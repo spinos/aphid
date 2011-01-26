@@ -197,7 +197,48 @@
 	<key>Notifications</key>
 	<array/>
 	<key>OpenEditors</key>
-	<array/>
+	<array>
+		<dict>
+			<key>Content</key>
+			<dict>
+				<key>PBXProjectModuleGUID</key>
+				<string>7FA07F4C12F0750E00A0D7C8</string>
+				<key>PBXProjectModuleLabel</key>
+				<string>word.h</string>
+				<key>PBXSplitModuleInNavigatorKey</key>
+				<dict>
+					<key>Split0</key>
+					<dict>
+						<key>PBXProjectModuleGUID</key>
+						<string>7FA07F4D12F0750E00A0D7C8</string>
+						<key>PBXProjectModuleLabel</key>
+						<string>word.h</string>
+						<key>_historyCapacity</key>
+						<integer>0</integer>
+						<key>bookmark</key>
+						<string>7FA07F5012F0750E00A0D7C8</string>
+						<key>history</key>
+						<array>
+							<string>7FA07F4E12F0750E00A0D7C8</string>
+						</array>
+					</dict>
+					<key>SplitCount</key>
+					<string>1</string>
+				</dict>
+				<key>StatusBarVisibility</key>
+				<true/>
+			</dict>
+			<key>Geometry</key>
+			<dict>
+				<key>Frame</key>
+				<string>{{0, 20}, {768, 556}}</string>
+				<key>PBXModuleWindowStatusBarHidden2</key>
+				<false/>
+				<key>RubberWindowFrame</key>
+				<string>15 176 768 597 0 0 1280 778 </string>
+			</dict>
+		</dict>
+	</array>
 	<key>PerspectiveWidths</key>
 	<array>
 		<integer>-1</integer>
@@ -520,7 +561,13 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>7FA07F3612F033D600A0D7C8</string>
+		<string>7FA07F5A12F0750E00A0D7C8</string>
+		<string>7FA07F5B12F0750E00A0D7C8</string>
+		<string>7FA07F5C12F0750E00A0D7C8</string>
+		<string>1C78EAAD065D492600B07095</string>
+		<string>1CD10A99069EF8BA00B06720</string>
+		<string>7FA07EAD12EFF53600A0D7C8</string>
+		<string>7FA07F4C12F0750E00A0D7C8</string>
 		<string>/Users/jianzhang/aphid/pyqt_in_qwidget/pyqt_in_qwidget.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
@@ -545,7 +592,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CD0528F0623707200166675</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>main.cpp</string>
+								<string></string>
 								<key>StatusBarVisibility</key>
 								<true/>
 							</dict>
@@ -562,8 +609,6 @@
 							<string>218pt</string>
 						</dict>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -603,7 +648,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>7FA07EAD12EFF53600A0D7C8</string>
-				<string>7FA07EAE12EFF53600A0D7C8</string>
+				<string>7FA07F5212F0750E00A0D7C8</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -645,8 +690,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {316, 185}}</string>
-											<string>{{316, 0}, {378, 185}}</string>
+											<string>{{0, 0}, {316, 194}}</string>
+											<string>{{316, 0}, {378, 194}}</string>
 										</array>
 									</dict>
 									<key>VerticalSplitView</key>
@@ -661,8 +706,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {694, 185}}</string>
-											<string>{{0, 185}, {694, 196}}</string>
+											<string>{{0, 0}, {694, 194}}</string>
+											<string>{{0, 194}, {694, 187}}</string>
 										</array>
 									</dict>
 								</dict>
@@ -695,7 +740,7 @@
 										<real>148</real>
 									</array>
 									<key>Frame</key>
-									<string>{{316, 0}, {378, 185}}</string>
+									<string>{{316, 0}, {378, 194}}</string>
 									<key>RubberWindowFrame</key>
 									<string>581 289 694 422 0 0 1280 778 </string>
 								</dict>
@@ -723,13 +768,13 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1CD10A99069EF8BA00B06720</string>
-				<string>7FA07EC312EFFB7F00A0D7C8</string>
+				<string>7FA07F5312F0750E00A0D7C8</string>
 				<string>1C162984064C10D400B95A72</string>
-				<string>7FA07EC412EFFB7F00A0D7C8</string>
-				<string>7FA07EC512EFFB7F00A0D7C8</string>
-				<string>7FA07EC612EFFB7F00A0D7C8</string>
-				<string>7FA07EC712EFFB7F00A0D7C8</string>
-				<string>7FA07EC812EFFB7F00A0D7C8</string>
+				<string>7FA07F5412F0750E00A0D7C8</string>
+				<string>7FA07F5512F0750E00A0D7C8</string>
+				<string>7FA07F5612F0750E00A0D7C8</string>
+				<string>7FA07F5712F0750E00A0D7C8</string>
+				<string>7FA07F5812F0750E00A0D7C8</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debugV3</string>
@@ -891,7 +936,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C78EAAD065D492600B07095</string>
-				<string>7FA07EC912EFFB7F00A0D7C8</string>
+				<string>7FA07F5912F0750E00A0D7C8</string>
 				<string>1C78EAAC065D492600B07095</string>
 			</array>
 			<key>ToolbarConfiguration</key>

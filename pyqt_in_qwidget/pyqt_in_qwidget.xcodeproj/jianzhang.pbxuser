@@ -2,9 +2,9 @@
 {
 	118FCBAABA162BA17933C789 /* main.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {709, 1386}}";
-			sepNavSelRange = "{3025, 0}";
-			sepNavVisRange = "{2171, 1109}";
+			sepNavIntBoundsRect = "{{0, 0}, {709, 1148}}";
+			sepNavSelRange = "{2136, 0}";
+			sepNavVisRange = "{1996, 842}";
 			sepNavWindowFrame = "{{452, 90}, {768, 653}}";
 		};
 	};
@@ -35,6 +35,8 @@
 		executableUserSymbolLevel = 0;
 		libgmallocEnabled = 0;
 		name = pyqt_in_qwidget;
+		savedGlobals = {
+		};
 		sourceDirectories = (
 		);
 	};
@@ -48,6 +50,44 @@
 	7FA07EA612EFF50600A0D7C8 /* Code sense */ = {
 		isa = PBXCodeSenseManager;
 		indexTemplatePath = "";
+	};
+	7FA07F4E12F0750E00A0D7C8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7FA07F4F12F0750E00A0D7C8 /* word.h */;
+		rLen = 0;
+		rLoc = 2147483647;
+		rType = 0;
+	};
+	7FA07F4F12F0750E00A0D7C8 /* word.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = word.h;
+		path = /Users/jianzhang/Downloads/helloSIP/word.h;
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavWindowFrame = "{{15, 120}, {768, 653}}";
+		};
+	};
+	7FA07F5012F0750E00A0D7C8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7FA07F5112F0750E00A0D7C8 /* word.h */;
+		name = "word.h: 9";
+		rLen = 0;
+		rLoc = 144;
+		rType = 0;
+		vrLen = 148;
+		vrLoc = 0;
+	};
+	7FA07F5112F0750E00A0D7C8 /* word.h */ = {
+		isa = PBXFileReference;
+		name = word.h;
+		path = /Users/jianzhang/Downloads/helloSIP/word.h;
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {709, 525}}";
+			sepNavSelRange = "{144, 0}";
+			sepNavVisRange = "{0, 148}";
+		};
 	};
 	91B15E841AA80083484172DE /* Project object */ = {
 		activeArchitecture = i386;
@@ -86,6 +126,10 @@
 			};
 			PBXPerProjectTemplateStateSaveDate = 317731785;
 			PBXWorkspaceStateSaveDate = 317731785;
+		};
+		perUserProjectItems = {
+			7FA07F4E12F0750E00A0D7C8 /* PBXTextBookmark */ = 7FA07F4E12F0750E00A0D7C8 /* PBXTextBookmark */;
+			7FA07F5012F0750E00A0D7C8 /* PBXTextBookmark */ = 7FA07F5012F0750E00A0D7C8 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 7FA07EA512EFF50600A0D7C8 /* Source Control */;
 		userBuildSettings = {
