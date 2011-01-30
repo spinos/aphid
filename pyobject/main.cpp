@@ -63,6 +63,23 @@ main()
 	PyObject *fooLog = PyObject_CallMethod(fooInstance, "log", "isi", 141, "Tom", 1961);
 // extract string
 	cout<<"log: "<<PyString_AsString(fooLog)<<endl;
+
+// equals
+// >>> l = loaf(13, 31)
+// >>> l.minus()
+
+// get name of class to create
+	PyObject *loafName = PyDict_GetItemString(mainDict, "inst_name");
+	cout<<"class name: "<<PyString_AsString(loafName)<<endl;
+// get arg list
+	PyObject *loafArgv = PyDict_GetItemString(mainDict, "inst_argv");
+
+	PyObject *loafClass = PyDict_GetItem(mainDict, loafName);
+	PyObject *loafInstance = PyObject_CallObject(loafClass, loafArgv);
+	
+// check 
+	PyObject *loafMinus = PyObject_CallMethod(loafInstance, "minus", NULL);	
+	cout<<"13 - 31 equals "<<PyInt_AsLong(loafMinus)<<endl;
 	
 	PyErr_Print();
 

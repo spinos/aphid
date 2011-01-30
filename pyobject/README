@@ -1,0 +1,9 @@
+To make sure it prints on Win32:
+
+CONFIG+=console
+
+To build on Mac OS X:
+
+@ qmake -spec macx-g++
+@ make
+
