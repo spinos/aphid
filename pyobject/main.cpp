@@ -43,7 +43,7 @@ main()
 // >>> a.getAge()
 // >>> a.add(37, 59)
 // >>> a.log(141, 'Tom', 1961)	
-	FILE *fin = fopen("./foo.py", "r+");
+        FILE *fin = fopen("/Users/jianzhang/aphid/pyobject/foo.py", "r+");
 	PyRun_SimpleFile(fin, "foo");
 	fclose(fin);
 	
