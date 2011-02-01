@@ -7,3 +7,7 @@ To build on Mac OS X:
 @ qmake -spec macx-g++
 @ make
 
+To build on Windows:
+
+@ qmake
+@ nmake release

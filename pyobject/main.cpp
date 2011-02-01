@@ -43,7 +43,12 @@ main()
 // >>> a.getAge()
 // >>> a.add(37, 59)
 // >>> a.log(141, 'Tom', 1961)	
+
+#ifdef WIN32
+	FILE *fin = fopen("D:/aphid/pyobject/foo.py", "r+");
+#else
         FILE *fin = fopen("/Users/jianzhang/aphid/pyobject/foo.py", "r+");
+#endif
 	PyRun_SimpleFile(fin, "foo");
 	fclose(fin);
 	
