@@ -1,0 +1,13 @@
+@ python setup.py build
+@ python setup.py install
+
+>>> import hello
+>>> hello.say_hello('John')
+>>> from hello import Customer
+>>> a = Customer()
+>>> a.getName()
+>>> a.setName('Jane')
+>>> a.getName()
+>>> b = Customer('Jack')
+>>> b.getName()
+
