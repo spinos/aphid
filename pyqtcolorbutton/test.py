@@ -7,7 +7,6 @@ class AddressBook(QtGui.QWidget):
         super(AddressBook, self).__init__(parent)
 
         nameLabel = QtGui.QLabel("Note:")
-        #self.nameLine = QtGui.QLineEdit()
 
         self.addressText = QtGui.QPushButton("Click to Change Color")
         self.addressText.setStyleSheet("QPushButton {background-color: darkkhaki; border-style: solid; border-radius: 5;} QPushButton:checked { background-color: green;}")
