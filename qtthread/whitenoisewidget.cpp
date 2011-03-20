@@ -17,8 +17,8 @@ MandelbrotWidget::MandelbrotWidget(QWidget *parent)
     resize(500, 400);
 	
 	QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-    timer->start(40);
+	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
+	timer->start(40);
 }
 
 void MandelbrotWidget::paintEvent(QPaintEvent * /* event */)

@@ -49,6 +49,10 @@ void RenderThread::run()
 			
 			for (int y = 0; y < resultSize.height(); ++y) 
 			{
+				 if (restart)
+                    break;
+                if (abort)
+                    return;
 
                 uint *scanLine = reinterpret_cast<uint *>(image.scanLine(y));
 				for (int x = 0; x < resultSize.width(); ++x) 

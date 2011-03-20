@@ -3,4 +3,3 @@ HEADERS       = whitenoisewidget.h \
 SOURCES       = main.cpp \
                 whitenoisewidget.cpp \
                 renderthread.cpp
-CONFIG += console
