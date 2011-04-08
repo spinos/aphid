@@ -20,6 +20,8 @@ MandelbrotWidget::MandelbrotWidget(QWidget *parent)
 	timer->start(41);
 	
 	_record_time.start();
+	
+	impulsePos = QPoint(0,0);
 }
 
 void MandelbrotWidget::paintEvent(QPaintEvent * /* event */)
@@ -44,13 +46,42 @@ void MandelbrotWidget::paintEvent(QPaintEvent * /* event */)
 	sst.str("");
 	sst<<"updates per second: "<<fps;
 	painter.drawText(QPoint(0, 16), sst.str().c_str());
+	sst.str("");
+	sst<<"impulse: "<<impulsePos.x()<<" "<<impulsePos.y();
+	painter.drawText(QPoint(0, 32), sst.str().c_str());
 }
 
 void MandelbrotWidget::resizeEvent(QResizeEvent * /* event */)
 {
 	QSize renderAreaSize = size();
 	_scaleFactor = renderAreaSize.height() / 128.f;
-	thread.render();
+	thread.render(impulsePos.x(), impulsePos.y());
+}
+
+void MandelbrotWidget::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+        impulsePos = event->pos();
+}
+//! [13]
+
+//! [14]
+void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    if (event->buttons() & Qt::LeftButton) {
+        impulsePos = event->pos();
+		
+    }
+}
+//! [14]
+
+//! [15]
+void MandelbrotWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+        impulsePos = QPoint(0,0);
+		
+    }
 }
 
 void MandelbrotWidget::updatePixmap(const QImage &image, const unsigned &step)
@@ -64,5 +95,7 @@ void MandelbrotWidget::updatePixmap(const QImage &image, const unsigned &step)
 void MandelbrotWidget::simulate()
 {
     update();
-    thread.render();
+	float fx = (float)impulsePos.x()/size().width();
+	float fy = (float)impulsePos.y()/size().height();
+    thread.render(fx*128, fy*128);
 }

@@ -15,6 +15,9 @@ public:
 protected:
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
+	void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 
 private slots:
     void updatePixmap(const QImage &image, const unsigned &step);
@@ -26,5 +29,6 @@ private:
 	float _scaleFactor;
 	unsigned _step;
 	QTime _record_time;
+	QPoint impulsePos;
 };
 
