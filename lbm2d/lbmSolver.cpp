@@ -27,6 +27,8 @@ RenderThread::RenderThread(QObject *parent)
 	map = new short[LAT_LEN];
 	density = new float[LAT_LEN];
 	pixel = new uchar[LAT_LEN*3];
+	impulse_x = new float[LAT_LEN];
+	impulse_y = new float[LAT_LEN];
 		
 	int x, y, i;
 	
@@ -72,12 +74,12 @@ RenderThread::~RenderThread()
     wait();
 }
 
-void RenderThread::render(int x, int y)
+void RenderThread::render()
 {
     QMutexLocker locker(&mutex);
 
 	this->resultSize = QSize(128,128);
-	impulse_x = x, impulse_y = y;
+	
 
     if (!isRunning()) {
         start(LowPriority);
@@ -93,12 +95,11 @@ void RenderThread::run()
         mutex.lock();
 
         QSize resultSize = this->resultSize;
-		this->addImpulse(impulse_x, impulse_y);
 		
-	simulate(0);
-	simulate(0);
-	simulate(0);
-	simulate(1);
+	simulate();
+	simulate();
+	simulate();
+	simulate();
 
 	_step++;
 	
@@ -158,12 +159,13 @@ void RenderThread::getMacro(int x, int y, float &rho, float &vx, float &vy)
 		vx = (lat[2][gi] + lat[5][gi] + lat[6][gi] - lat[8][gi] - lat[4][gi] - lat[7][gi])/rho;
 		vy = (lat[1][gi] + lat[5][gi] + lat[8][gi] - lat[7][gi] - lat[3][gi] - lat[6][gi])/rho;
 	} else {
-		vx = 0.f;
-		vy = -.4f * float(map[gi] - M_FLUID)/125.f;
+		float decay = float(map[gi] - M_FLUID)/125.f;
+		vx = impulse_x[gi] * decay;
+		vy = impulse_y[gi] * decay;
 	}
 }
 
-void RenderThread::simulate(char reset)
+void RenderThread::simulate()
 {
 // relaxate
 	int x, y, i, gi;
@@ -202,7 +204,7 @@ void RenderThread::simulate(char reset)
 					for (i = 0; i < 9; i++) {
 						lat[i][gi] = feq[i];
 					}
-					if(reset) map[gi]--;
+					map[gi]--;
 				}
 			} else {
 				float tmp;
@@ -287,8 +289,10 @@ void RenderThread::simulate(char reset)
 
 }
 
-void RenderThread::addImpulse(int x, int y)
+void RenderThread::addImpulse(int x, int y, float vx, float vy)
 {
 	int gi = idx(x,y);
-	if (map[gi] != M_WALL) map[gi] = M_SETU + 100;
+	if (map[gi] != M_WALL) map[gi] = M_SETU + 125;
+	impulse_x[gi] = vx * 0.49f;
+	impulse_y[gi] = vy * 0.49f;
 }

@@ -18,7 +18,8 @@ public:
     RenderThread(QObject *parent = 0);
     ~RenderThread();
 
-    void render(int x, int y);
+    void render();
+	void addImpulse(int x, int y, float vx, float vy);
 
 signals:
     void renderedImage(const QImage &image, const unsigned &step);
@@ -40,12 +41,12 @@ private:
 	float *density;
 	float *lat[9];
 	float tau;
-	void simulate(char reset);
+	void simulate();
 	void getMacro(int x, int y, float &rho, float &vx, float &vy);
 	unsigned _step;
 	uchar *pixel;
-	void addImpulse(int x, int y);
-	int impulse_x, impulse_y;
+	float *impulse_x;
+	float *impulse_y;
 };
 
 #endif

@@ -55,7 +55,7 @@ void MandelbrotWidget::resizeEvent(QResizeEvent * /* event */)
 {
 	QSize renderAreaSize = size();
 	_scaleFactor = renderAreaSize.height() / 128.f;
-	thread.render(impulsePos.x(), impulsePos.y());
+	thread.render();
 }
 
 void MandelbrotWidget::mousePressEvent(QMouseEvent *event)
@@ -69,8 +69,18 @@ void MandelbrotWidget::mousePressEvent(QMouseEvent *event)
 void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (event->buttons() & Qt::LeftButton) {
-        impulsePos = event->pos();
+        QPoint disp = event->pos() - impulsePos;
+		float dx = float(disp.x());
+		float dy = float(disp.y());
+		float vscaling = sqrt(dx*dx + dy*dy);
+		if(vscaling < 0.1f) vscaling = 0.1f;
+		dx /= vscaling;
+		dy /= vscaling;
 		
+		float fx = (float)impulsePos.x()/size().width();
+		float fy = (float)impulsePos.y()/size().height();
+		impulsePos = event->pos();
+		thread.addImpulse(fx*128, fy*128, dx, dy);
     }
 }
 //! [14]
@@ -95,7 +105,6 @@ void MandelbrotWidget::updatePixmap(const QImage &image, const unsigned &step)
 void MandelbrotWidget::simulate()
 {
     update();
-	float fx = (float)impulsePos.x()/size().width();
-	float fy = (float)impulsePos.y()/size().height();
-    thread.render(fx*128, fy*128);
+
+	thread.render();
 }
