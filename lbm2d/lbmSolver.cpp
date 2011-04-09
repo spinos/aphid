@@ -12,7 +12,7 @@
 #define M_WALL 0
 #define M_SETU 2
 
-const float visc = 0.01f;
+const float visc = 0.011f;
 
 RenderThread::RenderThread(QObject *parent)
     : QThread(parent)
@@ -100,10 +100,12 @@ void RenderThread::run()
 	simulate();
 	simulate();
 	simulate();
-
-	_step++;
 	
 	mutex.unlock();
+	
+	
+
+	_step++;
 	
 	for (int y = 0; y < LAT_H; ++y) 
 	{
@@ -116,16 +118,23 @@ void RenderThread::run()
 		for (int x = 0; x < LAT_W; ++x) 
 		{
 			int gi = idx(x, y);
-			int r = ux[gi]*128*4 + 128;
-			if(r < 0) r = 0;
-			else if(r > 255) r = 255;
-			int g = uy[gi]*128*4 + 128;
-			if(g < 0) g = 0;
-			else if(g > 255) g = 255; 
+			if(map[gi] != M_WALL)
+			{
+				int r = ux[gi]*128*4 + 128;
+				if(r < 0) r = 0;
+				else if(r > 255) r = 255;
+				int g = uy[gi]*128*4 + 128;
+				if(g < 0) g = 0;
+				else if(g > 255) g = 255; 
 			
-			pixel[gi*3] = r;
-			pixel[gi*3+1] = g;
-			pixel[gi*3+2] = 128;
+				pixel[gi*3] = r;
+				pixel[gi*3+1] = g;
+				pixel[gi*3+2] = 128;
+			}
+			else
+			{
+				pixel[gi*3] = pixel[gi*3+1] = pixel[gi*3+2] = 0;
+			}
 		}
 	}
 
@@ -159,7 +168,7 @@ void RenderThread::getMacro(int x, int y, float &rho, float &vx, float &vy)
 		vx = (lat[2][gi] + lat[5][gi] + lat[6][gi] - lat[8][gi] - lat[4][gi] - lat[7][gi])/rho;
 		vy = (lat[1][gi] + lat[5][gi] + lat[8][gi] - lat[7][gi] - lat[3][gi] - lat[6][gi])/rho;
 	} else {
-		float decay = float(map[gi] - M_FLUID)/125.f;
+		float decay = float(map[gi] - M_FLUID)/125.f*0.9f + 0.1f;
 		vx = impulse_x[gi] * decay;
 		vy = impulse_y[gi] * decay;
 	}
@@ -284,15 +293,21 @@ void RenderThread::simulate()
 			lat[2][idx(x,y)] = lat[2][idx(x-1,y)];
 		}
 	}
-	
-	
-
 }
 
 void RenderThread::addImpulse(int x, int y, float vx, float vy)
 {
 	int gi = idx(x,y);
-	if (map[gi] != M_WALL) map[gi] = M_SETU + 125;
-	impulse_x[gi] = vx * 0.49f;
-	impulse_y[gi] = vy * 0.49f;
+	if (map[gi] != M_WALL) {
+		map[gi] = M_SETU + 124;
+		impulse_x[gi] = vx * 0.47f;
+		impulse_y[gi] = vy * 0.47f;
+	}
 }
+
+void RenderThread::addObstacle(int x, int y)
+{
+	int gi = idx(x,y);
+	map[gi] = M_WALL;
+}
+
