@@ -46,9 +46,6 @@ void MandelbrotWidget::paintEvent(QPaintEvent * /* event */)
 	sst.str("");
 	sst<<"updates per second: "<<fps;
 	painter.drawText(QPoint(0, 16), sst.str().c_str());
-	sst.str("");
-	sst<<"impulse: "<<impulsePos.x()<<" "<<impulsePos.y();
-	painter.drawText(QPoint(0, 32), sst.str().c_str());
 }
 
 void MandelbrotWidget::resizeEvent(QResizeEvent * /* event */)
@@ -72,17 +69,31 @@ void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
         QPoint disp = event->pos() - impulsePos;
 		float dx = float(disp.x());
 		float dy = float(disp.y());
-		float vscaling = sqrt(dx*dx + dy*dy);
-		if(vscaling < 0.1f) vscaling = 0.1f;
-		dx /= vscaling;
-		dy /= vscaling;
-		impulsePos = event->pos();
+		float vscaling = sqrt(dx*dx + dy*dy) + 1.f;
+		if(vscaling < 2.f) 
+		{
+			vscaling = vscaling/2.f;
+			dx /= vscaling;
+			dy /= vscaling;
+		}
+		if(vscaling > 9.f) 
+		{
+			vscaling = vscaling / 9.f;
+			dx /= vscaling;
+			dy /= vscaling;
+		}
+		
+		dx /= 50.f;
+		dy /= 50.f;
+		
 		float fx = (float)impulsePos.x()/size().width();
 		if(fx < 0.f) fx = 0.f;
 		if(fx > 1.f) fx = 1.f;
 		float fy = (float)impulsePos.y()/size().height();
 		if(fy < 0.f) fy = 0.f;
 		if(fy > 1.f) fy = 1.f;
+		
+		impulsePos = event->pos();
 		thread.addImpulse(fx*127, fy*127, dx, dy);
     }
 	else if(event->buttons() & Qt::RightButton) {

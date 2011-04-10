@@ -44,6 +44,8 @@ private:
 	float tau;
 	void simulate();
 	void getMacro(int x, int y, float &rho, float &vx, float &vy);
+	void getForce(int x, int y, float &rho, float &vx, float &vy);
+
 	unsigned _step;
 	uchar *pixel;
 	float *impulse_x;

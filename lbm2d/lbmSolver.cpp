@@ -169,7 +169,7 @@ void RenderThread::getMacro(int x, int y, float &rho, float &vx, float &vy)
 
 	int gi = idx(x,y);
 
-	if (map[gi] == M_FLUID) {
+	if (map[gi] >= M_FLUID) {
 		for (i = 0; i < 9; i++) {
 			rho += lat[i][gi];
 		}
@@ -185,7 +185,7 @@ void RenderThread::getMacro(int x, int y, float &rho, float &vx, float &vy)
 		
 		dist_to_center /= LAT_H/2;
 		
-		vx = .17f * (1.f - dist_to_center*dist_to_center);
+		vx = .13f * (1.f - dist_to_center);
 		vy =0.f;
 	}
 	else if (map[gi] == M_YIN) 
@@ -197,25 +197,30 @@ void RenderThread::getMacro(int x, int y, float &rho, float &vx, float &vy)
 		dist_to_center /= LAT_W/2;
 		
 		vx =0.f;
-		vy = .17f * (1.f - dist_to_center*dist_to_center);
+		vy = .13f * (1.f - dist_to_center);
 		
 	}
-	else 
+	/*else 
 	{
 	
-		rho = 1.f;
-			
-		float decay = float(map[gi] - M_FLUID)/100.f;
-		vx = impulse_x[gi] * decay;
-		vy = impulse_y[gi] * decay;
 		
 		
-	}
+		
+	}*/
+}
+
+void RenderThread::getForce(int x, int y, float &rho, float &vx, float &vy)
+{
+	int gi = idx(x,y);
+	rho = 1.f;
+	float decay = float(map[gi] - M_SETU)/30.f;
+	vx = impulse_x[gi] * decay;
+	vy = impulse_y[gi] * decay;
 }
 
 void RenderThread::simulate()
 {
-// relaxate
+// collide
 	int x, y, i, gi;
 
 	for (x = 0; x < LAT_W; x++) {
@@ -254,7 +259,7 @@ void RenderThread::simulate()
 				}
 			}
 			else
-			 {
+			{
 				float v_x, v_y, rho;
 				getMacro(x, y, rho, v_x, v_y);
 
@@ -275,21 +280,41 @@ void RenderThread::simulate()
 				feq[7] = rho * (1.0f + Cusq + 3.0f*(-v_x-v_y) + 4.5f*(v_x+v_y)*(v_x+v_y)) / 36.0f;
 				feq[8] = rho * (1.0f + Cusq + 3.0f*(-v_x+v_y) + 4.5f*(-v_x+v_y)*(-v_x+v_y)) / 36.0f;
 
-				if (map[gi] == M_FLUID) {
-					for (i = 0; i < 9; i++) {
-						lat[i][gi] += (feq[i] - lat[i][gi]) / tau;
-					}
-				} else {
+				if (map[gi] < M_FLUID) {
 					for (i = 0; i < 9; i++) {
 						lat[i][gi] = feq[i];
 					}
-					if(map[gi] > M_FLUID) map[gi]--;
+				}
+				else  {
+					for (i = 0; i < 9; i++) {
+						lat[i][gi] += (feq[i] - lat[i][gi]) / tau;
+					}
+					
+					if (map[gi] > M_FLUID)
+					{
+						getForce(x, y, rho, v_x, v_y);
+						feq[0] = .0f;
+						feq[1] = (0.f * v_x + 1.f * v_y)/9.f;
+						feq[2] = (1.f * v_x + 0.f * v_y)/9.f;
+						feq[3] = (0.f * v_x - 1.f * v_y)/9.f;
+						feq[4] = (-1.f * v_x + 0.f * v_y)/9.f*1.414f;
+						feq[5] = (1.f * v_x + 1.f * v_y)/36.f*1.414f;
+						feq[6] = (1.f * v_x - 1.f * v_y)/36.f*1.414f;
+						feq[7] = (-1.f * v_x - 1.f * v_y)/36.f*1.414f;
+						feq[8] = (-1.f * v_x + 1.f * v_y)/36.f*1.414f;
+
+						for (i = 0; i < 9; i++) {
+							lat[i][gi] += feq[i];
+						}
+						
+						map[gi]--;
+					}
 				}
 			} 
 		}
 	}
 
-// propagate
+// propagate (stream)
 
 // west
 	for (x = 0; x < LAT_W-1; x++) {
@@ -353,10 +378,10 @@ void RenderThread::simulate()
 void RenderThread::addImpulse(int x, int y, float vx, float vy)
 {
 	int gi = idx(x,y);
-	if (map[gi] != M_WALL) {
-		map[gi] = M_SETU + 100;
-		impulse_x[gi] = vx * 0.41f;
-		impulse_y[gi] = vy * 0.41f;
+	if (map[gi] >= M_FLUID) {
+		if(map[gi] == M_FLUID) map[gi] = M_SETU + 30;
+		impulse_x[gi] = vx;
+		impulse_y[gi] = vy;
 	}
 }
 
