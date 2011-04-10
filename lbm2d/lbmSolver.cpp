@@ -8,11 +8,15 @@
 #define LAT_H 128
 #define LAT_LEN 16384
 #define idx(x,y) ((y)*LAT_W+(x))
-#define M_FLUID 1
 #define M_WALL 0
-#define M_SETU 2
+#define M_XOUT 1
+#define M_YOUT 2
+#define M_XIN 3
+#define M_YIN 4
+#define M_FLUID 5
+#define M_SETU 6
 
-const float visc = 0.011f;
+const float visc = 0.013f;
 
 RenderThread::RenderThread(QObject *parent)
     : QThread(parent)
@@ -25,7 +29,7 @@ RenderThread::RenderThread(QObject *parent)
 	ux = new float[LAT_LEN];
 	uy = new float[LAT_LEN];
 	map = new short[LAT_LEN];
-	density = new float[LAT_LEN];
+	//density = new float[LAT_LEN];
 	pixel = new uchar[LAT_LEN*3];
 	impulse_x = new float[LAT_LEN];
 	impulse_y = new float[LAT_LEN];
@@ -59,6 +63,11 @@ RenderThread::RenderThread(QObject *parent)
 
 	for (y = 0; y < LAT_H; y++) {
 		map[idx(0,y)] = map[idx(LAT_W-1,y)] = M_WALL;
+	}
+	
+	for (y = 1; y < LAT_H-1; y++) {
+		map[idx(0,y)] = M_XIN;
+		map[idx(LAT_W-1,y)] = M_XOUT;
 	}
 	
 	_step = 0;
@@ -160,17 +169,47 @@ void RenderThread::getMacro(int x, int y, float &rho, float &vx, float &vy)
 
 	int gi = idx(x,y);
 
-	for (i = 0; i < 9; i++) {
-		rho += lat[i][gi];
-	}
-
 	if (map[gi] == M_FLUID) {
+		for (i = 0; i < 9; i++) {
+			rho += lat[i][gi];
+		}
+	
 		vx = (lat[2][gi] + lat[5][gi] + lat[6][gi] - lat[8][gi] - lat[4][gi] - lat[7][gi])/rho;
 		vy = (lat[1][gi] + lat[5][gi] + lat[8][gi] - lat[7][gi] - lat[3][gi] - lat[6][gi])/rho;
-	} else {
-		float decay = float(map[gi] - M_FLUID)/125.f*0.9f + 0.1f;
+	} 
+	else if (map[gi] == M_XIN) 
+	{
+		rho = 1.f;
+		float dist_to_center = y - LAT_H/2;
+		if(dist_to_center < 0) dist_to_center = -dist_to_center;
+		
+		dist_to_center /= LAT_H/2;
+		
+		vx = .17f * (1.f - dist_to_center*dist_to_center);
+		vy =0.f;
+	}
+	else if (map[gi] == M_YIN) 
+	{
+		rho = 1.f;
+		float dist_to_center = x - LAT_W/2;
+		if(dist_to_center < 0) dist_to_center = -dist_to_center;
+		
+		dist_to_center /= LAT_W/2;
+		
+		vx =0.f;
+		vy = .17f * (1.f - dist_to_center*dist_to_center);
+		
+	}
+	else 
+	{
+	
+		rho = 1.f;
+			
+		float decay = float(map[gi] - M_FLUID)/100.f;
 		vx = impulse_x[gi] * decay;
 		vy = impulse_y[gi] * decay;
+		
+		
 	}
 }
 
@@ -183,14 +222,45 @@ void RenderThread::simulate()
 		for (y = 0; y < LAT_H; y++) {
 
 			gi = idx(x, y);
+			
+			if (map[gi] == M_WALL) {
+				float tmp;
+				tmp = lat[2][gi];
+				lat[2][gi] = lat[4][gi];
+				lat[4][gi] = tmp;
 
-			if (map[idx(x,y)] > M_WALL) {
+				tmp = lat[1][idx(x,y)];
+				lat[1][gi] = lat[3][gi];
+				lat[3][gi] = tmp;
+
+				tmp = lat[8][idx(x,y)];
+				lat[8][gi] = lat[6][gi];
+				lat[6][gi] = tmp;
+
+				tmp = lat[7][idx(x,y)];
+				lat[7][gi] = lat[5][gi];
+				lat[5][gi] = tmp;
+			}
+			else if(map[gi] == M_XOUT)
+			{
+				for (i = 0; i < 9; i++) {
+						lat[i][gi] = lat[i][idx(x-1, y)];
+				}
+			}
+			else if(map[gi] == M_YOUT)
+			{
+				for (i = 0; i < 9; i++) {
+						lat[i][gi] = lat[i][idx(x, y-1)];
+				}
+			}
+			else
+			 {
 				float v_x, v_y, rho;
 				getMacro(x, y, rho, v_x, v_y);
 
 				ux[gi] = v_x;
 				uy[gi] = v_y;
-				density[gi] = rho;
+				//density[gi] = rho;
 
 				float Cusq = -1.5f * (v_x*v_x + v_y*v_y);
 				float feq[9];
@@ -213,26 +283,9 @@ void RenderThread::simulate()
 					for (i = 0; i < 9; i++) {
 						lat[i][gi] = feq[i];
 					}
-					map[gi]--;
+					if(map[gi] > M_FLUID) map[gi]--;
 				}
-			} else {
-				float tmp;
-				tmp = lat[2][gi];
-				lat[2][gi] = lat[4][gi];
-				lat[4][gi] = tmp;
-
-				tmp = lat[1][idx(x,y)];
-				lat[1][gi] = lat[3][gi];
-				lat[3][gi] = tmp;
-
-				tmp = lat[8][idx(x,y)];
-				lat[8][gi] = lat[6][gi];
-				lat[6][gi] = tmp;
-
-				tmp = lat[7][idx(x,y)];
-				lat[7][gi] = lat[5][gi];
-				lat[5][gi] = tmp;
-			}
+			} 
 		}
 	}
 
@@ -242,6 +295,27 @@ void RenderThread::simulate()
 	for (x = 0; x < LAT_W-1; x++) {
 		for (y = 0; y < LAT_H; y++) {
 			lat[4][idx(x,y)] = lat[4][idx(x+1,y)];
+		}
+	}
+	
+	// east
+	for (x = LAT_W-1; x > 0; x--) {
+		for (y = 0; y < LAT_H; y++) {
+			lat[2][idx(x,y)] = lat[2][idx(x-1,y)];
+		}
+	}
+	
+	// north
+	for (x = 0; x < LAT_W; x++) {
+		for (y = LAT_H-1; y > 0; y--) {
+			lat[1][idx(x,y)] = lat[1][idx(x,y-1)];
+		}
+	}
+
+	// south
+	for (x = 0; x < LAT_W; x++) {
+		for (y = 0; y < LAT_H-1; y++) {
+			lat[3][idx(x,y)] = lat[3][idx(x,y+1)];
 		}
 	}
 
@@ -259,20 +333,6 @@ void RenderThread::simulate()
 		}
 	}
 
-	// north
-	for (x = 0; x < LAT_W; x++) {
-		for (y = LAT_H-1; y > 0; y--) {
-			lat[1][idx(x,y)] = lat[1][idx(x,y-1)];
-		}
-	}
-
-	// south
-	for (x = 0; x < LAT_W; x++) {
-		for (y = 0; y < LAT_H-1; y++) {
-			lat[3][idx(x,y)] = lat[3][idx(x,y+1)];
-		}
-	}
-
 	// south-west
 	for (x = 0; x < LAT_W-1; x++) {
 		for (y = 0; y < LAT_H-1; y++) {
@@ -287,21 +347,16 @@ void RenderThread::simulate()
 		}
 	}
 
-	// east
-	for (x = LAT_W-1; x > 0; x--) {
-		for (y = 0; y < LAT_H; y++) {
-			lat[2][idx(x,y)] = lat[2][idx(x-1,y)];
-		}
-	}
+	
 }
 
 void RenderThread::addImpulse(int x, int y, float vx, float vy)
 {
 	int gi = idx(x,y);
 	if (map[gi] != M_WALL) {
-		map[gi] = M_SETU + 124;
-		impulse_x[gi] = vx * 0.47f;
-		impulse_y[gi] = vy * 0.47f;
+		map[gi] = M_SETU + 100;
+		impulse_x[gi] = vx * 0.41f;
+		impulse_y[gi] = vy * 0.41f;
 	}
 }
 

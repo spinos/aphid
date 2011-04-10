@@ -39,7 +39,7 @@ private:
 	float *ux;
 	float *uy;
 	short *map;
-	float *density;
+	//float *density;
 	float *lat[9];
 	float tau;
 	void simulate();
