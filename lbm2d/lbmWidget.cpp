@@ -69,16 +69,14 @@ void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
         QPoint disp = event->pos() - impulsePos;
 		float dx = float(disp.x());
 		float dy = float(disp.y());
-		float vscaling = sqrt(dx*dx + dy*dy) + 1.f;
+		float vscaling = sqrt(dx*dx + dy*dy);
 		if(vscaling < 2.f) 
 		{
-			vscaling = vscaling/2.f;
-			dx /= vscaling;
-			dy /= vscaling;
+			dx = dy = 0.f;
 		}
-		if(vscaling > 9.f) 
+		if(vscaling > 11.f) 
 		{
-			vscaling = vscaling / 9.f;
+			vscaling = vscaling / 11.f;
 			dx /= vscaling;
 			dy /= vscaling;
 		}

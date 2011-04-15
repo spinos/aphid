@@ -200,13 +200,6 @@ void RenderThread::getMacro(int x, int y, float &rho, float &vx, float &vy)
 		vy = .13f * (1.f - dist_to_center);
 		
 	}
-	/*else 
-	{
-	
-		
-		
-		
-	}*/
 }
 
 void RenderThread::getForce(int x, int y, float &rho, float &vx, float &vy)
