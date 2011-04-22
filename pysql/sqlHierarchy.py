@@ -59,29 +59,30 @@ class sqlHierarchy:
         cur = conn.cursor()
         cur.execute('select lft, rgt from stocks where name="%s"' % branchName)
         col = cur.fetchone()
-        print '-%d %s %d'% (col[0], branchName, col[1])
+        print '%d %s %d'% (col[0], branchName, col[1])
         
         cur.execute('select * from stocks where lft>%d and rgt<%d order by lft' % (col[0], col[1]))
         
         right_pre = 0
-        max_right_pre = 0
-        rec_level = 0
-        level = 1
+        level = 0
+        level_end = []
         for row in cur:
-            
-            if row[2] == max_right_pre + 1:
-                level = rec_level
-            
-            elif row[2] != right_pre + 1:
+            if row[2] != right_pre + 1:
+                level_end.append( right_pre )
                 level += 1
-                
+              
+            for end in level_end:
+                if row[2] == end + 1:
+                    level -= 1
+   
             margin = '-'*level
             print margin + "%d %s %d" % (row[2], row[0], row[3])
+            
+                
+            for end in level_end:
+                if row[3] == end - 1:
+                    level -= 1
                 
             right_pre = row[3]
-
-            if row[3] > max_right_pre:
-                max_right_pre = row[3]
-                rec_level = level
 
         cur.close()
