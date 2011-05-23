@@ -5,6 +5,7 @@
 using namespace std;
 using namespace boost::filesystem;
 
+#include "fuzzyMatch.h"
 
 int
 main() 
@@ -60,5 +61,25 @@ cout<<what[0]<<endl;
 				
 			}
 		}
+	
+	static const boost::regex re1("(.*)\\_group1");
+	
+	std::string tomatch("prefix_group1");
+	regex_match(tomatch, what, re1, boost::match_partial );
+				if(what[0].matched) {
+					
+					cout<<tomatch<<" matched group1"<<endl;
+				}
+	cout<<"fuzzy match:"<<endl;			
+	FuzzyMatch fm;
+	std::string a("seftill_pre1_group13");
+	std::string b("cac_pre2_group13");
+	if(fm.deepCompare(a, b))
+		cout<<"\""<<a<<"\" matches \""<<b<<"\""<<endl;
+		
+	std::string c("group131");
+	std::string d("cac_pre2_group131");
+	if(fm.deepCompare(c, d))
+		cout<<"\""<<c<<"\" matches \""<<d<<"\""<<endl;
     return 0;
   };
