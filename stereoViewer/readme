@@ -1,0 +1,9 @@
+g++ -o stereoImage.o -c stereoImage.cpp
+ar rsc  libstereoImage.a stereoImage.o
+sudo cp libstereoImage.a /usr/local/lib
+sip -c . stereoImage.sip
+python configure.py
+make
+sudo make install
+
+

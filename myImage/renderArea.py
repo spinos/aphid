@@ -33,7 +33,7 @@ class RenderArea(QtGui.QWidget):
             self.imageHeight = image.height()
             
             self.a.setSize(image.width(), image.height())
-            self.a.addColor(image.bits());
+            self.a.addColor(image.bits())
 
 
     def paintEvent(self, event):
