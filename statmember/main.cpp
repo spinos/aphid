@@ -17,7 +17,7 @@ class B: public A {
 	virtual ~B() {cout<<"destroy B\n";}
   };
   
-class C: public A {
+class C: public B {
   public:
 	C() {cout<<"initialize C\n";}
 	virtual ~C() {cout<<"destroy C\n";}
@@ -31,23 +31,32 @@ void g(const char *note, A &data)
 int main () {
     
   A::pref = 97;
-  B ppoly1;
-  C ppoly2;
+  
   cout<<"A::pref "<<A::pref<<endl;
   cout<<"B::pref "<<B::pref<<endl;
   cout<<"C::pref "<<C::pref<<endl;
   
-  B::pref = 83; 
+  A ppoly0;
+  B ppoly1;
+  C ppoly2;
   
-  cout<<"A::pref "<<A::pref<<endl;
-  g("B::pref ", ppoly1);
-  g("C::pref ", ppoly2);
+  ppoly1.pref = 83; 
+  
+  g("ppoly0.pref ", ppoly0);
+  g("ppoly1.pref ", ppoly1);
+  g("ppoly2.pref ", ppoly2);
   
   C::pref = 71; 
   
   cout<<"A::pref "<<A::pref<<endl;
-  g("B::pref ", ppoly1);
-  g("C::pref ", ppoly2);
+  cout<<"B::pref "<<B::pref<<endl;
+  cout<<"C::pref "<<C::pref<<endl;
+  
+  B::pref = -59;
+  
+  g("ppoly0.pref ", ppoly0);
+  g("ppoly1.pref ", ppoly1);
+  g("ppoly2.pref ", ppoly2);
   
   return 0;
   
