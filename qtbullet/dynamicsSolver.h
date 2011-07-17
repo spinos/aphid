@@ -21,6 +21,7 @@ public:
 	void initPhysics();
 	void killPhysics();
 	void renderWorld();
+	void simulate();
 	
 	btDynamicsWorld*		getDynamicsWorld()
 	{

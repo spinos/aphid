@@ -37,7 +37,7 @@ void DynamicsSolver::initPhysics()
 	btCollisionShape* cubeShape = new btBoxShape(btVector3(1.f,1.f,1.f));
 	_collisionShapes.push_back(cubeShape);
 	
-	for(int i=0; i<64; i++)
+	for(int i=0; i<96; i++)
 	{
 		tr.setIdentity();
 		tr.setOrigin(btVector3(0.05*i,6+2.0*i,0));
@@ -94,9 +94,7 @@ void DynamicsSolver::killPhysics()
 
 void DynamicsSolver::renderWorld()
 {
-	btScalar dt = (btScalar)_clock.getTimeMicroseconds();
-	_clock.reset();
-	_dynamicsWorld->stepSimulation(dt / 1000000.f, 10);
+	
 	btScalar	m[16];
 	btMatrix3x3	rot;rot.setIdentity();
 	const int	numObjects= _dynamicsWorld->getNumCollisionObjects();
@@ -114,6 +112,13 @@ void DynamicsSolver::renderWorld()
 		
 		_drawer->draw(m,colObj->getCollisionShape());
 	}
+}
+
+void DynamicsSolver::simulate()
+{
+	btScalar dt = (btScalar)_clock.getTimeMicroseconds();
+	_clock.reset();
+	_dynamicsWorld->stepSimulation(dt / 1000000.f, 10);
 }
 
 btRigidBody* DynamicsSolver::localCreateRigidBody(float mass, const btTransform& startTransform,btCollisionShape* shape)

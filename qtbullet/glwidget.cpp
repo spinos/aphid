@@ -65,7 +65,10 @@ GLWidget::GLWidget(QWidget *parent)
     qtPurple = QColor::fromCmykF(0.29, 0.29, 0.20, 0.0);
 	
 	_dynamics = new DynamicsSolver();
-	
+	_dynamics->initPhysics();
+	QTimer *timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
+	timer->start(40);
 	
 }
 //! [0]
@@ -147,7 +150,7 @@ void GLWidget::initializeGL()
     //static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
     //glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 	
-	_dynamics->initPhysics();
+	
 }
 //! [6]
 
@@ -164,8 +167,6 @@ void GLWidget::paintGL()
 
 	_dynamics->renderWorld();
 	glFlush();
-	update();
-
 }
 //! [7]
 
@@ -215,3 +216,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     lastPos = event->pos();
 }
 //! [10]
+void GLWidget::simulate()
+{
+    update();
+    _dynamics->simulate();
+}

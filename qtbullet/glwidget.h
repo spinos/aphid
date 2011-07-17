@@ -92,6 +92,9 @@ private:
     QColor qtPurple;
 	
 	DynamicsSolver* _dynamics;
+	
+private slots:
+    void simulate();
 
 };
 //! [3]
