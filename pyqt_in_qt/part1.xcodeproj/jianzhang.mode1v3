@@ -231,8 +231,6 @@
 			<key>Layout</key>
 			<array>
 				<dict>
-					<key>BecomeActive</key>
-					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -344,6 +342,8 @@
 							<string>0pt</string>
 						</dict>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -380,9 +380,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>7FA07F2C12F0294A00A0D7C8</string>
+				<string>7F781A3813D478A300ED7DE1</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>7FA07F2D12F0294A00A0D7C8</string>
+				<string>7F781A3913D478A300ED7DE1</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -516,6 +516,8 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
+		<string>1CD10A99069EF8BA00B06720</string>
+		<string>7F057AE412EDC60700FDC1BF</string>
 		<string>/Users/jianzhang/aphid/pyqt_in_qt/part1.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
@@ -596,7 +598,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>7F057AE412EDC60700FDC1BF</string>
-				<string>7F0581A712EE00F900FDC1BF</string>
+				<string>7F781A2F13D4788200ED7DE1</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -638,8 +640,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {316, 185}}</string>
-											<string>{{316, 0}, {378, 185}}</string>
+											<string>{{0, 0}, {316, 194}}</string>
+											<string>{{316, 0}, {378, 194}}</string>
 										</array>
 									</dict>
 									<key>VerticalSplitView</key>
@@ -654,8 +656,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {694, 185}}</string>
-											<string>{{0, 185}, {694, 196}}</string>
+											<string>{{0, 0}, {694, 194}}</string>
+											<string>{{0, 194}, {694, 187}}</string>
 										</array>
 									</dict>
 								</dict>
@@ -688,7 +690,7 @@
 										<real>148</real>
 									</array>
 									<key>Frame</key>
-									<string>{{316, 0}, {378, 185}}</string>
+									<string>{{316, 0}, {378, 194}}</string>
 									<key>RubberWindowFrame</key>
 									<string>316 266 694 422 0 0 1280 778 </string>
 								</dict>
@@ -716,13 +718,13 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1CD10A99069EF8BA00B06720</string>
-				<string>7F057AFF12EDC67100FDC1BF</string>
+				<string>7F781A3013D4788200ED7DE1</string>
 				<string>1C162984064C10D400B95A72</string>
-				<string>7F057B0012EDC67100FDC1BF</string>
-				<string>7F057B0112EDC67100FDC1BF</string>
-				<string>7F057B0212EDC67100FDC1BF</string>
-				<string>7F057B0312EDC67100FDC1BF</string>
-				<string>7F057B0412EDC67100FDC1BF</string>
+				<string>7F781A3113D4788200ED7DE1</string>
+				<string>7F781A3213D4788200ED7DE1</string>
+				<string>7F781A3313D4788200ED7DE1</string>
+				<string>7F781A3413D4788200ED7DE1</string>
+				<string>7F781A3513D4788200ED7DE1</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debugV3</string>
