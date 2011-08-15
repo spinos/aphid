@@ -144,8 +144,6 @@ Center::Center()
     ShakeHole *rightDial = new ShakeHole();
     box->addWidget(rightDial);
     setLayout(box);
-	
-	//connect(rightDial, SIGNAL(intvalue(int)), leftDial, SLOT(setValue(int)));
 }
 
 class Window : public QMainWindow
@@ -166,10 +164,9 @@ int main(int argc, char *argv[])
 {
 	Py_Initialize();
     QApplication app(argc, argv);
-	
-	
 
 	Window window;
+	window.resize(400, 300);
     window.show();
 
     return app.exec();

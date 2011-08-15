@@ -41,7 +41,7 @@
 
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
-
+#include <OGRE/Ogre.h>
 #include <QGLWidget>
 
 class QtLogo;
