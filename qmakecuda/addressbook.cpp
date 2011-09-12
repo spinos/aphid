@@ -50,33 +50,24 @@ AddressBook::AddressBook(QWidget *parent)
     : QWidget(parent)
 {
 	checkCUDevice();
-	
-	QImage *imagefile = new QImage(":images/eagle.jpg");
+	QString filename(":images/eagle.jpg");
+	qDebug() << "loading image: " << filename;
+	QImage *imagefile = new QImage(filename);
 	qDebug() << "image depth: " << imagefile->depth();
 	QSize imagesize = imagefile->size();
 	qDebug() << QString("image size: %1 x %2")
                      .arg(imagesize.width()).arg(imagesize.height());
 	
-        //unsigned char *luminancebits = new unsigned char[imagesize.width()*imagesize.height()*4];				 
-	//initTexture(imagesize.width(), imagesize.height(), imagefile->bits(), luminancebits); 
+	unsigned char *unsortedbits = new unsigned char[imagesize.width()*imagesize.height()*4];
+	compactImage(imagesize.width(), imagesize.height(), imagefile->bits(), unsortedbits);
 	
-	unsigned char *countbits = new unsigned char[imagesize.width()*imagesize.height()*4];
-	countTexture(imagesize.width(), imagesize.height(), imagefile->bits(), countbits);
+	unsigned char *sortedbits = new unsigned char[imagesize.width()*imagesize.height()*4];
+	compactImage(imagesize.width(), imagesize.height(), imagefile->bits(), sortedbits, 1);
 
-	inimagelabel = new QLabel();
+	QLabel *inimagelabel = new QLabel();
 	inimagelabel->setPixmap(QPixmap::fromImage(*imagefile));
 	
-	//QImage *luminanceImage = new QImage(luminancebits, imagesize.width(), imagesize.height(), QImage::Format_ARGB32);
-	
-	//QPixmap outimage = QPixmap::fromImage(*luminanceImage);
-	//outimagelabel = new QLabel();
-	//outimagelabel->setPixmap(outimage);
-	
-	QLabel *compactimagelabel = new QLabel();
-	QImage *compactImage = new QImage(countbits, imagesize.width(), imagesize.height(), QImage::Format_ARGB32);
-	
-	QPixmap compactpix = QPixmap::fromImage(*compactImage);
-	compactimagelabel->setPixmap(compactpix);
+
 //! [constructor and input fields]
 
 //! [layout]
@@ -84,13 +75,14 @@ AddressBook::AddressBook(QWidget *parent)
 
 	mainLayout->addWidget(inimagelabel, 0, 0);
 	
-	mainLayout->addWidget(compactimagelabel, 0, 1);
-	//mainLayout->addWidget(outimagelabel, 1, 1);
+	mainLayout->addWidget(createImageLabelFromData(imagesize.width(), imagesize.height(), unsortedbits), 0, 1);
+	mainLayout->addWidget(createImageLabelFromData(imagesize.width(), imagesize.height(), sortedbits), 0, 2);
+	
 //! [layout]
 
 //![setting the layout]    
     setLayout(mainLayout);
-    setWindowTitle(tr("Compaction"));
+    setWindowTitle(tr("Image Compaction"));
 }
 //! [setting the layout]
 
@@ -122,3 +114,15 @@ int deviceCount = 0;
         		   
 	}
 }
+
+QLabel *AddressBook::createImageLabelFromData(int w, int h, unsigned char *data)
+{
+    QLabel *label = new QLabel();
+    QImage *image = new QImage(data, w, h, QImage::Format_ARGB32);
+	
+    QPixmap pix = QPixmap::fromImage(*image);
+    label->setPixmap(pix);
+    
+    return label;
+}
+

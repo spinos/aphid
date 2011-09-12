@@ -2,9 +2,14 @@
 #define SCAM_IMPLEMENT_H
 
 extern "C" void initTexture(int width, int height, unsigned char*pImage, unsigned char*outImage);
-extern "C" void countTexture(int width, int height, unsigned char*pImage, unsigned char*outImage);
+extern "C" void compactImage(
+    int width, 
+    int height, 
+    unsigned char *pImage, 
+    unsigned char *outImage, 
+    char needSort = 0);
 
-extern "C" size_t scanExclusive(
+extern "C" uint scanExclusive(
     uint *d_Dst,
     uint *d_Src,
     uint batchSize,
@@ -16,5 +21,6 @@ extern "C" void checkScanResult(
     uint *d_count, 
     uint numElement
 );
+
 #endif        //  #ifndef SCAM_IMPLEMENT_H
 

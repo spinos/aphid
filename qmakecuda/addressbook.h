@@ -57,13 +57,11 @@ class AddressBook : public QWidget
 
 public:
     AddressBook(QWidget *parent = 0);
-	void checkCUDevice();
+    void checkCUDevice();
+    QLabel *createImageLabelFromData(int w, int h, unsigned char *data);
 
 private:
-    QLineEdit *nameLine;
-    QTextEdit *addressText;
-	QLabel *inimagelabel;
-	QLabel *outimagelabel;
+    
 };
 //! [class definition]
 

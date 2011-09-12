@@ -168,7 +168,22 @@ __global__ void scanExclusiveShared2(
         d_Buf[pos] = odata;
 }
 
-extern "C" size_t scanExclusive(
+__global__ void
+mergeScanGroups(uint *in, uint *element, uint *out)
+{
+    uint pos = blockIdx.x * blockDim.x + threadIdx.x;
+    uint offset = 0;
+    uint i_group = pos/1024;
+    for(uint i = 0; i < i_group; i++)
+    {
+        offset += in[i * 1024 + 1023] + element[i * 1024 + 1023];
+        
+    }
+    out[pos] = in[pos] + offset;
+    
+}
+
+extern "C" uint scanExclusive(
     uint *d_Dst,
     uint *d_Src,
     uint batchSize,
@@ -188,42 +203,53 @@ extern "C" size_t scanExclusive(
     //Check all threadblocks to be fully packed with data
     assert( (batchSize * arrayLength) % (4 * THREADBLOCK_SIZE) == 0 );
 
+    uint *d_intermediate;
+    cutilSafeCall( cudaMalloc((void **)&d_intermediate, sizeof(uint) * (batchSize * arrayLength) ) );
+    
     scanExclusiveShared<<<(batchSize * arrayLength) / (4 * THREADBLOCK_SIZE), THREADBLOCK_SIZE>>>(
-        (uint4 *)d_Dst,
+        (uint4 *)d_intermediate,
         (uint4 *)d_Src,
         arrayLength
     );
+    
+    mergeScanGroups<<<(batchSize * arrayLength)/32, 32>>>(d_intermediate, d_Src, d_Dst);
+    
+    
+    cutilSafeCall( cudaFree(d_intermediate));
+    
+// get the number of valid elements by adding up last count and its prefix_sum
+// need access to device memory
+    thrust::device_ptr<uint>dp_scanMerge(d_Dst);
+    thrust::device_ptr<uint>dp_count(d_Src);
+    uint num_scan = dp_scanMerge[batchSize * arrayLength-1] + dp_count[batchSize * arrayLength-1];
+        
 
-    return THREADBLOCK_SIZE;
+    return num_scan;
 }
+
 
 extern "C" 
 void checkScanResult(uint *d_scanResult, uint *d_count, uint numElement)
 {
-    uint *h_scanResult;
-    cudaMalloc((void **)&h_scanResult, sizeof(uint) * numElement );
-    uint *h_count;
-    cudaMalloc((void **)&h_count, sizeof(uint) * numElement );
+    thrust::device_ptr<uint>dp_scanMerge(d_scanResult);
+    thrust::device_ptr<uint>dp_count(d_count);
     
-    cudaMemcpy(h_scanResult, d_scanResult, sizeof(uint) * numElement, cudaMemcpyDeviceToHost);		
-        
-    cudaMemcpy(h_count, d_count, sizeof(uint) * numElement, cudaMemcpyDeviceToHost);		
-    
+    printf("tesing scan result... ");
     uint sum = 0;
     for(uint i = 0; i < numElement; i++)
     {
         
-        if(i>0)sum += h_count[i-1];
+        if(i>0)sum += dp_count[i-1];
         
-        printf("%i %i %i == %i \n", i, h_count[i], sum, h_scanResult[i]);
-        if(i % 1024 == 1023)
-            printf("===============\n");
-        //assert(d_scanResult[i] == sum);
+        //printf("%i %i %i == %i \n", i, h_count[i], sum, h_scanResult[i]);
+        //if(i % 1024 == 1023)
+        //    printf("===============\n");
+        if(dp_scanMerge[i] != sum)
+            printf("mismatch at element %i, get %i instead of %i", i, dp_scanMerge[i], sum );
 
     }
     
-    cudaFree(h_scanResult);
-    cudaFree(h_count);
+    printf("passed\n");
 }
 
 
