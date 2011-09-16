@@ -50,7 +50,7 @@ AddressBook::AddressBook(QWidget *parent)
     : QWidget(parent)
 {
 	checkCUDevice();
-	QString filename(":images/eagle.jpg");
+	QString filename(":images/triplet.jpg");
 	qDebug() << "loading image: " << filename;
 	QImage *imagefile = new QImage(filename);
 	qDebug() << "image depth: " << imagefile->depth();

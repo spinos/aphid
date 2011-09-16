@@ -125,11 +125,9 @@ compact_image(uint *prefix_sum, uchar4 *color, uchar4 *od, uint *key, uint group
         {   
             if(color[pix_loc].w > 5)
             {
-                od[offset].x = color[pix_loc].x; // blue
-                od[offset].y = color[pix_loc].y; // green
-                od[offset].z = color[pix_loc].z; // red
-                od[offset].w = 255; // alpha
-                key[offset] = color[pix_loc].w;
+                od[offset] = color[pix_loc];
+                od[offset].w = 255;
+                key[offset] = color[pix_loc].w; // alpha
                 offset++;
             }
         }
