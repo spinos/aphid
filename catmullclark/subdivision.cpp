@@ -29,26 +29,6 @@ float averageOf(float *d, int a, int b, int dim)
 	return (getVec(d, a, dim) + getVec(d, b, dim)) / 2.f;
 }
 
-void edgeMid(float *p0, float *p1, int i, int j, int w1, int a, int b)
-{
-	p1[getId(i, j, w1, 0)] = averageOf(p0, a, b, 0);
-	p1[getId(i, j, w1, 1)] = averageOf(p0, a, b, 1);
-	p1[getId(i, j, w1, 2)] = averageOf(p0, a, b, 2);
-}
-
-int isFaceOnCorner(int i, int w)
-{
-	if(i == 0)
-		return 0;
-	if(i == w - 1)
-		return 1;
-	if(i == w * w - 1)
-		return 2;
-	if(i == w * (w - 1))
-		return 3;
-	return -1;		
-}
-
 void drawP(float *p, int i)
 {
 	glVertex3f(p[i * 3], p[i * 3 + 1], p[i * 3 + 2]);
@@ -112,14 +92,6 @@ int vertexAt(int i, int j, int w)
 int faceAt(int i, int j, int w)
 {
 	return j * (w - 1) + i + 1;
-}
-
-void fillPatchSet(int *set)
-{
-	set[0] = 0;
-	set[1] = 1;
-	set[2] = 2;
-	set[3] = 2;
 }
 
 void faceConnectionAtLevel(int* connection, int level, int *set)
@@ -325,6 +297,14 @@ void updateEdgeCenterNode(float *p1, int node, float *p0, int edge0, int edge1)
 	p1[node * 3+2] = averageOf(p0, edge0, edge1, 2);
 }
 
+void updateBoundaryVertexNode(float *p1, int node, float *p0, int center, int corner0, int corner1)
+{	
+	p1[node * 3]     = getVec(p0, center, 0) * 0.75f + (getVec(p0, corner0, 0) + getVec(p0, corner1, 0)) * 0.125f;
+	p1[node * 3 + 1] = getVec(p0, center, 1) * 0.75f + (getVec(p0, corner0, 1) + getVec(p0, corner1, 1)) * 0.125f;
+	p1[node * 3 + 2] = getVec(p0, center, 2) * 0.75f + (getVec(p0, corner0, 2) + getVec(p0, corner1, 2)) * 0.125f;
+}
+
+
 void updateVertexNode(float *p1, int node, float *p0, int face0, int face1, int face2, int face3, int *c0)
 {	
 	int corner0 = c0[face0 * 4];
@@ -428,7 +408,234 @@ void updateVetexNodeValence5(float *p1, int node, float *p0, int face0, int face
 	p1[node * 3 + 2] = (getVec(p0, center, 2) * 65.f + (getVec(p0, edge0, 2) + getVec(p0, edge1, 2) + getVec(p0, edge2, 2) + getVec(p0, edge3, 2) + getVec(p0, edge4, 2)) * 6.f + (getVec(p0, corner0, 2) + getVec(p0, corner1, 2) + getVec(p0, corner2, 2) + getVec(p0, corner3, 2) + getVec(p0, corner4, 2))) / 100.f;
 }
 
-void updateNodeAtLevel(float *p1, float *p0, int *c0, int level, int *set)
+void fillBoundary(char *set)
+{
+	set[0]  = 1; set[1]  = 0; set[2]  = 0; set[3]  = 0; set[4]  = 1; 
+	set[5]  = 1; set[6]  = 0; set[7]  = 1; set[8]  = 1; set[9]  = 1; 
+	set[10] = 1; set[11] = 0; set[12] = 1; set[13] = 0; set[14] = 1;
+}
+
+void fillPatchSet(int *set)
+{
+	set[0] = 1; set[1] = 1;
+	set[2] = 1; set[3] = 1;
+}
+
+void processBoundary(float *p1, float *p0, int *c0, int level, int *set, char *boundary)
+{
+	int patchWidth = towpowerof(level) + 1 + 2 + 2;
+	int patchHeight = towpowerof(level) + 1 + 2;
+	int faceWidth0 = towpowerof(level-1) + 2 + 2;
+	int faceHeight0 = towpowerof(level-1) + 2;
+	int face0, face1;
+
+	if(!boundary[2])
+	{
+		for(int i= 1; i < patchWidth; i += 2)
+		{
+			face0 = faceWidth0 + i / 2 + 1;
+			updateEdgeCenterNode(p1, patchWidth + i, p0, c0[face0*4], c0[face0*4+1]);
+		}
+		for(int i= 2; i < patchWidth; i += 2)
+		{
+			face0 = faceWidth0 + i / 2;
+			face1 = faceWidth0 + i / 2 + 1;
+			updateBoundaryVertexNode(p1, patchWidth + i, p0, c0[face0*4+1], c0[face0*4], c0[face1*4+1]);
+		}
+	}
+	
+	if(!boundary[8])
+	{
+		for(int j= 0; j < patchHeight; j += 2)
+		{
+			face0 = faceWidth0 * (j / 2) + (patchWidth - 3) / 2 ;
+			updateEdgeCenterNode(p1, patchWidth * j + patchWidth - 3, p0, c0[face0*4 + 1], c0[face0*4+ 2]);
+		}
+		for(int j= 1; j < patchHeight; j += 2)
+		{
+			face0 = faceWidth0 * (j / 2) + (patchWidth - 3) / 2;
+			face1 = faceWidth0 * (j / 2 + 1) + (patchWidth - 3) / 2;
+			updateBoundaryVertexNode(p1, patchWidth * j + patchWidth - 3, p0, c0[face0*4+2], c0[face0*4+1], c0[face1*4+2]);
+		}
+	}
+	
+	if(!boundary[12])
+	{
+		for(int i= 1; i < patchWidth; i += 2)
+		{
+			face0 = faceWidth0 * (faceHeight0 - 2) + i / 2 + 1;
+			updateEdgeCenterNode(p1, patchWidth * (patchHeight - 2) + i, p0, c0[face0*4 + 2], c0[face0*4+3]);
+		}
+		for(int i= 2; i < patchWidth; i += 2)
+		{
+			face0 = faceWidth0 * (faceHeight0 - 2) + i / 2;
+			face1 = faceWidth0 * (faceHeight0 - 2) + i / 2 + 1;
+			updateBoundaryVertexNode(p1, patchWidth * (patchHeight - 2) + i, p0, c0[face0*4+2], c0[face0*4 + 3], c0[face1*4+2]);
+		}
+	}
+	
+	if(!boundary[6])
+	{
+		for(int j= 0; j < patchHeight; j += 2)
+		{
+			face0 = faceWidth0 * (j / 2) + 2 ;
+			updateEdgeCenterNode(p1, patchWidth * j + 2, p0, c0[face0*4 + 3], c0[face0*4]);
+		}
+		for(int j= 1; j < patchHeight; j += 2)
+		{
+			face0 = faceWidth0 * (j / 2) + 2;
+			face1 = faceWidth0 * (j / 2 + 1) + 2;
+			updateBoundaryVertexNode(p1, patchWidth * j + 2, p0, c0[face0*4 + 3], c0[face0*4], c0[face1*4+ 3]);
+		}
+	}
+	if(!boundary[1])
+	{
+		updateEdgeCenterNode(p1, 2, p0, c0[2*4], c0[2*4+3]);
+		updateEdgeCenterNode(p1, patchWidth + 1, p0, c0[(faceWidth0 + 1)*4], c0[(faceWidth0 + 1)*4+1]);
+	}
+	if(!boundary[3])
+	{
+		updateEdgeCenterNode(p1, patchWidth - 3, p0, c0[(faceWidth0 - 3)*4 + 1], c0[(faceWidth0 - 3)*4 + 2]);
+		updateEdgeCenterNode(p1, patchWidth * 2 - 2, p0, c0[(faceWidth0 * 2 - 2)*4], c0[(faceWidth0 * 2 - 2)*4+1]);
+	}
+	if(!boundary[13])
+	{
+		updateEdgeCenterNode(p1, patchWidth * (patchHeight- 1) - 2, p0, c0[(faceWidth0 * (faceHeight0 - 1)- 2)*4 + 2], c0[(faceWidth0 * (faceHeight0 - 1)- 2)*4 + 3]);
+		updateEdgeCenterNode(p1, patchWidth * patchHeight - 3, p0, c0[(faceWidth0 * faceHeight0 - 3)*4 + 1], c0[(faceWidth0 * faceHeight0 - 3)*4+2]);
+	}
+	if(!boundary[11])
+	{
+		updateEdgeCenterNode(p1, patchWidth * (patchHeight- 2) + 1, p0, c0[(faceWidth0 * (faceHeight0 - 2) + 1)*4 + 2], c0[(faceWidth0 * (faceHeight0 - 2) + 1)*4 + 3]);
+		updateEdgeCenterNode(p1, patchWidth * (patchHeight- 1) + 2, p0, c0[(faceWidth0 * (faceHeight0 - 1) + 2)*4 + 3], c0[(faceWidth0 * (faceHeight0 - 1) + 2)*4]);
+	}
+	
+	int end0 = -1, end1 = -1;
+	if(!boundary[2])
+	{
+		end0 = c0[(faceWidth0 + 2) * 4 + 1];
+	}
+	if(!boundary[1])
+	{
+		if(end0 < 0) 
+			end0 = c0[2 * 4];
+	}
+	if(!boundary[6])
+	{
+		if(end0 < 0) 
+			end0 = c0[1 * 4 + 3];
+		end1 = c0[(faceWidth0 + 2) * 4 + 3];
+	}
+	if(!boundary[1])
+	{
+		if(end1 < 0) 
+			end1 = c0[(faceWidth0 + 1) * 4];
+	}
+	if(!boundary[2])
+	{
+		if(end1 < 0) 
+			end1 = c0[1 * 4 + 1];
+	}
+	if(end1 > 0)
+	{
+		updateBoundaryVertexNode(p1, patchWidth + 2, p0, c0[(faceWidth0 + 2) * 4], end0, end1);
+	}
+	
+	end0 = -1, end1 = -1;
+	if(!boundary[8])
+	{
+		end0 = c0[(faceWidth0 * 2 - 3) * 4 + 2];
+	}
+	if(!boundary[3])
+	{
+		if(end0 < 0) 
+			end0 = c0[(faceWidth0 * 2 - 2) * 4 + 1];
+	}
+	if(!boundary[2])
+	{
+		if(end0 < 0) 
+			end0 = c0[(faceWidth0 - 2) * 4];
+		end1 = c0[(faceWidth0 * 2 - 3) * 4];
+	}
+	if(!boundary[3])
+	{
+		if(end1 < 0) 
+			end1 = c0[(faceWidth0 - 3) * 4 + 1];
+	}
+	if(!boundary[8])
+	{
+		if(end1 < 0) 
+			end1 = c0[(faceWidth0 - 2) * 4 + 2];
+	}
+	if(end1 > 0)
+	{
+		updateBoundaryVertexNode(p1, patchWidth + patchWidth - 3, p0, c0[(faceWidth0 * 2 - 3) * 4 + 1], end0, end1);
+	}
+	
+	end0 = -1, end1 = -1;
+	if(!boundary[12])
+	{
+		end0 = c0[(faceWidth0 * (faceHeight0 - 1) - 3) * 4 + 3];
+	}
+	if(!boundary[13])
+	{
+		if(end0 < 0) 
+			end0 = c0[(faceWidth0 * faceHeight0 - 3) * 4 + 2];
+	}
+	if(!boundary[8])
+	{
+		if(end0 < 0) 
+			end0 = c0[(faceWidth0 * faceHeight0 - 2) * 4 + 1];
+		end1 = c0[(faceWidth0 * (faceHeight0 - 1) - 3) * 4 + 1];
+	}
+	if(!boundary[13])
+	{
+		if(end1 < 0) 
+			end1 = c0[(faceWidth0 * (faceHeight0 - 1) - 2) * 4 + 2];
+	}
+	if(!boundary[12])
+	{
+		if(end1 < 0) 
+			end1 = c0[(faceWidth0 * faceHeight0 - 2) * 4 + 3];
+	}
+	if(end1 > 0)
+	{
+		updateBoundaryVertexNode(p1, patchWidth *(patchHeight - 1) - 3, p0, c0[(faceWidth0 * (faceHeight0 - 1) - 3) * 4 + 2], end0, end1);
+	}
+	
+	end0 = -1, end1 = -1;
+	if(!boundary[6])
+	{
+		end0 = c0[(faceWidth0 * (faceHeight0 - 2) + 2) * 4];
+		printf("e0 %i\n", end0);
+	}
+	if(!boundary[11])
+	{
+		if(end0 < 0) 
+			end0 = c0[(faceWidth0 * (faceHeight0 - 2) + 1) * 4 + 3];
+	}
+	if(!boundary[12])
+	{
+		if(end0 < 0) 
+			end0 = c0[(faceWidth0 * (faceHeight0 - 1) + 1) * 4 + 2];
+		end1 = c0[(faceWidth0 * (faceHeight0 - 2) + 2) * 4 + 2];
+	}
+	if(!boundary[11])
+	{
+		if(end1 < 0) 
+			end1 = c0[(faceWidth0 * (faceHeight0 - 1) + 2) * 4 + 3];
+	}
+	if(!boundary[6])
+	{
+		if(end1 < 0) 
+			end1 = c0[(faceWidth0 * (faceHeight0 - 1) + 1) * 4];
+	}
+	if(end1 > 0)
+	{
+		updateBoundaryVertexNode(p1, patchWidth * (patchHeight - 2) + 2, p0, c0[(faceWidth0 * (faceHeight0 - 2) + 2) * 4 + 3], end0, end1);
+	}
+}
+
+void updateNodeAtLevel(float *p1, float *p0, int *c0, int level, int *set, char *boundary)
 {
 	int patchWidth = towpowerof(level) + 1 + 2 + 2;
 	int patchHeight = towpowerof(level) + 1 + 2;
@@ -557,8 +764,24 @@ void updateNodeAtLevel(float *p1, float *p0, int *c0, int level, int *set)
 		updateFaceNode(p1, patchWidth * (patchHeight - 1), p0, faceWidth0 * (faceHeight0 - 1) + 1, c0);
 		face0 = faceWidth0 * (faceHeight0 - 1);
 		updateEdgeCenterNode(p1, patchWidth * (patchHeight - 1) + 1, p0, c0[face0*4+2], c0[face0*4+3]);
-		updateVetexNodeValence5(p1, patchWidth * (patchHeight -2) + 2, p0, faceWidth0 * (faceHeight0 - 2) + 1, faceWidth0 * (faceHeight0 - 2) + 2, faceWidth0 * (faceHeight0 - 1) + 2, faceWidth0 * (faceHeight0 - 1) + 1, faceWidth0 * (faceHeight0 - 1), c0, 3);
+		updateVetexNodeValence5(p1, patchWidth * (patchHeight -2) + 2, p0, faceWidth0 * (faceHeight0 - 2) + 1, faceWidth0 * (faceHeight0 - 2) + 2, faceWidth0 * (faceHeight0 - 1) + 2, faceWidth0 * (faceHeight0 - 1) + 1, faceWidth0 * (faceHeight0 - 1), c0, 3);	
+	}
 	
+	processBoundary(p1, p0, c0, level, set, boundary);	
+	
+}
+
+void drawFace(float *p, int *c, int level)
+{
+	int w = towpowerof(level) + 2 + 2;
+	int h = towpowerof(level) + 2;
+	for(int j=1; j < h -1; j++)
+	{
+		for(int i = 2; i < w - 2; i++)
+		{
+			drawF(p, c, j * w + i);	
+			
+		}
 	}
 }
 
@@ -600,6 +823,10 @@ Subdivision::Subdivision()
 	_patch_set = new int[4];
 	
 	fillPatchSet(_patch_set);
+	
+	char *boundary = new char[15];
+	
+	fillBoundary(boundary);
 
 	int _cage_num_face = faceCountAtLevel(0);
 	_caga_connection = new int[4 * _cage_num_face];	
@@ -615,7 +842,7 @@ Subdivision::Subdivision()
 	
 	faceConnectionAtLevel(_bent_connection, 1, _patch_set);
 	
-	updateNodeAtLevel(_bent_vertices, _cage_vertices, _caga_connection, 1, _patch_set);
+	updateNodeAtLevel(_bent_vertices, _cage_vertices, _caga_connection, 1, _patch_set, boundary);
 	
 	int l2_num_face = faceCountAtLevel(2);
 	_l2_connection = new int[4 * l2_num_face];
@@ -623,7 +850,7 @@ Subdivision::Subdivision()
 	
 	faceConnectionAtLevel(_l2_connection, 2, _patch_set);
 	
-	updateNodeAtLevel(_l2_vertices, _bent_vertices, _bent_connection, 2, _patch_set);
+	updateNodeAtLevel(_l2_vertices, _bent_vertices, _bent_connection, 2, _patch_set, boundary);
 	
 	int l3_num_face = faceCountAtLevel(3);
 	_l3_connection = new int[4 * l3_num_face];
@@ -631,7 +858,7 @@ Subdivision::Subdivision()
 	
 	faceConnectionAtLevel(_l3_connection, 3, _patch_set);
 	
-	updateNodeAtLevel(_l3_vertices, _l2_vertices, _l2_connection, 3, _patch_set);
+	updateNodeAtLevel(_l3_vertices, _l2_vertices, _l2_connection, 3, _patch_set, boundary);
 	
 	int l4_num_face = faceCountAtLevel(4);
 	_l4_connection = new int[4 * l4_num_face];
@@ -639,7 +866,7 @@ Subdivision::Subdivision()
 	
 	faceConnectionAtLevel(_l4_connection, 4, _patch_set);
 	
-	updateNodeAtLevel(_l4_vertices, _l3_vertices, _l3_connection,  4, _patch_set);
+	updateNodeAtLevel(_l4_vertices, _l3_vertices, _l3_connection,  4, _patch_set, boundary);
 	
 	int l5_num_face = faceCountAtLevel(5);
 	_l5_connection = new int[4 * l5_num_face];
@@ -647,7 +874,7 @@ Subdivision::Subdivision()
 	
 	faceConnectionAtLevel(_l5_connection, 5, _patch_set);
 	
-	updateNodeAtLevel(_l5_vertices, _l4_vertices, _l4_connection,  5, _patch_set);
+	updateNodeAtLevel(_l5_vertices, _l4_vertices, _l4_connection,  5, _patch_set, boundary);
 }
 
 void Subdivision::draw()
@@ -669,15 +896,15 @@ void Subdivision::draw()
 
 	glColor3f(.1f, 1.f, .5f);
 	
-	drawPatch(_l3_vertices, _l3_connection, 3, _patch_set);
+	drawFace(_l3_vertices, _l3_connection, 3);
 	
 	glColor3f(1.f, .5f, 0.f);
 
-	drawPatch(_l4_vertices, _l4_connection, 4, _patch_set);
+	drawFace(_l4_vertices, _l4_connection, 4);
 
 	glColor3f(1.f, 0.f, 0.f);
 
-	drawPatch(_l5_vertices, _l5_connection, 5, _patch_set);
+	drawFace(_l5_vertices, _l5_connection, 5);
 	
 	glEnd();
 	
