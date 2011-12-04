@@ -45,9 +45,14 @@
 #include <math.h>
 
 #include "glwidget.h"
-
+#include "modelIn.h"
 #include "subdivision.h"
-
+#include "accPatch.h"
+#include "accStencil.h"
+#include "patchTopology.h"
+#include "LODCamera.h"
+#include "tessellator.h"
+#include "zEXRImage.h"
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
 #endif
@@ -67,8 +72,89 @@ GLWidget::GLWidget(QWidget *parent)
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(40);
 	
-	_subdiv = new Subdivision();
+	_image = new ZEXRImage("/Users/jianzhang/aphid/catmullclark/disp.exr");
+	if(_image->isValid()) qDebug()<<"image is loaded";
 	
+	_camera = new LODCamera();
+	_camera->setClip(1.f, 1000.f);
+	_camera->translate(0.f, 0.f, 100.f);
+	_tess = new Tessellator();
+	_tess->setDisplacementMap(_image);
+	
+	//_subdiv = new Subdivision();
+	//_subdiv->setLevel(4);
+	//_subdiv->runTest();
+	_model = new EasyModel("/Users/jianzhang/aphid/catmullclark/plane.m");
+	float* cvs = _model->getVertexPosition();
+	float* normal = _model->getVertexNormal();
+	int* valence = _model->getVertexValence();
+	int* patchV = _model->getPatchVertex();
+	char* patchB = _model->getPatchBoundary();
+	float* ucoord = _model->getUs();
+	float* vcoord = _model->getVs();
+	int* uvIds = _model->getUVIds();
+	int pv[24];
+	char pb[15];
+	float pp[24 * 3];
+	int numFace = _model->getNumFace();
+	//numFace = 1;
+	//_mesh = new Subdivision[numFace];
+	_topo = new PatchTopology[numFace];
+	AccStencil* sten = new AccStencil();
+	AccPatch::stencil = sten;
+	sten->setVertexPosition(cvs);
+	sten->setVertexNormal(normal);
+	
+	for(int j = 0; j < numFace; j++)
+	{
+		//_model->setPatchAtFace(j, pv, pb);
+		//for(int i = 0; i < 24; i++)
+		{
+		//	pp[i * 3] = cvs[pv[i] * 3];
+		//	pp[i * 3 + 1] = cvs[pv[i] * 3 + 1];
+		//	pp[i * 3 + 2] = cvs[pv[i] * 3 + 2];
+		}
+		//_mesh[j].setLevel(1);
+		//_mesh[j].setPatch(pp, pv, pb, valence);
+		//_mesh[j].dice();
+		
+		_topo[j].setVertexValence(valence);
+		
+		int* ip = patchV;
+		ip += j * 24;
+		_topo[j].setVertex(ip);
+		
+		char* cp = patchB;
+		cp += j * 15;
+		_topo[j].setBoundary(cp);
+	}
+	/*
+	_mesh1 = new Subdivision[numFace];
+	for(int j = 0; j < numFace; j++)
+	{
+		_model->setPatchAtFace(j, pv, pb);
+		for(int i = 0; i < 24; i++)
+		{
+			pp[i * 3] = cvs[pv[i] * 3];
+			pp[i * 3 + 1] = cvs[pv[i] * 3 + 1];
+			pp[i * 3 + 2] = cvs[pv[i] * 3 + 2];
+		}
+		_mesh1[j].setLevel(4);
+		_mesh1[j].setPatch(pp, pv, pb, valence);
+		_mesh1[j].dice();
+	}*/
+	_bezier = new AccPatch[numFace];
+	for(int j = 0; j < numFace; j++)
+	{
+		_bezier[j].setTexcoord(ucoord, vcoord, &uvIds[j * 4]);
+		_bezier[j].evaluateContolPoints(_topo[j]);
+		_bezier[j].evaluateTangents();
+		_bezier[j].evaluateBinormals();
+		_bezier[j].setCorner(_bezier[j].p(0, 0), 0);
+		_bezier[j].setCorner(_bezier[j].p(3, 0), 1);
+		_bezier[j].setCorner(_bezier[j].p(0, 3), 2);
+		_bezier[j].setCorner(_bezier[j].p(3, 3), 3);
+	}
 }
 //! [0]
 
@@ -141,7 +227,7 @@ void GLWidget::initializeGL()
     
 
     glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
+    
     glShadeModel(GL_SMOOTH);
     //glEnable(GL_LIGHTING);
     //glEnable(GL_LIGHT0);
@@ -158,11 +244,14 @@ void GLWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
+	
+	glLoadMatrixf(_camera->getMatrix());
 
-    glTranslatef(0.0, 0.0, -100.0);
-    glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-    glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
-    glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
+
+    //glTranslatef(0.0, 0.0, -100.0);
+    //glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
+    //glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
+    //glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
 	
 	
 	// draw origin coordinate system
@@ -178,8 +267,11 @@ void GLWidget::paintGL()
 	glVertex3i(0,0,100);
 	glEnd();
 	
-	_subdiv->draw();
+	//_subdiv->draw();
+	drawModel();
 	
+	//drawMesh();
+	drawBezier();
 
 	glFlush();
 }
@@ -191,12 +283,13 @@ void GLWidget::resizeGL(int width, int height)
     //int side = qMin(width, height);
     //glViewport((width - side) / 2, (height - side) / 2, side, side);
 	glViewport(0, 0, width, height);
+	_camera->setViewport(55.f, width, height);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-	
+/*	
 	float aspect = (float)width/(float)height;
-	float fov = 5.f;
+	float fov = 10.f;
 	float right = fov/ 2.f;
 	float top = right / aspect;
 #ifdef QT_OPENGL_ES_1
@@ -204,6 +297,9 @@ void GLWidget::resizeGL(int width, int height)
 #else
     glOrtho(-right, right, -top, top, 1.0, 1000.0);
 #endif
+*/
+	const float* frustum = _camera->getFrustum();
+	glFrustum(frustum[0], frustum[1], frustum[2], frustum[3], frustum[4], frustum[5]);
     glMatrixMode(GL_MODELVIEW);
 }
 //! [8]
@@ -222,17 +318,120 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     int dy = event->y() - lastPos.y();
 
     if (event->buttons() & Qt::LeftButton) {
-        setXRotation(xRot + 8 * dy);
-        setYRotation(yRot + 8 * dx);
+        _camera->tumble(dx, dy);
     } else if (event->buttons() & Qt::RightButton) {
-        setXRotation(xRot + 8 * dy);
-        setZRotation(zRot + 8 * dx);
+        _camera->dolly(dy);
+    }
+	else if (event->buttons() & Qt::MidButton) {
+        _camera->track(dx, dy);
     }
     lastPos = event->pos();
+	update();
 }
 //! [10]
 void GLWidget::simulate()
 {
-    update();
+    //update();
     
+}
+
+void GLWidget::drawModel()
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	unsigned numFace = _model->getNumFace();
+	int* counts = _model->getFaceCount();
+	int* connection = _model->getFaceConnection();
+	float* cvs = _model->getVertexPosition();
+	glColor3f(.1f, 1.f, .8f);
+	glBegin(GL_QUADS);
+	int acc = 0;
+	for(unsigned i=0; i < numFace; i++)
+	{
+		for(int j = 0; j < counts[i]; j++)
+		{
+			int vert = connection[acc];
+			glVertex3f(cvs[vert * 3], cvs[vert * 3 + 1], cvs[vert * 3 + 2]);
+			acc++;
+		}
+	}
+	glEnd();
+	
+}
+
+void GLWidget::drawMesh()
+{
+	unsigned numFace = _model->getNumFace();
+	for(unsigned i = 0; i < numFace; i++)
+	{
+		_mesh1[i].draw();
+	}
+}
+
+void GLWidget::drawBezier()
+{
+	Vector3F bmin, bmax;
+	unsigned numFace = _model->getNumFace();
+	for(unsigned i = 0; i < numFace; i++)
+	{
+		//drawBezierPatchCage(_bezier[i]);
+		_camera->computeQuadLOD(_bezier[i]);
+		float detail = _bezier[i].getMaxLOD();
+		if(detail > 0) drawBezierPatch(_bezier[i], detail);
+	}
+}
+
+void normalColor(Vector3F& nor)
+{
+	glColor3f(nor.x , nor.y , nor.z);
+}
+
+void GLWidget::drawBezierPatch(AccPatch& patch, float detail)
+{
+	int maxLevel = (int)log2f(detail) + 1;
+	if(maxLevel + patch.getLODBase() > 10) {
+		maxLevel = 10 - patch.getLODBase();
+	}
+	int seg = 2;
+	for(int i = 0; i < maxLevel; i++)
+	{
+		seg *= 2;
+	}
+	_tess->setNumSeg(seg);
+	_tess->evaluate(patch);
+	glEnable(GL_CULL_FACE);
+	glColor3f(0.5f, 0.1f, 0.2f);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+	glEnableClientState( GL_VERTEX_ARRAY );
+	glVertexPointer( 3, GL_FLOAT, 0, _tess->getPositions() );
+	
+	glEnableClientState( GL_COLOR_ARRAY );
+	glColorPointer( 3, GL_FLOAT, 0, _tess->getNormals() );
+
+	glDrawElements( GL_QUADS, seg * seg * 4, GL_UNSIGNED_INT, _tess->getVertices() );
+	glDisableClientState( GL_COLOR_ARRAY );
+	glDisableClientState( GL_VERTEX_ARRAY );
+}
+
+void GLWidget::drawBezierPatchCage(AccPatch& patch)
+{
+	glDisable(GL_CULL_FACE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_QUADS);
+	glColor3f(1,1,1);
+	for(unsigned j=0; j < 3; j++)
+	{
+		for(unsigned i = 0; i < 3; i++)
+		{
+			Vector3F p = patch.p(i, j);
+			glVertex3f(p.x, p.y, p.z);
+			p = patch.p(i + 1, j);
+			glVertex3f(p.x, p.y, p.z);
+			p = patch.p(i + 1, j + 1);
+			glVertex3f(p.x, p.y, p.z);
+			p = patch.p(i, j + 1);
+			glVertex3f(p.x, p.y, p.z);
+		}
+	}
+	glEnd();
 }

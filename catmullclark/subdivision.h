@@ -14,23 +14,18 @@ public:
 	
 	virtual void draw();
 	
+	void setLevel(int level);
+	void setPatch(float* cvs, int* vertex, char* boundary, int* valence);
+	void dice();
+	void runTest();
+	
 private:
+	int _level;
 	int* _patch_set;
-	int* _caga_connection;
+	char* _boundary;
+	int* _cage_connection;
 	float* _cage_vertices;
 	
 	int* _bent_connection;
 	float* _bent_vertices;
-	
-	int* _l2_connection;
-	float* _l2_vertices;
-	
-	int* _l3_connection;
-	float* _l3_vertices;
-	
-	int* _l4_connection;
-	float* _l4_vertices;
-	
-	int* _l5_connection;
-	float* _l5_vertices;
 };

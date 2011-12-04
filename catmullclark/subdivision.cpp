@@ -94,7 +94,7 @@ int faceAt(int i, int j, int w)
 	return j * (w - 1) + i + 1;
 }
 
-void faceConnectionAtLevel(int* connection, int level, int *set)
+void faceConnectionAtLevel(int* connection, int level, int *set, char* boundary)
 {
 	int patchWidth = towpowerof(level) + 1 + 2 + 2;
 	int patchHeight = towpowerof(level) + 1 + 2;
@@ -114,13 +114,13 @@ void faceConnectionAtLevel(int* connection, int level, int *set)
 
 	int lastFace = towpowerof(level) + 1;
 	int lastVert = patchWidth - 1;
-	if(set[0] == 0)
+	if(set[0] == 3 && boundary[2] && boundary[6])
 	{
 		int merge0 = faceAt(0, 1, patchWidth);
 		int merge1 = faceAt(1, 0, patchWidth);
 		connection[merge1*4] = connection[merge0*4];
 	}
-	if(set[0] == 2)
+	if(set[0] == 5)
 	{
 		int merge0 = faceAt(0, 0, patchWidth);
 		connection[merge0*4] = vertexAt(0, 0, patchWidth);
@@ -136,13 +136,13 @@ void faceConnectionAtLevel(int* connection, int level, int *set)
 
 	}
 
-	if(set[1] == 0)
+	if(set[1] == 3 && boundary[2] && boundary[8])
 	{
 		int merge0 = faceAt(lastFace - 1, 0, patchWidth);
 		int merge1 = faceAt(lastFace, 1, patchWidth);
 		connection[merge1*4+1] = connection[merge0*4+1];
 	}
-	if(set[1] == 2)
+	if(set[1] == 5)
 	{
 		int merge0 = faceAt(lastFace, 0, patchWidth);
 		connection[merge0*4] = vertexAt(lastVert, 0, patchWidth);
@@ -157,13 +157,13 @@ void faceConnectionAtLevel(int* connection, int level, int *set)
 		connection[merge1*4+3] = vertexAt(lastVert - 1, 0, patchWidth);
 	}
 	
-	if(set[2] == 0)
+	if(set[2] == 3 && boundary[12] && boundary[8])
 	{
 		int merge0 = faceAt(lastFace, lastFace - 1, patchWidth);
 		int merge1 = faceAt(lastFace - 1, lastFace, patchWidth);
 		connection[merge1*4+2] = connection[merge0*4+2];
 	}
-	if(set[2] == 2)
+	if(set[2] == 5)
 	{
 		int merge0 = faceAt(lastFace, lastFace, patchWidth);
 		connection[merge0*4] = vertexAt(lastVert, lastVert - 2, patchWidth);
@@ -179,13 +179,13 @@ void faceConnectionAtLevel(int* connection, int level, int *set)
 	}
 	
 	
-	if(set[3] == 0)
+	if(set[3] == 3 && boundary[12] && boundary[6])
 	{
 		int merge0 = faceAt(1, lastFace, patchWidth);
 		int merge1 = faceAt(0, lastFace - 1, patchWidth);
 		connection[merge1*4+3] = connection[merge0*4+3];
 	}
-	if(set[3] == 2)
+	if(set[3] == 5)
 	{
 		int merge0 = faceAt(0, lastFace, patchWidth);
 		connection[merge0*4] = vertexAt(0, lastVert - 2, patchWidth);
@@ -323,7 +323,7 @@ void updateVertexNode(float *p1, int node, float *p0, int face0, int face1, int 
 
 void weightedAverageValence3(float *p1, int node, float *p0, int corner1, int corner2, int corner3, int edge1, int edge2, int edge3, int center)
 {
-	p1[node * 3] = (getVec(p0, center, 0) * 15.f + (getVec(p0, edge1, 0) + getVec(p0, edge2, 0) + getVec(p0, edge3, 0)) * 6.f + (getVec(p0, corner1, 0) + getVec(p0, corner2, 0) + getVec(p0, corner3, 0))) / 36.f;
+	p1[node * 3]     = (getVec(p0, center, 0) * 15.f + (getVec(p0, edge1, 0) + getVec(p0, edge2, 0) + getVec(p0, edge3, 0)) * 6.f + (getVec(p0, corner1, 0) + getVec(p0, corner2, 0) + getVec(p0, corner3, 0))) / 36.f;
 	p1[node * 3 + 1] = (getVec(p0, center, 1) * 15.f + (getVec(p0, edge1, 1) + getVec(p0, edge2, 1) + getVec(p0, edge3, 1)) * 6.f + (getVec(p0, corner1, 1) + getVec(p0, corner2, 1) + getVec(p0, corner3, 1))) / 36.f;
 	p1[node * 3 + 2] = (getVec(p0, center, 2) * 15.f + (getVec(p0, edge1, 2) + getVec(p0, edge2, 2) + getVec(p0, edge3, 2)) * 6.f + (getVec(p0, corner1, 2) + getVec(p0, corner2, 2) + getVec(p0, corner3, 2))) / 36.f;
 }
@@ -341,19 +341,22 @@ void updateVetexNodeValence3(float *p1, int node, float *p0, int face0, int face
 	int center = c0[face0 * 4 + 2];
 	if(corner == 0)
 	{
-		center = c0[face1 * 4 + 3];
+		center = c0[face2 * 4];
 		weightedAverageValence3(p1, node, p0, corner1, corner2, corner3, edge1, edge2, edge3, center);
 	}
 	else if(corner == 1)
 	{
+		center = c0[face3 * 4 + 1];
 		weightedAverageValence3(p1, node, p0, corner0, corner2, corner3, edge0, edge2, edge3, center);
 	}
 	else if(corner == 2)
 	{
+		center = c0[face0 * 4 + 2];
 		weightedAverageValence3(p1, node, p0, corner0, corner1, corner3, edge0, edge1, edge3, center);
 	}
 	else if(corner == 3)
 	{
+		center = c0[face1 * 4 + 3];
 		weightedAverageValence3(p1, node, p0, corner0, corner1, corner2, edge0, edge1, edge2, center);
 	}
 }
@@ -458,7 +461,7 @@ void processBoundary(float *p1, float *p0, int *c0, int level, int *set, char *b
 			updateBoundaryVertexNode(p1, patchWidth * j + patchWidth - 3, p0, c0[face0*4+2], c0[face0*4+1], c0[face1*4+2]);
 		}
 	}
-	
+
 	if(!boundary[12])
 	{
 		for(int i= 1; i < patchWidth; i += 2)
@@ -473,7 +476,7 @@ void processBoundary(float *p1, float *p0, int *c0, int level, int *set, char *b
 			updateBoundaryVertexNode(p1, patchWidth * (patchHeight - 2) + i, p0, c0[face0*4+2], c0[face0*4 + 3], c0[face1*4+2]);
 		}
 	}
-	
+
 	if(!boundary[6])
 	{
 		for(int j= 0; j < patchHeight; j += 2)
@@ -488,6 +491,7 @@ void processBoundary(float *p1, float *p0, int *c0, int level, int *set, char *b
 			updateBoundaryVertexNode(p1, patchWidth * j + 2, p0, c0[face0*4 + 3], c0[face0*4], c0[face1*4+ 3]);
 		}
 	}
+	
 	if(!boundary[1])
 	{
 		updateEdgeCenterNode(p1, 2, p0, c0[2*4], c0[2*4+3]);
@@ -508,8 +512,19 @@ void processBoundary(float *p1, float *p0, int *c0, int level, int *set, char *b
 		updateEdgeCenterNode(p1, patchWidth * (patchHeight- 2) + 1, p0, c0[(faceWidth0 * (faceHeight0 - 2) + 1)*4 + 2], c0[(faceWidth0 * (faceHeight0 - 2) + 1)*4 + 3]);
 		updateEdgeCenterNode(p1, patchWidth * (patchHeight- 1) + 2, p0, c0[(faceWidth0 * (faceHeight0 - 1) + 2)*4 + 3], c0[(faceWidth0 * (faceHeight0 - 1) + 2)*4]);
 	}
-	
-	int end0 = -1, end1 = -1;
+}
+void processCornerBoundary(float *p1, float *p0, int *c0, int level, int *set, char *boundary)
+{
+	int patchWidth = towpowerof(level) + 1 + 2 + 2;
+	int patchHeight = towpowerof(level) + 1 + 2;
+	int faceWidth0 = towpowerof(level-1) + 2 + 2;
+	int faceHeight0 = towpowerof(level-1) + 2;
+
+	int end0, end1;
+	char isv3 = (set[0] == 3 && boundary[2] && boundary[6]);
+	if(!isv3)
+	{
+	end0 = -1, end1 = -1;
 	if(!boundary[2])
 	{
 		end0 = c0[(faceWidth0 + 2) * 4 + 1];
@@ -539,7 +554,10 @@ void processBoundary(float *p1, float *p0, int *c0, int level, int *set, char *b
 	{
 		updateBoundaryVertexNode(p1, patchWidth + 2, p0, c0[(faceWidth0 + 2) * 4], end0, end1);
 	}
-	
+	}
+	isv3 = (set[1] == 3 && boundary[2] && boundary[8]);
+	if(!isv3)
+	{
 	end0 = -1, end1 = -1;
 	if(!boundary[8])
 	{
@@ -570,22 +588,30 @@ void processBoundary(float *p1, float *p0, int *c0, int level, int *set, char *b
 	{
 		updateBoundaryVertexNode(p1, patchWidth + patchWidth - 3, p0, c0[(faceWidth0 * 2 - 3) * 4 + 1], end0, end1);
 	}
+	}
+	isv3 = (set[2] == 3  && boundary[12] && boundary[8]);
 	
+	if(!isv3)
+	{
 	end0 = -1, end1 = -1;
 	if(!boundary[12])
 	{
 		end0 = c0[(faceWidth0 * (faceHeight0 - 1) - 3) * 4 + 3];
+		printf("e0 %i ", end0);
 	}
 	if(!boundary[13])
 	{
 		if(end0 < 0) 
 			end0 = c0[(faceWidth0 * faceHeight0 - 3) * 4 + 2];
+		printf("fe %i ", faceWidth0 * faceHeight0 - 3);
+		printf("e0 %i ", end0);
 	}
 	if(!boundary[8])
 	{
 		if(end0 < 0) 
 			end0 = c0[(faceWidth0 * faceHeight0 - 2) * 4 + 1];
 		end1 = c0[(faceWidth0 * (faceHeight0 - 1) - 3) * 4 + 1];
+		printf("e0 %i ", end0);
 	}
 	if(!boundary[13])
 	{
@@ -597,16 +623,20 @@ void processBoundary(float *p1, float *p0, int *c0, int level, int *set, char *b
 		if(end1 < 0) 
 			end1 = c0[(faceWidth0 * faceHeight0 - 2) * 4 + 3];
 	}
-	if(end1 > 0)
+	if(end0 > 0)
 	{
+	printf("c3 e: %i %i", end0, end1);
 		updateBoundaryVertexNode(p1, patchWidth *(patchHeight - 1) - 3, p0, c0[(faceWidth0 * (faceHeight0 - 1) - 3) * 4 + 2], end0, end1);
 	}
-	
+	}
+	isv3 = (set[3] == 3  && boundary[12] && boundary[6]);
+	if(isv3) printf("e4 is v3 %i %i ", c0[(faceWidth0 * (faceHeight0 -2) +1) *4 + 3], c0[(faceWidth0 * (faceHeight0 - 1) + 2) * 4 + 3]);
+	if(!isv3)
+	{
 	end0 = -1, end1 = -1;
 	if(!boundary[6])
 	{
 		end0 = c0[(faceWidth0 * (faceHeight0 - 2) + 2) * 4];
-		printf("e0 %i\n", end0);
 	}
 	if(!boundary[11])
 	{
@@ -631,8 +661,15 @@ void processBoundary(float *p1, float *p0, int *c0, int level, int *set, char *b
 	}
 	if(end1 > 0)
 	{
+		printf("c4 e: %i %i", end0, end1);
 		updateBoundaryVertexNode(p1, patchWidth * (patchHeight - 2) + 2, p0, c0[(faceWidth0 * (faceHeight0 - 2) + 2) * 4 + 3], end0, end1);
 	}
+	}
+}
+
+char isInternalV3(int* valence, char* boundary, int corner, int neighbour0, int neighbour1)
+{
+	return (valence[corner] == 3 && boundary[neighbour0] && boundary[neighbour1]);
 }
 
 void updateNodeAtLevel(float *p1, float *p0, int *c0, int level, int *set, char *boundary)
@@ -678,13 +715,13 @@ void updateNodeAtLevel(float *p1, float *p0, int *c0, int level, int *set, char 
 		}
 	}
 	
-	if(set[0] == 0)
+	if(isInternalV3(set, boundary, 0, 2, 6))
 	{
 		updateEdgeCenterNode(p1, patchWidth + 1, p0, c0[(faceWidth0 + 1)*4], c0[(faceWidth0 + 1)*4 + 1]);
 		updateVetexNodeValence3(p1, patchWidth + 2, p0, 1, 2, faceWidth0 + 2, faceWidth0 + 1, c0, 0);
 	}
-	else if(set[0] == 2)
-	{
+	else if(set[0] == 5)
+	{printf("v5");
 		face0 = 1;
 		face1 = 2;
 		weightedAverageEdge(p0, p1, 2, c0[face0 * 4 + 3], c0[face0 * 4], c0[face1 * 4 + 1], c0[face1 * 4 + 2], c0[face0 * 4 + 1], c0[face0 * 4 + 2]);
@@ -699,13 +736,13 @@ void updateNodeAtLevel(float *p1, float *p0, int *c0, int level, int *set, char 
 		updateVetexNodeValence5(p1, patchWidth + 2, p0, 2, faceWidth0 + 2, faceWidth0 + 1, 0, 1, c0, 0);
 	}
 	
-	if(set[1] == 0)
+	if(isInternalV3(set, boundary, 1, 2, 8))
 	{
 		updateEdgeCenterNode(p1, patchWidth - 3, p0, c0[(faceWidth0 - 3)*4 + 1], c0[(faceWidth0 - 3)*4 + 2]);
 		updateVetexNodeValence3(p1, patchWidth + patchWidth - 3, p0, faceWidth0 - 3, faceWidth0 - 2, faceWidth0 + faceWidth0 - 2, faceWidth0 + faceWidth0 - 3, c0, 1);
 	}
-	else if(set[1] == 2)
-	{
+	else if(set[1] == 5)
+	{printf("v5");
 		face0 = faceWidth0 - 3;
 		face1 = faceWidth0 - 2;
 		
@@ -724,13 +761,13 @@ void updateNodeAtLevel(float *p1, float *p0, int *c0, int level, int *set, char 
 		updateVetexNodeValence5(p1, patchWidth * 2 - 3, p0, faceWidth0 * 2 - 2, faceWidth0 * 2 - 3, faceWidth0 - 3, faceWidth0 - 2, faceWidth0 - 1,  c0, 1);
 	}
 	
-	if(set[2] == 0)
+	if(isInternalV3(set, boundary, 2, 12, 8))
 	{
 		updateEdgeCenterNode(p1, patchWidth * (patchHeight - 1) - 2, p0, c0[(faceWidth0 * (faceHeight0 - 1) - 2)*4 + 2], c0[(faceWidth0 * (faceHeight0 - 1) - 2)*4 + 3]);
 		updateVetexNodeValence3(p1, patchWidth * (patchHeight - 1) - 3, p0, faceWidth0 * (faceHeight0 - 1) - 3, faceWidth0 * (faceHeight0 - 1) - 2, faceWidth0 * faceHeight0 - 2, faceWidth0 * faceHeight0 - 3, c0, 2);
 	}
-	else if(set[2] == 2)
-	{
+	else if(set[2] == 5)
+	{printf("v5");
 		face0 = faceWidth0 * faceHeight0 - 3;
 		face1 = faceWidth0 * faceHeight0 - 2;
 		weightedAverageEdge(p0, p1, patchWidth * patchHeight - 3, c0[face0 * 4 + 3], c0[face0 * 4], c0[face1 * 4 + 3], c0[face1 * 4], c0[face0 * 4 + 1], c0[face0 * 4 + 2]);
@@ -746,13 +783,13 @@ void updateNodeAtLevel(float *p1, float *p0, int *c0, int level, int *set, char 
 		updateVetexNodeValence5(p1, patchWidth * (patchHeight -1) - 3, p0, faceWidth0 * faceHeight0 - 3, faceWidth0 * (faceHeight0 - 1) - 3, faceWidth0 * (faceHeight0 - 1) - 2, faceWidth0 * faceHeight0 - 1, faceWidth0 * faceHeight0 - 2, c0, 2);
 	}
 	
-	if(set[3] == 0)
+	if(isInternalV3(set, boundary, 3, 12, 6))
 	{
 		updateEdgeCenterNode(p1, patchWidth * (patchHeight - 1) + 2, p0, c0[(faceWidth0 * (faceHeight0 - 1) + 2)*4 + 3], c0[(faceWidth0 * (faceHeight0 - 1) + 2)*4]);
 		updateVetexNodeValence3(p1, patchWidth * (patchHeight - 2) + 2, p0, faceWidth0 * (faceHeight0 - 2) + 1, faceWidth0 * (faceHeight0 - 2) + 2, faceWidth0 * (faceHeight0 - 1) + 2, faceWidth0 * (faceHeight0 - 1) + 1, c0, 3);
 	}
-	else if(set[3] == 2)
-	{
+	else if(set[3] == 5)
+	{printf("v5");
 		face0 = faceWidth0 * (faceHeight0 - 2) + 1;
 		face1 = faceWidth0 * (faceHeight0 - 1);
 		weightedAverageEdge(p0, p1, patchWidth * (patchHeight - 2) + 1, c0[face0 * 4], c0[face0 * 4 + 1], c0[face1 * 4 + 3], c0[face1 * 4], c0[face0 * 4 + 2], c0[face0 * 4 + 3]);
@@ -768,7 +805,7 @@ void updateNodeAtLevel(float *p1, float *p0, int *c0, int level, int *set, char 
 	}
 	
 	processBoundary(p1, p0, c0, level, set, boundary);	
-	
+	processCornerBoundary(p1, p0, c0, level, set, boundary);
 }
 
 void drawFace(float *p, int *c, int level)
@@ -800,9 +837,9 @@ void drawPatch(float *p, int *c, int level, int *set)
 			}
 			else
 			{
-				if(set[onCorner] > 0)
+				if(set[onCorner] > 3)
 					drawF(p, c, j * w + i);	
-				if(set[onCorner] > 1)
+				if(set[onCorner] > 4)
 				{
 					if(onCorner == 0)
 						drawF(p, c, 0);
@@ -818,74 +855,89 @@ void drawPatch(float *p, int *c, int level, int *set)
 	}
 }
 
-Subdivision::Subdivision()
+Subdivision::Subdivision():
+_cage_connection(0), _cage_vertices(0),
+_bent_connection(0), _bent_vertices(0)
 {
 	_patch_set = new int[4];
-	
-	fillPatchSet(_patch_set);
-	
-	char *boundary = new char[15];
-	
-	fillBoundary(boundary);
-
+	_boundary = new char[15];
 	int _cage_num_face = faceCountAtLevel(0);
-	_caga_connection = new int[4 * _cage_num_face];	
+	_cage_connection = new int[4 * _cage_num_face];	
 	_cage_vertices = new float[nodeCountAtLevel(0) * 3];
-	
-	faceConnectionAtLevel(_caga_connection, 0, _patch_set);
-	
-	fillNodePositionAtLevel(_cage_vertices, 0);
+}
 
-	int _bent_num_face = faceCountAtLevel(1);
-	_bent_connection = new int[4 * _bent_num_face];
-	_bent_vertices = new float[nodeCountAtLevel(1) * 3];
+void Subdivision::setLevel(int level)
+{
+	_level = level;
+}
+
+void Subdivision::setPatch(float* cvs, int* vertex, char* boundary, int* valence)
+{
+	_patch_set[0] = valence[vertex[8]];
+	_patch_set[1] = valence[vertex[9]];
+	_patch_set[2] = valence[vertex[15]];
+	_patch_set[3] = valence[vertex[14]];
+	for(int i = 0; i < 15; i++)
+		_boundary[i] = boundary[i];
+	faceConnectionAtLevel(_cage_connection, 0, _patch_set, _boundary);
+	for(int i = 0; i < 24; i++)
+	{
+		_cage_vertices[i*3] = cvs[i*3];
+		_cage_vertices[i*3 + 1] = cvs[i*3 + 1];
+		_cage_vertices[i*3 + 2] = cvs[i*3 + 2];
+	}
+}
+
+void Subdivision::dice()
+{
+	for(int i = 1; i <= _level; i++)
+	{
+		int cur_num_face = faceCountAtLevel(i);
+		if(i % 2 > 0)
+		{
+			if(_bent_connection) delete[] _bent_connection;
+			if(_bent_vertices) delete[] _bent_vertices;
+			_bent_connection = new int[4 * cur_num_face];
+			_bent_vertices = new float[nodeCountAtLevel(i) * 3];
+			
+			faceConnectionAtLevel(_bent_connection, i, _patch_set, _boundary);
+			updateNodeAtLevel(_bent_vertices, _cage_vertices, _cage_connection, i, _patch_set, _boundary);
 	
-	faceConnectionAtLevel(_bent_connection, 1, _patch_set);
+		}
+		else
+		{
+			if(_cage_connection) delete[] _cage_connection;
+			if(_cage_vertices) delete[] _cage_vertices;
+			_cage_connection = new int[4 * cur_num_face];
+			_cage_vertices = new float[nodeCountAtLevel(i) * 3];
+			
+			faceConnectionAtLevel(_cage_connection, i, _patch_set, _boundary);
+			updateNodeAtLevel(_cage_vertices, _bent_vertices, _bent_connection, i, _patch_set, _boundary);
+		}
+	}
+}
+
+void Subdivision::runTest()
+{
+	fillPatchSet(_patch_set);
+	fillBoundary(_boundary);
+	faceConnectionAtLevel(_cage_connection, 0, _patch_set, _boundary);
+	fillNodePositionAtLevel(_cage_vertices, 0);
+	dice();
 	
-	updateNodeAtLevel(_bent_vertices, _cage_vertices, _caga_connection, 1, _patch_set, boundary);
-	
-	int l2_num_face = faceCountAtLevel(2);
-	_l2_connection = new int[4 * l2_num_face];
-	_l2_vertices = new float[nodeCountAtLevel(2) * 3];
-	
-	faceConnectionAtLevel(_l2_connection, 2, _patch_set);
-	
-	updateNodeAtLevel(_l2_vertices, _bent_vertices, _bent_connection, 2, _patch_set, boundary);
-	
-	int l3_num_face = faceCountAtLevel(3);
-	_l3_connection = new int[4 * l3_num_face];
-	_l3_vertices = new float[nodeCountAtLevel(3) * 3];
-	
-	faceConnectionAtLevel(_l3_connection, 3, _patch_set);
-	
-	updateNodeAtLevel(_l3_vertices, _l2_vertices, _l2_connection, 3, _patch_set, boundary);
-	
-	int l4_num_face = faceCountAtLevel(4);
-	_l4_connection = new int[4 * l4_num_face];
-	_l4_vertices = new float[nodeCountAtLevel(4) * 3];
-	
-	faceConnectionAtLevel(_l4_connection, 4, _patch_set);
-	
-	updateNodeAtLevel(_l4_vertices, _l3_vertices, _l3_connection,  4, _patch_set, boundary);
-	
-	int l5_num_face = faceCountAtLevel(5);
-	_l5_connection = new int[4 * l5_num_face];
-	_l5_vertices = new float[nodeCountAtLevel(5) * 3];
-	
-	faceConnectionAtLevel(_l5_connection, 5, _patch_set);
-	
-	updateNodeAtLevel(_l5_vertices, _l4_vertices, _l4_connection,  5, _patch_set, boundary);
+	return;
 }
 
 void Subdivision::draw()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             
-	glColor3f(1.f, 1.f, 1.f);
 	glBegin(GL_QUADS);
 	
-	drawPatch(_cage_vertices, _caga_connection, 0, _patch_set);
-	
+	if(_level % 2 > 0)
+	{
+		
+	/*
 	glColor3f(.5f, 1.f, 1.f);
 	
 	drawPatch(_bent_vertices, _bent_connection, 1, _patch_set);
@@ -901,10 +953,16 @@ void Subdivision::draw()
 	glColor3f(1.f, .5f, 0.f);
 
 	drawFace(_l4_vertices, _l4_connection, 4);
-
-	glColor3f(1.f, 0.f, 0.f);
-
-	drawFace(_l5_vertices, _l5_connection, 5);
+*/
+		
+		//drawPatch(_bent_vertices, _bent_connection, _level, _patch_set);
+		drawFace(_bent_vertices, _bent_connection, _level);
+	}
+	else
+	{
+		//drawPatch(_cage_vertices, _cage_connection, _level, _patch_set);
+		drawFace(_cage_vertices, _cage_connection, _level);
+	}
 	
 	glEnd();
 	

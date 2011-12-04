@@ -73,7 +73,7 @@ Window::Window()
     zSlider->setValue(0 * 16);
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Catmul Clark"));
+    setWindowTitle(tr("Approximated Catmul Clark"));
 }
 //! [1]
 

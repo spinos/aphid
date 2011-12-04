@@ -48,6 +48,8 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     Window window;
-    window.showMaximized();
+	window.resize(600, 600);
+	window.show();
+    //window.showMaximized();
     return app.exec();
 }

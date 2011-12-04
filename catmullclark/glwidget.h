@@ -45,7 +45,12 @@
 #include <QGLWidget>
 
 class Subdivision;
-
+class EasyModel;
+class AccPatch;
+class PatchTopology;
+class LODCamera;
+class Tessellator;
+class ZEXRImage;
 //! [0]
 class GLWidget : public QGLWidget
 {
@@ -90,6 +95,20 @@ private:
     QColor qtPurple;
 	
 	Subdivision* _subdiv;
+	EasyModel* _model;
+	Subdivision* _mesh;
+	Subdivision* _mesh1;
+	AccPatch* _bezier;
+	PatchTopology* _topo;
+	LODCamera* _camera;
+	Tessellator* _tess;
+	ZEXRImage* _image;
+
+	void drawModel();
+	void drawMesh();
+	void drawBezier();
+	void drawBezierPatch(AccPatch& patch, float detail);
+	void drawBezierPatchCage(AccPatch& patch);
 	
 private slots:
     void simulate();
