@@ -1,27 +1,36 @@
 #include <QtGui>
 #include "RegexUi.h"
-
+#include "Reagan.h"
 RegexUi::RegexUi(QWidget *parent)
     : QWidget(parent)
 {
-    contentLine = new QTextEdit;
-	expressionLine = new QLineEdit;
+    contentLine = new QTextEdit("abc");
+	expressionLine = new QLineEdit("a.*");
+	replaceLine = new QLineEdit("b");
 	resultLine = new QTextEdit;
 	resultLine->setReadOnly(true);
     togglePushButton = new QPushButton(tr("Match"));
        QPushButton *searchButton = new QPushButton(tr("Search")); 
+	QPushButton *replaceButton = new QPushButton(tr("Replace")); 
+
 
 	connect(togglePushButton, SIGNAL(clicked()), this, SLOT(doReMatch()));
     connect(searchButton, SIGNAL(clicked()), this, SLOT(doReSearch()));
+    connect(replaceButton, SIGNAL(clicked()), this, SLOT(doReReplace()));
     
 
 //! [layout]
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(contentLine);
 	mainLayout->addWidget(expressionLine);
+	mainLayout->addWidget(replaceLine);
 	mainLayout->addWidget(resultLine);
-    mainLayout->addWidget(togglePushButton);
-    mainLayout->addWidget(searchButton);
+	QHBoxLayout *buttonGrp = new QHBoxLayout;
+    
+    buttonGrp->addWidget(togglePushButton);
+    buttonGrp->addWidget(searchButton);
+	buttonGrp->addWidget(replaceButton);
+	mainLayout->addLayout(buttonGrp);
 //! [layout]
 
 //![setting the layout]    
@@ -62,6 +71,31 @@ void RegexUi::doReSearch()
 	QTextStream(&log) << (*constIterator).toLocal8Bit().constData() << "\n";
 
 	resultLine->setText(log);
+}
+
+void RegexUi::doReReplace()
+{
+	std::string b4(contentLine->toPlainText().toUtf8().data());
+	std::string aft = b4;
+	Reagan::runReReplace(aft, expressionLine->text().toUtf8().data(), replaceLine->text().toUtf8().data());
+	QString log;
+	
+	if(b4 == aft)
+		QTextStream(&log) << "not replaced!";
+	else
+		QTextStream(&log) << "found and replaced to:\n" << aft.c_str();
+	
+	resultLine->setText(log);
+	
+	std::string unixpathname("\\\\storage.company.some\\slow/stage\\share///file.mm");
+	Reagan::validateUnixPath(unixpathname);
+	
+	qDebug() << unixpathname.c_str();
+	
+	std::string namest("|abc:a_v0|abc:b_b2|abc:cc_grp");
+	Reagan::removeNamespaceInFullPathName(namest);
+	
+	qDebug() << namest.c_str();
 }
 
 #include <boost/regex.hpp>
@@ -113,3 +147,4 @@ QStringList RegexUi::search(QString& content, QString& expression)
 	}
 	return res;
 }
+

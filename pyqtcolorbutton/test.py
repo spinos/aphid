@@ -9,7 +9,7 @@ class AddressBook(QtGui.QWidget):
         nameLabel = QtGui.QLabel("Note:")
 
         self.addressText = QtGui.QPushButton("Click to Change Color")
-        self.addressText.setStyleSheet("QPushButton {background-color: darkkhaki; border-style: solid; border-radius: 5;} QPushButton:checked { background-color: green;}")
+        self.addressText.setStyleSheet("QPushButton {background-color: darkkhaki; border-style: solid; border-radius: 5;} QPushButton:checked { background-color: darkCyan;}")
         self.addressText.setCheckable(1)
         self.addressText.setChecked(0)
         mainLayout = QtGui.QGridLayout()

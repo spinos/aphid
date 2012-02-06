@@ -21,10 +21,12 @@ public:
 public slots:
 	void doReMatch();
 	void doReSearch();
+	void doReReplace();
 
 private:
 	QTextEdit *contentLine;
 	QLineEdit *expressionLine;
+	QLineEdit *replaceLine;
 	QTextEdit *resultLine;
     QPushButton *togglePushButton;
 	
