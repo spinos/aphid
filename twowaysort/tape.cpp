@@ -100,7 +100,6 @@ void ATape::writeBlock(int size, char *data)
 void ATape::finalize()
 {
 	if(_bufferLoc > 0) {
-		std::cout<<"write last "<<_fileName<<" "<<_bufferLoc<<"\n";
 		_stream.write((char*)_buffer, _bufferLoc);
 	}
 }

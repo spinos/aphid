@@ -74,15 +74,15 @@ void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
 		{
 			dx = dy = 0.f;
 		}
-		if(vscaling > 11.f) 
+		if(vscaling > 20.f) 
 		{
-			vscaling = vscaling / 11.f;
+			vscaling = vscaling / 20.f;
 			dx /= vscaling;
 			dy /= vscaling;
 		}
 		
-		dx /= 50.f;
-		dy /= 50.f;
+		dx /= 40.f;
+		dy /= 40.f;
 		
 		float fx = (float)impulsePos.x()/size().width();
 		if(fx < 0.f) fx = 0.f;
@@ -93,6 +93,7 @@ void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
 		
 		impulsePos = event->pos();
 		thread.addImpulse(fx*127, fy*127, dx, dy);
+		
     }
 	else if(event->buttons() & Qt::RightButton) {
 		QPoint hit = event->pos();
@@ -121,7 +122,7 @@ void MandelbrotWidget::updatePixmap(const QImage &image, const unsigned &step)
 
     pixmap = QPixmap::fromImage(image);
 	_step = step;
-    update();
+	update();	
 }
 
 void MandelbrotWidget::simulate()

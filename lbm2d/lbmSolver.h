@@ -43,6 +43,10 @@ private:
 	float *lat[9];
 	float tau;
 	void simulate();
+	void inject();
+	void boundaryConditions();
+	void collide();
+	void propagate();
 	void getMacro(int x, int y, float &rho, float &vx, float &vy);
 	void getForce(int x, int y, float &rho, float &vx, float &vy);
 

@@ -275,7 +275,7 @@ char TwoWayMerge::validate()
 		tapeSrc1.getF(cur);
 		if(cur < pre) {
 			std::cout<<" " <<  tapeSrc1.readLocation(_dataSize)<<" sort error! "<< cur << " < " << pre <<" !\n";
-			exit(0);
+			return 0;
 		}
 		pre = cur;
 	}
