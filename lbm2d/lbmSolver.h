@@ -39,7 +39,7 @@ private:
 	float *ux;
 	float *uy;
 	short *map;
-	//float *density;
+	float *density;
 	float *lat[9];
 	float tau;
 	void simulate();
@@ -47,8 +47,9 @@ private:
 	void boundaryConditions();
 	void collide();
 	void propagate();
+	void trasport();
 	void getMacro(int x, int y, float &rho, float &vx, float &vy);
-	void getForce(int x, int y, float &rho, float &vx, float &vy);
+	void getForce(int gi, float &rho, float &vx, float &vy);
 
 	unsigned _step;
 	uchar *pixel;

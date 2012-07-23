@@ -16,7 +16,7 @@
 #define M_FLUID 5
 #define M_SETU 6
 
-const float visc = 0.011f;
+const float visc = 0.009f;
 
 RenderThread::RenderThread(QObject *parent)
     : QThread(parent)
@@ -29,7 +29,7 @@ RenderThread::RenderThread(QObject *parent)
 	ux = new float[LAT_LEN];
 	uy = new float[LAT_LEN];
 	map = new short[LAT_LEN];
-	//density = new float[LAT_LEN];
+	density = new float[LAT_LEN];
 	pixel = new uchar[LAT_LEN*3];
 	impulse_x = new float[LAT_LEN];
 	impulse_y = new float[LAT_LEN];
@@ -54,6 +54,7 @@ RenderThread::RenderThread(QObject *parent)
 			lat[6][i] =
 			lat[7][i] =
 			lat[8][i] = 1.0f/36.0f;
+			density[i] = 0.f;
 		}
 	}
 
@@ -121,22 +122,26 @@ void RenderThread::run()
                 if (abort)
                     return;
 					
-		
+		int r, g, b = 128;
 		for (int x = 0; x < LAT_W; ++x) 
 		{
 			int gi = idx(x, y);
 			if(map[gi] != M_WALL)
 			{
-				int r = ux[gi]*128*4 + 128;
+				/*
+				r = ux[gi]*128*4 + 127;
 				if(r < 0) r = 0;
 				else if(r > 255) r = 255;
-				int g = uy[gi]*128*4 + 128;
+				g = uy[gi]*128*4 + 127;
 				if(g < 0) g = 0;
 				else if(g > 255) g = 255; 
+				*/
+				
+				r = g = b = density[gi] * 127;
 			
 				pixel[gi*3] = r;
 				pixel[gi*3+1] = g;
-				pixel[gi*3+2] = 128;
+				pixel[gi*3+2] = b;
 			}
 			else
 			{
@@ -204,14 +209,12 @@ void RenderThread::getMacro(int x, int y, float &rho, float &vx, float &vy)
 
 }
 
-void RenderThread::getForce(int x, int y, float &rho, float &vx, float &vy)
+void RenderThread::getForce(int gi, float &rho, float &vx, float &vy)
 {
-	int gi = idx(x,y);
-	rho = 1.f;
-	float decay = float(map[gi] - M_SETU)/30.f;
+	float decay = float(map[gi] - M_SETU)/80.f;
 	vx = impulse_x[gi] * decay;
 	vy = impulse_y[gi] * decay;
-	
+	rho = decay;
 }
 
 void RenderThread::simulate()
@@ -220,7 +223,7 @@ void RenderThread::simulate()
 	boundaryConditions();
 	propagate();
 	collide();
-	
+	trasport();	
 }
 
 void RenderThread::inject()
@@ -247,8 +250,8 @@ void RenderThread::inject()
 //           |   
 //      f7  f3   f6		
 			
-						getForce(x, y, rho, v_x, v_y);
-						
+						getForce(gi, rho, v_x, v_y);
+						density[gi] += rho;
 						feq[1] = (0.f * v_x + 1.f * v_y)/9.f;
 						feq[2] = (1.f * v_x + 0.f * v_y)/9.f;
 						feq[3] = (0.f * v_x - 1.f * v_y)/9.f;
@@ -258,12 +261,10 @@ void RenderThread::inject()
 						feq[7] = (-1.f * v_x - 1.f * v_y)/36.f;
 						feq[8] = (-1.f * v_x + 1.f * v_y)/36.f;
 						
-						
 						for (i = 1; i < 9; i++) {
 							lat[i][gi] += feq[i];
 						}
-						
-						
+												
 						map[gi]--;
 					
 
@@ -330,21 +331,35 @@ void RenderThread::collide()
 				float v_x, v_y, rho;
 				rho = lat[0][gi] + lat[1][gi] + lat[2][gi] + lat[3][gi] + lat[4][gi] + lat[5][gi] + lat[6][gi] + lat[7][gi] + lat[8][gi];
 				
-				
 	
 			v_x = (lat[2][gi] + lat[5][gi] + lat[6][gi] - lat[8][gi] - lat[4][gi] - lat[7][gi])/rho;
 			v_y = (lat[1][gi] + lat[5][gi] + lat[8][gi] - lat[7][gi] - lat[3][gi] - lat[6][gi])/rho;
-			if (v_x < -0.23f) v_x = -0.23f;
-			if (v_x >  0.23f) v_x =  0.23f;
-			if (v_y < -0.23f) v_y = -0.23f;
-			if (v_y >  0.23f) v_y =  0.23f;
+			
+			v_y -= density[gi] * 0.0004f;
+			float speedcap = 0.22f;
+			if (v_x < -speedcap) v_x = -speedcap;
+			if (v_x >  speedcap) v_x =  speedcap;
+			if (v_y < -speedcap) v_y = -speedcap;
+			if (v_y >  speedcap) v_y =  speedcap;
 				ux[gi] = v_x;
 				uy[gi] = v_y;
-				//density[gi] = rho;
+				
 
-				float Cusq = -1.5f * (v_x*v_x + v_y*v_y);
+				
+				float uu = v_x*v_x;
+				float vv = v_y*v_y;
+				float uv = v_x*v_y;
 				float feq[9];
-
+//      f8  f1   f5
+//           |   
+//           |  
+//           | 
+//      f4---|--- f2
+//           | 
+//           |         
+//           |   
+//      f7  f3   f6	
+				/*float Cusq = -1.5f * (v_x*v_x + v_y*v_y);
 				feq[0] = rho * (1.0f + Cusq) * 4.0f/9.0f;
 				feq[1] = rho * (1.0f + Cusq + 3.0f*v_y + 4.5f*v_y*v_y) / 9.0f;
 				feq[2] = rho * (1.0f + Cusq + 3.0f*v_x + 4.5f*v_x*v_x) / 9.0f;
@@ -354,6 +369,16 @@ void RenderThread::collide()
 				feq[6] = rho * (1.0f + Cusq + 3.0f*(v_x-v_y) + 4.5f*(v_x-v_y)*(v_x-v_y)) / 36.0f;
 				feq[7] = rho * (1.0f + Cusq + 3.0f*(-v_x-v_y) + 4.5f*(v_x+v_y)*(v_x+v_y)) / 36.0f;
 				feq[8] = rho * (1.0f + Cusq + 3.0f*(-v_x+v_y) + 4.5f*(-v_x+v_y)*(-v_x+v_y)) / 36.0f;
+				*/
+				feq[0] = rho * (1.0f - 1.5f * (uu + vv)) * 4.0f/9.0f;
+				feq[1] = rho * (1.0f + 3.0f * v_y + 3.f * vv - 1.5f * uu) / 9.0f;
+				feq[2] = rho * (1.0f + 3.0f * v_x + 3.f * uu - 1.5f * vv) / 9.0f;
+				feq[3] = rho * (1.0f - 3.0f * v_y + 3.f * vv - 1.5f * uu) / 9.0f;
+				feq[4] = rho * (1.0f - 3.0f * v_x + 3.f * uu - 1.5f * vv) / 9.0f;
+				feq[5] = rho * (1.0f + 3.0f * v_x + 3.f * v_y + 3.f * uu + 3.f * vv + 9.f * uv) / 36.0f;
+				feq[6] = rho * (1.0f + 3.0f * v_x - 3.f * v_y + 3.f * uu + 3.f * vv - 9.f * uv) / 36.0f;
+				feq[7] = rho * (1.0f - 3.0f * v_x - 3.f * v_y + 3.f * uu + 3.f * vv + 9.f * uv) / 36.0f;
+				feq[8] = rho * (1.0f - 3.0f * v_x + 3.f * v_y + 3.f * uu + 3.f * vv - 9.f * uv) / 36.0f;
 
 				
 					for (i = 0; i < 9; i++) {
@@ -362,7 +387,29 @@ void RenderThread::collide()
 					
 		}
 	}
+}
 
+void RenderThread::trasport()
+{
+	int x, y, gi;
+	for (x = 1; x < LAT_W-1; x++) {
+		for (y = 1; y < LAT_H-1; y++) {
+			gi = idx(x, y);
+			int x0 = x - ux[gi];
+			int y0 = y - uy[gi];
+			int x1 = x0 + 1;
+			int y1 = y0 + 1;
+			float fracx = x - ux[gi] - x0;
+			float fracy = y - uy[gi] - y0;
+			
+			float mix0 = density[idx(x0, y0)] * (1.f - fracx) + density[idx(x1, y0)] * fracx;
+			float mix1 = density[idx(x0, y1)] * (1.f - fracx) + density[idx(x1, y1)] * fracx;
+			density[gi] = mix0 * (1.f - fracy) + mix1 * fracy;
+			
+			if(density[gi] < 0.f) density[gi] = 0.f;
+			if(density[gi] > 2.f) density[gi] = 2.f;
+		}
+	}
 }
 
 void RenderThread::propagate()
@@ -431,7 +478,7 @@ void RenderThread::addImpulse(int x, int y, float vx, float vy)
 {
 	int gi = idx(x,y);
 	if (map[gi] >= M_FLUID) {
-		if(map[gi] == M_FLUID) map[gi] = M_SETU + 30;
+		if(map[gi] == M_FLUID) map[gi] = M_SETU + 40;
 		impulse_x[gi] = vx;
 		impulse_y[gi] = vy;
 	}
