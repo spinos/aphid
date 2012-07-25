@@ -14,15 +14,41 @@ BaseCamera::BaseCamera()
 	fSpace.setIdentity();
 	fSpace.setTranslation(10, 10, 100);
 	fCenterOfInterest = Vector3F(10, 10, 10);
+	fPortWidth = 400;
+	updateInverseSpace();
 }
 
 BaseCamera::~BaseCamera() {}
 
+void BaseCamera::setPortWidth(unsigned w)
+{
+	fPortWidth = w;
+}
+
+void BaseCamera::setPortHeight(unsigned h)
+{
+	fPortHeight = h;
+}
+
+void BaseCamera::setHorizontalAperture(float w)
+{
+	fHorizontalAperture = w;
+}
+
+void BaseCamera::setVerticalAperture(float h)
+{
+	fVerticalAperture = h;
+}
+
+void BaseCamera::updateInverseSpace()
+{
+	fInverseSpace = fSpace;
+	fInverseSpace.inverse();
+}
+
 void BaseCamera::getMatrix(float* m) const
 {
-	Matrix44F minv = fSpace;
-	minv.inverse();
-	minv.transposed(m);
+	fInverseSpace.transposed(m);
 }
 	
 void BaseCamera::tumble(int x, int y)
@@ -32,10 +58,10 @@ void BaseCamera::tumble(int x, int y)
 	Vector3F front = fSpace.getFront();
 	Vector3F eye = fSpace.getTranslation();	
 	Vector3F view = eye - fCenterOfInterest;
-	float dist = view.length();
-	
-	eye -= side * (float)x/200.f * dist;
-	eye += up * (float)y/200.f * dist;
+	const float dist = view.length();
+	const float scaleing = dist / fPortWidth * 2.f;
+	eye -= side * (float)x * scaleing;
+	eye += up * (float)y * scaleing;
 	
 	view = eye - fCenterOfInterest;
 	view.normalize();
@@ -52,6 +78,7 @@ void BaseCamera::tumble(int x, int y)
 	up.normalize();
 	
 	fSpace.setOrientations(side, up, front);
+	updateInverseSpace();
 }
 
 void BaseCamera::track(int x, int y)
@@ -59,15 +86,15 @@ void BaseCamera::track(int x, int y)
 	Vector3F side  = fSpace.getSide();
 	Vector3F up    = fSpace.getUp();
 	Vector3F eye = fSpace.getTranslation();
-	Vector3F view = eye - fCenterOfInterest;
-	float dist = view.length();
-	eye -= side * (float)x/800.f * dist;
-	eye += up * (float)y/800.f * dist;	
+	const float scaleing = fHorizontalAperture / fPortWidth;
+	eye -= side * (float)x * scaleing;
+	eye += up * (float)y * scaleing;	
 	
-	fCenterOfInterest -= side * (float)x/800.f * dist;
-	fCenterOfInterest += up * (float)y/800.f * dist;
+	fCenterOfInterest -= side * (float)x * scaleing;
+	fCenterOfInterest += up * (float)y * scaleing;
 	
-	fSpace.setTranslation(eye);	
+	fSpace.setTranslation(eye);
+	updateInverseSpace();
 }
 
 void BaseCamera::zoom(int y)
@@ -75,9 +102,22 @@ void BaseCamera::zoom(int y)
 	Vector3F front = fSpace.getFront();
 	Vector3F eye = fSpace.getTranslation();
 	Vector3F view = eye - fCenterOfInterest;
-	float dist = view.length();
+	const float dist = view.length();
 	
-	eye += front * (float)y/200.f * dist;
+	eye += front * (float)y * dist /fPortWidth;
 	
 	fSpace.setTranslation(eye);
+	updateInverseSpace();
 }
+
+char BaseCamera::transformOnScreen(int x, int y, Vector3F & worldPos)
+{	
+	worldPos = fInverseSpace.transform(worldPos);
+	
+	worldPos.x = ((float)x/(float)fPortWidth - 0.5f) * fHorizontalAperture;
+	worldPos.y = -((float)y/(float)fPortHeight - 0.5f) * fVerticalAperture;
+	
+	worldPos = fSpace.transform(worldPos);
+	return 1;
+}
+

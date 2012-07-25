@@ -13,11 +13,20 @@ public:
 	BaseCamera();
 	virtual ~BaseCamera();
 	
+	void setPortWidth(unsigned w);
+	void setPortHeight(unsigned h);
+	void setHorizontalAperture(float w);
+	void setVerticalAperture(float h);
+	void updateInverseSpace();
 	void getMatrix(float* m) const;
 	void tumble(int x, int y);
 	void track(int x, int y);
 	void zoom(int y);
+	
+	char transformOnScreen(int x, int y, Vector3F & hitPos);
 private:
-	Matrix44F fSpace;
+	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;
+	unsigned fPortWidth, fPortHeight;
+	float fHorizontalAperture, fVerticalAperture;
 };

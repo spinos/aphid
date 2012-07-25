@@ -125,8 +125,6 @@ void GLWidget::paintGL()
 //! [8]
 void GLWidget::resizeGL(int width, int height)
 {
-    //int side = qMin(width, height);
-    //glViewport((width - side) / 2, (height - side) / 2, side, side);
 	glViewport(0, 0, width, height);
 
     glMatrixMode(GL_PROJECTION);
@@ -140,6 +138,11 @@ void GLWidget::resizeGL(int width, int height)
     glOrtho(-right, right, -top, top, 1.0, 1000.0);
 
     glMatrixMode(GL_MODELVIEW);
+	
+	fCamera->setPortWidth(width);
+	fCamera->setPortHeight(height);
+	fCamera->setHorizontalAperture(80.f);
+	fCamera->setVerticalAperture(80.f/aspect);
 }
 //! [8]
 
@@ -154,8 +157,15 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
 	const Qt::KeyboardModifiers modifiers = event->modifiers();
-	if(modifiers == Qt::AltModifier)
+	if(modifiers == Qt::AltModifier) {
 		moveCamera(event);
+	}
+	else {
+		Vector3F hitp(16, 16, 16);
+		fCamera->transformOnScreen(event->x(), event->y(), hitp);
+		//qDebug() << "screen hit:" << event->x() << " " << event->y();
+		//qDebug() << "hit:" << hitp.x << " " << hitp.y << " " << hitp.z;
+	}
 
     lastPos = event->pos();
 }
