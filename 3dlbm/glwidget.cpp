@@ -161,10 +161,15 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 		moveCamera(event);
 	}
 	else {
-		Vector3F hitp(16, 16, 16);
-		fCamera->transformOnScreen(event->x(), event->y(), hitp);
+		Vector3F injp(16, 16, 16);
+		fCamera->intersection(event->x(), event->y(), injp);
+		int dx = event->x() - lastPos.x();
+		int dy = event->y() - lastPos.y();
+		Vector3F injv;
+		fCamera->screenToWorld(dx, dy, injv);
 		//qDebug() << "screen hit:" << event->x() << " " << event->y();
-		//qDebug() << "hit:" << hitp.x << " " << hitp.y << " " << hitp.z;
+		_dynamics->addSource(injp, injv);
+		//qDebug() << "hit:" << injv.x << " " << injv.y << " " << injv.z;
 	}
 
     lastPos = event->pos();

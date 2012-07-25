@@ -49,29 +49,6 @@ Window::Window()
 {
     glWidget = new GLWidget;
 
-    xSlider = createSlider();
-    ySlider = createSlider();
-    zSlider = createSlider();
-
-    connect(xSlider, SIGNAL(valueChanged(int)), glWidget, SLOT(setXRotation(int)));
-    connect(glWidget, SIGNAL(xRotationChanged(int)), xSlider, SLOT(setValue(int)));
-    connect(ySlider, SIGNAL(valueChanged(int)), glWidget, SLOT(setYRotation(int)));
-    connect(glWidget, SIGNAL(yRotationChanged(int)), ySlider, SLOT(setValue(int)));
-    connect(zSlider, SIGNAL(valueChanged(int)), glWidget, SLOT(setZRotation(int)));
-    connect(glWidget, SIGNAL(zRotationChanged(int)), zSlider, SLOT(setValue(int)));
-//! [0]
-
-//! [1]
-    QHBoxLayout *mainLayout = new QHBoxLayout;
-    mainLayout->addWidget(glWidget);
-    mainLayout->addWidget(xSlider);
-    mainLayout->addWidget(ySlider);
-    mainLayout->addWidget(zSlider);
-    
-    xSlider->setValue(15 * 16);
-    ySlider->setValue(345 * 16);
-    zSlider->setValue(0 * 16);
-	
 	setCentralWidget(glWidget);
     setWindowTitle(tr("Lattice Boltzmann 3D Fluid"));
 }

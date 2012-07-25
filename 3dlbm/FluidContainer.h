@@ -8,7 +8,7 @@
  */
 
 #include "shapeDrawer.h"
-
+#include <Vector3F.h>
 
 class FluidContainer {
 public:
@@ -19,6 +19,7 @@ public:
 	void killPhysics();
 	void renderWorld();
 	void simulate();
+	void addSource(const Vector3F & pos, const Vector3F & dir);
 	
 protected:
 	ShapeDrawer* fDrawer;

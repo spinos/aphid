@@ -23,7 +23,8 @@ public:
 	void track(int x, int y);
 	void zoom(int y);
 	
-	char transformOnScreen(int x, int y, Vector3F & hitPos);
+	char intersection(int x, int y, Vector3F & worldPos) const;
+	void screenToWorld(int x, int y, Vector3F & worldVec) const;
 private:
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;

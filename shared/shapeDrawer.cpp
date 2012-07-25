@@ -9,6 +9,11 @@
 #include <QGLWidget>
 #include "shapeDrawer.h"
 
+void ShapeDrawer::setGrey(float g)
+{
+    glColor3f(g, g, g);
+}
+
 void ShapeDrawer::box(float width, float height, float depth)
 {
 	glBegin(GL_LINES);
