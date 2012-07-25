@@ -14,4 +14,5 @@ public:
 	
 	void box(float width, float height, float depth);
 	void solidCube(float x, float y, float z, float size);
+	void setGrey(float g);
 };

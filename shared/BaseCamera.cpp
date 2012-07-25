@@ -110,7 +110,7 @@ void BaseCamera::zoom(int y)
 	updateInverseSpace();
 }
 
-char BaseCamera::transformOnScreen(int x, int y, Vector3F & worldPos)
+char BaseCamera::intersection(int x, int y, Vector3F & worldPos) const
 {	
 	worldPos = fInverseSpace.transform(worldPos);
 	
@@ -121,3 +121,11 @@ char BaseCamera::transformOnScreen(int x, int y, Vector3F & worldPos)
 	return 1;
 }
 
+void BaseCamera::screenToWorld(int x, int y, Vector3F & worldVec) const
+{
+    worldVec.x = (float)x;
+	worldVec.y = -(float)y;
+	worldVec.z = 0.f;
+	
+	worldVec = fSpace.transformAsNormal(worldVec);
+}

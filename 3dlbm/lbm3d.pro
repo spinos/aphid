@@ -16,4 +16,6 @@ SOURCES       = ../shared/Vector3F.cpp \
                 window.cpp \
                 FluidContainer.cpp
 QT           += opengl
-
+win32 {
+CONFIG += console
+}

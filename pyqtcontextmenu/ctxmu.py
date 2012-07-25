@@ -49,12 +49,11 @@ class MainWindow(QtGui.QMainWindow):
         
     def openMenu(self, position):
     	menu = QtGui.QMenu()
-        quitAction = menu.addAction("Quit")
-        action = menu.exec_(self.imageTree.mapToGlobal(position))
-	if action == quitAction:
-		self.close()
-
-
+        quitAction = menu.addAction(self.addImagesAct)
+        quitAction = menu.addAction(self.removeAllImagesAct)
+        quitAction = menu.addAction(self.exitAct)
+        menu.exec_(self.imageTree.mapToGlobal(position))
+	
 if __name__ == '__main__':
 
     import sys
