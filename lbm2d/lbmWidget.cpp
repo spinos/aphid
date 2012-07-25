@@ -11,15 +11,16 @@ MandelbrotWidget::MandelbrotWidget(QWidget *parent)
     connect(&thread, SIGNAL(renderedImage(QImage, unsigned)),
             this, SLOT(updatePixmap(QImage, unsigned)));
 
-    setWindowTitle(tr("LBM 2D Fluid 128 X 128"));
+    setWindowTitle(tr("LBM 2D Fluid 160 X 128"));
 
-    resize(512, 512);
+    resize(640, 512);
 	
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(41);
 	
 	_record_time.start();
+	_num_update = 0;
 	
 	impulsePos = QPoint(0,0);
 }
@@ -40,7 +41,7 @@ void MandelbrotWidget::paintEvent(QPaintEvent * /* event */)
 	painter.scale(1.f/_scaleFactor, 1.f/_scaleFactor);
 	
 	int frame_elapse_time = _record_time.elapsed();
-	float fps = float(_step) /( frame_elapse_time / 1000.f);
+	float fps = float(_num_update) /( frame_elapse_time / 1000.f);
 	
 	std::stringstream sst;
 	sst.str("");
@@ -92,7 +93,7 @@ void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
 		if(fy > 1.f) fy = 1.f;
 		
 		impulsePos = event->pos();
-		thread.addImpulse(fx*127, fy*127, dx, dy);
+		thread.addImpulse(fx*159, fy*127, dx, dy);
 		
     }
 	else if(event->buttons() & Qt::RightButton) {
@@ -103,7 +104,7 @@ void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
 		float fy = (float)hit.y()/size().height();
 		if(fy < 0.f) fy = 0.f;
 		if(fy > 1.f) fy = 1.f;
-		thread.addObstacle(fx*127, fy*127);
+		thread.addObstacle(fx*159, fy*127);
 	}
 }
 //! [14]
@@ -121,7 +122,7 @@ void MandelbrotWidget::updatePixmap(const QImage &image, const unsigned &step)
 {
 
     pixmap = QPixmap::fromImage(image);
-	_step = step;
+	_num_update++;
 	update();	
 }
 

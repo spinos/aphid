@@ -27,7 +27,7 @@ private:
     RenderThread thread;
     QPixmap pixmap;
 	float _scaleFactor;
-	unsigned _step;
+	unsigned _num_update;
 	QTime _record_time;
 	QPoint impulsePos;
 };

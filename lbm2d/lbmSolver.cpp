@@ -4,9 +4,9 @@
 
 #include "lbmSolver.h"
 
-#define LAT_W 128
+#define LAT_W 160
 #define LAT_H 128
-#define LAT_LEN 16384
+#define LAT_LEN LAT_W * LAT_H
 #define idx(x,y) ((y)*LAT_W+(x))
 #define M_WALL 0
 #define M_XOUT 1
@@ -88,7 +88,7 @@ void RenderThread::render()
 {
     QMutexLocker locker(&mutex);
 
-	this->resultSize = QSize(128,128);
+	this->resultSize = QSize(LAT_W, LAT_H);
 	
 
     if (!isRunning()) {
@@ -102,22 +102,18 @@ void RenderThread::render()
 void RenderThread::run()
 {
     forever {
-        mutex.lock();
-
-        QSize resultSize = this->resultSize;
-	simulate();
-	simulate();
-	simulate();
-	simulate();
-	mutex.unlock();
+        
 	
-	
+	simulate();
+	simulate();
+	simulate();
+	simulate();
 
 	_step++;
 	
 	for (int y = 0; y < LAT_H; ++y) 
 	{
-	if (restart)
+		if (restart)
                     break;
                 if (abort)
                     return;
