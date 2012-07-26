@@ -26,8 +26,7 @@ RenderThread::RenderThread(QObject *parent)
 	
 	tau = (5.f*visc + 1.0f)/2.0f;
 	
-	ux = new float[LAT_LEN];
-	uy = new float[LAT_LEN];
+	u = new float[LAT_LEN * 2];
 	map = new short[LAT_LEN];
 	density = new float[LAT_LEN];
 	pixel = new uchar[LAT_LEN*3];
@@ -125,10 +124,10 @@ void RenderThread::run()
 			if(map[gi] != M_WALL)
 			{
 				/*
-				r = ux[gi]*128*4 + 127;
+				r = u[gi * 2]*128*4 + 127;
 				if(r < 0) r = 0;
 				else if(r > 255) r = 255;
-				g = uy[gi]*128*4 + 127;
+				g = u[gi * 2 + 1]*128*4 + 127;
 				if(g < 0) g = 0;
 				else if(g > 255) g = 255; 
 				*/
@@ -337,8 +336,8 @@ void RenderThread::collide()
 			if (v_x >  speedcap) v_x =  speedcap;
 			if (v_y < -speedcap) v_y = -speedcap;
 			if (v_y >  speedcap) v_y =  speedcap;
-				ux[gi] = v_x;
-				uy[gi] = v_y;
+				u[gi * 2] = v_x;
+				u[gi * 2 + 1] = v_y;
 				
 
 				
@@ -391,12 +390,12 @@ void RenderThread::trasport()
 	for (x = 1; x < LAT_W-1; x++) {
 		for (y = 1; y < LAT_H-1; y++) {
 			gi = idx(x, y);
-			int x0 = x - ux[gi];
-			int y0 = y - uy[gi];
+			int x0 = x - u[gi * 2];
+			int y0 = y - u[gi * 2 + 1];
 			int x1 = x0 + 1;
 			int y1 = y0 + 1;
-			float fracx = x - ux[gi] - x0;
-			float fracy = y - uy[gi] - y0;
+			float fracx = x - u[gi * 2] - x0;
+			float fracy = y - u[gi * 2 + 1] - y0;
 			
 			float mix0 = density[idx(x0, y0)] * (1.f - fracx) + density[idx(x1, y0)] * fracx;
 			float mix1 = density[idx(x0, y1)] * (1.f - fracx) + density[idx(x1, y1)] * fracx;

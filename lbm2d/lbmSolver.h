@@ -36,8 +36,7 @@ private:
     bool restart;
     bool abort;
 	
-	float *ux;
-	float *uy;
+	float *u;
 	short *map;
 	float *density;
 	float *lat[9];
