@@ -5,12 +5,12 @@
 #include <QSize>
 #include <QThread>
 #include <QWaitCondition>
-#include <CudaBase.h>
+
 QT_BEGIN_NAMESPACE
 class QImage;
 QT_END_NAMESPACE
 
-class RenderThread : public QThread, CudaBase
+class RenderThread : public QThread
 {
     Q_OBJECT
 
@@ -36,8 +36,7 @@ private:
     bool restart;
     bool abort;
 	
-	float *ux;
-	float *uy;
+	float *u;
 	short *map;
 	float *density;
 	float *lat[9];
@@ -51,7 +50,6 @@ private:
 	void getMacro(int x, int y, float &rho, float &vx, float &vy);
 	void getForce(int gi, float &rho, float &vx, float &vy);
 
-	unsigned _step;
 	uchar *pixel;
 	float *impulse_x;
 	float *impulse_y;

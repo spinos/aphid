@@ -3,10 +3,7 @@
 #include <math.h>
 
 #include "lbmSolver.h"
-#include <cuda_runtime_api.h>
-#include <cuda_runtime.h>
-#include <solver_implement.h>
-
+#include "solver_implement.h"
 #define LAT_W 160
 #define LAT_H 128
 #define LAT_LEN LAT_W * LAT_H
@@ -24,15 +21,12 @@ const float visc = 0.009f;
 RenderThread::RenderThread(QObject *parent)
     : QThread(parent)
 {
-    checkCUDevice();
-    
     restart = false;
     abort = false;
 	
 	tau = (5.f*visc + 1.0f)/2.0f;
 	
-	ux = new float[LAT_LEN];
-	uy = new float[LAT_LEN];
+	u = new float[LAT_LEN * 2];
 	map = new short[LAT_LEN];
 	density = new float[LAT_LEN];
 	pixel = new uchar[LAT_LEN*3];
@@ -75,8 +69,6 @@ RenderThread::RenderThread(QObject *parent)
 		map[idx(0,y)] = M_WALL;
 		map[idx(LAT_W-1,y)] = M_WALL;
 	}
-	
-	_step = 0;
 }
 
 RenderThread::~RenderThread()
@@ -113,10 +105,8 @@ void RenderThread::run()
 	simulate();
 	simulate();
 	simulate();
-
-	_step++;
 	
-	for (int y = 0; y < LAT_H; ++y) 
+	/*for (int y = 0; y < LAT_H; ++y) 
 	{
 		if (restart)
                     break;
@@ -130,14 +120,6 @@ void RenderThread::run()
 			if(map[gi] != M_WALL)
 			{
 				
-				/*r = ux[gi]*128*4 + 127;
-				if(r < 0) r = 0;
-				else if(r > 255) r = 255;
-				g = uy[gi]*128*4 + 127;
-				if(g < 0) g = 0;
-				else if(g > 255) g = 255; 
-				*/
-				
 				r = g = b = density[gi] * 127;
 			
 				pixel[gi*3] = r;
@@ -150,11 +132,17 @@ void RenderThread::run()
 			}
 		}
 	}
+	*/
+	//if (restart)
+      //              break;
+                if (abort)
+                    return;
+		showScalarField(LAT_W, LAT_H, density, pixel);
 
         QImage image(pixel, LAT_W, LAT_H, QImage::Format_RGB888);
 		
 		if (!restart)
-				emit renderedImage(image, _step);
+				emit renderedImage(image, 0);
 
 		mutex.lock();
 		
@@ -336,14 +324,14 @@ void RenderThread::collide()
 			v_x = (lat[2][gi] + lat[5][gi] + lat[6][gi] - lat[8][gi] - lat[4][gi] - lat[7][gi])/rho;
 			v_y = (lat[1][gi] + lat[5][gi] + lat[8][gi] - lat[7][gi] - lat[3][gi] - lat[6][gi])/rho;
 			
-			v_y -= density[gi] * 0.0004f;
+			v_y -= density[gi] * 0.0001f;
 			float speedcap = 0.22f;
 			if (v_x < -speedcap) v_x = -speedcap;
 			if (v_x >  speedcap) v_x =  speedcap;
 			if (v_y < -speedcap) v_y = -speedcap;
 			if (v_y >  speedcap) v_y =  speedcap;
-				ux[gi] = v_x;
-				uy[gi] = v_y;
+				u[gi * 2] = v_x;
+				u[gi * 2 + 1] = v_y;
 				
 
 				
@@ -360,7 +348,17 @@ void RenderThread::collide()
 //           |         
 //           |   
 //      f7  f3   f6	
-
+				/*float Cusq = -1.5f * (v_x*v_x + v_y*v_y);
+				feq[0] = rho * (1.0f + Cusq) * 4.0f/9.0f;
+				feq[1] = rho * (1.0f + Cusq + 3.0f*v_y + 4.5f*v_y*v_y) / 9.0f;
+				feq[2] = rho * (1.0f + Cusq + 3.0f*v_x + 4.5f*v_x*v_x) / 9.0f;
+				feq[3] = rho * (1.0f + Cusq - 3.0f*v_y + 4.5f*v_y*v_y) / 9.0f;
+				feq[4] = rho * (1.0f + Cusq - 3.0f*v_x + 4.5f*v_x*v_x) / 9.0f;
+				feq[5] = rho * (1.0f + Cusq + 3.0f*(v_x+v_y) + 4.5f*(v_x+v_y)*(v_x+v_y)) / 36.0f;
+				feq[6] = rho * (1.0f + Cusq + 3.0f*(v_x-v_y) + 4.5f*(v_x-v_y)*(v_x-v_y)) / 36.0f;
+				feq[7] = rho * (1.0f + Cusq + 3.0f*(-v_x-v_y) + 4.5f*(v_x+v_y)*(v_x+v_y)) / 36.0f;
+				feq[8] = rho * (1.0f + Cusq + 3.0f*(-v_x+v_y) + 4.5f*(-v_x+v_y)*(-v_x+v_y)) / 36.0f;
+				*/
 				feq[0] = rho * (1.0f - 1.5f * (uu + vv)) * 4.0f/9.0f;
 				feq[1] = rho * (1.0f + 3.0f * v_y + 3.f * vv - 1.5f * uu) / 9.0f;
 				feq[2] = rho * (1.0f + 3.0f * v_x + 3.f * uu - 1.5f * vv) / 9.0f;
@@ -381,26 +379,8 @@ void RenderThread::collide()
 }
 
 void RenderThread::trasport()
-{
-	int x, y, gi;
-	for (x = 1; x < LAT_W-1; x++) {
-		for (y = 1; y < LAT_H-1; y++) {
-			gi = idx(x, y);
-			int x0 = x - ux[gi];
-			int y0 = y - uy[gi];
-			int x1 = x0 + 1;
-			int y1 = y0 + 1;
-			float fracx = x - ux[gi] - x0;
-			float fracy = y - uy[gi] - y0;
-			
-			float mix0 = density[idx(x0, y0)] * (1.f - fracx) + density[idx(x1, y0)] * fracx;
-			float mix1 = density[idx(x0, y1)] * (1.f - fracx) + density[idx(x1, y1)] * fracx;
-			density[gi] = mix0 * (1.f - fracy) + mix1 * fracy;
-			
-			if(density[gi] < 0.f) density[gi] = 0.f;
-			if(density[gi] > 2.f) density[gi] = 2.f;
-		}
-	}
+{	
+	advectScalarField(LAT_W, LAT_H, u, density);
 }
 
 void RenderThread::propagate()
@@ -480,5 +460,3 @@ void RenderThread::addObstacle(int x, int y)
 	int gi = idx(x,y);
 	map[gi] = M_WALL;
 }
-
-
