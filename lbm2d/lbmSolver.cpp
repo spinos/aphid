@@ -4,8 +4,8 @@
 
 #include "lbmSolver.h"
 
-#define LAT_W 160
-#define LAT_H 128
+#define LAT_W 192
+#define LAT_H 120
 #define LAT_LEN LAT_W * LAT_H
 #define idx(x,y) ((y)*LAT_W+(x))
 #define M_WALL 0
@@ -81,6 +81,16 @@ RenderThread::~RenderThread()
     mutex.unlock();
 
     wait();
+}
+
+int RenderThread::solverWidth() const
+{
+	return LAT_W;
+}
+
+int RenderThread::solverHeight() const
+{
+	return LAT_H;
 }
 
 void RenderThread::render()

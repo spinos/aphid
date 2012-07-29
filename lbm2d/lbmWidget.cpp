@@ -11,13 +11,13 @@ MandelbrotWidget::MandelbrotWidget(QWidget *parent)
     connect(&thread, SIGNAL(renderedImage(QImage, unsigned)),
             this, SLOT(updatePixmap(QImage, unsigned)));
 
-    setWindowTitle(tr("LBM 2D Fluid 160 X 128"));
+    setWindowTitle(tr("LBM 2D Fluid 192 X 120"));
 
-    resize(640, 512);
+    resize(thread.solverWidth() * 4, thread.solverHeight() * 4);
 	
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(41);
+	timer->start(37);
 	
 	_record_time.start();
 	_num_update = 0;
@@ -52,7 +52,7 @@ void MandelbrotWidget::paintEvent(QPaintEvent * /* event */)
 void MandelbrotWidget::resizeEvent(QResizeEvent * /* event */)
 {
 	QSize renderAreaSize = size();
-	_scaleFactor = renderAreaSize.height() / 128.f;
+	_scaleFactor = renderAreaSize.height() / thread.solverHeight();
 	thread.render();
 }
 
@@ -93,7 +93,7 @@ void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
 		if(fy > 1.f) fy = 1.f;
 		
 		impulsePos = event->pos();
-		thread.addImpulse(fx*159, fy*127, dx, dy);
+		thread.addImpulse(fx* (thread.solverWidth() - 1), fy*(thread.solverHeight() - 1), dx, dy);
 		
     }
 	else if(event->buttons() & Qt::RightButton) {
@@ -104,7 +104,7 @@ void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
 		float fy = (float)hit.y()/size().height();
 		if(fy < 0.f) fy = 0.f;
 		if(fy > 1.f) fy = 1.f;
-		thread.addObstacle(fx*159, fy*127);
+		thread.addObstacle(fx*(thread.solverWidth() - 1), fy*(thread.solverHeight() - 1));
 	}
 }
 //! [14]

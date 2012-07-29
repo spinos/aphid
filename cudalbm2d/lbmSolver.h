@@ -17,6 +17,9 @@ class RenderThread : public QThread
 public:
     RenderThread(QObject *parent = 0);
     ~RenderThread();
+    
+    int solverWidth() const;
+    int solverHeight() const;
 
     void render();
 	void addImpulse(int x, int y, float vx, float vy);

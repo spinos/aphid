@@ -21,6 +21,9 @@ public:
     void render();
 	void addImpulse(int x, int y, float vx, float vy);
 	void addObstacle(int x, int y);
+	
+	int solverWidth() const;
+	int solverHeight() const;
 
 signals:
     void renderedImage(const QImage &image, const unsigned &step);
