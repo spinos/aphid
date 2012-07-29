@@ -17,7 +17,7 @@ MandelbrotWidget::MandelbrotWidget(QWidget *parent)
 	
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(41);
+	timer->start(37);
 	
 	_record_time.start();
 	_num_update = 0;

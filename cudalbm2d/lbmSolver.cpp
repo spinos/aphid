@@ -24,51 +24,34 @@ RenderThread::RenderThread(QObject *parent)
     restart = false;
     abort = false;
 	
-	tau = (5.f*visc + 1.0f)/2.0f;
-	
-	u = new float[LAT_LEN * 2];
-	map = new short[LAT_LEN];
-	density = new float[LAT_LEN];
+	wall = new unsigned char[LAT_LEN];
 	pixel = new uchar[LAT_LEN*3];
-	impulse_x = new float[LAT_LEN];
-	impulse_y = new float[LAT_LEN];
+	impulse = new float[LAT_LEN * 2];
 		
 	int x, y, i;
-	
-	for(i=0; i<9; i++)
-	{
-		lat[i] = new float[LAT_LEN];
-	}
 
 	for (x = 0; x < LAT_W; x++) {
 		for (y = 0; y < LAT_H; y++) {
 			i = idx(x,y);
-			map[i] = M_FLUID;
-			lat[0][i] = 4.0f/9.0f;
-			lat[1][i] =
-			lat[2][i] =
-			lat[3][i] =
-			lat[4][i] = 1.0f/9.0f;
-			lat[5][i] =
-			lat[6][i] =
-			lat[7][i] =
-			lat[8][i] = 1.0f/36.0f;
-			density[i] = 0.f;
+			wall[i] = M_FLUID;
+			impulse[i*2] = impulse[i*2 + 1] = 0.f;
 		}
 	}
 
 	for (x = 0; x < LAT_W; x++) {
-		map[idx(x,0)] = map[idx(x,LAT_H-1)] = M_WALL;
+		wall[idx(x,0)] = wall[idx(x,LAT_H-1)] = M_WALL;
 	}
 
 	for (y = 0; y < LAT_H; y++) {
-		map[idx(0,y)] = map[idx(LAT_W-1,y)] = M_WALL;
+		wall[idx(0,y)] = wall[idx(LAT_W-1,y)] = M_WALL;
 	}
 	
 	for (y = 1; y < LAT_H-1; y++) {
-		map[idx(0,y)] = M_WALL;
-		map[idx(LAT_W-1,y)] = M_WALL;
+		wall[idx(0,y)] = M_WALL;
+		wall[idx(LAT_W-1,y)] = M_WALL;
 	}
+	
+	initializeSolverData(LAT_W, LAT_H);
 }
 
 RenderThread::~RenderThread()
@@ -77,8 +60,8 @@ RenderThread::~RenderThread()
     abort = true;
     condition.wakeOne();
     mutex.unlock();
-
     wait();
+    
 }
 
 void RenderThread::render()
@@ -105,39 +88,12 @@ void RenderThread::run()
 	simulate();
 	simulate();
 	simulate();
-	
-	/*for (int y = 0; y < LAT_H; ++y) 
-	{
-		if (restart)
-                    break;
-                if (abort)
-                    return;
-					
-		int r, g, b = 128;
-		for (int x = 0; x < LAT_W; ++x) 
-		{
-			int gi = idx(x, y);
-			if(map[gi] != M_WALL)
-			{
-				
-				r = g = b = density[gi] * 127;
-			
-				pixel[gi*3] = r;
-				pixel[gi*3+1] = g;
-				pixel[gi*3+2] = b;
-			}
-			else
-			{
-				pixel[gi*3] = pixel[gi*3+1] = pixel[gi*3+2] = 0;
-			}
-		}
-	}
-	*/
-	//if (restart)
-      //              break;
-                if (abort)
-                    return;
-		showScalarField(LAT_W, LAT_H, density, pixel);
+      
+        if (abort) {
+            destroySolverData();
+            return;
+        }
+        getDisplayField(LAT_W, LAT_H, wall, pixel);
 
         QImage image(pixel, LAT_W, LAT_H, QImage::Format_RGB888);
 		
@@ -154,309 +110,20 @@ void RenderThread::run()
     }
 }
 
-void RenderThread::getMacro(int x, int y, float &rho, float &vx, float &vy)
-{
-	int i;
-	rho = 0.0;
-
-	int gi = idx(x,y);
-
-	//if (map[gi] >= M_FLUID) {
-		for (i = 0; i < 9; i++) {
-			rho += lat[i][gi];
-		}
-	
-		vx = (lat[2][gi] + lat[5][gi] + lat[6][gi] - lat[8][gi] - lat[4][gi] - lat[7][gi])/rho;
-		vy = (lat[1][gi] + lat[5][gi] + lat[8][gi] - lat[7][gi] - lat[3][gi] - lat[6][gi])/rho;
-	//}
-	/*
-	else if (map[gi] == M_XIN) 
-	{
-		rho = 1.f;
-		float dist_to_center = y - LAT_H/2;
-		if(dist_to_center < 0) dist_to_center = -dist_to_center;
-		
-		dist_to_center /= LAT_H/2;
-		
-		vx = .13f * (1.f - dist_to_center);
-		vx = .13f;
-		vy =0.f;
-	}
-	else if (map[gi] == M_YIN) 
-	{
-		rho = 1.f;
-		float dist_to_center = x - LAT_W/2;
-		if(dist_to_center < 0) dist_to_center = -dist_to_center;
-		
-		dist_to_center /= LAT_W/2;
-		
-		vx =0.f;
-		vy = .13f * (1.f - dist_to_center);
-		
-	}
-	*/
-
-}
-
-void RenderThread::getForce(int gi, float &rho, float &vx, float &vy)
-{
-	float decay = float(map[gi] - M_SETU)/80.f;
-	vx = impulse_x[gi] * decay;
-	vy = impulse_y[gi] * decay;
-	rho = decay;
-}
-
 void RenderThread::simulate()
 {
-	inject();
-	boundaryConditions();
-	propagate();
-	collide();
-	trasport();	
-}
-
-void RenderThread::inject()
-{
-	int x, y, i, gi;
-
-	for (x = 0; x < LAT_W; x++) {
-		for (y = 0; y < LAT_H; y++) {
-
-			gi = idx(x, y);
-			
-			if (map[gi] > M_FLUID)
-			{
-				float v_x, v_y, rho;
-				float feq[9];
-					
-//      f8  f1   f5
-//           |   
-//           |  
-//           | 
-//      f4---|--- f2
-//           | 
-//           |         and f0 for the rest (zero) velocity
-//           |   
-//      f7  f3   f6		
-			
-						getForce(gi, rho, v_x, v_y);
-						density[gi] += rho;
-						feq[1] = (0.f * v_x + 1.f * v_y)/9.f;
-						feq[2] = (1.f * v_x + 0.f * v_y)/9.f;
-						feq[3] = (0.f * v_x - 1.f * v_y)/9.f;
-						feq[4] = (-1.f * v_x + 0.f * v_y)/9.f;
-						feq[5] = (1.f * v_x + 1.f * v_y)/36.f;
-						feq[6] = (1.f * v_x - 1.f * v_y)/36.f;
-						feq[7] = (-1.f * v_x - 1.f * v_y)/36.f;
-						feq[8] = (-1.f * v_x + 1.f * v_y)/36.f;
-						
-						for (i = 1; i < 9; i++) {
-							lat[i][gi] += feq[i];
-						}
-												
-						map[gi]--;
-					
-
-			} 
-		}
-	}
-}
-
-void RenderThread::boundaryConditions()
-{
-	int x, y, i, gi;
-
-	for (x = 0; x < LAT_W; x++) {
-		for (y = 0; y < LAT_H; y++) {
-
-			gi = idx(x, y);
-			
-			if (map[gi] == M_WALL) {
-				float tmp;
-				tmp = lat[2][gi];
-				lat[2][gi] = lat[4][gi];
-				lat[4][gi] = tmp;
-
-				tmp = lat[1][idx(x,y)];
-				lat[1][gi] = lat[3][gi];
-				lat[3][gi] = tmp;
-
-				tmp = lat[8][idx(x,y)];
-				lat[8][gi] = lat[6][gi];
-				lat[6][gi] = tmp;
-
-				tmp = lat[7][idx(x,y)];
-				lat[7][gi] = lat[5][gi];
-				lat[5][gi] = tmp;
-			}
-			else if(map[gi] == M_XOUT)
-			{
-				for (i = 0; i < 9; i++) {
-						lat[i][gi] = lat[i][idx(x-1, y)];
-				}
-			}
-			else if(map[gi] == M_YOUT)
-			{
-				for (i = 0; i < 9; i++) {
-						lat[i][gi] = lat[i][idx(x, y-1)];
-				}
-			}
-			 
-		}
-	}
-}
-
-void RenderThread::collide()
-{
-	// collide
-	int x, y, i, gi;
-
-	for (x = 0; x < LAT_W; x++) {
-		for (y = 0; y < LAT_H; y++) {
-
-			gi = idx(x, y);
-			
-			
-				float v_x, v_y, rho;
-				rho = lat[0][gi] + lat[1][gi] + lat[2][gi] + lat[3][gi] + lat[4][gi] + lat[5][gi] + lat[6][gi] + lat[7][gi] + lat[8][gi];
-				
-	
-			v_x = (lat[2][gi] + lat[5][gi] + lat[6][gi] - lat[8][gi] - lat[4][gi] - lat[7][gi])/rho;
-			v_y = (lat[1][gi] + lat[5][gi] + lat[8][gi] - lat[7][gi] - lat[3][gi] - lat[6][gi])/rho;
-			
-			v_y -= density[gi] * 0.0001f;
-			float speedcap = 0.22f;
-			if (v_x < -speedcap) v_x = -speedcap;
-			if (v_x >  speedcap) v_x =  speedcap;
-			if (v_y < -speedcap) v_y = -speedcap;
-			if (v_y >  speedcap) v_y =  speedcap;
-				u[gi * 2] = v_x;
-				u[gi * 2 + 1] = v_y;
-				
-
-				
-				float uu = v_x*v_x;
-				float vv = v_y*v_y;
-				float uv = v_x*v_y;
-				float feq[9];
-//      f8  f1   f5
-//           |   
-//           |  
-//           | 
-//      f4---|--- f2
-//           | 
-//           |         
-//           |   
-//      f7  f3   f6	
-				/*float Cusq = -1.5f * (v_x*v_x + v_y*v_y);
-				feq[0] = rho * (1.0f + Cusq) * 4.0f/9.0f;
-				feq[1] = rho * (1.0f + Cusq + 3.0f*v_y + 4.5f*v_y*v_y) / 9.0f;
-				feq[2] = rho * (1.0f + Cusq + 3.0f*v_x + 4.5f*v_x*v_x) / 9.0f;
-				feq[3] = rho * (1.0f + Cusq - 3.0f*v_y + 4.5f*v_y*v_y) / 9.0f;
-				feq[4] = rho * (1.0f + Cusq - 3.0f*v_x + 4.5f*v_x*v_x) / 9.0f;
-				feq[5] = rho * (1.0f + Cusq + 3.0f*(v_x+v_y) + 4.5f*(v_x+v_y)*(v_x+v_y)) / 36.0f;
-				feq[6] = rho * (1.0f + Cusq + 3.0f*(v_x-v_y) + 4.5f*(v_x-v_y)*(v_x-v_y)) / 36.0f;
-				feq[7] = rho * (1.0f + Cusq + 3.0f*(-v_x-v_y) + 4.5f*(v_x+v_y)*(v_x+v_y)) / 36.0f;
-				feq[8] = rho * (1.0f + Cusq + 3.0f*(-v_x+v_y) + 4.5f*(-v_x+v_y)*(-v_x+v_y)) / 36.0f;
-				*/
-				feq[0] = rho * (1.0f - 1.5f * (uu + vv)) * 4.0f/9.0f;
-				feq[1] = rho * (1.0f + 3.0f * v_y + 3.f * vv - 1.5f * uu) / 9.0f;
-				feq[2] = rho * (1.0f + 3.0f * v_x + 3.f * uu - 1.5f * vv) / 9.0f;
-				feq[3] = rho * (1.0f - 3.0f * v_y + 3.f * vv - 1.5f * uu) / 9.0f;
-				feq[4] = rho * (1.0f - 3.0f * v_x + 3.f * uu - 1.5f * vv) / 9.0f;
-				feq[5] = rho * (1.0f + 3.0f * v_x + 3.f * v_y + 3.f * uu + 3.f * vv + 9.f * uv) / 36.0f;
-				feq[6] = rho * (1.0f + 3.0f * v_x - 3.f * v_y + 3.f * uu + 3.f * vv - 9.f * uv) / 36.0f;
-				feq[7] = rho * (1.0f - 3.0f * v_x - 3.f * v_y + 3.f * uu + 3.f * vv + 9.f * uv) / 36.0f;
-				feq[8] = rho * (1.0f - 3.0f * v_x + 3.f * v_y + 3.f * uu + 3.f * vv - 9.f * uv) / 36.0f;
-
-				
-					for (i = 0; i < 9; i++) {
-						lat[i][gi] += (feq[i] - lat[i][gi]) / tau;
-					}
-					
-		}
-	}
-}
-
-void RenderThread::trasport()
-{	
-	advectScalarField(LAT_W, LAT_H, u, density);
-}
-
-void RenderThread::propagate()
-{
-// propagate (stream)
-	int x, y;
-
-// west
-	for (x = 0; x < LAT_W-1; x++) {
-		for (y = 0; y < LAT_H; y++) {
-			lat[4][idx(x,y)] = lat[4][idx(x+1,y)];
-		}
-	}
-	
-	// east
-	for (x = LAT_W-1; x > 0; x--) {
-		for (y = 0; y < LAT_H; y++) {
-			lat[2][idx(x,y)] = lat[2][idx(x-1,y)];
-		}
-	}
-	
-	// north
-	for (x = 0; x < LAT_W; x++) {
-		for (y = LAT_H-1; y > 0; y--) {
-			lat[1][idx(x,y)] = lat[1][idx(x,y-1)];
-		}
-	}
-
-	// south
-	for (x = 0; x < LAT_W; x++) {
-		for (y = 0; y < LAT_H-1; y++) {
-			lat[3][idx(x,y)] = lat[3][idx(x,y+1)];
-		}
-	}
-
-	// north-west
-	for (x = 0; x < LAT_W-1; x++) {
-		for (y = LAT_H-1; y > 0; y--) {
-			lat[8][idx(x,y)] = lat[8][idx(x+1,y-1)];
-		}
-	}
-
-	// north-east
-	for (x = LAT_W-1; x > 0; x--) {
-		for (y = LAT_H-1; y > 0; y--) {
-			lat[5][idx(x,y)] = lat[5][idx(x-1,y-1)];
-		}
-	}
-
-	// south-west
-	for (x = 0; x < LAT_W-1; x++) {
-		for (y = 0; y < LAT_H-1; y++) {
-			lat[7][idx(x,y)] = lat[7][idx(x+1,y+1)];
-		}
-	}
-
-	// south-east
-	for (x = LAT_W-1; x > 0; x--) {
-		for (y = 0; y < LAT_H-1; y++) {
-			lat[6][idx(x,y)] = lat[6][idx(x-1,y+1)];
-		}
-	}
+	advanceSolver(LAT_W, LAT_H, impulse, wall);
 }
 
 void RenderThread::addImpulse(int x, int y, float vx, float vy)
 {
 	int gi = idx(x,y);
-	if (map[gi] >= M_FLUID) {
-		if(map[gi] == M_FLUID) map[gi] = M_SETU + 40;
-		impulse_x[gi] = vx;
-		impulse_y[gi] = vy;
-	}
+	impulse[gi * 2] = vx;
+	impulse[gi * 2 + 1] = vy;	
 }
 
 void RenderThread::addObstacle(int x, int y)
 {
 	int gi = idx(x,y);
-	map[gi] = M_WALL;
+	wall[gi] = M_WALL;
 }

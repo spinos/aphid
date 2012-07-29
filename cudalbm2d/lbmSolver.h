@@ -36,23 +36,12 @@ private:
     bool restart;
     bool abort;
 	
-	float *u;
-	short *map;
-	float *density;
-	float *lat[9];
-	float tau;
+	unsigned char *wall;
+
 	void simulate();
-	void inject();
-	void boundaryConditions();
-	void collide();
-	void propagate();
-	void trasport();
-	void getMacro(int x, int y, float &rho, float &vx, float &vy);
-	void getForce(int gi, float &rho, float &vx, float &vy);
 
 	uchar *pixel;
-	float *impulse_x;
-	float *impulse_y;
+	float *impulse;
 };
 
 #endif
