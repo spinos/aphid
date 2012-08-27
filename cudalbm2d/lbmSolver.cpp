@@ -5,7 +5,7 @@
 #include "lbmSolver.h"
 #include "solver_implement.h"
 #define LAT_W 192
-#define LAT_H 120
+#define LAT_H 128
 #define LAT_LEN LAT_W * LAT_H
 #define idx(x,y) ((y)*LAT_W+(x))
 #define M_WALL 0

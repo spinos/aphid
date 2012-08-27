@@ -21,8 +21,9 @@
 #include <limits.h>
 
 #include "solver_implement.h"
-#define TILE_I 16
-#define TILE_J 8
+
+#define TILE_DIM 16
+
 const float visc = 0.009f;
 
 float *f0_data, *f1_data, *f2_data, *f3_data, *f4_data, *f5_data, *f6_data, *f7_data, *f8_data;
@@ -42,8 +43,8 @@ texture<float, cudaTextureType2D> densityTex;
 __global__ void
 show_scalar(float *id, unsigned char*mask, unsigned char *od, int w, int h)
 {
-    uint x = blockIdx.x*TILE_I + threadIdx.x;
-    uint y = blockIdx.y*TILE_J + threadIdx.y;
+    uint x = blockIdx.x*TILE_DIM + threadIdx.x;
+    uint y = blockIdx.y*TILE_DIM + threadIdx.y;
     uint i = y * w + x;
     
     if(mask[i] == 0) {
@@ -61,8 +62,8 @@ show_scalar(float *id, unsigned char*mask, unsigned char *od, int w, int h)
 __global__ void
 show_velocity(float *id, unsigned char*mask, unsigned char *od, int w, int h)
 {
-    uint x = blockIdx.x*TILE_I + threadIdx.x;
-    uint y = blockIdx.y*TILE_J + threadIdx.y;
+    uint x = blockIdx.x*TILE_DIM + threadIdx.x;
+    uint y = blockIdx.y*TILE_DIM + threadIdx.y;
     uint i = y * w + x;
     
     if(mask[i] == 0) {
@@ -86,8 +87,8 @@ show_velocity(float *id, unsigned char*mask, unsigned char *od, int w, int h)
 __global__ void
 advect_density(float *result, float *u, int w, int h)
 {
-    uint x = blockIdx.x*TILE_I + threadIdx.x;
-    uint y = blockIdx.y*TILE_J + threadIdx.y;
+    uint x = blockIdx.x*TILE_DIM + threadIdx.x;
+    uint y = blockIdx.y*TILE_DIM + threadIdx.y;
     uint i = y * w + x;
 
     float tx = (float)x + 0.5 - u[i * 2];
@@ -103,8 +104,8 @@ inject_energy(float *d,
               float *f5_data, float *f6_data, float *f7_data, float *f8_data,
               float *stir, unsigned char * obstacle, int w, int h)
 {
-    uint x = blockIdx.x*TILE_I + threadIdx.x;
-    uint y = blockIdx.y*TILE_J + threadIdx.y;
+    uint x = blockIdx.x*TILE_DIM + threadIdx.x;
+    uint y = blockIdx.y*TILE_DIM + threadIdx.y;
     uint i = y * w + x;
     
     if(obstacle[i] > 0) {
@@ -134,10 +135,10 @@ inject_energy(float *d,
 __global__ void
 boundary_condition_kernel(float *f1_data, float *f2_data, float *f3_data, float *f4_data,
               float *f5_data, float *f6_data, float *f7_data, float *f8_data,
-              unsigned char * obstacle, int w, int h)
+              unsigned char * obstacle, int w)
 {
-    uint x = blockIdx.x*TILE_I + threadIdx.x;
-    uint y = blockIdx.y*TILE_J + threadIdx.y;
+    uint x = blockIdx.x*TILE_DIM + threadIdx.x;
+    uint y = blockIdx.y*TILE_DIM + threadIdx.y;
     uint i = y * w + x;
 
     float tmp;
@@ -163,29 +164,29 @@ boundary_condition_kernel(float *f1_data, float *f2_data, float *f3_data, float 
 __global__ void stream_kernel (float *f1_data, float *f2_data,
                                float *f3_data, float *f4_data, float *f5_data,
 			       float *f6_data, float *f7_data, float *f8_data,
-			       unsigned char * obstacle, int width)
+			       int width)
 {
-    uint x = blockIdx.x*TILE_I + threadIdx.x;
-    uint y = blockIdx.y*TILE_J + threadIdx.y;
+    uint x = blockIdx.x*TILE_DIM + threadIdx.x;
+    uint y = blockIdx.y*TILE_DIM + threadIdx.y;
     uint i = y * width + x;
-    if(obstacle > 0) {
-        f1_data[i] = tex2D(f1_tex, (float) x  , (float) (y-1));
-        f2_data[i] = tex2D(f2_tex, (float) (x-1)  , (float) y);
-        f3_data[i] = tex2D(f3_tex, (float) x  , (float) (y+1));
-        f4_data[i] = tex2D(f4_tex, (float) (x+1)  , (float) y);
-        f5_data[i] = tex2D(f5_tex, (float) (x-1)  , (float) (y-1));
-        f6_data[i] = tex2D(f6_tex, (float) (x-1)  , (float) (y+1));
-        f7_data[i] = tex2D(f7_tex, (float) (x+1)  , (float) (y+1));
-        f8_data[i] = tex2D(f8_tex, (float) (x+1)  , (float) (y-1));
-    }
+
+    f1_data[i] = tex2D(f1_tex, (float) x  , (float) (y-1));
+    f2_data[i] = tex2D(f2_tex, (float) (x-1)  , (float) y);
+    f3_data[i] = tex2D(f3_tex, (float) x  , (float) (y+1));
+    f4_data[i] = tex2D(f4_tex, (float) (x+1)  , (float) y);
+    f5_data[i] = tex2D(f5_tex, (float) (x-1)  , (float) (y-1));
+    f6_data[i] = tex2D(f6_tex, (float) (x-1)  , (float) (y+1));
+    f7_data[i] = tex2D(f7_tex, (float) (x+1)  , (float) (y+1));
+    f8_data[i] = tex2D(f8_tex, (float) (x+1)  , (float) (y-1));
+   
 }
 
 __global__ void reset_kernel (float *f0_data, float *f1_data, float *f2_data, float *f3_data, 
                                 float *f4_data, float *f5_data, float *f6_data, float *f7_data, float *f8_data, 
                                 float *density, float * injection, float * velocity, int width)
 {
-    uint x = blockIdx.x*TILE_I + threadIdx.x;
-    uint y = blockIdx.y*TILE_J + threadIdx.y;
+    uint x = blockIdx.x*TILE_DIM + threadIdx.x;
+    uint y = blockIdx.y*TILE_DIM + threadIdx.y;
     uint i = y * width + x;
     
     float faceq1 = 4.f/9.f;
@@ -210,8 +211,8 @@ __global__ void collide_kernel (float *f0_data, float *f1_data, float *f2_data, 
                                 float *f4_data, float *f5_data, float *f6_data, float *f7_data, float *f8_data, 
                                 float *velocity, float * density, int width)
 {
-    uint x = blockIdx.x*TILE_I + threadIdx.x;
-    uint y = blockIdx.y*TILE_J + threadIdx.y;
+    uint x = blockIdx.x*TILE_DIM + threadIdx.x;
+    uint y = blockIdx.y*TILE_DIM + threadIdx.y;
     uint i = y * width + x;
     float ro, v_x, v_y;
     float tau = (5.f*visc + 1.0f)/2.0f;
@@ -305,8 +306,8 @@ extern "C" void initializeSolverData(int width, int height)
     cutilSafeCall( cudaMallocArray( &f7_array, &channelDesc, width, height )); 
     cutilSafeCall( cudaMallocArray( &f8_array, &channelDesc, width, height )); 
     
-    dim3 grid = dim3(width/TILE_I, height/TILE_J);
-    dim3 block = dim3(TILE_I, TILE_J);
+    dim3 grid = dim3(width/TILE_DIM, height/TILE_DIM);
+    dim3 block = dim3(TILE_DIM, TILE_DIM);
     reset_kernel<<<grid, block>>>( f0_data, f1_data, f2_data, f3_data, 
                                 f4_data, f5_data, f6_data, f7_data, f8_data, 
                                 density_data, injection_data, velocity_data, width);
@@ -354,8 +355,8 @@ void getDisplayField(int width, int height, unsigned char * obstable, unsigned c
     unsigned char *d_Out;
     cutilSafeCall( cudaMalloc((void **)&d_Out, size) );
     
-    dim3 grid = dim3(width/TILE_I, height/TILE_J);
-    dim3 block = dim3(TILE_I, TILE_J);
+    dim3 grid = dim3(width/TILE_DIM, height/TILE_DIM);
+    dim3 block = dim3(TILE_DIM, TILE_DIM);
     
     show_scalar<<< grid, block>>>(density_data, d_obstacle, d_Out, width, height);
 
@@ -378,8 +379,8 @@ void advanceSolver(int width, int height, float *impulse, unsigned char * obstab
     const int size = width * height * sizeof(float);
     cutilSafeCall( cudaMemcpy(injection_data, impulse, size * 2, cudaMemcpyHostToDevice) );    
     
-    dim3 grid = dim3(width/TILE_I, height/TILE_J);
-    dim3 block = dim3(TILE_I, TILE_J);
+    dim3 grid = dim3(width/TILE_DIM, height/TILE_DIM);
+    dim3 block = dim3(TILE_DIM, TILE_DIM);
     
     inject_energy<<<grid, block>>>(density_data, 
                                    f1_data, f2_data, f3_data, f4_data,
@@ -390,10 +391,15 @@ void advanceSolver(int width, int height, float *impulse, unsigned char * obstab
     
     boundary_condition_kernel<<<grid, block>>>(f1_data, f2_data, f3_data, f4_data,
                                    f5_data, f6_data, f7_data, f8_data, 
-                                   d_obstacle, width, height);
+                                   d_obstacle, width);
+      
     
-    
-    
+
+    collide_kernel<<<grid, block>>>( f0_data, f1_data, f2_data, f3_data, 
+                                f4_data, f5_data, f6_data, f7_data, f8_data, 
+                                velocity_data, density_data,
+                                width);
+
     cutilSafeCall( cudaMemcpyToArray( f1_array, 0, 0, f1_data, size, cudaMemcpyDeviceToDevice));
     cutilSafeCall( cudaMemcpyToArray( f2_array, 0, 0, f2_data, size, cudaMemcpyDeviceToDevice));
     cutilSafeCall( cudaMemcpyToArray( f3_array, 0, 0, f3_data, size, cudaMemcpyDeviceToDevice));
@@ -453,7 +459,7 @@ void advanceSolver(int width, int height, float *impulse, unsigned char * obstab
 
     stream_kernel<<<grid, block>>>(f1_data, f2_data, f3_data, f4_data,
                                    f5_data, f6_data, f7_data, f8_data, 
-                                   d_obstacle, width);
+                                   width);
 
     CUDA_SAFE_CALL(cudaUnbindTexture(f1_tex));
     CUDA_SAFE_CALL(cudaUnbindTexture(f2_tex));
@@ -462,12 +468,7 @@ void advanceSolver(int width, int height, float *impulse, unsigned char * obstab
     CUDA_SAFE_CALL(cudaUnbindTexture(f5_tex));
     CUDA_SAFE_CALL(cudaUnbindTexture(f6_tex));
     CUDA_SAFE_CALL(cudaUnbindTexture(f7_tex));
-    CUDA_SAFE_CALL(cudaUnbindTexture(f8_tex));    
-
-    collide_kernel<<<grid, block>>>( f0_data, f1_data, f2_data, f3_data, 
-                                f4_data, f5_data, f6_data, f7_data, f8_data, 
-                                velocity_data, density_data,
-                                width);
+    CUDA_SAFE_CALL(cudaUnbindTexture(f8_tex));
 
     cutilSafeCall( cudaMemcpyToArray( density_array, 0, 0, density_data, size, cudaMemcpyDeviceToDevice));
 

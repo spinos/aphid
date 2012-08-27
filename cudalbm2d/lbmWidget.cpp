@@ -11,13 +11,13 @@ MandelbrotWidget::MandelbrotWidget(QWidget *parent)
     connect(&thread, SIGNAL(renderedImage(QImage, unsigned)),
             this, SLOT(updatePixmap(QImage, unsigned)));
 
-    setWindowTitle(tr("LBM 2D Fluid 192 X 120"));
+    setWindowTitle(tr("LBM 2D Fluid 192 X 128"));
 
     resize(thread.solverWidth() * 4, thread.solverHeight() * 4);
 	
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(37);
+	timer->start(35);
 	
 	_record_time.start();
 	_num_update = 0;
