@@ -11,6 +11,8 @@ public:
 	
 	void set(float vx, float vy, float vz);
 	
+	char equals(const Vector3F &other ) const;
+	char operator==( const Vector3F& other ) const;
 	void operator+=( const Vector3F& other );	
 	void operator-=( const Vector3F& other );
 	

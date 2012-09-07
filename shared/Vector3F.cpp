@@ -41,6 +41,16 @@ void Vector3F::set(float vx, float vy, float vz)
     y = vy;
     z = vz;
 }
+
+char Vector3F::equals(const Vector3F &other ) const
+{
+	return (x == other.x && y == other.y && z == other.z);
+}
+
+char Vector3F::operator==( const Vector3F& other ) const
+{
+        return (x == other.x && y == other.y && z == other.z);
+}
 	
 void Vector3F::operator+=( const Vector3F& other )
 {

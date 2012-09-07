@@ -15,4 +15,11 @@ public:
 	void box(float width, float height, float depth);
 	void solidCube(float x, float y, float z, float size);
 	void setGrey(float g);
+	void setColor(float r, float g, float b);
+	void end();
+	void beginWireTriangle();
+	void beginLine();
+	void beginPoint();
+	void aVertex(float x, float y, float z);
+	
 };

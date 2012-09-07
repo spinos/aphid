@@ -14,6 +14,11 @@ void ShapeDrawer::setGrey(float g)
     glColor3f(g, g, g);
 }
 
+void ShapeDrawer::setColor(float r, float g, float b)
+{
+	glColor3f(r, g, b);
+}
+
 void ShapeDrawer::box(float width, float height, float depth)
 {
 	glBegin(GL_LINES);
@@ -100,4 +105,30 @@ void ShapeDrawer::solidCube(float x, float y, float z, float size)
 	glVertex3f(x + size, y + size, z + size);
 	glVertex3f(x + size, y + size, z);
 	glEnd();
+}
+
+void ShapeDrawer::end()
+{
+	glEnd();
+}
+
+void ShapeDrawer::beginWireTriangle()
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_TRIANGLES);
+}
+
+void ShapeDrawer::beginLine()
+{
+	glBegin(GL_LINES);
+}
+
+void ShapeDrawer::beginPoint()
+{
+	glBegin(GL_POINTS);
+}
+
+void ShapeDrawer::aVertex(float x, float y, float z)
+{
+	glVertex3f(x, y, z);
 }
