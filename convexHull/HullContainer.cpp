@@ -88,19 +88,19 @@ Vertex *HullContainer::vertex(int idx)
 void HullContainer::initHull()
 {
 	fDrawer = new ShapeDrawer();
-	int nv = 2877;
+	int nv = 9999;
 	for(int i = 0; i < nv; i++) 
 	{
 		Vertex * v = new Vertex;
-		float r = ((float)(rand() % 24091)) / 24091.f * 25.f;
+		float r = ((float)(rand() % 24091)) / 24091.f * 8.f + 12.f;
 		float phi = ((float)(rand() % 25391)) / 25391.f * 2.f * 3.14f;
 		float theta = ((float)(rand() % 24331)) / 24331.f * 3.14f;
 		v->x = sin(theta) * cos(phi) * r + 16.f;
 		v->y = sin(theta) * sin(phi) * r + 16.f;
 		v->z = cos(theta) * r + 16.f;
-		v->x = ((float)(rand() % 358091)) / 8092.f;
-		v->y = ((float)(rand() % 358391)) / 8392.f;
-		v->z = ((float)(rand() % 358331)) / 8332.f;
+		//v->x = ((float)(rand() % 318091)) / 8092.f;
+		//v->y = ((float)(rand() % 308391)) / 8392.f;
+		//v->z = ((float)(rand() % 298331)) / 8332.f;
 		addVertex(v);
 		v->setData((char*)new ConflictGraph(0));
 	}
@@ -175,11 +175,6 @@ void HullContainer::beginHull()
 					break;
 				}
 			}
-			else 
-			{
-				printf("horizon failed at v %d", i);
-				break;
-			}
 		}
 	}
 }
@@ -251,9 +246,9 @@ char HullContainer::searchHorizons()
 	m_numHorizon = 1;
 	while(cur && i < (int)horizons.size())
 	{
-		Vertex * a = cur->v0();
+		//Vertex * a = cur->v0();
 		Vertex * b = cur->v1();
-		printf("%f %f %f - %f %f %f\n", a->x, a->y, a->z, b->x, b->y, b->z);
+		//printf("%f %f %f - %f %f %f\n", a->x, a->y, a->z, b->x, b->y, b->z);
 		if( b->getIndex() == m_horizon->v0()->getIndex()) {
 			cur->disconnect();
 			loop = 1;
@@ -265,6 +260,7 @@ char HullContainer::searchHorizons()
 		m_numHorizon++;
 	}
 	
+	int numE = (int)horizons.size();
 	horizons.clear();
 	
 	if(!loop) 
@@ -274,10 +270,10 @@ char HullContainer::searchHorizons()
 	}
 	
 	printf("num horizon %d\n", m_numHorizon);
-	
-	if(m_numHorizon < 3)
+
+	if(m_numHorizon < 3 || m_numHorizon != numE)
 	{
-		printf("horizon loop less than 3\n");
+		printf("unexpected horizon loop\n");
 		return 0;
 	}
 	
@@ -353,9 +349,8 @@ char HullContainer::finishStep(Vertex *v)
 	for(int i = 0; i < (int)visibleFaces.size(); i++)
 	{
 		Facet *f = visibleFaces[i];
-		//((ConflictGraph *)f->getData())->clear();
 		removeConflict(f);
-		printf("\n rm face %d\n", f->getIndex());
+		printf(" rm face %d\n", f->getIndex());
 
 		f->setIndex(-1);
 	}
