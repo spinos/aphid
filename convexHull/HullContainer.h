@@ -35,8 +35,8 @@ public:
 	void beginHull();
 	char searchVisibleFaces(Vertex *v);
 	char searchHorizons();
-	void spawn(Vertex *v);
-	void finishStep(Vertex *v);
+	char spawn(Vertex *v);
+	char finishStep(Vertex *v);
 	void addConflict(Facet *f, Vertex *v);
 	void addConflict(Facet *f, Facet *a, Facet *b);
 	void removeConflict(Facet *f);

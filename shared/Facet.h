@@ -14,10 +14,10 @@
 class Facet : public GeoElement {
 public:
 	Facet();
-	Facet(Vertex *a, Vertex *b, Vertex *c, Vertex *d);
+	Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d);
 	virtual ~Facet();
 	
-	void connectTo(Facet *another, Vertex *a, Vertex *b);
+	char connectTo(Facet *another, Vertex *a, Vertex *b);
 	Edge * matchedEdge(Vertex * a, Vertex * b);
 	
 	Vertex * vertex(int idx);
@@ -26,8 +26,9 @@ public:
 	Vector3F getCentroid() const;
 	Vector3F getNormal() const;
 	char isVertexAbove(const Vertex & v) const;
+	char isClosed() const;
 	
-	void getEdgeOnHorizon(std::vector<Edge *> & horizons) const;
+	char getEdgeOnHorizon(std::vector<Edge *> & horizons) const;
 private:
 	void createEdges();
 	

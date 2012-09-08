@@ -88,19 +88,19 @@ Vertex *HullContainer::vertex(int idx)
 void HullContainer::initHull()
 {
 	fDrawer = new ShapeDrawer();
-	int nv = 603;
+	int nv = 2877;
 	for(int i = 0; i < nv; i++) 
 	{
 		Vertex * v = new Vertex;
-		//float r = ((float)(rand() % 4091)) / 4091.f * 13.f + 3.f;
-		//float phi = ((float)(rand() % 5391)) / 5391.f * 2.f * 3.14f;
-		//float theta = ((float)(rand() % 4331)) / 4331.f * 3.14f;
-		//v->x = sin(theta) * cos(phi) * r + 16.f;
-		//v->y = sin(theta) * sin(phi) * r + 16.f;
-		//v->z = cos(theta) * r + 16.f;
-		v->x = ((float)(rand() % 8091)) / 8092.f * 32;
-		v->y = ((float)(rand() % 8391)) / 8392.f * 32;
-		v->z = ((float)(rand() % 8331)) / 8332.f * 32;
+		float r = ((float)(rand() % 24091)) / 24091.f * 25.f;
+		float phi = ((float)(rand() % 25391)) / 25391.f * 2.f * 3.14f;
+		float theta = ((float)(rand() % 24331)) / 24331.f * 3.14f;
+		v->x = sin(theta) * cos(phi) * r + 16.f;
+		v->y = sin(theta) * sin(phi) * r + 16.f;
+		v->z = cos(theta) * r + 16.f;
+		v->x = ((float)(rand() % 358091)) / 8092.f;
+		v->y = ((float)(rand() % 358391)) / 8392.f;
+		v->z = ((float)(rand() % 358331)) / 8332.f;
 		addVertex(v);
 		v->setData((char*)new ConflictGraph(0));
 	}
@@ -165,8 +165,15 @@ void HullContainer::beginHull()
 			m_currentVertexId = i;
 			if(searchHorizons())
 			{
-				spawn(q);
-				finishStep(q);
+				if(!spawn(q)) {
+					printf("spawn failed at v %d", i);
+					break;
+				}
+				if(!finishStep(q))
+				{
+					printf("spawn failed at v %d", i);
+					break;
+				}
 			}
 			else 
 			{
@@ -181,6 +188,10 @@ char HullContainer::searchVisibleFaces(Vertex *v)
 {
 	visibleFaces.clear();
 	((ConflictGraph *)v->getData())->getFaces(visibleFaces);
+	//std::vector<Facet *>::iterator it;
+	//for(it = m_faces.begin(); it < m_faces.end(); it++ ) {
+	//	if((*it)->isVertexAbove(*v)) visibleFaces.push_back(*it);
+	//}
 	if(visibleFaces.size() < 1) return 0;
 	printf("%d faces are visible\n", (int)visibleFaces.size());
 	return 1;
@@ -189,8 +200,8 @@ char HullContainer::searchVisibleFaces(Vertex *v)
 char HullContainer::searchHorizons()
 {
 	std::vector<Facet *>::iterator it;
-	//for(it = m_faces.begin(); it < m_faces.end(); it++ )
-	//	(*it)->setMarked(0);
+	for(it = m_faces.begin(); it < m_faces.end(); it++ )
+		(*it)->setMarked(0);
 	
 	for (it = visibleFaces.begin(); it < visibleFaces.end(); it++) 
 	{ 
@@ -203,12 +214,16 @@ char HullContainer::searchHorizons()
 	for(it = visibleFaces.begin(); it < visibleFaces.end(); it++) 
 	{ 
 		printf("get horizon from face %d\n", (*it)->getIndex());
-		(*it)->getEdgeOnHorizon(horizons);
+		if(!(*it)->getEdgeOnHorizon(horizons))
+		{
+			printf("face not connected\n");
+			return 0;
+		}
 	}
 	
-	if(horizons.size() < 1)
+	if(horizons.size() < 3)
 	{
-		printf("no horizon\n");
+		printf("horizon less than 3\n");
 		return 0;
 	}
 	
@@ -233,7 +248,7 @@ char HullContainer::searchHorizons()
 	m_horizon = cur;
 	int i = 0;
 	char loop = 0;
-	m_numHorizon = 0;
+	m_numHorizon = 1;
 	while(cur && i < (int)horizons.size())
 	{
 		Vertex * a = cur->v0();
@@ -258,25 +273,56 @@ char HullContainer::searchHorizons()
 		return 0;
 	}
 	
+	printf("num horizon %d\n", m_numHorizon);
+	
+	if(m_numHorizon < 3)
+	{
+		printf("horizon loop less than 3\n");
+		return 0;
+	}
+	
 	return 1;
 }
 
-void HullContainer::spawn(Vertex *v)
+char HullContainer::spawn(Vertex *v)
 {
+	Edge *cur = m_horizon;
+	Vector3F horizonCen(0.f, 0.f, 0.f);
+	for(int i = 0; i < (int)visibleFaces.size(); i++)
+	{
+		
+		horizonCen += visibleFaces.at(i)->getCentroid() - visibleFaces.at(i)->getNormal();
+		
+	}
+	horizonCen /= (float)visibleFaces.size();
+	
+	
+	
 	Facet *last = 0;
 	Facet *first = 0;
 	Vertex * end = 0;
 	
-	Edge *cur = m_horizon;
+	cur = m_horizon;
 	while(cur)
 	{
 		Edge *e = cur;
 		Vertex * a = e->v0();
 		Vertex * b = e->v1();
 		Facet *wall = (Facet *)(e->getFace());
+		if(wall->getIndex() < 0 || wall->isMarked())
+		{
+			printf("face %d is not wall\n", wall->getIndex());
+			return 0;
+		}
 		Facet *yard = (Facet *)(e->getTwin()->getFace());
-		Vertex * c = wall->thirdVertex(a, b);
-		Facet *f = new Facet(v, a, b, c);
+		if(yard->getIndex() < 0)
+		{
+			printf("face %d is not yard\n", yard->getIndex());
+			return 0;
+		}
+		
+		//Vertex * c = yard->thirdVertex(a, b);
+		Facet *f = new Facet(v, a, b, &horizonCen);
 		f->setData((char*)new ConflictGraph(1));
 		
 		addFacet(f);
@@ -285,7 +331,10 @@ void HullContainer::spawn(Vertex *v)
 		
 		if(!first) first = f;
 		
-		if(last) f->connectTo(last, v, a);
+		if(last) {
+			if(!f->connectTo(last, v, a))
+				return 0;
+		}
 		
 		last = f;
 		end = b;
@@ -294,10 +343,10 @@ void HullContainer::spawn(Vertex *v)
 		
 		cur = (Edge *)cur->getNext();
 	}
-	last->connectTo(first, v, end);
+	return last->connectTo(first, v, end);
 }
 
-void HullContainer::finishStep(Vertex *v)
+char HullContainer::finishStep(Vertex *v)
 {
 	v->setVisibility(0);
 	
@@ -305,12 +354,22 @@ void HullContainer::finishStep(Vertex *v)
 	{
 		Facet *f = visibleFaces[i];
 		//((ConflictGraph *)f->getData())->clear();
-		//removeConflict(f);
+		removeConflict(f);
 		printf("\n rm face %d\n", f->getIndex());
 
 		f->setIndex(-1);
 	}
 	removeFaces();
+	
+	std::vector<Facet *>::iterator it;
+	for(it = m_faces.begin(); it < m_faces.end(); it++ )
+	{
+		if(!(*it)->isClosed()) {
+			printf("face %d is not closed\n", (*it)->getIndex());
+			return 0;
+		}
+	}
+	return 1;
 }
 
 void HullContainer::renderWorld()
@@ -326,13 +385,13 @@ void HullContainer::renderWorld()
 	fDrawer->end();
 	
 	fDrawer->beginWireTriangle();
-	
+	fDrawer->setColor(0.f, .75f, 0.f);
 	std::vector<Facet *>::iterator it;
 	for(it = m_faces.begin(); it < m_faces.end(); it++ )
 	{
 		const Facet *f = *it;
 
-		fDrawer->setColor(0.f, .75f, 0.f);
+		
 		Vertex p = f->getVertex(0);
 		fDrawer->aVertex(p.x, p.y, p.z);
 		p = f->getVertex(1);
@@ -359,7 +418,7 @@ void HullContainer::renderWorld()
 	fDrawer->end();
 	
 	fDrawer->beginLine();
-	
+	fDrawer->setColor(0.f, .75f, 1.f);
 	for(it = m_faces.begin(); it < m_faces.end(); it++ )
 	{
 		const Facet *f = *it;
@@ -453,7 +512,7 @@ void HullContainer::addConflict(Facet *f, Facet *f1, Facet *f2)
 	for(int i=(int)visible.size() - 1; i >= 0; i--) 
 	{
 		Vertex *v = visible.at(i);
-		if (f->isVertexAbove(*v) && v->isVisible()) addConflict(f, v);
+		if (f->isVertexAbove(*v)) addConflict(f, v);
 	}
 }
 

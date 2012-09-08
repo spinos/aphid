@@ -21,8 +21,10 @@ Edge::Edge(Vertex *a, Vertex *b, char * f)
 
 char Edge::matches(Vertex *a, Vertex *b) const
 {
-	return ((va->equals(*a) && vb->equals(*b)) ||
-              (va->equals(*b) && vb->equals(*a)));
+	//return ((va->equals(*a) && vb->equals(*b)) ||
+    //          (va->equals(*b) && vb->equals(*a)));
+	return ((va->getIndex() == a->getIndex() && vb->getIndex() == b->getIndex()) ||
+              (va->getIndex() == b->getIndex() && vb->getIndex() == a->getIndex()));
 }
 
 void Edge::setTwin(Edge *e)
