@@ -24,6 +24,10 @@ public:
 	void setIndex(int val);
 	int getIndex() const;
 	
+	void setNext(GeoElement * another);
+	GeoElement* getNext() const;
+	
+	GeoElement *next;
 	char *m_data;
 	int index;
 	char visibility;

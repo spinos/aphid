@@ -33,11 +33,13 @@ public:
 	void renderWorld();
 
 	void beginHull();
-	char searchHorizons(Vertex *v);
+	char searchVisibleFaces(Vertex *v);
+	char searchHorizons();
 	void spawn(Vertex *v);
 	void finishStep(Vertex *v);
 	void addConflict(Facet *f, Vertex *v);
 	void addConflict(Facet *f, Facet *a, Facet *b);
+	void removeConflict(Facet *f);
 	
 protected:
 	ShapeDrawer* fDrawer;
@@ -45,4 +47,6 @@ protected:
 	std::vector<Facet *>m_faces;
 	std::vector<Facet *>visibleFaces;
 	Edge * m_horizon;
+	int m_currentVertexId;
+	int m_numHorizon;
 };

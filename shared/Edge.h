@@ -26,9 +26,9 @@ public:
 	Vertex getV0() const;
 	Vertex getV1() const;
 	
-	char isConnectedTo(Edge * another);
-	void setNext(Edge * another);
-	Edge* getNext() const;
+	char canBeConnectedTo(Edge * another) const;
+	void connect(Edge * another);
+
 	void flip();
 	void disconnect();
 
@@ -37,5 +37,4 @@ private:
 	Vertex *vb;
 	char *face;
 	Edge *identicalTwin;
-	Edge *next;
 };

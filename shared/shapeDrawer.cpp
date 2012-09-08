@@ -112,6 +112,12 @@ void ShapeDrawer::end()
 	glEnd();
 }
 
+void ShapeDrawer::beginSolidTriangle()
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glBegin(GL_TRIANGLES);
+}
+
 void ShapeDrawer::beginWireTriangle()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

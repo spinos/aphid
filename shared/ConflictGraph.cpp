@@ -44,7 +44,10 @@ void ConflictGraph::getFaces(std::vector<Facet *>&faces) const
 	GraphArch *arch = m_head;
 	while(arch)
 	{
-		if(arch->face->getIndex() > -1) faces.push_back(arch->face);
+		if(arch->face->getIndex() > -1) 
+			faces.push_back(arch->face);
+		//else
+		//	printf("get -1 face from v %d\n", arch->vertex->getIndex());
 		arch = arch->nextVertex;
 	}
 }
@@ -55,6 +58,35 @@ void ConflictGraph::getVertices(std::vector<Vertex *>&vertices) const
 	while(arch)
 	{
 		vertices.push_back(arch->vertex);
+		arch = arch->nextFace;
+	}
+}
+
+void ConflictGraph::removeFace(Facet *f)
+{
+	GraphArch *arch = m_head;
+	while(arch)
+	{
+		if(arch->face->getIndex() == f->getIndex())
+		{
+			//printf("rm f %d from v %d\n", arch->face->getIndex(), arch->vertex->getIndex());
+			GraphArch *o = arch->previousVertex;
+			GraphArch *r = arch->nextVertex;
+			if(r) r->previousVertex = o;
+			if(o) o->nextVertex = r;
+			if(o) arch = o;
+		}
+		arch = arch->nextVertex;
+	}
+}
+
+void ConflictGraph::getVertices(GeoElement * dest) const
+{
+	GraphArch *arch = m_head;
+	while(arch)
+	{
+		dest->next = arch->vertex;
+		dest = dest->next;
 		arch = arch->nextFace;
 	}
 }

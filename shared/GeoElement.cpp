@@ -9,7 +9,7 @@
 
 #include "GeoElement.h"
 
-GeoElement::GeoElement()
+GeoElement::GeoElement() : next(0)
 {
 	marked = 0;
 	visibility = 1;
@@ -57,3 +57,12 @@ int GeoElement::getIndex() const
 	return index;
 }
 
+void GeoElement::setNext(GeoElement * another)
+{
+	next = another;
+}
+
+GeoElement* GeoElement::getNext() const
+{
+	return next;
+}

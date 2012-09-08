@@ -17,6 +17,8 @@ public:
 	void add(GraphArch * arch);
 	void getFaces(std::vector<Facet *>&faces) const;
 	void getVertices(std::vector<Vertex *>&vertices) const;
+	void getVertices(GeoElement * dest) const;
+	void removeFace(Facet *f);
 private:
 	GraphArch *m_head;
 	char m_faceOriented;

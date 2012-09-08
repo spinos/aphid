@@ -17,6 +17,7 @@ public:
 	void setGrey(float g);
 	void setColor(float r, float g, float b);
 	void end();
+	void beginSolidTriangle();
 	void beginWireTriangle();
 	void beginLine();
 	void beginPoint();
