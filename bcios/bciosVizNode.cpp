@@ -1,26 +1,6 @@
-/*
- createNode barycentricInterpolationViz;
- spaceLocator;
- spaceLocator;
- spaceLocator;
- spaceLocator;
- spaceLocator;
- spaceLocator;
- spaceLocator;
- connectAttr -f locator1.worldMatrix[0] barycentricInterpolationViz1.input;
- connectAttr -f barycentricInterpolationViz1.ov locator2.tx;
- connectAttr -f locator3.worldMatrix[0] barycentricInterpolationViz1.tgt[0];
- connectAttr -f locator4.worldMatrix[0] barycentricInterpolationViz1.tgt[1];
- connectAttr -f locator5.worldMatrix[0] barycentricInterpolationViz1.tgt[2];
- connectAttr -f locator6.worldMatrix[0] barycentricInterpolationViz1.tgt[3];
- connectAttr -f locator7.worldMatrix[0] barycentricInterpolationViz1.tgt[4];
-*/
-
-#include <Vector2F.h>
 #include "bciosVizNode.h"
 #include <maya/MString.h> 
 #include <maya/MGlobal.h>
-
 #include <maya/MVector.h>
 #include <maya/MFnMatrixAttribute.h>
 #include <maya/MDataHandle.h>
@@ -36,6 +16,8 @@
 #include <maya/MIntArray.h>
 #include <maya/MPointArray.h>
 #include <TriangleRaster.h>
+#include <ConflictGraph.h>
+#include <shapeDrawer.h>
 #include <fstream> 
 
 MTypeId BCIViz::id( 0x17b733 );
@@ -44,10 +26,13 @@ MObject BCIViz::outValue;
 MObject BCIViz::atargets;
 
 BCIViz::BCIViz() {
-
+m_hitTriangle = 0;
 fDriverPos.x = 1.0;
 fDriverPos.y = fDriverPos.z = 0.0;
-			
+	m_hull = new HullContainer;
+	neighbourId[0] = 0;
+	neighbourId[1] = 1;
+	neighbourId[2] = 2;
 }
 
 BCIViz::~BCIViz() {}
@@ -96,7 +81,17 @@ MStatus BCIViz::compute( const MPlug& plug, MDataBlock& block )
 			htarget.next();
 		}
 		
+		if(numTarget < 4)
+		{
+			MGlobal::displayWarning("convex hull must have no less than 4 targes.");
+			return MS::kSuccess;
+		}
+		
+		constructHull();
+		
 		findNeighbours();
+		
+		calculateWeight();
 
         MArrayDataHandle outputHandle = block.outputArrayValue( outValue );
 		
@@ -127,6 +122,26 @@ MStatus BCIViz::compute( const MPlug& plug, MDataBlock& block )
 	return MS::kSuccess;
 }
 
+char BCIViz::constructHull()
+{
+	m_hull->destroy();
+	const int numTargets = fTargetPositions.length();
+	
+	for(int i = 0; i < numTargets; i++) 
+	{
+		Vertex * v = new Vertex;
+
+		v->x = fTargetPositions[i].x;
+		v->y = fTargetPositions[i].y;
+		v->z = fTargetPositions[i].z;
+
+		m_hull->addVertex(v);
+		v->setData((char*)new ConflictGraph(0));
+	}
+	m_hull->processHull();
+	return 1;
+}
+
 void BCIViz::draw( M3dView & view, const MDagPath & path, 
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
@@ -136,7 +151,6 @@ void BCIViz::draw( M3dView & view, const MDagPath & path,
 	
 	glPushAttrib (GL_CURRENT_BIT);
 	glDisable(GL_DEPTH_TEST);
-	drawSphere();
 	drawDriver();
 	drawTargets();
 	drawNeighbours();
@@ -225,44 +239,39 @@ void BCIViz::drawSphere() const
 
 void BCIViz::drawDriver() const
 {
+	const MPoint proof = fTargetPositions[neighbourId[0]] * fAlpha + fTargetPositions[neighbourId[1]] * fBeta + fTargetPositions[neighbourId[2]] * fGamma;
 	glBegin(GL_LINES);
-	glVertex3f(fHitPos.x, fHitPos.y, fHitPos.z);
+	glVertex3f(proof.x, proof.y, proof.z);
 	glVertex3f(fDriverPos.x, fDriverPos.y, fDriverPos.z);
 	glEnd();
 }
 
 void BCIViz::drawTargets() const
 {
-	const int numTargets = fTargetPositions.length();
-	if(numTargets < 1)
+	if(m_hull->getNumFace() < 4) {
+		drawSphere();
 		return;
-	glBegin(GL_LINES);	
-	for(int i = 0; i < numTargets; i++) {
-		glVertex3f(0.f, 0.f, 0.f);
-		glVertex3f(fTargetPositions[i].x, fTargetPositions[i].y, fTargetPositions[i].z);
 	}
-	glEnd();
+	
+	ShapeDrawer drawer;
+	drawer.drawWiredFace(m_hull);
+	
 }
 
 void BCIViz::drawNeighbours() const
 {
-	drawCircleAround(fTargetPositions[neighbourId[0]]);
-	drawCircleAround(fTargetPositions[neighbourId[1]]);
-	drawCircleAround(fTargetPositions[neighbourId[2]]);
-	drawCircleAround(fHitPos);
+	Facet f = m_hull->getFacet(m_hitTriangle);
+	const Vertex p0 = f.getVertex(0);
+	const Vertex p1 = f.getVertex(1);
+	const Vertex p2 = f.getVertex(2);
 	
-	const MPoint proof = fTargetPositions[neighbourId[0]] * fAlpha + fTargetPositions[neighbourId[1]] * fBeta + fTargetPositions[neighbourId[2]] * fGamma;
-	glBegin(GL_LINES);
-	glVertex3f(proof.x, proof.y, proof.z);
-	glVertex3f(fNeighbours[0].x, fNeighbours[0].y, fNeighbours[0].z);
-	glVertex3f(proof.x, proof.y, proof.z);
-	glVertex3f(fNeighbours[1].x, fNeighbours[1].y, fNeighbours[1].z);
-	glVertex3f(proof.x, proof.y, proof.z);
-	glVertex3f(fNeighbours[2].x, fNeighbours[2].y, fNeighbours[2].z);
-	glEnd();
+	drawCircleAround(p0);
+	drawCircleAround(p1);
+	drawCircleAround(p2);
+	drawCircleAround(m_hitP);
 }
 
-void BCIViz::drawCircleAround(const MPoint& center) const
+void BCIViz::drawCircleAround(const Vector3F& center) const
 {
 	Vector3F nor(center.x, center.y, center.z);
 	Vector3F tangent = nor.perpendicular();
@@ -286,118 +295,84 @@ void BCIViz::drawCircleAround(const MPoint& center) const
 
 void BCIViz::findNeighbours()
 {
-	const int numTargets = fTargetPositions.length();
-	if(numTargets < 3)
-		return;
-	
-	MVector disp;
-	float min = 1000.f;
-	int a = 0;
-	for(int i = 0; i < numTargets; i++) {
-		disp = fTargetPositions[i] - fOnSpherePos;
-		if(min > disp.length()) {
-			fNeighbours[0] = fTargetPositions[i];
-			min = disp.length();
-			a = i;
-		}		
-	}
-	
-	int b = 0;
-	if(!secondNeightour(a, b)) {
-		MGlobal::displayWarning("BCI cannot find 2nd hit");
-		neighbourId[0] = neighbourId[1] = neighbourId[2] = a;
-		fAlpha = 1.f;
-		fBeta = fGamma = 0.f;
+	const int numTri = m_hull->getNumFace();
+	if(numTri < 4) {
+		MGlobal::displayInfo("barycentric coordinate cannot find three neighbours.");
 		return;
 	}
-
-	int c = 0;
-	if(thirdNeighbour(a, b, c)) {
-		neighbourId[0] = a;
-		neighbourId[1] = b;
-		neighbourId[2] = c;
-		//MGlobal::displayInfo(MString("nearest ") + a + " " + b + " " + c);
-	}
-	else {
-		MGlobal::displayWarning("BCI cannot find hit within any triangles");
-		neighbourId[0] = neighbourId[1] = neighbourId[2] = a;
-		fAlpha = 1.f;
-		fBeta = fGamma = 0.f;
-	}
+	
+	Vector3F d;
+	d.x = fDriverPos.x;
+	d.y = fDriverPos.y;
+	d.z = fDriverPos.z;
+	
+	d.normalize();
+	
+	m_hitTriangle = 0;
+	for(int i = 0; i < numTri; i++)
+	{
+		Facet f = m_hull->getFacet(i);
+		Vertex p0 = f.getVertex(0);
 		
-	fNeighbours[2] = fTargetPositions[c];
-}
+		const Vector3F nor = f.getNormal();
+		
+		float t = p0.dot(nor) / d.dot(nor); 
+		if(t < 0.f) continue;
+		
+		Vertex p1 = f.getVertex(1);
+		Vertex p2 = f.getVertex(2);
+		
+		m_hitTriangle = i;
+		m_hitP = d * t; 
 
-char BCIViz::secondNeightour(int a, int & b)
-{
-	char res = 0;
-	MVector edge0 = fNeighbours[0] - fOnSpherePos;
-	float min = 1000.f;
-	const int numTargets = fTargetPositions.length();
-	for(int i = 0; i < numTargets; i++) {
-		if(i==a)
-			continue;
-			
-		MVector edge1 = fTargetPositions[i] - fOnSpherePos;
-		float dist = edge1.length(); 
-		if(min > dist && edge0 * edge1 < 0.0) {
-			fNeighbours[1] = fTargetPositions[i];
-			min = dist;
-			b = i;
-			res = 1;
-		}		
-	}
-	return res;
-}
-
-char BCIViz::thirdNeighbour(int a, int b, int &c)
-{
-	const MVector edge0 = fNeighbours[1] - fNeighbours[0];
-	char res = 0;
-	const int numTargets = fTargetPositions.length();
-	TriangleRaster tri;
-	float alpha, beta, gamma;
-	
-	Vector3F p0(fNeighbours[1].x, fNeighbours[1].y, fNeighbours[1].z);
-	Vector3F p1(fNeighbours[0].x, fNeighbours[0].y, fNeighbours[0].z);
-	
-	double max = 0.0;
-	for(int i = 0; i < numTargets; i++) {
-		if(i != a && i != b) {
-			const MVector edge1 = fTargetPositions[i] - fNeighbours[0];
-			MVector N = edge0 ^ edge1;
-			N.normalize();
-			
-			if(N * MVector(fOnSpherePos) < 0.0)
-				N *= -1.0;
-				
-			const double d = MVector(fNeighbours[0]) * N * (-1.0);
-			double facing = MVector(fOnSpherePos) * N;
-			if(facing < 10e-6) 
-				continue;
-				
-			double t = -d / facing;
-			if(t < 0.0 || t > 1.01) 
-				continue;
-				
-			Vector3F q(fOnSpherePos.x * t, fOnSpherePos.y * t, fOnSpherePos.z * t);
-			Vector3F p2(fTargetPositions[i].x, fTargetPositions[i].y, fTargetPositions[i].z);
-			tri.create(p0, p1, p2);
-			
-			if(tri.isPointWithin(q, alpha, beta, gamma)) {
-				if(t > max) {
-					res = 1;
-					fHitPos = fOnSpherePos * t;
-					max = t;
-					c = i;
-					fAlpha = beta;
-					fBeta = alpha;
-					fGamma = gamma;
-				}
-			}
+		Vector3F e01 = p1 - p0;
+		Vector3F e02 = p2 - p0;
+		Vector3F tmp = e01.cross(e02);
+		if(tmp.dot(nor) < 0.f) {
+			Vertex sw = p1;
+			p1 = p2;
+			p2 = sw;
 		}
+		
+		e01 = p1 - p0;
+		Vector3F x0 = m_hitP - p0;
+		
+		Vector3F e12 = p2 - p1;
+		Vector3F x1 = m_hitP - p1;
+		
+		Vector3F e20 = p0 - p2;
+		Vector3F x2 = m_hitP - p2;
+		
+		neighbourId[0] = p0.getIndex();
+		neighbourId[1] = p1.getIndex();
+		neighbourId[2] = p2.getIndex();
+		
+		if(e01.cross(x0).dot(nor) < 0.f) continue;
+		if(e12.cross(x1).dot(nor) < 0.f) continue;
+		if(e20.cross(x2).dot(nor) < 0.f) continue;
+		
+		return;
 	}
+}
 
-	return res;
+void BCIViz::calculateWeight()
+{
+	TriangleRaster tri;
+	Facet f = m_hull->getFacet(m_hitTriangle);
+	Vertex p0; 
+	p0.x = fTargetPositions[neighbourId[0]].x;
+	p0.y = fTargetPositions[neighbourId[0]].y;
+	p0.z = fTargetPositions[neighbourId[0]].z;
+	Vertex p1;
+	p1.x = fTargetPositions[neighbourId[1]].x;
+	p1.y = fTargetPositions[neighbourId[1]].y;
+	p1.z = fTargetPositions[neighbourId[1]].z;
+	Vertex p2;
+	p2.x = fTargetPositions[neighbourId[2]].x;
+	p2.y = fTargetPositions[neighbourId[2]].y;
+	p2.z = fTargetPositions[neighbourId[2]].z;
+
+	tri.create(p0, p1, p2);
+	tri.isPointWithin(m_hitP, fAlpha, fBeta, fGamma); 
 }
 //:~

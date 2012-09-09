@@ -18,7 +18,7 @@ public:
 	void initHull();
 	void renderWorld(ShapeDrawer * drawer);
 
-	void beginHull();
+	void processHull();
 	char searchVisibleFaces(Vertex *v);
 	char searchHorizons();
 	char spawn(Vertex *v);
@@ -28,8 +28,6 @@ public:
 	void removeConflict(Facet *f);
 	
 protected:
-	//ShapeDrawer* fDrawer;
-	
 	std::vector<Facet *>visibleFaces;
 	Edge * m_horizon;
 	int m_currentVertexId;

@@ -6,7 +6,15 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include <QGLWidget>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <OpenGL/glext.h>
+#include <GLUT/glut.h>
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
 #include "shapeDrawer.h"
 
 void ShapeDrawer::setGrey(float g)

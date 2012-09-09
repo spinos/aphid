@@ -14,29 +14,28 @@
 HullContainer::HullContainer() {}
 HullContainer::~HullContainer() {}
 
-
 void HullContainer::initHull()
 {
 	int nv = 9999;
 	for(int i = 0; i < nv; i++) 
 	{
 		Vertex * v = new Vertex;
-		float r = ((float)(rand() % 24091)) / 24091.f * 8.f + 12.f;
+		float r = ((float)(rand() % 24091)) / 24091.f * 10.f + 12.f;
 		float phi = ((float)(rand() % 25391)) / 25391.f * 2.f * 3.14f;
 		float theta = ((float)(rand() % 24331)) / 24331.f * 3.14f;
 		v->x = sin(theta) * cos(phi) * r + 16.f;
 		v->y = sin(theta) * sin(phi) * r + 16.f;
 		v->z = cos(theta) * r + 16.f;
-		v->x = ((float)(rand() % 218091)) / 8092.f;
-		v->y = ((float)(rand() % 208391)) / 8392.f;
-		v->z = ((float)(rand() % 298331)) / 8332.f;
+		//v->x = ((float)(rand() % 218091)) / 8092.f;
+		//v->y = ((float)(rand() % 308391)) / 8392.f;
+		//v->z = ((float)(rand() % 298331)) / 8332.f;
 		addVertex(v);
 		v->setData((char*)new ConflictGraph(0));
 	}
-	beginHull();
+	processHull();
 }
 
-void HullContainer::beginHull()
+void HullContainer::processHull()
 {
 	Vertex *a = vertex(0);
 	Vertex *b = vertex(1);

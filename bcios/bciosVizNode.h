@@ -22,8 +22,9 @@
 #include <maya/MFnMesh.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
-#include "../core/Matrix44F.h"
-#include "../core/Vector3F.h"
+#include <Matrix44F.h>
+#include <Vector3F.h>
+#include <HullContainer.h>
 
 class BCIViz : public MPxLocatorNode
 {
@@ -51,18 +52,22 @@ public:
 	static	MTypeId		id;
 	
 private:
-	void findNeighbours();
-	char secondNeightour(int a, int & b);
-	char thirdNeighbour(int a, int b, int & c);
 	void drawSphere() const;
 	void drawDriver() const;
 	void drawTargets() const;
 	void drawNeighbours() const;
-	void drawCircleAround(const MPoint& center) const;
+	void drawCircleAround(const Vector3F& center) const;
+	char constructHull();
+	void findNeighbours();
+	void calculateWeight();
+	
+	HullContainer * m_hull;
 	int neighbourId[3];
 	float fAlpha, fBeta, fGamma;
 	MPoint fDriverPos, fOnSpherePos, fHitPos;
 	MPointArray fTargetPositions;
 	MPoint fNeighbours[3];
+	int m_hitTriangle;
+	Vector3F m_hitP;
 };
 #endif        //  #ifndef BCIOSVIZNODE_H
