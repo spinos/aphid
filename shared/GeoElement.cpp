@@ -17,6 +17,11 @@ GeoElement::GeoElement() : next(0)
 
 GeoElement::~GeoElement() {}
 
+void GeoElement::clear()
+{
+
+}
+
 void GeoElement::setVisibility(char val)
 {
 	visibility = val;

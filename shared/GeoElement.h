@@ -12,6 +12,8 @@ public:
 	GeoElement();
 	virtual ~GeoElement();
 	
+	virtual void clear();
+	
 	void setVisibility(char val);
 	char isVisible() const;
 	

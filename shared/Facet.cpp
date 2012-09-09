@@ -34,6 +34,13 @@ Facet::~Facet()
 	
 }
 
+void Facet::clear()
+{
+	delete m_edges[0];
+	delete m_edges[1];
+	delete m_edges[2];
+}
+
 void Facet::createEdges()
 {
 	m_edges[0] = new Edge(m_vertices[0], m_vertices[1], (char*)this);

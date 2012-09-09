@@ -6,6 +6,9 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
+#pragma once
+
+#include <Polytode.h>
 
 class ShapeDrawer {
 public:
@@ -22,5 +25,7 @@ public:
 	void beginLine();
 	void beginPoint();
 	void aVertex(float x, float y, float z);
-	
+	void drawVertex(const Polytode * poly);
+	void drawWiredFace(const Polytode * poly);
+	void drawNormal(const Polytode * poly);
 };

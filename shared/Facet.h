@@ -17,6 +17,7 @@ public:
 	Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d);
 	virtual ~Facet();
 	
+	virtual void clear();
 	char connectTo(Facet *another, Vertex *a, Vertex *b);
 	Edge * matchedEdge(Vertex * a, Vertex * b);
 	

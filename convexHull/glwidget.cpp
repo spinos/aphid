@@ -45,7 +45,7 @@
 #include <math.h>
 
 #include "glwidget.h"
-
+#include <shapeDrawer.h>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -117,8 +117,16 @@ void GLWidget::paintGL()
 	float m[16];
 	fCamera->getMatrix(m);
 	glMultMatrixf(m);
+	ShapeDrawer drawer;
+	drawer.box(32, 32, 32);
+	drawer.setGrey(.8f);
+	drawer.drawVertex(_dynamics);
+	drawer.setColor(0.f, .75f, 0.f);
 	
-	_dynamics->renderWorld();
+	drawer.drawWiredFace(_dynamics);
+	drawer.setColor(0.f, .75f, 1.f);
+	drawer.drawNormal(_dynamics);
+	_dynamics->renderWorld(&drawer);
 	glFlush();
 }
 //! [7]

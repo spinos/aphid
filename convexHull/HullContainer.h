@@ -8,29 +8,15 @@
  */
 
 #include "shapeDrawer.h"
-#include <Vertex.h>
-#include <Facet.h>
-#include <vector>
+#include <Polytode.h>
 
-class HullContainer {
+class HullContainer : public Polytode {
 public:
 	HullContainer();
 	virtual ~HullContainer();
-	
-	int getNumVertex() const;
-	int getNumFace() const;
-	
-	void addVertex(Vertex *p);
-	Vertex getVertex(int idx) const;
-	Vertex *vertex(int idx);
-	
-	void addFacet(Facet *f);
-	Facet getFacet(int idx) const;
-	void removeFaces();
-	
+
 	void initHull();
-	void killHull();
-	void renderWorld();
+	void renderWorld(ShapeDrawer * drawer);
 
 	void beginHull();
 	char searchVisibleFaces(Vertex *v);
@@ -42,9 +28,8 @@ public:
 	void removeConflict(Facet *f);
 	
 protected:
-	ShapeDrawer* fDrawer;
-	std::vector<Vertex *>m_vertices;
-	std::vector<Facet *>m_faces;
+	//ShapeDrawer* fDrawer;
+	
 	std::vector<Facet *>visibleFaces;
 	Edge * m_horizon;
 	int m_currentVertexId;

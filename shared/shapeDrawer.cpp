@@ -138,3 +138,53 @@ void ShapeDrawer::aVertex(float x, float y, float z)
 {
 	glVertex3f(x, y, z);
 }
+
+void ShapeDrawer::drawVertex(const Polytode * poly)
+{
+	const int numV = poly->getNumVertex();
+	beginPoint();
+	for(int i = 0; i < numV; i++) 
+	{
+		const Vertex p = poly->getVertex(i);
+		aVertex(p.x, p.y, p.z);
+	}
+	end();
+}
+
+void ShapeDrawer::drawWiredFace(const Polytode * poly)
+{
+	beginWireTriangle();
+	
+	const int numFace = poly->getNumFace();
+	
+	for(int i = 0; i < numFace; i++ )
+	{
+		const Facet f = poly->getFacet(i);
+
+		Vertex p = f.getVertex(0);
+		aVertex(p.x, p.y, p.z);
+		p = f.getVertex(1);
+		aVertex(p.x, p.y, p.z);
+		p = f.getVertex(2);
+		aVertex(p.x, p.y, p.z);
+	}
+	
+	end();
+}
+
+void ShapeDrawer::drawNormal(const Polytode * poly)
+{
+	const int numFace = poly->getNumFace();
+	beginLine();
+	for(int i = 0; i < numFace; i++ )
+	{
+		const Facet f = poly->getFacet(i);
+
+		const Vector3F c = f.getCentroid();
+		const Vector3F nor = f.getNormal();
+		aVertex(c.x, c.y, c.z);
+		aVertex(c.x + nor.x, c.y + nor.y, c.z + nor.z);
+	}
+	end();
+}
+

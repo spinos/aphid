@@ -14,80 +14,9 @@
 HullContainer::HullContainer() {}
 HullContainer::~HullContainer() {}
 
-int HullContainer::getNumVertex() const
-{
-	return m_vertices.size();
-}
-	
-int HullContainer::getNumFace() const
-{
-	return m_faces.size();
-}
-
-void HullContainer::addVertex(Vertex *p)
-{
-	p->setIndex(getNumVertex());
-	m_vertices.push_back(p);
-}
-
-void HullContainer::addFacet(Facet *f)
-{
-	f->setIndex(getNumFace());
-	m_faces.push_back(f);
-	printf("add face %d\n", f->getIndex());
-}
-
-void HullContainer::removeFaces()
-{
-	//printf("remove face\n");
-	//printf("b4\n");
-	std::vector<Facet *>::iterator it;
-	std::vector<Facet *>::iterator rest;
-	//for(it = m_faces.begin(); it < m_faces.end(); it++ )
-	//	printf("%d ", (*it)->getIndex());
-
-	int i = 0;
-	for(it = m_faces.begin(); it < m_faces.end(); it++)
-	{ 
-		if((*it)->getIndex() < 0)
-		{
-			for(rest = m_faces.begin() + i; rest < m_faces.end(); rest++)
-			{
-				(*rest)->setIndex((*rest)->getIndex() - 1);
-			}
-			m_faces.erase(m_faces.begin() + i);
-			it--;
-			i--;
-		}
-		i++;
-	}
-	
-	//printf("\naft\n");
-	//for(it = m_faces.begin(); it < m_faces.end(); it++ )
-	//	printf("%d ", (*it)->getIndex());
-
-	//printf("\n");
-	
-}
-
-Facet HullContainer::getFacet(int idx) const
-{
-	return *m_faces[idx];
-}
-
-Vertex HullContainer::getVertex(int idx) const
-{
-	return *m_vertices[idx];
-}
-
-Vertex *HullContainer::vertex(int idx)
-{
-	return m_vertices[idx];
-}
 
 void HullContainer::initHull()
 {
-	fDrawer = new ShapeDrawer();
 	int nv = 9999;
 	for(int i = 0; i < nv; i++) 
 	{
@@ -98,19 +27,13 @@ void HullContainer::initHull()
 		v->x = sin(theta) * cos(phi) * r + 16.f;
 		v->y = sin(theta) * sin(phi) * r + 16.f;
 		v->z = cos(theta) * r + 16.f;
-		//v->x = ((float)(rand() % 318091)) / 8092.f;
-		//v->y = ((float)(rand() % 308391)) / 8392.f;
-		//v->z = ((float)(rand() % 298331)) / 8332.f;
+		v->x = ((float)(rand() % 218091)) / 8092.f;
+		v->y = ((float)(rand() % 208391)) / 8392.f;
+		v->z = ((float)(rand() % 298331)) / 8332.f;
 		addVertex(v);
 		v->setData((char*)new ConflictGraph(0));
 	}
 	beginHull();
-}
-
-void HullContainer::killHull()
-{
-	m_vertices.clear();
-	m_faces.clear();
 }
 
 void HullContainer::beginHull()
@@ -156,8 +79,8 @@ void HullContainer::beginHull()
 	d->setVisibility(0);
 	
 	m_currentVertexId = 4;
-	
-	for(int i = 4; i < getNumVertex(); i++)
+	int i;
+	for(i = 4; i < getNumVertex(); i++)
 	{
 		Vertex *q = vertex(i);
 		if(searchVisibleFaces(q))
@@ -177,16 +100,15 @@ void HullContainer::beginHull()
 			}
 		}
 	}
+	
+	if(i == getNumVertex())
+		printf("well done!");
 }
 
 char HullContainer::searchVisibleFaces(Vertex *v)
 {
 	visibleFaces.clear();
 	((ConflictGraph *)v->getData())->getFaces(visibleFaces);
-	//std::vector<Facet *>::iterator it;
-	//for(it = m_faces.begin(); it < m_faces.end(); it++ ) {
-	//	if((*it)->isVertexAbove(*v)) visibleFaces.push_back(*it);
-	//}
 	if(visibleFaces.size() < 1) return 0;
 	printf("%d faces are visible\n", (int)visibleFaces.size());
 	return 1;
@@ -367,70 +289,31 @@ char HullContainer::finishStep(Vertex *v)
 	return 1;
 }
 
-void HullContainer::renderWorld()
+void HullContainer::renderWorld(ShapeDrawer * drawer)
 {
-	fDrawer->box(32, 32, 32);
-	fDrawer->setGrey(.8f);
-	fDrawer->beginPoint();
-	for(int i = 0; i < getNumVertex(); i++) 
-	{
-		const Vertex p = getVertex(i);
-		fDrawer->aVertex(p.x, p.y, p.z);
-	}
-	fDrawer->end();
-	
-	fDrawer->beginWireTriangle();
-	fDrawer->setColor(0.f, .75f, 0.f);
 	std::vector<Facet *>::iterator it;
-	for(it = m_faces.begin(); it < m_faces.end(); it++ )
-	{
-		const Facet *f = *it;
-
-		
-		Vertex p = f->getVertex(0);
-		fDrawer->aVertex(p.x, p.y, p.z);
-		p = f->getVertex(1);
-		fDrawer->aVertex(p.x, p.y, p.z);
-		p = f->getVertex(2);
-		fDrawer->aVertex(p.x, p.y, p.z);
-	}
 	
-	fDrawer->end();
+	drawer->setGrey(1.f);
 	
-	fDrawer->setGrey(1.f);
-	
-	fDrawer->beginSolidTriangle();
+	drawer->beginSolidTriangle();
 	for(it = visibleFaces.begin(); it < visibleFaces.end(); it++ )
 	{
 		const Facet *f = *it;
 		Vertex p = f->getVertex(0);
-		fDrawer->aVertex(p.x, p.y, p.z);
+		drawer->aVertex(p.x, p.y, p.z);
 		p = f->getVertex(1);
-		fDrawer->aVertex(p.x, p.y, p.z);
+		drawer->aVertex(p.x, p.y, p.z);
 		p = f->getVertex(2);
-		fDrawer->aVertex(p.x, p.y, p.z);
+		drawer->aVertex(p.x, p.y, p.z);
 	}
-	fDrawer->end();
+	drawer->end();
 	
-	fDrawer->beginLine();
-	fDrawer->setColor(0.f, .75f, 1.f);
-	for(it = m_faces.begin(); it < m_faces.end(); it++ )
-	{
-		const Facet *f = *it;
-		Vector3F c = f->getCentroid();
-		Vector3F nor = f->getNormal();
-		fDrawer->aVertex(c.x, c.y, c.z);
-		fDrawer->aVertex(c.x + nor.x, c.y + nor.y, c.z + nor.z);
-	}
-	
-	fDrawer->end();
-	
-	fDrawer->setColor(1.f, 0.f, 0.f);
+	drawer->setColor(1.f, 0.f, 0.f);
 	
 	const Vertex pv = getVertex(m_currentVertexId);
-	fDrawer->solidCube(pv.x, pv.y, pv.z, 0.5f);
+	drawer->solidCube(pv.x, pv.y, pv.z, 0.5f);
 	
-	fDrawer->beginLine();
+	drawer->beginLine();
 	
 	Edge *cur = m_horizon;
 	int i = 0;
@@ -438,13 +321,13 @@ void HullContainer::renderWorld()
 	{
 		const Vertex a = cur->getV0();
 		const Vertex b = cur->getV1();
-		fDrawer->aVertex(a.x, a.y, a.z);
-		fDrawer->aVertex(b.x, b.y, b.z);
+		drawer->aVertex(a.x, a.y, a.z);
+		drawer->aVertex(b.x, b.y, b.z);
 		cur = (Edge *)cur->getNext();
 		i++;
 	}
 	
-	fDrawer->end();
+	drawer->end();
 }
 
 void HullContainer::addConflict(Facet *f, Vertex *v)
