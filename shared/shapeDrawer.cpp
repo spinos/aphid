@@ -196,3 +196,51 @@ void ShapeDrawer::drawNormal(const Polytode * poly)
 	end();
 }
 
+void ShapeDrawer::drawSphere()
+{
+	const float angleDelta = 3.14159269f / 36.f;
+	float a0, a1, b0, b1;
+	glBegin(GL_LINES);
+	for(int i=0; i<72; i++) {
+		float angleMin = angleDelta * i;
+		float angleMax = angleMin + angleDelta;
+		
+		a0 = cos(angleMin);
+		b0 = sin(angleMin);
+		
+		a1 = cos(angleMax);
+		b1 = sin(angleMax);
+		
+		glVertex3f(a0, b0, 0.f);
+		glVertex3f(a1, b1, 0.f);
+		
+		glVertex3f(a0, 0.f, b0);
+		glVertex3f(a1, 0.f, b1);
+		
+		glVertex3f(0.f, a0, b0);
+		glVertex3f(0.f, a1, b1);
+	}
+	glEnd();
+}
+
+void ShapeDrawer::drawCircleAround(const Vector3F& center)
+{
+	Vector3F nor(center.x, center.y, center.z);
+	Vector3F tangent = nor.perpendicular();
+	
+	Vector3F v0 = tangent * 0.1f;
+	Vector3F p,;
+	const float delta = 3.14159269f / 9.f;
+	
+	glBegin(GL_LINES);
+	for(int i = 0; i < 18; i++) {
+		p = nor + v0;
+		glVertex3f(p.x, p.y, p.z);
+		
+		v0.rotateAroundAxis(nor, delta);
+		
+		p = nor + v0;
+		glVertex3f(p.x, p.y, p.z);
+	}
+	glEnd();
+}

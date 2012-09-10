@@ -52,22 +52,22 @@ public:
 	static	MTypeId		id;
 	
 private:
-	void drawSphere() const;
+	char checkHull() const;
+	char checkTarget() const;
 	void drawDriver() const;
 	void drawTargets() const;
 	void drawNeighbours() const;
-	void drawCircleAround(const Vector3F& center) const;
 	char constructHull();
 	void findNeighbours();
 	void calculateWeight();
 	
 	HullContainer * m_hull;
+	Vector3F m_hitP;
 	int neighbourId[3];
 	float fAlpha, fBeta, fGamma;
-	MPoint fDriverPos, fOnSpherePos, fHitPos;
+	MPoint fDriverPos;
 	MPointArray fTargetPositions;
-	MPoint fNeighbours[3];
 	int m_hitTriangle;
-	Vector3F m_hitP;
+	
 };
 #endif        //  #ifndef BCIOSVIZNODE_H
