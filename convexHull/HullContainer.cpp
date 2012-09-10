@@ -88,20 +88,25 @@ void HullContainer::processHull()
 			if(searchHorizons())
 			{
 				if(!spawn(q)) {
+#ifndef NDEBUG
 					printf("spawn failed at v %d", i);
+#endif
 					break;
 				}
 				if(!finishStep(q))
 				{
+#ifndef NDEBUG
 					printf("spawn failed at v %d", i);
+#endif
 					break;
 				}
 			}
 		}
 	}
-	
+#ifndef NDEBUG	
 	if(i == getNumVertex())
 		printf("well done!");
+#endif
 }
 
 char HullContainer::searchVisibleFaces(Vertex *v)
@@ -109,7 +114,9 @@ char HullContainer::searchVisibleFaces(Vertex *v)
 	visibleFaces.clear();
 	((ConflictGraph *)v->getData())->getFaces(visibleFaces);
 	if(visibleFaces.size() < 1) return 0;
+#ifndef NDEBUG
 	printf("%d faces are visible\n", (int)visibleFaces.size());
+#endif
 	return 1;
 }
 
@@ -121,30 +128,38 @@ char HullContainer::searchHorizons()
 	
 	for (it = visibleFaces.begin(); it < visibleFaces.end(); it++) 
 	{ 
+#ifndef NDEBUG
 		printf("mark faces %d\n", (*it)->getIndex());
+#endif
 		(*it)->setMarked(1);
 	}
 	
 	std::vector<Edge *>horizons;
 
 	for(it = visibleFaces.begin(); it < visibleFaces.end(); it++) 
-	{ 
+	{
+#ifndef NDEBUG
 		printf("get horizon from face %d\n", (*it)->getIndex());
+#endif
 		if(!(*it)->getEdgeOnHorizon(horizons))
 		{
+#ifndef NDEBUG
 			printf("face not connected\n");
+#endif
 			return 0;
 		}
 	}
 	
 	if(horizons.size() < 3)
 	{
+#ifndef NDEBUG
 		printf("horizon less than 3\n");
+#endif
 		return 0;
 	}
-	
+#ifndef NDEBUG	
 	printf("%d horizon edges\n", (int)horizons.size());
-	
+#endif	
 	Edge *cur = horizons.at(0);
 	for (int j=1; j<(int)horizons.size(); j++) 
 	{
@@ -173,7 +188,9 @@ char HullContainer::searchHorizons()
 		if( b->getIndex() == m_horizon->v0()->getIndex()) {
 			cur->disconnect();
 			loop = 1;
+#ifndef NDEBUG
 			printf("found loop\n");
+#endif
 			break;
 		}
 		cur = (Edge *)cur->getNext();
@@ -186,15 +203,19 @@ char HullContainer::searchHorizons()
 	
 	if(!loop) 
 	{
+#ifndef NDEBUG
 		printf("no loop\n");
+#endif
 		return 0;
 	}
-	
+#ifndef NDEBUG	
 	printf("num horizon %d\n", m_numHorizon);
-
+#endif
 	if(m_numHorizon < 3 || m_numHorizon != numE)
 	{
+#ifndef NDEBUG
 		printf("unexpected horizon loop\n");
+#endif
 		return 0;
 	}
 	
@@ -228,13 +249,17 @@ char HullContainer::spawn(Vertex *v)
 		Facet *wall = (Facet *)(e->getFace());
 		if(wall->getIndex() < 0 || wall->isMarked())
 		{
+#ifndef NDEBUG
 			printf("face %d is not wall\n", wall->getIndex());
+#endif
 			return 0;
 		}
 		Facet *yard = (Facet *)(e->getTwin()->getFace());
 		if(yard->getIndex() < 0)
 		{
+#ifndef NDEBUG
 			printf("face %d is not yard\n", yard->getIndex());
+#endif
 			return 0;
 		}
 		
@@ -271,7 +296,10 @@ char HullContainer::finishStep(Vertex *v)
 	{
 		Facet *f = visibleFaces[i];
 		removeConflict(f);
+		
+#ifndef NDEBUG
 		printf(" rm face %d\n", f->getIndex());
+#endif
 
 		f->setIndex(-1);
 	}
@@ -281,7 +309,9 @@ char HullContainer::finishStep(Vertex *v)
 	for(it = m_faces.begin(); it < m_faces.end(); it++ )
 	{
 		if(!(*it)->isClosed()) {
+#ifndef NDEBUG
 			printf("face %d is not closed\n", (*it)->getIndex());
+#endif
 			return 0;
 		}
 	}

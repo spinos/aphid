@@ -96,22 +96,21 @@ MStatus BCIViz::compute( const MPlug& plug, MDataBlock& block )
         MArrayDataHandle outputHandle = block.outputArrayValue( outValue );
 		
 		int numWeight = fTargetPositions.length();
-		
-		MDoubleArray weights;
-		weights.setLength(numWeight);
+
+		m_resultWeights.setLength(numWeight);
 		
 		for(int i=0; i < numWeight; i++) 
-			weights[i] = 0.0;
+			m_resultWeights[i] = 0.0;
 			
-		weights[neighbourId[0]] = fAlpha;
-		weights[neighbourId[1]] = fBeta;
-		weights[neighbourId[2]] = fGamma;
+		m_resultWeights[neighbourId[0]] = fAlpha;
+		m_resultWeights[neighbourId[1]] = fBeta;
+		m_resultWeights[neighbourId[2]] = fGamma;
 		
 		MArrayDataBuilder builder(outValue, numWeight, &status);
 		
 		for(int i=0; i < numWeight; i++) {
 			MDataHandle outWeightHandle = builder.addElement(i);
-			outWeightHandle.set( weights[i] );
+			outWeightHandle.set( m_resultWeights[i] );
 			//MGlobal::displayInfo(MString("wei ") + i + " " + weights[i]);
 		}
 		
@@ -154,6 +153,7 @@ void BCIViz::draw( M3dView & view, const MDagPath & path,
 	drawDriver();
 	drawTargets();
 	drawNeighbours();
+	drawWeights();
 	glEnable(GL_DEPTH_TEST);
 	glPopAttrib();
 	view.endGL();
@@ -255,7 +255,6 @@ void BCIViz::drawTargets() const
 	
 	ShapeDrawer drawer;
 	drawer.drawWiredFace(m_hull);
-	
 }
 
 void BCIViz::drawNeighbours() const
@@ -271,13 +270,29 @@ void BCIViz::drawNeighbours() const
 	drawCircleAround(m_hitP);
 }
 
+void BCIViz::drawWeights() const
+{
+    const int numWeight = fTargetPositions.length();
+    
+    if(numWeight < 4) return;
+	
+    glBegin(GL_LINES);
+    for(int i=0; i < numWeight; i++) 
+    {
+        glVertex3f(2.f + i, 0.f, 0.f);
+        glVertex3f(2.f + i, m_resultWeights[i] + 0.1f, 0.f);
+	}
+	glEnd();	
+	
+}
+
 void BCIViz::drawCircleAround(const Vector3F& center) const
 {
 	Vector3F nor(center.x, center.y, center.z);
 	Vector3F tangent = nor.perpendicular();
 	
 	Vector3F v0 = tangent * 0.1f;
-	Vector3F p,;
+	Vector3F p;
 	const float delta = 3.14159269f / 9.f;
 	
 	glBegin(GL_LINES);

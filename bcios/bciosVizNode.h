@@ -56,6 +56,7 @@ private:
 	void drawDriver() const;
 	void drawTargets() const;
 	void drawNeighbours() const;
+	void drawWeights() const;
 	void drawCircleAround(const Vector3F& center) const;
 	char constructHull();
 	void findNeighbours();
@@ -66,6 +67,7 @@ private:
 	float fAlpha, fBeta, fGamma;
 	MPoint fDriverPos, fOnSpherePos, fHitPos;
 	MPointArray fTargetPositions;
+	MDoubleArray m_resultWeights;
 	MPoint fNeighbours[3];
 	int m_hitTriangle;
 	Vector3F m_hitP;

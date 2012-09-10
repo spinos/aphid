@@ -38,7 +38,9 @@ void Polytode::addFacet(Facet *f)
 {
 	f->setIndex(getNumFace());
 	m_faces.push_back(f);
+#ifndef NDEBUG
 	printf("add face %d\n", f->getIndex());
+#endif
 }
 
 void Polytode::removeFaces()

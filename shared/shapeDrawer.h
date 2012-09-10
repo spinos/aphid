@@ -12,7 +12,7 @@
 
 class ShapeDrawer {
 public:
-	ShapeDrawer () {}
+	ShapeDrawer () : m_wired(0) {}
 	virtual ~ShapeDrawer () {}
 	
 	void box(float width, float height, float depth);
@@ -28,4 +28,7 @@ public:
 	void drawVertex(const Polytode * poly);
 	void drawWiredFace(const Polytode * poly);
 	void drawNormal(const Polytode * poly);
+	
+private:
+    char m_wired;
 };
