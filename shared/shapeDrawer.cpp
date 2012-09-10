@@ -6,6 +6,10 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -117,17 +121,18 @@ void ShapeDrawer::solidCube(float x, float y, float z, float size)
 
 void ShapeDrawer::end()
 {
+    if(m_wired) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnd();
 }
 
 void ShapeDrawer::beginSolidTriangle()
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBegin(GL_TRIANGLES);
 }
 
 void ShapeDrawer::beginWireTriangle()
 {
+    m_wired = 1;
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_TRIANGLES);
 }
@@ -161,7 +166,7 @@ void ShapeDrawer::drawVertex(const Polytode * poly)
 
 void ShapeDrawer::drawWiredFace(const Polytode * poly)
 {
-	beginWireTriangle();
+	beginLine();
 	
 	const int numFace = poly->getNumFace();
 	
@@ -169,12 +174,18 @@ void ShapeDrawer::drawWiredFace(const Polytode * poly)
 	{
 		const Facet f = poly->getFacet(i);
 
-		Vertex p = f.getVertex(0);
-		aVertex(p.x, p.y, p.z);
-		p = f.getVertex(1);
-		aVertex(p.x, p.y, p.z);
-		p = f.getVertex(2);
-		aVertex(p.x, p.y, p.z);
+		Vertex p0 = f.getVertex(0);
+		Vertex p1 = f.getVertex(1);
+		Vertex p2 = f.getVertex(2);
+		
+		aVertex(p0.x, p0.y, p0.z);
+		aVertex(p1.x, p1.y, p1.z);
+		
+		aVertex(p1.x, p1.y, p1.z);
+		aVertex(p2.x, p2.y, p2.z);
+		
+		aVertex(p2.x, p2.y, p2.z);
+		aVertex(p0.x, p0.y, p0.z);
 	}
 	
 	end();

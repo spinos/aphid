@@ -57,6 +57,8 @@ private:
 	void drawDriver() const;
 	void drawTargets() const;
 	void drawNeighbours() const;
+	void drawWeights() const;
+	
 	char constructHull();
 	void findNeighbours();
 	void calculateWeight();
@@ -67,7 +69,7 @@ private:
 	float fAlpha, fBeta, fGamma;
 	MPoint fDriverPos;
 	MPointArray fTargetPositions;
+	MDoubleArray m_resultWeights;
 	int m_hitTriangle;
-	
 };
 #endif        //  #ifndef BCIOSVIZNODE_H
