@@ -20,6 +20,7 @@
 #include <GL/glu.h>
 #endif
 #include "shapeDrawer.h"
+#include <cmath>
 
 void ShapeDrawer::setGrey(float g)
 {
@@ -240,7 +241,7 @@ void ShapeDrawer::drawCircleAround(const Vector3F& center)
 	Vector3F tangent = nor.perpendicular();
 	
 	Vector3F v0 = tangent * 0.1f;
-	Vector3F p,;
+	Vector3F p;
 	const float delta = 3.14159269f / 9.f;
 	
 	glBegin(GL_LINES);
