@@ -26,16 +26,34 @@ MObject BCIViz::outValue;
 MObject BCIViz::atargets;
 
 BCIViz::BCIViz() {
-m_hitTriangle = 0;
 fDriverPos.x = 1.0;
 fDriverPos.y = fDriverPos.z = 0.0;
 	m_hull = new HullContainer;
-	neighbourId[0] = 0;
-	neighbourId[1] = 1;
-	neighbourId[2] = 2;
 }
 
 BCIViz::~BCIViz() {}
+
+char BCIViz::checkHull() const
+{
+	return (m_hull->getNumFace() > 3 && m_hull->getNumFace() > m_hitTriangle);
+}
+
+char BCIViz::checkTarget() const
+{
+	return (fTargetPositions.length() > 3 && fTargetPositions.length() > neighbourId[0] && fTargetPositions.length() > neighbourId[1] && fTargetPositions.length() > neighbourId[2]);
+}
+
+char BCIViz::checkFirstFour(const MPointArray & p) const
+{
+	const MVector e01 = p[1] - p[0];
+	const MVector e02 = p[2] - p[0];
+	MVector nor = e01^e02;
+	nor.normalize();
+	const float d = -(MVector(p[0])*nor); // P.N + d = 0 , P = P0 + Vt, (P0 + Vt).N + d = 0, t = -(P0.N + d)/(V.N)
+	const float t = MVector(p[3])*nor + d; // where V = -N
+	if(t > -10e-5 && t < 10e-5) return 0;
+	return 1;
+}
 
 MStatus BCIViz::compute( const MPlug& plug, MDataBlock& block )
 {
@@ -57,15 +75,12 @@ MStatus BCIViz::compute( const MPlug& plug, MDataBlock& block )
 			fDriverPos *= worldInverseSpace;
 		}
 		
-		MVector onSphere = fDriverPos;
-		onSphere.normalize();
-		
-		fOnSpherePos = onSphere;
-		
 		fTargetPositions.clear();
 		
 		MArrayDataHandle htarget = block.inputArrayValue( atargets );
 		unsigned numTarget = htarget.elementCount();
+		
+		fTargetPositions.setLength(numTarget);
 		
 		for(unsigned i = 0; i<numTarget; i++) {
 			MDataHandle tgtdata = htarget.inputValue(&status);
@@ -76,19 +91,34 @@ MStatus BCIViz::compute( const MPlug& plug, MDataBlock& block )
 				MVector disp = tgtPos;
 				disp.normalize();
 				tgtPos = disp;
-				fTargetPositions.append(tgtPos);
+				fTargetPositions[i] = tgtPos;
 			}
 			htarget.next();
 		}
 		
-		if(numTarget < 4)
+		m_hitTriangle = 0;
+		neighbourId[0] = 0;
+		neighbourId[1] = 1;
+		neighbourId[2] = 2;
+		
+		if(!checkTarget())
 		{
 			MGlobal::displayWarning("convex hull must have no less than 4 targes.");
 			return MS::kSuccess;
 		}
 		
-		constructHull();
+		if(!checkFirstFour(fTargetPositions))
+		{
+			MGlobal::displayWarning("first 4 targes cannot sit on the same plane.");
+			return MS::kSuccess;
+		}
 		
+		if(!constructHull())
+		{
+			MGlobal::displayWarning("convex hull failed on construction.");
+			return MS::kSuccess;
+		}
+
 		findNeighbours();
 		
 		calculateWeight();
@@ -138,7 +168,7 @@ char BCIViz::constructHull()
 		v->setData((char*)new ConflictGraph(0));
 	}
 	m_hull->processHull();
-	return 1;
+	return m_hull->getNumFace() >= 4;
 }
 
 void BCIViz::draw( M3dView & view, const MDagPath & path, 
@@ -210,35 +240,10 @@ MStatus BCIViz::initialize()
 	return MS::kSuccess;
 }
 
-void BCIViz::drawSphere() const
-{
-	const float angleDelta = 3.14159269f / 36.f;
-	float a0, a1, b0, b1;
-	glBegin(GL_LINES);
-	for(int i=0; i<72; i++) {
-		float angleMin = angleDelta * i;
-		float angleMax = angleMin + angleDelta;
-		
-		a0 = cos(angleMin);
-		b0 = sin(angleMin);
-		
-		a1 = cos(angleMax);
-		b1 = sin(angleMax);
-		
-		glVertex3f(a0, b0, 0.f);
-		glVertex3f(a1, b1, 0.f);
-		
-		glVertex3f(a0, 0.f, b0);
-		glVertex3f(a1, 0.f, b1);
-		
-		glVertex3f(0.f, a0, b0);
-		glVertex3f(0.f, a1, b1);
-	}
-	glEnd();
-}
-
 void BCIViz::drawDriver() const
 {
+	if(!checkTarget()) return;
+	
 	const MPoint proof = fTargetPositions[neighbourId[0]] * fAlpha + fTargetPositions[neighbourId[1]] * fBeta + fTargetPositions[neighbourId[2]] * fGamma;
 	glBegin(GL_LINES);
 	glVertex3f(proof.x, proof.y, proof.z);
@@ -248,26 +253,30 @@ void BCIViz::drawDriver() const
 
 void BCIViz::drawTargets() const
 {
-	if(m_hull->getNumFace() < 4) {
-		drawSphere();
+	ShapeDrawer drawer;
+	
+	if(!checkHull()) {
+		drawer.drawSphere();
 		return;
 	}
 	
-	ShapeDrawer drawer;
 	drawer.drawWiredFace(m_hull);
 }
 
 void BCIViz::drawNeighbours() const
 {
+	if(!checkHull()) return;
+	
 	Facet f = m_hull->getFacet(m_hitTriangle);
 	const Vertex p0 = f.getVertex(0);
 	const Vertex p1 = f.getVertex(1);
 	const Vertex p2 = f.getVertex(2);
 	
-	drawCircleAround(p0);
-	drawCircleAround(p1);
-	drawCircleAround(p2);
-	drawCircleAround(m_hitP);
+	ShapeDrawer drawer;
+	drawer.drawCircleAround(p0);
+	drawer.drawCircleAround(p1);
+	drawer.drawCircleAround(p2);
+	drawer.drawCircleAround(m_hitP);
 }
 
 void BCIViz::drawWeights() const
@@ -286,35 +295,10 @@ void BCIViz::drawWeights() const
 	
 }
 
-void BCIViz::drawCircleAround(const Vector3F& center) const
-{
-	Vector3F nor(center.x, center.y, center.z);
-	Vector3F tangent = nor.perpendicular();
-	
-	Vector3F v0 = tangent * 0.1f;
-	Vector3F p;
-	const float delta = 3.14159269f / 9.f;
-	
-	glBegin(GL_LINES);
-	for(int i = 0; i < 18; i++) {
-		p = nor + v0;
-		glVertex3f(p.x, p.y, p.z);
-		
-		v0.rotateAroundAxis(nor, delta);
-		
-		p = nor + v0;
-		glVertex3f(p.x, p.y, p.z);
-	}
-	glEnd();
-}
-
 void BCIViz::findNeighbours()
 {
+	if(!checkHull()) return;
 	const int numTri = m_hull->getNumFace();
-	if(numTri < 4) {
-		MGlobal::displayInfo("barycentric coordinate cannot find three neighbours.");
-		return;
-	}
 	
 	Vector3F d;
 	d.x = fDriverPos.x;
@@ -331,7 +315,11 @@ void BCIViz::findNeighbours()
 		
 		const Vector3F nor = f.getNormal();
 		
-		float t = p0.dot(nor) / d.dot(nor); 
+		float ddotn = d.dot(nor);
+		
+		if(ddotn < 10e-5 && ddotn > -10e-5) continue;
+		
+		float t = p0.dot(nor) / ddotn; 
 		if(t < 0.f) continue;
 		
 		Vertex p1 = f.getVertex(1);
@@ -372,6 +360,8 @@ void BCIViz::findNeighbours()
 
 void BCIViz::calculateWeight()
 {
+	if(!checkTarget() || !checkHull()) return;
+	
 	TriangleRaster tri;
 	Facet f = m_hull->getFacet(m_hitTriangle);
 	Vertex p0; 

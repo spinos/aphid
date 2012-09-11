@@ -19,7 +19,7 @@ MStatus initializePlugin( MObject obj )
 { 
     
 	MStatus   status;
-	MFnPlugin plugin( obj, "OF3D | Zhang Jian", "0.0.2 - Monday September 10 2011", "Any");
+	MFnPlugin plugin( obj, "OF3D | Zhang Jian", "0.0.3 - Tuesday September 11 2011", "Any");
 											
 	status = plugin.registerNode( "barycentricInterpolationViz", BCIViz::id, 
 						 &BCIViz::creator, &BCIViz::initialize,

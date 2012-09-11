@@ -28,6 +28,8 @@ public:
 	void drawVertex(const Polytode * poly);
 	void drawWiredFace(const Polytode * poly);
 	void drawNormal(const Polytode * poly);
+	void drawSphere();
+	void drawCircleAround(const Vector3F& center);
 	
 private:
     char m_wired;
