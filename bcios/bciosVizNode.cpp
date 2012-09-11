@@ -43,6 +43,18 @@ char BCIViz::checkTarget() const
 	return (fTargetPositions.length() > 3 && fTargetPositions.length() > neighbourId[0] && fTargetPositions.length() > neighbourId[1] && fTargetPositions.length() > neighbourId[2]);
 }
 
+char BCIViz::checkFirstFour(const MPointArray & p) const
+{
+	const MVector e01 = p[1] - p[0];
+	const MVector e02 = p[2] - p[0];
+	MVector nor = e01^e02;
+	nor.normalize();
+	const float d = -(MVector(p[0])*nor); // P.N + d = 0 , P = P0 + Vt, (P0 + Vt).N + d = 0, t = -(P0.N + d)/(V.N)
+	const float t = MVector(p[3])*nor + d; // where V = -N
+	if(t > -10e-5 && t < 10e-5) return 0;
+	return 1;
+}
+
 MStatus BCIViz::compute( const MPlug& plug, MDataBlock& block )
 {
 	if( plug == outValue ) {
@@ -92,6 +104,12 @@ MStatus BCIViz::compute( const MPlug& plug, MDataBlock& block )
 		if(!checkTarget())
 		{
 			MGlobal::displayWarning("convex hull must have no less than 4 targes.");
+			return MS::kSuccess;
+		}
+		
+		if(!checkFirstFour(fTargetPositions))
+		{
+			MGlobal::displayWarning("first 4 targes cannot sit on the same plane.");
 			return MS::kSuccess;
 		}
 		
@@ -297,7 +315,11 @@ void BCIViz::findNeighbours()
 		
 		const Vector3F nor = f.getNormal();
 		
-		float t = p0.dot(nor) / d.dot(nor); 
+		float ddotn = d.dot(nor);
+		
+		if(ddotn < 10e-5 && ddotn > -10e-5) continue;
+		
+		float t = p0.dot(nor) / ddotn; 
 		if(t < 0.f) continue;
 		
 		Vertex p1 = f.getVertex(1);

@@ -54,6 +54,7 @@ public:
 private:
 	char checkHull() const;
 	char checkTarget() const;
+	char checkFirstFour(const MPointArray & p) const;
 	void drawDriver() const;
 	void drawTargets() const;
 	void drawNeighbours() const;
