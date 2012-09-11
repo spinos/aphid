@@ -53,7 +53,7 @@ void Polytode::removeFaces()
 	//	printf("%d ", (*it)->getIndex());
 
 	int i = 0;
-	for(it = m_faces.begin(); it < m_faces.end(); it++)
+	for(it = m_faces.begin(); it < m_faces.end();)
 	{ 
 		if((*it)->getIndex() < 0)
 		{
@@ -64,10 +64,11 @@ void Polytode::removeFaces()
 			
 			(*it)->clear();
 			m_faces.erase(m_faces.begin() + i);
-			it--;
-			i--;
 		}
-		i++;
+		else {
+		    it++;
+		    i++;
+		}
 	}
 	
 	//printf("\naft\n");
