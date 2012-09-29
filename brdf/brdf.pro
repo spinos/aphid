@@ -9,9 +9,11 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/Facet.h \
                 ../shared/GeoElement.h \
                 ../shared/Edge.h \
+                ../shared/BaseMesh.h \
+                ../shared/CubeMesh.h \
                 glwidget.h \
-                window.h \
-                FluidContainer.h
+                window.h
+
 SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/Matrix44F.cpp \
                 ../shared/BaseCamera.cpp \
@@ -21,10 +23,12 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/Facet.cpp \
                 ../shared/GeoElement.cpp \
                 ../shared/Edge.cpp \
+                ../shared/BaseMesh.cpp \
+                ../shared/CubeMesh.cpp \
                 glwidget.cpp \
                 main.cpp \
-                window.cpp \
-                FluidContainer.cpp
+                window.cpp
+
 QT           += opengl
 win32 {
 CONFIG += console

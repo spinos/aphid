@@ -256,3 +256,22 @@ void ShapeDrawer::drawCircleAround(const Vector3F& center)
 	}
 	glEnd();
 }
+
+void ShapeDrawer::drawMesh(const BaseMesh * mesh)
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
+
+// draw a cube
+	glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
+
+// deactivate vertex arrays after drawing
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void ShapeDrawer::setWired(char var)
+{
+	if(var) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+

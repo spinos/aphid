@@ -20,6 +20,14 @@ BaseCamera::BaseCamera()
 
 BaseCamera::~BaseCamera() {}
 
+void BaseCamera::lookFromTo(Vector3F & from, Vector3F & to)
+{
+	fSpace.setIdentity();
+	fSpace.setTranslation(from.x, from.y, from.z);
+	fCenterOfInterest = to;
+	updateInverseSpace();
+}
+
 void BaseCamera::setPortWidth(unsigned w)
 {
 	fPortWidth = w;

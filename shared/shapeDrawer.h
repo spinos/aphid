@@ -9,6 +9,7 @@
 #pragma once
 
 #include <Polytode.h>
+#include <BaseMesh.h>
 
 class ShapeDrawer {
 public:
@@ -30,6 +31,8 @@ public:
 	void drawNormal(const Polytode * poly);
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
+	void drawMesh(const BaseMesh * mesh);
+	void setWired(char var);
 	
 private:
     char m_wired;

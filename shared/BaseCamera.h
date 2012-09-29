@@ -13,6 +13,7 @@ public:
 	BaseCamera();
 	virtual ~BaseCamera();
 	
+	void lookFromTo(Vector3F & from, Vector3F & to);
 	void setPortWidth(unsigned w);
 	void setPortHeight(unsigned h);
 	void setHorizontalAperture(float w);
