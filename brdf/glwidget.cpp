@@ -62,10 +62,10 @@ GLWidget::GLWidget(QWidget *parent)
 	timer->start(40);
 	
 	fCamera = new BaseCamera();
-	Vector3F eye(0.5f, 0.5f, 10.f);
-	Vector3F coi(0.5f, 0.5f, 0.5f);
+	Vector3F eye(0.f, 0.f, 10.f);
+	Vector3F coi(0.f, 0.f, 0.5f);
 	fCamera->lookFromTo(eye, coi);
-	_aCube = new CubeMesh;
+	_aHemisphere = new HemisphereMesh(30, 60);
 	_drawer = new ShapeDrawer;
 }
 //! [0]
@@ -120,7 +120,7 @@ void GLWidget::paintGL()
 	glMultMatrixf(m);
 	
 	_drawer->setWired(1);
-	_drawer->drawMesh(_aCube);
+	_drawer->drawMesh(_aHemisphere);
 	_drawer->setWired(0);
 	
 	glFlush();

@@ -10,7 +10,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/GeoElement.h \
                 ../shared/Edge.h \
                 ../shared/BaseMesh.h \
-                ../shared/CubeMesh.h \
+                ../shared/HemisphereMesh.h \
                 glwidget.h \
                 window.h
 
@@ -24,7 +24,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/GeoElement.cpp \
                 ../shared/Edge.cpp \
                 ../shared/BaseMesh.cpp \
-                ../shared/CubeMesh.cpp \
+                ../shared/HemisphereMesh.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp

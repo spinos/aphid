@@ -44,7 +44,7 @@
 
 #include <QGLWidget>
 #include <BaseCamera.h>
-#include <CubeMesh.h>
+#include <HemisphereMesh.h>
 #include <shapeDrawer.h>
 
 class QtLogo;
@@ -85,7 +85,7 @@ private:
     QColor qtPurple;
 	
 	BaseCamera* fCamera;
-	CubeMesh * _aCube;
+	HemisphereMesh * _aHemisphere;
 	ShapeDrawer * _drawer;
 private slots:
     void simulate();
