@@ -65,8 +65,9 @@ GLWidget::GLWidget(QWidget *parent)
 	Vector3F eye(0.f, 0.f, 10.f);
 	Vector3F coi(0.f, 0.f, 0.5f);
 	fCamera->lookFromTo(eye, coi);
-	_aHemisphere = new HemisphereMesh(30, 60);
-	_vertexBuffer = new BaseBuffer;
+	_aHemisphere = new HemisphereMesh(64, 128);
+	_vertexBuffer = new CUDABuffer;
+	_program = new HemisphereProgram;
 	_drawer = new ShapeDrawer;
 }
 //! [0]
@@ -106,6 +107,8 @@ void GLWidget::initializeGL()
     //static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
     //glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 	
+    CUDABuffer::setDevice();
+    
 	_vertexBuffer->create((float*)_aHemisphere->vertices(), _aHemisphere->getNumVertices() * 12);
 }
 //! [6]
@@ -113,6 +116,7 @@ void GLWidget::initializeGL()
 //! [7]
 void GLWidget::paintGL()
 {
+    _program->run(_vertexBuffer, _aHemisphere);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 	

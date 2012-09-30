@@ -50,7 +50,7 @@ Window::Window()
     glWidget = new GLWidget;
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("BRDF Visualization"));
+    setWindowTitle(tr("CUDA BRDF Visualization"));
 }
 //! [1]
 

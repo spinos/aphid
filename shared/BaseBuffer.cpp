@@ -6,28 +6,25 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#ifdef WIN32
-#include <windows.h>
-#endif
-
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <OpenGL/glext.h>
-#include <GLUT/glut.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
+#include <gl_heads.h>
 #include "BaseBuffer.h"
 
 BaseBuffer::BaseBuffer() : _buffereName(0) {}
 BaseBuffer::~BaseBuffer() 
 {
-	destroy();
 }
 
 void BaseBuffer::create(float * data, unsigned size)
+{
+	createVBO(data, size);
+}
+
+void BaseBuffer::destroy()
+{
+	destroyVBO();
+}
+
+void BaseBuffer::createVBO(float * data, unsigned size)
 {
 	if(!data) return;
 	
@@ -37,10 +34,10 @@ void BaseBuffer::create(float * data, unsigned size)
 	
 	glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
 	
-	glBindBuffer(GL_ARRAY_BUFFER, 0);	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void BaseBuffer::destroy()
+void BaseBuffer::destroyVBO()
 {
 	if(_buffereName == 0) return;
 	

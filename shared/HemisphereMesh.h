@@ -14,4 +14,9 @@ class HemisphereMesh : public BaseMesh {
 public:
 	HemisphereMesh(unsigned grid_theta, unsigned grid_phi);
 	virtual ~HemisphereMesh();
+	
+	unsigned getGridTheta() const;
+	unsigned getGridPhi() const;
+private:
+	unsigned _gridTheta, _gridPhi;
 };

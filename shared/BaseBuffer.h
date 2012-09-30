@@ -14,8 +14,11 @@ public:
 	BaseBuffer();
 	virtual ~BaseBuffer();
 	
-	void create(float * data, unsigned size);
-	void destroy();
+	virtual void create(float * data, unsigned size);
+	virtual void destroy();
+	
+	void createVBO(float * data, unsigned size);
+	void destroyVBO();
 	
 	unsigned getBufferName() const;
 	
