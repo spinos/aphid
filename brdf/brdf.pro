@@ -11,6 +11,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/Edge.h \
                 ../shared/BaseMesh.h \
                 ../shared/HemisphereMesh.h \
+                ../shared/BaseBuffer.h \
                 glwidget.h \
                 window.h
 
@@ -25,6 +26,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/Edge.cpp \
                 ../shared/BaseMesh.cpp \
                 ../shared/HemisphereMesh.cpp \
+                ../shared/BaseBuffer.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp

@@ -44,6 +44,7 @@
 
 #include <QGLWidget>
 #include <BaseCamera.h>
+#include <BaseBuffer.h>
 #include <HemisphereMesh.h>
 #include <shapeDrawer.h>
 
@@ -87,6 +88,7 @@ private:
 	BaseCamera* fCamera;
 	HemisphereMesh * _aHemisphere;
 	ShapeDrawer * _drawer;
+	BaseBuffer * _vertexBuffer;
 private slots:
     void simulate();
 

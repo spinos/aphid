@@ -269,12 +269,12 @@ void ShapeDrawer::drawMesh(const BaseMesh * mesh)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void ShapeDrawer::drawBuffered(BaseMesh * mesh)
+void ShapeDrawer::drawMesh(const BaseMesh * mesh, const BaseBuffer * buffer)
 {
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
     
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->getBufferedVertices());
+	glBindBuffer(GL_ARRAY_BUFFER, buffer->getBufferName());
     glVertexPointer(3, GL_FLOAT, 0, 0);
 
     glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());

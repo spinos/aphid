@@ -10,6 +10,7 @@
 
 #include <Polytode.h>
 #include <BaseMesh.h>
+#include <BaseBuffer.h>
 
 class ShapeDrawer {
 public:
@@ -32,7 +33,7 @@ public:
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh);
-	void drawBuffered(BaseMesh * mesh);
+	void drawMesh(const BaseMesh * mesh, const BaseBuffer * buffer);
 	void setWired(char var);
 	
 private:

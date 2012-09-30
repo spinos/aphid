@@ -18,7 +18,7 @@ public:
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
 	
-	void createVBOs();
+	
 	
 	Vector3F * vertices();
 	unsigned * indices();
@@ -33,5 +33,5 @@ public:
 	unsigned * _indices;
 	unsigned _numVertices;
 	unsigned _numFaceVertices;
-	unsigned _bufferedVertices;
+	
 };
