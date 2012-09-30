@@ -18,14 +18,20 @@ public:
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
 	
+	void createVBOs();
+	
 	Vector3F * vertices();
 	unsigned * indices();
 	
+	unsigned getNumVertices() const;
 	unsigned getNumFaceVertices() const;
 	Vector3F * getVertices() const;
 	unsigned * getIndices() const;
+	unsigned getBufferedVertices() const;
 	
 	Vector3F * _vertices;
 	unsigned * _indices;
+	unsigned _numVertices;
 	unsigned _numFaceVertices;
+	unsigned _bufferedVertices;
 };

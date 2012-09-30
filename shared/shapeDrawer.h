@@ -32,6 +32,7 @@ public:
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh);
+	void drawBuffered(BaseMesh * mesh);
 	void setWired(char var);
 	
 private:

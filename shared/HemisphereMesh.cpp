@@ -6,7 +6,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-
+#include <iostream>
 #include "HemisphereMesh.h"
 #include <cmath>
 
