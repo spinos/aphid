@@ -141,7 +141,7 @@ void GLWidget::resizeGL(int width, int height)
     glLoadIdentity();
 	
 	float aspect = (float)width/(float)height;
-	float fov = 4.f;
+	float fov = 3.f;
 	float right = fov/ 2.f;
 	float top = right / aspect;
 
@@ -151,8 +151,8 @@ void GLWidget::resizeGL(int width, int height)
 	
 	fCamera->setPortWidth(width);
 	fCamera->setPortHeight(height);
-	fCamera->setHorizontalAperture(4.f);
-	fCamera->setVerticalAperture(4.f/aspect);
+	fCamera->setHorizontalAperture(3.f);
+	fCamera->setVerticalAperture(3.f/aspect);
 }
 //! [8]
 
@@ -203,4 +203,9 @@ void GLWidget::moveCamera(QMouseEvent *event)
 void GLWidget::simulate()
 {
     update();
+}
+
+void GLWidget::setProgram(HemisphereProgram * program)
+{
+    _program = program;
 }

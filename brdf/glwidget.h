@@ -65,6 +65,8 @@ public:
     QSize sizeHint() const;
 //! [0]
 
+    void setProgram(HemisphereProgram * program);
+
 //! [1]
 public slots:
 	

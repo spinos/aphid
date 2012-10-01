@@ -43,14 +43,24 @@
 
 #include "glwidget.h"
 #include "window.h"
+#include "Lambert.h"
 
 //! [0]
 Window::Window()
 {
+    centralWidget = new QWidget;
+    setCentralWidget(centralWidget);
     glWidget = new GLWidget;
+    lambert = new Lambert;
 
-	setCentralWidget(glWidget);
+	QVBoxLayout *mainLayout = new QVBoxLayout;
+	mainLayout->addWidget(glWidget);
+	mainLayout->addWidget(lambert);
+	centralWidget->setLayout(mainLayout);
+	
     setWindowTitle(tr("CUDA BRDF Visualization"));
+    
+    glWidget->setProgram(lambert);
 }
 //! [1]
 

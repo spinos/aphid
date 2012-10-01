@@ -19,7 +19,10 @@ HEADERS = ../shared/Vector3F.h \
     glwidget.h \
     window.h \
     HemisphereProgram.h \
-    hemisphere_implement.h
+    hemisphere_implement.h \
+    Lambert.h \
+    lambert_implement.h
+    
 SOURCES = ../shared/Vector3F.cpp \
     ../shared/Matrix44F.cpp \
     ../shared/BaseCamera.cpp \
@@ -37,9 +40,10 @@ SOURCES = ../shared/Vector3F.cpp \
     glwidget.cpp \
     main.cpp \
     window.cpp \
-    HemisphereProgram.cpp
+    HemisphereProgram.cpp \
+    Lambert.cpp
     
-CUSOURCES = hemisphere.cu
+CUSOURCES = hemisphere.cu lambert.cu
 
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda

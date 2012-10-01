@@ -49,6 +49,7 @@ class QSlider;
 QT_END_NAMESPACE
 //! [0]
 class GLWidget;
+class Lambert;
 
 class Window : public QMainWindow
 {
@@ -62,8 +63,9 @@ protected:
 
 private:
     QSlider *createSlider();
-
+    QWidget * centralWidget;
     GLWidget *glWidget;
+    Lambert * lambert;
     QSlider *xSlider;
     QSlider *ySlider;
     QSlider *zSlider;
