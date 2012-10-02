@@ -19,9 +19,12 @@ HEADERS = ../shared/Vector3F.h \
     glwidget.h \
     window.h \
     HemisphereProgram.h \
+    BRDFProgram.h \
     hemisphere_implement.h \
     Lambert.h \
-    lambert_implement.h
+    lambert_implement.h \
+    Phong.h \
+    phong_implement.h
     
 SOURCES = ../shared/Vector3F.cpp \
     ../shared/Matrix44F.cpp \
@@ -41,9 +44,13 @@ SOURCES = ../shared/Vector3F.cpp \
     main.cpp \
     window.cpp \
     HemisphereProgram.cpp \
-    Lambert.cpp
+    BRDFProgram.cpp \
+    Lambert.cpp \
+    Phong.cpp
     
-CUSOURCES = hemisphere.cu lambert.cu
+CUSOURCES = hemisphere.cu \
+            lambert.cu \
+            phong.cu
 
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda

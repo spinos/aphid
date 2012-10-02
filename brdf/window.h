@@ -45,11 +45,16 @@
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
+class QLabel;
 class QSlider;
+class QLineEdit;
+class QComboBox;
+class QStackedWidget;
 QT_END_NAMESPACE
 //! [0]
 class GLWidget;
 class Lambert;
+class Phong;
 
 class Window : public QMainWindow
 {
@@ -57,18 +62,24 @@ class Window : public QMainWindow
 
 public:
     Window();
+    
+public slots:
+	void chooseProgram(int value);
+	void setThetaOfV(int value);
 
 protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
-    QSlider *createSlider();
     QWidget * centralWidget;
     GLWidget *glWidget;
     Lambert * lambert;
-    QSlider *xSlider;
-    QSlider *ySlider;
-    QSlider *zSlider;
+    Phong * phong;
+    QComboBox * brdfCombo;
+    QStackedWidget * controlStack;
+    QLabel * thetaName;
+    QLineEdit * thetaValue;
+    QSlider * thetaControl;
 };
 //! [0]
 

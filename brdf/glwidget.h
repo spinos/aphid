@@ -46,7 +46,7 @@
 #include <BaseCamera.h>
 #include <CUDABuffer.h>
 #include <CUDABuffer.h>
-#include <HemisphereProgram.h>
+#include <BRDFProgram.h>
 #include <HemisphereMesh.h>
 #include <shapeDrawer.h>
 

@@ -1,11 +1,12 @@
 /*
- *  Lambert.h
+ *  Phong.h
  *  
  *
  *  Created by jian zhang on 10/2/12.
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
+
 #pragma once
 
 #include <BRDFProgram.h>
@@ -17,26 +18,30 @@ class QSlider;
 class QLabel;
 class QLineEdit;
 class QGroupBox;
+class QCheckBox;
 QT_END_NAMESPACE
 
-class Lambert : public QWidget, public BRDFProgram
+class Phong : public QWidget, public BRDFProgram
 {
 	Q_OBJECT
 
 public:
-    Lambert();
+    Phong();
 	
 	virtual void run(CUDABuffer * buffer, HemisphereMesh * mesh);
 	
 public slots:
-	void setReflectanceValue(int value);
+	void setExposureValue(int value);
+	void setDivideByNdoLValue(int value);
 
 private:
 	QGroupBox *controlsGroup;
-	QLabel *reflectance;
-	QLineEdit *reflectanceValue;
-	QSlider *slider;
+	QLabel *exposureName;
+	QLineEdit *exposureValue;
+	QSlider *exposureSlider;
+	QLabel *divideByNdoLName;
+	QCheckBox *divideByNdoLControl;
 	
-	float _reflectance;
+	float _exposure;
+	int _divideByNdoL;
 };
-

@@ -44,6 +44,7 @@
 #include "glwidget.h"
 #include "window.h"
 #include "Lambert.h"
+#include "Phong.h"
 
 //! [0]
 Window::Window()
@@ -52,29 +53,61 @@ Window::Window()
     setCentralWidget(centralWidget);
     glWidget = new GLWidget;
     lambert = new Lambert;
-
+    phong = new Phong;
+    
+    brdfCombo = new QComboBox;
+    brdfCombo->addItem(tr("Lambert"));
+    brdfCombo->addItem(tr("Phong"));
+    
+    controlStack = new QStackedWidget;
+    controlStack->addWidget(lambert);
+    controlStack->addWidget(phong);
+    
+    thetaName = new QLabel(tr("Theta of V"));
+    thetaValue = new QLineEdit;
+    thetaValue->setReadOnly(true);
+    thetaValue->setText(tr("45"));
+    thetaControl = new QSlider(Qt::Horizontal);
+    thetaControl->setRange(0, 89);
+	thetaControl->setSingleStep(1);
+	thetaControl->setValue(45);
+    
+    QGridLayout * thetaLayout = new QGridLayout;
+    thetaLayout->setColumnStretch(2, 1);
+    thetaLayout->addWidget(thetaName, 0, 0);
+    thetaLayout->addWidget(thetaValue, 0, 1);
+    thetaLayout->addWidget(thetaControl, 0, 2);
+    
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 	mainLayout->addWidget(glWidget);
-	mainLayout->addWidget(lambert);
+	mainLayout->addLayout(thetaLayout);
+	mainLayout->addWidget(brdfCombo);
+	mainLayout->addWidget(controlStack);
 	centralWidget->setLayout(mainLayout);
 	
     setWindowTitle(tr("CUDA BRDF Visualization"));
     
     glWidget->setProgram(lambert);
+    
+    connect(brdfCombo, SIGNAL(activated(int)),
+            this, SLOT(chooseProgram(int)));
+    
+    connect(thetaControl, SIGNAL(valueChanged(int)),
+            this, SLOT(setThetaOfV(int)));
 }
 //! [1]
 
 //! [2]
-QSlider *Window::createSlider()
-{
-    QSlider *slider = new QSlider(Qt::Vertical);
-    slider->setRange(0, 360 * 16);
-    slider->setSingleStep(16);
-    slider->setPageStep(15 * 16);
-    slider->setTickInterval(15 * 16);
-    slider->setTickPosition(QSlider::TicksRight);
-    return slider;
-}
+// QSlider *Window::createSlider()
+// {
+    // QSlider *slider = new QSlider(Qt::Vertical);
+    // slider->setRange(0, 360 * 16);
+    // slider->setSingleStep(16);
+    // slider->setPageStep(15 * 16);
+    // slider->setTickInterval(15 * 16);
+    // slider->setTickPosition(QSlider::TicksRight);
+    // return slider;
+// }
 //! [2]
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -83,4 +116,19 @@ void Window::keyPressEvent(QKeyEvent *e)
         close();
     else
         QWidget::keyPressEvent(e);
+}
+
+void Window::chooseProgram(int value)
+{
+    controlStack->setCurrentIndex(value);
+    if(value == 0)
+        glWidget->setProgram(lambert);
+    else
+        glWidget->setProgram(phong);
+}
+
+void Window::setThetaOfV(int value)
+{
+    float theta = (float)value / 90.f * 3.1415927f * 0.5f;
+    BRDFProgram::setVTheta(theta);
 }

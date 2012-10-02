@@ -63,12 +63,14 @@ GLWidget::GLWidget(QWidget *parent)
 	
 	fCamera = new BaseCamera();
 	Vector3F eye(0.f, 0.f, 10.f);
-	Vector3F coi(0.f, 0.f, 0.5f);
+	Vector3F coi(0.f, 0.f, 0.f);
 	fCamera->lookFromTo(eye, coi);
-	_aHemisphere = new HemisphereMesh(64, 128);
+	_aHemisphere = new HemisphereMesh(128, 256);
 	_vertexBuffer = new CUDABuffer;
 	_program = new HemisphereProgram;
 	_drawer = new ShapeDrawer;
+	
+	BRDFProgram::setVTheta(0.76f);
 }
 //! [0]
 
@@ -124,9 +126,25 @@ void GLWidget::paintGL()
 	fCamera->getMatrix(m);
 	glMultMatrixf(m);
 	
+	glColor3f(0.f, 0.6f, 0.4f);
 	_drawer->setWired(1);
 	_drawer->drawMesh(_aHemisphere, _vertexBuffer);
 	_drawer->setWired(0);
+	
+	glColor3f(0.f, 0.f, 1.f);
+	glBegin(GL_LINES);
+	glVertex3f(0.f, 0.f, 0.f);
+	const Vector3F v = BRDFProgram::V;
+	glVertex3f(v.x, v.y, v.z);
+	glEnd();
+	
+	glColor3f(0.9f, 0.9f, 0.5f);
+	glBegin(GL_QUADS);
+	glVertex3f(-.5f, -.5f, 0.f);
+	glVertex3f(.5f, -.5f, 0.f);
+	glVertex3f(.5f, .5f, 0.f);
+	glVertex3f(-.5f, .5f, 0.f);
+	glEnd();
 	
 	glFlush();
 }
