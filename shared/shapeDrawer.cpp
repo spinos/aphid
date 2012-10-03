@@ -279,6 +279,8 @@ void ShapeDrawer::drawMesh(const BaseMesh * mesh, const BaseBuffer * buffer)
 
     glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
 	glDisableClientState(GL_VERTEX_ARRAY);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
 }
 
 void ShapeDrawer::setWired(char var)

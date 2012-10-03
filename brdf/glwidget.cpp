@@ -66,6 +66,7 @@ GLWidget::GLWidget(QWidget *parent)
 	Vector3F coi(0.f, 0.f, 0.f);
 	fCamera->lookFromTo(eye, coi);
 	_aHemisphere = new HemisphereMesh(128, 256);
+	_dome = new GeodesicHemisphereMesh;
 	_vertexBuffer = new CUDABuffer;
 	_program = new HemisphereProgram;
 	_drawer = new ShapeDrawer;
@@ -137,14 +138,18 @@ void GLWidget::paintGL()
 	const Vector3F v = BRDFProgram::V;
 	glVertex3f(v.x, v.y, v.z);
 	glEnd();
-	
+	/*
 	glColor3f(0.9f, 0.9f, 0.5f);
 	glBegin(GL_QUADS);
 	glVertex3f(-.5f, -.5f, 0.f);
 	glVertex3f(.5f, -.5f, 0.f);
 	glVertex3f(.5f, .5f, 0.f);
 	glVertex3f(-.5f, .5f, 0.f);
-	glEnd();
+	glEnd();*/
+	
+	_drawer->setWired(1);
+	_drawer->drawMesh(_dome);
+	_drawer->setWired(0);
 	
 	glFlush();
 }

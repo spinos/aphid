@@ -1,5 +1,5 @@
 /*
- *  CubeMesh.h
+ *  HemisphereMesh.h
  *  brdf
  *
  *  Created by jian zhang on 9/30/12.

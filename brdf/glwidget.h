@@ -49,6 +49,7 @@
 #include <BRDFProgram.h>
 #include <HemisphereMesh.h>
 #include <shapeDrawer.h>
+#include <GeodesicHemisphereMesh.h>
 
 class QtLogo;
 
@@ -91,6 +92,7 @@ private:
 	
 	BaseCamera* fCamera;
 	HemisphereMesh * _aHemisphere;
+	GeodesicHemisphereMesh * _dome;
 	ShapeDrawer * _drawer;
 	CUDABuffer * _vertexBuffer;
 	HemisphereProgram * _program;

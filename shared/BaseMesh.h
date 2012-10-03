@@ -18,8 +18,6 @@ public:
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
 	
-	
-	
 	Vector3F * vertices();
 	unsigned * indices();
 	

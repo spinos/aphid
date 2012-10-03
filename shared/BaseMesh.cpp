@@ -29,8 +29,6 @@ void BaseMesh::createIndices(unsigned num)
 	_numFaceVertices = num;
 }
 
-
-
 Vector3F * BaseMesh::vertices()
 {
 	return _vertices;
