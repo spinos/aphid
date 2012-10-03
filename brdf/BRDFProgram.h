@@ -15,5 +15,5 @@ public:
 	BRDFProgram();
 	
 	static void setVTheta(float val);
-	static Vector3F V, N;
+	static Vector3F V, N, Tangent, Binormal;
 };

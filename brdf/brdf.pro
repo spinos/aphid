@@ -25,7 +25,9 @@ HEADERS = ../shared/Vector3F.h \
     lambert_implement.h \
     Phong.h \
     phong_implement.h \
-    brdf_common.h
+    brdf_common.h \
+    ward_implement.h \
+    Ward.h
     
 SOURCES = ../shared/Vector3F.cpp \
     ../shared/Matrix44F.cpp \
@@ -47,11 +49,13 @@ SOURCES = ../shared/Vector3F.cpp \
     HemisphereProgram.cpp \
     BRDFProgram.cpp \
     Lambert.cpp \
-    Phong.cpp
+    Phong.cpp \
+    Ward.cpp
     
 CUSOURCES = hemisphere.cu \
             lambert.cu \
-            phong.cu
+            phong.cu \
+            ward.cu
 
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda

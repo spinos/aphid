@@ -55,6 +55,7 @@ QT_END_NAMESPACE
 class GLWidget;
 class Lambert;
 class Phong;
+class Ward;
 
 class Window : public QMainWindow
 {
@@ -75,6 +76,7 @@ private:
     GLWidget *glWidget;
     Lambert * lambert;
     Phong * phong;
+    Ward * ward;
     QComboBox * brdfCombo;
     QStackedWidget * controlStack;
     QLabel * thetaName;

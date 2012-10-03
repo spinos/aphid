@@ -159,7 +159,7 @@ void GLWidget::resizeGL(int width, int height)
     glLoadIdentity();
 	
 	float aspect = (float)width/(float)height;
-	float fov = 3.f;
+	float fov = 8.f;
 	float right = fov/ 2.f;
 	float top = right / aspect;
 
@@ -169,8 +169,8 @@ void GLWidget::resizeGL(int width, int height)
 	
 	fCamera->setPortWidth(width);
 	fCamera->setPortHeight(height);
-	fCamera->setHorizontalAperture(3.f);
-	fCamera->setVerticalAperture(3.f/aspect);
+	fCamera->setHorizontalAperture(fov);
+	fCamera->setVerticalAperture(fov/aspect);
 }
 //! [8]
 
