@@ -10,9 +10,9 @@
 #include "BRDFProgram.h"
 
 Vector3F BRDFProgram::V = Vector3F(0.f, 0.7071f, 0.7071f);
-Vector3F BRDFProgram::N = Vector3F(0.f, 0.f, 1.f);
+Vector3F BRDFProgram::N = Vector3F(0.f, 1.f, 0.f);
 Vector3F BRDFProgram::Tangent = Vector3F(1.f, 0.f, 0.f);
-Vector3F BRDFProgram::Binormal = Vector3F(0.f, -1.f, 0.f);
+Vector3F BRDFProgram::Binormal = Vector3F(0.f, 0.f, 1.f);
 
 BRDFProgram::BRDFProgram() {}
 

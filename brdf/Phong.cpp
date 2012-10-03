@@ -60,7 +60,7 @@ void Phong::setDivideByNdoLValue(int value)
 	_divideByNdoL = value;
 }
 
-void Phong::run(CUDABuffer * buffer, HemisphereMesh * mesh)
+void Phong::run(CUDABuffer * buffer, BaseMesh * mesh)
 {
 	float3 *dptr;
 	map(buffer, (void **)&dptr);
@@ -68,7 +68,10 @@ void Phong::run(CUDABuffer * buffer, HemisphereMesh * mesh)
 	float3 fV = {V.x, V.y, V.z};
 	float3 fN = {N.x, N.y, N.z};
 	
-	phong_brdf(dptr, mesh->getGridPhi(), mesh->getGridTheta(), fV, fN, _exposure, _divideByNdoL);
+	unsigned width, height;
+	calculateDim(mesh->getNumVertices(), width, height);
+	
+	phong_brdf(dptr, mesh->getNumVertices(), width, fV, fN, _exposure, _divideByNdoL);
 
 	unmap(buffer);
 }

@@ -10,5 +10,5 @@
 #ifndef HEMISPHERE_IMPLEMENT_H
 #define HEMISPHERE_IMPLEMENT_H
 
-extern "C" void hemisphere(float3 *pos, unsigned width, unsigned height);
+extern "C" void hemisphere(float3 *pos, unsigned numVertices);
 #endif        //  #ifndef SOLVER_IMPLEMENT_H

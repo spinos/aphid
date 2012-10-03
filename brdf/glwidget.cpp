@@ -59,14 +59,13 @@ GLWidget::GLWidget(QWidget *parent)
 	
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(40);
+	timer->start(60);
 	
 	fCamera = new BaseCamera();
 	Vector3F eye(0.f, 0.f, 10.f);
 	Vector3F coi(0.f, 0.f, 0.f);
 	fCamera->lookFromTo(eye, coi);
-	_aHemisphere = new HemisphereMesh(128, 256);
-	_dome = new GeodesicHemisphereMesh;
+	_dome = new GeodesicHemisphereMesh(127);
 	_vertexBuffer = new CUDABuffer;
 	_program = new HemisphereProgram;
 	_drawer = new ShapeDrawer;
@@ -112,14 +111,15 @@ void GLWidget::initializeGL()
 	
     CUDABuffer::setDevice();
     
-	_vertexBuffer->create((float*)_aHemisphere->vertices(), _aHemisphere->getNumVertices() * 12);
+	_vertexBuffer->create((float*)_dome->vertices(), _dome->getNumVertices() * 12);
 }
 //! [6]
 
 //! [7]
 void GLWidget::paintGL()
 {
-    _program->run(_vertexBuffer, _aHemisphere);
+    _vertexBuffer->create((float*)_dome->vertices(), _dome->getNumVertices() * 12);
+    _program->run(_vertexBuffer, _dome);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 	
@@ -129,27 +129,33 @@ void GLWidget::paintGL()
 	
 	glColor3f(0.f, 0.6f, 0.4f);
 	_drawer->setWired(1);
-	_drawer->drawMesh(_aHemisphere, _vertexBuffer);
+	_drawer->drawMesh(_dome, _vertexBuffer);
 	_drawer->setWired(0);
 	
-	glColor3f(0.f, 0.f, 1.f);
 	glBegin(GL_LINES);
+	glColor3f(0.f, 0.f, 1.f);
 	glVertex3f(0.f, 0.f, 0.f);
 	const Vector3F v = BRDFProgram::V;
 	glVertex3f(v.x, v.y, v.z);
+	
+	glColor3f(0.f, 1.f, 0.f);
+	glVertex3f(0.f, 0.f, 0.f);
+	const Vector3F n = BRDFProgram::N;
+	glVertex3f(n.x, n.y, n.z);
+	
+	glColor3f(1.f, 0.f, 0.f);
+	glVertex3f(0.f, 0.f, 0.f);
+	const Vector3F t = BRDFProgram::Tangent;
+	glVertex3f(t.x, t.y, t.z);
 	glEnd();
-	/*
+	
 	glColor3f(0.9f, 0.9f, 0.5f);
 	glBegin(GL_QUADS);
-	glVertex3f(-.5f, -.5f, 0.f);
-	glVertex3f(.5f, -.5f, 0.f);
-	glVertex3f(.5f, .5f, 0.f);
-	glVertex3f(-.5f, .5f, 0.f);
-	glEnd();*/
-	
-	_drawer->setWired(1);
-	_drawer->drawMesh(_dome);
-	_drawer->setWired(0);
+	glVertex3f(-.5f, -0.005f, -.5f);
+	glVertex3f(.5f, -0.005f, -.5f);
+	glVertex3f(.5f, -0.005f, .5f);
+	glVertex3f(-.5f, -0.005f, .5f);
+	glEnd();
 	
 	glFlush();
 }

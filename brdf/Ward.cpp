@@ -9,27 +9,27 @@
 #include <QtGui>
 #include "Ward.h"
 #include "ward_implement.h"
-Ward::Ward() : _alphaX(.15f), _alphaY(.15f), _anisotropic(0)
+Ward::Ward() : _alphaX(.25f), _alphaY(.25f), _anisotropic(0)
 {
 	controlsGroup = new QGroupBox(tr("Ward"));
 	
 	axName = new QLabel(tr("Alpha X"));
 	axValue = new QLineEdit;
 	axValue->setReadOnly(true);
-	axValue->setText(tr("0.15"));
+	axValue->setText(tr("0.25"));
 	axSlider = new QSlider(Qt::Horizontal);
-	axSlider->setRange(0, 200);
+	axSlider->setRange(1, 100);
 	axSlider->setSingleStep(1);
-	axSlider->setValue(15);
+	axSlider->setValue(25);
 	
 	ayName = new QLabel(tr("Alpha Y"));
 	ayValue = new QLineEdit;
 	ayValue->setReadOnly(true);
-	ayValue->setText(tr("0.15"));
+	ayValue->setText(tr("0.25"));
 	aySlider = new QSlider(Qt::Horizontal);
-	aySlider->setRange(0, 200);
+	aySlider->setRange(1, 100);
 	aySlider->setSingleStep(1);
-	aySlider->setValue(15);
+	aySlider->setValue(25);
 	
 	anisotropicName = new QLabel(tr("Anisotropic"));
 	anisotropicControl = new QCheckBox;
@@ -83,7 +83,7 @@ void Ward::setAnisotropicValue(int value)
 	_anisotropic = value;
 }
 
-void Ward::run(CUDABuffer * buffer, HemisphereMesh * mesh)
+void Ward::run(CUDABuffer * buffer, BaseMesh * mesh)
 {
 	float3 *dptr;
 	map(buffer, (void **)&dptr);
@@ -94,7 +94,10 @@ void Ward::run(CUDABuffer * buffer, HemisphereMesh * mesh)
 	float3 fY = {Binormal.x, Binormal.y, Binormal.z};
 	bool bAnis = _anisotropic > 0 ? 1 : 0;
 	
-	ward_brdf(dptr, mesh->getGridPhi(), mesh->getGridTheta(), fV, fN, fX, fY, _alphaX, _alphaY, bAnis);
+	unsigned width, height;
+	calculateDim(mesh->getNumVertices(), width, height);
+	
+	ward_brdf(dptr, mesh->getNumVertices(), width, fV, fN, fX, fY, _alphaX, _alphaY, bAnis);
 
 	unmap(buffer);
 }

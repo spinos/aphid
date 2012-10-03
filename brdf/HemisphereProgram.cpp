@@ -14,12 +14,12 @@
 HemisphereProgram::HemisphereProgram() {}
 HemisphereProgram::~HemisphereProgram() {}
 
-void HemisphereProgram::run(CUDABuffer * buffer, HemisphereMesh * mesh)
+void HemisphereProgram::run(CUDABuffer * buffer, BaseMesh * mesh)
 {
 	float3 *dptr;
 	map(buffer, (void **)&dptr);
 	
-	hemisphere(dptr, mesh->getGridPhi(), mesh->getGridTheta());
+	hemisphere(dptr, mesh->getNumVertices());
 
 	unmap(buffer);
 }

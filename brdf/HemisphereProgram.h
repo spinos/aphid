@@ -16,5 +16,5 @@ public:
 	HemisphereProgram();
 	virtual ~HemisphereProgram();
 	
-	virtual void run(CUDABuffer * buffer, HemisphereMesh * mesh);
+	virtual void run(CUDABuffer * buffer, BaseMesh * mesh);
 };

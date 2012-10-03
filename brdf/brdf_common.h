@@ -14,6 +14,16 @@ inline float3 scale(float3 v0, float scalar)
     return res;
 }
 
+__device__ 
+inline float3 divide(float3 v0, float scalar)
+{
+    float3 res = v0;
+    res.x /= scalar;
+    res.y /= scalar;
+    res.z /= scalar;
+    return res;
+}
+
 __device__
 inline float3 add(float3 v0, float3 v1)
 {
@@ -66,12 +76,9 @@ inline float3 reflect(float3 I, float3 N)
 }
 
 __device__
-inline float3 calculateL(unsigned int width, unsigned int height, unsigned int x, unsigned int y)
+inline float3 calculateL(float3 * p, unsigned int width, unsigned int x, unsigned int y)
 {
-    float phi = 3.1415926f * 2.f / (float) width * x;
-    float theta = 3.1415926f * 0.5f / (float) height * y;
-
-    return make_float3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));   
+    return normalize(p[y * width + x]);   
 }
 
 

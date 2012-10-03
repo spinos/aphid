@@ -47,7 +47,6 @@
 #include <CUDABuffer.h>
 #include <CUDABuffer.h>
 #include <BRDFProgram.h>
-#include <HemisphereMesh.h>
 #include <shapeDrawer.h>
 #include <GeodesicHemisphereMesh.h>
 
@@ -91,7 +90,6 @@ private:
     QColor qtPurple;
 	
 	BaseCamera* fCamera;
-	HemisphereMesh * _aHemisphere;
 	GeodesicHemisphereMesh * _dome;
 	ShapeDrawer * _drawer;
 	CUDABuffer * _vertexBuffer;

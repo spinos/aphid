@@ -19,5 +19,7 @@ public:
 	
 	void map(CUDABuffer * buffer, void ** p);
 	void unmap(CUDABuffer * buffer);
+	
+	void calculateDim(unsigned count, unsigned & w, unsigned & h);
 
 };

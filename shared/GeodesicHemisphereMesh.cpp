@@ -10,10 +10,8 @@
 #include "GeodesicHemisphereMesh.h"
 #include <cmath>
 
-GeodesicHemisphereMesh::GeodesicHemisphereMesh()
+GeodesicHemisphereMesh::GeodesicHemisphereMesh(unsigned level)
 {
-    unsigned level = 15;
-    
     unsigned nv = (level + 1) * (level + 1) * 2;
     
     unsigned nf = level * level * 2 * 2;
@@ -29,10 +27,10 @@ GeodesicHemisphereMesh::GeodesicHemisphereMesh()
 	unsigned currentver = 0;
 	
 	Vector3F a(0.f, 1.f, 0.f);
-	Vector3F b(-1.f, 0.f, 0.f);
-	Vector3F c(0.f, 0.f, 1.f);
-	Vector3F d(1.f, 0.f, 0.f);
-	Vector3F e(0.f, 0.f, -1.f);
+	Vector3F b(-1.f, 0.001f, 0.f);
+	Vector3F c(0.f, 0.001f, 1.f);
+	Vector3F d(1.f, 0.001f, 0.f);
+	Vector3F e(0.f, 0.001f, -1.f);
 	
 	subdivide(level, currentver, currentidx, p, idx, a, b, c, d);
 	subdivide(level, currentver, currentidx, p, idx, a, d, e, b);

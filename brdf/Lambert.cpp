@@ -18,7 +18,7 @@ Lambert::Lambert() : _reflectance(0.5f)
 	reflectanceValue->setReadOnly(true);
 	reflectance = new QLabel(tr("Reflectance"));
 	slider = new QSlider(Qt::Horizontal);
-	slider->setRange(0, 100);
+	slider->setRange(1, 100);
 	slider->setSingleStep(1);
 	
 	QGridLayout *controlLayout = new QGridLayout;
@@ -47,12 +47,15 @@ void Lambert::setReflectanceValue(int value)
 	reflectanceValue->setText(t);
 }
 
-void Lambert::run(CUDABuffer * buffer, HemisphereMesh * mesh)
+void Lambert::run(CUDABuffer * buffer, BaseMesh * mesh)
 {
 	float3 *dptr;
 	map(buffer, (void **)&dptr);
 	
-	lambert(dptr, mesh->getGridPhi(), mesh->getGridTheta(), _reflectance);
+	unsigned width, height;
+	calculateDim(mesh->getNumVertices(), width, height);
+	
+	lambert_brdf(dptr, mesh->getNumVertices(), width, _reflectance);
 
 	unmap(buffer);
 }

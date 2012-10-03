@@ -10,5 +10,5 @@
 #ifndef LAMBERT_IMPLEMENT_H
 #define LAMBERT_IMPLEMENT_H
 
-extern "C" void lambert(float3 *pos, unsigned width, unsigned height, float reflectance);
+extern "C" void lambert_brdf(float3 *pos, unsigned numVertices, unsigned width, float reflectance);
 #endif        //  #ifndef LAMBERT_IMPLEMENT_H

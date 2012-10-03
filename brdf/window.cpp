@@ -72,7 +72,7 @@ Window::Window()
     thetaValue->setReadOnly(true);
     thetaValue->setText(tr("45"));
     thetaControl = new QSlider(Qt::Horizontal);
-    thetaControl->setRange(0, 89);
+    thetaControl->setRange(1, 90);
 	thetaControl->setSingleStep(1);
 	thetaControl->setValue(45);
     

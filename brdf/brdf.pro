@@ -12,7 +12,6 @@ HEADERS = ../shared/Vector3F.h \
     ../shared/GeoElement.h \
     ../shared/Edge.h \
     ../shared/BaseMesh.h \
-    ../shared/HemisphereMesh.h \
     ../shared/GeodesicHemisphereMesh.h \
     ../shared/BaseBuffer.h \
     ../shared/CUDABuffer.h \
@@ -40,7 +39,6 @@ SOURCES = ../shared/Vector3F.cpp \
     ../shared/GeoElement.cpp \
     ../shared/Edge.cpp \
     ../shared/BaseMesh.cpp \
-    ../shared/HemisphereMesh.cpp \
     ../shared/GeodesicHemisphereMesh.cpp \
     ../shared/BaseBuffer.cpp \
     ../shared/CUDABuffer.cpp \

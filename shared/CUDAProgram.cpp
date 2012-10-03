@@ -21,6 +21,7 @@ void CUDAProgram::run(CUDABuffer * buffer)
 
 void CUDAProgram::map(CUDABuffer * buffer, void ** p)
 {
+    cutilSafeCall(cudaGraphicsResourceSetMapFlags(*buffer->resource(), cudaGraphicsMapFlagsNone));
 	cutilSafeCall(cudaGraphicsMapResources(1, buffer->resource(), 0));
 	size_t num_bytes; 
     cutilSafeCall(cudaGraphicsResourceGetMappedPointer(p, &num_bytes,  
@@ -30,4 +31,14 @@ void CUDAProgram::map(CUDABuffer * buffer, void ** p)
 void CUDAProgram::unmap(CUDABuffer * buffer)
 {
 	cutilSafeCall(cudaGraphicsUnmapResources(1, buffer->resource(), 0));
+}
+
+void CUDAProgram::calculateDim(unsigned count, unsigned & w, unsigned & h)
+{
+    w = 4; h = count / w;
+    while(w < h)
+    {
+        w *= 2;
+        h = count / w;
+    }
 }

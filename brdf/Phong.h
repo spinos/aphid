@@ -28,7 +28,7 @@ class Phong : public QWidget, public BRDFProgram
 public:
     Phong();
 	
-	virtual void run(CUDABuffer * buffer, HemisphereMesh * mesh);
+	virtual void run(CUDABuffer * buffer, BaseMesh * mesh);
 	
 public slots:
 	void setExposureValue(int value);

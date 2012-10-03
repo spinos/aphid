@@ -26,7 +26,7 @@ class Lambert : public QWidget, public BRDFProgram
 public:
     Lambert();
 	
-	virtual void run(CUDABuffer * buffer, HemisphereMesh * mesh);
+	virtual void run(CUDABuffer * buffer, BaseMesh * mesh);
 	
 public slots:
 	void setReflectanceValue(int value);

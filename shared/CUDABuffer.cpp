@@ -15,6 +15,7 @@ CUDABuffer::~CUDABuffer() {}
 
 void CUDABuffer::create(float * data, unsigned size)
 {
+    if(_buffereName != 0) destroy();
 	createVBO(data, size);
 	if(_buffereName == 0) return;
 	

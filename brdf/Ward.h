@@ -28,7 +28,7 @@ class Ward : public QWidget, public BRDFProgram
 public:
     Ward();
 	
-	virtual void run(CUDABuffer * buffer, HemisphereMesh * mesh);
+	virtual void run(CUDABuffer * buffer, BaseMesh * mesh);
 	
 public slots:
 	void setAlphaXValue(int value);
