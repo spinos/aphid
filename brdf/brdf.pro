@@ -24,7 +24,8 @@ HEADERS = ../shared/Vector3F.h \
     Lambert.h \
     lambert_implement.h \
     Phong.h \
-    phong_implement.h
+    phong_implement.h \
+    brdf_common.h
     
 SOURCES = ../shared/Vector3F.cpp \
     ../shared/Matrix44F.cpp \
