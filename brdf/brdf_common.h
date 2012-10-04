@@ -92,6 +92,5 @@ inline float beckmann(float m, float t)
 __device__ 
 inline float fresnel(float f0, float u)
 {
-    // from Schlick
-    return f0 + (1-f0) * pow(1-u, 5);
+    return f0 + (1.f - f0) * pow(1.f - u, 5);
 }

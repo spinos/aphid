@@ -18,7 +18,7 @@ Cooktorrance::Cooktorrance() : _m(.1f), _f0(.1f), _includeF(1), _includeG(1)
 	mValue->setReadOnly(true);
 	mValue->setText(tr("0.1"));
 	mSlider = new QSlider(Qt::Horizontal);
-	mSlider->setRange(1, 1000);
+	mSlider->setRange(1, 500);
 	mSlider->setSingleStep(1);
 	mSlider->setValue(100);
 	
@@ -27,9 +27,9 @@ Cooktorrance::Cooktorrance() : _m(.1f), _f0(.1f), _includeF(1), _includeG(1)
 	f0Value->setReadOnly(true);
 	f0Value->setText(tr("0.1"));
 	f0Slider = new QSlider(Qt::Horizontal);
-	f0Slider->setRange(0, 100);
+	f0Slider->setRange(0, 1000);
 	f0Slider->setSingleStep(1);
-	f0Slider->setValue(10);
+	f0Slider->setValue(100);
 	
 	incfName = new QLabel(tr("include F"));
 	incfControl = new QCheckBox;
@@ -47,10 +47,6 @@ Cooktorrance::Cooktorrance() : _m(.1f), _f0(.1f), _includeF(1), _includeG(1)
     controlLayout->addWidget(f0Name, 1, 0);
 	controlLayout->addWidget(f0Value, 1, 1);
     controlLayout->addWidget(f0Slider, 1, 2);
-	controlLayout->addWidget(incfName, 2, 0);
-	controlLayout->addWidget(incfControl, 2, 1);
-	controlLayout->addWidget(incgName, 3, 0);
-	controlLayout->addWidget(incgControl, 3, 1);
     controlsGroup->setLayout(controlLayout);
 	
 	QVBoxLayout *layout = new QVBoxLayout;
@@ -81,7 +77,7 @@ void Cooktorrance::setMValue(int value)
 
 void Cooktorrance::setF0Value(int value)
 {
-	_f0 = (float)value / 100.f;
+	_f0 = (float)value / 1000.f;
 	QString t;
 	t.setNum(_f0);
 	f0Value->setText(t);
@@ -104,13 +100,11 @@ void Cooktorrance::run(CUDABuffer * buffer, BaseMesh * mesh)
 	
 	float3 fV = {V.x, V.y, V.z};
 	float3 fN = {N.x, N.y, N.z};
-	bool include_F = _includeF > 0 ? 1 : 0;
-	bool include_G = _includeG > 0 ? 1 : 0;
 	
 	unsigned width, height;
 	calculateDim(mesh->getNumVertices(), width, height);
 	
-	cooktorrance_brdf(dptr, mesh->getNumVertices(), width, fV, fN, _m, _f0, include_F, include_G);
+	cooktorrance_brdf(dptr, mesh->getNumVertices(), width, fV, fN, _m, _f0);
 
 	unmap(buffer);
 }

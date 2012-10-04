@@ -62,7 +62,7 @@ GLWidget::GLWidget(QWidget *parent)
 	timer->start(60);
 	
 	fCamera = new BaseCamera();
-	Vector3F eye(0.f, 0.f, 10.f);
+	Vector3F eye(0.f, 0.f, 500.f);
 	Vector3F coi(0.f, 0.f, 0.f);
 	fCamera->lookFromTo(eye, coi);
 	_dome = new GeodesicHemisphereMesh(127);
