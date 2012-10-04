@@ -46,6 +46,7 @@
 #include "Lambert.h"
 #include "Phong.h"
 #include "Ward.h"
+#include "Cooktorrance.h"
 
 //! [0]
 Window::Window()
@@ -56,16 +57,19 @@ Window::Window()
     lambert = new Lambert;
     phong = new Phong;
     ward = new Ward;
+	cooktorrance = new Cooktorrance;
     
     brdfCombo = new QComboBox;
     brdfCombo->addItem(tr("Lambert"));
     brdfCombo->addItem(tr("Phong"));
     brdfCombo->addItem(tr("Ward"));
+	brdfCombo->addItem(tr("Cooktorrance"));
     
     controlStack = new QStackedWidget;
     controlStack->addWidget(lambert);
     controlStack->addWidget(phong);
     controlStack->addWidget(ward);
+	controlStack->addWidget(cooktorrance);
     
     thetaName = new QLabel(tr("Theta of V"));
     thetaValue = new QLineEdit;
@@ -129,8 +133,10 @@ void Window::chooseProgram(int value)
         glWidget->setProgram(lambert);
     else if(value == 1)
         glWidget->setProgram(phong);
-    else
+    else if(value == 2)
         glWidget->setProgram(ward);
+	else
+		glWidget->setProgram(cooktorrance);
 }
 
 void Window::setThetaOfV(int value)

@@ -81,4 +81,17 @@ inline float3 calculateL(float3 * p, unsigned int width, unsigned int x, unsigne
     return normalize(p[y * width + x]);   
 }
 
+__device__ 
+inline float beckmann(float m, float t)
+{
+    float M = m*m;
+    float T = t*t;
+    return exp((T-1)/(M*T)) / (M*T*T);
+}
 
+__device__ 
+inline float fresnel(float f0, float u)
+{
+    // from Schlick
+    return f0 + (1-f0) * pow(1-u, 5);
+}

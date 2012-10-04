@@ -56,6 +56,7 @@ class GLWidget;
 class Lambert;
 class Phong;
 class Ward;
+class Cooktorrance;
 
 class Window : public QMainWindow
 {
@@ -77,6 +78,7 @@ private:
     Lambert * lambert;
     Phong * phong;
     Ward * ward;
+	Cooktorrance * cooktorrance;
     QComboBox * brdfCombo;
     QStackedWidget * controlStack;
     QLabel * thetaName;
