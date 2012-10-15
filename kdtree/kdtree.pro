@@ -11,6 +11,10 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/Edge.h \
                 ../shared/BaseMesh.h \
                 ../shared/BaseBuffer.h \
+                ../shared/KdTreeNode.h \
+                ../shared/KdTree.h \
+                ../shared/Primitive.h \
+                ../shared/Triangle.h \
                 glwidget.h \
                 window.h \
                 SceneContainer.h \
@@ -26,6 +30,10 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/Edge.cpp \
                 ../shared/BaseMesh.cpp \
                 ../shared/BaseBuffer.cpp \
+                ../shared/KdTreeNode.cpp \
+                ../shared/KdTree.cpp \
+                ../shared/Primitive.cpp \
+                ../shared/Triangle.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp \

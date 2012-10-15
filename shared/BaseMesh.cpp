@@ -39,6 +39,11 @@ unsigned * BaseMesh::indices()
 	return _indices;
 }
 
+unsigned BaseMesh::getNumFaces() const
+{
+	return _numFaceVertices / 3;
+}
+
 unsigned BaseMesh::getNumVertices() const
 {
 	return _numVertices;
@@ -57,5 +62,17 @@ Vector3F * BaseMesh::getVertices() const
 unsigned * BaseMesh::getIndices() const
 {
 	return _indices;
+}
+
+Triangle * BaseMesh::getFace(unsigned idx) const
+{
+	Vector3F a = _vertices[_indices[idx * 3]];
+	Vector3F b = _vertices[_indices[idx * 3 + 1]];
+	Vector3F c = _vertices[_indices[idx * 3 + 2]];
+	Vector3F ab = b - a;
+	Vector3F ac = c - a;
+	Vector3F n = ab.cross(ac);
+	n.normalize();
+	return new Triangle(a, b, c, n);
 }
 //:~

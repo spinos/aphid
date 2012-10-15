@@ -9,7 +9,7 @@
 
 #pragma once
 #include <Vector3F.h>
-
+#include <Triangle.h>
 class BaseMesh {
 public:
 	BaseMesh();
@@ -21,11 +21,13 @@ public:
 	Vector3F * vertices();
 	unsigned * indices();
 	
+	unsigned getNumFaces() const;
 	unsigned getNumVertices() const;
 	unsigned getNumFaceVertices() const;
 	Vector3F * getVertices() const;
 	unsigned * getIndices() const;
 	unsigned getBufferedVertices() const;
+	Triangle * getFace(unsigned idx) const;
 	
 	Vector3F * _vertices;
 	unsigned * _indices;

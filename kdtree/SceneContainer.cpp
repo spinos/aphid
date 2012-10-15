@@ -9,10 +9,13 @@
 
 #include "SceneContainer.h"
 
+
 SceneContainer::SceneContainer() 
 {
 	fDrawer = new ShapeDrawer;
 	m_mesh = new RandomMesh(199);
+	m_tree = new KdTree;
+	m_tree->create(m_mesh);
 }
 
 SceneContainer::~SceneContainer() {}

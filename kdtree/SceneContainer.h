@@ -10,7 +10,7 @@
 #include "shapeDrawer.h"
 #include <Vector3F.h>
 #include <RandomMesh.h>
-
+#include <KdTree.h>
 class SceneContainer {
 public:
 	SceneContainer();
@@ -21,4 +21,5 @@ public:
 protected:
 	ShapeDrawer* fDrawer;
 	RandomMesh * m_mesh;
+	KdTree * m_tree;
 };
