@@ -50,7 +50,7 @@ Window::Window()
     glWidget = new GLWidget;
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Lattice Boltzmann 3D Fluid"));
+    setWindowTitle(tr("Kd-Tree Viz"));
 }
 //! [1]
 

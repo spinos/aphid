@@ -21,8 +21,10 @@ public:
 	char backIntersects(const Vector3F& origin, const Vector3F& ray, float maxDistance, Vector3F &position, Vector3F &normal) const;
 	char closestHit(const Vector3F& origin, Vector3F& dest, float maxDistance) const;
 	
-	virtual void name() const;
-	
+	Vector3F getMin() const;
+	Vector3F getMax() const;
+	float getMin(int axis) const;
+	float getMax(int axis) const;
 	Vector3F center() const;
 	Vector3F randomOnPlane() const;
 	Vector3F normal() const;

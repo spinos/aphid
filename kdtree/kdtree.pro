@@ -15,6 +15,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/KdTree.h \
                 ../shared/Primitive.h \
                 ../shared/Triangle.h \
+                ../shared/BoundingBox.h \
                 glwidget.h \
                 window.h \
                 SceneContainer.h \
@@ -34,6 +35,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/KdTree.cpp \
                 ../shared/Primitive.cpp \
                 ../shared/Triangle.cpp \
+                ../shared/BoundingBox.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp \

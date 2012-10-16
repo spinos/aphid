@@ -12,15 +12,16 @@ class KdTreeNode
 {
 public:
 	KdTreeNode();
-	void SetAxis( int a_Axis );
-	int GetAxis();
-	void SetSplitPos(float a_Pos );
-	float GetSplitPos();
-	void SetLeft( KdTreeNode* a_Left );
-	KdTreeNode* GetLeft();
-	KdTreeNode* GetRight();
-	bool IsLeaf();
-	void SetLeaf( bool a_Leaf );
+	void setAxis( int a_Axis );
+	int getAxis() const;
+	void setSplitPos(float a_Pos );
+	float getSplitPos() const;
+	void setLeft( KdTreeNode* a_Left );
+	void setLeaf( bool a_Leaf );
+	KdTreeNode* getLeft() const;
+	KdTreeNode* getRight() const;
+	bool isLeaf() const;
+	
 private:
 	float m_Split;
 	unsigned long m_Data;

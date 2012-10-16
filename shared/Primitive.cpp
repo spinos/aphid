@@ -11,9 +11,13 @@
 
 Primitive::Primitive() {}
 Primitive::~Primitive() {}
-	
-void Primitive::name()
+
+void Primitive::setType(short t)
 {
-	printf("prim");
+	m_type = t;
 }
 
+short Primitive::getType() const
+{
+	return m_type;
+}
