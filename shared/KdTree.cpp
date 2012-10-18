@@ -9,10 +9,26 @@
 #include <iostream>
 #include "KdTree.h"
 
+const char *byte_to_binary(int x)
+{
+    static char b[33];
+    b[32] = '\0';
+
+    for (int z = 0; z < 32; z++) {
+        b[31-z] = ((x>>z) & 0x1) ? '1' : '0';
+    }
+
+    return b;
+
+}
 
 KdTree::KdTree() 
 {
 	m_root = new KdTreeNode;
+	
+	printf("axis mask        %s\n", byte_to_binary(KdTreeNode::EInnerAxisMask));
+	printf("type        mask %s\n", byte_to_binary(KdTreeNode::ETypeMask));
+	printf("indirection mask %s\n", byte_to_binary(KdTreeNode::EIndirectionMask));
 }
 
 KdTree::~KdTree() 
@@ -61,17 +77,17 @@ void KdTree::allocateTree(unsigned num)
 
 void KdTree::subdivide(KdTreeNode * node, primitivePtr * prim, BoundingBox bbox, unsigned first, unsigned last)
 {
-	printf("first last: %i %i\n", first, last);
+	//printf("first last: %i %i\n", first, last);
 	if(first == last) {
 		node->setLeaf(true);
 		return;
 	}
 	
-	printf("bbox: %f %f %f - %f %f %f\n", bbox.m_min.x, bbox.m_min.y, bbox.m_min.z, bbox.m_max.x, bbox.m_max.y, bbox.m_max.z);
+	//printf("bbox: %f %f %f - %f %f %f\n", bbox.m_min.x, bbox.m_min.y, bbox.m_min.z, bbox.m_max.x, bbox.m_max.y, bbox.m_max.z);
 	
 	int axis = bbox.getLongestAxis();
 	
-	printf("axis: %i\n", axis);
+	//printf("axis: %i\n", axis);
 	
 	node->setAxis(axis);
 	
@@ -79,7 +95,7 @@ void KdTree::subdivide(KdTreeNode * node, primitivePtr * prim, BoundingBox bbox,
 	
 	float splitPos = ((Triangle *)prim[(first + last)/2])->getMin(axis);
 	
-	printf("split at %f\n", splitPos);
+	//printf("split at %f\n", splitPos);
 	
 	node->setSplitPos(splitPos);
 	
