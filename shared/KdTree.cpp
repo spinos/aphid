@@ -8,6 +8,7 @@
  */
 #include <iostream>
 #include "KdTree.h"
+#include <BlockedVector.h>
 
 const char *byte_to_binary(int x)
 {

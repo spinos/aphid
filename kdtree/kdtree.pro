@@ -16,6 +16,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/Primitive.h \
                 ../shared/Triangle.h \
                 ../shared/BoundingBox.h \
+                ../shared/BlockedVector.h \
                 glwidget.h \
                 window.h \
                 SceneContainer.h \
