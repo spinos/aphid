@@ -11,6 +11,7 @@
 class BoundingBox {
 public:
 	BoundingBox();
+	void reset();
 	void updateMin(const Vector3F & p);
 	void updateMax(const Vector3F & p);
 	

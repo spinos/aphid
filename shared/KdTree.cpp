@@ -8,7 +8,7 @@
  */
 #include <iostream>
 #include "KdTree.h"
-#include <BlockedVector.h>
+#include <BuildKdTreeContext.h>
 
 const char *byte_to_binary(int x)
 {
@@ -30,6 +30,21 @@ KdTree::KdTree()
 	printf("axis mask        %s\n", byte_to_binary(KdTreeNode::EInnerAxisMask));
 	printf("type        mask %s\n", byte_to_binary(KdTreeNode::ETypeMask));
 	printf("indirection mask %s\n", byte_to_binary(KdTreeNode::EIndirectionMask));
+	
+	printf("32 bit align mask %s\n", byte_to_binary(0xffffffff - 31));
+	
+	unsigned lc = 127;
+	lc = lc & (0xffffffff - 31);
+	printf("32 bit align lc %d\n", lc);
+	printf("32 bit align lc %s\n", byte_to_binary(lc));
+	printf("2199              %s\n", byte_to_binary(2199));
+
+	printf("31              %s\n", byte_to_binary(31));
+	
+	printf("2199 & 31         %s\n", byte_to_binary(2199 & 31));
+	printf("2199 & 31         %d\n", 2199 & 31);
+	
+
 }
 
 KdTree::~KdTree() 
@@ -43,7 +58,17 @@ KdTreeNode* KdTree::getRoot() const
 }
 
 void KdTree::create(BaseMesh* mesh)
-{printf("node sz %d\n", (int)sizeof(KdTreeNode));
+{
+	BuildKdTreeContext ctx;
+	ctx.appendMesh(mesh);
+	printf("ctx primitive count %d\n", ctx.getNumPrimitives());
+	BoundingBox bbox = ctx.getBBox();
+	printf("ctx bbox: %f %f %f - %f %f %f\n", bbox.m_min.x, bbox.m_min.y, bbox.m_min.z, bbox.m_max.x, bbox.m_max.y, bbox.m_max.z);
+	m_bbox = bbox;
+	
+	printf("node sz %d\n", (int)sizeof(KdTreeNode));
+	printf("prim sz %d\n", (int)sizeof(Primitive));
+	
 	unsigned nf = mesh->getNumFaces();
 	printf("num triangles %i \n", nf);
 	
@@ -54,14 +79,6 @@ void KdTree::create(BaseMesh* mesh)
 		primitives[i] = mesh->getFace(i);
 		primitives[i]->setType(0);
 	}
-
-	for(unsigned i = 0; i < nf; i++) {
-		if(primitives[i]->getType() == 0) {
-			Triangle * tri = (Triangle *)primitives[i];
-			m_bbox.updateMin(tri->getMin());
-			m_bbox.updateMax(tri->getMax());
-		}
-	}
 	
 	subdivide(m_root, primitives, m_bbox, 0, nf - 1);
 		
@@ -71,8 +88,7 @@ void KdTree::create(BaseMesh* mesh)
 
 void KdTree::allocateTree(unsigned num)
 {
-	m_nodePtr = new char[num * sizeof(KdTreeNode)];
-	
+	m_nodePtr = new char[num * sizeof(KdTreeNode) + 31];
 	m_currentNode = (KdTreeNode *)(((unsigned long)m_nodePtr + 32) & (0xffffffff - 31));
 }
 

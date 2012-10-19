@@ -12,10 +12,9 @@
 class Primitive {
 public:
 	Primitive();
-	virtual ~Primitive();
-	
+
 	void setType(short t);
-	short getType() const;
+	const short & getType() const;
 private:
 	short m_type;
 };

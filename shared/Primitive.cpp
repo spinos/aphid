@@ -10,14 +10,13 @@
 #include "Primitive.h"
 
 Primitive::Primitive() {}
-Primitive::~Primitive() {}
 
 void Primitive::setType(short t)
 {
 	m_type = t;
 }
 
-short Primitive::getType() const
+const short &Primitive::getType() const
 {
 	return m_type;
 }

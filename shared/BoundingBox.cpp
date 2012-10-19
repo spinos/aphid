@@ -11,6 +11,11 @@
 
 BoundingBox::BoundingBox()
 {
+	reset();
+}
+
+void BoundingBox::reset()
+{
 	m_min.x = m_min.y = m_min.z = 10e8;
 	m_max.x = m_max.y = m_max.z = -10e8;
 }

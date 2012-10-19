@@ -41,8 +41,6 @@ Triangle::Triangle(const Vector3F& a, const Vector3F& b, const Vector3F& c, cons
 	
 }
 
-Triangle::~Triangle() {}
-
 char Triangle::intersects(const Triangle * another) const
 {
 	float ndotn = nor.dot(another->nor);
@@ -285,4 +283,14 @@ float Triangle::getMax(int axis) const
 	if(p0.z > p1.z && p0.z > p2.z) return p0.z;
 	if(p1.z > p2.z && p1.z > p0.z) return p1.z;
 	return p2.z;
+}
+
+void Triangle::expandBBox(BoundingBox & bbox) const
+{
+	bbox.updateMin(p0);
+	bbox.updateMin(p1);
+	bbox.updateMin(p2);
+	bbox.updateMax(p0);
+	bbox.updateMax(p1);
+	bbox.updateMax(p2);
 }

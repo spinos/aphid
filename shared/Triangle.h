@@ -10,11 +10,11 @@
 #pragma once
 #include <Vector3F.h>
 #include <Primitive.h>
-
+#include <BoundingBox.h>
 class Triangle : public Primitive {
 public:
 	Triangle(const Vector3F& a, const Vector3F& b, const Vector3F& c, const Vector3F& n);
-	virtual ~Triangle();
+
 	char intersects(const Triangle * another) const;
 	char intersects(const Vector3F& origin, const Vector3F& ray, float maxDistance, Vector3F &position, Vector3F &normal) const;
 	char frontIntersects(const Vector3F& origin, const Vector3F& ray, float maxDistance, Vector3F &position, Vector3F &normal) const;
@@ -25,6 +25,7 @@ public:
 	Vector3F getMax() const;
 	float getMin(int axis) const;
 	float getMax(int axis) const;
+	void expandBBox(BoundingBox & bbox) const;
 	Vector3F center() const;
 	Vector3F randomOnPlane() const;
 	Vector3F normal() const;
