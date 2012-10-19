@@ -10,16 +10,24 @@
 #pragma once
 #include <BoundingBox.h>
 #include <PrimitiveArray.h>
+#include <IndexArray.h>
 #include <BaseMesh.h>
+#include <SplitCandidate.h>
+#include <ClassificationStorage.h>
 class BuildKdTreeContext {
 public:
 	BuildKdTreeContext();
-	void appendMesh(BaseMesh* mesh);
+	void appendMesh(BaseMesh* mesh);	
+	void initIndices();
+	void partition(const SplitCandidate & split);
 	
 	const unsigned getNumPrimitives() const;
-	const BoundingBox getBBox() const;
+	const BoundingBox calculateTightBBox() const;
 	
 private:
 	BoundingBox m_bbox;
 	PrimitiveArray m_primitives;
+	IndexArray m_indices;
+	IndexArray m_leftIndices;
+	IndexArray m_rightIndices;
 };

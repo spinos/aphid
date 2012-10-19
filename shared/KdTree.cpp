@@ -61,10 +61,12 @@ void KdTree::create(BaseMesh* mesh)
 {
 	BuildKdTreeContext ctx;
 	ctx.appendMesh(mesh);
+	ctx.initIndices();
 	printf("ctx primitive count %d\n", ctx.getNumPrimitives());
-	BoundingBox bbox = ctx.getBBox();
-	printf("ctx bbox: %f %f %f - %f %f %f\n", bbox.m_min.x, bbox.m_min.y, bbox.m_min.z, bbox.m_max.x, bbox.m_max.y, bbox.m_max.z);
-	m_bbox = bbox;
+	BoundingBox bbox = ctx.calculateTightBBox();
+	printf("ctx tight bbox: %f %f %f - %f %f %f\n", bbox.m_min.x, bbox.m_min.y, bbox.m_min.z, bbox.m_max.x, bbox.m_max.y, bbox.m_max.z);
+	m_bbox.setMin(0.f, 0.f, 0.f);
+	m_bbox.setMax(32.f, 32.f, 32.f);
 	
 	printf("node sz %d\n", (int)sizeof(KdTreeNode));
 	printf("prim sz %d\n", (int)sizeof(Primitive));
@@ -72,18 +74,18 @@ void KdTree::create(BaseMesh* mesh)
 	unsigned nf = mesh->getNumFaces();
 	printf("num triangles %i \n", nf);
 	
-	allocateTree(nf * 2 + 1);
-	
+/*	allocateTree(nf * 2 + 1);
+
 	primitivePtr * primitives = new primitivePtr[nf];
 	for(unsigned i = 0; i < nf; i++) {
-		primitives[i] = mesh->getFace(i);
+		primitives[i]->setGeom((char*)mesh->getFace(i));
 		primitives[i]->setType(0);
 	}
 	
 	subdivide(m_root, primitives, m_bbox, 0, nf - 1);
 		
 	for(unsigned i = 0; i < nf; i++) delete primitives[i];
-	delete[] primitives;
+	delete[] primitives;*/
 }
 
 void KdTree::allocateTree(unsigned num)

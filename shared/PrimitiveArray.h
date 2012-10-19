@@ -10,6 +10,7 @@
 #pragma once
 #include <vector>
 #include <Primitive.h>
+#include <Triangle.h>
 
 class PrimitiveArray {
 public:
@@ -23,6 +24,9 @@ public:
 	
 	Primitive &operator[](unsigned index);
 	const Primitive &operator[](unsigned index) const;
+	
+	Triangle * asTriangle(unsigned index);
+	Triangle * asTriangle(unsigned index) const;
 		
 	unsigned size() const;
 	unsigned blockCount() const;

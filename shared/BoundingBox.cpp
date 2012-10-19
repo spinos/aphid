@@ -20,6 +20,16 @@ void BoundingBox::reset()
 	m_max.x = m_max.y = m_max.z = -10e8;
 }
 
+void BoundingBox::setMin(float x, float y, float z)
+{
+	m_min.x = x; m_min.y = y; m_min.z = z;
+}
+
+void BoundingBox::setMax(float x, float y, float z)
+{
+	m_max.x = x; m_max.y = y; m_max.z = z;
+}
+
 void BoundingBox::updateMin(const Vector3F & p)
 {
 	if(m_min.x > p.x) m_min.x = p.x;

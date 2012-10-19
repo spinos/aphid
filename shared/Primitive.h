@@ -15,6 +15,10 @@ public:
 
 	void setType(short t);
 	const short & getType() const;
+	
+	void setGeom(char * data);
+	char *geom();
 private:
-	short m_type;
+	unsigned m_type;
+	char *m_geom;
 };

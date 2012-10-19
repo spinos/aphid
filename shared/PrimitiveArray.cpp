@@ -70,11 +70,22 @@ const Primitive &PrimitiveArray::operator[](unsigned index) const
 		(index % BlockSize));
 }
 
+Triangle *PrimitiveArray::asTriangle(unsigned index)
+{
+	Primitive prim = *(m_blocks[index / BlockSize] + (index % BlockSize));
+	return (Triangle *) prim.geom();
+}
+
+Triangle *PrimitiveArray::asTriangle(unsigned index) const
+{
+	Primitive prim = *(m_blocks[index / BlockSize] + (index % BlockSize));
+	return (Triangle *) prim.geom();
+}
+
 unsigned PrimitiveArray::size() const 
 {
 	return m_pos;
 }
-
 
 unsigned PrimitiveArray::blockCount() const 
 {

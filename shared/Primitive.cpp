@@ -20,3 +20,13 @@ const short &Primitive::getType() const
 {
 	return m_type;
 }
+
+void Primitive::setGeom(char * data)
+{
+	m_geom = data;
+}
+
+char *Primitive::geom()
+{
+	return m_geom;
+}
