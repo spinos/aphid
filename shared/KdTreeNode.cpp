@@ -9,49 +9,52 @@
 
 #include "KdTreeNode.h"
 
-KdTreeNode::KdTreeNode() : m_Data( 6 ) {};
-void KdTreeNode::SetAxis( int a_Axis ) 
-{ 
-	m_Data = (m_Data & 0xfffffffc) + a_Axis; 
-}
+KdTreeNode::KdTreeNode() : m_combined( 6 ) {};
 
-int KdTreeNode::GetAxis() 
-{ 
-	return m_Data & 3; 
-}
-
-void KdTreeNode::SetSplitPos(float a_Pos ) 
+void KdTreeNode::setSplitPos(float a_Pos ) 
 {
 	m_Split = a_Pos; 
 }
 
-float KdTreeNode::GetSplitPos() 
+float KdTreeNode::getSplitPos() const
 { 
 	return m_Split; 
 }
 
-void KdTreeNode::SetLeft( KdTreeNode* a_Left ) 
+void KdTreeNode::setAxis( int a_Axis ) 
 { 
-	m_Data = (unsigned long)a_Left + (m_Data & 7); 
+	m_combined = a_Axis + (m_combined & EInnerAxisMask); 
 }
 
-KdTreeNode* KdTreeNode::GetLeft()
+int KdTreeNode::getAxis() const
 { 
-	return (KdTreeNode*)(m_Data&0xfffffff8); 
+	return m_combined & (~EInnerAxisMask); 
 }
 
-KdTreeNode* KdTreeNode::GetRight() 
+void KdTreeNode::setLeaf( bool a_Leaf ) 
 { 
-	return ((KdTreeNode*)(m_Data&0xfffffff8)) + 1; 
+	m_combined = (a_Leaf) ? (m_combined | ~ETypeMask):(m_combined & ETypeMask); 
 }
 
-bool KdTreeNode::IsLeaf() 
+bool KdTreeNode::isLeaf() const
 { 
-	return ((m_Data & 4) > 0); 
+	return ((m_combined & ~ETypeMask) > 0); 
 }
 
-void KdTreeNode::SetLeaf( bool a_Leaf ) 
+void KdTreeNode::setLeft( KdTreeNode* a_Left )
 { 
-	m_Data = (a_Leaf)?(m_Data|4):(m_Data&0xfffffffb); 
+	m_combined = (unsigned long)a_Left + (m_combined & EIndirectionMask); 
 }
+
+KdTreeNode* KdTreeNode::getLeft() const
+{ 
+	return (KdTreeNode*)(m_combined & ~EIndirectionMask); 
+}
+
+KdTreeNode* KdTreeNode::getRight() const 
+{ 
+	return (KdTreeNode*)(getLeft()) + 1; 
+}
+
+
 //:~

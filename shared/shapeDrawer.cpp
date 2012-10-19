@@ -148,6 +148,11 @@ void ShapeDrawer::beginPoint()
 	glBegin(GL_POINTS);
 }
 
+void ShapeDrawer::beginQuad()
+{
+	glBegin(GL_QUADS);
+}
+
 void ShapeDrawer::aVertex(float x, float y, float z)
 {
 	glVertex3f(x, y, z);
@@ -281,6 +286,86 @@ void ShapeDrawer::drawMesh(const BaseMesh * mesh, const BaseBuffer * buffer)
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
     
+}
+
+void ShapeDrawer::drawKdTree(const KdTree * tree)
+{
+	BoundingBox bbox = tree->m_bbox;
+	KdTreeNode * root = tree->getRoot();
+	
+	setWired(1);
+	beginQuad();
+	drawKdTreeNode(root, bbox);
+	end();
+}
+
+void ShapeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox)
+{
+	if(tree->isLeaf()) return;
+	Vector3F corner0 = bbox.m_min;
+	Vector3F corner1 = bbox.m_max;
+	
+	glVertex3f(corner0.x, corner0.y, corner0.z);
+	glVertex3f(corner1.x, corner0.y, corner0.z);
+	glVertex3f(corner1.x, corner1.y, corner0.z);
+	glVertex3f(corner0.x, corner1.y, corner0.z);
+	
+	glVertex3f(corner0.x, corner0.y, corner1.z);
+	glVertex3f(corner0.x, corner1.y, corner1.z);
+	glVertex3f(corner1.x, corner1.y, corner1.z);
+	glVertex3f(corner1.x, corner0.y, corner1.z);
+	
+	glVertex3f(corner0.x, corner0.y, corner0.z);
+	glVertex3f(corner0.x, corner0.y, corner1.z);
+	glVertex3f(corner0.x, corner1.y, corner1.z);
+	glVertex3f(corner0.x, corner1.y, corner0.z);
+	
+	glVertex3f(corner1.x, corner0.y, corner0.z);
+	glVertex3f(corner1.x, corner1.y, corner0.z);
+	glVertex3f(corner1.x, corner1.y, corner1.z);
+	glVertex3f(corner1.x, corner0.y, corner1.z);
+	
+	glVertex3f(corner0.x, corner0.y, corner0.z);
+	glVertex3f(corner0.x, corner0.y, corner1.z);
+	glVertex3f(corner1.x, corner0.y, corner1.z);
+	glVertex3f(corner1.x, corner0.y, corner0.z);
+	
+	glVertex3f(corner0.x, corner1.y, corner0.z);
+	glVertex3f(corner0.x, corner1.y, corner1.z);
+	glVertex3f(corner1.x, corner1.y, corner1.z);
+	glVertex3f(corner1.x, corner1.y, corner0.z);
+	
+	int axis = tree->getAxis();
+	/*if(axis == 0) {
+		corner0.x = corner1.x = tree->getSplitPos();
+		glVertex3f(corner0.x, corner0.y, corner0.z);
+		glVertex3f(corner0.x, corner1.y, corner0.z);
+		glVertex3f(corner0.x, corner1.y, corner1.z);
+		glVertex3f(corner0.x, corner0.y, corner1.z);
+	}
+	else if(axis == 1) {
+		corner0.y = corner1.y = tree->getSplitPos();
+		glVertex3f(corner0.x, corner0.y, corner0.z);
+		glVertex3f(corner1.x, corner0.y, corner0.z);
+		glVertex3f(corner1.x, corner0.y, corner1.z);
+		glVertex3f(corner0.x, corner0.y, corner1.z);
+	}
+	else {
+		corner0.z = corner1.z = tree->getSplitPos();
+		glVertex3f(corner0.x, corner0.y, corner0.z);
+		glVertex3f(corner1.x, corner0.y, corner0.z);
+		glVertex3f(corner1.x, corner1.y, corner0.z);
+		glVertex3f(corner0.x, corner1.y, corner0.z);
+	}*/
+	
+	BoundingBox leftBox, rightBox;
+	
+	float splitPos = tree->getSplitPos();
+	bbox.split(axis, splitPos, leftBox, rightBox);
+	
+	drawKdTreeNode(tree->getLeft(), leftBox);
+	drawKdTreeNode(tree->getRight(), rightBox);
+	
 }
 
 void ShapeDrawer::setWired(char var)

@@ -13,7 +13,7 @@
 SceneContainer::SceneContainer() 
 {
 	fDrawer = new ShapeDrawer;
-	m_mesh = new RandomMesh(199);
+	m_mesh = new RandomMesh(21264);
 	m_tree = new KdTree;
 	m_tree->create(m_mesh);
 }
@@ -25,4 +25,5 @@ void SceneContainer::renderWorld()
 	fDrawer->box(32.f, 32.f, 32.f);
 	fDrawer->setGrey(1.f);
 	fDrawer->drawMesh(m_mesh);
+	fDrawer->drawKdTree(m_tree);
 }

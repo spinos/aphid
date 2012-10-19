@@ -11,6 +11,7 @@
 #include <Polytode.h>
 #include <BaseMesh.h>
 #include <BaseBuffer.h>
+#include <KdTree.h>
 
 class ShapeDrawer {
 public:
@@ -26,6 +27,7 @@ public:
 	void beginWireTriangle();
 	void beginLine();
 	void beginPoint();
+	void beginQuad();
 	void aVertex(float x, float y, float z);
 	void drawVertex(const Polytode * poly);
 	void drawWiredFace(const Polytode * poly);
@@ -34,6 +36,8 @@ public:
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh);
 	void drawMesh(const BaseMesh * mesh, const BaseBuffer * buffer);
+	void drawKdTree(const KdTree * tree);
+	void drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox);
 	void setWired(char var);
 	
 private:

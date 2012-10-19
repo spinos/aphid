@@ -13,6 +13,9 @@ class Primitive {
 public:
 	Primitive();
 	virtual ~Primitive();
-	virtual void name();
-	int m_type;
+	
+	void setType(short t);
+	short getType() const;
+private:
+	short m_type;
 };

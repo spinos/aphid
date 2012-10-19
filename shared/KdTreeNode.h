@@ -12,16 +12,27 @@ class KdTreeNode
 {
 public:
 	KdTreeNode();
-	void SetAxis( int a_Axis );
-	int GetAxis();
-	void SetSplitPos(float a_Pos );
-	float GetSplitPos();
-	void SetLeft( KdTreeNode* a_Left );
-	KdTreeNode* GetLeft();
-	KdTreeNode* GetRight();
-	bool IsLeaf();
-	void SetLeaf( bool a_Leaf );
+	
+	void setSplitPos(float a_Pos );
+	float getSplitPos() const;
+	void setAxis( int a_Axis );
+	int getAxis() const;
+	void setLeaf( bool a_Leaf );
+	bool isLeaf() const;
+	void setLeft( KdTreeNode* a_Left );
+	KdTreeNode* getLeft() const;
+	KdTreeNode* getRight() const;
+
+	enum EMask {
+		EInnerAxisMask = ~0x3,
+		ETypeMask = ~0x4,
+		EIndirectionMask = 0x7,
+		//ELeafOffsetMask = ~ETypeMask,
+		//EInnerOffsetMask = ~(EInnerAxisMask + EIndirectionMask),
+		//ERelOffsetLimit = (1<<28) - 1
+	};
+	
 private:
 	float m_Split;
-	unsigned long m_Data;
+	unsigned long m_combined;
 };

@@ -223,7 +223,66 @@ Vector3F Triangle::normal() const
 	return nor;
 }
 
-void Triangle::name() const
+Vector3F Triangle::getMin() const
 {
-	printf("tri");
+	Vector3F res = p0;
+	if(p1.x < res.x) res.x = p1.x;
+	if(p1.y < res.y) res.y = p1.y;
+	if(p1.z < res.z) res.z = p1.z;
+	if(p2.x < res.x) res.x = p2.x;
+	if(p2.y < res.y) res.y = p2.y;
+	if(p2.z < res.z) res.z = p2.z;
+	
+	return res;
+}
+	
+Vector3F Triangle::getMax() const
+{
+	Vector3F res = p0;
+	if(p1.x > res.x) res.x = p1.x;
+	if(p1.y > res.y) res.y = p1.y;
+	if(p1.z > res.z) res.z = p1.z;
+	if(p2.x > res.x) res.x = p2.x;
+	if(p2.y > res.y) res.y = p2.y;
+	if(p2.z > res.z) res.z = p2.z;
+	
+	return res;
+}
+
+float Triangle::getMin(int axis) const
+{
+	if(axis == 0) {
+		if(p0.x < p1.x && p0.x < p2.x) return p0.x;
+		if(p1.x < p2.x && p1.x < p0.x) return p1.x;
+		return p2.x;
+	}
+		
+	if(axis == 1) {
+		if(p0.y < p1.y && p0.y < p2.y) return p0.y;
+		if(p1.y < p2.y && p1.y < p0.y) return p1.y;
+		return p2.y;
+	}
+		
+	if(p0.z < p1.z && p0.z < p2.z) return p0.z;
+	if(p1.z < p2.z && p1.z < p0.z) return p1.z;
+	return p2.z;
+}
+	
+float Triangle::getMax(int axis) const
+{
+	if(axis == 0) {
+		if(p0.x > p1.x && p0.x > p2.x) return p0.x;
+		if(p1.x > p2.x && p1.x > p0.x) return p1.x;
+		return p2.x;
+	}
+		
+	if(axis == 1) {
+		if(p0.y > p1.y && p0.y > p2.y) return p0.y;
+		if(p1.y > p2.y && p1.y > p0.y) return p1.y;
+		return p2.y;
+	}
+		
+	if(p0.z > p1.z && p0.z > p2.z) return p0.z;
+	if(p1.z > p2.z && p1.z > p0.z) return p1.z;
+	return p2.z;
 }
