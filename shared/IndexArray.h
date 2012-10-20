@@ -23,6 +23,7 @@ public:
 	
 	void start();
 	void take(const unsigned &value);
+	void resizeToTaken();
 	
 	unsigned &operator[](unsigned index);
 	const unsigned &operator[](unsigned index) const;

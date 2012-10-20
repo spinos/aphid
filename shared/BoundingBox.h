@@ -18,6 +18,8 @@ public:
 	void updateMax(const Vector3F & p);
 	
 	int getLongestAxis() const;
+	const float getMin(int axis) const;
+	const float getMax(int axis) const;
 	
 	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
 

@@ -30,9 +30,18 @@ void BuildKdTreeContext::initIndices()
 	}
 }
 
+SplitCandidate BuildKdTreeContext::bestSplit()
+{
+	int axis = m_bbox.getLongestAxis();
+	float pos = (m_bbox.getMin(axis) + m_bbox.getMax(axis)) * 0.5f;
+	SplitCandidate candidate;
+	candidate.setPos(pos);
+	candidate.setAxis(axis);
+	return candidate;
+}
+
 void BuildKdTreeContext::partition(const SplitCandidate & split)
 {
-	split.verbose();
 	unsigned numPrim = getNumPrimitives();
 	m_leftIndices.allocate(numPrim);
 	m_rightIndices.allocate(numPrim);
@@ -55,11 +64,48 @@ void BuildKdTreeContext::partition(const SplitCandidate & split)
 		if(side > 0)
 			m_rightIndices.take(idx);
 	}
+	m_leftIndices.resizeToTaken();
+	m_rightIndices.resizeToTaken();
+}
+
+void BuildKdTreeContext::setBBox(const BoundingBox &bbox)
+{
+	m_bbox = bbox;
+}
+
+void BuildKdTreeContext::setPrimitives(const PrimitiveArray &prims)
+{
+	m_primitives = prims;
+}
+
+void BuildKdTreeContext::setIndices(const IndexArray &indices)
+{
+	m_indices = indices;
 }
 
 const unsigned BuildKdTreeContext::getNumPrimitives() const
 {
 	return m_indices.size();
+}
+
+const BoundingBox & BuildKdTreeContext::getBBox() const
+{
+	return m_bbox;
+}
+	
+const PrimitiveArray &BuildKdTreeContext::getPrimitives() const
+{
+	return m_primitives;
+}	
+
+const IndexArray &BuildKdTreeContext::getLeftIndices() const
+{
+	return m_leftIndices;
+}
+	
+const IndexArray &BuildKdTreeContext::getRightIndices() const
+{
+	return m_rightIndices;
 }
 
 const BoundingBox BuildKdTreeContext::calculateTightBBox() const
@@ -71,4 +117,20 @@ const BoundingBox BuildKdTreeContext::calculateTightBBox() const
 		tri->expandBBox(bbox);
 	}
 	return bbox;
+}
+
+void BuildKdTreeContext::verbose() const
+{
+	printf("ctx partition %i primitives:\n", getNumPrimitives());
+	unsigned leftCount = m_leftIndices.taken();
+	unsigned rightCount = m_rightIndices.taken();
+	printf("%i to left side:\n", leftCount);
+	for(unsigned i = 0; i < leftCount; i++) {
+		printf("%i ", m_leftIndices[i]);
+	}
+	printf("\n%i to right side:\n", rightCount);
+	for(unsigned i = 0; i < rightCount; i++) {
+		printf("%i ", m_rightIndices[i]);
+	}
+	printf("\n");
 }

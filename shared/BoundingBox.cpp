@@ -52,6 +52,28 @@ int BoundingBox::getLongestAxis() const
 	return 0;
 }
 
+const float BoundingBox::getMin(int axis) const
+{
+	if(axis == 0) {
+		return m_min.x;
+	}
+	else if(axis == 1) {
+		return m_min.y;
+	}
+	return m_min.z;
+}
+
+const float BoundingBox::getMax(int axis) const
+{
+	if(axis == 0) {
+		return m_max.x;
+	}
+	else if(axis == 1) {
+		return m_max.y;
+	}
+	return m_max.z;
+}
+
 void BoundingBox::split(int axis, float pos, BoundingBox & left, BoundingBox & right) const
 {
 	left = *this;

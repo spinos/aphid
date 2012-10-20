@@ -12,6 +12,8 @@
 #include <BaseMesh.h>
 #include <BoundingBox.h>
 #include <Primitive.h>
+#include <BuildKdTreeContext.h>
+
 typedef Primitive * primitivePtr;
 	
 class KdTree
@@ -25,7 +27,8 @@ public:
 	void create(BaseMesh* mesh);
 	
 	void allocateTree(unsigned num);
-	
+	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx);
+
 	void subdivide(KdTreeNode * node, primitivePtr * prim, BoundingBox bbox, unsigned first, unsigned last);
 	
 	KdTreeNode* treeNodePair();

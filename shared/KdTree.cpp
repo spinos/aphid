@@ -8,7 +8,6 @@
  */
 #include <iostream>
 #include "KdTree.h"
-#include <BuildKdTreeContext.h>
 
 const char *byte_to_binary(int x)
 {
@@ -65,17 +64,20 @@ void KdTree::create(BaseMesh* mesh)
 	printf("ctx primitive count %d\n", ctx.getNumPrimitives());
 	BoundingBox bbox = ctx.calculateTightBBox();
 	printf("ctx tight bbox: %f %f %f - %f %f %f\n", bbox.m_min.x, bbox.m_min.y, bbox.m_min.z, bbox.m_max.x, bbox.m_max.y, bbox.m_max.z);
-	m_bbox.setMin(0.f, 0.f, 0.f);
-	m_bbox.setMax(32.f, 32.f, 32.f);
+	m_bbox.setMin(-3.f, -3.f, -3.f);
+	m_bbox.setMax(35.f, 35.f, 36.f);
+	ctx.setBBox(m_bbox);
 	
 	printf("node sz %d\n", (int)sizeof(KdTreeNode));
 	printf("prim sz %d\n", (int)sizeof(Primitive));
 	
 	unsigned nf = mesh->getNumFaces();
 	printf("num triangles %i \n", nf);
+	allocateTree(nf * 2 + 1);
+	subdivide(m_root, ctx);
 	
-/*	allocateTree(nf * 2 + 1);
-
+	
+/*
 	primitivePtr * primitives = new primitivePtr[nf];
 	for(unsigned i = 0; i < nf; i++) {
 		primitives[i]->setGeom((char*)mesh->getFace(i));
@@ -92,6 +94,44 @@ void KdTree::allocateTree(unsigned num)
 {
 	m_nodePtr = new char[num * sizeof(KdTreeNode) + 31];
 	m_currentNode = (KdTreeNode *)(((unsigned long)m_nodePtr + 32) & (0xffffffff - 31));
+}
+
+void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx)
+{
+	if(ctx.getNumPrimitives() < 64) {
+		node->setLeaf(true);
+		return;
+	}
+	
+	SplitCandidate plane = ctx.bestSplit();
+	plane.verbose();
+	ctx.partition(plane);
+	ctx.verbose();
+	
+	node->setAxis(plane.getAxis());
+	node->setSplitPos(plane.getPos());
+	KdTreeNode* branch = treeNodePair();
+	
+	node->setLeft(branch);
+	node->setLeaf(false);
+	
+	BoundingBox leftBox, rightBox;
+	
+	ctx.getBBox().split(plane.getAxis(), plane.getPos(), leftBox, rightBox);
+	
+	BuildKdTreeContext leftCtx;
+	leftCtx.setPrimitives(ctx.getPrimitives());
+	leftCtx.setIndices(ctx.getLeftIndices());
+	leftCtx.setBBox(leftBox);
+	
+	
+	BuildKdTreeContext rightCtx;
+	rightCtx.setPrimitives(ctx.getPrimitives());
+	rightCtx.setIndices(ctx.getRightIndices());
+	rightCtx.setBBox(rightBox);
+	
+	subdivide(branch, leftCtx);
+	subdivide(branch + 1, rightCtx);
 }
 
 void KdTree::subdivide(KdTreeNode * node, primitivePtr * prim, BoundingBox bbox, unsigned first, unsigned last)

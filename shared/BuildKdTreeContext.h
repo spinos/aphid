@@ -19,10 +19,22 @@ public:
 	BuildKdTreeContext();
 	void appendMesh(BaseMesh* mesh);	
 	void initIndices();
+	SplitCandidate bestSplit();
 	void partition(const SplitCandidate & split);
 	
+	void setBBox(const BoundingBox &bbox);
+	void setPrimitives(const PrimitiveArray &prims);
+	void setIndices(const IndexArray &indices);
+	
 	const unsigned getNumPrimitives() const;
+	const BoundingBox & getBBox() const;
+	const PrimitiveArray &getPrimitives() const;
+	const IndexArray &getLeftIndices() const;
+	const IndexArray &getRightIndices() const;
+	
 	const BoundingBox calculateTightBBox() const;
+
+	void verbose() const;
 	
 private:
 	BoundingBox m_bbox;

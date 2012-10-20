@@ -15,14 +15,15 @@ PrimitiveArray::PrimitiveArray() : m_pos(0) {}
 
 PrimitiveArray::~PrimitiveArray() 
 {
-	clear();
+	printf("prim array destruct");
+	//clear();
 }
 
 void PrimitiveArray::clear()
 {
 	for (std::vector<Primitive *>::iterator it = m_blocks.begin(); 
 				it != m_blocks.end(); ++it)
-			delete[] *it;
+			if(*it) delete[] *it;
 	m_blocks.clear();
 	m_pos = 0;
 }

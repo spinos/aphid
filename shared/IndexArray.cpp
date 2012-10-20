@@ -15,7 +15,7 @@ IndexArray::IndexArray() : m_pos(0) {}
 
 IndexArray::~IndexArray() 
 {
-	clear();
+	//clear();
 }
 
 void IndexArray::clear()
@@ -68,6 +68,11 @@ void IndexArray::take(const unsigned &value)
 	*(m_blocks[m_current / BlockSize] +
 			(m_current % BlockSize)) = value;
 	m_current++;
+}
+
+void IndexArray::resizeToTaken()
+{
+	m_pos = m_current;
 }
 
 unsigned &IndexArray::operator[](unsigned index) 
