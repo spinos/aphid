@@ -86,16 +86,10 @@ void KdTree::create()
 	ctx.verbose();
 	std::cout << "kd tree finished after " << timer.elapsed() << "ms\n";
 }
-/*
-void KdTree::allocateTree(unsigned num)
-{
-	m_nodePtr = new char[num * sizeof(KdTreeNode) + 31];
-	m_currentNode = (KdTreeNode *)(((unsigned long)m_nodePtr + 32) & (0xffffffff - 31));
-}
-*/
+
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level)
 {
-	if(bound.numPrimitive() < 64 || level == 18) {
+	if(bound.numPrimitive() < 64 || level == 15) {
 		node->setLeaf(true);
 		return;
 	}
@@ -103,7 +97,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 	BoundingBox bbox = bound.bbox;
 
 	SplitCandidate plane = bound.bestSplit();
-	ctx.partition(plane, bound);
+	
 	//ctx.verbose();
 	
 	node->setAxis(plane.getAxis());
@@ -117,6 +111,8 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 
 	bound.bbox.split(plane.getAxis(), plane.getPos(), leftBox, rightBox);
 
+	ctx.partition(plane, bound, 1);
+	
 	PartitionBound subBound;
 	subBound.bbox = leftBox;
 	subBound.parentMin = bound.leftChildMin;
@@ -127,6 +123,12 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 		subdivide(branch, ctx, subBound, level + 1);
 	}
 	
+	//printf("left return\n");
+		
+	ctx.releaseIndicesAt(subBound.parentMin);
+	
+	ctx.partition(plane, bound, 0);
+	
 	PartitionBound rightBound;
 	rightBound.bbox = rightBox;
 	rightBound.parentMin = bound.rightChildMin;
@@ -136,7 +138,9 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 		//printf("ctx partition right %i - %i\n", rightBound.parentMin, rightBound.parentMax);
 		subdivide(branch + 1, ctx, rightBound, level + 1);
 	}
+	//printf("right return\n");
 	
+	ctx.releaseIndicesAt(rightBound.parentMin);
 }
 /*
 void KdTree::subdivide(KdTreeNode * node, primitivePtr * prim, BoundingBox bbox, unsigned first, unsigned last)

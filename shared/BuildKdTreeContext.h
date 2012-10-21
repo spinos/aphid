@@ -56,6 +56,7 @@ public:
 	void initIndices();
 	
 	void partition(const SplitCandidate & split, PartitionBound & bound);
+	void partition(const SplitCandidate & split, PartitionBound & bound, int leftSide);
 	
 	const unsigned getNumPrimitives() const;
 	
@@ -63,6 +64,7 @@ public:
 	
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
+	void releaseIndicesAt(unsigned loc);
 
 	void verbose() const;
 	

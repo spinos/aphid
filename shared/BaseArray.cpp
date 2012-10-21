@@ -42,12 +42,13 @@ char *BaseArray::expandBy(unsigned size)
 void BaseArray::shrinkTo(unsigned size)
 {
 	if(size >= capacity()) return;
-	
 	unsigned blockIdx = size * m_elementSize / BASEARRAYBLOCK;
 	unsigned i = 0;
 	for (std::vector<PtrTup *>::iterator it = m_blocks.begin(); 
 				it != m_blocks.end(); ++it) {
-		if(i > blockIdx) delete *it;
+		if(i > blockIdx) {
+			delete *it;
+		}
 		i++;
 	}
 	m_blocks.resize(blockIdx+1);
