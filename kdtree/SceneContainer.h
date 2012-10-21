@@ -20,6 +20,7 @@ public:
 	
 protected:
 	ShapeDrawer* fDrawer;
-	RandomMesh * m_mesh;
+	RandomMesh * m_cube;
+	RandomMesh * m_ball;
 	KdTree * m_tree;
 };

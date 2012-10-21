@@ -12,6 +12,6 @@
 
 class RandomMesh : public BaseMesh {
 public:
-	RandomMesh(unsigned numFaces);
+	RandomMesh(unsigned numFaces, const Vector3F & center, const float & size, int type);
 	virtual ~RandomMesh();
 };

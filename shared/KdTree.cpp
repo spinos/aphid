@@ -44,7 +44,9 @@ KdTree::KdTree()
 	printf("2199 & 31         %s\n", byte_to_binary(2199 & 31));
 	printf("2199 & 31         %d\n", 2199 & 31);
 	
-
+	printf("node sz %d\n", (int)sizeof(KdTreeNode));
+	printf("prim sz %d\n", (int)sizeof(Primitive));
+	
 }
 
 KdTree::~KdTree() 
@@ -57,28 +59,27 @@ KdTreeNode* KdTree::getRoot() const
 	return m_root; 
 }
 
-void KdTree::create(BaseMesh* mesh)
+void KdTree::addMesh(BaseMesh* mesh)
 {
 	unsigned nf = mesh->getNumFaces();
-	printf("num triangles %i \n", nf);
-	
-	BuildKdTreeContext ctx;
+	printf("add %i triangles\n", nf);
 	ctx.appendMesh(mesh);
+}
+
+void KdTree::create()
+{
 	ctx.initIndices();
 	printf("ctx primitive count %d\n", ctx.getNumPrimitives());
 	BoundingBox bbox = ctx.calculateTightBBox();
 	printf("ctx tight bbox: %f %f %f - %f %f %f\n", bbox.m_min.x, bbox.m_min.y, bbox.m_min.z, bbox.m_max.x, bbox.m_max.y, bbox.m_max.z);
 	m_bbox = bbox;
 	
-	printf("node sz %d\n", (int)sizeof(KdTreeNode));
-	printf("prim sz %d\n", (int)sizeof(Primitive));
-	
 	PartitionBound bound;
 	bound.bbox = bbox;
 	bound.parentMin = 0;
 	bound.parentMax = ctx.getNumPrimitives();
 	
-	allocateTree(nf * 3 + 2);
+	allocateTree(ctx.getNumPrimitives() * 3 + 2);
 	QElapsedTimer timer;
 	timer.start();
 
@@ -95,7 +96,7 @@ void KdTree::allocateTree(unsigned num)
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level)
 {
-	if(bound.numPrimitive() < 64 || level == 15) {
+	if(bound.numPrimitive() < 64 || level == 18) {
 		node->setLeaf(true);
 		return;
 	}

@@ -24,7 +24,8 @@ public:
 	
 	KdTreeNode* getRoot() const;
 	
-	void create(BaseMesh* mesh);
+	void addMesh(BaseMesh* mesh);
+	void create();
 	
 	void allocateTree(unsigned num);
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level);
@@ -34,7 +35,8 @@ public:
 	KdTreeNode* treeNodePair();
 	
 	void sort(primitivePtr * prim, unsigned first, unsigned last, int axis);
-
+	
+	BuildKdTreeContext ctx;
 	BoundingBox m_bbox;
 	KdTreeNode * m_root;
 	char * m_nodePtr;
