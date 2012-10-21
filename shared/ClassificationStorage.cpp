@@ -19,6 +19,12 @@ ClassificationStorage::~ClassificationStorage()
 		delete[] m_buffer;
 }
 
+void ClassificationStorage::clear()
+{
+	delete[] m_buffer;
+	m_buffer = 0;
+}
+
 void ClassificationStorage::setPrimitiveCount(unsigned size) 
 {
 	if (m_buffer)

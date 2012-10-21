@@ -42,17 +42,17 @@ void BuildKdTreeContext::initIndices()
 	m_indices.verbose();
 }
 
-void BuildKdTreeContext::partition(const SplitCandidate & split, PartitionBound & bound, int leftSide)
+void BuildKdTreeContext::partition(const SplitEvent &split, PartitionBound & bound, int leftSide)
 {	
 	unsigned numPrim = bound.numPrimitive();
-	
+
 	ClassificationStorage classification;
 	classification.setPrimitiveCount(numPrim);
 	
 	for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
 		unsigned idx = *m_indices.asIndex(i);
 		const Triangle *tri = (Triangle *)(m_primitives.asPrimitive(idx)->geom());
-		int side = tri->classify(split);
+		int side = tri->classify(split.getAxis(), split.getPos());
 		classification.set(i - bound.parentMin, side);
 	}
 	
@@ -114,6 +114,16 @@ void BuildKdTreeContext::partition(const SplitCandidate & split, PartitionBound 
 const unsigned BuildKdTreeContext::getNumPrimitives() const
 {
 	return m_primitives.index();
+}
+
+const PrimitiveArray &BuildKdTreeContext::getPrimitives() const
+{
+	return m_primitives;
+}
+
+const IndexArray &BuildKdTreeContext::getIndices() const
+{
+	return m_indices;
 }
 
 const BoundingBox BuildKdTreeContext::calculateTightBBox()

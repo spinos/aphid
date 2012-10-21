@@ -10,7 +10,7 @@
 #pragma once
 #include <Vector3F.h>
 #include <BoundingBox.h>
-#include <SplitCandidate.h>
+
 class Triangle {
 public:
 	Triangle(const Vector3F& a, const Vector3F& b, const Vector3F& c, const Vector3F& n);
@@ -20,7 +20,7 @@ public:
 	char frontIntersects(const Vector3F& origin, const Vector3F& ray, float maxDistance, Vector3F &position, Vector3F &normal) const;
 	char backIntersects(const Vector3F& origin, const Vector3F& ray, float maxDistance, Vector3F &position, Vector3F &normal) const;
 	char closestHit(const Vector3F& origin, Vector3F& dest, float maxDistance) const;
-	int classify(const SplitCandidate & split) const;
+	int classify(const int & axis, const float &pos) const;
 	Vector3F getMin() const;
 	Vector3F getMax() const;
 	float getMin(int axis) const;

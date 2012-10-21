@@ -25,6 +25,11 @@ unsigned *IndexArray::asIndex(unsigned index)
 	return (unsigned *)at(index);
 }
 
+unsigned *IndexArray::asIndex(unsigned index) const
+{
+	return (unsigned *)at(index);
+}
+
 unsigned *IndexArray::asIndex()
 {
 	return (unsigned *)current();

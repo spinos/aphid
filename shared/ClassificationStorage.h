@@ -14,6 +14,8 @@ public:
 	ClassificationStorage();
 	~ClassificationStorage();
 	
+	void clear();
+	
 	void setPrimitiveCount(unsigned size);
 	void set(unsigned index, int value);
 	int get(unsigned index) const;

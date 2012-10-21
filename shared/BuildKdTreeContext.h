@@ -15,29 +15,8 @@
 #include <BaseMesh.h>
 #include <SplitCandidate.h>
 #include <ClassificationStorage.h>
-
-class PartitionBound {
-public:
-	PartitionBound() {}
-	
-	unsigned numPrimitive() {
-		return parentMax - parentMin;
-	}
-	
-	SplitCandidate bestSplit()
-	{
-		int axis = bbox.getLongestAxis();
-		float pos = bbox.getMin(axis) * 0.5f + bbox.getMax(axis) * 0.5f;
-		SplitCandidate candidate;
-		candidate.setPos(pos);
-		candidate.setAxis(axis);
-		return candidate;
-	}
-	
-	BoundingBox bbox;
-	unsigned parentMin, parentMax;
-	unsigned childMin, childMax;
-};
+#include <PartitionBound.h>
+#include <SplitEvent.h>
 
 class BuildKdTreeContext {
 public:
@@ -46,9 +25,11 @@ public:
 	void appendMesh(BaseMesh* mesh);	
 	void initIndices();
 	
-	void partition(const SplitCandidate & split, PartitionBound & bound, int leftSide);
+	void partition(const SplitEvent &split, PartitionBound & bound, int leftSide);
 	
 	const unsigned getNumPrimitives() const;
+	const PrimitiveArray &getPrimitives() const;
+	const IndexArray &getIndices() const;
 	
 	const BoundingBox calculateTightBBox();
 	

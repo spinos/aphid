@@ -203,10 +203,8 @@ char Triangle::closestHit(const Vector3F& origin, Vector3F& dest, float maxDista
 	return 1;
 }
 
-int Triangle::classify(const SplitCandidate & split) const
+int Triangle::classify(const int & axis, const float &pos) const
 {
-	float pos = split.getPos();
-	int axis = split.getAxis();
 	if(axis == 0) {
 		if(p0.x < pos && p1.x < pos && p2.x < pos)
 			return 0;

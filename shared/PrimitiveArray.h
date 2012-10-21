@@ -18,5 +18,6 @@ public:
 	virtual ~PrimitiveArray();
 	
 	Primitive * asPrimitive(unsigned index);
+	Primitive * asPrimitive(unsigned index) const;
 	Primitive * asPrimitive();
 };

@@ -69,6 +69,7 @@ void KdTree::addMesh(BaseMesh* mesh)
 void KdTree::create()
 {
 	ctx.initIndices();
+	
 	printf("ctx primitive count %d\n", ctx.getNumPrimitives());
 	BoundingBox bbox = ctx.calculateTightBBox();
 	printf("ctx tight bbox: %f %f %f - %f %f %f\n", bbox.m_min.x, bbox.m_min.y, bbox.m_min.z, bbox.m_max.x, bbox.m_max.y, bbox.m_max.z);
@@ -94,9 +95,9 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 		return;
 	}
 	
-	BoundingBox bbox = bound.bbox;
-
-	SplitCandidate plane = bound.bestSplit();
+	//m_builder.setBound(bound);
+	m_builder.calculateSplitEvents(bound);
+	SplitEvent plane = m_builder.bestSplit();
 	
 	//ctx.verbose();
 	
@@ -107,11 +108,11 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 	node->setLeft(branch);
 	node->setLeaf(false);
 	
+	ctx.partition(plane, bound, 1);
+	
 	BoundingBox leftBox, rightBox;
 
 	bound.bbox.split(plane.getAxis(), plane.getPos(), leftBox, rightBox);
-
-	ctx.partition(plane, bound, 1);
 	
 	PartitionBound subBound;
 	subBound.bbox = leftBox;

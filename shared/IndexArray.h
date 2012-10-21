@@ -17,5 +17,6 @@ public:
 	virtual ~IndexArray();
 	
 	unsigned *asIndex(unsigned index);
+	unsigned *asIndex(unsigned index) const;
 	unsigned *asIndex();
 };

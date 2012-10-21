@@ -13,6 +13,7 @@
 #include <BoundingBox.h>
 #include <Primitive.h>
 #include <BuildKdTreeContext.h>
+#include <KdTreeBuilder.h>
 
 typedef Primitive * primitivePtr;
 	
@@ -28,8 +29,11 @@ public:
 	void create();
 	
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level);
-	
-	BuildKdTreeContext ctx;
+
 	BoundingBox m_bbox;
+	
+private:	
+	KdTreeBuilder m_builder;
+	BuildKdTreeContext ctx;
 	KdTreeNode * m_root;
 };

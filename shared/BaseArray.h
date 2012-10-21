@@ -28,6 +28,7 @@ public:
 	
 	char *current();
 	char *at(unsigned index);
+	char *at(unsigned index) const;
 	
 	unsigned capacity() const;
 	unsigned numElementPerBlock() const;

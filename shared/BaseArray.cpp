@@ -93,6 +93,13 @@ char *BaseArray::at(unsigned index)
 	return m_blocks[blockIdx]->aligned + offset;
 }
 
+char *BaseArray::at(unsigned index) const
+{
+	unsigned blockIdx = index * m_elementSize / BASEARRAYBLOCK;
+	unsigned offset = index * m_elementSize % BASEARRAYBLOCK;
+	return m_blocks[blockIdx]->aligned + offset;
+}
+
 unsigned BaseArray::capacity() const 
 {
 	return numBlock() * numElementPerBlock();
