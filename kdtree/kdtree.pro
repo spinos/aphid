@@ -17,9 +17,10 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/Triangle.h \
                 ../shared/BoundingBox.h \
                 ../shared/BuildKdTreeContext.h \
+                ../shared/KdTreeNodeArray.h \
                 ../shared/PrimitiveArray.h \
                 ../shared/IndexArray.h \
-				../shared/BaseArray.h \
+                ../shared/BaseArray.h \
                 ../shared/ClassificationStorage.h \
                 ../shared/SplitCandidate.h \
                 glwidget.h \
@@ -43,9 +44,10 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/Triangle.cpp \
                 ../shared/BoundingBox.cpp \
                 ../shared/BuildKdTreeContext.cpp \
+                ../shared/KdTreeNodeArray.cpp \
                 ../shared/PrimitiveArray.cpp \
                 ../shared/IndexArray.cpp \
-				../shared/BaseArray.cpp \
+                ../shared/BaseArray.cpp \
                 ../shared/ClassificationStorage.cpp \
                 ../shared/SplitCandidate.cpp \
                 glwidget.cpp \

@@ -79,7 +79,6 @@ void KdTree::create()
 	bound.parentMin = 0;
 	bound.parentMax = ctx.getNumPrimitives();
 	
-	allocateTree(ctx.getNumPrimitives() * 3 + 2);
 	QElapsedTimer timer;
 	timer.start();
 
@@ -87,13 +86,13 @@ void KdTree::create()
 	ctx.verbose();
 	std::cout << "kd tree finished after " << timer.elapsed() << "ms\n";
 }
-
+/*
 void KdTree::allocateTree(unsigned num)
 {
 	m_nodePtr = new char[num * sizeof(KdTreeNode) + 31];
 	m_currentNode = (KdTreeNode *)(((unsigned long)m_nodePtr + 32) & (0xffffffff - 31));
 }
-
+*/
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level)
 {
 	if(bound.numPrimitive() < 64 || level == 18) {
@@ -109,7 +108,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 	
 	node->setAxis(plane.getAxis());
 	node->setSplitPos(plane.getPos());
-	KdTreeNode* branch = treeNodePair();
+	KdTreeNode* branch = ctx.createTreeBranch();
 	
 	node->setLeft(branch);
 	node->setLeaf(false);
@@ -139,7 +138,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 	}
 	
 }
-
+/*
 void KdTree::subdivide(KdTreeNode * node, primitivePtr * prim, BoundingBox bbox, unsigned first, unsigned last)
 {
 	//printf("first last: %i %i\n", first, last);
@@ -226,4 +225,4 @@ void KdTree::sort(primitivePtr * prim, unsigned first, unsigned last, int axis)
 	if(first<high) sort(prim,first,high, axis);
 	if(low<last) sort(prim,low,last, axis);
 }
-
+*/

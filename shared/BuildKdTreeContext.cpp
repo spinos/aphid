@@ -9,6 +9,12 @@
 
 #include "BuildKdTreeContext.h"
 BuildKdTreeContext::BuildKdTreeContext() {}
+BuildKdTreeContext::~BuildKdTreeContext() 
+{
+	m_primitives.clear();
+	m_indices.clear();
+	m_nodes.clear();
+}
 
 void BuildKdTreeContext::appendMesh(BaseMesh* mesh)
 {
@@ -116,7 +122,29 @@ const BoundingBox BuildKdTreeContext::calculateTightBBox()
 	return bbox;
 }
 
+KdTreeNode *BuildKdTreeContext::createTreeBranch()
+{
+	KdTreeNode *p = (KdTreeNode *)m_nodes.expandBy(2);
+	unsigned long * tmp = (unsigned long*)m_nodes.current();
+	tmp[1] = tmp[3] = 6;
+	m_nodes.next();
+	tmp = (unsigned long*)m_nodes.current();
+	tmp[1] = tmp[3] = 6;
+	m_nodes.next();
+	return p;
+}
+
+KdTreeNode *BuildKdTreeContext::firstTreeBranch()
+{
+	return m_nodes.asKdTreeNode(0);
+}
+
 void BuildKdTreeContext::verbose() const
 {
+	printf("primitives state:\n");
+	m_primitives.verbose();
+	printf("indices state:\n");
 	m_indices.verbose();
+	printf("nodes state:\n");
+	m_nodes.verbose();
 }

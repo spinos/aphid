@@ -11,6 +11,7 @@
 #include <BoundingBox.h>
 #include <PrimitiveArray.h>
 #include <IndexArray.h>
+#include <KdTreeNodeArray.h>
 #include <BaseMesh.h>
 #include <SplitCandidate.h>
 #include <ClassificationStorage.h>
@@ -50,6 +51,7 @@ public:
 class BuildKdTreeContext {
 public:
 	BuildKdTreeContext();
+	~BuildKdTreeContext();
 	void appendMesh(BaseMesh* mesh);	
 	void initIndices();
 	
@@ -58,10 +60,14 @@ public:
 	const unsigned getNumPrimitives() const;
 	
 	const BoundingBox calculateTightBBox();
+	
+	KdTreeNode *createTreeBranch();
+	KdTreeNode *firstTreeBranch();
 
 	void verbose() const;
 	
 private:
 	PrimitiveArray m_primitives;
 	IndexArray m_indices;
+	KdTreeNodeArray m_nodes;
 };
