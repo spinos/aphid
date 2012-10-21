@@ -8,33 +8,15 @@
  */
 
 #pragma once
-#include <vector>
+#include <BaseArray.h>
 #include <Primitive.h>
 #include <Triangle.h>
 
-class PrimitiveArray {
+class PrimitiveArray : public BaseArray {
 public:
 	PrimitiveArray();
 	virtual ~PrimitiveArray();
 	
-	void clear();
-	
-	Primitive * allocate(unsigned size);
-	void push_back(const Primitive &value);
-	
-	Primitive &operator[](unsigned index);
-	const Primitive &operator[](unsigned index) const;
-	
-	Triangle * asTriangle(unsigned index);
-	Triangle * asTriangle(unsigned index) const;
-		
-	unsigned size() const;
-	unsigned blockCount() const;
-	unsigned capacity() const;
-	
-	static unsigned BlockSize;
-	
-private:
-	std::vector<Primitive *> m_blocks;
-	unsigned m_pos;
+	Primitive * asPrimitive(unsigned index);
+	Primitive * asPrimitive();
 };

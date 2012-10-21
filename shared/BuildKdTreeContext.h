@@ -14,32 +14,54 @@
 #include <BaseMesh.h>
 #include <SplitCandidate.h>
 #include <ClassificationStorage.h>
+
+class PartitionBound {
+public:
+	PartitionBound() {}
+	
+	unsigned numPrimitive() {
+		return parentMax - parentMin;
+	}
+	
+	unsigned leftCount() {
+		return leftChildMax - leftChildMin;
+	}
+	
+	unsigned rightCount() {
+		return rightChildMax - rightChildMin;
+	}
+	
+	SplitCandidate bestSplit()
+	{
+		int axis = bbox.getLongestAxis();
+		float pos = bbox.getMin(axis) * 0.5f + bbox.getMax(axis) * 0.5f;
+		SplitCandidate candidate;
+		candidate.setPos(pos);
+		candidate.setAxis(axis);
+		return candidate;
+	}
+	
+	BoundingBox bbox;
+	unsigned parentMin, parentMax;
+	unsigned leftChildMin, leftChildMax;
+	unsigned rightChildMin, rightChildMax;
+};
+
 class BuildKdTreeContext {
 public:
 	BuildKdTreeContext();
 	void appendMesh(BaseMesh* mesh);	
 	void initIndices();
-	SplitCandidate bestSplit();
-	void partition(const SplitCandidate & split);
 	
-	void setBBox(const BoundingBox &bbox);
-	void setPrimitives(const PrimitiveArray &prims);
-	void setIndices(const IndexArray &indices);
+	void partition(const SplitCandidate & split, PartitionBound & bound);
 	
 	const unsigned getNumPrimitives() const;
-	const BoundingBox & getBBox() const;
-	const PrimitiveArray &getPrimitives() const;
-	const IndexArray &getLeftIndices() const;
-	const IndexArray &getRightIndices() const;
 	
-	const BoundingBox calculateTightBBox() const;
+	const BoundingBox calculateTightBBox();
 
 	void verbose() const;
 	
 private:
-	BoundingBox m_bbox;
 	PrimitiveArray m_primitives;
 	IndexArray m_indices;
-	IndexArray m_leftIndices;
-	IndexArray m_rightIndices;
 };

@@ -35,13 +35,13 @@ RandomMesh::RandomMesh(unsigned numFaces)
 		ry = float(random()%594) / 594.f - 0.5f;
 		rz = float(random()%794) / 794.f - 0.5f;
 		
-		p[i * 3 + 1] = p[i * 3] + Vector3F(rx, ry, rz) * 5.f;
+		p[i * 3 + 1] = p[i * 3] + Vector3F(rx, ry, rz) * 2.f;
 		
 		rx = float(random()%394) / 394.f - 0.5f;
 		ry = float(random()%594) / 594.f - 0.5f;
 		rz = float(random()%794) / 794.f - 0.5f;
 		
-		p[i * 3 + 2] = p[i * 3] + Vector3F(rx, ry, rz) * 5.f;
+		p[i * 3 + 2] = p[i * 3] + Vector3F(rx, ry, rz) * 2.f;
 	}
 }
 

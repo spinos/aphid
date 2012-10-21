@@ -27,7 +27,7 @@ public:
 	void create(BaseMesh* mesh);
 	
 	void allocateTree(unsigned num);
-	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx);
+	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level);
 
 	void subdivide(KdTreeNode * node, primitivePtr * prim, BoundingBox bbox, unsigned first, unsigned last);
 	

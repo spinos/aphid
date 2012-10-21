@@ -301,10 +301,10 @@ void ShapeDrawer::drawKdTree(const KdTree * tree)
 
 void ShapeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox)
 {
-	if(tree->isLeaf()) return;
 	Vector3F corner0 = bbox.m_min;
 	Vector3F corner1 = bbox.m_max;
-	
+	if(tree->isLeaf()) return;
+
 	glVertex3f(corner0.x, corner0.y, corner0.z);
 	glVertex3f(corner1.x, corner0.y, corner0.z);
 	glVertex3f(corner1.x, corner1.y, corner0.z);
@@ -336,6 +336,7 @@ void ShapeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bb
 	glVertex3f(corner1.x, corner1.y, corner0.z);
 	
 	int axis = tree->getAxis();
+	
 	if(axis == 0) {
 		corner0.x = corner1.x = tree->getSplitPos();
 		glVertex3f(corner0.x, corner0.y, corner0.z);

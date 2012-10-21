@@ -8,6 +8,7 @@
  */
 #include <iostream>
 #include "KdTree.h"
+#include <QElapsedTimer>
 
 const char *byte_to_binary(int x)
 {
@@ -58,36 +59,32 @@ KdTreeNode* KdTree::getRoot() const
 
 void KdTree::create(BaseMesh* mesh)
 {
+	unsigned nf = mesh->getNumFaces();
+	printf("num triangles %i \n", nf);
+	
 	BuildKdTreeContext ctx;
 	ctx.appendMesh(mesh);
 	ctx.initIndices();
 	printf("ctx primitive count %d\n", ctx.getNumPrimitives());
 	BoundingBox bbox = ctx.calculateTightBBox();
 	printf("ctx tight bbox: %f %f %f - %f %f %f\n", bbox.m_min.x, bbox.m_min.y, bbox.m_min.z, bbox.m_max.x, bbox.m_max.y, bbox.m_max.z);
-	m_bbox.setMin(-3.f, -3.f, -3.f);
-	m_bbox.setMax(35.f, 35.f, 36.f);
-	ctx.setBBox(m_bbox);
+	m_bbox = bbox;
 	
 	printf("node sz %d\n", (int)sizeof(KdTreeNode));
 	printf("prim sz %d\n", (int)sizeof(Primitive));
 	
-	unsigned nf = mesh->getNumFaces();
-	printf("num triangles %i \n", nf);
-	allocateTree(nf * 2 + 1);
-	subdivide(m_root, ctx);
+	PartitionBound bound;
+	bound.bbox = bbox;
+	bound.parentMin = 0;
+	bound.parentMax = ctx.getNumPrimitives();
 	
-	
-/*
-	primitivePtr * primitives = new primitivePtr[nf];
-	for(unsigned i = 0; i < nf; i++) {
-		primitives[i]->setGeom((char*)mesh->getFace(i));
-		primitives[i]->setType(0);
-	}
-	
-	subdivide(m_root, primitives, m_bbox, 0, nf - 1);
-		
-	for(unsigned i = 0; i < nf; i++) delete primitives[i];
-	delete[] primitives;*/
+	allocateTree(nf * 3 + 2);
+	QElapsedTimer timer;
+	timer.start();
+
+	subdivide(m_root, ctx, bound, 0);
+	ctx.verbose();
+	std::cout << "kd tree finished after " << timer.elapsed() << "ms\n";
 }
 
 void KdTree::allocateTree(unsigned num)
@@ -96,17 +93,18 @@ void KdTree::allocateTree(unsigned num)
 	m_currentNode = (KdTreeNode *)(((unsigned long)m_nodePtr + 32) & (0xffffffff - 31));
 }
 
-void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx)
+void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level)
 {
-	if(ctx.getNumPrimitives() < 64) {
+	if(bound.numPrimitive() < 64 || level == 15) {
 		node->setLeaf(true);
 		return;
 	}
 	
-	SplitCandidate plane = ctx.bestSplit();
-	plane.verbose();
-	ctx.partition(plane);
-	ctx.verbose();
+	BoundingBox bbox = bound.bbox;
+
+	SplitCandidate plane = bound.bestSplit();
+	ctx.partition(plane, bound);
+	//ctx.verbose();
 	
 	node->setAxis(plane.getAxis());
 	node->setSplitPos(plane.getPos());
@@ -116,22 +114,29 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx)
 	node->setLeaf(false);
 	
 	BoundingBox leftBox, rightBox;
+
+	bound.bbox.split(plane.getAxis(), plane.getPos(), leftBox, rightBox);
+
+	PartitionBound subBound;
+	subBound.bbox = leftBox;
+	subBound.parentMin = bound.leftChildMin;
+	subBound.parentMax = bound.leftChildMax;
 	
-	ctx.getBBox().split(plane.getAxis(), plane.getPos(), leftBox, rightBox);
+	if(subBound.numPrimitive() > 0) {
+		//printf("ctx partition left %i - %i\n", subBound.parentMin, subBound.parentMax);
+		subdivide(branch, ctx, subBound, level + 1);
+	}
 	
-	BuildKdTreeContext leftCtx;
-	leftCtx.setPrimitives(ctx.getPrimitives());
-	leftCtx.setIndices(ctx.getLeftIndices());
-	leftCtx.setBBox(leftBox);
+	PartitionBound rightBound;
+	rightBound.bbox = rightBox;
+	rightBound.parentMin = bound.rightChildMin;
+	rightBound.parentMax = bound.rightChildMax;
 	
+	if(rightBound.numPrimitive() > 0) {
+		//printf("ctx partition right %i - %i\n", rightBound.parentMin, rightBound.parentMax);
+		subdivide(branch + 1, ctx, rightBound, level + 1);
+	}
 	
-	BuildKdTreeContext rightCtx;
-	rightCtx.setPrimitives(ctx.getPrimitives());
-	rightCtx.setIndices(ctx.getRightIndices());
-	rightCtx.setBBox(rightBox);
-	
-	subdivide(branch, leftCtx);
-	subdivide(branch + 1, rightCtx);
 }
 
 void KdTree::subdivide(KdTreeNode * node, primitivePtr * prim, BoundingBox bbox, unsigned first, unsigned last)

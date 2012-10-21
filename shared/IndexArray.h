@@ -9,34 +9,13 @@
 
 #pragma once
 
-#include <vector>
+#include <BaseArray.h>
 
-class IndexArray {
+class IndexArray : public BaseArray {
 public:
 	IndexArray();
 	virtual ~IndexArray();
 	
-	void clear();
-	
-	unsigned * allocate(unsigned size);
-	void push_back(const unsigned &value);
-	
-	void start();
-	void take(const unsigned &value);
-	void resizeToTaken();
-	
-	unsigned &operator[](unsigned index);
-	const unsigned &operator[](unsigned index) const;
-		
-	unsigned size() const;
-	unsigned blockCount() const;
-	unsigned capacity() const;
-	unsigned taken() const;
-	
-	static unsigned BlockSize;
-	
-private:
-	std::vector<unsigned *> m_blocks;
-	unsigned m_pos;
-	unsigned m_current;
+	unsigned *asIndex(unsigned index);
+	unsigned *asIndex();
 };

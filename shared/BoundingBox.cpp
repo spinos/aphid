@@ -47,8 +47,8 @@ void BoundingBox::updateMax(const Vector3F & p)
 int BoundingBox::getLongestAxis() const
 {
 	Vector3F d = m_max - m_min;
-	if(d.y > d.x && d.y > d.z) return 1;
-	if(d.z > d.x && d.z > d.y) return 2;
+	if(d.y >= d.x && d.y >= d.z) return 1;
+	if(d.z >= d.x && d.z >= d.y) return 2;
 	return 0;
 }
 
@@ -76,8 +76,10 @@ const float BoundingBox::getMax(int axis) const
 
 void BoundingBox::split(int axis, float pos, BoundingBox & left, BoundingBox & right) const
 {
-	left = *this;
-	right = *this;
+	left.m_min = m_min;
+	left.m_max = m_max;
+	right.m_min = m_min;
+	right.m_max = m_max;
 	if(axis == 0) {
 		left.m_max.x = pos;
 		right.m_min.x = pos;
