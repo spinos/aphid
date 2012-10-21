@@ -115,8 +115,8 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 	
 	PartitionBound subBound;
 	subBound.bbox = leftBox;
-	subBound.parentMin = bound.leftChildMin;
-	subBound.parentMax = bound.leftChildMax;
+	subBound.parentMin = bound.childMin;
+	subBound.parentMax = bound.childMax;
 	
 	if(subBound.numPrimitive() > 0) {
 		//printf("ctx partition left %i - %i\n", subBound.parentMin, subBound.parentMax);
@@ -129,18 +129,17 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 	
 	ctx.partition(plane, bound, 0);
 	
-	PartitionBound rightBound;
-	rightBound.bbox = rightBox;
-	rightBound.parentMin = bound.rightChildMin;
-	rightBound.parentMax = bound.rightChildMax;
+	subBound.bbox = rightBox;
+	subBound.parentMin = bound.childMin;
+	subBound.parentMax = bound.childMax;
 	
-	if(rightBound.numPrimitive() > 0) {
+	if(subBound.numPrimitive() > 0) {
 		//printf("ctx partition right %i - %i\n", rightBound.parentMin, rightBound.parentMax);
-		subdivide(branch + 1, ctx, rightBound, level + 1);
+		subdivide(branch + 1, ctx, subBound, level + 1);
 	}
 	//printf("right return\n");
 	
-	ctx.releaseIndicesAt(rightBound.parentMin);
+	ctx.releaseIndicesAt(subBound.parentMin);
 }
 /*
 void KdTree::subdivide(KdTreeNode * node, primitivePtr * prim, BoundingBox bbox, unsigned first, unsigned last)

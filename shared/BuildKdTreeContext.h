@@ -24,14 +24,6 @@ public:
 		return parentMax - parentMin;
 	}
 	
-	unsigned leftCount() {
-		return leftChildMax - leftChildMin;
-	}
-	
-	unsigned rightCount() {
-		return rightChildMax - rightChildMin;
-	}
-	
 	SplitCandidate bestSplit()
 	{
 		int axis = bbox.getLongestAxis();
@@ -44,8 +36,7 @@ public:
 	
 	BoundingBox bbox;
 	unsigned parentMin, parentMax;
-	unsigned leftChildMin, leftChildMax;
-	unsigned rightChildMin, rightChildMax;
+	unsigned childMin, childMax;
 };
 
 class BuildKdTreeContext {
@@ -55,7 +46,6 @@ public:
 	void appendMesh(BaseMesh* mesh);	
 	void initIndices();
 	
-	void partition(const SplitCandidate & split, PartitionBound & bound);
 	void partition(const SplitCandidate & split, PartitionBound & bound, int leftSide);
 	
 	const unsigned getNumPrimitives() const;

@@ -42,72 +42,6 @@ void BuildKdTreeContext::initIndices()
 	m_indices.verbose();
 }
 
-void BuildKdTreeContext::partition(const SplitCandidate & split, PartitionBound & bound)
-{	
-	unsigned numPrim = bound.numPrimitive();
-	
-	ClassificationStorage classification;
-	classification.setPrimitiveCount(numPrim);
-	
-	for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
-		unsigned idx = *m_indices.asIndex(i);
-		const Triangle *tri = (Triangle *)(m_primitives.asPrimitive(idx)->geom());
-		int side = tri->classify(split);
-		classification.set(i - bound.parentMin, side);
-	}
-	
-	bound.leftChildMin = m_indices.index();
-
-	m_indices.expandBy(numPrim);
-	//printf("left side ");
-	for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
-		int side = classification.get(i - bound.parentMin);
-		if(side < 2) {
-			unsigned idx = *m_indices.asIndex(i);
-			unsigned *cur = m_indices.asIndex();
-			*cur = idx;
-			//printf(" %i ", *cur);
-			m_indices.next();
-		}
-	}
-	bound.rightChildMin = bound.leftChildMax = m_indices.index();
-	
-	printf("left index %i - %i\n", bound.leftChildMin, bound.leftChildMax);
-	
-	return;
-	//printf("right side ");
-	m_indices.expandBy(numPrim);
-	for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
-		int side = classification.get(i - bound.parentMin);
-		if(side > 0) {
-			unsigned idx = *m_indices.asIndex(i);
-			unsigned *cur = m_indices.asIndex();
-			*cur = idx;
-			//printf(" %i ", *cur);
-			m_indices.next();
-		}
-	}
-	bound.rightChildMax = m_indices.index();
-	
-	printf("right index %i - %i\n", bound.rightChildMin, bound.rightChildMax);
-	
-	//printf("ctx partition %i primitives\n", bound.numPrimitive());
-	
-	//unsigned leftCount = bound.leftCount();
-	//unsigned rightCount = bound.rightCount();
-	//printf("%i to left side\n", leftCount);
-	//for(unsigned i = bound.leftChildMin; i < bound.leftChildMax; i++) {
-	//	printf("%i ", *m_indices.asIndex(i));
-	//}
-	//printf("\n");
-	//printf("%i to right side\n", rightCount);
-	//for(unsigned i = bound.rightChildMin; i < bound.rightChildMax; i++) {
-	//	printf("%i ", *m_indices.asIndex(i));
-	//}
-	//printf("\n");
-	
-}
-
 void BuildKdTreeContext::partition(const SplitCandidate & split, PartitionBound & bound, int leftSide)
 {	
 	unsigned numPrim = bound.numPrimitive();
@@ -123,7 +57,7 @@ void BuildKdTreeContext::partition(const SplitCandidate & split, PartitionBound 
 	}
 	
 	if(leftSide == 1) {
-		bound.leftChildMin = m_indices.index();
+		bound.childMin = m_indices.index();
 
 		m_indices.expandBy(numPrim);
 		//printf("left side ");
@@ -137,12 +71,12 @@ void BuildKdTreeContext::partition(const SplitCandidate & split, PartitionBound 
 				m_indices.next();
 			}
 		}
-		bound.rightChildMin = bound.leftChildMax = m_indices.index();
+		bound.childMax = m_indices.index();
 		
-		//printf("left index %i - %i\n", bound.leftChildMin, bound.leftChildMax);
+		//printf("left index %i - %i\n", bound.childMin, bound.childMax);
 	}
 	else {
-		bound.rightChildMin = m_indices.index();
+		bound.childMin = m_indices.index();
 		//printf("right side ");
 		m_indices.expandBy(numPrim);
 		for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
@@ -155,9 +89,9 @@ void BuildKdTreeContext::partition(const SplitCandidate & split, PartitionBound 
 				m_indices.next();
 			}
 		}
-		bound.rightChildMax = m_indices.index();
+		bound.childMax = m_indices.index();
 	
-		//printf("right index %i - %i\n", bound.rightChildMin, bound.rightChildMax);
+		//printf("right index %i - %i\n", bound.childMin, bound.childMax);
 	}
 	
 	//printf("ctx partition %i primitives\n", bound.numPrimitive());
