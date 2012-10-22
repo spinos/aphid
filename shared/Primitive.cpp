@@ -6,27 +6,32 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include <iostream>
+#include <TypedEntity.h>
 #include "Primitive.h"
 
 Primitive::Primitive() {}
 
-void Primitive::setType(short t)
+void Primitive::setGeometry(char * data)
 {
-	m_type = t;
+	m_geometry = data;
 }
 
-const short &Primitive::getType() const
+char *Primitive::getGeometry()
 {
-	return m_type;
+	return m_geometry;
 }
 
-void Primitive::setGeom(char * data)
+void Primitive::setComponentIndex(const unsigned &idx)
 {
-	m_geom = data;
+	m_componentIndex = idx;
 }
 
-char *Primitive::geom()
+const unsigned Primitive::getComponentIndex() const
 {
-	return m_geom;
+	return m_componentIndex;
+}
+
+bool Primitive::isMeshGeometry() const
+{
+	return ((TypedEntity *)m_geometry)->isMesh();
 }

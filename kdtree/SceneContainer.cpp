@@ -14,10 +14,10 @@ SceneContainer::SceneContainer()
 {
 	fDrawer = new ShapeDrawer;
 	Vector3F cubeC(-10.f, 22.f, -8.f);
-	m_cube = new RandomMesh(323294, cubeC, 14.f, 0);
+	m_cube = new RandomMesh(110200, cubeC, 15.f, 0);
 	
 	Vector3F ballC(13.f, 3.f, 10.f);
-	m_ball = new RandomMesh(321294, ballC, 13.f, 1);
+	m_ball = new RandomMesh(151294, ballC, 13.f, 1);
 	
 	m_tree = new KdTree;
 	m_tree->addMesh(m_cube);

@@ -22,6 +22,6 @@ public:
 	const float getMax(int axis) const;
 	
 	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
-
+	void expandBy(const BoundingBox &another);
 	Vector3F m_min, m_max;
 };

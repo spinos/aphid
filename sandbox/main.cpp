@@ -1,6 +1,28 @@
 #include <iostream>
 #include <QElapsedTimer>
 #include <BaseArray.h>
+#include <TypedEntity.h>
+#include <Primitive.h>
+
+class Geom : public TypedEntity 
+{
+public:
+	Geom() {printf("geom init ");}
+};
+
+class Mesh : public Geom 
+{
+public:
+	Mesh() {printf("mesh init ");setMeshType();}
+};
+
+class Prim
+{
+public:
+	Prim() {}
+	unsigned geometry;
+	unsigned component;
+};
 
 class A
 {
@@ -69,7 +91,7 @@ int main (int argc, char * const argv[]) {
 	BaseArray a;
 	a.setElementSize(4);
 	a.expandBy(22);
-	unsigned n = 7553789;
+	unsigned n = 75589;
 	a.expandBy(n);
 	
 	a.verbose();
@@ -96,9 +118,9 @@ int main (int argc, char * const argv[]) {
 	std::cout << "combine operation took " << timer.elapsed() << " milliseconds\n";
 	
 	//a.expand(302001);
-	a.shrinkTo(222000);
+	a.shrinkTo(22200);
 	
-	for(unsigned j = 0; j < 222000; j++) {
+	for(unsigned j = 0; j < 22200; j++) {
 			float *p = (float *)a.at(j);
 			*p = 0.f;
 			
@@ -140,5 +162,19 @@ int main (int argc, char * const argv[]) {
 	
 	printf("a.getA() = %i\n", aa.getA());
 	
+	printf("2^20 is %i\n", (unsigned)1<<20);
+	printf("2^20 as bits %s\n", byte_to_binary(1<<20));
+	
+	Mesh m;
+	if(m.isMesh()) printf("m is mesh!\n");
+	
+	printf("size of mesh %i\n", sizeof(Mesh));
+	printf("size of prim %i\n", sizeof(Prim));
+	printf("size of Prim %i\n", sizeof(Primitive));
+	Prim prm;
+	prm.geometry = (unsigned)&m;
+	if(((const Mesh *)prm.geometry)->isMesh()) printf("geom of prm is mesh!\n");
+	
+
 	return 0;
 }

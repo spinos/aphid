@@ -14,7 +14,6 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/KdTreeNode.h \
                 ../shared/KdTree.h \
                 ../shared/Primitive.h \
-                ../shared/Triangle.h \
                 ../shared/BoundingBox.h \
                 ../shared/BuildKdTreeContext.h \
                 ../shared/KdTreeNodeArray.h \
@@ -23,8 +22,10 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/BaseArray.h \
                 ../shared/ClassificationStorage.h \
                 ../shared/SplitCandidate.h \
-				../shared/KdTreeBuilder.h \
-				../shared/SplitEvent.h \
+                ../shared/KdTreeBuilder.h \
+                ../shared/SplitEvent.h \
+                ../shared/TypedEntity.h \
+                ../shared/Geometry.h \
                 glwidget.h \
                 window.h \
                 SceneContainer.h \
@@ -43,7 +44,6 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/KdTreeNode.cpp \
                 ../shared/KdTree.cpp \
                 ../shared/Primitive.cpp \
-                ../shared/Triangle.cpp \
                 ../shared/BoundingBox.cpp \
                 ../shared/BuildKdTreeContext.cpp \
                 ../shared/KdTreeNodeArray.cpp \
@@ -52,8 +52,10 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/BaseArray.cpp \
                 ../shared/ClassificationStorage.cpp \
                 ../shared/SplitCandidate.cpp \
-				../shared/KdTreeBuilder.cpp \
-				../shared/SplitEvent.cpp \
+                ../shared/KdTreeBuilder.cpp \
+                ../shared/SplitEvent.cpp \
+                ../shared/TypedEntity.cpp \
+                ../shared/Geometry.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp \

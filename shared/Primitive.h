@@ -13,12 +13,14 @@ class Primitive {
 public:
 	Primitive();
 
-	void setType(short t);
-	const short & getType() const;
+	void setGeometry(char * data);
+	char *getGeometry();
 	
-	void setGeom(char * data);
-	char *geom();
+	void setComponentIndex(const unsigned &idx);
+	const unsigned getComponentIndex() const;
+	
+	bool isMeshGeometry() const;
 private:
-	unsigned m_type;
-	char *m_geom;
+	char *m_geometry;
+	unsigned m_componentIndex;
 };

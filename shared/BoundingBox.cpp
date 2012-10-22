@@ -93,3 +93,9 @@ void BoundingBox::split(int axis, float pos, BoundingBox & left, BoundingBox & r
 		right.m_min.z = pos;
 	}
 }
+
+void BoundingBox::expandBy(const BoundingBox &another)
+{
+	updateMin(another.m_min);
+	updateMax(another.m_max);
+}

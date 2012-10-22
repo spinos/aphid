@@ -64,19 +64,17 @@ void KdTree::addMesh(BaseMesh* mesh)
 	unsigned nf = mesh->getNumFaces();
 	printf("add %i triangles\n", nf);
 	ctx.appendMesh(mesh);
+	const BoundingBox box = mesh->calculateBBox();
+	m_bbox.expandBy(box);
 }
 
 void KdTree::create()
-{
-	ctx.initIndices();
-	
+{	
 	printf("ctx primitive count %d\n", ctx.getNumPrimitives());
-	BoundingBox bbox = ctx.calculateTightBBox();
-	printf("ctx tight bbox: %f %f %f - %f %f %f\n", bbox.m_min.x, bbox.m_min.y, bbox.m_min.z, bbox.m_max.x, bbox.m_max.y, bbox.m_max.z);
-	m_bbox = bbox;
+	printf("tree bbox: %f %f %f - %f %f %f\n", m_bbox.m_min.x, m_bbox.m_min.y, m_bbox.m_min.z, m_bbox.m_max.x, m_bbox.m_max.y, m_bbox.m_max.z);
 	
 	PartitionBound bound;
-	bound.bbox = bbox;
+	bound.bbox = m_bbox;
 	bound.parentMin = 0;
 	bound.parentMax = ctx.getNumPrimitives();
 	

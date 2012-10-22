@@ -23,15 +23,12 @@ public:
 	BuildKdTreeContext();
 	~BuildKdTreeContext();
 	void appendMesh(BaseMesh* mesh);	
-	void initIndices();
 	
 	void partition(const SplitEvent &split, PartitionBound & bound, int leftSide);
 	
 	const unsigned getNumPrimitives() const;
 	const PrimitiveArray &getPrimitives() const;
 	const IndexArray &getIndices() const;
-	
-	const BoundingBox calculateTightBBox();
 	
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();

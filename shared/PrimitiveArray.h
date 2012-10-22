@@ -10,7 +10,6 @@
 #pragma once
 #include <BaseArray.h>
 #include <Primitive.h>
-#include <Triangle.h>
 
 class PrimitiveArray : public BaseArray {
 public:

@@ -20,25 +20,20 @@ void BuildKdTreeContext::appendMesh(BaseMesh* mesh)
 {
 	unsigned numFace = mesh->getNumFaces();
 	m_primitives.expandBy(numFace);
+	m_indices.expandBy(numFace);
+	
 	for(unsigned i = 0; i < numFace; i++) {
 		Primitive *p = m_primitives.asPrimitive();
-		p->setGeom((char *)mesh->getFace(i));
-		p->setType(0);
+		p->setGeometry((char *)mesh);
+		p->setComponentIndex(i);
+		unsigned *dest = m_indices.asIndex();
+		*dest = m_primitives.index();
 		m_primitives.next();
+		m_indices.next();
 	}
+	printf("primitive state:\n");
 	m_primitives.verbose();
-}
-
-void BuildKdTreeContext::initIndices()
-{
-	unsigned numPrim = getNumPrimitives();
-	m_indices.expandBy(numPrim);
-	
-	for(unsigned i = 0; i < numPrim; i++) {
-		unsigned * p = m_indices.asIndex(i);
-		*p = i;
-	}
-	m_indices.setIndex(numPrim);
+	printf("indices state:\n");
 	m_indices.verbose();
 }
 
@@ -51,8 +46,10 @@ void BuildKdTreeContext::partition(const SplitEvent &split, PartitionBound & bou
 	
 	for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
 		unsigned idx = *m_indices.asIndex(i);
-		const Triangle *tri = (Triangle *)(m_primitives.asPrimitive(idx)->geom());
-		int side = tri->classify(split.getAxis(), split.getPos());
+		BaseMesh *mesh = (BaseMesh *)(m_primitives.asPrimitive(idx)->getGeometry());
+		const unsigned triIdx = m_primitives.asPrimitive(idx)->getComponentIndex();
+		const int side = mesh->faceOnSideOf(triIdx, split.getAxis(), split.getPos());
+		
 		classification.set(i - bound.parentMin, side);
 	}
 	
@@ -124,17 +121,6 @@ const PrimitiveArray &BuildKdTreeContext::getPrimitives() const
 const IndexArray &BuildKdTreeContext::getIndices() const
 {
 	return m_indices;
-}
-
-const BoundingBox BuildKdTreeContext::calculateTightBBox()
-{
-	BoundingBox bbox;
-	unsigned numPrim = getNumPrimitives();	
-	for(unsigned i = 0; i < numPrim; i++) {
-		Triangle *tri = (Triangle *)(m_primitives.asPrimitive(i)->geom());
-		tri->expandBBox(bbox);
-	}
-	return bbox;
 }
 
 KdTreeNode *BuildKdTreeContext::createTreeBranch()

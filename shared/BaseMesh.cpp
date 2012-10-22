@@ -10,7 +10,11 @@
 
 #include "BaseMesh.h"
 
-BaseMesh::BaseMesh() : _vertices(0), _indices(0) {}
+BaseMesh::BaseMesh() : _vertices(0), _indices(0) 
+{
+	setMeshType();
+}
+
 BaseMesh::~BaseMesh()
 {
 	if(_vertices) delete[] _vertices;
@@ -27,6 +31,43 @@ void BaseMesh::createIndices(unsigned num)
 {
 	_indices = new unsigned[num];
 	_numFaceVertices = num;
+}
+
+const BoundingBox BaseMesh::calculateBBox() const
+{
+	BoundingBox box;
+	const unsigned nv = getNumVertices();
+	for(unsigned i = 0; i < nv; i++) {
+		box.updateMin(_vertices[i]);
+		box.updateMax(_vertices[i]);
+	}
+	return box;
+}
+
+const int BaseMesh::faceOnSideOf(const unsigned idx, const int &axis, const float &pos) const
+{
+	Vector3F &p0 = _vertices[_indices[idx * 3]];
+	Vector3F &p1 = _vertices[_indices[idx * 3 + 1]];
+	Vector3F &p2 = _vertices[_indices[idx * 3 + 2]];
+	if(axis == 0) {
+		if(p0.x < pos && p1.x < pos && p2.x < pos)
+			return 0;
+		if(p0.x >= pos && p1.x >= pos && p2.x >= pos)
+			return 2;
+		return 1;
+	}
+	else if(axis == 1) {
+		if(p0.y < pos && p1.y < pos && p2.y < pos)
+			return 0;
+		if(p0.y >= pos && p1.y >= pos && p2.y >= pos)
+			return 2;
+		return 1;
+	}
+	if(p0.z < pos && p1.z < pos && p2.z < pos)
+		return 0;
+	if(p0.z >= pos && p1.z >= pos && p2.z >= pos)
+		return 2;
+	return 1;
 }
 
 Vector3F * BaseMesh::vertices()
@@ -63,7 +104,7 @@ unsigned * BaseMesh::getIndices() const
 {
 	return _indices;
 }
-
+/*
 Triangle * BaseMesh::getFace(unsigned idx) const
 {
 	Vector3F a = _vertices[_indices[idx * 3]];
@@ -74,5 +115,5 @@ Triangle * BaseMesh::getFace(unsigned idx) const
 	Vector3F n = ab.cross(ac);
 	n.normalize();
 	return new Triangle(a, b, c, n);
-}
+}*/
 //:~

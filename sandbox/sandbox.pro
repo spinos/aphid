@@ -1,7 +1,11 @@
 INCLUDEPATH += ../shared
 
-HEADERS       = ../shared/BaseArray.h
+HEADERS       = ../shared/BaseArray.h \
+                ../shared/TypedEntity.h \
+                ../shared/Primitive.h
 SOURCES       = ../shared/BaseArray.cpp \
+                ../shared/TypedEntity.cpp \
+                ../shared/Primitive.cpp \
                 main.cpp
 win32 {
 CONFIG += console

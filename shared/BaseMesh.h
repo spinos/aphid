@@ -9,14 +9,16 @@
 
 #pragma once
 #include <Vector3F.h>
-#include <Triangle.h>
-class BaseMesh {
+#include <Geometry.h>
+class BaseMesh : public Geometry {
 public:
 	BaseMesh();
 	virtual ~BaseMesh();
 	
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
+	const BoundingBox calculateBBox() const;
+	const int faceOnSideOf(const unsigned idx, const int &axis, const float &pos) const;
 	
 	Vector3F * vertices();
 	unsigned * indices();
@@ -27,11 +29,9 @@ public:
 	Vector3F * getVertices() const;
 	unsigned * getIndices() const;
 	unsigned getBufferedVertices() const;
-	Triangle * getFace(unsigned idx) const;
 	
 	Vector3F * _vertices;
 	unsigned * _indices;
 	unsigned _numVertices;
 	unsigned _numFaceVertices;
-	
 };
