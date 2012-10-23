@@ -3,6 +3,7 @@
 #include <BaseArray.h>
 #include <TypedEntity.h>
 #include <Primitive.h>
+#include <algorithm>
 
 class Geom : public TypedEntity 
 {
