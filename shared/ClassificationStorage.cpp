@@ -15,8 +15,7 @@ ClassificationStorage::ClassificationStorage()
 
 ClassificationStorage::~ClassificationStorage() 
 {
-	if (m_buffer)
-		delete[] m_buffer;
+	clear();
 }
 
 void ClassificationStorage::clear()
@@ -27,8 +26,7 @@ void ClassificationStorage::clear()
 
 void ClassificationStorage::setPrimitiveCount(unsigned size) 
 {
-	if (m_buffer)
-		delete[] m_buffer;
+	clear();
 	if (size > 0) {
 		m_bufferSize = size/4 + ((size % 4) > 0 ? 1 : 0);
 		m_buffer = new char[m_bufferSize];

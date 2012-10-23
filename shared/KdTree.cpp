@@ -26,7 +26,7 @@ const char *byte_to_binary(int x)
 KdTree::KdTree() 
 {
 	m_root = new KdTreeNode;
-	
+	SplitEvent::Context = &ctx;
 	printf("axis mask        %s\n", byte_to_binary(KdTreeNode::EInnerAxisMask));
 	printf("type        mask %s\n", byte_to_binary(KdTreeNode::ETypeMask));
 	printf("indirection mask %s\n", byte_to_binary(KdTreeNode::EIndirectionMask));
@@ -46,6 +46,7 @@ KdTree::KdTree()
 	
 	printf("node sz %d\n", (int)sizeof(KdTreeNode));
 	printf("prim sz %d\n", (int)sizeof(Primitive));
+	printf("event sz %d\n", (int)sizeof(SplitEvent));
 	
 }
 
@@ -88,29 +89,31 @@ void KdTree::create()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level)
 {
-	if(bound.numPrimitive() < 64 || level == 15) {
+	if(bound.numPrimitive() < 64 || level == 18) {
 		node->setLeaf(true);
 		return;
 	}
 	
-	//m_builder.setBound(bound);
-	m_builder.calculateSplitEvents(bound);
-	SplitEvent plane = m_builder.bestSplit();
+	//printf("subdiv begin %i\n", level);
+	
+	KdTreeBuilder builder;
+	builder.calculateSplitEvents(bound);
+	const SplitEvent *plane = builder.bestSplit();
 	
 	//ctx.verbose();
 	
-	node->setAxis(plane.getAxis());
-	node->setSplitPos(plane.getPos());
+	node->setAxis(plane->getAxis());
+	node->setSplitPos(plane->getPos());
 	KdTreeNode* branch = ctx.createTreeBranch();
 	
 	node->setLeft(branch);
 	node->setLeaf(false);
 	
-	ctx.partition(plane, bound, 1);
+	ctx.partition(*plane, bound, 1);
 	
 	BoundingBox leftBox, rightBox;
 
-	bound.bbox.split(plane.getAxis(), plane.getPos(), leftBox, rightBox);
+	bound.bbox.split(plane->getAxis(), plane->getPos(), leftBox, rightBox);
 	
 	PartitionBound subBound;
 	subBound.bbox = leftBox;
@@ -122,11 +125,9 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 		subdivide(branch, ctx, subBound, level + 1);
 	}
 	
-	//printf("left return\n");
-		
 	ctx.releaseIndicesAt(subBound.parentMin);
 	
-	ctx.partition(plane, bound, 0);
+	ctx.partition(*plane, bound, 0);
 	
 	subBound.bbox = rightBox;
 	subBound.parentMin = bound.childMin;
@@ -136,9 +137,10 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 		//printf("ctx partition right %i - %i\n", rightBound.parentMin, rightBound.parentMax);
 		subdivide(branch + 1, ctx, subBound, level + 1);
 	}
-	//printf("right return\n");
-	
+
 	ctx.releaseIndicesAt(subBound.parentMin);
+	
+	//printf("subdiv end %i\n", level);
 }
 /*
 void KdTree::subdivide(KdTreeNode * node, primitivePtr * prim, BoundingBox bbox, unsigned first, unsigned last)

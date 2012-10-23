@@ -14,7 +14,7 @@ class PartitionBound {
 public:
 	PartitionBound() {}
 	
-	unsigned numPrimitive() const {
+	const unsigned numPrimitive() const {
 		return parentMax - parentMin;
 	}
 	

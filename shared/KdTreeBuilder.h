@@ -19,7 +19,7 @@ public:
 	
 	void calculateSplitEvents(const PartitionBound &bound);
 	
-	SplitEvent &bestSplit();
+	const SplitEvent *bestSplit() const;
 		
 private:
 	SplitEvent m_event;

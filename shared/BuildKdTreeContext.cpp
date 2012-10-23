@@ -40,18 +40,8 @@ void BuildKdTreeContext::appendMesh(BaseMesh* mesh)
 void BuildKdTreeContext::partition(const SplitEvent &split, PartitionBound & bound, int leftSide)
 {	
 	unsigned numPrim = bound.numPrimitive();
-
-	ClassificationStorage classification;
-	classification.setPrimitiveCount(numPrim);
 	
-	for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
-		unsigned idx = *m_indices.asIndex(i);
-		BaseMesh *mesh = (BaseMesh *)(m_primitives.asPrimitive(idx)->getGeometry());
-		const unsigned triIdx = m_primitives.asPrimitive(idx)->getComponentIndex();
-		const int side = mesh->faceOnSideOf(triIdx, split.getAxis(), split.getPos());
-		
-		classification.set(i - bound.parentMin, side);
-	}
+	const ClassificationStorage *classification = split.getSides();
 	
 	if(leftSide == 1) {
 		bound.childMin = m_indices.index();
@@ -59,7 +49,7 @@ void BuildKdTreeContext::partition(const SplitEvent &split, PartitionBound & bou
 		m_indices.expandBy(numPrim);
 		//printf("left side ");
 		for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
-			int side = classification.get(i - bound.parentMin);
+			int side = classification->get(i - bound.parentMin);
 			if(side < 2) {
 				unsigned idx = *m_indices.asIndex(i);
 				unsigned *cur = m_indices.asIndex();
@@ -77,7 +67,7 @@ void BuildKdTreeContext::partition(const SplitEvent &split, PartitionBound & bou
 		//printf("right side ");
 		m_indices.expandBy(numPrim);
 		for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
-			int side = classification.get(i - bound.parentMin);
+			int side = classification->get(i - bound.parentMin);
 			if(side > 0) {
 				unsigned idx = *m_indices.asIndex(i);
 				unsigned *cur = m_indices.asIndex();
@@ -119,6 +109,16 @@ const PrimitiveArray &BuildKdTreeContext::getPrimitives() const
 }
 
 const IndexArray &BuildKdTreeContext::getIndices() const
+{
+	return m_indices;
+}
+
+PrimitiveArray &BuildKdTreeContext::primitives()
+{
+	return m_primitives;
+}
+	
+IndexArray &BuildKdTreeContext::indices()
 {
 	return m_indices;
 }

@@ -33,7 +33,6 @@ public:
 	BoundingBox m_bbox;
 	
 private:	
-	KdTreeBuilder m_builder;
 	BuildKdTreeContext ctx;
-	KdTreeNode * m_root;
+	KdTreeNode *m_root;
 };

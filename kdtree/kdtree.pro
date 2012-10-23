@@ -21,7 +21,6 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/IndexArray.h \
                 ../shared/BaseArray.h \
                 ../shared/ClassificationStorage.h \
-                ../shared/SplitCandidate.h \
                 ../shared/KdTreeBuilder.h \
                 ../shared/SplitEvent.h \
                 ../shared/TypedEntity.h \
@@ -51,7 +50,6 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/IndexArray.cpp \
                 ../shared/BaseArray.cpp \
                 ../shared/ClassificationStorage.cpp \
-                ../shared/SplitCandidate.cpp \
                 ../shared/KdTreeBuilder.cpp \
                 ../shared/SplitEvent.cpp \
                 ../shared/TypedEntity.cpp \

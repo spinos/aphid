@@ -13,7 +13,6 @@
 #include <IndexArray.h>
 #include <KdTreeNodeArray.h>
 #include <BaseMesh.h>
-#include <SplitCandidate.h>
 #include <ClassificationStorage.h>
 #include <PartitionBound.h>
 #include <SplitEvent.h>
@@ -29,6 +28,9 @@ public:
 	const unsigned getNumPrimitives() const;
 	const PrimitiveArray &getPrimitives() const;
 	const IndexArray &getIndices() const;
+	
+	PrimitiveArray &primitives();
+	IndexArray &indices();
 	
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
