@@ -14,7 +14,7 @@ public:
 	Primitive();
 
 	void setGeometry(char * data);
-	char *getGeometry();
+	char *getGeometry() const;
 	
 	void setComponentIndex(const unsigned &idx);
 	const unsigned getComponentIndex() const;

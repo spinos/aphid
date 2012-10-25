@@ -30,8 +30,6 @@ void ClassificationStorage::setPrimitiveCount(unsigned size)
 	if (size > 0) {
 		m_bufferSize = size/4 + ((size % 4) > 0 ? 1 : 0);
 		m_buffer = new char[m_bufferSize];
-	} else {
-		m_buffer = 0;
 	}
 }
 

@@ -56,4 +56,5 @@ private:
 	std::vector<PtrTup *> m_blocks;
 	unsigned m_elementSize;
 	unsigned m_current;
+	char *m_ptr;
 };

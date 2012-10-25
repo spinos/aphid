@@ -16,6 +16,7 @@ class BuildKdTreeContext;
 
 class SplitEvent {
 public:
+	typedef Primitive* PrimitivePtr;
 	SplitEvent();
 	~SplitEvent();
 	
@@ -27,13 +28,13 @@ public:
 	float getPos() const;
 	int getAxis() const;
 	
-	void calculateSides(const PartitionBound &bound);
-	const ClassificationStorage *getSides() const;
+	void calculateSides(const PrimitivePtr *primitives, const unsigned &count);
 	
 	static int Dimension;
-	static BuildKdTreeContext *Context;
+	//static BuildKdTreeContext *Context;
+	//ClassificationStorage m_sides;
+	
 private:
-	ClassificationStorage m_sides;
 	float m_pos;
 	int m_axis;
 };

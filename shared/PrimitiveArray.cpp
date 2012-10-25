@@ -25,7 +25,7 @@ Primitive *PrimitiveArray::asPrimitive(unsigned index)
 	return (Primitive *)at(index);
 }
 
-Primitive * PrimitiveArray::asPrimitive(unsigned index) const
+Primitive *PrimitiveArray::asPrimitive(unsigned index) const
 {
 	return (Primitive *)at(index);
 }

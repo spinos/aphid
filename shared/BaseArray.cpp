@@ -13,6 +13,8 @@
 
 BaseArray::BaseArray() 
 {
+	m_blocks.push_back(new PtrTup);
+	m_ptr = m_blocks[0]->aligned;
 	m_current = 0;
 	m_elementSize = 1;
 }
@@ -57,11 +59,18 @@ void BaseArray::shrinkTo(unsigned size)
 void BaseArray::begin()
 {
 	m_current = 0;
+	m_ptr = m_blocks[0]->aligned;
 }
 
 void BaseArray::next()
 {
 	m_current += m_elementSize;
+	if(m_current % BASEARRAYBLOCK == 0) {
+		unsigned blockIdx = m_current / BASEARRAYBLOCK;
+		m_ptr = m_blocks[blockIdx]->aligned;
+	}
+	else 
+		m_ptr += m_elementSize;
 }
 
 char BaseArray::end() const
@@ -77,13 +86,14 @@ unsigned BaseArray::index() const
 void BaseArray::setIndex(unsigned index)
 {
 	m_current = index * m_elementSize;
+	unsigned blockIdx = m_current / BASEARRAYBLOCK;
+	unsigned offset = m_current % BASEARRAYBLOCK;
+	m_ptr = m_blocks[blockIdx]->aligned + offset;
 }
 
 char *BaseArray::current()
 {
-	unsigned blockIdx = m_current / BASEARRAYBLOCK;
-	unsigned offset = m_current % BASEARRAYBLOCK;
-	return m_blocks[blockIdx]->aligned + offset;
+	return m_ptr;
 }
 
 char *BaseArray::at(unsigned index)

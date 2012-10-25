@@ -3,6 +3,7 @@
 #include <BaseArray.h>
 #include <TypedEntity.h>
 #include <Primitive.h>
+#include <ClassificationStorage.h>
 #include <algorithm>
 
 class Geom : public TypedEntity 
@@ -92,7 +93,7 @@ int main (int argc, char * const argv[]) {
 	BaseArray a;
 	a.setElementSize(4);
 	a.expandBy(22);
-	unsigned n = 75589;
+	unsigned n = 3859;
 	a.expandBy(n);
 	
 	a.verbose();
@@ -105,26 +106,68 @@ int main (int argc, char * const argv[]) {
 	}
 	
 	float sum = 0.f;
-	
-	//for(unsigned i = 0; i < n; i++) {
-		for(unsigned j = 0; j < n; j++) {
+/*	
+	for(unsigned i = 0; i < n; i++) {
+		for(unsigned j = 0; j < i; j++) {
 			float *p = (float *)a.at(j);
 			sum += *p;
 			
 		}
-	//}
+	}
 	
 	printf("sum %f \n", sum);
 	
-	std::cout << "combine operation took " << timer.elapsed() << " milliseconds\n";
+	std::cout << "blocked combine operation took " << timer.elapsed() << " milliseconds\n";
+*/	
+	timer.start();
 	
+	float *smp = new float[n];
+	for(unsigned i = 0; i < n; i++) {
+		smp[i] = 2.001f;
+	}
+	
+	sum = 0.f;
+	for(unsigned i = 0; i < n; i++) {
+		for(unsigned j = 0; j < i; j++) {
+			sum += smp[j];
+			
+		}
+	}
+	printf("sum %f \n", sum);
+	std::cout << "fixed combine operation took " << timer.elapsed() << " milliseconds\n";
+	
+	timer.start();
+	sum = 0.f;
+	for(unsigned i = 0; i < n; i++) {
+		for(unsigned j = 0; j < i; j++) {
+			float *p = (float *)a.at(j);
+			sum += *p;
+		}
+	}
+	printf("sum %f \n", sum);
+	std::cout << "blocked set index combine operation took " << timer.elapsed() << " milliseconds\n";
+	
+	timer.start();
+	sum = 0.f;
+	
+	for(unsigned i = 0; i < n; i++) {
+		a.setIndex(0);
+		for(unsigned j = 0; j < i; j++) {
+			float *p = (float *)a.current();
+			sum += *p;
+			a.next();
+		}
+	}
+	printf("sum %f \n", sum);
+	std::cout << "blocked current combine operation took " << timer.elapsed() << " milliseconds\n";
+	
+
 	//a.expand(302001);
-	a.shrinkTo(22200);
+	a.shrinkTo(n/3);
 	
-	for(unsigned j = 0; j < 22200; j++) {
+	for(unsigned j = 0; j < n/3; j++) {
 			float *p = (float *)a.at(j);
 			*p = 0.f;
-			
 		}
 
 	a.verbose();
@@ -176,6 +219,42 @@ int main (int argc, char * const argv[]) {
 	prm.geometry = (unsigned)&m;
 	if(((const Mesh *)prm.geometry)->isMesh()) printf("geom of prm is mesh!\n");
 	
-
+	
+	ClassificationStorage *sides = new ClassificationStorage[32];
+	sides[13].setPrimitiveCount(1983);
+	sides[13].set(99, 2);
+	printf("classify[13][99] = %i\n", sides[13].get(99));
+	
+	delete[] sides;
+	
+	unsigned nc = 509274;
+	
+	char *eightbitC = new char[nc];
+	
+	timer.start();
+	for(unsigned i=0; i < nc; i++) {
+		eightbitC[i] = i % 4;
+	}
+	
+	for(unsigned i=0; i < nc; i++) {
+		int x = eightbitC[i];
+	}
+	std::cout << "8 bit classification operation took " << timer.elapsed() << " milliseconds\n";
+	
+	delete[] eightbitC;
+	
+	ClassificationStorage twobitC;
+	twobitC.setPrimitiveCount(nc);
+	
+	timer.start();
+	for(unsigned i=0; i < nc; i++) {
+		twobitC.set(i, i % 4);
+	}
+	
+	for(unsigned i=0; i < nc; i++) {
+		int x = twobitC.get(i);
+	}
+	std::cout << "2 bit classification operation took " << timer.elapsed() << " milliseconds\n";
+	
 	return 0;
 }

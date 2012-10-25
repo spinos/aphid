@@ -37,67 +37,6 @@ void BuildKdTreeContext::appendMesh(BaseMesh* mesh)
 	m_indices.verbose();
 }
 
-void BuildKdTreeContext::partition(const SplitEvent &split, PartitionBound & bound, int leftSide)
-{	
-	unsigned numPrim = bound.numPrimitive();
-	
-	const ClassificationStorage *classification = split.getSides();
-	
-	if(leftSide == 1) {
-		bound.childMin = m_indices.index();
-
-		m_indices.expandBy(numPrim);
-		//printf("left side ");
-		for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
-			int side = classification->get(i - bound.parentMin);
-			if(side < 2) {
-				unsigned idx = *m_indices.asIndex(i);
-				unsigned *cur = m_indices.asIndex();
-				*cur = idx;
-				//printf(" %i ", *cur);
-				m_indices.next();
-			}
-		}
-		bound.childMax = m_indices.index();
-		
-		//printf("left index %i - %i\n", bound.childMin, bound.childMax);
-	}
-	else {
-		bound.childMin = m_indices.index();
-		//printf("right side ");
-		m_indices.expandBy(numPrim);
-		for(unsigned i = bound.parentMin; i < bound.parentMax; i++) {
-			int side = classification->get(i - bound.parentMin);
-			if(side > 0) {
-				unsigned idx = *m_indices.asIndex(i);
-				unsigned *cur = m_indices.asIndex();
-				*cur = idx;
-				//printf(" %i ", *cur);
-				m_indices.next();
-			}
-		}
-		bound.childMax = m_indices.index();
-	
-		//printf("right index %i - %i\n", bound.childMin, bound.childMax);
-	}
-	
-	//printf("ctx partition %i primitives\n", bound.numPrimitive());
-	
-	//unsigned leftCount = bound.leftCount();
-	//unsigned rightCount = bound.rightCount();
-	//printf("%i to left side\n", leftCount);
-	//for(unsigned i = bound.leftChildMin; i < bound.leftChildMax; i++) {
-	//	printf("%i ", *m_indices.asIndex(i));
-	//}
-	//printf("\n");
-	//printf("%i to right side\n", rightCount);
-	//for(unsigned i = bound.rightChildMin; i < bound.rightChildMax; i++) {
-	//	printf("%i ", *m_indices.asIndex(i));
-	//}
-	//printf("\n");
-	
-}
-
 const unsigned BuildKdTreeContext::getNumPrimitives() const
 {
 	return m_primitives.index();
@@ -140,10 +79,12 @@ KdTreeNode *BuildKdTreeContext::firstTreeBranch()
 	return m_nodes.asKdTreeNode(0);
 }
 
-void BuildKdTreeContext::releaseIndicesAt(unsigned loc)
+void BuildKdTreeContext::releaseAt(unsigned loc)
 {
 	m_indices.shrinkTo(loc);
 	m_indices.setIndex(loc);
+	m_primitives.shrinkTo(loc);
+	m_primitives.setIndex(loc);
 }
 
 void BuildKdTreeContext::verbose() const

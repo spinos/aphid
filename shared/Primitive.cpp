@@ -16,7 +16,7 @@ void Primitive::setGeometry(char * data)
 	m_geometry = data;
 }
 
-char *Primitive::getGeometry()
+char *Primitive::getGeometry() const
 {
 	return m_geometry;
 }

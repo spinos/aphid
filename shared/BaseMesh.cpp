@@ -46,26 +46,29 @@ const BoundingBox BaseMesh::calculateBBox() const
 
 const int BaseMesh::faceOnSideOf(const unsigned idx, const int &axis, const float &pos) const
 {
-	Vector3F &p0 = _vertices[_indices[idx * 3]];
-	Vector3F &p1 = _vertices[_indices[idx * 3 + 1]];
-	Vector3F &p2 = _vertices[_indices[idx * 3 + 2]];
+	unsigned *trii = &_indices[idx * 3];
+	Vector3F *p0 = &_vertices[*trii];
+	trii++;
+	Vector3F *p1 = &_vertices[*trii];
+	trii++;
+	Vector3F *p2 = &_vertices[*trii];
 	if(axis == 0) {
-		if(p0.x < pos && p1.x < pos && p2.x < pos)
+		if(p0->x < pos && p1->x < pos && p2->x < pos)
 			return 0;
-		if(p0.x >= pos && p1.x >= pos && p2.x >= pos)
+		if(p0->x >= pos && p1->x >= pos && p2->x >= pos)
 			return 2;
 		return 1;
 	}
 	else if(axis == 1) {
-		if(p0.y < pos && p1.y < pos && p2.y < pos)
+		if(p0->y < pos && p1->y < pos && p2->y < pos)
 			return 0;
-		if(p0.y >= pos && p1.y >= pos && p2.y >= pos)
+		if(p0->y >= pos && p1->y >= pos && p2->y >= pos)
 			return 2;
 		return 1;
 	}
-	if(p0.z < pos && p1.z < pos && p2.z < pos)
+	if(p0->z < pos && p1->z < pos && p2->z < pos)
 		return 0;
-	if(p0.z >= pos && p1.z >= pos && p2.z >= pos)
+	if(p0->z >= pos && p1->z >= pos && p2->z >= pos)
 		return 2;
 	return 1;
 }

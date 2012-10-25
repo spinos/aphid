@@ -23,8 +23,6 @@ public:
 	~BuildKdTreeContext();
 	void appendMesh(BaseMesh* mesh);	
 	
-	void partition(const SplitEvent &split, PartitionBound & bound, int leftSide);
-	
 	const unsigned getNumPrimitives() const;
 	const PrimitiveArray &getPrimitives() const;
 	const IndexArray &getIndices() const;
@@ -34,7 +32,7 @@ public:
 	
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
-	void releaseIndicesAt(unsigned loc);
+	void releaseAt(unsigned loc);
 
 	void verbose() const;
 	
