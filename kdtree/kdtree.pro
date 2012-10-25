@@ -1,5 +1,5 @@
 INCLUDEPATH += ../shared
-
+CONFIG += release
 HEADERS       = ../shared/Vector3F.h \
                 ../shared/Matrix44F.h \
                 ../shared/BaseCamera.h \

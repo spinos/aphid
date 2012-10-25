@@ -64,7 +64,7 @@ void KdTreeBuilder::calculateSplitEvents(const PartitionBound &bound)
 			eventIdx++;
 		}
 	}
-	
+
 	for(unsigned j = 0; j < m_numPrimitive; j++) {
 		unsigned &primIdx = m_indices[j];
 		BoundingBox &primBox = primBoxes[primIdx];

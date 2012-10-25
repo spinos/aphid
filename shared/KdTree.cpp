@@ -47,7 +47,7 @@ KdTree::KdTree()
 	printf("node sz %d\n", (int)sizeof(KdTreeNode));
 	printf("prim sz %d\n", (int)sizeof(Primitive));
 	printf("event sz %d\n", (int)sizeof(SplitEvent));
-	
+	printf("bbox sz %d\n", (int)sizeof(BoundingBox));
 }
 
 KdTree::~KdTree() 

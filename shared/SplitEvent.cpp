@@ -17,11 +17,6 @@ SplitEvent::SplitEvent()
 	
 }
 
-SplitEvent::~SplitEvent() 
-{
-	//printf("event quit\n");
-}
-
 void SplitEvent::setPos(float val)
 {
 	m_pos = val;

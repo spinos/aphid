@@ -18,7 +18,6 @@ class SplitEvent {
 public:
 	typedef Primitive* PrimitivePtr;
 	SplitEvent();
-	~SplitEvent();
 	
 	void setPos(float val);
 	void setAxis(int val);
@@ -33,8 +32,8 @@ public:
 	static int Dimension;
 	
 private:
-	BoundingBox m_leftTightBBox, m_rightTightBBox;
-	
+	BoundingBox m_leftTightBBox;
+	BoundingBox m_rightTightBBox;
 	float m_pos;
 	int m_axis;
 };
