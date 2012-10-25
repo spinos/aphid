@@ -81,15 +81,16 @@ void KdTree::create()
 	
 	QElapsedTimer timer;
 	timer.start();
-
+	ctx.createPrimitiveBoxes();
 	subdivide(m_root, ctx, bound, 0);
+	ctx.clearPrimitiveBoxes();
 	ctx.verbose();
 	std::cout << "kd tree finished after " << timer.elapsed() << "ms\n";
 }
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level)
 {
-	if(bound.numPrimitive() < 64 || level == 15) {
+	if(bound.numPrimitive() < 64 || level == 1) {
 		node->setLeaf(true);
 		return;
 	}
@@ -97,7 +98,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 	//printf("subdiv begin %i\n", level);
 	
 	KdTreeBuilder builder(ctx, bound);
-	builder.calculateSplitEvents(bound);
+	//builder.createSplitEvents(bound);
 	const SplitEvent *plane = builder.bestSplit();
 	
 	//ctx.verbose();

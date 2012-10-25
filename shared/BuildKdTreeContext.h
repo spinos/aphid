@@ -33,11 +33,17 @@ public:
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
 	void releaseAt(unsigned loc);
+	
+	void createPrimitiveBoxes();
+	void clearPrimitiveBoxes();
 
 	void verbose() const;
+	
+	BoundingBox *m_primitiveBoxes;
 	
 private:
 	PrimitiveArray m_primitives;
 	IndexArray m_indices;
 	KdTreeNodeArray m_nodes;
+	
 };

@@ -20,21 +20,21 @@ public:
 	SplitEvent();
 	~SplitEvent();
 	
-	void clear();
-	
 	void setPos(float val);
 	void setAxis(int val);
 	
 	float getPos() const;
 	int getAxis() const;
 	
-	void calculateSides(const PrimitivePtr *primitives, const unsigned &count);
+	void calculateTightBBoxes(const BoundingBox &box);
+	
+	int side(const BoundingBox &box) const;
 	
 	static int Dimension;
-	//static BuildKdTreeContext *Context;
-	//ClassificationStorage m_sides;
 	
 private:
+	BoundingBox m_leftTightBBox, m_rightTightBBox;
+	
 	float m_pos;
 	int m_axis;
 };

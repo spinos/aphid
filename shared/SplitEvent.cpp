@@ -14,15 +14,12 @@ int SplitEvent::Dimension = 3;
 
 SplitEvent::SplitEvent() 
 {
+	
 }
 
 SplitEvent::~SplitEvent() 
 {
 	//printf("event quit\n");
-}
-
-void SplitEvent::clear()
-{
 }
 
 void SplitEvent::setPos(float val)
@@ -45,16 +42,24 @@ int SplitEvent::getAxis() const
 	return m_axis;
 }
 
-void SplitEvent::calculateSides(const PrimitivePtr *primitives, const unsigned &count)
+int SplitEvent::side(const BoundingBox &box) const
 {
-	//m_sides.setPrimitiveCount(count);
-	for(unsigned i = 0; i < count; i++) {
-		Primitive *prim = primitives[i];
-		BaseMesh *mesh = (BaseMesh *)(prim->getGeometry());
-		unsigned triIdx = prim->getComponentIndex();
-		int side = mesh->faceOnSideOf(triIdx, getAxis(), getPos());
-		//m_sides.set(i, side);
-		//m_sides.set(i, 2);
+	int side = 1;
+	if(box.getMax(m_axis) < m_pos)
+		side = 0;
+	else if(box.getMin(m_axis) >= m_pos)
+		side = 2;
+	return side;
+}
+
+void SplitEvent::calculateTightBBoxes(const BoundingBox &box)
+{
+	const int s = side(box);
+	if(s < 2) {
+		m_leftTightBBox.expandBy(box);
+	}
+	if(s > 1) {
+		m_rightTightBBox.expandBy(box);
 	}
 }
 

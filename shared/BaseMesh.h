@@ -18,7 +18,8 @@ public:
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
 	const BoundingBox calculateBBox() const;
-	const int faceOnSideOf(const unsigned idx, const int &axis, const float &pos) const;
+	const BoundingBox calculateBBox(const unsigned &idx) const;
+	const int faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const;
 	
 	Vector3F * vertices();
 	unsigned * indices();

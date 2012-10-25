@@ -87,6 +87,26 @@ void BuildKdTreeContext::releaseAt(unsigned loc)
 	m_primitives.setIndex(loc);
 }
 
+void BuildKdTreeContext::createPrimitiveBoxes()
+{
+	const unsigned numPrim = getNumPrimitives();
+	m_primitiveBoxes = new BoundingBox[numPrim];
+	m_primitives.begin();
+	for(unsigned i = 0; i < numPrim; i++) {
+		Primitive *p = m_primitives.asPrimitive();
+		BaseMesh *mesh = (BaseMesh *)(p->getGeometry());
+		unsigned triIdx = p->getComponentIndex();
+		
+		m_primitiveBoxes[i] = mesh->calculateBBox(triIdx);
+		m_primitives.next();
+	}
+}
+
+void BuildKdTreeContext::clearPrimitiveBoxes()
+{
+	delete[] m_primitiveBoxes;
+}
+
 void BuildKdTreeContext::verbose() const
 {
 	printf("primitives state:\n");

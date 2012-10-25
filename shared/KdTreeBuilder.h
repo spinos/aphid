@@ -21,7 +21,7 @@ public:
 	virtual ~KdTreeBuilder();
 	
 	void calculateSplitEvents(const PartitionBound &bound);
-	void calculateSides(const unsigned &eventIdx);
+	void calculateSides();
 	
 	void partitionLeft(BuildKdTreeContext &ctx, PartitionBound & bound);
 	void partitionRight(BuildKdTreeContext &ctx, PartitionBound & bound);
@@ -30,9 +30,12 @@ public:
 		
 private:
 	unsigned numEvents() const;
+	BoundingBox m_bbox;
+	BuildKdTreeContext *m_context;
 	unsigned m_numPrimitive;
 	SplitEvent *m_event;
 	PrimitivePtr *m_primitives;
+	unsigned *m_indices;
 	char *m_primitiveClassification;
-	BoundingBox m_bbox;
+	unsigned m_bestEventIdx;
 };

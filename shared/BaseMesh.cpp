@@ -44,7 +44,27 @@ const BoundingBox BaseMesh::calculateBBox() const
 	return box;
 }
 
-const int BaseMesh::faceOnSideOf(const unsigned idx, const int &axis, const float &pos) const
+const BoundingBox BaseMesh::calculateBBox(const unsigned &idx) const
+{
+	BoundingBox box;
+	unsigned *trii = &_indices[idx * 3];
+	Vector3F *p0 = &_vertices[*trii];
+	trii++;
+	Vector3F *p1 = &_vertices[*trii];
+	trii++;
+	Vector3F *p2 = &_vertices[*trii];
+		
+	box.updateMin(*p0);
+	box.updateMax(*p0);
+	box.updateMin(*p1);
+	box.updateMax(*p1);
+	box.updateMin(*p2);
+	box.updateMax(*p2);
+
+	return box;
+}
+
+const int BaseMesh::faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const
 {
 	unsigned *trii = &_indices[idx * 3];
 	Vector3F *p0 = &_vertices[*trii];
