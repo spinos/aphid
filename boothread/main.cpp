@@ -27,6 +27,7 @@ class ThreadClass {
         ThreadClass(); // Constructor
         ~ThreadClass(); // Destructor
         void Run(int *start, int c);
+        void scan(int *start, int c);
 		int sum;
 	private:
 };
@@ -35,10 +36,36 @@ ThreadClass::ThreadClass() {
 } // Constructor
 ThreadClass::~ThreadClass() { } // Destructor
 
-void ThreadClass::Run(int *start, int c) {
+void ThreadClass::scan(int *start, int c) {
      //std::cout << "Worker: running" << std::endl; 
 
 
+/*
+	int *r = start;
+	int *b = new int[c];
+	for(int j=0; j < c; j++) {
+		
+		b[j] = *r;
+		
+		r++;
+	}*/
+	
+	sum = 0;
+	for(int j=0; j < 2000; j++) {
+	sum = 0;
+		for(int i=0; i < c; i++) {
+		sum += start[i];
+		}
+	}
+	//delete[] b;
+	//std::cout << "sum up " << sum << std::endl;
+    // Pretend to do something useful... 
+    //boost::this_thread::sleep(workTime);          
+    //std::cout << "Worker: finished" << std::endl; 
+}
+
+void ThreadClass::Run(int *start, int c) {
+     //std::cout << "Worker: running" << std::endl; 
 
 	int *r = start;
 	int *b = new int[c];
@@ -52,7 +79,7 @@ void ThreadClass::Run(int *start, int c) {
 	myLock.unlock();
 	
 	sum = 0;
-	for(int j=0; j < 3200; j++) {
+	for(int j=0; j < 400; j++) {
 	sum = 0;
 		for(int i=0; i < c; i++) {
 		sum += b[i];
@@ -74,14 +101,14 @@ int main(int argc, char* argv[])
 	boost::timer met;
 	met.restart();
 	ThreadClass t0;
-	t0.Run(sharedNum, sharedLen);
+	t0.scan(sharedNum, sharedLen);
 	std::cout<<"sequence sum "<<t0.sum<<std::endl;
 	std::cout<<"took "<<met.elapsed() * 1000<<"ms\n";
     std::cout << "main: startup" << std::endl; 
 	
 	met.restart();
 	
-	int nt = 64;
+	const int nt = 256;
 	ThreadClass t[nt];
 	boost::thread tr[nt];
 	
