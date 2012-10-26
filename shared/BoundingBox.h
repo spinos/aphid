@@ -20,6 +20,7 @@ public:
 	int getLongestAxis() const;
 	const float getMin(int axis) const;
 	const float getMax(int axis) const;
+	const float area() const;
 	
 	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
 	void expandBy(const BoundingBox &another);

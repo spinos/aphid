@@ -37,5 +37,6 @@ private:
 	PrimitivePtr *m_primitives;
 	unsigned *m_indices;
 	char *m_primitiveClassification;
+	BoundingBox *m_primitiveBoxes;
 	unsigned m_bestEventIdx;
 };

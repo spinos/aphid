@@ -1,4 +1,5 @@
-INCLUDEPATH += ../shared
+INCLUDEPATH += ../shared \
+				../../Library/boost_1_44_0
 CONFIG += release
 HEADERS       = ../shared/Vector3F.h \
                 ../shared/Matrix44F.h \
@@ -62,4 +63,8 @@ SOURCES       = ../shared/Vector3F.cpp \
 QT           += opengl
 win32 {
 CONFIG += console
+}
+macx {
+	LIBS += -lboost_date_time\
+            -lboost_thread
 }

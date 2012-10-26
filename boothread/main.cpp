@@ -16,11 +16,11 @@
 int *sharedNum; 
 int sharedLen = 65536*128; 
 
-typedef boost::shared_mutex Lock;
-typedef boost::unique_lock< boost::shared_mutex > WrtieLock;
-typedef boost::shared_lock< boost::shared_mutex >  ReadLock;
+//typedef boost::shared_mutex Lock;
+//typedef boost::unique_lock< boost::shared_mutex > WrtieLock;
+//typedef boost::shared_lock< boost::shared_mutex >  ReadLock;
 
-Lock myLock; 
+//Lock myLock; 
 
 class ThreadClass {
     public:

@@ -90,18 +90,20 @@ void KdTree::create()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level)
 {
-	if(bound.numPrimitive() < 64 || level == 1) {
+	if(bound.numPrimitive() < 64 || level == 3) {
 		node->setLeaf(true);
 		return;
 	}
 	
-	//printf("subdiv begin %i\n", level);
+	printf("subdiv node level %i\n", level);
 	
 	KdTreeBuilder builder(ctx, bound);
 	//builder.createSplitEvents(bound);
 	const SplitEvent *plane = builder.bestSplit();
 	
-	//ctx.verbose();
+	printf("plane split left %i - right %i\n", plane->leftCount(), plane->rightCount());
+	printf("plane cost %f\n", plane->getCost());
+	plane->verbose();
 	
 	node->setAxis(plane->getAxis());
 	node->setSplitPos(plane->getPos());

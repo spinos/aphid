@@ -25,15 +25,27 @@ public:
 	float getPos() const;
 	int getAxis() const;
 	
-	void calculateTightBBoxes(const BoundingBox &box);
+	const float getCost() const;
 	
+	int leftCount() const;
+	int rightCount() const;
+	
+	void calculateTightBBoxes(const BoundingBox &box, BoundingBox &leftBBox, BoundingBox &rightBBox);
+	void calculateCost();
 	int side(const BoundingBox &box) const;
 	
+	void verbose() const;
+
 	static int Dimension;
+	static unsigned NumPrimitive;
+	static unsigned *PrimitiveIndices;
+	static BoundingBox *PrimitiveBoxes;
+	static BoundingBox ParentBox;
 	
 private:
-	BoundingBox m_leftTightBBox;
-	BoundingBox m_rightTightBBox;
 	float m_pos;
 	int m_axis;
+	float m_cost;
+	int m_leftTouch;
+	int m_rightTouch;
 };

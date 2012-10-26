@@ -74,6 +74,11 @@ const float BoundingBox::getMax(int axis) const
 	return m_max.z;
 }
 
+const float BoundingBox::area() const
+{
+	return (m_max.x - m_min.x) * (m_max.y - m_min.y) * 2.f + (m_max.x - m_min.x) * (m_max.z - m_min.z)  * 2.f + (m_max.y - m_min.y) * (m_max.z - m_min.z)  * 2.f;
+}
+
 void BoundingBox::split(int axis, float pos, BoundingBox & left, BoundingBox & right) const
 {
 	left.m_min = m_min;
