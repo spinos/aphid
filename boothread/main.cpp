@@ -26,17 +26,20 @@ class ThreadClass {
     public:
         ThreadClass(); // Constructor
         ~ThreadClass(); // Destructor
-        void Run(int *start, int c);
-        void scan(int *start, int c);
+        void Run(int start, int c);
+        void scan(int c);
 		int sum;
+		static int *Src;
 	private:
 };
+
+int *ThreadClass::Src = 0;
 
 ThreadClass::ThreadClass() { 
 } // Constructor
 ThreadClass::~ThreadClass() { } // Destructor
 
-void ThreadClass::scan(int *start, int c) {
+void ThreadClass::scan(int c) {
      //std::cout << "Worker: running" << std::endl; 
 
 
@@ -50,11 +53,10 @@ void ThreadClass::scan(int *start, int c) {
 		r++;
 	}*/
 	
-	sum = 0;
 	for(int j=0; j < 2000; j++) {
 	sum = 0;
 		for(int i=0; i < c; i++) {
-		sum += start[i];
+		sum += Src[i];
 		}
 	}
 	//delete[] b;
@@ -64,28 +66,27 @@ void ThreadClass::scan(int *start, int c) {
     //std::cout << "Worker: finished" << std::endl; 
 }
 
-void ThreadClass::Run(int *start, int c) {
+void ThreadClass::Run(int start, int c) {
      //std::cout << "Worker: running" << std::endl; 
 
-	int *r = start;
-	int *b = new int[c];
-	myLock.lock();
+	int *r = Src + start;
+	//int *b = new int[c];
+	/*myLock.lock();
 	for(int j=0; j < c; j++) {
 		
 		b[j] = *r;
 		
 		r++;
 	}
-	myLock.unlock();
+	myLock.unlock();*/
 	
-	sum = 0;
 	for(int j=0; j < 400; j++) {
 	sum = 0;
 		for(int i=0; i < c; i++) {
-		sum += b[i];
+		sum += r[i];
 		}
 	}
-	delete[] b;
+	//delete[] b;
 	//std::cout << "sum up " << sum << std::endl;
     // Pretend to do something useful... 
     //boost::this_thread::sleep(workTime);          
@@ -98,22 +99,26 @@ int main(int argc, char* argv[])
 	for(int i = 0; i < sharedLen; i++) {
 		sharedNum[i] = 1;
 	}
+	
+	ThreadClass::Src = sharedNum;
+	
 	boost::timer met;
+	std::cout<<"sequence scan start\n ";
 	met.restart();
 	ThreadClass t0;
-	t0.scan(sharedNum, sharedLen);
+	t0.scan(sharedLen);
 	std::cout<<"sequence sum "<<t0.sum<<std::endl;
 	std::cout<<"took "<<met.elapsed() * 1000<<"ms\n";
     std::cout << "main: startup" << std::endl; 
 	
 	met.restart();
 	
-	const int nt = 256;
+	const int nt = 64;
 	ThreadClass t[nt];
 	boost::thread tr[nt];
 	
 	for(int ti = 0; ti < nt; ti++) {
-		tr[ti] = boost::thread(boost::bind(&ThreadClass::Run, &t[ti], sharedNum + sharedLen/nt*ti, sharedLen/nt));
+		tr[ti] = boost::thread(boost::bind(&ThreadClass::Run, &t[ti], sharedLen/nt*ti, sharedLen/nt));
 	}
 	std::cout << "main: waiting for thread" << std::endl;          
 	for(int ti = 0; ti < nt; ti++) {
