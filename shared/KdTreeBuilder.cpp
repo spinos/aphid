@@ -178,7 +178,6 @@ void KdTreeBuilder::cutoffEmptySpace()
 		for (std::vector<IndexLimit>::iterator it = cutoff.begin() ; it < cutoff.end(); it++ ) {
 			IndexLimit block = *it;
 			if(block.high - block.low > 7) {
-				//printf("%i: empty %i - %i\n", axis, block.low, block.high);
 				if(block.high - block.low > emptySpace[axis].high - emptySpace[axis].low)
 					emptySpace[axis] = block;
 			}

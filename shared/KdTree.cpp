@@ -90,7 +90,7 @@ void KdTree::create()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level)
 {
-	if(bound.numPrimitive() < 64 || level == 8) {
+	if(bound.numPrimitive() < 64 || level == 10) {
 		node->setLeaf(true);
 		return;
 	}
@@ -110,37 +110,41 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 	node->setLeft(branch);
 	node->setLeaf(false);
 	
-	builder.partitionLeft(ctx, bound);
-	
 	BoundingBox leftBox, rightBox;
 
 	bound.bbox.split(plane->getAxis(), plane->getPos(), leftBox, rightBox);
 	
 	PartitionBound subBound;
+	
+	if(plane->leftCount() > 0) {
+	builder.partitionLeft(ctx, bound);
+	
+	
 	subBound.bbox = leftBox;
 	subBound.parentMin = bound.childMin;
 	subBound.parentMax = bound.childMax;
 	
-	if(subBound.numPrimitive() > 0) {
+	//if(subBound.numPrimitive() > 0) {
 		//printf("ctx partition left %i - %i\n", subBound.parentMin, subBound.parentMax);
 		subdivide(branch, ctx, subBound, level + 1);
-	}
+	//}
 	
 	ctx.releaseAt(subBound.parentMin);
-	
+	}
+	if(plane->rightCount() > 0) {
 	builder.partitionRight(ctx, bound);
 	
 	subBound.bbox = rightBox;
 	subBound.parentMin = bound.childMin;
 	subBound.parentMax = bound.childMax;
 	
-	if(subBound.numPrimitive() > 0) {
+	//if(subBound.numPrimitive() > 0) {
 		//printf("ctx partition right %i - %i\n", rightBound.parentMin, rightBound.parentMax);
 		subdivide(branch + 1, ctx, subBound, level + 1);
-	}
+	//}
 
 	ctx.releaseAt(subBound.parentMin);
-	
+	}
 	//printf("subdiv end %i\n", level);
 }
 /*

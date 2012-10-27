@@ -22,5 +22,6 @@ protected:
 	ShapeDrawer* fDrawer;
 	RandomMesh * m_cube;
 	RandomMesh * m_ball;
+	RandomMesh * m_bb;
 	KdTree * m_tree;
 };
