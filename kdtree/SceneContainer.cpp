@@ -9,14 +9,13 @@
 
 #include "SceneContainer.h"
 
-
 SceneContainer::SceneContainer() 
 {
 	fDrawer = new ShapeDrawer;
 	Vector3F cubeC(1.f, 22.f, -1.f);
 	m_cube = new RandomMesh(255200, cubeC, 9.f, 1);
 	
-	Vector3F ballC(17.f, -5.f, 10.f);
+	Vector3F ballC(17.f, -10.f, 10.f);
 	m_ball = new RandomMesh(261294, ballC, 8.f, 1);
 	
 	m_tree = new KdTree;

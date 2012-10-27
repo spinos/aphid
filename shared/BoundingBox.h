@@ -22,6 +22,7 @@ public:
 	const float getMax(int axis) const;
 	const float area() const;
 	const float crossSectionArea(const int &axis) const;
+	const float distance(const int &axis) const;
 	
 	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
 	void expandBy(const BoundingBox &another);

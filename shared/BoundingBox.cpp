@@ -90,6 +90,17 @@ const float BoundingBox::crossSectionArea(const int &axis) const
 	return (m_max.x - m_min.x) * (m_max.y - m_min.y);
 }
 
+const float BoundingBox::distance(const int &axis) const
+{
+	if(axis == 0) {
+		return m_max.x - m_min.x;
+	}
+	if(axis == 1) {
+		return m_max.y - m_min.y;
+	}
+	return m_max.z - m_min.z;
+}
+
 void BoundingBox::split(int axis, float pos, BoundingBox & left, BoundingBox & right) const
 {
 	left.m_min = m_min;

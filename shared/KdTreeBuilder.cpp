@@ -189,8 +189,7 @@ void KdTreeBuilder::cutoffEmptySpace()
 	
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		if(emptySpace[axis].high > emptySpace[axis].low) {
-			emptyArea[axis] = m_bbox.crossSectionArea(axis) * (emptySpace[axis].high - emptySpace[axis].low);
-			//printf("%i %f %i %i\n", axis, emptyArea[axis], emptySpace[axis].low, emptySpace[axis].high);
+			emptyArea[axis] = m_bbox.distance(axis) * m_bbox.crossSectionArea(axis) * (emptySpace[axis].high - emptySpace[axis].low);
 		}
 		else
 			emptyArea[axis] = -99.f;
@@ -207,7 +206,7 @@ void KdTreeBuilder::cutoffEmptySpace()
 	
 	if(maxEmptySpace < 0.f || maxEmptyAxis < 0) return;
 	
-	printf("%i: empty %i - %i\n", maxEmptyAxis, emptySpace[maxEmptyAxis].low, emptySpace[maxEmptyAxis].high);
+	//printf("%i: empty %i - %i\n", maxEmptyAxis, emptySpace[maxEmptyAxis].low, emptySpace[maxEmptyAxis].high);
 	if(emptySpace[maxEmptyAxis].low == 0)
 		m_bestEventIdx = maxEmptyAxis * 32 + emptySpace[maxEmptyAxis].high;
 	else
