@@ -98,12 +98,10 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBou
 	printf("subdiv node level %i\n", level);
 	
 	KdTreeBuilder builder(ctx, bound);
-	//builder.createSplitEvents(bound);
+
 	const SplitEvent *plane = builder.bestSplit();
 	
-	printf("plane split left %i - right %i\n", plane->leftCount(), plane->rightCount());
-	printf("plane cost %f\n", plane->getCost());
-	plane->verbose();
+	//plane->verbose();
 	
 	node->setAxis(plane->getAxis());
 	node->setSplitPos(plane->getPos());

@@ -57,7 +57,7 @@ const float BoundingBox::getMin(int axis) const
 	if(axis == 0) {
 		return m_min.x;
 	}
-	else if(axis == 1) {
+	if(axis == 1) {
 		return m_min.y;
 	}
 	return m_min.z;
@@ -68,7 +68,7 @@ const float BoundingBox::getMax(int axis) const
 	if(axis == 0) {
 		return m_max.x;
 	}
-	else if(axis == 1) {
+	if(axis == 1) {
 		return m_max.y;
 	}
 	return m_max.z;
@@ -77,6 +77,17 @@ const float BoundingBox::getMax(int axis) const
 const float BoundingBox::area() const
 {
 	return ((m_max.x - m_min.x) * (m_max.y - m_min.y) + (m_max.x - m_min.x) * (m_max.z - m_min.z) + (m_max.y - m_min.y) * (m_max.z - m_min.z)) * 2.f;
+}
+
+const float BoundingBox::crossSectionArea(const int &axis) const
+{
+	if(axis == 0) {
+		return (m_max.y - m_min.y) * (m_max.z - m_min.z);
+	}
+	if(axis == 1) {
+		return (m_max.x - m_min.x) * (m_max.z - m_min.z);
+	}
+	return (m_max.x - m_min.x) * (m_max.y - m_min.y);
 }
 
 void BoundingBox::split(int axis, float pos, BoundingBox & left, BoundingBox & right) const

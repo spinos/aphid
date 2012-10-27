@@ -141,18 +141,77 @@ void KdTreeBuilder::calculateSides()
 
 const SplitEvent *KdTreeBuilder::bestSplit()
 {
-	//int axis = m_bbox.getLongestAxis();
 	m_bestEventIdx = 0;//axis * 32 + 16;
 	float lowest = m_event[0].getCost();
-	for(unsigned i = 1; i < numEvents(); i++) {
-		m_event[i].verbose();
+	for(unsigned i = 0; i < numEvents(); i++) {
+		//m_event[i].verbose();
 		if(m_event[i].getCost() < lowest) {
 			lowest = m_event[i].getCost();
 			m_bestEventIdx = i;
 		}
 	}
+	cutoffEmptySpace();
 	calculateSides();
 	return &m_event[m_bestEventIdx];
+}
+
+void KdTreeBuilder::cutoffEmptySpace()
+{
+	IndexLimit emptySpace[3];
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		float preCost = -1.f;
+		int eventStart = 32 * axis;
+		EmptySpace cutoff;
+		for(unsigned i = 0; i < 32; i++) {
+			if(m_event[eventStart + i].getCost() != preCost) {
+				IndexLimit block;
+				block.low = i;
+				cutoff.push_back(block);
+			}
+			else {
+				IndexLimit &lastBlock = cutoff.back();
+				lastBlock.high = i;
+			}
+			preCost = m_event[eventStart + i].getCost();
+		}
+		
+		for (std::vector<IndexLimit>::iterator it = cutoff.begin() ; it < cutoff.end(); it++ ) {
+			IndexLimit block = *it;
+			if(block.high - block.low > 7) {
+				//printf("%i: empty %i - %i\n", axis, block.low, block.high);
+				if(block.high - block.low > emptySpace[axis].high - emptySpace[axis].low)
+					emptySpace[axis] = block;
+			}
+		}
+	}
+	
+	float emptyArea[3];
+	
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(emptySpace[axis].high > emptySpace[axis].low) {
+			emptyArea[axis] = m_bbox.crossSectionArea(axis) * (emptySpace[axis].high - emptySpace[axis].low);
+			//printf("%i %f %i %i\n", axis, emptyArea[axis], emptySpace[axis].low, emptySpace[axis].high);
+		}
+		else
+			emptyArea[axis] = -99.f;
+	}
+	
+	float maxEmptySpace = -1.f;
+	int maxEmptyAxis = -1;
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(emptyArea[axis] > maxEmptySpace) {
+			maxEmptySpace = emptyArea[axis];
+			maxEmptyAxis = axis;
+		}
+	}
+	
+	if(maxEmptySpace < 0.f || maxEmptyAxis < 0) return;
+	
+	printf("%i: empty %i - %i\n", maxEmptyAxis, emptySpace[maxEmptyAxis].low, emptySpace[maxEmptyAxis].high);
+	if(emptySpace[maxEmptyAxis].low == 0)
+		m_bestEventIdx = maxEmptyAxis * 32 + emptySpace[maxEmptyAxis].high;
+	else
+		m_bestEventIdx = maxEmptyAxis * 32 + emptySpace[maxEmptyAxis].low;
 }
 
 unsigned KdTreeBuilder::numEvents() const
