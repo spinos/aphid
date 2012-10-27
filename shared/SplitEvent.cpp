@@ -13,8 +13,7 @@ int SplitEvent::Dimension = 3;
 unsigned SplitEvent::NumPrimitive = 0;
 unsigned *SplitEvent::PrimitiveIndices = 0;
 BoundingBox *SplitEvent::PrimitiveBoxes = 0;
-BoundingBox SplitEvent::ParentBox;
-//BuildKdTreeContext *SplitEvent::Context = 0;
+float SplitEvent::ParentBoxArea = 1.f;
 
 SplitEvent::SplitEvent() 
 {
@@ -41,6 +40,12 @@ int SplitEvent::getAxis() const
 	return m_axis;
 }
 
+void SplitEvent::setLeftRightNumPrim(const unsigned &leftNumPrim, const unsigned &rightNumPrim)
+{
+	m_leftNumPrim = leftNumPrim;
+	m_rightNumPrim = rightNumPrim;
+}
+
 const float SplitEvent::getCost() const
 {
 	return m_cost;
@@ -48,12 +53,12 @@ const float SplitEvent::getCost() const
 
 int SplitEvent::leftCount() const
 {
-	return m_leftTouch;
+	return m_leftNumPrim;
 }
 
 int SplitEvent::rightCount() const
 {
-	return m_rightTouch;
+	return m_rightNumPrim;
 }
 
 int SplitEvent::side(const BoundingBox &box) const
@@ -70,16 +75,12 @@ void SplitEvent::calculateTightBBoxes(const BoundingBox &box, BoundingBox &leftB
 {
 	const int s = side(box);
 	if(s == 0) {
-		m_leftTouch++;
 		leftBBox.expandBy(box);
 	}
 	else if(s == 2 ) {
-		m_rightTouch++;
 		rightBBox.expandBy(box);
 	}
 	else {
-		m_leftTouch++;
-		m_rightTouch++;
 		leftBBox.expandBy(box);
 		rightBBox.expandBy(box);
 	}
@@ -88,8 +89,6 @@ void SplitEvent::calculateTightBBoxes(const BoundingBox &box, BoundingBox &leftB
 void SplitEvent::calculateCost()
 {
 	m_cost = 10e8;
-	m_leftTouch = 0;
-	m_rightTouch = 0;
 	BoundingBox leftBBox, rightBBox;
 	for(unsigned i = 0; i < NumPrimitive; i++) {
 		//unsigned &primIdx = PrimitiveIndices[i];
@@ -97,11 +96,10 @@ void SplitEvent::calculateCost()
 		calculateTightBBoxes(primBox, leftBBox, rightBBox);
 	}
 	
-	m_cost = 15.f + 20.f * (leftBBox.area() * m_leftTouch + rightBBox.area() * m_rightTouch ) / ParentBox.area();
+	m_cost = 15.f + 20.f * (leftBBox.area() * m_leftNumPrim + rightBBox.area() * m_rightNumPrim) / ParentBoxArea;
 }
 
 void SplitEvent::verbose() const
 {
-	printf("%i: %i + %i c %f \n", m_axis, m_leftTouch, m_rightTouch, m_cost);
-	
+	printf("%i: %i + %i c %f \n", m_axis, m_leftNumPrim, m_rightNumPrim, m_cost);
 }

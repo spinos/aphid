@@ -17,7 +17,7 @@ SceneContainer::SceneContainer()
 	m_cube = new RandomMesh(255200, cubeC, 13.f, 1);
 	
 	Vector3F ballC(13.f, -5.f, 10.f);
-	m_ball = new RandomMesh(61294, ballC, 8.f, 1);
+	m_ball = new RandomMesh(261294, ballC, 8.f, 1);
 	
 	m_tree = new KdTree;
 	m_tree->addMesh(m_cube);

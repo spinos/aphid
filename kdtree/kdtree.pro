@@ -26,6 +26,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/SplitEvent.h \
                 ../shared/TypedEntity.h \
                 ../shared/Geometry.h \
+				../shared/MinMaxBins.h \
                 glwidget.h \
                 window.h \
                 SceneContainer.h \
@@ -55,6 +56,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/SplitEvent.cpp \
                 ../shared/TypedEntity.cpp \
                 ../shared/Geometry.cpp \
+				../shared/MinMaxBins.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp \

@@ -7,8 +7,7 @@
  *
  */
 #pragma once
-#include <ClassificationStorage.h>
-#include <PartitionBound.h>
+#include <BoundingBox.h>
 #include <IndexArray.h>
 #include <PrimitiveArray.h>
 
@@ -25,6 +24,8 @@ public:
 	float getPos() const;
 	int getAxis() const;
 	
+	void setLeftRightNumPrim(const unsigned &leftNumPrim, const unsigned &rightNumPrim);
+	
 	const float getCost() const;
 	
 	int leftCount() const;
@@ -40,12 +41,11 @@ public:
 	static unsigned NumPrimitive;
 	static unsigned *PrimitiveIndices;
 	static BoundingBox *PrimitiveBoxes;
-	static BoundingBox ParentBox;
+	static float ParentBoxArea;
 	
 private:
 	float m_pos;
 	int m_axis;
 	float m_cost;
-	int m_leftTouch;
-	int m_rightTouch;
+	unsigned m_leftNumPrim, m_rightNumPrim;
 };

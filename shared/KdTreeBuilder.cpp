@@ -39,39 +39,59 @@ KdTreeBuilder::KdTreeBuilder(BuildKdTreeContext &ctx, const PartitionBound &boun
 	indices.setIndex(oldIdx);
 	primitives.setIndex(oldIdx);
 	
-	calculateSplitEvents(bound);
+	m_bbox = bound.bbox;
+	
+	calculateBins();
+	calculateSplitEvents();
 }
 
 KdTreeBuilder::~KdTreeBuilder() 
 {
 	//printf("builder quit\n");
 	delete[] m_event;
+	delete[] m_bins;
 	delete[] m_primitives;
 	delete[] m_indices;
 	delete[] m_primitiveClassification;
 	delete[] m_primitiveBoxes;
 }
 
-void KdTreeBuilder::calculateSplitEvents(const PartitionBound &bound)
+void KdTreeBuilder::calculateBins()
 {
-	m_bbox = bound.bbox;
-	//BoundingBox *primBoxes = m_context->m_primitiveBoxes;
+	m_bins = new MinMaxBins[SplitEvent::Dimension];
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		m_bins[axis].create(33, m_bbox.getMin(axis), m_bbox.getMax(axis));
+	
+		for(unsigned i = 0; i < m_numPrimitive; i++) {
+			BoundingBox &primBox = m_primitiveBoxes[i];
+			m_bins[axis].add(primBox.getMin(axis), primBox.getMax(axis));
+		}
+		
+		m_bins[axis].scan();
+	}
+}
+
+void KdTreeBuilder::calculateSplitEvents()
+{
 	SplitEvent::NumPrimitive = m_numPrimitive;
 	SplitEvent::PrimitiveIndices = m_indices;
 	SplitEvent::PrimitiveBoxes = m_primitiveBoxes;
-	SplitEvent::ParentBox = bound.bbox;
+	SplitEvent::ParentBoxArea = m_bbox.area();
 	
 	const unsigned numEvent = numEvents();
 	m_event = new SplitEvent[numEvent];
 	int eventIdx = 0;
+	unsigned leftNumPrim, rightNumPrim;
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		const float min = bound.bbox.getMin(axis);
-		const float max = bound.bbox.getMax(axis);
+		const float min = m_bbox.getMin(axis);
+		const float max = m_bbox.getMax(axis);
 		const float delta = (max - min) / 33.f;
 		for(int i = 1; i < 33; i++) {
 			SplitEvent &event = m_event[eventIdx];
 			event.setAxis(axis);
 			event.setPos(min + delta * i);
+			m_bins[axis].get(i - 1, leftNumPrim, rightNumPrim);
+			event.setLeftRightNumPrim(leftNumPrim, rightNumPrim);
 			eventIdx++;
 		}
 	}
