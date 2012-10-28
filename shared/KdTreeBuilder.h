@@ -18,13 +18,13 @@ class KdTreeBuilder {
 public:
 	typedef Primitive* PrimitivePtr;
 
-	KdTreeBuilder(BuildKdTreeContext &ctx, const PartitionBound &bound);
+	KdTreeBuilder(BuildKdTreeContext &ctx);
 	virtual ~KdTreeBuilder();
 	
 	void calculateSides();
 	
-	void partitionLeft(BuildKdTreeContext &ctx, PartitionBound & bound);
-	void partitionRight(BuildKdTreeContext &ctx, PartitionBound & bound);
+	void partitionLeft(BuildKdTreeContext &ctx);
+	void partitionRight(BuildKdTreeContext &ctx);
 	
 	const SplitEvent *bestSplit();
 		
@@ -39,14 +39,12 @@ private:
 	void calculateSplitEvents();
 	void cutoffEmptySpace();
 	unsigned numEvents() const;
+	
 	BoundingBox m_bbox;
 	BuildKdTreeContext *m_context;
-	unsigned m_numPrimitive;
 	MinMaxBins *m_bins;
 	SplitEvent *m_event;
-	PrimitivePtr *m_primitives;
-	unsigned *m_indices;
 	char *m_primitiveClassification;
-	BoundingBox *m_primitiveBoxes;
+	unsigned m_numPrimitive;
 	unsigned m_bestEventIdx;
 };

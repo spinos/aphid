@@ -16,34 +16,33 @@
 #include <ClassificationStorage.h>
 #include <PartitionBound.h>
 #include <SplitEvent.h>
+#include <BuildKdTreeStream.h>
 
 class BuildKdTreeContext {
 public:
 	BuildKdTreeContext();
+	BuildKdTreeContext(BuildKdTreeStream &data);
 	~BuildKdTreeContext();
-	void appendMesh(BaseMesh* mesh);	
 	
-	const unsigned getNumPrimitives() const;
-	const PrimitiveArray &getPrimitives() const;
-	const IndexArray &getIndices() const;
-	
-	PrimitiveArray &primitives();
-	IndexArray &indices();
-	
-	KdTreeNode *createTreeBranch();
-	KdTreeNode *firstTreeBranch();
-	void releaseAt(unsigned loc);
-	
-	void createPrimitiveBoxes();
-	void clearPrimitiveBoxes();
+	void create(const unsigned &count);
 
+	const unsigned getNumPrimitives() const;
+
+	void setPrimitiveIndex(const unsigned &idx, const unsigned &val);
+	void setPrimitiveBBox(const unsigned &idx, const BoundingBox &val);
+	
+	const unsigned *getIndices() const;
+	unsigned *indices();
+	
 	void verbose() const;
 	
 	BoundingBox *m_primitiveBoxes;
 	
-private:
-	PrimitiveArray m_primitives;
-	IndexArray m_indices;
-	KdTreeNodeArray m_nodes;
+	void setBBox(const BoundingBox &bbox);
+	BoundingBox getBBox() const;
 	
+private:
+	BoundingBox m_bbox;
+	unsigned *m_indices;
+	unsigned m_numPrimitive;
 };

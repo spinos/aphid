@@ -9,110 +9,77 @@
 
 #include "BuildKdTreeContext.h"
 BuildKdTreeContext::BuildKdTreeContext() {}
-BuildKdTreeContext::~BuildKdTreeContext() 
-{
-	m_primitives.clear();
-	m_indices.clear();
-	m_nodes.clear();
-}
 
-void BuildKdTreeContext::appendMesh(BaseMesh* mesh)
+BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
 {
-	unsigned numFace = mesh->getNumFaces();
-	m_primitives.expandBy(numFace);
-	m_indices.expandBy(numFace);
+	create(data.getNumPrimitives());
 	
-	for(unsigned i = 0; i < numFace; i++) {
-		Primitive *p = m_primitives.asPrimitive();
-		p->setGeometry((char *)mesh);
-		p->setComponentIndex(i);
-		unsigned *dest = m_indices.asIndex();
-		*dest = m_primitives.index();
-		m_primitives.next();
-		m_indices.next();
-	}
-	printf("primitive state:\n");
-	m_primitives.verbose();
-	printf("indices state:\n");
-	m_indices.verbose();
-}
-
-const unsigned BuildKdTreeContext::getNumPrimitives() const
-{
-	return m_primitives.index();
-}
-
-const PrimitiveArray &BuildKdTreeContext::getPrimitives() const
-{
-	return m_primitives;
-}
-
-const IndexArray &BuildKdTreeContext::getIndices() const
-{
-	return m_indices;
-}
-
-PrimitiveArray &BuildKdTreeContext::primitives()
-{
-	return m_primitives;
-}
-	
-IndexArray &BuildKdTreeContext::indices()
-{
-	return m_indices;
-}
-
-KdTreeNode *BuildKdTreeContext::createTreeBranch()
-{
-	KdTreeNode *p = (KdTreeNode *)m_nodes.expandBy(2);
-	unsigned long * tmp = (unsigned long*)m_nodes.current();
-	tmp[1] = tmp[3] = 6;
-	m_nodes.next();
-	tmp = (unsigned long*)m_nodes.current();
-	tmp[1] = tmp[3] = 6;
-	m_nodes.next();
-	return p;
-}
-
-KdTreeNode *BuildKdTreeContext::firstTreeBranch()
-{
-	return m_nodes.asKdTreeNode(0);
-}
-
-void BuildKdTreeContext::releaseAt(unsigned loc)
-{
-	m_indices.shrinkTo(loc);
-	m_indices.setIndex(loc);
-	m_primitives.shrinkTo(loc);
-	m_primitives.setIndex(loc);
-}
-
-void BuildKdTreeContext::createPrimitiveBoxes()
-{
-	const unsigned numPrim = getNumPrimitives();
-	m_primitiveBoxes = new BoundingBox[numPrim];
-	m_primitives.begin();
-	for(unsigned i = 0; i < numPrim; i++) {
-		Primitive *p = m_primitives.asPrimitive();
+	PrimitiveArray &primitives = data.primitives();
+	primitives.begin();
+	for(unsigned i = 0; i < m_numPrimitive; i++) {
+		m_indices[i] = i;
+		
+		Primitive *p = primitives.asPrimitive();
 		BaseMesh *mesh = (BaseMesh *)(p->getGeometry());
 		unsigned triIdx = p->getComponentIndex();
 		
 		m_primitiveBoxes[i] = mesh->calculateBBox(triIdx);
-		m_primitives.next();
+		primitives.next();
 	}
 }
 
-void BuildKdTreeContext::clearPrimitiveBoxes()
+BuildKdTreeContext::~BuildKdTreeContext() 
 {
+	delete[] m_indices;
 	delete[] m_primitiveBoxes;
+}
+
+void BuildKdTreeContext::create(const unsigned &count)
+{
+	m_numPrimitive = count;
+	m_indices = new unsigned[m_numPrimitive];
+	m_primitiveBoxes = new BoundingBox[m_numPrimitive];
+}
+
+void BuildKdTreeContext::setBBox(const BoundingBox &bbox)
+{
+	m_bbox = bbox;
+}
+
+BoundingBox BuildKdTreeContext::getBBox() const
+{
+	return m_bbox;
+}
+
+const unsigned BuildKdTreeContext::getNumPrimitives() const
+{
+	return m_numPrimitive;
+}
+
+const unsigned *BuildKdTreeContext::getIndices() const
+{
+	return m_indices;
+}
+	
+unsigned *BuildKdTreeContext::indices()
+{
+	return m_indices;
+}
+
+void BuildKdTreeContext::setPrimitiveIndex(const unsigned &idx, const unsigned &val)
+{
+	m_indices[idx] = val;
+}
+
+void BuildKdTreeContext::setPrimitiveBBox(const unsigned &idx, const BoundingBox &val)
+{
+	m_primitiveBoxes[idx] = val;
 }
 
 void BuildKdTreeContext::verbose() const
 {
-	printf("primitives state:\n");
-	m_primitives.verbose();
-	printf("indices state:\n");
-	m_indices.verbose();
-	printf("nodes state:\n");
-	m_nodes.verbose();
+	//printf("indices state:\n");
+	//m_indices.verbose();
+	//printf("nodes state:\n");
+	//m_nodes.verbose();
 }

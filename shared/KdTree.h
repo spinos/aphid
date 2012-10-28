@@ -12,7 +12,7 @@
 #include <BaseMesh.h>
 #include <BoundingBox.h>
 #include <Primitive.h>
-#include <BuildKdTreeContext.h>
+#include <BuildKdTreeStream.h>
 #include <KdTreeBuilder.h>
 
 typedef Primitive * primitivePtr;
@@ -28,11 +28,11 @@ public:
 	void addMesh(BaseMesh* mesh);
 	void create();
 	
-	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, PartitionBound & bound, int level);
+	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
 
 	BoundingBox m_bbox;
 	
 private:	
-	BuildKdTreeContext ctx;
+	BuildKdTreeStream m_stream;
 	KdTreeNode *m_root;
 };
