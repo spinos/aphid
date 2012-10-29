@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <PartitionBound.h>
+
 #include <PrimitiveArray.h>
 #include <SplitEvent.h>
 #include <BuildKdTreeContext.h>
@@ -22,9 +22,11 @@ public:
 	virtual ~KdTreeBuilder();
 	
 	void calculateSides();
+	void updateEventBBoxAlong(const int &axis);
 	
 	void partitionLeft(BuildKdTreeContext &ctx);
 	void partitionRight(BuildKdTreeContext &ctx);
+	void partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx);
 	
 	const SplitEvent *bestSplit();
 		

@@ -28,6 +28,8 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/Geometry.h \
 				../shared/MinMaxBins.h \
 				../shared/BuildKdTreeStream.h \
+				../shared/IndexList.h \
+				../shared/BoundingBoxList.h \
                 glwidget.h \
                 window.h \
                 SceneContainer.h \
@@ -59,6 +61,8 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/Geometry.cpp \
 				../shared/MinMaxBins.cpp \
 				../shared/BuildKdTreeStream.cpp \
+				../shared/IndexList.cpp \
+				../shared/BoundingBoxList.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp \

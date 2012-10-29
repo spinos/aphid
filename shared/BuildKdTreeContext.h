@@ -14,7 +14,8 @@
 #include <KdTreeNodeArray.h>
 #include <BaseMesh.h>
 #include <ClassificationStorage.h>
-#include <PartitionBound.h>
+#include <BoundingBoxList.h>
+#include <IndexList.h>
 #include <SplitEvent.h>
 #include <BuildKdTreeStream.h>
 
@@ -28,21 +29,17 @@ public:
 
 	const unsigned getNumPrimitives() const;
 
-	void setPrimitiveIndex(const unsigned &idx, const unsigned &val);
-	void setPrimitiveBBox(const unsigned &idx, const BoundingBox &val);
-	
-	const unsigned *getIndices() const;
 	unsigned *indices();
 	
 	void verbose() const;
 	
-	BoundingBox *m_primitiveBoxes;
+	BoundingBoxList m_primitiveBoxes;
 	
 	void setBBox(const BoundingBox &bbox);
 	BoundingBox getBBox() const;
 	
 private:
 	BoundingBox m_bbox;
-	unsigned *m_indices;
+	IndexList m_indices;
 	unsigned m_numPrimitive;
 };

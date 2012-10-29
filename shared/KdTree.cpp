@@ -107,21 +107,18 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	node->setLeft(branch);
 	node->setLeaf(false);
 
-	PartitionBound subBound;
+	BuildKdTreeContext *leftCtx = new BuildKdTreeContext();
+	BuildKdTreeContext *rightCtx = new BuildKdTreeContext();
+		
+	builder.partition(*leftCtx, *rightCtx);
 	
-	if(plane->leftCount() > 0) {
-		BuildKdTreeContext *leftCtx = new BuildKdTreeContext();
-		builder.partitionLeft(*leftCtx);
-	
+	if(plane->leftCount() > 0)
 		subdivide(branch, *leftCtx, level + 1);
-		delete leftCtx;
-	}
-	if(plane->rightCount() > 0) {
-		BuildKdTreeContext *rightCtx = new BuildKdTreeContext();
-		builder.partitionRight(*rightCtx);
-	
+		
+	delete leftCtx;
+
+	if(plane->rightCount() > 0)
 		subdivide(branch + 1, *rightCtx, level + 1);
-		delete rightCtx;
-	}
-	//printf("subdiv end %i\n", level);
+		
+	delete rightCtx;
 }
