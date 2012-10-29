@@ -26,9 +26,9 @@ RandomMesh::RandomMesh(unsigned numFaces, const Vector3F & center, const float &
 		idx[i * 3 + 2] = i * 3 + 2;
 
 		if(type == 0) {
-			rx = (float(random()%694) / 694.f - 0.5f) * 1.4f;
-			ry = (float(random()%594) / 594.f - 0.5f) * 1.4f;
-			rz = (float(random()%794) / 794.f - 0.5f) * 1.4f;
+			rx = (float(rand()%694) / 694.f - 0.5f) * 1.4f;
+			ry = (float(rand()%594) / 594.f - 0.5f) * 1.4f;
+			rz = (float(rand()%794) / 794.f - 0.5f) * 1.4f;
 		}
 		else {
 			phi = ((float)(rand() % 25391)) / 25391.f * 2.f * 3.14f;
@@ -40,15 +40,15 @@ RandomMesh::RandomMesh(unsigned numFaces, const Vector3F & center, const float &
 		}
 		p[i * 3] = center + Vector3F(rx * size, ry * size, rz * size);	
 		
-		rx = float(random()%294) / 294.f - 0.5f;
-		ry = float(random()%594) / 594.f - 0.5f;
-		rz = float(random()%794) / 794.f - 0.5f;
+		rx = float(rand()%294) / 294.f - 0.5f;
+		ry = float(rand()%594) / 594.f - 0.5f;
+		rz = float(rand()%794) / 794.f - 0.5f;
 		
 		p[i * 3 + 1] = p[i * 3] + Vector3F(rx, ry, rz);
 		
-		rx = float(random()%394) / 394.f - 0.5f;
-		ry = float(random()%594) / 594.f - 0.5f;
-		rz = float(random()%794) / 794.f - 0.5f;
+		rx = float(rand()%394) / 394.f - 0.5f;
+		ry = float(rand()%594) / 594.f - 0.5f;
+		rz = float(rand()%794) / 794.f - 0.5f;
 		
 		p[i * 3 + 2] = p[i * 3] + Vector3F(rx, ry, rz);
 	}

@@ -6,8 +6,8 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-
 #ifdef WIN32
+#include <winsock2.h>
 #include <windows.h>
 #endif
 
@@ -17,6 +17,5 @@
 #include <OpenGL/glext.h>
 #include <GLUT/glut.h>
 #else
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <gExtension.h>
 #endif

@@ -87,7 +87,7 @@ void KdTree::create()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 64 || level == 3) {
+	if(ctx.getNumPrimitives() < 64 || level == 1) {
 		node->setLeaf(true);
 		return;
 	}

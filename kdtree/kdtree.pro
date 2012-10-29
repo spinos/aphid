@@ -1,5 +1,5 @@
-INCLUDEPATH += ../shared \
-				../../Library/boost_1_44_0
+INCLUDEPATH += ../shared ./
+				
 CONFIG += release
 HEADERS       = ../shared/Vector3F.h \
                 ../shared/Matrix44F.h \
@@ -27,6 +27,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/TypedEntity.h \
                 ../shared/Geometry.h \
 				../shared/MinMaxBins.h \
+				../shared/BuildKdTreeStream.h \
                 glwidget.h \
                 window.h \
                 SceneContainer.h \
@@ -57,6 +58,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/TypedEntity.cpp \
                 ../shared/Geometry.cpp \
 				../shared/MinMaxBins.cpp \
+				../shared/BuildKdTreeStream.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp \
@@ -64,9 +66,14 @@ SOURCES       = ../shared/Vector3F.cpp \
                 RandomMesh.cpp
 QT           += opengl
 win32 {
+    HEADERS += ../shared/gExtension.h
+    SOURCES += ../shared/gExtension.cpp
+    INCLUDEPATH += D:/usr/local/include
+    QMAKE_LIBDIR += D:/usr/local/lib64
 CONFIG += console
 }
 macx {
+    INCLUDEPATH += ../../Library/boost_1_44_0
 	LIBS += -lboost_date_time\
             -lboost_thread
 }

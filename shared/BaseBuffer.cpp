@@ -6,7 +6,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include <gl_heads.h>
+#include <gExtension.h>
 #include "BaseBuffer.h"
 
 BaseBuffer::BaseBuffer() : _buffereName(0) {}

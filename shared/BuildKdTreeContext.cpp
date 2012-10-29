@@ -37,8 +37,8 @@ BuildKdTreeContext::~BuildKdTreeContext()
 void BuildKdTreeContext::create(const unsigned &count)
 {
 	m_numPrimitive = count;
-	m_indices = new unsigned[m_numPrimitive];
-	m_primitiveBoxes = new BoundingBox[m_numPrimitive];
+	m_indices = new unsigned[m_numPrimitive+1];
+	m_primitiveBoxes = new BoundingBox[m_numPrimitive+1];
 }
 
 void BuildKdTreeContext::setBBox(const BoundingBox &bbox)
