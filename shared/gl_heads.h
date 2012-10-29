@@ -6,16 +6,9 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#ifdef WIN32
-#include <winsock2.h>
-#include <windows.h>
-#endif
-
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #include <OpenGL/glext.h>
 #include <GLUT/glut.h>
-#else
-#include <gExtension.h>
 #endif

@@ -6,7 +6,12 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
+#ifdef WIN32
 #include <gExtension.h>
+#else
+#include <gl_heads.h>
+#endif
+
 #include "shapeDrawer.h"
 #include <cmath>
 
@@ -289,8 +294,8 @@ void ShapeDrawer::drawKdTree(const KdTree * tree)
 
 void ShapeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox)
 {
-	Vector3F corner0 = bbox.m_min;
-	Vector3F corner1 = bbox.m_max;
+	Vector3F corner0(bbox.m_min_x, bbox.m_min_y, bbox.m_min_z);
+	Vector3F corner1(bbox.m_max_x, bbox.m_max_y, bbox.m_max_z);
 	if(tree->isLeaf()) return;
 
 	glVertex3f(corner0.x, corner0.y, corner0.z);

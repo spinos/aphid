@@ -34,6 +34,8 @@ public:
 	void calculateTightBBoxes(const BoundingBox &box, BoundingBox &leftBBox, BoundingBox &rightBBox);
 	void calculateCost();
 	int side(const BoundingBox &box) const;
+	void updateLeftBox(const BoundingBox &box);
+	void updateRightBox(const BoundingBox &box);
 	
 	void verbose() const;
 
@@ -44,6 +46,7 @@ public:
 	static float ParentBoxArea;
 	
 private:
+	BoundingBox m_leftBox, m_rightBox;
 	float m_pos;
 	int m_axis;
 	float m_cost;

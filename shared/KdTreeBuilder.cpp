@@ -49,7 +49,7 @@ void KdTreeBuilder::calculateBins()
 void KdTreeBuilder::calculateSplitEvents()
 {
 	SplitEvent::NumPrimitive = m_numPrimitive;
-	SplitEvent::PrimitiveIndices = m_context->indices();
+	//SplitEvent::PrimitiveIndices = m_context->indices();
 	SplitEvent::PrimitiveBoxes = m_context->m_primitiveBoxes;
 	SplitEvent::ParentBoxArea = m_bbox.area();
 	
@@ -70,7 +70,7 @@ void KdTreeBuilder::calculateSplitEvents()
 			eventIdx++;
 		}
 	}
-	
+/*	
 	boost::thread eventThread[NUMEVENTTHREAD];
 	
 	for(unsigned i = 0; i < NUMEVENTTHREAD; i++) {
@@ -80,15 +80,49 @@ void KdTreeBuilder::calculateSplitEvents()
 	for(unsigned i = 0; i < NUMEVENTTHREAD; i++) {
 		eventThread[i].join();
 	}
-	
+	*/
+
 /*
+	for(unsigned i = 0; i < numEvent; i++) {
+		m_event[i].calculateCost();
+	}
+*/
+
+	BoundingBox *primBoxes = m_context->m_primitiveBoxes;
+	for(unsigned i = 0; i < m_numPrimitive; i++) {
+		const BoundingBox &primBox = primBoxes[i];
+		for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+			const float min = m_bbox.getMin(axis);
+			const float max = m_bbox.getMax(axis);
+			const float delta = (max - min) / 33.f;
+			const int eventOffset = axis * 32;
+			
+			int minGrid = (primBox.getMin(axis) - min) / delta;
+			
+			if(minGrid < 0) minGrid = 0;
+			else if(minGrid > 31) minGrid = 31;
+			
+			for(int g = minGrid + 1; g < 32; g++)
+				m_event[eventOffset + g].updateLeftBox(primBox);
+
+			int maxGrid = (primBox.getMax(axis) - min) / delta;
+			
+			if(maxGrid < 0) maxGrid = 0;
+			else if(maxGrid > 31) maxGrid = 31;
+			
+			for(int g = 0; g <= maxGrid - 1; g++)
+				m_event[eventOffset + g].updateRightBox(primBox);
+		}
+	}
+	
+	for(unsigned i = 0; i < numEvent; i++) {
+		m_event[i].calculateCost();
+	}
+	
 	//for(unsigned j = 0; j < m_numPrimitive; j++) {
 		//unsigned &primIdx = m_indices[j];
 		//BoundingBox &primBox = primBoxes[primIdx];
-		for(unsigned i = 0; i < numEvent; i++) {
-			SplitEvent &event = m_event[i];
-			event.calculateCost();
-		}
+		
 		
 		//Primitive *prim = m_primitives[i];
 		//BaseMesh *mesh = (BaseMesh *)(prim->getGeometry());
@@ -96,7 +130,7 @@ void KdTreeBuilder::calculateSplitEvents()
 		
 		//mesh->calculateBBox(triIdx);
 	//}
-*/
+
 }
 
 void KdTreeBuilder::calculateSides()

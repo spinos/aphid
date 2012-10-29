@@ -71,7 +71,7 @@ void KdTree::addMesh(BaseMesh* mesh)
 void KdTree::create()
 {	
 	printf("input primitive count %d\n", m_stream.getNumPrimitives());
-	printf("tree bbox: %f %f %f - %f %f %f\n", m_bbox.m_min.x, m_bbox.m_min.y, m_bbox.m_min.z, m_bbox.m_max.x, m_bbox.m_max.y, m_bbox.m_max.z);
+	printf("tree bbox: %f %f %f - %f %f %f\n", m_bbox.m_min_x, m_bbox.m_min_y, m_bbox.m_min_z, m_bbox.m_max_x, m_bbox.m_max_y, m_bbox.m_max_z);
 	
 	QElapsedTimer timer;
 	timer.start();

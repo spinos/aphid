@@ -26,5 +26,7 @@ public:
 	
 	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
 	void expandBy(const BoundingBox &another);
-	Vector3F m_min, m_max;
+	
+	float m_min_x, m_min_y, m_min_z, m_max_x, m_max_y, m_max_z;
+	float na, nb;
 };

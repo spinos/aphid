@@ -17,7 +17,7 @@ float SplitEvent::ParentBoxArea = 1.f;
 
 SplitEvent::SplitEvent() 
 {
-	
+	m_cost = 10e8;
 }
 
 void SplitEvent::setPos(float val)
@@ -86,9 +86,18 @@ void SplitEvent::calculateTightBBoxes(const BoundingBox &box, BoundingBox &leftB
 	}
 }
 
-void SplitEvent::calculateCost()
+void SplitEvent::updateLeftBox(const BoundingBox &box)
 {
-	m_cost = 10e8;
+	m_leftBox.expandBy(box);
+}
+
+void SplitEvent::updateRightBox(const BoundingBox &box)
+{
+	m_rightBox.expandBy(box);	
+}
+
+void SplitEvent::calculateCost()
+{/*
 	BoundingBox leftBBox, rightBBox;
 	for(unsigned i = 0; i < NumPrimitive; i++) {
 		//unsigned &primIdx = PrimitiveIndices[i];
@@ -97,6 +106,10 @@ void SplitEvent::calculateCost()
 	}
 	
 	m_cost = 15.f + 20.f * (leftBBox.area() * m_leftNumPrim + rightBBox.area() * m_rightNumPrim) / ParentBoxArea;
+	*/
+	
+	m_cost = 150.f + 200.f * (m_leftBox.area() * m_leftNumPrim + m_rightBox.area() * m_rightNumPrim) / ParentBoxArea;
+	
 }
 
 void SplitEvent::verbose() const
