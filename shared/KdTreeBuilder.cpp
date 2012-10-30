@@ -82,7 +82,7 @@ void KdTreeBuilder::calculateSplitEvents()
 	}
 	*/
 
-	boost::thread boxThread[SplitEvent::Dimension];
+	boost::thread boxThread[3];
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		boxThread[axis] = boost::thread(boost::bind(&KdTreeBuilder::updateEventBBoxAlong, this, axis));
 	}
