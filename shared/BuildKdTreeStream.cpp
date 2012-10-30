@@ -22,7 +22,7 @@ void BuildKdTreeStream::appendMesh(BaseMesh* mesh)
 	unsigned numFace = mesh->getNumFaces();
 	m_primitives.expandBy(numFace);
 	m_indices.expandBy(numFace);
-	
+
 	for(unsigned i = 0; i < numFace; i++) {
 		Primitive *p = m_primitives.asPrimitive();
 		p->setGeometry((char *)mesh);

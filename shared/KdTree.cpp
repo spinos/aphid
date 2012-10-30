@@ -64,6 +64,7 @@ void KdTree::addMesh(BaseMesh* mesh)
 	unsigned nf = mesh->getNumFaces();
 	printf("add %i triangles\n", nf);
 	m_stream.appendMesh(mesh);
+
 	const BoundingBox box = mesh->calculateBBox();
 	m_bbox.expandBy(box);
 }
