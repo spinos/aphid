@@ -1,24 +1,41 @@
-ABC_SRC = D:/usr/Alembic/lib/Alembic
-HDF5_ROOT = D:/usr/hdf5
+HEADERS       = ../shared/ALFile.h
 
-INCLUDEPATH += D:/usr/Alembic/lib \
-                D:/usr/local/include \
-                D:/usr/local/include/boost/tr1/tr1 \
+SOURCES       = ../shared/ALFile.cpp \
+                main.cpp
+
+win32 {
+    CONFIG += console
+    ABC_SRC = D:/usr/Alembic/lib/alembic-1.0.5/lib
+    BOOST_SRC = D:/usr/boost_1_44_0
+    HDF5_ROOT = D:/usr/hdf5
+    INCLUDEPATH += D:/usr/local/include
+}
+
+macx {
+    ABC_SRC = /Users/jianzhang/Library/alembic-1.0.5/lib
+    BOOST_SRC = /Users/jianzhang/Library/boost_1_44_0
+    HDF5_ROOT = /Users/jianzhang/Library/hdf5
+    INCLUDEPATH += /usr/local/include/OpenEXR
+}
+
+INCLUDEPATH += $$ABC_SRC \
+                $$BOOST_SRC \
+                $$BOOST_SRC/boost/tr1/tr1 \
                 $$HDF5_ROOT/include \
                 ../shared
                 
-QMAKE_LIBDIR += $$HDF5_ROOT/lib \
-                D:/usr/local/lib64
+QMAKE_LIBDIR += $$HDF5_ROOT/lib
 
-HEADERS       = ../shared/ALFile.h
-                
-SOURCES       = ../shared/ALFile.cpp \
-		main.cpp
-                
-DEFINES += OPENEXR_DLL
-                
-LIBS += -lhdf5 -lhdf5_hl -lszip -lHalf -lIex -lIlmImf -lImath -lIlmThread -lalembic
+LIBS += -lhdf5 -lhdf5_hl -lHalf -lIex -lIlmImf -lImath -lIlmThread
 
 win32 {
-CONFIG += console
+    DEFINES += OPENEXR_DLL
+    QMAKE_LIBDIR += D:/usr/local/lib64
+    LIBS += -lszip -lalembic
+}
+
+macx {
+    CONFIG -= app_bundle
+    QMAKE_LIBDIR += $$ABC_SRC
+    LIBS += -lAlembicAbc -lAlembicAbcCoreAbstract -lAlembicAbcCoreHDF5 -lAlembicUtil
 }

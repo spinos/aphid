@@ -147,12 +147,6 @@ void visitObject( IObject iObj,
     }
 }
 
-void add(ALFile & file, const char * path)
-{
-    Alembic::Abc::OObject dest;
-    file.object(path, dest);
-}
-
 void write(const char * filename)
 {
     std::cout<<"write test\n";
@@ -161,18 +155,18 @@ void write(const char * filename)
     
     afile.openAbc(filename);
     
-    //OObject archiveTop = afile.root();
-    /*
-    AbcA::TimeSamplingPtr transTime, geoTime;
-    transTime.reset(new AbcA::TimeSampling());
-    geoTime = transTime;
-    
-    mRoot.addTimeSampling(*transTime);
-    mRoot.addTimeSampling(*geoTime);
-    */
-    add(afile, "|a");
-    add(afile, "|a|b");
-    
+    OObject p; 
+	afile.findParentOf("|a", p);
+	OObject a(p, "a");
+	
+	afile.findParentOf("|a|b", p);
+	OObject b(p, "b");
+	
+	afile.findParentOf("|a|b|c", p);
+	OObject c(p, "c");
+
+	afile.findParentOf("|d", p);
+	OObject d(p, "d");
 }
 
 //-*****************************************************************************

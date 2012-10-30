@@ -1,5 +1,7 @@
 #pragma once
 #include <Alembic/Abc/All.h>
+#include <vector>
+using namespace Alembic::Abc;
 
 class ALFile
 {
@@ -8,9 +10,15 @@ public:
     ~ALFile();
     
     void openAbc(const char *filename);
-    Alembic::Abc::OObject root();
-    char object(const std::string &objectPath, Alembic::Abc::OObject &dest);
-    char findChildByName(Alembic::Abc::OObject &parent, Alembic::Abc::OObject &child, const std::string &name);
-private: 
-    Alembic::Abc::OArchive m_archive;
+    OObject root();
+    char findObject(const std::vector<std::string> &path, OObject &dest);
+	char findObject(const std::string &fullPathName, OObject &dest);
+    char findChildByName(OObject &parent, OObject &child, const std::string &name);
+	char findParentOf(const std::string &fullPathName, OObject &dest);
+	
+	static void splitNames(const std::string &fullPath, std::vector<std::string> &paths);
+
+private:
+	
+    OArchive m_archive;
 };

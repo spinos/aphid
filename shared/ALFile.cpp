@@ -19,69 +19,79 @@ void ALFile::openAbc(const char *filename)
 
     m_archive = CreateArchiveWithInfo(Alembic::AbcCoreHDF5::WriteArchive(),
                                 abcName, "opium write test", "foo info",
-            Alembic::Abc::ErrorHandler::kThrowPolicy);
+            ErrorHandler::kThrowPolicy);
     
     if (!m_archive.valid())
-        std::cout<<"write failed\n";
+        std::cout<<"failed to open file "<<filename<<" to write\n";
 }
 
-Alembic::Abc::OObject ALFile::root()
+OObject ALFile::root()
 {
     return m_archive.getTop();
 }
 
-char ALFile::object(const std::string &objectPath, Alembic::Abc::OObject &dest)
+void ALFile::splitNames(const std::string &fullPath, std::vector<std::string> &paths)
 {
-    std::cout<<"obj path "<<objectPath<<"\n";
-    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	boost::char_separator<char> sep("|");
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("|/");
+	tokenizer tokens(fullPath, sep);
 	
-	std::string combined(objectPath);
-	tokenizer tokens(combined, sep);
-	
-	Alembic::Abc::OObject parent = m_archive.getTop();
-	Alembic::Abc::OObject child;
-	std::string r;
-	char found = 0;
 	for (tokenizer::iterator tok_iter = tokens.begin();
 		tok_iter != tokens.end(); ++tok_iter)
 	{
-		r = *tok_iter;
-		std::cout<<"try to find "<<r<<" within "<<parent.getName()<<"\n";
-		
-		found = findChildByName(parent, child, r);
-		
-		if(found) std::cout<<"found "<<r<<std::endl;
-		
-		tokenizer::iterator last = tok_iter;
-		last++;
-		
-		if(last != tokens.end()) {
-		    
-		    if(!found)
-		        return 0;
-		    
-		    parent = child;
-		}
-		
-		
+		paths.push_back(*tok_iter);
 	}
-	if(!found) {
-	    dest = Alembic::Abc::OObject(parent, r);
-	    std::cout<<"created "<<dest.getName()<<"\n";
-	    
-	}
-	return found;
 }
 
-char ALFile::findChildByName(Alembic::Abc::OObject &parent, Alembic::Abc::OObject &child, const std::string &name)
+char ALFile::findObject(const std::vector<std::string> &path, OObject &dest)
 {
-    std::cout<<"child count "<<parent.getNumChildren()<<"\n";
+    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("|");
+	
+	OObject parent = root();
+
+	for(std::vector<std::string >::const_iterator it = path.begin();
+		it != path.end(); it++)
+	{
+		std::string r = *it;
+		
+		if(!findChildByName(parent, dest, r))
+			return 0;
+		    
+		parent = dest;
+	}
+
+	return 1;
+}
+
+char ALFile::findObject(const std::string &fullPathName, OObject &dest)
+{
+	std::vector<std::string > paths;
+	splitNames(fullPathName, paths);
+	return findObject(paths, dest);
+}
+
+char ALFile::findChildByName(OObject &parent, OObject &child, const std::string &name)
+{
     for ( size_t i = 0 ; i < parent.getNumChildren() ; i++ ) {
-        std::cout<<" child "<<child.getName();
-        child = parent.getChild(i);
+		child = parent.getChild(i);
         if(child.getName() == name)
             return 1;
     }
     return 0;
+}
+
+char ALFile::findParentOf(const std::string &fullPathName, OObject &dest)
+{
+	std::vector<std::string > paths;
+	splitNames(fullPathName, paths);
+	std::string terminalName = paths.back();
+	paths.erase(paths.end());
+	
+	if(paths.size() < 1) {
+		dest = root();
+		return 1;
+	}
+	
+	return findObject(paths, dest);
 }
