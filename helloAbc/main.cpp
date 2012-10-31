@@ -39,6 +39,7 @@
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <ALFile.h>
 #include <ALTransform.h>
+#include <ALMesh.h>
 #include <iostream>
 #include <sstream>
 
@@ -177,7 +178,10 @@ void write(const char * filename)
 	group1.addRotatePivot(0,0,0);
 	group1.addRotatePivotTranslate(0,0,0);
 	group1.write();
-	
+
+	afile.findParentOf("|group1|meshShape", p);
+	ALMesh mesh(p, "meshShape");
+	mesh.write();
 }
 
 void read(const char * filename)
