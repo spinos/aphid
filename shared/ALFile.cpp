@@ -25,6 +25,22 @@ void ALFile::openAbc(const char *filename)
         std::cout<<"failed to open file "<<filename<<" to write\n";
 }
 
+void ALFile::addTimeSampling()
+{
+	Alembic::AbcCoreAbstract::TimeSamplingPtr mShapeTime;
+	Alembic::AbcCoreAbstract::TimeSamplingPtr mTransTime;
+	
+	mShapeTime.reset(new AbcA::TimeSampling());
+	mTransTime.reset(new AbcA::TimeSampling());
+	
+	Alembic::Util::uint32_t mShapeTimeIndex = m_archive.addTimeSampling(*mShapeTime);
+	
+	Alembic::Util::uint32_t mTransTimeIndex = m_archive.addTimeSampling(*mTransTime);
+	
+	std::cout<<"shape time index "<<mShapeTimeIndex<<std::endl;
+	std::cout<<"trans time index "<<mTransTimeIndex<<std::endl;
+}
+
 OObject ALFile::root()
 {
     return m_archive.getTop();

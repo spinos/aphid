@@ -10,6 +10,7 @@ public:
     ~ALFile();
     
     void openAbc(const char *filename);
+	void addTimeSampling();
     OObject root();
     char findObject(const std::vector<std::string> &path, OObject &dest);
 	char findObject(const std::string &fullPathName, OObject &dest);

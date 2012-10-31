@@ -38,6 +38,7 @@
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <ALFile.h>
+#include <ALTransform.h>
 #include <iostream>
 #include <sstream>
 
@@ -147,52 +148,43 @@ void visitObject( IObject iObj,
     }
 }
 
+void showTimeSampling(IArchive archive)
+{
+	std::cout<<"num time samplings "<<archive.getNumTimeSamplings()<<std::endl;
+	AbcA::TimeSamplingPtr sampler = archive.getTimeSampling(0);
+	std::cout<<"time sampling[0] "<<sampler->getSampleTime(0)<<std::endl;
+}
+
 void write(const char * filename)
 {
-    std::cout<<"write test\n";
+    std::cout<<"write "<<filename<<"\n";
     
     ALFile afile;
     
     afile.openAbc(filename);
+	afile.addTimeSampling();
     
-    OObject p; 
-	afile.findParentOf("|a", p);
-	OObject a(p, "a");
+    OObject p;
 	
-	afile.findParentOf("|a|b", p);
-	OObject b(p, "b");
+	afile.findParentOf("|group1", p);
 	
-	afile.findParentOf("|a|b|c", p);
-	OObject c(p, "c");
-
-	afile.findParentOf("|d", p);
-	OObject d(p, "d");
+	ALTransform group1(p, "group1");
+	group1.addTranslate(3.0, 4.0, 5.0);
+	group1.addRotate(0.5, 0.0, 0.0, 0);
+	group1.addScale(2.0, 2.0, 2.0);
+	group1.addScalePivot(0,0,0);
+	group1.addScalePivotTranslate(0,0,0);
+	group1.addRotatePivot(0,0,0);
+	group1.addRotatePivotTranslate(0,0,0);
+	group1.write();
+	
 }
 
-//-*****************************************************************************
-//-*****************************************************************************
-// DO IT.
-//-*****************************************************************************
-//-*****************************************************************************
-int main( int argc, char *argv[] )
+void read(const char * filename)
 {
-    if ( argc != 2 )
-    {
-        std::cerr << "USAGE: " << argv[0] << " <AlembicArchive.abc>"
-                  << std::endl;
-        exit( -1 );
-    }
-    
-    std::cout<<"hello abc\n";
-    
-    write(argv[1]);
-
-    std::cout<<"read "<<argv[1]<<std::endl;
-
-    // Scoped.
-    {
-        IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
-                          argv[1]);
+    std::cout<<"read "<<filename<<"\n";
+	IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
+                          filename);
         if (archive)
         {
             std::cout  << "AbcEcho for " 
@@ -221,14 +213,35 @@ int main( int argc, char *argv[] )
             }
             else
             {
-                std::cout << argv[1] << std::endl;
+                std::cout << filename << std::endl;
                 std::cout << "  (file doesn't have any ArchiveInfo)" 
                           << std::endl;
                 std::cout << std::endl;
             }
         }
+		showTimeSampling(archive);
         visitObject( archive.getTop(), "" );
+}
+
+//-*****************************************************************************
+//-*****************************************************************************
+// DO IT.
+//-*****************************************************************************
+//-*****************************************************************************
+int main( int argc, char *argv[] )
+{
+	std::cout<<"hello abc\n";
+    if ( argc != 2 )
+    {
+        //std::cerr << "USAGE: " << argv[0] << " <AlembicArchive.abc>"
+          //        << std::endl;
+        //exit( -1 );
+		write("./foo.abc");
+		read("./foo.abc");
+		exit(0);
     }
+	
+	read(argv[1]);
 
     return 0;
 }

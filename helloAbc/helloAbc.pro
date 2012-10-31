@@ -1,6 +1,8 @@
-HEADERS       = ../shared/ALFile.h
+HEADERS       = ../shared/ALFile.h \
+                ../shared/ALTransform.h \
 
 SOURCES       = ../shared/ALFile.cpp \
+                ../shared/ALTransform.cpp \
                 main.cpp
 
 win32 {
@@ -37,5 +39,5 @@ win32 {
 macx {
     CONFIG -= app_bundle
     QMAKE_LIBDIR += $$ABC_SRC
-    LIBS += -lAlembicAbc -lAlembicAbcCoreAbstract -lAlembicAbcCoreHDF5 -lAlembicUtil
+    LIBS += -lAlembicAbc -lAlembicAbcCoreAbstract -lAlembicAbcCoreHDF5 -lAlembicAbcGeom -lAlembicUtil
 }
