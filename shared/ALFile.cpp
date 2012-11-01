@@ -101,13 +101,18 @@ char ALFile::findParentOf(const std::string &fullPathName, OObject &dest)
 {
 	std::vector<std::string > paths;
 	splitNames(fullPathName, paths);
+
 	std::string terminalName = paths.back();
-	paths.erase(paths.end());
-	
-	if(paths.size() < 1) {
+
+	if(paths.size() < 2) {
 		dest = root();
 		return 1;
 	}
+
+	std::vector<std::string >::const_iterator lastPos = paths.begin();
+	lastPos += paths.size() - 1;
 	
+	paths.erase(lastPos);
+
 	return findObject(paths, dest);
 }

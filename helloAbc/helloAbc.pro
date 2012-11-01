@@ -9,8 +9,8 @@ SOURCES       = ../shared/ALFile.cpp \
 
 win32 {
     CONFIG += console
-    ABC_SRC = D:/usr/Alembic/lib/alembic-1.0.5/lib
-    BOOST_SRC = D:/usr/boost_1_44_0
+    ABC_SRC = D:/usr/Alembic/lib
+    BOOST_SRC = D:/usr/local/include
     HDF5_ROOT = D:/usr/hdf5
     INCLUDEPATH += D:/usr/local/include
 }
