@@ -5,9 +5,13 @@
 #include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <ALTransform.h>
+#include <ALMesh.h>
 
 ALFile::ALFile() {}
-ALFile::~ALFile() {}
+ALFile::~ALFile() 
+{
+	flush();
+}
 
 void ALFile::openAbc(const char *filename)
 {
@@ -108,18 +112,16 @@ char ALFile::findChildByName(OObject &parent, OObject &child, const std::string 
 }
 
 char ALFile::findParentOf(const std::string &fullPathName, OObject &dest)
-{std::cout<<"try to find "<<fullPathName<<std::endl;
+{
 	std::vector<std::string > paths;
 	splitNames(fullPathName, paths);
-
-	std::string terminalName = paths.back();
 
 	if(paths.size() < 2) {
 		dest = root();
 		return 1;
 	}
 
-	std::vector<std::string >::const_iterator lastPos = paths.begin();
+	std::vector<std::string >::iterator lastPos = paths.begin();
 	lastPos += paths.size() - 1;
 	
 	paths.erase(lastPos);
@@ -141,6 +143,22 @@ bool ALFile::addTransform(const std::string &fullPathName)
 ALTransform &ALFile::lastTransform()
 {
     return m_transform.back();
+}
+
+bool ALFile::addMesh(const std::string &fullPathName)
+{
+	OObject p;
+    if(!findParentOf(fullPathName, p))
+        return 0;
+		
+	std::string name = terminalName(fullPathName);
+    m_mesh.push_back(ALMesh(p, name));
+	return 1;
+}
+
+ALMesh &ALFile::lastMesh()
+{
+	return m_mesh.back();
 }
 
 void ALFile::flush()

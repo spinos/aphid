@@ -4,6 +4,7 @@
 #include <vector>
 using namespace Alembic::Abc;
 class ALTransform;
+class ALMesh;
 class ALFile
 {
 public:
@@ -23,9 +24,14 @@ public:
 
 	bool addTransform(const std::string &fullPathName);
 	ALTransform &lastTransform();
-	void flush();
+	
+	bool addMesh(const std::string &fullPathName);
+	ALMesh &lastMesh();
+	
 private:
+	void flush();
 	
     OArchive m_archive;
     std::vector<ALTransform> m_transform;
+	std::vector<ALMesh> m_mesh;
 };

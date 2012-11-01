@@ -186,11 +186,25 @@ void write(const char * filename)
 	afile.addTransform("|group1");
 	
 	ALTransform t = afile.lastTransform();
-	t.addTranslate(3.0, 4.0, 5.0);
+	t.addTranslate(0.0, 4.0, 5.0);
 	t.write();
 	
 	afile.addTransform("|group1|group2");
 	afile.addTransform("|group1|group2|group3");
+	afile.addMesh("|group1|group2|group3|shape3");
+	
+	ALMesh shape3 = afile.lastMesh();
+	
+	const float vertices[12] = {0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0};
+	shape3.addP(vertices, 4);
+	
+	const unsigned indices[6] = {0, 1, 2, 2, 3, 0};
+	shape3.addFaceConnection(indices, 6);
+	
+	const unsigned counts[2] = {3, 3};
+	shape3.addFaceCount(counts, 2);
+	
+	shape3.write();
 	//ALTransform g0 = addAbcGroup(afile, "|group1", "group1");
 	//ALTransform g1 = addAbcGroup(afile, "|group1|group2", "group2");
 	//ALTransform g3 = addAbcGroup(afile, "|group1|group2|group3", "group3");
@@ -206,7 +220,6 @@ void write(const char * filename)
 	//afile.findParentOf("|group1|meshShape", p);
 	//ALMesh mesh(p, "meshShape");
 	//mesh.write();
-	afile.flush();
 	std::cout<<"cleanup";
 }
 
