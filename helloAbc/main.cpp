@@ -48,6 +48,8 @@ using namespace ::Alembic::AbcGeom;
 
 static const std::string g_sep( ";" );
 
+
+
 //-*****************************************************************************
 // FORWARD
 void visitProperties( ICompoundProperty, std::string & );
@@ -156,6 +158,23 @@ void showTimeSampling(IArchive archive)
 	std::cout<<"time sampling[0] "<<sampler->getSampleTime(0)<<std::endl;
 }
 
+ALTransform addAbcGroup(ALFile &file, const char *name, const char *term)
+{
+    OObject p;
+    file.findParentOf(name, p);
+
+    ALTransform res(p, term);
+    res.addTranslate(3.0, 4.0, 5.0);
+	/*group1.addRotate(0.5, 0.0, 0.0, 0);
+	group1.addScale(2.0, 2.0, 2.0);
+	group1.addScalePivot(0,0,0);
+	group1.addScalePivotTranslate(0,0,0);
+	group1.addRotatePivot(0,0,0);
+	group1.addRotatePivotTranslate(0,0,0);*/
+	res.write();
+	return res;
+}
+
 void write(const char * filename)
 {
     std::cout<<"write "<<filename<<"\n";
@@ -164,24 +183,31 @@ void write(const char * filename)
     
     afile.openAbc(filename);
 	afile.addTimeSampling();
-    
-    OObject p;
+	afile.addTransform("|group1");
 	
+	ALTransform t = afile.lastTransform();
+	t.addTranslate(3.0, 4.0, 5.0);
+	t.write();
+	
+	afile.addTransform("|group1|group2");
+	afile.addTransform("|group1|group2|group3");
+	//ALTransform g0 = addAbcGroup(afile, "|group1", "group1");
+	//ALTransform g1 = addAbcGroup(afile, "|group1|group2", "group2");
+	//ALTransform g3 = addAbcGroup(afile, "|group1|group2|group3", "group3");
+	//addAbcGroup(afile, "|group1|group3", "group3", p);
+	/*OObject p;
 	afile.findParentOf("|group1", p);
-	
 	ALTransform group1(p, "group1");
-	group1.addTranslate(3.0, 4.0, 5.0);
-	group1.addRotate(0.5, 0.0, 0.0, 0);
-	group1.addScale(2.0, 2.0, 2.0);
-	group1.addScalePivot(0,0,0);
-	group1.addScalePivotTranslate(0,0,0);
-	group1.addRotatePivot(0,0,0);
-	group1.addRotatePivotTranslate(0,0,0);
-	group1.write();
+	
+	OObject p1;
+	afile.findParentOf("|group1|group2", p1);
+	ALTransform group2(p1, "group2");*/
 
-	afile.findParentOf("|group1|meshShape", p);
-	ALMesh mesh(p, "meshShape");
-	mesh.write();
+	//afile.findParentOf("|group1|meshShape", p);
+	//ALMesh mesh(p, "meshShape");
+	//mesh.write();
+	afile.flush();
+	std::cout<<"cleanup";
 }
 
 void read(const char * filename)

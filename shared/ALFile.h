@@ -1,8 +1,9 @@
 #pragma once
-#include <Alembic/Abc/All.h>
+#include <Alembic/Abc/OObject.h>
+#include <Alembic/Abc/OArchive.h>
 #include <vector>
 using namespace Alembic::Abc;
-
+class ALTransform;
 class ALFile
 {
 public:
@@ -17,9 +18,14 @@ public:
     char findChildByName(OObject &parent, OObject &child, const std::string &name);
 	char findParentOf(const std::string &fullPathName, OObject &dest);
 	
-	static void splitNames(const std::string &fullPath, std::vector<std::string> &paths);
+	std::string terminalName(const std::string &fullPathName);
+	void splitNames(const std::string &fullPathName, std::vector<std::string> &paths);
 
+	bool addTransform(const std::string &fullPathName);
+	ALTransform &lastTransform();
+	void flush();
 private:
 	
     OArchive m_archive;
+    std::vector<ALTransform> m_transform;
 };

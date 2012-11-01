@@ -2,9 +2,9 @@
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 #include <string>
-
+#include <Alembic/Abc/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
-
+#include <ALTransform.h>
 
 ALFile::ALFile() {}
 ALFile::~ALFile() {}
@@ -46,11 +46,18 @@ OObject ALFile::root()
     return m_archive.getTop();
 }
 
-void ALFile::splitNames(const std::string &fullPath, std::vector<std::string> &paths)
+std::string ALFile::terminalName(const std::string &fullPathName)
+{
+    std::vector<std::string > paths;
+	splitNames(fullPathName, paths);
+	return paths.back();
+}
+
+void ALFile::splitNames(const std::string &fullPathName, std::vector<std::string> &paths)
 {
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep("|/");
-	tokenizer tokens(fullPath, sep);
+	tokenizer tokens(fullPathName, sep);
 	
 	for (tokenizer::iterator tok_iter = tokens.begin();
 		tok_iter != tokens.end(); ++tok_iter)
@@ -91,14 +98,17 @@ char ALFile::findChildByName(OObject &parent, OObject &child, const std::string 
 {
     for ( size_t i = 0 ; i < parent.getNumChildren() ; i++ ) {
 		child = parent.getChild(i);
-        if(child.getName() == name)
+		if(!child.valid()) {
+		    std::cout<<"not valid\n";
+		}
+        else if(child.getName() == name)
             return 1;
     }
     return 0;
 }
 
 char ALFile::findParentOf(const std::string &fullPathName, OObject &dest)
-{
+{std::cout<<"try to find "<<fullPathName<<std::endl;
 	std::vector<std::string > paths;
 	splitNames(fullPathName, paths);
 
@@ -115,4 +125,25 @@ char ALFile::findParentOf(const std::string &fullPathName, OObject &dest)
 	paths.erase(lastPos);
 
 	return findObject(paths, dest);
+}
+
+bool ALFile::addTransform(const std::string &fullPathName)
+{
+    OObject p;
+    if(!findParentOf(fullPathName, p))
+        return 0;
+
+    std::string name = terminalName(fullPathName);
+    m_transform.push_back(ALTransform(p, name));
+	return 1;
+}
+
+ALTransform &ALFile::lastTransform()
+{
+    return m_transform.back();
+}
+
+void ALFile::flush()
+{
+    m_transform.clear();
 }
