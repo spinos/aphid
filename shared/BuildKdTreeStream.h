@@ -29,6 +29,8 @@ public:
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
 	
+	void verbose();
+	
 private:
 	PrimitiveArray m_primitives;
 	IndexArray m_indices;

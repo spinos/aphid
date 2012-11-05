@@ -46,7 +46,6 @@ private:
 	BuildKdTreeContext *m_context;
 	MinMaxBins *m_bins;
 	SplitEvent *m_event;
-	char *m_primitiveClassification;
 	unsigned m_numPrimitive;
 	unsigned m_bestEventIdx;
 };

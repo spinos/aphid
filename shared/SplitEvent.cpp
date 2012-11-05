@@ -10,9 +10,6 @@
 #include <BaseMesh.h>
 #include <BuildKdTreeContext.h>
 int SplitEvent::Dimension = 3;
-unsigned SplitEvent::NumPrimitive = 0;
-unsigned *SplitEvent::PrimitiveIndices = 0;
-BoundingBox *SplitEvent::PrimitiveBoxes = 0;
 float SplitEvent::ParentBoxArea = 1.f;
 
 SplitEvent::SplitEvent() 

@@ -83,17 +83,19 @@ void KdTree::create()
 	subdivide(m_root, *ctx, 0);
 	ctx->verbose();
 	delete ctx;
+	
+	m_stream.verbose();
 	std::cout << "kd tree finished after " << timer.elapsed() << "ms\n";
 }
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 64 || level == 1) {
+	if(ctx.getNumPrimitives() < 64 || level == 19) {
 		node->setLeaf(true);
 		return;
 	}
 	
-	printf("subdiv node level %i\n", level);
+	//printf("subdiv node level %i\n", level);
 	
 	KdTreeBuilder builder(ctx);
 

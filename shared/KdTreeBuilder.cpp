@@ -15,7 +15,6 @@ KdTreeBuilder::KdTreeBuilder(BuildKdTreeContext &ctx)
 {
 	m_context = &ctx;
 	m_numPrimitive = ctx.getNumPrimitives();
-	m_primitiveClassification = new char[m_numPrimitive];
 	m_bbox = ctx.getBBox();
 	
 	calculateBins();
@@ -27,7 +26,6 @@ KdTreeBuilder::~KdTreeBuilder()
 	//printf("builder quit\n");
 	delete[] m_event;
 	delete[] m_bins;
-	delete[] m_primitiveClassification;
 }
 
 void KdTreeBuilder::calculateBins()
@@ -48,9 +46,6 @@ void KdTreeBuilder::calculateBins()
 
 void KdTreeBuilder::calculateSplitEvents()
 {
-	SplitEvent::NumPrimitive = m_numPrimitive;
-	//SplitEvent::PrimitiveIndices = m_context->indices();
-	SplitEvent::PrimitiveBoxes = m_context->m_primitiveBoxes.ptr();
 	SplitEvent::ParentBoxArea = m_bbox.area();
 	
 	const unsigned numEvent = numEvents();
@@ -126,17 +121,6 @@ void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
 	}
 }
 
-void KdTreeBuilder::calculateSides()
-{
-	BoundingBox *primBoxes = m_context->m_primitiveBoxes.ptr();
-
-	SplitEvent &e = m_event[m_bestEventIdx];
-	for(unsigned i = 0; i < m_numPrimitive; i++) {
-		BoundingBox &primBox = primBoxes[i];
-		m_primitiveClassification[i] = e.side(primBox);
-	}
-}
-
 const SplitEvent *KdTreeBuilder::bestSplit()
 {
 	m_bestEventIdx = 0;//axis * 32 + 16;
@@ -149,7 +133,7 @@ const SplitEvent *KdTreeBuilder::bestSplit()
 		}
 	}
 	cutoffEmptySpace();
-	calculateSides();
+	//calculateSides();
 	return &m_event[m_bestEventIdx];
 }
 
@@ -218,6 +202,7 @@ unsigned KdTreeBuilder::numEvents() const
 void KdTreeBuilder::partitionLeft(BuildKdTreeContext &ctx)
 {	
 	SplitEvent &e = m_event[m_bestEventIdx];
+	if(e.leftCount() < 1) return;
 	ctx.create(e.leftCount());
 	
 	BoundingBox leftBox, rightBox;
@@ -231,7 +216,8 @@ void KdTreeBuilder::partitionLeft(BuildKdTreeContext &ctx)
 	unsigned *idxDst = ctx.indices();
 	int count = 0;
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
-		int side = m_primitiveClassification[i];
+		BoundingBox &primBox = boxSrc[i];
+		int side = e.side(primBox);
 		if(side < 2) {
 			idxDst[count] = indices[i];
 			boxDst[count] = boxSrc[i];
@@ -244,6 +230,8 @@ void KdTreeBuilder::partitionLeft(BuildKdTreeContext &ctx)
 void KdTreeBuilder::partitionRight(BuildKdTreeContext &ctx)
 {	
 	SplitEvent &e = m_event[m_bestEventIdx];
+	if(e.rightCount() < 1) return;
+	
 	ctx.create(e.rightCount());
 	
 	BoundingBox leftBox, rightBox;
@@ -257,7 +245,8 @@ void KdTreeBuilder::partitionRight(BuildKdTreeContext &ctx)
 	unsigned *idxDst = ctx.indices();
 	int count = 0;
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
-		int side = m_primitiveClassification[i];
+		BoundingBox &primBox = boxSrc[i];
+		int side = e.side(primBox);
 		if(side > 0) {
 			idxDst[count] = indices[i];
 			boxDst[count] = boxSrc[i];
@@ -269,12 +258,13 @@ void KdTreeBuilder::partitionRight(BuildKdTreeContext &ctx)
 
 void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx)
 {
+	
 	SplitEvent &e = m_event[m_bestEventIdx];
 	if(e.leftCount() > 0)
 		leftCtx.create(e.leftCount());
 	if(e.rightCount() > 0)
 		rightCtx.create(e.rightCount());
-		
+	
 	BoundingBox leftBox, rightBox;
 
 	m_bbox.split(e.getAxis(), e.getPos(), leftBox, rightBox);
@@ -292,17 +282,21 @@ void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &r
 	int rightCount = 0;
 	int side;
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
-		side = m_primitiveClassification[i];
+		BoundingBox &primBox = boxSrc[i];
+		side = e.side(primBox);
+		
+		//side = m_primitiveClassification[i];
 		if(side < 2) {
-			leftIdxDst[leftCount] = indices[i];
+			leftIdxDst[leftCount] = *indices;
 			leftBoxDst[leftCount] = boxSrc[i];
 			leftCount++;
 		}
 		if(side > 0) {
-			rightIdxDst[rightCount] = indices[i];
+			rightIdxDst[rightCount] = *indices;
 			rightBoxDst[rightCount] = boxSrc[i];
 			rightCount++;
 		}
+		indices++;
 	}
-	printf("partition %i | %i\n", leftCount, rightCount);
+	//printf("partition %i | %i\n", leftCount, rightCount);
 }

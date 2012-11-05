@@ -40,9 +40,6 @@ public:
 	void verbose() const;
 
 	static int Dimension;
-	static unsigned NumPrimitive;
-	static unsigned *PrimitiveIndices;
-	static BoundingBox *PrimitiveBoxes;
 	static float ParentBoxArea;
 	
 private:

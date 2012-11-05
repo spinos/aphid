@@ -66,6 +66,4 @@ void BuildKdTreeContext::verbose() const
 {
 	//printf("indices state:\n");
 	//m_indices.verbose();
-	//printf("nodes state:\n");
-	//m_nodes.verbose();
 }

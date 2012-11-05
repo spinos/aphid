@@ -75,3 +75,9 @@ KdTreeNode *BuildKdTreeStream::firstTreeBranch()
 {
 	return m_nodes.asKdTreeNode(0);
 }
+
+void BuildKdTreeStream::verbose()
+{
+	printf("nodes state:\n");
+	m_nodes.verbose();
+}
