@@ -30,7 +30,7 @@ KdTreeBuilder::~KdTreeBuilder()
 
 void KdTreeBuilder::calculateBins()
 {
-	BoundingBox *primBoxes = m_context->m_primitiveBoxes.ptr();
+	BoundingBox *primBoxes = m_context->boxes();
 	m_bins = new MinMaxBins[SplitEvent::Dimension];
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		m_bins[axis].create(33, m_bbox.getMin(axis), m_bbox.getMax(axis));
@@ -93,7 +93,7 @@ void KdTreeBuilder::calculateSplitEvents()
 
 void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
 {
-	BoundingBox *primBoxes = m_context->m_primitiveBoxes.ptr();
+	BoundingBox *primBoxes = m_context->boxes();
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
 		const BoundingBox &primBox = primBoxes[i];
 		
@@ -211,8 +211,8 @@ void KdTreeBuilder::partitionLeft(BuildKdTreeContext &ctx)
 	ctx.setBBox(leftBox);
 	
 	unsigned *indices = m_context->indices();
-	BoundingBox *boxSrc = m_context->m_primitiveBoxes.ptr();
-	BoundingBox *boxDst = ctx.m_primitiveBoxes.ptr();
+	BoundingBox *boxSrc = m_context->boxes();
+	BoundingBox *boxDst = ctx.boxes();
 	unsigned *idxDst = ctx.indices();
 	int count = 0;
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
@@ -240,8 +240,8 @@ void KdTreeBuilder::partitionRight(BuildKdTreeContext &ctx)
 	ctx.setBBox(rightBox);
 	
 	unsigned *indices = m_context->indices();
-	BoundingBox *boxSrc = m_context->m_primitiveBoxes.ptr();
-	BoundingBox *boxDst = ctx.m_primitiveBoxes.ptr();
+	BoundingBox *boxSrc = m_context->boxes();
+	BoundingBox *boxDst = ctx.boxes();
 	unsigned *idxDst = ctx.indices();
 	int count = 0;
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
@@ -272,9 +272,9 @@ void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &r
 	rightCtx.setBBox(rightBox);
 	
 	unsigned *indices = m_context->indices();
-	BoundingBox *boxSrc = m_context->m_primitiveBoxes.ptr();
-	BoundingBox *leftBoxDst = leftCtx.m_primitiveBoxes.ptr();
-	BoundingBox *rightBoxDst = rightCtx.m_primitiveBoxes.ptr();
+	BoundingBox *boxSrc = m_context->boxes();
+	BoundingBox *leftBoxDst = leftCtx.boxes();
+	BoundingBox *rightBoxDst = rightCtx.boxes();
 	unsigned *leftIdxDst = leftCtx.indices();
 	unsigned *rightIdxDst = rightCtx.indices();
 	

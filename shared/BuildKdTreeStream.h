@@ -25,6 +25,7 @@ public:
 	
 	PrimitiveArray &primitives();
 	IndexArray &indices();
+	IndexArray &indirection();
 	
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
@@ -34,5 +35,6 @@ public:
 private:
 	PrimitiveArray m_primitives;
 	IndexArray m_indices;
+	IndexArray m_indirection;
 	KdTreeNodeArray m_nodes;
 };

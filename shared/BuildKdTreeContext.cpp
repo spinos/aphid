@@ -62,6 +62,11 @@ unsigned *BuildKdTreeContext::indices()
 	return m_indices.ptr();
 }
 
+BoundingBox *BuildKdTreeContext::boxes()
+{
+	return m_primitiveBoxes.ptr();
+}
+
 void BuildKdTreeContext::verbose() const
 {
 	//printf("indices state:\n");

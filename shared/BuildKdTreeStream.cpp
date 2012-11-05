@@ -59,6 +59,11 @@ IndexArray &BuildKdTreeStream::indices()
 	return m_indices;
 }
 
+IndexArray &BuildKdTreeStream::indirection()
+{
+	return m_indirection;
+}
+
 KdTreeNode *BuildKdTreeStream::createTreeBranch()
 {
 	KdTreeNode *p = (KdTreeNode *)m_nodes.expandBy(2);
@@ -80,4 +85,6 @@ void BuildKdTreeStream::verbose()
 {
 	printf("nodes state:\n");
 	m_nodes.verbose();
+	printf("indirection state:\n");
+	m_indirection.verbose();
 }

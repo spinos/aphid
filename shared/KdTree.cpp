@@ -90,8 +90,19 @@ void KdTree::create()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 64 || level == 19) {
+	if(ctx.getNumPrimitives() < 64 || level == 22) {
 		node->setLeaf(true);
+		if(ctx.getNumPrimitives() > 0) {
+			IndexArray &indir = m_stream.indirection();
+			unsigned numDir = ctx.getNumPrimitives();
+			indir.expandBy(numDir);
+			unsigned *src = ctx.indices();
+			for(unsigned i = 0; i < numDir; i++) {
+				unsigned *idx = indir.asIndex();
+				*idx = src[i];
+				indir.next();
+			}
+		}
 		return;
 	}
 	
