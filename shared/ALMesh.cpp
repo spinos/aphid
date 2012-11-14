@@ -36,12 +36,14 @@ void ALMesh::addFaceCount(const unsigned *counts, const unsigned &numCounts)
 	m_sample.setFaceCounts(i);
 }
 
-void ALMesh::addUV(const float *uvs, const unsigned &numUVs)
+void ALMesh::addUV(const float *uvs, const unsigned &numUVs, const unsigned *indices, const unsigned &numIds)
 {
-	OV2fGeomParam::Sample uvSamp;
+	Alembic::AbcGeom::OV2fGeomParam::Sample uvSamp;
 	uvSamp.setScope(Alembic::AbcGeom::kFacevaryingScope);
-	V2fArraySample s((const Imath::V2f *)uvs, numUVs);
-	uvSamp.setVals(s);
+	Alembic::AbcGeom::V2fArraySample v((const Imath::V2f *)uvs, numUVs);
+	uvSamp.setVals(v);
+	Alembic::Abc::UInt32ArraySample i((Abc::uint32_t *)indices, numIds);
+	uvSamp.setIndices(i);
 	m_sample.setUVs(uvSamp);
 }
 

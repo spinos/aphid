@@ -175,6 +175,27 @@ ALTransform addAbcGroup(ALFile &file, const char *name, const char *term)
 	return res;
 }
 
+void fillUV(float *uvs, unsigned *uvIds)
+{
+    //uvs = new float[8];
+	uvs[0] = 0;
+	uvs[1] = 0;
+	uvs[2] = 1;
+	uvs[3] = 0;
+	uvs[4] = 1;
+	uvs[5] = 1;
+	uvs[6] = 0;
+	uvs[7] = 1;
+
+	//uvIds = new unsigned[6];
+	uvIds[0] = 0;
+	uvIds[1] = 1;
+	uvIds[2] = 2;
+	uvIds[3] = 4;
+	uvIds[4] = 3;
+	uvIds[5] = 0;
+}
+
 void write(const char * filename)
 {
     std::cout<<"write "<<filename<<"\n";
@@ -204,7 +225,22 @@ void write(const char * filename)
 	const unsigned counts[2] = {3, 3};
 	shape3.addFaceCount(counts, 2);
 	
+	float *uvs = 0;
+
+	unsigned *uvIds = 0;
+
+	//
+	uvs = new float[8];
+	
+
+	uvIds = new unsigned[6];
+	fillUV(uvs, uvIds);
+
+	shape3.addUV(uvs, 4, uvIds, 6);
+	
 	shape3.write();
+	//delete[] uvIds;
+	//delete[] uvs;
 	//ALTransform g0 = addAbcGroup(afile, "|group1", "group1");
 	//ALTransform g1 = addAbcGroup(afile, "|group1|group2", "group2");
 	//ALTransform g3 = addAbcGroup(afile, "|group1|group2|group3", "group3");

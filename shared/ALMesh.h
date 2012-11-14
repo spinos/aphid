@@ -17,7 +17,7 @@ public:
 	void addP(const float *vertices, const unsigned &numVertices);
 	void addFaceConnection(const unsigned *indices, const unsigned &numIndices);
 	void addFaceCount(const unsigned *counts, const unsigned &numCounts);
-	void addUV(const float *uvs, const unsigned &numUVs);
+	void addUV(const float *uvs, const unsigned &numUVs, const unsigned *indices, const unsigned &numIds);
 	bool isTopologyValid();
 	void write();
 private:
