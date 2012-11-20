@@ -17,6 +17,23 @@ proc float distance_between(float $a[], float $b[])
     return $res;
 }
 
+proc float orientation_between(float $a[], float $b[], int $dim)
+{
+    vector $v3 = <<$a[0] - $b[0], $a[1] - $b[1], $a[2] - $b[2]>>;
+    $v3 = $v3 / mag($v3);
+    float $angdeg;
+    if($dim == 2) {
+        $angdeg = acos($v3.z) / 3.14 * 180;
+        if($v3.x < 0) $angdeg = -$angdeg;
+    }
+    else {
+        $angdeg = acos($v3.x) / 3.14 * 180;
+        if($v3.z < 0) $angdeg = -$angdeg;
+    }
+    
+    return $angdeg;
+}
+
 global proc calc_walkcyc()
 {
     int $stepMin = `intFieldGrp -q -v1 walkcycStepRange`;
@@ -97,7 +114,7 @@ global proc calc_walkcyc()
     
     int $frameMin = `playbackOptions -q -min`;
     int $frameMax = `playbackOptions -q -max`;
-    
+
     float $preOverall[] =  walkcyc_getTranslate3($overall);
     float $curOverall[];
     float $delta = 0.0;
@@ -105,7 +122,16 @@ global proc calc_walkcyc()
     string $tmp[];
     int $setpBegin = $frameMin;
     int $iStep = 0;
+    
+    progressWindow
+         -title "Doing Nothing"
+         -progress 0
+         -status "Sleeping: 0%"
+         -isInterruptable true;
+    
+    
     for($i = $frameMin; $i <= $frameMax; $i++) {
+
         currentTime $i;
         if($i == $frameMin) {
             $tmp = `clip -pi -s $i $character`;
@@ -127,9 +153,24 @@ global proc calc_walkcyc()
             $setpBegin = $i;
             print("step" + $iStep + " at frame " + $i + "\n");
             $iStep++;
+            float $existingKey[] = `keyframe  -t $i -q  ($overall + ".rotateY")`;
+            if(size($existingKey) < 1) {
+                float $orient = orientation_between($curOverall, $preOverall, $dim);
+                setKeyframe -value $orient ($overall + ".rotateY");
+            }
         }
-        $preOverall = $curOverall; 
+        $preOverall = $curOverall;
+        
+        if ( `progressWindow -query -isCancelled` ) break;
+        
+        float $pec = ($i - $frameMin) / ($frameMax - $frameMin) * 100;
+        progressWindow -edit
+            -status ("Calculating Steps: "+$pec+"%")
+             -progress $pec;
+        
     }
+    
+    progressWindow -endProgress;
 }
 
 global proc set_walkcycControl(string $ctl)
@@ -187,7 +228,7 @@ global proc walkcyc_main()
  if ( (`window -exists walkcycWin`) == true ) deleteUI walkcycWin;
  
 //Create the window.
- window -title "Walk Cycle Configurations - 1.0 November 14, 2012" -wh 400 300  -mb false walkcycWin;
+ window -title "Walk Cycle Configurations - 1.1 November 16, 2012" -wh 400 300  -mb false walkcycWin;
 
 //Layout
 string $form = `formLayout -numberOfDivisions 100`;
@@ -231,16 +272,16 @@ columnLayout -adjustableColumn true;
      walkcycRightFootGrp;
      
     textFieldButtonGrp
-     -cw 1 110 -label "Body" -buttonLabel "Use Selected"
+     -cw 1 110 -label "Overall Control" -buttonLabel "Use Selected"
 	 -bc "set_walkcycControl(\"walkcycOverAllGrp\")"
 	 -ann "body"
 	 -text "|group2|pCube3"
      walkcycOverAllGrp;
      
     radioButtonGrp -numberOfRadioButtons 2
-     -label "Front Facing" -labelArray2 "+X" "+Z" -select 1
+     -label "Front Facing" -labelArray2 "+X" "+Z" -select 2
      walkcycFrontFacingGrp;
-
+     
 //row begin
 //button -l "Load" -c "calc_walkcyc; deleteUI walkcycWin"-p $row;
 button -l "Apply" -c "calc_walkcyc" -p $row;
