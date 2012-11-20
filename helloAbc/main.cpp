@@ -175,15 +175,9 @@ ALTransform addAbcGroup(ALFile &file, const char *name, const char *term)
 	return res;
 }
 
-void write(const char * filename)
+void writeFirstFrame(ALFile &afile)
 {
-    std::cout<<"write "<<filename<<"\n";
-    
-    ALFile afile;
-    
-    afile.openAbc(filename);
-	afile.addTimeSampling();
-	afile.addTransform("|group1");
+    afile.addTransform("|group1");
 	
 	ALTransform t = afile.lastTransform();
 	t.addTranslate(0.0, 4.0, 5.0);
@@ -225,8 +219,19 @@ void write(const char * filename)
 	shape3.addUV(uvs, 4, uvIds, 6);
 	
 	shape3.write();
-	//delete[] uvIds;
-	//delete[] uvs;
+	delete[] uvIds;
+	delete[] uvs;
+}
+
+void write(const char * filename)
+{
+    std::cout<<"write "<<filename<<"\n";
+    
+    ALFile afile;
+    
+    afile.openAbc(filename);
+	afile.addTimeSampling();
+	writeFirstFrame(afile);
 	//ALTransform g0 = addAbcGroup(afile, "|group1", "group1");
 	//ALTransform g1 = addAbcGroup(afile, "|group1|group2", "group2");
 	//ALTransform g3 = addAbcGroup(afile, "|group1|group2|group3", "group3");
