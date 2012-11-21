@@ -29,16 +29,32 @@ void ALFile::openAbc(const char *filename)
         std::cout<<"failed to open file "<<filename<<" to write\n";
 }
 
-void ALFile::addTimeSampling()
+void ALFile::addTimeSampling(double startTime, double endTime, double secondsPerFrame)
 {
 	Alembic::AbcCoreAbstract::TimeSamplingPtr mShapeTime;
 	Alembic::AbcCoreAbstract::TimeSamplingPtr mTransTime;
 	
-	mShapeTime.reset(new AbcA::TimeSampling());
-	mTransTime.reset(new AbcA::TimeSampling());
+	if(startTime >= endTime) {
+	    std::cout<<"no range "<<std::endl;
+	    
+	    mTransTime.reset(new AbcA::TimeSampling());
+	    mShapeTime = mTransTime;
+	}
+	else {
+	    std::vector<double> transSamples;
+	    transSamples.push_back(startTime * secondsPerFrame);
+	    
+	    mTransTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
+                static_cast<Alembic::Util::uint32_t>(transSamples.size()),
+                secondsPerFrame), transSamples));
+
+        std::vector<double> shapeSamples;
+        shapeSamples.push_back(startTime * secondsPerFrame);
+        mShapeTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
+                secondsPerFrame), shapeSamples));
+	}
 	
-	Alembic::Util::uint32_t mShapeTimeIndex = m_archive.addTimeSampling(*mShapeTime);
-	
+	Alembic::Util::uint32_t mShapeTimeIndex = m_archive.addTimeSampling(*mShapeTime);	
 	Alembic::Util::uint32_t mTransTimeIndex = m_archive.addTimeSampling(*mTransTime);
 	
 	std::cout<<"shape time index "<<mShapeTimeIndex<<std::endl;

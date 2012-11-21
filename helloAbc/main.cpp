@@ -230,7 +230,8 @@ void write(const char * filename)
     ALFile afile;
     
     afile.openAbc(filename);
-	afile.addTimeSampling();
+    double secondsPerFrame = 1.0 / 24.0;
+	afile.addTimeSampling(100, 135, secondsPerFrame);
 	writeFirstFrame(afile);
 	//ALTransform g0 = addAbcGroup(afile, "|group1", "group1");
 	//ALTransform g1 = addAbcGroup(afile, "|group1|group2", "group2");
