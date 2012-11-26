@@ -31,9 +31,6 @@ void ALFile::openAbc(const char *filename)
 
 void ALFile::addTimeSampling(double startTime, double endTime, double secondsPerFrame)
 {
-	Alembic::AbcCoreAbstract::TimeSamplingPtr mShapeTime;
-	Alembic::AbcCoreAbstract::TimeSamplingPtr mTransTime;
-	
 	if(startTime >= endTime) {
 	    std::cout<<"no range "<<std::endl;
 	    
@@ -42,20 +39,20 @@ void ALFile::addTimeSampling(double startTime, double endTime, double secondsPer
 	}
 	else {
 	    std::vector<double> transSamples;
-	    transSamples.push_back(startTime * secondsPerFrame);
+	    transSamples.push_back(startTime);
 	    
 	    mTransTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
                 static_cast<Alembic::Util::uint32_t>(transSamples.size()),
                 secondsPerFrame), transSamples));
 
         std::vector<double> shapeSamples;
-        shapeSamples.push_back(startTime * secondsPerFrame);
+        shapeSamples.push_back(startTime);
         mShapeTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
                 secondsPerFrame), shapeSamples));
 	}
 	
-	Alembic::Util::uint32_t mShapeTimeIndex = m_archive.addTimeSampling(*mShapeTime);	
 	Alembic::Util::uint32_t mTransTimeIndex = m_archive.addTimeSampling(*mTransTime);
+	Alembic::Util::uint32_t mShapeTimeIndex = m_archive.addTimeSampling(*mShapeTime);	
 	
 	std::cout<<"shape time index "<<mShapeTimeIndex<<std::endl;
 	std::cout<<"trans time index "<<mTransTimeIndex<<std::endl;

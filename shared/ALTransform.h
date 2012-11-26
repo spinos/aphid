@@ -10,6 +10,7 @@
 #pragma once
 #include <Alembic/AbcGeom/OXform.h>
 #include <Alembic/AbcGeom/XformOp.h>
+
 class ALTransform {
 public:
 	ALTransform(Alembic::Abc::OObject &parent, const std::string &name);

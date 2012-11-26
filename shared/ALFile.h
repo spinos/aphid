@@ -34,4 +34,7 @@ private:
     OArchive m_archive;
     std::vector<ALTransform> m_transform;
 	std::vector<ALMesh> m_mesh;
+	
+	Alembic::AbcCoreAbstract::TimeSamplingPtr mShapeTime;
+	Alembic::AbcCoreAbstract::TimeSamplingPtr mTransTime;
 };

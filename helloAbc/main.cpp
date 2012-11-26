@@ -175,21 +175,21 @@ ALTransform addAbcGroup(ALFile &file, const char *name, const char *term)
 	return res;
 }
 
-void writeFirstFrame(ALFile &afile)
+void writeFirstFrame(ALFile &afile, int imin, int imax)
 {
     afile.addTransform("|group1");
+	afile.addTransform("|group1|group2");
+	afile.addTransform("|group1|group2|group3");
 	
 	ALTransform t = afile.lastTransform();
 	t.addTranslate(0.0, 4.0, 5.0);
 	t.write();
 	
-	afile.addTransform("|group1|group2");
-	afile.addTransform("|group1|group2|group3");
 	afile.addMesh("|group1|group2|group3|shape3");
 	
 	ALMesh shape3 = afile.lastMesh();
 	
-	const float vertices[12] = {0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0};
+	float vertices[12] = {0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0};
 	shape3.addP(vertices, 4);
 	
 	const unsigned indices[6] = {0, 1, 2, 2, 3, 0};
@@ -219,7 +219,21 @@ void writeFirstFrame(ALFile &afile)
 	shape3.addUV(uvs, 4, uvIds, 6);
 	
 	shape3.write();
-	delete[] uvIds;
+
+	for(int i = imin; i <= imax; i++) {
+        std::cout<<" frame"<<i<<std::endl;
+        t.addTranslate(0.0, 4.0 , 5.0 + i);
+        t.write();
+        
+        vertices[1] += 0.5;
+        vertices[4] += 0.5;
+        vertices[7] += 0.5;
+        vertices[10] += 0.5;
+        shape3.addP(vertices, 4);
+        shape3.write();
+    }
+    
+    delete[] uvIds;
 	delete[] uvs;
 }
 
@@ -232,22 +246,8 @@ void write(const char * filename)
     afile.openAbc(filename);
     double secondsPerFrame = 1.0 / 24.0;
 	afile.addTimeSampling(100, 135, secondsPerFrame);
-	writeFirstFrame(afile);
-	//ALTransform g0 = addAbcGroup(afile, "|group1", "group1");
-	//ALTransform g1 = addAbcGroup(afile, "|group1|group2", "group2");
-	//ALTransform g3 = addAbcGroup(afile, "|group1|group2|group3", "group3");
-	//addAbcGroup(afile, "|group1|group3", "group3", p);
-	/*OObject p;
-	afile.findParentOf("|group1", p);
-	ALTransform group1(p, "group1");
-	
-	OObject p1;
-	afile.findParentOf("|group1|group2", p1);
-	ALTransform group2(p1, "group2");*/
+	writeFirstFrame(afile, 101, 135);
 
-	//afile.findParentOf("|group1|meshShape", p);
-	//ALMesh mesh(p, "meshShape");
-	//mesh.write();
 	std::cout<<"cleanup";
 }
 
@@ -307,8 +307,8 @@ int main( int argc, char *argv[] )
         //std::cerr << "USAGE: " << argv[0] << " <AlembicArchive.abc>"
           //        << std::endl;
         //exit( -1 );
-		write("./foo.abc");
-		read("./foo.abc");
+		write("./foo1.abc");
+		read("./foo1.abc");
 		exit(0);
     }
 	
