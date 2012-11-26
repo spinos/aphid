@@ -9,9 +9,8 @@
 
 #include "ALTransform.h"
 
-ALTransform::ALTransform(Alembic::Abc::OObject &parent, const std::string &name) 
+ALTransform::ALTransform(Alembic::AbcGeom::OXform &obj) 
 {
-	Alembic::AbcGeom::OXform obj(parent, name, 0);
 	m_schema = obj.getSchema();
 }
 

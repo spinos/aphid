@@ -10,10 +10,9 @@
 #include "ALMesh.h"
 #include <Alembic/AbcGeom/All.h>
 using namespace Alembic::AbcGeom;
-ALMesh::ALMesh(Alembic::Abc::OObject &parent, const std::string &name) 
+ALMesh::ALMesh(Alembic::AbcGeom::OPolyMesh &obj) 
 {
-	Alembic::AbcGeom::OPolyMesh obj(parent, name, 0);
-    m_schema = obj.getSchema();
+	m_schema = obj.getSchema();
 }
 
 ALMesh::~ALMesh() {}

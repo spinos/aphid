@@ -11,7 +11,7 @@
 #include <Alembic/AbcGeom/OPolyMesh.h>
 class ALMesh {
 public:
-	ALMesh(Alembic::Abc::OObject &parent, const std::string &name);
+	ALMesh(Alembic::AbcGeom::OPolyMesh &obj);
 	~ALMesh();
 	
 	void addP(const float *vertices, const unsigned &numVertices);

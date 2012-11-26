@@ -158,24 +158,7 @@ void showTimeSampling(IArchive archive)
 	std::cout<<"time sampling[0] "<<sampler->getSampleTime(0)<<std::endl;
 }
 
-ALTransform addAbcGroup(ALFile &file, const char *name, const char *term)
-{
-    OObject p;
-    file.findParentOf(name, p);
-
-    ALTransform res(p, term);
-    res.addTranslate(3.0, 4.0, 5.0);
-	/*group1.addRotate(0.5, 0.0, 0.0, 0);
-	group1.addScale(2.0, 2.0, 2.0);
-	group1.addScalePivot(0,0,0);
-	group1.addScalePivotTranslate(0,0,0);
-	group1.addRotatePivot(0,0,0);
-	group1.addRotatePivotTranslate(0,0,0);*/
-	res.write();
-	return res;
-}
-
-void writeFirstFrame(ALFile &afile, int imin, int imax)
+void writeFrames(ALFile &afile, int imin, int imax)
 {
     afile.addTransform("|group1");
 	afile.addTransform("|group1|group2");
@@ -221,7 +204,6 @@ void writeFirstFrame(ALFile &afile, int imin, int imax)
 	shape3.write();
 
 	for(int i = imin; i <= imax; i++) {
-        std::cout<<" frame"<<i<<std::endl;
         t.addTranslate(0.0, 4.0 , 5.0 + i);
         t.write();
         
@@ -246,7 +228,7 @@ void write(const char * filename)
     afile.openAbc(filename);
     double secondsPerFrame = 1.0 / 24.0;
 	afile.addTimeSampling(100, 135, secondsPerFrame);
-	writeFirstFrame(afile, 101, 135);
+	writeFrames(afile, 101, 135);
 
 	std::cout<<"cleanup";
 }
@@ -307,8 +289,8 @@ int main( int argc, char *argv[] )
         //std::cerr << "USAGE: " << argv[0] << " <AlembicArchive.abc>"
           //        << std::endl;
         //exit( -1 );
-		write("./foo1.abc");
-		read("./foo1.abc");
+		write("./foo.abc");
+		read("./foo.abc");
 		exit(0);
     }
 	

@@ -149,7 +149,8 @@ bool ALFile::addTransform(const std::string &fullPathName)
         return 0;
 
     std::string name = terminalName(fullPathName);
-    m_transform.push_back(ALTransform(p, name));
+	Alembic::AbcGeom::OXform obj(p, name, mTransTime);
+    m_transform.push_back(ALTransform(obj));
 	return 1;
 }
 
@@ -165,7 +166,8 @@ bool ALFile::addMesh(const std::string &fullPathName)
         return 0;
 		
 	std::string name = terminalName(fullPathName);
-    m_mesh.push_back(ALMesh(p, name));
+	Alembic::AbcGeom::OPolyMesh obj(p, name, mShapeTime);
+    m_mesh.push_back(ALMesh(obj));
 	return 1;
 }
 

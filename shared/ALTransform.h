@@ -13,7 +13,7 @@
 
 class ALTransform {
 public:
-	ALTransform(Alembic::Abc::OObject &parent, const std::string &name);
+	ALTransform(Alembic::AbcGeom::OXform &obj);
 	~ALTransform();
 	
 	void addTranslate(const double &tx, const double &ty, const double &tz, Alembic::Util::uint8_t hint);
