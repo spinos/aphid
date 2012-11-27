@@ -158,28 +158,44 @@ void showTimeSampling(IArchive archive)
 	std::cout<<"time sampling[0] "<<sampler->getSampleTime(0)<<std::endl;
 }
 
+void writeAFrame(ALFile &afile, int &frame, float *vertices)
+{
+    ALTransform *t = afile.getTransform();
+    t->addTranslate(0.0, 4.0 , 5.0 + frame);
+    t->write();
+        
+    vertices[1] += 0.5;
+    vertices[4] += 0.5;
+    vertices[7] += 0.5;
+    vertices[10] += 0.5;
+    
+    ALMesh *shape3 = afile.lastMesh();
+    shape3->addP(vertices, 4);
+    shape3->write();
+}
+
 void writeFrames(ALFile &afile, int imin, int imax)
 {
     afile.addTransform("|group1");
 	afile.addTransform("|group1|group2");
 	afile.addTransform("|group1|group2|group3");
 	
-	ALTransform t = afile.lastTransform();
-	t.addTranslate(0.0, 4.0, 5.0);
-	t.write();
+	ALTransform *t = afile.lastTransform();
+	t->addTranslate(0.0, 4.0, 5.0);
+	t->write();
 	
 	afile.addMesh("|group1|group2|group3|shape3");
 	
-	ALMesh shape3 = afile.lastMesh();
+	ALMesh *shape3 = afile.lastMesh();
 	
 	float vertices[12] = {0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0};
-	shape3.addP(vertices, 4);
+	shape3->addP(vertices, 4);
 	
 	const unsigned indices[6] = {0, 1, 2, 2, 3, 0};
-	shape3.addFaceConnection(indices, 6);
+	shape3->addFaceConnection(indices, 6);
 	
 	const unsigned counts[2] = {3, 3};
-	shape3.addFaceCount(counts, 2);
+	shape3->addFaceCount(counts, 2);
 	
 	float *uvs = new float[8];
 	uvs[0] = 0.2f;
@@ -199,20 +215,13 @@ void writeFrames(ALFile &afile, int imin, int imax)
 	uvIds[4] = 3;
 	uvIds[5] = 0;
 
-	shape3.addUV(uvs, 4, uvIds, 6);
+	shape3->addUV(uvs, 4, uvIds, 6);
 	
-	shape3.write();
+	shape3->write();
 
 	for(int i = imin; i <= imax; i++) {
-        t.addTranslate(0.0, 4.0 , 5.0 + i);
-        t.write();
-        
-        vertices[1] += 0.5;
-        vertices[4] += 0.5;
-        vertices[7] += 0.5;
-        vertices[10] += 0.5;
-        shape3.addP(vertices, 4);
-        shape3.write();
+	    afile.begin();
+        writeAFrame(afile, i, vertices);
     }
     
     delete[] uvIds;

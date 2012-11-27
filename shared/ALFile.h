@@ -23,17 +23,27 @@ public:
 	void splitNames(const std::string &fullPathName, std::vector<std::string> &paths);
 
 	bool addTransform(const std::string &fullPathName);
-	ALTransform &lastTransform();
+	ALTransform *lastTransform();
 	
 	bool addMesh(const std::string &fullPathName);
-	ALMesh &lastMesh();
+	ALMesh *lastMesh();
+	
+	void begin();
+	ALTransform *getTransform();
+	ALMesh *getMesh();
+	
+	void nextTransform();
+	void nextMesh();
 	
 private:
 	void flush();
 	
     OArchive m_archive;
-    std::vector<ALTransform> m_transform;
-	std::vector<ALMesh> m_mesh;
+    std::vector<ALTransform *> m_transform;
+	std::vector<ALMesh *> m_mesh;
+	
+	unsigned m_currentTransformIdx;
+	unsigned m_currentMeshIdx;
 	
 	Alembic::AbcCoreAbstract::TimeSamplingPtr mShapeTime;
 	Alembic::AbcCoreAbstract::TimeSamplingPtr mTransTime;

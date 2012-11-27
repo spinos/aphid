@@ -150,11 +150,11 @@ bool ALFile::addTransform(const std::string &fullPathName)
 
     std::string name = terminalName(fullPathName);
 	Alembic::AbcGeom::OXform obj(p, name, mTransTime);
-    m_transform.push_back(ALTransform(obj));
+    m_transform.push_back(new ALTransform(obj));
 	return 1;
 }
 
-ALTransform &ALFile::lastTransform()
+ALTransform *ALFile::lastTransform()
 {
     return m_transform.back();
 }
@@ -167,16 +167,52 @@ bool ALFile::addMesh(const std::string &fullPathName)
 		
 	std::string name = terminalName(fullPathName);
 	Alembic::AbcGeom::OPolyMesh obj(p, name, mShapeTime);
-    m_mesh.push_back(ALMesh(obj));
+    m_mesh.push_back(new ALMesh(obj));
 	return 1;
 }
 
-ALMesh &ALFile::lastMesh()
+ALMesh *ALFile::lastMesh()
 {
 	return m_mesh.back();
 }
 
 void ALFile::flush()
 {
+    std::vector<ALTransform *>::iterator itTransform;
+    for(itTransform = m_transform.begin(); itTransform != m_transform.end(); itTransform++)
+        delete *itTransform;
+    
+    std::vector<ALMesh *>::iterator itMesh;
+    for(itMesh = m_mesh.begin(); itMesh != m_mesh.end(); itMesh++)
+        delete *itMesh;
+
     m_transform.clear();
+    m_mesh.clear();
 }
+
+void ALFile::begin()
+{
+    m_currentTransformIdx = 0;
+	m_currentMeshIdx = 0;
+}
+
+ALTransform *ALFile::getTransform()
+{
+    return m_transform[m_currentTransformIdx];
+}
+
+ALMesh *ALFile::getMesh()
+{
+    return m_mesh[m_currentMeshIdx];
+}
+
+void ALFile::nextTransform()
+{
+    m_currentTransformIdx++;
+}
+
+void ALFile::nextMesh()
+{
+    m_currentMeshIdx++;
+}
+//:~
