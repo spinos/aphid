@@ -39,14 +39,14 @@ void ALFile::addTimeSampling(double startTime, double endTime, double secondsPer
 	}
 	else {
 	    std::vector<double> transSamples;
-	    transSamples.push_back(startTime);
+	    transSamples.push_back(startTime * secondsPerFrame);
 	    
 	    mTransTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
                 static_cast<Alembic::Util::uint32_t>(transSamples.size()),
                 secondsPerFrame), transSamples));
 
         std::vector<double> shapeSamples;
-        shapeSamples.push_back(startTime);
+        shapeSamples.push_back(startTime * secondsPerFrame);
         mShapeTime.reset(new AbcA::TimeSampling(AbcA::TimeSamplingType(
                 secondsPerFrame), shapeSamples));
 	}
