@@ -35,6 +35,9 @@ public:
 	void nextTransform();
 	void nextMesh();
 	
+	unsigned numTransform() const;
+	unsigned numMesh() const;
+	
 private:
 	void flush();
 	

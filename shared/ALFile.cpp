@@ -215,4 +215,14 @@ void ALFile::nextMesh()
 {
     m_currentMeshIdx++;
 }
+
+unsigned ALFile::numTransform() const
+{
+    return m_transform.size();
+}
+
+unsigned ALFile::numMesh() const
+{
+    return m_mesh.size();
+}
 //:~
