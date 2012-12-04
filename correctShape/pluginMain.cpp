@@ -16,7 +16,7 @@
 MStatus initializePlugin( MObject obj ) 
 {
 	MStatus status;
-	MFnPlugin plugin( obj, "OF3D | ZHANG JIAN ", "0.0.6 build Friday November 30 2012 5:11 PM", "Any" );
+	MFnPlugin plugin( obj, "OF3D | ZHANG JIAN ", "0.0.7 build Friday 12/4/12 6:05 PM", "Any" );
 
 	status=plugin.registerCommand("calculatePoseSpace", CBPoseSpaceCmd::creator);
 

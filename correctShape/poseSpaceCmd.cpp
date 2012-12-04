@@ -399,30 +399,30 @@ MString CBPoseSpaceCmd::saveResult(const MPointArray& bindPoints, const MPointAr
 
 MString CBPoseSpaceCmd::cacheResult(const MPointArray& bindPoints, const MPointArray& posePoints, const MVectorArray& dx, const MVectorArray& dy, const MVectorArray& dz)
 {
-    /*
-	unsigned count = dx.length();
-	float* data = new float[count * (3 + 3 + 16)];
-	
-	for(unsigned i=0; i < count; i++)
-	{
-		data[i*3] = bindPoints[i].x;
-		data[i*3+1] = bindPoints[i].y;
-		data[i*3+2] = bindPoints[i].z;
-	}
-	
-	unsigned offset = count * 3;
-	
-	for(unsigned i=0; i < count; i++)
-	{
-		data[offset+i*3] = posePoints[i].x;
-		data[offset+i*3+1] = posePoints[i].y;
-		data[offset+i*3+2] = posePoints[i].z;
-	}
-	
-	offset = count * 6;
-	
-	for(unsigned i=0; i < count; i++)
-	{
+	MDGModifier modif;
+	MObject opose = modif.createNode("sculptSpaceRecord");
+	modif.doIt();
+
+    unsigned count = dx.length();
+    
+    MGlobal::displayInfo(MString("correct shape recodes ") + count + " points");
+    
+    MVectorArray row0Array;
+    row0Array.setLength(count);
+    MVectorArray row1Array;
+    row1Array.setLength(count);
+    MVectorArray row2Array;
+    row2Array.setLength(count);
+    MVectorArray row3Array;
+    row3Array.setLength(count);
+    
+    MVectorArray bndArray;
+    bndArray.setLength(count);
+    
+    MVectorArray posArray;
+    posArray.setLength(count);
+    
+    for(unsigned i=0; i < count; i++) {
 		float m[4][4];
 		
 		m[0][0] = dx[i].x;
@@ -447,61 +447,58 @@ MString CBPoseSpaceCmd::cacheResult(const MPointArray& bindPoints, const MPointA
 		
 		tm.get(m);
 		
-		unsigned ivx = offset+i*16;
+		row0Array[i].x = m[0][0];
+		row0Array[i].y = m[0][1];
+		row0Array[i].z = m[0][2];
+		row1Array[i].x = m[1][0];
+		row1Array[i].y = m[1][1];
+		row1Array[i].z = m[1][2];
+		row2Array[i].x = m[2][0];
+		row2Array[i].y = m[2][1];
+		row2Array[i].z = m[2][2];
+		row3Array[i].x = m[3][0];
+		row3Array[i].y = m[3][1];
+		row3Array[i].z = m[3][2];
 		
-		data[ivx]    = m[0][0];
-		data[ivx+1]  = m[0][1];
-		data[ivx+2]  = m[0][2];
-		data[ivx+3]  = m[0][3];
-		data[ivx+4]  = m[1][0];
-		data[ivx+5]  = m[1][1];
-		data[ivx+6]  = m[1][2];
-		data[ivx+7]  = m[1][3];
-		data[ivx+8]  = m[2][0];
-		data[ivx+9]  = m[2][1];
-		data[ivx+10] = m[2][2];
-		data[ivx+11] = m[2][3];
-		data[ivx+12] = m[3][0];
-		data[ivx+13] = m[3][1];
-		data[ivx+14] = m[3][2];
-		data[ivx+15] = m[3][3];
+		bndArray[i] = bindPoints[i];
+		posArray[i] = posePoints[i];
 	}
 	
-	io::filtering_ostream out;
-	out.push(boost::iostreams::gzip_compressor());
+	MFnDependencyNode fposec(opose);
 	
-	MString filename = _cacheName;
+	MStatus stat;
+	MPlug pspacerow0 = fposec.findPlug("poseSpaceRow0", false, &stat);
+	MPlug pspacerow1 = fposec.findPlug("poseSpaceRow1", false, &stat);
+	MPlug pspacerow2 = fposec.findPlug("poseSpaceRow2", false, &stat);
+	MPlug pspacerow3 = fposec.findPlug("poseSpaceRow3", false, &stat);
+	MPlug pbind = fposec.findPlug("bpnt", false, &stat);
+	MPlug ppose = fposec.findPlug("ppnt", false, &stat);
 	
-	if(filename == "") {
-	
-	MString projRoot;
-	MGlobal::executeCommand(MString("workspace -q -dir"), projRoot, 0, 0);
-	
-	projRoot = projRoot + "/poses/";
-	if(!exists( projRoot.asChar() )) {
-		create_directory(projRoot.asChar());
-	}
-	
-	const ptime now = second_clock::local_time();
-	std::string file_time = to_iso_string(now);
-	
-		filename = projRoot+file_time.c_str()+".pos";
-	}
-	
-	out.push(io::file_sink(filename.asChar(), ios::binary));
-
-	out.write((char*)data, count*(3 + 3 + 16)*4);
-	out.flush();
-	
-	delete[] data;
-	
-	MGlobal::displayInfo(MString("corrective blendshape writes pose cache to ") + filename);
-	return filename;
-	*/
-	MDGModifier modif;
-	MObject opose = modif.createNode("sculptSpaceRecord");
-	modif.doIt();
-	return MFnDependencyNode(opose).name();
+	MFnVectorArrayData frow0;
+    MObject orow0 = frow0.create(row0Array);
+    pspacerow0.setMObject(orow0);
+    
+    MFnVectorArrayData frow1;
+    MObject orow1 = frow1.create(row1Array);
+    pspacerow1.setMObject(orow1);
+    
+    MFnVectorArrayData frow2;
+    MObject orow2 = frow2.create(row2Array);
+    pspacerow2.setMObject(orow2);
+    
+    MFnVectorArrayData frow3;
+    MObject orow3 = frow3.create(row3Array);
+    pspacerow3.setMObject(orow3);
+    
+    MFnVectorArrayData fbind;
+    MObject obind = fbind.create(bndArray);
+    pbind.setMObject(obind);
+    
+    MFnVectorArrayData fpose;
+    MObject oposed = fpose.create(posArray);
+    ppose.setMObject(oposed);
+    
+	return fposec.name();
 }
 
 void CBPoseSpaceCmd::setCachedVertexPosition(MObject& poseMesh)
