@@ -1,0 +1,225 @@
+proc string findBlendShapeInHistory(string $mesh)
+{
+    string $history[] = `listHistory $mesh`;
+    string $ahistory;
+    for($ahistory in $history)
+    {
+        if(`nodeType $ahistory` == "blendShape")
+            return $ahistory;            
+    }
+    return "nil";
+}
+
+proc disableAllBlendShapeTargets(string $blend)
+{
+    int $existingNumTargets = `blendShape -q -wc $blend`;
+    if($existingNumTargets < 1)
+        return;
+    int $i;
+    for($i = 1; $i < $existingNumTargets + 1; $i++)
+    {
+        blendShape -edit -w $i 0.0 $blend;
+    }
+}
+
+proc string duplicateSkinnedMeshAtBindPos(string $mesh)
+{
+    string $skin = `findRelatedSkinCluster $mesh`;
+    if($skin == "")
+    {
+        print("found no skin cluster!");
+        return "nil";
+    }
+    setAttr ($skin + ".envelope") 0;
+    string $duplicated[] = `duplicate -rr $mesh`;
+    setAttr ($skin + ".envelope") 1;
+    
+    string $refname = `rename $duplicated[0] ($duplicated[0] + "CBSRef")`;
+    
+    setAttr -lock false ($refname + ".tx");
+    move -r -os -wd -37 0 0 $refname;
+    setAttr -lock true ($refname + ".tx");
+    
+    return $refname;   
+}
+
+proc string duplicateMeshToSculpt(string $mesh)
+{
+    string $duplicated[] = `duplicate -rr $mesh`;
+    string $refname = `rename $duplicated[0] ($duplicated[0] + "CBSculpt")`;
+    
+    setAttr -lock false ($refname + ".tx");
+    move -r -os -wd 37 0 0 $refname;
+    
+    return $refname;  
+}
+
+proc string duplicateMeshAsTarget(string $mesh)
+{
+    string $duplicated[] = `duplicate -rr $mesh`;
+    string $refname = `rename $duplicated[0] ($duplicated[0] + "CBSculptTgt")`;
+    
+    setAttr -lock false ($refname + ".tx");
+    move -r -os -wd -37 0 0 $refname;
+    
+    return $refname;  
+}
+
+proc addTargetToBlend(string $ref, string $mesh, string $blend)
+{ 
+    int $existingNumTargets = `blendShape -q -wc $blend`;
+    blendShape -edit -t $mesh ($existingNumTargets+1) $ref 1.0 $blend;
+    blendShape -edit -w ($existingNumTargets+1) 1.0 $blend;
+}
+
+proc removeTargetFromBlend(string $target, string $mesh, string $blend)
+{
+    int $existingNumTargets = `blendShape -q -wc $blend`;
+    blendShape -edit -rm -t $mesh ($existingNumTargets+1) $target 1.0 $blend;
+}
+
+proc string createCorrectBlendTarget(string $sculpt, string $cache)
+{
+    string $src[] = `pickWalk -d down $sculpt`;
+    
+    string $node = `createNode -n "correctBlendShape" sculptToBlendTarget`;
+    
+    connectAttr -f ($cache + ".poseSpaceRow0") ($node + ".poseSpaceRow0");
+    connectAttr -f ($cache + ".poseSpaceRow1") ($node + ".poseSpaceRow1");
+    connectAttr -f ($cache + ".poseSpaceRow2") ($node + ".poseSpaceRow2");
+    connectAttr -f ($cache + ".bindPoint") ($node + ".bindPoint");
+    connectAttr -f ($cache + ".posePoint") ($node + ".posePoint");
+    
+    connectAttr -f ($src[0] + ".outMesh") ($node + ".sculptMesh");
+    
+    setAttr -type "string" ($node + ".poseFile") $cache;
+    
+    string $target[] = `polyCube -ch 0 -n ($sculpt+"Tgt")`;
+    move -r -os -wd -27 0 0 $target[0];
+    string $targetMesh[] = `pickWalk -d down $target[0]`;
+
+    connectAttr -f ($node + ".outMesh") ($targetMesh[0] + ".inMesh");
+    
+    return $target[0];
+}
+
+proc connectCorrectBlendTarget(string $sculpt, string $target, string $cache)
+{
+    string $src[] = `pickWalk -d down $sculpt`;
+    
+    string $node = `createNode -n "correctBlendShape" sculptToBlendTarget`;
+    
+    connectAttr -f ($src[0] + ".outMesh") ($node + ".sculptMesh");
+    
+    setAttr -type "string" ($node + ".poseFile") $cache;
+    
+    string $targetMesh[] = `pickWalk -d down $target`;
+
+    connectAttr -f ($node + ".outMesh") ($targetMesh[0] + ".inMesh");
+}
+
+proc string getFullPath(string $obj)
+{
+    string $full[] = `ls -l $obj`;
+    return $full[0];
+}
+
+proc string getShapeFullPath(string $obj)
+{
+    string $shape[] = `pickWalk -d down $obj`;
+    return getFullPath($shape[0]);
+}
+
+global proc setupCorrectBlendSkin()
+{
+    string $sel[] = `ls -sl`;
+	if(size($sel) < 1) {
+		print "must select a mesh\n";
+		return;
+	}
+    string $sculpt = duplicateMeshToSculpt($sel[0]);
+    string $ref = duplicateSkinnedMeshAtBindPos($sel[0]);
+    if( $ref == "nil" )
+        return;
+    
+    string $blend = findBlendShapeInHistory($sel[0]);
+    if( $blend == "nil" )
+    {
+         string $ress[] = `blendShape -foc $sel[0]`;
+         $blend = $ress[0];
+    }
+    
+    addTargetToBlend($ref, $sel[0], $blend);
+
+    string $refMesh = getShapeFullPath($ref);
+    string $poseMesh = getShapeFullPath($sel[0]);
+	    
+    string $cache = `calculatePoseSpace -pa $poseMesh -bt $refMesh -cc`;
+    
+    removeTargetFromBlend($ref, $sel[0], $blend);
+    
+    delete $ref;
+    
+    if($cache == "")
+        return;
+        
+    string $target = createCorrectBlendTarget($sculpt, $cache);
+}
+
+global proc rebuildCorrectBlendPose()
+{
+	string $sel[] = `ls -sl`;
+	if(size($sel) < 1) {
+		print "must select a mesh\n";
+		return;
+	}
+	
+	string $skinnedMesh[] = `pickWalk -d down $sel[0]`;
+	print("try find skin of " + $skinnedMesh[0] + "\n");
+	string $skin = `findRelatedSkinCluster $skinnedMesh[0]`;
+	if($skin == "")
+	    print("cannot find skin of " + $skinnedMesh[0] + "\n");
+	else 
+	    print("found skin " + $skin + "\n");
+	    
+	string $sculpt = duplicateMeshToSculpt($sel[0]);
+	
+	string $ref = "";
+	
+    if($skin == "") {
+	    $ref = $sel[0];
+	}
+	else {
+	    $ref = duplicateMeshAsTarget($sel[0]);
+	}
+	
+	string $poseMesh = getShapeFullPath($sculpt);
+	string $refMesh = getShapeFullPath($ref);
+    string $cacheName = `fileDialog`;
+    calculatePoseSpace -pa $poseMesh -bt $refMesh -lc $cacheName;
+    connectCorrectBlendTarget($poseMesh, $refMesh, $cacheName);
+    
+    calculatePoseSpace -pa $poseMesh -lp $cacheName;    
+}
+
+global proc updateCorrectBlendPose()
+{
+	string $sel[] = `ls -sl`;
+	if(size($sel) < 1) {
+		print "must select a sculpted mesh\n";
+		return;
+	}
+	
+	string $poseMesh = getShapeFullPath($sel[0]);
+	
+	string $cbshp[] = `listConnections -t "sculptToBlendTarget" $poseMesh`;
+	if(size($cbshp) < 1) {
+	    print("cannot find correctBlendShape connected to " + $poseMesh);
+	    return;
+	}
+	string $cacheName = `getAttr ($cbshp[0] + ".poseFile")`;
+    
+    calculatePoseSpace -pa $poseMesh -sp $cacheName;
+    
+}
+
