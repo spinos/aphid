@@ -80,27 +80,27 @@ char CorrectBlendShapeNode::readInternalCache(MDataBlock& block, unsigned numVer
     unsigned numPose = posArray.length();
     
     if(numRow0 != numVertex) {
-        MGlobal::displayInfo(MString("row0 count ") + numRow0);
+        MGlobal::displayInfo(MString("miss row0 count ") + numRow0);
         return 0;
     }
     
     if(numRow1 != numVertex) {
-        MGlobal::displayInfo(MString("row1 count ") + numRow1);
+        MGlobal::displayInfo(MString("miss row1 count ") + numRow1);
         return 0;
     }
     
     if(numRow2 != numVertex) {
-        MGlobal::displayInfo(MString("row2 count ") + numRow2);
+        MGlobal::displayInfo(MString("miss row2 count ") + numRow2);
         return 0;
     }
     
     if(numBind != numVertex) {
-        MGlobal::displayInfo(MString("bind count ") + numBind);
+        MGlobal::displayInfo(MString("miss bind count ") + numBind);
         return 0;
     }
     
     if(numPose != numVertex) {
-        MGlobal::displayInfo(MString("pose count ") + numPose);
+        MGlobal::displayInfo(MString("miss pose count ") + numPose);
         return 0;
     }
     
@@ -194,7 +194,6 @@ char CorrectBlendShapeNode::loadCache(const char* filename, unsigned numVertex)
 		m[3][3] = data[ivx+15];
 		
 		_poseSpace[i] = MMatrix(m);
-	
 	}
 	
 	delete[] data;
@@ -206,8 +205,7 @@ MStatus CorrectBlendShapeNode::compute( const MPlug& plug, MDataBlock& data )
 {
 	MStatus stat;
 	
-	if (plug == outMesh)
-	{
+	if (plug == outMesh) {
 		MObject sculpted = data.inputValue( asculptMesh, &stat ).asMesh();
 		MFnMesh fsculpt(sculpted);
 		unsigned numVertex = fsculpt.numVertices();
@@ -219,13 +217,11 @@ MStatus CorrectBlendShapeNode::compute( const MPlug& plug, MDataBlock& data )
 		    _isCached = readInternalCache(data, numVertex);
 		}
 		
-		if(!_isCached && filename != "")
-		{ 
+		if(!_isCached && filename != "") { 
 			_isCached = loadCache(filename.asChar(), numVertex);
 		}
 
-		if(_isCached)
-		{
+		if(_isCached) {
 			MPointArray targetVertex;
 			targetVertex.setLength(numVertex);
 			for(unsigned i = 0; i < numVertex; i++)

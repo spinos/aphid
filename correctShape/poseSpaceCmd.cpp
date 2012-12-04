@@ -67,8 +67,7 @@ MStatus CBPoseSpaceCmd::doIt( const MArgList& args )
 		MObject bindMesh;
 		finder.getObjByFullName(_bindName.asChar(), bindMesh);
 			
-		if(bindMesh == MObject::kNullObj)
-		{
+		if(bindMesh == MObject::kNullObj) {
 			MGlobal::displayWarning(_bindName+" doesn't exist, skipped.");
 			return MS::kFailure;
 		}
@@ -125,10 +124,7 @@ MStatus CBPoseSpaceCmd::parseArgs( const MArgList& args )
 			continue;
 				
 		if ( arg == createCacheFlag || arg == createCacheFlagLong ) {
-			if (i == args.length()-1) 
-				continue;
-			i++;
-			args.get(i, _cacheName);
+			_operation = tCreate;
 		}
 		else if ( arg == loadCacheFlag || arg == loadCacheFlagLong ) {
 			if (i == args.length()-1) 
@@ -163,8 +159,7 @@ MStatus CBPoseSpaceCmd::parseArgs( const MArgList& args )
 			i++;
 			args.get(i, _bindName);
 		}
-		else 
-		{
+		else {
 			MGlobal::displayInfo(MString("unknown flag ") + arg);
 		}
 	}
@@ -241,14 +236,11 @@ void CBPoseSpaceCmd::calculateVertexPoseSpace(const MObject& poseMesh, const MOb
 	MVectorArray dirx;
 	dirx.setLength(numVert);
 	
-	for(unsigned i=0; i < numVert; i++)
-	{
+	for(unsigned i=0; i < numVert; i++) {
 		dirx[i] = xPoseVertex[i] - originalPoseVertex[i];
-		//if(i < 19) MGlobal::displayInfo(MString("dx ") + dirx[i].x + " " + dirx[i].y + " " + dirx[i].z);
 	}
 	
-	for(unsigned i=0; i < numVert; i++)
-	{
+	for(unsigned i=0; i < numVert; i++) {
 		movedVertex[i].x =  originalbindVertex[i].x;
 		movedVertex[i].y =  originalbindVertex[i].y + 1.0;
 	}
@@ -262,14 +254,11 @@ void CBPoseSpaceCmd::calculateVertexPoseSpace(const MObject& poseMesh, const MOb
 	MVectorArray diry;
 	diry.setLength(numVert);
 	
-	for(unsigned i=0; i < numVert; i++)
-	{
+	for(unsigned i=0; i < numVert; i++) {
 		diry[i] = xPoseVertex[i] - originalPoseVertex[i];
-		//if(i < 19) MGlobal::displayInfo(MString("dy ") + diry[i].x + " " + diry[i].y + " " + diry[i].z);
 	}
 
-	for(unsigned i=0; i < numVert; i++)
-	{
+	for(unsigned i=0; i < numVert; i++) {
 		movedVertex[i].y =  originalbindVertex[i].y;
 		movedVertex[i].z =  originalbindVertex[i].z + 1.0;
 	}
@@ -283,17 +272,18 @@ void CBPoseSpaceCmd::calculateVertexPoseSpace(const MObject& poseMesh, const MOb
 	MVectorArray dirz;
 	dirz.setLength(numVert);
 	
-	for(unsigned i=0; i < numVert; i++)
-	{
+	for(unsigned i=0; i < numVert; i++) {
 		dirz[i] = xPoseVertex[i] - originalPoseVertex[i];
-		//if(i < 19) MGlobal::displayInfo(MString("dz ") + dirz[i].x + " " + dirz[i].y + " " + dirz[i].z);
 	}
 	
 	bindFn.setPoints(originalbindVertex, MSpace::kObject );
 	bindFn.updateSurface();
 	
-	//setResult(saveResult(originalbindVertex, originalPoseVertex, dirx, diry, dirz));
-	setResult(cacheResult(originalbindVertex, originalPoseVertex, dirx, diry, dirz));
+	const MString cacheNodeName = cacheResult(originalbindVertex, originalPoseVertex, dirx, diry, dirz);
+	
+	MGlobal::displayInfo(MString("correct shape recordes ") + numVert + " points in " + cacheNodeName);
+    	
+	setResult(cacheNodeName);
 }
 
 MString CBPoseSpaceCmd::saveResult(const MPointArray& bindPoints, const MPointArray& posePoints, const MVectorArray& dx, const MVectorArray& dy, const MVectorArray& dz)
@@ -404,9 +394,7 @@ MString CBPoseSpaceCmd::cacheResult(const MPointArray& bindPoints, const MPointA
 	modif.doIt();
 
     unsigned count = dx.length();
-    
-    MGlobal::displayInfo(MString("correct shape recodes ") + count + " points");
-    
+
     MVectorArray row0Array;
     row0Array.setLength(count);
     MVectorArray row1Array;
@@ -421,10 +409,10 @@ MString CBPoseSpaceCmd::cacheResult(const MPointArray& bindPoints, const MPointA
     
     MVectorArray posArray;
     posArray.setLength(count);
+	
+	float m[4][4];
     
     for(unsigned i=0; i < count; i++) {
-		float m[4][4];
-		
 		m[0][0] = dx[i].x;
 		m[0][1] = dx[i].y;
 		m[0][2] = dx[i].z;
