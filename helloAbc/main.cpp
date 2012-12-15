@@ -40,6 +40,9 @@
 #include <ALFile.h>
 #include <ALTransform.h>
 #include <ALMesh.h>
+#include <ALIFile.h>
+#include <ALITransform.h>
+#include <ALIMesh.h>
 #include <iostream>
 #include <sstream>
 
@@ -177,11 +180,14 @@ void writeAFrame(ALFile &afile, int &frame, float *vertices)
 void writeFrames(ALFile &afile, int imin, int imax)
 {
     afile.addTransform("|group1");
+    ALTransform *t = afile.lastTransform();
+	t->addTranslate(-2.0, 3.0, 0.91);
+	t->write();
 	afile.addTransform("|group1|group2");
 	afile.addTransform("|group1|group2|group3");
 	
-	ALTransform *t = afile.lastTransform();
-	t->addTranslate(0.0, 4.0, 5.0);
+	t = afile.lastTransform();
+	t->addTranslate(0.0, 4.0, 5.3);
 	t->write();
 	
 	afile.addMesh("|group1|group2|group3|shape3");
@@ -245,6 +251,18 @@ void write(const char * filename)
 void read(const char * filename)
 {
     std::cout<<"read "<<filename<<"\n";
+    
+    ALIFile file;
+    file.loadAbc(filename);
+    
+    std::cout<< "transform count: "<<file.numTransform()<<std::endl;
+    std::cout<< "mesh count: "<<file.numMesh()<<std::endl;
+    
+    file.getTransform(0)->verbose();
+    file.getTransform(2)->verbose();
+    file.getMesh(0)->verbose();
+    
+    return;
 	IArchive archive( Alembic::AbcCoreHDF5::ReadArchive(),
                           filename);
         if (archive)

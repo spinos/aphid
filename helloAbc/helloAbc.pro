@@ -1,10 +1,16 @@
 HEADERS       = ../shared/ALFile.h \
                 ../shared/ALTransform.h \
-                ../shared/ALMesh.h
+                ../shared/ALMesh.h \
+                ../shared/ALIFile.h \
+                ../shared/ALITransform.h \
+                ../shared/ALIMesh.h 
 
 SOURCES       = ../shared/ALFile.cpp \
                 ../shared/ALTransform.cpp \
                 ../shared/ALMesh.cpp \
+                ../shared/ALIFile.cpp \
+                ../shared/ALITransform.cpp \
+                ../shared/ALIMesh.cpp \
                 main.cpp
 
 win32 {
