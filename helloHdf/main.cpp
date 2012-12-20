@@ -2,6 +2,8 @@
 
 #include "HGroup.h"
 #include "HDataset.h"
+#include "HIntAttribute.h"
+#include "HFloatAttribute.h"
 #include "hdf5_hl.h"
 #define MAX_NAME 1024
 
@@ -415,6 +417,28 @@ int main (int argc, char * const argv[]) {
 	
 	if(HObject::FileIO.checkExist("/A1"))
 		printf("find grp /A1");
+		
+	HIntAttribute rootAttr("/.range");
+	rootAttr.create(4);
+	rootAttr.open();
+	
+	int vrange[4];
+	vrange[0] = 31;
+	vrange[1] = 1037;
+	vrange[2] = -87;
+	vrange[3] = 7;
+	if(!rootAttr.write(vrange)) std::cout<<"/.range write failed\n";
+	rootAttr.close();
+	
+	HFloatAttribute fltAttr("/.time");
+	fltAttr.create(2);
+	fltAttr.open();
+	
+	float vtime[2];
+	vtime[0] = .00947;
+	vtime[1] = -36.450;
+	if(!fltAttr.write(vtime)) std::cout<<"/.time write failed\n";
+	fltAttr.close();
 	
 	HGroup grpAC("/A1/C");
 	grpAC.create();
@@ -457,6 +481,40 @@ int main (int argc, char * const argv[]) {
 	
 	diagnoseFile("dset.h5");
 	//diagnoseFile("/Users/jianzhang/man/bakep/alot/hdt.h5");
+	
+	if(HObject::FileIO.open("dset.h5", HDocument::oReadOnly)) {
+		printf("opened to read /.range\n");
+	}
+	
+	HIntAttribute inAttr("/.range");
+	if(!inAttr.open())
+		std::cout<<"/.range not opened\n";
+	
+	int *vinattr;
+	if(!inAttr.read(vinattr)) std::cout<<"./range read failed\n";
+	
+	int at = inAttr.dataSpaceDimension();
+	//
+	
+	inAttr.close();
+	
+	std::cout<<"inst attr /.range: "<<vinattr[0]<<", "<<vinattr[1]<<", "<<vinattr[2]<<", "<<vinattr[3]<<std::endl;
+	std::cout<<"dim attr: "<<at<<std::endl;
+	
+	HIntAttribute dummy("/.nouse");
+	//if(!dummy.open()) std::cout<<"no dummy";
+	
+	HFloatAttribute inTime("/.time");
+	inTime.open();
+	
+	float *vintime;
+	inTime.read(vintime);
+	
+	std::cout<<"float attr /.time: "<<vintime[0]<<", "<<vintime[1]<<std::endl;
+	
+	
+	inTime.close();
+	HObject::FileIO.close();
 	              
 	return 0;
 }
