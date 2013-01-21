@@ -276,6 +276,10 @@ scan_group(hid_t gid) {
 char diagnoseFile(const char* filename)
 {
 	hid_t file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+	if(file_id < 0) {
+		printf("cannot open file\n");
+		return 0;
+	}
 	hid_t    grp = H5Gopen(file_id,"/", H5P_DEFAULT);
 	scan_group(grp);
 	H5Gclose(grp);
@@ -395,7 +399,7 @@ char readFile(const char* filename)
 int main (int argc, char * const argv[]) {
     // insert code here...
     std::cout << "Hello, HDF5!\n";
-	
+
 	//writeFile("dset.h5","/car");
 	//writeFile("dset.h5","/foo2");
 	//writeFile("dset.h5","/boo/tar");
@@ -403,7 +407,6 @@ int main (int argc, char * const argv[]) {
 	//writeFile("dset.h5","/boo/x");
 	//diagnoseFile("/Users/jianzhang/Desktop/scene.abc");
 	
-	//
 	
 	if(HObject::FileIO.open("dset.h5", HDocument::oReadAndWrite)) {
 		printf("opened");
@@ -516,5 +519,8 @@ int main (int argc, char * const argv[]) {
 	inTime.close();
 	HObject::FileIO.close();
 	              
+	diagnoseFile(argv[1]);
+	
+	
 	return 0;
 }
