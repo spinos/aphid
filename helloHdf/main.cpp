@@ -398,7 +398,7 @@ char readFile(const char* filename)
 
 #define FILE    "cmprss.h5"
 #define RANK    2
-#define DIM0    100
+#define DIM0    10000
 #define DIM1    20
 
 void testCompression()
@@ -454,6 +454,7 @@ hid_t    file_id, dataset_id, dataspace_id; /* identifiers */
     
     dataset_id = H5Dcreate (file_id, "Compressed_Data", H5T_STD_I32BE, 
                             dataspace_id, H5P_DEFAULT, plist_id, H5P_DEFAULT); 
+							//dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); 
 
  
     for (i = 0; i< DIM0; i++) 

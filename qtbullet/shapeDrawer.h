@@ -8,11 +8,17 @@
  */
  
 #include "btBulletCollisionCommon.h"
+#include "btBulletDynamicsCommon.h"
 
 class ShapeDrawer {
 public:
 	ShapeDrawer () {}
 	virtual ~ShapeDrawer () {}
 	
-	virtual void draw(btScalar* m, const btCollisionShape* shape);
+	void drawConstraint(const btTypedConstraint* constraint);
+	void drawObject(const btCollisionObject* object);
+	void drawShape(const btCollisionShape* shape);
+	void drawTransform(const btRigidBody & body);
+	void loadWorldSpace(const btRigidBody* body);
+	void drawTransform(const btTransform & t);
 };
