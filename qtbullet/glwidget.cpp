@@ -56,11 +56,6 @@
 GLWidget::GLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
-    logo = 0;
-    xRot = 0;
-    yRot = 0;
-    zRot = 0;
-
     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
     qtPurple = QColor::fromCmykF(0.29, 0.29, 0.20, 0.0);
 	
@@ -69,7 +64,7 @@ GLWidget::GLWidget(QWidget *parent)
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(40);
-	
+	fCamera = new BaseCamera();
 }
 //! [0]
 
@@ -102,38 +97,6 @@ static void qNormalizeAngle(int &angle)
         angle -= 360 * 16;
 }
 
-//! [5]
-void GLWidget::setXRotation(int angle)
-{
-    qNormalizeAngle(angle);
-    if (angle != xRot) {
-        xRot = angle;
-        emit xRotationChanged(angle);
-        updateGL();
-    }
-}
-//! [5]
-
-void GLWidget::setYRotation(int angle)
-{
-    qNormalizeAngle(angle);
-    if (angle != yRot) {
-        yRot = angle;
-        emit yRotationChanged(angle);
-        updateGL();
-    }
-}
-
-void GLWidget::setZRotation(int angle)
-{
-    qNormalizeAngle(angle);
-    if (angle != zRot) {
-        zRot = angle;
-        emit zRotationChanged(angle);
-        updateGL();
-    }
-}
-
 //! [6]
 void GLWidget::initializeGL()
 {
@@ -160,11 +123,9 @@ void GLWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    glTranslatef(0.0, 0.0, -100.0);
-    glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-    glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
-    glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-
+    float m[16];
+	fCamera->getMatrix(m);
+	glMultMatrixf(m);
 	_dynamics->renderWorld();
 	glFlush();
 }
@@ -190,6 +151,10 @@ void GLWidget::resizeGL(int width, int height)
     glOrtho(-right, right, -top, top, 1.0, 1000.0);
 #endif
     glMatrixMode(GL_MODELVIEW);
+    fCamera->setPortWidth(width);
+	fCamera->setPortHeight(height);
+	fCamera->setHorizontalAperture(80.f);
+	fCamera->setVerticalAperture(80.f/aspect);
 }
 //! [8]
 
@@ -197,25 +162,66 @@ void GLWidget::resizeGL(int width, int height)
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
     lastPos = event->pos();
+    if(event->modifiers() == Qt::AltModifier) 
+        return;
+    
+    processSelection(event);
 }
 //! [9]
 
 //! [10]
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    int dx = event->x() - lastPos.x();
-    int dy = event->y() - lastPos.y();
-
-    if (event->buttons() & Qt::LeftButton) {
-        setXRotation(xRot + 8 * dy);
-        setYRotation(yRot + 8 * dx);
-    } else if (event->buttons() & Qt::RightButton) {
-        setXRotation(xRot + 8 * dy);
-        setZRotation(zRot + 8 * dx);
+    if(event->modifiers() == Qt::AltModifier) {
+        processCamera(event);
+    }
+    else {
+        processImpulse(event);
     }
     lastPos = event->pos();
 }
 //! [10]
+
+void GLWidget::processCamera(QMouseEvent *event)
+{
+    int dx = event->x() - lastPos.x();
+    int dy = event->y() - lastPos.y();
+    if (event->buttons() & Qt::LeftButton) {
+        fCamera->tumble(dx, dy);
+    } 
+	else if (event->buttons() & Qt::MidButton) {
+		fCamera->track(dx, dy);
+    }
+	else if (event->buttons() & Qt::RightButton) {
+		fCamera->zoom(dy);
+    }
+}
+
+void GLWidget::processSelection(QMouseEvent *event)
+{
+    Vector3F incident;
+    fCamera->incidentRay(event->x(), event->y(), incident);
+    if(_dynamics->selectByRayHit(fCamera->eyePosition(), incident)) {
+        qDebug() << "hit:" << incident.x << " " << incident.y << " " << incident.z;
+        qDebug() << "src:" << event->x() << " " << event->y();
+    }
+}
+
+void GLWidget::processImpulse(QMouseEvent *event)
+{
+    if(!_dynamics->hasActive())
+        return;
+    
+    Vector3F injp(16, 16, 16);
+    fCamera->intersection(event->x(), event->y(), injp);
+    int dx = event->x() - lastPos.x();
+    int dy = event->y() - lastPos.y();
+    Vector3F injv;
+    fCamera->screenToWorld(dx, dy, injv);
+    _dynamics->addImpulse(injv);
+    qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
+}
+
 void GLWidget::simulate()
 {
     update();

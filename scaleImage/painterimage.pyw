@@ -48,7 +48,7 @@ sip.setapi('QVariant', 2)
 
 from math import cos, pi, sin
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, QtWebKit
 
 
 class RenderArea(QtGui.QWidget):
@@ -70,7 +70,7 @@ class RenderArea(QtGui.QWidget):
         
         picture = QtGui.QPixmap()
         picture.load(self.imageFilename)
-        picture = picture.scaled(100, 100, QtCore.Qt.IgnoreAspectRatio)
+        picture = picture.scaled(100, 100, QtCore.Qt.KeepAspectRatioByExpanding)
         
         painter = QtGui.QPainter(self)
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
@@ -90,7 +90,7 @@ class Window(QtGui.QWidget):
         ellipsePath.moveTo(80.0, 50.0)
         ellipsePath.arcTo(20.0, 30.0, 60.0, 40.0, 0.0, 360.0)
 
-        self.renderAreas = RenderArea('C:\\Users\\zhangjian\\Pictures\\27029_single.jpg')
+        self.renderAreas = RenderArea('http://sdl2.4pda.ru/1750287.png')
 
 
         self.fillRuleComboBox = QtGui.QComboBox()
@@ -138,11 +138,16 @@ class Window(QtGui.QWidget):
 
         rotationAngleLabel = QtGui.QLabel("&Rotation Angle:")
         rotationAngleLabel.setBuddy(self.rotationAngleSpinBox)
-
         
-        mainLayout = QtGui.QGridLayout()
-        mainLayout.addWidget(self.renderAreas, 0, 0)
+        web = QtWebKit.QWebView()
+        web.load(QtCore.QUrl("http://sdl2.4pda.ru/1750287.png"))
+        web.resize(200, 100)
         
+        mainLayout = QtGui.QVBoxLayout()
+        #mainLayout.addWidget(self.renderAreas, 0, 0)
+        #mainLayout.addWidget(QtGui.QLabel(), 0, 1)
+        mainLayout.addWidget(web)
+        mainLayout.addStretch(125)
         self.setLayout(mainLayout)
 
         self.setWindowTitle("Painter Paths")

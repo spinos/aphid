@@ -44,7 +44,7 @@
 
 #include <QGLWidget>
 #include "dynamicsSolver.h"
-
+#include <BaseCamera.h>
 class QtLogo;
 
 //! [0]
@@ -60,18 +60,6 @@ public:
     QSize sizeHint() const;
 //! [0]
 
-//! [1]
-public slots:
-    void setXRotation(int angle);
-    void setYRotation(int angle);
-    void setZRotation(int angle);
-
-signals:
-    void xRotationChanged(int angle);
-    void yRotationChanged(int angle);
-    void zRotationChanged(int angle);
-//! [1]
-
 //! [2]
 protected:
     void initializeGL();
@@ -79,20 +67,17 @@ protected:
     void resizeGL(int width, int height);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-//! [2]
-
+    void processCamera(QMouseEvent *event);
+    void processSelection(QMouseEvent *event);
+    void processImpulse(QMouseEvent *event);
 //! [3]
 private:
-    QtLogo *logo;
-    int xRot;
-    int yRot;
-    int zRot;
     QPoint lastPos;
     QColor qtGreen;
     QColor qtPurple;
 	
 	DynamicsSolver* _dynamics;
-	
+	BaseCamera* fCamera;
 private slots:
     void simulate();
 

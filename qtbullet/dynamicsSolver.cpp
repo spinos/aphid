@@ -21,7 +21,7 @@ void DynamicsSolver::initPhysics()
 	_constraintSolver = new btSequentialImpulseConstraintSolver();
 	btBroadphaseInterface* broadphase = new btDbvtBroadphase();
 	_dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, broadphase, _constraintSolver, _collisionConfiguration);
-	_dynamicsWorld->setGravity(btVector3(0,-9.8,0));
+	_dynamicsWorld->setGravity(btVector3(0,0,0));
 
 	btCollisionShape* groundShape = new btBoxShape(btVector3(75,1,75));
 	_collisionShapes.push_back(groundShape);
@@ -67,6 +67,8 @@ void DynamicsSolver::initPhysics()
 	_dynamicsWorld->addConstraint(d6f);
 	
 	_drawer = new ShapeDrawer();
+	
+	m_activeBody = 0;
 }
 
 void DynamicsSolver::killPhysics()
@@ -161,4 +163,40 @@ btRigidBody* DynamicsSolver::localCreateRigidBody(float mass, const btTransform&
 	body->setContactProcessingThreshold(_defaultContactProcessingThreshold);
 
 	return body;
+}
+
+char DynamicsSolver::selectByRayHit(const Vector3F & origin, const Vector3F & ray)
+{
+    m_activeBody = 0;
+    btVector3 fromP(origin.x, origin.y, origin.z);
+    btVector3 rayV(ray.x, ray.y, ray.z);
+    btCollisionWorld::ClosestRayResultCallback rayCallback(fromP, rayV);
+    _dynamicsWorld->rayTest(fromP ,rayV, rayCallback);
+    if(rayCallback.hasHit()) {
+        m_activeBody = (btRigidBody *)btRigidBody::upcast(rayCallback.m_collisionObject);
+        if(m_activeBody) {
+            //if(m_activeBody->isStaticObject() || m_activeBody->isKinematicObject()) {
+            //    m_activeBody = 0;
+            //    return 0;
+            //}
+            m_activeBody->setActivationState(DISABLE_DEACTIVATION);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void DynamicsSolver::addImpulse(const Vector3F & impulse)
+{
+    if(!hasActive()) return;
+    
+    btVector3 impulseV(impulse.x, impulse.y, impulse.z);
+    impulseV *= 1000.f;
+    m_activeBody->setActivationState(ACTIVE_TAG);
+	m_activeBody->applyImpulse(impulseV, m_activeBody->getCenterOfMassPosition());
+}
+
+char DynamicsSolver::hasActive() const
+{
+    return m_activeBody != 0;
 }

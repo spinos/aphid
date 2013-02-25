@@ -26,6 +26,9 @@ public:
 	
 	char intersection(int x, int y, Vector3F & worldPos) const;
 	void screenToWorld(int x, int y, Vector3F & worldVec) const;
+	void incidentRay(int x, int y, Vector3F & worldVec) const;
+	Vector3F eyePosition() const;
+	
 private:
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;

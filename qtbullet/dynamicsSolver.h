@@ -11,7 +11,7 @@
 #include "btBulletCollisionCommon.h"
 
 #include "shapeDrawer.h"
-
+#include <Vector3F.h>
 
 class DynamicsSolver {
 public:
@@ -22,11 +22,15 @@ public:
 	void killPhysics();
 	void renderWorld();
 	void simulate();
+	char selectByRayHit(const Vector3F & origin, const Vector3F & ray);
+	void addImpulse(const Vector3F & impulse);
 	
 	btDynamicsWorld*		getDynamicsWorld()
 	{
 		return _dynamicsWorld;
 	}
+	
+	char hasActive() const;
 protected:
 	btDynamicsWorld* _dynamicsWorld;
 	class btBroadphaseInterface*	_overlappingPairCache;
@@ -46,5 +50,5 @@ protected:
 	btClock _clock;
 
 	btRigidBody* localCreateRigidBody(float mass, const btTransform& startTransform,btCollisionShape* shape);
-
+	btRigidBody* m_activeBody;
 };

@@ -137,3 +137,20 @@ void BaseCamera::screenToWorld(int x, int y, Vector3F & worldVec) const
 	
 	worldVec = fSpace.transformAsNormal(worldVec);
 }
+
+void BaseCamera::incidentRay(int x, int y, Vector3F & worldVec) const
+{
+    const Vector3F eye = fSpace.getTranslation();
+    const Vector3F view = eye - fCenterOfInterest;
+    Vector3F worldPos = fCenterOfInterest - view;
+    worldPos = fInverseSpace.transform(worldPos);
+    worldPos.x = ((float)x/(float)fPortWidth - 0.5f) * fHorizontalAperture;
+	worldPos.y = -((float)y/(float)fPortHeight - 0.5f) * fVerticalAperture;
+	worldPos = fSpace.transform(worldPos);
+	worldVec = worldPos - eye;
+}
+
+Vector3F BaseCamera::eyePosition() const
+{
+    return fSpace.getTranslation();
+}
