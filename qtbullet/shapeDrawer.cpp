@@ -60,6 +60,10 @@ void ShapeDrawer::drawObject(const btCollisionObject* object)
     glPushMatrix();
     loadWorldSpace(body);
     glDrawCoordsys();
+    if(object->getActivationState() == 1)
+        glColor3f(0.f, 1.f, 0.f);
+    else
+        glColor3f(0.f, 0.f, 1.f);
     const btCollisionShape* shape = object->getCollisionShape();
     drawShape(shape);
     
@@ -79,7 +83,7 @@ void ShapeDrawer::drawShape(const btCollisionShape* shape)
 	dy *= halfExtent[1];
 	dz *= halfExtent[2];
 	
-	glColor3f(0.f, 0.f, 1.f);
+	
 	glBegin(GL_LINE_LOOP);
 	glDrawVector(org - dx - dy - dz);
 	glDrawVector(org + dx - dy - dz);

@@ -22,7 +22,7 @@ public:
 	void killPhysics();
 	void renderWorld();
 	void simulate();
-	char selectByRayHit(const Vector3F & origin, const Vector3F & ray);
+	char selectByRayHit(const Vector3F & origin, const Vector3F & ray, Vector3F & hitP);
 	void addImpulse(const Vector3F & impulse);
 	
 	btDynamicsWorld*		getDynamicsWorld()
@@ -51,4 +51,5 @@ protected:
 
 	btRigidBody* localCreateRigidBody(float mass, const btTransform& startTransform,btCollisionShape* shape);
 	btRigidBody* m_activeBody;
+	btVector3 m_hitRelPos;
 };

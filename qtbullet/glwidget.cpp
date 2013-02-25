@@ -142,19 +142,17 @@ void GLWidget::resizeGL(int width, int height)
     glLoadIdentity();
 	
 	float aspect = (float)width/(float)height;
-	float fov = 100.f;
+	float fov = 80.f;
 	float right = fov/ 2.f;
 	float top = right / aspect;
-#ifdef QT_OPENGL_ES_1
-    glOrthof(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
-#else
+
     glOrtho(-right, right, -top, top, 1.0, 1000.0);
-#endif
+
     glMatrixMode(GL_MODELVIEW);
     fCamera->setPortWidth(width);
 	fCamera->setPortHeight(height);
-	fCamera->setHorizontalAperture(80.f);
-	fCamera->setVerticalAperture(80.f/aspect);
+	fCamera->setHorizontalAperture(fov);
+	fCamera->setVerticalAperture(fov/aspect);
 }
 //! [8]
 
@@ -199,12 +197,11 @@ void GLWidget::processCamera(QMouseEvent *event)
 
 void GLWidget::processSelection(QMouseEvent *event)
 {
-    Vector3F incident;
-    fCamera->incidentRay(event->x(), event->y(), incident);
-    if(_dynamics->selectByRayHit(fCamera->eyePosition(), incident)) {
-        qDebug() << "hit:" << incident.x << " " << incident.y << " " << incident.z;
-        qDebug() << "src:" << event->x() << " " << event->y();
-    }
+    Vector3F origin, incident;
+    fCamera->incidentRay(event->x(), event->y(), origin, incident);
+    incident = incident.normal() * 1000.f;
+    Vector3F hitP;
+    _dynamics->selectByRayHit(origin, incident, hitP);
 }
 
 void GLWidget::processImpulse(QMouseEvent *event)
@@ -218,8 +215,9 @@ void GLWidget::processImpulse(QMouseEvent *event)
     int dy = event->y() - lastPos.y();
     Vector3F injv;
     fCamera->screenToWorld(dx, dy, injv);
+    injv.normalize();
     _dynamics->addImpulse(injv);
-    qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
+    //qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
 }
 
 void GLWidget::simulate()

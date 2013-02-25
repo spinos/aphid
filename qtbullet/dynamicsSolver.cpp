@@ -21,7 +21,7 @@ void DynamicsSolver::initPhysics()
 	_constraintSolver = new btSequentialImpulseConstraintSolver();
 	btBroadphaseInterface* broadphase = new btDbvtBroadphase();
 	_dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, broadphase, _constraintSolver, _collisionConfiguration);
-	_dynamicsWorld->setGravity(btVector3(0,0,0));
+	_dynamicsWorld->setGravity(btVector3(0,-9.8,0));
 
 	btCollisionShape* groundShape = new btBoxShape(btVector3(75,1,75));
 	_collisionShapes.push_back(groundShape);
@@ -40,7 +40,7 @@ void DynamicsSolver::initPhysics()
 	for(int i=0; i<16; i++)
 	{
 		tr.setIdentity();
-		tr.setOrigin(btVector3(0.05*i,6+2.0*i,0));
+		tr.setOrigin(btVector3(0,6+2.0*i,0));
 		btRigidBody* cube = localCreateRigidBody(1.f,tr,cubeShape);
 		_dynamicsWorld->addRigidBody(cube);
 	}
@@ -49,7 +49,7 @@ void DynamicsSolver::initPhysics()
 	trans.setIdentity();
 	trans.setOrigin(btVector3(12.0, 15.0, 3.0));
 	
-	btRigidBody* body0 = localCreateRigidBody(10.f, trans, cubeShape);
+	btRigidBody* body0 = localCreateRigidBody(2.f, trans, cubeShape);
 	_dynamicsWorld->addRigidBody(body0);
 	
 	trans.setOrigin(btVector3(11.0, 11.0, 3.0));
@@ -165,21 +165,26 @@ btRigidBody* DynamicsSolver::localCreateRigidBody(float mass, const btTransform&
 	return body;
 }
 
-char DynamicsSolver::selectByRayHit(const Vector3F & origin, const Vector3F & ray)
+char DynamicsSolver::selectByRayHit(const Vector3F & origin, const Vector3F & ray, Vector3F & hitP)
 {
     m_activeBody = 0;
     btVector3 fromP(origin.x, origin.y, origin.z);
-    btVector3 rayV(ray.x, ray.y, ray.z);
-    btCollisionWorld::ClosestRayResultCallback rayCallback(fromP, rayV);
-    _dynamicsWorld->rayTest(fromP ,rayV, rayCallback);
+    btVector3 toP(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z);
+    btCollisionWorld::ClosestRayResultCallback rayCallback(fromP, toP);
+    _dynamicsWorld->rayTest(fromP , toP, rayCallback);
     if(rayCallback.hasHit()) {
-        m_activeBody = (btRigidBody *)btRigidBody::upcast(rayCallback.m_collisionObject);
-        if(m_activeBody) {
-            //if(m_activeBody->isStaticObject() || m_activeBody->isKinematicObject()) {
-            //    m_activeBody = 0;
-            //    return 0;
-            //}
-            m_activeBody->setActivationState(DISABLE_DEACTIVATION);
+        btRigidBody * body = (btRigidBody *)btRigidBody::upcast(rayCallback.m_collisionObject);
+        if(body) {
+            /*if(m_activeBody->isStaticObject() || m_activeBody->isKinematicObject()) {
+                m_activeBody = 0;
+                return 0;
+            }*/
+            body->setActivationState(DISABLE_DEACTIVATION);
+            btVector3 pickPos = rayCallback.m_hitPointWorld;
+            hitP.x = pickPos.getX();
+            hitP.y = pickPos.getY();
+            hitP.z = pickPos.getZ();
+            m_activeBody = body;
             return 1;
         }
     }
@@ -188,12 +193,11 @@ char DynamicsSolver::selectByRayHit(const Vector3F & origin, const Vector3F & ra
 
 void DynamicsSolver::addImpulse(const Vector3F & impulse)
 {
-    if(!hasActive()) return;
+    if(!m_activeBody) return;
     
     btVector3 impulseV(impulse.x, impulse.y, impulse.z);
-    impulseV *= 1000.f;
     m_activeBody->setActivationState(ACTIVE_TAG);
-	m_activeBody->applyImpulse(impulseV, m_activeBody->getCenterOfMassPosition());
+    m_activeBody->applyImpulse(impulseV, m_hitRelPos);
 }
 
 char DynamicsSolver::hasActive() const

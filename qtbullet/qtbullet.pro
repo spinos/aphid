@@ -23,6 +23,5 @@ SOURCES       = glwidget.cpp \
                 ../shared/BaseCamera.cpp \
                 shapeDrawer.cpp
 QT           += opengl
-win32 {
-CONFIG += console
-}
+win32:CONFIG += console
+mac:CONFIG -= app_bundle
