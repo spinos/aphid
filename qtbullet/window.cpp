@@ -88,8 +88,15 @@ QSlider *Window::createSlider()
 
 void Window::keyPressEvent(QKeyEvent *e)
 {
-    if (e->key() == Qt::Key_Escape)
+	if (e->key() == Qt::Key_Escape)
         close();
-    else
-        QWidget::keyPressEvent(e);
+	else if(e->key() == Qt::Key_Q) {
+		qDebug() << "select/force mode";
+		glWidget->setInteractionMode(GLWidget::AddForce);
+	}
+    else if(e->key() == Qt::Key_A) {
+		qDebug() << "lock/unlock mode";
+		glWidget->setInteractionMode(GLWidget::ToggleLock);
+	}
+	QWidget::keyPressEvent(e);
 }

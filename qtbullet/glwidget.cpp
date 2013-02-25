@@ -65,6 +65,8 @@ GLWidget::GLWidget(QWidget *parent)
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(40);
 	fCamera = new BaseCamera();
+	
+	m_interactionMode = AddForce;
 }
 //! [0]
 
@@ -156,6 +158,11 @@ void GLWidget::resizeGL(int width, int height)
 }
 //! [8]
 
+void GLWidget::setInteractionMode(InteractionMode mode)
+{
+    m_interactionMode = mode;
+}
+
 //! [9]
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
@@ -164,6 +171,8 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
         return;
     
     processSelection(event);
+    if(m_interactionMode == ToggleLock) 
+        processLock(event);
 }
 //! [9]
 
@@ -173,9 +182,9 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     if(event->modifiers() == Qt::AltModifier) {
         processCamera(event);
     }
-    else {
+    else 
         processImpulse(event);
-    }
+
     lastPos = event->pos();
 }
 //! [10]
@@ -215,9 +224,14 @@ void GLWidget::processImpulse(QMouseEvent *event)
     int dy = event->y() - lastPos.y();
     Vector3F injv;
     fCamera->screenToWorld(dx, dy, injv);
-    injv.normalize();
+    injv *= 2.f;
     _dynamics->addImpulse(injv);
     //qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
+}
+
+void GLWidget::processLock(QMouseEvent *event)
+{
+    _dynamics->toggleMassProp();
 }
 
 void GLWidget::simulate()

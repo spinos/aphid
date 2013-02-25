@@ -53,11 +53,17 @@ class GLWidget : public QGLWidget
     Q_OBJECT
 
 public:
+    enum InteractionMode {
+        AddForce,
+        ToggleLock
+    };
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
+    
+    void setInteractionMode(InteractionMode mode);
 //! [0]
 
 //! [2]
@@ -70,6 +76,7 @@ protected:
     void processCamera(QMouseEvent *event);
     void processSelection(QMouseEvent *event);
     void processImpulse(QMouseEvent *event);
+    void processLock(QMouseEvent *event);
 //! [3]
 private:
     QPoint lastPos;
@@ -78,6 +85,7 @@ private:
 	
 	DynamicsSolver* _dynamics;
 	BaseCamera* fCamera;
+	InteractionMode m_interactionMode;
 private slots:
     void simulate();
 

@@ -21,4 +21,5 @@ public:
 	void drawTransform(const btRigidBody & body);
 	void loadWorldSpace(const btRigidBody* body);
 	void drawTransform(const btTransform & t);
+	void drawForce(const btRigidBody* body);
 };

@@ -60,10 +60,15 @@ void ShapeDrawer::drawObject(const btCollisionObject* object)
     glPushMatrix();
     loadWorldSpace(body);
     glDrawCoordsys();
-    if(object->getActivationState() == 1)
-        glColor3f(0.f, 1.f, 0.f);
-    else
-        glColor3f(0.f, 0.f, 1.f);
+    if(body->getInvMass() < .99f) {
+        glColor3f(.1f, .2f, .2f);
+    }
+    else {   
+        if(object->getActivationState() == 1)
+            glColor3f(0.f, 1.f, 0.f);
+        else
+            glColor3f(0.f, 0.f, 1.f);
+    }
     const btCollisionShape* shape = object->getCollisionShape();
     drawShape(shape);
     
@@ -140,3 +145,14 @@ void ShapeDrawer::drawTransform(const btTransform & t)
     glDrawCoordsys();
     glPopMatrix();
 }
+
+void ShapeDrawer::drawForce(const btRigidBody* body)
+{
+    btVector3 c = body->getWorldTransform().getOrigin();
+    btVector3 f = body->getTotalForce();
+    glBegin( GL_LINES );
+	glDrawVector(c);
+	glDrawVector(c + f);
+	glEnd();
+}
+

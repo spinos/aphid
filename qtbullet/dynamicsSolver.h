@@ -31,6 +31,9 @@ public:
 	}
 	
 	char hasActive() const;
+	
+	void toggleMassProp();
+	
 protected:
 	btDynamicsWorld* _dynamicsWorld;
 	class btBroadphaseInterface*	_overlappingPairCache;
@@ -51,5 +54,4 @@ protected:
 
 	btRigidBody* localCreateRigidBody(float mass, const btTransform& startTransform,btCollisionShape* shape);
 	btRigidBody* m_activeBody;
-	btVector3 m_hitRelPos;
 };
