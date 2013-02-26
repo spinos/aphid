@@ -67,19 +67,19 @@ void DynamicsSolver::initPhysics()
 	_dynamicsWorld->addConstraint(d6f);
 	
 	btGeneric6DofConstraint* d6f1 = new btGeneric6DofConstraint(*body1, *body2, frameInA, frameInB, true);
-	d6f1->setAngularLowerLimit(btVector3(0., 0., -SIMD_PI));
-    d6f1->setAngularUpperLimit(btVector3(0., 0., SIMD_PI));	
+	d6f1->setAngularLowerLimit(btVector3(0., 0., 0.));
+    d6f1->setAngularUpperLimit(btVector3(0., 0., SIMD_PI* .8));	
 	_dynamicsWorld->addConstraint(d6f1);
 	
 	btGeneric6DofConstraint* d6f2 = new btGeneric6DofConstraint(*body2, *body3, frameInA, frameInB, true);
-	d6f2->setAngularLowerLimit(btVector3(-SIMD_PI,  -SIMD_PI/2, -SIMD_PI));
-    d6f2->setAngularUpperLimit(btVector3(SIMD_PI, SIMD_PI/2, SIMD_PI));	
+	d6f2->setAngularLowerLimit(btVector3(-SIMD_PI,  -SIMD_PI/2., -SIMD_PI));
+    d6f2->setAngularUpperLimit(btVector3(SIMD_PI, SIMD_PI/2., SIMD_PI));	
 	_dynamicsWorld->addConstraint(d6f2);
 	
-	body0->setDamping(.8f, .8f);
-	body1->setDamping(.8f, .8f);
-	body2->setDamping(.8f, .8f);
-	body3->setDamping(.8f, .8f);
+	body0->setDamping(.9f, .9f);
+	body1->setDamping(.9f, .9f);
+	body2->setDamping(.9f, .9f);
+	body3->setDamping(.9f, .9f);
 	
 	_drawer = new ShapeDrawer();
 
@@ -206,6 +206,8 @@ char DynamicsSolver::selectByRayHit(const Vector3F & origin, const Vector3F & ra
             hitP.y = pickPos.getY();
             hitP.z = pickPos.getZ();
             m_activeBody = body;
+            
+            
             return 1;
         }
     }
@@ -215,24 +217,60 @@ char DynamicsSolver::selectByRayHit(const Vector3F & origin, const Vector3F & ra
 void DynamicsSolver::addImpulse(const Vector3F & impulse)
 {
     if(!m_activeBody) return;
+
+    m_activeBody->setCollisionFlags(m_activeBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+    m_activeBody->setActivationState(DISABLE_DEACTIVATION);
     
-    btVector3 impulseV(impulse.x, impulse.y, impulse.z);
-    m_activeBody->setActivationState(ACTIVE_TAG);
-    m_activeBody->applyForce(impulseV, btVector3(0,0,0));
+    btTransform tm = m_activeBody->getWorldTransform();
+    btVector3 t = tm.getOrigin() + btVector3(impulse.x/10.f, impulse.y/10.f, impulse.z/80.f);
+    tm.setOrigin(t);
+    
+    m_activeBody->setWorldTransform(tm);
+    m_activeBody->setLinearVelocity(btVector3(0.f, 0.f, 0.f));
+    m_activeBody->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
+    m_activeBody->setCollisionFlags(m_activeBody->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
+    //m_activeBody->forceActivationState(ACTIVE_TAG);
+    
+    //btVector3 impulseV(impulse.x, impulse.y, impulse.z);
+    //m_activeBody->setActivationState(ACTIVE_TAG);
+    //m_activeBody->applyForce(impulseV, btVector3(0,0,0));
 }
 
 void DynamicsSolver::addTorque(const Vector3F & torque)
 {
     if(!m_activeBody) return;
     
-    m_testJoint->getRotationalLimitMotor(0)->m_enableMotor = true;
-    m_testJoint->getRotationalLimitMotor(0)->m_targetVelocity = 4.0f;
-    m_testJoint->getRotationalLimitMotor(0)->m_maxMotorForce = 100.f;
+    m_activeBody->setCollisionFlags(m_activeBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+    m_activeBody->setActivationState(DISABLE_DEACTIVATION);
+    
+    btTransform tm = m_activeBody->getWorldTransform();
+    btQuaternion q = tm.getRotation();
+    
+    btQuaternion a;
+    a.setRotation(btVector3(0.f, 0.f, 1.f), btScalar(1.57f));
+    
+    q = a;
+    tm.setRotation(q);
+    
+    m_activeBody->setWorldTransform(tm);
+    m_activeBody->setLinearVelocity(btVector3(0.f, 0.f, 0.f));
+    m_activeBody->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
+    m_activeBody->setCollisionFlags(m_activeBody->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
+    //m_activeBody->forceActivationState(ACTIVE_TAG);
+    
+    //m_testJoint->getRotationalLimitMotor(0)->m_enableMotor = true;
+    //m_testJoint->getRotationalLimitMotor(0)->m_targetVelocity = 4.0f;
+    //m_testJoint->getRotationalLimitMotor(0)->m_maxMotorForce = 100.f;
 }
 
 void DynamicsSolver::removeTorque()
 {
     m_testJoint->getRotationalLimitMotor(0)->m_enableMotor = false;
+}
+
+void DynamicsSolver::removeSelection()
+{
+    m_activeBody = 0;
 }
 
 char DynamicsSolver::hasActive() const

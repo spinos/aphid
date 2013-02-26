@@ -31,6 +31,7 @@ public:
 	void addImpulse(const Vector3F & impulse);
 	void addTorque(const Vector3F & torque);
 	void removeTorque();
+	void removeSelection();
 	
 	void setInteractMode(InteractMode mode);
 	InteractMode getInteractMode() const;

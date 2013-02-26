@@ -173,6 +173,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+    _dynamics->removeSelection();
     if(_dynamics->getInteractMode() == DynamicsSolver::RotateJoint) {
         _dynamics->removeTorque();
     }
@@ -229,7 +230,6 @@ void GLWidget::processImpulse(QMouseEvent *event)
     int dy = event->y() - lastPos.y();
     Vector3F injv;
     fCamera->screenToWorld(dx, dy, injv);
-    injv *= 2.f;
     _dynamics->addImpulse(injv);
     //qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
 }
@@ -245,7 +245,6 @@ void GLWidget::processTorque(QMouseEvent *event)
     int dy = event->y() - lastPos.y();
     Vector3F injv;
     fCamera->screenToWorld(dx, dy, injv);
-    injv *= 2.f;
     _dynamics->addTorque(injv);
     //qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
 }
