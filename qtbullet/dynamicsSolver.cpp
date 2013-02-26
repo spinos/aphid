@@ -62,18 +62,18 @@ void DynamicsSolver::initPhysics()
     frameInA.setOrigin(btVector3(0., -3., 0.));
     frameInB.setOrigin(btVector3(0., 3., 0.));
 	btGeneric6DofConstraint* d6f = new btGeneric6DofConstraint(*body0, *body1, frameInA, frameInB, true);
-	d6f->setAngularLowerLimit(btVector3(0., 0., -SIMD_PI/3.));
-    d6f->setAngularUpperLimit(btVector3(0., 0., SIMD_PI));	
+	d6f->setAngularLowerLimit(btVector3(-SIMD_PI/3., 0., -SIMD_PI/3.));
+    d6f->setAngularUpperLimit(btVector3(SIMD_PI, 0., SIMD_PI));	
 	_dynamicsWorld->addConstraint(d6f);
 	
 	btGeneric6DofConstraint* d6f1 = new btGeneric6DofConstraint(*body1, *body2, frameInA, frameInB, true);
-	d6f1->setAngularLowerLimit(btVector3(0., 0., -SIMD_PI/3.));
-    d6f1->setAngularUpperLimit(btVector3(0., 0., SIMD_PI));	
+	d6f1->setAngularLowerLimit(btVector3(-SIMD_PI, 0., 0.));
+    d6f1->setAngularUpperLimit(btVector3(SIMD_PI, 0., 0.));	
 	_dynamicsWorld->addConstraint(d6f1);
 	
 	btGeneric6DofConstraint* d6f2 = new btGeneric6DofConstraint(*body2, *body3, frameInA, frameInB, true);
-	d6f2->setAngularLowerLimit(btVector3(0., 0., -SIMD_PI/3.));
-    d6f2->setAngularUpperLimit(btVector3(0., 0., SIMD_PI));	
+	d6f2->setAngularLowerLimit(btVector3(-SIMD_PI/3., 0., -SIMD_PI/3.));
+    d6f2->setAngularUpperLimit(btVector3(SIMD_PI, 0., SIMD_PI));	
 	_dynamicsWorld->addConstraint(d6f2);
 	
 	body0->setDamping(.8f, .8f);
@@ -84,6 +84,8 @@ void DynamicsSolver::initPhysics()
 	_drawer = new ShapeDrawer();
 
 	m_activeBody = 0;
+	
+	m_testJoint = d6f1;
 }
 
 void DynamicsSolver::killPhysics()
@@ -142,11 +144,6 @@ void DynamicsSolver::renderWorld()
 	for(int i=0;i< numConstraints;i++) {
 	    btTypedConstraint* constraint = _dynamicsWorld->getConstraint(i);
 	    _drawer->drawConstraint(constraint);
-	    
-	    //btGeneric6DofConstraint* d6f = static_cast<btGeneric6DofConstraint* >(constraint);
-	    //d6f->getRotationalLimitMotor(0)->m_enableMotor = true;
-	    //d6f->getRotationalLimitMotor(0)->m_targetVelocity = 5.0f;
-	    //d6f->getRotationalLimitMotor(0)->m_maxMotorForce = 0.1f;
 	}
 }
 
@@ -211,6 +208,20 @@ void DynamicsSolver::addImpulse(const Vector3F & impulse)
     btVector3 impulseV(impulse.x, impulse.y, impulse.z);
     m_activeBody->setActivationState(ACTIVE_TAG);
     m_activeBody->applyForce(impulseV, btVector3(0,0,0));
+}
+
+void DynamicsSolver::addTorque(const Vector3F & torque)
+{
+    if(!m_activeBody) return;
+    
+    m_testJoint->getRotationalLimitMotor(0)->m_enableMotor = true;
+    m_testJoint->getRotationalLimitMotor(0)->m_targetVelocity = 4.0f;
+    m_testJoint->getRotationalLimitMotor(0)->m_maxMotorForce = 1.f;
+}
+
+void DynamicsSolver::removeTorque()
+{
+    m_testJoint->getRotationalLimitMotor(0)->m_enableMotor = false;
 }
 
 char DynamicsSolver::hasActive() const

@@ -98,5 +98,9 @@ void Window::keyPressEvent(QKeyEvent *e)
 		qDebug() << "lock/unlock mode";
 		glWidget->setInteractionMode(GLWidget::ToggleLock);
 	}
+	else if(e->key() == Qt::Key_R) {
+		qDebug() << "rotate mode";
+		glWidget->setInteractionMode(GLWidget::RotateJoint);
+	}
 	QWidget::keyPressEvent(e);
 }

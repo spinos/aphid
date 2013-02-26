@@ -24,6 +24,8 @@ public:
 	void simulate();
 	char selectByRayHit(const Vector3F & origin, const Vector3F & ray, Vector3F & hitP);
 	void addImpulse(const Vector3F & impulse);
+	void addTorque(const Vector3F & torque);
+	void removeTorque();
 	
 	btDynamicsWorld*		getDynamicsWorld()
 	{
@@ -54,4 +56,6 @@ protected:
 
 	btRigidBody* localCreateRigidBody(float mass, const btTransform& startTransform,btCollisionShape* shape);
 	btRigidBody* m_activeBody;
+	
+	btGeneric6DofConstraint* m_testJoint;
 };

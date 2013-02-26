@@ -176,11 +176,21 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 }
 //! [9]
 
+void GLWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    if(m_interactionMode == RotateJoint) {
+        _dynamics->removeTorque();
+    }
+}
+
 //! [10]
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if(event->modifiers() == Qt::AltModifier) {
         processCamera(event);
+    }
+    else if(m_interactionMode == RotateJoint) {
+        processTorque(event);
     }
     else 
         processImpulse(event);
@@ -226,6 +236,22 @@ void GLWidget::processImpulse(QMouseEvent *event)
     fCamera->screenToWorld(dx, dy, injv);
     injv *= 2.f;
     _dynamics->addImpulse(injv);
+    //qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
+}
+
+void GLWidget::processTorque(QMouseEvent *event)
+{
+    if(!_dynamics->hasActive())
+        return;
+    
+    Vector3F injp(16, 16, 16);
+    fCamera->intersection(event->x(), event->y(), injp);
+    int dx = event->x() - lastPos.x();
+    int dy = event->y() - lastPos.y();
+    Vector3F injv;
+    fCamera->screenToWorld(dx, dy, injv);
+    injv *= 2.f;
+    _dynamics->addTorque(injv);
     //qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
 }
 

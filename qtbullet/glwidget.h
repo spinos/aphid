@@ -55,7 +55,8 @@ class GLWidget : public QGLWidget
 public:
     enum InteractionMode {
         AddForce,
-        ToggleLock
+        ToggleLock,
+        RotateJoint
     };
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
@@ -72,11 +73,13 @@ protected:
     void paintGL();
     void resizeGL(int width, int height);
     void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void processCamera(QMouseEvent *event);
     void processSelection(QMouseEvent *event);
     void processImpulse(QMouseEvent *event);
     void processLock(QMouseEvent *event);
+    void processTorque(QMouseEvent *event);
 //! [3]
 private:
     QPoint lastPos;
