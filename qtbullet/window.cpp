@@ -92,15 +92,15 @@ void Window::keyPressEvent(QKeyEvent *e)
         close();
 	else if(e->key() == Qt::Key_Q) {
 		qDebug() << "select/force mode";
-		glWidget->setInteractionMode(GLWidget::AddForce);
+		glWidget->getSolver()->setInteractMode(DynamicsSolver::TranslateBone);
 	}
     else if(e->key() == Qt::Key_A) {
 		qDebug() << "lock/unlock mode";
-		glWidget->setInteractionMode(GLWidget::ToggleLock);
+		glWidget->getSolver()->setInteractMode(DynamicsSolver::ToggleLock);
 	}
 	else if(e->key() == Qt::Key_R) {
 		qDebug() << "rotate mode";
-		glWidget->setInteractionMode(GLWidget::RotateJoint);
+		glWidget->getSolver()->setInteractMode(DynamicsSolver::RotateJoint);
 	}
 	QWidget::keyPressEvent(e);
 }

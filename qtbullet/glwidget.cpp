@@ -66,7 +66,7 @@ GLWidget::GLWidget(QWidget *parent)
 	timer->start(40);
 	fCamera = new BaseCamera();
 	
-	m_interactionMode = AddForce;
+	
 }
 //! [0]
 
@@ -144,7 +144,7 @@ void GLWidget::resizeGL(int width, int height)
     glLoadIdentity();
 	
 	float aspect = (float)width/(float)height;
-	float fov = 80.f;
+	float fov = 40.f;
 	float right = fov/ 2.f;
 	float top = right / aspect;
 
@@ -158,11 +158,6 @@ void GLWidget::resizeGL(int width, int height)
 }
 //! [8]
 
-void GLWidget::setInteractionMode(InteractionMode mode)
-{
-    m_interactionMode = mode;
-}
-
 //! [9]
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
@@ -171,14 +166,14 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
         return;
     
     processSelection(event);
-    if(m_interactionMode == ToggleLock) 
+    if(_dynamics->getInteractMode() == DynamicsSolver::ToggleLock) 
         processLock(event);
 }
 //! [9]
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    if(m_interactionMode == RotateJoint) {
+    if(_dynamics->getInteractMode() == DynamicsSolver::RotateJoint) {
         _dynamics->removeTorque();
     }
 }
@@ -189,7 +184,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     if(event->modifiers() == Qt::AltModifier) {
         processCamera(event);
     }
-    else if(m_interactionMode == RotateJoint) {
+    else if(_dynamics->getInteractMode() == DynamicsSolver::RotateJoint) {
         processTorque(event);
     }
     else 
@@ -264,4 +259,9 @@ void GLWidget::simulate()
 {
     update();
     _dynamics->simulate();
+}
+
+DynamicsSolver* GLWidget::getSolver()
+{
+    return _dynamics;
 }

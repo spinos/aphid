@@ -60,7 +60,7 @@ void ShapeDrawer::drawObject(const btCollisionObject* object)
     glPushMatrix();
     loadWorldSpace(body);
     glDrawCoordsys();
-    if(body->getInvMass() < .99f) {
+    if(body->getInvMass() < .01f) {
         glColor3f(.1f, .2f, .2f);
     }
     else {   
@@ -153,6 +153,23 @@ void ShapeDrawer::drawForce(const btRigidBody* body)
     glBegin( GL_LINES );
 	glDrawVector(c);
 	glDrawVector(c + f);
+	glEnd();
+}
+
+void ShapeDrawer::drawTranslateHandle(const btRigidBody* body)
+{
+    btVector3 c = body->getWorldTransform().getOrigin();
+    glBegin( GL_LINES );
+	
+	glColor3f(1.f, 0.f, 0.f);
+			glDrawVector(c);
+			glDrawVector(c + btVector3(4.f, 0.f, 0.f));
+	glColor3f(0.f, 1.f, 0.f);					
+			glDrawVector(c);
+			glDrawVector(c + btVector3(0.f, 4.f, 0.f)); 
+	glColor3f(0.f, 0.f, 1.f);					
+			glDrawVector(c);
+			glDrawVector(c + btVector3(0.f, 0.f, 4.f)); 	
 	glEnd();
 }
 

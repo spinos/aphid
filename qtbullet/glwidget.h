@@ -53,18 +53,15 @@ class GLWidget : public QGLWidget
     Q_OBJECT
 
 public:
-    enum InteractionMode {
-        AddForce,
-        ToggleLock,
-        RotateJoint
-    };
+    
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
     
-    void setInteractionMode(InteractionMode mode);
+    DynamicsSolver* getSolver();
+    
 //! [0]
 
 //! [2]
@@ -88,7 +85,7 @@ private:
 	
 	DynamicsSolver* _dynamics;
 	BaseCamera* fCamera;
-	InteractionMode m_interactionMode;
+	
 private slots:
     void simulate();
 

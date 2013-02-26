@@ -15,6 +15,11 @@
 
 class DynamicsSolver {
 public:
+    enum InteractMode {
+        ToggleLock,
+        TranslateBone,
+        RotateJoint
+    };
 	DynamicsSolver() {}
 	virtual ~DynamicsSolver() {}
 	
@@ -27,14 +32,14 @@ public:
 	void addTorque(const Vector3F & torque);
 	void removeTorque();
 	
-	btDynamicsWorld*		getDynamicsWorld()
-	{
-		return _dynamicsWorld;
-	}
+	void setInteractMode(InteractMode mode);
+	InteractMode getInteractMode() const;
 	
 	char hasActive() const;
 	
 	void toggleMassProp();
+	
+	InteractMode m_interactMode;
 	
 protected:
 	btDynamicsWorld* _dynamicsWorld;

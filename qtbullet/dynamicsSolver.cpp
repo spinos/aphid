@@ -39,41 +39,41 @@ void DynamicsSolver::initPhysics()
 	
 	btTransform trans;
 	trans.setIdentity();
-	trans.setOrigin(btVector3(12.0, 15.0, 3.0));
+	trans.setOrigin(btVector3(-8.0, 5.0, 3.0));
 	
 	btRigidBody* body0 = localCreateRigidBody(1.f, trans, cubeShape);
 	_dynamicsWorld->addRigidBody(body0);
 	
-	trans.setOrigin(btVector3(10.0, 11.0, 3.0));
+	trans.setOrigin(btVector3(-4.0, 5.0, 3.0));
 	btRigidBody* body1 = localCreateRigidBody(1.f, trans, cubeShape);
 	_dynamicsWorld->addRigidBody(body1);
 	
-	trans.setOrigin(btVector3(10.0, 7.0, 3.0));
+	trans.setOrigin(btVector3(0.0, 5.0, 3.0));
 	btRigidBody* body2 = localCreateRigidBody(1.f, trans, cubeShape);
 	_dynamicsWorld->addRigidBody(body2);
 	
-	trans.setOrigin(btVector3(10.0, 3.0, 3.0));
+	trans.setOrigin(btVector3(4.0, 5.0, 3.0));
 	btRigidBody* body3 = localCreateRigidBody(1.f, trans, cubeShape);
 	_dynamicsWorld->addRigidBody(body3);
 	
 	btTransform frameInA, frameInB;
     frameInA = btTransform::getIdentity();
     frameInB = btTransform::getIdentity();
-    frameInA.setOrigin(btVector3(0., -3., 0.));
-    frameInB.setOrigin(btVector3(0., 3., 0.));
+    frameInA.setOrigin(btVector3(3., 0., 0.));
+    frameInB.setOrigin(btVector3(-3., 0., 0.));
 	btGeneric6DofConstraint* d6f = new btGeneric6DofConstraint(*body0, *body1, frameInA, frameInB, true);
-	d6f->setAngularLowerLimit(btVector3(-SIMD_PI/3., 0., -SIMD_PI/3.));
-    d6f->setAngularUpperLimit(btVector3(SIMD_PI, 0., SIMD_PI));	
+	d6f->setAngularLowerLimit(btVector3(-SIMD_PI, -SIMD_PI/2., -SIMD_PI));
+    d6f->setAngularUpperLimit(btVector3(SIMD_PI, SIMD_PI/2., SIMD_PI));	
 	_dynamicsWorld->addConstraint(d6f);
 	
 	btGeneric6DofConstraint* d6f1 = new btGeneric6DofConstraint(*body1, *body2, frameInA, frameInB, true);
-	d6f1->setAngularLowerLimit(btVector3(-SIMD_PI, 0., 0.));
-    d6f1->setAngularUpperLimit(btVector3(SIMD_PI, 0., 0.));	
+	d6f1->setAngularLowerLimit(btVector3(0., 0., -SIMD_PI));
+    d6f1->setAngularUpperLimit(btVector3(0., 0., SIMD_PI));	
 	_dynamicsWorld->addConstraint(d6f1);
 	
 	btGeneric6DofConstraint* d6f2 = new btGeneric6DofConstraint(*body2, *body3, frameInA, frameInB, true);
-	d6f2->setAngularLowerLimit(btVector3(-SIMD_PI/3., 0., -SIMD_PI/3.));
-    d6f2->setAngularUpperLimit(btVector3(SIMD_PI, 0., SIMD_PI));	
+	d6f2->setAngularLowerLimit(btVector3(-SIMD_PI,  -SIMD_PI/2, -SIMD_PI));
+    d6f2->setAngularUpperLimit(btVector3(SIMD_PI, SIMD_PI/2, SIMD_PI));	
 	_dynamicsWorld->addConstraint(d6f2);
 	
 	body0->setDamping(.8f, .8f);
@@ -85,7 +85,9 @@ void DynamicsSolver::initPhysics()
 
 	m_activeBody = 0;
 	
-	m_testJoint = d6f1;
+	m_testJoint = d6f;
+	
+	m_interactMode = TranslateBone;
 }
 
 void DynamicsSolver::killPhysics()
@@ -145,6 +147,15 @@ void DynamicsSolver::renderWorld()
 	    btTypedConstraint* constraint = _dynamicsWorld->getConstraint(i);
 	    _drawer->drawConstraint(constraint);
 	}
+	
+	if(!m_activeBody) return;
+	
+	if(m_interactMode == TranslateBone) {
+	    _drawer->drawTranslateHandle(m_activeBody);
+	}
+	//else if(m_interactMode == RotateJoint) {
+	    
+	//}
 }
 
 void DynamicsSolver::simulate()
@@ -216,7 +227,7 @@ void DynamicsSolver::addTorque(const Vector3F & torque)
     
     m_testJoint->getRotationalLimitMotor(0)->m_enableMotor = true;
     m_testJoint->getRotationalLimitMotor(0)->m_targetVelocity = 4.0f;
-    m_testJoint->getRotationalLimitMotor(0)->m_maxMotorForce = 1.f;
+    m_testJoint->getRotationalLimitMotor(0)->m_maxMotorForce = 100.f;
 }
 
 void DynamicsSolver::removeTorque()
@@ -233,8 +244,19 @@ void DynamicsSolver::toggleMassProp()
 {
     if(!m_activeBody) return;
     
-    if(m_activeBody->getInvMass() < .99f)
+    if(m_activeBody->getInvMass() < 0.001f)
         m_activeBody->setMassProps(1.f, btVector3(0.666667, 0.666667, 0.666667));
     else
         m_activeBody->setMassProps(0.f, btVector3(0,0,0));
 }
+
+void DynamicsSolver::setInteractMode(InteractMode mode)
+{
+    m_interactMode = mode;
+}
+
+DynamicsSolver::InteractMode DynamicsSolver::getInteractMode() const
+{
+    return m_interactMode;
+}
+
