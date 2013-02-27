@@ -23,4 +23,5 @@ public:
 	void drawTransform(const btTransform & t);
 	void drawForce(const btRigidBody* body);
 	void drawTranslateHandle(const btRigidBody* body);
+	void drawAngularLimit(const btTransform& space, const btVector3& angularLower, const btVector3& angularUpper);
 };
