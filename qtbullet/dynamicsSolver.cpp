@@ -32,54 +32,83 @@ void DynamicsSolver::initPhysics()
 	btRigidBody* body = localCreateRigidBody(0.f,tr,groundShape);
 
 
-	_dynamicsWorld->addRigidBody(body);
+	//_dynamicsWorld->addRigidBody(body);
 	
 	btCollisionShape* cubeShape = new btBoxShape(btVector3(1.f,1.f,1.f));
 	_collisionShapes.push_back(cubeShape);
 	
 	btTransform trans;
 	trans.setIdentity();
-	trans.setOrigin(btVector3(-8.0, 5.0, 3.0));
+	trans.setOrigin(btVector3(0.0, 5.0, 3.0));
 	
-	btRigidBody* body0 = localCreateRigidBody(1.f, trans, cubeShape);
+	btCollisionShape* cubeShape1 = new btBoxShape(btVector3(1.f,4.f,.2f));
+	_collisionShapes.push_back(cubeShape1);
+	
+	btRigidBody* body0 = localCreateRigidBody(1.f, trans, cubeShape1);
 	_dynamicsWorld->addRigidBody(body0);
 	
-	trans.setOrigin(btVector3(-4.0, 5.0, 3.0));
-	btRigidBody* body1 = localCreateRigidBody(1.f, trans, cubeShape);
+	btCollisionShape* cubeShape2 = new btBoxShape(btVector3(3.f,.2f,.2f));
+	_collisionShapes.push_back(cubeShape2);
+	
+	trans.setOrigin(btVector3(5.0, 9.0, 3.0));
+	btRigidBody* body1 = localCreateRigidBody(1.f, trans, cubeShape2);
 	_dynamicsWorld->addRigidBody(body1);
 	
-	trans.setOrigin(btVector3(0.0, 5.0, 3.0));
-	btRigidBody* body2 = localCreateRigidBody(1.f, trans, cubeShape);
+	btCollisionShape* cubeShape3 = new btBoxShape(btVector3(4.f,.2f,.2f));
+	_collisionShapes.push_back(cubeShape3);
+	
+	trans.setOrigin(btVector3(15.0, 9.0, 4.0));
+	btRigidBody* body2 = localCreateRigidBody(1.f, trans, cubeShape3);
 	_dynamicsWorld->addRigidBody(body2);
 	
-	trans.setOrigin(btVector3(4.0, 5.0, 3.0));
-	btRigidBody* body3 = localCreateRigidBody(1.f, trans, cubeShape);
+	trans.setOrigin(btVector3(27.0, 9.0, 6.0));
+	btRigidBody* body3 = localCreateRigidBody(1.f, trans, cubeShape3);
 	_dynamicsWorld->addRigidBody(body3);
+	
+	btCollisionShape* cubeShape4 = new btBoxShape(btVector3(.2f,.2f,.2f));
+	_collisionShapes.push_back(cubeShape4);
+	
+	trans.setOrigin(btVector3(35.0, 9.0, 12.0));
+	btRigidBody* body4 = localCreateRigidBody(1.f, trans, cubeShape4);
+	_dynamicsWorld->addRigidBody(body4);
 	
 	btTransform frameInA, frameInB;
     frameInA = btTransform::getIdentity();
     frameInB = btTransform::getIdentity();
-    frameInA.setOrigin(btVector3(3., 0., 0.));
-    frameInB.setOrigin(btVector3(-3., 0., 0.));
+    frameInA.setOrigin(btVector3(1., 4., 0.));
+    frameInB.setOrigin(btVector3(-4., 0., 0.));
 	btGeneric6DofConstraint* d6f = new btGeneric6DofConstraint(*body0, *body1, frameInA, frameInB, true);
-	d6f->setAngularLowerLimit(btVector3(-SIMD_PI, -SIMD_PI/2., -SIMD_PI));
-    d6f->setAngularUpperLimit(btVector3(SIMD_PI, SIMD_PI/2., SIMD_PI));	
+	d6f->setAngularLowerLimit(btVector3(0., -SIMD_PI/10., -SIMD_PI/20.0));
+    d6f->setAngularUpperLimit(btVector3(0., SIMD_PI/10., SIMD_PI/20.0));	
 	_dynamicsWorld->addConstraint(d6f);
 	
+	frameInA.setOrigin(btVector3(4., 0., 0.));
+    frameInB.setOrigin(btVector3(-6., 0., 0.));
+	
 	btGeneric6DofConstraint* d6f1 = new btGeneric6DofConstraint(*body1, *body2, frameInA, frameInB, true);
-	d6f1->setAngularLowerLimit(btVector3(0., 0., 0.));
-    d6f1->setAngularUpperLimit(btVector3(0., 0., SIMD_PI* .8));	
+	d6f1->setAngularLowerLimit(btVector3(0.0, -SIMD_PI/2., -SIMD_PI));
+    d6f1->setAngularUpperLimit(btVector3(SIMD_PI/2, SIMD_PI/2., SIMD_PI));	
 	_dynamicsWorld->addConstraint(d6f1);
 	
+	frameInA.setOrigin(btVector3(6., 0., 0.));
+    frameInB.setOrigin(btVector3(-6., 0., 0.));
+	
 	btGeneric6DofConstraint* d6f2 = new btGeneric6DofConstraint(*body2, *body3, frameInA, frameInB, true);
-	d6f2->setAngularLowerLimit(btVector3(-SIMD_PI,  -SIMD_PI/2., -SIMD_PI));
-    d6f2->setAngularUpperLimit(btVector3(SIMD_PI, SIMD_PI/2., SIMD_PI));	
+	d6f2->setAngularLowerLimit(btVector3(0., SIMD_PI* .1, 0.));
+    d6f2->setAngularUpperLimit(btVector3(0., SIMD_PI* .9, 0.));	
 	_dynamicsWorld->addConstraint(d6f2);
 	
-	body0->setDamping(.9f, .9f);
-	body1->setDamping(.9f, .9f);
-	body2->setDamping(.9f, .9f);
-	body3->setDamping(.9f, .9f);
+	frameInA.setOrigin(btVector3(6., 0., 0.));
+    frameInB.setOrigin(btVector3(-2., 0., 0.));
+	
+	btGeneric6DofConstraint* d6f3 = new btGeneric6DofConstraint(*body3, *body4, frameInA, frameInB, true);
+	_dynamicsWorld->addConstraint(d6f3);
+	
+	body0->setDamping(12.9f, 12.9f);
+	body1->setDamping(12.9f, 12.9f);
+	body2->setDamping(12.9f, 12.9f);
+	body3->setDamping(12.9f, 12.9f);
+	body4->setDamping(12.9f, 12.9f);
 	
 	_drawer = new ShapeDrawer();
 
@@ -229,7 +258,7 @@ void DynamicsSolver::addImpulse(const Vector3F & impulse)
     m_activeBody->setLinearVelocity(btVector3(0.f, 0.f, 0.f));
     m_activeBody->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
     m_activeBody->setCollisionFlags(m_activeBody->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
-    //m_activeBody->forceActivationState(ACTIVE_TAG);
+    m_activeBody->forceActivationState(ACTIVE_TAG);
     
     //btVector3 impulseV(impulse.x, impulse.y, impulse.z);
     //m_activeBody->setActivationState(ACTIVE_TAG);

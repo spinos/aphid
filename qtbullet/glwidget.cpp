@@ -144,7 +144,7 @@ void GLWidget::resizeGL(int width, int height)
     glLoadIdentity();
 	
 	float aspect = (float)width/(float)height;
-	float fov = 40.f;
+	float fov = 70.f;
 	float right = fov/ 2.f;
 	float top = right / aspect;
 
