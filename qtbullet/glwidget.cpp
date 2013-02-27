@@ -215,8 +215,7 @@ void GLWidget::processSelection(QMouseEvent *event)
     Vector3F origin, incident;
     fCamera->incidentRay(event->x(), event->y(), origin, incident);
     incident = incident.normal() * 1000.f;
-    Vector3F hitP;
-    _dynamics->selectByRayHit(origin, incident, hitP);
+    _dynamics->selectByRayHit(origin, incident, m_hitPosition);
 }
 
 void GLWidget::processImpulse(QMouseEvent *event)
@@ -224,12 +223,12 @@ void GLWidget::processImpulse(QMouseEvent *event)
     if(!_dynamics->hasActive())
         return;
     
-    Vector3F injp(16, 16, 16);
-    fCamera->intersection(event->x(), event->y(), injp);
+    fCamera->intersection(event->x(), event->y(), m_hitPosition);
     int dx = event->x() - lastPos.x();
     int dy = event->y() - lastPos.y();
     Vector3F injv;
     fCamera->screenToWorld(dx, dy, injv);
+    injv *= 10.f;
     _dynamics->addImpulse(injv);
     //qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
 }
@@ -239,8 +238,7 @@ void GLWidget::processTorque(QMouseEvent *event)
     if(!_dynamics->hasActive())
         return;
     
-    Vector3F injp(16, 16, 16);
-    fCamera->intersection(event->x(), event->y(), injp);
+    fCamera->intersection(event->x(), event->y(), m_hitPosition);
     int dx = event->x() - lastPos.x();
     int dy = event->y() - lastPos.y();
     Vector3F injv;

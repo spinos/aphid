@@ -40,8 +40,6 @@ public:
 	
 	void toggleMassProp();
 	
-	InteractMode m_interactMode;
-	
 protected:
 	btDynamicsWorld* _dynamicsWorld;
 	class btBroadphaseInterface*	_overlappingPairCache;
@@ -64,4 +62,6 @@ protected:
 	btRigidBody* m_activeBody;
 	
 	btGeneric6DofConstraint* m_testJoint;
+	
+	InteractMode m_interactMode;
 };

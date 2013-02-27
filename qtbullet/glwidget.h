@@ -86,6 +86,8 @@ private:
 	DynamicsSolver* _dynamics;
 	BaseCamera* fCamera;
 	
+	Vector3F m_hitPosition;
+	
 private slots:
     void simulate();
 

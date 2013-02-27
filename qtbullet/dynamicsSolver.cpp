@@ -85,9 +85,9 @@ void DynamicsSolver::initPhysics()
 	frameInA.setOrigin(btVector3(4., 0., 0.));
     frameInB.setOrigin(btVector3(-6., 0., 0.));
 	
-	btGeneric6DofConstraint* d6f1 = new btGeneric6DofConstraint(*body1, *body2, frameInA, frameInB, true);
-	d6f1->setAngularLowerLimit(btVector3(0.0, -SIMD_PI/2., -SIMD_PI));
-    d6f1->setAngularUpperLimit(btVector3(SIMD_PI/2, SIMD_PI/2., SIMD_PI));	
+	btGeneric6DofConstraint* d6f1 = new btGeneric6DofConstraint(*body2, *body1, frameInB, frameInA, true);
+	d6f1->setAngularLowerLimit(btVector3(-SIMD_PI/22.2, -SIMD_PI/2.2, -SIMD_PI/2.2));
+    d6f1->setAngularUpperLimit(btVector3(SIMD_PI/2.2, -SIMD_PI/22.2, 0.));	
 	_dynamicsWorld->addConstraint(d6f1);
 	
 	frameInA.setOrigin(btVector3(6., 0., 0.));
@@ -95,7 +95,7 @@ void DynamicsSolver::initPhysics()
 	
 	btGeneric6DofConstraint* d6f2 = new btGeneric6DofConstraint(*body2, *body3, frameInA, frameInB, true);
 	d6f2->setAngularLowerLimit(btVector3(0., SIMD_PI* .1, 0.));
-    d6f2->setAngularUpperLimit(btVector3(0., SIMD_PI* .9, 0.));	
+    d6f2->setAngularUpperLimit(btVector3(0., SIMD_PI* .45, 0.));	
 	_dynamicsWorld->addConstraint(d6f2);
 	
 	frameInA.setOrigin(btVector3(6., 0., 0.));
@@ -104,11 +104,11 @@ void DynamicsSolver::initPhysics()
 	btGeneric6DofConstraint* d6f3 = new btGeneric6DofConstraint(*body3, *body4, frameInA, frameInB, true);
 	_dynamicsWorld->addConstraint(d6f3);
 	
-	body0->setDamping(12.9f, 12.9f);
-	body1->setDamping(12.9f, 12.9f);
-	body2->setDamping(12.9f, 12.9f);
-	body3->setDamping(12.9f, 12.9f);
-	body4->setDamping(12.9f, 12.9f);
+	body0->setDamping(.9f, .9f);
+	body1->setDamping(.9f, .9f);
+	body2->setDamping(.9f, .9f);
+	body3->setDamping(.9f, .9f);
+	body4->setDamping(.9f, .9f);
 	
 	_drawer = new ShapeDrawer();
 
@@ -246,7 +246,7 @@ char DynamicsSolver::selectByRayHit(const Vector3F & origin, const Vector3F & ra
 void DynamicsSolver::addImpulse(const Vector3F & impulse)
 {
     if(!m_activeBody) return;
-
+/*
     m_activeBody->setCollisionFlags(m_activeBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
     m_activeBody->setActivationState(DISABLE_DEACTIVATION);
     
@@ -259,10 +259,10 @@ void DynamicsSolver::addImpulse(const Vector3F & impulse)
     m_activeBody->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
     m_activeBody->setCollisionFlags(m_activeBody->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
     m_activeBody->forceActivationState(ACTIVE_TAG);
-    
-    //btVector3 impulseV(impulse.x, impulse.y, impulse.z);
-    //m_activeBody->setActivationState(ACTIVE_TAG);
-    //m_activeBody->applyForce(impulseV, btVector3(0,0,0));
+    */
+    btVector3 impulseV(impulse.x, impulse.y, impulse.z);
+    m_activeBody->setActivationState(ACTIVE_TAG);
+    m_activeBody->applyForce(impulseV, btVector3(0,0,0));
 }
 
 void DynamicsSolver::addTorque(const Vector3F & torque)
