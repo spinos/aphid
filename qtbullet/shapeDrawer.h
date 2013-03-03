@@ -9,7 +9,7 @@
  
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
-
+#include "BulletSoftBody/btSoftBody.h"
 class ShapeDrawer {
 public:
 	ShapeDrawer () {}
@@ -17,6 +17,8 @@ public:
 	
 	void drawConstraint(const btTypedConstraint* constraint);
 	void drawObject(const btCollisionObject* object);
+	void drawRigidBody(const btRigidBody* body);
+	void drawSoftBody(const btSoftBody* body);
 	void drawShape(const btCollisionShape* shape);
 	void drawTransform(const btRigidBody & body);
 	void loadWorldSpace(const btRigidBody* body);

@@ -1,7 +1,8 @@
 mac:INCLUDEPATH += /Users/jianzhang/Library/bullet-2.78/src/
 mac:LIBS += -lBulletDynamics -L/Users/jianzhang/dyn/build/src/BulletDynamics/Release \
         -lBulletCollision -L/Users/jianzhang/dyn/build/src/BulletCollision/Release \
-        -lLinearMath -L/Users/jianzhang/dyn/build/src/LinearMath/Release
+        -lLinearMath -L/Users/jianzhang/dyn/build/src/LinearMath/Release \
+        -lBulletSoftBody
         
 win32:INCLUDEPATH += D:/usr/bullet-2.81/src
 win32:LIBS += -lBulletDynamics_vs2008_x64_release -lBulletCollision_vs2008_x64_release -lLinearMath_vs2008_x64_release\ 

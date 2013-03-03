@@ -8,20 +8,51 @@
  */
 
 #include "dynamicsSolver.h"
+#include "btBulletDynamicsCommon.h"
+#include "btBulletCollisionCommon.h"
+#include "BulletSoftBody/btSoftBody.h"
+#include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
+#include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
+#include "BulletSoftBody/btSoftBodyHelpers.h"
 
+DynamicsSolver::DynamicsSolver()
+{
+    _drawer = new ShapeDrawer();
+    m_activeBody = 0;
+
+	m_interactMode = TranslateBone;
+}
+
+DynamicsSolver::~DynamicsSolver()
+{
+    killPhysics();
+    m_activeBody = 0;
+}
+	
 void DynamicsSolver::initPhysics()
 {
-	_defaultContactProcessingThreshold = BT_LARGE_FLOAT;
-	
-	_collisionConfiguration = new btDefaultCollisionConfiguration();
-	_dispatcher = new btCollisionDispatcher(_collisionConfiguration);
+    
+    m_collisionConfiguration = new btSoftBodyRigidBodyCollisionConfiguration();
+    m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
+
+	btSoftBodyWorldInfo worldInfo;
+	worldInfo.m_dispatcher = m_dispatcher;
+
 	btVector3 worldMin(-1000,-1000,-1000);
 	btVector3 worldMax(1000,1000,1000);
-	_overlappingPairCache = new btAxisSweep3(worldMin,worldMax);
-	_constraintSolver = new btSequentialImpulseConstraintSolver();
-	btBroadphaseInterface* broadphase = new btDbvtBroadphase();
-	_dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, broadphase, _constraintSolver, _collisionConfiguration);
-	_dynamicsWorld->setGravity(btVector3(0,0,0));
+	
+	m_broadphase = new btAxisSweep3(worldMin,worldMax, 1000);
+
+	worldInfo.m_broadphase = m_broadphase;
+	worldInfo.m_sparsesdf.Initialize();
+    worldInfo.m_gravity.setValue(0,0.0,0);
+	m_constraintSolver = new btSequentialImpulseConstraintSolver();
+	m_dynamicsWorld = new btSoftRigidDynamicsWorld(m_dispatcher, m_broadphase, m_constraintSolver, m_collisionConfiguration);
+
+	m_dynamicsWorld->getDispatchInfo().m_enableSPU = true;
+	
+
+/*	_dynamicsWorld->setGravity(btVector3(0,0,0));
 
 	btCollisionShape* groundShape = new btBoxShape(btVector3(75,1,75));
 	_collisionShapes.push_back(groundShape);
@@ -44,31 +75,31 @@ void DynamicsSolver::initPhysics()
 	btCollisionShape* cubeShape1 = new btBoxShape(btVector3(1.f,4.f,.2f));
 	_collisionShapes.push_back(cubeShape1);
 	
-	btRigidBody* body0 = localCreateRigidBody(1.f, trans, cubeShape1);
+	btRigidBody* body0 = localCreateRigidBody(0.f, trans, cubeShape1);
 	_dynamicsWorld->addRigidBody(body0);
 	
 	btCollisionShape* cubeShape2 = new btBoxShape(btVector3(2.f,.2f,.5f));
 	_collisionShapes.push_back(cubeShape2);
 	
 	trans.setOrigin(btVector3(5.0, 9.0, 3.0));
-	btRigidBody* body1 = localCreateRigidBody(1.f, trans, cubeShape2);
-	_dynamicsWorld->addRigidBody(body1);
+	btRigidBody* clavicle = localCreateRigidBody(1.f, trans, cubeShape2);
+	_dynamicsWorld->addRigidBody(clavicle);
 	
 	btCollisionShape* cubeShape3 = new btBoxShape(btVector3(4.f,.2f,.5f));
 	_collisionShapes.push_back(cubeShape3);
 	
-	trans.setOrigin(btVector3(15.0, 9.0, 4.0));
+	trans.setOrigin(btVector3(20.0, 9.0, 4.0));
 	btRigidBody* body2 = localCreateRigidBody(1.f, trans, cubeShape3);
 	_dynamicsWorld->addRigidBody(body2);
 	
-	trans.setOrigin(btVector3(20.0, 9.0, 6.0));
+	trans.setOrigin(btVector3(25.0, 9.0, 6.0));
 	btRigidBody* body3 = localCreateRigidBody(1.f, trans, cubeShape3);
 	_dynamicsWorld->addRigidBody(body3);
 	
 	btCollisionShape* cubeShape4 = new btBoxShape(btVector3(.5f,.5f,.5f));
 	_collisionShapes.push_back(cubeShape4);
 	
-	trans.setOrigin(btVector3(23.0, 9.0, 12.0));
+	trans.setOrigin(btVector3(28.0, 9.0, 12.0));
 	btRigidBody* body4 = localCreateRigidBody(1.f, trans, cubeShape4);
 	_dynamicsWorld->addRigidBody(body4);
 	
@@ -77,25 +108,29 @@ void DynamicsSolver::initPhysics()
     
     frameInA.setOrigin(btVector3(2., 4., 0.));
     frameInB.setOrigin(btVector3(-2.5, 0., 0.));
-	btGeneric6DofConstraint* d6f = new btGeneric6DofConstraint(*body0, *body1, frameInA, frameInB, true);
-	d6f->setAngularLowerLimit(btVector3(-SIMD_PI/24., -SIMD_PI/4., -SIMD_PI/4.));
-    d6f->setAngularUpperLimit(btVector3(SIMD_PI/24., SIMD_PI/4., SIMD_PI/4.));	
+	btGeneric6DofConstraint* d6f = new btGeneric6DofConstraint(*body0, *clavicle, frameInA, frameInB, true);
+	d6f->setAngularLowerLimit(btVector3(0., -SIMD_PI/4., -SIMD_PI/4.));
+    d6f->setAngularUpperLimit(btVector3(0., SIMD_PI/4., SIMD_PI/4.));	
 	_dynamicsWorld->addConstraint(d6f);
 	
 	frameInA.setOrigin(btVector3(2.5, 0., 0.));
     frameInB.setOrigin(btVector3(-6., 0., 0.));
 	
-	btGeneric6DofConstraint* d6f1 = new btGeneric6DofConstraint(*body2, *body1, frameInB, frameInA, true);
+	btGeneric6DofConstraint* d6f1 = new btGeneric6DofConstraint(*body2, *clavicle, frameInB, frameInA, true);
 	d6f1->setAngularLowerLimit(btVector3(-SIMD_PI/2.3, -SIMD_PI/2.1, -SIMD_PI/22.3));
     d6f1->setAngularUpperLimit(btVector3(SIMD_PI/2.3, SIMD_PI/12.3, SIMD_PI/1.8));	
 	_dynamicsWorld->addConstraint(d6f1);
 	
 	frameInA.setOrigin(btVector3(6., 0., 0.));
-    frameInB.setOrigin(btVector3(-6., 0., 0.));
+    frameInB.setOrigin(btVector3(0., 0., 0.));
 	
-	btGeneric6DofConstraint* d6f2 = new btGeneric6DofConstraint(*body2, *body3, frameInA, frameInB, true);
-	d6f2->setAngularLowerLimit(btVector3(0., 0., -SIMD_PI* .75));
-    d6f2->setAngularUpperLimit(btVector3(0., 0., 0.));	
+	btGeneric6DofConstraint* d6f2 = new btGeneric6DofConstraint(*body2, *body4, frameInA, frameInB, true);
+	//d6f2->setAngularLowerLimit(btVector3(0., 0., -SIMD_PI* .75));
+    //d6f2->setAngularUpperLimit(btVector3(0., 0., 0.));
+    //d6f2->setAngularLowerLimit(btVector3(0., 0., 0.));
+    //d6f2->setAngularUpperLimit(btVector3(0., 0., 0.));
+    d6f2->setLinearLowerLimit(btVector3(-33.3, 0., 0.));
+    d6f2->setLinearUpperLimit(btVector3(33.3, 0., 0.));	
 	_dynamicsWorld->addConstraint(d6f2);
 	
 	frameInA.setOrigin(btVector3(6., 0., 0.));
@@ -105,27 +140,58 @@ void DynamicsSolver::initPhysics()
 	_dynamicsWorld->addConstraint(d6f3);
 	
 	body0->setDamping(.99f, .99f);
-	body1->setDamping(.99f, .99f);
+	clavicle->setDamping(.99f, .99f);
 	body2->setDamping(.99f, .99f);
 	body3->setDamping(.99f, .99f);
 	body4->setDamping(.99f, .99f);
 	
-	_drawer = new ShapeDrawer();
-
-	m_activeBody = 0;
+	btCollisionShape* scapulaShape = new btBoxShape(btVector3(1.f,1.5f,.25f));
+	_collisionShapes.push_back(scapulaShape);
 	
-	m_testJoint = d6f;
+	trans.setOrigin(btVector3(6.0, 7.0, 4.0));
+	btRigidBody* scapula = localCreateRigidBody(1.f, trans, scapulaShape);
+	_dynamicsWorld->addRigidBody(scapula);
+	scapula->setDamping(.99f, .99f);
 	
-	m_interactMode = TranslateBone;
+	frameInA.setOrigin(btVector3(2.5, 0., 0.));
+    frameInB.setOrigin(btVector3(1.2, 1.99, 0.5));
+	
+	btGeneric6DofConstraint* c2s = new btGeneric6DofConstraint(*clavicle, *scapula, frameInA, frameInB, true);
+	c2s->setAngularLowerLimit(btVector3(-SIMD_PI/2.3, -SIMD_PI/2.1, -SIMD_PI/22.3));
+    c2s->setAngularUpperLimit(btVector3(SIMD_PI/2.3, SIMD_PI/12.3, SIMD_PI/1.8));	
+	_dynamicsWorld->addConstraint(c2s);
+	
+	frameInA.setOrigin(btVector3(-1.2, 1.99, 0.));
+	frameInB.setOrigin(btVector3(3., 2., -3.));
+    btGeneric6DofConstraint* r2s = new btGeneric6DofConstraint(*scapula, *body0, frameInA, frameInB, true);
+	r2s->setLinearLowerLimit(btVector3(-3.3, -3.1, -3.3));
+    r2s->setLinearUpperLimit(btVector3(3.3, 3.3, 3.8));	
+	
+    
+    _dynamicsWorld->addConstraint(r2s);
+    
+    frameInA.setOrigin(btVector3(-1.2, -1.99, 0.));
+	frameInB.setOrigin(btVector3(3., -2., -3.));
+    btGeneric6DofConstraint* r2s2 = new btGeneric6DofConstraint(*scapula, *body0, frameInA, frameInB, true);
+	r2s2->setLinearLowerLimit(btVector3(-3.3, -3.1, -3.3));
+    r2s2->setLinearUpperLimit(btVector3(3.3, 3.3, 3.8));	
+	
+    
+    _dynamicsWorld->addConstraint(r2s2);
+    */
+	
+	
+	
+	initRope();
 }
 
 void DynamicsSolver::killPhysics()
 {
 	//remove the rigidbodies from the dynamics world and delete them
 	int i;
-	for (i=_dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
+	for (i=m_dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
 	{
-		btCollisionObject* obj = _dynamicsWorld->getCollisionObjectArray()[i];
+		btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
 		btRigidBody* body = btRigidBody::upcast(obj);
 		if (body && body->getMotionState())
 		{
@@ -133,47 +199,54 @@ void DynamicsSolver::killPhysics()
 			while (body->getNumConstraintRefs())
 			{
 				btTypedConstraint* constraint = body->getConstraintRef(0);
-				_dynamicsWorld->removeConstraint(constraint);
+				m_dynamicsWorld->removeConstraint(constraint);
 				delete constraint;
 			}
 			delete body->getMotionState();
-			_dynamicsWorld->removeRigidBody(body);
+			m_dynamicsWorld->removeRigidBody(body);
 		} 
 		else
 		{
-			_dynamicsWorld->removeCollisionObject( obj );
+			m_dynamicsWorld->removeCollisionObject( obj );
 		}
 		delete obj;
 	}
 	
-	for (int j=0;j<_collisionShapes.size();j++)
+	for (int j=0;j<m_collisionShapes.size();j++)
 	{
-		btCollisionShape* shape = _collisionShapes[j];
+		btCollisionShape* shape = m_collisionShapes[j];
 		delete shape;
 	}
 
-	delete _constraintSolver;
+	delete m_constraintSolver;
 
-	delete _overlappingPairCache;
+	//delete _overlappingPairCache;
 
-	delete _dispatcher;
+	delete m_dispatcher;
 
-	delete _collisionConfiguration;
+	delete m_collisionConfiguration;
 }
 
 void DynamicsSolver::renderWorld()
 {
-	const int	numObjects= _dynamicsWorld->getNumCollisionObjects();
+	const int	numObjects= m_dynamicsWorld->getNumCollisionObjects();
 	btVector3 wireColor(1,0,0);
 	for(int i=0;i<numObjects;i++)
 	{
-		btCollisionObject*	colObj= _dynamicsWorld->getCollisionObjectArray()[i];
+		btCollisionObject*	colObj= m_dynamicsWorld->getCollisionObjectArray()[i];
 		_drawer->drawObject(colObj);
 	}
 	
-	const int numConstraints = _dynamicsWorld->getNumConstraints();
+	for (  int i=0;i<m_dynamicsWorld->getSoftBodyArray().size();i++) {
+		//btSoftBody*	psb=(btSoftBody*)m_dynamicsWorld->getSoftBodyArray()[i];
+
+			//btSoftBodyHelpers::DrawFrame(psb,m_dynamicsWorld->getDebugDrawer());
+			//btSoftBodyHelpers::Draw(psb,m_dynamicsWorld->getDebugDrawer(),m_dynamicsWorld->getDrawFlags());
+	}
+	
+	const int numConstraints = m_dynamicsWorld->getNumConstraints();
 	for(int i=0;i< numConstraints;i++) {
-	    btTypedConstraint* constraint = _dynamicsWorld->getConstraint(i);
+	    btTypedConstraint* constraint = m_dynamicsWorld->getConstraint(i);
 	    _drawer->drawConstraint(constraint);
 	}
 	
@@ -191,7 +264,7 @@ void DynamicsSolver::simulate()
 {
 	btScalar dt = (btScalar)_clock.getTimeMicroseconds();
 	_clock.reset();
-	_dynamicsWorld->stepSimulation(dt / 1000000.f, 10);
+	m_dynamicsWorld->stepSimulation(dt / 100.f, 30);
 }
 
 btRigidBody* DynamicsSolver::localCreateRigidBody(float mass, const btTransform& startTransform,btCollisionShape* shape)
@@ -225,7 +298,7 @@ char DynamicsSolver::selectByRayHit(const Vector3F & origin, const Vector3F & ra
     btVector3 fromP(origin.x, origin.y, origin.z);
     btVector3 toP(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z);
     btCollisionWorld::ClosestRayResultCallback rayCallback(fromP, toP);
-    _dynamicsWorld->rayTest(fromP , toP, rayCallback);
+    m_dynamicsWorld->rayTest(fromP , toP, rayCallback);
     if(rayCallback.hasHit()) {
         btRigidBody * body = (btRigidBody *)btRigidBody::upcast(rayCallback.m_collisionObject);
         if(body) {
@@ -263,6 +336,7 @@ void DynamicsSolver::addImpulse(const Vector3F & impulse)
     btVector3 impulseV(impulse.x, impulse.y, impulse.z);
     m_activeBody->setActivationState(ACTIVE_TAG);
     m_activeBody->applyForce(impulseV, btVector3(0,0,0));
+    relaxRope();
 }
 
 void DynamicsSolver::addTorque(const Vector3F & torque)
@@ -327,3 +401,68 @@ DynamicsSolver::InteractMode DynamicsSolver::getInteractMode() const
     return m_interactMode;
 }
 
+void DynamicsSolver::initRope()
+{
+    m_dynamicsWorld->setGravity(btVector3(0,0,0));
+    m_dynamicsWorld->getWorldInfo().m_gravity.setValue(0,0,0);
+
+	btCollisionShape* groundShape = new btBoxShape(btVector3(75,1,75));
+	m_collisionShapes.push_back(groundShape);
+	
+	btTransform tr;
+	tr.setIdentity();
+	tr.setOrigin(btVector3(0,-5,0));
+	btRigidBody* body = localCreateRigidBody(0.f,tr,groundShape);
+
+
+	m_dynamicsWorld->addRigidBody(body);
+	
+	btCollisionShape* cubeShape = new btBoxShape(btVector3(1.f,1.f,1.f));
+	m_collisionShapes.push_back(cubeShape);
+	
+	btTransform trans;
+	trans.setIdentity();
+	trans.setOrigin(btVector3(0.0, 5.0, 1.0));
+	
+	btCollisionShape* cubeShape1 = new btBoxShape(btVector3(1.f,2.f,1.f));
+	m_collisionShapes.push_back(cubeShape1);
+	
+	btRigidBody* body4 = localCreateRigidBody(2.f, trans, cubeShape1);
+	m_dynamicsWorld->addRigidBody(body4);
+	body4->setDamping(.99f, .99f);
+	
+	btVector3 start(-12.0, 12.0, 1.0), end(-2.0, 3., 1.0);
+	btSoftBody*	psb = btSoftBodyHelpers::CreateRope(m_dynamicsWorld->getWorldInfo(), start, end,8,1);
+    psb->setTotalMass(1.1);
+    psb->m_materials[0]->m_kLST	= 0.926945;
+    m_dynamicsWorld->addSoftBody(psb);
+    
+    start = btVector3(15.0, 12.0, 1.0);
+    end = btVector3(0.0, 8., 1.0);
+	btSoftBody*	psb1 = btSoftBodyHelpers::CreateRope(m_dynamicsWorld->getWorldInfo(), start, end,8,1);
+    psb1->setTotalMass(1.1);
+    psb1->m_materials[0]->m_kLST	= 0.926945;
+    m_dynamicsWorld->addSoftBody(psb1);
+    
+	psb->appendAnchor(psb->m_nodes.size()-1,body4);
+	psb1->appendAnchor(psb->m_nodes.size()-1,body4);
+}
+
+void DynamicsSolver::relaxRope()
+{
+    for (  int i=0;i<m_dynamicsWorld->getSoftBodyArray().size();i++) {
+		btSoftBody*	body =(btSoftBody*)m_dynamicsWorld->getSoftBodyArray()[i];
+		btSoftBody::Node & n0 = body->m_nodes[0];
+		btSoftBody::Node & n1 = body->m_nodes[body->m_nodes.size() - 1];
+		
+		btVector3 seg = n0.m_x - n1.m_x;
+        float fulllen = seg.length();
+
+        float divl = fulllen / body->m_links.size() * 0.998f;
+        for(int j=0; j < body->m_links.size(); ++j) {
+		    btSoftBody::Link&	l = body->m_links[j];
+            l.m_rl = divl;
+            l.m_c1 = divl * divl;
+        }
+	}
+}

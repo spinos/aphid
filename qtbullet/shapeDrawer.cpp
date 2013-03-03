@@ -59,7 +59,16 @@ void ShapeDrawer::drawConstraint(const btTypedConstraint* constraint)
 
 void ShapeDrawer::drawObject(const btCollisionObject* object)
 {
-    const btRigidBody* body = btRigidBody::upcast(object);
+    if(object->getInternalType() ==  btCollisionObject::CO_RIGID_BODY) {
+        drawRigidBody(btRigidBody::upcast(object));
+    }
+    else if(object->getInternalType() ==  btCollisionObject::CO_SOFT_BODY) {
+        drawSoftBody(btSoftBody::upcast(object));
+    }
+}
+
+void ShapeDrawer::drawRigidBody(const btRigidBody* body)
+{
     glPushMatrix();
     loadWorldSpace(body);
     glDrawCoordsys();
@@ -67,12 +76,12 @@ void ShapeDrawer::drawObject(const btCollisionObject* object)
         glColor3f(.1f, .2f, .2f);
     }
     else {   
-        if(object->getActivationState() == 1)
+        if(body->getActivationState() == 1)
             glColor3f(0.f, 1.f, 0.f);
         else
             glColor3f(0.f, 0.f, 1.f);
     }
-    const btCollisionShape* shape = object->getCollisionShape();
+    const btCollisionShape* shape = body->getCollisionShape();
     drawShape(shape);
     
     glPopMatrix();
@@ -111,6 +120,18 @@ void ShapeDrawer::drawShape(const btCollisionShape* shape)
 	glDrawVector(org - dx + dy - dz);
 	glDrawVector(org - dx - dy + dz);
 	glDrawVector(org - dx + dy + dz);
+	glEnd();
+}
+
+void ShapeDrawer::drawSoftBody(const btSoftBody* body)
+{
+    int i;
+    glBegin(GL_LINES);
+	for(i=0; i < body->m_links.size(); ++i) {
+        const btSoftBody::Link&	l = body->m_links[i];
+        glDrawVector(l.m_n[0]->m_x);
+        glDrawVector(l.m_n[1]->m_x);
+    }
 	glEnd();
 }
 

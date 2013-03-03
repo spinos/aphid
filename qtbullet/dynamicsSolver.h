@@ -7,11 +7,13 @@
  *
  */
  
-#include "btBulletDynamicsCommon.h"
-#include "btBulletCollisionCommon.h"
 
 #include "shapeDrawer.h"
 #include <Vector3F.h>
+class btSoftRigidDynamicsWorld;
+class btSoftRididCollisionAlgorithm;
+class btSoftSoftCollisionAlgorithm;
+class btDefaultCollisionConfiguration;
 
 class DynamicsSolver {
 public:
@@ -20,8 +22,9 @@ public:
         TranslateBone,
         RotateJoint
     };
-	DynamicsSolver() {}
-	virtual ~DynamicsSolver() {}
+    
+	DynamicsSolver();
+	virtual ~DynamicsSolver();
 	
 	void initPhysics();
 	void killPhysics();
@@ -41,16 +44,17 @@ public:
 	void toggleMassProp();
 	
 protected:
-	btDynamicsWorld* _dynamicsWorld;
-	class btBroadphaseInterface*	_overlappingPairCache;
-
-	class btCollisionDispatcher*	_dispatcher;
-
-	class btConstraintSolver*	_constraintSolver;
-
-	class btDefaultCollisionConfiguration* _collisionConfiguration;
+	btSoftRigidDynamicsWorld* m_dynamicsWorld;
 	
-	btAlignedObjectArray<btCollisionShape*> _collisionShapes;
+	//class btBroadphaseInterface*	_overlappingPairCache;
+
+	btCollisionDispatcher*	m_dispatcher;
+
+	btConstraintSolver*	m_constraintSolver;
+
+	btDefaultCollisionConfiguration* m_collisionConfiguration;
+	
+	btAlignedObjectArray<btCollisionShape*> m_collisionShapes;
 	
 	btScalar		_defaultContactProcessingThreshold;
 	
@@ -64,4 +68,16 @@ protected:
 	btGeneric6DofConstraint* m_testJoint;
 	
 	InteractMode m_interactMode;
+	
+	btBroadphaseInterface*	m_broadphase;
+
+	
+	btAlignedObjectArray<btSoftSoftCollisionAlgorithm*> m_SoftSoftCollisionAlgorithms;
+
+	btAlignedObjectArray<btSoftRididCollisionAlgorithm*> m_SoftRigidCollisionAlgorithms;
+private:
+    
+    void initRope();
+    void relaxRope();
+
 };
