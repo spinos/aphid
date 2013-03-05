@@ -14,6 +14,7 @@ HEADERS       = glwidget.h \
                 ../shared/Vector3F.h \
                 ../shared/Matrix44F.h \
                 ../shared/BaseCamera.h \
+                ../shared/Base3DView.h \
                 Muscle.h \
                 MuscleFascicle.h \
                 shapeDrawer.h
@@ -24,6 +25,7 @@ SOURCES       = glwidget.cpp \
                 ../shared/Vector3F.cpp \
                 ../shared/Matrix44F.cpp \
                 ../shared/BaseCamera.cpp \
+                ../shared/Base3DView.cpp \
                 Muscle.cpp \
                 MuscleFascicle.cpp \
                 shapeDrawer.cpp

@@ -47,26 +47,14 @@
 #include "glwidget.h"
 
 
-
-#ifndef GL_MULTISAMPLE
-#define GL_MULTISAMPLE  0x809D
-#endif
-
 //! [0]
-GLWidget::GLWidget(QWidget *parent)
-    : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
+GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-    qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
-    qtPurple = QColor::fromCmykF(0.29, 0.29, 0.20, 0.0);
-	
-	_dynamics = new DynamicsSolver();
+    _dynamics = new DynamicsSolver();
 	_dynamics->initPhysics();
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(40);
-	fCamera = new BaseCamera();
-	
-	
 }
 //! [0]
 
@@ -76,102 +64,28 @@ GLWidget::~GLWidget()
 }
 //! [1]
 
-//! [2]
-QSize GLWidget::minimumSizeHint() const
+DynamicsSolver* GLWidget::getSolver()
 {
-    return QSize(50, 50);
+    return _dynamics;
 }
-//! [2]
-
-//! [3]
-QSize GLWidget::sizeHint() const
-//! [3] //! [4]
-{
-    return QSize(400, 400);
-}
-//! [4]
-
-static void qNormalizeAngle(int &angle)
-{
-    while (angle < 0)
-        angle += 360 * 16;
-    while (angle > 360 * 16)
-        angle -= 360 * 16;
-}
-
-//! [6]
-void GLWidget::initializeGL()
-{
-    qglClearColor(qtPurple.dark());
-
-    
-
-    glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
-    glShadeModel(GL_SMOOTH);
-    //glEnable(GL_LIGHTING);
-    //glEnable(GL_LIGHT0);
-    glEnable(GL_MULTISAMPLE);
-    //static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
-    //glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-	
-	
-}
-//! [6]
 
 //! [7]
-void GLWidget::paintGL()
+void GLWidget::clientDraw()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-
-    float m[16];
-	fCamera->getMatrix(m);
-	glMultMatrixf(m);
-	_dynamics->renderWorld();
-	glFlush();
+    _dynamics->renderWorld();
 }
 //! [7]
-
-//! [8]
-void GLWidget::resizeGL(int width, int height)
-{
-    //int side = qMin(width, height);
-    //glViewport((width - side) / 2, (height - side) / 2, side, side);
-	glViewport(0, 0, width, height);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-	
-	float aspect = (float)width/(float)height;
-	float fov = 40.f;
-	float right = fov/ 2.f;
-	float top = right / aspect;
-
-    glOrtho(-right, right, -top, top, 1.0, 1000.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    fCamera->setPortWidth(width);
-	fCamera->setPortHeight(height);
-	fCamera->setHorizontalAperture(fov);
-	fCamera->setVerticalAperture(fov/aspect);
-}
-//! [8]
 
 //! [9]
-void GLWidget::mousePressEvent(QMouseEvent *event)
+void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
 {
-    lastPos = event->pos();
-    if(event->modifiers() == Qt::AltModifier) 
-        return;
-    
-    processSelection(event);
+    _dynamics->selectByRayHit(origin, ray, hit);
     if(_dynamics->getInteractMode() == DynamicsSolver::ToggleLock) 
-        processLock(event);
+        _dynamics->toggleMassProp();
 }
 //! [9]
 
-void GLWidget::mouseReleaseEvent(QMouseEvent *event)
+void GLWidget::clientDeselect()
 {
     _dynamics->removeSelection();
     if(_dynamics->getInteractMode() == DynamicsSolver::RotateJoint) {
@@ -180,77 +94,16 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 }
 
 //! [10]
-void GLWidget::mouseMoveEvent(QMouseEvent *event)
+void GLWidget::clientMouseInput(Vector3F & stir)
 {
-    if(event->modifiers() == Qt::AltModifier) {
-        processCamera(event);
-    }
-    else if(_dynamics->getInteractMode() == DynamicsSolver::RotateJoint) {
-        processTorque(event);
-    }
-    else 
-        processImpulse(event);
-
-    lastPos = event->pos();
+    if(!_dynamics->hasActive())
+        return;
+    if(_dynamics->getInteractMode() == DynamicsSolver::TranslateBone)
+        _dynamics->addImpulse(stir);
+    //else 
+    //    _dynamics->(addTorquestir);
 }
 //! [10]
-
-void GLWidget::processCamera(QMouseEvent *event)
-{
-    int dx = event->x() - lastPos.x();
-    int dy = event->y() - lastPos.y();
-    if (event->buttons() & Qt::LeftButton) {
-        fCamera->tumble(dx, dy);
-    } 
-	else if (event->buttons() & Qt::MidButton) {
-		fCamera->track(dx, dy);
-    }
-	else if (event->buttons() & Qt::RightButton) {
-		fCamera->zoom(dy);
-    }
-}
-
-void GLWidget::processSelection(QMouseEvent *event)
-{
-    Vector3F origin, incident;
-    fCamera->incidentRay(event->x(), event->y(), origin, incident);
-    incident = incident.normal() * 1000.f;
-    _dynamics->selectByRayHit(origin, incident, m_hitPosition);
-}
-
-void GLWidget::processImpulse(QMouseEvent *event)
-{
-    if(!_dynamics->hasActive())
-        return;
-    
-    fCamera->intersection(event->x(), event->y(), m_hitPosition);
-    int dx = event->x() - lastPos.x();
-    int dy = event->y() - lastPos.y();
-    Vector3F injv;
-    fCamera->screenToWorld(dx, dy, injv);
-
-    _dynamics->addImpulse(injv);
-    //qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
-}
-
-void GLWidget::processTorque(QMouseEvent *event)
-{
-    if(!_dynamics->hasActive())
-        return;
-    
-    fCamera->intersection(event->x(), event->y(), m_hitPosition);
-    int dx = event->x() - lastPos.x();
-    int dy = event->y() - lastPos.y();
-    Vector3F injv;
-    fCamera->screenToWorld(dx, dy, injv);
-    _dynamics->addTorque(injv);
-    //qDebug() << "force:" << injv.x << " " << injv.y << " " << injv.z;
-}
-
-void GLWidget::processLock(QMouseEvent *event)
-{
-    _dynamics->toggleMassProp();
-}
 
 void GLWidget::simulate()
 {
@@ -258,7 +111,4 @@ void GLWidget::simulate()
     _dynamics->simulate();
 }
 
-DynamicsSolver* GLWidget::getSolver()
-{
-    return _dynamics;
-}
+

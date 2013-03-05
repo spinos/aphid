@@ -41,6 +41,8 @@ void Muscle::create(	btSoftBodyWorldInfo& worldInfo)
         }
         nFascicle++;
     }
+    
+    m_dynBody->m_materials[0]->m_kLST	= 0.1326945;
 }
 
 int Muscle::numVertices() const

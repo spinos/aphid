@@ -44,11 +44,10 @@
 
 #include <QGLWidget>
 #include "dynamicsSolver.h"
-#include <BaseCamera.h>
-class QtLogo;
+#include <Base3DView.h>
 
 //! [0]
-class GLWidget : public QGLWidget
+class GLWidget : public Base3DView
 {
     Q_OBJECT
 
@@ -57,36 +56,20 @@ public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 
-    QSize minimumSizeHint() const;
-    QSize sizeHint() const;
-    
     DynamicsSolver* getSolver();
     
-//! [0]
+    virtual void clientDraw();
+    virtual void clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit);
+    virtual void clientDeselect();
+    virtual void clientMouseInput(Vector3F & stir);
 
 //! [2]
 protected:
-    void initializeGL();
-    void paintGL();
-    void resizeGL(int width, int height);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void processCamera(QMouseEvent *event);
-    void processSelection(QMouseEvent *event);
-    void processImpulse(QMouseEvent *event);
-    void processLock(QMouseEvent *event);
-    void processTorque(QMouseEvent *event);
+    
 //! [3]
 private:
-    QPoint lastPos;
-    QColor qtGreen;
-    QColor qtPurple;
-	
+    
 	DynamicsSolver* _dynamics;
-	BaseCamera* fCamera;
-	
-	Vector3F m_hitPosition;
 	
 private slots:
     void simulate();

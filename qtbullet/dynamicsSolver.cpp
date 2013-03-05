@@ -19,6 +19,7 @@ DynamicsSolver::DynamicsSolver()
 {
     _drawer = new ShapeDrawer();
     m_activeBody = 0;
+    m_testJoint = 0;
 
 	m_interactMode = TranslateBone;
 }
@@ -368,6 +369,7 @@ void DynamicsSolver::addTorque(const Vector3F & torque)
 
 void DynamicsSolver::removeTorque()
 {
+    if(!m_testJoint) return;
     m_testJoint->getRotationalLimitMotor(0)->m_enableMotor = false;
 }
 
@@ -434,14 +436,14 @@ void DynamicsSolver::initRope()
 	btVector3 start(-12.0, 1.0, 1.0), end(-2.0, 3., 1.0);
 	btSoftBody*	psb = btSoftBodyHelpers::CreateRope(m_dynamicsWorld->getWorldInfo(), start, end,8,1);
     psb->setTotalMass(1.1);
-    psb->m_materials[0]->m_kLST	= 0.926945;
+    psb->m_materials[0]->m_kLST	= 0.426945;
     m_dynamicsWorld->addSoftBody(psb);
     
     start = btVector3(15.0, 12.0, 1.0);
     end = btVector3(0.0, 8., 1.0);
 	btSoftBody*	psb1 = btSoftBodyHelpers::CreateRope(m_dynamicsWorld->getWorldInfo(), start, end,8,1);
     psb1->setTotalMass(1.1);
-    psb1->m_materials[0]->m_kLST	= 0.926945;
+    psb1->m_materials[0]->m_kLST	= 0.426945;
     m_dynamicsWorld->addSoftBody(psb1);
     
 	psb->appendAnchor(psb->m_nodes.size()-1,body4);
@@ -468,14 +470,14 @@ void DynamicsSolver::initRope()
 	fascicle1.addVertex(8.7f, 15.f, -8.f);
 	
 	MuscleFascicle fascicle2;
-	fascicle2.addVertex(1.1f, 6.5f, -2.f);
-	fascicle2.addVertex(2.2f, 7.5f, -3.f);
-	fascicle2.addVertex(3.3f, 8.5f, -4.f);
-	fascicle2.addVertex(4.4f, 9.5f, -5.f);
-	fascicle2.addVertex(5.5f, 10.5f, -6.f);
-	fascicle2.addVertex(6.6f, 11.5f, -7.f);
-	fascicle2.addVertex(7.7f, 12.5f, -8.f);
-	fascicle2.addVertex(8.8f, 13.5f, -9.f);
+	fascicle2.addVertex(3.1f, 5.5f, -2.f);
+	fascicle2.addVertex(4.2f, 6.5f, -3.f);
+	fascicle2.addVertex(5.3f, 7.5f, -4.f);
+	fascicle2.addVertex(6.4f, 8.5f, -5.f);
+	fascicle2.addVertex(7.5f, 9.5f, -6.f);
+	fascicle2.addVertex(8.6f, 10.5f, -7.f);
+	fascicle2.addVertex(9.7f, 11.5f, -8.f);
+	fascicle2.addVertex(10.8f, 12.5f, -9.f);
 	
 	Muscle msc;
 	msc.addFacicle(fascicle);
