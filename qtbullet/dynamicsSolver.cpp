@@ -458,26 +458,57 @@ void DynamicsSolver::initRope()
 	fascicle.addVertex(7.f, 13.f, -8.f);
 	
 	MuscleFascicle fascicle1;
-	fascicle1.addVertex(1.f, 6.f, -1.f);
-	fascicle1.addVertex(2.f, 7.f, -2.f);
-	fascicle1.addVertex(3.f, 8.f, -3.f);
-	fascicle1.addVertex(4.f, 9.f, -4.f);
-	fascicle1.addVertex(5.f, 10.f, -5.f);
-	fascicle1.addVertex(6.f, 11.f, -6.f);
-	fascicle1.addVertex(7.f, 12.f, -7.f);
-	fascicle1.addVertex(8.f, 13.f, -8.f);
+	fascicle1.addVertex(1.f, 8.f, -1.f);
+	fascicle1.addVertex(2.1f, 9.f, -2.f);
+	fascicle1.addVertex(3.2f, 10.f, -3.f);
+	fascicle1.addVertex(4.3f, 11.f, -4.f);
+	fascicle1.addVertex(5.4f, 12.f, -5.f);
+	fascicle1.addVertex(6.5f, 13.f, -6.f);
+	fascicle1.addVertex(7.6f, 14.f, -7.f);
+	fascicle1.addVertex(8.7f, 15.f, -8.f);
+	
+	MuscleFascicle fascicle2;
+	fascicle2.addVertex(1.1f, 6.5f, -2.f);
+	fascicle2.addVertex(2.2f, 7.5f, -3.f);
+	fascicle2.addVertex(3.3f, 8.5f, -4.f);
+	fascicle2.addVertex(4.4f, 9.5f, -5.f);
+	fascicle2.addVertex(5.5f, 10.5f, -6.f);
+	fascicle2.addVertex(6.6f, 11.5f, -7.f);
+	fascicle2.addVertex(7.7f, 12.5f, -8.f);
+	fascicle2.addVertex(8.8f, 13.5f, -9.f);
 	
 	Muscle msc;
 	msc.addFacicle(fascicle);
 	msc.addFacicle(fascicle1);
+	msc.addFacicle(fascicle2);
 	
 	msc.create(m_dynamicsWorld->getWorldInfo());
 	m_dynamicsWorld->addSoftBody(msc.getSoftBody());
 	
 	msc.addAnchor(body4, 0, 0);
 	msc.addAnchor(body4, 1, 0);
+	msc.addAnchor(body4, 2, 0);
 	msc.addAnchor(0, 0, 1);
 	msc.addAnchor(0, 1, 1);
+	msc.addAnchor(0, 2, 1);
+	
+	msc.connectFascicles(0, 1, 1);
+	msc.connectFascicles(0, 1, 2);
+	msc.connectFascicles(0, 1, 3);
+	msc.connectFascicles(0, 1, 4);
+	msc.connectFascicles(0, 1, 5);
+	
+	msc.connectFascicles(1, 2, 1);
+	msc.connectFascicles(1, 2, 2);
+	msc.connectFascicles(1, 2, 3);
+	msc.connectFascicles(1, 2, 4);
+	msc.connectFascicles(1, 2, 5);
+	
+	msc.connectFascicles(2, 0, 1);
+	msc.connectFascicles(2, 0, 2);
+	msc.connectFascicles(2, 0, 3);
+	msc.connectFascicles(2, 0, 4);
+	msc.connectFascicles(2, 0, 5);
 }
 
 void DynamicsSolver::relaxRope()

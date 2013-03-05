@@ -19,6 +19,8 @@ public:
     int vertexIdx(int fascicle, int end) const;
     int fascicleStart(int fascicle) const;
     int fascicleEnd(int fascicle) const;
+    
+    void connectFascicles(int fascicle0, int fascicle1, int seg);
 private:
     std::vector<MuscleFascicle> m_fascicles;
     btSoftBody* m_dynBody;

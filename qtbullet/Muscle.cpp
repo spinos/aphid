@@ -89,3 +89,16 @@ int Muscle::fascicleEnd(int fascicle) const
 {    
     return fascicleStart(fascicle) + m_fascicles.at(fascicle).numVertices() - 1;
 }
+
+void Muscle::connectFascicles(int fascicle0, int fascicle1, int seg)
+{
+    int v0, v1;
+    v0 = vertexIdx(fascicle0, seg);
+    v1 = vertexIdx(fascicle1, seg);
+    m_dynBody->appendLink(v0, v1);
+    v0 = vertexIdx(fascicle0, seg + 1);
+    v1 = vertexIdx(fascicle1, seg + 1);
+    m_dynBody->appendLink(v0, v1);
+    v0 = vertexIdx(fascicle0, seg);
+    m_dynBody->appendLink(v0, v1);
+}
