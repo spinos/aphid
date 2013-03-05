@@ -14,7 +14,7 @@
 #include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
 #include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
 #include "BulletSoftBody/btSoftBodyHelpers.h"
-
+#include "Muscle.h"
 DynamicsSolver::DynamicsSolver()
 {
     _drawer = new ShapeDrawer();
@@ -336,7 +336,7 @@ void DynamicsSolver::addImpulse(const Vector3F & impulse)
     btVector3 impulseV(impulse.x, impulse.y, impulse.z);
     m_activeBody->setActivationState(ACTIVE_TAG);
     m_activeBody->applyForce(impulseV, btVector3(0,0,0));
-    relaxRope();
+    //relaxRope();
 }
 
 void DynamicsSolver::addTorque(const Vector3F & torque)
@@ -431,7 +431,7 @@ void DynamicsSolver::initRope()
 	m_dynamicsWorld->addRigidBody(body4);
 	body4->setDamping(.99f, .99f);
 	
-	btVector3 start(-12.0, 12.0, 1.0), end(-2.0, 3., 1.0);
+	btVector3 start(-12.0, 1.0, 1.0), end(-2.0, 3., 1.0);
 	btSoftBody*	psb = btSoftBodyHelpers::CreateRope(m_dynamicsWorld->getWorldInfo(), start, end,8,1);
     psb->setTotalMass(1.1);
     psb->m_materials[0]->m_kLST	= 0.926945;
@@ -446,6 +446,38 @@ void DynamicsSolver::initRope()
     
 	psb->appendAnchor(psb->m_nodes.size()-1,body4);
 	psb1->appendAnchor(psb->m_nodes.size()-1,body4);
+	
+	MuscleFascicle fascicle;
+	fascicle.addVertex(0.f, 6.f, -1.f);
+	fascicle.addVertex(1.f, 7.f, -2.f);
+	fascicle.addVertex(2.f, 8.f, -3.f);
+	fascicle.addVertex(3.f, 9.f, -4.f);
+	fascicle.addVertex(4.f, 10.f, -5.f);
+	fascicle.addVertex(5.f, 11.f, -6.f);
+	fascicle.addVertex(6.f, 12.f, -7.f);
+	fascicle.addVertex(7.f, 13.f, -8.f);
+	
+	MuscleFascicle fascicle1;
+	fascicle1.addVertex(1.f, 6.f, -1.f);
+	fascicle1.addVertex(2.f, 7.f, -2.f);
+	fascicle1.addVertex(3.f, 8.f, -3.f);
+	fascicle1.addVertex(4.f, 9.f, -4.f);
+	fascicle1.addVertex(5.f, 10.f, -5.f);
+	fascicle1.addVertex(6.f, 11.f, -6.f);
+	fascicle1.addVertex(7.f, 12.f, -7.f);
+	fascicle1.addVertex(8.f, 13.f, -8.f);
+	
+	Muscle msc;
+	msc.addFacicle(fascicle);
+	msc.addFacicle(fascicle1);
+	
+	msc.create(m_dynamicsWorld->getWorldInfo());
+	m_dynamicsWorld->addSoftBody(msc.getSoftBody());
+	
+	msc.addAnchor(body4, 0, 0);
+	msc.addAnchor(body4, 1, 0);
+	msc.addAnchor(0, 0, 1);
+	msc.addAnchor(0, 1, 1);
 }
 
 void DynamicsSolver::relaxRope()
