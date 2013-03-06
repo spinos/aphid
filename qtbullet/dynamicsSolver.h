@@ -79,5 +79,7 @@ private:
     
     void initRope();
     void relaxRope();
+    
+    btSoftBody* m_skin;
 
 };

@@ -54,7 +54,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	_dynamics->initPhysics();
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(40);
+	timer->start(30);
 }
 //! [0]
 

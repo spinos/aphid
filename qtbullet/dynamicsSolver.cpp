@@ -15,6 +15,8 @@
 #include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
 #include "BulletSoftBody/btSoftBodyHelpers.h"
 #include "Muscle.h"
+#include "Skin.h"
+
 DynamicsSolver::DynamicsSolver()
 {
     _drawer = new ShapeDrawer();
@@ -334,10 +336,40 @@ void DynamicsSolver::addImpulse(const Vector3F & impulse)
     m_activeBody->setCollisionFlags(m_activeBody->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
     m_activeBody->forceActivationState(ACTIVE_TAG);
     */
-    btVector3 impulseV(impulse.x, impulse.y, impulse.z);
-    m_activeBody->setActivationState(ACTIVE_TAG);
-    m_activeBody->applyForce(impulseV, btVector3(0,0,0));
+    if(m_activeBody->getInvMass() > 0.001f) {
+        btVector3 impulseV(impulse.x, impulse.y, impulse.z);
+        m_activeBody->setActivationState(ACTIVE_TAG);
+        m_activeBody->applyForce(impulseV, btVector3(0,0,0));
+    }
+    else {
+        btTransform tm = m_activeBody->getWorldTransform();
+        btVector3 t = tm.getOrigin() + btVector3(impulse.x/10.f, impulse.y/10.f, impulse.z/80.f);
+        tm.setOrigin(t);
+    
+        m_activeBody->setWorldTransform(tm);
+    }
     //relaxRope();
+    m_skin->m_nodes[10].m_im = 0.f;
+    m_skin->m_nodes[10].m_x += btVector3(impulse.x, impulse.y, impulse.z);
+    
+    //m_skin->m_nodes[67].m_q = m_skin->m_nodes[67].m_x;
+    //m_skin->m_nodes[10].m_x += btVector3(impulse.x/2.f, impulse.y/2.f, impulse.z/2.f);
+    //m_skin->m_nodes[5].m_x += btVector3(impulse.x / 1.3f, impulse.y / 1.3f, impulse.z / 1.3f);
+    //m_skin->m_nodes[5].m_im = 0.f;
+    //m_skin->m_nodes[135].m_im = 0.f;
+    //m_skin->m_nodes[135].m_x += btVector3(impulse.x/20.f, impulse.y/20.f, impulse.z/10.f);
+    //m_skin->m_nodes[136].m_im = 0.f;
+    //m_skin->m_nodes[136].m_x += btVector3(impulse.x/20.f, impulse.y/20.f, impulse.z/10.f);
+    m_skin->m_nodes[0].m_im = 0.f;
+    m_skin->m_nodes[0].m_x -= btVector3(impulse.x, impulse.y, impulse.z);
+    //m_skin->m_nodes[0].m_x += btVector3(impulse.x/20.f, impulse.y/20.f, impulse.z/20.f);
+    m_skin->m_nodes[120].m_im = 0.f;
+    
+    m_skin->m_nodes[120].m_x += btVector3(impulse.x, impulse.y, impulse.z);
+    m_skin->m_nodes[110].m_im = 0.f;
+    m_skin->m_nodes[110].m_x -= btVector3(impulse.x/1.1f, impulse.y/1.1f, impulse.z/1.1f);
+    //m_skin->m_nodes[65].m_im = 0.f;
+    //m_skin->m_nodes[65].m_x += btVector3(impulse.x/3.f, impulse.y/8.f, impulse.z/8.f);
 }
 
 void DynamicsSolver::addTorque(const Vector3F & torque)
@@ -511,6 +543,56 @@ void DynamicsSolver::initRope()
 	msc.connectFascicles(2, 0, 3);
 	msc.connectFascicles(2, 0, 4);
 	msc.connectFascicles(2, 0, 5);
+	
+	Skin skn;
+	skn.create(m_dynamicsWorld->getWorldInfo(), "/Users/jianzhang/aphid/qtbullet/nose.m");
+	m_dynamicsWorld->addSoftBody(skn.getSoftBody());
+	
+	btCollisionShape* cubeShape2 = new btBoxShape(btVector3(.36f,.36f,.36f));
+	m_collisionShapes.push_back(cubeShape2);
+	
+	trans.setOrigin(btVector3(0.0, 12.325, 22.0));
+	btRigidBody* body5 = localCreateRigidBody(1.f, trans, cubeShape2);
+	m_dynamicsWorld->addRigidBody(body5);
+	body5->setDamping(.99f, .99f);
+	
+	//skn.addAnchor(body5, 30);
+	skn.addAnchor(0, 131);
+	//skn.addAnchor(0, 61);
+	skn.addAnchor(0, 142);
+	
+	skn.addAnchor(0, 143);
+	//skn.addAnchor(0, 75);
+	//skn.addAnchor(0, 8);
+	//skn.addAnchor(0, 86);
+	
+	trans.setOrigin(btVector3(3.742343, 9.339369, 19.463814));
+	btRigidBody* body6 = localCreateRigidBody(1.f, trans, cubeShape2);
+	m_dynamicsWorld->addRigidBody(body6);
+	body6->setDamping(.99f, .99f);
+	
+	skn.addAnchor(body6, 142);
+	
+	trans.setOrigin(btVector3(-3.742343, 9.339369, 19.463814));
+	btRigidBody* body7 = localCreateRigidBody(1.f, trans, cubeShape2);
+	m_dynamicsWorld->addRigidBody(body7);
+	body7->setDamping(.99f, .99f);
+	
+	skn.addAnchor(body7, 74);
+	
+	m_skin = skn.getSoftBody();
+	
+	//skn.addAnchor(0, 67);
+	
+	Skin skn1;
+	skn1.create(m_dynamicsWorld->getWorldInfo(), "/Users/jianzhang/aphid/qtbullet/plane.m");
+	m_dynamicsWorld->addSoftBody(skn1.getSoftBody());
+	
+	m_skin = skn1.getSoftBody();
+	
+	skn1.addAnchor(0, 110);
+	skn1.addAnchor(0, 120);
+	skn1.addAnchor(0, 0);
 }
 
 void DynamicsSolver::relaxRope()
