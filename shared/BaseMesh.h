@@ -15,6 +15,8 @@ public:
 	BaseMesh();
 	virtual ~BaseMesh();
 	
+	void verbose() const;
+	
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
 	const BoundingBox calculateBBox() const;
@@ -34,5 +36,6 @@ public:
 	Vector3F * _vertices;
 	unsigned * _indices;
 	unsigned _numVertices;
+	unsigned _numFaces;
 	unsigned _numFaceVertices;
 };

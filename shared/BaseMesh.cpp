@@ -127,6 +127,16 @@ unsigned * BaseMesh::getIndices() const
 {
 	return _indices;
 }
+
+void BaseMesh::verbose() const
+{
+    printf("mesh parameters:\n  face count:%d\n", _numFaces);
+    printf("  face vertex count:%d\n", _numFaceVertices);
+    printf("  vertex count:%d\n", _numVertices);
+    printf("  face connection:");
+    for(unsigned i = 0; i < _numFaceVertices; i++)
+        printf(" %d", _indices[i]);
+}
 /*
 Triangle * BaseMesh::getFace(unsigned idx) const
 {
