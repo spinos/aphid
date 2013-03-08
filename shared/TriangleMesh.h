@@ -6,6 +6,7 @@ class EasyModel;
 class TriangleMesh : public BaseMesh {
 public:
     TriangleMesh();
+    TriangleMesh(const char * filename);
     virtual ~TriangleMesh();
     
     void copyOf(EasyModel * esm);

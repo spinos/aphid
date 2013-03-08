@@ -46,8 +46,7 @@
 
 #include "glwidget.h"
 
-#include "TriangleMesh.h"
-#include "modelIn.h"
+#include "MeshLaplacian.h"
 #include "BaseDrawer.h"
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -56,11 +55,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(30);
 	
-	m_mesh = new TriangleMesh;
-	
-	EasyModel * esm = new EasyModel("D:/aphid/lapl/simple.m");
-	m_mesh->copyOf(esm);
-	delete esm;
+	m_mesh = new MeshLaplacian("D:/aphid/lapl/simple.m");
 	
 	m_drawer = new BaseDrawer;
 }

@@ -44,7 +44,7 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
-class TriangleMesh;
+class MeshLaplacian;
 class BaseDrawer;
 //! [0]
 class GLWidget : public Base3DView
@@ -66,7 +66,7 @@ protected:
     
 //! [3]
 private:
-    TriangleMesh * m_mesh;
+    MeshLaplacian * m_mesh;
     BaseDrawer * m_drawer;
 private slots:
     void simulate();

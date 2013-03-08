@@ -1,6 +1,14 @@
 #include "TriangleMesh.h"
 #include "modelIn.h"
 TriangleMesh::TriangleMesh() {}
+
+TriangleMesh::TriangleMesh(const char * filename)
+{
+    EasyModel * esm = new EasyModel("D:/aphid/lapl/simple.m");
+	copyOf(esm);
+	delete esm;
+}
+
 TriangleMesh::~TriangleMesh() {}
 
 void TriangleMesh::copyOf(EasyModel * esm)

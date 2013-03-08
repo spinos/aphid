@@ -14,7 +14,8 @@ HEADERS       = glwidget.h \
                 ../shared/BoundingBox.h \
                 ../shared/TriangleMesh.h \
                 ../shared/modelIn.h \
-                ../shared/BaseDrawer.h 
+                ../shared/BaseDrawer.h \
+                MeshLaplacian.h
 SOURCES       = glwidget.cpp \
                 main.cpp \
                 window.cpp \
@@ -27,7 +28,8 @@ SOURCES       = glwidget.cpp \
                 ../shared/BoundingBox.cpp \
                 ../shared/BaseMesh.cpp \
                 ../shared/TriangleMesh.cpp \
-                ../shared/BaseDrawer.cpp 
+                ../shared/BaseDrawer.cpp \
+                MeshLaplacian.cpp
 QT           += opengl
 win32:CONFIG += console
 mac:CONFIG -= app_bundle
