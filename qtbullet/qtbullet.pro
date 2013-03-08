@@ -4,11 +4,11 @@ mac:LIBS += -lBulletDynamics -L/Users/jianzhang/dyn/build/src/BulletDynamics/Rel
         -lLinearMath -L/Users/jianzhang/dyn/build/src/LinearMath/Release \
         -lBulletSoftBody \
         -leasymodel
-        
-win32:INCLUDEPATH += D:/usr/bullet-2.81/src
+INCLUDEPATH += ../shared 
+win32:INCLUDEPATH += D:/usr/bullet-2.81/src D:/ofl/shared D:/usr/libxml2x64/include
 win32:LIBS += -lBulletDynamics_vs2008_x64_release -lBulletCollision_vs2008_x64_release -lBulletSoftBody_vs2008_x64_release -lLinearMath_vs2008_x64_release\ 
-                -LD:/usr/bullet-2.81/lib
-INCLUDEPATH += ../shared ../catmullclark
+                -LD:/usr/bullet-2.81/lib \
+                -LD:/usr/local/lib64 -leasymodel -LD:/usr/libxml2x64/lib -llibxml2
 HEADERS       = glwidget.h \
                 window.h \
                 dynamicsSolver.h \
@@ -16,7 +16,7 @@ HEADERS       = glwidget.h \
                 ../shared/Matrix44F.h \
                 ../shared/BaseCamera.h \
                 ../shared/Base3DView.h \
-                ../catmullclark/modelIn.h \
+                ../shared/modelIn.h \
                 Muscle.h \
                 MuscleFascicle.h \
                 shapeDrawer.h \

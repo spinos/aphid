@@ -545,8 +545,12 @@ void DynamicsSolver::initRope()
 	msc.connectFascicles(2, 0, 5);
 	
 	Skin skn;
+#ifdef WIN32
+    skn.create(m_dynamicsWorld->getWorldInfo(), "D:/aphid/qtbullet/nose.m");
+#else
 	skn.create(m_dynamicsWorld->getWorldInfo(), "/Users/jianzhang/aphid/qtbullet/nose.m");
-	m_dynamicsWorld->addSoftBody(skn.getSoftBody());
+#endif
+    m_dynamicsWorld->addSoftBody(skn.getSoftBody());
 	
 	btCollisionShape* cubeShape2 = new btBoxShape(btVector3(.36f,.36f,.36f));
 	m_collisionShapes.push_back(cubeShape2);
@@ -585,8 +589,12 @@ void DynamicsSolver::initRope()
 	//skn.addAnchor(0, 67);
 	
 	Skin skn1;
+#ifdef WIN32
+    skn1.create(m_dynamicsWorld->getWorldInfo(), "D:/aphid/qtbullet/plane.m");
+#else
 	skn1.create(m_dynamicsWorld->getWorldInfo(), "/Users/jianzhang/aphid/qtbullet/plane.m");
-	m_dynamicsWorld->addSoftBody(skn1.getSoftBody());
+#endif
+    m_dynamicsWorld->addSoftBody(skn1.getSoftBody());
 	
 	m_skin = skn1.getSoftBody();
 	
