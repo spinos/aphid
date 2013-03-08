@@ -14,6 +14,7 @@
 class Facet : public GeoElement {
 public:
 	Facet();
+	Facet(Vertex *a, Vertex *b, Vertex *c);
 	Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d);
 	virtual ~Facet();
 	
@@ -21,7 +22,10 @@ public:
 	char connectTo(Facet *another, Vertex *a, Vertex *b);
 	Edge * matchedEdge(Vertex * a, Vertex * b);
 	
+	Edge * edge(int idx);
 	Vertex * vertex(int idx);
+	Vertex * vertexAfter(int idx);
+	Vertex * vertexBefore(int idx);
 	Vertex * thirdVertex(Vertex *a, Vertex *b);
 	Vertex getVertex(int idx) const;
 	Vector3F getCentroid() const;

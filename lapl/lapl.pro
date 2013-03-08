@@ -13,9 +13,13 @@ HEADERS       = glwidget.h \
                 ../shared/BaseMesh.h \
                 ../shared/BoundingBox.h \
                 ../shared/TriangleMesh.h \
-                ../shared/modelIn.h \
                 ../shared/BaseDrawer.h \
-                MeshLaplacian.h
+                ../shared/GeoElement.h \
+                ../shared/Vertex.h \
+                ../shared/Edge.h \
+                ../shared/Facet.h \
+                MeshLaplacian.h \
+                VertexAdjacency.h
 SOURCES       = glwidget.cpp \
                 main.cpp \
                 window.cpp \
@@ -29,7 +33,12 @@ SOURCES       = glwidget.cpp \
                 ../shared/BaseMesh.cpp \
                 ../shared/TriangleMesh.cpp \
                 ../shared/BaseDrawer.cpp \
-                MeshLaplacian.cpp
+                ../shared/GeoElement.cpp \
+                ../shared/Vertex.cpp \
+                ../shared/Edge.cpp \
+                ../shared/Facet.cpp \
+                MeshLaplacian.cpp \
+                VertexAdjacency.cpp
 QT           += opengl
 win32:CONFIG += console
-mac:CONFIG -= app_bundle
+#mac:CONFIG -= app_bundle

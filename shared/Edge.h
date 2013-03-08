@@ -16,6 +16,7 @@ public:
 	Edge(Vertex *a, Vertex *b, char * f);
 	virtual ~Edge();
 	
+	char matches(Edge *e) const;
 	char matches(Vertex *a, Vertex *b) const;
 	void setTwin(Edge *e);
 	Edge * getTwin() const;

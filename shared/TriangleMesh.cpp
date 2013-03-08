@@ -4,7 +4,7 @@ TriangleMesh::TriangleMesh() {}
 
 TriangleMesh::TriangleMesh(const char * filename)
 {
-    EasyModel * esm = new EasyModel("D:/aphid/lapl/simple.m");
+    EasyModel * esm = new EasyModel(filename);
 	copyOf(esm);
 	delete esm;
 }

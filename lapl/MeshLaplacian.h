@@ -2,7 +2,8 @@
 #define MESHLAPLACIAN_H
 
 #include "TriangleMesh.h"
-
+#include <vector>
+class VertexAdjacency;
 class MeshLaplacian : public TriangleMesh {
 public:
     MeshLaplacian();
@@ -10,7 +11,7 @@ public:
     virtual ~MeshLaplacian();
     
 private:
-    
+    VertexAdjacency * m_adjacency;
 };
 #endif        //  #ifndef MESHLAPLACIAN_H
 

@@ -11,6 +11,20 @@
 
 Facet::Facet() {}
 
+Facet::Facet(Vertex *a, Vertex *b, Vertex *c)
+{
+	m_vertices[0] = a;
+	m_vertices[1] = b;
+	m_vertices[2] = c;
+	
+	Vector3F e0 = *b - *a; e0.normalize();
+	Vector3F e1 = *c - *a; e1.normalize();
+	m_normal = e0.cross(e1);
+	m_normal.normalize();
+		
+	createEdges();
+}
+
 Facet::Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d)
 {
 	m_vertices[0] = a;
@@ -71,9 +85,26 @@ Edge * Facet::matchedEdge(Vertex * a, Vertex * b)
 	return 0;
 }
 
+Edge * Facet::edge(int idx)
+{
+	return m_edges[idx];
+}
+
 Vertex * Facet::vertex(int idx)
 {
 	return m_vertices[idx];
+}
+
+Vertex * Facet::vertexAfter(int idx)
+{
+	if(idx == 2) return m_vertices[0];
+	return m_vertices[idx + 1];
+}
+
+Vertex * Facet::vertexBefore(int idx)
+{
+	if(idx == 0) return m_vertices[2];
+	return m_vertices[idx - 1];
 }
 
 Vertex * Facet::thirdVertex(Vertex *a, Vertex *b)
