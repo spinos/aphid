@@ -9,11 +9,12 @@ MeshLaplacian::MeshLaplacian(const char * filename) : TriangleMesh(filename), m_
 	
 	m_adjacency = new VertexAdjacency[nv];
 	
-	std::vector<Vertex *> verts;
 	for(unsigned i = 0; i < nv; i++) {
-		Vertex * v = new Vertex;
-		v->setIndex(i);
-		verts.push_back(v);
+		VertexAdjacency & v = m_adjacency[i];
+		v.setIndex(i);
+		v.x = _vertices[i].x;
+		v.y = _vertices[i].y;
+		v.z = _vertices[i].z;
 	}
 	
 	const unsigned nf = getNumFaces();
@@ -23,29 +24,25 @@ MeshLaplacian::MeshLaplacian(const char * filename) : TriangleMesh(filename), m_
 		a = _indices[i * 3];
 		b = _indices[i * 3 + 1];
 		c = _indices[i * 3 + 2];
-		Facet * f = new Facet(verts[a], verts[b], verts[c]);
+		Facet * f = new Facet(&m_adjacency[a], &m_adjacency[b], &m_adjacency[c]);
+		f->setIndex(i);
 		for(unsigned j = 0; j < 3; j++) {
 			Edge * e = f->edge(j);
-			m_adjacency[e->v0()->getIndex()].addEdge(e, e->v0()->getIndex());
-			m_adjacency[e->v1()->getIndex()].addEdge(e, e->v1()->getIndex());
+			m_adjacency[e->v0()->getIndex()].addEdge(e);
+			m_adjacency[e->v1()->getIndex()].addEdge(e);
 		}
 		faces.push_back(f);
 	}
 	
+	//if(!checkClosed())
+	//	printf("mesh is not closed\n");
+		
 	for(unsigned i = 0; i < nv; i++) {
-		printf("v %d ", i);
+		//printf("v %i \n", i);
+		if(!m_adjacency[i].findOneRingNeighbors())
+			break;
 		m_adjacency[i].verbose();
 	}
-	/*
-	std::vector<Facet *>::iterator it;
-	for(it = faces.begin(); it < faces.end(); it++) {
-		Facet * f = (*it);
-		for(unsigned i = 0; i < 3; i++) {
-			Vertex * v = f->vertex(i);
-			Vertex * v0 = f->vertexBefore(i);
-			Vertex * v1 = f->vertexAfter(i);
-		}
-	}*/
 }
 
 MeshLaplacian::~MeshLaplacian() 
@@ -53,3 +50,14 @@ MeshLaplacian::~MeshLaplacian()
 	if(m_adjacency) delete[] m_adjacency;
 }
     
+char MeshLaplacian::checkClosed() const
+{
+	const unsigned nv = getNumVertices();
+	for(unsigned i = 0; i < nv; i++) {
+		if(!m_adjacency[i].checkOneRing()) {
+			printf("v %d is not 1-ring", i);
+			return 0;
+		}
+	}
+	return 1;
+}

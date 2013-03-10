@@ -17,6 +17,7 @@ public:
 	virtual ~Edge();
 	
 	char matches(Edge *e) const;
+	char isOppositeOf(Edge *e) const;
 	char matches(Vertex *a, Vertex *b) const;
 	void setTwin(Edge *e);
 	Edge * getTwin() const;

@@ -9,6 +9,8 @@ public:
     MeshLaplacian();
     MeshLaplacian(const char * filename);
     virtual ~MeshLaplacian();
+	
+	char checkClosed() const;
     
 private:
     VertexAdjacency * m_adjacency;

@@ -58,7 +58,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 #ifdef WIN32
 	m_mesh = new MeshLaplacian("D:/aphid/lapl/simple.m");
 #else	
-	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/lapl/simple.m");
+	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/lapl/cube.m");
 #endif
 	
 	m_drawer = new BaseDrawer;

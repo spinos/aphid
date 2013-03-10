@@ -8,16 +8,24 @@
  */
 #pragma once
 #include <vector>
-
+#include "Vertex.h"
 class Edge;
-class VertexAdjacency {
+class VertexAdjacency : public Vertex {
 public:
 	VertexAdjacency();
 	virtual ~VertexAdjacency();
 	
-	void addEdge(Edge * e, int idx);
+	void addEdge(Edge * e);
 	
+	char checkOneRing() const;
+
+	char findOppositeEdge(Edge & e, Edge & dest) const;
+	char findOneRingNeighbors();
+	char firstOutgoingEdge(Edge & e);
+	char findIncomming(Edge & eout, Edge & ein);
+
 	void verbose() const;
 private:
 	std::vector<Edge *> m_edges;
+	std::vector<Vertex *> m_neighbors;
 };
