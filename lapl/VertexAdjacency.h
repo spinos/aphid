@@ -17,10 +17,10 @@ public:
 	
 	void addEdge(Edge * e);
 	
-	char checkOneRing() const;
-
-	char findOppositeEdge(Edge & e, Edge & dest) const;
 	char findOneRingNeighbors();
+	void computeWeights();
+	
+	char findOppositeEdge(Edge & e, Edge & dest) const;
 	char firstOutgoingEdge(Edge & e);
 	char findIncomming(Edge & eout, Edge & ein);
 
@@ -28,4 +28,6 @@ public:
 private:
 	std::vector<Edge *> m_edges;
 	std::vector<Vertex *> m_neighbors;
+	std::vector<float> m_weights;
+	Vector3F m_mvcoord;
 };

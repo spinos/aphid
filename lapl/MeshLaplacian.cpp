@@ -5,6 +5,16 @@ MeshLaplacian::MeshLaplacian() {}
 
 MeshLaplacian::MeshLaplacian(const char * filename) : TriangleMesh(filename), m_adjacency(NULL)
 {
+	computeMeanValueCoordinate();
+}
+
+MeshLaplacian::~MeshLaplacian() 
+{
+	if(m_adjacency) delete[] m_adjacency;
+}
+
+char MeshLaplacian::computeMeanValueCoordinate()
+{
 	const unsigned nv = getNumVertices();
 	
 	m_adjacency = new VertexAdjacency[nv];
@@ -34,30 +44,13 @@ MeshLaplacian::MeshLaplacian(const char * filename) : TriangleMesh(filename), m_
 		faces.push_back(f);
 	}
 	
-	//if(!checkClosed())
-	//	printf("mesh is not closed\n");
-		
 	for(unsigned i = 0; i < nv; i++) {
-		//printf("v %i \n", i);
-		if(!m_adjacency[i].findOneRingNeighbors())
-			break;
-		m_adjacency[i].verbose();
-	}
-}
-
-MeshLaplacian::~MeshLaplacian() 
-{
-	if(m_adjacency) delete[] m_adjacency;
-}
-    
-char MeshLaplacian::checkClosed() const
-{
-	const unsigned nv = getNumVertices();
-	for(unsigned i = 0; i < nv; i++) {
-		if(!m_adjacency[i].checkOneRing()) {
-			printf("v %d is not 1-ring", i);
+		if(!m_adjacency[i].findOneRingNeighbors()) {
+			printf("v %i is not closed\n", i);
 			return 0;
 		}
+		m_adjacency[i].computeWeights();
+		m_adjacency[i].verbose();
 	}
 	return 1;
 }

@@ -60,7 +60,6 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 #else	
 	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/lapl/cube.m");
 #endif
-	
 	m_drawer = new BaseDrawer;
 }
 //! [0]

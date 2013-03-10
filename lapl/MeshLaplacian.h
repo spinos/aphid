@@ -10,8 +10,8 @@ public:
     MeshLaplacian(const char * filename);
     virtual ~MeshLaplacian();
 	
-	char checkClosed() const;
-    
+	char computeMeanValueCoordinate();
+	
 private:
     VertexAdjacency * m_adjacency;
 };
