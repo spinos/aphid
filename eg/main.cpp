@@ -39,20 +39,29 @@ void testSimple()
 void testLLT()
 {
     std::cout<<"LLT\n";
-    MatrixXf D = MatrixXf::Random(8,8);
-    MatrixXf symm = D * D.adjoint();
-    
-    std::cout<<"symm\n"<<symm<<std::endl;
+    MatrixXf D = MatrixXf::Random(8,6);
+    D = D * D.adjoint();
+    MatrixXf m = MatrixXf::Random(8,6);
+    D += m * m.adjoint();
+    D(3, 0) = 0.f;
+    D(3, 1) = 0.1f;
+    D(3, 2) = 0.2f;
+    D(3, 3) = 1.f;
+    std::cout<<"D\n"<<D<<std::endl;
     
     VectorXf b = VectorXf::Random(8);
     std::cout<<"b\n"<<b<<std::endl;
     
-    LLT<MatrixXf> llt(symm);
+    MatrixXf A = D.transpose() * D;
+    
+    VectorXf b1 = D.transpose() * b;
+    
+    LLT<MatrixXf> llt(A);
     
     VectorXf x;
-    llt.solve(b,&x);
+    llt.solve(b1,&x);
     std::cout << "x\n" << x << std::endl;
-    std::cout << "check\n" << symm * x << std::endl;
+    std::cout << "check Ax\n" << D * x << std::endl;
 }
 
 int main()
