@@ -44,9 +44,12 @@ void testLLT()
     MatrixXf m = MatrixXf::Random(8,6);
     D += m * m.adjoint();
     D(3, 0) = 0.f;
-    D(3, 1) = 0.1f;
-    D(3, 2) = 0.2f;
+    D(3, 1) = -0.1f;
+    D(3, 2) = -0.2f;
     D(3, 3) = 1.f;
+    D(3, 4) = -0.7f;
+    D(3, 5) = 0.f;
+
     std::cout<<"D\n"<<D<<std::endl;
     
     VectorXf b = VectorXf::Random(8);
@@ -64,10 +67,32 @@ void testLLT()
     std::cout << "check Ax\n" << D * x << std::endl;
 }
 
+void resizeTest()
+{
+    std::cout<<"Sizing row-major matrix\n";
+    Matrix<float, Dynamic, Dynamic, RowMajor> m;
+    m.resize(3, 3);
+    m(0,0) = 4;
+    m(0,1) = 1;
+    m(0,2) = 0;
+    m(1,0) = 2;
+    m(1,1) = 4;
+    m(1,2) = 1;
+    m(2,0) = 1; 
+    m(2,1) = 2;
+    m(2,2) = 2;
+    
+    std::cout << "m before\n" << m << std::endl;
+    
+    m.resize(5, 3);
+    std::cout << "m after\n" << m << std::endl << "coefficients changed\n";
+}
+
 int main()
 {
     testSimple();
     testLLT();
+    resizeTest();
     return 0;
 }
 
