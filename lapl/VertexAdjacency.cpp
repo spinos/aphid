@@ -24,9 +24,12 @@ void VertexAdjacency::addEdge(Edge * e)
 
 char VertexAdjacency::findOneRingNeighbors()
 {
+	int nneib = 0;
 	Edge outgoing;
 	firstOutgoingEdge(outgoing);
 	m_neighbors.push_back(outgoing.v1());
+	m_idxInOrder[outgoing.v1()->getIndex()] = nneib;
+	nneib++;
 	Edge incoming;
 	if(!findIncomming(outgoing, incoming)) {
 		printf("cannot find incoming edge ");
@@ -40,6 +43,8 @@ char VertexAdjacency::findOneRingNeighbors()
 	}
 	for(int i = 1; i < m_edges.size() / 2; i++) {
 		m_neighbors.push_back(outgoing.v1());
+		m_idxInOrder[outgoing.v1()->getIndex()] = nneib;
+		nneib++;
 		findIncomming(outgoing, incoming);
 		findOppositeEdge(incoming, outgoing);
 	}
@@ -135,6 +140,32 @@ char VertexAdjacency::findIncomming(Edge & eout, Edge & ein)
 		}
 	}
 	return 0;
+}
+
+std::map<int,int> VertexAdjacency::getNeighborOrder() const
+{
+	return m_idxInOrder;
+}
+
+void VertexAdjacency::getNeighbor(const int & idx, int & vertexIdx, float & weight) const
+{
+	vertexIdx = m_neighbors[idx]->getIndex();
+	weight = m_weights[idx];
+}
+
+float VertexAdjacency::getDeltaCoordX() const
+{
+	return m_mvcoord.x;
+}
+	
+float VertexAdjacency::getDeltaCoordY() const
+{
+	return m_mvcoord.y;
+}
+	
+float VertexAdjacency::getDeltaCoordZ() const
+{
+	return m_mvcoord.z;
 }
 
 void VertexAdjacency::verbose() const

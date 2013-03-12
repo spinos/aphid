@@ -200,10 +200,13 @@ void BaseDrawer::drawCircleAround(const Vector3F& center)
 	glEnd();
 }
 
-void BaseDrawer::drawMesh(const BaseMesh * mesh)
+void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer)
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
+	if(!deformer)
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
+	else
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
 
 // draw a cube
 	glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());

@@ -28,7 +28,7 @@ public:
 	void aVertex(float x, float y, float z);
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
-	void drawMesh(const BaseMesh * mesh);
+	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void setWired(char var);
 	
 private:

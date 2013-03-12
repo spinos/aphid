@@ -1,6 +1,7 @@
 #include "MeshLaplacian.h"
 #include "Facet.h"
 #include "VertexAdjacency.h"
+#include "LaplaceDeformer.h"
 MeshLaplacian::MeshLaplacian() {}
 
 MeshLaplacian::MeshLaplacian(const char * filename) : TriangleMesh(filename), m_adjacency(NULL)
@@ -50,7 +51,17 @@ char MeshLaplacian::computeMeanValueCoordinate()
 			return 0;
 		}
 		m_adjacency[i].computeWeights();
-		m_adjacency[i].verbose();
+		//m_adjacency[i].verbose();
 	}
 	return 1;
+}
+
+void MeshLaplacian::initializeDeformer()
+{
+	printf("init laplace deformer");
+	LaplaceDeformer *laplace = static_cast <LaplaceDeformer *>(m_deformer);
+	const unsigned nv = getNumVertices();
+	
+	laplace->fillM(nv, m_adjacency);
+	laplace->fillDelta(nv, m_adjacency);
 }
