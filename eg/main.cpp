@@ -112,12 +112,36 @@ void testSparse()
     std::cout << "RsTRs \n" << RsTRs << std::endl;
 }
 
+void valuePtr()
+{
+    Matrix<double, 4, 4, Eigen::RowMajor> Rs;
+    Rs.setZero();
+    
+    Rs(0, 1) = 0.1;
+    Rs(0, 2) = 0.2;
+    Rs(1, 1) = 1.1;
+    Rs(1, 3) = 1.3;
+    Rs(2, 3) = 2.3;
+    Rs(3, 1) = 3.1;
+    Rs(3, 3) = 1;
+
+    double *p = Rs.data();
+    std::cout<<"retrieve p\n";
+    for(int i=0; i< 16; i++) {
+        std::cout<<" "<<*p;
+        p++;
+        if((i+1)%4 == 0) 
+            std::cout<<"\n";
+    }
+}
+
 int main()
 {
     testSimple();
     testLLT();
     resizeTest();
     testSparse();
+    valuePtr();
     return 0;
 }
 
