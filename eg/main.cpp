@@ -3,8 +3,9 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <Eigen/LU>
-#include <Eigen/Cholesky>
+#include <Eigen/Sparse>
 using namespace Eigen;
+typedef SparseMatrix<double,Eigen::RowMajor> SparseMatrixType;
 
 void testSimple()
 {
@@ -88,11 +89,35 @@ void resizeTest()
     std::cout << "m after\n" << m << std::endl << "coefficients changed\n";
 }
 
+void testSparse()
+{
+    std::cout<<"test sparse\n";
+    int n = 16;
+    SparseMatrixType Rs(n, n);
+    for( int i = 0; i < n; i++ ) {
+        if(i>0)
+            Rs.fill(i, i-1) = .4f;
+        Rs.fill(i, i) = -1.f;
+        if(i<n-1)
+            Rs.fill(i, i+1) = .6f;
+    }
+    std::cout << "Rs \n" << Rs << std::endl;
+    
+    SparseMatrixType RsT = Rs.transpose();
+    
+    std::cout << "RsT \n" << RsT << std::endl;
+    
+    SparseMatrixType RsTRs = RsT * Rs;
+    
+    std::cout << "RsTRs \n" << RsTRs << std::endl;
+}
+
 int main()
 {
     testSimple();
     testLLT();
     resizeTest();
+    testSparse();
     return 0;
 }
 
