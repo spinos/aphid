@@ -51,6 +51,7 @@ char MeshLaplacian::computeMeanValueCoordinate()
 			return 0;
 		}
 		m_adjacency[i].computeWeights();
+		m_adjacency[i].computeTangentFrame();
 		//m_adjacency[i].verbose();
 	}
 	return 1;

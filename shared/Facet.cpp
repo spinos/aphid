@@ -23,6 +23,8 @@ Facet::Facet(Vertex *a, Vertex *b, Vertex *c)
 	m_normal.normalize();
 		
 	createEdges();
+	
+	m_area = Facet::cumputeArea(a, b, c);
 }
 
 Facet::Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d)
@@ -41,6 +43,8 @@ Facet::Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d)
 		m_normal.reverse();
 		
 	createEdges();
+	
+	m_area = Facet::cumputeArea(a, b, c);
 }
 
 Facet::~Facet()
@@ -129,9 +133,9 @@ Vector3F Facet::getNormal() const
 	return m_normal;
 }
 
-float Facet::area() const
+float Facet::getArea() const
 {
-	return Facet::cumputeArea(m_vertices[0], m_vertices[1], m_vertices[2]);
+	return m_area;
 }
 
 char Facet::isVertexAbove(const Vertex & v) const

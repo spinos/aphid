@@ -30,7 +30,7 @@ public:
 	Vertex getVertex(int idx) const;
 	Vector3F getCentroid() const;
 	Vector3F getNormal() const;
-	float area() const;
+	float getArea() const;
 	
 	char isVertexAbove(const Vertex & v) const;
 	char isClosed() const;
@@ -40,8 +40,8 @@ public:
 	static float cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c);
 private:
 	void createEdges();
-	
+	Vector3F m_normal;
+	float m_area;
 	Vertex *m_vertices[3];
 	Edge *m_edges[3];
-	Vector3F m_normal;
 };

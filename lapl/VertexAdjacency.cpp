@@ -27,7 +27,9 @@ char VertexAdjacency::findOneRingNeighbors()
 	int nneib = 0;
 	Edge outgoing;
 	firstOutgoingEdge(outgoing);
-	m_neighbors.push_back(outgoing.v1());
+	
+	addNeighbor(outgoing);
+	
 	m_idxInOrder[outgoing.v1()->getIndex()] = nneib;
 	nneib++;
 	Edge incoming;
@@ -41,8 +43,8 @@ char VertexAdjacency::findOneRingNeighbors()
 		printf("cannot find outgoing edge ");
 		return 0;
 	}
-	for(int i = 1; i < m_edges.size() / 2; i++) {
-		m_neighbors.push_back(outgoing.v1());
+	for(int i = 1; i < (int)m_edges.size() / 2; i++) {
+		addNeighbor(outgoing);
 		m_idxInOrder[outgoing.v1()->getIndex()] = nneib;
 		nneib++;
 		findIncomming(outgoing, incoming);
@@ -69,52 +71,48 @@ void VertexAdjacency::computeWeights()
 		theta1 = acos(vij.dot(vij1));
 		
 		wij = (tan(theta0 * 0.5f) + tan(theta1 * 0.5f))/dist;
-		m_weights.push_back(wij);
+		m_neighbors[i]->weight = wij;
 	}
 	
 	float sum = 0;
 	for(unsigned i = 0; i < numNeighbors; i++) {
-		sum += m_weights[i];
+		sum += m_neighbors[i]->weight;
 	}
 	
 	for(unsigned i = 0; i < numNeighbors; i++) {
-		m_weights[i] /= sum;
+		m_neighbors[i]->weight /= sum;
 	}
 	
 	m_mvcoord = Vector3F(0.f, 0.f, 0.f);
 	
 	for(unsigned i = 0; i < numNeighbors; i++) {
-		m_mvcoord += *m_neighbors[i] * m_weights[i];
+		m_mvcoord += *(m_neighbors[i]->v) * m_neighbors[i]->weight;
 	}
 	
 	m_mvcoord -= *this;
 }
 
-void VertexAdjacency::computeNormal()
+void VertexAdjacency::computeTangentFrame()
 {
-    Vector3F vij, vij0, vij1, faceN;
-    float faceArea;
     m_normal = Vector3F(0.f, 0.f, 0.f);
     const unsigned numNeighbors = m_neighbors.size();
 	for(unsigned i = 0; i < numNeighbors; i++) {
-		getVijs(i, vij, vij0, vij1);
-		
-		vij.normalize();
-		vij1.normalize();
-		
-		faceN = vij.cross(vij1);
-		faceN.normalize();
-		
-		faceArea = Facet::cumputeArea((Vector3F *)this, &vij, &vij1);
-		
-		m_normal += faceN * faceArea;
+		Facet *f = m_neighbors[i]->f;
+		m_normal += f->getNormal() * f->getArea();
 	}
 	m_normal.normalize();
+	
+	const Vector3F x1 = *(m_neighbors[0]->v) - *this;
+	
+	m_binormal = x1.cross(m_normal);
+	m_binormal.normalize();
+	
+	m_tangent = m_normal.cross(m_binormal);
+	m_tangent.normalize();
 }
 
 char VertexAdjacency::findOppositeEdge(Edge & e, Edge &dest) const
 {
-	
 	std::vector<Edge *>::const_iterator it;
 	for(it = m_edges.begin(); it < m_edges.end(); it++) {
 		//printf("e %i-%i ", (*it)->v0()->getIndex(), (*it)->v1()->getIndex());
@@ -126,7 +124,7 @@ char VertexAdjacency::findOppositeEdge(Edge & e, Edge &dest) const
 	return 0;
 }
 
-char VertexAdjacency::firstOutgoingEdge(Edge & e)
+char VertexAdjacency::firstOutgoingEdge(Edge & e) const
 {
 	std::vector<Edge *>::const_iterator it;
 	for(it = m_edges.begin(); it < m_edges.end(); it++) {
@@ -138,10 +136,10 @@ char VertexAdjacency::firstOutgoingEdge(Edge & e)
 	return 0;
 }
 
-char VertexAdjacency::findIncomming(Edge & eout, Edge & ein)
+char VertexAdjacency::findIncomming(Edge & eout, Edge & ein) const
 {
 	const int faceId = ((Facet *)eout.getFace())->getIndex();
-	std::vector<Edge *>::iterator it;
+	std::vector<Edge *>::const_iterator it;
 	for(it = m_edges.begin(); it < m_edges.end(); it++) {
 		//printf("ee %i-%i ", (*it)->v0()->getIndex(), (*it)->v1()->getIndex());
 	
@@ -161,8 +159,8 @@ std::map<int,int> VertexAdjacency::getNeighborOrder() const
 
 void VertexAdjacency::getNeighbor(const int & idx, int & vertexIdx, float & weight) const
 {
-	vertexIdx = m_neighbors[idx]->getIndex();
-	weight = m_weights[idx];
+	vertexIdx = m_neighbors[idx]->v->getIndex();
+	weight = m_neighbors[idx]->weight;
 }
 
 float VertexAdjacency::getDeltaCoordX() const
@@ -180,35 +178,41 @@ float VertexAdjacency::getDeltaCoordZ() const
 	return m_mvcoord.z;
 }
 
+void VertexAdjacency::addNeighbor(Edge &outgoing)
+{
+	VertexNeighbor *aneighbor = new VertexNeighbor;
+	aneighbor->v = outgoing.v1();
+	aneighbor->e = &outgoing;
+	aneighbor->f = (Facet *)outgoing.getFace();
+	aneighbor->weight = 1.f;
+	
+	m_neighbors.push_back(aneighbor);
+}
+
 void VertexAdjacency::getVijs(const int & idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const
 {
     const int numNeighbors = (int)m_neighbors.size();
-    vij = *m_neighbors[idx] - *this;
+    vij = *(m_neighbors[idx]->v) - *this;
     if(idx == 0)
-        vij0 = *m_neighbors[numNeighbors - 1] - *this;
+        vij0 = *(m_neighbors[numNeighbors - 1]->v) - *this;
     else
-        vij0 = *m_neighbors[idx - 1] - *this;
+        vij0 = *(m_neighbors[idx - 1]->v) - *this;
     if(idx == numNeighbors - 1)
-        vij1 = *m_neighbors[0] - *this;
+        vij1 = *(m_neighbors[0]->v) - *this;
     else
-        vij1 = *m_neighbors[idx + 1] - *this;
+        vij1 = *(m_neighbors[idx + 1]->v) - *this;
 }
 
 void VertexAdjacency::verbose() const
 {
 	printf("\nv %i\n adjacent edge count: %i\n", getIndex(), (int)m_edges.size());
-	/*std::vector<Edge *>::const_iterator it;
-	for(it = m_edges.begin(); it < m_edges.end(); it++) {
-		printf(" %d - %d", (*it)->v0()->getIndex(), (*it)->v1()->getIndex());
-	}*/
-	std::vector<Vertex *>::const_iterator it;
-	for(it = m_neighbors.begin(); it < m_neighbors.end(); it++) {
-		printf(" %i ", (*it)->getIndex());
+	std::vector<Edge *>::const_iterator eit;
+	for(eit = m_edges.begin(); eit < m_edges.end(); eit++) {
+		printf(" %d - %d", (*eit)->v0()->getIndex(), (*eit)->v1()->getIndex());
 	}
-	printf("\n");
-	std::vector<float >::const_iterator itw;
-	for(itw = m_weights.begin(); itw < m_weights.end(); itw++) {
-		printf(" %f ", (*itw));
+	std::vector<VertexNeighbor *>::const_iterator it;
+	for(it = m_neighbors.begin(); it < m_neighbors.end(); it++) {
+		printf(" %i ", (*it)->v->getIndex());
 	}
 	printf("\n delta-coordinate %f %f %f \n", m_mvcoord.x, m_mvcoord.y, m_mvcoord.z);
 }

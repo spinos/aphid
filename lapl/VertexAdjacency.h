@@ -11,8 +11,16 @@
 #include <map>
 #include "Vertex.h"
 class Edge;
+class Facet;
 class VertexAdjacency : public Vertex {
 public:
+	struct VertexNeighbor {
+		Vertex *v;
+		Edge *e;
+		Facet *f;
+		float weight;
+	};
+	
 	VertexAdjacency();
 	virtual ~VertexAdjacency();
 	
@@ -20,12 +28,8 @@ public:
 	
 	char findOneRingNeighbors();
 	void computeWeights();
-	void computeNormal();
-	
-	char findOppositeEdge(Edge & e, Edge & dest) const;
-	char firstOutgoingEdge(Edge & e);
-	char findIncomming(Edge & eout, Edge & ein);
-	
+	void computeTangentFrame();
+
 	std::map<int,int> getNeighborOrder() const;
 	
 	float getDeltaCoordX() const;
@@ -35,10 +39,14 @@ public:
 	void getNeighbor(const int & idx, int & vertexIdx, float & weight) const;
 	void verbose() const;
 private:
+	char findOppositeEdge(Edge & e, Edge & dest) const;
+	char firstOutgoingEdge(Edge & e) const;
+	char findIncomming(Edge & eout, Edge & ein) const;
+	void addNeighbor(Edge &e);
     void getVijs(const int & idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const;
+	
 	std::vector<Edge *> m_edges;
-	std::vector<Vertex *> m_neighbors;
-	std::vector<float> m_weights;
+	std::vector<VertexNeighbor *> m_neighbors;
 	std::map<int,int> m_idxInOrder;
-	Vector3F m_mvcoord, m_normal;
+	Vector3F m_mvcoord, m_tangent, m_binormal, m_normal;
 };

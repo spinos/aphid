@@ -12,7 +12,7 @@ char LaplaceDeformer::fillM(const unsigned & numVertices, VertexAdjacency * adja
 	LaplaceMatrixType L(numVertices + 3, numVertices);
 	L.setZero();
 	L.startFill();
-	for(int i = 0; i < (unsigned)numVertices; i++) {
+	for(int i = 0; i < (int)numVertices; i++) {
 		VertexAdjacency & adj = adjacency[i];
 
 		ordered = adj.getNeighborOrder();
@@ -27,9 +27,9 @@ char LaplaceDeformer::fillM(const unsigned & numVertices, VertexAdjacency * adja
 		if(lastNeighbor < i)
 			L.fill(i, i) = -1.0f;
 	}
-	L.fill(numVertices, 27) = 1.f;
+	L.fill(numVertices, 0) = 1.f;
 	L.fill(numVertices + 1, 47) = 1.f;
-	L.fill(numVertices + 2, 53) = 1.f;
+	L.fill(numVertices + 2, 67) = 1.f;
 	L.endFill();
 	
 	m_LT = L.transpose();
@@ -53,14 +53,14 @@ char LaplaceDeformer::fillDelta(const unsigned & numVertices, VertexAdjacency * 
 	}
 	
 	m_delta[0](numVertices) = 11;
-	m_delta[1](numVertices) = 20;
-	m_delta[2](numVertices) = -12;
+	m_delta[1](numVertices) = 2;
+	m_delta[2](numVertices) = 5;
 	m_delta[0](numVertices + 1) = 5;
-	m_delta[1](numVertices + 1) = 12;
-	m_delta[2](numVertices + 1) = -11;
+	m_delta[1](numVertices + 1) = 25;
+	m_delta[2](numVertices + 1) = 18;
 	m_delta[0](numVertices + 2) = 23;
-	m_delta[1](numVertices + 2) = 12;
-	m_delta[2](numVertices + 2) = -5;
+	m_delta[1](numVertices + 2) = 22;
+	m_delta[2](numVertices + 2) = 20;
 	
 	m_delta[0] = m_LT * m_delta[0];
 	m_delta[1] = m_LT * m_delta[1];
