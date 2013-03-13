@@ -30,10 +30,14 @@ public:
 	Vertex getVertex(int idx) const;
 	Vector3F getCentroid() const;
 	Vector3F getNormal() const;
+	float area() const;
+	
 	char isVertexAbove(const Vertex & v) const;
 	char isClosed() const;
 	
 	char getEdgeOnHorizon(std::vector<Edge *> & horizons) const;
+	
+	static float cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c);
 private:
 	void createEdges();
 	

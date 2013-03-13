@@ -53,26 +53,16 @@ char VertexAdjacency::findOneRingNeighbors()
 
 void VertexAdjacency::computeWeights()
 {
-	Vector3F vj, vj0, vj1;
-	Vector3F vi = *this;
-	
 	Vector3F vij, vij0, vij1;
 	float dist, theta0, theta1, wij;
 
 	const unsigned numNeighbors = m_neighbors.size();
 	for(unsigned i = 0; i < numNeighbors; i++) {
-		vj = *m_neighbors[i];
-		if(i == 0) vj0 = *m_neighbors[numNeighbors - 1];
-		else vj0 = *m_neighbors[i - 1];
-		if(i == numNeighbors - 1) vj1 = *m_neighbors[0];
-		else vj1 = *m_neighbors[i + 1];
+		getVijs(i, vij, vij0, vij1);
 		
-		vij = vj - vi;
 		dist = vij.length();
 		vij.normalize();
-		vij0 = vj0 - vi;
 		vij0.normalize();
-		vij1 = vj1 - vi;
 		vij1.normalize();
 		
 		theta0 = acos(vij.dot(vij0));
@@ -98,6 +88,28 @@ void VertexAdjacency::computeWeights()
 	}
 	
 	m_mvcoord -= *this;
+}
+
+void VertexAdjacency::computeNormal()
+{
+    Vector3F vij, vij0, vij1, faceN;
+    float faceArea;
+    m_normal = Vector3F(0.f, 0.f, 0.f);
+    const unsigned numNeighbors = m_neighbors.size();
+	for(unsigned i = 0; i < numNeighbors; i++) {
+		getVijs(i, vij, vij0, vij1);
+		
+		vij.normalize();
+		vij1.normalize();
+		
+		faceN = vij.cross(vij1);
+		faceN.normalize();
+		
+		faceArea = Facet::cumputeArea((Vector3F *)this, &vij, &vij1);
+		
+		m_normal += faceN * faceArea;
+	}
+	m_normal.normalize();
 }
 
 char VertexAdjacency::findOppositeEdge(Edge & e, Edge &dest) const
@@ -166,6 +178,20 @@ float VertexAdjacency::getDeltaCoordY() const
 float VertexAdjacency::getDeltaCoordZ() const
 {
 	return m_mvcoord.z;
+}
+
+void VertexAdjacency::getVijs(const int & idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const
+{
+    const int numNeighbors = (int)m_neighbors.size();
+    vij = *m_neighbors[idx] - *this;
+    if(idx == 0)
+        vij0 = *m_neighbors[numNeighbors - 1] - *this;
+    else
+        vij0 = *m_neighbors[idx - 1] - *this;
+    if(idx == numNeighbors - 1)
+        vij1 = *m_neighbors[0] - *this;
+    else
+        vij1 = *m_neighbors[idx + 1] - *this;
 }
 
 void VertexAdjacency::verbose() const

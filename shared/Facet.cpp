@@ -6,7 +6,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-
+#include <cmath>
 #include "Facet.h"
 
 Facet::Facet() {}
@@ -129,6 +129,11 @@ Vector3F Facet::getNormal() const
 	return m_normal;
 }
 
+float Facet::area() const
+{
+	return Facet::cumputeArea(m_vertices[0], m_vertices[1], m_vertices[2]);
+}
+
 char Facet::isVertexAbove(const Vertex & v) const
 {
 	Vector3F dv = v - getCentroid();
@@ -194,4 +199,20 @@ char Facet::isClosed() const
 	}
 	
 	return 1;
+}
+
+float Facet::cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c)
+{
+    Vector3F d[3]; float l[3];
+
+	d[0] = *b - *a;
+	l[0] = d[0].length();
+	
+	d[1] = *c - *b;
+	l[1] = d[1].length();
+	
+	d[2] = *a - *c;
+	l[2] = d[2].length();
+	
+	return (0.5*sqrt(l[0]*l[0]*l[2]*l[2] - (d[0].dot(d[2]))*(d[0].dot(d[2]))));
 }
