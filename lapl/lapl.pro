@@ -1,6 +1,7 @@
 mac:LIBS += -leasymodel
 INCLUDEPATH += ../shared 
 win32:INCLUDEPATH += D:/ofl/shared D:/usr/libxml2x64/include
+mac:INCLUDEPATH += /Users/jianzhang/Library/eigen2
 win32:LIBS +=  -LD:/usr/local/lib64 -leasymodel -LD:/usr/libxml2x64/lib -llibxml2
 HEADERS       = glwidget.h \
                 window.h \
@@ -18,8 +19,11 @@ HEADERS       = glwidget.h \
                 ../shared/Vertex.h \
                 ../shared/Edge.h \
                 ../shared/Facet.h \
+                ../shared/BaseDeformer.h \
                 MeshLaplacian.h \
-                VertexAdjacency.h
+                VertexAdjacency.h \
+                LaplaceDeformer.h
+                
 SOURCES       = glwidget.cpp \
                 main.cpp \
                 window.cpp \
@@ -37,8 +41,11 @@ SOURCES       = glwidget.cpp \
                 ../shared/Vertex.cpp \
                 ../shared/Edge.cpp \
                 ../shared/Facet.cpp \
+                ../shared/BaseDeformer.cpp \
                 MeshLaplacian.cpp \
-                VertexAdjacency.cpp
+                VertexAdjacency.cpp \
+                LaplaceDeformer.cpp
+
 QT           += opengl
 win32:CONFIG += console
 #mac:CONFIG -= app_bundle

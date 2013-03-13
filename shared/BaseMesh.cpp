@@ -137,6 +137,15 @@ void BaseMesh::verbose() const
     for(unsigned i = 0; i < _numFaceVertices; i++)
         printf(" %d", _indices[i]);
 }
+
+void BaseMesh::attachDeformer(BaseDeformer * deformer)
+{
+	m_deformer = deformer;
+	m_deformer->setNumVertices(getNumVertices());
+	initializeDeformer();
+}
+
+void BaseMesh::initializeDeformer() {}
 /*
 Triangle * BaseMesh::getFace(unsigned idx) const
 {

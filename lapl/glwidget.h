@@ -45,6 +45,7 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 class MeshLaplacian;
+class LaplaceDeformer;
 class BaseDrawer;
 //! [0]
 class GLWidget : public Base3DView
@@ -67,6 +68,7 @@ protected:
 //! [3]
 private:
     MeshLaplacian * m_mesh;
+	LaplaceDeformer * m_deformer;
     BaseDrawer * m_drawer;
 private slots:
     void simulate();

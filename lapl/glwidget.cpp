@@ -47,6 +47,7 @@
 #include "glwidget.h"
 
 #include "MeshLaplacian.h"
+#include "LaplaceDeformer.h"
 #include "BaseDrawer.h"
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -61,6 +62,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/lapl/cube.m");
 #endif
 	m_drawer = new BaseDrawer;
+	m_deformer = new LaplaceDeformer;
+	
+	m_mesh->attachDeformer(m_deformer);
+	m_deformer->solve();
 }
 //! [0]
 
@@ -75,6 +80,7 @@ void GLWidget::clientDraw()
 {
     m_drawer->setWired(1);
     m_drawer->drawMesh(m_mesh);
+	m_drawer->drawMesh(m_mesh, m_deformer);
 }
 //! [7]
 
