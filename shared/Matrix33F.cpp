@@ -25,6 +25,21 @@ float Matrix33F::operator() (int i, int j) const
 	return v[i * 3 + j];
 }
 
+Matrix33F Matrix33F::operator+( Matrix33F other ) const
+{
+	Matrix33F a;
+	*a.m(0, 0) = M(0,0) + other.M(0,0);
+	*a.m(0, 1) = M(0,1) + other.M(0,1);
+	*a.m(0, 2) = M(0,2) + other.M(0,2);
+	*a.m(1, 0) = M(1,0) + other.M(1,0);
+	*a.m(1, 1) = M(1,1) + other.M(1,1);
+	*a.m(1, 2) = M(1,2) + other.M(1,2);
+	*a.m(2, 0) = M(2,0) + other.M(2,0);
+	*a.m(2, 1) = M(2,1) + other.M(2,1);
+	*a.m(2, 2) = M(2,2) + other.M(2,2);
+	return a;
+}
+
 float* Matrix33F::m(int i, int j)
 {
 	return &v[i * 3 + j];
@@ -87,4 +102,12 @@ Matrix33F Matrix33F::multiply(const Matrix33F& a) const
 	return r;
 }
 
+Vector3F Matrix33F::transform(const Vector3F & a) const
+{
+	Vector3F b;
+	b.x = a.x * M(0, 0) + a.y * M(1, 0) + a.z * M(2, 0);
+	b.y = a.x * M(0, 1) + a.y * M(1, 1) + a.z * M(2, 1);
+	b.z = a.x * M(0, 2) + a.y * M(1, 2) + a.z * M(2, 2);
+	return b;
+}
 

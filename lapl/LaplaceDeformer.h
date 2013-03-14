@@ -2,7 +2,7 @@
 #include "BaseDeformer.h"
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-
+#include "Matrix33F.h"
 typedef Eigen::SparseMatrix<float, Eigen::RowMajor> LaplaceMatrixType;
 
 class VertexAdjacency;
@@ -16,10 +16,15 @@ public:
 	
 	virtual char solve();
 	
-	char fillM(const unsigned & numVertices, VertexAdjacency * adjacency);
-	char fillDelta(const unsigned & numVertices, VertexAdjacency * adjacency);
+	void initialCondition();
+	char fillM();
+	char fillDelta();
+	void LaplaceDeformer::updateRi();
 private:
     LaplaceMatrixType m_M, m_LT;
 	Eigen::VectorXf m_delta[3];
 	Eigen::SparseLLT<LaplaceMatrixType> m_llt;
+	Vector3F *m_vPi;
+	Matrix33F *m_mRi;
+	VertexAdjacency * m_topology;
 };
