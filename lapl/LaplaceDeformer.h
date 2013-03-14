@@ -16,15 +16,17 @@ public:
 	
 	virtual char solve();
 	
-	void initialCondition();
-	char fillM();
-	char fillDelta();
-	void LaplaceDeformer::updateRi();
+	unsigned getNumAnchors() const;
+
 private:
-    LaplaceMatrixType m_M, m_LT;
+	void initialCondition();
+	char fillL();
+	char fillDelta();
+	void updateRi();
+    LaplaceMatrixType m_LT;
 	Eigen::VectorXf m_delta[3];
 	Eigen::SparseLLT<LaplaceMatrixType> m_llt;
-	Vector3F *m_vPi;
+	Vector3F *m_ViVjWj;
 	Matrix33F *m_mRi;
 	VertexAdjacency * m_topology;
 };

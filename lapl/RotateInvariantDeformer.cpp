@@ -86,9 +86,6 @@ char RotateInvariantDeformer::fillDelta(const unsigned & numVertices, VertexAdja
 	
 	for(int i = 0; i < (int)numVertices; i++) {
 		VertexAdjacency & adj = adjacency[i];
-		m_delta[0](i) = adj.getDeltaCoordX();
-		m_delta[1](i) = adj.getDeltaCoordY();
-		m_delta[2](i) = adj.getDeltaCoordZ();
 	}
 	
 	m_delta[0](numVertices) = 11;

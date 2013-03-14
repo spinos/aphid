@@ -84,14 +84,6 @@ void VertexAdjacency::computeWeights()
 	for(unsigned i = 0; i < numNeighbors; i++) {
 		m_neighbors[i]->weight /= sum;
 	}
-	
-	m_mvcoord = Vector3F(0.f, 0.f, 0.f);
-	
-	for(unsigned i = 0; i < numNeighbors; i++) {
-		m_mvcoord += *(m_neighbors[i]->v) * m_neighbors[i]->weight;
-	}
-	
-	m_mvcoord -= *this;
 }
 
 void VertexAdjacency::computeTangentFrame()
@@ -114,35 +106,6 @@ void VertexAdjacency::computeTangentFrame()
 	tangent.normalize();
 	
 	m_tangentFrame.fill(tangent, binormal, m_normal);
-}
-
-void VertexAdjacency::computeDiscreteForms()
-{
-    float delta;
-    Vector3F x_hat_ij, vij0, x_hat_ij1;
-    Vector3F x_bar_ij, x_bar_ij1;
-    const unsigned numNeighbors = m_neighbors.size();
-    m_g1.resize(numNeighbors);
-    m_g2.resize(numNeighbors);
-    m_g3.resize(numNeighbors);
-    m_L.resize(numNeighbors);
-    m_O.resize(numNeighbors);
-    m_x_bar.resize(numNeighbors);
-    
-	for(unsigned i = 0; i < numNeighbors; i++) {
-		getVijs(i, x_hat_ij, vij0, x_hat_ij1);
-		x_bar_ij = m_normal.cross(x_hat_ij.cross(m_normal));
-		x_bar_ij1 = m_normal.cross(x_hat_ij1.cross(m_normal));
-		
-		delta = Matrix44F::Determinant33(x_bar_ij.x, x_bar_ij.y, x_bar_ij.z, x_bar_ij1.x, x_bar_ij1.y, x_bar_ij1.z, m_normal.x, m_normal.y, m_normal.z);
-		
-		m_g1[i] = x_bar_ij.dot(x_bar_ij);
-		m_g2[i] = x_bar_ij.dot(x_bar_ij1);
-		m_g3[i] = x_bar_ij1.dot(x_bar_ij1);
-		m_L[i] = x_hat_ij.dot(m_normal);
-		//m_O[i] = sign(delta);
-		m_x_bar[i] = x_bar_ij;
-	}
 }
 
 char VertexAdjacency::findOppositeEdge(Edge & e, Edge &dest) const
@@ -202,21 +165,6 @@ void VertexAdjacency::getNeighbor(const int & idx, int & vertexIdx, float & weig
 	weight = m_neighbors[idx]->weight;
 }
 
-float VertexAdjacency::getDeltaCoordX() const
-{
-	return m_mvcoord.x;
-}
-	
-float VertexAdjacency::getDeltaCoordY() const
-{
-	return m_mvcoord.y;
-}
-	
-float VertexAdjacency::getDeltaCoordZ() const
-{
-	return m_mvcoord.z;
-}
-
 void VertexAdjacency::addNeighbor(Edge &outgoing)
 {
 	VertexNeighbor *aneighbor = new VertexNeighbor;
@@ -258,5 +206,4 @@ void VertexAdjacency::verbose() const
 	for(it = m_neighbors.begin(); it < m_neighbors.end(); it++) {
 		printf(" %i ", (*it)->v->getIndex());
 	}
-	printf("\n delta-coordinate %f %f %f \n", m_mvcoord.x, m_mvcoord.y, m_mvcoord.z);
 }
