@@ -10,6 +10,8 @@ public:
     virtual ~TriangleMesh();
     
     void copyOf(EasyModel * esm);
+	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
+	
 private:
 
 };

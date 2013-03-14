@@ -79,8 +79,10 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
     m_drawer->setWired(1);
+	m_drawer->setGrey(0.8f);
     m_drawer->drawMesh(m_mesh);
 	m_drawer->drawMesh(m_mesh, m_deformer);
+	m_drawer->tangentFrame(m_mesh);
 }
 //! [7]
 

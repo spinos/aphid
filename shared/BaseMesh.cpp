@@ -138,6 +138,10 @@ void BaseMesh::verbose() const
         printf(" %d", _indices[i]);
 }
 
+Matrix33F BaseMesh::getTangentFrame(const unsigned& idx) const
+{
+	return Matrix33F();
+}
 /*
 Triangle * BaseMesh::getFace(unsigned idx) const
 {

@@ -9,6 +9,7 @@
 
 #pragma once
 #include <Vector3F.h>
+#include <Matrix33F.h>
 #include <Geometry.h>
 
 class BaseMesh : public Geometry {
@@ -32,7 +33,7 @@ public:
 	unsigned getNumFaceVertices() const;
 	Vector3F * getVertices() const;
 	unsigned * getIndices() const;
-	unsigned getBufferedVertices() const;
+	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	
 	Vector3F * _vertices;
 	unsigned * _indices;

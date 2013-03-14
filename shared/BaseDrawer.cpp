@@ -13,6 +13,7 @@
 #endif
 
 #include "BaseDrawer.h"
+#include "Matrix33F.h"
 #include <cmath>
 
 void BaseDrawer::setGrey(float g)
@@ -213,6 +214,48 @@ void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer)
 
 // deactivate vertex arrays after drawing
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void BaseDrawer::tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer)
+{
+	unsigned nv = mesh->getNumVertices();
+	Vector3F * v = mesh->getVertices();
+	if(deformer)
+		v = deformer->getDeformedData();
+		
+	float m[16];
+	for(unsigned i = 0; i < nv; i++) {
+		glPushMatrix();
+		//glTranslatef(v[i].x, v[i].y, v[i].z);
+		Matrix33F orient = mesh->getTangentFrame(i);
+    
+    m[0] = orient(0, 0); m[1] = orient(0, 1); m[2] = orient(0, 2); m[3] = 0.0;
+    m[4] = orient(1, 0); m[5] = orient(1, 1); m[6] = orient(1, 2); m[7] = 0.0;
+    m[8] = orient(2, 0); m[9] = orient(2, 1); m[10] = orient(2, 2); m[11] = 0.0;
+    m[12] = v[i].x;
+	m[13] = v[i].y;
+	m[14] = v[i].z; 
+	m[15] = 1.0;
+    glMultMatrixf((const GLfloat*)m);
+		coordsys();
+				glPopMatrix();
+	}
+}
+
+void BaseDrawer::coordsys()
+{
+	glBegin( GL_LINES );
+	glColor3f(1.f, 0.f, 0.f);
+			glVertex3f( 0.f, 0.f, 0.f );
+			glVertex3f(1.f, 0.f, 0.f); 
+	glColor3f(0.f, 1.f, 0.f);					
+			glVertex3f( 0.f, 0.f, 0.f );
+			glVertex3f(0.f, 1.f, 0.f); 
+	glColor3f(0.f, 0.f, 1.f);					
+			glVertex3f( 0.f, 0.f, 0.f );
+			glVertex3f(0.f, 0.f, 1.f);		
+	glEnd();
+
 }
 
 void BaseDrawer::setWired(char var)

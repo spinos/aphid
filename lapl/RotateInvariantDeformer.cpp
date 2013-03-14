@@ -4,10 +4,10 @@
 RotateInvariantDeformer::RotateInvariantDeformer() {}
 RotateInvariantDeformer::~RotateInvariantDeformer() {}
 
-char RotateInvariantDeformer::fillM(const unsigned & numVertices, VertexAdjacency * adjacency)
+char RotateInvariantDeformer::fillMRot(VertexAdjacency * adjacency, LaplaceMatrixType &ATA, LaplaceMatrixType &AT)
 {
     MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_mesh);
-    const unsigned numEdges = countEdges(numVertices, adjacency);
+    const unsigned numEdges = countEdges(m_numVertices, adjacency);
     
 	std::map<int,int> ordered;
 	std::map<int,int>::iterator orderIt;
@@ -15,12 +15,15 @@ char RotateInvariantDeformer::fillM(const unsigned & numVertices, VertexAdjacenc
 	float neighborWei;
 	unsigned i3, j3;
 	
-	LaplaceMatrixType L(numEdges * 3, numVertices * 3);
-	L.setZero();
-	L.startFill();
+	const unsigned numAnchors = 2;
+	const unsigned anchorIds[2] = {0, 67};
 	
-	unsigned row = 0;
-	for(int i = 0; i < (int)numVertices; i++) {
+	LaplaceMatrixType Rs(numEdges * 3 * 2 + numAnchors, m_numVertices * 3);
+	Rs.setZero();
+	Rs.startFill();
+	
+	unsigned rowIdx = 0;
+	for(int i = 0; i < (int)m_numVertices; i++) {
 		VertexAdjacency & adj = adjacency[i];
 		Matrix33F Fi = adj.getTangentFrame();
 		
@@ -36,25 +39,43 @@ char RotateInvariantDeformer::fillM(const unsigned & numVertices, VertexAdjacenc
 			
 			j3 = neighborIdx * 3;
 			
-			for ( int k = 0; k < 3; ++k ) {
-			    if(j3 < i3)
-				    L.fill( row+k, j3+k ) = neighborWei * -1.0f;
-				L.fill( row+k, i3+0 ) = neighborWei * Rij(k, 0);
-				L.fill( row+k, i3+1 ) = neighborWei * Rij(k, 1);
-				L.fill( row+k, i3+2 ) = neighborWei * Rij(k, 2);
-				if(j3 > i3)
-				    L.fill( row+k, j3+k ) = neighborWei * -1.0f;
-			}
-			row += 3; 
+			for ( int k = 0; k < 3; ++k ) {  
+				Rs.fill( rowIdx, i3+0 ) = neighborWei * Rij(k, 0);
+				Rs.fill( rowIdx, i3+1 ) = neighborWei * Rij(k, 1);
+				Rs.fill( rowIdx, i3+2 ) = neighborWei * Rij(k, 2);
+				rowIdx++;
+				Rs.fill( rowIdx, j3+k ) = -1.0f;
+				rowIdx++;
+			} 
 		}
 	}
-	L.endFill();
 	
-	m_LT = L.transpose();
-	m_M = m_LT * L;
+	for(int i=0; i < (int)numAnchors; i++) {
+		unsigned anchorIdx = anchorIds[i];
+		Rs.fill(rowIdx + i, anchorIdx * 3) = 1;
+		Rs.fill(rowIdx + i, anchorIdx * 3 + 1) = 1;
+		Rs.fill(rowIdx + i, anchorIdx * 3 + 2) = 1;
+	}
+	
+	Rs.endFill();
+	
+	AT = Rs.transpose();
+	ATA = AT * Rs;
 	//std::cout << "M \n" << m_M << std::endl;
-	m_llt = Eigen::SparseLLT<LaplaceMatrixType>(m_M);
+	//m_llt = Eigen::SparseLLT<LaplaceMatrixType>(m_M);
     return 1;
+}
+
+char RotateInvariantDeformer::solveRotation(MeshLaplacian *msh)
+{
+	LaplaceMatrixType ATA, AT;
+	fillMRot(msh->connectivity(), ATA, AT);
+	
+	const unsigned numAnchors = 2;
+	const unsigned anchorIds[2] = {0, 67};
+	
+	
+	return 1;
 }
 
 char RotateInvariantDeformer::fillDelta(const unsigned & numVertices, VertexAdjacency * adjacency)
@@ -93,14 +114,16 @@ void RotateInvariantDeformer::setMesh(BaseMesh * mesh)
 	m_deformedV = new Vector3F[m_numVertices];
 	
 	printf("init laplace deformer");
-	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_mesh);
-
-	fillM(m_numVertices, msh->connectivity());
-	fillDelta(m_numVertices, msh->connectivity());
+	
+	
+	//fillDelta(m_numVertices, msh->connectivity());
 }
 
 char RotateInvariantDeformer::solve()
 {
+	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_mesh);
+	solveRotation(msh);
+/*
 	m_llt.solveInPlace(m_delta[0]);
 	m_llt.solveInPlace(m_delta[1]);
 	m_llt.solveInPlace(m_delta[2]);
@@ -109,7 +132,7 @@ char RotateInvariantDeformer::solve()
 		m_deformedV[i].x = m_delta[0](i);
 		m_deformedV[i].y = m_delta[1](i);
 		m_deformedV[i].z = m_delta[2](i);
-	}
+	}*/
 	return 1;
 }
 

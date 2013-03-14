@@ -50,3 +50,8 @@ void TriangleMesh::copyOf(EasyModel * esm)
         _vertices[i].z = cvs[i * 3 + 2];
     }
 }
+
+Matrix33F TriangleMesh::getTangentFrame(const unsigned& idx) const
+{
+	return Matrix33F();
+}

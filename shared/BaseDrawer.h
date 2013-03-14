@@ -29,6 +29,8 @@ public:
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
+	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
+	void coordsys();
 	void setWired(char var);
 	
 private:

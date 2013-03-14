@@ -67,4 +67,3 @@ Matrix33F MeshLaplacian::getTangentFrame(const unsigned &idx) const
 {
     return m_adjacency[idx].getTangentFrame();
 }
-
