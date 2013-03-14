@@ -11,6 +11,10 @@ void BaseDeformer::setMesh(BaseMesh * mesh)
 	m_mesh = mesh;
 	m_numVertices = mesh->getNumVertices();
 	m_deformedV = new Vector3F[m_numVertices];
+	Vector3F *v = mesh->getVertices();
+	for(int i = 0; i < (int)m_numVertices; i++) {
+		m_deformedV[i] = v[i];
+	}
 }
 
 char BaseDeformer::solve()

@@ -51,6 +51,9 @@ char LaplaceDeformer::fillDelta(const unsigned & numVertices, VertexAdjacency * 
 		m_delta[0](i) = adj.getDeltaCoordX();
 		m_delta[1](i) = adj.getDeltaCoordY();
 		m_delta[2](i) = adj.getDeltaCoordZ();
+		//m_delta[0](i) = 0;
+		//m_delta[1](i) = 0;
+		//m_delta[2](i) = 0;
 	}
 	
 	m_delta[0](numVertices) = 11;
@@ -71,9 +74,7 @@ char LaplaceDeformer::fillDelta(const unsigned & numVertices, VertexAdjacency * 
 
 void LaplaceDeformer::setMesh(BaseMesh * mesh)
 {
-	m_mesh = mesh;
-	m_numVertices = mesh->getNumVertices();
-	m_deformedV = new Vector3F[m_numVertices];
+	BaseDeformer::setMesh(mesh);
 	
 	printf("init laplace deformer");
 	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_mesh);

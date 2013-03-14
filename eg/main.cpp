@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <Eigen/LU>
 #include <Eigen/Sparse>
+#include <Eigen/SVD>
 using namespace Eigen;
 typedef SparseMatrix<double,Eigen::RowMajor> SparseMatrixType;
 
@@ -112,6 +113,24 @@ void testSparse()
     std::cout << "RsTRs \n" << RsTRs << std::endl;
 }
 
+void testSVD()
+{
+	Matrix<float, 4, 2> A;
+	A.setZero();
+	A(0,0) = 2;
+	A(0,1) = 4;
+	A(1,0) = 1;
+	A(1,1) = 3;
+	
+	std::cout<<"SVD A\n"<<A<<"\n";
+	
+	SVD<Matrix<float, 4, 2> > solver(A);
+	
+	std::cout<<"U\n"<<solver.matrixU()<<"\n";
+	std::cout<<"V\n"<<solver.matrixV()<<"\n";
+	std::cout<<"S\n"<<solver.singularValues()<<"\n";
+}
+
 void valuePtr()
 {
     Matrix<double, 4, 4, Eigen::RowMajor> Rs;
@@ -142,6 +161,7 @@ int main()
     resizeTest();
     testSparse();
     valuePtr();
+	testSVD();
     return 0;
 }
 
