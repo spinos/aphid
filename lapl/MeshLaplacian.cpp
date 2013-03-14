@@ -52,6 +52,7 @@ char MeshLaplacian::computeMeanValueCoordinate()
 		}
 		m_adjacency[i].computeWeights();
 		m_adjacency[i].computeTangentFrame();
+		m_adjacency[i].computeDiscreteForms();
 		//m_adjacency[i].verbose();
 	}
 	return 1;
@@ -61,3 +62,9 @@ VertexAdjacency * MeshLaplacian::connectivity()
 {
 	return m_adjacency;
 }
+
+Matrix33F MeshLaplacian::getTangentFrame(const unsigned &idx) const
+{
+    return m_adjacency[idx].getTangentFrame();
+}
+

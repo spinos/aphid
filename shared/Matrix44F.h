@@ -38,6 +38,8 @@
 	Vector3F getFront() const;
 	void transposed(float * mat) const;
 	float v[16];
+	
+	static float Determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i );
  };
  
 

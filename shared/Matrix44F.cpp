@@ -208,3 +208,9 @@ void Matrix44F::transposed(float * mat) const
 	mat[14] = M(3, 2);
 	mat[15] = M(3, 3);
 }
+
+float Matrix44F::Determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i )
+{
+    return float( a*( e*i - h*f ) - b*( d*i - g*f ) + c*( d*h - g*e ) );
+}
+

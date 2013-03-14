@@ -10,6 +10,8 @@
 #include "VertexAdjacency.h"
 #include "Edge.h"
 #include "Facet.h"
+#include "Matrix44F.h"
+
 #include <cmath>
 VertexAdjacency::VertexAdjacency() {}
 VertexAdjacency::~VertexAdjacency() 
@@ -94,9 +96,10 @@ void VertexAdjacency::computeWeights()
 
 void VertexAdjacency::computeTangentFrame()
 {
-    m_normal = Vector3F(0.f, 0.f, 0.f);
     const unsigned numNeighbors = m_neighbors.size();
-	for(unsigned i = 0; i < numNeighbors; i++) {
+	
+    m_normal = Vector3F(0.f, 0.f, 0.f);
+    for(unsigned i = 0; i < numNeighbors; i++) {
 		Facet *f = m_neighbors[i]->f;
 		m_normal += f->getNormal() * f->getArea();
 	}
@@ -104,11 +107,42 @@ void VertexAdjacency::computeTangentFrame()
 	
 	const Vector3F x1 = *(m_neighbors[0]->v) - *this;
 	
-	m_binormal = x1.cross(m_normal);
-	m_binormal.normalize();
+	Vector3F binormal = x1.cross(m_normal);
+	binormal.normalize();
 	
-	m_tangent = m_normal.cross(m_binormal);
-	m_tangent.normalize();
+	Vector3F tangent = m_normal.cross(binormal);
+	tangent.normalize();
+	
+	m_tangentFrame.fill(tangent, binormal, m_normal);
+}
+
+void VertexAdjacency::computeDiscreteForms()
+{
+    float delta;
+    Vector3F x_hat_ij, vij0, x_hat_ij1;
+    Vector3F x_bar_ij, x_bar_ij1;
+    const unsigned numNeighbors = m_neighbors.size();
+    m_g1.resize(numNeighbors);
+    m_g2.resize(numNeighbors);
+    m_g3.resize(numNeighbors);
+    m_L.resize(numNeighbors);
+    m_O.resize(numNeighbors);
+    m_x_bar.resize(numNeighbors);
+    
+	for(unsigned i = 0; i < numNeighbors; i++) {
+		getVijs(i, x_hat_ij, vij0, x_hat_ij1);
+		x_bar_ij = m_normal.cross(x_hat_ij.cross(m_normal));
+		x_bar_ij1 = m_normal.cross(x_hat_ij1.cross(m_normal));
+		
+		delta = Matrix44F::Determinant33(x_bar_ij.x, x_bar_ij.y, x_bar_ij.z, x_bar_ij1.x, x_bar_ij1.y, x_bar_ij1.z, m_normal.x, m_normal.y, m_normal.z);
+		
+		m_g1[i] = x_bar_ij.dot(x_bar_ij);
+		m_g2[i] = x_bar_ij.dot(x_bar_ij1);
+		m_g3[i] = x_bar_ij1.dot(x_bar_ij1);
+		m_L[i] = x_hat_ij.dot(m_normal);
+		//m_O[i] = sign(delta);
+		m_x_bar[i] = x_bar_ij;
+	}
 }
 
 char VertexAdjacency::findOppositeEdge(Edge & e, Edge &dest) const
@@ -157,6 +191,11 @@ std::map<int,int> VertexAdjacency::getNeighborOrder() const
 	return m_idxInOrder;
 }
 
+unsigned VertexAdjacency::getNumNeighbors() const
+{
+    return (unsigned)m_neighbors.size();
+}
+
 void VertexAdjacency::getNeighbor(const int & idx, int & vertexIdx, float & weight) const
 {
 	vertexIdx = m_neighbors[idx]->v->getIndex();
@@ -201,6 +240,11 @@ void VertexAdjacency::getVijs(const int & idx, Vector3F &vij, Vector3F &vij0, Ve
         vij1 = *(m_neighbors[0]->v) - *this;
     else
         vij1 = *(m_neighbors[idx + 1]->v) - *this;
+}
+
+Matrix33F VertexAdjacency::getTangentFrame() const
+{
+    return m_tangentFrame;
 }
 
 void VertexAdjacency::verbose() const

@@ -4,6 +4,7 @@
 #include "TriangleMesh.h"
 #include <vector>
 class VertexAdjacency;
+class Matrix33F;
 class MeshLaplacian : public TriangleMesh {
 public:
     MeshLaplacian();
@@ -13,7 +14,7 @@ public:
 	char computeMeanValueCoordinate();
 	
 	VertexAdjacency * connectivity();
-	
+	Matrix33F getTangentFrame(const unsigned &idx) const;
 private:
     VertexAdjacency * m_adjacency;
 };

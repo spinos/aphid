@@ -1,36 +1,53 @@
-#include "LaplaceDeformer.h"
+#include "RotateInvariantDeformer.h"
 #include "VertexAdjacency.h"
 #include "MeshLaplacian.h"
-LaplaceDeformer::LaplaceDeformer() {}
-LaplaceDeformer::~LaplaceDeformer() {}
+RotateInvariantDeformer::RotateInvariantDeformer() {}
+RotateInvariantDeformer::~RotateInvariantDeformer() {}
 
-char LaplaceDeformer::fillM(const unsigned & numVertices, VertexAdjacency * adjacency)
+char RotateInvariantDeformer::fillM(const unsigned & numVertices, VertexAdjacency * adjacency)
 {
+    MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_mesh);
+    const unsigned numEdges = countEdges(numVertices, adjacency);
+    
 	std::map<int,int> ordered;
 	std::map<int,int>::iterator orderIt;
-	int neighborIdx, lastNeighbor;
+	int neighborIdx;
 	float neighborWei;
-	LaplaceMatrixType L(numVertices + 3, numVertices);
+	unsigned i3, j3;
+	
+	LaplaceMatrixType L(numEdges * 3, numVertices * 3);
 	L.setZero();
 	L.startFill();
+	
+	unsigned row = 0;
 	for(int i = 0; i < (int)numVertices; i++) {
 		VertexAdjacency & adj = adjacency[i];
-		lastNeighbor = -1;
+		Matrix33F Fi = adj.getTangentFrame();
+		
+		i3 = i * 3;
+
 		ordered = adj.getNeighborOrder();
 		for (orderIt= ordered.begin(); orderIt!= ordered.end(); ++orderIt) {
 			adj.getNeighbor(orderIt->second, neighborIdx, neighborWei);
-			if(neighborIdx > i && lastNeighbor < i) {
-				L.fill(i, i) = -1.0f;
+			
+			Matrix33F Fj = msh->getTangentFrame(neighborIdx);
+			Fj.transpose();
+			Matrix33F Rij = Fj.multiply(Fi);
+			
+			j3 = neighborIdx * 3;
+			
+			for ( int k = 0; k < 3; ++k ) {
+			    if(j3 < i3)
+				    L.fill( row+k, j3+k ) = neighborWei * -1.0f;
+				L.fill( row+k, i3+0 ) = neighborWei * Rij(k, 0);
+				L.fill( row+k, i3+1 ) = neighborWei * Rij(k, 1);
+				L.fill( row+k, i3+2 ) = neighborWei * Rij(k, 2);
+				if(j3 > i3)
+				    L.fill( row+k, j3+k ) = neighborWei * -1.0f;
 			}
-			L.fill(i, neighborIdx) = neighborWei;
-			lastNeighbor = neighborIdx; 
+			row += 3; 
 		}
-		if(lastNeighbor < i)
-			L.fill(i, i) = -1.0f;
 	}
-	L.fill(numVertices, 0) = 1.f;
-	L.fill(numVertices + 1, 47) = 1.f;
-	L.fill(numVertices + 2, 67) = 1.f;
 	L.endFill();
 	
 	m_LT = L.transpose();
@@ -40,7 +57,7 @@ char LaplaceDeformer::fillM(const unsigned & numVertices, VertexAdjacency * adja
     return 1;
 }
 
-char LaplaceDeformer::fillDelta(const unsigned & numVertices, VertexAdjacency * adjacency)
+char RotateInvariantDeformer::fillDelta(const unsigned & numVertices, VertexAdjacency * adjacency)
 {
 	m_delta[0].resize(numVertices + 3);
 	m_delta[1].resize(numVertices + 3);
@@ -69,7 +86,7 @@ char LaplaceDeformer::fillDelta(const unsigned & numVertices, VertexAdjacency * 
 	return 1;
 }
 
-void LaplaceDeformer::setMesh(BaseMesh * mesh)
+void RotateInvariantDeformer::setMesh(BaseMesh * mesh)
 {
 	m_mesh = mesh;
 	m_numVertices = mesh->getNumVertices();
@@ -82,7 +99,7 @@ void LaplaceDeformer::setMesh(BaseMesh * mesh)
 	fillDelta(m_numVertices, msh->connectivity());
 }
 
-char LaplaceDeformer::solve()
+char RotateInvariantDeformer::solve()
 {
 	m_llt.solveInPlace(m_delta[0]);
 	m_llt.solveInPlace(m_delta[1]);
@@ -94,4 +111,15 @@ char LaplaceDeformer::solve()
 		m_deformedV[i].z = m_delta[2](i);
 	}
 	return 1;
+}
+
+unsigned RotateInvariantDeformer::countEdges(const unsigned & numVertices, VertexAdjacency * adjacency)
+{
+    unsigned count = 0;
+    for(int i = 0; i < (int)numVertices; i++) {
+		VertexAdjacency & adj = adjacency[i];
+
+		count += adj.getNumNeighbors();
+	}
+	return count;
 }

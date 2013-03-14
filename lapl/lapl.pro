@@ -7,6 +7,7 @@ HEADERS       = glwidget.h \
                 window.h \
                 ../shared/Vector3F.h \
                 ../shared/Matrix44F.h \
+                ../shared/Matrix33F.h \
                 ../shared/BaseCamera.h \
                 ../shared/Base3DView.h \
                 ../shared/TypedEntity.h \
@@ -22,13 +23,15 @@ HEADERS       = glwidget.h \
                 ../shared/BaseDeformer.h \
                 MeshLaplacian.h \
                 VertexAdjacency.h \
-                LaplaceDeformer.h
+                LaplaceDeformer.h \
+                RotateInvariantDeformer.h
                 
 SOURCES       = glwidget.cpp \
                 main.cpp \
                 window.cpp \
                 ../shared/Vector3F.cpp \
                 ../shared/Matrix44F.cpp \
+                ../shared/Matrix33F.cpp \
                 ../shared/BaseCamera.cpp \
                 ../shared/Base3DView.cpp \
                 ../shared/TypedEntity.cpp \
@@ -44,7 +47,8 @@ SOURCES       = glwidget.cpp \
                 ../shared/BaseDeformer.cpp \
                 MeshLaplacian.cpp \
                 VertexAdjacency.cpp \
-                LaplaceDeformer.cpp
+                LaplaceDeformer.cpp \
+                RotateInvariantDeformer.cpp
 
 QT           += opengl
 win32:CONFIG += console
