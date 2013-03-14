@@ -12,7 +12,7 @@ public:
 	
 	char computeMeanValueCoordinate();
 	
-	virtual void initializeDeformer();
+	VertexAdjacency * connectivity();
 	
 private:
     VertexAdjacency * m_adjacency;

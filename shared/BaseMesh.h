@@ -10,7 +10,7 @@
 #pragma once
 #include <Vector3F.h>
 #include <Geometry.h>
-#include <BaseDeformer.h>
+
 class BaseMesh : public Geometry {
 public:
 	BaseMesh();
@@ -23,9 +23,6 @@ public:
 	const BoundingBox calculateBBox() const;
 	const BoundingBox calculateBBox(const unsigned &idx) const;
 	const int faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const;
-	
-	void attachDeformer(BaseDeformer * deformer);
-	virtual void initializeDeformer();
 	
 	Vector3F * vertices();
 	unsigned * indices();
@@ -42,6 +39,5 @@ public:
 	unsigned _numVertices;
 	unsigned _numFaces;
 	unsigned _numFaceVertices;
-	
-	BaseDeformer * m_deformer;
+
 };

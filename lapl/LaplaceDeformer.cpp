@@ -1,5 +1,6 @@
 #include "LaplaceDeformer.h"
 #include "VertexAdjacency.h"
+#include "MeshLaplacian.h"
 LaplaceDeformer::LaplaceDeformer() {}
 LaplaceDeformer::~LaplaceDeformer() {}
 
@@ -66,6 +67,19 @@ char LaplaceDeformer::fillDelta(const unsigned & numVertices, VertexAdjacency * 
 	m_delta[1] = m_LT * m_delta[1];
 	m_delta[2] = m_LT * m_delta[2];
 	return 1;
+}
+
+void LaplaceDeformer::setMesh(BaseMesh * mesh)
+{
+	m_mesh = mesh;
+	m_numVertices = mesh->getNumVertices();
+	m_deformedV = new Vector3F[m_numVertices];
+	
+	printf("init laplace deformer");
+	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_mesh);
+
+	fillM(m_numVertices, msh->connectivity());
+	fillDelta(m_numVertices, msh->connectivity());
 }
 
 char LaplaceDeformer::solve()

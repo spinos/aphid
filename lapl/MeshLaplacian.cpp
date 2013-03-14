@@ -57,12 +57,7 @@ char MeshLaplacian::computeMeanValueCoordinate()
 	return 1;
 }
 
-void MeshLaplacian::initializeDeformer()
+VertexAdjacency * MeshLaplacian::connectivity()
 {
-	printf("init laplace deformer");
-	LaplaceDeformer *laplace = static_cast <LaplaceDeformer *>(m_deformer);
-	const unsigned nv = getNumVertices();
-	
-	laplace->fillM(nv, m_adjacency);
-	laplace->fillDelta(nv, m_adjacency);
+	return m_adjacency;
 }

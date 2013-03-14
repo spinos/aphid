@@ -12,6 +12,8 @@ public:
     LaplaceDeformer();
     virtual ~LaplaceDeformer();
 	
+	virtual void setMesh(BaseMesh * mesh);
+	
 	virtual char solve();
 	
 	char fillM(const unsigned & numVertices, VertexAdjacency * adjacency);

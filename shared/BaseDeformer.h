@@ -1,13 +1,15 @@
 #pragma once
 
 #include <Vector3F.h>
+class BaseMesh;
 class BaseDeformer
 {
 public:
     
     BaseDeformer();
     virtual ~BaseDeformer();
-	void setNumVertices(const unsigned & nv);
+	
+	virtual void setMesh(BaseMesh * mesh);
 	
 	Vector3F * getDeformedData() const;
     
@@ -16,6 +18,8 @@ public:
     unsigned m_numVertices;
 	
 	Vector3F * m_deformedV;
+	
+	BaseMesh * m_mesh;
 private:
     
 };

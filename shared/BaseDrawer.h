@@ -9,7 +9,7 @@
 #pragma once
 
 #include <BaseMesh.h>
-
+#include <BaseDeformer.h>
 class BaseDrawer {
 public:
 	BaseDrawer () : m_wired(0) {}

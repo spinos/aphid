@@ -1,15 +1,16 @@
 #include "BaseDeformer.h"
-
+#include "BaseMesh.h"
 BaseDeformer::BaseDeformer() : m_deformedV(0) {}
 BaseDeformer::~BaseDeformer() 
 {
 	if(m_deformedV) delete[] m_deformedV;
 }
 
-void BaseDeformer::setNumVertices(const unsigned & nv)
+void BaseDeformer::setMesh(BaseMesh * mesh)
 {
-	m_numVertices = nv;
-	m_deformedV = new Vector3F[nv];
+	m_mesh = mesh;
+	m_numVertices = mesh->getNumVertices();
+	m_deformedV = new Vector3F[m_numVertices];
 }
 
 char BaseDeformer::solve()

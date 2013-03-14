@@ -64,7 +64,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_drawer = new BaseDrawer;
 	m_deformer = new LaplaceDeformer;
 	
-	m_mesh->attachDeformer(m_deformer);
+	m_deformer->setMesh(m_mesh);
 	m_deformer->solve();
 }
 //! [0]
