@@ -25,6 +25,16 @@ float Matrix33F::operator() (int i, int j) const
 	return v[i * 3 + j];
 }
 
+Vector3F Matrix33F::operator*( Vector3F other ) const
+{
+	Vector3F v;
+	v.x = M(0, 0) * other.x + M(0, 1) * other.y + M(0, 2) * other.z;
+	v.y = M(1, 0) * other.x + M(1, 1) * other.y + M(1, 2) * other.z;
+	v.z = M(2, 0) * other.x + M(2, 1) * other.y + M(2, 2) * other.z;
+	
+	return v;
+}
+
 Matrix33F Matrix33F::operator+( Matrix33F other ) const
 {
 	Matrix33F a;

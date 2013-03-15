@@ -6,7 +6,7 @@ MeshLaplacian::MeshLaplacian() {}
 
 MeshLaplacian::MeshLaplacian(const char * filename) : TriangleMesh(filename), m_adjacency(NULL)
 {
-	computeMeanValueCoordinate();
+	buildTopology();
 }
 
 MeshLaplacian::~MeshLaplacian() 
@@ -14,7 +14,7 @@ MeshLaplacian::~MeshLaplacian()
 	if(m_adjacency) delete[] m_adjacency;
 }
 
-char MeshLaplacian::computeMeanValueCoordinate()
+char MeshLaplacian::buildTopology()
 {
 	const unsigned nv = getNumVertices();
 	

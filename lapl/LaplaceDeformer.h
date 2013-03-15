@@ -27,6 +27,6 @@ private:
 	Eigen::VectorXf m_delta[3];
 	Eigen::SparseLLT<LaplaceMatrixType> m_llt;
 	Vector3F *m_ViVjWj;
-	Matrix33F *m_mRi;
+	Eigen::Matrix3f *m_mRi;
 	VertexAdjacency * m_topology;
 };

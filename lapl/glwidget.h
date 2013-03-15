@@ -47,6 +47,7 @@
 class MeshLaplacian;
 class LaplaceDeformer;
 class BaseDrawer;
+class KdTree;
 //! [0]
 class GLWidget : public Base3DView
 {
@@ -70,6 +71,7 @@ private:
     MeshLaplacian * m_mesh;
 	LaplaceDeformer * m_deformer;
     BaseDrawer * m_drawer;
+	KdTree * m_tree;
 private slots:
     void simulate();
 

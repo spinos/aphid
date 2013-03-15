@@ -11,7 +11,7 @@ public:
     MeshLaplacian(const char * filename);
     virtual ~MeshLaplacian();
 	
-	char computeMeanValueCoordinate();
+	char buildTopology();
 	
 	VertexAdjacency * connectivity();
 	Matrix33F getTangentFrame(const unsigned &idx) const;

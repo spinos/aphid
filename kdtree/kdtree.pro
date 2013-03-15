@@ -2,6 +2,7 @@ INCLUDEPATH += ../shared ./
 				
 CONFIG += release
 HEADERS       = ../shared/Vector3F.h \
+                ../shared/Matrix33F.h \
                 ../shared/Matrix44F.h \
                 ../shared/BaseCamera.h \
                 ../shared/shapeDrawer.h \
@@ -35,6 +36,7 @@ HEADERS       = ../shared/Vector3F.h \
                 SceneContainer.h \
                 RandomMesh.h
 SOURCES       = ../shared/Vector3F.cpp \
+                ../shared/Matrix33F.cpp \
                 ../shared/Matrix44F.cpp \
                 ../shared/BaseCamera.cpp \
                 ../shared/shapeDrawer.cpp \

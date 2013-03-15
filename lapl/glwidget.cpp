@@ -49,6 +49,7 @@
 #include "MeshLaplacian.h"
 #include "LaplaceDeformer.h"
 #include "BaseDrawer.h"
+#include <KdTree.h>
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -66,6 +67,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_deformer->setMesh(m_mesh);
 	m_deformer->solve();
+	
+	m_tree = new KdTree;
+	//m_tree->addMesh(m_mesh);
+	//m_tree->create();
 }
 //! [0]
 
@@ -82,7 +87,7 @@ void GLWidget::clientDraw()
 	m_drawer->setGrey(0.9f);
     m_drawer->drawMesh(m_mesh);
 	m_drawer->drawMesh(m_mesh, m_deformer);
-	//m_drawer->tangentFrame(m_mesh);
+	//m_drawer->drawKdTree(m_tree);
 }
 //! [7]
 

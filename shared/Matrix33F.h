@@ -14,6 +14,7 @@
 	~Matrix33F();
 	float Matrix33F::operator() (int i, int j);
 	float Matrix33F::operator() (int i, int j) const;
+	Vector3F operator*( Vector3F other ) const;
 	Matrix33F operator+( Matrix33F other ) const;	
 	void setIdentity();
 	
