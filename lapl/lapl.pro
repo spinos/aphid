@@ -23,8 +23,7 @@ HEADERS       = glwidget.h \
                 ../shared/BaseDeformer.h \
                 MeshLaplacian.h \
                 VertexAdjacency.h \
-                LaplaceDeformer.h \
-                RotateInvariantDeformer.h
+                LaplaceDeformer.h
                 
 SOURCES       = glwidget.cpp \
                 main.cpp \
@@ -47,8 +46,7 @@ SOURCES       = glwidget.cpp \
                 ../shared/BaseDeformer.cpp \
                 MeshLaplacian.cpp \
                 VertexAdjacency.cpp \
-                LaplaceDeformer.cpp \
-                RotateInvariantDeformer.cpp
+                LaplaceDeformer.cpp
 
 QT           += opengl
 win32:CONFIG += console

@@ -31,11 +31,17 @@ public:
 	void computeWeights();
 	void computeTangentFrame();
 
-	std::map<int,int> getNeighborOrder() const;
-	
 	unsigned getNumNeighbors() const;
-	void getNeighbor(const int & idx, int & vertexIdx, float & weight) const;
 	Matrix33F getTangentFrame() const;
+	
+	VertexNeighbor * firstNeighbor();
+	VertexNeighbor * nextNeighbor();
+	char isLastNeighbor();
+	
+	VertexNeighbor * firstNeighborOrderedByVertexIdx();
+	VertexNeighbor * nextNeighborOrderedByVertexIdx();
+	char isLastNeighborOrderedByVertexIdx();
+	
 	void verbose() const;
 private:
 	char findOppositeEdge(Edge & e, Edge & dest) const;
@@ -49,5 +55,6 @@ private:
 	std::map<int,int> m_idxInOrder;
 	Matrix33F m_tangentFrame;
 	Vector3F m_normal;
-	
+	std::vector<VertexNeighbor *>::iterator m_neighborIt;
+	std::map<int,int>::iterator m_orderedNeighborIt;
 };

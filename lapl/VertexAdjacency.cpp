@@ -149,20 +149,9 @@ char VertexAdjacency::findIncomming(Edge & eout, Edge & ein) const
 	return 0;
 }
 
-std::map<int,int> VertexAdjacency::getNeighborOrder() const
-{
-	return m_idxInOrder;
-}
-
 unsigned VertexAdjacency::getNumNeighbors() const
 {
     return (unsigned)m_neighbors.size();
-}
-
-void VertexAdjacency::getNeighbor(const int & idx, int & vertexIdx, float & weight) const
-{
-	vertexIdx = m_neighbors[idx]->v->getIndex();
-	weight = m_neighbors[idx]->weight;
 }
 
 void VertexAdjacency::addNeighbor(Edge &outgoing)
@@ -193,6 +182,42 @@ void VertexAdjacency::getVijs(const int & idx, Vector3F &vij, Vector3F &vij0, Ve
 Matrix33F VertexAdjacency::getTangentFrame() const
 {
     return m_tangentFrame;
+}
+
+VertexAdjacency::VertexNeighbor * VertexAdjacency::firstNeighbor()
+{
+    m_neighborIt = m_neighbors.begin();
+    return *m_neighborIt;
+}
+
+VertexAdjacency::VertexNeighbor * VertexAdjacency::nextNeighbor()
+{
+    m_neighborIt++;
+    if(isLastNeighbor()) return 0;
+    return *m_neighborIt;
+}
+
+char VertexAdjacency::isLastNeighbor()
+{
+    return m_neighborIt == m_neighbors.end();
+}
+
+VertexAdjacency::VertexNeighbor * VertexAdjacency::firstNeighborOrderedByVertexIdx()
+{
+    m_orderedNeighborIt = m_idxInOrder.begin();
+    return m_neighbors[m_orderedNeighborIt->second];
+}
+
+VertexAdjacency::VertexNeighbor * VertexAdjacency::nextNeighborOrderedByVertexIdx()
+{
+    m_orderedNeighborIt++;
+    if(isLastNeighborOrderedByVertexIdx()) return 0;
+    return m_neighbors[m_orderedNeighborIt->second];
+}
+
+char VertexAdjacency::isLastNeighborOrderedByVertexIdx()
+{
+    return m_orderedNeighborIt == m_idxInOrder.end();
 }
 
 void VertexAdjacency::verbose() const
