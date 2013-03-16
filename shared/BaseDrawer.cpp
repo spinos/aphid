@@ -280,6 +280,22 @@ void BaseDrawer::box(const BoundingBox & b)
 	end();
 }
 
+void BaseDrawer::triangle(const BaseMesh * mesh, unsigned idx)
+{
+	beginSolidTriangle();
+	Vector3F *v = mesh->getVertices();
+	unsigned *i = mesh->getIndices();
+	
+	Vector3F & a = v[i[idx * 3]];
+	Vector3F & b = v[i[idx * 3 + 2]];
+	Vector3F & c = v[i[idx * 3 + 1]];
+	
+	glVertex3f(a.x, a.y, a.z);
+	glVertex3f(b.x, b.y, b.z);
+	glVertex3f(c.x, c.y, c.z);
+	end();
+}
+
 void BaseDrawer::coordsys()
 {
 	glBegin( GL_LINES );

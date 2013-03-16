@@ -32,6 +32,7 @@ public:
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void box(const BoundingBox & b);
+	void triangle(const BaseMesh * mesh, unsigned idx);
 	void coordsys();
 	void setWired(char var);
 	

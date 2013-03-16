@@ -12,6 +12,8 @@
 RayIntersectionContext::RayIntersectionContext() 
 {
 	m_level = 0;
+	m_minHitDistance = 10e28;
+	m_success = 0;
 }
 
 RayIntersectionContext::~RayIntersectionContext() {}

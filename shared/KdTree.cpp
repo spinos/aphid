@@ -146,7 +146,7 @@ char KdTree::intersect(const Ray &ray, RayIntersectionContext & ctx)
 
 char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx)
 {
-	//printf("recus intersect level %i\n", ctx.m_level);
+	printf("recus intersect level %i\n", ctx.m_level);
 	if(node->isLeaf()) {
 		return leafIntersect(node, ray, ctx);
 	}
@@ -221,24 +221,32 @@ char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionCont
 	unsigned num = node->getNumPrims();
 	
 	printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
-	
 	IndexArray &indir = m_stream.indirection();
 	PrimitiveArray &prims = m_stream.primitives();
 	indir.setIndex(start);
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
-		
-		
+
 		Primitive * prim = prims.asPrimitive(*iprim);
 		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
 		unsigned iface = prim->getComponentIndex();
 		
-		printf("i prim %i i face %i", *iprim, iface);
+		//printf("i prim %i i face %i", *iprim, iface);
 		Vector3F hitP, hitN;
-		mesh->intersect(iface, ray, hitP, hitN);
+		float hitD;
+		if(mesh->intersect(iface, ray, hitP, hitN, hitD)) {
+			if(hitD < ctx.m_minHitDistance) {
+				ctx.m_minHitDistance = hitD;
+				ctx.m_hitP = hitP;
+				ctx.m_hitN = hitN;
+				ctx.m_geometry = mesh;
+				ctx.m_componentIdx = iface; 
+				ctx.m_success = 1;
+			}
+		}
 		indir.next();
 	}
-	
-	return 0;
+	if(ctx.m_success) printf("hit");
+	return ctx.m_success;
 }
 

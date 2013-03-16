@@ -42,9 +42,6 @@ public:
 		
 	KdTreeNode();
 	
-	void initLeafNode(unsigned int offset, unsigned numPrims);
-	void initInnerNode(int axis, float splitAt);
-	
 	void setSplitPos(float a_Pos );
 	float getSplitPos() const;
 	void setAxis( int a_Axis );
@@ -69,6 +66,5 @@ public:
 	};
 	
 private:
-	//float m_Split;
-	//unsigned long m_combined;
+
 };

@@ -12,19 +12,6 @@
 
 KdTreeNode::KdTreeNode() /*: m_combined( 6 )*/ {};
 
-void KdTreeNode::initLeafNode(unsigned int offset, unsigned numPrims)
-{
-	leaf.combined = (unsigned long) ETypeMask | offset;
-	leaf.end = offset + numPrims;
-}
-
-void KdTreeNode::initInnerNode(int axis, float splitAt)
-{
-	inner.combined = 6;
-	inner.combined = axis  + (inner.combined & EInnerAxisMask);
-	inner.split = splitAt;
-}
-
 void KdTreeNode::setSplitPos(float a_Pos ) 
 {
 	inner.split = a_Pos; 
