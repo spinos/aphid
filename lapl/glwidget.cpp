@@ -53,7 +53,7 @@
 #include <Ray.h>
 #include <RayIntersectionContext.h>
 
-static Vector3F rayo(14, 43, 8), raye(-20, -35, -17);
+static Vector3F rayo(14, 43, 8), raye(-20, -5, -17);
 
 static RayIntersectionContext intersectCtx;
 	
@@ -97,6 +97,7 @@ void GLWidget::clientDraw()
 	m_drawer->setGrey(0.9f);
     //m_drawer->drawMesh(m_mesh);
 	m_drawer->drawMesh(m_mesh, m_deformer);
+	
 	m_drawer->drawKdTree(m_tree);
 	
 	glBegin(GL_LINES);

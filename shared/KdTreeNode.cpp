@@ -6,49 +6,83 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-
+#include <iostream>
+#include <APhid.h>
 #include "KdTreeNode.h"
 
-KdTreeNode::KdTreeNode() : m_combined( 6 ) {};
+KdTreeNode::KdTreeNode() /*: m_combined( 6 )*/ {};
+
+void KdTreeNode::initLeafNode(unsigned int offset, unsigned numPrims)
+{
+	leaf.combined = (unsigned long) ETypeMask | offset;
+	leaf.end = offset + numPrims;
+}
+
+void KdTreeNode::initInnerNode(int axis, float splitAt)
+{
+	inner.combined = 6;
+	inner.combined = axis  + (inner.combined & EInnerAxisMask);
+	inner.split = splitAt;
+}
 
 void KdTreeNode::setSplitPos(float a_Pos ) 
 {
-	m_Split = a_Pos; 
+	inner.split = a_Pos; 
 }
 
 float KdTreeNode::getSplitPos() const
 { 
-	return m_Split; 
+	return inner.split; 
 }
 
 void KdTreeNode::setAxis( int a_Axis ) 
 { 
-	m_combined = a_Axis + (m_combined & EInnerAxisMask); 
+	inner.combined = a_Axis + (inner.combined & EInnerAxisMask); 
 }
 
 int KdTreeNode::getAxis() const
 { 
-	return m_combined & (~EInnerAxisMask); 
+	return inner.combined & (~EInnerAxisMask); 
 }
 
 void KdTreeNode::setLeaf( bool a_Leaf ) 
 { 
-	m_combined = (a_Leaf) ? (m_combined | ~ETypeMask):(m_combined & ETypeMask); 
+	leaf.combined = (a_Leaf) ? (leaf.combined | ~ETypeMask):(leaf.combined & ETypeMask); 
+}
+
+void KdTreeNode::setPrimStart(unsigned long offset)
+{
+	leaf.combined = offset + (inner.combined & ELeafOffsetMask);
+}
+
+void KdTreeNode::setNumPrims(unsigned long numPrims)
+{
+	leaf.end = numPrims;
+}
+
+unsigned long KdTreeNode::getPrimStart() const 
+{
+	return leaf.combined & ~ELeafOffsetMask;
+}
+
+unsigned long KdTreeNode::getNumPrims() const 
+{
+	return leaf.end;
 }
 
 bool KdTreeNode::isLeaf() const
-{ 
-	return ((m_combined & ~ETypeMask) > 0); 
+{
+	return ((leaf.combined & ~ETypeMask) > 0); 
 }
 
 void KdTreeNode::setLeft( KdTreeNode* a_Left )
 { 
-	m_combined = (unsigned long)a_Left + (m_combined & EIndirectionMask); 
+	inner.combined = (unsigned long)a_Left + (inner.combined & EIndirectionMask); 
 }
 
 KdTreeNode* KdTreeNode::getLeft() const
 { 
-	return (KdTreeNode*)(m_combined & ~EIndirectionMask); 
+	return (KdTreeNode*)(inner.combined & ~EIndirectionMask); 
 }
 
 KdTreeNode* KdTreeNode::getRight() const 

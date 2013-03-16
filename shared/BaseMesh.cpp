@@ -142,6 +142,11 @@ Matrix33F BaseMesh::getTangentFrame(const unsigned& idx) const
 {
 	return Matrix33F();
 }
+
+char BaseMesh::intersect(unsigned idx, const Ray & ray, Vector3F &hitP, Vector3F& hitN) const
+{
+	return 0;
+}
 /*
 Triangle * BaseMesh::getFace(unsigned idx) const
 {

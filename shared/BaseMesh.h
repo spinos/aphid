@@ -11,7 +11,7 @@
 #include <Vector3F.h>
 #include <Matrix33F.h>
 #include <Geometry.h>
-
+#include <Ray.h>
 class BaseMesh : public Geometry {
 public:
 	BaseMesh();
@@ -34,6 +34,8 @@ public:
 	Vector3F * getVertices() const;
 	unsigned * getIndices() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
+	
+	char intersect(unsigned idx, const Ray & ray, Vector3F &hitP, Vector3F& hitN) const;
 	
 	Vector3F * _vertices;
 	unsigned * _indices;

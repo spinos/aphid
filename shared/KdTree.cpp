@@ -13,27 +13,15 @@
 #include <RayIntersectionContext.h>
 #include <QElapsedTimer>
 
-const char *byte_to_binary(int x)
-{
-    static char b[33];
-    b[32] = '\0';
-
-    for (int z = 0; z < 32; z++) {
-        b[31-z] = ((x>>z) & 0x1) ? '1' : '0';
-    }
-
-    return b;
-
-}
-
 KdTree::KdTree() 
 {
 	m_root = new KdTreeNode;
-	/*
+	
 	printf("axis mask        %s\n", byte_to_binary(KdTreeNode::EInnerAxisMask));
 	printf("type        mask %s\n", byte_to_binary(KdTreeNode::ETypeMask));
 	printf("indirection mask %s\n", byte_to_binary(KdTreeNode::EIndirectionMask));
-	
+	printf("leaf offset mask %s\n", byte_to_binary(KdTreeNode::ELeafOffsetMask));
+	/*
 	printf("32 bit align mask %s\n", byte_to_binary(0xffffffff - 31));
 	
 	unsigned lc = 127;
@@ -94,11 +82,14 @@ void KdTree::create()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 64 || level == 22) {
-		node->setLeaf(true);
+	if(ctx.getNumPrimitives() < 32 || level == 22) {
 		if(ctx.getNumPrimitives() > 0) {
 			IndexArray &indir = m_stream.indirection();
 			unsigned numDir = ctx.getNumPrimitives();
+			
+			node->setPrimStart(indir.index());
+			node->setNumPrims(numDir);
+			
 			indir.expandBy(numDir);
 			unsigned *src = ctx.indices();
 			for(unsigned i = 0; i < numDir; i++) {
@@ -107,6 +98,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 				indir.next();
 			}
 		}
+		node->setLeaf(true);
 		return;
 	}
 	
@@ -141,7 +133,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	delete rightCtx;
 }
 
-char KdTree::intersect(const Ray &ray, RayIntersectionContext & ctx) const
+char KdTree::intersect(const Ray &ray, RayIntersectionContext & ctx)
 {
 	float hitt0, hitt1;
 	if(!m_bbox.intersect(ray, &hitt0, &hitt1)) return 0;
@@ -149,15 +141,14 @@ char KdTree::intersect(const Ray &ray, RayIntersectionContext & ctx) const
 	ctx.setBBox(m_bbox);
 
 	KdTreeNode * root = getRoot();
-	return recus_intersect(root, ray, ctx);
+	return recusiveIntersect(root, ray, ctx);
 }
 
-char KdTree::recus_intersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx) const
+char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx)
 {
-	printf("recus intersect level %i\n", ctx.m_level);
+	//printf("recus intersect level %i\n", ctx.m_level);
 	if(node->isLeaf()) {
-		printf("reached leaf\n");
-		return 1;
+		return leafIntersect(node, ray, ctx);
 	}
 	const int axis = node->getAxis();
 	
@@ -191,42 +182,63 @@ char KdTree::recus_intersect(KdTreeNode *node, const Ray &ray, RayIntersectionCo
 	if(bigBox.isPointInside(pplane)) {
 		ctx.setBBox(nearBox);
 		ctx.m_level++;
-		if(recus_intersect(nearNode, ray, ctx)) return 1;
-	
+		if(recusiveIntersect(nearNode, ray, ctx)) return 1;
 	
 		if(tplane < ray.m_tmin || tplane > ray.m_tmax)
 			return 0;
 		
 		ctx.setBBox(farBox);
 		ctx.m_level--;
-		if(recus_intersect(farNode, ray, ctx)) return 1;
+		if(recusiveIntersect(farNode, ray, ctx)) return 1;
 	}
 	else {
-		float hitt0, hitt1;
-		bigBox.intersect(ray, &hitt0, &hitt1);
-		printf("plane t %f ", tplane);
-		printf("hit t0 %f ", hitt0);
-		printf("hit t1 %f \n", hitt1);
 		if(tplane > 0) {
+			float hitt0, hitt1;
+			bigBox.intersect(ray, &hitt0, &hitt1);
 			if(tplane > hitt1) {
-				printf("near\n");
 				ctx.setBBox(nearBox);
 				ctx.m_level++;
-				if(recus_intersect(nearNode, ray, ctx)) return 1;
+				if(recusiveIntersect(nearNode, ray, ctx)) return 1;
 			}
 			else {
-				printf("far\n");
 				ctx.setBBox(farBox);
 				ctx.m_level++;
-				if(recus_intersect(farNode, ray, ctx)) return 1;
+				if(recusiveIntersect(farNode, ray, ctx)) return 1;
 			}
 		}
 		else {
-			printf("near\n");
 				ctx.setBBox(nearBox);
 				ctx.m_level++;
-				if(recus_intersect(nearNode, ray, ctx)) return 1;
+				if(recusiveIntersect(nearNode, ray, ctx)) return 1;
 		}
 	}
 	return 0;
 }
+
+char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx)
+{
+	unsigned start = node->getPrimStart();
+	unsigned num = node->getNumPrims();
+	
+	printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
+	
+	IndexArray &indir = m_stream.indirection();
+	PrimitiveArray &prims = m_stream.primitives();
+	indir.setIndex(start);
+	for(unsigned i = 0; i < num; i++) {
+		unsigned *iprim = indir.asIndex();
+		
+		
+		Primitive * prim = prims.asPrimitive(*iprim);
+		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
+		unsigned iface = prim->getComponentIndex();
+		
+		printf("i prim %i i face %i", *iprim, iface);
+		Vector3F hitP, hitN;
+		mesh->intersect(iface, ray, hitP, hitN);
+		indir.next();
+	}
+	
+	return 0;
+}
+
