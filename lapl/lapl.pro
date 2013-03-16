@@ -16,6 +16,7 @@ HEADERS       = glwidget.h \
                 ../shared/BoundingBox.h \
                 ../shared/TriangleMesh.h \
                 ../shared/BaseDrawer.h \
+				../shared/KdTreeDrawer.h \
                 ../shared/GeoElement.h \
                 ../shared/Vertex.h \
                 ../shared/Edge.h \
@@ -54,6 +55,7 @@ SOURCES       = glwidget.cpp \
                 ../shared/BaseMesh.cpp \
                 ../shared/TriangleMesh.cpp \
                 ../shared/BaseDrawer.cpp \
+				../shared/KdTreeDrawer.cpp \
                 ../shared/GeoElement.cpp \
                 ../shared/Vertex.cpp \
                 ../shared/Edge.cpp \

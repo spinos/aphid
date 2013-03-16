@@ -9,7 +9,7 @@
 
 #include "MinMaxBins.h"
 
-MinMaxBins::MinMaxBins() {}
+MinMaxBins::MinMaxBins() : m_isFlat(0) {}
 MinMaxBins::~MinMaxBins() 
 {
 	delete[] m_minBin;
@@ -58,4 +58,14 @@ void MinMaxBins::validateIdx(int &idx) const
 {
 	if(idx < 0) idx = 0;
 	else if(idx > (int)m_binSize - 1) idx = m_binSize - 1;
+}
+
+char MinMaxBins::isFlat() const
+{
+	return m_isFlat;
+}
+
+void MinMaxBins::setFlat()
+{
+	m_isFlat = 1;
 }

@@ -33,6 +33,11 @@ void KdTreeBuilder::calculateBins()
 	BoundingBox *primBoxes = m_context->boxes();
 	m_bins = new MinMaxBins[SplitEvent::Dimension];
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		//printf("bbox size %f\n", m_bbox.getMax(axis) - m_bbox.getMin(axis));
+		if(m_bbox.getMax(axis) - m_bbox.getMin(axis) < 10e-3) {
+			m_bins[axis].setFlat();
+			continue;
+		}
 		m_bins[axis].create(33, m_bbox.getMin(axis), m_bbox.getMax(axis));
 	
 		for(unsigned i = 0; i < m_numPrimitive; i++) {
@@ -53,6 +58,9 @@ void KdTreeBuilder::calculateSplitEvents()
 	int eventIdx = 0;
 	unsigned leftNumPrim, rightNumPrim;
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat())
+			continue;
+			
 		const float min = m_bbox.getMin(axis);
 		const float max = m_bbox.getMax(axis);
 		const float delta = (max - min) / 33.f;
@@ -79,10 +87,14 @@ void KdTreeBuilder::calculateSplitEvents()
 
 	boost::thread boxThread[3];
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat())
+			continue;
 		boxThread[axis] = boost::thread(boost::bind(&KdTreeBuilder::updateEventBBoxAlong, this, axis));
 	}
 	
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat())
+			continue;
 		boxThread[axis].join();
 	}
 	
@@ -132,8 +144,9 @@ const SplitEvent *KdTreeBuilder::bestSplit()
 			m_bestEventIdx = i;
 		}
 	}
+	
 	cutoffEmptySpace();
-	//calculateSides();
+	
 	return &m_event[m_bestEventIdx];
 }
 
@@ -141,6 +154,12 @@ void KdTreeBuilder::cutoffEmptySpace()
 {
 	IndexLimit emptySpace[3];
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat()) {
+			emptySpace[axis].low = 100;
+			emptySpace[axis].low = 99;
+			continue;
+		}
+			
 		float preCost = -1.f;
 		int eventStart = 32 * axis;
 		EmptySpace cutoff;
@@ -179,6 +198,8 @@ void KdTreeBuilder::cutoffEmptySpace()
 	float maxEmptySpace = -1.f;
 	int maxEmptyAxis = -1;
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat())
+			continue;
 		if(emptyArea[axis] > maxEmptySpace) {
 			maxEmptySpace = emptyArea[axis];
 			maxEmptyAxis = axis;
@@ -187,11 +208,17 @@ void KdTreeBuilder::cutoffEmptySpace()
 	
 	if(maxEmptySpace < 0.f || maxEmptyAxis < 0) return;
 	
+	if(emptySpace[maxEmptyAxis].high > 29 || emptySpace[maxEmptyAxis].low < 2 ) return;
+	
 	//printf("%i: empty %i - %i\n", maxEmptyAxis, emptySpace[maxEmptyAxis].low, emptySpace[maxEmptyAxis].high);
+	
 	if(emptySpace[maxEmptyAxis].low == 0)
 		m_bestEventIdx = maxEmptyAxis * 32 + emptySpace[maxEmptyAxis].high;
 	else
 		m_bestEventIdx = maxEmptyAxis * 32 + emptySpace[maxEmptyAxis].low;
+		
+	//printf("space of split %f\n", m_bbox.getMax(maxEmptyAxis) - m_bbox.getMin(maxEmptyAxis));
+
 }
 
 unsigned KdTreeBuilder::numEvents() const

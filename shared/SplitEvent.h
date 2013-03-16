@@ -48,4 +48,5 @@ private:
 	int m_axis;
 	float m_cost;
 	unsigned m_leftNumPrim, m_rightNumPrim;
+	char m_isEmpty;
 };

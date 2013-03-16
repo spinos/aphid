@@ -17,6 +17,8 @@ public:
 	void add(const float &min, const float &max);
 	void scan();
 	void get(const unsigned &idx, unsigned &left, unsigned &right) const;
+	char isFlat() const;
+	void setFlat();
 	
 private:
 	void validateIdx(int &idx) const;
@@ -24,4 +26,5 @@ private:
 	unsigned *m_maxBin;
 	unsigned m_binSize;
 	float m_boundLeft, m_delta;
+	char m_isFlat;
 };

@@ -46,7 +46,7 @@
 #include <Base3DView.h>
 class MeshLaplacian;
 class LaplaceDeformer;
-class BaseDrawer;
+class KdTreeDrawer;
 class KdTree;
 //! [0]
 class GLWidget : public Base3DView
@@ -70,7 +70,7 @@ protected:
 private:
     MeshLaplacian * m_mesh;
 	LaplaceDeformer * m_deformer;
-    BaseDrawer * m_drawer;
+    KdTreeDrawer * m_drawer;
 	KdTree * m_tree;
 private slots:
     void simulate();

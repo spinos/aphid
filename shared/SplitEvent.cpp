@@ -12,9 +12,9 @@
 int SplitEvent::Dimension = 3;
 float SplitEvent::ParentBoxArea = 1.f;
 
-SplitEvent::SplitEvent() 
+SplitEvent::SplitEvent() : m_isEmpty(1)
 {
-	m_cost = 10e8;
+	m_cost = 10e32;
 }
 
 void SplitEvent::setPos(float val)
@@ -24,6 +24,7 @@ void SplitEvent::setPos(float val)
 
 void SplitEvent::setAxis(int val)
 {
+	m_isEmpty = 0;
 	m_axis = val;
 }
 	
@@ -104,7 +105,7 @@ void SplitEvent::calculateCost()
 	
 	m_cost = 15.f + 20.f * (leftBBox.area() * m_leftNumPrim + rightBBox.area() * m_rightNumPrim) / ParentBoxArea;
 	*/
-	
+	if(m_isEmpty) return;
 	m_cost = 150.f + 200.f * (m_leftBox.area() * m_leftNumPrim + m_rightBox.area() * m_rightNumPrim) / ParentBoxArea;
 	
 }

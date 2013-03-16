@@ -48,7 +48,7 @@
 
 #include "MeshLaplacian.h"
 #include "LaplaceDeformer.h"
-#include "BaseDrawer.h"
+#include "KdTreeDrawer.h"
 #include <KdTree.h>
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -62,15 +62,15 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 #else	
 	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/lapl/cube.m");
 #endif
-	m_drawer = new BaseDrawer;
+	m_drawer = new KdTreeDrawer;
 	m_deformer = new LaplaceDeformer;
 	
 	m_deformer->setMesh(m_mesh);
 	m_deformer->solve();
 	
 	m_tree = new KdTree;
-	//m_tree->addMesh(m_mesh);
-	//m_tree->create();
+	m_tree->addMesh(m_mesh);
+	m_tree->create();
 }
 //! [0]
 

@@ -143,7 +143,7 @@ char LaplaceDeformer::fillDelta()
 	Matrix33F rot;
 	rot.fill(side, up, front);
 	
-	Vector3F trans(18, 29, 0);
+	Vector3F trans(28, 19, 0);
 	Vector3F a = rot.transform(Vector3F(-4, 0, 4)) + trans;
 	m_delta[0](m_numVertices + 4) = a.x * 0.5f;
 	m_delta[1](m_numVertices + 4) = a.y * 0.5f;
