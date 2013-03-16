@@ -7,7 +7,10 @@
  *
  */
 #include <iostream>
+#include <APhid.h>
 #include "KdTree.h"
+#include <Ray.h>
+#include <RayIntersectionContext.h>
 #include <QElapsedTimer>
 
 const char *byte_to_binary(int x)
@@ -26,6 +29,7 @@ const char *byte_to_binary(int x)
 KdTree::KdTree() 
 {
 	m_root = new KdTreeNode;
+	/*
 	printf("axis mask        %s\n", byte_to_binary(KdTreeNode::EInnerAxisMask));
 	printf("type        mask %s\n", byte_to_binary(KdTreeNode::ETypeMask));
 	printf("indirection mask %s\n", byte_to_binary(KdTreeNode::EIndirectionMask));
@@ -46,7 +50,7 @@ KdTree::KdTree()
 	printf("node sz %d\n", (int)sizeof(KdTreeNode));
 	printf("prim sz %d\n", (int)sizeof(Primitive));
 	printf("event sz %d\n", (int)sizeof(SplitEvent));
-	printf("bbox sz %d\n", (int)sizeof(BoundingBox));
+	printf("bbox sz %d\n", (int)sizeof(BoundingBox));*/
 }
 
 KdTree::~KdTree() 
@@ -72,7 +76,7 @@ void KdTree::addMesh(BaseMesh* mesh)
 void KdTree::create()
 {	
 	printf("input primitive count %d\n", m_stream.getNumPrimitives());
-	printf("tree bbox: %f %f %f - %f %f %f\n", m_bbox.m_min_x, m_bbox.m_min_y, m_bbox.m_min_z, m_bbox.m_max_x, m_bbox.m_max_y, m_bbox.m_max_z);
+	printf("tree bbox: %f %f %f - %f %f %f\n", m_bbox.min(0), m_bbox.min(1), m_bbox.min(2), m_bbox.max(0), m_bbox.max(1), m_bbox.max(2));
 	
 	QElapsedTimer timer;
 	timer.start();
@@ -135,4 +139,94 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 		subdivide(branch + 1, *rightCtx, level + 1);
 		
 	delete rightCtx;
+}
+
+char KdTree::intersect(const Ray &ray, RayIntersectionContext & ctx) const
+{
+	float hitt0, hitt1;
+	if(!m_bbox.intersect(ray, &hitt0, &hitt1)) return 0;
+	
+	ctx.setBBox(m_bbox);
+
+	KdTreeNode * root = getRoot();
+	return recus_intersect(root, ray, ctx);
+}
+
+char KdTree::recus_intersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx) const
+{
+	printf("recus intersect level %i\n", ctx.m_level);
+	if(node->isLeaf()) {
+		printf("reached leaf\n");
+		return 1;
+	}
+	const int axis = node->getAxis();
+	
+	const float splitPos = node->getSplitPos();
+	const float invRayDir = 1.f / ray.m_dir.comp(axis);
+	const Vector3F o = ray.m_origin;
+	const float origin = ray.m_origin.comp(axis);
+	char belowPlane = (origin < splitPos || (origin == splitPos && ray.m_dir.comp(axis) <= 0.f));
+	
+	BoundingBox leftBox, rightBox;
+	BoundingBox bigBox = ctx.getBBox();
+	bigBox.split(axis, splitPos, leftBox, rightBox);
+	
+	KdTreeNode *nearNode, *farNode;
+	BoundingBox nearBox, farBox;
+	if(belowPlane) {
+		nearNode = node->getLeft();
+		farNode = node->getRight();
+		nearBox = leftBox;
+		farBox = rightBox;
+	}
+	else {
+		farNode = node->getLeft();
+		nearNode = node->getRight();
+		farBox = leftBox;
+		nearBox = rightBox;
+	}
+	float tplane = (splitPos - origin) * invRayDir;
+	Vector3F pplane = ray.m_origin + ray.m_dir * tplane;
+
+	if(bigBox.isPointInside(pplane)) {
+		ctx.setBBox(nearBox);
+		ctx.m_level++;
+		if(recus_intersect(nearNode, ray, ctx)) return 1;
+	
+	
+		if(tplane < ray.m_tmin || tplane > ray.m_tmax)
+			return 0;
+		
+		ctx.setBBox(farBox);
+		ctx.m_level--;
+		if(recus_intersect(farNode, ray, ctx)) return 1;
+	}
+	else {
+		float hitt0, hitt1;
+		bigBox.intersect(ray, &hitt0, &hitt1);
+		printf("plane t %f ", tplane);
+		printf("hit t0 %f ", hitt0);
+		printf("hit t1 %f \n", hitt1);
+		if(tplane > 0) {
+			if(tplane > hitt1) {
+				printf("near\n");
+				ctx.setBBox(nearBox);
+				ctx.m_level++;
+				if(recus_intersect(nearNode, ray, ctx)) return 1;
+			}
+			else {
+				printf("far\n");
+				ctx.setBBox(farBox);
+				ctx.m_level++;
+				if(recus_intersect(farNode, ray, ctx)) return 1;
+			}
+		}
+		else {
+			printf("near\n");
+				ctx.setBBox(nearBox);
+				ctx.m_level++;
+				if(recus_intersect(nearNode, ray, ctx)) return 1;
+		}
+	}
+	return 0;
 }

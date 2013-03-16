@@ -27,7 +27,7 @@ public:
 	Vector3F operator+( Vector3F other ) const;	
 	Vector3F operator+( Vector3F& other ) const;
 	Vector3F operator-( Vector3F other ) const;		
-	Vector3F operator-( Vector3F& other ) const;	
+	Vector3F operator-( Vector3F& other ) const;
 	
 	float length() const;
 	
@@ -42,6 +42,8 @@ public:
 	
 	void rotateAroundAxis(const Vector3F& axis, float theta);
 	Vector3F perpendicular() const;
+	
+	float comp(int dim) const;
 
 	float x,y,z;
 };

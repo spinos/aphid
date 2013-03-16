@@ -14,7 +14,7 @@
 #include <Primitive.h>
 #include <BuildKdTreeStream.h>
 #include <KdTreeBuilder.h>
-
+class RayIntersectionContext;
 typedef Primitive * primitivePtr;
 	
 class KdTree
@@ -28,11 +28,13 @@ public:
 	void addMesh(BaseMesh* mesh);
 	void create();
 	
-	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
+	char intersect(const Ray &ray, RayIntersectionContext & ctx) const;
 
 	BoundingBox m_bbox;
 	
-private:	
+private:
+	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
+	char recus_intersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx) const;
 	BuildKdTreeStream m_stream;
 	KdTreeNode *m_root;
 };

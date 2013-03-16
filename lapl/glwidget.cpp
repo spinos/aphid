@@ -50,6 +50,13 @@
 #include "LaplaceDeformer.h"
 #include "KdTreeDrawer.h"
 #include <KdTree.h>
+#include <Ray.h>
+#include <RayIntersectionContext.h>
+
+static Vector3F rayo(14, 43, 8), raye(-20, -35, -17);
+
+static RayIntersectionContext intersectCtx;
+	
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -71,6 +78,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_tree = new KdTree;
 	m_tree->addMesh(m_mesh);
 	m_tree->create();
+	
+	Ray ray(rayo, raye);
+	m_tree->intersect(ray, intersectCtx);
 }
 //! [0]
 
@@ -85,9 +95,20 @@ void GLWidget::clientDraw()
 {
     m_drawer->setWired(1);
 	m_drawer->setGrey(0.9f);
-    m_drawer->drawMesh(m_mesh);
+    //m_drawer->drawMesh(m_mesh);
 	m_drawer->drawMesh(m_mesh, m_deformer);
-	//m_drawer->drawKdTree(m_tree);
+	m_drawer->drawKdTree(m_tree);
+	
+	glBegin(GL_LINES);
+	glColor3f(1,0,0);
+	glVertex3f(rayo.x, rayo.y, rayo.z);
+	glColor3f(0,0,1);
+	glVertex3f(raye.x, raye.y, raye.z);
+	glEnd();
+	m_drawer->setWired(0);
+	m_drawer->setColor(0.f, 1.f, 0.4f);
+
+	m_drawer->box(intersectCtx.getBBox());
 }
 //! [7]
 

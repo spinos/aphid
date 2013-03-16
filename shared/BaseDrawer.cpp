@@ -242,6 +242,44 @@ void BaseDrawer::tangentFrame(const BaseMesh * mesh, const BaseDeformer * deform
 	}
 }
 
+void BaseDrawer::box(const BoundingBox & b)
+{
+	beginQuad();
+	Vector3F corner0(b.min(0), b.min(1), b.min(2));
+	Vector3F corner1(b.max(0), b.max(1), b.max(2));
+
+	glVertex3f(corner0.x, corner0.y, corner0.z);
+	glVertex3f(corner1.x, corner0.y, corner0.z);
+	glVertex3f(corner1.x, corner1.y, corner0.z);
+	glVertex3f(corner0.x, corner1.y, corner0.z);
+	
+	glVertex3f(corner0.x, corner0.y, corner1.z);
+	glVertex3f(corner0.x, corner1.y, corner1.z);
+	glVertex3f(corner1.x, corner1.y, corner1.z);
+	glVertex3f(corner1.x, corner0.y, corner1.z);
+	
+	glVertex3f(corner0.x, corner0.y, corner0.z);
+	glVertex3f(corner0.x, corner0.y, corner1.z);
+	glVertex3f(corner0.x, corner1.y, corner1.z);
+	glVertex3f(corner0.x, corner1.y, corner0.z);
+	
+	glVertex3f(corner1.x, corner0.y, corner0.z);
+	glVertex3f(corner1.x, corner1.y, corner0.z);
+	glVertex3f(corner1.x, corner1.y, corner1.z);
+	glVertex3f(corner1.x, corner0.y, corner1.z);
+	
+	glVertex3f(corner0.x, corner0.y, corner0.z);
+	glVertex3f(corner0.x, corner0.y, corner1.z);
+	glVertex3f(corner1.x, corner0.y, corner1.z);
+	glVertex3f(corner1.x, corner0.y, corner0.z);
+	
+	glVertex3f(corner0.x, corner1.y, corner0.z);
+	glVertex3f(corner0.x, corner1.y, corner1.z);
+	glVertex3f(corner1.x, corner1.y, corner1.z);
+	glVertex3f(corner1.x, corner1.y, corner0.z);
+	end();
+}
+
 void BaseDrawer::coordsys()
 {
 	glBegin( GL_LINES );

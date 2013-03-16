@@ -10,6 +10,7 @@
 
 #include <BaseMesh.h>
 #include <BaseDeformer.h>
+#include <BoundingBox.h>
 class BaseDrawer {
 public:
 	BaseDrawer () : m_wired(0) {}
@@ -30,6 +31,7 @@ public:
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
+	void box(const BoundingBox & b);
 	void coordsys();
 	void setWired(char var);
 	

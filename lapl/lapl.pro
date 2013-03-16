@@ -6,6 +6,8 @@ win32:LIBS +=  -LD:/usr/local/lib64 -leasymodel -LD:/usr/libxml2x64/lib -llibxml
 HEADERS       = glwidget.h \
                 window.h \
                 ../shared/Vector3F.h \
+				../shared/Ray.h \
+				../shared/RayIntersectionContext.h \
                 ../shared/Matrix44F.h \
                 ../shared/Matrix33F.h \
                 ../shared/BaseCamera.h \
@@ -45,6 +47,8 @@ SOURCES       = glwidget.cpp \
                 main.cpp \
                 window.cpp \
                 ../shared/Vector3F.cpp \
+				../shared/Ray.cpp \
+				../shared/RayIntersectionContext.cpp \
                 ../shared/Matrix44F.cpp \
                 ../shared/Matrix33F.cpp \
                 ../shared/BaseCamera.cpp \

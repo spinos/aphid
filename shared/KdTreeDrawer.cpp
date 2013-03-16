@@ -30,9 +30,10 @@ void KdTreeDrawer::drawKdTree(const KdTree * tree)
 
 void KdTreeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox)
 {
-	Vector3F corner0(bbox.m_min_x, bbox.m_min_y, bbox.m_min_z);
-	Vector3F corner1(bbox.m_max_x, bbox.m_max_y, bbox.m_max_z);
 	if(tree->isLeaf()) return;
+	
+	Vector3F corner0(bbox.min(0), bbox.min(1), bbox.min(2));
+	Vector3F corner1(bbox.max(0), bbox.max(1), bbox.max(2));
 
 	glVertex3f(corner0.x, corner0.y, corner0.z);
 	glVertex3f(corner1.x, corner0.y, corner0.z);

@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <Vector3F.h>
+class Ray;
 class BoundingBox {
 public:
 	BoundingBox();
@@ -26,7 +27,10 @@ public:
 	
 	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
 	void expandBy(const BoundingBox &another);
+	char intersect(const Ray &ray, float *hitt0, float *hitt1) const;
+	char isPointInside(const Vector3F & p) const;
 	
-	float m_min_x, m_min_y, m_min_z, m_max_x, m_max_y, m_max_z;
-	float na, nb;
+	float min(int axis) const;
+	float max(int axis) const;
+	float m_data[6];
 };

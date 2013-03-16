@@ -205,3 +205,10 @@ Vector3F Vector3F::perpendicular() const
 	per.normalize();
 	return per;
 }
+
+float Vector3F::comp(int dim) const
+{
+	if(dim < 1) return x;
+	if(dim < 2) return y;
+	return z;
+}
