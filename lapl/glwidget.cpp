@@ -53,7 +53,7 @@
 #include <Ray.h>
 #include <RayIntersectionContext.h>
 
-static Vector3F rayo(14, 13, 28), raye(-24, 45, -47);
+static Vector3F rayo(14, 11, 28), raye(-24, 45, -47);
 
 static RayIntersectionContext intersectCtx;
 	
