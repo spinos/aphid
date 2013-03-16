@@ -97,7 +97,7 @@ void VertexAdjacency::computeTangentFrame()
 	}
 	m_normal.normalize();
 	
-	const Vector3F x1 = *(m_neighbors[0]->v) - *this;
+	const Vector3F x1 = *(m_neighbors[0]->v->m_v) - *(this->m_v);
 	
 	Vector3F binormal = x1.cross(m_normal);
 	binormal.normalize();
@@ -168,15 +168,15 @@ void VertexAdjacency::addNeighbor(Edge &outgoing)
 void VertexAdjacency::getVijs(const int & idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const
 {
     const int numNeighbors = (int)m_neighbors.size();
-    vij = *(m_neighbors[idx]->v) - *this;
+    vij = *(m_neighbors[idx]->v->m_v) - *(this->m_v);
     if(idx == 0)
-        vij0 = *(m_neighbors[numNeighbors - 1]->v) - *this;
+        vij0 = *(m_neighbors[numNeighbors - 1]->v->m_v) - *(this->m_v);
     else
-        vij0 = *(m_neighbors[idx - 1]->v) - *this;
+        vij0 = *(m_neighbors[idx - 1]->v->m_v) - *(this->m_v);
     if(idx == numNeighbors - 1)
-        vij1 = *(m_neighbors[0]->v) - *this;
+        vij1 = *(m_neighbors[0]->v->m_v) - *(this->m_v);
     else
-        vij1 = *(m_neighbors[idx + 1]->v) - *this;
+        vij1 = *(m_neighbors[idx + 1]->v->m_v) - *(this->m_v);
 }
 
 Matrix33F VertexAdjacency::getTangentFrame() const

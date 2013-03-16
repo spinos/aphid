@@ -9,8 +9,10 @@
 #pragma once
 #include <Vector3F.h>
 #include <GeoElement.h>
-class Vertex : public Vector3F, public GeoElement {
+class Vertex : public GeoElement {
 public:
 	Vertex();
 	virtual ~Vertex();
+	
+	Vector3F *m_v;
 };

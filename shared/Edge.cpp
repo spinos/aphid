@@ -75,14 +75,14 @@ Vertex Edge::getV1() const
 char Edge::canBeConnectedTo(Edge * another) const
 {
 	if(matches(another->v0(), another->v1())) return 0;
-	if(another->v0()->equals(*vb) || another->v1()->equals(*vb)) return 1;
+	if(another->v0()->getIndex() == vb->getIndex() || another->v1()->getIndex() == vb->getIndex()) return 1;
 	return 0;
 }
 
 void Edge::connect(Edge * another)
 {
 	next = another;
-	if(another->v0()->equals(*va) || another->v1()->equals(*vb)) another->flip();
+	if(another->v0()->getIndex() == va->getIndex() || another->v1()->getIndex() == vb->getIndex()) another->flip();
 }
 
 void Edge::flip()

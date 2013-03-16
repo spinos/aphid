@@ -23,9 +23,7 @@ char MeshLaplacian::buildTopology()
 	for(unsigned i = 0; i < nv; i++) {
 		VertexAdjacency & v = m_adjacency[i];
 		v.setIndex(i);
-		v.x = _vertices[i].x;
-		v.y = _vertices[i].y;
-		v.z = _vertices[i].z;
+		v.m_v = &_vertices[i];
 	}
 	
 	const unsigned nf = getNumFaces();

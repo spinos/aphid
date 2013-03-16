@@ -17,14 +17,14 @@ Facet::Facet(Vertex *a, Vertex *b, Vertex *c)
 	m_vertices[1] = b;
 	m_vertices[2] = c;
 	
-	Vector3F e0 = *b - *a; e0.normalize();
-	Vector3F e1 = *c - *a; e1.normalize();
+	Vector3F e0 = *b->m_v - *a->m_v; e0.normalize();
+	Vector3F e1 = *c->m_v - *a->m_v; e1.normalize();
 	m_normal = e0.cross(e1);
 	m_normal.normalize();
 		
 	createEdges();
 	
-	m_area = Facet::cumputeArea(a, b, c);
+	m_area = Facet::cumputeArea(a->m_v, b->m_v, c->m_v);
 }
 
 Facet::Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d)
@@ -33,18 +33,18 @@ Facet::Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d)
 	m_vertices[1] = b;
 	m_vertices[2] = c;
 	
-	Vector3F e0 = *b - *a; e0.normalize();
-	Vector3F e1 = *c - *a; e1.normalize();
+	Vector3F e0 = *b->m_v - *a->m_v; e0.normalize();
+	Vector3F e1 = *c->m_v - *a->m_v; e1.normalize();
 	m_normal = e0.cross(e1);
 	m_normal.normalize();
 	
-	Vector3F e2 = *d - *a;
+	Vector3F e2 = *d - *a->m_v;
 	if(e2.dot(m_normal) > 0.f)
 		m_normal.reverse();
 		
 	createEdges();
 	
-	m_area = Facet::cumputeArea(a, b, c);
+	m_area = Facet::cumputeArea(a->m_v, b->m_v, c->m_v);
 }
 
 Facet::~Facet()
@@ -113,8 +113,8 @@ Vertex * Facet::vertexBefore(int idx)
 
 Vertex * Facet::thirdVertex(Vertex *a, Vertex *b)
 {
-	if(!m_vertices[0]->equals(*a) && !m_vertices[0]->equals(*b)) return m_vertices[0];
-	if(!m_vertices[1]->equals(*a) && !m_vertices[1]->equals(*b)) return m_vertices[1];
+	if(!m_vertices[0]->getIndex() == a->getIndex() && !m_vertices[0]->getIndex() == b->getIndex()) return m_vertices[0];
+	if(!m_vertices[1]->getIndex() == a->getIndex() && !m_vertices[1]->getIndex() == b->getIndex()) return m_vertices[1];
 	return m_vertices[2];
 }
 
@@ -125,7 +125,7 @@ Vertex Facet::getVertex(int idx) const
 
 Vector3F Facet::getCentroid() const
 {
-	return (*m_vertices[0] * 0.333f + *m_vertices[1] * 0.333f + *m_vertices[2] * 0.333f);
+	return (*m_vertices[0]->m_v * 0.333f + *m_vertices[1]->m_v * 0.333f + *m_vertices[2]->m_v * 0.333f);
 }
 
 Vector3F Facet::getNormal() const
@@ -140,7 +140,7 @@ float Facet::getArea() const
 
 char Facet::isVertexAbove(const Vertex & v) const
 {
-	Vector3F dv = v - getCentroid();
+	Vector3F dv = *v.m_v - getCentroid();
 	dv.normalize();
 	return dv.dot(m_normal) > 0.0f;
 }

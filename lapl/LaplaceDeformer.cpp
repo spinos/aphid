@@ -38,7 +38,7 @@ void LaplaceDeformer::initialCondition()
 		VertexAdjacency & adj = m_topology[i];
 		VertexAdjacency::VertexNeighbor *neighbor;
 		for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
-            m_ViVjWj[ne] = p[i] - * neighbor->v;
+            m_ViVjWj[ne] = p[i] - * (neighbor->v->m_v);
 			ne++;
 		}
 		m_mRi[i].setIdentity();
