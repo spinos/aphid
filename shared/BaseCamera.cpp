@@ -15,10 +15,17 @@ BaseCamera::BaseCamera()
 	fSpace.setTranslation(0, 0, 100);
 	fCenterOfInterest = Vector3F(0, 0, -10);
 	fPortWidth = 400;
+	fPortHeight = 300;
+	fHorizontalAperture = 100.f;
 	updateInverseSpace();
 }
 
 BaseCamera::~BaseCamera() {}
+
+bool BaseCamera::isOrthographic() const
+{
+	return true;
+}
 
 void BaseCamera::lookFromTo(Vector3F & from, Vector3F & to)
 {
@@ -41,11 +48,6 @@ void BaseCamera::setPortHeight(unsigned h)
 void BaseCamera::setHorizontalAperture(float w)
 {
 	fHorizontalAperture = w;
-}
-
-void BaseCamera::setVerticalAperture(float h)
-{
-	fVerticalAperture = h;
 }
 
 void BaseCamera::updateInverseSpace()
@@ -114,6 +116,8 @@ void BaseCamera::zoom(int y)
 	
 	eye += front * (float)y * dist /fPortWidth;
 	
+	if(fHorizontalAperture + y > .1f) fHorizontalAperture += y;
+	
 	fSpace.setTranslation(eye);
 	updateInverseSpace();
 }
@@ -123,7 +127,7 @@ char BaseCamera::intersection(int x, int y, Vector3F & worldPos) const
 	worldPos = fInverseSpace.transform(worldPos);
 	
 	worldPos.x = ((float)x/(float)fPortWidth - 0.5f) * fHorizontalAperture;
-	worldPos.y = -((float)y/(float)fPortHeight - 0.5f) * fVerticalAperture;
+	worldPos.y = -((float)y/(float)fPortHeight - 0.5f) * fHorizontalAperture / aspectRatio();
 	
 	worldPos = fSpace.transform(worldPos);
 	return 1;
@@ -145,7 +149,7 @@ void BaseCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVe
     //Vector3F worldPos = fCenterOfInterest - view;
     //worldPos = fInverseSpace.transform(worldPos);
     origin.x = ((float)x/(float)fPortWidth - 0.5f) * fHorizontalAperture;
-	origin.y = -((float)y/(float)fPortHeight - 0.5f) * fVerticalAperture;
+	origin.y = -((float)y/(float)fPortHeight - 0.5f) * fHorizontalAperture / aspectRatio();
 	origin.z = 0.f;
 	origin = fSpace.transform(origin);
 	worldVec = fCenterOfInterest - fSpace.getTranslation();
@@ -154,4 +158,14 @@ void BaseCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVe
 Vector3F BaseCamera::eyePosition() const
 {
     return fSpace.getTranslation();
+}
+
+float BaseCamera::getHorizontalAperture() const
+{
+	return fHorizontalAperture;
+}
+
+float BaseCamera::aspectRatio() const
+{
+	return (float)fPortWidth / (float)fPortHeight;
 }

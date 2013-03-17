@@ -76,22 +76,10 @@ void Base3DView::paintGL()
 void Base3DView::resizeGL(int width, int height)
 {
     glViewport(0, 0, width, height);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-	
-	float aspect = (float)width/(float)height;
-	float fov = 70.f;
-	float right = fov/ 2.f;
-	float top = right / aspect;
-
-    glOrtho(-right, right, -top, top, 1.0, 1000.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    fCamera->setPortWidth(width);
+	fCamera->setPortWidth(width);
 	fCamera->setPortHeight(height);
-	fCamera->setHorizontalAperture(fov);
-	fCamera->setVerticalAperture(fov/aspect);
+	if(fCamera->isOrthographic())
+		updateOrthoProjection();
 }
 //! [8]
 
@@ -135,6 +123,8 @@ void Base3DView::processCamera(QMouseEvent *event)
     }
 	else if (event->buttons() & Qt::RightButton) {
 		fCamera->zoom(dy);
+		if(fCamera->isOrthographic())
+			updateOrthoProjection();
     }
 }
 
@@ -181,3 +171,17 @@ void Base3DView::clientMouseInput(Vector3F & stir)
     
 }
 
+void Base3DView::updateOrthoProjection()
+{
+	glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+	
+	float aspect = fCamera->aspectRatio();
+	float fov = fCamera->getHorizontalAperture();
+	float right = fov/ 2.f;
+	float top = right / aspect;
+
+    glOrtho(-right, right, -top, top, 1.0, 1000.0);
+
+    glMatrixMode(GL_MODELVIEW);
+}

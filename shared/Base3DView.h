@@ -37,6 +37,7 @@ public:
     virtual void clientMouseInput(Vector3F & stir);
 //! [3]
 private:
+	void updateOrthoProjection();
     QPoint m_lastPos;
     QColor m_backgroundColor;
 	BaseCamera* fCamera;

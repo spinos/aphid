@@ -3,22 +3,20 @@ INCLUDEPATH += ../shared
 win32:INCLUDEPATH += D:/ofl/shared D:/usr/libxml2x64/include D:/usr/eigen2
 mac:INCLUDEPATH += /Users/jianzhang/Library/eigen2
 win32:LIBS +=  -LD:/usr/local/lib64 -leasymodel -LD:/usr/libxml2x64/lib -llibxml2
-HEADERS       = glwidget.h \
-                window.h \
-                ../shared/Vector3F.h \
-				../shared/Ray.h \
-				../shared/RayIntersectionContext.h \
+HEADERS       = ../shared/Vector3F.h \
+                ../shared/Ray.h \
+                ../shared/RayIntersectionContext.h \
                 ../shared/Matrix44F.h \
                 ../shared/Matrix33F.h \
                 ../shared/BaseCamera.h \
                 ../shared/Base3DView.h \
+                ../shared/BaseDrawer.h \
+                ../shared/KdTreeDrawer.h \
                 ../shared/TypedEntity.h \
                 ../shared/Geometry.h \
                 ../shared/BaseMesh.h \
                 ../shared/BoundingBox.h \
                 ../shared/TriangleMesh.h \
-                ../shared/BaseDrawer.h \
-				../shared/KdTreeDrawer.h \
                 ../shared/GeoElement.h \
                 ../shared/Vertex.h \
                 ../shared/Edge.h \
@@ -39,27 +37,26 @@ HEADERS       = glwidget.h \
                 ../shared/BuildKdTreeStream.h \
                 ../shared/IndexList.h \
                 ../shared/BoundingBoxList.h \
+                glwidget.h \
+                window.h \
                 MeshLaplacian.h \
                 VertexAdjacency.h \
                 LaplaceDeformer.h
                 
-SOURCES       = glwidget.cpp \
-                main.cpp \
-                window.cpp \
-                ../shared/Vector3F.cpp \
-				../shared/Ray.cpp \
-				../shared/RayIntersectionContext.cpp \
+SOURCES       = ../shared/Vector3F.cpp \
+                ../shared/Ray.cpp \
+                ../shared/RayIntersectionContext.cpp \
                 ../shared/Matrix44F.cpp \
                 ../shared/Matrix33F.cpp \
                 ../shared/BaseCamera.cpp \
                 ../shared/Base3DView.cpp \
+                ../shared/BaseDrawer.cpp \
+                ../shared/KdTreeDrawer.cpp \
                 ../shared/TypedEntity.cpp \
                 ../shared/Geometry.cpp \
                 ../shared/BoundingBox.cpp \
                 ../shared/BaseMesh.cpp \
                 ../shared/TriangleMesh.cpp \
-                ../shared/BaseDrawer.cpp \
-				../shared/KdTreeDrawer.cpp \
                 ../shared/GeoElement.cpp \
                 ../shared/Vertex.cpp \
                 ../shared/Edge.cpp \
@@ -80,6 +77,9 @@ SOURCES       = glwidget.cpp \
                 ../shared/BuildKdTreeStream.cpp \
                 ../shared/IndexList.cpp \
                 ../shared/BoundingBoxList.cpp \
+                glwidget.cpp \
+                main.cpp \
+                window.cpp \
                 MeshLaplacian.cpp \
                 VertexAdjacency.cpp \
                 LaplaceDeformer.cpp

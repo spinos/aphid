@@ -13,11 +13,12 @@ public:
 	BaseCamera();
 	virtual ~BaseCamera();
 	
+	virtual bool isOrthographic() const;
+	
 	void lookFromTo(Vector3F & from, Vector3F & to);
 	void setPortWidth(unsigned w);
 	void setPortHeight(unsigned h);
 	void setHorizontalAperture(float w);
-	void setVerticalAperture(float h);
 	void updateInverseSpace();
 	void getMatrix(float* m) const;
 	void tumble(int x, int y);
@@ -28,10 +29,12 @@ public:
 	void screenToWorld(int x, int y, Vector3F & worldVec) const;
 	void incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const;
 	Vector3F eyePosition() const;
+	float aspectRatio() const;
+	float getHorizontalAperture() const;
 	
 private:
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;
 	unsigned fPortWidth, fPortHeight;
-	float fHorizontalAperture, fVerticalAperture;
+	float fHorizontalAperture;
 };
