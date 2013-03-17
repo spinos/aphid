@@ -11,12 +11,17 @@
 
 RayIntersectionContext::RayIntersectionContext() 
 {
+	reset();
+}
+
+RayIntersectionContext::~RayIntersectionContext() {}
+
+void RayIntersectionContext::reset()
+{
 	m_level = 0;
 	m_minHitDistance = 10e28;
 	m_success = 0;
 }
-
-RayIntersectionContext::~RayIntersectionContext() {}
 
 void RayIntersectionContext::setBBox(const BoundingBox & bbox)
 {

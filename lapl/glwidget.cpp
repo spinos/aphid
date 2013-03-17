@@ -53,7 +53,8 @@
 #include <Ray.h>
 #include <RayIntersectionContext.h>
 
-static Vector3F rayo(14, 11, 28), raye(-24, 45, -47);
+static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
+ 
 
 static RayIntersectionContext intersectCtx;
 	
@@ -115,9 +116,14 @@ void GLWidget::clientDraw()
 //! [7]
 
 //! [9]
-void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
+void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
 {
-
+	rayo = origin;
+	raye = origin + displacement;
+	Ray rayy(rayo, raye);
+	intersectCtx.reset();
+	m_tree->intersect(rayy, intersectCtx);
+	hit = intersectCtx.m_hitP;
 }
 //! [9]
 
@@ -127,9 +133,13 @@ void GLWidget::clientDeselect()
 }
 
 //! [10]
-void GLWidget::clientMouseInput(Vector3F & stir)
+void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
 {
-
+	rayo = origin;
+	raye = origin + displacement;
+	Ray rayy(rayo, raye);
+	intersectCtx.reset();
+	m_tree->intersect(rayy, intersectCtx);
 }
 //! [10]
 

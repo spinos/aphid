@@ -59,9 +59,9 @@ public:
     ~GLWidget();
 
     virtual void clientDraw();
-    virtual void clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit);
+    virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
     virtual void clientDeselect();
-    virtual void clientMouseInput(Vector3F & stir);
+    virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
 
 //! [2]
 protected:

@@ -32,12 +32,13 @@ public:
     void processMouseInput(QMouseEvent *event);
     
     virtual void clientDraw();
-    virtual void clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit);
+    virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
     virtual void clientDeselect();
-    virtual void clientMouseInput(Vector3F & stir);
+    virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
 //! [3]
 private:
 	void updateOrthoProjection();
+	void updatePerspProjection();
     QPoint m_lastPos;
     QColor m_backgroundColor;
 	BaseCamera* fCamera;

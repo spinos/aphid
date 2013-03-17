@@ -16,6 +16,7 @@ public:
 	RayIntersectionContext();
 	virtual ~RayIntersectionContext();
 	
+	void reset();
 	void setBBox(const BoundingBox & bbox);
 	BoundingBox getBBox() const;
 	

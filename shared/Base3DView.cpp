@@ -80,6 +80,8 @@ void Base3DView::resizeGL(int width, int height)
 	fCamera->setPortHeight(height);
 	if(fCamera->isOrthographic())
 		updateOrthoProjection();
+	else
+		updatePerspProjection();
 }
 //! [8]
 
@@ -125,6 +127,8 @@ void Base3DView::processCamera(QMouseEvent *event)
 		fCamera->zoom(dy);
 		if(fCamera->isOrthographic())
 			updateOrthoProjection();
+		else
+			updatePerspProjection();
     }
 }
 
@@ -148,7 +152,10 @@ void Base3DView::processMouseInput(QMouseEvent *event)
     int dy = event->y() - m_lastPos.y();
     Vector3F injv;
     fCamera->screenToWorld(dx, dy, injv);
-    clientMouseInput(injv);
+	Vector3F origin, incident;
+    fCamera->incidentRay(event->x(), event->y(), origin, incident);
+    incident = incident.normal() * 1000.f;
+    clientMouseInput(origin, incident, injv);
 }
 
 void Base3DView::clientDraw()
@@ -156,7 +163,7 @@ void Base3DView::clientDraw()
     
 }
 
-void Base3DView::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
+void Base3DView::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
 {
     
 }
@@ -166,7 +173,7 @@ void Base3DView::clientDeselect()
     
 }
 
-void Base3DView::clientMouseInput(Vector3F & stir)
+void Base3DView::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
 {
     
 }
@@ -184,4 +191,9 @@ void Base3DView::updateOrthoProjection()
     glOrtho(-right, right, -top, top, 1.0, 1000.0);
 
     glMatrixMode(GL_MODELVIEW);
+}
+
+void Base3DView::updatePerspProjection()
+{
+
 }

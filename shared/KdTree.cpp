@@ -146,7 +146,7 @@ char KdTree::intersect(const Ray &ray, RayIntersectionContext & ctx)
 
 char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx)
 {
-	printf("recus intersect level %i\n", ctx.m_level);
+	//printf("recus intersect level %i\n", ctx.m_level);
 	if(node->isLeaf()) {
 		return leafIntersect(node, ray, ctx);
 	}
@@ -220,7 +220,7 @@ char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionCont
 	unsigned start = node->getPrimStart();
 	unsigned num = node->getNumPrims();
 	
-	printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
+	//printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
 	IndexArray &indir = m_stream.indirection();
 	PrimitiveArray &prims = m_stream.primitives();
 	indir.setIndex(start);
@@ -235,7 +235,7 @@ char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionCont
 		mesh->intersect(iface, ray, ctx);
 		indir.next();
 	}
-	if(ctx.m_success) printf("hit");
+	//if(ctx.m_success) printf("hit");
 	return ctx.m_success;
 }
 
