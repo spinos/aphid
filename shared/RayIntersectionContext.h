@@ -10,6 +10,7 @@
 #pragma once
 
 #include <BoundingBox.h>
+#include <Primitive.h>
 #include <Geometry.h>
 class RayIntersectionContext {
 public:
@@ -28,6 +29,7 @@ public:
 	int m_level;
 	Geometry * m_geometry;
 	unsigned m_componentIdx;
+	Primitive * m_primitive;
 	char m_success;
 private:
 };

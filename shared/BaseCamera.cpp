@@ -8,7 +8,7 @@
  */
 
 #include "BaseCamera.h"
-
+#include <iostream>
 BaseCamera::BaseCamera() 
 {
 	fSpace.setIdentity();

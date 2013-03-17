@@ -9,6 +9,7 @@
 #include "Aphid.h"
 #include "BoundingBox.h"
 #include <Ray.h>
+
 BoundingBox::BoundingBox()
 {
 	reset();
@@ -138,16 +139,13 @@ char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 		const Vector3F o = ray.m_origin;
 		if(IsValueNearZero(diri)) {
 			if(i == 0) {
-				if(o.y < m_data[1] || o.y > m_data[4]) return 0;
-				if(o.z < m_data[2] || o.z > m_data[5]) return 0;
+				if(o.x < m_data[0] || o.x > m_data[3]) return 0;
 			}
 			else if(i == 1) {
-				if(o.x < m_data[0] || o.x > m_data[3]) return 0;
-				if(o.z < m_data[2] || o.z > m_data[5]) return 0;
+				if(o.y < m_data[1] || o.y > m_data[4]) return 0;
 			}
 			else {
-				if(o.x < m_data[0] || o.x > m_data[3]) return 0;
-				if(o.y < m_data[1] || o.y > m_data[4]) return 0;
+				if(o.z < m_data[2] || o.z > m_data[5]) return 0;
 			}
 			continue;
 		}

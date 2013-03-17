@@ -37,6 +37,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/BuildKdTreeStream.h \
                 ../shared/IndexList.h \
                 ../shared/BoundingBoxList.h \
+				../shared/SelectionArray.h \
                 glwidget.h \
                 window.h \
                 MeshLaplacian.h \
@@ -77,6 +78,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/BuildKdTreeStream.cpp \
                 ../shared/IndexList.cpp \
                 ../shared/BoundingBoxList.cpp \
+				../shared/SelectionArray.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp \

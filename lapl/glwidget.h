@@ -48,6 +48,7 @@ class MeshLaplacian;
 class LaplaceDeformer;
 class KdTreeDrawer;
 class KdTree;
+class SelectionArray;
 //! [0]
 class GLWidget : public Base3DView
 {
@@ -72,6 +73,7 @@ private:
 	LaplaceDeformer * m_deformer;
     KdTreeDrawer * m_drawer;
 	KdTree * m_tree;
+	SelectionArray * m_selected;
 private slots:
     void simulate();
 

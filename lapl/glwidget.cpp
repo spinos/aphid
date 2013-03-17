@@ -52,6 +52,7 @@
 #include <KdTree.h>
 #include <Ray.h>
 #include <RayIntersectionContext.h>
+#include <SelectionArray.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
  
@@ -80,8 +81,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_tree->addMesh(m_mesh);
 	m_tree->create();
 	
-	Ray ray(rayo, raye);
-	m_tree->intersect(ray, intersectCtx);
+	//Ray ray(rayo, raye);
+	//m_tree->intersect(ray, intersectCtx);
+	
+	m_selected = new SelectionArray();
 }
 //! [0]
 
@@ -101,17 +104,16 @@ void GLWidget::clientDraw()
 	//m_drawer->setGrey(0.5f);
 	//m_drawer->drawKdTree(m_tree);
 	
-	glBegin(GL_LINES);
+	/*glBegin(GL_LINES);
 	glColor3f(1,0,0);
 	glVertex3f(rayo.x, rayo.y, rayo.z);
 	glColor3f(0,0,1);
 	glVertex3f(raye.x, raye.y, raye.z);
-	glEnd();
+	glEnd();*/
 	m_drawer->setWired(0);
 	m_drawer->setColor(0.f, 1.f, 0.4f);
 
-	//m_drawer->box(intersectCtx.getBBox());
-	if(intersectCtx.m_success) m_drawer->triangle((const BaseMesh *)intersectCtx.m_geometry, intersectCtx.m_componentIdx);
+	m_drawer->components(m_selected);
 }
 //! [7]
 
@@ -120,10 +122,15 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 {
 	rayo = origin;
 	raye = origin + displacement;
+	
 	Ray rayy(rayo, raye);
 	intersectCtx.reset();
-	m_tree->intersect(rayy, intersectCtx);
-	hit = intersectCtx.m_hitP;
+	if(m_tree->intersect(rayy, intersectCtx)) {
+		m_selected->add(intersectCtx.m_primitive);
+		hit = intersectCtx.m_hitP;
+	}
+	else
+		m_selected->reset();
 }
 //! [9]
 
@@ -139,7 +146,9 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 	raye = origin + displacement;
 	Ray rayy(rayo, raye);
 	intersectCtx.reset();
-	m_tree->intersect(rayy, intersectCtx);
+	if(m_tree->intersect(rayy, intersectCtx)) {
+		m_selected->add(intersectCtx.m_primitive);
+	}
 }
 //! [10]
 

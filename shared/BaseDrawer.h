@@ -11,6 +11,7 @@
 #include <BaseMesh.h>
 #include <BaseDeformer.h>
 #include <BoundingBox.h>
+#include <SelectionArray.h>
 class BaseDrawer {
 public:
 	BaseDrawer () : m_wired(0) {}
@@ -33,6 +34,7 @@ public:
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void box(const BoundingBox & b);
 	void triangle(const BaseMesh * mesh, unsigned idx);
+	void components(SelectionArray * arr);
 	void coordsys();
 	void setWired(char var);
 	

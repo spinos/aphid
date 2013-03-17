@@ -296,6 +296,17 @@ void BaseDrawer::triangle(const BaseMesh * mesh, unsigned idx)
 	end();
 }
 
+void BaseDrawer::components(SelectionArray * arr)
+{
+	const unsigned numPrims = arr->numPrims();
+	for(unsigned i = 0; i < numPrims; i++) {
+		Primitive * prim = arr->getPrimitive(i);
+		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
+		unsigned iface = prim->getComponentIndex();
+		triangle((const BaseMesh *)mesh, iface);
+	}	
+}
+
 void BaseDrawer::coordsys()
 {
 	glBegin( GL_LINES );

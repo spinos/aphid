@@ -232,7 +232,9 @@ char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionCont
 		unsigned iface = prim->getComponentIndex();
 		
 		//printf("i prim %i i face %i", *iprim, iface);
-		mesh->intersect(iface, ray, ctx);
+		if(mesh->intersect(iface, ray, ctx))
+			ctx.m_primitive = prim;
+			
 		indir.next();
 	}
 	//if(ctx.m_success) printf("hit");
