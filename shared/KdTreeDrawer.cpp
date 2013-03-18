@@ -24,12 +24,14 @@ void KdTreeDrawer::drawKdTree(const KdTree * tree)
 	
 	setWired(1);
 	beginQuad();
-	drawKdTreeNode(root, bbox);
+	int level = 0;
+	drawKdTreeNode(root, bbox, level);
 	end();
 }
 
-void KdTreeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox)
+void KdTreeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox, int level)
 {
+	if(level > 8) return;
 	if(tree->isLeaf()) return;
 	
 	Vector3F corner0(bbox.min(0), bbox.min(1), bbox.min(2));
@@ -93,9 +95,9 @@ void KdTreeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & b
 	
 	float splitPos = tree->getSplitPos();
 	bbox.split(axis, splitPos, leftBox, rightBox);
-	
-	drawKdTreeNode(tree->getLeft(), leftBox);
-	drawKdTreeNode(tree->getRight(), rightBox);
+	level++;
+	drawKdTreeNode(tree->getLeft(), leftBox, level);
+	drawKdTreeNode(tree->getRight(), rightBox, level);
 	
 }
 

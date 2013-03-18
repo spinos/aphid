@@ -59,8 +59,9 @@ public:
 	enum EMask {
 		EInnerAxisMask = ~0x3,
 		ETypeMask = ~0x4,
-		EIndirectionMask = 0x7,
 		ELeafOffsetMask = ~ETypeMask,
+		EIndirectionMask = 0x7,
+		
 		//EInnerOffsetMask = ~(EInnerAxisMask + EIndirectionMask),
 		//ERelOffsetLimit = (1<<28) - 1
 	};

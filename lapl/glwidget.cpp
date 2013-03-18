@@ -113,12 +113,12 @@ void GLWidget::clientDraw()
 	m_drawer->setWired(0);
 	m_drawer->setColor(0.f, 1.f, 0.4f);
 
-	//m_drawer->components(m_selected);
+	m_drawer->components(m_selected);
 	m_drawer->setWired(1);
 	m_drawer->setColor(0.f, 1.f, 1.f);
 	m_drawer->box(intersectCtx.getBBox());
 	m_drawer->setWired(1);
-
+	/*
 	KdTreeNode * cell = (KdTreeNode *)intersectCtx.m_cell;
 	if(!cell) return;
 	unsigned start = cell->getPrimStart();
@@ -128,7 +128,7 @@ void GLWidget::clientDraw()
 	    Primitive * prim = m_tree->getPrim(start + i);
 	    m_drawer->primitive(prim);
 	}
-	
+	*/
 }
 //! [7]
 

@@ -39,7 +39,7 @@ void KdTreeNode::setLeaf( bool a_Leaf )
 
 void KdTreeNode::setPrimStart(unsigned long offset)
 {
-	leaf.combined = offset + (inner.combined & ELeafOffsetMask);
+	leaf.combined = (offset<<3) | ELeafOffsetMask;
 }
 
 void KdTreeNode::setNumPrims(unsigned long numPrims)
@@ -49,7 +49,7 @@ void KdTreeNode::setNumPrims(unsigned long numPrims)
 
 unsigned long KdTreeNode::getPrimStart() const 
 {
-	return leaf.combined & ~ELeafOffsetMask;
+	return (leaf.combined & ~ELeafOffsetMask) >> 3;
 }
 
 unsigned long KdTreeNode::getNumPrims() const 

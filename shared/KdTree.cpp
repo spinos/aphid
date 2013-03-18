@@ -16,29 +16,6 @@
 KdTree::KdTree() 
 {
 	m_root = new KdTreeNode;
-	
-	printf("axis mask        %s\n", byte_to_binary(KdTreeNode::EInnerAxisMask));
-	printf("type        mask %s\n", byte_to_binary(KdTreeNode::ETypeMask));
-	printf("indirection mask %s\n", byte_to_binary(KdTreeNode::EIndirectionMask));
-	printf("leaf offset mask %s\n", byte_to_binary(KdTreeNode::ELeafOffsetMask));
-	/*
-	printf("32 bit align mask %s\n", byte_to_binary(0xffffffff - 31));
-	
-	unsigned lc = 127;
-	lc = lc & (0xffffffff - 31);
-	printf("32 bit align lc %d\n", lc);
-	printf("32 bit align lc %s\n", byte_to_binary(lc));
-	printf("2199              %s\n", byte_to_binary(2199));
-
-	printf("31              %s\n", byte_to_binary(31));
-	
-	printf("2199 & 31         %s\n", byte_to_binary(2199 & 31));
-	printf("2199 & 31         %d\n", 2199 & 31);
-	
-	printf("node sz %d\n", (int)sizeof(KdTreeNode));
-	printf("prim sz %d\n", (int)sizeof(Primitive));
-	printf("event sz %d\n", (int)sizeof(SplitEvent));
-	printf("bbox sz %d\n", (int)sizeof(BoundingBox));*/
 }
 
 KdTree::~KdTree() 
@@ -82,11 +59,10 @@ void KdTree::create()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 32 || level == 5) {
+	if(ctx.getNumPrimitives() < 30 || level == 22) {
 		if(ctx.getNumPrimitives() > 0) {
 			IndexArray &indir = m_stream.indirection();
 			unsigned numDir = ctx.getNumPrimitives();
-			printf("start %i ", indir.index());
 			node->setPrimStart(indir.index());
 			node->setNumPrims(numDir);
 			
@@ -99,7 +75,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 			}
 		}
 		node->setLeaf(true);
-		printf(" %i\n", node->getPrimStart());
+		
 		return;
 	}
 	
@@ -125,11 +101,15 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	
 	if(plane->leftCount() > 0)
 		subdivide(branch, *leftCtx, level + 1);
+	else
+		branch->leaf.combined = 6;
 		
 	delete leftCtx;
 
 	if(plane->rightCount() > 0)
 		subdivide(branch + 1, *rightCtx, level + 1);
+	else
+		(branch+1)->leaf.combined = 6;
 		
 	delete rightCtx;
 }
@@ -220,7 +200,7 @@ char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionCont
 {
 	unsigned start = node->getPrimStart();
 	unsigned num = node->getNumPrims();
-	printf("prim start %i ", start);
+	//printf("prim start %i ", start);
 		
 	//printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
 	IndexArray &indir = m_stream.indirection();
@@ -244,7 +224,7 @@ char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionCont
 			
 		indir.next();
 	}
-	if(anyHit) {ctx.m_success = 1; ctx.m_cell = (char *)node; printf("hit %i\n", ctx.m_componentIdx);}
+	if(anyHit) {ctx.m_success = 1; ctx.m_cell = (char *)node;}
 	return anyHit;
 }
 
