@@ -58,15 +58,16 @@ void Window::keyPressEvent(QKeyEvent *e)
 {
 	if (e->key() == Qt::Key_Escape)
         close();
+	else if(e->key() == Qt::Key_A) {
+		qDebug() << "anchor selected";
+		glWidget->anchorSelected();
+	}
     /*
 	else if(e->key() == Qt::Key_Q) {
 		qDebug() << "select/force mode";
 		glWidget->getSolver()->setInteractMode(DynamicsSolver::TranslateBone);
 	}
-    else if(e->key() == Qt::Key_A) {
-		qDebug() << "lock/unlock mode";
-		glWidget->getSolver()->setInteractMode(DynamicsSolver::ToggleLock);
-	}
+    
 	else if(e->key() == Qt::Key_R) {
 		qDebug() << "rotate mode";
 		glWidget->getSolver()->setInteractMode(DynamicsSolver::RotateJoint);

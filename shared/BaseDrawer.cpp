@@ -336,3 +336,20 @@ void BaseDrawer::setWired(char var)
 	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
+void BaseDrawer::anchor(Anchor *a)
+{
+	glPushMatrix();
+	float m[16];
+    
+    a->spaceMatrix(m);
+    
+    glMultMatrixf((const GLfloat*)m);
+	coordsys();
+	
+	unsigned nouse;
+	for(Anchor::AnchorPoint * ap = a->firstPoint(nouse); a->hasPoint(); ap = a->nextPoint(nouse)) {
+		Vector3F p = ap->p;
+		solidCube(p.x, p.y, p.z, 0.2f);
+	}
+	glPopMatrix();
+}

@@ -17,4 +17,5 @@ public:
 	virtual ~KdTreeDrawer();
 	void drawKdTree(const KdTree * tree);
 	void drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox, int level);
+	void drawPrimitivesInNode(KdTree * tree, const KdTreeNode * node);
 };

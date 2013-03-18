@@ -49,6 +49,7 @@ class LaplaceDeformer;
 class KdTreeDrawer;
 class KdTree;
 class SelectionArray;
+class Anchor;
 //! [0]
 class GLWidget : public Base3DView
 {
@@ -63,6 +64,8 @@ public:
     virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
+	
+	void anchorSelected();
 
 //! [2]
 protected:
@@ -74,6 +77,7 @@ private:
     KdTreeDrawer * m_drawer;
 	KdTree * m_tree;
 	SelectionArray * m_selected;
+	std::vector<Anchor *> m_anchors;
 private slots:
     void simulate();
 

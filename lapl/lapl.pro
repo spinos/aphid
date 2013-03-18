@@ -42,7 +42,8 @@ HEADERS       = ../shared/Vector3F.h \
                 window.h \
                 MeshLaplacian.h \
                 VertexAdjacency.h \
-                LaplaceDeformer.h
+                LaplaceDeformer.h \
+				Anchor.h
                 
 SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/Ray.cpp \
@@ -84,7 +85,8 @@ SOURCES       = ../shared/Vector3F.cpp \
                 window.cpp \
                 MeshLaplacian.cpp \
                 VertexAdjacency.cpp \
-                LaplaceDeformer.cpp
+                LaplaceDeformer.cpp \
+				Anchor.cpp
 win32 {
     HEADERS += ../shared/gExtension.h
     SOURCES += ../shared/gExtension.cpp

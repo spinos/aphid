@@ -53,9 +53,9 @@
 #include <Ray.h>
 #include <RayIntersectionContext.h>
 #include <SelectionArray.h>
+#include <Anchor.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
- 
 
 static RayIntersectionContext intersectCtx;
 	
@@ -100,9 +100,9 @@ void GLWidget::clientDraw()
     m_drawer->setWired(1);
 	m_drawer->setGrey(0.9f);
     m_drawer->drawMesh(m_mesh);
-	m_drawer->drawMesh(m_mesh, m_deformer);
+	//m_drawer->drawMesh(m_mesh, m_deformer);
 	m_drawer->setGrey(0.5f);
-	m_drawer->drawKdTree(m_tree);
+	//m_drawer->drawKdTree(m_tree);
 	
 	glBegin(GL_LINES);
 	glColor3f(1,0,0);
@@ -117,18 +117,10 @@ void GLWidget::clientDraw()
 	m_drawer->setWired(1);
 	m_drawer->setColor(0.f, 1.f, 1.f);
 	m_drawer->box(intersectCtx.getBBox());
-	m_drawer->setWired(1);
-	/*
-	KdTreeNode * cell = (KdTreeNode *)intersectCtx.m_cell;
-	if(!cell) return;
-	unsigned start = cell->getPrimStart();
-	unsigned num = cell->getNumPrims();
-	m_drawer->setColor(1.f, .5f, 0.f);
-	for(unsigned i = 0; i < num; i++) {
-	    Primitive * prim = m_tree->getPrim(start + i);
-	    m_drawer->primitive(prim);
-	}
-	*/
+	m_drawer->setWired(0);
+	
+	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
+		m_drawer->anchor(*it);
 }
 //! [7]
 
@@ -172,4 +164,11 @@ void GLWidget::simulate()
     update();
 }
 
+void GLWidget::anchorSelected()
+{
+	if(m_selected->numVertices() < 1) return;
+	Anchor *a = new Anchor(*m_selected);
+	m_anchors.push_back(a);
+	m_selected->reset();
+}
 

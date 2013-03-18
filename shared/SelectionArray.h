@@ -10,6 +10,7 @@
 #include <vector>
 class Primitive;
 class Geometry;
+class Vertex;
 class SelectionArray {
 public:
 	SelectionArray();
@@ -20,6 +21,11 @@ public:
 	
 	unsigned numPrims() const;
 	Primitive * getPrimitive(const unsigned & idx) const;
+	
+	unsigned numVertices() const;
+	Vertex * getVertex(const unsigned & idx) const;
 private:
+	bool isVertexSelected(unsigned idx) const;
 	std::vector<Primitive *> m_prims;
+	std::vector<Vertex *> m_vertices;
 };

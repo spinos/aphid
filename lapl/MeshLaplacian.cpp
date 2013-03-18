@@ -28,7 +28,7 @@ char MeshLaplacian::buildTopology()
 	
 	const unsigned nf = getNumFaces();
 	unsigned a, b, c;
-	std::vector<Facet *> faces;
+	
 	for(unsigned i = 0; i < nf; i++) {
 		a = _indices[i * 3];
 		b = _indices[i * 3 + 1];
@@ -40,7 +40,7 @@ char MeshLaplacian::buildTopology()
 			m_adjacency[e->v0()->getIndex()].addEdge(e);
 			m_adjacency[e->v1()->getIndex()].addEdge(e);
 		}
-		faces.push_back(f);
+		m_faces.push_back(f);
 	}
 	
 	for(unsigned i = 0; i < nv; i++) {
@@ -63,4 +63,10 @@ VertexAdjacency * MeshLaplacian::connectivity()
 Matrix33F MeshLaplacian::getTangentFrame(const unsigned &idx) const
 {
     return m_adjacency[idx].getTangentFrame();
+}
+
+Facet * MeshLaplacian::getFace(const unsigned &idx) const
+{
+	if(idx >= getNumFaces()) return 0;
+	return m_faces[idx];
 }

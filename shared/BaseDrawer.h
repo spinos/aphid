@@ -12,6 +12,7 @@
 #include <BaseDeformer.h>
 #include <BoundingBox.h>
 #include <SelectionArray.h>
+#include <Anchor.h>
 class BaseDrawer {
 public:
 	BaseDrawer () : m_wired(0) {}
@@ -38,6 +39,7 @@ public:
 	void primitive(Primitive * prim);
 	void coordsys();
 	void setWired(char var);
+	void anchor(Anchor *a);
 	
 private:
     char m_wired;

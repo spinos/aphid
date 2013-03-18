@@ -10,7 +10,7 @@
 #include <APhid.h>
 #include "KdTreeNode.h"
 
-KdTreeNode::KdTreeNode() /*: m_combined( 6 )*/ {};
+KdTreeNode::KdTreeNode() {};
 
 void KdTreeNode::setSplitPos(float a_Pos ) 
 {
