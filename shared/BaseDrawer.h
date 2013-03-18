@@ -35,6 +35,7 @@ public:
 	void box(const BoundingBox & b);
 	void triangle(const BaseMesh * mesh, unsigned idx);
 	void components(SelectionArray * arr);
+	void primitive(Primitive * prim);
 	void coordsys();
 	void setWired(char var);
 	

@@ -31,5 +31,6 @@ public:
 	unsigned m_componentIdx;
 	Primitive * m_primitive;
 	char m_success;
+	char * m_cell;
 private:
 };

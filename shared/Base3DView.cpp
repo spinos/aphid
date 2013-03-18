@@ -54,7 +54,7 @@ void Base3DView::initializeGL()
     glEnable(GL_MULTISAMPLE);
     //static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
     //glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-		
+	glDepthFunc(GL_LEQUAL);	
 }
 //! [6]
 

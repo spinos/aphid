@@ -8,7 +8,7 @@
  */
 
 #include "MinMaxBins.h"
-
+#include <iostream>
 MinMaxBins::MinMaxBins() : m_isFlat(0) {}
 MinMaxBins::~MinMaxBins() 
 {
@@ -56,8 +56,14 @@ void MinMaxBins::get(const unsigned &idx, unsigned &left, unsigned &right) const
 
 void MinMaxBins::validateIdx(int &idx) const
 {
-	if(idx < 0) idx = 0;
-	else if(idx > (int)m_binSize - 1) idx = m_binSize - 1;
+	if(idx < 0) {
+	    //printf("too low %i ", idx);	
+	    idx = 0;
+	}
+	else if(idx > ((int)m_binSize - 1)) {
+	    //printf("too high %i ", idx);	
+	    idx = m_binSize - 1;
+	}
 }
 
 char MinMaxBins::isFlat() const

@@ -63,7 +63,7 @@ void KdTree::addMesh(BaseMesh* mesh)
 
 void KdTree::create()
 {	
-	printf("input primitive count %d\n", m_stream.getNumPrimitives());
+    printf("input primitive count %d\n", m_stream.getNumPrimitives());
 	printf("tree bbox: %f %f %f - %f %f %f\n", m_bbox.min(0), m_bbox.min(1), m_bbox.min(2), m_bbox.max(0), m_bbox.max(1), m_bbox.max(2));
 	
 	QElapsedTimer timer;
@@ -82,11 +82,11 @@ void KdTree::create()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 32 || level == 22) {
+	if(ctx.getNumPrimitives() < 32 || level == 5) {
 		if(ctx.getNumPrimitives() > 0) {
 			IndexArray &indir = m_stream.indirection();
 			unsigned numDir = ctx.getNumPrimitives();
-			
+			printf("start %i ", indir.index());
 			node->setPrimStart(indir.index());
 			node->setNumPrims(numDir);
 			
@@ -99,6 +99,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 			}
 		}
 		node->setLeaf(true);
+		printf(" %i\n", node->getPrimStart());
 		return;
 	}
 	
@@ -219,11 +220,13 @@ char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionCont
 {
 	unsigned start = node->getPrimStart();
 	unsigned num = node->getNumPrims();
-	
+	printf("prim start %i ", start);
+		
 	//printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
 	IndexArray &indir = m_stream.indirection();
 	PrimitiveArray &prims = m_stream.primitives();
 	indir.setIndex(start);
+	char anyHit = 0;
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
 
@@ -231,13 +234,26 @@ char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionCont
 		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
 		unsigned iface = prim->getComponentIndex();
 		
-		//printf("i prim %i i face %i", *iprim, iface);
-		if(mesh->intersect(iface, ray, ctx))
+		if(mesh->intersect(iface, ray, ctx)) {
 			ctx.m_primitive = prim;
+			anyHit = 1;
+			//printf("hit %i\n", iface);
+		}
+		//else
+		    //printf("miss %i\n", iface);
 			
 		indir.next();
 	}
-	//if(ctx.m_success) printf("hit");
-	return ctx.m_success;
+	if(anyHit) {ctx.m_success = 1; ctx.m_cell = (char *)node; printf("hit %i\n", ctx.m_componentIdx);}
+	return anyHit;
+}
+
+Primitive * KdTree::getPrim(unsigned idx)
+{
+    IndexArray &indir = m_stream.indirection();
+	PrimitiveArray &prims = m_stream.primitives();
+	indir.setIndex(idx);
+	unsigned *iprim = indir.asIndex();
+	return  prims.asPrimitive(*iprim);
 }
 

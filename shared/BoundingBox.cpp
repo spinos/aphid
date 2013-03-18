@@ -131,6 +131,16 @@ void BoundingBox::expandBy(const BoundingBox &another)
 	if(m_data[5] < another.m_data[5]) m_data[5] = another.m_data[5];
 }
 
+void BoundingBox::expand(float val)
+{
+    m_data[0] -= val;
+    m_data[1] -= val;
+    m_data[2] -= val;
+    m_data[3] += val;
+    m_data[4] += val;
+    m_data[5] += val;
+}
+
 char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const 
 {
     float t0 = ray.m_tmin, t1 = ray.m_tmax;

@@ -27,6 +27,9 @@ public:
 	
 	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
 	void expandBy(const BoundingBox &another);
+	
+	void expand(float v);
+	
 	char intersect(const Ray &ray, float *hitt0, float *hitt1) const;
 	char isPointInside(const Vector3F & p) const;
 	

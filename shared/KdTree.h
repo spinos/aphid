@@ -32,6 +32,8 @@ public:
 
 	BoundingBox m_bbox;
 	
+	Primitive * getPrim(unsigned idx);
+	
 private:
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
 	char recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx);

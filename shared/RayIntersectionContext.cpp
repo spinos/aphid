@@ -19,8 +19,9 @@ RayIntersectionContext::~RayIntersectionContext() {}
 void RayIntersectionContext::reset()
 {
 	m_level = 0;
-	m_minHitDistance = 10e28;
+	m_minHitDistance = 10e10;
 	m_success = 0;
+	m_cell = 0;
 }
 
 void RayIntersectionContext::setBBox(const BoundingBox & bbox)

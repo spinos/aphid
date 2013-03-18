@@ -101,19 +101,34 @@ void GLWidget::clientDraw()
 	m_drawer->setGrey(0.9f);
     m_drawer->drawMesh(m_mesh);
 	m_drawer->drawMesh(m_mesh, m_deformer);
-	//m_drawer->setGrey(0.5f);
-	//m_drawer->drawKdTree(m_tree);
+	m_drawer->setGrey(0.5f);
+	m_drawer->drawKdTree(m_tree);
 	
-	/*glBegin(GL_LINES);
+	glBegin(GL_LINES);
 	glColor3f(1,0,0);
 	glVertex3f(rayo.x, rayo.y, rayo.z);
 	glColor3f(0,0,1);
 	glVertex3f(raye.x, raye.y, raye.z);
-	glEnd();*/
+	glEnd();
 	m_drawer->setWired(0);
 	m_drawer->setColor(0.f, 1.f, 0.4f);
 
-	m_drawer->components(m_selected);
+	//m_drawer->components(m_selected);
+	m_drawer->setWired(1);
+	m_drawer->setColor(0.f, 1.f, 1.f);
+	m_drawer->box(intersectCtx.getBBox());
+	m_drawer->setWired(1);
+
+	KdTreeNode * cell = (KdTreeNode *)intersectCtx.m_cell;
+	if(!cell) return;
+	unsigned start = cell->getPrimStart();
+	unsigned num = cell->getNumPrims();
+	m_drawer->setColor(1.f, .5f, 0.f);
+	for(unsigned i = 0; i < num; i++) {
+	    Primitive * prim = m_tree->getPrim(start + i);
+	    m_drawer->primitive(prim);
+	}
+	
 }
 //! [7]
 

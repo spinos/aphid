@@ -98,3 +98,4 @@ void KdTreeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & b
 	drawKdTreeNode(tree->getRight(), rightBox);
 	
 }
+

@@ -34,7 +34,8 @@ void KdTreeBuilder::calculateBins()
 	m_bins = new MinMaxBins[SplitEvent::Dimension];
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		//printf("bbox size %f\n", m_bbox.getMax(axis) - m_bbox.getMin(axis));
-		if(m_bbox.getMax(axis) - m_bbox.getMin(axis) < 10e-3) {
+		if(m_bbox.getMax(axis) - m_bbox.getMin(axis) < 10e-4) {
+		    //printf("bbox[%i] is flat", axis);
 			m_bins[axis].setFlat();
 			continue;
 		}
@@ -310,6 +311,10 @@ void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &r
 	int side;
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
 		BoundingBox &primBox = boxSrc[i];
+		
+		//if(primBox.getMax(e.getAxis()) < m_bbox.getMin(e.getAxis())) continue;
+		//if(primBox.getMin(e.getAxis()) > m_bbox.getMax(e.getAxis())) continue;
+		//if(*indices == 2202) printf("2202 xbound %f %f", primBox.getMin(0), primBox.getMax(0));
 		side = e.side(primBox);
 		
 		//side = m_primitiveClassification[i];
