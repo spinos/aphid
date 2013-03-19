@@ -156,12 +156,12 @@ void valuePtr()
 
 int main()
 {
-    testSimple();
-    testLLT();
-    resizeTest();
+    //testSimple();
+    //testLLT();
+    //resizeTest();
     testSparse();
-    valuePtr();
-	testSVD();
+    //valuePtr();
+	//testSVD();
     return 0;
 }
 

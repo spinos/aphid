@@ -12,13 +12,64 @@ void LaplaceDeformer::setMesh(BaseMesh * mesh)
 	printf("init laplace deformer");
 	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_mesh);
 	m_topology = msh->connectivity();
-	fillL();
+	//fillL();
 	initialCondition();
 }
 
-unsigned LaplaceDeformer::getNumAnchors() const
+void LaplaceDeformer::precompute(std::vector<Anchor *> & anchors)
 {
-	return 8;
+	unsigned char *isAnchor = new unsigned char[m_numVertices];
+	for(int i = 0; i < (int)m_numVertices; i++) isAnchor[i] = 0;
+	
+	m_anchorPoints.clear();
+	for(std::vector<Anchor *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
+		unsigned idx;
+		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
+			m_anchorPoints[idx] = ap;
+			isAnchor[idx] = 1;
+		}
+	}
+	
+	int neighborIdx, lastNeighbor;
+	LaplaceMatrixType L(m_numVertices + numAnchorPoints(), m_numVertices);
+	L.startFill();
+	for(int i = 0; i < (int)m_numVertices; i++) {
+		VertexAdjacency & adj = m_topology[i];
+		lastNeighbor = -1;
+		
+		VertexAdjacency::VertexNeighbor *neighbor;
+		for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
+			neighborIdx = neighbor->v->getIndex();
+			if(neighborIdx > i && lastNeighbor < i) {
+				L.fill(i, i) = 1.0f;
+			}
+			L.fill(i, neighborIdx) = -neighbor->weight;
+			lastNeighbor = neighborIdx; 
+		}
+		if(lastNeighbor < i)
+			L.fill(i, i) = 1.0f;
+	}
+	
+	int irow = (int)m_numVertices;
+	std::map<unsigned, Anchor::AnchorPoint *>::iterator it;
+	for(it = m_anchorPoints.begin(); it != m_anchorPoints.end(); ++it) {
+		unsigned idx = (*it).first;
+		L.fill(irow, idx) = 1.0f;
+		irow++;
+	}
+	L.endFill();
+	
+	m_LT = L.transpose();
+	LaplaceMatrixType m_M = m_LT * L;
+	//std::cout << "M \n" << m_M << std::endl;
+	m_llt = Eigen::SparseLLT<LaplaceMatrixType>(m_M);
+	
+	delete[] isAnchor;
+}
+
+unsigned LaplaceDeformer::numAnchorPoints() const
+{
+	return m_anchorPoints.size();
 }
 
 void LaplaceDeformer::initialCondition()
@@ -28,29 +79,18 @@ void LaplaceDeformer::initialCondition()
 		VertexAdjacency & adj = m_topology[i];
 		ne += adj.getNumNeighbors();
 	}
-	printf("edge count: %i\n", ne);
-	m_ViVjWj = new Vector3F[ne];
-	
-	Vector3F * p = m_mesh->getVertices();
+	printf("\nedge count: %i\n", ne);
 	m_mRi = new Eigen::Matrix3f[m_numVertices];
-	ne = 0;
+
 	for(int i = 0; i < (int)m_numVertices; i++) {
-		VertexAdjacency & adj = m_topology[i];
-		VertexAdjacency::VertexNeighbor *neighbor;
-		for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
-            m_ViVjWj[ne] = p[i] - * (neighbor->v->m_v);
-			ne++;
-		}
 		m_mRi[i].setIdentity();
 	}
-	printf("edge count: %i\n", ne);
-	
 }
 
 char LaplaceDeformer::fillL()
 {
 	int neighborIdx, lastNeighbor;
-	LaplaceMatrixType L(m_numVertices + getNumAnchors(), m_numVertices);
+	LaplaceMatrixType L(m_numVertices + numAnchorPoints(), m_numVertices);
 	L.setZero();
 	L.startFill();
 	for(int i = 0; i < (int)m_numVertices; i++) {
@@ -89,7 +129,7 @@ char LaplaceDeformer::fillL()
 
 char LaplaceDeformer::fillDelta()
 {
-	const unsigned numAchors = getNumAnchors();
+	const unsigned numAchors = numAnchorPoints();
 	m_delta[0].resize(m_numVertices + numAchors);
 	m_delta[1].resize(m_numVertices + numAchors);
 	m_delta[2].resize(m_numVertices + numAchors);
@@ -168,6 +208,48 @@ char LaplaceDeformer::fillDelta()
 	return 1;
 }
 
+void LaplaceDeformer::prestep()
+{
+	m_delta[0].resize(m_numVertices + numAnchorPoints());
+	m_delta[1].resize(m_numVertices + numAnchorPoints());
+	m_delta[2].resize(m_numVertices + numAnchorPoints());
+	
+	for(int i = 0; i < (int)m_numVertices; i++) {
+		VertexAdjacency & adj = m_topology[i];
+
+		m_delta[0](i) = 0.f;
+		m_delta[1](i) = 0.f;
+		m_delta[2](i) = 0.f;
+		
+		VertexAdjacency::VertexNeighbor *neighbor;
+		for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
+		    Vector3F pij = *(adj.m_v) - *(neighbor->v->m_v);
+			Eigen::Vector3f matpij;
+			matpij(0) = pij.x;
+			matpij(1) = pij.y;
+			matpij(2) = pij.z;
+			Eigen::Matrix3f mixR = m_mRi[i] + m_mRi[neighbor->v->getIndex()];
+			matpij = mixR * matpij;
+			m_delta[0](i) += matpij(0) * neighbor->weight / 2.f;
+			m_delta[1](i) += matpij(1) * neighbor->weight / 2.f;
+			m_delta[2](i) += matpij(2) * neighbor->weight / 2.f;
+		}
+	}
+	int irow = (int)m_numVertices;
+	std::map<unsigned, Anchor::AnchorPoint *>::iterator it;
+	for(it = m_anchorPoints.begin(); it != m_anchorPoints.end(); ++it) {
+		Anchor::AnchorPoint *ap = (*it).second;
+		m_delta[0](irow) = ap->worldP.x;
+		m_delta[1](irow) = ap->worldP.y;
+		m_delta[2](irow) = ap->worldP.z;
+		irow++;
+	}
+	
+	m_delta[0] = m_LT * m_delta[0];
+	m_delta[1] = m_LT * m_delta[1];
+	m_delta[2] = m_LT * m_delta[2];
+}
+
 void LaplaceDeformer::updateRi()
 {
 
@@ -191,8 +273,7 @@ void LaplaceDeformer::updateRi()
 			P(1, degree) = m_ViVjWj[allEdgeIdx].y * neighbor->weight;
 			P(2, degree) = m_ViVjWj[allEdgeIdx].z * neighbor->weight;
 */			
-			Vector3F vp = m_deformedV[i] - m_deformedV[neighborIdx];
-			
+			Vector3F vp = *(adj.m_v) - *(neighbor->v->m_v);
 			P(0, degree) = vp.x * neighbor->weight;
 			P(1, degree) = vp.y * neighbor->weight;
 			P(2, degree) = vp.z * neighbor->weight;
@@ -226,19 +307,19 @@ void LaplaceDeformer::updateRi()
 
 char LaplaceDeformer::solve()
 {
-	int nstep = 4;
+	for(int i = 0; i < (int)m_numVertices; i++) {
+		m_mRi[i].setIdentity();
+	}
+	int nstep = 2;
 	for(int i=0; i < nstep; i++) {
-		fillDelta();
 		
-		m_delta[0] = m_LT * m_delta[0];
-		m_delta[1] = m_LT * m_delta[1];
-		m_delta[2] = m_LT * m_delta[2];
-		
+		prestep();
 		m_llt.solveInPlace(m_delta[0]);
 		m_llt.solveInPlace(m_delta[1]);
 		m_llt.solveInPlace(m_delta[2]);
 		
-		if(i != nstep-1) updateRi();
+		if(i < nstep - 1)
+		updateRi();
 	}
 	
 	for(int i = 0; i < (int)m_numVertices; i++) {

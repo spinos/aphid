@@ -50,7 +50,7 @@ Window::Window()
     glWidget = new GLWidget;
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Mesh Laplacian"));
+    setWindowTitle(tr("Laplace Deformation"));
 }
 //! [1]
 

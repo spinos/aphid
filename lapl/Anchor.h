@@ -16,7 +16,7 @@ class Ray;
 class Anchor {
 public:
 	struct AnchorPoint {
-		Vector3F p;
+		Vector3F p, worldP;
 		float w;
 	};
 	Anchor(SelectionArray & sel);

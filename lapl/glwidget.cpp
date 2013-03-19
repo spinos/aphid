@@ -75,7 +75,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_deformer = new LaplaceDeformer;
 	
 	m_deformer->setMesh(m_mesh);
-	m_deformer->solve();
+	//m_deformer->solve();
 	
 	m_tree = new KdTree;
 	m_tree->addMesh(m_mesh);
@@ -97,8 +97,8 @@ void GLWidget::clientDraw()
 {
     m_drawer->setWired(1);
 	m_drawer->setGrey(0.9f);
-    m_drawer->drawMesh(m_mesh);
-	//m_drawer->drawMesh(m_mesh, m_deformer);
+    //m_drawer->drawMesh(m_mesh);
+	m_drawer->drawMesh(m_mesh, m_deformer);
 	m_drawer->setGrey(0.5f);
 	//m_drawer->drawKdTree(m_tree);
 	
@@ -114,7 +114,7 @@ void GLWidget::clientDraw()
 	m_drawer->components(m_selected);
 	m_drawer->setWired(1);
 	m_drawer->setColor(0.f, 1.f, 1.f);
-	m_drawer->box(intersectCtx.getBBox());
+	//m_drawer->box(intersectCtx.getBBox());
 	m_drawer->setWired(0);
 	
 	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
@@ -130,8 +130,8 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 	
 	Ray ray(rayo, raye);
 	if(m_mode == SelectCompnent) {
-		m_selected->reset();
-		pickupComponent(ray, hit);
+		if(!pickupComponent(ray, hit))
+			m_selected->reset();
 	}
 	else {
 		m_activeAnchor = 0;
@@ -158,6 +158,7 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 	else {
 		if(m_activeAnchor) {
 			m_activeAnchor->translate(stir);
+			m_deformer->solve();
 		}
 	}
 }
@@ -179,6 +180,7 @@ void GLWidget::anchorSelected()
 void GLWidget::startDeform()
 {
 	if(m_anchors.size() < 2) return;
+	m_deformer->precompute(m_anchors);
 	m_mode = TransformAnchor;
 }
 

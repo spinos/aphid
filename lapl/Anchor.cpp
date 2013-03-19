@@ -17,8 +17,8 @@ Anchor::Anchor(SelectionArray & sel)
 	for(unsigned i=0; i < nv; i++) {
 		Vertex * v = sel.getVertex(i);
 		AnchorPoint *a = new AnchorPoint();
-		a->p = *v->m_v;
-		a->w = 0.5f;
+		a->worldP = *v->m_v;
+		a->w = 1.f;
 		m_anchorPoints[v->getIndex()] = a;
 		cen += *v->m_v;
 	}
@@ -30,8 +30,8 @@ Anchor::Anchor(SelectionArray & sel)
 	invs.inverse();
 	
 	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
-		Vector3F & pos = ((*m_anchorPointIt).second)->p;
-		pos = invs.transform(pos);
+		Vector3F & pos = ((*m_anchorPointIt).second)->worldP;
+		((*m_anchorPointIt).second)->p = invs.transform(pos);
 	}
 }
 
@@ -88,5 +88,10 @@ bool Anchor::intersect(const Ray &ray, float &t, float threshold) const
 void Anchor::translate(Vector3F & dis)
 {
 	m_space.translate(dis);
+	
+	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
+		Vector3F & pos = ((*m_anchorPointIt).second)->p;
+		((*m_anchorPointIt).second)->worldP = m_space.transform(pos);
+	}
 }
 
