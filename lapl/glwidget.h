@@ -50,13 +50,17 @@ class KdTreeDrawer;
 class KdTree;
 class SelectionArray;
 class Anchor;
+class Ray;
 //! [0]
 class GLWidget : public Base3DView
 {
     Q_OBJECT
 
 public:
-    
+    enum InteractMode {
+        SelectCompnent,
+        TransformAnchor
+    };
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 
@@ -66,7 +70,9 @@ public:
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
 	
 	void anchorSelected();
-
+	void startDeform();
+	bool pickupAnchor(const Ray & ray, Vector3F & hit);
+	bool pickupComponent(const Ray & ray, Vector3F & hit);
 //! [2]
 protected:
     
@@ -78,6 +84,8 @@ private:
 	KdTree * m_tree;
 	SelectionArray * m_selected;
 	std::vector<Anchor *> m_anchors;
+	InteractMode m_mode;
+	Anchor * m_activeAnchor;
 private slots:
     void simulate();
 

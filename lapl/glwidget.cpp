@@ -81,10 +81,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_tree->addMesh(m_mesh);
 	m_tree->create();
 	
-	//Ray ray(rayo, raye);
-	//m_tree->intersect(ray, intersectCtx);
-	
 	m_selected = new SelectionArray();
+	m_mode = SelectCompnent;
 }
 //! [0]
 
@@ -130,14 +128,15 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 	rayo = origin;
 	raye = origin + displacement;
 	
-	Ray rayy(rayo, raye);
-	intersectCtx.reset();
-	if(m_tree->intersect(rayy, intersectCtx)) {
-		m_selected->add(intersectCtx.m_primitive);
-		hit = intersectCtx.m_hitP;
-	}
-	else
+	Ray ray(rayo, raye);
+	if(m_mode == SelectCompnent) {
 		m_selected->reset();
+		pickupComponent(ray, hit);
+	}
+	else {
+		m_activeAnchor = 0;
+		pickupAnchor(ray, hit);
+	}
 }
 //! [9]
 
@@ -151,10 +150,15 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 {
 	rayo = origin;
 	raye = origin + displacement;
-	Ray rayy(rayo, raye);
-	intersectCtx.reset();
-	if(m_tree->intersect(rayy, intersectCtx)) {
-		m_selected->add(intersectCtx.m_primitive);
+	Ray ray(rayo, raye);
+	if(m_mode == SelectCompnent) {
+		Vector3F hit;
+		pickupComponent(ray, hit);
+	}
+	else {
+		if(m_activeAnchor) {
+			m_activeAnchor->translate(stir);
+		}
 	}
 }
 //! [10]
@@ -172,3 +176,35 @@ void GLWidget::anchorSelected()
 	m_selected->reset();
 }
 
+void GLWidget::startDeform()
+{
+	if(m_anchors.size() < 2) return;
+	m_mode = TransformAnchor;
+}
+
+bool GLWidget::pickupAnchor(const Ray & ray, Vector3F & hit)
+{
+	float minDist = 10e8;
+	float t;
+	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+		if((*it)->intersect(ray, t, 1.f)) {
+			if(t < minDist) {
+				m_activeAnchor = (*it);
+				minDist = t;
+				hit = ray.travel(t);
+			}
+		}
+	}
+	return minDist < 10e8;
+}
+
+bool GLWidget::pickupComponent(const Ray & ray, Vector3F & hit)
+{
+	intersectCtx.reset();
+	if(m_tree->intersect(ray, intersectCtx)) {
+		m_selected->add(intersectCtx.m_primitive);
+		hit = intersectCtx.m_hitP;
+		return true;
+	}
+	return false;
+}

@@ -12,6 +12,7 @@
 #include <Vector3F.h>
 #include <Matrix44F.h>
 #include <SelectionArray.h>
+class Ray;
 class Anchor {
 public:
 	struct AnchorPoint {
@@ -25,6 +26,9 @@ public:
 	AnchorPoint * nextPoint(unsigned &idx);
 	bool hasPoint();
 	void spaceMatrix(float m[16]) const;
+	Vector3F getCenter() const;
+	bool intersect(const Ray &ray, float &t, float threshold) const;
+	void translate(Vector3F & dis);
 	
 private:
 	std::map<unsigned, AnchorPoint *> m_anchorPoints;

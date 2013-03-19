@@ -62,12 +62,11 @@ void Window::keyPressEvent(QKeyEvent *e)
 		qDebug() << "anchor selected";
 		glWidget->anchorSelected();
 	}
-    /*
-	else if(e->key() == Qt::Key_Q) {
-		qDebug() << "select/force mode";
-		glWidget->getSolver()->setInteractMode(DynamicsSolver::TranslateBone);
+	else if(e->key() == Qt::Key_D) {
+		qDebug() << "deformation mode";
+		glWidget->startDeform();
 	}
-    
+    /*
 	else if(e->key() == Qt::Key_R) {
 		qDebug() << "rotate mode";
 		glWidget->getSolver()->setInteractMode(DynamicsSolver::RotateJoint);

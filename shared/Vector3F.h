@@ -44,6 +44,7 @@ public:
 	Vector3F perpendicular() const;
 	
 	float comp(int dim) const;
+	int longestAxis() const;
 
 	float x,y,z;
 };

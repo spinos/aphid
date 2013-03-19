@@ -212,3 +212,17 @@ float Vector3F::comp(int dim) const
 	if(dim < 2) return y;
 	return z;
 }
+
+int Vector3F::longestAxis() const
+{
+	float a = x;
+	if(a < 0) a = -a;
+	float b = y;
+	if(b < 0) b = -b;
+	float c = z;
+	if(c < 0) c = -c;
+	if(a > b && a > c) return 0;
+	if(b > c && b > a) return 1;
+	return 2;
+}
+

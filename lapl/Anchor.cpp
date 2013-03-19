@@ -9,7 +9,7 @@
 
 #include "Anchor.h"
 #include <Vertex.h>
-
+#include <Ray.h>
 Anchor::Anchor(SelectionArray & sel) 
 {
 	Vector3F cen(0.f, 0.f, 0.f);
@@ -70,3 +70,23 @@ void Anchor::spaceMatrix(float m[16]) const
     m[8] = m_space.M(2,0); m[9] = m_space.M(2,1); m[10] =m_space.M(2,2); m[11] = 0.0;
     m[12] = m_space.M(3,0); m[13] = m_space.M(3,1); m[14] = m_space.M(3,2) ; m[15] = 1.0;
 }
+
+Vector3F Anchor::getCenter() const
+{
+	return m_space.getTranslation();
+}
+
+bool Anchor::intersect(const Ray &ray, float &t, float threshold) const
+{
+	float axis = ray.m_dir.longestAxis();
+	t = (getCenter().comp(axis) - ray.m_origin.comp(axis)) / ray.m_dir.comp(axis);
+	if(t < 0) return false;
+	Vector3F pop = ray.travel(t);
+	return (pop - getCenter()).length() < threshold;
+}
+
+void Anchor::translate(Vector3F & dis)
+{
+	m_space.translate(dis);
+}
+

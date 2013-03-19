@@ -135,8 +135,8 @@ char BaseCamera::intersection(int x, int y, Vector3F & worldPos) const
 
 void BaseCamera::screenToWorld(int x, int y, Vector3F & worldVec) const
 {
-    worldVec.x = (float)x;
-	worldVec.y = -(float)y;
+    worldVec.x = ((float)x/(float)fPortWidth) * fHorizontalAperture;
+	worldVec.y = -((float)y/(float)fPortHeight)  * fHorizontalAperture / aspectRatio();
 	worldVec.z = 0.f;
 	
 	worldVec = fSpace.transformAsNormal(worldVec);
