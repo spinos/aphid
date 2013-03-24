@@ -46,11 +46,12 @@
 #include <Base3DView.h>
 class MeshLaplacian;
 class LaplaceDeformer;
-class KdTreeDrawer;
+class DeformationAnalysisDrawer;
 class KdTree;
 class SelectionArray;
 class Anchor;
 class Ray;
+class DeformationAnalysis;
 //! [0]
 class GLWidget : public Base3DView
 {
@@ -80,12 +81,13 @@ protected:
 private:
     MeshLaplacian * m_mesh;
 	LaplaceDeformer * m_deformer;
-    KdTreeDrawer * m_drawer;
+    DeformationAnalysisDrawer * m_drawer;
 	KdTree * m_tree;
 	SelectionArray * m_selected;
 	std::vector<Anchor *> m_anchors;
 	InteractMode m_mode;
 	Anchor * m_activeAnchor;
+	DeformationAnalysis * m_analysis;
 private slots:
     void simulate();
 

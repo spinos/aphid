@@ -48,7 +48,8 @@
 
 #include "MeshLaplacian.h"
 #include "LaplaceDeformer.h"
-#include "KdTreeDrawer.h"
+#include "DeformationAnalysisDrawer.h"
+#include "DeformationAnalysis.h"
 #include <KdTree.h>
 #include <Ray.h>
 #include <RayIntersectionContext.h>
@@ -71,7 +72,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 #else	
 	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/lapl/cube.m");
 #endif
-	m_drawer = new KdTreeDrawer;
+	m_drawer = new DeformationAnalysisDrawer;
 	m_deformer = new LaplaceDeformer;
 	
 	m_deformer->setMesh(m_mesh);
@@ -83,6 +84,14 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_selected = new SelectionArray();
 	m_mode = SelectCompnent;
+	
+	m_analysis = new DeformationAnalysis();
+	
+	MeshLaplacian *srcB4 = new MeshLaplacian("/Users/jianzhang/aphid/lapl/srcB4.m");
+	MeshLaplacian *srcAf = new MeshLaplacian("/Users/jianzhang/aphid/lapl/srcAf.m");
+	
+	m_analysis->setMeshes(srcB4, srcAf);
+	
 }
 //! [0]
 
@@ -95,6 +104,7 @@ GLWidget::~GLWidget()
 //! [7]
 void GLWidget::clientDraw()
 {
+/*
     m_drawer->setWired(1);
 	m_drawer->setGrey(0.9f);
     //m_drawer->drawMesh(m_mesh);
@@ -119,6 +129,8 @@ void GLWidget::clientDraw()
 	
 	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
 		m_drawer->anchor(*it);
+*/
+	m_drawer->visualize(m_analysis);
 }
 //! [7]
 

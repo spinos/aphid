@@ -37,13 +37,15 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/BuildKdTreeStream.h \
                 ../shared/IndexList.h \
                 ../shared/BoundingBoxList.h \
-				../shared/SelectionArray.h \
+                ../shared/SelectionArray.h \
                 glwidget.h \
                 window.h \
                 MeshLaplacian.h \
                 VertexAdjacency.h \
                 LaplaceDeformer.h \
-				Anchor.h
+                Anchor.h \
+                DeformationAnalysis.h \
+                DeformationAnalysisDrawer.h
                 
 SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/Ray.cpp \
@@ -79,14 +81,16 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/BuildKdTreeStream.cpp \
                 ../shared/IndexList.cpp \
                 ../shared/BoundingBoxList.cpp \
-				../shared/SelectionArray.cpp \
+                ../shared/SelectionArray.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp \
                 MeshLaplacian.cpp \
                 VertexAdjacency.cpp \
                 LaplaceDeformer.cpp \
-				Anchor.cpp
+                Anchor.cpp \
+                DeformationAnalysis.cpp \
+                DeformationAnalysisDrawer.cpp
 win32 {
     HEADERS += ../shared/gExtension.h
     SOURCES += ../shared/gExtension.cpp
