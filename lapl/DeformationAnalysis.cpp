@@ -12,6 +12,7 @@
 #include <Eigen/SVD>
 #include "VertexAdjacency.h"
 #include "MeshLaplacian.h"
+#include "Matrix44F.h"
 
 DeformationAnalysis::DeformationAnalysis() {}
 DeformationAnalysis::~DeformationAnalysis() {}
@@ -98,4 +99,42 @@ void DeformationAnalysis::computeR()
 			m_sht[i * 7 + j] = x(j);
 	}
 }
+
+unsigned DeformationAnalysis::numVertices() const
+{
+	return m_restMesh->getNumVertices();
+}
+
+Vector3F DeformationAnalysis::restP(unsigned idx) const
+{
+	return m_restMesh->getVertices()[idx];
+}
+
+Vector3F DeformationAnalysis::differential(unsigned idx) const
+{
+	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_restMesh);
+	return msh->connectivity()[idx].getDifferentialCoordinate();
+}
+
+Vector3F DeformationAnalysis::transformedDifferential(unsigned idx) const
+{
+	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_restMesh);
+	Vector3F d = msh->connectivity()[idx].getDifferentialCoordinate();
+	Matrix44F R;
+	*R.m(0, 0) =  m_sht[7 * idx];
+	*R.m(0, 1) =  m_sht[7 * idx + 3];
+	*R.m(0, 2) = -m_sht[7 * idx + 2];
+	*R.m(1, 0) = -m_sht[7 * idx + 3];
+	*R.m(1, 1) =  m_sht[7 * idx];
+	*R.m(1, 2) =  m_sht[7 * idx + 1];
+	*R.m(2, 0) =  m_sht[7 * idx + 2];
+	*R.m(2, 1) = -m_sht[7 * idx + 1];
+	*R.m(2, 2) =  m_sht[7 * idx];
+	*R.m(3, 0) =  m_sht[7 * idx + 4];
+	*R.m(3, 1) =  m_sht[7 * idx + 5];
+	*R.m(3, 2) =  m_sht[7 * idx + 6];
+	d = R.transform(d);
+	return d;
+}
+
 

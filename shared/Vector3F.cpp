@@ -35,6 +35,11 @@ Vector3F::Vector3F(const Vector3F& from, const Vector3F& to)
     z = to.z - from.z; 
 }
 
+void Vector3F::setZero()
+{
+	x = y = z = 0.f;
+}
+
 void Vector3F::set(float vx, float vy, float vz)
 {
     x = vx;

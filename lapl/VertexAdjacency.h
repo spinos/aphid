@@ -29,10 +29,12 @@ public:
 	
 	char findOneRingNeighbors();
 	void computeWeights();
+	void computeDifferentialCoordinate();
 	void computeTangentFrame();
 
 	unsigned getNumNeighbors() const;
 	Matrix33F getTangentFrame() const;
+	Vector3F getDifferentialCoordinate() const;
 	
 	VertexNeighbor * firstNeighbor();
 	VertexNeighbor * nextNeighbor();
@@ -55,6 +57,7 @@ private:
 	std::map<int,int> m_idxInOrder;
 	Matrix33F m_tangentFrame;
 	Vector3F m_normal;
+	Vector3F m_differential;
 	std::vector<VertexNeighbor *>::iterator m_neighborIt;
 	std::map<int,int>::iterator m_orderedNeighborIt;
 };

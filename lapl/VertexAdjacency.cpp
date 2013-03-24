@@ -86,6 +86,16 @@ void VertexAdjacency::computeWeights()
 	}
 }
 
+void VertexAdjacency::computeDifferentialCoordinate()
+{
+	m_differential.setZero();
+	const unsigned numNeighbors = m_neighbors.size();
+	for(unsigned i = 0; i < numNeighbors; i++) {
+		Vector3F vij = *m_v - *(m_neighbors[i]->v->m_v);
+		m_differential += vij * m_neighbors[i]->weight;
+	}
+}
+
 void VertexAdjacency::computeTangentFrame()
 {
     const unsigned numNeighbors = m_neighbors.size();
@@ -182,6 +192,11 @@ void VertexAdjacency::getVijs(const int & idx, Vector3F &vij, Vector3F &vij0, Ve
 Matrix33F VertexAdjacency::getTangentFrame() const
 {
     return m_tangentFrame;
+}
+
+Vector3F VertexAdjacency::getDifferentialCoordinate() const
+{
+	return m_differential;
 }
 
 VertexAdjacency::VertexNeighbor * VertexAdjacency::firstNeighbor()

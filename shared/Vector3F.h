@@ -9,6 +9,7 @@ public:
 	Vector3F(float* p);
 	Vector3F(const Vector3F& from, const Vector3F& to);
 	
+	void setZero();
 	void set(float vx, float vy, float vz);
 	
 	char equals(const Vector3F &other ) const;
