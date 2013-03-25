@@ -9,7 +9,7 @@
 
 #pragma once
 #include "BaseMesh.h"
-
+class Matrix33F;
 class DeformationAnalysis {
 public:
 	DeformationAnalysis();
@@ -20,6 +20,8 @@ public:
 	BaseMesh * getMeshB() const;
 	
 	void computeR();
+	void svdRotation();
+	void shtRotation();
 	
 	unsigned numVertices() const;
 	Vector3F restP(unsigned idx) const;
@@ -28,5 +30,5 @@ public:
 private:
 	BaseMesh * m_restMesh;
 	BaseMesh * m_effectMesh;
-	float * m_sht;
+	Matrix33F * m_Ri;
 };
