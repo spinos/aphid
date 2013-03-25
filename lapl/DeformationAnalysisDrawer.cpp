@@ -16,27 +16,35 @@
 DeformationAnalysisDrawer::DeformationAnalysisDrawer() {}
 DeformationAnalysisDrawer::~DeformationAnalysisDrawer() {}
 
-void DeformationAnalysisDrawer::visualize(DeformationAnalysis * analysis)
+void DeformationAnalysisDrawer::visualize(DeformationAnalysis * analysis, bool drawCoord)
 {
 	setWired(1);
-	setColor(0.f, 1.f, 0.7f);
+	setColor(0.f, 1.f, 0.2f);
 	drawMesh(analysis->getMeshA());
-	setColor(0.f, .7f, 1.f);
+	setColor(0.f, .1f, 1.f);
 	drawMesh(analysis->getMeshB());
+	
+	if(!drawCoord) return;
 	const unsigned nv = analysis->numVertices();
 	Vector3F vi, dc;
 	
-	beginLine();
 	for(unsigned i = 0; i < nv; i++) {
 		vi = analysis->restP(i);
 		dc = analysis->differential(i);
-		setColor(1.f, 0.f, 0.f);
+		Matrix33F orient = analysis->getR(i);
+		glPushMatrix();
+		glTranslatef(vi.x, vi.y, vi.z);
+		coordsys(orient/*, analysis->getS(i)*/);
+		glPopMatrix();
+		
+		beginLine();
+		setColor(1.f, 0.f, 1.f);
 		glVertex3f(vi.x - dc.x, vi.y - dc.y, vi.z - dc.z);
 		glVertex3f(vi.x, vi.y, vi.z);
 		dc = analysis->transformedDifferential(i);
 		setColor(1.f, 1.f, 0.f);
 		glVertex3f(vi.x - dc.x, vi.y - dc.y, vi.z - dc.z);
 		glVertex3f(vi.x, vi.y, vi.z);
+		end();
 	}
-	end();
 }

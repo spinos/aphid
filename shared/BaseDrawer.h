@@ -38,6 +38,7 @@ public:
 	void components(SelectionArray * arr);
 	void primitive(Primitive * prim);
 	void coordsys();
+	void coordsys(const Matrix33F & orient, float scale = 1.f);
 	void setWired(char var);
 	void anchor(Anchor *a);
 	

@@ -18,7 +18,7 @@
 typedef Eigen::SparseMatrix<float, Eigen::RowMajor> LaplaceMatrixType;
 
 class VertexAdjacency;
-
+class DeformationAnalysis;
 class TransferDeformer : public BaseDeformer
 {
 public:
@@ -26,6 +26,8 @@ public:
     virtual ~TransferDeformer();
 	
 	virtual void setMesh(BaseMesh * mesh);
+	virtual void setTargetAnalysis(DeformationAnalysis * analysis);
+	virtual void setBaseAnalysis(DeformationAnalysis * analysis);
 	virtual void precompute(std::vector<Anchor *> & anchors);
 	virtual char solve();
 	
@@ -39,4 +41,6 @@ private:
 	Eigen::VectorXf m_delta[3];
 	Eigen::SparseLLT<LaplaceMatrixType> m_llt;
 	VertexAdjacency * m_topology;
+	DeformationAnalysis * m_targetAnalysis;
+	DeformationAnalysis * m_baseAnalysis;
 };

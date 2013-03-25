@@ -16,7 +16,7 @@ public:
 	DeformationAnalysisDrawer();
 	virtual ~DeformationAnalysisDrawer();
 	
-	void visualize(DeformationAnalysis * analysis);
+	void visualize(DeformationAnalysis * analysis, bool drawCoord=0);
 	
 private:
 	

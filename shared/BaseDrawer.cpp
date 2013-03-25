@@ -330,6 +330,21 @@ void BaseDrawer::coordsys()
 
 }
 
+void BaseDrawer::coordsys(const Matrix33F & orient, float scale)
+{
+	float m[16];
+	
+	m[0] = orient(0, 0) * scale; m[1] = orient(0, 1) * scale; m[2] = orient(0, 2) * scale; m[3] = 0.0;
+	m[4] = orient(1, 0) * scale; m[5] = orient(1, 1) * scale; m[6] = orient(1, 2) * scale; m[7] = 0.0;
+	m[8] = orient(2, 0) * scale; m[9] = orient(2, 1) * scale; m[10] = orient(2, 2) * scale; m[11] = 0.0;
+	m[12] = 0.f;
+	m[13] = 0.f;
+	m[14] = 0.f; 
+	m[15] = 1.f;
+	glMultMatrixf((const GLfloat*)m);
+	coordsys();
+}
+
 void BaseDrawer::setWired(char var)
 {
 	if(var) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

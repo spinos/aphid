@@ -38,6 +38,7 @@ BaseMesh * DeformationAnalysis::getMeshB() const
 void DeformationAnalysis::computeR()
 {
 	svdRotation();
+	edgeScale();
 }
 
 void DeformationAnalysis::svdRotation()
@@ -132,6 +133,7 @@ void DeformationAnalysis::shtRotation()
 	const Vector3F * vts = m_effectMesh->getVertices();
 	
 	m_Ri = new Matrix33F[numVertices];
+	m_scale = new float[numVertices];
 	
 	Vector3F v, vt;
 	int neighborIdx;
@@ -192,7 +194,54 @@ void DeformationAnalysis::shtRotation()
 		*R.m(2, 0) =  x(2);
 		*R.m(2, 1) = -x(1);
 		*R.m(2, 2) =  x(0);
+		
+		m_scale[i] = x(0);
 	}
+}
+
+void DeformationAnalysis::edgeScale()
+{
+	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_restMesh);
+	VertexAdjacency *topology = msh->connectivity();
+	
+	unsigned numVertices = m_restMesh->getNumVertices();
+	const Vector3F * vs = m_restMesh->getVertices();
+	const Vector3F * vts = m_effectMesh->getVertices();
+	
+	m_scale = new float[numVertices];
+	
+	Vector3F v, vt, c, ct, dx, dy;
+	int neighborIdx, numNeighbors;
+		
+	for(int i = 0; i < (int)numVertices; i++) {
+		VertexAdjacency & adj = topology[i];
+		
+		c.setZero();
+		ct.setZero();
+		
+		VertexAdjacency::VertexNeighbor *neighbor;
+		for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
+			neighborIdx = neighbor->v->getIndex();
+			v = vs[neighborIdx];
+			vt = vts[neighborIdx];
+			
+			c += v * neighbor->weight;
+			ct += vt * neighbor->weight;
+		}
+		
+		m_scale[i] = 0.f;
+		for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
+			neighborIdx = neighbor->v->getIndex();
+			v = vs[neighborIdx];
+			vt = vts[neighborIdx];
+			
+			dx = v - c;
+			dy = vt - ct;
+			
+			m_scale[i] += (dy.length() / dx.length()) * neighbor->weight;
+		}
+	}
+	
 }
 
 unsigned DeformationAnalysis::numVertices() const
@@ -219,4 +268,19 @@ Vector3F DeformationAnalysis::transformedDifferential(unsigned idx) const
 	return d;
 }
 
+Matrix33F DeformationAnalysis::getR(unsigned idx) const
+{
+	return m_Ri[idx];
+}
 
+Vector3F DeformationAnalysis::getT(unsigned idx) const
+{
+	const Vector3F * vs = m_restMesh->getVertices();
+	const Vector3F * vts = m_effectMesh->getVertices();
+	return vts[idx] - vs[idx];
+}
+
+float DeformationAnalysis::getS(unsigned idx) const
+{
+	return m_scale[idx];
+}

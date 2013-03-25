@@ -168,7 +168,7 @@ void localRotation()
     float y[6] = {0, 0, 0, 0, 0, 0};
     float z[6] = {-1, -1, 0, 1, 1, 0};
     float xt[6] = {-0.3, -0.2, -0.15, 0.1, -1, -1};
-    float yt[6] = {0, 1, 2, 0, 0, 0};
+    float yt[6] = {0, 1, 4, 0, 0, 0};
     float zt[6] = {-1, -1, 0, 1, 1, 0};
     
     float cx, cy, cz, cxt, cyt, czt;
@@ -227,6 +227,8 @@ void localRotation()
     
     MatrixXf R = solver.matrixV() * D * solver.matrixU().transpose();
     std::cout<<"R\n"<<R<<"\n";
+    
+    std::cout<<"S\n"<<solver.singularValues()(0)<<"\n";
 }
 
 int main()

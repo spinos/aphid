@@ -50,7 +50,7 @@ Window::Window()
     glWidget = new GLWidget;
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Laplace Deformation"));
+    setWindowTitle(tr("Transfer Deformation"));
 }
 //! [1]
 

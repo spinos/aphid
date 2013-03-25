@@ -10,6 +10,7 @@
 #include "TransferDeformer.h"
 
 #include "VertexAdjacency.h"
+#include "DeformationAnalysis.h"
 #include "MeshLaplacian.h"
 
 TransferDeformer::TransferDeformer() {}
@@ -19,9 +20,19 @@ void TransferDeformer::setMesh(BaseMesh * mesh)
 {
 	BaseDeformer::setMesh(mesh);
 	
-	printf("init laplace deformer");
+	printf("init transfer deformer");
 	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_mesh);
 	m_topology = msh->connectivity();
+}
+
+void TransferDeformer::setTargetAnalysis(DeformationAnalysis * analysis)
+{
+	m_targetAnalysis = analysis;
+}
+
+void TransferDeformer::setBaseAnalysis(DeformationAnalysis * analysis)
+{
+	m_baseAnalysis = analysis;
 }
 
 void TransferDeformer::precompute(std::vector<Anchor *> & anchors)
@@ -35,6 +46,20 @@ void TransferDeformer::precompute(std::vector<Anchor *> & anchors)
 		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
 			m_anchorPoints[idx] = ap;
 			isAnchor[idx] = 1;
+		}
+	}
+	
+	for(int i = 0; i < (int)m_numVertices; i++) {
+		if(isAnchor[i]) continue;
+		Vector3F dis = m_targetAnalysis->getT(i);
+		if(dis.length() > 2.f) {
+			Matrix33F rot = m_baseAnalysis->getR(i);
+			dis *=  m_baseAnalysis->getS(i);
+			rot.transform(dis);
+			Anchor::AnchorPoint *ap = new Anchor::AnchorPoint();
+			ap->worldP = (*m_topology[i].m_v + dis) * 0.4f;
+			ap->w = 0.4f;
+			m_anchorPoints[i] = ap;
 		}
 	}
 	
@@ -62,14 +87,13 @@ void TransferDeformer::precompute(std::vector<Anchor *> & anchors)
 	std::map<unsigned, Anchor::AnchorPoint *>::iterator it;
 	for(it = m_anchorPoints.begin(); it != m_anchorPoints.end(); ++it) {
 		unsigned idx = (*it).first;
-		L.fill(irow, idx) = 1.0f;
+		L.fill(irow, idx) = (*it).second->w;
 		irow++;
 	}
 	L.endFill();
 	
 	m_LT = L.transpose();
 	LaplaceMatrixType m_M = m_LT * L;
-	//std::cout << "M \n" << m_M << std::endl;
 	m_llt = Eigen::SparseLLT<LaplaceMatrixType>(m_M);
 	
 	delete[] isAnchor;
@@ -88,19 +112,14 @@ void TransferDeformer::prestep()
 	
 	for(int i = 0; i < (int)m_numVertices; i++) {
 		VertexAdjacency & adj = m_topology[i];
-
-		m_delta[0](i) = 0.f;
-		m_delta[1](i) = 0.f;
-		m_delta[2](i) = 0.f;
-		
-		VertexAdjacency::VertexNeighbor *neighbor;
-		for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
-		    Vector3F pij = *(adj.m_v) - *(neighbor->v->m_v);
-			m_delta[0](i) += pij.x * neighbor->weight;
-			m_delta[1](i) += pij.y * neighbor->weight;
-			m_delta[2](i) += pij.z * neighbor->weight;
-		}
+		Vector3F dif = adj.getDifferentialCoordinate();
+		Matrix33F R = m_targetAnalysis->getR(i);
+		dif = R.transform(dif);
+		m_delta[0](i) = dif.x;
+		m_delta[1](i) = dif.y;
+		m_delta[2](i) = dif.z;
 	}
+	
 	int irow = (int)m_numVertices;
 	std::map<unsigned, Anchor::AnchorPoint *>::iterator it;
 	for(it = m_anchorPoints.begin(); it != m_anchorPoints.end(); ++it) {

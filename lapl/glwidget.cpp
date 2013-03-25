@@ -91,7 +91,11 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	MeshLaplacian *srcAf = new MeshLaplacian("/Users/jianzhang/aphid/lapl/srcAf.m");
 	
 	m_analysis->setMeshes(srcB4, srcAf);
+	m_deformer->setTargetAnalysis(m_analysis);
 	
+	m_base = new DeformationAnalysis();
+	m_base->setMeshes(srcB4, m_mesh);
+	m_deformer->setBaseAnalysis(m_base);
 }
 //! [0]
 
@@ -123,16 +127,13 @@ void GLWidget::clientDraw()
 	glColor3f(0,0,1);
 	glVertex3f(raye.x, raye.y, raye.z);
 	glEnd();
-	
 
-	
 	m_drawer->setWired(1);
 	m_drawer->setColor(0.f, 1.f, 1.f);
 	//m_drawer->box(intersectCtx.getBBox());
 	m_drawer->setWired(0);
-	
-	
 */
+	glTranslatef(-40,0,0);
 	m_drawer->visualize(m_analysis);
 }
 //! [7]

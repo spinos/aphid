@@ -88,6 +88,7 @@ private:
 	InteractMode m_mode;
 	Anchor * m_activeAnchor;
 	DeformationAnalysis * m_analysis;
+	DeformationAnalysis * m_base;
 private slots:
     void simulate();
 
