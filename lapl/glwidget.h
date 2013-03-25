@@ -45,7 +45,7 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 class MeshLaplacian;
-class LaplaceDeformer;
+class TransferDeformer;
 class DeformationAnalysisDrawer;
 class KdTree;
 class SelectionArray;
@@ -80,7 +80,7 @@ protected:
 //! [3]
 private:
     MeshLaplacian * m_mesh;
-	LaplaceDeformer * m_deformer;
+	TransferDeformer * m_deformer;
     DeformationAnalysisDrawer * m_drawer;
 	KdTree * m_tree;
 	SelectionArray * m_selected;

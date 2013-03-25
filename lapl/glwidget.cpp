@@ -47,7 +47,7 @@
 #include "glwidget.h"
 
 #include "MeshLaplacian.h"
-#include "LaplaceDeformer.h"
+#include "TransferDeformer.h"
 #include "DeformationAnalysisDrawer.h"
 #include "DeformationAnalysis.h"
 #include <KdTree.h>
@@ -70,10 +70,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 #ifdef WIN32
 	m_mesh = new MeshLaplacian("D:/aphid/lapl/cube.m");
 #else	
-	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/lapl/cube.m");
+	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/lapl/tgt.m");
 #endif
 	m_drawer = new DeformationAnalysisDrawer;
-	m_deformer = new LaplaceDeformer;
+	m_deformer = new TransferDeformer;
 	
 	m_deformer->setMesh(m_mesh);
 	//m_deformer->solve();
@@ -104,31 +104,34 @@ GLWidget::~GLWidget()
 //! [7]
 void GLWidget::clientDraw()
 {
-/*
+
     m_drawer->setWired(1);
 	m_drawer->setGrey(0.9f);
     //m_drawer->drawMesh(m_mesh);
 	m_drawer->drawMesh(m_mesh, m_deformer);
 	m_drawer->setGrey(0.5f);
 	//m_drawer->drawKdTree(m_tree);
-	
+	m_drawer->setWired(0);
+	m_drawer->setColor(0.f, 1.f, 0.4f);
+	m_drawer->components(m_selected);
+	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
+		m_drawer->anchor(*it);
+/*	
 	glBegin(GL_LINES);
 	glColor3f(1,0,0);
 	glVertex3f(rayo.x, rayo.y, rayo.z);
 	glColor3f(0,0,1);
 	glVertex3f(raye.x, raye.y, raye.z);
 	glEnd();
-	m_drawer->setWired(0);
-	m_drawer->setColor(0.f, 1.f, 0.4f);
+	
 
-	m_drawer->components(m_selected);
+	
 	m_drawer->setWired(1);
 	m_drawer->setColor(0.f, 1.f, 1.f);
 	//m_drawer->box(intersectCtx.getBBox());
 	m_drawer->setWired(0);
 	
-	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
-		m_drawer->anchor(*it);
+	
 */
 	m_drawer->visualize(m_analysis);
 }
@@ -191,7 +194,7 @@ void GLWidget::anchorSelected()
 
 void GLWidget::startDeform()
 {
-	if(m_anchors.size() < 2) return;
+	if(m_anchors.size() < 1) return;
 	m_deformer->precompute(m_anchors);
 	m_mode = TransformAnchor;
 }

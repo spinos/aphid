@@ -42,7 +42,7 @@ HEADERS       = ../shared/Vector3F.h \
                 window.h \
                 MeshLaplacian.h \
                 VertexAdjacency.h \
-                LaplaceDeformer.h \
+                TransferDeformer.h \
                 Anchor.h \
                 DeformationAnalysis.h \
                 DeformationAnalysisDrawer.h
@@ -87,7 +87,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 window.cpp \
                 MeshLaplacian.cpp \
                 VertexAdjacency.cpp \
-                LaplaceDeformer.cpp \
+                TransferDeformer.cpp \
                 Anchor.cpp \
                 DeformationAnalysis.cpp \
                 DeformationAnalysisDrawer.cpp
