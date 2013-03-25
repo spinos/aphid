@@ -154,14 +154,90 @@ void valuePtr()
     }
 }
 
+/*
+// based on Least-Squares Rigid Motion Using SVD 
+//      0    1
+//      |  /
+// 5 -  x  -  2
+//   /  |
+// 4    3
+*/
+void localRotation()
+{
+    float x[6] = {0, 1, 2, 0, -1, -1};
+    float y[6] = {0, 0, 0, 0, 0, 0};
+    float z[6] = {-1, -1, 0, 1, 1, 0};
+    float xt[6] = {-0.3, -0.2, -0.15, 0.1, -1, -1};
+    float yt[6] = {0, 1, 2, 0, 0, 0};
+    float zt[6] = {-1, -1, 0, 1, 1, 0};
+    
+    float cx, cy, cz, cxt, cyt, czt;
+    cx = 0.f;
+    cy = 0.f;
+    cz = 0.f;
+    cxt = 0.f;
+    cyt = 0.f;
+    czt = 0.f;
+    for(int i = 0; i < 6; i++) {
+        cx += x[i] / 6.0;
+        cy += y[i] / 6.0;
+        cz += z[i] / 6.0;
+        cxt += xt[i] / 6.0;
+        cyt += yt[i] / 6.0;
+        czt += zt[i] / 6.0;
+    }
+    
+    float dx[6], dy[6], dz[6], dxt[6], dyt[6], dzt[6];
+    for(int i = 0; i < 6; i++) {
+        dx[i] = x[i] - cx;
+        dy[i] = y[i] - cy;
+        dz[i] = z[i] - cz;
+        dxt[i] = xt[i] - cxt;
+        dyt[i] = yt[i] - cyt;       
+        dzt[i] = zt[i] - czt;
+    }
+    
+    MatrixXf X(3, 6);
+    MatrixXf Y(3, 6);
+    for(int i = 0; i < 6; i++) {
+        X(0, i) = dx[i];
+        X(1, i) = dy[i];
+        X(2, i) = dz[i];
+        Y(0, i) = dxt[i];
+        Y(1, i) = dyt[i];
+        Y(2, i) = dzt[i];
+    }
+    MatrixXf W(6, 6);
+    W.setZero();
+    for(int i = 0; i < 6; i++) {
+        W(i,i) = 1.f/6.f;
+    }
+    MatrixXf S = X * W * Y.transpose();
+    
+    SVD<MatrixXf > solver(S);
+    
+    float d = (solver.matrixV() * solver.matrixU().transpose()).determinant();
+    std::cout<<"d\n"<<d<<"\n";
+    MatrixXf D(3, 3);
+    D.setIdentity();
+    D(2,2) = d;
+    
+    std::cout<<"U\n"<<solver.matrixU()<<"\n";
+    std::cout<<"V\n"<<solver.matrixV()<<"\n";
+    
+    MatrixXf R = solver.matrixV() * D * solver.matrixU().transpose();
+    std::cout<<"R\n"<<R<<"\n";
+}
+
 int main()
 {
     //testSimple();
     //testLLT();
     //resizeTest();
-    testSparse();
+    //testSparse();
     //valuePtr();
 	//testSVD();
+	localRotation();
     return 0;
 }
 
