@@ -28,13 +28,16 @@ public:
 	Vector3F restP(unsigned idx) const;
 	Vector3F differential(unsigned idx) const;
 	Vector3F transformedDifferential(unsigned idx) const;
+	float minDisplacement() const;
 private:
 	void svdRotation();
 	void shtRotation();
 	void edgeScale();
+	void computeTRange();
 	
 	BaseMesh * m_restMesh;
 	BaseMesh * m_effectMesh;
 	Matrix33F * m_Ri;
 	float * m_scale;
+	float m_minDisplacement, m_maxDisplacement;
 };

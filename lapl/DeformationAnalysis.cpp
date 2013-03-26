@@ -23,6 +23,8 @@ void DeformationAnalysis::setMeshes(BaseMesh * a, BaseMesh * b)
 	m_effectMesh = b;
 	
 	computeR();
+	edgeScale();
+	computeTRange();
 }
 
 BaseMesh * DeformationAnalysis::getMeshA() const
@@ -38,7 +40,6 @@ BaseMesh * DeformationAnalysis::getMeshB() const
 void DeformationAnalysis::computeR()
 {
 	svdRotation();
-	edgeScale();
 }
 
 void DeformationAnalysis::svdRotation()
@@ -210,7 +211,7 @@ void DeformationAnalysis::edgeScale()
 	m_scale = new float[numVertices];
 	
 	Vector3F v, vt, c, ct, dx, dy;
-	int neighborIdx, numNeighbors;
+	int neighborIdx;
 		
 	for(int i = 0; i < (int)numVertices; i++) {
 		VertexAdjacency & adj = topology[i];
@@ -240,7 +241,25 @@ void DeformationAnalysis::edgeScale()
 			m_scale[i] += (dy.length() / dx.length()) * neighbor->weight;
 		}
 	}
+}
+
+void DeformationAnalysis::computeTRange()
+{
+	m_minDisplacement = 10e28;
+	m_maxDisplacement = -10e28;
 	
+	unsigned numVertices = m_restMesh->getNumVertices();
+	const Vector3F * vs = m_restMesh->getVertices();
+	const Vector3F * vts = m_effectMesh->getVertices();
+	
+	for(int i = 0; i < (int)numVertices; i++) {
+		Vector3F di = vts[i] - vs[i];
+		const float d = di.length();
+		if(d < 0.03f) continue;
+		
+		if(d < m_minDisplacement) m_minDisplacement = d;
+		if(d > m_maxDisplacement) m_maxDisplacement = d;
+	}
 }
 
 unsigned DeformationAnalysis::numVertices() const
@@ -283,3 +302,9 @@ float DeformationAnalysis::getS(unsigned idx) const
 {
 	return m_scale[idx];
 }
+
+float DeformationAnalysis::minDisplacement() const
+{
+	return m_minDisplacement;
+}
+

@@ -52,15 +52,14 @@ void TransferDeformer::precompute(std::vector<Anchor *> & anchors)
 	for(int i = 0; i < (int)m_numVertices; i++) {
 		if(isAnchor[i]) continue;
 		Vector3F dis = m_targetAnalysis->getT(i);
-		if(dis.length() > 2.f) {
-			Matrix33F rot = m_baseAnalysis->getR(i);
-			dis *=  m_baseAnalysis->getS(i);
-			rot.transform(dis);
-			Anchor::AnchorPoint *ap = new Anchor::AnchorPoint();
-			ap->worldP = (*m_topology[i].m_v + dis) * 0.4f;
-			ap->w = 0.4f;
-			m_anchorPoints[i] = ap;
-		}
+		if(dis.length() < m_targetAnalysis->minDisplacement() * 1.5f) continue;
+		Matrix33F rot = m_baseAnalysis->getR(i);
+		dis *=  m_baseAnalysis->getS(i);
+		rot.transform(dis);
+		Anchor::AnchorPoint *ap = new Anchor::AnchorPoint();
+		ap->worldP = (*m_topology[i].m_v + dis) * 0.4f;
+		ap->w = 0.4f;
+		m_anchorPoints[i] = ap;
 	}
 
 	int neighborIdx, lastNeighbor;
