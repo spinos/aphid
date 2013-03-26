@@ -20,7 +20,7 @@ void DeformationAnalysisDrawer::visualize(DeformationAnalysis * analysis, bool d
 {
 	setWired(1);
 	setColor(0.f, 1.f, 0.2f);
-	drawMesh(analysis->getMeshA());
+	//drawMesh(analysis->getMeshA());
 	setColor(0.f, .1f, 1.f);
 	drawMesh(analysis->getMeshB());
 	

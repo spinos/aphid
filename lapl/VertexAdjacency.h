@@ -17,7 +17,6 @@ class VertexAdjacency : public Vertex {
 public:
 	struct VertexNeighbor {
 		Vertex *v;
-		Edge *e;
 		Facet *f;
 		float weight;
 	};
@@ -29,7 +28,6 @@ public:
 	
 	char isOpen() const;
 	void findNeighbors();
-	char findOneRingNeighbors();
 	void computeWeights();
 	void computeDifferentialCoordinate();
 	void computeTangentFrame();
@@ -48,12 +46,15 @@ public:
 	
 	void verbose() const;
 private:
+	char findOneRingNeighbors();
+	void findOpenNeighbors();
+	char findOppositeEdge(int i, int j, Edge & dest) const;
 	char findOppositeEdge(Edge & e, Edge & dest) const;
 	char firstOutgoingEdge(Edge & e) const;
 	char firstOutgoingEdgeOnBoundary(Edge & e) const;
 	char findIncomming(Edge & eout, Edge & ein) const;
-	void addNeighbor(Edge &e);
-    void getVijs(const int & idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const;
+	void addNeighbor(Edge *e, char isOutgoing = 1);
+    void getVijs(int idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const;
 	
 	std::vector<Edge *> m_edges;
 	std::vector<VertexNeighbor *> m_neighbors;

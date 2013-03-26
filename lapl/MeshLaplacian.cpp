@@ -44,10 +44,7 @@ char MeshLaplacian::buildTopology()
 	}
 	
 	for(unsigned i = 0; i < nv; i++) {
-		if(!m_adjacency[i].findOneRingNeighbors()) {
-			printf("v %i is not closed\n", i);
-			return 0;
-		}
+		m_adjacency[i].findNeighbors();
 		m_adjacency[i].computeWeights();
 		m_adjacency[i].computeDifferentialCoordinate();
 		//m_adjacency[i].verbose();

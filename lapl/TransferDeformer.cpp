@@ -62,7 +62,7 @@ void TransferDeformer::precompute(std::vector<Anchor *> & anchors)
 			m_anchorPoints[i] = ap;
 		}
 	}
-	
+
 	int neighborIdx, lastNeighbor;
 	LaplaceMatrixType L(m_numVertices + numAnchorPoints(), m_numVertices);
 	L.startFill();

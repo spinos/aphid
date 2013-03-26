@@ -24,6 +24,11 @@ char Edge::matches(Edge *e) const
 	return matches(e->v0(), e->v1());
 }
 
+char Edge::isOppositeOf(int i, int j) const
+{
+	return ((va->getIndex() == j && vb->getIndex() == i));
+}
+
 char Edge::isOppositeOf(Edge *e) const
 {
 	return ((va->getIndex() == e->v1()->getIndex() && vb->getIndex() == e->v0()->getIndex()));

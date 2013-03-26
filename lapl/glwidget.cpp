@@ -102,6 +102,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_base = new DeformationAnalysis();
 	m_base->setMeshes(srcB4, m_mesh);
 	m_deformer->setBaseAnalysis(m_base);
+	
 }
 //! [0]
 
@@ -139,7 +140,7 @@ void GLWidget::clientDraw()
 	//m_drawer->box(intersectCtx.getBBox());
 	m_drawer->setWired(0);
 */
-	glTranslatef(-40,0,0);
+	glTranslatef(-20,0,0);
 	m_drawer->visualize(m_analysis);
 }
 //! [7]

@@ -32,28 +32,36 @@ char VertexAdjacency::isOpen() const
 
 void VertexAdjacency::findNeighbors()
 {
-    if(!isOpen()) {
+    if(!isOpen())
         findOneRingNeighbors();
-        return;
-    }
-    
-    int nneib = 0;
-    Edge outgoing;
+    else
+		findOpenNeighbors();
+}
+
+void VertexAdjacency::findOpenNeighbors()
+{
+	Edge outgoing;
 	firstOutgoingEdgeOnBoundary(outgoing);
+	addNeighbor(&outgoing);
 	
+	Edge incoming;
+	findIncomming(outgoing, incoming);
 	
+	while(findOppositeEdge(incoming, outgoing)) {
+		addNeighbor(&outgoing);
+		findIncomming(outgoing, incoming);
+	}
+	
+	addNeighbor(&incoming, 0);
 }
 
 char VertexAdjacency::findOneRingNeighbors()
 {
-	int nneib = 0;
 	Edge outgoing;
 	firstOutgoingEdge(outgoing);
 	
-	addNeighbor(outgoing);
-	
-	m_idxInOrder[outgoing.v1()->getIndex()] = nneib;
-	nneib++;
+	addNeighbor(&outgoing);
+
 	Edge incoming;
 	if(!findIncomming(outgoing, incoming)) {
 		printf("cannot find incoming edge ");
@@ -65,10 +73,9 @@ char VertexAdjacency::findOneRingNeighbors()
 		printf("cannot find outgoing edge ");
 		return 0;
 	}
+	
 	for(int i = 1; i < (int)m_edges.size() / 2; i++) {
-		addNeighbor(outgoing);
-		m_idxInOrder[outgoing.v1()->getIndex()] = nneib;
-		nneib++;
+		addNeighbor(&outgoing);
 		findIncomming(outgoing, incoming);
 		findOppositeEdge(incoming, outgoing);
 	}
@@ -77,6 +84,14 @@ char VertexAdjacency::findOneRingNeighbors()
 
 void VertexAdjacency::computeWeights()
 {
+	if(isOpen()) {
+		const unsigned numNeighbors = m_neighbors.size();
+		for(unsigned i = 0; i < numNeighbors; i++) {
+			m_neighbors[i]->weight = 1.f / (float)numNeighbors;
+		}
+		return;
+	}
+	
 	Vector3F vij, vij0, vij1;
 	float dist, theta0, theta1, wij;
 
@@ -92,7 +107,7 @@ void VertexAdjacency::computeWeights()
 		theta0 = acos(vij.dot(vij0));
 		theta1 = acos(vij.dot(vij1));
 		
-		wij = (tan(theta0 * 0.5f) + tan(theta1 * 0.5f))/dist;
+		wij = (tan(theta0 * 0.5) + tan(theta1 * 0.5))/dist;
 		m_neighbors[i]->weight = wij;
 	}
 	
@@ -136,6 +151,18 @@ void VertexAdjacency::computeTangentFrame()
 	tangent.normalize();
 	
 	m_tangentFrame.fill(tangent, binormal, m_normal);
+}
+
+char VertexAdjacency::findOppositeEdge(int i, int j, Edge & dest) const
+{
+	std::vector<Edge *>::const_iterator it;
+	for(it = m_edges.begin(); it < m_edges.end(); it++) {
+		if((*it)->isOppositeOf(i, j)) {
+			dest = *(*it);
+			return 1;
+		}
+	}
+	return 0;
 }
 
 char VertexAdjacency::findOppositeEdge(Edge & e, Edge &dest) const
@@ -198,29 +225,42 @@ unsigned VertexAdjacency::getNumNeighbors() const
     return (unsigned)m_neighbors.size();
 }
 
-void VertexAdjacency::addNeighbor(Edge &outgoing)
+void VertexAdjacency::addNeighbor(Edge *e, char isOutgoing)
 {
-	VertexNeighbor *aneighbor = new VertexNeighbor;
-	aneighbor->v = outgoing.v1();
-	aneighbor->e = &outgoing;
-	aneighbor->f = (Facet *)outgoing.getFace();
+	VertexNeighbor *aneighbor = new VertexNeighbor();
+	if(isOutgoing)
+		aneighbor->v = e->v1();
+	else
+		aneighbor->v = e->v0();
+		
+	aneighbor->f = (Facet *)e->getFace();
 	aneighbor->weight = 1.f;
 	
 	m_neighbors.push_back(aneighbor);
+	if(isOutgoing)
+		m_idxInOrder[e->v1()->getIndex()] = m_idxInOrder.size();
+	else
+		m_idxInOrder[e->v0()->getIndex()] = m_idxInOrder.size();
 }
 
-void VertexAdjacency::getVijs(const int & idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const
+void VertexAdjacency::getVijs(int idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const
 {
     const int numNeighbors = (int)m_neighbors.size();
-    vij = *(m_neighbors[idx]->v->m_v) - *m_v;
-    if(idx == 0)
-        vij0 = *(m_neighbors[numNeighbors - 1]->v->m_v) - *m_v;
-    else
-        vij0 = *(m_neighbors[idx - 1]->v->m_v) - *m_v;
-    if(idx == numNeighbors - 1)
-        vij1 = *(m_neighbors[0]->v->m_v) - *m_v;
-    else
+	Vertex * v = m_neighbors[idx]->v;
+    vij = *(v->m_v) - *m_v;
+
+	if(idx == 0) {
+		vij0 = *(m_neighbors[numNeighbors - 1]->v->m_v) - *m_v;
+		vij1 = *(m_neighbors[idx + 1]->v->m_v) - *m_v;
+	}
+    else if(idx == numNeighbors - 1) {
+		vij0 = *(m_neighbors[idx - 1]->v->m_v) - *m_v;
+		vij1 = *(m_neighbors[0]->v->m_v) - *m_v;
+	}    
+    else {
+		vij0 = *(m_neighbors[idx - 1]->v->m_v) - *m_v;
         vij1 = *(m_neighbors[idx + 1]->v->m_v) - *m_v;
+	}
 }
 
 Matrix33F VertexAdjacency::getTangentFrame() const

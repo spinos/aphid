@@ -59,6 +59,7 @@ void DeformationAnalysis::svdRotation()
 		
 	for(int i = 0; i < (int)numVertices; i++) {
 		VertexAdjacency & adj = topology[i];
+		numNeighbors = adj.getNumNeighbors();
 		
 		c.setZero();
 		ct.setZero();
@@ -72,9 +73,7 @@ void DeformationAnalysis::svdRotation()
 			c += v * neighbor->weight;
 			ct += vt * neighbor->weight;
 		}
-		
-		numNeighbors = adj.getNumNeighbors();
-	
+
 		Eigen::MatrixXf X(3, numNeighbors);
 		Eigen::MatrixXf Y(3, numNeighbors);
 		Eigen::MatrixXf W(numNeighbors, numNeighbors);
