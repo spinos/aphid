@@ -24,6 +24,26 @@ void VertexAdjacency::addEdge(Edge * e)
 	m_edges.push_back(e);
 }
 
+char VertexAdjacency::isOpen() const
+{
+    Edge dummy;
+    return firstOutgoingEdgeOnBoundary(dummy);
+}
+
+void VertexAdjacency::findNeighbors()
+{
+    if(!isOpen()) {
+        findOneRingNeighbors();
+        return;
+    }
+    
+    int nneib = 0;
+    Edge outgoing;
+	firstOutgoingEdgeOnBoundary(outgoing);
+	
+	
+}
+
 char VertexAdjacency::findOneRingNeighbors()
 {
 	int nneib = 0;
@@ -138,6 +158,20 @@ char VertexAdjacency::firstOutgoingEdge(Edge & e) const
 		if((*it)->v0()->getIndex() == getIndex()) {
 			e = *(*it);
 			return 1;
+		}
+	}
+	return 0;
+}
+
+char VertexAdjacency::firstOutgoingEdgeOnBoundary(Edge & e) const
+{
+    Edge dummy;
+    std::vector<Edge *>::const_iterator it;
+	for(it = m_edges.begin(); it < m_edges.end(); it++) {
+		if((*it)->v0()->getIndex() == getIndex()) {
+			e = *(*it);
+			if(!findOppositeEdge(e, dummy))
+			    return 1;
 		}
 	}
 	return 0;

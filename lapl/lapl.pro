@@ -1,6 +1,6 @@
 mac:LIBS += -leasymodel
 INCLUDEPATH += ../shared 
-win32:INCLUDEPATH += D:/ofl/shared D:/usr/libxml2x64/include D:/usr/eigen2
+win32:INCLUDEPATH += D:/ofl/shared D:/usr/libxml2x64/include D:/usr/eigen2 ./
 mac:INCLUDEPATH += /Users/jianzhang/Library/eigen2
 win32:LIBS +=  -LD:/usr/local/lib64 -leasymodel -LD:/usr/libxml2x64/lib -llibxml2
 HEADERS       = ../shared/Vector3F.h \

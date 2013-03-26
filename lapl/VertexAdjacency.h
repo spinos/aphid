@@ -27,6 +27,8 @@ public:
 	
 	void addEdge(Edge * e);
 	
+	char isOpen() const;
+	void findNeighbors();
 	char findOneRingNeighbors();
 	void computeWeights();
 	void computeDifferentialCoordinate();
@@ -48,6 +50,7 @@ public:
 private:
 	char findOppositeEdge(Edge & e, Edge & dest) const;
 	char firstOutgoingEdge(Edge & e) const;
+	char firstOutgoingEdgeOnBoundary(Edge & e) const;
 	char findIncomming(Edge & eout, Edge & ein) const;
 	void addNeighbor(Edge &e);
     void getVijs(const int & idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const;

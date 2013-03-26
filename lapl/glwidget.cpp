@@ -68,10 +68,11 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	timer->start(30);
 	
 #ifdef WIN32
-	m_mesh = new MeshLaplacian("D:/aphid/lapl/cube.m");
+	m_mesh = new MeshLaplacian("D:/aphid/lapl/tgt.m");
 #else	
 	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/lapl/tgt.m");
 #endif
+
 	m_drawer = new DeformationAnalysisDrawer;
 	m_deformer = new TransferDeformer;
 	
@@ -87,8 +88,13 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_analysis = new DeformationAnalysis();
 	
+#ifdef WIN32
+	MeshLaplacian *srcB4 = new MeshLaplacian("D:/aphid/lapl/srcB4.m");
+	MeshLaplacian *srcAf = new MeshLaplacian("D:/aphid/lapl/srcAf.m");
+#else
 	MeshLaplacian *srcB4 = new MeshLaplacian("/Users/jianzhang/aphid/lapl/srcB4.m");
 	MeshLaplacian *srcAf = new MeshLaplacian("/Users/jianzhang/aphid/lapl/srcAf.m");
+#endif
 	
 	m_analysis->setMeshes(srcB4, srcAf);
 	m_deformer->setTargetAnalysis(m_analysis);
