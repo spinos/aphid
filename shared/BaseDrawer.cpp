@@ -314,35 +314,114 @@ void BaseDrawer::primitive(Primitive * prim)
 	triangle((const BaseMesh *)mesh, iface);	
 }
 
-void BaseDrawer::coordsys()
+void BaseDrawer::coordsys(float scale)
 {
 	glBegin( GL_LINES );
 	glColor3f(1.f, 0.f, 0.f);
 			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(1.f, 0.f, 0.f); 
+			glVertex3f(scale, 0.f, 0.f); 
 	glColor3f(0.f, 1.f, 0.f);					
 			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(0.f, 1.f, 0.f); 
+			glVertex3f(0.f, scale, 0.f); 
 	glColor3f(0.f, 0.f, 1.f);					
 			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(0.f, 0.f, 1.f);		
+			glVertex3f(0.f, 0.f, scale);	
 	glEnd();
-
+	float arrowSize = scale * 0.1f;
+	if(arrowSize < .1f) arrowSize = .1f;
+	if(arrowSize > scale * 0.33f) arrowSize = scale * 0.33f;
+	const float arrowWidth = arrowSize * .23f;
+	setWired(0);
+	glBegin(GL_TRIANGLES);
+	glColor3f(1.f, 0.f, 0.f);
+			glVertex3f(scale - arrowSize, -arrowWidth, arrowWidth);
+			glVertex3f(scale - arrowSize,  arrowWidth, arrowWidth);
+			glVertex3f(scale - arrowSize,  arrowWidth, -arrowWidth);
+			
+			glVertex3f(scale - arrowSize,  arrowWidth, -arrowWidth);
+			glVertex3f(scale - arrowSize, -arrowWidth, -arrowWidth);
+			glVertex3f(scale - arrowSize, -arrowWidth, arrowWidth);
+			
+			glVertex3f(scale - arrowSize, -arrowWidth, arrowWidth);
+			glVertex3f(scale, 0.f, 0.f);
+			glVertex3f(scale - arrowSize, arrowWidth, arrowWidth);
+			
+			glVertex3f(scale - arrowSize, arrowWidth, arrowWidth);
+			glVertex3f(scale, 0.f, 0.f);
+			glVertex3f(scale - arrowSize, arrowWidth, -arrowWidth);
+			
+			glVertex3f(scale - arrowSize, arrowWidth, -arrowWidth);
+			glVertex3f(scale, 0.f, 0.f);
+			glVertex3f(scale - arrowSize, -arrowWidth, -arrowWidth);
+			
+			glVertex3f(scale - arrowSize, -arrowWidth, -arrowWidth);
+			glVertex3f(scale, 0.f, 0.f);
+			glVertex3f(scale - arrowSize, -arrowWidth, arrowWidth);
+	glColor3f(0.f, 1.f, 0.f);					
+			glVertex3f(-arrowWidth, scale - arrowSize, arrowWidth);
+			glVertex3f(arrowWidth, scale - arrowSize,  arrowWidth);
+			glVertex3f(arrowWidth, scale - arrowSize,  -arrowWidth);
+			
+			glVertex3f(arrowWidth, scale - arrowSize,  -arrowWidth);
+			glVertex3f(-arrowWidth, scale - arrowSize, -arrowWidth);
+			glVertex3f(-arrowWidth, scale - arrowSize, arrowWidth);
+			
+			glVertex3f(arrowWidth, scale - arrowSize, arrowWidth);
+			glVertex3f(0.f, scale, 0.f);
+			glVertex3f(-arrowWidth, scale - arrowSize, arrowWidth);
+			
+			glVertex3f(arrowWidth, scale - arrowSize, -arrowWidth);
+			glVertex3f(0.f, scale, 0.f);
+			glVertex3f(arrowWidth, scale - arrowSize, arrowWidth);
+			
+			glVertex3f(-arrowWidth, scale - arrowSize, -arrowWidth);
+			glVertex3f(0.f, scale, 0.f);
+			glVertex3f(arrowWidth, scale - arrowSize, -arrowWidth);
+			
+			glVertex3f(-arrowWidth, scale - arrowSize, arrowWidth);
+			glVertex3f(0.f, scale, 0.f);
+			glVertex3f(-arrowWidth, scale - arrowSize, -arrowWidth);
+			
+	glColor3f(0.f, 0.f, 1.f);					
+			glVertex3f(arrowWidth, -arrowWidth, scale - arrowSize);
+			glVertex3f(-arrowWidth, -arrowWidth, scale - arrowSize);
+			glVertex3f(arrowWidth,  arrowWidth, scale - arrowSize);
+			
+			glVertex3f(-arrowWidth, -arrowWidth, scale - arrowSize);
+			glVertex3f(-arrowWidth, arrowWidth, scale - arrowSize);
+			glVertex3f(arrowWidth,  arrowWidth, scale - arrowSize);
+			
+			glVertex3f(-arrowWidth, arrowWidth, scale - arrowSize);
+			glVertex3f(0.f, 0.f, scale);
+			glVertex3f(arrowWidth, arrowWidth, scale - arrowSize);
+			
+			glVertex3f(arrowWidth, arrowWidth, scale - arrowSize);
+			glVertex3f(0.f, 0.f, scale);
+			glVertex3f(arrowWidth, -arrowWidth, scale - arrowSize);
+			
+			glVertex3f(arrowWidth, -arrowWidth, scale - arrowSize);
+			glVertex3f(0.f, 0.f, scale);
+			glVertex3f(-arrowWidth, -arrowWidth, scale - arrowSize);
+			
+			glVertex3f(-arrowWidth, -arrowWidth, scale - arrowSize);
+			glVertex3f(0.f, 0.f, scale);
+			glVertex3f(-arrowWidth, arrowWidth, scale - arrowSize);
+	glEnd();
+	setWired(1);
 }
 
 void BaseDrawer::coordsys(const Matrix33F & orient, float scale)
 {
 	float m[16];
-	
-	m[0] = orient(0, 0) * scale; m[1] = orient(0, 1) * scale; m[2] = orient(0, 2) * scale; m[3] = 0.0;
-	m[4] = orient(1, 0) * scale; m[5] = orient(1, 1) * scale; m[6] = orient(1, 2) * scale; m[7] = 0.0;
-	m[8] = orient(2, 0) * scale; m[9] = orient(2, 1) * scale; m[10] = orient(2, 2) * scale; m[11] = 0.0;
+	m[0] = orient(0, 0); m[1] = orient(0, 1); m[2] = orient(0, 2); m[3] = 0.0;
+	m[4] = orient(1, 0); m[5] = orient(1, 1); m[6] = orient(1, 2); m[7] = 0.0;
+	m[8] = orient(2, 0); m[9] = orient(2, 1); m[10] = orient(2, 2); m[11] = 0.0;
 	m[12] = 0.f;
 	m[13] = 0.f;
 	m[14] = 0.f; 
 	m[15] = 1.f;
 	glMultMatrixf((const GLfloat*)m);
-	coordsys();
+	coordsys(scale);
 }
 
 void BaseDrawer::setWired(char var)

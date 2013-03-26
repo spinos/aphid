@@ -37,7 +37,7 @@ public:
 	void triangle(const BaseMesh * mesh, unsigned idx);
 	void components(SelectionArray * arr);
 	void primitive(Primitive * prim);
-	void coordsys();
+	void coordsys(float scale = 1.f);
 	void coordsys(const Matrix33F & orient, float scale = 1.f);
 	void setWired(char var);
 	void anchor(Anchor *a);
