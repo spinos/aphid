@@ -8,7 +8,7 @@
  */
 
 #include "DeformationAnalysis.h"
-#include "LaplaceDeformer.h"
+#include <Eigen/LU>
 #include <Eigen/SVD>
 #include "VertexAdjacency.h"
 #include "MeshLaplacian.h"

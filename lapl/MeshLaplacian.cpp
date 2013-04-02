@@ -1,7 +1,7 @@
 #include "MeshLaplacian.h"
 #include "Facet.h"
 #include "VertexAdjacency.h"
-#include "LaplaceDeformer.h"
+
 MeshLaplacian::MeshLaplacian() {}
 
 MeshLaplacian::MeshLaplacian(const char * filename) : TriangleMesh(filename), m_adjacency(NULL)
