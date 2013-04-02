@@ -50,7 +50,7 @@ Window::Window()
     glWidget = new GLWidget;
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Transfer Deformation"));
+    setWindowTitle(tr("Harmonic Coordinate"));
 }
 //! [1]
 
@@ -59,11 +59,15 @@ void Window::keyPressEvent(QKeyEvent *e)
 	if (e->key() == Qt::Key_Escape)
         close();
 	else if(e->key() == Qt::Key_A) {
-		qDebug() << "anchor selected";
-		glWidget->anchorSelected();
+		qDebug() << "anchor selected as one";
+		glWidget->anchorSelected(1.f);
+	}
+	else if(e->key() == Qt::Key_Z) {
+		qDebug() << "anchor selected as zero";
+		glWidget->anchorSelected(0.f);
 	}
 	else if(e->key() == Qt::Key_D) {
-		qDebug() << "deformation mode";
+		qDebug() << "calculate coordinate";
 		glWidget->startDeform();
 	}
     /*

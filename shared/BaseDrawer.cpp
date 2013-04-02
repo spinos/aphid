@@ -216,6 +216,22 @@ void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+void BaseDrawer::field(const BaseField * f)
+{
+	BaseMesh *mesh = f->m_mesh;
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
+	
+	glEnableClientState(GL_COLOR_ARRAY);
+	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)f->getValue());
+	
+// draw a cube
+	glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
+
+// deactivate vertex arrays after drawing
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void BaseDrawer::tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer)
 {
 	unsigned nv = mesh->getNumVertices();

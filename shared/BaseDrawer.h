@@ -10,6 +10,7 @@
 
 #include <BaseMesh.h>
 #include <BaseDeformer.h>
+#include <BaseField.h>
 #include <BoundingBox.h>
 #include <SelectionArray.h>
 #include <Anchor.h>
@@ -32,6 +33,7 @@ public:
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
+	void field(const BaseField * f);
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void box(const BoundingBox & b);
 	void triangle(const BaseMesh * mesh, unsigned idx);

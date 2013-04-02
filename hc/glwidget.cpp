@@ -53,6 +53,7 @@
 #include <RayIntersectionContext.h>
 #include <SelectionArray.h>
 #include <Anchor.h>
+#include <HarmonicCoord.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 
@@ -73,7 +74,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 
 	m_drawer = new KdTreeDrawer;
 	
-	//m_deformer->solve();
+	m_harm = new HarmonicCoord;
+	m_harm->setMesh(m_mesh);
 	
 	m_tree = new KdTree;
 	m_tree->addMesh(m_mesh);
@@ -94,10 +96,15 @@ GLWidget::~GLWidget()
 //! [7]
 void GLWidget::clientDraw()
 {
-
-    m_drawer->setWired(1);
-	m_drawer->setGrey(0.9f);
-    m_drawer->drawMesh(m_mesh);
+	if(m_mode != TransformAnchor) {
+		m_drawer->setWired(1);
+		m_drawer->setGrey(0.9f);
+		m_drawer->drawMesh(m_mesh);
+	}
+    else {
+		m_drawer->setWired(0);
+		m_drawer->field(m_harm);
+	}	
 	m_drawer->setGrey(0.5f);
 	//m_drawer->drawKdTree(m_tree);
 	m_drawer->setWired(0);
@@ -156,8 +163,8 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 		pickupComponent(ray, hit);
 	}
 	else {
-		
-		
+		//m_activeAnchor->translate(stir);
+		//m_harm->solve();
 	}
 }
 //! [10]
@@ -167,10 +174,11 @@ void GLWidget::simulate()
     update();
 }
 
-void GLWidget::anchorSelected()
+void GLWidget::anchorSelected(float wei)
 {
 	if(m_selected->numVertices() < 1) return;
 	Anchor *a = new Anchor(*m_selected);
+	a->setWeight(wei);
 	m_anchors.push_back(a);
 	m_selected->reset();
 }
@@ -178,6 +186,8 @@ void GLWidget::anchorSelected()
 void GLWidget::startDeform()
 {
 	if(m_anchors.size() < 1) return;
+	m_harm->precompute(m_anchors);
+	m_harm->solve();
 	m_mode = TransformAnchor;
 }
 

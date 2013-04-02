@@ -21,6 +21,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/Vertex.h \
                 ../shared/Edge.h \
                 ../shared/Facet.h \
+                ../shared/BaseField.h \
                 ../shared/BaseDeformer.h \
                 ../shared/KdTreeNode.h \
                 ../shared/KdTree.h \
@@ -41,6 +42,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../lapl/MeshLaplacian.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
+                HarmonicCoord.h \
                 glwidget.h \
                 window.h
                 
@@ -62,6 +64,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/Vertex.cpp \
                 ../shared/Edge.cpp \
                 ../shared/Facet.cpp \
+                ../shared/BaseField.cpp \
                 ../shared/BaseDeformer.cpp \
                 ../shared/KdTreeNode.cpp \
                 ../shared/KdTree.cpp \
@@ -82,6 +85,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../lapl/MeshLaplacian.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
+                HarmonicCoord.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp

@@ -43,6 +43,13 @@ Anchor::~Anchor()
 	m_anchorPoints.clear();
 }
 
+void Anchor::setWeight(float wei)
+{
+	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
+		(*m_anchorPointIt).second->w = wei;
+	}
+}
+
 Anchor::AnchorPoint * Anchor::firstPoint(unsigned &idx)
 {
 	m_anchorPointIt = m_anchorPoints.begin();

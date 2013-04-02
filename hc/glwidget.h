@@ -47,6 +47,7 @@
 class MeshLaplacian;
 class KdTreeDrawer;
 class KdTree;
+class HarmonicCoord;
 class SelectionArray;
 class Anchor;
 class Ray;
@@ -69,7 +70,7 @@ public:
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
 	
-	void anchorSelected();
+	void anchorSelected(float wei);
 	void startDeform();
 	bool pickupAnchor(const Ray & ray, Vector3F & hit);
 	bool pickupComponent(const Ray & ray, Vector3F & hit);
@@ -85,6 +86,7 @@ private:
 	InteractMode m_mode;
 	std::vector<Anchor *> m_anchors;
 	Anchor * m_activeAnchor;
+	HarmonicCoord * m_harm;
 private slots:
     void simulate();
 

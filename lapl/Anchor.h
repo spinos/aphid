@@ -22,6 +22,8 @@ public:
 	Anchor(SelectionArray & sel);
 	virtual ~Anchor();
 	
+	void setWeight(float wei);
+	
 	AnchorPoint * firstPoint(unsigned &idx);
 	AnchorPoint * nextPoint(unsigned &idx);
 	bool hasPoint();
