@@ -11,6 +11,7 @@
 
 RayIntersectionContext::RayIntersectionContext() 
 {
+	m_componentType = TFace;
 	reset();
 }
 
@@ -32,6 +33,11 @@ void RayIntersectionContext::setBBox(const BoundingBox & bbox)
 BoundingBox RayIntersectionContext::getBBox() const
 {
 	return m_bbox;
+}
+
+void RayIntersectionContext::setComponentFilerType(ComponentType ft)
+{
+	m_componentType = ft;
 }
 
 void RayIntersectionContext::verbose() const

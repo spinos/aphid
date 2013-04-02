@@ -50,14 +50,13 @@
 #include "KdTreeDrawer.h"
 #include <KdTree.h>
 #include <Ray.h>
-#include <RayIntersectionContext.h>
 #include <SelectionArray.h>
 #include <Anchor.h>
 #include <HarmonicCoord.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 
-static RayIntersectionContext intersectCtx;
+
 	
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -83,7 +82,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_selected = new SelectionArray();
 	m_mode = SelectCompnent;
-
+	intersectCtx.setComponentFilerType(RayIntersectionContext::TVertex);
 }
 //! [0]
 

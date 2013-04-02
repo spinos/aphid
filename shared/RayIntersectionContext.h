@@ -14,12 +14,18 @@
 #include <Geometry.h>
 class RayIntersectionContext {
 public:
+	enum ComponentType {
+		TFace,
+		TVertex
+	};
 	RayIntersectionContext();
 	virtual ~RayIntersectionContext();
 	
 	void reset();
 	void setBBox(const BoundingBox & bbox);
 	BoundingBox getBBox() const;
+	
+	void setComponentFilerType(ComponentType ft);
 	
 	void verbose() const;
 
@@ -32,5 +38,6 @@ public:
 	Primitive * m_primitive;
 	char m_success;
 	char * m_cell;
+	ComponentType m_componentType;
 private:
 };

@@ -44,6 +44,7 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
+#include <RayIntersectionContext.h>
 class MeshLaplacian;
 class KdTreeDrawer;
 class KdTree;
@@ -87,6 +88,7 @@ private:
 	std::vector<Anchor *> m_anchors;
 	Anchor * m_activeAnchor;
 	HarmonicCoord * m_harm;
+	RayIntersectionContext intersectCtx;
 private slots:
     void simulate();
 
