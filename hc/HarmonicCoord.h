@@ -1,12 +1,10 @@
 #pragma once
+#include <LinearMath.h>
 #include "BaseField.h"
-#include <Eigen/Dense>
-#include <Eigen/Sparse>
 #include "Matrix33F.h"
 #include "WeightHandle.h"
 #include <vector>
 #include <map>
-typedef Eigen::SparseMatrix<float> LaplaceMatrixType;
 
 class VertexAdjacency;
 

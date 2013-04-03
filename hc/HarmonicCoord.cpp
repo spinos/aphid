@@ -1,7 +1,7 @@
 #include "HarmonicCoord.h"
 #include "VertexAdjacency.h"
 #include "MeshLaplacian.h"
-#include <Eigen/SVD>
+
 HarmonicCoord::HarmonicCoord() {}
 HarmonicCoord::~HarmonicCoord() {}
 
