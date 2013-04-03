@@ -15,17 +15,19 @@ void HarmonicCoord::setMesh(BaseMesh * mesh)
 	initialCondition();
 }
 
-void HarmonicCoord::precompute(std::vector<Anchor *> & anchors)
+void HarmonicCoord::precompute(std::vector<WeightHandle *> & anchors)
 {
-	unsigned char *isAnchor = new unsigned char[m_numVertices];
-	for(int i = 0; i < (int)m_numVertices; i++) isAnchor[i] = 0;
+	//unsigned char *isAnchor = new unsigned char[m_numVertices];
+	//for(int i = 0; i < (int)m_numVertices; i++) isAnchor[i] = 0;
 	
-	m_anchorPoints.clear();
-	for(std::vector<Anchor *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
+	//m_anchorPoints.clear();
+	m_numAnchors = 0;
+	for(std::vector<WeightHandle *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
 		unsigned idx;
 		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
-			m_anchorPoints[idx] = ap;
-			isAnchor[idx] = 1;
+			//m_anchorPoints[idx] = ap;
+			//isAnchor[idx] = 1;
+			m_numAnchors++;
 		}
 	}
 	
@@ -49,23 +51,32 @@ void HarmonicCoord::precompute(std::vector<Anchor *> & anchors)
 	}
 	
 	int irow = (int)m_numVertices;
-	std::map<unsigned, Anchor::AnchorPoint *>::iterator it;
+	/*std::map<unsigned, Anchor::AnchorPoint *>::iterator it;
 	for(it = m_anchorPoints.begin(); it != m_anchorPoints.end(); ++it) {
 		unsigned idx = (*it).first;
 		L.insert(irow, idx) = 1.0f;
 		irow++;
+	}*/
+	for(std::vector<WeightHandle *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
+		unsigned idx;
+		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
+			//m_anchorPoints[idx] = ap;
+			//isAnchor[idx] = 1;
+			L.insert(irow, idx) = 1.f;
+			irow++;
+		}
 	}
 	
 	m_LT = L.transpose();
 	LaplaceMatrixType m_M = m_LT * L;
 	m_llt.compute(m_M);
 	
-	delete[] isAnchor;
+	//delete[] isAnchor;
 }
 
 unsigned HarmonicCoord::numAnchorPoints() const
 {
-	return m_anchorPoints.size();
+	return m_numAnchors;
 }
 
 void HarmonicCoord::initialCondition()
@@ -78,24 +89,31 @@ void HarmonicCoord::initialCondition()
 	printf("\nedge count: %i\n", ne);
 }
 
-void HarmonicCoord::prestep()
+void HarmonicCoord::prestep(std::vector<WeightHandle *> & anchors)
 {
 	m_b.resize(m_numVertices + numAnchorPoints());
 	m_b.setZero();
 	int irow = (int)m_numVertices;
-	std::map<unsigned, Anchor::AnchorPoint *>::iterator it;
+	/*std::map<unsigned, Anchor::AnchorPoint *>::iterator it;
 	for(it = m_anchorPoints.begin(); it != m_anchorPoints.end(); ++it) {
 		Anchor::AnchorPoint *ap = (*it).second;
 		m_b(irow) = ap->w;
 		irow++;
+	}*/
+	for(std::vector<WeightHandle *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
+		unsigned idx;
+		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
+			m_b(irow) = ap->w;
+			irow++;
+		}
 	}
 	
 	m_b = m_LT * m_b;
 }
 
-char HarmonicCoord::solve()
+char HarmonicCoord::solve(std::vector<WeightHandle *> & anchors)
 {
-	prestep();
+	prestep(anchors);
 	Eigen::VectorXf x = m_llt.solve(m_b);
 	
 	float r;

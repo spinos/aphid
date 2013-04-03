@@ -50,6 +50,16 @@ void Anchor::setWeight(float wei)
 	}
 }
 
+void Anchor::addWeight(float delta)
+{
+    for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
+		float wei = (*m_anchorPointIt).second->w + delta;
+		if(wei > 1.f) wei = 1.f;
+		if(wei < 0.f) wei = 0.f;
+        (*m_anchorPointIt).second->w = wei;
+	}
+}
+
 Anchor::AnchorPoint * Anchor::firstPoint(unsigned &idx)
 {
 	m_anchorPointIt = m_anchorPoints.begin();

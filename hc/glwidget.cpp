@@ -51,7 +51,7 @@
 #include <KdTree.h>
 #include <Ray.h>
 #include <SelectionArray.h>
-#include <Anchor.h>
+#include <WeightHandle.h>
 #include <HarmonicCoord.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
@@ -112,7 +112,7 @@ void GLWidget::clientDraw()
 	m_drawer->setWired(0);
 	m_drawer->setColor(0.f, 1.f, 0.4f);
 	m_drawer->components(m_selected);
-	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
+	for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
 		m_drawer->anchor(*it);
 /*	
 	glBegin(GL_LINES);
@@ -165,8 +165,9 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 		pickupComponent(ray, hit);
 	}
 	else {
-		//m_activeAnchor->translate(stir);
-		//m_harm->solve();
+	    if(!m_activeAnchor) return;
+		m_activeAnchor->translate(stir);
+		m_harm->solve(m_anchors);
 	}
 }
 //! [10]
@@ -179,7 +180,7 @@ void GLWidget::simulate()
 void GLWidget::anchorSelected(float wei)
 {
 	if(m_selected->numVertices() < 1) return;
-	Anchor *a = new Anchor(*m_selected);
+	WeightHandle *a = new WeightHandle(*m_selected);
 	a->setWeight(wei);
 	m_anchors.push_back(a);
 	m_selected->reset();
@@ -189,7 +190,7 @@ void GLWidget::startDeform()
 {
 	if(m_anchors.size() < 1) return;
 	m_harm->precompute(m_anchors);
-	m_harm->solve();
+	m_harm->solve(m_anchors);
 	m_mode = TransformAnchor;
 }
 
@@ -197,7 +198,7 @@ bool GLWidget::pickupAnchor(const Ray & ray, Vector3F & hit)
 {
 	float minDist = 10e8;
 	float t;
-	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+	for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
 		if((*it)->intersect(ray, t, 1.f)) {
 			if(t < minDist) {
 				m_activeAnchor = (*it);

@@ -44,6 +44,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 HarmonicCoord.h \
+                WeightHandle.h \
                 glwidget.h \
                 window.h
                 
@@ -88,6 +89,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 HarmonicCoord.cpp \
+                WeightHandle.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp

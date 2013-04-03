@@ -23,6 +23,7 @@ public:
 	virtual ~Anchor();
 	
 	void setWeight(float wei);
+	void addWeight(float delta);
 	
 	AnchorPoint * firstPoint(unsigned &idx);
 	AnchorPoint * nextPoint(unsigned &idx);
@@ -30,7 +31,8 @@ public:
 	void spaceMatrix(float m[16]) const;
 	Vector3F getCenter() const;
 	bool intersect(const Ray &ray, float &t, float threshold) const;
-	void translate(Vector3F & dis);
+	
+	virtual void translate(Vector3F & dis);
 	
 private:
 	std::map<unsigned, AnchorPoint *> m_anchorPoints;

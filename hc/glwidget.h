@@ -50,7 +50,7 @@ class KdTreeDrawer;
 class KdTree;
 class HarmonicCoord;
 class SelectionArray;
-class Anchor;
+class WeightHandle;
 class Ray;
 
 //! [0]
@@ -85,8 +85,8 @@ private:
 	KdTree * m_tree;
 	SelectionArray * m_selected;
 	InteractMode m_mode;
-	std::vector<Anchor *> m_anchors;
-	Anchor * m_activeAnchor;
+	std::vector<WeightHandle *> m_anchors;
+	WeightHandle * m_activeAnchor;
 	HarmonicCoord * m_harm;
 	RayIntersectionContext * m_intersectCtx;
 private slots:
