@@ -223,7 +223,7 @@ void BaseDrawer::field(const BaseField * f)
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
 	
 	glEnableClientState(GL_COLOR_ARRAY);
-	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)f->getValue());
+	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)f->getColor());
 	
 // draw a cube
 	glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());

@@ -167,7 +167,7 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 	else {
 	    if(!m_activeAnchor) return;
 		m_activeAnchor->translate(stir);
-		m_harm->solve(m_anchors);
+		m_harm->solve();
 	}
 }
 //! [10]
@@ -190,7 +190,7 @@ void GLWidget::startDeform()
 {
 	if(m_anchors.size() < 1) return;
 	m_harm->precompute(m_anchors);
-	m_harm->solve(m_anchors);
+	m_harm->solve();
 	m_mode = TransformAnchor;
 }
 

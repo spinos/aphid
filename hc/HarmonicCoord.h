@@ -18,15 +18,15 @@ public:
 	
 	virtual void setMesh(BaseMesh * mesh);
 	virtual void precompute(std::vector<WeightHandle *> & anchors);
-	virtual char solve(std::vector<WeightHandle *> & anchors);
+	virtual char solve();
 	
 	unsigned numAnchorPoints() const;
 
 private:
 	void initialCondition();
-	void prestep(std::vector<WeightHandle *> & anchors);
-	//std::map<unsigned, Anchor::AnchorPoint *> m_anchorPoints;
-    LaplaceMatrixType m_LT;
+	void prestep();
+	std::vector<WeightHandle *> m_anchors;
+	LaplaceMatrixType m_LT;
 	Eigen::VectorXf m_b;
 	Eigen::SimplicialLDLT<LaplaceMatrixType> m_llt;
 	VertexAdjacency * m_topology;
