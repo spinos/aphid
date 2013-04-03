@@ -80,9 +80,12 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_tree->addMesh(m_mesh);
 	m_tree->create();
 	
-	m_selected = new SelectionArray();
+	m_selected = new SelectionArray;
+	m_selected->setComponentFilterType(PrimitiveFilter::TVertex);
+	
 	m_mode = SelectCompnent;
-	intersectCtx.setComponentFilerType(RayIntersectionContext::TVertex);
+	m_intersectCtx = new RayIntersectionContext;
+	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
 }
 //! [0]
 
@@ -208,10 +211,10 @@ bool GLWidget::pickupAnchor(const Ray & ray, Vector3F & hit)
 
 bool GLWidget::pickupComponent(const Ray & ray, Vector3F & hit)
 {
-	intersectCtx.reset();
-	if(m_tree->intersect(ray, intersectCtx)) {
-		m_selected->add(intersectCtx.m_primitive);
-		hit = intersectCtx.m_hitP;
+	m_intersectCtx->reset();
+	if(m_tree->intersect(ray, m_intersectCtx)) {
+	    m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
+		hit = m_intersectCtx->m_hitP;
 		return true;
 	}
 	return false;

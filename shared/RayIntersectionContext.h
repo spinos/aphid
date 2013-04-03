@@ -11,21 +11,16 @@
 
 #include <BoundingBox.h>
 #include <Primitive.h>
+#include <PrimitiveFilter.h>
 #include <Geometry.h>
-class RayIntersectionContext {
+class RayIntersectionContext : public PrimitiveFilter {
 public:
-	enum ComponentType {
-		TFace,
-		TVertex
-	};
 	RayIntersectionContext();
 	virtual ~RayIntersectionContext();
 	
 	void reset();
 	void setBBox(const BoundingBox & bbox);
 	BoundingBox getBBox() const;
-	
-	void setComponentFilerType(ComponentType ft);
 	
 	void verbose() const;
 
@@ -35,9 +30,8 @@ public:
 	int m_level;
 	Geometry * m_geometry;
 	unsigned m_componentIdx;
-	Primitive * m_primitive;
+	//Primitive * m_primitive;
 	char m_success;
 	char * m_cell;
-	ComponentType m_componentType;
 private:
 };

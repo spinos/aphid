@@ -67,3 +67,9 @@ Facet * MeshLaplacian::getFace(const unsigned &idx) const
 	if(idx >= getNumFaces()) return 0;
 	return m_faces[idx];
 }
+
+Vertex * MeshLaplacian::getVertex(const unsigned &idx) const
+{
+    if(idx >= getNumVertices()) return 0;
+    return &m_adjacency[idx];
+}

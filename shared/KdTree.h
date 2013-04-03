@@ -28,7 +28,7 @@ public:
 	void addMesh(BaseMesh* mesh);
 	void create();
 	
-	char intersect(const Ray &ray, RayIntersectionContext & ctx);
+	char intersect(const Ray &ray, RayIntersectionContext * ctx);
 
 	BoundingBox m_bbox;
 	
@@ -36,8 +36,8 @@ public:
 	
 private:
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
-	char recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx);
-	char leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx);
+	char recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext * ctx);
+	char leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext * ctx);
 	BuildKdTreeStream m_stream;
 	KdTreeNode *m_root;
 };

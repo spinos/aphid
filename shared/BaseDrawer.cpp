@@ -314,13 +314,20 @@ void BaseDrawer::triangle(const BaseMesh * mesh, unsigned idx)
 
 void BaseDrawer::components(SelectionArray * arr)
 {
-	const unsigned numPrims = arr->numPrims();
-	for(unsigned i = 0; i < numPrims; i++) {
-		Primitive * prim = arr->getPrimitive(i);
-		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
-		unsigned iface = prim->getComponentIndex();
-		triangle((const BaseMesh *)mesh, iface);
-	}	
+    BaseMesh *mesh = (BaseMesh *)arr->getGeometry();
+    if(arr->getComponentFilterType() == PrimitiveFilter::TFace) {
+        const unsigned numFace = arr->numFaces();
+        for(unsigned i = 0; i < numFace; i++) {
+            triangle((const BaseMesh *)mesh, arr->getFaceId(i));
+        }
+    }
+    else if(arr->getComponentFilterType() == PrimitiveFilter::TVertex) {
+        const unsigned numVert = arr->numVertices();
+        for(unsigned i = 0; i < numVert; i++) {
+            Vector3F * p = arr->getVertexP(i);
+            solidCube(p->x, p->y, p->z, 0.2f);
+        }
+    }
 }
 
 void BaseDrawer::primitive(Primitive * prim)

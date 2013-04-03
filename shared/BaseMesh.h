@@ -36,7 +36,7 @@ public:
 	unsigned * getIndices() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	
-	char intersect(unsigned idx, const Ray & ray, RayIntersectionContext & ctx) const;
+	char intersect(unsigned idx, const Ray & ray, RayIntersectionContext * ctx) const;
 	
 	Vector3F * _vertices;
 	unsigned * _indices;

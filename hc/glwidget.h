@@ -88,7 +88,7 @@ private:
 	std::vector<Anchor *> m_anchors;
 	Anchor * m_activeAnchor;
 	HarmonicCoord * m_harm;
-	RayIntersectionContext intersectCtx;
+	RayIntersectionContext * m_intersectCtx;
 private slots:
     void simulate();
 

@@ -143,7 +143,7 @@ Matrix33F BaseMesh::getTangentFrame(const unsigned& idx) const
 	return Matrix33F();
 }
 
-char BaseMesh::intersect(unsigned idx, const Ray & ray, RayIntersectionContext & ctx) const
+char BaseMesh::intersect(unsigned idx, const Ray & ray, RayIntersectionContext * ctx) const
 {
 	Vector3F a = _vertices[_indices[idx * 3]];
 	Vector3F b = _vertices[_indices[idx * 3 + 1]];
@@ -161,9 +161,9 @@ char BaseMesh::intersect(unsigned idx, const Ray & ray, RayIntersectionContext &
 	
 	if(t < 0.f || t > ray.m_tmax) return 0;
 	
-	//printf("face %i %f %f", idx, t, ctx.m_minHitDistance);
+	//printf("face %i %f %f", idx, t, ctx->m_minHitDistance);
 	
-	if(t > ctx.m_minHitDistance) return 0;
+	if(t > ctx->m_minHitDistance) return 0;
 	
 	Vector3F onplane = ray.m_origin + ray.m_dir * t;
 	Vector3F e01 = b - a;
@@ -184,11 +184,27 @@ char BaseMesh::intersect(unsigned idx, const Ray & ray, RayIntersectionContext &
 	
 	//printf("pass c\n");
 	
-	ctx.m_hitP = onplane;
-	ctx.m_hitN = nor;
-	ctx.m_minHitDistance = t;
-	ctx.m_geometry = (Geometry*)this;
-	ctx.m_componentIdx = idx;
+	ctx->m_hitP = onplane;
+	ctx->m_hitN = nor;
+	ctx->m_minHitDistance = t;
+	ctx->m_geometry = (Geometry*)this;
+	ctx->m_componentIdx = idx;
+
+	if(ctx->getComponentFilterType() == PrimitiveFilter::TFace) {
+	    ctx->m_componentIdx = idx;
+	}
+	else {
+	    ctx->m_componentIdx = _indices[idx * 3];
+	    float mind = (a - onplane).length();
+	    float d = (b - onplane).length();
+	    if(d < mind) {
+	        ctx->m_componentIdx = _indices[idx * 3 + 1];
+	        mind = d;
+	    }
+	    d = (c - onplane).length();
+	    if(d < mind)
+	        ctx->m_componentIdx = _indices[idx * 3 + 2];
+	}
 	
 	return 1;
 }

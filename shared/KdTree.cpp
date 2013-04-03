@@ -114,18 +114,18 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	delete rightCtx;
 }
 
-char KdTree::intersect(const Ray &ray, RayIntersectionContext & ctx)
+char KdTree::intersect(const Ray &ray, RayIntersectionContext * ctx)
 {
 	float hitt0, hitt1;
 	if(!m_bbox.intersect(ray, &hitt0, &hitt1)) return 0;
 	
-	ctx.setBBox(m_bbox);
+	ctx->setBBox(m_bbox);
 
 	KdTreeNode * root = getRoot();
 	return recusiveIntersect(root, ray, ctx);
 }
 
-char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx)
+char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext * ctx)
 {
 	//printf("recus intersect level %i\n", ctx.m_level);
 	if(node->isLeaf()) {
@@ -140,7 +140,7 @@ char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersection
 	char belowPlane = (origin < splitPos || (origin == splitPos && ray.m_dir.comp(axis) <= 0.f));
 	
 	BoundingBox leftBox, rightBox;
-	BoundingBox bigBox = ctx.getBBox();
+	BoundingBox bigBox = ctx->getBBox();
 	bigBox.split(axis, splitPos, leftBox, rightBox);
 	
 	KdTreeNode *nearNode, *farNode;
@@ -161,15 +161,15 @@ char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersection
 	Vector3F pplane = ray.m_origin + ray.m_dir * tplane;
 
 	if(bigBox.isPointInside(pplane)) {
-		ctx.setBBox(nearBox);
-		ctx.m_level++;
+		ctx->setBBox(nearBox);
+		ctx->m_level++;
 		if(recusiveIntersect(nearNode, ray, ctx)) return 1;
 	
 		if(tplane < ray.m_tmin || tplane > ray.m_tmax)
 			return 0;
 		
-		ctx.setBBox(farBox);
-		ctx.m_level--;
+		ctx->setBBox(farBox);
+		ctx->m_level--;
 		if(recusiveIntersect(farNode, ray, ctx)) return 1;
 	}
 	else {
@@ -177,26 +177,26 @@ char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersection
 			float hitt0, hitt1;
 			bigBox.intersect(ray, &hitt0, &hitt1);
 			if(tplane > hitt1) {
-				ctx.setBBox(nearBox);
-				ctx.m_level++;
+				ctx->setBBox(nearBox);
+				ctx->m_level++;
 				if(recusiveIntersect(nearNode, ray, ctx)) return 1;
 			}
 			else {
-				ctx.setBBox(farBox);
-				ctx.m_level++;
+				ctx->setBBox(farBox);
+				ctx->m_level++;
 				if(recusiveIntersect(farNode, ray, ctx)) return 1;
 			}
 		}
 		else {
-				ctx.setBBox(nearBox);
-				ctx.m_level++;
+				ctx->setBBox(nearBox);
+				ctx->m_level++;
 				if(recusiveIntersect(nearNode, ray, ctx)) return 1;
 		}
 	}
 	return 0;
 }
 
-char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext & ctx)
+char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext * ctx)
 {
 	unsigned start = node->getPrimStart();
 	unsigned num = node->getNumPrims();
@@ -215,7 +215,7 @@ char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionCont
 		unsigned iface = prim->getComponentIndex();
 		
 		if(mesh->intersect(iface, ray, ctx)) {
-			ctx.m_primitive = prim;
+			//ctx->m_primitive = prim;
 			anyHit = 1;
 			//printf("hit %i\n", iface);
 		}
@@ -224,7 +224,7 @@ char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionCont
 			
 		indir.next();
 	}
-	if(anyHit) {ctx.m_success = 1; ctx.m_cell = (char *)node;}
+	if(anyHit) {ctx->m_success = 1; ctx->m_cell = (char *)node;}
 	return anyHit;
 }
 
