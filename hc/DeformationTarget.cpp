@@ -110,7 +110,7 @@ void DeformationTarget::svdRotation()
 		
 		Eigen::MatrixXf S = X * W * Y.transpose();
 		
-		Eigen::JacobiSVD<Eigen::MatrixXf > solver(S);
+		Eigen::JacobiSVD<Eigen::MatrixXf > solver(S, Eigen::ComputeThinU | Eigen::ComputeThinV);
 		
 		float d = (solver.matrixV() * solver.matrixU().transpose()).determinant();
 		D(2,2) = d;
@@ -227,7 +227,7 @@ Vector3F DeformationTarget::getT(unsigned idx) const
 {
 	const Vector3F * vs = m_restMesh->getVertices();
 	const Vector3F * vts = m_effectMesh->getVertices();
-	return vts[idx] - vs[idx];
+	return (vts[idx] - vs[idx]) * m_weightMap->getValue(idx);
 }
 
 float DeformationTarget::getS(unsigned idx) const
@@ -238,5 +238,26 @@ float DeformationTarget::getS(unsigned idx) const
 float DeformationTarget::minDisplacement() const
 {
 	return m_minDisplacement;
+}
+
+void DeformationTarget::update()
+{
+	m_activeIndices.clear();
+	std::vector<unsigned > nonzeroWeight;
+	if(m_weightMap->genNonZeroIndices(nonzeroWeight) < 2) return;
+	
+	const Vector3F * vs = m_restMesh->getVertices();
+	const Vector3F * vts = m_effectMesh->getVertices();
+	
+	for(std::vector<unsigned >::const_iterator it = nonzeroWeight.begin(); it != nonzeroWeight.end(); ++it) {
+		unsigned idx = *it;
+		if((vts[idx] - vs[idx]).length() > 10e-2)
+			m_activeIndices.push_back(idx);
+	}
+}
+
+unsigned DeformationTarget::numActiveIndices() const
+{
+	return (unsigned)m_activeIndices.size();
 }
 

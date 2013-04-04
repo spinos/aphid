@@ -109,3 +109,25 @@ char HarmonicCoord::solve()
 	plotColor();
 	return 1;
 }
+
+bool HarmonicCoord::allZero() const
+{
+	for(std::vector<WeightHandle *>::const_iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+		unsigned idx;
+		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
+			if(ap->w > 10e-3)
+				return false;
+		}
+	}
+	return true;
+}
+
+unsigned HarmonicCoord::genNonZeroIndices(std::vector<unsigned > & dst) const
+{
+	if(allZero()) return 0;
+	for(unsigned i = 0; i < m_numVertices; i++) {
+		if(m_value[i] > 10e-3)
+			dst.push_back(i);
+	}
+	return (unsigned)dst.size();
+}

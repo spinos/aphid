@@ -19,10 +19,12 @@ public:
 	virtual char solve();
 	
 	unsigned numAnchorPoints() const;
+	unsigned genNonZeroIndices(std::vector<unsigned > & dst) const;
 
 private:
 	void initialCondition();
 	void prestep();
+	bool allZero() const;
 	std::vector<WeightHandle *> m_anchors;
 	LaplaceMatrixType m_LT;
 	Eigen::VectorXf m_b;

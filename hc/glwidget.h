@@ -52,7 +52,7 @@ class HarmonicCoord;
 class SelectionArray;
 class WeightHandle;
 class Ray;
-
+class DeformationTarget;
 //! [0]
 class GLWidget : public Base3DView
 {
@@ -81,6 +81,7 @@ protected:
 //! [3]
 private:
     MeshLaplacian * m_mesh;
+	MeshLaplacian * m_mesh1;
     KdTreeDrawer * m_drawer;
 	KdTree * m_tree;
 	SelectionArray * m_selected;
@@ -89,6 +90,7 @@ private:
 	WeightHandle * m_activeAnchor;
 	HarmonicCoord * m_harm;
 	RayIntersectionContext * m_intersectCtx;
+	DeformationTarget * m_analysis;
 private slots:
     void simulate();
 

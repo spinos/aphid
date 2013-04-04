@@ -53,6 +53,7 @@
 #include <SelectionArray.h>
 #include <WeightHandle.h>
 #include <HarmonicCoord.h>
+#include <DeformationTarget.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 
@@ -67,8 +68,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 #ifdef WIN32
 	m_mesh = new MeshLaplacian("D:/aphid/mdl/eye.m");
+	m_mesh1 = new MeshLaplacian("D:/aphid/mdl/eyeO.m");
 #else	
 	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/mdl/eye.m");
+	m_mesh1 = new MeshLaplacian("/Users/jianzhang/aphid/mdl/eyeO.m");
 #endif
 
 	m_drawer = new KdTreeDrawer;
@@ -86,6 +89,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_mode = SelectCompnent;
 	m_intersectCtx = new RayIntersectionContext;
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
+	
+	m_analysis = new DeformationTarget;
+	m_analysis->setMeshes(m_mesh, m_mesh1);
+	m_analysis->setWeightMap(m_harm);
 }
 //! [0]
 
@@ -114,6 +121,25 @@ void GLWidget::clientDraw()
 	m_drawer->components(m_selected);
 	for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
 		m_drawer->anchor(*it);
+		
+	const unsigned nv = m_analysis->numVertices();
+	Vector3F vi, dc;
+	
+	for(unsigned i = 0; i < nv; i++) {
+		vi = m_analysis->restP(i);
+		Matrix33F orient = m_analysis->getR(i);
+		glPushMatrix();
+		glTranslatef(vi.x, vi.y, vi.z);
+		//m_drawer->coordsys(orient/*, analysis->getS(i)*/);
+		glPopMatrix();
+		
+		m_drawer->beginLine();
+		dc = m_analysis->getT(i);
+		m_drawer->setColor(0.f, 0.f, 1.f);
+		glVertex3f(vi.x, vi.y, vi.z);
+		glVertex3f(vi.x + dc.x, vi.y + dc.y, vi.z + dc.z);
+		m_drawer->end();
+	}
 /*	
 	glBegin(GL_LINES);
 	glColor3f(1,0,0);
@@ -168,6 +194,7 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 	    if(!m_activeAnchor) return;
 		m_activeAnchor->translate(stir);
 		m_harm->solve();
+		m_analysis->update();
 	}
 }
 //! [10]
@@ -191,6 +218,7 @@ void GLWidget::startDeform()
 	if(m_anchors.size() < 1) return;
 	m_harm->precompute(m_anchors);
 	m_harm->solve();
+	m_analysis->update();
 	m_mode = TransformAnchor;
 }
 

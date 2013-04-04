@@ -29,6 +29,11 @@ Vector3F * BaseField::getColor() const
 	return m_color;
 }
 
+float BaseField::getValue(unsigned idx) const
+{
+	return m_value[idx];
+}
+
 void BaseField::plotColor()
 {
 	for(int i = 0; i < (int)m_numVertices; i++) {

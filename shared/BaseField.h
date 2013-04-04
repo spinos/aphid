@@ -12,6 +12,7 @@ public:
 	virtual void setMesh(BaseMesh * mesh);
 	
 	Vector3F * getColor() const;
+	float getValue(unsigned idx) const;
     
 	virtual char solve();
 	

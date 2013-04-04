@@ -32,11 +32,16 @@ public:
 	Vector3F differential(unsigned idx) const;
 	Vector3F transformedDifferential(unsigned idx) const;
 	float minDisplacement() const;
+	
+	void update();
+	unsigned numActiveIndices() const;
+	
 private:
 	void svdRotation();
 	void edgeScale();
 	void computeTRange();
 	
+	std::vector<unsigned > m_activeIndices;
 	BaseMesh * m_restMesh;
 	BaseMesh * m_effectMesh;
 	HarmonicCoord * m_weightMap;
