@@ -49,10 +49,8 @@ void AccumulateDeformer::precompute()
 void AccumulateDeformer::prestep()
 {
 	LaplaceMatrixType L = m_L;
-	unsigned nach = m_targetAnalysis->numActiveIndices();
-	for(unsigned i = 0; i < nach; i++) {
-		unsigned irow = m_targetAnalysis->activeIndex(i);
-		L.coeffRef(irow, irow) = L.coeffRef(irow, irow) + m_targetAnalysis->getConstrainWeight(irow);
+	for(unsigned i = 0; i < m_numVertices; i++) {
+		L.coeffRef(i, i) = L.coeffRef(i, i) + .8f;
 	}
 	
 	LaplaceMatrixType LT = L.transpose();
@@ -74,13 +72,12 @@ void AccumulateDeformer::prestep()
 		m_delta[2](i) = dif.z;
 	}
 	
-	for(unsigned i = 0; i < nach; i++) {
-		unsigned irow = m_targetAnalysis->activeIndex(i);
-		Vector3F worldP = m_targetAnalysis->restP(irow) + m_targetAnalysis->getT(irow);
-		worldP *= m_targetAnalysis->getConstrainWeight(irow);
-		m_delta[0](irow) = m_delta[0](irow) + worldP.x;
-		m_delta[1](irow) = m_delta[1](irow) + worldP.y;
-		m_delta[2](irow) = m_delta[2](irow) + worldP.z;
+	for(unsigned i = 0; i < m_numVertices; i++) {
+		Vector3F worldP = m_targetAnalysis->restP(i) + m_targetAnalysis->getT(i);
+		worldP *= 0.8f;
+		m_delta[0](i) = m_delta[0](i) + worldP.x;
+		m_delta[1](i) = m_delta[1](i) + worldP.y;
+		m_delta[2](i) = m_delta[2](i) + worldP.z;
 	}
 	
 	m_delta[0] = LT * m_delta[0];

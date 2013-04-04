@@ -119,9 +119,9 @@ unsigned HarmonicCoord::genNonZeroIndices(std::vector<unsigned > & dst) const
 {
 	if(allZero()) return 0;
 	for(unsigned i = 0; i < m_numVertices; i++) {
-		if(isAnchorPoint(i))
-			dst.push_back(i);
-		else if(m_value[i] > 10e-3)
+		//if(isAnchorPoint(i))
+		//	dst.push_back(i);
+		//else //if(m_value[i] > 10e-3)
 			dst.push_back(i);
 	}
 	return (unsigned)dst.size();

@@ -34,9 +34,6 @@ public:
 	Vector3F transformedDifferential(unsigned idx) const;
 	float minDisplacement() const;
 	
-	void update();
-	unsigned numActiveIndices() const;
-	unsigned activeIndex(unsigned idx) const;
 	bool hasNoEffect() const;
 	
 private:
@@ -44,7 +41,6 @@ private:
 	void edgeScale();
 	void computeTRange();
 	
-	std::vector<unsigned > m_activeIndices;
 	BaseMesh * m_restMesh;
 	BaseMesh * m_effectMesh;
 	HarmonicCoord * m_weightMap;

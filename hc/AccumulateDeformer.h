@@ -31,7 +31,6 @@ public:
 private:
 	void prestep();
 	LaplaceMatrixType m_L;
-	//LaplaceMatrixType m_LT;
 	Eigen::VectorXf m_delta[3];
 	Eigen::SimplicialLDLT<LaplaceMatrixType> m_llt;
 	VertexAdjacency * m_topology;
