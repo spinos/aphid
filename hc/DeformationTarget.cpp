@@ -235,6 +235,12 @@ float DeformationTarget::getS(unsigned idx) const
 	return m_scale[idx];
 }
 
+float DeformationTarget::getConstrainWeight(unsigned idx) const
+{
+//printf("w%f ", m_weightMap->getValue(idx));
+	return m_weightMap->getValue(idx);
+}
+
 float DeformationTarget::minDisplacement() const
 {
 	return m_minDisplacement;
@@ -243,17 +249,8 @@ float DeformationTarget::minDisplacement() const
 void DeformationTarget::update()
 {
 	m_activeIndices.clear();
-	std::vector<unsigned > nonzeroWeight;
-	if(m_weightMap->genNonZeroIndices(nonzeroWeight) < 2) return;
-	
-	const Vector3F * vs = m_restMesh->getVertices();
-	const Vector3F * vts = m_effectMesh->getVertices();
-	
-	for(std::vector<unsigned >::const_iterator it = nonzeroWeight.begin(); it != nonzeroWeight.end(); ++it) {
-		unsigned idx = *it;
-		if((vts[idx] - vs[idx]).length() > 10e-2)
-			m_activeIndices.push_back(idx);
-	}
+	//m_weightMap->genAnchorIndices(m_activeIndices);	
+	m_weightMap->genNonZeroIndices(m_activeIndices);
 }
 
 unsigned DeformationTarget::numActiveIndices() const
@@ -261,3 +258,12 @@ unsigned DeformationTarget::numActiveIndices() const
 	return (unsigned)m_activeIndices.size();
 }
 
+unsigned DeformationTarget::activeIndex(unsigned idx) const
+{
+	return m_activeIndices[idx];
+}
+
+bool DeformationTarget::hasNoEffect() const
+{
+	return m_weightMap->hasNoEffect();
+}

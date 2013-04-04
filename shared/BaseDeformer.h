@@ -11,6 +11,8 @@ public:
 	
 	virtual void setMesh(BaseMesh * mesh);
 	
+	void reset();
+	
 	Vector3F * getDeformedData() const;
     
 	virtual char solve();

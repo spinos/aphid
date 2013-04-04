@@ -20,11 +20,13 @@ public:
 	
 	unsigned numAnchorPoints() const;
 	unsigned genNonZeroIndices(std::vector<unsigned > & dst) const;
-
+	void genAnchorIndices(std::vector<unsigned > & dst) const;
+	bool hasNoEffect() const;
 private:
 	void initialCondition();
 	void prestep();
 	bool allZero() const;
+	bool isAnchorPoint(unsigned i) const;
 	std::vector<WeightHandle *> m_anchors;
 	LaplaceMatrixType m_LT;
 	Eigen::VectorXf m_b;

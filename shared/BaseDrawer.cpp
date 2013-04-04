@@ -229,6 +229,7 @@ void BaseDrawer::field(const BaseField * f)
 	glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
 
 // deactivate vertex arrays after drawing
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 

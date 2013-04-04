@@ -53,6 +53,7 @@ class SelectionArray;
 class WeightHandle;
 class Ray;
 class DeformationTarget;
+class AccumulateDeformer;
 //! [0]
 class GLWidget : public Base3DView
 {
@@ -91,6 +92,7 @@ private:
 	HarmonicCoord * m_harm;
 	RayIntersectionContext * m_intersectCtx;
 	DeformationTarget * m_analysis;
+	AccumulateDeformer * m_deformer;
 private slots:
     void simulate();
 

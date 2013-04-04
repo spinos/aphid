@@ -54,10 +54,9 @@
 #include <WeightHandle.h>
 #include <HarmonicCoord.h>
 #include <DeformationTarget.h>
+#include <AccumulateDeformer.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
-
-
 	
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -93,6 +92,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_analysis = new DeformationTarget;
 	m_analysis->setMeshes(m_mesh, m_mesh1);
 	m_analysis->setWeightMap(m_harm);
+	
+	m_deformer = new AccumulateDeformer;
+	m_deformer->setMesh(m_mesh);
+	m_deformer->setTargetAnalysis(m_analysis);
 }
 //! [0]
 
@@ -116,7 +119,7 @@ void GLWidget::clientDraw()
 	}	
 	m_drawer->setGrey(0.5f);
 	//m_drawer->drawKdTree(m_tree);
-	m_drawer->setWired(0);
+	//m_drawer->setWired(0);
 	m_drawer->setColor(0.f, 1.f, 0.4f);
 	m_drawer->components(m_selected);
 	for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
@@ -140,6 +143,14 @@ void GLWidget::clientDraw()
 		glVertex3f(vi.x + dc.x, vi.y + dc.y, vi.z + dc.z);
 		m_drawer->end();
 	}
+	glTranslatef(20,0,0);
+	m_drawer->setWired(1);
+	m_drawer->setColor(0.f, 1.f, .4f);
+	m_drawer->drawMesh(m_mesh, m_deformer);
+	glTranslatef(20,0,0);
+	m_drawer->setColor(0.f, 4.f, 1.f);
+	m_drawer->drawMesh(m_mesh1);
+	
 /*	
 	glBegin(GL_LINES);
 	glColor3f(1,0,0);
@@ -153,7 +164,7 @@ void GLWidget::clientDraw()
 	//m_drawer->box(intersectCtx.getBBox());
 	m_drawer->setWired(0);
 */
-	glTranslatef(-20,0,0);
+	
 }
 //! [7]
 
@@ -195,6 +206,7 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 		m_activeAnchor->translate(stir);
 		m_harm->solve();
 		m_analysis->update();
+		m_deformer->solve();
 	}
 }
 //! [10]
@@ -219,6 +231,8 @@ void GLWidget::startDeform()
 	m_harm->precompute(m_anchors);
 	m_harm->solve();
 	m_analysis->update();
+	m_deformer->precompute();
+	m_deformer->solve();
 	m_mode = TransformAnchor;
 }
 

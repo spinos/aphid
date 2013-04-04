@@ -25,17 +25,13 @@ public:
 	
 	virtual void setMesh(BaseMesh * mesh);
 	virtual void setTargetAnalysis(DeformationTarget * analysis);
-	virtual void setBaseAnalysis(DeformationTarget * analysis);
-	virtual void precompute(std::vector<Anchor *> & anchors);
+	virtual void precompute();
 	virtual char solve();
 	
-	unsigned numAnchorPoints() const;
-
 private:
 	void prestep();
-	
-	std::map<unsigned, Anchor::AnchorPoint *> m_anchorPoints;
-    LaplaceMatrixType m_LT;
+	LaplaceMatrixType m_L;
+	//LaplaceMatrixType m_LT;
 	Eigen::VectorXf m_delta[3];
 	Eigen::SimplicialLDLT<LaplaceMatrixType> m_llt;
 	VertexAdjacency * m_topology;
