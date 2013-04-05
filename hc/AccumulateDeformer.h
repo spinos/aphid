@@ -29,7 +29,7 @@ public:
 	virtual char solve();
 	
 private:
-	void prestep();
+	void prestep(Eigen::VectorXf b[]);
 	LaplaceMatrixType m_L;
 	Eigen::VectorXf m_delta[3];
 	Eigen::SimplicialLDLT<LaplaceMatrixType> m_llt;

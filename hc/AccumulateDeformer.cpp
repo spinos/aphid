@@ -42,16 +42,29 @@ void AccumulateDeformer::precompute()
 			neighborIdx = neighbor->v->getIndex();
 			m_L.insert(i, neighborIdx) = -neighbor->weight;
 		}
-		m_L.insert(i, i) = 1.0f;
+		m_L.insert(i, i) = 1.1f;
+	}
+	
+	m_delta[0].resize(m_numVertices);
+	m_delta[1].resize(m_numVertices);
+	m_delta[2].resize(m_numVertices);
+	
+	Vector3F *v = m_mesh->getVertices();
+	
+	for(int i = 0; i < (int)m_numVertices; i++) {
+		VertexAdjacency & adj = m_topology[i];
+		Vector3F dif = adj.getDifferentialCoordinate();
+		Vector3F worldP = v[i];
+		worldP *= .1f;
+		m_delta[0](i) = dif.x + worldP.x;
+		m_delta[1](i) = dif.y + worldP.y;
+		m_delta[2](i) = dif.z + worldP.z;
 	}
 }
 
-void AccumulateDeformer::prestep()
+void AccumulateDeformer::prestep(Eigen::VectorXf b[])
 {
 	LaplaceMatrixType L = m_L;
-	for(unsigned i = 0; i < m_numVertices; i++) {
-		L.coeffRef(i, i) = L.coeffRef(i, i) + .1f;
-	}
 	
 	std::vector<unsigned> constrainIndices;
 	m_targetAnalysis->genNonZeroIndices(constrainIndices);
@@ -66,19 +79,9 @@ void AccumulateDeformer::prestep()
 	LaplaceMatrixType M = LT * L;
 	m_llt.compute(M);
 	
-	m_delta[0].resize(m_numVertices);
-	m_delta[1].resize(m_numVertices);
-	m_delta[2].resize(m_numVertices);
-	
-	for(int i = 0; i < (int)m_numVertices; i++) {
-		VertexAdjacency & adj = m_topology[i];
-		Vector3F dif = adj.getDifferentialCoordinate();
-		Vector3F worldP = m_targetAnalysis->restP(i);
-		worldP *= .1f;
-		m_delta[0](i) = dif.x + worldP.x;
-		m_delta[1](i) = dif.y + worldP.y;
-		m_delta[2](i) = dif.z + worldP.z;
-	}
+	b[0] = m_delta[0];
+	b[1] = m_delta[1];
+	b[2] = m_delta[2];
 	
 	for(std::vector<unsigned>::const_iterator it = constrainIndices.begin(); it != constrainIndices.end(); ++it) {
 		unsigned ic = *it;
@@ -88,14 +91,14 @@ void AccumulateDeformer::prestep()
 		dif = R.transform(dif);
 		Vector3F worldP = m_targetAnalysis->restP(ic) + m_targetAnalysis->getT(ic);
 		worldP *= .9f;
-		m_delta[0](ic) = dif.x + worldP.x;
-		m_delta[1](ic) = dif.y + worldP.y;
-		m_delta[2](ic) = dif.z + worldP.z;
+		b[0](ic) = dif.x + worldP.x;
+		b[1](ic) = dif.y + worldP.y;
+		b[2](ic) = dif.z + worldP.z;
 	}
 	
-	m_delta[0] = LT * m_delta[0];
-	m_delta[1] = LT * m_delta[1];
-	m_delta[2] = LT * m_delta[2];
+	b[0] = LT * b[0];
+	b[1] = LT * b[1];
+	b[2] = LT * b[2];
 }
 
 char AccumulateDeformer::solve()
@@ -104,11 +107,12 @@ char AccumulateDeformer::solve()
 		reset();
 		return 0;
 	}
-	prestep();
+	Eigen::VectorXf b[3];
+	prestep(b);
 	Eigen::VectorXf x[3];
-	x[0] = m_llt.solve(m_delta[0]);
-	x[1] = m_llt.solve(m_delta[1]);
-	x[2] = m_llt.solve(m_delta[2]);
+	x[0] = m_llt.solve(b[0]);
+	x[1] = m_llt.solve(b[1]);
+	x[2] = m_llt.solve(b[2]);
 	
 	for(int i = 0; i < (int)m_numVertices; i++) {
 		m_deformedV[i].x = x[0](i);
