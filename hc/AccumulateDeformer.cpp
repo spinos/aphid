@@ -50,7 +50,15 @@ void AccumulateDeformer::prestep()
 {
 	LaplaceMatrixType L = m_L;
 	for(unsigned i = 0; i < m_numVertices; i++) {
-		L.coeffRef(i, i) = L.coeffRef(i, i) + .8f;
+		L.coeffRef(i, i) = L.coeffRef(i, i) + .1f;
+	}
+	
+	std::vector<unsigned> constrainIndices;
+	m_targetAnalysis->genNonZeroIndices(constrainIndices);
+	
+	for(std::vector<unsigned>::const_iterator it = constrainIndices.begin(); it != constrainIndices.end(); ++it) {
+		unsigned ic = *it;
+		L.coeffRef(ic, ic) = L.coeffRef(ic, ic) + .8f;
 	}
 	
 	LaplaceMatrixType LT = L.transpose();
@@ -65,19 +73,24 @@ void AccumulateDeformer::prestep()
 	for(int i = 0; i < (int)m_numVertices; i++) {
 		VertexAdjacency & adj = m_topology[i];
 		Vector3F dif = adj.getDifferentialCoordinate();
-		Matrix33F R = m_targetAnalysis->getR(i);
-		dif = R.transform(dif);
-		m_delta[0](i) = dif.x;
-		m_delta[1](i) = dif.y;
-		m_delta[2](i) = dif.z;
+		Vector3F worldP = m_targetAnalysis->restP(i);
+		worldP *= .1f;
+		m_delta[0](i) = dif.x + worldP.x;
+		m_delta[1](i) = dif.y + worldP.y;
+		m_delta[2](i) = dif.z + worldP.z;
 	}
 	
-	for(unsigned i = 0; i < m_numVertices; i++) {
-		Vector3F worldP = m_targetAnalysis->restP(i) + m_targetAnalysis->getT(i);
-		worldP *= 0.8f;
-		m_delta[0](i) = m_delta[0](i) + worldP.x;
-		m_delta[1](i) = m_delta[1](i) + worldP.y;
-		m_delta[2](i) = m_delta[2](i) + worldP.z;
+	for(std::vector<unsigned>::const_iterator it = constrainIndices.begin(); it != constrainIndices.end(); ++it) {
+		unsigned ic = *it;
+		VertexAdjacency & adj = m_topology[ic];
+		Vector3F dif = adj.getDifferentialCoordinate();
+		Matrix33F R = m_targetAnalysis->getR(ic);
+		dif = R.transform(dif);
+		Vector3F worldP = m_targetAnalysis->restP(ic) + m_targetAnalysis->getT(ic);
+		worldP *= .9f;
+		m_delta[0](ic) = dif.x + worldP.x;
+		m_delta[1](ic) = dif.y + worldP.y;
+		m_delta[2](ic) = dif.z + worldP.z;
 	}
 	
 	m_delta[0] = LT * m_delta[0];

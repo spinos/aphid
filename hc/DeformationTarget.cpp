@@ -249,3 +249,13 @@ bool DeformationTarget::hasNoEffect() const
 {
 	return m_weightMap->hasNoEffect();
 }
+
+void DeformationTarget::genNonZeroIndices(std::vector<unsigned > & dst) const
+{
+	unsigned numVertices = m_restMesh->getNumVertices();
+	for(unsigned i = 0; i < numVertices; i++) {
+		if(m_weightMap->getValue(i) > 10e-3)
+			dst.push_back(i);
+	}
+}
+

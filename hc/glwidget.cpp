@@ -115,7 +115,9 @@ void GLWidget::clientDraw()
 	}
     else {
 		m_drawer->setWired(0);
+		glTranslatef(0,-20,0);
 		m_drawer->field(m_harm);
+		glTranslatef(0,20,0);
 	}	
 	m_drawer->setGrey(0.5f);
 	//m_drawer->drawKdTree(m_tree);
@@ -124,7 +126,7 @@ void GLWidget::clientDraw()
 	m_drawer->components(m_selected);
 	for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
 		m_drawer->anchor(*it);
-		
+	/*	
 	const unsigned nv = m_analysis->numVertices();
 	Vector3F vi, dc;
 	
@@ -133,7 +135,7 @@ void GLWidget::clientDraw()
 		Matrix33F orient = m_analysis->getR(i);
 		glPushMatrix();
 		glTranslatef(vi.x, vi.y, vi.z);
-		//m_drawer->coordsys(orient/*, analysis->getS(i)*/);
+		//m_drawer->coordsys(orient);
 		glPopMatrix();
 		
 		m_drawer->beginLine();
@@ -143,11 +145,12 @@ void GLWidget::clientDraw()
 		glVertex3f(vi.x + dc.x, vi.y + dc.y, vi.z + dc.z);
 		m_drawer->end();
 	}
+	*/
 	glTranslatef(20,0,0);
 	m_drawer->setWired(1);
 	m_drawer->setColor(0.f, 1.f, .4f);
 	m_drawer->drawMesh(m_mesh, m_deformer);
-	glTranslatef(20,0,0);
+	glTranslatef(0,-20,0);
 	m_drawer->setColor(0.f, 4.f, 1.f);
 	m_drawer->drawMesh(m_mesh1);
 	

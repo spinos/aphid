@@ -35,6 +35,7 @@ public:
 	float minDisplacement() const;
 	
 	bool hasNoEffect() const;
+	void genNonZeroIndices(std::vector<unsigned > & dst) const;
 	
 private:
 	void svdRotation();

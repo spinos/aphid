@@ -115,38 +115,6 @@ bool HarmonicCoord::allZero() const
 	return true;
 }
 
-unsigned HarmonicCoord::genNonZeroIndices(std::vector<unsigned > & dst) const
-{
-	if(allZero()) return 0;
-	for(unsigned i = 0; i < m_numVertices; i++) {
-		//if(isAnchorPoint(i))
-		//	dst.push_back(i);
-		//else //if(m_value[i] > 10e-3)
-			dst.push_back(i);
-	}
-	return (unsigned)dst.size();
-}
-
-bool HarmonicCoord::isAnchorPoint(unsigned i) const
-{
-	for(std::vector<WeightHandle *>::const_iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
-		unsigned idx;
-		(*it)->firstPoint(idx);  
-		if(i == idx) return true;
-	}
-	return false;
-}
-
-void HarmonicCoord::genAnchorIndices(std::vector<unsigned > & dst) const
-{
-	for(std::vector<WeightHandle *>::const_iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
-		unsigned idx;
-		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
-			dst.push_back(idx);
-		}
-	}
-}
-
 bool HarmonicCoord::hasNoEffect() const
 {
 	return allZero();
