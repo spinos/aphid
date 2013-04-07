@@ -29,6 +29,9 @@ public:
 	Vector3F * vertices();
 	unsigned * indices();
 	
+	void setVertex(unsigned idx, float x, float y, float z);
+	void setTriangle(unsigned idx, unsigned a, unsigned b, unsigned c);
+	
 	unsigned getNumFaces() const;
 	unsigned getNumVertices() const;
 	unsigned getNumFaceVertices() const;
@@ -37,6 +40,7 @@ public:
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	
 	char intersect(unsigned idx, const Ray & ray, RayIntersectionContext * ctx) const;
+	char intersect(const Ray & ray, RayIntersectionContext * ctx) const;
 	
 	Vector3F * _vertices;
 	unsigned * _indices;

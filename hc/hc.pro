@@ -48,6 +48,7 @@ HEADERS       = ../shared/Vector3F.h \
                 WeightHandle.h \
                 AccumulateDeformer.h \
                 DeformationTarget.h \
+				TargetGraph.h \
                 glwidget.h \
                 window.h
                 
@@ -95,6 +96,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 WeightHandle.cpp \
                 AccumulateDeformer.cpp \
                 DeformationTarget.cpp \
+				TargetGraph.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp

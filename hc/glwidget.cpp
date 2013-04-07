@@ -55,6 +55,7 @@
 #include <HarmonicCoord.h>
 #include <DeformationTarget.h>
 #include <AccumulateDeformer.h>
+#include <TargetGraph.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 	
@@ -96,6 +97,16 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_deformer = new AccumulateDeformer;
 	m_deformer->setMesh(m_mesh);
 	m_deformer->setTargetAnalysis(m_analysis);
+	
+	m_graph = new TargetGraph;
+	m_graph->createVertices(3);
+	m_graph->createIndices(3);
+	m_graph->createTargetIndices(3);
+	m_graph->setVertex(0, 10, 20, 10);
+	m_graph->setVertex(1, 13, 20, 10);
+	m_graph->setVertex(2, 13, 23, 10); 
+	m_graph->setTriangle(0, 0, 1, 2);
+	m_graph->setTargetTriangle(0, 0, 1, 1);
 }
 //! [0]
 
@@ -167,7 +178,9 @@ void GLWidget::clientDraw()
 	//m_drawer->box(intersectCtx.getBBox());
 	m_drawer->setWired(0);
 */
-	
+	m_drawer->setWired(1);
+	m_drawer->setColor(0.f, 1.f, 1.f);
+	m_drawer->drawMesh(m_graph);
 }
 //! [7]
 

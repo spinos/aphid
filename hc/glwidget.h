@@ -54,6 +54,7 @@ class WeightHandle;
 class Ray;
 class DeformationTarget;
 class AccumulateDeformer;
+class TargetGraph;
 //! [0]
 class GLWidget : public Base3DView
 {
@@ -93,6 +94,7 @@ private:
 	RayIntersectionContext * m_intersectCtx;
 	DeformationTarget * m_analysis;
 	AccumulateDeformer * m_deformer;
+	TargetGraph * m_graph;
 private slots:
     void simulate();
 

@@ -103,6 +103,26 @@ unsigned * BaseMesh::indices()
 	return _indices;
 }
 
+void BaseMesh::setVertex(unsigned idx, float x, float y, float z)
+{
+	Vector3F *v = _vertices;
+	v += idx;
+	v->x = x;
+	v->y = y;
+	v->z = z;
+}
+
+void BaseMesh::setTriangle(unsigned idx, unsigned a, unsigned b, unsigned c)
+{
+	unsigned *i = _indices;
+	i += idx * 3;
+	*i = a;
+	i++;
+	*i = b;
+	i++;
+	*i = c;
+}
+
 unsigned BaseMesh::getNumFaces() const
 {
 	return _numFaceVertices / 3;
@@ -207,5 +227,14 @@ char BaseMesh::intersect(unsigned idx, const Ray & ray, RayIntersectionContext *
 	}
 	
 	return 1;
+}
+
+char BaseMesh::intersect(const Ray & ray, RayIntersectionContext * ctx) const
+{
+	unsigned nf = getNumFaces();
+	for(unsigned i = 0; i < nf; i++) {
+		if(intersect(i, ray, ctx)) return 1;
+	}
+	return 0;
 }
 //:~
