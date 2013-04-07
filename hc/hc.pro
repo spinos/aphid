@@ -41,6 +41,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/BoundingBoxList.h \
                 ../shared/SelectionArray.h \
                 ../shared/LinearMath.h \
+                ../shared/BarycentricCoordinate.h \
                 ../lapl/MeshLaplacian.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
@@ -51,6 +52,7 @@ HEADERS       = ../shared/Vector3F.h \
 				TargetGraph.h \
                 glwidget.h \
 				ControlWidget.h \
+                ControlGraph.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \
@@ -90,6 +92,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/IndexList.cpp \
                 ../shared/BoundingBoxList.cpp \
                 ../shared/SelectionArray.cpp \
+                ../shared/BarycentricCoordinate.cpp \
                 ../lapl/MeshLaplacian.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
@@ -100,6 +103,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				TargetGraph.cpp \
                 glwidget.cpp \
 				ControlWidget.cpp \
+                ControlGraph.cpp \
                 main.cpp \
                 window.cpp
 

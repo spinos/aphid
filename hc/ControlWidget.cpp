@@ -58,22 +58,7 @@ ControlWidget::ControlWidget(QWidget *parent) : Base3DView(parent)
 	timer->start(30);
 
 	m_drawer = new KdTreeDrawer;
-	
-	m_intersectCtx = new RayIntersectionContext;
-	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TFace);
-	
-	m_graph = new TargetGraph;
-	m_graph->createVertices(3);
-	m_graph->createIndices(3);
-	m_graph->createTargetIndices(3);
-	m_graph->createVertexWeights(3);
-	m_graph->setVertex(0, 0, 0, 0);
-	m_graph->setVertex(1, 4, 0, 0);
-	m_graph->setVertex(2, 4, 4, 0); 
-	m_graph->move(20, 20, 10);
-	m_graph->setTriangle(0, 0, 1, 2);
-	m_graph->setTargetTriangle(0, 0, 1, 1);
-	m_graph->reset();
+	m_graph = new ControlGraph;
 }
 //! [0]
 
@@ -85,25 +70,17 @@ ControlWidget::~ControlWidget()
 void ControlWidget::clientDraw()
 {
 	m_drawer->setGrey(0.5f);
-	//m_drawer->drawKdTree(m_tree);
-	//m_drawer->setWired(0);
-	m_drawer->setColor(0.f, 1.f, 0.4f);
-	
-	glTranslatef(20,0,0);
-	m_drawer->setWired(1);
-	m_drawer->setColor(0.f, 1.f, .4f);
-	
-	glTranslatef(0,-20,0);
-	m_drawer->setColor(0.f, 4.f, 1.f);
-	
-	
 	m_drawer->setWired(1);
 	m_drawer->setColor(0.f, 1.f, .3f);
-	m_drawer->drawMesh(m_graph);
 	
-	Vector3F handp = m_graph->getHandlePos();
-	m_drawer->setColor(.8f, 1.f, 0.f);
-	m_drawer->solidCube(handp.x, handp.y, handp.z, 0.5f);
+	TargetGraph *graph;
+	for(graph = m_graph->firstGraph(); m_graph->hasGraph(); graph = m_graph->nextGraph()) {
+		m_drawer->drawMesh(graph);
+	
+		Vector3F handp = graph->getHandlePos();
+		m_drawer->setColor(.8f, 1.f, 0.f);
+		m_drawer->solidCube(handp.x, handp.y, handp.z, 0.5f);
+	}
 }
 //! [7]
 
@@ -113,8 +90,8 @@ void ControlWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vec
 	Vector3F rayo = origin;
 	Vector3F raye = origin + displacement;
 	Ray ray(rayo, raye);
-	if(!pickupControl(ray, hit)) return;
-	updateControl();
+	if(!m_graph->pickupControl(ray, hit)) return;
+	m_graph->updateControl();
 }
 //! [9]
 
@@ -129,22 +106,7 @@ void ControlWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement,
 	Vector3F raye = origin + displacement;
 	Ray ray(rayo, raye);
 	Vector3F hit;
-	if(!pickupControl(ray, hit)) return;
-	updateControl();
-}
-//! [10]
-
-bool ControlWidget::pickupControl(const Ray & ray, Vector3F & hit)
-{
-	m_intersectCtx->reset();
-	if(m_graph->intersect(ray, m_intersectCtx)) {
-	    hit = m_intersectCtx->m_hitP;
-		return true;
-	}
-	return false;
+	if(!m_graph->pickupControl(ray, hit)) return;
+	m_graph->updateControl();
 }
 
-void ControlWidget::updateControl()
-{
-
-}

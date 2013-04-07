@@ -44,7 +44,7 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
-#include <RayIntersectionContext.h>
+#include <ControlGraph.h>
 class KdTreeDrawer;
 class Ray;
 class TargetGraph;
@@ -54,10 +54,6 @@ class ControlWidget : public Base3DView
     Q_OBJECT
 
 public:
-    enum InteractMode {
-        SelectCompnent,
-        TransformAnchor
-    };
     ControlWidget(QWidget *parent = 0);
     ~ControlWidget();
 	
@@ -66,15 +62,12 @@ public:
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
 	
-	bool pickupControl(const Ray & ray, Vector3F & hit);
-//! [2]
 protected:
-    void updateControl();
+    
 //! [3]
 private:
 	KdTreeDrawer * m_drawer;
-	RayIntersectionContext * m_intersectCtx;
-	TargetGraph * m_graph;
+	ControlGraph * m_graph;
 private slots:
 
 

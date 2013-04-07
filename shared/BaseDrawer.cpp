@@ -74,6 +74,9 @@ void BaseDrawer::box(float width, float height, float depth)
 
 void BaseDrawer::solidCube(float x, float y, float z, float size)
 {
+	x -= size * 0.5f;
+	y -= size * 0.5f;
+	z -= size * 0.5f;
 	glBegin(GL_QUADS);
 	
 // bottom
