@@ -69,12 +69,9 @@ ControlWidget::~ControlWidget()
 
 void ControlWidget::clientDraw()
 {
-	m_drawer->setGrey(0.5f);
 	m_drawer->setWired(1);
-	m_drawer->setColor(0.f, 1.f, .3f);
-	
-	TargetGraph *graph;
-	for(graph = m_graph->firstGraph(); m_graph->hasGraph(); graph = m_graph->nextGraph()) {
+	for(TargetGraph *graph = m_graph->firstGraph(); m_graph->hasGraph(); graph = m_graph->nextGraph()) {
+		m_drawer->setColor(0.f, 1.f, .3f);
 		m_drawer->drawMesh(graph);
 	
 		Vector3F handp = graph->getHandlePos();

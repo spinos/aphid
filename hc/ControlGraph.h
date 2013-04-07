@@ -23,6 +23,7 @@ public:
 	void updateControl();
 	
 private:
+	void simpleGraph(TargetGraph * g);
 	RayIntersectionContext * m_intersectCtx;
 	std::vector<TargetGraph *> m_graphList;
 	std::vector<TargetGraph *>::iterator m_graphIt;
