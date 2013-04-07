@@ -123,6 +123,16 @@ void BaseMesh::setTriangle(unsigned idx, unsigned a, unsigned b, unsigned c)
 	*i = c;
 }
 
+void BaseMesh::move(float x, float y, float z)
+{
+	const unsigned nv = getNumVertices();
+	for(unsigned i = 0; i < nv; i++) {
+		_vertices[i].x += x;
+		_vertices[i].y += y;
+		_vertices[i].y += z;
+	}
+}
+
 unsigned BaseMesh::getNumFaces() const
 {
 	return _numFaceVertices / 3;

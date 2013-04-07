@@ -19,18 +19,17 @@ public:
     
 //! [0]
 
-//! [2]
+	BaseCamera * getCamera() const;
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-    void processCamera(QMouseEvent *event);
     void processSelection(QMouseEvent *event);
     void processDeselection(QMouseEvent *event);
     void processMouseInput(QMouseEvent *event);
-    
+	void processCamera(QMouseEvent *event);
     virtual void clientDraw();
     virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
     virtual void clientDeselect();

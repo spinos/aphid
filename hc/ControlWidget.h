@@ -39,49 +39,46 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+#ifndef CONTROLWIDGET_H
+#define CONTROLWIDGET_H
 
-#include "glwidget.h"
-#include "ControlWidget.h"
-#include "window.h"
-
+#include <QGLWidget>
+#include <Base3DView.h>
+#include <RayIntersectionContext.h>
+class KdTreeDrawer;
+class Ray;
+class TargetGraph;
 //! [0]
-Window::Window()
+class ControlWidget : public Base3DView
 {
-    glWidget = new GLWidget;
-	m_control = new ControlWidget;
+    Q_OBJECT
+
+public:
+    enum InteractMode {
+        SelectCompnent,
+        TransformAnchor
+    };
+    ControlWidget(QWidget *parent = 0);
+    ~ControlWidget();
 	
-	QHBoxLayout *mainLayout = new QHBoxLayout;
-    mainLayout->addWidget(m_control);
-    mainLayout->addWidget(glWidget);
+	virtual void clientDraw();
+    virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
+    virtual void clientDeselect();
+    virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
+	
+	bool pickupControl(const Ray & ray, Vector3F & hit);
+//! [2]
+protected:
+    void updateControl();
+//! [3]
+private:
+	KdTreeDrawer * m_drawer;
+	RayIntersectionContext * m_intersectCtx;
+	TargetGraph * m_graph;
+private slots:
 
-	QWidget *mainWidget = new QWidget;
-	mainWidget->setLayout(mainLayout);
-	setCentralWidget(mainWidget);
-    setWindowTitle(tr("Partial Blend Shape"));
-}
-//! [1]
 
-void Window::keyPressEvent(QKeyEvent *e)
-{
-	if (e->key() == Qt::Key_Escape)
-        close();
-	else if(e->key() == Qt::Key_A) {
-		qDebug() << "anchor selected as one";
-		glWidget->anchorSelected(1.f);
-	}
-	else if(e->key() == Qt::Key_Z) {
-		qDebug() << "anchor selected as zero";
-		glWidget->anchorSelected(0.f);
-	}
-	else if(e->key() == Qt::Key_D) {
-		qDebug() << "calculate coordinate";
-		glWidget->startDeform();
-	}
-    /*
-	else if(e->key() == Qt::Key_R) {
-		qDebug() << "rotate mode";
-		glWidget->getSolver()->setInteractMode(DynamicsSolver::RotateJoint);
-	}*/
-	QWidget::keyPressEvent(e);
-}
+};
+//! [3]
+
+#endif

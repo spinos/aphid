@@ -68,7 +68,7 @@ public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 
-    virtual void clientDraw();
+	virtual void clientDraw();
     virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
@@ -94,7 +94,6 @@ private:
 	RayIntersectionContext * m_intersectCtx;
 	DeformationTarget * m_analysis;
 	AccumulateDeformer * m_deformer;
-	TargetGraph * m_graph;
 private slots:
     void simulate();
 

@@ -49,6 +49,7 @@ class QSlider;
 QT_END_NAMESPACE
 //! [0]
 class GLWidget;
+class ControlWidget;
 
 class Window : public QMainWindow
 {
@@ -63,6 +64,7 @@ protected:
 private:
 
     GLWidget *glWidget;
+	ControlWidget * m_control;
 };
 //! [0]
 

@@ -116,7 +116,7 @@ void BaseCamera::zoom(int y)
 	
 	eye += front * (float)y * dist /fPortWidth;
 	
-	if(fHorizontalAperture + y > .1f) fHorizontalAperture += y;
+	if(fHorizontalAperture + y > .1f) fHorizontalAperture += (float)y * 0.5f;
 	
 	fSpace.setTranslation(eye);
 	updateInverseSpace();

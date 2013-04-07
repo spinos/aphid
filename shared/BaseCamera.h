@@ -32,7 +32,6 @@ public:
 	float aspectRatio() const;
 	float getHorizontalAperture() const;
 	
-private:
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;
 	unsigned fPortWidth, fPortHeight;

@@ -50,6 +50,7 @@ HEADERS       = ../shared/Vector3F.h \
                 DeformationTarget.h \
 				TargetGraph.h \
                 glwidget.h \
+				ControlWidget.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \
@@ -98,6 +99,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 DeformationTarget.cpp \
 				TargetGraph.cpp \
                 glwidget.cpp \
+				ControlWidget.cpp \
                 main.cpp \
                 window.cpp
 
