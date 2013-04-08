@@ -25,9 +25,9 @@ void AccumulateDeformer::setMesh(BaseMesh * mesh)
 	m_topology = msh->connectivity();
 }
 
-void AccumulateDeformer::setTargetAnalysis(DeformationTarget * analysis)
+void AccumulateDeformer::addTargetAnalysis(DeformationTarget * analysis)
 {
-	m_targetAnalysis = analysis;
+	m_analysis.push_back(analysis);
 }
 
 void AccumulateDeformer::precompute()
@@ -66,11 +66,13 @@ void AccumulateDeformer::prestep(Eigen::VectorXf b[])
 {
 	LaplaceMatrixType L = m_L;
 	
-	std::vector<unsigned> constrainIndices;
-	m_targetAnalysis->genNonZeroIndices(constrainIndices);
+	std::map<unsigned, char> constrainIndices;
+	for(std::vector<DeformationTarget *>::const_iterator ita = m_analysis.begin(); ita != m_analysis.end(); ++ita) {
+		(*ita)->genNonZeroIndices(constrainIndices);
+	}
 	
-	for(std::vector<unsigned>::const_iterator it = constrainIndices.begin(); it != constrainIndices.end(); ++it) {
-		unsigned ic = *it;
+	for(std::map<unsigned, char>::const_iterator it = constrainIndices.begin(); it != constrainIndices.end(); ++it) {
+		unsigned ic = it->first;
 		L.coeffRef(ic, ic) = L.coeffRef(ic, ic) + .7f;
 	}
 	
@@ -83,17 +85,18 @@ void AccumulateDeformer::prestep(Eigen::VectorXf b[])
 	b[1] = m_delta[1];
 	b[2] = m_delta[2];
 	
-	for(std::vector<unsigned>::const_iterator it = constrainIndices.begin(); it != constrainIndices.end(); ++it) {
-		unsigned ic = *it;
+	for(std::map<unsigned, char>::const_iterator it = constrainIndices.begin(); it != constrainIndices.end(); ++it) {
+		unsigned ic = it->first;
 		VertexAdjacency & adj = m_topology[ic];
 		Vector3F dif = adj.getDifferentialCoordinate();
-		Matrix33F R = m_targetAnalysis->getR(ic);
-		dif = R.transform(dif);
-		Vector3F worldP = m_targetAnalysis->restP(ic) + m_targetAnalysis->getT(ic);
-		//worldP *= .8f;
+		Vector3F worldP = restP(ic);
 		b[0](ic) = dif.x + worldP.x;
 		b[1](ic) = dif.y + worldP.y;
 		b[2](ic) = dif.z + worldP.z;
+	}
+	
+	for(std::vector<DeformationTarget *>::const_iterator ita = m_analysis.begin(); ita != m_analysis.end(); ++ita) {
+		addupConstrains(*ita, b);
 	}
 	
 	b[0] = LT * b[0];
@@ -103,11 +106,6 @@ void AccumulateDeformer::prestep(Eigen::VectorXf b[])
 
 char AccumulateDeformer::solve()
 {
-/*
-	if(m_targetAnalysis->hasNoEffect()) {
-		reset();
-		return 0;
-	}*/
 	Eigen::VectorXf b[3];
 	prestep(b);
 	Eigen::VectorXf x[3];
@@ -123,3 +121,17 @@ char AccumulateDeformer::solve()
 
 	return 1;
 }
+
+void AccumulateDeformer::addupConstrains(DeformationTarget * target, Eigen::VectorXf b[])
+{
+	std::map<unsigned, char> constrainIndices;
+	target->genNonZeroIndices(constrainIndices);
+	for(std::map<unsigned, char>::const_iterator it = constrainIndices.begin(); it != constrainIndices.end(); ++it) {
+		unsigned ic = it->first;
+		Vector3F worldP = target->getT(ic);
+		b[0](ic) += worldP.x;
+		b[1](ic) += worldP.y;
+		b[2](ic) += worldP.z;
+	}
+}
+

@@ -69,10 +69,12 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 #ifdef WIN32
 	m_mesh = new MeshLaplacian("D:/aphid/mdl/eye.m");
-	m_mesh1 = new MeshLaplacian("D:/aphid/mdl/eyeO.m");
+	m_mesh1 = new MeshLaplacian("D:/aphid/mdl/eyeU.m");
+	m_mesh2 = new MeshLaplacian("D:/aphid/mdl/eyeL.m");
 #else	
 	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/mdl/eye.m");
-	m_mesh1 = new MeshLaplacian("/Users/jianzhang/aphid/mdl/eyeO.m");
+	m_mesh1 = new MeshLaplacian("/Users/jianzhang/aphid/mdl/eyeU.m");
+	m_mesh2 = new MeshLaplacian("/Users/jianzhang/aphid/mdl/eyeL.m");
 #endif
 
 	m_drawer = new KdTreeDrawer;
@@ -93,13 +95,18 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_intersectCtx = new RayIntersectionContext;
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
 	
-	m_analysis = new DeformationTarget;
-	m_analysis->setMeshes(m_mesh, m_mesh1);
-	m_analysis->setWeightMap(m_harm);
+	DeformationTarget * analysis1 = new DeformationTarget;
+	analysis1->setMeshes(m_mesh, m_mesh1);
+	analysis1->setWeightMap(m_harm, 1);
+	
+	DeformationTarget * analysis2 = new DeformationTarget;
+	analysis2->setMeshes(m_mesh, m_mesh2);
+	analysis2->setWeightMap(m_harm, 2);
 	
 	m_deformer = new AccumulateDeformer;
 	m_deformer->setMesh(m_mesh);
-	m_deformer->setTargetAnalysis(m_analysis);
+	m_deformer->addTargetAnalysis(analysis1);
+	m_deformer->addTargetAnalysis(analysis2);
 }
 //! [0]
 
@@ -159,7 +166,9 @@ void GLWidget::clientDraw()
 	glTranslatef(0,-20,0);
 	m_drawer->setColor(0.f, 4.f, 1.f);
 	m_drawer->drawMesh(m_mesh1);
-	
+	glTranslatef(0,-20,0);
+	m_drawer->setColor(1.f, 4.f, 0.f);
+	m_drawer->drawMesh(m_mesh2);
 /*	
 	glBegin(GL_LINES);
 	glColor3f(1,0,0);

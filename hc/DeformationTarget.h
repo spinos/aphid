@@ -10,6 +10,7 @@
 #pragma once
 #include "BaseMesh.h"
 #include <LinearMath.h>
+#include <map>
 class Matrix33F;
 class HarmonicCoord;
 class DeformationTarget {
@@ -18,7 +19,7 @@ public:
 	virtual ~DeformationTarget();
 	
 	void setMeshes(BaseMesh * a, BaseMesh * b);
-	void setWeightMap(HarmonicCoord * hc);
+	void setWeightMap(HarmonicCoord * hc, unsigned valueId);
 	void computeR();
 	
 	BaseMesh * getMeshA() const;
@@ -34,8 +35,7 @@ public:
 	Vector3F transformedDifferential(unsigned idx) const;
 	float minDisplacement() const;
 	
-	bool hasNoEffect() const;
-	void genNonZeroIndices(std::vector<unsigned > & dst) const;
+	void genNonZeroIndices(std::map<unsigned, char > & dst) const;
 	
 private:
 	void svdRotation();
@@ -48,4 +48,5 @@ private:
 	Matrix33F * m_Ri;
 	float * m_scale;
 	float m_minDisplacement, m_maxDisplacement;
+	unsigned m_valueId;
 };

@@ -24,16 +24,16 @@ public:
     virtual ~AccumulateDeformer();
 	
 	virtual void setMesh(BaseMesh * mesh);
-	virtual void setTargetAnalysis(DeformationTarget * analysis);
+	virtual void addTargetAnalysis(DeformationTarget * analysis);
 	virtual void precompute();
 	virtual char solve();
 	
 private:
 	void prestep(Eigen::VectorXf b[]);
+	void addupConstrains(DeformationTarget * target, Eigen::VectorXf b[]);
 	LaplaceMatrixType m_L;
 	Eigen::VectorXf m_delta[3];
 	Eigen::SimplicialLDLT<LaplaceMatrixType> m_llt;
 	VertexAdjacency * m_topology;
-	DeformationTarget * m_targetAnalysis;
-	DeformationTarget * m_baseAnalysis;
+	std::vector<DeformationTarget *> m_analysis;
 };

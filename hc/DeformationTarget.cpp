@@ -30,9 +30,10 @@ void DeformationTarget::setMeshes(BaseMesh * a, BaseMesh * b)
 	computeTRange();
 }
 
-void DeformationTarget::setWeightMap(HarmonicCoord * hc)
+void DeformationTarget::setWeightMap(HarmonicCoord * hc, unsigned valueId)
 {
 	m_weightMap = hc;
+	m_valueId = valueId;
 }
 
 BaseMesh * DeformationTarget::getMeshA() const
@@ -227,7 +228,7 @@ Vector3F DeformationTarget::getT(unsigned idx) const
 {
 	const Vector3F * vs = m_restMesh->getVertices();
 	const Vector3F * vts = m_effectMesh->getVertices();
-	return (vts[idx] - vs[idx]) * m_weightMap->getValue(1, idx);
+	return (vts[idx] - vs[idx]) * m_weightMap->getValue(m_valueId, idx);
 }
 
 float DeformationTarget::getS(unsigned idx) const
@@ -237,7 +238,7 @@ float DeformationTarget::getS(unsigned idx) const
 
 float DeformationTarget::getConstrainWeight(unsigned idx) const
 {
-	return m_weightMap->getValue(1, idx);
+	return m_weightMap->getValue(m_valueId, idx);
 }
 
 float DeformationTarget::minDisplacement() const
@@ -245,17 +246,12 @@ float DeformationTarget::minDisplacement() const
 	return m_minDisplacement;
 }
 
-bool DeformationTarget::hasNoEffect() const
-{
-	return m_weightMap->hasNoEffect();
-}
-
-void DeformationTarget::genNonZeroIndices(std::vector<unsigned > & dst) const
+void DeformationTarget::genNonZeroIndices(std::map<unsigned, char > & dst) const
 {
 	unsigned numVertices = m_restMesh->getNumVertices();
 	for(unsigned i = 0; i < numVertices; i++) {
-		if(m_weightMap->getValue(1, i) > 10e-3)
-			dst.push_back(i);
+		if(m_weightMap->getValue(m_valueId, i) > 10e-3)
+			dst[i] = 1;
 	}
 }
 

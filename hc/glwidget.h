@@ -87,6 +87,7 @@ protected:
 private:
     MeshLaplacian * m_mesh;
 	MeshLaplacian * m_mesh1;
+	MeshLaplacian * m_mesh2;
     KdTreeDrawer * m_drawer;
 	KdTree * m_tree;
 	SelectionArray * m_selected;
@@ -95,7 +96,6 @@ private:
 	WeightHandle * m_activeAnchor;
 	HarmonicCoord * m_harm;
 	RayIntersectionContext * m_intersectCtx;
-	DeformationTarget * m_analysis;
 	AccumulateDeformer * m_deformer;
 	ControlGraph * m_graph;
 private slots:

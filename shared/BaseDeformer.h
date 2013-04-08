@@ -14,6 +14,8 @@ public:
 	void reset();
 	
 	Vector3F * getDeformedData() const;
+	
+	Vector3F restP(unsigned idx) const;
     
 	virtual char solve();
 

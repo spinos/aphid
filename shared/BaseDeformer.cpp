@@ -31,3 +31,8 @@ void BaseDeformer::reset()
 		m_deformedV[i] = v[i];
 	}
 }
+
+Vector3F BaseDeformer::restP(unsigned idx) const
+{
+	return m_mesh->getVertices()[idx];
+}
