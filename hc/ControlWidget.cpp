@@ -89,6 +89,7 @@ void ControlWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vec
 	Ray ray(rayo, raye);
 	if(!m_graph->pickupControl(ray, hit)) return;
 	m_graph->updateControl();
+	emit(handleChanged(m_graph->handleId()));
 }
 //! [9]
 
@@ -105,5 +106,10 @@ void ControlWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement,
 	Vector3F hit;
 	if(!m_graph->pickupControl(ray, hit)) return;
 	m_graph->updateControl();
+	emit(handleChanged(m_graph->handleId()));
 }
 
+ControlGraph * ControlWidget::getControlGraph() const
+{
+	return m_graph;
+}

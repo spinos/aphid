@@ -54,11 +54,15 @@ Window::Window()
 	QHBoxLayout *mainLayout = new QHBoxLayout;
     mainLayout->addWidget(m_control);
     mainLayout->addWidget(glWidget);
+	
+	glWidget->setControlGraph(m_control->getControlGraph());
 
 	QWidget *mainWidget = new QWidget;
 	mainWidget->setLayout(mainLayout);
 	setCentralWidget(mainWidget);
     setWindowTitle(tr("Partial Blend Shape"));
+	
+	connect(m_control, SIGNAL(handleChanged(unsigned)), glWidget, SLOT(onHandleChanged(unsigned)));
 }
 //! [1]
 

@@ -56,6 +56,7 @@
 #include <DeformationTarget.h>
 #include <AccumulateDeformer.h>
 #include <TargetGraph.h>
+#include <ControlGraph.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 	
@@ -78,6 +79,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_harm = new HarmonicCoord;
 	m_harm->setMesh(m_mesh);
+	m_harm->addValue(1);
+	m_harm->addValue(2);
 	
 	m_tree = new KdTree;
 	m_tree->addMesh(m_mesh);
@@ -115,8 +118,12 @@ void GLWidget::clientDraw()
     else {
 		m_drawer->setWired(0);
 		glTranslatef(0,-20,0);
+		m_harm->plotColor(1);
 		m_drawer->field(m_harm);
-		glTranslatef(0,20,0);
+		glTranslatef(0,-20,0);
+		m_harm->plotColor(2);
+		m_drawer->field(m_harm);
+		glTranslatef(0,40,0);
 	}	
 	m_drawer->setGrey(0.5f);
 	//m_drawer->drawKdTree(m_tree);
@@ -203,10 +210,10 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 		pickupComponent(ray, hit);
 	}
 	else {
-	    if(!m_activeAnchor) return;
-		m_activeAnchor->translate(stir);
-		m_harm->solve();
-		m_deformer->solve();
+	    //if(!m_activeAnchor) return;
+		//m_activeAnchor->translate(stir);
+		//m_harm->solve();
+		//m_deformer->solve();
 	}
 }
 //! [10]
@@ -228,10 +235,8 @@ void GLWidget::anchorSelected(float wei)
 void GLWidget::startDeform()
 {
 	if(m_anchors.size() < 1) return;
-	m_harm->precompute(m_anchors);
-	m_harm->solve();
+	m_harm->precompute(m_anchors, m_graph);
 	m_deformer->precompute();
-	m_deformer->solve();
 	m_mode = TransformAnchor;
 }
 
@@ -260,4 +265,21 @@ bool GLWidget::pickupComponent(const Ray & ray, Vector3F & hit)
 		return true;
 	}
 	return false;
+}
+
+void GLWidget::setControlGraph(ControlGraph * graph)
+{
+	m_graph = graph;
+}
+
+void GLWidget::onHandleChanged(unsigned ihandle)
+{
+	if(m_mode != TransformAnchor) return;
+	//qDebug()<<" handle moved "<< ihandle;
+	TargetGraph * graph = m_graph->activeGraph();
+	for(unsigned i = graph->firstDirtyTarget(); graph->hasDirtyTarget(); i = graph->nextDirtyTarget()) {
+		//qDebug()<<" target "<< i;
+		m_harm->solve(i);
+	}
+	m_deformer->solve();
 }

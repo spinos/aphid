@@ -62,6 +62,7 @@ public:
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
 	
+	ControlGraph * getControlGraph() const;
 protected:
     
 //! [3]
@@ -70,7 +71,8 @@ private:
 	ControlGraph * m_graph;
 private slots:
 
-
+signals:
+    void handleChanged(unsigned ihandle);
 };
 //! [3]
 

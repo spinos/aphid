@@ -15,6 +15,7 @@ inline float barycentric_coord(float ax, float ay, float bx, float by, float x, 
 }
 
 BarycentricCoordinate::BarycentricCoordinate() {}
+
 void BarycentricCoordinate::create(const Vector3F& p0, const Vector3F& p1, const Vector3F& p2)
 {
 	m_p[0] = p0;
@@ -50,7 +51,7 @@ void BarycentricCoordinate::create(const Vector3F& p0, const Vector3F& p1, const
 	f201 = barycentric_coord(m_p[2].x, m_p[2].y, m_p[0].x, m_p[0].y, m_p[1].x, m_p[1].y);
 	f012 = barycentric_coord(m_p[0].x, m_p[0].y, m_p[1].x, m_p[1].y, m_p[2].x, m_p[2].y);
 }
-	
+
 void BarycentricCoordinate::compute(const Vector3F & pos)
 {
 	Vector3F po = m_space.transform(pos);

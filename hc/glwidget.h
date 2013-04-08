@@ -54,7 +54,8 @@ class WeightHandle;
 class Ray;
 class DeformationTarget;
 class AccumulateDeformer;
-class TargetGraph;
+class ControlGraph;
+
 //! [0]
 class GLWidget : public Base3DView
 {
@@ -77,6 +78,8 @@ public:
 	void startDeform();
 	bool pickupAnchor(const Ray & ray, Vector3F & hit);
 	bool pickupComponent(const Ray & ray, Vector3F & hit);
+	
+	void setControlGraph(ControlGraph * graph);
 //! [2]
 protected:
     
@@ -94,8 +97,12 @@ private:
 	RayIntersectionContext * m_intersectCtx;
 	DeformationTarget * m_analysis;
 	AccumulateDeformer * m_deformer;
+	ControlGraph * m_graph;
 private slots:
     void simulate();
+	
+public slots:
+    void onHandleChanged(unsigned ihandle);
 
 };
 //! [3]

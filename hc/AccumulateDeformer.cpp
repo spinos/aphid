@@ -103,10 +103,11 @@ void AccumulateDeformer::prestep(Eigen::VectorXf b[])
 
 char AccumulateDeformer::solve()
 {
+/*
 	if(m_targetAnalysis->hasNoEffect()) {
 		reset();
 		return 0;
-	}
+	}*/
 	Eigen::VectorXf b[3];
 	prestep(b);
 	Eigen::VectorXf x[3];

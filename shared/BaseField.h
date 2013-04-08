@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Vector3F.h>
+#include <map>
 class BaseMesh;
 class BaseField
 {
@@ -10,20 +11,20 @@ public:
     virtual ~BaseField();
 	
 	virtual void setMesh(BaseMesh * mesh);
+	void BaseField::addValue(unsigned idx);
 	
 	Vector3F * getColor() const;
-	float getValue(unsigned idx) const;
-    
+	float * value(unsigned idx);
+	float getValue(unsigned setIdx, unsigned valIdx);
+	
 	virtual char solve();
 	
-	void plotColor();
+	void plotColor(unsigned idx);
 
     unsigned m_numVertices;
-	
-	float * m_value;
-	
+	unsigned m_activeValue;
 	BaseMesh * m_mesh;
 private:
     Vector3F * m_color;
-	
+	std::map<unsigned, float *> m_values;
 };

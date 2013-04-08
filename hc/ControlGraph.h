@@ -22,8 +22,11 @@ public:
 	bool pickupControl(const Ray & ray, Vector3F & hit);
 	void updateControl();
 	
+	unsigned handleId() const;
+	TargetGraph * activeGraph() const;
+	TargetGraph * getGraph(unsigned idx) const;
 private:
-	void simpleGraph(TargetGraph * g);
+	void simpleGraph(TargetGraph * g, float tx, float ty, float tz);
 	RayIntersectionContext * m_intersectCtx;
 	std::vector<TargetGraph *> m_graphList;
 	std::vector<TargetGraph *>::iterator m_graphIt;

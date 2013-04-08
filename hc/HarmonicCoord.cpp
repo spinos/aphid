@@ -1,8 +1,13 @@
 #include "HarmonicCoord.h"
 #include "VertexAdjacency.h"
 #include "MeshLaplacian.h"
+#include "ControlGraph.h"
 
-HarmonicCoord::HarmonicCoord() {}
+HarmonicCoord::HarmonicCoord() 
+{
+	m_controls = 0;
+}
+
 HarmonicCoord::~HarmonicCoord() {}
 
 void HarmonicCoord::setMesh(BaseMesh * mesh)
@@ -15,9 +20,10 @@ void HarmonicCoord::setMesh(BaseMesh * mesh)
 	initialCondition();
 }
 
-void HarmonicCoord::precompute(std::vector<WeightHandle *> & anchors)
+void HarmonicCoord::precompute(std::vector<WeightHandle *> & anchors, ControlGraph * controls)
 {
 	m_anchors = anchors;
+	m_controls = controls;
 	
 	m_numAnchors = 0;
 	for(std::vector<WeightHandle *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
@@ -75,31 +81,47 @@ void HarmonicCoord::prestep()
 	m_b.setZero();
 	int irow = (int)m_numVertices;
 
-	for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
-		unsigned idx;
-		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
-			m_b(irow) = ap->w;
-			irow++;
+	if(!m_controls) {
+		for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+			unsigned idx;
+			for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
+				m_b(irow) = ap->w;
+				irow++;
+			}
 		}
 	}
-	
+	else {
+		unsigned ianchor = 0;
+		for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+			float wei = 0.f;
+			TargetGraph * graph = m_controls->getGraph(ianchor);
+			if(graph) wei = graph->targetWeight(m_activeValue);
+			
+			unsigned idx;
+			for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
+				m_b(irow) = wei;
+				irow++;
+			}
+			ianchor++;
+		}
+	}
 	m_b = m_LT * m_b;
 }
 
-char HarmonicCoord::solve()
+char HarmonicCoord::solve(unsigned iset)
 {
+	m_activeValue = iset;
 	prestep();
 	Eigen::VectorXf x = m_llt.solve(m_b);
 	
 	float r;
-	
+	float *v = value(iset);
 	for(int i = 0; i < (int)m_numVertices; i++) {
 		r = x(i);
 		if(r < 0.f) r = 0.f;
 		if(r > 1.f) r = 1.f;
-		m_value[i] = r;
+		v[i] = r;
 	}
-	plotColor();
 	return 1;
 }
 
