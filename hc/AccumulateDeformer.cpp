@@ -42,7 +42,7 @@ void AccumulateDeformer::precompute()
 			neighborIdx = neighbor->v->getIndex();
 			m_L.insert(i, neighborIdx) = -neighbor->weight;
 		}
-		m_L.insert(i, i) = 1.1f;
+		m_L.insert(i, i) = 1.3f;
 	}
 	
 	m_delta[0].resize(m_numVertices);
@@ -55,7 +55,7 @@ void AccumulateDeformer::precompute()
 		VertexAdjacency & adj = m_topology[i];
 		Vector3F dif = adj.getDifferentialCoordinate();
 		Vector3F worldP = v[i];
-		worldP *= .1f;
+		worldP *= .3f;
 		m_delta[0](i) = dif.x + worldP.x;
 		m_delta[1](i) = dif.y + worldP.y;
 		m_delta[2](i) = dif.z + worldP.z;
@@ -71,7 +71,7 @@ void AccumulateDeformer::prestep(Eigen::VectorXf b[])
 	
 	for(std::vector<unsigned>::const_iterator it = constrainIndices.begin(); it != constrainIndices.end(); ++it) {
 		unsigned ic = *it;
-		L.coeffRef(ic, ic) = L.coeffRef(ic, ic) + .8f;
+		L.coeffRef(ic, ic) = L.coeffRef(ic, ic) + .7f;
 	}
 	
 	LaplaceMatrixType LT = L.transpose();
@@ -90,7 +90,7 @@ void AccumulateDeformer::prestep(Eigen::VectorXf b[])
 		Matrix33F R = m_targetAnalysis->getR(ic);
 		dif = R.transform(dif);
 		Vector3F worldP = m_targetAnalysis->restP(ic) + m_targetAnalysis->getT(ic);
-		worldP *= .9f;
+		//worldP *= .8f;
 		b[0](ic) = dif.x + worldP.x;
 		b[1](ic) = dif.y + worldP.y;
 		b[2](ic) = dif.z + worldP.z;
