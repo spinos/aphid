@@ -10,7 +10,10 @@
 #include "Anchor.h"
 #include <Vertex.h>
 #include <Ray.h>
-Anchor::Anchor(SelectionArray & sel) 
+
+Anchor::Anchor() {}
+
+Anchor::Anchor(SelectionArray & sel)
 {
 	Vector3F cen(0.f, 0.f, 0.f);
 	const unsigned nv = sel.numVertices();

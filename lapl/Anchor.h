@@ -19,6 +19,7 @@ public:
 		Vector3F p, worldP;
 		float w;
 	};
+	Anchor();
 	Anchor(SelectionArray & sel);
 	virtual ~Anchor();
 	

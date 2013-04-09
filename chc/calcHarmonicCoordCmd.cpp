@@ -171,6 +171,28 @@ MStatus HarmonicCoordCmd::doIt( const MArgList& args )
 	MGlobal::displayInfo(MString("vertex count: ") + fmesh.numVertices());
 	MeshLaplacian * mesh = new MeshLaplacian;
 	
+	unsigned nv = fmesh.numVertices();
+	mesh->createVertices(nv);
+	
+	MPointArray vertexArray;
+	fmesh.getPoints(vertexArray);
+	for(unsigned i = 0; i < nv; i++) {
+		mesh->setVertex(i, vertexArray[i].x, vertexArray[i].y, vertexArray[i].z);
+	}
+	
+	MIntArray triangleCounts, triangleVertices;
+	fmesh.getTriangles(triangleCounts, triangleVertices);
+	
+	unsigned ni = 0;
+	for(unsigned i = 0; i < triangleCounts.length(); i++) {
+		ni += triangleCounts[i];
+	}
+	mesh->createIndices(ni);
+	
+	for(unsigned i = 0; i < triangleVertices.length(); i+=3) {
+		mesh->setTriangle(i / 3, triangleVertices[i], triangleVertices[i + 1], triangleVertices[i + 2]);
+	}
+	
 	mesh->buildTopology();
 	
 	HarmonicCoord * harm = new HarmonicCoord;

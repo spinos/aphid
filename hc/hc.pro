@@ -47,7 +47,6 @@ HEADERS       = ../shared/Vector3F.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 HarmonicCoord.h \
-                WeightHandle.h \
                 AccumulateDeformer.h \
                 DeformationTarget.h \
 				TargetGraph.h \
@@ -99,7 +98,6 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 HarmonicCoord.cpp \
-                WeightHandle.cpp \
                 AccumulateDeformer.cpp \
                 DeformationTarget.cpp \
 				TargetGraph.cpp \

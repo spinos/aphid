@@ -2,7 +2,7 @@
 #include "VertexAdjacency.h"
 #include "MeshLaplacian.h"
 #include "ControlGraph.h"
-
+#include <Anchor.h>
 HarmonicCoord::HarmonicCoord() 
 {
 	m_constrainValues = 0;
@@ -23,12 +23,12 @@ void HarmonicCoord::setMesh(BaseMesh * mesh)
 	initialCondition();
 }
 
-void HarmonicCoord::precompute(std::vector<WeightHandle *> & anchors)
+void HarmonicCoord::precompute(std::vector<Anchor *> & anchors)
 {
 	m_anchors = anchors;
 	
 	m_numAnchors = 0;
-	for(std::vector<WeightHandle *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
+	for(std::vector<Anchor *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
 		unsigned idx;
 		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
 			m_numAnchors++;
@@ -51,7 +51,7 @@ void HarmonicCoord::precompute(std::vector<WeightHandle *> & anchors)
 	}
 	
 	int irow = m_numVertices;
-	for(std::vector<WeightHandle *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
+	for(std::vector<Anchor *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
 		unsigned idx;
 		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
 			L.coeffRef(irow, idx) = 1.f;
@@ -86,7 +86,7 @@ void HarmonicCoord::prestep()
 	int irow = (int)m_numVertices;
 
 	unsigned ianchor = 0;
-	for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
 		float wei = m_constrainValues[ianchor];
 		unsigned idx;
 		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
@@ -117,7 +117,7 @@ char HarmonicCoord::solve(unsigned iset)
 
 bool HarmonicCoord::allZero() const
 {
-	for(std::vector<WeightHandle *>::const_iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+	for(std::vector<Anchor *>::const_iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
 		unsigned idx;
 		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
 			if(ap->w > 10e-3)

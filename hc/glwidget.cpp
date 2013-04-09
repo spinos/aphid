@@ -51,13 +51,13 @@
 #include <KdTree.h>
 #include <Ray.h>
 #include <SelectionArray.h>
-#include <WeightHandle.h>
 #include <HarmonicCoord.h>
 #include <DeformationTarget.h>
 #include <AccumulateDeformer.h>
 #include <TargetGraph.h>
 #include <ControlGraph.h>
 #include <EasemodelUtil.h>
+#include <Anchor.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 	
@@ -153,7 +153,7 @@ void GLWidget::clientDraw()
 	//m_drawer->setWired(0);
 	m_drawer->setColor(0.f, 1.f, 0.4f);
 	m_drawer->components(m_selected);
-	for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
+	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it)
 		m_drawer->anchor(*it);
 	/*	
 	const unsigned nv = m_analysis->numVertices();
@@ -251,7 +251,7 @@ void GLWidget::simulate()
 void GLWidget::anchorSelected(float wei)
 {
 	if(m_selected->numVertices() < 1) return;
-	WeightHandle *a = new WeightHandle(*m_selected);
+	Anchor *a = new Anchor(*m_selected);
 	a->setWeight(wei);
 	m_anchors.push_back(a);
 	m_selected->reset();
@@ -269,7 +269,7 @@ bool GLWidget::pickupAnchor(const Ray & ray, Vector3F & hit)
 {
 	float minDist = 10e8;
 	float t;
-	for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
 		if((*it)->intersect(ray, t, 1.f)) {
 			if(t < minDist) {
 				m_activeAnchor = (*it);
