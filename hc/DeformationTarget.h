@@ -12,14 +12,13 @@
 #include <LinearMath.h>
 #include <map>
 class Matrix33F;
-class HarmonicCoord;
 class DeformationTarget {
 public:
 	DeformationTarget();
 	virtual ~DeformationTarget();
 	
 	void setMeshes(BaseMesh * a, BaseMesh * b);
-	void setWeightMap(HarmonicCoord * hc, unsigned valueId);
+	void setWeightMap(float * hc);
 	void computeR();
 	
 	BaseMesh * getMeshA() const;
@@ -44,9 +43,8 @@ private:
 	
 	BaseMesh * m_restMesh;
 	BaseMesh * m_effectMesh;
-	HarmonicCoord * m_weightMap;
+	float * m_weight;
 	Matrix33F * m_Ri;
 	float * m_scale;
 	float m_minDisplacement, m_maxDisplacement;
-	unsigned m_valueId;
 };

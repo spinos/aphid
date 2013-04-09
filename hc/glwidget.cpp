@@ -57,6 +57,7 @@
 #include <AccumulateDeformer.h>
 #include <TargetGraph.h>
 #include <ControlGraph.h>
+#include <EasemodelUtil.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 	
@@ -68,14 +69,29 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	timer->start(30);
 	
 #ifdef WIN32
-	m_mesh = new MeshLaplacian("D:/aphid/mdl/eye.m");
-	m_mesh1 = new MeshLaplacian("D:/aphid/mdl/eyeU.m");
-	m_mesh2 = new MeshLaplacian("D:/aphid/mdl/eyeL.m");
-#else	
-	m_mesh = new MeshLaplacian("/Users/jianzhang/aphid/mdl/eye.m");
-	m_mesh1 = new MeshLaplacian("/Users/jianzhang/aphid/mdl/eyeU.m");
-	m_mesh2 = new MeshLaplacian("/Users/jianzhang/aphid/mdl/eyeL.m");
+	EasyModel * eye = new EasyModel("D:/aphid/mdl/eye.m");
+	EasyModel * eyeU = new EasyModel("D:/aphid/mdl/eyeU.m");
+	EasyModel * eyeL = new EasyModel("D:/aphid/mdl/eyeL.m");
+#else
+	EasyModel * eye = new EasyModel("/Users/jianzhang/aphid/mdl/eye.m");
+	EasyModel * eyeU = new EasyModel("/Users/jianzhang/aphid/mdl/eyeU.m");
+	EasyModel * eyeL = new EasyModel("/Users/jianzhang/aphid/mdl/eyeL.m");
 #endif
+	m_mesh = new MeshLaplacian;
+	m_mesh1 = new MeshLaplacian;
+	m_mesh2 = new MeshLaplacian;
+	
+	ESMUtil::copy(eye, m_mesh);
+	ESMUtil::copy(eyeU, m_mesh1);
+	ESMUtil::copy(eyeL, m_mesh2);
+	
+	delete eye;
+	delete eyeU;
+	delete eyeL;
+	
+	m_mesh->buildTopology();
+	m_mesh1->buildTopology();
+	m_mesh2->buildTopology();
 
 	m_drawer = new KdTreeDrawer;
 	
@@ -97,11 +113,11 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	DeformationTarget * analysis1 = new DeformationTarget;
 	analysis1->setMeshes(m_mesh, m_mesh1);
-	analysis1->setWeightMap(m_harm, 1);
+	analysis1->setWeightMap(m_harm->value(1));
 	
 	DeformationTarget * analysis2 = new DeformationTarget;
 	analysis2->setMeshes(m_mesh, m_mesh2);
-	analysis2->setWeightMap(m_harm, 2);
+	analysis2->setWeightMap(m_harm->value(2));
 	
 	m_deformer = new AccumulateDeformer;
 	m_deformer->setMesh(m_mesh);
@@ -244,7 +260,7 @@ void GLWidget::anchorSelected(float wei)
 void GLWidget::startDeform()
 {
 	if(m_anchors.size() < 1) return;
-	m_harm->precompute(m_anchors, m_graph);
+	m_harm->precompute(m_anchors);
 	m_deformer->precompute();
 	m_mode = TransformAnchor;
 }
@@ -288,7 +304,21 @@ void GLWidget::onHandleChanged(unsigned ihandle)
 	TargetGraph * graph = m_graph->activeGraph();
 	for(unsigned i = graph->firstDirtyTarget(); graph->hasDirtyTarget(); i = graph->nextDirtyTarget()) {
 		//qDebug()<<" target "<< i;
+		updateConstrains(i);
 		m_harm->solve(i);
 	}
 	m_deformer->solve();
 }
+
+void GLWidget::updateConstrains(unsigned itarget)
+{
+	const unsigned nanchor = m_harm->numAnchorPoints();
+	for(unsigned i = 0; i < nanchor; i++) {
+		float wei = 0.f;
+		TargetGraph * graph = m_graph->getGraph(i);
+		if(graph) wei = graph->targetWeight(itarget);
+		
+		m_harm->setConstrain(i, wei);
+	}
+}
+

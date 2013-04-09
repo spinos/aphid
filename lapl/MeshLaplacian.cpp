@@ -4,11 +4,6 @@
 
 MeshLaplacian::MeshLaplacian() {}
 
-MeshLaplacian::MeshLaplacian(const char * filename) : TriangleMesh(filename), m_adjacency(NULL)
-{
-	buildTopology();
-}
-
 MeshLaplacian::~MeshLaplacian() 
 {
 	if(m_adjacency) delete[] m_adjacency;

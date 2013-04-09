@@ -10,7 +10,6 @@ class Facet;
 class MeshLaplacian : public TriangleMesh {
 public:
     MeshLaplacian();
-    MeshLaplacian(const char * filename);
     virtual ~MeshLaplacian();
 	
 	char buildTopology();

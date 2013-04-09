@@ -103,7 +103,7 @@ private slots:
 	
 public slots:
     void onHandleChanged(unsigned ihandle);
-
+	void updateConstrains(unsigned itarget);
 };
 //! [3]
 

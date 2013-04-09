@@ -5,10 +5,13 @@
 
 HarmonicCoord::HarmonicCoord() 
 {
-	m_controls = 0;
+	m_constrainValues = 0;
 }
 
-HarmonicCoord::~HarmonicCoord() {}
+HarmonicCoord::~HarmonicCoord() 
+{
+	if(m_constrainValues) delete[] m_constrainValues;
+}
 
 void HarmonicCoord::setMesh(BaseMesh * mesh)
 {
@@ -20,10 +23,9 @@ void HarmonicCoord::setMesh(BaseMesh * mesh)
 	initialCondition();
 }
 
-void HarmonicCoord::precompute(std::vector<WeightHandle *> & anchors, ControlGraph * controls)
+void HarmonicCoord::precompute(std::vector<WeightHandle *> & anchors)
 {
 	m_anchors = anchors;
-	m_controls = controls;
 	
 	m_numAnchors = 0;
 	for(std::vector<WeightHandle *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
@@ -32,6 +34,8 @@ void HarmonicCoord::precompute(std::vector<WeightHandle *> & anchors, ControlGra
 			m_numAnchors++;
 		}
 	}
+	
+	m_constrainValues = new float[m_numAnchors];
 	
 	int neighborIdx;
 	LaplaceMatrixType L(m_numVertices + m_numAnchors, m_numVertices);
@@ -81,29 +85,15 @@ void HarmonicCoord::prestep()
 	m_b.setZero();
 	int irow = (int)m_numVertices;
 
-	if(!m_controls) {
-		for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
-			unsigned idx;
-			for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
-				m_b(irow) = ap->w;
-				irow++;
-			}
+	unsigned ianchor = 0;
+	for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+		float wei = m_constrainValues[ianchor];
+		unsigned idx;
+		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
+			m_b(irow) = wei;
+			irow++;
 		}
-	}
-	else {
-		unsigned ianchor = 0;
-		for(std::vector<WeightHandle *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
-			float wei = 0.f;
-			TargetGraph * graph = m_controls->getGraph(ianchor);
-			if(graph) wei = graph->targetWeight(m_activeValue);
-			
-			unsigned idx;
-			for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
-				m_b(irow) = wei;
-				irow++;
-			}
-			ianchor++;
-		}
+		ianchor++;
 	}
 	m_b = m_LT * m_b;
 }
@@ -140,4 +130,9 @@ bool HarmonicCoord::allZero() const
 bool HarmonicCoord::hasNoEffect() const
 {
 	return allZero();
+}
+
+void HarmonicCoord::setConstrain(unsigned idx, float val)
+{
+	m_constrainValues[idx] = val;
 }

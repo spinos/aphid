@@ -1,0 +1,22 @@
+string $sphere[] = `polySphere -r 1 -sx 20 -sy 20 -ax 0 1 0 -cuv 2 -ch 0`;
+select -r $sphere[0];
+pickWalk -d down;
+string $mesh[] = `ls -sl -l`;
+
+addAttr -dt doubleArray -ln asanchor -sn aa $mesh[0];
+addAttr -dt doubleArray -ln asvalue -sn av $mesh[0];
+
+string $saa = "", $sav ="";
+int $i;
+for($i = 0; $i < 382; $i++) {    
+    $saa = $saa + " 0";    
+    $sav = $saa + " 0";
+}
+
+string $cmd;
+$cmd = "setAttr ($mesh[0]+\".aa\") -type doubleArray 382 " + $saa;
+eval($cmd);
+$cmd = "setAttr ($mesh[0]+\".av\") -type doubleArray 382 "+ $sav;
+eval($cmd);
+
+calcHarmCoord -a aa -v av $mesh[0];

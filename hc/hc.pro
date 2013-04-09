@@ -42,6 +42,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/SelectionArray.h \
                 ../shared/LinearMath.h \
                 ../shared/BarycentricCoordinate.h \
+                ../shared/EasemodelUtil.h \
                 ../lapl/MeshLaplacian.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
@@ -93,6 +94,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/BoundingBoxList.cpp \
                 ../shared/SelectionArray.cpp \
                 ../shared/BarycentricCoordinate.cpp \
+                ../shared/EasemodelUtil.cpp \
                 ../lapl/MeshLaplacian.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
