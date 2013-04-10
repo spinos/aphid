@@ -46,6 +46,13 @@ Anchor::~Anchor()
 	m_anchorPoints.clear();
 }
 
+void Anchor::addPoint(unsigned vertexId)
+{
+	AnchorPoint *a = new AnchorPoint();
+	a->w = 1.f;
+	m_anchorPoints[vertexId] = a;
+}
+
 void Anchor::setWeight(float wei)
 {
 	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {

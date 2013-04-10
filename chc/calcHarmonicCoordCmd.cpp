@@ -33,6 +33,7 @@
 
 #include <MeshLaplacian.h>
 #include <HarmonicCoord.h>
+#include <Anchor.h>
 
 #define CheckError(stat,msg)		\
 	if ( MS::kSuccess != stat ) {	\
@@ -187,18 +188,44 @@ MStatus HarmonicCoordCmd::doIt( const MArgList& args )
 	for(unsigned i = 0; i < triangleCounts.length(); i++) {
 		ni += triangleCounts[i];
 	}
-	mesh->createIndices(ni);
+	mesh->createIndices(ni * 3);
 	
 	for(unsigned i = 0; i < triangleVertices.length(); i+=3) {
-		mesh->setTriangle(i / 3, triangleVertices[i], triangleVertices[i + 1], triangleVertices[i + 2]);
+		mesh->setTriangle(i/3, triangleVertices[i], triangleVertices[i + 1], triangleVertices[i + 2]);
 	}
-	
 	mesh->buildTopology();
-	
+
 	HarmonicCoord * harm = new HarmonicCoord;
 	harm->setMesh(mesh);
 	harm->addValue(1);
 	
+	std::vector<Anchor *> constrains;
+	for(unsigned i=0; i < anchors.length(); i++) {
+		if(anchors[i] > 0) {
+			Anchor *a = new Anchor;
+			a->addPoint(i);
+			constrains.push_back(a);
+		}
+	}
+	
+	harm->precompute(constrains);
+	
+	unsigned ic = 0;
+	for(std::vector<Anchor *>::iterator it = constrains.begin(); it != constrains.end(); ++it) {
+		unsigned idx;
+		(*it)->firstPoint(idx);
+		harm->setConstrain(ic, values[idx]);
+		MGlobal::displayInfo(MString("anchor vertex ")+idx + " value at " + values[idx]);
+		ic++;
+	}
+	
+	harm->solve(1);
+	
+	float *out = harm->value(1);
+	for(unsigned i = 0; i < nv; i++) {
+		values[i] = out[i];
+	}
+
 	return MS::kSuccess;
 }
 

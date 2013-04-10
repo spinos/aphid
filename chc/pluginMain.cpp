@@ -14,7 +14,7 @@
 MStatus initializePlugin( MObject obj )
 {
 	MStatus   status;
-    MFnPlugin plugin( obj, "OF3D | Zhang Jian", "0.0.1 Wednesday April 10 2013", "Any");
+    MFnPlugin plugin( obj, "OF3D | Zhang Jian", "0.0.2 Wednesday April 10 2013", "Any");
 
     status = plugin.registerCommand( "calcHarmCoord", HarmonicCoordCmd::creator );
 	if (!status) {

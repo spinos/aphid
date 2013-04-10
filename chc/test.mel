@@ -6,17 +6,42 @@ string $mesh[] = `ls -sl -l`;
 addAttr -dt doubleArray -ln asanchor -sn aa $mesh[0];
 addAttr -dt doubleArray -ln asvalue -sn av $mesh[0];
 
+
+int $anchorIds[] = {250, 283, 81, 93};
+float $anchorValue[] = {1.0, 0.1, 0.5, 0.0};
+
 string $saa = "", $sav ="";
 int $i;
-for($i = 0; $i < 382; $i++) {    
-    $saa = $saa + " 0";    
-    $sav = $saa + " 0";
+
+float $allaa[], $allav[];
+for($i = 0; $i < 382; $i++) {
+
+    $allaa[$i] = 0;
+    
+    $allav[$i] = 0;
 }
 
-string $cmd;
+for($i = 0; $i < size($anchorIds); $i++) {
+    int $ai = $anchorIds[$i];
+    $allaa[$ai] = 1;
+    
+    $allav[$ai] = $anchorValue[$i];
+}
+
+for($i = 0; $i < 382; $i++) {
+
+    $saa = $saa + " " + $allaa[$i];
+    
+    $sav = $sav + " " + $allav[$i];
+}
+
+string $cmd;
+
 $cmd = "setAttr ($mesh[0]+\".aa\") -type doubleArray 382 " + $saa;
-eval($cmd);
+
+eval($cmd);
 $cmd = "setAttr ($mesh[0]+\".av\") -type doubleArray 382 "+ $sav;
 eval($cmd);
 
 calcHarmCoord -a aa -v av $mesh[0];
+getAttr ($mesh[0] + ".av");
