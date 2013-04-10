@@ -55,24 +55,12 @@ int BoundingBox::getLongestAxis() const
 
 const float BoundingBox::getMin(int axis) const
 {
-	if(axis == 0) {
-		return m_data[0];
-	}
-	if(axis == 1) {
-		return m_data[1];
-	}
-	return m_data[2];
+	return m_data[axis];
 }
 
 const float BoundingBox::getMax(int axis) const
 {
-	if(axis == 0) {
-		return m_data[3];
-	}
-	if(axis == 1) {
-		return m_data[4];
-	}
-	return m_data[5];
+	return m_data[axis + 3];
 }
 
 const float BoundingBox::area() const
@@ -161,8 +149,8 @@ char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 		}
         // Update interval for _i_th bounding box slab
         float invRayDir = 1.f / ray.m_dir.comp(i);
-        float tNear = (min(i) - ray.m_origin.comp(i)) * invRayDir;
-        float tFar  = (max(i) - ray.m_origin.comp(i)) * invRayDir;
+        float tNear = (getMin(i) - ray.m_origin.comp(i)) * invRayDir;
+        float tFar  = (getMax(i) - ray.m_origin.comp(i)) * invRayDir;
 
         // Update parametric interval from slab intersection $t$s
         if (tNear > tFar) SwapValues(tNear, tFar);
@@ -177,18 +165,8 @@ char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 
 char BoundingBox::isPointInside(const Vector3F & p) const
 {
-	if(p.x < min(0) || p.x > max(0)) return 0;
-	if(p.y < min(1) || p.y > max(1)) return 0;
-	if(p.z < min(2) || p.z > max(2)) return 0;
+	if(p.x < getMin(0) || p.x > getMax(0)) return 0;
+	if(p.y < getMin(1) || p.y > getMax(1)) return 0;
+	if(p.z < getMin(2) || p.z > getMax(2)) return 0;
 	return 1;
-}
-
-float BoundingBox::min(int axis) const
-{
-	return m_data[axis];
-}
-
-float BoundingBox::max(int axis) const
-{
-	return m_data[3 + axis];
 }

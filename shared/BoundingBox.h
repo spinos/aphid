@@ -33,7 +33,5 @@ public:
 	char intersect(const Ray &ray, float *hitt0, float *hitt1) const;
 	char isPointInside(const Vector3F & p) const;
 	
-	float min(int axis) const;
-	float max(int axis) const;
 	float m_data[6];
 };

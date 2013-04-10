@@ -1,20 +1,23 @@
-string $sphere[] = `polySphere -r 1 -sx 20 -sy 20 -ax 0 1 0 -cuv 2 -ch 0`;
+global proc testHarm()
+{
+string $sphere[] = `polyPlane -ch off -o on -w 32 -h 32 -sw 32 -sh 32`;
+int $nv = 1089;
 select -r $sphere[0];
 pickWalk -d down;
 string $mesh[] = `ls -sl -l`;
+string $msh = $mesh[0];
+print("work on "+$msh);
+addAttr -dt doubleArray -ln asanchor -sn aa $msh;
+addAttr -dt doubleArray -ln asvalue -sn av $msh;
 
-addAttr -dt doubleArray -ln asanchor -sn aa $mesh[0];
-addAttr -dt doubleArray -ln asvalue -sn av $mesh[0];
-
-
-int $anchorIds[] = {250, 283, 81, 93};
-float $anchorValue[] = {1.0, 0.1, 0.5, 0.0};
+int $anchorIds[] = {34, 64, 1020, 992, 647};
+float $anchorValue[] = {1.0, 0.1, 0.5, 0.8, 0.4};
 
 string $saa = "", $sav ="";
 int $i;
 
 float $allaa[], $allav[];
-for($i = 0; $i < 382; $i++) {
+for($i = 0; $i < $nv; $i++) {
 
     $allaa[$i] = 0;
     
@@ -28,7 +31,7 @@ for($i = 0; $i < size($anchorIds); $i++) {
     $allav[$ai] = $anchorValue[$i];
 }
 
-for($i = 0; $i < 382; $i++) {
+for($i = 0; $i < $nv; $i++) {
 
     $saa = $saa + " " + $allaa[$i];
     
@@ -37,11 +40,11 @@ for($i = 0; $i < 382; $i++) {
 
 string $cmd;
 
-$cmd = "setAttr ($mesh[0]+\".aa\") -type doubleArray 382 " + $saa;
+$cmd = "setAttr " + $msh+ ".aa -type doubleArray " + $nv + " " + $saa;
 
 eval($cmd);
-$cmd = "setAttr ($mesh[0]+\".av\") -type doubleArray 382 "+ $sav;
+$cmd = "setAttr " + $msh+ ".av -type doubleArray " + $nv + " " + $sav;
 eval($cmd);
 
-calcHarmCoord -a aa -v av $mesh[0];
-getAttr ($mesh[0] + ".av");
+calcHarmCoord -a aa -v av $msh;
+}

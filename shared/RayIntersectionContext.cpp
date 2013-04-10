@@ -36,5 +36,5 @@ BoundingBox RayIntersectionContext::getBBox() const
 
 void RayIntersectionContext::verbose() const
 {
-	std::cout<<" bbox "<<m_bbox.min(0)<<" "<<m_bbox.min(1)<<" "<<m_bbox.min(2)<<" - "<<m_bbox.max(0)<<" "<<m_bbox.max(1)<<" "<<m_bbox.max(2)<<"\n";
+	std::cout<<" bbox "<<m_bbox.getMin(0)<<" "<<m_bbox.getMin(1)<<" "<<m_bbox.getMin(2)<<" - "<<m_bbox.getMax(0)<<" "<<m_bbox.getMax(1)<<" "<<m_bbox.getMax(2)<<"\n";
 }

@@ -28,9 +28,7 @@
 #include <boost/format.hpp>
 #include <fstream>
 
-#include "../opium/aSearchHelper.h"
-#include <IntersectionGroup.h>
-
+#include <ASearchHelper.h>
 #include <MeshLaplacian.h>
 #include <HarmonicCoord.h>
 #include <Anchor.h>
@@ -225,7 +223,10 @@ MStatus HarmonicCoordCmd::doIt( const MArgList& args )
 	for(unsigned i = 0; i < nv; i++) {
 		values[i] = out[i];
 	}
+	MGlobal::displayInfo("solved!");
 
+	delete harm;
+	delete mesh;
 	return MS::kSuccess;
 }
 
