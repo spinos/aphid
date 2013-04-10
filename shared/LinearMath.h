@@ -11,4 +11,4 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <Eigen/SVD>
-typedef Eigen::SparseMatrix<float> LaplaceMatrixType;
+typedef Eigen::SparseMatrix<double> LaplaceMatrixType;

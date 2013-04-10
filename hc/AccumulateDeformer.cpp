@@ -62,7 +62,7 @@ void AccumulateDeformer::precompute()
 	}
 }
 
-void AccumulateDeformer::prestep(Eigen::VectorXf b[])
+void AccumulateDeformer::prestep(Eigen::VectorXd b[])
 {
 	LaplaceMatrixType L = m_L;
 	
@@ -106,9 +106,9 @@ void AccumulateDeformer::prestep(Eigen::VectorXf b[])
 
 char AccumulateDeformer::solve()
 {
-	Eigen::VectorXf b[3];
+	Eigen::VectorXd b[3];
 	prestep(b);
-	Eigen::VectorXf x[3];
+	Eigen::VectorXd x[3];
 	x[0] = m_llt.solve(b[0]);
 	x[1] = m_llt.solve(b[1]);
 	x[2] = m_llt.solve(b[2]);
@@ -122,7 +122,7 @@ char AccumulateDeformer::solve()
 	return 1;
 }
 
-void AccumulateDeformer::addupConstrains(DeformationTarget * target, Eigen::VectorXf b[])
+void AccumulateDeformer::addupConstrains(DeformationTarget * target, Eigen::VectorXd b[])
 {
 	std::map<unsigned, char> constrainIndices;
 	target->genNonZeroIndices(constrainIndices);

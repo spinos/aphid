@@ -29,10 +29,10 @@ public:
 	virtual char solve();
 	
 private:
-	void prestep(Eigen::VectorXf b[]);
-	void addupConstrains(DeformationTarget * target, Eigen::VectorXf b[]);
+	void prestep(Eigen::VectorXd b[]);
+	void addupConstrains(DeformationTarget * target, Eigen::VectorXd b[]);
 	LaplaceMatrixType m_L;
-	Eigen::VectorXf m_delta[3];
+	Eigen::VectorXd m_delta[3];
 	Eigen::SimplicialLDLT<LaplaceMatrixType> m_llt;
 	VertexAdjacency * m_topology;
 	std::vector<DeformationTarget *> m_analysis;

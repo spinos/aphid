@@ -265,8 +265,8 @@ void BaseDrawer::tangentFrame(const BaseMesh * mesh, const BaseDeformer * deform
 void BaseDrawer::box(const BoundingBox & b)
 {
 	beginQuad();
-	Vector3F corner0(b.min(0), b.min(1), b.min(2));
-	Vector3F corner1(b.max(0), b.max(1), b.max(2));
+	Vector3F corner0(b.getMin(0), b.getMin(1), b.getMin(2));
+	Vector3F corner1(b.getMax(0), b.getMax(1), b.getMax(2));
 
 	glVertex3f(corner0.x, corner0.y, corner0.z);
 	glVertex3f(corner1.x, corner0.y, corner0.z);

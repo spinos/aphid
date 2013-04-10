@@ -19,16 +19,16 @@ public:
 	virtual char solve(unsigned iset);
 	
 	unsigned numAnchorPoints() const;
-	bool hasNoEffect() const;
 	
 	void setConstrain(unsigned idx, float val);
 private:
 	void initialCondition();
 	void prestep();
-	bool allZero() const;
+	void checkConstrain(unsigned iset);
+
 	std::vector<Anchor *> m_anchors;
 	LaplaceMatrixType m_LT;
-	Eigen::VectorXf m_b;
+	Eigen::VectorXd m_b;
 	Eigen::SimplicialLDLT<LaplaceMatrixType> m_llt;
 	VertexAdjacency * m_topology;
 	float * m_constrainValues;

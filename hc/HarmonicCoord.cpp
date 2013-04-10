@@ -47,14 +47,14 @@ void HarmonicCoord::precompute(std::vector<Anchor *> & anchors)
 			neighborIdx = neighbor->v->getIndex();
 			L.insert(i, neighborIdx) = -neighbor->weight;
 		}
-		L.insert(i, i) = 1.0f;
+		L.insert(i, i) = 1.0;
 	}
 	
 	int irow = m_numVertices;
 	for(std::vector<Anchor *>::iterator it = anchors.begin(); it != anchors.end(); ++it) {
 		unsigned idx;
 		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
-			L.coeffRef(irow, idx) = 1.f;
+			L.coeffRef(irow, idx) = 1.0;
 			irow++;
 		}
 	}
@@ -102,7 +102,7 @@ char HarmonicCoord::solve(unsigned iset)
 {
 	m_activeValue = iset;
 	prestep();
-	Eigen::VectorXf x = m_llt.solve(m_b);
+	Eigen::VectorXd x = m_llt.solve(m_b);
 	
 	float r;
 	float *v = value(iset);
@@ -112,27 +112,27 @@ char HarmonicCoord::solve(unsigned iset)
 		if(r > 1.f) r = 1.f;
 		v[i] = r;
 	}
+	
+	checkConstrain(iset);
 	return 1;
-}
-
-bool HarmonicCoord::allZero() const
-{
-	for(std::vector<Anchor *>::const_iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
-		unsigned idx;
-		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
-			if(ap->w > 10e-3)
-				return false;
-		}
-	}
-	return true;
-}
-
-bool HarmonicCoord::hasNoEffect() const
-{
-	return allZero();
 }
 
 void HarmonicCoord::setConstrain(unsigned idx, float val)
 {
 	m_constrainValues[idx] = val;
 }
+
+void HarmonicCoord::checkConstrain(unsigned iset)
+{
+	float *v = value(iset);
+	unsigned ianchor = 0;
+	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+		float c = m_constrainValues[ianchor];
+		unsigned idx;
+		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
+			printf("c %f v %f \n", c, v[idx]);
+		}
+		ianchor++;
+	}
+}
+
