@@ -113,7 +113,6 @@ char HarmonicCoord::solve(unsigned iset)
 		v[i] = r;
 	}
 	
-	checkConstrain(iset);
 	return 1;
 }
 
