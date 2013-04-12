@@ -48,6 +48,7 @@
 
 #include "KdTreeDrawer.h"
 #include <RadialBasisFunction.h>
+#include <Anchor.h>
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 	
@@ -60,26 +61,24 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_drawer = new KdTreeDrawer;
 	
-	m_mode = SelectCompnent;
-	
-	RadialBasisFunction *rbf = new RadialBasisFunction;
-	rbf->create(5);
+	rbf = new RadialBasisFunction;
+	rbf->create(7);
 	rbf->setXi(0, Vector3F(0,0,0));
-	rbf->setXi(1, Vector3F(1,0.1,0));
-	rbf->setXi(2, Vector3F(0.1,1.1,0));
-	rbf->setXi(3, Vector3F(-1,0.2,0.1));
-	rbf->setXi(4, Vector3F(-0.2,-2.2,-0.1));
+	rbf->setXi(1, Vector3F(8,0,0));
+	rbf->setXi(2, Vector3F(2.5,8.5,0));
+	rbf->setXi(3, Vector3F(-8,0.2,1.0));
+	rbf->setXi(4, Vector3F(-0.2,-8.2,-0.1));
+	rbf->setXi(5, Vector3F(-0.1,-1.2, 7.1));
+	rbf->setXi(6, Vector3F(9.0, 5.2, 2.1));
 	
-	rbf->setCi(0, 1.0);
-	rbf->setCi(1, 0.0);
-	rbf->setCi(2, 0.0);
-	rbf->setCi(3, 0.0);
-	rbf->setCi(4, 0.0);
-	rbf->setTau(2.0);
+	rbf->setTau(16.0);
 	rbf->computeWeights();
 	
-	float r = rbf->solve(Vector3F(0.0, 0.1, 0.1));
-	qDebug()<<"rbf "<<r;
+	m_anchor = new Anchor;
+	Vector3F pa(-7.0, 5., 0.);
+	m_anchor->placeAt(pa);
+	
+	rbf->solve(m_anchor->getCenter());
 }
 //! [0]
 
@@ -90,23 +89,23 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientDraw()
 {
-	if(m_mode != TransformAnchor) {
-		m_drawer->setWired(1);
-		m_drawer->setGrey(0.9f);
-		
-	}
-    else {
-		m_drawer->setWired(0);
-		
-	}	
-	m_drawer->setGrey(0.5f);
-	//m_drawer->drawKdTree(m_tree);
-	//m_drawer->setWired(0);
-	m_drawer->setColor(0.f, 1.f, 0.4f);
-	
-	glTranslatef(20,0,0);
 	m_drawer->setWired(1);
+	unsigned nn = rbf->getNumNodes();
+	for(unsigned i=0; i < nn; i++) {
+		m_drawer->setGrey(0.8f);
+		Vector3F p = rbf->getXi(i);
+		m_drawer->solidCube(p.x, p.y, p.z, 1.f);
+		float w = rbf->getResult(i);
+		glColor3f(w,  1.f - w, 0.f);
+		glBegin(GL_LINES);
+		glVertex3f(p.x, p.y, p.z);
+		glVertex3f(p.x, p.y + w * 8, p.z);
+		glEnd();
+	}
+	m_drawer->setWired(0);
 	m_drawer->setColor(0.f, 1.f, .4f);
+	Vector3F ap = m_anchor->getCenter();
+	m_drawer->solidCube(ap.x, ap.y, ap.z, 1.f);
 	
 }
 //! [7]
@@ -118,11 +117,7 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 	raye = origin + displacement;
 	
 	Ray ray(rayo, raye);
-	if(m_mode == SelectCompnent) {
-	}
-	else {
-		
-	}
+	
 }
 //! [9]
 
@@ -137,15 +132,10 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 	rayo = origin;
 	raye = origin + displacement;
 	Ray ray(rayo, raye);
-	if(m_mode == SelectCompnent) {
-		Vector3F hit;
-		pickupComponent(ray, hit);
-	}
-	else {
-	    //if(!m_activeAnchor) return;
-		//m_activeAnchor->translate(stir);
-		//m_harm->solve();
-		//m_deformer->solve();
+	float t;
+	if(m_anchor->intersect(ray, t, 2.f)) {
+		m_anchor->translate(stir);
+		rbf->solve(m_anchor->getCenter());
 	}
 }
 //! [10]

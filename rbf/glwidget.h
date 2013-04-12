@@ -47,6 +47,8 @@
 #include <RayIntersectionContext.h>
 
 class KdTreeDrawer;
+class RadialBasisFunction;
+class Anchor;
 
 //! [0]
 class GLWidget : public Base3DView
@@ -54,10 +56,6 @@ class GLWidget : public Base3DView
     Q_OBJECT
 
 public:
-    enum InteractMode {
-        SelectCompnent,
-        TransformAnchor
-    };
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 
@@ -77,7 +75,8 @@ protected:
 //! [3]
 private:
     KdTreeDrawer * m_drawer;
-	InteractMode m_mode;
+	RadialBasisFunction *rbf;
+	Anchor * m_anchor;
 private slots:
     void simulate();
 	

@@ -46,6 +46,12 @@ Anchor::~Anchor()
 	m_anchorPoints.clear();
 }
 
+void Anchor::placeAt(const Vector3F & cen)
+{
+	m_space.setIdentity();
+	m_space.setTranslation(cen);
+}
+
 void Anchor::addPoint(unsigned vertexId)
 {
 	AnchorPoint *a = new AnchorPoint();
