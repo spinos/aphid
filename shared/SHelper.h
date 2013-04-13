@@ -38,8 +38,8 @@ public:
 	static int findPartBeforeChar(std::string& full, std::string& frag, int start, char sep);
 	static void protectCommaFree(std::string& res);
 	static void endNoReturn(std::string& res);
-	static std::string getLastName(std::string& name);
-	static std::string getParentName(std::string& name);
+	static std::string getParentName(const std::string& name);
+	static std::string getLastName(const std::string& name);
 	static std::string getHighestParentName(std::string& name);
 	static void getHierarchy(const char *name, std::vector<std::string> &res);
 	static void listAllNames(std::string& name, std::vector<std::string>& all);

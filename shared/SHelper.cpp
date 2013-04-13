@@ -473,12 +473,12 @@ void SHelper::getHierarchy(const char *name, std::vector<std::string> &res)
 		}
 }
 
-std::string SHelper::getParentName(std::string& name)
+std::string SHelper::getParentName(const std::string& name)
 {
 	std::string r("");
 	std::string str = name;
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	boost::char_separator<char> sep("|");
+	boost::char_separator<char> sep("|/");
 	tokenizer tokens(str, sep);
 	for (tokenizer::iterator tok_iter = tokens.begin();
 		tok_iter != tokens.end(); ++tok_iter)
@@ -492,12 +492,12 @@ std::string SHelper::getParentName(std::string& name)
 	return r;
 }
 
-std::string SHelper::getLastName(std::string& name)
+std::string SHelper::getLastName(const std::string& name)
 {
 	std::string r;
 	std::string str = name;
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	boost::char_separator<char> sep("|");
+	boost::char_separator<char> sep("|/");
 	tokenizer tokens(str, sep);
 	for (tokenizer::iterator tok_iter = tokens.begin();
 		tok_iter != tokens.end(); ++tok_iter)

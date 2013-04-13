@@ -9,14 +9,19 @@
 #ifndef _SEARCH_HELPER_H
 #define _SEARCH_HELPER_H
 
-#include "../shared/AHelper.h"
 class MString;
 class MObject;
+class MObjectArray;
+class MFnMesh;
+class MMatrix;
+class MDagPath;
+class MPlug;
+class MDagPathArray;
 #include <string>
 #include <vector>
 #include <sstream>
 
-class ASearchHelper : public AHelper {
+class ASearchHelper {
 public:
 	ASearchHelper() {}
 	std::string getPullPathName(MObject &node);
@@ -29,7 +34,6 @@ public:
 	char fuzzyGetObjByFullName(std::string &toReplace,const char* name,MObject& res,MObject& root = MObject::kNullObj);
 	char getDescendedByFullNameIgnoreNamespace(MObject& root, const char* name, MObject& res);
 	char fuzzyGetDescendedByTerminalName(MObject& root, const char* name, MObject& res);
-	char findObjByAttrValInArray(MObjectArray &objarr, MString &attrname, MString &attrval, MObject &res);
 	char findTypedNodeInHistory(MObject &root, const char *nodename, MObject &res);
 	char findNamedPlugInHistory(MObject &root, MFn::Type type, MString &name1, MPlug &plug1);
 	char isObjInDownstream(MObject &root, MObject &obj);

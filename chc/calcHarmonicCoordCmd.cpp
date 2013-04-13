@@ -8,6 +8,7 @@
 #include <map>
 
 #include <maya/MObject.h>
+#include <maya/MPlug.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
 #include <maya/MDagPathArray.h>
@@ -23,6 +24,9 @@
 #include <maya/MFnSingleIndexedComponent.h>
 #include <maya/MFnIntArrayData.h>
 #include <maya/MIntArray.h>
+#include <maya/MFnMesh.h>
+#include <maya/MFnDoubleArrayData.h>
+#include <maya/MPointArray.h>
 
 #include <maya/MIOStream.h>
 #include <boost/format.hpp>
