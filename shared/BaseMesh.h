@@ -8,10 +8,8 @@
  */
 
 #pragma once
-#include <Vector3F.h>
-#include <Matrix33F.h>
+#include <AllMath.h>
 #include <Geometry.h>
-#include <Ray.h>
 #include <RayIntersectionContext.h>
 class BaseMesh : public Geometry {
 public:
