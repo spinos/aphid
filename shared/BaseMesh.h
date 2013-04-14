@@ -31,6 +31,8 @@ public:
 	void setTriangle(unsigned idx, unsigned a, unsigned b, unsigned c);
 	void move(float x, float y, float z);
 	
+	void getTriangle(unsigned idx, unsigned *vertexId) const;
+	
 	unsigned getNumFaces() const;
 	unsigned getNumVertices() const;
 	unsigned getNumFaceVertices() const;

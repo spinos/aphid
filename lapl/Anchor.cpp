@@ -18,12 +18,12 @@ Anchor::Anchor(SelectionArray & sel)
 	Vector3F cen(0.f, 0.f, 0.f);
 	const unsigned nv = sel.numVertices();
 	for(unsigned i=0; i < nv; i++) {
-		Vertex * v = sel.getVertex(i);
+		Vector3F * v = sel.getVertexP(i);
 		AnchorPoint *a = new AnchorPoint();
-		a->worldP = *v->m_v;
+		a->worldP = *v;
 		a->w = 1.f;
-		m_anchorPoints[v->getIndex()] = a;
-		cen += *v->m_v;
+		m_anchorPoints[sel.getVertexId(i)] = a;
+		cen += *v;
 	}
 	cen /= nv;
 	m_space.setIdentity();

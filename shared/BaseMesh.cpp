@@ -247,4 +247,15 @@ char BaseMesh::intersect(const Ray & ray, RayIntersectionContext * ctx) const
 	}
 	return 0;
 }
+
+void BaseMesh::getTriangle(unsigned idx, unsigned *vertexId) const
+{
+	unsigned *i = _indices;
+	i += idx * 3;
+	vertexId[0] = *i;
+	i++;
+	vertexId[1] = *i;
+	i++;
+	vertexId[2] = *i;
+}
 //:~
