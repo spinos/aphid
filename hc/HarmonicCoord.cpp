@@ -18,9 +18,11 @@ void HarmonicCoord::setMesh(BaseMesh * mesh)
 	BaseField::setMesh(mesh);
 	
 	printf("init laplace deformer");
-	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_mesh);
-	m_topology = msh->connectivity();
-	initialCondition();
+}
+
+void HarmonicCoord::setTopology(VertexAdjacency * topo)
+{
+	m_topology = topo;
 }
 
 void HarmonicCoord::precompute(std::vector<Anchor *> & anchors)

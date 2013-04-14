@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Vector3F.h>
-class BaseMesh;
+#include <BaseMesh.h>
+
 class BaseDeformer
 {
 public:

@@ -1,5 +1,5 @@
 #include "BaseDeformer.h"
-#include "BaseMesh.h"
+
 BaseDeformer::BaseDeformer() : m_deformedV(0) {}
 BaseDeformer::~BaseDeformer() 
 {

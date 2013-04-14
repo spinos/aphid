@@ -43,6 +43,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/LinearMath.h \
                 ../shared/BarycentricCoordinate.h \
                 ../shared/EasemodelUtil.h \
+				../shared/GeodesicSphereMesh.h \
                 ../lapl/MeshLaplacian.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
@@ -94,6 +95,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/SelectionArray.cpp \
                 ../shared/BarycentricCoordinate.cpp \
                 ../shared/EasemodelUtil.cpp \
+				../shared/GeodesicSphereMesh.cpp \
                 ../lapl/MeshLaplacian.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \

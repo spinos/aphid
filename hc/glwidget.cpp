@@ -97,6 +97,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_harm = new HarmonicCoord;
 	m_harm->setMesh(m_mesh);
+	m_harm->setTopology(m_mesh->connectivity());
 	m_harm->addValue(1);
 	m_harm->addValue(2);
 	

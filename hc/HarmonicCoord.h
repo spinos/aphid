@@ -15,6 +15,7 @@ public:
     virtual ~HarmonicCoord();
 	
 	virtual void setMesh(BaseMesh * mesh);
+	void setTopology(VertexAdjacency * topo);
 	virtual void precompute(std::vector<Anchor *> & anchors);
 	virtual char solve(unsigned iset);
 	
