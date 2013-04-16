@@ -28,17 +28,21 @@ void AnchorGroup::addAnchor(Anchor * a)
 
 bool AnchorGroup::pickupAnchor(const Ray & ray, Vector3F & hit)
 {
+	m_activeAnchorIdx = 0;
 	m_activeAnchor = 0;
 	float minDist = 10e8;
 	float t;
+	int i = 0;
 	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
 		if((*it)->intersect(ray, t, m_hitTolerance)) {
 			if(t < minDist) {
 				m_activeAnchor = (*it);
+				m_activeAnchorIdx = i;
 				minDist = t;
 				hit = ray.travel(t);
 			}
 		}
+		i++;
 	}
 	return minDist < 10e8;
 }
@@ -80,5 +84,12 @@ void AnchorGroup::setHitTolerance(float val)
 std::vector<Anchor *> & AnchorGroup::data()
 {
 	return m_anchors;
+}
+
+bool AnchorGroup::activeAnchor(unsigned & idx) const
+{
+	if(!m_activeAnchor) return false;
+	idx = m_activeAnchorIdx;
+	return true;
 }
 //:~

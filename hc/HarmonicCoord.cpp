@@ -137,8 +137,8 @@ void HarmonicCoord::setSingularConstrain(unsigned ic)
 			m_constrainValues[i] = wei;
 			i++;
 		}
+		ianchor++;
 	}
-	ianchor++;
 }
 
 void HarmonicCoord::checkConstrain(unsigned iset)
