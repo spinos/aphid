@@ -7,8 +7,20 @@
  *
  */
 #include <maya/MFnSet.h>
+#include <maya/MDagPath.h>
+#include <maya/MDagPathArray.h>
+#include <maya/MFnDagNode.h>
+#include <maya/MItDag.h>
+#include <maya/MItDependencyGraph.h>
+#include <maya/MItDependencyNodes.h>
+#include <maya/MMatrix.h>
+#include <maya/MFnTransform.h>
+#include <maya/MFnMesh.h>
+#include <maya/MSelectionList.h>
+#include <maya/MItSelectionList.h>
+#include <maya/MGlobal.h>
 #include "ASearchHelper.h"
-#include "../shared/SHelper.h"
+#include <SHelper.h>
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -141,7 +153,7 @@ char ASearchHelper::getObjByFullName(const char* name, MObject& res, MObject& ro
 	std::string r;
 	std::string str = name;
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	boost::char_separator<char> sep("|");
+	boost::char_separator<char> sep("|/");
 	tokenizer tokens(str, sep);
 	MObject parent = root;
 	for (tokenizer::iterator tok_iter = tokens.begin();
@@ -244,36 +256,6 @@ char ASearchHelper::fuzzyGetDescendedByTerminalName(MObject& root, const char* n
         }
     }
     return 0;
-}
-
-char ASearchHelper::findObjByAttrValInArray(MObjectArray &objarr, MString &attrname, MString &attrval, MObject &res)
-{
-	MString meshname;
-	for(unsigned i = 0; i <objarr.length(); i++)
-	{
-		if(getStringAttributeByName(objarr[i], attrname.asChar(), meshname))
-		{
-			if(meshname == attrval)
-			{
-				res = objarr[i];
-				return 1;
-			}
-		}
-		else
-		{
-			MPlug plg;
-			if(findNamedPlugInHistory(objarr[i], MFn::kMesh, attrname, plg))
-			{
-				meshname = plg.asString();
-				if(meshname == attrval)
-				{
-					res = objarr[i];
-					return 1;
-				}
-			}
-		}
-	}
-	return 0;
 }
 
 char ASearchHelper::findFirstTypedChild(MDagPath &parent, MObject &result, MFn::Type type)
@@ -802,7 +784,7 @@ char ASearchHelper::dagByFullName(const char *name, MDagPath & res)
 	std::string r;
 	std::string str = name;
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	boost::char_separator<char> sep("|");
+	boost::char_separator<char> sep("|/");
 	tokenizer tokens(str, sep);
 	MDagPath parent;
 	for (tokenizer::iterator tok_iter = tokens.begin();

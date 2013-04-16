@@ -11,6 +11,7 @@
 
 #include <AllMath.h>
 #include <LinearMath.h>
+#include <vector>
 class RadialBasisFunction {
 public:
 	RadialBasisFunction();
@@ -19,14 +20,19 @@ public:
 	void setTau(float tau);
 	void create(unsigned num);
 	void setXi(unsigned idx, Vector3F xi);
-	void setCi(unsigned idx, float ci);
 	void computeWeights();
-	float solve(Vector3F x) const;
+	void solve(Vector3F x) const;
+	
+	unsigned getNumNodes() const;
+	Vector3F getXi(unsigned idx) const;
+	float getResult(unsigned idx) const;
 private:
 	float Phir(float r) const;
+	void weightI(unsigned idx, Eigen::MatrixXd & A);
 	Vector3F *m_xi;
-	float *m_ci;
-	float *m_wi;
+	std::vector<float *> m_ci;
+	std::vector<float *> m_wi;
+	float * m_res;
 	float m_tau;
 	unsigned m_numNodes;
 };

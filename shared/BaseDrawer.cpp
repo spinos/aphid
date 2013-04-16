@@ -16,6 +16,16 @@
 #include "Matrix33F.h"
 #include <cmath>
 
+BaseDrawer::BaseDrawer () : m_wired(0) 
+{
+	m_sphere = new GeodesicSphereMesh(8);
+}
+
+BaseDrawer::~BaseDrawer () 
+{
+	delete m_sphere;
+}
+
 void BaseDrawer::setGrey(float g)
 {
     glColor3f(g, g, g);
@@ -327,7 +337,7 @@ void BaseDrawer::components(SelectionArray * arr)
     }
     else if(arr->getComponentFilterType() == PrimitiveFilter::TVertex) {
         const unsigned numVert = arr->numVertices();
-        for(unsigned i = 0; i < numVert; i++) {
+		for(unsigned i = 0; i < numVert; i++) {
             Vector3F * p = arr->getVertexP(i);
             solidCube(p->x, p->y, p->z, 0.2f);
         }
@@ -465,12 +475,20 @@ void BaseDrawer::anchor(Anchor *a)
     a->spaceMatrix(m);
     
     glMultMatrixf((const GLfloat*)m);
-	coordsys();
-	
+	sphere(0.2f);
+
 	unsigned nouse;
 	for(Anchor::AnchorPoint * ap = a->firstPoint(nouse); a->hasPoint(); ap = a->nextPoint(nouse)) {
 		Vector3F p = ap->p;
 		solidCube(p.x, p.y, p.z, 0.2f);
 	}
+	glPopMatrix();
+}
+
+void BaseDrawer::sphere(float size)
+{
+	glPushMatrix();
+	glScalef(size, size, size);
+	drawMesh(m_sphere);
 	glPopMatrix();
 }

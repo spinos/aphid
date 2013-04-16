@@ -15,12 +15,14 @@ public:
     virtual ~HarmonicCoord();
 	
 	virtual void setMesh(BaseMesh * mesh);
+	void setTopology(VertexAdjacency * topo);
 	virtual void precompute(std::vector<Anchor *> & anchors);
 	virtual char solve(unsigned iset);
 	
 	unsigned numAnchorPoints() const;
 	
 	void setConstrain(unsigned idx, float val);
+	void setSingularConstrain(unsigned ic);
 private:
 	void initialCondition();
 	void prestep();

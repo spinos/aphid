@@ -8,10 +8,8 @@
  */
 
 #pragma once
-#include <Vector3F.h>
-#include <Matrix33F.h>
+#include <AllMath.h>
 #include <Geometry.h>
-#include <Ray.h>
 #include <RayIntersectionContext.h>
 class BaseMesh : public Geometry {
 public:
@@ -32,6 +30,8 @@ public:
 	void setVertex(unsigned idx, float x, float y, float z);
 	void setTriangle(unsigned idx, unsigned a, unsigned b, unsigned c);
 	void move(float x, float y, float z);
+	
+	void getTriangle(unsigned idx, unsigned *vertexId) const;
 	
 	unsigned getNumFaces() const;
 	unsigned getNumVertices() const;

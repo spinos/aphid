@@ -7,24 +7,7 @@
 #include <math.h>
 #include <map>
 
-#include <maya/MObject.h>
-#include <maya/MGlobal.h>
-#include <maya/MDagPath.h>
-#include <maya/MDagPathArray.h>
-#include <maya/MItSelectionList.h>
-#include <maya/MSelectionList.h>
-#include <maya/MIntArray.h>
-#include <maya/MDoubleArray.h>
-#include <maya/MObjectArray.h>
-#include <maya/MItDependencyNodes.h>
-#include <maya/MItGeometry.h>
-#include <maya/MFnSkinCluster.h>
-#include <maya/MItMeshVertex.h>
-#include <maya/MFnSingleIndexedComponent.h>
-#include <maya/MFnIntArrayData.h>
-#include <maya/MIntArray.h>
-
-#include <maya/MIOStream.h>
+#include <AllMaya.h>
 #include <boost/format.hpp>
 #include <fstream>
 

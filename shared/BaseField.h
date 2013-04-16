@@ -11,7 +11,7 @@ public:
     virtual ~BaseField();
 	
 	virtual void setMesh(BaseMesh * mesh);
-	void BaseField::addValue(unsigned idx);
+	void addValue(unsigned idx);
 	
 	Vector3F * getColor() const;
 	float * value(unsigned idx);

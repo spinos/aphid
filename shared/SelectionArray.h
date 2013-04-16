@@ -12,7 +12,7 @@
 class Vector3F;
 class Primitive;
 class Geometry;
-class Vertex;
+
 class SelectionArray : public PrimitiveFilter {
 public:
 	SelectionArray();
@@ -25,7 +25,7 @@ public:
 	Primitive * getPrimitive(const unsigned & idx) const;
 	
 	unsigned numVertices() const;
-	Vertex * getVertex(const unsigned & idx) const;
+	unsigned getVertexId(const unsigned & idx) const;
 	Vector3F * getVertexP(const unsigned & idx) const;
 	
 	Geometry * getGeometry() const;
@@ -37,6 +37,6 @@ private:
 	bool isVertexSelected(unsigned idx) const;
 	bool isFaceSelected(unsigned idx) const;
 	std::vector<Primitive *> m_prims;
-	std::vector<Vertex *> m_vertices;
+	std::vector<unsigned> m_vertexIds;
 	std::vector<unsigned> m_faceIds;
 };

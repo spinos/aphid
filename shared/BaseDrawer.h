@@ -14,10 +14,11 @@
 #include <BoundingBox.h>
 #include <SelectionArray.h>
 #include <Anchor.h>
+#include <GeodesicSphereMesh.h>
 class BaseDrawer {
 public:
-	BaseDrawer () : m_wired(0) {}
-	virtual ~BaseDrawer () {}
+	BaseDrawer ();
+	virtual ~BaseDrawer ();
 	
 	void box(float width, float height, float depth);
 	void solidCube(float x, float y, float z, float size);
@@ -43,7 +44,9 @@ public:
 	void coordsys(const Matrix33F & orient, float scale = 1.f);
 	void setWired(char var);
 	void anchor(Anchor *a);
+	void sphere(float size = 1.f);
 	
 private:
     char m_wired;
+	GeodesicSphereMesh * m_sphere;
 };

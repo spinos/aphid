@@ -9,9 +9,7 @@
 
 #include "SelectionArray.h"
 #include "Primitive.h"
-#include "Vertex.h"
-#include "Facet.h"
-#include "MeshLaplacian.h"
+#include "BaseMesh.h"
 
 SelectionArray::SelectionArray() {}
 SelectionArray::~SelectionArray() {}
@@ -19,31 +17,30 @@ SelectionArray::~SelectionArray() {}
 void SelectionArray::reset() 
 {
 	m_prims.clear();
-	m_vertices.clear();
+	m_vertexIds.clear();
 	m_faceIds.clear();
 }
 
 void SelectionArray::add(Geometry * geo, unsigned icomp)
 {
     m_geometry = geo;
-	MeshLaplacian * mesh = (MeshLaplacian *)geo;
+	BaseMesh * mesh = (BaseMesh *)geo;
 	if(getComponentFilterType() == PrimitiveFilter::TFace) {
 	    if(isFaceSelected(icomp)) return;
 	    m_faceIds.push_back(icomp);
 	    
-	    Facet *face = mesh->getFace(icomp);
+	    unsigned vertexId[3];
+		mesh->getTriangle(icomp, vertexId);
 	
         for(int i = 0; i < 3; i++) {
-            Vertex * v = face->vertex(i);
-            if(!isVertexSelected(v->getIndex())) {
-                m_vertices.push_back(v);
+            if(!isVertexSelected(vertexId[i])) {
+                m_vertexIds.push_back(vertexId[i]);
             }
         }
     }
     else {
-        Vertex * v = mesh->getVertex(icomp);
-        if(!isVertexSelected(v->getIndex())) {
-            m_vertices.push_back(v);
+        if(!isVertexSelected(icomp)) {
+            m_vertexIds.push_back(icomp);
         }
     }
 }
@@ -60,24 +57,25 @@ Primitive * SelectionArray::getPrimitive(const unsigned & idx) const
 
 unsigned SelectionArray::numVertices() const
 {
-	return (unsigned)m_vertices.size();
+	return (unsigned)m_vertexIds.size();
 }
 
-Vertex * SelectionArray::getVertex(const unsigned & idx) const
+unsigned SelectionArray::getVertexId(const unsigned & idx) const
 {
-	return m_vertices[idx];
+	return m_vertexIds[idx];
 }
 
 Vector3F * SelectionArray::getVertexP(const unsigned & idx) const
 {
-    return m_vertices[idx]->m_v;
+	BaseMesh * mesh = (BaseMesh *)m_geometry;
+    return &mesh->getVertices()[m_vertexIds[idx]];
 }
 
 bool SelectionArray::isVertexSelected(unsigned idx) const
 {
-	std::vector<Vertex *>::const_iterator vIt;
-	for(vIt = m_vertices.begin(); vIt != m_vertices.end(); ++vIt) {
-		if((*vIt)->getIndex() == idx)
+	std::vector<unsigned>::const_iterator vIt;
+	for(vIt = m_vertexIds.begin(); vIt != m_vertexIds.end(); ++vIt) {
+		if((*vIt) == idx)
 			return true;
 	}
 	return false;

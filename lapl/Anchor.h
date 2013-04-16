@@ -23,6 +23,8 @@ public:
 	Anchor(SelectionArray & sel);
 	virtual ~Anchor();
 	
+	void placeAt(const Vector3F & cen);
+	
 	void addPoint(unsigned vertexId);
 	
 	void setWeight(float wei);

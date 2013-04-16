@@ -3,6 +3,7 @@
 #include "MeshLaplacian.h"
 #include "ControlGraph.h"
 #include <Anchor.h>
+
 HarmonicCoord::HarmonicCoord() 
 {
 	m_constrainValues = 0;
@@ -18,9 +19,11 @@ void HarmonicCoord::setMesh(BaseMesh * mesh)
 	BaseField::setMesh(mesh);
 	
 	printf("init laplace deformer");
-	MeshLaplacian * msh = static_cast <MeshLaplacian *>(m_mesh);
-	m_topology = msh->connectivity();
-	initialCondition();
+}
+
+void HarmonicCoord::setTopology(VertexAdjacency * topo)
+{
+	m_topology = topo;
 }
 
 void HarmonicCoord::precompute(std::vector<Anchor *> & anchors)
@@ -119,6 +122,23 @@ char HarmonicCoord::solve(unsigned iset)
 void HarmonicCoord::setConstrain(unsigned idx, float val)
 {
 	m_constrainValues[idx] = val;
+}
+
+void HarmonicCoord::setSingularConstrain(unsigned ic)
+{
+	unsigned ianchor = 0;
+	unsigned i = 0;
+	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
+		float wei = 0.f;
+		if(ianchor == ic) wei = 1.f;
+		
+		unsigned idx;
+		for(Anchor::AnchorPoint * ap = (*it)->firstPoint(idx); (*it)->hasPoint(); ap = (*it)->nextPoint(idx)) {
+			m_constrainValues[i] = wei;
+			i++;
+		}
+		ianchor++;
+	}
 }
 
 void HarmonicCoord::checkConstrain(unsigned iset)
