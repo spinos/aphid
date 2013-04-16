@@ -6,7 +6,7 @@
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
-
+#include <iostream>
 #include "RadialBasisFunction.h"
 
 RadialBasisFunction::RadialBasisFunction() {m_tau = 1.f;}
