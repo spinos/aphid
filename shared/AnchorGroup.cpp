@@ -76,3 +76,9 @@ void AnchorGroup::setHitTolerance(float val)
 {
 	m_hitTolerance = val;
 }
+
+std::vector<Anchor *> & AnchorGroup::data()
+{
+	return m_anchors;
+}
+//:~

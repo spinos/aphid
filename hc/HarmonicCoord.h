@@ -22,6 +22,7 @@ public:
 	unsigned numAnchorPoints() const;
 	
 	void setConstrain(unsigned idx, float val);
+	void setSingularConstrain(unsigned ic);
 private:
 	void initialCondition();
 	void prestep();
