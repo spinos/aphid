@@ -28,6 +28,7 @@ Anchor::Anchor(SelectionArray & sel)
 	cen /= nv;
 	m_space.setIdentity();
 	m_space.setTranslation(cen);
+	m_space0 = m_space;
 	
 	Matrix44F invs = m_space;
 	invs.inverse();
@@ -76,6 +77,11 @@ void Anchor::addWeight(float delta)
 	}
 }
 
+unsigned Anchor::numPoints() const
+{
+	return (unsigned) m_anchorPoints.size();
+}
+
 Anchor::AnchorPoint * Anchor::firstPoint(unsigned &idx)
 {
 	m_anchorPointIt = m_anchorPoints.begin();
@@ -107,6 +113,11 @@ void Anchor::spaceMatrix(float m[16]) const
 Vector3F Anchor::getCenter() const
 {
 	return m_space.getTranslation();
+}
+
+Vector3F Anchor::displacement() const
+{
+	return m_space.getTranslation() - m_space0.getTranslation();
 }
 
 bool Anchor::intersect(const Ray &ray, float &t, float threshold) const

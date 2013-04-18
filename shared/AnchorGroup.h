@@ -24,6 +24,7 @@ public:
 	Anchor * nextAnchor();
 	bool hasAnchor();
 	void setHitTolerance(float val);
+	float getHitTolerance() const;
 	std::vector<Anchor *> & data();
 	bool activeAnchor(unsigned & idx) const;
 private:

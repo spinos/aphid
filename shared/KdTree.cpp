@@ -11,6 +11,7 @@
 #include "KdTree.h"
 #include <Ray.h>
 #include <RayIntersectionContext.h>
+#include <IntersectionContext.h>
 #include <QElapsedTimer>
 
 KdTree::KdTree() 
@@ -237,3 +238,71 @@ Primitive * KdTree::getPrim(unsigned idx)
 	return  prims.asPrimitive(*iprim);
 }
 
+char KdTree::closestPoint(const Vector3F & origin, IntersectionContext * ctx)
+{
+	KdTreeNode * root = getRoot();
+	ctx->setBBox(m_bbox);
+	return recusiveClosestPoint(root, origin, ctx);
+}
+
+char KdTree::recusiveClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx)
+{
+	int level = ctx->m_level;
+	level++;
+	if(node->isLeaf()) {
+		return leafClosestPoint(node, origin, ctx);
+	}
+	const int axis = node->getAxis();
+	const float splitPos = node->getSplitPos();
+	BoundingBox leftBox, rightBox;
+	BoundingBox bigBox = ctx->getBBox();
+	bigBox.split(axis, splitPos, leftBox, rightBox);
+	KdTreeNode *nearNode, *farNode;
+	BoundingBox nearBox, farBox;
+	nearNode = node->getLeft();
+	farNode = node->getRight();
+	nearBox = leftBox;
+	farBox = rightBox;
+	
+	char hit = 0;
+	if(nearBox.isPointAround(origin, ctx->m_minHitDistance)) {
+		ctx->setBBox(nearBox);
+		ctx->m_level = level;
+		hit = recusiveClosestPoint(nearNode, origin, ctx);
+	}
+
+	if(farBox.isPointAround(origin, ctx->m_minHitDistance)) {
+		ctx->setBBox(farBox);
+		ctx->m_level = level;
+		hit = recusiveClosestPoint(farNode, origin, ctx);
+		
+	}
+
+	return hit;
+}
+
+char KdTree::leafClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx)
+{
+	unsigned start = node->getPrimStart();
+	unsigned num = node->getNumPrims();
+	
+	IndexArray &indir = m_stream.indirection();
+	PrimitiveArray &prims = m_stream.primitives();
+	indir.setIndex(start);
+	char anyHit = 0;
+	for(unsigned i = 0; i < num; i++) {
+		unsigned *iprim = indir.asIndex();
+
+		Primitive * prim = prims.asPrimitive(*iprim);
+		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
+		unsigned iface = prim->getComponentIndex();
+		
+		if(mesh->closestPoint(iface, origin, ctx)) {
+			anyHit = 1;
+		}
+			
+		indir.next();
+	}
+	if(anyHit) {ctx->m_success = 1; ctx->m_cell = (char *)node;}
+	return anyHit;
+}

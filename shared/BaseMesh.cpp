@@ -258,4 +258,54 @@ void BaseMesh::getTriangle(unsigned idx, unsigned *vertexId) const
 	i++;
 	vertexId[2] = *i;
 }
+
+char BaseMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const
+{
+	Vector3F a = _vertices[_indices[idx * 3]];
+	Vector3F b = _vertices[_indices[idx * 3 + 1]];
+	Vector3F c = _vertices[_indices[idx * 3 + 2]];
+	Vector3F ab = b - a;
+	Vector3F ac = c - a;
+	Vector3F nor = ab.cross(ac);
+	nor.normalize();
+	
+	float t = (a.dot(nor) - origin.dot(nor)) * -1.f;
+	
+	Vector3F onplane = origin - nor * t;
+	
+	char hit = 0;
+	for(int i = 0 ; i < 3; i++) {
+		Vector3F v = _vertices[_indices[idx * 3 + i]];
+		Vector3F dp = v - origin;
+		float da = dp.length();
+		if(da < ctx->m_minHitDistance) {
+			ctx->m_minHitDistance = da;
+			if(ctx->getComponentFilterType() == PrimitiveFilter::TFace)
+				ctx->m_componentIdx = idx;
+			else
+				ctx->m_componentIdx = _indices[idx * 3 + i];
+			ctx->m_hitP = v;
+			hit = 1;
+		}
+	}
+	
+	return hit;
+}
+
+char BaseMesh::insideTriangle(const Vector3F & p, const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n) const
+{
+	Vector3F e01 = b - a;
+	Vector3F x0 = p - a;
+	if(e01.cross(x0).dot(n) < 0.f) return 0;
+	
+	Vector3F e12 = c - b;
+	Vector3F x1 = p - b;
+	if(e12.cross(x1).dot(n) < 0.f) return 0;
+	
+	Vector3F e20 = a - c;
+	Vector3F x2 = p - c;
+	if(e20.cross(x2).dot(n) < 0.f) return 0;
+	
+	return 1;
+}
 //:~

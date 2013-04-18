@@ -467,7 +467,7 @@ void BaseDrawer::setWired(char var)
 	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void BaseDrawer::anchor(Anchor *a)
+void BaseDrawer::anchor(Anchor *a, float size)
 {
 	glPushMatrix();
 	float m[16];
@@ -475,7 +475,7 @@ void BaseDrawer::anchor(Anchor *a)
     a->spaceMatrix(m);
     
     glMultMatrixf((const GLfloat*)m);
-	sphere(0.2f);
+	sphere(size);
 
 	unsigned nouse;
 	for(Anchor::AnchorPoint * ap = a->firstPoint(nouse); a->hasPoint(); ap = a->nextPoint(nouse)) {

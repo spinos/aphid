@@ -170,3 +170,11 @@ char BoundingBox::isPointInside(const Vector3F & p) const
 	if(p.z < getMin(2) || p.z > getMax(2)) return 0;
 	return 1;
 }
+
+char BoundingBox::isPointAround(const Vector3F & p, float threshold) const
+{
+	if(p.x + threshold < getMin(0) || p.x - threshold > getMax(0)) return 0;
+	if(p.y + threshold < getMin(1) || p.y - threshold > getMax(1)) return 0;
+	if(p.z + threshold < getMin(2) || p.z - threshold > getMax(2)) return 0;
+	return 1;
+}

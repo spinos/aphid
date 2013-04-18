@@ -38,11 +38,20 @@ GeodesicSphereMesh::GeodesicSphereMesh(unsigned level)
 	subdivide(level, currentver, currentidx, p, idx, f, d, c, b);
 	subdivide(level, currentver, currentidx, p, idx, f, b, e, d);
 
-    for(unsigned i = 0; i < nv; i++)
-		p[i].normalize();
+    setRadius(1.f);
 }
 
 GeodesicSphereMesh::~GeodesicSphereMesh() {}
+
+void GeodesicSphereMesh::setRadius(float r)
+{
+	const unsigned nv = getNumVertices();
+	Vector3F * p = vertices();
+	for(unsigned i = 0; i < nv; i++) {
+		p[i].normalize();
+		p[i] *= r;
+	}
+}
 
 void GeodesicSphereMesh::subdivide(unsigned level, unsigned & currentVertex, unsigned & currentIndex, Vector3F * p, unsigned * idx, Vector3F a, Vector3F b, Vector3F c, Vector3F d)
 {
