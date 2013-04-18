@@ -81,19 +81,19 @@ void GeodesicSphereMesh::subdivide(unsigned level, unsigned & currentVertex, uns
             idx[currentIndex] = j * (level + 1) + i + offset;           
             currentIndex++;
             
-            idx[currentIndex] = (j + 1) * (level + 1) + (i + 1) + offset;           
-            currentIndex++;
-            
             idx[currentIndex] = (j + 1) * (level + 1) + i + offset;           
+            currentIndex++;
+			
+			idx[currentIndex] = (j + 1) * (level + 1) + (i + 1) + offset;           
             currentIndex++;
             
             idx[currentIndex] = j * (level + 1) + i + offset;           
             currentIndex++;
             
-            idx[currentIndex] = j * (level + 1) + i + 1 + offset;           
-            currentIndex++;
-            
             idx[currentIndex] = (j + 1) * (level + 1) + (i + 1) + offset;           
+            currentIndex++;
+			
+			idx[currentIndex] = j * (level + 1) + i + 1 + offset;           
             currentIndex++;
         }
     }

@@ -274,13 +274,25 @@ char BaseMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionC
 	Vector3F onplane = origin - nor * t;
 	
 	char hit = 0;
+
+	if(insideTriangle(onplane, a, b, c, nor)) {
+		if(t < 0.f) t = -t;
+		if(t < ctx->m_minHitDistance) {
+			ctx->m_minHitDistance = t;
+			ctx->m_componentIdx = idx;
+			ctx->m_hitP = onplane;
+			hit = 1;
+		}
+		return hit;
+	}
+
 	for(int i = 0 ; i < 3; i++) {
 		Vector3F v = _vertices[_indices[idx * 3 + i]];
 		Vector3F dp = v - origin;
 		float da = dp.length();
 		if(da < ctx->m_minHitDistance) {
 			ctx->m_minHitDistance = da;
-			if(ctx->getComponentFilterType() == PrimitiveFilter::TFace)
+			if(ctx->getComponentFilterType() == PrimitiveFilter::TFace) 
 				ctx->m_componentIdx = idx;
 			else
 				ctx->m_componentIdx = _indices[idx * 3 + i];
