@@ -247,6 +247,7 @@ char KdTree::closestPoint(const Vector3F & origin, IntersectionContext * ctx)
 
 char KdTree::recusiveClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx)
 {
+	//printf("%i ", ctx->m_level);
 	int level = ctx->m_level;
 	level++;
 	if(node->isLeaf()) {
@@ -254,15 +255,26 @@ char KdTree::recusiveClosestPoint(KdTreeNode *node, const Vector3F &origin, Inte
 	}
 	const int axis = node->getAxis();
 	const float splitPos = node->getSplitPos();
+	const float ori = origin.comp(axis);
+	char belowPlane = ori < splitPos;
+	
 	BoundingBox leftBox, rightBox;
 	BoundingBox bigBox = ctx->getBBox();
 	bigBox.split(axis, splitPos, leftBox, rightBox);
 	KdTreeNode *nearNode, *farNode;
 	BoundingBox nearBox, farBox;
-	nearNode = node->getLeft();
-	farNode = node->getRight();
-	nearBox = leftBox;
-	farBox = rightBox;
+	if(belowPlane) {
+		nearNode = node->getLeft();
+		farNode = node->getRight();
+		nearBox = leftBox;
+		farBox = rightBox;
+	}
+	else {
+		farNode = node->getLeft();
+		nearNode = node->getRight();
+		farBox = leftBox;
+		nearBox = rightBox;
+	}
 	
 	char hit = 0;
 	if(nearBox.isPointAround(origin, ctx->m_minHitDistance)) {
