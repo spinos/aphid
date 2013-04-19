@@ -125,6 +125,15 @@ void GLWidget::clientDraw()
 	ap = m_intersectCtx->m_hitP;
 	m_drawer->solidCube(ap.x, ap.y, ap.z, .2f);
 	
+	glBegin(GL_LINES);
+	glVertex3f(ap.x, ap.y, ap.z);
+	ap = m_anchor->getCenter();
+	glVertex3f(ap.x, ap.y, ap.z);
+	glVertex3f(ap.x, ap.y, ap.z);
+	ap = m_intersectCtx->m_closest;
+	glVertex3f(ap.x, ap.y, ap.z);
+	glEnd();
+	
 }
 //! [7]
 

@@ -7,7 +7,7 @@
  *
  */
 #include <iostream>
-
+#include <BarycentricCoordinate.h>
 #include "BaseMesh.h"
 
 BaseMesh::BaseMesh() : _vertices(0), _indices(0) 
@@ -264,43 +264,29 @@ char BaseMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionC
 	Vector3F a = _vertices[_indices[idx * 3]];
 	Vector3F b = _vertices[_indices[idx * 3 + 1]];
 	Vector3F c = _vertices[_indices[idx * 3 + 2]];
-	Vector3F ab = b - a;
-	Vector3F ac = c - a;
-	Vector3F nor = ab.cross(ac);
-	nor.normalize();
 	
-	float t = (a.dot(nor) - origin.dot(nor)) * -1.f;
-	
-	Vector3F onplane = origin - nor * t;
+	BarycentricCoordinate bar;
+	bar.create(a, b, c);
+	bar.compute(origin);
+	if(!bar.insideTriangle()) {
+		bar.computeClosest();
+	}
 	
 	char hit = 0;
+	Vector3F clampledP = bar.getClosest();
+	float d = (clampledP - origin).length();
 
-	if(insideTriangle(onplane, a, b, c, nor)) {
-		if(t < 0.f) t = -t;
-		if(t < ctx->m_minHitDistance) {
-			ctx->m_minHitDistance = t;
-			ctx->m_componentIdx = idx;
-			ctx->m_hitP = onplane;
-			hit = 1;
-		}
-		return hit;
+	if(d < ctx->m_minHitDistance) {
+		ctx->m_minHitDistance = d;
+		ctx->m_componentIdx = idx;
+		ctx->m_coord[0] = bar.getV(0);
+		ctx->m_coord[1] = bar.getV(1);
+		ctx->m_coord[2] = bar.getV(2);
+		ctx->m_closest = clampledP;
+		
+		ctx->m_hitP = clampledP;
+		hit = 1;
 	}
-
-	for(int i = 0 ; i < 3; i++) {
-		Vector3F v = _vertices[_indices[idx * 3 + i]];
-		Vector3F dp = v - origin;
-		float da = dp.length();
-		if(da < ctx->m_minHitDistance) {
-			ctx->m_minHitDistance = da;
-			if(ctx->getComponentFilterType() == PrimitiveFilter::TFace) 
-				ctx->m_componentIdx = idx;
-			else
-				ctx->m_componentIdx = _indices[idx * 3 + i];
-			ctx->m_hitP = v;
-			hit = 1;
-		}
-	}
-	
 	return hit;
 }
 
@@ -319,5 +305,28 @@ char BaseMesh::insideTriangle(const Vector3F & p, const Vector3F & a, const Vect
 	if(e20.cross(x2).dot(n) < 0.f) return 0;
 	
 	return 1;
+}
+
+void BaseMesh::computeBarycentricCoord(const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n, const Vector3F & p, float *dst) const
+{
+	Vector3F ba = b - a;
+	Vector3F ca = c - a;
+	float areaABC = n.dot(ba.cross(ca));
+	
+	Vector3F bp = b - p;
+	Vector3F cp = c - p;
+	Vector3F ap = a - p;
+	
+	float areaPBC = n.dot(bp.cross(cp));
+	
+	dst[0] = areaPBC / areaABC;
+
+	float areaPCA = n.dot(cp.cross(ap));
+	
+	dst[1] = areaPCA / areaABC;
+	
+	float areaPAB = n.dot(ap.cross(bp));
+	
+	dst[2] = areaPAB / areaABC;
 }
 //:~

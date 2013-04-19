@@ -50,5 +50,6 @@ public:
 	unsigned _numVertices;
 	unsigned _numFaces;
 	unsigned _numFaceVertices;
-
+	
+	void computeBarycentricCoord(const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n, const Vector3F & p, float *dst) const;
 };

@@ -14,5 +14,10 @@
 #include <Matrix44F.h>
 #include <Ray.h>
 
+inline void Clamp01(float &v) {
+	if(v < 0.f) v = 0.f;
+	if(v > 1.f) v = 1.f;
+}
+
 #endif        //  #ifndef ALLMATH_H
 

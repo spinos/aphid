@@ -25,12 +25,13 @@ public:
 	void verbose() const;
 
 	BoundingBox m_bbox;
-	Vector3F m_hitP, m_hitN;
+	Vector3F m_hitP, m_hitN, m_closest;
 	float m_minHitDistance;
 	int m_level;
 	Geometry * m_geometry;
 	unsigned m_componentIdx;
 	char m_success;
 	char * m_cell;
+	float m_coord[3];
 private:
 };
