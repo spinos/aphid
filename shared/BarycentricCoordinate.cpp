@@ -30,16 +30,21 @@ void BarycentricCoordinate::create(const Vector3F& a, const Vector3F& b, const V
 	m_area = m_n.dot(ba.cross(ca));
 }
 
-void BarycentricCoordinate::compute(const Vector3F & p)
+float BarycentricCoordinate::project(const Vector3F & pos)
 {
-	Vector3F pa = p - getP(0);
+	Vector3F pa = pos - getP(0);
 	
-	Vector3F projp = p - m_n * pa.dot(m_n);
-	m_onplane = projp;
+	float t = pa.dot(m_n);
+	m_onplane = pos - m_n * t;
 	
-	Vector3F bp = m_p[1] - projp;
-	Vector3F cp = m_p[2] - projp;
-	Vector3F ap = m_p[0] - projp;
+	return t;
+}
+
+void BarycentricCoordinate::compute()
+{
+	Vector3F bp = m_p[1] - m_onplane;
+	Vector3F cp = m_p[2] - m_onplane;
+	Vector3F ap = m_p[0] - m_onplane;
 	
 	float areaPBC = m_n.dot(bp.cross(cp));
 	
@@ -86,23 +91,27 @@ void BarycentricCoordinate::computeClosest()
 	float dc = pc.dot(nc);
 	onEdge[2] = m_onplane - nc * dc;
 	
+	float lpa = pa.length();
+	float lpb = pb.length();
+	float lpc = pc.length();
+	
 	float mindist = 10e6;
-	if(pa.length() < mindist) {
-		mindist = pa.length();
+	if(lpa < mindist) {
+		mindist = lpa;
 		m_closest = getP(0);
 		m_v[0] = 1.f;
 		m_v[1] = 0.f;
 		m_v[2] = 0.f;
 	}
-	if(pb.length() < mindist) {
-		mindist = pb.length();
+	if(lpb < mindist) {
+		mindist = lpb;
 		m_closest = getP(1);
 		m_v[0] = 0.f;
 		m_v[1] = 1.f;
 		m_v[2] = 0.f;
 	}
-	if(pc.length() < mindist) {
-		mindist = pc.length();
+	if(lpc < mindist) {
+		mindist = lpc;
 		m_closest = getP(2);
 		m_v[0] = 0.f;
 		m_v[1] = 0.f;

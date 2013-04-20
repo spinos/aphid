@@ -14,7 +14,8 @@ class BarycentricCoordinate {
 public:
 	BarycentricCoordinate();
 	void create(const Vector3F& p0, const Vector3F& p1, const Vector3F& p2);
-	void compute(const Vector3F & pos);
+	float project(const Vector3F & pos);
+	void compute();
 	void computeClosest();
 	const float * getValue() const;
 	

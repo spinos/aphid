@@ -267,14 +267,16 @@ char BaseMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionC
 	
 	BarycentricCoordinate bar;
 	bar.create(a, b, c);
-	bar.compute(origin);
+	float d = bar.project(origin);
+	if(d >= ctx->m_minHitDistance) return 0;
+	bar.compute();
 	if(!bar.insideTriangle()) {
 		bar.computeClosest();
 	}
 	
 	char hit = 0;
 	Vector3F clampledP = bar.getClosest();
-	float d = (clampledP - origin).length();
+	d = (clampledP - origin).length();
 
 	if(d < ctx->m_minHitDistance) {
 		ctx->m_minHitDistance = d;
