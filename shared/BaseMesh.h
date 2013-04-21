@@ -10,8 +10,8 @@
 #pragma once
 #include <AllMath.h>
 #include <Geometry.h>
-#include <RayIntersectionContext.h>
 #include <IntersectionContext.h>
+
 class BaseMesh : public Geometry {
 public:
 	BaseMesh();
@@ -21,6 +21,8 @@ public:
 	
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
+	void createEdgeIndices(unsigned num);
+	
 	const BoundingBox calculateBBox() const;
 	const BoundingBox calculateBBox(const unsigned &idx) const;
 	const int faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const;
@@ -41,15 +43,15 @@ public:
 	unsigned * getIndices() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	
-	char intersect(unsigned idx, const Ray & ray, RayIntersectionContext * ctx) const;
-	char intersect(const Ray & ray, RayIntersectionContext * ctx) const;
+	char intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const;
+	char intersect(const Ray & ray, IntersectionContext * ctx) const;
 	char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
 	char insideTriangle(const Vector3F & p, const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n) const;
 	Vector3F * _vertices;
 	unsigned * _indices;
+	unsigned * m_edgeIndices;
 	unsigned _numVertices;
 	unsigned _numFaces;
 	unsigned _numFaceVertices;
-	
-	void computeBarycentricCoord(const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n, const Vector3F & p, float *dst) const;
+	unsigned m_numEdgeVertices;
 };

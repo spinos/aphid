@@ -39,33 +39,65 @@
 **
 ****************************************************************************/
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef TARGETVIEW_H
+#define TARGETVIEW_H
 
-#include <QMainWindow>
+#include <QGLWidget>
+#include <Base3DView.h>
+#include <IntersectionContext.h>
+class MeshLaplacian;
+class KdTreeDrawer;
+class KdTree;
+class HarmonicCoord;
+class SelectionArray;
+class AnchorGroup;
+class Ray;
+class MembraneDeformer;
 
-QT_BEGIN_NAMESPACE
-class QSlider;
-QT_END_NAMESPACE
 //! [0]
-class GLWidget;
-class TargetView;
-
-class Window : public QMainWindow
+class TargetView : public Base3DView
 {
     Q_OBJECT
 
 public:
-    Window();
+    enum InteractMode {
+        SelectCompnent,
+        TransformAnchor
+    };
+    TargetView(QWidget *parent = 0);
+    ~TargetView();
 
+	virtual void clientDraw();
+    virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
+    virtual void clientDeselect();
+    virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
+	
+	void anchorSelected(float wei);
+	void startDeform();
+	bool pickupComponent(const Ray & ray, Vector3F & hit);
+	
+	AnchorGroup * getAnchors() const;
+	KdTree * getTree() const;
+
+//! [2]
 protected:
-    void keyPressEvent(QKeyEvent *event);
-
+    
+//! [3]
 private:
+    MeshLaplacian * m_mesh;
+    KdTreeDrawer * m_drawer;
+	KdTree * m_tree;
+	SelectionArray * m_selected;
+	InteractMode m_mode;
+	AnchorGroup * m_anchors;
+	IntersectionContext * m_intersectCtx;
+	MembraneDeformer * m_deformer;
+private slots:
+    void simulate();
+	
+public slots:
 
-    GLWidget *glWidget;
-	TargetView * targetWidget;
 };
-//! [0]
+//! [3]
 
 #endif

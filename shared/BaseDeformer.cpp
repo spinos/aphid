@@ -36,3 +36,11 @@ Vector3F BaseDeformer::restP(unsigned idx) const
 {
 	return m_mesh->getVertices()[idx];
 }
+
+void BaseDeformer::updateMesh() const
+{
+	Vector3F *v = m_mesh->vertices();
+	for(int i = 0; i < (int)m_numVertices; i++) {
+		v[i] = m_deformedV[i];
+	}
+}

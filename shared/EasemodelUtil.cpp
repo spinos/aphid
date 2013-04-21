@@ -22,6 +22,12 @@ void copy(EasyModel * esm, BaseMesh * dst)
     unsigned i, j;
     for(i = 0; i < nf; i++)
         dst->_numFaces += faceCount[i] - 2;
+		
+	unsigned ne = 0;
+	for(i = 0; i < nf; i++)
+		ne += faceCount[i];
+		
+	dst->createEdgeIndices(ne * 2);
     
     dst->_numFaceVertices = dst->_numFaces * 3;
     
@@ -38,6 +44,17 @@ void copy(EasyModel * esm, BaseMesh * dst)
         }
         curFace += faceCount[i];
     }
+	
+	unsigned ie = 0;
+	curFace = 0;
+	for(i = 0; i < nf; i++) {
+		for(j = 0; j < faceCount[i] - 1; j++) {
+			dst->m_edgeIndices[ie] = faceConnection[curFace + j];
+			dst->m_edgeIndices[ie + 1] = faceConnection[curFace + j + 1];
+			ie += 2;
+		}
+		curFace += faceCount[i];
+	}
     
     float* cvs = esm->getVertexPosition();
     dst->_numVertices = esm->getNumVertex();

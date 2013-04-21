@@ -40,10 +40,12 @@ public:
 	bool intersect(const Ray &ray, float &t, float threshold) const;
 	
 	virtual void translate(Vector3F & dis);
+	AnchorPoint *getPoint(unsigned idx) const;
 	
 private:
 	std::map<unsigned, AnchorPoint *> m_anchorPoints;
 	std::map<unsigned, AnchorPoint *>::iterator m_anchorPointIt;
+	std::vector<AnchorPoint *> m_points;
 	Matrix44F m_space;
 	Matrix44F m_space0;
 };

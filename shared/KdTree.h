@@ -14,7 +14,7 @@
 #include <Primitive.h>
 #include <BuildKdTreeStream.h>
 #include <KdTreeBuilder.h>
-class RayIntersectionContext;
+
 class IntersectionContext;
 typedef Primitive * primitivePtr;
 	
@@ -25,11 +25,11 @@ public:
 	~KdTree();
 	
 	KdTreeNode* getRoot() const;
-	
+	void cleanup();
 	void addMesh(BaseMesh* mesh);
 	void create();
 	
-	char intersect(const Ray &ray, RayIntersectionContext * ctx);
+	char intersect(const Ray &ray, IntersectionContext * ctx);
 	char closestPoint(const Vector3F & origin, IntersectionContext * ctx);
 
 	BoundingBox m_bbox;
@@ -38,10 +38,11 @@ public:
 	
 private:
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
-	char recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext * ctx);
-	char leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext * ctx);
+	char recusiveIntersect(KdTreeNode *node, const Ray &ray, IntersectionContext * ctx);
+	char leafIntersect(KdTreeNode *node, const Ray &ray, IntersectionContext * ctx);
 	char recusiveClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx);
 	char leafClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx);
+	
 	BuildKdTreeStream m_stream;
 	KdTreeNode *m_root;
 };

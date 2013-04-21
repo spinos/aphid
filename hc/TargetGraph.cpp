@@ -70,7 +70,8 @@ void TargetGraph::computeWeight(unsigned faceIdx, const Vector3F & pos)
 {
 	m_handlePos = pos;
 	BarycentricCoordinate &co = m_baryc[faceIdx];
-	co.compute(pos);
+	co.project(pos);
+	co.compute();
 	unsigned * in = indices();
 	unsigned a, b, c;
 	

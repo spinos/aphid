@@ -15,6 +15,8 @@
 #include <SelectionArray.h>
 #include <Anchor.h>
 #include <GeodesicSphereMesh.h>
+#include <BaseCurve.h>
+
 class BaseDrawer {
 public:
 	BaseDrawer ();
@@ -34,6 +36,7 @@ public:
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
+	void edge(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void field(const BaseField * f);
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void box(const BoundingBox & b);
@@ -45,6 +48,7 @@ public:
 	void setWired(char var);
 	void anchor(Anchor *a, float size=1.f);
 	void sphere(float size = 1.f);
+	void linearCurve(const BaseCurve & curve);
 	
 private:
     char m_wired;

@@ -23,6 +23,7 @@ Anchor::Anchor(SelectionArray & sel)
 		a->worldP = *v;
 		a->w = 1.f;
 		m_anchorPoints[sel.getVertexId(i)] = a;
+		m_points.push_back(a);
 		cen += *v;
 	}
 	cen /= nv;
@@ -51,6 +52,10 @@ void Anchor::placeAt(const Vector3F & cen)
 {
 	m_space.setIdentity();
 	m_space.setTranslation(cen);
+	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
+		Vector3F & pos = ((*m_anchorPointIt).second)->p;
+		((*m_anchorPointIt).second)->worldP = m_space.transform(pos);
+	}
 }
 
 void Anchor::addPoint(unsigned vertexId)
@@ -139,3 +144,7 @@ void Anchor::translate(Vector3F & dis)
 	}
 }
 
+Anchor::AnchorPoint * Anchor::getPoint(unsigned idx) const
+{
+	return m_points[idx];
+}

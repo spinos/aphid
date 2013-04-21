@@ -30,7 +30,6 @@ public:
 	int m_level;
 	Geometry * m_geometry;
 	unsigned m_componentIdx;
-	//Primitive * m_primitive;
 	char m_success;
 	char * m_cell;
 private:

@@ -33,6 +33,12 @@ void BaseMesh::createIndices(unsigned num)
 	_numFaceVertices = num;
 }
 
+void BaseMesh::createEdgeIndices(unsigned num)
+{
+	m_edgeIndices = new unsigned[num];
+	m_numEdgeVertices = num;
+}
+
 const BoundingBox BaseMesh::calculateBBox() const
 {
 	BoundingBox box;
@@ -173,7 +179,7 @@ Matrix33F BaseMesh::getTangentFrame(const unsigned& idx) const
 	return Matrix33F();
 }
 
-char BaseMesh::intersect(unsigned idx, const Ray & ray, RayIntersectionContext * ctx) const
+char BaseMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const
 {
 	Vector3F a = _vertices[_indices[idx * 3]];
 	Vector3F b = _vertices[_indices[idx * 3 + 1]];
@@ -239,7 +245,7 @@ char BaseMesh::intersect(unsigned idx, const Ray & ray, RayIntersectionContext *
 	return 1;
 }
 
-char BaseMesh::intersect(const Ray & ray, RayIntersectionContext * ctx) const
+char BaseMesh::intersect(const Ray & ray, IntersectionContext * ctx) const
 {
 	unsigned nf = getNumFaces();
 	for(unsigned i = 0; i < nf; i++) {
@@ -307,28 +313,5 @@ char BaseMesh::insideTriangle(const Vector3F & p, const Vector3F & a, const Vect
 	if(e20.cross(x2).dot(n) < 0.f) return 0;
 	
 	return 1;
-}
-
-void BaseMesh::computeBarycentricCoord(const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n, const Vector3F & p, float *dst) const
-{
-	Vector3F ba = b - a;
-	Vector3F ca = c - a;
-	float areaABC = n.dot(ba.cross(ca));
-	
-	Vector3F bp = b - p;
-	Vector3F cp = c - p;
-	Vector3F ap = a - p;
-	
-	float areaPBC = n.dot(bp.cross(cp));
-	
-	dst[0] = areaPBC / areaABC;
-
-	float areaPCA = n.dot(cp.cross(ap));
-	
-	dst[1] = areaPCA / areaABC;
-	
-	float areaPAB = n.dot(ap.cross(bp));
-	
-	dst[2] = areaPAB / areaABC;
 }
 //:~

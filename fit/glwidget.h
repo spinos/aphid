@@ -44,7 +44,7 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
-#include <RayIntersectionContext.h>
+#include <IntersectionContext.h>
 class MeshLaplacian;
 class KdTreeDrawer;
 class KdTree;
@@ -52,7 +52,7 @@ class HarmonicCoord;
 class SelectionArray;
 class AnchorGroup;
 class Ray;
-class MembraneDeformer;
+class FitDeformer;
 
 //! [0]
 class GLWidget : public Base3DView
@@ -75,6 +75,9 @@ public:
 	void anchorSelected(float wei);
 	void startDeform();
 	bool pickupComponent(const Ray & ray, Vector3F & hit);
+	
+	void setTarget(AnchorGroup * src, KdTree * tree);
+	void fit();
 
 //! [2]
 protected:
@@ -82,15 +85,14 @@ protected:
 //! [3]
 private:
     MeshLaplacian * m_mesh;
-	MeshLaplacian * m_mesh1;
-	MeshLaplacian * m_mesh2;
     KdTreeDrawer * m_drawer;
 	KdTree * m_tree;
 	SelectionArray * m_selected;
 	InteractMode m_mode;
 	AnchorGroup * m_anchors;
-	RayIntersectionContext * m_intersectCtx;
-	MembraneDeformer * m_deformer;
+	IntersectionContext * m_intersectCtx;
+	FitDeformer * m_deformer;
+	AnchorGroup * m_targetAnchors;
 private slots:
     void simulate();
 	

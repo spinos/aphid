@@ -42,17 +42,25 @@
 #include <QtGui>
 
 #include "glwidget.h"
+#include "TargetView.h"
 #include "window.h"
 
 //! [0]
 Window::Window()
 {
     glWidget = new GLWidget;
+	targetWidget = new TargetView;
 	
-	setCentralWidget(glWidget);
+	QHBoxLayout *mainLayout = new QHBoxLayout;
+    mainLayout->addWidget(glWidget);
+    mainLayout->addWidget(targetWidget);
+
+	QWidget *mainWidget = new QWidget;
+	mainWidget->setLayout(mainLayout);
+	setCentralWidget(mainWidget);
     setWindowTitle(tr("Matching Shape"));
 	
-	//connect(m_control, SIGNAL(handleChanged(unsigned)), glWidget, SLOT(onHandleChanged(unsigned)));
+	glWidget->setTarget(targetWidget->getAnchors(), targetWidget->getTree());//connect(m_control, SIGNAL(handleChanged(unsigned)), glWidget, SLOT(onHandleChanged(unsigned)));
 }
 //! [1]
 
@@ -61,17 +69,21 @@ void Window::keyPressEvent(QKeyEvent *e)
 	if (e->key() == Qt::Key_Escape)
         close();
 	else if(e->key() == Qt::Key_A) {
-		qDebug() << "anchor selected as one";
+		qDebug() << "source anchor selected as one";
 		glWidget->anchorSelected(1.f);
 	}
+	else if(e->key() == Qt::Key_S) {
+		qDebug() << "target anchor selected as one";
+		targetWidget->anchorSelected(1.f);
+	}
 	else if(e->key() == Qt::Key_D) {
-		qDebug() << "calculate coordinate";
+		qDebug() << "deform";
 		glWidget->startDeform();
 	}
-    /*
-	else if(e->key() == Qt::Key_R) {
-		qDebug() << "rotate mode";
-		glWidget->getSolver()->setInteractMode(DynamicsSolver::RotateJoint);
-	}*/
+	else if(e->key() == Qt::Key_F) {
+		qDebug() << "fit to target";
+		glWidget->fit();
+	}
+    
 	QWidget::keyPressEvent(e);
 }

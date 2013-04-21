@@ -44,7 +44,7 @@
 
 #include <math.h>
 
-#include "glwidget.h"
+#include "TargetView.h"
 
 #include "MeshLaplacian.h"
 #include "KdTreeDrawer.h"
@@ -53,21 +53,21 @@
 #include <SelectionArray.h>
 #include <EasemodelUtil.h>
 #include <AnchorGroup.h>
-#include "FitDeformer.h"
+#include "MembraneDeformer.h"
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 	
 //! [0]
-GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
+TargetView::TargetView(QWidget *parent) : Base3DView(parent)
 {
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(30);
 	
 #ifdef WIN32
-	EasyModel * eye = new EasyModel("D:/aphid/mdl/flat.m");
+	EasyModel * eye = new EasyModel("D:/aphid/mdl/ball.m");
 #else
-	EasyModel * eye = new EasyModel("/Users/jianzhang/aphid/mdl/flat.m");
+	EasyModel * eye = new EasyModel("/Users/jianzhang/aphid/mdl/ball.m");
 #endif
 	m_mesh = new MeshLaplacian;
 	
@@ -75,6 +75,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	delete eye;
 	
+	m_mesh->buildTopology();
+
 	m_drawer = new KdTreeDrawer;
 	
 	m_tree = new KdTree;
@@ -91,26 +93,30 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_anchors = new AnchorGroup;
 	m_anchors->setHitTolerance(.8f);
 	
-	m_deformer = new FitDeformer;
+	m_deformer = new MembraneDeformer;
 	m_deformer->setMesh(m_mesh);
 	m_deformer->setAnchors(m_anchors);
 }
 //! [0]
 
 //! [1]
-GLWidget::~GLWidget()
+TargetView::~TargetView()
 {
 }
 
-void GLWidget::clientDraw()
+void TargetView::clientDraw()
 {
-	m_drawer->setWired(1);
-	m_drawer->setGrey(0.9f);
-	m_drawer->edge(m_mesh);
-	
+	if(m_mode != TransformAnchor) {
+		m_drawer->setWired(1);
+		m_drawer->setGrey(0.9f);
+		m_drawer->edge(m_mesh);
+	}
+    else {
+		m_drawer->setWired(1);
+		m_drawer->setGrey(0.6f);
+		m_drawer->drawMesh(m_mesh, m_deformer);
+	}	
 	m_drawer->setGrey(0.5f);
-	//m_drawer->drawKdTree(m_tree);
-	//m_drawer->setWired(0);
 	m_drawer->setColor(0.f, 1.f, 0.4f);
 	m_drawer->components(m_selected);
 	if(m_anchors->numAnchors() > 0) {
@@ -121,7 +127,7 @@ void GLWidget::clientDraw()
 //! [7]
 
 //! [9]
-void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
+void TargetView::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
 {
 	rayo = origin;
 	raye = origin + displacement;
@@ -137,13 +143,13 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 }
 //! [9]
 
-void GLWidget::clientDeselect()
+void TargetView::clientDeselect()
 {
 
 }
 
 //! [10]
-void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
+void TargetView::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
 {
 	rayo = origin;
 	raye = origin + displacement;
@@ -159,12 +165,12 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 }
 //! [10]
 
-void GLWidget::simulate()
+void TargetView::simulate()
 {
     update();
 }
 
-void GLWidget::anchorSelected(float wei)
+void TargetView::anchorSelected(float wei)
 {
 	if(m_selected->numVertices() < 1) return;
 	Anchor *a = new Anchor(*m_selected);
@@ -173,36 +179,16 @@ void GLWidget::anchorSelected(float wei)
 	m_selected->reset();
 }
 
-void GLWidget::startDeform()
+void TargetView::startDeform()
 {
 	if(m_anchors->numAnchors() < 1) return;
 	
-	if(m_targetAnchors) {
-		std::vector<Vector3F> ps; 
-		for(Anchor *a = m_targetAnchors->firstAnchor(); m_targetAnchors->hasAnchor(); a = m_targetAnchors->nextAnchor())
-			ps.push_back(a->getCenter());
-		
-		unsigned i = 0;
-		for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor()) {
-			if(i < ps.size()) {
-				a->placeAt(ps[i]);
-			}
-			i++;
-		}
-			
-	}
-	
-	m_deformer->precompute();	
+	m_deformer->precompute();
 	m_deformer->solve();
-	m_deformer->updateMesh();
-	
-	delete m_tree;
-	m_tree = new KdTree;
-	m_tree->addMesh(m_mesh);
-	m_tree->create();
+	m_mode = TransformAnchor;
 }
 
-bool GLWidget::pickupComponent(const Ray & ray, Vector3F & hit)
+bool TargetView::pickupComponent(const Ray & ray, Vector3F & hit)
 {
 	m_intersectCtx->reset();
 	if(m_tree->intersect(ray, m_intersectCtx)) {
@@ -213,14 +199,13 @@ bool GLWidget::pickupComponent(const Ray & ray, Vector3F & hit)
 	return false;
 }
 
-void GLWidget::setTarget(AnchorGroup * src, KdTree * tree)
+AnchorGroup * TargetView::getAnchors() const
 {
-	m_targetAnchors = src;
-	m_deformer->setTarget(tree);
+	return m_anchors;
 }
 
-void GLWidget::fit()
+KdTree * TargetView::getTree() const
 {
-	m_deformer->fit();
-	m_deformer->updateMesh();
+	return m_tree;
 }
+//:~

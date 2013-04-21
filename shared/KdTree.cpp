@@ -10,18 +10,17 @@
 #include <APhid.h>
 #include "KdTree.h"
 #include <Ray.h>
-#include <RayIntersectionContext.h>
 #include <IntersectionContext.h>
 #include <QElapsedTimer>
 
 KdTree::KdTree() 
 {
-	m_root = new KdTreeNode;
+	m_root = 0;
 }
 
 KdTree::~KdTree() 
 {
-	delete m_root;
+	cleanup();
 }
 
 KdTreeNode* KdTree::getRoot() const
@@ -41,6 +40,7 @@ void KdTree::addMesh(BaseMesh* mesh)
 
 void KdTree::create()
 {	
+	m_root = new KdTreeNode;
     printf("input primitive count %d\n", m_stream.getNumPrimitives());
 	printf("tree bbox: %f %f %f - %f %f %f\n", m_bbox.getMin(0), m_bbox.getMin(1), m_bbox.getMin(2), m_bbox.getMax(0), m_bbox.getMax(1), m_bbox.getMax(2));
 	
@@ -56,6 +56,12 @@ void KdTree::create()
 	
 	m_stream.verbose();
 	std::cout << "kd tree finished after " << timer.elapsed() << "ms\n";
+}
+
+void KdTree::cleanup()
+{
+	if(m_root) delete m_root;
+	m_stream.cleanup();
 }
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
@@ -115,7 +121,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	delete rightCtx;
 }
 
-char KdTree::intersect(const Ray &ray, RayIntersectionContext * ctx)
+char KdTree::intersect(const Ray &ray, IntersectionContext * ctx)
 {
 	float hitt0, hitt1;
 	if(!m_bbox.intersect(ray, &hitt0, &hitt1)) return 0;
@@ -126,7 +132,7 @@ char KdTree::intersect(const Ray &ray, RayIntersectionContext * ctx)
 	return recusiveIntersect(root, ray, ctx);
 }
 
-char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext * ctx)
+char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, IntersectionContext * ctx)
 {
 	//printf("recus intersect level %i\n", ctx.m_level);
 	if(node->isLeaf()) {
@@ -197,7 +203,7 @@ char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersection
 	return 0;
 }
 
-char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext * ctx)
+char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, IntersectionContext * ctx)
 {
 	unsigned start = node->getPrimStart();
 	unsigned num = node->getNumPrims();

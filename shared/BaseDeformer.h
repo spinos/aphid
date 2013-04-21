@@ -18,6 +18,8 @@ public:
 	Vector3F restP(unsigned idx) const;
     
 	virtual char solve();
+	
+	void updateMesh() const;
 
     unsigned m_numVertices;
 	
