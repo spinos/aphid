@@ -51,3 +51,26 @@ float BaseCurve::getKnot(unsigned idx) const
 {
 	return m_knots[idx];
 }
+
+void BaseCurve::fitInto(BaseCurve & another)
+{
+	for(unsigned i = 0; i < numVertices(); i++) {
+		float param = m_knots[i];
+		m_vertices[i] = another.interplate(param);
+	}
+}
+
+Vector3F BaseCurve::interplate(float param) const
+{
+	if(param <= 0.f) return m_vertices[0];
+	if(param >= 1.f) return m_vertices[numVertices() - 1];
+	Vector3F p = m_vertices[0];
+	for(unsigned i = 1; i < numVertices(); i++) {
+		float t0 = m_knots[i-1];
+		float t1 = m_knots[i];
+		if(param >= t0 && param < t1) {
+			p = m_vertices[i-1] * ( 1.f - (param - t0) / (t1 - t0)) + m_vertices[i] * ((param - t0) / (t1 - t0));
+		}
+	}
+	return p;
+}

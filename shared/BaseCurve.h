@@ -23,6 +23,9 @@ public:
 	
 	Vector3F getVertex(unsigned idx) const;
 	float getKnot(unsigned idx) const;
+	
+	void fitInto(BaseCurve & another);
+	Vector3F interplate(float param) const;
 private:
 	std::vector<Vector3F> m_vertices;
 	std::vector<float> m_knots;

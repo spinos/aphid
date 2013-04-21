@@ -148,3 +148,24 @@ Anchor::AnchorPoint * Anchor::getPoint(unsigned idx) const
 {
 	return m_points[idx];
 }
+
+void Anchor::computeLocalSpace()
+{
+	Vector3F cen;
+	cen.setZero();
+	for(unsigned i=0; i < numPoints(); i++) {
+		cen += m_points[i]->worldP;
+	}
+	cen /= numPoints();
+	m_space.setIdentity();
+	m_space.setTranslation(cen);
+	
+	Matrix44F invs = m_space;
+	invs.inverse();
+	
+	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
+		Vector3F & pos = ((*m_anchorPointIt).second)->worldP;
+		((*m_anchorPointIt).second)->p = invs.transform(pos);
+	}
+}
+//:~

@@ -42,6 +42,8 @@ public:
 	virtual void translate(Vector3F & dis);
 	AnchorPoint *getPoint(unsigned idx) const;
 	
+	void computeLocalSpace();
+	
 private:
 	std::map<unsigned, AnchorPoint *> m_anchorPoints;
 	std::map<unsigned, AnchorPoint *>::iterator m_anchorPointIt;

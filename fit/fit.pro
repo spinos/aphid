@@ -46,11 +46,13 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/EasemodelUtil.h \
                 ../shared/GeodesicSphereMesh.h \
                 ../shared/AnchorGroup.h \
+                ../shared/BaseCurve.h \
                 ../lapl/MeshLaplacian.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 MembraneDeformer.h \
                 AnchorDeformer.h \
+                FitDeformer.h \
                 TargetView.h \
                 glwidget.h \
                 window.h
@@ -97,11 +99,13 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/EasemodelUtil.cpp \
                 ../shared/GeodesicSphereMesh.cpp \
                 ../shared/AnchorGroup.cpp \
+                ../shared/BaseCurve.cpp \
                 ../lapl/MeshLaplacian.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 MembraneDeformer.cpp \
                 AnchorDeformer.cpp \
+                FitDeformer.cpp \
                 glwidget.cpp \
                 TargetView.cpp \
                 main.cpp \

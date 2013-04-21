@@ -178,18 +178,17 @@ void GLWidget::startDeform()
 	if(m_anchors->numAnchors() < 1) return;
 	
 	if(m_targetAnchors) {
-		std::vector<Vector3F> ps; 
+		std::vector<Anchor *> src; 
 		for(Anchor *a = m_targetAnchors->firstAnchor(); m_targetAnchors->hasAnchor(); a = m_targetAnchors->nextAnchor())
-			ps.push_back(a->getCenter());
+			src.push_back(a);
 		
 		unsigned i = 0;
 		for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor()) {
-			if(i < ps.size()) {
-				a->placeAt(ps[i]);
+			if(i < src.size()) {
+				fitAnchors(src[i], a);
 			}
 			i++;
-		}
-			
+		}	
 	}
 	
 	m_deformer->precompute();	
@@ -224,3 +223,31 @@ void GLWidget::fit()
 	m_deformer->fit();
 	m_deformer->updateMesh();
 }
+
+void GLWidget::fitAnchors(Anchor * src, Anchor * dst)
+{
+	if(dst->numPoints() < 2 || src->numPoints() < 2) {
+		dst->placeAt(src->getCenter());
+		return;
+	}
+	
+	BaseCurve dstCurve;
+	for(unsigned i = 0; i < dst->numPoints(); i++)
+		dstCurve.addVertex(dst->getPoint(i)->worldP);
+		
+	dstCurve.computeKnots();
+	
+	BaseCurve srcCurve;
+	for(unsigned i = 0; i < src->numPoints(); i++)
+		srcCurve.addVertex(src->getPoint(i)->worldP);
+		
+	srcCurve.computeKnots();
+	
+	dstCurve.fitInto(srcCurve);
+	for(unsigned i = 0; i < dst->numPoints(); i++) {
+		dst->getPoint(i)->worldP = dstCurve.getVertex(i);
+	}
+	
+	dst->computeLocalSpace();
+}
+

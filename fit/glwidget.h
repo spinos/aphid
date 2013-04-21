@@ -51,6 +51,7 @@ class KdTree;
 class HarmonicCoord;
 class SelectionArray;
 class AnchorGroup;
+class Anchor;
 class Ray;
 class FitDeformer;
 
@@ -78,6 +79,7 @@ public:
 	
 	void setTarget(AnchorGroup * src, KdTree * tree);
 	void fit();
+	void fitAnchors(Anchor * src, Anchor * dst);
 
 //! [2]
 protected:
