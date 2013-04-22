@@ -17,6 +17,7 @@ class BuildKdTreeStream {
 public:
 	BuildKdTreeStream();
 	~BuildKdTreeStream();
+	void cleanup();
 	void appendMesh(BaseMesh* mesh);
 	
 	const unsigned getNumPrimitives() const;

@@ -7,7 +7,7 @@
  *
  */
 #include <iostream>
-
+#include <BarycentricCoordinate.h>
 #include "BaseMesh.h"
 
 BaseMesh::BaseMesh() : _vertices(0), _indices(0) 
@@ -31,6 +31,12 @@ void BaseMesh::createIndices(unsigned num)
 {
 	_indices = new unsigned[num];
 	_numFaceVertices = num;
+}
+
+void BaseMesh::createEdgeIndices(unsigned num)
+{
+	m_edgeIndices = new unsigned[num];
+	m_numEdgeVertices = num;
 }
 
 const BoundingBox BaseMesh::calculateBBox() const
@@ -173,7 +179,7 @@ Matrix33F BaseMesh::getTangentFrame(const unsigned& idx) const
 	return Matrix33F();
 }
 
-char BaseMesh::intersect(unsigned idx, const Ray & ray, RayIntersectionContext * ctx) const
+char BaseMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const
 {
 	Vector3F a = _vertices[_indices[idx * 3]];
 	Vector3F b = _vertices[_indices[idx * 3 + 1]];
@@ -239,7 +245,7 @@ char BaseMesh::intersect(unsigned idx, const Ray & ray, RayIntersectionContext *
 	return 1;
 }
 
-char BaseMesh::intersect(const Ray & ray, RayIntersectionContext * ctx) const
+char BaseMesh::intersect(const Ray & ray, IntersectionContext * ctx) const
 {
 	unsigned nf = getNumFaces();
 	for(unsigned i = 0; i < nf; i++) {
@@ -257,5 +263,55 @@ void BaseMesh::getTriangle(unsigned idx, unsigned *vertexId) const
 	vertexId[1] = *i;
 	i++;
 	vertexId[2] = *i;
+}
+
+char BaseMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const
+{
+	Vector3F a = _vertices[_indices[idx * 3]];
+	Vector3F b = _vertices[_indices[idx * 3 + 1]];
+	Vector3F c = _vertices[_indices[idx * 3 + 2]];
+	
+	BarycentricCoordinate bar;
+	bar.create(a, b, c);
+	float d = bar.project(origin);
+	if(d >= ctx->m_minHitDistance) return 0;
+	bar.compute();
+	if(!bar.insideTriangle()) {
+		bar.computeClosest();
+	}
+	
+	char hit = 0;
+	Vector3F clampledP = bar.getClosest();
+	d = (clampledP - origin).length();
+
+	if(d < ctx->m_minHitDistance) {
+		ctx->m_minHitDistance = d;
+		ctx->m_componentIdx = idx;
+		ctx->m_coord[0] = bar.getV(0);
+		ctx->m_coord[1] = bar.getV(1);
+		ctx->m_coord[2] = bar.getV(2);
+		ctx->m_closest = clampledP;
+		
+		ctx->m_hitP = clampledP;
+		hit = 1;
+	}
+	return hit;
+}
+
+char BaseMesh::insideTriangle(const Vector3F & p, const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n) const
+{
+	Vector3F e01 = b - a;
+	Vector3F x0 = p - a;
+	if(e01.cross(x0).dot(n) < 0.f) return 0;
+	
+	Vector3F e12 = c - b;
+	Vector3F x1 = p - b;
+	if(e12.cross(x1).dot(n) < 0.f) return 0;
+	
+	Vector3F e20 = a - c;
+	Vector3F x2 = p - c;
+	if(e20.cross(x2).dot(n) < 0.f) return 0;
+	
+	return 1;
 }
 //:~

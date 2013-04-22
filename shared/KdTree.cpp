@@ -10,17 +10,17 @@
 #include <APhid.h>
 #include "KdTree.h"
 #include <Ray.h>
-#include <RayIntersectionContext.h>
+#include <IntersectionContext.h>
 #include <QElapsedTimer>
 
 KdTree::KdTree() 
 {
-	m_root = new KdTreeNode;
+	m_root = 0;
 }
 
 KdTree::~KdTree() 
 {
-	delete m_root;
+	cleanup();
 }
 
 KdTreeNode* KdTree::getRoot() const
@@ -40,6 +40,7 @@ void KdTree::addMesh(BaseMesh* mesh)
 
 void KdTree::create()
 {	
+	m_root = new KdTreeNode;
     printf("input primitive count %d\n", m_stream.getNumPrimitives());
 	printf("tree bbox: %f %f %f - %f %f %f\n", m_bbox.getMin(0), m_bbox.getMin(1), m_bbox.getMin(2), m_bbox.getMax(0), m_bbox.getMax(1), m_bbox.getMax(2));
 	
@@ -55,6 +56,12 @@ void KdTree::create()
 	
 	m_stream.verbose();
 	std::cout << "kd tree finished after " << timer.elapsed() << "ms\n";
+}
+
+void KdTree::cleanup()
+{
+	if(m_root) delete m_root;
+	m_stream.cleanup();
 }
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
@@ -114,7 +121,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	delete rightCtx;
 }
 
-char KdTree::intersect(const Ray &ray, RayIntersectionContext * ctx)
+char KdTree::intersect(const Ray &ray, IntersectionContext * ctx)
 {
 	float hitt0, hitt1;
 	if(!m_bbox.intersect(ray, &hitt0, &hitt1)) return 0;
@@ -125,7 +132,7 @@ char KdTree::intersect(const Ray &ray, RayIntersectionContext * ctx)
 	return recusiveIntersect(root, ray, ctx);
 }
 
-char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext * ctx)
+char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, IntersectionContext * ctx)
 {
 	//printf("recus intersect level %i\n", ctx.m_level);
 	if(node->isLeaf()) {
@@ -196,7 +203,7 @@ char KdTree::recusiveIntersect(KdTreeNode *node, const Ray &ray, RayIntersection
 	return 0;
 }
 
-char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, RayIntersectionContext * ctx)
+char KdTree::leafIntersect(KdTreeNode *node, const Ray &ray, IntersectionContext * ctx)
 {
 	unsigned start = node->getPrimStart();
 	unsigned num = node->getNumPrims();
@@ -237,3 +244,83 @@ Primitive * KdTree::getPrim(unsigned idx)
 	return  prims.asPrimitive(*iprim);
 }
 
+char KdTree::closestPoint(const Vector3F & origin, IntersectionContext * ctx)
+{
+	KdTreeNode * root = getRoot();
+	ctx->setBBox(m_bbox);
+	return recusiveClosestPoint(root, origin, ctx);
+}
+
+char KdTree::recusiveClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx)
+{
+	//printf("%i ", ctx->m_level);
+	int level = ctx->m_level;
+	level++;
+	if(node->isLeaf()) {
+		return leafClosestPoint(node, origin, ctx);
+	}
+	const int axis = node->getAxis();
+	const float splitPos = node->getSplitPos();
+	const float ori = origin.comp(axis);
+	char belowPlane = ori < splitPos;
+	
+	BoundingBox leftBox, rightBox;
+	BoundingBox bigBox = ctx->getBBox();
+	bigBox.split(axis, splitPos, leftBox, rightBox);
+	KdTreeNode *nearNode, *farNode;
+	BoundingBox nearBox, farBox;
+	if(belowPlane) {
+		nearNode = node->getLeft();
+		farNode = node->getRight();
+		nearBox = leftBox;
+		farBox = rightBox;
+	}
+	else {
+		farNode = node->getLeft();
+		nearNode = node->getRight();
+		farBox = leftBox;
+		nearBox = rightBox;
+	}
+	
+	char hit = 0;
+	if(nearBox.isPointAround(origin, ctx->m_minHitDistance)) {
+		ctx->setBBox(nearBox);
+		ctx->m_level = level;
+		hit = recusiveClosestPoint(nearNode, origin, ctx);
+	}
+
+	if(farBox.isPointAround(origin, ctx->m_minHitDistance)) {
+		ctx->setBBox(farBox);
+		ctx->m_level = level;
+		hit = recusiveClosestPoint(farNode, origin, ctx);
+		
+	}
+
+	return hit;
+}
+
+char KdTree::leafClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx)
+{
+	unsigned start = node->getPrimStart();
+	unsigned num = node->getNumPrims();
+	
+	IndexArray &indir = m_stream.indirection();
+	PrimitiveArray &prims = m_stream.primitives();
+	indir.setIndex(start);
+	char anyHit = 0;
+	for(unsigned i = 0; i < num; i++) {
+		unsigned *iprim = indir.asIndex();
+
+		Primitive * prim = prims.asPrimitive(*iprim);
+		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
+		unsigned iface = prim->getComponentIndex();
+		
+		if(mesh->closestPoint(iface, origin, ctx)) {
+			anyHit = 1;
+		}
+			
+		indir.next();
+	}
+	if(anyHit) {ctx->m_success = 1; ctx->m_cell = (char *)node;}
+	return anyHit;
+}

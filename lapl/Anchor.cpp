@@ -23,11 +23,13 @@ Anchor::Anchor(SelectionArray & sel)
 		a->worldP = *v;
 		a->w = 1.f;
 		m_anchorPoints[sel.getVertexId(i)] = a;
+		m_points.push_back(a);
 		cen += *v;
 	}
 	cen /= nv;
 	m_space.setIdentity();
 	m_space.setTranslation(cen);
+	m_space0 = m_space;
 	
 	Matrix44F invs = m_space;
 	invs.inverse();
@@ -50,6 +52,10 @@ void Anchor::placeAt(const Vector3F & cen)
 {
 	m_space.setIdentity();
 	m_space.setTranslation(cen);
+	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
+		Vector3F & pos = ((*m_anchorPointIt).second)->p;
+		((*m_anchorPointIt).second)->worldP = m_space.transform(pos);
+	}
 }
 
 void Anchor::addPoint(unsigned vertexId)
@@ -74,6 +80,11 @@ void Anchor::addWeight(float delta)
 		if(wei < 0.f) wei = 0.f;
         (*m_anchorPointIt).second->w = wei;
 	}
+}
+
+unsigned Anchor::numPoints() const
+{
+	return (unsigned) m_anchorPoints.size();
 }
 
 Anchor::AnchorPoint * Anchor::firstPoint(unsigned &idx)
@@ -109,6 +120,11 @@ Vector3F Anchor::getCenter() const
 	return m_space.getTranslation();
 }
 
+Vector3F Anchor::displacement() const
+{
+	return m_space.getTranslation() - m_space0.getTranslation();
+}
+
 bool Anchor::intersect(const Ray &ray, float &t, float threshold) const
 {
 	float axis = ray.m_dir.longestAxis();
@@ -128,3 +144,28 @@ void Anchor::translate(Vector3F & dis)
 	}
 }
 
+Anchor::AnchorPoint * Anchor::getPoint(unsigned idx) const
+{
+	return m_points[idx];
+}
+
+void Anchor::computeLocalSpace()
+{
+	Vector3F cen;
+	cen.setZero();
+	for(unsigned i=0; i < numPoints(); i++) {
+		cen += m_points[i]->worldP;
+	}
+	cen /= numPoints();
+	m_space.setIdentity();
+	m_space.setTranslation(cen);
+	
+	Matrix44F invs = m_space;
+	invs.inverse();
+	
+	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
+		Vector3F & pos = ((*m_anchorPointIt).second)->worldP;
+		((*m_anchorPointIt).second)->p = invs.transform(pos);
+	}
+}
+//:~

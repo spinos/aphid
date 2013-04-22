@@ -12,9 +12,14 @@
 BuildKdTreeStream::BuildKdTreeStream() {}
 BuildKdTreeStream::~BuildKdTreeStream() 
 {
-	m_primitives.clear();
+	cleanup();
+}
+
+void BuildKdTreeStream::cleanup()
+{
 	m_indices.clear();
 	m_nodes.clear();
+	m_indirection.clear();
 }
 
 void BuildKdTreeStream::appendMesh(BaseMesh* mesh)

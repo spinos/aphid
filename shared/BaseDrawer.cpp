@@ -229,6 +229,21 @@ void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+void BaseDrawer::edge(const BaseMesh * mesh, const BaseDeformer * deformer)
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	if(!deformer)
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
+	else
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
+
+// draw a cube
+	glDrawElements(GL_LINES, mesh->m_numEdgeVertices, GL_UNSIGNED_INT, mesh->m_edgeIndices);
+
+// deactivate vertex arrays after drawing
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void BaseDrawer::field(const BaseField * f)
 {
 	BaseMesh *mesh = f->m_mesh;
@@ -337,10 +352,20 @@ void BaseDrawer::components(SelectionArray * arr)
     }
     else if(arr->getComponentFilterType() == PrimitiveFilter::TVertex) {
         const unsigned numVert = arr->numVertices();
-		for(unsigned i = 0; i < numVert; i++) {
-            Vector3F * p = arr->getVertexP(i);
+		if(numVert < 1) return;
+		if(numVert < 2) {
+			Vector3F * p = arr->getVertexP(0);
             solidCube(p->x, p->y, p->z, 0.2f);
-        }
+		}
+		else {
+			BaseCurve curve;
+			for(unsigned i = 0; i < numVert; i++) {
+				Vector3F * p = arr->getVertexP(i);
+				curve.addVertex(*p);
+			}
+			curve.computeKnots();
+			linearCurve(curve);
+		}
     }
 }
 
@@ -467,7 +492,7 @@ void BaseDrawer::setWired(char var)
 	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void BaseDrawer::anchor(Anchor *a)
+void BaseDrawer::anchor(Anchor *a, float size)
 {
 	glPushMatrix();
 	float m[16];
@@ -475,12 +500,19 @@ void BaseDrawer::anchor(Anchor *a)
     a->spaceMatrix(m);
     
     glMultMatrixf((const GLfloat*)m);
-	sphere(0.2f);
+	sphere(size);
 
 	unsigned nouse;
 	for(Anchor::AnchorPoint * ap = a->firstPoint(nouse); a->hasPoint(); ap = a->nextPoint(nouse)) {
 		Vector3F p = ap->p;
 		solidCube(p.x, p.y, p.z, 0.2f);
+	}
+	if(a->numPoints() > 1) {
+		BaseCurve curve;
+		for(unsigned i = 0; i < a->numPoints(); i++)
+			curve.addVertex(a->getPoint(i)->p);
+		curve.computeKnots();
+		linearCurve(curve);
 	}
 	glPopMatrix();
 }
@@ -492,3 +524,21 @@ void BaseDrawer::sphere(float size)
 	drawMesh(m_sphere);
 	glPopMatrix();
 }
+
+void BaseDrawer::linearCurve(const BaseCurve & curve)
+{
+	float t;
+	Vector3F p = curve.getVertex(0);
+	solidCube(p.x, p.y, p.z, 0.2f);
+	p = curve.getVertex(curve.numVertices() - 1);
+	solidCube(p.x, p.y, p.z, 0.2f);
+	glBegin(GL_LINE_STRIP);
+	for(unsigned i = 0; i < curve.numVertices(); i++) {
+		p = curve.getVertex(i);
+		t = curve.getKnot(i);
+		setColor(1.f - t, 0.f, t);
+		glVertex3f(p.x, p.y, p.z);
+	}
+	glEnd();
+}
+
