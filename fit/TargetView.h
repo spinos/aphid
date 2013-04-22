@@ -78,7 +78,7 @@ public:
 	
 	AnchorGroup * getAnchors() const;
 	KdTree * getTree() const;
-
+	void removeLastAnchor();
 //! [2]
 protected:
     

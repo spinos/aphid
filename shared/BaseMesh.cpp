@@ -33,10 +33,10 @@ void BaseMesh::createIndices(unsigned num)
 	_numFaceVertices = num;
 }
 
-void BaseMesh::createEdgeIndices(unsigned num)
+void BaseMesh::createQuadIndices(unsigned num)
 {
-	m_edgeIndices = new unsigned[num];
-	m_numEdgeVertices = num;
+	m_quadIndices = new unsigned[num];
+	m_numQuadVertices = num;
 }
 
 const BoundingBox BaseMesh::calculateBBox() const

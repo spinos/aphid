@@ -27,7 +27,7 @@ void AnchorDeformer::setMesh(BaseMesh * mesh)
 	BaseDeformer::setMesh(mesh);
 	
 	printf("init anchor deformer");
-	buildTopology();
+	buildTopology(mesh);
 }
 
 void AnchorDeformer::setAnchors(AnchorGroup * ag)
@@ -163,43 +163,15 @@ char AnchorDeformer::solve()
 		m_deformedV[i].y = x[1](i);
 		m_deformedV[i].z = x[2](i);
 	}
+	
+	for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor()) {
+		unsigned iap;
+		for(Anchor::AnchorPoint *ap = a->firstPoint(iap); a->hasPoint(); ap = a->nextPoint(iap)) {
+			Vector3F worldP = ap->worldP;
+			m_deformedV[iap] = worldP;
+		}	
+	}
 
-	return 1;
-}
-
-char AnchorDeformer::buildTopology()
-{
-	const unsigned nv = m_mesh->getNumVertices();
-	
-	m_topology = new VertexAdjacency[nv];
-	
-	for(unsigned i = 0; i < nv; i++) {
-		VertexAdjacency & v = m_topology[i];
-		v.setIndex(i);
-		v.m_v = &(m_mesh->getVertices()[i]);
-	}
-	
-	const unsigned nf = m_mesh->getNumFaces();
-	unsigned a, b, c;
-	
-	for(unsigned i = 0; i < nf; i++) {
-		a = m_mesh->getIndices()[i * 3];
-		b = m_mesh->getIndices()[i * 3 + 1];
-		c = m_mesh->getIndices()[i * 3 + 2];
-		Facet * f = new Facet(&m_topology[a], &m_topology[b], &m_topology[c]);
-		f->setIndex(i);
-		for(unsigned j = 0; j < 3; j++) {
-			Edge * e = f->edge(j);
-			m_topology[e->v0()->getIndex()].addEdge(e);
-			m_topology[e->v1()->getIndex()].addEdge(e);
-		}
-	}
-	
-	for(unsigned i = 0; i < nv; i++) {
-		m_topology[i].findNeighbors();
-		m_topology[i].computeWeights();
-		m_topology[i].computeDifferentialCoordinate();
-	}
 	return 1;
 }
 
@@ -272,3 +244,4 @@ Matrix33F AnchorDeformer::svdRotation(unsigned iv)
 	*Ri.m(2, 2) = R(2, 2);
 	return Ri;
 }
+

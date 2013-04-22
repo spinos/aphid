@@ -231,6 +231,10 @@ void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer)
 
 void BaseDrawer::edge(const BaseMesh * mesh, const BaseDeformer * deformer)
 {
+	if(mesh->m_numQuadVertices < 4) return;
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	if(!deformer)
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
@@ -238,7 +242,7 @@ void BaseDrawer::edge(const BaseMesh * mesh, const BaseDeformer * deformer)
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
 
 // draw a cube
-	glDrawElements(GL_LINES, mesh->m_numEdgeVertices, GL_UNSIGNED_INT, mesh->m_edgeIndices);
+	glDrawElements(GL_QUADS, mesh->m_numQuadVertices, GL_UNSIGNED_INT, mesh->m_quadIndices);
 
 // deactivate vertex arrays after drawing
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -490,6 +494,12 @@ void BaseDrawer::setWired(char var)
 {
 	if(var) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void BaseDrawer::setCullFace(char var)
+{
+	if(var) glEnable(GL_CULL_FACE);
+	else glDisable(GL_CULL_FACE);
 }
 
 void BaseDrawer::anchor(Anchor *a, float size)

@@ -97,4 +97,12 @@ bool AnchorGroup::activeAnchor(unsigned & idx) const
 	idx = m_activeAnchorIdx;
 	return true;
 }
+
+void AnchorGroup::removeLast()
+{
+	if(numAnchors() < 1) return;
+	m_anchorIt = m_anchors.begin();
+	m_anchorIt += numAnchors() - 1;
+	m_anchors.erase(m_anchorIt);
+}
 //:~

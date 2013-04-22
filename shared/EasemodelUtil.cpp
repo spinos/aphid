@@ -18,16 +18,10 @@ void copy(EasyModel * esm, BaseMesh * dst)
     int *faceConnection = esm->getFaceConnection();
 
     dst->_numFaces = 0;
-    
-    unsigned i, j;
+	
+	unsigned i, j;
     for(i = 0; i < nf; i++)
         dst->_numFaces += faceCount[i] - 2;
-		
-	unsigned ne = 0;
-	for(i = 0; i < nf; i++)
-		ne += faceCount[i];
-		
-	dst->createEdgeIndices(ne * 2);
     
     dst->_numFaceVertices = dst->_numFaces * 3;
     
@@ -44,17 +38,6 @@ void copy(EasyModel * esm, BaseMesh * dst)
         }
         curFace += faceCount[i];
     }
-	
-	unsigned ie = 0;
-	curFace = 0;
-	for(i = 0; i < nf; i++) {
-		for(j = 0; j < faceCount[i] - 1; j++) {
-			dst->m_edgeIndices[ie] = faceConnection[curFace + j];
-			dst->m_edgeIndices[ie + 1] = faceConnection[curFace + j + 1];
-			ie += 2;
-		}
-		curFace += faceCount[i];
-	}
     
     float* cvs = esm->getVertexPosition();
     dst->_numVertices = esm->getNumVertex();
@@ -65,5 +48,27 @@ void copy(EasyModel * esm, BaseMesh * dst)
         dst->_vertices[i].y = cvs[i * 3 + 1];
         dst->_vertices[i].z = cvs[i * 3 + 2];
     }
+	
+	unsigned numQuads = 0;
+    for(i = 0; i < nf; i++) {
+		if(faceCount[i] == 4)
+			numQuads++;
+	}
+		
+	if(numQuads < 1) return;
+	
+	dst->createQuadIndices(numQuads * 4);
+	
+	unsigned ie = 0;
+	curFace = 0;
+	for(i = 0; i < nf; i++) {
+		if(faceCount[i] == 4) {
+			for(j = 0; j < faceCount[i]; j++) {
+				dst->m_quadIndices[ie] = faceConnection[curFace + j];
+				ie++;
+			}
+		}
+		curFace += faceCount[i];
+	}
 }
 }

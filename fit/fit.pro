@@ -47,6 +47,8 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/GeodesicSphereMesh.h \
                 ../shared/AnchorGroup.h \
                 ../shared/BaseCurve.h \
+                ../shared/VertexPath.h \
+                ../shared/MeshTopology.h \
                 ../lapl/MeshLaplacian.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
@@ -100,6 +102,8 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/GeodesicSphereMesh.cpp \
                 ../shared/AnchorGroup.cpp \
                 ../shared/BaseCurve.cpp \
+                ../shared/VertexPath.cpp \
+                ../shared/MeshTopology.cpp \
                 ../lapl/MeshLaplacian.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \

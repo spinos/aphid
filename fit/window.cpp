@@ -51,13 +51,12 @@ Window::Window()
     glWidget = new GLWidget;
 	targetWidget = new TargetView;
 	
-	QHBoxLayout *mainLayout = new QHBoxLayout;
-    mainLayout->addWidget(glWidget);
-    mainLayout->addWidget(targetWidget);
+	QSplitter *splitter = new QSplitter;
+	
+	splitter->addWidget(glWidget);
+    splitter->addWidget(targetWidget);
 
-	QWidget *mainWidget = new QWidget;
-	mainWidget->setLayout(mainLayout);
-	setCentralWidget(mainWidget);
+	setCentralWidget(splitter);
     setWindowTitle(tr("Matching Shape"));
 	
 	glWidget->setTarget(targetWidget->getAnchors(), targetWidget->getTree());//connect(m_control, SIGNAL(handleChanged(unsigned)), glWidget, SLOT(onHandleChanged(unsigned)));
@@ -83,6 +82,12 @@ void Window::keyPressEvent(QKeyEvent *e)
 	else if(e->key() == Qt::Key_F) {
 		qDebug() << "fit to target";
 		glWidget->fit();
+	}
+	else if(e->key() == Qt::Key_Z) {
+		glWidget->removeLastAnchor();
+	}
+	else if(e->key() == Qt::Key_X) {
+		targetWidget->removeLastAnchor();
 	}
     
 	QWidget::keyPressEvent(e);

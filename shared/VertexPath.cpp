@@ -13,26 +13,41 @@ void VertexPath::create(unsigned startVert, unsigned endVert)
     m_vertices.clear();
     VertexAdjacency adj = m_topology[startVert];
     
-    Vector3F endPoint = m_topology[endVert]->m_v;
+    Vector3F endPoint = *(m_topology[endVert].m_v);
     recursiveFindClosestNeighbor(startVert, endVert, endPoint);
 }
 
 char VertexPath::recursiveFindClosestNeighbor(unsigned vert, unsigned endVert, const Vector3F & endPoint)
 {
+	VertexAdjacency adj = m_topology[vert];
+	Vector3F vertP = *(adj.m_v);
     unsigned closestNei;
     float minDist = 10e8;
-    for(VertexNeighbor * nei = adj.firstNeighbor(); !adj.isLastNeighbor(); nei = nextNeighbor()) {
+    for(VertexAdjacency::VertexNeighbor * nei = adj.firstNeighbor(); !adj.isLastNeighbor(); nei = adj.nextNeighbor()) {
         if(nei->v->getIndex() == endVert) {
+			m_vertices.push_back(endVert);
             return 1;
         }
         
         Vector3F p = *(nei->v->m_v);
-        float dist = (p - endPoint).length();
+        float dist = (p - endPoint).length() + (vertP - p).length();
         if(dist < minDist) {
             minDist = dist;
             closestNei = nei->v->getIndex();
         }
     }
-    
-    return recursiveFindClosestNeighbor(closestNei, endVert, endPoint));
+    m_vertices.push_back(closestNei);
+	if(m_vertices.size() > 64) return 1;
+    return recursiveFindClosestNeighbor(closestNei, endVert, endPoint);
 }
+
+unsigned VertexPath::numVertices() const
+{
+	return (unsigned)m_vertices.size();
+}
+
+unsigned VertexPath::vertex(unsigned idx) const
+{
+	return m_vertices[idx];
+}
+

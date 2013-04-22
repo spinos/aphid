@@ -21,7 +21,7 @@ public:
 	
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
-	void createEdgeIndices(unsigned num);
+	void createQuadIndices(unsigned num);
 	
 	const BoundingBox calculateBBox() const;
 	const BoundingBox calculateBBox(const unsigned &idx) const;
@@ -49,9 +49,9 @@ public:
 	char insideTriangle(const Vector3F & p, const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n) const;
 	Vector3F * _vertices;
 	unsigned * _indices;
-	unsigned * m_edgeIndices;
+	unsigned * m_quadIndices;
 	unsigned _numVertices;
 	unsigned _numFaces;
 	unsigned _numFaceVertices;
-	unsigned m_numEdgeVertices;
+	unsigned m_numQuadVertices;
 };

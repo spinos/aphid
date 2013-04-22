@@ -94,6 +94,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_deformer = new FitDeformer;
 	m_deformer->setMesh(m_mesh);
 	m_deformer->setAnchors(m_anchors);
+
+	m_selected->setTopology(m_deformer->getTopology());
 }
 //! [0]
 
@@ -104,13 +106,15 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientDraw()
 {
+	m_drawer->setCullFace(1);
+	m_drawer->setWired(0);
+	m_drawer->setGrey(0.4f);
+	m_drawer->drawMesh(m_mesh);
 	m_drawer->setWired(1);
 	m_drawer->setGrey(0.9f);
 	m_drawer->edge(m_mesh);
+	m_drawer->setCullFace(0);
 	
-	m_drawer->setGrey(0.5f);
-	//m_drawer->drawKdTree(m_tree);
-	//m_drawer->setWired(0);
 	m_drawer->setColor(0.f, 1.f, 0.4f);
 	m_drawer->components(m_selected);
 	if(m_anchors->numAnchors() > 0) {
@@ -175,7 +179,11 @@ void GLWidget::anchorSelected(float wei)
 
 void GLWidget::startDeform()
 {
-	if(m_anchors->numAnchors() < 1) return;
+	if(m_anchors->numAnchors() < 1) {
+		m_deformer->reset();
+		rebuildTree();
+		return;
+	}
 	
 	if(m_targetAnchors) {
 		std::vector<Anchor *> src; 
@@ -193,23 +201,17 @@ void GLWidget::startDeform()
 	
 	m_deformer->precompute();	
 	m_deformer->solve();
-	m_deformer->updateMesh();
-	
-	delete m_tree;
-	m_tree = new KdTree;
-	m_tree->addMesh(m_mesh);
-	m_tree->create();
+	rebuildTree();
 }
 
 bool GLWidget::pickupComponent(const Ray & ray, Vector3F & hit)
 {
 	m_intersectCtx->reset();
-	if(m_tree->intersect(ray, m_intersectCtx)) {
-	    m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
-		hit = m_intersectCtx->m_hitP;
-		return true;
-	}
-	return false;
+	if(!m_tree->intersect(ray, m_intersectCtx)) 
+		return false;
+	hit = m_intersectCtx->m_hitP;
+	m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
+	return true;
 }
 
 void GLWidget::setTarget(AnchorGroup * src, KdTree * tree)
@@ -251,3 +253,18 @@ void GLWidget::fitAnchors(Anchor * src, Anchor * dst)
 	dst->computeLocalSpace();
 }
 
+void GLWidget::removeLastAnchor()
+{
+	m_anchors->removeLast();
+}
+
+void GLWidget::rebuildTree()
+{
+	m_deformer->updateMesh();
+	
+	delete m_tree;
+	m_tree = new KdTree;
+	m_tree->addMesh(m_mesh);
+	m_tree->create();
+}
+//:~

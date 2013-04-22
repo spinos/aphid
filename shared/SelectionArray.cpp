@@ -10,8 +10,14 @@
 #include "SelectionArray.h"
 #include "Primitive.h"
 #include "BaseMesh.h"
+#include <VertexPath.h>
+#include <VertexAdjacency.h>
 
-SelectionArray::SelectionArray() {}
+SelectionArray::SelectionArray() 
+{
+	m_vertexPath = new VertexPath;
+}
+
 SelectionArray::~SelectionArray() {}
 
 void SelectionArray::reset() 
@@ -39,9 +45,23 @@ void SelectionArray::add(Geometry * geo, unsigned icomp)
         }
     }
     else {
-        if(!isVertexSelected(icomp)) {
-            m_vertexIds.push_back(icomp);
-        }
+		if(isVertexSelected(icomp)) return;
+		
+		if(numVertices() < 1) {
+			m_vertexIds.push_back(icomp);
+			return;
+		}
+		
+		unsigned startVert = lastVertexId();
+		unsigned endVert = icomp;
+		m_vertexPath->create(startVert, endVert);
+		
+		for(unsigned i = 0; i < m_vertexPath->numVertices(); i++) {
+			unsigned vi = m_vertexPath->vertex(i);
+			if(!isVertexSelected(vi)) {
+				m_vertexIds.push_back(vi);
+			}
+		}
     }
 }
 
@@ -63,6 +83,11 @@ unsigned SelectionArray::numVertices() const
 unsigned SelectionArray::getVertexId(const unsigned & idx) const
 {
 	return m_vertexIds[idx];
+}
+
+unsigned SelectionArray::lastVertexId() const
+{
+	return m_vertexIds[m_vertexIds.size() - 1];
 }
 
 Vector3F * SelectionArray::getVertexP(const unsigned & idx) const
@@ -104,4 +129,9 @@ unsigned SelectionArray::numFaces() const
 unsigned SelectionArray::getFaceId(const unsigned & idx) const
 {
     return m_faceIds[idx];
+}
+
+void SelectionArray::setTopology(VertexAdjacency * topo)
+{
+	m_vertexPath->setTopology(topo);
 }
