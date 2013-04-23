@@ -52,7 +52,6 @@ class HarmonicCoord;
 class SelectionArray;
 class AnchorGroup;
 class Ray;
-class MembraneDeformer;
 
 //! [0]
 class TargetView : public Base3DView
@@ -91,7 +90,6 @@ private:
 	InteractMode m_mode;
 	AnchorGroup * m_anchors;
 	IntersectionContext * m_intersectCtx;
-	MembraneDeformer * m_deformer;
 private slots:
     void simulate();
 	

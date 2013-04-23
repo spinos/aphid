@@ -54,7 +54,6 @@
 #include <EasemodelUtil.h>
 #include <AnchorGroup.h>
 #include <MeshTopology.h>
-#include "MembraneDeformer.h"
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 	
@@ -93,10 +92,6 @@ TargetView::TargetView(QWidget *parent) : Base3DView(parent)
 	
 	m_anchors = new AnchorGroup;
 	m_anchors->setHitTolerance(.8f);
-	
-	m_deformer = new MembraneDeformer;
-	m_deformer->setMesh(m_mesh);
-	m_deformer->setAnchors(m_anchors);
 	
 	MeshTopology *topo = new MeshTopology;
 	topo->buildTopology(m_mesh);
@@ -164,7 +159,6 @@ void TargetView::clientMouseInput(Vector3F & origin, Vector3F & displacement, Ve
 	}
 	else {
 	    m_anchors->moveAnchor(stir);
-		m_deformer->solve();
 	}
 }
 //! [10]
@@ -187,8 +181,6 @@ void TargetView::startDeform()
 {
 	if(m_anchors->numAnchors() < 1) return;
 	
-	m_deformer->precompute();
-	m_deformer->solve();
 	m_mode = TransformAnchor;
 }
 

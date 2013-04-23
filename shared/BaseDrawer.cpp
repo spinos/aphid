@@ -510,7 +510,6 @@ void BaseDrawer::anchor(Anchor *a, float size)
     a->spaceMatrix(m);
     
     glMultMatrixf((const GLfloat*)m);
-	sphere(size);
 
 	unsigned nouse;
 	for(Anchor::AnchorPoint * ap = a->firstPoint(nouse); a->hasPoint(); ap = a->nextPoint(nouse)) {
