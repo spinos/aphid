@@ -12,6 +12,8 @@
 class Vector3F;
 class Primitive;
 class Geometry;
+class VertexPath;
+class VertexAdjacency;
 
 class SelectionArray : public PrimitiveFilter {
 public:
@@ -26,13 +28,17 @@ public:
 	
 	unsigned numVertices() const;
 	unsigned getVertexId(const unsigned & idx) const;
+	unsigned lastVertexId() const;
 	Vector3F * getVertexP(const unsigned & idx) const;
 	
 	Geometry * getGeometry() const;
 	
 	unsigned numFaces() const;
 	unsigned getFaceId(const unsigned & idx) const;
+	
+	void setTopology(VertexAdjacency * topo);
 private:
+	VertexPath * m_vertexPath;
     Geometry * m_geometry;
 	bool isVertexSelected(unsigned idx) const;
 	bool isFaceSelected(unsigned idx) const;

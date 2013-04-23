@@ -10,13 +10,14 @@
 #pragma once
 #include <LinearMath.h>
 #include "BaseDeformer.h"
+#include <MeshTopology.h>
 #include <AnchorGroup.h>
 #include <vector>
 
 class VertexAdjacency;
 class Matrix33F;
 
-class AnchorDeformer : public BaseDeformer
+class AnchorDeformer : public BaseDeformer, public MeshTopology
 {
 public:
     AnchorDeformer();
@@ -28,14 +29,12 @@ public:
 	virtual char solve();
 	
 private:
-	char buildTopology();
 	void prestep(Eigen::VectorXd b[], char isMembrane = 0);
 	Matrix33F svdRotation(unsigned iv);
 	LaplaceMatrixType m_L;
 	LaplaceMatrixType m_LT;
 	Eigen::VectorXd m_delta[3];
 	Eigen::SimplicialLDLT<LaplaceMatrixType> m_llt;
-	VertexAdjacency * m_topology;
 	AnchorGroup * m_anchors;
 	Vector3F * m_membrane;
 };

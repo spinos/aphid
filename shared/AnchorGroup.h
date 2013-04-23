@@ -27,6 +27,7 @@ public:
 	float getHitTolerance() const;
 	std::vector<Anchor *> & data();
 	bool activeAnchor(unsigned & idx) const;
+	void removeLast();
 private:
 	std::vector<Anchor *> m_anchors;
 	std::vector<Anchor *>::iterator m_anchorIt;

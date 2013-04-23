@@ -53,6 +53,7 @@
 #include <SelectionArray.h>
 #include <EasemodelUtil.h>
 #include <AnchorGroup.h>
+#include <MeshTopology.h>
 #include "MembraneDeformer.h"
 
 static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
@@ -96,6 +97,10 @@ TargetView::TargetView(QWidget *parent) : Base3DView(parent)
 	m_deformer = new MembraneDeformer;
 	m_deformer->setMesh(m_mesh);
 	m_deformer->setAnchors(m_anchors);
+	
+	MeshTopology *topo = new MeshTopology;
+	topo->buildTopology(m_mesh);
+	m_selected->setTopology(topo->getTopology());
 }
 //! [0]
 
@@ -106,16 +111,15 @@ TargetView::~TargetView()
 
 void TargetView::clientDraw()
 {
-	if(m_mode != TransformAnchor) {
-		m_drawer->setWired(1);
-		m_drawer->setGrey(0.9f);
-		m_drawer->edge(m_mesh);
-	}
-    else {
-		m_drawer->setWired(1);
-		m_drawer->setGrey(0.6f);
-		m_drawer->drawMesh(m_mesh, m_deformer);
-	}	
+	m_drawer->setCullFace(1);
+	m_drawer->setWired(0);
+	m_drawer->setGrey(0.4f);
+	m_drawer->drawMesh(m_mesh);
+	m_drawer->setWired(1);
+	m_drawer->setGrey(0.9f);
+	m_drawer->edge(m_mesh);
+	m_drawer->setCullFace(0);
+	
 	m_drawer->setGrey(0.5f);
 	m_drawer->setColor(0.f, 1.f, 0.4f);
 	m_drawer->components(m_selected);
@@ -207,5 +211,10 @@ AnchorGroup * TargetView::getAnchors() const
 KdTree * TargetView::getTree() const
 {
 	return m_tree;
+}
+
+void TargetView::removeLastAnchor()
+{
+	m_anchors->removeLast();
 }
 //:~

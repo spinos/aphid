@@ -80,7 +80,8 @@ public:
 	void setTarget(AnchorGroup * src, KdTree * tree);
 	void fit();
 	void fitAnchors(Anchor * src, Anchor * dst);
-
+	void removeLastAnchor();
+	void rebuildTree();
 //! [2]
 protected:
     

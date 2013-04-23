@@ -24,6 +24,7 @@ public:
     unsigned m_numVertices;
 	
 	Vector3F * m_deformedV;
+	Vector3F * m_restV;
 	
 	BaseMesh * m_mesh;
 private:

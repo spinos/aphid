@@ -51,6 +51,8 @@ void Base3DView::initializeGL()
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
+	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
     //glEnable(GL_LIGHTING);
     //glEnable(GL_LIGHT0);
     glEnable(GL_MULTISAMPLE);

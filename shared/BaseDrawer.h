@@ -46,6 +46,7 @@ public:
 	void coordsys(float scale = 1.f);
 	void coordsys(const Matrix33F & orient, float scale = 1.f);
 	void setWired(char var);
+	void setCullFace(char var);
 	void anchor(Anchor *a, float size=1.f);
 	void sphere(float size = 1.f);
 	void linearCurve(const BaseCurve & curve);
