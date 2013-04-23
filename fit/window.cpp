@@ -89,6 +89,22 @@ void Window::keyPressEvent(QKeyEvent *e)
 	else if(e->key() == Qt::Key_X) {
 		targetWidget->removeLastAnchor();
 	}
+	else if(e->key() == Qt::Key_Up) {
+		qDebug() << "target go forward";
+		targetWidget->getCamera()->moveForward(23);
+	}
+	else if(e->key() == Qt::Key_Down) {
+		qDebug() << "target go backward";
+		targetWidget->getCamera()->moveForward(-23);
+	}
+	else if(e->key() == Qt::Key_Right) {
+		qDebug() << "template go forward";
+		glWidget->getCamera()->moveForward(23);
+	}
+	else if(e->key() == Qt::Key_Left) {
+		qDebug() << "template go backward";
+		glWidget->getCamera()->moveForward(-23);
+	}
     
 	QWidget::keyPressEvent(e);
 }

@@ -24,6 +24,7 @@ public:
 	void tumble(int x, int y);
 	void track(int x, int y);
 	void zoom(int y);
+	void moveForward(int y);
 	
 	char intersection(int x, int y, Vector3F & worldPos) const;
 	void screenToWorld(int x, int y, Vector3F & worldVec) const;

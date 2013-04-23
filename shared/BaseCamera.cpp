@@ -109,15 +109,19 @@ void BaseCamera::track(int x, int y)
 
 void BaseCamera::zoom(int y)
 {
+	if(fHorizontalAperture + y > .1f) fHorizontalAperture += (float)y * 0.5f;
+}
+
+void BaseCamera::moveForward(int y)
+{
 	Vector3F front = fSpace.getFront();
 	Vector3F eye = fSpace.getTranslation();
 	Vector3F view = eye - fCenterOfInterest;
 	const float dist = view.length();
 	
-	eye += front * (float)y * dist /fPortWidth;
+	const float fra = (float)y/100.f;
 	
-	if(fHorizontalAperture + y > .1f) fHorizontalAperture += (float)y * 0.5f;
-	
+	eye += front * dist * -fra;
 	fSpace.setTranslation(eye);
 	updateInverseSpace();
 }
