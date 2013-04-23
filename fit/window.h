@@ -62,7 +62,13 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
+	void createActions();
+	void createMenus();
 
+private:
+	QMenu *fileMenu;
+	QAction *loadTemplateAct;
+	QAction *loadTargetAct;
     GLWidget *glWidget;
 	TargetView * targetWidget;
 };

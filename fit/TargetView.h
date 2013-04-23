@@ -45,7 +45,7 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 #include <IntersectionContext.h>
-class MeshLaplacian;
+class BaseMesh;
 class KdTreeDrawer;
 class KdTree;
 class HarmonicCoord;
@@ -78,12 +78,14 @@ public:
 	AnchorGroup * getAnchors() const;
 	KdTree * getTree() const;
 	void removeLastAnchor();
+	void rebuildTree();
+	void loadMesh(std::string filename);
 //! [2]
 protected:
     
 //! [3]
 private:
-    MeshLaplacian * m_mesh;
+    BaseMesh * m_mesh;
     KdTreeDrawer * m_drawer;
 	KdTree * m_tree;
 	SelectionArray * m_selected;
@@ -94,7 +96,7 @@ private slots:
     void simulate();
 	
 public slots:
-
+	void open();
 };
 //! [3]
 

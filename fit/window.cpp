@@ -59,7 +59,10 @@ Window::Window()
 	setCentralWidget(splitter);
     setWindowTitle(tr("Matching Shape"));
 	
-	glWidget->setTarget(targetWidget->getAnchors(), targetWidget->getTree());//connect(m_control, SIGNAL(handleChanged(unsigned)), glWidget, SLOT(onHandleChanged(unsigned)));
+	glWidget->setTarget(targetWidget->getAnchors(), targetWidget->getTree());
+	createActions();
+	createMenus();
+	//connect(m_control, SIGNAL(handleChanged(unsigned)), glWidget, SLOT(onHandleChanged(unsigned)));
 }
 //! [1]
 
@@ -108,3 +111,22 @@ void Window::keyPressEvent(QKeyEvent *e)
     
 	QWidget::keyPressEvent(e);
 }
+
+void Window::createActions()
+{
+	loadTemplateAct = new QAction(tr("&Load Template"), this);
+	loadTemplateAct->setStatusTip(tr("Open an model file as the template"));
+	connect(loadTemplateAct, SIGNAL(triggered()), glWidget, SLOT(open()));
+	
+	loadTargetAct = new QAction(tr("&Load Target"), this);
+	loadTargetAct->setStatusTip(tr("Open an model file as the target"));
+	connect(loadTargetAct, SIGNAL(triggered()), targetWidget, SLOT(open()));
+}
+
+void Window::createMenus()
+{
+	fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(loadTemplateAct);
+	fileMenu->addAction(loadTargetAct);
+}
+

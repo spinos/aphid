@@ -46,7 +46,7 @@
 
 #include "glwidget.h"
 
-#include "MeshLaplacian.h"
+#include "BaseMesh.h"
 #include "KdTreeDrawer.h"
 #include <KdTree.h>
 #include <Ray.h>
@@ -60,42 +60,30 @@ static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(30);
-	
-#ifdef WIN32
-	EasyModel * eye = new EasyModel("D:/aphid/mdl/flat.m");
-#else
-	EasyModel * eye = new EasyModel("/Users/jianzhang/aphid/mdl/flat.m");
-#endif
-	m_mesh = new MeshLaplacian;
-	
-	ESMUtil::copy(eye, m_mesh);
-	
-	delete eye;
-	
+	m_tree = 0;
+	m_mesh = new BaseMesh;
 	m_drawer = new KdTreeDrawer;
-	
-	m_tree = new KdTree;
-	m_tree->addMesh(m_mesh);
-	m_tree->create();
-	
 	m_selected = new SelectionArray;
 	m_selected->setComponentFilterType(PrimitiveFilter::TVertex);
-	
-	m_mode = SelectCompnent;
 	m_intersectCtx = new IntersectionContext;
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
-	
 	m_anchors = new AnchorGroup;
 	m_anchors->setHitTolerance(.8f);
 	
 	m_deformer = new FitDeformer;
-	m_deformer->setMesh(m_mesh);
 	m_deformer->setAnchors(m_anchors);
+	
+#ifdef WIN32
+	loadMesh("D:/aphid/mdl/flat.m");
+#else
+	loadMesh("/Users/jianzhang/aphid/mdl/flat.m");
+#endif
 
-	m_selected->setTopology(m_deformer->getTopology());
+	m_mode = SelectCompnent;
+	
+	QTimer *timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
+	timer->start(30);
 }
 //! [0]
 
@@ -201,6 +189,7 @@ void GLWidget::startDeform()
 	
 	m_deformer->precompute();	
 	m_deformer->solve();
+	
 	rebuildTree();
 }
 
@@ -261,10 +250,36 @@ void GLWidget::removeLastAnchor()
 void GLWidget::rebuildTree()
 {
 	m_deformer->updateMesh();
-	
-	delete m_tree;
+	if(m_tree) delete m_tree;
 	m_tree = new KdTree;
 	m_tree->addMesh(m_mesh);
 	m_tree->create();
+}
+
+void GLWidget::open()
+{
+	QFileDialog *fileDlg = new QFileDialog(this);
+	QString temQStr = fileDlg->getOpenFileName(this, 
+		tr("Open Model File"), "../", tr("Mesh(*.m)"));
+	
+	if(temQStr == NULL)
+		return;
+		
+	loadMesh(temQStr.toStdString());
+}
+
+void GLWidget::loadMesh(std::string filename)
+{
+	EasyModel * eye = new EasyModel(filename.c_str());
+	
+	ESMUtil::copy(eye, m_mesh);
+	
+	delete eye;
+
+	m_deformer->setMesh(m_mesh);
+	
+	m_selected->setTopology(m_deformer->getTopology());
+	
+	rebuildTree();
 }
 //:~
