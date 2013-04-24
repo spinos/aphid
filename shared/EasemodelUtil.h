@@ -7,9 +7,10 @@
  *
  */	
 #pragma once
-#include <modelIn.h>
+
 #include <BaseMesh.h>
 namespace ESMUtil
 {
-void copy(EasyModel * esm, BaseMesh * dst);
+void Import(const char * filename, BaseMesh * dst);
+void Export(const char * filename, BaseMesh * src);
 }

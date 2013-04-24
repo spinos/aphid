@@ -217,11 +217,7 @@ void TargetView::open()
 
 void TargetView::loadMesh(std::string filename)
 {
-	EasyModel * eye = new EasyModel(filename.c_str());
-	
-	ESMUtil::copy(eye, m_mesh);
-	
-	delete eye;
+	ESMUtil::Import(filename.c_str(), m_mesh);
 	
 	MeshTopology *topo = new MeshTopology;
 	topo->buildTopology(m_mesh);

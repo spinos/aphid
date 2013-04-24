@@ -102,6 +102,7 @@ private slots:
 	
 public slots:
 	void open();
+	void save();
 };
 //! [3]
 

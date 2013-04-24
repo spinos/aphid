@@ -115,12 +115,16 @@ void Window::keyPressEvent(QKeyEvent *e)
 void Window::createActions()
 {
 	loadTemplateAct = new QAction(tr("&Load Template"), this);
-	loadTemplateAct->setStatusTip(tr("Open an model file as the template"));
+	loadTemplateAct->setStatusTip(tr("Open a model file as the template"));
 	connect(loadTemplateAct, SIGNAL(triggered()), glWidget, SLOT(open()));
 	
 	loadTargetAct = new QAction(tr("&Load Target"), this);
-	loadTargetAct->setStatusTip(tr("Open an model file as the target"));
+	loadTargetAct->setStatusTip(tr("Open a model file as the target"));
 	connect(loadTargetAct, SIGNAL(triggered()), targetWidget, SLOT(open()));
+	
+	saveTemplateAct = new QAction(tr("&Save Template"), this);
+	saveTemplateAct->setStatusTip(tr("Save currest template as a model file"));
+	connect(saveTemplateAct, SIGNAL(triggered()), glWidget, SLOT(save()));
 }
 
 void Window::createMenus()
@@ -128,5 +132,6 @@ void Window::createMenus()
 	fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(loadTemplateAct);
 	fileMenu->addAction(loadTargetAct);
+	fileMenu->addAction(saveTemplateAct);
 }
 

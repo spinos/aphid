@@ -69,6 +69,7 @@ private:
 	QMenu *fileMenu;
 	QAction *loadTemplateAct;
 	QAction *loadTargetAct;
+	QAction *saveTemplateAct;
     GLWidget *glWidget;
 	TargetView * targetWidget;
 };

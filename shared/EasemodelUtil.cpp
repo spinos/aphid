@@ -6,12 +6,16 @@
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
-
+#include <EasyModelIn.h>
+#include <EasyModelOut.h>
 #include "EasemodelUtil.h"
+
 namespace ESMUtil
 {
-void copy(EasyModel * esm, BaseMesh * dst)
+void Import(const char * filename, BaseMesh * dst)
 {
+	EasyModelIn * esm = new EasyModelIn(filename);
+	
 	const unsigned nf = esm->getNumFace();
     
     int *faceCount = esm->getFaceCount();
@@ -70,5 +74,38 @@ void copy(EasyModel * esm, BaseMesh * dst)
 		}
 		curFace += faceCount[i];
 	}
+	
+	delete esm;
+}
+
+void Export(const char * filename, BaseMesh * src)
+{
+	EasyModelOut * esm = new EasyModelOut(filename);
+	
+	esm->begin();
+	
+	unsigned numPolygons = src->getNumFaces();
+	int * faceCounts = new int[numPolygons];
+	for(unsigned i = 0; i < numPolygons; i++) faceCounts[i] = 3;
+	
+	esm->writeFaceCount(numPolygons, faceCounts);
+	
+	unsigned numFaceVertices = src->getNumFaceVertices();
+	
+	int * faceVertices = new int[numFaceVertices];
+	for(unsigned i = 0; i < numFaceVertices; i++) faceVertices[i] = src->getIndices()[i];
+	
+	esm->writeFaceConnection(numFaceVertices, faceVertices);
+	
+	unsigned numVertices = src->getNumVertices();
+	
+	Vector3F * vertexPositions = new Vector3F[numVertices];
+	for(unsigned i = 0; i < numVertices; i++) vertexPositions[i] = src->getVertices()[i];
+	
+	esm->writeP(numVertices, vertexPositions);
+	esm->end();
+	esm->flush();
+	
+	delete esm;
 }
 }

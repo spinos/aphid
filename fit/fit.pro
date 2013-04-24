@@ -1,5 +1,5 @@
 mac:LIBS += -leasymodel
-INCLUDEPATH += ../shared ../lapl ./
+INCLUDEPATH += ../shared ../lapl ./ ../easymodel ../../ofl/opium
 win32:INCLUDEPATH += D:/ofl/shared D:/usr/libxml2x64/include D:/usr/eigen3
 mac:INCLUDEPATH += /Users/jianzhang/Library/eigen3
 win32:LIBS +=  -LD:/usr/local/lib64 -leasymodel -LD:/usr/libxml2x64/lib -llibxml2

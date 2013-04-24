@@ -258,9 +258,8 @@ void GLWidget::rebuildTree()
 
 void GLWidget::open()
 {
-	QFileDialog *fileDlg = new QFileDialog(this);
-	QString temQStr = fileDlg->getOpenFileName(this, 
-		tr("Open Model File"), "../", tr("Mesh(*.m)"));
+	QString temQStr = QFileDialog::getOpenFileName(this, 
+		tr("Open Model File As Temple"), "../", tr("Mesh(*.m)"));
 	
 	if(temQStr == NULL)
 		return;
@@ -270,16 +269,25 @@ void GLWidget::open()
 
 void GLWidget::loadMesh(std::string filename)
 {
-	EasyModel * eye = new EasyModel(filename.c_str());
-	
-	ESMUtil::copy(eye, m_mesh);
-	
-	delete eye;
+	ESMUtil::Import(filename.c_str(), m_mesh);
 
 	m_deformer->setMesh(m_mesh);
 	
 	m_selected->setTopology(m_deformer->getTopology());
 	
 	rebuildTree();
+}
+
+void GLWidget::save()
+{
+	QString temQStr = QFileDialog::getSaveFileName(this, 
+		tr("Save Template to Model File"), "./untitled.m", tr("Mesh(*.m)"));
+	
+	if(temQStr == NULL)
+		return;
+		
+	ESMUtil::Export(temQStr.toStdString().c_str(), m_mesh);
+	
+	QMessageBox::information(this, tr("Success"), QString("Template saved as ").append(temQStr));
 }
 //:~

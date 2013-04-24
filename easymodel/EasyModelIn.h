@@ -1,11 +1,11 @@
-#ifndef MODELIN_H
-#define MODELIN_H
+#ifndef EasyModelInIN_H
+#define EasyModelInIN_H
 #include <ZXMLDoc.h>
 
-class EasyModel {
+class EasyModelIn {
 public:
-	EasyModel(const char* filename);
-	~EasyModel();
+	EasyModelIn(const char* filename);
+	~EasyModelIn();
 	unsigned getNumFace() const;
 	unsigned getNumVertex() const;
 	int* getFaceCount() const;
@@ -47,5 +47,5 @@ private:
 	void readP();
 	void readUV();
 };
-#endif        //  #ifndef EasyModel_H
+#endif        //  #ifndef EasyModelIn_H
 
