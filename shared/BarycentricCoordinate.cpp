@@ -175,3 +175,9 @@ Vector3F BarycentricCoordinate::getOnPlane() const
 {
 	return m_onplane;
 }
+
+Vector3F BarycentricCoordinate::getNormal() const
+{
+	return m_n;
+}
+//:~

@@ -36,6 +36,7 @@ public:
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
+	void showNormal(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void edge(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void field(const BaseField * f);
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);

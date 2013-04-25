@@ -24,8 +24,10 @@ void FitDeformer::fit()
 	
 	for(int i = 0; i < (int)m_numVertices; i++) {
 		Vector3F pp = m_deformedV[i];
+		Vector3F pn = m_mesh->getNormals()[i];
 		ctx.reset();
+		ctx.setNormalReference(pn);
 		m_tree->closestPoint(pp, &ctx);
-		m_deformedV[i] = ctx.m_closest;
+		if(ctx.m_success) m_deformedV[i] = ctx.m_closest;
 	}
 }

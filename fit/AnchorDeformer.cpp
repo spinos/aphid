@@ -45,7 +45,7 @@ void AnchorDeformer::precompute()
 	int neighborIdx;
 	m_L.resize(m_numVertices + numConstrains, m_numVertices);
 	for(int i = 0; i < (int)m_numVertices; i++) {
-		VertexAdjacency & adj = m_topology[i];
+		VertexAdjacency & adj = getTopology()[i];
 		
 		VertexAdjacency::VertexNeighbor *neighbor;
 		for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
@@ -76,7 +76,7 @@ void AnchorDeformer::precompute()
 	m_delta[2].resize(m_numVertices + numConstrains);
 	
 	for(int i = 0; i < (int)m_numVertices; i++) {
-		VertexAdjacency & adj = m_topology[i];
+		VertexAdjacency & adj = getTopology()[i];
 		Vector3F dif = adj.getDifferentialCoordinate();
 		m_delta[0](i) = dif.x;
 		m_delta[1](i) = dif.y;
@@ -182,7 +182,7 @@ Matrix33F AnchorDeformer::svdRotation(unsigned iv)
 	Eigen::MatrixXf D(3, 3);
 	D.setIdentity();
 		
-	VertexAdjacency & adj = m_topology[iv];
+	VertexAdjacency & adj = getTopology()[iv];
 	numNeighbors = adj.getNumNeighbors();
 	
 	c.setZero();

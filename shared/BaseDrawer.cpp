@@ -229,6 +229,24 @@ void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+void BaseDrawer::showNormal(const BaseMesh * mesh, const BaseDeformer * deformer)
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	if(!deformer)
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
+	else
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
+
+	glEnableClientState(GL_COLOR_ARRAY);
+	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getNormals());
+	
+	glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
+
+// deactivate vertex arrays after drawing
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void BaseDrawer::edge(const BaseMesh * mesh, const BaseDeformer * deformer)
 {
 	if(mesh->m_numQuadVertices < 4) return;

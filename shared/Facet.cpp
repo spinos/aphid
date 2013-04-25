@@ -25,6 +25,7 @@ Facet::Facet(Vertex *a, Vertex *b, Vertex *c)
 	createEdges();
 	
 	m_area = Facet::cumputeArea(a->m_v, b->m_v, c->m_v);
+	if(m_area < 10e-5) printf("WARNING: near zero face area!\n");
 }
 
 Facet::Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d)
@@ -45,11 +46,12 @@ Facet::Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d)
 	createEdges();
 	
 	m_area = Facet::cumputeArea(a->m_v, b->m_v, c->m_v);
+	if(m_area < 10e-5) printf("WARNING: near zero face area!\n");
 }
 
 Facet::~Facet()
 {
-	
+	clear();
 }
 
 void Facet::clear()
@@ -203,6 +205,17 @@ char Facet::isClosed() const
 	}
 	
 	return 1;
+}
+
+void Facet::update()
+{
+	Vector3F e0 = *m_vertices[1]->m_v - *m_vertices[0]->m_v; e0.normalize();
+	Vector3F e1 = *m_vertices[2]->m_v - *m_vertices[0]->m_v; e1.normalize();
+	m_normal = e0.cross(e1);
+	m_normal.normalize();
+	
+	m_area = Facet::cumputeArea(m_vertices[0]->m_v, m_vertices[1]->m_v, m_vertices[2]->m_v);
+	if(m_area < 10e-5) printf("WARNING: near zero face area!\n");
 }
 
 float Facet::cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c)

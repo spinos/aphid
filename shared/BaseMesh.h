@@ -30,6 +30,7 @@ public:
 	const int faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const;
 	
 	Vector3F * vertices();
+	Vector3F * normals();
 	unsigned * indices();
 	
 	void setVertex(unsigned idx, float x, float y, float z);
@@ -43,6 +44,7 @@ public:
 	unsigned getNumFaceVertices() const;
 	
 	Vector3F * getVertices() const;
+	Vector3F * getNormals() const;
 	unsigned * getIndices() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	
@@ -51,6 +53,7 @@ public:
 	char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
 	char insideTriangle(const Vector3F & p, const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n) const;
 	Vector3F * _vertices;
+	Vector3F * m_normals;
 	unsigned * _indices;
 	unsigned * m_quadIndices;
 	unsigned _numVertices;

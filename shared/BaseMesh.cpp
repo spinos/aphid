@@ -10,8 +10,14 @@
 #include <BarycentricCoordinate.h>
 #include "BaseMesh.h"
 
-BaseMesh::BaseMesh() : _vertices(0), _indices(0) 
+BaseMesh::BaseMesh()
 {
+	_vertices = 0;
+	_indices = 0;
+	m_normals = 0;
+	m_quadIndices = 0;
+	m_polygonCounts = 0;
+	m_polygonIndices = 0;
 	setMeshType();
 }
 
@@ -19,11 +25,16 @@ BaseMesh::~BaseMesh()
 {
 	if(_vertices) delete[] _vertices;
 	if(_indices) delete[] _indices;
+	if(m_normals) delete[] m_normals;
+	if(m_quadIndices) delete[] m_quadIndices;
+	if(m_polygonCounts) delete[] m_polygonCounts;
+	if(m_polygonIndices) delete[] m_polygonIndices;
 }
 
 void BaseMesh::createVertices(unsigned num)
 {
 	_vertices = new Vector3F[num];
+	m_normals = new Vector3F[num];
 	_numVertices = num;
 }
 
@@ -116,6 +127,11 @@ Vector3F * BaseMesh::vertices()
 	return _vertices;
 }
 
+Vector3F * BaseMesh::normals()
+{
+	return m_normals;
+}
+
 unsigned * BaseMesh::indices()
 {
 	return _indices;
@@ -169,6 +185,11 @@ unsigned BaseMesh::getNumFaceVertices() const
 Vector3F * BaseMesh::getVertices() const
 {
 	return _vertices;
+}
+
+Vector3F * BaseMesh::getNormals() const
+{
+	return m_normals;
 }
 
 unsigned * BaseMesh::getIndices() const
@@ -287,6 +308,11 @@ char BaseMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionC
 	bar.create(a, b, c);
 	float d = bar.project(origin);
 	if(d >= ctx->m_minHitDistance) return 0;
+	
+	if(ctx->m_enableNormalRef) {
+		if(bar.getNormal().dot(ctx->m_refN) < 0.1f) return 0;
+	}
+	
 	bar.compute();
 	if(!bar.insideTriangle()) {
 		bar.computeClosest();

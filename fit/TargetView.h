@@ -52,6 +52,7 @@ class HarmonicCoord;
 class SelectionArray;
 class AnchorGroup;
 class Ray;
+class MeshTopology;
 
 //! [0]
 class TargetView : public Base3DView
@@ -78,7 +79,7 @@ public:
 	AnchorGroup * getAnchors() const;
 	KdTree * getTree() const;
 	void removeLastAnchor();
-	void rebuildTree();
+	void buildTree();
 	void loadMesh(std::string filename);
 	void clearSelection();
 //! [2]
@@ -93,6 +94,8 @@ private:
 	InteractMode m_mode;
 	AnchorGroup * m_anchors;
 	IntersectionContext * m_intersectCtx;
+	MeshTopology *m_topo;
+	
 private slots:
     void simulate();
 	

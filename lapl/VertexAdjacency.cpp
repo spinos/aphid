@@ -153,6 +153,19 @@ void VertexAdjacency::computeTangentFrame()
 	m_tangentFrame.fill(tangent, binormal, m_normal);
 }
 
+Vector3F VertexAdjacency::computeNormal()
+{
+	Vector3F s;
+	s.setZero();
+	const unsigned numNeighbors = m_neighbors.size();
+	for(unsigned i = 0; i < numNeighbors; i++) {
+		Facet *f = m_neighbors[i]->f;
+		s += f->getNormal() * f->getArea();
+	}
+	s.normalize();
+	return s;
+}
+
 char VertexAdjacency::findOppositeEdge(int i, int j, Edge & dest) const
 {
 	std::vector<Edge *>::const_iterator it;

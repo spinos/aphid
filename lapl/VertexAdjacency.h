@@ -31,6 +31,7 @@ public:
 	void computeWeights();
 	void computeDifferentialCoordinate();
 	void computeTangentFrame();
+	Vector3F computeNormal();
 
 	unsigned getNumNeighbors() const;
 	Matrix33F getTangentFrame() const;

@@ -9,7 +9,9 @@
 
 #pragma once
 #include <AllMath.h>
+#include <vector>
 class VertexAdjacency;
+class Facet;
 class BaseMesh;
 
 class MeshTopology {
@@ -18,9 +20,11 @@ public:
 	virtual ~MeshTopology();
 	
 	char buildTopology(BaseMesh * mesh);
+	void calculateNormal(BaseMesh * mesh);
 
 	VertexAdjacency * getTopology() const;
-	
-	VertexAdjacency * m_topology;
 private:
+	void cleanup();
+	VertexAdjacency * m_adjacency;
+	std::vector<Facet *> m_faces;
 };

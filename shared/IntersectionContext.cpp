@@ -22,6 +22,7 @@ void IntersectionContext::reset()
 	m_minHitDistance = 10e10;
 	m_success = 0;
 	m_cell = 0;
+	m_enableNormalRef = 0;
 }
 
 void IntersectionContext::setBBox(const BoundingBox & bbox)
@@ -32,6 +33,12 @@ void IntersectionContext::setBBox(const BoundingBox & bbox)
 BoundingBox IntersectionContext::getBBox() const
 {
 	return m_bbox;
+}
+
+void IntersectionContext::setNormalReference(const Vector3F & nor)
+{
+	m_refN = nor;
+	m_enableNormalRef = 1;
 }
 
 void IntersectionContext::verbose() const

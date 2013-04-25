@@ -168,7 +168,7 @@ void GLWidget::startDeform()
 {
 	if(m_anchors->numAnchors() < 1) {
 		m_deformer->reset();
-		rebuildTree();
+		buildTree();
 		return;
 	}
 	
@@ -190,8 +190,8 @@ void GLWidget::startDeform()
 	
 	m_deformer->precompute();	
 	m_deformer->solve();
-	
-	rebuildTree();
+	buildTree();
+	m_deformer->calculateNormal(m_mesh);
 }
 
 bool GLWidget::pickupComponent(const Ray & ray, Vector3F & hit)
@@ -248,7 +248,7 @@ void GLWidget::removeLastAnchor()
 	m_anchors->removeLast();
 }
 
-void GLWidget::rebuildTree()
+void GLWidget::buildTree()
 {
 	m_deformer->updateMesh();
 	if(m_tree) delete m_tree;
@@ -273,10 +273,9 @@ void GLWidget::loadMesh(std::string filename)
 	ESMUtil::Import(filename.c_str(), m_mesh);
 
 	m_deformer->setMesh(m_mesh);
-	
 	m_selected->setTopology(m_deformer->getTopology());
-	
-	rebuildTree();
+	m_deformer->calculateNormal(m_mesh);
+	buildTree();
 }
 
 void GLWidget::save()

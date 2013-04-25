@@ -63,8 +63,7 @@ void Import(const char * filename, BaseMesh * dst)
     }
     
     float* cvs = esm->getVertexPosition();
-    dst->_numVertices = esm->getNumVertex();
-    dst->_vertices = new Vector3F[dst->_numVertices];
+    dst->createVertices(esm->getNumVertex());
     
     for(i = 0; i < dst->_numVertices; i++) {
         dst->_vertices[i].x = cvs[i * 3];

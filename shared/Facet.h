@@ -37,6 +37,8 @@ public:
 	
 	char getEdgeOnHorizon(std::vector<Edge *> & horizons) const;
 	
+	void update();
+	
 	static float cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c);
 private:
 	void createEdges();

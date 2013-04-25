@@ -81,7 +81,7 @@ public:
 	void fit();
 	void fitAnchors(Anchor * src, Anchor * dst);
 	void removeLastAnchor();
-	void rebuildTree();
+	void buildTree();
 	void loadMesh(std::string filename);
 	void clearSelection();
 //! [2]

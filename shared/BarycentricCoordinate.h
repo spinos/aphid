@@ -25,6 +25,7 @@ public:
 	char insideTriangle() const;
 	Vector3F getClosest() const;
 	Vector3F getOnPlane() const;
+	Vector3F getNormal() const;
 	
 private:
 	Vector3F m_p[3];

@@ -69,6 +69,7 @@ TargetView::TargetView(QWidget *parent) : Base3DView(parent)
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_anchors = new AnchorGroup;
 	m_anchors->setHitTolerance(.8f);
+	m_topo = new MeshTopology;
 	
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
@@ -194,7 +195,7 @@ void TargetView::removeLastAnchor()
 	m_anchors->removeLast();
 }
 
-void TargetView::rebuildTree()
+void TargetView::buildTree()
 {
 	if(m_tree) delete m_tree;
 	m_tree = new KdTree;
@@ -218,11 +219,10 @@ void TargetView::loadMesh(std::string filename)
 {
 	ESMUtil::Import(filename.c_str(), m_mesh);
 	
-	MeshTopology *topo = new MeshTopology;
-	topo->buildTopology(m_mesh);
-	m_selected->setTopology(topo->getTopology());
-	
-	rebuildTree();
+	m_topo->buildTopology(m_mesh);
+	m_selected->setTopology(m_topo->getTopology());
+	m_topo->calculateNormal(m_mesh);
+	buildTree();
 }
 
 void TargetView::clearSelection()
