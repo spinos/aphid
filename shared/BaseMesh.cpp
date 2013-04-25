@@ -39,6 +39,18 @@ void BaseMesh::createQuadIndices(unsigned num)
 	m_numQuadVertices = num;
 }
 
+void BaseMesh::createPolygonCounts(unsigned num)
+{
+    m_numPolygons = num;
+    m_polygonCounts = new unsigned[num];
+}
+
+void BaseMesh::createPolygonIndices(unsigned num)
+{
+    m_numPolygonVertices = num;
+    m_polygonIndices = new unsigned[num];
+}
+
 const BoundingBox BaseMesh::calculateBBox() const
 {
 	BoundingBox box;

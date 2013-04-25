@@ -128,7 +128,7 @@ void Base3DView::processCamera(QMouseEvent *event)
 		getCamera()->track(dx, dy);
     }
 	else if (event->buttons() & Qt::RightButton) {
-		getCamera()->zoom(dy);
+		getCamera()->zoom(-dx / 2 + -dy / 2);
 		if(getCamera()->isOrthographic())
 			updateOrthoProjection();
 		else

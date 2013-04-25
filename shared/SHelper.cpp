@@ -250,37 +250,6 @@ void SHelper::cutfilepath(std::string& res)
 	if(foundf > 1)
 		res.erase(0, foundf);
 }
-#ifdef WIN32
-#include <windows.h>
-#endif
-
-void SHelper::saveFloatFile(const char* filename, const int nfloat, const float* data)
-{
-	std::string tmpfile = filename;
-#ifdef WIN32
-	cutfilepath(tmpfile);
-#endif	
-	//std::cout<<" saving "<<tmpfile<<std::endl;
-	
-	std::ofstream ffile;
-	ffile.open(tmpfile.c_str(), std::ios::out | std::ios::binary);
-	if(!ffile.is_open()) return;
-
-	ffile.write((char*)data, nfloat*sizeof(float));
-	ffile.close();
-#ifdef WIN32	
-	Sleep(1999);
-	
-	CopyFile(tmpfile.c_str(),filename,0);
-	
-	Sleep(1999);
-	
-	tmpfile = "del " + tmpfile;
-	
-	system(tmpfile.c_str());
-#endif	
-	return;
-}
 
 void SHelper::changeFrameNumberFistDot4Digit(std::string& res, int frame)
 {

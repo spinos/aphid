@@ -29,7 +29,6 @@ public:
 	static void replacefilename(std::string& res, std::string& toreplace);
 	static void findLastAndReplace(std::string& res, const char *tofind, const char *toreplace);
 	static void cutfilepath(std::string& res);
-	static void saveFloatFile(const char* filename, const int nfloat, const float* data);
 	static void changeFrameNumberFistDot4Digit(std::string& res, int frame);
 	static char isInArrayDividedBySpace(const char* handle, const char* array);
 	static void filenameWithoutPath(std::string& res);

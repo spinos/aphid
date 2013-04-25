@@ -2,7 +2,7 @@ mac:LIBS += -leasymodel
 INCLUDEPATH += ../shared ../lapl ./ ../easymodel ../../ofl/opium
 win32:INCLUDEPATH += D:/ofl/shared D:/usr/libxml2x64/include D:/usr/eigen3
 mac:INCLUDEPATH += /Users/jianzhang/Library/eigen3
-win32:LIBS +=  -LD:/usr/local/lib64 -leasymodel -LD:/usr/libxml2x64/lib -llibxml2
+win32:LIBS += -LD:/usr/libxml2x64/lib -llibxml2
 HEADERS       = ../shared/Vector3F.h \
                 ../shared/Ray.h \
                 ../shared/RayIntersectionContext.h \
@@ -117,7 +117,8 @@ win32 {
     HEADERS += ../shared/gExtension.h
     SOURCES += ../shared/gExtension.cpp
     INCLUDEPATH += D:/usr/local/include
-    QMAKE_LIBDIR += D:/usr/local/lib64
+    QMAKE_LIBDIR += D:/usr/local/lib64 
+    LIBS += -L../easymodel -leasymodel
 CONFIG += console
 }
 macx {

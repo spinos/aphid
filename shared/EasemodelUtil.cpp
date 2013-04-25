@@ -43,6 +43,25 @@ void Import(const char * filename, BaseMesh * dst)
         curFace += faceCount[i];
     }
     
+    printf("create pc %i ", nf);
+    dst->createPolygonCounts(nf);
+    
+    unsigned nfv = 0;
+    for(i = 0; i < nf; i++) {
+        dst->m_polygonCounts[i] = faceCount[i];
+        nfv += faceCount[i];
+    }
+    
+    dst->createPolygonIndices(nfv);
+    
+    nfv = 0;
+    for(i = 0; i < nf; i++) {
+        for(j = 0; j < faceCount[i]; j++) {
+            dst->m_polygonIndices[nfv] = faceConnection[nfv];
+            nfv++;
+        }
+    }
+    
     float* cvs = esm->getVertexPosition();
     dst->_numVertices = esm->getNumVertex();
     dst->_vertices = new Vector3F[dst->_numVertices];
@@ -84,16 +103,16 @@ void Export(const char * filename, BaseMesh * src)
 	
 	esm->begin();
 	
-	unsigned numPolygons = src->getNumFaces();
+	unsigned numPolygons = src->m_numPolygons;
 	int * faceCounts = new int[numPolygons];
-	for(unsigned i = 0; i < numPolygons; i++) faceCounts[i] = 3;
+	for(unsigned i = 0; i < numPolygons; i++) faceCounts[i] = src->m_polygonCounts[i];
 	
 	esm->writeFaceCount(numPolygons, faceCounts);
 	
-	unsigned numFaceVertices = src->getNumFaceVertices();
+	unsigned numFaceVertices = src->m_numPolygonVertices;
 	
 	int * faceVertices = new int[numFaceVertices];
-	for(unsigned i = 0; i < numFaceVertices; i++) faceVertices[i] = src->getIndices()[i];
+	for(unsigned i = 0; i < numFaceVertices; i++) faceVertices[i] = src->m_polygonIndices[i];
 	
 	esm->writeFaceConnection(numFaceVertices, faceVertices);
 	

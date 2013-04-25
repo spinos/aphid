@@ -22,6 +22,8 @@ public:
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
 	void createQuadIndices(unsigned num);
+	void createPolygonCounts(unsigned num);
+	void createPolygonIndices(unsigned num);
 	
 	const BoundingBox calculateBBox() const;
 	const BoundingBox calculateBBox(const unsigned &idx) const;
@@ -39,6 +41,7 @@ public:
 	unsigned getNumFaces() const;
 	unsigned getNumVertices() const;
 	unsigned getNumFaceVertices() const;
+	
 	Vector3F * getVertices() const;
 	unsigned * getIndices() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
@@ -54,4 +57,8 @@ public:
 	unsigned _numFaces;
 	unsigned _numFaceVertices;
 	unsigned m_numQuadVertices;
+	unsigned m_numPolygons;
+	unsigned * m_polygonCounts;
+	unsigned m_numPolygonVertices;
+	unsigned * m_polygonIndices;
 };
