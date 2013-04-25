@@ -34,6 +34,7 @@ public:
     virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
+	void resetView();
 //! [3]
 private:
 	void updateOrthoProjection();

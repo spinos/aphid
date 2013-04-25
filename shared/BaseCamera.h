@@ -14,7 +14,7 @@ public:
 	virtual ~BaseCamera();
 	
 	virtual bool isOrthographic() const;
-	
+	void reset();
 	void lookFromTo(Vector3F & from, Vector3F & to);
 	void setPortWidth(unsigned w);
 	void setPortHeight(unsigned h);

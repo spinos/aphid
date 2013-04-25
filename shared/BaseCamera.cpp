@@ -11,13 +11,9 @@
 #include <iostream>
 BaseCamera::BaseCamera() 
 {
-	fSpace.setIdentity();
-	fSpace.setTranslation(0, 0, 100);
-	fCenterOfInterest = Vector3F(0, 0, -10);
 	fPortWidth = 400;
 	fPortHeight = 300;
-	fHorizontalAperture = 100.f;
-	updateInverseSpace();
+	reset();
 }
 
 BaseCamera::~BaseCamera() {}
@@ -25,6 +21,16 @@ BaseCamera::~BaseCamera() {}
 bool BaseCamera::isOrthographic() const
 {
 	return true;
+}
+
+void BaseCamera::reset()
+{
+	fHorizontalAperture = 100.f;
+	
+	fSpace.setIdentity();
+	fSpace.setTranslation(0, 0, 100);
+	fCenterOfInterest = Vector3F(0, 0, -10);
+	updateInverseSpace();
 }
 
 void BaseCamera::lookFromTo(Vector3F & from, Vector3F & to)
@@ -150,10 +156,6 @@ void BaseCamera::screenToWorld(int x, int y, Vector3F & worldVec) const
 
 void BaseCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const
 {
-    //const Vector3F eye = fSpace.getTranslation();
-    //const Vector3F view = eye - fCenterOfInterest;
-    //Vector3F worldPos = fCenterOfInterest - view;
-    //worldPos = fInverseSpace.transform(worldPos);
     origin.x = ((float)x/(float)fPortWidth - 0.5f) * fHorizontalAperture;
 	origin.y = -((float)y/(float)fPortHeight - 0.5f) * fHorizontalAperture / aspectRatio();
 	origin.z = 0.f;

@@ -203,3 +203,12 @@ void Base3DView::updatePerspProjection()
 {
 
 }
+
+void Base3DView::resetView()
+{
+	getCamera()->reset();
+	if(getCamera()->isOrthographic())
+		updateOrthoProjection();
+	else
+		updatePerspProjection();
+}

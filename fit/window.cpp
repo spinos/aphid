@@ -57,7 +57,7 @@ Window::Window()
     splitter->addWidget(targetWidget);
 
 	setCentralWidget(splitter);
-    setWindowTitle(tr("Matching Shape 0.1 April 25 2013"));
+    setWindowTitle(tr("Matching Shape Version 0.2 Fri 4/26/2013"));
 	
 	glWidget->setTarget(targetWidget->getAnchors(), targetWidget->getTree());
 	createActions();
@@ -112,6 +112,11 @@ void Window::keyPressEvent(QKeyEvent *e)
 		qDebug() << "clear selection";
 		glWidget->clearSelection();
 		targetWidget->clearSelection();
+	}
+	else if(e->key() == Qt::Key_H) {
+		qDebug() << "reset camera";
+		glWidget->resetView();
+		targetWidget->resetView();
 	}
     
 	QWidget::keyPressEvent(e);
