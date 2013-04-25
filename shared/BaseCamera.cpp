@@ -79,9 +79,10 @@ void BaseCamera::tumble(int x, int y)
 	eye = fCenterOfInterest + view * dist;
 	fSpace.setTranslation(eye);
 	
-	front = view;	
+	front = view;
 	
 	side = up.cross(front);
+	side.y = 0.f;
 	side.normalize();
 	
 	up = front.cross(side);
@@ -109,7 +110,8 @@ void BaseCamera::track(int x, int y)
 
 void BaseCamera::zoom(int y)
 {
-	if(fHorizontalAperture + y > .1f) fHorizontalAperture += (float)y * 0.5f;
+	fHorizontalAperture *= (float)(fPortWidth + fPortHeight + y * 3)/(float)(fPortWidth + fPortHeight);
+	if(fHorizontalAperture < .05f) fHorizontalAperture = .05f;
 }
 
 void BaseCamera::moveForward(int y)

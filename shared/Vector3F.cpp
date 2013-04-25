@@ -47,6 +47,13 @@ void Vector3F::set(float vx, float vy, float vz)
     z = vz;
 }
 
+void Vector3F::setComp(float v, int icomp)
+{
+	if(icomp < 1) x = v;
+	else if(icomp < 2) y = v;
+	else z = v;
+}
+
 char Vector3F::equals(const Vector3F &other ) const
 {
 	return (x == other.x && y == other.y && z == other.z);

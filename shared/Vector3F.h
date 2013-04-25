@@ -11,6 +11,7 @@ public:
 	
 	void setZero();
 	void set(float vx, float vy, float vz);
+	void setComp(float v, int icomp);
 	
 	char equals(const Vector3F &other ) const;
 	char operator==( const Vector3F& other ) const;

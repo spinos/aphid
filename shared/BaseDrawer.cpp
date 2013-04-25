@@ -514,7 +514,7 @@ void BaseDrawer::anchor(Anchor *a, float size)
 	unsigned nouse;
 	for(Anchor::AnchorPoint * ap = a->firstPoint(nouse); a->hasPoint(); ap = a->nextPoint(nouse)) {
 		Vector3F p = ap->p;
-		solidCube(p.x, p.y, p.z, 0.2f);
+		solidCube(p.x, p.y, p.z, 0.1f);
 	}
 	if(a->numPoints() > 1) {
 		BaseCurve curve;

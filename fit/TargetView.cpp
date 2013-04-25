@@ -118,8 +118,7 @@ void TargetView::clientSelect(Vector3F & origin, Vector3F & displacement, Vector
 	
 	Ray ray(rayo, raye);
 	if(m_mode == SelectCompnent) {
-		if(!pickupComponent(ray, hit))
-			m_selected->reset();
+		pickupComponent(ray, hit);
 	}
 	else {
 		m_anchors->pickupAnchor(ray, hit);
@@ -224,5 +223,10 @@ void TargetView::loadMesh(std::string filename)
 	m_selected->setTopology(topo->getTopology());
 	
 	rebuildTree();
+}
+
+void TargetView::clearSelection()
+{
+	m_selected->reset();
 }
 //:~

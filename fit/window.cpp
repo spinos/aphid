@@ -108,6 +108,11 @@ void Window::keyPressEvent(QKeyEvent *e)
 		qDebug() << "template go backward";
 		glWidget->getCamera()->moveForward(-23);
 	}
+	else if(e->key() == Qt::Key_Space) {
+		qDebug() << "clear selection";
+		glWidget->clearSelection();
+		targetWidget->clearSelection();
+	}
     
 	QWidget::keyPressEvent(e);
 }

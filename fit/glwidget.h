@@ -83,6 +83,7 @@ public:
 	void removeLastAnchor();
 	void rebuildTree();
 	void loadMesh(std::string filename);
+	void clearSelection();
 //! [2]
 protected:
     

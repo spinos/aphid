@@ -120,8 +120,7 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 	
 	Ray ray(rayo, raye);
 	if(m_mode == SelectCompnent) {
-		if(!pickupComponent(ray, hit))
-			m_selected->reset();
+		pickupComponent(ray, hit);
 	}
 	else {
 		m_anchors->pickupAnchor(ray, hit);
@@ -172,6 +171,8 @@ void GLWidget::startDeform()
 		rebuildTree();
 		return;
 	}
+	
+	if(m_targetAnchors->numAnchors() < 1) return;
 	
 	if(m_targetAnchors) {
 		std::vector<Anchor *> src; 
@@ -289,5 +290,10 @@ void GLWidget::save()
 	ESMUtil::Export(temQStr.toStdString().c_str(), m_mesh);
 	
 	QMessageBox::information(this, tr("Success"), QString("Template saved as ").append(temQStr));
+}
+
+void GLWidget::clearSelection()
+{
+	m_selected->reset();
 }
 //:~
