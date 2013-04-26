@@ -50,7 +50,6 @@
 #include "KdTreeDrawer.h"
 #include <KdTree.h>
 #include <Ray.h>
-#include <SelectionArray.h>
 #include <EasemodelUtil.h>
 #include <AnchorGroup.h>
 #include <MeshTopology.h>
@@ -62,9 +61,6 @@ TargetView::TargetView(QWidget *parent) : Base3DView(parent)
 {
 	m_tree = 0;
 	m_mesh = new BaseMesh;
-	m_drawer = new KdTreeDrawer;
-	m_selected = new SelectionArray;
-	m_selected->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_intersectCtx = new IntersectionContext;
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_anchors = new AnchorGroup;
@@ -92,21 +88,21 @@ TargetView::~TargetView()
 
 void TargetView::clientDraw()
 {
-	m_drawer->setCullFace(1);
-	m_drawer->setWired(0);
-	m_drawer->setGrey(0.4f);
-	m_drawer->drawMesh(m_mesh);
-	m_drawer->setWired(1);
-	m_drawer->setGrey(0.9f);
-	m_drawer->edge(m_mesh);
-	m_drawer->setCullFace(0);
+	KdTreeDrawer *drawer = getDrawer();
+	drawer->setCullFace(1);
+	drawer->setWired(0);
+	drawer->setGrey(0.4f);
+	drawer->drawMesh(m_mesh);
+	drawer->setWired(1);
+	drawer->setGrey(0.9f);
+	drawer->edge(m_mesh);
+	drawer->setCullFace(0);
 	
-	m_drawer->setGrey(0.5f);
-	m_drawer->setColor(0.f, 1.f, 0.4f);
-	m_drawer->components(m_selected);
+	drawSelection();
+	
 	if(m_anchors->numAnchors() > 0) {
 		for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor())
-			m_drawer->anchor(a, m_anchors->getHitTolerance());
+			drawer->anchor(a, m_anchors->getHitTolerance());
 	}
 }
 //! [7]
@@ -155,11 +151,11 @@ void TargetView::simulate()
 
 void TargetView::anchorSelected(float wei)
 {
-	if(m_selected->numVertices() < 1) return;
-	Anchor *a = new Anchor(*m_selected);
+	if(getSelection()->numVertices() < 1) return;
+	Anchor *a = new Anchor(*getSelection());
 	a->setWeight(wei);
 	m_anchors->addAnchor(a);
-	m_selected->reset();
+	clearSelection();
 }
 
 void TargetView::startDeform()
@@ -173,7 +169,7 @@ bool TargetView::pickupComponent(const Ray & ray, Vector3F & hit)
 {
 	m_intersectCtx->reset();
 	if(m_tree->intersect(ray, m_intersectCtx)) {
-	    m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
+	    getSelection()->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
 		hit = m_intersectCtx->m_hitP;
 		return true;
 	}
@@ -220,13 +216,8 @@ void TargetView::loadMesh(std::string filename)
 	ESMUtil::Import(filename.c_str(), m_mesh);
 	
 	m_topo->buildTopology(m_mesh);
-	m_selected->setTopology(m_topo->getTopology());
+	getSelection()->setTopology(m_topo->getTopology());
 	m_topo->calculateNormal(m_mesh);
 	buildTree();
-}
-
-void TargetView::clearSelection()
-{
-	m_selected->reset();
 }
 //:~

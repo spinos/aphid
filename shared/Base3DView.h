@@ -4,6 +4,8 @@
 
 #include <QGLWidget>
 #include <BaseCamera.h>
+#include <KdTreeDrawer.h>
+#include <SelectionArray.h>
 
 class Base3DView : public QGLWidget
 {
@@ -20,6 +22,8 @@ public:
 //! [0]
 
 	BaseCamera * getCamera() const;
+	KdTreeDrawer * getDrawer() const;
+	SelectionArray * getSelection() const;
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
@@ -35,6 +39,8 @@ public:
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
 	void resetView();
+	void drawSelection();
+	void clearSelection();
 //! [3]
 private:
 	void updateOrthoProjection();
@@ -42,7 +48,8 @@ private:
     QPoint m_lastPos;
     QColor m_backgroundColor;
 	BaseCamera* fCamera;
-	
+	KdTreeDrawer * m_drawer;
+	SelectionArray * m_selected;
 	Vector3F m_hitPosition;
 
 };

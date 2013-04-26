@@ -15,12 +15,18 @@ Base3DView::Base3DView(QWidget *parent)
 {
     m_backgroundColor = QColor::fromCmykF(0.29, 0.29, 0.20, 0.0);
 	fCamera = new BaseCamera;
+	m_drawer = new KdTreeDrawer;
+	m_selected = new SelectionArray;
+	m_selected->setComponentFilterType(PrimitiveFilter::TVertex);
 }
 //! [0]
 
 //! [1]
 Base3DView::~Base3DView()
 {
+	delete fCamera;
+	delete m_drawer;
+	delete m_selected;
 }
 //! [1]
 
@@ -43,7 +49,16 @@ BaseCamera * Base3DView::getCamera() const
 	return fCamera;
 }
 
-//! [6]
+KdTreeDrawer * Base3DView::getDrawer() const
+{
+	return m_drawer;
+}
+
+SelectionArray * Base3DView::getSelection() const
+{
+	return m_selected;
+}
+
 void Base3DView::initializeGL()
 {
     qglClearColor(m_backgroundColor.dark());
@@ -212,3 +227,15 @@ void Base3DView::resetView()
 	else
 		updatePerspProjection();
 }
+
+void Base3DView::drawSelection()
+{
+	m_drawer->setColor(0.f, .8f, .2f);
+	m_drawer->components(m_selected);
+}
+
+void Base3DView::clearSelection()
+{
+	m_selected->reset();
+}
+//:~

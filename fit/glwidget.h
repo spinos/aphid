@@ -49,7 +49,6 @@ class BaseMesh;
 class KdTreeDrawer;
 class KdTree;
 class HarmonicCoord;
-class SelectionArray;
 class AnchorGroup;
 class Anchor;
 class Ray;
@@ -83,16 +82,13 @@ public:
 	void removeLastAnchor();
 	void buildTree();
 	void loadMesh(std::string filename);
-	void clearSelection();
 //! [2]
 protected:
     
 //! [3]
 private:
     BaseMesh * m_mesh;
-    KdTreeDrawer * m_drawer;
 	KdTree * m_tree;
-	SelectionArray * m_selected;
 	InteractMode m_mode;
 	AnchorGroup * m_anchors;
 	IntersectionContext * m_intersectCtx;

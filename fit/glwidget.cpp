@@ -47,7 +47,6 @@
 #include "glwidget.h"
 
 #include "BaseMesh.h"
-#include "KdTreeDrawer.h"
 #include <KdTree.h>
 #include <Ray.h>
 #include <SelectionArray.h>
@@ -62,9 +61,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_tree = 0;
 	m_mesh = new BaseMesh;
-	m_drawer = new KdTreeDrawer;
-	m_selected = new SelectionArray;
-	m_selected->setComponentFilterType(PrimitiveFilter::TVertex);
+	
 	m_intersectCtx = new IntersectionContext;
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_anchors = new AnchorGroup;
@@ -94,20 +91,21 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientDraw()
 {
-	m_drawer->setCullFace(1);
-	m_drawer->setWired(0);
-	m_drawer->setGrey(0.4f);
-	m_drawer->drawMesh(m_mesh);
-	m_drawer->setWired(1);
-	m_drawer->setGrey(0.9f);
-	m_drawer->edge(m_mesh);
-	m_drawer->setCullFace(0);
+	KdTreeDrawer *drawer = getDrawer();
+	drawer->setCullFace(1);
+	drawer->setWired(0);
+	drawer->setGrey(0.4f);
+	drawer->drawMesh(m_mesh);
+	drawer->setWired(1);
+	drawer->setGrey(0.9f);
+	drawer->edge(m_mesh);
+	drawer->setCullFace(0);
 	
-	m_drawer->setColor(0.f, 1.f, 0.4f);
-	m_drawer->components(m_selected);
+	drawSelection();
+	
 	if(m_anchors->numAnchors() > 0) {
 		for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor())
-			m_drawer->anchor(a, m_anchors->getHitTolerance());
+			drawer->anchor(a, m_anchors->getHitTolerance());
 	}
 }
 //! [7]
@@ -157,11 +155,11 @@ void GLWidget::simulate()
 
 void GLWidget::anchorSelected(float wei)
 {
-	if(m_selected->numVertices() < 1) return;
-	Anchor *a = new Anchor(*m_selected);
+	if(getSelection()->numVertices() < 1) return;
+	Anchor *a = new Anchor(*getSelection());
 	a->setWeight(wei);
 	m_anchors->addAnchor(a);
-	m_selected->reset();
+	clearSelection();
 }
 
 void GLWidget::startDeform()
@@ -200,7 +198,7 @@ bool GLWidget::pickupComponent(const Ray & ray, Vector3F & hit)
 	if(!m_tree->intersect(ray, m_intersectCtx)) 
 		return false;
 	hit = m_intersectCtx->m_hitP;
-	m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
+	getSelection()->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
 	return true;
 }
 
@@ -273,7 +271,7 @@ void GLWidget::loadMesh(std::string filename)
 	ESMUtil::Import(filename.c_str(), m_mesh);
 
 	m_deformer->setMesh(m_mesh);
-	m_selected->setTopology(m_deformer->getTopology());
+	getSelection()->setTopology(m_deformer->getTopology());
 	m_deformer->calculateNormal(m_mesh);
 	buildTree();
 }
@@ -289,10 +287,5 @@ void GLWidget::save()
 	ESMUtil::Export(temQStr.toStdString().c_str(), m_mesh);
 	
 	QMessageBox::information(this, tr("Success"), QString("Template saved as ").append(temQStr));
-}
-
-void GLWidget::clearSelection()
-{
-	m_selected->reset();
 }
 //:~

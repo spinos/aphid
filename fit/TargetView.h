@@ -81,16 +81,13 @@ public:
 	void removeLastAnchor();
 	void buildTree();
 	void loadMesh(std::string filename);
-	void clearSelection();
 //! [2]
 protected:
     
 //! [3]
 private:
     BaseMesh * m_mesh;
-    KdTreeDrawer * m_drawer;
-	KdTree * m_tree;
-	SelectionArray * m_selected;
+    KdTree * m_tree;
 	InteractMode m_mode;
 	AnchorGroup * m_anchors;
 	IntersectionContext * m_intersectCtx;
