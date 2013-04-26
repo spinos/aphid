@@ -18,6 +18,11 @@ Base3DView::Base3DView(QWidget *parent)
 	m_drawer = new KdTreeDrawer;
 	m_selected = new SelectionArray;
 	m_selected->setComponentFilterType(PrimitiveFilter::TVertex);
+	m_intersectCtx = new IntersectionContext;
+	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
+	QTimer *timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+	timer->start(30);
 }
 //! [0]
 
@@ -27,6 +32,7 @@ Base3DView::~Base3DView()
 	delete fCamera;
 	delete m_drawer;
 	delete m_selected;
+	delete m_intersectCtx;
 }
 //! [1]
 
@@ -57,6 +63,11 @@ KdTreeDrawer * Base3DView::getDrawer() const
 SelectionArray * Base3DView::getSelection() const
 {
 	return m_selected;
+}
+
+IntersectionContext * Base3DView::getIntersectionContext() const
+{
+	return m_intersectCtx;
 }
 
 void Base3DView::initializeGL()
@@ -237,5 +248,10 @@ void Base3DView::drawSelection()
 void Base3DView::clearSelection()
 {
 	m_selected->reset();
+}
+
+void Base3DView::addHitToSelection()
+{
+	m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
 }
 //:~

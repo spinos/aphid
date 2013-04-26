@@ -61,15 +61,9 @@ TargetView::TargetView(QWidget *parent) : Base3DView(parent)
 {
 	m_tree = 0;
 	m_mesh = new BaseMesh;
-	m_intersectCtx = new IntersectionContext;
-	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_anchors = new AnchorGroup;
 	m_anchors->setHitTolerance(.8f);
 	m_topo = new MeshTopology;
-	
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(30);
 	
 #ifdef WIN32
 	loadMesh("D:/aphid/mdl/ball.m");
@@ -167,13 +161,13 @@ void TargetView::startDeform()
 
 bool TargetView::pickupComponent(const Ray & ray, Vector3F & hit)
 {
-	m_intersectCtx->reset();
-	if(m_tree->intersect(ray, m_intersectCtx)) {
-	    getSelection()->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
-		hit = m_intersectCtx->m_hitP;
-		return true;
-	}
-	return false;
+	getIntersectionContext()->reset();
+	if(!m_tree->intersect(ray, getIntersectionContext())) 
+		return false;
+		
+	hit = getIntersectionContext()->m_hitP;
+	addHitToSelection();
+	return true;
 }
 
 AnchorGroup * TargetView::getAnchors() const

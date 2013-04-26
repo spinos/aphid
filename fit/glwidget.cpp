@@ -62,8 +62,6 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_tree = 0;
 	m_mesh = new BaseMesh;
 	
-	m_intersectCtx = new IntersectionContext;
-	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_anchors = new AnchorGroup;
 	m_anchors->setHitTolerance(.8f);
 	
@@ -77,10 +75,6 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 #endif
 
 	m_mode = SelectCompnent;
-	
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(30);
 }
 //! [0]
 
@@ -194,11 +188,11 @@ void GLWidget::startDeform()
 
 bool GLWidget::pickupComponent(const Ray & ray, Vector3F & hit)
 {
-	m_intersectCtx->reset();
-	if(!m_tree->intersect(ray, m_intersectCtx)) 
+	getIntersectionContext()->reset();
+	if(!m_tree->intersect(ray, getIntersectionContext())) 
 		return false;
-	hit = m_intersectCtx->m_hitP;
-	getSelection()->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
+	hit = getIntersectionContext()->m_hitP;
+	addHitToSelection();
 	return true;
 }
 

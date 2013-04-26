@@ -6,6 +6,7 @@
 #include <BaseCamera.h>
 #include <KdTreeDrawer.h>
 #include <SelectionArray.h>
+#include <IntersectionContext.h>
 
 class Base3DView : public QGLWidget
 {
@@ -24,6 +25,8 @@ public:
 	BaseCamera * getCamera() const;
 	KdTreeDrawer * getDrawer() const;
 	SelectionArray * getSelection() const;
+	IntersectionContext * getIntersectionContext() const;
+	
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
@@ -41,6 +44,8 @@ public:
 	void resetView();
 	void drawSelection();
 	void clearSelection();
+	void addHitToSelection();
+	
 //! [3]
 private:
 	void updateOrthoProjection();
@@ -50,6 +55,7 @@ private:
 	BaseCamera* fCamera;
 	KdTreeDrawer * m_drawer;
 	SelectionArray * m_selected;
+	IntersectionContext * m_intersectCtx;
 	Vector3F m_hitPosition;
 
 };

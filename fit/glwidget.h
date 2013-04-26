@@ -44,9 +44,8 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
-#include <IntersectionContext.h>
+
 class BaseMesh;
-class KdTreeDrawer;
 class KdTree;
 class HarmonicCoord;
 class AnchorGroup;
@@ -91,7 +90,6 @@ private:
 	KdTree * m_tree;
 	InteractMode m_mode;
 	AnchorGroup * m_anchors;
-	IntersectionContext * m_intersectCtx;
 	FitDeformer * m_deformer;
 	AnchorGroup * m_targetAnchors;
 private slots:
