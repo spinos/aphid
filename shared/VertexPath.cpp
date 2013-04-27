@@ -44,11 +44,22 @@ char VertexPath::recursiveFindClosestNeighbor(unsigned vert, unsigned endVert, c
 bool VertexPath::grow(unsigned startVert, unsigned endVert, unsigned & dst)
 {
 	VertexAdjacency adj = m_topology[endVert];
-	if(adj.isOpen()) return false;
 	if(!adj.isConnectedTo(startVert)) return false;
+	if(adj.isOpen()) return growOnBoundary(startVert, endVert, dst);
 	
 	dst = adj.nextRealEdgeNeighbor(startVert);
 	dst = adj.nextRealEdgeNeighbor(dst);
+	return true;
+}
+
+bool VertexPath::growOnBoundary(unsigned startVert, unsigned endVert, unsigned & dst)
+{
+	VertexAdjacency adj = m_topology[startVert];
+	if(!adj.isOpen()) return false;
+	adj = m_topology[endVert];
+	if(!adj.isOpen()) return false;
+	
+	dst = adj.nextBoundaryNeighbor(startVert);
 	return true;
 }
 

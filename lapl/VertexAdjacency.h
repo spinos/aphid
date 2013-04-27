@@ -47,6 +47,7 @@ public:
 	
 	bool isConnectedTo(unsigned idx);
 	unsigned nextRealEdgeNeighbor(unsigned idx);
+	unsigned nextBoundaryNeighbor(unsigned idx);
 	
 	void verbose() const;
 private:

@@ -364,6 +364,27 @@ unsigned VertexAdjacency::nextRealEdgeNeighbor(unsigned idx)
 	return (*m_neighborIt)->v->getIndex();
 }
 
+unsigned VertexAdjacency::nextBoundaryNeighbor(unsigned idx)
+{
+	for(m_neighborIt = m_neighbors.begin(); m_neighborIt != m_neighbors.end(); ++m_neighborIt) {
+		if((*m_neighborIt)->v->getIndex() == idx) {
+			m_neighborIt++;
+			if(m_neighborIt == m_neighbors.end()) m_neighborIt = m_neighbors.begin();
+			break;
+		}
+	}
+	
+	Edge dummy, nouse;
+	for(unsigned i = 0; i < getNumNeighbors()-1; i++) {
+		findEdge(this->getIndex(), (*m_neighborIt)->v->getIndex(), dummy);
+		if(!findOppositeEdge(dummy, nouse)) return (*m_neighborIt)->v->getIndex();
+		m_neighborIt++;
+		if(m_neighborIt == m_neighbors.end()) m_neighborIt = m_neighbors.begin();
+	}
+	
+	return (*m_neighborIt)->v->getIndex();
+}
+
 void VertexAdjacency::verbose() const
 {
 	printf("\nv %i\n adjacent edge count: %i\n", getIndex(), (int)m_edges.size());
