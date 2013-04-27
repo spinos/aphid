@@ -18,6 +18,7 @@ BaseMesh::BaseMesh()
 	m_quadIndices = 0;
 	m_polygonCounts = 0;
 	m_polygonIndices = 0;
+	m_realEdges = 0;
 	setMeshType();
 }
 
@@ -29,6 +30,7 @@ BaseMesh::~BaseMesh()
 	if(m_quadIndices) delete[] m_quadIndices;
 	if(m_polygonCounts) delete[] m_polygonCounts;
 	if(m_polygonIndices) delete[] m_polygonIndices;
+	if(m_realEdges) delete[] m_realEdges;
 }
 
 void BaseMesh::createVertices(unsigned num)
@@ -41,6 +43,7 @@ void BaseMesh::createVertices(unsigned num)
 void BaseMesh::createIndices(unsigned num)
 {
 	_indices = new unsigned[num];
+	m_realEdges = new char[num];
 	_numFaceVertices = num;
 }
 

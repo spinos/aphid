@@ -34,10 +34,14 @@ public:
 
 	void flip();
 	void disconnect();
+	
+	char isReal() const;
+	void setReal(char val);
 
 private:
 	Vertex *va;
 	Vertex *vb;
 	char *face;
 	Edge *identicalTwin;
+	char m_isReal;
 };

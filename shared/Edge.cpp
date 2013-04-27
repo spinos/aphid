@@ -101,3 +101,13 @@ void Edge::disconnect()
 {
 	next = 0;
 }
+
+char Edge::isReal() const
+{
+	return m_isReal;
+}
+
+void Edge::setReal(char val)
+{
+	m_isReal = val;
+}

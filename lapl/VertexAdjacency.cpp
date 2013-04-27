@@ -178,6 +178,18 @@ char VertexAdjacency::findOppositeEdge(int i, int j, Edge & dest) const
 	return 0;
 }
 
+char VertexAdjacency::findEdge(int i, int j, Edge & dest) const
+{
+	std::vector<Edge *>::const_iterator it;
+	for(it = m_edges.begin(); it < m_edges.end(); it++) {
+		if((*it)->isOppositeOf(i, j) || (*it)->isOppositeOf(j, i)) {
+			dest = *(*it);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 char VertexAdjacency::findOppositeEdge(Edge & e, Edge &dest) const
 {
 	std::vector<Edge *>::const_iterator it;
@@ -320,6 +332,27 @@ VertexAdjacency::VertexNeighbor * VertexAdjacency::nextNeighborOrderedByVertexId
 char VertexAdjacency::isLastNeighborOrderedByVertexIdx()
 {
     return m_orderedNeighborIt == m_idxInOrder.end();
+}
+
+unsigned VertexAdjacency::nextRealEdgeNeighbor(unsigned idx)
+{
+	for(m_neighborIt = m_neighbors.begin(); m_neighborIt != m_neighbors.end(); ++m_neighborIt) {
+		if((*m_neighborIt)->v->getIndex() == idx) {
+			m_neighborIt++;
+			if(m_neighborIt == m_neighbors.end()) m_neighborIt = m_neighbors.begin();
+			break;
+		}
+	}
+	
+	Edge dummy;
+	for(unsigned i = 0; i < getNumNeighbors()-1; i++) {
+		findEdge(this->getIndex(), (*m_neighborIt)->v->getIndex(), dummy);
+		if(dummy.isReal()) return (*m_neighborIt)->v->getIndex();
+		m_neighborIt++;
+		if(m_neighborIt == m_neighbors.end()) m_neighborIt = m_neighbors.begin();
+	}
+	
+	return (*m_neighborIt)->v->getIndex();
 }
 
 void VertexAdjacency::verbose() const

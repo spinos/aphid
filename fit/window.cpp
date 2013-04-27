@@ -118,6 +118,14 @@ void Window::keyPressEvent(QKeyEvent *e)
 		glWidget->resetView();
 		targetWidget->resetView();
 	}
+	else if(e->key() == Qt::Key_BracketRight) {
+		glWidget->growSelection();
+		targetWidget->growSelection();
+	}
+	else if(e->key() == Qt::Key_BracketLeft) {
+		glWidget->shrinkSelection();
+		targetWidget->shrinkSelection();
+	}
     
 	QWidget::keyPressEvent(e);
 }

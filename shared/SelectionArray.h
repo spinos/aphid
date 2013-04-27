@@ -36,6 +36,9 @@ public:
 	unsigned numFaces() const;
 	unsigned getFaceId(const unsigned & idx) const;
 	
+	void grow();
+	void shrink();
+	
 	void setTopology(VertexAdjacency * topo);
 private:
 	VertexPath * m_vertexPath;

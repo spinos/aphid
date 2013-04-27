@@ -9,6 +9,7 @@ public:
     
     void setTopology(VertexAdjacency * topo);
     void create(unsigned startVert, unsigned endVert);
+	unsigned grow(unsigned startVert, unsigned endVert);
 	
 	unsigned numVertices() const;
 	unsigned vertex(unsigned idx) const;

@@ -64,4 +64,5 @@ public:
 	unsigned * m_polygonCounts;
 	unsigned m_numPolygonVertices;
 	unsigned * m_polygonIndices;
+	char * m_realEdges;
 };

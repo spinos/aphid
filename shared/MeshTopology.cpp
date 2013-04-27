@@ -47,6 +47,7 @@ char MeshTopology::buildTopology(BaseMesh * mesh)
 		f->setIndex(i);
 		for(unsigned j = 0; j < 3; j++) {
 			Edge * e = f->edge(j);
+			e->setReal(mesh->m_realEdges[i * 3 + j]);
 			m_adjacency[e->v0()->getIndex()].addEdge(e);
 			m_adjacency[e->v1()->getIndex()].addEdge(e);
 		}

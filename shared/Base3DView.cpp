@@ -254,4 +254,14 @@ void Base3DView::addHitToSelection()
 {
 	m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
 }
+
+void Base3DView::growSelection()
+{
+	m_selected->grow();
+}
+
+void Base3DView::shrinkSelection()
+{
+	m_selected->shrink();
+}
 //:~

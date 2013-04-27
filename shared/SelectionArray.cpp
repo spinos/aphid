@@ -135,3 +135,27 @@ void SelectionArray::setTopology(VertexAdjacency * topo)
 {
 	m_vertexPath->setTopology(topo);
 }
+
+void SelectionArray::grow()
+{
+	if(numVertices() < 2) return;
+	
+	std::vector<unsigned>::iterator it = m_vertexIds.end();
+	it--;
+	unsigned endVert = *it;
+	it--;
+	unsigned startVert = *it;
+	unsigned nextVert = m_vertexPath->grow(startVert, endVert);
+	if(!isVertexSelected(nextVert)) {
+		m_vertexIds.push_back(nextVert);
+	}	
+}
+
+void SelectionArray::shrink()
+{
+	if(numVertices() > 0) {
+		std::vector<unsigned>::iterator it = m_vertexIds.end();
+		--it;
+		m_vertexIds.erase(it);
+	}
+}

@@ -45,6 +45,8 @@ public:
 	VertexNeighbor * nextNeighborOrderedByVertexIdx();
 	char isLastNeighborOrderedByVertexIdx();
 	
+	unsigned nextRealEdgeNeighbor(unsigned idx);
+	
 	void verbose() const;
 private:
 	char findOneRingNeighbors();
@@ -56,6 +58,7 @@ private:
 	char findIncomming(Edge & eout, Edge & ein) const;
 	void addNeighbor(Edge *e, char isOutgoing = 1);
     void getVijs(int idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const;
+	char findEdge(int i, int j, Edge & dest) const;
 	
 	std::vector<Edge *> m_edges;
 	std::vector<VertexNeighbor *> m_neighbors;

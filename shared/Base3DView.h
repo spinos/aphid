@@ -45,6 +45,8 @@ public:
 	void drawSelection();
 	void clearSelection();
 	void addHitToSelection();
+	void growSelection();
+	void shrinkSelection();
 	
 //! [3]
 private:
