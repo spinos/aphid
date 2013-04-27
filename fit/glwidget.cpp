@@ -282,4 +282,24 @@ void GLWidget::save()
 	
 	QMessageBox::information(this, tr("Success"), QString("Template saved as ").append(temQStr));
 }
+
+void GLWidget::keyPressEvent(QKeyEvent *e)
+{
+	if(e->key() == Qt::Key_A) {
+		anchorSelected(1.f);
+	}
+	else if(e->key() == Qt::Key_D) {
+		qDebug() << "deform";
+		startDeform();
+	}
+	else if(e->key() == Qt::Key_F) {
+		qDebug() << "fit to target";
+		fit();
+	}
+	else if(e->key() == Qt::Key_Z) {
+		removeLastAnchor();
+	}
+
+	Base3DView::keyPressEvent(e);
+}
 //:~

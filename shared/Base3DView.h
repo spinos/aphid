@@ -1,12 +1,13 @@
 #ifndef BASE3DVIEW_H
 #define BASE3DVIEW_H
 
-
 #include <QGLWidget>
 #include <BaseCamera.h>
 #include <KdTreeDrawer.h>
 #include <SelectionArray.h>
 #include <IntersectionContext.h>
+
+class QTimer;
 
 class Base3DView : public QGLWidget
 {
@@ -48,7 +49,10 @@ public:
 	void growSelection();
 	void shrinkSelection();
 	
-//! [3]
+protected:
+    void keyPressEvent(QKeyEvent *event);
+	void focusInEvent(QFocusEvent * event);
+	void focusOutEvent(QFocusEvent * event);
 private:
 	void updateOrthoProjection();
 	void updatePerspProjection();
@@ -58,7 +62,9 @@ private:
 	KdTreeDrawer * m_drawer;
 	SelectionArray * m_selected;
 	IntersectionContext * m_intersectCtx;
+	QTimer *m_timer;
 	Vector3F m_hitPosition;
+	char m_isFocused;
 
 };
 #endif        //  #ifndef BASE3DVIEW_H

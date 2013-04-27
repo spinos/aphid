@@ -214,4 +214,16 @@ void TargetView::loadMesh(std::string filename)
 	m_topo->calculateNormal(m_mesh);
 	buildTree();
 }
+
+void TargetView::keyPressEvent(QKeyEvent *e)
+{
+	if(e->key() == Qt::Key_A) {
+		anchorSelected(1.f);
+	}
+	else if(e->key() == Qt::Key_Z) {
+		removeLastAnchor();
+	}
+
+	Base3DView::keyPressEvent(e);
+}
 //:~

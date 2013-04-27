@@ -529,6 +529,7 @@ void BaseDrawer::anchor(Anchor *a, float size)
     
     glMultMatrixf((const GLfloat*)m);
 
+	glColor3f(0.f, .8f, .2f);
 	unsigned nouse;
 	for(Anchor::AnchorPoint * ap = a->firstPoint(nouse); a->hasPoint(); ap = a->nextPoint(nouse)) {
 		Vector3F p = ap->p;

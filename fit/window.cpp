@@ -57,7 +57,7 @@ Window::Window()
     splitter->addWidget(targetWidget);
 
 	setCentralWidget(splitter);
-    setWindowTitle(tr("Matching Shape Version 0.2 Fri 4/26/2013"));
+    setWindowTitle(tr("Matching Shape Version 0.4 Sun 4/28/2013"));
 	
 	glWidget->setTarget(targetWidget->getAnchors(), targetWidget->getTree());
 	createActions();
@@ -70,63 +70,7 @@ void Window::keyPressEvent(QKeyEvent *e)
 {
 	if (e->key() == Qt::Key_Escape)
         close();
-	else if(e->key() == Qt::Key_A) {
-		qDebug() << "source anchor selected as one";
-		glWidget->anchorSelected(1.f);
-	}
-	else if(e->key() == Qt::Key_S) {
-		qDebug() << "target anchor selected as one";
-		targetWidget->anchorSelected(1.f);
-	}
-	else if(e->key() == Qt::Key_D) {
-		qDebug() << "deform";
-		glWidget->startDeform();
-	}
-	else if(e->key() == Qt::Key_F) {
-		qDebug() << "fit to target";
-		glWidget->fit();
-	}
-	else if(e->key() == Qt::Key_Z) {
-		glWidget->removeLastAnchor();
-	}
-	else if(e->key() == Qt::Key_X) {
-		targetWidget->removeLastAnchor();
-	}
-	else if(e->key() == Qt::Key_Up) {
-		qDebug() << "target go forward";
-		targetWidget->getCamera()->moveForward(23);
-	}
-	else if(e->key() == Qt::Key_Down) {
-		qDebug() << "target go backward";
-		targetWidget->getCamera()->moveForward(-23);
-	}
-	else if(e->key() == Qt::Key_Right) {
-		qDebug() << "template go forward";
-		glWidget->getCamera()->moveForward(23);
-	}
-	else if(e->key() == Qt::Key_Left) {
-		qDebug() << "template go backward";
-		glWidget->getCamera()->moveForward(-23);
-	}
-	else if(e->key() == Qt::Key_Space) {
-		qDebug() << "clear selection";
-		glWidget->clearSelection();
-		targetWidget->clearSelection();
-	}
-	else if(e->key() == Qt::Key_H) {
-		qDebug() << "reset camera";
-		glWidget->resetView();
-		targetWidget->resetView();
-	}
-	else if(e->key() == Qt::Key_BracketRight) {
-		glWidget->growSelection();
-		targetWidget->growSelection();
-	}
-	else if(e->key() == Qt::Key_BracketLeft) {
-		glWidget->shrinkSelection();
-		targetWidget->shrinkSelection();
-	}
-    
+	
 	QWidget::keyPressEvent(e);
 }
 

@@ -20,9 +20,11 @@ Base3DView::Base3DView(QWidget *parent)
 	m_selected->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_intersectCtx = new IntersectionContext;
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-	timer->start(30);
+	m_timer = new QTimer(this);
+	connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
+	m_timer->start(30);
+	setFocusPolicy(Qt::ClickFocus);
+	m_isFocused = 0;
 }
 //! [0]
 
@@ -98,6 +100,17 @@ void Base3DView::paintGL()
 	getCamera()->getMatrix(m);
 	glMultMatrixf(m);
 	clientDraw();
+	if(m_isFocused) {
+		Vector3F corners[4];
+		getCamera()->frameCorners(corners[0], corners[1], corners[2], corners[3]);
+		glColor3f(0.f, 0.f, 1.f);
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(corners[0].x, corners[0].y, corners[0].z);
+		glVertex3f(corners[1].x, corners[1].y, corners[1].z);
+		glVertex3f(corners[2].x, corners[2].y, corners[2].z);
+		glVertex3f(corners[3].x, corners[3].y, corners[3].z);
+		glEnd();
+	}
 	glFlush();
 }
 //! [7]
@@ -269,5 +282,45 @@ void Base3DView::growSelection()
 void Base3DView::shrinkSelection()
 {
 	m_selected->shrink();
+}
+
+void Base3DView::keyPressEvent(QKeyEvent *e)
+{
+	if(e->key() == Qt::Key_Space) {
+		qDebug() << "clear selection";
+		clearSelection();
+	}
+	else if(e->key() == Qt::Key_H) {
+		qDebug() << "reset camera";
+		resetView();
+	}
+	else if(e->key() == Qt::Key_BracketRight) {
+		growSelection();
+	}
+	else if(e->key() == Qt::Key_BracketLeft) {
+		shrinkSelection();
+	}
+	else if(e->key() == Qt::Key_Up) {
+		getCamera()->moveForward(23);
+	}
+	else if(e->key() == Qt::Key_Down) {
+		getCamera()->moveForward(-23);
+	}
+    
+	QWidget::keyPressEvent(e);
+}
+
+void Base3DView::focusInEvent(QFocusEvent * event)
+{
+	m_isFocused = 1;
+	m_timer->start(30);
+	QGLWidget::focusInEvent(event);
+}
+
+void Base3DView::focusOutEvent(QFocusEvent * event)
+{
+	m_isFocused = 0;
+	m_timer->stop();
+	QGLWidget::focusOutEvent(event);
 }
 //:~

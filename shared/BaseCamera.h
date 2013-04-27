@@ -32,6 +32,7 @@ public:
 	Vector3F eyePosition() const;
 	float aspectRatio() const;
 	float getHorizontalAperture() const;
+	void frameCorners(Vector3F & bottomLeft, Vector3F & bottomRight, Vector3F & topRight, Vector3F & topLeft) const;
 	
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;

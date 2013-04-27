@@ -177,3 +177,28 @@ float BaseCamera::aspectRatio() const
 {
 	return (float)fPortWidth / (float)fPortHeight;
 }
+
+void BaseCamera::frameCorners(Vector3F & bottomLeft, Vector3F & bottomRight, Vector3F & topRight, Vector3F & topLeft) const
+{
+	const float halfw = fHorizontalAperture * 0.498f;
+	bottomLeft.setZero(); bottomLeft.z = -1.05f;
+	bottomLeft.x = -halfw;
+	bottomLeft.y = -halfw / aspectRatio();
+	bottomLeft = fSpace.transform(bottomLeft);
+	
+	bottomRight.setZero(); bottomRight.z = -1.05f;
+	bottomRight.x = halfw;
+	bottomRight.y = -halfw / aspectRatio();
+	bottomRight = fSpace.transform(bottomRight);
+	
+	topRight.setZero(); topRight.z = -1.05f;
+	topRight.x = halfw;
+	topRight.y = halfw / aspectRatio();
+	topRight = fSpace.transform(topRight);
+	
+	topLeft.setZero(); topLeft.z = -1.05f;
+	topLeft.x = -halfw;
+	topLeft.y = halfw / aspectRatio();
+	topLeft = fSpace.transform(topLeft);
+}
+//:~
