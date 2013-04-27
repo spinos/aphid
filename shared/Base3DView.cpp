@@ -14,7 +14,9 @@ Base3DView::Base3DView(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
     m_backgroundColor = QColor::fromCmykF(0.29, 0.29, 0.20, 0.0);
-	fCamera = new BaseCamera;
+	m_orthoCamera = new BaseCamera;
+	m_perspCamera = new PerspectiveCamera;
+	fCamera = m_orthoCamera;
 	m_drawer = new KdTreeDrawer;
 	m_selected = new SelectionArray;
 	m_selected->setComponentFilterType(PrimitiveFilter::TVertex);
@@ -119,8 +121,10 @@ void Base3DView::paintGL()
 void Base3DView::resizeGL(int width, int height)
 {
     glViewport(0, 0, width, height);
-	getCamera()->setPortWidth(width);
-	getCamera()->setPortHeight(height);
+	m_perspCamera->setPortWidth(width);
+	m_perspCamera->setPortHeight(height);
+	m_orthoCamera->setPortWidth(width);
+	m_orthoCamera->setPortHeight(height);
 	if(getCamera()->isOrthographic())
 		updateOrthoProjection();
 	else
@@ -196,11 +200,11 @@ void Base3DView::processDeselection(QMouseEvent *event)
 
 void Base3DView::processMouseInput(QMouseEvent *event)
 {
-    getCamera()->intersection(event->x(), event->y(), m_hitPosition);
+    getCamera()->screenToWorldPoint(event->x(), event->y(), m_hitPosition);
     int dx = event->x() - m_lastPos.x();
     int dy = event->y() - m_lastPos.y();
     Vector3F injv;
-    getCamera()->screenToWorld(dx, dy, injv);
+    getCamera()->screenToWorldVector(dx, dy, injv);
 	Vector3F origin, incident;
     getCamera()->incidentRay(event->x(), event->y(), origin, incident);
     incident = incident.normal() * 1000.f;
@@ -234,7 +238,7 @@ void Base3DView::updateOrthoProjection()
     glLoadIdentity();
 	
 	float aspect = getCamera()->aspectRatio();
-	float fov = getCamera()->getHorizontalAperture();
+	float fov = getCamera()->fieldOfView();
 	float right = fov/ 2.f;
 	float top = right / aspect;
 
@@ -246,7 +250,21 @@ void Base3DView::updateOrthoProjection()
 
 void Base3DView::updatePerspProjection()
 {
+	makeCurrent();
+	glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+	
+	GLdouble left,right,bottom,top;
+		
+	right = getCamera()->frameWidth() * 0.5f;
+	left = -right;
+	top = getCamera()->frameHeight() * 0.5f;
+	bottom = -top;
 
+    glFrustum(left, right, bottom, top, 1.0, 1000.0);
+	
+    glMatrixMode(GL_MODELVIEW);
+	doneCurrent();
 }
 
 void Base3DView::resetView()
@@ -305,6 +323,16 @@ void Base3DView::keyPressEvent(QKeyEvent *e)
 	}
 	else if(e->key() == Qt::Key_Down) {
 		getCamera()->moveForward(-23);
+	}
+	else if(e->key() == Qt::Key_O) {
+		if(getCamera()->isOrthographic()) {
+			fCamera = m_perspCamera;
+			updatePerspProjection();
+		}
+		else {
+			fCamera = m_orthoCamera;
+			updateOrthoProjection();
+		}
 	}
     
 	QWidget::keyPressEvent(e);

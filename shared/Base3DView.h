@@ -2,7 +2,7 @@
 #define BASE3DVIEW_H
 
 #include <QGLWidget>
-#include <BaseCamera.h>
+#include <PerspectiveCamera.h>
 #include <KdTreeDrawer.h>
 #include <SelectionArray.h>
 #include <IntersectionContext.h>
@@ -59,6 +59,8 @@ private:
     QPoint m_lastPos;
     QColor m_backgroundColor;
 	BaseCamera* fCamera;
+	BaseCamera* m_orthoCamera;
+	PerspectiveCamera* m_perspCamera;
 	KdTreeDrawer * m_drawer;
 	SelectionArray * m_selected;
 	IntersectionContext * m_intersectCtx;

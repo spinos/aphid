@@ -23,16 +23,20 @@ public:
 	void getMatrix(float* m) const;
 	void tumble(int x, int y);
 	void track(int x, int y);
-	void zoom(int y);
+	virtual void zoom(int y);
 	void moveForward(int y);
 	
-	char intersection(int x, int y, Vector3F & worldPos) const;
-	void screenToWorld(int x, int y, Vector3F & worldVec) const;
-	void incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const;
+	char screenToWorldPoint(int x, int y, Vector3F & worldPos) const;
+	void screenToWorldVector(int x, int y, Vector3F & worldVec) const;
+	virtual void incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const;
 	Vector3F eyePosition() const;
 	float aspectRatio() const;
+	virtual float fieldOfView() const;
+	virtual float frameWidth() const;
+	virtual float frameHeight() const;
+	virtual float frameWidthRel() const;
 	float getHorizontalAperture() const;
-	void frameCorners(Vector3F & bottomLeft, Vector3F & bottomRight, Vector3F & topRight, Vector3F & topLeft) const;
+	virtual void frameCorners(Vector3F & bottomLeft, Vector3F & bottomRight, Vector3F & topRight, Vector3F & topLeft) const;
 	
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;

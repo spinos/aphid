@@ -103,7 +103,7 @@ void BaseCamera::track(int x, int y)
 	Vector3F side  = fSpace.getSide();
 	Vector3F up    = fSpace.getUp();
 	Vector3F eye = fSpace.getTranslation();
-	const float scaleing = fHorizontalAperture / fPortWidth;
+	const float scaleing = frameWidthRel();
 	eye -= side * (float)x * scaleing;
 	eye += up * (float)y * scaleing;	
 	
@@ -134,21 +134,20 @@ void BaseCamera::moveForward(int y)
 	updateInverseSpace();
 }
 
-char BaseCamera::intersection(int x, int y, Vector3F & worldPos) const
+char BaseCamera::screenToWorldPoint(int x, int y, Vector3F & worldPos) const
 {	
-	worldPos = fInverseSpace.transform(worldPos);
-	
-	worldPos.x = ((float)x/(float)fPortWidth - 0.5f) * fHorizontalAperture;
-	worldPos.y = -((float)y/(float)fPortHeight - 0.5f) * fHorizontalAperture / aspectRatio();
+	worldPos.x = ((float)x/(float)fPortWidth - 0.5f) * frameWidth();
+	worldPos.y = -((float)y/(float)fPortHeight - 0.5f) * frameHeight();
+	worldPos.z = -1.f;
 	
 	worldPos = fSpace.transform(worldPos);
 	return 1;
 }
 
-void BaseCamera::screenToWorld(int x, int y, Vector3F & worldVec) const
+void BaseCamera::screenToWorldVector(int x, int y, Vector3F & worldVec) const
 {
-    worldVec.x = ((float)x/(float)fPortWidth) * fHorizontalAperture;
-	worldVec.y = -((float)y/(float)fPortHeight)  * fHorizontalAperture / aspectRatio();
+    worldVec.x = ((float)x/(float)fPortWidth) * frameWidth();
+	worldVec.y = -((float)y/(float)fPortHeight)  * frameHeight();
 	worldVec.z = 0.f;
 	
 	worldVec = fSpace.transformAsNormal(worldVec);
@@ -156,9 +155,9 @@ void BaseCamera::screenToWorld(int x, int y, Vector3F & worldVec) const
 
 void BaseCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const
 {
-    origin.x = ((float)x/(float)fPortWidth - 0.5f) * fHorizontalAperture;
-	origin.y = -((float)y/(float)fPortHeight - 0.5f) * fHorizontalAperture / aspectRatio();
-	origin.z = 0.f;
+    origin.x = ((float)x/(float)fPortWidth - 0.5f) * frameWidth();
+	origin.y = -((float)y/(float)fPortHeight - 0.5f) * frameHeight();
+	origin.z = -1.f;
 	origin = fSpace.transform(origin);
 	worldVec = fCenterOfInterest - fSpace.getTranslation();
 }
@@ -178,27 +177,48 @@ float BaseCamera::aspectRatio() const
 	return (float)fPortWidth / (float)fPortHeight;
 }
 
+float BaseCamera::fieldOfView() const
+{
+	return getHorizontalAperture();
+}
+
+float BaseCamera::frameWidth() const
+{
+	return getHorizontalAperture();
+}
+
+float BaseCamera::frameHeight() const
+{
+	return frameWidth() / aspectRatio();
+}
+
+float BaseCamera::frameWidthRel() const
+{
+	return frameWidth() / fPortWidth;
+}
+
 void BaseCamera::frameCorners(Vector3F & bottomLeft, Vector3F & bottomRight, Vector3F & topRight, Vector3F & topLeft) const
 {
-	const float halfw = fHorizontalAperture * 0.498f;
-	bottomLeft.setZero(); bottomLeft.z = -1.05f;
+	const float halfw = frameWidth() * 0.499f;
+	const float halfh = frameHeight() * 0.499f;
+	bottomLeft.setZero(); bottomLeft.z = -1.01f;
 	bottomLeft.x = -halfw;
-	bottomLeft.y = -halfw / aspectRatio();
+	bottomLeft.y = -halfh;
 	bottomLeft = fSpace.transform(bottomLeft);
 	
-	bottomRight.setZero(); bottomRight.z = -1.05f;
+	bottomRight.setZero(); bottomRight.z = -1.01f;
 	bottomRight.x = halfw;
-	bottomRight.y = -halfw / aspectRatio();
+	bottomRight.y = -halfh;
 	bottomRight = fSpace.transform(bottomRight);
 	
-	topRight.setZero(); topRight.z = -1.05f;
+	topRight.setZero(); topRight.z = -1.01f;
 	topRight.x = halfw;
-	topRight.y = halfw / aspectRatio();
+	topRight.y = halfh;
 	topRight = fSpace.transform(topRight);
 	
-	topLeft.setZero(); topLeft.z = -1.05f;
+	topLeft.setZero(); topLeft.z = -1.01f;
 	topLeft.x = -halfw;
-	topLeft.y = halfw / aspectRatio();
+	topLeft.y = halfh;
 	topLeft = fSpace.transform(topLeft);
 }
 //:~

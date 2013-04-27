@@ -10,6 +10,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/Matrix44F.h \
                 ../shared/Matrix33F.h \
                 ../shared/BaseCamera.h \
+                ../shared/PerspectiveCamera.h \
                 ../shared/Base3DView.h \
                 ../shared/BaseDrawer.h \
                 ../shared/KdTreeDrawer.h \
@@ -65,6 +66,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/Matrix44F.cpp \
                 ../shared/Matrix33F.cpp \
                 ../shared/BaseCamera.cpp \
+                ../shared/PerspectiveCamera.cpp \
                 ../shared/Base3DView.cpp \
                 ../shared/BaseDrawer.cpp \
                 ../shared/KdTreeDrawer.cpp \
