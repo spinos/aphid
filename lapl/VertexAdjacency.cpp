@@ -334,6 +334,15 @@ char VertexAdjacency::isLastNeighborOrderedByVertexIdx()
     return m_orderedNeighborIt == m_idxInOrder.end();
 }
 
+bool VertexAdjacency::isConnectedTo(unsigned idx)
+{
+	for(m_neighborIt = m_neighbors.begin(); m_neighborIt != m_neighbors.end(); ++m_neighborIt) {
+		if((*m_neighborIt)->v->getIndex() == idx) 
+			return true;
+	}
+	return false;
+}
+
 unsigned VertexAdjacency::nextRealEdgeNeighbor(unsigned idx)
 {
 	for(m_neighborIt = m_neighbors.begin(); m_neighborIt != m_neighbors.end(); ++m_neighborIt) {

@@ -38,11 +38,8 @@ void SelectionArray::add(Geometry * geo, unsigned icomp)
 	    unsigned vertexId[3];
 		mesh->getTriangle(icomp, vertexId);
 	
-        for(int i = 0; i < 3; i++) {
-            if(!isVertexSelected(vertexId[i])) {
-                m_vertexIds.push_back(vertexId[i]);
-            }
-        }
+        for(int i = 0; i < 3; i++)
+            addVertex(vertexId[i]);
     }
     else {
 		if(isVertexSelected(icomp)) return;
@@ -52,16 +49,17 @@ void SelectionArray::add(Geometry * geo, unsigned icomp)
 			return;
 		}
 		
+		if(!m_needVertexPath) {
+			addVertex(icomp);
+			return;
+		}
+		
 		unsigned startVert = lastVertexId();
 		unsigned endVert = icomp;
 		m_vertexPath->create(startVert, endVert);
 		
-		for(unsigned i = 0; i < m_vertexPath->numVertices(); i++) {
-			unsigned vi = m_vertexPath->vertex(i);
-			if(!isVertexSelected(vi)) {
-				m_vertexIds.push_back(vi);
-			}
-		}
+		for(unsigned i = 0; i < m_vertexPath->numVertices(); i++)
+			addVertex(m_vertexPath->vertex(i));
     }
 }
 
@@ -106,6 +104,12 @@ bool SelectionArray::isVertexSelected(unsigned idx) const
 	return false;
 }
 
+void SelectionArray::addVertex(unsigned idx)
+{
+	if(!isVertexSelected(idx))
+		m_vertexIds.push_back(idx);
+}
+
 bool SelectionArray::isFaceSelected(unsigned idx) const
 {
 	std::vector<unsigned>::const_iterator it;
@@ -145,10 +149,9 @@ void SelectionArray::grow()
 	unsigned endVert = *it;
 	it--;
 	unsigned startVert = *it;
-	unsigned nextVert = m_vertexPath->grow(startVert, endVert);
-	if(!isVertexSelected(nextVert)) {
-		m_vertexIds.push_back(nextVert);
-	}	
+	unsigned nextVert;
+	if(m_vertexPath->grow(startVert, endVert, nextVert))
+		addVertex(nextVert);	
 }
 
 void SelectionArray::shrink()
@@ -159,3 +162,14 @@ void SelectionArray::shrink()
 		m_vertexIds.erase(it);
 	}
 }
+
+void SelectionArray::enableVertexPath()
+{
+	m_needVertexPath = true;
+}
+
+void SelectionArray::disableVertexPath()
+{
+	m_needVertexPath = false;
+}
+//:~

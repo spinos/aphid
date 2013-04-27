@@ -167,6 +167,12 @@ void Base3DView::processSelection(QMouseEvent *event)
     Vector3F origin, incident;
     getCamera()->incidentRay(event->x(), event->y(), origin, incident);
     incident = incident.normal() * 1000.f;
+	
+	if(event->modifiers() == Qt::ShiftModifier) 
+		m_selected->disableVertexPath();
+	else 
+		m_selected->enableVertexPath();
+		
     clientSelect(origin, incident, m_hitPosition);
 }
 

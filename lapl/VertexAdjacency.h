@@ -45,6 +45,7 @@ public:
 	VertexNeighbor * nextNeighborOrderedByVertexIdx();
 	char isLastNeighborOrderedByVertexIdx();
 	
+	bool isConnectedTo(unsigned idx);
 	unsigned nextRealEdgeNeighbor(unsigned idx);
 	
 	void verbose() const;

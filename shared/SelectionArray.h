@@ -39,6 +39,11 @@ public:
 	void grow();
 	void shrink();
 	
+	void enableVertexPath();
+	void disableVertexPath();
+	
+	void addVertex(unsigned idx);
+	
 	void setTopology(VertexAdjacency * topo);
 private:
 	VertexPath * m_vertexPath;
@@ -48,4 +53,5 @@ private:
 	std::vector<Primitive *> m_prims;
 	std::vector<unsigned> m_vertexIds;
 	std::vector<unsigned> m_faceIds;
+	bool m_needVertexPath;
 };
