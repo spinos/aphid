@@ -11,7 +11,7 @@
 
 HIntAttribute::HIntAttribute(const std::string & path)
 {
-	fObjectPath = validPathName(path);
+	fObjectPath = ValidPathName(path);
 }
 
 char HIntAttribute::write(int *data)

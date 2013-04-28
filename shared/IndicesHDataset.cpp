@@ -13,7 +13,7 @@ IndicesHDataset::IndicesHDataset() {}
 
 IndicesHDataset::IndicesHDataset(const std::string & path)
 {
-	fObjectPath = validPathName(path);
+	fObjectPath = ValidPathName(path);
 }
 
 IndicesHDataset::~IndicesHDataset() {}

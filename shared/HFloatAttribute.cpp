@@ -11,7 +11,7 @@
 
 HFloatAttribute::HFloatAttribute(const std::string & path)
 {
-	fObjectPath = validPathName(path);
+	fObjectPath = ValidPathName(path);
 }
 
 hid_t HFloatAttribute::dataType()

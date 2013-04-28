@@ -13,7 +13,7 @@ VerticesHDataset::VerticesHDataset() {}
 
 VerticesHDataset::VerticesHDataset(const std::string & path)
 {
-	fObjectPath = validPathName(path);
+	fObjectPath = ValidPathName(path);
 }
 
 VerticesHDataset::~VerticesHDataset() {}

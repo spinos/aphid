@@ -11,7 +11,7 @@
 
 HAttribute::HAttribute(const std::string & path)
 {
-	fObjectPath = validPathName(path);
+	fObjectPath = ValidPathName(path);
 }
 
 char HAttribute::create(int dim)
