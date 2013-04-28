@@ -44,7 +44,7 @@ float PerspectiveCamera::frameWidthRel() const
 
 void PerspectiveCamera::zoom(int y)
 {
-	moveForward(y/2);
+	moveForward(-y/2);
 }
 
 void PerspectiveCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const

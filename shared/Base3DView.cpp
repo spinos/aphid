@@ -327,10 +327,12 @@ void Base3DView::keyPressEvent(QKeyEvent *e)
 	else if(e->key() == Qt::Key_O) {
 		if(getCamera()->isOrthographic()) {
 			fCamera = m_perspCamera;
+			fCamera->copyTransformFrom(m_orthoCamera);
 			updatePerspProjection();
 		}
 		else {
 			fCamera = m_orthoCamera;
+			fCamera->copyTransformFrom(m_perspCamera);
 			updateOrthoProjection();
 		}
 	}

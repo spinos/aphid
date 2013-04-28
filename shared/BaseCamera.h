@@ -37,6 +37,7 @@ public:
 	virtual float frameWidthRel() const;
 	float getHorizontalAperture() const;
 	virtual void frameCorners(Vector3F & bottomLeft, Vector3F & bottomRight, Vector3F & topRight, Vector3F & topLeft) const;
+	void copyTransformFrom(BaseCamera * another);
 	
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;

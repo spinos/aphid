@@ -221,4 +221,11 @@ void BaseCamera::frameCorners(Vector3F & bottomLeft, Vector3F & bottomRight, Vec
 	topLeft.y = halfh;
 	topLeft = fSpace.transform(topLeft);
 }
+
+void BaseCamera::copyTransformFrom(BaseCamera * another)
+{
+	fSpace = another->fSpace;
+	fInverseSpace = another->fInverseSpace;
+	fCenterOfInterest = another->fCenterOfInterest;
+}
 //:~
