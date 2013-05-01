@@ -81,6 +81,7 @@ public:
 	void removeLastAnchor();
 	void buildTree();
 	void loadMesh(std::string filename);
+	void saveMesh(std::string filename);
 
 protected:
     void keyPressEvent(QKeyEvent *event);

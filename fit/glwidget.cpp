@@ -53,8 +53,6 @@
 #include <EasemodelUtil.h>
 #include <AnchorGroup.h>
 #include "FitDeformer.h"
-
-static Vector3F rayo(15.299140, 20.149620, 97.618355), raye(-141.333694, -64.416885, -886.411499);
 	
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -69,9 +67,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_deformer->setAnchors(m_anchors);
 	
 #ifdef WIN32
-	loadMesh("D:/aphid/mdl/flat.m");
+	loadMesh("D:/aphid/mdl/face.m");
 #else
-	loadMesh("/Users/jianzhang/aphid/mdl/flat.m");
+	loadMesh("/Users/jianzhang/aphid/mdl/face.m");
 #endif
 
 	m_mode = SelectCompnent;
@@ -107,8 +105,8 @@ void GLWidget::clientDraw()
 //! [9]
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
 {
-	rayo = origin;
-	raye = origin + displacement;
+	Vector3F rayo = origin;
+	Vector3F raye = origin + displacement;
 	
 	Ray ray(rayo, raye);
 	if(m_mode == SelectCompnent) {
@@ -128,8 +126,8 @@ void GLWidget::clientDeselect()
 //! [10]
 void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
 {
-	rayo = origin;
-	raye = origin + displacement;
+	Vector3F rayo = origin;
+	Vector3F raye = origin + displacement;
 	Ray ray(rayo, raye);
 	if(m_mode == SelectCompnent) {
 		Vector3F hit;
@@ -270,6 +268,11 @@ void GLWidget::loadMesh(std::string filename)
 	buildTree();
 }
 
+void GLWidget::saveMesh(std::string filename)
+{
+	ESMUtil::Export(filename.c_str(), m_mesh);
+}
+
 void GLWidget::save()
 {
 	QString temQStr = QFileDialog::getSaveFileName(this, 
@@ -278,8 +281,7 @@ void GLWidget::save()
 	if(temQStr == NULL)
 		return;
 		
-	ESMUtil::Export(temQStr.toStdString().c_str(), m_mesh);
-	
+	saveMesh(temQStr.toStdString());
 	QMessageBox::information(this, tr("Success"), QString("Template saved as ").append(temQStr));
 }
 
