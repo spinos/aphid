@@ -65,11 +65,10 @@ TargetView::TargetView(QWidget *parent) : Base3DView(parent)
 	m_anchors->setHitTolerance(.8f);
 	m_topo = new MeshTopology;
 	
-#ifdef WIN32
-	loadMesh("D:/aphid/mdl/ball.m");
-#else
-	loadMesh("/Users/jianzhang/aphid/mdl/ball.m");
-#endif
+	QString filename  = QString("%1/mdl/ball.m")
+                 .arg(QDir::currentPath());
+
+	loadMesh(filename.toStdString().c_str());
 	
 	m_mode = SelectCompnent;
 }

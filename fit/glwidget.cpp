@@ -66,11 +66,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_deformer = new FitDeformer;
 	m_deformer->setAnchors(m_anchors);
 	
-#ifdef WIN32
-	loadMesh("D:/aphid/mdl/face.m");
-#else
-	loadMesh("/Users/jianzhang/aphid/mdl/face.m");
-#endif
+	QString filename  = QString("%1/mdl/face.m")
+                 .arg(QDir::currentPath());
+
+	loadMesh(filename.toStdString().c_str());
 
 	m_mode = SelectCompnent;
 }
