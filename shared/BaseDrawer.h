@@ -15,6 +15,7 @@
 #include <SelectionArray.h>
 #include <Anchor.h>
 #include <GeodesicSphereMesh.h>
+#include <PyramidMesh.h>
 #include <BaseCurve.h>
 
 class BaseDrawer {
@@ -55,4 +56,5 @@ public:
 private:
     char m_wired;
 	GeodesicSphereMesh * m_sphere;
+	PyramidMesh * m_pyramid;
 };

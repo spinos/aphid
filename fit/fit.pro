@@ -46,6 +46,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/BarycentricCoordinate.h \
                 ../shared/EasemodelUtil.h \
                 ../shared/GeodesicSphereMesh.h \
+				../shared/PyramidMesh.h \
                 ../shared/AnchorGroup.h \
                 ../shared/BaseCurve.h \
                 ../shared/VertexPath.h \
@@ -101,6 +102,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/BarycentricCoordinate.cpp \
                 ../shared/EasemodelUtil.cpp \
                 ../shared/GeodesicSphereMesh.cpp \
+				../shared/PyramidMesh.cpp \
                 ../shared/AnchorGroup.cpp \
                 ../shared/BaseCurve.cpp \
                 ../shared/VertexPath.cpp \

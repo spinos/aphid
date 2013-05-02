@@ -19,6 +19,7 @@
 BaseDrawer::BaseDrawer () : m_wired(0) 
 {
 	m_sphere = new GeodesicSphereMesh(8);
+	m_pyramid = new PyramidMesh;
 }
 
 BaseDrawer::~BaseDrawer () 
@@ -375,19 +376,16 @@ void BaseDrawer::components(SelectionArray * arr)
     else if(arr->getComponentFilterType() == PrimitiveFilter::TVertex) {
         const unsigned numVert = arr->numVertices();
 		if(numVert < 1) return;
-		if(numVert < 2) {
-			Vector3F p = arr->getVertexP(0);
-            solidCube(p.x, p.y, p.z, 0.2f);
+		BaseCurve curve;
+		glDisable(GL_DEPTH_TEST);
+		for(unsigned i = 0; i < numVert; i++) {
+			Vector3F p = arr->getVertexP(i);
+			solidCube(p.x, p.y, p.z, 0.2f);
+			curve.addVertex(p);
 		}
-		else {
-			BaseCurve curve;
-			for(unsigned i = 0; i < numVert; i++) {
-				Vector3F p = arr->getVertexP(i);
-				curve.addVertex(p);
-			}
-			curve.computeKnots();
-			linearCurve(curve);
-		}
+		glEnable(GL_DEPTH_TEST);
+		curve.computeKnots();
+		linearCurve(curve);
     }
 }
 
@@ -528,13 +526,21 @@ void BaseDrawer::anchor(Anchor *a, float size)
     a->spaceMatrix(m);
     
     glMultMatrixf((const GLfloat*)m);
-
+	glDisable(GL_DEPTH_TEST);
+	
 	glColor3f(0.f, .8f, .2f);
 	unsigned nouse;
 	for(Anchor::AnchorPoint * ap = a->firstPoint(nouse); a->hasPoint(); ap = a->nextPoint(nouse)) {
 		Vector3F p = ap->p;
-		solidCube(p.x, p.y, p.z, 0.1f);
+		glPushMatrix();
+		glTranslatef(p.x, p.y, p.z);
+		glScalef(0.2f, 0.2f, 0.2f);
+		glRotatef(180.f, 1.0f, .0f, 0.0f);
+		drawMesh(m_pyramid);
+		glPopMatrix();
 	}
+	glEnable(GL_DEPTH_TEST);
+	
 	if(a->numPoints() > 1) {
 		BaseCurve curve;
 		for(unsigned i = 0; i < a->numPoints(); i++)
@@ -558,9 +564,7 @@ void BaseDrawer::linearCurve(const BaseCurve & curve)
     glDisable(GL_DEPTH_TEST);
 	float t;
 	Vector3F p = curve.getVertex(0);
-	solidCube(p.x, p.y, p.z, 0.2f);
 	p = curve.getVertex(curve.numVertices() - 1);
-	solidCube(p.x, p.y, p.z, 0.2f);
 	glBegin(GL_LINE_STRIP);
 	for(unsigned i = 0; i < curve.numVertices(); i++) {
 		p = curve.getVertex(i);
