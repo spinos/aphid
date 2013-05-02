@@ -376,14 +376,14 @@ void BaseDrawer::components(SelectionArray * arr)
         const unsigned numVert = arr->numVertices();
 		if(numVert < 1) return;
 		if(numVert < 2) {
-			Vector3F * p = arr->getVertexP(0);
-            solidCube(p->x, p->y, p->z, 0.2f);
+			Vector3F p = arr->getVertexP(0);
+            solidCube(p.x, p.y, p.z, 0.2f);
 		}
 		else {
 			BaseCurve curve;
 			for(unsigned i = 0; i < numVert; i++) {
-				Vector3F * p = arr->getVertexP(i);
-				curve.addVertex(*p);
+				Vector3F p = arr->getVertexP(i);
+				curve.addVertex(p);
 			}
 			curve.computeKnots();
 			linearCurve(curve);
@@ -555,6 +555,7 @@ void BaseDrawer::sphere(float size)
 
 void BaseDrawer::linearCurve(const BaseCurve & curve)
 {
+    glDisable(GL_DEPTH_TEST);
 	float t;
 	Vector3F p = curve.getVertex(0);
 	solidCube(p.x, p.y, p.z, 0.2f);
@@ -568,5 +569,6 @@ void BaseDrawer::linearCurve(const BaseCurve & curve)
 		glVertex3f(p.x, p.y, p.z);
 	}
 	glEnd();
+	glEnable(GL_DEPTH_TEST);
 }
 

@@ -289,7 +289,7 @@ void Base3DView::clearSelection()
 
 void Base3DView::addHitToSelection()
 {
-	m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx);
+	m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx, m_hitPosition);
 }
 
 void Base3DView::growSelection()

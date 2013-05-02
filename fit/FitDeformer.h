@@ -15,7 +15,6 @@ public:
 	virtual ~FitDeformer();
 	
 	void setTarget(KdTree * tree);
-	
 	void fit();
 private:
 	KdTree * m_tree;

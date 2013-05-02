@@ -57,7 +57,7 @@ Window::Window()
     splitter->addWidget(targetWidget);
 
 	setCentralWidget(splitter);
-    setWindowTitle(tr("Matching Shape Version 0.4 Sun 4/28/2013"));
+    setWindowTitle(tr("Matching Shape Version 0.5 Thu 5/2/2013"));
 	
 	glWidget->setTarget(targetWidget->getAnchors(), targetWidget->getTree());
 	createActions();

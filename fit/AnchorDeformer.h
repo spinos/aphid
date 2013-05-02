@@ -24,10 +24,14 @@ public:
     virtual ~AnchorDeformer();
 	
 	virtual void setMesh(BaseMesh * mesh);
+	virtual void reset();
 	void setAnchors(AnchorGroup * ag);
 	virtual void precompute();
 	virtual char solve();
 	
+	float getSmoothFactor() const;
+	void setSmoothFactor(float factor);
+
 private:
 	void prestep(Eigen::VectorXd b[], char isMembrane = 0);
 	Matrix33F svdRotation(unsigned iv);
@@ -37,4 +41,5 @@ private:
 	Eigen::SimplicialLDLT<LaplaceMatrixType> m_llt;
 	AnchorGroup * m_anchors;
 	Vector3F * m_membrane;
+	float m_smoothFactor;
 };

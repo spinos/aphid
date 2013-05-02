@@ -21,7 +21,7 @@ public:
 	virtual ~SelectionArray();
 	
 	void reset();
-	void add(Geometry * geo, unsigned icomp);
+	void add(Geometry * geo, unsigned icomp, const Vector3F & atP);
 	
 	unsigned numPrims() const;
 	Primitive * getPrimitive(const unsigned & idx) const;
@@ -29,7 +29,7 @@ public:
 	unsigned numVertices() const;
 	unsigned getVertexId(const unsigned & idx) const;
 	unsigned lastVertexId() const;
-	Vector3F * getVertexP(const unsigned & idx) const;
+	Vector3F getVertexP(const unsigned & idx) const;
 	
 	Geometry * getGeometry() const;
 	
@@ -42,7 +42,7 @@ public:
 	void enableVertexPath();
 	void disableVertexPath();
 	
-	void addVertex(unsigned idx);
+	void addVertex(unsigned idx, const Vector3F & atP);
 	
 	void setTopology(VertexAdjacency * topo);
 private:
@@ -52,6 +52,7 @@ private:
 	bool isFaceSelected(unsigned idx) const;
 	std::vector<Primitive *> m_prims;
 	std::vector<unsigned> m_vertexIds;
+	std::vector<Vector3F> m_vertexPs;
 	std::vector<unsigned> m_faceIds;
 	bool m_needVertexPath;
 };

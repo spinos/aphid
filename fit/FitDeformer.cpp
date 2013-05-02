@@ -31,3 +31,4 @@ void FitDeformer::fit()
 		if(ctx.m_success) m_deformedV[i] = ctx.m_closest;
 	}
 }
+

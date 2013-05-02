@@ -15,6 +15,7 @@
 AnchorDeformer::AnchorDeformer() 
 {
 	m_membrane = 0;
+	m_smoothFactor = 1.f;
 }
 
 AnchorDeformer::~AnchorDeformer() 
@@ -28,6 +29,12 @@ void AnchorDeformer::setMesh(BaseMesh * mesh)
 	
 	printf("init anchor deformer");
 	buildTopology(mesh);
+}
+
+void AnchorDeformer::reset()
+{
+    BaseDeformer::reset();
+    m_smoothFactor = 1.f;
 }
 
 void AnchorDeformer::setAnchors(AnchorGroup * ag)
@@ -115,9 +122,9 @@ void AnchorDeformer::prestep(Eigen::VectorXd b[], char isMembrane)
 			Matrix33F R = svdRotation(i);
 			Vector3F dif(b[0](i), b[1](i), b[2](i));
 			dif = R.transform(dif);
-			b[0](i) = dif.x;
-			b[1](i) = dif.y;
-			b[2](i) = dif.z;
+			b[0](i) = dif.x * m_smoothFactor;
+			b[1](i) = dif.y * m_smoothFactor;
+			b[2](i) = dif.z * m_smoothFactor;
 		}
 	}
 	
@@ -163,7 +170,7 @@ char AnchorDeformer::solve()
 		m_deformedV[i].y = x[1](i);
 		m_deformedV[i].z = x[2](i);
 	}
-	
+	/*
 	for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor()) {
 		unsigned iap;
 		for(Anchor::AnchorPoint *ap = a->firstPoint(iap); a->hasPoint(); ap = a->nextPoint(iap)) {
@@ -171,7 +178,7 @@ char AnchorDeformer::solve()
 			m_deformedV[iap] = worldP;
 		}	
 	}
-
+*/
 	return 1;
 }
 
@@ -245,3 +252,12 @@ Matrix33F AnchorDeformer::svdRotation(unsigned iv)
 	return Ri;
 }
 
+float AnchorDeformer::getSmoothFactor() const
+{
+    return m_smoothFactor;
+}
+
+void AnchorDeformer::setSmoothFactor(float factor)
+{
+    m_smoothFactor = factor;
+}

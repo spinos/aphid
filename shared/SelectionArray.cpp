@@ -24,10 +24,11 @@ void SelectionArray::reset()
 {
 	m_prims.clear();
 	m_vertexIds.clear();
+	m_vertexPs.clear();
 	m_faceIds.clear();
 }
 
-void SelectionArray::add(Geometry * geo, unsigned icomp)
+void SelectionArray::add(Geometry * geo, unsigned icomp, const Vector3F & atP)
 {
     m_geometry = geo;
 	BaseMesh * mesh = (BaseMesh *)geo;
@@ -39,18 +40,18 @@ void SelectionArray::add(Geometry * geo, unsigned icomp)
 		mesh->getTriangle(icomp, vertexId);
 	
         for(int i = 0; i < 3; i++)
-            addVertex(vertexId[i]);
+            addVertex(vertexId[i], mesh->getVertices()[vertexId[i]]);
     }
     else {
 		if(isVertexSelected(icomp)) return;
 		
 		if(numVertices() < 1) {
-			m_vertexIds.push_back(icomp);
+			addVertex(icomp, mesh->getVertices()[icomp]);
 			return;
 		}
 		
 		if(!m_needVertexPath) {
-			addVertex(icomp);
+		    addVertex(icomp, atP);
 			return;
 		}
 		
@@ -59,7 +60,7 @@ void SelectionArray::add(Geometry * geo, unsigned icomp)
 		m_vertexPath->create(startVert, endVert);
 		
 		for(unsigned i = 0; i < m_vertexPath->numVertices(); i++)
-			addVertex(m_vertexPath->vertex(i));
+			addVertex(m_vertexPath->vertex(i), mesh->getVertices()[m_vertexPath->vertex(i)]);
     }
 }
 
@@ -88,10 +89,9 @@ unsigned SelectionArray::lastVertexId() const
 	return m_vertexIds[m_vertexIds.size() - 1];
 }
 
-Vector3F * SelectionArray::getVertexP(const unsigned & idx) const
+Vector3F SelectionArray::getVertexP(const unsigned & idx) const
 {
-	BaseMesh * mesh = (BaseMesh *)m_geometry;
-    return &mesh->getVertices()[m_vertexIds[idx]];
+	return m_vertexPs[idx];
 }
 
 bool SelectionArray::isVertexSelected(unsigned idx) const
@@ -104,10 +104,12 @@ bool SelectionArray::isVertexSelected(unsigned idx) const
 	return false;
 }
 
-void SelectionArray::addVertex(unsigned idx)
+void SelectionArray::addVertex(unsigned idx, const Vector3F & atP)
 {
-	if(!isVertexSelected(idx))
+	if(!isVertexSelected(idx)) {
 		m_vertexIds.push_back(idx);
+		m_vertexPs.push_back(atP);
+	}
 }
 
 bool SelectionArray::isFaceSelected(unsigned idx) const
@@ -143,7 +145,7 @@ void SelectionArray::setTopology(VertexAdjacency * topo)
 void SelectionArray::grow()
 {
 	if(numVertices() < 2) return;
-	
+	BaseMesh * mesh = (BaseMesh *)m_geometry;
 	std::vector<unsigned>::iterator it = m_vertexIds.end();
 	it--;
 	unsigned endVert = *it;
@@ -151,7 +153,7 @@ void SelectionArray::grow()
 	unsigned startVert = *it;
 	unsigned nextVert;
 	if(m_vertexPath->grow(startVert, endVert, nextVert))
-		addVertex(nextVert);	
+		addVertex(nextVert, mesh->getVertices()[nextVert]);
 }
 
 void SelectionArray::shrink()
@@ -160,6 +162,9 @@ void SelectionArray::shrink()
 		std::vector<unsigned>::iterator it = m_vertexIds.end();
 		--it;
 		m_vertexIds.erase(it);
+		std::vector<Vector3F>::iterator itp = m_vertexPs.end();
+		--itp;
+		m_vertexPs.erase(itp);
 	}
 }
 

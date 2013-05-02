@@ -301,6 +301,11 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 	else if(e->key() == Qt::Key_Z) {
 		removeLastAnchor();
 	}
+	else if(e->key() == Qt::Key_S) {
+		qDebug() << "smooth by 0.9";
+		m_deformer->setSmoothFactor(m_deformer->getSmoothFactor() * 0.9f);
+		startDeform();
+	}
 
 	Base3DView::keyPressEvent(e);
 }
