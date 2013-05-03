@@ -68,7 +68,6 @@ private:
 	SelectionArray * m_selected;
 	IntersectionContext * m_intersectCtx;
 	QTimer *m_timer;
-	Vector3F m_hitPosition;
 	char m_isFocused;
 };
 #endif        //  #ifndef BASE3DVIEW_H

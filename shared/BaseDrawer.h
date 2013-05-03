@@ -52,6 +52,7 @@ public:
 	void anchor(Anchor *a, float size=1.f);
 	void sphere(float size = 1.f);
 	void linearCurve(const BaseCurve & curve);
+	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	
 private:
     char m_wired;

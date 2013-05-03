@@ -53,7 +53,6 @@ void AnchorDeformer::precompute()
 	m_L.resize(m_numVertices + numConstrains, m_numVertices);
 	for(int i = 0; i < (int)m_numVertices; i++) {
 		VertexAdjacency & adj = getTopology()[i];
-		
 		VertexAdjacency::VertexNeighbor *neighbor;
 		for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
 			neighborIdx = neighbor->v->getIndex();
@@ -159,7 +158,7 @@ char AnchorDeformer::solve()
 		m_deformedV[i].y = x[1](i);
 		m_deformedV[i].z = x[2](i);
 	}
-	
+
 	prestep(b);
 	x[0] = m_llt.solve(b[0]);
 	x[1] = m_llt.solve(b[1]);
@@ -195,28 +194,19 @@ Matrix33F AnchorDeformer::svdRotation(unsigned iv)
 	c.setZero();
 	ct.setZero();
 	
+	Eigen::MatrixXf X(3, numNeighbors);
+	Eigen::MatrixXf Y(3, numNeighbors);
+	Eigen::MatrixXf W(numNeighbors, numNeighbors);
+	W.setZero();
+	int k = 0;
 	VertexAdjacency::VertexNeighbor *neighbor;
 	for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
 		neighborIdx = neighbor->v->getIndex();
 		v = m_membrane[neighborIdx];
 		vt = m_deformedV[neighborIdx];
 		
-		c += v * neighbor->weight;
-		ct += vt * neighbor->weight;
-	}
-
-	Eigen::MatrixXf X(3, numNeighbors);
-	Eigen::MatrixXf Y(3, numNeighbors);
-	Eigen::MatrixXf W(numNeighbors, numNeighbors);
-	W.setZero();
-	int k = 0;
-	for(neighbor = adj.firstNeighborOrderedByVertexIdx(); !adj.isLastNeighborOrderedByVertexIdx(); neighbor = adj.nextNeighborOrderedByVertexIdx()) {
-		neighborIdx = neighbor->v->getIndex();
-		v = m_membrane[neighborIdx];
-		vt = m_deformedV[neighborIdx];
-		
-		dx = v - c;
-		dy = vt - ct;
+		dx = v - m_membrane[iv];
+		dy = vt - m_deformedV[iv];
 		
 		X(0, k) = dx.x;
 		X(1, k) = dx.y;

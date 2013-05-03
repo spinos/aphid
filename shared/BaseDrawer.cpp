@@ -576,3 +576,14 @@ void BaseDrawer::linearCurve(const BaseCurve & curve)
 	glEnable(GL_DEPTH_TEST);
 }
 
+void BaseDrawer::hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer)
+{
+	setCullFace(1);
+	setWired(0);
+	setGrey(0.4f);
+	drawMesh(mesh, deformer);
+	setWired(1);
+	setGrey(0.9f);
+	edge(mesh, deformer);
+	setCullFace(0);
+}

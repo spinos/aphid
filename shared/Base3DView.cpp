@@ -190,7 +190,8 @@ void Base3DView::processSelection(QMouseEvent *event)
 	else 
 		m_selected->enableVertexPath();
 		
-    clientSelect(origin, incident, m_hitPosition);
+	Vector3F nouse;
+    clientSelect(origin, incident, nouse);
 }
 
 void Base3DView::processDeselection(QMouseEvent *event)
@@ -200,7 +201,6 @@ void Base3DView::processDeselection(QMouseEvent *event)
 
 void Base3DView::processMouseInput(QMouseEvent *event)
 {
-    getCamera()->screenToWorldPoint(event->x(), event->y(), m_hitPosition);
     int dx = event->x() - m_lastPos.x();
     int dy = event->y() - m_lastPos.y();
     Vector3F injv;
@@ -295,7 +295,7 @@ void Base3DView::clearSelection()
 
 void Base3DView::addHitToSelection()
 {
-	m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx, m_hitPosition);
+	m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx, m_intersectCtx->m_hitP);
 }
 
 void Base3DView::growSelection()
