@@ -59,11 +59,12 @@ Window::Window()
 	setCentralWidget(splitter);
     setWindowTitle(tr("Matching Shape Version 0.6 Fri 5/3/2013"));
 	
-	glWidget->setTarget(targetWidget->getAnchors(), targetWidget->getTree());
 	createActions();
 	createMenus();
 	
-	//connect(m_control, SIGNAL(handleChanged(unsigned)), glWidget, SLOT(onHandleChanged(unsigned)));
+	updateFitTarget();
+	
+	connect(targetWidget, SIGNAL(targetChanged(void)), this, SLOT(updateFitTarget(void)));
 }
 //! [1]
 
@@ -96,5 +97,10 @@ void Window::createMenus()
     fileMenu->addAction(loadTemplateAct);
 	fileMenu->addAction(loadTargetAct);
 	fileMenu->addAction(saveTemplateAct);
+}
+
+void Window::updateFitTarget()
+{
+    glWidget->setTarget(targetWidget->getAnchors(), targetWidget->getTree());
 }
 

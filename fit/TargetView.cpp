@@ -135,7 +135,13 @@ void TargetView::clientMouseInput(Vector3F & origin, Vector3F & displacement, Ve
 	    m_anchors->moveAnchor(stir);
 	}
 }
-//! [10]
+
+void TargetView::sceneCenter(Vector3F & dst) const
+{
+    dst.x = m_tree->m_bbox.getMin(0) * 0.5f + m_tree->m_bbox.getMax(0) * 0.5f;
+    dst.y = m_tree->m_bbox.getMin(1) * 0.5f + m_tree->m_bbox.getMax(1) * 0.5f;
+    dst.z = m_tree->m_bbox.getMin(2) * 0.5f + m_tree->m_bbox.getMax(2) * 0.5f;
+}
 
 void TargetView::simulate()
 {
@@ -190,6 +196,7 @@ void TargetView::buildTree()
 	m_tree = new KdTree;
 	m_tree->addMesh(m_mesh);
 	m_tree->create();
+	emit targetChanged();
 }
 
 void TargetView::open()

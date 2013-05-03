@@ -185,7 +185,7 @@ void Base3DView::processSelection(QMouseEvent *event)
     getCamera()->incidentRay(event->x(), event->y(), origin, incident);
     incident = incident.normal() * 1000.f;
 	
-	if(event->modifiers() == Qt::ShiftModifier) 
+    if(event->modifiers() == Qt::ShiftModifier) 
 		m_selected->disableVertexPath();
 	else 
 		m_selected->enableVertexPath();
@@ -229,6 +229,12 @@ void Base3DView::clientDeselect()
 void Base3DView::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
 {
     
+}
+
+void Base3DView::sceneCenter(Vector3F & dst) const
+{
+    dst.x = dst.y = 0.f;
+    dst.z = -1.f;
 }
 
 void Base3DView::updateOrthoProjection()
@@ -302,6 +308,15 @@ void Base3DView::shrinkSelection()
 	m_selected->shrink();
 }
 
+void Base3DView::frameAll()
+{
+    Vector3F coi;
+    sceneCenter(coi);
+    Vector3F eye = coi + Vector3F(0.f, 0.f, 100.f);
+    
+    getCamera()->lookFromTo(eye, coi);
+}
+
 void Base3DView::keyPressEvent(QKeyEvent *e)
 {
 	if(e->key() == Qt::Key_Space) {
@@ -336,7 +351,11 @@ void Base3DView::keyPressEvent(QKeyEvent *e)
 			updateOrthoProjection();
 		}
 	}
-    
+    else if(e->key() == Qt::Key_G) {
+		qDebug() << "frame all camera";
+		frameAll();
+	}
+	
 	QWidget::keyPressEvent(e);
 }
 

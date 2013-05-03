@@ -70,7 +70,8 @@ public:
     virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
-	
+    virtual void sceneCenter(Vector3F & dst) const;
+    
 	void anchorSelected(float wei);
 	void startDeform();
 	bool pickupComponent(const Ray & ray, Vector3F & hit);

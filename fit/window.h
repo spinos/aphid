@@ -72,6 +72,9 @@ private:
 	QAction *saveTemplateAct;
     GLWidget *glWidget;
 	TargetView * targetWidget;
+	
+public slots:
+    void updateFitTarget();
 };
 //! [0]
 

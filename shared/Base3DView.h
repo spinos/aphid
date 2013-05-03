@@ -42,12 +42,15 @@ public:
     virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
-	void resetView();
+    virtual void sceneCenter(Vector3F & dst) const;
+    
+    void resetView();
 	void drawSelection();
 	void clearSelection();
 	void addHitToSelection();
 	void growSelection();
 	void shrinkSelection();
+	void frameAll();
 	
 protected:
     void keyPressEvent(QKeyEvent *event);

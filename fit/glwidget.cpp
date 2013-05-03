@@ -104,6 +104,8 @@ void GLWidget::clientDraw()
 //! [9]
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
 {
+    getSelection()->enableVertexPath();
+    
 	Vector3F rayo = origin;
 	Vector3F raye = origin + displacement;
 	
@@ -137,7 +139,13 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 		m_deformer->solve();
 	}
 }
-//! [10]
+
+void GLWidget::sceneCenter(Vector3F & dst) const
+{
+    dst.x = m_tree->m_bbox.getMin(0) * 0.5f + m_tree->m_bbox.getMax(0) * 0.5f;
+    dst.y = m_tree->m_bbox.getMin(1) * 0.5f + m_tree->m_bbox.getMax(1) * 0.5f;
+    dst.z = m_tree->m_bbox.getMin(2) * 0.5f + m_tree->m_bbox.getMax(2) * 0.5f;
+}
 
 void GLWidget::simulate()
 {
