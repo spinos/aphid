@@ -9,11 +9,10 @@
 
 #pragma once
 #include <map>
-#include <Vector3F.h>
-#include <Matrix44F.h>
+#include <SpaceHandle.h>
 #include <SelectionArray.h>
 class Ray;
-class Anchor {
+class Anchor : public SpaceHandle {
 public:
 	struct AnchorPoint {
 		Vector3F p, worldP;
@@ -33,17 +32,14 @@ public:
 	AnchorPoint * firstPoint(unsigned &idx);
 	AnchorPoint * nextPoint(unsigned &idx);
 	bool hasPoint();
-	void spaceMatrix(float m[16]) const;
-	Vector3F getCenter() const;
-	Vector3F displacement() const;
-	bool intersect(const Ray &ray, float &t, float threshold) const;
+	
+	bool intersect(const Ray &ray, float &t, float threshold);
 	
 	virtual void translate(Vector3F & dis);
 	AnchorPoint *getPoint(unsigned idx);
 	unsigned getVertexIndex(unsigned idx);
 	
 	void computeLocalSpace();
-	void keepOriginalSpace();
 	
 	void clear();
 	
@@ -51,6 +47,4 @@ private:
 	std::map<unsigned, AnchorPoint *> m_anchorPoints;
 	std::map<unsigned, AnchorPoint *>::iterator m_anchorPointIt;
 	std::vector<unsigned> m_pointIndex;
-	Matrix44F m_space;
-	Matrix44F m_space0;
 };

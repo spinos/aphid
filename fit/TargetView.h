@@ -79,7 +79,6 @@ public:
 	
 	AnchorGroup * getAnchors() const;
 	KdTree * getTree() const;
-	void removeLastAnchor();
 	void buildTree();
 	void loadMesh(std::string filename);
 

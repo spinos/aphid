@@ -51,6 +51,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/BaseCurve.h \
                 ../shared/VertexPath.h \
                 ../shared/MeshTopology.h \
+				../shared/SpaceHandle.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 MembraneDeformer.h \
@@ -107,6 +108,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/BaseCurve.cpp \
                 ../shared/VertexPath.cpp \
                 ../shared/MeshTopology.cpp \
+				../shared/SpaceHandle.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 MembraneDeformer.cpp \

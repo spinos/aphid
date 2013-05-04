@@ -94,31 +94,19 @@ bool Anchor::hasPoint()
 	return m_anchorPointIt != m_anchorPoints.end();
 }
 
-void Anchor::spaceMatrix(float m[16]) const
+bool Anchor::intersect(const Ray &ray, float &t, float threshold)
 {
-	m[0] = m_space.M(0,0); m[1] = m_space.M(0,1); m[2] = m_space.M(0,2); m[3] = 0.0;
-    m[4] = m_space.M(1,0); m[5] = m_space.M(1,1); m[6] = m_space.M(1,2); m[7] = 0.0;
-    m[8] = m_space.M(2,0); m[9] = m_space.M(2,1); m[10] =m_space.M(2,2); m[11] = 0.0;
-    m[12] = m_space.M(3,0); m[13] = m_space.M(3,1); m[14] = m_space.M(3,2) ; m[15] = 1.0;
-}
-
-Vector3F Anchor::getCenter() const
-{
-	return m_space.getTranslation();
-}
-
-Vector3F Anchor::displacement() const
-{
-	return m_space.getTranslation() - m_space0.getTranslation();
-}
-
-bool Anchor::intersect(const Ray &ray, float &t, float threshold) const
-{
-	float axis = ray.m_dir.longestAxis();
-	t = (getCenter().comp(axis) - ray.m_origin.comp(axis)) / ray.m_dir.comp(axis);
-	if(t < 0) return false;
-	Vector3F pop = ray.travel(t);
-	return (pop - getCenter()).length() < threshold;
+	const float axis = ray.m_dir.longestAxis();
+	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
+		Vector3F & pos = ((*m_anchorPointIt).second)->worldP;
+		t = (pos.comp(axis) - ray.m_origin.comp(axis)) / ray.m_dir.comp(axis);
+		if(t > 0.f) {
+			Vector3F pop = ray.travel(t);
+			if((pop - pos).length() < threshold)
+				return true;
+		}
+	}
+	return false;
 }
 
 void Anchor::translate(Vector3F & dis)
@@ -160,11 +148,6 @@ void Anchor::computeLocalSpace()
 		Vector3F & pos = ((*m_anchorPointIt).second)->worldP;
 		((*m_anchorPointIt).second)->p = invs.transform(pos);
 	}
-}
-
-void Anchor::keepOriginalSpace()
-{
-	m_space0 = m_space;
 }
 
 void Anchor::clear()

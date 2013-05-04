@@ -50,12 +50,15 @@ public:
 	void setWired(char var);
 	void setCullFace(char var);
 	void anchor(Anchor *a, float size=1.f);
+	void spaceHandle(SpaceHandle * hand, float size = 1.f);
 	void sphere(float size = 1.f);
 	void linearCurve(const BaseCurve & curve);
 	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
+	void colorAsActive();
 	
 private:
     char m_wired;
 	GeodesicSphereMesh * m_sphere;
 	PyramidMesh * m_pyramid;
+	Vector3F m_activeColor;
 };

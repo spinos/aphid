@@ -9,7 +9,7 @@
 
 #include "AnchorGroup.h"
 
-AnchorGroup::AnchorGroup() {m_activeAnchor = 0; m_hitTolerance = 0.5f;}
+AnchorGroup::AnchorGroup() {m_activeAnchor = 0;}
 AnchorGroup::~AnchorGroup() {}
 
 void AnchorGroup::reset()
@@ -34,7 +34,7 @@ bool AnchorGroup::pickupAnchor(const Ray & ray, Vector3F & hit)
 	float t;
 	int i = 0;
 	for(std::vector<Anchor *>::iterator it = m_anchors.begin(); it != m_anchors.end(); ++it) {
-		if((*it)->intersect(ray, t, m_hitTolerance)) {
+		if((*it)->intersect(ray, t, getHitTolerance())) {
 			if(t < minDist) {
 				m_activeAnchor = (*it);
 				m_activeAnchorIdx = i;
@@ -85,26 +85,21 @@ bool AnchorGroup::hasAnchor()
 	return m_anchorIt != m_anchors.end();
 }
 
-void AnchorGroup::setHitTolerance(float val)
-{
-	m_hitTolerance = val;
-}
-
-float AnchorGroup::getHitTolerance() const
-{
-	return m_hitTolerance;
-}
-
 std::vector<Anchor *> & AnchorGroup::data()
 {
 	return m_anchors;
 }
 
-bool AnchorGroup::activeAnchor(unsigned & idx) const
+bool AnchorGroup::activeAnchorIdx(unsigned & idx) const
 {
 	if(!m_activeAnchor) return false;
 	idx = m_activeAnchorIdx;
 	return true;
+}
+
+Anchor * AnchorGroup::activeAnchor() const
+{
+	return m_activeAnchor;
 }
 
 void AnchorGroup::removeLast()
@@ -113,5 +108,25 @@ void AnchorGroup::removeLast()
 	m_anchorIt = m_anchors.begin();
 	m_anchorIt += numAnchors() - 1;
 	m_anchors.erase(m_anchorIt);
+}
+
+void AnchorGroup::removeActive()
+{
+	if(!m_activeAnchor) return;
+	m_anchorIt = m_anchors.begin();
+	m_anchorIt += m_activeAnchorIdx;
+	m_anchors.erase(m_anchorIt);
+	delete m_activeAnchor;
+	m_activeAnchor = 0;
+}
+
+void AnchorGroup::setHitTolerance(float val)
+{
+	m_hitTolerance = val;
+}
+
+float AnchorGroup::getHitTolerance() const
+{
+	return m_hitTolerance;
 }
 //:~

@@ -185,11 +185,6 @@ KdTree * TargetView::getTree() const
 	return m_tree;
 }
 
-void TargetView::removeLastAnchor()
-{
-	m_anchors->removeLast();
-}
-
 void TargetView::buildTree()
 {
 	if(m_tree) delete m_tree;
@@ -227,7 +222,7 @@ void TargetView::keyPressEvent(QKeyEvent *e)
 		anchorSelected(1.f);
 	}
 	else if(e->key() == Qt::Key_Z) {
-		removeLastAnchor();
+		m_anchors->removeLast();
 	}
 
 	Base3DView::keyPressEvent(e);

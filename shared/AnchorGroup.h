@@ -24,11 +24,15 @@ public:
 	Anchor * firstAnchor();
 	Anchor * nextAnchor();
 	bool hasAnchor();
+	
+	std::vector<Anchor *> & data();
+	bool activeAnchorIdx(unsigned & idx) const;
+	Anchor * activeAnchor() const;
+	void removeLast();
+	void removeActive();
+	
 	void setHitTolerance(float val);
 	float getHitTolerance() const;
-	std::vector<Anchor *> & data();
-	bool activeAnchor(unsigned & idx) const;
-	void removeLast();
 private:
 	std::vector<Anchor *> m_anchors;
 	std::vector<Anchor *>::iterator m_anchorIt;

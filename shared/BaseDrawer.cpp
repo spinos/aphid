@@ -20,6 +20,7 @@ BaseDrawer::BaseDrawer () : m_wired(0)
 {
 	m_sphere = new GeodesicSphereMesh(8);
 	m_pyramid = new PyramidMesh;
+	m_activeColor.set(0.f, .8f, .2f);
 }
 
 BaseDrawer::~BaseDrawer () 
@@ -552,6 +553,23 @@ void BaseDrawer::anchor(Anchor *a, float size)
 	glPopMatrix();
 }
 
+void BaseDrawer::spaceHandle(SpaceHandle * hand, float size)
+{
+	if(!hand) return;
+	glPushMatrix();
+	float m[16];
+    
+    hand->spaceMatrix(m);
+	glMultMatrixf((const GLfloat*)m);
+	glDisable(GL_DEPTH_TEST);
+	
+	colorAsActive();
+	sphere(hand->getSize());
+	
+	glEnable(GL_DEPTH_TEST);
+	glPopMatrix();
+}
+
 void BaseDrawer::sphere(float size)
 {
 	glPushMatrix();
@@ -587,4 +605,9 @@ void BaseDrawer::hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer
 	setGrey(0.9f);
 	edge(mesh, deformer);
 	setCullFace(0);
+}
+
+void BaseDrawer::colorAsActive()
+{
+	glColor3f(m_activeColor.x, m_activeColor.y, m_activeColor.z);
 }
