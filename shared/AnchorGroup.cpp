@@ -58,6 +58,15 @@ unsigned AnchorGroup::numAnchors() const
 	return (unsigned)m_anchors.size();
 }
 
+unsigned AnchorGroup::numAnchorPoints()
+{
+	unsigned numPoints = 0;
+	for(Anchor *a = firstAnchor(); hasAnchor(); a = nextAnchor()) {
+		numPoints += a->numPoints();
+	}
+	return numPoints;
+}
+
 Anchor * AnchorGroup::firstAnchor()
 {
 	m_anchorIt = m_anchors.begin();

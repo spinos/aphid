@@ -44,10 +44,7 @@ void AnchorDeformer::setAnchors(AnchorGroup * ag)
 
 void AnchorDeformer::precompute()
 {	
-	unsigned numConstrains = 0;
-	for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor()) {
-		numConstrains += a->numPoints();
-	}
+	unsigned numConstrains = m_anchors->numAnchorPoints();
 	
 	int neighborIdx;
 	m_L.resize(m_numVertices + numConstrains, m_numVertices);

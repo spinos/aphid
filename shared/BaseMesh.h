@@ -52,6 +52,7 @@ public:
 	char intersect(const Ray & ray, IntersectionContext * ctx) const;
 	char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
 	char insideTriangle(const Vector3F & p, const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n) const;
+	
 	Vector3F * _vertices;
 	Vector3F * m_normals;
 	unsigned * _indices;
@@ -65,4 +66,5 @@ public:
 	unsigned m_numPolygonVertices;
 	unsigned * m_polygonIndices;
 	char * m_realEdges;
+private:
 };

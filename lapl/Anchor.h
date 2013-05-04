@@ -24,8 +24,7 @@ public:
 	virtual ~Anchor();
 	
 	void placeAt(const Vector3F & cen);
-	
-	void addPoint(unsigned vertexId);
+	void addPoint(unsigned vertexId, AnchorPoint * ap);
 	
 	void setWeight(float wei);
 	void addWeight(float delta);
@@ -40,14 +39,18 @@ public:
 	bool intersect(const Ray &ray, float &t, float threshold) const;
 	
 	virtual void translate(Vector3F & dis);
-	AnchorPoint *getPoint(unsigned idx) const;
+	AnchorPoint *getPoint(unsigned idx);
+	unsigned getVertexIndex(unsigned idx);
 	
 	void computeLocalSpace();
+	void keepOriginalSpace();
+	
+	void clear();
 	
 private:
 	std::map<unsigned, AnchorPoint *> m_anchorPoints;
 	std::map<unsigned, AnchorPoint *>::iterator m_anchorPointIt;
-	std::vector<AnchorPoint *> m_points;
+	std::vector<unsigned> m_pointIndex;
 	Matrix44F m_space;
 	Matrix44F m_space0;
 };

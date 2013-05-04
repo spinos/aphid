@@ -15,29 +15,17 @@ Anchor::Anchor() {}
 
 Anchor::Anchor(SelectionArray & sel)
 {
-	Vector3F cen(0.f, 0.f, 0.f);
 	const unsigned nv = sel.numVertices();
 	for(unsigned i=0; i < nv; i++) {
 		Vector3F v = sel.getVertexP(i);
 		AnchorPoint *a = new AnchorPoint();
 		a->worldP = v;
 		a->w = 1.f;
-		m_anchorPoints[sel.getVertexId(i)] = a;
-		m_points.push_back(a);
-		cen += v;
+		addPoint(sel.getVertexId(i), a);
 	}
-	cen /= nv;
-	m_space.setIdentity();
-	m_space.setTranslation(cen);
-	m_space0 = m_space;
 	
-	Matrix44F invs = m_space;
-	invs.inverse();
-	
-	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
-		Vector3F & pos = ((*m_anchorPointIt).second)->worldP;
-		((*m_anchorPointIt).second)->p = invs.transform(pos);
-	}
+	computeLocalSpace();
+	keepOriginalSpace();
 }
 
 Anchor::~Anchor() 
@@ -58,11 +46,10 @@ void Anchor::placeAt(const Vector3F & cen)
 	}
 }
 
-void Anchor::addPoint(unsigned vertexId)
+void Anchor::addPoint(unsigned vertexId, AnchorPoint * ap)
 {
-	AnchorPoint *a = new AnchorPoint();
-	a->w = 1.f;
-	m_anchorPoints[vertexId] = a;
+	m_anchorPoints[vertexId] = ap;
+	m_pointIndex.push_back(vertexId);
 }
 
 void Anchor::setWeight(float wei)
@@ -144,17 +131,23 @@ void Anchor::translate(Vector3F & dis)
 	}
 }
 
-Anchor::AnchorPoint * Anchor::getPoint(unsigned idx) const
+Anchor::AnchorPoint * Anchor::getPoint(unsigned idx)
 {
-	return m_points[idx];
+	const unsigned linearIdx = m_pointIndex[idx];
+	return m_anchorPoints[linearIdx];
+}
+
+unsigned Anchor::getVertexIndex(unsigned idx)
+{
+	return m_pointIndex[idx];
 }
 
 void Anchor::computeLocalSpace()
 {
 	Vector3F cen;
 	cen.setZero();
-	for(unsigned i=0; i < numPoints(); i++) {
-		cen += m_points[i]->worldP;
+	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
+		cen += ((*m_anchorPointIt).second)->worldP;
 	}
 	cen /= numPoints();
 	m_space.setIdentity();
@@ -167,5 +160,19 @@ void Anchor::computeLocalSpace()
 		Vector3F & pos = ((*m_anchorPointIt).second)->worldP;
 		((*m_anchorPointIt).second)->p = invs.transform(pos);
 	}
+}
+
+void Anchor::keepOriginalSpace()
+{
+	m_space0 = m_space;
+}
+
+void Anchor::clear()
+{
+	for(m_anchorPointIt = m_anchorPoints.begin(); m_anchorPointIt != m_anchorPoints.end(); ++m_anchorPointIt) {
+		delete (*m_anchorPointIt).second;
+	}
+	m_anchorPoints.clear();
+	m_pointIndex.clear();
 }
 //:~

@@ -20,6 +20,7 @@ public:
 	bool pickupAnchor(const Ray & ray, Vector3F & hit);
 	void moveAnchor(Vector3F & dis);
 	unsigned numAnchors() const;
+	unsigned numAnchorPoints();
 	Anchor * firstAnchor();
 	Anchor * nextAnchor();
 	bool hasAnchor();

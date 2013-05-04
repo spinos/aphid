@@ -369,7 +369,7 @@ void SHelper::listAllNames(std::string& name, std::vector<std::string>& all)
 	std::string r;
 	std::string str = name;
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	boost::char_separator<char> sep("|");
+	boost::char_separator<char> sep("|/");
 	tokenizer tokens(str, sep);
 	for (tokenizer::iterator tok_iter = tokens.begin();
 		tok_iter != tokens.end(); ++tok_iter)
