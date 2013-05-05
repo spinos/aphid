@@ -79,11 +79,15 @@ public:
 	void setTarget(AnchorGroup * src, KdTree * tree);
 	void fit();
 	void fitAnchors(Anchor * src, Anchor * dst);
-	void removeLastAnchor();
 	void buildTree();
 	void loadMesh(std::string filename);
 	void saveMesh(std::string filename);
-
+	
+	void setSelectComponent();
+	void setSelectAnchor();
+	
+	void drawAnchors();
+	
 protected:
     void keyPressEvent(QKeyEvent *event);
     

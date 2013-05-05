@@ -72,6 +72,14 @@ void Window::keyPressEvent(QKeyEvent *e)
 {
 	if (e->key() == Qt::Key_Escape)
         close();
+	else if(e->key() == Qt::Key_Q) {
+		glWidget->setSelectAnchor();
+		targetWidget->setSelectAnchor();
+	}
+	else if(e->key() == Qt::Key_W) {
+		glWidget->setSelectComponent();
+		targetWidget->setSelectComponent();
+	}
 	
 	QWidget::keyPressEvent(e);
 }

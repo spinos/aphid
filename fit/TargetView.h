@@ -74,13 +74,17 @@ public:
 	virtual void sceneCenter(Vector3F & dst) const;
     
 	void anchorSelected(float wei);
-	void startDeform();
 	bool pickupComponent(const Ray & ray, Vector3F & hit);
 	
 	AnchorGroup * getAnchors() const;
 	KdTree * getTree() const;
 	void buildTree();
 	void loadMesh(std::string filename);
+	
+	void setSelectComponent();
+	void setSelectAnchor();
+	
+	void drawAnchors();
 
 protected:
     void keyPressEvent(QKeyEvent *event);

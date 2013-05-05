@@ -93,11 +93,7 @@ void GLWidget::clientDraw()
 	drawer->setCullFace(0);
 	
 	drawSelection();
-	
-	if(m_anchors->numAnchors() > 0) {
-		for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor())
-			drawer->anchor(a, m_anchors->getHitTolerance());
-	}
+	drawAnchors();
 }
 //! [7]
 
@@ -133,10 +129,6 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 	if(m_mode == SelectCompnent) {
 		Vector3F hit;
 		pickupComponent(ray, hit);
-	}
-	else {
-	    m_anchors->moveAnchor(stir);
-		m_deformer->solve();
 	}
 }
 
@@ -240,11 +232,6 @@ void GLWidget::fitAnchors(Anchor * src, Anchor * dst)
 	dst->computeLocalSpace();
 }
 
-void GLWidget::removeLastAnchor()
-{
-	m_anchors->removeLast();
-}
-
 void GLWidget::buildTree()
 {
 	m_deformer->updateMesh();
@@ -306,7 +293,10 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 		fit();
 	}
 	else if(e->key() == Qt::Key_Z) {
-		removeLastAnchor();
+		m_anchors->removeLast();
+	}
+	else if(e->key() == Qt::Key_X) {
+		m_anchors->removeActive();
 	}
 	else if(e->key() == Qt::Key_S) {
 		qDebug() << "smooth by 0.9";
@@ -315,5 +305,29 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 	}
 
 	Base3DView::keyPressEvent(e);
+}
+
+void GLWidget::setSelectComponent()
+{
+	m_mode = SelectCompnent;
+	m_anchors->clearSelected();
+}
+
+void GLWidget::setSelectAnchor()
+{
+	m_mode = TransformAnchor;
+}
+
+void GLWidget::drawAnchors()
+{
+	if(m_anchors->numAnchors() < 1) return;
+	
+	Anchor *a;
+	for(a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor())
+		getDrawer()->anchor(a, a == m_anchors->activeAnchor());
+
+	if(m_mode == SelectCompnent) return;
+	
+	getDrawer()->spaceHandle(m_anchors->activeAnchor());
 }
 //:~

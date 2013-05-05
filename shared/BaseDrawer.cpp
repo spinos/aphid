@@ -21,6 +21,7 @@ BaseDrawer::BaseDrawer () : m_wired(0)
 	m_sphere = new GeodesicSphereMesh(8);
 	m_pyramid = new PyramidMesh;
 	m_activeColor.set(0.f, .8f, .2f);
+	m_inertColor.set(0.1f, 0.6f, 0.1f);
 }
 
 BaseDrawer::~BaseDrawer () 
@@ -519,7 +520,7 @@ void BaseDrawer::setCullFace(char var)
 	else glDisable(GL_CULL_FACE);
 }
 
-void BaseDrawer::anchor(Anchor *a, float size)
+void BaseDrawer::anchor(Anchor *a, char active)
 {
 	glPushMatrix();
 	float m[16];
@@ -529,10 +530,12 @@ void BaseDrawer::anchor(Anchor *a, float size)
     glMultMatrixf((const GLfloat*)m);
 	glDisable(GL_DEPTH_TEST);
 	
-	glColor3f(0.f, .8f, .2f);
 	unsigned nouse;
 	Anchor::AnchorPoint * ap;
 	for(ap = a->firstPoint(nouse); a->hasPoint(); ap = a->nextPoint(nouse)) {
+		if(!active) colorAsInert();
+		else colorAsActive();
+	
 		Vector3F p = ap->p;
 		glPushMatrix();
 		glTranslatef(p.x, p.y, p.z);
@@ -610,4 +613,9 @@ void BaseDrawer::hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer
 void BaseDrawer::colorAsActive()
 {
 	glColor3f(m_activeColor.x, m_activeColor.y, m_activeColor.z);
+}
+
+void BaseDrawer::colorAsInert()
+{
+	glColor3f(m_inertColor.x, m_inertColor.y, m_inertColor.z);
 }

@@ -46,19 +46,20 @@ public:
 	void components(SelectionArray * arr);
 	void primitive(Primitive * prim);
 	void coordsys(float scale = 1.f);
-	void coordsys(const Matrix33F & orient, float scale = 1.f);
+	void coordsys(const Matrix33F & orient, float size = 1.f);
 	void setWired(char var);
 	void setCullFace(char var);
-	void anchor(Anchor *a, float size=1.f);
-	void spaceHandle(SpaceHandle * hand, float size = 1.f);
+	void anchor(Anchor *a, char active = 0);
+	void spaceHandle(SpaceHandle * hand, float scale = 1.f);
 	void sphere(float size = 1.f);
 	void linearCurve(const BaseCurve & curve);
 	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void colorAsActive();
+	void colorAsInert();
 	
 private:
     char m_wired;
 	GeodesicSphereMesh * m_sphere;
 	PyramidMesh * m_pyramid;
-	Vector3F m_activeColor;
+	Vector3F m_activeColor, m_inertColor;
 };

@@ -92,11 +92,7 @@ void TargetView::clientDraw()
 	drawer->setCullFace(0);
 	
 	drawSelection();
-	
-	if(m_anchors->numAnchors() > 0) {
-		for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor())
-			drawer->anchor(a, m_anchors->getHitTolerance());
-	}
+	drawAnchors();
 }
 //! [7]
 
@@ -131,9 +127,6 @@ void TargetView::clientMouseInput(Vector3F & origin, Vector3F & displacement, Ve
 		Vector3F hit;
 		pickupComponent(ray, hit);
 	}
-	else {
-	    m_anchors->moveAnchor(stir);
-	}
 }
 
 void TargetView::sceneCenter(Vector3F & dst) const
@@ -155,13 +148,6 @@ void TargetView::anchorSelected(float wei)
 	a->setWeight(wei);
 	m_anchors->addAnchor(a);
 	clearSelection();
-}
-
-void TargetView::startDeform()
-{
-	if(m_anchors->numAnchors() < 1) return;
-	
-	m_mode = TransformAnchor;
 }
 
 bool TargetView::pickupComponent(const Ray & ray, Vector3F & hit)
@@ -224,7 +210,34 @@ void TargetView::keyPressEvent(QKeyEvent *e)
 	else if(e->key() == Qt::Key_Z) {
 		m_anchors->removeLast();
 	}
+	else if(e->key() == Qt::Key_X) {
+		m_anchors->removeActive();
+	}
 
 	Base3DView::keyPressEvent(e);
+}
+
+void TargetView::setSelectComponent()
+{
+	m_mode = SelectCompnent;
+	m_anchors->clearSelected();
+}
+
+void TargetView::setSelectAnchor()
+{
+	m_mode = TransformAnchor;
+}
+
+void TargetView::drawAnchors()
+{
+	if(m_anchors->numAnchors() < 1) return;
+	
+	Anchor *a;
+	for(a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor())
+		getDrawer()->anchor(a, a == m_anchors->activeAnchor());
+
+	if(m_mode == SelectCompnent) return;
+	
+	getDrawer()->spaceHandle(m_anchors->activeAnchor());
 }
 //:~
