@@ -64,6 +64,7 @@ protected:
 private:
 	void createActions();
 	void createMenus();
+	void createStatusBar();
 
 private:
 	QMenu *fileMenu;

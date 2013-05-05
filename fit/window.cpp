@@ -61,6 +61,7 @@ Window::Window()
 	
 	createActions();
 	createMenus();
+	createStatusBar();
 	
 	updateFitTarget();
 	
@@ -70,15 +71,23 @@ Window::Window()
 
 void Window::keyPressEvent(QKeyEvent *e)
 {
-	if (e->key() == Qt::Key_Escape)
-        close();
+	if (e->key() == Qt::Key_Escape) {
+		QApplication::exit();
+    }
 	else if(e->key() == Qt::Key_Q) {
 		glWidget->setSelectAnchor();
 		targetWidget->setSelectAnchor();
+		statusBar()->showMessage(tr("Set to select anchors"));
 	}
 	else if(e->key() == Qt::Key_W) {
 		glWidget->setSelectComponent();
 		targetWidget->setSelectComponent();
+		statusBar()->showMessage(tr("Set to select vertices"));
+	}
+	else if(e->key() == Qt::Key_D) {
+		glWidget->startDeform();
+		glWidget->setFocus();
+		statusBar()->showMessage(tr("Deformed by matching anchors"));
 	}
 	
 	QWidget::keyPressEvent(e);
@@ -105,6 +114,11 @@ void Window::createMenus()
     fileMenu->addAction(loadTemplateAct);
 	fileMenu->addAction(loadTargetAct);
 	fileMenu->addAction(saveTemplateAct);
+}
+
+void Window::createStatusBar()
+{
+    statusBar()->showMessage(tr("Ready"));
 }
 
 void Window::updateFitTarget()

@@ -1,0 +1,194 @@
+/*
+ *  SingleModelView.cpp
+ *  fit
+ *
+ *  Created by jian zhang on 5/6/13.
+ *  Copyright 2013 __MyCompanyName__. All rights reserved.
+ *
+ */
+#include <QtGui>
+#include <QtOpenGL>
+#include <math.h>
+#include "SingleModelView.h"
+
+#include <BaseMesh.h>
+#include <KdTree.h>
+#include <Ray.h>
+#include <EasemodelUtil.h>
+#include <AnchorGroup.h>
+
+SingleModelView::SingleModelView(QWidget *parent) : Base3DView(parent)
+{
+	m_tree = 0;
+	m_mesh = new BaseMesh;
+	
+	m_anchors = new AnchorGroup;
+	m_anchors->setHitTolerance(.8f);
+
+	m_mode = SelectCompnent;
+}
+//! [0]
+
+//! [1]
+SingleModelView::~SingleModelView()
+{
+}
+
+void SingleModelView::clientDraw()
+{
+	KdTreeDrawer *drawer = getDrawer();
+	drawer->hiddenLine(m_mesh);	
+	drawSelection();
+	drawAnchors();
+}
+//! [7]
+
+//! [9]
+void SingleModelView::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
+{
+    Vector3F rayo = origin;
+	Vector3F raye = origin + displacement;
+	
+	Ray ray(rayo, raye);
+	if(m_mode == SelectCompnent) {
+		pickupComponent(ray, hit);
+	}
+	else {
+		m_anchors->pickupAnchor(ray, hit);
+	}
+}
+//! [9]
+
+void SingleModelView::clientDeselect()
+{
+
+}
+
+//! [10]
+void SingleModelView::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
+{
+	Vector3F rayo = origin;
+	Vector3F raye = origin + displacement;
+	Ray ray(rayo, raye);
+	if(m_mode == SelectCompnent) {
+		Vector3F hit;
+		pickupComponent(ray, hit);
+	}
+}
+
+void SingleModelView::sceneCenter(Vector3F & dst) const
+{
+    dst.x = m_tree->m_bbox.getMin(0) * 0.5f + m_tree->m_bbox.getMax(0) * 0.5f;
+    dst.y = m_tree->m_bbox.getMin(1) * 0.5f + m_tree->m_bbox.getMax(1) * 0.5f;
+    dst.z = m_tree->m_bbox.getMin(2) * 0.5f + m_tree->m_bbox.getMax(2) * 0.5f;
+}
+
+void SingleModelView::anchorSelected(float wei)
+{
+	if(getSelection()->numVertices() < 1) return;
+	Anchor *a = new Anchor(*getSelection());
+	a->setWeight(wei);
+	m_anchors->addAnchor(a);
+	clearSelection();
+}
+
+bool SingleModelView::pickupComponent(const Ray & ray, Vector3F & hit)
+{
+	getIntersectionContext()->reset();
+	if(!m_tree->intersect(ray, getIntersectionContext())) 
+		return false;
+	hit = getIntersectionContext()->m_hitP;
+	addHitToSelection();
+	return true;
+}
+
+void SingleModelView::buildTree()
+{
+	if(m_tree) delete m_tree;
+	m_tree = new KdTree;
+	m_tree->addMesh(m_mesh);
+	m_tree->create();
+}
+
+void SingleModelView::open()
+{
+	QString temQStr = QFileDialog::getOpenFileName(this, 
+		tr("Open Model File As Temple"), "../", tr("Mesh(*.m)"));
+	
+	if(temQStr == NULL)
+		return;
+		
+	loadMesh(temQStr.toStdString());
+}
+
+void SingleModelView::loadMesh(std::string filename)
+{
+	ESMUtil::Import(filename.c_str(), m_mesh);
+}
+
+void SingleModelView::saveMesh(std::string filename)
+{
+	ESMUtil::Export(filename.c_str(), m_mesh);
+}
+
+void SingleModelView::save()
+{
+	QString temQStr = QFileDialog::getSaveFileName(this, 
+		tr("Save Template to Model File"), "./untitled.m", tr("Mesh(*.m)"));
+	
+	if(temQStr == NULL)
+		return;
+		
+	saveMesh(temQStr.toStdString());
+	QMessageBox::information(this, tr("Success"), QString("Template saved as ").append(temQStr));
+}
+
+void SingleModelView::keyPressEvent(QKeyEvent *e)
+{
+	if(e->key() == Qt::Key_A) {
+		anchorSelected(1.f);
+	}
+	else if(e->key() == Qt::Key_Z) {
+		m_anchors->removeLast();
+	}
+	else if(e->key() == Qt::Key_X) {
+		m_anchors->removeActive();
+	}
+
+	Base3DView::keyPressEvent(e);
+}
+
+void SingleModelView::setSelectComponent()
+{
+	m_mode = SelectCompnent;
+	m_anchors->clearSelected();
+}
+
+void SingleModelView::setSelectAnchor()
+{
+	m_mode = TransformAnchor;
+}
+
+void SingleModelView::drawAnchors()
+{
+	if(m_anchors->numAnchors() < 1) return;
+	
+	Anchor *a;
+	for(a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor())
+		getDrawer()->anchor(a, a == m_anchors->activeAnchor());
+
+	if(m_mode == SelectCompnent) return;
+	
+	getDrawer()->spaceHandle(m_anchors->activeAnchor());
+}
+
+AnchorGroup * SingleModelView::getAnchors() const
+{
+	return m_anchors;
+}
+
+KdTree * SingleModelView::getTree() const
+{
+	return m_tree;
+}
+//:~
