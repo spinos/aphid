@@ -65,6 +65,86 @@ void BaseMesh::createPolygonIndices(unsigned num)
     m_polygonIndices = new unsigned[num];
 }
 
+unsigned BaseMesh::processTriangleFromPolygon()
+{
+	_numFaces = 0;
+	
+	unsigned i, j;
+    for(i = 0; i < m_numPolygons; i++)
+        _numFaces += m_polygonCounts[i] - 2;
+		
+	createIndices(_numFaces * 3);
+    
+    unsigned curTri = 0;
+    unsigned curFace = 0;
+    for(i = 0; i < m_numPolygons; i++) {
+        for(j = 1; j < m_polygonCounts[i] - 1; j++) {
+            _indices[curTri] = m_polygonIndices[curFace];
+            _indices[curTri + 1] = m_polygonIndices[curFace + j];
+            _indices[curTri + 2] = m_polygonIndices[curFace + j + 1];
+            curTri += 3;
+        }
+        curFace += m_polygonCounts[i];
+    }
+	
+	return _numFaces;
+}
+
+unsigned BaseMesh::processQuadFromPolygon()
+{
+	unsigned i, j;
+	unsigned numQuads = 0;
+    for(i = 0; i < m_numPolygons; i++) {
+		if(m_polygonCounts[i] == 4)
+			numQuads++;
+	}
+		
+	if(numQuads < 1) return 0;
+	
+	createQuadIndices(numQuads * 4);
+	
+	unsigned ie = 0;
+	unsigned curFace = 0;
+	for(i = 0; i < m_numPolygons; i++) {
+		if(m_polygonCounts[i] == 4) {
+			for(j = 0; j < 4; j++) {
+				m_quadIndices[ie] = m_polygonIndices[curFace + j];
+				ie++;
+			}
+		}
+		curFace += m_polygonCounts[i];
+	}
+	
+	return numQuads;
+}
+
+void BaseMesh::processRealEdgeFromPolygon()
+{
+	unsigned i, j;
+	unsigned curTri = 0;
+	for(i = 0; i < m_numPolygons; i++) {
+        for(j = 1; j < m_polygonCounts[i] - 1; j++) {
+			if(j == 1) {
+				m_realEdges[curTri] = 1;
+				m_realEdges[curTri + 1] = 1;
+				m_realEdges[curTri + 2] = 0;
+			}
+			else if(j == m_polygonCounts[i] - 2) {
+				m_realEdges[curTri] = 0;
+				m_realEdges[curTri + 1] = 1;
+				m_realEdges[curTri + 2] = 1;
+			}
+			else {
+				m_realEdges[curTri] = 0;
+				m_realEdges[curTri + 1] = 1;
+				m_realEdges[curTri + 2] = 0;
+			}
+			
+            curTri += 3;
+        }
+    }
+}
+
 const BoundingBox BaseMesh::calculateBBox() const
 {
 	BoundingBox box;

@@ -25,6 +25,10 @@ public:
 	void createPolygonCounts(unsigned num);
 	void createPolygonIndices(unsigned num);
 	
+	unsigned processTriangleFromPolygon();
+	unsigned processQuadFromPolygon();
+	void processRealEdgeFromPolygon();
+	
 	const BoundingBox calculateBBox() const;
 	const BoundingBox calculateBBox(const unsigned &idx) const;
 	const int faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const;

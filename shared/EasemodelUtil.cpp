@@ -21,48 +21,7 @@ void Import(const char * filename, BaseMesh * dst)
     int *faceCount = esm->getFaceCount();
     int *faceConnection = esm->getFaceConnection();
 
-    dst->_numFaces = 0;
-	
 	unsigned i, j;
-    for(i = 0; i < nf; i++)
-        dst->_numFaces += faceCount[i] - 2;
-		
-	dst->createIndices(dst->_numFaces * 3);
-    
-    unsigned curTri = 0;
-    unsigned curFace = 0;
-    for(i = 0; i < nf; i++) {
-        for(j = 1; j < faceCount[i] - 1; j++) {
-            dst->_indices[curTri] = faceConnection[curFace];
-            dst->_indices[curTri + 1] = faceConnection[curFace + j];
-            dst->_indices[curTri + 2] = faceConnection[curFace + j + 1];
-            curTri += 3;
-        }
-        curFace += faceCount[i];
-    }
-	
-	curTri = 0;
-	for(i = 0; i < nf; i++) {
-        for(j = 1; j < faceCount[i] - 1; j++) {
-			if(j == 1) {
-				dst->m_realEdges[curTri] = 1;
-				dst->m_realEdges[curTri + 1] = 1;
-				dst->m_realEdges[curTri + 2] = 0;
-			}
-			else if(j == faceCount[i] - 2) {
-				dst->m_realEdges[curTri] = 0;
-				dst->m_realEdges[curTri + 1] = 1;
-				dst->m_realEdges[curTri + 2] = 1;
-			}
-			else {
-				dst->m_realEdges[curTri] = 0;
-				dst->m_realEdges[curTri + 1] = 1;
-				dst->m_realEdges[curTri + 2] = 0;
-			}
-			
-            curTri += 3;
-        }
-    }
     
     dst->createPolygonCounts(nf);
     
@@ -91,29 +50,11 @@ void Import(const char * filename, BaseMesh * dst)
         dst->_vertices[i].z = cvs[i * 3 + 2];
     }
 	
-	unsigned numQuads = 0;
-    for(i = 0; i < nf; i++) {
-		if(faceCount[i] == 4)
-			numQuads++;
-	}
-		
-	if(numQuads < 1) return;
-	
-	dst->createQuadIndices(numQuads * 4);
-	
-	unsigned ie = 0;
-	curFace = 0;
-	for(i = 0; i < nf; i++) {
-		if(faceCount[i] == 4) {
-			for(j = 0; j < faceCount[i]; j++) {
-				dst->m_quadIndices[ie] = faceConnection[curFace + j];
-				ie++;
-			}
-		}
-		curFace += faceCount[i];
-	}
-	
 	delete esm;
+	
+	dst->processTriangleFromPolygon();
+	dst->processQuadFromPolygon();
+	dst->processRealEdgeFromPolygon();
 }
 
 void Export(const char * filename, BaseMesh * src)

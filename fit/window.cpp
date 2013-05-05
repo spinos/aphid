@@ -57,7 +57,7 @@ Window::Window()
     splitter->addWidget(targetWidget);
 
 	setCentralWidget(splitter);
-    setWindowTitle(tr("Matching Shape Version 0.7 Sat 5/4/2013"));
+    setWindowTitle(tr("Matching Shape Version 0.8 Sun 5/5/2013"));
 	
 	createActions();
 	createMenus();
