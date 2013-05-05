@@ -30,6 +30,7 @@ public:
 	Anchor * activeAnchor() const;
 	void removeLast();
 	void removeActive();
+	void clearSelected();
 	
 	void setHitTolerance(float val);
 	float getHitTolerance() const;

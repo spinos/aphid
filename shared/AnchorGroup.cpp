@@ -120,6 +120,11 @@ void AnchorGroup::removeActive()
 	m_activeAnchor = 0;
 }
 
+void AnchorGroup::clearSelected()
+{
+	m_activeAnchor = 0;
+}
+
 void AnchorGroup::setHitTolerance(float val)
 {
 	m_hitTolerance = val;
