@@ -19,11 +19,14 @@ void AnchorGroup::reset()
 		delete *it;
 	}
 	m_anchors.clear();
+	m_relevantIndex.clear();
 }
 
 void AnchorGroup::addAnchor(Anchor * a)
 {
+    a->setSize(getHitTolerance());
 	m_anchors.push_back(a);
+	m_relevantIndex.push_back(0);
 }
 
 bool AnchorGroup::pickupAnchor(const Ray & ray, Vector3F & hit)
@@ -90,9 +93,15 @@ std::vector<Anchor *> & AnchorGroup::data()
 	return m_anchors;
 }
 
+bool AnchorGroup::hasActiveAnchor() const
+{
+    return m_activeAnchor != 0;
+}
+
 bool AnchorGroup::activeAnchorIdx(unsigned & idx) const
 {
 	if(!m_activeAnchor) return false;
+
 	idx = m_activeAnchorIdx;
 	return true;
 }
@@ -105,19 +114,49 @@ Anchor * AnchorGroup::activeAnchor() const
 void AnchorGroup::removeLast()
 {
 	if(numAnchors() < 1) return;
-	m_anchorIt = m_anchors.begin();
-	m_anchorIt += numAnchors() - 1;
-	m_anchors.erase(m_anchorIt);
+	printf("rm last");
+	removeAnchor(numAnchors() - 1);
 }
 
 void AnchorGroup::removeActive()
 {
 	if(!m_activeAnchor) return;
-	m_anchorIt = m_anchors.begin();
-	m_anchorIt += m_activeAnchorIdx;
-	m_anchors.erase(m_anchorIt);
-	delete m_activeAnchor;
+	removeAnchor(m_activeAnchorIdx);
+	
 	m_activeAnchor = 0;
+	m_activeAnchorIdx = 0;
+}
+
+void AnchorGroup::removeAnchor(unsigned idx)
+{
+    printf("rm %i ", idx);
+    m_anchorIt = m_anchors.begin();
+    m_anchorIt += idx;
+    delete *m_anchorIt;
+    m_anchors.erase(m_anchorIt);
+    
+    std::vector<unsigned>::iterator it = m_relevantIndex.begin();
+	it += idx;
+	m_relevantIndex.erase(it);
+}
+
+void AnchorGroup::removeRelevantAnchor(unsigned idx)
+{
+    printf("rm rel %i ", idx);
+    for(unsigned i = 0; i < m_relevantIndex.size(); ++i) {
+        if(m_relevantIndex[i] == idx) {
+            removeAnchor(i);
+            popReleventIndex(idx);
+        }   
+    }
+}
+
+void AnchorGroup::popReleventIndex(unsigned idx)
+{
+    for(unsigned i = 0; i < m_relevantIndex.size(); i++) {
+        if(m_relevantIndex[i] > idx)
+            m_relevantIndex[i] = m_relevantIndex[i] - 1;
+    }
 }
 
 void AnchorGroup::clearSelected()
@@ -133,5 +172,15 @@ void AnchorGroup::setHitTolerance(float val)
 float AnchorGroup::getHitTolerance() const
 {
 	return m_hitTolerance;
+}
+
+void AnchorGroup::setLastReleventIndex(unsigned val)
+{
+    m_relevantIndex.back() = val;
+}
+
+unsigned AnchorGroup::getReleventIndex(unsigned idx) const
+{
+    return m_relevantIndex[idx];
 }
 //:~

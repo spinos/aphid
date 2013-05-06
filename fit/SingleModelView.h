@@ -30,7 +30,10 @@ public:
     SingleModelView(QWidget *parent = 0);
     ~SingleModelView();
 	
-	void anchorSelected(float wei);
+	virtual bool anchorSelected(float wei);
+	virtual bool removeLastAnchor(unsigned & idx);
+	virtual bool removeActiveAnchor(unsigned & idx);
+	
 	bool pickupComponent(const Ray & ray, Vector3F & hit);
 	
 	virtual void clientDraw();

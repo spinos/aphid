@@ -50,7 +50,7 @@ public:
 	void setWired(char var);
 	void setCullFace(char var);
 	void anchor(Anchor *a, char active = 0);
-	void spaceHandle(SpaceHandle * hand, float scale = 1.f);
+	void spaceHandle(SpaceHandle * hand);
 	void sphere(float size = 1.f);
 	void linearCurve(const BaseCurve & curve);
 	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);

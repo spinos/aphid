@@ -23,12 +23,16 @@ public:
     TargetView(QWidget *parent = 0);
     ~TargetView();
 
+    virtual bool anchorSelected(float wei);
 	virtual	void buildTree();
 	virtual void loadMesh(std::string filename);
+	
+	void setSource(AnchorGroup * src);
     
 //! [3]
 private:
-	MeshTopology *m_topo;
+	MeshTopology * m_topo;
+	AnchorGroup * m_sourceAnchors;
 
 signals:
      void targetChanged();

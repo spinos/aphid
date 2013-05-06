@@ -28,7 +28,26 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 //! [1]
 GLWidget::~GLWidget() {}
 
-//! [9]
+bool GLWidget::removeLastAnchor(unsigned & idx)
+{
+    if(!SingleModelView::removeLastAnchor(idx))
+        return false;
+    if(m_targetAnchors)
+        m_targetAnchors->removeRelevantAnchor(idx);
+
+    return true;
+}
+
+bool GLWidget::removeActiveAnchor(unsigned & idx)
+{
+    if(!SingleModelView::removeActiveAnchor(idx))
+        return false;
+    if(m_targetAnchors)
+        m_targetAnchors->removeRelevantAnchor(idx);
+
+    return true;
+}
+	
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
 {
     getSelection()->enableVertexPath();
@@ -47,16 +66,19 @@ void GLWidget::startDeform()
 	if(m_targetAnchors->numAnchors() < 1) return;
 	
 	if(m_targetAnchors) {
-		std::vector<Anchor *> src; 
-		for(Anchor *a = m_targetAnchors->firstAnchor(); m_targetAnchors->hasAnchor(); a = m_targetAnchors->nextAnchor())
-			src.push_back(a);
+		std::vector<Anchor *> relDst;
+		unsigned i, relIdx;
+		for(i = 0; i < m_targetAnchors->numAnchors(); i++) {
+		    relIdx = m_targetAnchors->getReleventIndex(i);
+		    relDst.push_back(m_anchors->data()[relIdx]);
+		}
 		
-		unsigned i = 0;
-		for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor()) {
-			if(i < src.size()) {
-				fitAnchors(src[i], a);
-			}
-			i++;
+		for(i = 0; i < m_targetAnchors->numAnchors(); i++) {
+		//for(Anchor *a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor()) {
+			//if(i < relSrc.size()) {
+			fitAnchors(m_targetAnchors->data()[i], relDst[i]);
+			//}
+			//i++;
 		}	
 	}
 	

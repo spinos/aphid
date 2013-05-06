@@ -124,5 +124,6 @@ void Window::createStatusBar()
 void Window::updateFitTarget()
 {
     glWidget->setTarget(targetWidget->getAnchors(), targetWidget->getTree());
+    targetWidget->setSource(glWidget->getAnchors());
 }
 

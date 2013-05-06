@@ -22,6 +22,9 @@ class GLWidget : public SingleModelView
 public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
+    
+    virtual bool removeLastAnchor(unsigned & idx);
+	virtual bool removeActiveAnchor(unsigned & idx);
 
 	virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
 	virtual void buildTree();

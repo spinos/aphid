@@ -11,6 +11,7 @@
 #include <QtOpenGL>
 #include "TargetView.h"
 #include <MeshTopology.h>
+#include <AnchorGroup.h>
 	
 //! [0]
 TargetView::TargetView(QWidget *parent) : SingleModelView(parent)
@@ -24,6 +25,16 @@ TargetView::TargetView(QWidget *parent) : SingleModelView(parent)
 
 //! [1]
 TargetView::~TargetView() {}
+
+bool TargetView::anchorSelected(float wei)
+{
+    if(!SingleModelView::anchorSelected(wei)) return false;
+    unsigned activeSrc = m_anchors->numAnchors() - 1;
+    m_sourceAnchors->activeAnchorIdx(activeSrc);
+    printf("match %i",activeSrc);
+    m_anchors->setLastReleventIndex(activeSrc);
+    return true;
+}
 
 void TargetView::buildTree()
 {
@@ -39,5 +50,10 @@ void TargetView::loadMesh(std::string filename)
 	getSelection()->setTopology(m_topo->getTopology());
 	m_topo->calculateNormal(m_mesh);
 	buildTree();
+}
+
+void TargetView::setSource(AnchorGroup * src)
+{
+    m_sourceAnchors = src;
 }
 //:~

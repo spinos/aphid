@@ -23,7 +23,7 @@ SingleModelView::SingleModelView(QWidget *parent) : Base3DView(parent)
 	m_mesh = new BaseMesh;
 	
 	m_anchors = new AnchorGroup;
-	m_anchors->setHitTolerance(.8f);
+	m_anchors->setHitTolerance(.3f);
 
 	m_mode = SelectCompnent;
 }
@@ -83,13 +83,30 @@ void SingleModelView::sceneCenter(Vector3F & dst) const
     dst.z = m_tree->m_bbox.getMin(2) * 0.5f + m_tree->m_bbox.getMax(2) * 0.5f;
 }
 
-void SingleModelView::anchorSelected(float wei)
+bool SingleModelView::anchorSelected(float wei)
 {
-	if(getSelection()->numVertices() < 1) return;
+	if(getSelection()->numVertices() < 1) return false;
 	Anchor *a = new Anchor(*getSelection());
 	a->setWeight(wei);
 	m_anchors->addAnchor(a);
 	clearSelection();
+	return true;
+}
+
+bool SingleModelView::removeLastAnchor(unsigned & idx)
+{
+    if(m_anchors->numAnchors() < 1) return false;
+    m_anchors->removeLast();
+    idx = (unsigned)m_anchors->numAnchors();
+    return true;
+}
+
+bool SingleModelView::removeActiveAnchor(unsigned & idx)
+{
+    if(!m_anchors->hasActiveAnchor()) return false;
+    m_anchors->activeAnchorIdx(idx);
+    m_anchors->removeActive();
+    return true;
 }
 
 bool SingleModelView::pickupComponent(const Ray & ray, Vector3F & hit)
@@ -145,14 +162,15 @@ void SingleModelView::save()
 
 void SingleModelView::keyPressEvent(QKeyEvent *e)
 {
+    unsigned nouse;
 	if(e->key() == Qt::Key_A) {
 		anchorSelected(1.f);
 	}
 	else if(e->key() == Qt::Key_Z) {
-		m_anchors->removeLast();
+		removeLastAnchor(nouse);
 	}
 	else if(e->key() == Qt::Key_X) {
-		m_anchors->removeActive();
+		removeActiveAnchor(nouse);
 	}
 
 	Base3DView::keyPressEvent(e);
@@ -161,7 +179,6 @@ void SingleModelView::keyPressEvent(QKeyEvent *e)
 void SingleModelView::setSelectComponent()
 {
 	m_mode = SelectCompnent;
-	m_anchors->clearSelected();
 }
 
 void SingleModelView::setSelectAnchor()
@@ -177,8 +194,8 @@ void SingleModelView::drawAnchors()
 	for(a = m_anchors->firstAnchor(); m_anchors->hasAnchor(); a = m_anchors->nextAnchor())
 		getDrawer()->anchor(a, a == m_anchors->activeAnchor());
 
-	if(m_mode == SelectCompnent) return;
-	
+	if(!m_anchors->hasActiveAnchor()) return;
+	    
 	getDrawer()->spaceHandle(m_anchors->activeAnchor());
 }
 

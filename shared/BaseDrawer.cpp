@@ -556,7 +556,7 @@ void BaseDrawer::anchor(Anchor *a, char active)
 	glPopMatrix();
 }
 
-void BaseDrawer::spaceHandle(SpaceHandle * hand, float size)
+void BaseDrawer::spaceHandle(SpaceHandle * hand)
 {
 	if(!hand) return;
 	glPushMatrix();

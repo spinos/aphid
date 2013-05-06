@@ -26,17 +26,29 @@ public:
 	bool hasAnchor();
 	
 	std::vector<Anchor *> & data();
+	
+	bool hasActiveAnchor() const;
 	bool activeAnchorIdx(unsigned & idx) const;
 	Anchor * activeAnchor() const;
 	void removeLast();
 	void removeActive();
+	
+	void removeAnchor(unsigned idx);
+	void removeRelevantAnchor(unsigned idx);
+	void popReleventIndex(unsigned idx);
+	
 	void clearSelected();
 	
 	void setHitTolerance(float val);
 	float getHitTolerance() const;
+	
+	void setLastReleventIndex(unsigned val);
+	unsigned getReleventIndex(unsigned idx) const;
+	
 private:
 	std::vector<Anchor *> m_anchors;
 	std::vector<Anchor *>::iterator m_anchorIt;
+	std::vector<unsigned> m_relevantIndex;
 	Anchor * m_activeAnchor;
 	unsigned m_activeAnchorIdx;
 	float m_hitTolerance;
