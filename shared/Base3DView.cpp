@@ -248,7 +248,7 @@ void Base3DView::updateOrthoProjection()
 	float right = fov/ 2.f;
 	float top = right / aspect;
 
-    glOrtho(-right, right, -top, top, 1.0, 1000.0);
+    glOrtho(-right, right, -top, top, getCamera()->nearClipPlane(), getCamera()->farClipPlane());
 
     glMatrixMode(GL_MODELVIEW);
 	doneCurrent();
@@ -267,7 +267,7 @@ void Base3DView::updatePerspProjection()
 	top = getCamera()->frameHeight() * 0.5f;
 	bottom = -top;
 
-    glFrustum(left, right, bottom, top, 1.0, 1000.0);
+    glFrustum(left, right, bottom, top, getCamera()->nearClipPlane(), getCamera()->farClipPlane());
 	
     glMatrixMode(GL_MODELVIEW);
 	doneCurrent();

@@ -11,6 +11,8 @@
 #include <iostream>
 BaseCamera::BaseCamera() 
 {
+    m_nearClipPlane = 1.f;
+    m_farClipPlane = 1000.f;
 	fPortWidth = 400;
 	fPortHeight = 300;
 	reset();
@@ -175,6 +177,16 @@ float BaseCamera::getHorizontalAperture() const
 float BaseCamera::aspectRatio() const
 {
 	return (float)fPortWidth / (float)fPortHeight;
+}
+
+float BaseCamera::nearClipPlane() const
+{
+    return m_nearClipPlane;
+}
+
+float BaseCamera::farClipPlane() const
+{
+    return m_farClipPlane;
 }
 
 float BaseCamera::fieldOfView() const

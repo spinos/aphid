@@ -31,6 +31,8 @@ public:
 	virtual void incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const;
 	Vector3F eyePosition() const;
 	float aspectRatio() const;
+	float nearClipPlane() const;
+	float farClipPlane() const;
 	virtual float fieldOfView() const;
 	virtual float frameWidth() const;
 	virtual float frameHeight() const;
@@ -43,4 +45,5 @@ public:
 	Vector3F fCenterOfInterest;
 	unsigned fPortWidth, fPortHeight;
 	float fHorizontalAperture;
+	float m_nearClipPlane, m_farClipPlane;
 };
