@@ -38,6 +38,9 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *event);
     
+signals:
+     void needTargetRedraw();
+    
 private:
 	FitDeformer * m_deformer;
 	AnchorGroup * m_targetAnchors;

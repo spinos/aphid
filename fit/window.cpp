@@ -57,7 +57,7 @@ Window::Window()
     splitter->addWidget(targetWidget);
 
 	setCentralWidget(splitter);
-    setWindowTitle(tr("Matching Shape Version 0.8 Sun 5/5/2013"));
+    setWindowTitle(tr("Matching Shape Version 0.8a Sun 5/10/2013"));
 	
 	createActions();
 	createMenus();
@@ -66,6 +66,7 @@ Window::Window()
 	updateFitTarget();
 	
 	connect(targetWidget, SIGNAL(targetChanged(void)), this, SLOT(updateFitTarget(void)));
+	connect(glWidget, SIGNAL(needTargetRedraw(void)), this, SLOT(drawRight(void)));
 }
 //! [1]
 
@@ -127,3 +128,7 @@ void Window::updateFitTarget()
     targetWidget->setSource(glWidget->getAnchors());
 }
 
+void Window::drawRight()
+{
+    targetWidget->update();
+}

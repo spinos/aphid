@@ -76,6 +76,7 @@ private:
 	
 public slots:
     void updateFitTarget();
+    void drawRight();
 };
 //! [0]
 

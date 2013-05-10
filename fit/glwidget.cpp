@@ -45,6 +45,7 @@ bool GLWidget::removeActiveAnchor(unsigned & idx)
     if(m_targetAnchors)
         m_targetAnchors->removeRelevantAnchor(idx);
 
+    emit needTargetRedraw();
     return true;
 }
 	
