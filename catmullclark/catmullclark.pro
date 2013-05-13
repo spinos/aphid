@@ -51,6 +51,9 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/PatchMesh.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
+                ../../ofl/core/BaseImage.cpp \
+                ../../ofl/core/zEXRImage.h \
+                LODQuad.h \
                 accPatch.h \
                 accStencil.h \
                 bezierPatch.h \
@@ -112,6 +115,9 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/PatchMesh.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
+                ../../ofl/core/BaseImage.cpp \
+                ../../ofl/core/zEXRImage.cpp \
+                LODQuad.cpp \
                 accPatch.cpp \
                 accStencil.cpp \
                 bezierPatch.cpp \
@@ -119,9 +125,11 @@ SOURCES       = ../shared/Vector3F.cpp \
                 tessellator.cpp \
                 glwidget.cpp \
                 subdivision.cpp \
+                window.cpp \
                 main.cpp 
                 
 INCLUDEPATH += /usr/local/include/OpenEXR
+LIBS += -leasymodel -lIlmImf -lHalf
 macx {
     INCLUDEPATH += ../../Library/boost_1_44_0
         LIBS += -lboost_date_time\

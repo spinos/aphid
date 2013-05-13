@@ -61,12 +61,7 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
-    QSlider *createSlider();
-
     GLWidget *glWidget;
-    QSlider *xSlider;
-    QSlider *ySlider;
-    QSlider *zSlider;
 };
 //! [0]
 

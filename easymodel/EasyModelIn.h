@@ -8,7 +8,8 @@ public:
 	~EasyModelIn();
 	unsigned getNumFace() const;
 	unsigned getNumVertex() const;
-	unsigned getNumValence() const;
+	unsigned getNumUVs() const;
+	unsigned getNumUVIds() const;
 	int* getFaceCount() const;
 	int* getFaceConnection() const;
 	float* getVertexPosition() const;
@@ -24,7 +25,8 @@ public:
 private:
 	unsigned _numPolygon;
 	unsigned _numVertex;
-	unsigned _numValence;
+	unsigned _numUVs;
+	unsigned _numUVIds;
 	int* _faceCount;
 	int* _vertices;
 	float* _cvs;

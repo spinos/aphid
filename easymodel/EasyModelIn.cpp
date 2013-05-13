@@ -44,9 +44,14 @@ unsigned EasyModelIn::getNumVertex() const
 	return _numVertex;
 }
 
-unsigned EasyModelIn::getNumValence() const
+unsigned EasyModelIn::getNumUVs() const
 {
-	return _numValence;
+	return _numUVs;
+}
+
+unsigned EasyModelIn::getNumUVIds() const
+{
+	return _numUVIds;
 }
 
 int* EasyModelIn::getFaceCount() const
@@ -205,7 +210,6 @@ void EasyModelIn::readPatchBoundary()
 void EasyModelIn::readVertexValence()
 {
 	_doc.getChildByName("VertexValence");
-	_numValence = _doc.getIntAttribByName("count");
 	int pos = _doc.getIntAttribByName("loc");
 
 	char *ptr = _data;
@@ -229,6 +233,8 @@ void EasyModelIn::readUV()
 {
 	_doc.getChildByName("uvSet");
 	_doc.getChildByName("s");
+	_numUVs = _doc.getIntAttribByName("count");
+	
 	int pos = _doc.getIntAttribByName("loc");
 	
 	char *ptr = _data;
@@ -244,6 +250,7 @@ void EasyModelIn::readUV()
 	_doc.setParent();
 	
 	_doc.getChildByName("uvid");
+	_numUVIds = _doc.getIntAttribByName("count");
 	pos = _doc.getIntAttribByName("loc");
 	ptr = _data;
 	ptr += pos;

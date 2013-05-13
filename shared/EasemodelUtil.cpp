@@ -35,13 +35,27 @@ void ImportPatch(const char * filename, PatchMesh * dst)
 	dst->processQuadFromPolygon();
 	dst->processRealEdgeFromPolygon();
 	
-	dst->createVertexValence(esm->getNumValence());
-	
 	dst->prePatchValence();
 	
-	for(int i = 0; i < dst->getNumVertices(); i++) {
-		esm->setPatchAtFace(i, dst->patchVertices(), dst->patchBoundaries());
+	for(int i = 0; i < dst->numPatches(); i++) {
+		for(unsigned j = 0; j < 24; j++)
+			dst->patchVertices()[i*24 + j] = esm->getPatchVertex()[i*24 + j];
+		for(unsigned j = 0; j < 15; j++)
+			dst->patchBoundaries()[i*15 + j] = esm->getPatchBoundary()[i*15 + j];
 	}
+	
+	for(int i = 0; i < dst->getNumVertices(); i++)
+		dst->vertexValence()[i] = esm->getVertexValence()[i];
+	
+	dst->prePatchUV(esm->getNumUVs(), esm->getNumUVIds());
+	
+	for(int i = 0; i < esm->getNumUVs(); i++) {
+		dst->us()[i] = esm->getUs()[i];
+		dst->vs()[i] = esm->getVs()[i];
+	}
+	
+	for(int i = 0; i < esm->getNumUVIds(); i++)
+		dst->uvIds()[i] = esm->getUVIds()[i];
 	
 	delete esm;
 }

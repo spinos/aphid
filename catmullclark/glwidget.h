@@ -42,7 +42,7 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include <QGLWidget>
+#include <Base3DView.h>
 
 class Subdivision;
 class PatchMesh;
@@ -52,7 +52,7 @@ class LODCamera;
 class Tessellator;
 class ZEXRImage;
 //! [0]
-class GLWidget : public QGLWidget
+class GLWidget : public Base3DView
 {
     Q_OBJECT
 
@@ -60,60 +60,21 @@ public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 
-    QSize minimumSizeHint() const;
-    QSize sizeHint() const;
-//! [0]
-
-//! [1]
-public slots:
-    void setXRotation(int angle);
-    void setYRotation(int angle);
-    void setZRotation(int angle);
-
-signals:
-    void xRotationChanged(int angle);
-    void yRotationChanged(int angle);
-    void zRotationChanged(int angle);
-//! [1]
-
 //! [2]
 protected:
-    void initializeGL();
-    void paintGL();
-    void resizeGL(int width, int height);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-//! [2]
+    virtual void clientDraw();
 
 //! [3]
-private:
-    int xRot;
-    int yRot;
-    int zRot;
-    QPoint lastPos;
-    QColor qtGreen;
-    QColor qtPurple;
-	
-	Subdivision* _subdiv;
+private:	
 	PatchMesh* _model;
-	Subdivision* _mesh;
-	Subdivision* _mesh1;
 	AccPatch* _bezier;
 	PatchTopology* _topo;
-	LODCamera* _camera;
 	Tessellator* _tess;
 	ZEXRImage* _image;
 
-	void drawModel();
-	void drawMesh();
 	void drawBezier();
 	void drawBezierPatch(AccPatch& patch, float detail);
 	void drawBezierPatchCage(AccPatch& patch);
-	
-private slots:
-    void simulate();
-	
-	
 
 };
 //! [3]
