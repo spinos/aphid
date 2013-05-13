@@ -19,6 +19,7 @@ public:
 	Vector3F getCorner(int i) const;
 	
 	void setDetail(float d, int i);
+	void setUniformDetail(float d);
 	float getDetail(int i) const;
 	
 	void evaluateSurfaceLOD(float u, float v, float * detail) const;

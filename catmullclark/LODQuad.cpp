@@ -28,6 +28,11 @@ void LODQuad::setDetail(float d, int i)
 	_details[i] = d;
 }
 
+void LODQuad::setUniformDetail(float d)
+{
+	_details[0] = _details[1] = _details[2] = _details[3] = d;
+}
+
 float LODQuad::getDetail(int i) const
 {
 	return _details[i];
