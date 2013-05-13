@@ -44,6 +44,7 @@ public:
 	void getTriangle(unsigned idx, unsigned *vertexId) const;
 	
 	unsigned getNumFaces() const;
+	unsigned getNumQuads() const;
 	unsigned getNumVertices() const;
 	unsigned getNumFaceVertices() const;
 	
@@ -66,6 +67,7 @@ public:
 	unsigned _numFaceVertices;
 	unsigned m_numQuadVertices;
 	unsigned m_numPolygons;
+	unsigned m_numQuads;
 	unsigned * m_polygonCounts;
 	unsigned m_numPolygonVertices;
 	unsigned * m_polygonIndices;

@@ -93,15 +93,15 @@ unsigned BaseMesh::processTriangleFromPolygon()
 unsigned BaseMesh::processQuadFromPolygon()
 {
 	unsigned i, j;
-	unsigned numQuads = 0;
+	m_numQuads = 0;
     for(i = 0; i < m_numPolygons; i++) {
 		if(m_polygonCounts[i] == 4)
-			numQuads++;
+			m_numQuads++;
 	}
 		
-	if(numQuads < 1) return 0;
+	if(m_numQuads < 1) return 0;
 	
-	createQuadIndices(numQuads * 4);
+	createQuadIndices(m_numQuads * 4);
 	
 	unsigned ie = 0;
 	unsigned curFace = 0;
@@ -115,7 +115,7 @@ unsigned BaseMesh::processQuadFromPolygon()
 		curFace += m_polygonCounts[i];
 	}
 	
-	return numQuads;
+	return m_numQuads;
 }
 
 void BaseMesh::processRealEdgeFromPolygon()
@@ -253,6 +253,11 @@ void BaseMesh::move(float x, float y, float z)
 unsigned BaseMesh::getNumFaces() const
 {
 	return _numFaceVertices / 3;
+}
+
+unsigned BaseMesh::getNumQuads() const
+{
+	return m_numQuads;
 }
 
 unsigned BaseMesh::getNumVertices() const

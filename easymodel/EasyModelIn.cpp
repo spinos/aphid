@@ -94,7 +94,7 @@ char* EasyModelIn::getPatchBoundary() const
 	return _patchBoundary;
 }
 
-void EasyModelIn::setPatchAtFace(int index, int* vertex, char* boundary) const
+void EasyModelIn::setPatchAtFace(unsigned index, unsigned* vertex, char* boundary) const
 {
 	int offset = index * 24;
 	for(int i = 0; i < 24; i++)

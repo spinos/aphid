@@ -16,6 +16,67 @@ void Import(const char * filename, BaseMesh * dst)
 {
 	EasyModelIn * esm = new EasyModelIn(filename);
 	
+	baseImport(esm, dst);	
+	
+	delete esm;
+	
+	dst->processTriangleFromPolygon();
+	dst->processQuadFromPolygon();
+	dst->processRealEdgeFromPolygon();
+}
+
+void ImportPatch(const char * filename, PatchMesh * dst)
+{
+	EasyModelIn * esm = new EasyModelIn(filename);
+	
+	baseImport(esm, dst);	
+	
+	dst->processTriangleFromPolygon();
+	dst->processQuadFromPolygon();
+	dst->processRealEdgeFromPolygon();
+	
+	dst->prePatchValence();
+	
+	for(int i = 0; i < dst->getNumVertices(); i++) {
+		esm->setPatchAtFace(i, dst->patchVertices(), dst->patchBoundaries());
+	}
+	
+	delete esm;
+}
+
+void Export(const char * filename, BaseMesh * src)
+{
+	EasyModelOut * esm = new EasyModelOut(filename);
+	
+	esm->begin();
+	
+	unsigned numPolygons = src->m_numPolygons;
+	int * faceCounts = new int[numPolygons];
+	for(unsigned i = 0; i < numPolygons; i++) faceCounts[i] = src->m_polygonCounts[i];
+	
+	esm->writeFaceCount(numPolygons, faceCounts);
+	
+	unsigned numFaceVertices = src->m_numPolygonVertices;
+	
+	int * faceVertices = new int[numFaceVertices];
+	for(unsigned i = 0; i < numFaceVertices; i++) faceVertices[i] = src->m_polygonIndices[i];
+	
+	esm->writeFaceConnection(numFaceVertices, faceVertices);
+	
+	unsigned numVertices = src->getNumVertices();
+	
+	Vector3F * vertexPositions = new Vector3F[numVertices];
+	for(unsigned i = 0; i < numVertices; i++) vertexPositions[i] = src->getVertices()[i];
+	
+	esm->writeP(numVertices, vertexPositions);
+	esm->end();
+	esm->flush();
+	
+	delete esm;
+}
+
+void baseImport(EasyModelIn *esm, BaseMesh * dst)
+{
 	const unsigned nf = esm->getNumFace();
     
     int *faceCount = esm->getFaceCount();
@@ -50,41 +111,12 @@ void Import(const char * filename, BaseMesh * dst)
         dst->_vertices[i].z = cvs[i * 3 + 2];
     }
 	
-	delete esm;
-	
-	dst->processTriangleFromPolygon();
-	dst->processQuadFromPolygon();
-	dst->processRealEdgeFromPolygon();
-}
+	float * nors = esm->getVertexNormal();
+	for(i = 0; i < dst->_numVertices; i++) {
+        dst->normals()[i].x = nors[i * 3];
+        dst->normals()[i].y = nors[i * 3 + 1];
+        dst->normals()[i].z = nors[i * 3 + 2];
+    }
 
-void Export(const char * filename, BaseMesh * src)
-{
-	EasyModelOut * esm = new EasyModelOut(filename);
-	
-	esm->begin();
-	
-	unsigned numPolygons = src->m_numPolygons;
-	int * faceCounts = new int[numPolygons];
-	for(unsigned i = 0; i < numPolygons; i++) faceCounts[i] = src->m_polygonCounts[i];
-	
-	esm->writeFaceCount(numPolygons, faceCounts);
-	
-	unsigned numFaceVertices = src->m_numPolygonVertices;
-	
-	int * faceVertices = new int[numFaceVertices];
-	for(unsigned i = 0; i < numFaceVertices; i++) faceVertices[i] = src->m_polygonIndices[i];
-	
-	esm->writeFaceConnection(numFaceVertices, faceVertices);
-	
-	unsigned numVertices = src->getNumVertices();
-	
-	Vector3F * vertexPositions = new Vector3F[numVertices];
-	for(unsigned i = 0; i < numVertices; i++) vertexPositions[i] = src->getVertices()[i];
-	
-	esm->writeP(numVertices, vertexPositions);
-	esm->end();
-	esm->flush();
-	
-	delete esm;
 }
 }

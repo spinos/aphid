@@ -18,7 +18,7 @@ public:
 	float* getVs() const;
 	int* getPatchVertex() const;
 	char* getPatchBoundary() const;
-	void setPatchAtFace(int index, int* vertex, char* boundary) const;
+	void setPatchAtFace(unsigned index, unsigned* vertex, char* boundary) const;
 	
 private:
 	unsigned _numPolygon;

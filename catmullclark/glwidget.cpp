@@ -45,7 +45,7 @@
 #include <math.h>
 
 #include "glwidget.h"
-#include <BaseMesh.h>
+#include <PatchMesh.h>
 #include <EasemodelUtil.h>
 #include "subdivision.h"
 #include "accPatch.h"
@@ -85,11 +85,12 @@ GLWidget::GLWidget(QWidget *parent)
 	//_subdiv = new Subdivision();
 	//_subdiv->setLevel(4);
 	//_subdiv->runTest();
-	_model = new BaseMesh;
-	ESMUtil::Import("/Users/jianzhang/aphid/catmullclark/plane.m", _model);
+	_model = new PatchMesh;
+	ESMUtil::ImportPatch("/Users/jianzhang/aphid/catmullclark/plane.m", _model);
 
 	Vector3F* cvs = _model->getVertices();
 	Vector3F* normal = _model->getNormals();
+	
 	int* valence = _model->getVertexValence();
 	int* patchV = _model->getPatchVertex();
 	char* patchB = _model->getPatchBoundary();
