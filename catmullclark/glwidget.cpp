@@ -91,12 +91,12 @@ GLWidget::GLWidget(QWidget *parent)
 	Vector3F* cvs = _model->getVertices();
 	Vector3F* normal = _model->getNormals();
 	
-	int* valence = _model->getVertexValence();
-	int* patchV = _model->getPatchVertex();
-	char* patchB = _model->getPatchBoundary();
-	float* ucoord = _model->getUs();
-	float* vcoord = _model->getVs();
-	int* uvIds = _model->getUVIds();
+	unsigned* valence = _model->vertexValence();
+	unsigned* patchV = _model->patchVertices();
+	char* patchB = _model->patchBoundaries();
+	//float* ucoord = _model->getUs();
+	//float* vcoord = _model->getVs();
+	//int* uvIds = _model->getUVIds();
 	int pv[24];
 	char pb[15];
 	float pp[24 * 3];
@@ -124,7 +124,7 @@ GLWidget::GLWidget(QWidget *parent)
 		
 		_topo[j].setVertexValence(valence);
 		
-		int* ip = patchV;
+		unsigned* ip = patchV;
 		ip += j * 24;
 		_topo[j].setVertex(ip);
 		

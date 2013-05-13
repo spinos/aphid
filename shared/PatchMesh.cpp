@@ -12,8 +12,14 @@
 PatchMesh::PatchMesh() {}
 PatchMesh::~PatchMesh() 
 {
+	delete[] m_vertexValence;
 	delete[] m_patchVertices;
 	delete[] m_patchBoundary;
+}
+
+void PatchMesh::createVertexValence(unsigned num)
+{
+	m_vertexValence = new unsigned[num];
 }
 
 void PatchMesh::prePatchValence()
@@ -25,6 +31,11 @@ void PatchMesh::prePatchValence()
 unsigned PatchMesh::numPatches() const
 {
 	return m_numQuads;
+}
+
+unsigned * PatchMesh::vertexValence()
+{
+	return m_vertexValence;
 }
 
 unsigned * PatchMesh::patchVertices()

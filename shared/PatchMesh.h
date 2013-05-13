@@ -16,12 +16,15 @@ public:
 	PatchMesh();
 	virtual ~PatchMesh();
 	
+	void createVertexValence(unsigned num);
 	void prePatchValence();
 	
 	unsigned numPatches() const;
+	unsigned * vertexValence();
 	unsigned * patchVertices();
 	char * patchBoundaries();
 private:
 	unsigned * m_patchVertices;
+	unsigned * m_vertexValence;
 	char * m_patchBoundary;
 };

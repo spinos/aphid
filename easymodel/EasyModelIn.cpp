@@ -44,6 +44,11 @@ unsigned EasyModelIn::getNumVertex() const
 	return _numVertex;
 }
 
+unsigned EasyModelIn::getNumValence() const
+{
+	return _numValence;
+}
+
 int* EasyModelIn::getFaceCount() const
 {
 	return _faceCount;
@@ -200,6 +205,7 @@ void EasyModelIn::readPatchBoundary()
 void EasyModelIn::readVertexValence()
 {
 	_doc.getChildByName("VertexValence");
+	_numValence = _doc.getIntAttribByName("count");
 	int pos = _doc.getIntAttribByName("loc");
 
 	char *ptr = _data;

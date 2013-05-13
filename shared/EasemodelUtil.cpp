@@ -35,6 +35,8 @@ void ImportPatch(const char * filename, PatchMesh * dst)
 	dst->processQuadFromPolygon();
 	dst->processRealEdgeFromPolygon();
 	
+	dst->createVertexValence(esm->getNumValence());
+	
 	dst->prePatchValence();
 	
 	for(int i = 0; i < dst->getNumVertices(); i++) {
