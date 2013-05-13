@@ -45,7 +45,7 @@
 #include <QGLWidget>
 
 class Subdivision;
-class EasyModel;
+class BaseMesh;
 class AccPatch;
 class PatchTopology;
 class LODCamera;
@@ -95,7 +95,7 @@ private:
     QColor qtPurple;
 	
 	Subdivision* _subdiv;
-	EasyModel* _model;
+	BaseMesh* _model;
 	Subdivision* _mesh;
 	Subdivision* _mesh1;
 	AccPatch* _bezier;

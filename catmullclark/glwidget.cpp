@@ -45,7 +45,8 @@
 #include <math.h>
 
 #include "glwidget.h"
-#include "modelIn.h"
+#include <BaseMesh.h>
+#include <EasemodelUtil.h>
 #include "subdivision.h"
 #include "accPatch.h"
 #include "accStencil.h"
@@ -84,9 +85,11 @@ GLWidget::GLWidget(QWidget *parent)
 	//_subdiv = new Subdivision();
 	//_subdiv->setLevel(4);
 	//_subdiv->runTest();
-	_model = new EasyModel("/Users/jianzhang/aphid/catmullclark/plane.m");
-	float* cvs = _model->getVertexPosition();
-	float* normal = _model->getVertexNormal();
+	_model = new BaseMesh;
+	ESMUtil::Import("/Users/jianzhang/aphid/catmullclark/plane.m", _model);
+
+	Vector3F* cvs = _model->getVertices();
+	Vector3F* normal = _model->getNormals();
 	int* valence = _model->getVertexValence();
 	int* patchV = _model->getPatchVertex();
 	char* patchB = _model->getPatchBoundary();
@@ -96,7 +99,7 @@ GLWidget::GLWidget(QWidget *parent)
 	int pv[24];
 	char pb[15];
 	float pp[24 * 3];
-	int numFace = _model->getNumFace();
+	int numFace = _model->getNumFaces();
 	//numFace = 1;
 	//_mesh = new Subdivision[numFace];
 	_topo = new PatchTopology[numFace];
@@ -338,7 +341,7 @@ void GLWidget::simulate()
 void GLWidget::drawModel()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	unsigned numFace = _model->getNumFace();
+	unsigned numFace = _model->getNumFaces();
 	int* counts = _model->getFaceCount();
 	int* connection = _model->getFaceConnection();
 	float* cvs = _model->getVertexPosition();
@@ -360,7 +363,7 @@ void GLWidget::drawModel()
 
 void GLWidget::drawMesh()
 {
-	unsigned numFace = _model->getNumFace();
+	unsigned numFace = _model->getNumFaces();
 	for(unsigned i = 0; i < numFace; i++)
 	{
 		_mesh1[i].draw();

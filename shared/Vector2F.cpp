@@ -9,7 +9,7 @@
 
 #include "Vector2F.h"
 
-#include <math.h>
+#include <cmath>
 
 Vector2F::Vector2F() 
 {

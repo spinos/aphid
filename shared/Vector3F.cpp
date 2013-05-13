@@ -1,6 +1,6 @@
-#include <Vector3F.h>
+#include "Vector3F.h"
 
-#include <math.h>
+#include <cmath>
 
 Vector3F::Vector3F() 
 {
