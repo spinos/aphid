@@ -6,22 +6,13 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include "Vector3F.h"
-#include "Vector2F.h"
+#include <Vector3F.h>
+#include <Vector2F.h>
 #include "LODQuad.h"
 
 LODQuad::LODQuad() {}
+
 LODQuad::~LODQuad() {}
-
-void LODQuad::setCorner(Vector3F p, int i)
-{
-	_corners[i] = p;
-}
-
-Vector3F LODQuad::getCorner(int i) const
-{
-	return _corners[i];
-}
 
 void LODQuad::setDetail(float d, int i)
 {

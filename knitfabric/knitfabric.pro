@@ -53,13 +53,16 @@ HEADERS       = ../shared/Vector3F.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
                 ../../ofl/core/zEXRImage.h \
+                ../catmullclark/BaseQuad.h \
                 ../catmullclark/LODQuad.h \
-                ../catmullclark/accPatch.h \
-                ../catmullclark/accStencil.h \
-                ../catmullclark/bezierPatch.h \
-                ../catmullclark/patchTopology.h \
-                ../catmullclark/tessellator.h \
-                glwidget.h \
+                #../catmullclark/accPatch.h \
+                #../catmullclark/accStencil.h \
+                #../catmullclark/bezierPatch.h \
+                #../catmullclark/patchTopology.h \
+                #../catmullclark/tessellator.h \
+                KnitView.h \
+                KnitPatch.h \
+                #glwidget.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \  
@@ -116,13 +119,16 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \
                 ../../ofl/core/zEXRImage.cpp \
+                ../catmullclark/BaseQuad.cpp \
                 ../catmullclark/LODQuad.cpp \
-                ../catmullclark/accPatch.cpp \
-                ../catmullclark/accStencil.cpp \
-                ../catmullclark/bezierPatch.cpp \
-                ../catmullclark/patchTopology.cpp \
-                ../catmullclark/tessellator.cpp \
-                glwidget.cpp \
+                #../catmullclark/accPatch.cpp \
+                #../catmullclark/accStencil.cpp \
+                #../catmullclark/bezierPatch.cpp \
+                #../catmullclark/patchTopology.cpp \
+                #../catmullclark/tessellator.cpp \
+                KnitVIew.cpp \
+                KnitPatch.cpp \
+                #glwidget.cpp \
                 window.cpp \
                 main.cpp 
                 
@@ -132,6 +138,15 @@ macx {
     INCLUDEPATH += ../../Library/boost_1_44_0
         LIBS += -lboost_date_time\
             -lboost_thread
+}
+win32 {
+    HEADERS += ../shared/gExtension.h
+    SOURCES += ../shared/gExtension.cpp
+    INCLUDEPATH += D:/usr/local/include D:/ofl/shared D:/usr/libxml2x64/include D:/usr/eigen3
+    QMAKE_LIBDIR += D:/usr/local/lib64 
+    LIBS += -L../easymodel -leasymodel -LD:/usr/libxml2x64/lib -llibxml2
+    DEFINES += OPENEXR_DLL NDEBUG
+CONFIG += console
 }
 QT           += opengl
 

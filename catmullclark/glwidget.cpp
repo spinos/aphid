@@ -47,16 +47,12 @@
 #include "glwidget.h"
 #include <PatchMesh.h>
 #include <EasemodelUtil.h>
-#include "subdivision.h"
+
 #include "accPatch.h"
 #include "accStencil.h"
 #include "patchTopology.h"
-#include "LODCamera.h"
 #include "tessellator.h"
 #include "zEXRImage.h"
-#ifndef GL_MULTISAMPLE
-#define GL_MULTISAMPLE  0x809D
-#endif
 
 //! [0]
 GLWidget::GLWidget(QWidget *parent)

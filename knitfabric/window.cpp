@@ -41,15 +41,17 @@
 
 #include <QtGui>
 
-#include "glwidget.h"
+//#include "glwidget.h"
+#include "KnitView.h"
 #include "window.h"
 
 //! [0]
 Window::Window()
 {
-    glWidget = new GLWidget;
+    //glWidget = new GLWidget;
+    m_knit = new KnitView;
 	
-	setCentralWidget(glWidget);
+	setCentralWidget(m_knit);
     setWindowTitle(tr("Knit Fabric"));
 }
 

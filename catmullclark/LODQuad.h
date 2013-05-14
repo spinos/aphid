@@ -9,15 +9,12 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-class Vector3F;
-class LODQuad {
+#include "BaseQuad.h"
+class LODQuad : public BaseQuad {
 public:
 	LODQuad();
 	virtual ~LODQuad();
-	
-	void setCorner(Vector3F p, int i);
-	Vector3F getCorner(int i) const;
-	
+
 	void setDetail(float d, int i);
 	void setUniformDetail(float d);
 	float getDetail(int i) const;
@@ -26,7 +23,6 @@ public:
 	float getMaxLOD() const;
 	float getMaxEdgeLength() const;
 	
-	Vector3F _corners[4];
 	float _details[4];
 };
 #endif        //  #ifndef LODQUAD_H
