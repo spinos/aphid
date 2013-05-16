@@ -38,13 +38,16 @@ void ImportPatch(const char * filename, PatchMesh * dst)
 	dst->prePatchValence();
 	
 	for(int i = 0; i < dst->numPatches(); i++) {
-		for(unsigned j = 0; j < 24; j++)
+		for(unsigned j = 0; j < 24; j++) {
 			dst->patchVertices()[i*24 + j] = esm->getPatchVertex()[i*24 + j];
-		for(unsigned j = 0; j < 15; j++)
+		}
+		
+		for(unsigned j = 0; j < 15; j++) {
 			dst->patchBoundaries()[i*15 + j] = esm->getPatchBoundary()[i*15 + j];
+		}
 	}
 	
-	for(int i = 0; i < dst->getNumVertices(); i++)
+	for(int i = 0; i < dst->getNumVertices(); i++) 
 		dst->vertexValence()[i] = esm->getVertexValence()[i];
 	
 	dst->prePatchUV(esm->getNumUVs(), esm->getNumUVIds());

@@ -55,14 +55,13 @@ HEADERS       = ../shared/Vector3F.h \
                 ../../ofl/core/zEXRImage.h \
                 ../catmullclark/BaseQuad.h \
                 ../catmullclark/LODQuad.h \
-                #../catmullclark/accPatch.h \
-                #../catmullclark/accStencil.h \
-                #../catmullclark/bezierPatch.h \
-                #../catmullclark/patchTopology.h \
-                #../catmullclark/tessellator.h \
-                KnitView.h \
+                ../catmullclark/accPatch.h \
+                ../catmullclark/accStencil.h \
+                ../catmullclark/bezierPatch.h \
+                ../catmullclark/patchTopology.h \
+                ../catmullclark/tessellator.h \
                 KnitPatch.h \
-                #glwidget.h \
+                glwidget.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \  
@@ -121,14 +120,13 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../../ofl/core/zEXRImage.cpp \
                 ../catmullclark/BaseQuad.cpp \
                 ../catmullclark/LODQuad.cpp \
-                #../catmullclark/accPatch.cpp \
-                #../catmullclark/accStencil.cpp \
-                #../catmullclark/bezierPatch.cpp \
-                #../catmullclark/patchTopology.cpp \
-                #../catmullclark/tessellator.cpp \
-                KnitVIew.cpp \
+                ../catmullclark/accPatch.cpp \
+                ../catmullclark/accStencil.cpp \
+                ../catmullclark/bezierPatch.cpp \
+                ../catmullclark/patchTopology.cpp \
+                ../catmullclark/tessellator.cpp \
                 KnitPatch.cpp \
-                #glwidget.cpp \
+                glwidget.cpp \
                 window.cpp \
                 main.cpp 
                 

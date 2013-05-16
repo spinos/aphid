@@ -51,10 +51,8 @@
 #include "accStencil.h"
 #include "patchTopology.h"
 #include "tessellator.h"
+#include "KnitPatch.h"
 #include "zEXRImage.h"
-#ifndef GL_MULTISAMPLE
-#define GL_MULTISAMPLE  0x809D
-#endif
 
 //! [0]
 GLWidget::GLWidget(QWidget *parent)
@@ -64,10 +62,11 @@ GLWidget::GLWidget(QWidget *parent)
 	if(_image->isValid()) qDebug()<<"image is loaded";
 	
 	_tess = new Tessellator();
-	_tess->setDisplacementMap(_image);
+	//_tess->setDisplacementMap(_image);
 	
 	_model = new PatchMesh;
-	ESMUtil::ImportPatch("/Users/jianzhang/aphid/catmullclark/plane.m", _model);
+	ESMUtil::ImportPatch("/Users/jianzhang/aphid/mdl/plane.m", _model);
+	//ESMUtil::ImportPatch("/Users/jianzhang/aphid/catmullclark/plane.m", _model);
 
 	Vector3F* cvs = _model->getVertices();
 	Vector3F* normal = _model->getNormals();
@@ -110,6 +109,8 @@ GLWidget::GLWidget(QWidget *parent)
 		_bezier[j].setCorner(_bezier[j].p(0, 3), 2);
 		_bezier[j].setCorner(_bezier[j].p(3, 3), 3);
 	}
+	
+	m_knit = new KnitPatch;
 }
 //! [0]
 
@@ -127,30 +128,32 @@ void GLWidget::clientDraw()
 
 void GLWidget::drawBezier()
 {
-	float detail = 7.f;
+	float detail = 2.f;
 	unsigned numFace = _model->numPatches();
-	for(unsigned i = 0; i < numFace; i++)
-	{
+	//numFace = 1;
+	for(unsigned i = 0; i < numFace; i++) {
+		//drawBezierPatchCage(_bezier[i]);
 		_bezier[i].setUniformDetail(detail);
-		drawBezierPatch(_bezier[i], detail);
+		//drawBezierPatch(_bezier[i], detail);
+		drawYarn(_bezier[i], detail);
 	}
 }
 
 void GLWidget::drawBezierPatch(AccPatch& patch, float detail)
 {
 	int maxLevel = (int)log2f(detail) + 1;
-	if(maxLevel + patch.getLODBase() > 10) {
-		maxLevel = 10 - patch.getLODBase();
-	}
+	//if(maxLevel + patch.getLODBase() > 10) {
+	//	maxLevel = 10 - patch.getLODBase();
+	//}
 	int seg = 2;
-	for(int i = 0; i < maxLevel; i++)
-	{
+	for(int i = 0; i < maxLevel; i++) {
 		seg *= 2;
 	}
 	_tess->setNumSeg(seg);
 	_tess->evaluate(patch);
+	glColor3f(0.f, 0.3f, 0.9f);
 	glEnable(GL_CULL_FACE);
-	glColor3f(0.5f, 0.1f, 0.2f);
+
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
 	glEnableClientState( GL_VERTEX_ARRAY );
@@ -185,4 +188,41 @@ void GLWidget::drawBezierPatchCage(AccPatch& patch)
 		}
 	}
 	glEnd();
+}
+
+void GLWidget::drawYarn(AccPatch& patch, float detail)
+{
+	int maxLevel = (int)log2f(detail) + 1;
+
+	int seg = 2;
+	for(int i = 0; i < maxLevel; i++) {
+		seg *= 2;
+	}
+	_tess->setNumSeg(seg);
+	_tess->evaluate(patch);
+	
+	m_knit->setNumSeg(seg);
+	
+	Vector2F uvs[4];
+	uvs[0] = patch.tex(0, 0);
+	uvs[1] = patch.tex(1, 0);
+	uvs[2] = patch.tex(1, 1);
+	uvs[3] = patch.tex(0, 1);
+	
+	m_knit->directionByBiggestDu(uvs);
+	m_knit->createYarn(_tess->_positions);
+	
+	glColor3f(0.f, 0.9f, 0.2f);
+	
+	for(unsigned i = 0; i < m_knit->getNumYarn(); i++) {
+		Vector3F *p = m_knit->yarn();
+		p += i * m_knit->numYarnPoints();
+	
+	glEnableClientState( GL_VERTEX_ARRAY );
+	glVertexPointer( 3, GL_FLOAT, 0, (float *)p);
+	
+	glDrawElements(GL_LINE_STRIP, m_knit->numYarnPoints(), GL_UNSIGNED_INT, m_knit->yarnIndices() );
+
+	glDisableClientState( GL_VERTEX_ARRAY );
+	}
 }

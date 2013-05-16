@@ -48,6 +48,7 @@ class PatchMesh;
 class AccPatch;
 class PatchTopology;
 class Tessellator;
+class KnitPatch;
 class ZEXRImage;
 //! [0]
 class GLWidget : public Base3DView
@@ -69,11 +70,12 @@ private:
 	PatchTopology* _topo;
 	Tessellator* _tess;
 	ZEXRImage* _image;
+	KnitPatch * m_knit;
 
 	void drawBezier();
 	void drawBezierPatch(AccPatch& patch, float detail);
 	void drawBezierPatchCage(AccPatch& patch);
-
+	void drawYarn(AccPatch& patch, float detail);
 };
 //! [3]
 

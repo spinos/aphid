@@ -48,8 +48,7 @@ QT_BEGIN_NAMESPACE
 class QSlider;
 QT_END_NAMESPACE
 //! [0]
-//class GLWidget;
-class KnitView;
+class GLWidget;
 
 class Window : public QMainWindow
 {
@@ -62,8 +61,7 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
-    //GLWidget *glWidget;
-    KnitView * m_knit;
+    GLWidget *glWidget;
 };
 //! [0]
 

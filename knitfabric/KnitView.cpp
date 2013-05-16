@@ -15,7 +15,7 @@ KnitView::KnitView(QWidget *parent)
 #ifdef WIN32
     ESMUtil::ImportPatch("D:/aphid/mdl/sweater.m", _model);
 #else
-	ESMUtil::ImportPatch("/Users/jianzhang/aphid/catmullclark/plane.m", _model);
+	ESMUtil::ImportPatch("/Users/jianzhang/aphid/mdl/sweater.m", _model);
 #endif
 
 	Vector3F* cvs = _model->getVertices();
@@ -49,7 +49,7 @@ KnitView::KnitView(QWidget *parent)
 	        
 	    }
 	    acc += 4;
-	    m_knit[i].createYarn();
+	    //m_knit[i].createYarn();
 	}
 }
 //! [0]
