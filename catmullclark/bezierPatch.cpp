@@ -11,7 +11,7 @@
 
 BezierPatch::BezierPatch() {}
 BezierPatch::~BezierPatch() {}
-#include <iostream>
+
 void BezierPatch::setTexcoord(float* u, float* v, unsigned* idx)
 {
 	_texcoords[0].x = u[idx[0]];
@@ -47,7 +47,6 @@ void BezierPatch::setTexcoord(float* u, float* v, unsigned* idx)
 	float delta = smax - smin;
 	if(tmax - tmin > delta) delta = tmax - tmin;
 	_lodBase = (int)log2(1.0 / delta) + 1;
-	printf("lod b %i ", _lodBase);
 }
 
 Vector3F BezierPatch::p(unsigned u, unsigned v) const
