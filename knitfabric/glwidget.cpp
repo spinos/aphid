@@ -130,7 +130,7 @@ void GLWidget::drawBezier()
 {
 	float detail = 2.f;
 	unsigned numFace = _model->numPatches();
-	//numFace = 1;
+
 	for(unsigned i = 0; i < numFace; i++) {
 		//drawBezierPatchCage(_bezier[i]);
 		_bezier[i].setUniformDetail(detail);
@@ -210,19 +210,21 @@ void GLWidget::drawYarn(AccPatch& patch, float detail)
 	uvs[3] = patch.tex(0, 1);
 	
 	m_knit->directionByBiggestDu(uvs);
-	m_knit->createYarn(_tess->_positions);
-	
-	glColor3f(0.f, 0.9f, 0.2f);
+	m_knit->createYarn(_tess->_positions, _tess->_normals);
+	m_knit->setThickness(0.17f);
 	
 	for(unsigned i = 0; i < m_knit->getNumYarn(); i++) {
 		Vector3F *p = m_knit->yarn();
-		p += i * m_knit->numYarnPoints();
+		p += i * m_knit->numPointsPerYarn();
+		
+		if(i%2 == 0) glColor3f(0.7f, 0.3f, 0.f);
+		else glColor3f(0.4f, 0.7f, 0.3f);
 	
-	glEnableClientState( GL_VERTEX_ARRAY );
-	glVertexPointer( 3, GL_FLOAT, 0, (float *)p);
-	
-	glDrawElements(GL_LINE_STRIP, m_knit->numYarnPoints(), GL_UNSIGNED_INT, m_knit->yarnIndices() );
+		glEnableClientState( GL_VERTEX_ARRAY );
+		glVertexPointer( 3, GL_FLOAT, 0, (float *)p);
+		
+		glDrawElements(GL_LINE_STRIP, m_knit->numPointsPerYarn(), GL_UNSIGNED_INT, m_knit->yarnIndices() );
 
-	glDisableClientState( GL_VERTEX_ARRAY );
+		glDisableClientState( GL_VERTEX_ARRAY );
 	}
 }

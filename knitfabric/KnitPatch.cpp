@@ -2,33 +2,47 @@
 #include <Vector3F.h>
 #include <Vector2F.h>
 
-static float yarmU[14] = {0.f, .2f, .4f, .4f, .1f, .1f, .33f, .66f, .9f, .9f, .6f, .6f, .8f, 1.f };
+static float yarmU[14] = {.1f, .2f, .4f, .25f, .15f, .11f, .33f, .66f, .89f, .85f, .75f, .6f, .8f, .9f };
 static float yarmV[14] = {0.f, 0.f, .15f, .33f, .45f, .67f, .8f, .8f, .67f, .45f, .33f, .15f, 0.f, 0.f };
-KnitPatch::KnitPatch() {}
+static float yarmW[14] = {-.3f, -.3f, .1f, .23f, .32f, .1f, -.5f, -.5f, .2f, .32f, .23f, .1f, -.3f, -.3f };
+KnitPatch::KnitPatch() 
+{
+	m_indices = 0;
+	m_yarnP = 0;
+	m_thickness = 1.f;
+}
+
 KnitPatch::~KnitPatch() 
 {
 	delete[] m_indices;
 	delete[] m_yarnP;
 }
 
-unsigned KnitPatch::numYarnPointsPerGrid() const
+unsigned KnitPatch::numPointsPerGrid() const
 {
     return 14;
 }
 
-unsigned KnitPatch::numYarnPoints() const
+unsigned KnitPatch::numPointsPerYarn() const
 {
-    return numYarnPointsPerGrid() * m_numSeg;
+    return numPointsPerGrid() * m_numSeg;
 }
 
 void KnitPatch::setNumSeg(int num)
 {
+	if(m_indices) delete[] m_indices;
+	if(m_yarnP) delete[] m_yarnP;
 	m_numSeg = num;
-	m_numYarn = num;
-	const unsigned np = numYarnPointsPerGrid();
-	m_yarnP = new Vector3F[num * num * np];
-	m_indices = new unsigned[num * np];
-	for(unsigned i = 0; i < num * np; i++) m_indices[i] = i;
+	m_numYarn = num * 2;
+	const unsigned nppy = numPointsPerYarn();
+	m_yarnP = new Vector3F[m_numYarn * nppy];
+	m_indices = new unsigned[nppy];
+	for(unsigned i = 0; i < nppy; i++) m_indices[i] = i;
+}
+
+void KnitPatch::setThickness(float thickness)
+{
+	m_thickness = thickness;
 }
 
 Vector3F * KnitPatch::yarn()
@@ -132,51 +146,122 @@ void KnitPatch::proceedV(unsigned &val) const
 	val += m_vStep;
 }
 
-void KnitPatch::createYarn(const Vector3F * tessellateP)
+void KnitPatch::createYarn(const Vector3F * tessellateP, const Vector3F * tessellateN)
 {
+	const unsigned nseg1 = m_numSeg + 1;
+	float disp;
+	Vector3F gN, dLat0, dLat1;
 	unsigned gu0, gv0, gu1, gv1;
 	unsigned i, j, k;
 	unsigned yarnBegin = 0;
+	unsigned firstBegin, secondBegin;
 	if(m_uMajor) {
 		for(vStart(j); vEnd(j); proceedV(j)) {
 			gv0 = j;
 			gv1 = j + m_vStep;
+			firstBegin = yarnBegin;
+			secondBegin = yarnBegin + numPointsPerYarn();
 			for(uStart(i); uEnd(i); proceedU(i)) {
 			
 				gu0 = i;
 				gu1 = i + m_uStep;
 				
-				setCorner(tessellateP[gv0 * (m_numSeg + 1) + gu0], 0);
-				setCorner(tessellateP[gv0 * (m_numSeg + 1) + gu1], 1);
-				setCorner(tessellateP[gv1 * (m_numSeg + 1) + gu1], 2);
-				setCorner(tessellateP[gv1 * (m_numSeg + 1) + gu0], 3);
+				gN = tessellateN[gv0 * nseg1 + gu0];
 				
-				for(k = 0; k < numYarnPointsPerGrid(); k++) {
-					m_yarnP[k + yarnBegin] = interpolate(yarmU[k], yarmV[k]);
+				setCorner(tessellateP[gv0 * nseg1 + gu0], 0);
+				setCorner(tessellateP[gv0 * nseg1 + gu1], 1);
+				setCorner(tessellateP[gv1 * nseg1 + gu1], 2);
+				setCorner(tessellateP[gv1 * nseg1 + gu0], 3);
+				
+				dLat0 = tessellateP[gv1 * nseg1 + gu0] - tessellateP[gv0 * nseg1 + gu0];
+				dLat1 = tessellateP[gv1 * nseg1 + gu1] - tessellateP[gv0 * nseg1 + gu1];
+				dLat0 *= 0.5f;
+				dLat1 *= 0.5f;
+				
+				for(k = 0; k < numPointsPerGrid(); k++) {
+					m_yarnP[k + firstBegin] = interpolate(yarmU[k], yarmV[k]);
+					disp = yarmW[k] * m_thickness;
+					m_yarnP[k + firstBegin] += gN * disp;
 				}
-				yarnBegin += numYarnPointsPerGrid();
+				
+				/*
+				for(k = 0; k < numPointsPerGrid(); k++) {
+					m_yarnP[k + yarnBegin] = interpolate(yarmU[k], yarmV[k]);
+					disp = yarmW[k] * m_thickness;
+					m_yarnP[k + yarnBegin] += gN * disp;
+				}
+				yarnBegin += numPointsPerGrid();*/
+				
+				moveCorner(dLat0, 0);
+				moveCorner(dLat1, 1);
+				moveCorner(dLat1, 2);
+				moveCorner(dLat0, 3);
+				
+				for(k = 0; k < numPointsPerGrid(); k++) {
+					m_yarnP[k + secondBegin] = interpolate(yarmU[k], yarmV[k]);
+					disp = yarmW[k] * m_thickness;
+					m_yarnP[k + secondBegin] += gN * disp;
+				}
+				
+				firstBegin += numPointsPerGrid();
+				
+				secondBegin += numPointsPerGrid();
 			}
+			yarnBegin += numPointsPerYarn() * 2;
 		}
 	}
 	else {
 		for(uStart(j); uEnd(j); proceedU(j)) {
 			gu0 = j;
 			gu1 = j + m_uStep;
+			firstBegin = yarnBegin;
+			secondBegin = yarnBegin + numPointsPerYarn();	
 			for(vStart(i); vEnd(i); proceedV(i)) {
 			
 				gv0 = i;
 				gv1 = i + m_vStep;
 				
-				setCorner(tessellateP[gv0 * (m_numSeg + 1) + gu0], 0);
-				setCorner(tessellateP[gv1 * (m_numSeg + 1) + gu0], 1);
-				setCorner(tessellateP[gv1 * (m_numSeg + 1) + gu1], 2);
-				setCorner(tessellateP[gv0 * (m_numSeg + 1) + gu1], 3);
+				gN = tessellateN[gv0 * nseg1 + gu0];
 				
-				for(k = 0; k < numYarnPointsPerGrid(); k++) {
-					m_yarnP[k + yarnBegin] = interpolate(yarmU[k], yarmV[k]);
+				setCorner(tessellateP[gv0 * nseg1 + gu0], 0);
+				setCorner(tessellateP[gv1 * nseg1 + gu0], 1);
+				setCorner(tessellateP[gv1 * nseg1 + gu1], 2);
+				setCorner(tessellateP[gv0 * nseg1 + gu1], 3);
+				
+				dLat0 = tessellateP[gv0 * nseg1 + gu1] - tessellateP[gv0 * nseg1 + gu0];
+				dLat1 = tessellateP[gv1 * nseg1 + gu1] - tessellateP[gv1 * nseg1 + gu0];
+				dLat0 *= 0.5f;
+				dLat1 *= 0.5f;
+				
+				for(k = 0; k < numPointsPerGrid(); k++) {
+					m_yarnP[k + firstBegin] = interpolate(yarmU[k], yarmV[k]);
+					disp = yarmW[k] * m_thickness;
+					m_yarnP[k + firstBegin] += gN * disp;
 				}
-				yarnBegin += numYarnPointsPerGrid();
+				
+				/*
+				for(k = 0; k < numPointsPerGrid(); k++) {
+					m_yarnP[k + yarnBegin] = interpolate(yarmU[k], yarmV[k]);
+					disp = yarmW[k] * m_thickness;
+					m_yarnP[k + yarnBegin] += gN * disp;
+				}
+				yarnBegin += numPointsPerGrid();*/
+				firstBegin += numPointsPerGrid();
+				
+				moveCorner(dLat0, 0);
+				moveCorner(dLat1, 1);
+				moveCorner(dLat1, 2);
+				moveCorner(dLat0, 3);
+				
+				for(k = 0; k < numPointsPerGrid(); k++) {
+					m_yarnP[k + secondBegin] = interpolate(yarmU[k], yarmV[k]);
+					disp = yarmW[k] * m_thickness;
+					m_yarnP[k + secondBegin] += gN * disp;
+				}
+				
+				secondBegin += numPointsPerGrid();
 			}
+			yarnBegin += numPointsPerYarn() * 2;
 		}
 	}
 }

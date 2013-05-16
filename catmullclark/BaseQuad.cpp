@@ -16,6 +16,11 @@ void BaseQuad::setCorner(Vector3F p, int i)
 	_corners[i] = p;
 }
 
+void BaseQuad::moveCorner(Vector3F v, int i)
+{
+	_corners[i] += v;
+}
+
 Vector3F BaseQuad::getCorner(int i) const
 {
 	return _corners[i];
