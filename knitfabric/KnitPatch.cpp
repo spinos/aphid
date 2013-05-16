@@ -3,8 +3,8 @@
 #include <Vector2F.h>
 
 static float yarmU[14] = {.1f, .2f, .4f, .25f, .15f, .11f, .33f, .66f, .89f, .85f, .75f, .6f, .8f, .9f };
-static float yarmV[14] = {0.f, 0.f, .15f, .33f, .45f, .67f, .8f, .8f, .67f, .45f, .33f, .15f, 0.f, 0.f };
-static float yarmW[14] = {-.3f, -.3f, .1f, .23f, .32f, .1f, -.5f, -.5f, .2f, .32f, .23f, .1f, -.3f, -.3f };
+static float yarmV[14] = {0.f, 0.f, .15f, .33f, .45f, .69f, .88f, .88f, .69f, .45f, .33f, .15f, 0.f, 0.f };
+static float yarmW[14] = {-.3f, -.3f, .1f, .23f, .32f, .1f, -.5f, -.5f, .1f, .32f, .23f, .1f, -.3f, -.3f };
 KnitPatch::KnitPatch() 
 {
 	m_indices = 0;

@@ -128,7 +128,7 @@ void GLWidget::clientDraw()
 
 void GLWidget::drawBezier()
 {
-	float detail = 2.f;
+	float detail = 4.f;
 	unsigned numFace = _model->numPatches();
 
 	for(unsigned i = 0; i < numFace; i++) {
