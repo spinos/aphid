@@ -6,7 +6,7 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include <math.h>
+#include <AllMath.h>
 #include "bezierPatch.h"
 
 BezierPatch::BezierPatch() {}
@@ -46,7 +46,7 @@ void BezierPatch::setTexcoord(float* u, float* v, unsigned* idx)
 	
 	float delta = smax - smin;
 	if(tmax - tmin > delta) delta = tmax - tmin;
-	_lodBase = (int)log2(1.0 / delta) + 1;
+	_lodBase = (int)log2f(1.0 / delta) + 1;
 }
 
 Vector3F BezierPatch::p(unsigned u, unsigned v) const

@@ -9,13 +9,22 @@ KnitPatch::KnitPatch()
 {
 	m_indices = 0;
 	m_yarnP = 0;
+	m_yarnN = 0;
+    m_yarnT = 0;
 	m_thickness = 1.f;
 }
 
 KnitPatch::~KnitPatch() 
 {
-	delete[] m_indices;
-	delete[] m_yarnP;
+	cleanup();
+}
+
+void KnitPatch::cleanup()
+{
+    if(m_indices) delete[] m_indices;
+    if(m_yarnP) delete[] m_yarnP;
+    if(m_yarnN) delete[] m_yarnN;
+    if(m_yarnT) delete[] m_yarnT;
 }
 
 unsigned KnitPatch::numPointsPerGrid() const
@@ -30,12 +39,14 @@ unsigned KnitPatch::numPointsPerYarn() const
 
 void KnitPatch::setNumSeg(int num)
 {
-	if(m_indices) delete[] m_indices;
-	if(m_yarnP) delete[] m_yarnP;
+	cleanup();
+	
 	m_numSeg = num;
 	m_numYarn = num * 2;
 	const unsigned nppy = numPointsPerYarn();
 	m_yarnP = new Vector3F[m_numYarn * nppy];
+	m_yarnN = new Vector3F[m_numYarn * nppy];
+	m_yarnT = new Vector3F[m_numYarn * nppy];
 	m_indices = new unsigned[nppy];
 	for(unsigned i = 0; i < nppy; i++) m_indices[i] = i;
 }
@@ -55,11 +66,21 @@ Vector3F * KnitPatch::yarnAt(unsigned idx)
 	return m_yarnP + idx * numPointsPerYarn();
 }
 
+Vector3F * KnitPatch::normalAt(unsigned idx)
+{
+    return m_yarnN + idx * numPointsPerYarn();
+}
+
+Vector3F * KnitPatch::tangentAt(unsigned idx)
+{
+    return m_yarnT + idx * numPointsPerYarn();
+}
+
 unsigned * KnitPatch::yarnIndices()
 {
 	return m_indices;
 }
-#include <iostream>
+
 void KnitPatch::directionByBiggestDu(Vector2F *uv)
 {
     unsigned r = 0;
@@ -68,13 +89,11 @@ void KnitPatch::directionByBiggestDu(Vector2F *uv)
         unsigned i1 = i + 1;
         if(i1 > 3) i1 = 0;
         float du = uv[i1].x - uv[i].x;
-		//printf("%i du %f ", i, du);
         if(du > maxdu) {
             maxdu = du;
             r = i;
         }
     }
-	//if(r != 0) printf("%i %f ", r, maxdu);
 
 	if(r == 0) {
 		m_uMajor = 1;
@@ -187,15 +206,8 @@ void KnitPatch::createYarn(const Vector3F * tessellateP, const Vector3F * tessel
 					m_yarnP[k + firstBegin] = interpolate(yarmU[k], yarmV[k]);
 					disp = yarmW[k] * m_thickness;
 					m_yarnP[k + firstBegin] += gN * disp;
+					m_yarnN[k + firstBegin] = gN;
 				}
-				
-				/*
-				for(k = 0; k < numPointsPerGrid(); k++) {
-					m_yarnP[k + yarnBegin] = interpolate(yarmU[k], yarmV[k]);
-					disp = yarmW[k] * m_thickness;
-					m_yarnP[k + yarnBegin] += gN * disp;
-				}
-				yarnBegin += numPointsPerGrid();*/
 				
 				moveCorner(dLat0, 0);
 				moveCorner(dLat1, 1);
@@ -206,6 +218,7 @@ void KnitPatch::createYarn(const Vector3F * tessellateP, const Vector3F * tessel
 					m_yarnP[k + secondBegin] = interpolate(yarmU[k], yarmV[k]);
 					disp = yarmW[k] * m_thickness;
 					m_yarnP[k + secondBegin] += gN * disp;
+					m_yarnN[k + secondBegin] = gN;
 				}
 				
 				firstBegin += numPointsPerGrid();
@@ -242,15 +255,9 @@ void KnitPatch::createYarn(const Vector3F * tessellateP, const Vector3F * tessel
 					m_yarnP[k + firstBegin] = interpolate(yarmU[k], yarmV[k]);
 					disp = yarmW[k] * m_thickness;
 					m_yarnP[k + firstBegin] += gN * disp;
+					m_yarnN[k + firstBegin] = gN;
 				}
 				
-				/*
-				for(k = 0; k < numPointsPerGrid(); k++) {
-					m_yarnP[k + yarnBegin] = interpolate(yarmU[k], yarmV[k]);
-					disp = yarmW[k] * m_thickness;
-					m_yarnP[k + yarnBegin] += gN * disp;
-				}
-				yarnBegin += numPointsPerGrid();*/
 				firstBegin += numPointsPerGrid();
 				
 				moveCorner(dLat0, 0);
@@ -262,6 +269,7 @@ void KnitPatch::createYarn(const Vector3F * tessellateP, const Vector3F * tessel
 					m_yarnP[k + secondBegin] = interpolate(yarmU[k], yarmV[k]);
 					disp = yarmW[k] * m_thickness;
 					m_yarnP[k + secondBegin] += gN * disp;
+					m_yarnN[k + secondBegin] = gN;
 				}
 				
 				secondBegin += numPointsPerGrid();
@@ -269,4 +277,24 @@ void KnitPatch::createYarn(const Vector3F * tessellateP, const Vector3F * tessel
 			yarnBegin += numPointsPerYarn() * 2;
 		}
 	}
+	calculateTangent();
+}
+
+void KnitPatch::calculateTangent()
+{
+    for(unsigned j = 0; j < getNumYarn(); j++) {
+        Vector3F* p = yarnAt(j);
+        Vector3F* t = tangentAt(j);
+        Vector3F* n = normalAt(j);
+        for(unsigned i = 0; i < numPointsPerYarn(); i++) {
+            if(i == 0)
+                t[i] = p[i+1] - p[i];
+            else if(i == numPointsPerYarn() - 1)
+                t[i] = p[i] - p[i-1];
+            else
+                t[i] = p[i+1] - p[i-1];
+            
+            t[i].normalize();
+        }
+    }
 }

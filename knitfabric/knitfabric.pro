@@ -61,6 +61,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../catmullclark/patchTopology.h \
                 ../catmullclark/tessellator.h \
                 KnitPatch.h \
+                FiberPatch.h \
                 glwidget.h \
                 window.h
                 
@@ -126,6 +127,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../catmullclark/patchTopology.cpp \
                 ../catmullclark/tessellator.cpp \
                 KnitPatch.cpp \
+                FiberPatch.cpp \
                 glwidget.cpp \
                 window.cpp \
                 main.cpp 

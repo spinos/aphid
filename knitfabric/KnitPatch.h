@@ -7,6 +7,7 @@ class KnitPatch : public LODQuad {
 public:
     KnitPatch();
     virtual ~KnitPatch();
+    void cleanup();
     unsigned numPointsPerYarn() const;
 	unsigned numPointsPerGrid() const;
     void setNumSeg(int num);
@@ -16,6 +17,8 @@ public:
     
     Vector3F * yarn();
 	Vector3F * yarnAt(unsigned idx);
+	Vector3F * normalAt(unsigned idx);
+	Vector3F * tangentAt(unsigned idx);
 	unsigned * yarnIndices();
 	unsigned getNumYarn() const;
 	
@@ -27,9 +30,12 @@ private:
 	bool vEnd(unsigned val) const;
 	void proceedU(unsigned &val) const;
 	void proceedV(unsigned &val) const;
+	void calculateTangent();
 	
 	unsigned * m_indices;
     Vector3F * m_yarnP;
+    Vector3F * m_yarnN;
+    Vector3F * m_yarnT;
 	unsigned m_numSeg;
 	unsigned m_numYarn;
 	unsigned m_uGridMin, m_uGridMax;

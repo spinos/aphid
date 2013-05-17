@@ -6,7 +6,7 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-
+#include <AllMath.h>
 #include "tessellator.h"
 
 Tessellator::Tessellator() : _positions(0), _normals(0), _vertices(0), _displacementMap(0) {}

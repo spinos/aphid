@@ -53,19 +53,29 @@
 #include "tessellator.h"
 #include "KnitPatch.h"
 #include "zEXRImage.h"
+#include "FiberPatch.h"
 
 //! [0]
 GLWidget::GLWidget(QWidget *parent)
     : Base3DView(parent)
-{	
+{
+#ifdef WIN32
+_image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
+#else
 	_image = new ZEXRImage("/Users/jianzhang/aphid/catmullclark/disp.exr");
+#endif
 	if(_image->isValid()) qDebug()<<"image is loaded";
 	
 	_tess = new Tessellator();
 	//_tess->setDisplacementMap(_image);
 	
 	_model = new PatchMesh;
+	
+#ifdef WIN32
+ESMUtil::ImportPatch("D:/aphid/mdl/plane.m", _model);
+#else
 	ESMUtil::ImportPatch("/Users/jianzhang/aphid/mdl/plane.m", _model);
+#endif
 	//ESMUtil::ImportPatch("/Users/jianzhang/aphid/catmullclark/plane.m", _model);
 
 	Vector3F* cvs = _model->getVertices();
@@ -111,12 +121,47 @@ GLWidget::GLWidget(QWidget *parent)
 	}
 	
 	m_knit = new KnitPatch;
+	
+	m_fiber = new FiberPatch[numFace];
+	createFiber();
 }
 //! [0]
 
 //! [1]
 GLWidget::~GLWidget()
 {
+}
+
+void GLWidget::createFiber()
+{
+    const unsigned numFace = _model->numPatches();
+    for(unsigned i = 0; i < numFace; i++) {
+		_bezier[i].setUniformDetail(4.f);
+		int seg = 8;
+		_tess->setNumSeg(seg);
+		_tess->evaluate(_bezier[i]);
+	
+		m_knit->setNumSeg(seg);
+		
+		Vector2F uvs[4];
+        uvs[0] = _bezier[i].tex(0, 0);
+        uvs[1] = _bezier[i].tex(1, 0);
+        uvs[2] = _bezier[i].tex(1, 1);
+        uvs[3] = _bezier[i].tex(0, 1);
+        
+        m_knit->directionByBiggestDu(uvs);
+        m_knit->setThickness(0.17f);
+        m_knit->createYarn(_tess->_positions, _tess->_normals);
+        
+        m_fiber[i].create(m_knit->getNumYarn(), m_knit->numPointsPerYarn());
+        
+        for(unsigned j = 0; j < m_knit->getNumYarn(); j++) {
+            Vector3F *p = m_knit->yarnAt(j);
+            Vector3F *n = m_knit->normalAt(j);
+            Vector3F *t = m_knit->tangentAt(j);
+            m_fiber[i].processYarn(j, p, n, t);
+        }
+	}
 }
 
 void GLWidget::clientDraw()
@@ -135,13 +180,14 @@ void GLWidget::drawBezier()
 		//drawBezierPatchCage(_bezier[i]);
 		_bezier[i].setUniformDetail(detail);
 		//drawBezierPatch(_bezier[i], detail);
-		drawYarn(_bezier[i], detail);
+		//drawYarn(_bezier[i], detail);
+		drawFiber(m_fiber[i]);
 	}
 }
 
 void GLWidget::drawBezierPatch(AccPatch& patch, float detail)
 {
-	int maxLevel = (int)log2f(detail) + 1;
+	int maxLevel = (int)log2f(detail);
 	//if(maxLevel + patch.getLODBase() > 10) {
 	//	maxLevel = 10 - patch.getLODBase();
 	//}
@@ -149,6 +195,7 @@ void GLWidget::drawBezierPatch(AccPatch& patch, float detail)
 	for(int i = 0; i < maxLevel; i++) {
 		seg *= 2;
 	}
+
 	_tess->setNumSeg(seg);
 	_tess->evaluate(patch);
 	glColor3f(0.f, 0.3f, 0.9f);
@@ -192,12 +239,13 @@ void GLWidget::drawBezierPatchCage(AccPatch& patch)
 
 void GLWidget::drawYarn(AccPatch& patch, float detail)
 {
-	int maxLevel = (int)log2f(detail) + 1;
+	int maxLevel = (int)log2f(detail);
 
 	int seg = 2;
 	for(int i = 0; i < maxLevel; i++) {
 		seg *= 2;
 	}
+
 	_tess->setNumSeg(seg);
 	_tess->evaluate(patch);
 	
@@ -210,8 +258,9 @@ void GLWidget::drawYarn(AccPatch& patch, float detail)
 	uvs[3] = patch.tex(0, 1);
 	
 	m_knit->directionByBiggestDu(uvs);
-	m_knit->createYarn(_tess->_positions, _tess->_normals);
 	m_knit->setThickness(0.17f);
+	m_knit->createYarn(_tess->_positions, _tess->_normals);
+	
 	
 	for(unsigned i = 0; i < m_knit->getNumYarn(); i++) {
 		Vector3F *p = m_knit->yarnAt(i);
@@ -223,6 +272,21 @@ void GLWidget::drawYarn(AccPatch& patch, float detail)
 		glVertexPointer( 3, GL_FLOAT, 0, (float *)p);
 		
 		glDrawElements(GL_LINE_STRIP, m_knit->numPointsPerYarn(), GL_UNSIGNED_INT, m_knit->yarnIndices() );
+
+		glDisableClientState( GL_VERTEX_ARRAY );
+	}
+}
+
+void GLWidget::drawFiber(FiberPatch & fiber)
+{
+    glColor3f(0.f, 0.6f, 0.5f);
+    for(unsigned i = 0; i < fiber.getNumFiber(); i++) {
+		Vector3F *p = fiber.fiberAt(i);
+	
+		glEnableClientState( GL_VERTEX_ARRAY );
+		glVertexPointer( 3, GL_FLOAT, 0, (float *)p);
+		
+		glDrawElements(GL_LINE_STRIP, fiber.numPointsPerFiber(), GL_UNSIGNED_INT, fiber.fiberIndices() );
 
 		glDisableClientState( GL_VERTEX_ARRAY );
 	}

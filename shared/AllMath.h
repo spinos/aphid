@@ -19,5 +19,12 @@ inline void Clamp01(float &v) {
 	if(v > 1.f) v = 1.f;
 }
 
+#ifdef WIN32
+inline float log2f( float n )  
+{  
+    return logf( n ) / logf( 2.f );  
+}
+#endif
+
 #endif        //  #ifndef ALLMATH_H
 
