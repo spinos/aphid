@@ -585,11 +585,11 @@ void BaseDrawer::linearCurve(const BaseCurve & curve)
 {
     glDisable(GL_DEPTH_TEST);
 	float t;
-	Vector3F p = curve.getVertex(0);
-	p = curve.getVertex(curve.numVertices() - 1);
+	Vector3F p = curve.getCv(0);
+	p = curve.getCv(curve.numVertices() - 1);
 	glBegin(GL_LINE_STRIP);
 	for(unsigned i = 0; i < curve.numVertices(); i++) {
-		p = curve.getVertex(i);
+		p = curve.getCv(i);
 		t = curve.getKnot(i);
 		setColor(1.f - t, 0.f, t);
 		glVertex3f(p.x, p.y, p.z);

@@ -9,11 +9,21 @@
 
 #include "BaseCurve.h"
 
-BaseCurve::BaseCurve() {}
+BaseCurve::BaseCurve() 
+{
+	m_cvs = 0;
+	m_knots = 0;
+}
+
 BaseCurve::~BaseCurve() 
 {
-	m_vertices.clear();
-	m_knots.clear();
+	cleanup();
+}
+
+void BaseCurve::cleanup()
+{
+	if(m_knots) delete[] m_knots;
+	if(m_cvs) delete[] m_cvs;
 }
 
 void BaseCurve::addVertex(const Vector3F & vert)
@@ -23,28 +33,36 @@ void BaseCurve::addVertex(const Vector3F & vert)
 
 unsigned BaseCurve::numVertices() const
 {
-	return (unsigned)m_vertices.size();
+	return m_numVertices;
 }
 
 void BaseCurve::computeKnots()
 {
+	m_numVertices = (unsigned)m_vertices.size();
+	
+	m_cvs = new Vector3F[numVertices()];
+	for(unsigned i = 0; i < numVertices(); i++) m_cvs[i] = m_vertices[i];
+	
+	m_vertices.clear();
+	
 	m_length = 0;
 	for(unsigned i = 1; i < numVertices(); i++) {
-		m_length += (m_vertices[i] - m_vertices[i-1]).length();
+		m_length += (m_cvs[i] - m_cvs[i-1]).length();
 	}
 	
-	m_knots.push_back(0.f);
+	m_knots = new float[numVertices()];
+	m_knots[0] = 0.f;
 	
 	float knotL = 0.f;
 	for(unsigned i = 1; i < numVertices(); i++) {
-		knotL += (m_vertices[i] - m_vertices[i-1]).length();
-		m_knots.push_back(knotL/ m_length);
+		knotL += (m_cvs[i] - m_cvs[i-1]).length();
+		m_knots[i] = knotL / m_length;
 	}
 }
 
-Vector3F BaseCurve::getVertex(unsigned idx) const
+Vector3F BaseCurve::getCv(unsigned idx) const
 {
-	return m_vertices[idx];
+	return m_cvs[idx];
 }
 
 float BaseCurve::getKnot(unsigned idx) const
@@ -56,21 +74,54 @@ void BaseCurve::fitInto(BaseCurve & another)
 {
 	for(unsigned i = 0; i < numVertices(); i++) {
 		float param = m_knots[i];
-		m_vertices[i] = another.interplate(param);
+		m_cvs[i] = another.interpolate(param, another.m_cvs);
 	}
 }
 
-Vector3F BaseCurve::interplate(float param) const
+Vector3F BaseCurve::interpolate(float param, Vector3F * data) const
 {
-	if(param <= 0.f) return m_vertices[0];
-	if(param >= 1.f) return m_vertices[numVertices() - 1];
-	Vector3F p = m_vertices[0];
-	for(unsigned i = 1; i < numVertices(); i++) {
-		float t0 = m_knots[i-1];
-		float t1 = m_knots[i];
-		if(param >= t0 && param < t1) {
-			p = m_vertices[i-1] * ( 1.f - (param - t0) / (t1 - t0)) + m_vertices[i] * ((param - t0) / (t1 - t0));
-		}
-	}
-	return p;
+	unsigned k0 = 0;
+	unsigned k1 = numVertices() - 1;
+	
+	if(param <= 0.f) return data[k0];
+	if(param >= 1.f) return data[k1];
+	
+	findNeighborKnots(param, k0, k1);
+	
+	return calculateStraightPoint(param, k0, k1, data);
 }
+
+void BaseCurve::findNeighborKnots(float param, unsigned & nei0, unsigned & nei1) const
+{
+	if(nei1 == nei0 + 1) return;
+	unsigned mid = (nei0 + nei1) / 2;
+	if(m_knots[mid] > param)
+		nei1 = mid;
+	else 
+		nei0 = mid;
+		
+	findNeighborKnots(param, nei0, nei1);
+}
+
+Vector3F BaseCurve::interpolateByKnot(float param, Vector3F * data) const
+{
+	unsigned k0 = 0;
+	unsigned k1 = numVertices() - 1;
+	
+	if(param <= k0) return data[k0];
+	if(param >= k1) return data[k1];
+	
+	k0 = (unsigned)param;
+	k1 = k0 + 1;
+	float realparam = m_knots[k0] * (1.f - (param - k0)) + m_knots[k1] * (param - k0);
+	
+	return calculateStraightPoint(realparam, k0, k1, data);
+}
+
+Vector3F BaseCurve::calculateStraightPoint(float param, unsigned k0, unsigned k1, Vector3F * data) const
+{
+	float t = (param - m_knots[k0]) / (m_knots[k1] - m_knots[k0]);
+	
+	return data[k0] * ( 1.f - t) + data[k1] * t;
+}
+

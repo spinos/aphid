@@ -2,7 +2,7 @@
 #include <Vector3F.h>
 #include <Vector2F.h>
 
-static float yarmU[14] = {.1f, .2f, .4f, .25f, .15f, .11f, .33f, .66f, .89f, .85f, .75f, .6f, .8f, .9f };
+static float yarmU[14] = {.05f, .3f, .5f, .4f, .15f, .05f, .3f, .7f, .95f, .85f, .6f, .5f, .7f, .95f};
 static float yarmV[14] = {0.f, 0.f, .15f, .33f, .45f, .69f, .88f, .88f, .69f, .45f, .33f, .15f, 0.f, 0.f };
 static float yarmW[14] = {-.3f, -.3f, .1f, .23f, .32f, .1f, -.5f, -.5f, .1f, .32f, .23f, .1f, -.3f, -.3f };
 KnitPatch::KnitPatch() 
@@ -209,6 +209,9 @@ void KnitPatch::createYarn(const Vector3F * tessellateP, const Vector3F * tessel
 					m_yarnN[k + firstBegin] = gN;
 				}
 				
+				firstBegin += numPointsPerGrid();
+				m_yarnP[firstBegin - 1] += m_yarnP[firstBegin - 1] - m_yarnP[firstBegin - 2];
+				
 				moveCorner(dLat0, 0);
 				moveCorner(dLat1, 1);
 				moveCorner(dLat1, 2);
@@ -220,10 +223,9 @@ void KnitPatch::createYarn(const Vector3F * tessellateP, const Vector3F * tessel
 					m_yarnP[k + secondBegin] += gN * disp;
 					m_yarnN[k + secondBegin] = gN;
 				}
-				
-				firstBegin += numPointsPerGrid();
-				
+
 				secondBegin += numPointsPerGrid();
+				m_yarnP[secondBegin - 1] += m_yarnP[secondBegin - 1] - m_yarnP[secondBegin - 2];
 			}
 			yarnBegin += numPointsPerYarn() * 2;
 		}
@@ -259,6 +261,7 @@ void KnitPatch::createYarn(const Vector3F * tessellateP, const Vector3F * tessel
 				}
 				
 				firstBegin += numPointsPerGrid();
+				m_yarnP[firstBegin - 1] += m_yarnP[firstBegin - 1] - m_yarnP[firstBegin - 2];
 				
 				moveCorner(dLat0, 0);
 				moveCorner(dLat1, 1);
@@ -273,6 +276,7 @@ void KnitPatch::createYarn(const Vector3F * tessellateP, const Vector3F * tessel
 				}
 				
 				secondBegin += numPointsPerGrid();
+				m_yarnP[secondBegin - 1] += m_yarnP[secondBegin - 1] - m_yarnP[secondBegin - 2];
 			}
 			yarnBegin += numPointsPerYarn() * 2;
 		}
@@ -285,7 +289,6 @@ void KnitPatch::calculateTangent()
     for(unsigned j = 0; j < getNumYarn(); j++) {
         Vector3F* p = yarnAt(j);
         Vector3F* t = tangentAt(j);
-        Vector3F* n = normalAt(j);
         for(unsigned i = 0; i < numPointsPerYarn(); i++) {
             if(i == 0)
                 t[i] = p[i+1] - p[i];

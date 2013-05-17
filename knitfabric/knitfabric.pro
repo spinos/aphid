@@ -49,6 +49,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/VertexPath.h \
                 ../shared/MeshTopology.h \
                 ../shared/PatchMesh.h \
+				../shared/BezierCurve.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -115,6 +116,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/VertexPath.cpp \
                 ../shared/MeshTopology.cpp \
                 ../shared/PatchMesh.cpp \
+				../shared/BezierCurve.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \

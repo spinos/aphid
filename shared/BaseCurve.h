@@ -17,17 +17,28 @@ public:
 	BaseCurve();
 	virtual ~BaseCurve();
 	
+	void cleanup();
+	
 	void addVertex(const Vector3F & vert);
 	unsigned numVertices() const;
 	void computeKnots();
 	
-	Vector3F getVertex(unsigned idx) const;
+	Vector3F getCv(unsigned idx) const;
 	float getKnot(unsigned idx) const;
 	
 	void fitInto(BaseCurve & another);
-	Vector3F interplate(float param) const;
-private:
+	
+	virtual Vector3F interpolate(float param, Vector3F * data) const;
+	virtual Vector3F interpolateByKnot(float param, Vector3F * data) const;
+	
+	Vector3F calculateStraightPoint(float param, unsigned k0, unsigned k1, Vector3F * data) const;
+	
+	void findNeighborKnots(float param, unsigned & nei0, unsigned & nei1) const;
+	
 	std::vector<Vector3F> m_vertices;
-	std::vector<float> m_knots;
+	Vector3F * m_cvs;
+	float * m_knots;
+private:
 	float m_length;
+	unsigned m_numVertices;
 };

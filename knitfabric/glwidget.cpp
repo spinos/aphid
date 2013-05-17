@@ -72,11 +72,10 @@ _image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
 	_model = new PatchMesh;
 	
 #ifdef WIN32
-ESMUtil::ImportPatch("D:/aphid/mdl/plane.m", _model);
+	ESMUtil::ImportPatch("D:/aphid/mdl/plane.m", _model);
 #else
 	ESMUtil::ImportPatch("/Users/jianzhang/aphid/mdl/plane.m", _model);
 #endif
-	//ESMUtil::ImportPatch("/Users/jianzhang/aphid/catmullclark/plane.m", _model);
 
 	Vector3F* cvs = _model->getVertices();
 	Vector3F* normal = _model->getNormals();
@@ -150,16 +149,17 @@ void GLWidget::createFiber()
         uvs[3] = _bezier[i].tex(0, 1);
         
         m_knit->directionByBiggestDu(uvs);
-        m_knit->setThickness(0.17f);
+        m_knit->setThickness(0.24f);
         m_knit->createYarn(_tess->_positions, _tess->_normals);
         
         m_fiber[i].create(m_knit->getNumYarn(), m_knit->numPointsPerYarn());
+		m_fiber[i].setThickness(0.16f);
         
         for(unsigned j = 0; j < m_knit->getNumYarn(); j++) {
             Vector3F *p = m_knit->yarnAt(j);
             Vector3F *n = m_knit->normalAt(j);
             Vector3F *t = m_knit->tangentAt(j);
-            m_fiber[i].processYarn(j, p, n, t);
+            m_fiber[i].processYarn(j, p, n, t, m_knit->numPointsPerYarn());
         }
 	}
 }
