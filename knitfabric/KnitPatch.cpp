@@ -50,6 +50,11 @@ Vector3F * KnitPatch::yarn()
     return m_yarnP;
 }
 
+Vector3F * KnitPatch::yarnAt(unsigned idx)
+{
+	return m_yarnP + idx * numPointsPerYarn();
+}
+
 unsigned * KnitPatch::yarnIndices()
 {
 	return m_indices;

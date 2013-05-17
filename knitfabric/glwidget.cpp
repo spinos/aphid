@@ -214,8 +214,7 @@ void GLWidget::drawYarn(AccPatch& patch, float detail)
 	m_knit->setThickness(0.17f);
 	
 	for(unsigned i = 0; i < m_knit->getNumYarn(); i++) {
-		Vector3F *p = m_knit->yarn();
-		p += i * m_knit->numPointsPerYarn();
+		Vector3F *p = m_knit->yarnAt(i);
 		
 		if(i%2 == 0) glColor3f(0.7f, 0.3f, 0.f);
 		else glColor3f(0.4f, 0.7f, 0.3f);

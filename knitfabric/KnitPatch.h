@@ -15,6 +15,7 @@ public:
 	void createYarn(const Vector3F * tessellateP, const Vector3F * tessellateN);
     
     Vector3F * yarn();
+	Vector3F * yarnAt(unsigned idx);
 	unsigned * yarnIndices();
 	unsigned getNumYarn() const;
 	
