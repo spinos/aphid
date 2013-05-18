@@ -15,8 +15,13 @@ public:
 	BezierCurve();
 	virtual ~BezierCurve();
 	
-	virtual Vector3F interpolate(float param, Vector3F * data) const;
-	virtual Vector3F interpolateByKnot(float param, Vector3F * data) const;
+	virtual Vector3F interpolate(float param, Vector3F * data);
+	virtual Vector3F interpolateByKnot(float param, Vector3F * data);
+	virtual Vector3F interpolate(Vector3F * data) const;
+	
+	virtual void calculateT(float param);
+	unsigned m_k00, m_k11;
 private:
-	Vector3F calculateBezierPoint(float param, unsigned k0, unsigned k1, Vector3F * data) const;
+	void fourControlKnots();
+	Vector3F calculateBezierPoint(float t, unsigned k00, unsigned k0, unsigned k1, unsigned k11, Vector3F * data) const;
 };

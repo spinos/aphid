@@ -48,8 +48,8 @@ void FiberPatch::processYarn(unsigned iyarn, Vector3F * yarnP, Vector3F * yarnN,
         Vector3F * p = fiberAt(iyarn, ifiber);
         for(i = 0; i < m_numPointPerFiber; i++) {
 			Vector3F q = cuv.interpolate(delta * i, cuv.m_cvs);
-			Vector3F nor = cuv.interpolate(delta * i, yarnN);
-			Vector3F tang = cuv.interpolate(delta * i, yarnT);
+			Vector3F nor = cuv.interpolate(yarnN);
+			Vector3F tang = cuv.interpolate(yarnT);
 				
             if(ifiber < 3) {
 				nor.rotateAroundAxis(tang, 2.f * ifiber + .55f * i);

@@ -12,45 +12,83 @@
 BezierCurve::BezierCurve() {}
 BezierCurve::~BezierCurve() {}
 
-Vector3F BezierCurve::interpolate(float param, Vector3F * data) const
+Vector3F BezierCurve::interpolate(float param, Vector3F * data)
 {
-	unsigned k0 = 0;
-	unsigned k1 = numVertices() - 1;
+	m_t = 0.f;
+	m_k0 = 0;
+	m_k1 = numVertices() - 1;
 	
-	if(param <= 0.f) return data[k0];
-	if(param >= 1.f) return data[k1];
+	if(param <= 0.f) {
+		m_k1 = m_k0;
+		m_k11 = m_k0;
+		m_k00 = m_k0;
+		return data[m_k0];
+	}
 	
-	findNeighborKnots(param, k0, k1);
-	//printf("%f %i %i  ", param, k0, k1);
-	return calculateBezierPoint(param, k0, k1, data);
+	if(param >= 1.f) {
+		m_k0 = m_k1;
+		m_k11 = m_k1;
+		m_k00 = m_k1;
+		return data[m_k1];
+	}
+	
+	findNeighborKnots(param, m_k0, m_k1);
+	
+	fourControlKnots();
+	calculateT(param);
+	
+	return calculateBezierPoint(m_t, m_k00, m_k0, m_k1, m_k11, data);
 }
 
-Vector3F BezierCurve::interpolateByKnot(float param, Vector3F * data) const
+Vector3F BezierCurve::interpolateByKnot(float param, Vector3F * data)
 {
-	unsigned k0 = 0;
-	unsigned k1 = numVertices() - 1;
+	m_t = 0.f;
+	m_k0 = 0;
+	m_k1 = numVertices() - 1;
 	
-	if(param <= k0) return data[k0];
-	if(param >= k1) return data[k1];
+	if(param <= m_k0) {
+		m_k1 = m_k0;
+		m_k11 = m_k0;
+		m_k00 = m_k0;
+		return data[m_k0];
+	}
 	
-	k0 = (unsigned)param;
-	k1 = k0 + 1;
-	float realparam = m_knots[k0] * (1.f - (param - k0)) + m_knots[k1] * (param - k0);
-
-	return calculateBezierPoint(realparam, k0, k1, data);
+	if(param >= m_k1) {
+		m_k0 = m_k1;
+		m_k11 = m_k1;
+		m_k00 = m_k1;
+		return data[m_k1];
+	}
+	
+	m_k0 = (unsigned)param;
+	m_k1 = m_k0 + 1;
+	float realparam = m_knots[m_k0] * (1.f - (param - m_k0)) + m_knots[m_k1] * (param - m_k0);
+	
+	fourControlKnots();
+	calculateT(realparam);
+	
+	return calculateBezierPoint(m_t, m_k00, m_k0, m_k1, m_k11, data);
 }
 
-
-Vector3F BezierCurve::calculateBezierPoint(float param, unsigned k0, unsigned k1, Vector3F * data) const
+void BezierCurve::fourControlKnots()
 {
-	int k00 = k0 - 1;
+	int k00 = m_k0 - 1;
 	if(k00 < 0) k00 = 0;
 	
-	unsigned k11 = k1 + 1;
-	if(k11 > numVertices() - 1) k11 = numVertices() - 1;
+	m_k00 = k00;
 	
-	float t = (param - m_knots[k00]) / (m_knots[k11] - m_knots[k00]);
-	
+	m_k11 = m_k1 + 1;
+	if(m_k11 > numVertices() - 1) m_k11 = numVertices() - 1;
+}
+
+void BezierCurve::calculateT(float param)
+{
+	m_t = (param - m_knots[m_k00]) / (m_knots[m_k11] - m_knots[m_k00]);
+
+}
+
+Vector3F BezierCurve::calculateBezierPoint(float t, unsigned k00, unsigned k0, unsigned k1, unsigned k11, Vector3F * data) const
+{
 	float u = 1.f - t;
 	float tt = t * t;
 	float uu = u*u;
@@ -67,4 +105,9 @@ Vector3F BezierCurve::calculateBezierPoint(float param, unsigned k0, unsigned k1
 	p += p2 * 3.f * u * tt; //third term
 	p += p3 * ttt; //fourth term
 	return p;
+}
+
+Vector3F BezierCurve::interpolate(Vector3F * data) const
+{
+	return calculateBezierPoint(m_t, m_k00, m_k0, m_k1, m_k11, data);
 }

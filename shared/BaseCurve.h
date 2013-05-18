@@ -28,16 +28,21 @@ public:
 	
 	void fitInto(BaseCurve & another);
 	
-	virtual Vector3F interpolate(float param, Vector3F * data) const;
-	virtual Vector3F interpolateByKnot(float param, Vector3F * data) const;
+	virtual Vector3F interpolate(float param, Vector3F * data);
+	virtual Vector3F interpolateByKnot(float param, Vector3F * data);
+	virtual Vector3F interpolate(Vector3F * data) const;
 	
-	Vector3F calculateStraightPoint(float param, unsigned k0, unsigned k1, Vector3F * data) const;
+	virtual void calculateT(float param);
+	
+	Vector3F calculateStraightPoint(float t, unsigned k0, unsigned k1, Vector3F * data) const;
 	
 	void findNeighborKnots(float param, unsigned & nei0, unsigned & nei1) const;
 	
 	std::vector<Vector3F> m_vertices;
 	Vector3F * m_cvs;
 	float * m_knots;
+	float m_t;
+	unsigned m_k0, m_k1;
 private:
 	float m_length;
 	unsigned m_numVertices;
