@@ -1,6 +1,13 @@
 #include "FiberPatch.h"
 #include <BezierCurve.h>
 
+static float FiberRedAngle[21] = {1.05f, 0.f, 3.14f, -2.f, -1.5f, -.5f, -.5f, -1.f, -1.4f, -1.f, 0.f, 1.05f, -2.f, -2.3f, 3.14f, 1.6f, 1.6f, 2.f, 2.3f, 2.3f, 2.f};
+static float FiberRedRadius[21] = { 1.f,  .5f,  1.f,  1.f,   1.f, 1.5f, 1.5f,  1.f,  1.5f,  1.f, 1.f,   .5f,  .3f,   .5f,   1.f, 1.5f, 1.5f, 1.f,  1.f, 1.1f, 1.f};
+static float FiberGreenAngle[21] = {3.14f, 1.6f, 1.6f, 2.f, 2.3f, 2.3f, 2.f, 1.05f, 0.f, 3.14f, -2.f, -1.5f, -.5f, -.5f, -1.f, -1.4f, -1.f,  0.f, 1.05f, -2.f, -2.3f };
+static float FiberGreenRadius[21] = { 1.f, 1.5f, 1.5f, 1.f,  1.f, 1.1f, 1.f,   1.f, .5f,   1.f,  1.f,  1.f,  1.5f, 1.5f,  1.f,  1.5f,  1.f,  1.f,   .5f,  .3f,   .5f};
+static float FiberBlueAngle[21] = {-1.f, -1.4f, -1.f, 0.f, 1.05f, -2.f, -2.3f, 3.14f, 1.6f, 1.6f, 2.f, 2.3f, 2.3f, 2.f, 1.05f, 0.f, 3.14f, -2.f, -1.5f, -.5f, -.5f};
+static float FiberBlueRadius[21] = {1.f,  1.5f,  1.f, 1.f,   .5f,  .3f,   .5f,   1.f, 1.5f, 1.5f, 1.f,  1.f, 1.1f, 1.f,	  1.f,  .5f,  1.f,  1.f,   1.f, 1.5f, 1.5f};
+
 FiberPatch::FiberPatch() 
 {
     m_indices = 0;
@@ -21,7 +28,7 @@ void FiberPatch::cleanup()
 
 unsigned FiberPatch::numFiberPerYarn() const
 {
-    return 12;
+    return 3;
 }
 
 void FiberPatch::create(unsigned numYarn, unsigned numPointPerYarn)
