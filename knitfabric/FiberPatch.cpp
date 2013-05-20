@@ -76,7 +76,7 @@ void FiberPatch::processYarn(unsigned iyarn, Vector3F * yarnP, Vector3F * yarnN,
 			
 			int ii = i % 21;
 			nor.rotateAroundAxis(tang, angles[ii]);
-			p[i] = q + nor * m_halfThickness * radius[ii] * 0.5f;
+			p[i] = q + nor * m_halfThickness * radius[ii] * 0.45f;
 			
 			nor.rotateAroundAxis(tang, 1.f * iwool);
 			p[i] = p[i] + nor * m_halfThickness * 0.33f;
