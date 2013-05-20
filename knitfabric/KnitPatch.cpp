@@ -2,8 +2,8 @@
 #include <Vector3F.h>
 #include <Vector2F.h>
 
-static float yarmU[14] = {.05f, .3f, .5f, .4f, .15f, .05f, .3f, .7f, .95f, .85f, .6f, .5f, .7f, .95f};
-static float yarmV[14] = {0.f, 0.f, .15f, .33f, .45f, .69f, .88f, .88f, .69f, .45f, .33f, .15f, 0.f, 0.f };
+static float yarmU[14] = {.05f, .3f, .55f, .4f, .15f, .05f, .3f, .7f, .95f, .85f, .6f, .45f, .7f, .95f};
+static float yarmV[14] = {0.f, 0.f, .15f, .33f, .45f, .69f, .9f, .9f, .69f, .45f, .33f, .15f, 0.f, 0.f };
 static float yarmW[14] = {-.3f, -.3f, .1f, .23f, .32f, .1f, -.5f, -.5f, .1f, .32f, .23f, .1f, -.3f, -.3f };
 KnitPatch::KnitPatch() 
 {

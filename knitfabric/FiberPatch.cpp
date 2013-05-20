@@ -28,7 +28,7 @@ void FiberPatch::cleanup()
 
 unsigned FiberPatch::numFiberPerYarn() const
 {
-    return 3;
+    return 18;
 }
 
 void FiberPatch::create(unsigned numYarn, unsigned numPointPerYarn)
@@ -36,7 +36,7 @@ void FiberPatch::create(unsigned numYarn, unsigned numPointPerYarn)
     cleanup();
     
     m_numFiber = numYarn * numFiberPerYarn();
-    m_numPointPerFiber = numPointPerYarn * 2;
+    m_numPointPerFiber = numPointPerYarn * 2.3;
     m_fiberP = new Vector3F[m_numFiber * m_numPointPerFiber];
     m_indices = new unsigned[m_numPointPerFiber];
     for(unsigned i = 0; i < m_numPointPerFiber; i++) m_indices[i] = i;
@@ -52,20 +52,34 @@ void FiberPatch::processYarn(unsigned iyarn, Vector3F * yarnP, Vector3F * yarnN,
 	const float delta = 1.f / (float)m_numPointPerFiber;
 
     for(unsigned ifiber = 0; ifiber < numFiberPerYarn(); ifiber++) {
+        unsigned iwool = ifiber % 6;
+        float * angles = 0;
+        float * radius = 0;
+        if(ifiber/6 % 3 == 0) {
+            angles = FiberRedAngle;
+            radius = FiberRedRadius;
+        }
+        else if(ifiber/6 % 3 == 1) {
+            angles = FiberGreenAngle;
+            radius = FiberGreenRadius;
+        }
+        else {
+            angles = FiberBlueAngle;
+            radius = FiberBlueRadius;
+        }
+				
         Vector3F * p = fiberAt(iyarn, ifiber);
         for(i = 0; i < m_numPointPerFiber; i++) {
 			Vector3F q = cuv.interpolate(delta * i, cuv.m_cvs);
 			Vector3F nor = cuv.interpolate(yarnN);
 			Vector3F tang = cuv.interpolate(yarnT);
-				
-            if(ifiber < 3) {
-				nor.rotateAroundAxis(tang, 2.f * ifiber + .55f * i);
-				p[i] = q + nor * m_halfThickness * 0.5f;
-			}
-			else {
-				nor.rotateAroundAxis(tang, 0.69f * ifiber + .55f * i);
-				p[i] = q + nor * m_halfThickness;
-			}
+			
+			int ii = i % 21;
+			nor.rotateAroundAxis(tang, angles[ii]);
+			p[i] = q + nor * m_halfThickness * radius[ii] * 0.5f;
+			
+			nor.rotateAroundAxis(tang, 1.f * iwool);
+			p[i] = p[i] + nor * m_halfThickness * 0.33f;
         }
     }
 }

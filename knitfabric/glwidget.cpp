@@ -279,8 +279,13 @@ void GLWidget::drawYarn(AccPatch& patch, float detail)
 
 void GLWidget::drawFiber(FiberPatch & fiber)
 {
-    glColor3f(0.f, 0.6f, 0.5f);
+    glLineWidth(3.f);
     for(unsigned i = 0; i < fiber.getNumFiber(); i++) {
+        unsigned ic = i / 6;
+        if(ic % 3 == 0)glColor3f(0.f, 0.5f, 0.4f);
+        else if(ic % 3 == 1)glColor3f(0.f, .4f, 0.6f);
+        else glColor3f(0.f, 0.33f, 0.23f);
+        
 		Vector3F *p = fiber.fiberAt(i);
 	
 		glEnableClientState( GL_VERTEX_ARRAY );
@@ -290,4 +295,5 @@ void GLWidget::drawFiber(FiberPatch & fiber)
 
 		glDisableClientState( GL_VERTEX_ARRAY );
 	}
+	glLineWidth(1.f);
 }
