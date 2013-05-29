@@ -37,14 +37,13 @@ void PatchTopology::setBoundary(char* data)
 
 int PatchTopology::getCornerIndex(int i) const
 {
-	int corner = 8;
-	if(i == 1)
-		corner = 9;
+	if(i == 0)
+		return V(8);
+	else if(i == 1)
+		return V(9);
 	else if(i == 2)
-		corner = 15;
-	else if(i == 3)
-		corner = 14;
-	return V(corner);
+		return V(15);
+	return V(14);
 }
 
 char PatchTopology::isCornerOnBoundary(int i) const
@@ -236,11 +235,11 @@ void PatchTopology::getBoundaryEdgesOnCorner(int i, int* edge) const
 	edge[1] = V(end1);
 }
 
-void PatchTopology::getFringeAndEdgesOnCorner(int i, int* fringe, int* edge) const
+void PatchTopology::getFringeAndEdgesOnCorner(int i, int* fringe, int* edge, char &cornerBehind) const
 {
 	int vl;
-	if(i == 0)
-	{
+	if(i == 0) {
+		cornerBehind = 0;
 		vl = _valence[V(8)];
 		if(vl == 3)
 		{
@@ -263,14 +262,16 @@ void PatchTopology::getFringeAndEdgesOnCorner(int i, int* fringe, int* edge) con
 			fringe[3] = V(3);
 			if(vl > 4)
 			{
-				edge[4] = V(1);
-				fringe[2] = V(0);
-				fringe[4] = V(6);
+				edge[3] = V(1);
+				edge[4] = V(2);
+				fringe[2] = V(6);
+				fringe[3] = V(0);
+				fringe[4] = V(3);
 			}
 		}
 	}
-	else if(i == 1)
-	{
+	else if(i == 1) {
+		cornerBehind = 1;
 		vl = _valence[V(9)];
 		if(vl == 3)
 		{
@@ -294,13 +295,15 @@ void PatchTopology::getFringeAndEdgesOnCorner(int i, int* fringe, int* edge) con
 			if(vl > 4)
 			{
 				edge[4] = V(4);
-				fringe[0] = V(5);
-				fringe[4] = V(11);
+				
+				fringe[0] = V(11);
+				fringe[4] = V(5);
+				
 			}
 		}
 	}
-	else if(i == 2)
-	{
+	else if(i == 2) {
+		cornerBehind = 2;
 		vl = _valence[V(15)];
 		if(vl == 3)
 		{
@@ -323,14 +326,19 @@ void PatchTopology::getFringeAndEdgesOnCorner(int i, int* fringe, int* edge) con
 			fringe[3] = V(8);
 			if(vl > 4)
 			{
-				edge[4] = V(22);
-				fringe[1] = V(23);
-				fringe[4] = V(17);
+				edge[1] = V(22);
+				edge[2] = V(21);
+				edge[3] = V(14);
+				edge[4] = V(9);
+				fringe[1] = V(17);
+				fringe[2] = V(23);
+				fringe[3] = V(20);
+				fringe[4] = V(8);
 			}
 		}
 	}
-	else
-	{
+	else {
+		cornerBehind = 3;
 		vl = _valence[V(14)];
 		if(vl == 3)
 		{
@@ -353,9 +361,12 @@ void PatchTopology::getFringeAndEdgesOnCorner(int i, int* fringe, int* edge) con
 			fringe[3] = V(7);
 			if(vl > 4)
 			{
-				edge[4] = V(19);
+				edge[2] = V(19);
+				edge[3] = V(13);
+				edge[4] = V(8);
 				fringe[2] = V(18);
-				fringe[4] = V(12);
+				fringe[3] = V(12);
+				fringe[4] = V(7);
 			}
 		}
 	}

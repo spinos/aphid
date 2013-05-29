@@ -21,7 +21,7 @@ public:
 	char isCornerOnBoundary(int i) const;
 	char isEdgeOnBoundary(int i) const;
 	void getBoundaryEdgesOnCorner(int i, int* edge) const;
-	void getFringeAndEdgesOnCorner(int i, int* fringe, int* edge) const;
+	void getFringeAndEdgesOnCorner(int i, int* fringe, int* edge, char &cornerBehind) const;
 	void getFringeAndEdgesOnEdgeBySide(int i, int side, int* fringe, int* edge) const;
 	void getFringeOnFaceByCorner(int i, int* fringe) const;
 	void getEdgeBySide(int i, int side, int* edge) const;

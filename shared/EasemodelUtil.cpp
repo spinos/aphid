@@ -24,7 +24,7 @@ void Import(const char * filename, BaseMesh * dst)
 	dst->processQuadFromPolygon();
 	dst->processRealEdgeFromPolygon();
 }
-
+#define LOGPATCH 1
 void ImportPatch(const char * filename, PatchMesh * dst)
 {
 	EasyModelIn * esm = new EasyModelIn(filename);
@@ -38,10 +38,23 @@ void ImportPatch(const char * filename, PatchMesh * dst)
 	dst->prePatchValence();
 	
 	for(int i = 0; i < dst->numPatches(); i++) {
+#ifdef LOGPATCH
+		printf("\n");
+#endif		
+
 		for(unsigned j = 0; j < 24; j++) {
-			dst->patchVertices()[i*24 + j] = esm->getPatchVertex()[i*24 + j];
-		}
 		
+#ifdef LOGPATCH		
+			if(j % 6 == 0) printf("\n");
+#endif			
+			dst->patchVertices()[i*24 + j] = esm->getPatchVertex()[i*24 + j];
+			
+#ifdef LOGPATCH				
+			printf("%i ", dst->patchVertices()[i*24 + j]);
+			if(dst->patchVertices()[i*24 + j] < 10) printf(" ");
+#endif
+		}
+
 		for(unsigned j = 0; j < 15; j++) {
 			dst->patchBoundaries()[i*15 + j] = esm->getPatchBoundary()[i*15 + j];
 		}

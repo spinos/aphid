@@ -109,6 +109,8 @@ _image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
 
 	_bezier = new AccPatch[numFace];
 	for(int j = 0; j < numFace; j++) {
+		printf("face %i\n", j);
+		sten->m_faceIndex = j;
 		_bezier[j].setTexcoord(ucoord, vcoord, &uvIds[j * 4]);
 		_bezier[j].evaluateContolPoints(_topo[j]);
 		_bezier[j].evaluateTangents();
@@ -177,11 +179,12 @@ void GLWidget::drawBezier()
 	unsigned numFace = _model->numPatches();
 
 	for(unsigned i = 0; i < numFace; i++) {
-		//drawBezierPatchCage(_bezier[i]);
-		_bezier[i].setUniformDetail(detail);
+		//if(i != 9)
+		drawBezierPatchCage(_bezier[i]);
+		//_bezier[i].setUniformDetail(detail);
 		//drawBezierPatch(_bezier[i], detail);
 		//drawYarn(_bezier[i], detail);
-		drawFiber(m_fiber[i]);
+		//drawFiber(m_fiber[i]);
 	}
 }
 

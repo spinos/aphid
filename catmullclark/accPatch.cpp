@@ -29,6 +29,7 @@ void AccPatch::processCornerControlPoints(PatchTopology& topo)
 	for(int j = 0; j < 4; j++)
 	{
 		stencil->centerIndex = topo.getCornerIndex(j);
+	
 		if(topo.isCornerOnBoundary(j))
 		{
 			topo.getBoundaryEdgesOnCorner(j, stencil->edgeIndices);
@@ -37,7 +38,7 @@ void AccPatch::processCornerControlPoints(PatchTopology& topo)
 		}
 		else
 		{
-			topo.getFringeAndEdgesOnCorner(j, stencil->cornerIndices, stencil->edgeIndices);
+			topo.getFringeAndEdgesOnCorner(j, stencil->cornerIndices, stencil->edgeIndices, stencil->m_isCornerBehindEdge);
 			stencil->valence = topo.getValenceOnCorner(j);
 			_contorlPoints[cornerIndex[j]] = stencil->computePositionOnCorner();
 			_normals[cornerIndex[j]] = stencil->computeNormalOnCorner();

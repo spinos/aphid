@@ -95,7 +95,7 @@ unsigned BaseMesh::processQuadFromPolygon()
 	unsigned i, j;
 	m_numQuads = 0;
     for(i = 0; i < m_numPolygons; i++) {
-		if(m_polygonCounts[i] == 4)
+		if(m_polygonCounts[i] < 5)
 			m_numQuads++;
 	}
 		
@@ -111,6 +111,14 @@ unsigned BaseMesh::processQuadFromPolygon()
 				m_quadIndices[ie] = m_polygonIndices[curFace + j];
 				ie++;
 			}
+		}
+		else if(m_polygonCounts[i] == 3) {
+			for(j = 0; j < 3; j++) {
+				m_quadIndices[ie] = m_polygonIndices[curFace + j];
+				ie++;
+			}
+			m_quadIndices[ie] = m_quadIndices[ie - 3];
+			ie++;
 		}
 		curFace += m_polygonCounts[i];
 	}

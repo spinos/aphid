@@ -16,7 +16,7 @@ public:
 	void setVertexNormal(Vector3F* data);
 	
 	Vector3F computePositionOnCornerOnBoundary() const;
-	Vector3F computePositionOnCorner() const;
+	Vector3F computePositionOnCorner();
 	
 	Vector3F computePositionOnEdgeOnBoundary() const;
 	Vector3F computePositionOnEdge() const;
@@ -30,6 +30,8 @@ public:
 	Vector3F computeNormalOnEdge() const;
 	
 	Vector3F computeNormalInterior() const;
+	
+	void verbose() const;
 
 	Vector3F* _positions;
 	Vector3F* _normals;
@@ -37,5 +39,10 @@ public:
 	int centerIndex;
 	int edgeIndices[5];
 	int cornerIndices[5];
+	int m_faceIndex;
+	char m_isCornerBehindEdge;
+private:
+	char neighborCornerPosition(const int & i, Vector3F & dst) const;
+	char neighborEdgePosition(const int & i, Vector3F & dst);
 };
 
