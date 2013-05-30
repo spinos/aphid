@@ -8,6 +8,8 @@
  */
 #include <Vector3F.h>
 #include "accStencil.h"
+#include <VertexAdjacency.h>
+#include "Edge.h"
 #include <iostream>
 
 AccStencil::AccStencil() {}
@@ -23,154 +25,157 @@ void AccStencil::setVertexNormal(Vector3F* data)
 	_normals = data;
 }
 
-Vector3F AccStencil::computePositionOnCornerOnBoundary() const
+void AccStencil::findCorner(int vi)
 {
-	return _positions[centerIndex] * (2.f / 3.f) +  _positions[edgeIndices[0]] * (1.f / 6.f) +  _positions[edgeIndices[1]] * (1.f / 6.f);
+    AccCorner &topo = m_corners[vi];
+    topo._centerIndex = m_patchVertices[vi];
+    topo._centerPosition = _positions[m_patchVertices[vi]];
+    topo._centerNormal = _normals[m_patchVertices[vi]];
+    
+    VertexAdjacency &adj = m_vertexAdjacency[m_patchVertices[vi]];
+    
+    std::vector<int> neis;
+    VertexAdjacency::VertexNeighbor *neighbor;
+    int neighborIdx;
+    for(neighbor = adj.firstNeighbor(); !adj.isLastNeighbor(); neighbor = adj.nextNeighbor()) {
+        neighborIdx = neighbor->v->getIndex();
+        
+        neis.push_back(neighborIdx);
+    }
+    
+    printf("one ring around %i: ", m_patchVertices[vi]);
+
+    topo.reset();
+    
+    Edge dummy;
+    for(std::vector<int>::iterator it = neis.begin(); it != neis.end(); ++it) {
+        adj.findEdge(adj.getIndex(), *it, dummy);
+        if(dummy.isReal())
+            topo.addEdgeNeighbor(*it, _positions, _normals);
+        else
+            topo.addCornerNeighbor(*it, _positions, _normals);
+    }
+    
+	findFringeCornerNeighbors(m_patchVertices[vi], topo);
+	topo.verbose();
 }
 
-Vector3F AccStencil::computePositionOnCorner()
+void AccStencil::findFringeCornerNeighbors(int c, AccCorner & topo)
 {
-	//float n = valence * valence;
-	float e = 4.f;
-	float c = 1.f;
-	float sum = 0.f;// = n;
-	Vector3F res;// = _positions[centerIndex] * n;
-	res.setZero();
-	Vector3F q;
+    Edge dummy;
+    int fringeNei;
+    for(int i=0; i < topo._numEdgeNei; i++) {
+        int i1 = i + 1;
+        i1 = i1 % topo._numEdgeNei;
+        
+        int nei0 = topo._edgeIndices[i];
+        int nei1 = topo._edgeIndices[i1];
+        
+        VertexAdjacency &adj0 = m_vertexAdjacency[nei0];
+        
+        if(adj0.findEdge(adj0.getIndex(), nei1, dummy)) {
+            if(dummy.isReal()) {
+                printf("\ntri %i %i ", nei0, nei1);
+                topo.addCornerNeighborBetween(nei0, nei1, _positions, _normals);
+            }
+            else {
+                if(findSharedNeighbor(nei0, nei1, c, fringeNei)) {
+                    topo.addCornerNeighbor(fringeNei, _positions, _normals);
+                }
+            }
+        }
+    }
+}
+
+char AccStencil::findSharedNeighbor(int a, int b, int c, int & dst)
+{
+    VertexAdjacency &adjA = m_vertexAdjacency[a];
+    VertexAdjacency &adjB = m_vertexAdjacency[b];
+    VertexAdjacency::VertexNeighbor *neighborA;
+    VertexAdjacency::VertexNeighbor *neighborB;
+    
+    for(neighborA = adjA.firstNeighbor(); !adjA.isLastNeighbor(); neighborA = adjA.nextNeighbor()) {
+        dst = neighborA->v->getIndex();
+        if(dst != c) {
+            for(neighborB = adjB.firstNeighbor(); !adjB.isLastNeighbor(); neighborB = adjB.nextNeighbor()) {
+                if(dst == neighborB->v->getIndex()) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+void AccStencil::findEdge(int vi)
+{
+	AccEdge &topo = m_edges[vi];
+	int v1 = vi + 1;
+	v1 = v1 % 4;
+	int e0 = m_patchVertices[vi];
+	int e1 = m_patchVertices[v1];
 	
-	for(int i = 0; i < valence; i++) {
-		neighborEdgePosition(i, q);
-		res += q * e;
-		sum += e;
-		neighborCornerPosition(i, q);
-		res += q * c;
-		sum += c;
-	}
+	AccCorner &corner0 = m_corners[vi];
 	
-	sum += valence * valence;
-	res += _positions[centerIndex] * valence * valence;
-	return res / sum;
-}
-
-Vector3F AccStencil::computePositionOnEdgeOnBoundary() const
-{
-	return _positions[edgeIndices[0]] * (2.f / 3.f) + _positions[edgeIndices[1]] * (1.f / 3.f);
-}
-
-Vector3F AccStencil::computePositionOnEdge() const
-{
-	Vector3F res = _positions[edgeIndices[0]] * 2.f * valence;
-	res += _positions[edgeIndices[1]] * 4.f;
-	res += _positions[cornerIndices[0]] * 2.f;
-	res += _positions[cornerIndices[1]] * 2.f;
-	res += _positions[cornerIndices[2]];
-	res += _positions[cornerIndices[3]];
-	return res / (2.f * valence + 10.f);
-}
-
-Vector3F AccStencil::computePositionInterior() const
-{
-	Vector3F res = _positions[cornerIndices[0]] * valence;
-	res += _positions[cornerIndices[1]] * 2.f;
-	res += _positions[cornerIndices[2]] * 2.f;
-	res += _positions[cornerIndices[3]];
-	return res / (valence + 5.f);
-}
-
-Vector3F AccStencil::computeNormalOnCornerOnBoundary() const
-{
-	return _normals[centerIndex] * (2.f / 3.f) +  _normals[edgeIndices[0]] * (1.f / 6.f) +  _normals[edgeIndices[1]] * (1.f / 6.f);
-}
-
-Vector3F AccStencil::computeNormalOnCorner() const
-{
-	float n = valence * valence;
-	float e = 4.f;
-	float c = 1.f;
-	float sum = n;
-	Vector3F res = _normals[centerIndex] * n;
-	for(int i = 0; i < valence; i++)
-	{
-		res += _normals[edgeIndices[i]] * e;
-		res += _normals[cornerIndices[i]] * c;
-		sum += e;
-		sum += c;
-	}
-	return res / sum;
-}
-
-Vector3F AccStencil::computeNormalOnEdgeOnBoundary() const
-{
-	return _normals[edgeIndices[0]] * (2.f / 3.f) + _normals[edgeIndices[1]] * (1.f / 3.f);
-}
-
-Vector3F AccStencil::computeNormalOnEdge() const
-{
-	Vector3F res = _normals[edgeIndices[0]] * 2.f * valence;
-	res += _normals[edgeIndices[1]] * 4.f;
-	res += _normals[cornerIndices[0]] * 2.f;
-	res += _normals[cornerIndices[1]] * 2.f;
-	res += _normals[cornerIndices[2]];
-	res += _normals[cornerIndices[3]];
-	return res / (2.f * valence + 10.f);
-}
-
-Vector3F AccStencil::computeNormalInterior() const
-{
-	Vector3F res = _normals[cornerIndices[0]] * valence;
-	res += _normals[cornerIndices[1]] * 2.f;
-	res += _normals[cornerIndices[2]] * 2.f;
-	res += _normals[cornerIndices[3]];
-	return res / (valence + 5.f);
-}
-
-char AccStencil::neighborCornerPosition(const int & i, Vector3F & dst) const
-{
-	int iedge = edgeIndices[i];
-	int i1 = i + 1;
-	i1 = i1 % valence;
-	int iedge1 = edgeIndices[i1];
-	int icorner = cornerIndices[i];
-	if(m_isCornerBehindEdge) icorner = cornerIndices[i1];
-	verbose();
-	if(icorner == iedge || icorner == iedge1) {
-		
-		
-		dst = _positions[iedge] * 0.5f + _positions[iedge1] * 0.5f;
-		return 0;
-	}
-	dst = _positions[icorner];
-	return 1;
-}
-
-char AccStencil::neighborEdgePosition(const int & i, Vector3F & dst)
-{
-	int iedge = edgeIndices[i];
-	if(iedge == centerIndex) {
-		printf("edge is center %i, use corner %i\n", centerIndex, cornerIndices[i]);
-		dst = _positions[cornerIndices[i]];
-		edgeIndices[i] = cornerIndices[i];
-		return 1;
+	topo.reset();
+	
+	if(e1 == e0) {
+		topo._isZeroLength = 1;
+		topo._edgePositions[0] = corner0.computePosition();
+		topo._edgeNormals[0] = corner0.computeNormal();
+		return;
 	}
 	
-	dst = _positions[iedge];
-	return 0;
+	topo._edgePositions[0] = _positions[e0];
+	topo._edgeNormals[0] = _normals[e0];
+	topo._edgePositions[1] = _positions[e1];
+	topo._edgeNormals[1] = _normals[e1];
+
+	AccCorner &corner1 = m_corners[v1];
+	
+	if(corner0.isOnBoundary() && corner1.isOnBoundary()) {
+		topo._isBoundary = 1;
+		return;
+	}
+	
+	int a, b;
+	corner0.edgeNeighborBeside(e1, a, b);
+
+	//printf("%i-%i e %i %i \n", e0, e1, a, b);
+
+	topo._fringePositions[0] = _positions[a];
+	topo._fringePositions[1] = _positions[b];
+	topo._fringeNormals[0] = _normals[a];
+	topo._fringeNormals[1] = _normals[b];
+
+
+	corner1.edgeNeighborBeside(e0, a, b);
+
+	//printf("%i-%i e %i %i \n", e1, e0, a, b);
+	
+	topo._fringePositions[2] = _positions[a];
+	topo._fringePositions[3] = _positions[b];
+	topo._fringeNormals[2] = _normals[a];
+	topo._fringeNormals[3] = _normals[b];
+	
+	topo._valence[0] = corner0.valence();
+	topo._valence[1] = corner1.valence();
+}
+
+void AccStencil::findInterior(int vi)
+{
+	AccInterior &topo = m_interiors[vi];
+	topo._valence = m_corners[vi].valence();
+	for(int i = 0; i < 4; i++) {
+		int ii = vi + i;
+		ii = ii % 4;
+		ii = m_patchVertices[ii];
+		topo._cornerPositions[i] = _positions[ii];
+		topo._cornerNormals[i] = _normals[ii];
+	}
 }
 
 void AccStencil::verbose() const
 {
-	if(m_faceIndex != 9) return;
-	if(centerIndex != 13) return;
-	printf("\ncenter %i\n", centerIndex);
-	printf("corner %i\n", m_isCornerBehindEdge);
-	printf("edge: ");
-	for(int i = 0; i < valence; i++) {
-		printf("%i ", edgeIndices[i]);
-	}
-	printf("\ncorner: ");
-	for(int i = 0; i < valence; i++) {
-		printf("%i ", cornerIndices[i]);
-	}
-	printf("\n");
 }
 

@@ -8,75 +8,59 @@
  */
 
 #include "accPatch.h"
-#include "patchTopology.h"
 #include "accStencil.h"
 #include <iostream>
+
 AccPatch::AccPatch() {}
 AccPatch::~AccPatch() {}
 
 AccStencil* AccPatch::stencil;
 
-void AccPatch::evaluateContolPoints(PatchTopology& topo)
+void AccPatch::evaluateContolPoints()
 {
-	processCornerControlPoints(topo);
-	processEdgeControlPoints(topo);
-	processInteriorControlPoints(topo);
+    for(int i = 0; i < 4; i++) {
+        stencil->findCorner(i);
+        processCornerControlPoints(i);
+    }
+	
+	for(int i = 0; i < 4; i++) {
+        stencil->findEdge(i);
+        processEdgeControlPoints(i);
+    }
+	
+	for(int i = 0; i < 4; i++) {
+        stencil->findInterior(i);
+        processInteriorControlPoints(i);
+    }
 }
 
-void AccPatch::processCornerControlPoints(PatchTopology& topo)
+void AccPatch::processCornerControlPoints(int i)
 {
 	const int cornerIndex[4] = {0, 3, 15, 12};
-	for(int j = 0; j < 4; j++)
-	{
-		stencil->centerIndex = topo.getCornerIndex(j);
-	
-		if(topo.isCornerOnBoundary(j))
-		{
-			topo.getBoundaryEdgesOnCorner(j, stencil->edgeIndices);
-			_contorlPoints[cornerIndex[j]] = stencil->computePositionOnCornerOnBoundary();
-			_normals[cornerIndex[j]] = stencil->computeNormalOnCornerOnBoundary();
-		}
-		else
-		{
-			topo.getFringeAndEdgesOnCorner(j, stencil->cornerIndices, stencil->edgeIndices, stencil->m_isCornerBehindEdge);
-			stencil->valence = topo.getValenceOnCorner(j);
-			_contorlPoints[cornerIndex[j]] = stencil->computePositionOnCorner();
-			_normals[cornerIndex[j]] = stencil->computeNormalOnCorner();
-		}
-	}	
+	const int j = cornerIndex[i];
+	AccCorner &topo = stencil->m_corners[i];
+	_contorlPoints[j] = topo.computePosition();
+	_normals[j] = topo.computeNormal();
 }
 
-void AccPatch::processEdgeControlPoints(PatchTopology& topo)
+void AccPatch::processEdgeControlPoints(int i)
 {
 	const int edgeIndex[8] = {1, 2, 7, 11, 14, 13, 8, 4};
-	for(int j = 0; j < 8; j++)
-	{
-		int edge = j / 2;
-		int side = j % 2;
-		if(topo.isEdgeOnBoundary(edge))
-		{
-			topo.getEdgeBySide(edge, side, stencil->edgeIndices);
-			_contorlPoints[edgeIndex[j]] = stencil->computePositionOnEdgeOnBoundary();
-			_normals[edgeIndex[j]] = stencil->computeNormalOnEdgeOnBoundary();
-		}
-		else
-		{
-			topo.getFringeAndEdgesOnEdgeBySide(edge, side, stencil->cornerIndices, stencil->edgeIndices);
-			stencil->valence = topo.getCornerValenceByEdgeBySide(edge, side);
-			_contorlPoints[edgeIndex[j]] = stencil->computePositionOnEdge();
-			_normals[edgeIndex[j]] = stencil->computeNormalOnEdge();
-		}
-	}
+	AccEdge &topo = stencil->m_edges[i];
+	int v0 = edgeIndex[i * 2];
+	int v1 = edgeIndex[i * 2 + 1];
+	_contorlPoints[v0] = topo.computePosition(0);
+	_normals[v0] = topo.computeNormal(0);
+	
+	_contorlPoints[v1] = topo.computePosition(1);
+	_normals[v1] = topo.computeNormal(1);
 }
 
-void AccPatch::processInteriorControlPoints(PatchTopology& topo)
+void AccPatch::processInteriorControlPoints(int i)
 {
 	const int interiorIndex[4] = {5, 6, 10, 9};
-	for(int j = 0; j < 4; j++)
-	{
-		topo.getFringeOnFaceByCorner(j, stencil->cornerIndices);
-		stencil->valence = topo.getCornerValenceByEdgeBySide(j, 0);
-		_contorlPoints[interiorIndex[j]] = stencil->computePositionInterior();
-		_normals[interiorIndex[j]] = stencil->computeNormalInterior();
-	}
+	const int j = interiorIndex[i];
+	AccInterior &topo = stencil->m_interiors[i];
+	_contorlPoints[j] = topo.computePosition();
+	_normals[j] = topo.computeNormal();
 }

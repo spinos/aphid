@@ -7,15 +7,17 @@
  *
  */
 #include <bezierPatch.h>
-class PatchTopology;
+
 class AccStencil;
 class AccPatch : public BezierPatch {
 public:
 	AccPatch();
 	~AccPatch();
-	void evaluateContolPoints(PatchTopology& topo);
-	void processCornerControlPoints(PatchTopology& topo);
-	void processEdgeControlPoints(PatchTopology& topo);
-	void processInteriorControlPoints(PatchTopology& topo);
+	virtual void evaluateContolPoints();
+	
+	void processCornerControlPoints(int i);
+	void processEdgeControlPoints(int i);
+	void processInteriorControlPoints(int i);
+	
 	static AccStencil* stencil;
 };

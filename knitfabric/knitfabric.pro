@@ -59,8 +59,10 @@ HEADERS       = ../shared/Vector3F.h \
                 ../catmullclark/accPatch.h \
                 ../catmullclark/accStencil.h \
                 ../catmullclark/bezierPatch.h \
-                ../catmullclark/patchTopology.h \
                 ../catmullclark/tessellator.h \
+                ../catmullclark/AccCorner.h \
+                ../catmullclark/AccEdge.h \
+                ../catmullclark/AccInterior.h \
                 KnitPatch.h \
                 FiberPatch.h \
                 glwidget.h \
@@ -126,8 +128,10 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../catmullclark/accPatch.cpp \
                 ../catmullclark/accStencil.cpp \
                 ../catmullclark/bezierPatch.cpp \
-                ../catmullclark/patchTopology.cpp \
                 ../catmullclark/tessellator.cpp \
+                ../catmullclark/AccCorner.cpp \
+                ../catmullclark/AccEdge.cpp \
+                ../catmullclark/AccInterior.cpp \
                 KnitPatch.cpp \
                 FiberPatch.cpp \
                 glwidget.cpp \

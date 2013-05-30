@@ -49,11 +49,11 @@
 #include <EasemodelUtil.h>
 #include "accPatch.h"
 #include "accStencil.h"
-#include "patchTopology.h"
 #include "tessellator.h"
 #include "KnitPatch.h"
 #include "zEXRImage.h"
 #include "FiberPatch.h"
+#include <MeshTopology.h>
 
 //! [0]
 GLWidget::GLWidget(QWidget *parent)
@@ -77,48 +77,42 @@ _image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
 	ESMUtil::ImportPatch("/Users/jianzhang/aphid/mdl/plane.m", _model);
 #endif
 
+    m_topo = new MeshTopology;
+    m_topo->buildTopology(_model);
+    m_topo->calculateNormal(_model);
+
 	Vector3F* cvs = _model->getVertices();
 	Vector3F* normal = _model->getNormals();
-	
-	unsigned* valence = _model->vertexValence();
-	unsigned* patchV = _model->patchVertices();
-	char* patchB = _model->patchBoundaries();
 	float* ucoord = _model->us();
 	float* vcoord = _model->vs();
 	unsigned * uvIds = _model->uvIds();
 	int numFace = _model->numPatches();
-	//numFace = 1;
-	//_mesh = new Subdivision[numFace];
-	_topo = new PatchTopology[numFace];
+
 	AccStencil* sten = new AccStencil();
 	AccPatch::stencil = sten;
 	sten->setVertexPosition(cvs);
 	sten->setVertexNormal(normal);
 	
-	for(int j = 0; j < numFace; j++) {
-		_topo[j].setVertexValence(valence);
-		
-		unsigned* ip = patchV;
-		ip += j * 24;
-		_topo[j].setVertex(ip);
-		
-		char* cp = patchB;
-		cp += j * 15;
-		_topo[j].setBoundary(cp);
-	}
+	sten->m_vertexAdjacency = m_topo->getTopology();
 
 	_bezier = new AccPatch[numFace];
+	unsigned * quadV = _model->quadIndices();
 	for(int j = 0; j < numFace; j++) {
-		printf("face %i\n", j);
-		sten->m_faceIndex = j;
+		sten->m_patchVertices[0] = quadV[0];
+		sten->m_patchVertices[1] = quadV[1];
+		sten->m_patchVertices[2] = quadV[2];
+		sten->m_patchVertices[3] = quadV[3];
+		
 		_bezier[j].setTexcoord(ucoord, vcoord, &uvIds[j * 4]);
-		_bezier[j].evaluateContolPoints(_topo[j]);
+		_bezier[j].evaluateContolPoints();
 		_bezier[j].evaluateTangents();
 		_bezier[j].evaluateBinormals();
 		_bezier[j].setCorner(_bezier[j].p(0, 0), 0);
 		_bezier[j].setCorner(_bezier[j].p(3, 0), 1);
 		_bezier[j].setCorner(_bezier[j].p(0, 3), 2);
 		_bezier[j].setCorner(_bezier[j].p(3, 3), 3);
+		
+		quadV += 4;
 	}
 	
 	m_knit = new KnitPatch;
@@ -179,10 +173,9 @@ void GLWidget::drawBezier()
 	unsigned numFace = _model->numPatches();
 
 	for(unsigned i = 0; i < numFace; i++) {
-		//if(i != 9)
-		drawBezierPatchCage(_bezier[i]);
-		//_bezier[i].setUniformDetail(detail);
-		//drawBezierPatch(_bezier[i], detail);
+		//drawBezierPatchCage(_bezier[i]);
+		_bezier[i].setUniformDetail(detail);
+		drawBezierPatch(_bezier[i], detail);
 		//drawYarn(_bezier[i], detail);
 		//drawFiber(m_fiber[i]);
 	}

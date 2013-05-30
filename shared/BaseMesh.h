@@ -36,6 +36,7 @@ public:
 	Vector3F * vertices();
 	Vector3F * normals();
 	unsigned * indices();
+	unsigned * quadIndices();
 	
 	void setVertex(unsigned idx, float x, float y, float z);
 	void setTriangle(unsigned idx, unsigned a, unsigned b, unsigned c);

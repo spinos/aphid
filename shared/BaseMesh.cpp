@@ -130,26 +130,20 @@ void BaseMesh::processRealEdgeFromPolygon()
 {
 	unsigned i, j;
 	unsigned curTri = 0;
+	unsigned ntri;
 	for(i = 0; i < m_numPolygons; i++) {
-        for(j = 1; j < m_polygonCounts[i] - 1; j++) {
-			if(j == 1) {
-				m_realEdges[curTri] = 1;
-				m_realEdges[curTri + 1] = 1;
-				m_realEdges[curTri + 2] = 0;
-			}
-			else if(j == m_polygonCounts[i] - 2) {
-				m_realEdges[curTri] = 0;
-				m_realEdges[curTri + 1] = 1;
-				m_realEdges[curTri + 2] = 1;
-			}
-			else {
-				m_realEdges[curTri] = 0;
-				m_realEdges[curTri + 1] = 1;
-				m_realEdges[curTri + 2] = 0;
-			}
-			
-            curTri += 3;
+		ntri = m_polygonCounts[i] - 2;
+		
+        for(j = 0; j < ntri; j++) {
+			m_realEdges[curTri + j * 3] = 0;
+			m_realEdges[curTri + j * 3 + 1] = 1;
+			m_realEdges[curTri + j * 3 + 2] = 0;
         }
+		
+		m_realEdges[curTri] = 1;
+		m_realEdges[curTri + ntri * 3 - 1] = 1;
+		
+		curTri += ntri * 3;
     }
 }
 
@@ -226,6 +220,11 @@ Vector3F * BaseMesh::normals()
 unsigned * BaseMesh::indices()
 {
 	return _indices;
+}
+
+unsigned * BaseMesh::quadIndices()
+{
+    return m_quadIndices;
 }
 
 void BaseMesh::setVertex(unsigned idx, float x, float y, float z)

@@ -6,43 +6,39 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
+#include <AccCorner.h>
+#include <AccEdge.h>
+#include <AccInterior.h>
 class Vector3F;
+class VertexAdjacency;
 class AccStencil {
 public:
+    
+    
 	AccStencil();
 	~AccStencil();
 	
 	void setVertexPosition(Vector3F* data);
 	void setVertexNormal(Vector3F* data);
 	
-	Vector3F computePositionOnCornerOnBoundary() const;
-	Vector3F computePositionOnCorner();
-	
-	Vector3F computePositionOnEdgeOnBoundary() const;
-	Vector3F computePositionOnEdge() const;
-	
-	Vector3F computePositionInterior() const;
-	
-	Vector3F computeNormalOnCornerOnBoundary() const;
-	Vector3F computeNormalOnCorner() const;
-	
-	Vector3F computeNormalOnEdgeOnBoundary() const;
-	Vector3F computeNormalOnEdge() const;
-	
-	Vector3F computeNormalInterior() const;
-	
+	void findCorner(int vi);
+	void findEdge(int vi);
+	void findInterior(int vi);
+
 	void verbose() const;
 
+	VertexAdjacency * m_vertexAdjacency;
 	Vector3F* _positions;
 	Vector3F* _normals;
-	int valence;
-	int centerIndex;
-	int edgeIndices[5];
-	int cornerIndices[5];
-	int m_faceIndex;
-	char m_isCornerBehindEdge;
+	
+	int m_patchVertices[4];
+	
+	AccCorner m_corners[4];
+	AccEdge m_edges[4];
+	AccInterior m_interiors[4];
+
 private:
-	char neighborCornerPosition(const int & i, Vector3F & dst) const;
-	char neighborEdgePosition(const int & i, Vector3F & dst);
+	void findFringeCornerNeighbors(int c, AccCorner & topo);
+	char findSharedNeighbor(int a, int b, int c, int & dst);
 };
 

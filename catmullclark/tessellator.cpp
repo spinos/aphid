@@ -65,9 +65,9 @@ void Tessellator::evaluate(BezierPatch& bezier)
 		for(int i = 0; i < _numSeg; i++)
 		{
 			_vertices[(j * _numSeg + i) * 4] = j * (_numSeg + 1) + i;
-			_vertices[(j * _numSeg + i) * 4 + 1] = (j + 1) * (_numSeg + 1) + i;
+			_vertices[(j * _numSeg + i) * 4 + 1] = j * (_numSeg + 1) + i + 1;
 			_vertices[(j * _numSeg + i) * 4 + 2] = (j + 1) * (_numSeg + 1) + i + 1;
-			_vertices[(j * _numSeg + i) * 4 + 3] = j * (_numSeg + 1) + i + 1;
+			_vertices[(j * _numSeg + i) * 4 + 3] = (j + 1) * (_numSeg + 1) + i;
 		}
 	}
 }

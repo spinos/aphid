@@ -46,11 +46,11 @@
 
 class PatchMesh;
 class AccPatch;
-class PatchTopology;
 class Tessellator;
 class KnitPatch;
 class FiberPatch;
 class ZEXRImage;
+class MeshTopology;
 //! [0]
 class GLWidget : public Base3DView
 {
@@ -68,11 +68,11 @@ protected:
 private:	
 	PatchMesh* _model;
 	AccPatch* _bezier;
-	PatchTopology* _topo;
 	Tessellator* _tess;
 	ZEXRImage* _image;
 	KnitPatch * m_knit;
 	FiberPatch * m_fiber;
+	MeshTopology * m_topo;
 
 	void createFiber();
 	void drawBezier();
