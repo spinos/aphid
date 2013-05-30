@@ -140,13 +140,5 @@ void baseImport(EasyModelIn *esm, BaseMesh * dst)
         dst->_vertices[i].y = cvs[i * 3 + 1];
         dst->_vertices[i].z = cvs[i * 3 + 2];
     }
-	
-	float * nors = esm->getVertexNormal();
-	for(i = 0; i < dst->_numVertices; i++) {
-        dst->normals()[i].x = nors[i * 3];
-        dst->normals()[i].y = nors[i * 3 + 1];
-        dst->normals()[i].z = nors[i * 3 + 2];
-    }
-
 }
 }
