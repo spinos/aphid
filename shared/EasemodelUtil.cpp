@@ -22,7 +22,6 @@ void Import(const char * filename, BaseMesh * dst)
 	
 	dst->processTriangleFromPolygon();
 	dst->processQuadFromPolygon();
-	dst->processRealEdgeFromPolygon();
 }
 #define LOGPATCH 1
 void ImportPatch(const char * filename, PatchMesh * dst)
@@ -33,7 +32,6 @@ void ImportPatch(const char * filename, PatchMesh * dst)
 	
 	dst->processTriangleFromPolygon();
 	dst->processQuadFromPolygon();
-	dst->processRealEdgeFromPolygon();
 	
 	dst->prePatchValence();
 	

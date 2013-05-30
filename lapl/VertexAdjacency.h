@@ -28,6 +28,7 @@ public:
 	
 	char isOpen() const;
 	void findNeighbors();
+	void connectEdges();
 	void computeWeights();
 	void computeDifferentialCoordinate();
 	void computeTangentFrame();

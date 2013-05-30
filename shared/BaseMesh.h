@@ -27,8 +27,7 @@ public:
 	
 	unsigned processTriangleFromPolygon();
 	unsigned processQuadFromPolygon();
-	void processRealEdgeFromPolygon();
-	
+
 	const BoundingBox calculateBBox() const;
 	const BoundingBox calculateBBox(const unsigned &idx) const;
 	const int faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const;
@@ -46,6 +45,7 @@ public:
 	
 	unsigned getNumFaces() const;
 	unsigned getNumQuads() const;
+	unsigned getNumPolygons() const;
 	unsigned getNumVertices() const;
 	unsigned getNumFaceVertices() const;
 	
@@ -72,6 +72,5 @@ public:
 	unsigned * m_polygonCounts;
 	unsigned m_numPolygonVertices;
 	unsigned * m_polygonIndices;
-	char * m_realEdges;
 private:
 };

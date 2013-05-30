@@ -18,7 +18,7 @@ BaseMesh::BaseMesh()
 	m_quadIndices = 0;
 	m_polygonCounts = 0;
 	m_polygonIndices = 0;
-	m_realEdges = 0;
+	m_numPolygons = 0;
 	setMeshType();
 }
 
@@ -30,7 +30,6 @@ BaseMesh::~BaseMesh()
 	if(m_quadIndices) delete[] m_quadIndices;
 	if(m_polygonCounts) delete[] m_polygonCounts;
 	if(m_polygonIndices) delete[] m_polygonIndices;
-	if(m_realEdges) delete[] m_realEdges;
 }
 
 void BaseMesh::createVertices(unsigned num)
@@ -43,7 +42,6 @@ void BaseMesh::createVertices(unsigned num)
 void BaseMesh::createIndices(unsigned num)
 {
 	_indices = new unsigned[num];
-	m_realEdges = new char[num];
 	_numFaceVertices = num;
 }
 
@@ -124,27 +122,6 @@ unsigned BaseMesh::processQuadFromPolygon()
 	}
 	
 	return m_numQuads;
-}
-
-void BaseMesh::processRealEdgeFromPolygon()
-{
-	unsigned i, j;
-	unsigned curTri = 0;
-	unsigned ntri;
-	for(i = 0; i < m_numPolygons; i++) {
-		ntri = m_polygonCounts[i] - 2;
-		
-        for(j = 0; j < ntri; j++) {
-			m_realEdges[curTri + j * 3] = 0;
-			m_realEdges[curTri + j * 3 + 1] = 1;
-			m_realEdges[curTri + j * 3 + 2] = 0;
-        }
-		
-		m_realEdges[curTri] = 1;
-		m_realEdges[curTri + ntri * 3 - 1] = 1;
-		
-		curTri += ntri * 3;
-    }
 }
 
 const BoundingBox BaseMesh::calculateBBox() const
@@ -265,6 +242,11 @@ unsigned BaseMesh::getNumFaces() const
 unsigned BaseMesh::getNumQuads() const
 {
 	return m_numQuads;
+}
+
+unsigned BaseMesh::getNumPolygons() const
+{
+	return m_numPolygons;
 }
 
 unsigned BaseMesh::getNumVertices() const

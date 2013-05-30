@@ -36,28 +36,43 @@ char MeshTopology::buildTopology(BaseMesh * mesh)
 		v.m_v = &(mesh->getVertices()[i]);
 	}
 	
-	const unsigned nf = mesh->getNumFaces();
 	unsigned a, b, c;
 	
+	unsigned * polyC = mesh->m_polygonCounts;
+	unsigned polyTri = *polyC - 2;
+	unsigned curTri = 0;
+	unsigned curPoly = 0;
+	
+	const unsigned nf = mesh->getNumFaces();
 	for(unsigned i = 0; i < nf; i++) {
 		a = mesh->getIndices()[i * 3];
 		b = mesh->getIndices()[i * 3 + 1];
 		c = mesh->getIndices()[i * 3 + 2];
 		Facet * f = new Facet(&m_adjacency[a], &m_adjacency[b], &m_adjacency[c]);
 		f->setIndex(i);
+		f->setPolygonIndex(curPoly);
 		for(unsigned j = 0; j < 3; j++) {
 			Edge * e = f->edge(j);
-			e->setReal(mesh->m_realEdges[i * 3 + j]);
 			m_adjacency[e->v0()->getIndex()].addEdge(e);
 			m_adjacency[e->v1()->getIndex()].addEdge(e);
 		}
 		m_faces.push_back(f);
+		
+		curTri++;
+		if(curTri == polyTri) {
+			polyC++;
+			polyTri = *polyC - 2;
+			curPoly++;
+			curTri = 0;
+		}
 	}
 	
 	for(unsigned i = 0; i < nv; i++) {
 		m_adjacency[i].findNeighbors();
+		m_adjacency[i].connectEdges();
 		m_adjacency[i].computeWeights();
 		m_adjacency[i].computeDifferentialCoordinate();
+		//m_adjacency[i].verbose();
 	}
 	return 1;
 }

@@ -385,12 +385,25 @@ unsigned VertexAdjacency::nextBoundaryNeighbor(unsigned idx)
 	return (*m_neighborIt)->v->getIndex();
 }
 
+void VertexAdjacency::connectEdges()
+{
+	std::vector<Edge *>::iterator eit;
+	std::vector<Edge *>::iterator eit1;
+	for(eit = m_edges.begin(); eit < m_edges.end(); eit++) {
+		for(eit1 = m_edges.begin(); eit1 < m_edges.end(); eit1++) {
+			if((*eit1)->isOppositeOf(*eit)) {
+				(*eit)->setTwin(*eit1);
+			}
+		}
+	}
+}
+
 void VertexAdjacency::verbose() const
 {
 	printf("\nv %i\n adjacent edge count: %i\n", getIndex(), (int)m_edges.size());
 	std::vector<Edge *>::const_iterator eit;
 	for(eit = m_edges.begin(); eit < m_edges.end(); eit++) {
-		printf(" %d - %d", (*eit)->v0()->getIndex(), (*eit)->v1()->getIndex());
+		printf(" %d - %d f %i", (*eit)->v0()->getIndex(), (*eit)->v1()->getIndex(), ((Facet *)(*eit)->getFace())->getPolygonIndex());
 	}
 	std::vector<VertexNeighbor *>::const_iterator it;
 	for(it = m_neighbors.begin(); it < m_neighbors.end(); it++) {

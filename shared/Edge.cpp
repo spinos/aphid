@@ -8,12 +8,14 @@
  */
 
 #include "Edge.h"
+#include <Facet.h>
 
 Edge::Edge() : identicalTwin(0) {}
 Edge::~Edge() {}
 
 Edge::Edge(Vertex *a, Vertex *b, char * f)
 {
+	identicalTwin = 0;
 	va = a;
 	vb = b;
 	face = f;
@@ -104,10 +106,12 @@ void Edge::disconnect()
 
 char Edge::isReal() const
 {
-	return m_isReal;
+	Edge *opp = getTwin();
+	if(!opp) return 1;
+	
+	Facet *f0 = (Facet *)getFace();
+	Facet *f1 = (Facet *)opp->getFace();
+
+	return f0->getPolygonIndex() != f1->getPolygonIndex();
 }
 
-void Edge::setReal(char val)
-{
-	m_isReal = val;
-}

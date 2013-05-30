@@ -218,6 +218,16 @@ void Facet::update()
 	if(m_area < 10e-5) printf("WARNING: near zero face area!\n");
 }
 
+void Facet::setPolygonIndex(unsigned idx)
+{
+	m_polyIndex = idx;
+}
+
+unsigned Facet::getPolygonIndex() const
+{
+	return m_polyIndex;
+}
+
 float Facet::cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c)
 {
     Vector3F d[3]; float l[3];

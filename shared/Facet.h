@@ -38,6 +38,8 @@ public:
 	char getEdgeOnHorizon(std::vector<Edge *> & horizons) const;
 	
 	void update();
+	void setPolygonIndex(unsigned idx);
+	unsigned getPolygonIndex() const;
 	
 	static float cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c);
 private:
@@ -46,4 +48,5 @@ private:
 	float m_area;
 	Vertex *m_vertices[3];
 	Edge *m_edges[3];
+	unsigned m_polyIndex;
 };
