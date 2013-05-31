@@ -16,13 +16,9 @@ public:
 	PatchMesh();
 	virtual ~PatchMesh();
 	
-	void prePatchValence();
 	void prePatchUV(unsigned numUVs, unsigned numUVIds);
 	
 	unsigned numPatches() const;
-	unsigned * vertexValence();
-	unsigned * patchVertices();
-	char * patchBoundaries();
 	
 	float * us();
 	float * vs();
@@ -32,7 +28,4 @@ private:
 	float * m_u;
 	float * m_v;
 	unsigned * m_uvIds;
-	unsigned * m_patchVertices;
-	unsigned * m_vertexValence;
-	char * m_patchBoundary;
 };

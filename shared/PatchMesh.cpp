@@ -12,19 +12,9 @@
 PatchMesh::PatchMesh() {}
 PatchMesh::~PatchMesh() 
 {
-	delete[] m_vertexValence;
-	delete[] m_patchVertices;
-	delete[] m_patchBoundary;
 	delete[] m_u;
 	delete[] m_v;
 	delete[] m_uvIds;
-}
-
-void PatchMesh::prePatchValence()
-{
-	m_vertexValence = new unsigned[getNumVertices()];
-	m_patchVertices = new unsigned[numPatches() * 24];
-	m_patchBoundary = new char[numPatches() * 15];
 }
 
 void PatchMesh::prePatchUV(unsigned numUVs, unsigned numUVIds)
@@ -39,21 +29,6 @@ void PatchMesh::prePatchUV(unsigned numUVs, unsigned numUVIds)
 unsigned PatchMesh::numPatches() const
 {
 	return m_numQuads;
-}
-
-unsigned * PatchMesh::vertexValence()
-{
-	return m_vertexValence;
-}
-
-unsigned * PatchMesh::patchVertices()
-{
-	return m_patchVertices;
-}
-
-char * PatchMesh::patchBoundaries()
-{
-	return m_patchBoundary;
 }
 
 float * PatchMesh::us()
