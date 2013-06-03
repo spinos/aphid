@@ -1,6 +1,3 @@
-#ifndef LODQUAD_H
-#define LODQUAD_H
-
 /*
  *  LODQuad.h
  *  easymodel
@@ -9,7 +6,10 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
+#pragma once
+
 #include "BaseQuad.h"
+
 class LODQuad : public BaseQuad {
 public:
 	LODQuad();
@@ -25,4 +25,3 @@ public:
 	
 	float _details[4];
 };
-#endif        //  #ifndef LODQUAD_H

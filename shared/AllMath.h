@@ -12,6 +12,7 @@
 #include <Vector3F.h>
 #include <Matrix33F.h>
 #include <Matrix44F.h>
+#include <Vector2F.h>
 #include <Ray.h>
 
 inline void Clamp01(float &v) {

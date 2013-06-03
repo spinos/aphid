@@ -9,10 +9,10 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include <Vector3F.h>
-#include "Vector2F.h"
-#include "Matrix44F.h"
+#pragma once
+#include <AllMath.h>
 #include "LODQuad.h"
+
 class BezierPatch : public LODQuad
 {
 public:

@@ -1,9 +1,17 @@
+/*
+ *  KnitPatch.h
+ *  knitfabric
+ *
+ *  Created by jian zhang on 11/1/11.
+ *  Copyright 2011 __MyCompanyName__. All rights reserved.
+ *
+ */
 #pragma once
 
-#include <LODQuad.h>
-class Vector2F;
+#include <BaseQuad.h>
+#include <AllMath.h>
 
-class KnitPatch : public LODQuad {
+class KnitPatch : public BaseQuad {
 public:
     KnitPatch();
     virtual ~KnitPatch();
