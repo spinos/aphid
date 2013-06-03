@@ -133,7 +133,7 @@ void SingleModelView::buildTree()
 void SingleModelView::buildTopology()
 {
 	m_topo->buildTopology(m_mesh);
-	getSelection()->setTopology(m_topo->getTopology());
+	getSelection()->setTopology(m_topo);
     m_topo->calculateNormal(m_mesh);
 }
 

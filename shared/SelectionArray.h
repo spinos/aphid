@@ -13,7 +13,8 @@ class Vector3F;
 class Primitive;
 class Geometry;
 class VertexPath;
-class VertexAdjacency;
+class ComponentConversion;
+class MeshTopology;
 
 class SelectionArray : public PrimitiveFilter {
 public:
@@ -44,9 +45,13 @@ public:
 	
 	void addVertex(unsigned idx, const Vector3F & atP);
 	
-	void setTopology(VertexAdjacency * topo);
+	void setTopology(MeshTopology * topo);
+	
+	void asVertices(std::vector<unsigned> & dst) const;
+	void asPolygons(std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const;
 private:
 	VertexPath * m_vertexPath;
+	ComponentConversion * m_compconvert;
     Geometry * m_geometry;
 	bool isVertexSelected(unsigned idx) const;
 	bool isFaceSelected(unsigned idx) const;

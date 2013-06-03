@@ -299,5 +299,15 @@ void GLWidget::loadMesh(std::string filename)
 
 void GLWidget::setSelectionAsWale()
 {
-    printf("Wale");
+	std::vector<unsigned> fs;
+	std::vector<unsigned> vpps;
+	getSelection()->asPolygons(fs, vpps);
+    printf("\nWale faces ");
+	for(std::vector<unsigned>::const_iterator it = fs.begin(); it != fs.end(); ++it) {
+		printf(" %i", *it);
+	}
+	printf("\nper face vertex ");
+	for(std::vector<unsigned>::const_iterator it = vpps.begin(); it != vpps.end(); ++it) {
+		printf(" %i", *it);
+	}
 }

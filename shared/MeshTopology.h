@@ -23,6 +23,8 @@ public:
 	void calculateNormal(BaseMesh * mesh);
 
 	VertexAdjacency * getTopology() const;
+	VertexAdjacency & getAdjacency(unsigned idx) const;
+	Facet * getFacet(unsigned idx) const;
 private:
 	void cleanup();
 	VertexAdjacency * m_adjacency;

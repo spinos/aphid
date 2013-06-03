@@ -1,9 +1,11 @@
 #include <VertexPath.h>
+#include <MeshTopology.h>
+#include <VertexAdjacency.h>
 
 VertexPath::VertexPath() {}
 VertexPath::~VertexPath() {}
 
-void VertexPath::setTopology(VertexAdjacency * topo)
+void VertexPath::setTopology(MeshTopology * topo)
 {
     m_topology = topo;
 }
@@ -11,15 +13,14 @@ void VertexPath::setTopology(VertexAdjacency * topo)
 void VertexPath::create(unsigned startVert, unsigned endVert)
 {
     m_vertices.clear();
-    VertexAdjacency adj = m_topology[startVert];
     
-    Vector3F endPoint = *(m_topology[endVert].m_v);
+    Vector3F endPoint = *(m_topology->getAdjacency(endVert).m_v);
     recursiveFindClosestNeighbor(startVert, endVert, endPoint);
 }
 
 char VertexPath::recursiveFindClosestNeighbor(unsigned vert, unsigned endVert, const Vector3F & endPoint)
 {
-	VertexAdjacency adj = m_topology[vert];
+	VertexAdjacency adj = m_topology->getAdjacency(vert);
 	Vector3F vertP = *(adj.m_v);
     unsigned closestNei;
     float minDist = 10e8;
@@ -43,7 +44,7 @@ char VertexPath::recursiveFindClosestNeighbor(unsigned vert, unsigned endVert, c
 
 bool VertexPath::grow(unsigned startVert, unsigned endVert, unsigned & dst)
 {
-	VertexAdjacency adj = m_topology[endVert];
+	VertexAdjacency &adj = m_topology->getAdjacency(endVert);
 	if(!adj.isConnectedTo(startVert)) return false;
 	if(adj.isOpen()) return growOnBoundary(startVert, endVert, dst);
 	
@@ -54,9 +55,9 @@ bool VertexPath::grow(unsigned startVert, unsigned endVert, unsigned & dst)
 
 bool VertexPath::growOnBoundary(unsigned startVert, unsigned endVert, unsigned & dst)
 {
-	VertexAdjacency adj = m_topology[startVert];
+	VertexAdjacency &adj = m_topology->getAdjacency(startVert);
 	if(!adj.isOpen()) return false;
-	adj = m_topology[endVert];
+	adj = m_topology->getAdjacency(endVert);
 	if(!adj.isOpen()) return false;
 	
 	dst = adj.nextBoundaryNeighbor(startVert);

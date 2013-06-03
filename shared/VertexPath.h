@@ -1,13 +1,14 @@
 #pragma once
-
-#include <VertexAdjacency.h>
+#include <vector>
+#include <AllGeometry.h>
+class MeshTopology;
 
 class VertexPath {
 public:
     VertexPath();
     virtual ~VertexPath();
     
-    void setTopology(VertexAdjacency * topo);
+    void setTopology(MeshTopology * topo);
     void create(unsigned startVert, unsigned endVert);
 	bool grow(unsigned startVert, unsigned endVert, unsigned & dst);
 	bool growOnBoundary(unsigned startVert, unsigned endVert, unsigned & dst);
@@ -17,6 +18,6 @@ public:
 private:
     char recursiveFindClosestNeighbor(unsigned vert, unsigned endVert, const Vector3F & endPoint);
     std::vector<unsigned> m_vertices;
-    VertexAdjacency * m_topology;
+    MeshTopology * m_topology;
 };
 

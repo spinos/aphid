@@ -40,6 +40,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/IndexList.h \
                 ../shared/BoundingBoxList.h \
                 ../shared/SelectionArray.h \
+                ../shared/ComponentConversion.h \
                 ../shared/BarycentricCoordinate.h \
                 ../shared/EasemodelUtil.h \
                 ../shared/GeodesicSphereMesh.h \
@@ -55,7 +56,7 @@ HEADERS       = ../shared/Vector3F.h \
 				../shared/ActionIconFrame.h \
 				../shared/QIconFrame.h \
 				../shared/ToolContext.h \
-                ../lapl/VertexAdjacency.h \
+				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
                 ../../ofl/core/zEXRImage.h \
@@ -116,6 +117,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/IndexList.cpp \
                 ../shared/BoundingBoxList.cpp \
                 ../shared/SelectionArray.cpp \
+                ../shared/ComponentConversion.cpp \
                 ../shared/BarycentricCoordinate.cpp \
                 ../shared/EasemodelUtil.cpp \
                 ../shared/GeodesicSphereMesh.cpp \
@@ -131,7 +133,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				../shared/ActionIconFrame.cpp \
 				../shared/QIconFrame.cpp \
 				../shared/ToolContext.cpp \
-                ../lapl/VertexAdjacency.cpp \
+				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \
                 ../../ofl/core/zEXRImage.cpp \

@@ -21,9 +21,22 @@ Edge::Edge(Vertex *a, Vertex *b, char * f)
 	face = f;
 }
 
+char Edge::equals(int i, int j) const
+{
+	return ((va->getIndex() == i && vb->getIndex() == j));
+}
+
 char Edge::matches(Edge *e) const
 {
 	return matches(e->v0(), e->v1());
+}
+
+char Edge::matches(Vertex *a, Vertex *b) const
+{
+	//return ((va->equals(*a) && vb->equals(*b)) ||
+    //          (va->equals(*b) && vb->equals(*a)));
+	return ((va->getIndex() == a->getIndex() && vb->getIndex() == b->getIndex()) ||
+              (va->getIndex() == b->getIndex() && vb->getIndex() == a->getIndex()));
 }
 
 char Edge::isOppositeOf(int i, int j) const
@@ -34,14 +47,6 @@ char Edge::isOppositeOf(int i, int j) const
 char Edge::isOppositeOf(Edge *e) const
 {
 	return ((va->getIndex() == e->v1()->getIndex() && vb->getIndex() == e->v0()->getIndex()));
-}
-
-char Edge::matches(Vertex *a, Vertex *b) const
-{
-	//return ((va->equals(*a) && vb->equals(*b)) ||
-    //          (va->equals(*b) && vb->equals(*a)));
-	return ((va->getIndex() == a->getIndex() && vb->getIndex() == b->getIndex()) ||
-              (va->getIndex() == b->getIndex() && vb->getIndex() == a->getIndex()));
 }
 
 void Edge::setTwin(Edge *e)
@@ -115,3 +120,11 @@ char Edge::isReal() const
 	return f0->getPolygonIndex() != f1->getPolygonIndex();
 }
 
+char Edge::connectedToVertex(unsigned idx) const
+{
+	if(va->getIndex() == idx)
+		return 1;
+	if(vb->getIndex() == idx)
+		return 1;
+	return 0;
+}

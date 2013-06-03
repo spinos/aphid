@@ -94,6 +94,16 @@ VertexAdjacency * MeshTopology::getTopology() const
 	return m_adjacency;
 }
 
+VertexAdjacency & MeshTopology::getAdjacency(unsigned idx) const
+{
+	return m_adjacency[idx];
+}
+
+Facet * MeshTopology::getFacet(unsigned idx) const
+{
+	return m_faces[idx];
+}
+
 void MeshTopology::cleanup()
 {
 	if(m_adjacency) delete[] m_adjacency;

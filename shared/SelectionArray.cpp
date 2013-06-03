@@ -11,11 +11,13 @@
 #include "Primitive.h"
 #include "BaseMesh.h"
 #include <VertexPath.h>
-#include <VertexAdjacency.h>
+#include <ComponentConversion.h>
+#include <MeshTopology.h>
 
 SelectionArray::SelectionArray() 
 {
 	m_vertexPath = new VertexPath;
+	m_compconvert = new ComponentConversion;
 }
 
 SelectionArray::~SelectionArray() {}
@@ -137,9 +139,10 @@ unsigned SelectionArray::getFaceId(const unsigned & idx) const
     return m_faceIds[idx];
 }
 
-void SelectionArray::setTopology(VertexAdjacency * topo)
+void SelectionArray::setTopology(MeshTopology * topo)
 {
 	m_vertexPath->setTopology(topo);
+	m_compconvert->setTopology(topo);
 }
 
 void SelectionArray::grow()
@@ -176,5 +179,26 @@ void SelectionArray::enableVertexPath()
 void SelectionArray::disableVertexPath()
 {
 	m_needVertexPath = false;
+}
+
+void SelectionArray::asVertices(std::vector<unsigned> & dst) const
+{
+	if(getComponentFilterType() == PrimitiveFilter::TVertex) {
+		std::vector<unsigned>::const_iterator it;
+		for(it = m_vertexIds.begin(); it != m_vertexIds.end(); ++it) {
+			dst.push_back(*it);
+		}
+	}
+}
+
+void SelectionArray::asPolygons(std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const
+{
+	if(getComponentFilterType() == PrimitiveFilter::TFace) {
+		m_compconvert->facetToPolygon(m_faceIds, polyIds);
+		/**/
+	}
+	else if(getComponentFilterType() == PrimitiveFilter::TVertex) {
+		m_compconvert->vertexToPolygon(m_vertexIds, polyIds, vppIds);
+	}
 }
 //:~
