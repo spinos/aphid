@@ -296,3 +296,8 @@ void GLWidget::loadMesh(std::string filename)
 	buildTopology();
 	buildTree();
 }
+
+void GLWidget::setSelectionAsWale()
+{
+    printf("Wale");
+}

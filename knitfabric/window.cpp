@@ -57,6 +57,8 @@ Window::Window()
 
 	setCentralWidget(glWidget);
     setWindowTitle(tr("Knit Fabric"));
+    
+    connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -66,3 +68,10 @@ void Window::keyPressEvent(QKeyEvent *e)
     else
         QWidget::keyPressEvent(e);
 }
+
+void Window::receiveToolAction(int a)
+{
+    if(a == ToolContext::SetWaleEdge)
+        glWidget->setSelectionAsWale();
+}
+

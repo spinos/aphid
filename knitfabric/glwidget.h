@@ -61,6 +61,8 @@ public:
     ~GLWidget();
 	
 	virtual void loadMesh(std::string filename);
+	
+	void setSelectionAsWale();
 
 //! [2]
 protected:

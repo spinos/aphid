@@ -64,6 +64,9 @@ protected:
 private:
     GLWidget *glWidget;
 	ToolBox * m_tools;
+	
+public slots:
+    void receiveToolAction(int a);
 };
 //! [0]
 

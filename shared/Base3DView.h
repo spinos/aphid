@@ -20,8 +20,6 @@ public:
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
-    
-//! [0]
 
 	BaseCamera * getCamera() const;
 	KdTreeDrawer * getDrawer() const;
@@ -56,6 +54,7 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 	void focusInEvent(QFocusEvent * event);
 	void focusOutEvent(QFocusEvent * event);
+	
 private:
 	void updateOrthoProjection();
 	void updatePerspProjection();

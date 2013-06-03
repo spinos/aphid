@@ -13,7 +13,45 @@
 
 ToolBox::ToolBox(QWidget *parent) : QToolBar(parent) 
 {
-	ContextIconFrame * selectComponent = new ContextIconFrame(this);
+	createContext();
+	
+	createAction();
+	
+	for(std::vector<ContextIconFrame *>::iterator it = m_contextFrames.begin(); it != m_contextFrames.end(); ++it) {
+		addWidget(*it);
+		connect(*it, SIGNAL(contextEnabled(int)), this, SLOT(onContextFrameChanged(int)));
+	}
+	
+	addSeparator();
+	
+	for(std::vector<ActionIconFrame *>::iterator it = m_actionFrames.begin(); it != m_actionFrames.end(); ++it) {
+		addWidget(*it);
+		connect(*it, SIGNAL(actionTriggered(int)), this, SLOT(onActionFrameTriggered(int)));
+	}
+}
+
+ToolBox::~ToolBox() {}
+
+void ToolBox::onContextFrameChanged(int c)
+{
+	setContext((InteractMode)c);
+	for(std::vector<ContextIconFrame *>::iterator it = m_contextFrames.begin(); it != m_contextFrames.end(); ++it) {
+		if((*it)->getContext() != c)
+			(*it)->setIconIndex(0);
+		else
+			(*it)->setIconIndex(1);
+	}
+	emit contextChanged(c);
+}
+
+void ToolBox::onActionFrameTriggered(int a)
+{
+	emit actionTriggered(a);
+}
+
+void ToolBox::createContext()
+{
+    ContextIconFrame * selectComponent = new ContextIconFrame(this);
 	
 	selectComponent->addIconFile(":selvertex.png");
 	selectComponent->addIconFile(":selvertexact.png");
@@ -28,39 +66,16 @@ ToolBox::ToolBox(QWidget *parent) : QToolBar(parent)
 	
 	m_contextFrames.push_back(selectComponent);
 	m_contextFrames.push_back(selectAnchor);
-	
-	ActionIconFrame * setWale = new ActionIconFrame(this);
+}
+
+void ToolBox::createAction()
+{
+    ActionIconFrame * setWale = new ActionIconFrame(this);
 	
 	setWale->addIconFile(":setwale.png");
 	setWale->addIconFile(":setwaleact.png");
 	setWale->setIconIndex(0);
-	setWale->setAction(1);
+	setWale->setAction(SetWaleEdge);
 	
 	m_actionFrames.push_back(setWale);
-	
-	for(std::vector<ContextIconFrame *>::iterator it = m_contextFrames.begin(); it != m_contextFrames.end(); ++it) {
-		addWidget(*it);
-		connect(*it, SIGNAL(contextEnabled(int)), this, SLOT(contextFrameChanged(int)));
-	}
-	
-	addSeparator();
-	
-	for(std::vector<ActionIconFrame *>::iterator it = m_actionFrames.begin(); it != m_actionFrames.end(); ++it) {
-		addWidget(*it);
-		//connect(*it, SIGNAL(contextEnabled(int)), this, SLOT(contextFrameChanged(int)));
-	}
-}
-
-ToolBox::~ToolBox() {}
-
-void ToolBox::contextFrameChanged(int c)
-{
-	setContext((InteractMode)c);
-	for(std::vector<ContextIconFrame *>::iterator it = m_contextFrames.begin(); it != m_contextFrames.end(); ++it) {
-		if((*it)->getContext() != c)
-			(*it)->setIconIndex(0);
-		else
-			(*it)->setIconIndex(1);
-	}
-	emit contextChanged(c);
 }

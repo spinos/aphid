@@ -24,14 +24,18 @@ public:
 	ToolBox(QWidget *parent = 0);
     ~ToolBox();
 private:
+    void createContext();
+    void createAction();
 	std::vector<ContextIconFrame *> m_contextFrames;
 	std::vector<ActionIconFrame *> m_actionFrames;
 	
 signals:
 	void contextChanged(int c);
+	void actionTriggered(int c);
 	
 public slots:
-	void contextFrameChanged(int c);
+	void onContextFrameChanged(int c);
+	void onActionFrameTriggered(int a);
 };
 
 #endif
