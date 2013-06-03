@@ -20,6 +20,7 @@ BaseDrawer::BaseDrawer () : m_wired(0)
 {
 	m_sphere = new GeodesicSphereMesh(8);
 	m_pyramid = new PyramidMesh;
+	m_cube = new CubeMesh;
 	m_activeColor.set(0.f, .8f, .2f);
 	m_inertColor.set(0.1f, 0.6f, 0.1f);
 }
@@ -87,47 +88,15 @@ void BaseDrawer::box(float width, float height, float depth)
 
 void BaseDrawer::solidCube(float x, float y, float z, float size)
 {
-	x -= size * 0.5f;
-	y -= size * 0.5f;
-	z -= size * 0.5f;
-	glBegin(GL_QUADS);
-	
-// bottom
-	glVertex3f(x, y, z);
-	glVertex3f(x + size, y, z);
-	glVertex3f(x + size, y, z + size);
-	glVertex3f(x, y, z + size);
+	setWired(0);
+	glPushMatrix();
 
-// top
-	glVertex3f(x, y+ size, z);
-	glVertex3f(x + size, y+ size, z);
-	glVertex3f(x + size, y+ size, z + size);
-	glVertex3f(x, y+ size, z + size);
+	const float hsize = size * 0.5f; 
+	glTranslatef(x - hsize, y - hsize, z - hsize);
+	glScalef(size, size, size);
 	
-// back	
-	glVertex3f(x, y, z);
-	glVertex3f(x, y + size, z);
-	glVertex3f(x + size, y + size, z);
-	glVertex3f(x + size, y, z);
-	
-// front	
-	glVertex3f(x, y, z + size);
-	glVertex3f(x, y + size, z + size);
-	glVertex3f(x + size, y + size, z + size);
-	glVertex3f(x + size, y, z + size);
-
-// left
-	glVertex3f(x, y, z);
-	glVertex3f(x, y, z + size);
-	glVertex3f(x, y + size, z + size);
-	glVertex3f(x, y + size, z);
-	
-// right
-	glVertex3f(x + size, y, z);
-	glVertex3f(x + size, y, z + size);
-	glVertex3f(x + size, y + size, z + size);
-	glVertex3f(x + size, y + size, z);
-	glEnd();
+	drawMesh(m_cube);
+	glPopMatrix();	
 }
 
 void BaseDrawer::end()

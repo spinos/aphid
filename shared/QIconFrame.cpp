@@ -70,23 +70,27 @@ int QIconFrame::getIconIndex() const
 	return currentIconIndex;
 }
 
-void QIconFrame::useNextIcon()
+char QIconFrame::useNextIcon()
 {
 	if(icons.size() < 1)
-		return;
+		return 0;
 		
 	setIconIndex(currentIconIndex+1);
+	return 1;
 }
 
 void QIconFrame::mousePressEvent(QMouseEvent *event)
-//! [11] //! [12]
 {
 	if (event->button() == Qt::LeftButton) {
 		useNextIcon();
-		
-		emit iconIndexChanged(currentIconIndex);
 	}
 }
-//! [18]
+
+void QIconFrame::mouseReleaseEvent(QMouseEvent *event)
+{
+	if (event->button() == Qt::LeftButton) {
+		useNextIcon();
+	}
+}
 
 

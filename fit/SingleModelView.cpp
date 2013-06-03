@@ -9,23 +9,26 @@
 #include <QtGui>
 #include <QtOpenGL>
 #include <math.h>
+#include <ToolContext.h>
 #include "SingleModelView.h"
 
-#include <BaseMesh.h>
+#include <PatchMesh.h>
 #include <KdTree.h>
 #include <Ray.h>
 #include <EasemodelUtil.h>
 #include <AnchorGroup.h>
+#include <MeshTopology.h>
+
+ToolContext * SingleModelView::InteractContext = 0;
 
 SingleModelView::SingleModelView(QWidget *parent) : Base3DView(parent)
 {
 	m_tree = 0;
-	m_mesh = new BaseMesh;
+	m_mesh = new PatchMesh;
+	m_topo = new MeshTopology;
 	
 	m_anchors = new AnchorGroup;
 	m_anchors->setHitTolerance(.3f);
-
-	m_mode = SelectCompnent;
 }
 //! [0]
 
@@ -50,7 +53,7 @@ void SingleModelView::clientSelect(Vector3F & origin, Vector3F & displacement, V
 	Vector3F raye = origin + displacement;
 	
 	Ray ray(rayo, raye);
-	if(m_mode == SelectCompnent) {
+	if(interactMode() == ToolContext::SelectVertex) {
 		pickupComponent(ray, hit);
 	}
 	else {
@@ -70,7 +73,7 @@ void SingleModelView::clientMouseInput(Vector3F & origin, Vector3F & displacemen
 	Vector3F rayo = origin;
 	Vector3F raye = origin + displacement;
 	Ray ray(rayo, raye);
-	if(m_mode == SelectCompnent) {
+	if(interactMode() == ToolContext::SelectVertex) {
 		Vector3F hit;
 		pickupComponent(ray, hit);
 	}
@@ -127,6 +130,13 @@ void SingleModelView::buildTree()
 	m_tree->create();
 }
 
+void SingleModelView::buildTopology()
+{
+	m_topo->buildTopology(m_mesh);
+	getSelection()->setTopology(m_topo->getTopology());
+    m_topo->calculateNormal(m_mesh);
+}
+
 void SingleModelView::open()
 {
 	QString temQStr = QFileDialog::getOpenFileName(this, 
@@ -176,16 +186,6 @@ void SingleModelView::keyPressEvent(QKeyEvent *e)
 	Base3DView::keyPressEvent(e);
 }
 
-void SingleModelView::setSelectComponent()
-{
-	m_mode = SelectCompnent;
-}
-
-void SingleModelView::setSelectAnchor()
-{
-	m_mode = TransformAnchor;
-}
-
 void SingleModelView::drawAnchors()
 {
 	if(m_anchors->numAnchors() < 1) return;
@@ -207,5 +207,12 @@ AnchorGroup * SingleModelView::getAnchors() const
 KdTree * SingleModelView::getTree() const
 {
 	return m_tree;
+}
+
+int SingleModelView::interactMode()
+{
+	if(!InteractContext) return ToolContext::SelectVertex;
+	
+	return InteractContext->getContext();
 }
 //:~

@@ -43,7 +43,7 @@
 #include <QtOpenGL>
 
 #include <math.h>
-
+#include <MeshTopology.h>
 #include "glwidget.h"
 #include <PatchMesh.h>
 #include <EasemodelUtil.h>
@@ -53,14 +53,20 @@
 #include "KnitPatch.h"
 #include "zEXRImage.h"
 #include "FiberPatch.h"
-#include <MeshTopology.h>
 
 //! [0]
-GLWidget::GLWidget(QWidget *parent)
-    : Base3DView(parent)
+GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
 #ifdef WIN32
-_image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
+	std::string filename("D:/aphid/mdl/plane.m");
+#else
+	std::string filename("/Users/jianzhang/aphid/mdl/plane.m");
+#endif
+
+	loadMesh(filename);	
+	
+#ifdef WIN32
+	_image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
 #else
 	_image = new ZEXRImage("/Users/jianzhang/aphid/catmullclark/disp.exr");
 #endif
@@ -69,24 +75,12 @@ _image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
 	_tess = new Tessellator();
 	//_tess->setDisplacementMap(_image);
 	
-	_model = new PatchMesh;
-	
-#ifdef WIN32
-	ESMUtil::ImportPatch("D:/aphid/mdl/plane.m", _model);
-#else
-	ESMUtil::ImportPatch("/Users/jianzhang/aphid/mdl/plane.m", _model);
-#endif
-
-    m_topo = new MeshTopology;
-    m_topo->buildTopology(_model);
-    m_topo->calculateNormal(_model);
-
-	Vector3F* cvs = _model->getVertices();
-	Vector3F* normal = _model->getNormals();
-	float* ucoord = _model->us();
-	float* vcoord = _model->vs();
-	unsigned * uvIds = _model->uvIds();
-	int numFace = _model->numPatches();
+	Vector3F* cvs = m_mesh->getVertices();
+	Vector3F* normal = m_mesh->getNormals();
+	float* ucoord = m_mesh->us();
+	float* vcoord = m_mesh->vs();
+	unsigned * uvIds = m_mesh->uvIds();
+	int numFace = m_mesh->numPatches();
 
 	AccStencil* sten = new AccStencil();
 	AccPatch::stencil = sten;
@@ -96,7 +90,7 @@ _image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
 	sten->m_vertexAdjacency = m_topo->getTopology();
 
 	_bezier = new AccPatch[numFace];
-	unsigned * quadV = _model->quadIndices();
+	unsigned * quadV = m_mesh->quadIndices();
 	for(int j = 0; j < numFace; j++) {
 		sten->m_patchVertices[0] = quadV[0];
 		sten->m_patchVertices[1] = quadV[1];
@@ -129,7 +123,7 @@ GLWidget::~GLWidget()
 
 void GLWidget::createFiber()
 {
-    const unsigned numFace = _model->numPatches();
+    const unsigned numFace = m_mesh->numPatches();
     for(unsigned i = 0; i < numFace; i++) {
 		_bezier[i].setUniformDetail(4.f);
 		int seg = 8;
@@ -162,15 +156,17 @@ void GLWidget::createFiber()
 
 void GLWidget::clientDraw()
 {
-	getDrawer()->edge(_model);
+	getDrawer()->setGrey(1.f);
+	getDrawer()->edge(m_mesh);
 	
-	drawBezier();
+	//drawBezier();
+	drawSelection();
 }
 
 void GLWidget::drawBezier()
 {
 	float detail = 4.f;
-	unsigned numFace = _model->numPatches();
+	unsigned numFace = m_mesh->numPatches();
 
 	for(unsigned i = 0; i < numFace; i++) {
 		//drawBezierPatchCage(_bezier[i]);
@@ -292,4 +288,11 @@ void GLWidget::drawFiber(FiberPatch & fiber)
 		glDisableClientState( GL_VERTEX_ARRAY );
 	}
 	glLineWidth(1.f);
+}
+
+void GLWidget::loadMesh(std::string filename)
+{
+	ESMUtil::ImportPatch(filename.c_str(), m_mesh);
+	buildTopology();
+	buildTree();
 }

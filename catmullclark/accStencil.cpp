@@ -43,7 +43,7 @@ void AccStencil::findCorner(int vi)
         neis.push_back(neighborIdx);
     }
     
-    printf("one ring around %i: ", m_patchVertices[vi]);
+    //printf("one ring around %i: ", m_patchVertices[vi]);
 
     topo.reset();
     
@@ -57,7 +57,7 @@ void AccStencil::findCorner(int vi)
     }
     
 	findFringeCornerNeighbors(m_patchVertices[vi], topo);
-	topo.verbose();
+	//topo.verbose();
 }
 
 void AccStencil::findFringeCornerNeighbors(int c, AccCorner & topo)
@@ -75,7 +75,7 @@ void AccStencil::findFringeCornerNeighbors(int c, AccCorner & topo)
         
         if(adj0.findEdge(adj0.getIndex(), nei1, dummy)) {
             if(dummy.isReal()) {
-                printf("\ntri %i %i ", nei0, nei1);
+                //printf("\ntri %i %i ", nei0, nei1);
                 topo.addCornerNeighborBetween(nei0, nei1, _positions, _normals);
             }
             else {

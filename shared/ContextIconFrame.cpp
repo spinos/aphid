@@ -23,9 +23,11 @@ int ContextIconFrame::getContext() const
 
 void ContextIconFrame::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
-		useNextIcon();
-		
-		if(getIconIndex() == 1) emit contextEnabled(m_context);
-	}
+	QIconFrame::mousePressEvent(event);
+	if(getIconIndex() == 1) 
+		emit contextEnabled(m_context);
+}
+
+void ContextIconFrame::mouseReleaseEvent(QMouseEvent *event)
+{
 }

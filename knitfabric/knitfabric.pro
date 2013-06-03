@@ -1,4 +1,4 @@
-INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/core ../../ofl/opium
+INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/core ../../ofl/opium ../fit
 HEADERS       = ../shared/Vector3F.h \
                 ../shared/Vector2F.h \
                 ../shared/Matrix44F.h \
@@ -44,12 +44,16 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/EasemodelUtil.h \
                 ../shared/GeodesicSphereMesh.h \
 				../shared/PyramidMesh.h \
+				../shared/CubeMesh.h \
                 ../shared/AnchorGroup.h \
                 ../shared/BaseCurve.h \
                 ../shared/VertexPath.h \
                 ../shared/MeshTopology.h \
                 ../shared/PatchMesh.h \
 				../shared/BezierCurve.h \
+				../shared/ContextIconFrame.h \
+				../shared/QIconFrame.h \
+				../shared/ToolContext.h \
                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -63,6 +67,8 @@ HEADERS       = ../shared/Vector3F.h \
                 ../catmullclark/AccCorner.h \
                 ../catmullclark/AccEdge.h \
                 ../catmullclark/AccInterior.h \
+                ../fit/SingleModelView.h \
+                ToolBox.h \
                 KnitPatch.h \
                 FiberPatch.h \
                 glwidget.h \
@@ -113,12 +119,16 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/EasemodelUtil.cpp \
                 ../shared/GeodesicSphereMesh.cpp \
                 ../shared/PyramidMesh.cpp \
+                ../shared/CubeMesh.cpp \
                 ../shared/AnchorGroup.cpp \
                 ../shared/BaseCurve.cpp \
                 ../shared/VertexPath.cpp \
                 ../shared/MeshTopology.cpp \
                 ../shared/PatchMesh.cpp \
 				../shared/BezierCurve.cpp \
+				../shared/ContextIconFrame.cpp \
+				../shared/QIconFrame.cpp \
+				../shared/ToolContext.cpp \
                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \
@@ -132,6 +142,8 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../catmullclark/AccCorner.cpp \
                 ../catmullclark/AccEdge.cpp \
                 ../catmullclark/AccInterior.cpp \
+                ../fit/SingleModelView.cpp \
+                ToolBox.cpp \
                 KnitPatch.cpp \
                 FiberPatch.cpp \
                 glwidget.cpp \
@@ -155,4 +167,4 @@ win32 {
 CONFIG += console
 }
 QT           += opengl
-
+RESOURCES += ../icons/knitfabric.qrc

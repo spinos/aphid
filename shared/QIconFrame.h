@@ -59,9 +59,10 @@ public:
 	void setIconIndex(int index);
 	int getIconIndex() const;
 	
-	void useNextIcon();
+	char useNextIcon();
 	
 	virtual void mousePressEvent(QMouseEvent *event);
+	virtual void mouseReleaseEvent(QMouseEvent *event);
 	
 signals:
 	void iconIndexChanged(int index);

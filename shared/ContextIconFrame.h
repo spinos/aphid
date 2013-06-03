@@ -22,6 +22,7 @@ public:
 	int getContext() const;
 	
 	virtual void mousePressEvent(QMouseEvent *event);
+	virtual void mouseReleaseEvent(QMouseEvent *event);
 	
 signals:
 	void contextEnabled(int c);

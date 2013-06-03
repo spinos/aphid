@@ -16,6 +16,7 @@
 #include <Anchor.h>
 #include <GeodesicSphereMesh.h>
 #include <PyramidMesh.h>
+#include <CubeMesh.h>
 #include <BaseCurve.h>
 
 class BaseDrawer {
@@ -61,5 +62,6 @@ private:
     char m_wired;
 	GeodesicSphereMesh * m_sphere;
 	PyramidMesh * m_pyramid;
+	CubeMesh * m_cube;
 	Vector3F m_activeColor, m_inertColor;
 };

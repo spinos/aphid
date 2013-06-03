@@ -42,7 +42,7 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include <Base3DView.h>
+#include <SingleModelView.h>
 
 class PatchMesh;
 class AccPatch;
@@ -50,30 +50,30 @@ class Tessellator;
 class KnitPatch;
 class FiberPatch;
 class ZEXRImage;
-class MeshTopology;
+
 //! [0]
-class GLWidget : public Base3DView
+class GLWidget : public SingleModelView
 {
     Q_OBJECT
 
 public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
+	
+	virtual void loadMesh(std::string filename);
 
 //! [2]
 protected:
     virtual void clientDraw();
 
 //! [3]
-private:	
-	PatchMesh* _model;
+private:
 	AccPatch* _bezier;
 	Tessellator* _tess;
 	ZEXRImage* _image;
 	KnitPatch * m_knit;
 	FiberPatch * m_fiber;
-	MeshTopology * m_topo;
-
+	
 	void createFiber();
 	void drawBezier();
 	void drawBezierPatch(AccPatch& patch, float detail);

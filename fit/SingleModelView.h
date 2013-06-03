@@ -11,21 +11,23 @@
 
 #include <Base3DView.h>
 
-class BaseMesh;
+class ToolContext;
+class PatchMesh;
 class KdTree;
 class AnchorGroup;
 class Anchor;
 class Ray;
+class MeshTopology;
 
 class SingleModelView : public Base3DView
 {
     Q_OBJECT
 
 public:
-    enum InteractMode {
+    /*enum InteractMode {
         SelectCompnent,
         TransformAnchor
-    };
+    };*/
 	
     SingleModelView(QWidget *parent = 0);
     ~SingleModelView();
@@ -43,24 +45,25 @@ public:
     virtual void sceneCenter(Vector3F & dst) const;
     
 	virtual void buildTree();
+	virtual void buildTopology();
 	virtual void loadMesh(std::string filename);
 	virtual void saveMesh(std::string filename);
-	
-	void setSelectComponent();
-	void setSelectAnchor();
 	
 	void drawAnchors();
 	AnchorGroup * getAnchors() const;
 	KdTree * getTree() const;
 	
+	static ToolContext * InteractContext;
+	int interactMode();
+	
 protected:
     void keyPressEvent(QKeyEvent *event);
     
 public:
-    BaseMesh * m_mesh;
+    PatchMesh * m_mesh;
 	KdTree * m_tree;
-	InteractMode m_mode;
 	AnchorGroup * m_anchors;
+	MeshTopology * m_topo;
 	
 private:
 	

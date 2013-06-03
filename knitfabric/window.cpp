@@ -42,12 +42,18 @@
 #include <QtGui>
 
 #include "glwidget.h"
+#include "ToolBox.h"
 #include "window.h"
 
 //! [0]
 Window::Window()
 {
     glWidget = new GLWidget;
+	m_tools = new ToolBox;
+	
+	GLWidget::InteractContext = m_tools;
+	
+	addToolBar(m_tools);
 
 	setCentralWidget(glWidget);
     setWindowTitle(tr("Knit Fabric"));

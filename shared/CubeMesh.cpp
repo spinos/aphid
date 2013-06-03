@@ -32,7 +32,7 @@ CubeMesh::CubeMesh()
 	
 	idx[3] = 2;
 	idx[4] = 3;
-	idx[5] = 0;
+	idx[5] = 1;
 	
 	idx[6] = 0;
 	idx[7] = 3;

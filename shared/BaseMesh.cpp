@@ -334,7 +334,6 @@ char BaseMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ct
 	ctx->m_hitN = nor;
 	ctx->m_minHitDistance = t;
 	ctx->m_geometry = (Geometry*)this;
-	ctx->m_componentIdx = idx;
 
 	if(ctx->getComponentFilterType() == PrimitiveFilter::TFace) {
 	    ctx->m_componentIdx = idx;

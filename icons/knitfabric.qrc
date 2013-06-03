@@ -1,0 +1,9 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>selvertex.png</file>
+    <file>selvertexact.png</file>
+    <file>seledge.png</file>
+    <file>seledgeact.png</file>
+    <file>setwale.png</file>
+</qresource>
+</RCC>
