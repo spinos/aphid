@@ -15,6 +15,8 @@
 #include <ToolContext.h>
 
 class ContextIconFrame;
+class ActionIconFrame;
+
 class ToolBox : public QToolBar, public ToolContext {
 Q_OBJECT
 
@@ -23,6 +25,7 @@ public:
     ~ToolBox();
 private:
 	std::vector<ContextIconFrame *> m_contextFrames;
+	std::vector<ActionIconFrame *> m_actionFrames;
 	
 signals:
 	void contextChanged(int c);

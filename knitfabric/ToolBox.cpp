@@ -9,6 +9,7 @@
 #include <QtGui>
 #include "ToolBox.h"
 #include <ContextIconFrame.h>
+#include <ActionIconFrame.h>
 
 ToolBox::ToolBox(QWidget *parent) : QToolBar(parent) 
 {
@@ -28,9 +29,25 @@ ToolBox::ToolBox(QWidget *parent) : QToolBar(parent)
 	m_contextFrames.push_back(selectComponent);
 	m_contextFrames.push_back(selectAnchor);
 	
+	ActionIconFrame * setWale = new ActionIconFrame(this);
+	
+	setWale->addIconFile(":setwale.png");
+	setWale->addIconFile(":setwaleact.png");
+	setWale->setIconIndex(0);
+	setWale->setAction(1);
+	
+	m_actionFrames.push_back(setWale);
+	
 	for(std::vector<ContextIconFrame *>::iterator it = m_contextFrames.begin(); it != m_contextFrames.end(); ++it) {
 		addWidget(*it);
 		connect(*it, SIGNAL(contextEnabled(int)), this, SLOT(contextFrameChanged(int)));
+	}
+	
+	addSeparator();
+	
+	for(std::vector<ActionIconFrame *>::iterator it = m_actionFrames.begin(); it != m_actionFrames.end(); ++it) {
+		addWidget(*it);
+		//connect(*it, SIGNAL(contextEnabled(int)), this, SLOT(contextFrameChanged(int)));
 	}
 }
 

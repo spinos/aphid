@@ -52,6 +52,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../shared/PatchMesh.h \
 				../shared/BezierCurve.h \
 				../shared/ContextIconFrame.h \
+				../shared/ActionIconFrame.h \
 				../shared/QIconFrame.h \
 				../shared/ToolContext.h \
                 ../lapl/VertexAdjacency.h \
@@ -127,6 +128,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/PatchMesh.cpp \
 				../shared/BezierCurve.cpp \
 				../shared/ContextIconFrame.cpp \
+				../shared/ActionIconFrame.cpp \
 				../shared/QIconFrame.cpp \
 				../shared/ToolContext.cpp \
                 ../lapl/VertexAdjacency.cpp \

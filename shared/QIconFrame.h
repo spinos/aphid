@@ -65,7 +65,6 @@ public:
 	virtual void mouseReleaseEvent(QMouseEvent *event);
 	
 signals:
-	void iconIndexChanged(int index);
 
 public slots:
 
