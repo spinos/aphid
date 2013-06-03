@@ -9,7 +9,6 @@
 #pragma once
 
 #include <BaseQuad.h>
-#include <AllMath.h>
 
 class KnitPatch : public BaseQuad {
 public:

@@ -46,7 +46,7 @@ void BezierPatch::setTexcoord(float* u, float* v, unsigned* idx)
 	
 	float delta = smax - smin;
 	if(tmax - tmin > delta) delta = tmax - tmin;
-	_lodBase = (int)log2f(1.0 / delta) + 1;
+	//_lodBase = (int)log2f(1.0 / delta) + 1;
 }
 
 Vector3F BezierPatch::p(unsigned u, unsigned v) const
@@ -198,9 +198,9 @@ void BezierPatch::evaluateSurfaceTexcoord(float u, float v, Vector3F * texcoord)
 		(tex(0, 1) * L0.x + tex(1, 1) * L1.x) * L1.y;
 	*texcoord = Vector3F(st.x, st.y, 0.f);
 }
-
+/*
 int BezierPatch::getLODBase() const
 {
 	return _lodBase;
 }
-
+*/

@@ -98,7 +98,7 @@ void Tessellator::testLOD(BezierPatch& bezier)
 		{
 			bezier.evaluateSurfaceLOD(delta * i, delta * j, &d);
 			int idx = j * (_numSeg + 1) + i;
-			float t = _displacementMap->sampleRed(_texcoords[idx].x, _texcoords[idx].y, log2f(d) + bezier.getLODBase());
+			float t = _displacementMap->sampleRed(_texcoords[idx].x, _texcoords[idx].y, log2f(d) + 4);// + bezier.getLODBase());
 			_normals[idx].x = t;
 			_normals[idx].y = t;
 			_normals[idx].z = t;

@@ -71,6 +71,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../catmullclark/AccInterior.h \
                 ../fit/SingleModelView.h \
                 ToolBox.h \
+                Fabric.h \
                 KnitPatch.h \
                 FiberPatch.h \
                 glwidget.h \
@@ -148,6 +149,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../catmullclark/AccInterior.cpp \
                 ../fit/SingleModelView.cpp \
                 ToolBox.cpp \
+                Fabric.cpp \
                 KnitPatch.cpp \
                 FiberPatch.cpp \
                 glwidget.cpp \

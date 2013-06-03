@@ -1,5 +1,6 @@
 #pragma once
-class Vector3F;
+#include <AllMath.h>
+
 class BaseQuad {
 public:
     BaseQuad();

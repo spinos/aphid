@@ -1,6 +1,3 @@
-#ifndef BEZIERPATCH_H
-#define BEZIERPATCH_H
-
 /*
  *  bezierPatch.h
  *  catmullclark
@@ -10,7 +7,6 @@
  *
  */
 #pragma once
-#include <AllMath.h>
 #include "LODQuad.h"
 
 class BezierPatch : public LODQuad
@@ -27,7 +23,7 @@ public:
 	void evaluateSurfaceBinormal(float u, float v, Vector3F * binm) const;
 	void evaluateSurfaceNormal(float u, float v, Vector3F * nor) const;
 	void evaluateSurfaceTexcoord(float u, float v, Vector3F * tex) const;
-	int getLODBase() const;
+	//int getLODBase() const;
 	
 	Vector3F p(unsigned u, unsigned v) const;
 	Vector3F normal(unsigned u, unsigned v) const;
@@ -37,6 +33,5 @@ public:
 	Vector3F _tangents[12];
 	Vector3F _binormals[12];
 	Vector2F _texcoords[4];
-	int _lodBase;
+	//int _lodBase;
 };
-#endif        //  #ifndef BEZIERPATCH_H
