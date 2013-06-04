@@ -69,6 +69,7 @@ HEADERS       = ../shared/Vector3F.h \
                 ../catmullclark/AccCorner.h \
                 ../catmullclark/AccEdge.h \
                 ../catmullclark/AccInterior.h \
+                ../catmullclark/BezierDrawer.h \
                 ../fit/SingleModelView.h \
                 ToolBox.h \
                 Fabric.h \
@@ -147,6 +148,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../catmullclark/AccCorner.cpp \
                 ../catmullclark/AccEdge.cpp \
                 ../catmullclark/AccInterior.cpp \
+                ../catmullclark/BezierDrawer.cpp \
                 ../fit/SingleModelView.cpp \
                 ToolBox.cpp \
                 Fabric.cpp \

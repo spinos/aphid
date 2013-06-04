@@ -53,7 +53,8 @@
 #include "KnitPatch.h"
 #include "zEXRImage.h"
 #include "FiberPatch.h"
-
+#include "Fabric.h"
+#include <BezierDrawer.h>
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
@@ -101,10 +102,10 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 		_bezier[j].evaluateContolPoints();
 		_bezier[j].evaluateTangents();
 		_bezier[j].evaluateBinormals();
-		_bezier[j].setCorner(_bezier[j].p(0, 0), 0);
+		/*_bezier[j].setCorner(_bezier[j].p(0, 0), 0);
 		_bezier[j].setCorner(_bezier[j].p(3, 0), 1);
 		_bezier[j].setCorner(_bezier[j].p(0, 3), 2);
-		_bezier[j].setCorner(_bezier[j].p(3, 3), 3);
+		_bezier[j].setCorner(_bezier[j].p(3, 3), 3);*/
 		
 		quadV += 4;
 	}
@@ -113,6 +114,11 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	
 	m_fiber = new FiberPatch[numFace];
 	createFiber();
+	
+	m_fabric = new Fabric;
+	m_fabric->setMesh(m_mesh, m_topo);
+	
+	m_fabricDrawer = new BezierDrawer;
 }
 //! [0]
 
@@ -125,7 +131,7 @@ void GLWidget::createFiber()
 {
     const unsigned numFace = m_mesh->numPatches();
     for(unsigned i = 0; i < numFace; i++) {
-		_bezier[i].setUniformDetail(4.f);
+		//_bezier[i].setUniformDetail(4.f);
 		int seg = 8;
 		_tess->setNumSeg(seg);
 		_tess->evaluate(_bezier[i]);
@@ -159,74 +165,21 @@ void GLWidget::clientDraw()
 	getDrawer()->setGrey(1.f);
 	getDrawer()->edge(m_mesh);
 	
-	//drawBezier();
+	drawBezier();
 	drawSelection();
 }
 
 void GLWidget::drawBezier()
 {
 	float detail = 4.f;
-	unsigned numFace = m_mesh->numPatches();
+	unsigned numFace = m_fabric->numPatches();
 
 	for(unsigned i = 0; i < numFace; i++) {
-		//drawBezierPatchCage(_bezier[i]);
-		_bezier[i].setUniformDetail(detail);
-		drawBezierPatch(_bezier[i], detail);
+		m_fabricDrawer->drawBezierPatch(m_fabric->getPatch(i));
+		
 		//drawYarn(_bezier[i], detail);
 		//drawFiber(m_fiber[i]);
 	}
-}
-
-void GLWidget::drawBezierPatch(AccPatch& patch, float detail)
-{
-	int maxLevel = (int)log2f(detail);
-	//if(maxLevel + patch.getLODBase() > 10) {
-	//	maxLevel = 10 - patch.getLODBase();
-	//}
-	int seg = 2;
-	for(int i = 0; i < maxLevel; i++) {
-		seg *= 2;
-	}
-
-	_tess->setNumSeg(seg);
-	_tess->evaluate(patch);
-	glColor3f(0.f, 0.3f, 0.9f);
-	glEnable(GL_CULL_FACE);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	
-	glEnableClientState( GL_VERTEX_ARRAY );
-	glVertexPointer( 3, GL_FLOAT, 0, _tess->getPositions() );
-	
-	glEnableClientState( GL_COLOR_ARRAY );
-	glColorPointer( 3, GL_FLOAT, 0, _tess->getNormals() );
-
-	glDrawElements( GL_QUADS, seg * seg * 4, GL_UNSIGNED_INT, _tess->getVertices() );
-	glDisableClientState( GL_COLOR_ARRAY );
-	glDisableClientState( GL_VERTEX_ARRAY );
-}
-
-void GLWidget::drawBezierPatchCage(AccPatch& patch)
-{
-	glDisable(GL_CULL_FACE);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glBegin(GL_QUADS);
-	glColor3f(1,1,1);
-	for(unsigned j=0; j < 3; j++)
-	{
-		for(unsigned i = 0; i < 3; i++)
-		{
-			Vector3F p = patch.p(i, j);
-			glVertex3f(p.x, p.y, p.z);
-			p = patch.p(i + 1, j);
-			glVertex3f(p.x, p.y, p.z);
-			p = patch.p(i + 1, j + 1);
-			glVertex3f(p.x, p.y, p.z);
-			p = patch.p(i, j + 1);
-			glVertex3f(p.x, p.y, p.z);
-		}
-	}
-	glEnd();
 }
 
 void GLWidget::drawYarn(AccPatch& patch, float detail)

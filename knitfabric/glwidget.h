@@ -50,6 +50,8 @@ class Tessellator;
 class KnitPatch;
 class FiberPatch;
 class ZEXRImage;
+class Fabric;
+class BezierDrawer;
 
 //! [0]
 class GLWidget : public SingleModelView
@@ -76,10 +78,11 @@ private:
 	KnitPatch * m_knit;
 	FiberPatch * m_fiber;
 	
+	Fabric * m_fabric;
+	BezierDrawer * m_fabricDrawer;
+	
 	void createFiber();
 	void drawBezier();
-	void drawBezierPatch(AccPatch& patch, float detail);
-	void drawBezierPatchCage(AccPatch& patch);
 	void drawYarn(AccPatch& patch, float detail);
 	void drawFiber(FiberPatch & fiber);
 };

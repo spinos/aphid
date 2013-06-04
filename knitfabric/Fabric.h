@@ -10,11 +10,17 @@
 #pragma once
 
 class PatchMesh;
+class AccPatch;
+class MeshTopology;
+
 class Fabric {
 public:
 	Fabric();
 	
-	void setMesh(PatchMesh * mesh);
+	void setMesh(PatchMesh * mesh, MeshTopology * topo);
+	unsigned numPatches() const;
+	AccPatch & getPatch(unsigned idx) const;
 private:
 	PatchMesh * m_mesh;
+	AccPatch* m_bezier;
 };

@@ -74,13 +74,13 @@ void Tessellator::evaluate(BezierPatch& bezier)
 
 void Tessellator::displacePositions(BezierPatch& bezier)
 {
-	float d;
+	float d = 4.f;
 	float delta = 1.f / _numSeg;
 	for(int j=0; j < _numSeg + 1; j++)
 	{
 		for(int i = 0; i < _numSeg + 1; i++)
 		{
-			bezier.evaluateSurfaceLOD(delta * i, delta * j, &d);
+			//bezier.evaluateSurfaceLOD(delta * i, delta * j, &d);
 			int idx = j * (_numSeg + 1) + i;
 			_positions[idx] += _normals[idx] * (_displacementMap->sampleRed(_texcoords[idx].x, _texcoords[idx].y, log2f(d) + 4) - 0.5f);
 			
@@ -90,13 +90,13 @@ void Tessellator::displacePositions(BezierPatch& bezier)
 
 void Tessellator::testLOD(BezierPatch& bezier)
 {
-	float d;
+	float d = 4.f;
 	float delta = 1.f / _numSeg;
 	for(int j=0; j < _numSeg + 1; j++)
 	{
 		for(int i = 0; i < _numSeg + 1; i++)
 		{
-			bezier.evaluateSurfaceLOD(delta * i, delta * j, &d);
+			//bezier.evaluateSurfaceLOD(delta * i, delta * j, &d);
 			int idx = j * (_numSeg + 1) + i;
 			float t = _displacementMap->sampleRed(_texcoords[idx].x, _texcoords[idx].y, log2f(d) + 4);// + bezier.getLODBase());
 			_normals[idx].x = t;
