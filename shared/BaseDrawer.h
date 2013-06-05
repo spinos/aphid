@@ -38,6 +38,8 @@ public:
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
+	void drawPolygons(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
+	void drawPoints(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void showNormal(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void edge(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void field(const BaseField * f);
@@ -57,6 +59,7 @@ public:
 	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void colorAsActive();
 	void colorAsInert();
+	void vertex(const Vector3F & v);
 	void vertexWithOffset(const Vector3F & v, const Vector3F & o);
 	
 private:

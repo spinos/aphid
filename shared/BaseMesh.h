@@ -17,6 +17,8 @@ public:
 	BaseMesh();
 	virtual ~BaseMesh();
 	
+	void cleanup();
+	
 	void verbose() const;
 	
 	void createVertices(unsigned num);
@@ -36,6 +38,8 @@ public:
 	Vector3F * normals();
 	unsigned * indices();
 	unsigned * quadIndices();
+	unsigned * polygonCounts();
+	unsigned * polygonIndices();
 	
 	void setVertex(unsigned idx, float x, float y, float z);
 	void setTriangle(unsigned idx, unsigned a, unsigned b, unsigned c);
@@ -52,6 +56,7 @@ public:
 	Vector3F * getVertices() const;
 	Vector3F * getNormals() const;
 	unsigned * getIndices() const;
+	unsigned * getPolygonCounts() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	
 	char intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const;

@@ -16,7 +16,7 @@ public:
 	FabricDrawer();
 	
 	void setPositions(Vector3F * p);
-	
+	void drawYarn(YarnPatch * patch);
 	void drawWale(YarnPatch * patch);
 private:
 	Vector3F * m_positions;

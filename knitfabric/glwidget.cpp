@@ -172,12 +172,12 @@ void GLWidget::clientDraw()
 
 void GLWidget::drawBezier()
 {
-	float detail = 4.f;
 	unsigned numFace = m_fabric->numPatches();
 
 	for(unsigned i = 0; i < numFace; i++) {
-		m_fabricDrawer->drawBezierPatch(&m_fabric->getPatch(i));
-		m_fabricDrawer->drawWale(&m_fabric->getPatch(i));
+		//m_fabricDrawer->drawBezierPatch(m_fabric->patch(i));
+		m_fabricDrawer->drawYarn(m_fabric->patch(i));
+		m_fabricDrawer->drawWale(m_fabric->patch(i));
 		
 		//drawYarn(_bezier[i], detail);
 		//drawFiber(m_fiber[i]);
@@ -262,6 +262,7 @@ void GLWidget::setSelectionAsWale()
 	for(std::vector<unsigned>::const_iterator it = fs.begin(); it != fs.end(); ++it) {
 		YarnPatch * patch = m_fabric->patch(*it);
 		patch->findWaleEdge(vpps[ipatch * 2], vpps[ipatch * 2 + 1]);
+		if(patch->hasWaleEdges()) patch->tessellate();
 		ipatch++;
 	}
 	clearSelection();

@@ -194,10 +194,41 @@ void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer)
 	else
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
 
-// draw a cube
 	glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
 
 // deactivate vertex arrays after drawing
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void BaseDrawer::drawPolygons(const BaseMesh * mesh, const BaseDeformer * deformer)
+{
+	Vector3F * p = mesh->getVertices();
+	if(deformer) p = deformer->getDeformedData();
+	
+	const unsigned nf = mesh->getNumPolygons();
+	unsigned fi = 0;
+	unsigned *fc = mesh->getPolygonCounts();
+	unsigned *fv = mesh->m_polygonIndices;
+	for(unsigned i = 0; i < nf; i++) {
+		glBegin(GL_POLYGON);
+		for(unsigned j =0; j < fc[i]; j++) {
+			vertex(p[fv[fi + j]]);
+		}
+		glEnd();
+		fi += fc[i];
+	}
+}
+
+void BaseDrawer::drawPoints(const BaseMesh * mesh, const BaseDeformer * deformer)
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	if(!deformer)
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
+	else
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
+
+	glDrawArrays(GL_POINTS, 0, mesh->getNumVertices());
+
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
@@ -589,6 +620,11 @@ void BaseDrawer::colorAsActive()
 void BaseDrawer::colorAsInert()
 {
 	glColor3f(m_inertColor.x, m_inertColor.y, m_inertColor.z);
+}
+
+void BaseDrawer::vertex(const Vector3F & v)
+{
+	glVertex3f(v.x, v.y, v.z);
 }
 
 void BaseDrawer::vertexWithOffset(const Vector3F & v, const Vector3F & o)

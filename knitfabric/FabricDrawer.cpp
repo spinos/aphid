@@ -20,6 +20,13 @@ void FabricDrawer::setPositions(Vector3F * p)
 	m_positions = p;
 }
 
+void FabricDrawer::drawYarn(YarnPatch * patch)
+{
+	if(!patch->hasTessellation()) return;
+	setColor(0.f, .9f, .4f);
+	drawPolygons(patch);
+}
+
 void FabricDrawer::drawWale(YarnPatch * patch)
 {
 	setColor(1.f, 0.f, 0.f);

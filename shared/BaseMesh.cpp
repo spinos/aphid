@@ -24,12 +24,22 @@ BaseMesh::BaseMesh()
 
 BaseMesh::~BaseMesh()
 {
+	cleanup();
+}
+
+void BaseMesh::cleanup()
+{
 	if(_vertices) delete[] _vertices;
-	if(_indices) delete[] _indices;
 	if(m_normals) delete[] m_normals;
+	if(_indices) delete[] _indices;
 	if(m_quadIndices) delete[] m_quadIndices;
 	if(m_polygonCounts) delete[] m_polygonCounts;
 	if(m_polygonIndices) delete[] m_polygonIndices;
+	_numVertices = 0;
+	_numFaces = 0;
+	_numFaceVertices = 0;
+	m_numPolygons = 0;
+	m_polygonIndices = 0;
 }
 
 void BaseMesh::createVertices(unsigned num)
@@ -204,6 +214,16 @@ unsigned * BaseMesh::quadIndices()
     return m_quadIndices;
 }
 
+unsigned * BaseMesh::polygonCounts()
+{
+	return m_polygonCounts;
+}
+
+unsigned * BaseMesh::polygonIndices()
+{
+	return m_polygonIndices;
+}
+
 void BaseMesh::setVertex(unsigned idx, float x, float y, float z)
 {
 	Vector3F *v = _vertices;
@@ -272,6 +292,11 @@ Vector3F * BaseMesh::getNormals() const
 unsigned * BaseMesh::getIndices() const
 {
 	return _indices;
+}
+
+unsigned * BaseMesh::getPolygonCounts() const
+{
+	return m_polygonCounts;
 }
 
 void BaseMesh::verbose() const
