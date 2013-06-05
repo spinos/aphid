@@ -10,7 +10,6 @@
 #include "Fabric.h"
 #include <PatchMesh.h>
 #include <MeshTopology.h>
-#include <accPatch.h>
 #include <accStencil.h>
 
 Fabric::Fabric() {}
@@ -33,7 +32,7 @@ void Fabric::setMesh(PatchMesh * mesh, MeshTopology * topo)
 	sten->setVertexNormal(normal);
 	sten->m_vertexAdjacency = topo->getTopology();
 	
-	m_bezier = new AccPatch[numPatch];
+	m_bezier = new YarnPatch[numPatch];
 	for(unsigned i = 0; i < numPatch; i++) {
 		sten->m_patchVertices[0] = quadV[0];
 		sten->m_patchVertices[1] = quadV[1];
@@ -44,6 +43,7 @@ void Fabric::setMesh(PatchMesh * mesh, MeshTopology * topo)
 		m_bezier[i].evaluateContolPoints();
 		m_bezier[i].evaluateTangents();
 		m_bezier[i].evaluateBinormals();
+		m_bezier[i].setQuadVertices(quadV);
 
 		quadV += 4;
 	}
@@ -54,8 +54,12 @@ unsigned Fabric::numPatches() const
 	return m_mesh->numPatches();
 }
 
-AccPatch & Fabric::getPatch(unsigned idx) const
+YarnPatch Fabric::getPatch(unsigned idx) const
 {
 	return m_bezier[idx];
 }
 
+YarnPatch * Fabric::patch(unsigned idx)
+{
+	return &m_bezier[idx];
+}

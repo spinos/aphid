@@ -17,8 +17,8 @@ class BezierDrawer : public BaseDrawer {
 public:
 	BezierDrawer();
 	
-	void drawBezierPatch(BezierPatch & patch);
-	void drawBezierCage(BezierPatch & patch);
+	void drawBezierPatch(BezierPatch * patch);
+	void drawBezierCage(BezierPatch * patch);
 private:
 	Tessellator* m_tess;
 };

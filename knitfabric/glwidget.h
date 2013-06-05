@@ -51,7 +51,7 @@ class KnitPatch;
 class FiberPatch;
 class ZEXRImage;
 class Fabric;
-class BezierDrawer;
+class FabricDrawer;
 
 //! [0]
 class GLWidget : public SingleModelView
@@ -79,7 +79,7 @@ private:
 	FiberPatch * m_fiber;
 	
 	Fabric * m_fabric;
-	BezierDrawer * m_fabricDrawer;
+	FabricDrawer * m_fabricDrawer;
 	
 	void createFiber();
 	void drawBezier();

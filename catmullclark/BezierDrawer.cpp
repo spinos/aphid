@@ -19,11 +19,11 @@ BezierDrawer::BezierDrawer()
 	m_tess = new Tessellator;
 }
 
-void BezierDrawer::drawBezierPatch(BezierPatch & patch)
+void BezierDrawer::drawBezierPatch(BezierPatch * patch)
 {
 	int seg = 4;
 	m_tess->setNumSeg(seg);
-	m_tess->evaluate(patch);
+	m_tess->evaluate(*patch);
 	glColor3f(0.f, 0.3f, 0.9f);
 	glEnable(GL_CULL_FACE);
 
@@ -40,23 +40,22 @@ void BezierDrawer::drawBezierPatch(BezierPatch & patch)
 	glDisableClientState( GL_VERTEX_ARRAY );
 }
 
-void BezierDrawer::drawBezierCage(BezierPatch & patch)
+void BezierDrawer::drawBezierCage(BezierPatch * patch)
 {
 	glDisable(GL_CULL_FACE);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_QUADS);
 	glColor3f(1,1,1);
-	for(unsigned j=0; j < 3; j++)
-	{
-		for(unsigned i = 0; i < 3; i++)
-		{
-			Vector3F p = patch.p(i, j);
+	Vector3F p;
+	for(unsigned j=0; j < 3; j++) {
+		for(unsigned i = 0; i < 3; i++) {
+			p = patch->p(i, j);
 			glVertex3f(p.x, p.y, p.z);
-			p = patch.p(i + 1, j);
+			p = patch->p(i + 1, j);
 			glVertex3f(p.x, p.y, p.z);
-			p = patch.p(i + 1, j + 1);
+			p = patch->p(i + 1, j + 1);
 			glVertex3f(p.x, p.y, p.z);
-			p = patch.p(i, j + 1);
+			p = patch->p(i, j + 1);
 			glVertex3f(p.x, p.y, p.z);
 		}
 	}

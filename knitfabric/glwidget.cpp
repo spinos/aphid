@@ -54,7 +54,7 @@
 #include "zEXRImage.h"
 #include "FiberPatch.h"
 #include "Fabric.h"
-#include <BezierDrawer.h>
+#include <FabricDrawer.h>
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
@@ -118,7 +118,8 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	m_fabric = new Fabric;
 	m_fabric->setMesh(m_mesh, m_topo);
 	
-	m_fabricDrawer = new BezierDrawer;
+	m_fabricDrawer = new FabricDrawer;
+	m_fabricDrawer->setPositions(cvs);
 }
 //! [0]
 
@@ -175,7 +176,8 @@ void GLWidget::drawBezier()
 	unsigned numFace = m_fabric->numPatches();
 
 	for(unsigned i = 0; i < numFace; i++) {
-		m_fabricDrawer->drawBezierPatch(m_fabric->getPatch(i));
+		m_fabricDrawer->drawBezierPatch(&m_fabric->getPatch(i));
+		m_fabricDrawer->drawWale(&m_fabric->getPatch(i));
 		
 		//drawYarn(_bezier[i], detail);
 		//drawFiber(m_fiber[i]);
@@ -255,12 +257,12 @@ void GLWidget::setSelectionAsWale()
 	std::vector<unsigned> fs;
 	std::vector<unsigned> vpps;
 	getSelection()->asPolygons(fs, vpps);
-    printf("\nWale faces ");
+	
+	unsigned ipatch = 0;
 	for(std::vector<unsigned>::const_iterator it = fs.begin(); it != fs.end(); ++it) {
-		printf(" %i", *it);
+		YarnPatch * patch = m_fabric->patch(*it);
+		patch->findWaleEdge(vpps[ipatch * 2], vpps[ipatch * 2 + 1]);
+		ipatch++;
 	}
-	printf("\nper face vertex ");
-	for(std::vector<unsigned>::const_iterator it = vpps.begin(); it != vpps.end(); ++it) {
-		printf(" %i", *it);
-	}
+	clearSelection();
 }

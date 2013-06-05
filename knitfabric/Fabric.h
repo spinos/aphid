@@ -8,9 +8,8 @@
  */
 
 #pragma once
-
+#include <YarnPatch.h>
 class PatchMesh;
-class AccPatch;
 class MeshTopology;
 
 class Fabric {
@@ -19,8 +18,9 @@ public:
 	
 	void setMesh(PatchMesh * mesh, MeshTopology * topo);
 	unsigned numPatches() const;
-	AccPatch & getPatch(unsigned idx) const;
+	YarnPatch getPatch(unsigned idx) const;
+	YarnPatch *patch(unsigned idx);
 private:
 	PatchMesh * m_mesh;
-	AccPatch* m_bezier;
+	YarnPatch* m_bezier;
 };

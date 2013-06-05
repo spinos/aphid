@@ -73,6 +73,8 @@ HEADERS       = ../shared/Vector3F.h \
                 ../fit/SingleModelView.h \
                 ToolBox.h \
                 Fabric.h \
+                FabricDrawer.h \
+                YarnPatch.h \
                 KnitPatch.h \
                 FiberPatch.h \
                 glwidget.h \
@@ -152,6 +154,8 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../fit/SingleModelView.cpp \
                 ToolBox.cpp \
                 Fabric.cpp \
+                FabricDrawer.cpp \
+                YarnPatch.cpp \
                 KnitPatch.cpp \
                 FiberPatch.cpp \
                 glwidget.cpp \
