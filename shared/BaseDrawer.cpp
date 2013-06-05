@@ -590,3 +590,9 @@ void BaseDrawer::colorAsInert()
 {
 	glColor3f(m_inertColor.x, m_inertColor.y, m_inertColor.z);
 }
+
+void BaseDrawer::vertexWithOffset(const Vector3F & v, const Vector3F & o)
+{
+	glVertex3f(v.x, v.y, v.z);
+	glVertex3f(v.x + o.x, v.y + o.y, v.z + o.z);
+}

@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-
+#include <AllMath.h>
 #include <BaseMesh.h>
 #include <BaseDeformer.h>
 #include <BaseField.h>
@@ -57,6 +57,7 @@ public:
 	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void colorAsActive();
 	void colorAsInert();
+	void vertexWithOffset(const Vector3F & v, const Vector3F & o);
 	
 private:
     char m_wired;

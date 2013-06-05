@@ -19,6 +19,7 @@ public:
 	void waleEdges(short &n, unsigned * v) const;
 private:
 	void setWaleEdge(short i, short j);
+	void setSecondWaleEdge(short j, char dir);
 	unsigned * m_quadVertices;
 	short m_waleVertices[4];
 	short m_numWaleEdges;
