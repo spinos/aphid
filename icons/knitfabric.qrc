@@ -6,5 +6,9 @@
     <file>seledgeact.png</file>
     <file>setwale.png</file>
     <file>setwaleact.png</file>
+    <file>increasewaleact.png</file>
+    <file>increasewale.png</file>
+    <file>decreasewaleact.png</file>
+    <file>decreasewale.png</file>
 </qresource>
 </RCC>
