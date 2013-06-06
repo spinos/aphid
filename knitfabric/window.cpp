@@ -73,5 +73,9 @@ void Window::receiveToolAction(int a)
 {
     if(a == ToolContext::SetWaleEdge)
         glWidget->setSelectionAsWale();
+	else if(a == ToolContext::IncreaseWale)
+		glWidget->changeWaleResolution(1);
+	else if(a == ToolContext::DecreaseWale)
+		glWidget->changeWaleResolution(-1);
 }
 

@@ -11,7 +11,9 @@ public:
     
     enum ActionRank {
         UnknownAction = 0,
-        SetWaleEdge = 1
+        SetWaleEdge = 1,
+		IncreaseWale = 2,
+		DecreaseWale = 3
     };
     
     ToolContext();

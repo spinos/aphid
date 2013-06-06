@@ -81,13 +81,13 @@ void ToolBox::createAction()
 	increaseWale->addIconFile(":increasewale.png");
 	increaseWale->addIconFile(":increasewaleact.png");
 	increaseWale->setIconIndex(0);
-	increaseWale->setAction(SetWaleEdge);
+	increaseWale->setAction(IncreaseWale);
 	
 	ActionIconFrame * decreaseWale = new ActionIconFrame(this);
 	decreaseWale->addIconFile(":decreasewale.png");
 	decreaseWale->addIconFile(":decreasewaleact.png");
 	decreaseWale->setIconIndex(0);
-	decreaseWale->setAction(SetWaleEdge);
+	decreaseWale->setAction(DecreaseWale);
 
 	m_actionFrames.push_back(setWale);
 	m_actionFrames.push_back(increaseWale);

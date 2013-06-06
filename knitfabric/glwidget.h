@@ -65,6 +65,7 @@ public:
 	virtual void loadMesh(std::string filename);
 	
 	void setSelectionAsWale();
+	void changeWaleResolution(int change);
 
 //! [2]
 protected:

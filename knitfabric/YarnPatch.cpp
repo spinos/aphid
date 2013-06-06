@@ -321,3 +321,8 @@ void YarnPatch::getCornerUV(short quadV, float & u, float & v) const
 	}
 }
 
+void YarnPatch::increaseWaleGrid(int dv)
+{
+	m_numWaleGrid += dv;
+	if(m_numWaleGrid < 2) m_numWaleGrid = 2;
+}
