@@ -94,6 +94,7 @@ char YarnPatch::hasTessellation() const
 
 char YarnPatch::verifyNumGrid()
 {
+    if(m_numWaleGrid < 2) return 0;
 	if(m_numCourseGrid[0] < 2 || m_numCourseGrid[1] < 2) return 0;
 	
 	if(m_numCourseGrid[0] != m_numCourseGrid[1]) {
@@ -242,7 +243,7 @@ void YarnPatch::fillF(const short & nrow, const short & ncol0, const short & nco
 	unsigned * fv = polygonIndices();
 	for(short j = 0; j < nrow - 1; j++) {
 		rowIncrease = rowDifference(colStep, nextRowEnd, ncol1, j);
-		printf("row %i: %i, %i\n", j, currentRowStart, nextRowStart-1);
+		//printf("row %i: %i, %i\n", j, currentRowStart, nextRowStart-1);
 		for(short i = 0; i < rowEnd - 1; i++) {
 			if(i == 0) {
 				if(rowIncrease > 0) {
@@ -251,7 +252,7 @@ void YarnPatch::fillF(const short & nrow, const short & ncol0, const short & nco
 					fv[currentIdx + 2] = nextRowStart + 2;
 					fv[currentIdx + 3] = nextRowStart + 1;
 					fv[currentIdx + 4] = nextRowStart;
-					printf("increase %i %i %i %i %i\n", fv[currentIdx], fv[currentIdx + 1], fv[currentIdx + 2], fv[currentIdx + 3], fv[currentIdx + 4]);
+					//printf("increase %i %i %i %i %i\n", fv[currentIdx], fv[currentIdx + 1], fv[currentIdx + 2], fv[currentIdx + 3], fv[currentIdx + 4]);
 					currentIdx += 5;
 				}
 				else if(rowIncrease < 0) {
@@ -260,7 +261,7 @@ void YarnPatch::fillF(const short & nrow, const short & ncol0, const short & nco
 					fv[currentIdx + 2] = currentRowStart + 2;
 					fv[currentIdx + 3] = nextRowStart + 1;
 					fv[currentIdx + 4] = nextRowStart;
-					printf("decrease %i %i %i %i %i\n", fv[currentIdx], fv[currentIdx + 1], fv[currentIdx + 2], fv[currentIdx + 3], fv[currentIdx + 4]);
+					//printf("decrease %i %i %i %i %i\n", fv[currentIdx], fv[currentIdx + 1], fv[currentIdx + 2], fv[currentIdx + 3], fv[currentIdx + 4]);
 					
 					currentIdx += 5;
 					i++;
@@ -270,7 +271,7 @@ void YarnPatch::fillF(const short & nrow, const short & ncol0, const short & nco
 					fv[currentIdx + 1] = currentRowStart + 1;
 					fv[currentIdx + 2] = nextRowStart + 1;
 					fv[currentIdx + 3] = nextRowStart;
-					printf("quad %i %i %i %i\n", fv[currentIdx], fv[currentIdx + 1], fv[currentIdx + 2], fv[currentIdx + 3]);
+					//printf("quad %i %i %i %i\n", fv[currentIdx], fv[currentIdx + 1], fv[currentIdx + 2], fv[currentIdx + 3]);
 					
 					currentIdx += 4;
 				}
@@ -280,7 +281,7 @@ void YarnPatch::fillF(const short & nrow, const short & ncol0, const short & nco
 				fv[currentIdx + 1] = currentRowStart + i + 1;
 				fv[currentIdx + 2] = nextRowStart + i + 1 + rowIncrease;
 				fv[currentIdx + 3] = nextRowStart + i + rowIncrease;
-				printf("quad %i %i %i %i\n", fv[currentIdx], fv[currentIdx + 1], fv[currentIdx + 2], fv[currentIdx + 3]);
+				//printf("quad %i %i %i %i\n", fv[currentIdx], fv[currentIdx + 1], fv[currentIdx + 2], fv[currentIdx + 3]);
 					
 				currentIdx += 4;
 			}
@@ -326,8 +327,9 @@ void YarnPatch::getCornerUV(short quadV, float & u, float & v) const
 
 void YarnPatch::increaseWaleGrid(int dv)
 {
+    short oldv = m_numWaleGrid;
 	m_numWaleGrid += dv;
-	if(m_numWaleGrid < 2) m_numWaleGrid = 2;
+	if(!verifyNumGrid()) m_numWaleGrid = oldv;
 }
 
 void YarnPatch::increaseCourseGrid(unsigned v0, unsigned v1, int dv)

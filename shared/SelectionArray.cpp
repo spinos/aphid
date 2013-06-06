@@ -27,6 +27,7 @@ void SelectionArray::reset()
 	m_prims.clear();
 	m_vertexIds.clear();
 	m_vertexPs.clear();
+	m_edgeIds.clear();
 	m_faceIds.clear();
 }
 
@@ -181,6 +182,23 @@ void SelectionArray::disableVertexPath()
 	m_needVertexPath = false;
 }
 
+void SelectionArray::extendToEdgeRing()
+{
+    std::vector<unsigned> srcedges;
+    asEdges(srcedges);
+    std::vector<unsigned>::const_iterator it;
+    for(it = srcedges.begin(); it != srcedges.end(); ++it) {
+        m_compconvert->edgeRing(*it, m_edgeIds);
+    }
+}
+
+void SelectionArray::asEdges(std::vector<unsigned> & dst) const
+{
+    if(getComponentFilterType() == PrimitiveFilter::TVertex) {
+		m_compconvert->vertexToEdge(m_vertexIds, dst);
+	}
+}
+
 void SelectionArray::asVertices(std::vector<unsigned> & dst) const
 {
 	if(getComponentFilterType() == PrimitiveFilter::TVertex) {
@@ -195,7 +213,6 @@ void SelectionArray::asPolygons(std::vector<unsigned> & polyIds, std::vector<uns
 {
 	if(getComponentFilterType() == PrimitiveFilter::TFace) {
 		m_compconvert->facetToPolygon(m_faceIds, polyIds);
-		/**/
 	}
 	else if(getComponentFilterType() == PrimitiveFilter::TVertex) {
 		m_compconvert->vertexToPolygon(m_vertexIds, polyIds, vppIds);

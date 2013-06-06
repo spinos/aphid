@@ -19,6 +19,7 @@ public:
 	virtual ~Facet();
 	
 	virtual void clear();
+	virtual void setIndex(int val);
 	char connectTo(Facet *another, Vertex *a, Vertex *b);
 	Edge * matchedEdge(Vertex * a, Vertex * b);
 	
@@ -40,6 +41,8 @@ public:
 	void update();
 	void setPolygonIndex(unsigned idx);
 	unsigned getPolygonIndex() const;
+	
+	Edge * findUnrealEdge(unsigned edgeIdx, char & found) const;
 	
 	static float cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c);
 private:

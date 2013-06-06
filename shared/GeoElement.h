@@ -23,7 +23,7 @@ public:
 	void setMarked(char val);
 	char isMarked() const;
 	
-	void setIndex(int val);
+	virtual void setIndex(int val);
 	int getIndex() const;
 	
 	void setNext(GeoElement * another);

@@ -61,6 +61,14 @@ void Facet::clear()
 	delete m_edges[2];
 }
 
+void Facet::setIndex(int val)
+{
+    GeoElement::setIndex(val);
+    m_edges[0]->setIndex(val * 3);
+    m_edges[1]->setIndex(val * 3 + 1);
+    m_edges[2]->setIndex(val * 3 + 2);
+}
+
 void Facet::createEdges()
 {
 	m_edges[0] = new Edge(m_vertices[0], m_vertices[1], (char*)this);
@@ -226,6 +234,19 @@ void Facet::setPolygonIndex(unsigned idx)
 unsigned Facet::getPolygonIndex() const
 {
 	return m_polyIndex;
+}
+
+Edge * Facet::findUnrealEdge(unsigned edgeIdx, char & found) const
+{
+    found = 0;
+    for(int i = 0; i < 3; i++) {
+        if(!m_edges[i]->isReal()) {
+            found = 1;
+            return m_edges[i];
+        }
+    }
+    
+    return 0;
 }
 
 float Facet::cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c)

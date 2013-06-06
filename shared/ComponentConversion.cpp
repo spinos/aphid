@@ -19,6 +19,13 @@ void ComponentConversion::setTopology(MeshTopology * topo)
 	m_topology = topo;
 }
 
+void ComponentConversion::edgeRing(const unsigned & src, std::vector<unsigned> & edgeIds) const
+{
+    unsigned facetIdx = src / 3;
+    char found = 0;
+    Edge * parallel = m_topology->getFacet(facetIdx)->findUnrealEdge(src, found);
+}
+
 void ComponentConversion::facetToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds) const
 {
 	std::vector<unsigned>::const_iterator it;
@@ -42,7 +49,7 @@ void ComponentConversion::vertexToEdge(const std::vector<unsigned> & src, std::v
 		char found = 0;
 		Edge * e = adj.connectedToVertexBy(*it1, found);
 		if(found) {
-			appendUnique(e->getIndex(), dst);
+		    appendUnique(e->getIndex(), dst);
 		}
 	}
 }

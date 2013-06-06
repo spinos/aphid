@@ -18,6 +18,7 @@ public:
 	
 	void setTopology(MeshTopology * topo);
 	
+	void edgeRing(const unsigned & src, std::vector<unsigned> & edgeIds) const;
 	void facetToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds) const;
 	void vertexToEdge(const std::vector<unsigned> & src, std::vector<unsigned> & dst) const;
 	void vertexToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const;
