@@ -13,7 +13,9 @@ public:
         UnknownAction = 0,
         SetWaleEdge = 1,
 		IncreaseWale = 2,
-		DecreaseWale = 3
+		DecreaseWale = 3,
+		IncreaseCourse = 4,
+		DecreaseCourse = 5
     };
     
     ToolContext();

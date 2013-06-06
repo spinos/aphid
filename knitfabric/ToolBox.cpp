@@ -88,8 +88,22 @@ void ToolBox::createAction()
 	decreaseWale->addIconFile(":decreasewaleact.png");
 	decreaseWale->setIconIndex(0);
 	decreaseWale->setAction(DecreaseWale);
+	
+	ActionIconFrame * increaseCourse = new ActionIconFrame(this);
+	increaseCourse->addIconFile(":increasecourse.png");
+	increaseCourse->addIconFile(":increasecourseact.png");
+	increaseCourse->setIconIndex(0);
+	increaseCourse->setAction(IncreaseCourse);
+	
+	ActionIconFrame * decreaseCourse = new ActionIconFrame(this);
+	decreaseCourse->addIconFile(":decreasecourse.png");
+	decreaseCourse->addIconFile(":decreasecourseact.png");
+	decreaseCourse->setIconIndex(0);
+	decreaseCourse->setAction(DecreaseCourse);
 
 	m_actionFrames.push_back(setWale);
 	m_actionFrames.push_back(increaseWale);
 	m_actionFrames.push_back(decreaseWale);
+	m_actionFrames.push_back(increaseCourse);
+	m_actionFrames.push_back(decreaseCourse);
 }

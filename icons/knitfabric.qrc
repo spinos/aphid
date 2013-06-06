@@ -10,5 +10,9 @@
     <file>increasewale.png</file>
     <file>decreasewaleact.png</file>
     <file>decreasewale.png</file>
+    <file>increasecourseact.png</file>
+    <file>increasecourse.png</file>
+    <file>decreasecourseact.png</file>
+    <file>decreasecourse.png</file>
 </qresource>
 </RCC>
