@@ -66,6 +66,7 @@ public:
 	
 	void setSelectionAsWale();
 	void changeWaleResolution(int change);
+	void changeCourseResolution(int change);
 
 //! [2]
 protected:

@@ -23,6 +23,7 @@ public:
 	char hasTessellation() const;
 	void tessellate();
 	void increaseWaleGrid(int dv);
+	void increaseCourseGrid(unsigned v0, unsigned v1, int dv);
 private:
 	void setWaleEdge(short i, short j);
 	void setSecondWaleEdge(short j, char dir);

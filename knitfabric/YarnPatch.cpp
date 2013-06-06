@@ -15,7 +15,7 @@ YarnPatch::YarnPatch()
 	m_numWaleEdges = 0;
 	m_numWaleGrid = 4;
 	m_numCourseGrid[0] = 4;
-	m_numCourseGrid[1] = 3;
+	m_numCourseGrid[1] = 4;
 	m_hasTessellation = 0;
 }
 
@@ -94,6 +94,8 @@ char YarnPatch::hasTessellation() const
 
 char YarnPatch::verifyNumGrid()
 {
+	if(m_numCourseGrid[0] < 2 || m_numCourseGrid[1] < 2) return 0;
+	
 	if(m_numCourseGrid[0] != m_numCourseGrid[1]) {
 		short delta = m_numCourseGrid[0] - m_numCourseGrid[1];
 		if(delta < 0) delta = -delta;
@@ -105,6 +107,7 @@ char YarnPatch::verifyNumGrid()
 #include <iostream>
 void YarnPatch::tessellate()
 {
+	if(!hasWaleEdges()) return;
 	if(m_hasTessellation) BaseMesh::cleanup();
 	m_hasTessellation = 0;
 	if(!verifyNumGrid()) return;
@@ -326,3 +329,33 @@ void YarnPatch::increaseWaleGrid(int dv)
 	m_numWaleGrid += dv;
 	if(m_numWaleGrid < 2) m_numWaleGrid = 2;
 }
+
+void YarnPatch::increaseCourseGrid(unsigned v0, unsigned v1, int dv)
+{
+	if(!hasWaleEdges()) return;
+	short oldn[2];
+	oldn[0] = m_numCourseGrid[0];
+	oldn[1] = m_numCourseGrid[1];
+	
+	short nw = 0;
+	unsigned v[4];
+	waleEdges(nw, v);
+	if(v[0] == v0 && v[2] == v1) {
+		m_numCourseGrid[0] += dv;
+	}
+	else if(v[0] == v1 && v[2] == v0) {
+		m_numCourseGrid[0] += dv;
+	}
+	else if(v[1] == v0 && v[3] == v1) {
+		m_numCourseGrid[1] += dv;
+	}
+	else if(v[1] == v1 && v[3] == v0) {
+		m_numCourseGrid[1] += dv;
+	}
+	
+	if(!verifyNumGrid()) {
+		m_numCourseGrid[0] = oldn[0];
+		m_numCourseGrid[1] = oldn[1];
+	}
+}
+//:~

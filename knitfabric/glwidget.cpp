@@ -262,7 +262,7 @@ void GLWidget::setSelectionAsWale()
 	for(std::vector<unsigned>::const_iterator it = fs.begin(); it != fs.end(); ++it) {
 		YarnPatch * patch = m_fabric->patch(*it);
 		patch->findWaleEdge(vpps[ipatch * 2], vpps[ipatch * 2 + 1]);
-		if(patch->hasWaleEdges()) patch->tessellate();
+		patch->tessellate();
 		ipatch++;
 	}
 	clearSelection();
@@ -276,7 +276,22 @@ void GLWidget::changeWaleResolution(int change)
 	for(std::vector<unsigned>::const_iterator it = fs.begin(); it != fs.end(); ++it) {
 		YarnPatch * patch = m_fabric->patch(*it);
 		patch->increaseWaleGrid(change);
-		if(patch->hasWaleEdges()) patch->tessellate();
+		patch->tessellate();
+	}
+}
+
+void GLWidget::changeCourseResolution(int change)
+{
+	std::vector<unsigned> fs;
+	std::vector<unsigned> vpps;
+	getSelection()->asPolygons(fs, vpps);
+	
+	unsigned ipatch = 0;
+	for(std::vector<unsigned>::const_iterator it = fs.begin(); it != fs.end(); ++it) {
+		YarnPatch * patch = m_fabric->patch(*it);
+		patch->increaseCourseGrid(vpps[ipatch * 2], vpps[ipatch * 2 + 1], change);
+		patch->tessellate();
+		ipatch++;
 	}
 }
 //:~

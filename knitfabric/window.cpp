@@ -77,5 +77,9 @@ void Window::receiveToolAction(int a)
 		glWidget->changeWaleResolution(1);
 	else if(a == ToolContext::DecreaseWale)
 		glWidget->changeWaleResolution(-1);
+	else if(a == ToolContext::IncreaseCourse)
+		glWidget->changeCourseResolution(1);
+	else if(a == ToolContext::DecreaseCourse)
+		glWidget->changeCourseResolution(-1);
 }
 
