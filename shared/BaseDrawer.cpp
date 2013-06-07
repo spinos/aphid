@@ -386,10 +386,13 @@ void BaseDrawer::components(SelectionArray * arr)
 			curve.addVertex(p);
 		}
 		glEnable(GL_DEPTH_TEST);
-		curve.computeKnots();
-		glLineWidth(2.f);
-		linearCurve(curve);
-		glLineWidth(1.f);
+		
+		if(arr->hasVertexPath()) {
+			curve.computeKnots();
+			glLineWidth(2.f);
+			linearCurve(curve);
+			glLineWidth(1.f);
+		}
     }
 }
 

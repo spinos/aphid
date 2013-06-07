@@ -47,6 +47,7 @@ public:
 	char isLastNeighborOrderedByVertexIdx();
 	
 	bool isConnectedTo(unsigned idx);
+	Edge * outgoingEdgeToVertex(unsigned idx, char & res);
 	Edge * connectedToVertexBy(unsigned idx, char & res);
 	unsigned nextRealEdgeNeighbor(unsigned idx);
 	unsigned nextBoundaryNeighbor(unsigned idx);

@@ -343,6 +343,19 @@ bool VertexAdjacency::isConnectedTo(unsigned idx)
 	return false;
 }
 
+Edge * VertexAdjacency::outgoingEdgeToVertex(unsigned idx, char & res)
+{
+	res = 0;
+	std::vector<Edge *>::iterator it;
+	for(it = m_edges.begin(); it < m_edges.end(); it++) {
+		if((*it)->isReal() && (*it)->v1()->getIndex() == idx) {
+			res = 1;
+			return *it;
+		}
+	}
+	return 0;
+}
+
 Edge * VertexAdjacency::connectedToVertexBy(unsigned idx, char & res)
 {
 	res = 0;

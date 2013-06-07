@@ -272,9 +272,9 @@ void GLWidget::changeWaleResolution(int change)
 {
 	std::vector<unsigned> fs;
 	std::vector<unsigned> vpps;
-	getSelection()->extendToEdgeRing();
-	getSelection()->asPolygons(fs, vpps);
-	for(std::vector<unsigned>::const_iterator it = fs.begin(); it != fs.end(); ++it) {
+	getSelection()->asPolygonRing(fs, vpps);
+	std::vector<unsigned>::const_iterator it = fs.begin();
+	for(; it != fs.end(); ++it) {
 		YarnPatch * patch = m_fabric->patch(*it);
 		patch->increaseWaleGrid(change);
 		patch->tessellate();

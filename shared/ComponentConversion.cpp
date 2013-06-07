@@ -21,9 +21,26 @@ void ComponentConversion::setTopology(MeshTopology * topo)
 
 void ComponentConversion::edgeRing(const unsigned & src, std::vector<unsigned> & edgeIds) const
 {
-    unsigned facetIdx = src / 3;
-    char found = 0;
-    Edge * parallel = m_topology->getFacet(facetIdx)->findUnrealEdge(src, found);
+	Edge * e = m_topology->getEdge(src);
+    
+	Edge *para = m_topology->parallelEdge(e);
+	if(!para) return;
+	
+	printf("para %i %i\n", para->v0()->getIndex(), para->v1()->getIndex());
+	if(!appendUnique(para->getIndex(), edgeIds)) return;
+		
+	Edge * opp = para->getTwin();
+	if(!opp) return;	
+	for(unsigned i = 0; i < 50; i++) {
+		para = m_topology->parallelEdge(opp);
+		if(!para) return;
+		
+		printf("para %i %i\n", para->v0()->getIndex(), para->v1()->getIndex());
+		if(!appendUnique(para->getIndex(), edgeIds)) return;
+		
+		opp = para->getTwin();
+		if(!opp) return;
+	}
 }
 
 void ComponentConversion::facetToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds) const
@@ -32,6 +49,17 @@ void ComponentConversion::facetToPolygon(const std::vector<unsigned> & src, std:
 	for(it = src.begin(); it != src.end(); ++it) {
 		appendUnique(m_topology->getFacet(*it)->getPolygonIndex(), polyIds);
 	}
+}
+
+void ComponentConversion::edgeToVertex(const std::vector<unsigned> & src, std::vector<unsigned> & dst) const
+{
+	std::vector<unsigned>::const_iterator it = src.begin();
+	for(; it != src.end(); ++it) {
+		Edge * e = m_topology->getEdge(*it);
+		appendUnique(e->v0()->getIndex(), dst);
+		appendUnique(e->v1()->getIndex(), dst);
+	}
+	
 }
 
 void ComponentConversion::vertexToEdge(const std::vector<unsigned> & src, std::vector<unsigned> & dst) const
@@ -50,6 +78,9 @@ void ComponentConversion::vertexToEdge(const std::vector<unsigned> & src, std::v
 		Edge * e = adj.connectedToVertexBy(*it1, found);
 		if(found) {
 		    appendUnique(e->getIndex(), dst);
+			Edge * opp = e->getTwin();
+			if(opp)
+				appendUnique(opp->getIndex(), dst);
 		}
 	}
 }
@@ -87,6 +118,17 @@ void ComponentConversion::vertexToPolygon(const std::vector<unsigned> & src, std
 	}
 }
 
+void ComponentConversion::edgeToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const
+{
+	std::vector<unsigned>::const_iterator it = src.begin();
+	for(; it != src.end(); ++it) {
+		Edge * e = m_topology->getEdge(*it);
+		polyIds.push_back(((Facet *)e->getFace())->getPolygonIndex());
+		vppIds.push_back(e->v0()->getIndex());
+		vppIds.push_back(e->v1()->getIndex());
+	}
+}
+
 char ComponentConversion::appendUnique(unsigned val, std::vector<unsigned> & dst) const
 {
 	std::vector<unsigned>::const_iterator it;
@@ -98,3 +140,10 @@ char ComponentConversion::appendUnique(unsigned val, std::vector<unsigned> & dst
 	dst.push_back(val);
 	return 1;
 }
+
+Vector3F ComponentConversion::vertexPosition(unsigned idx) const
+{
+	VertexAdjacency & adj = m_topology->getAdjacency(idx);
+	return *adj.m_v;
+}
+

@@ -20,8 +20,11 @@ public:
 	
 	void edgeRing(const unsigned & src, std::vector<unsigned> & edgeIds) const;
 	void facetToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds) const;
+	void edgeToVertex(const std::vector<unsigned> & src, std::vector<unsigned> & dst) const;
 	void vertexToEdge(const std::vector<unsigned> & src, std::vector<unsigned> & dst) const;
 	void vertexToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const;
+	void edgeToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const;
+	Vector3F vertexPosition(unsigned idx) const;
 private:
 	char appendUnique(unsigned idx, std::vector<unsigned> & dst) const;
 	MeshTopology * m_topology;

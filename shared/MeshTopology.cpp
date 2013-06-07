@@ -26,6 +26,7 @@ MeshTopology::~MeshTopology()
 char MeshTopology::buildTopology(BaseMesh * mesh)
 {
 	cleanup();
+	m_mesh = mesh;
 	const unsigned nv = mesh->getNumVertices();
 	
 	m_adjacency = new VertexAdjacency[nv];
@@ -102,6 +103,62 @@ VertexAdjacency & MeshTopology::getAdjacency(unsigned idx) const
 Facet * MeshTopology::getFacet(unsigned idx) const
 {
 	return m_faces[idx];
+}
+
+Edge * MeshTopology::getEdge(unsigned idx) const
+{
+	const unsigned facetIdx = idx / 3;
+	const unsigned edgeInFacetIdx = idx - facetIdx * 3;
+	return getFacet(facetIdx)->edge(edgeInFacetIdx);
+}
+
+Edge * MeshTopology::findEdge(unsigned a, unsigned b) const
+{
+	VertexAdjacency & adj = getAdjacency(a);
+	char found = 0;
+	return adj.outgoingEdgeToVertex(b, found);
+}
+
+Edge * MeshTopology::parallelEdge(Edge * src) const
+{
+	Facet * face = (Facet *)src->getFace();
+	unsigned polyIdx = face->getPolygonIndex();
+	unsigned * pv = m_mesh->quadIndices();
+	pv += polyIdx * 4;
+	
+	unsigned v0 = src->v0()->getIndex();
+	unsigned v1 = src->v1()->getIndex();
+	unsigned a, b;
+	char found = parallelEdgeInQuad(pv, v0, v1, a, b);
+	
+	if(!found || a == b) return 0;
+	
+	return findEdge(a, b);
+}
+
+char MeshTopology::parallelEdgeInQuad(unsigned *indices, unsigned v0, unsigned v1, unsigned & a, unsigned & b) const
+{
+	int i, j;
+	for(i = 0; i < 4; i++) {
+		j = (i + 1)%4;
+		if(indices[i] == v0 && indices[j] == v1) {
+			a = indices[(j+1)%4];
+			b = indices[(j+2)%4];
+			return 1;
+		}
+	}
+	
+	for(i = 3; i >= 0; i--) {
+		j = i - 1;
+		if(j < 0) j = 3;
+		if(indices[i] == v0 && indices[j] == v1) {
+			a = indices[(j-1)%4];
+			b = indices[(j-2)%4];
+			return 1;
+		}
+	}
+	
+	return 0;
 }
 
 void MeshTopology::cleanup()

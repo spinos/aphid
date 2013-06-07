@@ -42,12 +42,13 @@ public:
 	
 	void enableVertexPath();
 	void disableVertexPath();
+	bool hasVertexPath() const;
 	
 	void addVertex(unsigned idx, const Vector3F & atP);
 	
 	void setTopology(MeshTopology * topo);
 	
-	void extendToEdgeRing();
+	void asPolygonRing(std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const;
 	void asEdges(std::vector<unsigned> & dst) const;
 	void asVertices(std::vector<unsigned> & dst) const;
 	void asPolygons(std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const;
@@ -55,7 +56,6 @@ private:
 	bool isVertexSelected(unsigned idx) const;
 	bool isFaceSelected(unsigned idx) const;
 	
-	std::vector<Vector3F> m_vertexPs;
 	std::vector<Primitive *> m_prims;
 	std::vector<unsigned> m_vertexIds;
 	std::vector<unsigned> m_faceIds;

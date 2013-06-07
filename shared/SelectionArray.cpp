@@ -26,7 +26,6 @@ void SelectionArray::reset()
 {
 	m_prims.clear();
 	m_vertexIds.clear();
-	m_vertexPs.clear();
 	m_edgeIds.clear();
 	m_faceIds.clear();
 }
@@ -94,7 +93,7 @@ unsigned SelectionArray::lastVertexId() const
 
 Vector3F SelectionArray::getVertexP(const unsigned & idx) const
 {
-	return m_vertexPs[idx];
+	return m_compconvert->vertexPosition(m_vertexIds[idx]);
 }
 
 bool SelectionArray::isVertexSelected(unsigned idx) const
@@ -111,7 +110,6 @@ void SelectionArray::addVertex(unsigned idx, const Vector3F & atP)
 {
 	if(!isVertexSelected(idx)) {
 		m_vertexIds.push_back(idx);
-		m_vertexPs.push_back(atP);
 	}
 }
 
@@ -166,9 +164,6 @@ void SelectionArray::shrink()
 		std::vector<unsigned>::iterator it = m_vertexIds.end();
 		--it;
 		m_vertexIds.erase(it);
-		std::vector<Vector3F>::iterator itp = m_vertexPs.end();
-		--itp;
-		m_vertexPs.erase(itp);
 	}
 }
 
@@ -182,14 +177,22 @@ void SelectionArray::disableVertexPath()
 	m_needVertexPath = false;
 }
 
-void SelectionArray::extendToEdgeRing()
+bool SelectionArray::hasVertexPath() const
+{
+	return m_needVertexPath;
+}
+
+void SelectionArray::asPolygonRing(std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const
 {
     std::vector<unsigned> srcedges;
     asEdges(srcedges);
+	std::vector<unsigned> ringedges;
     std::vector<unsigned>::const_iterator it;
     for(it = srcedges.begin(); it != srcedges.end(); ++it) {
-        m_compconvert->edgeRing(*it, m_edgeIds);
+        m_compconvert->edgeRing(*it, ringedges);
     }
+	
+	m_compconvert->edgeToPolygon(ringedges, polyIds, vppIds);
 }
 
 void SelectionArray::asEdges(std::vector<unsigned> & dst) const

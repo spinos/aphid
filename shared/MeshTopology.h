@@ -12,6 +12,7 @@
 #include <vector>
 class VertexAdjacency;
 class Facet;
+class Edge;
 class BaseMesh;
 
 class MeshTopology {
@@ -25,8 +26,13 @@ public:
 	VertexAdjacency * getTopology() const;
 	VertexAdjacency & getAdjacency(unsigned idx) const;
 	Facet * getFacet(unsigned idx) const;
+	Edge * getEdge(unsigned idx) const;
+	Edge * findEdge(unsigned a, unsigned b) const;
+	Edge * parallelEdge(Edge * src) const;
 private:
 	void cleanup();
+	char parallelEdgeInQuad(unsigned *indices, unsigned v0, unsigned v1, unsigned & a, unsigned & b) const;
 	VertexAdjacency * m_adjacency;
 	std::vector<Facet *> m_faces;
+	BaseMesh * m_mesh;
 };
