@@ -360,4 +360,71 @@ void YarnPatch::increaseCourseGrid(unsigned v0, unsigned v1, int dv)
 		m_numCourseGrid[1] = oldn[1];
 	}
 }
+
+char YarnPatch::isWaleEdge(unsigned v0, unsigned v1) const
+{
+	if(!hasWaleEdges()) return 0;
+	short nw = 0;
+	unsigned v[4];
+	waleEdges(nw, v);
+	if(v0 == v[0] && v1 == v[1]) return 1;
+	if(v0 == v[1] && v1 == v[0]) return 1;
+	if(v0 == v[2] && v1 == v[3]) return 1;
+	if(v0 == v[3] && v1 == v[2]) return 1;
+	return 0;
+}
+
+char YarnPatch::isCourseEdge(unsigned v0, unsigned v1) const
+{
+	if(!hasWaleEdges()) return 0;
+	short nw = 0;
+	unsigned v[4];
+	waleEdges(nw, v);
+	if(v0 == v[0] && v1 == v[2]) return 1;
+	if(v0 == v[2] && v1 == v[0]) return 1;
+	if(v0 == v[1] && v1 == v[3]) return 1;
+	if(v0 == v[3] && v1 == v[1]) return 1;
+	return 0;
+}
+
+short YarnPatch::getWaleGrid() const
+{
+	return m_numWaleGrid;
+}
+
+void YarnPatch::setWaleGrid(short val)
+{
+	m_numWaleGrid = val;
+	if(m_numWaleGrid < 2) m_numWaleGrid = 2;
+}
+
+short YarnPatch::getCourseGrid(unsigned v0, unsigned v1) const
+{
+	if(!hasWaleEdges()) return -1;
+	short side = courseSide(v0, v1);
+	return m_numCourseGrid[side];
+}
+
+char YarnPatch::setCourseGrid(unsigned v0, unsigned v1, short val)
+{
+	if(!hasWaleEdges()) return 0;
+	short side = courseSide(v0, v1);
+	short oldn = m_numCourseGrid[side];
+	m_numCourseGrid[side] = val;
+	if(!verifyNumGrid()) {
+		m_numCourseGrid[side] = oldn;
+		return 0;
+	}
+	return 1;
+}
+
+short YarnPatch::courseSide(unsigned v0, unsigned v1) const
+{
+	short nw = 0;
+	unsigned v[4];
+	waleEdges(nw, v);
+	if(v0 == v[0] && v1 == v[2]) return 0;
+	if(v0 == v[2] && v1 == v[0]) return 0;
+	return 1;
+}
 //:~

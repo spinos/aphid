@@ -22,6 +22,7 @@ public:
 	void facetToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds) const;
 	void edgeToVertex(const std::vector<unsigned> & src, std::vector<unsigned> & dst) const;
 	void vertexToEdge(const std::vector<unsigned> & src, std::vector<unsigned> & dst) const;
+	void vertexToEdge(const std::vector<unsigned> & src, std::vector<Edge *> & dst) const;
 	void vertexToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const;
 	void edgeToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const;
 	Vector3F vertexPosition(unsigned idx) const;

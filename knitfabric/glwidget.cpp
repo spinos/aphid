@@ -274,25 +274,52 @@ void GLWidget::changeWaleResolution(int change)
 	std::vector<unsigned> vpps;
 	getSelection()->asPolygonRing(fs, vpps);
 	std::vector<unsigned>::const_iterator it = fs.begin();
+	unsigned ipatch = 0;
+	char firstPatch = 1;
+	short numWale = 4;
 	for(; it != fs.end(); ++it) {
 		YarnPatch * patch = m_fabric->patch(*it);
-		patch->increaseWaleGrid(change);
-		patch->tessellate();
+		if(patch->isWaleEdge(vpps[ipatch * 2], vpps[ipatch * 2 + 1])) {
+			if(firstPatch) {
+				firstPatch = 0;
+				numWale = patch->getWaleGrid();
+				numWale += change;
+			}
+			patch->setWaleGrid(numWale);
+			patch->tessellate();
+		}
+		ipatch++;
 	}
 }
 
 void GLWidget::changeCourseResolution(int change)
 {
-	std::vector<unsigned> fs;
-	std::vector<unsigned> vpps;
-	getSelection()->asPolygons(fs, vpps);
+	std::vector<Edge *> es;
+	getSelection()->asEdges(es);
 	
-	unsigned ipatch = 0;
-	for(std::vector<unsigned>::const_iterator it = fs.begin(); it != fs.end(); ++it) {
-		YarnPatch * patch = m_fabric->patch(*it);
-		patch->increaseCourseGrid(vpps[ipatch * 2], vpps[ipatch * 2 + 1], change);
+	Edge * prevEdge = 0;
+	unsigned v0, v1, poly;
+	short courseGrid = 4;
+	std::vector<Edge *>::const_iterator it = es.begin();
+	for(; it != es.end(); ++it) {
+		v0 = (*it)->v0()->getIndex();
+		v1 = (*it)->v1()->getIndex();
+		poly = ((Facet *)(*it)->getFace())->getPolygonIndex();
+		
+		YarnPatch * patch = m_fabric->patch(poly);
+		
+		if(!patch->isCourseEdge(v0, v1)) return;
+		
+		if(!prevEdge) {
+			courseGrid = patch->getCourseGrid(v0, v1);
+			if(courseGrid < 0) return;
+			courseGrid += change;
+		}
+
+		if(!patch->setCourseGrid(v0, v1, courseGrid)) return;
 		patch->tessellate();
-		ipatch++;
+		prevEdge = *it;
+		
 	}
 }
 //:~

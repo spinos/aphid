@@ -85,6 +85,17 @@ void ComponentConversion::vertexToEdge(const std::vector<unsigned> & src, std::v
 	}
 }
 
+void ComponentConversion::vertexToEdge(const std::vector<unsigned> & src, std::vector<Edge *> & dst) const
+{
+	std::vector<unsigned> edgeIds;
+	vertexToEdge(src, edgeIds);
+
+	std::vector<unsigned>::const_iterator it = edgeIds.begin();
+	for(; it != edgeIds.end(); ++it) {
+		dst.push_back(m_topology->getEdge(*it));
+	}
+}
+
 void ComponentConversion::vertexToPolygon(const std::vector<unsigned> & src, std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const
 {
 	if(src.size() < 2) return;

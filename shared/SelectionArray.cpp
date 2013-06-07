@@ -202,6 +202,13 @@ void SelectionArray::asEdges(std::vector<unsigned> & dst) const
 	}
 }
 
+void SelectionArray::asEdges(std::vector<Edge *> & dst) const
+{
+    if(getComponentFilterType() == PrimitiveFilter::TVertex) {
+		m_compconvert->vertexToEdge(m_vertexIds, dst);
+	}
+}
+
 void SelectionArray::asVertices(std::vector<unsigned> & dst) const
 {
 	if(getComponentFilterType() == PrimitiveFilter::TVertex) {

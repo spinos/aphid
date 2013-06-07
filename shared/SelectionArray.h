@@ -9,6 +9,8 @@
 #pragma once
 #include <vector>
 #include <PrimitiveFilter.h>
+#include <AllGeometry.h>
+
 class Vector3F;
 class Primitive;
 class Geometry;
@@ -50,6 +52,7 @@ public:
 	
 	void asPolygonRing(std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const;
 	void asEdges(std::vector<unsigned> & dst) const;
+	void asEdges(std::vector<Edge *> & dst) const;
 	void asVertices(std::vector<unsigned> & dst) const;
 	void asPolygons(std::vector<unsigned> & polyIds, std::vector<unsigned> & vppIds) const;
 private:
