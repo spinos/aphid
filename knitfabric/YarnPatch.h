@@ -16,7 +16,7 @@ class YarnPatch : public AccPatch, public BaseMesh {
 public:
 	YarnPatch();
 	void setQuadVertices(unsigned *v);
-	void findWaleEdge(unsigned v0, unsigned v1);
+	void findWaleEdge(unsigned v0, unsigned v1, int bothSide);
 	void waleEdges(short &n, unsigned * v) const;
 	
 	char hasWaleEdges() const;
@@ -41,6 +41,11 @@ private:
 	void getCornerUV(short quadV, float & u, float & v) const;
 	short rowDifference(short & step, short & rowEnd, const short & targetRowEnd, const short & irow) const;
 	short courseSide(unsigned v0, unsigned v1) const;
+	char isTriangle() const;
+	void tessellateQuad();
+	void tessellateTriangle();
+	char isConverging() const;
+
 	unsigned * m_quadVertices;
 	short m_waleVertices[4];
 	short m_numWaleEdges;

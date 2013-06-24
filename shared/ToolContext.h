@@ -12,10 +12,11 @@ public:
     enum ActionRank {
         UnknownAction = 0,
         SetWaleEdge = 1,
-		IncreaseWale = 2,
-		DecreaseWale = 3,
-		IncreaseCourse = 4,
-		DecreaseCourse = 5
+        SetSingleWaleEdge = 2,
+		IncreaseWale = 3,
+		DecreaseWale = 4,
+		IncreaseCourse = 5,
+		DecreaseCourse = 6
     };
     
     ToolContext();

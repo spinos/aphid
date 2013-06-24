@@ -24,7 +24,7 @@ void YarnPatch::setQuadVertices(unsigned *v)
 	m_quadVertices = v;
 }
 
-void YarnPatch::findWaleEdge(unsigned v0, unsigned v1)
+void YarnPatch::findWaleEdge(unsigned v0, unsigned v1, int bothSide)
 {
 	short i, j;
 	for(i = 0; i < 4; i++) {
@@ -32,7 +32,7 @@ void YarnPatch::findWaleEdge(unsigned v0, unsigned v1)
 		if(j == 4) j = 0;
 		if(m_quadVertices[i] == v0 && m_quadVertices[j] == v1) {
 			setWaleEdge(i, j);
-			setSecondWaleEdge(j, 1);
+			if(bothSide == 1) setSecondWaleEdge(j, 1);
 		}
 	}
 	for(i = 3; i >= 0; i--) {
@@ -40,7 +40,7 @@ void YarnPatch::findWaleEdge(unsigned v0, unsigned v1)
 		if(j < 0) j = 3;
 		if(m_quadVertices[i] == v0 && m_quadVertices[j] == v1) {
 			setWaleEdge(i, j);
-			setSecondWaleEdge(j, 0);
+			if(bothSide == 1) setSecondWaleEdge(j, 0);
 		}
 	}
 }
@@ -113,19 +113,9 @@ void YarnPatch::tessellate()
 	m_hasTessellation = 0;
 	if(!verifyNumGrid()) return;
 	
-	const short nrow = m_numWaleGrid + 1;
-	const short colChange = m_numCourseGrid[1] - m_numCourseGrid[0];
-	short colDir = 0;
-	if(colChange > 0) colDir = 1;
-	else if(colChange < 0) colDir = -1;
+	if(isTriangle()) tessellateTriangle();
+	else tessellateQuad();
 	
-	const short ncol0 = m_numCourseGrid[0] + 1;
-	const short ncol1 = m_numCourseGrid[1] + 1;
-	
-	fillP(nrow, ncol0, ncol1, colDir);
-	fillF(nrow, ncol0, ncol1, colDir);
-	
-	m_hasTessellation = 1;
 }
 
 void YarnPatch::fillP(const short & nrow, const short & ncol0, const short & ncol1, const short & colDir)
@@ -426,5 +416,47 @@ short YarnPatch::courseSide(unsigned v0, unsigned v1) const
 	if(v0 == v[0] && v1 == v[2]) return 0;
 	if(v0 == v[2] && v1 == v[0]) return 0;
 	return 1;
+}
+
+char YarnPatch::isTriangle() const
+{
+    short i, j;
+	for(i = 0; i < 4; i++) {
+	    j = (i + 1)%4;
+	    if(m_quadVertices[i] == m_quadVertices[j]) return 1;
+	}
+	return 0;
+}
+
+void YarnPatch::tessellateQuad()
+{
+    const short nrow = m_numWaleGrid + 1;
+	const short colChange = m_numCourseGrid[1] - m_numCourseGrid[0];
+	short colDir = 0;
+	if(colChange > 0) colDir = 1;
+	else if(colChange < 0) colDir = -1;
+	
+	const short ncol0 = m_numCourseGrid[0] + 1;
+	const short ncol1 = m_numCourseGrid[1] + 1;
+	
+	fillP(nrow, ncol0, ncol1, colDir);
+	fillF(nrow, ncol0, ncol1, colDir);
+	
+	m_hasTessellation = 1;
+}
+
+void YarnPatch::tessellateTriangle()
+{
+    if(isConverging()) {
+        printf("triangle is converging");
+    }
+    else {
+        printf("triangle is diverging");
+    }
+}
+
+char YarnPatch::isConverging() const
+{
+    return (m_quadVertices[m_waleVertices[1]] == m_quadVertices[m_waleVertices[3]]);
 }
 //:~

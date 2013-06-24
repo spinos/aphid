@@ -72,7 +72,9 @@ void Window::keyPressEvent(QKeyEvent *e)
 void Window::receiveToolAction(int a)
 {
     if(a == ToolContext::SetWaleEdge)
-        glWidget->setSelectionAsWale();
+        glWidget->setSelectionAsWale(1);
+    if(a == ToolContext::SetSingleWaleEdge)
+        glWidget->setSelectionAsWale(0);
 	else if(a == ToolContext::IncreaseWale)
 		glWidget->changeWaleResolution(1);
 	else if(a == ToolContext::DecreaseWale)
