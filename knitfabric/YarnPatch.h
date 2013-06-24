@@ -32,6 +32,10 @@ private:
 	void fillF(const short & nrow, const short & ncol0, const short & ncol1, const short & colDir);
 	void getCornerUV(short quadV, float & u, float & v) const;
 	short rowDifference(short & step, short & rowEnd, const short & targetRowEnd, const short & irow) const;
+	char isTriangle() const;
+	void tessellateQuad();
+	void tessellateTriangle();
+	char isConverging() const;
 	
 	unsigned * m_quadVertices;
 	short m_waleVertices[4];
