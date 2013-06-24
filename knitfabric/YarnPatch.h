@@ -16,7 +16,7 @@ class YarnPatch : public AccPatch, public BaseMesh {
 public:
 	YarnPatch();
 	void setQuadVertices(unsigned *v);
-	void findWaleEdge(unsigned v0, unsigned v1);
+	void findWaleEdge(unsigned v0, unsigned v1, int bothSide);
 	void waleEdges(short &n, unsigned * v) const;
 	
 	char hasWaleEdges() const;

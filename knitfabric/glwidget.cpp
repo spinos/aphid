@@ -252,7 +252,7 @@ void GLWidget::loadMesh(std::string filename)
 	buildTree();
 }
 
-void GLWidget::setSelectionAsWale()
+void GLWidget::setSelectionAsWale(int bothSide)
 {
 	std::vector<unsigned> fs;
 	std::vector<unsigned> vpps;
@@ -261,7 +261,7 @@ void GLWidget::setSelectionAsWale()
 	unsigned ipatch = 0;
 	for(std::vector<unsigned>::const_iterator it = fs.begin(); it != fs.end(); ++it) {
 		YarnPatch * patch = m_fabric->patch(*it);
-		patch->findWaleEdge(vpps[ipatch * 2], vpps[ipatch * 2 + 1]);
+		patch->findWaleEdge(vpps[ipatch * 2], vpps[ipatch * 2 + 1], bothSide);
 		patch->tessellate();
 		ipatch++;
 	}

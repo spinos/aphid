@@ -71,11 +71,16 @@ void ToolBox::createContext()
 void ToolBox::createAction()
 {
     ActionIconFrame * setWale = new ActionIconFrame(this);
-	
 	setWale->addIconFile(":setwale.png");
 	setWale->addIconFile(":setwaleact.png");
 	setWale->setIconIndex(0);
 	setWale->setAction(SetWaleEdge);
+	
+	ActionIconFrame * setSingleWale = new ActionIconFrame(this);
+	setSingleWale->addIconFile(":setsinglewale.png");
+	setSingleWale->addIconFile(":setsinglewaleact.png");
+	setSingleWale->setIconIndex(0);
+	setSingleWale->setAction(SetSingleWaleEdge);
 	
 	ActionIconFrame * increaseWale = new ActionIconFrame(this);
 	increaseWale->addIconFile(":increasewale.png");
@@ -102,6 +107,7 @@ void ToolBox::createAction()
 	decreaseCourse->setAction(DecreaseCourse);
 
 	m_actionFrames.push_back(setWale);
+	m_actionFrames.push_back(setSingleWale);
 	m_actionFrames.push_back(increaseWale);
 	m_actionFrames.push_back(decreaseWale);
 	m_actionFrames.push_back(increaseCourse);

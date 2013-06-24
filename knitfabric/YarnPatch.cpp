@@ -24,7 +24,7 @@ void YarnPatch::setQuadVertices(unsigned *v)
 	m_quadVertices = v;
 }
 
-void YarnPatch::findWaleEdge(unsigned v0, unsigned v1)
+void YarnPatch::findWaleEdge(unsigned v0, unsigned v1, int bothSide)
 {
 	short i, j;
 	for(i = 0; i < 4; i++) {
@@ -32,7 +32,7 @@ void YarnPatch::findWaleEdge(unsigned v0, unsigned v1)
 		if(j == 4) j = 0;
 		if(m_quadVertices[i] == v0 && m_quadVertices[j] == v1) {
 			setWaleEdge(i, j);
-			setSecondWaleEdge(j, 1);
+			if(bothSide == 1) setSecondWaleEdge(j, 1);
 		}
 	}
 	for(i = 3; i >= 0; i--) {
@@ -40,7 +40,7 @@ void YarnPatch::findWaleEdge(unsigned v0, unsigned v1)
 		if(j < 0) j = 3;
 		if(m_quadVertices[i] == v0 && m_quadVertices[j] == v1) {
 			setWaleEdge(i, j);
-			setSecondWaleEdge(j, 0);
+			if(bothSide == 1) setSecondWaleEdge(j, 0);
 		}
 	}
 }
