@@ -94,6 +94,10 @@ char YarnPatch::hasTessellation() const
 
 char YarnPatch::verifyNumGrid()
 {
+	if(isTriangle()) {		
+		return 1;
+	}
+	
     if(m_numWaleGrid < 2) return 0;
 	if(m_numCourseGrid[0] < 2 || m_numCourseGrid[1] < 2) return 0;
 	
@@ -446,13 +450,30 @@ void YarnPatch::tessellateQuad()
 }
 
 void YarnPatch::tessellateTriangle()
-{
+{	
     if(isConverging()) {
         printf("triangle is converging");
+		m_numCourseGrid[1] = 0;
+		
     }
     else {
         printf("triangle is diverging");
+		m_numCourseGrid[0] = 0;
     }
+	
+	const short nrow = m_numWaleGrid + 1;
+	const short colChange = m_numCourseGrid[1] - m_numCourseGrid[0];
+	short colDir = 0;
+	if(colChange > 0) colDir = 1;
+	else if(colChange < 0) colDir = -1;
+	
+	const short ncol0 = m_numCourseGrid[0] + 1;
+	const short ncol1 = m_numCourseGrid[1] + 1;
+	
+	fillP(nrow, ncol0, ncol1, colDir);
+	
+	fillF(nrow, ncol0, ncol1, colDir);
+	m_hasTessellation = 1;
 }
 
 char YarnPatch::isConverging() const
