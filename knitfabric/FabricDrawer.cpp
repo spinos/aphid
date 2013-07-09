@@ -24,7 +24,8 @@ void FabricDrawer::drawYarn(YarnPatch * patch)
 {
 	if(!patch->hasTessellation()) return;
 	setColor(0.f, .9f, .4f);
-	drawPolygons(patch);
+	//drawPolygons(patch);
+	drawPoints(patch);
 }
 
 void FabricDrawer::drawWale(YarnPatch * patch)

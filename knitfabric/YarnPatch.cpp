@@ -160,7 +160,11 @@ void YarnPatch::fillP(const short & nrow, const short & ncol0, const short & nco
 		
 		rowDifference(colStep, nextRowEnd, ncol1, j);
 		
-		du = 1.f / (rowEnd - 1);
+		if(rowEnd > 1)
+		    du = 1.f / (rowEnd - 1);
+		else
+		    du = 1.f;
+
 		for(short i = 0; i < rowEnd; i++) {
 			
 			u = du * i;
@@ -289,7 +293,7 @@ void YarnPatch::fillF(const short & nrow, const short & ncol0, const short & nco
 
 short YarnPatch::rowDifference(short & step, short & rowEnd, const short & targetRowEnd, const short & irow) const
 {
-	if(irow == 0) return 0;
+	//if(irow == 0) return 0;
 	if(step == 0) return 0;
 		
 	short rowIncrease = step;
@@ -454,7 +458,6 @@ void YarnPatch::tessellateTriangle()
     if(isConverging()) {
         printf("triangle is converging");
 		m_numCourseGrid[1] = 0;
-		
     }
     else {
         printf("triangle is diverging");

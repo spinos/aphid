@@ -15,7 +15,7 @@ make
 make install
 open python, and run:
 
-rom word import Word
+from word import Word
 a = 'Casablanca.1942'
 print 'reverse', a
 b = Word(a)
