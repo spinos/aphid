@@ -436,16 +436,33 @@ char YarnPatch::isTriangle() const
 	return 0;
 }
 
-void YarnPatch::tessellateQuad()
+void YarnPatch::rowColDir(short &nrow, short &ncol0, short &ncol1, short &colDir) const
 {
-    const short nrow = m_numWaleGrid + 1;
+    nrow = m_numWaleGrid + 1;
 	const short colChange = m_numCourseGrid[1] - m_numCourseGrid[0];
-	short colDir = 0;
+	colDir = 0;
 	if(colChange > 0) colDir = 1;
 	else if(colChange < 0) colDir = -1;
 	
-	const short ncol0 = m_numCourseGrid[0] + 1;
-	const short ncol1 = m_numCourseGrid[1] + 1;
+	ncol0 = m_numCourseGrid[0] + 1;
+	ncol1 = m_numCourseGrid[1] + 1;
+	
+	if(isTriangle()) {
+        if(isConverging()) {
+            ncol1 = 1;
+            colDir = -1;
+        }
+        else {
+            ncol0 = 1;
+            colDir = 1;
+        }
+    }
+}
+
+void YarnPatch::tessellateQuad()
+{
+    short nrow, ncol0, ncol1, colDir;
+    rowColDir(nrow, ncol0, ncol1, colDir);
 	
 	fillP(nrow, ncol0, ncol1, colDir);
 	fillF(nrow, ncol0, ncol1, colDir);
@@ -455,27 +472,14 @@ void YarnPatch::tessellateQuad()
 
 void YarnPatch::tessellateTriangle()
 {	
-    if(isConverging()) {
-        printf("triangle is converging");
-		m_numCourseGrid[1] = 0;
-    }
-    else {
-        printf("triangle is diverging");
-		m_numCourseGrid[0] = 0;
-    }
-	
-	const short nrow = m_numWaleGrid + 1;
-	const short colChange = m_numCourseGrid[1] - m_numCourseGrid[0];
-	short colDir = 0;
-	if(colChange > 0) colDir = 1;
-	else if(colChange < 0) colDir = -1;
-	
-	const short ncol0 = m_numCourseGrid[0] + 1;
-	const short ncol1 = m_numCourseGrid[1] + 1;
-	
-	fillP(nrow, ncol0, ncol1, colDir);
-	
+    printf("triangle wale is %i %i %i %i", m_waleVertices[0], m_waleVertices[1], m_waleVertices[2], m_waleVertices[3]);
+
+    short nrow, ncol0, ncol1, colDir;
+    rowColDir(nrow, ncol0, ncol1, colDir);
+
+	fillP(nrow, ncol0, ncol1, colDir);    printf("ping");
 	fillF(nrow, ncol0, ncol1, colDir);
+	
 	m_hasTessellation = 1;
 }
 

@@ -45,6 +45,7 @@ private:
 	void tessellateQuad();
 	void tessellateTriangle();
 	char isConverging() const;
+	void rowColDir(short &nrow, short &ncol0, short &ncol1, short &colDir) const;
 
 	unsigned * m_quadVertices;
 	short m_waleVertices[4];
