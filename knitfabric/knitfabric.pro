@@ -57,6 +57,7 @@ HEADERS       = ../shared/Vector3F.h \
 				../shared/QIconFrame.h \
 				../shared/ToolContext.h \
 				../shared/BiLinearInterpolate.h \
+				../shared/LinearInterpolate.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -139,6 +140,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				../shared/QIconFrame.cpp \
 				../shared/ToolContext.cpp \
 				../shared/BiLinearInterpolate.cpp \
+				../shared/LinearInterpolate.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \

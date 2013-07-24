@@ -1,5 +1,5 @@
 /*
- *  BiLinearInterpolate.h
+ *  LinearInterpolate.h
  *  knitfabric
  *
  *  Created by jian zhang on 6/5/13.
@@ -9,8 +9,8 @@
 
 #pragma once
 #include <AllMath.h>
-class BiLinearInterpolate {
+class LinearInterpolate {
 public:
-	BiLinearInterpolate();
-	float interpolate(float u, float v, float * src) const;
+	LinearInterpolate();
+	float interpolate(float u, float * src) const;
 };

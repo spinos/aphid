@@ -9,6 +9,7 @@
 
 #include "YarnPatch.h"
 #include <BiLinearInterpolate.h>
+#include <LinearInterpolate.h>
 
 YarnPatch::YarnPatch() 
 {
@@ -143,7 +144,25 @@ void YarnPatch::fillP(const short & nrow, const short & ncol0, const short & nco
 	getCornerUV(m_waleVertices[2], cu[1], cv[1]);
 	getCornerUV(m_waleVertices[3], cu[2], cv[2]);
 	
-	BiLinearInterpolate bilinear;
+	LinearInterpolate linear;
+	
+	float leftU[2], leftV[2], rightU[2], rightV[2];
+	leftU[0] = cu[0];
+	leftU[1] = cu[3];
+	
+	leftV[0] = cv[0];
+	leftV[1] = cv[3];
+	
+	rightU[0] = cu[1];
+	rightU[1] = cu[2];
+	
+	rightV[0] = cv[1];
+	rightV[1] = cv[2];
+	
+	printf("uv %f,%f %f,%f\n %f,%f %f,%f\n", leftU[0], leftV[0], leftU[1], leftV[1], rightU[0], rightV[0], rightU[1], rightV[1]);
+	
+	float mixU[2], mixV[2];
+	
 	Vector3F * pos = vertices();
 			
 	float u, v;
@@ -156,7 +175,13 @@ void YarnPatch::fillP(const short & nrow, const short & ncol0, const short & nco
 	colStep = colDir;
 	nextRowEnd = rowEnd;
 	for(short j = 0; j < nrow; j++) {
+	    printf("\n");
 		v = dv * j;
+		
+		mixU[0] = linear.interpolate(v, leftU);
+		mixV[0] = linear.interpolate(v, leftV);
+		mixU[1] = linear.interpolate(v, rightU);
+		mixV[1] = linear.interpolate(v, rightV);
 		
 		rowDifference(colStep, nextRowEnd, ncol1, j);
 		
@@ -168,10 +193,13 @@ void YarnPatch::fillP(const short & nrow, const short & ncol0, const short & nco
 		for(short i = 0; i < rowEnd; i++) {
 			
 			u = du * i;
-			pau = bilinear.interpolate(u, v, cu);
-			pav = bilinear.interpolate(u, v, cv);
+			//pau = bilinear.interpolate(u, v, cu);
+			//pav = bilinear.interpolate(u, v, cv);
 			
-			//printf("%f %f- ", pau, pav);
+			pau = linear.interpolate(u, mixU);
+			pav = linear.interpolate(u, mixV);
+			
+			printf("%f %f\n", pau, pav);
 			evaluateSurfacePosition(pau, pav, &pos[nv]);
 			
 			nv++;
