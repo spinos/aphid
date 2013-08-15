@@ -46,7 +46,6 @@
 
 class PatchMesh;
 class AccPatch;
-class Tessellator;
 class ZEXRImage;
 class BezierDrawer;
 
@@ -72,7 +71,6 @@ protected:
 //! [3]
 private:
 	AccPatch* _bezier;
-	Tessellator* _tess;
 	ZEXRImage* _image;
 	BezierDrawer * m_fabricDrawer;
 	

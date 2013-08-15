@@ -49,7 +49,6 @@
 #include <EasemodelUtil.h>
 #include "accPatch.h"
 #include "accStencil.h"
-#include "tessellator.h"
 #include "zEXRImage.h"
 #include <BezierDrawer.h>
 //! [0]
@@ -70,7 +69,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 #endif
 	if(_image->isValid()) qDebug()<<"image is loaded";
 	
-	_tess = new Tessellator();
+	// use displacement map inside bezier drawer
 	//_tess->setDisplacementMap(_image);
 	
 	Vector3F* cvs = m_mesh->getVertices();
@@ -78,7 +77,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	float* ucoord = m_mesh->us();
 	float* vcoord = m_mesh->vs();
 	unsigned * uvIds = m_mesh->uvIds();
-	int numFace = m_mesh->numPatches();
+	const int numFace = m_mesh->numPatches();
 
 	AccStencil* sten = new AccStencil();
 	AccPatch::stencil = sten;
@@ -123,16 +122,11 @@ void GLWidget::clientDraw()
 
 void GLWidget::drawBezier()
 {
-	//unsigned numFace = m_fabric->numPatches();
+	const unsigned numFace = m_mesh->numPatches();
 
-	//for(unsigned i = 0; i < numFace; i++) {
-		//m_fabricDrawer->drawBezierPatch(m_fabric->patch(i));
-		//m_fabricDrawer->drawYarn(m_fabric->patch(i));
-		//m_fabricDrawer->drawWale(m_fabric->patch(i));
-		
-		//drawYarn(_bezier[i], detail);
-		//drawFiber(m_fiber[i]);
-	//}
+	for(unsigned i = 0; i < numFace; i++) {
+		m_fabricDrawer->drawBezierPatch(&_bezier[i]);
+	}
 }
 
 void GLWidget::loadMesh(std::string filename)
