@@ -21,10 +21,6 @@ EasyModelIn::EasyModelIn(const char* filename) : _data(0)
 	readFaceCount(); 
 	readFaceConnection();
 	readP();
-	readPatchVertex();
-	readPatchBoundary();
-	readVertexValence();
-	readVertexNormal();
 	readUV();
 	printf("model successfully loaded from %s\n", filename);
 }
