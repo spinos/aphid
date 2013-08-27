@@ -24,11 +24,6 @@ class SingleModelView : public Base3DView
     Q_OBJECT
 
 public:
-    /*enum InteractMode {
-        SelectCompnent,
-        TransformAnchor
-    };*/
-	
     SingleModelView(QWidget *parent = 0);
     ~SingleModelView();
 	

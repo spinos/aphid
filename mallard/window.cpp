@@ -72,9 +72,8 @@ void Window::keyPressEvent(QKeyEvent *e)
 
 void Window::receiveToolContext(int a)
 {
-	if(a == ToolContext::CreateBodyContourFeather)
-		qDebug()<<"create contour";
-	
+	if(a == ToolContext::CreateBodyContourFeather) {
+	}
 }
 
 void Window::receiveToolAction(int a)
