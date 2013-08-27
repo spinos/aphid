@@ -66,6 +66,7 @@ private:
 	ToolBox * m_tools;
 	
 public slots:
+	void receiveToolContext(int a);
     void receiveToolAction(int a);
 };
 //! [0]

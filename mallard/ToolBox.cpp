@@ -51,12 +51,12 @@ void ToolBox::onActionFrameTriggered(int a)
 
 void ToolBox::createContext()
 {
-    ContextIconFrame * selectComponent = new ContextIconFrame(this);
+    ContextIconFrame * createContour = new ContextIconFrame(this);
 	
-	selectComponent->addIconFile(":selvertex.png");
-	selectComponent->addIconFile(":selvertexact.png");
-	selectComponent->setIconIndex(1);
-	selectComponent->setContext(SelectVertex);
+	createContour->addIconFile(":mallardFeatherGreen.png");
+	createContour->addIconFile(":mallardFeatherGreenAct.png");
+	createContour->setIconIndex(1);
+	createContour->setContext(CreateBodyContourFeather);
 	
 	ContextIconFrame * selectAnchor = new ContextIconFrame(this);
 	selectAnchor->addIconFile(":seledge.png");
@@ -64,7 +64,7 @@ void ToolBox::createContext()
 	selectAnchor->setIconIndex(0);
 	selectAnchor->setContext(SelectEdge);
 	
-	m_contextFrames.push_back(selectComponent);
+	m_contextFrames.push_back(createContour);
 	m_contextFrames.push_back(selectAnchor);
 }
 

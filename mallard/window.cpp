@@ -58,6 +58,7 @@ Window::Window()
 	setCentralWidget(glWidget);
     setWindowTitle(tr("Knit Fabric"));
     
+	connect(m_tools, SIGNAL(contextChanged(int)), this, SLOT(receiveToolContext(int)));
     connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
 }
 
@@ -69,11 +70,18 @@ void Window::keyPressEvent(QKeyEvent *e)
         QWidget::keyPressEvent(e);
 }
 
+void Window::receiveToolContext(int a)
+{
+	if(a == ToolContext::CreateBodyContourFeather)
+		qDebug()<<"create contour";
+	
+}
+
 void Window::receiveToolAction(int a)
 {
     if(a == ToolContext::SetWaleEdge)
         glWidget->setSelectionAsWale(1);
-    if(a == ToolContext::SetSingleWaleEdge)
+    else if(a == ToolContext::SetSingleWaleEdge)
         glWidget->setSelectionAsWale(0);
 	else if(a == ToolContext::IncreaseWale)
 		glWidget->changeWaleResolution(1);

@@ -173,4 +173,4 @@ win32 {
 CONFIG += console
 }
 QT           += opengl
-RESOURCES += ../icons/knitfabric.qrc
+RESOURCES += ../icons/mallard.qrc

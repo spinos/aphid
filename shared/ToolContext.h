@@ -6,7 +6,8 @@ public:
         UnknownInteract = 0,
         SelectVertex = 1,
         SelectEdge = 2,
-        SelectFace = 3
+        SelectFace = 3,
+		CreateBodyContourFeather = 4
     };
     
     enum ActionRank {

@@ -1,0 +1,20 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>mallardFeatherGreen.png</file>
+    <file>mallardFeatherGreenAct.png</file>
+    <file>seledge.png</file>
+    <file>seledgeact.png</file>
+    <file>setwale.png</file>
+    <file>setwaleact.png</file>
+    <file>setsinglewale.png</file>
+    <file>setsinglewaleact.png</file>
+    <file>increasewaleact.png</file>
+    <file>increasewale.png</file>
+    <file>decreasewaleact.png</file>
+    <file>decreasewale.png</file>
+    <file>increasecourseact.png</file>
+    <file>increasecourse.png</file>
+    <file>decreasecourseact.png</file>
+    <file>decreasecourse.png</file>
+</qresource>
+</RCC>
