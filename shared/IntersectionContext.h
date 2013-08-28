@@ -13,6 +13,7 @@
 #include <Primitive.h>
 #include <PrimitiveFilter.h>
 #include <Geometry.h>
+
 class IntersectionContext : public PrimitiveFilter {
 public:
 	IntersectionContext();

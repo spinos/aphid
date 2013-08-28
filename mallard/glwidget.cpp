@@ -59,7 +59,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 #ifdef WIN32
 	std::string filename("D:/aphid/mdl/torus.m");
 #else
-	std::string filename("/Users/jianzhang/aphid/mdl/plane.m");
+	std::string filename("/Users/jianzhang/aphid/mdl/torus.m");
 #endif
 
 	loadMesh(filename);	

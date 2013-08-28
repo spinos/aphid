@@ -73,10 +73,11 @@ const BoundingBox PatchMesh::calculateBBox(const unsigned &idx) const
 
 	return box;
 }
-#include <iostream>
+
 char PatchMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const
 {
-    printf("pat inst");
+	Plane pl = ray.m_plane;
+	
     return BaseMesh::intersect(idx, ray, ctx);
 }
 //:~

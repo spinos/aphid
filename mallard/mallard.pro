@@ -58,6 +58,7 @@ HEADERS       = ../shared/Vector3F.h \
 				../shared/ToolContext.h \
 				../shared/BiLinearInterpolate.h \
 				../shared/LinearInterpolate.h \
+                ../shared/Plane.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -136,6 +137,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				../shared/ToolContext.cpp \
 				../shared/BiLinearInterpolate.cpp \
 				../shared/LinearInterpolate.cpp \
+                ../shared/Plane.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \
@@ -157,18 +159,17 @@ SOURCES       = ../shared/Vector3F.cpp \
                 main.cpp 
                 
 INCLUDEPATH += /usr/local/include/OpenEXR
-LIBS += -leasymodel -lIlmImf -lHalf
+LIBS += -L../easymodel -leasymodel -lIlmImf -lHalf
 macx {
     INCLUDEPATH += ../../Library/boost_1_44_0
-        LIBS += -lboost_date_time\
-            -lboost_thread
+        LIBS += -lboost_date_time -lboost_thread -framework libxml
 }
 win32 {
     HEADERS += ../shared/gExtension.h
     SOURCES += ../shared/gExtension.cpp
     INCLUDEPATH += D:/usr/local/include D:/ofl/shared D:/usr/libxml2x64/include D:/usr/eigen3
     QMAKE_LIBDIR += D:/usr/local/lib64 
-    LIBS += -L../easymodel -leasymodel -LD:/usr/libxml2x64/lib -llibxml2
+    LIBS += -LD:/usr/libxml2x64/lib -llibxml2
     DEFINES += OPENEXR_DLL NDEBUG
 CONFIG += console
 }

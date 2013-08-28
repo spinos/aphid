@@ -12,7 +12,7 @@ INCLUDEPATH += $${SHAREDDIR} \
                 
 win32:INCLUDEPATH += D:/usr/local/include \
                     D:/usr/libxml2x64/include
-mac:LIBS += -L$(HOME)/Library/boost_1_44_0/stage/lib -lboost_filesystem -framework libxml
+macx:LIBS += -L$(HOME)/Library/boost_1_44_0/stage/lib -lboost_filesystem
 win32: LIBS += -LD:/usr/local/lib64 -LD:/usr/libxml2x64/lib -llibxml2
 HEADERS = EasyModelIn.h \
             EasyModelOut.h \
