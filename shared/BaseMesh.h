@@ -31,7 +31,7 @@ public:
 	unsigned processQuadFromPolygon();
 
 	const BoundingBox calculateBBox() const;
-	const BoundingBox calculateBBox(const unsigned &idx) const;
+	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
 	const int faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const;
 	
 	Vector3F * vertices();
@@ -59,7 +59,7 @@ public:
 	unsigned * getPolygonCounts() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	
-	char intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const;
+	virtual char intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const;
 	char intersect(const Ray & ray, IntersectionContext * ctx) const;
 	char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
 	char insideTriangle(const Vector3F & p, const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n) const;

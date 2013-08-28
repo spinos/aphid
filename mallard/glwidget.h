@@ -59,11 +59,12 @@ public:
     ~GLWidget();
 	
 	virtual void loadMesh(std::string filename);
+	virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
 	
 	void setSelectionAsWale(int bothSide);
 	void changeWaleResolution(int change);
 	void changeCourseResolution(int change);
-
+	
 //! [2]
 protected:
     virtual void clientDraw();

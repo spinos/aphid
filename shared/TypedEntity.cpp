@@ -10,12 +10,24 @@
 #include "TypedEntity.h"
 
 TypedEntity::TypedEntity() {}
-void TypedEntity::setMeshType()
+
+void TypedEntity::setEntityType(TypeEntries val)
 {
-	m_type = 0;
+    m_type = val;
 }
 
-bool TypedEntity::isMesh() const
+unsigned TypedEntity::entityType() const
 {
-	return m_type == 0;
+    return m_type;
 }
+
+bool TypedEntity::isTriangleMesh() const
+{
+    return m_type == TTriangleMesh;
+}
+
+bool TypedEntity::isPatchMesh() const
+{
+    return m_type == TPatchMesh;
+}
+//:~

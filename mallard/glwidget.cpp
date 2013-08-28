@@ -51,6 +51,8 @@
 #include "accStencil.h"
 #include "zEXRImage.h"
 #include <BezierDrawer.h>
+#include <ToolContext.h>
+
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
@@ -118,6 +120,7 @@ void GLWidget::clientDraw()
 	
 	drawBezier();
 	drawSelection();
+	getDrawer()->drawKdTree(getTree());
 }
 
 void GLWidget::drawBezier()
@@ -146,5 +149,21 @@ void GLWidget::changeWaleResolution(int change)
 
 void GLWidget::changeCourseResolution(int change)
 {
+}
+
+void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
+{
+    Vector3F rayo = origin;
+	Vector3F raye = origin + displacement;
+	
+	Ray ray(rayo, raye);
+	if(interactMode() == ToolContext::SelectVertex) {
+		qDebug()<<"select vertex";
+	}
+	else {
+		if(hitTest(ray, hit))
+		    qDebug()<<"hit"<<hit.x<<" "<<hit.y<<" "<<hit.z;
+		
+	}
 }
 //:~

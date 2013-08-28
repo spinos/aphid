@@ -32,6 +32,7 @@ public:
 	virtual bool removeActiveAnchor(unsigned & idx);
 	
 	bool pickupComponent(const Ray & ray, Vector3F & hit);
+	bool hitTest(const Ray & ray, Vector3F & hit);
 	
 	virtual void clientDraw();
     virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);

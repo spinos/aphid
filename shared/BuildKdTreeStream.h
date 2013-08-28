@@ -13,12 +13,14 @@
 #include <IndexArray.h>
 #include <KdTreeNodeArray.h>
 #include <BaseMesh.h>
+#include <PatchMesh.h>
 class BuildKdTreeStream {
 public:
 	BuildKdTreeStream();
 	~BuildKdTreeStream();
 	void cleanup();
 	void appendMesh(BaseMesh* mesh);
+	void appendPatchMesh(PatchMesh* mesh);
 	
 	const unsigned getNumPrimitives() const;
 	const PrimitiveArray &getPrimitives() const;

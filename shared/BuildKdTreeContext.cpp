@@ -23,10 +23,12 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
 		primIndex[i] = i;
 		
 		Primitive *p = primitives.asPrimitive();
+
 		BaseMesh *mesh = (BaseMesh *)(p->getGeometry());
-		unsigned triIdx = p->getComponentIndex();
 		
-		primBoxes[i] = mesh->calculateBBox(triIdx);
+		unsigned compIdx = p->getComponentIndex();
+		
+		primBoxes[i] = mesh->calculateBBox(compIdx);
 		primBoxes[i].expand(10e-5);
 		primitives.next();
 	}

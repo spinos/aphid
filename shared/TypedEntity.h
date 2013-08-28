@@ -11,9 +11,18 @@
 
 class TypedEntity {
 public:
+    enum TypeEntries {
+        TTriangleMesh = 0,
+        TPatchMesh = 1,
+        TUnknown = 2
+    };
+    
 	TypedEntity();
-	void setMeshType();
-	bool isMesh() const;
+	void setEntityType(TypeEntries val);
+	unsigned entityType() const;
+	
+	bool isTriangleMesh() const;
+	bool isPatchMesh() const;
 private:	
 	unsigned m_type;
 };

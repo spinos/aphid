@@ -33,5 +33,5 @@ const unsigned Primitive::getComponentIndex() const
 
 bool Primitive::isMeshGeometry() const
 {
-	return ((TypedEntity *)m_geometry)->isMesh();
+	return ((TypedEntity *)m_geometry)->isTriangleMesh();
 }

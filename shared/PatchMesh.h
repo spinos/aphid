@@ -23,6 +23,10 @@ public:
 	float * us();
 	float * vs();
 	unsigned * uvIds();
+	
+	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
+	virtual char intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const;
+	
 private:
 	unsigned m_numUVs, m_numUVIds;
 	float * m_u;

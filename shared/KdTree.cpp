@@ -66,7 +66,7 @@ void KdTree::cleanup()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 30 || level == 22) {
+	if(ctx.getNumPrimitives() < 16 || level == 22) {
 		if(ctx.getNumPrimitives() > 0) {
 			IndexArray &indir = m_stream.indirection();
 			unsigned numDir = ctx.getNumPrimitives();

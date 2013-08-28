@@ -122,6 +122,15 @@ bool SingleModelView::pickupComponent(const Ray & ray, Vector3F & hit)
 	return true;
 }
 
+bool SingleModelView::hitTest(const Ray & ray, Vector3F & hit)
+{
+	getIntersectionContext()->reset();
+	if(!m_tree->intersect(ray, getIntersectionContext())) 
+		return false;
+	hit = getIntersectionContext()->m_hitP;
+	return true;
+}
+
 void SingleModelView::buildTree()
 {
 	if(m_tree) delete m_tree;

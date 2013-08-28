@@ -19,7 +19,7 @@ BaseMesh::BaseMesh()
 	m_polygonCounts = 0;
 	m_polygonIndices = 0;
 	m_numPolygons = 0;
-	setMeshType();
+	setEntityType(TypedEntity::TTriangleMesh);
 }
 
 BaseMesh::~BaseMesh()
