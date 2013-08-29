@@ -44,10 +44,9 @@
 
 #include <SingleModelView.h>
 
-class PatchMesh;
-class AccPatch;
 class ZEXRImage;
 class BezierDrawer;
+class AccPatchMesh;
 
 //! [0]
 class GLWidget : public SingleModelView
@@ -60,7 +59,7 @@ public:
 	
 	virtual void loadMesh(std::string filename);
 	virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
-	
+	virtual PatchMesh * mesh() const;
 	void setSelectionAsWale(int bothSide);
 	void changeWaleResolution(int change);
 	void changeCourseResolution(int change);
@@ -71,11 +70,9 @@ protected:
 
 //! [3]
 private:
-	AccPatch* _bezier;
 	ZEXRImage* _image;
 	BezierDrawer * m_fabricDrawer;
-	
-	void drawBezier();
+	AccPatchMesh * m_accmesh;
 };
 //! [3]
 

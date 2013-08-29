@@ -10,6 +10,7 @@
 
 #include <BaseDrawer.h>
 #include <BezierPatch.h>
+#include <AccPatchMesh.h>
 
 class Tessellator;
 
@@ -19,6 +20,7 @@ public:
 	
 	void drawBezierPatch(BezierPatch * patch);
 	void drawBezierCage(BezierPatch * patch);
+	void drawAccPatchMesh(AccPatchMesh * mesh);
 private:
 	Tessellator* m_tess;
 };

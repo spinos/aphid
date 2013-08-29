@@ -52,16 +52,18 @@ public:
 	static ToolContext * InteractContext;
 	int interactMode();
 	
+	virtual PatchMesh * mesh() const;
+	
 protected:
     void keyPressEvent(QKeyEvent *event);
     
 public:
-    PatchMesh * m_mesh;
-	KdTree * m_tree;
+    KdTree * m_tree;
 	AnchorGroup * m_anchors;
 	MeshTopology * m_topo;
 	
 private:
+	PatchMesh * m_mesh;
 	
 public slots:
 	void open();

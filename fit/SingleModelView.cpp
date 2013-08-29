@@ -40,7 +40,7 @@ SingleModelView::~SingleModelView()
 void SingleModelView::clientDraw()
 {
 	KdTreeDrawer *drawer = getDrawer();
-	drawer->hiddenLine(m_mesh);	
+	drawer->hiddenLine(mesh());	
 	drawSelection();
 	drawAnchors();
 }
@@ -135,15 +135,15 @@ void SingleModelView::buildTree()
 {
 	if(m_tree) delete m_tree;
 	m_tree = new KdTree;
-	m_tree->addMesh(m_mesh);
+	m_tree->addMesh(mesh());
 	m_tree->create();
 }
 
 void SingleModelView::buildTopology()
 {
-	m_topo->buildTopology(m_mesh);
+	m_topo->buildTopology(mesh());
 	getSelection()->setTopology(m_topo);
-    m_topo->calculateNormal(m_mesh);
+    m_topo->calculateNormal(mesh());
 }
 
 void SingleModelView::open()
@@ -159,12 +159,12 @@ void SingleModelView::open()
 
 void SingleModelView::loadMesh(std::string filename)
 {
-	ESMUtil::Import(filename.c_str(), m_mesh);
+	ESMUtil::Import(filename.c_str(), mesh());
 }
 
 void SingleModelView::saveMesh(std::string filename)
 {
-	ESMUtil::Export(filename.c_str(), m_mesh);
+	ESMUtil::Export(filename.c_str(), mesh());
 }
 
 void SingleModelView::save()
@@ -223,5 +223,10 @@ int SingleModelView::interactMode()
 	if(!InteractContext) return ToolContext::SelectVertex;
 	
 	return InteractContext->getContext();
+}
+
+PatchMesh * SingleModelView::mesh() const
+{
+	return m_mesh;
 }
 //:~

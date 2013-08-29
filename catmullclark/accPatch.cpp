@@ -14,7 +14,7 @@
 AccPatch::AccPatch() {}
 AccPatch::~AccPatch() {}
 
-AccStencil* AccPatch::stencil;
+AccStencil* AccPatch::stencil = 0;
 
 void AccPatch::evaluateContolPoints()
 {

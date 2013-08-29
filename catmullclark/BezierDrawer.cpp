@@ -13,6 +13,7 @@
 #endif
 #include "tessellator.h"
 #include "BezierDrawer.h"
+#include <accPatch.h>
 
 BezierDrawer::BezierDrawer() 
 {
@@ -61,3 +62,13 @@ void BezierDrawer::drawBezierCage(BezierPatch * patch)
 	}
 	glEnd();
 }
+
+void BezierDrawer::drawAccPatchMesh(AccPatchMesh * mesh)
+{
+	const unsigned numFace = mesh->numPatches();
+	AccPatch* bez = mesh->beziers();
+	for(unsigned i = 0; i < numFace; i++) {
+		drawBezierPatch(&bez[i]);
+	}
+}
+//:~

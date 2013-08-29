@@ -45,10 +45,8 @@
 #include <math.h>
 #include <MeshTopology.h>
 #include "glwidget.h"
-#include <PatchMesh.h>
+#include <AccPatchMesh.h>
 #include <EasemodelUtil.h>
-#include "accPatch.h"
-#include "accStencil.h"
 #include "zEXRImage.h"
 #include <BezierDrawer.h>
 #include <ToolContext.h>
@@ -56,54 +54,25 @@
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
+	m_accmesh = new AccPatchMesh;
 #ifdef WIN32
 	std::string filename("D:/aphid/mdl/torus.m");
 #else
 	std::string filename("/Users/jianzhang/aphid/mdl/torus.m");
 #endif
 
-	loadMesh(filename);	
+	loadMesh(filename);
+	m_accmesh->setup(m_topo);
 	
 #ifdef WIN32
 	_image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
 #else
 	_image = new ZEXRImage("/Users/jianzhang/aphid/catmullclark/disp.exr");
 #endif
-	if(_image->isValid()) qDebug()<<"image is loaded";
-	
+	//if(_image->isValid()) qDebug()<<"image is loaded";
 	// use displacement map inside bezier drawer
 	//_tess->setDisplacementMap(_image);
-	
-	Vector3F* cvs = m_mesh->getVertices();
-	Vector3F* normal = m_mesh->getNormals();
-	float* ucoord = m_mesh->us();
-	float* vcoord = m_mesh->vs();
-	unsigned * uvIds = m_mesh->uvIds();
-	const int numFace = m_mesh->numPatches();
 
-	AccStencil* sten = new AccStencil();
-	AccPatch::stencil = sten;
-	sten->setVertexPosition(cvs);
-	sten->setVertexNormal(normal);
-	
-	sten->m_vertexAdjacency = m_topo->getTopology();
-
-	_bezier = new AccPatch[numFace];
-	unsigned * quadV = m_mesh->quadIndices();
-	for(int j = 0; j < numFace; j++) {
-		sten->m_patchVertices[0] = quadV[0];
-		sten->m_patchVertices[1] = quadV[1];
-		sten->m_patchVertices[2] = quadV[2];
-		sten->m_patchVertices[3] = quadV[3];
-		
-		_bezier[j].setTexcoord(ucoord, vcoord, &uvIds[j * 4]);
-		_bezier[j].evaluateContolPoints();
-		_bezier[j].evaluateTangents();
-		_bezier[j].evaluateBinormals();
-		
-		quadV += 4;
-	}
-	
 	m_fabricDrawer = new BezierDrawer;
 }
 //! [0]
@@ -116,25 +85,16 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
-	getDrawer()->edge(m_mesh);
+	getDrawer()->edge(mesh());
 	
-	drawBezier();
+	m_fabricDrawer->drawAccPatchMesh(m_accmesh);
 	drawSelection();
-	getDrawer()->drawKdTree(getTree());
-}
-
-void GLWidget::drawBezier()
-{
-	const unsigned numFace = m_mesh->numPatches();
-
-	for(unsigned i = 0; i < numFace; i++) {
-		m_fabricDrawer->drawBezierPatch(&_bezier[i]);
-	}
+	//getDrawer()->drawKdTree(getTree());
 }
 
 void GLWidget::loadMesh(std::string filename)
 {
-	ESMUtil::ImportPatch(filename.c_str(), m_mesh);
+	ESMUtil::ImportPatch(filename.c_str(), mesh());
 	buildTopology();
 	buildTree();
 }
@@ -165,5 +125,10 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 		    qDebug()<<"hit"<<hit.x<<" "<<hit.y<<" "<<hit.z;
 		
 	}
+}
+
+PatchMesh * GLWidget::mesh() const
+{
+	return m_accmesh;
 }
 //:~
