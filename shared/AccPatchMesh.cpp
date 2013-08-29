@@ -66,4 +66,9 @@ const BoundingBox AccPatchMesh::calculateBBox(const unsigned &idx) const
 {
 	return beziers()[idx].controlBBox();
 }
+
+char AccPatchMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const
+{
+	return PatchMesh::intersect(idx, ray, ctx);
+}
 //:~
