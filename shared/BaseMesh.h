@@ -11,6 +11,7 @@
 #include <AllMath.h>
 #include <Geometry.h>
 #include <IntersectionContext.h>
+#include <Ray.h>
 
 class BaseMesh : public Geometry {
 public:

@@ -8,7 +8,7 @@
  */
 
 #include "AnchorGroup.h"
-
+#include <Ray.h>
 AnchorGroup::AnchorGroup() {m_activeAnchor = 0;}
 AnchorGroup::~AnchorGroup() {}
 

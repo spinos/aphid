@@ -13,7 +13,6 @@
 #include <Matrix33F.h>
 #include <Matrix44F.h>
 #include <Vector2F.h>
-#include <Ray.h>
 
 inline void Clamp01(float &v) {
 	if(v < 0.f) v = 0.f;
@@ -26,6 +25,9 @@ inline float log2f( float n )
     return logf( n ) / logf( 2.f );  
 }
 #endif
+
+#define PI 3.1415926535
+#define EPSILON 10e-7
 
 #endif        //  #ifndef ALLMATH_H
 
