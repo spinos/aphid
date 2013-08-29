@@ -61,4 +61,9 @@ AccPatch* AccPatchMesh::beziers() const
 {
 	return m_bezier;
 }
+
+const BoundingBox AccPatchMesh::calculateBBox(const unsigned &idx) const
+{
+	return beziers()[idx].controlBBox();
+}
 //:~

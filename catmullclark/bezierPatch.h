@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <AllMath.h>
+class BoundingBox;
 
 class BezierPatch
 {
@@ -23,6 +24,7 @@ public:
 	void evaluateSurfaceBinormal(float u, float v, Vector3F * binm) const;
 	void evaluateSurfaceNormal(float u, float v, Vector3F * nor) const;
 	void evaluateSurfaceTexcoord(float u, float v, Vector3F * tex) const;
+	const BoundingBox controlBBox() const;
 	
 	Vector3F p(unsigned u, unsigned v) const;
 	Vector3F normal(unsigned u, unsigned v) const;

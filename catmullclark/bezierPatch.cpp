@@ -7,6 +7,7 @@
  *
  */
 #include <AllMath.h>
+#include <BoundingBox.h>
 #include "bezierPatch.h"
 
 BezierPatch::BezierPatch() {}
@@ -198,9 +199,14 @@ void BezierPatch::evaluateSurfaceTexcoord(float u, float v, Vector3F * texcoord)
 		(tex(0, 1) * L0.x + tex(1, 1) * L1.x) * L1.y;
 	*texcoord = Vector3F(st.x, st.y, 0.f);
 }
-/*
-int BezierPatch::getLODBase() const
+
+const BoundingBox BezierPatch::controlBBox() const
 {
-	return _lodBase;
+	BoundingBox box;
+	for(int i = 0; i < 16; i++) {
+		box.updateMin(_contorlPoints[i]);
+		box.updateMax(_contorlPoints[i]);
+	}
+	return box;
 }
-*/
+//:~

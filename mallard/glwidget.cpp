@@ -43,7 +43,6 @@
 #include <QtOpenGL>
 
 #include <math.h>
-#include <MeshTopology.h>
 #include "glwidget.h"
 #include <AccPatchMesh.h>
 #include <EasemodelUtil.h>
@@ -62,7 +61,6 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 #endif
 
 	loadMesh(filename);
-	m_accmesh->setup(m_topo);
 	
 #ifdef WIN32
 	_image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
@@ -86,17 +84,10 @@ void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
 	getDrawer()->edge(mesh());
-	
 	m_fabricDrawer->drawAccPatchMesh(m_accmesh);
+	getDrawer()->drawKdTree(getTree());
+	
 	drawSelection();
-	//getDrawer()->drawKdTree(getTree());
-}
-
-void GLWidget::loadMesh(std::string filename)
-{
-	ESMUtil::ImportPatch(filename.c_str(), mesh());
-	buildTopology();
-	buildTree();
 }
 
 void GLWidget::setSelectionAsWale(int bothSide)
@@ -111,6 +102,14 @@ void GLWidget::changeCourseResolution(int change)
 {
 }
 
+void GLWidget::loadMesh(std::string filename)
+{
+	ESMUtil::ImportPatch(filename.c_str(), mesh());
+	buildTopology();
+	m_accmesh->setup(m_topo);
+	buildTree();
+}
+
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
 {
     Vector3F rayo = origin;
@@ -118,7 +117,7 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 	
 	Ray ray(rayo, raye);
 	if(interactMode() == ToolContext::SelectVertex) {
-		qDebug()<<"select vertex";
+		pickupComponent(ray, hit);
 	}
 	else {
 		if(hitTest(ray, hit))

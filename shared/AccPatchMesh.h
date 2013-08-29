@@ -20,6 +20,8 @@ public:
 	
 	AccPatch* beziers() const;
 	
+	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
+	
 private:
 	AccPatch* m_bezier;
 };
