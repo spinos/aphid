@@ -46,7 +46,7 @@ void BezierDrawer::drawBezierCage(BezierPatch * patch)
 	glDisable(GL_CULL_FACE);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_QUADS);
-	glColor3f(1,1,1);
+	//glColor3f(1,1,1);
 	Vector3F p;
 	for(unsigned j=0; j < 3; j++) {
 		for(unsigned i = 0; i < 3; i++) {

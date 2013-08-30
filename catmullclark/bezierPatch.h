@@ -25,6 +25,7 @@ public:
 	void evaluateSurfaceNormal(float u, float v, Vector3F * nor) const;
 	void evaluateSurfaceTexcoord(float u, float v, Vector3F * tex) const;
 	const BoundingBox controlBBox() const;
+	void decasteljauSplit(BezierPatch *dst) const;
 	
 	Vector3F p(unsigned u, unsigned v) const;
 	Vector3F normal(unsigned u, unsigned v) const;
