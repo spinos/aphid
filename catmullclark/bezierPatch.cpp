@@ -67,25 +67,25 @@ Vector2F BezierPatch::tex(unsigned u, unsigned v) const
 
 void BezierPatch::evaluateContolPoints()
 {
-	_contorlPoints[0] = Vector3F(-1.f, -1.1f, -1.5f);
-	_contorlPoints[1] = Vector3F(0.f, -1.05f, -1.1f);
-	_contorlPoints[2] = Vector3F(1.f, -1.3f, -1.4f);
-	_contorlPoints[3] = Vector3F(2.f, -2.f, -1.9f);
+	_contorlPoints[0] = Vector3F(-2.f, -1.1f, 1.5f);
+	_contorlPoints[1] = Vector3F(0.f, -1.05f, 1.1f);
+	_contorlPoints[2] = Vector3F(1.f, -1.3f, 1.f);
+	_contorlPoints[3] = Vector3F(2.f, -2.f, 1.4f);
 	
-	_contorlPoints[4] = Vector3F(-1.f, .34f, 0.f);
-	_contorlPoints[5] = Vector3F(0.f, 1.16f, 0.f);
-	_contorlPoints[6] = Vector3F(1.4f, 1.f, 0.f);
-	_contorlPoints[7] = Vector3F(2.5f, .2f, 0.17f);
+	_contorlPoints[4] = Vector3F(-1.f, .14f, 0.f);
+	_contorlPoints[5] = Vector3F(0.f, .26f, 0.2f);
+	_contorlPoints[6] = Vector3F(1.4f, -.45f, 0.3f);
+	_contorlPoints[7] = Vector3F(2.5f, -1.2f, 0.17f);
 	
-	_contorlPoints[8] = Vector3F(-1.f, .5f, 1.f);
-	_contorlPoints[9] = Vector3F(0.f, 1.1f, 1.2f);
-	_contorlPoints[10] = Vector3F(1.2f, .9f, 1.6f);
-	_contorlPoints[11] = Vector3F(2.3f, .1f, 1.5f);
+	_contorlPoints[8] = Vector3F(-1.f, 1.5f, -1.f);
+	_contorlPoints[9] = Vector3F(.41f, 1.1f, -1.2f);
+	_contorlPoints[10] = Vector3F(1.8f, .3f, -1.6f);
+	_contorlPoints[11] = Vector3F(2.9f, -.4f, -1.5f);
 	
-	_contorlPoints[12] = Vector3F(-1.f, 1.f, 2.f);
-	_contorlPoints[13] = Vector3F(0.f, 1.f, 2.3f);
-	_contorlPoints[14] = Vector3F(1.f, 1.f, 2.5f);
-	_contorlPoints[15] = Vector3F(2.f, 1.f, 1.98f);
+	_contorlPoints[12] = Vector3F(-1.f, 3.f, -2.f);
+	_contorlPoints[13] = Vector3F(0.f, 2.f, -2.3f);
+	_contorlPoints[14] = Vector3F(1.f, 3.f, -2.5f);
+	_contorlPoints[15] = Vector3F(2.f, 4.f, -2.98f);
 }
 
 void BezierPatch::evaluateTangents()
@@ -213,101 +213,46 @@ const BoundingBox BezierPatch::controlBBox() const
 void BezierPatch::decasteljauSplit(BezierPatch *dst) const
 {
     Vector3F split[7][7];
+
+// blue	corner
     split[0][0] = p(0, 0);
     split[0][6] = p(3, 0);
+	split[2][0] = p(0, 1);
+    split[2][6] = p(3, 1);
+	split[4][0] = p(0, 2);
+    split[4][6] = p(3, 2);
     split[6][6] = p(3, 3);
     split[6][0] = p(0, 3);
     
     unsigned u, v;
-    for(v = 0; v <7; v+= 2) {
+	
+// u direction
+
+	for(v = 0; v < 7; v+= 2) {
+// green
         for(u = 1; u < 7; u += 2) {
-            split[v][u] = p(u / 2, v / 2) + p(u / 2 + 1, v / 2);
-            split[v][u] *= 0.5f;
+            split[v][u] = (p(u/2, v/2) + p(u/2 + 1, v/2)) * .5f;
         }
+// yellow
+		split[v][2] = (split[v][1] + split[v][3]) * .5f;
+		split[v][4] = (split[v][3] + split[v][5]) * .5f;
+// red
+		split[v][3] = (split[v][2] + split[v][4]) * .5f;
     }
-    
-    for(v = 1; v <7; v+= 2) {
-        for(u = 0; u < 7; u += 2) {
-            split[v][u] = p(u / 2, v / 2) + p(u / 2, v / 2 + 1);
-            split[v][u] *= 0.5f;
-        }
-    }
-    
-    split[0][2] = split[0][1] + split[0][3];
-    split[0][2] *= 0.5f;
-    split[0][4] = split[0][3] + split[0][5];
-    split[0][4] *= 0.5f;
-    split[6][2] = split[6][1] + split[6][3];
-    split[6][2] *= 0.5f;
-    split[6][4] = split[6][3] + split[6][5];
-    split[6][4] *= 0.5f;
-    split[2][0] = split[1][0] + split[3][0];
-    split[2][0] *= 0.5f;
-    split[4][0] = split[3][0] + split[5][0];
-    split[4][0] *= 0.5f;
-    split[2][6] = split[1][6] + split[3][6];
-    split[2][6] *= 0.5f;
-    split[4][6] = split[3][6] + split[5][6];
-    split[4][6] *= 0.5f;
-    
-    split[2][2] = split[1][2] + split[2][3] + split[3][2] + split[2][1];
-    split[2][2] *= 0.25f;
-    split[2][4] = split[1][4] + split[2][5] + split[3][4] + split[2][3];
-    split[2][4] *= 0.25f;
-    split[4][2] = split[3][2] + split[4][3] + split[5][2] + split[4][1];
-    split[4][2] *= 0.25f;
-    split[4][4] = split[3][4] + split[4][5] + split[5][4] + split[4][3];
-    split[4][4] *= 0.25f;
-    
-    for(v = 1; v <7; v+= 2) {
-        for(u = 1; u < 7; u += 2) {
-            split[v][u] = split[v - 1][u - 1] + split[v - 1][u + 1] + split[v + 1][u + 1] + split[v + 1][u - 1];
-            split[v][u] *= .25f;
-        }
-    }
-    
-    split[0][1] = split[0][0] + split[0][2];
-    split[0][1] *= 0.5f;
-    split[0][3] = split[0][2] + split[0][4];
-    split[0][3] *= 0.5f;
-    split[0][5] = split[0][4] + split[0][6];
-    split[0][5] *= 0.5f;
-    
-    split[6][1] = split[6][0] + split[6][2];
-    split[6][1] *= 0.5f;
-    split[6][3] = split[6][2] + split[6][4];
-    split[6][3] *= 0.5f;
-    split[6][5] = split[6][4] + split[6][6];
-    split[6][5] *= 0.5f;
-    
-    split[1][0] = split[0][0] + split[2][0];
-    split[1][0] *= 0.5f;
-    split[3][0] = split[2][0] + split[4][0];
-    split[3][0] *= 0.5f;
-    split[5][0] = split[4][0] + split[5][0];
-    split[5][0] *= 0.5f;
-    
-    split[1][6] = split[0][6] + split[2][6];
-    split[1][6] *= 0.5f;
-    split[3][6] = split[2][6] + split[4][6];
-    split[3][6] *= 0.5f;
-    split[5][6] = split[4][6] + split[5][6];
-    split[5][6] *= 0.5f;
-    /*
-    for(v = 0; v <7; v+= 2) {
-        for(u = 1; u < 7; u += 2) {
-            split[v][u] = split[v][u - 1] + split[v][u + 1];
-            split[v][u] *= 0.5f;
-        }
-    }
-    
-    for(v = 1; v <7; v+= 2) {
-        for(u = 0; u < 7; u += 2) {
-            split[v][u] = split[v - 1][u] + split[v + 1][u];
-            split[v][u] *= 0.5f;
-        }
-    }*/
-    
+
+// v direction
+	for(u = 0; u < 7; u += 1) {
+// green
+		for(v = 1; v <7; v+= 2) {
+			split[v][u] = (split[v-1][u] + split[v+1][u]) * .5f;
+		}
+// yellow		
+		split[2][u] = (split[1][u] + split[3][u]) * .5f;
+		split[4][u] = (split[3][u] + split[5][u]) * .5f;
+// red
+		split[3][u] = (split[2][u] + split[4][u]) * .5f;
+	}
+	
     BezierPatch *child0 = &dst[0];
     BezierPatch *child1 = &dst[1];
     BezierPatch *child2 = &dst[2];
