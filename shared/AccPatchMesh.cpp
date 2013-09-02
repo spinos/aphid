@@ -69,6 +69,14 @@ const BoundingBox AccPatchMesh::calculateBBox(const unsigned &idx) const
 
 char AccPatchMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const
 {
+	BoundingBox controlbox = beziers()[idx].controlBBox();
+	float hitt0, hitt1;
+	if(!controlbox.intersect(ray, &hitt0, &hitt1)) {
+		return 0;
+	}
+	if(hitt0 > ctx->m_minHitDistance) return 0;
+	
+	
 	return PatchMesh::intersect(idx, ray, ctx);
 }
 //:~

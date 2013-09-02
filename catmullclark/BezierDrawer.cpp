@@ -64,11 +64,13 @@ void BezierDrawer::drawBezierCage(BezierPatch * patch)
 }
 
 void BezierDrawer::drawAccPatchMesh(AccPatchMesh * mesh)
-{
+{setWired(1);
 	const unsigned numFace = mesh->numPatches();
 	AccPatch* bez = mesh->beziers();
 	for(unsigned i = 0; i < numFace; i++) {
-		drawBezierPatch(&bez[i]);
+		//drawBezierCage(&bez[i]);
+		BoundingBox b = bez[i].controlBBox();
+		box(b);
 	}
 }
 //:~

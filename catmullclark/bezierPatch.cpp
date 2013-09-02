@@ -199,7 +199,7 @@ void BezierPatch::evaluateSurfaceTexcoord(float u, float v, Vector3F * texcoord)
 		(tex(0, 1) * L0.x + tex(1, 1) * L1.x) * L1.y;
 	*texcoord = Vector3F(st.x, st.y, 0.f);
 }
-
+#include <iostream>
 const BoundingBox BezierPatch::controlBBox() const
 {
 	BoundingBox box;
@@ -207,6 +207,8 @@ const BoundingBox BezierPatch::controlBBox() const
 		box.updateMin(_contorlPoints[i]);
 		box.updateMax(_contorlPoints[i]);
 	}
+	//printf("miss %f %f %f : %f %f %f ", box.m_data[0], box.m_data[1], box.m_data[2], box.m_data[3], box.m_data[4], box.m_data[5]);
+		
 	return box;
 }
 

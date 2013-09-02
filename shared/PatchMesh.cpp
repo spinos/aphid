@@ -78,16 +78,29 @@ const BoundingBox PatchMesh::calculateBBox(const unsigned &idx) const
 
 char PatchMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const
 {
-	Vector3F pop[4];
+	Vector3F po[4];
 	unsigned *qudi = &m_quadIndices[idx * 4];
-	Vector3F *p0 = &_vertices[*qudi];
+	po[0] = _vertices[*qudi];
 	qudi++;
-	Vector3F *p1 = &_vertices[*qudi];
+	po[1] = _vertices[*qudi];
 	qudi++;
-	Vector3F *p2 = &_vertices[*qudi];
+	po[2] = _vertices[*qudi];
 	qudi++;
-	Vector3F *p3 = &_vertices[*qudi];
-	Plane pl(*p0, *p1, *p2, *p3);
+	po[3] = _vertices[*qudi];
+	
+	if(!planarIntersect(po, ray, ctx)) return 0;
+	
+	if(ctx->getComponentFilterType() == PrimitiveFilter::TFace)
+	    ctx->m_componentIdx = idx;
+	else
+	    ctx->m_componentIdx = closestVertex(idx, ctx->m_hitP);
+		
+	return 1;
+}
+
+char PatchMesh::planarIntersect(const Vector3F * fourCorners, const Ray & ray, IntersectionContext * ctx) const
+{
+	Plane pl(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
 	
 	Vector3F px;
 	float t;
@@ -96,10 +109,11 @@ char PatchMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * c
 	if(t < 0.f || t > ray.m_tmax) return 0;
 	if(t > ctx->m_minHitDistance) return 0;
 	
-	pl.projectPoint(*p0, pop[0]);
-	pl.projectPoint(*p1, pop[1]);
-	pl.projectPoint(*p2, pop[2]);
-	pl.projectPoint(*p3, pop[3]);
+	Vector3F pop[4];
+	pl.projectPoint(fourCorners[0], pop[0]);
+	pl.projectPoint(fourCorners[1], pop[1]);
+	pl.projectPoint(fourCorners[2], pop[2]);
+	pl.projectPoint(fourCorners[3], pop[3]);
 	
 	Vector3F pn;
 	pl.getNormal(pn);
@@ -112,14 +126,25 @@ char PatchMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * c
 	ctx->m_minHitDistance = t;
 	ctx->m_geometry = (Geometry*)this;
 	
-	if(ctx->getComponentFilterType() == PrimitiveFilter::TFace) {
-	    ctx->m_componentIdx = idx;
-	}
-	else {
-		int vertInFace = pipt.closestVertex(px, pop, 4);
-	    ctx->m_componentIdx = m_quadIndices[idx * 4 + vertInFace];
-	}
-	
 	return 1;
+}
+
+unsigned PatchMesh::closestVertex(unsigned idx, const Vector3F & px) const
+{
+	unsigned *qudi = &m_quadIndices[idx * 4];
+	float mag, minDist = 10e8;
+	unsigned vert = 0;
+	for(int i = 0; i < 4; i++) {
+		Vector3F v = _vertices[*qudi] - px;
+		
+		mag = v.length();
+		
+		if(mag < minDist) {
+			minDist = mag;
+			vert = *qudi;
+		}
+		qudi++;
+	}
+	return vert;
 }
 //:~

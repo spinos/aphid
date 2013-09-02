@@ -86,10 +86,10 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
-	//getDrawer()->edge(mesh());
-	//m_fabricDrawer->drawAccPatchMesh(m_accmesh);
+	getDrawer()->edge(mesh());
+	m_fabricDrawer->drawAccPatchMesh(m_accmesh);
 	//getDrawer()->drawKdTree(getTree());
-	
+	/*
 	glColor3f(0.f, 1.f, 1.f);
 	m_fabricDrawer->drawBezierCage(&testbez);
 	glColor3f(1.f, 1.f, 0.f);
@@ -103,6 +103,7 @@ void GLWidget::clientDraw()
     m_fabricDrawer->drawBezierPatch(&testsplt[1]);
     m_fabricDrawer->drawBezierPatch(&testsplt[2]);
     m_fabricDrawer->drawBezierPatch(&testsplt[3]);
+	*/
 	drawSelection();
 }
 
@@ -137,7 +138,7 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 	}
 	else {
 		if(hitTest(ray, hit))
-		    qDebug()<<"hit"<<hit.x<<" "<<hit.y<<" "<<hit.z;
+		    qDebug()<<"\nhit"<<hit.x<<" "<<hit.y<<" "<<hit.z<<"\n";
 		
 	}
 }
