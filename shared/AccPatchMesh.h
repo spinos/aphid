@@ -9,6 +9,7 @@
 #pragma once
 
 #include <PatchMesh.h>
+class BezierPatch;
 class AccPatch;
 class MeshTopology;
 class AccPatchMesh : public PatchMesh {
@@ -22,7 +23,7 @@ public:
 	
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
 	virtual char intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const;
-	
+	char recursiveBezierIntersect(BezierPatch* patch, const Ray & ray, IntersectionContext * ctx, int level) const;
 private:
 	AccPatch* m_bezier;
 };

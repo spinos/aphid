@@ -68,9 +68,7 @@ void BezierDrawer::drawAccPatchMesh(AccPatchMesh * mesh)
 	const unsigned numFace = mesh->numPatches();
 	AccPatch* bez = mesh->beziers();
 	for(unsigned i = 0; i < numFace; i++) {
-		//drawBezierCage(&bez[i]);
-		BoundingBox b = bez[i].controlBBox();
-		box(b);
+		drawBezierPatch(&bez[i]);
 	}
 }
 //:~

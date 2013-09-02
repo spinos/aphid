@@ -32,13 +32,14 @@
 	void setTranslation(const Vector3F& p);
 	void setTranslation(float x, float y, float z);
 	void setOrientations(const Vector3F& side, const Vector3F& up, const Vector3F& front);
+	void setFrontOrientation(const Vector3F& front);
 	Vector3F getTranslation() const;
 	Vector3F getSide() const;
 	Vector3F getUp() const;
 	Vector3F getFront() const;
 	void transposed(float * mat) const;
 	float v[16];
-	
+	void glMatrix(float *m) const;
 	static float Determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i );
  };
  

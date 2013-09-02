@@ -105,6 +105,7 @@ void GLWidget::clientDraw()
     m_fabricDrawer->drawBezierPatch(&testsplt[3]);
 	*/
 	drawSelection();
+	drawIntersection();
 }
 
 void GLWidget::setSelectionAsWale(int bothSide)
@@ -137,9 +138,7 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 		pickupComponent(ray, hit);
 	}
 	else {
-		if(hitTest(ray, hit))
-		    qDebug()<<"\nhit"<<hit.x<<" "<<hit.y<<" "<<hit.z<<"\n";
-		
+		hitTest(ray, hit);
 	}
 }
 

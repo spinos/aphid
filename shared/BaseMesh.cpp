@@ -316,67 +316,24 @@ Matrix33F BaseMesh::getTangentFrame(const unsigned& idx) const
 
 char BaseMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const
 {
-	Vector3F a = _vertices[_indices[idx * 3]];
-	Vector3F b = _vertices[_indices[idx * 3 + 1]];
-	Vector3F c = _vertices[_indices[idx * 3 + 2]];
-	Vector3F ab = b - a;
-	Vector3F ac = c - a;
-	Vector3F nor = ab.cross(ac);
-	nor.normalize();
+    Vector3F threeCorners[3];
+	threeCorners[0] = _vertices[_indices[idx * 3]];
+	threeCorners[1] = _vertices[_indices[idx * 3 + 1]];
+	threeCorners[2] = _vertices[_indices[idx * 3 + 2]];
 	
-	float ddotn = ray.m_dir.dot(nor);
-		
-	if(ddotn > 0.f) return 0;
-	
-	float t = (a.dot(nor) - ray.m_origin.dot(nor)) / ddotn;
-	
-	if(t < 0.f || t > ray.m_tmax) return 0;
-	
-	//printf("face %i %f %f", idx, t, ctx->m_minHitDistance);
-	
-	if(t > ctx->m_minHitDistance) return 0;
-	
-	Vector3F onplane = ray.m_origin + ray.m_dir * t;
-	Vector3F e01 = b - a;
-	Vector3F x0 = onplane - a;
-	if(e01.cross(x0).dot(nor) < 0.f) return 0;
-	
-	//printf("pass a\n");
+	if(!triangleIntersect(threeCorners,ray, ctx)) return 0;
 
-	Vector3F e12 = c - b;
-	Vector3F x1 = onplane - b;
-	if(e12.cross(x1).dot(nor) < 0.f) return 0;
-	
-	//printf("pass b\n");
-	
-	Vector3F e20 = a - c;
-	Vector3F x2 = onplane - c;
-	if(e20.cross(x2).dot(nor) < 0.f) return 0;
-	
-	//printf("pass c\n");
-	
-	ctx->m_hitP = onplane;
-	ctx->m_hitN = nor;
-	ctx->m_minHitDistance = t;
-	ctx->m_geometry = (Geometry*)this;
-
-	if(ctx->getComponentFilterType() == PrimitiveFilter::TFace) {
-	    ctx->m_componentIdx = idx;
-	}
-	else {
-	    ctx->m_componentIdx = _indices[idx * 3];
-	    float mind = (a - onplane).length();
-	    float d = (b - onplane).length();
-	    if(d < mind) {
-	        ctx->m_componentIdx = _indices[idx * 3 + 1];
-	        mind = d;
-	    }
-	    d = (c - onplane).length();
-	    if(d < mind)
-	        ctx->m_componentIdx = _indices[idx * 3 + 2];
-	}
+	postIntersection(idx, ctx);
 	
 	return 1;
+}
+
+void BaseMesh::postIntersection(unsigned idx, IntersectionContext * ctx) const
+{
+    if(ctx->getComponentFilterType() == PrimitiveFilter::TFace)
+	    ctx->m_componentIdx = idx;
+	else
+	    ctx->m_componentIdx = closestVertex(idx, ctx->m_hitP);
 }
 
 char BaseMesh::intersect(const Ray & ray, IntersectionContext * ctx) const
@@ -451,6 +408,74 @@ char BaseMesh::insideTriangle(const Vector3F & p, const Vector3F & a, const Vect
 	Vector3F x2 = p - c;
 	if(e20.cross(x2).dot(n) < 0.f) return 0;
 	
+	return 1;
+}
+
+unsigned BaseMesh::closestVertex(unsigned idx, const Vector3F & px) const
+{
+	unsigned *trii = &_indices[idx * 3];
+	float mag, minDist = 10e8;
+	unsigned vert = 0;
+	for(int i = 0; i < 3; i++) {
+		Vector3F v = _vertices[*trii] - px;
+		
+		mag = v.length();
+		
+		if(mag < minDist) {
+			minDist = mag;
+			vert = *trii;
+		}
+		trii++;
+	}
+	return vert;
+}
+
+char BaseMesh::triangleIntersect(const Vector3F * threeCorners, const Ray & ray, IntersectionContext * ctx) const
+{
+    Vector3F a = threeCorners[0];
+	Vector3F b = threeCorners[1];
+	Vector3F c = threeCorners[2];
+	Vector3F ab = b - a;
+	Vector3F ac = c - a;
+	Vector3F nor = ab.cross(ac);
+	nor.normalize();
+	
+	float ddotn = ray.m_dir.dot(nor);
+		
+	if(ddotn > 0.f) return 0;
+	
+	float t = (a.dot(nor) - ray.m_origin.dot(nor)) / ddotn;
+	
+	if(t < 0.f || t > ray.m_tmax) return 0;
+	
+	//printf("face %i %f %f", idx, t, ctx->m_minHitDistance);
+	
+	if(t > ctx->m_minHitDistance) return 0;
+	
+	Vector3F onplane = ray.m_origin + ray.m_dir * t;
+	Vector3F e01 = b - a;
+	Vector3F x0 = onplane - a;
+	if(e01.cross(x0).dot(nor) < 0.f) return 0;
+	
+	//printf("pass a\n");
+
+	Vector3F e12 = c - b;
+	Vector3F x1 = onplane - b;
+	if(e12.cross(x1).dot(nor) < 0.f) return 0;
+	
+	//printf("pass b\n");
+	
+	Vector3F e20 = a - c;
+	Vector3F x2 = onplane - c;
+	if(e20.cross(x2).dot(nor) < 0.f) return 0;
+	
+	//printf("pass c\n");
+	
+	ctx->m_hitP = onplane;
+	ctx->m_hitN = nor;
+	ctx->m_minHitDistance = t;
+	ctx->m_geometry = (Geometry*)this;
+	ctx->m_success = 1;
 	return 1;
 }
 //:~

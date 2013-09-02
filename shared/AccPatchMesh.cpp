@@ -69,14 +69,40 @@ const BoundingBox AccPatchMesh::calculateBBox(const unsigned &idx) const
 
 char AccPatchMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const
 {
-	BoundingBox controlbox = beziers()[idx].controlBBox();
+    if(!recursiveBezierIntersect(&beziers()[idx], ray, ctx, 0)) return 0;
+
+	postIntersection(idx, ctx);
+	
+	return 1;
+}
+
+char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, const Ray & ray, IntersectionContext * ctx, int level) const
+{
+    BoundingBox controlbox = patch->controlBBox();
 	float hitt0, hitt1;
-	if(!controlbox.intersect(ray, &hitt0, &hitt1)) {
+	if(!controlbox.intersect(ray, &hitt0, &hitt1))
 		return 0;
+
+	if(hitt1 > ctx->m_minHitDistance) return 0;
+	
+	if(level > 3 || controlbox.area() < .1f) {
+	    Vector3F fourCorners[4];
+	    fourCorners[0] = patch->_contorlPoints[0];
+	    fourCorners[1] = patch->_contorlPoints[3];
+	    fourCorners[2] = patch->_contorlPoints[15];
+	    fourCorners[3] = patch->_contorlPoints[12];
+	    return planarIntersect(fourCorners, ray, ctx);
 	}
-	if(hitt0 > ctx->m_minHitDistance) return 0;
 	
+	level++;
 	
-	return PatchMesh::intersect(idx, ray, ctx);
+	BezierPatch children[4];
+	patch->decasteljauSplit(children);
+	
+	if(recursiveBezierIntersect(&children[0], ray, ctx, level)) return 1;
+	if(recursiveBezierIntersect(&children[1], ray, ctx, level)) return 1;
+	if(recursiveBezierIntersect(&children[2], ray, ctx, level)) return 1;
+	if(recursiveBezierIntersect(&children[3], ray, ctx, level)) return 1;
+	return 0;
 }
 //:~

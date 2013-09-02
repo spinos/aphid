@@ -169,6 +169,13 @@ void Matrix44F::setOrientations(const Vector3F& side, const Vector3F& up, const 
 	*m(2, 2) = front.z;
 }
 
+void Matrix44F::setFrontOrientation(const Vector3F& front)
+{
+    Vector3F side = front.perpendicular();
+    Vector3F up = front.cross(side);
+    setOrientations(side, up, front);
+}
+
 Vector3F Matrix44F::getTranslation() const
 {
 	return Vector3F(M(3, 0), M(3, 1), M(3, 2));
@@ -214,3 +221,11 @@ float Matrix44F::Determinant33( float a, float b, float c, float d, float e, flo
     return float( a*( e*i - h*f ) - b*( d*i - g*f ) + c*( d*h - g*e ) );
 }
 
+void Matrix44F::glMatrix(float m[16]) const
+{
+	m[0] = M(0,0); m[1] = M(0,1); m[2] = M(0,2); m[3] = 0.0;
+    m[4] = M(1,0); m[5] = M(1,1); m[6] = M(1,2); m[7] = 0.0;
+    m[8] = M(2,0); m[9] = M(2,1); m[10] =M(2,2); m[11] = 0.0;
+    m[12] = M(3,0); m[13] = M(3,1); m[14] = M(3,2) ; m[15] = 1.0;
+}
+//:~

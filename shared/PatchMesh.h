@@ -28,7 +28,8 @@ public:
 	virtual char intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const;
 	
 	char planarIntersect(const Vector3F * fourCorners, const Ray & ray, IntersectionContext * ctx) const;
-	unsigned closestVertex(unsigned idx, const Vector3F & px) const;
+	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
+
 private:
 	unsigned m_numUVs, m_numUVIds;
 	float * m_u;

@@ -371,4 +371,12 @@ void Base3DView::focusOutEvent(QFocusEvent * event)
 	m_timer->stop();
 	QGLWidget::focusOutEvent(event);
 }
+
+void Base3DView::drawIntersection() const
+{
+    IntersectionContext * ctx = getIntersectionContext();
+    if(!ctx->m_success) return;
+    
+    getDrawer()->circleAt(ctx->m_hitP, ctx->m_hitN);
+}
 //:~

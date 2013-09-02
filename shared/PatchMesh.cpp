@@ -90,11 +90,8 @@ char PatchMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * c
 	
 	if(!planarIntersect(po, ray, ctx)) return 0;
 	
-	if(ctx->getComponentFilterType() == PrimitiveFilter::TFace)
-	    ctx->m_componentIdx = idx;
-	else
-	    ctx->m_componentIdx = closestVertex(idx, ctx->m_hitP);
-		
+	postIntersection(idx, ctx);
+	
 	return 1;
 }
 
@@ -125,7 +122,7 @@ char PatchMesh::planarIntersect(const Vector3F * fourCorners, const Ray & ray, I
 	ctx->m_hitN = pn;
 	ctx->m_minHitDistance = t;
 	ctx->m_geometry = (Geometry*)this;
-	
+	ctx->m_success = 1;
 	return 1;
 }
 

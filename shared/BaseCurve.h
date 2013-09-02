@@ -42,8 +42,7 @@ public:
 	Vector3F * m_cvs;
 	float * m_knots;
 	float m_t;
-	unsigned m_k0, m_k1;
-private:
 	float m_length;
-	unsigned m_numVertices;
+	unsigned m_k0, m_k1, m_numVertices;
+private:
 };

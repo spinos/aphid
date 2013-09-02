@@ -20,6 +20,8 @@ BaseDrawer::BaseDrawer () : m_wired(0)
 {
 	m_sphere = new GeodesicSphereMesh(8);
 	m_pyramid = new PyramidMesh;
+	m_circle = new CircleCurve;
+	m_circle->create();
 	m_cube = new CubeMesh;
 	m_activeColor.set(0.f, .8f, .2f);
 	m_inertColor.set(0.1f, 0.6f, 0.1f);
@@ -635,3 +637,18 @@ void BaseDrawer::vertexWithOffset(const Vector3F & v, const Vector3F & o)
 	glVertex3f(v.x, v.y, v.z);
 	glVertex3f(v.x + o.x, v.y + o.y, v.z + o.z);
 }
+
+void BaseDrawer::circleAt(const Vector3F & pos, const Vector3F & nor)
+{
+    glPushMatrix();
+    Matrix44F mat;
+    mat.setTranslation(pos);
+    mat.setFrontOrientation(nor);
+    float m[16];
+    mat.glMatrix(m);
+	glMultMatrixf((const GLfloat*)m);
+	
+    linearCurve(*m_circle);
+    glPopMatrix();
+}
+//:~

@@ -18,6 +18,7 @@
 #include <PyramidMesh.h>
 #include <CubeMesh.h>
 #include <BaseCurve.h>
+#include <CircleCurve.h>
 
 class BaseDrawer {
 public:
@@ -61,11 +62,13 @@ public:
 	void colorAsInert();
 	void vertex(const Vector3F & v);
 	void vertexWithOffset(const Vector3F & v, const Vector3F & o);
+	void circleAt(const Vector3F & pos, const Vector3F & nor);
 	
 private:
     char m_wired;
 	GeodesicSphereMesh * m_sphere;
 	PyramidMesh * m_pyramid;
 	CubeMesh * m_cube;
+	CircleCurve * m_circle;
 	Vector3F m_activeColor, m_inertColor;
 };
