@@ -314,14 +314,14 @@ Matrix33F BaseMesh::getTangentFrame(const unsigned& idx) const
 	return Matrix33F();
 }
 
-char BaseMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const
+char BaseMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 {
     Vector3F threeCorners[3];
 	threeCorners[0] = _vertices[_indices[idx * 3]];
 	threeCorners[1] = _vertices[_indices[idx * 3 + 1]];
 	threeCorners[2] = _vertices[_indices[idx * 3 + 2]];
 	
-	if(!triangleIntersect(threeCorners,ray, ctx)) return 0;
+	if(!triangleIntersect(threeCorners, ctx)) return 0;
 
 	postIntersection(idx, ctx);
 	
@@ -336,11 +336,11 @@ void BaseMesh::postIntersection(unsigned idx, IntersectionContext * ctx) const
 	    ctx->m_componentIdx = closestVertex(idx, ctx->m_hitP);
 }
 
-char BaseMesh::intersect(const Ray & ray, IntersectionContext * ctx) const
+char BaseMesh::intersect(IntersectionContext * ctx) const
 {
 	unsigned nf = getNumFaces();
 	for(unsigned i = 0; i < nf; i++) {
-		if(intersect(i, ray, ctx)) return 1;
+		if(intersect(i, ctx)) return 1;
 	}
 	return 0;
 }
@@ -430,7 +430,7 @@ unsigned BaseMesh::closestVertex(unsigned idx, const Vector3F & px) const
 	return vert;
 }
 
-char BaseMesh::triangleIntersect(const Vector3F * threeCorners, const Ray & ray, IntersectionContext * ctx) const
+char BaseMesh::triangleIntersect(const Vector3F * threeCorners, IntersectionContext * ctx) const
 {
     Vector3F a = threeCorners[0];
 	Vector3F b = threeCorners[1];
@@ -440,6 +440,7 @@ char BaseMesh::triangleIntersect(const Vector3F * threeCorners, const Ray & ray,
 	Vector3F nor = ab.cross(ac);
 	nor.normalize();
 	
+	Ray &ray = ctx->m_ray;
 	float ddotn = ray.m_dir.dot(nor);
 		
 	if(ddotn > 0.f) return 0;

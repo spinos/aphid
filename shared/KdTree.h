@@ -29,7 +29,7 @@ public:
 	void addMesh(BaseMesh* mesh);
 	void create();
 	
-	char intersect(const Ray &ray, IntersectionContext * ctx);
+	char intersect(IntersectionContext * ctx);
 	char closestPoint(const Vector3F & origin, IntersectionContext * ctx);
 
 	BoundingBox m_bbox;
@@ -38,8 +38,8 @@ public:
 	
 private:
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
-	char recusiveIntersect(KdTreeNode *node, const Ray &ray, IntersectionContext * ctx);
-	char leafIntersect(KdTreeNode *node, const Ray &ray, IntersectionContext * ctx);
+	char recusiveIntersect(KdTreeNode *node, IntersectionContext * ctx);
+	char leafIntersect(KdTreeNode *node, IntersectionContext * ctx);
 	char recusiveClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx);
 	char leafClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx);
 	

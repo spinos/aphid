@@ -9,15 +9,13 @@
 #include <iostream>
 #include "IntersectionContext.h"
 
-IntersectionContext::IntersectionContext()
-{
-	reset();
-}
+IntersectionContext::IntersectionContext() {}
 
 IntersectionContext::~IntersectionContext() {}
 
-void IntersectionContext::reset()
+void IntersectionContext::reset(const Ray & ray)
 {
+    m_ray = ray;
 	m_level = 0;
 	m_minHitDistance = 10e10;
 	m_success = 0;

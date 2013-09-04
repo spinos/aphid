@@ -76,7 +76,7 @@ const BoundingBox PatchMesh::calculateBBox(const unsigned &idx) const
 	return box;
 }
 
-char PatchMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const
+char PatchMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 {
 	Vector3F po[4];
 	unsigned *qudi = &m_quadIndices[idx * 4];
@@ -88,17 +88,17 @@ char PatchMesh::intersect(unsigned idx, const Ray & ray, IntersectionContext * c
 	qudi++;
 	po[3] = _vertices[*qudi];
 	
-	if(!planarIntersect(po, ray, ctx)) return 0;
+	if(!planarIntersect(po, ctx)) return 0;
 	
 	postIntersection(idx, ctx);
 	
 	return 1;
 }
 
-char PatchMesh::planarIntersect(const Vector3F * fourCorners, const Ray & ray, IntersectionContext * ctx) const
+char PatchMesh::planarIntersect(const Vector3F * fourCorners, IntersectionContext * ctx) const
 {
 	Plane pl(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
-	
+	Ray &ray = ctx->m_ray;
 	Vector3F px;
 	float t;
 	if(!pl.rayIntersect(ray, px, t)) return 0;

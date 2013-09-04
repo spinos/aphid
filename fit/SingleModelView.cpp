@@ -114,8 +114,8 @@ bool SingleModelView::removeActiveAnchor(unsigned & idx)
 
 bool SingleModelView::pickupComponent(const Ray & ray, Vector3F & hit)
 {
-	getIntersectionContext()->reset();
-	if(!m_tree->intersect(ray, getIntersectionContext())) 
+	getIntersectionContext()->reset(ray);
+	if(!m_tree->intersect(getIntersectionContext())) 
 		return false;
 	hit = getIntersectionContext()->m_hitP;
 	addHitToSelection();
@@ -124,8 +124,8 @@ bool SingleModelView::pickupComponent(const Ray & ray, Vector3F & hit)
 
 bool SingleModelView::hitTest(const Ray & ray, Vector3F & hit)
 {
-	getIntersectionContext()->reset();
-	if(!m_tree->intersect(ray, getIntersectionContext())) 
+	getIntersectionContext()->reset(ray);
+	if(!m_tree->intersect(getIntersectionContext())) 
 		return false;
 	hit = getIntersectionContext()->m_hitP;
 	return true;

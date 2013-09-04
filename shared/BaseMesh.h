@@ -60,13 +60,13 @@ public:
 	unsigned * getPolygonCounts() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	
-	virtual char intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const;
-	char intersect(const Ray & ray, IntersectionContext * ctx) const;
+	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
+	char intersect(IntersectionContext * ctx) const;
 	void postIntersection(unsigned idx, IntersectionContext * ctx) const;
 	char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
 	char insideTriangle(const Vector3F & p, const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n) const;
 	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
-	char triangleIntersect(const Vector3F * threeCorners, const Ray & ray, IntersectionContext * ctx) const;
+	char triangleIntersect(const Vector3F * threeCorners, IntersectionContext * ctx) const;
 	
 	Vector3F * _vertices;
 	Vector3F * m_normals;

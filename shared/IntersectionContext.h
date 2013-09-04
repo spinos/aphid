@@ -13,13 +13,14 @@
 #include <Primitive.h>
 #include <PrimitiveFilter.h>
 #include <Geometry.h>
+#include <Ray.h>
 
 class IntersectionContext : public PrimitiveFilter {
 public:
 	IntersectionContext();
 	virtual ~IntersectionContext();
 	
-	void reset();
+	void reset(const Ray & ray);
 	void setBBox(const BoundingBox & bbox);
 	BoundingBox getBBox() const;
 	
@@ -28,6 +29,7 @@ public:
 	void verbose() const;
 
 	BoundingBox m_bbox;
+	Ray m_ray;
 	Vector3F m_hitP, m_hitN, m_closest, m_refN;
 	float m_minHitDistance;
 	int m_level;

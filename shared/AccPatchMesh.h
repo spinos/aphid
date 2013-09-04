@@ -22,8 +22,8 @@ public:
 	AccPatch* beziers() const;
 	
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
-	virtual char intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const;
-	char recursiveBezierIntersect(BezierPatch* patch, const Ray & ray, IntersectionContext * ctx, int level) const;
+	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
+	char recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, int level) const;
 private:
 	AccPatch* m_bezier;
 };

@@ -25,9 +25,9 @@ public:
 	unsigned * uvIds();
 	
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
-	virtual char intersect(unsigned idx, const Ray & ray, IntersectionContext * ctx) const;
+	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
 	
-	char planarIntersect(const Vector3F * fourCorners, const Ray & ray, IntersectionContext * ctx) const;
+	char planarIntersect(const Vector3F * fourCorners, IntersectionContext * ctx) const;
 	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
 
 private:
