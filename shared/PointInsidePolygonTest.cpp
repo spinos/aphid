@@ -92,4 +92,15 @@ bool PointInsidePolygonTest::isPointInside(const Vector3F & px, const Vector3F &
 	return theta > PI;
 }
 
+bool PointInsidePolygonTest::intersect(Ray & ray, Vector3F & closestP)
+{
+	float t;
+	if(!rayIntersect(ray, closestP, t)) return false;
+	
+	if(t < 0.f || t > ray.m_tmax) return false;
+	
+	if(!isPointInside(closestP)) return false;
+	
+	return true;
+}
 //:~

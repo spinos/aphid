@@ -13,6 +13,7 @@
 #include <MeshTopology.h>
 #include <PointInsidePolygonTest.h>
 #include <BiLinearInterpolate.h>
+#include <InverseBilinearInterpolate.h>
 
 AccPatchMesh::AccPatchMesh() 
 {
@@ -104,12 +105,13 @@ char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionCont
 	    fourCorners[1] = patch->_contorlPoints[3];
 	    fourCorners[2] = patch->_contorlPoints[15];
 	    fourCorners[3] = patch->_contorlPoints[12];
-	    if(!planarIntersect(fourCorners, ctx))
-			return 0;
+		
+		PointInsidePolygonTest pa(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
+		if(!patchIntersect(pa, ctx)) return 0;
 		
 		BiLinearInterpolate bili;
 		ctx->m_patchUV = bili.interpolate2(ctx->m_patchUV.x, ctx->m_patchUV.y, split.patchUV);
-		//printf("uv %f %f\n", ctx->m_patchUV.x, ctx->m_patchUV.y);
+		printf("uv %f %f\n", ctx->m_patchUV.x, ctx->m_patchUV.y);
 		return 1;
 	}
 	

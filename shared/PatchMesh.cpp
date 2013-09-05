@@ -78,54 +78,33 @@ const BoundingBox PatchMesh::calculateBBox(const unsigned &idx) const
 
 char PatchMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 {
-	Vector3F po[4];
-	unsigned *qudi = &m_quadIndices[idx * 4];
-	po[0] = _vertices[*qudi];
-	qudi++;
-	po[1] = _vertices[*qudi];
-	qudi++;
-	po[2] = _vertices[*qudi];
-	qudi++;
-	po[3] = _vertices[*qudi];
+	PointInsidePolygonTest pa = patchAt(idx);
 	
-	if(!planarIntersect(po, ctx)) return 0;
+	if(!patchIntersect(pa, ctx)) return 0;
 	
 	postIntersection(idx, ctx);
 	
 	return 1;
 }
 
-char PatchMesh::planarIntersect(const Vector3F * fourCorners, IntersectionContext * ctx) const
+char PatchMesh::patchIntersect(PointInsidePolygonTest & pa, IntersectionContext * ctx) const
 {
-	PointInsidePolygonTest pl(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
-	Ray &ray = ctx->m_ray;
 	Vector3F px;
-	float t;
-	if(!pl.rayIntersect(ray, px, t)) return 0;
+	if(!pa.intersect(ctx->m_ray, px)) return 0;
 	
-	if(t < 0.f || t > ray.m_tmax) return 0;
-	if(t > ctx->m_minHitDistance) return 0;
-	
-	Vector3F pop[4];
-	pl.projectPoint(fourCorners[0], pop[0]);
-	pl.projectPoint(fourCorners[1], pop[1]);
-	pl.projectPoint(fourCorners[2], pop[2]);
-	pl.projectPoint(fourCorners[3], pop[3]);
-	
-	Vector3F pn;
-	pl.getNormal(pn);
-	
-	if(!pl.isPointInside(px, pn, pop, 4)) return 0;
+	float d = Vector3F(ctx->m_ray.m_origin, px).length();
+	if(d > ctx->m_minHitDistance) return 0;
 	
 	InverseBilinearInterpolate invbil;
-	invbil.setVertices(fourCorners[0], fourCorners[1], fourCorners[3], fourCorners[2]);
+	invbil.setVertices(pa.vertex(0), pa.vertex(1), pa.vertex(3), pa.vertex(2));
 	
 	ctx->m_patchUV = invbil(px);
 	ctx->m_hitP = px;
-	ctx->m_hitN = pn;
-	ctx->m_minHitDistance = t;
+	pa.getNormal(ctx->m_hitN);
+	ctx->m_minHitDistance = d;
 	ctx->m_geometry = (Geometry*)this;
 	ctx->m_success = 1;
+	
 	return 1;
 }
 

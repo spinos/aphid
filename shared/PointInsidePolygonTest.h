@@ -10,6 +10,7 @@
 #pragma once
 #include <AllMath.h>
 #include <Patch.h>
+#include <Ray.h>
 class PointInsidePolygonTest : public Patch {
 public:
 	PointInsidePolygonTest();
@@ -17,4 +18,5 @@ public:
 	bool isPointInside(const Vector3F & px) const;
 	float distanceTo(const Vector3F & origin, Vector3F & closestP) const;
 	static bool isPointInside(const Vector3F & px, const Vector3F & nor, Vector3F *vertices, const int nv);
+	bool intersect(Ray & ray, Vector3F & closestP);
 };

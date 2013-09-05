@@ -28,7 +28,7 @@ public:
 	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
 	virtual char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
 	
-	char planarIntersect(const Vector3F * fourCorners, IntersectionContext * ctx) const;
+	char patchIntersect(PointInsidePolygonTest & pa, IntersectionContext * ctx) const;
 	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
 	
 	PointInsidePolygonTest patchAt(unsigned idx) const;
