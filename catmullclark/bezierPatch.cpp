@@ -199,7 +199,7 @@ void BezierPatch::evaluateSurfaceTexcoord(float u, float v, Vector3F * texcoord)
 		(tex(0, 1) * L0.x + tex(1, 1) * L1.x) * L1.y;
 	*texcoord = Vector3F(st.x, st.y, 0.f);
 }
-#include <iostream>
+
 const BoundingBox BezierPatch::controlBBox() const
 {
 	BoundingBox box;
@@ -207,7 +207,6 @@ const BoundingBox BezierPatch::controlBBox() const
 		box.updateMin(_contorlPoints[i]);
 		box.updateMax(_contorlPoints[i]);
 	}
-	//printf("miss %f %f %f : %f %f %f ", box.m_data[0], box.m_data[1], box.m_data[2], box.m_data[3], box.m_data[4], box.m_data[5]);
 		
 	return box;
 }
@@ -267,5 +266,49 @@ void BezierPatch::decasteljauSplit(BezierPatch *dst) const
             child3->_contorlPoints[v * 4 + u] = split[v + 3][u];
         }
     }
+}
+
+/*
+ *  3 ---- c ---- 2
+ *	|	   |      |
+ *  |  3   |  2   |
+ *  d ---- e ---- b
+ *	|	   |      |
+ *  |  0   |  1   |
+ *  0 ---- a ---- 1
+ */
+
+void BezierPatch::splitPatchUV(PatchSplitContext ctx, PatchSplitContext * child) const
+{
+	Vector2F a = ctx.patchUV[0]/ 2.f + ctx.patchUV[1]/2.f;
+	Vector2F b = ctx.patchUV[1]/ 2.f + ctx.patchUV[2]/2.f;
+	Vector2F c = ctx.patchUV[2]/ 2.f + ctx.patchUV[3]/2.f;
+	Vector2F d = ctx.patchUV[3]/ 2.f + ctx.patchUV[0]/2.f;
+	Vector2F e = ctx.patchUV[0]/ 4.f + ctx.patchUV[1]/4.f + ctx.patchUV[2]/ 4.f + ctx.patchUV[3]/4.f;
+		
+	PatchSplitContext *res = &child[0];
+
+	res->patchUV[0] = ctx.patchUV[0];
+	res->patchUV[1] = a;
+	res->patchUV[2] = e;
+	res->patchUV[3] = d;
+
+	res = &child[1];
+	res->patchUV[0] = a;
+	res->patchUV[1] = ctx.patchUV[1];
+	res->patchUV[2] = b;
+	res->patchUV[3] = e;
+
+	res = &child[2];
+	res->patchUV[0] = e;
+	res->patchUV[1] = b;
+	res->patchUV[2] = ctx.patchUV[2];
+	res->patchUV[3] = c;
+	
+	res = &child[3];
+	res->patchUV[0] = d;
+	res->patchUV[1] = e;
+	res->patchUV[2] = c;
+	res->patchUV[3] = ctx.patchUV[3];
 }
 //:~

@@ -14,6 +14,7 @@
 #include <PrimitiveFilter.h>
 #include <Geometry.h>
 #include <Ray.h>
+#include <Vector2F.h>
 
 class IntersectionContext : public PrimitiveFilter {
 public:
@@ -31,6 +32,7 @@ public:
 	BoundingBox m_bbox;
 	Ray m_ray;
 	Vector3F m_hitP, m_hitN, m_closest, m_refN;
+	Vector2F m_patchUV;
 	float m_minHitDistance;
 	int m_level;
 	Geometry * m_geometry;

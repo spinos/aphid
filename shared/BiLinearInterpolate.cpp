@@ -11,9 +11,16 @@
 
 BiLinearInterpolate::BiLinearInterpolate() {}
 
-float BiLinearInterpolate::interpolate(float u, float v, float * src) const
+float BiLinearInterpolate::interpolate(float u, float v, const float * src) const
 {
     float lo = src[0] * (1.f - u) + src[1] * u;
     float hi = src[3] * (1.f - u) + src[2] * u;
+    return lo * (1.f - v) + hi * v;
+}
+
+Vector2F BiLinearInterpolate::interpolate2(float u, float v, const Vector2F * src) const
+{
+	Vector2F lo = src[0] * (1.f - u) + src[1] * u;
+    Vector2F hi = src[3] * (1.f - u) + src[2] * u;
     return lo * (1.f - v) + hi * v;
 }

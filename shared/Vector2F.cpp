@@ -16,9 +16,9 @@ Vector2F::Vector2F()
 	x = y = 0.f;
 }
 
-Vector2F::Vector2F(const float& vx, const float& vy) 
+Vector2F::Vector2F(float vx, float vy)
 {
-    x = vx;
+	x = vx;
     y = vy;
 }
 
@@ -46,24 +46,24 @@ void Vector2F::set(float vx, float vy)
     y = vy;
 }
 
-void Vector2F::set(const float& vx, const float& vy)
-{
-    x = vx;
-    y = vy;
-}
-	
 void Vector2F::operator+=( const Vector2F& other )
 {
         x += other.x;
         y += other.y;
 }
-	
-void Vector2F::operator-=( const Vector2F& other )
+
+void Vector2F::operator-=(Vector2F& other )
 {
         x -= other.x;
         y -= other.y;
 }
-	
+
+void Vector2F::operator-=( Vector2F other )
+{
+        x -= other.x;
+        y -= other.y;
+}
+
 void Vector2F::operator/=( const float& scale )
 {
     x /= scale;
@@ -121,6 +121,11 @@ Vector2F Vector2F::operator-(Vector2F other ) const
         return Vector2F(x-other.x, y-other.y);
 }
 
+Vector2F Vector2F::operator-(Vector2F other )
+{
+        return Vector2F(x-other.x, y-other.y);
+}
+
 float Vector2F::distantTo(const Vector2F & other) const
 {
 	return sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
@@ -137,4 +142,8 @@ Vector2F Vector2F::reversed() const
         return Vector2F(-x, -y);
 }
 
-
+float Vector2F::cross(const Vector2F & b) const
+{
+	return x * b.y - y * b.x;
+}
+//:~

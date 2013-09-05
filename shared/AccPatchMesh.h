@@ -12,6 +12,8 @@
 class BezierPatch;
 class AccPatch;
 class MeshTopology;
+struct PatchSplitContext;
+
 class AccPatchMesh : public PatchMesh {
 public:
 	AccPatchMesh();
@@ -23,7 +25,7 @@ public:
 	
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
 	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
-	char recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, int level) const;
+	char recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
 private:
 	AccPatch* m_bezier;
 };

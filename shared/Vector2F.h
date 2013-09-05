@@ -13,16 +13,16 @@
 class Vector2F{
 public:
 	Vector2F();
-	Vector2F(const float& vx, const float& vy);
+	Vector2F(float vx, float vy);
 	Vector2F(const float* p);
 	Vector2F(float* p);
 	Vector2F(const Vector2F& from, const Vector2F& to);
 	
 	void set(float vx, float vy);
-	void set(const float& vx, const float& vy);
 	
-	void operator+=( const Vector2F& other );	
-	void operator-=( const Vector2F& other );
+	void operator+=( const Vector2F& other );
+	void operator-=( Vector2F& other );
+	void operator-=( Vector2F other );
 	
 	void operator/=( const float& scale );	
 	void operator*=( const float& scale );
@@ -36,11 +36,14 @@ public:
 	Vector2F operator-( Vector2F& other ) const;
 	Vector2F operator+( Vector2F other ) const;	
 	Vector2F operator-( Vector2F other ) const;	
+	Vector2F operator-( Vector2F other );	
 	
 	float distantTo(const Vector2F & other) const;
 	
 	void reverse();	
 	Vector2F reversed() const;
+	
+	float cross(const Vector2F & b) const;
 
 	float x,y;
 };

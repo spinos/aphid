@@ -10,6 +10,7 @@
 #include "PatchMesh.h"
 #include <PointInsidePolygonTest.h>
 #include <Plane.h>
+#include <InverseBilinearInterpolate.h>
 
 PatchMesh::PatchMesh() 
 {
@@ -118,6 +119,10 @@ char PatchMesh::planarIntersect(const Vector3F * fourCorners, IntersectionContex
 	PointInsidePolygonTest pipt;
 	if(!pipt.isPointInside(px, pn, pop, 4)) return 0;
 	
+	InverseBilinearInterpolate invbil;
+	invbil.setVertices(fourCorners[0], fourCorners[1], fourCorners[3], fourCorners[2]);
+	
+	ctx->m_patchUV = invbil(px);
 	ctx->m_hitP = px;
 	ctx->m_hitN = pn;
 	ctx->m_minHitDistance = t;

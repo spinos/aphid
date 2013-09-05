@@ -11,6 +11,7 @@
 #include <accPatch.h>
 #include <accStencil.h>
 #include <MeshTopology.h>
+#include <BiLinearInterpolate.h>
 
 AccPatchMesh::AccPatchMesh() 
 {
@@ -69,14 +70,19 @@ const BoundingBox AccPatchMesh::calculateBBox(const unsigned &idx) const
 
 char AccPatchMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 {
-    if(!recursiveBezierIntersect(&beziers()[idx], ctx, 0)) return 0;
+	PatchSplitContext split;
+	split.patchUV[0].set(0.f, 0.f);
+	split.patchUV[1].set(1.f, 0.f);
+	split.patchUV[2].set(1.f, 1.f);
+	split.patchUV[3].set(0.f, 1.f);
+    if(!recursiveBezierIntersect(&beziers()[idx], ctx, split, 0)) return 0;
 
 	postIntersection(idx, ctx);
 	
 	return 1;
 }
 
-char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, int level) const
+char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const
 {
     Ray ray = ctx->m_ray;
     BoundingBox controlbox = patch->controlBBox();
@@ -92,7 +98,13 @@ char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionCont
 	    fourCorners[1] = patch->_contorlPoints[3];
 	    fourCorners[2] = patch->_contorlPoints[15];
 	    fourCorners[3] = patch->_contorlPoints[12];
-	    return planarIntersect(fourCorners, ctx);
+	    if(!planarIntersect(fourCorners, ctx))
+			return 0;
+		
+		BiLinearInterpolate bili;
+		ctx->m_patchUV = bili.interpolate2(ctx->m_patchUV.x, ctx->m_patchUV.y, split.patchUV);
+		//printf("uv %f %f\n", ctx->m_patchUV.x, ctx->m_patchUV.y);
+		return 1;
 	}
 	
 	level++;
@@ -100,10 +112,13 @@ char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionCont
 	BezierPatch children[4];
 	patch->decasteljauSplit(children);
 	
-	if(recursiveBezierIntersect(&children[0], ctx, level)) return 1;
-	if(recursiveBezierIntersect(&children[1], ctx, level)) return 1;
-	if(recursiveBezierIntersect(&children[2], ctx, level)) return 1;
-	if(recursiveBezierIntersect(&children[3], ctx, level)) return 1;
+	PatchSplitContext childUV[4];
+	patch->splitPatchUV(split, childUV);
+	if(recursiveBezierIntersect(&children[0], ctx, childUV[0], level)) return 1;
+	if(recursiveBezierIntersect(&children[1], ctx, childUV[1], level)) return 1;
+	if(recursiveBezierIntersect(&children[2], ctx, childUV[2], level)) return 1;
+	if(recursiveBezierIntersect(&children[3], ctx, childUV[3], level)) return 1;
+	
 	return 0;
 }
 //:~

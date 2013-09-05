@@ -10,6 +10,10 @@
 #include <AllMath.h>
 class BoundingBox;
 
+struct PatchSplitContext {
+	Vector2F patchUV[4];
+};
+
 class BezierPatch
 {
 public:
@@ -26,6 +30,7 @@ public:
 	void evaluateSurfaceTexcoord(float u, float v, Vector3F * tex) const;
 	const BoundingBox controlBBox() const;
 	void decasteljauSplit(BezierPatch *dst) const;
+	void splitPatchUV(PatchSplitContext ctx, PatchSplitContext * child) const;
 	
 	Vector3F p(unsigned u, unsigned v) const;
 	Vector3F normal(unsigned u, unsigned v) const;
