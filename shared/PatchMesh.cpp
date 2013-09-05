@@ -9,7 +9,6 @@
 
 #include "PatchMesh.h"
 #include <PointInsidePolygonTest.h>
-#include <Plane.h>
 #include <InverseBilinearInterpolate.h>
 
 PatchMesh::PatchMesh() 
@@ -98,7 +97,7 @@ char PatchMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 
 char PatchMesh::planarIntersect(const Vector3F * fourCorners, IntersectionContext * ctx) const
 {
-	Plane pl(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
+	PointInsidePolygonTest pl(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
 	Ray &ray = ctx->m_ray;
 	Vector3F px;
 	float t;
@@ -116,8 +115,7 @@ char PatchMesh::planarIntersect(const Vector3F * fourCorners, IntersectionContex
 	Vector3F pn;
 	pl.getNormal(pn);
 	
-	PointInsidePolygonTest pipt;
-	if(!pipt.isPointInside(px, pn, pop, 4)) return 0;
+	if(!pl.isPointInside(px, pn, pop, 4)) return 0;
 	
 	InverseBilinearInterpolate invbil;
 	invbil.setVertices(fourCorners[0], fourCorners[1], fourCorners[3], fourCorners[2]);
@@ -148,5 +146,38 @@ unsigned PatchMesh::closestVertex(unsigned idx, const Vector3F & px) const
 		qudi++;
 	}
 	return vert;
+}
+
+char PatchMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const
+{
+	PointInsidePolygonTest pa = patchAt(idx);
+	
+	Vector3F px;
+	float d = pa.distanceTo(origin, px);
+	
+	if(d > ctx->m_minHitDistance) 
+		return 0;
+		
+	ctx->m_minHitDistance = d;
+	ctx->m_componentIdx = idx;
+	ctx->m_closest = px;
+	ctx->m_hitP = px;
+
+	return 1;
+}
+
+PointInsidePolygonTest PatchMesh::patchAt(unsigned idx) const
+{
+	Vector3F po[4];
+	unsigned *qudi = &m_quadIndices[idx * 4];
+	po[0] = _vertices[*qudi];
+	qudi++;
+	po[1] = _vertices[*qudi];
+	qudi++;
+	po[2] = _vertices[*qudi];
+	qudi++;
+	po[3] = _vertices[*qudi];
+	
+	return PointInsidePolygonTest(po[0], po[1], po[2], po[3]);
 }
 //:~

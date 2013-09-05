@@ -11,6 +11,7 @@
 #include <accPatch.h>
 #include <accStencil.h>
 #include <MeshTopology.h>
+#include <PointInsidePolygonTest.h>
 #include <BiLinearInterpolate.h>
 
 AccPatchMesh::AccPatchMesh() 
@@ -71,15 +72,20 @@ const BoundingBox AccPatchMesh::calculateBBox(const unsigned &idx) const
 char AccPatchMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 {
 	PatchSplitContext split;
-	split.patchUV[0].set(0.f, 0.f);
-	split.patchUV[1].set(1.f, 0.f);
-	split.patchUV[2].set(1.f, 1.f);
-	split.patchUV[3].set(0.f, 1.f);
+	split.reset();
     if(!recursiveBezierIntersect(&beziers()[idx], ctx, split, 0)) return 0;
 
 	postIntersection(idx, ctx);
 	
 	return 1;
+}
+
+char AccPatchMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const
+{
+	PatchSplitContext split;
+	split.reset();
+	recursiveBezierClosestPoint(origin, &beziers()[idx], ctx, split, 0);
+	return PatchMesh::closestPoint(idx, origin, ctx);
 }
 
 char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const
@@ -120,5 +126,41 @@ char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionCont
 	if(recursiveBezierIntersect(&children[3], ctx, childUV[3], level)) return 1;
 	
 	return 0;
+}
+
+void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const
+{
+	Vector3F fourCorners[4];
+	fourCorners[0] = patch->_contorlPoints[0];
+	fourCorners[1] = patch->_contorlPoints[3];
+	fourCorners[2] = patch->_contorlPoints[15];
+	fourCorners[3] = patch->_contorlPoints[12];
+	
+	PointInsidePolygonTest pl(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
+	Vector3F px;
+	const float d = pl.distanceTo(origin, px);
+		
+	BoundingBox controlbox = patch->controlBBox();
+	if(level > 3 || controlbox.area() < .1f || !pl.isPointInside(px)) {
+		if(d > ctx->m_minHitDistance) return;
+		ctx->m_minHitDistance = d;
+		//ctx->m_componentIdx = idx;
+		ctx->m_closest = px;
+		ctx->m_hitP = px;
+		//BiLinearInterpolate bili;
+		//ctx->m_patchUV = bili.interpolate2(ctx->m_patchUV.x, ctx->m_patchUV.y, split.patchUV);
+	}
+	
+	level++;
+	
+	BezierPatch children[4];
+	patch->decasteljauSplit(children);
+	
+	PatchSplitContext childUV[4];
+	patch->splitPatchUV(split, childUV);
+	recursiveBezierClosestPoint(origin, &children[0], ctx, childUV[0], level);
+	recursiveBezierClosestPoint(origin, &children[1], ctx, childUV[1], level);
+	recursiveBezierClosestPoint(origin, &children[2], ctx, childUV[2], level);
+	recursiveBezierClosestPoint(origin, &children[3], ctx, childUV[3], level);
 }
 //:~

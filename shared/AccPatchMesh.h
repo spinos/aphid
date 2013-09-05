@@ -25,7 +25,11 @@ public:
 	
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
 	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
-	char recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
+	virtual char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
+	
 private:
+	char recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
+	void recursiveBezierClosestPoint(const Vector3F & origin, BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
+	
 	AccPatch* m_bezier;
 };

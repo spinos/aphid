@@ -12,6 +12,12 @@ class BoundingBox;
 
 struct PatchSplitContext {
 	Vector2F patchUV[4];
+	void reset() {
+		patchUV[0].set(0.f, 0.f);
+		patchUV[1].set(1.f, 0.f);
+		patchUV[2].set(1.f, 1.f);
+		patchUV[3].set(0.f, 1.f);
+	}
 };
 
 class BezierPatch

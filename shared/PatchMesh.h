@@ -10,7 +10,7 @@
 #pragma once
 
 #include <BaseMesh.h>
-
+class PointInsidePolygonTest;
 class PatchMesh : public BaseMesh {
 public:
 	PatchMesh();
@@ -26,9 +26,12 @@ public:
 	
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
 	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
+	virtual char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
 	
 	char planarIntersect(const Vector3F * fourCorners, IntersectionContext * ctx) const;
 	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
+	
+	PointInsidePolygonTest patchAt(unsigned idx) const;
 
 private:
 	unsigned m_numUVs, m_numUVIds;
