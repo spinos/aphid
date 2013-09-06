@@ -23,52 +23,21 @@ void KdTreeDrawer::drawKdTree(const KdTree * tree)
 	KdTreeNode * root = tree->getRoot();
 	
 	setWired(1);
-	beginQuad();
 	int level = 0;
 	drawKdTreeNode(root, bbox, level);
-	end();
 }
 
 void KdTreeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox, int level)
 {
-	if(level > 8) return;
+	if(level > 16) return;
 	if(tree->isLeaf()) return;
 	
+	boundingBox(bbox);
 	Vector3F corner0(bbox.getMin(0), bbox.getMin(1), bbox.getMin(2));
 	Vector3F corner1(bbox.getMax(0), bbox.getMax(1), bbox.getMax(2));
 
-	glVertex3f(corner0.x, corner0.y, corner0.z);
-	glVertex3f(corner1.x, corner0.y, corner0.z);
-	glVertex3f(corner1.x, corner1.y, corner0.z);
-	glVertex3f(corner0.x, corner1.y, corner0.z);
-	
-	glVertex3f(corner0.x, corner0.y, corner1.z);
-	glVertex3f(corner0.x, corner1.y, corner1.z);
-	glVertex3f(corner1.x, corner1.y, corner1.z);
-	glVertex3f(corner1.x, corner0.y, corner1.z);
-	
-	glVertex3f(corner0.x, corner0.y, corner0.z);
-	glVertex3f(corner0.x, corner0.y, corner1.z);
-	glVertex3f(corner0.x, corner1.y, corner1.z);
-	glVertex3f(corner0.x, corner1.y, corner0.z);
-	
-	glVertex3f(corner1.x, corner0.y, corner0.z);
-	glVertex3f(corner1.x, corner1.y, corner0.z);
-	glVertex3f(corner1.x, corner1.y, corner1.z);
-	glVertex3f(corner1.x, corner0.y, corner1.z);
-	
-	glVertex3f(corner0.x, corner0.y, corner0.z);
-	glVertex3f(corner0.x, corner0.y, corner1.z);
-	glVertex3f(corner1.x, corner0.y, corner1.z);
-	glVertex3f(corner1.x, corner0.y, corner0.z);
-	
-	glVertex3f(corner0.x, corner1.y, corner0.z);
-	glVertex3f(corner0.x, corner1.y, corner1.z);
-	glVertex3f(corner1.x, corner1.y, corner1.z);
-	glVertex3f(corner1.x, corner1.y, corner0.z);
-	
 	int axis = tree->getAxis();
-	
+	glBegin(GL_LINE_LOOP);
 	if(axis == 0) {
 		corner0.x = corner1.x = tree->getSplitPos();
 		glVertex3f(corner0.x, corner0.y, corner0.z);
@@ -90,7 +59,7 @@ void KdTreeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & b
 		glVertex3f(corner1.x, corner1.y, corner0.z);
 		glVertex3f(corner0.x, corner1.y, corner0.z);
 	}
-	
+	glEnd();
 	BoundingBox leftBox, rightBox;
 	
 	float splitPos = tree->getSplitPos();

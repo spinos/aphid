@@ -136,9 +136,9 @@ void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
 
 const SplitEvent *KdTreeBuilder::bestSplit()
 {
-	m_bestEventIdx = 0;//axis * 32 + 16;
+	m_bestEventIdx = 0;
 	float lowest = m_event[0].getCost();
-	for(unsigned i = 0; i < numEvents(); i++) {
+	for(unsigned i = 1; i < numEvents(); i++) {
 		//m_event[i].verbose();
 		if(m_event[i].getCost() < lowest) {
 			lowest = m_event[i].getCost();

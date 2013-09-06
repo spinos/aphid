@@ -45,7 +45,7 @@ public:
 	void edge(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void field(const BaseField * f);
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
-	void box(const BoundingBox & b);
+	void boundingBox(const BoundingBox & b);
 	void triangle(const BaseMesh * mesh, unsigned idx);
 	void components(SelectionArray * arr);
 	void primitive(Primitive * prim);

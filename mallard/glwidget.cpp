@@ -100,7 +100,7 @@ void GLWidget::clientDraw()
 	getDrawer()->setGrey(1.f);
 	getDrawer()->edge(mesh());
 	m_fabricDrawer->drawAccPatchMesh(m_accmesh);
-	//getDrawer()->drawKdTree(getTree());
+	getDrawer()->drawKdTree(getTree());
 	/*
 	glColor3f(0.f, 1.f, 1.f);
 	m_fabricDrawer->drawBezierCage(&testbez);
