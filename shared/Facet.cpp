@@ -25,7 +25,7 @@ Facet::Facet(Vertex *a, Vertex *b, Vertex *c)
 	createEdges();
 	
 	m_area = Facet::cumputeArea(a->m_v, b->m_v, c->m_v);
-	if(m_area < 10e-5) printf("WARNING: near zero face area!\n");
+	if(m_area < 10e-6) printf("WARNING: near zero face area!\n");
 }
 
 Facet::Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d)

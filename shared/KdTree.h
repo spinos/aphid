@@ -38,6 +38,7 @@ public:
 	
 private:
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
+	void createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx);
 	char recusiveIntersect(KdTreeNode *node, IntersectionContext * ctx);
 	char leafIntersect(KdTreeNode *node, IntersectionContext * ctx);
 	char recusiveClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx);

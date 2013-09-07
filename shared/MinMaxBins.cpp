@@ -33,11 +33,11 @@ void MinMaxBins::add(const float &min, const float &max)
 {
 	int minIdx = (min - m_boundLeft) / m_delta;
 	validateIdx(minIdx);
-	m_minBin[minIdx] += 1;
+	m_minBin[minIdx]++;
 	
 	int maxIdx = (max - m_boundLeft) / m_delta;
 	validateIdx(maxIdx);
-	m_maxBin[maxIdx] += 1;
+	m_maxBin[maxIdx]++;
 }
 
 void MinMaxBins::scan()

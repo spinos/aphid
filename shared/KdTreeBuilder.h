@@ -29,18 +29,22 @@ public:
 	void partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx);
 	
 	const SplitEvent *bestSplit();
-		
+	void verbose() const;
 private:
 	struct IndexLimit {
-		IndexLimit() {low = high = -1;}
+		IndexLimit() {low = 1; high = -1;}
+		char isValid() {return low < high;}
+		int bound() {return high - low;}
 		int low, high;
+		float area;
 	};
 	typedef std::vector<IndexLimit> EmptySpace;
 	
 	void calculateBins();
 	void calculateSplitEvents();
-	void cutoffEmptySpace();
-	unsigned numEvents() const;
+	char byCutoffEmptySpace(unsigned & dst);
+	void byLowestCost(unsigned & dst);
+	SplitEvent splitAt(int axis, int idx) const;
 	
 	BoundingBox m_bbox;
 	BuildKdTreeContext *m_context;

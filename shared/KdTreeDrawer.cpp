@@ -29,14 +29,15 @@ void KdTreeDrawer::drawKdTree(const KdTree * tree)
 
 void KdTreeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox, int level)
 {
-	if(level > 16) return;
+	if(level > 17) return;
 	if(tree->isLeaf()) return;
-	
+	setColor(.5f, 0.1f, 0.f);
 	boundingBox(bbox);
 	Vector3F corner0(bbox.getMin(0), bbox.getMin(1), bbox.getMin(2));
 	Vector3F corner1(bbox.getMax(0), bbox.getMax(1), bbox.getMax(2));
 
 	int axis = tree->getAxis();
+	setColor(1.f, 1.f, 0.f);
 	glBegin(GL_LINE_LOOP);
 	if(axis == 0) {
 		corner0.x = corner1.x = tree->getSplitPos();

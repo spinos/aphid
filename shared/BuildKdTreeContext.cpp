@@ -29,7 +29,7 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
 		unsigned compIdx = p->getComponentIndex();
 		
 		primBoxes[i] = mesh->calculateBBox(compIdx);
-		primBoxes[i].expand(10e-5);
+		primBoxes[i].expand(10e-6);
 		primitives.next();
 	}
 }
@@ -68,6 +68,11 @@ unsigned *BuildKdTreeContext::indices()
 BoundingBox *BuildKdTreeContext::boxes()
 {
 	return m_primitiveBoxes.ptr();
+}
+
+float BuildKdTreeContext::visitCost() const
+{
+	return 2.f * m_numPrimitive;
 }
 
 void BuildKdTreeContext::verbose() const

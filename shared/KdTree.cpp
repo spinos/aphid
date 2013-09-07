@@ -30,8 +30,8 @@ KdTreeNode* KdTree::getRoot() const
 
 void KdTree::addMesh(BaseMesh* mesh)
 {
-	unsigned nf = mesh->getNumFaces();
-	printf("add %i triangles\n", nf);
+	//unsigned nf = mesh->getNumFaces();
+	//printf("add %i triangles\n", nf);
 	m_stream.appendMesh(mesh);
 
 	const BoundingBox box = mesh->calculateBBox();
@@ -66,23 +66,8 @@ void KdTree::cleanup()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 12 || level == 22) {
-		if(ctx.getNumPrimitives() > 0) {
-			IndexArray &indir = m_stream.indirection();
-			unsigned numDir = ctx.getNumPrimitives();
-			node->setPrimStart(indir.index());
-			node->setNumPrims(numDir);
-			
-			indir.expandBy(numDir);
-			unsigned *src = ctx.indices();
-			for(unsigned i = 0; i < numDir; i++) {
-				unsigned *idx = indir.asIndex();
-				*idx = src[i];
-				indir.next();
-			}
-		}
-		node->setLeaf(true);
-		
+	if(ctx.getNumPrimitives() < 8 || level == 18) {
+		createLeaf(node, ctx);
 		return;
 	}
 	
@@ -91,8 +76,11 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	KdTreeBuilder builder(ctx);
 
 	const SplitEvent *plane = builder.bestSplit();
-	
-	//plane->verbose();
+	//builder.verbose();
+	if(plane->getCost() > ctx.visitCost()) {
+		createLeaf(node, ctx);
+		return;
+	}
 	
 	node->setAxis(plane->getAxis());
 	node->setSplitPos(plane->getPos());
@@ -103,7 +91,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 
 	BuildKdTreeContext *leftCtx = new BuildKdTreeContext();
 	BuildKdTreeContext *rightCtx = new BuildKdTreeContext();
-		
+	
 	builder.partition(*leftCtx, *rightCtx);
 	
 	if(plane->leftCount() > 0)
@@ -119,6 +107,25 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 		(branch+1)->leaf.combined = 6;
 		
 	delete rightCtx;
+}
+
+void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
+{
+	if(ctx.getNumPrimitives() > 0) {
+		IndexArray &indir = m_stream.indirection();
+		unsigned numDir = ctx.getNumPrimitives();
+		node->setPrimStart(indir.index());
+		node->setNumPrims(numDir);
+		
+		indir.expandBy(numDir);
+		unsigned *src = ctx.indices();
+		for(unsigned i = 0; i < numDir; i++) {
+			unsigned *idx = indir.asIndex();
+			*idx = src[i];
+			indir.next();
+		}
+	}
+	node->setLeaf(true);
 }
 
 char KdTree::intersect(IntersectionContext * ctx)

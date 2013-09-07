@@ -34,12 +34,12 @@ void KdTreeBuilder::calculateBins()
 	m_bins = new MinMaxBins[SplitEvent::Dimension];
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		//printf("bbox size %f\n", m_bbox.getMax(axis) - m_bbox.getMin(axis));
-		if(m_bbox.getMax(axis) - m_bbox.getMin(axis) < 10e-4) {
+		if(m_bbox.distance(axis) < 10e-4) {
 		    //printf("bbox[%i] is flat", axis);
 			m_bins[axis].setFlat();
 			continue;
 		}
-		m_bins[axis].create(33, m_bbox.getMin(axis), m_bbox.getMax(axis));
+		m_bins[axis].create(SplitEvent::NumBinPerDimension, m_bbox.getMin(axis), m_bbox.getMax(axis));
 	
 		for(unsigned i = 0; i < m_numPrimitive; i++) {
 			BoundingBox &primBox = primBoxes[i];
@@ -52,26 +52,25 @@ void KdTreeBuilder::calculateBins()
 
 void KdTreeBuilder::calculateSplitEvents()
 {
-	SplitEvent::ParentBoxArea = m_bbox.area();
+	//SplitEvent::ParentBoxArea = m_bbox.area();
+	//SplitEvent::ParentBox = m_bbox;
 	
-	const unsigned numEvent = numEvents();
+	const unsigned numEvent = SplitEvent::NumEventPerDimension * SplitEvent::Dimension;
 	m_event = new SplitEvent[numEvent];
-	int eventIdx = 0;
+	int dimOffset;
 	unsigned leftNumPrim, rightNumPrim;
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		if(m_bins[axis].isFlat())
 			continue;
-			
+		dimOffset = SplitEvent::NumEventPerDimension * axis;	
 		const float min = m_bbox.getMin(axis);
-		const float max = m_bbox.getMax(axis);
-		const float delta = (max - min) / 33.f;
-		for(int i = 1; i < 33; i++) {
-			SplitEvent &event = m_event[eventIdx];
+		const float delta = m_bbox.distance(axis) / SplitEvent::NumBinPerDimension;
+		for(int i = 0; i < SplitEvent::NumEventPerDimension; i++) {
+			SplitEvent &event = m_event[dimOffset + i];
 			event.setAxis(axis);
-			event.setPos(min + delta * i);
-			m_bins[axis].get(i - 1, leftNumPrim, rightNumPrim);
+			event.setPos(min + delta * (i + 1));
+			m_bins[axis].get(i, leftNumPrim, rightNumPrim);
 			event.setLeftRightNumPrim(leftNumPrim, rightNumPrim);
-			eventIdx++;
 		}
 	}
 /*	
@@ -100,7 +99,7 @@ void KdTreeBuilder::calculateSplitEvents()
 	}
 	
 	for(unsigned i = 0; i < numEvent; i++) {
-		m_event[i].calculateCost();
+		m_event[i].calculateCost(m_bbox.area());
 	}
 }
 
@@ -111,120 +110,105 @@ void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
 		const BoundingBox &primBox = primBoxes[i];
 		
 		const float min = m_bbox.getMin(axis);
-		const float max = m_bbox.getMax(axis);
-		const float delta = (max - min) / 33.f;
-		const int eventOffset = axis * 32;
+		const float delta = m_bbox.distance(axis) / SplitEvent::NumBinPerDimension;
+		const int eventOffset = axis * SplitEvent::NumEventPerDimension;
 		
 		int minGrid = (primBox.getMin(axis) - min) / delta;
 		
 		if(minGrid < 0) minGrid = 0;
-		else if(minGrid > 31) minGrid = 31;
-		
-		for(int g = minGrid + 1; g < 32; g++)
+		//if(minGrid >= 0)
+		for(int g = minGrid; g < 32; g++)
 			m_event[eventOffset + g].updateLeftBox(primBox);
 
 		int maxGrid = (primBox.getMax(axis) - min) / delta;
 		
-		if(maxGrid < 0) maxGrid = 0;
-		else if(maxGrid > 31) maxGrid = 31;
-		
-		for(int g = 0; g <= maxGrid - 1; g++)
-			m_event[eventOffset + g].updateRightBox(primBox);
-		
+		if(maxGrid > 32) maxGrid = 32;
+		//if(maxGrid > 1 && maxGrid < 32)
+		for(int g = 0; g <= maxGrid; g++)
+			m_event[eventOffset + g - 1].updateRightBox(primBox);
 	}
 }
 
 const SplitEvent *KdTreeBuilder::bestSplit()
 {
 	m_bestEventIdx = 0;
-	float lowest = m_event[0].getCost();
-	for(unsigned i = 1; i < numEvents(); i++) {
-		//m_event[i].verbose();
-		if(m_event[i].getCost() < lowest) {
-			lowest = m_event[i].getCost();
-			m_bestEventIdx = i;
-		}
+	byLowestCost(m_bestEventIdx);
+	
+	unsigned lc = 0;
+	if(byCutoffEmptySpace(lc)) {
+		if(m_event[lc].getCost() < m_event[m_bestEventIdx].getCost() * 2.f)
+			m_bestEventIdx = lc;
 	}
-	
-	cutoffEmptySpace();
-	
+		
 	return &m_event[m_bestEventIdx];
 }
 
-void KdTreeBuilder::cutoffEmptySpace()
+SplitEvent KdTreeBuilder::splitAt(int axis, int idx) const
 {
-	IndexLimit emptySpace[3];
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat()) {
-			emptySpace[axis].low = 100;
-			emptySpace[axis].low = 99;
-			continue;
-		}
-			
-		float preCost = -1.f;
-		int eventStart = 32 * axis;
-		EmptySpace cutoff;
-		for(unsigned i = 0; i < 32; i++) {
-			if(m_event[eventStart + i].getCost() != preCost) {
-				IndexLimit block;
-				block.low = i;
-				cutoff.push_back(block);
-			}
-			else {
-				IndexLimit &lastBlock = cutoff.back();
-				lastBlock.high = i;
-			}
-			preCost = m_event[eventStart + i].getCost();
-		}
-		
-		for (std::vector<IndexLimit>::iterator it = cutoff.begin() ; it < cutoff.end(); it++ ) {
-			IndexLimit block = *it;
-			if(block.high - block.low > 8) {
-				if(block.high - block.low > emptySpace[axis].high - emptySpace[axis].low)
-					emptySpace[axis] = block;
-			}
-		}
-	}
-	
-	float emptyArea[3];
-	
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(emptySpace[axis].high > emptySpace[axis].low) {
-			emptyArea[axis] = m_bbox.distance(axis) * m_bbox.crossSectionArea(axis) * (emptySpace[axis].high - emptySpace[axis].low);
-		}
-		else
-			emptyArea[axis] = -99.f;
-	}
-	
-	float maxEmptySpace = -1.f;
-	int maxEmptyAxis = -1;
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-		if(emptyArea[axis] > maxEmptySpace) {
-			maxEmptySpace = emptyArea[axis];
-			maxEmptyAxis = axis;
-		}
-	}
-	
-	if(maxEmptySpace < 0.f || maxEmptyAxis < 0) return;
-	
-	if(emptySpace[maxEmptyAxis].high > 29 || emptySpace[maxEmptyAxis].low < 2 ) return;
-	
-	//printf("%i: empty %i - %i\n", maxEmptyAxis, emptySpace[maxEmptyAxis].low, emptySpace[maxEmptyAxis].high);
-	
-	if(emptySpace[maxEmptyAxis].low == 0)
-		m_bestEventIdx = maxEmptyAxis * 32 + emptySpace[maxEmptyAxis].high;
-	else
-		m_bestEventIdx = maxEmptyAxis * 32 + emptySpace[maxEmptyAxis].low;
-		
-	//printf("space of split %f\n", m_bbox.getMax(maxEmptyAxis) - m_bbox.getMin(maxEmptyAxis));
-
+	return m_event[axis * SplitEvent::NumEventPerDimension + idx];
 }
 
-unsigned KdTreeBuilder::numEvents() const
+void KdTreeBuilder::byLowestCost(unsigned & dst)
 {
-	return 32 * SplitEvent::Dimension;
+	float lowest = 10e28;
+	
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		for(int i = 1; i < SplitEvent::NumEventPerDimension - 1; i++) {
+			SplitEvent e = splitAt(axis, i);
+			if(e.getCost() < lowest && e.hasBothSides()) {
+				lowest = e.getCost();
+				dst = i + SplitEvent::NumEventPerDimension * axis;
+			}
+		}
+	}
+}
+
+char KdTreeBuilder::byCutoffEmptySpace(unsigned &dst)
+{
+	int res = -1;
+	float vol, emptyVolume = -1.f;
+	int i, head, tail;
+	SplitEvent cand;
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		head = 0;
+		cand = splitAt(axis, 0);
+		if(cand.leftCount() == 0) {
+			for(i = 1; i < SplitEvent::NumEventPerDimension - 1; i++) {
+				cand = splitAt(axis, i);
+				if(cand.leftCount() == 0)
+					head = i;
+			}
+			
+			if(head > 2) {
+				vol = head;
+				if(vol > emptyVolume) {
+					emptyVolume = vol;
+					res = SplitEvent::NumEventPerDimension * axis + head;
+				}
+			}
+		}
+		tail = SplitEvent::NumEventPerDimension - 1;
+		cand = splitAt(axis, SplitEvent::NumEventPerDimension - 1);
+		if(cand.rightCount() == 0) {
+			for(i = 1; i < SplitEvent::NumEventPerDimension - 1; i++) {
+				cand = splitAt(axis, SplitEvent::NumEventPerDimension - 1 - i);
+				if(cand.rightCount() == 0)
+					tail = SplitEvent::NumEventPerDimension - 1 - i;
+			}
+			if(tail < SplitEvent::NumEventPerDimension - 3) {
+				vol = SplitEvent::NumEventPerDimension - tail;
+				if(vol > emptyVolume) {
+					emptyVolume = vol;
+					res = SplitEvent::NumEventPerDimension * axis + tail;
+				}
+			}
+		}
+	}
+	if(res > 0) {
+		dst = res;
+		//printf("cutoff at %i: %i left %i right %i\n", res/SplitEvent::NumEventPerDimension,  res%SplitEvent::NumEventPerDimension, m_event[res].leftCount(), m_event[res].rightCount());
+	}
+	return res>0;
 }
 
 void KdTreeBuilder::partitionLeft(BuildKdTreeContext &ctx)
@@ -331,4 +315,11 @@ void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &r
 		indices++;
 	}
 	//printf("partition %i | %i\n", leftCount, rightCount);
+}
+
+void KdTreeBuilder::verbose() const
+{
+	printf("unsplit cost %f = 2 * %i box %f\n", 2.f * m_numPrimitive, m_numPrimitive, m_bbox.area());
+	m_event[m_bestEventIdx].verbose();
+	printf("chose split %i: %i\n", m_bestEventIdx/SplitEvent::NumEventPerDimension,  m_bestEventIdx%SplitEvent::NumEventPerDimension);
 }

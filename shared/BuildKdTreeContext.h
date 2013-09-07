@@ -36,7 +36,7 @@ public:
 
 	void setBBox(const BoundingBox &bbox);
 	BoundingBox getBBox() const;
-	
+	float visitCost() const;
 private:
 	BoundingBox m_bbox;
 	IndexList m_indices;

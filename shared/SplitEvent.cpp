@@ -10,11 +10,13 @@
 #include <BaseMesh.h>
 #include <BuildKdTreeContext.h>
 int SplitEvent::Dimension = 3;
-float SplitEvent::ParentBoxArea = 1.f;
-
+int SplitEvent::NumBinPerDimension = 33;
+int SplitEvent::NumEventPerDimension = 32;
+//float SplitEvent::ParentBoxArea = 1.f;
+//BoundingBox SplitEvent::ParentBox;
 SplitEvent::SplitEvent() : m_isEmpty(1)
 {
-	m_cost = 10e32;
+	m_cost = 10e28;
 }
 
 void SplitEvent::setPos(float val)
@@ -94,7 +96,7 @@ void SplitEvent::updateRightBox(const BoundingBox &box)
 	m_rightBox.expandBy(box);	
 }
 
-void SplitEvent::calculateCost()
+void SplitEvent::calculateCost(float x)
 {/*
 	BoundingBox leftBBox, rightBBox;
 	for(unsigned i = 0; i < NumPrimitive; i++) {
@@ -106,11 +108,20 @@ void SplitEvent::calculateCost()
 	m_cost = 15.f + 20.f * (leftBBox.area() * m_leftNumPrim + rightBBox.area() * m_rightNumPrim) / ParentBoxArea;
 	*/
 	if(m_isEmpty) return;
-	m_cost = 150.f + 200.f * (m_leftBox.area() * m_leftNumPrim + m_rightBox.area() * m_rightNumPrim) / ParentBoxArea;
-	
+	m_cost = 1.5f + 2.f * (m_leftBox.area() * m_leftNumPrim + m_rightBox.area() * m_rightNumPrim) / x;
+}
+
+float SplitEvent::area() const
+{
+	return m_leftBox.area() + m_rightBox.area();
+}
+
+float SplitEvent::hasBothSides() const
+{
+	return (m_leftNumPrim > 0 && m_rightNumPrim > 0);
 }
 
 void SplitEvent::verbose() const
 {
-	printf("%i: %i + %i c %f \n", m_axis, m_leftNumPrim, m_rightNumPrim, m_cost);
+	printf("cost %f left %i %f right %i %f\n", m_cost, m_leftNumPrim, m_leftBox.area(), m_rightNumPrim, m_rightBox.area());
 }

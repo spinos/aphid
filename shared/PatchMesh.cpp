@@ -52,26 +52,21 @@ unsigned * PatchMesh::uvIds()
 	return m_uvIds;
 }
 
+const BoundingBox PatchMesh::calculateBBox() const
+{
+	return BaseMesh::calculateBBox();
+}
+
 const BoundingBox PatchMesh::calculateBBox(const unsigned &idx) const
 {
     BoundingBox box;
 	unsigned *qudi = &m_quadIndices[idx * 4];
-	Vector3F *p0 = &_vertices[*qudi];
-	qudi++;
-	Vector3F *p1 = &_vertices[*qudi];
-	qudi++;
-	Vector3F *p2 = &_vertices[*qudi];
-	qudi++;
-	Vector3F *p3 = &_vertices[*qudi];
-		
-	box.updateMin(*p0);
-	box.updateMax(*p0);
-	box.updateMin(*p1);
-	box.updateMax(*p1);
-	box.updateMin(*p2);
-	box.updateMax(*p2);
-	box.updateMin(*p3);
-	box.updateMax(*p3);
+	for(int i=0; i < 4; i++) {
+		Vector3F *p0 = &_vertices[*qudi];
+		qudi++;
+		box.updateMin(*p0);
+		box.updateMax(*p0);
+	}
 
 	return box;
 }

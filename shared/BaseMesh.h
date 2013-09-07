@@ -31,7 +31,7 @@ public:
 	unsigned processTriangleFromPolygon();
 	unsigned processQuadFromPolygon();
 
-	const BoundingBox calculateBBox() const;
+	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
 	const int faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const;
 	

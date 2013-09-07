@@ -98,24 +98,10 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
-	getDrawer()->edge(mesh());
+	//getDrawer()->edge(mesh());
 	m_fabricDrawer->drawAccPatchMesh(m_accmesh);
 	getDrawer()->drawKdTree(getTree());
-	/*
-	glColor3f(0.f, 1.f, 1.f);
-	m_fabricDrawer->drawBezierCage(&testbez);
-	glColor3f(1.f, 1.f, 0.f);
-    m_fabricDrawer->drawBezierCage(&testsplt[0]);
-    m_fabricDrawer->drawBezierCage(&testsplt[1]);
-    m_fabricDrawer->drawBezierCage(&testsplt[2]);
-    m_fabricDrawer->drawBezierCage(&testsplt[3]);
-    
-    m_fabricDrawer->drawBezierPatch(&testbez);
-    m_fabricDrawer->drawBezierPatch(&testsplt[0]);
-    m_fabricDrawer->drawBezierPatch(&testsplt[1]);
-    m_fabricDrawer->drawBezierPatch(&testsplt[2]);
-    m_fabricDrawer->drawBezierPatch(&testsplt[3]);
-	*/
+
 	drawSelection();
 	drawIntersection();
 }

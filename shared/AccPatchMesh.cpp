@@ -65,9 +65,20 @@ AccPatch* AccPatchMesh::beziers() const
 	return m_bezier;
 }
 
+const BoundingBox AccPatchMesh::calculateBBox() const
+{
+	BoundingBox box;
+	const unsigned numFace = numPatches();
+	for(unsigned i = 0; i < numFace; i++) {
+		box.expandBy(calculateBBox(i));
+	}
+	return box;
+}
+
 const BoundingBox AccPatchMesh::calculateBBox(const unsigned &idx) const
 {
 	return beziers()[idx].controlBBox();
+	//return PatchMesh::calculateBBox(idx);
 }
 
 char AccPatchMesh::intersect(unsigned idx, IntersectionContext * ctx) const
@@ -111,7 +122,7 @@ char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionCont
 		
 		BiLinearInterpolate bili;
 		ctx->m_patchUV = bili.interpolate2(ctx->m_patchUV.x, ctx->m_patchUV.y, split.patchUV);
-		printf("uv %f %f\n", ctx->m_patchUV.x, ctx->m_patchUV.y);
+		//printf("uv %f %f\n", ctx->m_patchUV.x, ctx->m_patchUV.y);
 		return 1;
 	}
 	

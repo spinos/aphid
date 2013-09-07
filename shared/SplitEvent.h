@@ -32,15 +32,19 @@ public:
 	int rightCount() const;
 	
 	void calculateTightBBoxes(const BoundingBox &box, BoundingBox &leftBBox, BoundingBox &rightBBox);
-	void calculateCost();
+	void calculateCost(float x);
+	float area() const;
 	int side(const BoundingBox &box) const;
 	void updateLeftBox(const BoundingBox &box);
 	void updateRightBox(const BoundingBox &box);
-	
+	float hasBothSides() const;
 	void verbose() const;
 
 	static int Dimension;
-	static float ParentBoxArea;
+	static int NumBinPerDimension;
+	static int NumEventPerDimension;
+	//static float ParentBoxArea;
+	//static BoundingBox ParentBox;
 	
 private:
 	BoundingBox m_leftBox, m_rightBox;

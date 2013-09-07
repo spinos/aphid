@@ -21,6 +21,16 @@ void BoundingBox::reset()
 	m_data[3] = m_data[4] = m_data[5] = -10e8;
 }
 
+void BoundingBox::setMin(float x, int axis)
+{
+	m_data[axis] = x;
+}
+	
+void BoundingBox::setMax(float x, int axis)
+{
+	m_data[axis + 3] = x;
+}
+
 void BoundingBox::setMin(float x, float y, float z)
 {
 	m_data[0] = x; m_data[1] = y; m_data[2] = z;
@@ -178,3 +188,9 @@ char BoundingBox::isPointAround(const Vector3F & p, float threshold) const
 	if(p.z + threshold < getMin(2) || p.z - threshold > getMax(2)) return 0;
 	return 1;
 }
+
+char BoundingBox::isValid() const
+{
+	return (getMin(0) < getMax(0) && getMin(1) < getMax(1) && getMin(2) < getMax(2));
+}
+//:~
