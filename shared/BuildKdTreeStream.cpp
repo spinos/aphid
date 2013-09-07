@@ -109,9 +109,9 @@ KdTreeNode *BuildKdTreeStream::firstTreeBranch()
 	return m_nodes.asKdTreeNode(0);
 }
 
-void BuildKdTreeStream::verbose()
+void BuildKdTreeStream::verbose() const
 {
-	printf("nodes state:\n");
+	printf("kd-tree data stream input primitive count: %i\nnodes state:\n", getNumPrimitives());	
 	m_nodes.verbose();
 	printf("indirection state:\n");
 	m_indirection.verbose();

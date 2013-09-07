@@ -14,7 +14,8 @@ public:
     enum TypeEntries {
         TTriangleMesh = 0,
         TPatchMesh = 1,
-        TUnknown = 2
+		TKdTree = 2,
+        TUnknown = 3
     };
     
 	TypedEntity();

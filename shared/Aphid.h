@@ -6,7 +6,7 @@
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
-
+#include <iostream>
 inline char IsValueNearZero(const float & value)
 {
 	return (value < 10e-5 && value > -10e-5);

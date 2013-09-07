@@ -15,6 +15,7 @@
 
 KdTree::KdTree() 
 {
+	setEntityType(TypedEntity::TKdTree);
 	m_root = 0;
 }
 
@@ -30,25 +31,24 @@ KdTreeNode* KdTree::getRoot() const
 
 void KdTree::addMesh(BaseMesh* mesh)
 {
-	//unsigned nf = mesh->getNumFaces();
-	//printf("add %i triangles\n", nf);
 	m_stream.appendMesh(mesh);
 
-	const BoundingBox box = mesh->calculateBBox();
-	m_bbox.expandBy(box);
+	BoundingBox b = getBBox();
+	b.expandBy(mesh->calculateBBox());
+	setBBox(b);
 }
 
 void KdTree::create()
 {	
 	m_root = new KdTreeNode;
-    printf("input primitive count %d\n", m_stream.getNumPrimitives());
-	printf("tree bbox: %f %f %f - %f %f %f\n", m_bbox.getMin(0), m_bbox.getMin(1), m_bbox.getMin(2), m_bbox.getMax(0), m_bbox.getMax(1), m_bbox.getMax(2));
 	
+	BoundingBox b = getBBox();
+    b.verbose();
 	QElapsedTimer timer;
 	timer.start();
 	
 	BuildKdTreeContext *ctx = new BuildKdTreeContext(m_stream);
-	ctx->setBBox(m_bbox);
+	ctx->setBBox(b);
 	
 	subdivide(m_root, *ctx, 0);
 	ctx->verbose();
@@ -131,9 +131,10 @@ void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 char KdTree::intersect(IntersectionContext * ctx)
 {
 	float hitt0, hitt1;
-	if(!m_bbox.intersect(ctx->m_ray, &hitt0, &hitt1)) return 0;
+	BoundingBox b = getBBox();
+	if(!b.intersect(ctx->m_ray, &hitt0, &hitt1)) return 0;
 	
-	ctx->setBBox(m_bbox);
+	ctx->setBBox(b);
 
 	KdTreeNode * root = getRoot();
 	return recusiveIntersect(root, ctx);
@@ -215,7 +216,6 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 	unsigned start = node->getPrimStart();
 	unsigned num = node->getNumPrims();
 	//printf("prim start %i ", start);
-	const Ray &ray = ctx->m_ray;	
 	//printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
 	IndexArray &indir = m_stream.indirection();
 	PrimitiveArray &prims = m_stream.primitives();
@@ -254,7 +254,7 @@ Primitive * KdTree::getPrim(unsigned idx)
 char KdTree::closestPoint(const Vector3F & origin, IntersectionContext * ctx)
 {
 	KdTreeNode * root = getRoot();
-	ctx->setBBox(m_bbox);
+	ctx->setBBox(getBBox());
 	return recusiveClosestPoint(root, origin, ctx);
 }
 

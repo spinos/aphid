@@ -139,6 +139,11 @@ void BoundingBox::expand(float val)
     m_data[5] += val;
 }
 
+Vector3F BoundingBox::center() const
+{
+	return Vector3F(m_data[0] * 0.5f + m_data[3] * 0.5f, m_data[1] * 0.5f + m_data[4] * 0.5f, m_data[2] * 0.5f + m_data[5] * 0.5f);
+}
+
 char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const 
 {
     float t0 = ray.m_tmin, t1 = ray.m_tmax;
@@ -193,4 +198,9 @@ char BoundingBox::isValid() const
 {
 	return (getMin(0) < getMax(0) && getMin(1) < getMax(1) && getMin(2) < getMax(2));
 }
+
+void BoundingBox::verbose() const
+{
+	printf("bounding box min max: (%f, %f, %f) (%f, %f, %f)\n", m_data[0], m_data[1], m_data[2], m_data[3], m_data[4], m_data[5]);
+}	
 //:~

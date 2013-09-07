@@ -19,7 +19,7 @@ KdTreeDrawer::~KdTreeDrawer() {}
 
 void KdTreeDrawer::drawKdTree(const KdTree * tree)
 {
-	BoundingBox bbox = tree->m_bbox;
+	BoundingBox bbox = tree->getBBox();
 	KdTreeNode * root = tree->getRoot();
 	
 	setWired(1);

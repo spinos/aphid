@@ -7,18 +7,14 @@
  *
  */
 #pragma once
-
+#include <Geometry.h>
 #include <KdTreeNode.h>
-#include <BaseMesh.h>
-#include <BoundingBox.h>
-#include <Primitive.h>
 #include <BuildKdTreeStream.h>
 #include <KdTreeBuilder.h>
 
 class IntersectionContext;
-typedef Primitive * primitivePtr;
 	
-class KdTree
+class KdTree : public Geometry
 {
 public:
 	KdTree();
@@ -32,8 +28,6 @@ public:
 	char intersect(IntersectionContext * ctx);
 	char closestPoint(const Vector3F & origin, IntersectionContext * ctx);
 
-	BoundingBox m_bbox;
-	
 	Primitive * getPrim(unsigned idx);
 	
 private:

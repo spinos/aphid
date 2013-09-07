@@ -33,7 +33,7 @@ public:
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
 	
-	void verbose();
+	void verbose() const;
 	
 private:
 	PrimitiveArray m_primitives;
