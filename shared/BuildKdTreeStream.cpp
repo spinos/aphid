@@ -24,34 +24,14 @@ void BuildKdTreeStream::cleanup()
 
 void BuildKdTreeStream::appendMesh(BaseMesh* mesh)
 {
-    if(mesh->isPatchMesh()) {
-        appendPatchMesh((PatchMesh *)mesh);
-        return;
-    }
+    if(mesh->isPatchMesh())
+		printf("is patch mesh\n");
     
 	unsigned numFace = mesh->getNumFaces();
 	m_primitives.expandBy(numFace);
 	m_indices.expandBy(numFace);
 
 	for(unsigned i = 0; i < numFace; i++) {
-		Primitive *p = m_primitives.asPrimitive();
-		p->setGeometry((char *)mesh);
-		p->setComponentIndex(i);
-		unsigned *dest = m_indices.asIndex();
-		*dest = m_primitives.index();
-		m_primitives.next();
-		m_indices.next();
-	}
-}
-
-void BuildKdTreeStream::appendPatchMesh(PatchMesh* mesh)
-{
-    printf("is patch mesh\n");
-	unsigned numPatch = mesh->numPatches();
-	m_primitives.expandBy(numPatch);
-	m_indices.expandBy(numPatch);
-
-	for(unsigned i = 0; i < numPatch; i++) {
 		Primitive *p = m_primitives.asPrimitive();
 		p->setGeometry((char *)mesh);
 		p->setComponentIndex(i);

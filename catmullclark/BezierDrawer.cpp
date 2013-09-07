@@ -65,7 +65,7 @@ void BezierDrawer::drawBezierCage(BezierPatch * patch)
 
 void BezierDrawer::drawAccPatchMesh(AccPatchMesh * mesh)
 {setWired(1);
-	const unsigned numFace = mesh->numPatches();
+	const unsigned numFace = mesh->getNumFaces();
 	AccPatch* bez = mesh->beziers();
 	for(unsigned i = 0; i < numFace; i++) {
 		drawBezierPatch(&bez[i]);

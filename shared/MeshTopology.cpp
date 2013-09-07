@@ -44,7 +44,7 @@ char MeshTopology::buildTopology(BaseMesh * mesh)
 	unsigned curTri = 0;
 	unsigned curPoly = 0;
 	
-	const unsigned nf = mesh->getNumFaces();
+	const unsigned nf = mesh->getNumTriangles();
 	for(unsigned i = 0; i < nf; i++) {
 		a = mesh->getIndices()[i * 3];
 		b = mesh->getIndices()[i * 3 + 1];

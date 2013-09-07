@@ -32,11 +32,6 @@ void PatchMesh::prePatchUV(unsigned numUVs, unsigned numUVIds)
 	m_numUVIds = numUVIds;
 }
 
-unsigned PatchMesh::numPatches() const
-{
-	return m_numQuads;
-}
-
 float * PatchMesh::us()
 {
 	return m_u;
@@ -50,6 +45,11 @@ float * PatchMesh::vs()
 unsigned * PatchMesh::uvIds()
 {
 	return m_uvIds;
+}
+
+unsigned PatchMesh::getNumFaces() const
+{
+	return m_numQuads;
 }
 
 const BoundingBox PatchMesh::calculateBBox() const

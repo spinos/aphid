@@ -35,7 +35,7 @@ void AccPatchMesh::setup(MeshTopology * topo)
 	float* ucoord = us();
 	float* vcoord = vs();
 	unsigned * uvs = uvIds();
-	const int numFace = numPatches();
+	const unsigned numFace = getNumFaces();
 
 	AccStencil* sten = AccPatch::stencil;
 	sten->setVertexPosition(cvs);
@@ -45,7 +45,7 @@ void AccPatchMesh::setup(MeshTopology * topo)
 
 	m_bezier = new AccPatch[numFace];
 	unsigned * quadV = quadIndices();
-	for(int j = 0; j < numFace; j++) {
+	for(unsigned j = 0; j < numFace; j++) {
 		sten->m_patchVertices[0] = quadV[0];
 		sten->m_patchVertices[1] = quadV[1];
 		sten->m_patchVertices[2] = quadV[2];
@@ -68,7 +68,7 @@ AccPatch* AccPatchMesh::beziers() const
 const BoundingBox AccPatchMesh::calculateBBox() const
 {
 	BoundingBox box;
-	const unsigned numFace = numPatches();
+	const unsigned numFace = getNumFaces();
 	for(unsigned i = 0; i < numFace; i++) {
 		box.expandBy(calculateBBox(i));
 	}

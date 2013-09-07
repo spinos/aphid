@@ -256,6 +256,11 @@ void BaseMesh::move(float x, float y, float z)
 
 unsigned BaseMesh::getNumFaces() const
 {
+	return getNumTriangles();
+}
+
+unsigned BaseMesh::getNumTriangles() const
+{
 	return _numFaceVertices / 3;
 }
 

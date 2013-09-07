@@ -18,12 +18,11 @@ public:
 	
 	void prePatchUV(unsigned numUVs, unsigned numUVIds);
 	
-	unsigned numPatches() const;
-	
 	float * us();
 	float * vs();
 	unsigned * uvIds();
 	
+	virtual unsigned getNumFaces() const;
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
 	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;

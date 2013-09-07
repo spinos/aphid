@@ -48,7 +48,8 @@ public:
 	
 	void getTriangle(unsigned idx, unsigned *vertexId) const;
 	
-	unsigned getNumFaces() const;
+	virtual unsigned getNumFaces() const;
+	unsigned getNumTriangles() const;
 	unsigned getNumQuads() const;
 	unsigned getNumPolygons() const;
 	unsigned getNumVertices() const;
