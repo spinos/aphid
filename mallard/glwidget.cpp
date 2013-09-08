@@ -99,9 +99,38 @@ void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
 	//getDrawer()->edge(mesh());
-	m_fabricDrawer->drawAccPatchMesh(m_accmesh);
-	getDrawer()->drawKdTree(getTree());
-
+	//m_fabricDrawer->drawAccPatchMesh(m_accmesh);
+	//getDrawer()->drawKdTree(getTree());
+	
+	glPushMatrix();
+	
+	Matrix44F s;
+	s.setTranslation(5.f, 3.f, 4.f);
+	s.rotateX(1.3f);
+	s.rotateY(0.67f);
+	getDrawer()->useSpace(s);
+	//getDrawer()->coordsys(13.f);
+	
+	Matrix44F b;
+	b.rotateZ(0.37f);
+	getDrawer()->useSpace(b);
+	getDrawer()->coordsys(10.f);
+	glPopMatrix();
+	
+	
+	glPushMatrix();
+	
+	Matrix44F c;
+	c.setTranslation(5.f, 3.5f, 4.f);
+	c.rotateX(1.3f);
+	c.rotateY(0.67f);
+	c.rotateZ(0.37f);
+	
+	getDrawer()->useSpace(c);
+	getDrawer()->coordsys(17.f);
+	
+	glPopMatrix();
+	
 	drawSelection();
 	drawIntersection();
 }

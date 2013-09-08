@@ -25,6 +25,7 @@
 	void transpose();
 	Matrix33F multiply(const Matrix33F & a) const;
 	Vector3F transform(const Vector3F & a) const;
+	void glMatrix(float m[16]) const;
 	float v[9];
  };
 

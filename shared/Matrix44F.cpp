@@ -6,12 +6,23 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include "Vector3F.h"
+#include <cmath>
 #include "Matrix44F.h"
+#include "Vector3F.h"
 
 Matrix44F::Matrix44F() 
 {
 	setIdentity();
+}
+
+Matrix44F::Matrix44F(float x)
+{
+	for(int i = 0; i < 16; i++) v[i] = x; 
+}
+
+Matrix44F::Matrix44F(Matrix44F & a)
+{
+	for(int i = 0; i < 16; i++) v[i] = a.v[i];
 }
 
 Matrix44F::~Matrix44F() {}
@@ -24,6 +35,39 @@ float Matrix44F::operator() (int i, int j)
 float Matrix44F::operator() (int i, int j) const
 {
 	return v[i * 4 + j];
+}
+
+Matrix44F Matrix44F::operator* (const Matrix44F & a) const
+{
+	Matrix44F r(0.f);
+	int i, j, k;
+	for(j = 0; j < 4; j++) {
+		for(i = 0; i < 4; i++) {
+			for(k = 0; k < 4; k++) {
+				*r.m(i, j) += M(k, j) * a.M(i, k);
+			}
+		}
+	}
+	return r;
+}
+
+void Matrix44F::operator*= (const Matrix44F & a)
+{
+	multiply(a);
+}
+
+void Matrix44F::multiply(const Matrix44F & a)
+{
+	Matrix44F t(*this);
+	setZero();
+	int i, j, k;
+	for(j = 0; j < 4; j++) {
+		for(i = 0; i < 4; i++) {
+			for(k = 0; k < 4; k++) {
+				*m(i, j) += t.M(k, j) * a.M(i, k);
+			}
+		}
+	}
 }
 
 float* Matrix44F::m(int i, int j)
@@ -40,6 +84,11 @@ void Matrix44F::setIdentity()
 {
 	*m(0, 0) = *m(1, 1) = *m(2, 2) = *m(3, 3) = 1.0f;
 	*m(0, 1) = *m(0, 2) = *m(0, 3) = *m(1, 0) = *m(1, 2) = *m(1, 3) = *m(2, 0) = *m(2, 1) = *m(2, 3) = *m(3, 0) = *m(3, 1) = *m(3, 2) = 0.0f;
+}
+
+void Matrix44F::setZero()
+{
+	for(int i = 0; i < 16; i++) v[i] = 0.f;
 }
 
 float Matrix44F::determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i ) const
@@ -174,6 +223,36 @@ void Matrix44F::setFrontOrientation(const Vector3F& front)
     Vector3F side = front.perpendicular();
     Vector3F up = front.cross(side);
     setOrientations(side, up, front);
+}
+
+void Matrix44F::rotateX(float alpha)
+{
+	const float c = cos(alpha);
+	const float s = sin(alpha);
+	Matrix44F r;
+	*r.m(1, 1) =  c; *r.m(2, 1) = s;
+	*r.m(1, 2) = -s; *r.m(2, 2) = c;
+	multiply(r);
+}
+
+void Matrix44F::rotateY(float beta)
+{
+	const float c = cos(beta);
+	const float s = sin(beta);
+	Matrix44F r;
+	*r.m(0, 0) = c; *r.m(2, 0) = -s;
+	*r.m(0, 2) = s; *r.m(2, 2) = c;
+	multiply(r);
+}
+
+void Matrix44F::rotateZ(float gamma)
+{
+	const float c = cos(gamma);
+	const float s = sin(gamma);
+	Matrix44F r;
+	*r.m(0, 0) =  c; *r.m(1, 0) = s;
+	*r.m(0, 1) = -s; *r.m(1, 1) = c;
+	multiply(r);
 }
 
 Vector3F Matrix44F::getTranslation() const

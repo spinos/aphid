@@ -38,7 +38,7 @@ public:
 	void aVertex(float x, float y, float z);
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
-	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
+	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0) const;
 	void drawPolygons(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void drawPoints(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void showNormal(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
@@ -55,7 +55,7 @@ public:
 	void setCullFace(char var);
 	void anchor(Anchor *a, char active = 0);
 	void spaceHandle(SpaceHandle * hand);
-	void sphere(float size = 1.f);
+	void sphere(float size = 1.f) const;
 	void linearCurve(const BaseCurve & curve);
 	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void colorAsActive();
@@ -63,7 +63,9 @@ public:
 	void vertex(const Vector3F & v);
 	void vertexWithOffset(const Vector3F & v, const Vector3F & o);
 	void circleAt(const Vector3F & pos, const Vector3F & nor);
-	
+	void arrow(const Vector3F& origin, const Vector3F& dest) const;
+	void useSpace(const Matrix44F & s) const;
+	void useSpace(const Matrix33F & s) const;
 private:
     char m_wired;
 	GeodesicSphereMesh * m_sphere;

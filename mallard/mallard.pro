@@ -1,5 +1,6 @@
 INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/core ../../ofl/opium ../fit
-HEADERS       = ../shared/Vector3F.h \
+HEADERS       = ../shared/AllMath.h \
+				../shared/Vector3F.h \
                 ../shared/Vector2F.h \
                 ../shared/Matrix44F.h \
                 ../shared/Matrix33F.h \

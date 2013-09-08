@@ -188,7 +188,7 @@ void BaseDrawer::drawCircleAround(const Vector3F& center)
 	glEnd();
 }
 
-void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer)
+void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer) const
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	if(!deformer)
@@ -411,112 +411,58 @@ void BaseDrawer::primitive(Primitive * prim)
 
 void BaseDrawer::coordsys(float scale)
 {
-	glBegin( GL_LINES );
-	glColor3f(1.f, 0.f, 0.f);
-			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(scale, 0.f, 0.f); 
-	glColor3f(0.f, 1.f, 0.f);					
-			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(0.f, scale, 0.f); 
-	glColor3f(0.f, 0.f, 1.f);					
-			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(0.f, 0.f, scale);	
-	glEnd();
-	float arrowSize = scale * 0.1f;
-	if(arrowSize < .1f) arrowSize = .1f;
-	if(arrowSize > scale * 0.33f) arrowSize = scale * 0.33f;
-	const float arrowWidth = arrowSize * .23f;
 	setWired(0);
-	glBegin(GL_TRIANGLES);
 	glColor3f(1.f, 0.f, 0.f);
-			glVertex3f(scale - arrowSize, -arrowWidth, arrowWidth);
-			glVertex3f(scale - arrowSize,  arrowWidth, arrowWidth);
-			glVertex3f(scale - arrowSize,  arrowWidth, -arrowWidth);
-			
-			glVertex3f(scale - arrowSize,  arrowWidth, -arrowWidth);
-			glVertex3f(scale - arrowSize, -arrowWidth, -arrowWidth);
-			glVertex3f(scale - arrowSize, -arrowWidth, arrowWidth);
-			
-			glVertex3f(scale - arrowSize, -arrowWidth, arrowWidth);
-			glVertex3f(scale, 0.f, 0.f);
-			glVertex3f(scale - arrowSize, arrowWidth, arrowWidth);
-			
-			glVertex3f(scale - arrowSize, arrowWidth, arrowWidth);
-			glVertex3f(scale, 0.f, 0.f);
-			glVertex3f(scale - arrowSize, arrowWidth, -arrowWidth);
-			
-			glVertex3f(scale - arrowSize, arrowWidth, -arrowWidth);
-			glVertex3f(scale, 0.f, 0.f);
-			glVertex3f(scale - arrowSize, -arrowWidth, -arrowWidth);
-			
-			glVertex3f(scale - arrowSize, -arrowWidth, -arrowWidth);
-			glVertex3f(scale, 0.f, 0.f);
-			glVertex3f(scale - arrowSize, -arrowWidth, arrowWidth);
-	glColor3f(0.f, 1.f, 0.f);					
-			glVertex3f(-arrowWidth, scale - arrowSize, arrowWidth);
-			glVertex3f(arrowWidth, scale - arrowSize,  arrowWidth);
-			glVertex3f(arrowWidth, scale - arrowSize,  -arrowWidth);
-			
-			glVertex3f(arrowWidth, scale - arrowSize,  -arrowWidth);
-			glVertex3f(-arrowWidth, scale - arrowSize, -arrowWidth);
-			glVertex3f(-arrowWidth, scale - arrowSize, arrowWidth);
-			
-			glVertex3f(arrowWidth, scale - arrowSize, arrowWidth);
-			glVertex3f(0.f, scale, 0.f);
-			glVertex3f(-arrowWidth, scale - arrowSize, arrowWidth);
-			
-			glVertex3f(arrowWidth, scale - arrowSize, -arrowWidth);
-			glVertex3f(0.f, scale, 0.f);
-			glVertex3f(arrowWidth, scale - arrowSize, arrowWidth);
-			
-			glVertex3f(-arrowWidth, scale - arrowSize, -arrowWidth);
-			glVertex3f(0.f, scale, 0.f);
-			glVertex3f(arrowWidth, scale - arrowSize, -arrowWidth);
-			
-			glVertex3f(-arrowWidth, scale - arrowSize, arrowWidth);
-			glVertex3f(0.f, scale, 0.f);
-			glVertex3f(-arrowWidth, scale - arrowSize, -arrowWidth);
-			
-	glColor3f(0.f, 0.f, 1.f);					
-			glVertex3f(arrowWidth, -arrowWidth, scale - arrowSize);
-			glVertex3f(-arrowWidth, -arrowWidth, scale - arrowSize);
-			glVertex3f(arrowWidth,  arrowWidth, scale - arrowSize);
-			
-			glVertex3f(-arrowWidth, -arrowWidth, scale - arrowSize);
-			glVertex3f(-arrowWidth, arrowWidth, scale - arrowSize);
-			glVertex3f(arrowWidth,  arrowWidth, scale - arrowSize);
-			
-			glVertex3f(-arrowWidth, arrowWidth, scale - arrowSize);
-			glVertex3f(0.f, 0.f, scale);
-			glVertex3f(arrowWidth, arrowWidth, scale - arrowSize);
-			
-			glVertex3f(arrowWidth, arrowWidth, scale - arrowSize);
-			glVertex3f(0.f, 0.f, scale);
-			glVertex3f(arrowWidth, -arrowWidth, scale - arrowSize);
-			
-			glVertex3f(arrowWidth, -arrowWidth, scale - arrowSize);
-			glVertex3f(0.f, 0.f, scale);
-			glVertex3f(-arrowWidth, -arrowWidth, scale - arrowSize);
-			
-			glVertex3f(-arrowWidth, -arrowWidth, scale - arrowSize);
-			glVertex3f(0.f, 0.f, scale);
-			glVertex3f(-arrowWidth, arrowWidth, scale - arrowSize);
+	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(scale, 0.f, 0.f));
+	glColor3f(0.f, 1.f, 0.f);
+	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, scale, 0.f));
+	glColor3f(0.f, 0.f, 1.f);
+	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 0.f, scale));
+}
+
+void BaseDrawer::arrow(const Vector3F& origin, const Vector3F& dest) const
+{
+	glBegin( GL_LINES );
+	glVertex3f(origin.x, origin.y, origin.z);
+	glVertex3f(dest.x, dest.y, dest.z); 
 	glEnd();
-	setWired(1);
+	
+	Matrix44F space;
+	const Vector3F r = dest - origin;
+	space.setFrontOrientation(r.normal());
+	space.setTranslation(dest);
+	
+	glPushMatrix();
+	useSpace(space);
+	glRotatef(90.f, 1.f, 0.f, 0.f);
+	
+	const float arrowLength = r.length() * 0.13f;
+	const float arrowWidth = arrowLength * .31f;
+	glScalef(arrowWidth, arrowLength, arrowWidth);
+	drawMesh(m_pyramid);
+	glPopMatrix();
 }
 
 void BaseDrawer::coordsys(const Matrix33F & orient, float scale)
 {
 	float m[16];
-	m[0] = orient(0, 0); m[1] = orient(0, 1); m[2] = orient(0, 2); m[3] = 0.0;
-	m[4] = orient(1, 0); m[5] = orient(1, 1); m[6] = orient(1, 2); m[7] = 0.0;
-	m[8] = orient(2, 0); m[9] = orient(2, 1); m[10] = orient(2, 2); m[11] = 0.0;
-	m[12] = 0.f;
-	m[13] = 0.f;
-	m[14] = 0.f; 
-	m[15] = 1.f;
+	orient.glMatrix(m);
 	glMultMatrixf((const GLfloat*)m);
 	coordsys(scale);
+}
+
+void BaseDrawer::useSpace(const Matrix44F & s) const
+{
+	float m[16];
+	s.glMatrix(m);
+	glMultMatrixf((const GLfloat*)m);
+}
+
+void BaseDrawer::useSpace(const Matrix33F & s) const
+{
+	float m[16];
+	s.glMatrix(m);
+	glMultMatrixf((const GLfloat*)m);
 }
 
 void BaseDrawer::setWired(char var)
@@ -584,7 +530,7 @@ void BaseDrawer::spaceHandle(SpaceHandle * hand)
 	glPopMatrix();
 }
 
-void BaseDrawer::sphere(float size)
+void BaseDrawer::sphere(float size) const
 {
 	glPushMatrix();
 	glScalef(size, size, size);
@@ -648,10 +594,7 @@ void BaseDrawer::circleAt(const Vector3F & pos, const Vector3F & nor)
     Matrix44F mat;
     mat.setTranslation(pos);
     mat.setFrontOrientation(nor);
-    float m[16];
-    mat.glMatrix(m);
-	glMultMatrixf((const GLfloat*)m);
-	
+	useSpace(mat);
     linearCurve(*m_circle);
     glPopMatrix();
 }

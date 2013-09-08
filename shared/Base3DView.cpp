@@ -100,6 +100,7 @@ void Base3DView::paintGL()
     float m[16];
 	getCamera()->getMatrix(m);
 	glMultMatrixf(m);
+	getDrawer()->coordsys(20.f);
 	clientDraw();
 	if(m_isFocused) {
 		Vector3F corners[4];

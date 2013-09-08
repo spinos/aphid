@@ -14,10 +14,16 @@
  {
  public:
 	Matrix44F();
+	Matrix44F(float x);
+	Matrix44F(Matrix44F & a);
 	~Matrix44F();
 	float Matrix44F::operator() (int i, int j);
 	float Matrix44F::operator() (int i, int j) const;
+	Matrix44F operator* (const Matrix44F & a) const;
+	void operator*= (const Matrix44F & a);
+	void multiply(const Matrix44F & a);
 	void setIdentity();
+	void setZero();
 	float* m(int i, int j);
 	float M(int i, int j) const;
 	
@@ -33,6 +39,9 @@
 	void setTranslation(float x, float y, float z);
 	void setOrientations(const Vector3F& side, const Vector3F& up, const Vector3F& front);
 	void setFrontOrientation(const Vector3F& front);
+	void rotateX(float alpha);
+	void rotateY(float beta);
+	void rotateZ(float gamma);
 	Vector3F getTranslation() const;
 	Vector3F getSide() const;
 	Vector3F getUp() const;

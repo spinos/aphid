@@ -121,3 +121,10 @@ Vector3F Matrix33F::transform(const Vector3F & a) const
 	return b;
 }
 
+void Matrix33F::glMatrix(float m[16]) const
+{
+	m[0] = M(0,0); m[1] = M(0,1); m[2] = M(0,2); m[3] = 0.f;
+    m[4] = M(1,0); m[5] = M(1,1); m[6] = M(1,2); m[7] = 0.f;
+    m[8] = M(2,0); m[9] = M(2,1); m[10] =M(2,2); m[11] = 0.f;
+    m[12] = m[13] = m[14] = 0.f; m[15] = 1.f;
+}
