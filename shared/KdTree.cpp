@@ -71,13 +71,11 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 		return;
 	}
 	
-	//printf("subdiv node level %i\n", level);
-	
 	KdTreeBuilder builder(ctx);
 
 	const SplitEvent *plane = builder.bestSplit();
 	
-	builder.verbose();
+	//builder.verbose();
 	
 	if(plane->getCost() > ctx.visitCost()) {
 		createLeaf(node, ctx);
@@ -149,7 +147,6 @@ char KdTree::intersect(IntersectionContext * ctx)
 
 char KdTree::recusiveIntersect(KdTreeNode *node, IntersectionContext * ctx)
 {
-	//printf("recus intersect level %i\n", ctx.m_level);
 	if(node->isLeaf())
 		return leafIntersect(node, ctx);
 	

@@ -72,10 +72,7 @@ void KdTreeDrawer::drawKdTreeNode(KdTreeNode * tree, const BoundingBox & bbox, i
 
 void KdTreeDrawer::drawPrimitivesInNode(KdTree * tree, KdTreeNode * node)
 {
-	unsigned num = node->getNumPrims();
-	if(num < 1)
-		return;
-	
+	unsigned num = node->getNumPrims();	
 	unsigned start = node->getPrimStart();
 	for(unsigned i = 0; i < num; i++) {
 	    Primitive * prim = tree->getPrim(start + i);

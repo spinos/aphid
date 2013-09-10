@@ -124,7 +124,7 @@ void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
 		
 		if(maxGrid > SplitEvent::NumBinPerDimension) maxGrid = SplitEvent::NumBinPerDimension;
 
-		for(int g = 0; g <= maxGrid; g++)
+		for(int g = maxGrid; g > 0; g--)
 			m_event[eventOffset + g - 1].updateRightBox(primBox);
 	}
 }
