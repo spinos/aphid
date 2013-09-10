@@ -83,6 +83,7 @@ const BoundingBox AccPatchMesh::calculateBBox(const unsigned &idx) const
 
 char AccPatchMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 {
+    return PatchMesh::intersect(idx, ctx);
 	PatchSplitContext split;
 	split.reset();
     if(!recursiveBezierIntersect(&beziers()[idx], ctx, split, 0)) return 0;
@@ -110,7 +111,7 @@ char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionCont
 
 	if(hitt1 > ctx->m_minHitDistance) return 0;
 	
-	if(level > 3 || controlbox.area() < .1f) {
+	if(level > 4 || controlbox.area() < .1f) {
 	    Vector3F fourCorners[4];
 	    fourCorners[0] = patch->_contorlPoints[0];
 	    fourCorners[1] = patch->_contorlPoints[3];

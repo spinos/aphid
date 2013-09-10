@@ -50,6 +50,7 @@
 	float v[16];
 	void glMatrix(float *m) const;
 	static float Determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i );
+	static Matrix44F Identitiy;
  };
  
 

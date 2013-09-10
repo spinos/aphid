@@ -20,6 +20,7 @@ public:
 	void cleanup();
 	
 	void addVertex(const Vector3F & vert);
+	void finishAddVertex();
 	unsigned numVertices() const;
 	void computeKnots();
 	
@@ -38,7 +39,7 @@ public:
 	
 	void findNeighborKnots(float param, unsigned & nei0, unsigned & nei1) const;
 	
-	std::vector<Vector3F> m_vertices;
+	static std::vector<Vector3F> BuilderVertices;
 	Vector3F * m_cvs;
 	float * m_knots;
 	float m_t;

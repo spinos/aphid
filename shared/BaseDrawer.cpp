@@ -394,6 +394,7 @@ void BaseDrawer::components(SelectionArray * arr)
 		glEnable(GL_DEPTH_TEST);
 		
 		if(arr->hasVertexPath()) {
+		    curve.finishAddVertex();
 			curve.computeKnots();
 			glLineWidth(2.f);
 			linearCurve(curve);
@@ -507,6 +508,7 @@ void BaseDrawer::anchor(Anchor *a, char active)
 		BaseCurve curve;
 		for(unsigned i = 0; i < a->numPoints(); i++)
 			curve.addVertex(a->getPoint(i)->p);
+		curve.finishAddVertex();
 		curve.computeKnots();
 		linearCurve(curve);
 	}

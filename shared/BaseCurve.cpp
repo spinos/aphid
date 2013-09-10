@@ -8,7 +8,7 @@
  */
 
 #include "BaseCurve.h"
-
+std::vector<Vector3F> BaseCurve::BuilderVertices;
 BaseCurve::BaseCurve() 
 {
 	m_cvs = 0;
@@ -28,7 +28,17 @@ void BaseCurve::cleanup()
 
 void BaseCurve::addVertex(const Vector3F & vert)
 {
-	m_vertices.push_back(vert);
+	BuilderVertices.push_back(vert);
+}
+
+void BaseCurve::finishAddVertex()
+{
+    m_numVertices = (unsigned)BuilderVertices.size();
+	
+	m_cvs = new Vector3F[numVertices()];
+	for(unsigned i = 0; i < numVertices(); i++) m_cvs[i] = BuilderVertices[i];
+	
+	BuilderVertices.clear();
 }
 
 unsigned BaseCurve::numVertices() const
@@ -38,13 +48,6 @@ unsigned BaseCurve::numVertices() const
 
 void BaseCurve::computeKnots()
 {
-	m_numVertices = (unsigned)m_vertices.size();
-	
-	m_cvs = new Vector3F[numVertices()];
-	for(unsigned i = 0; i < numVertices(); i++) m_cvs[i] = m_vertices[i];
-	
-	m_vertices.clear();
-	
 	m_length = 0;
 	for(unsigned i = 1; i < numVertices(); i++) {
 		m_length += (m_cvs[i] - m_cvs[i-1]).length();

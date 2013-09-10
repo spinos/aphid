@@ -83,6 +83,7 @@ HEADERS       = ../shared/AllMath.h \
                 ../fit/SingleModelView.h \
                 ToolBox.h \
                 glwidget.h \
+                MlFeather.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \  
@@ -168,6 +169,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../fit/SingleModelView.cpp \
                 ToolBox.cpp \
                 glwidget.cpp \
+                MlFeather.cpp \
                 window.cpp \
                 main.cpp 
                 

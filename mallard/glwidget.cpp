@@ -98,10 +98,10 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
-	//getDrawer()->edge(mesh());
+	getDrawer()->edge(mesh());
 	//m_fabricDrawer->drawAccPatchMesh(m_accmesh);
-	//getDrawer()->drawKdTree(getTree());
-	
+	getDrawer()->drawKdTree(getTree());
+	/*
 	glPushMatrix();
 	
 	Matrix44F s;
@@ -130,7 +130,7 @@ void GLWidget::clientDraw()
 	getDrawer()->coordsys(17.f);
 	
 	glPopMatrix();
-	
+	*/
 	drawSelection();
 	drawIntersection();
 }
@@ -167,6 +167,15 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 	else {
 		hitTest(ray, hit);
 	}
+}
+
+void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
+{
+    Vector3F rayo = origin;
+	Vector3F raye = origin + displacement;
+	Vector3F hit;
+	Ray ray(rayo, raye);
+	hitTest(ray, hit);
 }
 
 PatchMesh * GLWidget::mesh() const
