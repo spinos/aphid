@@ -98,10 +98,10 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
-	//getDrawer()->edge(mesh());
+	getDrawer()->edge(mesh());
 	//m_fabricDrawer->drawAccPatchMesh(m_accmesh);
-	//getDrawer()->drawKdTree(getTree());
-	
+	getDrawer()->drawKdTree(getTree());
+	/*
 	glPushMatrix();
 	
 	Matrix44F s;
@@ -130,7 +130,7 @@ void GLWidget::clientDraw()
 	getDrawer()->coordsys(17.f);
 	
 	glPopMatrix();
-	
+	*/
 	drawSelection();
 	drawIntersection();
 }

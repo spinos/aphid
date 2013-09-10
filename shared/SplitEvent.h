@@ -43,8 +43,6 @@ public:
 	static int Dimension;
 	static int NumBinPerDimension;
 	static int NumEventPerDimension;
-	//static float ParentBoxArea;
-	//static BoundingBox ParentBox;
 	
 private:
 	BoundingBox m_leftBox, m_rightBox;

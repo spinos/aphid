@@ -49,7 +49,7 @@ public:
 	void growSelection();
 	void shrinkSelection();
 	void frameAll();
-	void drawIntersection() const;
+	virtual void drawIntersection() const;
 	
 protected:
     void keyPressEvent(QKeyEvent *event);

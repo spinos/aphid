@@ -66,7 +66,7 @@ void KdTree::cleanup()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 8 || level == 18) {
+	if(ctx.getNumPrimitives() < 8 || level == 22) {
 		createLeaf(node, ctx);
 		return;
 	}
@@ -76,7 +76,9 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	KdTreeBuilder builder(ctx);
 
 	const SplitEvent *plane = builder.bestSplit();
-	//builder.verbose();
+	
+	builder.verbose();
+	
 	if(plane->getCost() > ctx.visitCost()) {
 		createLeaf(node, ctx);
 		return;
@@ -96,15 +98,19 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	
 	if(plane->leftCount() > 0)
 		subdivide(branch, *leftCtx, level + 1);
-	else
+	else {
 		branch->leaf.combined = 6;
+		branch->setNumPrims(0);
+	}
 		
 	delete leftCtx;
 
 	if(plane->rightCount() > 0)
 		subdivide(branch + 1, *rightCtx, level + 1);
-	else
+	else {
 		(branch+1)->leaf.combined = 6;
+		(branch+1)->setNumPrims(0);
+	}
 		
 	delete rightCtx;
 }
@@ -125,6 +131,7 @@ void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 			indir.next();
 		}
 	}
+	
 	node->setLeaf(true);
 }
 
@@ -143,9 +150,9 @@ char KdTree::intersect(IntersectionContext * ctx)
 char KdTree::recusiveIntersect(KdTreeNode *node, IntersectionContext * ctx)
 {
 	//printf("recus intersect level %i\n", ctx.m_level);
-	if(node->isLeaf()) {
+	if(node->isLeaf())
 		return leafIntersect(node, ctx);
-	}
+	
 	const int axis = node->getAxis();
 	const Ray & ray = ctx->m_ray;
 	const float splitPos = node->getSplitPos();
@@ -213,8 +220,9 @@ char KdTree::recusiveIntersect(KdTreeNode *node, IntersectionContext * ctx)
 
 char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 {
+	const unsigned num = node->getNumPrims();
+	if(num < 1) return 0;
 	unsigned start = node->getPrimStart();
-	unsigned num = node->getNumPrims();
 	//printf("prim start %i ", start);
 	//printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
 	IndexArray &indir = m_stream.indirection();
@@ -238,7 +246,10 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 			
 		indir.next();
 	}
-	if(anyHit) {ctx->m_success = 1; ctx->m_cell = (char *)node;}
+	if(anyHit) {
+		ctx->m_success = 1; 
+		ctx->m_cell = (char *)node;
+	}
 	return anyHit;
 }
 

@@ -22,6 +22,7 @@ public:
 	void setEntityType(TypeEntries val);
 	unsigned entityType() const;
 	
+	bool isMesh() const;
 	bool isTriangleMesh() const;
 	bool isPatchMesh() const;
 private:	

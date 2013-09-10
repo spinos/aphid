@@ -21,6 +21,11 @@ unsigned TypedEntity::entityType() const
     return m_type;
 }
 
+bool TypedEntity::isMesh() const
+{
+	return m_type < 2;
+}
+
 bool TypedEntity::isTriangleMesh() const
 {
     return m_type == TTriangleMesh;

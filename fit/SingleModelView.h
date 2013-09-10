@@ -45,6 +45,8 @@ public:
 	virtual void loadMesh(std::string filename);
 	virtual void saveMesh(std::string filename);
 	
+	virtual void drawIntersection() const;
+	
 	void drawAnchors();
 	AnchorGroup * getAnchors() const;
 	KdTree * getTree() const;

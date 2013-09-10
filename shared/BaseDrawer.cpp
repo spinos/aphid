@@ -372,6 +372,24 @@ void BaseDrawer::triangle(const BaseMesh * mesh, unsigned idx)
 	end();
 }
 
+void BaseDrawer::patch(const BaseMesh * mesh, unsigned idx)
+{
+	beginQuad();
+	Vector3F *v = mesh->getVertices();
+	unsigned *i = mesh->getQuadIndices();
+	
+	Vector3F & a = v[i[idx * 4]];
+	Vector3F & b = v[i[idx * 4 + 1]];
+	Vector3F & c = v[i[idx * 4 + 2]];
+	Vector3F & d = v[i[idx * 4 + 3]];
+	
+	glVertex3f(a.x, a.y, a.z);
+	glVertex3f(b.x, b.y, b.z);
+	glVertex3f(c.x, c.y, c.z);
+	glVertex3f(d.x, d.y, d.z);
+	end();
+}
+
 void BaseDrawer::components(SelectionArray * arr)
 {
     BaseMesh *mesh = (BaseMesh *)arr->getGeometry();
@@ -404,9 +422,13 @@ void BaseDrawer::components(SelectionArray * arr)
 
 void BaseDrawer::primitive(Primitive * prim)
 {
-	BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
-	unsigned iface = prim->getComponentIndex();
-	triangle((const BaseMesh *)mesh, iface);	
+	BaseMesh *geo = (BaseMesh *)prim->getGeometry();//printf("prim %i ", geo->entityType());
+	const unsigned iface = prim->getComponentIndex();
+	if(geo->isTriangleMesh())
+		triangle((const BaseMesh *)geo, iface);
+	else {
+		patch((const BaseMesh *)geo, iface);
+		}
 }
 
 void BaseDrawer::coordsys(float scale)

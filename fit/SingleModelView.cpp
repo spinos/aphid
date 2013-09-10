@@ -230,4 +230,14 @@ PatchMesh * SingleModelView::mesh() const
 {
 	return m_mesh;
 }
+
+void SingleModelView::drawIntersection() const
+{
+    IntersectionContext * ctx = getIntersectionContext();
+    if(!ctx->m_success) return;
+    
+	getDrawer()->drawPrimitivesInNode(m_tree, (KdTreeNode *)ctx->m_cell);
+	
+	Base3DView::drawIntersection();
+}
 //:~

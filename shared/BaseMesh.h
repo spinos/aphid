@@ -58,6 +58,7 @@ public:
 	Vector3F * getVertices() const;
 	Vector3F * getNormals() const;
 	unsigned * getIndices() const;
+	unsigned * getQuadIndices() const;
 	unsigned * getPolygonCounts() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	

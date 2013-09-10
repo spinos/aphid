@@ -299,6 +299,11 @@ unsigned * BaseMesh::getIndices() const
 	return _indices;
 }
 
+unsigned * BaseMesh::getQuadIndices() const
+{
+	return m_quadIndices;
+}
+
 unsigned * BaseMesh::getPolygonCounts() const
 {
 	return m_polygonCounts;

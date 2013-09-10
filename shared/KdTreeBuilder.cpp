@@ -116,14 +116,14 @@ void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
 		int minGrid = (primBox.getMin(axis) - min) / delta;
 		
 		if(minGrid < 0) minGrid = 0;
-		//if(minGrid >= 0)
-		for(int g = minGrid; g < 32; g++)
+		
+		for(int g = minGrid; g < SplitEvent::NumEventPerDimension; g++)
 			m_event[eventOffset + g].updateLeftBox(primBox);
 
 		int maxGrid = (primBox.getMax(axis) - min) / delta;
 		
-		if(maxGrid > 32) maxGrid = 32;
-		//if(maxGrid > 1 && maxGrid < 32)
+		if(maxGrid > SplitEvent::NumBinPerDimension) maxGrid = SplitEvent::NumBinPerDimension;
+
 		for(int g = 0; g <= maxGrid; g++)
 			m_event[eventOffset + g - 1].updateRightBox(primBox);
 	}
@@ -303,14 +303,20 @@ void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &r
 		
 		//side = m_primitiveClassification[i];
 		if(side < 2) {
+			if(primBox.touch(leftBox)) {
+		
 			leftIdxDst[leftCount] = *indices;
 			leftBoxDst[leftCount] = boxSrc[i];
 			leftCount++;
+			
+			}
 		}
 		if(side > 0) {
+			if(primBox.touch(rightBox)) {
 			rightIdxDst[rightCount] = *indices;
 			rightBoxDst[rightCount] = boxSrc[i];
 			rightCount++;
+			}
 		}
 		indices++;
 	}

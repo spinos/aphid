@@ -15,7 +15,7 @@ class KdTreeDrawer : public BaseDrawer {
 public:
 	KdTreeDrawer();
 	virtual ~KdTreeDrawer();
-	void drawKdTree(const KdTree * tree);
-	void drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox, int level);
-	void drawPrimitivesInNode(KdTree * tree, const KdTreeNode * node);
+	void drawKdTree(KdTree * tree);
+	void drawKdTreeNode(KdTreeNode * tree, const BoundingBox & bbox, int level);
+	void drawPrimitivesInNode(KdTree *tree, KdTreeNode * node);
 };

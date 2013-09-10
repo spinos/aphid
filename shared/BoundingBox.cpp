@@ -144,6 +144,14 @@ Vector3F BoundingBox::center() const
 	return Vector3F(m_data[0] * 0.5f + m_data[3] * 0.5f, m_data[1] * 0.5f + m_data[4] * 0.5f, m_data[2] * 0.5f + m_data[5] * 0.5f);
 }
 
+char BoundingBox::touch(const BoundingBox & b) const
+{
+	if(m_data[0] > b.m_data[3] || m_data[3] < b.m_data[0]) return 0;
+	if(m_data[1] > b.m_data[4] || m_data[4] < b.m_data[1]) return 0;
+	if(m_data[2] > b.m_data[5] || m_data[5] < b.m_data[2]) return 0;
+	return 1;
+}
+
 char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const 
 {
     float t0 = ray.m_tmin, t1 = ray.m_tmax;

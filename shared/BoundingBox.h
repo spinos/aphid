@@ -31,6 +31,7 @@ public:
 	void expandBy(const BoundingBox &another);
 	void expand(float v);
 	Vector3F center() const;
+	char touch(const BoundingBox & b) const;
 	
 	char intersect(const Ray &ray, float *hitt0, float *hitt1) const;
 	char isPointInside(const Vector3F & p) const;

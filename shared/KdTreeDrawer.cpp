@@ -17,7 +17,7 @@
 KdTreeDrawer::KdTreeDrawer() {}
 KdTreeDrawer::~KdTreeDrawer() {}
 
-void KdTreeDrawer::drawKdTree(const KdTree * tree)
+void KdTreeDrawer::drawKdTree(KdTree * tree)
 {
 	BoundingBox bbox = tree->getBBox();
 	KdTreeNode * root = tree->getRoot();
@@ -30,10 +30,11 @@ void KdTreeDrawer::drawKdTree(const KdTree * tree)
 	drawKdTreeNode(root, bbox, level);
 }
 
-void KdTreeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & bbox, int level)
+void KdTreeDrawer::drawKdTreeNode(KdTreeNode * tree, const BoundingBox & bbox, int level)
 {
-	if(level > 17) return;
+	if(level == 22) return;
 	if(tree->isLeaf()) return;
+	
 	Vector3F corner0(bbox.getMin(0), bbox.getMin(1), bbox.getMin(2));
 	Vector3F corner1(bbox.getMax(0), bbox.getMax(1), bbox.getMax(2));
 	const int axis = tree->getAxis();
@@ -69,10 +70,13 @@ void KdTreeDrawer::drawKdTreeNode(const KdTreeNode * tree, const BoundingBox & b
 	drawKdTreeNode(tree->getRight(), rightBox, level);	
 }
 
-void KdTreeDrawer::drawPrimitivesInNode(KdTree * tree, const KdTreeNode * node)
+void KdTreeDrawer::drawPrimitivesInNode(KdTree * tree, KdTreeNode * node)
 {
-	unsigned start = node->getPrimStart();
 	unsigned num = node->getNumPrims();
+	if(num < 1)
+		return;
+	
+	unsigned start = node->getPrimStart();
 	for(unsigned i = 0; i < num; i++) {
 	    Primitive * prim = tree->getPrim(start + i);
 	    primitive(prim);

@@ -47,6 +47,7 @@ public:
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void boundingBox(const BoundingBox & b);
 	void triangle(const BaseMesh * mesh, unsigned idx);
+	void patch(const BaseMesh * mesh, unsigned idx);
 	void components(SelectionArray * arr);
 	void primitive(Primitive * prim);
 	void coordsys(float scale = 1.f);
