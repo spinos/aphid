@@ -58,7 +58,8 @@ public:
     ~GLWidget();
 	virtual void loadMesh(std::string filename);
 	virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
-	virtual PatchMesh * mesh() const;
+	virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
+    virtual PatchMesh * mesh() const;
 	void setSelectionAsWale(int bothSide);
 	void changeWaleResolution(int change);
 	void changeCourseResolution(int change);

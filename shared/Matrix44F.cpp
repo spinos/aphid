@@ -10,6 +10,8 @@
 #include "Matrix44F.h"
 #include "Vector3F.h"
 
+Matrix44F Matrix44F::Identitiy;
+
 Matrix44F::Matrix44F() 
 {
 	setIdentity();

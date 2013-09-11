@@ -78,12 +78,11 @@ const BoundingBox AccPatchMesh::calculateBBox() const
 const BoundingBox AccPatchMesh::calculateBBox(const unsigned &idx) const
 {
 	return beziers()[idx].controlBBox();
-	//return PatchMesh::calculateBBox(idx);
 }
 
 char AccPatchMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 {
-	PatchSplitContext split;
+    PatchSplitContext split;
 	split.reset();
     if(!recursiveBezierIntersect(&beziers()[idx], ctx, split, 0)) return 0;
 

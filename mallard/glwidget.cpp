@@ -169,6 +169,15 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 	}
 }
 
+void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
+{
+    Vector3F rayo = origin;
+	Vector3F raye = origin + displacement;
+	Vector3F hit;
+	Ray ray(rayo, raye);
+	hitTest(ray, hit);
+}
+
 PatchMesh * GLWidget::mesh() const
 {
 	return m_accmesh;

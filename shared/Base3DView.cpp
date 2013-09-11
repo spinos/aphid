@@ -380,5 +380,6 @@ void Base3DView::drawIntersection() const
     
     getDrawer()->circleAt(ctx->m_hitP, ctx->m_hitN);
 	getDrawer()->boundingBox(ctx->m_bbox);
+    getDrawer()->arrow(ctx->m_hitP, ctx->m_hitP + ctx->m_hitN);
 }
 //:~
