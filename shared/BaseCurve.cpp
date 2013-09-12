@@ -26,6 +26,12 @@ void BaseCurve::cleanup()
 	if(m_cvs) delete[] m_cvs;
 }
 
+void BaseCurve::createVertices(unsigned num)
+{
+	m_numVertices = num;
+	m_cvs = new Vector3F[m_numVertices];
+}
+
 void BaseCurve::addVertex(const Vector3F & vert)
 {
 	BuilderVertices.push_back(vert);

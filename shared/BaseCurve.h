@@ -19,6 +19,7 @@ public:
 	
 	void cleanup();
 	
+	void createVertices(unsigned num);
 	void addVertex(const Vector3F & vert);
 	void finishAddVertex();
 	unsigned numVertices() const;

@@ -48,6 +48,7 @@
 #include <EasemodelUtil.h>
 #include "zEXRImage.h"
 #include <BezierDrawer.h>
+#include <BezierCurve.h>
 #include <ToolContext.h>
 #include <bezierPatch.h>
 #include <InverseBilinearInterpolate.h>
@@ -74,17 +75,17 @@ void createFeather()
     vanes[2].set(3.f, 2.2f);
     vanes = fea.vaneAt(0, 1);
     vanes[0].set(-1.f, .5f);
-    vanes[1].set(-2.f, 1.2f);
-    vanes[2].set(-3.f, 2.2f);
+    vanes[1].set(-1.6f, 1.2f);
+    vanes[2].set(-2.4f, 2.2f);
     
     vanes = fea.vaneAt(1, 0);
     vanes[0].set(1.2f, .62f);
-    vanes[1].set(2.2f, 1.3f);
-    vanes[2].set(3.2f, 2.2f);
+    vanes[1].set(1.8f, 1.1f);
+    vanes[2].set(3.f, 2.2f);
     vanes = fea.vaneAt(1, 1);
     vanes[0].set(-1.2f, .62f);
-    vanes[1].set(-2.2f, 1.4f);
-    vanes[2].set(-3.2f, 2.2f);
+    vanes[1].set(-1.7f, 1.2f);
+    vanes[2].set(-2.4f, 2.2f);
     
     vanes = fea.vaneAt(2, 0);
     vanes[0].set(.6f, .25f);
@@ -106,12 +107,12 @@ void createFeather()
     
     vanes = fea.vaneAt(4, 0);
     vanes[0].set(.0f, .1f);
-    vanes[1].set(.1f, .2f);
-    vanes[2].set(.1f, .3f);
+    vanes[1].set(.01f, .2f);
+    vanes[2].set(.01f, .3f);
     vanes = fea.vaneAt(4, 1);
-    vanes[0].set(-.1f, .1f);
-    vanes[1].set(-.2f, .2f);
-    vanes[2].set(-.2f, .3f);
+    vanes[0].set(-.01f, .1f);
+    vanes[1].set(-.02f, .2f);
+    vanes[2].set(-.02f, .3f);
 }
 
 void drawFeather()
@@ -124,32 +125,112 @@ void drawFeather()
 	
 	Vector3F a, b;
 	
-	for(int i=0; i < 4; i++) {
+	BezierCurve quillC;
+	quillC.createVertices(5);
+	quillC.m_cvs[0] = s.transform(b);
+	
+	for(int i = 0; i < 4; i++) {
+	    b.set(0.f, quill[i], 0.f);
+		quillC.m_cvs[i + 1] = s.transform(b);
+		s.translate(b);
+	}
+		
+	quillC.computeKnots();
+	
+	dr->smoothCurve(quillC, 2);
+	
+	BezierCurve eRC, eLC, fRC, fLC, gRC, gLC;
+
+	eRC.createVertices(5);
+	eLC.createVertices(5);
+	fRC.createVertices(5);
+	fLC.createVertices(5);
+	gRC.createVertices(5);
+	gLC.createVertices(5);
+	s.setTranslation(5.f, 3.f, 4.f);
+	
+	for(int i = 0; i <=4; i++) {
+		b.set(0.f, quill[i], 0.f);
+		Vector2F * vanes = fea.getVaneAt(i, 0);
+	    eRC.m_cvs[i] = s.transform(Vector3F(vanes[0]));
+		fRC.m_cvs[i] = s.transform(Vector3F(vanes[1]));
+		gRC.m_cvs[i] = s.transform(Vector3F(vanes[2]));
+		vanes = fea.getVaneAt(i, 1);
+	    eLC.m_cvs[i] = s.transform(Vector3F(vanes[0]));
+		fLC.m_cvs[i] = s.transform(Vector3F(vanes[1]));
+		gLC.m_cvs[i] = s.transform(Vector3F(vanes[2]));
+		s.translate(b);
+	}
+	eRC.computeKnots();
+	fRC.computeKnots();
+	gRC.computeKnots();
+	eLC.computeKnots();
+	fLC.computeKnots();
+	gLC.computeKnots();
+	dr->smoothCurve(eRC, 2);
+	dr->smoothCurve(fRC, 2);
+	dr->smoothCurve(gRC, 2);
+	dr->smoothCurve(eLC, 2);
+	dr->smoothCurve(fLC, 2);
+	dr->smoothCurve(gLC, 2);
+	
+	const float delta = 1.f / 12.f;
+	for(int i=0; i <= 12; i++) {
+		float t = delta * i;
+		BezierCurve vaneRC;
+		vaneRC.createVertices(4);
+		vaneRC.m_cvs[0] = quillC.interpolate(t, quillC.m_cvs);
+		vaneRC.m_cvs[1] = vaneRC.m_cvs[0] + Vector3F(1.f, 0.f, 0.f);//eRC.interpolate(t, eRC.m_cvs);
+		vaneRC.m_cvs[2] = vaneRC.m_cvs[1] + Vector3F(1.f, 0.f, 0.f);//fRC.interpolate(t, fRC.m_cvs);
+		vaneRC.m_cvs[3] = vaneRC.m_cvs[2] + Vector3F(1.f, 0.f, 0.f);//gRC.interpolate(t, gRC.m_cvs);
+		vaneRC.computeKnots();
+		dr->smoothCurve(vaneRC, 2);
+		
+		/*BezierCurve vaneLC;
+		vaneLC.createVertices(4);
+		vaneLC.m_cvs[0] = quillC.interpolate(t, quillC.m_cvs);
+		vaneLC.m_cvs[1] = eLC.interpolate(t, eLC.m_cvs);
+		vaneLC.m_cvs[2] = fLC.interpolate(t, fLC.m_cvs);
+		vaneLC.m_cvs[3] = gLC.interpolate(t, gLC.m_cvs);
+		vaneLC.computeKnots();
+		dr->smoothCurve(vaneLC, 2);*/
+	}
+	/*
+	s.setTranslation(5.f, 3.f, 4.f);
+	for(int i=0; i <= 4; i++) {
 	    b.set(0.f, quill[i], 0.f);
 	    
 	    dr->useSpace(s);
-	    dr->arrow(a, b);
+		
+		BezierCurve vaneRC;
+		vaneRC.addVertex(Vector3F(0.f, 0.f, 0.f));
+		
+		Vector2F * vanes = fea.getVaneAt(i, 0);
+		vaneRC.addVertex(Vector3F(vanes[0]));
+		vaneRC.addVertex(Vector3F(vanes[1]));
+		vaneRC.addVertex(Vector3F(vanes[2]));
+		
+		vaneRC.finishAddVertex();
+		vaneRC.computeKnots();
+	
+		dr->smoothCurve(vaneRC, 2);
 	    
-	    Vector2F * vanes = fea.getVaneAt(i, 0);
-	    dr->arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(vanes[0]));
-	    dr->arrow(Vector3F(vanes[0]), Vector3F(vanes[1]));
-	    dr->arrow(Vector3F(vanes[1]), Vector3F(vanes[2]));
-	    vanes = fea.getVaneAt(i, 1);
-	    dr->arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(vanes[0]));
-	    dr->arrow(Vector3F(vanes[0]), Vector3F(vanes[1]));
-	    dr->arrow(Vector3F(vanes[1]), Vector3F(vanes[2]));
+	    BezierCurve vaneLC;
+		vaneLC.addVertex(Vector3F(0.f, 0.f, 0.f));
+		
+		vanes = fea.getVaneAt(i, 1);
+		vaneLC.addVertex(Vector3F(vanes[0]));
+		vaneLC.addVertex(Vector3F(vanes[1]));
+		vaneLC.addVertex(Vector3F(vanes[2]));
+		
+		vaneLC.finishAddVertex();
+		vaneLC.computeKnots();
+	
+		dr->smoothCurve(vaneLC, 2);
 	    
 	    s.setTranslation(b);
 	}
-	dr->useSpace(s);
-	Vector2F * vanes = fea.getVaneAt(4, 0);
-	dr->arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(vanes[0]));
-	    dr->arrow(Vector3F(vanes[0]), Vector3F(vanes[1]));
-	    dr->arrow(Vector3F(vanes[1]), Vector3F(vanes[2]));
-	    vanes = fea.getVaneAt(4, 1);
-	    dr->arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(vanes[0]));
-	    dr->arrow(Vector3F(vanes[0]), Vector3F(vanes[1]));
-	    dr->arrow(Vector3F(vanes[1]), Vector3F(vanes[2]));
+	*/
     glPopMatrix();
 }
 
@@ -198,9 +279,9 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
-	//getDrawer()->edge(mesh());
+	getDrawer()->edge(mesh());
 	//m_fabricDrawer->drawAccPatchMesh(m_accmesh);
-	//getDrawer()->drawKdTree(getTree());
+	getDrawer()->drawKdTree(getTree());
 	/*
 	glPushMatrix();
 	

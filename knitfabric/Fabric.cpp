@@ -17,7 +17,7 @@ Fabric::Fabric() {}
 void Fabric::setMesh(PatchMesh * mesh, MeshTopology * topo)
 {
 	m_mesh = mesh;
-	const unsigned numPatch = m_mesh->numPatches();
+	const unsigned numPatch = m_mesh->getNumFaces();
 	
 	Vector3F* cvs = m_mesh->getVertices();
 	Vector3F* normal = m_mesh->getNormals();
@@ -51,7 +51,7 @@ void Fabric::setMesh(PatchMesh * mesh, MeshTopology * topo)
 
 unsigned Fabric::numPatches() const
 {
-	return m_mesh->numPatches();
+	return m_mesh->getNumFaces();
 }
 
 YarnPatch Fabric::getPatch(unsigned idx) const

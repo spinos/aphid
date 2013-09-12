@@ -58,6 +58,7 @@ public:
 	void spaceHandle(SpaceHandle * hand);
 	void sphere(float size = 1.f) const;
 	void linearCurve(const BaseCurve & curve);
+	void smoothCurve(BaseCurve & curve, short deg);
 	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void colorAsActive();
 	void colorAsInert();
