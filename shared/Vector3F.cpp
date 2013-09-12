@@ -35,6 +35,13 @@ Vector3F::Vector3F(const Vector3F& from, const Vector3F& to)
     z = to.z - from.z; 
 }
 
+Vector3F::Vector3F(const Vector2F& from)
+{
+    x = from.x;
+    y = from.y;
+    z = 0.f;
+}
+
 void Vector3F::setZero()
 {
 	x = y = z = 0.f;

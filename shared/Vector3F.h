@@ -1,6 +1,6 @@
 #ifndef VECTOR3F_H
 #define VECTOR3F_H
-
+#include <Vector2F.h>
 class Vector3F{
 public:
 	Vector3F();
@@ -8,6 +8,7 @@ public:
 	Vector3F(const float* p);
 	Vector3F(float* p);
 	Vector3F(const Vector3F& from, const Vector3F& to);
+	Vector3F(const Vector2F& from);
 	
 	void setZero();
 	void set(float vx, float vy, float vz);

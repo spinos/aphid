@@ -51,13 +51,113 @@
 #include <ToolContext.h>
 #include <bezierPatch.h>
 #include <InverseBilinearInterpolate.h>
+#include <MlFeather.h>
 BezierPatch testbez;
 BezierPatch testsplt[4];
 InverseBilinearInterpolate invbil;
 PatchSplitContext childUV[4];
-//! [0]
+MlFeather fea;
+BaseDrawer * dr;
+
+void createFeather()
+{
+    fea.createNumSegment(4);
+    float * quill = fea.quilly();
+    quill[0] = 3.f;
+    quill[1] = 2.7f;
+    quill[2] = 1.7f;
+    quill[3] = .9f;
+    
+    Vector2F * vanes = fea.vaneAt(0, 0);
+    vanes[0].set(1.f, .5f);
+    vanes[1].set(2.f, 1.2f);
+    vanes[2].set(3.f, 2.2f);
+    vanes = fea.vaneAt(0, 1);
+    vanes[0].set(-1.f, .5f);
+    vanes[1].set(-2.f, 1.2f);
+    vanes[2].set(-3.f, 2.2f);
+    
+    vanes = fea.vaneAt(1, 0);
+    vanes[0].set(1.2f, .62f);
+    vanes[1].set(2.2f, 1.3f);
+    vanes[2].set(3.2f, 2.2f);
+    vanes = fea.vaneAt(1, 1);
+    vanes[0].set(-1.2f, .62f);
+    vanes[1].set(-2.2f, 1.4f);
+    vanes[2].set(-3.2f, 2.2f);
+    
+    vanes = fea.vaneAt(2, 0);
+    vanes[0].set(.6f, .25f);
+    vanes[1].set(1.f, .6f);
+    vanes[2].set(1.6f, 1.1f);
+    vanes = fea.vaneAt(2, 1);
+    vanes[0].set(-.7f, .35f);
+    vanes[1].set(-1.f, .5f);
+    vanes[2].set(-1.5f, 1.1f);
+    
+    vanes = fea.vaneAt(3, 0);
+    vanes[0].set(.4f, .3f);
+    vanes[1].set(.5f, .5f);
+    vanes[2].set(.7f, .6f);
+    vanes = fea.vaneAt(3, 1);
+    vanes[0].set(-.4f, .4f);
+    vanes[1].set(-.5f, .6f);
+    vanes[2].set(-.6f, .7f);
+    
+    vanes = fea.vaneAt(4, 0);
+    vanes[0].set(.0f, .1f);
+    vanes[1].set(.1f, .2f);
+    vanes[2].set(.1f, .3f);
+    vanes = fea.vaneAt(4, 1);
+    vanes[0].set(-.1f, .1f);
+    vanes[1].set(-.2f, .2f);
+    vanes[2].set(-.2f, .3f);
+}
+
+void drawFeather()
+{
+    glPushMatrix();
+    Matrix44F s;
+	s.setTranslation(5.f, 3.f, 4.f);
+	
+	float * quill = fea.getQuilly();
+	
+	Vector3F a, b;
+	
+	for(int i=0; i < 4; i++) {
+	    b.set(0.f, quill[i], 0.f);
+	    
+	    dr->useSpace(s);
+	    dr->arrow(a, b);
+	    
+	    Vector2F * vanes = fea.getVaneAt(i, 0);
+	    dr->arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(vanes[0]));
+	    dr->arrow(Vector3F(vanes[0]), Vector3F(vanes[1]));
+	    dr->arrow(Vector3F(vanes[1]), Vector3F(vanes[2]));
+	    vanes = fea.getVaneAt(i, 1);
+	    dr->arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(vanes[0]));
+	    dr->arrow(Vector3F(vanes[0]), Vector3F(vanes[1]));
+	    dr->arrow(Vector3F(vanes[1]), Vector3F(vanes[2]));
+	    
+	    s.setTranslation(b);
+	}
+	dr->useSpace(s);
+	Vector2F * vanes = fea.getVaneAt(4, 0);
+	dr->arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(vanes[0]));
+	    dr->arrow(Vector3F(vanes[0]), Vector3F(vanes[1]));
+	    dr->arrow(Vector3F(vanes[1]), Vector3F(vanes[2]));
+	    vanes = fea.getVaneAt(4, 1);
+	    dr->arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(vanes[0]));
+	    dr->arrow(Vector3F(vanes[0]), Vector3F(vanes[1]));
+	    dr->arrow(Vector3F(vanes[1]), Vector3F(vanes[2]));
+    glPopMatrix();
+}
+
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
-{testbez.evaluateContolPoints();testbez.decasteljauSplit(testsplt);
+{
+    dr = getDrawer();
+    createFeather();
+    testbez.evaluateContolPoints();testbez.decasteljauSplit(testsplt);
 invbil.setVertices(Vector3F(-1,0,0), Vector3F(1,0,0), Vector3F(-1,1,0), Vector3F(2,2,0));
 Vector3F P(1.51f,0.71f,0.f);
 Vector2F testuv = invbil(P);
@@ -98,9 +198,9 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
-	getDrawer()->edge(mesh());
+	//getDrawer()->edge(mesh());
 	//m_fabricDrawer->drawAccPatchMesh(m_accmesh);
-	getDrawer()->drawKdTree(getTree());
+	//getDrawer()->drawKdTree(getTree());
 	/*
 	glPushMatrix();
 	
@@ -131,6 +231,7 @@ void GLWidget::clientDraw()
 	
 	glPopMatrix();
 	*/
+	drawFeather();
 	drawSelection();
 	drawIntersection();
 }
