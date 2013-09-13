@@ -23,6 +23,7 @@ public:
 	void addVertex(const Vector3F & vert);
 	void finishAddVertex();
 	unsigned numVertices() const;
+	unsigned numSegments() const;
 	void computeKnots();
 	
 	Vector3F getCv(unsigned idx) const;

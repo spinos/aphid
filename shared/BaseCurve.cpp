@@ -52,6 +52,11 @@ unsigned BaseCurve::numVertices() const
 	return m_numVertices;
 }
 
+unsigned BaseCurve::numSegments() const
+{
+    return m_numVertices - 1;
+}
+
 void BaseCurve::computeKnots()
 {
 	m_length = 0;

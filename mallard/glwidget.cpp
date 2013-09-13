@@ -62,12 +62,12 @@ BaseDrawer * dr;
 
 void createFeather()
 {
-    fea.createNumSegment(4);
+    fea.createNumSegment(3);
     float * quill = fea.quilly();
     quill[0] = 3.f;
     quill[1] = 2.7f;
     quill[2] = 1.7f;
-    quill[3] = .9f;
+    //quill[3] = .9f;
     
     Vector2F * vanes = fea.vaneAt(0, 0);
     vanes[0].set(1.f, .5f);
@@ -105,14 +105,14 @@ void createFeather()
     vanes[1].set(-.5f, .6f);
     vanes[2].set(-.6f, .7f);
     
-    vanes = fea.vaneAt(4, 0);
+    /*vanes = fea.vaneAt(4, 0);
     vanes[0].set(.0f, .1f);
     vanes[1].set(.01f, .2f);
     vanes[2].set(.01f, .3f);
     vanes = fea.vaneAt(4, 1);
     vanes[0].set(-.01f, .1f);
     vanes[1].set(-.02f, .2f);
-    vanes[2].set(-.02f, .3f);
+    vanes[2].set(-.02f, .3f);*/
 }
 
 void drawFeather()
@@ -131,25 +131,29 @@ void drawFeather()
 	
 	for(int i = 0; i < 4; i++) {
 	    b.set(0.f, quill[i], 0.f);
+	    b.x = -i;
 		quillC.m_cvs[i + 1] = s.transform(b);
 		s.translate(b);
 	}
 		
 	quillC.computeKnots();
 	
+	dr->linearCurve(quillC);
+	
 	dr->smoothCurve(quillC, 2);
 	
+	/*
 	BezierCurve eRC, eLC, fRC, fLC, gRC, gLC;
 
-	eRC.createVertices(5);
-	eLC.createVertices(5);
-	fRC.createVertices(5);
-	fLC.createVertices(5);
-	gRC.createVertices(5);
-	gLC.createVertices(5);
+	eRC.createVertices(4);
+	eLC.createVertices(4);
+	fRC.createVertices(4);
+	fLC.createVertices(4);
+	gRC.createVertices(4);
+	gLC.createVertices(4);
 	s.setTranslation(5.f, 3.f, 4.f);
 	
-	for(int i = 0; i <=4; i++) {
+	for(int i = 0; i <=3; i++) {
 		b.set(0.f, quill[i], 0.f);
 		Vector2F * vanes = fea.getVaneAt(i, 0);
 	    eRC.m_cvs[i] = s.transform(Vector3F(vanes[0]));
@@ -174,8 +178,8 @@ void drawFeather()
 	dr->smoothCurve(fLC, 2);
 	dr->smoothCurve(gLC, 2);
 	
-	const float delta = 1.f / 12.f;
-	for(int i=0; i <= 12; i++) {
+	const float delta = 1.f / 32.f;
+	for(int i=0; i <= 32; i++) {
 		float t = delta * i;
 		BezierCurve vaneRC;
 		vaneRC.createVertices(4);
@@ -186,14 +190,7 @@ void drawFeather()
 		vaneRC.computeKnots();
 		dr->smoothCurve(vaneRC, 2);
 		
-		/*BezierCurve vaneLC;
-		vaneLC.createVertices(4);
-		vaneLC.m_cvs[0] = quillC.interpolate(t, quillC.m_cvs);
-		vaneLC.m_cvs[1] = eLC.interpolate(t, eLC.m_cvs);
-		vaneLC.m_cvs[2] = fLC.interpolate(t, fLC.m_cvs);
-		vaneLC.m_cvs[3] = gLC.interpolate(t, gLC.m_cvs);
-		vaneLC.computeKnots();
-		dr->smoothCurve(vaneLC, 2);*/
+		
 	}
 	/*
 	s.setTranslation(5.f, 3.f, 4.f);
@@ -201,7 +198,7 @@ void drawFeather()
 	    b.set(0.f, quill[i], 0.f);
 	    
 	    dr->useSpace(s);
-		
+		dr->arrow(Vector3F(0.f, 0.f, 0.f), b);
 		BezierCurve vaneRC;
 		vaneRC.addVertex(Vector3F(0.f, 0.f, 0.f));
 		
