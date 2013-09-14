@@ -26,16 +26,16 @@ public:
 	unsigned numSegments() const;
 	void computeKnots();
 	
+	unsigned segmentByParameter(float param) const;
+	unsigned segmentByLength(float param) const;
+	
 	Vector3F getCv(unsigned idx) const;
 	float getKnot(unsigned idx) const;
 	
 	void fitInto(BaseCurve & another);
 	
-	virtual Vector3F interpolate(float param, Vector3F * data);
-	virtual Vector3F interpolateByKnot(float param, Vector3F * data);
-	virtual Vector3F interpolate(Vector3F * data) const;
-	
-	virtual void calculateT(float param);
+	virtual Vector3F interpolate(float param) const;
+	virtual Vector3F interpolate(float param, Vector3F * data) const;
 	
 	Vector3F calculateStraightPoint(float t, unsigned k0, unsigned k1, Vector3F * data) const;
 	
@@ -44,8 +44,7 @@ public:
 	static std::vector<Vector3F> BuilderVertices;
 	Vector3F * m_cvs;
 	float * m_knots;
-	float m_t;
 	float m_length;
-	unsigned m_k0, m_k1, m_numVertices;
+	unsigned m_numVertices;
 private:
 };

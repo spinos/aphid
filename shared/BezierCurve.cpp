@@ -12,31 +12,27 @@
 BezierCurve::BezierCurve() {}
 BezierCurve::~BezierCurve() {}
 
-Vector3F BezierCurve::interpolate(float param, Vector3F * data)
+Vector3F BezierCurve::interpolate(float param) const
 {	
-	//findNeighborKnots(param, m_k0, m_k1);
-	//m_k0 = (unsigned)(param * (numVertices()-1));
-	//m_k1 = m_k0 + 1;
-	unsigned seg = param * numSegments();
+	unsigned seg = segmentByParameter(param);
 	Vector3F p[4];
 	
-	if(seg == 0) p[0] = m_cvs[0];
-	else p[0] = (m_cvs[seg - 1] * 0.33f + m_cvs[seg] * 0.67f) * .5f + (m_cvs[seg + 1] * 0.33f + m_cvs[seg] * 0.67f) * .5f;
-	
-	if(seg >= numSegments() - 1) p[3] = m_cvs[numSegments()];
-	else p[3] = (m_cvs[seg] * 0.33f + m_cvs[seg + 1] * 0.67f) * .5f + (m_cvs[seg + 2] * 0.33f + m_cvs[seg + 1] * 0.67f) * .5f;
-
-	p[1] = m_cvs[seg + 1] * 0.33f + m_cvs[seg] * 0.67f;
-	p[2] = m_cvs[seg] * 0.33f + m_cvs[seg + 1] * 0.67f;
-	//fourControlKnots();
-	//calculateT(param);
+	calculateCage(seg, p);
 	float t = param * numSegments() - seg;
 	
 	return calculateBezierPoint(t, p);
 }
 
-void BezierCurve::fourControlKnots()
+void BezierCurve::calculateCage(unsigned seg, Vector3F *p) const
 {
+	if(seg == 0) p[0] = m_cvs[0];
+	else p[0] = (m_cvs[seg] * 2.f + m_cvs[seg - 1] + m_cvs[seg + 1]) * .25f;
+	
+	if(seg >= numSegments() - 1) p[3] = m_cvs[numSegments()];
+	else p[3] = (m_cvs[seg + 1] * 2.f + m_cvs[seg] + m_cvs[seg + 2]) * .25f;
+
+	p[1] = (m_cvs[seg + 1] * 0.5f + m_cvs[seg] * 0.5f) * .5f + p[0] * .5f;
+	p[2] = (m_cvs[seg] * 0.5f + m_cvs[seg + 1] * 0.5f) * .5f + p[3] * .5f;
 }
 
 Vector3F BezierCurve::calculateBezierPoint(float t, Vector3F * data) const

@@ -57,6 +57,20 @@ unsigned BaseCurve::numSegments() const
     return m_numVertices - 1;
 }
 
+unsigned BaseCurve::segmentByParameter(float param) const
+{
+	if(param < 0.f) return 0;
+	if(param >= 1.f) return numSegments() - 1;
+	return param * numSegments();
+}
+
+unsigned BaseCurve::segmentByLength(float param) const
+{
+	unsigned nei0, nei1;
+	findNeighborKnots(param, nei0, nei1);
+	return nei0;
+}
+
 void BaseCurve::computeKnots()
 {
 	m_length = 0;
@@ -92,27 +106,18 @@ void BaseCurve::fitInto(BaseCurve & another)
 	}
 }
 
-Vector3F BaseCurve::interpolate(float param, Vector3F * data)
+Vector3F BaseCurve::interpolate(float param) const
 {
-	m_t = 0.f;
-	m_k0 = 0;
-	m_k1 = numVertices() - 1;
-	
-	if(param <= 0.f) {
-		m_k1 = m_k0;
-		return data[m_k0];
-	}
-	
-	if(param >= 1.f) {
-		m_k0 = m_k1;
-		return data[m_k1];
-	}
-	
-	findNeighborKnots(param, m_k0, m_k1);
-	
-	calculateT(param);
-	
-	return calculateStraightPoint(m_t, m_k0, m_k1, data);
+	unsigned seg = segmentByParameter(param);
+	float t = param * numSegments() - seg;
+	return m_cvs[seg] * (1.f - t) + m_cvs[seg+1] * t;
+}
+
+Vector3F BaseCurve::interpolate(float param, Vector3F * data) const
+{
+	unsigned seg = segmentByParameter(param);
+	float t = param * numSegments() - seg;
+	return data[seg] * (1.f - t) + data[seg+1] * t;
 }
 
 void BaseCurve::findNeighborKnots(float param, unsigned & nei0, unsigned & nei1) const
@@ -127,42 +132,7 @@ void BaseCurve::findNeighborKnots(float param, unsigned & nei0, unsigned & nei1)
 	findNeighborKnots(param, nei0, nei1);
 }
 
-Vector3F BaseCurve::interpolateByKnot(float param, Vector3F * data)
-{
-	m_t = 0.f;
-	m_k0 = 0;
-	m_k1 = numVertices() - 1;
-	
-	if(param <= m_k0) {
-		m_k1 = m_k0;
-		return data[m_k0];
-	}
-	
-	if(param >= m_k1) {
-		m_k0 = m_k1;
-		return data[m_k1];
-	}
-	
-	m_k0 = (unsigned)param;
-	m_k1 = m_k0 + 1;
-	float realparam = m_knots[m_k0] * (1.f - (param - m_k0)) + m_knots[m_k1] * (param - m_k0);
-	
-	calculateT(realparam);
-
-	return calculateStraightPoint(m_t, m_k0, m_k1, data);
-}
-
-void BaseCurve::calculateT(float param)
-{
-	m_t = (param - m_knots[m_k0]) / (m_knots[m_k1] - m_knots[m_k0]);
-}
-
 Vector3F BaseCurve::calculateStraightPoint(float t, unsigned k0, unsigned k1, Vector3F * data) const
 {
 	return data[k0] * ( 1.f - t) + data[k1] * t;
-}
-
-Vector3F BaseCurve::interpolate(Vector3F * data) const
-{
-	return calculateStraightPoint(m_t, m_k0, m_k1, data);
 }

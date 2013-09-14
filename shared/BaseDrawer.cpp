@@ -588,7 +588,7 @@ void BaseDrawer::smoothCurve(BaseCurve & curve, short deg)
 	glBegin(GL_LINE_STRIP);
 	for(unsigned i = 0; i <= nseg; i++) {
 		t = delta * i;
-		p = curve.interpolate(t, curve.m_cvs);
+		p = curve.interpolate(t);
 		setColor(1.f - t, 0.f, t);
 		glVertex3f(p.x, p.y, p.z);
 	}
