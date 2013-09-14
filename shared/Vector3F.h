@@ -48,6 +48,8 @@ public:
 	
 	float comp(int dim) const;
 	int longestAxis() const;
+	
+	void verbose(const char * pref) const;
 
 	float x,y,z;
 };

@@ -84,6 +84,10 @@ HEADERS       = ../shared/AllMath.h \
                 ToolBox.h \
                 glwidget.h \
                 MlFeather.h \
+				MlCalamus.h \
+				MlCalamusArray.h \
+				MlDrawer.h \
+				MlSkin.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \  
@@ -170,6 +174,10 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ToolBox.cpp \
                 glwidget.cpp \
                 MlFeather.cpp \
+				MlCalamus.cpp \
+				MlCalamusArray.cpp \
+				MlDrawer.cpp \
+				MlSkin.cpp \
                 window.cpp \
                 main.cpp 
                 

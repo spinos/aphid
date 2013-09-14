@@ -45,8 +45,9 @@
 #include <SingleModelView.h>
 
 class ZEXRImage;
-class BezierDrawer;
+class MlDrawer;
 class AccPatchMesh;
+class MlSkin;
 
 //! [0]
 class GLWidget : public SingleModelView
@@ -70,9 +71,12 @@ protected:
 
 //! [3]
 private:
+	void growFeather();
+private:
 	ZEXRImage* _image;
-	BezierDrawer * m_fabricDrawer;
+	MlDrawer * m_featherDrawer;
 	AccPatchMesh * m_accmesh;
+	MlSkin * m_skin;
 };
 //! [3]
 

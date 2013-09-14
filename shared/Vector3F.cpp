@@ -1,6 +1,7 @@
 #include "Vector3F.h"
 
 #include <cmath>
+#include <iostream>
 
 Vector3F::Vector3F() 
 {
@@ -245,3 +246,7 @@ int Vector3F::longestAxis() const
 	return 2;
 }
 
+void Vector3F::verbose(const char * pref) const
+{
+	std::cout<<pref<<" ("<<x<<","<<y<<","<<z<<")\n";
+}

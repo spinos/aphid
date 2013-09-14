@@ -28,6 +28,8 @@ ToolBox::ToolBox(QWidget *parent) : QToolBar(parent)
 		addWidget(*it);
 		connect(*it, SIGNAL(actionTriggered(int)), this, SLOT(onActionFrameTriggered(int)));
 	}
+	
+	setContext(CreateBodyContourFeather);
 }
 
 ToolBox::~ToolBox() {}

@@ -175,4 +175,9 @@ void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPa
 	recursiveBezierClosestPoint(origin, &children[2], ctx, childUV[2], level);
 	recursiveBezierClosestPoint(origin, &children[3], ctx, childUV[3], level);
 }
+
+void AccPatchMesh::pointOnPatch(unsigned idx, float u, float v, Vector3F & dst) const
+{
+	beziers()[idx].evaluateSurfacePosition(u, v, &dst);
+}
 //:~

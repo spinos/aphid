@@ -44,7 +44,6 @@ public:
 	static std::vector<Vector3F> BuilderVertices;
 	Vector3F * m_cvs;
 	float * m_knots;
-	float m_length;
 	unsigned m_numVertices;
 private:
 };

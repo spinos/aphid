@@ -47,12 +47,13 @@
 #include <AccPatchMesh.h>
 #include <EasemodelUtil.h>
 #include "zEXRImage.h"
-#include <BezierDrawer.h>
+#include <MlDrawer.h>
 #include <BezierCurve.h>
 #include <ToolContext.h>
 #include <bezierPatch.h>
 #include <InverseBilinearInterpolate.h>
 #include <MlFeather.h>
+#include <MlSkin.h>
 BezierPatch testbez;
 BezierPatch testsplt[4];
 InverseBilinearInterpolate invbil;
@@ -247,7 +248,11 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 	// use displacement map inside bezier drawer
 	//_tess->setDisplacementMap(_image);
 
-	m_fabricDrawer = new BezierDrawer;
+	m_featherDrawer = new MlDrawer;
+	m_skin = new MlSkin;
+	m_skin->setBodyMesh(m_accmesh);
+	
+	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 }
 //! [0]
 
@@ -260,8 +265,9 @@ void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
 	getDrawer()->edge(mesh());
-	//m_fabricDrawer->drawAccPatchMesh(m_accmesh);
-	getDrawer()->drawKdTree(getTree());
+	//m_featherDrawer->drawAccPatchMesh(m_accmesh);
+	//getDrawer()->drawKdTree(getTree());
+	m_featherDrawer->drawFeather(m_skin);
 	/*
 	glPushMatrix();
 	
@@ -292,7 +298,7 @@ void GLWidget::clientDraw()
 	
 	glPopMatrix();
 	*/
-	drawFeather();
+	//drawFeather();
 	drawSelection();
 	drawIntersection();
 }
@@ -326,8 +332,9 @@ void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F
 	if(interactMode() == ToolContext::SelectVertex) {
 		pickupComponent(ray, hit);
 	}
-	else {
+	else if(interactMode() == ToolContext::CreateBodyContourFeather) {
 		hitTest(ray, hit);
+		growFeather();
 	}
 }
 
@@ -348,5 +355,16 @@ void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vect
 PatchMesh * GLWidget::mesh() const
 {
 	return m_accmesh;
+}
+
+void GLWidget::growFeather()
+{
+	IntersectionContext * ctx = getIntersectionContext();
+    if(!ctx->m_success) return;
+	
+	MlCalamus c;
+	c.bindToFace(ctx->m_componentIdx, ctx->m_patchUV.x, ctx->m_patchUV.y);
+	
+	m_skin->addCalamus(c);
 }
 //:~

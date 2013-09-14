@@ -344,6 +344,8 @@ void BaseMesh::postIntersection(unsigned idx, IntersectionContext * ctx) const
 	    ctx->m_componentIdx = idx;
 	else
 	    ctx->m_componentIdx = closestVertex(idx, ctx->m_hitP);
+		
+	//printf("hit comp %i ", idx);
 }
 
 char BaseMesh::intersect(IntersectionContext * ctx) const

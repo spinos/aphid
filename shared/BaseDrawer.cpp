@@ -124,8 +124,9 @@ void BaseDrawer::beginLine()
 	glBegin(GL_LINES);
 }
 
-void BaseDrawer::beginPoint()
+void BaseDrawer::beginPoint(float x)
 {
+	glPointSize(x);
 	glBegin(GL_POINTS);
 }
 
@@ -638,5 +639,11 @@ void BaseDrawer::circleAt(const Vector3F & pos, const Vector3F & nor)
 	useSpace(mat);
     linearCurve(*m_circle);
     glPopMatrix();
+}
+
+void BaseDrawer::useDepthTest(char on) const
+{
+	if(on) glEnable(GL_DEPTH_TEST);
+	else glDisable(GL_DEPTH_TEST);
 }
 //:~

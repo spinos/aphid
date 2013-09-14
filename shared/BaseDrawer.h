@@ -33,7 +33,7 @@ public:
 	void beginSolidTriangle();
 	void beginWireTriangle();
 	void beginLine();
-	void beginPoint();
+	void beginPoint(float x);
 	void beginQuad();
 	void aVertex(float x, float y, float z);
 	void drawSphere();
@@ -68,6 +68,7 @@ public:
 	void arrow(const Vector3F& origin, const Vector3F& dest) const;
 	void useSpace(const Matrix44F & s) const;
 	void useSpace(const Matrix33F & s) const;
+	void useDepthTest(char on) const;
 private:
     char m_wired;
 	GeodesicSphereMesh * m_sphere;

@@ -73,9 +73,9 @@ unsigned BaseCurve::segmentByLength(float param) const
 
 void BaseCurve::computeKnots()
 {
-	m_length = 0;
+	float hullLength = 0;
 	for(unsigned i = 1; i < numVertices(); i++) {
-		m_length += (m_cvs[i] - m_cvs[i-1]).length();
+		hullLength += (m_cvs[i] - m_cvs[i-1]).length();
 	}
 	
 	m_knots = new float[numVertices()];
@@ -84,7 +84,7 @@ void BaseCurve::computeKnots()
 	float knotL = 0.f;
 	for(unsigned i = 1; i < numVertices(); i++) {
 		knotL += (m_cvs[i] - m_cvs[i-1]).length();
-		m_knots[i] = knotL / m_length;
+		m_knots[i] = knotL / hullLength;
 	}
 }
 
