@@ -148,6 +148,13 @@ const char *byte_to_binary1(int x)
 
 }
 
+float BaseArray::sortKeyAt(unsigned idx) const
+{
+	return 0.f;
+}
+
+void BaseArray::swapElement(unsigned a, unsigned b) {}
+
 void BaseArray::verbose() const
 {
 	std::cout<<"base array:\n";

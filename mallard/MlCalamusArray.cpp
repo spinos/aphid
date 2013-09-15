@@ -34,3 +34,17 @@ MlCalamus * MlCalamusArray::asCalamus()
 {
 	return (MlCalamus *)current();
 }
+
+float MlCalamusArray::sortKeyAt(unsigned idx) const
+{
+	MlCalamus * c = asCalamus(idx);
+	return (float)c->faceIdx();
+}
+
+void MlCalamusArray::swapElement(unsigned a, unsigned b)
+{
+	MlCalamus t = *asCalamus(a);
+	*asCalamus(a) = *asCalamus(b);
+	*asCalamus(b) = t;
+}
+

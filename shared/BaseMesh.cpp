@@ -128,6 +128,7 @@ unsigned BaseMesh::processQuadFromPolygon()
 			m_quadIndices[ie] = m_quadIndices[ie - 3];
 			ie++;
 		}
+		
 		curFace += m_polygonCounts[i];
 	}
 	

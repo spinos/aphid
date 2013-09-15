@@ -9,6 +9,7 @@
 
 #pragma once
 #include "MlCalamusArray.h"
+
 class AccPatchMesh;
 class MlSkin {
 public:
@@ -21,8 +22,11 @@ public:
 	MlCalamus * getCalamus(unsigned idx) const;
 	
 	AccPatchMesh * bodyMesh() const;
+	
+	void verbose() const;
 private:
 	MlCalamusArray m_calamus;
 	unsigned m_numFeather;
 	AccPatchMesh * m_body;
+	unsigned * m_faceCalamusStart;
 };

@@ -37,6 +37,9 @@ public:
 	void setElementSize(unsigned size);
 	unsigned getElementSize() const;
 	
+	virtual float sortKeyAt(unsigned idx) const;
+	virtual void swapElement(unsigned a, unsigned b);
+	
 	void verbose() const;
 	
 private:

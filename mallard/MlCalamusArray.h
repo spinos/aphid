@@ -19,4 +19,7 @@ public:
 	MlCalamus * asCalamus(unsigned index);
 	MlCalamus * asCalamus(unsigned index) const;
 	MlCalamus * asCalamus();
+	
+	virtual float sortKeyAt(unsigned idx) const;
+	virtual void swapElement(unsigned a, unsigned b);
 };

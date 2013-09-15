@@ -9,7 +9,7 @@
 
 #include "BaseBrush.h"
 
-BaseBrush::BaseBrush() : m_radius(4.f) 
+BaseBrush::BaseBrush() : m_radius(1.f) 
 {
 	setNumDarts(8);
 }
