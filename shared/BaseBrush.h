@@ -22,6 +22,7 @@ public:
 	float getRadius() const;
 	unsigned getNumDarts() const;
 	Ray getObjectRay(unsigned idx) const;
+	float minDartDistance() const;
 private:
 	char ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float d) const;
 private:

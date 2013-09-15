@@ -424,6 +424,16 @@ void VertexAdjacency::connectEdges()
 	}
 }
 
+void VertexAdjacency::getConnectedPolygons(std::vector<unsigned> & dst) const
+{
+	const unsigned numNeighbors = m_neighbors.size();
+	for(unsigned i = 0; i < numNeighbors; i++) {
+		Facet *f = m_neighbors[i]->f;
+		unsigned polyIdx = f->getPolygonIndex();
+		if(!IsElementIn(polyIdx, dst)) dst.push_back(polyIdx);
+	}
+}
+
 void VertexAdjacency::verbose() const
 {
 	printf("\nv %i\n adjacent edge count: %i\n", getIndex(), (int)m_edges.size());

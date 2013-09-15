@@ -9,9 +9,9 @@
 
 #include "BaseBrush.h"
 
-BaseBrush::BaseBrush() : m_radius(1.f) 
+BaseBrush::BaseBrush() : m_radius(3.f) 
 {
-	setNumDarts(8);
+	setNumDarts(15);
 }
 
 BaseBrush::~BaseBrush() 
@@ -36,13 +36,13 @@ void BaseBrush::setNumDarts(unsigned x)
 	m_numDarts = x;
 	m_darts = new Vector3F[m_numDarts];
 	
-	const float fac = .6f/m_numDarts;
+	const unsigned minD = 1.f / sqrt((float)m_numDarts);
 	unsigned valid = 0;
 	while (valid < m_numDarts) {
 		const float alpha = (rand()%131/131.f*2.f - 1.f) * PI;
 		const float r = rand()%143/143.f;
 		Vector3F p(r * cos(alpha), r * sin(alpha), 0.f);
-		if(!ignoreTooClose(p, m_darts, valid, m_radius * fac)) {
+		if(!ignoreTooClose(p, m_darts, valid, minD)) {
 			m_darts[valid] = p;
 			valid++;
 		}
@@ -84,4 +84,9 @@ char BaseBrush::ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float
 		if(v.length() < d) return 1;
 	}
 	return 0;
+}
+
+float BaseBrush::minDartDistance() const
+{
+	return .67f * m_radius / sqrt((float)m_numDarts);
 }

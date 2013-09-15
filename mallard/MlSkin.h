@@ -11,12 +11,13 @@
 #include "MlCalamusArray.h"
 
 class AccPatchMesh;
+class MeshTopology;
 class MlSkin {
 public:
 	MlSkin();
 	virtual ~MlSkin();
-	void setBodyMesh(AccPatchMesh * mesh);
-	void addCalamus(MlCalamus & ori);
+	void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
+	bool addCalamus(MlCalamus & ori, const Vector3F & pos, float minDistance);
 	
 	unsigned numFeathers() const;
 	MlCalamus * getCalamus(unsigned idx) const;
@@ -25,8 +26,11 @@ public:
 	
 	void verbose() const;
 private:
+	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance) const;
+private:
 	MlCalamusArray m_calamus;
 	unsigned m_numFeather;
 	AccPatchMesh * m_body;
+	MeshTopology * m_topo;
 	unsigned * m_faceCalamusStart;
 };

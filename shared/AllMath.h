@@ -11,6 +11,7 @@
 #include <cmath>
 #include <stdlib.h>
 #include <iostream>
+#include <vector>
 #include <Vector3F.h>
 #include <Matrix33F.h>
 #include <Matrix44F.h>
@@ -30,6 +31,16 @@ inline float log2f( float n )
 
 #define PI 3.1415926535
 #define EPSILON 10e-7
+
+template<typename T>
+inline bool IsElementIn(T const& a, const std::vector<T>& array)
+{
+	typename std::vector<T>::const_iterator it;
+	for(it = array.begin(); it != array.end(); ++it) {
+		if(a == *it) return true;
+	}
+	return false;
+}
 
 #endif        //  #ifndef ALLMATH_H
 

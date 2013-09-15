@@ -250,7 +250,7 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 
 	m_featherDrawer = new MlDrawer;
 	m_skin = new MlSkin;
-	m_skin->setBodyMesh(m_accmesh);
+	m_skin->setBodyMesh(m_accmesh, m_topo);
 	
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 }
@@ -375,7 +375,7 @@ void GLWidget::growFeather()
 			MlCalamus c;
 			c.bindToFace(ctx->m_componentIdx, ctx->m_patchUV.x, ctx->m_patchUV.y);
 
-			m_skin->addCalamus(c);
+			m_skin->addCalamus(c, ctx->m_hitP, brush()->minDartDistance());
 		}
 	}
 }

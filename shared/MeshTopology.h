@@ -29,6 +29,7 @@ public:
 	Edge * getEdge(unsigned idx) const;
 	Edge * findEdge(unsigned a, unsigned b) const;
 	Edge * parallelEdge(Edge * src) const;
+	unsigned growAroundQuad(unsigned idx, std::vector<unsigned> & dst) const;
 private:
 	void cleanup();
 	char parallelEdgeInQuad(unsigned *indices, unsigned v0, unsigned v1, unsigned & a, unsigned & b) const;

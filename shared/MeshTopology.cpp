@@ -169,4 +169,20 @@ void MeshTopology::cleanup()
 	}
 	m_faces.clear();
 }
+
+unsigned MeshTopology::growAroundQuad(unsigned idx, std::vector<unsigned> & dst) const
+{
+	if(!IsElementIn(idx, dst)) dst.push_back(idx);
+	unsigned * pv = m_mesh->quadIndices();
+	pv += idx * 4;
+	
+	unsigned iv;
+	for(unsigned i = 0; i < 4; i++) {
+		iv = pv[i];
+		VertexAdjacency & adj = getAdjacency(iv);
+		adj.getConnectedPolygons(dst);
+	}
+	
+	return dst.size();
+}
 //:~

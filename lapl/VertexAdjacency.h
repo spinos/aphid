@@ -7,10 +7,10 @@
  *
  */
 #pragma once
-#include <vector>
+#include <AllMath.h>
 #include <map>
 #include "Vertex.h"
-#include "Matrix33F.h"
+
 class Edge;
 class Facet;
 class VertexAdjacency : public Vertex {
@@ -52,6 +52,8 @@ public:
 	unsigned nextRealEdgeNeighbor(unsigned idx);
 	unsigned nextBoundaryNeighbor(unsigned idx);
 	char findEdge(int i, int j, Edge & dest) const;
+	
+	void getConnectedPolygons(std::vector<unsigned> & dst) const;
 	
 	void verbose() const;
 private:
