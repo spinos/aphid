@@ -10,7 +10,7 @@
 #include "MlCalamus.h"
 
 MlCalamus::MlCalamus() {}
-MlCalamus::~MlCalamus() {}
+//MlCalamus::~MlCalamus() {}
 
 void MlCalamus::bindToFace(unsigned faceIdx, float u, float v)
 {

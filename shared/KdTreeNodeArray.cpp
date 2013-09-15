@@ -8,11 +8,12 @@
  */
 
 #include "KdTreeNodeArray.h"
-
+#include <iostream>
 KdTreeNodeArray::KdTreeNodeArray() 
 {
 	setIndex(0);
 	setElementSize(sizeof(KdTreeNode));
+	std::cout<<"size of kdtreenode "<<sizeof(KdTreeNode)<<"\n";
 }
 
 KdTreeNodeArray::~KdTreeNodeArray() 

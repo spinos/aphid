@@ -13,13 +13,13 @@ class MlCalamus
 public:
 	MlCalamus();
 	void bindToFace(unsigned faceIdx, float u, float v);
-	virtual ~MlCalamus();
+	//virtual ~MlCalamus();
 	
 	unsigned faceIdx() const;
 	float patchU() const;
 	float patchV() const;
 private:
+	MlFeather * m_geo;
 	unsigned m_faceIdx;
 	float m_patchU, m_patchV, m_rotX, m_rotY, m_scale, padding;
-	MlFeather * m_geo;
 };

@@ -13,6 +13,8 @@ MlCalamusArray::MlCalamusArray()
 {
 	setIndex(0);
 	setElementSize(sizeof(MlCalamus));
+	
+	std::cout<<"size of calamus "<<sizeof(MlCalamus)<<"\n";
 }
 
 MlCalamusArray::~MlCalamusArray()
