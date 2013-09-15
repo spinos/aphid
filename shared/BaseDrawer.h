@@ -65,6 +65,7 @@ public:
 	void vertex(const Vector3F & v);
 	void vertexWithOffset(const Vector3F & v, const Vector3F & o);
 	void circleAt(const Vector3F & pos, const Vector3F & nor);
+	void circleAt(const Matrix44F & mat, float radius);
 	void arrow(const Vector3F& origin, const Vector3F& dest) const;
 	void useSpace(const Matrix44F & s) const;
 	void useSpace(const Matrix33F & s) const;

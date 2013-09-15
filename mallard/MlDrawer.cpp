@@ -17,7 +17,7 @@ void MlDrawer::drawFeather(MlSkin * skin)
 	const unsigned nf = skin->numFeathers();
 	if(nf < 1) return;
 	useDepthTest(0);
-	beginPoint(5.f);
+	beginPoint(4.f);
 	setColor(1.f, 0.f, 0.f);
 	AccPatchMesh * mesh = skin->bodyMesh();
 	Vector3F p;

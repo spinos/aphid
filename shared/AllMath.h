@@ -9,6 +9,7 @@
  *
  */
 #include <cmath>
+#include <stdlib.h>
 #include <Vector3F.h>
 #include <Matrix33F.h>
 #include <Matrix44F.h>

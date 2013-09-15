@@ -66,6 +66,7 @@ HEADERS       = ../shared/AllMath.h \
 				../shared/InverseBilinearInterpolate.h \
 				../shared/Segment.h \
 				../shared/Patch.h \
+				../shared/BaseBrush.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -156,6 +157,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				../shared/InverseBilinearInterpolate.cpp \
 				../shared/Segment.cpp \
 				../shared/Patch.cpp \
+				../shared/BaseBrush.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \

@@ -641,6 +641,15 @@ void BaseDrawer::circleAt(const Vector3F & pos, const Vector3F & nor)
     glPopMatrix();
 }
 
+void BaseDrawer::circleAt(const Matrix44F & mat, float radius)
+{
+    glPushMatrix();
+    useSpace(mat);
+	glScalef(radius, radius, radius);
+    linearCurve(*m_circle);
+    glPopMatrix();
+}
+
 void BaseDrawer::useDepthTest(char on) const
 {
 	if(on) glEnable(GL_DEPTH_TEST);

@@ -21,6 +21,7 @@ Base3DView::Base3DView(QWidget *parent)
 	m_selected->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_intersectCtx = new IntersectionContext;
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
+	m_brush = new BaseBrush;
 	m_timer = new QTimer(this);
 	connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
 	m_timer->start(30);
@@ -381,5 +382,15 @@ void Base3DView::drawIntersection() const
     getDrawer()->circleAt(ctx->m_hitP, ctx->m_hitN);
 	getDrawer()->boundingBox(ctx->m_bbox);
     getDrawer()->arrow(ctx->m_hitP, ctx->m_hitP + ctx->m_hitN);
+}
+
+BaseBrush * Base3DView::brush()
+{
+	return m_brush;
+}
+
+void Base3DView::showBrush() const
+{
+	getDrawer()->circleAt(m_brush->getSpace(), m_brush->getRadius());	
 }
 //:~

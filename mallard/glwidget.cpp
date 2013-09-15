@@ -299,8 +299,8 @@ void GLWidget::clientDraw()
 	glPopMatrix();
 	*/
 	//drawFeather();
-	drawSelection();
-	drawIntersection();
+	//drawSelection();
+	showBrush();
 }
 
 void GLWidget::setSelectionAsWale(int bothSide)
@@ -362,9 +362,21 @@ void GLWidget::growFeather()
 	IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) return;
 	
-	MlCalamus c;
-	c.bindToFace(ctx->m_componentIdx, ctx->m_patchUV.x, ctx->m_patchUV.y);
-	
-	m_skin->addCalamus(c);
+	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
+	const unsigned iface = ctx->m_componentIdx;
+	for(unsigned i = 0; i < brush()->getNumDarts(); i++) {
+		Ray r = brush()->getObjectRay(i);
+		ctx->reset(r);
+		if(!m_accmesh->intersect(iface, ctx)) {
+			Vector3F hit;
+			hitTest(r, hit);
+		}
+		if(ctx->m_success) {
+			MlCalamus c;
+			c.bindToFace(ctx->m_componentIdx, ctx->m_patchUV.x, ctx->m_patchUV.y);
+
+			m_skin->addCalamus(c);
+		}
+	}
 }
 //:~

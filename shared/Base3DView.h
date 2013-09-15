@@ -6,6 +6,7 @@
 #include <KdTreeDrawer.h>
 #include <SelectionArray.h>
 #include <IntersectionContext.h>
+#include <BaseBrush.h>
 
 class QTimer;
 
@@ -25,6 +26,8 @@ public:
 	KdTreeDrawer * getDrawer() const;
 	SelectionArray * getSelection() const;
 	IntersectionContext * getIntersectionContext() const;
+	
+	BaseBrush * brush();
 	
     void initializeGL();
     void paintGL();
@@ -50,6 +53,7 @@ public:
 	void shrinkSelection();
 	void frameAll();
 	virtual void drawIntersection() const;
+	void showBrush() const;
 	
 protected:
     void keyPressEvent(QKeyEvent *event);
@@ -67,6 +71,7 @@ private:
 	KdTreeDrawer * m_drawer;
 	SelectionArray * m_selected;
 	IntersectionContext * m_intersectCtx;
+	BaseBrush * m_brush;
 	QTimer *m_timer;
 	char m_isFocused;
 };
