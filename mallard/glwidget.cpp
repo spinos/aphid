@@ -323,12 +323,10 @@ void GLWidget::loadMesh(std::string filename)
 	buildTree();
 }
 
-void GLWidget::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
+void GLWidget::clientSelect()
 {
-    Vector3F rayo = origin;
-	Vector3F raye = origin + displacement;
-	
-	Ray ray(rayo, raye);
+    Vector3F hit;
+	Ray ray = *getIncidentRay();
 	if(interactMode() == ToolContext::SelectVertex) {
 		pickupComponent(ray, hit);
 	}

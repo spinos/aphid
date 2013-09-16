@@ -71,7 +71,7 @@ Ray BaseBrush::getObjectRay(unsigned idx) const
 	ori.z = m_radius;
 	ori = m_space.transform(ori);
 	
-	dst.z = - m_radius;
+	dst.z = -m_radius;
 	dst = m_space.transform(dst);
 	
 	return Ray(ori, dst);

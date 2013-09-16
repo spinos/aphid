@@ -26,6 +26,7 @@ public:
 	KdTreeDrawer * getDrawer() const;
 	SelectionArray * getSelection() const;
 	IntersectionContext * getIntersectionContext() const;
+	const Ray * getIncidentRay() const;
 	
 	BaseBrush * brush();
 	
@@ -40,7 +41,7 @@ public:
     void processMouseInput(QMouseEvent *event);
 	void processCamera(QMouseEvent *event);
     virtual void clientDraw();
-    virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
+    virtual void clientSelect();
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
     virtual void sceneCenter(Vector3F & dst) const;
@@ -63,6 +64,10 @@ protected:
 private:
 	void updateOrthoProjection();
 	void updatePerspProjection();
+	void computeIncidentRay(int x, int y);
+	
+private:
+	Ray m_incidentRay;
     QPoint m_lastPos;
     QColor m_backgroundColor;
 	BaseCamera* fCamera;

@@ -58,7 +58,7 @@ public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 	virtual void loadMesh(std::string filename);
-	virtual void clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit);
+	virtual void clientSelect();
 	virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
     virtual PatchMesh * mesh() const;
 	void setSelectionAsWale(int bothSide);

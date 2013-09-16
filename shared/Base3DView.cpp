@@ -74,6 +74,11 @@ IntersectionContext * Base3DView::getIntersectionContext() const
 	return m_intersectCtx;
 }
 
+const Ray * Base3DView::getIncidentRay() const
+{	
+	return &m_incidentRay;
+}
+
 void Base3DView::initializeGL()
 {
     qglClearColor(m_backgroundColor.dark());
@@ -182,6 +187,8 @@ void Base3DView::processCamera(QMouseEvent *event)
 
 void Base3DView::processSelection(QMouseEvent *event)
 {
+	computeIncidentRay(event->x(), event->y());
+	
     Vector3F origin, incident;
     getCamera()->incidentRay(event->x(), event->y(), origin, incident);
     incident = incident.normal() * 1000.f;
@@ -191,8 +198,7 @@ void Base3DView::processSelection(QMouseEvent *event)
 	else 
 		m_selected->enableVertexPath();
 		
-	Vector3F nouse;
-    clientSelect(origin, incident, nouse);
+	clientSelect();
 }
 
 void Base3DView::processDeselection(QMouseEvent *event)
@@ -208,7 +214,7 @@ void Base3DView::processMouseInput(QMouseEvent *event)
     getCamera()->screenToWorldVector(dx, dy, injv);
 	Vector3F origin, incident;
     getCamera()->incidentRay(event->x(), event->y(), origin, incident);
-    incident = incident.normal() * 1000.f;
+    incident = incident.normal() * getCamera()->farClipPlane();
     clientMouseInput(origin, incident, injv);
 }
 
@@ -217,7 +223,7 @@ void Base3DView::clientDraw()
     
 }
 
-void Base3DView::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
+void Base3DView::clientSelect()
 {
     
 }
@@ -392,5 +398,13 @@ BaseBrush * Base3DView::brush()
 void Base3DView::showBrush() const
 {
 	getDrawer()->circleAt(m_brush->getSpace(), m_brush->getRadius());	
+}
+
+void Base3DView::computeIncidentRay(int x, int y)
+{
+	Vector3F origin, direct;
+    getCamera()->incidentRay(x, y, origin, direct);
+    direct.normalize();
+	m_incidentRay = Ray(origin + direct * getCamera()->nearClipPlane(), origin + direct * getCamera()->farClipPlane());
 }
 //:~

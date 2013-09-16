@@ -47,12 +47,10 @@ void SingleModelView::clientDraw()
 //! [7]
 
 //! [9]
-void SingleModelView::clientSelect(Vector3F & origin, Vector3F & displacement, Vector3F & hit)
+void SingleModelView::clientSelect()
 {
-    Vector3F rayo = origin;
-	Vector3F raye = origin + displacement;
-	
-	Ray ray(rayo, raye);
+	Vector3F hit;
+	Ray ray = *getIncidentRay();
 	if(interactMode() == ToolContext::SelectVertex) {
 		pickupComponent(ray, hit);
 	}
