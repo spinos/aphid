@@ -68,10 +68,10 @@ Ray BaseBrush::getObjectRay(unsigned idx) const
 {
 	Vector3F ori = m_darts[idx] * m_radius;
 	Vector3F dst = ori;
-	ori.z = m_radius;
+	ori.z = m_radius * .5f;
 	ori = m_space.transform(ori);
 	
-	dst.z = -m_radius;
+	dst.z = m_radius * -.5f;
 	dst = m_space.transform(dst);
 	
 	return Ray(ori, dst);
