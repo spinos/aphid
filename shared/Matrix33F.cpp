@@ -128,3 +128,35 @@ void Matrix33F::glMatrix(float m[16]) const
     m[8] = M(2,0); m[9] = M(2,1); m[10] =M(2,2); m[11] = 0.f;
     m[12] = m[13] = m[14] = 0.f; m[15] = 1.f;
 }
+
+/*
+ *  | a11 a12 a13 |-1             |   a33a22-a32a23  -(a33a12-a32a13)   a23a12-a22a13  |
+ *  | a21 a22 a23 |    =  1/DET * | -(a33a21-a31a23)   a33a11-a31a13  -(a23a11-a21a13) |
+ *  | a31 a32 a33 |               |   a32a21-a31a22  -(a32a11-a31a12)   a22a11-a21a12  |
+ *
+ *  with DET  =  a11(a33a22-a32a23)-a21(a33a12-a32a13)+a31(a23a12-a22a13)
+ *
+ *
+ *  00 01 02
+ *  10 11 12
+ *  20 21 22
+ */
+
+void Matrix33F::inverse()
+{
+    const float det = determinant();
+    
+    *m(0, 0) =  determinant22(M(2, 2), M(1, 1), M(2, 1), M(1, 2)) / det;
+    *m(0, 1) = -determinant22(M(2, 2), M(1, 0), M(2, 0), M(1, 2)) / det;
+    *m(0, 2) =  determinant22(M(2, 2), M(1, 0), M(2, 0), M(1, 2)) / det;
+}
+
+float Matrix33F::determinant() const
+{
+    return M(0, 0) * (M(2, 2) * M(1, 1) - M(1, 1) * M(1, 2)) - M(1, 0) * (M(2, 2) * M(0, 1) - M(2, 1) * M(0, 2)) + M(2, 0) *(M(1, 2) * M(0, 1) - M(1, 1) * M(0, 2));
+}
+
+float Matrix33F::determinant22(float a, float b, float c, float d) const
+{
+    return a * b - c * d;
+}

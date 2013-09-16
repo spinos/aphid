@@ -59,7 +59,8 @@ public:
     ~GLWidget();
 	virtual void loadMesh(std::string filename);
 	virtual void clientSelect();
-	virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
+	virtual void clientMouseInput();
+	virtual void clientDeselect();
     virtual PatchMesh * mesh() const;
 	void setSelectionAsWale(int bothSide);
 	void changeWaleResolution(int change);
@@ -71,7 +72,7 @@ protected:
 
 //! [3]
 private:
-	void growFeather();
+	void addFeather();
 private:
 	ZEXRImage* _image;
 	MlDrawer * m_featherDrawer;

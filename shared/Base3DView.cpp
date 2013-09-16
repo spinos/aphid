@@ -208,14 +208,13 @@ void Base3DView::processDeselection(QMouseEvent *event)
 
 void Base3DView::processMouseInput(QMouseEvent *event)
 {
+    computeIncidentRay(event->x(), event->y());
+	
     int dx = event->x() - m_lastPos.x();
     int dy = event->y() - m_lastPos.y();
     Vector3F injv;
     getCamera()->screenToWorldVector(dx, dy, injv);
-	Vector3F origin, incident;
-    getCamera()->incidentRay(event->x(), event->y(), origin, incident);
-    incident = incident.normal() * getCamera()->farClipPlane();
-    clientMouseInput(origin, incident, injv);
+    clientMouseInput();
 }
 
 void Base3DView::clientDraw()
@@ -233,7 +232,7 @@ void Base3DView::clientDeselect()
     
 }
 
-void Base3DView::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
+void Base3DView::clientMouseInput()
 {
     
 }
@@ -390,6 +389,11 @@ void Base3DView::drawIntersection() const
     getDrawer()->arrow(ctx->m_hitP, ctx->m_hitP + ctx->m_hitN);
 }
 
+const BaseBrush * Base3DView::brush() const
+{
+	return m_brush;
+}
+
 BaseBrush * Base3DView::brush()
 {
 	return m_brush;
@@ -397,7 +401,14 @@ BaseBrush * Base3DView::brush()
 
 void Base3DView::showBrush() const
 {
-	getDrawer()->circleAt(m_brush->getSpace(), m_brush->getRadius());	
+	getDrawer()->circleAt(brush()->getSpace(), brush()->getRadius());
+	Vector3F p;
+	for(unsigned i = 0; i < brush()->getNumDarts(); i++) {
+	     brush()->getDartPoint(i, p);
+	     getDrawer()->solidCube(p.x, p.y, p.z, .1f);
+	}
+    if(brush()->length() > 10e-3)
+        getDrawer()->arrow(brush()->heelPosition(), brush()->toePosition());
 }
 
 void Base3DView::computeIncidentRay(int x, int y)

@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include <AllMath.h>
 #include <Plane.h>
 #include <Segment.h>
 class Patch : public Plane {
@@ -19,6 +20,7 @@ public:
 	virtual ~Patch();
 	
 	Vector3F vertex(int idx) const;
+	Matrix33F tangentFrame() const;
 	
 private:
 	Segment m_segs[4];

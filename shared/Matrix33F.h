@@ -17,7 +17,7 @@
 	Vector3F operator*( Vector3F other ) const;
 	Matrix33F operator+( Matrix33F other ) const;	
 	void setIdentity();
-	
+	void inverse();
 	float* m(int i, int j);
 	float M(int i, int j) const;
 	
@@ -26,6 +26,8 @@
 	Matrix33F multiply(const Matrix33F & a) const;
 	Vector3F transform(const Vector3F & a) const;
 	void glMatrix(float m[16]) const;
+	float determinant() const;
+	float determinant22(float a, float b, float c, float d) const;
 	float v[9];
  };
 

@@ -60,19 +60,14 @@ void SingleModelView::clientSelect()
 }
 //! [9]
 
-void SingleModelView::clientDeselect()
-{
-
-}
+void SingleModelView::clientDeselect() {}
 
 //! [10]
-void SingleModelView::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
+void SingleModelView::clientMouseInput()
 {
-	Vector3F rayo = origin;
-	Vector3F raye = origin + displacement;
-	Ray ray(rayo, raye);
+	Vector3F hit;
+	Ray ray = *getIncidentRay();
 	if(interactMode() == ToolContext::SelectVertex) {
-		Vector3F hit;
 		pickupComponent(ray, hit);
 	}
 }

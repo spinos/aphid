@@ -12,8 +12,13 @@
 #include <MeshTopology.h>
 #include <iostream>
 #include <QuickSort.h>
+#include <PointInsidePolygonTest.h>
 
-MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0) {}
+MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0) 
+{
+    m_growCalamusIndices.clear();
+}
+
 MlSkin::~MlSkin()
 {
 	m_calamus.clear();
@@ -33,7 +38,7 @@ AccPatchMesh * MlSkin::bodyMesh() const
 	return m_body;
 }
 
-bool MlSkin::addCalamus(MlCalamus & ori, const Vector3F & pos, float minDistance)
+bool MlSkin::createFeather(MlCalamus & ori, const Vector3F & pos, float minDistance)
 {
 	const unsigned iface = ori.faceIdx();
 	if(isPointTooCloseToExisting(pos, iface, minDistance)) return false;
@@ -42,9 +47,29 @@ bool MlSkin::addCalamus(MlCalamus & ori, const Vector3F & pos, float minDistance
 	MlCalamus * c = m_calamus.asCalamus();
 	*c = ori;
 	m_calamus.next();
+	
+	m_growCalamusIndices.push_back(m_numFeather);
 	m_numFeather++;
 	
-	if(m_numFeather > 1)
+	return true;
+}
+
+void MlSkin::growFeather(const Vector3F & direction)
+{
+    if(m_growCalamusIndices.size() < 1) return;
+    
+    for(std::vector<unsigned>::iterator it = m_growCalamusIndices.begin(); it != m_growCalamusIndices.end(); ++it) {
+        //std::cout<<" feather i"<<*it;
+        //std::cout<<" face i "<<getCalamus(*it)->faceIdx();
+        const PointInsidePolygonTest pa = m_body->patchAt(getCalamus(*it)->faceIdx());
+        Matrix33F space = pa.tangentFrame();
+        space.inverse();
+    }
+}
+
+void MlSkin::finishCreateFeather()
+{
+    if(m_numFeather > 1)
 		QuickSort::Sort(m_calamus, 0, m_numFeather - 1);
 		
 	unsigned cur;
@@ -57,7 +82,7 @@ bool MlSkin::addCalamus(MlCalamus & ori, const Vector3F & pos, float minDistance
 		}
 	}
 	
-	return true;
+	m_growCalamusIndices.clear();
 }
 
 bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance) const

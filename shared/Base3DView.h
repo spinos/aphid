@@ -28,6 +28,7 @@ public:
 	IntersectionContext * getIntersectionContext() const;
 	const Ray * getIncidentRay() const;
 	
+	const BaseBrush * brush() const;
 	BaseBrush * brush();
 	
     void initializeGL();
@@ -43,7 +44,7 @@ public:
     virtual void clientDraw();
     virtual void clientSelect();
     virtual void clientDeselect();
-    virtual void clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir);
+    virtual void clientMouseInput();
     virtual void sceneCenter(Vector3F & dst) const;
     
     void resetView();

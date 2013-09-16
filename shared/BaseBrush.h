@@ -17,16 +17,25 @@ public:
 	void setSpace(const Vector3F & point, const Vector3F & facing);
 	void setRadius(float x);
 	void setNumDarts(unsigned x);
+	void resetToe();
+	void setToeByIntersectNormal(const Ray * r);
 	
 	Matrix44F getSpace() const;
 	float getRadius() const;
 	unsigned getNumDarts() const;
 	Ray getObjectRay(unsigned idx) const;
 	float minDartDistance() const;
+	const Vector3F heelPosition() const;
+	const Vector3F toePosition() const;
+	const Vector3F normal() const;
+	const Vector3F toeDisplacement() const;
+	const float length() const;
+	void getDartPoint(unsigned idx, Vector3F & p) const;
 private:
 	char ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float d) const;
 private:
 	Matrix44F m_space;
+	Vector3F m_toeWorldPos;
 	float m_radius;
 	Vector3F * m_darts;
 	unsigned m_numDarts;

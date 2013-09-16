@@ -332,21 +332,27 @@ void GLWidget::clientSelect()
 	}
 	else if(interactMode() == ToolContext::CreateBodyContourFeather) {
 		hitTest(ray, hit);
-		growFeather();
+		addFeather();
 	}
 }
 
-void GLWidget::clientMouseInput(Vector3F & origin, Vector3F & displacement, Vector3F & stir)
+void GLWidget::clientMouseInput()
 {
-    Vector3F rayo = origin;
-	Vector3F raye = origin + displacement;
-	Vector3F hit;
-	Ray ray(rayo, raye);
+    Vector3F hit;
+	Ray ray = *getIncidentRay();
 	if(interactMode() == ToolContext::SelectVertex) {
 		pickupComponent(ray, hit);
 	}
-	else {
-		hitTest(ray, hit);
+	else if(interactMode() == ToolContext::CreateBodyContourFeather) {
+		brush()->setToeByIntersectNormal(&ray);
+		m_skin->growFeather(brush()->toeDisplacement());
+	}
+}
+
+void GLWidget::clientDeselect()
+{
+    if(interactMode() == ToolContext::CreateBodyContourFeather) {
+		m_skin->finishCreateFeather();
 	}
 }
 
@@ -355,12 +361,13 @@ PatchMesh * GLWidget::mesh() const
 	return m_accmesh;
 }
 
-void GLWidget::growFeather()
+void GLWidget::addFeather()
 {
 	IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) return;
 	
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
+	brush()->resetToe();
 	const unsigned iface = ctx->m_componentIdx;
 	for(unsigned i = 0; i < brush()->getNumDarts(); i++) {
 		Ray r = brush()->getObjectRay(i);
@@ -373,7 +380,7 @@ void GLWidget::growFeather()
 			MlCalamus c;
 			c.bindToFace(ctx->m_componentIdx, ctx->m_patchUV.x, ctx->m_patchUV.y);
 
-			m_skin->addCalamus(c, ctx->m_hitP, brush()->minDartDistance());
+			m_skin->createFeather(c, ctx->m_hitP, brush()->minDartDistance());
 		}
 	}
 }

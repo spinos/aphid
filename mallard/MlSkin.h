@@ -17,8 +17,9 @@ public:
 	MlSkin();
 	virtual ~MlSkin();
 	void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
-	bool addCalamus(MlCalamus & ori, const Vector3F & pos, float minDistance);
-	
+	bool createFeather(MlCalamus & ori, const Vector3F & pos, float minDistance);
+	void growFeather(const Vector3F & direction);
+	void finishCreateFeather();
 	unsigned numFeathers() const;
 	MlCalamus * getCalamus(unsigned idx) const;
 	
@@ -29,6 +30,7 @@ private:
 	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance) const;
 private:
 	MlCalamusArray m_calamus;
+	std::vector<unsigned> m_growCalamusIndices;
 	unsigned m_numFeather;
 	AccPatchMesh * m_body;
 	MeshTopology * m_topo;

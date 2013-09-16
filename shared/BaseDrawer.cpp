@@ -93,8 +93,9 @@ void BaseDrawer::solidCube(float x, float y, float z, float size)
 	setWired(0);
 	glPushMatrix();
 
-	const float hsize = size * 0.5f; 
-	glTranslatef(x - hsize, y - hsize, z - hsize);
+	//const float hsize = size * 0.5f; 
+	//glTranslatef(x - hsize, y - hsize, z - hsize);
+	glTranslatef(x, y, z);
 	glScalef(size, size, size);
 	
 	drawMesh(m_cube);

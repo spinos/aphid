@@ -8,10 +8,10 @@
  */
 
 #include "BaseBrush.h"
-
+#include <Plane.h>
 BaseBrush::BaseBrush() : m_radius(3.f) 
 {
-	setNumDarts(15);
+	setNumDarts(16);
 }
 
 BaseBrush::~BaseBrush() 
@@ -36,11 +36,11 @@ void BaseBrush::setNumDarts(unsigned x)
 	m_numDarts = x;
 	m_darts = new Vector3F[m_numDarts];
 	
-	const unsigned minD = 1.f / sqrt((float)m_numDarts);
+	const float minD = 1.f / sqrt((float)m_numDarts);
 	unsigned valid = 0;
 	while (valid < m_numDarts) {
 		const float alpha = (rand()%131/131.f*2.f - 1.f) * PI;
-		const float r = rand()%143/143.f;
+		const float r = rand()%143/143.f * .9f + .1f;
 		Vector3F p(r * cos(alpha), r * sin(alpha), 0.f);
 		if(!ignoreTooClose(p, m_darts, valid, minD)) {
 			m_darts[valid] = p;
@@ -77,9 +77,15 @@ Ray BaseBrush::getObjectRay(unsigned idx) const
 	return Ray(ori, dst);
 }
 
+void BaseBrush::getDartPoint(unsigned idx, Vector3F & p) const
+{
+    p = m_darts[idx] * m_radius;
+    p = m_space.transform(p);
+}
+
 char BaseBrush::ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float d) const
 {
-	for(unsigned i = 0; i <count; i++) {
+	for(unsigned i = 0; i <= count; i++) {
 		Vector3F v = p - data[i];
 		if(v.length() < d) return 1;
 	}
@@ -88,5 +94,44 @@ char BaseBrush::ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float
 
 float BaseBrush::minDartDistance() const
 {
-	return .67f * m_radius / sqrt((float)m_numDarts);
+	return m_radius / sqrt((float)m_numDarts);
+}
+
+void BaseBrush::resetToe()
+{
+    m_toeWorldPos = heelPosition();
+}
+
+const Vector3F BaseBrush::heelPosition() const
+{
+    return m_space.getTranslation();
+}
+
+const Vector3F BaseBrush::toePosition() const
+{
+    return m_toeWorldPos;
+}
+
+const Vector3F BaseBrush::normal() const
+{
+    return m_space.getFront();
+}
+
+void BaseBrush::setToeByIntersectNormal(const Ray * r)
+{
+    Plane pl(normal(), heelPosition());
+    Vector3F hit;
+    float t;
+    if(pl.rayIntersect(*r, hit, t))
+        m_toeWorldPos = hit;
+}
+
+const float BaseBrush::length() const
+{
+    return toeDisplacement().length();
+}
+
+const Vector3F BaseBrush::toeDisplacement() const
+{
+    return Vector3F(heelPosition(), toePosition());
 }
