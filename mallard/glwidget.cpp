@@ -268,36 +268,46 @@ void GLWidget::clientDraw()
 	//m_featherDrawer->drawAccPatchMesh(m_accmesh);
 	//getDrawer()->drawKdTree(getTree());
 	m_featherDrawer->drawFeather(m_skin);
-	/*
+	
 	glPushMatrix();
 	
 	Matrix44F s;
-	s.setTranslation(5.f, 3.f, 4.f);
-	s.rotateX(1.3f);
-	s.rotateY(0.67f);
+	//s.setTranslation(5.f, 3.f, 4.f);
+	s.rotateX(1.1f);
+	s.rotateY(0.97f);
 	getDrawer()->useSpace(s);
-	//getDrawer()->coordsys(13.f);
+	getDrawer()->coordsys(15.f);
 	
 	Matrix44F b;
-	b.rotateZ(0.37f);
+	b.rotateY(0.97f);
 	getDrawer()->useSpace(b);
-	getDrawer()->coordsys(10.f);
+	//getDrawer()->coordsys(10.f);
 	glPopMatrix();
 	
 	
-	glPushMatrix();
+	//glPushMatrix();
 	
-	Matrix44F c;
-	c.setTranslation(5.f, 3.5f, 4.f);
-	c.rotateX(1.3f);
-	c.rotateY(0.67f);
-	c.rotateZ(0.37f);
 	
-	getDrawer()->useSpace(c);
-	getDrawer()->coordsys(17.f);
+	Matrix33F c;
+	c.rotateX(6.1f);
+	c.rotateY(0.97f);
+	//c.rotateZ(-0.67f);
+	//c.setTranslation(0.f, 0.f, 14.f);
 	
-	glPopMatrix();
-	*/
+	//
+	
+	//Matrix44F t;
+	//t.rotateZ(-0.67f);
+	//t.setTranslation(5.f, 8.f, 14.f);
+	
+	//c.multiply(t);
+	Vector3F p(4.f, 3.f, 5.f);
+	
+	//getDrawer()->useSpace(c);
+	getDrawer()->coordsys(c, 5.f, &p);
+	
+	//glPopMatrix();
+	
 	//drawFeather();
 	//drawSelection();
 	showBrush();
@@ -368,6 +378,11 @@ void GLWidget::addFeather()
 	
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
 	brush()->resetToe();
+	
+	Vector3F rr = getIncidentRay()->m_dir;
+	rr.reverse();
+	if(rr.dot(brush()->normal()) < .23f) return;
+	
 	const unsigned iface = ctx->m_componentIdx;
 	for(unsigned i = 0; i < brush()->getNumDarts(); i++) {
 		Ray r = brush()->getObjectRay(i);

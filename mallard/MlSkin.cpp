@@ -16,7 +16,7 @@
 
 MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0) 
 {
-    m_growCalamusIndices.clear();
+    m_activeIndices.clear();
 }
 
 MlSkin::~MlSkin()
@@ -48,7 +48,7 @@ bool MlSkin::createFeather(MlCalamus & ori, const Vector3F & pos, float minDista
 	*c = ori;
 	m_calamus.next();
 	
-	m_growCalamusIndices.push_back(m_numFeather);
+	m_activeIndices.push_back(m_numFeather);
 	m_numFeather++;
 	
 	return true;
@@ -56,14 +56,28 @@ bool MlSkin::createFeather(MlCalamus & ori, const Vector3F & pos, float minDista
 
 void MlSkin::growFeather(const Vector3F & direction)
 {
-    if(m_growCalamusIndices.size() < 1) return;
+    if(m_activeIndices.size() < 1) return;
+	if(direction.length() < 10e-3) return;
+	
+	const float scale = direction.length();
     
-    for(std::vector<unsigned>::iterator it = m_growCalamusIndices.begin(); it != m_growCalamusIndices.end(); ++it) {
-        //std::cout<<" feather i"<<*it;
+	Vector3F d;
+	float rotX, rotY;
+    for(std::vector<unsigned>::iterator it = m_activeIndices.begin(); it != m_activeIndices.end(); ++it) {
+        MlCalamus * c = m_calamus.asCalamus(*it);
+		//std::cout<<" feather i"<<*it;
         //std::cout<<" face i "<<getCalamus(*it)->faceIdx();
-        const PointInsidePolygonTest pa = m_body->patchAt(getCalamus(*it)->faceIdx());
+        const PointInsidePolygonTest pa = m_body->patchAt(c->faceIdx());
         Matrix33F space = pa.tangentFrame();
         space.inverse();
+		
+		d = space.transform(direction);
+		d.verbose("obj d");
+		rotX = d.angleX();
+		rotY = d.angleY();
+		std::cout<<" feather rot"<<rotX<<"\n";
+		c->setRotate(rotX, rotY);
+		c->setScale(scale);
     }
 }
 
@@ -82,7 +96,7 @@ void MlSkin::finishCreateFeather()
 		}
 	}
 	
-	m_growCalamusIndices.clear();
+	m_activeIndices.clear();
 }
 
 bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance) const
@@ -120,6 +134,16 @@ unsigned MlSkin::numFeathers() const
 MlCalamus * MlSkin::getCalamus(unsigned idx) const
 {
 	return m_calamus.asCalamus(idx);
+}
+
+unsigned MlSkin::numActiveFeather() const
+{
+	return m_activeIndices.size();
+}
+
+MlCalamus * MlSkin::getActive(unsigned idx) const
+{
+	return m_calamus.asCalamus(m_activeIndices[idx]);
 }
 
 void MlSkin::verbose() const

@@ -25,15 +25,16 @@ public:
 	BaseDrawer ();
 	virtual ~BaseDrawer ();
 	
+	void cube(const Vector3F & p, const float & size) const;
 	void box(float width, float height, float depth);
 	void solidCube(float x, float y, float z, float size);
 	void setGrey(float g);
-	void setColor(float r, float g, float b);
-	void end();
+	void setColor(float r, float g, float b) const;
+	void end() const;
 	void beginSolidTriangle();
 	void beginWireTriangle();
 	void beginLine();
-	void beginPoint(float x);
+	void beginPoint(float x) const;
 	void beginQuad();
 	void aVertex(float x, float y, float z);
 	void drawSphere();
@@ -50,8 +51,8 @@ public:
 	void patch(const BaseMesh * mesh, unsigned idx);
 	void components(SelectionArray * arr);
 	void primitive(Primitive * prim);
-	void coordsys(float scale = 1.f);
-	void coordsys(const Matrix33F & orient, float size = 1.f);
+	void coordsys(float scale = 1.f) const;
+	void coordsys(const Matrix33F & orient, float size = 1.f, Vector3F * p = 0) const;
 	void setWired(char var);
 	void setCullFace(char var);
 	void anchor(Anchor *a, char active = 0);
@@ -62,7 +63,7 @@ public:
 	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void colorAsActive();
 	void colorAsInert();
-	void vertex(const Vector3F & v);
+	void vertex(const Vector3F & v) const;
 	void vertexWithOffset(const Vector3F & v, const Vector3F & o);
 	void circleAt(const Vector3F & pos, const Vector3F & nor);
 	void circleAt(const Matrix44F & mat, float radius);

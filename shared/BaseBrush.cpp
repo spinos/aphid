@@ -11,7 +11,7 @@
 #include <Plane.h>
 BaseBrush::BaseBrush() : m_radius(3.f) 
 {
-	setNumDarts(16);
+	setNumDarts(25);
 }
 
 BaseBrush::~BaseBrush() 
@@ -40,7 +40,7 @@ void BaseBrush::setNumDarts(unsigned x)
 	unsigned valid = 0;
 	while (valid < m_numDarts) {
 		const float alpha = (rand()%131/131.f*2.f - 1.f) * PI;
-		const float r = rand()%143/143.f * .9f + .1f;
+		const float r = rand()%143/143.f;
 		Vector3F p(r * cos(alpha), r * sin(alpha), 0.f);
 		if(!ignoreTooClose(p, m_darts, valid, minD)) {
 			m_darts[valid] = p;

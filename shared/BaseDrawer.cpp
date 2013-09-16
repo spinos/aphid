@@ -32,12 +32,23 @@ BaseDrawer::~BaseDrawer ()
 	delete m_sphere;
 }
 
+void BaseDrawer::cube(const Vector3F & p, const float & size) const
+{
+	glPushMatrix();
+
+	glTranslatef(p.x, p.y, p.z);
+	glScalef(size, size, size);
+	
+	drawMesh(m_cube);
+	glPopMatrix();	
+}
+
 void BaseDrawer::setGrey(float g)
 {
     glColor3f(g, g, g);
 }
 
-void BaseDrawer::setColor(float r, float g, float b)
+void BaseDrawer::setColor(float r, float g, float b) const
 {
 	glColor3f(r, g, b);
 }
@@ -102,7 +113,7 @@ void BaseDrawer::solidCube(float x, float y, float z, float size)
 	glPopMatrix();	
 }
 
-void BaseDrawer::end()
+void BaseDrawer::end() const
 {
     if(m_wired) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnd();
@@ -125,7 +136,7 @@ void BaseDrawer::beginLine()
 	glBegin(GL_LINES);
 }
 
-void BaseDrawer::beginPoint(float x)
+void BaseDrawer::beginPoint(float x) const
 {
 	glPointSize(x);
 	glBegin(GL_POINTS);
@@ -434,9 +445,9 @@ void BaseDrawer::primitive(Primitive * prim)
 		}
 }
 
-void BaseDrawer::coordsys(float scale)
+void BaseDrawer::coordsys(float scale) const
 {
-	setWired(0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glColor3f(1.f, 0.f, 0.f);
 	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(scale, 0.f, 0.f));
 	glColor3f(0.f, 1.f, 0.f);
@@ -468,12 +479,16 @@ void BaseDrawer::arrow(const Vector3F& origin, const Vector3F& dest) const
 	glPopMatrix();
 }
 
-void BaseDrawer::coordsys(const Matrix33F & orient, float scale)
+void BaseDrawer::coordsys(const Matrix33F & orient, float scale, Vector3F * p) const
 {
+	glPushMatrix();
+	if(p) glTranslatef(p->x, p->y, p->z);
 	float m[16];
 	orient.glMatrix(m);
 	glMultMatrixf((const GLfloat*)m);
 	coordsys(scale);
+	
+	glPopMatrix();
 }
 
 void BaseDrawer::useSpace(const Matrix44F & s) const
@@ -620,7 +635,7 @@ void BaseDrawer::colorAsInert()
 	glColor3f(m_inertColor.x, m_inertColor.y, m_inertColor.z);
 }
 
-void BaseDrawer::vertex(const Vector3F & v)
+void BaseDrawer::vertex(const Vector3F & v) const
 {
 	glVertex3f(v.x, v.y, v.z);
 }

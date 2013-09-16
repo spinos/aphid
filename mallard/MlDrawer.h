@@ -15,6 +15,8 @@ class MlDrawer : public BezierDrawer {
 public:
 	MlDrawer();
 	virtual ~MlDrawer();
-	void drawFeather(MlSkin * skin);
+	void drawFeather(MlSkin * skin) const;
+private:
+	void drawActiveFeather(MlSkin * skin) const;
 private:
 };

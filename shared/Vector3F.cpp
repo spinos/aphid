@@ -246,6 +246,22 @@ int Vector3F::longestAxis() const
 	return 2;
 }
 
+float Vector3F::angleX() const
+{
+	float r = sqrt(y * y + z * z);
+	if(r < 10e-5) return 0.f;
+	if(y <= 0.f) return acos(z / r);
+	return 6.283f - acos(z / r);
+}
+	
+float Vector3F::angleY() const
+{
+	float r = sqrt(x * x + z * z);
+	if(r < 10e-5) return 0.f;
+	if(x > 0.f) return acos(z / r);
+	return 6.283f - acos(z / r);
+}
+
 void Vector3F::verbose(const char * pref) const
 {
 	std::cout<<pref<<" ("<<x<<","<<y<<","<<z<<")\n";

@@ -24,13 +24,15 @@ public:
 	MlCalamus * getCalamus(unsigned idx) const;
 	
 	AccPatchMesh * bodyMesh() const;
+	unsigned numActiveFeather() const;
+	MlCalamus * getActive(unsigned idx) const;
 	
 	void verbose() const;
 private:
 	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance) const;
 private:
 	MlCalamusArray m_calamus;
-	std::vector<unsigned> m_growCalamusIndices;
+	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather;
 	AccPatchMesh * m_body;
 	MeshTopology * m_topo;
