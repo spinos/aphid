@@ -36,9 +36,14 @@ float MlCalamus::patchV() const
 	return m_patchV;
 }
 
-void MlCalamus::setRotate(const float& x, const float y)
+void MlCalamus::setRotateX(const float& x)
 {
 	m_rotX = x;
+	
+}
+
+void MlCalamus::setRotateY(const float& y)
+{
 	m_rotY = y;
 }
 

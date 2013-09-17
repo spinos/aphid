@@ -16,12 +16,15 @@ public:
 	virtual ~BaseBrush();
 	void setSpace(const Vector3F & point, const Vector3F & facing);
 	void setRadius(float x);
+	void setPitch(float x);
+	void setMaxToeFactor(float x);
 	void setNumDarts(unsigned x);
 	void resetToe();
 	void setToeByIntersectNormal(const Ray * r);
 	
 	Matrix44F getSpace() const;
 	float getRadius() const;
+	float getPitch() const;
 	unsigned getNumDarts() const;
 	Ray getObjectRay(unsigned idx) const;
 	float minDartDistance() const;
@@ -36,7 +39,7 @@ private:
 private:
 	Matrix44F m_space;
 	Vector3F m_toeWorldPos;
-	float m_radius;
+	float m_radius, m_pitch, m_maxToeFactor;
 	Vector3F * m_darts;
 	unsigned m_numDarts;
 };

@@ -9,7 +9,7 @@
 
 #include "BaseBrush.h"
 #include <Plane.h>
-BaseBrush::BaseBrush() : m_radius(3.f) 
+BaseBrush::BaseBrush() : m_radius(2.f), m_pitch(.3f), m_maxToeFactor(2.f)
 {
 	setNumDarts(25);
 }
@@ -28,6 +28,16 @@ void BaseBrush::setSpace(const Vector3F & point, const Vector3F & facing)
 void BaseBrush::setRadius(float x)
 {
 	m_radius = x;
+}
+
+void BaseBrush::setPitch(float x)
+{
+	m_pitch = x;
+}
+
+void BaseBrush::setMaxToeFactor(float x)
+{
+	m_maxToeFactor = x;
 }
 
 void BaseBrush::setNumDarts(unsigned x)
@@ -57,6 +67,11 @@ Matrix44F BaseBrush::getSpace() const
 float BaseBrush::getRadius() const
 {
 	return m_radius;
+}
+
+float BaseBrush::getPitch() const
+{
+	return m_pitch;
 }
 
 unsigned BaseBrush::getNumDarts() const
@@ -122,8 +137,16 @@ void BaseBrush::setToeByIntersectNormal(const Ray * r)
     Plane pl(normal(), heelPosition());
     Vector3F hit;
     float t;
-    if(pl.rayIntersect(*r, hit, t))
+    if(pl.rayIntersect(*r, hit, t)) {
         m_toeWorldPos = hit;
+		Vector3F d = toeDisplacement();
+		float dd = d.length();
+		if(dd > m_radius * m_maxToeFactor) {
+			d *= m_radius * m_maxToeFactor / dd;
+			m_toeWorldPos = heelPosition();
+			m_toeWorldPos += d;
+		}
+	}
 }
 
 const float BaseBrush::length() const

@@ -30,8 +30,12 @@ void MlDrawer::drawFeather(MlSkin * skin) const
 		space.rotateX(c->rotateX());
 		space.multiply(frm);
 		
+		Matrix33F ys;
+		ys.rotateY(c->rotateY());
+		ys.multiply(space);
+		
 		Vector3F d(0.f, 0.f, c->scale());
-		d = space.transform(d);
+		d = ys.transform(d);
 		d = p + d;
 		arrow(p, d);
 	}
@@ -57,8 +61,12 @@ void MlDrawer::drawActiveFeather(MlSkin * skin) const
 		
 		space.multiply(frm);
 		
+		Matrix33F ys;
+		ys.rotateY(c->rotateY());
+		ys.multiply(space);
+		
 		Vector3F d(0.f, 0.f, c->scale());
-		d = space.transform(d);
+		d = ys.transform(d);
 		d = p + d;
 		arrow(p, d);
 	}

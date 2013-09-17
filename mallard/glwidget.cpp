@@ -381,7 +381,7 @@ void GLWidget::addFeather()
 	
 	Vector3F rr = getIncidentRay()->m_dir;
 	rr.reverse();
-	if(rr.dot(brush()->normal()) < .33f) return;
+	if(rr.dot(brush()->normal()) < .34f) return;
 	
 	const unsigned iface = ctx->m_componentIdx;
 	for(unsigned i = 0; i < brush()->getNumDarts(); i++) {
@@ -394,7 +394,7 @@ void GLWidget::addFeather()
 		if(ctx->m_success && ctx->m_hitN.dot(brush()->normal()) > .8f) {
 			MlCalamus c;
 			c.bindToFace(ctx->m_componentIdx, ctx->m_patchUV.x, ctx->m_patchUV.y);
-
+			c.setRotateY(brush()->getPitch());
 			m_skin->createFeather(c, ctx->m_hitP, brush()->minDartDistance());
 		}
 	}

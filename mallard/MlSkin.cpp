@@ -62,7 +62,7 @@ void MlSkin::growFeather(const Vector3F & direction)
 	const float scale = direction.length();
     
 	Vector3F d;
-	float rotX, rotY;
+	float rotX;
     for(std::vector<unsigned>::iterator it = m_activeIndices.begin(); it != m_activeIndices.end(); ++it) {
         MlCalamus * c = m_calamus.asCalamus(*it);
 		Matrix33F space = m_body->tangentFrame(c->faceIdx(), c->patchU(), c->patchV());
@@ -70,9 +70,7 @@ void MlSkin::growFeather(const Vector3F & direction)
 		
 		d = space.transform(direction);
 		rotX = d.angleX();
-		rotY = d.angleY();
-
-		c->setRotate(rotX, rotY);
+		c->setRotateX(rotX);
 		c->setScale(scale);
     }
 }

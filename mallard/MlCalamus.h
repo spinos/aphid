@@ -21,7 +21,8 @@ public:
 	float rotateY() const;
 	float scale() const;
 	
-	void setRotate(const float& x, const float y);
+	void setRotateX(const float& x);
+	void setRotateY(const float& y);
 	void setScale(const float & x);
 private:
 	MlFeather * m_geo;
