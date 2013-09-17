@@ -35,6 +35,18 @@ BaseDrawer::~BaseDrawer ()
 	delete m_cube;
 }
 
+void BaseDrawer::initializeProfile()
+{
+	m_markerProfile = GProfile(false, true, false, false);
+	m_surfaceProfile = GProfile(true, true, false, true);
+	surfaceMat = new GMaterial(Color4(0.1, 0.1, 0.1, 1.0),Color4(0.8, 0.8, 0.8, 1.0),Color4(0.4, 0.4, 0.3, 1.0),Color4(0.0, 0.0, 0.0, 1.0), 64.f);
+	m_surfaceProfile.m_material = surfaceMat;
+	majorLit.activate();
+	fillLit.m_LightID = GL_LIGHT1;
+	fillLit.m_Position = Float4(0.f, 0.f, -1000.f, 1.f);
+	fillLit.activate();
+}
+
 void BaseDrawer::cube(const Vector3F & p, const float & size) const
 {
 	glPushMatrix();
@@ -461,6 +473,7 @@ void BaseDrawer::coordsys(float scale) const
 
 void BaseDrawer::arrow(const Vector3F& origin, const Vector3F& dest) const
 {
+	m_markerProfile.apply();
 	glBegin( GL_LINES );
 	glVertex3f(origin.x, origin.y, origin.z);
 	glVertex3f(dest.x, dest.y, dest.z); 

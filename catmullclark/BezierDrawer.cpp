@@ -105,18 +105,16 @@ void BezierDrawer::drawBezierCage(BezierPatch * patch)
 
 void BezierDrawer::drawAcc() const
 {
-	glEnable(GL_CULL_FACE);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
+	setColor(0.4f, .6f, .9f);
 	glEnableClientState( GL_VERTEX_ARRAY );
 	glVertexPointer( 3, GL_FLOAT, 0, m_vertices );
 	
-	glEnableClientState( GL_COLOR_ARRAY );
-	glColorPointer( 3, GL_FLOAT, 0, m_normals );
-
+	glEnableClientState( GL_NORMAL_ARRAY );
+	glNormalPointer( GL_FLOAT, 0, m_normals );
+	
 	glDrawElements( GL_QUADS, m_tess->numIndices() * m_mesh->getNumFaces(), GL_UNSIGNED_INT, m_indices);
-	glDisableClientState( GL_COLOR_ARRAY );
+	
+	glDisableClientState( GL_NORMAL_ARRAY );
 	glDisableClientState( GL_VERTEX_ARRAY );
 }
 

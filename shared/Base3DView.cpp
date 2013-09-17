@@ -81,19 +81,16 @@ const Ray * Base3DView::getIncidentRay() const
 
 void Base3DView::initializeGL()
 {
-    qglClearColor(m_backgroundColor.dark());
+	qglClearColor(m_backgroundColor.dark());
 
     glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
-    glShadeModel(GL_SMOOTH);
+    glEnable(GL_COLOR_MATERIAL);
+	glShadeModel(GL_SMOOTH);
 	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
 	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-    //glEnable(GL_LIGHTING);
-    //glEnable(GL_LIGHT0);
     glEnable(GL_MULTISAMPLE);
-    //static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
-    //glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-	glDepthFunc(GL_LEQUAL);	
+	glDepthFunc(GL_LEQUAL);
+	getDrawer()->initializeProfile();
 }
 //! [6]
 

@@ -267,6 +267,8 @@ void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
 	//getDrawer()->edge(mesh());
+	getDrawer()->m_surfaceProfile.apply();
+	
 	m_featherDrawer->drawAcc();
 	//getDrawer()->drawKdTree(getTree());
 	m_featherDrawer->drawFeather(m_skin);

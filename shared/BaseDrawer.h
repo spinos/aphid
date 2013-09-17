@@ -19,11 +19,14 @@
 #include <CubeMesh.h>
 #include <BaseCurve.h>
 #include <CircleCurve.h>
+#include <GProfile.h>
 
 class BaseDrawer {
 public:
 	BaseDrawer ();
 	virtual ~BaseDrawer ();
+	
+	virtual void initializeProfile();
 	
 	void cube(const Vector3F & p, const float & size) const;
 	void box(float width, float height, float depth);
@@ -71,6 +74,13 @@ public:
 	void useSpace(const Matrix44F & s) const;
 	void useSpace(const Matrix33F & s) const;
 	void useDepthTest(char on) const;
+	
+public:
+	GProfile m_markerProfile;
+	GProfile m_surfaceProfile;
+	GMaterial *surfaceMat;
+	GLight majorLit;
+	GLight fillLit;
 private:
     char m_wired;
 	GeodesicSphereMesh * m_sphere;

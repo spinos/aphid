@@ -69,7 +69,7 @@ private:
 	
 private:
 	Ray m_incidentRay;
-    QPoint m_lastPos;
+	QPoint m_lastPos;
     QColor m_backgroundColor;
 	BaseCamera* fCamera;
 	BaseCamera* m_orthoCamera;

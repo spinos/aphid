@@ -68,6 +68,9 @@ HEADERS       = ../shared/AllMath.h \
 				../shared/Patch.h \
 				../shared/BaseBrush.h \
 				../shared/QuickSort.h \
+				../shared/GLight.h \
+				../shared/GMaterial.h \
+				../shared/GProfile.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -160,6 +163,9 @@ SOURCES       = ../shared/Vector3F.cpp \
 				../shared/Patch.cpp \
 				../shared/BaseBrush.cpp \
 				../shared/QuickSort.cpp \
+				../shared/GLight.cpp \
+				../shared/GMaterial.cpp \
+				../shared/GProfile.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \
