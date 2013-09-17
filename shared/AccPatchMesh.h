@@ -29,6 +29,7 @@ public:
 	virtual char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
 	
 	void pointOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
+	Matrix33F tangentFrame(unsigned idx, float u, float v) const;
 	
 private:
 	char recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;

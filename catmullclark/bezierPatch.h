@@ -37,6 +37,7 @@ public:
 	const BoundingBox controlBBox() const;
 	void decasteljauSplit(BezierPatch *dst) const;
 	void splitPatchUV(PatchSplitContext ctx, PatchSplitContext * child) const;
+	Matrix33F tangentFrame(float u, float v) const;
 	
 	Vector3F p(unsigned u, unsigned v) const;
 	Vector3F normal(unsigned u, unsigned v) const;

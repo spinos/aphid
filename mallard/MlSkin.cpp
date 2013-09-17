@@ -65,8 +65,7 @@ void MlSkin::growFeather(const Vector3F & direction)
 	float rotX, rotY;
     for(std::vector<unsigned>::iterator it = m_activeIndices.begin(); it != m_activeIndices.end(); ++it) {
         MlCalamus * c = m_calamus.asCalamus(*it);
-		const PointInsidePolygonTest pa = m_body->patchAt(c->faceIdx());
-        Matrix33F space = pa.tangentFrame();
+		Matrix33F space = m_body->tangentFrame(c->faceIdx(), c->patchU(), c->patchV());
         space.inverse();
 		
 		d = space.transform(direction);
