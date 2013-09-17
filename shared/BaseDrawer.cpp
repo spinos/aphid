@@ -30,6 +30,9 @@ BaseDrawer::BaseDrawer () : m_wired(0)
 BaseDrawer::~BaseDrawer () 
 {
 	delete m_sphere;
+	delete m_pyramid;
+	delete m_circle;
+	delete m_cube;
 }
 
 void BaseDrawer::cube(const Vector3F & p, const float & size) const

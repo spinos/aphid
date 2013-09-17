@@ -20,6 +20,8 @@ public:
 	void displacePositions(BezierPatch& bezier);
 	void calculateNormals();
 	void testLOD(BezierPatch& bezier);
+	int numVertices() const;
+	int numIndices() const;
 	
 	int* getVertices() const;
 	float* getPositions() const;

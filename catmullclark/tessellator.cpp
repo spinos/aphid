@@ -27,10 +27,10 @@ void Tessellator::setNumSeg(int n)
 {
 	cleanup();
 	_numSeg = n;
-	_positions = new Vector3F[(n + 1) * (n + 1)];
-	_normals = new Vector3F[(n + 1) * (n + 1)];
-	_texcoords = new Vector3F[(n + 1) * (n + 1)];
-	_vertices = new int[(n * n) * 4];
+	_positions = new Vector3F[numVertices()];
+	_normals = new Vector3F[numVertices()];
+	_texcoords = new Vector3F[numVertices()];
+	_vertices = new int[numIndices()];
 }
 
 void Tessellator::setDisplacementMap(ZEXRImage* image)
@@ -151,4 +151,14 @@ Vector3F* Tessellator::p(int i, int j)
 Vector3F* Tessellator::n(int i, int j)
 {
 	return &_normals[j * (_numSeg + 1) + i];
+}
+
+int Tessellator::numVertices() const
+{
+	return (_numSeg + 1) * (_numSeg + 1);
+}
+
+int Tessellator::numIndices() const
+{
+	return _numSeg * _numSeg * 4;
 }

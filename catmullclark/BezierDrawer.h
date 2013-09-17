@@ -17,10 +17,19 @@ class Tessellator;
 class BezierDrawer : public BaseDrawer {
 public:
 	BezierDrawer();
+	virtual ~BezierDrawer();
+	void updateMesh(AccPatchMesh * mesh);
 	
 	void drawBezierPatch(BezierPatch * patch);
 	void drawBezierCage(BezierPatch * patch);
-	void drawAccPatchMesh(AccPatchMesh * mesh);
+	void drawAcc() const;
+	void verbose() const;
+private:
+	void cleanup();
 private:
 	Tessellator* m_tess;
+	AccPatchMesh * m_mesh;
+	Vector3F * m_vertices;
+	Vector3F * m_normals;
+	unsigned * m_indices;
 };

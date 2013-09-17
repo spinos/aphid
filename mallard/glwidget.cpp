@@ -248,9 +248,11 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 	// use displacement map inside bezier drawer
 	//_tess->setDisplacementMap(_image);
 
-	m_featherDrawer = new MlDrawer;
 	m_skin = new MlSkin;
 	m_skin->setBodyMesh(m_accmesh, m_topo);
+	
+	m_featherDrawer = new MlDrawer;
+	m_featherDrawer->updateMesh(m_accmesh);
 	
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 }
@@ -264,8 +266,8 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
-	getDrawer()->edge(mesh());
-	//m_featherDrawer->drawAccPatchMesh(m_accmesh);
+	//getDrawer()->edge(mesh());
+	m_featherDrawer->drawAcc();
 	//getDrawer()->drawKdTree(getTree());
 	m_featherDrawer->drawFeather(m_skin);
 	
