@@ -92,6 +92,7 @@ HEADERS       = ../shared/AllMath.h \
 				MlCalamus.h \
 				MlCalamusArray.h \
 				MlDrawer.h \
+				MlTessellate.h \
 				MlSkin.h \
                 window.h
                 
@@ -187,6 +188,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				MlCalamus.cpp \
 				MlCalamusArray.cpp \
 				MlDrawer.cpp \
+				MlTessellate.cpp \
 				MlSkin.cpp \
                 window.cpp \
                 main.cpp 

@@ -397,6 +397,7 @@ void GLWidget::addFeather()
 		}
 		if(ctx->m_success && ctx->m_hitN.dot(brush()->normal()) > .8f) {
 			MlCalamus c;
+			c.setFeather(&fea);
 			c.bindToFace(ctx->m_componentIdx, ctx->m_patchUV.x, ctx->m_patchUV.y);
 			c.setRotateY(brush()->getPitch());
 			m_skin->createFeather(c, ctx->m_hitP, brush()->minDartDistance());

@@ -21,6 +21,11 @@ void MlCalamus::bindToFace(unsigned faceIdx, float u, float v)
 	m_patchV = v;
 }
 
+MlFeather * MlCalamus::feather() const
+{
+	return m_geo;
+}
+
 unsigned MlCalamus::faceIdx() const
 {
 	return m_faceIdx;
@@ -34,6 +39,11 @@ float MlCalamus::patchU() const
 float MlCalamus::patchV() const
 {
 	return m_patchV;
+}
+
+void MlCalamus::setFeather(MlFeather * geo)
+{
+	m_geo = geo;
 }
 
 void MlCalamus::setRotateX(const float& x)

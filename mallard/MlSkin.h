@@ -12,6 +12,7 @@
 
 class AccPatchMesh;
 class MeshTopology;
+class MlTessellate;
 class MlSkin {
 public:
 	MlSkin();
@@ -36,5 +37,6 @@ private:
 	unsigned m_numFeather;
 	AccPatchMesh * m_body;
 	MeshTopology * m_topo;
+	MlTessellate * m_tess;
 	unsigned * m_faceCalamusStart;
 };

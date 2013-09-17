@@ -14,6 +14,7 @@ public:
 	MlCalamus();
 	void bindToFace(unsigned faceIdx, float u, float v);
 	
+	MlFeather * feather() const;
 	unsigned faceIdx() const;
 	float patchU() const;
 	float patchV() const;
@@ -21,6 +22,7 @@ public:
 	float rotateY() const;
 	float scale() const;
 	
+	void setFeather(MlFeather * geo);
 	void setRotateX(const float& x);
 	void setRotateY(const float& y);
 	void setScale(const float & x);
