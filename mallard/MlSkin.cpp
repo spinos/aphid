@@ -67,7 +67,7 @@ void MlSkin::growFeather(const Vector3F & direction)
 	float rotX;
     for(std::vector<unsigned>::iterator it = m_activeIndices.begin(); it != m_activeIndices.end(); ++it) {
         MlCalamus * c = m_calamus.asCalamus(*it);
-		Matrix33F space = m_body->tangentFrame(c->faceIdx(), c->patchU(), c->patchV());
+		Matrix33F space = tangentFrame(c);
         space.inverse();
 		
 		d = space.transform(direction);
@@ -110,7 +110,7 @@ bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned face
 			MlCalamus *c = getCalamus(ifeather);
 			if(c->faceIdx() != conn[i]) break;
 			
-			m_body->pointOnPatch(c->faceIdx(), c->patchU(), c->patchV(), p);
+			getPointOnBody(c, p);
 			
 			d = p - pos;
 			if(d.length() < minDistance) return true;
@@ -140,6 +140,16 @@ unsigned MlSkin::numActiveFeather() const
 MlCalamus * MlSkin::getActive(unsigned idx) const
 {
 	return m_calamus.asCalamus(m_activeIndices[idx]);
+}
+
+void MlSkin::getPointOnBody(MlCalamus * c, Vector3F &p) const
+{
+	m_body->pointOnPatch(c->faceIdx(), c->patchU(), c->patchV(), p);
+}
+
+Matrix33F MlSkin::tangentFrame(MlCalamus * c) const
+{
+	return m_body->tangentFrame(c->faceIdx(), c->patchU(), c->patchV());
 }
 
 void MlSkin::verbose() const

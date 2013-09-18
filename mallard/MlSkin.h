@@ -28,9 +28,13 @@ public:
 	unsigned numActiveFeather() const;
 	MlCalamus * getActive(unsigned idx) const;
 	
+	void getPointOnBody(MlCalamus * c, Vector3F &p) const;
+	Matrix33F tangentFrame(MlCalamus * c) const;
+	
 	void verbose() const;
 private:
 	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance) const;
+	
 private:
 	MlCalamusArray m_calamus;
 	std::vector<unsigned> m_activeIndices;
