@@ -9,14 +9,15 @@
 
 #pragma once
 #include <BezierDrawer.h>
-#include "MlSkin.h"
-
+class MlSkin;
+class MlCalamus;
+class MlTessellate;
 class MlDrawer : public BezierDrawer {
 public:
 	MlDrawer();
 	virtual ~MlDrawer();
 	void drawFeather(MlSkin * skin) const;
+	void drawAFeather(MlSkin * skin, MlCalamus * c) const;
 private:
-	void drawActiveFeather(MlSkin * skin) const;
-private:
+	MlTessellate * m_featherTess;
 };

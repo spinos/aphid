@@ -103,6 +103,8 @@ void Base3DView::paintGL()
     float m[16];
 	getCamera()->getMatrix(m);
 	glMultMatrixf(m);
+	
+	getDrawer()->m_markerProfile.apply();
 	getDrawer()->coordsys(20.f);
 	clientDraw();
 	if(m_isFocused) {

@@ -27,6 +27,7 @@
 	void fill(const Vector3F & a, const Vector3F & b, const Vector3F & c);
 	void transpose();
 	void multiply(const Matrix33F & a);
+	Matrix33F multiply(const Matrix33F & a) const;
 	Vector3F transform(const Vector3F & a) const;
 	void glMatrix(float m[16]) const;
 	float determinant() const;

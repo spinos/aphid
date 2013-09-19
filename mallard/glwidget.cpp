@@ -66,54 +66,56 @@ void createFeather()
     fea.createNumSegment(4);
     float * quill = fea.quilly();
     quill[0] = 4.f;
-    quill[1] = 2.7f;
-    quill[2] = 1.7f;
+    quill[1] = 2.4f;
+    quill[2] = 1.3f;
     quill[3] = .9f;
     
     Vector2F * vanes = fea.vaneAt(0, 0);
-    vanes[0].set(1.f, 1.5f);
-    vanes[1].set(2.f, 1.5f);
-    vanes[2].set(3.f, 2.7f);
+    vanes[0].set(1.f, .9f);
+    vanes[1].set(.8f, 1.59f);
+    vanes[2].set(.3f, 1.3f);
     vanes = fea.vaneAt(0, 1);
-    vanes[0].set(-1.f, .5f);
-    vanes[1].set(-1.6f, 1.2f);
-    vanes[2].set(-2.4f, 2.2f);
+    vanes[0].set(-.6f, .9f);
+    vanes[1].set(-.6f, 1.1f);
+    vanes[2].set(-.2f, .9f);
     
     vanes = fea.vaneAt(1, 0);
-    vanes[0].set(1.2f, 1.1f);
-    vanes[1].set(1.8f, 1.1f);
-    vanes[2].set(3.f, 2.2f);
+    vanes[0].set(.7f, 1.1f);
+    vanes[1].set(.6f, 1.f);
+    vanes[2].set(.5f, .9f);
     vanes = fea.vaneAt(1, 1);
-    vanes[0].set(-1.2f, .62f);
-    vanes[1].set(-1.7f, 1.2f);
-    vanes[2].set(-2.4f, 2.2f);
+    vanes[0].set(-.6f, .62f);
+    vanes[1].set(-.6f, .97f);
+    vanes[2].set(-.4f, 1.f);
     
     vanes = fea.vaneAt(2, 0);
-    vanes[0].set(.6f, .25f);
-    vanes[1].set(1.f, .6f);
-    vanes[2].set(1.6f, 1.1f);
+    vanes[0].set(.4f, .5f);
+    vanes[1].set(.5f, .6f);
+    vanes[2].set(.4f, .7f);
     vanes = fea.vaneAt(2, 1);
-    vanes[0].set(-.7f, .35f);
-    vanes[1].set(-1.f, .5f);
-    vanes[2].set(-1.5f, 1.1f);
+    vanes[0].set(-.3f, .5f);
+    vanes[1].set(-.4f, .5f);
+    vanes[2].set(-.3f, .7f);
     
     vanes = fea.vaneAt(3, 0);
-    vanes[0].set(.4f, .3f);
-    vanes[1].set(.5f, .5f);
-    vanes[2].set(.7f, .6f);
+    vanes[0].set(.4f, .4f);
+    vanes[1].set(.3f, .5f);
+    vanes[2].set(.3f, .6f);
     vanes = fea.vaneAt(3, 1);
-    vanes[0].set(-.4f, .4f);
-    vanes[1].set(-.5f, .6f);
-    vanes[2].set(-.6f, .7f);
+    vanes[0].set(-.3f, .4f);
+    vanes[1].set(-.3f, .4f);
+    vanes[2].set(-.2f, .6f);
     
     vanes = fea.vaneAt(4, 0);
-    vanes[0].set(.0f, .1f);
-    vanes[1].set(.01f, .2f);
-    vanes[2].set(.01f, .3f);
+    vanes[0].set(.0f, .42f);
+    vanes[1].set(.01f, .32f);
+    vanes[2].set(.01f, .33f);
     vanes = fea.vaneAt(4, 1);
-    vanes[0].set(-.01f, .1f);
-    vanes[1].set(-.02f, .2f);
-    vanes[2].set(-.02f, .3f);
+    vanes[0].set(-.01f, .42f);
+    vanes[1].set(-.02f, .32f);
+    vanes[2].set(-.02f, .33f);
+	
+	fea.computeLength();
 }
 
 void drawFeather()
@@ -153,16 +155,23 @@ void drawFeather()
 	gLC.createVertices(5);
 	s.setTranslation(5.f, 3.f, 4.f);
 	
+	Vector2F pv;
 	for(int i = 0; i < 5; i++) {
 		b.set(0.f, quill[i], 0.f);
 		Vector2F * vanes = fea.getVaneAt(i, 0);
-	    eRC.m_cvs[i] = s.transform(Vector3F(vanes[0]));
-		fRC.m_cvs[i] = s.transform(Vector3F(vanes[1]));
-		gRC.m_cvs[i] = s.transform(Vector3F(vanes[2]));
+		pv = vanes[0];
+	    eRC.m_cvs[i] = s.transform(Vector3F(pv));
+		pv += vanes[1];
+		fRC.m_cvs[i] = s.transform(Vector3F(pv));
+		pv += vanes[2];
+		gRC.m_cvs[i] = s.transform(Vector3F(pv));
 		vanes = fea.getVaneAt(i, 1);
-	    eLC.m_cvs[i] = s.transform(Vector3F(vanes[0]));
-		fLC.m_cvs[i] = s.transform(Vector3F(vanes[1]));
-		gLC.m_cvs[i] = s.transform(Vector3F(vanes[2]));
+		pv = vanes[0];
+	    eLC.m_cvs[i] = s.transform(Vector3F(pv));
+		pv += vanes[1];
+		fLC.m_cvs[i] = s.transform(Vector3F(pv));
+		pv += vanes[2];
+		gLC.m_cvs[i] = s.transform(Vector3F(pv));
 		s.translate(b);
 	}
 	eRC.computeKnots();
@@ -200,14 +209,20 @@ void drawFeather()
 		dr->arrow(Vector3F(0.f, 0.f, 0.f), b);
 		
 		Vector2F * vanes = fea.getVaneAt(i, 0);
-		dr->arrow(Vector3F(0.f, 0.f, 0.f), vanes[0]);
-		dr->arrow(vanes[0], vanes[1]);
-		dr->arrow(vanes[1], vanes[2]);
+		pv = vanes[0];
+		dr->arrow(Vector3F(0.f, 0.f, 0.f), pv);
+		pv += vanes[1];
+		dr->arrow(pv - vanes[1], pv);
+		pv += vanes[2];
+		dr->arrow(pv - vanes[2], pv);
 	    
 		vanes = fea.getVaneAt(i, 1);
-		dr->arrow(Vector3F(0.f, 0.f, 0.f), vanes[0]);
-		dr->arrow(vanes[0], vanes[1]);
-		dr->arrow(vanes[1], vanes[2]);
+		pv = vanes[0];
+		dr->arrow(Vector3F(0.f, 0.f, 0.f), pv);
+		pv += vanes[1];
+		dr->arrow(pv - vanes[1], pv);
+		pv += vanes[2];
+		dr->arrow(pv - vanes[2], pv);
 	    
 	    s.setTranslation(b);
 	}
@@ -268,9 +283,13 @@ void GLWidget::clientDraw()
 	getDrawer()->setGrey(1.f);
 	//getDrawer()->edge(mesh());
 	getDrawer()->m_surfaceProfile.apply();
-	
+	getDrawer()->setColor(0.37f, .59f, .9f);
 	m_featherDrawer->drawAcc();
 	//getDrawer()->drawKdTree(getTree());
+	getDrawer()->setColor(0.57f, .29f, .13f);
+	
+	//getDrawer()->m_wireProfile.apply();
+	
 	m_featherDrawer->drawFeather(m_skin);
 	
 	glPushMatrix();
@@ -312,7 +331,10 @@ void GLWidget::clientDraw()
 	
 	//glPopMatrix();
 	
-	//drawFeather();
+	glPushMatrix();
+	glTranslatef(0.f, 0.f, 10.f);
+	drawFeather();
+	glPopMatrix();
 	//drawSelection();
 	showBrush();
 }

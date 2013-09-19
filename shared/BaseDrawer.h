@@ -78,6 +78,7 @@ public:
 public:
 	GProfile m_markerProfile;
 	GProfile m_surfaceProfile;
+	GProfile m_wireProfile;
 	GMaterial *surfaceMat;
 	GLight majorLit;
 	GLight fillLit;

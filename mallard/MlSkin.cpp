@@ -12,12 +12,10 @@
 #include <MeshTopology.h>
 #include <iostream>
 #include <QuickSort.h>
-#include <MlTessellate.h>
 
 MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0) 
 {
     m_activeIndices.clear();
-	m_tess = new MlTessellate;
 }
 
 MlSkin::~MlSkin()
@@ -32,7 +30,6 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 	m_topo = topo;
 	m_faceCalamusStart = new unsigned[mesh->getNumFaces()];
 	for(unsigned i = 0; i < m_body->getNumFaces(); i++) m_faceCalamusStart[i] = 0;
-	m_tess->setBodyMesh(mesh, topo);
 }
 
 AccPatchMesh * MlSkin::bodyMesh() const

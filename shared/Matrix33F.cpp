@@ -125,6 +125,21 @@ void Matrix33F::multiply(const Matrix33F& a)
 	}
 }
 
+Matrix33F Matrix33F::multiply(const Matrix33F & a) const
+{
+	Matrix33F t;
+	t.setZero();
+	int i, j, k;
+	for(i = 0; i < 3; i++) {
+		for(j = 0; j < 3; j++) {
+			for(k = 0; k < 3; k++) {
+				*t.m(i, j) += M(i, k) * a.M(k, j);
+			}
+		}
+	}
+	return t;
+}
+
 Vector3F Matrix33F::transform(const Vector3F & a) const
 {
 	Vector3F b;

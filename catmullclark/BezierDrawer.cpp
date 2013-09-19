@@ -105,7 +105,6 @@ void BezierDrawer::drawBezierCage(BezierPatch * patch)
 
 void BezierDrawer::drawAcc() const
 {
-	setColor(0.4f, .6f, .9f);
 	glEnableClientState( GL_VERTEX_ARRAY );
 	glVertexPointer( 3, GL_FLOAT, 0, m_vertices );
 	

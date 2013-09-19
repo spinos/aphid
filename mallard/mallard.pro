@@ -71,6 +71,7 @@ HEADERS       = ../shared/AllMath.h \
 				../shared/GLight.h \
 				../shared/GMaterial.h \
 				../shared/GProfile.h \
+				../shared/BaseTessellator.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -94,6 +95,7 @@ HEADERS       = ../shared/AllMath.h \
 				MlDrawer.h \
 				MlTessellate.h \
 				MlSkin.h \
+                MlRachis.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \  
@@ -167,6 +169,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				../shared/GLight.cpp \
 				../shared/GMaterial.cpp \
 				../shared/GProfile.cpp \
+				../shared/BaseTessellator.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \
@@ -190,6 +193,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				MlDrawer.cpp \
 				MlTessellate.cpp \
 				MlSkin.cpp \
+                MlRachis.cpp \
                 window.cpp \
                 main.cpp 
                 

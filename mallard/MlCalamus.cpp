@@ -59,7 +59,7 @@ void MlCalamus::setRotateY(const float& y)
 
 void MlCalamus::setScale(const float & x)
 {
-	m_scale = x;
+	m_scale = x / m_geo->getLength();
 }
 
 float MlCalamus::rotateX() const

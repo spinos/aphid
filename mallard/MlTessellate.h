@@ -8,16 +8,17 @@
  */
 
 #pragma once
-class AccPatchMesh;
-class MeshTopology;
+#include <BaseTessellator.h>
+
 class MlFeather;
-class MlTessellate {
+class MlTessellate : public BaseTessellator {
 public:
 	MlTessellate();
-	void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
+	virtual ~MlTessellate();
 	void setFeather(MlFeather * feather);
+	void evaluate(const MlFeather * feather);
+	void createVertices(const MlFeather * feather);
+	void createIndices(const MlFeather * feather);
 private:
-	AccPatchMesh * m_body;
-	MeshTopology * m_topo;
 	MlFeather * m_feather;
 };
