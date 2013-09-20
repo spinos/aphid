@@ -8,11 +8,12 @@
  */
 
 #pragma once
+#include <CollisionRegion.h>
 #include "MlCalamusArray.h"
 
 class AccPatchMesh;
 class MeshTopology;
-class MlSkin {
+class MlSkin : public CollisionRegion {
 public:
 	MlSkin();
 	virtual ~MlSkin();
@@ -30,9 +31,11 @@ public:
 	void getPointOnBody(MlCalamus * c, Vector3F &p) const;
 	Matrix33F tangentFrame(MlCalamus * c) const;
 	
+	virtual void resetCollisionRegion(unsigned idx);
+	
 	void verbose() const;
 private:
-	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance) const;
+	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance);
 	
 private:
 	MlCalamusArray m_calamus;

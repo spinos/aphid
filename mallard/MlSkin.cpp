@@ -92,20 +92,19 @@ void MlSkin::finishCreateFeather()
 	m_activeIndices.clear();
 }
 
-bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance) const
+bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance)
 {
-	std::vector<unsigned> conn;
-	m_topo->growAroundQuad(faceIdx, conn);
+	resetCollisionRegion(faceIdx);
 	
 	const unsigned maxCountPerFace = m_numFeather / 2;
 	
 	Vector3F d, p;
-	for(unsigned i=0; i < conn.size(); i++) {
+	for(unsigned i=0; i < numRegionElements(); i++) {
 		
-		unsigned ifeather = m_faceCalamusStart[conn[i]];
+		unsigned ifeather = m_faceCalamusStart[regionElementIndex(i)];
 		for(unsigned j = 0; j < maxCountPerFace; j++) {
 			MlCalamus *c = getCalamus(ifeather);
-			if(c->faceIdx() != conn[i]) break;
+			if(c->faceIdx() != regionElementIndex(i)) break;
 			
 			getPointOnBody(c, p);
 			
@@ -117,6 +116,15 @@ bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned face
 	}
 
 	return false;
+}
+
+void MlSkin::resetCollisionRegion(unsigned idx)
+{
+	if(idx == regionElementStart()) return;
+
+	regionElementIndices()->clear();
+	m_topo->growAroundQuad(idx, *regionElementIndices());
+	CollisionRegion::resetCollisionRegion(idx);
 }
 
 unsigned MlSkin::numFeathers() const
