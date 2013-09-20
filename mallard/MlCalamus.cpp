@@ -21,6 +21,11 @@ void MlCalamus::bindToFace(unsigned faceIdx, float u, float v)
 	m_patchV = v;
 }
 
+void MlCalamus::computeFeatherWorldP(const Vector3F & origin, const Matrix33F& space)
+{
+	m_geo->computeWorldP(origin, space, rotateY(), scale());
+}
+
 MlFeather * MlCalamus::feather() const
 {
 	return m_geo;

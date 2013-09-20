@@ -66,7 +66,7 @@ void MlDrawer::drawAFeather(MlSkin * skin, MlCalamus * c) const
 	d = p + d;
 	arrow(p, d);*/
 	
-	c->feather()->computeWorldP(p, ys, c->scale());
+	c->computeFeatherWorldP(p, space);
 	m_featherTess->setFeather(c->feather());
 	m_featherTess->evaluate(c->feather());
 	

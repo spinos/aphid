@@ -15,10 +15,13 @@ public:
 	~MlRachis();
 	
 	void create(unsigned x);
+	void computeAngles(float * segL, float fullL);
 	void reset();
+	void update(const float & fullPitch);
 	
 	Matrix33F getSpace(short idx) const;
 private:
 	unsigned m_numSpace;
-	Matrix33F * m_space;
+	Matrix33F * m_spaces;
+	float * m_angles;
 };

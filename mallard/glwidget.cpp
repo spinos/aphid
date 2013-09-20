@@ -71,12 +71,12 @@ void createFeather()
     quill[3] = .9f;
     
     Vector2F * vanes = fea.vaneAt(0, 0);
-    vanes[0].set(1.f, .9f);
+    vanes[0].set(.9f, .9f);
     vanes[1].set(.8f, 1.59f);
     vanes[2].set(.3f, 1.3f);
     vanes = fea.vaneAt(0, 1);
     vanes[0].set(-.6f, .9f);
-    vanes[1].set(-.6f, 1.1f);
+    vanes[1].set(-.5f, 1.1f);
     vanes[2].set(-.2f, .9f);
     
     vanes = fea.vaneAt(1, 0);
@@ -107,13 +107,13 @@ void createFeather()
     vanes[2].set(-.2f, .6f);
     
     vanes = fea.vaneAt(4, 0);
-    vanes[0].set(.0f, .42f);
+    vanes[0].set(.01f, .42f);
     vanes[1].set(.01f, .32f);
     vanes[2].set(.01f, .33f);
     vanes = fea.vaneAt(4, 1);
     vanes[0].set(-.01f, .42f);
-    vanes[1].set(-.02f, .32f);
-    vanes[2].set(-.02f, .33f);
+    vanes[1].set(-.01f, .32f);
+    vanes[2].set(-.01f, .33f);
 	
 	fea.computeLength();
 }
@@ -286,7 +286,7 @@ void GLWidget::clientDraw()
 	getDrawer()->setColor(0.37f, .59f, .9f);
 	m_featherDrawer->drawAcc();
 	//getDrawer()->drawKdTree(getTree());
-	getDrawer()->setColor(0.57f, .29f, .13f);
+	getDrawer()->setColor(0.f, .71f, .51f);
 	
 	//getDrawer()->m_wireProfile.apply();
 	
@@ -299,7 +299,7 @@ void GLWidget::clientDraw()
 	s.rotateX(1.1f);
 	s.rotateY(0.97f);
 	getDrawer()->useSpace(s);
-	getDrawer()->coordsys(15.f);
+	//getDrawer()->coordsys(15.f);
 	
 	Matrix44F b;
 	b.rotateY(0.97f);
@@ -327,13 +327,13 @@ void GLWidget::clientDraw()
 	Vector3F p(4.f, 3.f, 5.f);
 	
 	//getDrawer()->useSpace(c);
-	getDrawer()->coordsys(c, 5.f, &p);
+	//getDrawer()->coordsys(c, 5.f, &p);
 	
 	//glPopMatrix();
 	
 	glPushMatrix();
 	glTranslatef(0.f, 0.f, 10.f);
-	drawFeather();
+	//drawFeather();
 	glPopMatrix();
 	//drawSelection();
 	showBrush();

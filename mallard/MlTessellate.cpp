@@ -64,11 +64,11 @@ void MlTessellate::evaluate(const MlFeather * feather)
 	curF = 0;
 	Vector3F N;
 	for(short i = 0; i < feather->numSegment(); i++) {
-		N = Vector3F(m_cvs[curF], m_cvs[curF + 1]).cross(Vector3F(m_cvs[curF], m_cvs[curF + 3]));
+		N = Vector3F(m_cvs[curF + 1], m_cvs[curF]).cross(Vector3F(m_cvs[curF], m_cvs[curF + 3])) + Vector3F(m_cvs[curF], m_cvs[curF+3]).cross(Vector3F(m_cvs[curF], m_cvs[curF + 2]));
 		m_normals[curF] = N.normal();
 		N = Vector3F(m_cvs[curF+1], m_cvs[curF + 1 + 3]).cross(Vector3F(m_cvs[curF+1], m_cvs[curF]));
 		m_normals[curF+1] = N.normal();
-		N = Vector3F(m_cvs[curF+2], m_cvs[curF + 2 + 3]).cross(Vector3F(m_cvs[curF+2], m_cvs[curF]));
+		N = Vector3F(m_cvs[curF+2], m_cvs[curF]).cross(Vector3F(m_cvs[curF+2], m_cvs[curF + 2 + 3]));
 		m_normals[curF+2] = N.normal();
 		curF += 3;
 	}

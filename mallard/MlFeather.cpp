@@ -27,6 +27,7 @@ void MlFeather::computeLength()
 	m_length = 0.f;
 	for(short i=0; i < m_numSeg; i++)
 		m_length += m_quilly[i];
+	m_rachis->computeAngles(m_quilly, m_length);
 }
 
 short MlFeather::numSegment() const
@@ -59,9 +60,27 @@ float MlFeather::getLength() const
 	return m_length;
 }
 
-void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale)
+float MlFeather::getWidth(short seg) const
 {
-	m_rachis->reset();
+	Vector2F * vane = getVaneAt(seg, 0);
+	float r = vane->x;
+	vane++;
+	r += vane->x;
+	vane++;
+	r += vane->x;
+
+	vane = getVaneAt(seg, 1);
+	r -= vane->x;
+	vane++;
+	r -= vane->x;
+	vane++;
+	r -= vane->x;
+	return r;
+}
+
+void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale)
+{
+	m_rachis->update(pitch);
 	Vector3F segOrigin = oriPos;
 	Matrix33F segSpace = oriRot;
 	for(short i = 0; i < m_numSeg; i++) {
@@ -109,8 +128,10 @@ void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, s
 	Vector3F p = origin;
 	Vector2F * vane = getVaneAt(seg, side);
 	
+	const float tapper = getWidth(seg) * -.03f;
 	for(short i = 0; i < 3; i++) {
-		Vector3F d(0.f, vane->x * scale, vane->y * scale);
+		Vector3F d(tapper * (i + 1), vane->x, vane->y);
+		d *= scale;
 		d = space.transform(d);
 		
 		p += d;

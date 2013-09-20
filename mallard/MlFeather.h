@@ -14,8 +14,9 @@ public:
     Vector2F * vaneAt(short seg, short side);
     Vector2F * getVaneAt(short seg, short side) const;
 	float getLength() const;
+	float getWidth(short seg) const;
 	
-	void computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
+	void computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale);
 	Vector3F * segmentOriginWP(short seg);
 	Vector3F * segmentVaneWP(short seg, short side, short idx);
 	

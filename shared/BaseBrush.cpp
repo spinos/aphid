@@ -9,7 +9,7 @@
 
 #include "BaseBrush.h"
 #include <Plane.h>
-BaseBrush::BaseBrush() : m_radius(3.f), m_pitch(.3f), m_maxToeFactor(2.f)
+BaseBrush::BaseBrush() : m_radius(2.f), m_pitch(.5f), m_maxToeFactor(2.f)
 {
 	setNumDarts(16);
 }
@@ -135,17 +135,21 @@ const Vector3F BaseBrush::normal() const
 void BaseBrush::setToeByIntersectNormal(const Ray * r)
 {
     Plane pl(normal(), heelPosition());
-    Vector3F hit;
+    Vector3F hit, d;
+	float dd;
     float t;
     if(pl.rayIntersect(*r, hit, t)) {
-        m_toeWorldPos = hit;
-		Vector3F d = toeDisplacement();
-		float dd = d.length();
-		if(dd > m_radius * m_maxToeFactor) {
-			d *= m_radius * m_maxToeFactor / dd;
-			m_toeWorldPos = heelPosition();
-			m_toeWorldPos += d;
-		}
+        d = hit - heelPosition();
+		dd = d.length();
+		d /= dd;
+		if(dd < m_radius * .1f) 
+			dd = m_radius * .1f;
+		else if(dd > m_radius * m_maxToeFactor) 
+			dd = m_radius * m_maxToeFactor;
+		d *= dd;	
+		
+		m_toeWorldPos = heelPosition();
+		m_toeWorldPos += d;
 	}
 }
 

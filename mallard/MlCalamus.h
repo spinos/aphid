@@ -13,6 +13,7 @@ class MlCalamus
 public:
 	MlCalamus();
 	void bindToFace(unsigned faceIdx, float u, float v);
+	void computeFeatherWorldP(const Vector3F & origin, const Matrix33F& space);
 	
 	MlFeather * feather() const;
 	unsigned faceIdx() const;
