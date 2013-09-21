@@ -9,13 +9,32 @@
 
 #include "CollisionRegion.h"
 
-CollisionRegion::CollisionRegion() : m_regionElementStart(UINT_MAX) {}
-CollisionRegion::~CollisionRegion() {}
+CollisionRegion::CollisionRegion() : m_regionElementStart(UINT_MAX) 
+{
+	m_ctx = new IntersectionContext;
+}
+
+CollisionRegion::~CollisionRegion() 
+{
+	m_regionElementIndices.clear();
+	delete m_ctx;
+}
+
+Vector3F CollisionRegion::getClosestPoint(const Vector3F & origin)
+{
+	m_ctx->reset();
+	closestPoint(origin, m_ctx);
+	return m_ctx->m_closestP;
+}
 
 void CollisionRegion::resetCollisionRegion(unsigned idx)
 {
 	m_regionElementStart = idx;
+	m_regionElementIndices.clear();
 }
+
+void CollisionRegion::closestPoint(const Vector3F & origin, IntersectionContext * ctx) const
+{}
 
 unsigned CollisionRegion::numRegionElements() const
 {

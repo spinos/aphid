@@ -1,6 +1,7 @@
 #pragma once
 #include <AllMath.h>
 class MlRachis;
+class CollisionRegion;
 class MlFeather {
 public:
     MlFeather();
@@ -22,9 +23,12 @@ public:
 	
 	Vector3F getSegmentOriginWP(short seg) const;
 	Vector3F getSegmentVaneWP(short seg, short side, short idx) const;
+	
+	void setCollision(CollisionRegion * skin);
 private:
 	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale);
 private:
+	CollisionRegion * m_skin;
 	MlRachis * m_rachis;
     float *m_quilly;
     Vector2F * m_vaneVertices;

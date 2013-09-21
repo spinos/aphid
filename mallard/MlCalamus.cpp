@@ -8,7 +8,8 @@
  */
 
 #include "MlCalamus.h"
-
+#include "MlFeather.h"
+#include <CollisionRegion.h>
 MlCalamus::MlCalamus() 
 {
 	m_patchU = m_patchV = m_rotX = m_rotY = m_scale = 0.f;
@@ -80,4 +81,10 @@ float MlCalamus::rotateY() const
 float MlCalamus::scale() const
 {
 	return m_scale;
+}
+
+void MlCalamus::collideWith(CollisionRegion * skin)
+{
+	skin->resetCollisionRegion(m_faceIdx);
+	m_geo->setCollision(skin);
 }

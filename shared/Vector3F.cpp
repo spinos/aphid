@@ -120,27 +120,27 @@ Vector3F Vector3F::operator+( Vector3F other )
 	return Vector3F(x+other.x, y+other.y, z+other.z);
 }
 
-Vector3F Vector3F::operator-( Vector3F other )
-{
-	return Vector3F(x-other.x, y-other.y, z-other.z);
-}
-	
-Vector3F Vector3F::operator+( Vector3F other ) const
-{
-	return Vector3F(x+other.x, y+other.y, z+other.z);
-}
-	
 Vector3F Vector3F::operator+(Vector3F& other ) const
 {
         return Vector3F(x+other.x, y+other.y, z+other.z);
 }
+	
+Vector3F Vector3F::operator+(const Vector3F& other ) const
+{
+        return Vector3F(x+other.x, y+other.y, z+other.z);
+}
 
-Vector3F Vector3F::operator-(Vector3F other ) const
+Vector3F Vector3F::operator-(Vector3F other)
+{
+	return Vector3F(x-other.x, y-other.y, z-other.z);
+}
+
+Vector3F Vector3F::operator-(Vector3F& other ) const
 {
         return Vector3F(x-other.x, y-other.y, z-other.z);
 }
 
-Vector3F Vector3F::operator-(Vector3F& other ) const
+Vector3F Vector3F::operator-(const Vector3F& other ) const
 {
         return Vector3F(x-other.x, y-other.y, z-other.z);
 }
@@ -260,6 +260,14 @@ float Vector3F::angleY() const
 	if(r < 10e-5) return 0.f;
 	if(x > 0.f) return acos(z / r);
 	return 6.283f - acos(z / r);
+}
+
+float Vector3F::angleBetween(const Vector3F& another, const Vector3F& up) const
+{
+	const Vector3F nn = another.normal();
+	float ang = acos(normal().dot(nn));
+	if(up.dot(nn) > 0.f) return ang;
+	return -ang;
 }
 
 void Vector3F::verbose(const char * pref) const

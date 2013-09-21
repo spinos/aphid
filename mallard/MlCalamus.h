@@ -7,7 +7,10 @@
  *
  */
 #pragma once
-#include <MlFeather.h>
+
+#include <AllMath.h>
+class MlFeather;
+class CollisionRegion;
 class MlCalamus
 {
 public:
@@ -27,6 +30,8 @@ public:
 	void setRotateX(const float& x);
 	void setRotateY(const float& y);
 	void setScale(const float & x);
+	
+	void collideWith(CollisionRegion * skin);
 private:
 	MlFeather * m_geo;
 	unsigned m_faceIdx;

@@ -10,7 +10,6 @@
 #include "MlSkin.h"
 #include <AccPatchMesh.h>
 #include <MeshTopology.h>
-#include <iostream>
 #include <QuickSort.h>
 
 MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0) 
@@ -121,10 +120,15 @@ bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned face
 void MlSkin::resetCollisionRegion(unsigned idx)
 {
 	if(idx == regionElementStart()) return;
-
-	regionElementIndices()->clear();
-	m_topo->growAroundQuad(idx, *regionElementIndices());
 	CollisionRegion::resetCollisionRegion(idx);
+	m_topo->growAroundQuad(idx, *regionElementIndices());
+}
+
+void MlSkin::closestPoint(const Vector3F & origin, IntersectionContext * ctx) const
+{
+	for(unsigned i=0; i < numRegionElements(); i++) {
+		m_body->closestPoint(regionElementIndex(i), origin, ctx);
+	}
 }
 
 unsigned MlSkin::numFeathers() const

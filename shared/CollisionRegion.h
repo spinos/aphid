@@ -9,12 +9,17 @@
 
 #pragma once
 #include <AllMath.h>
+#include <IntersectionContext.h>
+
 class CollisionRegion {
 public:
 	CollisionRegion();
 	virtual ~CollisionRegion();
 	
+	Vector3F getClosestPoint(const Vector3F & origin);
+	
 	virtual void resetCollisionRegion(unsigned idx);
+	virtual void closestPoint(const Vector3F & origin, IntersectionContext * ctx) const;
 	
 	unsigned numRegionElements() const;
 	unsigned regionElementIndex(unsigned idx) const;
@@ -26,4 +31,5 @@ public:
 private:
 	std::vector<unsigned> m_regionElementIndices;
 	unsigned m_regionElementStart;
+	IntersectionContext * m_ctx;
 };

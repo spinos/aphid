@@ -13,6 +13,7 @@
 
 class AccPatchMesh;
 class MeshTopology;
+
 class MlSkin : public CollisionRegion {
 public:
 	MlSkin();
@@ -32,6 +33,7 @@ public:
 	Matrix33F tangentFrame(MlCalamus * c) const;
 	
 	virtual void resetCollisionRegion(unsigned idx);
+	virtual void closestPoint(const Vector3F & origin, IntersectionContext * ctx) const;
 	
 	void verbose() const;
 private:

@@ -8,6 +8,7 @@
  */
 
 #include "MlRachis.h"
+#include <CollisionRegion.h>
 
 MlRachis::MlRachis() : m_spaces(0), m_angles(0) {}
 MlRachis::~MlRachis() 
@@ -38,11 +39,25 @@ void MlRachis::reset()
 	for(unsigned i = 0; i < m_numSpace; i++) m_spaces[i].setIdentity(); 
 }
 
-void MlRachis::update(const float & fullPitch)
+void MlRachis::update(const Vector3F & oriP, const Matrix33F & space, const float & scale, CollisionRegion * collide, const float & fullPitch)
 {
+	Vector3F zdir(0.f, 0.f, scale);
+	zdir = space.transform(zdir);
+	Vector3F xdir(1.f, 0.f, 0.f);
+	xdir = space.transform(xdir);
+	
+	const Vector3F toP = oriP + zdir;
+	const Vector3F clsP = collide->getClosestPoint(toP);
+	const Vector3F clsV(oriP, clsP);
+	
+	const float bounceAngle = zdir.angleBetween(clsV, xdir);
+	
 	reset();
-	for(unsigned i = 0; i < m_numSpace; i++) {
-		m_spaces[i].rotateY(fullPitch * m_angles[i]);
+	
+	if(bounceAngle > 0.1) m_spaces[0].rotateY(fullPitch * m_angles[0] + bounceAngle);
+	else m_spaces[0].rotateY(fullPitch * m_angles[0]);
+	for(unsigned i = 1; i < m_numSpace; i++) {
+		m_spaces[i].rotateY((fullPitch + bounceAngle) * m_angles[i]);
 	}
 }
 

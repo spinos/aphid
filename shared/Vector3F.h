@@ -25,12 +25,14 @@ public:
 	Vector3F operator*( const float& scale ) const;	
 	Vector3F operator/( const float& scale ) const;	
 	Vector3F operator*( const Vector3F& other ) const;	
+	
 	Vector3F operator+( Vector3F other );
-	Vector3F operator-( Vector3F other );		
-	Vector3F operator+( Vector3F other ) const;	
 	Vector3F operator+( Vector3F& other ) const;
-	Vector3F operator-( Vector3F other ) const;		
-	Vector3F operator-( Vector3F& other ) const;
+	Vector3F operator+( const Vector3F& other ) const;
+	
+	Vector3F operator-( Vector3F other );
+	Vector3F operator-( Vector3F& other ) const;		
+	Vector3F operator-( const Vector3F& other ) const;
 	
 	float length() const;
 	
@@ -51,6 +53,8 @@ public:
 	
 	float angleX() const;
 	float angleY() const;
+	
+	float angleBetween(const Vector3F& another, const Vector3F& up) const;
 	
 	void verbose(const char * pref) const;
 

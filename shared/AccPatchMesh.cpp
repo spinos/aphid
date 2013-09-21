@@ -95,8 +95,10 @@ char AccPatchMesh::closestPoint(unsigned idx, const Vector3F & origin, Intersect
 {
 	PatchSplitContext split;
 	split.reset();
+	ctx->m_elementHitDistance = 10e8;
 	recursiveBezierClosestPoint(origin, &beziers()[idx], ctx, split, 0);
-	return PatchMesh::closestPoint(idx, origin, ctx);
+	return 1;
+	//return PatchMesh::closestPoint(idx, origin, ctx);
 }
 
 char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const
@@ -141,7 +143,7 @@ char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionCont
 }
 
 void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const
-{
+{//std::cout<<" l "<<level;
 	Vector3F fourCorners[4];
 	fourCorners[0] = patch->_contorlPoints[0];
 	fourCorners[1] = patch->_contorlPoints[3];
@@ -151,16 +153,22 @@ void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPa
 	PointInsidePolygonTest pl(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
 	Vector3F px;
 	const float d = pl.distanceTo(origin, px);
+	
+	if(d >= ctx->m_elementHitDistance && d > ctx->m_minHitDistance)
+		return;
+		
+	ctx->m_elementHitDistance = d;
 		
 	BoundingBox controlbox = patch->controlBBox();
 	if(level > 3 || controlbox.area() < .1f || !pl.isPointInside(px)) {
 		if(d > ctx->m_minHitDistance) return;
 		ctx->m_minHitDistance = d;
 		//ctx->m_componentIdx = idx;
-		ctx->m_closest = px;
+		ctx->m_closestP = px;
 		ctx->m_hitP = px;
 		//BiLinearInterpolate bili;
 		//ctx->m_patchUV = bili.interpolate2(ctx->m_patchUV.x, ctx->m_patchUV.y, split.patchUV);
+		return;
 	}
 	
 	level++;

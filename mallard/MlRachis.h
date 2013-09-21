@@ -9,6 +9,9 @@
 
 #pragma once
 #include <AllMath.h>
+
+class CollisionRegion;
+
 class MlRachis {
 public:
 	MlRachis();
@@ -17,7 +20,7 @@ public:
 	void create(unsigned x);
 	void computeAngles(float * segL, float fullL);
 	void reset();
-	void update(const float & fullPitch);
+	void update(const Vector3F & oriP, const Matrix33F & space, const float & scale, CollisionRegion * collide, const float & fullPitch);
 	
 	Matrix33F getSpace(short idx) const;
 private:

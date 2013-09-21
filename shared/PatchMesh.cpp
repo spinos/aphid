@@ -134,7 +134,7 @@ char PatchMesh::closestPoint(unsigned idx, const Vector3F & origin, Intersection
 		
 	ctx->m_minHitDistance = d;
 	ctx->m_componentIdx = idx;
-	ctx->m_closest = px;
+	ctx->m_closestP = px;
 	ctx->m_hitP = px;
 
 	return 1;

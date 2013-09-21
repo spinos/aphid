@@ -399,7 +399,7 @@ char BaseMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionC
 		ctx->m_coord[0] = bar.getV(0);
 		ctx->m_coord[1] = bar.getV(1);
 		ctx->m_coord[2] = bar.getV(2);
-		ctx->m_closest = clampledP;
+		ctx->m_closestP = clampledP;
 		
 		ctx->m_hitP = clampledP;
 		hit = 1;

@@ -13,14 +13,19 @@ IntersectionContext::IntersectionContext() {}
 
 IntersectionContext::~IntersectionContext() {}
 
-void IntersectionContext::reset(const Ray & ray)
+void IntersectionContext::reset()
 {
-    m_ray = ray;
 	m_level = 0;
 	m_minHitDistance = 10e10;
 	m_success = 0;
 	m_cell = 0;
 	m_enableNormalRef = 0;
+}
+
+void IntersectionContext::reset(const Ray & ray)
+{
+    m_ray = ray;
+	reset();
 }
 
 void IntersectionContext::setBBox(const BoundingBox & bbox)

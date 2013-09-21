@@ -1,5 +1,6 @@
 #include "MlFeather.h"
 #include "MlRachis.h"
+#include <CollisionRegion.h>
 MlFeather::MlFeather() : m_quilly(0), m_vaneVertices(0), m_worldP(0) 
 {
 	m_rachis = new MlRachis;
@@ -80,7 +81,9 @@ float MlFeather::getWidth(short seg) const
 
 void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale)
 {
-	m_rachis->update(pitch);
+	
+	m_rachis->update(oriPos, oriRot, getLength() * scale, m_skin, pitch);
+	
 	Vector3F segOrigin = oriPos;
 	Matrix33F segSpace = oriRot;
 	for(short i = 0; i < m_numSeg; i++) {
@@ -139,4 +142,9 @@ void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, s
 		
 		vane++;
 	}
+}
+
+void MlFeather::setCollision(CollisionRegion * skin)
+{
+	m_skin = skin;
 }
