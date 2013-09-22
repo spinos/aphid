@@ -35,6 +35,7 @@ public:
 	virtual void resetCollisionRegion(unsigned idx);
 	virtual void closestPoint(const Vector3F & origin, IntersectionContext * ctx) const;
 	
+	bool hasFeatherCreated() const;
 	void verbose() const;
 private:
 	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance);
@@ -46,4 +47,5 @@ private:
 	AccPatchMesh * m_body;
 	MeshTopology * m_topo;
 	unsigned * m_faceCalamusStart;
+	bool m_hasFeatherCreated;
 };

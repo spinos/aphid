@@ -73,6 +73,7 @@ HEADERS       = ../shared/AllMath.h \
 				../shared/GProfile.h \
 				../shared/BaseTessellator.h \
 				../shared/CollisionRegion.h \
+				../shared/DrawBuffer.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -172,6 +173,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				../shared/GProfile.cpp \
 				../shared/BaseTessellator.cpp \
 				../shared/CollisionRegion.cpp \
+				../shared/DrawBuffer.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \

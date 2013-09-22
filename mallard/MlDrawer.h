@@ -8,16 +8,18 @@
  */
 
 #pragma once
-#include <BezierDrawer.h>
+#include <BaseDrawer.h>
+#include <DrawBuffer.h>
 class MlSkin;
 class MlCalamus;
 class MlTessellate;
-class MlDrawer : public BezierDrawer {
+class MlDrawer : public BaseDrawer, public DrawBuffer {
 public:
 	MlDrawer();
 	virtual ~MlDrawer();
 	void drawFeather(MlSkin * skin) const;
 	void drawAFeather(MlSkin * skin, MlCalamus * c) const;
+	virtual void rebuildBuffer(MlSkin * skin);
 private:
 	MlTessellate * m_featherTess;
 };

@@ -15,30 +15,32 @@
 #include "BezierDrawer.h"
 #include <accPatch.h>
 
-BezierDrawer::BezierDrawer() : m_vertices(0), m_normals(0), m_indices(0)
+BezierDrawer::BezierDrawer()
 {
 	m_tess = new Tessellator;
 }
 
 BezierDrawer::~BezierDrawer()
 {
-	cleanup();
 	delete m_tess;
 }
 
 void BezierDrawer::updateMesh(AccPatchMesh * mesh)
 {
 	m_mesh = mesh;
-	AccPatch* bez = mesh->beziers();
-	cleanup();
+	rebuildBuffer(m_mesh);
+}
+
+void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
+{
+    AccPatch* bez = mesh->beziers();
 	
 	m_tess->setNumSeg(4);
 	const unsigned numFace = mesh->getNumFaces();
 	const unsigned vpf = m_tess->numVertices();
 	const unsigned ipf = m_tess->numIndices();
-	m_vertices = new Vector3F[vpf * numFace];
-	m_normals = new Vector3F[vpf * numFace];
-	m_indices = new unsigned[ipf * numFace];
+
+	createBuffer(vpf * numFace, ipf * numFace);
 	
 	unsigned curP = 0, curI = 0, faceStart;
 	unsigned i, j;
@@ -101,27 +103,6 @@ void BezierDrawer::drawBezierCage(BezierPatch * patch)
 		}
 	}
 	glEnd();
-}
-
-void BezierDrawer::drawAcc() const
-{
-	glEnableClientState( GL_VERTEX_ARRAY );
-	glVertexPointer( 3, GL_FLOAT, 0, m_vertices );
-	
-	glEnableClientState( GL_NORMAL_ARRAY );
-	glNormalPointer( GL_FLOAT, 0, m_normals );
-	
-	glDrawElements( GL_QUADS, m_tess->numIndices() * m_mesh->getNumFaces(), GL_UNSIGNED_INT, m_indices);
-	
-	glDisableClientState( GL_NORMAL_ARRAY );
-	glDisableClientState( GL_VERTEX_ARRAY );
-}
-
-void BezierDrawer::cleanup()
-{
-	if(m_vertices) delete[] m_vertices;
-	if(m_normals) delete[] m_normals;
-	if(m_indices) delete[] m_indices;
 }
 
 void BezierDrawer::verbose() const

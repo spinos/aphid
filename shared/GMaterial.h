@@ -10,13 +10,14 @@
 #ifndef G_MATERIAL_H
 #define G_MATERIAL_H
 
+#include <AllMath.h>
+
 #ifdef WIN32
-#include <gExtension.h>
+#include <windows.h>
+#include <GL/gl.h>
 #else
 #include <gl_heads.h>
 #endif
-
-#include <AllMath.h>
 
 class GMaterial {
 public:

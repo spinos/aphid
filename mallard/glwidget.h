@@ -45,6 +45,7 @@
 #include <SingleModelView.h>
 
 class ZEXRImage;
+class BezierDrawer;
 class MlDrawer;
 class AccPatchMesh;
 class MlSkin;
@@ -75,6 +76,7 @@ private:
 	void addFeather();
 private:
 	ZEXRImage* _image;
+	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;
 	AccPatchMesh * m_accmesh;
 	MlSkin * m_skin;

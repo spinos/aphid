@@ -9,27 +9,24 @@
 #pragma once
 
 #include <BaseDrawer.h>
+#include <DrawBuffer.h>
 #include <BezierPatch.h>
 #include <AccPatchMesh.h>
 
 class Tessellator;
 
-class BezierDrawer : public BaseDrawer {
+class BezierDrawer : public BaseDrawer, public DrawBuffer {
 public:
 	BezierDrawer();
 	virtual ~BezierDrawer();
 	void updateMesh(AccPatchMesh * mesh);
+	virtual void rebuildBuffer(AccPatchMesh * mesh);
 	
 	void drawBezierPatch(BezierPatch * patch);
 	void drawBezierCage(BezierPatch * patch);
-	void drawAcc() const;
 	void verbose() const;
-private:
-	void cleanup();
+
 private:
 	Tessellator* m_tess;
 	AccPatchMesh * m_mesh;
-	Vector3F * m_vertices;
-	Vector3F * m_normals;
-	unsigned * m_indices;
 };

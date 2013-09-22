@@ -13,7 +13,7 @@
 #include "MlTessellate.h"
 #include <AccPatchMesh.h>
 #include <PointInsidePolygonTest.h>
-MlDrawer::MlDrawer() 
+MlDrawer::MlDrawer()
 {
 	m_featherTess = new MlTessellate; 
 }
@@ -26,16 +26,15 @@ MlDrawer::~MlDrawer()
 void MlDrawer::drawFeather(MlSkin * skin) const
 {
 	const unsigned nf = skin->numFeathers();
-	if(nf < 1) return;
-	
-	//setColor(1.f, 0.f, 0.f);
+	if(nf > 0) drawBuffer();
 	
 	unsigned i;
+	/*
 	for(i = 0; i < nf; i++) {
 		MlCalamus * c = skin->getCalamus(i);
 		drawAFeather(skin, c);
 	}
-	
+	*/
 	const unsigned num = skin->numActiveFeather();
 	if(num < 1) return;
 	
@@ -57,14 +56,9 @@ void MlDrawer::drawAFeather(MlSkin * skin, MlCalamus * c) const
 	space.multiply(frm);
 	
 	
-	Matrix33F ys;
-	ys.rotateY(c->rotateY());
-	ys.multiply(space);
-	/*
-	Vector3F d(0.f, 0.f, c->scale());
-	d = ys.transform(d);
-	d = p + d;
-	arrow(p, d);*/
+	//Matrix33F ys;
+	//ys.rotateY(c->rotateY());
+	//ys.multiply(space);
 	
 	c->collideWith(skin);
 	c->computeFeatherWorldP(p, space);
@@ -81,4 +75,56 @@ void MlDrawer::drawAFeather(MlSkin * skin, MlCalamus * c) const
 	
 	glDisableClientState( GL_NORMAL_ARRAY );
 	glDisableClientState( GL_VERTEX_ARRAY );
+}
+
+void MlDrawer::rebuildBuffer(MlSkin * skin)
+{
+    const unsigned nf = skin->numFeathers();
+	if(nf < 1) return;
+	
+	unsigned nv = 0, ni = 0;
+    unsigned i, j;
+	for(i = 0; i < nf; i++) {
+		MlCalamus * c = skin->getCalamus(i);
+		m_featherTess->setFeather(c->feather());
+		nv += m_featherTess->numVertices();
+		ni += m_featherTess->numIndices();
+	}
+	
+	createBuffer(nv, ni);
+	
+	unsigned curv = 0, curi = 0, nvpf, nipf;
+	for(i = 0; i < nf; i++) {
+		MlCalamus * c = skin->getCalamus(i);
+		Vector3F p;
+		skin->getPointOnBody(c, p);
+		Matrix33F frm = skin->tangentFrame(c);
+	
+		Matrix33F space;
+		space.rotateX(c->rotateX());
+	
+		space.multiply(frm);
+	
+		c->collideWith(skin);
+		c->computeFeatherWorldP(p, space);
+		m_featherTess->setFeather(c->feather());
+		m_featherTess->evaluate(c->feather());
+		
+		nvpf = m_featherTess->numVertices();
+		for(j = 0; j < nvpf; j++) {
+		    m_vertices[curv + j] = m_featherTess->vertices()[j];
+		    m_normals[curv + j] = m_featherTess->normals()[j];
+		}
+		
+		nipf = m_featherTess->numIndices();
+		for(j = 0; j < nipf; j++) {
+		    m_indices[curi + j] = curv + m_featherTess->indices()[j];
+		}
+		
+		curv += nvpf;
+		curi += nipf;
+	}
+	
+	std::cout<<"nv "<< curv;
+	std::cout<<"ni "<< curi;
 }

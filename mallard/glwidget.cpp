@@ -47,6 +47,7 @@
 #include <AccPatchMesh.h>
 #include <EasemodelUtil.h>
 #include "zEXRImage.h"
+#include <BezierDrawer.h>
 #include <MlDrawer.h>
 #include <BezierCurve.h>
 #include <ToolContext.h>
@@ -266,8 +267,9 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 	m_skin = new MlSkin;
 	m_skin->setBodyMesh(m_accmesh, m_topo);
 	
+	m_bezierDrawer = new BezierDrawer;
+	m_bezierDrawer->updateMesh(m_accmesh);
 	m_featherDrawer = new MlDrawer;
-	m_featherDrawer->updateMesh(m_accmesh);
 	
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 }
@@ -284,7 +286,7 @@ void GLWidget::clientDraw()
 	//getDrawer()->edge(mesh());
 	getDrawer()->m_surfaceProfile.apply();
 	getDrawer()->setColor(0.37f, .59f, .9f);
-	m_featherDrawer->drawAcc();
+	m_bezierDrawer->drawBuffer();
 	//getDrawer()->drawKdTree(getTree());
 	getDrawer()->setColor(0.f, .71f, .51f);
 	
@@ -388,7 +390,10 @@ void GLWidget::clientMouseInput()
 void GLWidget::clientDeselect()
 {
     if(interactMode() == ToolContext::CreateBodyContourFeather) {
-		m_skin->finishCreateFeather();
+		if(m_skin->hasFeatherCreated()) {
+		    m_skin->finishCreateFeather();
+		    m_featherDrawer->rebuildBuffer(m_skin);
+		}
 	}
 }
 

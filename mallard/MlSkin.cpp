@@ -12,7 +12,7 @@
 #include <MeshTopology.h>
 #include <QuickSort.h>
 
-MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0) 
+MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_hasFeatherCreated(false)
 {
     m_activeIndices.clear();
 }
@@ -49,6 +49,7 @@ bool MlSkin::createFeather(MlCalamus & ori, const Vector3F & pos, float minDista
 	m_activeIndices.push_back(m_numFeather);
 	m_numFeather++;
 	
+	m_hasFeatherCreated = true;
 	return true;
 }
 
@@ -89,6 +90,7 @@ void MlSkin::finishCreateFeather()
 	}
 	
 	m_activeIndices.clear();
+	m_hasFeatherCreated = false;
 }
 
 bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance)
@@ -159,6 +161,11 @@ void MlSkin::getPointOnBody(MlCalamus * c, Vector3F &p) const
 Matrix33F MlSkin::tangentFrame(MlCalamus * c) const
 {
 	return m_body->tangentFrame(c->faceIdx(), c->patchU(), c->patchV());
+}
+
+bool MlSkin::hasFeatherCreated() const
+{
+    return m_hasFeatherCreated;
 }
 
 void MlSkin::verbose() const
