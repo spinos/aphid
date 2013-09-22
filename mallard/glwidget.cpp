@@ -55,6 +55,7 @@
 #include <InverseBilinearInterpolate.h>
 #include <MlFeather.h>
 #include <MlSkin.h>
+#include "MlCalamus.h"
 BezierPatch testbez;
 BezierPatch testsplt[4];
 InverseBilinearInterpolate invbil;
@@ -268,7 +269,7 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 	m_skin->setBodyMesh(m_accmesh, m_topo);
 	
 	m_bezierDrawer = new BezierDrawer;
-	m_bezierDrawer->updateMesh(m_accmesh);
+	m_bezierDrawer->rebuildBuffer(m_accmesh);
 	m_featherDrawer = new MlDrawer;
 	
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
@@ -283,7 +284,7 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
-	//getDrawer()->edge(mesh());
+	getDrawer()->edge(mesh());
 	getDrawer()->m_surfaceProfile.apply();
 	getDrawer()->setColor(0.37f, .59f, .9f);
 	m_bezierDrawer->drawBuffer();
@@ -339,18 +340,6 @@ void GLWidget::clientDraw()
 	glPopMatrix();
 	//drawSelection();
 	showBrush();
-}
-
-void GLWidget::setSelectionAsWale(int bothSide)
-{
-}
-
-void GLWidget::changeWaleResolution(int change)
-{
-}
-
-void GLWidget::changeCourseResolution(int change)
-{
 }
 
 void GLWidget::loadMesh(std::string filename)
@@ -415,20 +404,10 @@ void GLWidget::addFeather()
 	if(rr.dot(brush()->normal()) < .34f) return;
 	
 	const unsigned iface = ctx->m_componentIdx;
-	for(unsigned i = 0; i < brush()->getNumDarts(); i++) {
-		Ray r = brush()->getObjectRay(i);
-		ctx->reset(r);
-		if(!m_accmesh->intersect(iface, ctx)) {
-			Vector3F hit;
-			hitTest(r, hit);
-		}
-		if(ctx->m_success && ctx->m_hitN.dot(brush()->normal()) > .8f) {
-			MlCalamus c;
-			c.setFeather(&fea);
-			c.bindToFace(ctx->m_componentIdx, ctx->m_patchUV.x, ctx->m_patchUV.y);
-			c.setRotateY(brush()->getPitch());
-			m_skin->createFeather(c, ctx->m_hitP, brush()->minDartDistance());
-		}
-	}
+	
+	MlCalamus ac;
+	ac.setFeather(&fea);
+	ac.setRotateY(brush()->getPitch());
+	m_skin->floodAround(ac, iface, ctx->m_hitP, brush()->getRadius(), brush()->minDartDistance());
 }
 //:~

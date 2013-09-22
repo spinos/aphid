@@ -63,9 +63,6 @@ public:
 	virtual void clientMouseInput();
 	virtual void clientDeselect();
     virtual PatchMesh * mesh() const;
-	void setSelectionAsWale(int bothSide);
-	void changeWaleResolution(int change);
-	void changeCourseResolution(int change);
 	
 //! [2]
 protected:

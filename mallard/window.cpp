@@ -77,7 +77,7 @@ void Window::receiveToolContext(int a)
 }
 
 void Window::receiveToolAction(int a)
-{
+{/*
     if(a == ToolContext::SetWaleEdge)
         glWidget->setSelectionAsWale(1);
     else if(a == ToolContext::SetSingleWaleEdge)
@@ -90,5 +90,6 @@ void Window::receiveToolAction(int a)
 		glWidget->changeCourseResolution(1);
 	else if(a == ToolContext::DecreaseCourse)
 		glWidget->changeCourseResolution(-1);
+		*/
 }
 

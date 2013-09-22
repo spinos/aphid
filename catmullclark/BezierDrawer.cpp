@@ -25,12 +25,6 @@ BezierDrawer::~BezierDrawer()
 	delete m_tess;
 }
 
-void BezierDrawer::updateMesh(AccPatchMesh * mesh)
-{
-	m_mesh = mesh;
-	rebuildBuffer(m_mesh);
-}
-
 void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
 {
     AccPatch* bez = mesh->beziers();
@@ -50,13 +44,13 @@ void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
 		Vector3F *nor = m_tess->_normals;
 		int *idr = m_tess->getVertices();
 		for(j = 0; j < vpf; j++) {
-			m_vertices[curP] = pop[j];
-			m_normals[curP] = nor[j];
+			vertices()[curP] = pop[j];
+			normals()[curP] = nor[j];
 			curP++;
 		}
 		faceStart = vpf * i;
 		for(j = 0; j < ipf; j++) {
-			m_indices[curI] = faceStart + idr[j];
+			indices()[curI] = faceStart + idr[j];
 			curI++;
 		}
 	}
@@ -103,14 +97,5 @@ void BezierDrawer::drawBezierCage(BezierPatch * patch)
 		}
 	}
 	glEnd();
-}
-
-void BezierDrawer::verbose() const
-{
-	const unsigned numFace = m_mesh->getNumFaces();
-	const unsigned vpf = m_tess->numVertices();
-	const unsigned ipf = m_tess->numIndices();
-	std::cout<<"ACC patch drawer\ncvs count: "<<vpf * numFace<<"("<<vpf<<" X "<<numFace<<")\n";
-	std::cout<<"index count: "<<ipf * numFace<<"("<<ipf<<" X "<<numFace<<")\n";
 }
 //:~

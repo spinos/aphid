@@ -50,3 +50,18 @@ void DrawBuffer::createBuffer(unsigned numVertices, unsigned numIndices)
 }
 
 void DrawBuffer::rebuildBuffer() {}
+
+Vector3F * DrawBuffer::vertices()
+{
+	return m_vertices;
+}
+
+Vector3F * DrawBuffer::normals()
+{
+	return m_normals;
+}
+
+unsigned * DrawBuffer::indices()
+{
+	return m_indices;
+}

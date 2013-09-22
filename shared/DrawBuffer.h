@@ -13,10 +13,12 @@ public:
     
     virtual void rebuildBuffer();
     
-    Vector3F * m_vertices;
+	Vector3F * vertices();
+	Vector3F * normals();
+	unsigned * indices();
+private:
+	Vector3F * m_vertices;
     Vector3F * m_normals;
     unsigned * m_indices;
     unsigned m_numVertices, m_numIndices;
-private:
-
 };
