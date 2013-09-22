@@ -142,8 +142,8 @@ void BaseBrush::setToeByIntersectNormal(const Ray * r)
         d = hit - heelPosition();
 		dd = d.length();
 		d /= dd;
-		if(dd < m_radius * .1f) 
-			dd = m_radius * .1f;
+		if(dd < minDartDistance()) 
+			dd = minDartDistance();
 		else if(dd > m_radius * m_maxToeFactor) 
 			dd = m_radius * m_maxToeFactor;
 		d *= dd;	

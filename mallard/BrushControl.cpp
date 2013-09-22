@@ -17,6 +17,10 @@ BrushControl::BrushControl(QWidget *parent)
     : QDialog(parent)
 {
 	controlsGroup = new QGroupBox(tr("Brush"));
+	
+	maxR = new QLabel(tr("Max Radius"));
+	maxRValue = new QLineEdit;
+	
 	radiusValue = new QLineEdit;
 	radiusValue->setReadOnly(true);
 	radius = new QLabel(tr("Radius"));
@@ -31,14 +35,21 @@ BrushControl::BrushControl(QWidget *parent)
 	pitchSlider->setRange(1, 100);
 	pitchSlider->setSingleStep(1);
 	
+	numSamples = new QLabel(tr("Num Feathers"));
+	numSamplesValue = new QLineEdit;
+	
 	QGridLayout *controlLayout = new QGridLayout;
 	controlLayout->setColumnStretch(2, 1);
-	controlLayout->addWidget(radius, 0, 0);
-	controlLayout->addWidget(radiusValue, 0, 1);
-    controlLayout->addWidget(radiusSlider, 0, 2);
-    controlLayout->addWidget(pitch, 1, 0);
-	controlLayout->addWidget(pitchValue, 1, 1);
-    controlLayout->addWidget(pitchSlider, 1, 2);
+	controlLayout->addWidget(maxR, 0, 0);
+	controlLayout->addWidget(maxRValue, 0, 1);
+	controlLayout->addWidget(radius, 1, 0);
+	controlLayout->addWidget(radiusValue, 1, 1);
+    controlLayout->addWidget(radiusSlider, 1, 2);
+    controlLayout->addWidget(numSamples, 2, 0);
+	controlLayout->addWidget(numSamplesValue, 2, 1);
+	controlLayout->addWidget(pitch, 3, 0);
+	controlLayout->addWidget(pitchValue, 3, 1);
+    controlLayout->addWidget(pitchSlider, 3, 2);
 	controlsGroup->setLayout(controlLayout);
 	
 	QVBoxLayout *layout = new QVBoxLayout;

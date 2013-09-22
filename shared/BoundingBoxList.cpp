@@ -8,6 +8,7 @@
  */
 
 #include "BoundingBoxList.h"
+#include <iostream>
 BoundingBoxList::BoundingBoxList() {m_raw = 0;}
 BoundingBoxList::~BoundingBoxList() 
 {

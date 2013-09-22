@@ -36,12 +36,16 @@ private slots:
 	void pitchSliderChanged(int value);
 private:
 	QGroupBox *controlsGroup;
+	QLabel * maxR;
+	QLineEdit *maxRValue;
 	QLabel *radius;
 	QLineEdit *radiusValue;
 	QSlider *radiusSlider;
 	QLabel *pitch;
 	QLineEdit *pitchValue;
 	QSlider *pitchSlider;
+	QLabel * numSamples;
+	QLineEdit *numSamplesValue;
 };
 
 #endif

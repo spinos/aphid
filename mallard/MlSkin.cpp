@@ -47,13 +47,12 @@ void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & p, const fl
 	for(i = 0; i < numRegionElements(); i++)
 		growOnFaces.push_back(regionElementIndex(i));
 	
-	const unsigned ndart = (maxD / minD + 1) * (maxD / minD + 1) * 4;
-	
 	float u, v;
 	Vector3F adart;
 	std::vector<Vector3F> darts;
 	for(i = 0; i < growOnFaces.size(); i++) {
 		iface = growOnFaces[i];
+		const unsigned ndart = 4 + m_body->calculateBBox(iface).area() / minD / minD;
 		for(j = 0; j < ndart; j++) {
 		
 			u = rand()%91/91.f;

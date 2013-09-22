@@ -38,5 +38,5 @@ public:
 	char isPointAround(const Vector3F & p, float threshold) const;
 	char isValid() const;
 	void verbose() const;
-	float m_data[6];
+	float m_data[8];
 };
