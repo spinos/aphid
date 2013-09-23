@@ -28,16 +28,10 @@ void MlDrawer::drawFeather(MlSkin * skin) const
 	const unsigned nf = skin->numFeathers();
 	if(nf > 0) drawBuffer();
 	
-	unsigned i;
-	/*
-	for(i = 0; i < nf; i++) {
-		MlCalamus * c = skin->getCalamus(i);
-		drawAFeather(skin, c);
-	}
-	*/
 	const unsigned num = skin->numActiveFeather();
 	if(num < 1) return;
 	
+	unsigned i;
 	for(i = 0; i < num; i++) {
 		MlCalamus * c = skin->getActive(i);
 		drawAFeather(skin, c);
@@ -54,11 +48,6 @@ void MlDrawer::drawAFeather(MlSkin * skin, MlCalamus * c) const
 	space.rotateX(c->rotateX());
 	
 	space.multiply(frm);
-	
-	
-	//Matrix33F ys;
-	//ys.rotateY(c->rotateY());
-	//ys.multiply(space);
 	
 	c->collideWith(skin);
 	c->computeFeatherWorldP(p, space);
