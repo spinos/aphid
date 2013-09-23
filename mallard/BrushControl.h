@@ -14,17 +14,13 @@
 #include <QQueue>
 
 QT_BEGIN_NAMESPACE
-class QComboBox;
-class QDialogButtonBox;
-class QGridLayout;
 class QGroupBox;
 class QLabel;
-class QPushButton;
-class QLineEdit;
 class QSlider;
-class QDoubleValidator;
-class QIntValidator;
 QT_END_NAMESPACE
+
+class QIntEditSlider;
+class QDoubleEditSlider;
 
 class BrushControl : public QDialog
 {
@@ -32,32 +28,20 @@ class BrushControl : public QDialog
 
 public:
     BrushControl(QWidget *parent = 0);
+	
+	QWidget * numSamplesWidget();
+	QWidget * radiusWidget();
+	QWidget * pitchWidget();
 
 private slots:
-    void radiusSliderChanged(int value);
-	void pitchSliderChanged(int value);
-	void maxRadiusEdited();
-	void numSamplesEdited();
 	
 signals:
-	void radiusChanged(double c);
-	void pitchChanged(double c);
-	void numSamplesChanged(int c);
 	
 private:
 	QGroupBox *controlsGroup;
-	QLabel * maxR;
-	QDoubleValidator * maxRVal;
-	QLineEdit *maxRValue;
-	QLabel *radius;
-	QLineEdit *radiusValue;
-	QSlider *radiusSlider;
-	QLabel *pitch;
-	QLineEdit *pitchValue;
-	QSlider *pitchSlider;
-	QLabel * numSamples;
-	QLineEdit *numSamplesValue;
-	QIntValidator * numSamplesVal;
+	QDoubleEditSlider * m_radiusValue;
+	QDoubleEditSlider * m_pitchValue;
+	QIntEditSlider * m_numSampleValue;
 };
 
 #endif
