@@ -60,14 +60,23 @@ void ToolBox::createContext()
 	createContour->setIconIndex(1);
 	createContour->setContext(CreateBodyContourFeather);
 	
-	ContextIconFrame * selectAnchor = new ContextIconFrame(this);
-	selectAnchor->addIconFile(":seledge.png");
-	selectAnchor->addIconFile(":seledgeact.png");
-	selectAnchor->setIconIndex(0);
-	selectAnchor->setContext(SelectEdge);
+	ContextIconFrame * combContour = new ContextIconFrame(this);
+	
+	combContour->addIconFile(":mallardFeatherGreen.png");
+	combContour->addIconFile(":mallardFeatherGreenAct.png");
+	combContour->setIconIndex(0);
+	combContour->setContext(CombBodyContourFeather);
+	
+	ContextIconFrame * eraseContour = new ContextIconFrame(this);
+	
+	eraseContour->addIconFile(":mallardFeatherGreen.png");
+	eraseContour->addIconFile(":mallardFeatherGreenAct.png");
+	eraseContour->setIconIndex(0);
+	eraseContour->setContext(EraseBodyContourFeather);
 	
 	m_contextFrames.push_back(createContour);
-	m_contextFrames.push_back(selectAnchor);
+	m_contextFrames.push_back(combContour);
+	m_contextFrames.push_back(eraseContour);
 }
 
 void ToolBox::createAction()
