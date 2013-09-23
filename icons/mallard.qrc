@@ -1,7 +1,11 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file>mallardFeatherGreen.png</file>
-    <file>mallardFeatherGreenAct.png</file>
+    <file>brush.png</file>
+    <file>brushActive.png</file>
+    <file>comb.png</file>
+    <file>combActive.png</file>
+    <file>eraser.png</file>
+    <file>eraserActive.png</file>
     <file>seledge.png</file>
     <file>seledgeact.png</file>
     <file>setwale.png</file>

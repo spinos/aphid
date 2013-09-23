@@ -55,22 +55,22 @@ void ToolBox::createContext()
 {
     ContextIconFrame * createContour = new ContextIconFrame(this);
 	
-	createContour->addIconFile(":mallardFeatherGreen.png");
-	createContour->addIconFile(":mallardFeatherGreenAct.png");
+	createContour->addIconFile(":brush.png");
+	createContour->addIconFile(":brushActive.png");
 	createContour->setIconIndex(1);
 	createContour->setContext(CreateBodyContourFeather);
 	
 	ContextIconFrame * combContour = new ContextIconFrame(this);
 	
-	combContour->addIconFile(":mallardFeatherGreen.png");
-	combContour->addIconFile(":mallardFeatherGreenAct.png");
+	combContour->addIconFile(":comb.png");
+	combContour->addIconFile(":combActive.png");
 	combContour->setIconIndex(0);
 	combContour->setContext(CombBodyContourFeather);
 	
 	ContextIconFrame * eraseContour = new ContextIconFrame(this);
 	
-	eraseContour->addIconFile(":mallardFeatherGreen.png");
-	eraseContour->addIconFile(":mallardFeatherGreenAct.png");
+	eraseContour->addIconFile(":eraser.png");
+	eraseContour->addIconFile(":eraserActive.png");
 	eraseContour->setIconIndex(0);
 	eraseContour->setContext(EraseBodyContourFeather);
 	
