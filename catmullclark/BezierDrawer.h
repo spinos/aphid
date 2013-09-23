@@ -19,14 +19,12 @@ class BezierDrawer : public BaseDrawer, public DrawBuffer {
 public:
 	BezierDrawer();
 	virtual ~BezierDrawer();
-	void updateMesh(AccPatchMesh * mesh);
+	
 	virtual void rebuildBuffer(AccPatchMesh * mesh);
 	
 	void drawBezierPatch(BezierPatch * patch);
 	void drawBezierCage(BezierPatch * patch);
-	void verbose() const;
 
 private:
 	Tessellator* m_tess;
-	AccPatchMesh * m_mesh;
 };

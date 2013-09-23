@@ -8,6 +8,7 @@
  */
 
 #include "CollisionRegion.h"
+#include <IntersectionContext.h>
 
 CollisionRegion::CollisionRegion() : m_regionElementStart(UINT_MAX) 
 {
@@ -31,6 +32,11 @@ void CollisionRegion::resetCollisionRegion(unsigned idx)
 {
 	m_regionElementStart = idx;
 	m_regionElementIndices.clear();
+}
+
+void CollisionRegion::resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d)
+{
+	resetCollisionRegion(idx);
 }
 
 void CollisionRegion::closestPoint(const Vector3F & origin, IntersectionContext * ctx) const

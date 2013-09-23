@@ -98,6 +98,7 @@ HEADERS       = ../shared/AllMath.h \
 				MlTessellate.h \
 				MlSkin.h \
                 MlRachis.h \
+                BrushControl.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \  
@@ -199,6 +200,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				MlSkin.cpp \
                 MlRachis.cpp \
                 window.cpp \
+                BrushControl.cpp \
                 main.cpp 
                 
 INCLUDEPATH += /usr/local/include/OpenEXR

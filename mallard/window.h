@@ -45,11 +45,13 @@
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
-class QSlider;
+class QMenu;
+class QAction;
 QT_END_NAMESPACE
 //! [0]
 class GLWidget;
 class ToolBox;
+class BrushControl;
 
 class Window : public QMainWindow
 {
@@ -64,6 +66,13 @@ protected:
 private:
     GLWidget *glWidget;
 	ToolBox * m_tools;
+	BrushControl * m_brushControl;
+	QMenu * windowMenu;
+	QAction * showBrushControlAct;
+	
+private:
+	void createActions();
+	void createMenus();
 	
 public slots:
 	void receiveToolContext(int a);

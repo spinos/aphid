@@ -101,13 +101,13 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 		
 		nvpf = m_featherTess->numVertices();
 		for(j = 0; j < nvpf; j++) {
-		    m_vertices[curv + j] = m_featherTess->vertices()[j];
-		    m_normals[curv + j] = m_featherTess->normals()[j];
+		    vertices()[curv + j] = m_featherTess->vertices()[j];
+		    normals()[curv + j] = m_featherTess->normals()[j];
 		}
 		
 		nipf = m_featherTess->numIndices();
 		for(j = 0; j < nipf; j++) {
-		    m_indices[curi + j] = curv + m_featherTess->indices()[j];
+		    indices()[curi + j] = curv + m_featherTess->indices()[j];
 		}
 		
 		curv += nvpf;

@@ -43,6 +43,7 @@
 
 #include "glwidget.h"
 #include "ToolBox.h"
+#include "BrushControl.h"
 #include "window.h"
 
 //! [0]
@@ -52,14 +53,18 @@ Window::Window()
 	m_tools = new ToolBox;
 	
 	GLWidget::InteractContext = m_tools;
+	m_brushControl = new BrushControl(this); 
 	
 	addToolBar(m_tools);
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Knit Fabric"));
+    setWindowTitle(tr("Mallard"));
     
 	connect(m_tools, SIGNAL(contextChanged(int)), this, SLOT(receiveToolContext(int)));
     connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
+	
+	createActions();
+	createMenus();
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -77,7 +82,7 @@ void Window::receiveToolContext(int a)
 }
 
 void Window::receiveToolAction(int a)
-{
+{/*
     if(a == ToolContext::SetWaleEdge)
         glWidget->setSelectionAsWale(1);
     else if(a == ToolContext::SetSingleWaleEdge)
@@ -90,5 +95,18 @@ void Window::receiveToolAction(int a)
 		glWidget->changeCourseResolution(1);
 	else if(a == ToolContext::DecreaseCourse)
 		glWidget->changeCourseResolution(-1);
+		*/
 }
 
+void Window::createActions()
+{
+	showBrushControlAct = new QAction(tr("&Brush Control"), this);
+	showBrushControlAct->setStatusTip(tr("Show brush settings"));
+    connect(showBrushControlAct, SIGNAL(triggered()), m_brushControl, SLOT(show()));
+}
+
+void Window::createMenus()
+{
+	windowMenu = menuBar()->addMenu(tr("&Window"));
+    windowMenu->addAction(showBrushControlAct);
+}

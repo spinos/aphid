@@ -9,7 +9,7 @@
 
 #pragma once
 #include <AllMath.h>
-#include <IntersectionContext.h>
+class IntersectionContext;
 
 class CollisionRegion {
 public:
@@ -19,6 +19,7 @@ public:
 	Vector3F getClosestPoint(const Vector3F & origin);
 	
 	virtual void resetCollisionRegion(unsigned idx);
+	virtual void resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d);
 	virtual void closestPoint(const Vector3F & origin, IntersectionContext * ctx) const;
 	
 	unsigned numRegionElements() const;
