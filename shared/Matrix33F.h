@@ -6,12 +6,11 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
- class Vector3F;
+#include "Vector3F.h"
  class Matrix33F
  {
  public:
 	Matrix33F();
-	Matrix33F(Matrix33F & a);
 	Matrix33F(const Matrix33F & a);
 	~Matrix33F();
 	float Matrix33F::operator() (int i, int j);

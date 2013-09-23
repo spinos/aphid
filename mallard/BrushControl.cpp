@@ -19,7 +19,12 @@ BrushControl::BrushControl(QWidget *parent)
 	controlsGroup = new QGroupBox(tr("Brush"));
 	
 	maxR = new QLabel(tr("Max Radius"));
+	maxRVal = new QDoubleValidator;
+	maxRVal->setBottom(0.1);
+	maxRVal->setRange(0.1, 1000.0, 4);
 	maxRValue = new QLineEdit;
+	maxRValue->setValidator(maxRVal);
+	maxRValue->setText(tr("4.0"));
 	
 	radiusValue = new QLineEdit;
 	radiusValue->setReadOnly(true);
@@ -37,6 +42,10 @@ BrushControl::BrushControl(QWidget *parent)
 	
 	numSamples = new QLabel(tr("Num Feathers"));
 	numSamplesValue = new QLineEdit;
+	numSamplesVal = new QIntValidator;
+	numSamplesVal->setBottom(8);
+	numSamplesVal->setRange(8, 10000);
+	numSamplesValue->setValidator(numSamplesVal);
 	
 	QGridLayout *controlLayout = new QGridLayout;
 	controlLayout->setColumnStretch(2, 1);
@@ -56,32 +65,76 @@ BrushControl::BrushControl(QWidget *parent)
 	layout->addWidget(controlsGroup);
 	setLayout(layout);
 	
+	connect(maxRValue, SIGNAL(editingFinished()),
+            this, SLOT(maxRadiusEdited()));
+	
 	connect(radiusSlider, SIGNAL(valueChanged(int)),
             this, SLOT(radiusSliderChanged(int)));
 			
 	connect(pitchSlider, SIGNAL(valueChanged(int)),
             this, SLOT(pitchSliderChanged(int)));
+    
+    connect(numSamplesValue, SIGNAL(editingFinished()),
+            this, SLOT(numSamplesEdited()));
 			
 	radiusSlider->setValue(50);
 	pitchSlider->setValue(50);
+	numSamplesValue->setText(tr("32"));
 
     layout->setSizeConstraint(QLayout::SetMinimumSize);
 
     setWindowTitle(tr("Brush Settings"));
+    
+    emit radiusChanged(2.0);
+    emit numSamplesChanged(32);
+    emit pitchChanged(0.5);
 }
 
 void BrushControl::radiusSliderChanged(int value)
 {
-    double r = (double)value / 100.f;
+    double r = (double)value / 100.0 * maxRValue->text().toDouble();
 	QString t;
 	t.setNum(r);
 	radiusValue->setText(t);
+	emit radiusChanged(r);
 }
 
 void BrushControl::pitchSliderChanged(int value)
 {
-    double r = (double)value / 100.f;
+    double r = (double)value / 100.0 * 0.9 + 0.1;
 	QString t;
 	t.setNum(r);
 	pitchValue->setText(t);
+	emit pitchChanged(r);
+}
+
+void BrushControl::maxRadiusEdited()
+{
+    double r = maxRValue->text().toDouble();
+    
+    if(r < maxRVal->bottom()) r = maxRVal->bottom();
+    else if(r > maxRVal->top()) r = maxRVal->top();
+    
+    QString t;
+	t.setNum(r);
+	maxRValue->setText(t);
+	
+    r = r * (double)radiusSlider->value()/ 100.0 ;
+    
+    t.setNum(r);
+	radiusValue->setText(t);
+	
+	emit radiusChanged(r);
+}
+
+void BrushControl::numSamplesEdited()
+{
+    int s = numSamplesValue->text().toInt();
+    if(s < numSamplesVal->bottom()) s = numSamplesVal->bottom();
+    else if(s > numSamplesVal->top()) s = numSamplesVal->top();
+    
+    QString t;
+	t.setNum(s);
+	numSamplesValue->setText(t);
+    emit numSamplesChanged(s);
 }

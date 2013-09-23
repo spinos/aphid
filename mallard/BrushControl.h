@@ -22,6 +22,8 @@ class QLabel;
 class QPushButton;
 class QLineEdit;
 class QSlider;
+class QDoubleValidator;
+class QIntValidator;
 QT_END_NAMESPACE
 
 class BrushControl : public QDialog
@@ -34,9 +36,18 @@ public:
 private slots:
     void radiusSliderChanged(int value);
 	void pitchSliderChanged(int value);
+	void maxRadiusEdited();
+	void numSamplesEdited();
+	
+signals:
+	void radiusChanged(double c);
+	void pitchChanged(double c);
+	void numSamplesChanged(int c);
+	
 private:
 	QGroupBox *controlsGroup;
 	QLabel * maxR;
+	QDoubleValidator * maxRVal;
 	QLineEdit *maxRValue;
 	QLabel *radius;
 	QLineEdit *radiusValue;
@@ -46,6 +57,7 @@ private:
 	QSlider *pitchSlider;
 	QLabel * numSamples;
 	QLineEdit *numSamplesValue;
+	QIntValidator * numSamplesVal;
 };
 
 #endif

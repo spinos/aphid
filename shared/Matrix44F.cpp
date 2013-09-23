@@ -8,7 +8,6 @@
  */
 #include <cmath>
 #include "Matrix44F.h"
-#include "Vector3F.h"
 
 Matrix44F Matrix44F::Identitiy;
 
@@ -20,11 +19,6 @@ Matrix44F::Matrix44F()
 Matrix44F::Matrix44F(float x)
 {
 	for(int i = 0; i < 16; i++) v[i] = x; 
-}
-
-Matrix44F::Matrix44F(Matrix44F & a)
-{
-	for(int i = 0; i < 16; i++) v[i] = a.v[i];
 }
 
 Matrix44F::Matrix44F(const Matrix44F & a)

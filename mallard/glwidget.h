@@ -64,7 +64,10 @@ public:
 	virtual void clientDeselect();
     virtual PatchMesh * mesh() const;
 	
-//! [2]
+public slots:
+    void receiveBrushRadius(double x);
+    void receiveBrushPitch(double x);
+    void receiveBrushNumSamples(int x);
 protected:
     virtual void clientDraw();
 

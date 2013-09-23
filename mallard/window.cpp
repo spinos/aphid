@@ -62,7 +62,9 @@ Window::Window()
     
 	connect(m_tools, SIGNAL(contextChanged(int)), this, SLOT(receiveToolContext(int)));
     connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
-	
+	connect(m_brushControl, SIGNAL(radiusChanged(double)), glWidget, SLOT(receiveBrushRadius(double)));
+	connect(m_brushControl, SIGNAL(pitchChanged(double)), glWidget, SLOT(receiveBrushPitch(double)));
+	connect(m_brushControl, SIGNAL(numSamplesChanged(int)), glWidget, SLOT(receiveBrushNumSamples(int)));
 	createActions();
 	createMenus();
 }

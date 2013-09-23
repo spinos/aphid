@@ -9,13 +9,12 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
- class Vector3F;
+#include "Vector3F.h"
  class Matrix44F
  {
  public:
 	Matrix44F();
 	Matrix44F(float x);
-	Matrix44F(Matrix44F & a);
 	Matrix44F(const Matrix44F & a);
 	~Matrix44F();
 	float Matrix44F::operator() (int i, int j);

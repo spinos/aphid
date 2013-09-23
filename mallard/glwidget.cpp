@@ -410,4 +410,19 @@ void GLWidget::addFeather()
 	ac.setRotateY(brush()->getPitch());
 	m_skin->floodAround(ac, iface, ctx->m_hitP, brush()->getRadius(), brush()->minDartDistance());
 }
+
+void GLWidget::receiveBrushRadius(double x)
+{
+    brush()->setRadius(x);
+}
+
+void GLWidget::receiveBrushPitch(double x)
+{
+    brush()->setPitch(x);
+}
+
+void GLWidget::receiveBrushNumSamples(int x)
+{
+    brush()->setNumDarts(x);
+}
 //:~

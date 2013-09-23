@@ -6,17 +6,11 @@
  *
  */
 #include <cmath>
-#include "Vector3F.h"
 #include "Matrix33F.h"
 
 Matrix33F::Matrix33F() 
 {
 	setIdentity();
-}
-
-Matrix33F::Matrix33F(Matrix33F & a)
-{
-	for(int i = 0; i < 9; i++) v[i] = a.v[i];
 }
 
 Matrix33F::Matrix33F(const Matrix33F & a)
