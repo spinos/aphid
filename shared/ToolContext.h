@@ -26,7 +26,10 @@ public:
     
     void setContext(InteractMode val);
     InteractMode getContext() const;
+	
+	void setPreviousContext(InteractMode val);
+    InteractMode previousContext() const;
     
 private:
-    InteractMode m_ctx;
+    InteractMode m_ctx, m_preCtx;
 };

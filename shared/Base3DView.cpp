@@ -417,4 +417,20 @@ void Base3DView::computeIncidentRay(int x, int y)
     direct.normalize();
 	m_incidentRay = Ray(origin + direct * getCamera()->nearClipPlane(), origin + direct * getCamera()->farClipPlane());
 }
+
+
+void Base3DView::receiveBrushRadius(double x)
+{
+    brush()->setRadius(x);
+}
+
+void Base3DView::receiveBrushPitch(double x)
+{
+    brush()->setPitch(x);
+}
+
+void Base3DView::receiveBrushNumSamples(int x)
+{
+    brush()->setNumDarts(x);
+}
 //:~

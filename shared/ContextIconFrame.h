@@ -26,7 +26,7 @@ public:
 	
 signals:
 	void contextEnabled(int c);
-
+	void contextDisabled(int c);
 private:
 	int m_context;
 };

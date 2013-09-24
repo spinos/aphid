@@ -64,16 +64,17 @@ public:
 	virtual void clientDeselect();
     virtual PatchMesh * mesh() const;
 	
+	void finishEraseFeather();
+	
 public slots:
-    void receiveBrushRadius(double x);
-    void receiveBrushPitch(double x);
-    void receiveBrushNumSamples(int x);
+    
 protected:
     virtual void clientDraw();
 
 //! [3]
 private:
 	void addFeather();
+	void hideFeather();
 private:
 	ZEXRImage* _image;
 	BezierDrawer * m_bezierDrawer;

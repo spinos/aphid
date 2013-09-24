@@ -57,6 +57,11 @@ public:
 	virtual void drawIntersection() const;
 	void showBrush() const;
 	
+public slots:
+	void receiveBrushRadius(double x);
+    void receiveBrushPitch(double x);
+    void receiveBrushNumSamples(int x);
+	
 protected:
     void keyPressEvent(QKeyEvent *event);
 	void focusInEvent(QFocusEvent * event);

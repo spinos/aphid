@@ -20,6 +20,7 @@ ToolBox::ToolBox(QWidget *parent) : QToolBar(parent)
 	for(std::vector<ContextIconFrame *>::iterator it = m_contextFrames.begin(); it != m_contextFrames.end(); ++it) {
 		addWidget(*it);
 		connect(*it, SIGNAL(contextEnabled(int)), this, SLOT(onContextFrameChanged(int)));
+		connect(*it, SIGNAL(contextDisabled(int)), this, SLOT(onContextFrameChanged(int)));
 	}
 	
 	addSeparator();
@@ -36,7 +37,18 @@ ToolBox::~ToolBox() {}
 
 void ToolBox::onContextFrameChanged(int c)
 {
+	InteractMode cur = getContext();
+	if(cur == (InteractMode)c) {
+		for(std::vector<ContextIconFrame *>::iterator it = m_contextFrames.begin(); it != m_contextFrames.end(); ++it) {
+			if((*it)->getContext() == c)
+				(*it)->setIconIndex(1);
+		}
+		return;
+	}
+	
+	setPreviousContext(cur);
 	setContext((InteractMode)c);
+	
 	for(std::vector<ContextIconFrame *>::iterator it = m_contextFrames.begin(); it != m_contextFrames.end(); ++it) {
 		if((*it)->getContext() != c)
 			(*it)->setIconIndex(0);

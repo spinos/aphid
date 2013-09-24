@@ -26,6 +26,8 @@ void ContextIconFrame::mousePressEvent(QMouseEvent *event)
 	QIconFrame::mousePressEvent(event);
 	if(getIconIndex() == 1) 
 		emit contextEnabled(m_context);
+	else 
+		emit contextDisabled(m_context);
 }
 
 void ContextIconFrame::mouseReleaseEvent(QMouseEvent *event)

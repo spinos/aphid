@@ -19,6 +19,8 @@ public:
 	virtual ~MlDrawer();
 	void drawFeather(MlSkin * skin) const;
 	void drawAFeather(MlSkin * skin, MlCalamus * c) const;
+	void hideAFeather(MlCalamus * c);
+	void hideActive(MlSkin * skin);
 	virtual void rebuildBuffer(MlSkin * skin);
 private:
 	MlTessellate * m_featherTess;

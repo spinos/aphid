@@ -68,6 +68,11 @@ void MlCalamus::setScale(const float & x)
 	m_scale = x / m_geo->getLength();
 }
 
+void MlCalamus::setBufferStart(unsigned x)
+{
+	m_bufStart = x;
+}
+
 float MlCalamus::rotateX() const
 {
 	return m_rotX;
@@ -81,6 +86,11 @@ float MlCalamus::rotateY() const
 float MlCalamus::scale() const
 {
 	return m_scale;
+}
+
+unsigned MlCalamus::bufferStart() const
+{
+	return m_bufStart;
 }
 
 void MlCalamus::collideWith(CollisionRegion * skin)

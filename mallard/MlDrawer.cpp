@@ -66,6 +66,28 @@ void MlDrawer::drawAFeather(MlSkin * skin, MlCalamus * c) const
 	glDisableClientState( GL_VERTEX_ARRAY );
 }
 
+void MlDrawer::hideAFeather(MlCalamus * c)
+{
+	const unsigned loc = c->bufferStart();
+	m_featherTess->setFeather(c->feather());
+	const unsigned nipf = m_featherTess->numIndices();
+	for(unsigned i = 0; i < nipf; i++) {
+		indices()[loc + i] = indices()[loc];
+	}
+}
+
+void MlDrawer::hideActive(MlSkin * skin)
+{
+	const unsigned num = skin->numActiveFeather();
+	if(num < 1) return;
+	
+	unsigned i;
+	for(i = 0; i < num; i++) {
+		MlCalamus * c = skin->getActive(i);
+		hideAFeather(c);
+	}
+}
+
 void MlDrawer::rebuildBuffer(MlSkin * skin)
 {
     const unsigned nf = skin->numFeathers();
@@ -109,6 +131,8 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 		for(j = 0; j < nipf; j++) {
 		    indices()[curi + j] = curv + m_featherTess->indices()[j];
 		}
+		
+		c->setBufferStart(curi);
 		
 		curv += nvpf;
 		curi += nipf;

@@ -79,8 +79,8 @@ void Window::keyPressEvent(QKeyEvent *e)
 
 void Window::receiveToolContext(int a)
 {
-	if(a == ToolContext::CreateBodyContourFeather) {
-	}
+	if(m_tools->previousContext() == ToolContext::EraseBodyContourFeather)
+		glWidget->finishEraseFeather();
 }
 
 void Window::receiveToolAction(int a)

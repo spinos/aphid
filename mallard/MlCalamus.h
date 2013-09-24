@@ -25,15 +25,17 @@ public:
 	float rotateX() const;
 	float rotateY() const;
 	float scale() const;
+	unsigned bufferStart() const;
 	
 	void setFeather(MlFeather * geo);
 	void setRotateX(const float& x);
 	void setRotateY(const float& y);
 	void setScale(const float & x);
+	void setBufferStart(unsigned x);
 	
 	void collideWith(CollisionRegion * skin);
 private:
 	MlFeather * m_geo;
-	unsigned m_faceIdx;
-	float m_patchU, m_patchV, m_rotX, m_rotY, m_scale, padding;
+	unsigned m_faceIdx, m_bufStart;
+	float m_patchU, m_patchV, m_rotX, m_rotY, m_scale;
 };

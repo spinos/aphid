@@ -38,9 +38,9 @@ AccPatchMesh * MlSkin::bodyMesh() const
 	return m_body;
 }
 
-void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & p, const float & maxD, const float & minD)
+void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const float & maxD, const float & minD)
 {
-	resetCollisionRegionAround(idx, p, maxD);
+	resetCollisionRegionAround(idx, pos, maxD);
 	std::vector<unsigned> growOnFaces;
 	unsigned i, j, iface;
 	
@@ -59,7 +59,7 @@ void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & p, const fl
 			v = rand()%97/97.f;
 			m_body->pointOnPatch(iface, u, v, adart);
 			
-			if(Vector3F(p, adart).length() > maxD) continue;
+			if(Vector3F(pos, adart).length() > maxD) continue;
 			if(isPointTooCloseToExisting(adart, iface, minD)) continue;
 			
 			if(!isDartCloseToExisting(adart, darts, minD)) {
@@ -71,6 +71,34 @@ void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & p, const fl
 	}
 	growOnFaces.clear();
 	darts.clear();
+}
+
+void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const float & maxD)
+{
+	resetCollisionRegionAround(idx, pos, maxD);
+	const unsigned maxCountPerFace = m_numFeather / 2;
+	
+	Vector3F d, p;
+	for(unsigned i=0; i < numRegionElements(); i++) {
+		
+		unsigned ifeather = m_faceCalamusStart[regionElementIndex(i)];
+		for(unsigned j = 0; j < maxCountPerFace; j++) {
+			MlCalamus *c = getCalamus(ifeather);
+			if(c->faceIdx() != regionElementIndex(i)) break;
+			
+			getPointOnBody(c, p);
+			
+			d = p - pos;
+			if(d.length() < maxD) m_activeIndices.push_back(ifeather);
+			
+			ifeather++;
+		}
+	}
+}
+
+void MlSkin::discardActive()
+{
+	m_activeIndices.clear();
 }
 
 bool MlSkin::createFeather(MlCalamus & ori)
@@ -125,6 +153,11 @@ void MlSkin::finishCreateFeather()
 	
 	m_activeIndices.clear();
 	m_hasFeatherCreated = false;
+}
+
+void MlSkin::finishEraseFeather()
+{
+
 }
 
 bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance)

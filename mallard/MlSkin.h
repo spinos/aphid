@@ -21,10 +21,13 @@ public:
 	MlSkin();
 	virtual ~MlSkin();
 	void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
-	void floodAround(MlCalamus c, unsigned idx, const Vector3F & p, const float & maxD, const float & minD);
+	void floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const float & maxD, const float & minD);
+	void selectAround(unsigned idx, const Vector3F & pos, const float & maxD);
+	void discardActive();
 	
 	void growFeather(const Vector3F & direction);
 	void finishCreateFeather();
+	void finishEraseFeather();
 	unsigned numFeathers() const;
 	MlCalamus * getCalamus(unsigned idx) const;
 	

@@ -361,6 +361,10 @@ void GLWidget::clientSelect()
 		hitTest(ray, hit);
 		addFeather();
 	}
+	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
+		hitTest(ray, hit);
+		hideFeather();
+	}
 }
 
 void GLWidget::clientMouseInput()
@@ -374,12 +378,17 @@ void GLWidget::clientMouseInput()
 		brush()->setToeByIntersectNormal(&ray);
 		m_skin->growFeather(brush()->toeDisplacement());
 	}
+	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
+		hitTest(ray, hit);
+		hideFeather();
+	}
 }
 
 void GLWidget::clientDeselect()
 {
     if(interactMode() == ToolContext::CreateBodyContourFeather) {
 		if(m_skin->hasFeatherCreated()) {
+		qDebug()<<"finish create";
 		    m_skin->finishCreateFeather();
 		    m_featherDrawer->rebuildBuffer(m_skin);
 		}
@@ -411,18 +420,21 @@ void GLWidget::addFeather()
 	m_skin->floodAround(ac, iface, ctx->m_hitP, brush()->getRadius(), brush()->minDartDistance());
 }
 
-void GLWidget::receiveBrushRadius(double x)
+void GLWidget::hideFeather()
 {
-    brush()->setRadius(x);
+	IntersectionContext * ctx = getIntersectionContext();
+    if(!ctx->m_success) return;
+	
+	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
+	brush()->resetToe();
+	
+	m_skin->selectAround(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
+	m_featherDrawer->hideActive(m_skin);
+	m_skin->discardActive();
 }
 
-void GLWidget::receiveBrushPitch(double x)
+void GLWidget::finishEraseFeather()
 {
-    brush()->setPitch(x);
-}
-
-void GLWidget::receiveBrushNumSamples(int x)
-{
-    brush()->setNumDarts(x);
+	m_skin->finishEraseFeather();
 }
 //:~
