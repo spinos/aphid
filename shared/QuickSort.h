@@ -12,5 +12,5 @@ public:
 	~QuickSort() {}
 	
 	static void Sort(BaseArray &array,int first,int last);
-	
+	static void Sort(vector<unsigned> &array,int first,int last);
 };

@@ -26,7 +26,7 @@ MlDrawer::~MlDrawer()
 void MlDrawer::drawFeather(MlSkin * skin) const
 {
 	if(skin->numFeathers() > 0) drawBuffer();
-	
+
 	const unsigned num = skin->numCreated();
 	if(num < 1) return;
 	
@@ -77,7 +77,7 @@ void MlDrawer::hideAFeather(MlCalamus * c)
 
 void MlDrawer::hideActive(MlSkin * skin)
 {
-	const unsigned num = skin->numActiveFeather();
+	const unsigned num = skin->numActive();
 	if(num < 1) return;
 	
 	unsigned i;
@@ -137,6 +137,6 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 		curi += nipf;
 	}
 	
-	std::cout<<"nv "<< curv;
-	std::cout<<"ni "<< curi;
+	//std::cout<<"nv "<< curv;
+	//std::cout<<"ni "<< curi;
 }

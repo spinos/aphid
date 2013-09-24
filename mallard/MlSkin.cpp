@@ -30,7 +30,7 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 	m_body = mesh;
 	m_topo = topo;
 	m_faceCalamusStart = new unsigned[mesh->getNumFaces()];
-	for(unsigned i = 0; i < m_body->getNumFaces(); i++) m_faceCalamusStart[i] = 0;
+	resetFaceCalamusIndirection();
 }
 
 AccPatchMesh * MlSkin::bodyMesh() const
@@ -89,7 +89,10 @@ void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const float & maxD
 			getPointOnBody(c, p);
 			
 			d = p - pos;
-			if(d.length() < maxD) m_activeIndices.push_back(ifeather);
+			if(d.length() < maxD) {
+				if(!IsElementIn(ifeather, m_activeIndices))
+					m_activeIndices.push_back(ifeather);
+			}
 			
 			ifeather++;
 		}
@@ -138,7 +141,41 @@ void MlSkin::growFeather(const Vector3F & direction)
 
 void MlSkin::finishCreateFeather()
 {
-    if(m_numFeather > 1)
+    computeFaceCalamusIndirection();
+	
+	m_numCreatedFeather = 0;
+}
+
+void MlSkin::finishEraseFeather()
+{
+	if(numActive() == numFeathers()) {
+		discardActive();
+		m_numFeather = 0;
+		m_calamus->setIndex(0);
+		resetFaceCalamusIndirection();
+	}
+	
+	QuickSort::Sort(m_activeIndices, 0, numActive() - 1);
+	
+	unsigned i, j;
+	const unsigned num = numActive();
+	for(i = 0; i < num; i++) {
+		j = lastInactive();
+		if(m_activeIndices[i] < j) {
+			m_calamus->swapElement(m_activeIndices[i], j);
+			m_activeIndices.push_back(j);
+		}
+		m_numFeather--;
+	}
+	discardActive();
+	
+	m_calamus->setIndex(m_numFeather);
+	computeFaceCalamusIndirection();
+}
+
+void MlSkin::computeFaceCalamusIndirection()
+{
+	if(m_numFeather > 1)
 		QuickSort::Sort(*m_calamus, 0, m_numFeather - 1);
 		
 	unsigned cur;
@@ -150,13 +187,21 @@ void MlSkin::finishCreateFeather()
 			pre = cur;
 		}
 	}
-	
-	m_numCreatedFeather = 0;
 }
 
-void MlSkin::finishEraseFeather()
+void MlSkin::resetFaceCalamusIndirection()
 {
+	for(unsigned i = 0; i < m_body->getNumFaces(); i++) m_faceCalamusStart[i] = 0;
+}
 
+unsigned MlSkin::lastInactive() const
+{	
+	unsigned i = 0;
+	for(i = numFeathers() - 1; i > 0; i--) {
+		if(!IsElementIn(i, m_activeIndices))
+			return i;
+	}
+	return i;
 }
 
 bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance)
@@ -236,7 +281,7 @@ MlCalamus * MlSkin::getCalamus(unsigned idx) const
 	return m_calamus->asCalamus(idx);
 }
 
-unsigned MlSkin::numActiveFeather() const
+unsigned MlSkin::numActive() const
 {
 	return m_activeIndices.size();
 }

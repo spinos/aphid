@@ -32,7 +32,7 @@ public:
 	MlCalamus * getCalamus(unsigned idx) const;
 	
 	AccPatchMesh * bodyMesh() const;
-	unsigned numActiveFeather() const;
+	unsigned numActive() const;
 	MlCalamus * getActive(unsigned idx) const;
 	
 	void getPointOnBody(MlCalamus * c, Vector3F &p) const;
@@ -50,6 +50,9 @@ private:
 	bool createFeather(MlCalamus & ori);
 	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance);
 	bool isDartCloseToExisting(const Vector3F & pos, const std::vector<Vector3F> & existing, float minDistance) const;
+	void computeFaceCalamusIndirection();
+	void resetFaceCalamusIndirection();
+	unsigned lastInactive() const;
 private:
 	MlCalamusArray * m_calamus;
 	std::vector<unsigned> m_activeIndices;

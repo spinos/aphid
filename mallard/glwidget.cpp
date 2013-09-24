@@ -388,7 +388,6 @@ void GLWidget::clientDeselect()
 {
     if(interactMode() == ToolContext::CreateBodyContourFeather) {
 		if(m_skin->hasFeatherCreated()) {
-		qDebug()<<"finish create";
 		    m_skin->finishCreateFeather();
 		    m_featherDrawer->rebuildBuffer(m_skin);
 		}
@@ -430,11 +429,11 @@ void GLWidget::hideFeather()
 	
 	m_skin->selectAround(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
 	m_featherDrawer->hideActive(m_skin);
-	m_skin->discardActive();
 }
 
 void GLWidget::finishEraseFeather()
 {
 	m_skin->finishEraseFeather();
+	m_featherDrawer->rebuildBuffer(m_skin);
 }
 //:~
