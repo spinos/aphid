@@ -88,6 +88,11 @@ float MlCalamus::scale() const
 	return m_scale;
 }
 
+float MlCalamus::realScale() const
+{
+	return m_scale * m_geo->getLength();
+}
+
 unsigned MlCalamus::bufferStart() const
 {
 	return m_bufStart;

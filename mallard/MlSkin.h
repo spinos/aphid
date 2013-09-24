@@ -26,7 +26,7 @@ public:
 	void discardActive();
 	
 	void growFeather(const Vector3F & direction);
-	void combFeather(const Vector3F & direction, const float & pitch);
+	void combFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	
 	void finishCreateFeather();
 	void finishEraseFeather();
@@ -38,7 +38,8 @@ public:
 	MlCalamus * getActive(unsigned idx) const;
 	
 	void getPointOnBody(MlCalamus * c, Vector3F &p) const;
-	Matrix33F tangentFrame(MlCalamus * c) const;
+	Matrix33F tangentSpace(MlCalamus * c) const;
+	Matrix33F rotationFrame(MlCalamus * c) const;
 	
 	virtual void resetCollisionRegion(unsigned idx);
 	virtual void resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d);

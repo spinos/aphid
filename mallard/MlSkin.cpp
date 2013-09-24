@@ -129,7 +129,7 @@ void MlSkin::growFeather(const Vector3F & direction)
 	float rotX;
 	for(unsigned i =0; i < num; i++) {
 		MlCalamus * c = getCreated(i);
-		Matrix33F space = tangentFrame(c);
+		Matrix33F space = tangentSpace(c);
         space.inverse();
 		
 		d = space.transform(direction);
@@ -139,25 +139,33 @@ void MlSkin::growFeather(const Vector3F & direction)
     }
 }
 
-void MlSkin::combFeather(const Vector3F & direction, const float & pitch)
+void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, const float & radius)
 {
 	if(direction.length() < 10e-3) return;
 	const unsigned num = numActive();
 	if(num < 1) return;
-	const float scale = direction.length();
-    
-	Vector3F d;
-	float rotX;
+	
+	Vector3F p, d;
+	float rotX, drop;
 	for(unsigned i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
-		Matrix33F space = tangentFrame(c);
-        space.inverse();
 		
-		d = space.transform(direction);
-		rotX = d.angleX();
+		getPointOnBody(c, p);
+		drop = Vector3F(p, center).length() / radius;
+		drop = 1.f - drop * drop;
+		
+		Matrix33F space = tangentSpace(c);
+		
+		Vector3F zdir(0.f, 0.f, c->realScale());
+		zdir = rotationFrame(c).transform(zdir);
+		zdir += direction * drop * .1f * c->realScale();
+		
+		space.inverse();
+		
+		zdir = space.transform(zdir);
+		rotX = zdir.angleX();
+
 		c->setRotateX(rotX);
-		c->setScale(scale);
-		c->setRotateY(pitch);
     }
 }
 
@@ -316,9 +324,17 @@ void MlSkin::getPointOnBody(MlCalamus * c, Vector3F &p) const
 	m_body->pointOnPatch(c->faceIdx(), c->patchU(), c->patchV(), p);
 }
 
-Matrix33F MlSkin::tangentFrame(MlCalamus * c) const
+Matrix33F MlSkin::tangentSpace(MlCalamus * c) const
 {
 	return m_body->tangentFrame(c->faceIdx(), c->patchU(), c->patchV());
+}
+
+Matrix33F MlSkin::rotationFrame(MlCalamus * c) const
+{
+	Matrix33F frm;
+	frm.rotateX(c->rotateX());
+	frm.multiply(m_body->tangentFrame(c->faceIdx(), c->patchU(), c->patchV()));
+	return frm;
 }
 
 bool MlSkin::hasFeatherCreated() const

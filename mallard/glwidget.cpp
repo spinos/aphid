@@ -391,7 +391,7 @@ void GLWidget::clientMouseInput()
 	}
 	else if(interactMode() == ToolContext::CombBodyContourFeather) {
 		brush()->setToeByIntersectNormal(&ray);
-		m_skin->combFeather(brush()->toeDisplacement(), brush()->getPitch());
+		m_skin->combFeather(brush()->toeDisplacement(), brush()->heelPosition(), brush()->getRadius());
 		m_featherDrawer->updateActive(m_skin);
 	}
 }

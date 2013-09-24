@@ -25,6 +25,7 @@ public:
 	float rotateX() const;
 	float rotateY() const;
 	float scale() const;
+	float realScale() const;
 	unsigned bufferStart() const;
 	
 	void setFeather(MlFeather * geo);

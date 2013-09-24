@@ -41,12 +41,8 @@ void MlDrawer::drawAFeather(MlSkin * skin, MlCalamus * c) const
 {
 	Vector3F p;
 	skin->getPointOnBody(c, p);
-	Matrix33F frm = skin->tangentFrame(c);
 	
-	Matrix33F space;
-	space.rotateX(c->rotateX());
-	
-	space.multiply(frm);
+	Matrix33F space = skin->rotationFrame(c);
 	
 	c->collideWith(skin);
 	c->computeFeatherWorldP(p, space);
@@ -157,12 +153,8 @@ void MlDrawer::tessellate(MlSkin * skin, MlCalamus * c)
 {
 	Vector3F p;
 	skin->getPointOnBody(c, p);
-	Matrix33F frm = skin->tangentFrame(c);
 
-	Matrix33F space;
-	space.rotateX(c->rotateX());
-
-	space.multiply(frm);
+	Matrix33F space = skin->rotationFrame(c);
 
 	c->collideWith(skin);
 	c->computeFeatherWorldP(p, space);
