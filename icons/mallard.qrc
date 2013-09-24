@@ -22,5 +22,7 @@
         <file>decreasecourse.png</file>
         <file>ruler.png</file>
         <file>rulerActive.png</file>
+        <file>pitch.png</file>
+        <file>pitchActive.png</file>
     </qresource>
 </RCC>

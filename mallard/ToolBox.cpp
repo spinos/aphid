@@ -93,9 +93,17 @@ void ToolBox::createContext()
 	scaleContour->setIconIndex(0);
 	scaleContour->setContext(ScaleBodyContourFeather);
 	
+	ContextIconFrame * bendContour = new ContextIconFrame(this);
+	
+	bendContour->addIconFile(":pitch.png");
+	bendContour->addIconFile(":pitchActive.png");
+	bendContour->setIconIndex(0);
+	bendContour->setContext(PitchBodyContourFeather);
+	
 	m_contextFrames.push_back(createContour);
 	m_contextFrames.push_back(combContour);
 	m_contextFrames.push_back(scaleContour);
+	m_contextFrames.push_back(bendContour);
 	m_contextFrames.push_back(eraseContour);
 }
 

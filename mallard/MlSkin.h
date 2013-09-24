@@ -28,6 +28,7 @@ public:
 	void growFeather(const Vector3F & direction);
 	void combFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	void scaleFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
+	void pitchFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	
 	void finishCreateFeather();
 	void finishEraseFeather();

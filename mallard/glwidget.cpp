@@ -366,7 +366,7 @@ void GLWidget::clientSelect()
 		selectFeather();
 		m_featherDrawer->hideActive(m_skin);
 	}
-	else if(interactMode() == ToolContext::CombBodyContourFeather || interactMode() == ToolContext::ScaleBodyContourFeather) {
+	else if(interactMode() == ToolContext::CombBodyContourFeather || interactMode() == ToolContext::ScaleBodyContourFeather || interactMode() == ToolContext::PitchBodyContourFeather) {
 		hitTest(ray, hit);
 		m_skin->discardActive();
 		selectFeather();
@@ -397,6 +397,11 @@ void GLWidget::clientMouseInput()
 	else if(interactMode() == ToolContext::ScaleBodyContourFeather) {
 		brush()->setToeByIntersect(&ray);
 		m_skin->scaleFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
+		m_featherDrawer->updateActive(m_skin);
+	}
+	else if(interactMode() == ToolContext::PitchBodyContourFeather) {
+		brush()->setToeByIntersect(&ray);
+		m_skin->pitchFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
 		m_featherDrawer->updateActive(m_skin);
 	}
 }

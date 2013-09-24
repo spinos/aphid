@@ -10,7 +10,8 @@ public:
 		CreateBodyContourFeather = 4,
 		CombBodyContourFeather = 5,
 		EraseBodyContourFeather = 6,
-		ScaleBodyContourFeather = 7
+		ScaleBodyContourFeather = 7,
+		PitchBodyContourFeather = 8
     };
     
     enum ActionRank {
