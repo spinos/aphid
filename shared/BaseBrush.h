@@ -20,7 +20,7 @@ public:
 	void setMaxToeFactor(float x);
 	void setNumDarts(unsigned x);
 	void resetToe();
-	void setToeByIntersectNormal(const Ray * r);
+	void setToeByIntersect(const Ray * r, bool useNormal = true);
 	
 	Matrix44F getSpace() const;
 	float getRadius() const;
@@ -32,13 +32,15 @@ public:
 	const Vector3F toePosition() const;
 	const Vector3F normal() const;
 	const Vector3F toeDisplacement() const;
+	const Vector3F toeDisplacementDelta();
 	const float length() const;
 	void getDartPoint(unsigned idx, Vector3F & p) const;
+	
 private:
 	char ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float d) const;
 private:
 	Matrix44F m_space;
-	Vector3F m_toeWorldPos;
+	Vector3F m_toeWorldPos, m_previousToeWorldP;
 	float m_radius, m_pitch, m_maxToeFactor;
 	Vector3F * m_darts;
 	unsigned m_numDarts;

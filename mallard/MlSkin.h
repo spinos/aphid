@@ -27,6 +27,7 @@ public:
 	
 	void growFeather(const Vector3F & direction);
 	void combFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
+	void scaleFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	
 	void finishCreateFeather();
 	void finishEraseFeather();
@@ -48,6 +49,7 @@ public:
 	bool hasFeatherCreated() const;
 	unsigned numCreated() const;
 	MlCalamus * getCreated(unsigned idx) const;
+	
 	void verbose() const;
 private:
 	bool createFeather(MlCalamus & ori);

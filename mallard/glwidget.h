@@ -65,7 +65,7 @@ public:
     virtual PatchMesh * mesh() const;
 	
 	void finishEraseFeather();
-	void finishCombFeather();
+	void deselectFeather();
 public slots:
     
 protected:

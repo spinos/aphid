@@ -145,7 +145,7 @@ void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, co
 	const unsigned num = numActive();
 	if(num < 1) return;
 	
-	Vector3F p, d;
+	Vector3F p;
 	float rotX, drop;
 	for(unsigned i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
@@ -166,6 +166,41 @@ void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, co
 		rotX = zdir.angleX();
 
 		c->setRotateX(rotX);
+    }
+}
+
+void MlSkin::scaleFeather(const Vector3F & direction, const Vector3F & center, const float & radius)
+{
+	if(direction.length() < 10e-3) return;
+	const unsigned num = numActive();
+	if(num < 1) return;
+	
+	Vector3F p, d;
+	float drop;
+	unsigned i;
+	
+	float activeMeanScale = 0.f;
+	for(i =0; i < num; i++) {
+		MlCalamus * c = getActive(i);
+		activeMeanScale += c->realScale();
+	}
+	activeMeanScale /= num;
+	
+	for(i =0; i < num; i++) {
+		MlCalamus * c = getActive(i);
+		
+		getPointOnBody(c, p);
+		drop = Vector3F(p, center).length() / radius;
+		drop = 1.f - drop * drop;
+		
+		Matrix33F space = rotationFrame(c);
+		Vector3F zdir(0.f, 0.f, 1.f);
+		zdir = space.transform(zdir);
+
+		float fac = 0.1f;
+		if(direction.dot(zdir) < 0.f) fac = -0.1f;
+
+		c->setScale((fac + 1.f) * activeMeanScale * drop + c->realScale() * (1.f - drop));
     }
 }
 

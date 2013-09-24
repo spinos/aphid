@@ -86,8 +86,16 @@ void ToolBox::createContext()
 	eraseContour->setIconIndex(0);
 	eraseContour->setContext(EraseBodyContourFeather);
 	
+	ContextIconFrame * scaleContour = new ContextIconFrame(this);
+	
+	scaleContour->addIconFile(":ruler.png");
+	scaleContour->addIconFile(":rulerActive.png");
+	scaleContour->setIconIndex(0);
+	scaleContour->setContext(ScaleBodyContourFeather);
+	
 	m_contextFrames.push_back(createContour);
 	m_contextFrames.push_back(combContour);
+	m_contextFrames.push_back(scaleContour);
 	m_contextFrames.push_back(eraseContour);
 }
 

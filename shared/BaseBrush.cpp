@@ -115,6 +115,7 @@ float BaseBrush::minDartDistance() const
 void BaseBrush::resetToe()
 {
     m_toeWorldPos = heelPosition();
+	m_previousToeWorldP = m_toeWorldPos;
 }
 
 const Vector3F BaseBrush::heelPosition() const
@@ -132,10 +133,18 @@ const Vector3F BaseBrush::normal() const
     return m_space.getFront();
 }
 
-void BaseBrush::setToeByIntersectNormal(const Ray * r)
+void BaseBrush::setToeByIntersect(const Ray * r, bool useNormal)
 {
-    Plane pl(normal(), heelPosition());
-    Vector3F hit, d;
+	Vector3F pn = normal();
+	
+	if(!useNormal) {
+		pn = r->m_dir;
+		pn.reverse();
+		pn.normalize();
+	}
+	
+	Plane pl(pn, heelPosition());
+	Vector3F hit, d;
 	float dd;
     float t;
     if(pl.rayIntersect(*r, hit, t)) {
@@ -162,3 +171,12 @@ const Vector3F BaseBrush::toeDisplacement() const
 {
     return Vector3F(heelPosition(), toePosition());
 }
+
+const Vector3F BaseBrush::toeDisplacementDelta()
+{
+    Vector3F d0 = m_previousToeWorldP;
+	Vector3F d1 = m_toeWorldPos;
+	m_previousToeWorldP = m_toeWorldPos;
+	return d1 - d0;
+}
+

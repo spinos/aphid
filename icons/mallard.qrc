@@ -1,24 +1,26 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-    <file>brush.png</file>
-    <file>brushActive.png</file>
-    <file>comb.png</file>
-    <file>combActive.png</file>
-    <file>eraser.png</file>
-    <file>eraserActive.png</file>
-    <file>seledge.png</file>
-    <file>seledgeact.png</file>
-    <file>setwale.png</file>
-    <file>setwaleact.png</file>
-    <file>setsinglewale.png</file>
-    <file>setsinglewaleact.png</file>
-    <file>increasewaleact.png</file>
-    <file>increasewale.png</file>
-    <file>decreasewaleact.png</file>
-    <file>decreasewale.png</file>
-    <file>increasecourseact.png</file>
-    <file>increasecourse.png</file>
-    <file>decreasecourseact.png</file>
-    <file>decreasecourse.png</file>
-</qresource>
+<RCC>
+    <qresource prefix="/">
+        <file>brush.png</file>
+        <file>brushActive.png</file>
+        <file>comb.png</file>
+        <file>combActive.png</file>
+        <file>eraser.png</file>
+        <file>eraserActive.png</file>
+        <file>seledge.png</file>
+        <file>seledgeact.png</file>
+        <file>setwale.png</file>
+        <file>setwaleact.png</file>
+        <file>setsinglewale.png</file>
+        <file>setsinglewaleact.png</file>
+        <file>increasewaleact.png</file>
+        <file>increasewale.png</file>
+        <file>decreasewaleact.png</file>
+        <file>decreasewale.png</file>
+        <file>increasecourseact.png</file>
+        <file>increasecourse.png</file>
+        <file>decreasecourseact.png</file>
+        <file>decreasecourse.png</file>
+        <file>ruler.png</file>
+        <file>rulerActive.png</file>
+    </qresource>
 </RCC>

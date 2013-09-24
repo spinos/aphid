@@ -284,7 +284,7 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->setGrey(1.f);
-	getDrawer()->edge(mesh());
+	//getDrawer()->edge(mesh());
 	getDrawer()->m_surfaceProfile.apply();
 	getDrawer()->setColor(0.37f, .59f, .9f);
 	m_bezierDrawer->drawBuffer();
@@ -366,7 +366,7 @@ void GLWidget::clientSelect()
 		selectFeather();
 		m_featherDrawer->hideActive(m_skin);
 	}
-	else if(interactMode() == ToolContext::CombBodyContourFeather) {
+	else if(interactMode() == ToolContext::CombBodyContourFeather || interactMode() == ToolContext::ScaleBodyContourFeather) {
 		hitTest(ray, hit);
 		m_skin->discardActive();
 		selectFeather();
@@ -381,7 +381,7 @@ void GLWidget::clientMouseInput()
 		pickupComponent(ray, hit);
 	}
 	else if(interactMode() == ToolContext::CreateBodyContourFeather) {
-		brush()->setToeByIntersectNormal(&ray);
+		brush()->setToeByIntersect(&ray);
 		m_skin->growFeather(brush()->toeDisplacement());
 	}
 	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
@@ -390,8 +390,13 @@ void GLWidget::clientMouseInput()
 		m_featherDrawer->hideActive(m_skin);
 	}
 	else if(interactMode() == ToolContext::CombBodyContourFeather) {
-		brush()->setToeByIntersectNormal(&ray);
+		brush()->setToeByIntersect(&ray);
 		m_skin->combFeather(brush()->toeDisplacement(), brush()->heelPosition(), brush()->getRadius());
+		m_featherDrawer->updateActive(m_skin);
+	}
+	else if(interactMode() == ToolContext::ScaleBodyContourFeather) {
+		brush()->setToeByIntersect(&ray);
+		m_skin->scaleFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
 		m_featherDrawer->updateActive(m_skin);
 	}
 }
@@ -453,7 +458,7 @@ void GLWidget::finishEraseFeather()
 	m_featherDrawer->rebuildBuffer(m_skin);
 }
 
-void GLWidget::finishCombFeather()
+void GLWidget::deselectFeather()
 {
 	m_skin->discardActive();
 }
