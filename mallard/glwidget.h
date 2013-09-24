@@ -65,7 +65,7 @@ public:
     virtual PatchMesh * mesh() const;
 	
 	void finishEraseFeather();
-	
+	void finishCombFeather();
 public slots:
     
 protected:
@@ -73,8 +73,8 @@ protected:
 
 //! [3]
 private:
+	void selectFeather();
 	void addFeather();
-	void hideFeather();
 private:
 	ZEXRImage* _image;
 	BezierDrawer * m_bezierDrawer;

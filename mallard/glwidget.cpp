@@ -363,7 +363,13 @@ void GLWidget::clientSelect()
 	}
 	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
 		hitTest(ray, hit);
-		hideFeather();
+		selectFeather();
+		m_featherDrawer->hideActive(m_skin);
+	}
+	else if(interactMode() == ToolContext::CombBodyContourFeather) {
+		hitTest(ray, hit);
+		m_skin->discardActive();
+		selectFeather();
 	}
 }
 
@@ -380,7 +386,13 @@ void GLWidget::clientMouseInput()
 	}
 	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
 		hitTest(ray, hit);
-		hideFeather();
+		selectFeather();
+		m_featherDrawer->hideActive(m_skin);
+	}
+	else if(interactMode() == ToolContext::CombBodyContourFeather) {
+		brush()->setToeByIntersectNormal(&ray);
+		m_skin->combFeather(brush()->toeDisplacement(), brush()->getPitch());
+		m_featherDrawer->updateActive(m_skin);
 	}
 }
 
@@ -397,6 +409,21 @@ void GLWidget::clientDeselect()
 PatchMesh * GLWidget::mesh() const
 {
 	return m_accmesh;
+}
+
+void GLWidget::selectFeather()
+{
+	IntersectionContext * ctx = getIntersectionContext();
+    if(!ctx->m_success) return;
+	
+	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
+	brush()->resetToe();
+	
+	Vector3F rr = getIncidentRay()->m_dir;
+	rr.reverse();
+	if(rr.dot(brush()->normal()) < .34f) return;
+	
+	m_skin->selectAround(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
 }
 
 void GLWidget::addFeather()
@@ -419,21 +446,15 @@ void GLWidget::addFeather()
 	m_skin->floodAround(ac, iface, ctx->m_hitP, brush()->getRadius(), brush()->minDartDistance());
 }
 
-void GLWidget::hideFeather()
-{
-	IntersectionContext * ctx = getIntersectionContext();
-    if(!ctx->m_success) return;
-	
-	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
-	brush()->resetToe();
-	
-	m_skin->selectAround(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
-	m_featherDrawer->hideActive(m_skin);
-}
-
 void GLWidget::finishEraseFeather()
 {
 	m_skin->finishEraseFeather();
+	m_skin->discardActive();
 	m_featherDrawer->rebuildBuffer(m_skin);
+}
+
+void GLWidget::finishCombFeather()
+{
+	m_skin->discardActive();
 }
 //:~

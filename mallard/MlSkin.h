@@ -26,6 +26,8 @@ public:
 	void discardActive();
 	
 	void growFeather(const Vector3F & direction);
+	void combFeather(const Vector3F & direction, const float & pitch);
+	
 	void finishCreateFeather();
 	void finishEraseFeather();
 	unsigned numFeathers() const;

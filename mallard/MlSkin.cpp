@@ -128,7 +128,7 @@ void MlSkin::growFeather(const Vector3F & direction)
 	Vector3F d;
 	float rotX;
 	for(unsigned i =0; i < num; i++) {
-    MlCalamus * c = getCreated(i);
+		MlCalamus * c = getCreated(i);
 		Matrix33F space = tangentFrame(c);
         space.inverse();
 		
@@ -136,6 +136,28 @@ void MlSkin::growFeather(const Vector3F & direction)
 		rotX = d.angleX();
 		c->setRotateX(rotX);
 		c->setScale(scale);
+    }
+}
+
+void MlSkin::combFeather(const Vector3F & direction, const float & pitch)
+{
+	if(direction.length() < 10e-3) return;
+	const unsigned num = numActive();
+	if(num < 1) return;
+	const float scale = direction.length();
+    
+	Vector3F d;
+	float rotX;
+	for(unsigned i =0; i < num; i++) {
+		MlCalamus * c = getActive(i);
+		Matrix33F space = tangentFrame(c);
+        space.inverse();
+		
+		d = space.transform(direction);
+		rotX = d.angleX();
+		c->setRotateX(rotX);
+		c->setScale(scale);
+		c->setRotateY(pitch);
     }
 }
 
@@ -149,7 +171,6 @@ void MlSkin::finishCreateFeather()
 void MlSkin::finishEraseFeather()
 {
 	if(numActive() == numFeathers()) {
-		discardActive();
 		m_numFeather = 0;
 		m_calamus->setIndex(0);
 		resetFaceCalamusIndirection();
@@ -167,7 +188,6 @@ void MlSkin::finishEraseFeather()
 		}
 		m_numFeather--;
 	}
-	discardActive();
 	
 	m_calamus->setIndex(m_numFeather);
 	computeFaceCalamusIndirection();

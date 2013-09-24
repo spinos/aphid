@@ -81,6 +81,8 @@ void Window::receiveToolContext(int a)
 {
 	if(m_tools->previousContext() == ToolContext::EraseBodyContourFeather)
 		glWidget->finishEraseFeather();
+	else if(m_tools->previousContext() == ToolContext::CombBodyContourFeather)
+		glWidget->finishCombFeather();
 }
 
 void Window::receiveToolAction(int a)

@@ -87,6 +87,30 @@ void MlDrawer::hideActive(MlSkin * skin)
 	}
 }
 
+void MlDrawer::updateActive(MlSkin * skin)
+{
+	const unsigned num = skin->numActive();
+	if(num < 1) return;
+	
+	unsigned i;
+	for(i = 0; i < num; i++) {
+		MlCalamus * c = skin->getActive(i);
+		computeAFeather(skin, c);
+	}
+}
+
+void MlDrawer::computeAFeather(MlSkin * skin, MlCalamus * c)
+{
+	tessellate(skin, c);
+	
+	const unsigned nvpf = m_featherTess->numVertices();
+	const unsigned startv = indices()[c->bufferStart()];
+	for(unsigned i = 0; i < nvpf; i++) {
+		vertices()[startv + i] = m_featherTess->vertices()[i];
+		normals()[startv + i] = m_featherTess->normals()[i];
+	}
+}
+
 void MlDrawer::rebuildBuffer(MlSkin * skin)
 {
     const unsigned nf = skin->numFeathers();
@@ -106,19 +130,7 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 	unsigned curv = 0, curi = 0, nvpf, nipf;
 	for(i = 0; i < nf; i++) {
 		MlCalamus * c = skin->getCalamus(i);
-		Vector3F p;
-		skin->getPointOnBody(c, p);
-		Matrix33F frm = skin->tangentFrame(c);
-	
-		Matrix33F space;
-		space.rotateX(c->rotateX());
-	
-		space.multiply(frm);
-	
-		c->collideWith(skin);
-		c->computeFeatherWorldP(p, space);
-		m_featherTess->setFeather(c->feather());
-		m_featherTess->evaluate(c->feather());
+		tessellate(skin, c);
 		
 		nvpf = m_featherTess->numVertices();
 		for(j = 0; j < nvpf; j++) {
@@ -139,4 +151,21 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 	
 	//std::cout<<"nv "<< curv;
 	//std::cout<<"ni "<< curi;
+}
+
+void MlDrawer::tessellate(MlSkin * skin, MlCalamus * c)
+{
+	Vector3F p;
+	skin->getPointOnBody(c, p);
+	Matrix33F frm = skin->tangentFrame(c);
+
+	Matrix33F space;
+	space.rotateX(c->rotateX());
+
+	space.multiply(frm);
+
+	c->collideWith(skin);
+	c->computeFeatherWorldP(p, space);
+	m_featherTess->setFeather(c->feather());
+	m_featherTess->evaluate(c->feather());
 }
