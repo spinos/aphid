@@ -25,15 +25,14 @@ MlDrawer::~MlDrawer()
 
 void MlDrawer::drawFeather(MlSkin * skin) const
 {
-	const unsigned nf = skin->numFeathers();
-	if(nf > 0) drawBuffer();
+	if(skin->numFeathers() > 0) drawBuffer();
 	
-	const unsigned num = skin->numActiveFeather();
+	const unsigned num = skin->numCreated();
 	if(num < 1) return;
 	
 	unsigned i;
 	for(i = 0; i < num; i++) {
-		MlCalamus * c = skin->getActive(i);
+		MlCalamus * c = skin->getCreated(i);
 		drawAFeather(skin, c);
 	}
 }

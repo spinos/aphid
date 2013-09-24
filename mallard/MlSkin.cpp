@@ -13,7 +13,7 @@
 #include <QuickSort.h>
 #include "MlCalamusArray.h"
 
-MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_hasFeatherCreated(false)
+MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_numCreatedFeather(0)
 {
     m_activeIndices.clear();
 	m_calamus = new MlCalamusArray; 
@@ -108,24 +108,24 @@ bool MlSkin::createFeather(MlCalamus & ori)
 	*c = ori;
 	m_calamus->next();
 	
-	m_activeIndices.push_back(m_numFeather);
 	m_numFeather++;
+	m_numCreatedFeather++;
 	
-	m_hasFeatherCreated = true;
 	return true;
 }
 
 void MlSkin::growFeather(const Vector3F & direction)
 {
-    if(m_activeIndices.size() < 1) return;
+	if(!hasFeatherCreated()) return;
+	const unsigned num = numCreated();
 	if(direction.length() < 10e-3) return;
 	
 	const float scale = direction.length();
     
 	Vector3F d;
 	float rotX;
-    for(std::vector<unsigned>::iterator it = m_activeIndices.begin(); it != m_activeIndices.end(); ++it) {
-        MlCalamus * c = m_calamus->asCalamus(*it);
+	for(unsigned i =0; i < num; i++) {
+    MlCalamus * c = getCreated(i);
 		Matrix33F space = tangentFrame(c);
         space.inverse();
 		
@@ -151,8 +151,7 @@ void MlSkin::finishCreateFeather()
 		}
 	}
 	
-	m_activeIndices.clear();
-	m_hasFeatherCreated = false;
+	m_numCreatedFeather = 0;
 }
 
 void MlSkin::finishEraseFeather()
@@ -259,7 +258,17 @@ Matrix33F MlSkin::tangentFrame(MlCalamus * c) const
 
 bool MlSkin::hasFeatherCreated() const
 {
-    return m_hasFeatherCreated;
+    return m_numCreatedFeather > 0;
+}
+
+unsigned MlSkin::numCreated() const
+{
+	return m_numCreatedFeather;
+}
+
+MlCalamus * MlSkin::getCreated(unsigned idx) const
+{
+	return m_calamus->asCalamus(m_numFeather - m_numCreatedFeather + idx);
 }
 
 void MlSkin::verbose() const

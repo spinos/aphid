@@ -43,6 +43,8 @@ public:
 	virtual void closestPoint(const Vector3F & origin, IntersectionContext * ctx) const;
 	
 	bool hasFeatherCreated() const;
+	unsigned numCreated() const;
+	MlCalamus * getCreated(unsigned idx) const;
 	void verbose() const;
 private:
 	bool createFeather(MlCalamus & ori);
@@ -51,9 +53,8 @@ private:
 private:
 	MlCalamusArray * m_calamus;
 	std::vector<unsigned> m_activeIndices;
-	unsigned m_numFeather;
+	unsigned m_numFeather, m_numCreatedFeather;
 	AccPatchMesh * m_body;
 	MeshTopology * m_topo;
 	unsigned * m_faceCalamusStart;
-	bool m_hasFeatherCreated;
 };
