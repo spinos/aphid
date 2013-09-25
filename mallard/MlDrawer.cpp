@@ -64,10 +64,18 @@ void MlDrawer::drawAFeather(MlSkin * skin, MlCalamus * c) const
 void MlDrawer::hideAFeather(MlCalamus * c)
 {
 	const unsigned loc = c->bufferStart();
+	
+	setIndex(loc);
+	
 	m_featherTess->setFeather(c->feather());
-	const unsigned nipf = m_featherTess->numIndices();
-	for(unsigned i = 0; i < nipf; i++) {
-		indices()[loc + i] = indices()[loc];
+	
+	unsigned i;
+	const unsigned nvpf = m_featherTess->numIndices();
+	for(i = 0; i < nvpf; i++) {
+		vertices()[0] = 0.f;
+		vertices()[1] = 0.f;
+		vertices()[2] = 0.f;
+		next();
 	}
 }
 
@@ -99,50 +107,62 @@ void MlDrawer::computeAFeather(MlSkin * skin, MlCalamus * c)
 {
 	tessellate(skin, c);
 	
-	const unsigned nvpf = m_featherTess->numVertices();
-	const unsigned startv = indices()[c->bufferStart()];
-	for(unsigned i = 0; i < nvpf; i++) {
-		vertices()[startv + i] = m_featherTess->vertices()[i];
-		normals()[startv + i] = m_featherTess->normals()[i];
+	const unsigned nvpf = m_featherTess->numIndices();
+	const unsigned startv = c->bufferStart();
+	setIndex(startv);
+	
+	unsigned i, j;
+	Vector3F v;
+	for(i = 0; i < nvpf; i++) {
+		j = m_featherTess->indices()[i];
+		v = m_featherTess->vertices()[j];
+		vertices()[0] = v.x;
+		vertices()[1] = v.y;
+		vertices()[2] = v.z;
+		
+		v = m_featherTess->normals()[j];
+		normals()[0] = v.x;
+		normals()[1] = v.y;
+		normals()[2] = v.z;
+		
+		next();
 	}
 }
 
-void MlDrawer::rebuildBuffer(MlSkin * skin)
+void MlDrawer::addToBuffer(MlSkin * skin)
 {
-    const unsigned nf = skin->numFeathers();
-	if(nf < 1) return;
+	const unsigned num = skin->numCreated();
+	if(num < 1) return;
 	
-	unsigned nv = 0, ni = 0;
-    unsigned i, j;
-	for(i = 0; i < nf; i++) {
-		MlCalamus * c = skin->getCalamus(i);
-		m_featherTess->setFeather(c->feather());
-		nv += m_featherTess->numVertices();
-		ni += m_featherTess->numIndices();
-	}
+	const unsigned loc = taken();
+	setIndex(loc);
 	
-	createBuffer(nv, ni);
-	
-	unsigned curv = 0, curi = 0, nvpf, nipf;
-	for(i = 0; i < nf; i++) {
-		MlCalamus * c = skin->getCalamus(i);
+	unsigned i, j, k, nvpf;
+	Vector3F v;
+	for(i = 0; i < num; i++) {
+		MlCalamus * c = skin->getCreated(i);
 		tessellate(skin, c);
 		
-		nvpf = m_featherTess->numVertices();
+		c->setBufferStart(index());
+		
+		nvpf = m_featherTess->numIndices();
+		
+		expandBy(nvpf);
+		
 		for(j = 0; j < nvpf; j++) {
-		    vertices()[curv + j] = m_featherTess->vertices()[j];
-		    normals()[curv + j] = m_featherTess->normals()[j];
+			k = m_featherTess->indices()[j];
+			v = m_featherTess->vertices()[k];
+		    vertices()[0] = v.x;
+			vertices()[1] = v.y;
+			vertices()[2] = v.z;
+			
+			v = m_featherTess->normals()[k];
+		    normals()[0] = v.x;
+			normals()[1] = v.y;
+			normals()[2] = v.z;
+			
+			next();
 		}
-		
-		nipf = m_featherTess->numIndices();
-		for(j = 0; j < nipf; j++) {
-		    indices()[curi + j] = curv + m_featherTess->indices()[j];
-		}
-		
-		c->setBufferStart(curi);
-		
-		curv += nvpf;
-		curi += nipf;
 	}
 }
 

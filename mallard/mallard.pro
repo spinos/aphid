@@ -76,6 +76,7 @@ HEADERS       = ../shared/AllMath.h \
 				../shared/DrawBuffer.h \
 				../shared/QIntEditSlider.h \
                 ../shared/QDoubleEditSlider.h \
+				../shared/BlockDrawBuffer.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -179,6 +180,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				../shared/DrawBuffer.cpp \
 				../shared/QIntEditSlider.cpp \
                 ../shared/QDoubleEditSlider.cpp \
+				../shared/BlockDrawBuffer.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \

@@ -20,6 +20,7 @@ BlockDrawBuffer::BlockDrawBuffer()
 	m_vertexPtr = m_blocks[0]->alignedV;
 	m_normalPtr = m_blocks[0]->alignedN;
 	m_current = 0;
+	m_taken = 0;
 }
 
 BlockDrawBuffer::~BlockDrawBuffer() 
@@ -59,6 +60,8 @@ void BlockDrawBuffer::expandBy(unsigned size)
 			m_blocks.push_back(new PtrTup);
 		}
 	}
+	if(m_current + size > m_taken)
+		m_taken = m_current + size;
 }
 
 void BlockDrawBuffer::begin()
@@ -71,6 +74,7 @@ void BlockDrawBuffer::begin()
 void BlockDrawBuffer::next()
 {
 	m_current++;
+	if(end()) return;
 	if(m_current % numElementPerBlock() == 0) {
 		unsigned blockIdx = m_current / numElementPerBlock();
 		m_vertexPtr = m_blocks[blockIdx]->alignedV;
@@ -87,6 +91,15 @@ char BlockDrawBuffer::end() const
 	return m_current >= capacity();
 }
 
+void BlockDrawBuffer::setIndex(unsigned index)
+{
+	m_current = index;
+	unsigned blockIdx = m_current / numElementPerBlock();
+	unsigned offset = m_current % numElementPerBlock();
+	m_vertexPtr = m_blocks[blockIdx]->alignedV + offset * 12;
+	m_normalPtr = m_blocks[blockIdx]->alignedN + offset * 12;
+}
+
 void BlockDrawBuffer::drawBuffer() const
 {
 	for(unsigned i = 0; i < numBlock(); i++) {
@@ -96,7 +109,10 @@ void BlockDrawBuffer::drawBuffer() const
 		glEnableClientState( GL_NORMAL_ARRAY );
 		glNormalPointer( GL_FLOAT, 0, (float *)m_blocks[i]->alignedN );
 	
-		glDrawArrays( GL_QUADS, 0, numElementPerBlock());
+		if(i == numBlock() - 1) { //std::cout<<" d "<<m_taken % numElementPerBlock();
+			glDrawArrays( GL_QUADS, 0, m_taken % numElementPerBlock());}
+		else 
+			glDrawArrays( GL_QUADS, 0, numElementPerBlock());
 	
 		glDisableClientState( GL_NORMAL_ARRAY );
 		glDisableClientState( GL_VERTEX_ARRAY );		
@@ -111,4 +127,14 @@ float * BlockDrawBuffer::vertices()
 float * BlockDrawBuffer::normals()
 {
 	return (float *)m_normalPtr;
+}
+
+unsigned BlockDrawBuffer::taken() const
+{
+	return m_taken;
+}
+
+unsigned BlockDrawBuffer::index() const
+{
+	return m_current;
 }

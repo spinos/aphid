@@ -420,8 +420,8 @@ void GLWidget::clientDeselect()
 {
     if(interactMode() == ToolContext::CreateBodyContourFeather) {
 		if(m_skin->hasFeatherCreated()) {
-		    m_skin->finishCreateFeather();
-		    m_featherDrawer->rebuildBuffer(m_skin);
+		    m_featherDrawer->addToBuffer(m_skin);
+			m_skin->finishCreateFeather();
 		}
 	}
 }
@@ -466,7 +466,7 @@ void GLWidget::finishEraseFeather()
 {
 	m_skin->finishEraseFeather();
 	m_skin->discardActive();
-	m_featherDrawer->rebuildBuffer(m_skin);
+	//m_featherDrawer->rebuildBuffer(m_skin);
 }
 
 void GLWidget::deselectFeather()

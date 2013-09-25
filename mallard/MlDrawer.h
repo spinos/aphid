@@ -9,11 +9,11 @@
 
 #pragma once
 #include <BaseDrawer.h>
-#include <DrawBuffer.h>
+#include <BlockDrawBuffer.h>
 class MlSkin;
 class MlCalamus;
 class MlTessellate;
-class MlDrawer : public BaseDrawer, public DrawBuffer {
+class MlDrawer : public BaseDrawer, public BlockDrawBuffer {
 public:
 	MlDrawer();
 	virtual ~MlDrawer();
@@ -23,7 +23,7 @@ public:
 	void hideActive(MlSkin * skin);
 	void updateActive(MlSkin * skin);
 	void computeAFeather(MlSkin * skin, MlCalamus * c);
-	virtual void rebuildBuffer(MlSkin * skin);
+	void addToBuffer(MlSkin * skin);
 private:
 	void tessellate(MlSkin * skin, MlCalamus * c);
 private:

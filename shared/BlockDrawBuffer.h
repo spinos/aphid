@@ -28,6 +28,10 @@ public:
 	void begin();
 	void next();
 	char end() const;
+	
+	void setIndex(unsigned index);
+	unsigned index() const;
+	unsigned taken() const;
     
 	float * vertices();
 	float * normals();
@@ -37,7 +41,7 @@ private:
 			rawV = new char[32768 * 12 + 31];
 			alignedV = (char *)(((unsigned long)rawV + 32) & (0xffffffff - 31));
 			rawN = new char[32768 * 12 + 31];
-			alignedN = (char *)(((unsigned long)rawV + 32) & (0xffffffff - 31));
+			alignedN = (char *)(((unsigned long)rawN + 32) & (0xffffffff - 31));
 		}
 		~PtrTup() {
 			delete[] rawV;
@@ -51,7 +55,7 @@ private:
 	};
 	
 	std::vector<PtrTup *> m_blocks;
-	unsigned m_current;
+	unsigned m_current, m_taken;
 	char * m_vertexPtr;
 	char * m_normalPtr;
 };
