@@ -189,6 +189,11 @@ void AccPatchMesh::pointOnPatch(unsigned idx, float u, float v, Vector3F & dst) 
 	beziers()[idx].evaluateSurfacePosition(u, v, &dst);
 }
 
+void AccPatchMesh::normalOnPatch(unsigned idx, float u, float v, Vector3F & dst) const
+{
+	beziers()[idx].evaluateSurfaceNormal(u, v, &dst);
+}
+
 Matrix33F AccPatchMesh::tangentFrame(unsigned idx, float u, float v) const
 {
 	return beziers()[idx].tangentFrame(u, v);

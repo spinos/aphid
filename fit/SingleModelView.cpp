@@ -154,6 +154,7 @@ void SingleModelView::loadMesh(std::string filename)
 	ESMUtil::ImportPatch(filename.c_str(), mesh());
 	buildTopology();
 	buildTree();
+	update();
 }
 
 void SingleModelView::saveMesh(std::string filename)

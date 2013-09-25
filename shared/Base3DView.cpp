@@ -422,15 +422,18 @@ void Base3DView::computeIncidentRay(int x, int y)
 void Base3DView::receiveBrushRadius(double x)
 {
     brush()->setRadius(x);
+	update();
 }
 
 void Base3DView::receiveBrushPitch(double x)
 {
     brush()->setPitch(x);
+	update();
 }
 
 void Base3DView::receiveBrushNumSamples(int x)
 {
     brush()->setNumDarts(x);
+	update();
 }
 //:~

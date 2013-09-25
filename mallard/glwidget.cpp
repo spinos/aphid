@@ -344,14 +344,12 @@ void GLWidget::clientDraw()
 void GLWidget::loadMesh(std::string filename)
 {
 	ESMUtil::ImportPatch(filename.c_str(), mesh());
-	std::cout<<"bud to";
 	buildTopology();
-	std::cout<<"set acc";
 	m_accmesh->setup(m_topo);
-	std::cout<<"bud tr";
 	buildTree();
 	m_skin->setBodyMesh(m_accmesh, m_topo);
 	m_bezierDrawer->rebuildBuffer(m_accmesh);
+	update();
 }
 
 void GLWidget::clientSelect()
@@ -433,11 +431,7 @@ void GLWidget::selectFeather()
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
 	brush()->resetToe();
 	
-	Vector3F rr = getIncidentRay()->m_dir;
-	rr.reverse();
-	if(rr.dot(brush()->normal()) < .34f) return;
-	
-	m_skin->selectAround(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
+	m_skin->selectAround(ctx->m_componentIdx, ctx->m_hitP, ctx->m_hitN, brush()->getRadius());
 }
 
 void GLWidget::addFeather()
@@ -457,7 +451,7 @@ void GLWidget::addFeather()
 	MlCalamus ac;
 	ac.setFeather(&fea);
 	ac.setRotateY(brush()->getPitch());
-	m_skin->floodAround(ac, iface, ctx->m_hitP, brush()->getRadius(), brush()->minDartDistance());
+	m_skin->floodAround(ac, iface, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
 }
 
 void GLWidget::finishEraseFeather()

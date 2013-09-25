@@ -34,7 +34,7 @@ public:
 	void setScale(const float & x);
 	void setBufferStart(unsigned x);
 	
-	void collideWith(CollisionRegion * skin);
+	void collideWith(CollisionRegion * skin, const Vector3F & p);
 private:
 	MlFeather * m_geo;
 	unsigned m_faceIdx, m_bufStart;

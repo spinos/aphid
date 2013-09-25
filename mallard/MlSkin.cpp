@@ -38,7 +38,7 @@ AccPatchMesh * MlSkin::bodyMesh() const
 	return m_body;
 }
 
-void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const float & maxD, const float & minD)
+void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, const float & minD)
 {
 	resetCollisionRegionAround(idx, pos, maxD);
 	std::vector<unsigned> growOnFaces;
@@ -48,7 +48,7 @@ void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const 
 		growOnFaces.push_back(regionElementIndex(i));
 	
 	float u, v;
-	Vector3F adart;
+	Vector3F adart, facing;
 	std::vector<Vector3F> darts;
 	for(i = 0; i < growOnFaces.size(); i++) {
 		iface = growOnFaces[i];
@@ -60,6 +60,11 @@ void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const 
 			m_body->pointOnPatch(iface, u, v, adart);
 			
 			if(Vector3F(pos, adart).length() > maxD) continue;
+			
+			m_body->normalOnPatch(iface, u, v, facing);
+			
+			if(facing.dot(nor) < .5f) return;
+			
 			if(isPointTooCloseToExisting(adart, iface, minD)) continue;
 			
 			if(!isDartCloseToExisting(adart, darts, minD)) {
@@ -73,18 +78,21 @@ void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const 
 	darts.clear();
 }
 
-void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const float & maxD)
+void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD)
 {
 	resetCollisionRegionAround(idx, pos, maxD);
 	const unsigned maxCountPerFace = m_numFeather / 2;
 	
-	Vector3F d, p;
+	Vector3F d, p, n;
 	for(unsigned i=0; i < numRegionElements(); i++) {
 		
 		unsigned ifeather = m_faceCalamusStart[regionElementIndex(i)];
 		for(unsigned j = 0; j < maxCountPerFace; j++) {
 			MlCalamus *c = getCalamus(ifeather);
 			if(c->faceIdx() != regionElementIndex(i)) break;
+			
+			getNormalOnBody(c, n);
+			if(n.dot(nor) < .5f) continue;
 			
 			getPointOnBody(c, p);
 			
@@ -385,6 +393,11 @@ MlCalamus * MlSkin::getActive(unsigned idx) const
 void MlSkin::getPointOnBody(MlCalamus * c, Vector3F &p) const
 {
 	m_body->pointOnPatch(c->faceIdx(), c->patchU(), c->patchV(), p);
+}
+
+void MlSkin::getNormalOnBody(MlCalamus * c, Vector3F &p) const
+{
+	m_body->normalOnPatch(c->faceIdx(), c->patchU(), c->patchV(), p);
 }
 
 Matrix33F MlSkin::tangentSpace(MlCalamus * c) const

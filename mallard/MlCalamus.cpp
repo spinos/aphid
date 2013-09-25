@@ -98,8 +98,8 @@ unsigned MlCalamus::bufferStart() const
 	return m_bufStart;
 }
 
-void MlCalamus::collideWith(CollisionRegion * skin)
+void MlCalamus::collideWith(CollisionRegion * skin, const Vector3F & p)
 {
-	skin->resetCollisionRegion(m_faceIdx);
+	skin->resetCollisionRegionAround(m_faceIdx, p, realScale());
 	m_geo->setCollision(skin);
 }

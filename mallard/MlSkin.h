@@ -21,8 +21,8 @@ public:
 	MlSkin();
 	virtual ~MlSkin();
 	void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
-	void floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const float & maxD, const float & minD);
-	void selectAround(unsigned idx, const Vector3F & pos, const float & maxD);
+	void floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, const float & minD);
+	void selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD);
 	void discardActive();
 	
 	void growFeather(const Vector3F & direction);
@@ -40,6 +40,8 @@ public:
 	MlCalamus * getActive(unsigned idx) const;
 	
 	void getPointOnBody(MlCalamus * c, Vector3F &p) const;
+	void getNormalOnBody(MlCalamus * c, Vector3F &p) const;
+	
 	Matrix33F tangentSpace(MlCalamus * c) const;
 	Matrix33F rotationFrame(MlCalamus * c) const;
 	

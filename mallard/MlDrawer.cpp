@@ -44,7 +44,7 @@ void MlDrawer::drawAFeather(MlSkin * skin, MlCalamus * c) const
 	
 	Matrix33F space = skin->rotationFrame(c);
 	
-	c->collideWith(skin);
+	c->collideWith(skin, p);
 	c->computeFeatherWorldP(p, space);
 	m_featherTess->setFeather(c->feather());
 	m_featherTess->evaluate(c->feather());
@@ -153,7 +153,7 @@ void MlDrawer::tessellate(MlSkin * skin, MlCalamus * c)
 
 	Matrix33F space = skin->rotationFrame(c);
 
-	c->collideWith(skin);
+	c->collideWith(skin, p);
 	c->computeFeatherWorldP(p, space);
 	m_featherTess->setFeather(c->feather());
 	m_featherTess->evaluate(c->feather());
