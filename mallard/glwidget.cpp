@@ -63,6 +63,8 @@ PatchSplitContext childUV[4];
 MlFeather fea;
 BaseDrawer * dr;
 
+# define THIRTYTWO_BYTE_ALIGNMENT(X)   ((((char*)(X) - (char*)0)&31)==0)
+
 void createFeather()
 {
     fea.createNumSegment(4);
@@ -272,6 +274,12 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 	
 	
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
+	
+	//char * ap = new char[33];
+	char * ap = new char[33 + 31];
+	ap = (char *)(((unsigned long)ap + 32) & (0xffffffff - 31));
+	if(THIRTYTWO_BYTE_ALIGNMENT(ap) ) std::cout<<"ap is aligned";
+	else std::cout<<"ap is not aligned";
 }
 //! [0]
 
