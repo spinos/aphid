@@ -67,8 +67,10 @@ private:
     GLWidget *glWidget;
 	ToolBox * m_tools;
 	BrushControl * m_brushControl;
+	QMenu * fileMenu;
 	QMenu * windowMenu;
 	QAction * showBrushControlAct;
+	QAction * importMeshAct;
 	
 private:
 	void createActions();

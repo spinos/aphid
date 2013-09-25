@@ -144,9 +144,6 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 		curv += nvpf;
 		curi += nipf;
 	}
-	
-	//std::cout<<"nv "<< curv;
-	//std::cout<<"ni "<< curi;
 }
 
 void MlDrawer::tessellate(MlSkin * skin, MlCalamus * c)

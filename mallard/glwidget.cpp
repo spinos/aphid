@@ -248,6 +248,10 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 
 
 	m_accmesh = new AccPatchMesh;
+	m_skin = new MlSkin;
+	m_bezierDrawer = new BezierDrawer;
+	m_featherDrawer = new MlDrawer;
+	
 #ifdef WIN32
 	std::string filename("D:/aphid/mdl/torus.m");
 #else
@@ -265,12 +269,7 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 	// use displacement map inside bezier drawer
 	//_tess->setDisplacementMap(_image);
 
-	m_skin = new MlSkin;
-	m_skin->setBodyMesh(m_accmesh, m_topo);
 	
-	m_bezierDrawer = new BezierDrawer;
-	m_bezierDrawer->rebuildBuffer(m_accmesh);
-	m_featherDrawer = new MlDrawer;
 	
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 }
@@ -345,9 +344,14 @@ void GLWidget::clientDraw()
 void GLWidget::loadMesh(std::string filename)
 {
 	ESMUtil::ImportPatch(filename.c_str(), mesh());
+	std::cout<<"bud to";
 	buildTopology();
+	std::cout<<"set acc";
 	m_accmesh->setup(m_topo);
+	std::cout<<"bud tr";
 	buildTree();
+	m_skin->setBodyMesh(m_accmesh, m_topo);
+	m_bezierDrawer->rebuildBuffer(m_accmesh);
 }
 
 void GLWidget::clientSelect()

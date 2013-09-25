@@ -104,6 +104,9 @@ void Window::receiveToolAction(int a)
 
 void Window::createActions()
 {
+    importMeshAct = new QAction(tr("&Import Mesh"), this);
+    importMeshAct->setStatusTip(tr("Load a mesh cache file as the body"));
+    connect(importMeshAct, SIGNAL(triggered()), glWidget, SLOT(open()));
 	showBrushControlAct = new QAction(tr("&Brush Control"), this);
 	showBrushControlAct->setStatusTip(tr("Show brush settings"));
     connect(showBrushControlAct, SIGNAL(triggered()), m_brushControl, SLOT(show()));
@@ -111,6 +114,8 @@ void Window::createActions()
 
 void Window::createMenus()
 {
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(importMeshAct);
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showBrushControlAct);
 }
