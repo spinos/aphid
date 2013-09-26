@@ -6,7 +6,6 @@
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
-
 #include "MlSkin.h"
 #include <AccPatchMesh.h>
 #include <MeshTopology.h>
@@ -38,9 +37,10 @@ AccPatchMesh * MlSkin::bodyMesh() const
 	return m_body;
 }
 
-void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, const float & minD)
+void MlSkin::floodAround(MlCalamus floodC, unsigned floodFaceIdx, const Vector3F & floodPos, const Vector3F & floodNor, const float & floodMaxD, const float & floodMinD)
 {
-	resetCollisionRegionAround(idx, pos, maxD);
+
+	resetCollisionRegionAround(floodFaceIdx, floodPos, floodMaxD);
 	std::vector<unsigned> growOnFaces;
 	unsigned i, j, iface;
 	
@@ -52,25 +52,25 @@ void MlSkin::floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const 
 	std::vector<Vector3F> darts;
 	for(i = 0; i < growOnFaces.size(); i++) {
 		iface = growOnFaces[i];
-		const unsigned ndart = 4 + m_body->calculateBBox(iface).area() / minD / minD;
+		const unsigned ndart = 4 + m_body->calculateBBox(iface).area() / floodMinD / floodMinD;
 		for(j = 0; j < ndart; j++) {
 		
 			u = rand()%91/91.f;
 			v = rand()%97/97.f;
 			m_body->pointOnPatch(iface, u, v, adart);
 			
-			if(Vector3F(pos, adart).length() > maxD) continue;
+			if(Vector3F(floodPos, adart).length() > floodMaxD) continue;
 			
 			m_body->normalOnPatch(iface, u, v, facing);
 			
-			if(facing.dot(nor) < .5f) return;
+			if(facing.dot(floodNor) < .67f) continue;
 			
-			if(isPointTooCloseToExisting(adart, iface, minD)) continue;
+			if(isPointTooCloseToExisting(adart, iface, floodMinD)) continue;
 			
-			if(!isDartCloseToExisting(adart, darts, minD)) {
+			if(!isDartCloseToExisting(adart, darts, floodMinD)) {
 				darts.push_back(adart);
-				c.bindToFace(iface, u, v);
-				createFeather(c);
+				floodC.bindToFace(iface, u, v);
+				createFeather(floodC);
 			}
 		}
 	}
@@ -92,7 +92,7 @@ void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & n
 			if(c->faceIdx() != regionElementIndex(i)) break;
 			
 			getNormalOnBody(c, n);
-			if(n.dot(nor) < .5f) continue;
+			if(n.dot(nor) < .67f) continue;
 			
 			getPointOnBody(c, p);
 			
@@ -119,6 +119,8 @@ bool MlSkin::createFeather(MlCalamus & ori)
 	*c = ori;
 	m_calamus->next();
 	
+	m_activeIndices.push_back(m_numFeather);
+	
 	m_numFeather++;
 	m_numCreatedFeather++;
 	
@@ -127,16 +129,17 @@ bool MlSkin::createFeather(MlCalamus & ori)
 
 void MlSkin::growFeather(const Vector3F & direction)
 {
-	if(!hasFeatherCreated()) return;
-	const unsigned num = numCreated();
-	if(direction.length() < 10e-3) return;
-	
+	//if(!hasFeatherCreated()) return;
+	const unsigned num = numActive();
+	if(num < 1) return;
+
 	const float scale = direction.length();
-    
+    if(scale < 10e-3) return;
+	
 	Vector3F d;
 	float rotX;
 	for(unsigned i =0; i < num; i++) {
-		MlCalamus * c = getCreated(i);
+		MlCalamus * c = getActive(i);
 		Matrix33F space = tangentSpace(c);
         space.inverse();
 		
@@ -441,4 +444,9 @@ void MlSkin::verbose() const
 		if(m_faceCalamusStart[i] > 0) std::cout<<" "<<i<<":"<<m_faceCalamusStart[i];
 	}
 	std::cout<<"\n";
+}
+
+void MlSkin::run()
+{
+
 }

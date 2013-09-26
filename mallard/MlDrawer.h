@@ -18,7 +18,6 @@ public:
 	MlDrawer();
 	virtual ~MlDrawer();
 	void drawFeather(MlSkin * skin) const;
-	void drawAFeather(MlSkin * skin, MlCalamus * c) const;
 	void hideAFeather(MlCalamus * c);
 	void hideActive(MlSkin * skin);
 	void updateActive(MlSkin * skin);

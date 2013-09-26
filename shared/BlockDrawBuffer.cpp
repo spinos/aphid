@@ -54,7 +54,7 @@ unsigned BlockDrawBuffer::numBlock() const
 
 void BlockDrawBuffer::expandBy(unsigned size)
 {
-	if(m_current + size > capacity()) {
+	if(m_current + size >= capacity()) {
 		unsigned blockToCreate = (m_current + size) / numElementPerBlock() + 1 - numBlock();
 		for(unsigned i = 0; i < blockToCreate; i++) {
 			m_blocks.push_back(new PtrTup);

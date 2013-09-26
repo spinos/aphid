@@ -26,39 +26,6 @@ MlDrawer::~MlDrawer()
 void MlDrawer::drawFeather(MlSkin * skin) const
 {
 	if(skin->numFeathers() > 0) drawBuffer();
-
-	const unsigned num = skin->numCreated();
-	if(num < 1) return;
-	
-	unsigned i;
-	for(i = 0; i < num; i++) {
-		MlCalamus * c = skin->getCreated(i);
-		drawAFeather(skin, c);
-	}
-}
-
-void MlDrawer::drawAFeather(MlSkin * skin, MlCalamus * c) const
-{
-	Vector3F p;
-	skin->getPointOnBody(c, p);
-	
-	Matrix33F space = skin->rotationFrame(c);
-	
-	c->collideWith(skin, p);
-	c->computeFeatherWorldP(p, space);
-	m_featherTess->setFeather(c->feather());
-	m_featherTess->evaluate(c->feather());
-	
-	glEnableClientState( GL_VERTEX_ARRAY );
-	glVertexPointer( 3, GL_FLOAT, 0, m_featherTess->vertices() );
-	
-	glEnableClientState( GL_NORMAL_ARRAY );
-	glNormalPointer( GL_FLOAT, 0, m_featherTess->normals() );
-	
-	glDrawElements( GL_QUADS, m_featherTess->numIndices(), GL_UNSIGNED_INT, m_featherTess->indices());
-	
-	glDisableClientState( GL_NORMAL_ARRAY );
-	glDisableClientState( GL_VERTEX_ARRAY );
 }
 
 void MlDrawer::hideAFeather(MlCalamus * c)
@@ -134,35 +101,23 @@ void MlDrawer::addToBuffer(MlSkin * skin)
 	const unsigned num = skin->numCreated();
 	if(num < 1) return;
 	
-	const unsigned loc = taken();
-	setIndex(loc);
+	unsigned loc = taken();
 	
-	unsigned i, j, k, nvpf;
+	unsigned i, nvpf;
 	Vector3F v;
 	for(i = 0; i < num; i++) {
 		MlCalamus * c = skin->getCreated(i);
-		tessellate(skin, c);
 		
-		c->setBufferStart(index());
+		m_featherTess->setFeather(c->feather());
+		
+		setIndex(loc);
+		c->setBufferStart(loc);
 		
 		nvpf = m_featherTess->numIndices();
-		
+
 		expandBy(nvpf);
 		
-		for(j = 0; j < nvpf; j++) {
-			k = m_featherTess->indices()[j];
-			v = m_featherTess->vertices()[k];
-		    vertices()[0] = v.x;
-			vertices()[1] = v.y;
-			vertices()[2] = v.z;
-			
-			v = m_featherTess->normals()[k];
-		    normals()[0] = v.x;
-			normals()[1] = v.y;
-			normals()[2] = v.z;
-			
-			next();
-		}
+		loc += nvpf;
 	}
 }
 

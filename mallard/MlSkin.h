@@ -10,13 +10,15 @@
 #pragma once
 #include <AllMath.h>
 #include <CollisionRegion.h>
+#include <MlCalamus.h>
 
 class AccPatchMesh;
 class MeshTopology;
-class MlCalamus;
 class MlCalamusArray;
 
-class MlSkin : public CollisionRegion {
+class MlSkin : public CollisionRegion 
+{
+	//Q_OBJECT
 public:
 	MlSkin();
 	virtual ~MlSkin();
@@ -54,6 +56,10 @@ public:
 	MlCalamus * getCreated(unsigned idx) const;
 	
 	void verbose() const;
+	
+protected:
+	void run();
+	
 private:
 	bool createFeather(MlCalamus & ori);
 	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance);

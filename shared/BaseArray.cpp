@@ -32,7 +32,7 @@ void BaseArray::clear()
 
 char *BaseArray::expandBy(unsigned size)
 {
-	if(m_current / m_elementSize + size > capacity()) {
+	if(m_current / m_elementSize + size >= capacity()) {
 		unsigned blockToCreate = (m_current + size * m_elementSize) / BASEARRAYBLOCK + 1 - numBlock();
 		for(unsigned i = 0; i < blockToCreate; i++) {
 			m_blocks.push_back(new PtrTup);

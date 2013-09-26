@@ -393,6 +393,7 @@ void GLWidget::clientMouseInput()
 	else if(interactMode() == ToolContext::CreateBodyContourFeather) {
 		brush()->setToeByIntersect(&ray);
 		m_skin->growFeather(brush()->toeDisplacement());
+		m_featherDrawer->updateActive(m_skin);
 	}
 	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
 		hitTest(ray, hit);
@@ -419,10 +420,8 @@ void GLWidget::clientMouseInput()
 void GLWidget::clientDeselect()
 {
     if(interactMode() == ToolContext::CreateBodyContourFeather) {
-		if(m_skin->hasFeatherCreated()) {
-		    m_featherDrawer->addToBuffer(m_skin);
-			m_skin->finishCreateFeather();
-		}
+		m_skin->finishCreateFeather();
+		m_skin->discardActive();
 	}
 }
 
@@ -460,13 +459,13 @@ void GLWidget::addFeather()
 	ac.setFeather(&fea);
 	ac.setRotateY(brush()->getPitch());
 	m_skin->floodAround(ac, iface, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
+	m_featherDrawer->addToBuffer(m_skin);
 }
 
 void GLWidget::finishEraseFeather()
 {
 	m_skin->finishEraseFeather();
 	m_skin->discardActive();
-	//m_featherDrawer->rebuildBuffer(m_skin);
 }
 
 void GLWidget::deselectFeather()
