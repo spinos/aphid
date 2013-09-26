@@ -24,18 +24,18 @@ char HWorld::save()
 	time_duration td = now - ref;
 	m_modifiedTime = td.total_seconds();
 	
-	if(!hasNamedAttr("/.time"))
-		addIntAttr("/.time", &m_modifiedTime);
+	if(!hasNamedAttr(".time"))
+		addIntAttr(".time", &m_modifiedTime);
 	else 
-		writeIntAttr("/.time", &m_modifiedTime);
+		writeIntAttr(".time", &m_modifiedTime);
 	
 	return 1;
 }
 
 char HWorld::load()
 {
-	if(hasNamedAttr("/.time")) {
-		readIntAttr("/.time", &m_modifiedTime);
+	if(hasNamedAttr(".time")) {
+		readIntAttr(".time", &m_modifiedTime);
 		std::cout<<" read time "<<m_modifiedTime;
 	}
 	return 1;

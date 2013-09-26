@@ -12,7 +12,7 @@
 #include <MlSkin.h>
 #include <AllHdf.h>
 #include <HWorld.h>
-
+#include <HMesh.h>
 MlScene::MlScene() 
 {
 	m_accmesh = new AccPatchMesh;
@@ -41,6 +41,15 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 	grpWorld.save();
 	
 	grpWorld.load();
+	
+	HMesh grpBody("/world/body");
+	grpBody.close();
+	
+	HMesh grpSkin("/world/skin");
+	grpSkin.close();
+	
+	if(grpWorld.hasNamedChild("skin")) std::cout<<"found skin";
+	
 	grpWorld.close();
 	/*	
 	HIntAttribute rootAttr("/.range");

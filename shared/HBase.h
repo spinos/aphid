@@ -26,12 +26,10 @@ public:
 	char readIntData(const char * dataname, unsigned count, unsigned *dst);
 	char readVector3Data(const char * dataname, unsigned count, Vector3F *dst);
 	
-	std::string fullName(const std::string & partialName) const;
-	
 	char hasNamedAttr(const char * attrName);
 	std::string getAttrName(hid_t attrId);
 	
-	char hasNamedChild(const char * name);
+	char hasNamedChild(const char * childName);
 	std::string getChildName(hsize_t i);
 	
 	virtual char save();
