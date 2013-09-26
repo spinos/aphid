@@ -43,15 +43,14 @@
 #define GLWIDGET_H
 
 #include <SingleModelView.h>
+#include <MlScene.h>
 
 class ZEXRImage;
 class BezierDrawer;
 class MlDrawer;
-class AccPatchMesh;
-class MlSkin;
 
 //! [0]
-class GLWidget : public SingleModelView
+class GLWidget : public SingleModelView, public MlScene
 {
     Q_OBJECT
 
@@ -64,9 +63,16 @@ public:
 	virtual void clientDeselect();
     virtual PatchMesh * mesh() const;
 	
+	virtual bool discardConfirm();
+	virtual void clearScene();
+	
 	void finishEraseFeather();
 	void deselectFeather();
+	
 public slots:
+	void cleanSheet();
+	void saveSheet();
+	void saveSheetAs();
     
 protected:
     virtual void clientDraw();
@@ -79,8 +85,6 @@ private:
 	ZEXRImage* _image;
 	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;
-	AccPatchMesh * m_accmesh;
-	MlSkin * m_skin;
 };
 //! [3]
 

@@ -61,6 +61,7 @@ void KdTree::create()
 void KdTree::cleanup()
 {
 	if(m_root) delete m_root;
+	m_root = 0;
 	m_stream.cleanup();
 }
 
@@ -135,6 +136,7 @@ void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 
 char KdTree::intersect(IntersectionContext * ctx)
 {
+	if(!getRoot()) return 0;
 	float hitt0, hitt1;
 	BoundingBox b = getBBox();
 	if(!b.intersect(ctx->m_ray, &hitt0, &hitt1)) return 0;
@@ -261,6 +263,7 @@ Primitive * KdTree::getPrim(unsigned idx)
 
 char KdTree::closestPoint(const Vector3F & origin, IntersectionContext * ctx)
 {
+	if(!getRoot()) return 0;
 	KdTreeNode * root = getRoot();
 	ctx->setBBox(getBBox());
 	return recusiveClosestPoint(root, origin, ctx);

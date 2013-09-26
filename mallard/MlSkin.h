@@ -22,6 +22,8 @@ class MlSkin : public CollisionRegion
 public:
 	MlSkin();
 	virtual ~MlSkin();
+	void cleanup();
+	
 	void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
 	void floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, const float & minD);
 	void selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD);

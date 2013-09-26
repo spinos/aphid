@@ -20,8 +20,14 @@ MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_numCreatedFeather(0
 
 MlSkin::~MlSkin()
 {
+	cleanup();
+}
+
+void MlSkin::cleanup()
+{
 	m_calamus->clear();
 	if(m_faceCalamusStart) delete[] m_faceCalamusStart;
+	m_numFeather = 0;
 }
 
 void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)

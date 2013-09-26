@@ -164,6 +164,7 @@ char MeshTopology::parallelEdgeInQuad(unsigned *indices, unsigned v0, unsigned v
 void MeshTopology::cleanup()
 {
 	if(m_adjacency) delete[] m_adjacency;
+	m_adjacency = 0;
 	for(std::vector<Facet *>::iterator it = m_faces.begin(); it != m_faces.end(); ++it) {
 		delete *it;
 	}

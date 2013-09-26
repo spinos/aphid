@@ -234,4 +234,14 @@ void SingleModelView::drawIntersection() const
 	
 	Base3DView::drawIntersection();
 }
+
+void SingleModelView::clearTree()
+{
+	m_tree->cleanup();
+}
+
+void SingleModelView::clearTopology()
+{
+	m_topo->cleanup();
+}
 //:~

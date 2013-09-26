@@ -47,6 +47,9 @@ public:
 	
 	virtual void drawIntersection() const;
 	
+	void clearTree();
+	void clearTopology();
+	
 	void drawAnchors();
 	AnchorGroup * getAnchors() const;
 	KdTree * getTree() const;

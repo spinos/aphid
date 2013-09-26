@@ -20,6 +20,8 @@ public:
 	MeshTopology();
 	virtual ~MeshTopology();
 	
+	void cleanup();
+	
 	char buildTopology(BaseMesh * mesh);
 	void calculateNormal(BaseMesh * mesh);
 
@@ -31,7 +33,6 @@ public:
 	Edge * parallelEdge(Edge * src) const;
 	unsigned growAroundQuad(unsigned idx, std::vector<unsigned> & dst) const;
 private:
-	void cleanup();
 	char parallelEdgeInQuad(unsigned *indices, unsigned v0, unsigned v1, unsigned & a, unsigned & b) const;
 	VertexAdjacency * m_adjacency;
 	std::vector<Facet *> m_faces;

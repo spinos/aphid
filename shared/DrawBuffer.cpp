@@ -23,10 +23,12 @@ void DrawBuffer::clearBuffer()
     if(m_vertices) delete[] m_vertices;
 	if(m_normals) delete[] m_normals;
 	if(m_indices) delete[] m_indices;
+	m_numVertices = m_numIndices = 0;
 }
 
 void DrawBuffer::drawBuffer() const
 {
+	if(m_numIndices < 1) return;
     glEnableClientState( GL_VERTEX_ARRAY );
 	glVertexPointer( 3, GL_FLOAT, 0, m_vertices );
 	

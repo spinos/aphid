@@ -248,9 +248,6 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 //testuv = invbil.evalBiLinear(uv);
 //printf("bilinear %f %f\n", testuv.x, testuv.y);
 
-
-	m_accmesh = new AccPatchMesh;
-	m_skin = new MlSkin;
 	m_bezierDrawer = new BezierDrawer;
 	m_featherDrawer = new MlDrawer;
 	
@@ -357,6 +354,7 @@ void GLWidget::loadMesh(std::string filename)
 	buildTree();
 	m_skin->setBodyMesh(m_accmesh, m_topo);
 	m_bezierDrawer->rebuildBuffer(m_accmesh);
+	setDirty();
 	update();
 }
 
@@ -471,5 +469,52 @@ void GLWidget::finishEraseFeather()
 void GLWidget::deselectFeather()
 {
 	m_skin->discardActive();
+}
+
+void GLWidget::cleanSheet()
+{
+	newScene();
+}
+
+bool GLWidget::discardConfirm()
+{
+	QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, tr(" "),
+                                    tr("Save changes to the scene before creating a new one?"),
+                                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    if (reply == QMessageBox::Cancel)
+		return false;
+	
+	if (reply == QMessageBox::Yes)
+		saveSheet();
+
+	return true;
+}
+
+void GLWidget::clearScene()
+{
+	MlScene::clearScene();
+	m_bezierDrawer->clearBuffer();
+	clearTree();
+	clearTopology();
+	update();
+}
+
+void GLWidget::saveSheet()
+{
+	if(isUntitled()) saveSheetAs();
+	else saveScene();
+}
+
+void GLWidget::saveSheetAs()
+{
+	QString selectedFilter;
+	QString fileName = QFileDialog::getSaveFileName(this,
+							tr("Save scene to file"),
+							tr("info"),
+							tr("All Files (*);;Text Files (*.txt)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	saveSceneAs(fileName.toUtf8().data());
 }
 //:~

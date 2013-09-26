@@ -14,9 +14,9 @@ public:
 	HAttribute(const std::string & path);
 	virtual ~HAttribute() {}
 	
-	virtual char create(int dim);
+	virtual char create(int dim, hid_t parentId = FileIO.fFileId);
 
-	virtual char open();
+	virtual char open(hid_t parentId = FileIO.fFileId);
 	virtual void close();
 	virtual int objectType() const;
 	virtual hid_t dataType();

@@ -14,13 +14,13 @@ HAttribute::HAttribute(const std::string & path)
 	fObjectPath = ValidPathName(path);
 }
 
-char HAttribute::create(int dim)
+char HAttribute::create(int dim, hid_t parentId)
 {
 	hsize_t dims = dim;
 	
 	fDataSpace = H5Screate_simple(1, &dims, NULL);
 	
-	fObjectId = H5Acreate(FileIO.fFileId, fObjectPath.c_str(), dataType(), fDataSpace, 
+	fObjectId = H5Acreate(parentId, fObjectPath.c_str(), dataType(), fDataSpace, 
                           H5P_DEFAULT, H5P_DEFAULT);
 						  
 	if(fObjectId < 0)
@@ -28,9 +28,9 @@ char HAttribute::create(int dim)
 	return 1;
 }
 
-char HAttribute::open()
+char HAttribute::open(hid_t parentId)
 {
-	fObjectId = H5Aopen(FileIO.fFileId, fObjectPath.c_str(), H5P_DEFAULT);
+	fObjectId = H5Aopen(parentId, fObjectPath.c_str(), H5P_DEFAULT);
 	
 	if(fObjectId < 0)
 		return 0;

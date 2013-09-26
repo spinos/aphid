@@ -1,3 +1,10 @@
+win32 {
+    Aphid = D:/aphid
+}
+mac {
+    Aphid = ../../aphid
+}
+
 INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/core ../../ofl/opium ../fit
 HEADERS       = ../shared/AllMath.h \
 				../shared/Vector3F.h \
@@ -77,6 +84,19 @@ HEADERS       = ../shared/AllMath.h \
 				../shared/QIntEditSlider.h \
                 ../shared/QDoubleEditSlider.h \
 				../shared/BlockDrawBuffer.h \
+                ../shared/BaseScene.h \
+    $${Aphid}/shared/AllHdf.h \
+    $${Aphid}/shared/HObject.h \
+    $${Aphid}/shared/HDocument.h \
+    $${Aphid}/shared/HGroup.h \
+    $${Aphid}/shared/HDataset.h \
+    $${Aphid}/shared/HAttribute.h \
+    $${Aphid}/shared/VerticesHDataset.h \
+    $${Aphid}/shared/IndicesHDataset.h \
+    $${Aphid}/shared/HIntAttribute.h \
+    $${Aphid}/shared/HFloatAttribute.h \
+    $${Aphid}/shared/HBase.h \
+    $${Aphid}/shared/HWorld.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -102,6 +122,7 @@ HEADERS       = ../shared/AllMath.h \
 				MlSkin.h \
                 MlRachis.h \
                 BrushControl.h \
+                MlScene.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \  
@@ -181,6 +202,18 @@ SOURCES       = ../shared/Vector3F.cpp \
 				../shared/QIntEditSlider.cpp \
                 ../shared/QDoubleEditSlider.cpp \
 				../shared/BlockDrawBuffer.cpp \
+                ../shared/BaseScene.cpp \
+    $${Aphid}/shared/HObject.cpp \
+    $${Aphid}/shared/HDocument.cpp \
+    $${Aphid}/shared/HGroup.cpp \
+    $${Aphid}/shared/HDataset.cpp \
+    $${Aphid}/shared/HAttribute.cpp \
+    $${Aphid}/shared/VerticesHDataset.cpp \
+    $${Aphid}/shared/IndicesHDataset.cpp \
+    $${Aphid}/shared/HIntAttribute.cpp \
+    $${Aphid}/shared/HFloatAttribute.cpp \
+    $${Aphid}/shared/HBase.cpp \
+    $${Aphid}/shared/HWorld.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \
@@ -207,13 +240,17 @@ SOURCES       = ../shared/Vector3F.cpp \
                 MlRachis.cpp \
                 window.cpp \
                 BrushControl.cpp \
-                main.cpp 
+                MlScene.cpp \
+                main.cpp
                 
 INCLUDEPATH += /usr/local/include/OpenEXR
-LIBS += -L../easymodel -leasymodel -lIlmImf -lHalf
+LIBS += -L../easymodel -leasymodel -lIlmImf -lHalf -lhdf5 -lhdf5_hl
 macx {
-    INCLUDEPATH += ../../Library/boost_1_44_0
-        LIBS += -lboost_date_time -lboost_thread -framework libxml
+    INCLUDEPATH += ../../Library/boost_1_44_0 \
+                    ../../Library/hdf5/include
+    QMAKE_LIBDIR += ../../Library/boost_1_44_0/stage/lib \
+                    ../../Library/hdf5/lib
+    LIBS += -lboost_date_time -lboost_thread -lboost_filesystem -lboost_system -framework libxml
 }
 win32 {
     HEADERS += ../shared/gExtension.h
