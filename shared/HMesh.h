@@ -8,14 +8,13 @@
  */
 
 #pragma once
-#include <BaseMesh.h>
 #include <HBase.h>
-class HMesh : public BaseMesh, public HBase {
+class HMesh : public HBase {
 public:
-	HMesh();
+	HMesh(const std::string & path);
 	virtual ~HMesh();
 	
-	static char verifyType(HObject & grp);
+	char verifyType();
 	virtual char save();
 	virtual char load();
 private:

@@ -13,25 +13,28 @@
 #include <sstream>
 #include <iostream>
 #include <SHelper.h>
-HMesh::HMesh() {}
+HMesh::HMesh(const std::string & path) : HBase(path) 
+{
+}
+
 HMesh::~HMesh() {}
 
-char HMesh::verifyType(HObject & grp)
+char HMesh::verifyType()
 {
-	if(!hasNamedAttr(grp, ".polyc"))
+	if(!hasNamedAttr(".polyc"))
 		return 0;
 
-	if(!hasNamedAttr(grp, ".polyv"))
+	if(!hasNamedAttr(".polyv"))
 		return 0;
 	
-	if(!hasNamedAttr(grp, ".p"))
+	if(!hasNamedAttr(".p"))
 		return 0;
 	
 	return 1;
 }
 
 char HMesh::save()
-{
+{/*
 	HGroup grpMesh(getName());
 	if(!grpMesh.open()) {
 		std::cout<<"cannot open group "<<getName();
@@ -52,12 +55,12 @@ char HMesh::save()
 	addIntData("/.polyv", m_numPolygonVertices, (int *)m_polygonIndices);
 	
 	grpMesh.close();
-
+*/
 	return 1;
 }
 
 char HMesh::load()
-{
+{/*
 	HGroup chd(getName());
 	if(!chd.open()) {
 		std::cout<<"cannot open group "<<getName();
@@ -93,7 +96,7 @@ char HMesh::load()
 	processTriangleFromPolygon();
 	processQuadFromPolygon();
 	processRealEdgeFromPolygon();
-	
+	*/
 	return 1;
 }
 //:~

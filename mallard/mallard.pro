@@ -97,6 +97,7 @@ HEADERS       = ../shared/AllMath.h \
     $${Aphid}/shared/HFloatAttribute.h \
     $${Aphid}/shared/HBase.h \
     $${Aphid}/shared/HWorld.h \
+    $${Aphid}/shared/HMesh.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../../ofl/core/BaseImage.cpp \
@@ -214,6 +215,7 @@ SOURCES       = ../shared/Vector3F.cpp \
     $${Aphid}/shared/HFloatAttribute.cpp \
     $${Aphid}/shared/HBase.cpp \
     $${Aphid}/shared/HWorld.cpp \
+    $${Aphid}/shared/HMesh.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../../ofl/core/BaseImage.cpp \

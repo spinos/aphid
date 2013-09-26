@@ -11,7 +11,14 @@
 
 #include <sstream>
 #include <iostream>
-HBase::HBase(const std::string & path) : HGroup(path) {}
+HBase::HBase(const std::string & path) : HGroup(path) 
+{
+	if(!HObject::FileIO.checkExist(fObjectPath))
+		create();
+	else 
+		open();
+}
+
 HBase::~HBase() {}
 
 std::string HBase::fullName(const std::string & partialName) const
