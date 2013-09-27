@@ -2,7 +2,7 @@ win32 {
     Aphid = D:/aphid
 }
 mac {
-    Aphid = ../../aphid
+    Aphid = $$(HOME)/aphid
 }
 
 INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/core ../../ofl/opium ../fit
@@ -257,9 +257,12 @@ macx {
 win32 {
     HEADERS += ../shared/gExtension.h
     SOURCES += ../shared/gExtension.cpp
-    INCLUDEPATH += D:/usr/local/include D:/ofl/shared D:/usr/libxml2x64/include D:/usr/eigen3
+    INCLUDEPATH += D:/usr/local/include D:/ofl/shared \
+                   D:/usr/hdf5/include \
+                   D:/usr/libxml2x64/include D:/usr/eigen3
     QMAKE_LIBDIR += D:/usr/local/lib64 
-    LIBS += -LD:/usr/libxml2x64/lib -llibxml2
+    LIBS += -LD:/usr/libxml2x64/lib -llibxml2 \
+            -LD:/usr/hdf5/lib -lszip
     DEFINES += OPENEXR_DLL NDEBUG
 CONFIG += console
 }

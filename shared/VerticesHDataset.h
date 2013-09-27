@@ -11,12 +11,11 @@
 
 class VerticesHDataset : public HDataset {
 public:
-	VerticesHDataset();
 	VerticesHDataset(const std::string & path);
 	virtual ~VerticesHDataset();
 	
 	void setNumVertices(int num);
 	int numVertices() const;
 	
-	virtual char create();
+	virtual char create(hid_t parentId);
 };

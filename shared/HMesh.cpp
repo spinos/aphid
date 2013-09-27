@@ -54,11 +54,24 @@ char HMesh::save(BaseMesh * mesh)
 		writeIntAttr(".nfv", &nfv);
 		
 	std::cout<<" "<<nv<<" "<<nf<<" "<<nfv;
-/*	
-	addVector3Data("/.p", nv, vertices());
-	addIntData("/.polyc", m_numPolygons, (int *)m_polygonCounts);
-	addIntData("/.polyv", m_numPolygonVertices, (int *)m_polygonIndices);
-*/
+	std::cout<<"\np\n";
+	if(!hasNamedData(".p"))
+	    addVector3Data(".p", nv, mesh->vertices());
+	else 
+	    writeVector3Data(".p", nv, mesh->vertices());
+	
+	std::cout<<"\npc\n";
+	if(!hasNamedData(".polyc"))
+	    addIntData(".polyc", nf, (int *)mesh->polygonCounts());
+	else
+	    writeIntData(".polyc", nf, (int *)mesh->polygonCounts());
+	
+	std::cout<<"\npv\n";
+	if(!hasNamedData(".polyv"))
+	    addIntData(".polyv", nf, (int *)mesh->polygonIndices());
+	else
+	    writeIntData(".polyv", nf, (int *)mesh->polygonIndices());
+
 	return 1;
 }
 

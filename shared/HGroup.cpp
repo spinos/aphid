@@ -9,9 +9,8 @@
 
 #include "HGroup.h"
 
-HGroup::HGroup(const std::string & path)
+HGroup::HGroup(const std::string & path) : HObject(path)
 {
-	fObjectPath = ValidPathName(path);
 }
 
 char HGroup::create()

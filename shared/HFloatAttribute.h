@@ -14,7 +14,6 @@
 class HFloatAttribute : public HAttribute
 {
 public:
-	HFloatAttribute() {}
 	HFloatAttribute(const std::string & path);
 	~HFloatAttribute() {}
 	virtual hid_t dataType();

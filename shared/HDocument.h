@@ -38,7 +38,8 @@ public:
 	char isOpened() const;
 	
 	char checkExist(const std::string & path);
-	char deleteObject(const std::string & path);
+
+	char deleteObject(const std::string & path, hid_t parentId = 0);
 	
 	std::string fileName() const;
 	

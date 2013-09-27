@@ -9,11 +9,8 @@
 
 #include "VerticesHDataset.h"
 
-VerticesHDataset::VerticesHDataset() {}
-
-VerticesHDataset::VerticesHDataset(const std::string & path)
+VerticesHDataset::VerticesHDataset(const std::string & path) : HDataset(path)
 {
-	fObjectPath = ValidPathName(path);
 }
 
 VerticesHDataset::~VerticesHDataset() {}
@@ -30,7 +27,7 @@ int VerticesHDataset::numVertices() const
 	return fDimension[0] / 3;
 }
 
-char VerticesHDataset::create()
+char VerticesHDataset::create(hid_t parentId)
 {
-	return raw_create();
+	return raw_create(parentId);
 }

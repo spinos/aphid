@@ -11,7 +11,6 @@
 
 class IndicesHDataset : public HDataset {
 public:
-	IndicesHDataset();
 	IndicesHDataset(const std::string & path);
 	virtual ~IndicesHDataset();
 	
@@ -20,7 +19,7 @@ public:
 	
 	virtual hid_t dataType();
 	
-	virtual char create();
+	virtual char create(hid_t parentId);
 	virtual char write(int *data);
 	virtual char read(int *data);
 };

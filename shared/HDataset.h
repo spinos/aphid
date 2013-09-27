@@ -13,13 +13,13 @@
 #include "HObject.h"
 class HDataset : public HObject {
 public:
-	HDataset() {}
 	HDataset(const std::string & path);
 	virtual ~HDataset() {}
 	
 	virtual char validate();
-	virtual char create(int dimx, int dimy);
-	virtual char raw_create();
+
+	//virtual char create(int dimx, int dimy);
+	virtual char raw_create(hid_t parentId);
 
 	virtual char open();
 	virtual void close();

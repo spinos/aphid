@@ -9,9 +9,9 @@
 
 #include "HDataset.h"
 #include <iostream>
-HDataset::HDataset(const std::string & path)
+
+HDataset::HDataset(const std::string & path) : HObject(path)
 {
-	fObjectPath = ValidPathName(path);
 }
 
 char HDataset::validate()
@@ -25,6 +25,7 @@ char HDataset::validate()
 	return 1;
 }
 
+/*
 char HDataset::create(int dimx, int dimy)
 {
 	fDimension[0] = dimx;
@@ -33,21 +34,27 @@ char HDataset::create(int dimx, int dimy)
 	
 	return raw_create();
 }
-
-char HDataset::raw_create()
+*/
+char HDataset::raw_create(hid_t parentId)
 {
-	if(validate())
-		return 1;
-	else if(exists())
-		return 0;
+	//if(validate())
+	//	return 1;
+	//else if(exists())
+	//	return 0;
 		
 	createDataSpace();
+	
+	if(fDataSpace < 0) std::cout<<"\nh data space create failed\n";
 				
-	fObjectId = H5Dcreate(FileIO.fFileId, fObjectPath.c_str(), dataType(), fDataSpace, 
+	fObjectId = H5Dcreate(parentId, fObjectPath.c_str(), dataType(), fDataSpace, 
                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-						  
-	if(fObjectId < 0)
+			std::cout<<"\nh data set create\n";			  
+	if(fObjectId < 0) {
+	    std::cout<<"\nh data set create failed\n";
 		return 0;
+	}
+	else std::cout<<"\nh data set create success\n";
+
 	return 1;
 }
 

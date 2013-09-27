@@ -14,7 +14,6 @@
 
 class HObject {
 public:
-	HObject() {}
 	HObject(const std::string & path);
 	virtual ~HObject() {}
 	
@@ -24,9 +23,10 @@ public:
 	virtual void close() {}
 	virtual int objectType() const;
 	virtual char exists();
+
 	static std::string ValidPathName(const std::string & name);
-	std::string pathToObject() const;
 	
+	std::string pathToObject() const;
 	
 	static HDocument FileIO;
 	

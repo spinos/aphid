@@ -9,11 +9,8 @@
 
 #include "IndicesHDataset.h"
 
-IndicesHDataset::IndicesHDataset() {}
-
-IndicesHDataset::IndicesHDataset(const std::string & path)
+IndicesHDataset::IndicesHDataset(const std::string & path) : HDataset(path)
 {
-	fObjectPath = ValidPathName(path);
 }
 
 IndicesHDataset::~IndicesHDataset() {}
@@ -35,9 +32,9 @@ hid_t IndicesHDataset::dataType()
 	return H5T_NATIVE_INT;
 }
 
-char IndicesHDataset::create()
+char IndicesHDataset::create(hid_t parentId)
 {
-	return raw_create();
+	return raw_create(parentId);
 }
 
 char IndicesHDataset::write(int *data)
