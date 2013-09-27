@@ -48,19 +48,18 @@ char HDataset::raw_create(hid_t parentId)
 				
 	fObjectId = H5Dcreate(parentId, fObjectPath.c_str(), dataType(), fDataSpace, 
                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-			std::cout<<"\nh data set create\n";			  
+		  
 	if(fObjectId < 0) {
 	    std::cout<<"\nh data set create failed\n";
 		return 0;
 	}
-	else std::cout<<"\nh data set create success\n";
-
+	
 	return 1;
 }
 
-char HDataset::open()
+char HDataset::open(hid_t parentId)
 {
-	fObjectId = H5Dopen(FileIO.fFileId, fObjectPath.c_str(), H5P_DEFAULT);
+	fObjectId = H5Dopen(parentId, fObjectPath.c_str(), H5P_DEFAULT);
 	
 	if(fObjectId < 0)
 		return 0;

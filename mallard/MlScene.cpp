@@ -40,17 +40,17 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 	HWorld grpWorld;
 	grpWorld.save();
 	
-	grpWorld.load();
+	//grpWorld.load();
 	
 	HMesh grpBody("/world/body");
 	grpBody.save(m_accmesh);
 	
 	grpBody.close();
 	
-	HMesh grpSkin("/world/skin");
-	grpSkin.close();
+	//HMesh grpSkin("/world/skin");
+	//grpSkin.close();
 	
-	if(grpWorld.hasNamedChild("skin")) std::cout<<"found skin";
+	//if(grpWorld.hasNamedChild("skin")) std::cout<<"found skin";
 	
 	grpWorld.close();
 	/*	

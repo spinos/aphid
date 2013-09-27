@@ -21,12 +21,27 @@ HBase::HBase(const std::string & path) : HGroup(path)
 
 HBase::~HBase() {}
 
-void HBase::addIntAttr(const char * attrName, int *value)
+void HBase::addIntAttr(const char * attrName)
 {
 	HIntAttribute nvAttr(attrName);
 	nvAttr.create(1, fObjectId);
-	if(!nvAttr.write(value)) std::cout<<attrName<<" write failed";
 	nvAttr.close();
+}
+
+void HBase::addIntData(const char * dataName, unsigned count)
+{	
+	IndicesHDataset cset(dataName);
+	cset.setNumIndices(count);
+	cset.create(fObjectId);
+	cset.close();
+}
+
+void HBase::addVector3Data(const char * dataName, unsigned count)
+{	
+	VerticesHDataset pset(dataName);
+	pset.setNumVertices(count);
+	pset.create(fObjectId);
+	pset.close();
 }
 
 void HBase::writeIntAttr(const char * attrName, int *value)
@@ -37,44 +52,21 @@ void HBase::writeIntAttr(const char * attrName, int *value)
 	nvAttr.close();
 }
 
-void HBase::addIntData(const char * dataName, unsigned count, int *value)
-{	
-	IndicesHDataset cset(dataName);
-	cset.setNumIndices(count);
-	cset.create(fObjectId);
-	cset.open();
-	if(!cset.write((int *)value)) std::cout<<dataName<<" write failed";
-	cset.close();
-}
-
 void HBase::writeIntData(const char * dataName, unsigned count, int *value)
 {	
 	IndicesHDataset cset(dataName);
 	cset.setNumIndices(count);
-	cset.open();
+	cset.open(fObjectId);
 	if(!cset.write((int *)value)) std::cout<<dataName<<" write failed";
 	cset.close();
 }
 
-void HBase::addVector3Data(const char * dataName, unsigned count, Vector3F *value)
-{	std::cout<<"\nadd v3 data\n";
-	VerticesHDataset pset(dataName);
-	pset.setNumVertices(count);
-	std::cout<<"\ncreate v3 data\n";
-	
-	pset.create(fObjectId);
-	pset.open();
-	if(!pset.write((float *)value)) std::cout<<dataName<<" write failed";
-	pset.close();
-}
-
 void HBase::writeVector3Data(const char * dataName, unsigned count, Vector3F *value)
 {
-    std::cout<<"\nwrt v3 data\n";
-	VerticesHDataset pset(dataName);
+    VerticesHDataset pset(dataName);
 	pset.setNumVertices(count);
 	
-	pset.open();
+	pset.open(fObjectId);
 	if(!pset.write((float *)value)) std::cout<<dataName<<" write failed";
 	pset.close();
 }
@@ -148,11 +140,13 @@ char HBase::hasNamedAttr(const char * attrName)
 	hsize_t i;
 	for(i = 0; i < nattr; i++) {
 		hid_t aid = H5Aopen_idx(fObjectId, (unsigned int)i );
-		std::cout<<getAttrName(aid)<<"\n";
+		//std::cout<<getAttrName(aid)<<"\n";
 		if(getAttrName(aid) == attrName) {
 			std::cout<<"found "<<attrName;
+			H5Aclose(aid);
 			return 1;
 		}
+		H5Aclose(aid);
 	}
 	return 0;
 }
@@ -170,7 +164,7 @@ std::string HBase::getAttrName(hid_t attrId)
 
 char HBase::hasNamedChild(const char * childName)
 {
-	hsize_t nobj;
+	hsize_t nobj = 0;
 	H5Gget_num_objs(fObjectId, &nobj);
 	std::cout<<"\n"<<fObjectPath<<" has "<<nobj<<"objs\n";
 	hsize_t i;

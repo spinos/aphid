@@ -16,9 +16,9 @@ public:
 	HBase(const std::string & path);
 	virtual ~HBase();
 	
-	void addIntAttr(const char * attrName, int *value);
-	void addIntData(const char * dataName, unsigned count, int *value);
-	void addVector3Data(const char * dataName, unsigned count, Vector3F *value);
+	void addIntAttr(const char * attrName);
+	void addIntData(const char * dataName, unsigned count);
+	void addVector3Data(const char * dataName, unsigned count);
 	
 	void writeIntAttr(const char * attrName, int *value);
 	void writeIntData(const char * dataName, unsigned count, int *value);

@@ -25,9 +25,8 @@ char HWorld::save()
 	m_modifiedTime = td.total_seconds();
 	
 	if(!hasNamedAttr(".time"))
-		addIntAttr(".time", &m_modifiedTime);
-	else 
-		writeIntAttr(".time", &m_modifiedTime);
+		addIntAttr(".time");
+	writeIntAttr(".time", &m_modifiedTime);
 	
 	return 1;
 }

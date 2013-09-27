@@ -21,7 +21,7 @@ public:
 	//virtual char create(int dimx, int dimy);
 	virtual char raw_create(hid_t parentId);
 
-	virtual char open();
+	virtual char open(hid_t parentId = FileIO.fFileId);
 	virtual void close();
 	virtual int objectType() const;
 	

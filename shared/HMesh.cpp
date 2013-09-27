@@ -37,40 +37,36 @@ char HMesh::save(BaseMesh * mesh)
 {
 	int nv = mesh->getNumVertices();
 	if(!hasNamedAttr(".nv"))
-		addIntAttr(".nv", &nv);
-	else 
-		writeIntAttr(".nv", &nv);
-		
+		addIntAttr(".nv");
+	
+	writeIntAttr(".nv", &nv);
+	
 	int nf = mesh->getNumPolygons();
 	if(!hasNamedAttr(".nf"))
-		addIntAttr(".nf", &nf);
-	else 
-		writeIntAttr(".nf", &nf);
+		addIntAttr(".nf");
+	
+	writeIntAttr(".nf", &nf);
 		
 	int nfv = mesh->getNumFaceVertices();
 	if(!hasNamedAttr(".nfv"))
-		addIntAttr(".nfv", &nfv);
-	else 
-		writeIntAttr(".nfv", &nfv);
-		
-	std::cout<<" "<<nv<<" "<<nf<<" "<<nfv;
-	std::cout<<"\np\n";
+		addIntAttr(".nfv");
+	
+	writeIntAttr(".nfv", &nfv);
+	
 	if(!hasNamedData(".p"))
-	    addVector3Data(".p", nv, mesh->vertices());
-	else 
-	    writeVector3Data(".p", nv, mesh->vertices());
+	    addVector3Data(".p", nv);
 	
-	std::cout<<"\npc\n";
+	writeVector3Data(".p", nv, mesh->vertices());
+		
 	if(!hasNamedData(".polyc"))
-	    addIntData(".polyc", nf, (int *)mesh->polygonCounts());
-	else
-	    writeIntData(".polyc", nf, (int *)mesh->polygonCounts());
+	    addIntData(".polyc", nf);
 	
-	std::cout<<"\npv\n";
+	writeIntData(".polyc", nf, (int *)mesh->polygonCounts());
+	
 	if(!hasNamedData(".polyv"))
-	    addIntData(".polyv", nf, (int *)mesh->polygonIndices());
-	else
-	    writeIntData(".polyv", nf, (int *)mesh->polygonIndices());
+	    addIntData(".polyv", nf);
+	
+	writeIntData(".polyv", nf, (int *)mesh->polygonIndices());
 
 	return 1;
 }
