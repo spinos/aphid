@@ -43,6 +43,8 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 	grpWorld.load();
 	
 	HMesh grpBody("/world/body");
+	grpBody.save(m_accmesh);
+	
 	grpBody.close();
 	
 	HMesh grpSkin("/world/skin");

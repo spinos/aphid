@@ -12,7 +12,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-#include <SHelper.h>
+#include <BaseMesh.h>
 HMesh::HMesh(const std::string & path) : HBase(path) 
 {
 }
@@ -33,65 +33,64 @@ char HMesh::verifyType()
 	return 1;
 }
 
-char HMesh::save()
-{/*
-	HGroup grpMesh(getName());
-	if(!grpMesh.open()) {
-		std::cout<<"cannot open group "<<getName();
-		return 0;
-	}
-	
-	int nv = _numVertices;
-	addIntAttr("/.nv", &nv);
-	
-	int nf = m_numPolygons;
-	addIntAttr("/.nf", &nf);
-	
-	int nfv = m_numPolygonVertices;
-	addIntAttr("/.nfv", &nfv);
-	
+char HMesh::save(BaseMesh * mesh)
+{
+	int nv = mesh->getNumVertices();
+	if(!hasNamedAttr(".nv"))
+		addIntAttr(".nv", &nv);
+	else 
+		writeIntAttr(".nv", &nv);
+		
+	int nf = mesh->getNumPolygons();
+	if(!hasNamedAttr(".nf"))
+		addIntAttr(".nf", &nf);
+	else 
+		writeIntAttr(".nf", &nf);
+		
+	int nfv = mesh->getNumFaceVertices();
+	if(!hasNamedAttr(".nfv"))
+		addIntAttr(".nfv", &nfv);
+	else 
+		writeIntAttr(".nfv", &nfv);
+		
+	std::cout<<" "<<nv<<" "<<nf<<" "<<nfv;
+/*	
 	addVector3Data("/.p", nv, vertices());
 	addIntData("/.polyc", m_numPolygons, (int *)m_polygonCounts);
 	addIntData("/.polyv", m_numPolygonVertices, (int *)m_polygonIndices);
-	
-	grpMesh.close();
 */
 	return 1;
 }
 
-char HMesh::load()
-{/*
-	HGroup chd(getName());
-	if(!chd.open()) {
-		std::cout<<"cannot open group "<<getName();
-		return 0;
-	}
-	
-	std::stringstream sst;
-	
+char HMesh::load(BaseMesh * mesh)
+{
 	int numVertices = 3;
 	
-	readIntAttr("/.nv", &numVertices);
-	
-	createVertices(numVertices);
+	readIntAttr(".nv", &numVertices);
 	
 	int numPolygons = 1;
 	
-	readIntAttr("/.nf", &numPolygons);
-	
-	createPolygonCounts(numPolygons);
+	readIntAttr(".nf", &numPolygons);
 	
 	int numPolygonVertices = 3;
 	
-	readIntAttr("/.nfv", &numPolygonVertices);
+	readIntAttr(".nfv", &numPolygonVertices);
+	
+	std::cout<<" "<<numVertices<<" "<<numPolygons<<" "<<numPolygonVertices;
+/*
+	createVertices(numVertices);
+	
+	
+	
+	createPolygonCounts(numPolygons);
+	
+	
 	
 	createPolygonIndices(numPolygonVertices);
 	
 	readVector3Data("/.p", numVertices, vertices());
 	readIntData("/.polyc", numPolygons, m_polygonCounts);
 	readIntData("/.polyv", numPolygonVertices, m_polygonIndices);
-	
-	chd.close();
 	
 	processTriangleFromPolygon();
 	processQuadFromPolygon();

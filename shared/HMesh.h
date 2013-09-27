@@ -9,14 +9,15 @@
 
 #pragma once
 #include <HBase.h>
+class BaseMesh;
 class HMesh : public HBase {
 public:
 	HMesh(const std::string & path);
 	virtual ~HMesh();
 	
 	char verifyType();
-	virtual char save();
-	virtual char load();
+	virtual char save(BaseMesh * mesh);
+	virtual char load(BaseMesh * mesh);
 private:
 	
 };
