@@ -7,6 +7,7 @@
 #include <HDataset.h>
 #include <HAttribute.h>
 #include <VerticesHDataset.h>
+#include <FloatsHDataset.h>
 #include <IndicesHDataset.h>
 #include <HIntAttribute.h>
 #include <HFloatAttribute.h>

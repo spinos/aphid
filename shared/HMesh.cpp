@@ -81,6 +81,21 @@ char HMesh::save(BaseMesh * mesh)
 	    addIntData(".polyv", nfv);
 	
 	writeIntData(".polyv", nfv, (int *)mesh->polygonIndices());
+	
+	if(!hasNamedData(".us"))
+		addFloatData(".us", nuvid);
+		
+	writeFloatData(".us", nuvid, (int *)mesh->us());
+	
+	if(!hasNamedData(".vs"))
+		addFloatData(".vs", nuv);
+		
+	writeFloatData(".vs", nuv, (int *)mesh->vs());
+	
+	if(!hasNamedData(".uvids"))
+		addIntData(".uvids", nuvid);
+		
+	writeIntData(".uvids", nuvid, (int *)mesh->uvIds());
 
 	return 1;
 }
@@ -117,16 +132,11 @@ char HMesh::load(BaseMesh * mesh)
 	mesh->processQuadFromPolygon();
 	
 	mesh->createPolygonUV(numUVs, numUVIds);
-	/*
 	
-	for(unsigned i = 0; i < esm->getNumUVs(); i++) {
-		mesh->us()[i] = esm->getUs()[i];
-		mesh->vs()[i] = esm->getVs()[i];
-	}
-	
-	for(unsigned i = 0; i < esm->getNumUVIds(); i++)
-		mesh->uvIds()[i] = esm->getUVIds()[i];
-*/
+	readFloatData(".us", numUVs, mesh->us());
+	readFloatData(".vs", numUVs, mesh->vs());
+	readIntData(".uvids", numUVIds, mesh->uvIds());
+
 	mesh->verbose();
 	
 	return 1;

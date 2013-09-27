@@ -36,6 +36,14 @@ void HBase::addIntData(const char * dataName, unsigned count)
 	cset.close();
 }
 
+void HBase::addFloatData(const char * dataName, unsigned count)
+{
+	FloatsHDataset cset(dataName);
+	cset.setNumFloats(count);
+	cset.create(fObjectId);
+	cset.close();
+}
+
 void HBase::addVector3Data(const char * dataName, unsigned count)
 {	
 	VerticesHDataset pset(dataName);
@@ -58,6 +66,15 @@ void HBase::writeIntData(const char * dataName, unsigned count, int *value)
 	cset.setNumIndices(count);
 	cset.open(fObjectId);
 	if(!cset.write((int *)value)) std::cout<<dataName<<" write failed";
+	cset.close();
+}
+
+void HBase::writeFloatData(const char * dataName, unsigned count, int *value)
+{	
+	FloatsHDataset cset(dataName);
+	cset.setNumFloats(count);
+	cset.open(fObjectId);
+	if(!cset.write((float *)value)) std::cout<<dataName<<" write failed";
 	cset.close();
 }
 
@@ -101,6 +118,28 @@ char HBase::readIntData(const char * dataName, unsigned count, unsigned *dst)
 	
 	if(cset.dimensionMatched()) {
 		cset.read((int *)dst);
+	}
+	else {
+		std::cout<<dataName<<" dim check failed";
+		return 0;
+	}
+		
+	cset.close();
+	return 1;
+}
+
+char HBase::readFloatData(const char * dataName, unsigned count, float *dst)
+{	
+	FloatsHDataset cset(dataName);
+	cset.setNumFloats(count);
+	
+	if(!cset.open(fObjectId)) {
+		std::cout<<dataName<<" open failed";
+		return 0;
+	}
+	
+	if(cset.dimensionMatched()) {
+		cset.read(dst);
 	}
 	else {
 		std::cout<<dataName<<" dim check failed";

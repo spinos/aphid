@@ -18,14 +18,17 @@ public:
 	
 	void addIntAttr(const char * attrName);
 	void addIntData(const char * dataName, unsigned count);
+	void addFloatData(const char * dataName, unsigned count);
 	void addVector3Data(const char * dataName, unsigned count);
 	
 	void writeIntAttr(const char * attrName, int *value);
 	void writeIntData(const char * dataName, unsigned count, int *value);
+	void writeFloatData(const char * dataName, unsigned count, int *value);
 	void writeVector3Data(const char * dataName, unsigned count, Vector3F *value);
 	
 	char readIntAttr(const char * attrName, int *value);
 	char readIntData(const char * dataname, unsigned count, unsigned *dst);
+	char readFloatData(const char * dataname, unsigned count, float *dst);
 	char readVector3Data(const char * dataname, unsigned count, Vector3F *dst);
 	
 	char hasNamedAttr(const char * attrName);

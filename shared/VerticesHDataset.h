@@ -6,7 +6,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-
+#pragma once
 #include <HDataset.h>
 
 class VerticesHDataset : public HDataset {

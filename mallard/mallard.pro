@@ -93,6 +93,7 @@ HEADERS       = ../shared/AllMath.h \
     $${Aphid}/shared/HAttribute.h \
     $${Aphid}/shared/VerticesHDataset.h \
     $${Aphid}/shared/IndicesHDataset.h \
+	$${Aphid}/shared/FloatsHDataset.h \
     $${Aphid}/shared/HIntAttribute.h \
     $${Aphid}/shared/HFloatAttribute.h \
     $${Aphid}/shared/HBase.h \
@@ -211,6 +212,7 @@ SOURCES       = ../shared/Vector3F.cpp \
     $${Aphid}/shared/HAttribute.cpp \
     $${Aphid}/shared/VerticesHDataset.cpp \
     $${Aphid}/shared/IndicesHDataset.cpp \
+	$${Aphid}/shared/FloatsHDataset.cpp \
     $${Aphid}/shared/HIntAttribute.cpp \
     $${Aphid}/shared/HFloatAttribute.cpp \
     $${Aphid}/shared/HBase.cpp \
