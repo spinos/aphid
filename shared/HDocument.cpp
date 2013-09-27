@@ -85,9 +85,10 @@ char HDocument::checkExist(const std::string & path)
 	return 1;
 }
 
-char HDocument::deleteObject(const std::string & path)
+char HDocument::deleteObject(const std::string & path, hid_t parentId)
 {
-	if(H5Ldelete(fFileId, path.c_str(), H5P_DEFAULT) < 0) {
+    if(parentId == 0) parentId = fFileId;
+	if(H5Ldelete(parentId, path.c_str(), H5P_DEFAULT) < 0) {
 		fCurrentError = eDeleteFailure;
 		return 0;
 	}

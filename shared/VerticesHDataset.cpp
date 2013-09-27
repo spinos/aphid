@@ -27,7 +27,7 @@ int VerticesHDataset::numVertices() const
 	return fDimension[0] / 3;
 }
 
-char VerticesHDataset::create()
+char VerticesHDataset::create(hid_t parentId)
 {
-	return raw_create();
+	return raw_create(parentId);
 }

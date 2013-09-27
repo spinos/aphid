@@ -17,8 +17,8 @@ public:
 	virtual ~HDataset() {}
 	
 	virtual char validate();
-	virtual char create(int dimx, int dimy);
-	virtual char raw_create();
+	//virtual char create(int dimx, int dimy);
+	virtual char raw_create(hid_t parentId);
 
 	virtual char open();
 	virtual void close();

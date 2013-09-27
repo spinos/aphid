@@ -19,7 +19,7 @@ public:
 	
 	virtual hid_t dataType();
 	
-	virtual char create();
+	virtual char create(hid_t parentId);
 	virtual char write(int *data);
 	virtual char read(int *data);
 };

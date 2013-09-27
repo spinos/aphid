@@ -32,9 +32,9 @@ hid_t IndicesHDataset::dataType()
 	return H5T_NATIVE_INT;
 }
 
-char IndicesHDataset::create()
+char IndicesHDataset::create(hid_t parentId)
 {
-	return raw_create();
+	return raw_create(parentId);
 }
 
 char IndicesHDataset::write(int *data)

@@ -21,6 +21,8 @@ public:
 	void addVector3Data(const char * dataName, unsigned count, Vector3F *value);
 	
 	void writeIntAttr(const char * attrName, int *value);
+	void writeIntData(const char * dataName, unsigned count, int *value);
+	void writeVector3Data(const char * dataName, unsigned count, Vector3F *value);
 	
 	char readIntAttr(const char * attrName, int *value);
 	char readIntData(const char * dataname, unsigned count, unsigned *dst);
@@ -31,6 +33,9 @@ public:
 	
 	char hasNamedChild(const char * childName);
 	std::string getChildName(hsize_t i);
+	
+	char hasNamedData(const char * dataName);
+	char discardNamedAttr(const char * path);
 	
 	virtual char save();
 	virtual char load();
