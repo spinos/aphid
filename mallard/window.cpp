@@ -105,23 +105,35 @@ void Window::receiveToolAction(int a)
 void Window::createActions()
 {
     newSceneAct = new QAction(tr("&New Scene"), this);
-    newSceneAct->setStatusTip(tr("Load a mesh cache file as the body"));
+    newSceneAct->setStatusTip(tr("Create an empty scene"));
     connect(newSceneAct, SIGNAL(triggered()), glWidget, SLOT(cleanSheet()));
+	
 	showBrushControlAct = new QAction(tr("&Brush Control"), this);
 	showBrushControlAct->setStatusTip(tr("Show brush settings"));
     connect(showBrushControlAct, SIGNAL(triggered()), m_brushControl, SLOT(show()));
+	
 	saveSceneAct = new QAction(tr("&Save Scene"), this);
 	connect(saveSceneAct, SIGNAL(triggered()), glWidget, SLOT(saveSheet()));
+	
 	saveSceneAsAct = new QAction(tr("&Save Scene As"), this);
 	connect(saveSceneAsAct, SIGNAL(triggered()), glWidget, SLOT(saveSheetAs()));
+	
+	importMeshAct = new QAction(tr("&Import Mesh"), this);
+	importMeshAct->setStatusTip(tr("Load a mesh cache file as the body"));
+	connect(importMeshAct, SIGNAL(triggered()), glWidget, SLOT(open()));
+	
+	openSceneAct = new QAction(tr("&Open Scene"), this);
+	connect(openSceneAct, SIGNAL(triggered()), glWidget, SLOT(openSheet()));
 }
 
 void Window::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(newSceneAct);
+	fileMenu->addAction(openSceneAct);
 	fileMenu->addAction(saveSceneAct);
 	fileMenu->addAction(saveSceneAsAct);
+	fileMenu->addAction(importMeshAct);
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showBrushControlAct);
 }

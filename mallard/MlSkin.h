@@ -60,7 +60,6 @@ public:
 	void verbose() const;
 	
 protected:
-	void run();
 	
 private:
 	bool createFeather(MlCalamus & ori);

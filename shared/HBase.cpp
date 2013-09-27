@@ -94,7 +94,7 @@ char HBase::readIntData(const char * dataName, unsigned count, unsigned *dst)
 	IndicesHDataset cset(dataName);
 	cset.setNumIndices(count);
 	
-	if(!cset.open()) {
+	if(!cset.open(fObjectId)) {
 		std::cout<<dataName<<" open failed";
 		return 0;
 	}
@@ -116,7 +116,7 @@ char HBase::readVector3Data(const char * dataName, unsigned count, Vector3F *dst
 	VerticesHDataset pset(dataName);
 	pset.setNumVertices(count);
 	
-	if(!pset.open()) {
+	if(!pset.open(fObjectId)) {
 		std::cout<<dataName<<" open failed";
 		return 0;
 	}

@@ -16,6 +16,7 @@ public:
     BlockDrawBuffer();
     virtual ~BlockDrawBuffer();
     
+	void initializeBuffer();
     void clearBuffer();
     void drawBuffer() const;
 	

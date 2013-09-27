@@ -71,8 +71,10 @@ private:
 	QMenu * windowMenu;
 	QAction * showBrushControlAct;
 	QAction * newSceneAct;
+	QAction * openSceneAct;
 	QAction * saveSceneAct;
 	QAction * saveSceneAsAct;
+	QAction * importMeshAct;
 private:
 	void createActions();
 	void createMenus();

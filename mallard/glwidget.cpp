@@ -352,8 +352,10 @@ void GLWidget::loadMesh(std::string filename)
 	buildTopology();
 	m_accmesh->setup(m_topo);
 	buildTree();
+	std::cout<<"skin";
 	m_skin->setBodyMesh(m_accmesh, m_topo);
-	m_bezierDrawer->rebuildBuffer(m_accmesh);
+	std::cout<<"buf";
+	m_bezierDrawer->rebuildBuffer(m_accmesh);std::cout<<"buf end";
 	setDirty();
 	update();
 }
@@ -379,6 +381,7 @@ void GLWidget::clientSelect()
 		m_skin->discardActive();
 		selectFeather();
 	}
+	setDirty();
 }
 
 void GLWidget::clientMouseInput()
@@ -495,6 +498,8 @@ void GLWidget::clearScene()
 {
 	MlScene::clearScene();
 	m_bezierDrawer->clearBuffer();
+	m_featherDrawer->clearBuffer();
+	m_featherDrawer->initializeBuffer();
 	clearTree();
 	clearTopology();
 	update();
@@ -515,6 +520,28 @@ void GLWidget::saveSheetAs()
 							tr("All Files (*);;Text Files (*.txt)"),
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
-	saveSceneAs(fileName.toUtf8().data());
+	if(fileName != "")
+		saveSceneAs(fileName.toUtf8().data());
+}
+
+void GLWidget::openSheet()
+{
+	QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this,
+							tr("Open scene from file"),
+							tr("info"),
+							tr("All Files (*);;Text Files (*.txt)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName != "") {
+		openScene(fileName.toUtf8().data());
+		buildTopology();
+		std::cout<<"acc set";
+		m_accmesh->setup(m_topo);
+		buildTree();
+		m_skin->setBodyMesh(m_accmesh, m_topo);
+		m_bezierDrawer->rebuildBuffer(m_accmesh);
+		update();
+	}
 }
 //:~

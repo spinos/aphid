@@ -35,7 +35,7 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 		return false;
 	}
 	
-	std::cout<<"write scene to "<<fileName;
+	std::cout<<"write scene to "<<fileName<<"\n";
 	
 	HWorld grpWorld;
 	grpWorld.save();
@@ -44,7 +44,6 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 	
 	HMesh grpBody("/world/body");
 	grpBody.save(m_accmesh);
-	
 	grpBody.close();
 	
 	//HMesh grpSkin("/world/skin");
@@ -113,5 +112,29 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 	
 	//HObject::FileIO.deleteObject("/A1");
 	HObject::FileIO.close();*/
+	return true;
+}
+
+bool MlScene::readSceneFromFile(const std::string & fileName)
+{
+	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadAndWrite)) {
+		setLatestError(BaseScene::FileNotWritable);
+		return false;
+	}
+	
+	std::cout<<"read scene from "<<fileName<<"\n";
+		
+	HWorld grpWorld;
+	grpWorld.load();
+
+	HMesh grpBody("/world/body");
+	grpBody.load(m_accmesh);
+	grpBody.close();
+	
+	//HMesh grpSkin("/world/skin");
+	//grpSkin.close();
+	
+	grpWorld.close();
+	HObject::FileIO.close();
 	return true;
 }

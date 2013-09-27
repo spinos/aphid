@@ -19,6 +19,10 @@ BaseMesh::BaseMesh()
 	m_polygonCounts = 0;
 	m_polygonIndices = 0;
 	m_numPolygons = 0;
+	m_u = 0;
+	m_v = 0;
+	m_uvIds = 0;
+	m_numUVs = m_numUVIds = 0;
 	setEntityType(TypedEntity::TTriangleMesh);
 }
 
@@ -35,11 +39,15 @@ void BaseMesh::cleanup()
 	if(m_quadIndices) delete[] m_quadIndices;
 	if(m_polygonCounts) delete[] m_polygonCounts;
 	if(m_polygonIndices) delete[] m_polygonIndices;
+	if(m_u) delete[] m_u;
+	if(m_v) delete[] m_v;
+	if(m_uvIds) delete[] m_uvIds;
 	_numVertices = 0;
 	_numFaces = 0;
 	_numFaceVertices = 0;
 	m_numPolygons = 0;
 	m_polygonIndices = 0;
+	m_numUVs = m_numUVIds = 0;
 }
 
 void BaseMesh::createVertices(unsigned num)
@@ -71,6 +79,15 @@ void BaseMesh::createPolygonIndices(unsigned num)
 {
     m_numPolygonVertices = num;
     m_polygonIndices = new unsigned[num];
+}
+
+void BaseMesh::createPolygonUV(unsigned numUVs, unsigned numUVIds)
+{
+	m_u = new float[numUVs];
+	m_v = new float[numUVs];
+	m_uvIds = new unsigned[numUVIds];
+	m_numUVs = numUVs;
+	m_numUVIds = numUVIds;
 }
 
 unsigned BaseMesh::processTriangleFromPolygon()
@@ -225,6 +242,21 @@ unsigned * BaseMesh::polygonIndices()
 	return m_polygonIndices;
 }
 
+float * BaseMesh::us()
+{
+	return m_u;
+}
+
+float * BaseMesh::vs()
+{
+	return m_v;
+}
+
+unsigned * BaseMesh::uvIds()
+{
+	return m_uvIds;
+}
+
 void BaseMesh::setVertex(unsigned idx, float x, float y, float z)
 {
 	Vector3F *v = _vertices;
@@ -285,6 +317,16 @@ unsigned BaseMesh::getNumFaceVertices() const
 	return _numFaceVertices;
 }
 
+unsigned BaseMesh::getNumUVs() const
+{
+	return m_numUVs;
+}
+
+unsigned BaseMesh::getNumUVIds() const
+{
+	return m_numUVIds;
+}
+
 Vector3F * BaseMesh::getVertices() const
 {
 	return _vertices;
@@ -308,16 +350,6 @@ unsigned * BaseMesh::getQuadIndices() const
 unsigned * BaseMesh::getPolygonCounts() const
 {
 	return m_polygonCounts;
-}
-
-void BaseMesh::verbose() const
-{
-    printf("mesh parameters:\n  face count:%d\n", _numFaces);
-    printf("  face vertex count:%d\n", _numFaceVertices);
-    printf("  vertex count:%d\n", _numVertices);
-    printf("  face connection:");
-    for(unsigned i = 0; i < _numFaceVertices; i++)
-        printf(" %d", _indices[i]);
 }
 
 Matrix33F BaseMesh::getTangentFrame(const unsigned& idx) const
@@ -491,5 +523,16 @@ char BaseMesh::triangleIntersect(const Vector3F * threeCorners, IntersectionCont
 	ctx->m_geometry = (Geometry*)this;
 	ctx->m_success = 1;
 	return 1;
+}
+
+void BaseMesh::verbose() const
+{
+	std::cout<<"mesh status:\n";
+	std::cout<<" num vertices "<<getNumVertices()<<"\n";
+	std::cout<<" num polygons "<<getNumPolygons()<<"\n";
+	std::cout<<" num face vertices "<<getNumFaceVertices()<<"\n";
+	std::cout<<" num uvs "<<getNumUVs()<<"\n";
+	std::cout<<" num uvs indices "<<getNumUVIds()<<"\n";
+
 }
 //:~

@@ -33,7 +33,7 @@ void ImportPatch(const char * filename, PatchMesh * dst)
 	dst->processTriangleFromPolygon();
 	dst->processQuadFromPolygon();
 	
-	dst->prePatchUV(esm->getNumUVs(), esm->getNumUVIds());
+	dst->createPolygonUV(esm->getNumUVs(), esm->getNumUVIds());
 	
 	for(unsigned i = 0; i < esm->getNumUVs(); i++) {
 		dst->us()[i] = esm->getUs()[i];

@@ -16,12 +16,6 @@ public:
 	PatchMesh();
 	virtual ~PatchMesh();
 	
-	void prePatchUV(unsigned numUVs, unsigned numUVIds);
-	
-	float * us();
-	float * vs();
-	unsigned * uvIds();
-	
 	virtual unsigned getNumFaces() const;
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
@@ -34,8 +28,5 @@ public:
 	PointInsidePolygonTest patchAt(unsigned idx) const;
 
 private:
-	unsigned m_numUVs, m_numUVIds;
-	float * m_u;
-	float * m_v;
-	unsigned * m_uvIds;
+	
 };

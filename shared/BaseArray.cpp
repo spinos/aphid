@@ -13,13 +13,18 @@
 
 BaseArray::BaseArray() 
 {
-	m_blocks.push_back(new PtrTup);
-	m_ptr = m_blocks[0]->aligned;
-	m_current = 0;
 	m_elementSize = 1;
+	initialize();
 }
 
 BaseArray::~BaseArray() {}
+
+void BaseArray::initialize()
+{
+	m_blocks.push_back(new PtrTup);
+	m_ptr = m_blocks[0]->aligned;
+	m_current = 0;
+}
 
 void BaseArray::clear() 
 {
@@ -27,7 +32,6 @@ void BaseArray::clear()
 				it != m_blocks.end(); ++it)
 		delete *it;
 	m_blocks.clear();
-	m_current = 0;
 }
 
 char *BaseArray::expandBy(unsigned size)

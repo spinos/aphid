@@ -22,7 +22,7 @@ public:
 	
 	virtual void clearScene();
 	virtual bool writeSceneToFile(const std::string & fileName);
-	
+	virtual bool readSceneFromFile(const std::string & fileName);
 private:
 	
 };

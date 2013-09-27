@@ -26,6 +26,7 @@ MlSkin::~MlSkin()
 void MlSkin::cleanup()
 {
 	m_calamus->clear();
+	m_calamus->initialize();
 	if(m_faceCalamusStart) delete[] m_faceCalamusStart;
 	m_numFeather = 0;
 }
@@ -450,9 +451,4 @@ void MlSkin::verbose() const
 		if(m_faceCalamusStart[i] > 0) std::cout<<" "<<i<<":"<<m_faceCalamusStart[i];
 	}
 	std::cout<<"\n";
-}
-
-void MlSkin::run()
-{
-
 }

@@ -35,6 +35,8 @@ char HMesh::verifyType()
 
 char HMesh::save(BaseMesh * mesh)
 {
+	mesh->verbose();
+	
 	int nv = mesh->getNumVertices();
 	if(!hasNamedAttr(".nv"))
 		addIntAttr(".nv");
@@ -53,6 +55,18 @@ char HMesh::save(BaseMesh * mesh)
 	
 	writeIntAttr(".nfv", &nfv);
 	
+	int nuv = mesh->getNumUVs();
+	if(!hasNamedAttr(".nuv"))
+		addIntAttr(".nuv");
+	
+	writeIntAttr(".nuv", &nuv);
+	
+	int nuvid = mesh->getNumUVIds();
+	if(!hasNamedAttr(".nuvid"))
+		addIntAttr(".nuvid");
+	
+	writeIntAttr(".nuvid", &nuvid);
+	
 	if(!hasNamedData(".p"))
 	    addVector3Data(".p", nv);
 	
@@ -64,9 +78,9 @@ char HMesh::save(BaseMesh * mesh)
 	writeIntData(".polyc", nf, (int *)mesh->polygonCounts());
 	
 	if(!hasNamedData(".polyv"))
-	    addIntData(".polyv", nf);
+	    addIntData(".polyv", nfv);
 	
-	writeIntData(".polyv", nf, (int *)mesh->polygonIndices());
+	writeIntData(".polyv", nfv, (int *)mesh->polygonIndices());
 
 	return 1;
 }
@@ -85,26 +99,36 @@ char HMesh::load(BaseMesh * mesh)
 	
 	readIntAttr(".nfv", &numPolygonVertices);
 	
-	std::cout<<" "<<numVertices<<" "<<numPolygons<<" "<<numPolygonVertices;
-/*
-	createVertices(numVertices);
+	int numUVs = 3;
+	readIntAttr(".nuv", &numUVs);
 	
+	int numUVIds = 3;
+	readIntAttr(".nuvid", &numUVIds);
 	
+	mesh->createVertices(numVertices);
+	mesh->createPolygonCounts(numPolygons);
+	mesh->createPolygonIndices(numPolygonVertices);
 	
-	createPolygonCounts(numPolygons);
+	readVector3Data(".p", numVertices, mesh->vertices());
+	readIntData(".polyc", numPolygons, mesh->polygonCounts());
+	readIntData(".polyv", numPolygonVertices, mesh->polygonIndices());
 	
+	mesh->processTriangleFromPolygon();
+	mesh->processQuadFromPolygon();
 	
+	mesh->createPolygonUV(numUVs, numUVIds);
+	/*
 	
-	createPolygonIndices(numPolygonVertices);
+	for(unsigned i = 0; i < esm->getNumUVs(); i++) {
+		mesh->us()[i] = esm->getUs()[i];
+		mesh->vs()[i] = esm->getVs()[i];
+	}
 	
-	readVector3Data("/.p", numVertices, vertices());
-	readIntData("/.polyc", numPolygons, m_polygonCounts);
-	readIntData("/.polyv", numPolygonVertices, m_polygonIndices);
+	for(unsigned i = 0; i < esm->getNumUVIds(); i++)
+		mesh->uvIds()[i] = esm->getUVIds()[i];
+*/
+	mesh->verbose();
 	
-	processTriangleFromPolygon();
-	processQuadFromPolygon();
-	processRealEdgeFromPolygon();
-	*/
 	return 1;
 }
 //:~

@@ -20,13 +20,12 @@ public:
 	
 	void cleanup();
 	
-	void verbose() const;
-	
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
 	void createQuadIndices(unsigned num);
 	void createPolygonCounts(unsigned num);
 	void createPolygonIndices(unsigned num);
+	void createPolygonUV(unsigned numUVs, unsigned numUVIds);
 	
 	unsigned processTriangleFromPolygon();
 	unsigned processQuadFromPolygon();
@@ -41,6 +40,9 @@ public:
 	unsigned * quadIndices();
 	unsigned * polygonCounts();
 	unsigned * polygonIndices();
+	float * us();
+	float * vs();
+	unsigned * uvIds();
 	
 	void setVertex(unsigned idx, float x, float y, float z);
 	void setTriangle(unsigned idx, unsigned a, unsigned b, unsigned c);
@@ -54,6 +56,8 @@ public:
 	unsigned getNumPolygons() const;
 	unsigned getNumVertices() const;
 	unsigned getNumFaceVertices() const;
+	unsigned getNumUVs() const;
+	unsigned getNumUVIds() const;
 	
 	Vector3F * getVertices() const;
 	Vector3F * getNormals() const;
@@ -70,6 +74,8 @@ public:
 	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
 	char triangleIntersect(const Vector3F * threeCorners, IntersectionContext * ctx) const;
 	
+	void verbose() const;
+	
 	Vector3F * _vertices;
 	Vector3F * m_normals;
 	unsigned * _indices;
@@ -83,5 +89,9 @@ public:
 	unsigned * m_polygonCounts;
 	unsigned m_numPolygonVertices;
 	unsigned * m_polygonIndices;
+	unsigned m_numUVs, m_numUVIds;
+	float * m_u;
+	float * m_v;
+	unsigned * m_uvIds;
 private:
 };

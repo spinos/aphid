@@ -71,6 +71,7 @@ public:
 	
 public slots:
 	void cleanSheet();
+	void openSheet();
 	void saveSheet();
 	void saveSheetAs();
     

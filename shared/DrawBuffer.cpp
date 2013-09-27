@@ -21,9 +21,13 @@ DrawBuffer::~DrawBuffer()
 void DrawBuffer::clearBuffer()
 {
     if(m_vertices) delete[] m_vertices;
+	m_vertices = 0;
 	if(m_normals) delete[] m_normals;
+	m_normals = 0;
 	if(m_indices) delete[] m_indices;
+	m_indices = 0;
 	m_numVertices = m_numIndices = 0;
+	
 }
 
 void DrawBuffer::drawBuffer() const

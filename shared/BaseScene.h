@@ -37,6 +37,7 @@ public:
 	virtual bool discardConfirm();
 	virtual void clearScene();
 	virtual bool writeSceneToFile(const std::string & fileName);
+	virtual bool readSceneFromFile(const std::string & fileName);
 	
 	static bool fileExists(const std::string & fileName);
 private:

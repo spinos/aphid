@@ -41,23 +41,45 @@ bool BaseScene::isUntitled() const
 
 bool BaseScene::newScene()
 {
-	if(isDirty()) {
+	if(isDirty())
 		if(!discardConfirm()) return false;
-		clearScene();
-	}
+	
+	clearScene();
 	
 	return true;
 }
 
 bool BaseScene::openScene(const std::string & fileName)
 {
+	if(isDirty()) {
+		if(!discardConfirm()) return false;
+		clearScene();
+	}
+	
 	if(!fileExists(fileName)) {
 		m_error = FileNotFound;
 		return false;
 	}
 	
+	readSceneFromFile(fileName);
 	m_fileName = fileName;
+	setClean();
 	return true;
+}
+
+bool BaseScene::saveScene()
+{
+	if(writeSceneToFile(m_fileName)) {
+		setClean();
+		return true;
+	}
+	return false;
+}
+
+bool BaseScene::saveSceneAs(const std::string & fileName)
+{
+	m_fileName = fileName;
+	return saveScene();
 }
 
 bool BaseScene::fileExists(const std::string & fileName)
@@ -85,23 +107,12 @@ void BaseScene::clearScene()
 	setClean();
 }
 
-bool BaseScene::saveScene()
-{
-	if(writeSceneToFile(m_fileName)) {
-		setClean();
-		return true;
-	}
-	return false;
-}
-
-bool BaseScene::saveSceneAs(const std::string & fileName)
-{
-	m_fileName = fileName;
-	return saveScene();
-}
-
 bool BaseScene::writeSceneToFile(const std::string & fileName)
 {
 	return true;
 }
 
+bool BaseScene::readSceneFromFile(const std::string & fileName)
+{
+	return true;
+}

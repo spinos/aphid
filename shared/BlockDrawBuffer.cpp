@@ -16,16 +16,21 @@
 #endif
 BlockDrawBuffer::BlockDrawBuffer() 
 {
-    m_blocks.push_back(new PtrTup);
-	m_vertexPtr = m_blocks[0]->alignedV;
-	m_normalPtr = m_blocks[0]->alignedN;
-	m_current = 0;
-	m_taken = 0;
+    initializeBuffer();
 }
 
 BlockDrawBuffer::~BlockDrawBuffer() 
 {
     clearBuffer();
+}
+
+void BlockDrawBuffer::initializeBuffer()
+{
+	m_blocks.push_back(new PtrTup);
+	m_vertexPtr = m_blocks[0]->alignedV;
+	m_normalPtr = m_blocks[0]->alignedN;
+	m_current = 0;
+	m_taken = 0;
 }
 
 void BlockDrawBuffer::clearBuffer()

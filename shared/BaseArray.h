@@ -14,6 +14,7 @@ public:
 	BaseArray();
 	virtual ~BaseArray();
 
+	void initialize();
 	void clear();
 	
 	char *expandBy(unsigned size);
