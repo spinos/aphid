@@ -14,7 +14,6 @@
 class HIntAttribute : public HAttribute
 {
 public:
-	HIntAttribute() {}
 	HIntAttribute(const std::string & path);
 	~HIntAttribute() {}
 	

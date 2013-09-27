@@ -10,7 +10,6 @@
 #include "HObject.h"
 class HAttribute : public HObject {
 public:
-	HAttribute() {}
 	HAttribute(const std::string & path);
 	virtual ~HAttribute() {}
 	

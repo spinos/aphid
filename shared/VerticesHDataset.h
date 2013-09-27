@@ -11,7 +11,6 @@
 
 class VerticesHDataset : public HDataset {
 public:
-	VerticesHDataset();
 	VerticesHDataset(const std::string & path);
 	virtual ~VerticesHDataset();
 	

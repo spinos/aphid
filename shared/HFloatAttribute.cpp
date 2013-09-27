@@ -9,9 +9,8 @@
 
 #include "HFloatAttribute.h"
 
-HFloatAttribute::HFloatAttribute(const std::string & path)
+HFloatAttribute::HFloatAttribute(const std::string & path) : HAttribute(path)
 {
-	fObjectPath = ValidPathName(path);
 }
 
 hid_t HFloatAttribute::dataType()

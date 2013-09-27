@@ -9,11 +9,8 @@
 
 #include "IndicesHDataset.h"
 
-IndicesHDataset::IndicesHDataset() {}
-
-IndicesHDataset::IndicesHDataset(const std::string & path)
+IndicesHDataset::IndicesHDataset(const std::string & path) : HDataset(path)
 {
-	fObjectPath = ValidPathName(path);
 }
 
 IndicesHDataset::~IndicesHDataset() {}

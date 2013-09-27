@@ -9,9 +9,8 @@
 
 #include "HIntAttribute.h"
 
-HIntAttribute::HIntAttribute(const std::string & path)
+HIntAttribute::HIntAttribute(const std::string & path) : HAttribute(path)
 {
-	fObjectPath = ValidPathName(path);
 }
 
 char HIntAttribute::write(int *data)

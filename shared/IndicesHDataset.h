@@ -11,7 +11,6 @@
 
 class IndicesHDataset : public HDataset {
 public:
-	IndicesHDataset();
 	IndicesHDataset(const std::string & path);
 	virtual ~IndicesHDataset();
 	

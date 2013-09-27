@@ -9,9 +9,8 @@
 
 #include "HAttribute.h"
 
-HAttribute::HAttribute(const std::string & path)
+HAttribute::HAttribute(const std::string & path) : HObject(path)
 {
-	fObjectPath = ValidPathName(path);
 }
 
 char HAttribute::create(int dim, hid_t parentId)

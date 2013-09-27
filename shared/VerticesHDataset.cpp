@@ -9,11 +9,8 @@
 
 #include "VerticesHDataset.h"
 
-VerticesHDataset::VerticesHDataset() {}
-
-VerticesHDataset::VerticesHDataset(const std::string & path)
+VerticesHDataset::VerticesHDataset(const std::string & path) : HDataset(path)
 {
-	fObjectPath = ValidPathName(path);
 }
 
 VerticesHDataset::~VerticesHDataset() {}
