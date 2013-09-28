@@ -198,7 +198,7 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 #ifdef WIN32
 	std::string filename("D:/aphid/mdl/torus.m");
 #else
-	std::string filename("/Users/jianzhang/aphid/mdl/torus.m");
+	std::string filename("/Users/jianzhang/aphid/mdl/head.m");
 #endif
 
 	loadMesh(filename);
@@ -292,6 +292,7 @@ void GLWidget::clientDraw()
 
 void GLWidget::loadMesh(std::string filename)
 {
+	mesh()->cleanup();
 	ESMUtil::ImportPatch(filename.c_str(), mesh());
 	buildTopology();
 	body()->setup(m_topo);

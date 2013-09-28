@@ -33,15 +33,15 @@ BaseMesh::~BaseMesh()
 
 void BaseMesh::cleanup()
 {
-	if(_vertices) delete[] _vertices;
-	if(m_normals) delete[] m_normals;
-	if(_indices) delete[] _indices;
-	if(m_quadIndices) delete[] m_quadIndices;
-	if(m_polygonCounts) delete[] m_polygonCounts;
-	if(m_polygonIndices) delete[] m_polygonIndices;
-	if(m_u) delete[] m_u;
-	if(m_v) delete[] m_v;
-	if(m_uvIds) delete[] m_uvIds;
+	if(_vertices) delete[] _vertices; _vertices = 0;
+	if(m_normals) delete[] m_normals; m_normals = 0;
+	if(_indices) delete[] _indices; _indices = 0;
+	if(m_quadIndices) delete[] m_quadIndices; m_quadIndices = 0;
+	if(m_polygonCounts) delete[] m_polygonCounts; m_polygonCounts = 0;
+	if(m_polygonIndices) delete[] m_polygonIndices; m_polygonIndices = 0;
+	if(m_u) delete[] m_u; m_u = 0;
+	if(m_v) delete[] m_v; m_v = 0;
+	if(m_uvIds) delete[] m_uvIds; m_uvIds = 0;
 	_numVertices = 0;
 	_numFaces = 0;
 	_numFaceVertices = 0;
