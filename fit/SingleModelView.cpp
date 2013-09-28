@@ -220,7 +220,7 @@ int SingleModelView::interactMode()
 	return InteractContext->getContext();
 }
 
-PatchMesh * SingleModelView::mesh() const
+PatchMesh * SingleModelView::mesh()
 {
 	return m_mesh;
 }

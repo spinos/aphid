@@ -62,7 +62,7 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *event);
-
+	
 private:
     GLWidget *glWidget;
 	ToolBox * m_tools;
@@ -82,6 +82,7 @@ private:
 public slots:
 	void receiveToolContext(int a);
     void receiveToolAction(int a);
+	void setWorkTitle(QString name);
 };
 //! [0]
 

@@ -60,67 +60,10 @@ BezierPatch testbez;
 BezierPatch testsplt[4];
 InverseBilinearInterpolate invbil;
 PatchSplitContext childUV[4];
-MlFeather fea;
+MlFeather feat;
 BaseDrawer * dr;
 
 # define THIRTYTWO_BYTE_ALIGNMENT(X)   ((((char*)(X) - (char*)0)&31)==0)
-
-void createFeather()
-{
-    fea.createNumSegment(4);
-    float * quill = fea.quilly();
-    quill[0] = 4.f;
-    quill[1] = 2.4f;
-    quill[2] = 1.3f;
-    quill[3] = .9f;
-    
-    Vector2F * vanes = fea.vaneAt(0, 0);
-    vanes[0].set(.9f, .9f);
-    vanes[1].set(.8f, 1.59f);
-    vanes[2].set(.3f, 1.3f);
-    vanes = fea.vaneAt(0, 1);
-    vanes[0].set(-.6f, .9f);
-    vanes[1].set(-.5f, 1.1f);
-    vanes[2].set(-.2f, .9f);
-    
-    vanes = fea.vaneAt(1, 0);
-    vanes[0].set(.7f, 1.1f);
-    vanes[1].set(.6f, 1.f);
-    vanes[2].set(.5f, .9f);
-    vanes = fea.vaneAt(1, 1);
-    vanes[0].set(-.6f, .62f);
-    vanes[1].set(-.6f, .97f);
-    vanes[2].set(-.4f, 1.f);
-    
-    vanes = fea.vaneAt(2, 0);
-    vanes[0].set(.4f, .5f);
-    vanes[1].set(.5f, .6f);
-    vanes[2].set(.4f, .7f);
-    vanes = fea.vaneAt(2, 1);
-    vanes[0].set(-.3f, .5f);
-    vanes[1].set(-.4f, .5f);
-    vanes[2].set(-.3f, .7f);
-    
-    vanes = fea.vaneAt(3, 0);
-    vanes[0].set(.4f, .4f);
-    vanes[1].set(.3f, .5f);
-    vanes[2].set(.3f, .6f);
-    vanes = fea.vaneAt(3, 1);
-    vanes[0].set(-.3f, .4f);
-    vanes[1].set(-.3f, .4f);
-    vanes[2].set(-.2f, .6f);
-    
-    vanes = fea.vaneAt(4, 0);
-    vanes[0].set(.01f, .42f);
-    vanes[1].set(.01f, .32f);
-    vanes[2].set(.01f, .33f);
-    vanes = fea.vaneAt(4, 1);
-    vanes[0].set(-.01f, .42f);
-    vanes[1].set(-.01f, .32f);
-    vanes[2].set(-.01f, .33f);
-	
-	fea.computeLength();
-}
 
 void drawFeather()
 {
@@ -128,7 +71,7 @@ void drawFeather()
     Matrix44F s;
 	s.setTranslation(5.f, 3.f, 4.f);
 	
-	float * quill = fea.getQuilly();
+	float * quill = feat.getQuilly();
 	
 	Vector3F a, b;
 	
@@ -162,14 +105,14 @@ void drawFeather()
 	Vector2F pv;
 	for(int i = 0; i < 5; i++) {
 		b.set(0.f, quill[i], 0.f);
-		Vector2F * vanes = fea.getVaneAt(i, 0);
+		Vector2F * vanes = feat.getVaneAt(i, 0);
 		pv = vanes[0];
 	    eRC.m_cvs[i] = s.transform(Vector3F(pv));
 		pv += vanes[1];
 		fRC.m_cvs[i] = s.transform(Vector3F(pv));
 		pv += vanes[2];
 		gRC.m_cvs[i] = s.transform(Vector3F(pv));
-		vanes = fea.getVaneAt(i, 1);
+		vanes = feat.getVaneAt(i, 1);
 		pv = vanes[0];
 	    eLC.m_cvs[i] = s.transform(Vector3F(pv));
 		pv += vanes[1];
@@ -212,7 +155,7 @@ void drawFeather()
 	    dr->useSpace(s);
 		dr->arrow(Vector3F(0.f, 0.f, 0.f), b);
 		
-		Vector2F * vanes = fea.getVaneAt(i, 0);
+		Vector2F * vanes = feat.getVaneAt(i, 0);
 		pv = vanes[0];
 		dr->arrow(Vector3F(0.f, 0.f, 0.f), pv);
 		pv += vanes[1];
@@ -220,7 +163,7 @@ void drawFeather()
 		pv += vanes[2];
 		dr->arrow(pv - vanes[2], pv);
 	    
-		vanes = fea.getVaneAt(i, 1);
+		vanes = feat.getVaneAt(i, 1);
 		pv = vanes[0];
 		dr->arrow(Vector3F(0.f, 0.f, 0.f), pv);
 		pv += vanes[1];
@@ -237,7 +180,8 @@ void drawFeather()
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
     dr = getDrawer();
-    createFeather();
+    feat.defaultCreate();
+	feat.setFeatherId(0);
     testbez.evaluateContolPoints();testbez.decasteljauSplit(testsplt);
 invbil.setVertices(Vector3F(-1,0,0), Vector3F(1,0,0), Vector3F(-1,1,0), Vector3F(2,2,0));
 Vector3F P(1.51f,0.71f,0.f);
@@ -297,7 +241,7 @@ void GLWidget::clientDraw()
 	
 	//getDrawer()->m_wireProfile.apply();
 	
-	m_featherDrawer->drawFeather(m_skin);
+	m_featherDrawer->drawFeather(skin());
 	
 	glPushMatrix();
 	
@@ -350,12 +294,11 @@ void GLWidget::loadMesh(std::string filename)
 {
 	ESMUtil::ImportPatch(filename.c_str(), mesh());
 	buildTopology();
-	m_accmesh->setup(m_topo);
+	body()->setup(m_topo);
 	buildTree();
-	std::cout<<"skin";
-	m_skin->setBodyMesh(m_accmesh, m_topo);
-	std::cout<<"buf";
-	m_bezierDrawer->rebuildBuffer(m_accmesh);std::cout<<"buf end";
+	skin()->setBodyMesh(body(), m_topo);
+	m_bezierDrawer->rebuildBuffer(body());
+	initializeFeatherExample();
 	setDirty();
 	update();
 }
@@ -369,16 +312,16 @@ void GLWidget::clientSelect()
 	}
 	else if(interactMode() == ToolContext::CreateBodyContourFeather) {
 		hitTest(ray, hit);
-		addFeather();
+		floodFeather();
 	}
 	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
 		hitTest(ray, hit);
 		selectFeather();
-		m_featherDrawer->hideActive(m_skin);
+		m_featherDrawer->hideActive(skin());
 	}
 	else if(interactMode() == ToolContext::CombBodyContourFeather || interactMode() == ToolContext::ScaleBodyContourFeather || interactMode() == ToolContext::PitchBodyContourFeather) {
 		hitTest(ray, hit);
-		m_skin->discardActive();
+		skin()->discardActive();
 		selectFeather();
 	}
 	setDirty();
@@ -393,42 +336,42 @@ void GLWidget::clientMouseInput()
 	}
 	else if(interactMode() == ToolContext::CreateBodyContourFeather) {
 		brush()->setToeByIntersect(&ray);
-		m_skin->growFeather(brush()->toeDisplacement());
-		m_featherDrawer->updateActive(m_skin);
+		skin()->growFeather(brush()->toeDisplacement());
+		m_featherDrawer->updateActive(skin());
 	}
 	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
 		hitTest(ray, hit);
 		selectFeather();
-		m_featherDrawer->hideActive(m_skin);
+		m_featherDrawer->hideActive(skin());
 	}
 	else if(interactMode() == ToolContext::CombBodyContourFeather) {
 		brush()->setToeByIntersect(&ray);
-		m_skin->combFeather(brush()->toeDisplacement(), brush()->heelPosition(), brush()->getRadius());
-		m_featherDrawer->updateActive(m_skin);
+		skin()->combFeather(brush()->toeDisplacement(), brush()->heelPosition(), brush()->getRadius());
+		m_featherDrawer->updateActive(skin());
 	}
 	else if(interactMode() == ToolContext::ScaleBodyContourFeather) {
 		brush()->setToeByIntersect(&ray);
-		m_skin->scaleFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
-		m_featherDrawer->updateActive(m_skin);
+		skin()->scaleFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
+		m_featherDrawer->updateActive(skin());
 	}
 	else if(interactMode() == ToolContext::PitchBodyContourFeather) {
 		brush()->setToeByIntersect(&ray);
-		m_skin->pitchFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
-		m_featherDrawer->updateActive(m_skin);
+		skin()->pitchFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
+		m_featherDrawer->updateActive(skin());
 	}
 }
 
 void GLWidget::clientDeselect()
 {
     if(interactMode() == ToolContext::CreateBodyContourFeather) {
-		m_skin->finishCreateFeather();
-		m_skin->discardActive();
+		skin()->finishCreateFeather();
+		skin()->discardActive();
 	}
 }
 
-PatchMesh * GLWidget::mesh() const
+PatchMesh * GLWidget::mesh()
 {
-	return m_accmesh;
+	return body();
 }
 
 void GLWidget::selectFeather()
@@ -439,10 +382,10 @@ void GLWidget::selectFeather()
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
 	brush()->resetToe();
 	
-	m_skin->selectAround(ctx->m_componentIdx, ctx->m_hitP, ctx->m_hitN, brush()->getRadius());
+	skin()->selectAround(ctx->m_componentIdx, ctx->m_hitP, ctx->m_hitN, brush()->getRadius());
 }
 
-void GLWidget::addFeather()
+void GLWidget::floodFeather()
 {
 	IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) return;
@@ -457,21 +400,21 @@ void GLWidget::addFeather()
 	const unsigned iface = ctx->m_componentIdx;
 	
 	MlCalamus ac;
-	ac.setFeather(&fea);
+	ac.setFeather(selectedFeatherExample());
 	ac.setRotateY(brush()->getPitch());
-	m_skin->floodAround(ac, iface, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
-	m_featherDrawer->addToBuffer(m_skin);
+	skin()->floodAround(ac, iface, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
+	m_featherDrawer->addToBuffer(skin());
 }
 
 void GLWidget::finishEraseFeather()
 {
-	m_skin->finishEraseFeather();
-	m_skin->discardActive();
+	skin()->finishEraseFeather();
+	skin()->discardActive();
 }
 
 void GLWidget::deselectFeather()
 {
-	m_skin->discardActive();
+	skin()->discardActive();
 }
 
 void GLWidget::cleanSheet()
@@ -499,9 +442,10 @@ void GLWidget::clearScene()
 	MlScene::clearScene();
 	m_bezierDrawer->clearBuffer();
 	m_featherDrawer->clearBuffer();
-	m_featherDrawer->initializeBuffer();
+	//m_featherDrawer->initializeBuffer();
 	clearTree();
 	clearTopology();
+	emit sceneNameChanged(tr("untitled"));
 	update();
 }
 
@@ -520,8 +464,10 @@ void GLWidget::saveSheetAs()
 							tr("All Files (*);;Text Files (*.txt)"),
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
-	if(fileName != "")
+	if(fileName != "") {
 		saveSceneAs(fileName.toUtf8().data());
+		emit sceneNameChanged(fileName);
+	}
 }
 
 void GLWidget::openSheet()
@@ -537,11 +483,12 @@ void GLWidget::openSheet()
 		openScene(fileName.toUtf8().data());
 		buildTopology();
 		std::cout<<"acc set";
-		m_accmesh->setup(m_topo);
+		body()->setup(m_topo);
 		buildTree();
-		m_skin->setBodyMesh(m_accmesh, m_topo);
-		m_bezierDrawer->rebuildBuffer(m_accmesh);
+		skin()->setBodyMesh(body(), m_topo);
+		m_bezierDrawer->rebuildBuffer(body());
 		update();
+		emit sceneNameChanged(fileName);
 	}
 }
 //:~

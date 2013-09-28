@@ -8,21 +8,38 @@
  */
 
 #pragma once
-
+#include <vector>
 #include <BaseScene.h>
 class AccPatchMesh;
 class MlSkin;
+class MlFeather;
 class MlScene : public BaseScene {
 public:
 	MlScene();
 	virtual ~MlScene();
 
-	MlSkin * m_skin;
-	AccPatchMesh * m_accmesh;
+	MlSkin * skin();
+	AccPatchMesh * body();
+	
+	MlFeather * addFeatherExample();
+	short numFeatherExamples() const;
+	void selectFeatherExample(short x);
+	MlFeather * selectedFeatherExample() const;
+	MlFeather * featherExample(short idx) const;
 	
 	virtual void clearScene();
 	virtual bool writeSceneToFile(const std::string & fileName);
 	virtual bool readSceneFromFile(const std::string & fileName);
-private:
 	
+	void initializeFeatherExample();
+	
+private:
+	void writeFeatherExamples();
+	void readFeatherExamples();
+	void sortFeatherExamples();
+private:
+	std::vector<MlFeather *> m_feathers;
+	MlSkin * m_skin;
+	AccPatchMesh * m_accmesh;
+	short m_selectedFeatherId;
 };

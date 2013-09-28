@@ -57,7 +57,7 @@ public:
 	static ToolContext * InteractContext;
 	int interactMode();
 	
-	virtual PatchMesh * mesh() const;
+	virtual PatchMesh * mesh();
 	
 protected:
     void keyPressEvent(QKeyEvent *event);

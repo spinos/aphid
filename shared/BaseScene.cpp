@@ -116,3 +116,8 @@ bool BaseScene::readSceneFromFile(const std::string & fileName)
 {
 	return true;
 }
+
+std::string BaseScene::fileName() const
+{
+	return m_fileName;
+}

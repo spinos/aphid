@@ -83,14 +83,14 @@ char HMesh::save(BaseMesh * mesh)
 	writeIntData(".polyv", nfv, (int *)mesh->polygonIndices());
 	
 	if(!hasNamedData(".us"))
-		addFloatData(".us", nuvid);
+		addFloatData(".us", nuv);
 		
-	writeFloatData(".us", nuvid, (int *)mesh->us());
+	writeFloatData(".us", nuv, mesh->us());
 	
 	if(!hasNamedData(".vs"))
 		addFloatData(".vs", nuv);
 		
-	writeFloatData(".vs", nuv, (int *)mesh->vs());
+	writeFloatData(".vs", nuv, mesh->vs());
 	
 	if(!hasNamedData(".uvids"))
 		addIntData(".uvids", nuvid);

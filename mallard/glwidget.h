@@ -61,13 +61,16 @@ public:
 	virtual void clientSelect();
 	virtual void clientMouseInput();
 	virtual void clientDeselect();
-    virtual PatchMesh * mesh() const;
+    virtual PatchMesh * mesh();
 	
 	virtual bool discardConfirm();
 	virtual void clearScene();
 	
 	void finishEraseFeather();
 	void deselectFeather();
+	
+signals:
+	void sceneNameChanged(QString name);
 	
 public slots:
 	void cleanSheet();
@@ -81,7 +84,7 @@ protected:
 //! [3]
 private:
 	void selectFeather();
-	void addFeather();
+	void floodFeather();
 private:
 	ZEXRImage* _image;
 	BezierDrawer * m_bezierDrawer;

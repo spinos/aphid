@@ -69,12 +69,12 @@ void HBase::writeIntData(const char * dataName, unsigned count, int *value)
 	cset.close();
 }
 
-void HBase::writeFloatData(const char * dataName, unsigned count, int *value)
+void HBase::writeFloatData(const char * dataName, unsigned count, float *value)
 {	
 	FloatsHDataset cset(dataName);
 	cset.setNumFloats(count);
 	cset.open(fObjectId);
-	if(!cset.write((float *)value)) std::cout<<dataName<<" write failed";
+	if(!cset.write(value)) std::cout<<dataName<<" write failed";
 	cset.close();
 }
 
@@ -254,6 +254,19 @@ char HBase::discardNamedAttr(const char * path)
 {
     if(H5Adelete(fObjectId, path) < 0) return 0;
     return 1;
+}
+
+int HBase::numChildren()
+{
+	hsize_t nobj = 0;
+	H5Gget_num_objs(fObjectId, &nobj);
+	return (int)nobj;
+}
+
+int HBase::numAttrs()
+{
+	hsize_t nattr = H5Aget_num_attrs(fObjectId);
+	return (int)nattr;
 }
 
 char HBase::save()

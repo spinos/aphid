@@ -35,6 +35,16 @@ short MlFeather::numSegment() const
 {
 	return m_numSeg;
 }
+	
+unsigned MlFeather::numVaneVertices() const
+{
+	return (m_numSeg + 1) * 6;
+}
+	
+unsigned MlFeather::numWorldP() const
+{
+	return (m_numSeg + 1) * 7;
+}
 
 float * MlFeather::quilly()
 {
@@ -44,6 +54,11 @@ float * MlFeather::quilly()
 float * MlFeather::getQuilly() const
 {
      return m_quilly;
+}
+
+Vector2F * MlFeather::vane()
+{
+	return m_vaneVertices;
 }
 
 Vector2F * MlFeather::vaneAt(short seg, short side)
@@ -147,4 +162,79 @@ void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, s
 void MlFeather::setCollision(CollisionRegion * skin)
 {
 	m_skin = skin;
+}
+
+void MlFeather::setFeatherId(short x)
+{
+	m_id = x;
+}
+	
+short MlFeather::featherId() const
+{
+	return m_id;
+}
+
+void MlFeather::defaultCreate()
+{
+    createNumSegment(4);
+    float * quill = quilly();
+    quill[0] = 4.f;
+    quill[1] = 2.4f;
+    quill[2] = 1.3f;
+    quill[3] = .9f;
+    
+    Vector2F * vanes = vaneAt(0, 0);
+    vanes[0].set(.9f, .9f);
+    vanes[1].set(.8f, 1.59f);
+    vanes[2].set(.3f, 1.3f);
+    vanes = vaneAt(0, 1);
+    vanes[0].set(-.6f, .9f);
+    vanes[1].set(-.5f, 1.1f);
+    vanes[2].set(-.2f, .9f);
+    
+    vanes = vaneAt(1, 0);
+    vanes[0].set(.7f, 1.1f);
+    vanes[1].set(.6f, 1.f);
+    vanes[2].set(.5f, .9f);
+    vanes = vaneAt(1, 1);
+    vanes[0].set(-.6f, .62f);
+    vanes[1].set(-.6f, .97f);
+    vanes[2].set(-.4f, 1.f);
+    
+    vanes = vaneAt(2, 0);
+    vanes[0].set(.4f, .5f);
+    vanes[1].set(.5f, .6f);
+    vanes[2].set(.4f, .7f);
+    vanes = vaneAt(2, 1);
+    vanes[0].set(-.3f, .5f);
+    vanes[1].set(-.4f, .5f);
+    vanes[2].set(-.3f, .7f);
+    
+    vanes = vaneAt(3, 0);
+    vanes[0].set(.4f, .4f);
+    vanes[1].set(.3f, .5f);
+    vanes[2].set(.3f, .6f);
+    vanes = vaneAt(3, 1);
+    vanes[0].set(-.3f, .4f);
+    vanes[1].set(-.3f, .4f);
+    vanes[2].set(-.2f, .6f);
+    
+    vanes = vaneAt(4, 0);
+    vanes[0].set(.01f, .42f);
+    vanes[1].set(.01f, .32f);
+    vanes[2].set(.01f, .33f);
+    vanes = vaneAt(4, 1);
+    vanes[0].set(-.01f, .42f);
+    vanes[1].set(-.01f, .32f);
+    vanes[2].set(-.01f, .33f);
+	
+	computeLength();
+}
+
+void MlFeather::verbose()
+{
+	std::cout<<"feather status:\n id "<<featherId();
+	std::cout<<"\n n segment "<<numSegment();
+	std::cout<<"\n length "<<getLength()<<"\n";
+	for(int i=0; i <numSegment(); i++) std::cout<<" "<<quilly()[i];
 }

@@ -23,7 +23,7 @@ public:
 	
 	void writeIntAttr(const char * attrName, int *value);
 	void writeIntData(const char * dataName, unsigned count, int *value);
-	void writeFloatData(const char * dataName, unsigned count, int *value);
+	void writeFloatData(const char * dataName, unsigned count, float *value);
 	void writeVector3Data(const char * dataName, unsigned count, Vector3F *value);
 	
 	char readIntAttr(const char * attrName, int *value);
@@ -39,6 +39,9 @@ public:
 	
 	char hasNamedData(const char * dataName);
 	char discardNamedAttr(const char * path);
+	
+	int numChildren();
+	int numAttrs();
 	
 	virtual char save();
 	virtual char load();

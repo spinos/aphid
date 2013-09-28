@@ -58,13 +58,14 @@ Window::Window()
 	addToolBar(m_tools);
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Mallard"));
+    setWorkTitle(tr("untitled"));
     
 	connect(m_tools, SIGNAL(contextChanged(int)), this, SLOT(receiveToolContext(int)));
     connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
 	connect(m_brushControl->pitchWidget(), SIGNAL(valueChanged(double)), glWidget, SLOT(receiveBrushPitch(double)));
 	connect(m_brushControl->radiusWidget(), SIGNAL(valueChanged(double)), glWidget, SLOT(receiveBrushRadius(double)));
 	connect(m_brushControl->numSamplesWidget(), SIGNAL(valueChanged(int)), glWidget, SLOT(receiveBrushNumSamples(int)));
+	connect(glWidget, SIGNAL(sceneNameChanged(QString)), this, SLOT(setWorkTitle(QString)));
 	createActions();
 	createMenus();
 }
@@ -136,4 +137,9 @@ void Window::createMenus()
 	fileMenu->addAction(importMeshAct);
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showBrushControlAct);
+}
+
+void Window::setWorkTitle(QString name)
+{
+	setWindowTitle(QString("Mallard - %1").arg(name));
 }

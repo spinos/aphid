@@ -10,19 +10,38 @@
 #include "MlScene.h"
 #include <AccPatchMesh.h>
 #include <MlSkin.h>
+#include <MlFeather.h>
 #include <AllHdf.h>
 #include <HWorld.h>
 #include <HMesh.h>
+#include <HFeather.h>
+#include <sstream>
 MlScene::MlScene() 
 {
 	m_accmesh = new AccPatchMesh;
 	m_skin = new MlSkin;
+	initializeFeatherExample();
 }
 
 MlScene::~MlScene() {}
 
+MlSkin * MlScene::skin()
+{
+	return m_skin;
+}
+
+AccPatchMesh * MlScene::body()
+{
+	return m_accmesh;
+}
+
 void MlScene::clearScene()
 {
+	std::vector<MlFeather *>::iterator it;
+	for(it = m_feathers.begin(); it != m_feathers.end(); ++it) {
+		delete *it;
+	}
+	m_feathers.clear();
 	m_skin->cleanup();
 	m_accmesh->cleanup();
 	BaseScene::clearScene();
@@ -40,16 +59,14 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 	HWorld grpWorld;
 	grpWorld.save();
 	
-	//grpWorld.load();
-	
 	HMesh grpBody("/world/body");
 	grpBody.save(m_accmesh);
 	grpBody.close();
 	
+	writeFeatherExamples();
+	
 	//HMesh grpSkin("/world/skin");
 	//grpSkin.close();
-	
-	//if(grpWorld.hasNamedChild("skin")) std::cout<<"found skin";
 	
 	grpWorld.close();
 	/*	
@@ -100,19 +117,23 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 	dsetBg.close();
 	*/
 	HObject::FileIO.close();
-/*
-	HObject::FileIO.open(fileName.c_str(), HDocument::oReadAndWrite);
-	dsetAg.open();
-	//dsetAg.read();
-	dsetAg.close();
-	
-	dsetBg.open();
-	//dsetBg.read();
-	dsetBg.close();
-	
-	//HObject::FileIO.deleteObject("/A1");
-	HObject::FileIO.close();*/
+
 	return true;
+}
+
+void MlScene::writeFeatherExamples()
+{
+	HBase g("/world/feathers");
+	for(short i = 0; i < numFeatherExamples(); i++) {
+		MlFeather * f = featherExample(i);
+		std::stringstream sst;
+		sst.str("");
+		sst<<"/world/feathers/feather_"<<f->featherId();
+		HFeather h(sst.str());
+		h.save(f);
+		h.close();
+	}
+	g.close();
 }
 
 bool MlScene::readSceneFromFile(const std::string & fileName)
@@ -131,10 +152,84 @@ bool MlScene::readSceneFromFile(const std::string & fileName)
 	grpBody.load(m_accmesh);
 	grpBody.close();
 	
+	readFeatherExamples();
+	sortFeatherExamples();
+	initializeFeatherExample();
 	//HMesh grpSkin("/world/skin");
 	//grpSkin.close();
 	
 	grpWorld.close();
 	HObject::FileIO.close();
 	return true;
+}
+
+void MlScene::readFeatherExamples()
+{
+	HBase g("/world/feathers");
+	int nf = g.numChildren();
+	for(int i = 0; i < nf; i++) {
+		MlFeather * f = addFeatherExample();
+		std::stringstream sst;
+		sst.str("");
+		sst<<"/world/feathers/feather_"<<i;
+		HFeather h(sst.str());
+		h.load(f);
+		h.close();
+	}
+	g.close();	
+}
+
+MlFeather * MlScene::addFeatherExample()
+{
+	MlFeather * f = new MlFeather;
+	f->setFeatherId(numFeatherExamples());
+	m_feathers.push_back(f);
+	return f;
+}
+
+short MlScene::numFeatherExamples() const
+{
+	return (short)m_feathers.size();
+}
+
+void MlScene::selectFeatherExample(short x)
+{
+	m_selectedFeatherId = x;
+}
+
+MlFeather * MlScene::selectedFeatherExample() const
+{
+	return m_feathers[m_selectedFeatherId];
+}
+
+MlFeather * MlScene::featherExample(short idx) const
+{
+	return m_feathers[idx];
+}
+
+void MlScene::initializeFeatherExample()
+{
+	if(numFeatherExamples() < 1) {
+		MlFeather * f = addFeatherExample();
+		f->defaultCreate();
+		selectFeatherExample(0);
+	}
+}
+
+void MlScene::sortFeatherExamples()
+{
+	if(numFeatherExamples() < 2) return;
+	int i, j;
+	char swapOccured;
+	for(i = 0; i < numFeatherExamples() && swapOccured; i++) {
+		swapOccured = 0;
+		for(j = 0; j < numFeatherExamples() - 1; j++) {
+			if(m_feathers[j]->featherId() > m_feathers[j + 1]->featherId()) {
+				MlFeather *f = m_feathers[j];
+				m_feathers[j] = m_feathers[j + 1];
+				m_feathers[j + 1] = f;
+				swapOccured = 1;
+			}
+		}
+	}
 }

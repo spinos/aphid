@@ -125,6 +125,7 @@ HEADERS       = ../shared/AllMath.h \
                 MlRachis.h \
                 BrushControl.h \
                 MlScene.h \
+				HFeather.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \  
@@ -245,6 +246,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 window.cpp \
                 BrushControl.cpp \
                 MlScene.cpp \
+				HFeather.cpp \
                 main.cpp
                 
 INCLUDEPATH += /usr/local/include/OpenEXR

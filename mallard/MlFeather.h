@@ -10,8 +10,12 @@ public:
 	void computeLength();
     
 	short numSegment() const;
+	unsigned numVaneVertices() const;
+	unsigned numWorldP() const;
     float * quilly();
     float * getQuilly() const;
+	
+	Vector2F * vane();
     Vector2F * vaneAt(short seg, short side);
     Vector2F * getVaneAt(short seg, short side) const;
 	float getLength() const;
@@ -25,6 +29,13 @@ public:
 	Vector3F getSegmentVaneWP(short seg, short side, short idx) const;
 	
 	void setCollision(CollisionRegion * skin);
+	
+	void setFeatherId(short x);
+	short featherId() const;
+	
+	void defaultCreate();
+	
+	void verbose();
 private:
 	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale);
 private:
@@ -34,5 +45,5 @@ private:
     Vector2F * m_vaneVertices;
 	Vector3F * m_worldP;
 	float m_length;
-    short m_numSeg;
+    short m_numSeg, m_id;
 };

@@ -154,13 +154,20 @@ void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPa
 	Vector3F px;
 	const float d = pl.distanceTo(origin, px);
 	
-	if(d >= ctx->m_elementHitDistance && d > ctx->m_minHitDistance)
+	char converged = 0;
+	if(d >= ctx->m_elementHitDistance) {
+		if(d > ctx->m_minHitDistance)
 		return;
+	}
+	else {
+		if(ctx->m_minHitDistance - d < 10e3)
+			converged = 1;
+	}
 		
 	ctx->m_elementHitDistance = d;
 		
 	BoundingBox controlbox = patch->controlBBox();
-	if(level > 3 || controlbox.area() < .1f || !pl.isPointInside(px)) {
+	if(level > 3 || controlbox.area() < .1f || !pl.isPointInside(px) || converged) {
 		if(d > ctx->m_minHitDistance) return;
 		ctx->m_minHitDistance = d;
 		//ctx->m_componentIdx = idx;

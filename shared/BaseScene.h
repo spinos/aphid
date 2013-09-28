@@ -40,6 +40,8 @@ public:
 	virtual bool readSceneFromFile(const std::string & fileName);
 	
 	static bool fileExists(const std::string & fileName);
+	
+	std::string fileName() const;
 private:
 	std::string m_fileName;
 	ErrorMsg m_error;
