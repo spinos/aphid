@@ -30,7 +30,7 @@ char HDataset::raw_create(hid_t parentId)
 	createDataSpace();
 	
 	if(fDataSpace < 0) std::cout<<"\nh data space create failed\n";
-	/*
+	
 	m_createProps = H5Pcreate(H5P_DATASET_CREATE);
 	if(m_createProps < 0) std::cout<<"\nh create property failed\n";
 	
@@ -49,16 +49,16 @@ char HDataset::raw_create(hid_t parentId)
 	if(H5Pset_chunk(m_createProps, dataSpaceNumDimensions(), m_chunkSize)<0) {
       printf("Error: fail to set chunk\n");
       return -1;
-   }*/
+   }
    	
 	fObjectId = H5Dcreate(parentId, fObjectPath.c_str(), dataType(), fDataSpace, 
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                          H5P_DEFAULT, m_createProps, H5P_DEFAULT);
 		  
 	if(fObjectId < 0) {
 	    std::cout<<"\nh data set create failed\n";
 		return 0;
 	}
-	//H5Pclose(m_createProps);
+	H5Pclose(m_createProps);
 	return 1;
 }
 
@@ -107,7 +107,7 @@ void HDataset::createDataSpace()
 	maximumDims[1] = 0;
 	maximumDims[2] = 0;
 		
-	fDataSpace = H5Screate_simple(ndim, dims, NULL);
+	fDataSpace = H5Screate_simple(ndim, dims, maximumDims);
 }
 
 char HDataset::verifyDataSpace()
