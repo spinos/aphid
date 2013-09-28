@@ -298,7 +298,6 @@ void GLWidget::loadMesh(std::string filename)
 	buildTree();
 	skin()->setBodyMesh(body(), m_topo);
 	m_bezierDrawer->rebuildBuffer(body());
-	initializeFeatherExample();
 	setDirty();
 	update();
 }
@@ -420,6 +419,7 @@ void GLWidget::deselectFeather()
 void GLWidget::cleanSheet()
 {
 	newScene();
+	initializeFeatherExample();
 }
 
 bool GLWidget::discardConfirm()

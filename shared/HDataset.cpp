@@ -25,27 +25,32 @@ char HDataset::validate()
 	return 1;
 }
 
-/*
-char HDataset::create(int dimx, int dimy)
-{
-	fDimension[0] = dimx;
-	fDimension[1] = dimy;
-	fDimension[2] = 0;
-	
-	return raw_create();
-}
-*/
 char HDataset::raw_create(hid_t parentId)
-{
-	//if(validate())
-	//	return 1;
-	//else if(exists())
-	//	return 0;
-		
+{	
 	createDataSpace();
 	
 	if(fDataSpace < 0) std::cout<<"\nh data space create failed\n";
-				
+	/*
+	m_createProps = H5Pcreate(H5P_DATASET_CREATE);
+	if(m_createProps < 0) std::cout<<"\nh create property failed\n";
+	
+	for(int i=0; i < 3; i++) {
+		if(fDimension[i] > 0) {
+			m_chunkSize[i] = fDimension[i] / 8;
+			if(m_chunkSize[i] < 1) m_chunkSize[i] = 1;
+		}
+		else 
+			m_chunkSize[i] = 0;
+	}
+	
+	std::cout<<"d space "<<fDimension[0]<<" "<<fDimension[1]<<" "<<fDimension[2]<<" \n";
+	std::cout<<"d chunk "<<m_chunkSize[0]<<" "<<m_chunkSize[1]<<" "<<m_chunkSize[2]<<" \n";
+	
+	if(H5Pset_chunk(m_createProps, dataSpaceNumDimensions(), m_chunkSize)<0) {
+      printf("Error: fail to set chunk\n");
+      return -1;
+   }*/
+   	
 	fObjectId = H5Dcreate(parentId, fObjectPath.c_str(), dataType(), fDataSpace, 
                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		  
@@ -53,7 +58,7 @@ char HDataset::raw_create(hid_t parentId)
 	    std::cout<<"\nh data set create failed\n";
 		return 0;
 	}
-	
+	//H5Pclose(m_createProps);
 	return 1;
 }
 
@@ -96,6 +101,11 @@ void HDataset::createDataSpace()
 	dims[2] = fDimension[2];
 	
 	int ndim = dataSpaceNumDimensions();
+	
+	hsize_t maximumDims[3];
+	maximumDims[0] = H5S_UNLIMITED;
+	maximumDims[1] = 0;
+	maximumDims[2] = 0;
 		
 	fDataSpace = H5Screate_simple(ndim, dims, NULL);
 }
@@ -134,7 +144,7 @@ char HDataset::dimensionMatched()
 char HDataset::write()
 {
 	float * data = new float[fDimension[0]*fDimension[1]];
-    int         i, j;
+    hsize_t i, j;
    for(j = 0; j < fDimension[0]; j++)
 	for(i = 0; i < fDimension[1]; i++)
 	    data[j*fDimension[1] +i] = i + j;
@@ -150,7 +160,7 @@ char HDataset::read()
 	float *         data = new float[fDimension[0]*fDimension[1]];
 	read(data);
 	
-	int i, j;				
+	hsize_t i, j;				
 	for(j = 0; j < fDimension[0]; j++) {
 	for(i = 0; i < fDimension[1]; i++) {
 		std::cout<<" "<<data[j*fDimension[1]+i];
@@ -196,4 +206,11 @@ void HDataset::dataSpaceDimensions(int dim[3]) const
 	dim[0] = dims_out[0];
 	dim[1] = dims_out[1];
 	dim[2] = dims_out[2];
+}
+
+void HDataset::resize()
+{
+	std::cout<<"resize data";
+	herr_t status = H5Dset_extent(fObjectId, fDimension);
+	if(status < 0) std::cout<<"resize failed";
 }

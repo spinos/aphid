@@ -18,7 +18,6 @@ public:
 	
 	virtual char validate();
 
-	//virtual char create(int dimx, int dimy);
 	virtual char raw_create(hid_t parentId);
 
 	virtual char open(hid_t parentId = FileIO.fFileId);
@@ -38,8 +37,12 @@ public:
 	int dataSpaceNumDimensions() const;
 	void dataSpaceDimensions(int dim[3]) const;
 	
-	hid_t fDataSpace;
-	int fDimension[3];
+	void resize();
 	
+	hid_t fDataSpace;
+	hsize_t fDimension[3];
+private:
+	hid_t m_createProps;
+	hsize_t	m_chunkSize[3];
 };
 #endif        //  #ifndef HDATASET_H

@@ -65,6 +65,7 @@ void HBase::writeIntData(const char * dataName, unsigned count, int *value)
 	IndicesHDataset cset(dataName);
 	cset.setNumIndices(count);
 	cset.open(fObjectId);
+	if(!cset.dimensionMatched()) cset.resize();
 	if(!cset.write((int *)value)) std::cout<<dataName<<" write failed";
 	cset.close();
 }
@@ -74,6 +75,7 @@ void HBase::writeFloatData(const char * dataName, unsigned count, float *value)
 	FloatsHDataset cset(dataName);
 	cset.setNumFloats(count);
 	cset.open(fObjectId);
+	if(!cset.dimensionMatched()) cset.resize();
 	if(!cset.write(value)) std::cout<<dataName<<" write failed";
 	cset.close();
 }
@@ -84,6 +86,7 @@ void HBase::writeVector3Data(const char * dataName, unsigned count, Vector3F *va
 	pset.setNumVertices(count);
 	
 	pset.open(fObjectId);
+	if(!pset.dimensionMatched()) pset.resize();
 	if(!pset.write((float *)value)) std::cout<<dataName<<" write failed";
 	pset.close();
 }
@@ -175,7 +178,7 @@ char HBase::readVector3Data(const char * dataName, unsigned count, Vector3F *dst
 char HBase::hasNamedAttr(const char * attrName)
 {
 	hsize_t nattr = H5Aget_num_attrs(fObjectId);
-	std::cout<<"\n "<<fObjectPath<<" has "<<nattr<<" attrs\n";
+	//std::cout<<"\n "<<fObjectPath<<" has "<<nattr<<" attrs\n";
 	hsize_t i;
 	for(i = 0; i < nattr; i++) {
 		hid_t aid = H5Aopen_idx(fObjectId, (unsigned int)i );
@@ -205,10 +208,10 @@ char HBase::hasNamedChild(const char * childName)
 {
 	hsize_t nobj = 0;
 	H5Gget_num_objs(fObjectId, &nobj);
-	std::cout<<"\n"<<fObjectPath<<" has "<<nobj<<"objs\n";
+	//std::cout<<"\n"<<fObjectPath<<" has "<<nobj<<"objs\n";
 	hsize_t i;
 	for(i = 0; i < nobj; i++) {
-		std::cout<<getChildName(i)<<"\n";
+		//std::cout<<getChildName(i)<<"\n";
 		if(getChildName(i) == childName) {
 			std::cout<<"found "<<childName;
 			return 1;
@@ -233,10 +236,10 @@ char HBase::hasNamedData(const char * dataName)
 	hsize_t nobj;
 	int otype;
 	H5Gget_num_objs(fObjectId, &nobj);
-	std::cout<<"\n"<<fObjectPath<<" has "<<nobj<<"objs\n";
+	//std::cout<<"\n"<<fObjectPath<<" has "<<nobj<<"objs\n";
 	hsize_t i;
 	for(i = 0; i < nobj; i++) {
-		std::cout<<getChildName(i)<<"\n";
+		//std::cout<<getChildName(i)<<"\n";
 		
 		otype =  H5Gget_objtype_by_idx(fObjectId, (size_t)i );
 		
