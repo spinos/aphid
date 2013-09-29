@@ -236,10 +236,9 @@ void Base3DView::clientMouseInput()
     
 }
 
-void Base3DView::sceneCenter(Vector3F & dst) const
+Vector3F Base3DView::sceneCenter() const
 {
-    dst.x = dst.y = 0.f;
-    dst.z = -1.f;
+    return Vector3F(0.f, 0.f, 0.f);
 }
 
 void Base3DView::updateOrthoProjection()
@@ -280,7 +279,7 @@ void Base3DView::updatePerspProjection()
 
 void Base3DView::resetView()
 {
-	getCamera()->reset();
+	getCamera()->reset(sceneCenter());
 	if(getCamera()->isOrthographic())
 		updateOrthoProjection();
 	else
@@ -315,8 +314,7 @@ void Base3DView::shrinkSelection()
 
 void Base3DView::frameAll()
 {
-    Vector3F coi;
-    sceneCenter(coi);
+    Vector3F coi = sceneCenter();
     Vector3F eye = coi + Vector3F(0.f, 0.f, 100.f);
     
     getCamera()->lookFromTo(eye, coi);

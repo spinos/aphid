@@ -20,6 +20,7 @@ public:
 	KdTree();
 	~KdTree();
 	
+	bool isEmpty() const;
 	KdTreeNode* getRoot() const;
 	void cleanup();
 	void addMesh(BaseMesh* mesh);

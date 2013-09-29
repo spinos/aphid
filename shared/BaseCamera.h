@@ -6,15 +6,15 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include <Matrix44F.h>
-#include <Vector3F.h>
+#include <AllMath.h>
+
 class BaseCamera {
 public:
 	BaseCamera();
 	virtual ~BaseCamera();
 	
 	virtual bool isOrthographic() const;
-	void reset();
+	void reset(const Vector3F & pos);
 	void lookFromTo(Vector3F & from, Vector3F & to);
 	void setPortWidth(unsigned w);
 	void setPortHeight(unsigned h);

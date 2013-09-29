@@ -45,7 +45,7 @@ public:
     virtual void clientSelect();
     virtual void clientDeselect();
     virtual void clientMouseInput();
-    virtual void sceneCenter(Vector3F & dst) const;
+    virtual Vector3F sceneCenter() const;
     
     void resetView();
 	void drawSelection();

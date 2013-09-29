@@ -180,27 +180,10 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
     dr = getDrawer();
     feat.defaultCreate();
 	feat.setFeatherId(0);
-    testbez.evaluateContolPoints();testbez.decasteljauSplit(testsplt);
-invbil.setVertices(Vector3F(-1,0,0), Vector3F(1,0,0), Vector3F(-1,1,0), Vector3F(2,2,0));
-Vector3F P(1.51f,0.71f,0.f);
-Vector2F testuv = invbil(P);
-printf("invbilinear %f %f\n", testuv.x, testuv.y);
-
-//Vector2F uv(0.005f, 0.00485f);
-//testuv = invbil.evalBiLinear(uv);
-//printf("bilinear %f %f\n", testuv.x, testuv.y);
 
 	m_bezierDrawer = new BezierDrawer;
 	m_featherDrawer = new MlDrawer;
-	
-#ifdef WIN32
-	std::string filename("D:/aphid/mdl/torus.m");
-#else
-	std::string filename("/Users/jianzhang/aphid/mdl/torus.m");
-#endif
 
-	loadMesh(filename);
-	
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 }
 //! [0]

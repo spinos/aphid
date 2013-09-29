@@ -24,6 +24,11 @@ KdTree::~KdTree()
 	cleanup();
 }
 
+bool KdTree::isEmpty() const
+{
+	return m_root == 0;
+}
+
 KdTreeNode* KdTree::getRoot() const
 { 
 	return m_root; 

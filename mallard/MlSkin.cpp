@@ -16,6 +16,8 @@ MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_numCreatedFeather(0
 {
     m_activeIndices.clear();
 	m_calamus = new MlCalamusArray; 
+	m_body = 0;
+	m_topo = 0;
 }
 
 MlSkin::~MlSkin()
@@ -136,7 +138,6 @@ bool MlSkin::createFeather(MlCalamus & ori)
 
 void MlSkin::growFeather(const Vector3F & direction)
 {
-	//if(!hasFeatherCreated()) return;
 	const unsigned num = numActive();
 	if(num < 1) return;
 
@@ -252,6 +253,7 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 
 void MlSkin::finishCreateFeather()
 {
+	if(!m_body) return;
     computeFaceCalamusIndirection();
 	
 	m_numCreatedFeather = 0;

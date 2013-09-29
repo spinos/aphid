@@ -23,7 +23,7 @@ ToolContext * SingleModelView::InteractContext = 0;
 
 SingleModelView::SingleModelView(QWidget *parent) : Base3DView(parent)
 {
-	m_tree = 0;
+	m_tree = new KdTree;
 	m_mesh = new PatchMesh;
 	m_topo = new MeshTopology;
 	
@@ -72,9 +72,10 @@ void SingleModelView::clientMouseInput()
 	}
 }
 
-void SingleModelView::sceneCenter(Vector3F & dst) const
+Vector3F SingleModelView::sceneCenter() const
 {
-	dst = m_tree->getBBox().center();
+	if(m_tree->isEmpty()) return Vector3F(0.f, 0.f, 100.f);
+	return m_tree->getBBox().center() + Vector3F(0.f, 0.f, m_tree->getBBox().distance(2));
 }
 
 bool SingleModelView::anchorSelected(float wei)
