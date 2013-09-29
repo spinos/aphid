@@ -236,5 +236,4 @@ void MlFeather::verbose()
 	std::cout<<"feather status:\n id "<<featherId();
 	std::cout<<"\n n segment "<<numSegment();
 	std::cout<<"\n length "<<getLength()<<"\n";
-	for(int i=0; i <numSegment(); i++) std::cout<<" "<<quilly()[i];
 }

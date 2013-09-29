@@ -32,11 +32,6 @@ char HFeather::save(MlFeather * feather)
 		addFloatData(".quill", nseg);
 		
 	writeFloatData(".quill", nseg, feather->quilly());
-	std::cout<<" q "<<feather->quilly()[0]<<"\n";
-	
-	float b[4];
-	readFloatData(".quill", nseg, b);
-	std::cout<<" qi "<<b[0]<<"\n";
 	
 	int nvv = feather->numVaneVertices();
 	if(!hasNamedAttr(".nvv"))

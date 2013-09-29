@@ -68,9 +68,6 @@ void HBase::writeIntData(const char * dataName, unsigned count, int *value)
 	//if(!cset.hasEnoughSpace()) 
 	cset.resize();
 	
-	cset.close();
-	cset.open(fObjectId);
-	
 	if(!cset.write((char *)value)) std::cout<<dataName<<" write failed";
 	cset.close();
 }
@@ -82,8 +79,6 @@ void HBase::writeFloatData(const char * dataName, unsigned count, float *value)
 	cset.open(fObjectId);
 	//if(!cset.hasEnoughSpace()) 
 	cset.resize();
-	cset.close();
-	cset.open(fObjectId);
 	
 	if(!cset.write((char *)value)) std::cout<<dataName<<" write failed";
 	cset.close();
@@ -97,9 +92,6 @@ void HBase::writeVector3Data(const char * dataName, unsigned count, Vector3F *va
 	pset.open(fObjectId);
 	//if(!pset.hasEnoughSpace()) 
 	pset.resize();
-	
-	pset.close();
-	pset.open(fObjectId);
 	
 	if(!pset.write((char *)value)) std::cout<<dataName<<" write failed";
 	pset.close();
@@ -198,7 +190,7 @@ char HBase::hasNamedAttr(const char * attrName)
 		hid_t aid = H5Aopen_idx(fObjectId, (unsigned int)i );
 		//std::cout<<getAttrName(aid)<<"\n";
 		if(getAttrName(aid) == attrName) {
-			std::cout<<"found "<<attrName;
+			//std::cout<<"found "<<attrName;
 			H5Aclose(aid);
 			return 1;
 		}
@@ -227,7 +219,7 @@ char HBase::hasNamedChild(const char * childName)
 	for(i = 0; i < nobj; i++) {
 		//std::cout<<getChildName(i)<<"\n";
 		if(getChildName(i) == childName) {
-			std::cout<<"found "<<childName;
+			//std::cout<<"found "<<childName;
 			return 1;
 		}
 	}
@@ -259,7 +251,7 @@ char HBase::hasNamedData(const char * dataName)
 		
 		if(otype == H5G_DATASET) {
             if(getChildName(i) == dataName) {
-                std::cout<<"found "<<dataName<<"\n";;
+                //std::cout<<"found "<<dataName<<"\n";;
                 return 1;
             }
         }

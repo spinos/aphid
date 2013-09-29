@@ -16,8 +16,6 @@ public:
 	HDataset(const std::string & path);
 	virtual ~HDataset() {}
 	
-	virtual char validate();
-
 	char create(hid_t parentId);
 
 	virtual char open(hid_t parentId = FileIO.fFileId);
@@ -26,16 +24,11 @@ public:
 	
 	virtual hid_t dataType();
 	
-	//virtual char verifyDataSpace();
 	char hasEnoughSpace() const;
 	
-	virtual char write();
-	virtual char read();
 	virtual char write(char *data);
 	virtual char read(char *data);
 	
-	int dataSpaceNumDimensions() const;
-	void dataSpaceDimensions(int dim[3]) const;
 	hid_t createMemDataSpace() const;
 	hid_t createFileDataSpace() const;
 	
