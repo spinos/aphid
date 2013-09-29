@@ -55,7 +55,8 @@ public:
 	unsigned getNumQuads() const;
 	unsigned getNumPolygons() const;
 	unsigned getNumVertices() const;
-	unsigned getNumFaceVertices() const;
+	unsigned getNumPolygonFaceVertices() const;
+	unsigned getNumTriangleFaceVertices() const;
 	unsigned getNumUVs() const;
 	unsigned getNumUVIds() const;
 	
@@ -64,6 +65,10 @@ public:
 	unsigned * getIndices() const;
 	unsigned * getQuadIndices() const;
 	unsigned * getPolygonCounts() const;
+	unsigned * getPolygonIndices() const;
+	float * getUs() const;
+	float * getVs() const;
+	unsigned * getUvIds() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	
 	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
@@ -81,8 +86,8 @@ public:
 	unsigned * _indices;
 	unsigned * m_quadIndices;
 	unsigned _numVertices;
-	unsigned _numFaces;
-	unsigned _numFaceVertices;
+	unsigned m_numTriangles;
+	unsigned m_numTriangleFaceVertices;
 	unsigned m_numQuadVertices;
 	unsigned m_numPolygons;
 	unsigned m_numQuads;

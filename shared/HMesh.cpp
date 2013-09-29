@@ -49,7 +49,7 @@ char HMesh::save(BaseMesh * mesh)
 	
 	writeIntAttr(".nf", &nf);
 		
-	int nfv = mesh->getNumFaceVertices();
+	int nfv = mesh->getNumPolygonFaceVertices();
 	if(!hasNamedAttr(".nfv"))
 		addIntAttr(".nfv");
 	
@@ -70,32 +70,34 @@ char HMesh::save(BaseMesh * mesh)
 	if(!hasNamedData(".p"))
 	    addVector3Data(".p", nv);
 	
-	writeVector3Data(".p", nv, mesh->vertices());
+	writeVector3Data(".p", nv, mesh->getVertices());
 		
 	if(!hasNamedData(".polyc"))
 	    addIntData(".polyc", nf);
 	
-	writeIntData(".polyc", nf, (int *)mesh->polygonCounts());
+	writeIntData(".polyc", nf, (int *)mesh->getPolygonCounts());
 	
 	if(!hasNamedData(".polyv"))
 	    addIntData(".polyv", nfv);
 	
-	writeIntData(".polyv", nfv, (int *)mesh->polygonIndices());
+	std::cout<<" polyv[0]"<<mesh->getPolygonIndices()[0]<<"\n";
+	std::cout<<" polyv["<<nfv<<"-1]"<<mesh->getPolygonIndices()[nfv - 1]<<"\n";
+	writeIntData(".polyv", nfv, (int *)mesh->getPolygonIndices());
 	
 	if(!hasNamedData(".us"))
 		addFloatData(".us", nuv);
 		
-	writeFloatData(".us", nuv, mesh->us());
+	writeFloatData(".us", nuv, mesh->getUs());
 	
 	if(!hasNamedData(".vs"))
 		addFloatData(".vs", nuv);
 		
-	writeFloatData(".vs", nuv, mesh->vs());
+	writeFloatData(".vs", nuv, mesh->getVs());
 	
 	if(!hasNamedData(".uvids"))
 		addIntData(".uvids", nuvid);
 		
-	writeIntData(".uvids", nuvid, (int *)mesh->uvIds());
+	writeIntData(".uvids", nuvid, (int *)mesh->getUvIds());
 
 	return 1;
 }

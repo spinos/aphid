@@ -26,8 +26,3 @@ int FloatsHDataset::numFloats() const
 {
 	return fDimension[0];
 }
-
-char FloatsHDataset::create(hid_t parentId)
-{
-	return raw_create(parentId);
-}

@@ -8,7 +8,7 @@
  */
 
 #include "IndicesHDataset.h"
-
+#include <iostream>
 IndicesHDataset::IndicesHDataset(const std::string & path) : HDataset(path)
 {
 }
@@ -32,23 +32,3 @@ hid_t IndicesHDataset::dataType()
 	return H5T_NATIVE_INT;
 }
 
-char IndicesHDataset::create(hid_t parentId)
-{
-	return raw_create(parentId);
-}
-
-char IndicesHDataset::write(int *data)
-{
-	herr_t status = H5Dwrite(fObjectId, dataType(), H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-	if(status < 0)
-		return 0;
-	return 1;
-}
-
-char IndicesHDataset::read(int *data)
-{
-	herr_t status = H5Dread(fObjectId, dataType(), H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-	if(status < 0)
-		return 0;
-	return 1;
-}

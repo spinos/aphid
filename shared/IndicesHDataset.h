@@ -18,8 +18,4 @@ public:
 	int numIndices() const;
 	
 	virtual hid_t dataType();
-	
-	virtual char create(hid_t parentId);
-	virtual char write(int *data);
-	virtual char read(int *data);
 };

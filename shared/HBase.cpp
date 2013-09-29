@@ -65,8 +65,13 @@ void HBase::writeIntData(const char * dataName, unsigned count, int *value)
 	IndicesHDataset cset(dataName);
 	cset.setNumIndices(count);
 	cset.open(fObjectId);
-	if(!cset.dimensionMatched()) cset.resize();
-	if(!cset.write((int *)value)) std::cout<<dataName<<" write failed";
+	//if(!cset.hasEnoughSpace()) 
+	cset.resize();
+	
+	cset.close();
+	cset.open(fObjectId);
+	
+	if(!cset.write((char *)value)) std::cout<<dataName<<" write failed";
 	cset.close();
 }
 
@@ -75,8 +80,12 @@ void HBase::writeFloatData(const char * dataName, unsigned count, float *value)
 	FloatsHDataset cset(dataName);
 	cset.setNumFloats(count);
 	cset.open(fObjectId);
-	if(!cset.dimensionMatched()) cset.resize();
-	if(!cset.write(value)) std::cout<<dataName<<" write failed";
+	//if(!cset.hasEnoughSpace()) 
+	cset.resize();
+	cset.close();
+	cset.open(fObjectId);
+	
+	if(!cset.write((char *)value)) std::cout<<dataName<<" write failed";
 	cset.close();
 }
 
@@ -86,8 +95,13 @@ void HBase::writeVector3Data(const char * dataName, unsigned count, Vector3F *va
 	pset.setNumVertices(count);
 	
 	pset.open(fObjectId);
-	if(!pset.dimensionMatched()) pset.resize();
-	if(!pset.write((float *)value)) std::cout<<dataName<<" write failed";
+	//if(!pset.hasEnoughSpace()) 
+	pset.resize();
+	
+	pset.close();
+	pset.open(fObjectId);
+	
+	if(!pset.write((char *)value)) std::cout<<dataName<<" write failed";
 	pset.close();
 }
 
@@ -119,8 +133,8 @@ char HBase::readIntData(const char * dataName, unsigned count, unsigned *dst)
 		return 0;
 	}
 	
-	if(cset.dimensionMatched()) {
-		cset.read((int *)dst);
+	if(cset.hasEnoughSpace()) {
+		cset.read((char *)dst);
 	}
 	else {
 		std::cout<<dataName<<" dim check failed";
@@ -141,8 +155,8 @@ char HBase::readFloatData(const char * dataName, unsigned count, float *dst)
 		return 0;
 	}
 	
-	if(cset.dimensionMatched()) {
-		cset.read(dst);
+	if(cset.hasEnoughSpace()) {
+		cset.read((char *)dst);
 	}
 	else {
 		std::cout<<dataName<<" dim check failed";
@@ -163,8 +177,8 @@ char HBase::readVector3Data(const char * dataName, unsigned count, Vector3F *dst
 		return 0;
 	}
 	
-	if(pset.dimensionMatched()) {
-		pset.read((float *)dst);
+	if(pset.hasEnoughSpace()) {
+		pset.read((char *)dst);
 	}
 	else {
 		std::cout<<dataName<<" dim check failed";

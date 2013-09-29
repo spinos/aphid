@@ -16,6 +16,4 @@ public:
 	
 	void setNumFloats(int num);
 	int numFloats() const;
-	
-	virtual char create(hid_t parentId);
 };

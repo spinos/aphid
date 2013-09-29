@@ -79,6 +79,8 @@ void Export(const char * filename, BaseMesh * src)
 
 void baseImport(EasyModelIn *esm, BaseMesh * dst)
 {
+	dst->cleanup();
+	
 	const unsigned nf = esm->getNumFace();
     
     int *faceCount = esm->getFaceCount();
@@ -95,7 +97,7 @@ void baseImport(EasyModelIn *esm, BaseMesh * dst)
     }
     
     dst->createPolygonIndices(nfv);
-    
+    const unsigned nfacev = nfv;
     nfv = 0;
     for(i = 0; i < nf; i++) {
         for(j = 0; j < faceCount[i]; j++) {
@@ -103,6 +105,8 @@ void baseImport(EasyModelIn *esm, BaseMesh * dst)
             nfv++;
         }
     }
+	
+	if(nfv == nfacev) std::cout<<"\nn face v equals\n";
     
     float* cvs = esm->getVertexPosition();
     dst->createVertices(esm->getNumVertex());

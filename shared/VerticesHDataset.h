@@ -16,6 +16,4 @@ public:
 	
 	void setNumVertices(int num);
 	int numVertices() const;
-	
-	virtual char create(hid_t parentId);
 };

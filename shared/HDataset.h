@@ -18,31 +18,32 @@ public:
 	
 	virtual char validate();
 
-	virtual char raw_create(hid_t parentId);
+	char create(hid_t parentId);
 
 	virtual char open(hid_t parentId = FileIO.fFileId);
 	virtual void close();
 	virtual int objectType() const;
 	
 	virtual hid_t dataType();
-	virtual void createDataSpace();
-	virtual char verifyDataSpace();
-	virtual char dimensionMatched();
+	
+	//virtual char verifyDataSpace();
+	char hasEnoughSpace() const;
 	
 	virtual char write();
 	virtual char read();
-	virtual char write(float *data);
-	virtual char read(float *data);
+	virtual char write(char *data);
+	virtual char read(char *data);
 	
 	int dataSpaceNumDimensions() const;
 	void dataSpaceDimensions(int dim[3]) const;
+	hid_t createMemDataSpace() const;
+	hid_t createFileDataSpace() const;
 	
 	void resize();
 	
-	hid_t fDataSpace;
 	hsize_t fDimension[3];
+
 private:
-	hid_t m_createProps;
-	hsize_t	m_chunkSize[3];
+	
 };
 #endif        //  #ifndef HDATASET_H

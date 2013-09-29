@@ -19,45 +19,46 @@ char HDataset::validate()
 	if(!exists())
 		return 0;
 		
-	if(!verifyDataSpace())
-		return 0;
+	//if(!verifyDataSpace())
+	//	return 0;
 		
 	return 1;
 }
 
-char HDataset::raw_create(hid_t parentId)
+char HDataset::create(hid_t parentId)
 {	
-	createDataSpace();
+	hid_t fDataSpace = createFileDataSpace();
 	
 	if(fDataSpace < 0) std::cout<<"\nh data space create failed\n";
 	
-	m_createProps = H5Pcreate(H5P_DATASET_CREATE);
+	hid_t m_createProps = H5Pcreate(H5P_DATASET_CREATE);
 	if(m_createProps < 0) std::cout<<"\nh create property failed\n";
 	
-	for(int i=0; i < 3; i++) {
-		if(fDimension[i] > 0) {
-			m_chunkSize[i] = fDimension[i] / 8;
-			if(m_chunkSize[i] < 1) m_chunkSize[i] = 1;
-		}
-		else 
-			m_chunkSize[i] = 0;
-	}
+	int ndim = H5Sget_simple_extent_ndims(fDataSpace);
+	hsize_t dims[3] = {0, 0, 0};
+	hsize_t maxdims[3];
+	hsize_t m_chunkSize[3] = {32, 0, 0};
 	
-	std::cout<<"d space "<<fDimension[0]<<" "<<fDimension[1]<<" "<<fDimension[2]<<" \n";
+	H5Sget_simple_extent_dims(fDataSpace, dims, maxdims);
+	m_chunkSize[0] = dims[0] / 32;
+	
+	std::cout<<"d space n dim "<<ndim<<"\n";
+	std::cout<<"d space "<<dims[0]<<" "<<dims[1]<<" "<<dims[2]<<" \n";
 	std::cout<<"d chunk "<<m_chunkSize[0]<<" "<<m_chunkSize[1]<<" "<<m_chunkSize[2]<<" \n";
 	
-	if(H5Pset_chunk(m_createProps, dataSpaceNumDimensions(), m_chunkSize)<0) {
+	if(H5Pset_chunk(m_createProps, ndim, m_chunkSize)<0) {
       printf("Error: fail to set chunk\n");
       return -1;
    }
    	
-	fObjectId = H5Dcreate(parentId, fObjectPath.c_str(), dataType(), fDataSpace, 
+	fObjectId = H5Dcreate2(parentId, fObjectPath.c_str(), dataType(), fDataSpace, 
                           H5P_DEFAULT, m_createProps, H5P_DEFAULT);
 		  
 	if(fObjectId < 0) {
 	    std::cout<<"\nh data set create failed\n";
 		return 0;
 	}
+	H5Sclose(fDataSpace);
 	H5Pclose(m_createProps);
 	return 1;
 }
@@ -69,17 +70,16 @@ char HDataset::open(hid_t parentId)
 	if(fObjectId < 0)
 		return 0;
 		
-	fDataSpace = H5Dget_space(fObjectId);
+	//fDataSpace = H5Dget_space(fObjectId);
 
-	if(fDataSpace<0)
-		return 0;
+	//if(fDataSpace<0)
+	//	return 0;
 		
 	return 1;
 }
 
 void HDataset::close()
 {
-	H5Sclose(fDataSpace);
 	H5Dclose(fObjectId);
 }
 
@@ -93,23 +93,36 @@ hid_t HDataset::dataType()
 	return H5T_NATIVE_FLOAT;
 }
 
-void HDataset::createDataSpace()
+hid_t HDataset::createFileDataSpace() const
 {
 	hsize_t     dims[3];
-	dims[0] = fDimension[0];
-	dims[1] = fDimension[1];
-	dims[2] = fDimension[2];
+	dims[0] = (fDimension[0] / 32 + 1) * 32;
+	dims[1] = 0;
+	dims[2] = 0;
 	
-	int ndim = dataSpaceNumDimensions();
+	int ndim = 1;
 	
 	hsize_t maximumDims[3];
 	maximumDims[0] = H5S_UNLIMITED;
 	maximumDims[1] = 0;
 	maximumDims[2] = 0;
 		
-	fDataSpace = H5Screate_simple(ndim, dims, maximumDims);
+	return H5Screate_simple(ndim, dims, maximumDims);
 }
 
+hid_t HDataset::createMemDataSpace() const
+{
+	hsize_t     dims[3];
+	dims[0] = fDimension[0];
+	dims[1] = 0;
+	dims[2] = 0;
+	
+	int ndim = 1;
+		
+	return H5Screate_simple(ndim, dims, NULL);
+}
+
+/*
 char HDataset::verifyDataSpace()
 {	
 	open();
@@ -133,9 +146,29 @@ char HDataset::dimensionMatched()
 	H5Sget_simple_extent_dims(fDataSpace, dims_out, NULL);
 	
 	for(int i=0; i<rank; i++) {
-		if(dims_out[i] != fDimension[i]) {
+		if(dims_out[i] != (fDimension[i] / 32 + 1) * 32) {
 			FileIO.fCurrentError = HDocument::eDataSpaceDimensionMissMatch;
 			return 0;
+		}
+	}
+	return 1;
+}
+*/
+
+char HDataset::hasEnoughSpace() const
+{
+	hid_t spaceId = H5Dget_space(fObjectId);
+	hsize_t dims[3];
+	hsize_t maxdims[3];
+	H5Sget_simple_extent_dims(spaceId, dims, maxdims);
+	int ndim = H5Sget_simple_extent_ndims(spaceId);
+	for(int i = 0; i < ndim; i++) {
+		if(dims[i] < fDimension[i]) {
+			std::cout<<" data space dim["<<i<<"] = "<<dims[i]<<" not enough for "<<fDimension[i]<<"\n";
+			return 0;
+		}
+		else {
+			std::cout<<" data space dim["<<i<<"] = "<<dims[i]<<" is enough for "<<fDimension[i]<<"\n";
 		}
 	}
 	return 1;
@@ -149,7 +182,7 @@ char HDataset::write()
 	for(i = 0; i < fDimension[1]; i++)
 	    data[j*fDimension[1] +i] = i + j;
 		
-	write(data);
+	write((char *)data);
 	
 	delete[] data;
 	return 1;
@@ -158,7 +191,7 @@ char HDataset::write()
 char HDataset::read()
 {
 	float *         data = new float[fDimension[0]*fDimension[1]];
-	read(data);
+	read((char *)data);
 	
 	hsize_t i, j;				
 	for(j = 0; j < fDimension[0]; j++) {
@@ -172,45 +205,66 @@ char HDataset::read()
 	return 1;
 }
 
-char HDataset::write(float *data)
+char HDataset::write(char *data)
 {
-	herr_t status = H5Dwrite(fObjectId, dataType(), H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+	std::cout<<"to write "<<fObjectPath<<"\n";
+	hid_t memSpace = createMemDataSpace();
+	if(memSpace > 0) std::cout<<"dspace success\n";
+	else std::cout<<"dspace failed\n";
+	
+	hid_t spaceId = H5Dget_space(fObjectId);
+	
+	herr_t status = H5Dwrite(fObjectId, dataType(), H5S_ALL, memSpace, H5P_DEFAULT, data);
+	H5Sclose(memSpace);
 	if(status < 0)
 		return 0;
+		
+	std::cout<<"wrote "<<fObjectPath<<"\n";
 	return 1;
 }
 
-char HDataset::read(float *data)
+char HDataset::read(char *data)
 {
-	herr_t status = H5Dread(fObjectId, dataType(), H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-	if(status < 0)
+	hid_t fDataSpace = createMemDataSpace();
+	herr_t status = H5Dread(fObjectId, dataType(), H5S_ALL, fDataSpace, H5P_DEFAULT, data);
+	H5Sclose(fDataSpace);
+	if(status < 0) {
+		std::cout<<"float write failed";
 		return 0;
+	}	
 	return 1;
 }
 
 int HDataset::dataSpaceNumDimensions() const
 {
-	int ndim = 1;
-	if(fDimension[1] > 0)
-		ndim = 2;
-	if(fDimension[2] > 0)
-		ndim = 3;
-		
-	return ndim;
+	return 1;
 }
 
 void HDataset::dataSpaceDimensions(int dim[3]) const
 {
-    hsize_t dims_out[3];
-	H5Sget_simple_extent_dims(fDataSpace, dims_out, NULL);
-	dim[0] = dims_out[0];
-	dim[1] = dims_out[1];
-	dim[2] = dims_out[2];
+	hid_t spaceId = H5Dget_space(fObjectId);
+	hsize_t dims[3];
+	hsize_t maxdims[3];
+	H5Sget_simple_extent_dims(spaceId, dims, maxdims);
+	
+	dim[0] = dims[0];
+	dim[1] = dims[1];
+	dim[2] = 0;
 }
 
 void HDataset::resize()
 {
-	std::cout<<"resize data";
-	herr_t status = H5Dset_extent(fObjectId, fDimension);
-	if(status < 0) std::cout<<"resize failed";
+	std::cout<<"resize data to accommodate "<<fDimension[0]<<"\n";
+	hsize_t size[1] = {(fDimension[0] / 32 + 1) * 32};
+	std::cout<<"targeting "<<(fDimension[0] / 32 + 1) * 32<<"\n";
+	herr_t status = H5Dset_extent(fObjectId, size);
+	if(status < 0) std::cout<<"resize failed\n";
+	
+	int dims[3];
+	dataSpaceDimensions(dims);
+	
+	if(dims[0] != size[0])
+		std::cout<<"failed to resize to "<<size[0]<<"\n";
+	else
+		std::cout<<"success resized to"<<size[0]<<"\n";
 }

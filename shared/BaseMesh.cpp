@@ -33,20 +33,19 @@ BaseMesh::~BaseMesh()
 
 void BaseMesh::cleanup()
 {
-	if(_vertices) delete[] _vertices; _vertices = 0;
-	if(m_normals) delete[] m_normals; m_normals = 0;
-	if(_indices) delete[] _indices; _indices = 0;
-	if(m_quadIndices) delete[] m_quadIndices; m_quadIndices = 0;
-	if(m_polygonCounts) delete[] m_polygonCounts; m_polygonCounts = 0;
-	if(m_polygonIndices) delete[] m_polygonIndices; m_polygonIndices = 0;
-	if(m_u) delete[] m_u; m_u = 0;
-	if(m_v) delete[] m_v; m_v = 0;
-	if(m_uvIds) delete[] m_uvIds; m_uvIds = 0;
+	if(_vertices) {delete[] _vertices; _vertices = 0;}
+	if(m_normals) {delete[] m_normals; m_normals = 0;}
+	if(_indices) {delete[] _indices; _indices = 0;}
+	if(m_quadIndices) {delete[] m_quadIndices; m_quadIndices = 0;}
+	if(m_polygonCounts) {delete[] m_polygonCounts; m_polygonCounts = 0;}
+	if(m_polygonIndices) {delete[] m_polygonIndices; m_polygonIndices = 0;}
+	if(m_u) {delete[] m_u; m_u = 0;}
+	if(m_v) {delete[] m_v; m_v = 0;}
+	if(m_uvIds) {delete[] m_uvIds; m_uvIds = 0;}
 	_numVertices = 0;
-	_numFaces = 0;
-	_numFaceVertices = 0;
+	m_numTriangles = 0;
+	m_numTriangleFaceVertices = 0;
 	m_numPolygons = 0;
-	m_polygonIndices = 0;
 	m_numUVs = m_numUVIds = 0;
 }
 
@@ -60,7 +59,7 @@ void BaseMesh::createVertices(unsigned num)
 void BaseMesh::createIndices(unsigned num)
 {
 	_indices = new unsigned[num];
-	_numFaceVertices = num;
+	m_numTriangleFaceVertices = num;
 }
 
 void BaseMesh::createQuadIndices(unsigned num)
@@ -92,13 +91,13 @@ void BaseMesh::createPolygonUV(unsigned numUVs, unsigned numUVIds)
 
 unsigned BaseMesh::processTriangleFromPolygon()
 {
-	_numFaces = 0;
+	m_numTriangles = 0;
 	
 	unsigned i, j;
     for(i = 0; i < m_numPolygons; i++)
-        _numFaces += m_polygonCounts[i] - 2;
+        m_numTriangles += m_polygonCounts[i] - 2;
 		
-	createIndices(_numFaces * 3);
+	createIndices(m_numTriangles * 3);
     
     unsigned curTri = 0;
     unsigned curFace = 0;
@@ -112,7 +111,7 @@ unsigned BaseMesh::processTriangleFromPolygon()
         curFace += m_polygonCounts[i];
     }
 	
-	return _numFaces;
+	return m_numTriangles;
 }
 
 unsigned BaseMesh::processQuadFromPolygon()
@@ -294,7 +293,7 @@ unsigned BaseMesh::getNumFaces() const
 
 unsigned BaseMesh::getNumTriangles() const
 {
-	return _numFaceVertices / 3;
+	return m_numTriangles;
 }
 
 unsigned BaseMesh::getNumQuads() const
@@ -312,9 +311,14 @@ unsigned BaseMesh::getNumVertices() const
 	return _numVertices;
 }
 
-unsigned BaseMesh::getNumFaceVertices() const
+unsigned BaseMesh::getNumPolygonFaceVertices() const
 {
-	return _numFaceVertices;
+	return m_numPolygonVertices;
+}
+
+unsigned BaseMesh::getNumTriangleFaceVertices() const
+{
+	return m_numTriangleFaceVertices;
 }
 
 unsigned BaseMesh::getNumUVs() const
@@ -350,6 +354,26 @@ unsigned * BaseMesh::getQuadIndices() const
 unsigned * BaseMesh::getPolygonCounts() const
 {
 	return m_polygonCounts;
+}
+
+unsigned * BaseMesh::getPolygonIndices() const
+{
+	return m_polygonIndices;
+}
+
+float * BaseMesh::getUs() const
+{
+	return m_u;
+}
+
+float * BaseMesh::getVs() const
+{
+	return m_v;
+}
+
+unsigned * BaseMesh::getUvIds() const
+{
+	return m_uvIds;
 }
 
 Matrix33F BaseMesh::getTangentFrame(const unsigned& idx) const
@@ -530,7 +554,9 @@ void BaseMesh::verbose() const
 	std::cout<<"mesh status:\n";
 	std::cout<<" num vertices "<<getNumVertices()<<"\n";
 	std::cout<<" num polygons "<<getNumPolygons()<<"\n";
-	std::cout<<" num face vertices "<<getNumFaceVertices()<<"\n";
+	std::cout<<" num polygon face vertices "<<getNumPolygonFaceVertices()<<"\n";
+	std::cout<<" num triangles "<<getNumTriangles()<<"\n";
+	std::cout<<" num quads "<<getNumQuads()<<"\n";
 	std::cout<<" num uvs "<<getNumUVs()<<"\n";
 	std::cout<<" num uvs indices "<<getNumUVIds()<<"\n";
 

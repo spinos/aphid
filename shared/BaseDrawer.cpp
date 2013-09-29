@@ -225,7 +225,7 @@ void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer) 
 	else
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
 
-	glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
+	glDrawElements(GL_TRIANGLES, mesh->getNumTriangleFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
 
 // deactivate vertex arrays after drawing
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -239,7 +239,7 @@ void BaseDrawer::drawPolygons(const BaseMesh * mesh, const BaseDeformer * deform
 	const unsigned nf = mesh->getNumPolygons();
 	unsigned fi = 0;
 	unsigned *fc = mesh->getPolygonCounts();
-	unsigned *fv = mesh->m_polygonIndices;
+	unsigned *fv = mesh->getPolygonIndices();
 	for(unsigned i = 0; i < nf; i++) {
 		glBegin(GL_POLYGON);
 		for(unsigned j =0; j < fc[i]; j++) {
@@ -274,7 +274,7 @@ void BaseDrawer::showNormal(const BaseMesh * mesh, const BaseDeformer * deformer
 	glEnableClientState(GL_COLOR_ARRAY);
 	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getNormals());
 	
-	glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
+	glDrawElements(GL_TRIANGLES, mesh->getNumTriangleFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
 
 // deactivate vertex arrays after drawing
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -310,7 +310,7 @@ void BaseDrawer::field(const BaseField * f)
 	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)f->getColor());
 	
 // draw a cube
-	glDrawElements(GL_TRIANGLES, mesh->getNumFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
+	glDrawElements(GL_TRIANGLES, mesh->getNumTriangleFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
 
 // deactivate vertex arrays after drawing
 	glDisableClientState(GL_COLOR_ARRAY);
