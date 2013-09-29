@@ -33,11 +33,15 @@ char HWorld::save()
 
 char HWorld::load()
 {
-	if(hasNamedAttr(".time")) {
+	if(hasNamedAttr(".time"))
 		readIntAttr(".time", &m_modifiedTime);
-		time_duration td = seconds(m_modifiedTime);
-		ptime rec = ptime(from_iso_string("20120131T235959")) + td;
-		std::cout<<" world modified time is "<<to_iso_extended_string(rec);
-	}
+
 	return 1;
+}
+
+std::string HWorld::modifiedTimeStr() const
+{
+	time_duration td = seconds(m_modifiedTime);
+	ptime rec = ptime(from_iso_string("20120131T235959")) + td;
+	return to_iso_extended_string(rec);
 }

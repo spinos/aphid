@@ -119,15 +119,13 @@ char HDataset::hasEnoughSpace() const
 			std::cout<<" data space dim["<<i<<"] = "<<dims[i]<<" not enough for "<<fDimension[i]<<"\n";
 			return 0;
 		}
-		else {
-			std::cout<<" data space dim["<<i<<"] = "<<dims[i]<<" is enough for "<<fDimension[i]<<"\n";
-		}
 	}
 	return 1;
 }
 
 char HDataset::write(char *data)
 {
+	resize();
 	hid_t memSpace = createMemDataSpace();
 	
 	herr_t status = H5Dwrite(fObjectId, dataType(), H5S_ALL, memSpace, H5P_DEFAULT, data);
@@ -139,6 +137,7 @@ char HDataset::write(char *data)
 
 char HDataset::read(char *data)
 {
+	if(!hasEnoughSpace()) return 0;
 	hid_t memSpace = createMemDataSpace();
 	herr_t status = H5Dread(fObjectId, dataType(), H5S_ALL, memSpace, H5P_DEFAULT, data);
 	H5Sclose(memSpace);
@@ -149,7 +148,6 @@ char HDataset::read(char *data)
 
 void HDataset::resize()
 {
-	std::cout<<"resize data to accommodate "<<fDimension[0]<<"\n";
 	hsize_t size[1] = {(fDimension[0] / 32 + 1) * 32};
 	
 	herr_t status = H5Dset_extent(fObjectId, size);
@@ -162,6 +160,4 @@ void HDataset::resize()
 	
 	if(dims[0] != size[0])
 		std::cout<<"failed to resize to "<<size[0]<<"\n";
-	else
-		std::cout<<"success resized to"<<size[0]<<"\n";
 }

@@ -47,6 +47,13 @@ void MlScene::clearScene()
 	BaseScene::clearScene();
 }
 
+bool MlScene::shouldSave()
+{
+	if(m_accmesh->getNumVertices() < 1)
+		return false;
+	return true;
+}
+
 bool MlScene::writeSceneToFile(const std::string & fileName)
 {
 	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadAndWrite)) {
@@ -118,6 +125,7 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 	*/
 	HObject::FileIO.close();
 
+	std::cout<<" Scene file "<<fileName<<" saved at "<<grpWorld.modifiedTimeStr()<<"\n";
 	return true;
 }
 
@@ -160,6 +168,8 @@ bool MlScene::readSceneFromFile(const std::string & fileName)
 	
 	grpWorld.close();
 	HObject::FileIO.close();
+	
+	std::cout<<" Scene file "<<fileName<<" modified at "<<grpWorld.modifiedTimeStr()<<"\n";
 	return true;
 }
 

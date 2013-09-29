@@ -15,6 +15,8 @@ public:
 	HWorld();
 	virtual char save();
 	virtual char load();
+	
+	std::string modifiedTimeStr() const;
 private:
 	int m_modifiedTime;
 };

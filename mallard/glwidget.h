@@ -45,7 +45,6 @@
 #include <SingleModelView.h>
 #include <MlScene.h>
 
-class ZEXRImage;
 class BezierDrawer;
 class MlDrawer;
 
@@ -77,7 +76,7 @@ public slots:
 	void openSheet();
 	void saveSheet();
 	void saveSheetAs();
-    
+    void revertSheet();
 protected:
     virtual void clientDraw();
 
@@ -85,8 +84,8 @@ protected:
 private:
 	void selectFeather();
 	void floodFeather();
+	void postLoad();
 private:
-	ZEXRImage* _image;
 	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;
 };

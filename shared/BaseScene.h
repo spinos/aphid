@@ -30,10 +30,12 @@ public:
 	bool openScene(const std::string & fileName);
 	bool saveScene();
 	bool saveSceneAs(const std::string & fileName);
+	bool revertScene();
 	
 	void setLatestError(BaseScene::ErrorMsg err);
 	BaseScene::ErrorMsg latestError() const;
 	
+	virtual bool shouldSave();
 	virtual bool discardConfirm();
 	virtual void clearScene();
 	virtual bool writeSceneToFile(const std::string & fileName);

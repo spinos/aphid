@@ -125,6 +125,10 @@ void Window::createActions()
 	
 	openSceneAct = new QAction(tr("&Open Scene"), this);
 	connect(openSceneAct, SIGNAL(triggered()), glWidget, SLOT(openSheet()));
+	
+	revertAct = new QAction(tr("&Revert To Saved"), this);
+	revertAct->setStatusTip(tr("Discard changes after lastest save"));
+    connect(revertAct, SIGNAL(triggered()), glWidget, SLOT(revertSheet()));
 }
 
 void Window::createMenus()
@@ -134,7 +138,9 @@ void Window::createMenus()
 	fileMenu->addAction(openSceneAct);
 	fileMenu->addAction(saveSceneAct);
 	fileMenu->addAction(saveSceneAsAct);
+	fileMenu->addAction(revertAct);
 	fileMenu->addAction(importMeshAct);
+	
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showBrushControlAct);
 }

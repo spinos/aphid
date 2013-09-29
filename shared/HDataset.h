@@ -23,20 +23,18 @@ public:
 	virtual int objectType() const;
 	
 	virtual hid_t dataType();
-	
-	char hasEnoughSpace() const;
-	
+
 	virtual char write(char *data);
 	virtual char read(char *data);
 	
-	hid_t createMemDataSpace() const;
-	hid_t createFileDataSpace() const;
-	
-	void resize();
-	
 	hsize_t fDimension[3];
 
+	
 private:
+	void resize();
+	char hasEnoughSpace() const;
+	hid_t createMemDataSpace() const;
+	hid_t createFileDataSpace() const;
 	
 };
 #endif        //  #ifndef HDATASET_H

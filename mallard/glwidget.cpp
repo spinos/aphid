@@ -63,8 +63,6 @@ PatchSplitContext childUV[4];
 MlFeather feat;
 BaseDrawer * dr;
 
-# define THIRTYTWO_BYTE_ALIGNMENT(X)   ((((char*)(X) - (char*)0)&31)==0)
-
 void drawFeather()
 {
     glPushMatrix();
@@ -203,24 +201,7 @@ printf("invbilinear %f %f\n", testuv.x, testuv.y);
 
 	loadMesh(filename);
 	
-#ifdef WIN32
-	_image = new ZEXRImage("D:/aphid/catmullclark/disp.exr");
-#else
-	_image = new ZEXRImage("/Users/jianzhang/aphid/catmullclark/disp.exr");
-#endif
-	//if(_image->isValid()) qDebug()<<"image is loaded";
-	// use displacement map inside bezier drawer
-	//_tess->setDisplacementMap(_image);
-
-	
-	
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
-	
-	//char * ap = new char[33];
-	char * ap = new char[33 + 31];
-	ap = (char *)(((unsigned long)ap + 32) & (0xffffffff - 31));
-	if(THIRTYTWO_BYTE_ALIGNMENT(ap) ) std::cout<<"ap is aligned";
-	else std::cout<<"ap is not aligned";
 }
 //! [0]
 
@@ -293,13 +274,8 @@ void GLWidget::clientDraw()
 void GLWidget::loadMesh(std::string filename)
 {
 	ESMUtil::ImportPatch(filename.c_str(), mesh());
-	buildTopology();
-	body()->setup(m_topo);
-	buildTree();
-	skin()->setBodyMesh(body(), m_topo);
-	m_bezierDrawer->rebuildBuffer(body());
+	postLoad();
 	setDirty();
-	update();
 }
 
 void GLWidget::clientSelect()
@@ -451,6 +427,10 @@ void GLWidget::clearScene()
 
 void GLWidget::saveSheet()
 {
+	if(!shouldSave()) {
+		qDebug()<<"Nothing to save.";
+		return;
+	}
 	if(isUntitled()) saveSheetAs();
 	else saveScene();
 }
@@ -481,14 +461,31 @@ void GLWidget::openSheet()
 							QFileDialog::DontUseNativeDialog);
 	if(fileName != "") {
 		openScene(fileName.toUtf8().data());
-		buildTopology();
-		std::cout<<"acc set";
-		body()->setup(m_topo);
-		buildTree();
-		skin()->setBodyMesh(body(), m_topo);
-		m_bezierDrawer->rebuildBuffer(body());
-		update();
+		postLoad();
 		emit sceneNameChanged(fileName);
 	}
+}
+
+void GLWidget::revertSheet()
+{
+	if(isUntitled()) return;
+	QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, tr(" "),
+                                    tr("Do you want to revert to the most recently saved version?"),
+                                    QMessageBox::Yes | QMessageBox::Cancel);
+    if (reply == QMessageBox::Cancel)
+		return;
+	revertScene();
+	postLoad();
+}
+
+void GLWidget::postLoad()
+{
+	buildTopology();
+	body()->setup(m_topo);
+	buildTree();
+	skin()->setBodyMesh(body(), m_topo);
+	m_bezierDrawer->rebuildBuffer(body());
+	update();
 }
 //:~

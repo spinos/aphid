@@ -75,6 +75,7 @@ private:
 	QAction * saveSceneAct;
 	QAction * saveSceneAsAct;
 	QAction * importMeshAct;
+	QAction * revertAct;
 private:
 	void createActions();
 	void createMenus();

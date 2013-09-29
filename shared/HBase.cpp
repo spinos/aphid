@@ -66,7 +66,6 @@ void HBase::writeIntData(const char * dataName, unsigned count, int *value)
 	cset.setNumIndices(count);
 	cset.open(fObjectId);
 	//if(!cset.hasEnoughSpace()) 
-	cset.resize();
 	
 	if(!cset.write((char *)value)) std::cout<<dataName<<" write failed";
 	cset.close();
@@ -78,7 +77,6 @@ void HBase::writeFloatData(const char * dataName, unsigned count, float *value)
 	cset.setNumFloats(count);
 	cset.open(fObjectId);
 	//if(!cset.hasEnoughSpace()) 
-	cset.resize();
 	
 	if(!cset.write((char *)value)) std::cout<<dataName<<" write failed";
 	cset.close();
@@ -91,7 +89,6 @@ void HBase::writeVector3Data(const char * dataName, unsigned count, Vector3F *va
 	
 	pset.open(fObjectId);
 	//if(!pset.hasEnoughSpace()) 
-	pset.resize();
 	
 	if(!pset.write((char *)value)) std::cout<<dataName<<" write failed";
 	pset.close();
@@ -125,13 +122,7 @@ char HBase::readIntData(const char * dataName, unsigned count, unsigned *dst)
 		return 0;
 	}
 	
-	if(cset.hasEnoughSpace()) {
-		cset.read((char *)dst);
-	}
-	else {
-		std::cout<<dataName<<" dim check failed";
-		return 0;
-	}
+	cset.read((char *)dst);
 		
 	cset.close();
 	return 1;
@@ -147,13 +138,7 @@ char HBase::readFloatData(const char * dataName, unsigned count, float *dst)
 		return 0;
 	}
 	
-	if(cset.hasEnoughSpace()) {
-		cset.read((char *)dst);
-	}
-	else {
-		std::cout<<dataName<<" dim check failed";
-		return 0;
-	}
+	cset.read((char *)dst);
 		
 	cset.close();
 	return 1;
@@ -169,14 +154,7 @@ char HBase::readVector3Data(const char * dataName, unsigned count, Vector3F *dst
 		return 0;
 	}
 	
-	if(pset.hasEnoughSpace()) {
-		pset.read((char *)dst);
-	}
-	else {
-		std::cout<<dataName<<" dim check failed";
-		return 0;
-	}
-	
+	pset.read((char *)dst);
 	pset.close();
 	return 1;
 }
