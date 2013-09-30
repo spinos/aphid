@@ -183,7 +183,8 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 
 	m_bezierDrawer = new BezierDrawer;
 	m_featherDrawer = new MlDrawer;
-
+	MlCalamus::FeatherLibrary = this;
+	
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 }
 //! [0]
@@ -358,7 +359,7 @@ void GLWidget::floodFeather()
 	const unsigned iface = ctx->m_componentIdx;
 	
 	MlCalamus ac;
-	ac.setFeather(selectedFeatherExample());
+	ac.setFeatherId(selectedFeatherExampleId());
 	ac.setRotateY(brush()->getPitch());
 	skin()->floodAround(ac, iface, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
 	m_featherDrawer->addToBuffer(skin());

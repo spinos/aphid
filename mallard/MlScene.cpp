@@ -23,7 +23,10 @@ MlScene::MlScene()
 	initializeFeatherExample();
 }
 
-MlScene::~MlScene() {}
+MlScene::~MlScene() 
+{
+	clearScene();
+}
 
 MlSkin * MlScene::skin()
 {
@@ -37,11 +40,7 @@ AccPatchMesh * MlScene::body()
 
 void MlScene::clearScene()
 {
-	std::vector<MlFeather *>::iterator it;
-	for(it = m_feathers.begin(); it != m_feathers.end(); ++it) {
-		delete *it;
-	}
-	m_feathers.clear();
+	clearFeatherExamples();
 	m_skin->cleanup();
 	m_accmesh->cleanup();
 	BaseScene::clearScene();
@@ -161,7 +160,6 @@ bool MlScene::readSceneFromFile(const std::string & fileName)
 	grpBody.close();
 	
 	readFeatherExamples();
-	sortFeatherExamples();
 	initializeFeatherExample();
 	//HMesh grpSkin("/world/skin");
 	//grpSkin.close();
@@ -187,61 +185,4 @@ void MlScene::readFeatherExamples()
 		h.close();
 	}
 	g.close();	
-}
-
-MlFeather * MlScene::addFeatherExample()
-{
-	MlFeather * f = new MlFeather;
-	f->setFeatherId(numFeatherExamples());
-	m_feathers.push_back(f);
-	return f;
-}
-
-short MlScene::numFeatherExamples() const
-{
-	return (short)m_feathers.size();
-}
-
-void MlScene::selectFeatherExample(short x)
-{
-	m_selectedFeatherId = x;
-}
-
-MlFeather * MlScene::selectedFeatherExample() const
-{
-	return m_feathers[m_selectedFeatherId];
-}
-
-MlFeather * MlScene::featherExample(short idx) const
-{
-	return m_feathers[idx];
-}
-
-void MlScene::initializeFeatherExample()
-{
-    std::cout<<"num feather example "<<numFeatherExamples()<<"\n";
-	if(numFeatherExamples() < 1) {
-		MlFeather * f = addFeatherExample();
-		f->defaultCreate();
-		std::cout<<"select feather example 0\n";
-	}
-	selectFeatherExample(0);
-}
-
-void MlScene::sortFeatherExamples()
-{
-	if(numFeatherExamples() < 2) return;
-	int i, j;
-	char swapOccured;
-	for(i = 0; i < numFeatherExamples() && swapOccured; i++) {
-		swapOccured = 0;
-		for(j = 0; j < numFeatherExamples() - 1; j++) {
-			if(m_feathers[j]->featherId() > m_feathers[j + 1]->featherId()) {
-				MlFeather *f = m_feathers[j];
-				m_feathers[j] = m_feathers[j + 1];
-				m_feathers[j + 1] = f;
-				swapOccured = 1;
-			}
-		}
-	}
 }

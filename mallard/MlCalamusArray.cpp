@@ -9,14 +9,6 @@
 
 #include "MlCalamusArray.h"
 
-struct test {
-    MlFeather * m_geo;
-    unsigned m_faceIdx, m_bufStart;
-	float m_patchU, m_patchV;
-	float m_rotX, m_rotY;
-	//float m_scale;
-};
-
 MlCalamusArray::MlCalamusArray()
 {
 	setIndex(0);
@@ -24,14 +16,6 @@ MlCalamusArray::MlCalamusArray()
 	
 	std::cout<<"size of calamus "<<sizeof(MlCalamus)<<"\n";
 	std::cout<<"size of MlFeather * "<<sizeof(MlFeather *)<<"\n";
-	std::cout<<"size of float "<<sizeof(float)<<"\n";
-	std::cout<<"size of unsigned "<<sizeof(unsigned)<<"\n";
-	std::cout<<"size of test "<<sizeof(test)<<"\n";
-	
-	MlCalamus c;
-	c.setPatchU(0.0001);
-	c.setPatchV(0.024607);
-	std::cout<<" u 0.0001 "<<c.patchU()<<"\n"<<" v 0.024607 "<<c.patchV()<<"\n";
 }
 
 MlCalamusArray::~MlCalamusArray()

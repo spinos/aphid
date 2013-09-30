@@ -11,6 +11,7 @@
 #include <AllMath.h>
 class MlFeather;
 class CollisionRegion;
+class MlFeatherCollection;
 class MlCalamus
 {
 public:
@@ -28,26 +29,19 @@ public:
 	float realScale() const;
 	unsigned bufferStart() const;
 	
+	void setFeatherId(unsigned x);
 	void setPatchU(float u);
 	void setPatchV(float v);
-	void setFeather(MlFeather * geo);
 	void setRotateX(const float& x);
 	void setRotateY(const float& y);
 	void setScale(const float & x);
 	void setBufferStart(unsigned x);
 	
 	void collideWith(CollisionRegion * skin, const Vector3F & p);
+	
+	static MlFeatherCollection * FeatherLibrary;
+
 private:
-    enum EMask {
-		EUMask = 16383,
-		EVMask = ~EUMask,
-		EVOFFSET = 15
-	};
-	#define PATCHPARAMMIN 1.0 / 8192
-	#define PATCHPRAAMTIME 8192
-private:
-	unsigned m_faceIdx, m_bufStart;
-	unsigned m_patchCombined;
-	float m_rotX, m_rotY, m_scale;
-	MlFeather * m_geo;
+	unsigned m_faceIdx, m_featherId, m_bufStart;
+	float m_patchU, m_patchV, m_rotX, m_rotY, m_scale;
 };
