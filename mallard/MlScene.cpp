@@ -219,11 +219,13 @@ MlFeather * MlScene::featherExample(short idx) const
 
 void MlScene::initializeFeatherExample()
 {
+    std::cout<<"num feather example "<<numFeatherExamples()<<"\n";
 	if(numFeatherExamples() < 1) {
 		MlFeather * f = addFeatherExample();
 		f->defaultCreate();
-		selectFeatherExample(0);
+		std::cout<<"select feather example 0\n";
 	}
+	selectFeatherExample(0);
 }
 
 void MlScene::sortFeatherExamples()

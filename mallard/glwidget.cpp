@@ -401,7 +401,7 @@ void GLWidget::clearScene()
 	MlScene::clearScene();
 	m_bezierDrawer->clearBuffer();
 	m_featherDrawer->clearBuffer();
-	//m_featherDrawer->initializeBuffer();
+	m_featherDrawer->initializeBuffer();
 	clearTree();
 	clearTopology();
 	emit sceneNameChanged(tr("untitled"));
@@ -470,5 +470,6 @@ void GLWidget::postLoad()
 	skin()->setBodyMesh(body(), m_topo);
 	m_bezierDrawer->rebuildBuffer(body());
 	update();
+	emit sceneNameChanged(tr(fileName().c_str()));
 }
 //:~
