@@ -10,16 +10,18 @@
 #include "MlCalamus.h"
 #include "MlFeather.h"
 #include <CollisionRegion.h>
+#include <Aphid.h>
 MlCalamus::MlCalamus() 
 {
-	m_patchU = m_patchV = m_rotX = m_rotY = m_scale = 0.f;
+    m_rotX = m_rotY = m_scale = 0.f;
+    m_patchCombined = 0;
 }
 
 void MlCalamus::bindToFace(unsigned faceIdx, float u, float v)
 {
 	m_faceIdx = faceIdx;
-	m_patchU = u; 
-	m_patchV = v;
+	setPatchU(u); 
+	setPatchV(v);
 }
 
 void MlCalamus::computeFeatherWorldP(const Vector3F & origin, const Matrix33F& space)
@@ -39,12 +41,38 @@ unsigned MlCalamus::faceIdx() const
 
 float MlCalamus::patchU() const
 {
-	return m_patchU;
+	unsigned iu = m_patchCombined & EUMask;
+	return PATCHPARAMMIN * iu;
 }
 
 float MlCalamus::patchV() const
 {
-	return m_patchV;
+    unsigned iv = (m_patchCombined & EVMask) >> EVOFFSET;
+	return PATCHPARAMMIN * iv;
+}
+
+void MlCalamus::setPatchU(float u)
+{
+    unsigned iu = u * PATCHPRAAMTIME;
+    m_patchCombined = iu + (m_patchCombined & EUMask);
+    /*
+    std::cout<<"  "<<byte_to_binary(iu)<<"\n";
+    std::cout<<"  "<<byte_to_binary(EUMask)<<"\n";
+    std::cout<<"  "<<byte_to_binary(EVMask)<<"\n";
+    std::cout<<"  "<<byte_to_binary(m_patchCombined)<<"\n";
+    */
+}
+
+void MlCalamus::setPatchV(float v)
+{
+    unsigned iv = v * PATCHPRAAMTIME;
+    /*std::cout<<"  "<<byte_to_binary(iv)<<"\n";
+	std::cout<<"  "<<byte_to_binary(iv<<EVOFFSET)<<"\n";
+    std::cout<<"  "<<byte_to_binary(m_patchCombined)<<"\n";
+    std::cout<<"  "<<byte_to_binary(~EVMask)<<"\n";*/
+    m_patchCombined = (iv<<EVOFFSET) | (m_patchCombined & ~EVMask);
+    /*std::cout<<"  "<<byte_to_binary(m_patchCombined)<<"\n";*/
+    
 }
 
 void MlCalamus::setFeather(MlFeather * geo)

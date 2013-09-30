@@ -28,6 +28,8 @@ public:
 	float realScale() const;
 	unsigned bufferStart() const;
 	
+	void setPatchU(float u);
+	void setPatchV(float v);
 	void setFeather(MlFeather * geo);
 	void setRotateX(const float& x);
 	void setRotateY(const float& y);
@@ -36,7 +38,16 @@ public:
 	
 	void collideWith(CollisionRegion * skin, const Vector3F & p);
 private:
-	MlFeather * m_geo;
+    enum EMask {
+		EUMask = 16383,
+		EVMask = ~EUMask,
+		EVOFFSET = 15
+	};
+	#define PATCHPARAMMIN 1.0 / 8192
+	#define PATCHPRAAMTIME 8192
+private:
 	unsigned m_faceIdx, m_bufStart;
-	float m_patchU, m_patchV, m_rotX, m_rotY, m_scale;
+	unsigned m_patchCombined;
+	float m_rotX, m_rotY, m_scale;
+	MlFeather * m_geo;
 };
