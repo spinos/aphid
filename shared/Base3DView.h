@@ -40,7 +40,7 @@ public:
     void processSelection(QMouseEvent *event);
     void processDeselection(QMouseEvent *event);
     void processMouseInput(QMouseEvent *event);
-	void processCamera(QMouseEvent *event);
+	virtual void processCamera(QMouseEvent *event);
     virtual void clientDraw();
     virtual void clientSelect();
     virtual void clientDeselect();
@@ -57,6 +57,11 @@ public:
 	virtual void drawIntersection() const;
 	void showBrush() const;
 	
+	void updateOrthoProjection();
+	void updatePerspProjection();
+	
+	QPoint lastMousePos() const;
+	
 public slots:
 	void receiveBrushRadius(double x);
     void receiveBrushPitch(double x);
@@ -68,8 +73,6 @@ protected:
 	void focusOutEvent(QFocusEvent * event);
 	
 private:
-	void updateOrthoProjection();
-	void updatePerspProjection();
 	void computeIncidentRay(int x, int y);
 	
 private:

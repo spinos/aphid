@@ -69,6 +69,7 @@ public:
 	
 signals:
 	void sceneNameChanged(QString name);
+	void sendMessage(QString msg);
 	
 public slots:
 	void cleanSheet();

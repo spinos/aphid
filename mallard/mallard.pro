@@ -85,6 +85,7 @@ HEADERS       = ../shared/AllMath.h \
                 ../shared/QDoubleEditSlider.h \
 				../shared/BlockDrawBuffer.h \
                 ../shared/BaseScene.h \
+    $${Aphid}/shared/Base2DView.h \
     $${Aphid}/shared/AllHdf.h \
     $${Aphid}/shared/HObject.h \
     $${Aphid}/shared/HDocument.h \
@@ -129,6 +130,8 @@ HEADERS       = ../shared/AllMath.h \
 				HFeather.h \
     HSkin.h \
                 MlFeatherCollection.h \
+    MlUVView.h \
+    FeatherEdit.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \  
@@ -209,6 +212,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/QDoubleEditSlider.cpp \
 				../shared/BlockDrawBuffer.cpp \
                 ../shared/BaseScene.cpp \
+    $${Aphid}/shared/Base2DView.cpp \
     $${Aphid}/shared/HObject.cpp \
     $${Aphid}/shared/HDocument.cpp \
     $${Aphid}/shared/HGroup.cpp \
@@ -253,6 +257,8 @@ SOURCES       = ../shared/Vector3F.cpp \
 				HFeather.cpp \
     HSkin.cpp \
                 MLFeatherCollection.cpp \
+    MlUVView.cpp \
+    FeatherEdit.cpp \
                 main.cpp
                 
 INCLUDEPATH += /usr/local/include/OpenEXR

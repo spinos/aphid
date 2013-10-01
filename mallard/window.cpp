@@ -44,6 +44,7 @@
 #include "glwidget.h"
 #include "ToolBox.h"
 #include "BrushControl.h"
+#include "FeatherEdit.h"
 #include "window.h"
 
 //! [0]
@@ -53,12 +54,15 @@ Window::Window()
 	m_tools = new ToolBox;
 	
 	GLWidget::InteractContext = m_tools;
-	m_brushControl = new BrushControl(this); 
+	m_brushControl = new BrushControl(this);
+	m_featherEdit = new FeatherEdit(this);
 	
 	addToolBar(m_tools);
 
 	setCentralWidget(glWidget);
     setWorkTitle(tr("untitled"));
+	createActions();
+	createMenus();
     
 	connect(m_tools, SIGNAL(contextChanged(int)), this, SLOT(receiveToolContext(int)));
     connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
@@ -66,8 +70,9 @@ Window::Window()
 	connect(m_brushControl->radiusWidget(), SIGNAL(valueChanged(double)), glWidget, SLOT(receiveBrushRadius(double)));
 	connect(m_brushControl->numSamplesWidget(), SIGNAL(valueChanged(int)), glWidget, SLOT(receiveBrushNumSamples(int)));
 	connect(glWidget, SIGNAL(sceneNameChanged(QString)), this, SLOT(setWorkTitle(QString)));
-	createActions();
-	createMenus();
+	connect(glWidget, SIGNAL(sendMessage(QString)), this, SLOT(showMessage(QString)));
+	
+	statusBar()->showMessage(tr("Ready"));
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -110,10 +115,16 @@ void Window::createActions()
 	showBrushControlAct->setStatusTip(tr("Show brush settings"));
     connect(showBrushControlAct, SIGNAL(triggered()), m_brushControl, SLOT(show()));
 	
+	showFeatherEditAct = new QAction(tr("&Feather Editor"), this);
+	showFeatherEditAct->setStatusTip(tr("Show feather editor"));
+    connect(showFeatherEditAct, SIGNAL(triggered()), m_featherEdit, SLOT(show()));
+	
 	saveSceneAct = new QAction(tr("&Save Scene"), this);
-	connect(saveSceneAct, SIGNAL(triggered()), glWidget, SLOT(saveSheet()));
+	saveSceneAct->setStatusTip(tr("Save current scene file"));
+    connect(saveSceneAct, SIGNAL(triggered()), glWidget, SLOT(saveSheet()));
 	
 	saveSceneAsAct = new QAction(tr("&Save Scene As"), this);
+	saveSceneAsAct->setStatusTip(tr("Save current scene into another file"));
 	connect(saveSceneAsAct, SIGNAL(triggered()), glWidget, SLOT(saveSheetAs()));
 	
 	importMeshAct = new QAction(tr("&Import Mesh"), this);
@@ -121,6 +132,7 @@ void Window::createActions()
 	connect(importMeshAct, SIGNAL(triggered()), glWidget, SLOT(open()));
 	
 	openSceneAct = new QAction(tr("&Open Scene"), this);
+	openSceneAct->setStatusTip(tr("Load a file as current scene"));
 	connect(openSceneAct, SIGNAL(triggered()), glWidget, SLOT(openSheet()));
 	
 	revertAct = new QAction(tr("&Revert To Saved"), this);
@@ -140,9 +152,15 @@ void Window::createMenus()
 	
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showBrushControlAct);
+	windowMenu->addAction(showFeatherEditAct);
 }
 
 void Window::setWorkTitle(QString name)
 {
 	setWindowTitle(QString("Mallard - %1").arg(name));
+}
+
+void Window::showMessage(QString msg)
+{
+	statusBar()->showMessage(msg);
 }

@@ -52,6 +52,7 @@ QT_END_NAMESPACE
 class GLWidget;
 class ToolBox;
 class BrushControl;
+class FeatherEdit;
 
 class Window : public QMainWindow
 {
@@ -67,9 +68,11 @@ private:
     GLWidget *glWidget;
 	ToolBox * m_tools;
 	BrushControl * m_brushControl;
+	FeatherEdit * m_featherEdit;
 	QMenu * fileMenu;
 	QMenu * windowMenu;
 	QAction * showBrushControlAct;
+	QAction * showFeatherEditAct;
 	QAction * newSceneAct;
 	QAction * openSceneAct;
 	QAction * saveSceneAct;
@@ -84,6 +87,7 @@ public slots:
 	void receiveToolContext(int a);
     void receiveToolAction(int a);
 	void setWorkTitle(QString name);
+	void showMessage(QString msg);
 };
 //! [0]
 

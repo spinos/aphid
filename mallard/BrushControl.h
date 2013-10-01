@@ -11,12 +11,9 @@
 #define BRUSH_CONTROL_H
 
 #include <QDialog>
-#include <QQueue>
 
 QT_BEGIN_NAMESPACE
 class QGroupBox;
-class QLabel;
-class QSlider;
 QT_END_NAMESPACE
 
 class QIntEditSlider;

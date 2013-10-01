@@ -39,6 +39,8 @@ BrushControl::BrushControl(QWidget *parent)
 	setLayout(layout);
 
     layout->setSizeConstraint(QLayout::SetMinimumSize);
+	setContentsMargins(8, 8, 8, 8);
+	layout->setContentsMargins(0, 0, 0, 0);
 
     setWindowTitle(tr("Brush Settings"));
     

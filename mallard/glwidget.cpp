@@ -414,7 +414,8 @@ void GLWidget::saveSheet()
 		return;
 	}
 	if(isUntitled()) saveSheetAs();
-	else saveScene();
+	else if(saveScene())
+		emit sendMessage(QString("Scene file %1 is saved").arg(fileName().c_str()));
 }
 
 void GLWidget::saveSheetAs()
@@ -429,6 +430,7 @@ void GLWidget::saveSheetAs()
 	if(fileName != "") {
 		saveSceneAs(fileName.toUtf8().data());
 		emit sceneNameChanged(fileName);
+		emit sendMessage(QString("Scene file %1 is saved").arg(fileName));
 	}
 }
 
@@ -472,5 +474,6 @@ void GLWidget::postLoad()
 	m_featherDrawer->rebuildBuffer(skin());
 	update();
 	emit sceneNameChanged(tr(fileName().c_str()));
+	emit sendMessage(QString("Scene file %1 is loaded").arg(tr(fileName().c_str())));
 }
 //:~

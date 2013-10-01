@@ -434,4 +434,9 @@ void Base3DView::receiveBrushNumSamples(int x)
     brush()->setNumDarts(x);
 	update();
 }
+
+QPoint Base3DView::lastMousePos() const
+{
+	return m_lastPos;
+}
 //:~
