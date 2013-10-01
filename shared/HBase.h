@@ -32,6 +32,7 @@ public:
 	char readIntData(const char * dataname, unsigned count, unsigned *dst, HDataset::SelectPart * part = 0);
 	char readFloatData(const char * dataname, unsigned count, float *dst, HDataset::SelectPart * part = 0);
 	char readVector3Data(const char * dataname, unsigned count, Vector3F *dst, HDataset::SelectPart * part = 0);
+	char readCharData(const char * dataName, unsigned count, char *dst, HDataset::SelectPart * part = 0);
 	
 	char hasNamedAttr(const char * attrName);
 	std::string getAttrName(hid_t attrId);

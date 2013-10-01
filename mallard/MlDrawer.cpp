@@ -121,6 +121,37 @@ void MlDrawer::addToBuffer(MlSkin * skin)
 	}
 }
 
+void MlDrawer::rebuildBuffer(MlSkin * skin)
+{
+	unsigned nc = skin->numFeathers();
+	if(nc < 1) return;
+	
+	std::cout<<"building feather draw buffer\n num feathers "<<nc<<"\n";
+	unsigned loc = 0;
+	
+	unsigned i, nvpf;
+	Vector3F v;
+	for(i = 0; i < nc; i++) {
+		MlCalamus * c = skin->getCalamus(i);
+		
+		m_featherTess->setFeather(c->feather());
+		
+		setIndex(loc);
+		c->setBufferStart(loc);
+		
+		nvpf = m_featherTess->numIndices();
+
+		expandBy(nvpf);
+		
+		loc += nvpf;
+	}
+	
+	for(i = 0; i < nc; i++) {
+		MlCalamus * c = skin->getCalamus(i);
+		computeAFeather(skin, c);
+	}
+}
+
 void MlDrawer::tessellate(MlSkin * skin, MlCalamus * c)
 {
 	Vector3F p;

@@ -23,6 +23,7 @@ public:
 	void updateActive(MlSkin * skin);
 	void computeAFeather(MlSkin * skin, MlCalamus * c);
 	void addToBuffer(MlSkin * skin);
+	void rebuildBuffer(MlSkin * skin);
 private:
 	void tessellate(MlSkin * skin, MlCalamus * c);
 private:

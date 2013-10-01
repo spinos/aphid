@@ -173,6 +173,19 @@ char HBase::readVector3Data(const char * dataName, unsigned count, Vector3F *dst
 	return 1;
 }
 
+char HBase::readCharData(const char * dataName, unsigned count, char *dst, HDataset::SelectPart * part)
+{
+	HCharData pset(dataName);
+	pset.setNumChars(count);
+	if(!pset.open(fObjectId)) {
+		std::cout<<dataName<<" open failed";
+		return 0;
+	}
+	pset.read((char *)dst, part);
+	pset.close();
+	return 1;
+}
+
 char HBase::hasNamedAttr(const char * attrName)
 {
 	hsize_t nattr = H5Aget_num_attrs(fObjectId);

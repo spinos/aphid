@@ -136,6 +136,12 @@ bool MlSkin::createFeather(MlCalamus & ori)
 	return true;
 }
 
+void MlSkin::setNumFeathers(unsigned num)
+{
+	m_calamus->expandBy(num);
+	m_numFeather = num;
+}
+
 void MlSkin::growFeather(const Vector3F & direction)
 {
 	const unsigned num = numActive();
@@ -261,6 +267,8 @@ void MlSkin::finishCreateFeather()
 
 void MlSkin::finishEraseFeather()
 {
+	if(numActive() < 1) return;
+	std::cout<<"erase from "<<numFeathers();
 	if(numActive() == numFeathers()) {
 		m_numFeather = 0;
 		m_calamus->setIndex(0);
@@ -282,6 +290,7 @@ void MlSkin::finishEraseFeather()
 	
 	m_calamus->setIndex(m_numFeather);
 	computeFaceCalamusIndirection();
+	std::cout<<" to "<<numFeathers();
 }
 
 void MlSkin::computeFaceCalamusIndirection()

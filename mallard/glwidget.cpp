@@ -326,6 +326,10 @@ void GLWidget::clientDeselect()
 		skin()->finishCreateFeather();
 		skin()->discardActive();
 	}
+	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
+		skin()->finishEraseFeather();
+		skin()->discardActive();
+	}
 }
 
 PatchMesh * GLWidget::mesh()
@@ -363,12 +367,6 @@ void GLWidget::floodFeather()
 	ac.setRotateY(brush()->getPitch());
 	skin()->floodAround(ac, iface, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
 	m_featherDrawer->addToBuffer(skin());
-}
-
-void GLWidget::finishEraseFeather()
-{
-	skin()->finishEraseFeather();
-	skin()->discardActive();
 }
 
 void GLWidget::deselectFeather()
@@ -469,7 +467,9 @@ void GLWidget::postLoad()
 	body()->setup(m_topo);
 	buildTree();
 	skin()->setBodyMesh(body(), m_topo);
+	skin()->finishCreateFeather();
 	m_bezierDrawer->rebuildBuffer(body());
+	m_featherDrawer->rebuildBuffer(skin());
 	update();
 	emit sceneNameChanged(tr(fileName().c_str()));
 }

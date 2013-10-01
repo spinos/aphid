@@ -24,6 +24,8 @@ public:
 	virtual ~MlSkin();
 	void cleanup();
 	
+	void setNumFeathers(unsigned num);
+	
 	void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
 	void floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, const float & minD);
 	void selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD);

@@ -68,8 +68,6 @@ MlScene::MlScene()
 	m_accmesh = new AccPatchMesh;
 	m_skin = new MlSkin;
 	initializeFeatherExample();
-	
-	test();
 }
 
 MlScene::~MlScene() 
@@ -98,6 +96,8 @@ void MlScene::clearScene()
 bool MlScene::shouldSave()
 {
 	if(m_accmesh->getNumVertices() < 1)
+		return false;
+	if(m_skin->numFeathers() < 1)
 		return false;
 	return true;
 }
