@@ -60,37 +60,33 @@ void HBase::writeIntAttr(const char * attrName, int *value)
 	nvAttr.close();
 }
 
-void HBase::writeIntData(const char * dataName, unsigned count, int *value)
+void HBase::writeIntData(const char * dataName, unsigned count, int *value, HDataset::SelectPart * part)
 {	
 	IndicesHDataset cset(dataName);
 	cset.setNumIndices(count);
 	cset.open(fObjectId);
-	//if(!cset.hasEnoughSpace()) 
-	
-	if(!cset.write((char *)value)) std::cout<<dataName<<" write failed";
+
+	if(!cset.write((char *)value, part)) std::cout<<dataName<<" write failed";
 	cset.close();
 }
 
-void HBase::writeFloatData(const char * dataName, unsigned count, float *value)
+void HBase::writeFloatData(const char * dataName, unsigned count, float *value, HDataset::SelectPart * part)
 {	
 	FloatsHDataset cset(dataName);
 	cset.setNumFloats(count);
 	cset.open(fObjectId);
-	//if(!cset.hasEnoughSpace()) 
-	
-	if(!cset.write((char *)value)) std::cout<<dataName<<" write failed";
+
+	if(!cset.write((char *)value, part)) std::cout<<dataName<<" write failed";
 	cset.close();
 }
 
-void HBase::writeVector3Data(const char * dataName, unsigned count, Vector3F *value)
+void HBase::writeVector3Data(const char * dataName, unsigned count, Vector3F *value, HDataset::SelectPart * part)
 {
     VerticesHDataset pset(dataName);
-	pset.setNumVertices(count);
-	
+	pset.setNumVertices(count);	
 	pset.open(fObjectId);
-	//if(!pset.hasEnoughSpace()) 
-	
-	if(!pset.write((char *)value)) std::cout<<dataName<<" write failed";
+
+	if(!pset.write((char *)value, part)) std::cout<<dataName<<" write failed";
 	pset.close();
 }
 
@@ -112,7 +108,7 @@ char HBase::readIntAttr(const char * dataName, int *value)
 	return 1;
 }
 
-char HBase::readIntData(const char * dataName, unsigned count, unsigned *dst)
+char HBase::readIntData(const char * dataName, unsigned count, unsigned *dst, HDataset::SelectPart * part)
 {	
 	IndicesHDataset cset(dataName);
 	cset.setNumIndices(count);
@@ -122,13 +118,13 @@ char HBase::readIntData(const char * dataName, unsigned count, unsigned *dst)
 		return 0;
 	}
 	
-	cset.read((char *)dst);
+	cset.read((char *)dst, part);
 		
 	cset.close();
 	return 1;
 }
 
-char HBase::readFloatData(const char * dataName, unsigned count, float *dst)
+char HBase::readFloatData(const char * dataName, unsigned count, float *dst, HDataset::SelectPart * part)
 {	
 	FloatsHDataset cset(dataName);
 	cset.setNumFloats(count);
@@ -138,13 +134,13 @@ char HBase::readFloatData(const char * dataName, unsigned count, float *dst)
 		return 0;
 	}
 	
-	cset.read((char *)dst);
+	cset.read((char *)dst, part);
 		
 	cset.close();
 	return 1;
 }
 
-char HBase::readVector3Data(const char * dataName, unsigned count, Vector3F *dst)
+char HBase::readVector3Data(const char * dataName, unsigned count, Vector3F *dst, HDataset::SelectPart * part)
 {
 	VerticesHDataset pset(dataName);
 	pset.setNumVertices(count);
@@ -154,7 +150,7 @@ char HBase::readVector3Data(const char * dataName, unsigned count, Vector3F *dst
 		return 0;
 	}
 	
-	pset.read((char *)dst);
+	pset.read((char *)dst, part);
 	pset.close();
 	return 1;
 }

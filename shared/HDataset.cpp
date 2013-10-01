@@ -15,7 +15,7 @@ HDataset::HDataset(const std::string & path) : HObject(path)
 
 char HDataset::create(hid_t parentId)
 {	
-	hid_t createSpace = createFileDataSpace();
+	hid_t createSpace = createFileSpace();
 	
 	if(createSpace < 0) std::cout<<"\nh data space create failed\n";
 	
@@ -78,7 +78,7 @@ hid_t HDataset::dataType()
 	return H5T_NATIVE_FLOAT;
 }
 
-hid_t HDataset::createFileDataSpace() const
+hid_t HDataset::createFileSpace() const
 {
 	hsize_t     dims[3];
 	dims[0] = (fDimension[0] / 32 + 1) * 32;
@@ -95,12 +95,10 @@ hid_t HDataset::createFileDataSpace() const
 	return H5Screate_simple(ndim, dims, maximumDims);
 }
 
-hid_t HDataset::createMemDataSpace() const
+hid_t HDataset::createMemSpace() const
 {
-	hsize_t     dims[3];
+	hsize_t     dims[1];
 	dims[0] = fDimension[0];
-	dims[1] = 0;
-	dims[2] = 0;
 	
 	int ndim = 1;
 		
@@ -123,23 +121,46 @@ char HDataset::hasEnoughSpace() const
 	return 1;
 }
 
-char HDataset::write(char *data)
+char HDataset::write(char *data, SelectPart * part)
 {
-	resize();
-	hid_t memSpace = createMemDataSpace();
+	hid_t dataSpace = H5S_ALL;
+	hid_t memSpace = createMemSpace();
+	herr_t status;
+	if(part) {
+		if(part->start[0] == 0)
+			resize();
+		
+		status = H5Sselect_hyperslab(memSpace, H5S_SELECT_SET, part->start, part->stride, part->count, part->block);
+		if(status < 0) std::cout<<"failed to select hyperslab\n";
+		
+		dataSpace = createSpace(part->block);
+	}
+	else 
+		resize();
 	
-	herr_t status = H5Dwrite(fObjectId, dataType(), H5S_ALL, memSpace, H5P_DEFAULT, data);
+	status = H5Dwrite(fObjectId, dataType(), dataSpace, memSpace, H5P_DEFAULT, data);
 	H5Sclose(memSpace);
 	if(status < 0)
 		return 0;
+	
 	return 1;
 }
 
-char HDataset::read(char *data)
+char HDataset::read(char *data, SelectPart * part)
 {
 	if(!hasEnoughSpace()) return 0;
-	hid_t memSpace = createMemDataSpace();
-	herr_t status = H5Dread(fObjectId, dataType(), H5S_ALL, memSpace, H5P_DEFAULT, data);
+	hid_t dataSpace = H5S_ALL;
+	hid_t memSpace = createMemSpace();
+	herr_t status;
+	
+	if(part) {
+		status = H5Sselect_hyperslab(memSpace, H5S_SELECT_SET, part->start, part->stride, part->count, part->block);
+		if(status < 0) std::cout<<"failed to select hyperslab\n";
+
+		dataSpace = createSpace(part->block);
+	}
+
+	status = H5Dread(fObjectId, dataType(), dataSpace, memSpace, H5P_DEFAULT, data);
 	H5Sclose(memSpace);
 	if(status < 0)
 		return 0;	
@@ -160,4 +181,14 @@ void HDataset::resize()
 	
 	if(dims[0] != size[0])
 		std::cout<<"failed to resize to "<<size[0]<<"\n";
+}
+
+hid_t HDataset::createSpace(hsize_t * block) const
+{
+	hsize_t     dims[1];
+	dims[0] = block[0];
+	
+	int ndim = 1;
+		
+	return H5Screate_simple(ndim, dims, NULL);
 }

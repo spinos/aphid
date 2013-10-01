@@ -13,6 +13,20 @@
 #include "HObject.h"
 class HDataset : public HObject {
 public:
+	struct SelectPart {
+		SelectPart() {
+			start[0] = 0;
+			stride[0] = 1;
+			count[0] = 1;
+			block[0] = 1;
+		}
+		
+		hsize_t start[1];
+		hsize_t stride[1];
+		hsize_t count[1];
+		hsize_t block[1];
+	};
+	
 	HDataset(const std::string & path);
 	virtual ~HDataset() {}
 	
@@ -24,8 +38,8 @@ public:
 	
 	virtual hid_t dataType();
 
-	virtual char write(char *data);
-	virtual char read(char *data);
+	virtual char write(char *data, SelectPart * part = 0);
+	virtual char read(char *data, SelectPart * part = 0);
 	
 	hsize_t fDimension[3];
 
@@ -33,8 +47,8 @@ public:
 private:
 	void resize();
 	char hasEnoughSpace() const;
-	hid_t createMemDataSpace() const;
-	hid_t createFileDataSpace() const;
-	
+	hid_t createMemSpace() const;
+	hid_t createFileSpace() const;
+	hid_t createSpace(hsize_t * block) const;
 };
 #endif        //  #ifndef HDATASET_H

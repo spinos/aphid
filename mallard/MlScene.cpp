@@ -16,11 +16,59 @@
 #include <HMesh.h>
 #include <HFeather.h>
 #include <sstream>
+
+void test()
+{
+	std::cout<<"\nh io begin\n";
+	HObject::FileIO.open("parttest.f", HDocument::oCreate);
+	
+	int n = 33;
+	float data[10], rd[n];
+	for(int i=0; i < 10; i++) data[i] = i + 2;
+	
+	HBase grp("/world");
+	if(!grp.hasNamedData(".t"))
+		grp.addFloatData(".t", n);
+		
+	HDataset::SelectPart p;
+	p.start[0] = 0;
+	p.count[0] = 1;
+	p.block[0] = 10; 
+		
+	grp.writeFloatData(".t", n, data, &p);
+
+	for(int i=0; i < 10; i++) data[i] = i + 10;
+	
+	p.start[0] = 19;
+	grp.writeFloatData(".t", n, data, &p);
+	
+	grp.close();
+	HObject::FileIO.close();
+	
+	HObject::FileIO.open("parttest.f", HDocument::oReadAndWrite);
+	HBase grpi("/world");
+	grpi.readFloatData(".t", n, rd);
+	std::cout<<"\n";
+	for(int i=0; i < n; i++) std::cout<<" "<<rd[i];
+	
+	float rd9[10];
+	grpi.readFloatData(".t", n, rd9, &p);
+	std::cout<<"\n";
+	for(int i=0; i < 10; i++) std::cout<<" "<<rd9[i];
+	
+	grpi.close();
+	HObject::FileIO.close();
+	
+	std::cout<<"\nh io end\n";
+}
+
 MlScene::MlScene() 
 {
 	m_accmesh = new AccPatchMesh;
 	m_skin = new MlSkin;
 	initializeFeatherExample();
+	
+	test();
 }
 
 MlScene::~MlScene() 
