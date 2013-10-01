@@ -11,5 +11,6 @@
 #include <IndicesHDataset.h>
 #include <HIntAttribute.h>
 #include <HFloatAttribute.h>
+#include <HCharData.h>
 #endif        //  #ifndef ALLHDF_H
 

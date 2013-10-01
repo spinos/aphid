@@ -52,6 +52,14 @@ void HBase::addVector3Data(const char * dataName, unsigned count)
 	pset.close();
 }
 
+void HBase::addCharData(const char * dataName, unsigned count)
+{
+	HCharData cset(dataName);
+	cset.setNumChars(count);
+	cset.create(fObjectId);
+	cset.close();
+}
+
 void HBase::writeIntAttr(const char * attrName, int *value)
 {
 	HIntAttribute nvAttr(attrName);
@@ -84,6 +92,16 @@ void HBase::writeVector3Data(const char * dataName, unsigned count, Vector3F *va
 {
     VerticesHDataset pset(dataName);
 	pset.setNumVertices(count);	
+	pset.open(fObjectId);
+
+	if(!pset.write((char *)value, part)) std::cout<<dataName<<" write failed";
+	pset.close();
+}
+
+void HBase::writeCharData(const char * dataName, unsigned count, char *value, HDataset::SelectPart * part)
+{
+	HCharData pset(dataName);
+	pset.setNumChars(count);	
 	pset.open(fObjectId);
 
 	if(!pset.write((char *)value, part)) std::cout<<dataName<<" write failed";

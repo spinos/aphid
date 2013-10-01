@@ -15,6 +15,7 @@
 #include <HWorld.h>
 #include <HMesh.h>
 #include <HFeather.h>
+#include <HSkin.h>
 #include <sstream>
 
 void test()
@@ -119,57 +120,12 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 	
 	writeFeatherExamples();
 	
-	//HMesh grpSkin("/world/skin");
-	//grpSkin.close();
+	HSkin grpSkin("/world/skin");
+	grpSkin.save(m_skin);
+	grpSkin.close();
 	
 	grpWorld.close();
-	/*	
-	HIntAttribute rootAttr("/.range");
-	rootAttr.create(4);
-	rootAttr.open();
-	
-	int vrange[4];
-	vrange[0] = 31;
-	vrange[1] = 1037;
-	vrange[2] = -87;
-	vrange[3] = 7;
-	if(!rootAttr.write(vrange)) std::cout<<"/.range write failed\n";
-	rootAttr.close();
-	
-	HFloatAttribute fltAttr("/.time");
-	fltAttr.create(2);
-	fltAttr.open();
-	
-	float vtime[2];
-	vtime[0] = .00947;
-	vtime[1] = -36.450;
-	if(!fltAttr.write(vtime)) std::cout<<"/.time write failed\n";
-	fltAttr.close();
-	
-	HGroup grpAC("/A1/C");
-	grpAC.create();
-	
-	HGroup grpB("/B2");
-	grpB.create();
-	
-	HGroup grpBD("/B2/D");
-	grpBD.create();
-	
-	HGroup grpBDE("/B2/D/E");
-	grpBDE.create();
-	
-	HDataset dsetAg("/A1/g");
-	dsetAg.create(32,1);
-	dsetAg.open();
-	dsetAg.write();
-	dsetAg.close();
-	
-	HDataset dsetBg("/B2/D/g");
-	dsetBg.create(32,1);
-	dsetBg.open();
-	dsetBg.write();
-	dsetBg.close();
-	*/
+
 	HObject::FileIO.close();
 
 	std::cout<<" Scene file "<<fileName<<" saved at "<<grpWorld.modifiedTimeStr()<<"\n";
@@ -179,7 +135,7 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 void MlScene::writeFeatherExamples()
 {
 	HBase g("/world/feathers");
-	for(short i = 0; i < numFeatherExamples(); i++) {
+	for(unsigned i = 0; i < numFeatherExamples(); i++) {
 		MlFeather * f = featherExample(i);
 		std::stringstream sst;
 		sst.str("");
@@ -209,8 +165,10 @@ bool MlScene::readSceneFromFile(const std::string & fileName)
 	
 	readFeatherExamples();
 	initializeFeatherExample();
-	//HMesh grpSkin("/world/skin");
-	//grpSkin.close();
+	
+	HSkin grpSkin("/world/skin");
+	grpSkin.load(m_skin);
+	grpSkin.close();
 	
 	grpWorld.close();
 	HObject::FileIO.close();

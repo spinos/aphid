@@ -33,7 +33,9 @@ public:
 	
 	unsigned capacity() const;
 	unsigned numElementPerBlock() const;
-	unsigned numBlock() const;
+	unsigned numBlocks() const;
+	char * getBlock(unsigned idx) const;
+	unsigned numElementsInBlock(unsigned blockIdx, const unsigned & maxCount) const;
 	
 	void setElementSize(unsigned size);
 	unsigned getElementSize() const;

@@ -56,7 +56,7 @@ public:
 	bool hasFeatherCreated() const;
 	unsigned numCreated() const;
 	MlCalamus * getCreated(unsigned idx) const;
-	
+	MlCalamusArray * getCalamusArray() const;
 	void verbose() const;
 	
 protected:

@@ -37,7 +37,7 @@ void BaseArray::clear()
 char *BaseArray::expandBy(unsigned size)
 {
 	if(m_current / m_elementSize + size >= capacity()) {
-		unsigned blockToCreate = (m_current + size * m_elementSize) / BASEARRAYBLOCK + 1 - numBlock();
+		unsigned blockToCreate = (m_current + size * m_elementSize) / BASEARRAYBLOCK + 1 - numBlocks();
 		for(unsigned i = 0; i < blockToCreate; i++) {
 			m_blocks.push_back(new PtrTup);
 		}
@@ -116,7 +116,7 @@ char *BaseArray::at(unsigned index) const
 
 unsigned BaseArray::capacity() const 
 {
-	return numBlock() * numElementPerBlock();
+	return numBlocks() * numElementPerBlock();
 }
 
 unsigned BaseArray::numElementPerBlock() const
@@ -124,9 +124,22 @@ unsigned BaseArray::numElementPerBlock() const
 	return BASEARRAYBLOCK / m_elementSize;
 }
 
-unsigned BaseArray::numBlock() const
+unsigned BaseArray::numBlocks() const
 {
 	return m_blocks.size();
+}
+
+char * BaseArray::getBlock(unsigned idx) const
+{
+	return m_blocks[idx]->aligned;
+}
+
+unsigned BaseArray::numElementsInBlock(unsigned blockIdx, const unsigned & maxCount) const
+{
+	if((blockIdx + 1) * numElementPerBlock() > maxCount)
+		return maxCount % numElementPerBlock();
+		
+	return numElementPerBlock();
 }
 
 void BaseArray::setElementSize(unsigned size)
@@ -164,7 +177,7 @@ void BaseArray::verbose() const
 	std::cout<<"base array:\n";
     std::cout<<"elem size "<<getElementSize()<<"\n";
     std::cout<<"elem per blk "<<numElementPerBlock()<<"\n";
-	std::cout<<"num blk "<<numBlock()<<"\n";
+	std::cout<<"num blk "<<numBlocks()<<"\n";
     std::cout<<"capacity "<<capacity()<<"\n";
     std::cout<<"current index "<<index()<<"\n";
     return;

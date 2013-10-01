@@ -440,6 +440,11 @@ MlCalamus * MlSkin::getCreated(unsigned idx) const
 	return m_calamus->asCalamus(m_numFeather - m_numCreatedFeather + idx);
 }
 
+MlCalamusArray * MlSkin::getCalamusArray() const
+{
+	return m_calamus;
+}
+
 void MlSkin::verbose() const
 {
 	std::cout<<"face id\n";
