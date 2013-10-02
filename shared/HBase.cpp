@@ -21,11 +21,18 @@ HBase::HBase(const std::string & path) : HGroup(path)
 
 HBase::~HBase() {}
 
-void HBase::addIntAttr(const char * attrName)
+void HBase::addIntAttr(const char * attrName, int dim)
 {
 	HIntAttribute nvAttr(attrName);
-	nvAttr.create(1, fObjectId);
+	nvAttr.create(dim, fObjectId);
 	nvAttr.close();
+}
+
+void HBase::addFloatAttr(const char * attrName, int dim)
+{
+	HFloatAttribute attr(attrName);
+	attr.create(dim, fObjectId);
+	attr.close();
 }
 
 void HBase::addIntData(const char * dataName, unsigned count)
@@ -66,6 +73,14 @@ void HBase::writeIntAttr(const char * attrName, int *value)
 	nvAttr.open(fObjectId);
 	if(!nvAttr.write(value)) std::cout<<attrName<<" write failed";
 	nvAttr.close();
+}
+
+void HBase::writeFloatAttr(const char * attrName, float *value)
+{
+	HFloatAttribute attr(attrName);
+	attr.open(fObjectId);
+	if(!attr.write(value)) std::cout<<attrName<<" write failed";
+	attr.close();
 }
 
 void HBase::writeIntData(const char * dataName, unsigned count, int *value, HDataset::SelectPart * part)
@@ -122,6 +137,24 @@ char HBase::readIntAttr(const char * dataName, int *value)
 	}
 
 	nvAttr.close();
+	
+	return 1;
+}
+
+char HBase::readFloatAttr(const char * attrName, float *value)
+{
+	HFloatAttribute attr(attrName);
+	if(!attr.open(fObjectId)) {
+		std::cout<<attrName<<" open failed";
+		return 0;
+	}
+	
+	if(!attr.read(value)) {
+		std::cout<<attrName<<" read failed";
+		return 0;
+	}
+
+	attr.close();
 	
 	return 1;
 }

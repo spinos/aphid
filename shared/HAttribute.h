@@ -21,6 +21,4 @@ public:
 	virtual hid_t dataType();
 	
 	int dataSpaceDimension() const;
-	
-	hid_t fDataSpace;
 };

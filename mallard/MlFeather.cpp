@@ -285,6 +285,11 @@ Vector2F MlFeather::baseUV() const
 	return m_uv;
 }
 
+void MlFeather::setBaseUV(const Vector2F & d)
+{
+	m_uv = d;
+}
+
 void MlFeather::translateUV(const Vector2F & d)
 {
 	m_uv += d;
@@ -295,5 +300,6 @@ void MlFeather::verbose()
 {
 	std::cout<<"feather status:\n id "<<featherId();
 	std::cout<<"\n n segment "<<numSegment();
-	std::cout<<"\n length "<<getLength()<<"\n";
+	std::cout<<"\n length "<<getLength();
+	std::cout<<"\n base uv ("<<m_uv.x<<","<<m_uv.y<<")\n";
 }

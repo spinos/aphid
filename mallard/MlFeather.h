@@ -8,8 +8,7 @@ public:
     MlFeather();
     virtual ~MlFeather();
     void createNumSegment(short x);
-	void computeLength();
-    
+
 	short numSegment() const;
 	unsigned numVaneVertices() const;
 	unsigned numWorldP() const;
@@ -35,12 +34,15 @@ public:
 	
 	void setFeatherId(short x);
 	short featherId() const;
+	void setBaseUV(const Vector2F & d);
 	void translateUV(const Vector2F & d);
+	
+	void computeLength();
+	void computeBounding();
 	
 	void verbose();
 private:
 	void defaultCreate();
-	void computeBounding();
 	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale);
 private:
 	BoundingRectangle m_brect;

@@ -17,11 +17,12 @@ char HAttribute::create(int dim, hid_t parentId)
 {
 	hsize_t dims = dim;
 	
-	fDataSpace = H5Screate_simple(1, &dims, NULL);
+	hid_t fDataSpace = H5Screate_simple(1, &dims, NULL);
 	
 	fObjectId = H5Acreate(parentId, fObjectPath.c_str(), dataType(), fDataSpace, 
                           H5P_DEFAULT, H5P_DEFAULT);
 						  
+	H5Sclose(fDataSpace);
 	if(fObjectId < 0)
 		return 0;
 	return 1;
@@ -34,17 +35,11 @@ char HAttribute::open(hid_t parentId)
 	if(fObjectId < 0)
 		return 0;
 		
-	fDataSpace = H5Aget_space(fObjectId);
-
-	if(fDataSpace<0)
-		return 0;
-		
 	return 1;
 }
 
 void HAttribute::close()
 {
-	H5Sclose(fDataSpace);
 	H5Aclose(fObjectId);
 }
 
@@ -60,6 +55,7 @@ hid_t HAttribute::dataType()
 
 int HAttribute::dataSpaceDimension() const
 {
+	hid_t fDataSpace = H5Aget_space(fObjectId);
 	hsize_t     dims_out[3];
 	H5Sget_simple_extent_dims(fDataSpace, dims_out, NULL);
 	return dims_out[0];

@@ -44,6 +44,12 @@ char HFeather::save(MlFeather * feather)
 		
 	writeFloatData(".vv", nvv * 2, (float *)feather->vane());
 	
+	if(!hasNamedAttr(".uv"))
+		addFloatAttr(".uv", 2);
+		
+	Vector2F uv = feather->baseUV();
+	writeFloatAttr(".uv", (float *)(&uv));
+	
 	return 1;
 }
 
@@ -81,6 +87,13 @@ char HFeather::load(MlFeather * feather)
 		
 	readFloatData(".vv", nvv * 2, (float *)feather->vane());
 	
+	Vector2F uv(4.f, 4.f);
+	
+	if(hasNamedAttr(".uv"))
+		readFloatAttr(".uv", (float *)(&uv));
+		
+	feather->setBaseUV(uv);
+	feather->computeBounding();
 	feather->computeLength();
 	feather->verbose();
 	
