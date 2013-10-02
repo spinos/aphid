@@ -17,5 +17,9 @@ public:
 	virtual ~Base2DView();
 	
 	virtual void processCamera(QMouseEvent *event);
+	
+	void startTracking(const Vector2F & p);
+	Vector2F updateTracking(const Vector2F & p);
 private:
+	Vector2F m_trackPos;
 };

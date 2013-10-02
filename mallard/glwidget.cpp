@@ -63,122 +63,9 @@ PatchSplitContext childUV[4];
 MlFeather feat;
 BaseDrawer * dr;
 
-void drawFeather()
-{
-    glPushMatrix();
-    Matrix44F s;
-	s.setTranslation(5.f, 3.f, 4.f);
-	
-	float * quill = feat.getQuilly();
-	
-	Vector3F a, b;
-	
-	BezierCurve quillC;
-	quillC.createVertices(5);
-	quillC.m_cvs[0] = s.transform(b);
-	
-	for(int i = 0; i < 4; i++) {
-	    b.set(0.f, quill[i], 0.f);
-		quillC.m_cvs[i + 1] = s.transform(b);
-		s.translate(b);
-	}
-		
-	quillC.computeKnots();
-	
-	dr->linearCurve(quillC);
-	
-	dr->smoothCurve(quillC, 8);
-	
-	
-	BezierCurve eRC, eLC, fRC, fLC, gRC, gLC;
-
-	eRC.createVertices(5);
-	eLC.createVertices(5);
-	fRC.createVertices(5);
-	fLC.createVertices(5);
-	gRC.createVertices(5);
-	gLC.createVertices(5);
-	s.setTranslation(5.f, 3.f, 4.f);
-	
-	Vector2F pv;
-	for(int i = 0; i < 5; i++) {
-		b.set(0.f, quill[i], 0.f);
-		Vector2F * vanes = feat.getVaneAt(i, 0);
-		pv = vanes[0];
-	    eRC.m_cvs[i] = s.transform(Vector3F(pv));
-		pv += vanes[1];
-		fRC.m_cvs[i] = s.transform(Vector3F(pv));
-		pv += vanes[2];
-		gRC.m_cvs[i] = s.transform(Vector3F(pv));
-		vanes = feat.getVaneAt(i, 1);
-		pv = vanes[0];
-	    eLC.m_cvs[i] = s.transform(Vector3F(pv));
-		pv += vanes[1];
-		fLC.m_cvs[i] = s.transform(Vector3F(pv));
-		pv += vanes[2];
-		gLC.m_cvs[i] = s.transform(Vector3F(pv));
-		s.translate(b);
-	}
-	eRC.computeKnots();
-	fRC.computeKnots();
-	gRC.computeKnots();
-	eLC.computeKnots();
-	fLC.computeKnots();
-	gLC.computeKnots();
-	
-	const float delta = 1.f / 52.f;
-	for(int i=0; i <= 52; i++) {
-		float t = delta * i;
-		BezierCurve vaneRC;
-		vaneRC.createVertices(4);
-		vaneRC.m_cvs[0] = quillC.interpolate(t);
-		vaneRC.m_cvs[1] = eRC.interpolate(t);
-		vaneRC.m_cvs[2] = fRC.interpolate(t);
-		vaneRC.m_cvs[3] = gRC.interpolate(t);
-		vaneRC.computeKnots();
-		dr->smoothCurve(vaneRC, 2);
-		
-		vaneRC.m_cvs[0] = quillC.interpolate(t);
-		vaneRC.m_cvs[1] = eLC.interpolate(t);
-		vaneRC.m_cvs[2] = fLC.interpolate(t);
-		vaneRC.m_cvs[3] = gLC.interpolate(t);
-		vaneRC.computeKnots();
-		dr->smoothCurve(vaneRC, 2);
-	}
-	
-	s.setTranslation(5.f, 3.f, 4.f);
-	for(int i=0; i <= 4; i++) {
-	    b.set(0.f, quill[i], 0.f);
-	    
-	    dr->useSpace(s);
-		dr->arrow(Vector3F(0.f, 0.f, 0.f), b);
-		
-		Vector2F * vanes = feat.getVaneAt(i, 0);
-		pv = vanes[0];
-		dr->arrow(Vector3F(0.f, 0.f, 0.f), pv);
-		pv += vanes[1];
-		dr->arrow(pv - vanes[1], pv);
-		pv += vanes[2];
-		dr->arrow(pv - vanes[2], pv);
-	    
-		vanes = feat.getVaneAt(i, 1);
-		pv = vanes[0];
-		dr->arrow(Vector3F(0.f, 0.f, 0.f), pv);
-		pv += vanes[1];
-		dr->arrow(pv - vanes[1], pv);
-		pv += vanes[2];
-		dr->arrow(pv - vanes[2], pv);
-	    
-	    s.setTranslation(b);
-	}
-	
-    glPopMatrix();
-}
-
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
     dr = getDrawer();
-    feat.defaultCreate();
 	feat.setFeatherId(0);
 
 	m_bezierDrawer = new BezierDrawer;
@@ -247,10 +134,6 @@ void GLWidget::clientDraw()
 	
 	//glPopMatrix();
 	
-	glPushMatrix();
-	glTranslatef(0.f, 0.f, 10.f);
-	//drawFeather();
-	glPopMatrix();
 	//drawSelection();
 	showBrush();
 }
@@ -326,10 +209,6 @@ void GLWidget::clientDeselect()
 		skin()->finishCreateFeather();
 		skin()->discardActive();
 	}
-	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
-		skin()->finishEraseFeather();
-		skin()->discardActive();
-	}
 }
 
 PatchMesh * GLWidget::mesh()
@@ -369,6 +248,11 @@ void GLWidget::floodFeather()
 	m_featherDrawer->addToBuffer(skin());
 }
 
+void GLWidget::finishEraseFeather()
+{
+	skin()->finishEraseFeather();
+}
+
 void GLWidget::deselectFeather()
 {
 	skin()->discardActive();
@@ -377,7 +261,6 @@ void GLWidget::deselectFeather()
 void GLWidget::cleanSheet()
 {
 	newScene();
-	initializeFeatherExample();
 }
 
 bool GLWidget::discardConfirm()
@@ -413,6 +296,12 @@ void GLWidget::saveSheet()
 		qDebug()<<"Nothing to save.";
 		return;
 	}
+	
+	if(interactMode() == ToolContext::EraseBodyContourFeather)
+		finishEraseFeather();
+		
+	deselectFeather();
+	
 	if(isUntitled()) saveSheetAs();
 	else if(saveScene())
 		emit sendMessage(QString("Scene file %1 is saved").arg(fileName().c_str()));

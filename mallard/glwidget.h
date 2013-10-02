@@ -65,6 +65,7 @@ public:
 	virtual bool discardConfirm();
 	virtual void clearScene();
 	
+	void finishEraseFeather();
 	void deselectFeather();
 	
 signals:

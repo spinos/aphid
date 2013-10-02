@@ -30,7 +30,8 @@ void MlRachis::computeAngles(float * segL, float fullL)
 {
 	for(unsigned i = 0; i < m_numSpace; i++) {
 		const float fac = (float)i/(float)m_numSpace;
-		m_angles[i] = segL[i] / fullL * (1.f - fac) + sqrt(segL[i] / fullL) * fac;
+		m_angles[i] = segL[i] / fullL * segL[i] / fullL * (1.f - fac) + sqrt(segL[i] / fullL) * fac;
+		m_angles[i] *= 1.f + fac;
 	}
 }
 

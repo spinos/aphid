@@ -1,5 +1,6 @@
 #pragma once
 #include <AllMath.h>
+#include <BoundingRectangle.h>
 class MlRachis;
 class CollisionRegion;
 class MlFeather {
@@ -14,12 +15,14 @@ public:
 	unsigned numWorldP() const;
     float * quilly();
     float * getQuilly() const;
+	Vector2F baseUV() const;
 	
 	Vector2F * vane();
     Vector2F * vaneAt(short seg, short side);
     Vector2F * getVaneAt(short seg, short side) const;
 	float getLength() const;
 	float getWidth(short seg) const;
+	BoundingRectangle getBoundingRectangle() const;
 	
 	void computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale);
 	Vector3F * segmentOriginWP(short seg);
@@ -32,13 +35,16 @@ public:
 	
 	void setFeatherId(short x);
 	short featherId() const;
-	
-	void defaultCreate();
+	void translateUV(const Vector2F & d);
 	
 	void verbose();
 private:
+	void defaultCreate();
+	void computeBounding();
 	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale);
 private:
+	BoundingRectangle m_brect;
+	Vector2F m_uv;
 	CollisionRegion * m_skin;
 	MlRachis * m_rachis;
     float *m_quilly;

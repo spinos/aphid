@@ -45,6 +45,7 @@
 #include "ToolBox.h"
 #include "BrushControl.h"
 #include "FeatherEdit.h"
+#include "MlUVView.h"
 #include "window.h"
 
 //! [0]
@@ -56,7 +57,7 @@ Window::Window()
 	GLWidget::InteractContext = m_tools;
 	m_brushControl = new BrushControl(this);
 	m_featherEdit = new FeatherEdit(this);
-	
+	MlUVView::FeatherLibrary = glWidget;
 	addToolBar(m_tools);
 
 	setCentralWidget(glWidget);
@@ -85,6 +86,8 @@ void Window::keyPressEvent(QKeyEvent *e)
 
 void Window::receiveToolContext(int a)
 {
+	if(m_tools->previousContext() == ToolContext::EraseBodyContourFeather)
+		glWidget->finishEraseFeather();
 	glWidget->deselectFeather();
 }
 

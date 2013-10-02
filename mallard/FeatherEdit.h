@@ -12,13 +12,13 @@
 #include <QDialog>
 
 class MlUVView;
-
 class FeatherEdit : public QDialog
 {
     Q_OBJECT
 	
 public:
 	FeatherEdit(QWidget *parent = 0);
+	
 private:
 	MlUVView * m_view;
 };

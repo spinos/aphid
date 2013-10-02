@@ -36,10 +36,11 @@ public:
 	Vector2F operator-( Vector2F& other ) const;
 	Vector2F operator+( Vector2F other ) const;	
 	Vector2F operator-( Vector2F other ) const;	
+	Vector2F operator-( Vector2F& other );
 	Vector2F operator-( Vector2F other );	
 	
 	float distantTo(const Vector2F & other) const;
-	
+	float length() const;
 	void reverse();	
 	Vector2F reversed() const;
 	

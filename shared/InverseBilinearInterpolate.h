@@ -17,7 +17,7 @@ public:
 	Vector2F operator()(const Vector3F &P);
 	
 private:
-	Vector2F evalBiLinear(const Vector2F& uv);
+	Vector2F evalBiLinear(const Vector2F& uv) const;
 	Vector2F solve(Vector2F M1, Vector2F M2, Vector2F b, bool safeInvert);
 	Matrix44F m_space;
 	Vector2F m_E, m_F, m_G;

@@ -42,15 +42,15 @@ void InverseBilinearInterpolate::setVertices(const Vector3F & a, const Vector3F 
 	m_G.set(-B.x - C.x + D.x, -B.y - C.y + D.y);
 }
 
-Vector2F InverseBilinearInterpolate::evalBiLinear(const Vector2F& uv)
+Vector2F InverseBilinearInterpolate::evalBiLinear(const Vector2F& uv) const
 {
 	return m_E * uv.x + m_F * uv.y + m_G * uv.x * uv.y;
 }
 
 Vector2F InverseBilinearInterpolate::operator()(const Vector3F &P)
 {
-	Vector3F q = m_space.transform(P);
-	Vector2F q2(q.x, q.y);
+	const Vector3F q = m_space.transform(P);
+	const Vector2F q2(q.x, q.y);
 	Vector2F uv(0.5, 0.5);
 
 	uv -= solve(m_E + m_G * uv.y, m_F + m_G * uv.x, evalBiLinear(uv) - q2, true);

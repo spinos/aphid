@@ -34,3 +34,15 @@ void Base2DView::processCamera(QMouseEvent *event)
 			updatePerspProjection();
     }
 }
+
+void Base2DView::startTracking(const Vector2F & p)
+{
+	m_trackPos = p;
+}
+	
+Vector2F Base2DView::updateTracking(const Vector2F & p)
+{
+	Vector2F d = p - Vector2F(m_trackPos);
+	m_trackPos = p;
+	return d;
+}

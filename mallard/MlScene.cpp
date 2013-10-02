@@ -67,7 +67,6 @@ MlScene::MlScene()
 {
 	m_accmesh = new AccPatchMesh;
 	m_skin = new MlSkin;
-	initializeFeatherExample();
 }
 
 MlScene::~MlScene() 
@@ -88,6 +87,7 @@ AccPatchMesh * MlScene::body()
 void MlScene::clearScene()
 {
 	clearFeatherExamples();
+	initializeFeatherExample();
 	m_skin->cleanup();
 	m_accmesh->cleanup();
 	BaseScene::clearScene();
@@ -182,7 +182,9 @@ void MlScene::readFeatherExamples()
 	HBase g("/world/feathers");
 	int nf = g.numChildren();
 	for(int i = 0; i < nf; i++) {
-		MlFeather * f = addFeatherExample();
+		MlFeather * f = featherExample(i);
+		if(!f)
+			f = addFeatherExample();
 		std::stringstream sst;
 		sst.str("");
 		sst<<"/world/feathers/feather_"<<i;

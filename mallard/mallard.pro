@@ -23,7 +23,6 @@ HEADERS       = ../shared/AllMath.h \
                 ../shared/TypedEntity.h \
                 ../shared/Geometry.h \
                 ../shared/BaseMesh.h \
-                ../shared/BoundingBox.h \
                 ../shared/TriangleMesh.h \
                 ../shared/GeoElement.h \
                 ../shared/Vertex.h \
@@ -85,6 +84,8 @@ HEADERS       = ../shared/AllMath.h \
                 ../shared/QDoubleEditSlider.h \
 				../shared/BlockDrawBuffer.h \
                 ../shared/BaseScene.h \
+    $${Aphid}/shared/BoundingBox.h \
+    $${Aphid}/shared/BoundingRectangle.h \
     $${Aphid}/shared/Base2DView.h \
     $${Aphid}/shared/AllHdf.h \
     $${Aphid}/shared/HObject.h \
@@ -149,7 +150,6 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/SpaceHandle.cpp \
                 ../shared/TypedEntity.cpp \
                 ../shared/Geometry.cpp \
-                ../shared/BoundingBox.cpp \
                 ../shared/BaseMesh.cpp \
                 ../shared/TriangleMesh.cpp \
                 ../shared/GeoElement.cpp \
@@ -212,6 +212,8 @@ SOURCES       = ../shared/Vector3F.cpp \
                 ../shared/QDoubleEditSlider.cpp \
 				../shared/BlockDrawBuffer.cpp \
                 ../shared/BaseScene.cpp \
+    $${Aphid}/shared/BoundingBox.cpp \
+    $${Aphid}/shared/BoundingRectangle.cpp \
     $${Aphid}/shared/Base2DView.cpp \
     $${Aphid}/shared/HObject.cpp \
     $${Aphid}/shared/HDocument.cpp \

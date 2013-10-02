@@ -20,13 +20,16 @@ public:
 	
 	MlFeather * addFeatherExample();
 	unsigned numFeatherExamples() const;
-	void selectFeatherExample(unsigned x);
+	bool selectFeatherExample(unsigned x);
 	
 	unsigned selectedFeatherExampleId() const;
 	MlFeather * selectedFeatherExample();
 	MlFeather * featherExample(unsigned idx);
 	
 	void initializeFeatherExample();
+	
+private:
+	bool featherIdExists(unsigned idx) const;
 	
 private:
 	std::map<unsigned, MlFeather *> m_feathers;

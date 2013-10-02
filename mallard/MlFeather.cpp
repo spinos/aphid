@@ -4,6 +4,8 @@
 MlFeather::MlFeather() : m_quilly(0), m_vaneVertices(0), m_worldP(0) 
 {
 	m_rachis = new MlRachis;
+	m_uv.set(4.f, 4.f);
+	defaultCreate();
 }
 
 MlFeather::~MlFeather() 
@@ -21,14 +23,6 @@ void MlFeather::createNumSegment(short x)
     m_vaneVertices = new Vector2F[(m_numSeg + 1) * 6];
 	m_worldP = new Vector3F[(m_numSeg + 1) * 7];
 	m_rachis->create(x);
-}
-
-void MlFeather::computeLength()
-{
-	m_length = 0.f;
-	for(short i=0; i < m_numSeg; i++)
-		m_length += m_quilly[i];
-	m_rachis->computeAngles(m_quilly, m_length);
 }
 
 short MlFeather::numSegment() const
@@ -86,12 +80,17 @@ float MlFeather::getWidth(short seg) const
 	r += vane->x;
 
 	vane = getVaneAt(seg, 1);
-	r -= vane->x;
+	r = - vane->x;
 	vane++;
 	r -= vane->x;
 	vane++;
 	r -= vane->x;
 	return r;
+}
+
+BoundingRectangle MlFeather::getBoundingRectangle() const
+{
+	return m_brect;
 }
 
 void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale)
@@ -146,7 +145,7 @@ void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, s
 	Vector3F p = origin;
 	Vector2F * vane = getVaneAt(seg, side);
 	
-	const float tapper = getWidth(seg) * -.03f;
+	const float tapper = getWidth(seg) * -.05f;
 	for(short i = 0; i < 3; i++) {
 		Vector3F d(tapper * (i + 1), vane->x, vane->y);
 		d *= scale;
@@ -176,12 +175,14 @@ short MlFeather::featherId() const
 
 void MlFeather::defaultCreate()
 {
-    createNumSegment(4);
+    createNumSegment(5);
+	
     float * quill = quilly();
-    quill[0] = 4.f;
-    quill[1] = 2.4f;
-    quill[2] = 1.3f;
-    quill[3] = .9f;
+    quill[0] = 5.f;
+    quill[1] = 3.4f;
+    quill[2] = 1.9f;
+    quill[3] =  .9f;
+	quill[4] =  .5f;
     
     Vector2F * vanes = vaneAt(0, 0);
     vanes[0].set(.9f, .9f);
@@ -220,15 +221,74 @@ void MlFeather::defaultCreate()
     vanes[2].set(-.2f, .6f);
     
     vanes = vaneAt(4, 0);
+    vanes[0].set(.1f, .42f);
+    vanes[1].set(.1f, .32f);
+    vanes[2].set(.1f, .33f);
+    vanes = vaneAt(4, 1);
+    vanes[0].set(-.1f, .42f);
+    vanes[1].set(-.1f, .32f);
+    vanes[2].set(-.1f, .33f);
+	
+	vanes = vaneAt(5, 0);
     vanes[0].set(.01f, .42f);
     vanes[1].set(.01f, .32f);
     vanes[2].set(.01f, .33f);
-    vanes = vaneAt(4, 1);
+    vanes = vaneAt(5, 1);
     vanes[0].set(-.01f, .42f);
     vanes[1].set(-.01f, .32f);
     vanes[2].set(-.01f, .33f);
 	
+	computeBounding();
 	computeLength();
+}
+
+void MlFeather::computeLength()
+{
+	m_length = 0.f;
+	for(short i=0; i < m_numSeg; i++)
+		m_length += m_quilly[i];
+	m_rachis->computeAngles(m_quilly, m_length);
+}
+
+void MlFeather::computeBounding()
+{
+	m_brect.reset();
+	Vector2F c = m_uv;
+	Vector2F p;
+	for(short i = 0; i <= m_numSeg; i++) {
+		m_brect.update(c);
+		
+		Vector2F* vane = getVaneAt(i, 0);
+		
+		p = c;
+		p += vane[0];
+		p += vane[1];
+		p += vane[2];
+		m_brect.update(p);
+		
+		vane = getVaneAt(i, 1);
+		
+		p = c;
+		p += vane[0];
+		p += vane[1];
+		p += vane[2];
+		m_brect.update(p);
+		
+		if(i < m_numSeg)
+			c += Vector2F(0.f, getQuilly()[i]);
+	}
+	m_brect.update(c);
+}
+
+Vector2F MlFeather::baseUV() const
+{
+	return m_uv;
+}
+
+void MlFeather::translateUV(const Vector2F & d)
+{
+	m_uv += d;
+	m_brect.translate(d);
 }
 
 void MlFeather::verbose()

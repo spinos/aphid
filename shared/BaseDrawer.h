@@ -12,6 +12,7 @@
 #include <BaseDeformer.h>
 #include <BaseField.h>
 #include <BoundingBox.h>
+#include <BoundingRectangle.h>
 #include <SelectionArray.h>
 #include <Anchor.h>
 #include <GeodesicSphereMesh.h>
@@ -40,6 +41,10 @@ public:
 	void beginPoint(float x) const;
 	void beginQuad();
 	void aVertex(float x, float y, float z);
+	
+	void boundingRectangle(const BoundingRectangle & b) const;
+	void boundingBox(const BoundingBox & b) const;
+	
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0) const;
@@ -49,7 +54,6 @@ public:
 	void edge(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void field(const BaseField * f);
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
-	void boundingBox(const BoundingBox & b);
 	void triangle(const BaseMesh * mesh, unsigned idx);
 	void patch(const BaseMesh * mesh, unsigned idx);
 	void components(SelectionArray * arr);

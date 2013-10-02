@@ -121,14 +121,25 @@ Vector2F Vector2F::operator-(Vector2F other ) const
         return Vector2F(x-other.x, y-other.y);
 }
 
+Vector2F Vector2F::operator-(Vector2F& other )
+{
+        return Vector2F(x-other.x, y-other.y);
+}
+
 Vector2F Vector2F::operator-(Vector2F other )
 {
         return Vector2F(x-other.x, y-other.y);
 }
 
+
 float Vector2F::distantTo(const Vector2F & other) const
 {
 	return sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
+}
+
+float Vector2F::length() const
+{
+	return sqrt(x * x + y * y);
 }
 	
 void Vector2F::reverse()

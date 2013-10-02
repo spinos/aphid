@@ -91,13 +91,7 @@ const float BoundingBox::crossSectionArea(const int &axis) const
 
 const float BoundingBox::distance(const int &axis) const
 {
-	if(axis == 0) {
-		return m_data[3] - m_data[0];
-	}
-	if(axis == 1) {
-		return m_data[4] - m_data[1];
-	}
-	return m_data[5] - m_data[2];
+	return m_data[axis + 3] - m_data[axis];
 }
 
 void BoundingBox::split(int axis, float pos, BoundingBox & left, BoundingBox & right) const

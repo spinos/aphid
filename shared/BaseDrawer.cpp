@@ -343,7 +343,17 @@ void BaseDrawer::tangentFrame(const BaseMesh * mesh, const BaseDeformer * deform
 	}
 }
 
-void BaseDrawer::boundingBox(const BoundingBox & b)
+void BaseDrawer::boundingRectangle(const BoundingRectangle & b) const
+{
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(b.getMin(0), b.getMin(1), 0.f);
+	glVertex3f(b.getMax(0), b.getMin(1), 0.f);
+	glVertex3f(b.getMax(0), b.getMax(1), 0.f);
+	glVertex3f(b.getMin(0), b.getMax(1), 0.f);
+	glEnd();
+}
+
+void BaseDrawer::boundingBox(const BoundingBox & b) const
 {
 	Vector3F corner0(b.getMin(0), b.getMin(1), b.getMin(2));
 	Vector3F corner1(b.getMax(0), b.getMax(1), b.getMax(2));

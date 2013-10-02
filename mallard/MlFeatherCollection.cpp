@@ -13,6 +13,7 @@
 
 MlFeatherCollection::MlFeatherCollection()
 {
+	initializeFeatherExample();
 }
 
 MlFeatherCollection::~MlFeatherCollection()
@@ -41,9 +42,12 @@ unsigned MlFeatherCollection::numFeatherExamples() const
 	return m_feathers.size();
 }
 
-void MlFeatherCollection::selectFeatherExample(unsigned x)
+bool MlFeatherCollection::selectFeatherExample(unsigned x)
 {
+	if(!featherIdExists(x)) return false;
+		
 	m_selectedFeatherId = x;
+	return true;
 }
 
 MlFeather * MlFeatherCollection::selectedFeatherExample()
@@ -57,15 +61,21 @@ unsigned MlFeatherCollection::selectedFeatherExampleId() const
 }
 
 MlFeather * MlFeatherCollection::featherExample(unsigned idx)
-{
-	return m_feathers[idx];
+{	
+	if(featherIdExists(idx)) 
+		return m_feathers[idx];
+	return 0;
 }
 
 void MlFeatherCollection::initializeFeatherExample()
 {
-    if(numFeatherExamples() < 1) {
-		MlFeather * f = addFeatherExample();
-		f->defaultCreate();
-	}
+    if(numFeatherExamples() < 1)
+		addFeatherExample();
 	selectFeatherExample(0);
+}
+
+bool MlFeatherCollection::featherIdExists(unsigned idx) const
+{
+	std::map<unsigned, MlFeather *>::const_iterator it = m_feathers.find(idx);
+	return it != m_feathers.end();
 }
