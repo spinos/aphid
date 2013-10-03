@@ -9,7 +9,6 @@
 #include <QtGui>
 #include <QtOpenGL>
 #include <math.h>
-#include <ToolContext.h>
 #include "SingleModelView.h"
 
 #include <PatchMesh.h>
@@ -18,8 +17,7 @@
 #include <EasemodelUtil.h>
 #include <AnchorGroup.h>
 #include <MeshTopology.h>
-
-ToolContext * SingleModelView::InteractContext = 0;
+#include <ToolContext.h>
 
 SingleModelView::SingleModelView(QWidget *parent) : Base3DView(parent)
 {
@@ -212,13 +210,6 @@ AnchorGroup * SingleModelView::getAnchors() const
 KdTree * SingleModelView::getTree() const
 {
 	return m_tree;
-}
-
-int SingleModelView::interactMode()
-{
-	if(!InteractContext) return ToolContext::SelectVertex;
-	
-	return InteractContext->getContext();
 }
 
 PatchMesh * SingleModelView::mesh()

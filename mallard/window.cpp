@@ -54,7 +54,7 @@ Window::Window()
     glWidget = new GLWidget;
 	m_tools = new ToolBox;
 	
-	GLWidget::InteractContext = m_tools;
+	glWidget->setInteractContext(m_tools);
 	m_brushControl = new BrushControl(this);
 	m_featherEdit = new FeatherEdit(this);
 	MlUVView::FeatherLibrary = glWidget;

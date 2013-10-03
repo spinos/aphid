@@ -3,6 +3,7 @@
 #include <QtOpenGL>
 
 #include "Base3DView.h"
+#include <ToolContext.h>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -27,6 +28,7 @@ Base3DView::Base3DView(QWidget *parent)
 	m_timer->start(30);
 	setFocusPolicy(Qt::ClickFocus);
 	m_isFocused = 0;
+	m_interactContext = 0;
 }
 //! [0]
 
@@ -438,5 +440,17 @@ void Base3DView::receiveBrushNumSamples(int x)
 QPoint Base3DView::lastMousePos() const
 {
 	return m_lastPos;
+}
+
+void Base3DView::setInteractContext(ToolContext * ctx)
+{
+	m_interactContext = ctx;
+}
+
+int Base3DView::interactMode()
+{
+	if(!m_interactContext) return ToolContext::SelectVertex;
+	
+	return m_interactContext->getContext();
 }
 //:~

@@ -10,14 +10,21 @@
 #include "FeatherEdit.h"
 #include <QtGui>
 #include <MlUVView.h>
+#include <ToolBox.h>
+#include <FeatherEditTool.h>
 
 FeatherEdit::FeatherEdit(QWidget *parent)
     : QDialog(parent)
 {
 	m_view = new MlUVView(this);
 	
+	FeatherEditTool *tools = new FeatherEditTool(this);
+	
 	QVBoxLayout *layout = new QVBoxLayout;
+	layout->addWidget(tools);
+	layout->setStretch(0, 0);
 	layout->addWidget(m_view);
+	layout->setStretch(1, 1);
 	setLayout(layout);
 	setWindowTitle(tr("Feather Editor"));
 	

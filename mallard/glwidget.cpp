@@ -56,18 +56,9 @@
 #include <MlFeather.h>
 #include <MlSkin.h>
 #include "MlCalamus.h"
-BezierPatch testbez;
-BezierPatch testsplt[4];
-InverseBilinearInterpolate invbil;
-PatchSplitContext childUV[4];
-MlFeather feat;
-BaseDrawer * dr;
 
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
-    dr = getDrawer();
-	feat.setFeatherId(0);
-
 	m_bezierDrawer = new BezierDrawer;
 	m_featherDrawer = new MlDrawer;
 	MlCalamus::FeatherLibrary = this;
@@ -92,48 +83,8 @@ void GLWidget::clientDraw()
 	getDrawer()->setColor(0.f, .71f, .51f);
 	
 	//getDrawer()->m_wireProfile.apply();
-	
 	m_featherDrawer->drawFeather(skin());
-	
-	glPushMatrix();
-	
-	Matrix44F s;
-	//s.setTranslation(5.f, 3.f, 4.f);
-	s.rotateX(1.1f);
-	s.rotateY(0.97f);
-	getDrawer()->useSpace(s);
-	//getDrawer()->coordsys(15.f);
-	
-	Matrix44F b;
-	b.rotateY(0.97f);
-	getDrawer()->useSpace(b);
-	//getDrawer()->coordsys(10.f);
-	glPopMatrix();
-	
-	
-	//glPushMatrix();
-	
-	
-	Matrix33F c;
-	c.rotateX(6.1f);
-	c.rotateY(0.97f);
-	//c.rotateZ(-0.67f);
-	//c.setTranslation(0.f, 0.f, 14.f);
-	
-	//
-	
-	//Matrix44F t;
-	//t.rotateZ(-0.67f);
-	//t.setTranslation(5.f, 8.f, 14.f);
-	
-	//c.multiply(t);
-	Vector3F p(4.f, 3.f, 5.f);
-	
-	//getDrawer()->useSpace(c);
-	//getDrawer()->coordsys(c, 5.f, &p);
-	
-	//glPopMatrix();
-	
+
 	//drawSelection();
 	showBrush();
 }

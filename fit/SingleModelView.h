@@ -53,17 +53,13 @@ public:
 	void drawAnchors();
 	AnchorGroup * getAnchors() const;
 	KdTree * getTree() const;
-	
-	static ToolContext * InteractContext;
-	int interactMode();
-	
 	virtual PatchMesh * mesh();
 	
 protected:
     void keyPressEvent(QKeyEvent *event);
     
 public:
-    KdTree * m_tree;
+	KdTree * m_tree;
 	AnchorGroup * m_anchors;
 	MeshTopology * m_topo;
 	

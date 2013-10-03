@@ -48,7 +48,7 @@ QIconFrame::QIconFrame(QWidget *parent)
     : QLabel(parent)
 {
 	currentIconIndex = 0;
-	setMinimumSize(24,24);
+	setMinimumSize(32,32);
 }
 
 void QIconFrame::addIconFile(const QString & fileName)

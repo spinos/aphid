@@ -133,6 +133,7 @@ HEADERS       = ../shared/AllMath.h \
                 MlFeatherCollection.h \
     MlUVView.h \
     FeatherEdit.h \
+	FeatherEditTool.h \
                 window.h
                 
 SOURCES       = ../shared/Vector3F.cpp \  
@@ -261,6 +262,7 @@ SOURCES       = ../shared/Vector3F.cpp \
                 MLFeatherCollection.cpp \
     MlUVView.cpp \
     FeatherEdit.cpp \
+	FeatherEditTool.cpp \
                 main.cpp
                 
 INCLUDEPATH += /usr/local/include/OpenEXR

@@ -7,7 +7,7 @@
 #include <SelectionArray.h>
 #include <IntersectionContext.h>
 #include <BaseBrush.h>
-
+class ToolContext;
 class QTimer;
 
 class Base3DView : public QGLWidget
@@ -62,6 +62,9 @@ public:
 	
 	QPoint lastMousePos() const;
 	
+	void setInteractContext(ToolContext * ctx);
+	int interactMode();
+	
 public slots:
 	void receiveBrushRadius(double x);
     void receiveBrushPitch(double x);
@@ -87,6 +90,7 @@ private:
 	IntersectionContext * m_intersectCtx;
 	BaseBrush * m_brush;
 	QTimer *m_timer;
+	ToolContext * m_interactContext;
 	char m_isFocused;
 };
 #endif        //  #ifndef BASE3DVIEW_H

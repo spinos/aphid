@@ -23,6 +23,7 @@ QIntEditSlider::QIntEditSlider(const QString & name, QWidget *parent)
 	layout->addWidget(m_label);
 	layout->addWidget(m_edit);
 	layout->addWidget(m_slider);
+	layout->setStretch(2, 1);
 	setLayout(layout);
 	
 	setLimit(0, 10);
