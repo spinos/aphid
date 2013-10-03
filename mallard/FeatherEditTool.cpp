@@ -39,7 +39,7 @@ FeatherEditTool::FeatherEditTool(QWidget *parent) : QWidget(parent)
 	setContentsMargins(0, 0, 0, 0);
 	layout->setContentsMargins(2, 2, 2, 2);
 	
-	setContext(CreateBodyContourFeather);
+	setContext(MoveInUV);
 }
 
 FeatherEditTool::~FeatherEditTool() {}
@@ -74,46 +74,22 @@ void FeatherEditTool::onActionFrameTriggered(int a)
 
 void FeatherEditTool::createContext()
 {
-    ContextIconFrame * createContour = new ContextIconFrame(this);
+    ContextIconFrame * move = new ContextIconFrame(this);
 	
-	createContour->addIconFile(":brush.png");
-	createContour->addIconFile(":brushActive.png");
-	createContour->setIconIndex(1);
-	createContour->setContext(CreateBodyContourFeather);
+	move->addIconFile(":move.png");
+	move->addIconFile(":moveActive.png");
+	move->setIconIndex(1);
+	move->setContext(MoveInUV);
 	
-	ContextIconFrame * combContour = new ContextIconFrame(this);
+	ContextIconFrame * mv = new ContextIconFrame(this);
 	
-	combContour->addIconFile(":comb.png");
-	combContour->addIconFile(":combActive.png");
-	combContour->setIconIndex(0);
-	combContour->setContext(CombBodyContourFeather);
+	mv->addIconFile(":moveVertex.png");
+	mv->addIconFile(":moveVertexActive.png");
+	mv->setIconIndex(0);
+	mv->setContext(MoveVertexInUV);
 	
-	ContextIconFrame * eraseContour = new ContextIconFrame(this);
-	
-	eraseContour->addIconFile(":eraser.png");
-	eraseContour->addIconFile(":eraserActive.png");
-	eraseContour->setIconIndex(0);
-	eraseContour->setContext(EraseBodyContourFeather);
-	
-	ContextIconFrame * scaleContour = new ContextIconFrame(this);
-	
-	scaleContour->addIconFile(":ruler.png");
-	scaleContour->addIconFile(":rulerActive.png");
-	scaleContour->setIconIndex(0);
-	scaleContour->setContext(ScaleBodyContourFeather);
-	
-	ContextIconFrame * bendContour = new ContextIconFrame(this);
-	
-	bendContour->addIconFile(":pitch.png");
-	bendContour->addIconFile(":pitchActive.png");
-	bendContour->setIconIndex(0);
-	bendContour->setContext(PitchBodyContourFeather);
-	
-	m_contextFrames.push_back(createContour);
-	m_contextFrames.push_back(combContour);
-	m_contextFrames.push_back(scaleContour);
-	m_contextFrames.push_back(bendContour);
-	m_contextFrames.push_back(eraseContour);
+	m_contextFrames.push_back(move);
+	m_contextFrames.push_back(mv);
 }
 
 void FeatherEditTool::createAction()

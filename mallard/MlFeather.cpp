@@ -296,6 +296,70 @@ void MlFeather::translateUV(const Vector2F & d)
 	m_brect.translate(d);
 }
 
+float* MlFeather::selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp)
+{
+	float * r = 0;
+	float minD = 10e8;
+	yOnly = true;
+	
+	Vector2F puv = m_uv;
+	float *q = quilly();
+	int i, j;
+	for(i=0; i < numSegment(); i++) {
+		puv += Vector2F(0.f, *q);
+		
+		if(p.distantTo(puv) < minD) {
+			minD = p.distantTo(puv);
+			r = q;
+			wp = puv;
+		}
+		
+		q++;
+	}
+	
+	q = quilly();
+	puv = m_uv;
+	
+	Vector2F pvane;
+	for(i=0; i <= numSegment(); i++) {
+		
+		pvane = puv;
+		Vector2F * vanes = vaneAt(i, 0);
+		
+		for(j = 0; j < 3; j++) {
+			pvane += *vanes;
+			if(p.distantTo(pvane) < minD) {
+				minD = p.distantTo(pvane);
+				r = (float *)vanes;
+				yOnly = false;
+				wp = pvane;
+			}
+			vanes++;
+		}
+
+		pvane = puv;
+		vanes = getVaneAt(i, 1);
+		
+		for(j = 0; j < 3; j++) {
+			pvane += *vanes;
+			if(p.distantTo(pvane) < minD) {
+				minD = p.distantTo(pvane);
+				r = (float *)vanes;
+				yOnly = false;
+				wp = pvane;
+			}
+			vanes++;
+		}
+		
+		if(i < numSegment()) {
+			puv += Vector2F(0.f, *q);
+			q++;
+		}
+	}
+	
+	return r;
+}
+
 void MlFeather::verbose()
 {
 	std::cout<<"feather status:\n id "<<featherId();

@@ -24,5 +24,9 @@
         <file>rulerActive.png</file>
         <file>pitch.png</file>
         <file>pitchActive.png</file>
+        <file>move.png</file>
+        <file>moveActive.png</file>
+        <file>moveVertex.png</file>
+        <file>moveVertexActive.png</file>
     </qresource>
 </RCC>

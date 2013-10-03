@@ -31,4 +31,7 @@ private:
 	void drawActiveBound();
 private:
 	int m_activeId;
+	float * m_selectedVert;
+	Vector2F m_selectVertWP;
+	bool m_moveYOnly;
 };

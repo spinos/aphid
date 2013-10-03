@@ -40,6 +40,8 @@ public:
 	void computeLength();
 	void computeBounding();
 	
+	float* selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp);
+	
 	void verbose();
 private:
 	void defaultCreate();

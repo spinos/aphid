@@ -19,7 +19,7 @@ FeatherEdit::FeatherEdit(QWidget *parent)
 	m_view = new MlUVView(this);
 	
 	FeatherEditTool *tools = new FeatherEditTool(this);
-	
+	m_view->setInteractContext(tools);
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->addWidget(tools);
 	layout->setStretch(0, 0);

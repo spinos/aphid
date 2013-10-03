@@ -12,12 +12,13 @@
 #include <MlFeather.h>
 #include <BezierCurve.h>
 #include <QtGui>
-
+#include <ToolContext.h>
 MlFeatherCollection * MlUVView::FeatherLibrary = 0;
 
 MlUVView::MlUVView(QWidget *parent) : Base2DView(parent)
 {
 	m_activeId = -1;
+	m_selectedVert = 0;
 }
 
 MlUVView::~MlUVView()
@@ -33,7 +34,13 @@ void MlUVView::clientDraw()
 		MlFeather * f = FeatherLibrary->featherExample(i);
 		if(!f) continue;
 		drawFeather(f);
-		drawControlVectors(f);
+		if(interactMode() ==  ToolContext::MoveVertexInUV) {
+			drawControlVectors(f);
+			if(m_selectedVert) {
+				Vector3F pv(m_selectVertWP);
+				getDrawer()->cube(pv, 0.1f);
+			}
+		}
 	}
 	
 	drawActiveBound();
@@ -43,8 +50,12 @@ void MlUVView::clientSelect()
 {
     const Ray * ray = getIncidentRay();
 	Vector2F p(ray->m_origin.x, ray->m_origin.y);
-	pickupFeather(p);
 	startTracking(p);
+	pickupFeather(p);
+	if(m_activeId < 0) return;
+	if(interactMode() ==  ToolContext::MoveVertexInUV) {
+		m_selectedVert = FeatherLibrary->selectedFeatherExample()->selectVertexInUV(p, m_moveYOnly, m_selectVertWP);
+	}
 }
 
 bool MlUVView::pickupFeather(const Vector2F & p)
@@ -76,7 +87,23 @@ void MlUVView::clientMouseInput()
 	const Ray * ray = getIncidentRay();
 	Vector2F p(ray->m_origin.x, ray->m_origin.y);
 	Vector2F d = updateTracking(p);
-	FeatherLibrary->selectedFeatherExample()->translateUV(d);
+	if(interactMode() ==  ToolContext::MoveInUV) {
+		FeatherLibrary->selectedFeatherExample()->translateUV(d);
+	}
+	else if(interactMode() ==  ToolContext::MoveVertexInUV) {
+		if(m_selectedVert) {
+			if(m_moveYOnly) {
+				*m_selectedVert += d.y;
+				m_selectVertWP.y += d.y;
+			}
+			else {
+				m_selectedVert[0] += d.x;
+				m_selectedVert[1] += d.y;
+				m_selectVertWP += d;
+			}
+			FeatherLibrary->selectedFeatherExample()->computeBounding();
+		}
+	}
 }
 
 void MlUVView::drawFeather(MlFeather * f)
