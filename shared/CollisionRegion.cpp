@@ -28,6 +28,10 @@ Vector3F CollisionRegion::getClosestPoint(const Vector3F & origin)
 	return m_ctx->m_closestP;
 }
 
+void CollisionRegion::pushPlane(Patch::PushPlaneContext * ctx) const
+{
+}
+
 void CollisionRegion::resetCollisionRegion(unsigned idx)
 {
 	m_regionElementStart = idx;

@@ -69,3 +69,30 @@ Matrix33F Patch::tangentFrame() const
     frm.fill(side, up, du);
     return frm;
 }
+
+bool Patch::pushPlane(PushPlaneContext * ctx) const
+{
+	bool pushed = false;
+	Vector3F n, dv, v, dp, pop;
+	ctx->m_plane.getNormal(n);
+	float l, ang;
+	for(int i = 0; i < 4; i++) {
+		v = vertex(i);
+		dv = v - ctx->m_origin;
+		l = dv.length();
+		if(l < 10e-4) continue;
+		if(dv.dot(ctx->m_front) < 0.f) continue;
+		
+		ctx->m_plane.projectPoint(v, pop);
+		
+		dp = pop - ctx->m_origin;
+		dp.normalize();
+		
+		ang = dp.angleBetween(dv, n);
+		
+		ctx->m_currentAngle = ang;
+		pushed = true;
+	}
+	return pushed;
+}
+

@@ -9,6 +9,7 @@
 
 #include "MlRachis.h"
 #include <CollisionRegion.h>
+#include <Patch.h>
 
 MlRachis::MlRachis() : m_spaces(0), m_angles(0) {}
 MlRachis::~MlRachis() 
@@ -47,18 +48,16 @@ void MlRachis::update(const Vector3F & oriP, const Matrix33F & space, const floa
 	Vector3F xdir(1.f, 0.f, 0.f);
 	xdir = space.transform(xdir);
 	
-	const Vector3F toP = oriP + zdir;
-	const Vector3F clsP = collide->getClosestPoint(toP);
-	const Vector3F clsV(oriP, clsP);
-	
-	const float bounceAngle = zdir.angleBetween(clsV, xdir);
+	Patch::PushPlaneContext ctx;
+	ctx.reset(xdir, oriP, zdir);
+	collide->pushPlane(&ctx);
+	float bounceAngle = ctx.m_maxAngle;
 	
 	reset();
 	
-	if(bounceAngle > 0.1) m_spaces[0].rotateY(fullPitch * m_angles[0] + bounceAngle);
-	else m_spaces[0].rotateY(fullPitch * m_angles[0]);
+	m_spaces[0].rotateY(fullPitch * m_angles[0] + bounceAngle);
 	for(unsigned i = 1; i < m_numSpace; i++) {
-		m_spaces[i].rotateY((fullPitch + bounceAngle) * m_angles[i]);
+		m_spaces[i].rotateY(fullPitch * m_angles[i]);
 	}
 }
 

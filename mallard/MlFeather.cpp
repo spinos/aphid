@@ -145,7 +145,7 @@ void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, s
 	Vector3F p = origin;
 	Vector2F * vane = getVaneAt(seg, side);
 	
-	const float tapper = getWidth(seg) * -.05f;
+	const float tapper = getWidth(seg) * -.02f;
 	for(short i = 0; i < 3; i++) {
 		Vector3F d(tapper * (i + 1), vane->x, vane->y);
 		d *= scale;
@@ -178,11 +178,11 @@ void MlFeather::defaultCreate()
     createNumSegment(5);
 	
     float * quill = quilly();
-    quill[0] = 5.f;
-    quill[1] = 3.4f;
-    quill[2] = 1.9f;
+    quill[0] = 3.f;
+    quill[1] = 2.2f;
+    quill[2] = 1.5f;
     quill[3] =  .9f;
-	quill[4] =  .5f;
+	quill[4] =  .4f;
     
     Vector2F * vanes = vaneAt(0, 0);
     vanes[0].set(.9f, .9f);
@@ -194,8 +194,8 @@ void MlFeather::defaultCreate()
     vanes[2].set(-.2f, .9f);
     
     vanes = vaneAt(1, 0);
-    vanes[0].set(.7f, 1.1f);
-    vanes[1].set(.6f, 1.f);
+    vanes[0].set(.9f, 1.1f);
+    vanes[1].set(.7f, 1.f);
     vanes[2].set(.5f, .9f);
     vanes = vaneAt(1, 1);
     vanes[0].set(-.6f, .62f);

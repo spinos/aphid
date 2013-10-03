@@ -98,7 +98,6 @@ char AccPatchMesh::closestPoint(unsigned idx, const Vector3F & origin, Intersect
 	ctx->m_elementHitDistance = 10e8;
 	recursiveBezierClosestPoint(origin, &beziers()[idx], ctx, split, 0);
 	return 1;
-	//return PatchMesh::closestPoint(idx, origin, ctx);
 }
 
 char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const
@@ -204,5 +203,47 @@ void AccPatchMesh::normalOnPatch(unsigned idx, float u, float v, Vector3F & dst)
 Matrix33F AccPatchMesh::tangentFrame(unsigned idx, float u, float v) const
 {
 	return beziers()[idx].tangentFrame(u, v);
+}
+
+void AccPatchMesh::pushPlane(unsigned idx, Patch::PushPlaneContext * ctx) const
+{
+	ctx->m_componentMaxAngle = -3.14f;
+	recursiveBezierPushPlane(&beziers()[idx], ctx, 0);
+}
+
+void AccPatchMesh::recursiveBezierPushPlane(BezierPatch* patch, Patch::PushPlaneContext * ctx, int level) const
+{
+	Vector3F fourCorners[4];
+	fourCorners[0] = patch->_contorlPoints[0];
+	fourCorners[1] = patch->_contorlPoints[3];
+	fourCorners[2] = patch->_contorlPoints[15];
+	fourCorners[3] = patch->_contorlPoints[12];
+	
+	Patch pl(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
+	if(!pl.pushPlane(ctx))
+		return;
+		
+	if(ctx->m_currentAngle > ctx->m_componentMaxAngle)
+		ctx->m_componentMaxAngle = ctx->m_currentAngle;
+	else if(ctx->m_componentMaxAngle < ctx->m_maxAngle)
+		return;
+	
+	BoundingBox controlbox = patch->controlBBox();
+	if(level > 3 || controlbox.area() < .1f) {
+		if(ctx->m_currentAngle > ctx->m_maxAngle) 
+			ctx->m_maxAngle = ctx->m_currentAngle;
+
+		return;
+	}
+	
+	level++;
+	
+	BezierPatch children[4];
+	patch->decasteljauSplit(children);
+	
+	recursiveBezierPushPlane(&children[0], ctx, level);
+	recursiveBezierPushPlane(&children[1], ctx, level);
+	recursiveBezierPushPlane(&children[2], ctx, level);
+	recursiveBezierPushPlane(&children[3], ctx, level);
 }
 //:~

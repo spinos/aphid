@@ -9,6 +9,7 @@
 
 #pragma once
 #include <AllMath.h>
+#include <Patch.h>
 class IntersectionContext;
 
 class CollisionRegion {
@@ -21,6 +22,7 @@ public:
 	virtual void resetCollisionRegion(unsigned idx);
 	virtual void resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d);
 	virtual void closestPoint(const Vector3F & origin, IntersectionContext * ctx) const;
+	virtual void pushPlane(Patch::PushPlaneContext * ctx) const;
 	
 	unsigned numRegionElements() const;
 	unsigned regionElementIndex(unsigned idx) const;

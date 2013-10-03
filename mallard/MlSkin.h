@@ -11,6 +11,7 @@
 #include <AllMath.h>
 #include <CollisionRegion.h>
 #include <MlCalamus.h>
+#include <Patch.h>
 
 class AccPatchMesh;
 class MeshTopology;
@@ -54,6 +55,7 @@ public:
 	virtual void resetCollisionRegion(unsigned idx);
 	virtual void resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d);
 	virtual void closestPoint(const Vector3F & origin, IntersectionContext * ctx) const;
+	virtual void pushPlane(Patch::PushPlaneContext * ctx) const;
 	
 	bool hasFeatherCreated() const;
 	unsigned numCreated() const;

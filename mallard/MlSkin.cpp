@@ -391,6 +391,13 @@ void MlSkin::closestPoint(const Vector3F & origin, IntersectionContext * ctx) co
 	}
 }
 
+void MlSkin::pushPlane(Patch::PushPlaneContext * ctx) const
+{
+	for(unsigned i=0; i < numRegionElements(); i++) {
+		m_body->pushPlane(regionElementIndex(i), ctx);
+	}
+}
+
 unsigned MlSkin::numFeathers() const
 {
 	return m_numFeather;

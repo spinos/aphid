@@ -46,7 +46,7 @@ BrushControl::BrushControl(QWidget *parent)
     
 	m_numSampleValue->setValue(32);
 	m_radiusValue->setValue(4.0);
-	m_pitchValue->setValue(0.6);
+	m_pitchValue->setValue(0.4);
 }
 
 QWidget * BrushControl::numSamplesWidget()

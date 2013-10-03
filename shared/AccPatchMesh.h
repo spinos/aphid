@@ -9,6 +9,7 @@
 #pragma once
 
 #include <PatchMesh.h>
+#include <Patch.h>
 class BezierPatch;
 class AccPatch;
 class MeshTopology;
@@ -27,6 +28,7 @@ public:
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
 	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
 	virtual char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
+	virtual void pushPlane(unsigned idx, Patch::PushPlaneContext * ctx) const;
 	
 	void pointOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
 	void normalOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
@@ -36,6 +38,7 @@ public:
 private:
 	char recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
 	void recursiveBezierClosestPoint(const Vector3F & origin, BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
+	void recursiveBezierPushPlane(BezierPatch* patch, Patch::PushPlaneContext * ctx, int level) const;
 	
 	AccPatch* m_bezier;
 };
