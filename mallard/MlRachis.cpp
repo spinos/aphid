@@ -30,9 +30,7 @@ void MlRachis::create(unsigned x)
 void MlRachis::computeAngles(float * segL, float fullL)
 {
 	for(unsigned i = 0; i < m_numSpace; i++) {
-		const float fac = (float)i/(float)m_numSpace;
-		m_angles[i] = segL[i] / fullL * (1.f - fac) + sqrt(segL[i] / fullL) * fac;
-		m_angles[i] *= 1.f + fac;
+		m_angles[i] = sqrt(segL[i] / fullL) * .5f + segL[i] / fullL * .5f;
 	}
 }
 
@@ -41,7 +39,7 @@ void MlRachis::reset()
 	for(unsigned i = 0; i < m_numSpace; i++) m_spaces[i].setIdentity(); 
 }
 
-void MlRachis::update(const Vector3F & oriP, const Matrix33F & space, const float & scale, CollisionRegion * collide, const float & fullPitch)
+void MlRachis::update(const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide, const float & fullPitch)
 {
 	Vector3F zdir(0.f, 0.f, 1.f);
 	zdir = space.transform(zdir);
@@ -49,7 +47,7 @@ void MlRachis::update(const Vector3F & oriP, const Matrix33F & space, const floa
 	xdir = space.transform(xdir);
 	
 	Patch::PushPlaneContext ctx;
-	ctx.reset(xdir, oriP, zdir);
+	ctx.reset(xdir, oriP, zdir, radius);
 	collide->pushPlane(&ctx);
 	float bounceAngle = ctx.m_maxAngle;
 	

@@ -39,10 +39,14 @@ void DrawBuffer::drawBuffer() const
 	glEnableClientState( GL_NORMAL_ARRAY );
 	glNormalPointer( GL_FLOAT, 0, m_normals );
 	
+	//glEnableClientState( GL_COLOR_ARRAY );
+	//glColorPointer(3, GL_FLOAT, 0, m_normals );
+	
 	glDrawElements( GL_QUADS, m_numIndices, GL_UNSIGNED_INT, m_indices);
 	
 	glDisableClientState( GL_NORMAL_ARRAY );
 	glDisableClientState( GL_VERTEX_ARRAY );
+	//glDisableClientState( GL_COLOR_ARRAY );
 }
 
 void DrawBuffer::createBuffer(unsigned numVertices, unsigned numIndices)

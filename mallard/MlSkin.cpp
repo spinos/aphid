@@ -72,7 +72,7 @@ void MlSkin::floodAround(MlCalamus floodC, unsigned floodFaceIdx, const Vector3F
 			
 			m_body->normalOnPatch(iface, u, v, facing);
 			
-			if(facing.dot(floodNor) < .67f) continue;
+			if(facing.dot(floodNor) < .33f) continue;
 			
 			if(isPointTooCloseToExisting(adart, iface, floodMinD)) continue;
 			
@@ -102,7 +102,7 @@ void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & n
 			if(c->faceIdx() != regionElementIndex(i)) break;
 			
 			getNormalOnBody(c, n);
-			if(n.dot(nor) < .67f) continue;
+			if(n.dot(nor) < 0.f) continue;
 			
 			getPointOnBody(c, p);
 			
@@ -167,7 +167,7 @@ void MlSkin::growFeather(const Vector3F & direction)
 
 void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, const float & radius)
 {
-	if(direction.length() < 10e-3) return;
+	if(direction.length() < 10e-4) return;
 	const unsigned num = numActive();
 	if(num < 1) return;
 	
@@ -197,7 +197,7 @@ void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, co
 
 void MlSkin::scaleFeather(const Vector3F & direction, const Vector3F & center, const float & radius)
 {
-	if(direction.length() < 10e-3) return;
+	if(direction.length() < 10e-4) return;
 	const unsigned num = numActive();
 	if(num < 1) return;
 	
@@ -232,13 +232,20 @@ void MlSkin::scaleFeather(const Vector3F & direction, const Vector3F & center, c
 
 void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, const float & radius)
 {
-	if(direction.length() < 10e-3) return;
+	if(direction.length() < 10e-4) return;
 	const unsigned num = numActive();
 	if(num < 1) return;
 	
 	Vector3F p;
 	float drop;
 	unsigned i;
+	
+	float activeMeanPitch = 0.f;
+	for(i =0; i < num; i++) {
+		MlCalamus * c = getActive(i);
+		activeMeanPitch += c->rotateY();
+	}
+	activeMeanPitch /= num;
 	
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
@@ -254,7 +261,7 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 		float fac = 0.1f;
 		if(direction.dot(zdir) < 0.f) fac = -0.1f;
 
-		c->setRotateY(((fac + 1.f) * drop + (1.f - drop)) * c->rotateY());
+		c->setRotateY(((fac + 1.f) * drop + (1.f - drop)) * activeMeanPitch);
     }
 }
 
@@ -269,14 +276,16 @@ void MlSkin::finishCreateFeather()
 void MlSkin::finishEraseFeather()
 {
 	if(numActive() < 1) return;
-	std::cout<<"erase from "<<numFeathers();
 	if(numActive() == numFeathers()) {
+		std::cout<<"erase all "<<numFeathers();
 		m_numFeather = 0;
 		m_calamus->setIndex(0);
 		resetFaceCalamusIndirection();
+		return;
 	}
 	
 	QuickSort::Sort(m_activeIndices, 0, numActive() - 1);
+	std::cout<<"erase from "<<numFeathers();
 	
 	unsigned i, j;
 	const unsigned num = numActive();

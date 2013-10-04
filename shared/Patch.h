@@ -14,17 +14,18 @@
 class Patch : public Plane {
 public:
 	struct PushPlaneContext {
-		void reset(const Vector3F & n, const Vector3F & p, const Vector3F & f) {
+		void reset(const Vector3F & n, const Vector3F & p, const Vector3F & f, const float & r) {
 			m_plane = Plane(n, p);
 			m_origin = p;
 			m_front = f.normal();
-			m_maxAngle = -3.14f;
-			m_frontFacingThreshold = 0.3f;
+			m_maxRadius = r;
+			m_maxAngle = 0.f;
+			m_frontFacingThreshold = 0.f;
 		}
 		
 		Plane m_plane;
 		Vector3F m_origin, m_front;
-		float m_maxAngle, m_currentAngle, m_componentMaxAngle, m_frontFacingThreshold;
+		float m_maxAngle, m_currentAngle, m_componentMaxAngle, m_frontFacingThreshold, m_maxRadius;
 	};
 	
 	Patch();
@@ -35,6 +36,7 @@ public:
 	bool pushPlane(PushPlaneContext * ctx) const;
 	
 	Vector3F vertex(int idx) const;
+	Vector3F center() const;
 	Matrix33F tangentFrame() const;
 	
 private:

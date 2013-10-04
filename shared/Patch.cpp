@@ -40,6 +40,17 @@ Vector3F Patch::vertex(int idx) const
 	return m_segs[idx].m_origin;
 }
 
+Vector3F Patch::center() const
+{
+	Vector3F v, c;
+	for(int i = 0; i < 4; i++) {
+		v = vertex(i);
+		c += v;
+	}
+	c /= 4.f;
+	return c;
+}
+
 /*
  *   (dv)
  *   
@@ -73,15 +84,51 @@ Matrix33F Patch::tangentFrame() const
 bool Patch::pushPlane(PushPlaneContext * ctx) const
 {
 	bool pushed = false;
-	Vector3F n, dv, v, dp, pop;
+	Vector3F selfN, n, dv, v, dp, pop;
+	
+	getNormal(selfN);
 	ctx->m_plane.getNormal(n);
+	
+	if(n.dot(selfN) < 0.f) return false;
+	if(ctx->m_front.dot(selfN) > 0.f) return false;
+	
+	int i;
 	float l, ang;
-	for(int i = 0; i < 4; i++) {
+	
+	bool tooFar = true;
+	for(i = 0; i < 4; i++) {
 		v = vertex(i);
 		dv = v - ctx->m_origin;
 		l = dv.length();
-		if(l < 10e-4) continue;
-		if(dv.dot(ctx->m_front) < ctx->m_frontFacingThreshold) continue;
+		
+		if(l < ctx->m_maxRadius) {
+			tooFar = false;
+			break;
+		}
+	}
+	
+	if(tooFar) {
+		bool tooSmall = true;
+		Vector3F toC = center() - ctx->m_origin + selfN;
+		toC.normalize();
+		for(i = 0; i < 4; i++) {
+			v = vertex(i);
+			dv = v - ctx->m_origin + selfN;
+			dv.normalize();
+			if(toC.dot(dv) < .866f) {
+				tooSmall = false;
+				break;
+			}
+		}
+		
+		if(tooSmall) return false;
+	}
+	
+	for(i = 0; i < 4; i++) {
+		v = vertex(i);
+		dv = v - ctx->m_origin;
+		l = dv.length();
+		if(l < 10e-5) continue;
 		
 		ctx->m_plane.projectPoint(v, pop);
 		
@@ -90,7 +137,12 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 		
 		ang = dp.angleBetween(dv, n);
 		
+		if(ang > ctx->m_componentMaxAngle) {
+			ctx->m_componentMaxAngle = ang;
+		}
+		
 		ctx->m_currentAngle = ang;
+		
 		pushed = true;
 	}
 	return pushed;
