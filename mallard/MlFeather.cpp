@@ -145,7 +145,7 @@ void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, s
 	Vector3F p = origin;
 	Vector2F * vane = getVaneAt(seg, side);
 	
-	const float tapper = getWidth(seg) * -.02f;
+	const float tapper = getWidth(seg) * -.01f;
 	for(short i = 0; i < 3; i++) {
 		Vector3F d(tapper * (i + 1), vane->x, vane->y);
 		d *= scale;
@@ -173,70 +173,64 @@ short MlFeather::featherId() const
 	return m_id;
 }
 
-void MlFeather::defaultCreate()
+void MlFeather::defaultCreate(int ns)
 {
-    createNumSegment(5);
+    createNumSegment(ns);
 	
     float * quill = quilly();
-    quill[0] = 3.f;
-    quill[1] = 2.2f;
-    quill[2] = 1.5f;
-    quill[3] =  .9f;
-	quill[4] =  .4f;
-    
-    Vector2F * vanes = vaneAt(0, 0);
-    vanes[0].set(.9f, .9f);
-    vanes[1].set(.8f, 1.59f);
-    vanes[2].set(.3f, 1.3f);
-    vanes = vaneAt(0, 1);
-    vanes[0].set(-.6f, .9f);
-    vanes[1].set(-.5f, 1.1f);
-    vanes[2].set(-.2f, .9f);
-    
-    vanes = vaneAt(1, 0);
-    vanes[0].set(.9f, 1.1f);
-    vanes[1].set(.7f, 1.f);
-    vanes[2].set(.5f, .9f);
-    vanes = vaneAt(1, 1);
-    vanes[0].set(-.6f, .62f);
-    vanes[1].set(-.6f, .97f);
-    vanes[2].set(-.4f, 1.f);
-    
-    vanes = vaneAt(2, 0);
-    vanes[0].set(.4f, .5f);
-    vanes[1].set(.5f, .6f);
-    vanes[2].set(.4f, .7f);
-    vanes = vaneAt(2, 1);
-    vanes[0].set(-.3f, .5f);
-    vanes[1].set(-.4f, .5f);
-    vanes[2].set(-.3f, .7f);
-    
-    vanes = vaneAt(3, 0);
-    vanes[0].set(.4f, .4f);
-    vanes[1].set(.3f, .5f);
-    vanes[2].set(.3f, .6f);
-    vanes = vaneAt(3, 1);
-    vanes[0].set(-.3f, .4f);
-    vanes[1].set(-.3f, .4f);
-    vanes[2].set(-.2f, .6f);
-    
-    vanes = vaneAt(4, 0);
-    vanes[0].set(.1f, .42f);
-    vanes[1].set(.1f, .32f);
-    vanes[2].set(.1f, .33f);
-    vanes = vaneAt(4, 1);
-    vanes[0].set(-.1f, .42f);
-    vanes[1].set(-.1f, .32f);
-    vanes[2].set(-.1f, .33f);
+	int i;
+	for(i = 0; i < ns; i++) {
+		if(i < ns - 2)
+			quill[i] = 3.f;
+		else if(i < ns - 1)
+			quill[i] = 1.7f;
+		else
+			quill[i] = .8f;
+    }
 	
-	vanes = vaneAt(5, 0);
-    vanes[0].set(.01f, .42f);
-    vanes[1].set(.01f, .32f);
-    vanes[2].set(.01f, .33f);
-    vanes = vaneAt(5, 1);
-    vanes[0].set(-.01f, .42f);
-    vanes[1].set(-.01f, .32f);
-    vanes[2].set(-.01f, .33f);
+	Vector2F * vanesR;
+	Vector2F * vanesL;
+	for(i = 0; i <= ns; i++) {
+		vanesR = vaneAt(i, 0);
+		vanesL = vaneAt(i, 1);
+		
+		if(i < ns - 2) {
+			vanesR[0].set(.9f, .8f);
+			vanesR[1].set(.8f, 1.1f);
+			vanesR[2].set(.2f, 1.3f);
+			
+			vanesL[0].set(-.9f, .8f);
+			vanesL[1].set(-.8f, 1.1f);
+			vanesL[2].set(-.2f, 1.3f);
+		}
+		else if(i < ns - 1) {
+			vanesR[0].set(.6f, .6f);
+			vanesR[1].set(.4f, .5f);
+			vanesR[2].set(.05f, .6f);
+			
+			vanesL[0].set(-.6f, .6f);
+			vanesL[1].set(-.4f, .5f);
+			vanesL[2].set(-.05f, .6f);
+		}
+		else if(i < ns) {
+			vanesR[0].set(.3f, .3f);
+			vanesR[1].set(.2f, .3f);
+			vanesR[2].set(0.f, .4f);
+			
+			vanesL[0].set(-.3f, .3f);
+			vanesL[1].set(-.2f, .3f);
+			vanesL[2].set(0.f, .4f);
+		}
+		else {
+			vanesR[0].set(0.f, .2f);
+			vanesR[1].set(0.f, .1f);
+			vanesR[2].set(0.f, .1f);
+			
+			vanesL[0].set(0.f, .2f);
+			vanesL[1].set(0.f, .1f);
+			vanesL[2].set(0.f, .1f);
+		}
+	}
 	
 	computeBounding();
 	computeLength();

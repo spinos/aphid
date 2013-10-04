@@ -44,7 +44,7 @@ public:
 	
 	void verbose();
 private:
-	void defaultCreate();
+	void defaultCreate(int ns = 5);
 	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale);
 private:
 	BoundingRectangle m_brect;
