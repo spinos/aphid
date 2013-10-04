@@ -19,11 +19,12 @@ public:
 			m_origin = p;
 			m_front = f.normal();
 			m_maxAngle = -3.14f;
+			m_frontFacingThreshold = 0.3f;
 		}
 		
 		Plane m_plane;
 		Vector3F m_origin, m_front;
-		float m_maxAngle, m_currentAngle, m_componentMaxAngle;
+		float m_maxAngle, m_currentAngle, m_componentMaxAngle, m_frontFacingThreshold;
 	};
 	
 	Patch();

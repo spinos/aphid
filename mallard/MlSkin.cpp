@@ -97,6 +97,7 @@ void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & n
 		
 		unsigned ifeather = m_faceCalamusStart[regionElementIndex(i)];
 		for(unsigned j = 0; j < maxCountPerFace; j++) {
+			if(ifeather >= m_numFeather) break;
 			MlCalamus *c = getCalamus(ifeather);
 			if(c->faceIdx() != regionElementIndex(i)) break;
 			
@@ -283,6 +284,7 @@ void MlSkin::finishEraseFeather()
 		j = lastInactive();
 		if(m_activeIndices[i] < j) {
 			m_calamus->swapElement(m_activeIndices[i], j);
+			//std::cout<<" sw "<<m_activeIndices[i]<<" "<< j<<" ";
 			m_activeIndices.push_back(j);
 		}
 		m_numFeather--;

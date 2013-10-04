@@ -43,7 +43,7 @@ void MlRachis::reset()
 
 void MlRachis::update(const Vector3F & oriP, const Matrix33F & space, const float & scale, CollisionRegion * collide, const float & fullPitch)
 {
-	Vector3F zdir(0.f, 0.f, scale);
+	Vector3F zdir(0.f, 0.f, 1.f);
 	zdir = space.transform(zdir);
 	Vector3F xdir(1.f, 0.f, 0.f);
 	xdir = space.transform(xdir);

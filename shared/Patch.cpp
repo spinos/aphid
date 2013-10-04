@@ -81,7 +81,7 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 		dv = v - ctx->m_origin;
 		l = dv.length();
 		if(l < 10e-4) continue;
-		if(dv.dot(ctx->m_front) < 0.f) continue;
+		if(dv.dot(ctx->m_front) < ctx->m_frontFacingThreshold) continue;
 		
 		ctx->m_plane.projectPoint(v, pop);
 		
