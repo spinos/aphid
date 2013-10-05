@@ -357,6 +357,57 @@ float* MlFeather::selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & 
 	return r;
 }
 
+void MlFeather::changeNumSegment(int d)
+{
+	float * bakQuilly = new float[m_numSeg];
+    Vector2F *bakVaneVertices = new Vector2F[(m_numSeg + 1) * 6];
+	
+	int i, j;
+	for(i = 0; i < m_numSeg; i++)
+		bakQuilly[i] = quilly()[i];
+		
+	for(i = 0; i < (m_numSeg + 1) * 6; i++)
+		bakVaneVertices[i] = vane()[i];
+		
+	createNumSegment(m_numSeg + d);
+	
+	if(d > 0) {
+		for(i = 0; i < m_numSeg; i++) {
+			if(i == 0) quilly()[i] = bakQuilly[0];
+			else quilly()[i] = bakQuilly[i - 1];
+		}
+		for(i = 0; i <= m_numSeg; i++) {
+			if(i == 0) {
+				for(j = 0; j < 6; j++)
+					vane()[i * 6 + j] = bakVaneVertices[j] ;
+			}
+			else {
+				for(j = 0; j < 6; j++)
+					vane()[i * 6 + j] = bakVaneVertices[(i - 1) * 6 + j] ;
+			}
+		}
+	}
+	else {
+		for(i = 0; i < m_numSeg; i++) {
+			if(i < m_numSeg -1) quilly()[i] = bakQuilly[i];
+			else quilly()[i] = bakQuilly[i + 1];
+		}
+		for(i = 0; i <= m_numSeg; i++) {
+			if(i < m_numSeg -1) {
+				for(j = 0; j < 6; j++)
+					vane()[i * 6 + j] = bakVaneVertices[i * 6 + j] ;
+			}
+			else {
+				for(j = 0; j < 6; j++)
+					vane()[i * 6 + j] = bakVaneVertices[(i + 1) * 6 + j] ;
+			}
+		}
+	}
+	
+	delete[] bakQuilly;
+	delete[] bakVaneVertices;
+}
+
 void MlFeather::verbose()
 {
 	std::cout<<"feather status:\n id "<<featherId();
