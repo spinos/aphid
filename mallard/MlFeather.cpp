@@ -406,6 +406,9 @@ void MlFeather::changeNumSegment(int d)
 	
 	delete[] bakQuilly;
 	delete[] bakVaneVertices;
+	
+	computeBounding();
+	computeLength();
 }
 
 void MlFeather::verbose()

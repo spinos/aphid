@@ -286,7 +286,7 @@ void MlUVView::changeSelectedFeatherNSegment(int d)
 	if(!f) return;
 	
 	int nseg = f->numSegment() + d;
-	if(nseg < 3 || nseg > 32) return;
+	if(nseg < 4 || nseg > 32) return;
 	
 	f->changeNumSegment(d);
 }
