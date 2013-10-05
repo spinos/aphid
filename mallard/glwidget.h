@@ -67,6 +67,8 @@ public:
 	
 	void finishEraseFeather();
 	void deselectFeather();
+	void rebuildFeather();
+	void clearFeather();
 	
 signals:
 	void sceneNameChanged(QString name);

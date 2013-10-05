@@ -209,6 +209,27 @@ void GLWidget::deselectFeather()
 	skin()->discardActive();
 }
 
+void GLWidget::rebuildFeather()
+{
+	m_featherDrawer->clearBuffer();
+	m_featherDrawer->initializeBuffer();
+	m_featherDrawer->rebuildBuffer(skin());
+}
+
+void GLWidget::clearFeather()
+{
+	QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, tr(" "),
+                                    tr("Delete all feathers?"),
+                                    QMessageBox::Yes | QMessageBox::Cancel);
+    if (reply == QMessageBox::Cancel)
+		return;
+		
+	skin()->clearFeather();
+	m_featherDrawer->clearBuffer();
+	m_featherDrawer->initializeBuffer();
+}
+
 void GLWidget::cleanSheet()
 {
 	newScene();

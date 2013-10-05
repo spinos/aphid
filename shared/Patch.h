@@ -21,7 +21,6 @@ public:
 			m_front = f.normal();
 			m_maxRadius = r * 0.5f;
 			m_maxAngle = 0.f;
-			m_frontFacingThreshold = 0.4f;
 		}
 		
 		Plane m_plane;

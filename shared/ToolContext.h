@@ -23,7 +23,9 @@ public:
 		IncreaseWale = 3,
 		DecreaseWale = 4,
 		IncreaseCourse = 5,
-		DecreaseCourse = 6
+		DecreaseCourse = 6,
+		RebuildBodyContourFeather = 7,
+		ClearBodyContourFeather = 8
     };
     
     ToolContext();

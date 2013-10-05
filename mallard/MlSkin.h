@@ -24,6 +24,7 @@ public:
 	MlSkin();
 	virtual ~MlSkin();
 	void cleanup();
+	void clearFeather();
 	
 	void setNumFeathers(unsigned num);
 	

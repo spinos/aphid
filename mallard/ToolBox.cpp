@@ -110,16 +110,16 @@ void ToolBox::createContext()
 void ToolBox::createAction()
 {
     ActionIconFrame * setWale = new ActionIconFrame(this);
-	setWale->addIconFile(":setwale.png");
-	setWale->addIconFile(":setwaleact.png");
+	setWale->addIconFile(":rebuild.png");
+	setWale->addIconFile(":rebuildActive.png");
 	setWale->setIconIndex(0);
-	setWale->setAction(SetWaleEdge);
+	setWale->setAction(RebuildBodyContourFeather);
 	
 	ActionIconFrame * setSingleWale = new ActionIconFrame(this);
-	setSingleWale->addIconFile(":setsinglewale.png");
-	setSingleWale->addIconFile(":setsinglewaleact.png");
+	setSingleWale->addIconFile(":clear.png");
+	setSingleWale->addIconFile(":clearActive.png");
 	setSingleWale->setIconIndex(0);
-	setSingleWale->setAction(SetSingleWaleEdge);
+	setSingleWale->setAction(ClearBodyContourFeather);
 	
 	ActionIconFrame * increaseWale = new ActionIconFrame(this);
 	increaseWale->addIconFile(":increasewale.png");

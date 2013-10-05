@@ -92,12 +92,12 @@ void Window::receiveToolContext(int a)
 }
 
 void Window::receiveToolAction(int a)
-{/*
-    if(a == ToolContext::SetWaleEdge)
-        glWidget->setSelectionAsWale(1);
-    else if(a == ToolContext::SetSingleWaleEdge)
-        glWidget->setSelectionAsWale(0);
-	else if(a == ToolContext::IncreaseWale)
+{
+    if(a == ToolContext::RebuildBodyContourFeather)
+        glWidget->rebuildFeather();
+    else if(a == ToolContext::ClearBodyContourFeather)
+        glWidget->clearFeather();
+	/*else if(a == ToolContext::IncreaseWale)
 		glWidget->changeWaleResolution(1);
 	else if(a == ToolContext::DecreaseWale)
 		glWidget->changeWaleResolution(-1);

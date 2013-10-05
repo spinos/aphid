@@ -28,5 +28,9 @@
         <file>moveActive.png</file>
         <file>moveVertex.png</file>
         <file>moveVertexActive.png</file>
+        <file>rebuild.png</file>
+        <file>rebuildActive.png</file>
+        <file>clearActive.png</file>
+        <file>clear.png</file>
     </qresource>
 </RCC>

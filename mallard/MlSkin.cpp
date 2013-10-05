@@ -27,9 +27,18 @@ MlSkin::~MlSkin()
 
 void MlSkin::cleanup()
 {
+	clearFeather();
+	if(m_faceCalamusStart) {
+		delete[] m_faceCalamusStart;
+		m_faceCalamusStart = 0;
+	}
+	
+}
+
+void MlSkin::clearFeather()
+{
 	m_calamus->clear();
 	m_calamus->initialize();
-	if(m_faceCalamusStart) delete[] m_faceCalamusStart;
 	m_numFeather = 0;
 }
 
