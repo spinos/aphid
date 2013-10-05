@@ -277,3 +277,16 @@ void MlUVView::removeSelectedFeather()
                                     QString("Cannot delete feather example[%1].").arg(f->featherId()));
 }
 
+void MlUVView::changeSelectedFeatherNSegment(int d)
+{
+	if(m_activeId < 0 ) return;
+	if(!FeatherLibrary) return;
+	
+	MlFeather * f = FeatherLibrary->selectedFeatherExample();
+	if(!f) return;
+	
+	int nseg = f->numSegment() + d;
+	if(nseg < 3 || nseg > 32) return;
+	
+	f->simpleCreate(nseg);
+}

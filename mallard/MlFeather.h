@@ -42,9 +42,10 @@ public:
 	
 	float* selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp);
 	
+	void simpleCreate(int ns = 5);
+	
 	void verbose();
 private:
-	void defaultCreate(int ns = 5);
 	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale);
 private:
 	BoundingRectangle m_brect;

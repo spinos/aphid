@@ -106,34 +106,20 @@ void FeatherEditTool::createAction()
 	rmFeather->setIconIndex(0);
 	rmFeather->setAction(RemoveFeatherExample);
 	
-	ActionIconFrame * increaseWale = new ActionIconFrame(this);
-	increaseWale->addIconFile(":increasewale.png");
-	increaseWale->addIconFile(":increasewaleact.png");
-	increaseWale->setIconIndex(0);
-	increaseWale->setAction(IncreaseWale);
+	ActionIconFrame * increaseNSeg = new ActionIconFrame(this);
+	increaseNSeg->addIconFile(":increaseNSeg.png");
+	increaseNSeg->addIconFile(":increaseNSegActive.png");
+	increaseNSeg->setIconIndex(0);
+	increaseNSeg->setAction(IncreaseFeathExampleNSegment);
 	
-	ActionIconFrame * decreaseWale = new ActionIconFrame(this);
-	decreaseWale->addIconFile(":decreasewale.png");
-	decreaseWale->addIconFile(":decreasewaleact.png");
-	decreaseWale->setIconIndex(0);
-	decreaseWale->setAction(DecreaseWale);
-	
-	ActionIconFrame * increaseCourse = new ActionIconFrame(this);
-	increaseCourse->addIconFile(":increasecourse.png");
-	increaseCourse->addIconFile(":increasecourseact.png");
-	increaseCourse->setIconIndex(0);
-	increaseCourse->setAction(IncreaseCourse);
-	
-	ActionIconFrame * decreaseCourse = new ActionIconFrame(this);
-	decreaseCourse->addIconFile(":decreasecourse.png");
-	decreaseCourse->addIconFile(":decreasecourseact.png");
-	decreaseCourse->setIconIndex(0);
-	decreaseCourse->setAction(DecreaseCourse);
+	ActionIconFrame * decreaseNSeg = new ActionIconFrame(this);
+	decreaseNSeg->addIconFile(":decreaseNSeg.png");
+	decreaseNSeg->addIconFile(":decreaseNSegActive.png");
+	decreaseNSeg->setIconIndex(0);
+	decreaseNSeg->setAction(DecreaseFeathExampleNSegment);
 
 	m_actionFrames.push_back(addFeather);
 	m_actionFrames.push_back(rmFeather);
-	m_actionFrames.push_back(increaseWale);
-	m_actionFrames.push_back(decreaseWale);
-	m_actionFrames.push_back(increaseCourse);
-	m_actionFrames.push_back(decreaseCourse);
+	m_actionFrames.push_back(increaseNSeg);
+	m_actionFrames.push_back(decreaseNSeg);
 }

@@ -36,5 +36,9 @@
         <file>addFeatherActive.png</file>
         <file>deleteFeather.png</file>
         <file>deleteFeatherActive.png</file>
+		<file>increaseNSegActive.png</file>
+		<file>increaseNSeg.png</file>
+		<file>decreaseNSegActive.png</file>
+		<file>decreaseNSeg.png</file>
     </qresource>
 </RCC>

@@ -11,18 +11,18 @@
 #include <MeshTopology.h>
 #include <AccPatchMesh.h>
 #include <MlFeather.h>
-MlTessellate::MlTessellate() : m_feather(0) {}
+MlTessellate::MlTessellate() : m_numSegment(0) {}
 
 MlTessellate::~MlTessellate() {}
 
 void MlTessellate::setFeather(MlFeather * feather)
 {
-	if(feather == m_feather) return;
+	if((unsigned)feather->numSegment() == m_numSegment) return;
 	cleanup();
 	
 	createVertices(feather);
 	createIndices(feather);
-	m_feather = feather;
+	m_numSegment = feather->numSegment();
 }
 
 void MlTessellate::createVertices(const MlFeather * feather)

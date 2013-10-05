@@ -109,46 +109,18 @@ void ToolBox::createContext()
 
 void ToolBox::createAction()
 {
-    ActionIconFrame * setWale = new ActionIconFrame(this);
-	setWale->addIconFile(":rebuild.png");
-	setWale->addIconFile(":rebuildActive.png");
-	setWale->setIconIndex(0);
-	setWale->setAction(RebuildBodyContourFeather);
+    ActionIconFrame * rb = new ActionIconFrame(this);
+	rb->addIconFile(":rebuild.png");
+	rb->addIconFile(":rebuildActive.png");
+	rb->setIconIndex(0);
+	rb->setAction(RebuildBodyContourFeather);
 	
-	ActionIconFrame * setSingleWale = new ActionIconFrame(this);
-	setSingleWale->addIconFile(":clear.png");
-	setSingleWale->addIconFile(":clearActive.png");
-	setSingleWale->setIconIndex(0);
-	setSingleWale->setAction(ClearBodyContourFeather);
-	
-	ActionIconFrame * increaseWale = new ActionIconFrame(this);
-	increaseWale->addIconFile(":increasewale.png");
-	increaseWale->addIconFile(":increasewaleact.png");
-	increaseWale->setIconIndex(0);
-	increaseWale->setAction(IncreaseWale);
-	
-	ActionIconFrame * decreaseWale = new ActionIconFrame(this);
-	decreaseWale->addIconFile(":decreasewale.png");
-	decreaseWale->addIconFile(":decreasewaleact.png");
-	decreaseWale->setIconIndex(0);
-	decreaseWale->setAction(DecreaseWale);
-	
-	ActionIconFrame * increaseCourse = new ActionIconFrame(this);
-	increaseCourse->addIconFile(":increasecourse.png");
-	increaseCourse->addIconFile(":increasecourseact.png");
-	increaseCourse->setIconIndex(0);
-	increaseCourse->setAction(IncreaseCourse);
-	
-	ActionIconFrame * decreaseCourse = new ActionIconFrame(this);
-	decreaseCourse->addIconFile(":decreasecourse.png");
-	decreaseCourse->addIconFile(":decreasecourseact.png");
-	decreaseCourse->setIconIndex(0);
-	decreaseCourse->setAction(DecreaseCourse);
+	ActionIconFrame * clr = new ActionIconFrame(this);
+	clr->addIconFile(":clear.png");
+	clr->addIconFile(":clearActive.png");
+	clr->setIconIndex(0);
+	clr->setAction(ClearBodyContourFeather);
 
-	m_actionFrames.push_back(setWale);
-	m_actionFrames.push_back(setSingleWale);
-	m_actionFrames.push_back(increaseWale);
-	m_actionFrames.push_back(decreaseWale);
-	m_actionFrames.push_back(increaseCourse);
-	m_actionFrames.push_back(decreaseCourse);
+	m_actionFrames.push_back(rb);
+	m_actionFrames.push_back(clr);
 }

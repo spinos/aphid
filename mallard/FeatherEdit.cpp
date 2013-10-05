@@ -38,6 +38,10 @@ void FeatherEdit::receiveToolAction(int a)
 {
 	if(a == ToolContext::AddFeatherExample)
 		m_view->addFeather();
-	else
+	else if(a == ToolContext::RemoveFeatherExample)
 		m_view->removeSelectedFeather();
+	else if(a == ToolContext::IncreaseFeathExampleNSegment)
+		m_view->changeSelectedFeatherNSegment(1);
+	else if(a == ToolContext::DecreaseFeathExampleNSegment)
+		m_view->changeSelectedFeatherNSegment(-1);
 }

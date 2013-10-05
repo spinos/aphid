@@ -20,5 +20,5 @@ public:
 	void createVertices(const MlFeather * feather);
 	void createIndices(const MlFeather * feather);
 private:
-	MlFeather * m_feather;
+	unsigned m_numSegment;
 };

@@ -1,11 +1,11 @@
 #include "MlFeather.h"
 #include "MlRachis.h"
 #include <CollisionRegion.h>
-MlFeather::MlFeather() : m_quilly(0), m_vaneVertices(0), m_worldP(0) 
+MlFeather::MlFeather() : m_quilly(0), m_vaneVertices(0), m_worldP(0)
 {
 	m_rachis = new MlRachis;
 	m_uv.set(4.f, 4.f);
-	defaultCreate();
+	simpleCreate();
 }
 
 MlFeather::~MlFeather() 
@@ -18,6 +18,9 @@ MlFeather::~MlFeather()
 
 void MlFeather::createNumSegment(short x)
 {
+	if(m_quilly) delete[] m_quilly;
+    if(m_vaneVertices) delete[] m_vaneVertices;
+	if(m_worldP) delete[] m_worldP;
     m_numSeg = x;
     m_quilly = new float[m_numSeg];
     m_vaneVertices = new Vector2F[(m_numSeg + 1) * 6];
@@ -173,7 +176,7 @@ short MlFeather::featherId() const
 	return m_id;
 }
 
-void MlFeather::defaultCreate(int ns)
+void MlFeather::simpleCreate(int ns)
 {
     createNumSegment(ns);
 	

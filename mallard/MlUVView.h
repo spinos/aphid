@@ -24,7 +24,8 @@ public:
 	
 	void addFeather();
 	void removeSelectedFeather();
-    
+    void changeSelectedFeatherNSegment(int d);
+	
 	static MlFeatherCollection * FeatherLibrary;
 
 private:

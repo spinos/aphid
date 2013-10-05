@@ -27,7 +27,9 @@ public:
 		RebuildBodyContourFeather = 7,
 		ClearBodyContourFeather = 8,
 		AddFeatherExample = 9,
-		RemoveFeatherExample = 10
+		RemoveFeatherExample = 10,
+		IncreaseFeathExampleNSegment = 11,
+		DecreaseFeathExampleNSegment = 12
     };
     
     ToolContext();
