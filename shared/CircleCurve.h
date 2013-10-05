@@ -15,4 +15,9 @@ public:
 	CircleCurve();
 	void create();
 	virtual ~CircleCurve();
+	
+	void setRadius(float x);
+	
+private:
+	float m_radius, m_eccentricity;
 };

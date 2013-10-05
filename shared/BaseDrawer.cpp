@@ -21,7 +21,6 @@ BaseDrawer::BaseDrawer () : m_wired(0)
 	m_sphere = new GeodesicSphereMesh(8);
 	m_pyramid = new PyramidMesh;
 	m_circle = new CircleCurve;
-	m_circle->create();
 	m_cube = new CubeMesh;
 	m_activeColor.set(0.f, .8f, .2f);
 	m_inertColor.set(0.1f, 0.6f, 0.1f);
@@ -687,7 +686,7 @@ void BaseDrawer::circleAt(const Matrix44F & mat, float radius)
 {
     glPushMatrix();
     useSpace(mat);
-	glScalef(radius, radius, radius);
+	m_circle->setRadius(radius);
     linearCurve(*m_circle);
     glPopMatrix();
 }

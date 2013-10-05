@@ -95,10 +95,23 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 	int i;
 	float l, ang;
 	
+	bool smallEnough = true;
+	Vector3F toC = center() - ctx->m_ellipseCenter + selfN * .01f;
+	toC.normalize();
+	for(i = 0; i < 4; i++) {
+		v = vertex(i);
+		dv = v - ctx->m_ellipseCenter + selfN * .01f;
+		dv.normalize();
+		if(toC.dot(dv) < .98f) {
+			smallEnough = false;
+			break;
+		}
+	}
+	
 	bool tooFar = true;
 	for(i = 0; i < 4; i++) {
 		v = vertex(i);
-		dv = v - ctx->m_origin;
+		dv = v - ctx->m_ellipseCenter;
 		l = dv.length();
 		
 		if(l < ctx->m_maxRadius) {
@@ -106,23 +119,10 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 			break;
 		}
 	}
+
+	if(tooFar && smallEnough) return false;
 	
-	if(tooFar) {
-		bool tooSmall = true;
-		Vector3F toC = center() - ctx->m_origin + selfN;
-		toC.normalize();
-		for(i = 0; i < 4; i++) {
-			v = vertex(i);
-			dv = v - ctx->m_origin + selfN;
-			dv.normalize();
-			if(toC.dot(dv) < .866f) {
-				tooSmall = false;
-				break;
-			}
-		}
-		
-		if(tooSmall) return false;
-	}
+	if(!smallEnough) return true;
 	
 	for(i = 0; i < 4; i++) {
 		v = vertex(i);

@@ -17,14 +17,15 @@ public:
 		void reset(const Vector3F & n, const Vector3F & p, const Vector3F & f, const float & r) {
 			m_plane = Plane(n, p);
 			m_origin = p;
+			m_ellipseCenter = p + f * r * 0.5f;
 			m_front = f.normal();
-			m_maxRadius = r;
+			m_maxRadius = r * 0.5f;
 			m_maxAngle = 0.f;
-			m_frontFacingThreshold = 0.f;
+			m_frontFacingThreshold = 0.4f;
 		}
 		
 		Plane m_plane;
-		Vector3F m_origin, m_front;
+		Vector3F m_origin, m_front, m_ellipseCenter;
 		float m_maxAngle, m_currentAngle, m_componentMaxAngle, m_frontFacingThreshold, m_maxRadius;
 	};
 	
