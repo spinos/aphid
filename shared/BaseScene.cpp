@@ -54,8 +54,9 @@ bool BaseScene::openScene(const std::string & fileName)
 {
 	if(isDirty()) {
 		if(!discardConfirm()) return false;
-		clearScene();
 	}
+	
+	clearScene();
 	
 	if(!fileExists(fileName)) {
 		m_error = FileNotFound;

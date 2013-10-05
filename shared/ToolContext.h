@@ -25,7 +25,9 @@ public:
 		IncreaseCourse = 5,
 		DecreaseCourse = 6,
 		RebuildBodyContourFeather = 7,
-		ClearBodyContourFeather = 8
+		ClearBodyContourFeather = 8,
+		AddFeatherExample = 9,
+		RemoveFeatherExample = 10
     };
     
     ToolContext();

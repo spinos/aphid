@@ -16,5 +16,6 @@ public:
 	
 	virtual char save(MlFeather * feather);
 	virtual char load(MlFeather * feather);
+	int loadId();
 private:
 };

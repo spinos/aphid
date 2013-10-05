@@ -19,20 +19,26 @@ public:
 	void clearFeatherExamples();
 	
 	MlFeather * addFeatherExample();
-	unsigned numFeatherExamples() const;
+	MlFeather * addFeatherExampleId(unsigned idx);
 	bool selectFeatherExample(unsigned x);
 	
 	unsigned selectedFeatherExampleId() const;
+	bool removeSelectedFeatherExample();
 	MlFeather * selectedFeatherExample();
 	MlFeather * featherExample(unsigned idx);
 	
 	void initializeFeatherExample();
 	
+	MlFeather* firstFeatherExample();
+	MlFeather* nextFeatherExample();
+	bool hasFeatherExample();
 private:
+	unsigned numFeatherExamples() const;
 	bool featherIdExists(unsigned idx) const;
-	
+	unsigned usableId() const;
 private:
 	std::map<unsigned, MlFeather *> m_feathers;
+	std::map<unsigned, MlFeather *>::iterator m_featherIt;
 	unsigned m_selectedFeatherId;
 };
 

@@ -94,17 +94,17 @@ void FeatherEditTool::createContext()
 
 void FeatherEditTool::createAction()
 {
-    ActionIconFrame * setWale = new ActionIconFrame(this);
-	setWale->addIconFile(":setwale.png");
-	setWale->addIconFile(":setwaleact.png");
-	setWale->setIconIndex(0);
-	setWale->setAction(SetWaleEdge);
+    ActionIconFrame * addFeather = new ActionIconFrame(this);
+	addFeather->addIconFile(":addFeather.png");
+	addFeather->addIconFile(":addFeatherActive.png");
+	addFeather->setIconIndex(0);
+	addFeather->setAction(AddFeatherExample);
 	
-	ActionIconFrame * setSingleWale = new ActionIconFrame(this);
-	setSingleWale->addIconFile(":setsinglewale.png");
-	setSingleWale->addIconFile(":setsinglewaleact.png");
-	setSingleWale->setIconIndex(0);
-	setSingleWale->setAction(SetSingleWaleEdge);
+	ActionIconFrame * rmFeather = new ActionIconFrame(this);
+	rmFeather->addIconFile(":deleteFeather.png");
+	rmFeather->addIconFile(":deleteFeatherActive.png");
+	rmFeather->setIconIndex(0);
+	rmFeather->setAction(RemoveFeatherExample);
 	
 	ActionIconFrame * increaseWale = new ActionIconFrame(this);
 	increaseWale->addIconFile(":increasewale.png");
@@ -130,8 +130,8 @@ void FeatherEditTool::createAction()
 	decreaseCourse->setIconIndex(0);
 	decreaseCourse->setAction(DecreaseCourse);
 
-	m_actionFrames.push_back(setWale);
-	m_actionFrames.push_back(setSingleWale);
+	m_actionFrames.push_back(addFeather);
+	m_actionFrames.push_back(rmFeather);
 	m_actionFrames.push_back(increaseWale);
 	m_actionFrames.push_back(decreaseWale);
 	m_actionFrames.push_back(increaseCourse);

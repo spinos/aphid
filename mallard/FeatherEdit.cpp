@@ -30,4 +30,14 @@ FeatherEdit::FeatherEdit(QWidget *parent)
 	
 	setContentsMargins(0, 0, 0, 0);
 	layout->setContentsMargins(0, 0, 0, 0);
+	
+	connect(tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
+}
+
+void FeatherEdit::receiveToolAction(int a)
+{
+	if(a == ToolContext::AddFeatherExample)
+		m_view->addFeather();
+	else
+		m_view->removeSelectedFeather();
 }

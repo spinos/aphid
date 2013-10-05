@@ -99,3 +99,14 @@ char HFeather::load(MlFeather * feather)
 	
 	return 1;
 }
+
+int HFeather::loadId()
+{
+	if(!hasNamedAttr(".featherId"))
+		return 0;
+	
+	int id = 0;
+	readIntAttr(".featherId", &id);
+	
+	return id;
+}

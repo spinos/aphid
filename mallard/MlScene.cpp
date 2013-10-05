@@ -135,8 +135,8 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 void MlScene::writeFeatherExamples()
 {
 	HBase g("/world/feathers");
-	for(unsigned i = 0; i < numFeatherExamples(); i++) {
-		MlFeather * f = featherExample(i);
+	for(MlFeather * f = firstFeatherExample(); hasFeatherExample(); f = nextFeatherExample()) {
+		if(!f) continue;
 		std::stringstream sst;
 		sst.str("");
 		sst<<"/world/feathers/feather_"<<f->featherId();
@@ -182,13 +182,16 @@ void MlScene::readFeatherExamples()
 	HBase g("/world/feathers");
 	int nf = g.numChildren();
 	for(int i = 0; i < nf; i++) {
-		MlFeather * f = featherExample(i);
-		if(!f)
-			f = addFeatherExample();
 		std::stringstream sst;
 		sst.str("");
-		sst<<"/world/feathers/feather_"<<i;
+		sst<<"/world/feathers/"<<g.getChildName(i);
 		HFeather h(sst.str());
+		
+		int fid = h.loadId();
+		MlFeather * f = featherExample(fid);
+		if(!f)
+			f = addFeatherExampleId(fid);
+
 		h.load(f);
 		h.close();
 	}

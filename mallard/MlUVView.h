@@ -21,6 +21,9 @@ public:
 	virtual void clientDraw();
 	virtual void clientSelect();
 	virtual void clientMouseInput();
+	
+	void addFeather();
+	void removeSelectedFeather();
     
 	static MlFeatherCollection * FeatherLibrary;
 

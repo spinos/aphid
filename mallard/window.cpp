@@ -154,8 +154,8 @@ void Window::createMenus()
 	fileMenu->addAction(importMeshAct);
 	
 	windowMenu = menuBar()->addMenu(tr("&Window"));
-    windowMenu->addAction(showBrushControlAct);
-	windowMenu->addAction(showFeatherEditAct);
+    windowMenu->addAction(showFeatherEditAct);
+	windowMenu->addAction(showBrushControlAct);
 }
 
 void Window::setWorkTitle(QString name)

@@ -28,22 +28,25 @@ MlUVView::~MlUVView()
 void MlUVView::clientDraw()
 {
 	if(!FeatherLibrary) return;
-	
-	unsigned i;
-	for(i = 0; i < FeatherLibrary->numFeatherExamples(); i++) {
-		MlFeather * f = FeatherLibrary->featherExample(i);
+	MlFeather *f;
+	for(f = FeatherLibrary->firstFeatherExample(); FeatherLibrary->hasFeatherExample(); f = FeatherLibrary->nextFeatherExample()) {
 		if(!f) continue;
 		drawFeather(f);
-		if(interactMode() ==  ToolContext::MoveVertexInUV) {
-			drawControlVectors(f);
-			if(m_selectedVert) {
-				Vector3F pv(m_selectVertWP);
-				getDrawer()->cube(pv, 0.1f);
-			}
-		}
 	}
 	
-	drawActiveBound();
+	if(m_activeId < 0) return;
+	
+	f = FeatherLibrary->selectedFeatherExample();
+	if(!f) return;
+	getDrawer()->boundingRectangle(f->getBoundingRectangle());
+	
+	if(interactMode() == ToolContext::MoveVertexInUV) {
+		drawControlVectors(f);
+		if(m_selectedVert) {
+			Vector3F pv(m_selectVertWP);
+			getDrawer()->cube(pv, 0.1f);
+		}
+	}
 }
 
 void MlUVView::clientSelect()
@@ -63,13 +66,11 @@ bool MlUVView::pickupFeather(const Vector2F & p)
 	m_activeId = -1;
 	if(!FeatherLibrary) return false;
 	
-	unsigned i;
-	for(i = 0; i < FeatherLibrary->numFeatherExamples(); i++) {
-		MlFeather * f = FeatherLibrary->featherExample(i);
+	for(MlFeather *f = FeatherLibrary->firstFeatherExample(); FeatherLibrary->hasFeatherExample(); f = FeatherLibrary->nextFeatherExample()) {
 		if(!f) continue;
 		
 		if(f->getBoundingRectangle().isPointInside(p)) {
-			m_activeId = i;
+			m_activeId = f->featherId();
 		}
 	}
 	
@@ -252,3 +253,27 @@ void MlUVView::drawActiveBound()
 	
 	getDrawer()->boundingRectangle(f->getBoundingRectangle());
 }
+
+void MlUVView::addFeather()
+{
+	FeatherLibrary->addFeatherExample();
+}
+
+void MlUVView::removeSelectedFeather()
+{
+	if(m_activeId < 0 ) return;
+	MlFeather * f = FeatherLibrary->selectedFeatherExample();
+	if(!f) return;
+	
+	QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, tr(" "),
+                                    QString("Deleting feather example[%1] will affect its instances, are you sure?").arg(f->featherId()),
+                                    QMessageBox::Yes | QMessageBox::Cancel);
+    if (reply == QMessageBox::Cancel)
+		return;
+		
+	if(!FeatherLibrary->removeSelectedFeatherExample())
+		QMessageBox::information(this, tr(" "),
+                                    QString("Cannot delete feather example[%1].").arg(f->featherId()));
+}
+

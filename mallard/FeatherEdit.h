@@ -19,6 +19,9 @@ class FeatherEdit : public QDialog
 public:
 	FeatherEdit(QWidget *parent = 0);
 	
+public slots:
+	void receiveToolAction(int a);
+	
 private:
 	MlUVView * m_view;
 };
