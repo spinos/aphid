@@ -5,7 +5,7 @@ mac {
     Aphid = $$(HOME)/aphid
 }
 
-INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/core ../../ofl/opium ../fit
+INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit
 HEADERS       = ../shared/AllMath.h \
 				../shared/Vector3F.h \
                 ../shared/Vector2F.h \
@@ -102,10 +102,10 @@ HEADERS       = ../shared/AllMath.h \
     $${Aphid}/shared/HBase.h \
     $${Aphid}/shared/HWorld.h \
     $${Aphid}/shared/HMesh.h \
+    $${Aphid}/shared/BaseImage.cpp \
+    $${Aphid}/shared/zEXRImage.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
-                ../../ofl/core/BaseImage.cpp \
-                ../../ofl/core/zEXRImage.h \
                 ../catmullclark/BaseQuad.h \
                 ../catmullclark/LODQuad.h \
                 ../catmullclark/accPatch.h \
@@ -230,10 +230,10 @@ SOURCES       = ../shared/Vector3F.cpp \
     $${Aphid}/shared/HBase.cpp \
     $${Aphid}/shared/HWorld.cpp \
     $${Aphid}/shared/HMesh.cpp \
+    $${Aphid}/shared/BaseImage.cpp \
+    $${Aphid}/shared/zEXRImage.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
-                ../../ofl/core/BaseImage.cpp \
-                ../../ofl/core/zEXRImage.cpp \
                 ../catmullclark/BaseQuad.cpp \
                 ../catmullclark/LODQuad.cpp \
                 ../catmullclark/accPatch.cpp \
