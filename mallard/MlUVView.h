@@ -11,6 +11,7 @@
 #include <Base2DView.h>
 class MlFeatherCollection;
 class MlFeather;
+class ZEXRImage;
 class MlUVView : public Base2DView {
 Q_OBJECT
 
@@ -25,6 +26,7 @@ public:
 	void addFeather();
 	void removeSelectedFeather();
     void changeSelectedFeatherNSegment(int d);
+	void loadImageBackground();
 	
 	static MlFeatherCollection * FeatherLibrary;
 
@@ -34,8 +36,10 @@ private:
 	void drawControlVectors(MlFeather * f);
 	void drawActiveBound();
 private:
-	int m_activeId;
 	float * m_selectedVert;
+	ZEXRImage* m_image;
 	Vector2F m_selectVertWP;
+	int m_activeId;
+	int m_texId;
 	bool m_moveYOnly;
 };

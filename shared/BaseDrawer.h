@@ -21,7 +21,7 @@
 #include <BaseCurve.h>
 #include <CircleCurve.h>
 #include <GProfile.h>
-
+class ZEXRImage;
 class BaseDrawer {
 public:
 	BaseDrawer ();
@@ -79,6 +79,9 @@ public:
 	void useSpace(const Matrix33F & s) const;
 	void useDepthTest(char on) const;
 	
+	unsigned addTexture();
+	void loadTexture(unsigned idx, ZEXRImage * image);
+	void texture(unsigned idx);
 public:
 	GProfile m_markerProfile;
 	GProfile m_surfaceProfile;
@@ -87,6 +90,7 @@ public:
 	GLight majorLit;
 	GLight fillLit;
 private:
+	std::vector<GLuint> m_textureNames;
     char m_wired;
 	GeodesicSphereMesh * m_sphere;
 	PyramidMesh * m_pyramid;

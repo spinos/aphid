@@ -13,12 +13,15 @@
 #include <BezierCurve.h>
 #include <QtGui>
 #include <ToolContext.h>
+#include <zEXRImage.h>
 MlFeatherCollection * MlUVView::FeatherLibrary = 0;
 
 MlUVView::MlUVView(QWidget *parent) : Base2DView(parent)
 {
-	m_activeId = -1;
+	m_activeId = m_texId = -1;
 	m_selectedVert = 0;
+	m_image = new ZEXRImage;
+	m_image->allBlack();
 }
 
 MlUVView::~MlUVView()
@@ -27,6 +30,14 @@ MlUVView::~MlUVView()
 
 void MlUVView::clientDraw()
 {
+	if(m_texId > -1) {
+		glPushMatrix();
+		glScalef(32.f, 32.f, 1.f);
+		glTranslatef(0.f, 0.f, -10.f);
+		getDrawer()->texture(m_texId);
+		glPopMatrix();
+	}
+		
 	if(!FeatherLibrary) return;
 	MlFeather *f;
 	for(f = FeatherLibrary->firstFeatherExample(); FeatherLibrary->hasFeatherExample(); f = FeatherLibrary->nextFeatherExample()) {
@@ -290,3 +301,26 @@ void MlUVView::changeSelectedFeatherNSegment(int d)
 	
 	f->changeNumSegment(d);
 }
+
+void MlUVView::loadImageBackground()
+{
+	setFocus();
+	QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this,
+							tr("Open .exr image file as the UV texture"),
+							tr("info"),
+							tr("All Files (*);;EXR Files (*.exr)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName != "") {
+		std::cout<<fileName.toUtf8().data();
+		m_image->load(fileName.toUtf8().data());
+		if(m_image->isValid()) {
+			if(m_texId < 0)
+				m_texId = getDrawer()->addTexture();
+				
+			getDrawer()->loadTexture(m_texId, m_image);
+		}
+	}
+}
+

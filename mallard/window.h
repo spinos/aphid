@@ -73,6 +73,7 @@ private:
 	QMenu * windowMenu;
 	QAction * showBrushControlAct;
 	QAction * showFeatherEditAct;
+	QAction * showTimeControlAct;
 	QAction * newSceneAct;
 	QAction * openSceneAct;
 	QAction * saveSceneAct;

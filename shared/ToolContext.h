@@ -29,7 +29,8 @@ public:
 		AddFeatherExample = 9,
 		RemoveFeatherExample = 10,
 		IncreaseFeathExampleNSegment = 11,
-		DecreaseFeathExampleNSegment = 12
+		DecreaseFeathExampleNSegment = 12,
+		LoadImage = 13
     };
     
     ToolContext();

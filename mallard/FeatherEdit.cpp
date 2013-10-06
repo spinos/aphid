@@ -36,12 +36,23 @@ FeatherEdit::FeatherEdit(QWidget *parent)
 
 void FeatherEdit::receiveToolAction(int a)
 {
-	if(a == ToolContext::AddFeatherExample)
-		m_view->addFeather();
-	else if(a == ToolContext::RemoveFeatherExample)
-		m_view->removeSelectedFeather();
-	else if(a == ToolContext::IncreaseFeathExampleNSegment)
-		m_view->changeSelectedFeatherNSegment(1);
-	else if(a == ToolContext::DecreaseFeathExampleNSegment)
-		m_view->changeSelectedFeatherNSegment(-1);
+	switch(a) {
+		case ToolContext::AddFeatherExample:
+			m_view->addFeather();
+			break;
+		case ToolContext::RemoveFeatherExample:
+			m_view->removeSelectedFeather();
+			break;
+		case ToolContext::IncreaseFeathExampleNSegment:
+			m_view->changeSelectedFeatherNSegment(1);
+			break;
+		case ToolContext::DecreaseFeathExampleNSegment:
+			m_view->changeSelectedFeatherNSegment(-1);
+			break;
+		case ToolContext::LoadImage:
+			m_view->loadImageBackground();
+			break;
+		default:
+			break;
+	}
 }

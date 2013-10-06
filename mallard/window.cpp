@@ -122,6 +122,10 @@ void Window::createActions()
 	showFeatherEditAct->setStatusTip(tr("Show feather editor"));
     connect(showFeatherEditAct, SIGNAL(triggered()), m_featherEdit, SLOT(show()));
 	
+	showTimeControlAct = new QAction(tr("&Time Control"), this);
+	showTimeControlAct->setStatusTip(tr("Show time control"));
+    connect(showTimeControlAct, SIGNAL(triggered()), m_featherEdit, SLOT(show()));
+	
 	saveSceneAct = new QAction(tr("&Save Scene"), this);
 	saveSceneAct->setStatusTip(tr("Save current scene file"));
     connect(saveSceneAct, SIGNAL(triggered()), glWidget, SLOT(saveSheet()));
@@ -156,6 +160,7 @@ void Window::createMenus()
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showFeatherEditAct);
 	windowMenu->addAction(showBrushControlAct);
+	windowMenu->addAction(showTimeControlAct);
 }
 
 void Window::setWorkTitle(QString name)

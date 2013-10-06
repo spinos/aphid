@@ -40,5 +40,7 @@
 		<file>increaseNSeg.png</file>
 		<file>decreaseNSegActive.png</file>
 		<file>decreaseNSeg.png</file>
+		<file>imageActive.png</file>
+		<file>image.png</file>
     </qresource>
 </RCC>

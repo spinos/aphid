@@ -117,9 +117,16 @@ void FeatherEditTool::createAction()
 	decreaseNSeg->addIconFile(":decreaseNSegActive.png");
 	decreaseNSeg->setIconIndex(0);
 	decreaseNSeg->setAction(DecreaseFeathExampleNSegment);
+	
+	ActionIconFrame * loadImage = new ActionIconFrame(this);
+	loadImage->addIconFile(":image.png");
+	loadImage->addIconFile(":imageActive.png");
+	loadImage->setIconIndex(0);
+	loadImage->setAction(LoadImage);
 
 	m_actionFrames.push_back(addFeather);
 	m_actionFrames.push_back(rmFeather);
 	m_actionFrames.push_back(increaseNSeg);
 	m_actionFrames.push_back(decreaseNSeg);
+	m_actionFrames.push_back(loadImage);
 }

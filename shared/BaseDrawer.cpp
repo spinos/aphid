@@ -15,7 +15,7 @@
 #include "BaseDrawer.h"
 #include "Matrix33F.h"
 #include <cmath>
-
+#include <zEXRImage.h>
 BaseDrawer::BaseDrawer () : m_wired(0) 
 {
 	m_sphere = new GeodesicSphereMesh(8);
@@ -695,5 +695,60 @@ void BaseDrawer::useDepthTest(char on) const
 {
 	if(on) glEnable(GL_DEPTH_TEST);
 	else glDisable(GL_DEPTH_TEST);
+}
+
+unsigned BaseDrawer::addTexture()
+{
+	GLuint tex = 0;
+	m_textureNames.push_back(tex);
+	std::cout<<" create tex "<<tex;
+	return m_textureNames.size() - 1;
+}
+
+void BaseDrawer::loadTexture(unsigned idx, ZEXRImage * image)
+{
+	//glEnable(GL_TEXTURE_2D);
+	GLuint & tex = m_textureNames[idx];
+	
+	if(tex > 0) glDeleteTextures(1, &tex);
+	glGenTextures(1, &tex);
+	
+	glBindTexture(GL_TEXTURE_2D, tex);
+	
+	const int w = image->_mipmaps[0]->getWidth();
+	if(image->m_channelRank == BaseImage::RGB)
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB, w, w, 0, GL_RGB, GL_HALF_FLOAT_ARB, image->_mipmaps[0]->getPixels());
+	else
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, w, w, 0, GL_RGBA, GL_HALF_FLOAT_ARB, image->_mipmaps[0]->getPixels());
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	
+	glBindTexture( GL_TEXTURE_2D, 0 );
+	
+}
+
+void BaseDrawer::texture(unsigned idx)
+{	
+	glDisable(GL_LIGHTING);
+	glColor3f(1, 1, 1);
+	glEnable(GL_TEXTURE_2D);
+	
+	glBindTexture(GL_TEXTURE_2D, m_textureNames[idx]);
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 0);
+	glVertex3f(0, 0, 0);
+	glTexCoord2f(1, 0);
+	glVertex3f(1, 0, 0);
+	glTexCoord2f(1, 1);
+	glVertex3f(1, 1, 0);
+	glTexCoord2f(0, 1);
+	glVertex3f(0, 1, 0);
+	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_TEXTURE_2D);
 }
 //:~
