@@ -302,7 +302,7 @@ void MlUVView::changeSelectedFeatherNSegment(int d)
 	f->changeNumSegment(d);
 }
 
-void MlUVView::loadImageBackground()
+void MlUVView::chooseImageBackground(std::string & name)
 {
 	QString selectedFilter;
 	QString fileName = QFileDialog::getOpenFileName(this,
@@ -312,12 +312,17 @@ void MlUVView::loadImageBackground()
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
 	if(fileName != "") {
-		m_image->load(fileName.toUtf8().data());
-		if(m_image->isValid()) {
-			makeCurrent();
-			m_texId = getDrawer()->loadTexture(m_texId, m_image);
-			doneCurrent();
-		}
+		loadImageBackground(fileName.toUtf8().data());
+		name = fileName.toUtf8().data();
 	}
+}
+
+void MlUVView::loadImageBackground(const std::string & name)
+{
+	m_image->load(name.c_str());
+	if(!m_image->isValid()) return;
+	makeCurrent();
+	m_texId = getDrawer()->loadTexture(m_texId, m_image);
+	doneCurrent();
 	update();
 }

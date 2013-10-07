@@ -17,12 +17,12 @@ char HAttribute::create(int dim, hid_t parentId)
 {
 	hsize_t dims = dim;
 	
-	hid_t fDataSpace = H5Screate_simple(1, &dims, NULL);
+	hid_t dataSpace = H5Screate_simple(1, &dims, NULL);
 	
-	fObjectId = H5Acreate(parentId, fObjectPath.c_str(), dataType(), fDataSpace, 
+	fObjectId = H5Acreate(parentId, fObjectPath.c_str(), dataType(), dataSpace, 
                           H5P_DEFAULT, H5P_DEFAULT);
 						  
-	H5Sclose(fDataSpace);
+	H5Sclose(dataSpace);
 	if(fObjectId < 0)
 		return 0;
 	return 1;

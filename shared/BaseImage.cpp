@@ -11,7 +11,8 @@
 #include <iostream>
 BaseImage::BaseImage()
 {
-
+	m_fileName = "unknown";
+	_valid = 0;
 }
 
 BaseImage::~BaseImage()

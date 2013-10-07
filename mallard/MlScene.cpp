@@ -67,11 +67,22 @@ MlScene::MlScene()
 {
 	m_accmesh = new AccPatchMesh;
 	m_skin = new MlSkin;
+	m_featherEditBackgroundName = "unknown";
 }
 
 MlScene::~MlScene() 
 {
 	clearScene();
+}
+
+void MlScene::setFeatherEditBackground(const std::string & name)
+{
+	m_featherEditBackgroundName = name;
+}
+
+std::string MlScene::featherEditBackground() const
+{
+	return m_featherEditBackgroundName;
 }
 
 MlSkin * MlScene::skin()
@@ -135,6 +146,9 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 void MlScene::writeFeatherExamples()
 {
 	HBase g("/world/feathers");
+	
+	writeFeatherEidtBackground(&g);
+	
 	for(MlFeather * f = firstFeatherExample(); hasFeatherExample(); f = nextFeatherExample()) {
 		if(!f) continue;
 		std::stringstream sst;
@@ -145,6 +159,15 @@ void MlScene::writeFeatherExamples()
 		h.close();
 	}
 	g.close();
+}
+
+void MlScene::writeFeatherEidtBackground(HBase * g)
+{
+	if(m_featherEditBackgroundName == "unknown") return;
+	if(!g->hasNamedAttr(".bkgrd"))
+		g->addStringAttr(".bkgrd", m_featherEditBackgroundName.size());
+		
+	g->writeStringAttr(".bkgrd", m_featherEditBackgroundName);
 }
 
 bool MlScene::readSceneFromFile(const std::string & fileName)
@@ -180,6 +203,9 @@ bool MlScene::readSceneFromFile(const std::string & fileName)
 void MlScene::readFeatherExamples()
 {
 	HBase g("/world/feathers");
+	
+	readFeatherEidtBackground(&g);
+	
 	int nf = g.numChildren();
 	for(int i = 0; i < nf; i++) {
 		std::stringstream sst;
@@ -196,4 +222,11 @@ void MlScene::readFeatherExamples()
 		h.close();
 	}
 	g.close();	
+}
+
+void MlScene::readFeatherEidtBackground(HBase * g)
+{
+	if(!g->hasNamedAttr(".bkgrd")) return;
+		
+	g->readStringAttr(".bkgrd", m_featherEditBackgroundName);
 }

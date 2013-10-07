@@ -98,6 +98,7 @@ HEADERS       = ../shared/AllMath.h \
 	$${Aphid}/shared/FloatsHDataset.h \
     $${Aphid}/shared/HIntAttribute.h \
     $${Aphid}/shared/HFloatAttribute.h \
+    $${Aphid}/shared/HStringAttribute.h \
     $${Aphid}/shared/HCharData.h \
     $${Aphid}/shared/HBase.h \
     $${Aphid}/shared/HWorld.h \
@@ -226,6 +227,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 	$${Aphid}/shared/FloatsHDataset.cpp \
     $${Aphid}/shared/HIntAttribute.cpp \
     $${Aphid}/shared/HFloatAttribute.cpp \
+    $${Aphid}/shared/HStringAttribute.cpp \
     $${Aphid}/shared/HCharData.cpp \
     $${Aphid}/shared/HBase.cpp \
     $${Aphid}/shared/HWorld.cpp \

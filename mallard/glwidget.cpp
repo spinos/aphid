@@ -324,6 +324,11 @@ void GLWidget::revertSheet()
 	postLoad();
 }
 
+void GLWidget::receiveFeatherEditBackground(QString name)
+{
+	setFeatherEditBackground(name.toUtf8().data());
+}
+
 void GLWidget::postLoad()
 {
 	buildTopology();
@@ -334,6 +339,8 @@ void GLWidget::postLoad()
 	m_bezierDrawer->rebuildBuffer(body());
 	m_featherDrawer->rebuildBuffer(skin());
 	update();
+	std::string febkgrd = featherEditBackground();
+	if(febkgrd != "unknown") emit sendFeatherEditBackground(tr(febkgrd.c_str()));
 	emit sceneNameChanged(tr(fileName().c_str()));
 	emit sendMessage(QString("Scene file %1 is loaded").arg(tr(fileName().c_str())));
 }

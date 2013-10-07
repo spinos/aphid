@@ -72,6 +72,8 @@ Window::Window()
 	connect(m_brushControl->numSamplesWidget(), SIGNAL(valueChanged(int)), glWidget, SLOT(receiveBrushNumSamples(int)));
 	connect(glWidget, SIGNAL(sceneNameChanged(QString)), this, SLOT(setWorkTitle(QString)));
 	connect(glWidget, SIGNAL(sendMessage(QString)), this, SLOT(showMessage(QString)));
+	connect(m_featherEdit, SIGNAL(textureLoaded(QString)), glWidget, SLOT(receiveFeatherEditBackground(QString)));
+	connect(glWidget, SIGNAL(sendFeatherEditBackground(QString)), m_featherEdit, SLOT(receiveTexture(QString)));
 	
 	statusBar()->showMessage(tr("Ready"));
 }

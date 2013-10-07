@@ -26,7 +26,8 @@ public:
 	void addFeather();
 	void removeSelectedFeather();
     void changeSelectedFeatherNSegment(int d);
-	void loadImageBackground();
+	void chooseImageBackground(std::string & name);
+	void loadImageBackground(const std::string & name);
 	
 	static MlFeatherCollection * FeatherLibrary;
 

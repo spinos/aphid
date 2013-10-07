@@ -36,6 +36,7 @@ FeatherEdit::FeatherEdit(QWidget *parent)
 
 void FeatherEdit::receiveToolAction(int a)
 {
+	std::string fname;
 	switch(a) {
 		case ToolContext::AddFeatherExample:
 			m_view->addFeather();
@@ -50,9 +51,15 @@ void FeatherEdit::receiveToolAction(int a)
 			m_view->changeSelectedFeatherNSegment(-1);
 			break;
 		case ToolContext::LoadImage:
-			m_view->loadImageBackground();
+			m_view->chooseImageBackground(fname);
+			emit textureLoaded(tr(fname.c_str()));
 			break;
 		default:
 			break;
 	}
+}
+
+void FeatherEdit::receiveTexture(QString name)
+{
+	m_view->loadImageBackground(name.toUtf8().data());
 }

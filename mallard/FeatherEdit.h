@@ -19,9 +19,12 @@ class FeatherEdit : public QDialog
 public:
 	FeatherEdit(QWidget *parent = 0);
 	
+signals:
+	void textureLoaded(QString name);
+	
 public slots:
 	void receiveToolAction(int a);
-	
+	void receiveTexture(QString name);
 private:
 	MlUVView * m_view;
 };

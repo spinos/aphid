@@ -13,10 +13,14 @@
 class AccPatchMesh;
 class MlSkin;
 class MlFeather;
+class HBase;
 class MlScene : public BaseScene, public MlFeatherCollection {
 public:
 	MlScene();
 	virtual ~MlScene();
+	
+	void setFeatherEditBackground(const std::string & name);
+	std::string featherEditBackground() const;
 
 	MlSkin * skin();
 	AccPatchMesh * body();
@@ -29,8 +33,10 @@ public:
 private:
 	void writeFeatherExamples();
 	void readFeatherExamples();
-	
+	void writeFeatherEidtBackground(HBase * g);
+	void readFeatherEidtBackground(HBase * g);
 private:
 	MlSkin * m_skin;
 	AccPatchMesh * m_accmesh;
+	std::string m_featherEditBackgroundName;
 };

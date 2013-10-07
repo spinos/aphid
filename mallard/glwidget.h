@@ -73,6 +73,7 @@ public:
 signals:
 	void sceneNameChanged(QString name);
 	void sendMessage(QString msg);
+	void sendFeatherEditBackground(QString name);
 	
 public slots:
 	void cleanSheet();
@@ -80,6 +81,7 @@ public slots:
 	void saveSheet();
 	void saveSheetAs();
     void revertSheet();
+	void receiveFeatherEditBackground(QString name);
 protected:
     virtual void clientDraw();
 
