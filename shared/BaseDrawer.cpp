@@ -222,7 +222,7 @@ void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer) 
 	if(!deformer)
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
 	else
-		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedP());
 
 	glDrawElements(GL_TRIANGLES, mesh->getNumTriangleFaceVertices(), GL_UNSIGNED_INT, mesh->getIndices());
 
@@ -233,7 +233,7 @@ void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer) 
 void BaseDrawer::drawPolygons(const BaseMesh * mesh, const BaseDeformer * deformer)
 {
 	Vector3F * p = mesh->getVertices();
-	if(deformer) p = deformer->getDeformedData();
+	if(deformer) p = deformer->getDeformedP();
 	
 	const unsigned nf = mesh->getNumPolygons();
 	unsigned fi = 0;
@@ -255,7 +255,7 @@ void BaseDrawer::drawPoints(const BaseMesh * mesh, const BaseDeformer * deformer
 	if(!deformer)
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
 	else
-		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedP());
 
 	glDrawArrays(GL_POINTS, 0, mesh->getNumVertices());
 
@@ -268,7 +268,7 @@ void BaseDrawer::showNormal(const BaseMesh * mesh, const BaseDeformer * deformer
 	if(!deformer)
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
 	else
-		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedP());
 
 	glEnableClientState(GL_COLOR_ARRAY);
 	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getNormals());
@@ -290,7 +290,7 @@ void BaseDrawer::edge(const BaseMesh * mesh, const BaseDeformer * deformer)
 	if(!deformer)
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
 	else
-		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedData());
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedP());
 
 // draw a cube
 	glDrawElements(GL_QUADS, mesh->m_numQuadVertices, GL_UNSIGNED_INT, mesh->m_quadIndices);
@@ -321,7 +321,7 @@ void BaseDrawer::tangentFrame(const BaseMesh * mesh, const BaseDeformer * deform
 	unsigned nv = mesh->getNumVertices();
 	Vector3F * v = mesh->getVertices();
 	if(deformer)
-		v = deformer->getDeformedData();
+		v = deformer->getDeformedP();
 		
 	float m[16];
 	for(unsigned i = 0; i < nv; i++) {

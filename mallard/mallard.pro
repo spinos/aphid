@@ -105,6 +105,8 @@ HEADERS       = ../shared/AllMath.h \
     $${Aphid}/shared/HMesh.h \
     $${Aphid}/shared/BaseImage.cpp \
     $${Aphid}/shared/zEXRImage.h \
+	$${Aphid}/shared/BaseFile.h \
+    $${Aphid}/shared/BakeDeformer.h \
 				../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -234,6 +236,8 @@ SOURCES       = ../shared/Vector3F.cpp \
     $${Aphid}/shared/HMesh.cpp \
     $${Aphid}/shared/BaseImage.cpp \
     $${Aphid}/shared/zEXRImage.cpp \
+	$${Aphid}/shared/BaseFile.cpp \
+    $${Aphid}/shared/BakeDeformer.cpp \
 				../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \

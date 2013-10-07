@@ -9,24 +9,25 @@ public:
     BaseDeformer();
     virtual ~BaseDeformer();
 	
+	void clear();
+	
+	Vector3F * deformedP();
+	Vector3F * getDeformedP() const;
+	
 	virtual void setMesh(BaseMesh * mesh);
 	
 	virtual void reset();
-	
-	Vector3F * getDeformedData() const;
-	
-	Vector3F restP(unsigned idx) const;
     
 	virtual char solve();
 	
 	void updateMesh() const;
-
+	
+	unsigned numVertices() const;
+private:
     unsigned m_numVertices;
 	
 	Vector3F * m_deformedV;
 	Vector3F * m_restV;
 	
 	BaseMesh * m_mesh;
-private:
-    
 };

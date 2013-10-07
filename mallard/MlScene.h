@@ -14,6 +14,8 @@ class AccPatchMesh;
 class MlSkin;
 class MlFeather;
 class HBase;
+class BakeDeformer;
+
 class MlScene : public BaseScene, public MlFeatherCollection {
 public:
 	MlScene();
@@ -24,6 +26,7 @@ public:
 
 	MlSkin * skin();
 	AccPatchMesh * body();
+	BakeDeformer * bodyDeformer();
 	
 	bool shouldSave();
 	virtual void clearScene();
@@ -38,5 +41,6 @@ private:
 private:
 	MlSkin * m_skin;
 	AccPatchMesh * m_accmesh;
+	BakeDeformer * m_deformer;
 	std::string m_featherEditBackgroundName;
 };

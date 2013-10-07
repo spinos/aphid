@@ -46,7 +46,6 @@
 #include "glwidget.h"
 #include <AccPatchMesh.h>
 #include <EasemodelUtil.h>
-#include "zEXRImage.h"
 #include <BezierDrawer.h>
 #include <MlDrawer.h>
 #include <BezierCurve.h>
@@ -55,6 +54,7 @@
 #include <InverseBilinearInterpolate.h>
 #include <MlFeather.h>
 #include <MlSkin.h>
+#include <BakeDeformer.h>
 #include "MlCalamus.h"
 
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
@@ -336,6 +336,7 @@ void GLWidget::postLoad()
 	buildTree();
 	skin()->setBodyMesh(body(), m_topo);
 	skin()->finishCreateFeather();
+	bodyDeformer()->setMesh(body());
 	m_bezierDrawer->rebuildBuffer(body());
 	m_featherDrawer->rebuildBuffer(skin());
 	update();

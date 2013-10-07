@@ -16,6 +16,7 @@
 #include <HMesh.h>
 #include <HFeather.h>
 #include <HSkin.h>
+#include <BakeDeformer.h>
 #include <sstream>
 
 void test()
@@ -67,6 +68,7 @@ MlScene::MlScene()
 {
 	m_accmesh = new AccPatchMesh;
 	m_skin = new MlSkin;
+	m_deformer = new BakeDeformer;
 	m_featherEditBackgroundName = "unknown";
 }
 
@@ -93,6 +95,11 @@ MlSkin * MlScene::skin()
 AccPatchMesh * MlScene::body()
 {
 	return m_accmesh;
+}
+
+BakeDeformer * MlScene::bodyDeformer()
+{
+	return m_deformer;
 }
 
 void MlScene::clearScene()
