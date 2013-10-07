@@ -7,8 +7,8 @@
  *
  */
 #pragma once
-#include <string>
-class BaseImage {
+#include <BaseFile.h>
+class BaseImage : public BaseFile {
 public:
 	enum ChannelRank {
 		RGB = 3,
@@ -35,7 +35,6 @@ public:
 	virtual void applyMask(BaseImage * another);
 	void verbose() const;
 	
-	std::string m_fileName;
 	int m_imageWidth, m_imageHeight;
 	ChannelRank m_channelRank;
 	char _valid;

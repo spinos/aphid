@@ -11,7 +11,6 @@
 #include <iostream>
 BaseImage::BaseImage()
 {
-	m_fileName = "unknown";
 	_valid = 0;
 }
 
@@ -88,7 +87,7 @@ void BaseImage::applyMask(BaseImage * another) {}
 
 void BaseImage::verbose() const
 {
-	std::cout<<"Image file: "<<m_fileName<<"\n";
+	std::cout<<"Image file: "<<fileName()<<"\n";
 	std::cout<<" format: "<<formatName()<<"\n";
 	std::cout<<" size: ("<<m_imageWidth<<", "<<m_imageHeight<<")\n";
 	if(m_channelRank == RGB)

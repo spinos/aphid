@@ -8,14 +8,10 @@
  */
 
 #include "BaseScene.h"
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/convenience.hpp>
 
-BaseScene::BaseScene()
+BaseScene::BaseScene() : BaseFile("untitled")
 {
 	m_isDirty = false;
-	m_fileName = "untitled";
 }
 
 BaseScene::~BaseScene() {}
@@ -58,7 +54,7 @@ bool BaseScene::openScene(const std::string & fileName)
 	
 	clearScene();
 	
-	if(!fileExists(fileName)) {
+	if(!FileExists(fileName)) {
 		m_error = FileNotFound;
 		return false;
 	}
@@ -92,11 +88,6 @@ bool BaseScene::revertScene()
 	m_fileName = fileToRevert;
 	setClean();
 	return true;
-}
-
-bool BaseScene::fileExists(const std::string & fileName)
-{
-	return boost::filesystem::exists(fileName);
 }
 
 void BaseScene::setLatestError(BaseScene::ErrorMsg err)
@@ -133,9 +124,4 @@ bool BaseScene::writeSceneToFile(const std::string & fileName)
 bool BaseScene::readSceneFromFile(const std::string & fileName)
 {
 	return true;
-}
-
-std::string BaseScene::fileName() const
-{
-	return m_fileName;
 }

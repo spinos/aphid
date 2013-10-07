@@ -8,9 +8,9 @@
  */
 
 #pragma once
-#include <string>
+#include <BaseFile.h>
 
-class BaseScene {
+class BaseScene : public BaseFile {
 public:
 	enum ErrorMsg {
 		NoError = 0,
@@ -41,11 +41,7 @@ public:
 	virtual bool writeSceneToFile(const std::string & fileName);
 	virtual bool readSceneFromFile(const std::string & fileName);
 	
-	static bool fileExists(const std::string & fileName);
-	
-	std::string fileName() const;
 private:
-	std::string m_fileName;
 	ErrorMsg m_error;
 	bool m_isDirty;
 };

@@ -319,6 +319,7 @@ void MlUVView::chooseImageBackground(std::string & name)
 
 void MlUVView::loadImageBackground(const std::string & name)
 {
+	if(!BaseFile::FileExists(name)) return;
 	m_image->load(name.c_str());
 	if(!m_image->isValid()) return;
 	makeCurrent();
