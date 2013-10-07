@@ -341,7 +341,7 @@ void GLWidget::chooseBake()
 	QString fileName = QFileDialog::getOpenFileName(this,
 							tr("Load bake from file"),
 							tr("info"),
-							tr("All Files (*);;Text Files (*.txt)"),
+							tr("All Files (*);;Bake Files (*.h5)"),
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
 	if(fileName != "") {

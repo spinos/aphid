@@ -54,6 +54,9 @@ public:
 	int numChildren();
 	int numAttrs();
 	
+	std::string childPath(const std::string & name) const;
+	std::string childPath(int i);
+	
 	virtual char save();
 	virtual char load();
 };

@@ -362,6 +362,22 @@ int HBase::numAttrs()
 	return (int)nattr;
 }
 
+std::string HBase::childPath(const std::string & name) const
+{
+	std::stringstream sst;
+	sst.str("");
+	sst<<fObjectPath<<"/"<<name;
+	return sst.str();
+}
+
+std::string HBase::childPath(int i)
+{
+	std::stringstream sst;
+	sst.str("");
+	sst<<fObjectPath<<"/"<<getChildName(i);
+	return sst.str();
+}
+
 char HBase::save()
 {
 	return 1;
