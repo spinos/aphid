@@ -8,7 +8,7 @@
  */
 
 #include "BaseImage.h"
-
+#include <iostream>
 BaseImage::BaseImage()
 {
 
@@ -16,15 +16,23 @@ BaseImage::BaseImage()
 
 BaseImage::~BaseImage()
 {
-
+	clear();
 }
 
 char BaseImage::load(const char *filename)
 {
-	return 0;
+	m_fileName = filename;
+	_valid = 1;
+	verbose();
+	return _valid;
 }
 
 void BaseImage::clear()  { _valid = 0; }
+
+const char * BaseImage::formatName() const
+{
+	return "Unknown";
+}
 
 char BaseImage::isValid() const
 {
@@ -76,3 +84,17 @@ float BaseImage::sampleRed(float u, float v) const
 void BaseImage::setRed(float u, float v, float red) {}
 
 void BaseImage::applyMask(BaseImage * another) {}
+
+void BaseImage::verbose() const
+{
+	std::cout<<"Image file: "<<m_fileName<<"\n";
+	std::cout<<" format: "<<formatName()<<"\n";
+	std::cout<<" size: ("<<m_imageWidth<<", "<<m_imageHeight<<")\n";
+	if(m_channelRank == RGB)
+		std::cout<<" channels: RGB\n";
+	else
+		std::cout<<" channels: RGBA\n";
+	
+	if(isValid())
+		std::cout<<" image is verified\n";
+}

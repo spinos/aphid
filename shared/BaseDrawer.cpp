@@ -697,19 +697,27 @@ void BaseDrawer::useDepthTest(char on) const
 	else glDisable(GL_DEPTH_TEST);
 }
 
-unsigned BaseDrawer::addTexture()
+int BaseDrawer::addTexture()
 {
 	GLuint tex = 0;
 	m_textureNames.push_back(tex);
 	return m_textureNames.size() - 1;
 }
 
-void BaseDrawer::loadTexture(unsigned idx, ZEXRImage * image)
+void BaseDrawer::clearTexture(int idx)
 {
-	glEnable(GL_TEXTURE_2D);
+	if(idx + 1 > m_textureNames.size()) return;
 	GLuint * tex = &m_textureNames[idx];
-	
 	if(*tex > 0) glDeleteTextures(1, tex);
+}
+
+int BaseDrawer::loadTexture(int idx, ZEXRImage * image)
+{
+	if(idx < 0) idx = addTexture();
+	
+	clearTexture(idx);
+	
+	GLuint * tex = &m_textureNames[idx];
 	
 	glGenTextures(1, tex);
 	
@@ -728,9 +736,10 @@ void BaseDrawer::loadTexture(unsigned idx, ZEXRImage * image)
 	
 	glBindTexture( GL_TEXTURE_2D, 0 );
 	
+	return idx;
 }
 
-void BaseDrawer::texture(unsigned idx)
+void BaseDrawer::texture(int idx)
 {	
 	glDisable(GL_LIGHTING);
 	glColor3f(1, 1, 1);

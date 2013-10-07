@@ -79,9 +79,8 @@ public:
 	void useSpace(const Matrix33F & s) const;
 	void useDepthTest(char on) const;
 	
-	unsigned addTexture();
-	void loadTexture(unsigned idx, ZEXRImage * image);
-	void texture(unsigned idx);
+	int loadTexture(int idx, ZEXRImage * image);
+	void texture(int idx);
 public:
 	GProfile m_markerProfile;
 	GProfile m_surfaceProfile;
@@ -89,6 +88,10 @@ public:
 	GMaterial *surfaceMat;
 	GLight majorLit;
 	GLight fillLit;
+	
+private:
+	int addTexture();
+	void clearTexture(int idx);
 private:
 	std::vector<GLuint> m_textureNames;
     char m_wired;

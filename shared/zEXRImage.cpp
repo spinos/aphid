@@ -103,16 +103,15 @@ ZEXRImage::ZEXRImage(const char* filename) : _pixels(0)
 
 ZEXRImage::~ZEXRImage(void)
 {
-	clear();
 }
 
-char ZEXRImage::load(const char* filename)
+char ZEXRImage::load(const char * filename)
 {
 	if(!isAnOpenExrFile(filename)) {
 		std::cout<<"ERROR: "<<filename<<" is not an openEXR image\n";
 		return 0;
 	}
-	std::cout<<"loading "<<filename<<"\n";
+	
 	clear();
 	try {
 	Imf::InputFile file(filename);
@@ -129,11 +128,11 @@ char ZEXRImage::load(const char* filename)
 	setupMipmaps();
 	}
 	catch (const std::exception &exc) { 
+		std::cout<<"ERROR: "<<filename<<" cannot be loaded as an openEXR image\n";
 		return 0; 
 	}
-	_valid = 1;
-	verbose();
-	return _valid;
+
+	return BaseImage::load(filename);
 }
 
 void ZEXRImage::clear()
@@ -146,6 +145,11 @@ void ZEXRImage::clear()
 		
 	_mipmaps.clear();
 	_valid = 0;
+}
+
+const char * ZEXRImage::formatName() const
+{
+	return "OpenEXR";
 }
 
 bool ZEXRImage::isAnOpenExrFile (const char fileName[])
@@ -245,18 +249,6 @@ void ZEXRImage::allBlack()
 int ZEXRImage::getNumMipmaps() const
 {
 	return _numMipmaps;
-}
-
-void ZEXRImage::verbose() const
-{
-	std::cout<<" image size: ("<<m_imageWidth<<", "<<m_imageHeight<<")\n";
-	if(m_channelRank == RGB)
-		std::cout<<" image channels: RGB\n";
-	else
-		std::cout<<" image channels: RGBA\n";
-	std::cout<<" mipmap count: "<<_numMipmaps<<"\n";
-	if(isValid())
-		std::cout<<" exr image is verified\n";
 }
 
 void ZEXRImage::applyMask(BaseImage * another)

@@ -315,12 +315,9 @@ void MlUVView::loadImageBackground()
 		m_image->load(fileName.toUtf8().data());
 		if(m_image->isValid()) {
 			makeCurrent();
-			if(m_texId < 0)
-				m_texId = getDrawer()->addTexture();
-			getDrawer()->loadTexture(m_texId, m_image);
+			m_texId = getDrawer()->loadTexture(m_texId, m_image);
 			doneCurrent();
 		}
 	}
 	update();
 }
-

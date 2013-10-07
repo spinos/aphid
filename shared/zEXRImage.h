@@ -46,11 +46,10 @@ public:
 	ZEXRImage();
 	ZEXRImage(const char* filename);
 	~ZEXRImage(void);
-	virtual char load(const char* filename);
-	virtual void clear();
-	static bool isAnOpenExrFile(const char* filename);
 	
-	void readPixels(Imf::InputFile& file);
+	virtual char load(const char * filename);
+	virtual void clear();
+	virtual const char * formatName() const;
 	
 	virtual void allWhite();
 	virtual void allBlack();
@@ -62,13 +61,15 @@ public:
 	
 	virtual void applyMask(BaseImage * another);
 	
+	static bool isAnOpenExrFile(const char* filename);
+	
 	half *_pixels;
 	
 	std::vector<ZEXRSampler*>_mipmaps;
 	int _numMipmaps;
 	
-	void verbose() const;
 private:
+	void readPixels(Imf::InputFile& file);
 	void setupMipmaps();
 };
 #endif

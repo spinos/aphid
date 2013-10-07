@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-
+#include <string>
 class BaseImage {
 public:
 	enum ChannelRank {
@@ -17,21 +17,25 @@ public:
 	
 	BaseImage();
 	virtual ~BaseImage();
-	virtual char load(const char *filename);
+	
+	virtual char load(const char * filename);
 	virtual void clear();
+	virtual const char * formatName() const;
+	virtual void allWhite();
+	virtual void allBlack();
+	
 	char isValid() const;
 	int getWidth() const;
 	int getHeight() const;
 	int pixelLoc(float s, float t, bool flipV = false) const;
-	
-	virtual void allWhite();
-	virtual void allBlack();
-	
+
 	virtual float sampleRed(float u, float v);
 	virtual float sampleRed(float u, float v) const;
 	virtual void setRed(float u, float v, float red);
 	virtual void applyMask(BaseImage * another);
+	void verbose() const;
 	
+	std::string m_fileName;
 	int m_imageWidth, m_imageHeight;
 	ChannelRank m_channelRank;
 	char _valid;
