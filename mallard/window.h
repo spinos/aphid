@@ -79,6 +79,7 @@ private:
 	QAction * saveSceneAct;
 	QAction * saveSceneAsAct;
 	QAction * importMeshAct;
+	QAction * importBakeAct;
 	QAction * revertAct;
 private:
 	void createActions();

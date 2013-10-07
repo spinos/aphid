@@ -11,7 +11,6 @@
 #include <iostream>
 BaseImage::BaseImage()
 {
-	_valid = 0;
 }
 
 BaseImage::~BaseImage()
@@ -21,10 +20,8 @@ BaseImage::~BaseImage()
 
 char BaseImage::load(const char *filename)
 {
-	m_fileName = filename;
-	_valid = 1;
 	verbose();
-	return _valid;
+	return BaseFile::load(filename);
 }
 
 void BaseImage::clear()  { _valid = 0; }

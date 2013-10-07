@@ -329,6 +329,26 @@ void GLWidget::receiveFeatherEditBackground(QString name)
 	setFeatherEditBackground(name.toUtf8().data());
 }
 
+void GLWidget::chooseBake()
+{
+	if(body()->isEmpty()) {
+		QMessageBox::information(this, tr(" "),
+                                    tr("Mesh not loaded. Cannot attach bake."));
+		return;
+	}
+	
+	QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this,
+							tr("Load bake from file"),
+							tr("info"),
+							tr("All Files (*);;Text Files (*.txt)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName != "") {
+		readBakeFromFile(fileName.toUtf8().data());
+	}
+}
+
 void GLWidget::postLoad()
 {
 	body()->putIntoObjectSpace();

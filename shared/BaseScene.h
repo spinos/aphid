@@ -12,12 +12,6 @@
 
 class BaseScene : public BaseFile {
 public:
-	enum ErrorMsg {
-		NoError = 0,
-		FileNotFound = 1,
-		FileNotWritable = 2
-	};
-	
 	BaseScene();
 	virtual ~BaseScene();
 	
@@ -32,9 +26,6 @@ public:
 	bool saveSceneAs(const std::string & fileName);
 	bool revertScene();
 	
-	void setLatestError(BaseScene::ErrorMsg err);
-	BaseScene::ErrorMsg latestError() const;
-	
 	virtual bool shouldSave();
 	virtual bool discardConfirm();
 	virtual void clearScene();
@@ -42,6 +33,5 @@ public:
 	virtual bool readSceneFromFile(const std::string & fileName);
 	
 private:
-	ErrorMsg m_error;
 	bool m_isDirty;
 };

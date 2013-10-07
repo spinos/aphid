@@ -37,5 +37,5 @@ public:
 	
 	int m_imageWidth, m_imageHeight;
 	ChannelRank m_channelRank;
-	char _valid;
+	
 };

@@ -113,7 +113,7 @@ void MlScene::clearScene()
 
 bool MlScene::shouldSave()
 {
-	if(m_accmesh->getNumVertices() < 1)
+	if(m_accmesh->isEmpty())
 		return false;
 	if(m_skin->numFeathers() < 1)
 		return false;
@@ -123,7 +123,7 @@ bool MlScene::shouldSave()
 bool MlScene::writeSceneToFile(const std::string & fileName)
 {
 	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadAndWrite)) {
-		setLatestError(BaseScene::FileNotWritable);
+		setLatestError(BaseFile::FileNotWritable);
 		return false;
 	}
 	
@@ -179,8 +179,8 @@ void MlScene::writeFeatherEidtBackground(HBase * g)
 
 bool MlScene::readSceneFromFile(const std::string & fileName)
 {
-	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadAndWrite)) {
-		setLatestError(BaseScene::FileNotWritable);
+	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadOnly)) {
+		setLatestError(BaseFile::FileNotReadable);
 		return false;
 	}
 	
@@ -236,4 +236,14 @@ void MlScene::readFeatherEidtBackground(HBase * g)
 	if(!g->hasNamedAttr(".bkgrd")) return;
 		
 	g->readStringAttr(".bkgrd", m_featherEditBackgroundName);
+}
+
+bool MlScene::readBakeFromFile(const std::string & fileName)
+{
+	if(!FileExists(fileName)) {
+		setLatestError(BaseFile::FileNotFound);
+		return false;
+	}
+	
+	return m_deformer->load(fileName.c_str());
 }

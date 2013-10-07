@@ -30,8 +30,9 @@ public:
 	
 	bool shouldSave();
 	virtual void clearScene();
-	virtual bool writeSceneToFile(const std::string & fileName);
-	virtual bool readSceneFromFile(const std::string & fileName);
+	bool writeSceneToFile(const std::string & fileName);
+	bool readSceneFromFile(const std::string & fileName);
+	bool readBakeFromFile(const std::string & fileName);
 	
 private:
 	void writeFeatherExamples();

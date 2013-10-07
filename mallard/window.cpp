@@ -147,6 +147,10 @@ void Window::createActions()
 	revertAct = new QAction(tr("&Revert To Saved"), this);
 	revertAct->setStatusTip(tr("Discard changes to current scene after lastest save"));
     connect(revertAct, SIGNAL(triggered()), glWidget, SLOT(revertSheet()));
+	
+	importBakeAct = new QAction(tr("&Import Baked Animation"), this);
+	importBakeAct->setStatusTip(tr("Attach bake point cache to the body"));
+    connect(importBakeAct, SIGNAL(triggered()), glWidget, SLOT(chooseBake()));
 }
 
 void Window::createMenus()
@@ -159,6 +163,7 @@ void Window::createMenus()
 	fileMenu->addAction(revertAct);
 	fileMenu->addSeparator();
 	fileMenu->addAction(importMeshAct);
+	fileMenu->addAction(importBakeAct);
 	
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showFeatherEditAct);

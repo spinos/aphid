@@ -82,6 +82,7 @@ public slots:
 	void saveSheetAs();
     void revertSheet();
 	void receiveFeatherEditBackground(QString name);
+	void chooseBake();
 protected:
     virtual void clientDraw();
 

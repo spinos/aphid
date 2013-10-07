@@ -31,6 +31,11 @@ BaseMesh::~BaseMesh()
 	cleanup();
 }
 
+bool BaseMesh::isEmpty() const
+{
+	return _numVertices < 3;
+}
+
 void BaseMesh::cleanup()
 {
 	if(_vertices) {delete[] _vertices; _vertices = 0;}

@@ -18,6 +18,7 @@ public:
 	BaseMesh();
 	virtual ~BaseMesh();
 	
+	bool isEmpty() const;
 	void cleanup();
 	
 	void createVertices(unsigned num);

@@ -15,6 +15,8 @@ class BakeDeformer : public BaseFile, public BaseDeformer {
 public:
 	BakeDeformer();
 	virtual ~BakeDeformer();
+	
+	virtual char load(const char * filename);
 private:
 
 };

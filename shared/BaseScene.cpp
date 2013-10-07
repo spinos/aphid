@@ -55,7 +55,7 @@ bool BaseScene::openScene(const std::string & fileName)
 	clearScene();
 	
 	if(!FileExists(fileName)) {
-		m_error = FileNotFound;
+		setLatestError(BaseFile::FileNotFound);
 		return false;
 	}
 	
@@ -88,16 +88,6 @@ bool BaseScene::revertScene()
 	m_fileName = fileToRevert;
 	setClean();
 	return true;
-}
-
-void BaseScene::setLatestError(BaseScene::ErrorMsg err)
-{
-	m_error = err;
-}
-
-BaseScene::ErrorMsg BaseScene::latestError() const
-{
-	return m_error;
 }
 
 bool BaseScene::shouldSave()
