@@ -331,6 +331,7 @@ void GLWidget::receiveFeatherEditBackground(QString name)
 
 void GLWidget::postLoad()
 {
+	body()->putIntoObjectSpace();
 	buildTopology();
 	body()->setup(m_topo);
 	buildTree();

@@ -79,6 +79,8 @@ public:
 	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
 	char triangleIntersect(const Vector3F * threeCorners, IntersectionContext * ctx) const;
 	
+	void putIntoObjectSpace();
+	
 	void verbose() const;
 	
 	Vector3F * _vertices;

@@ -112,7 +112,7 @@ void Window::receiveToolAction(int a)
 
 void Window::createActions()
 {
-    newSceneAct = new QAction(tr("&New Scene"), this);
+    newSceneAct = new QAction(tr("&New"), this);
     newSceneAct->setStatusTip(tr("Create an empty scene"));
     connect(newSceneAct, SIGNAL(triggered()), glWidget, SLOT(cleanSheet()));
 	
@@ -128,11 +128,11 @@ void Window::createActions()
 	showTimeControlAct->setStatusTip(tr("Show time control"));
     connect(showTimeControlAct, SIGNAL(triggered()), m_featherEdit, SLOT(show()));
 	
-	saveSceneAct = new QAction(tr("&Save Scene"), this);
+	saveSceneAct = new QAction(tr("&Save"), this);
 	saveSceneAct->setStatusTip(tr("Save current scene file"));
     connect(saveSceneAct, SIGNAL(triggered()), glWidget, SLOT(saveSheet()));
 	
-	saveSceneAsAct = new QAction(tr("&Save Scene As"), this);
+	saveSceneAsAct = new QAction(tr("&Save As"), this);
 	saveSceneAsAct->setStatusTip(tr("Save current scene into another file"));
 	connect(saveSceneAsAct, SIGNAL(triggered()), glWidget, SLOT(saveSheetAs()));
 	
@@ -140,12 +140,12 @@ void Window::createActions()
 	importMeshAct->setStatusTip(tr("Load a mesh cache file as the body"));
 	connect(importMeshAct, SIGNAL(triggered()), glWidget, SLOT(open()));
 	
-	openSceneAct = new QAction(tr("&Open Scene"), this);
+	openSceneAct = new QAction(tr("&Open"), this);
 	openSceneAct->setStatusTip(tr("Load a file as current scene"));
 	connect(openSceneAct, SIGNAL(triggered()), glWidget, SLOT(openSheet()));
 	
 	revertAct = new QAction(tr("&Revert To Saved"), this);
-	revertAct->setStatusTip(tr("Discard changes after lastest save"));
+	revertAct->setStatusTip(tr("Discard changes to current scene after lastest save"));
     connect(revertAct, SIGNAL(triggered()), glWidget, SLOT(revertSheet()));
 }
 
@@ -157,6 +157,7 @@ void Window::createMenus()
 	fileMenu->addAction(saveSceneAct);
 	fileMenu->addAction(saveSceneAsAct);
 	fileMenu->addAction(revertAct);
+	fileMenu->addSeparator();
 	fileMenu->addAction(importMeshAct);
 	
 	windowMenu = menuBar()->addMenu(tr("&Window"));

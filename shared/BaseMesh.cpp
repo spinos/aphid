@@ -549,6 +549,18 @@ char BaseMesh::triangleIntersect(const Vector3F * threeCorners, IntersectionCont
 	return 1;
 }
 
+void BaseMesh::putIntoObjectSpace()
+{
+	BoundingBox b = BaseMesh::calculateBBox();
+	setBBox(b);
+	
+	const Vector3F c = b.center();
+	
+	const unsigned nv = getNumVertices();
+	for(unsigned i = 0; i < nv; i++)
+		_vertices[i] -= c;
+}
+
 void BaseMesh::verbose() const
 {
 	std::cout<<"mesh status:\n";
@@ -559,6 +571,5 @@ void BaseMesh::verbose() const
 	std::cout<<" num quads "<<getNumQuads()<<"\n";
 	std::cout<<" num uvs "<<getNumUVs()<<"\n";
 	std::cout<<" num uvs indices "<<getNumUVIds()<<"\n";
-
 }
 //:~
