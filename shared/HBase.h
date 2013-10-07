@@ -45,6 +45,8 @@ public:
 	
 	char hasNamedChild(const char * childName);
 	std::string getChildName(hsize_t i);
+	bool isChildGroup(hsize_t i);
+	bool isChildData(hsize_t i);
 	
 	char hasNamedData(const char * dataName);
 	char discardNamedAttr(const char * path);

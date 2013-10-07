@@ -41,8 +41,9 @@ public:
 	virtual char write(char *data, SelectPart * part = 0);
 	virtual char read(char *data, SelectPart * part = 0);
 	
+	void getSpaceDimension(int * dimensions, int * ndimension);
+	
 	hsize_t fDimension[3];
-
 	
 private:
 	void resize();

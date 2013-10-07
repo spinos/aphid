@@ -20,7 +20,6 @@ BaseImage::~BaseImage()
 
 char BaseImage::load(const char *filename)
 {
-	verbose();
 	return BaseFile::load(filename);
 }
 

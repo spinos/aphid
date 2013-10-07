@@ -13,6 +13,11 @@
 #include <iostream>
 HBase::HBase(const std::string & path) : HGroup(path) 
 {
+	if(fObjectPath == "/") {
+		open();
+		return;
+	}
+	
 	if(!HObject::FileIO.checkExist(fObjectPath))
 		create();
 	else 
@@ -308,19 +313,27 @@ std::string HBase::getChildName(hsize_t i)
 	return sst.str();
 }
 
+bool HBase::isChildGroup(hsize_t i)
+{
+	int otype = H5Gget_objtype_by_idx(fObjectId, (size_t)i);
+	return otype == H5G_GROUP;
+}
+
+bool HBase::isChildData(hsize_t i)
+{
+	int otype = H5Gget_objtype_by_idx(fObjectId, (size_t)i);
+	return otype == H5G_DATASET;
+}
+
 char HBase::hasNamedData(const char * dataName)
 {
 	hsize_t nobj;
-	int otype;
 	H5Gget_num_objs(fObjectId, &nobj);
 	//std::cout<<"\n"<<fObjectPath<<" has "<<nobj<<"objs\n";
 	hsize_t i;
 	for(i = 0; i < nobj; i++) {
 		//std::cout<<getChildName(i)<<"\n";
-		
-		otype =  H5Gget_objtype_by_idx(fObjectId, (size_t)i );
-		
-		if(otype == H5G_DATASET) {
+		if(isChildData(i)) {
             if(getChildName(i) == dataName) {
                 //std::cout<<"found "<<dataName<<"\n";;
                 return 1;

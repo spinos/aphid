@@ -105,6 +105,18 @@ hid_t HDataset::createMemSpace() const
 	return H5Screate_simple(ndim, dims, NULL);
 }
 
+void HDataset::getSpaceDimension(int * dimensions, int * ndimension)
+{
+	hid_t spaceId = H5Dget_space(fObjectId);
+	hsize_t dims[3];
+	hsize_t maxdims[3];
+	H5Sget_simple_extent_dims(spaceId, dims, maxdims);
+	*ndimension = H5Sget_simple_extent_ndims(spaceId);
+	dimensions[0] = dims[0];
+	dimensions[1] = dims[1];
+	dimensions[2] = dims[2];
+}
+
 char HDataset::hasEnoughSpace() const
 {
 	hid_t spaceId = H5Dget_space(fObjectId);
