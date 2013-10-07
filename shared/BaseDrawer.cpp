@@ -701,19 +701,19 @@ unsigned BaseDrawer::addTexture()
 {
 	GLuint tex = 0;
 	m_textureNames.push_back(tex);
-	std::cout<<" create tex "<<tex;
 	return m_textureNames.size() - 1;
 }
 
 void BaseDrawer::loadTexture(unsigned idx, ZEXRImage * image)
 {
-	//glEnable(GL_TEXTURE_2D);
-	GLuint & tex = m_textureNames[idx];
+	glEnable(GL_TEXTURE_2D);
+	GLuint * tex = &m_textureNames[idx];
 	
-	if(tex > 0) glDeleteTextures(1, &tex);
-	glGenTextures(1, &tex);
+	if(*tex > 0) glDeleteTextures(1, tex);
 	
-	glBindTexture(GL_TEXTURE_2D, tex);
+	glGenTextures(1, tex);
+	
+	glBindTexture(GL_TEXTURE_2D, *tex);
 	
 	const int w = image->_mipmaps[0]->getWidth();
 	if(image->m_channelRank == BaseImage::RGB)

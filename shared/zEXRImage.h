@@ -60,12 +60,15 @@ public:
 	
 	int getNumMipmaps() const;
 	
-	virtual void setRed(float u, float v, float red);
 	virtual void applyMask(BaseImage * another);
 	
 	half *_pixels;
 	
 	std::vector<ZEXRSampler*>_mipmaps;
 	int _numMipmaps;
+	
+	void verbose() const;
+private:
+	void setupMipmaps();
 };
 #endif

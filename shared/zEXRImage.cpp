@@ -39,9 +39,8 @@ void ZEXRSampler::setPixels(ZEXRImage * src)
 void ZEXRSampler::setWidth(int w)
 {
 	_width = 2;
-	while(_width * 2 < w) 
+	while(_width * 2 <= w) 
 		_width *= 2;
-	std::cout<<"sampler w"<<_width;
 }
 
 half* ZEXRSampler::getPixels() const
@@ -109,46 +108,31 @@ ZEXRImage::~ZEXRImage(void)
 
 char ZEXRImage::load(const char* filename)
 {
-	if(!isAnOpenExrFile(filename)) return 0;
+	if(!isAnOpenExrFile(filename)) {
+		std::cout<<"ERROR: "<<filename<<" is not an openEXR image\n";
+		return 0;
+	}
+	std::cout<<"loading "<<filename<<"\n";
 	clear();
 	try {
 	Imf::InputFile file(filename);
 	Imath::Box2i dw = file.header().dataWindow(); 
 	m_imageWidth = dw.max.x - dw.min.x + 1;
 	m_imageHeight = dw.max.y - dw.min.y + 1;
-	std::cout<<"image size: ("<<m_imageWidth<<", "<<m_imageHeight<<")\n";
 	
 	m_channelRank = RGB;
 	const Imf::ChannelList &channels = file.header().channels(); 
 	const Imf::Channel *channelAPtr = channels.findChannel("A");
 	if(channelAPtr) m_channelRank = RGBA;
 	
-	if(m_channelRank == RGB)
-		std::cout<<"image channels: RGB\n";
-	else
-		std::cout<<"image channels: RGBA\n";
-	
 	readPixels(file);
-
-	_numMipmaps = Log2((double)m_imageWidth);
-	
-	ZEXRSampler* mipmap = new ZEXRSampler();
-	mipmap->setWidth(m_imageWidth);
-	mipmap->setPixels(this);
-	_mipmaps.push_back(mipmap);
-	
-	for(int i=1; i <_numMipmaps; i++)
-	{
-		ZEXRSampler* submap = new ZEXRSampler();
-		submap->reduceFrom(_mipmaps[i-1]);
-		_mipmaps.push_back(submap);
-		printf("mipmap %i\n", _mipmaps[i]->getWidth());
-	}
+	setupMipmaps();
 	}
 	catch (const std::exception &exc) { 
 		return 0; 
 	}
 	_valid = 1;
+	verbose();
 	return _valid;
 }
 
@@ -171,6 +155,23 @@ bool ZEXRImage::isAnOpenExrFile (const char fileName[])
 	char b[4]; 
 	f.read (b, sizeof (b)); 
 	return !!f && b[0] == 0x76 && b[1] == 0x2f && b[2] == 0x31 && b[3] == 0x01; 
+}
+
+void ZEXRImage::setupMipmaps()
+{
+	_numMipmaps = Log2((double)m_imageWidth);
+	
+	ZEXRSampler* mipmap = new ZEXRSampler();
+	mipmap->setWidth(m_imageWidth);
+	mipmap->setPixels(this);
+	_mipmaps.push_back(mipmap);
+	
+	for(int i=1; i <_numMipmaps; i++) {
+		ZEXRSampler* submap = new ZEXRSampler();
+		submap->reduceFrom(_mipmaps[i-1]);
+		_mipmaps.push_back(submap);
+		//printf("mipmap %i\n", _mipmaps[i]->getWidth());
+	}
 }
 
 void ZEXRImage::readPixels(Imf::InputFile& file)
@@ -225,7 +226,7 @@ void ZEXRImage::allWhite()
 	_pixels = new half[size];
 	
 	for(int i = 0; i < size; i++) _pixels[i] = 1.f;
-	
+	setupMipmaps();
 	_valid = 1;
 }
 
@@ -237,7 +238,7 @@ void ZEXRImage::allBlack()
 	_pixels = new half[size];
 	
 	for(int i = 0; i < size; i++) _pixels[i] = 0.f;
-	
+	setupMipmaps();
 	_valid = 1;
 }
 
@@ -246,9 +247,16 @@ int ZEXRImage::getNumMipmaps() const
 	return _numMipmaps;
 }
 
-void ZEXRImage::setRed(float u, float v, float red)
+void ZEXRImage::verbose() const
 {
-	_pixels[pixelLoc(u, v)] = red;
+	std::cout<<" image size: ("<<m_imageWidth<<", "<<m_imageHeight<<")\n";
+	if(m_channelRank == RGB)
+		std::cout<<" image channels: RGB\n";
+	else
+		std::cout<<" image channels: RGBA\n";
+	std::cout<<" mipmap count: "<<_numMipmaps<<"\n";
+	if(isValid())
+		std::cout<<" exr image is verified\n";
 }
 
 void ZEXRImage::applyMask(BaseImage * another)
