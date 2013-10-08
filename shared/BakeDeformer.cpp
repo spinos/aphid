@@ -11,8 +11,13 @@
 #include <AllHdf.h>
 #include <HBase.h>
 #include <sstream>
-BakeDeformer::BakeDeformer() {}
-BakeDeformer::~BakeDeformer() {}
+BakeDeformer::BakeDeformer()
+{}
+
+BakeDeformer::~BakeDeformer() 
+{
+    clearFrames();
+}
 
 char BakeDeformer::load(const char * filename)
 {
@@ -36,6 +41,7 @@ char BakeDeformer::load(const char * filename)
 	
 	if(found) {
 		processFrameRange();
+		processFrameCenters();
 		std::cout<<"Found matched bake cache\n";
 		std::cout<<" frame range: "<<m_minFrame<<" to "<<m_maxFrame<<"\n";
 		std::cout<<" bake path: "<<m_bakePath<<"\n";
@@ -123,4 +129,65 @@ void BakeDeformer::processFrameRange()
 		if(iframe < m_minFrame) m_minFrame = iframe;
 	}
 	b.close();
+}
+
+void BakeDeformer::processFrameCenters()
+{
+    clearFrames();
+
+    int iframe;
+	HBase b(m_bakePath);
+	int n = b.numChildren();
+	for(int i = 0; i < n; i++) {
+		std::string sframe(b.getChildName(i));
+		std::istringstream(sframe) >> iframe;
+		
+		b.readVector3Data(b.getChildName(i).c_str(), numVertices(), deformedP());
+		
+		BoundingBox b = calculateBBox();
+		
+		m_frameCenters[iframe] = b.center();
+	}
+	b.close();
+	
+	m_currentFrame = m_minFrame;
+}
+
+void BakeDeformer::clearFrames()
+{
+    if(m_frameCenters.size() > 0)
+        m_frameCenters.clear();
+}
+
+char BakeDeformer::solve()
+{
+    if(!isValid()) return 0;
+    
+    if(!HObject::FileIO.open(fileName().c_str(), HDocument::oReadOnly)) {
+		setLatestError(BaseFile::FileNotReadable);
+		return false;
+	}
+	
+	std::cout<<"read bake at frame "<<m_currentFrame<<"\n";
+	HBase b(m_bakePath);
+	std::stringstream sst;
+	sst.str("");
+	sst<<m_currentFrame;
+	char status = b.readVector3Data(sst.str().c_str(), numVertices(), deformedP());
+	
+	HObject::FileIO.close();
+	
+	if(status) {
+	    Vector3F c = m_frameCenters[m_currentFrame];
+	    for(unsigned i = 0; i < numVertices(); i++)
+	        deformedP()[i] -= c;
+	}
+    return status;
+}
+
+void BakeDeformer::setCurrentFrame(int x)
+{
+    if(x < m_minFrame) m_currentFrame = m_minFrame;
+    else if(x > m_maxFrame) m_currentFrame = m_maxFrame;
+    else m_currentFrame = x;
 }

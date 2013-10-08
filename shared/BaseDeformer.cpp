@@ -64,3 +64,13 @@ unsigned BaseDeformer::numVertices() const
 {
 	return m_numVertices;
 }
+
+BoundingBox BaseDeformer::calculateBBox() const
+{
+    BoundingBox b;
+    for(unsigned i = 0; i < m_numVertices; i++) {
+        b.updateMin(m_deformedV[i]);
+		b.updateMax(m_deformedV[i]);
+	}
+    return b;
+}

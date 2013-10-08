@@ -23,6 +23,8 @@ public:
 	void updateMesh() const;
 	
 	unsigned numVertices() const;
+	
+	BoundingBox calculateBBox() const;
 private:
     unsigned m_numVertices;
 	
