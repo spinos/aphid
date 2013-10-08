@@ -42,7 +42,7 @@ BrushControl::BrushControl(QWidget *parent)
 	setContentsMargins(8, 8, 8, 8);
 	layout->setContentsMargins(0, 0, 0, 0);
 
-    setWindowTitle(tr("Brush Settings"));
+    setWindowTitle(tr("Brush Control"));
     
 	m_numSampleValue->setValue(32);
 	m_radiusValue->setValue(4.0);

@@ -47,7 +47,7 @@
 #include "FeatherEdit.h"
 #include "MlUVView.h"
 #include "window.h"
-
+#include "TimeControl.h"
 //! [0]
 Window::Window()
 {
@@ -58,6 +58,7 @@ Window::Window()
 	m_brushControl = new BrushControl(this);
 	m_featherEdit = new FeatherEdit(this);
 	MlUVView::FeatherLibrary = glWidget;
+	m_timeControl = new TimeControl(this);
 	addToolBar(m_tools);
 
 	setCentralWidget(glWidget);
@@ -126,7 +127,7 @@ void Window::createActions()
 	
 	showTimeControlAct = new QAction(tr("&Time Control"), this);
 	showTimeControlAct->setStatusTip(tr("Show time control"));
-    connect(showTimeControlAct, SIGNAL(triggered()), m_featherEdit, SLOT(show()));
+    connect(showTimeControlAct, SIGNAL(triggered()), m_timeControl, SLOT(show()));
 	
 	saveSceneAct = new QAction(tr("&Save"), this);
 	saveSceneAct->setStatusTip(tr("Save current scene file"));

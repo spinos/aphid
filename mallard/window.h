@@ -53,6 +53,7 @@ class GLWidget;
 class ToolBox;
 class BrushControl;
 class FeatherEdit;
+class TimeControl;
 
 class Window : public QMainWindow
 {
@@ -69,6 +70,7 @@ private:
 	ToolBox * m_tools;
 	BrushControl * m_brushControl;
 	FeatherEdit * m_featherEdit;
+	TimeControl * m_timeControl;
 	QMenu * fileMenu;
 	QMenu * windowMenu;
 	QAction * showBrushControlAct;
