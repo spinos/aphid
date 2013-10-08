@@ -102,7 +102,7 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 		v = vertex(i);
 		dv = v - ctx->m_ellipseCenter + selfN * .01f;
 		dv.normalize();
-		if(toC.dot(dv) < .97f) {
+		if(toC.dot(dv) < .98f) {
 			smallEnough = false;
 			break;
 		}
@@ -138,10 +138,6 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 		dp.normalize();
 		
 		ang = dp.angleBetween(dv, n);
-		
-		if(ang > ctx->m_componentMaxAngle) {
-			ctx->m_componentMaxAngle = ang;
-		}
 		
 		ctx->m_currentAngle = ang;
 		

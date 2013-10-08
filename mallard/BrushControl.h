@@ -14,6 +14,7 @@
 
 QT_BEGIN_NAMESPACE
 class QGroupBox;
+class QStackedLayout;
 QT_END_NAMESPACE
 
 class QIntEditSlider;
@@ -30,15 +31,34 @@ public:
 	QWidget * radiusWidget();
 	QWidget * pitchWidget();
 
-private slots:
+public slots:
+	void receiveToolContext(int c);
 	
+private slots:
+	void sendBrushRadius(double d);
 signals:
+	void brushRadiusChanged(double d);
+private:
+	void createGroup();
+	void eraseGroup();
+	void combGroup();
+	void scaleGroup();
+	void bendGroup();
 	
 private:
-	QGroupBox *controlsGroup;
-	QDoubleEditSlider * m_radiusValue;
-	QDoubleEditSlider * m_pitchValue;
-	QIntEditSlider * m_numSampleValue;
+	QStackedLayout * stackLayout;
+	QGroupBox * controlsGroupC;
+	QDoubleEditSlider * m_radiusValueC;
+	QDoubleEditSlider * m_pitchValueC;
+	QIntEditSlider * m_numSampleValueC;
+	QGroupBox * controlsGroupE;
+	QDoubleEditSlider * m_radiusValueE;
+	QGroupBox * controlsGroupB;
+	QDoubleEditSlider * m_radiusValueB;
+	QGroupBox * controlsGroupS;
+	QDoubleEditSlider * m_radiusValueS;
+	QGroupBox * controlsGroupD;
+	QDoubleEditSlider * m_radiusValueD;
 };
 
 #endif

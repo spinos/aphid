@@ -10,56 +10,166 @@
 #include <QtGui>
 #include <QIntEditSlider.h>
 #include <QDoubleEditSlider.h>
+#include <ToolContext.h>
 #include "BrushControl.h"
 
 BrushControl::BrushControl(QWidget *parent)
     : QDialog(parent)
 {
-	controlsGroup = new QGroupBox(tr("Brush"));
+	createGroup();
+	eraseGroup();
+	combGroup();
+	scaleGroup();
+	bendGroup();
 	
-	m_numSampleValue = new QIntEditSlider(tr("Num Samples"));
-	m_numSampleValue->setLimit(8, 10000);
+	stackLayout = new QStackedLayout(this);
 	
-	m_radiusValue = new QDoubleEditSlider(tr("Radius"));
-	m_radiusValue->setLimit(0.1, 1000.0);
+	stackLayout->addWidget(controlsGroupC);
+	stackLayout->addWidget(controlsGroupB);
+	stackLayout->addWidget(controlsGroupS);
+	stackLayout->addWidget(controlsGroupD);
+	stackLayout->addWidget(controlsGroupE);
 	
-	m_pitchValue = new QDoubleEditSlider(tr("Pitch Angle"));
-	m_pitchValue->setLimit(0.1, 1.1);
-	
-	QVBoxLayout * controlLayout = new QVBoxLayout;
-	controlLayout->addWidget(m_radiusValue);
-	controlLayout->addWidget(m_pitchValue);
-	controlLayout->addWidget(m_numSampleValue);
-	
-	controlsGroup->setLayout(controlLayout);
-	
-	QVBoxLayout *layout = new QVBoxLayout;
-	
-	layout->addWidget(controlsGroup);
-	setLayout(layout);
+	stackLayout->setCurrentIndex(0);
+	setLayout(stackLayout);
 
-    layout->setSizeConstraint(QLayout::SetMinimumSize);
+    stackLayout->setSizeConstraint(QLayout::SetMinimumSize);
 	setContentsMargins(8, 8, 8, 8);
-	layout->setContentsMargins(0, 0, 0, 0);
+	stackLayout->setContentsMargins(0, 0, 0, 0);
 
     setWindowTitle(tr("Brush Control"));
-    
-	m_numSampleValue->setValue(32);
-	m_radiusValue->setValue(4.0);
-	m_pitchValue->setValue(0.4);
+	
+	connect(m_radiusValueC, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
+	connect(m_radiusValueE, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
+	connect(m_radiusValueB, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
+	connect(m_radiusValueS, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
+	connect(m_radiusValueD, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
+	
 }
 
 QWidget * BrushControl::numSamplesWidget()
 {
-	return m_numSampleValue;
+	return m_numSampleValueC;
 }
 
 QWidget * BrushControl::radiusWidget()
 {
-	return m_radiusValue;
+	return m_radiusValueC;
 }
 
 QWidget * BrushControl::pitchWidget()
 {
-	return m_pitchValue;
+	return m_pitchValueC;
 }
+
+void BrushControl::createGroup()
+{
+	controlsGroupC = new QGroupBox(tr("Create"));
+	
+	m_numSampleValueC = new QIntEditSlider(tr("Num Samples"));
+	m_numSampleValueC->setLimit(8, 10000);
+	
+	m_radiusValueC = new QDoubleEditSlider(tr("Radius"));
+	m_radiusValueC->setLimit(0.1, 1000.0);
+	
+	m_pitchValueC = new QDoubleEditSlider(tr("Pitch Angle"));
+	m_pitchValueC->setLimit(0.1, 1.1);
+	
+	QVBoxLayout * controlLayout = new QVBoxLayout;
+	controlLayout->addWidget(m_radiusValueC);
+	controlLayout->addWidget(m_pitchValueC);
+	controlLayout->addWidget(m_numSampleValueC);
+	controlLayout->addStretch();
+	controlsGroupC->setLayout(controlLayout);
+	
+	m_numSampleValueC->setValue(32);
+	m_radiusValueC->setValue(4.0);
+	m_pitchValueC->setValue(0.4);
+}
+
+void BrushControl::eraseGroup()
+{
+	controlsGroupE = new QGroupBox(tr("Erase"));
+	
+	m_radiusValueE = new QDoubleEditSlider(tr("Radius"));
+	m_radiusValueE->setLimit(0.1, 1000.0);
+	
+	QVBoxLayout * controlLayout = new QVBoxLayout;
+	controlLayout->addWidget(m_radiusValueE);
+	controlLayout->addStretch();
+	controlsGroupE->setLayout(controlLayout);
+}
+
+void BrushControl::combGroup()
+{
+	controlsGroupB = new QGroupBox(tr("Comb"));
+	
+	m_radiusValueB = new QDoubleEditSlider(tr("Radius"));
+	m_radiusValueB->setLimit(0.1, 1000.0);
+	
+	QVBoxLayout * controlLayout = new QVBoxLayout;
+	controlLayout->addWidget(m_radiusValueB);
+	controlLayout->addStretch();
+	controlsGroupB->setLayout(controlLayout);
+}
+
+void BrushControl::scaleGroup()
+{
+	controlsGroupS = new QGroupBox(tr("Scale"));
+	
+	m_radiusValueS = new QDoubleEditSlider(tr("Radius"));
+	m_radiusValueS->setLimit(0.1, 1000.0);
+	
+	QVBoxLayout * controlLayout = new QVBoxLayout;
+	controlLayout->addWidget(m_radiusValueS);
+	controlLayout->addStretch();
+	controlsGroupS->setLayout(controlLayout);
+}
+
+void BrushControl::bendGroup()
+{
+	controlsGroupD = new QGroupBox(tr("Pitch"));
+	
+	m_radiusValueD = new QDoubleEditSlider(tr("Radius"));
+	m_radiusValueD->setLimit(0.1, 1000.0);
+	
+	QVBoxLayout * controlLayout = new QVBoxLayout;
+	controlLayout->addWidget(m_radiusValueD);
+	controlLayout->addStretch();
+	controlsGroupD->setLayout(controlLayout);
+}
+
+void BrushControl::receiveToolContext(int c)
+{
+	double r = m_radiusValueC->value();
+	switch(c) {
+		case ToolContext::CreateBodyContourFeather:
+			stackLayout->setCurrentIndex(0);
+			break;
+		case ToolContext::CombBodyContourFeather:
+			stackLayout->setCurrentIndex(1);
+			r = m_radiusValueB->value();
+			break;
+		case ToolContext::ScaleBodyContourFeather:
+			stackLayout->setCurrentIndex(2);
+			r = m_radiusValueS->value();
+			break;
+		case ToolContext::PitchBodyContourFeather:
+			stackLayout->setCurrentIndex(3);
+			r = m_radiusValueB->value();
+			break;
+		case ToolContext::EraseBodyContourFeather:
+			stackLayout->setCurrentIndex(4);
+			r = m_radiusValueE->value();
+			break;
+		default:
+			break;
+	}
+	emit brushRadiusChanged(r);
+}
+	
+void BrushControl::sendBrushRadius(double d)
+{
+	emit brushRadiusChanged(d);
+}
+	

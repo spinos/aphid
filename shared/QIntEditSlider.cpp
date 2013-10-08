@@ -13,7 +13,9 @@ QIntEditSlider::QIntEditSlider(const QString & name, QWidget *parent)
     : QWidget(parent)
 {
 	m_label = new QLabel(name);
+	m_label->setMinimumWidth(100);
 	m_edit = new QLineEdit;
+	m_edit->setMaximumWidth(80);
 	m_slider = new QSlider(Qt::Horizontal);
 	m_validate = new QIntValidator;
 	
@@ -24,6 +26,7 @@ QIntEditSlider::QIntEditSlider(const QString & name, QWidget *parent)
 	layout->addWidget(m_edit);
 	layout->addWidget(m_slider);
 	layout->setStretch(2, 1);
+	layout->setContentsMargins(0, 0, 0, 0);
 	setLayout(layout);
 	
 	setLimit(0, 10);
