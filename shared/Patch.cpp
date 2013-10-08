@@ -89,8 +89,8 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 	getNormal(selfN);
 	ctx->m_plane.getNormal(n);
 	
-	if(n.dot(selfN) < 0.f) return false;
-	if(ctx->m_front.dot(selfN) > 0.f) return false;
+	//if(n.dot(selfN) < 0.f) return false;
+	//if(ctx->m_front.dot(selfN) > 0.f) return false;
 	
 	int i;
 	float l, ang;
@@ -139,7 +139,7 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 		
 		ang = dp.angleBetween(dv, n);
 		
-		ctx->m_currentAngle = ang;
+		ctx->m_currentAngle = ang + .05f;
 		
 		pushed = true;
 	}

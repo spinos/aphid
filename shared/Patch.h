@@ -17,9 +17,9 @@ public:
 		void reset(const Vector3F & n, const Vector3F & p, const Vector3F & f, const float & r) {
 			m_plane = Plane(n, p);
 			m_origin = p;
-			m_ellipseCenter = p + f * r * 0.5f;
+			m_ellipseCenter = p + f * r * 0.5f + n * r * 0.3f;
 			m_front = f.normal();
-			m_maxRadius = r * 0.5f;
+			m_maxRadius = r * 0.7f;
 			m_maxAngle = 0.f;
 		}
 		
