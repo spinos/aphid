@@ -249,8 +249,6 @@ void AccPatchMesh::recursiveBezierPushPlane(BezierPatch* patch, Patch::PushPlane
 	if(!pl.pushPlane(ctx))
 		return;
 		
-	BoundingBox controlbox = patch->controlBBox();
-	
 	if(ctx->m_convergent || level > 5) {
 		if(ctx->m_currentAngle > ctx->m_maxAngle) 
 			ctx->m_maxAngle = ctx->m_currentAngle;

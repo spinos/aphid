@@ -120,12 +120,12 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 		}
 	}
 
+	if(smallEnough) ctx->m_convergent = true;
+	
 	if(tooFar && smallEnough) return false;
 	
-	if(!smallEnough) return true;
-	
-	ctx->m_convergent = true;
-	
+	ctx->m_currentAngle = 0.f;
+	bool allBellow = true;
 	for(i = 0; i < 4; i++) {
 		v = vertex(i);
 		dv = v - ctx->m_origin;
@@ -139,10 +139,15 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 		
 		ang = dp.angleBetween(dv, n);
 		
-		ctx->m_currentAngle = ang + .05f;
+		if(ang > ctx->m_maxAngle) allBellow = false;
+		
+		if(ctx->m_currentAngle < ang)
+			ctx->m_currentAngle = ang;
 		
 		pushed = true;
 	}
+	
+	if(allBellow) return false;
 	return pushed;
 }
 
