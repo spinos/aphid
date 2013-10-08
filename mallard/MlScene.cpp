@@ -25,7 +25,7 @@ void test()
 	HObject::FileIO.open("parttest.f", HDocument::oCreate);
 	
 	int n = 33;
-	float data[10], rd[n];
+	float data[10], rd[33];
 	for(int i=0; i < 10; i++) data[i] = i + 2;
 	
 	HBase grp("/world");

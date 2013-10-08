@@ -26,6 +26,7 @@ public:
 		Plane m_plane;
 		Vector3F m_origin, m_front, m_ellipseCenter;
 		float m_maxAngle, m_currentAngle, m_componentMaxAngle, m_frontFacingThreshold, m_maxRadius;
+		bool m_convergent;
 	};
 	
 	Patch();

@@ -19,7 +19,7 @@ ZEXRSampler::~ZEXRSampler()
 void ZEXRSampler::setPixels(ZEXRImage * src)
 {
 	_rank = src->m_channelRank;
-	float p[_rank];
+	float * p = new float[_rank];
 	_pixels = new half[_width * _width * _rank];
 	float u, v;
 	const float d = 1.f / (float)_width;
@@ -34,6 +34,7 @@ void ZEXRSampler::setPixels(ZEXRImage * src)
 				_pixels[stride * j + i * _rank + k] = p[k];
 		}
 	}
+	delete[] p;
 }
 
 void ZEXRSampler::setWidth(int w)
@@ -279,20 +280,23 @@ void ZEXRImage::sample(float u, float v, float level, int count, float * dst) co
 	if(levelLow > _numMipmaps) levelLow = _numMipmaps;
 	if(levelLow < 1) levelLow = 1;
 	
-	float hi[count];
+	float * hi = new float[count];
 	
 	_mipmaps[_numMipmaps - levelHigh]->sample(u , v, count, hi);
 	if(levelHigh == levelLow) {
 		for(int k = 0; k < count; k++) dst[k] = hi[k];
+		delete[] hi;
 		return;
 	}
 	
-	float lo[count];
+	float * lo = new float[count];
 	 _mipmaps[_numMipmaps - levelLow]->sample(u , v, count, lo);
 	
 	float alpha = level - (int)level;
 	
 	for(int k = 0; k < count; k++) dst[k] = lo[k] * (1.f - alpha) + hi[k] * alpha;
+	delete[] hi;
+	delete[] lo;
 }
 
 void ZEXRImage::sample(float u, float v, int count, float * dst) const

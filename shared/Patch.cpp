@@ -124,6 +124,8 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 	
 	if(!smallEnough) return true;
 	
+	ctx->m_convergent = true;
+	
 	for(i = 0; i < 4; i++) {
 		v = vertex(i);
 		dv = v - ctx->m_origin;
