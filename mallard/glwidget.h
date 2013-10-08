@@ -83,9 +83,10 @@ public slots:
     void revertSheet();
 	void receiveFeatherEditBackground(QString name);
 	void chooseBake();
+	void updateOnFrame(int x);
 protected:
     virtual void clientDraw();
-
+	virtual void focusOutEvent(QFocusEvent * event);
 //! [3]
 private:
 	void selectFeather();

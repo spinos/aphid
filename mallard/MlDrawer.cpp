@@ -126,7 +126,7 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 	unsigned nc = skin->numFeathers();
 	if(nc < 1) return;
 	
-	std::cout<<"building feather draw buffer\n num feathers "<<nc<<"\n";
+	//std::cout<<"building feather draw buffer\n num feathers "<<nc<<"\n";
 	unsigned loc = 0;
 	
 	unsigned i, nvpf;

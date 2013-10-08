@@ -17,6 +17,7 @@
 #include <HFeather.h>
 #include <HSkin.h>
 #include <BakeDeformer.h>
+#include <PlaybackControl.h>
 #include <sstream>
 
 void test()
@@ -70,6 +71,7 @@ MlScene::MlScene()
 	m_skin = new MlSkin;
 	m_deformer = new BakeDeformer;
 	m_featherEditBackgroundName = "unknown";
+	m_playback = 0;
 }
 
 MlScene::~MlScene() 
@@ -100,6 +102,11 @@ AccPatchMesh * MlScene::body()
 BakeDeformer * MlScene::bodyDeformer()
 {
 	return m_deformer;
+}
+
+void MlScene::setPlayback(PlaybackControl * p)
+{
+	m_playback = p;
 }
 
 void MlScene::clearScene()
@@ -245,5 +252,18 @@ bool MlScene::readBakeFromFile(const std::string & fileName)
 		return false;
 	}
 	
-	return m_deformer->load(fileName.c_str());
+	if(m_deformer->load(fileName.c_str())) {
+		m_playback->setFrameRange(m_deformer->minFrame(), m_deformer->maxFrame());
+		m_playback->enableControl();
+		return true;
+	}
+	return false;
+}
+
+char MlScene::deformBody(int x)
+{
+	m_deformer->setCurrentFrame(x);
+	if(!m_deformer->solve()) return false;
+	
+	return true;
 }

@@ -21,6 +21,7 @@ public:
 	virtual ~AccPatchMesh();
 	
 	void setup(MeshTopology * topo);
+	void update(MeshTopology * topo);
 	
 	AccPatch* beziers() const;
 	

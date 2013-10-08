@@ -71,9 +71,9 @@ public slots:
     void receiveBrushNumSamples(int x);
 	
 protected:
-    void keyPressEvent(QKeyEvent *event);
-	void focusInEvent(QFocusEvent * event);
-	void focusOutEvent(QFocusEvent * event);
+    virtual void keyPressEvent(QKeyEvent *event);
+	virtual void focusInEvent(QFocusEvent * event);
+	virtual void focusOutEvent(QFocusEvent * event);
 	
 private:
 	void computeIncidentRay(int x, int y);

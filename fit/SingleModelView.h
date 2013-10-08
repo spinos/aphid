@@ -49,24 +49,27 @@ public:
 	
 	void clearTree();
 	void clearTopology();
-	
+	void setRebuildTree();
+
 	void drawAnchors();
 	AnchorGroup * getAnchors() const;
 	KdTree * getTree() const;
 	virtual PatchMesh * mesh();
 	
 protected:
-    void keyPressEvent(QKeyEvent *event);
-    
+    virtual void keyPressEvent(QKeyEvent *event);
+    virtual void focusInEvent(QFocusEvent * event);
+	
 public:
 	KdTree * m_tree;
 	AnchorGroup * m_anchors;
 	MeshTopology * m_topo;
 	
-private:
-	PatchMesh * m_mesh;
-	
 public slots:
 	void open();
 	void save();
+	
+private:
+	PatchMesh * m_mesh;
+	bool m_shouldRebuildTree;
 };

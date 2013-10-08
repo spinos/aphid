@@ -8,7 +8,7 @@
  */
  
 #pragma once
-
+#include <PlaybackControl.h>
 #include <QDialog>
 
 QT_BEGIN_NAMESPACE
@@ -20,17 +20,16 @@ QT_END_NAMESPACE
 
 class QIntEditSlider;
 
-class TimeControl : public QDialog
+class TimeControl : public QDialog, public PlaybackControl
 {
     Q_OBJECT
 
 public:
     TimeControl(QWidget *parent = 0);
 	
-	void setFrameRange(int mn, int mx);
-	int rangeMin() const;
-	int rangeMax() const;
-	int currentFrame() const;
+	virtual void setFrameRange(int mn, int mx);
+	virtual void disableControl();
+	virtual void enableControl();
 	
 public slots:
 	void updateCurrentFrame(int x);
@@ -52,6 +51,4 @@ private:
 	QSpinBox * minSpin;
 	QSpinBox * maxSpin;
 	QSpinBox * currentSpin;
-	
-	int m_rangeMin, m_rangeMax;
 };

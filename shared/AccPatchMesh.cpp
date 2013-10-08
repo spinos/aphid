@@ -60,6 +60,32 @@ void AccPatchMesh::setup(MeshTopology * topo)
 	}
 }
 
+void AccPatchMesh::update(MeshTopology * topo)
+{
+	topo->calculateNormal(this);
+	Vector3F* cvs = getVertices();
+	Vector3F* normal = getNormals();
+	AccStencil* sten = AccPatch::stencil;
+	sten->setVertexPosition(cvs);
+	sten->setVertexNormal(normal);
+	
+	sten->m_vertexAdjacency = topo->getTopology();
+	const unsigned numFace = getNumFaces();
+	unsigned * quadV = quadIndices();
+	for(unsigned j = 0; j < numFace; j++) {
+		sten->m_patchVertices[0] = quadV[0];
+		sten->m_patchVertices[1] = quadV[1];
+		sten->m_patchVertices[2] = quadV[2];
+		sten->m_patchVertices[3] = quadV[3];
+		
+		m_bezier[j].evaluateContolPoints();
+		m_bezier[j].evaluateTangents();
+		m_bezier[j].evaluateBinormals();
+		
+		quadV += 4;
+	}
+}
+
 AccPatch* AccPatchMesh::beziers() const
 {
 	return m_bezier;

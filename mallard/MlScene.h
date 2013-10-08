@@ -15,6 +15,7 @@ class MlSkin;
 class MlFeather;
 class HBase;
 class BakeDeformer;
+class PlaybackControl;
 
 class MlScene : public BaseScene, public MlFeatherCollection {
 public:
@@ -27,6 +28,7 @@ public:
 	MlSkin * skin();
 	AccPatchMesh * body();
 	BakeDeformer * bodyDeformer();
+	void setPlayback(PlaybackControl * p);
 	
 	bool shouldSave();
 	virtual void clearScene();
@@ -34,6 +36,7 @@ public:
 	bool readSceneFromFile(const std::string & fileName);
 	bool readBakeFromFile(const std::string & fileName);
 	
+	char deformBody(int x);
 private:
 	void writeFeatherExamples();
 	void readFeatherExamples();
@@ -43,5 +46,6 @@ private:
 	MlSkin * m_skin;
 	AccPatchMesh * m_accmesh;
 	BakeDeformer * m_deformer;
+	PlaybackControl * m_playback;
 	std::string m_featherEditBackgroundName;
 };

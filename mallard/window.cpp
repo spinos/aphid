@@ -59,6 +59,7 @@ Window::Window()
 	m_featherEdit = new FeatherEdit(this);
 	MlUVView::FeatherLibrary = glWidget;
 	m_timeControl = new TimeControl(this);
+	glWidget->setPlayback(m_timeControl);
 	addToolBar(m_tools);
 
 	setCentralWidget(glWidget);
@@ -75,6 +76,7 @@ Window::Window()
 	connect(glWidget, SIGNAL(sendMessage(QString)), this, SLOT(showMessage(QString)));
 	connect(m_featherEdit, SIGNAL(textureLoaded(QString)), glWidget, SLOT(receiveFeatherEditBackground(QString)));
 	connect(glWidget, SIGNAL(sendFeatherEditBackground(QString)), m_featherEdit, SLOT(receiveTexture(QString)));
+	connect(m_timeControl, SIGNAL(currentFrameChanged(int)), glWidget, SLOT(updateOnFrame(int)));
 	
 	statusBar()->showMessage(tr("Ready"));
 }

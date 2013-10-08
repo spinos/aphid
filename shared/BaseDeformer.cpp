@@ -12,7 +12,6 @@ BaseDeformer::~BaseDeformer()
 
 void BaseDeformer::clear()
 {
-	if(m_deformedV) delete[] m_deformedV;
 	if(m_restV) delete[] m_restV;
 	m_deformedV = m_restV = 0;
 	m_numVertices = 0;
@@ -33,8 +32,8 @@ void BaseDeformer::setMesh(BaseMesh * mesh)
 	clear();
 	m_mesh = mesh;
 	m_numVertices = mesh->getNumVertices();
+	m_deformedV = mesh->vertices();
 	m_restV = new Vector3F[m_numVertices];
-	m_deformedV = new Vector3F[m_numVertices];
 	Vector3F *v = m_mesh->getVertices();
 	for(unsigned i = 0; i < m_numVertices; i++)
 		m_restV[i] = v[i];
@@ -51,13 +50,6 @@ void BaseDeformer::reset()
 {
 	for(unsigned i = 0; i < m_numVertices; i++)
 		m_deformedV[i] = m_restV[i];
-}
-
-void BaseDeformer::updateMesh() const
-{
-	Vector3F *v = m_mesh->vertices();
-	for(unsigned i = 0; i < m_numVertices; i++)
-		v[i] = m_deformedV[i];
 }
 
 unsigned BaseDeformer::numVertices() const

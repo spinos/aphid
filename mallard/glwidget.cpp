@@ -349,6 +349,19 @@ void GLWidget::chooseBake()
 	}
 }
 
+void GLWidget::updateOnFrame(int x)
+{
+	if(!deformBody(x)) return;
+	
+	body()->update(m_topo);
+	m_bezierDrawer->rebuildBuffer(body());
+	m_featherDrawer->clearBuffer();
+	m_featherDrawer->initializeBuffer();
+	m_featherDrawer->rebuildBuffer(skin());
+	update();
+	setRebuildTree();
+}
+
 void GLWidget::postLoad()
 {
 	body()->putIntoObjectSpace();
@@ -365,5 +378,13 @@ void GLWidget::postLoad()
 	if(febkgrd != "unknown") emit sendFeatherEditBackground(tr(febkgrd.c_str()));
 	emit sceneNameChanged(tr(fileName().c_str()));
 	emit sendMessage(QString("Scene file %1 is loaded").arg(tr(fileName().c_str())));
+}
+
+void GLWidget::focusOutEvent(QFocusEvent * event)
+{
+	if(interactMode() == ToolContext::EraseBodyContourFeather)
+		finishEraseFeather();
+	deselectFeather();
+	SingleModelView::focusOutEvent(event);
 }
 //:~

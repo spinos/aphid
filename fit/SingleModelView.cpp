@@ -27,6 +27,7 @@ SingleModelView::SingleModelView(QWidget *parent) : Base3DView(parent)
 	
 	m_anchors = new AnchorGroup;
 	m_anchors->setHitTolerance(.3f);
+	m_shouldRebuildTree = false;
 }
 //! [0]
 
@@ -187,6 +188,20 @@ void SingleModelView::keyPressEvent(QKeyEvent *e)
 	}
 
 	Base3DView::keyPressEvent(e);
+}
+
+void SingleModelView::focusInEvent(QFocusEvent * event)
+{
+	if(m_shouldRebuildTree) {
+		buildTree();
+		m_shouldRebuildTree = false;
+	}
+	Base3DView::focusInEvent(event);
+}
+
+void SingleModelView::setRebuildTree()
+{
+	m_shouldRebuildTree = true;
 }
 
 void SingleModelView::drawAnchors()

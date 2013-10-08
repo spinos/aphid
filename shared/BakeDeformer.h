@@ -22,6 +22,9 @@ public:
 	virtual char solve();
 	
 	void setCurrentFrame(int x);
+	
+	int minFrame() const;
+	int maxFrame() const;
 private:
 	bool findMatchedMesh(HBase & grp);
 	bool isGeomMatched(HBase & grp);

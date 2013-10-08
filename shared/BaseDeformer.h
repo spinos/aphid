@@ -20,8 +20,6 @@ public:
     
 	virtual char solve();
 	
-	void updateMesh() const;
-	
 	unsigned numVertices() const;
 	
 	BoundingBox calculateBBox() const;

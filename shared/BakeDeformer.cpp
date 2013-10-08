@@ -168,7 +168,7 @@ char BakeDeformer::solve()
 		return false;
 	}
 	
-	std::cout<<"read bake at frame "<<m_currentFrame<<"\n";
+	//std::cout<<"read bake at frame "<<m_currentFrame<<"\n";
 	HBase b(m_bakePath);
 	std::stringstream sst;
 	sst.str("");
@@ -190,4 +190,14 @@ void BakeDeformer::setCurrentFrame(int x)
     if(x < m_minFrame) m_currentFrame = m_minFrame;
     else if(x > m_maxFrame) m_currentFrame = m_maxFrame;
     else m_currentFrame = x;
+}
+
+int BakeDeformer::minFrame() const
+{
+	return m_minFrame;
+}
+
+int BakeDeformer::maxFrame() const
+{
+	return m_maxFrame;
 }

@@ -63,6 +63,8 @@ TimeControl::TimeControl(QWidget *parent)
     setWindowTitle(tr("Time Control"));
 	
 	setFrameRange(1, 99);
+	
+	disableControl();
     
 	connect(bar, SIGNAL(valueChanged(int)), this, SLOT(updateCurrentFrame(int)));
 	connect(currentSpin, SIGNAL(valueChanged(int)), this, SLOT(updateCurrentFrame(int)));
@@ -104,45 +106,48 @@ void TimeControl::setPlayMax()
 
 void TimeControl::setFrameRange(int mn, int mx)
 {
-	m_rangeMin = mn;
-	m_rangeMax = mx;
+	minLabel->setText(QString("%1").arg(mn));
+	minSpin->setMinimum(mn);
+	minSpin->setMaximum(mx - 1);
+	minSpin->setValue(mn);
 	
-	minLabel->setText(QString("%1").arg(m_rangeMin));
-	minSpin->setMinimum(m_rangeMin);
-	minSpin->setMaximum(m_rangeMax - 1);
-	minSpin->setValue(m_rangeMin);
+	maxLabel->setText(QString("%1").arg(mx));
+	maxSpin->setMinimum(mn + 1);
+	maxSpin->setMaximum(mx);
+	maxSpin->setValue(mx);
 	
-	maxLabel->setText(QString("%1").arg(m_rangeMax));
-	maxSpin->setMinimum(m_rangeMin + 1);
-	maxSpin->setMaximum(m_rangeMax);
-	maxSpin->setValue(m_rangeMax);
-	
-	bar->setMinimum(m_rangeMin);
-	bar->setMaximum(m_rangeMax);
-	bar->setValue(m_rangeMin);
-	currentSpin->setMinimum(m_rangeMin);
-	currentSpin->setMaximum(m_rangeMax);
-	currentSpin->setValue(m_rangeMin);
+	bar->setMinimum(mn);
+	bar->setMaximum(mx);
+	bar->setValue(mn);
+	currentSpin->setMinimum(mn);
+	currentSpin->setMaximum(mx);
+	currentSpin->setValue(mn);
+	PlaybackControl::setFrameRange(mn, mx);
 }
 
 void TimeControl::updateCurrentFrame(int x)
 {
-	bar->setValue(x);
-	currentSpin->setValue(x);
-	emit currentFrameChanged(x);
+	if(bar->value() != x)
+		bar->setValue(x);
+	if(currentSpin->value() != x)
+		currentSpin->setValue(x);
+		
+	if(currentFrame() != x) {
+		setCurrentFrame(x);
+		emit currentFrameChanged(x);
+	}
 }
 
-int TimeControl::rangeMin() const
+void TimeControl::disableControl()
 {
-	return m_rangeMin;
+	minGroup->setEnabled(false);
+	playGroup->setEnabled(false);
+	maxGroup->setEnabled(false);
 }
 
-int TimeControl::rangeMax() const
+void TimeControl::enableControl()
 {
-	return m_rangeMax;
-}
-
-int TimeControl::currentFrame() const
-{
-	return bar->value();
+	minGroup->setEnabled(true);
+	playGroup->setEnabled(true);
+	maxGroup->setEnabled(true);
 }
