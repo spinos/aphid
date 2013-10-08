@@ -18,6 +18,8 @@ class QSpinBox;
 class QLabel;
 QT_END_NAMESPACE
 
+class QIntEditSlider;
+
 class TimeControl : public QDialog
 {
     Q_OBJECT
@@ -25,17 +27,31 @@ class TimeControl : public QDialog
 public:
     TimeControl(QWidget *parent = 0);
 	
+	void setFrameRange(int mn, int mx);
+	int rangeMin() const;
+	int rangeMax() const;
+	int currentFrame() const;
+	
+public slots:
+	void updateCurrentFrame(int x);
+	
 private slots:
+	void setPlayMin();
+	void setPlayMax();
 	
 signals:
+	void currentFrameChanged(int a);
 	
 private:
-	QGroupBox *controlsGroup;
-	QScrollBar * m_bar;
-	QLabel * m_maxLabel;
-	QLabel * m_minLabel;
-	QLabel * m_currentLabel;
-	QSpinBox * m_minSpin;
-	QSpinBox * m_maxSpin;
-	QSpinBox * m_currentSpin;
+	QGroupBox *minGroup;
+	QGroupBox *playGroup;
+	QGroupBox *maxGroup;
+	QScrollBar * bar;
+	QLabel * maxLabel;
+	QLabel * minLabel;
+	QSpinBox * minSpin;
+	QSpinBox * maxSpin;
+	QSpinBox * currentSpin;
+	
+	int m_rangeMin, m_rangeMax;
 };

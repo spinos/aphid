@@ -15,42 +15,134 @@
 TimeControl::TimeControl(QWidget *parent)
     : QDialog(parent)
 {
-	controlsGroup = new QGroupBox(tr("Frame"));
-	QScrollBar * m_bar = new QScrollBar(Qt::Horizontal);
-	QLabel * m_minLabel = new QLabel(tr("Minimum"));
-	QLabel * m_maxLabel = new QLabel(tr("Maximum"));
-	QLabel * m_currentLabel = new QLabel(tr("Current"));
-	QSpinBox * m_minSpin = new QSpinBox;
-	QSpinBox * m_maxSpin = new QSpinBox;
-	QSpinBox * m_currentSpin = new QSpinBox;
-	m_bar->setFocusPolicy(Qt::StrongFocus);
-	m_bar->setMinimumWidth(400);
+	minGroup = new QGroupBox;
+	minLabel = new QLabel;
+	minSpin = new QSpinBox;
+	QHBoxLayout *minLayout = new QHBoxLayout;
+	minLayout->setContentsMargins(4, 4, 4, 4);
+	minLayout->addWidget(minLabel);
+	minLayout->addWidget(minSpin);
+	minGroup->setLayout(minLayout);
 	
-	QGridLayout *spinLayout = new QGridLayout;
-    spinLayout->addWidget(m_minLabel, 0, 0);
-    spinLayout->addWidget(m_maxLabel, 1, 0);
-    spinLayout->addWidget(m_currentLabel, 2, 0);
-    spinLayout->addWidget(m_minSpin, 0, 1);
-    spinLayout->addWidget(m_maxSpin, 1, 1);
-    spinLayout->addWidget(m_currentSpin, 2, 1);
-    
-	QHBoxLayout * controlLayout = new QHBoxLayout;
-	controlLayout->addLayout(spinLayout);
-	controlsGroup->setLayout(controlLayout);
+	maxGroup = new QGroupBox;
+	maxLabel = new QLabel;
+	maxSpin = new QSpinBox;
+	QHBoxLayout *maxLayout = new QHBoxLayout;
+	maxLayout->setContentsMargins(4, 4, 4, 4);
+	maxLayout->addWidget(maxSpin);
+	maxLayout->addWidget(maxLabel);
+	maxGroup->setLayout(maxLayout);
 	
-	QVBoxLayout *layout = new QVBoxLayout;
 	
-	layout->addWidget(controlsGroup);
-	layout->addWidget(m_bar);
+	playGroup = new QGroupBox;
+	bar = new QScrollBar(Qt::Horizontal);
+	currentSpin = new QSpinBox;
+	bar->setFocusPolicy(Qt::StrongFocus);
+	bar->setMinimumWidth(400);
+	QHBoxLayout *playLayout = new QHBoxLayout;
+	playLayout->setContentsMargins(4, 4, 4, 4);
+	playLayout->addWidget(bar);
+	playLayout->addWidget(currentSpin);
+	playLayout->setStretch(0, 1);
+	playGroup->setLayout(playLayout);
+
+	QHBoxLayout *layout = new QHBoxLayout;
+	
+	layout->addWidget(minGroup);
+	layout->addWidget(playGroup);
+	layout->addWidget(maxGroup);
+	layout->setStretch(1, 1);
+	layout->setSpacing(4);
 	
 	setLayout(layout);
 
     layout->setSizeConstraint(QLayout::SetMinimumSize);
-	setContentsMargins(8, 8, 8, 8);
+	setContentsMargins(4, 4, 4, 4);
 	layout->setContentsMargins(0, 0, 0, 0);
 
     setWindowTitle(tr("Time Control"));
-    
 	
+	setFrameRange(1, 99);
+    
+	connect(bar, SIGNAL(valueChanged(int)), this, SLOT(updateCurrentFrame(int)));
+	connect(currentSpin, SIGNAL(valueChanged(int)), this, SLOT(updateCurrentFrame(int)));
+	connect(minSpin, SIGNAL(editingFinished()), this, SLOT(setPlayMin()));
+	connect(maxSpin, SIGNAL(editingFinished()), this, SLOT(setPlayMax()));
 }
 
+void TimeControl::setPlayMin()
+{
+	int x = minSpin->value();
+	if(x >= maxSpin->value()) {
+		maxSpin->setValue(x + 1);
+		bar->setMaximum(x + 1);
+		currentSpin->setMaximum(x + 1);
+	}
+	
+	if(currentFrame() < x)
+		updateCurrentFrame(x);
+
+	bar->setMinimum(x);
+	currentSpin->setMinimum(x);
+}
+
+void TimeControl::setPlayMax()
+{
+	int x = maxSpin->value();
+	if(x <= minSpin->value()) {
+		minSpin->setValue(x - 1);
+		bar->setMinimum(x - 1);
+		currentSpin->setMinimum(x - 1);
+	}
+	
+	if(currentFrame() > x)
+		updateCurrentFrame(x);
+		
+	bar->setMaximum(x);
+	currentSpin->setMaximum(x);
+}
+
+void TimeControl::setFrameRange(int mn, int mx)
+{
+	m_rangeMin = mn;
+	m_rangeMax = mx;
+	
+	minLabel->setText(QString("%1").arg(m_rangeMin));
+	minSpin->setMinimum(m_rangeMin);
+	minSpin->setMaximum(m_rangeMax - 1);
+	minSpin->setValue(m_rangeMin);
+	
+	maxLabel->setText(QString("%1").arg(m_rangeMax));
+	maxSpin->setMinimum(m_rangeMin + 1);
+	maxSpin->setMaximum(m_rangeMax);
+	maxSpin->setValue(m_rangeMax);
+	
+	bar->setMinimum(m_rangeMin);
+	bar->setMaximum(m_rangeMax);
+	bar->setValue(m_rangeMin);
+	currentSpin->setMinimum(m_rangeMin);
+	currentSpin->setMaximum(m_rangeMax);
+	currentSpin->setValue(m_rangeMin);
+}
+
+void TimeControl::updateCurrentFrame(int x)
+{
+	bar->setValue(x);
+	currentSpin->setValue(x);
+	emit currentFrameChanged(x);
+}
+
+int TimeControl::rangeMin() const
+{
+	return m_rangeMin;
+}
+
+int TimeControl::rangeMax() const
+{
+	return m_rangeMax;
+}
+
+int TimeControl::currentFrame() const
+{
+	return bar->value();
+}

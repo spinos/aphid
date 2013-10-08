@@ -102,7 +102,7 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 		v = vertex(i);
 		dv = v - ctx->m_ellipseCenter + selfN * .01f;
 		dv.normalize();
-		if(toC.dot(dv) < .98f) {
+		if(toC.dot(dv) < .97f) {
 			smallEnough = false;
 			break;
 		}
