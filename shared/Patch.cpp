@@ -83,95 +83,60 @@ Matrix33F Patch::tangentFrame() const
 
 bool Patch::pushPlane(PushPlaneContext * ctx) const
 {
-	bool pushed = false;
-	Vector3F selfN, n, dv, v, dp, pop;
+	if(!ctx->m_componentBBox.isPointAround(ctx->m_origin, ctx->m_maxRadius)) return false;
+
+	ctx->m_currentAngle = 0.f;
+	
+	if(ctx->m_componentBBox.isPointInside(ctx->m_origin)) return true;
+	
+	Vector3F selfN, dv, v, dp, pop;
 	
 	getNormal(selfN);
-	ctx->m_plane.getNormal(n);
 	
+	if(selfN.dot(ctx->m_front) > 0.f) return false;
+	
+	if(isBehind(ctx->m_origin, ctx->m_front)) return false;
+	
+	if(isBehind(ctx->m_origin, ctx->m_up)) return false;
+		
 	int i;
-	float maxFrontFacing = -1.f;
-	float facing;
-	for(i = 0; i < 4; i++) {
-		v = vertex(i);
-		dv = v - ctx->m_origin;
-		dv.normalize();
-		facing = ctx->m_front.dot(dv);
-		if(facing > maxFrontFacing) {
-			maxFrontFacing = facing;
-		}
-	}
+	float ang;
 	
-	if(maxFrontFacing < 0.f) return false;
-	
-	maxFrontFacing = -1.f;
-	for(i = 0; i < 4; i++) {
-		v = vertex(i);
-		dv = v - ctx->m_origin;
-		dv.normalize();
-		facing = n.dot(dv);
-		if(facing > maxFrontFacing) {
-			maxFrontFacing = facing;
-		}
-	}
-	
-	if(maxFrontFacing < 0.f) return false;
-		
-	float l, ang;
-	
-	bool smallEnough = true;
-	Vector3F toC = center() - ctx->m_ellipseCenter;
-	toC.normalize();
-	for(i = 0; i < 4; i++) {
-		v = vertex(i);
-		dv = v - ctx->m_ellipseCenter;
-		dv.normalize();
-		if(toC.dot(dv) < .98f) {
-			smallEnough = false;
-			break;
-		}
-	}
-	
-	bool tooFar = true;
-	for(i = 0; i < 4; i++) {
-		v = vertex(i);
-		dv = v - ctx->m_ellipseCenter;
-		l = dv.length();
-		
-		if(l < ctx->m_maxRadius) {
-			tooFar = false;
-			break;
-		}
-	}
-
-	if(smallEnough) ctx->m_convergent = true;
-	
-	if(tooFar && smallEnough) return false;
-	
-	ctx->m_currentAngle = 0.f;
 	bool allBellow = true;
 	for(i = 0; i < 4; i++) {
 		v = vertex(i);
 		dv = v - ctx->m_origin;
-		l = dv.length();
-		if(l < 10e-5) continue;
 		
 		ctx->m_plane.projectPoint(v, pop);
 		
 		dp = pop - ctx->m_origin;
 		dp.normalize();
 		
-		ang = dp.angleBetween(dv, n);
+		ang = dp.angleBetween(dv, ctx->m_up);
 		
 		if(ang > ctx->m_maxAngle) allBellow = false;
 		
-		if(ctx->m_currentAngle < ang)
+		if(ang > ctx->m_currentAngle)
 			ctx->m_currentAngle = ang;
-		
-		pushed = true;
 	}
 	
 	if(allBellow) return false;
-	return pushed;
+	return true;
 }
 
+bool Patch::isBehind(const Vector3F & po, Vector3F & nr) const
+{
+	int i;
+	float maxFacing = -1.f;
+	float facing;
+	Vector3F dv;
+	for(i = 0; i < 4; i++) {
+		dv = vertex(i) - po;
+		dv.normalize();
+		facing = nr.dot(dv);
+		if(facing > maxFacing) {
+			maxFacing = facing;
+		}
+	}
+	return maxFacing < 0.f;
+}

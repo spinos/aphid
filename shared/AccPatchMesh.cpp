@@ -233,7 +233,6 @@ Matrix33F AccPatchMesh::tangentFrame(unsigned idx, float u, float v) const
 
 void AccPatchMesh::pushPlane(unsigned idx, Patch::PushPlaneContext * ctx) const
 {
-	ctx->m_convergent = false;
 	recursiveBezierPushPlane(&beziers()[idx], ctx, 0);
 }
 
@@ -245,11 +244,13 @@ void AccPatchMesh::recursiveBezierPushPlane(BezierPatch* patch, Patch::PushPlane
 	fourCorners[2] = patch->_contorlPoints[15];
 	fourCorners[3] = patch->_contorlPoints[12];
 	
+	ctx->m_componentBBox = patch->controlBBox();
+	
 	Patch pl(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
 	if(!pl.pushPlane(ctx))
 		return;
 		
-	if(ctx->m_convergent || level > 5) {
+	if(ctx->isConverged() || level > 5) {
 		if(ctx->m_currentAngle > ctx->m_maxAngle) 
 			ctx->m_maxAngle = ctx->m_currentAngle;
 
