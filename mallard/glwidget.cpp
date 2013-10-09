@@ -295,20 +295,24 @@ void GLWidget::saveSheetAs()
 	}
 }
 
-void GLWidget::openSheet()
+QString GLWidget::openSheet(QString fileName)
 {
-	QString selectedFilter;
-	QString fileName = QFileDialog::getOpenFileName(this,
+	if(fileName == tr("")) {
+		QString selectedFilter;
+		fileName = QFileDialog::getOpenFileName(this,
 							tr("Open scene from file"),
 							tr("info"),
 							tr("All Files (*);;Text Files (*.txt)"),
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
-	if(fileName != "") {
+	}
+	
+	if(fileName != tr("")) {
 		openScene(fileName.toUtf8().data());
 		postLoad();
 		emit sceneNameChanged(fileName);
 	}
+	return fileName;
 }
 
 void GLWidget::revertSheet()

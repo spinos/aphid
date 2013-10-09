@@ -72,6 +72,7 @@ private:
 	FeatherEdit * m_featherEdit;
 	TimeControl * m_timeControl;
 	QMenu * fileMenu;
+	QMenu *recentFilesMenu;
 	QMenu * windowMenu;
 	QAction * showBrushControlAct;
 	QAction * showFeatherEditAct;
@@ -83,15 +84,22 @@ private:
 	QAction * importMeshAct;
 	QAction * importBakeAct;
 	QAction * revertAct;
+	enum { MaxRecentFiles = 5 };
+	QAction *recentFileActs[MaxRecentFiles];
 private:
 	void createActions();
 	void createMenus();
+	void updateRecentFileActions();
 	
 public slots:
 	void receiveToolContext(int a);
     void receiveToolAction(int a);
 	void setWorkTitle(QString name);
 	void showMessage(QString msg);
+	
+private slots:
+	void openFile();
+	void openRecentFile();
 };
 //! [0]
 

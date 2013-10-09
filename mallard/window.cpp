@@ -146,7 +146,7 @@ void Window::createActions()
 	
 	openSceneAct = new QAction(tr("&Open"), this);
 	openSceneAct->setStatusTip(tr("Load a file as current scene"));
-	connect(openSceneAct, SIGNAL(triggered()), glWidget, SLOT(openSheet()));
+	connect(openSceneAct, SIGNAL(triggered()), this, SLOT(openFile()));
 	
 	revertAct = new QAction(tr("&Revert To Saved"), this);
 	revertAct->setStatusTip(tr("Discard changes to current scene after lastest save"));
@@ -155,6 +155,13 @@ void Window::createActions()
 	importBakeAct = new QAction(tr("&Import Baked Animation"), this);
 	importBakeAct->setStatusTip(tr("Attach bake point cache to the body"));
     connect(importBakeAct, SIGNAL(triggered()), glWidget, SLOT(chooseBake()));
+	
+	for (int i = 0; i < MaxRecentFiles; ++i) {
+        recentFileActs[i] = new QAction(this);
+        recentFileActs[i]->setVisible(false);
+        connect(recentFileActs[i], SIGNAL(triggered()),
+                this, SLOT(openRecentFile()));
+    }
 }
 
 void Window::createMenus()
@@ -165,6 +172,12 @@ void Window::createMenus()
 	fileMenu->addAction(saveSceneAct);
 	fileMenu->addAction(saveSceneAsAct);
 	fileMenu->addAction(revertAct);
+	
+	recentFilesMenu = new QMenu(tr("&Recent Scene"));
+	for (int i = 0; i < MaxRecentFiles; ++i)
+        recentFilesMenu->addAction(recentFileActs[i]);
+	fileMenu->addMenu(recentFilesMenu);
+	
 	fileMenu->addSeparator();
 	fileMenu->addAction(importMeshAct);
 	fileMenu->addAction(importBakeAct);
@@ -173,6 +186,8 @@ void Window::createMenus()
     windowMenu->addAction(showFeatherEditAct);
 	windowMenu->addAction(showBrushControlAct);
 	windowMenu->addAction(showTimeControlAct);
+	
+	updateRecentFileActions();
 }
 
 void Window::setWorkTitle(QString name)
@@ -183,4 +198,45 @@ void Window::setWorkTitle(QString name)
 void Window::showMessage(QString msg)
 {
 	statusBar()->showMessage(msg);
+}
+
+void Window::openFile()
+{
+	QString fileName = glWidget->openSheet();
+	if(fileName == "") return;
+	
+	QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+    files.removeAll(fileName);
+    files.prepend(fileName);
+    while (files.size() > MaxRecentFiles)
+        files.removeLast();
+
+    settings.setValue("recentFileList", files);
+
+    updateRecentFileActions();
+}
+	
+void Window::openRecentFile()
+{
+	QAction *action = qobject_cast<QAction *>(sender());
+    if (action)
+		glWidget->openSheet(action->data().toString());
+}
+
+void Window::updateRecentFileActions()
+{
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+
+    int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
+
+    for (int i = 0; i < numRecentFiles; ++i) {
+        QString text = tr("&%1").arg(files[i]);
+        recentFileActs[i]->setText(text);
+        recentFileActs[i]->setData(files[i]);
+        recentFileActs[i]->setVisible(true);
+    }
+    for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
+        recentFileActs[j]->setVisible(false);
 }

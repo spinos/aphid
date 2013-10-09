@@ -69,6 +69,7 @@ public:
 	void deselectFeather();
 	void rebuildFeather();
 	void clearFeather();
+	QString openSheet(QString fileName = tr(""));
 	
 signals:
 	void sceneNameChanged(QString name);
@@ -77,7 +78,6 @@ signals:
 	
 public slots:
 	void cleanSheet();
-	void openSheet();
 	void saveSheet();
 	void saveSheetAs();
     void revertSheet();
