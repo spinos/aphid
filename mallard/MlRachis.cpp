@@ -53,10 +53,8 @@ void MlRachis::update(const Vector3F & oriP, const Matrix33F & space, float radi
 	
 	reset();
 	
-	m_spaces[0].rotateY(fullPitch * m_angles[0] + bounceAngle * .4f);
-	m_spaces[1].rotateY(fullPitch * m_angles[1] + bounceAngle * .6f);
-	for(unsigned i = 2; i < m_numSpace; i++) {
-		m_spaces[i].rotateY(fullPitch * m_angles[i]);
+	for(unsigned i = 0; i < m_numSpace; i++) {
+		m_spaces[i].rotateY((fullPitch + bounceAngle) * m_angles[i]);
 	}
 }
 
