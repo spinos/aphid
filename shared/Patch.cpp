@@ -89,7 +89,7 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 	
 	if(ctx->m_componentBBox.isPointInside(ctx->m_origin)) return true;
 	
-	Vector3F selfN, dv, v, dp, pop;
+	Vector3F selfN;
 	
 	getNormal(selfN);
 	
@@ -99,11 +99,11 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 	
 	if(isBehind(ctx->m_origin, ctx->m_up)) return false;
 		
-	int i;
 	float ang;
+	Vector3F v, dv, dp, pop;
 	
 	bool allBellow = true;
-	for(i = 0; i < 4; i++) {
+	for(int i = 0; i < 4; i++) {
 		v = vertex(i);
 		dv = v - ctx->m_origin;
 		

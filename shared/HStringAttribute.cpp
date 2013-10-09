@@ -28,10 +28,11 @@ char HStringAttribute::write(const std::string & str)
 char HStringAttribute::read(std::string & str)
 {
 	const int d = dataSpaceDimension();
-	char * t = new char[d];
+	char * t = new char[d + 1];
 	herr_t status = H5Aread(fObjectId, dataType(), t);
 	if(status < 0)
 		return 0;
+	t[d] = '\0';
 	str = std::string(t);
 	delete[] t;
 	return 1;

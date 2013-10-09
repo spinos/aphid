@@ -41,7 +41,6 @@ char BakeDeformer::load(const char * filename)
 	if(found) {
 		processFrameRange();
 		processFrameCenters();
-		verbose();
 	}
 	
 	HObject::FileIO.close();
