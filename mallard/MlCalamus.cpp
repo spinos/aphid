@@ -119,7 +119,7 @@ unsigned MlCalamus::bufferStart() const
 
 void MlCalamus::collideWith(CollisionRegion * skin, const Vector3F & p)
 {
-	skin->resetCollisionRegionAround(m_faceIdx, p, realScale() * 1.5f);
+	skin->resetCollisionRegionAround(m_faceIdx, p, realScale());
 	feather()->setCollision(skin);
 }
 

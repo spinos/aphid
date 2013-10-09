@@ -89,18 +89,42 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 	getNormal(selfN);
 	ctx->m_plane.getNormal(n);
 	
-	//if(n.dot(selfN) < 0.f) return false;
-	//if(ctx->m_front.dot(selfN) > 0.f) return false;
-	
 	int i;
+	float maxFrontFacing = -1.f;
+	float facing;
+	for(i = 0; i < 4; i++) {
+		v = vertex(i);
+		dv = v - ctx->m_origin;
+		dv.normalize();
+		facing = ctx->m_front.dot(dv);
+		if(facing > maxFrontFacing) {
+			maxFrontFacing = facing;
+		}
+	}
+	
+	if(maxFrontFacing < 0.f) return false;
+	
+	maxFrontFacing = -1.f;
+	for(i = 0; i < 4; i++) {
+		v = vertex(i);
+		dv = v - ctx->m_origin;
+		dv.normalize();
+		facing = n.dot(dv);
+		if(facing > maxFrontFacing) {
+			maxFrontFacing = facing;
+		}
+	}
+	
+	if(maxFrontFacing < 0.f) return false;
+		
 	float l, ang;
 	
 	bool smallEnough = true;
-	Vector3F toC = center() - ctx->m_ellipseCenter + selfN * .01f;
+	Vector3F toC = center() - ctx->m_ellipseCenter;
 	toC.normalize();
 	for(i = 0; i < 4; i++) {
 		v = vertex(i);
-		dv = v - ctx->m_ellipseCenter + selfN * .01f;
+		dv = v - ctx->m_ellipseCenter;
 		dv.normalize();
 		if(toC.dot(dv) < .98f) {
 			smallEnough = false;
