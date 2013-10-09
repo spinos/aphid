@@ -141,6 +141,15 @@ bool MlScene::writeSceneToFile(const std::string & fileName)
 	
 	HMesh grpBody("/world/body");
 	grpBody.save(m_accmesh);
+	
+	if(grpBody.hasNamedAttr(".bakefile"))
+		grpBody.discardNamedAttr(".bakefile");
+		
+	if(m_deformer->isEnabled()) {
+		grpBody.addStringAttr(".bakefile", m_deformer->fileName().size());
+		grpBody.writeStringAttr(".bakefile", m_deformer->fileName());
+	}
+	
 	grpBody.close();
 	
 	writeFeatherExamples();
@@ -198,6 +207,12 @@ bool MlScene::readSceneFromFile(const std::string & fileName)
 
 	HMesh grpBody("/world/body");
 	grpBody.load(m_accmesh);
+	
+	m_bakeName = std::string("");
+	if(grpBody.hasNamedAttr(".bakefile")) {
+		grpBody.readStringAttr(".bakefile", m_bakeName);
+	}
+	
 	grpBody.close();
 	
 	readFeatherExamples();
@@ -253,8 +268,7 @@ bool MlScene::readBakeFromFile(const std::string & fileName)
 	}
 	
 	if(m_deformer->load(fileName.c_str())) {
-		m_playback->setFrameRange(m_deformer->minFrame(), m_deformer->maxFrame());
-		m_playback->enableControl();
+		enableDeformer();
 		return true;
 	}
 	return false;
@@ -266,4 +280,23 @@ char MlScene::deformBody(int x)
 	if(!m_deformer->solve()) return false;
 	
 	return true;
+}
+
+void MlScene::enableDeformer()
+{
+	m_deformer->enable();
+	m_playback->setFrameRange(m_deformer->minFrame(), m_deformer->maxFrame());
+	m_playback->enableControl();
+}
+	
+void MlScene::disableDeformer()
+{
+	m_deformer->disable();
+	m_playback->disableControl();
+}
+
+void MlScene::postLoadBake()
+{
+	if(m_bakeName != "")
+		readBakeFromFile(m_bakeName);
 }

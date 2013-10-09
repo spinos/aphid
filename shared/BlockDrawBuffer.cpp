@@ -26,6 +26,7 @@ BlockDrawBuffer::~BlockDrawBuffer()
 
 void BlockDrawBuffer::initializeBuffer()
 {
+	if(numBlock() > 0) clearBuffer();
 	m_blocks.push_back(new PtrTup);
 	m_vertexPtr = m_blocks[0]->alignedV;
 	m_normalPtr = m_blocks[0]->alignedN;

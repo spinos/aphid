@@ -91,6 +91,9 @@ void GLWidget::clientDraw()
 
 void GLWidget::loadMesh(std::string filename)
 {
+	skin()->cleanup();
+	m_featherDrawer->initializeBuffer();
+	disableDeformer();
 	ESMUtil::ImportPatch(filename.c_str(), mesh());
 	postLoad();
 	setDirty();
@@ -211,7 +214,6 @@ void GLWidget::deselectFeather()
 
 void GLWidget::rebuildFeather()
 {
-	m_featherDrawer->clearBuffer();
 	m_featherDrawer->initializeBuffer();
 	m_featherDrawer->rebuildBuffer(skin());
 }
@@ -226,7 +228,6 @@ void GLWidget::clearFeather()
 		return;
 		
 	skin()->clearFeather();
-	m_featherDrawer->clearBuffer();
 	m_featherDrawer->initializeBuffer();
 }
 
@@ -254,7 +255,6 @@ void GLWidget::clearScene()
 {
 	MlScene::clearScene();
 	m_bezierDrawer->clearBuffer();
-	m_featherDrawer->clearBuffer();
 	m_featherDrawer->initializeBuffer();
 	clearTree();
 	clearTopology();
@@ -355,9 +355,7 @@ void GLWidget::updateOnFrame(int x)
 	
 	body()->update(m_topo);
 	m_bezierDrawer->rebuildBuffer(body());
-	m_featherDrawer->clearBuffer();
-	m_featherDrawer->initializeBuffer();
-	m_featherDrawer->rebuildBuffer(skin());
+	rebuildFeather();
 	update();
 	setRebuildTree();
 }
@@ -371,6 +369,7 @@ void GLWidget::postLoad()
 	skin()->setBodyMesh(body(), m_topo);
 	skin()->finishCreateFeather();
 	bodyDeformer()->setMesh(body());
+	postLoadBake();
 	m_bezierDrawer->rebuildBuffer(body());
 	m_featherDrawer->rebuildBuffer(skin());
 	update();

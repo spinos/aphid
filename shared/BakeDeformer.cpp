@@ -26,7 +26,6 @@ char BakeDeformer::load(const char * filename)
 		return false;
 	}
 	
-	std::cout<<"read bake from "<<filename<<"\n";
 	bool found = false;
 	HBase g("/");
 	int nf = g.numChildren();
@@ -42,15 +41,13 @@ char BakeDeformer::load(const char * filename)
 	if(found) {
 		processFrameRange();
 		processFrameCenters();
-		std::cout<<"Found matched bake cache\n";
-		std::cout<<" frame range: "<<m_minFrame<<" to "<<m_maxFrame<<"\n";
-		std::cout<<" bake path: "<<m_bakePath<<"\n";
+		verbose();
 	}
 	
 	HObject::FileIO.close();
 	
 	if(!found) {
-		std::cout<<"ERROR: cannot find matched bake cache\n";
+		std::cout<<"ERROR: cannot find matched bake cache in file "<<filename<<"\n";
 		return 0;
 	}
 	
@@ -162,6 +159,7 @@ void BakeDeformer::clearFrames()
 char BakeDeformer::solve()
 {
     if(!isValid()) return 0;
+	if(!isEnabled()) return 0;
     
     if(!HObject::FileIO.open(fileName().c_str(), HDocument::oReadOnly)) {
 		setLatestError(BaseFile::FileNotReadable);
@@ -200,4 +198,11 @@ int BakeDeformer::minFrame() const
 int BakeDeformer::maxFrame() const
 {
 	return m_maxFrame;
+}
+
+void BakeDeformer::verbose() const
+{
+	std::cout<<"Bake Cache Deformer: "<<fileName()<<"\n num vertices "<<numVertices();
+	std::cout<<" frame range "<<m_minFrame<<" to "<<m_maxFrame<<"\n";
+	std::cout<<" bake path "<<m_bakePath<<"\n";
 }

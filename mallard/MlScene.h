@@ -37,6 +37,11 @@ public:
 	bool readBakeFromFile(const std::string & fileName);
 	
 	char deformBody(int x);
+	
+	void enableDeformer();
+	void disableDeformer();
+	
+	void postLoadBake();
 private:
 	void writeFeatherExamples();
 	void readFeatherExamples();
@@ -48,4 +53,5 @@ private:
 	BakeDeformer * m_deformer;
 	PlaybackControl * m_playback;
 	std::string m_featherEditBackgroundName;
+	std::string m_bakeName;
 };

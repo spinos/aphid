@@ -25,6 +25,8 @@ public:
 	
 	int minFrame() const;
 	int maxFrame() const;
+	
+	void verbose() const;
 private:
 	bool findMatchedMesh(HBase & grp);
 	bool isGeomMatched(HBase & grp);
