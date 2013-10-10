@@ -30,9 +30,16 @@ public:
 	void closeSlice(const std::string & entryName, const std::string & sliceName);
 	
 	void writeSliceVector3(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data);
+	void readSliceVector3(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data);
 
+	void setCached(const std::string & entryName, const std::string & sliceName, unsigned size);
+	unsigned isCached(const std::string & entryName, const std::string & sliceName);
+	
+protected:
+	std::string fullPath(const std::string & entryName, const std::string & sliceName) const;
 private:
 	std::map<std::string, HBase *> m_entries;
 	std::map<std::string, HDataset *> m_slices;
+	std::map<std::string, unsigned> m_cachedSlices;
 };
 

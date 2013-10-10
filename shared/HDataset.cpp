@@ -31,9 +31,9 @@ char HDataset::create(hid_t parentId)
 	H5Sget_simple_extent_dims(createSpace, dims, maxdims);
 	m_chunkSize[0] = dims[0] / 16;
 	
-	std::cout<<"d space n dim "<<ndim<<"\n";
-	std::cout<<"d space "<<dims[0]<<" "<<dims[1]<<" "<<dims[2]<<" \n";
-	std::cout<<"d chunk "<<m_chunkSize[0]<<" "<<m_chunkSize[1]<<" "<<m_chunkSize[2]<<" \n";
+	//std::cout<<"d space n dim "<<ndim<<"\n";
+	//std::cout<<"d space "<<dims[0]<<" "<<dims[1]<<" "<<dims[2]<<" \n";
+	//std::cout<<"d chunk "<<m_chunkSize[0]<<" "<<m_chunkSize[1]<<" "<<m_chunkSize[2]<<" \n";
 	
 	if(H5Pset_chunk(createProps, ndim, m_chunkSize)<0) {
       printf("Error: fail to set chunk\n");
@@ -189,8 +189,6 @@ void HDataset::resize()
 	getSpaceDimension(dims, &ndim);
 	if(dims[0] != size[0])
 		std::cout<<"failed to resize to "<<size[0]<<"\n";
-	//else
-	//	std::cout<<"resize to "<<size[0]<<"\n";
 }
 
 hid_t HDataset::createSpace(hsize_t * block) const

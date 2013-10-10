@@ -70,13 +70,14 @@ void MlDrawer::updateActive(MlSkin * skin)
 	unsigned i;
 	for(i = 0; i < num; i++) {
 		MlCalamus * c = skin->getActive(i);
-		computeAFeather(skin, c);
+		computeFeather(skin, c);
+		updateBuffer(c);
 	}
 }
 
-void MlDrawer::computeAFeather(MlSkin * skin, MlCalamus * c)
+void MlDrawer::updateBuffer(MlCalamus * c)
 {
-	tessellate(skin, c);
+	tessellate(c->feather());
 	
 	const unsigned nvpf = m_featherTess->numIndices();
 	const unsigned startv = c->bufferStart();
@@ -127,7 +128,7 @@ void MlDrawer::addToBuffer(MlSkin * skin)
 
 void MlDrawer::rebuildBuffer(MlSkin * skin)
 {
-	unsigned nc = skin->numFeathers();
+	const unsigned nc = skin->numFeathers();
 	if(nc < 1) return;
 	
 	std::stringstream sst;
@@ -140,10 +141,11 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 	addSliceVector3("/p", sst.str());
 	
 	openSlice("/p", sst.str());
+	
 	//std::cout<<"building feather draw buffer\n num feathers "<<nc<<"\n";
 	unsigned loc = 0;
 	
-	unsigned i, j, nvpf;
+	unsigned i, nvpf;
 	Vector3F v;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin->getCalamus(i);
@@ -160,31 +162,18 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 		loc += nvpf;
 	}
 	
-	Vector3F wpb[10000];
-	unsigned iblock = 0, ifull = 0;
-	for(i = 0; i < nc; i++) {
-		MlCalamus * c = skin->getCalamus(i);
-		computeAFeather(skin, c);
-		
-		MlFeather * f = c->feather();
-		for(j = 0; j < f->numWorldP(); j++) {
-			wpb[iblock] = f->worldP()[j];
-			iblock++;
-			ifull++;
-			if(iblock == 10000) {
-				writeSliceVector3("/p", sst.str(), ifull - iblock, iblock, wpb);
-				iblock = 0;
-			}
-		}
+	if(isCached("/p", sst.str())) {
+		readFromCache(skin, sst.str());
 	}
-	
-	if(iblock > 0)
-		writeSliceVector3("/p", sst.str(), ifull - iblock, iblock, wpb);
-
+	else {
+		std::cout<<"caching frame "<<sst.str()<<"\n";
+		writeToCache(skin, sst.str());
+	}
+		
 	closeSlice("/p", sst.str());
 }
 
-void MlDrawer::updateFeather(MlSkin * skin, MlCalamus * c)
+void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c)
 {
     Vector3F p;
 	skin->getPointOnBody(c, p);
@@ -194,14 +183,70 @@ void MlDrawer::updateFeather(MlSkin * skin, MlCalamus * c)
 	c->computeFeatherWorldP(p, space);
 }
 
-void MlDrawer::tessellate(MlSkin * skin, MlCalamus * c)
+void MlDrawer::tessellate(MlFeather * f)
 {
-	updateFeather(skin, c);
-	m_featherTess->setFeather(c->feather());
-	m_featherTess->evaluate(c->feather());
+	m_featherTess->setFeather(f);
+	m_featherTess->evaluate(f);
 }
 
 void MlDrawer::setCurrentFrame(int x)
 {
 	m_currentFrame = x;
+}
+
+void MlDrawer::writeToCache(MlSkin * skin, const std::string & sliceName)
+{
+	const unsigned nc = skin->numFeathers();
+	Vector3F wpb[10000];
+	unsigned i, j, iblock = 0, ifull = 0;
+	for(i = 0; i < nc; i++) {
+		MlCalamus * c = skin->getCalamus(i);
+		computeFeather(skin, c);
+		
+		MlFeather * f = c->feather();
+		for(j = 0; j < f->numWorldP(); j++) {
+			wpb[iblock] = f->worldP()[j];
+			iblock++;
+			ifull++;
+			if(iblock == 10000) {
+				writeSliceVector3("/p", sliceName, ifull - iblock, iblock, wpb);
+				iblock = 0;
+			}
+		}
+		
+		updateBuffer(c);
+	}
+	
+	if(iblock > 0)
+		writeSliceVector3("/p", sliceName, ifull - iblock, iblock, wpb);
+		
+	setCached("/p", sliceName, ifull);
+}
+
+void MlDrawer::readFromCache(MlSkin * skin, const std::string & sliceName)
+{
+	const unsigned nc = skin->numFeathers();
+	Vector3F wpb[10000];
+	unsigned i, j, iblock = 0, ifull = 0;
+	readSliceVector3("/p", sliceName, 0, 10000, wpb);
+	
+	for(i = 0; i < nc; i++) {
+		
+		MlCalamus * c = skin->getCalamus(i);
+		
+		MlFeather * f = c->feather();
+		
+		Vector3F * dst = f->worldP();
+		for(j = 0; j < f->numWorldP(); j++) {
+			dst[j] = wpb[iblock];
+			iblock++;
+			ifull++;
+			if(iblock == 10000) {
+				readSliceVector3("/p", sliceName, ifull, 10000, wpb);
+				iblock = 0;
+			}
+		}
+		
+		updateBuffer(c);
+	}
 }
