@@ -59,7 +59,7 @@ bool BaseScene::openScene(const std::string & fileName)
 		return false;
 	}
 	
-	readSceneFromFile(fileName);
+	if(!readSceneFromFile(fileName)) return false;
 	m_fileName = fileName;
 	setClean();
 	return true;

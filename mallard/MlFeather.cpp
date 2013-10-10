@@ -98,7 +98,6 @@ BoundingRectangle MlFeather::getBoundingRectangle() const
 
 void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale)
 {
-	
 	m_rachis->update(oriPos, oriRot, scale * getLength(), m_skin, pitch);
 	
 	Vector3F segOrigin = oriPos;

@@ -308,7 +308,7 @@ QString GLWidget::openSheet(QString fileName)
 	}
 	
 	if(fileName != tr("")) {
-		openScene(fileName.toUtf8().data());
+		if(!openScene(fileName.toUtf8().data())) return tr("");
 		postLoad();
 		emit sceneNameChanged(fileName);
 	}
