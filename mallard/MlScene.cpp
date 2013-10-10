@@ -106,6 +106,11 @@ BakeDeformer * MlScene::bodyDeformer()
 	return m_deformer;
 }
 
+PlaybackControl * MlScene::playback()
+{
+	return m_playback;
+}
+
 void MlScene::setPlayback(PlaybackControl * p)
 {
 	m_playback = p;

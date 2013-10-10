@@ -55,6 +55,7 @@
 #include <MlFeather.h>
 #include <MlSkin.h>
 #include <BakeDeformer.h>
+#include <PlaybackControl.h>
 #include "MlCalamus.h"
 
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
@@ -121,6 +122,7 @@ void GLWidget::clientSelect()
 		skin()->discardActive();
 		selectFeather();
 	}
+	m_featherDrawer->clearCached();
 	setDirty();
 }
 
@@ -217,6 +219,14 @@ void GLWidget::rebuildFeather()
 {
 	m_featherDrawer->initializeBuffer();
 	m_featherDrawer->rebuildBuffer(skin());
+}
+
+void GLWidget::bakeFrames()
+{
+	if(!playback()->isControlEnabled()) return;
+	int i;
+	for(i = playback()->rangeMin(); i <= playback()->rangeMax(); i++)
+		updateOnFrame(i);
 }
 
 void GLWidget::clearFeather()
@@ -377,6 +387,7 @@ void GLWidget::postLoad()
 	bodyDeformer()->setMesh(body());
 	postLoadBake();
 	m_bezierDrawer->rebuildBuffer(body());
+	m_featherDrawer->clearCached();
 	m_featherDrawer->rebuildBuffer(skin());
 	update();
 	std::string febkgrd = featherEditBackground();

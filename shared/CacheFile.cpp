@@ -144,6 +144,11 @@ unsigned CacheFile::isCached(const std::string & entryName, const std::string & 
 	return m_cachedSlices[slicePath];
 }
 
+void CacheFile::clearCached()
+{
+	m_cachedSlices.clear();
+}
+
 std::string CacheFile::fullPath(const std::string & entryName, const std::string & sliceName) const
 {
 	std::stringstream sst;

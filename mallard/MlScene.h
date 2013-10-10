@@ -28,6 +28,7 @@ public:
 	MlSkin * skin();
 	AccPatchMesh * body();
 	BakeDeformer * bodyDeformer();
+	PlaybackControl * playback();
 	void setPlayback(PlaybackControl * p);
 	
 	bool shouldSave();

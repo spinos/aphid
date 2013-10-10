@@ -120,7 +120,14 @@ void ToolBox::createAction()
 	clr->addIconFile(":clearActive.png");
 	clr->setIconIndex(0);
 	clr->setAction(ClearBodyContourFeather);
+	
+	ActionIconFrame * b = new ActionIconFrame(this);
+	b->addIconFile(":bake.png");
+	b->addIconFile(":bakeActive.png");
+	b->setIconIndex(0);
+	b->setAction(BakeAnimation);
 
 	m_actionFrames.push_back(rb);
 	m_actionFrames.push_back(clr);
+	m_actionFrames.push_back(b);
 }

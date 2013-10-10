@@ -30,7 +30,8 @@ public:
 		RemoveFeatherExample = 10,
 		IncreaseFeathExampleNSegment = 11,
 		DecreaseFeathExampleNSegment = 12,
-		LoadImage = 13
+		LoadImage = 13,
+		BakeAnimation = 14
     };
     
     ToolContext();

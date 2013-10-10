@@ -34,7 +34,7 @@ public:
 
 	void setCached(const std::string & entryName, const std::string & sliceName, unsigned size);
 	unsigned isCached(const std::string & entryName, const std::string & sliceName);
-	
+	void clearCached();
 protected:
 	std::string fullPath(const std::string & entryName, const std::string & sliceName) const;
 private:

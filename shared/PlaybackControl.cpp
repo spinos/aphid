@@ -9,7 +9,10 @@
 
 #include "PlaybackControl.h"
 
-PlaybackControl::PlaybackControl() {}
+PlaybackControl::PlaybackControl() 
+{
+	m_enabled = false;
+}
 
 void PlaybackControl::setCurrentFrame(int x)
 {
@@ -38,5 +41,17 @@ int PlaybackControl::rangeMax() const
 	return m_rangeMax;
 }
 
-void PlaybackControl::disableControl() {}
-void PlaybackControl::enableControl() {}
+void PlaybackControl::disableControl() 
+{
+	m_enabled = false;
+}
+
+void PlaybackControl::enableControl() 
+{
+	m_enabled = true;
+}
+
+bool PlaybackControl::isControlEnabled() const
+{
+	return m_enabled;
+}

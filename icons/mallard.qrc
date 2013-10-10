@@ -36,11 +36,13 @@
         <file>addFeatherActive.png</file>
         <file>deleteFeather.png</file>
         <file>deleteFeatherActive.png</file>
-		<file>increaseNSegActive.png</file>
-		<file>increaseNSeg.png</file>
-		<file>decreaseNSegActive.png</file>
-		<file>decreaseNSeg.png</file>
-		<file>imageActive.png</file>
-		<file>image.png</file>
+        <file>increaseNSegActive.png</file>
+        <file>increaseNSeg.png</file>
+        <file>decreaseNSegActive.png</file>
+        <file>decreaseNSeg.png</file>
+        <file>imageActive.png</file>
+        <file>image.png</file>
+        <file>bake.png</file>
+        <file>bakeActive.png</file>
     </qresource>
 </RCC>

@@ -99,19 +99,19 @@ void Window::receiveToolContext(int a)
 
 void Window::receiveToolAction(int a)
 {
-    if(a == ToolContext::RebuildBodyContourFeather)
-        glWidget->rebuildFeather();
-    else if(a == ToolContext::ClearBodyContourFeather)
-        glWidget->clearFeather();
-	/*else if(a == ToolContext::IncreaseWale)
-		glWidget->changeWaleResolution(1);
-	else if(a == ToolContext::DecreaseWale)
-		glWidget->changeWaleResolution(-1);
-	else if(a == ToolContext::IncreaseCourse)
-		glWidget->changeCourseResolution(1);
-	else if(a == ToolContext::DecreaseCourse)
-		glWidget->changeCourseResolution(-1);
-		*/
+	switch (a) {
+		case ToolContext::RebuildBodyContourFeather:
+			glWidget->rebuildFeather();
+			break;
+		case ToolContext::ClearBodyContourFeather:
+			glWidget->clearFeather();
+			break;
+		case ToolContext::BakeAnimation:
+			glWidget->bakeFrames();
+			break;
+		default:
+			break;
+	}
 }
 
 void Window::createActions()

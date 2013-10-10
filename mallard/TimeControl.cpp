@@ -143,6 +143,7 @@ void TimeControl::disableControl()
 	minGroup->setEnabled(false);
 	playGroup->setEnabled(false);
 	maxGroup->setEnabled(false);
+	PlaybackControl::disableControl();
 }
 
 void TimeControl::enableControl()
@@ -150,4 +151,5 @@ void TimeControl::enableControl()
 	minGroup->setEnabled(true);
 	playGroup->setEnabled(true);
 	maxGroup->setEnabled(true);
+	PlaybackControl::enableControl();
 }

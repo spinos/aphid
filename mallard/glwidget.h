@@ -69,6 +69,8 @@ public:
 	void deselectFeather();
 	void rebuildFeather();
 	void clearFeather();
+	void bakeFrames();
+	
 	QString openSheet(QString fileName = tr(""));
 	void closeCache();
 	
