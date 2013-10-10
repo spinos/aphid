@@ -70,6 +70,7 @@ public:
 	void rebuildFeather();
 	void clearFeather();
 	QString openSheet(QString fileName = tr(""));
+	void closeCache();
 	
 signals:
 	void sceneNameChanged(QString name);
@@ -87,6 +88,7 @@ public slots:
 protected:
     virtual void clientDraw();
 	virtual void focusOutEvent(QFocusEvent * event);
+	
 //! [3]
 private:
 	void selectFeather();

@@ -76,7 +76,9 @@ MlScene::MlScene()
 
 MlScene::~MlScene() 
 {
-	clearScene();
+	clearFeatherExamples();
+	m_skin->cleanup();
+	m_accmesh->cleanup();
 }
 
 void MlScene::setFeatherEditBackground(const std::string & name)

@@ -8,9 +8,11 @@
  */
 
 #pragma once
-#include <string>
-class Vector3F;
 #include <AllHdf.h>
+#include <string>
+#include <iostream>
+class Vector3F;
+
 class HBase : public HGroup {
 public:
 	HBase(const std::string & path);

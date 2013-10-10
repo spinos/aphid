@@ -242,3 +242,8 @@ void Window::updateRecentFileActions()
     for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
         recentFileActs[j]->setVisible(false);
 }
+
+void Window::closeEvent(QCloseEvent *event)
+{
+	glWidget->closeCache();
+}

@@ -63,8 +63,8 @@ public:
     Window();
 
 protected:
-    void keyPressEvent(QKeyEvent *event);
-	
+    virtual void keyPressEvent(QKeyEvent *event);
+	virtual void closeEvent(QCloseEvent *event);
 private:
     GLWidget *glWidget;
 	ToolBox * m_tools;

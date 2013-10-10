@@ -26,6 +26,8 @@ bool BakeDeformer::open(const std::string & filename)
 		return false;
 	}
 	
+	setDocument(HObject::FileIO);
+	
 	bool found = false;
 	HBase g("/");
 	int nf = g.numChildren();
@@ -42,8 +44,6 @@ bool BakeDeformer::open(const std::string & filename)
 		processFrameRange();
 		processFrameCenters();
 	}
-	
-	HObject::FileIO.close();
 	
 	if(!found) {
 		std::cout<<"ERROR: cannot find matched bake cache in file "<<filename<<"\n";
@@ -160,19 +160,13 @@ char BakeDeformer::solve()
     if(!isValid()) return 0;
 	if(!isEnabled()) return 0;
     
-    if(!HObject::FileIO.open(fileName().c_str(), HDocument::oReadOnly)) {
-		setLatestError(BaseFile::FileNotReadable);
-		return false;
-	}
+    useDocument();
 	
-	//std::cout<<"read bake at frame "<<m_currentFrame<<"\n";
 	HBase b(m_bakePath);
 	std::stringstream sst;
 	sst.str("");
 	sst<<m_currentFrame;
 	char status = b.readVector3Data(sst.str().c_str(), numVertices(), deformedP());
-	
-	HObject::FileIO.close();
 	
 	if(status) {
 	    Vector3F c = m_frameCenters[m_currentFrame];

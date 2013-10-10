@@ -105,7 +105,7 @@ hid_t HDataset::createMemSpace() const
 	return H5Screate_simple(ndim, dims, NULL);
 }
 
-void HDataset::getSpaceDimension(int * dimensions, int * ndimension)
+void HDataset::getSpaceDimension(int * dimensions, int * ndimension) const
 {
 	hid_t spaceId = H5Dget_space(fObjectId);
 	hsize_t dims[3];
@@ -119,14 +119,12 @@ void HDataset::getSpaceDimension(int * dimensions, int * ndimension)
 
 char HDataset::hasEnoughSpace() const
 {
-	hid_t spaceId = H5Dget_space(fObjectId);
-	hsize_t dims[3];
-	hsize_t maxdims[3];
-	H5Sget_simple_extent_dims(spaceId, dims, maxdims);
-	int ndim = H5Sget_simple_extent_ndims(spaceId);
+	int dims[3];
+	int ndim;
+	getSpaceDimension(dims, &ndim);
 	for(int i = 0; i < ndim; i++) {
 		if(dims[i] < fDimension[i]) {
-			std::cout<<" data space dim["<<i<<"] = "<<dims[i]<<" not enough for "<<fDimension[i]<<"\n";
+			//std::cout<<" data space dim["<<i<<"] = "<<dims[i]<<" not enough for "<<fDimension[i]<<"\n";
 			return 0;
 		}
 	}
@@ -186,13 +184,13 @@ void HDataset::resize()
 	herr_t status = H5Dset_extent(fObjectId, size);
 	if(status < 0) std::cout<<"resize failed\n";
 	
-	hid_t spaceId = H5Dget_space(fObjectId);
-	hsize_t dims[3];
-	hsize_t maxdims[3];
-	H5Sget_simple_extent_dims(spaceId, dims, maxdims);
-	
+	int dims[3];
+	int ndim;
+	getSpaceDimension(dims, &ndim);
 	if(dims[0] != size[0])
 		std::cout<<"failed to resize to "<<size[0]<<"\n";
+	//else
+	//	std::cout<<"resize to "<<size[0]<<"\n";
 }
 
 hid_t HDataset::createSpace(hsize_t * block) const

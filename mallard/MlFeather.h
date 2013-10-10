@@ -24,6 +24,7 @@ public:
 	BoundingRectangle getBoundingRectangle() const;
 	
 	void computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale);
+	Vector3F * worldP();
 	Vector3F * segmentOriginWP(short seg);
 	Vector3F * segmentVaneWP(short seg, short side, short idx);
 	

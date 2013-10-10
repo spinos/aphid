@@ -9,13 +9,17 @@
 
 #include "MlDrawer.h"
 #include "MlCalamus.h"
+#include "MlFeather.h"
 #include "MlSkin.h"
 #include "MlTessellate.h"
 #include <AccPatchMesh.h>
 #include <PointInsidePolygonTest.h>
+#include <HBase.h>
+#include <sstream>
 MlDrawer::MlDrawer()
 {
-	m_featherTess = new MlTessellate; 
+	m_featherTess = new MlTessellate;
+	m_currentFrame = -9999;
 }
 
 MlDrawer::~MlDrawer() 
@@ -126,10 +130,20 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 	unsigned nc = skin->numFeathers();
 	if(nc < 1) return;
 	
+	std::stringstream sst;
+	sst.str("");
+	sst<<m_currentFrame;
+	
+	useDocument();
+	//std::cout<<"draw hdoc "<<HObject::FileIO.fileName()<<"\n";
+	addEntry("/p");
+	addSliceVector3("/p", sst.str());
+	
+	openSlice("/p", sst.str());
 	//std::cout<<"building feather draw buffer\n num feathers "<<nc<<"\n";
 	unsigned loc = 0;
 	
-	unsigned i, nvpf;
+	unsigned i, j, nvpf;
 	Vector3F v;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin->getCalamus(i);
@@ -146,10 +160,28 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 		loc += nvpf;
 	}
 	
+	Vector3F wpb[10000];
+	unsigned iblock = 0, ifull = 0;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin->getCalamus(i);
 		computeAFeather(skin, c);
+		
+		MlFeather * f = c->feather();
+		for(j = 0; j < f->numWorldP(); j++) {
+			wpb[iblock] = f->worldP()[j];
+			iblock++;
+			ifull++;
+			if(iblock == 10000) {
+				writeSliceVector3("/p", sst.str(), ifull - iblock, iblock, wpb);
+				iblock = 0;
+			}
+		}
 	}
+	
+	if(iblock > 0)
+		writeSliceVector3("/p", sst.str(), ifull - iblock, iblock, wpb);
+
+	closeSlice("/p", sst.str());
 }
 
 void MlDrawer::updateFeather(MlSkin * skin, MlCalamus * c)
@@ -167,4 +199,9 @@ void MlDrawer::tessellate(MlSkin * skin, MlCalamus * c)
 	updateFeather(skin, c);
 	m_featherTess->setFeather(c->feather());
 	m_featherTess->evaluate(c->feather());
+}
+
+void MlDrawer::setCurrentFrame(int x)
+{
+	m_currentFrame = x;
 }

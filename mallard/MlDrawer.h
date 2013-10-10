@@ -10,10 +10,11 @@
 #pragma once
 #include <BaseDrawer.h>
 #include <BlockDrawBuffer.h>
+#include <CacheFile.h>
 class MlSkin;
 class MlCalamus;
 class MlTessellate;
-class MlDrawer : public BaseDrawer, public BlockDrawBuffer {
+class MlDrawer : public BaseDrawer, public BlockDrawBuffer, public CacheFile {
 public:
 	MlDrawer();
 	virtual ~MlDrawer();
@@ -24,9 +25,11 @@ public:
 	void computeAFeather(MlSkin * skin, MlCalamus * c);
 	void addToBuffer(MlSkin * skin);
 	void rebuildBuffer(MlSkin * skin);
+	void setCurrentFrame(int x);
 private:
     void updateFeather(MlSkin * skin, MlCalamus * c);
 	void tessellate(MlSkin * skin, MlCalamus * c);
 private:
 	MlTessellate * m_featherTess;
+	int m_currentFrame;
 };

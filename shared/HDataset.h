@@ -41,13 +41,13 @@ public:
 	virtual char write(char *data, SelectPart * part = 0);
 	virtual char read(char *data, SelectPart * part = 0);
 	
-	void getSpaceDimension(int * dimensions, int * ndimension);
+	void getSpaceDimension(int * dimensions, int * ndimension) const;
+	char hasEnoughSpace() const;
+	void resize();
 	
 	hsize_t fDimension[3];
 	
 private:
-	void resize();
-	char hasEnoughSpace() const;
 	hid_t createMemSpace() const;
 	hid_t createFileSpace() const;
 	hid_t createSpace(hsize_t * block) const;

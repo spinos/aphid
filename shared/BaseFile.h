@@ -21,6 +21,8 @@ public:
 	
 	BaseFile();
 	BaseFile(const char * name);
+	
+	virtual bool create(const std::string & filename);
 	virtual bool open(const std::string & filename);
 	virtual bool open();
 	virtual bool save();

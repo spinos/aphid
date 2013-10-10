@@ -8,12 +8,12 @@
  */
 
 #pragma once
-#include <BaseFile.h>
+#include <HFile.h>
 #include <BaseDeformer.h>
 #include <AllMath.h>
 #include <map>
 class HBase;
-class BakeDeformer : public BaseFile, public BaseDeformer {
+class BakeDeformer : public HFile, public BaseDeformer {
 public:
 	BakeDeformer();
 	virtual ~BakeDeformer();

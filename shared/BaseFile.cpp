@@ -24,6 +24,13 @@ BaseFile::BaseFile(const char * name)
 	_valid = 0;
 }
 
+bool BaseFile::create(const std::string & filename)
+{
+	m_fileName = filename;
+	_valid = true;
+	return _valid;
+}
+
 bool BaseFile::open(const std::string & filename)
 {
 	m_fileName = filename;

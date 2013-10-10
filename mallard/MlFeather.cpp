@@ -122,6 +122,11 @@ void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot,
 	computeVaneWP(segOrigin, segSpace, m_numSeg, 1, scale);
 }
 
+Vector3F * MlFeather::worldP()
+{
+	return m_worldP;
+}
+
 Vector3F * MlFeather::segmentOriginWP(short seg)
 {
 	return &m_worldP[seg * 7];

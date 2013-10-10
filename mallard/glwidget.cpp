@@ -61,6 +61,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
 	m_bezierDrawer = new BezierDrawer;
 	m_featherDrawer = new MlDrawer;
+	m_featherDrawer->create("mallard.mlc");
 	MlCalamus::FeatherLibrary = this;
 	
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
@@ -359,6 +360,7 @@ void GLWidget::updateOnFrame(int x)
 	
 	body()->update(m_topo);
 	m_bezierDrawer->rebuildBuffer(body());
+	m_featherDrawer->setCurrentFrame(x);
 	rebuildFeather();
 	update();
 	setRebuildTree();
@@ -389,5 +391,11 @@ void GLWidget::focusOutEvent(QFocusEvent * event)
 		finishEraseFeather();
 	deselectFeather();
 	SingleModelView::focusOutEvent(event);
+}
+
+void GLWidget::closeCache()
+{
+	m_featherDrawer->close();
+	bodyDeformer()->close();
 }
 //:~
