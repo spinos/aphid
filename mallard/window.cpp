@@ -205,7 +205,8 @@ void Window::openFile()
 	QString fileName = glWidget->openSheet();
 	if(fileName == "") return;
 	
-	QSettings settings;
+	QSettings settings("mallard.ini", QSettings::IniFormat, this);
+
     QStringList files = settings.value("recentFileList").toStringList();
     files.removeAll(fileName);
     files.prepend(fileName);
@@ -226,7 +227,8 @@ void Window::openRecentFile()
 
 void Window::updateRecentFileActions()
 {
-    QSettings settings;
+    QSettings settings("mallard.ini", QSettings::IniFormat, this);
+	
     QStringList files = settings.value("recentFileList").toStringList();
 
     int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);

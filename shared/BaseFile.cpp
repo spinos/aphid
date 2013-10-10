@@ -24,11 +24,32 @@ BaseFile::BaseFile(const char * name)
 	_valid = 0;
 }
 
-char BaseFile::load(const char *filename)
+bool BaseFile::open(const std::string & filename)
 {
 	m_fileName = filename;
-	_valid = 1;
+	_valid = true;
 	return _valid;
+}
+
+bool BaseFile::open()
+{
+    if(isUntitled()) return false;
+    return open(m_fileName);
+}
+
+bool BaseFile::save()
+{
+    return true;
+}
+
+bool BaseFile::close()
+{
+    return true;
+}
+
+void BaseFile::setFileName(const std::string & filename)
+{
+    m_fileName = filename;
 }
 
 std::string BaseFile::fileName() const
@@ -36,9 +57,24 @@ std::string BaseFile::fileName() const
 	return m_fileName;
 }
 
-char BaseFile::isValid() const
+void BaseFile::setValid()
+{
+    _valid = true;
+}
+
+void BaseFile::setInvalid()
+{
+    _valid = false;
+}
+
+bool BaseFile::isValid() const
 {
 	return _valid;
+}
+
+bool BaseFile::isUntitled() const
+{
+	return m_fileName == "untitled";
 }
 
 bool BaseFile::FileExists(const std::string & name)

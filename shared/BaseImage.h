@@ -18,13 +18,11 @@ public:
 	BaseImage();
 	virtual ~BaseImage();
 	
-	virtual char load(const char * filename);
 	virtual void clear();
 	virtual const char * formatName() const;
 	virtual void allWhite();
 	virtual void allBlack();
 	
-	char isValid() const;
 	int getWidth() const;
 	int getHeight() const;
 	int pixelLoc(float s, float t, bool flipV = false) const;

@@ -25,6 +25,7 @@ public:
 	void addToBuffer(MlSkin * skin);
 	void rebuildBuffer(MlSkin * skin);
 private:
+    void updateFeather(MlSkin * skin, MlCalamus * c);
 	void tessellate(MlSkin * skin, MlCalamus * c);
 private:
 	MlTessellate * m_featherTess;

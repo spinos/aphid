@@ -18,7 +18,6 @@ public:
 	void setDirty();
 	void setClean();
 	bool isDirty() const;
-	bool isUntitled() const;
 	
 	bool newScene();
 	bool openScene(const std::string & fileName);
