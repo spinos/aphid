@@ -18,21 +18,11 @@ BaseImage::~BaseImage()
 	clear();
 }
 
-char BaseImage::load(const char *filename)
-{
-	return BaseFile::load(filename);
-}
-
-void BaseImage::clear()  { _valid = 0; }
+void BaseImage::clear()  { setInvalid(); }
 
 const char * BaseImage::formatName() const
 {
 	return "Unknown";
-}
-
-char BaseImage::isValid() const
-{
-	return _valid;
 }
 
 int BaseImage::getWidth() const

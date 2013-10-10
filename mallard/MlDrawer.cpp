@@ -152,15 +152,19 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 	}
 }
 
+void MlDrawer::updateFeather(MlSkin * skin, MlCalamus * c)
+{
+    Vector3F p;
+	skin->getPointOnBody(c, p);
+	c->collideWith(skin, p);
+	
+	Matrix33F space = skin->rotationFrame(c);
+	c->computeFeatherWorldP(p, space);
+}
+
 void MlDrawer::tessellate(MlSkin * skin, MlCalamus * c)
 {
-	Vector3F p;
-	skin->getPointOnBody(c, p);
-
-	Matrix33F space = skin->rotationFrame(c);
-
-	c->collideWith(skin, p);
-	c->computeFeatherWorldP(p, space);
+	updateFeather(skin, c);
 	m_featherTess->setFeather(c->feather());
 	m_featherTess->evaluate(c->feather());
 }

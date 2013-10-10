@@ -47,7 +47,7 @@ public:
 	ZEXRImage(const char* filename);
 	~ZEXRImage(void);
 	
-	virtual char load(const char * filename);
+	virtual bool open(const std::string & filename);
 	virtual void clear();
 	virtual const char * formatName() const;
 	
@@ -61,7 +61,7 @@ public:
 	
 	virtual void applyMask(BaseImage * another);
 	
-	static bool isAnOpenExrFile(const char* filename);
+	static bool isAnOpenExrFile(const std::string& filename);
 	
 	half *_pixels;
 	

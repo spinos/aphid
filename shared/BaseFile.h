@@ -21,17 +21,26 @@ public:
 	
 	BaseFile();
 	BaseFile(const char * name);
-	virtual char load(const char * filename);
+	virtual bool open(const std::string & filename);
+	virtual bool open();
+	virtual bool save();
+	virtual bool close();
+	
+	void setFileName(const std::string & filename);
 	std::string fileName() const;
-	char isValid() const;
+	
+	void setValid();
+	void setInvalid();
+	bool isValid() const;
+	bool isUntitled() const;
 	
 	void setLatestError(BaseFile::ErrorMsg err);
 	BaseFile::ErrorMsg latestError() const;
 	
 	static bool FileExists(const std::string & name);
 	
-	std::string m_fileName;
-	char _valid;
 private:
+	std::string m_fileName;
 	ErrorMsg m_error;
+	bool _valid;
 };

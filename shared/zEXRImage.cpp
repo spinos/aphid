@@ -99,23 +99,23 @@ ZEXRImage::ZEXRImage() : _pixels(0) {}
 
 ZEXRImage::ZEXRImage(const char* filename) : _pixels(0)
 {
-	load(filename);
+	open(filename);
 }
 
 ZEXRImage::~ZEXRImage(void)
 {
 }
 
-char ZEXRImage::load(const char * filename)
+bool ZEXRImage::open(const std::string & filename)
 {
 	if(!isAnOpenExrFile(filename)) {
 		std::cout<<"ERROR: "<<filename<<" is not an openEXR image\n";
-		return 0;
+		return false;
 	}
 	
 	clear();
 	try {
-	Imf::InputFile file(filename);
+	Imf::InputFile file(filename.c_str());
 	Imath::Box2i dw = file.header().dataWindow(); 
 	m_imageWidth = dw.max.x - dw.min.x + 1;
 	m_imageHeight = dw.max.y - dw.min.y + 1;
@@ -130,10 +130,10 @@ char ZEXRImage::load(const char * filename)
 	}
 	catch (const std::exception &exc) { 
 		std::cout<<"ERROR: "<<filename<<" cannot be loaded as an openEXR image\n";
-		return 0; 
+		return false; 
 	}
 
-	return BaseImage::load(filename);
+	return BaseImage::open(filename);
 }
 
 void ZEXRImage::clear()
@@ -145,7 +145,7 @@ void ZEXRImage::clear()
 		delete *it;
 		
 	_mipmaps.clear();
-	_valid = 0;
+	BaseImage::clear();
 }
 
 const char * ZEXRImage::formatName() const
@@ -153,9 +153,9 @@ const char * ZEXRImage::formatName() const
 	return "OpenEXR";
 }
 
-bool ZEXRImage::isAnOpenExrFile (const char fileName[])
+bool ZEXRImage::isAnOpenExrFile (const std::string& fileName)
 { 
-	std::ifstream f (fileName, std::ios_base::binary); 
+	std::ifstream f (fileName.c_str(), std::ios_base::binary); 
 	if(!f.is_open()) return 0;
 	char b[4]; 
 	f.read (b, sizeof (b)); 
@@ -232,7 +232,7 @@ void ZEXRImage::allWhite()
 	
 	for(int i = 0; i < size; i++) _pixels[i] = 1.f;
 	setupMipmaps();
-	_valid = 1;
+	setValid();
 }
 
 void ZEXRImage::allBlack()
@@ -244,7 +244,7 @@ void ZEXRImage::allBlack()
 	
 	for(int i = 0; i < size; i++) _pixels[i] = 0.f;
 	setupMipmaps();
-	_valid = 1;
+	setValid();
 }
 
 int ZEXRImage::getNumMipmaps() const
