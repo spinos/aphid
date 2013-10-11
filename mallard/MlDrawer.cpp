@@ -137,9 +137,7 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 	
 	useDocument();
 	//std::cout<<"draw hdoc "<<HObject::FileIO.fileName()<<"\n";
-	addEntry("/p");
-	addSliceVector3("/p", sst.str());
-	
+	openEntry("/p");
 	openSlice("/p", sst.str());
 	
 	//std::cout<<"building feather draw buffer\n num feathers "<<nc<<"\n";
@@ -171,6 +169,7 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 	}
 		
 	closeSlice("/p", sst.str());
+	closeEntry("/p");
 }
 
 void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c)
@@ -197,7 +196,7 @@ void MlDrawer::setCurrentFrame(int x)
 void MlDrawer::writeToCache(MlSkin * skin, const std::string & sliceName)
 {
 	const unsigned nc = skin->numFeathers();
-	Vector3F wpb[10000];
+	Vector3F wpb[8192];
 	unsigned i, j, iblock = 0, ifull = 0;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin->getCalamus(i);
@@ -208,7 +207,7 @@ void MlDrawer::writeToCache(MlSkin * skin, const std::string & sliceName)
 			wpb[iblock] = f->worldP()[j];
 			iblock++;
 			ifull++;
-			if(iblock == 10000) {
+			if(iblock == 8192) {
 				writeSliceVector3("/p", sliceName, ifull - iblock, iblock, wpb);
 				iblock = 0;
 			}
@@ -220,15 +219,17 @@ void MlDrawer::writeToCache(MlSkin * skin, const std::string & sliceName)
 	if(iblock > 0)
 		writeSliceVector3("/p", sliceName, ifull - iblock, iblock, wpb);
 		
+	saveEntrySize("/p", ifull);
 	setCached("/p", sliceName, ifull);
 }
 
 void MlDrawer::readFromCache(MlSkin * skin, const std::string & sliceName)
 {
 	const unsigned nc = skin->numFeathers();
-	Vector3F wpb[10000];
+	const unsigned blockL = 2048;
+	Vector3F wpb[blockL];
 	unsigned i, j, iblock = 0, ifull = 0;
-	readSliceVector3("/p", sliceName, 0, 10000, wpb);
+	readSliceVector3("/p", sliceName, 0, blockL, wpb);
 	
 	for(i = 0; i < nc; i++) {
 		
@@ -241,8 +242,8 @@ void MlDrawer::readFromCache(MlSkin * skin, const std::string & sliceName)
 			dst[j] = wpb[iblock];
 			iblock++;
 			ifull++;
-			if(iblock == 10000) {
-				readSliceVector3("/p", sliceName, ifull, 10000, wpb);
+			if(iblock == blockL) {
+				readSliceVector3("/p", sliceName, ifull, blockL, wpb);
 				iblock = 0;
 			}
 		}

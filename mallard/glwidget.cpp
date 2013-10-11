@@ -403,10 +403,10 @@ void GLWidget::postLoad()
 	skin()->setBodyMesh(body(), m_topo);
 	skin()->finishCreateFeather();
 	bodyDeformer()->setMesh(body());
-	postLoadBake();
 	m_bezierDrawer->rebuildBuffer(body());
 	m_featherDrawer->clearCached();
 	m_featherDrawer->rebuildBuffer(skin());
+	postLoadBake();
 	update();
 	std::string febkgrd = featherEditBackground();
 	if(febkgrd != "unknown") emit sendFeatherEditBackground(tr(febkgrd.c_str()));

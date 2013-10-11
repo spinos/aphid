@@ -1,7 +1,6 @@
 #include "CacheFile.h"
 #include <AllHdf.h>
 #include <HBase.h>
-#include <sstream>
 
 CacheFile::CacheFile() : HFile() {}
 CacheFile::CacheFile(const char * name) : HFile(name) {}
@@ -45,54 +44,77 @@ bool CacheFile::close()
 	useDocument();
 	std::map<std::string, HBase *>::iterator it;
 	for(it = m_entries.begin(); it != m_entries.end(); ++it) {
-		(*it).second->close();
-		delete (*it).second;
+	    if((*it).second) {
+	        (*it).second->close();
+	        delete (*it).second;
+	    }
 	}
 		
 	return HFile::close();
 }
 
-void CacheFile::addEntry(const std::string & name)
+HBase * CacheFile::getNamedEntry(const std::string & name)
+{
+    std::map<std::string, HBase *>::iterator it = m_entries.find(name);
+    if(it == m_entries.end()) return 0;
+    return (*it).second;
+}
+
+void CacheFile::openEntry(const std::string & name)
 {
 	HBase * entry = new HBase(name);
 	m_entries[name] = entry;
 }
 
-void CacheFile::addSliceVector3(const std::string & entryName, const std::string & sliceName)
+void CacheFile::closeEntry(const std::string & name)
 {
-	if(m_entries.find(entryName) == m_entries.end()) return;
-	
-	HBase * g = m_entries[entryName];
-	
-	if(!g->hasNamedData(sliceName.c_str()))
-		g->addVector3Data(sliceName.c_str(), 1024);
+    HBase * p = getNamedEntry(name);
+    if(p == 0) return;
+	p->close();
+	delete p;
+	m_entries[name] = 0;
 }
 
-void CacheFile::openSlice(const std::string & entryName, const std::string & sliceName)
+bool CacheFile::openSlice(const std::string & entryName, const std::string & sliceName)
 {
-	if(m_entries.find(entryName) == m_entries.end()) return;
-	HBase * g = m_entries[entryName];
+	HBase * g = getNamedEntry(entryName);
+	if(g == 0) return false;
 	
-	if(!g->hasNamedData(sliceName.c_str())) return;
+	if(!g->hasNamedData(sliceName.c_str()))
+	    g->addVector3Data(sliceName.c_str(), 1024);
 	
 	VerticesHDataset * pset = new VerticesHDataset(sliceName.c_str());
 	pset->open(g->fObjectId);
 	
-	m_slices[fullPath(entryName, sliceName)] = pset;
+	m_slices[HObject::FullPath(entryName, sliceName)] = pset;
+	
+	return true;
 }
 
 void CacheFile::closeSlice(const std::string & entryName, const std::string & sliceName)
 {
-	const std::string slicePath = fullPath(entryName, sliceName);
+	const std::string slicePath = HObject::FullPath(entryName, sliceName);
 	
 	if(m_slices.find(slicePath) == m_slices.end()) return;
 	
 	m_slices[slicePath]->close();
 }
 
+void CacheFile::saveEntrySize(const std::string & entryName, unsigned size)
+{
+    HBase * g = getNamedEntry(entryName);
+	if(g == 0) return;
+	
+	if(!g->hasNamedAttr(".size"))
+	    g->addIntAttr(".size");
+	
+	int x = size;
+	g->writeIntAttr(".size", &x);
+}
+
 void CacheFile::writeSliceVector3(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data)
 {
-	const std::string slicePath = fullPath(entryName, sliceName);
+	const std::string slicePath = HObject::FullPath(entryName, sliceName);
 	if(m_slices.find(slicePath) == m_slices.end()) return;
 	
 	VerticesHDataset * p = (VerticesHDataset *)m_slices[slicePath];
@@ -110,7 +132,7 @@ void CacheFile::writeSliceVector3(const std::string & entryName, const std::stri
 
 void CacheFile::readSliceVector3(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data)
 {
-	const std::string slicePath = fullPath(entryName, sliceName);
+	const std::string slicePath = HObject::FullPath(entryName, sliceName);
 	if(m_slices.find(slicePath) == m_slices.end()) return;
 	
 	VerticesHDataset * p = (VerticesHDataset *)m_slices[slicePath];
@@ -134,12 +156,12 @@ void CacheFile::readSliceVector3(const std::string & entryName, const std::strin
 
 void CacheFile::setCached(const std::string & entryName, const std::string & sliceName, unsigned size)
 {
-	m_cachedSlices[fullPath(entryName, sliceName)] = size;
+	m_cachedSlices[HObject::FullPath(entryName, sliceName)] = size;
 }
 
 unsigned CacheFile::isCached(const std::string & entryName, const std::string & sliceName)
 {
-	const std::string slicePath = fullPath(entryName, sliceName);
+	const std::string slicePath = HObject::FullPath(entryName, sliceName);
 	if(m_cachedSlices.find(slicePath) == m_cachedSlices.end()) return 0;
 	return m_cachedSlices[slicePath];
 }
@@ -147,12 +169,4 @@ unsigned CacheFile::isCached(const std::string & entryName, const std::string & 
 void CacheFile::clearCached()
 {
 	m_cachedSlices.clear();
-}
-
-std::string CacheFile::fullPath(const std::string & entryName, const std::string & sliceName) const
-{
-	std::stringstream sst;
-	sst.str("");
-	sst<<entryName<<"/"<<sliceName;
-	return sst.str();
 }

@@ -11,6 +11,8 @@
 #include <boost/algorithm/string.hpp>
 #include "HObject.h"
 #include "hdf5_hl.h"
+#include <sstream>
+
 HDocument HObject::FileIO;
 
 HObject::HObject(const std::string & path)
@@ -65,4 +67,12 @@ char HObject::exists()
 	if(statbuf.type != objectType())
 		return 0;
 	return 1;
+}
+
+std::string HObject::FullPath(const std::string & entryName, const std::string & sliceName)
+{
+	std::stringstream sst;
+	sst.str("");
+	sst<<entryName<<"/"<<sliceName;
+	return sst.str();
 }
