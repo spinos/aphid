@@ -223,7 +223,7 @@ void GLWidget::rebuildFeather()
 
 void GLWidget::bakeFrames()
 {
-	if(!playback()->isControlEnabled()) return;
+	if(!playback()->isEnabled()) return;
 	
 	const int bakeMin = playback()->playbackMin();
 	const int bakeMax = playback()->playbackMax();
@@ -390,7 +390,7 @@ void GLWidget::exportBake()
         return;
     }
     
-    if(!playback()->isControlEnabled()) {
+    if(!playback()->isEnabled()) {
         QMessageBox::information(this, tr("Warning"),
                                     tr("No animation to export."));
         return;   
@@ -417,6 +417,7 @@ void GLWidget::exportBake()
 void GLWidget::updateOnFrame(int x)
 {
 	if(!deformBody(x)) return;
+	if(!playback()->isEnabled()) return;
 	
 	body()->update(m_topo);
 	m_bezierDrawer->rebuildBuffer(body());

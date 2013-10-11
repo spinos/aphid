@@ -11,7 +11,6 @@
 
 PlaybackControl::PlaybackControl() 
 {
-	m_enabled = false;
 }
 
 void PlaybackControl::setCurrentFrame(int x)
@@ -56,17 +55,12 @@ int PlaybackControl::playbackMax() const
     return m_rangeMax;
 }
 
-void PlaybackControl::disableControl() 
+void PlaybackControl::enable()
 {
-	m_enabled = false;
+	BaseState::enable();
 }
 
-void PlaybackControl::enableControl() 
+void PlaybackControl::disable()
 {
-	m_enabled = true;
-}
-
-bool PlaybackControl::isControlEnabled() const
-{
-	return m_enabled;
+	BaseState::disable();
 }

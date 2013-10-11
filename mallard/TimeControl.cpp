@@ -64,7 +64,7 @@ TimeControl::TimeControl(QWidget *parent)
 	
 	setFrameRange(1, 99);
 	
-	disableControl();
+	disable();
     
 	connect(bar, SIGNAL(valueChanged(int)), this, SLOT(updateCurrentFrame(int)));
 	connect(currentSpin, SIGNAL(valueChanged(int)), this, SLOT(updateCurrentFrame(int)));
@@ -138,20 +138,20 @@ void TimeControl::updateCurrentFrame(int x)
 	}
 }
 
-void TimeControl::disableControl()
+void TimeControl::disable()
 {
 	minGroup->setEnabled(false);
 	playGroup->setEnabled(false);
 	maxGroup->setEnabled(false);
-	PlaybackControl::disableControl();
+	PlaybackControl::disable();
 }
 
-void TimeControl::enableControl()
+void TimeControl::enable()
 {
 	minGroup->setEnabled(true);
 	playGroup->setEnabled(true);
 	maxGroup->setEnabled(true);
-	PlaybackControl::enableControl();
+	PlaybackControl::enable();
 }
 
 int TimeControl::playbackMin() const

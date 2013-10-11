@@ -28,8 +28,8 @@ public:
     TimeControl(QWidget *parent = 0);
 	
 	virtual void setFrameRange(int mn, int mx);
-	virtual void disableControl();
-	virtual void enableControl();
+	virtual void disable();
+	virtual void enable();
 	virtual int playbackMin() const;
 	virtual int playbackMax() const;
 	

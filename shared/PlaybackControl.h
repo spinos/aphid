@@ -8,8 +8,8 @@
  */
 
 #pragma once
-
-class PlaybackControl {
+#include <BaseState.h>
+class PlaybackControl : public BaseState {
 public:
 	PlaybackControl();
 	
@@ -22,12 +22,10 @@ public:
 	void setCurrentFrame(int x);
 	
 	virtual void setFrameRange(int mn, int mx);
-	virtual void disableControl();
-	virtual void enableControl();
 	
-	bool isControlEnabled() const;
+	virtual void enable();
+	virtual void disable();
 
 private:
 	int m_rangeMin, m_rangeMax, m_currentFrame;
-	bool m_enabled;
 };

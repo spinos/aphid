@@ -294,13 +294,13 @@ void MlScene::enableDeformer()
 {
 	m_deformer->enable();
 	m_playback->setFrameRange(m_deformer->minFrame(), m_deformer->maxFrame());
-	m_playback->enableControl();
+	m_playback->enable();
 }
 	
 void MlScene::disableDeformer()
 {
 	m_deformer->disable();
-	m_playback->disableControl();
+	m_playback->disable();
 }
 
 void MlScene::postLoadBake()

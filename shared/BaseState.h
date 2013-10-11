@@ -4,8 +4,8 @@ class BaseState {
 public:
     BaseState();
     
-    void enable();
-	void disable();
+    virtual void enable();
+	virtual void disable();
 	bool isEnabled() const;
 private:
     bool m_enabled;
