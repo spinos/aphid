@@ -140,7 +140,7 @@ void Window::createActions()
 	saveSceneAsAct->setStatusTip(tr("Save current scene into another file"));
 	connect(saveSceneAsAct, SIGNAL(triggered()), glWidget, SLOT(saveSheetAs()));
 	
-	importMeshAct = new QAction(tr("&Import Mesh"), this);
+	importMeshAct = new QAction(tr("&Import Body Mesh"), this);
 	importMeshAct->setStatusTip(tr("Load a mesh cache file as the body"));
 	connect(importMeshAct, SIGNAL(triggered()), glWidget, SLOT(open()));
 	
@@ -152,7 +152,7 @@ void Window::createActions()
 	revertAct->setStatusTip(tr("Discard changes to current scene after lastest save"));
     connect(revertAct, SIGNAL(triggered()), glWidget, SLOT(revertSheet()));
 	
-	importBakeAct = new QAction(tr("&Import Baked Animation"), this);
+	importBakeAct = new QAction(tr("&Import Body Animation"), this);
 	importBakeAct->setStatusTip(tr("Attach bake point cache to the body"));
     connect(importBakeAct, SIGNAL(triggered()), glWidget, SLOT(chooseBake()));
 	
@@ -162,6 +162,10 @@ void Window::createActions()
         connect(recentFileActs[i], SIGNAL(triggered()),
                 this, SLOT(openRecentFile()));
     }
+    
+    exportBakeAct = new QAction(tr("&Export Baked Feather"), this);
+	exportBakeAct->setStatusTip(tr("Write feather cache"));
+    connect(exportBakeAct, SIGNAL(triggered()), glWidget, SLOT(exportBake()));
 }
 
 void Window::createMenus()
@@ -181,6 +185,7 @@ void Window::createMenus()
 	fileMenu->addSeparator();
 	fileMenu->addAction(importMeshAct);
 	fileMenu->addAction(importBakeAct);
+	fileMenu->addAction(exportBakeAct);
 	
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showFeatherEditAct);

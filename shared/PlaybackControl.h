@@ -15,7 +15,10 @@ public:
 	
 	int rangeMin() const;
 	int rangeMax() const;
+	int rangeLength() const;
 	int currentFrame() const;
+	virtual int playbackMin() const;
+	virtual int playbackMax() const;
 	void setCurrentFrame(int x);
 	
 	virtual void setFrameRange(int mn, int mx);

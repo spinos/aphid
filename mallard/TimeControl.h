@@ -30,6 +30,8 @@ public:
 	virtual void setFrameRange(int mn, int mx);
 	virtual void disableControl();
 	virtual void enableControl();
+	virtual int playbackMin() const;
+	virtual int playbackMax() const;
 	
 public slots:
 	void updateCurrentFrame(int x);

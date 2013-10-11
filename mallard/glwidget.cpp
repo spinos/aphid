@@ -225,11 +225,11 @@ void GLWidget::bakeFrames()
 {
 	if(!playback()->isControlEnabled()) return;
 	
-	const int bakeMin = playback()->rangeMin();
-	const int bakeMax = playback()->rangeMax();
-	QProgressDialog * progress = new QProgressDialog(QString("frame %1").arg(bakeMin), tr("Cancel"), bakeMin, bakeMax, this);
+	const int bakeMin = playback()->playbackMin();
+	const int bakeMax = playback()->playbackMax();
+	QProgressDialog * progress = new QProgressDialog(QString("Min %1 Max %2 Current %3").arg(bakeMin).arg(bakeMax).arg(bakeMin), tr("Cancel"), bakeMin, bakeMax, this);
 	progress->setWindowModality(Qt::WindowModal);
-	progress->setWindowTitle(tr("Baking..."));
+	progress->setWindowTitle(tr("Baking Frames"));
 	progress->show();
 	progress->setValue(0);
 	int i;
@@ -240,7 +240,7 @@ void GLWidget::bakeFrames()
 	    }
 	    
 		updateOnFrame(i);
-		progress->setLabelText(QString("Baking Frame %1").arg(i));
+		progress->setLabelText(QString("Min %1 Max %2 Current %3").arg(bakeMin).arg(bakeMax).arg(i));
 		progress->setValue(i);
 	}
 	
@@ -331,7 +331,7 @@ QString GLWidget::openSheet(QString fileName)
 		fileName = QFileDialog::getOpenFileName(this,
 							tr("Open scene from file"),
 							tr("info"),
-							tr("All Files (*);;Text Files (*.txt)"),
+							tr("All Files (*);;Mallard Files (*.mal)"),
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
 	}
@@ -365,7 +365,7 @@ void GLWidget::receiveFeatherEditBackground(QString name)
 void GLWidget::chooseBake()
 {
 	if(body()->isEmpty()) {
-		QMessageBox::information(this, tr(" "),
+		QMessageBox::information(this, tr("Warning"),
                                     tr("Mesh not loaded. Cannot attach bake."));
 		return;
 	}
@@ -374,11 +374,43 @@ void GLWidget::chooseBake()
 	QString fileName = QFileDialog::getOpenFileName(this,
 							tr("Load bake from file"),
 							tr("info"),
-							tr("All Files (*);;Bake Files (*.h5)"),
+							tr("All Files (*);;Mesh Bake Files (*.h5)"),
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
 	if(fileName != "") {
 		readBakeFromFile(fileName.toUtf8().data());
+	}
+}
+
+void GLWidget::exportBake()
+{   
+    if(skin()->numFeathers() < 1) {
+        QMessageBox::information(this, tr("Warning"),
+                                    tr("No feather to export."));
+        return;
+    }
+    
+    if(!playback()->isControlEnabled()) {
+        QMessageBox::information(this, tr("Warning"),
+                                    tr("No animation to export."));
+        return;   
+    }
+    
+    if(playback()->rangeLength() > m_featherDrawer->numCachedSlices("/p")) {
+        QMessageBox::information(this, tr("Warning"),
+                                    tr("Animation not fully baked, cannot export."));
+        return; 
+    }
+    
+    QString selectedFilter;
+	QString fileName = QFileDialog::getSaveFileName(this,
+							tr("Export Bake to File"),
+							tr("info"),
+							tr("All Files (*);;Feather Bake Files (*.mlb)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName != "") {
+	    std::cout<<"to bake "<<fileName.toUtf8().data();
 	}
 }
 
@@ -407,7 +439,6 @@ void GLWidget::postLoad()
 	m_featherDrawer->clearCached();
 	m_featherDrawer->rebuildBuffer(skin());
 	postLoadBake();
-	update();
 	std::string febkgrd = featherEditBackground();
 	if(febkgrd != "unknown") emit sendFeatherEditBackground(tr(febkgrd.c_str()));
 	emit sceneNameChanged(tr(fileName().c_str()));

@@ -170,3 +170,15 @@ void CacheFile::clearCached()
 {
 	m_cachedSlices.clear();
 }
+
+unsigned CacheFile::numCachedSlices(const std::string & entryName) const
+{
+    unsigned res = 0;
+    std::map<std::string, unsigned>::const_iterator it;
+	for(it = m_cachedSlices.begin(); it != m_cachedSlices.end(); ++it) {
+	    if((*it).first.find(entryName, 0) == 0) 
+	        res++;
+	}
+	
+	return res;
+}

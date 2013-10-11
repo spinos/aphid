@@ -87,6 +87,7 @@ public slots:
 	void receiveFeatherEditBackground(QString name);
 	void chooseBake();
 	void updateOnFrame(int x);
+	void exportBake();
 protected:
     virtual void clientDraw();
 	virtual void focusOutEvent(QFocusEvent * event);

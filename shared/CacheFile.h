@@ -38,6 +38,8 @@ public:
 	void setCached(const std::string & entryName, const std::string & sliceName, unsigned size);
 	unsigned isCached(const std::string & entryName, const std::string & sliceName);
 	void clearCached();
+	
+	unsigned numCachedSlices(const std::string & entryName) const;
 
 private:
 	std::map<std::string, HBase *> m_entries;

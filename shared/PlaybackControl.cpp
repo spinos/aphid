@@ -41,6 +41,21 @@ int PlaybackControl::rangeMax() const
 	return m_rangeMax;
 }
 
+int PlaybackControl::rangeLength() const
+{
+    return m_rangeMax - m_rangeMin + 1;
+}
+
+int PlaybackControl::playbackMin() const
+{
+    return m_rangeMin;
+}
+
+int PlaybackControl::playbackMax() const
+{
+    return m_rangeMax;
+}
+
 void PlaybackControl::disableControl() 
 {
 	m_enabled = false;

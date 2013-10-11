@@ -277,6 +277,7 @@ bool MlScene::readBakeFromFile(const std::string & fileName)
 	if(!m_deformer->open(fileName)) return false;
 		
 	m_deformer->verbose();
+	
 	enableDeformer();
 	return false;
 }

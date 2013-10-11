@@ -153,3 +153,13 @@ void TimeControl::enableControl()
 	maxGroup->setEnabled(true);
 	PlaybackControl::enableControl();
 }
+
+int TimeControl::playbackMin() const
+{
+    return bar->minimum();
+}
+
+int TimeControl::playbackMax() const
+{
+    return bar->maximum();
+}

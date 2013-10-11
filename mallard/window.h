@@ -84,6 +84,7 @@ private:
 	QAction * importMeshAct;
 	QAction * importBakeAct;
 	QAction * revertAct;
+	QAction * exportBakeAct;
 	enum { MaxRecentFiles = 5 };
 	QAction *recentFileActs[MaxRecentFiles];
 private:
