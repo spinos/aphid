@@ -16,9 +16,9 @@ public:
 	HFile();
 	HFile(const char * name);
 	
-	virtual bool create(const std::string & fileName);
-	virtual bool open(const std::string & fileName);
-	virtual bool close();
+	virtual bool doCreate(const std::string & fileName);
+	virtual bool doRead(const std::string & fileName);
+	virtual void doClose();
 	
 protected:
 	void useDocument();

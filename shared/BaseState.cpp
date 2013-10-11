@@ -5,6 +5,8 @@ BaseState::BaseState()
     m_enabled = false;
 }
 
+BaseState::~BaseState() {}
+
 void BaseState::enable()
 {
 	m_enabled = true;

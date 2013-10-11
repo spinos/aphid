@@ -18,7 +18,7 @@ public:
 	BaseImage();
 	virtual ~BaseImage();
 	
-	virtual void clear();
+	virtual void doClear();
 	virtual const char * formatName() const;
 	virtual void allWhite();
 	virtual void allBlack();

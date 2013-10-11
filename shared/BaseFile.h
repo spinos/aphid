@@ -21,12 +21,28 @@ public:
 	
 	BaseFile();
 	BaseFile(const char * name);
+	virtual ~BaseFile();
 	
-	virtual bool create(const std::string & filename);
-	virtual bool open(const std::string & filename);
-	virtual bool open();
-	virtual bool save();
-	virtual bool close();
+	bool clear();
+	bool create(const std::string & filename);
+	bool open();
+	bool open(const std::string & filename);
+	bool save();
+	bool saveAs(const std::string & filename);
+	bool revert();
+	bool close();
+	
+	virtual bool shouldSave();
+	virtual bool confirmDiscardChanges();
+	virtual std::string chooseOpenFileName();
+	virtual std::string chooseSaveFileName();
+	virtual void doClear();
+	virtual bool doCreate(const std::string & fileName);
+	virtual bool doRead(const std::string & fileName);
+	virtual bool doWrite(const std::string & fileName);
+	virtual void doClose();
+	virtual void beforeSave();
+	virtual void afterOpen();
 	
 	void setFileName(const std::string & filename);
 	std::string fileName() const;
@@ -36,13 +52,27 @@ public:
 	bool isOpened() const;
 	bool isUntitled() const;
 	
+	void setDirty();
+	void setClean();
+	bool isDirty() const;
+	
 	void setLatestError(BaseFile::ErrorMsg err);
 	BaseFile::ErrorMsg latestError() const;
+	
+	bool isReverting() const;
 	
 	static bool FileExists(const std::string & name);
 	
 private:
+	enum ClearMode {
+		Normal = 0,
+		Revert = 1
+	};
+	
 	std::string m_fileName;
 	ErrorMsg m_error;
+	ClearMode m_clearMode;
+	
 	bool _opened;
+	bool m_dirty;
 };

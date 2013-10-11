@@ -47,8 +47,8 @@ public:
 	ZEXRImage(const char* filename);
 	~ZEXRImage(void);
 	
-	virtual bool open(const std::string & filename);
-	virtual void clear();
+	virtual bool doRead(const std::string & filename);
+	virtual void doClear();
 	virtual const char * formatName() const;
 	
 	virtual void allWhite();

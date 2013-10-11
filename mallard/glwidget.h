@@ -62,8 +62,12 @@ public:
 	virtual void clientDeselect();
     virtual PatchMesh * mesh();
 	
-	virtual bool discardConfirm();
-	virtual void clearScene();
+	virtual bool confirmDiscardChanges();
+	virtual std::string chooseOpenFileName();
+	virtual std::string chooseSaveFileName();
+	virtual void doClear();
+	virtual void beforeSave();
+	virtual void afterOpen();
 	
 	void finishEraseFeather();
 	void deselectFeather();
@@ -71,7 +75,7 @@ public:
 	void clearFeather();
 	void bakeFrames();
 	
-	QString openSheet(QString fileName = tr(""));
+	QString openSheet(QString name);
 	void closeCache();
 	
 signals:
@@ -96,7 +100,6 @@ protected:
 private:
 	void selectFeather();
 	void floodFeather();
-	void postLoad();
 private:
 	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;

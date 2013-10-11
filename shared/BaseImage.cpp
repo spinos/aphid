@@ -18,7 +18,10 @@ BaseImage::~BaseImage()
 	clear();
 }
 
-void BaseImage::clear()  { setClosed(); }
+void BaseImage::doClear() 
+{
+	BaseFile::doClear();
+}
 
 const char * BaseImage::formatName() const
 {

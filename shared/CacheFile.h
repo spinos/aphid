@@ -19,7 +19,7 @@ public:
     CacheFile();
 	CacheFile(const char * name);
     
-	virtual bool close();
+	virtual void doClose();
 	
 	HBase * getNamedEntry(const std::string & name);
 	

@@ -5,7 +5,7 @@
 CacheFile::CacheFile() : HFile() {}
 CacheFile::CacheFile(const char * name) : HFile(name) {}
 
-bool CacheFile::close()
+void CacheFile::doClose()
 {
 	useDocument();
 	std::map<std::string, HBase *>::iterator it;
@@ -16,7 +16,7 @@ bool CacheFile::close()
 	    }
 	}
 		
-	return HFile::close();
+	HFile::doClose();
 }
 
 HBase * CacheFile::getNamedEntry(const std::string & name)

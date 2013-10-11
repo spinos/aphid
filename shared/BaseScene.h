@@ -15,22 +15,6 @@ public:
 	BaseScene();
 	virtual ~BaseScene();
 	
-	void setDirty();
-	void setClean();
-	bool isDirty() const;
-	
-	bool newScene();
-	bool openScene(const std::string & fileName);
-	bool saveScene();
-	bool saveSceneAs(const std::string & fileName);
-	bool revertScene();
-	
-	virtual bool shouldSave();
-	virtual bool discardConfirm();
-	virtual void clearScene();
-	virtual bool writeSceneToFile(const std::string & fileName);
-	virtual bool readSceneFromFile(const std::string & fileName);
-	
 private:
-	bool m_isDirty;
+
 };

@@ -3,6 +3,7 @@
 class BaseState {
 public:
     BaseState();
+	virtual ~BaseState();
     
     virtual void enable();
 	virtual void disable();

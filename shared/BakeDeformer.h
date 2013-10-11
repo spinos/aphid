@@ -18,8 +18,9 @@ public:
 	BakeDeformer();
 	virtual ~BakeDeformer();
 	
-	virtual bool open(const std::string & filename);
 	virtual char solve();
+	
+	virtual bool doRead(const std::string & filename);
 	
 	void setCurrentFrame(int x);
 	

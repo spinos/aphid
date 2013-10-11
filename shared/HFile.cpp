@@ -13,7 +13,7 @@
 HFile::HFile() : BaseFile() {}
 HFile::HFile(const char * name) : BaseFile(name) {}
 
-bool HFile::create(const std::string & fileName)
+bool HFile::doCreate(const std::string & fileName)
 {
 	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oCreate)) {
 		setLatestError(BaseFile::FileNotReadable);
@@ -21,17 +21,12 @@ bool HFile::create(const std::string & fileName)
 	}
 	
 	setDocument(HObject::FileIO);
-
-	return BaseFile::create(fileName);
+	
+	return true;
 }
 
-bool HFile::open(const std::string & fileName)
+bool HFile::doRead(const std::string & fileName)
 {
-    if(!FileExists(fileName)) {
-		setLatestError(BaseFile::FileNotFound);
-		return false;
-	}
-	
 	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadAndWrite)) {
 		setLatestError(BaseFile::FileNotReadable);
 		return false;
@@ -39,7 +34,15 @@ bool HFile::open(const std::string & fileName)
 	
 	setDocument(HObject::FileIO);
 
-	return BaseFile::open(fileName);
+	return true;
+}
+
+void HFile::doClose()
+{
+	if(!isOpened()) return;
+	useDocument();
+	std::cout<<"close "<<HObject::FileIO.fileName()<<"\n";
+	HObject::FileIO.close();
 }
 
 void HFile::useDocument() 
@@ -50,12 +53,4 @@ void HFile::useDocument()
 void HFile::setDocument(const HDocument & doc)
 {
 	m_doc = doc;
-}
-
-bool HFile::close()
-{
-	useDocument();
-	std::cout<<"close "<<HObject::FileIO.fileName()<<"\n";
-	HObject::FileIO.close();
-	return BaseFile::close();
 }

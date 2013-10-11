@@ -97,7 +97,7 @@ void GLWidget::loadMesh(std::string filename)
 	m_featherDrawer->initializeBuffer();
 	disableDeformer();
 	ESMUtil::ImportPatch(filename.c_str(), mesh());
-	postLoad();
+	afterOpen();
 	setDirty();
 }
 
@@ -262,27 +262,58 @@ void GLWidget::clearFeather()
 
 void GLWidget::cleanSheet()
 {
-	newScene();
+	clear();
 }
 
-bool GLWidget::discardConfirm()
+bool GLWidget::confirmDiscardChanges()
 {
 	QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, tr(" "),
+	if(isReverting()) {
+		reply = QMessageBox::question(this, tr(" "),
+                                    tr("Revert to latest saved version of the scene?"),
+                                    QMessageBox::Yes | QMessageBox::Cancel);
+	}
+	else {
+		reply = QMessageBox::question(this, tr(" "),
                                     tr("Save changes to the scene before creating a new one?"),
                                     QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    if (reply == QMessageBox::Cancel)
-		return false;
+    
+		if (reply == QMessageBox::Yes)
+			MlScene::save();
+	}
 	
-	if (reply == QMessageBox::Yes)
-		saveSheet();
+	if(reply == QMessageBox::Cancel) return false;
 
 	return true;
 }
 
-void GLWidget::clearScene()
+std::string GLWidget::chooseOpenFileName()
 {
-	MlScene::clearScene();
+	QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this,
+							tr("Open scene from file"),
+							tr("info"),
+							tr("All Files (*);;Mallard Files (*.mal)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	return fileName.toUtf8().data();
+}
+
+std::string GLWidget::chooseSaveFileName()
+{
+	QString selectedFilter;
+	QString fileName = QFileDialog::getSaveFileName(this,
+							tr("Save scene to file"),
+							tr("info"),
+							tr("All Files (*);;Mallard Files (*.mal)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	return fileName.toUtf8().data();
+}
+
+void GLWidget::doClear()
+{
+	MlScene::doClear();
 	m_bezierDrawer->clearBuffer();
 	m_featherDrawer->initializeBuffer();
 	clearTree();
@@ -291,70 +322,49 @@ void GLWidget::clearScene()
 	update();
 }
 
-void GLWidget::saveSheet()
+void GLWidget::beforeSave()
 {
-	if(!shouldSave()) {
-		qDebug()<<"Nothing to save.";
-		return;
-	}
-	
 	if(interactMode() == ToolContext::EraseBodyContourFeather)
 		finishEraseFeather();
 		
 	deselectFeather();
-	
-	if(isUntitled()) saveSheetAs();
-	else if(saveScene())
-		emit sendMessage(QString("Scene file %1 is saved").arg(fileName().c_str()));
+}
+
+void GLWidget::saveSheet()
+{	
+	if(MlScene::save())
+		emit sendMessage(QString("Scene file %1 is saved").arg(MlScene::fileName().c_str()));
 }
 
 void GLWidget::saveSheetAs()
 {
-	QString selectedFilter;
-	QString fileName = QFileDialog::getSaveFileName(this,
-							tr("Save scene to file"),
-							tr("info"),
-							tr("All Files (*);;Text Files (*.txt)"),
-							&selectedFilter,
-							QFileDialog::DontUseNativeDialog);
-	if(fileName != "") {
-		saveSceneAs(fileName.toUtf8().data());
-		emit sceneNameChanged(fileName);
-		emit sendMessage(QString("Scene file %1 is saved").arg(fileName));
+	if(MlScene::saveAs("")) {
+		QString s(MlScene::fileName().c_str());
+		emit sceneNameChanged(s);
+		emit sendMessage(QString("Saved scene file as %1").arg(s));
 	}
 }
 
-QString GLWidget::openSheet(QString fileName)
+QString GLWidget::openSheet(QString name)
 {
-	if(fileName == tr("")) {
-		QString selectedFilter;
-		fileName = QFileDialog::getOpenFileName(this,
-							tr("Open scene from file"),
-							tr("info"),
-							tr("All Files (*);;Mallard Files (*.mal)"),
-							&selectedFilter,
-							QFileDialog::DontUseNativeDialog);
+	if(name == tr("")) {
+		if(!MlScene::open()) return tr("");
+	}
+	else {
+		if(!MlScene::open(name.toUtf8().data())) return tr("");
 	}
 	
-	if(fileName != tr("")) {
-		if(!openScene(fileName.toUtf8().data())) return tr("");
-		postLoad();
-		emit sceneNameChanged(fileName);
-	}
-	return fileName;
+	QString res = tr(MlScene::fileName().c_str());
+	
+	emit sceneNameChanged(res);
+	emit sendMessage(QString("Scene file %1 is opened").arg(res));
+	return res;
 }
 
 void GLWidget::revertSheet()
 {
-	if(isUntitled()) return;
-	QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, tr(" "),
-                                    tr("Do you want to revert to the most recently saved version?"),
-                                    QMessageBox::Yes | QMessageBox::Cancel);
-    if (reply == QMessageBox::Cancel)
-		return;
-	revertScene();
-	postLoad();
+	if(revert())
+		emit sendMessage(QString("Scene file %1 is reverted to saved").arg(tr(MlScene::fileName().c_str())));
 }
 
 void GLWidget::receiveFeatherEditBackground(QString name)
@@ -427,7 +437,7 @@ void GLWidget::updateOnFrame(int x)
 	setRebuildTree();
 }
 
-void GLWidget::postLoad()
+void GLWidget::afterOpen()
 {
 	body()->putIntoObjectSpace();
 	buildTopology();
@@ -439,11 +449,9 @@ void GLWidget::postLoad()
 	m_bezierDrawer->rebuildBuffer(body());
 	m_featherDrawer->clearCached();
 	m_featherDrawer->rebuildBuffer(skin());
-	postLoadBake();
+	delayLoadBake();
 	std::string febkgrd = featherEditBackground();
 	if(febkgrd != "unknown") emit sendFeatherEditBackground(tr(febkgrd.c_str()));
-	emit sceneNameChanged(tr(fileName().c_str()));
-	emit sendMessage(QString("Scene file %1 is loaded").arg(tr(fileName().c_str())));
 }
 
 void GLWidget::focusOutEvent(QFocusEvent * event)

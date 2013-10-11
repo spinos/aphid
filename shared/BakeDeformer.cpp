@@ -19,7 +19,7 @@ BakeDeformer::~BakeDeformer()
     clearFrames();
 }
 
-bool BakeDeformer::open(const std::string & filename)
+bool BakeDeformer::doRead(const std::string & filename)
 {
 	if(!HObject::FileIO.open(filename.c_str(), HDocument::oReadOnly)) {
 		setLatestError(BaseFile::FileNotReadable);
@@ -50,7 +50,7 @@ bool BakeDeformer::open(const std::string & filename)
 		return 0;
 	}
 	
-	return BaseFile::open(filename);
+	return true;
 }
 
 bool BakeDeformer::findMatchedMesh(HBase & grp)

@@ -16,44 +16,148 @@ BaseFile::BaseFile()
 {
 	m_fileName = "unknown";
 	_opened = 0;
+	m_dirty = 0;
+	m_clearMode = Normal;
+	m_error = NoError;
 }
 
 BaseFile::BaseFile(const char * name)
 {
 	m_fileName = std::string(name);
 	_opened = 0;
+	m_dirty = 0;
+}
+
+BaseFile::~BaseFile() {}
+
+bool BaseFile::clear()
+{
+	if(shouldSave())
+		if(!confirmDiscardChanges()) return false;
+	
+	doClear();
+	
+	return true;
 }
 
 bool BaseFile::create(const std::string & filename)
 {
-	m_fileName = filename;
-	_opened = true;
-	return _opened;
-}
-
-bool BaseFile::open(const std::string & filename)
-{
-	m_fileName = filename;
-	_opened = true;
-	return _opened;
+	if(!doCreate(filename)) return false;
+	
+	setFileName(filename);
+	setOpened();
+	return true;
 }
 
 bool BaseFile::open()
 {
-    if(isUntitled()) return false;
-    return open(m_fileName);
+	std::string s = chooseOpenFileName();
+	if(s == "") return false;
+	m_clearMode = Normal;
+	return open(s);
+}
+
+bool BaseFile::open(const std::string & fileName)
+{
+	if(!FileExists(fileName)) {
+		setLatestError(BaseFile::FileNotFound);
+		return false;
+	}
+	
+	if(!clear()) return false;
+	
+	if(!doRead(fileName)) return false;
+	
+	afterOpen();
+	setFileName(fileName);
+	setOpened();
+	return true;
 }
 
 bool BaseFile::save()
 {
+	if(!shouldSave()) return false;
+	if(isUntitled()) {
+		std::string s = chooseSaveFileName();
+		if(s == "") return false;
+		return saveAs(s);
+	}
+	beforeSave();
+	if(!doWrite(fileName())) return false;
+	setClean();
     return true;
+}
+
+bool BaseFile::saveAs(const std::string & name)
+{
+	std::string s = name;
+	if(s == "") {
+		s = chooseSaveFileName();
+		if(s == "") return false;
+	}
+	beforeSave();
+	if(!doWrite(s)) return false;
+	setFileName(s);
+	setClean();
+    return true;
+}
+
+bool BaseFile::revert()
+{
+	if(isUntitled()) return false;
+	m_clearMode = Revert;
+	return open(fileName());
 }
 
 bool BaseFile::close()
 {
+	doClose();
     setClosed();
     return true;
 }
+
+bool BaseFile::shouldSave()
+{
+	return isDirty();
+}
+
+bool BaseFile::confirmDiscardChanges()
+{
+	return true;
+}
+
+std::string BaseFile::chooseOpenFileName()
+{
+	return "";
+}
+
+std::string BaseFile::chooseSaveFileName()
+{
+	return "";
+}
+
+void BaseFile::doClear()
+{
+	setClean();
+	setFileName("untitled");
+}
+
+bool BaseFile::doCreate(const std::string & fileName)
+{
+	return true;
+}
+
+bool BaseFile::doRead(const std::string & fileName)
+{
+	return true;
+}
+
+bool BaseFile::doWrite(const std::string & fileName)
+{
+	return true;
+}
+
+void BaseFile::doClose() {}
 
 void BaseFile::setFileName(const std::string & filename)
 {
@@ -88,7 +192,7 @@ bool BaseFile::isUntitled() const
 bool BaseFile::FileExists(const std::string & name)
 {
 	if(!boost::filesystem::exists(name)) {
-		std::cout<<"File "<<name<<" doesn't exist!";
+		std::cout<<"WARNING: file "<<name<<" doesn't exist!";
 		return false;
 	}
 	return true;
@@ -103,3 +207,27 @@ BaseFile::ErrorMsg BaseFile::latestError() const
 {
 	return m_error;
 }
+
+void BaseFile::setDirty()
+{
+	m_dirty = true;
+}
+
+void BaseFile::setClean()
+{
+	m_dirty = false;
+}
+
+bool BaseFile::isDirty() const
+{
+	return m_dirty;
+}
+
+bool BaseFile::isReverting() const
+{
+	return m_clearMode == Revert;
+}
+
+void BaseFile::beforeSave() {}
+
+void BaseFile::afterOpen() {}

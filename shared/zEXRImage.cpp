@@ -106,7 +106,7 @@ ZEXRImage::~ZEXRImage(void)
 {
 }
 
-bool ZEXRImage::open(const std::string & filename)
+bool ZEXRImage::doRead(const std::string & filename)
 {
 	if(!isAnOpenExrFile(filename)) {
 		std::cout<<"ERROR: "<<filename<<" is not an openEXR image\n";
@@ -133,10 +133,10 @@ bool ZEXRImage::open(const std::string & filename)
 		return false; 
 	}
 
-	return BaseImage::open(filename);
+	return true;
 }
 
-void ZEXRImage::clear()
+void ZEXRImage::doClear()
 {
     if(_pixels) delete[] _pixels;
 	_pixels = 0;
@@ -145,7 +145,7 @@ void ZEXRImage::clear()
 		delete *it;
 		
 	_mipmaps.clear();
-	BaseImage::clear();
+	BaseImage::doClear();
 }
 
 const char * ZEXRImage::formatName() const

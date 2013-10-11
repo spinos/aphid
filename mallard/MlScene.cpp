@@ -116,25 +116,24 @@ void MlScene::setPlayback(PlaybackControl * p)
 	m_playback = p;
 }
 
-void MlScene::clearScene()
+bool MlScene::shouldSave()
+{
+	if(!BaseFile::shouldSave()) return false;
+	if(m_accmesh->isEmpty()) return false;
+	if(m_skin->numFeathers() < 1) return false;
+	return true;
+}
+
+void MlScene::doClear()
 {
 	clearFeatherExamples();
 	initializeFeatherExample();
 	m_skin->cleanup();
 	m_accmesh->cleanup();
-	BaseScene::clearScene();
+	disableDeformer();
 }
 
-bool MlScene::shouldSave()
-{
-	if(m_accmesh->isEmpty())
-		return false;
-	if(m_skin->numFeathers() < 1)
-		return false;
-	return true;
-}
-
-bool MlScene::writeSceneToFile(const std::string & fileName)
+bool MlScene::doWrite(const std::string & fileName)
 {
 	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadAndWrite)) {
 		setLatestError(BaseFile::FileNotWritable);
@@ -200,7 +199,7 @@ void MlScene::writeFeatherEidtBackground(HBase * g)
 	g->writeStringAttr(".bkgrd", m_featherEditBackgroundName);
 }
 
-bool MlScene::readSceneFromFile(const std::string & fileName)
+bool MlScene::doRead(const std::string & fileName)
 {
 	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadOnly)) {
 		setLatestError(BaseFile::FileNotReadable);
@@ -299,11 +298,14 @@ void MlScene::enableDeformer()
 	
 void MlScene::disableDeformer()
 {
-	m_deformer->disable();
+	if(m_deformer->isEnabled()) {
+		m_deformer->disable();
+		m_deformer->close();
+	}
 	m_playback->disable();
 }
 
-void MlScene::postLoadBake()
+void MlScene::delayLoadBake()
 {
 	if(m_bakeName != "")
 		readBakeFromFile(m_bakeName);

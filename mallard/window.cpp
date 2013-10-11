@@ -207,7 +207,7 @@ void Window::showMessage(QString msg)
 
 void Window::openFile()
 {
-	QString fileName = glWidget->openSheet();
+	QString fileName = glWidget->openSheet(tr(""));
 	if(fileName == "") return;
 	
 	QSettings settings("mallard.ini", QSettings::IniFormat, this);

@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <BaseScene.h>
+#include <BaseFile.h>
 #include <MlFeatherCollection.h>
 class AccPatchMesh;
 class MlSkin;
@@ -17,7 +17,7 @@ class HBase;
 class BakeDeformer;
 class PlaybackControl;
 
-class MlScene : public BaseScene, public MlFeatherCollection {
+class MlScene : public BaseFile, public MlFeatherCollection {
 public:
 	MlScene();
 	virtual ~MlScene();
@@ -31,18 +31,18 @@ public:
 	PlaybackControl * playback();
 	void setPlayback(PlaybackControl * p);
 	
-	bool shouldSave();
-	virtual void clearScene();
-	bool writeSceneToFile(const std::string & fileName);
-	bool readSceneFromFile(const std::string & fileName);
-	bool readBakeFromFile(const std::string & fileName);
+	virtual bool shouldSave();
+	virtual void doClear();
+	virtual bool doWrite(const std::string & fileName);
+	virtual bool doRead(const std::string & fileName);
 	
+	bool readBakeFromFile(const std::string & fileName);
 	char deformBody(int x);
 	
 	void enableDeformer();
 	void disableDeformer();
 	
-	void postLoadBake();
+	void delayLoadBake();
 private:
 	void writeFeatherExamples();
 	void readFeatherExamples();
