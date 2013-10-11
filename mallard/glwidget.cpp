@@ -224,9 +224,27 @@ void GLWidget::rebuildFeather()
 void GLWidget::bakeFrames()
 {
 	if(!playback()->isControlEnabled()) return;
+	
+	const int bakeMin = playback()->rangeMin();
+	const int bakeMax = playback()->rangeMax();
+	QProgressDialog * progress = new QProgressDialog(QString("frame %1").arg(bakeMin), tr("Cancel"), bakeMin, bakeMax, this);
+	progress->setWindowModality(Qt::WindowModal);
+	progress->setWindowTitle(tr("Baking..."));
+	progress->show();
+	progress->setValue(0);
 	int i;
-	for(i = playback()->rangeMin(); i <= playback()->rangeMax(); i++)
+	for(i = playback()->rangeMin(); i <= playback()->rangeMax(); i++) {
+	    if(progress->wasCanceled()) {
+	        progress->close();
+	        break;
+	    }
+	    
 		updateOnFrame(i);
+		progress->setLabelText(QString("Baking Frame %1").arg(i));
+		progress->setValue(i);
+	}
+	
+	delete progress;
 }
 
 void GLWidget::clearFeather()
