@@ -157,7 +157,7 @@ void BakeDeformer::clearFrames()
 
 char BakeDeformer::solve()
 {
-    if(!isValid()) return 0;
+    if(!isOpened()) return 0;
 	if(!isEnabled()) return 0;
     
     useDocument();

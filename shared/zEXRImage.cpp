@@ -232,7 +232,7 @@ void ZEXRImage::allWhite()
 	
 	for(int i = 0; i < size; i++) _pixels[i] = 1.f;
 	setupMipmaps();
-	setValid();
+	setOpened();
 }
 
 void ZEXRImage::allBlack()
@@ -244,7 +244,7 @@ void ZEXRImage::allBlack()
 	
 	for(int i = 0; i < size; i++) _pixels[i] = 0.f;
 	setupMipmaps();
-	setValid();
+	setOpened();
 }
 
 int ZEXRImage::getNumMipmaps() const

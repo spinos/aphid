@@ -31,9 +31,9 @@ public:
 	void setFileName(const std::string & filename);
 	std::string fileName() const;
 	
-	void setValid();
-	void setInvalid();
-	bool isValid() const;
+	void setOpened();
+	void setClosed();
+	bool isOpened() const;
 	bool isUntitled() const;
 	
 	void setLatestError(BaseFile::ErrorMsg err);
@@ -44,5 +44,5 @@ public:
 private:
 	std::string m_fileName;
 	ErrorMsg m_error;
-	bool _valid;
+	bool _opened;
 };

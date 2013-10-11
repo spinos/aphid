@@ -16,6 +16,8 @@ public:
 	HFile();
 	HFile(const char * name);
 	
+	virtual bool create(const std::string & fileName);
+	virtual bool open(const std::string & fileName);
 	virtual bool close();
 	
 protected:

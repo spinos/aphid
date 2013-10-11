@@ -18,7 +18,7 @@ BaseImage::~BaseImage()
 	clear();
 }
 
-void BaseImage::clear()  { setInvalid(); }
+void BaseImage::clear()  { setClosed(); }
 
 const char * BaseImage::formatName() const
 {
@@ -81,6 +81,6 @@ void BaseImage::verbose() const
 	else
 		std::cout<<" channels: RGBA\n";
 	
-	if(isValid())
+	if(isOpened())
 		std::cout<<" image is verified\n";
 }

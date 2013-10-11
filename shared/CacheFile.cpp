@@ -5,40 +5,6 @@
 CacheFile::CacheFile() : HFile() {}
 CacheFile::CacheFile(const char * name) : HFile(name) {}
 
-bool CacheFile::create(const std::string & fileName)
-{
-	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oCreate)) {
-		setLatestError(BaseFile::FileNotReadable);
-		return false;
-	}
-	
-	setDocument(HObject::FileIO);
-
-	return BaseFile::create(fileName);
-}
-
-bool CacheFile::open(const std::string & fileName)
-{
-    if(!FileExists(fileName)) {
-		setLatestError(BaseFile::FileNotFound);
-		return false;
-	}
-	
-	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadAndWrite)) {
-		setLatestError(BaseFile::FileNotReadable);
-		return false;
-	}
-	
-	setDocument(HObject::FileIO);
-
-	return BaseFile::open(fileName);
-}
-
-bool CacheFile::save()
-{
-    return true;
-}
-
 bool CacheFile::close()
 {
 	useDocument();

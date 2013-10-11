@@ -19,9 +19,6 @@ public:
     CacheFile();
 	CacheFile(const char * name);
     
-	virtual bool create(const std::string & fileName);
-	virtual bool open(const std::string & fileName);
-	virtual bool save();
 	virtual bool close();
 	
 	HBase * getNamedEntry(const std::string & name);

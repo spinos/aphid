@@ -15,27 +15,27 @@
 BaseFile::BaseFile() 
 {
 	m_fileName = "unknown";
-	_valid = 0;
+	_opened = 0;
 }
 
 BaseFile::BaseFile(const char * name)
 {
 	m_fileName = std::string(name);
-	_valid = 0;
+	_opened = 0;
 }
 
 bool BaseFile::create(const std::string & filename)
 {
 	m_fileName = filename;
-	_valid = true;
-	return _valid;
+	_opened = true;
+	return _opened;
 }
 
 bool BaseFile::open(const std::string & filename)
 {
 	m_fileName = filename;
-	_valid = true;
-	return _valid;
+	_opened = true;
+	return _opened;
 }
 
 bool BaseFile::open()
@@ -51,6 +51,7 @@ bool BaseFile::save()
 
 bool BaseFile::close()
 {
+    setClosed();
     return true;
 }
 
@@ -64,19 +65,19 @@ std::string BaseFile::fileName() const
 	return m_fileName;
 }
 
-void BaseFile::setValid()
+void BaseFile::setOpened()
 {
-    _valid = true;
+    _opened = true;
 }
 
-void BaseFile::setInvalid()
+void BaseFile::setClosed()
 {
-    _valid = false;
+    _opened = false;
 }
 
-bool BaseFile::isValid() const
+bool BaseFile::isOpened() const
 {
-	return _valid;
+	return _opened;
 }
 
 bool BaseFile::isUntitled() const
