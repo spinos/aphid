@@ -11,10 +11,16 @@
 #include <BaseDrawer.h>
 #include <BlockDrawBuffer.h>
 #include <MlCache.h>
+
 class MlSkin;
 class MlCalamus;
 class MlTessellate;
 class MlFeather;
+class BezierDrawer;
+class AccPatchMesh;
+class MeshTopology;
+class BakeDeformer;
+class BezierDrawer;
 class MlDrawer : public BaseDrawer, public BlockDrawBuffer, public MlCache {
 public:
 	MlDrawer();
@@ -25,8 +31,17 @@ public:
 	void updateActive(MlSkin * skin);
 	void updateBuffer(MlCalamus * c);
 	void addToBuffer(MlSkin * skin);
-	void rebuildBuffer(MlSkin * skin);
+	void computeBufferIndirection(MlSkin * skin);
+	void rebuildBuffer(MlSkin * skin, bool forced = false);
 	void setCurrentFrame(int x);
+	void calculateFrame(int x, MlSkin * skin,
+	AccPatchMesh * mesh,
+	MeshTopology * topo,
+	BakeDeformer * deformer,
+	BezierDrawer * bezier);
+	
+protected:
+	
 private:
     void computeFeather(MlSkin * skin, MlCalamus * c);
 	void tessellate(MlFeather * f);
@@ -35,4 +50,9 @@ private:
 private:
 	MlTessellate * m_featherTess;
 	int m_currentFrame;
+	MlSkin * skin;
+	AccPatchMesh * mesh;
+	MeshTopology * topo;
+	BakeDeformer * deformer;
+	BezierDrawer * bezier;
 };

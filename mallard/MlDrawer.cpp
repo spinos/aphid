@@ -15,6 +15,8 @@
 #include <AccPatchMesh.h>
 #include <PointInsidePolygonTest.h>
 #include <HBase.h>
+#include <BakeDeformer.h>
+#include <BezierDrawer.h>
 #include <sstream>
 MlDrawer::MlDrawer()
 {
@@ -127,7 +129,7 @@ void MlDrawer::addToBuffer(MlSkin * skin)
 	}
 }
 
-void MlDrawer::rebuildBuffer(MlSkin * skin)
+void MlDrawer::rebuildBuffer(MlSkin * skin, bool forced)
 {
 	const unsigned nc = skin->numFeathers();
 	if(nc < 1) return;
@@ -137,15 +139,28 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 	sst<<m_currentFrame;
 	
 	useDocument();
-	//std::cout<<"draw hdoc "<<HObject::FileIO.fileName()<<"\n";
 	openEntry("/p");
 	openSlice("/p", sst.str());
 	
 	//std::cout<<"building feather draw buffer\n num feathers "<<nc<<"\n";
-	unsigned loc = 0;
 	
+	if(isCached("/p", sst.str()) && !forced) {
+		readFromCache(skin, sst.str());
+	}
+	else {
+		std::cout<<"caching frame "<<sst.str()<<"\n";
+		writeToCache(skin, sst.str());
+	}
+		
+	closeSlice("/p", sst.str());
+	closeEntry("/p");
+}
+
+void MlDrawer::computeBufferIndirection(MlSkin * skin)
+{
+	const unsigned nc = skin->numFeathers();
 	unsigned i, nvpf;
-	Vector3F v;
+	unsigned loc = 0;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin->getCalamus(i);
 		
@@ -160,17 +175,8 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 		
 		loc += nvpf;
 	}
-	
-	if(isCached("/p", sst.str())) {
-		readFromCache(skin, sst.str());
-	}
-	else {
-		std::cout<<"caching frame "<<sst.str()<<"\n";
-		writeToCache(skin, sst.str());
-	}
-		
-	closeSlice("/p", sst.str());
-	closeEntry("/p");
+
+	std::cout<<"buf out max "<<loc - nvpf;
 }
 
 void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c)
@@ -187,11 +193,6 @@ void MlDrawer::tessellate(MlFeather * f)
 {
 	m_featherTess->setFeather(f);
 	m_featherTess->evaluate(f);
-}
-
-void MlDrawer::setCurrentFrame(int x)
-{
-	m_currentFrame = x;
 }
 
 void MlDrawer::writeToCache(MlSkin * skin, const std::string & sliceName)
@@ -252,4 +253,28 @@ void MlDrawer::readFromCache(MlSkin * skin, const std::string & sliceName)
 		
 		updateBuffer(c);
 	}
+}
+
+void MlDrawer::setCurrentFrame(int x)
+{
+	m_currentFrame = x;
+}
+
+void MlDrawer::calculateFrame(int x, MlSkin * skin,
+	AccPatchMesh * mesh,
+	MeshTopology * topo,
+	BakeDeformer * deformer,
+	BezierDrawer * bezier)
+{
+	this->skin = skin;
+	this->mesh = mesh;
+	this->topo = topo;
+	this->deformer = deformer;
+	this->bezier = bezier;
+	
+	m_currentFrame = x;
+	
+	//if (!isRunning()) {
+    //    start(LowPriority);
+    //}
 }

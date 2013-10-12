@@ -50,6 +50,7 @@ public:
 	void clearTree();
 	void clearTopology();
 	void setRebuildTree();
+	bool shouldRebuildTree() const;
 
 	void drawAnchors();
 	AnchorGroup * getAnchors() const;

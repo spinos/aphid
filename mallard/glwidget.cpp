@@ -65,8 +65,10 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	m_featherDrawer = new MlDrawer;
 	m_featherDrawer->create("mallard.mlc");
 	MlCalamus::FeatherLibrary = this;
-	
+	m_baking = false;
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
+	
+	//connect(m_featherDrawer, SIGNAL(updateFrame()), this, SLOT(update()));
 }
 //! [0]
 
@@ -219,7 +221,9 @@ void GLWidget::deselectFeather()
 void GLWidget::rebuildFeather()
 {
 	m_featherDrawer->initializeBuffer();
-	m_featherDrawer->rebuildBuffer(skin());
+	m_featherDrawer->computeBufferIndirection(skin());
+	m_featherDrawer->rebuildBuffer(skin(), true);
+	update();
 }
 
 void GLWidget::bakeFrames()
@@ -232,7 +236,9 @@ void GLWidget::bakeFrames()
 	progress->setWindowModality(Qt::WindowModal);
 	progress->setWindowTitle(tr("Baking Frames"));
 	progress->show();
-	progress->setValue(0);
+	progress->setValue(bakeMin);
+
+	beginBaking();
 	int i;
 	for(i = playback()->rangeMin(); i <= playback()->rangeMax(); i++) {
 	    if(progress->wasCanceled()) {
@@ -244,7 +250,7 @@ void GLWidget::bakeFrames()
 		progress->setLabelText(QString("Min %1 Max %2 Current %3").arg(bakeMin).arg(bakeMax).arg(i));
 		progress->setValue(i);
 	}
-	
+	endBaking();
 	delete progress;
 }
 
@@ -428,14 +434,18 @@ void GLWidget::exportBake()
 
 void GLWidget::updateOnFrame(int x)
 {
-	if(!deformBody(x)) return;
 	if(!playback()->isEnabled()) return;
+	clearFocus();
+	
+	if(!deformBody(x)) return;
 	
 	body()->update(m_topo);
-	m_bezierDrawer->rebuildBuffer(body());
 	m_featherDrawer->setCurrentFrame(x);
-	rebuildFeather();
-	update();
+	m_featherDrawer->rebuildBuffer(skin());
+	m_bezierDrawer->rebuildBuffer(body());
+	
+	if(!isBaking()) update();
+	
 	setRebuildTree();
 }
 
@@ -448,9 +458,10 @@ void GLWidget::afterOpen()
 	skin()->setBodyMesh(body(), m_topo);
 	skin()->finishCreateFeather();
 	bodyDeformer()->setMesh(body());
-	m_bezierDrawer->rebuildBuffer(body());
 	m_featherDrawer->clearCached();
-	m_featherDrawer->rebuildBuffer(skin());
+	m_featherDrawer->computeBufferIndirection(skin());
+	m_featherDrawer->rebuildBuffer(skin(), true);
+	m_bezierDrawer->rebuildBuffer(body());
 	delayLoadBake();
 	std::string febkgrd = featherEditBackground();
 	if(febkgrd != "unknown") emit sendFeatherEditBackground(tr(febkgrd.c_str()));
@@ -468,5 +479,20 @@ void GLWidget::closeCache()
 {
 	m_featherDrawer->close();
 	bodyDeformer()->close();
+}
+
+void GLWidget::beginBaking()
+{
+	m_baking = true;
+}
+
+void GLWidget::endBaking()
+{
+	m_baking = false;
+}
+
+bool GLWidget::isBaking() const
+{
+	return m_baking;
 }
 //:~

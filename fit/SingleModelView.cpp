@@ -204,6 +204,11 @@ void SingleModelView::setRebuildTree()
 	m_shouldRebuildTree = true;
 }
 
+bool SingleModelView::shouldRebuildTree() const
+{
+	return m_shouldRebuildTree;
+}
+
 void SingleModelView::drawAnchors()
 {
 	if(m_anchors->numAnchors() < 1) return;
