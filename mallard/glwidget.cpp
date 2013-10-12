@@ -383,14 +383,14 @@ void GLWidget::chooseBake()
 	
 	QString selectedFilter;
 	QString fileName = QFileDialog::getOpenFileName(this,
-							tr("Load bake from file"),
+							tr("Load Body Animation from file"),
 							tr("info"),
 							tr("All Files (*);;Mesh Bake Files (*.h5)"),
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
-	if(fileName != "") {
-		readBakeFromFile(fileName.toUtf8().data());
-	}
+	if(fileName == "") return;
+	if(readBakeFromFile(fileName.toUtf8().data()))
+		emit sendMessage(QString("Attached body animation in file %1").arg(fileName));
 }
 
 void GLWidget::exportBake()
@@ -420,10 +420,10 @@ void GLWidget::exportBake()
 							tr("All Files (*);;Feather Bake Files (*.mlb)"),
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
-	if(fileName != "") {
-		m_featherDrawer->setSceneName(MlScene::fileName());
-	    m_featherDrawer->doCopy(fileName.toUtf8().data());
-	}
+	if(fileName == "") return;
+	m_featherDrawer->setSceneName(MlScene::fileName());
+	if(m_featherDrawer->doCopy(fileName.toUtf8().data()))
+		emit sendMessage(QString("Exported feather cache to file %1").arg(fileName));
 }
 
 void GLWidget::updateOnFrame(int x)
