@@ -47,7 +47,7 @@ bool CacheFile::openSlice(const std::string & entryName, const std::string & sli
 	if(g == 0) return false;
 	
 	if(!g->hasNamedData(sliceName.c_str()))
-	    g->addVector3Data(sliceName.c_str(), 1024);
+	    g->addVector3Data(sliceName.c_str(), 2048);
 	
 	VerticesHDataset * pset = new VerticesHDataset(sliceName.c_str());
 	pset->open(g->fObjectId);

@@ -29,7 +29,7 @@ char HDataset::create(hid_t parentId)
 	hsize_t m_chunkSize[3] = {32, 0, 0};
 	
 	H5Sget_simple_extent_dims(createSpace, dims, maxdims);
-	m_chunkSize[0] = dims[0] / 16;
+	m_chunkSize[0] = dims[0] / 4;
 	
 	//std::cout<<"d space n dim "<<ndim<<"\n";
 	//std::cout<<"d space "<<dims[0]<<" "<<dims[1]<<" "<<dims[2]<<" \n";
@@ -39,6 +39,8 @@ char HDataset::create(hid_t parentId)
       printf("Error: fail to set chunk\n");
       return -1;
 	}
+	
+	H5Pset_deflate(createProps, 8); 
    	
 	fObjectId = H5Dcreate2(parentId, fObjectPath.c_str(), dataType(), createSpace, 
                           H5P_DEFAULT, createProps, H5P_DEFAULT);
@@ -150,6 +152,7 @@ char HDataset::write(char *data, SelectPart * part)
 	
 	status = H5Dwrite(fObjectId, dataType(), dataSpace, memSpace, H5P_DEFAULT, data);
 	H5Sclose(memSpace);
+
 	if(status < 0)
 		return 0;
 	

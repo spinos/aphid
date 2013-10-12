@@ -197,7 +197,8 @@ void MlDrawer::setCurrentFrame(int x)
 void MlDrawer::writeToCache(MlSkin * skin, const std::string & sliceName)
 {
 	const unsigned nc = skin->numFeathers();
-	Vector3F wpb[8192];
+	const unsigned blockL = 2048;
+	Vector3F wpb[blockL];
 	unsigned i, j, iblock = 0, ifull = 0;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin->getCalamus(i);
@@ -208,7 +209,7 @@ void MlDrawer::writeToCache(MlSkin * skin, const std::string & sliceName)
 			wpb[iblock] = f->worldP()[j];
 			iblock++;
 			ifull++;
-			if(iblock == 8192) {
+			if(iblock == blockL) {
 				writeSliceVector3("/p", sliceName, ifull - iblock, iblock, wpb);
 				iblock = 0;
 			}
