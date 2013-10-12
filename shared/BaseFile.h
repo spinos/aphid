@@ -43,6 +43,7 @@ public:
 	virtual void doClose();
 	virtual void beforeSave();
 	virtual void afterOpen();
+	virtual bool doCopy(const std::string & filename);
 	
 	void setFileName(const std::string & filename);
 	std::string fileName() const;

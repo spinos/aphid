@@ -42,7 +42,7 @@ MlFeather * MlFeatherCollection::addFeatherExampleId(unsigned idx)
 	MlFeather * f = new MlFeather;
 	f->setFeatherId(idx);
 	m_feathers[idx] = f;
-	std::cout<<"add example["<<f->featherId()<<"]\n";
+	//std::cout<<"add example["<<f->featherId()<<"]\n";
 	return f;
 }
 

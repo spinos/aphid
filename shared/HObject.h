@@ -26,6 +26,7 @@ public:
 
 	static std::string ValidPathName(const std::string & name);
 	static std::string FullPath(const std::string & entryName, const std::string & sliceName);
+	static std::string PartialPath(const std::string & entryName, const std::string & sliceName);
 	
 	std::string pathToObject() const;
 	

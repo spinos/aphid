@@ -130,6 +130,7 @@ HEADERS       = ../shared/AllMath.h \
 				MlCalamus.h \
 				MlCalamusArray.h \
 				MlDrawer.h \
+    MlCache.h \
 				MlTessellate.h \
 				MlSkin.h \
                 MlRachis.h \
@@ -266,6 +267,7 @@ SOURCES       = ../shared/Vector3F.cpp \
 				MlCalamus.cpp \
 				MlCalamusArray.cpp \
 				MlDrawer.cpp \
+    MlCache.cpp \
 				MlTessellate.cpp \
 				MlSkin.cpp \
                 MlRachis.cpp \

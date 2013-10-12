@@ -231,3 +231,8 @@ bool BaseFile::isReverting() const
 void BaseFile::beforeSave() {}
 
 void BaseFile::afterOpen() {}
+
+bool BaseFile::doCopy(const std::string & filename) 
+{
+	return true;
+}

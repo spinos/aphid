@@ -60,6 +60,7 @@
 
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
+	std::cout<<"3Dview ";
 	m_bezierDrawer = new BezierDrawer;
 	m_featherDrawer = new MlDrawer;
 	m_featherDrawer->create("mallard.mlc");
@@ -420,7 +421,8 @@ void GLWidget::exportBake()
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
 	if(fileName != "") {
-	    std::cout<<"to bake "<<fileName.toUtf8().data();
+		m_featherDrawer->setSceneName(MlScene::fileName());
+	    m_featherDrawer->doCopy(fileName.toUtf8().data());
 	}
 }
 

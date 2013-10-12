@@ -10,12 +10,12 @@
 #pragma once
 #include <BaseDrawer.h>
 #include <BlockDrawBuffer.h>
-#include <CacheFile.h>
+#include <MlCache.h>
 class MlSkin;
 class MlCalamus;
 class MlTessellate;
 class MlFeather;
-class MlDrawer : public BaseDrawer, public BlockDrawBuffer, public CacheFile {
+class MlDrawer : public BaseDrawer, public BlockDrawBuffer, public MlCache {
 public:
 	MlDrawer();
 	virtual ~MlDrawer();

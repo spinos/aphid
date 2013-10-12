@@ -76,3 +76,11 @@ std::string HObject::FullPath(const std::string & entryName, const std::string &
 	sst<<entryName<<"/"<<sliceName;
 	return sst.str();
 }
+
+std::string HObject::PartialPath(const std::string & entryName, const std::string & sliceName)
+{
+	std::string res = sliceName;
+	if(res.find(entryName, 0) != 0) return res;
+	res.erase(0, entryName.size() + 1);
+	return res;
+}

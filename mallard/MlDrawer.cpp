@@ -18,6 +18,7 @@
 #include <sstream>
 MlDrawer::MlDrawer()
 {
+	std::cout<<"Feather buffer ";
 	m_featherTess = new MlTessellate;
 	m_currentFrame = -9999;
 }

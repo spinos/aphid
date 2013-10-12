@@ -51,6 +51,7 @@
 //! [0]
 Window::Window()
 {
+	std::cout<<"Initializing Mallard main window ";
     glWidget = new GLWidget;
 	m_tools = new ToolBox;
 	
@@ -79,6 +80,7 @@ Window::Window()
 	connect(glWidget, SIGNAL(sendFeatherEditBackground(QString)), m_featherEdit, SLOT(receiveTexture(QString)));
 	connect(m_timeControl, SIGNAL(currentFrameChanged(int)), glWidget, SLOT(updateOnFrame(int)));
 	
+	std::cout<<"Ready\n";
 	statusBar()->showMessage(tr("Ready"));
 }
 

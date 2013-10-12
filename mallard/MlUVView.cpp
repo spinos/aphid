@@ -18,6 +18,7 @@ MlFeatherCollection * MlUVView::FeatherLibrary = 0;
 
 MlUVView::MlUVView(QWidget *parent) : Base2DView(parent)
 {
+	std::cout<<"UVview ";
 	m_activeId = m_texId = -1;
 	m_selectedVert = 0;
 	m_image = new ZEXRImage;

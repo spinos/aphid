@@ -78,6 +78,19 @@ void CacheFile::saveEntrySize(const std::string & entryName, unsigned size)
 	g->writeIntAttr(".size", &x);
 }
 
+unsigned CacheFile::entrySize(const std::string & entryName)
+{
+    HBase * g = getNamedEntry(entryName);
+	if(g == 0) return 0;
+	
+	if(!g->hasNamedAttr(".size"))
+	    return 0;
+	
+	int x;
+	g->readIntAttr(".size", &x);
+	return x;
+}
+
 void CacheFile::writeSliceVector3(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data)
 {
 	const std::string slicePath = HObject::FullPath(entryName, sliceName);
@@ -144,6 +157,20 @@ unsigned CacheFile::numCachedSlices(const std::string & entryName) const
 	for(it = m_cachedSlices.begin(); it != m_cachedSlices.end(); ++it) {
 	    if((*it).first.find(entryName, 0) == 0) 
 	        res++;
+	}
+	
+	return res;
+}
+
+unsigned CacheFile::cacheSliceNames(const std::string & entryName, std::vector<std::string> & dst) const
+{
+	unsigned res = 0;
+    std::map<std::string, unsigned>::const_iterator it;
+	for(it = m_cachedSlices.begin(); it != m_cachedSlices.end(); ++it) {
+	    if((*it).first.find(entryName, 0) == 0) {
+			dst.push_back((*it).first);
+	        res++;
+		}
 	}
 	
 	return res;
