@@ -276,25 +276,25 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 
 void MlSkin::finishCreateFeather()
 {
+	if(!hasFeatherCreated()) return;
 	if(!m_body) return;
     computeFaceCalamusIndirection();
-	
 	m_numCreatedFeather = 0;
+	std::cout<<" add to "<<numFeathers();
 }
 
 void MlSkin::finishEraseFeather()
 {
 	if(numActive() < 1) return;
 	if(numActive() == numFeathers()) {
-		std::cout<<"erase all "<<numFeathers();
 		m_numFeather = 0;
 		m_calamus->setIndex(0);
 		resetFaceCalamusIndirection();
+		std::cout<<" reduce all 0";
 		return;
 	}
 	
 	QuickSort::Sort(m_activeIndices, 0, numActive() - 1);
-	std::cout<<"erase from "<<numFeathers();
 	
 	unsigned i, j;
 	const unsigned num = numActive();
@@ -302,7 +302,6 @@ void MlSkin::finishEraseFeather()
 		j = lastInactive();
 		if(m_activeIndices[i] < j) {
 			m_calamus->swapElement(m_activeIndices[i], j);
-			//std::cout<<" sw "<<m_activeIndices[i]<<" "<< j<<" ";
 			m_activeIndices.push_back(j);
 		}
 		m_numFeather--;
@@ -310,7 +309,7 @@ void MlSkin::finishEraseFeather()
 	
 	m_calamus->setIndex(m_numFeather);
 	computeFaceCalamusIndirection();
-	std::cout<<" to "<<numFeathers();
+	std::cout<<" reduce to "<<numFeathers();
 }
 
 void MlSkin::computeFaceCalamusIndirection()

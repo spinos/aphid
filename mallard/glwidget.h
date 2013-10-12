@@ -106,7 +106,6 @@ private:
 private:
 	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;
-	bool m_baking;
 };
 //! [3]
 

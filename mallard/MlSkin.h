@@ -38,6 +38,7 @@ public:
 	void scaleFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	void pitchFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	
+	void computeFaceCalamusIndirection();
 	void finishCreateFeather();
 	void finishEraseFeather();
 	unsigned numFeathers() const;
@@ -70,7 +71,6 @@ private:
 	bool createFeather(MlCalamus & ori);
 	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance);
 	bool isDartCloseToExisting(const Vector3F & pos, const std::vector<Vector3F> & existing, float minDistance) const;
-	void computeFaceCalamusIndirection();
 	void resetFaceCalamusIndirection();
 	unsigned lastInactive() const;
 private:

@@ -65,10 +65,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	m_featherDrawer = new MlDrawer;
 	m_featherDrawer->create("mallard.mlc");
 	MlCalamus::FeatherLibrary = this;
-	m_baking = false;
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
-	
-	//connect(m_featherDrawer, SIGNAL(updateFrame()), this, SLOT(update()));
 }
 //! [0]
 
@@ -238,9 +235,8 @@ void GLWidget::bakeFrames()
 	progress->show();
 	progress->setValue(bakeMin);
 
-	beginBaking();
 	int i;
-	for(i = playback()->rangeMin(); i <= playback()->rangeMax(); i++) {
+	for(i = bakeMin; i <= bakeMax; i++) {
 	    if(progress->wasCanceled()) {
 	        progress->close();
 	        break;
@@ -250,7 +246,7 @@ void GLWidget::bakeFrames()
 		progress->setLabelText(QString("Min %1 Max %2 Current %3").arg(bakeMin).arg(bakeMax).arg(i));
 		progress->setValue(i);
 	}
-	endBaking();
+
 	delete progress;
 }
 
@@ -444,7 +440,7 @@ void GLWidget::updateOnFrame(int x)
 	m_featherDrawer->rebuildBuffer(skin());
 	m_bezierDrawer->rebuildBuffer(body());
 	
-	if(!isBaking()) update();
+	update();
 	
 	setRebuildTree();
 }
@@ -456,7 +452,7 @@ void GLWidget::afterOpen()
 	body()->setup(m_topo);
 	buildTree();
 	skin()->setBodyMesh(body(), m_topo);
-	skin()->finishCreateFeather();
+	skin()->computeFaceCalamusIndirection();
 	bodyDeformer()->setMesh(body());
 	m_featherDrawer->clearCached();
 	m_featherDrawer->computeBufferIndirection(skin());
@@ -479,20 +475,5 @@ void GLWidget::closeCache()
 {
 	m_featherDrawer->close();
 	bodyDeformer()->close();
-}
-
-void GLWidget::beginBaking()
-{
-	m_baking = true;
-}
-
-void GLWidget::endBaking()
-{
-	m_baking = false;
-}
-
-bool GLWidget::isBaking() const
-{
-	return m_baking;
 }
 //:~

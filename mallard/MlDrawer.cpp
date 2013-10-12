@@ -176,7 +176,7 @@ void MlDrawer::computeBufferIndirection(MlSkin * skin)
 		loc += nvpf;
 	}
 
-	std::cout<<"buf out max "<<loc - nvpf;
+	std::cout<<"buffer n vertices: "<<loc<<"\n";
 }
 
 void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c)
