@@ -33,6 +33,7 @@ public:
 	
 	virtual bool shouldSave();
 	virtual void doClear();
+	virtual void doClose();
 	virtual bool doWrite(const std::string & fileName);
 	virtual bool doRead(const std::string & fileName);
 	

@@ -252,5 +252,5 @@ void Window::updateRecentFileActions()
 
 void Window::closeEvent(QCloseEvent *event)
 {
-	glWidget->closeCache();
+	if(!((MlScene *)glWidget)->close()) event->ignore();
 }

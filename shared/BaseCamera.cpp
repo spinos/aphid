@@ -15,7 +15,7 @@ BaseCamera::BaseCamera()
     m_farClipPlane = 1000.f;
 	fPortWidth = 400;
 	fPortHeight = 300;
-	reset(Vector3F(0.f, 0.f, 100.f));
+	reset(Vector3F(0.f, 0.f, 0.f));
 }
 
 BaseCamera::~BaseCamera() {}
@@ -30,8 +30,8 @@ void BaseCamera::reset(const Vector3F & pos)
 	fHorizontalAperture = 100.f;
 	
 	fSpace.setIdentity();
-	fSpace.setTranslation(pos);
-	fCenterOfInterest = pos + Vector3F(0.f, 0.f, -100.f);
+	fSpace.setTranslation(pos + Vector3F(0.f, 0.f, 100.f));
+	fCenterOfInterest = pos;
 	updateInverseSpace();
 }
 

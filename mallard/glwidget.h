@@ -67,6 +67,7 @@ public:
 	virtual std::string chooseOpenFileName();
 	virtual std::string chooseSaveFileName();
 	virtual void doClear();
+	virtual void doClose();
 	virtual void beforeSave();
 	virtual void afterOpen();
 	

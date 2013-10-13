@@ -84,7 +84,7 @@ void BrushControl::createGroup()
 	
 	m_numSampleValueC->setValue(32);
 	m_radiusValueC->setValue(4.0);
-	m_pitchValueC->setValue(0.4);
+	m_pitchValueC->setValue(0.35);
 }
 
 void BrushControl::eraseGroup()

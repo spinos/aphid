@@ -73,8 +73,8 @@ void SingleModelView::clientMouseInput()
 
 Vector3F SingleModelView::sceneCenter() const
 {
-	if(m_tree->isEmpty()) return Vector3F(0.f, 0.f, 100.f);
-	return m_tree->getBBox().center() + Vector3F(0.f, 0.f, m_tree->getBBox().distance(2));
+	if(m_tree->isEmpty()) return Base3DView::sceneCenter();
+	return m_tree->getBBox().center();
 }
 
 bool SingleModelView::anchorSelected(float wei)

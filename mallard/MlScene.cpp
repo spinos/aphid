@@ -135,6 +135,11 @@ void MlScene::doClear()
 	BaseFile::doClear();
 }
 
+void MlScene::doClose() 
+{
+	BaseFile::doClose();
+}
+
 bool MlScene::doWrite(const std::string & fileName)
 {
 	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadAndWrite)) {

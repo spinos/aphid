@@ -170,10 +170,12 @@ void BezierPatch::evaluateSurfaceBinormal(float u, float v, Vector3F * binm) con
 
 void BezierPatch::evaluateSurfaceNormal(float u, float v, Vector3F * nor) const
 {
-	//Vector3F dpdu, dpdv;
-	//evaluateSurfaceTangent(u, v, &dpdu);
-	//evaluateSurfaceBinormal(u , v, &dpdv);
-	//*nor = dpdv.cross(dpdu).normal();
+	/*
+	Vector3F dpdu, dpdv;
+	evaluateSurfaceTangent(u, v, &dpdu);
+	evaluateSurfaceBinormal(u , v, &dpdv);
+	*nor = dpdv.cross(dpdu).normal();
+	*/
 	Vector2F L0(1.f-u,1.f-v);
 	Vector2F L1(u,v);
 
@@ -311,24 +313,13 @@ void BezierPatch::splitPatchUV(PatchSplitContext ctx, PatchSplitContext * child)
 	res->patchUV[2] = c;
 	res->patchUV[3] = ctx.patchUV[3];
 }
-
-/*
- *   (dv)
- *   
- *   3 --> 2
- *   ^     ^
- *   |     |
- *   |     |
- *   0 --> 1   z(du)
- *
- *   y
- */
  
-Matrix33F BezierPatch::tangentFrame(float u, float v) const
+const Matrix33F BezierPatch::tangentFrame(float u, float v) const
 {
 	Matrix33F frm;
-    Vector3F du = (p(3, 0) - p(0, 0) + p(3, 3) - p(3, 0)) * .5f;
-    du.normalize();
+    Vector3F du;
+	evaluateSurfaceTangent(u, v, &du);
+	du.normalize();
     
     Vector3F side;
 	evaluateSurfaceNormal(u, v, &side);

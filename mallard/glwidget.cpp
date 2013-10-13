@@ -131,8 +131,6 @@ void GLWidget::clientSelect()
 		skin()->discardActive();
 		selectFeather();
 	}
-	m_featherDrawer->clearCached();
-	setDirty();
 }
 
 void GLWidget::clientMouseInput()
@@ -191,6 +189,8 @@ void GLWidget::selectFeather()
 	brush()->resetToe();
 	
 	skin()->selectAround(ctx->m_componentIdx, ctx->m_hitP, ctx->m_hitN, brush()->getRadius());
+	m_featherDrawer->clearCached();
+	setDirty();
 }
 
 void GLWidget::floodFeather()
@@ -212,6 +212,8 @@ void GLWidget::floodFeather()
 	ac.setRotateY(brush()->getPitch());
 	skin()->floodAround(ac, iface, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
 	m_featherDrawer->addToBuffer(skin());
+	m_featherDrawer->clearCached();
+	setDirty();
 }
 
 void GLWidget::finishEraseFeather()
@@ -230,6 +232,7 @@ void GLWidget::rebuildFeather()
 	m_featherDrawer->computeBufferIndirection(skin());
 	m_featherDrawer->rebuildBuffer(skin(), true);
 	update();
+	setDirty();
 }
 
 void GLWidget::bakeFrames()
@@ -285,6 +288,13 @@ bool GLWidget::confirmDiscardChanges()
                                     tr("Revert to latest saved version of the scene?"),
                                     QMessageBox::Yes | QMessageBox::Cancel);
 	}
+	else if(isClosing()) {
+		reply = QMessageBox::question(this, tr(" "),
+                                    tr("Save changes to the scene before closing?"),
+                                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+		if (reply == QMessageBox::Yes)
+			MlScene::save();
+	}
 	else {
 		reply = QMessageBox::question(this, tr(" "),
                                     tr("Save changes to the scene before creating a new one?"),
@@ -336,6 +346,12 @@ void GLWidget::doClear()
 	clearTopology();
 	emit sceneNameChanged(tr("untitled"));
 	update();
+}
+
+void GLWidget::doClose()
+{
+	closeCache();
+	MlScene::doClose();
 }
 
 void GLWidget::beforeSave()

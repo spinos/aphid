@@ -61,13 +61,14 @@ public:
 	BaseFile::ErrorMsg latestError() const;
 	
 	bool isReverting() const;
-	
+	bool isClosing() const;
 	static bool FileExists(const std::string & name);
 	
 private:
 	enum ClearMode {
 		Normal = 0,
-		Revert = 1
+		Revert = 1,
+		Close = 2
 	};
 	
 	std::string m_fileName;

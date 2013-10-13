@@ -111,6 +111,8 @@ bool BaseFile::revert()
 
 bool BaseFile::close()
 {
+	m_clearMode = Close;
+	if(!clear()) return false;
 	doClose();
     setClosed();
     return true;
@@ -226,6 +228,11 @@ bool BaseFile::isDirty() const
 bool BaseFile::isReverting() const
 {
 	return m_clearMode == Revert;
+}
+
+bool BaseFile::isClosing() const
+{
+	return m_clearMode == Close;
 }
 
 void BaseFile::beforeSave() {}

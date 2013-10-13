@@ -73,15 +73,15 @@ void MlSkin::floodAround(MlCalamus floodC, unsigned floodFaceIdx, const Vector3F
 		const unsigned ndart = 4 + m_body->calculateBBox(iface).area() / floodMinD / floodMinD;
 		for(j = 0; j < ndart; j++) {
 		
-			u = rand()%91/91.f;
-			v = rand()%97/97.f;
+			u = ((float)(rand()%591))/591.f;
+			v = ((float)(rand()%593))/593.f;
 			m_body->pointOnPatch(iface, u, v, adart);
 			
 			if(Vector3F(floodPos, adart).length() > floodMaxD) continue;
 			
 			m_body->normalOnPatch(iface, u, v, facing);
 			
-			if(facing.dot(floodNor) < .33f) continue;
+			if(facing.dot(floodNor) < .23f) continue;
 			
 			if(isPointTooCloseToExisting(adart, iface, floodMinD)) continue;
 			
@@ -215,11 +215,20 @@ void MlSkin::scaleFeather(const Vector3F & direction, const Vector3F & center, c
 	unsigned i;
 	
 	float activeMeanScale = 0.f;
+	Vector3F activeMeanDir;
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
+		Matrix33F space = rotationFrame(c);
+		Vector3F zdir(0.f, 0.f, 1.f);
+		zdir = space.transform(zdir);
+		activeMeanDir += zdir;
 		activeMeanScale += c->realScale();
 	}
 	activeMeanScale /= num;
+	activeMeanDir /= (float)num;
+
+	if(direction.dot(activeMeanDir) < 0.f) activeMeanScale *= .9f;
+	else activeMeanScale *= 1.1f;
 	
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
@@ -227,15 +236,8 @@ void MlSkin::scaleFeather(const Vector3F & direction, const Vector3F & center, c
 		getPointOnBody(c, p);
 		drop = Vector3F(p, center).length() / radius;
 		drop = 1.f - drop * drop;
-		
-		Matrix33F space = rotationFrame(c);
-		Vector3F zdir(0.f, 0.f, 1.f);
-		zdir = space.transform(zdir);
 
-		float fac = 0.1f;
-		if(direction.dot(zdir) < 0.f) fac = -0.1f;
-
-		c->setScale((fac + 1.f) * activeMeanScale * drop + c->realScale() * (1.f - drop));
+		c->setScale(activeMeanScale * drop + c->realScale() * (1.f - drop));
     }
 }
 
@@ -250,11 +252,20 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 	unsigned i;
 	
 	float activeMeanPitch = 0.f;
+	Vector3F activeMeanDir;
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
 		activeMeanPitch += c->rotateY();
+		Matrix33F space = rotationFrame(c);
+		Vector3F zdir(0.f, 0.f, 1.f);
+		zdir = space.transform(zdir);
+		activeMeanDir += zdir;
 	}
 	activeMeanPitch /= num;
+	activeMeanDir /= (float)num;
+
+	if(direction.dot(activeMeanDir) < 0.f) activeMeanPitch -= .07f;
+	else activeMeanPitch += .07f;
 	
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
@@ -262,15 +273,8 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 		getPointOnBody(c, p);
 		drop = Vector3F(p, center).length() / radius;
 		drop = 1.f - drop * drop;
-		
-		Matrix33F space = rotationFrame(c);
-		Vector3F zdir(0.f, 0.f, 1.f);
-		zdir = space.transform(zdir);
 
-		float fac = 0.1f;
-		if(direction.dot(zdir) < 0.f) fac = -0.1f;
-
-		c->setRotateY(((fac + 1.f) * drop + (1.f - drop)) * activeMeanPitch);
+		c->setRotateY(activeMeanPitch * drop + c->rotateY() * (1.f - drop));
     }
 }
 
@@ -456,7 +460,7 @@ Matrix33F MlSkin::rotationFrame(MlCalamus * c) const
 {
 	Matrix33F frm;
 	frm.rotateX(c->rotateX());
-	frm.multiply(m_body->tangentFrame(c->faceIdx(), c->patchU(), c->patchV()));
+	frm.multiply(tangentSpace(c));
 	return frm;
 }
 
