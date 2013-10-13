@@ -114,7 +114,7 @@ void MlUVView::clientMouseInput()
 				m_selectedVert[1] += d.y;
 				m_selectVertWP += d;
 			}
-			FeatherLibrary->selectedFeatherExample()->computeBounding();
+			FeatherLibrary->selectedFeatherExample()->computeTexcoord();
 		}
 	}
 }
@@ -201,14 +201,14 @@ void MlUVView::drawFeather(MlFeather * f)
 		vaneRC.m_cvs[2] = fRC.interpolate(t);
 		vaneRC.m_cvs[3] = gRC.interpolate(t);
 		vaneRC.computeKnots();
-		dr->smoothCurve(vaneRC, 2);
+		dr->smoothCurve(vaneRC, 4);
 		
 		vaneRC.m_cvs[0] = quillC.interpolate(t);
 		vaneRC.m_cvs[1] = eLC.interpolate(t);
 		vaneRC.m_cvs[2] = fLC.interpolate(t);
 		vaneRC.m_cvs[3] = gLC.interpolate(t);
 		vaneRC.computeKnots();
-		dr->smoothCurve(vaneRC, 2);
+		dr->smoothCurve(vaneRC, 4);
 	}
 
     glPopMatrix();

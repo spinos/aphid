@@ -68,6 +68,7 @@ bool MlCache::doCopy(const std::string & name)
 		closeSlice("/p", aslice);
 		tgt.useDocument();
 		tgt.closeSlice("/p", aslice);
+		tgt.flush();
 	}
 	delete[] b;
 	useDocument();

@@ -54,3 +54,9 @@ void HFile::setDocument(const HDocument & doc)
 {
 	m_doc = doc;
 }
+
+void HFile::flush()
+{
+	useDocument();
+	H5Fflush(HObject::FileIO.fFileId, H5F_SCOPE_LOCAL);
+}

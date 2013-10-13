@@ -15,8 +15,6 @@
 #include <AccPatchMesh.h>
 #include <PointInsidePolygonTest.h>
 #include <HBase.h>
-#include <BakeDeformer.h>
-#include <BezierDrawer.h>
 #include <sstream>
 MlDrawer::MlDrawer()
 {
@@ -30,7 +28,7 @@ MlDrawer::~MlDrawer()
 	delete m_featherTess;
 }
 
-void MlDrawer::drawFeather(MlSkin * skin) const
+void MlDrawer::draw(MlSkin * skin) const
 {
 	if(skin->numFeathers() > 0) drawBuffer();
 }
@@ -131,6 +129,7 @@ void MlDrawer::addToBuffer(MlSkin * skin)
 
 void MlDrawer::rebuildBuffer(MlSkin * skin, bool forced)
 {
+	this->skin = skin;
 	const unsigned nc = skin->numFeathers();
 	if(nc < 1) return;
 	
@@ -142,15 +141,10 @@ void MlDrawer::rebuildBuffer(MlSkin * skin, bool forced)
 	openEntry("/p");
 	openSlice("/p", sst.str());
 	
-	//std::cout<<"building feather draw buffer\n num feathers "<<nc<<"\n";
-	
-	if(isCached("/p", sst.str()) && !forced) {
-		readFromCache(skin, sst.str());
-	}
-	else {
-		std::cout<<"caching frame "<<sst.str()<<"\n";
-		writeToCache(skin, sst.str());
-	}
+	if(isCached("/p", sst.str()) && !forced)
+		readFromCache(sst.str());
+	else
+		writeToCache(sst.str());
 		
 	closeSlice("/p", sst.str());
 	closeEntry("/p");
@@ -195,11 +189,11 @@ void MlDrawer::tessellate(MlFeather * f)
 	m_featherTess->evaluate(f);
 }
 
-void MlDrawer::writeToCache(MlSkin * skin, const std::string & sliceName)
+void MlDrawer::writeToCache(const std::string & sliceName)
 {
 	const unsigned nc = skin->numFeathers();
 	const unsigned blockL = 2048;
-	Vector3F wpb[blockL];
+	Vector3F * wpb = new Vector3F[blockL];
 	unsigned i, j, iblock = 0, ifull = 0;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin->getCalamus(i);
@@ -224,13 +218,15 @@ void MlDrawer::writeToCache(MlSkin * skin, const std::string & sliceName)
 		
 	saveEntrySize("/p", ifull);
 	setCached("/p", sliceName, ifull);
+	delete[] wpb;
+	flush();
 }
 
-void MlDrawer::readFromCache(MlSkin * skin, const std::string & sliceName)
+void MlDrawer::readFromCache(const std::string & sliceName)
 {
 	const unsigned nc = skin->numFeathers();
 	const unsigned blockL = 2048;
-	Vector3F wpb[blockL];
+	Vector3F * wpb = new Vector3F[blockL];
 	unsigned i, j, iblock = 0, ifull = 0;
 	readSliceVector3("/p", sliceName, 0, blockL, wpb);
 	
@@ -253,28 +249,10 @@ void MlDrawer::readFromCache(MlSkin * skin, const std::string & sliceName)
 		
 		updateBuffer(c);
 	}
+	delete[] wpb;
 }
 
 void MlDrawer::setCurrentFrame(int x)
 {
 	m_currentFrame = x;
-}
-
-void MlDrawer::calculateFrame(int x, MlSkin * skin,
-	AccPatchMesh * mesh,
-	MeshTopology * topo,
-	BakeDeformer * deformer,
-	BezierDrawer * bezier)
-{
-	this->skin = skin;
-	this->mesh = mesh;
-	this->topo = topo;
-	this->deformer = deformer;
-	this->bezier = bezier;
-	
-	m_currentFrame = x;
-	
-	//if (!isRunning()) {
-    //    start(LowPriority);
-    //}
 }

@@ -93,8 +93,8 @@ char HFeather::load(MlFeather * feather)
 		readFloatAttr(".uv", (float *)(&uv));
 		
 	feather->setBaseUV(uv);
-	feather->computeBounding();
 	feather->computeLength();
+	feather->computeTexcoord();
 	feather->verbose();
 	
 	return 1;

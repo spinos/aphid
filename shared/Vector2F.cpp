@@ -72,8 +72,8 @@ void Vector2F::operator/=( const float& scale )
 
 void Vector2F::operator*=( const float& scale )
 {
-    x /= scale;
-    y /= scale;
+    x *= scale;
+    y *= scale;
 }
 
 Vector2F Vector2F::operator*(const float& scale ) const

@@ -1,7 +1,7 @@
 #include "MlFeather.h"
 #include "MlRachis.h"
 #include <CollisionRegion.h>
-MlFeather::MlFeather() : m_quilly(0), m_vaneVertices(0), m_worldP(0)
+MlFeather::MlFeather() : m_quilly(0), m_vaneVertices(0), m_worldP(0), m_st(0)
 {
 	m_rachis = new MlRachis;
 	m_uv.set(4.f, 4.f);
@@ -13,6 +13,7 @@ MlFeather::~MlFeather()
     if(m_quilly) delete[] m_quilly;
     if(m_vaneVertices) delete[] m_vaneVertices;
 	if(m_worldP) delete[] m_worldP;
+	if(m_st) delete[] m_st;
 	delete m_rachis;
 }
 
@@ -21,10 +22,12 @@ void MlFeather::createNumSegment(short x)
 	if(m_quilly) delete[] m_quilly;
     if(m_vaneVertices) delete[] m_vaneVertices;
 	if(m_worldP) delete[] m_worldP;
+	if(m_st) delete[] m_st;
     m_numSeg = x;
     m_quilly = new float[m_numSeg];
     m_vaneVertices = new Vector2F[(m_numSeg + 1) * 6];
 	m_worldP = new Vector3F[(m_numSeg + 1) * 7];
+	m_st = new Vector2F[(m_numSeg + 1) * 7];
 	m_rachis->create(x);
 }
 
@@ -147,6 +150,31 @@ Vector3F MlFeather::getSegmentVaneWP(short seg, short side, short idx) const
 	return m_worldP[seg * 7 + 1 + side * 3 + idx];
 }
 
+Vector2F * MlFeather::texcoord()
+{
+	return m_st;
+}
+
+Vector2F * MlFeather::segmentQuillTexcoord(short seg)
+{
+	return &m_st[seg * 7];
+}
+
+Vector2F * MlFeather::segmentVaneTexcoord(short seg, short side, short idx)
+{
+	return &m_st[seg * 7 + 1 + side * 3 + idx];
+}
+
+Vector2F MlFeather::getSegmentQuillTexcoord(short seg) const
+{
+	return m_st[seg * 7];
+}
+
+Vector2F MlFeather::getSegmentVaneTexcoord(short seg, short side, short idx) const
+{
+	return m_st[seg * 7 + 1 + side * 3 + idx];
+}
+
 void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale)
 {
 	Vector3F p = origin;
@@ -239,8 +267,8 @@ void MlFeather::simpleCreate(int ns)
 		}
 	}
 	
-	computeBounding();
 	computeLength();
+	computeTexcoord();
 }
 
 void MlFeather::computeLength()
@@ -254,31 +282,62 @@ void MlFeather::computeLength()
 void MlFeather::computeBounding()
 {
 	m_brect.reset();
-	Vector2F c = m_uv;
-	Vector2F p;
-	for(short i = 0; i <= m_numSeg; i++) {
-		m_brect.update(c);
-		
-		Vector2F* vane = getVaneAt(i, 0);
-		
-		p = c;
-		p += vane[0];
-		p += vane[1];
-		p += vane[2];
+	for(unsigned i = 0; i < numWorldP(); i++) {
+		Vector2F p = texcoord()[i] * 32.f;std::cout<<"p "<<p.x<<" "<<p.y;
 		m_brect.update(p);
-		
-		vane = getVaneAt(i, 1);
-		
-		p = c;
-		p += vane[0];
-		p += vane[1];
-		p += vane[2];
-		m_brect.update(p);
-		
-		if(i < m_numSeg)
-			c += Vector2F(0.f, getQuilly()[i]);
 	}
-	m_brect.update(c);
+}
+
+void MlFeather::computeTexcoord()
+{
+	Vector2F puv = m_uv;
+	float *q = quilly();
+	int i, j;
+	for(i=0; i <= numSegment(); i++) {
+		*segmentQuillTexcoord(i) = puv;
+		if(i < numSegment()) {
+			puv += Vector2F(0.f, *q);
+			q++;
+		}
+	}
+	
+	q = quilly();
+	puv = m_uv;
+	
+	Vector2F pvane;
+	for(i=0; i <= numSegment(); i++) {
+		
+		pvane = puv;
+		Vector2F * vanes = vaneAt(i, 0);
+		
+		for(j = 0; j < 3; j++) {
+			pvane += *vanes;
+			*segmentVaneTexcoord(i, 0, j) = pvane;
+			
+			vanes++;
+		}
+
+		pvane = puv;
+		vanes = getVaneAt(i, 1);
+		
+		for(j = 0; j < 3; j++) {
+			pvane += *vanes;
+			*segmentVaneTexcoord(i, 1, j) = pvane;
+			
+			vanes++;
+		}
+		
+		if(i < numSegment()) {
+			puv += Vector2F(0.f, *q);
+			q++;
+		}
+	}
+	
+	for(i = 0; i < numWorldP(); i++)
+
+		texcoord()[i] /= 32.f;
+		
+	computeBounding();
 }
 
 Vector2F MlFeather::baseUV() const
@@ -294,6 +353,9 @@ void MlFeather::setBaseUV(const Vector2F & d)
 void MlFeather::translateUV(const Vector2F & d)
 {
 	m_uv += d;
+	for(unsigned i = 0; i < numWorldP(); i++)
+		texcoord()[i] += d/32.f;
+
 	m_brect.translate(d);
 }
 
@@ -303,58 +365,29 @@ float* MlFeather::selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & 
 	float minD = 10e8;
 	yOnly = true;
 	
-	Vector2F puv = m_uv;
-	float *q = quilly();
-	int i, j;
-	for(i=0; i < numSegment(); i++) {
-		puv += Vector2F(0.f, *q);
+	Vector2F puv;
+	short seg, side, j;
+	for(unsigned i = 1; i < numWorldP(); i++) {
+		seg = i / 7;
+		side = (i - seg*7 - 1) / 3;
+		j = i - seg * 7 - 1 - side * 3;
+		
+		
+		puv = m_st[i];
+		puv *= 32.f;
 		
 		if(p.distantTo(puv) < minD) {
 			minD = p.distantTo(puv);
-			r = q;
 			wp = puv;
-		}
-		
-		q++;
-	}
-	
-	q = quilly();
-	puv = m_uv;
-	
-	Vector2F pvane;
-	for(i=0; i <= numSegment(); i++) {
-		
-		pvane = puv;
-		Vector2F * vanes = vaneAt(i, 0);
-		
-		for(j = 0; j < 3; j++) {
-			pvane += *vanes;
-			if(p.distantTo(pvane) < minD) {
-				minD = p.distantTo(pvane);
-				r = (float *)vanes;
-				yOnly = false;
-				wp = pvane;
+			
+			if(i % 7 == 0) { std::cout<<"sel "<<seg<<" \n";
+				r = &quilly()[seg - 1];
+				yOnly = true;
 			}
-			vanes++;
-		}
-
-		pvane = puv;
-		vanes = getVaneAt(i, 1);
-		
-		for(j = 0; j < 3; j++) {
-			pvane += *vanes;
-			if(p.distantTo(pvane) < minD) {
-				minD = p.distantTo(pvane);
-				r = (float *)vanes;
+			else { std::cout<<"sel "<<seg<<" "<<side<<" "<<j<<"\n";
+				r = (float *)&vaneAt(seg, side)[j];
 				yOnly = false;
-				wp = pvane;
 			}
-			vanes++;
-		}
-		
-		if(i < numSegment()) {
-			puv += Vector2F(0.f, *q);
-			q++;
 		}
 	}
 	
@@ -411,8 +444,8 @@ void MlFeather::changeNumSegment(int d)
 	delete[] bakQuilly;
 	delete[] bakVaneVertices;
 	
-	computeBounding();
 	computeLength();
+	computeTexcoord();
 }
 
 void MlFeather::verbose()

@@ -115,8 +115,8 @@ void BlockDrawBuffer::drawBuffer() const
 		glEnableClientState( GL_NORMAL_ARRAY );
 		glNormalPointer( GL_FLOAT, 0, (float *)m_blocks[i]->alignedN );
 	
-		if(i == numBlock() - 1) { //std::cout<<" d "<<m_taken % numElementPerBlock();
-			glDrawArrays( GL_QUADS, 0, m_taken % numElementPerBlock());}
+		if(i == numBlock() - 1)
+			glDrawArrays( GL_QUADS, 0, m_taken % numElementPerBlock());
 		else 
 			glDrawArrays( GL_QUADS, 0, numElementPerBlock());
 	

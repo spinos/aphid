@@ -20,6 +20,8 @@ public:
 	virtual bool doRead(const std::string & fileName);
 	virtual void doClose();
 	
+	void flush();
+	
 protected:
 	void useDocument();
 	void setDocument(const HDocument & doc);

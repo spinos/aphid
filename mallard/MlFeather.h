@@ -31,6 +31,12 @@ public:
 	Vector3F getSegmentOriginWP(short seg) const;
 	Vector3F getSegmentVaneWP(short seg, short side, short idx) const;
 	
+	Vector2F * texcoord();
+	Vector2F * segmentQuillTexcoord(short seg);
+	Vector2F * segmentVaneTexcoord(short seg, short side, short idx);
+	Vector2F getSegmentQuillTexcoord(short seg) const;
+	Vector2F getSegmentVaneTexcoord(short seg, short side, short idx) const;
+	
 	void setCollision(CollisionRegion * skin);
 	
 	void setFeatherId(short x);
@@ -39,13 +45,14 @@ public:
 	void translateUV(const Vector2F & d);
 	
 	void computeLength();
-	void computeBounding();
+	void computeTexcoord();
 	
 	float* selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp);
 	
 	void changeNumSegment(int d);
 	void verbose();
 private:
+	void computeBounding();
 	void simpleCreate(int ns = 5);
 	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale);
 private:
@@ -56,6 +63,7 @@ private:
     float *m_quilly;
     Vector2F * m_vaneVertices;
 	Vector3F * m_worldP;
+	Vector2F * m_st;
 	float m_length;
     short m_numSeg, m_id;
 };

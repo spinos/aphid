@@ -169,9 +169,9 @@ char BakeDeformer::solve()
 	char status = b.readVector3Data(sst.str().c_str(), numVertices(), deformedP());
 	
 	if(status) {
-	    Vector3F c = m_frameCenters[m_currentFrame];
-	    for(unsigned i = 0; i < numVertices(); i++)
-	        deformedP()[i] -= c;
+		Vector3F * p = deformedP();
+	    Vector3F & c = m_frameCenters[m_currentFrame];
+	    for(unsigned i = 0; i < numVertices(); i++) p[i] -= c;
 	}
     return status;
 }

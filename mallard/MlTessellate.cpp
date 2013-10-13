@@ -25,14 +25,14 @@ void MlTessellate::setFeather(MlFeather * feather)
 	m_numSegment = feather->numSegment();
 }
 
-void MlTessellate::createVertices(const MlFeather * feather)
+void MlTessellate::createVertices(MlFeather * feather)
 {
 	m_numVertices = (feather->numSegment() + 1) * 3;
 	m_cvs = new Vector3F[m_numVertices];
 	m_normals = new Vector3F[m_numVertices];
 }
 
-void MlTessellate::createIndices(const MlFeather * feather)
+void MlTessellate::createIndices(MlFeather * feather)
 {
 	m_numIndices = feather->numSegment() * 2 * 4;
 	m_indices = new unsigned[m_numIndices];
@@ -52,7 +52,7 @@ void MlTessellate::createIndices(const MlFeather * feather)
 	}
 }
 
-void MlTessellate::evaluate(const MlFeather * feather)
+void MlTessellate::evaluate(MlFeather * feather)
 {
 	unsigned curF = 0;
 	for(short i = 0; i <= feather->numSegment(); i++) {

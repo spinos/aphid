@@ -85,7 +85,7 @@ void GLWidget::clientDraw()
 	getDrawer()->setColor(0.f, .71f, .51f);
 	
 	//getDrawer()->m_wireProfile.apply();
-	m_featherDrawer->drawFeather(skin());
+	m_featherDrawer->draw(skin());
 
 	//drawSelection();
 	showBrush();

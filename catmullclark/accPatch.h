@@ -13,7 +13,7 @@ class AccStencil;
 class AccPatch : public BezierPatch {
 public:
 	AccPatch();
-	~AccPatch();
+	virtual ~AccPatch();
 	virtual void evaluateContolPoints();
 	
 	void processCornerControlPoints(int i);

@@ -16,9 +16,9 @@ public:
 	MlTessellate();
 	virtual ~MlTessellate();
 	void setFeather(MlFeather * feather);
-	void evaluate(const MlFeather * feather);
-	void createVertices(const MlFeather * feather);
-	void createIndices(const MlFeather * feather);
+	void evaluate(MlFeather * feather);
+	void createVertices(MlFeather * feather);
+	void createIndices(MlFeather * feather);
 private:
 	unsigned m_numSegment;
 };
