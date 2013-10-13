@@ -283,7 +283,7 @@ void MlFeather::computeBounding()
 {
 	m_brect.reset();
 	for(unsigned i = 0; i < numWorldP(); i++) {
-		Vector2F p = texcoord()[i] * 32.f;std::cout<<"p "<<p.x<<" "<<p.y;
+		Vector2F p = texcoord()[i] * 32.f;
 		m_brect.update(p);
 	}
 }
@@ -372,7 +372,6 @@ float* MlFeather::selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & 
 		side = (i - seg*7 - 1) / 3;
 		j = i - seg * 7 - 1 - side * 3;
 		
-		
 		puv = m_st[i];
 		puv *= 32.f;
 		
@@ -380,11 +379,11 @@ float* MlFeather::selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & 
 			minD = p.distantTo(puv);
 			wp = puv;
 			
-			if(i % 7 == 0) { std::cout<<"sel "<<seg<<" \n";
+			if(i % 7 == 0) {
 				r = &quilly()[seg - 1];
 				yOnly = true;
 			}
-			else { std::cout<<"sel "<<seg<<" "<<side<<" "<<j<<"\n";
+			else {
 				r = (float *)&vaneAt(seg, side)[j];
 				yOnly = false;
 			}

@@ -21,8 +21,6 @@ MlUVView::MlUVView(QWidget *parent) : Base2DView(parent)
 	std::cout<<"UVview ";
 	m_activeId = m_texId = -1;
 	m_selectedVert = 0;
-	m_image = new ZEXRImage;
-	m_image->allBlack();
 }
 
 MlUVView::~MlUVView()
@@ -320,11 +318,11 @@ void MlUVView::chooseImageBackground(std::string & name)
 
 void MlUVView::loadImageBackground(const std::string & name)
 {
-	if(!BaseFile::FileExists(name)) return;
-	if(!m_image->open(name)) return;
-	m_image->verbose();
+	ZEXRImage image;
+	if(!image.open(name)) return;
+	image.verbose();
 	makeCurrent();
-	m_texId = getDrawer()->loadTexture(m_texId, m_image);
+	m_texId = getDrawer()->loadTexture(m_texId, &image);
 	doneCurrent();
 	update();
 }

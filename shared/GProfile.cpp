@@ -13,14 +13,16 @@ GProfile::GProfile() : m_lighting(false),
 		m_depthTest(false),
 		m_wired(false),
 		m_culled(false),
+		m_textured(false),
 		m_material(0) {}
 		
-GProfile::GProfile(bool lighting, bool depthTest, bool wired, bool culled) 
+GProfile::GProfile(bool lighting, bool depthTest, bool wired, bool culled, bool textured) 
 {
 	m_lighting = lighting;
 	m_depthTest = depthTest; 
 	m_wired = wired; 
 	m_culled = culled;
+	m_textured = textured;
 	m_material = 0;
 }
 	
@@ -37,6 +39,9 @@ void GProfile::apply() const
 	
 	if(m_culled) glEnable(GL_CULL_FACE);
 	else glDisable(GL_CULL_FACE);
+	
+	if(m_textured) glEnable(GL_TEXTURE_2D);
+	else glDisable(GL_TEXTURE_2D);
 	
 	if(m_material) m_material->apply();
 }

@@ -17,11 +17,11 @@ class GProfile {
 public:
 	GProfile();
 		
-	GProfile(bool lighting, bool depthTest, bool wired, bool culled);	
+	GProfile(bool lighting, bool depthTest, bool wired, bool culled, bool textured);	
 	void apply() const;
 	
 	GMaterial * m_material;
-	bool m_lighting, m_depthTest, m_wired, m_culled;
+	bool m_lighting, m_depthTest, m_wired, m_culled, m_textured;
 };
 
 #endif

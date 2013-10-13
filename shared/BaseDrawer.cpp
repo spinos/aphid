@@ -36,11 +36,11 @@ BaseDrawer::~BaseDrawer ()
 
 void BaseDrawer::initializeProfile()
 {
-	m_markerProfile = GProfile(false, true, false, false);
-	m_surfaceProfile = GProfile(true, true, false, false);
+	m_markerProfile = GProfile(false, true, false, false, false);
+	m_surfaceProfile = GProfile(true, true, false, false, true);
 	surfaceMat = new GMaterial(Color4(0.1, 0.1, 0.1, 1.0),Color4(0.8, 0.8, 0.8, 1.0),Color4(0.4, 0.4, 0.3, 1.0),Color4(0.0, 0.0, 0.0, 1.0), 64.f);
 	m_surfaceProfile.m_material = surfaceMat;
-	m_wireProfile = GProfile(false, true, true, false);
+	m_wireProfile = GProfile(false, true, true, false, false);
 	majorLit.activate();
 	fillLit.m_LightID = GL_LIGHT1;
 	fillLit.m_Position = Float4(0.f, 0.f, -1000.f, 1.f);
@@ -706,6 +706,7 @@ int BaseDrawer::addTexture()
 
 void BaseDrawer::clearTexture(int idx)
 {
+	if(idx < 0) return;
 	if(idx + 1 > m_textureNames.size()) return;
 	GLuint * tex = &m_textureNames[idx];
 	if(*tex > 0) glDeleteTextures(1, tex);
@@ -745,8 +746,7 @@ void BaseDrawer::texture(int idx)
 	glColor3f(1, 1, 1);
 	glEnable(GL_TEXTURE_2D);
 	
-	glBindTexture(GL_TEXTURE_2D, m_textureNames[idx]);
-
+	bindTexture(idx);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0);
 	glVertex3f(0, 0, 0);
@@ -757,7 +757,17 @@ void BaseDrawer::texture(int idx)
 	glTexCoord2f(0, 1);
 	glVertex3f(0, 1, 0);
 	glEnd();
-	glBindTexture(GL_TEXTURE_2D, 0);
+	unbindTexture();
 	glDisable(GL_TEXTURE_2D);
+}
+
+void BaseDrawer::bindTexture(int idx)
+{
+	glBindTexture(GL_TEXTURE_2D, m_textureNames[idx]);
+}
+
+void BaseDrawer::unbindTexture()
+{
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 //:~

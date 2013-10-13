@@ -56,6 +56,7 @@
 #include <MlSkin.h>
 #include <BakeDeformer.h>
 #include <PlaybackControl.h>
+#include <zEXRImage.h>
 #include "MlCalamus.h"
 
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
@@ -66,6 +67,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	m_featherDrawer->create("mallard.mlc");
 	MlCalamus::FeatherLibrary = this;
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
+	m_featherTexId = -1;
 }
 //! [0]
 
@@ -82,11 +84,17 @@ void GLWidget::clientDraw()
 	getDrawer()->setColor(0.37f, .59f, .9f);
 	m_bezierDrawer->drawBuffer();
 	//getDrawer()->drawKdTree(getTree());
-	getDrawer()->setColor(0.f, .71f, .51f);
 	
+	if(m_featherTexId > -1) {
+		getDrawer()->setColor(.8f, .8f, .8f);
+		m_featherDrawer->bindTexture(m_featherTexId);
+	}
+	else 
+		getDrawer()->setColor(0.f, .71f, .51f);
 	//getDrawer()->m_wireProfile.apply();
 	m_featherDrawer->draw(skin());
-
+	m_featherDrawer->unbindTexture();
+	
 	//drawSelection();
 	showBrush();
 }
@@ -99,6 +107,7 @@ void GLWidget::loadMesh(std::string filename)
 	ESMUtil::ImportPatch(filename.c_str(), mesh());
 	afterOpen();
 	setDirty();
+	update();
 }
 
 void GLWidget::clientSelect()
@@ -317,6 +326,10 @@ std::string GLWidget::chooseSaveFileName()
 void GLWidget::doClear()
 {
 	MlScene::doClear();
+	if(m_featherTexId > -1) {
+		m_featherDrawer->clearTexture(m_featherTexId);
+		m_featherTexId = -1;
+	}
 	m_bezierDrawer->clearBuffer();
 	m_featherDrawer->initializeBuffer();
 	clearTree();
@@ -372,7 +385,8 @@ void GLWidget::revertSheet()
 
 void GLWidget::receiveFeatherEditBackground(QString name)
 {
-	setFeatherEditBackground(name.toUtf8().data());
+	setFeatherTexture(name.toUtf8().data());
+	update();
 }
 
 void GLWidget::chooseBake()
@@ -460,7 +474,10 @@ void GLWidget::afterOpen()
 	m_bezierDrawer->rebuildBuffer(body());
 	delayLoadBake();
 	std::string febkgrd = featherEditBackground();
-	if(febkgrd != "unknown") emit sendFeatherEditBackground(tr(febkgrd.c_str()));
+	if(febkgrd != "unknown") {
+		setFeatherTexture(febkgrd);
+		emit sendFeatherEditBackground(tr(febkgrd.c_str()));
+	}
 }
 
 void GLWidget::focusOutEvent(QFocusEvent * event)
@@ -475,5 +492,16 @@ void GLWidget::closeCache()
 {
 	m_featherDrawer->close();
 	bodyDeformer()->close();
+}
+
+void GLWidget::setFeatherTexture(const std::string & name)
+{
+	ZEXRImage image;
+	if(!image.open(name)) return;
+	image.verbose();
+	makeCurrent();
+	m_featherTexId = m_featherDrawer->loadTexture(m_featherTexId, &image);
+	doneCurrent();
+	MlScene::setFeatherTexture(name);
 }
 //:~

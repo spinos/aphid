@@ -80,7 +80,10 @@ public:
 	void useDepthTest(char on) const;
 	
 	int loadTexture(int idx, ZEXRImage * image);
+	void clearTexture(int idx);
 	void texture(int idx);
+	void bindTexture(int idx);
+	void unbindTexture();
 public:
 	GProfile m_markerProfile;
 	GProfile m_surfaceProfile;
@@ -91,7 +94,7 @@ public:
 	
 private:
 	int addTexture();
-	void clearTexture(int idx);
+	
 private:
 	std::vector<GLuint> m_textureNames;
     char m_wired;

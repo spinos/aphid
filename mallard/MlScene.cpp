@@ -81,7 +81,7 @@ MlScene::~MlScene()
 	m_accmesh->cleanup();
 }
 
-void MlScene::setFeatherEditBackground(const std::string & name)
+void MlScene::setFeatherTexture(const std::string & name)
 {
 	m_featherEditBackgroundName = name;
 }
@@ -131,6 +131,8 @@ void MlScene::doClear()
 	m_skin->cleanup();
 	m_accmesh->cleanup();
 	disableDeformer();
+	m_featherEditBackgroundName = "unknown";
+	BaseFile::doClear();
 }
 
 bool MlScene::doWrite(const std::string & fileName)

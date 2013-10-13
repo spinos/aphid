@@ -22,7 +22,7 @@ public:
 	MlScene();
 	virtual ~MlScene();
 	
-	void setFeatherEditBackground(const std::string & name);
+	virtual void setFeatherTexture(const std::string & name);
 	std::string featherEditBackground() const;
 
 	MlSkin * skin();

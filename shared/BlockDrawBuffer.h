@@ -36,6 +36,7 @@ public:
     
 	float * vertices();
 	float * normals();
+	float * texcoords();
 private:
 	struct PtrTup {
 		PtrTup() {
@@ -43,20 +44,26 @@ private:
 			alignedV = (char *)(((unsigned long)rawV + 32) & (0xffffffff - 31));
 			rawN = new char[32768 * 12 + 31];
 			alignedN = (char *)(((unsigned long)rawN + 32) & (0xffffffff - 31));
+			rawT = new char[32768 * 8 + 31];
+			alignedT = (char *)(((unsigned long)rawT + 32) & (0xffffffff - 31));
 		}
 		~PtrTup() {
 			delete[] rawV;
 			delete[] rawN;
+			delete[] rawT;
 		}
 		
 		char *rawV;
 		char *alignedV;
 		char *rawN;
 		char *alignedN;
+		char *rawT;
+		char *alignedT;
 	};
 	
 	std::vector<PtrTup *> m_blocks;
 	unsigned m_current, m_taken;
 	char * m_vertexPtr;
 	char * m_normalPtr;
+	char * m_texcoordPtr;
 };

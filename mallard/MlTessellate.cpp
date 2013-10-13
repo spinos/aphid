@@ -30,6 +30,7 @@ void MlTessellate::createVertices(MlFeather * feather)
 	m_numVertices = (feather->numSegment() + 1) * 3;
 	m_cvs = new Vector3F[m_numVertices];
 	m_normals = new Vector3F[m_numVertices];
+	m_uvs = new Vector2F[m_numVertices];
 }
 
 void MlTessellate::createIndices(MlFeather * feather)
@@ -59,6 +60,9 @@ void MlTessellate::evaluate(MlFeather * feather)
 		m_cvs[curF] = feather->getSegmentOriginWP(i);
 		m_cvs[curF + 1] = feather->getSegmentVaneWP(i, 0, 2);
 		m_cvs[curF + 2] = feather->getSegmentVaneWP(i, 1, 2);
+		m_uvs[curF] = feather->getSegmentQuillTexcoord(i);
+		m_uvs[curF + 1] = feather->getSegmentVaneTexcoord(i, 0, 2);
+		m_uvs[curF + 2] = feather->getSegmentVaneTexcoord(i, 1, 2);
 		curF += 3;
 	}
 	curF = 0;

@@ -56,6 +56,7 @@ class GLWidget : public SingleModelView, public MlScene
 public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
+	virtual void setFeatherTexture(const std::string & name);
 	virtual void loadMesh(std::string filename);
 	virtual void clientSelect();
 	virtual void clientMouseInput();
@@ -106,6 +107,7 @@ private:
 private:
 	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;
+	int m_featherTexId;
 };
 //! [3]
 

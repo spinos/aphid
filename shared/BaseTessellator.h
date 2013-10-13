@@ -19,12 +19,14 @@ public:
 	
 	Vector3F * vertices() const;
 	Vector3F * normals() const;
+	Vector2F * texcoords() const;
 	unsigned * indices() const;
 	unsigned numVertices() const;
 	unsigned numIndices() const;
 	
 	Vector3F * m_cvs;
 	Vector3F * m_normals;
+	Vector2F * m_uvs;
 	unsigned * m_indices;
 	unsigned m_numVertices, m_numIndices;
 private:

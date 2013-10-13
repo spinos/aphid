@@ -28,9 +28,7 @@ void BlockDrawBuffer::initializeBuffer()
 {
 	if(numBlock() > 0) clearBuffer();
 	m_blocks.push_back(new PtrTup);
-	m_vertexPtr = m_blocks[0]->alignedV;
-	m_normalPtr = m_blocks[0]->alignedN;
-	m_current = 0;
+	begin();
 	m_taken = 0;
 }
 
@@ -75,6 +73,7 @@ void BlockDrawBuffer::begin()
 	m_current = 0;
 	m_vertexPtr = m_blocks[0]->alignedV;
 	m_normalPtr = m_blocks[0]->alignedN;
+	m_texcoordPtr = m_blocks[0]->alignedT;
 }
 
 void BlockDrawBuffer::next()
@@ -85,10 +84,12 @@ void BlockDrawBuffer::next()
 		unsigned blockIdx = m_current / numElementPerBlock();
 		m_vertexPtr = m_blocks[blockIdx]->alignedV;
 		m_normalPtr = m_blocks[blockIdx]->alignedN;
+		m_texcoordPtr = m_blocks[blockIdx]->alignedT;
 	}
 	else {
 		m_vertexPtr += 12;
 		m_normalPtr += 12;
+		m_texcoordPtr += 8;
 	}
 }
 
@@ -104,6 +105,7 @@ void BlockDrawBuffer::setIndex(unsigned index)
 	unsigned offset = m_current % numElementPerBlock();
 	m_vertexPtr = m_blocks[blockIdx]->alignedV + offset * 12;
 	m_normalPtr = m_blocks[blockIdx]->alignedN + offset * 12;
+	m_texcoordPtr = m_blocks[blockIdx]->alignedT + offset * 8;
 }
 
 void BlockDrawBuffer::drawBuffer() const
@@ -114,6 +116,9 @@ void BlockDrawBuffer::drawBuffer() const
 	
 		glEnableClientState( GL_NORMAL_ARRAY );
 		glNormalPointer( GL_FLOAT, 0, (float *)m_blocks[i]->alignedN );
+		
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, (float *)m_blocks[i]->alignedT);
 	
 		if(i == numBlock() - 1)
 			glDrawArrays( GL_QUADS, 0, m_taken % numElementPerBlock());
@@ -121,7 +126,8 @@ void BlockDrawBuffer::drawBuffer() const
 			glDrawArrays( GL_QUADS, 0, numElementPerBlock());
 	
 		glDisableClientState( GL_NORMAL_ARRAY );
-		glDisableClientState( GL_VERTEX_ARRAY );		
+		glDisableClientState( GL_VERTEX_ARRAY );
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);		
 	}
 }
 
@@ -133,6 +139,11 @@ float * BlockDrawBuffer::vertices()
 float * BlockDrawBuffer::normals()
 {
 	return (float *)m_normalPtr;
+}
+
+float * BlockDrawBuffer::texcoords()
+{
+	return (float *)m_texcoordPtr;
 }
 
 unsigned BlockDrawBuffer::taken() const

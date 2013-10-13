@@ -86,6 +86,7 @@ void MlDrawer::updateBuffer(MlCalamus * c)
 	
 	unsigned i, j;
 	Vector3F v;
+	Vector2F st;
 	for(i = 0; i < nvpf; i++) {
 		j = m_featherTess->indices()[i];
 		v = m_featherTess->vertices()[j];
@@ -97,6 +98,10 @@ void MlDrawer::updateBuffer(MlCalamus * c)
 		normals()[0] = v.x;
 		normals()[1] = v.y;
 		normals()[2] = v.z;
+		
+		st = m_featherTess->texcoords()[j];
+		texcoords()[0] = st.x;
+		texcoords()[1] = st.y;
 		
 		next();
 	}
