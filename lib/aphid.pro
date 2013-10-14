@@ -3,12 +3,9 @@ CONFIG += staticlib thread release
 CONFIG   -= qt
 PARENTPROJ = ..
 SHAREDDIR = ../shared
-INCLUDEPATH = $${SHAREDDIR} \
-                $(HOME)/Library/boost_1_44_0 \
-                /usr/local/include/OpenEXR
+INCLUDEPATH = $${SHAREDDIR}
+
 INCLUDEPATH += ../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit
-LIBS += -L$(HOME)/Library/boost_1_44_0/stage/lib -lboost_filesystem
-LIBS += -framework libxml
 
 HEADERS = ../shared/AllMath.h \
                 ../shared/Vector3F.h \
@@ -230,10 +227,8 @@ SOURCES = ../shared/Vector3F.cpp \
 TARGET  = aphid
 macx {
     INCLUDEPATH += ../../Library/boost_1_44_0 \
-                    ../../Library/hdf5/include
-    QMAKE_LIBDIR += ../../Library/boost_1_44_0/stage/lib \
-                    ../../Library/hdf5/lib
-    LIBS += -lboost_date_time -lboost_thread -lboost_filesystem -lboost_system -framework libxml
+                    ../../Library/hdf5/include \
+                    /usr/local/include/OpenEXR
 }
 win32 {
     HEADERS += ../shared/gExtension.h
@@ -241,8 +236,4 @@ win32 {
     INCLUDEPATH += D:/usr/local/include D:/ofl/shared \
                    D:/usr/hdf5/include \
                    D:/usr/libxml2x64/include D:/usr/eigen3
-    QMAKE_LIBDIR += D:/usr/local/lib64
-    LIBS += -LD:/usr/libxml2x64/lib -llibxml2 \
-            -LD:/usr/hdf5/lib -lszip
-    DEFINES += OPENEXR_DLL NDEBUG
 }
