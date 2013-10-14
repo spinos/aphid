@@ -11,7 +11,7 @@
 #include "KdTree.h"
 #include <Ray.h>
 #include <IntersectionContext.h>
-#include <QElapsedTimer>
+#include <boost/timer.hpp>
 
 KdTree::KdTree() 
 {
@@ -49,8 +49,8 @@ void KdTree::create()
 	
 	BoundingBox b = getBBox();
     b.verbose();
-	QElapsedTimer timer;
-	timer.start();
+	boost::timer bTimer;
+	bTimer.restart();
 	
 	BuildKdTreeContext *ctx = new BuildKdTreeContext(m_stream);
 	ctx->setBBox(b);
@@ -60,7 +60,7 @@ void KdTree::create()
 	delete ctx;
 	
 	m_stream.verbose();
-	std::cout << "kd tree finished after " << timer.elapsed() << "ms\n";
+	std::cout << "kd tree constructed in " << bTimer.elapsed() << " secs\n";
 }
 
 void KdTree::cleanup()

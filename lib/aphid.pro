@@ -35,6 +35,7 @@ HEADERS = ../shared/AllMath.h \
                 ../shared/PrimitiveFilter.h \
                 ../shared/BuildKdTreeContext.h \
                 ../shared/KdTreeNodeArray.h \
+                ../shared/KdTree.h \
                 ../shared/PrimitiveArray.h \
                 ../shared/IndexArray.h \
                 ../shared/BaseArray.h \
@@ -143,6 +144,7 @@ SOURCES = ../shared/Vector3F.cpp \
                 ../shared/PrimitiveFilter.cpp \
                 ../shared/BuildKdTreeContext.cpp \
                 ../shared/KdTreeNodeArray.cpp \
+                ../shared/KdTree.cpp \
                 ../shared/PrimitiveArray.cpp \
                 ../shared/IndexArray.cpp \
                 ../shared/BaseArray.cpp \
