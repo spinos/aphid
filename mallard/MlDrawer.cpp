@@ -184,7 +184,9 @@ void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c)
 	skin->getPointOnBody(c, p);
 	c->collideWith(skin, p);
 	
-	Matrix33F space = skin->rotationFrame(c);
+	Matrix33F space, tang;
+	skin->tangentSpace(c, tang);
+	skin->rotationFrame(c, tang, space);
 	c->computeFeatherWorldP(p, space);
 }
 

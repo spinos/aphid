@@ -51,8 +51,8 @@ public:
 	void getPointOnBody(MlCalamus * c, Vector3F &p) const;
 	void getNormalOnBody(MlCalamus * c, Vector3F &p) const;
 	
-	Matrix33F tangentSpace(MlCalamus * c) const;
-	Matrix33F rotationFrame(MlCalamus * c) const;
+	void tangentSpace(MlCalamus * c, Matrix33F & frm) const;
+	void rotationFrame(MlCalamus * c, const Matrix33F & tang, Matrix33F & frm) const;
 	
 	virtual void resetCollisionRegion(unsigned idx);
 	virtual void resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d);

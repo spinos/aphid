@@ -314,10 +314,9 @@ void BezierPatch::splitPatchUV(PatchSplitContext ctx, PatchSplitContext * child)
 	res->patchUV[3] = ctx.patchUV[3];
 }
  
-const Matrix33F BezierPatch::tangentFrame(float u, float v) const
+void BezierPatch::tangentFrame(float u, float v, Matrix33F & frm) const
 {
-	Matrix33F frm;
-    Vector3F du;
+	Vector3F du;
 	evaluateSurfaceTangent(u, v, &du);
 	du.normalize();
     
@@ -329,6 +328,5 @@ const Matrix33F BezierPatch::tangentFrame(float u, float v) const
     up.normalize();
     
     frm.fill(side, up, du);
-    return frm;
 }
 //:~

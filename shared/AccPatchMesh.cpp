@@ -226,9 +226,9 @@ void AccPatchMesh::normalOnPatch(unsigned idx, float u, float v, Vector3F & dst)
 	beziers()[idx].evaluateSurfaceNormal(u, v, &dst);
 }
 
-Matrix33F AccPatchMesh::tangentFrame(unsigned idx, float u, float v) const
+void AccPatchMesh::tangentFrame(unsigned idx, float u, float v, Matrix33F & frm) const
 {
-	return beziers()[idx].tangentFrame(u, v);
+	return beziers()[idx].tangentFrame(u, v, frm);
 }
 
 void AccPatchMesh::pushPlane(unsigned idx, Patch::PushPlaneContext * ctx) const

@@ -68,7 +68,7 @@ char HSkin::load(MlSkin * s)
 	std::cout<<" num feather instances "<<nc<<"\n";
 	
 	const unsigned fullSize = nc * sizeof(MlCalamus);
-	std::cout<<" full size "<<fullSize<<"\n";
+	std::cout<<" data size "<<fullSize<<"\n";
 	
 	s->setNumFeathers(nc);
 	

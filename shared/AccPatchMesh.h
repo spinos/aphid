@@ -34,7 +34,7 @@ public:
 	void pointOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
 	void normalOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
 	
-	Matrix33F tangentFrame(unsigned idx, float u, float v) const;
+	void tangentFrame(unsigned idx, float u, float v, Matrix33F & frm) const;
 	
 private:
 	char recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
