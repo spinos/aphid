@@ -10,7 +10,11 @@
 #include "MlCache.h"
 #include <AllHdf.h>
 #include <HBase.h>
-MlCache::MlCache() {}
+MlCache::MlCache() 
+{
+    m_sceneName = "unknown";
+}
+
 MlCache::~MlCache() {}
 
 bool MlCache::doCopy(const std::string & name)
@@ -82,4 +86,15 @@ bool MlCache::doCopy(const std::string & name)
 void MlCache::setSceneName(const std::string & name)
 {
 	m_sceneName = name;
+}
+
+std::string MlCache::readSceneName()
+{
+    useDocument();
+	openEntry("/info");
+	HBase *info = getNamedEntry("/info");
+	if(info->hasNamedAttr(".scene"))
+	    info->readStringAttr(".scene", m_sceneName);
+	closeEntry("/info");
+    return m_sceneName;
 }

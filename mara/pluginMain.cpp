@@ -18,8 +18,8 @@ MStatus initializePlugin( MObject obj )
 	MGlobal::displayInfo("Mallard initialize plug-in");
 #ifdef WIN32
     TimeCheck tc;
-    if(!tc.noLaterThan("20130530")) {
-        MGlobal::executeCommand("confirmDialog -title \"Proxy Paint License Error\" -message \"Your license to use Proxy Paint has expired! Please contact Original Force to renew your license.\"");
+    if(!tc.noLaterThan("20131231")) {
+        MGlobal::executeCommand("confirmDialog -title \"Mallard License Error\" -message \"Your license to use Proxy Paint has expired! Please contact Original Force to renew your license.\"");
         return MS::kFailure;
     }
 #endif

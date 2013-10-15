@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <BaseFile.h>
+#include <HFile.h>
 #include <MlFeatherCollection.h>
 class AccPatchMesh;
 class MlSkin;
@@ -17,7 +17,7 @@ class HBase;
 class BakeDeformer;
 class PlaybackControl;
 
-class MlScene : public BaseFile, public MlFeatherCollection {
+class MlScene : public HFile, public MlFeatherCollection {
 public:
 	MlScene();
 	virtual ~MlScene();

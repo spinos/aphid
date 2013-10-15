@@ -23,8 +23,8 @@
 #include <maya/MDagPath.h>
 #include "AllMath.h"
 
-class MItMeshPolygon;
-
+class MlCache;
+class MlScene;
 class MallardViz : public MPxLocatorNode
 {
 public:
@@ -58,14 +58,17 @@ private:
 	
 	MMatrix _worldSpace, _worldInverseSpace;
 	M3dView _viewport;
-	char _firstLoad, fHasView;
+	char fHasView;
 	
 	void loadCache(const char* filename);
+	void loadScene(const char* filename);
 	void updateWorldSpace();
 	MMatrix localizeSpace(const MMatrix & s) const;
 	MMatrix worldizeSpace(const MMatrix & s) const;
 	void useActiveView();
 
 	MObject m_bodyMesh;
+	MlCache * m_cache;
+	MlScene * m_scene;
 };
 #endif        //  #ifndef MallardVIZNODE_H

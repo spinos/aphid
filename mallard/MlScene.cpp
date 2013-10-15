@@ -118,7 +118,7 @@ void MlScene::setPlayback(PlaybackControl * p)
 
 bool MlScene::shouldSave()
 {
-	if(!BaseFile::shouldSave()) return false;
+	if(!HFile::shouldSave()) return false;
 	if(m_accmesh->isEmpty()) return false;
 	if(m_skin->numFeathers() < 1) return false;
 	return true;
@@ -132,12 +132,12 @@ void MlScene::doClear()
 	m_accmesh->cleanup();
 	disableDeformer();
 	m_featherEditBackgroundName = "unknown";
-	BaseFile::doClear();
+	HFile::doClear();
 }
 
 void MlScene::doClose() 
 {
-	BaseFile::doClose();
+	HFile::doClose();
 }
 
 bool MlScene::doWrite(const std::string & fileName)
@@ -208,13 +208,14 @@ void MlScene::writeFeatherEidtBackground(HBase * g)
 
 bool MlScene::doRead(const std::string & fileName)
 {
-	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadOnly)) {
+    if(!HFile::doRead(fileName)) return false;
+	/*if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadOnly)) {
 		setLatestError(BaseFile::FileNotReadable);
 		return false;
-	}
+	}*/
 	
 	std::cout<<"read scene from "<<fileName<<"\n";
-		
+	
 	HWorld grpWorld;
 	grpWorld.load();
 
@@ -236,9 +237,10 @@ bool MlScene::doRead(const std::string & fileName)
 	grpSkin.close();
 	
 	grpWorld.close();
-	HObject::FileIO.close();
+	//HObject::FileIO.close();
 	
 	std::cout<<" Scene file "<<fileName<<" modified at "<<grpWorld.modifiedTimeStr()<<"\n";
+	
 	return true;
 }
 
@@ -299,8 +301,10 @@ char MlScene::deformBody(int x)
 void MlScene::enableDeformer()
 {
 	m_deformer->enable();
-	m_playback->setFrameRange(m_deformer->minFrame(), m_deformer->maxFrame());
-	m_playback->enable();
+	if(m_playback) {
+	    m_playback->setFrameRange(m_deformer->minFrame(), m_deformer->maxFrame());
+	    m_playback->enable();
+	}
 }
 	
 void MlScene::disableDeformer()
@@ -309,7 +313,8 @@ void MlScene::disableDeformer()
 		m_deformer->disable();
 		m_deformer->close();
 	}
-	m_playback->disable();
+	if(m_playback) 
+	    m_playback->disable();
 }
 
 void MlScene::delayLoadBake()

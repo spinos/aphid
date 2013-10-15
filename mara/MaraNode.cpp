@@ -18,6 +18,8 @@
 #include <maya/MPointArray.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MItMeshPolygon.h>
+#include <MlCache.h>
+#include <MlScene.h>
 
 MTypeId MallardViz::id( 0x52e8a1 );
 MObject MallardViz::outValue;
@@ -25,9 +27,16 @@ MObject MallardViz::aframe;
 MObject MallardViz::acachename;
 MObject MallardViz::ainmesh;
 
-MallardViz::MallardViz() : _firstLoad(1), fHasView(0) {}
+MallardViz::MallardViz() : fHasView(0) 
+{
+    m_cache = new MlCache;
+    m_scene = new MlScene;
+}
+
 MallardViz::~MallardViz() 
 {
+    if(m_cache->isOpened()) m_cache->close();
+    delete m_cache;
 }
 
 MStatus MallardViz::compute( const MPlug& plug, MDataBlock& block )
@@ -43,13 +52,10 @@ MStatus MallardViz::compute( const MPlug& plug, MDataBlock& block )
 		m_bodyMesh = block.inputValue( ainmesh ).asMesh();
 		MString filename =  block.inputValue( acachename ).asString();	
 		
-		if(_firstLoad) {
-			if(filename != "") {
-				loadCache(filename.asChar());
-			}	
-			_firstLoad = 0;
-		}
+		loadCache(filename.asChar());
 		
+		MGlobal::displayInfo(MString("ml update frame ") + iframe);
+
 		float result = 1.f;
 
 		MDataHandle outputHandle = block.outputValue( outValue );
@@ -147,15 +153,32 @@ MStatus MallardViz::initialize()
 	addAttribute( ainmesh );
 	
 	attributeAffects(ainmesh, outValue);
+	attributeAffects(acachename, outValue);
 	attributeAffects(aframe, outValue);
 	return MS::kSuccess;
 }
 
 void MallardViz::loadCache(const char* filename)
 {
+    if(filename == m_cache->fileName().c_str()) return;
+
     MGlobal::displayInfo("Mallard viz loading...");
-	
-	MGlobal::displayInfo(MString("Mallard viz read cache from ") + filename);
+	if(m_cache->isOpened()) m_cache->close();
+	if(m_cache->open(filename)) {
+	    MGlobal::displayInfo(MString("Mallard viz read cache from ") + filename);
+	    std::string sceneName = m_cache->readSceneName();
+		if(sceneName != "unknown") loadScene(sceneName.c_str());	   
+	}
+	else
+	    MGlobal::displayWarning(MString("Mallard viz cannot read cache from ") + filename);
+}
+
+void MallardViz::loadScene(const char* filename)
+{
+    if(filename == m_scene->fileName()) return;
+        
+    MGlobal::displayInfo(MString("scene is ")+ filename);
+	m_scene->open(filename);
 }
 
 void MallardViz::setCullMesh(MDagPath mesh)

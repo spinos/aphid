@@ -302,7 +302,7 @@ win32 {
     LIBS += -LD:/usr/libxml2x64/lib -llibxml2 \
             -LD:/usr/hdf5/lib -lszip
     DEFINES += OPENEXR_DLL NDEBUG
-    ##CONFIG += console
+    CONFIG += console
 }
 QT           += opengl
 RESOURCES += ../icons/mallard.qrc
