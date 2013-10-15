@@ -21,12 +21,7 @@ BakeDeformer::~BakeDeformer()
 
 bool BakeDeformer::doRead(const std::string & filename)
 {
-	if(!HObject::FileIO.open(filename.c_str(), HDocument::oReadOnly)) {
-		setLatestError(BaseFile::FileNotReadable);
-		return false;
-	}
-	
-	setDocument(HObject::FileIO);
+	if(!HRFile::doRead(filename)) return false;
 	
 	bool found = false;
 	HBase g("/");

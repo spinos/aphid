@@ -105,6 +105,7 @@ HEADERS = ../shared/AllMath.h \
     ../shared/CacheFile.h \
     ../shared/BaseState.h \
     ../shared/HFile.h \
+    ../shared/HRFile.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -213,6 +214,7 @@ SOURCES = ../shared/Vector3F.cpp \
     ../shared/CacheFile.cpp \
     ../shared/BaseState.cpp \
     ../shared/HFile.cpp \
+    ../shared/HRFile.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \

@@ -350,7 +350,7 @@ void GLWidget::doClear()
 
 void GLWidget::doClose()
 {
-	closeCache();
+	if(isClosing()) m_featherDrawer->close();
 	MlScene::doClose();
 }
 
@@ -502,12 +502,6 @@ void GLWidget::focusOutEvent(QFocusEvent * event)
 		finishEraseFeather();
 	deselectFeather();
 	SingleModelView::focusOutEvent(event);
-}
-
-void GLWidget::closeCache()
-{
-	m_featherDrawer->close();
-	bodyDeformer()->close();
 }
 
 void GLWidget::setFeatherTexture(const std::string & name)

@@ -43,6 +43,7 @@ void HFile::doClose()
 	useDocument();
 	std::cout<<"close "<<HObject::FileIO.fileName()<<"\n";
 	HObject::FileIO.close();
+	BaseFile::doClose();
 }
 
 void HFile::useDocument() 

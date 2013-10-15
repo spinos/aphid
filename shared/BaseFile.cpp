@@ -66,6 +66,8 @@ bool BaseFile::open(const std::string & fileName)
 	
 	if(!clear()) return false;
 	
+	doClose();
+	
 	if(!doRead(fileName)) return false;
 	
 	afterOpen();
@@ -114,7 +116,6 @@ bool BaseFile::close()
 	m_clearMode = Close;
 	if(!clear()) return false;
 	doClose();
-    setClosed();
     return true;
 }
 
@@ -159,7 +160,10 @@ bool BaseFile::doWrite(const std::string & fileName)
 	return true;
 }
 
-void BaseFile::doClose() {}
+void BaseFile::doClose() 
+{
+	setClosed();
+}
 
 void BaseFile::setFileName(const std::string & filename)
 {

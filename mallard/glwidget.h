@@ -78,7 +78,6 @@ public:
 	void bakeFrames();
 	
 	QString openSheet(QString name);
-	void closeCache();
 	
 signals:
 	void sceneNameChanged(QString name);
