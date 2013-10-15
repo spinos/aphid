@@ -55,6 +55,7 @@ public:
 	
 	int numChildren();
 	int numAttrs();
+	int numDatas();
 	
 	std::string childPath(const std::string & name) const;
 	std::string childPath(int i);

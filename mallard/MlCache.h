@@ -16,6 +16,7 @@ public:
 	MlCache();
 	virtual ~MlCache();
 	
+	virtual bool doRead(const std::string & name);
 	virtual bool doCopy(const std::string & name);
 	
 	void setSceneName(const std::string & name);

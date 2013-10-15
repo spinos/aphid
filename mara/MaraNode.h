@@ -23,7 +23,7 @@
 #include <maya/MDagPath.h>
 #include "AllMath.h"
 
-class MlCache;
+class MlDrawer;
 class MlScene;
 class MallardViz : public MPxLocatorNode
 {
@@ -68,7 +68,7 @@ private:
 	void useActiveView();
 
 	MObject m_bodyMesh;
-	MlCache * m_cache;
+	MlDrawer * m_cache;
 	MlScene * m_scene;
 };
 #endif        //  #ifndef MallardVIZNODE_H

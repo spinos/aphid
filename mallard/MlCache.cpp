@@ -17,6 +17,29 @@ MlCache::MlCache()
 
 MlCache::~MlCache() {}
 
+bool MlCache::doRead(const std::string & name)
+{
+	if(!HFile::doRead(name)) return false;
+	
+	openEntry("/info");
+	HBase *info = getNamedEntry("/info");
+	if(info->hasNamedAttr(".scene"))
+	    info->readStringAttr(".scene", m_sceneName);
+	closeEntry("/info");
+	
+	openEntry("/p");
+	HBase * p = getNamedEntry("/p");
+	int nf = p->numChildren();
+	unsigned csize = entrySize("/p");
+	for(int i = 0; i < nf; i++) {
+		if(p->isChildData(i))
+			setCached("/p", p->getChildName(i), csize);
+	}
+	
+	closeEntry("/p");
+	return true;
+}
+
 bool MlCache::doCopy(const std::string & name)
 {
 	std::cout<<"copy cache to "<<name;
@@ -90,11 +113,5 @@ void MlCache::setSceneName(const std::string & name)
 
 std::string MlCache::readSceneName()
 {
-    useDocument();
-	openEntry("/info");
-	HBase *info = getNamedEntry("/info");
-	if(info->hasNamedAttr(".scene"))
-	    info->readStringAttr(".scene", m_sceneName);
-	closeEntry("/info");
     return m_sceneName;
 }

@@ -362,6 +362,19 @@ int HBase::numAttrs()
 	return (int)nattr;
 }
 
+int HBase::numDatas()
+{
+	int res = 0;
+	hsize_t nobj;
+	H5Gget_num_objs(fObjectId, &nobj);
+	hsize_t i;
+	for(i = 0; i < nobj; i++) {
+		if(isChildData(i))
+            res++;
+	}
+	return res;
+}
+
 std::string HBase::childPath(const std::string & name) const
 {
 	std::stringstream sst;

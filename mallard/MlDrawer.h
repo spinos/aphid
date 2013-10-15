@@ -26,6 +26,7 @@ public:
 	void updateActive(MlSkin * skin);
 	void addToBuffer(MlSkin * skin);
 	void computeBufferIndirection(MlSkin * skin);
+	void readBuffer(MlSkin * skin);
 	void rebuildBuffer(MlSkin * skin, bool forced = false);
 	void setCurrentFrame(int x);
 	

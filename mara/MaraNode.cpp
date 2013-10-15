@@ -18,8 +18,9 @@
 #include <maya/MPointArray.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MItMeshPolygon.h>
-#include <MlCache.h>
+#include <MlDrawer.h>
 #include <MlScene.h>
+#include <MlSkin.h>
 
 MTypeId MallardViz::id( 0x52e8a1 );
 MObject MallardViz::outValue;
@@ -29,12 +30,14 @@ MObject MallardViz::ainmesh;
 
 MallardViz::MallardViz() : fHasView(0) 
 {
-    m_cache = new MlCache;
+    m_cache = new MlDrawer;
     m_scene = new MlScene;
 }
 
 MallardViz::~MallardViz() 
 {
+	if(m_scene->isOpened()) m_scene->close();
+	delete m_scene;
     if(m_cache->isOpened()) m_cache->close();
     delete m_cache;
 }
@@ -54,8 +57,8 @@ MStatus MallardViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		loadCache(filename.asChar());
 		
-		MGlobal::displayInfo(MString("ml update frame ") + iframe);
-
+		m_cache->setCurrentFrame(iframe);
+		if(m_scene->isOpened()) m_cache->readBuffer(m_scene->skin());
 		float result = 1.f;
 
 		MDataHandle outputHandle = block.outputValue( outValue );
@@ -84,20 +87,20 @@ void MallardViz::draw( M3dView & view, const MDagPath & path,
 	const GLfloat grayDiffuseMaterial[] = {0.47, 0.46, 0.45};
 	const GLfloat greenDiffuseMaterial[] = {0.33, 0.53, 0.37}; 
 	
-	if ( ( style == M3dView::kFlatShaded ) || 
-		    ( style == M3dView::kGouraudShaded ) ) {
+	//if ( ( style == M3dView::kFlatShaded ) || 
+	//	    ( style == M3dView::kGouraudShaded ) ) {
 		glPushAttrib(GL_LIGHTING_BIT);
 		glEnable(GL_LIGHTING);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, grayDiffuseMaterial);
 		
             glPushMatrix();
     
-				
+			if(m_scene->isOpened()) m_cache->draw(m_scene->skin());	
             glPopMatrix();
         
 		glDisable(GL_LIGHTING);
 		glPopAttrib();
-	}
+	//}
 	
 	view.endGL();
 }
@@ -160,25 +163,31 @@ MStatus MallardViz::initialize()
 
 void MallardViz::loadCache(const char* filename)
 {
-    if(filename == m_cache->fileName().c_str()) return;
+	if(std::string(filename) == m_cache->fileName()) return;
 
     MGlobal::displayInfo("Mallard viz loading...");
-	if(m_cache->isOpened()) m_cache->close();
-	if(m_cache->open(filename)) {
-	    MGlobal::displayInfo(MString("Mallard viz read cache from ") + filename);
-	    std::string sceneName = m_cache->readSceneName();
-		if(sceneName != "unknown") loadScene(sceneName.c_str());	   
+	if(!m_cache->open(filename)) {
+		MGlobal::displayWarning(MString("Mallard viz cannot read cache from ") + filename);
+		return;
 	}
-	else
-	    MGlobal::displayWarning(MString("Mallard viz cannot read cache from ") + filename);
+	MGlobal::displayInfo(MString("Mallard viz read cache from ") + filename);
+	std::string sceneName = m_cache->readSceneName();
+	if(sceneName != "unknown") loadScene(sceneName.c_str());
+	    
+	if(m_scene->isOpened()) {
+		const unsigned nc = m_scene->skin()->numFeathers();
+		MlCalamus::FeatherLibrary = m_scene;
+		m_cache->computeBufferIndirection(m_scene->skin());
+	}
 }
 
 void MallardViz::loadScene(const char* filename)
 {
     if(filename == m_scene->fileName()) return;
         
-    MGlobal::displayInfo(MString("scene is ")+ filename);
-	m_scene->open(filename);
+    m_scene->open(filename);
+	MGlobal::displayInfo(MString("scene is opened ")+ m_scene->fileName().c_str());
+	
 }
 
 void MallardViz::setCullMesh(MDagPath mesh)

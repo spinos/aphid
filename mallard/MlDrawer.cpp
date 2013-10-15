@@ -132,6 +132,28 @@ void MlDrawer::addToBuffer(MlSkin * skin)
 	}
 }
 
+void MlDrawer::readBuffer(MlSkin * skin)
+{
+	this->skin = skin;
+	const unsigned nc = skin->numFeathers();
+	if(nc < 1) return;
+	
+	std::stringstream sst;
+	sst.str("");
+	sst<<m_currentFrame;
+	
+	if(!isCached("/p", sst.str())) return;
+	
+	useDocument();
+	openEntry("/p");
+	openSlice("/p", sst.str());
+	
+	readFromCache(sst.str());
+		
+	closeSlice("/p", sst.str());
+	closeEntry("/p");
+}
+
 void MlDrawer::rebuildBuffer(MlSkin * skin, bool forced)
 {
 	this->skin = skin;
