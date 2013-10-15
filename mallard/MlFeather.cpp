@@ -447,6 +447,12 @@ void MlFeather::changeNumSegment(int d)
 	computeTexcoord();
 }
 
+void MlFeather::getBoundingBox(BoundingBox & box) const
+{
+	for(unsigned i = 0; i < numWorldP(); i++)
+		box.update(m_worldP[i]);
+}
+
 void MlFeather::verbose()
 {
 	std::cout<<"feather status:\n id "<<featherId();

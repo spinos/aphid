@@ -21,6 +21,7 @@
 #include <MlDrawer.h>
 #include <MlScene.h>
 #include <MlSkin.h>
+#include <sstream>
 
 MTypeId MallardViz::id( 0x52e8a1 );
 MObject MallardViz::outValue;
@@ -58,6 +59,12 @@ MStatus MallardViz::compute( const MPlug& plug, MDataBlock& block )
 		loadCache(filename.asChar());
 		
 		m_cache->setCurrentFrame(iframe);
+		
+		std::stringstream sst; sst.str("");
+		sst<<iframe;
+		
+		m_cache->getBounding(sst.str(), m_bbox);
+		
 		if(m_scene->isOpened()) m_cache->readBuffer(m_scene->skin());
 		float result = 1.f;
 
@@ -99,6 +106,8 @@ void MallardViz::draw( M3dView & view, const MDagPath & path,
             glPopMatrix();
         
 		glDisable(GL_LIGHTING);
+		
+		m_cache->boundingBox(m_bbox);
 		glPopAttrib();
 	//}
 	
@@ -113,9 +122,9 @@ bool MallardViz::isBounded() const
 MBoundingBox MallardViz::boundingBox() const
 {   
 	
-	MPoint corner1(-1, -1, -1);
-	MPoint corner2(1, 1, 1);
-
+	MPoint corner1(m_bbox.getMin(0), m_bbox.getMin(1), m_bbox.getMin(2));
+	MPoint corner2(m_bbox.getMax(0), m_bbox.getMax(1), m_bbox.getMax(2));
+	
 	return MBoundingBox( corner1, corner2 );
 }
 
@@ -171,11 +180,10 @@ void MallardViz::loadCache(const char* filename)
 		return;
 	}
 	MGlobal::displayInfo(MString("Mallard viz read cache from ") + filename);
-	std::string sceneName = m_cache->readSceneName();
+	std::string sceneName = m_cache->sceneName();
 	if(sceneName != "unknown") loadScene(sceneName.c_str());
 	    
 	if(m_scene->isOpened()) {
-		const unsigned nc = m_scene->skin()->numFeathers();
 		MlCalamus::FeatherLibrary = m_scene;
 		m_cache->computeBufferIndirection(m_scene->skin());
 	}

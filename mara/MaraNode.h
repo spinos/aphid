@@ -21,7 +21,8 @@
 #include <maya/MFnMesh.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
-#include "AllMath.h"
+#include <AllMath.h>
+#include <BoundingBox.h>
 
 class MlDrawer;
 class MlScene;
@@ -68,6 +69,7 @@ private:
 	void useActiveView();
 
 	MObject m_bodyMesh;
+	BoundingBox m_bbox;
 	MlDrawer * m_cache;
 	MlScene * m_scene;
 };

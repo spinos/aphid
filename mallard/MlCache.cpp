@@ -10,6 +10,7 @@
 #include "MlCache.h"
 #include <AllHdf.h>
 #include <HBase.h>
+
 MlCache::MlCache() 
 {
     m_sceneName = "unknown";
@@ -69,6 +70,7 @@ bool MlCache::doCopy(const std::string & name)
 	
 	const unsigned blockL = 16384;
 	Vector3F * b = new Vector3F[blockL];
+	BoundingBox box;
 	unsigned i, j, start, count;
 	for(i = 0; i < sliceNames.size(); i++) {
 		std::string aslice = HObject::PartialPath("/p", sliceNames[i]);
@@ -95,6 +97,10 @@ bool MlCache::doCopy(const std::string & name)
 		closeSlice("/p", aslice);
 		tgt.useDocument();
 		tgt.closeSlice("/p", aslice);
+		
+		getBounding(aslice, box);
+		
+		tgt.setBounding(aslice, box);
 		tgt.flush();
 	}
 	delete[] b;
@@ -111,7 +117,7 @@ void MlCache::setSceneName(const std::string & name)
 	m_sceneName = name;
 }
 
-std::string MlCache::readSceneName()
+std::string MlCache::sceneName()
 {
     return m_sceneName;
 }

@@ -12,6 +12,7 @@
 #include <BaseState.h>
 #include <map>
 #include <AllMath.h>
+#include <BoundingBox.h>
 class HBase;
 class HDataset;
 class CacheFile : public HFile, public BaseState {
@@ -41,6 +42,8 @@ public:
 	unsigned numCachedSlices(const std::string & entryName) const;
 	unsigned cacheSliceNames(const std::string & entryName, std::vector<std::string> & dst) const;
 
+	void setBounding(const std::string & name, const BoundingBox & box);
+	void getBounding(const std::string & name, BoundingBox & box);
 private:
 	std::map<std::string, HBase *> m_entries;
 	std::map<std::string, HDataset *> m_slices;

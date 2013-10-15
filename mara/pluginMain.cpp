@@ -23,7 +23,7 @@ MStatus initializePlugin( MObject obj )
         return MS::kFailure;
     }
 #endif
-    MString buildInfo = MString("build 0.0.3 Wed 2:54 AM 10/16/2013");
+    MString buildInfo = MString("build 0.0.4 Wed 5:14 AM 10/16/2013");
 	MStatus   status;
 
 	MFnPlugin plugin( obj, "OF3D | Zhang Jian", buildInfo.asChar(), "Any");

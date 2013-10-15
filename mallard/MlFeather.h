@@ -1,6 +1,7 @@
 #pragma once
 #include <AllMath.h>
 #include <BoundingRectangle.h>
+#include <BoundingBox.h>
 class MlRachis;
 class CollisionRegion;
 class MlFeather {
@@ -50,6 +51,7 @@ public:
 	float* selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp);
 	
 	void changeNumSegment(int d);
+	void getBoundingBox(BoundingBox & box) const;
 	void verbose();
 private:
 	void computeBounding();

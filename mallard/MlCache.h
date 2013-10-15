@@ -20,7 +20,7 @@ public:
 	virtual bool doCopy(const std::string & name);
 	
 	void setSceneName(const std::string & name);
-	std::string readSceneName();
+	std::string sceneName();
 private:
 	std::string m_sceneName;
 };

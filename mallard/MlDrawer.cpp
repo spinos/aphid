@@ -224,11 +224,13 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 	const unsigned blockL = 2048;
 	Vector3F * wpb = new Vector3F[blockL];
 	unsigned i, j, iblock = 0, ifull = 0;
+	BoundingBox box;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin->getCalamus(i);
 		computeFeather(skin, c);
 		
 		MlFeather * f = c->feather();
+		f->getBoundingBox(box);
 		for(j = 0; j < f->numWorldP(); j++) {
 			wpb[iblock] = f->worldP()[j];
 			iblock++;
@@ -247,6 +249,7 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 		
 	saveEntrySize("/p", ifull);
 	setCached("/p", sliceName, ifull);
+	setBounding(sliceName, box);
 	delete[] wpb;
 	flush();
 }

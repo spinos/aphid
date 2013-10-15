@@ -175,3 +175,23 @@ unsigned CacheFile::cacheSliceNames(const std::string & entryName, std::vector<s
 	
 	return res;
 }
+
+void CacheFile::setBounding(const std::string & name, const BoundingBox & box)
+{
+	useDocument();
+	HBase b("/bbox");
+	if(!b.hasNamedAttr(name.c_str()))
+		b.addFloatAttr(name.c_str(), 6);
+		
+	b.writeFloatAttr(name.c_str(), (float *)&box);
+	b.close();
+}
+
+void CacheFile::getBounding(const std::string & name, BoundingBox & box)
+{
+	useDocument();
+	HBase b("/bbox");
+	if(b.hasNamedAttr(name.c_str()))
+		b.readFloatAttr(name.c_str(), (float *)&box);
+	b.close();
+}

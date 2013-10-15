@@ -41,6 +41,12 @@ void BoundingBox::setMax(float x, float y, float z)
 	m_data[3] = x; m_data[4] = y; m_data[5] = z;
 }
 
+void BoundingBox::update(const Vector3F & p)
+{
+	updateMin(p);
+	updateMax(p);
+}
+
 void BoundingBox::updateMin(const Vector3F & p)
 {
 	if(m_data[0] > p.x) m_data[0] = p.x;

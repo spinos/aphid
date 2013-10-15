@@ -17,6 +17,7 @@ public:
 	void setMax(float x, int axis);
 	void setMin(float x, float y, float z);
 	void setMax(float x, float y, float z);
+	void update(const Vector3F & p);
 	void updateMin(const Vector3F & p);
 	void updateMax(const Vector3F & p);
 	
