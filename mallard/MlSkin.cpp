@@ -184,7 +184,9 @@ void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, co
 	Matrix33F space, rotfrm;
 	Vector3F p;
 	float rotX, drop;
-	for(unsigned i =0; i < num; i++) {
+	unsigned i;
+	
+	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
 		
 		getPointOnBody(c, p);
@@ -194,9 +196,9 @@ void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, co
 		tangentSpace(c, space);
 		rotationFrame(c, space, rotfrm);
 		
-		Vector3F zdir(0.f, 0.f, c->realScale());
+		Vector3F zdir(0.f, 0.f, 1.f);
 		zdir = rotfrm.transform(zdir);
-		zdir += direction * drop * .1f * c->realScale();
+		zdir += direction * drop * .1f;
 		
 		space.inverse();
 		
