@@ -26,6 +26,7 @@ public:
 	
 	int minFrame() const;
 	int maxFrame() const;
+	Vector3F frameCenter();
 	
 	void verbose() const;
 private:

@@ -467,6 +467,7 @@ void GLWidget::updateOnFrame(int x)
 	
 	body()->update(m_topo);
 	m_featherDrawer->setCurrentFrame(x);
+	m_featherDrawer->setCurrentOrigin(bodyDeformer()->frameCenter());
 	m_featherDrawer->rebuildBuffer(skin());
 	m_bezierDrawer->rebuildBuffer(body());
 	

@@ -165,7 +165,7 @@ char BakeDeformer::solve()
 	
 	if(status) {
 		Vector3F * p = deformedP();
-	    Vector3F & c = m_frameCenters[m_currentFrame];
+	    Vector3F & c = frameCenter();
 	    for(unsigned i = 0; i < numVertices(); i++) p[i] -= c;
 	}
     return status;
@@ -186,6 +186,11 @@ int BakeDeformer::minFrame() const
 int BakeDeformer::maxFrame() const
 {
 	return m_maxFrame;
+}
+
+Vector3F BakeDeformer::frameCenter()
+{
+    return m_frameCenters[m_currentFrame];
 }
 
 void BakeDeformer::verbose() const

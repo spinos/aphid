@@ -70,6 +70,7 @@ private:
 
 	MObject m_bodyMesh;
 	BoundingBox m_bbox;
+	Vector3F m_bakeOrigin;
 	MlDrawer * m_cache;
 	MlScene * m_scene;
 };

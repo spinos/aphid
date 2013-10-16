@@ -44,6 +44,9 @@ public:
 
 	void setBounding(const std::string & name, const BoundingBox & box);
 	void getBounding(const std::string & name, BoundingBox & box);
+	
+	void setTranslation(const std::string & name, const Vector3F & at);
+	void getTranslation(const std::string & name, Vector3F & at);
 private:
 	std::map<std::string, HBase *> m_entries;
 	std::map<std::string, HDataset *> m_slices;

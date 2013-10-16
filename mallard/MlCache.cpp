@@ -71,6 +71,7 @@ bool MlCache::doCopy(const std::string & name)
 	const unsigned blockL = 16384;
 	Vector3F * b = new Vector3F[blockL];
 	BoundingBox box;
+	Vector3F center;
 	unsigned i, j, start, count;
 	for(i = 0; i < sliceNames.size(); i++) {
 		std::string aslice = HObject::PartialPath("/p", sliceNames[i]);
@@ -99,8 +100,10 @@ bool MlCache::doCopy(const std::string & name)
 		tgt.closeSlice("/p", aslice);
 		
 		getBounding(aslice, box);
+		getTranslation(aslice, center);
 		
 		tgt.setBounding(aslice, box);
+		tgt.setTranslation(aslice, center);
 		tgt.flush();
 	}
 	delete[] b;

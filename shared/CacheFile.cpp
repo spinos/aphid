@@ -195,3 +195,23 @@ void CacheFile::getBounding(const std::string & name, BoundingBox & box)
 		b.readFloatAttr(name.c_str(), (float *)&box);
 	b.close();
 }
+
+void CacheFile::setTranslation(const std::string & name, const Vector3F & at)
+{
+    useDocument();
+	HBase b("/translate");
+	if(!b.hasNamedAttr(name.c_str()))
+		b.addFloatAttr(name.c_str(), 3);
+	
+	b.writeFloatAttr(name.c_str(), (float *)&at);
+	b.close();
+}
+
+void CacheFile::getTranslation(const std::string & name, Vector3F & at)
+{
+    useDocument();
+	HBase b("/translate");
+	if(b.hasNamedAttr(name.c_str()))
+		b.readFloatAttr(name.c_str(), (float *)&at);
+	b.close();
+}

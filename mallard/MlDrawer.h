@@ -29,6 +29,7 @@ public:
 	void readBuffer(MlSkin * skin);
 	void rebuildBuffer(MlSkin * skin, bool forced = false);
 	void setCurrentFrame(int x);
+	void setCurrentOrigin(const Vector3F & at);
 	
 protected:
 	
@@ -39,6 +40,7 @@ private:
 	void writeToCache(const std::string & sliceName);
 	void readFromCache(const std::string & sliceName);
 private:
+    Vector3F m_currentOrigin;
 	MlTessellate * m_featherTess;
 	MlSkin * skin;
 	int m_currentFrame;

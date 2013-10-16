@@ -64,6 +64,7 @@ MStatus MallardViz::compute( const MPlug& plug, MDataBlock& block )
 		sst<<iframe;
 		
 		m_cache->getBounding(sst.str(), m_bbox);
+		m_cache->getTranslation(sst.str(), m_bakeOrigin);
 		
 		if(m_scene->isOpened()) m_cache->readBuffer(m_scene->skin());
 		float result = 1.f;
@@ -96,19 +97,22 @@ void MallardViz::draw( M3dView & view, const MDagPath & path,
 	
 	//if ( ( style == M3dView::kFlatShaded ) || 
 	//	    ( style == M3dView::kGouraudShaded ) ) {
+	glPushMatrix();
 		glPushAttrib(GL_LIGHTING_BIT);
 		glEnable(GL_LIGHTING);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, grayDiffuseMaterial);
 		
-            glPushMatrix();
-    
-			if(m_scene->isOpened()) m_cache->draw(m_scene->skin());	
-            glPopMatrix();
+            
+            glTranslatef(m_bakeOrigin.x, m_bakeOrigin.y, m_bakeOrigin.z);
+			if(m_scene->isOpened()) m_cache->draw(m_scene->skin());
+			
+            
         
 		glDisable(GL_LIGHTING);
-		
-		m_cache->boundingBox(m_bbox);
+
 		glPopAttrib();
+		m_cache->boundingBox(m_bbox);
+	glPopMatrix();
 	//}
 	
 	view.endGL();
@@ -122,8 +126,8 @@ bool MallardViz::isBounded() const
 MBoundingBox MallardViz::boundingBox() const
 {   
 	
-	MPoint corner1(m_bbox.getMin(0), m_bbox.getMin(1), m_bbox.getMin(2));
-	MPoint corner2(m_bbox.getMax(0), m_bbox.getMax(1), m_bbox.getMax(2));
+	MPoint corner1(m_bbox.getMin(0) + m_bakeOrigin.x, m_bbox.getMin(1) + m_bakeOrigin.y, m_bbox.getMin(2) + m_bakeOrigin.z);
+	MPoint corner2(m_bbox.getMax(0) + m_bakeOrigin.x, m_bbox.getMax(1) + m_bakeOrigin.y, m_bbox.getMax(2) + m_bakeOrigin.z);
 	
 	return MBoundingBox( corner1, corner2 );
 }

@@ -250,6 +250,7 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 	saveEntrySize("/p", ifull);
 	setCached("/p", sliceName, ifull);
 	setBounding(sliceName, box);
+	setTranslation(sliceName, m_currentOrigin);
 	delete[] wpb;
 	flush();
 }
@@ -287,4 +288,9 @@ void MlDrawer::readFromCache(const std::string & sliceName)
 void MlDrawer::setCurrentFrame(int x)
 {
 	m_currentFrame = x;
+}
+
+void MlDrawer::setCurrentOrigin(const Vector3F & at)
+{
+    m_currentOrigin = at;
 }
