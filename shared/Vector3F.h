@@ -57,6 +57,10 @@ public:
 	float angleBetween(const Vector3F& another, const Vector3F& up) const;
 	
 	void verbose(const char * pref) const;
+	
+	static Vector3F XAxis;
+	static Vector3F YAxis;
+	static Vector3F ZAxis;
 
 	float x,y,z;
 };

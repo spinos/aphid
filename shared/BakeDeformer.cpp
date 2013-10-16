@@ -165,7 +165,7 @@ char BakeDeformer::solve()
 	
 	if(status) {
 		Vector3F * p = deformedP();
-	    Vector3F & c = frameCenter();
+	    Vector3F c = frameCenter();
 	    for(unsigned i = 0; i < numVertices(); i++) p[i] -= c;
 	}
     return status;

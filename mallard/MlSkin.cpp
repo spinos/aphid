@@ -182,7 +182,7 @@ void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, co
 	if(num < 1) return;
 	
 	Matrix33F space, rotfrm;
-	Vector3F p;
+	Vector3F p, div, zdir;
 	float rotX, drop;
 	unsigned i;
 	
@@ -193,16 +193,16 @@ void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, co
 		drop = Vector3F(p, center).length() / radius;
 		drop = 1.f - drop * drop;
 		
-		tangentSpace(c, space);
-		rotationFrame(c, space, rotfrm);
-		
-		Vector3F zdir(0.f, 0.f, 1.f);
-		zdir = rotfrm.transform(zdir);
-		zdir += direction * drop * .1f;
-		
+		tangentSpace(c, space);		
 		space.inverse();
 		
-		zdir = space.transform(zdir);
+		div = space.transform(direction);
+		div.x = 0.f;
+		
+		zdir.set(0.f, 0.f, 1.f);
+		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
+		zdir += div * drop * .5f;
+		
 		rotX = zdir.angleX();
 
 		c->setRotateX(rotX);
@@ -215,8 +215,8 @@ void MlSkin::scaleFeather(const Vector3F & direction, const Vector3F & center, c
 	const unsigned num = numActive();
 	if(num < 1) return;
 	
-	Matrix33F tang, space;
-	Vector3F p;
+	Matrix33F space;
+	Vector3F p, zdir;
 	float drop;
 	unsigned i;
 	
@@ -225,9 +225,10 @@ void MlSkin::scaleFeather(const Vector3F & direction, const Vector3F & center, c
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
 		
-		tangentSpace(c, tang);
-		rotationFrame(c, tang, space);
-		Vector3F zdir(0.f, 0.f, 1.f);
+		tangentSpace(c, space);
+		
+		zdir.set(0.f, 0.f, 1.f);
+		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
 		zdir = space.transform(zdir);
 		activeMeanDir += zdir;
 		activeMeanScale += c->realScale();
@@ -255,8 +256,8 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 	const unsigned num = numActive();
 	if(num < 1) return;
 	
-	Matrix33F tang, space;
-	Vector3F p;
+	Matrix33F space;
+	Vector3F p, zdir;
 	float drop;
 	unsigned i;
 	
@@ -266,9 +267,9 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 		MlCalamus * c = getActive(i);
 		activeMeanPitch += c->rotateY();
 		
-		tangentSpace(c, tang);
-		rotationFrame(c, tang, space);
-		Vector3F zdir(0.f, 0.f, 1.f);
+		tangentSpace(c, space);
+		zdir.set(0.f, 0.f, 1.f);
+		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
 		zdir = space.transform(zdir);
 		activeMeanDir += zdir;
 	}

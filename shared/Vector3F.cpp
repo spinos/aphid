@@ -3,6 +3,10 @@
 #include <cmath>
 #include <iostream>
 
+Vector3F Vector3F::XAxis(1.f, 0.f, 0.f);
+Vector3F Vector3F::YAxis(0.f, 1.f, 0.f);
+Vector3F Vector3F::ZAxis(0.f, 0.f, 1.f);
+
 Vector3F::Vector3F() 
 {
 	x = y = z = 0.f;
