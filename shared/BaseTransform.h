@@ -9,8 +9,10 @@
 
 #pragma once
 #include <AllMath.h>
+#include <TypedEntity.h>
+#include <NamedEntity.h>
 
-class BaseTransform {
+class BaseTransform : public TypedEntity, public NamedEntity {
 public:
 	BaseTransform(BaseTransform * parent = 0);
 	virtual ~BaseTransform();

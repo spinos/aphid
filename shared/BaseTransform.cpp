@@ -12,6 +12,7 @@
 BaseTransform::BaseTransform(BaseTransform * parent)
 {
 	m_parent = parent;
+	setEntityType(TTransform);
 }
 
 BaseTransform::~BaseTransform() {}

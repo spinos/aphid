@@ -16,14 +16,14 @@ void TypedEntity::setEntityType(TypeEntries val)
     m_type = val;
 }
 
-unsigned TypedEntity::entityType() const
+int TypedEntity::entityType() const
 {
     return m_type;
 }
 
 bool TypedEntity::isMesh() const
 {
-	return m_type < 2;
+	return (m_type == 1 || m_type == 2);
 }
 
 bool TypedEntity::isTriangleMesh() const

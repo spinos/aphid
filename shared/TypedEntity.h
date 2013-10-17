@@ -12,19 +12,20 @@
 class TypedEntity {
 public:
     enum TypeEntries {
-        TTriangleMesh = 0,
-        TPatchMesh = 1,
-		TKdTree = 2,
-        TUnknown = 3
+		TUnknown = 0,
+        TTriangleMesh = 1,
+        TPatchMesh = 2,
+		TKdTree = 3,
+        TTransform = 4
     };
     
 	TypedEntity();
 	void setEntityType(TypeEntries val);
-	unsigned entityType() const;
+	int entityType() const;
 	
 	bool isMesh() const;
 	bool isTriangleMesh() const;
 	bool isPatchMesh() const;
 private:	
-	unsigned m_type;
+	int m_type;
 };
