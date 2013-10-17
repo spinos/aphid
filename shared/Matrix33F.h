@@ -10,6 +10,11 @@
  class Matrix33F
  {
  public:
+	enum RotateOrder {
+		XYZ = 0,
+		ZYX = 1
+	};
+	
 	Matrix33F();
 	Matrix33F(const Matrix33F & a);
 	~Matrix33F();
@@ -35,6 +40,7 @@
 	void rotateX(float alpha);
 	void rotateY(float beta);
 	void rotateZ(float gamma);
+	void rotateEuler(float phi, float theta, float psi, RotateOrder order = XYZ);
 	
 	float v[9];
  };

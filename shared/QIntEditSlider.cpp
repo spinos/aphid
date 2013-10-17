@@ -71,6 +71,10 @@ void QIntEditSlider::updateSlider(int x)
 	int slideMax = x * 3;
 	if(slideMin < m_bottomValue) slideMin = m_bottomValue;
 	if(slideMax > m_topValue) slideMax = m_topValue;
+	if(x == m_bottomValue || x == m_topValue) {
+		slideMin = m_bottomValue;
+		slideMax = m_topValue;
+	}
 	m_slider->setRange(slideMin, slideMax);
 	m_slider->setValue(x);
 }

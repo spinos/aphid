@@ -219,3 +219,42 @@ void Matrix33F::rotateZ(float gamma)
 	*r.m(1, 0) = -s; *r.m(1, 1) = c;
 	multiply(r);
 }
+
+void Matrix33F::rotateEuler(float phi, float theta, float psi, RotateOrder order)
+{
+	Matrix33F B;
+	const float cpsi = cos(phi);
+	const float spsi = sin(phi);
+	*B.m(1, 1) = cpsi;
+	*B.m(1, 2) = spsi;
+	*B.m(2, 1) = -spsi;
+	*B.m(2, 2) = cpsi;
+	
+	const float ctheta = cos(theta);
+	const float stheta = sin(theta);
+	Matrix33F C;
+	*C.m(0, 0) = ctheta;
+	*C.m(0, 2) = -stheta;
+	*C.m(2, 0) = stheta;
+	*C.m(2, 2) = ctheta;
+	
+	const float cphi = cos(psi);
+	const float sphi = sin(psi);
+	Matrix33F D;
+	*D.m(0, 0) = cphi;
+	*D.m(0, 1) = sphi;
+	*D.m(1, 0) = -sphi;
+	*D.m(1, 1) = cphi;
+	
+	if(order == XYZ) {
+		multiply(B);
+		multiply(C);
+		multiply(D);
+	}
+	else {
+		multiply(D);
+		multiply(C);
+		multiply(B);
+	}
+}
+

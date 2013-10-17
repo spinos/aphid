@@ -72,6 +72,10 @@ void QDoubleEditSlider::updateSlider(double x)
 	double slideMax = x * 3;
 	if(slideMin < m_bottomValue) slideMin = m_bottomValue;
 	if(slideMax > m_topValue) slideMax = m_topValue;
+	if(x == m_bottomValue || x == m_topValue) {
+		slideMin = m_bottomValue;
+		slideMax = m_topValue;
+	}
 	
 	m_slideMin = slideMin;
 	m_slideMax = slideMax;

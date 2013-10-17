@@ -285,11 +285,11 @@ SOURCES       = ../shared/Vector3F.cpp \
     window.cpp \
                 main.cpp
                 
-INCLUDEPATH += /usr/local/include/OpenEXR
 LIBS += -L../easymodel -leasymodel -lIlmImf -lHalf -lhdf5 -lhdf5_hl
 macx {
     INCLUDEPATH += ../../Library/boost_1_44_0 \
-                    ../../Library/hdf5/include
+                    ../../Library/hdf5/include \
+                    /usr/local/include/OpenEXR
     QMAKE_LIBDIR += ../../Library/boost_1_44_0/stage/lib \
                     ../../Library/hdf5/lib
     LIBS += -lboost_date_time -lboost_thread -lboost_filesystem -lboost_system -framework libxml

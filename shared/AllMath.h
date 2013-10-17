@@ -42,6 +42,18 @@ inline bool IsElementIn(T const& a, const std::vector<T>& array)
 	return false;
 }
 
+template<typename T>
+inline T DegreeToAngle(T const & a)
+{
+	return a * 3.14159269 / 180.0;
+}
+
+template<typename T>
+inline T AngleToDegree(T const & a)
+{
+	return a / 3.14159269 * 180.0;
+}
+
 struct Color4 {
 	Color4(): r(0.f), g(0.f), b(0.f), a(0.f)
 	{}
