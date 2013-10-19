@@ -36,6 +36,8 @@ public:
 	void solidCube(float x, float y, float z, float size);
 	void transform(BaseTransform * t);
 	void manipulator(TransformManipulator * m);
+	void moveHandle(int axis, bool active);
+	void spinHandle(TransformManipulator * m, bool active);
 	
 	void setGrey(float g);
 	void setColor(float r, float g, float b) const;

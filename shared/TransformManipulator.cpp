@@ -71,6 +71,7 @@ void TransformManipulator::move(const Vector3F & d)
 	invps.inverse();
 	
 	Vector3F od = invps.transformAsNormal(d);
+		
 	m_subject->translate(od);
 	setTranslation(m_subject->translation());
 }
@@ -87,9 +88,6 @@ void TransformManipulator::spin(const Vector3F & d)
 	
 	Vector3F toa = m_startPoint - worldP;
 	Vector3F tob = toa + d;
-	
-	toa = invps.transformAsNormal(toa);
-	tob = invps.transformAsNormal(tob);
 	
 	toa.normalize();
 	tob.normalize();
