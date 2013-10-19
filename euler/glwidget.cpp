@@ -56,8 +56,22 @@
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-	m_transform = new BaseTransform;
-	m_transform->setName("/group0");
+	BaseTransform * grp0 = new BaseTransform;
+	grp0->setName("/group0");
+	m_groups.push_back(grp0);
+	
+	BaseTransform * child1 = new BaseTransform(grp0);
+	child1->setName("/group0/child1");
+	child1->setTranslation(Vector3F(36.f, 0.f, 13.f));
+	grp0->addChild(child1);
+	m_groups.push_back(child1);
+	
+	BaseTransform * child2 = new BaseTransform(child1);
+	child2->setName("/group0/child1/child2");
+	child2->setTranslation(Vector3F(24.f, 0.f, 12.f));
+	child1->addChild(child2);
+	m_groups.push_back(child2);
+	
 	solve();
 }
 
@@ -69,14 +83,23 @@ void GLWidget::clientDraw()
 {
 	getDrawer()->coordsys(m_space, 8.f);
 
-	getDrawer()->transform(m_transform);
+	std::vector<BaseTransform *>::iterator it = m_groups.begin();
+	for(; it != m_groups.end(); ++it) {
+		getDrawer()->transform(*it);
+	}
+	
 	getDrawer()->manipulator(manipulator());
 }
 
 void GLWidget::clientSelect()
 {	
-	manipulator()->attachTo(m_transform);
 	const Ray * ray = getIncidentRay();
+	std::vector<BaseTransform *>::iterator it = m_groups.begin();
+	BaseTransform * subject = *it;
+	for(; it != m_groups.end(); ++it) {
+		if((*it)->intersect(*ray)) subject = *it;
+	}
+	manipulator()->attachTo(subject);
 	manipulator()->start(ray);
 }
 

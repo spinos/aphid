@@ -63,7 +63,7 @@ private:
 private:
 	Matrix33F m_space;
 	Vector3F m_angles;
-	BaseTransform * m_transform;
+	std::vector<BaseTransform *> m_groups;
 private slots:
 	
 public slots:

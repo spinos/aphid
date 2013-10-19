@@ -11,12 +11,19 @@
 #include <AllMath.h>
 #include <TypedEntity.h>
 #include <NamedEntity.h>
+#include <Ray.h>
 
 class BaseTransform : public TypedEntity, public NamedEntity {
 public:
+	enum RotateAxis {
+		AX,
+		AY,
+		AZ
+	};
 	BaseTransform(BaseTransform * parent = 0);
 	virtual ~BaseTransform();
 	
+	void setParent(BaseTransform * parent);
 	BaseTransform * parent() const;
 	
 	void translate(const Vector3F & v);
@@ -29,10 +36,24 @@ public:
 	Matrix33F rotation() const;
 	Vector3F rotationAngles() const;
 	
+	void addChild(BaseTransform * child);
+	unsigned numChildren() const;
+	BaseTransform * child(unsigned idx) const;
+	
+	void parentSpace(Matrix44F & dst) const;
+	Matrix44F space() const;
+	Matrix44F worldSpace() const;
+	
+	bool intersect(const Ray & ray) const;
+	
+	Vector3F translatePlane(RotateAxis a) const;
+	virtual Vector3F rotatePlane(RotateAxis a) const;
 protected:
-
+	
+	
 private:
 	Matrix33F m_rotation;
 	Vector3F m_translation, m_angles;
 	BaseTransform * m_parent;
+	std::vector<BaseTransform *> m_children;
 };

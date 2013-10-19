@@ -11,7 +11,6 @@
 #include <Plane.h>
 TransformManipulator::TransformManipulator() 
 {
-	m_origin = new BaseTransform;
 	m_subject = 0;
 	m_rotateAxis = AY;
 	m_mode = ToolContext::MoveTransform;
@@ -19,7 +18,6 @@ TransformManipulator::TransformManipulator()
 
 TransformManipulator::~TransformManipulator() 
 {
-	delete m_origin;
 }
 
 void TransformManipulator::attachTo(BaseTransform * subject)
@@ -27,19 +25,19 @@ void TransformManipulator::attachTo(BaseTransform * subject)
 	m_subject = subject;
 	setTranslation(subject->translation());
 	setRotation(subject->rotation());
-	
-	m_origin->setTranslation(subject->translation());
-	m_origin->setRotation(subject->rotation());
+	setParent(subject->parent());
 }
 
 void TransformManipulator::start(const Ray * r)
 {
-	Plane pl(hitPlaneNormal(), translation());
-	
+	Matrix44F ps;
+	parentSpace(ps);
+	const Vector3F worldP = ps.transform(translation());
+	Plane pl(ps.transformAsNormal(hitPlaneNormal()), worldP);
 	Vector3F hit, d;
 	float t;
 	if(pl.rayIntersect(*r, hit, t, 1)) {
-		d = hit - translation();
+		d = hit - worldP;
 		if(d.length() > 10.f) return;
 		m_startPoint = hit;
 	}
@@ -47,7 +45,10 @@ void TransformManipulator::start(const Ray * r)
 
 void TransformManipulator::perform(const Ray * r)
 {
-	Plane pl(hitPlaneNormal(), translation());
+	Matrix44F ps;
+	parentSpace(ps);
+	const Vector3F worldP = ps.transform(translation());
+	Plane pl(ps.transformAsNormal(hitPlaneNormal()), worldP);
 	Vector3F hit, d;
     float t;
 	if(pl.rayIntersect(*r, hit, t, 1)) {
@@ -64,17 +65,35 @@ void TransformManipulator::perform(const Ray * r)
 
 void TransformManipulator::move(const Vector3F & d)
 {
-	m_subject->translate(d);
-	translate(d);
+	Matrix44F ps;
+	parentSpace(ps);
+	Matrix44F invps = ps;
+	invps.inverse();
+	
+	Vector3F od = invps.transformAsNormal(d);
+	m_subject->translate(od);
+	setTranslation(m_subject->translation());
 }
 
 void TransformManipulator::spin(const Vector3F & d)
 {
-	Vector3F toa = m_startPoint - translation();
+	Matrix44F ps;
+	parentSpace(ps);
+	Matrix44F invps = ps;
+	invps.inverse();
+	
+	const Vector3F worldP = ps.transform(translation());
+	const Vector3F rotUp = ps.transformAsNormal(hitPlaneNormal());
+	
+	Vector3F toa = m_startPoint - worldP;
 	Vector3F tob = toa + d;
+	
+	toa = invps.transformAsNormal(toa);
+	tob = invps.transformAsNormal(tob);
+	
 	toa.normalize();
 	tob.normalize();
-	float ang = toa.angleBetween(tob, toa.cross(rotatePlaneNormal(m_rotateAxis)).reversed());
+	float ang = toa.angleBetween(tob, toa.cross(rotUp).reversed());
 	
 	Vector3F angles;
 	
@@ -83,12 +102,7 @@ void TransformManipulator::spin(const Vector3F & d)
 	else angles.set(ang, 0.f, 0.f);
 	
 	m_subject->rotate(angles);
-	rotate(angles);
-}
-
-BaseTransform * TransformManipulator::origin() const
-{
-	return m_origin;
+	setRotation(m_subject->rotation());
 }
 
 void TransformManipulator::detach()
@@ -126,32 +140,14 @@ TransformManipulator::RotateAxis TransformManipulator::rotateAxis() const
 	return m_rotateAxis;
 }
 
-Vector3F TransformManipulator::rotatePlaneNormal(RotateAxis a) const
+Vector3F TransformManipulator::rotatePlane(RotateAxis a) const
 {
-	if(a == AZ) return Vector3F::ZAxis;
-	Matrix33F m;
-	Vector3F r;
-	m.rotateZ(rotationAngles().z);
-	if(a == AY) {
-		r = Vector3F::YAxis;
-		r = m.transform(r);
-		return r;
-	}
-	r = Vector3F::XAxis;
-	r = rotation().transform(r);
-	return r;
-}
-
-Vector3F TransformManipulator::translatePlaneNormal() const
-{
-	if(m_rotateAxis == AX) return Vector3F::XAxis;
-	if(m_rotateAxis == AY) return Vector3F::YAxis;
-	return Vector3F::ZAxis;
+	return m_subject->rotatePlane(a);
 }
 
 Vector3F TransformManipulator::hitPlaneNormal() const
 {
 	if(m_mode == ToolContext::MoveTransform)
-		return translatePlaneNormal();
-	return rotatePlaneNormal(m_rotateAxis);
+		return translatePlane(m_rotateAxis);
+	return rotatePlane(m_rotateAxis);
 }

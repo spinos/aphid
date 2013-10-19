@@ -219,6 +219,19 @@ void Matrix44F::setFrontOrientation(const Vector3F& front)
     setOrientations(side, up, front);
 }
 
+void Matrix44F::setRotation(const Matrix33F & r)
+{
+	*m(0, 0) = r.M(0, 0);
+	*m(0, 1) = r.M(0, 1);
+	*m(0, 2) = r.M(0, 2);
+	*m(1, 0) = r.M(1, 0);
+	*m(1, 1) = r.M(1, 1);
+	*m(1, 2) = r.M(1, 2);
+	*m(2, 0) = r.M(2, 0);
+	*m(2, 1) = r.M(2, 1);
+	*m(2, 2) = r.M(2, 2);
+}
+
 void Matrix44F::rotateX(float alpha)
 {
 	const float c = cos(alpha);

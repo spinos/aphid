@@ -9,7 +9,8 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include "Vector3F.h"
+#include <Vector3F.h>
+#include <Matrix33F.h>
  class Matrix44F
  {
  public:
@@ -39,6 +40,7 @@
 	void setTranslation(float x, float y, float z);
 	void setOrientations(const Vector3F& side, const Vector3F& up, const Vector3F& front);
 	void setFrontOrientation(const Vector3F& front);
+	void setRotation(const Matrix33F & r);
 	void rotateX(float alpha);
 	void rotateY(float beta);
 	void rotateZ(float gamma);

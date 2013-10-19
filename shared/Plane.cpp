@@ -35,6 +35,11 @@ Plane::Plane(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, cons
 	m_d = - cen.dot(nn);
 }
 
+Vector3F Plane::normal() const
+{
+	return Vector3F(m_a, m_b, m_c);
+}
+
 void Plane::getNormal(Vector3F & nor) const
 {
 	nor.x = m_a;
