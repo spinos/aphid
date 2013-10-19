@@ -50,10 +50,15 @@ void Plane::projectPoint(const Vector3F & p0, Vector3F & dst) const
 	dst.z = p0.z - m_c * tt;
 }
 
-bool Plane::rayIntersect(const Ray & ray, Vector3F & dst, float & t) const
+bool Plane::rayIntersect(const Ray & ray, Vector3F & dst, float & t, bool twoSided) const
 {
 	float below = ray.m_dir.x * m_a + ray.m_dir.y * m_b + ray.m_dir.z * m_c;
-	if(below > -EPSILON) return false;
+	if(!twoSided) {
+		if(below > -EPSILON) return false;
+	}
+	else {
+		if(below > -EPSILON && below < EPSILON) return false;
+	}
 	t = - (ray.m_origin.x * m_a + ray.m_origin.y * m_b + ray.m_origin.z * m_c + m_d) / below;
 	dst = ray.m_origin + ray.m_dir * t;
 	return true;

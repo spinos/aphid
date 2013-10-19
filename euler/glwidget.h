@@ -43,8 +43,8 @@
 #define GLWIDGET_H
 
 #include <Base3DView.h>
+class BaseTransform;
 
-//! [0]
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -53,16 +53,17 @@ public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 
-	virtual void clientDraw();
-    
-//! [2]
 protected:
-    
+    virtual void clientDraw();
+    virtual void clientSelect();
+	virtual void clientDeselect();
+	virtual void clientMouseInput();
 private:
 	void solve();
 private:
 	Matrix33F m_space;
 	Vector3F m_angles;
+	BaseTransform * m_transform;
 private slots:
 	
 public slots:

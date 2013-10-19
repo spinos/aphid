@@ -16,6 +16,9 @@
 #include "Matrix33F.h"
 #include <cmath>
 #include <zEXRImage.h>
+#include <BaseTransform.h>
+#include <TransformManipulator.h>
+
 BaseDrawer::BaseDrawer () : m_wired(0) 
 {
 	m_sphere = new GeodesicSphereMesh(8);
@@ -56,16 +59,6 @@ void BaseDrawer::cube(const Vector3F & p, const float & size) const
 	
 	drawMesh(m_cube);
 	glPopMatrix();	
-}
-
-void BaseDrawer::setGrey(float g)
-{
-    glColor3f(g, g, g);
-}
-
-void BaseDrawer::setColor(float r, float g, float b) const
-{
-	glColor3f(r, g, b);
 }
 
 void BaseDrawer::box(float width, float height, float depth)
@@ -126,6 +119,115 @@ void BaseDrawer::solidCube(float x, float y, float z, float size)
 	
 	drawMesh(m_cube);
 	glPopMatrix();	
+}
+
+void BaseDrawer::transform(BaseTransform * t)
+{
+	const Vector3F p = t->translation();
+	const Matrix33F mat = t->rotation();
+	glPushMatrix();
+	glTranslatef(p.x, p.y, p.z);
+	useSpace(mat);
+	
+	glBegin(GL_LINES);
+	glColor3f(1.f, 0.f, 0.f);
+	glVertex3f(0.f, 0.f, 0.f);
+	glVertex3f(8.f, 0.f, 0.f);
+	glColor3f(0.f, 1.f, 0.f);
+	glVertex3f(0.f, 0.f, 0.f);
+	glVertex3f(0.f, 8.f, 0.f);
+	glColor3f(0.f, 0.f, 1.f);
+	glVertex3f(0.f, 0.f, 0.f);
+	glVertex3f(0.f, 0.f, 8.f);
+	glEnd();
+	
+	glPopMatrix();
+}
+
+void BaseDrawer::manipulator(TransformManipulator * m)
+{
+	if(m->isDetached()) return;
+
+	const Vector3F p = m->translation();
+	Vector3F a;
+	Matrix44F mat;
+	mat.setTranslation(p);	
+	if(m->mode() == ToolContext::MoveTransform) {
+		glPushMatrix();
+		a = m->rotatePlaneNormal(TransformManipulator::AZ);
+		mat.setFrontOrientation(a);
+		useSpace(mat);
+		if(m->rotateAxis() == TransformManipulator::AZ) {
+			glColor3f(1.f, 0.f, 0.f);
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(8.f, 0.f, 0.f));
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(-8.f, 0.f, 0.f));
+			glColor3f(0.f, 1.f, 0.f);
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 8.f, 0.f));
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, -8.f, 0.f));
+		}
+		else if(m->rotateAxis() == TransformManipulator::AY) {
+			glColor3f(1.f, 0.f, 0.f);
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(8.f, 0.f, 0.f));
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(-8.f, 0.f, 0.f));
+			glColor3f(0.f, 0.f, 1.f);
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 0.f, 8.f));
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 0.f, -8.f));
+		}
+		else {
+			glColor3f(0.f, 1.f, 0.f);
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F( 0.f, 8.f,0.f));
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, -8.f, 0.f));
+			glColor3f(0.f, 0.f, 1.f);
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 0.f, 8.f));
+			arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 0.f, -8.f));
+		}
+		glPopMatrix();
+	}
+	else {
+		m_circle->setRadius(8.f);
+		glPushMatrix();
+		a = m->rotatePlaneNormal(TransformManipulator::AZ);
+		mat.setFrontOrientation(a);
+		useSpace(mat);
+		if(m->rotateAxis() == TransformManipulator::AZ) setColor(0.f, 0.f, 1.f);
+		else setGrey(.5f);
+		linearCurve(*m_circle);
+		glPopMatrix();
+		glPushMatrix();
+		a = m->rotatePlaneNormal(TransformManipulator::AY);
+		mat.setFrontOrientation(a);
+		useSpace(mat);
+		if(m->rotateAxis() == TransformManipulator::AY) setColor(0.f, 1.f, 0.f);
+		else setGrey(.5f);
+		linearCurve(*m_circle);
+		glPopMatrix();
+		glPushMatrix();
+		a = m->rotatePlaneNormal(TransformManipulator::AX);
+		mat.setFrontOrientation(a);
+		useSpace(mat);
+		if(m->rotateAxis() == TransformManipulator::AX) setColor(1.f, 0.f, 0.f);
+		else setGrey(.5f);
+		linearCurve(*m_circle);
+		glPopMatrix();
+	}
+	
+	if(m->mode() == ToolContext::MoveTransform) {
+		setGrey(.5f);
+		arrow(m->origin()->translation(), m->translation());
+	}
+	else {
+	
+	}
+}
+
+void BaseDrawer::setGrey(float g)
+{
+    glColor3f(g, g, g);
+}
+
+void BaseDrawer::setColor(float r, float g, float b) const
+{
+	glColor3f(r, g, b);
 }
 
 void BaseDrawer::end() const
@@ -613,7 +715,7 @@ void BaseDrawer::linearCurve(const BaseCurve & curve)
 	for(unsigned i = 0; i < curve.numVertices(); i++) {
 		p = curve.getCv(i);
 		t = curve.getKnot(i);
-		setColor(1.f - t, 0.f, t);
+		//setColor(1.f - t, 0.f, t);
 		glVertex3f(p.x, p.y, p.z);
 	}
 	glEnd();

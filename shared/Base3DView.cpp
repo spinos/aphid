@@ -4,6 +4,12 @@
 
 #include "Base3DView.h"
 #include <ToolContext.h>
+#include <SelectionArray.h>
+#include <BaseBrush.h>
+#include <PerspectiveCamera.h>
+#include <KdTreeDrawer.h>
+#include <IntersectionContext.h>
+#include <TransformManipulator.h>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -18,11 +24,13 @@ Base3DView::Base3DView(QWidget *parent)
 	m_perspCamera = new PerspectiveCamera;
 	fCamera = m_orthoCamera;
 	m_drawer = new KdTreeDrawer;
-	m_selected = new SelectionArray;
-	m_selected->setComponentFilterType(PrimitiveFilter::TVertex);
+	m_activeComponent = new SelectionArray;
+	m_activeComponent->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_intersectCtx = new IntersectionContext;
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_brush = new BaseBrush;
+	m_manipulator = new TransformManipulator;
+	
 	m_timer = new QTimer(this);
 	connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
 	m_timer->start(30);
@@ -37,7 +45,7 @@ Base3DView::~Base3DView()
 {
 	delete fCamera;
 	delete m_drawer;
-	delete m_selected;
+	delete m_activeComponent;
 	delete m_intersectCtx;
 }
 //! [1]
@@ -66,9 +74,9 @@ KdTreeDrawer * Base3DView::getDrawer() const
 	return m_drawer;
 }
 
-SelectionArray * Base3DView::getSelection() const
+SelectionArray * Base3DView::getActiveComponent() const
 {
-	return m_selected;
+	return m_activeComponent;
 }
 
 IntersectionContext * Base3DView::getIntersectionContext() const
@@ -191,14 +199,22 @@ void Base3DView::processSelection(QMouseEvent *event)
 {
 	computeIncidentRay(event->x(), event->y());
 	
-    Vector3F origin, incident;
-    getCamera()->incidentRay(event->x(), event->y(), origin, incident);
-    incident = incident.normal() * 1000.f;
-	
     if(event->modifiers() == Qt::ShiftModifier) 
-		m_selected->disableVertexPath();
+		m_activeComponent->disableVertexPath();
 	else 
-		m_selected->enableVertexPath();
+		m_activeComponent->enableVertexPath();
+		
+	switch (event->button()) {
+		case Qt::LeftButton:
+			manipulator()->setRotateAxis(TransformManipulator::AY);
+			break;
+		case Qt::MiddleButton:
+			manipulator()->setRotateAxis(TransformManipulator::AZ);
+			break;
+		default:
+			manipulator()->setRotateAxis(TransformManipulator::AX);
+			break;
+	}
 		
 	clientSelect();
 }
@@ -292,27 +308,28 @@ void Base3DView::resetView()
 void Base3DView::drawSelection()
 {
 	m_drawer->setColor(0.f, .8f, .2f);
-	m_drawer->components(m_selected);
+	m_drawer->components(m_activeComponent);
 }
 
 void Base3DView::clearSelection()
 {
-	m_selected->reset();
+	m_activeComponent->reset();
+	m_manipulator->detach();
 }
 
 void Base3DView::addHitToSelection()
 {
-	m_selected->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx, m_intersectCtx->m_hitP);
+	m_activeComponent->add(m_intersectCtx->m_geometry, m_intersectCtx->m_componentIdx, m_intersectCtx->m_hitP);
 }
 
 void Base3DView::growSelection()
 {
-	m_selected->grow();
+	m_activeComponent->grow();
 }
 
 void Base3DView::shrinkSelection()
 {
-	m_selected->shrink();
+	m_activeComponent->shrink();
 }
 
 void Base3DView::frameAll()
@@ -325,27 +342,7 @@ void Base3DView::frameAll()
 
 void Base3DView::keyPressEvent(QKeyEvent *e)
 {
-	if(e->key() == Qt::Key_Space) {
-		qDebug() << "clear selection";
-		clearSelection();
-	}
-	else if(e->key() == Qt::Key_H) {
-		qDebug() << "reset camera";
-		resetView();
-	}
-	else if(e->key() == Qt::Key_BracketRight) {
-		growSelection();
-	}
-	else if(e->key() == Qt::Key_BracketLeft) {
-		shrinkSelection();
-	}
-	else if(e->key() == Qt::Key_Up) {
-		getCamera()->moveForward(23);
-	}
-	else if(e->key() == Qt::Key_Down) {
-		getCamera()->moveForward(-23);
-	}
-	else if(e->key() == Qt::Key_O) {
+	if(e->key() == Qt::Key_O) {
 		if(getCamera()->isOrthographic()) {
 			fCamera = m_perspCamera;
 			fCamera->copyTransformFrom(m_orthoCamera);
@@ -357,9 +354,37 @@ void Base3DView::keyPressEvent(QKeyEvent *e)
 			updateOrthoProjection();
 		}
 	}
-    else if(e->key() == Qt::Key_G) {
-		qDebug() << "frame all camera";
-		frameAll();
+	
+	switch (e->key()) {
+		case Qt::Key_Space:
+			clearSelection();
+			break;
+		case Qt::Key_H:
+			resetView();
+			break;
+		case Qt::Key_BracketRight:
+			growSelection();
+			break;
+		case Qt::Key_BracketLeft:
+			shrinkSelection();
+			break;
+		case Qt::Key_Up:
+			getCamera()->moveForward(23);
+			break;
+		case Qt::Key_Down:
+			getCamera()->moveForward(-23);
+			break;
+		case Qt::Key_G:
+			frameAll();
+			break;
+		case Qt::Key_T:
+			manipulator()->setToMove();
+			break;
+		case Qt::Key_R:
+			manipulator()->setToRotate();
+			break;
+		default:
+			break;
 	}
 	
 	QWidget::keyPressEvent(e);
@@ -397,6 +422,11 @@ const BaseBrush * Base3DView::brush() const
 BaseBrush * Base3DView::brush()
 {
 	return m_brush;
+}
+
+TransformManipulator * Base3DView::manipulator()
+{
+	return m_manipulator;
 }
 
 void Base3DView::showBrush() const

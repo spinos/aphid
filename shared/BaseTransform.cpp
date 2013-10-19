@@ -39,16 +39,29 @@ Vector3F BaseTransform::translation() const
 
 void BaseTransform::rotate(const Vector3F & v)
 {
-	m_rotation.rotateEuler(v.x, v.y, v.z);
+	m_angles += v;
+	m_rotation.setIdentity();
+	m_rotation.rotateEuler(m_angles.x, m_angles.y, m_angles.z);
 }
 
 void BaseTransform::setRotation(const Vector3F & v)
 {
+	m_angles = v;
 	m_rotation.setIdentity();
-	m_rotation.rotateEuler(v.x, v.y, v.z);
+	m_rotation.rotateEuler(m_angles.x, m_angles.y, m_angles.z);
+}
+
+void BaseTransform::setRotation(const Matrix33F & m)
+{
+	m_rotation = m;
 }
 
 Matrix33F BaseTransform::rotation() const
 {
 	return m_rotation;
+}
+
+Vector3F BaseTransform::rotationAngles() const
+{
+	return m_angles;
 }

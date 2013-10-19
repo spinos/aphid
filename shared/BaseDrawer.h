@@ -21,6 +21,8 @@
 #include <BaseCurve.h>
 #include <CircleCurve.h>
 #include <GProfile.h>
+class BaseTransform;
+class TransformManipulator;
 class ZEXRImage;
 class BaseDrawer {
 public:
@@ -32,6 +34,9 @@ public:
 	void cube(const Vector3F & p, const float & size) const;
 	void box(float width, float height, float depth);
 	void solidCube(float x, float y, float z, float size);
+	void transform(BaseTransform * t);
+	void manipulator(TransformManipulator * m);
+	
 	void setGrey(float g);
 	void setColor(float r, float g, float b) const;
 	void end() const;

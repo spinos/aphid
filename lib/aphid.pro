@@ -21,6 +21,8 @@ HEADERS = ../shared/AllMath.h \
                 ../shared/KdTreeDrawer.h \
                 ../shared/SpaceHandle.h \
                 ../shared/TypedEntity.h \
+				../shared/NamedEntity.h \
+				../shared/BaseTransform.h \
                 ../shared/Geometry.h \
                 ../shared/BaseMesh.h \
                 ../shared/TriangleMesh.h \
@@ -106,6 +108,7 @@ HEADERS = ../shared/AllMath.h \
     ../shared/BaseState.h \
     ../shared/HFile.h \
     ../shared/HRFile.h \
+../shared/TransformManipulator.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -131,6 +134,8 @@ SOURCES = ../shared/Vector3F.cpp \
                 ../shared/KdTreeDrawer.cpp \
                 ../shared/SpaceHandle.cpp \
                 ../shared/TypedEntity.cpp \
+				../shared/NamedEntity.cpp \
+				../shared/BaseTransform.cpp \
                 ../shared/Geometry.cpp \
                 ../shared/BaseMesh.cpp \
                 ../shared/TriangleMesh.cpp \
@@ -215,6 +220,7 @@ SOURCES = ../shared/Vector3F.cpp \
     ../shared/BaseState.cpp \
     ../shared/HFile.cpp \
     ../shared/HRFile.cpp \
+    ../shared/TransformManipulator.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \

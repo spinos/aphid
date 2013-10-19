@@ -25,12 +25,14 @@ public:
 	
 	void rotate(const Vector3F & v);
 	void setRotation(const Vector3F & v);
+	void setRotation(const Matrix33F & m);
 	Matrix33F rotation() const;
+	Vector3F rotationAngles() const;
 	
 protected:
 
 private:
 	Matrix33F m_rotation;
-	Vector3F m_translation;
+	Vector3F m_translation, m_angles;
 	BaseTransform * m_parent;
 };

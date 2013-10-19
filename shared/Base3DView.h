@@ -2,13 +2,18 @@
 #define BASE3DVIEW_H
 
 #include <QGLWidget>
-#include <PerspectiveCamera.h>
-#include <KdTreeDrawer.h>
-#include <SelectionArray.h>
-#include <IntersectionContext.h>
-#include <BaseBrush.h>
+#include <AllMath.h>
+#include <Ray.h>
+class BaseCamera;
+class PerspectiveCamera;
+class KdTreeDrawer;
+class IntersectionContext;
 class ToolContext;
+class SelectionArray;
 class QTimer;
+class BaseBrush;
+class BaseTransform;
+class TransformManipulator;
 
 class Base3DView : public QGLWidget
 {
@@ -24,12 +29,14 @@ public:
 
 	BaseCamera * getCamera() const;
 	KdTreeDrawer * getDrawer() const;
-	SelectionArray * getSelection() const;
+	SelectionArray * getActiveComponent() const;
 	IntersectionContext * getIntersectionContext() const;
 	const Ray * getIncidentRay() const;
 	
 	const BaseBrush * brush() const;
 	BaseBrush * brush();
+	
+	TransformManipulator * manipulator();
 	
     void initializeGL();
     void paintGL();
@@ -40,12 +47,6 @@ public:
     void processSelection(QMouseEvent *event);
     void processDeselection(QMouseEvent *event);
     void processMouseInput(QMouseEvent *event);
-	virtual void processCamera(QMouseEvent *event);
-    virtual void clientDraw();
-    virtual void clientSelect();
-    virtual void clientDeselect();
-    virtual void clientMouseInput();
-    virtual Vector3F sceneCenter() const;
     
     void resetView();
 	void drawSelection();
@@ -71,6 +72,12 @@ public slots:
     void receiveBrushNumSamples(int x);
 	
 protected:
+	virtual void processCamera(QMouseEvent *event);
+    virtual void clientDraw();
+    virtual void clientSelect();
+    virtual void clientDeselect();
+    virtual void clientMouseInput();
+    virtual Vector3F sceneCenter() const;
     virtual void keyPressEvent(QKeyEvent *event);
 	virtual void focusInEvent(QFocusEvent * event);
 	virtual void focusOutEvent(QFocusEvent * event);
@@ -79,6 +86,7 @@ private:
 	void computeIncidentRay(int x, int y);
 	
 private:
+	TransformManipulator * m_manipulator;
 	Ray m_incidentRay;
 	QPoint m_lastPos;
     QColor m_backgroundColor;
@@ -86,7 +94,7 @@ private:
 	BaseCamera* m_orthoCamera;
 	PerspectiveCamera* m_perspCamera;
 	KdTreeDrawer * m_drawer;
-	SelectionArray * m_selected;
+	SelectionArray * m_activeComponent;
 	IntersectionContext * m_intersectCtx;
 	BaseBrush * m_brush;
 	QTimer *m_timer;

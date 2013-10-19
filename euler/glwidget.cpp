@@ -50,9 +50,14 @@
 #include <Anchor.h>
 #include <KdTree.h>
 #include <IntersectionContext.h>
+#include <BaseTransform.h>
+#include <BaseBrush.h>
+#include <TransformManipulator.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
+	m_transform = new BaseTransform;
+	m_transform->setName("/group0");
 	solve();
 }
 
@@ -63,6 +68,26 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	getDrawer()->coordsys(m_space, 8.f);
+
+	getDrawer()->transform(m_transform);
+	getDrawer()->manipulator(manipulator());
+}
+
+void GLWidget::clientSelect()
+{	
+	manipulator()->attachTo(m_transform);
+	const Ray * ray = getIncidentRay();
+	manipulator()->start(ray);
+}
+
+void GLWidget::clientDeselect()
+{
+}
+
+void GLWidget::clientMouseInput()
+{
+	const Ray * ray = getIncidentRay();
+	manipulator()->perform(ray);
 }
 
 void GLWidget::setAngleAlpha(double x)

@@ -18,7 +18,7 @@ public:
 	
 	void getNormal(Vector3F & nor) const;
 	void projectPoint(const Vector3F & p0, Vector3F & dst) const;
-	bool rayIntersect(const Ray & ray, Vector3F & dst, float & t) const;
+	bool rayIntersect(const Ray & ray, Vector3F & dst, float & t, bool twoSided = false) const;
 	void verbose() const;
 private:
 	float m_a, m_b, m_c, m_d;

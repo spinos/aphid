@@ -4,7 +4,7 @@ class ToolContext {
 public:
     enum InteractMode {
         UnknownInteract = 0,
-        SelectVertex = 1,
+		SelectVertex = 1,
         SelectEdge = 2,
         SelectFace = 3,
 		CreateBodyContourFeather = 4,
@@ -13,7 +13,9 @@ public:
 		ScaleBodyContourFeather = 7,
 		PitchBodyContourFeather = 8,
 		MoveInUV = 9,
-		MoveVertexInUV = 10
+		MoveVertexInUV = 10,
+		MoveTransform = 11,
+		RotateTransform = 12
     };
     
     enum ActionRank {
