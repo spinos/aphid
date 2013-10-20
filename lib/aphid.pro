@@ -109,6 +109,7 @@ HEADERS = ../shared/AllMath.h \
     ../shared/HFile.h \
     ../shared/HRFile.h \
 ../shared/TransformManipulator.h \
+	../shared/SkeletonJoint.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -221,6 +222,7 @@ SOURCES = ../shared/Vector3F.cpp \
     ../shared/HFile.cpp \
     ../shared/HRFile.cpp \
     ../shared/TransformManipulator.cpp \
+	../shared/SkeletonJoint.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \

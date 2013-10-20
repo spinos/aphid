@@ -8,6 +8,8 @@
 #include <cmath>
 #include "Matrix33F.h"
 
+Matrix33F Matrix33F::IdentityMatrix;
+
 Matrix33F::Matrix33F() 
 {
 	setIdentity();

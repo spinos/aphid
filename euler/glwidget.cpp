@@ -51,24 +51,25 @@
 #include <KdTree.h>
 #include <IntersectionContext.h>
 #include <BaseTransform.h>
+#include <SkeletonJoint.h>
 #include <BaseBrush.h>
 #include <TransformManipulator.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-	BaseTransform * grp0 = new BaseTransform;
+	SkeletonJoint * grp0 = new SkeletonJoint;
 	grp0->setName("/group0");
 	m_groups.push_back(grp0);
 	
 	BaseTransform * child1 = new BaseTransform(grp0);
 	child1->setName("/group0/child1");
-	child1->setTranslation(Vector3F(36.f, 0.f, 13.f));
+	child1->setTranslation(Vector3F(44.f, 0.f, 0.f));
 	grp0->addChild(child1);
 	m_groups.push_back(child1);
 	
 	BaseTransform * child2 = new BaseTransform(child1);
 	child2->setName("/group0/child1/child2");
-	child2->setTranslation(Vector3F(24.f, 0.f, 12.f));
+	child2->setTranslation(Vector3F(0.f, 0.f, 32.f));
 	child1->addChild(child2);
 	m_groups.push_back(child2);
 	
@@ -135,5 +136,8 @@ void GLWidget::solve()
 {
 	m_space.setIdentity();
 	m_space.rotateEuler(DegreeToAngle(m_angles.x), DegreeToAngle(m_angles.y), DegreeToAngle(m_angles.z));
+	
+	Vector3F dv(DegreeToAngle(m_angles.x), DegreeToAngle(m_angles.y), DegreeToAngle(m_angles.z));
+	((SkeletonJoint *)m_groups[0])->setJointOrient(dv);
 	update();
 }

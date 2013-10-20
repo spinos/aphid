@@ -16,7 +16,8 @@ public:
         TTriangleMesh = 1,
         TPatchMesh = 2,
 		TKdTree = 3,
-        TTransform = 4
+        TTransform = 4,
+		TJoint = 5
     };
     
 	TypedEntity();

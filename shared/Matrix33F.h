@@ -42,6 +42,8 @@
 	void rotateZ(float gamma);
 	void rotateEuler(float phi, float theta, float psi, RotateOrder order = XYZ);
 	
+	static Matrix33F IdentityMatrix;
+	
 	float v[9];
  };
 

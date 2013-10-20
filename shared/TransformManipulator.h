@@ -25,6 +25,7 @@ public:
 	
 	void start(const Ray * r);
 	void perform(const Ray * r);
+	void stop();
 	
 	void move(const Vector3F & d);
 	void spin(const Vector3F & d);
@@ -38,11 +39,18 @@ public:
 	
 	Vector3F hitPlaneNormal() const;
 	virtual Vector3F rotatePlane(RotateAxis a) const;
+	virtual Vector3F rotationBaseAngles() const;
+	
+	Vector3F startPoint() const;
+	Vector3F currentPoint() const;
+	
+	bool started() const;
 private:
 	
 private:
 	RotateAxis m_rotateAxis;
-	Vector3F m_startPoint;
+	Vector3F m_startPoint, m_currentPoint;
 	BaseTransform * m_subject;
 	ToolContext::InteractMode m_mode;
+	bool m_started;
 };

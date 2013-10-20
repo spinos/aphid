@@ -14,6 +14,7 @@ TransformManipulator::TransformManipulator()
 	m_subject = 0;
 	m_rotateAxis = AY;
 	m_mode = ToolContext::MoveTransform;
+	m_started = 0;
 }
 
 TransformManipulator::~TransformManipulator() 
@@ -24,42 +25,57 @@ void TransformManipulator::attachTo(BaseTransform * subject)
 {
 	m_subject = subject;
 	setTranslation(subject->translation());
-	setRotation(subject->rotation());
+	setRotationAngles(subject->rotationAngles());
 	setParent(subject->parent());
 }
 
 void TransformManipulator::start(const Ray * r)
 {
+	const Vector3F worldP = worldSpace().getTranslation();
 	Matrix44F ps;
 	parentSpace(ps);
-	const Vector3F worldP = ps.transform(translation());
 	Plane pl(ps.transformAsNormal(hitPlaneNormal()), worldP);
 	Vector3F hit, d;
 	float t;
 	if(pl.rayIntersect(*r, hit, t, 1)) {
 		d = hit - worldP;
 		if(d.length() > 10.f) return;
+		
+		if(m_mode == ToolContext::RotateTransform) {
+			d = d.normal() * 8.f;
+			hit = worldP + d;
+		}
 		m_startPoint = hit;
+		m_currentPoint = m_startPoint;
 	}
+	m_started = 1;
 }
 
 void TransformManipulator::perform(const Ray * r)
 {
+	const Vector3F worldP = worldSpace().getTranslation();
 	Matrix44F ps;
 	parentSpace(ps);
-	const Vector3F worldP = ps.transform(translation());
 	Plane pl(ps.transformAsNormal(hitPlaneNormal()), worldP);
 	Vector3F hit, d;
     float t;
 	if(pl.rayIntersect(*r, hit, t, 1)) {
-		d = hit - m_startPoint;
+		d = hit - worldP;
 		if(d.length() > 10.f) return;
+		
+		if(m_mode == ToolContext::RotateTransform) {
+			d = d.normal() * 8.f;
+			hit = worldP + d;
+		}
+		
+		d = hit - m_currentPoint;
+		
 		if(m_mode == ToolContext::MoveTransform)
 			move(d);
 		else
 			spin(d);
 			
-		m_startPoint = hit;
+		m_currentPoint = hit;
 	}
 }
 
@@ -86,7 +102,7 @@ void TransformManipulator::spin(const Vector3F & d)
 	const Vector3F worldP = ps.transform(translation());
 	const Vector3F rotUp = ps.transformAsNormal(hitPlaneNormal());
 	
-	Vector3F toa = m_startPoint - worldP;
+	Vector3F toa = m_currentPoint - worldP;
 	Vector3F tob = toa + d;
 	
 	toa.normalize();
@@ -100,7 +116,12 @@ void TransformManipulator::spin(const Vector3F & d)
 	else angles.set(ang, 0.f, 0.f);
 	
 	m_subject->rotate(angles);
-	setRotation(m_subject->rotation());
+	setRotationAngles(m_subject->rotationAngles());
+}
+
+void TransformManipulator::stop()
+{
+	m_started = 0;
 }
 
 void TransformManipulator::detach()
@@ -143,9 +164,29 @@ Vector3F TransformManipulator::rotatePlane(RotateAxis a) const
 	return m_subject->rotatePlane(a);
 }
 
+Vector3F TransformManipulator::rotationBaseAngles() const
+{
+	return m_subject->rotationBaseAngles();
+}
+
 Vector3F TransformManipulator::hitPlaneNormal() const
 {
 	if(m_mode == ToolContext::MoveTransform)
 		return translatePlane(m_rotateAxis);
 	return rotatePlane(m_rotateAxis);
+}
+
+Vector3F TransformManipulator::startPoint() const
+{
+	return m_startPoint;
+}
+
+Vector3F TransformManipulator::currentPoint() const
+{
+	return m_currentPoint;
+}
+
+bool TransformManipulator::started() const
+{
+	return m_started;
 }

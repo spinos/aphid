@@ -38,6 +38,7 @@ public:
 	void manipulator(TransformManipulator * m);
 	void moveHandle(int axis, bool active);
 	void spinHandle(TransformManipulator * m, bool active);
+	void spinHandle(BaseTransform * t);
 	
 	void setGrey(float g);
 	void setColor(float r, float g, float b) const;

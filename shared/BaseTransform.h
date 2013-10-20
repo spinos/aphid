@@ -31,8 +31,8 @@ public:
 	Vector3F translation() const;
 	
 	void rotate(const Vector3F & v);
-	void setRotation(const Vector3F & v);
-	void setRotation(const Matrix33F & m);
+	void setRotationAngles(const Vector3F & v);
+
 	Matrix33F rotation() const;
 	Vector3F rotationAngles() const;
 	
@@ -48,11 +48,14 @@ public:
 	
 	Vector3F translatePlane(RotateAxis a) const;
 	virtual Vector3F rotatePlane(RotateAxis a) const;
+	
+	virtual Vector3F rotationBaseAngles() const;
+	
+	Matrix33F worldRotationBase() const;
 protected:
 	
 	
 private:
-	Matrix33F m_rotation;
 	Vector3F m_translation, m_angles;
 	BaseTransform * m_parent;
 	std::vector<BaseTransform *> m_children;

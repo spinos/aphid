@@ -44,26 +44,26 @@ Vector3F BaseTransform::translation() const
 
 void BaseTransform::rotate(const Vector3F & v)
 {
-	m_angles += v;
-	m_rotation.setIdentity();
-	m_rotation.rotateEuler(m_angles.x, m_angles.y, m_angles.z);
+	Vector3F v1 = m_angles + v;
+	setRotationAngles(v1);
 }
 
-void BaseTransform::setRotation(const Vector3F & v)
+void BaseTransform::setRotationAngles(const Vector3F & v)
 {
 	m_angles = v;
-	m_rotation.setIdentity();
-	m_rotation.rotateEuler(m_angles.x, m_angles.y, m_angles.z);
 }
 
-void BaseTransform::setRotation(const Matrix33F & m)
+Vector3F BaseTransform::rotationBaseAngles() const
 {
-	m_rotation = m;
+	return Vector3F();
 }
 
 Matrix33F BaseTransform::rotation() const
 {
-	return m_rotation;
+	Matrix33F r;
+	Vector3F angs = rotationBaseAngles() + rotationAngles();
+	r.rotateEuler(angs.x, angs.y, angs.z);
+	return r;
 }
 
 Vector3F BaseTransform::rotationAngles() const
@@ -101,7 +101,7 @@ Matrix44F BaseTransform::space() const
 {
 	Matrix44F s;
 	s.setTranslation(m_translation);
-	s.setRotation(m_rotation);
+	s.setRotation(rotation());
 	return s;
 }
 
@@ -135,14 +135,15 @@ Vector3F BaseTransform::translatePlane(RotateAxis a) const
 
 Vector3F BaseTransform::rotatePlane(RotateAxis a) const
 {
+	
 	if(a == AZ) return Vector3F::ZAxis;
-	Vector3F r;
-	Matrix33F m;
-	m.rotateEuler(0.f, 0.f, rotationAngles().z);
+	
 	if(a == AY) {
-		r = m.transform(Vector3F::YAxis);
-		return r;
+		Matrix33F m;
+		m.rotateEuler(0.f, 0.f, rotationAngles().z + rotationBaseAngles().z);
+		return m.transform(Vector3F::YAxis);
 	}
-	r = rotation().transform(Vector3F::XAxis);
-	return r;
+	
+	Matrix33F r = rotation();
+	return r.transform(Vector3F::XAxis);
 }

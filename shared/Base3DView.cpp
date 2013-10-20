@@ -221,6 +221,7 @@ void Base3DView::processSelection(QMouseEvent *event)
 
 void Base3DView::processDeselection(QMouseEvent *event)
 {
+	manipulator()->stop();
     clientDeselect();
 }
 

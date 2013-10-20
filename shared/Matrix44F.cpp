@@ -232,6 +232,21 @@ void Matrix44F::setRotation(const Matrix33F & r)
 	*m(2, 2) = r.M(2, 2);
 }
 
+Matrix33F Matrix44F::rotation() const
+{
+	Matrix33F r;
+	*r.m(0, 0) = M(0, 0);
+	*r.m(0, 1) = M(0, 1);
+	*r.m(0, 2) = M(0, 2);
+	*r.m(1, 0) = M(1, 0);
+	*r.m(1, 1) = M(1, 1);
+	*r.m(1, 2) = M(1, 2);
+	*r.m(2, 0) = M(2, 0);
+	*r.m(2, 1) = M(2, 1);
+	*r.m(2, 2) = M(2, 2);
+	return r;
+}
+
 void Matrix44F::rotateX(float alpha)
 {
 	const float c = cos(alpha);

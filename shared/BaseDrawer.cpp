@@ -123,15 +123,9 @@ void BaseDrawer::solidCube(float x, float y, float z, float size)
 
 void BaseDrawer::transform(BaseTransform * t)
 {
-	Matrix44F ps;
-	t->parentSpace(ps);
+	Matrix44F ws = t->worldSpace();
 	glPushMatrix();
-	useSpace(ps);
-	
-	Matrix44F mat = t->space();
-	glPushMatrix();
-	useSpace(mat);
-	
+	useSpace(ws);
 	glBegin(GL_LINES);
 	glColor3f(1.f, 0.f, 0.f);
 	glVertex3f(0.f, 0.f, 0.f);
@@ -143,35 +137,18 @@ void BaseDrawer::transform(BaseTransform * t)
 	glVertex3f(0.f, 0.f, 0.f);
 	glVertex3f(0.f, 0.f, 8.f);
 	glEnd();
-	
 	glPopMatrix();
 	
-	Vector3F a;
-	m_circle->setRadius(8.f);
-		
-		glPushMatrix();
-		a = t->rotatePlane(TransformManipulator::AZ);
-		mat.setFrontOrientation(a);
-		useSpace(mat);
-		setColor(0.f, 0.f, 1.f);
-		linearCurve(*m_circle);
-		glPopMatrix();
-		
-		glPushMatrix();
-		a = t->rotatePlane(TransformManipulator::AY);
-		mat.setFrontOrientation(a);
-		useSpace(mat);
-		setColor(0.f, 1.f, 0.f);
-		linearCurve(*m_circle);
-		glPopMatrix();
-		
-		glPushMatrix();
-		a = t->rotatePlane(TransformManipulator::AX);
-		mat.setFrontOrientation(a);
-		useSpace(mat);
-		setColor(1.f, 0.f, 0.f);
-		linearCurve(*m_circle);
-		glPopMatrix();
+	Matrix44F ps;
+	t->parentSpace(ps);
+	glPushMatrix();
+	useSpace(ps);
+	
+	const Vector3F p = t->translation();
+	glPushMatrix();
+	
+	glTranslatef(p.x, p.y, p.z);
+	spinHandle(t);
 		
 	glPopMatrix();
 }
@@ -187,7 +164,8 @@ void BaseDrawer::manipulator(TransformManipulator * m)
 
 	const Vector3F p = m->translation();
 	glPushMatrix();
-	glTranslatef(p.x, p.y, p.z);	
+	glTranslatef(p.x, p.y, p.z);
+
 	if(m->mode() == ToolContext::MoveTransform) {
 		moveHandle(m->rotateAxis(), 1);
 		spinHandle(m, 0);
@@ -197,6 +175,16 @@ void BaseDrawer::manipulator(TransformManipulator * m)
 		
 	glPopMatrix();
 	glPopMatrix();
+	
+	if(!m->started()) return;
+	
+	setGrey(.5f);
+	if(m->mode() == ToolContext::MoveTransform)
+		arrow(m->startPoint(), m->currentPoint());
+	else {
+		arrow(m->worldSpace().getTranslation(), m->startPoint());
+		arrow(m->worldSpace().getTranslation(), m->currentPoint());
+	}
 }
 
 void BaseDrawer::moveHandle(int axis, bool active)
@@ -226,9 +214,45 @@ void BaseDrawer::moveHandle(int axis, bool active)
 	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 0.f, -8.f));
 }
 
+void BaseDrawer::spinHandle(BaseTransform * t)
+{
+	m_circle->setRadius(8.f);
+	glPushMatrix();
+
+	Matrix44F mat;
+	Vector3F a;
+	glPushMatrix();
+	a = t->rotatePlane(TransformManipulator::AZ);
+	mat.setFrontOrientation(a);
+	useSpace(mat);
+	setColor(0.f, 0.f, 1.f);
+	linearCurve(*m_circle);
+	glPopMatrix();
+	
+	glPushMatrix();
+	a = t->rotatePlane(TransformManipulator::AY);
+	mat.setFrontOrientation(a);
+	useSpace(mat);
+	setColor(0.f, 1.f, 0.f);
+	linearCurve(*m_circle);
+	glPopMatrix();
+	
+	glPushMatrix();
+	a = t->rotatePlane(TransformManipulator::AX);
+	mat.setFrontOrientation(a);
+	useSpace(mat);
+	setColor(1.f, 0.f, 0.f);
+	linearCurve(*m_circle);
+	glPopMatrix();
+	glPopMatrix();
+}
+
 void BaseDrawer::spinHandle(TransformManipulator * m, bool active)
 {
 	m_circle->setRadius(8.f);
+	glPushMatrix();
+	//const Matrix33F rb = m->rotationBase();
+	//useSpace(rb);
 	
 	Matrix44F mat;
 	Vector3F a;
@@ -257,6 +281,7 @@ void BaseDrawer::spinHandle(TransformManipulator * m, bool active)
 	if(m->rotateAxis() == TransformManipulator::AX && active) setColor(1.f, 0.f, 0.f);
 	else setGrey(.5f);
 	linearCurve(*m_circle);
+	glPopMatrix();
 	glPopMatrix();
 }
 

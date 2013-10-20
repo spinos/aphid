@@ -41,6 +41,7 @@
 	void setOrientations(const Vector3F& side, const Vector3F& up, const Vector3F& front);
 	void setFrontOrientation(const Vector3F& front);
 	void setRotation(const Matrix33F & r);
+	Matrix33F rotation() const;
 	void rotateX(float alpha);
 	void rotateY(float beta);
 	void rotateZ(float gamma);
