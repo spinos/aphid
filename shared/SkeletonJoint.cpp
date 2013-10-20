@@ -34,9 +34,10 @@ Vector3F SkeletonJoint::jointOrient() const
 void SkeletonJoint::align()
 {
 	if(numChildren() < 1) return;
-	Vector3F t = child(0)->translation();
-	
-	t.verbose("t");
+	Vector3F t = child(0)->worldSpace().getTranslation();
+	Matrix44F ps = worldSpace();
+	ps.inverse();
+	t = ps.transform(t);
 	
 	float td = t.length();
 	if(td < 10e-5) return;
@@ -47,19 +48,10 @@ void SkeletonJoint::align()
 	Vector3F angles;
 	if(txz.z < -10e-5 || txz.z > 10e-5) angles.y = Vector3F::XAxis.angleBetween(txz, Vector3F::ZAxis.reversed());
 	if(t.y < -10e-5 || t.y > 10e-5) angles.z = txz.angleBetween(t, Vector3F::YAxis);
-	
-	m_jointOrientAngles.verbose("a");
-	angles.verbose("d");
-	if(t.x < 0.f) {
-		//angles.z = 3.14159269 - angles.z;
-		//angles.y = 3.14159269 - angles.y;
-	}
-	
-	setJointOrient(m_jointOrientAngles + angles);
-	
+
 	child(0)->setTranslation(Vector3F(td, 0.f, 0.f));
 	
-	if(child(0)->numChildren() < 1) return;
+	setJointOrient(m_jointOrientAngles + angles);
 	
 	Vector3F cj = ((SkeletonJoint *)child(0))->jointOrient();
 	((SkeletonJoint *)child(0))->setJointOrient(cj + angles.reversed());

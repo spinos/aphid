@@ -151,13 +151,15 @@ void GLWidget::solve()
 void GLWidget::keyPressEvent(QKeyEvent *e)
 {
 	if(e->key() == Qt::Key_A) {
-		std::vector<SkeletonJoint *>::iterator it = m_groups.begin();
-		for(; it != m_groups.end(); ++it) {
-			(*it)->setRotationAngles(Vector3F(0.f, 0.f, 0.f));
-			(*it)->align();
-		}
+		if(!manipulator()->isDetached()) {
+		//std::vector<SkeletonJoint *>::iterator it = m_groups.begin();
+		//for(; it != m_groups.end(); ++it) {
+			//(*it)->setRotationAngles(Vector3F(0.f, 0.f, 0.f));
+			((SkeletonJoint *)(manipulator()->subject()))->align();
+		//}
 			
-		manipulator()->reattach();
+			manipulator()->reattach();
+		}
 	}
 	Base3DView::keyPressEvent(e);
 }

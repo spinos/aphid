@@ -50,6 +50,8 @@ public:
 	virtual Vector3F rotatePlane(RotateAxis a) const;
 	
 	virtual Vector3F rotationBaseAngles() const;
+	
+	void detachChild(unsigned idx);
 protected:
 	
 	

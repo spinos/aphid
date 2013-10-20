@@ -153,3 +153,12 @@ Vector3F BaseTransform::rotatePlane(RotateAxis a) const
 	r = rotation();
 	return r.transform(Vector3F::XAxis);
 }
+
+void BaseTransform::detachChild(unsigned idx)
+{
+	BaseTransform * c = m_children[idx];
+	Vector3F p = c->worldSpace().getTranslation();
+	c->setTranslation(p);
+	c->setParent(0);
+	m_children.erase(m_children.begin() + idx);
+}
