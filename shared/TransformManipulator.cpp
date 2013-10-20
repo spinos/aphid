@@ -30,6 +30,11 @@ void TransformManipulator::attachTo(BaseTransform * subject)
 	setParent(subject->parent());
 }
 
+void TransformManipulator::reattach()
+{
+	attachTo(m_subject);
+}
+
 void TransformManipulator::start(const Ray * r)
 {
 	const Vector3F worldP = worldSpace().getTranslation();
@@ -190,4 +195,9 @@ Vector3F TransformManipulator::currentPoint() const
 bool TransformManipulator::started() const
 {
 	return m_started;
+}
+
+BaseTransform * TransformManipulator::subject() const
+{
+	return m_subject;
 }

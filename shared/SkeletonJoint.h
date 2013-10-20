@@ -17,6 +17,7 @@ public:
 	virtual ~SkeletonJoint();
 	
 	void setJointOrient(const Vector3F & v);
+	Vector3F jointOrient() const;
 	
 	void align();
 	

@@ -19,6 +19,7 @@ public:
 	virtual ~TransformManipulator();
 	
 	void attachTo(BaseTransform * subject);
+	void reattach();
 	void detach();
 	
 	bool isDetached() const;
@@ -45,6 +46,8 @@ public:
 	Vector3F currentPoint() const;
 	
 	bool started() const;
+	
+	BaseTransform * subject() const;
 private:
 	
 private:

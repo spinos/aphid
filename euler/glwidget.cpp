@@ -82,7 +82,8 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientDraw()
 {
-	getDrawer()->coordsys(m_space, 8.f);
+	getDrawer()->coordsys(m_space0, 8.f);
+	getDrawer()->coordsys(m_space1, 8.f);
 
 	std::vector<SkeletonJoint *>::iterator it = m_groups.begin();
 	for(; it != m_groups.end(); ++it) {
@@ -134,10 +135,29 @@ void GLWidget::setAngleGamma(double x)
 
 void GLWidget::solve()
 {
-	m_space.setIdentity();
-	m_space.rotateEuler(DegreeToAngle(m_angles.x), DegreeToAngle(m_angles.y), DegreeToAngle(m_angles.z));
+	m_space0.setIdentity();
+	m_space0.rotateEuler(DegreeToAngle(m_angles.x), DegreeToAngle(m_angles.y), DegreeToAngle(m_angles.z));
+	m_space0.rotateEuler(0.2, 0.3, 0.5);
 	
+	m_space1.setIdentity();
+	m_space1.rotateEuler(DegreeToAngle(m_angles.x), DegreeToAngle(m_angles.y), DegreeToAngle(m_angles.z));
+	Matrix33F s; s.rotateEuler(0.2, 0.3, 0.5);
+	m_space1.multiply(s);
 	Vector3F dv(DegreeToAngle(m_angles.x), DegreeToAngle(m_angles.y), DegreeToAngle(m_angles.z));
 	((SkeletonJoint *)m_groups[0])->setJointOrient(dv);
 	update();
+}
+
+void GLWidget::keyPressEvent(QKeyEvent *e)
+{
+	if(e->key() == Qt::Key_A) {
+		std::vector<SkeletonJoint *>::iterator it = m_groups.begin();
+		for(; it != m_groups.end(); ++it) {
+			(*it)->setRotationAngles(Vector3F(0.f, 0.f, 0.f));
+			(*it)->align();
+		}
+			
+		manipulator()->reattach();
+	}
+	Base3DView::keyPressEvent(e);
 }

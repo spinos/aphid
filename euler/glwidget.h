@@ -58,10 +58,11 @@ protected:
     virtual void clientSelect();
 	virtual void clientDeselect();
 	virtual void clientMouseInput();
+	virtual void keyPressEvent(QKeyEvent *event);
 private:
 	void solve();
 private:
-	Matrix33F m_space;
+	Matrix33F m_space0, m_space1;
 	Vector3F m_angles;
 	std::vector<SkeletonJoint *> m_groups;
 private slots:

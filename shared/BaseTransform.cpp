@@ -61,8 +61,12 @@ Vector3F BaseTransform::rotationBaseAngles() const
 Matrix33F BaseTransform::rotation() const
 {
 	Matrix33F r;
-	Vector3F angs = rotationBaseAngles() + rotationAngles();
+	Vector3F angs = rotationAngles();
 	r.rotateEuler(angs.x, angs.y, angs.z);
+	angs = rotationBaseAngles();
+	Matrix33F b;
+	b.rotateEuler(angs.x, angs.y, angs.z);
+	r.multiply(b);
 	return r;
 }
 
@@ -135,15 +139,17 @@ Vector3F BaseTransform::translatePlane(RotateAxis a) const
 
 Vector3F BaseTransform::rotatePlane(RotateAxis a) const
 {
+	Matrix33F base;
+	base.rotateEuler(rotationBaseAngles().x, rotationBaseAngles().y, rotationBaseAngles().z);
+	if(a == AZ) return base.transform(Vector3F::ZAxis);
 	
-	if(a == AZ) return Vector3F::ZAxis;
-	
+	Matrix33F r;
 	if(a == AY) {
-		Matrix33F m;
-		m.rotateEuler(0.f, 0.f, rotationAngles().z + rotationBaseAngles().z);
-		return m.transform(Vector3F::YAxis);
+		r.rotateEuler(0.f, 0.f, rotationAngles().z);
+		r.multiply(base);
+		return r.transform(Vector3F::YAxis);
 	}
 	
-	Matrix33F r = rotation();
+	r = rotation();
 	return r.transform(Vector3F::XAxis);
 }
