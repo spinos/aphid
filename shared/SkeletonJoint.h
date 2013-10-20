@@ -18,6 +18,8 @@ public:
 	
 	void setJointOrient(const Vector3F & v);
 	
+	void align();
+	
 	virtual Vector3F rotationBaseAngles() const;
 protected:
 	

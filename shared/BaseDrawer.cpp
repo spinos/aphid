@@ -18,6 +18,7 @@
 #include <zEXRImage.h>
 #include <BaseTransform.h>
 #include <TransformManipulator.h>
+#include <SkeletonJoint.h>
 
 BaseDrawer::BaseDrawer () : m_wired(0) 
 {
@@ -148,7 +149,7 @@ void BaseDrawer::transform(BaseTransform * t)
 	glPushMatrix();
 	
 	glTranslatef(p.x, p.y, p.z);
-	spinHandle(t);
+	spinPlanes(t);
 		
 	glPopMatrix();
 }
@@ -187,6 +188,29 @@ void BaseDrawer::manipulator(TransformManipulator * m)
 	}
 }
 
+void BaseDrawer::skeletonJoint(SkeletonJoint * joint)
+{
+	transform(joint);
+	if(joint->numChildren() < 1) return;
+	
+	Matrix44F ws = joint->worldSpace();
+	glPushMatrix();
+	useSpace(ws);
+	setGrey(.67f);
+	m_wireProfile.apply();
+	Vector3F to, fm;
+	float d;
+	for(unsigned i = 0; i < joint->numChildren(); i++) {
+		to = joint->child(i)->translation();
+		fm = to.normal() * 8.f;
+		d = to.length();
+		to.normalize();
+		to *= d - 8.f;
+		arrow2(fm, to, 6.f);
+	}
+	glPopMatrix();
+}
+
 void BaseDrawer::moveHandle(int axis, bool active)
 {
 	if(axis != BaseTransform::AX && active)
@@ -214,7 +238,7 @@ void BaseDrawer::moveHandle(int axis, bool active)
 	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 0.f, -8.f));
 }
 
-void BaseDrawer::spinHandle(BaseTransform * t)
+void BaseDrawer::spinPlanes(BaseTransform * t)
 {
 	m_circle->setRadius(8.f);
 	glPushMatrix();
@@ -251,9 +275,7 @@ void BaseDrawer::spinHandle(TransformManipulator * m, bool active)
 {
 	m_circle->setRadius(8.f);
 	glPushMatrix();
-	//const Matrix33F rb = m->rotationBase();
-	//useSpace(rb);
-	
+
 	Matrix44F mat;
 	Vector3F a;
 	glPushMatrix();
@@ -648,6 +670,19 @@ void BaseDrawer::coordsys(float scale) const
 	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 0.f, scale));
 }
 
+void BaseDrawer::arrow0(const Vector3F & at, const Vector3F & dir, float l, float w) const
+{
+	Matrix44F space;
+	space.setFrontOrientation(dir.normal());
+	space.setTranslation(at);
+	glPushMatrix();
+	useSpace(space);
+	glRotatef(90.f, 1.f, 0.f, 0.f);
+	glScalef(w, l, w);
+	drawMesh(m_pyramid);
+	glPopMatrix();
+}
+
 void BaseDrawer::arrow(const Vector3F& origin, const Vector3F& dest) const
 {
 	glBegin( GL_LINES );
@@ -655,20 +690,19 @@ void BaseDrawer::arrow(const Vector3F& origin, const Vector3F& dest) const
 	glVertex3f(dest.x, dest.y, dest.z); 
 	glEnd();
 	
-	Matrix44F space;
 	const Vector3F r = dest - origin;
-	space.setFrontOrientation(r.normal());
-	space.setTranslation(dest);
-	
-	glPushMatrix();
-	useSpace(space);
-	glRotatef(90.f, 1.f, 0.f, 0.f);
-	
 	const float arrowLength = r.length() * 0.13f;
 	const float arrowWidth = arrowLength * .31f;
-	glScalef(arrowWidth, arrowLength, arrowWidth);
-	drawMesh(m_pyramid);
-	glPopMatrix();
+	arrow0(dest, r, arrowLength, arrowWidth);
+}
+
+void BaseDrawer::arrow2(const Vector3F& origin, const Vector3F& dest, float width) const
+{	
+	Vector3F r = dest - origin;
+	arrow0(dest, r, r.length() * .8f, width);
+	
+	r = origin - dest;
+	arrow0(origin, r, r.length() * .2f, width);
 }
 
 void BaseDrawer::coordsys(const Matrix33F & orient, float scale, Vector3F * p) const

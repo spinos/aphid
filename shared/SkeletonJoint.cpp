@@ -19,10 +19,17 @@ SkeletonJoint::~SkeletonJoint() {}
 void SkeletonJoint::setJointOrient(const Vector3F & v)
 {
 	m_jointOrientAngles = v;
-	setRotationAngles(rotationAngles());
 }
 
 Vector3F SkeletonJoint::rotationBaseAngles() const
 {
 	return m_jointOrientAngles;
+}
+
+void SkeletonJoint::align()
+{
+	if(numChildren() < 1) return;
+	Vector3F t = child(0)->translation();
+	
+	
 }

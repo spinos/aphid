@@ -50,8 +50,6 @@ public:
 	virtual Vector3F rotatePlane(RotateAxis a) const;
 	
 	virtual Vector3F rotationBaseAngles() const;
-	
-	Matrix33F worldRotationBase() const;
 protected:
 	
 	

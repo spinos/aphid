@@ -61,13 +61,13 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	grp0->setName("/group0");
 	m_groups.push_back(grp0);
 	
-	BaseTransform * child1 = new BaseTransform(grp0);
+	SkeletonJoint * child1 = new SkeletonJoint(grp0);
 	child1->setName("/group0/child1");
 	child1->setTranslation(Vector3F(44.f, 0.f, 0.f));
 	grp0->addChild(child1);
 	m_groups.push_back(child1);
 	
-	BaseTransform * child2 = new BaseTransform(child1);
+	SkeletonJoint * child2 = new SkeletonJoint(child1);
 	child2->setName("/group0/child1/child2");
 	child2->setTranslation(Vector3F(0.f, 0.f, 32.f));
 	child1->addChild(child2);
@@ -84,9 +84,9 @@ void GLWidget::clientDraw()
 {
 	getDrawer()->coordsys(m_space, 8.f);
 
-	std::vector<BaseTransform *>::iterator it = m_groups.begin();
+	std::vector<SkeletonJoint *>::iterator it = m_groups.begin();
 	for(; it != m_groups.end(); ++it) {
-		getDrawer()->transform(*it);
+		getDrawer()->skeletonJoint(*it);
 	}
 	
 	getDrawer()->manipulator(manipulator());
@@ -95,7 +95,7 @@ void GLWidget::clientDraw()
 void GLWidget::clientSelect()
 {	
 	const Ray * ray = getIncidentRay();
-	std::vector<BaseTransform *>::iterator it = m_groups.begin();
+	std::vector<SkeletonJoint *>::iterator it = m_groups.begin();
 	BaseTransform * subject = *it;
 	for(; it != m_groups.end(); ++it) {
 		if((*it)->intersect(*ray)) subject = *it;

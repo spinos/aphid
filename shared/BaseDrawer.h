@@ -23,6 +23,7 @@
 #include <GProfile.h>
 class BaseTransform;
 class TransformManipulator;
+class SkeletonJoint;
 class ZEXRImage;
 class BaseDrawer {
 public:
@@ -36,9 +37,10 @@ public:
 	void solidCube(float x, float y, float z, float size);
 	void transform(BaseTransform * t);
 	void manipulator(TransformManipulator * m);
+	void skeletonJoint(SkeletonJoint * joint);
 	void moveHandle(int axis, bool active);
 	void spinHandle(TransformManipulator * m, bool active);
-	void spinHandle(BaseTransform * t);
+	void spinPlanes(BaseTransform * t);
 	
 	void setGrey(float g);
 	void setColor(float r, float g, float b) const;
@@ -82,6 +84,8 @@ public:
 	void vertexWithOffset(const Vector3F & v, const Vector3F & o);
 	void circleAt(const Vector3F & pos, const Vector3F & nor);
 	void circleAt(const Matrix44F & mat, float radius);
+	void arrow0(const Vector3F & at, const Vector3F & dir, float l, float w) const;
+	void arrow2(const Vector3F& origin, const Vector3F& dest, float width) const;
 	void arrow(const Vector3F& origin, const Vector3F& dest) const;
 	void useSpace(const Matrix44F & s) const;
 	void useSpace(const Matrix33F & s) const;

@@ -43,7 +43,7 @@
 #define GLWIDGET_H
 
 #include <Base3DView.h>
-class BaseTransform;
+class SkeletonJoint;
 
 class GLWidget : public Base3DView
 {
@@ -63,7 +63,7 @@ private:
 private:
 	Matrix33F m_space;
 	Vector3F m_angles;
-	std::vector<BaseTransform *> m_groups;
+	std::vector<SkeletonJoint *> m_groups;
 private slots:
 	
 public slots:
