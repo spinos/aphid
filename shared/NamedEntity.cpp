@@ -14,3 +14,13 @@ NamedEntity::~NamedEntity() {}
 	
 void NamedEntity::setName(const std::string & name) { m_name = name; }
 std::string NamedEntity::name() const { return m_name; }
+
+void NamedEntity::setIndex(unsigned idx)
+{
+    m_index = idx;
+}
+
+unsigned NamedEntity::index() const
+{
+    return m_index;
+}

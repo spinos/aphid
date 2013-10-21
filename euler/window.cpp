@@ -44,7 +44,7 @@
 #include "glwidget.h"
 #include "window.h"
 #include <QDoubleEditSlider.h>
-
+#include "SkeletonJointEdit.h"
 //! [0]
 Window::Window()
 {
@@ -59,17 +59,19 @@ Window::Window()
 	gamma->setLimit(0.0, 360.0);
 	gamma->setValue(0.0);
 	
-	QVBoxLayout * layout = new QVBoxLayout;
+	jointEdit = new SkeletonJointEdit;
+	
+	QHBoxLayout * layout = new QHBoxLayout;
 	layout->addWidget(glWidget);
-	layout->addWidget(alpha);
-	layout->addWidget(beta);
-	layout->addWidget(gamma);
+	layout->addWidget(jointEdit);
 	
 	QWidget * main = new QWidget;
 	main->setLayout(layout);
 	
 	setCentralWidget(main);
     setWindowTitle(tr("Euler Angles"));
+    
+    connect(glWidget, SIGNAL(jointSelected(int)), jointEdit, SLOT(attachToJoint(int)));
 	
 	connect(alpha, SIGNAL(valueChanged(double)), glWidget, SLOT(setAngleAlpha(double)));
 	connect(beta, SIGNAL(valueChanged(double)), glWidget, SLOT(setAngleBeta(double)));

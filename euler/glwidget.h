@@ -44,14 +44,14 @@
 
 #include <Base3DView.h>
 class SkeletonJoint;
-
+class SkeletonSystem;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
 
 public:
     GLWidget(QWidget *parent = 0);
-    ~GLWidget();
+    virtual ~GLWidget();
 
 protected:
     virtual void clientDraw();
@@ -64,13 +64,17 @@ private:
 private:
 	Matrix33F m_space0, m_space1;
 	Vector3F m_angles;
-	std::vector<SkeletonJoint *> m_groups;
+	
+	SkeletonSystem * m_skeleton;
 private slots:
 	
 public slots:
 	void setAngleAlpha(double x);
 	void setAngleBeta(double x);
 	void setAngleGamma(double x);
+	
+signals:
+    void jointSelected(int idx);
 };
 //! [3]
 

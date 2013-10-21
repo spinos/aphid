@@ -45,7 +45,7 @@
 #include <QMainWindow>
 
 class QDoubleEditSlider;
-
+class SkeletonJointEdit;
 QT_BEGIN_NAMESPACE
 class QSlider;
 QT_END_NAMESPACE
@@ -67,6 +67,7 @@ private:
 	QDoubleEditSlider * beta;
 	QDoubleEditSlider * gamma;
     GLWidget *glWidget;
+    SkeletonJointEdit * jointEdit;
 };
 //! [0]
 

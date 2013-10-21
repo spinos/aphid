@@ -17,6 +17,10 @@ public:
 	
 	void setName(const std::string & name);
 	std::string name() const;
+	
+	void setIndex(unsigned idx);
+	unsigned index() const;
 private:
 	std::string m_name;
+	unsigned m_index;
 };

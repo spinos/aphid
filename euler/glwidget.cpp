@@ -54,24 +54,46 @@
 #include <SkeletonJoint.h>
 #include <BaseBrush.h>
 #include <TransformManipulator.h>
+#include <SkeletonJoint.h>
+#include <SkeletonSystem.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
+    m_skeleton = new SkeletonSystem;
 	SkeletonJoint * grp0 = new SkeletonJoint;
-	grp0->setName("/group0");
-	m_groups.push_back(grp0);
+	grp0->setName("/humerus");
+	grp0->setTranslation(Vector3F(12.f, 0.f, 0.f));
+	m_skeleton->addJoint(grp0);
 	
 	SkeletonJoint * child1 = new SkeletonJoint(grp0);
-	child1->setName("/group0/child1");
-	child1->setTranslation(Vector3F(44.f, 0.f, 0.f));
+	child1->setName("/humerus/ulna");
+	child1->setTranslation(Vector3F(32.f, 0.f, -12.f));
 	grp0->addChild(child1);
-	m_groups.push_back(child1);
+	m_skeleton->addJoint(child1);
 	
 	SkeletonJoint * child2 = new SkeletonJoint(child1);
-	child2->setName("/group0/child1/child2");
-	child2->setTranslation(Vector3F(0.f, 0.f, 32.f));
+	child2->setName("/humerus/ulna/radius");
+	child2->setTranslation(Vector3F(40.f, 0.f, 0.f));
 	child1->addChild(child2);
-	m_groups.push_back(child2);
+	m_skeleton->addJoint(child2);
+	
+	SkeletonJoint * child3 = new SkeletonJoint(child2);
+	child3->setName("/humerus/ulna/radius/carpometacarpus");
+	child3->setTranslation(Vector3F(40.f, 0.f, 0.f));
+	child2->addChild(child3);
+	m_skeleton->addJoint(child3);
+	
+	SkeletonJoint * child4 = new SkeletonJoint(child3);
+	child4->setName("/humerus/ulna/radius/carpometacarpus/secondDigit");
+	child4->setTranslation(Vector3F(40.f, 0.f, 0.f));
+	child3->addChild(child4);
+	m_skeleton->addJoint(child4);
+	
+	SkeletonJoint * child5 = new SkeletonJoint(child4);
+	child5->setName("/humerus/ulna/radius/carpometacarpus/secondDigit/digitEnd");
+	child5->setTranslation(Vector3F(20.f, 0.f, 0.f));
+	child4->addChild(child5);
+	m_skeleton->addJoint(child5);
 	
 	solve();
 }
@@ -85,9 +107,8 @@ void GLWidget::clientDraw()
 	getDrawer()->coordsys(m_space0, 8.f);
 	getDrawer()->coordsys(m_space1, 8.f);
 
-	std::vector<SkeletonJoint *>::iterator it = m_groups.begin();
-	for(; it != m_groups.end(); ++it) {
-		getDrawer()->skeletonJoint(*it);
+	for(unsigned i = 0; i < m_skeleton->numJoints(); i++) {
+		getDrawer()->skeletonJoint(m_skeleton->joint(i));
 	}
 	
 	getDrawer()->manipulator(manipulator());
@@ -96,13 +117,12 @@ void GLWidget::clientDraw()
 void GLWidget::clientSelect()
 {	
 	const Ray * ray = getIncidentRay();
-	std::vector<SkeletonJoint *>::iterator it = m_groups.begin();
-	BaseTransform * subject = *it;
-	for(; it != m_groups.end(); ++it) {
-		if((*it)->intersect(*ray)) subject = *it;
-	}
+
+	SkeletonJoint * subject = m_skeleton->selectJoint(*ray);
+	if(!subject) return;
 	manipulator()->attachTo(subject);
 	manipulator()->start(ray);
+	emit jointSelected((int)subject->index());
 }
 
 void GLWidget::clientDeselect()
@@ -144,7 +164,7 @@ void GLWidget::solve()
 	Matrix33F s; s.rotateEuler(0.2, 0.3, 0.5);
 	m_space1.multiply(s);
 	Vector3F dv(DegreeToAngle(m_angles.x), DegreeToAngle(m_angles.y), DegreeToAngle(m_angles.z));
-	((SkeletonJoint *)m_groups[0])->setJointOrient(dv);
+	
 	update();
 }
 
@@ -152,12 +172,7 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 {
 	if(e->key() == Qt::Key_A) {
 		if(!manipulator()->isDetached()) {
-		//std::vector<SkeletonJoint *>::iterator it = m_groups.begin();
-		//for(; it != m_groups.end(); ++it) {
-			//(*it)->setRotationAngles(Vector3F(0.f, 0.f, 0.f));
 			((SkeletonJoint *)(manipulator()->subject()))->align();
-		//}
-			
 			manipulator()->reattach();
 		}
 	}
