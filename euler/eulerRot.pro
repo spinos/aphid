@@ -4,12 +4,14 @@ mac:INCLUDEPATH += /Users/jianzhang/Library/eigen3
 LIBS += -L../easymodel -leasymodel -lIlmImf -lHalf -lhdf5 -lhdf5_hl -L../lib -laphid
 HEADERS       = ../shared/Base3DView.h \
                 ../shared/QDoubleEditSlider.h \
+                ../shared/QDouble3Edit.h \
                 glwidget.h \
                 SkeletonJointEdit.h \
                 window.h
                 
 SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/QDoubleEditSlider.cpp \
+                ../shared/QDouble3Edit.cpp \
                 glwidget.cpp \
                 main.cpp \
                 SkeletonJointEdit.cpp \

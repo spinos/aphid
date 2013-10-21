@@ -63,35 +63,41 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	SkeletonJoint * grp0 = new SkeletonJoint;
 	grp0->setName("/humerus");
 	grp0->setTranslation(Vector3F(12.f, 0.f, 0.f));
+	grp0->setJointOrient(Vector3F(0.f, .4f, 0.f));
 	m_skeleton->addJoint(grp0);
 	
 	SkeletonJoint * child1 = new SkeletonJoint(grp0);
 	child1->setName("/humerus/ulna");
-	child1->setTranslation(Vector3F(32.f, 0.f, -12.f));
+	child1->setTranslation(Vector3F(50.f, 0.f, 0.f));
+	child1->setJointOrient(Vector3F(0.f, -.4f, 0.f));
 	grp0->addChild(child1);
 	m_skeleton->addJoint(child1);
 	
 	SkeletonJoint * child2 = new SkeletonJoint(child1);
 	child2->setName("/humerus/ulna/radius");
-	child2->setTranslation(Vector3F(40.f, 0.f, 0.f));
+	child2->setTranslation(Vector3F(25.f, 0.f, 0.f));
+	child2->setJointOrient(Vector3F(0.f, 0.f, 0.f));
 	child1->addChild(child2);
 	m_skeleton->addJoint(child2);
 	
 	SkeletonJoint * child3 = new SkeletonJoint(child2);
 	child3->setName("/humerus/ulna/radius/carpometacarpus");
-	child3->setTranslation(Vector3F(40.f, 0.f, 0.f));
+	child3->setTranslation(Vector3F(25.f, 0.f, 0.f));
+	child3->setJointOrient(Vector3F(0.f, .2f, 0.f));
 	child2->addChild(child3);
 	m_skeleton->addJoint(child3);
 	
 	SkeletonJoint * child4 = new SkeletonJoint(child3);
 	child4->setName("/humerus/ulna/radius/carpometacarpus/secondDigit");
-	child4->setTranslation(Vector3F(40.f, 0.f, 0.f));
+	child4->setTranslation(Vector3F(20.f, 0.f, 0.f));
+	child4->setJointOrient(Vector3F(0.f, 0.f, 0.f));
 	child3->addChild(child4);
 	m_skeleton->addJoint(child4);
 	
 	SkeletonJoint * child5 = new SkeletonJoint(child4);
 	child5->setName("/humerus/ulna/radius/carpometacarpus/secondDigit/digitEnd");
-	child5->setTranslation(Vector3F(20.f, 0.f, 0.f));
+	child5->setTranslation(Vector3F(10.f, 0.f, 0.f));
+	child5->setJointOrient(Vector3F(0.f, 0.f, 0.f));
 	child4->addChild(child5);
 	m_skeleton->addJoint(child5);
 	
@@ -133,6 +139,7 @@ void GLWidget::clientMouseInput()
 {
 	const Ray * ray = getIncidentRay();
 	manipulator()->perform(ray);
+	emit jointChanged();
 }
 
 void GLWidget::setAngleAlpha(double x)
@@ -174,7 +181,19 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 		if(!manipulator()->isDetached()) {
 			((SkeletonJoint *)(manipulator()->subject()))->align();
 			manipulator()->reattach();
+			emit jointChanged();
 		}
 	}
 	Base3DView::keyPressEvent(e);
+}
+
+SkeletonSystem * GLWidget::skeleton() const
+{
+	return m_skeleton;
+}
+
+void GLWidget::updateJoint()
+{
+	if(!manipulator()->isDetached()) manipulator()->reattach();
+	update();
 }

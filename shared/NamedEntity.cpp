@@ -24,3 +24,12 @@ unsigned NamedEntity::index() const
 {
     return m_index;
 }
+
+std::string NamedEntity::particalName() const 
+{
+	std::string s = name();
+	int found = s.rfind("/", s.size() - 1);
+	if(found > 0)
+		s.erase(0, found + 1);
+	return s;
+}

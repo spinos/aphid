@@ -202,11 +202,11 @@ void BaseDrawer::skeletonJoint(SkeletonJoint * joint)
 	float d;
 	for(unsigned i = 0; i < joint->numChildren(); i++) {
 		to = joint->child(i)->translation();
-		fm = to.normal() * 8.f;
+		fm = to.normal() * 1.f;
 		d = to.length();
 		to.normalize();
-		to *= d - 8.f;
-		arrow2(fm, to, 6.f);
+		to *= d - 1.f;
+		arrow2(fm, to, 4.f);
 	}
 	glPopMatrix();
 }

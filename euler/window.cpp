@@ -61,6 +61,8 @@ Window::Window()
 	
 	jointEdit = new SkeletonJointEdit;
 	
+	SkeletonJointEdit::UseSkeleton = glWidget->skeleton();
+	
 	QHBoxLayout * layout = new QHBoxLayout;
 	layout->addWidget(glWidget);
 	layout->addWidget(jointEdit);
@@ -72,6 +74,8 @@ Window::Window()
     setWindowTitle(tr("Euler Angles"));
     
     connect(glWidget, SIGNAL(jointSelected(int)), jointEdit, SLOT(attachToJoint(int)));
+	connect(glWidget, SIGNAL(jointChanged()), jointEdit, SLOT(updateValues()));
+	connect(jointEdit, SIGNAL(valueChanged()), glWidget, SLOT(updateJoint()));
 	
 	connect(alpha, SIGNAL(valueChanged(double)), glWidget, SLOT(setAngleAlpha(double)));
 	connect(beta, SIGNAL(valueChanged(double)), glWidget, SLOT(setAngleBeta(double)));

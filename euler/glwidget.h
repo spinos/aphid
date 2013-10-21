@@ -52,6 +52,8 @@ class GLWidget : public Base3DView
 public:
     GLWidget(QWidget *parent = 0);
     virtual ~GLWidget();
+	
+	SkeletonSystem * skeleton() const;
 
 protected:
     virtual void clientDraw();
@@ -72,9 +74,11 @@ public slots:
 	void setAngleAlpha(double x);
 	void setAngleBeta(double x);
 	void setAngleGamma(double x);
+	void updateJoint();
 	
 signals:
     void jointSelected(int idx);
+	void jointChanged();
 };
 //! [3]
 
