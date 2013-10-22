@@ -1,5 +1,6 @@
 #ifndef VECTOR3F_H
 #define VECTOR3F_H
+#include <ATypes.h>
 #include <Vector2F.h>
 class Vector3F{
 public:
@@ -23,6 +24,7 @@ public:
 	void operator*=( const float& scale );
 	
 	Vector3F operator*( const float& scale ) const;	
+	Vector3F operator*( const Float3 & scale ) const;	
 	Vector3F operator/( const float& scale ) const;	
 	Vector3F operator*( const Vector3F& other ) const;	
 	

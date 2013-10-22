@@ -109,6 +109,11 @@ Vector3F Vector3F::operator*(const float& scale ) const
         return Vector3F(x*scale,y*scale,z*scale);
 }
 
+Vector3F Vector3F::operator*( const Float3 & scale ) const
+{
+    return Vector3F(x*scale.x,y*scale.y,z*scale.z);
+}
+
 Vector3F Vector3F::operator/(const float& scale ) const
 {
         return Vector3F(x/scale,y/scale,z/scale);

@@ -70,6 +70,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	child1->setName("/humerus/ulna");
 	child1->setTranslation(Vector3F(50.f, 0.f, 0.f));
 	child1->setJointOrient(Vector3F(0.f, -.4f, 0.f));
+	child1->setRotateDOF(Float3(0.f, 1.f, 0.f));
 	grp0->addChild(child1);
 	m_skeleton->addJoint(child1);
 	
@@ -77,6 +78,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	child2->setName("/humerus/ulna/radius");
 	child2->setTranslation(Vector3F(25.f, 0.f, 0.f));
 	child2->setJointOrient(Vector3F(0.f, 0.f, 0.f));
+	child2->setRotateDOF(Float3(1.f, 0.f, 0.f));
 	child1->addChild(child2);
 	m_skeleton->addJoint(child2);
 	
@@ -84,6 +86,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	child3->setName("/humerus/ulna/radius/carpometacarpus");
 	child3->setTranslation(Vector3F(25.f, 0.f, 0.f));
 	child3->setJointOrient(Vector3F(0.f, .2f, 0.f));
+	child3->setRotateDOF(Float3(0.f, 1.f, 1.f));
 	child2->addChild(child3);
 	m_skeleton->addJoint(child3);
 	
@@ -91,6 +94,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	child4->setName("/humerus/ulna/radius/carpometacarpus/secondDigit");
 	child4->setTranslation(Vector3F(20.f, 0.f, 0.f));
 	child4->setJointOrient(Vector3F(0.f, 0.f, 0.f));
+	child4->setRotateDOF(Float3(0.f, 1.f, 1.f));
 	child3->addChild(child4);
 	m_skeleton->addJoint(child4);
 	
@@ -98,6 +102,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	child5->setName("/humerus/ulna/radius/carpometacarpus/secondDigit/digitEnd");
 	child5->setTranslation(Vector3F(10.f, 0.f, 0.f));
 	child5->setJointOrient(Vector3F(0.f, 0.f, 0.f));
+	child5->setRotateDOF(Float3(0.f, 0.f, 0.f));
 	child4->addChild(child5);
 	m_skeleton->addJoint(child5);
 	

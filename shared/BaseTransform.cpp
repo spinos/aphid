@@ -13,6 +13,7 @@ BaseTransform::BaseTransform(BaseTransform * parent)
 {
 	m_parent = parent;
 	setEntityType(TTransform);
+	m_rotateDOF.x = m_rotateDOF.y = m_rotateDOF.z = 1.f;
 }
 
 BaseTransform::~BaseTransform() {}
@@ -44,7 +45,7 @@ Vector3F BaseTransform::translation() const
 
 void BaseTransform::rotate(const Vector3F & v)
 {
-	Vector3F v1 = m_angles + v;
+	Vector3F v1 = m_angles + v * m_rotateDOF;
 	setRotationAngles(v1);
 }
 
@@ -162,3 +163,14 @@ void BaseTransform::detachChild(unsigned idx)
 	c->setParent(0);
 	m_children.erase(m_children.begin() + idx);
 }
+
+void BaseTransform::setRotateDOF(const Float3 & dof)
+{
+    m_rotateDOF = dof;
+}
+
+Float3 BaseTransform::rotateDOF() const
+{
+    return m_rotateDOF;
+}
+

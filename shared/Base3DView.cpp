@@ -433,11 +433,7 @@ TransformManipulator * Base3DView::manipulator()
 void Base3DView::showBrush() const
 {
 	getDrawer()->circleAt(brush()->getSpace(), brush()->getRadius());
-	Vector3F p;
-	for(unsigned i = 0; i < brush()->getNumDarts(); i++) {
-	     brush()->getDartPoint(i, p);
-	     getDrawer()->solidCube(p.x, p.y, p.z, .1f);
-	}
+
     if(brush()->length() > 10e-3)
         getDrawer()->arrow(brush()->heelPosition(), brush()->toePosition());
 }

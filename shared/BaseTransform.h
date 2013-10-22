@@ -52,6 +52,9 @@ public:
 	virtual Vector3F rotationBaseAngles() const;
 	
 	void detachChild(unsigned idx);
+	
+	void setRotateDOF(const Float3 & dof);
+	Float3 rotateDOF() const;
 protected:
 	
 	
@@ -59,4 +62,5 @@ private:
 	Vector3F m_translation, m_angles;
 	BaseTransform * m_parent;
 	std::vector<BaseTransform *> m_children;
+	Float3 m_rotateDOF;
 };
