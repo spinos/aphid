@@ -11,6 +11,7 @@
 #include <MlFeatherCollection.h>
 #include <MlFeather.h>
 #include <BezierCurve.h>
+#include <KdTreeDrawer.h>
 #include <QtGui>
 #include <ToolContext.h>
 #include <zEXRImage.h>

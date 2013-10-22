@@ -46,6 +46,8 @@
 #include "glwidget.h"
 #include <AccPatchMesh.h>
 #include <EasemodelUtil.h>
+#include <BaseBrush.h>
+#include <KdTreeDrawer.h>
 #include <BezierDrawer.h>
 #include <MlDrawer.h>
 #include <BezierCurve.h>

@@ -63,13 +63,13 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	SkeletonJoint * grp0 = new SkeletonJoint;
 	grp0->setName("/humerus");
 	grp0->setTranslation(Vector3F(12.f, 0.f, 0.f));
-	grp0->setJointOrient(Vector3F(0.f, .4f, 0.f));
+	grp0->setJointOrient(Vector3F(0.f, .3f, 0.f));
 	m_skeleton->addJoint(grp0);
 	
 	SkeletonJoint * child1 = new SkeletonJoint(grp0);
 	child1->setName("/humerus/ulna");
 	child1->setTranslation(Vector3F(50.f, 0.f, 0.f));
-	child1->setJointOrient(Vector3F(0.f, -.4f, 0.f));
+	child1->setJointOrient(Vector3F(0.f, -.6f, 0.f));
 	child1->setRotateDOF(Float3(0.f, 1.f, 0.f));
 	grp0->addChild(child1);
 	m_skeleton->addJoint(child1);
@@ -85,14 +85,14 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	SkeletonJoint * child3 = new SkeletonJoint(child2);
 	child3->setName("/humerus/ulna/radius/carpometacarpus");
 	child3->setTranslation(Vector3F(25.f, 0.f, 0.f));
-	child3->setJointOrient(Vector3F(0.f, .2f, 0.f));
+	child3->setJointOrient(Vector3F(0.f, .6f, 0.f));
 	child3->setRotateDOF(Float3(0.f, 1.f, 1.f));
 	child2->addChild(child3);
 	m_skeleton->addJoint(child3);
 	
 	SkeletonJoint * child4 = new SkeletonJoint(child3);
 	child4->setName("/humerus/ulna/radius/carpometacarpus/secondDigit");
-	child4->setTranslation(Vector3F(20.f, 0.f, 0.f));
+	child4->setTranslation(Vector3F(30.f, 0.f, 0.f));
 	child4->setJointOrient(Vector3F(0.f, 0.f, 0.f));
 	child4->setRotateDOF(Float3(0.f, 1.f, 1.f));
 	child3->addChild(child4);
@@ -100,11 +100,13 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	SkeletonJoint * child5 = new SkeletonJoint(child4);
 	child5->setName("/humerus/ulna/radius/carpometacarpus/secondDigit/digitEnd");
-	child5->setTranslation(Vector3F(10.f, 0.f, 0.f));
+	child5->setTranslation(Vector3F(20.f, 0.f, 0.f));
 	child5->setJointOrient(Vector3F(0.f, 0.f, 0.f));
 	child5->setRotateDOF(Float3(0.f, 0.f, 0.f));
 	child4->addChild(child5);
 	m_skeleton->addJoint(child5);
+	
+	std::cout<<"skeleton dof "<<m_skeleton->degreeOfFreedom();
 	
 	solve();
 }

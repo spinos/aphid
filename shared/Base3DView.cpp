@@ -6,6 +6,7 @@
 #include <ToolContext.h>
 #include <SelectionArray.h>
 #include <BaseBrush.h>
+#include <BaseCamera.h>
 #include <PerspectiveCamera.h>
 #include <KdTreeDrawer.h>
 #include <IntersectionContext.h>

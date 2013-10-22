@@ -1,6 +1,11 @@
 #include "SkeletonSystem.h"
 #include <SkeletonJoint.h>
-SkeletonSystem::SkeletonSystem() {}
+#include <SkeletonPose.h>
+SkeletonSystem::SkeletonSystem() 
+{
+	m_activePose = 0;
+}
+
 SkeletonSystem::~SkeletonSystem() 
 {
     clear();
@@ -11,6 +16,10 @@ void SkeletonSystem::clear()
     std::vector<SkeletonJoint *>::iterator it = m_joints.begin();
     for(; it != m_joints.end(); ++it) delete (*it); 
     m_joints.clear();
+	
+	std::vector<SkeletonPose *>::iterator itp = m_poses.begin();
+    for(; itp != m_poses.end(); ++itp) delete (*itp); 
+    m_poses.clear();
 }
 
 void SkeletonSystem::addJoint(SkeletonJoint * j)
@@ -38,4 +47,64 @@ SkeletonJoint * SkeletonSystem::selectJoint(const Ray & ray) const
 	return m_joints[0];
 }
 
+unsigned SkeletonSystem::degreeOfFreedom() const
+{
+	std::vector<Float3> dofs;
+	degreeOfFreedom(m_joints[0], dofs);
+	unsigned ndof = 0;
+	std::vector<Float3>::iterator it = dofs.begin();
+	for(; it != dofs.end(); ++it) {
+		if((*it).x > 0.f) ndof++;
+		if((*it).y > 0.f) ndof++;
+		if((*it).z > 0.f) ndof++;
+	}
+	return ndof;
+}
 
+void SkeletonSystem::degreeOfFreedom(BaseTransform * j, std::vector<Float3> & dof) const
+{
+	dof.push_back(j->rotateDOF());
+	
+	for(unsigned i = 0; i < j->numChildren(); i++) degreeOfFreedom(j->child(i), dof);
+}
+
+void SkeletonSystem::rotationAngles(BaseTransform * j, std::vector<Vector3F> & angles) const
+{
+	angles.push_back(j->rotationAngles());
+	for(unsigned i = 0; i < j->numChildren(); i++) rotationAngles(j->child(i), angles);
+}
+
+void SkeletonSystem::addPose()
+{
+	SkeletonPose *pose = new SkeletonPose;
+	pose->setNumJoints(numJoints());
+	std::vector<Float3> dofs;
+	degreeOfFreedom(m_joints[0], dofs);
+	pose->setDegreeOfFreedom(dofs);
+	std::vector<Vector3F> angles;
+	rotationAngles(m_joints[0], angles);
+	pose->setValues(dofs, angles);
+	
+	m_poses.push_back(pose);
+}
+
+void SkeletonSystem::selectPose(unsigned i)
+{
+	m_activePose = m_poses[i];
+}
+	
+void SkeletonSystem::updatePose()
+{
+	if(!m_activePose) return;
+	std::vector<Float3> dofs;
+	degreeOfFreedom(m_joints[0], dofs);
+	std::vector<Vector3F> angles;
+	rotationAngles(m_joints[0], angles);
+	m_activePose->setValues(dofs, angles);
+}
+
+void SkeletonSystem::recoverPose()
+{
+	if(!m_activePose) return;
+	m_activePose->recoverValues(m_joints);
+}

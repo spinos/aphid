@@ -6,6 +6,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
+#pragma once
 #include <AllMath.h>
 
 class BaseCamera {

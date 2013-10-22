@@ -6,10 +6,9 @@
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
-
-#include "Base2DView.h"
-
 #include <QtGui>
+#include "Base2DView.h"
+#include <BaseCamera.h>
 
 Base2DView::Base2DView(QWidget *parent) : Base3DView(parent)
 {}

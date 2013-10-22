@@ -10,7 +10,7 @@
 #include <QtOpenGL>
 #include <math.h>
 #include "SingleModelView.h"
-
+#include <KdTreeDrawer.h>
 #include <PatchMesh.h>
 #include <KdTree.h>
 #include <Ray.h>
@@ -79,8 +79,8 @@ Vector3F SingleModelView::sceneCenter() const
 
 bool SingleModelView::anchorSelected(float wei)
 {
-	if(getSelection()->numVertices() < 1) return false;
-	Anchor *a = new Anchor(*getSelection());
+	if(getActiveComponent()->numVertices() < 1) return false;
+	Anchor *a = new Anchor(*getActiveComponent());
 	a->setWeight(wei);
 	m_anchors->addAnchor(a);
 	clearSelection();
@@ -133,7 +133,7 @@ void SingleModelView::buildTree()
 void SingleModelView::buildTopology()
 {
 	m_topo->buildTopology(mesh());
-	getSelection()->setTopology(m_topo);
+	getActiveComponent()->setTopology(m_topo);
     m_topo->calculateNormal(mesh());
 }
 

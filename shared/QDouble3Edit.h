@@ -26,6 +26,8 @@ public:
 	void setValue(const Vector3F & v);
 	Vector3F value() const;
 	
+	void setDOF(const Float3 & dof);
+	
 private slots:
 	void validateEditValue();
 	

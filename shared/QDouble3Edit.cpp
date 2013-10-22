@@ -70,3 +70,13 @@ void QDouble3Edit::validateEditValue()
 {
 	emit valueChanged(value());
 }
+
+void QDouble3Edit::setDOF(const Float3 & dof)
+{
+	if(dof.x == 0.f) m_edit0->setEnabled(0);
+	else m_edit0->setEnabled(1);
+	if(dof.y == 0.f) m_edit1->setEnabled(0);
+	else m_edit1->setEnabled(1);
+	if(dof.z == 0.f) m_edit2->setEnabled(0);
+	else m_edit2->setEnabled(1);
+}

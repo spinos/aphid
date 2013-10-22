@@ -99,7 +99,7 @@ HEADERS = ../shared/AllMath.h \
     ../shared/HBase.h \
     ../shared/HWorld.h \
     ../shared/HMesh.h \
-    ../shared/BaseImage.cpp \
+    ../shared/BaseImage.h \
     ../shared/zEXRImage.h \
     ../shared/BaseFile.h \
     ../shared/BakeDeformer.h \
@@ -111,6 +111,7 @@ HEADERS = ../shared/AllMath.h \
 ../shared/TransformManipulator.h \
 	../shared/SkeletonJoint.h \
 	../shared/SkeletonSystem.h \
+	../shared/SkeletonPose.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -225,6 +226,7 @@ SOURCES = ../shared/Vector3F.cpp \
     ../shared/TransformManipulator.cpp \
 	../shared/SkeletonJoint.cpp \
 	../shared/SkeletonSystem.cpp \
+	../shared/SkeletonPose.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \

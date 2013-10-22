@@ -75,5 +75,6 @@ void SkeletonJointEdit::updateValues()
 	if(!m_activeJoint) return;
 	translation->setValue(m_activeJoint->translation());
 	rotateAngle->setValue(m_activeJoint->rotationAngles());
+	rotateAngle->setDOF(m_activeJoint->rotateDOF());
 	orientAngle->setValue(m_activeJoint->jointOrient());
 }
