@@ -33,7 +33,9 @@ public:
 		IncreaseFeathExampleNSegment = 11,
 		DecreaseFeathExampleNSegment = 12,
 		LoadImage = 13,
-		BakeAnimation = 14
+		BakeAnimation = 14,
+		AddSkeletonPose = 15,
+		SaveSkeletonPose = 16
     };
     
     ToolContext();

@@ -16,6 +16,7 @@ public:
 	virtual ~NamedEntity();
 	
 	void setName(const std::string & name);
+	void setName(const std::string & name, int i);
 	std::string name() const;
 	std::string NamedEntity::particalName() const;
 	

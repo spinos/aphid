@@ -8,11 +8,20 @@
  */
 
 #include "NamedEntity.h"
-
+#include <sstream>
 NamedEntity::NamedEntity() { m_name = "unknown"; }
 NamedEntity::~NamedEntity() {}
 	
 void NamedEntity::setName(const std::string & name) { m_name = name; }
+
+void NamedEntity::setName(const std::string & name, int i)
+{
+	std::stringstream sst;
+	sst.str("");
+	sst<<name<<i;
+	m_name = sst.str();
+}
+
 std::string NamedEntity::name() const { return m_name; }
 
 void NamedEntity::setIndex(unsigned idx)

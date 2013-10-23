@@ -22,11 +22,17 @@ public:
 	
 	void addPose();
 	void selectPose(unsigned i);
+	void selectPose(const std::string & name);
 	void updatePose();
 	void recoverPose();
+	
+	unsigned numPoses() const;
+	SkeletonPose * pose(unsigned idx) const;
+	
 protected:
 
 private:
+	unsigned maxPoseIndex() const;
 	void degreeOfFreedom(BaseTransform * j, std::vector<Float3> & dof) const;
 	void rotationAngles(BaseTransform * j, std::vector<Vector3F> & angles) const;
 private:

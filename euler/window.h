@@ -46,6 +46,7 @@
 
 class QDoubleEditSlider;
 class SkeletonJointEdit;
+class SkeletonPoseEdit;
 QT_BEGIN_NAMESPACE
 class QSlider;
 QT_END_NAMESPACE
@@ -68,6 +69,7 @@ private:
 	QDoubleEditSlider * gamma;
     GLWidget *glWidget;
     SkeletonJointEdit * jointEdit;
+	SkeletonPoseEdit * poseEdit;
 };
 //! [0]
 

@@ -10,8 +10,9 @@
 #pragma once
 
 #include <AllMath.h>
+#include <NamedEntity.h>
 class SkeletonJoint;
-class SkeletonPose {
+class SkeletonPose : public NamedEntity {
 public:
 	SkeletonPose();
 	virtual ~SkeletonPose();

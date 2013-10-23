@@ -13,14 +13,13 @@ QT_END_NAMESPACE
 class SkeletonJointEdit : public QWidget {
 Q_OBJECT
 public:
-    SkeletonJointEdit(QWidget *parent = 0);
+    SkeletonJointEdit(SkeletonSystem * skeleton, QWidget *parent = 0);
     virtual ~SkeletonJointEdit();
-	
-	static SkeletonSystem * UseSkeleton;
     
 protected:
 
 private:
+	SkeletonSystem * m_skeleton;
     QGroupBox * controlGrp;
 	QDouble3Edit * translation;
 	QDouble3Edit * orientAngle;

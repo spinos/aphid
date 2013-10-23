@@ -44,5 +44,9 @@
         <file>image.png</file>
         <file>bake.png</file>
         <file>bakeActive.png</file>
+        <file>addFile.png</file>
+        <file>addFileActive.png</file>
+        <file>save.png</file>
+        <file>saveActive.png</file>
     </qresource>
 </RCC>

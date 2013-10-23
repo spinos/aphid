@@ -45,6 +45,7 @@
 #include "window.h"
 #include <QDoubleEditSlider.h>
 #include "SkeletonJointEdit.h"
+#include "SkeletonPoseEdit.h"
 //! [0]
 Window::Window()
 {
@@ -59,23 +60,31 @@ Window::Window()
 	gamma->setLimit(0.0, 360.0);
 	gamma->setValue(0.0);
 	
-	jointEdit = new SkeletonJointEdit;
+	jointEdit = new SkeletonJointEdit(glWidget->skeleton());
 	
-	SkeletonJointEdit::UseSkeleton = glWidget->skeleton();
+	poseEdit = new SkeletonPoseEdit(glWidget->skeleton());
 	
-	QHBoxLayout * layout = new QHBoxLayout;
-	layout->addWidget(glWidget);
+	QSplitter * page = new QSplitter;
+	page->addWidget(glWidget);
+	
+	QVBoxLayout * layout = new QVBoxLayout;
 	layout->addWidget(jointEdit);
+	layout->addWidget(poseEdit);
+	layout->setContentsMargins(0,0,0,0);
 	
-	QWidget * main = new QWidget;
-	main->setLayout(layout);
+	QWidget * rgt = new QWidget;
+	rgt->setLayout(layout);
+	rgt->setContentsMargins(0,0,0,0);
 	
-	setCentralWidget(main);
-    setWindowTitle(tr("Euler Angles"));
+	page->addWidget(rgt);
+	
+	setCentralWidget(page);
+    setWindowTitle(tr("Skeleton Poses"));
     
     connect(glWidget, SIGNAL(jointSelected(int)), jointEdit, SLOT(attachToJoint(int)));
 	connect(glWidget, SIGNAL(jointChanged()), jointEdit, SLOT(updateValues()));
 	connect(jointEdit, SIGNAL(valueChanged()), glWidget, SLOT(updateJoint()));
+	connect(poseEdit, SIGNAL(poseChanged()), glWidget, SLOT(update()));
 	
 	connect(alpha, SIGNAL(valueChanged(double)), glWidget, SLOT(setAngleAlpha(double)));
 	connect(beta, SIGNAL(valueChanged(double)), glWidget, SLOT(setAngleBeta(double)));

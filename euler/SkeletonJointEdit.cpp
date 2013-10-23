@@ -5,10 +5,9 @@
 #include <QDouble3Edit.h>
 #include <sstream>
 
-SkeletonSystem * SkeletonJointEdit::UseSkeleton = 0;
-
-SkeletonJointEdit::SkeletonJointEdit(QWidget *parent) : QWidget(parent)
+SkeletonJointEdit::SkeletonJointEdit(SkeletonSystem * skeleton, QWidget *parent) : QWidget(parent)
 {
+	m_skeleton = skeleton;
     controlGrp = new QGroupBox(tr("unknown"));
 	translation = new QDouble3Edit(tr("translate"));
 	orientAngle = new QDouble3Edit(tr("orient"));
@@ -18,7 +17,6 @@ SkeletonJointEdit::SkeletonJointEdit(QWidget *parent) : QWidget(parent)
 	controlLayout->addWidget(translation);
 	controlLayout->addWidget(rotateAngle);
 	controlLayout->addWidget(orientAngle);
-	controlLayout->addStretch();
 	controlGrp->setLayout(controlLayout);
     
     QVBoxLayout * main = new QVBoxLayout;
@@ -41,8 +39,8 @@ SkeletonJointEdit::~SkeletonJointEdit() {}
 
 void SkeletonJointEdit::attachToJoint(int idx)
 {
-	if(!UseSkeleton) return;
-	m_activeJoint = UseSkeleton->joint(idx);
+	if(!m_skeleton) return;
+	m_activeJoint = m_skeleton->joint(idx);
 	
     controlGrp->setTitle(tr(m_activeJoint->particalName().c_str()));
 	

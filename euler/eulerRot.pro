@@ -5,16 +5,24 @@ LIBS += -L../easymodel -leasymodel -lIlmImf -lHalf -lhdf5 -lhdf5_hl -L../lib -la
 HEADERS       = ../shared/Base3DView.h \
                 ../shared/QDoubleEditSlider.h \
                 ../shared/QDouble3Edit.h \
+                ../shared/ActionIconFrame.h \
+                ../shared/QIconFrame.h \
                 glwidget.h \
                 SkeletonJointEdit.h \
+                SkeletonPoseEdit.h \
+                PoseListModel.h \
                 window.h
                 
 SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/QDoubleEditSlider.cpp \
                 ../shared/QDouble3Edit.cpp \
+                ../shared/ActionIconFrame.cpp \
+                ../shared/QIconFrame.cpp \
                 glwidget.cpp \
                 main.cpp \
                 SkeletonJointEdit.cpp \
+                SkeletonPoseEdit.cpp \
+                PoseListModel.cpp \
                 window.cpp
 
 win32 {
@@ -49,3 +57,4 @@ win32 {
     DEFINES += OPENEXR_DLL NDEBUG
     CONFIG += console
 }
+RESOURCES += ../icons/mallard.qrc

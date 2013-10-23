@@ -77,6 +77,8 @@ void SkeletonSystem::rotationAngles(BaseTransform * j, std::vector<Vector3F> & a
 void SkeletonSystem::addPose()
 {
 	SkeletonPose *pose = new SkeletonPose;
+	pose->setName("pose", maxPoseIndex() + 1);
+	pose->setIndex(maxPoseIndex() + 1);
 	pose->setNumJoints(numJoints());
 	std::vector<Float3> dofs;
 	degreeOfFreedom(m_joints[0], dofs);
@@ -91,6 +93,15 @@ void SkeletonSystem::addPose()
 void SkeletonSystem::selectPose(unsigned i)
 {
 	m_activePose = m_poses[i];
+}
+
+void SkeletonSystem::selectPose(const std::string & name)
+{
+	m_activePose = 0;
+	std::vector<SkeletonPose *>::const_iterator it = m_poses.begin();
+	for(; it != m_poses.end(); ++it) {
+		if((*it)->name() == name) m_activePose = *it;
+	}
 }
 	
 void SkeletonSystem::updatePose()
@@ -107,4 +118,24 @@ void SkeletonSystem::recoverPose()
 {
 	if(!m_activePose) return;
 	m_activePose->recoverValues(m_joints);
+}
+
+unsigned SkeletonSystem::numPoses() const
+{
+	return m_poses.size();
+}
+
+SkeletonPose * SkeletonSystem::pose(unsigned idx) const
+{
+	return m_poses[idx];
+}
+
+unsigned SkeletonSystem::maxPoseIndex() const
+{
+	unsigned mx = 0;
+	std::vector<SkeletonPose *>::const_iterator it = m_poses.begin();
+    for(; it != m_poses.end(); ++it) {
+		if((*it)->index() > mx) mx = (*it)->index();
+	}
+	return mx;
 }
