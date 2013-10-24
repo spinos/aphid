@@ -25,6 +25,7 @@ public:
 	void selectPose(const std::string & name);
 	void updatePose();
 	void recoverPose();
+	void renamePose(const std::string & fromName, const std::string & toName);
 	
 	unsigned numPoses() const;
 	SkeletonPose * pose(unsigned idx) const;

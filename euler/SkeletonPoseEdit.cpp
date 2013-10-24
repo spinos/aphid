@@ -48,9 +48,8 @@ SkeletonPoseEdit::SkeletonPoseEdit(SkeletonSystem * skeleton, QWidget *parent) :
 	connect(addPoseBtn, SIGNAL(actionTriggered(int)), model, SLOT(addPose()));
 	connect(savePoseBtn, SIGNAL(actionTriggered(int)), this, SLOT(savePose()));
 	
-	connect(poseList->selectionModel(),
-            SIGNAL(selectionChanged(const QItemSelection &,
-                                    const QItemSelection &)),
+	connect(poseList,
+            SIGNAL(clicked ( const QModelIndex &)),
             this, SLOT(selectPose()));
 }
 

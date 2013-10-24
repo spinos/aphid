@@ -65,20 +65,35 @@ QVariant FileListModel::data(const QModelIndex &index, int role) const
     if (index.row() >= fileList.size() || index.row() < 0)
         return QVariant();
     
-    if (role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole || role == Qt::EditRole)
         return fileList.at(index.row());
-    else if (role == Qt::BackgroundRole) {
-        int batch = (index.row() / 100) % 2;
-        if (batch == 0)
-            return qApp->palette().base();
-        else
-            return qApp->palette().alternateBase();
-    }
+
     return QVariant();
 }
-//![4]
 
-//![1]
+Qt::ItemFlags FileListModel::flags(const QModelIndex &index) const
+{
+ if (!index.isValid())
+	 return Qt::ItemIsEnabled;
+
+ return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+}
+
+bool FileListModel::setData(const QModelIndex &index,
+                               const QVariant &value, int role)
+{
+ if (index.isValid() && role == Qt::EditRole) {
+
+	QString preName = fileList.at(index.row());
+	
+	m_skeleton->renamePose(preName.toUtf8().data(), value.toString().toUtf8().data());
+	 fileList.replace(index.row(), value.toString());
+	 emit dataChanged(index, index);
+	 return true;
+ }
+ return false;
+}
+ 
 bool FileListModel::canFetchMore(const QModelIndex & /* index */) const
 {
     if (fileCount < fileList.size())

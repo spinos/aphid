@@ -120,6 +120,13 @@ void SkeletonSystem::recoverPose()
 	m_activePose->recoverValues(m_joints);
 }
 
+void SkeletonSystem::renamePose(const std::string & fromName, const std::string & toName)
+{
+	selectPose(fromName);
+	if(!m_activePose) return;
+	m_activePose->setName(toName);
+}
+
 unsigned SkeletonSystem::numPoses() const
 {
 	return m_poses.size();
