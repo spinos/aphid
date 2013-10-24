@@ -38,6 +38,15 @@ SkeletonJoint * SkeletonSystem::joint(unsigned idx) const
     return m_joints[idx];
 }
 
+SkeletonJoint * SkeletonSystem::jointByIndex(unsigned idx) const
+{
+	std::vector<SkeletonJoint *>::const_iterator it = m_joints.begin();
+	for(; it != m_joints.end(); ++it) {
+		if((*it)->index() == idx) return *it;
+	}
+	return 0;
+}
+
 SkeletonJoint * SkeletonSystem::selectJoint(const Ray & ray) const
 {
     std::vector<SkeletonJoint *>::const_iterator it = m_joints.begin();
@@ -145,4 +154,20 @@ unsigned SkeletonSystem::maxPoseIndex() const
 		if((*it)->index() > mx) mx = (*it)->index();
 	}
 	return mx;
+}
+
+unsigned SkeletonSystem::closestJointIndex(const Vector3F & pt) const
+{
+	unsigned res = m_joints[0]->index();
+	float curD, minD = 10e8;
+	std::vector<SkeletonJoint *>::const_iterator it = m_joints.begin();
+	for(; it != m_joints.end(); ++it) {
+		curD = (*it)->worldSpace().getTranslation().distance2To(pt);
+		if(curD < minD) {
+			minD = curD;
+			res = (*it)->index();
+		}
+	}
+	
+	return res;
 }

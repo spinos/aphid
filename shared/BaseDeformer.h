@@ -9,7 +9,7 @@ public:
     BaseDeformer();
     virtual ~BaseDeformer();
 	
-	void clear();
+	virtual void clear();
 	
 	Vector3F * deformedP();
 	Vector3F * getDeformedP() const;

@@ -25,6 +25,7 @@ HEADERS = ../shared/AllMath.h \
 				../shared/BaseTransform.h \
                 ../shared/Geometry.h \
                 ../shared/BaseMesh.h \
+				../shared/PlaneMesh.h \
                 ../shared/TriangleMesh.h \
                 ../shared/GeoElement.h \
                 ../shared/Vertex.h \
@@ -32,6 +33,7 @@ HEADERS = ../shared/AllMath.h \
                 ../shared/Facet.h \
                 ../shared/BaseField.h \
                 ../shared/BaseDeformer.h \
+    ../shared/SkeletonSubspaceDeformer.h \
                 ../shared/KdTreeNode.h \
                 ../shared/Primitive.h \
                 ../shared/PrimitiveFilter.h \
@@ -141,6 +143,7 @@ SOURCES = ../shared/Vector3F.cpp \
 				../shared/BaseTransform.cpp \
                 ../shared/Geometry.cpp \
                 ../shared/BaseMesh.cpp \
+				../shared/PlaneMesh.cpp \
                 ../shared/TriangleMesh.cpp \
                 ../shared/GeoElement.cpp \
                 ../shared/Vertex.cpp \
@@ -148,6 +151,7 @@ SOURCES = ../shared/Vector3F.cpp \
                 ../shared/Facet.cpp \
                 ../shared/BaseField.cpp \
                 ../shared/BaseDeformer.cpp \
+    ../shared/SkeletonSubspaceDeformer.cpp \
                 ../shared/KdTreeNode.cpp \
                 ../shared/Primitive.cpp \
                 ../shared/PrimitiveFilter.cpp \

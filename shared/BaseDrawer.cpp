@@ -405,6 +405,16 @@ void BaseDrawer::drawCircleAround(const Vector3F& center)
 	glEnd();
 }
 
+void BaseDrawer::quadMesh(const BaseMesh * mesh) const
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->getVertices());
+	
+	glDrawElements(GL_QUADS, mesh->getNumPolygonFaceVertices(), GL_UNSIGNED_INT, mesh->getPolygonIndices());
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void BaseDrawer::drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer) const
 {
 	glEnableClientState(GL_VERTEX_ARRAY);

@@ -84,7 +84,7 @@ Window::Window()
     connect(glWidget, SIGNAL(jointSelected(int)), jointEdit, SLOT(attachToJoint(int)));
 	connect(glWidget, SIGNAL(jointChanged()), jointEdit, SLOT(updateValues()));
 	connect(jointEdit, SIGNAL(valueChanged()), glWidget, SLOT(updateJoint()));
-	connect(poseEdit, SIGNAL(poseChanged()), glWidget, SLOT(update()));
+	connect(poseEdit, SIGNAL(poseChanged()), glWidget, SLOT(updateJoint()));
 	
 	connect(alpha, SIGNAL(valueChanged(double)), glWidget, SLOT(setAngleAlpha(double)));
 	connect(beta, SIGNAL(valueChanged(double)), glWidget, SLOT(setAngleBeta(double)));

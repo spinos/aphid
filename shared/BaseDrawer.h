@@ -41,6 +41,7 @@ public:
 	void moveHandle(int axis, bool active);
 	void spinHandle(TransformManipulator * m, bool active);
 	void spinPlanes(BaseTransform * t);
+	void quadMesh(const BaseMesh * mesh) const;
 	
 	void setGrey(float g);
 	void setColor(float r, float g, float b) const;

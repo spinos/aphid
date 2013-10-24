@@ -56,6 +56,8 @@
 #include <TransformManipulator.h>
 #include <SkeletonJoint.h>
 #include <SkeletonSystem.h>
+#include <PlaneMesh.h>
+#include <SkeletonSubspaceDeformer.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -108,6 +110,11 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	std::cout<<"skeleton dof "<<m_skeleton->degreeOfFreedom();
 	
+	m_mesh = new PlaneMesh(Vector3F(20.f, 0.f, 5.f), Vector3F(160.f, 0.f, 5.f), Vector3F(160.f, 0.f, -25.f), Vector3F(20.f, 0.f, -25.f), 20, 10);
+	
+	m_deformer = new SkeletonSubspaceDeformer;
+	m_deformer->setMesh(m_mesh);
+	m_deformer->bindToSkeleton(m_skeleton);
 	solve();
 }
 
@@ -125,6 +132,8 @@ void GLWidget::clientDraw()
 	}
 	
 	getDrawer()->manipulator(manipulator());
+	getDrawer()->setColor(.2f, .546f, .35f);
+	getDrawer()->quadMesh(m_mesh);
 }
 
 void GLWidget::clientSelect()
@@ -146,6 +155,7 @@ void GLWidget::clientMouseInput()
 {
 	const Ray * ray = getIncidentRay();
 	manipulator()->perform(ray);
+	solve();
 	emit jointChanged();
 }
 
@@ -178,7 +188,7 @@ void GLWidget::solve()
 	Matrix33F s; s.rotateEuler(0.2, 0.3, 0.5);
 	m_space1.multiply(s);
 	Vector3F dv(DegreeToAngle(m_angles.x), DegreeToAngle(m_angles.y), DegreeToAngle(m_angles.z));
-	
+	m_deformer->solve();
 	update();
 }
 
@@ -202,5 +212,5 @@ SkeletonSystem * GLWidget::skeleton() const
 void GLWidget::updateJoint()
 {
 	if(!manipulator()->isDetached()) manipulator()->reattach();
-	update();
+	solve();
 }

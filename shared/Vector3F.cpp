@@ -279,6 +279,11 @@ float Vector3F::angleBetween(const Vector3F& another, const Vector3F& up) const
 	return -ang;
 }
 
+float Vector3F::distance2To(const Vector3F& another) const
+{
+	return (x - another.x) * (x - another.x) + (y - another.y) * (y - another.y) + (z - another.z) * (z - another.z);
+}
+
 void Vector3F::verbose(const char * pref) const
 {
 	std::cout<<pref<<" ("<<x<<","<<y<<","<<z<<")\n";

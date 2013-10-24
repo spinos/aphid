@@ -15,6 +15,7 @@ public:
     
     unsigned numJoints() const;
     SkeletonJoint * joint(unsigned idx) const;
+	SkeletonJoint * jointByIndex(unsigned idx) const;
     
     SkeletonJoint * selectJoint(const Ray & ray) const;
 	
@@ -30,6 +31,7 @@ public:
 	unsigned numPoses() const;
 	SkeletonPose * pose(unsigned idx) const;
 	
+	unsigned closestJointIndex(const Vector3F & pt) const;
 protected:
 
 private:

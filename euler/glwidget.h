@@ -45,6 +45,8 @@
 #include <Base3DView.h>
 class SkeletonJoint;
 class SkeletonSystem;
+class PlaneMesh;
+class SkeletonSubspaceDeformer;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -68,6 +70,8 @@ private:
 	Vector3F m_angles;
 	
 	SkeletonSystem * m_skeleton;
+	PlaneMesh * m_mesh;
+	SkeletonSubspaceDeformer * m_deformer;
 private slots:
 	
 public slots:

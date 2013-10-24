@@ -47,6 +47,7 @@ public:
 	Vector3F vertex(int idx) const;
 	Vector3F center() const;
 	Matrix33F tangentFrame() const;
+	Vector3F point(float u, float v) const;
 	
 private:
 	Segment m_segs[4];

@@ -57,6 +57,7 @@ public:
 	float angleY() const;
 	
 	float angleBetween(const Vector3F& another, const Vector3F& up) const;
+	float distance2To(const Vector3F& another) const;
 	
 	void verbose(const char * pref) const;
 	

@@ -140,3 +140,10 @@ bool Patch::isBehind(const Vector3F & po, Vector3F & nr) const
 	}
 	return maxFacing < 0.f;
 }
+
+Vector3F Patch::point(float u, float v) const
+{
+	Vector3F lo = vertex(0) * (1.f - u) + vertex(1) * u;
+    Vector3F hi = vertex(3) * (1.f - u) + vertex(2) * u;
+    return lo * (1.f - v) + hi * v;
+}
