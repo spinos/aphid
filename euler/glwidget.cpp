@@ -58,6 +58,7 @@
 #include <SkeletonSystem.h>
 #include <PlaneMesh.h>
 #include <SkeletonSubspaceDeformer.h>
+#include <BezierCurve.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -110,7 +111,25 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	std::cout<<"skeleton dof "<<m_skeleton->degreeOfFreedom();
 	
-	m_mesh = new PlaneMesh(Vector3F(20.f, 0.f, 5.f), Vector3F(160.f, 0.f, 5.f), Vector3F(160.f, 0.f, -25.f), Vector3F(20.f, 0.f, -25.f), 20, 10);
+	BezierCurve udir;
+	udir.addVertex(Vector3F(15.f, 0.f, 0.f));
+	udir.addVertex(Vector3F(50.f, 0.f, -10.f));
+	udir.addVertex(Vector3F(80.f, 0.f, 0.f));
+	udir.addVertex(Vector3F(110.f, 0.f, 5.f));
+	udir.addVertex(Vector3F(140.f, 0.f, -5.f));
+	udir.addVertex(Vector3F(160.f, 0.f, -10.f));
+	udir.finishAddVertex();
+	udir.computeKnots();
+	
+	BezierCurve vdir;
+	vdir.addVertex(Vector3F(0.f, 0.f, 0.f));
+	vdir.addVertex(Vector3F(0.f, 0.f, -16.f));
+	vdir.addVertex(Vector3F(0.f, 0.f, -32.f));
+	vdir.addVertex(Vector3F(0.f, 0.f, -48.f));
+	vdir.finishAddVertex();
+	vdir.computeKnots();
+	
+	m_mesh = new PlaneMesh(udir, vdir, 20, 10);
 	
 	m_deformer = new SkeletonSubspaceDeformer;
 	m_deformer->setMesh(m_mesh);
