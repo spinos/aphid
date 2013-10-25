@@ -18,15 +18,13 @@ public:
 	void setRadius(float x);
 	void setPitch(float x);
 	void setMaxToeFactor(float x);
-	void setNumDarts(unsigned x);
+	void setNumDarts(int x);
 	void resetToe();
 	void setToeByIntersect(const Ray * r, bool useNormal = true);
 	
 	Matrix44F getSpace() const;
 	float getRadius() const;
 	float getPitch() const;
-	unsigned getNumDarts() const;
-	Ray getObjectRay(unsigned idx) const;
 	float minDartDistance() const;
 	const Vector3F heelPosition() const;
 	const Vector3F toePosition() const;
@@ -42,6 +40,5 @@ private:
 	Matrix44F m_space;
 	Vector3F m_toeWorldPos, m_previousToeWorldP;
 	float m_radius, m_pitch, m_maxToeFactor;
-	Vector3F * m_darts;
 	unsigned m_numDarts;
 };

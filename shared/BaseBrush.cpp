@@ -9,14 +9,12 @@
 
 #include "BaseBrush.h"
 #include <Plane.h>
-BaseBrush::BaseBrush() : m_radius(5.f), m_pitch(.5f), m_maxToeFactor(2.f)
+BaseBrush::BaseBrush() : m_radius(5.f), m_pitch(.5f), m_maxToeFactor(2.f), m_numDarts(25)
 {
-	setNumDarts(25);
 }
 
 BaseBrush::~BaseBrush() 
 {
-	if(m_darts) delete[] m_darts;
 }
 
 void BaseBrush::setSpace(const Vector3F & point, const Vector3F & facing)
@@ -35,28 +33,14 @@ void BaseBrush::setPitch(float x)
 	m_pitch = x;
 }
 
+void BaseBrush::setNumDarts(int x)
+{
+    m_numDarts = x;
+}
+
 void BaseBrush::setMaxToeFactor(float x)
 {
 	m_maxToeFactor = x;
-}
-
-void BaseBrush::setNumDarts(unsigned x)
-{
-	if(m_darts) delete[] m_darts;
-	m_numDarts = x;
-	m_darts = new Vector3F[m_numDarts];
-	
-	const float minD = 1.f / sqrt((float)m_numDarts);
-	unsigned valid = 0;
-	while (valid < m_numDarts) {
-		const float alpha = (rand()%131/131.f*2.f - 1.f) * PI;
-		const float r = rand()%143/143.f;
-		Vector3F p(r * cos(alpha), r * sin(alpha), 0.f);
-		if(!ignoreTooClose(p, m_darts, valid, minD)) {
-			m_darts[valid] = p;
-			valid++;
-		}
-	}
 }
 
 Matrix44F BaseBrush::getSpace() const
@@ -72,30 +56,6 @@ float BaseBrush::getRadius() const
 float BaseBrush::getPitch() const
 {
 	return m_pitch;
-}
-
-unsigned BaseBrush::getNumDarts() const
-{
-	return m_numDarts;
-}
-
-Ray BaseBrush::getObjectRay(unsigned idx) const
-{
-	Vector3F ori = m_darts[idx] * m_radius;
-	Vector3F dst = ori;
-	ori.z = m_radius * .5f;
-	ori = m_space.transform(ori);
-	
-	dst.z = m_radius * -.5f;
-	dst = m_space.transform(dst);
-	
-	return Ray(ori, dst);
-}
-
-void BaseBrush::getDartPoint(unsigned idx, Vector3F & p) const
-{
-    p = m_darts[idx] * m_radius;
-    p = m_space.transform(p);
 }
 
 char BaseBrush::ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float d) const
