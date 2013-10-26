@@ -14,12 +14,11 @@ public:
 	BaseFunction();
 	virtual ~BaseFunction();
 	
-	virtual float f(const Vector2F & x);
-	virtual float f1(float x, const Vector2F & at, const Vector2F & S);
-	virtual float f2(const Vector2F & x, const Vector2F & at, const Vector2F & S);
+	virtual double f(const Vector2F & x);
 	
 	float particalDerivativeAt(float x, const Vector2F & at, const Vector2F & S);
 	
 	float minimization(const Vector2F & x, const Vector2F & part);
 private:
+	
 };

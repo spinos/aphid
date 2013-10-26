@@ -32,6 +32,15 @@ inline float log2f( float n )
 
 #define PI 3.1415926535
 #define EPSILON 10e-7
+#define GoldenRatio 1.618
+#define ReGoldenRatio 0.382
+
+template<typename T>
+inline T Absolute(T const& a)
+{
+	if(a >= 0.0) return a;
+	return -a;
+}
 
 template<typename T>
 inline bool IsElementIn(T const& a, const std::vector<T>& array)
