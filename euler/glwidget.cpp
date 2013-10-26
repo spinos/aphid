@@ -59,9 +59,20 @@
 #include <PlaneMesh.h>
 #include <SkeletonSubspaceDeformer.h>
 #include <BezierCurve.h>
+#include <BaseFunction.h>
+#include <PowellMethod.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
+	BaseFunction F;
+	Vector2F x(.5, .5);
+	//F.minimization(x, Vector2F(1,0));
+	//Vector2F x(.75, .5);
+	//F.minimization(x, Vector2F(0,1), Vector2F(0,1));
+	//std::cout<<"x "<<x.x<<" "<<x.y<<"\n";
+	PowellMethod pm;
+	pm.solve(F, x);
+
     m_skeleton = new SkeletonSystem;
 	SkeletonJoint * grp0 = new SkeletonJoint;
 	grp0->setName("/humerus");

@@ -21,8 +21,8 @@ public:
 	void set(float vx, float vy);
 	
 	void operator+=( const Vector2F& other );
-	void operator-=( Vector2F& other );
-	void operator-=( Vector2F other );
+	void operator-=( const Vector2F& other );
+	//void operator-=( Vector2F other );
 	
 	void operator/=( const float& scale );	
 	void operator*=( const float& scale );
@@ -36,8 +36,6 @@ public:
 	Vector2F operator-( Vector2F& other ) const;
 	Vector2F operator+( Vector2F other ) const;	
 	Vector2F operator-( Vector2F other ) const;	
-	Vector2F operator-( Vector2F& other );
-	Vector2F operator-( Vector2F other );	
 	
 	float distantTo(const Vector2F & other) const;
 	float length() const;
@@ -45,7 +43,7 @@ public:
 	Vector2F reversed() const;
 	
 	float cross(const Vector2F & b) const;
-
+	void verbose(const char * pref) const;
 	float x,y;
 };
 #endif        //  #ifndef VECTOR2F_H

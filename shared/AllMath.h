@@ -55,5 +55,12 @@ inline T AngleToDegree(T const & a)
 	return a / 3.14159269 * 180.0;
 }
 
+template<typename T>
+inline char IsNearZero(T const & a)
+{
+	if(a > EPSILON || a < -EPSILON) return 0;
+	return 1;
+}
+
 #endif        //  #ifndef ALLMATH_H
 

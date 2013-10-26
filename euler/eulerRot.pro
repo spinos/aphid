@@ -1,4 +1,4 @@
-INCLUDEPATH += ../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit
+INCLUDEPATH += ../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit ../powell
 win32:INCLUDEPATH += D:/ofl/shared D:/usr/eigen3
 mac:INCLUDEPATH += /Users/jianzhang/Library/eigen3
 LIBS += -L../easymodel -leasymodel -lIlmImf -lHalf -lhdf5 -lhdf5_hl -L../lib -laphid

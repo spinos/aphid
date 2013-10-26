@@ -8,7 +8,7 @@
  */
 
 #include "Vector2F.h"
-
+#include <iostream>
 #include <cmath>
 
 Vector2F::Vector2F() 
@@ -52,17 +52,17 @@ void Vector2F::operator+=( const Vector2F& other )
         y += other.y;
 }
 
-void Vector2F::operator-=(Vector2F& other )
+void Vector2F::operator-=(const Vector2F& other )
 {
         x -= other.x;
         y -= other.y;
 }
-
+/*
 void Vector2F::operator-=( Vector2F other )
 {
         x -= other.x;
         y -= other.y;
-}
+}*/
 
 void Vector2F::operator/=( const float& scale )
 {
@@ -106,7 +106,7 @@ Vector2F Vector2F::operator+(Vector2F& other ) const
         return Vector2F(x+other.x, y+other.y);
 }
 
-Vector2F Vector2F::operator-(Vector2F& other ) const
+Vector2F Vector2F::operator-( Vector2F& other ) const
 {
         return Vector2F(x-other.x, y-other.y);
 }
@@ -120,17 +120,6 @@ Vector2F Vector2F::operator-(Vector2F other ) const
 {
         return Vector2F(x-other.x, y-other.y);
 }
-
-Vector2F Vector2F::operator-(Vector2F& other )
-{
-        return Vector2F(x-other.x, y-other.y);
-}
-
-Vector2F Vector2F::operator-(Vector2F other )
-{
-        return Vector2F(x-other.x, y-other.y);
-}
-
 
 float Vector2F::distantTo(const Vector2F & other) const
 {
@@ -156,5 +145,10 @@ Vector2F Vector2F::reversed() const
 float Vector2F::cross(const Vector2F & b) const
 {
 	return x * b.y - y * b.x;
+}
+
+void Vector2F::verbose(const char * pref) const
+{
+	std::cout<<pref<<" ("<<x<<","<<y<<")\n";
 }
 //:~
