@@ -14,11 +14,14 @@ public:
 	BaseFunction();
 	virtual ~BaseFunction();
 	
+	virtual unsigned ndim() const;
+	virtual double f(const VectorN<double> & X);
 	virtual double f(const Vector2F & x);
 	
-	float particalDerivativeAt(float x, const Vector2F & at, const Vector2F & S);
+	void setLimit(float lo, float hi);
+	float limitLow() const;
+	float limitHigh() const;
 	
-	float minimization(const Vector2F & x, const Vector2F & part);
 private:
-	
+	float m_limit[2];
 };

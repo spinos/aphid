@@ -31,11 +31,9 @@ public:
 	Vector2F operator/( const float& scale ) const;
 	Vector2F operator*( float& scale ) const;	
 	Vector2F operator/( float& scale ) const;
-	Vector2F operator*( Vector2F& other ) const;		
-	Vector2F operator+( Vector2F& other ) const;	
-	Vector2F operator-( Vector2F& other ) const;
-	Vector2F operator+( Vector2F other ) const;	
-	Vector2F operator-( Vector2F other ) const;	
+	Vector2F operator*(const Vector2F& other ) const;		
+	Vector2F operator+(const Vector2F& other ) const;	
+	Vector2F operator-(const Vector2F& other ) const;
 	
 	float distantTo(const Vector2F & other) const;
 	float length() const;

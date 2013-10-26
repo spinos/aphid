@@ -7,7 +7,7 @@ INCLUDEPATH = $${SHAREDDIR}
 
 INCLUDEPATH += ../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit
 
-HEADERS = ../shared/AllMath.h \
+HEADERS = ../shared/AllMath.h ../shared/ATypes.h \
                 ../shared/Vector3F.h \
                 ../shared/Vector2F.h \
                 ../shared/Matrix44F.h \

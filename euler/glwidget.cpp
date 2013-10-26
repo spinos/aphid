@@ -64,8 +64,8 @@
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-	BaseFunction F;
-	Vector2F x(.5, .5);
+	BaseFunction F; F.setLimit(-10, 10); 
+	VectorN<double> x(2); *x.at(0) = 1.5; *x.at(1) = .5;
 	//F.minimization(x, Vector2F(1,0));
 	//Vector2F x(.75, .5);
 	//F.minimization(x, Vector2F(0,1), Vector2F(0,1));

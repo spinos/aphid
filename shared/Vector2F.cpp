@@ -96,27 +96,17 @@ Vector2F Vector2F::operator/(float& scale ) const
         return Vector2F(x/scale,y/scale);
 }
 	
-Vector2F Vector2F::operator*( Vector2F& other ) const
+Vector2F Vector2F::operator*(const Vector2F& other ) const
 {
 	return Vector2F(x * other.x, y * other.y);
 }
 	
-Vector2F Vector2F::operator+(Vector2F& other ) const
+Vector2F Vector2F::operator+(const Vector2F& other ) const
 {
         return Vector2F(x+other.x, y+other.y);
 }
 
-Vector2F Vector2F::operator-( Vector2F& other ) const
-{
-        return Vector2F(x-other.x, y-other.y);
-}
-
-Vector2F Vector2F::operator+(Vector2F other ) const
-{
-        return Vector2F(x+other.x, y+other.y);
-}
-
-Vector2F Vector2F::operator-(Vector2F other ) const
+Vector2F Vector2F::operator-(const Vector2F& other ) const
 {
         return Vector2F(x-other.x, y-other.y);
 }

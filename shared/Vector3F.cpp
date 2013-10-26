@@ -124,11 +124,6 @@ Vector3F Vector3F::operator*( const Vector3F& other ) const
         return Vector3F(x*other.x,y* other.y, z* other.z);
 }
 
-Vector3F Vector3F::operator+( Vector3F other )
-{
-	return Vector3F(x+other.x, y+other.y, z+other.z);
-}
-
 Vector3F Vector3F::operator+(Vector3F& other ) const
 {
         return Vector3F(x+other.x, y+other.y, z+other.z);
@@ -137,11 +132,6 @@ Vector3F Vector3F::operator+(Vector3F& other ) const
 Vector3F Vector3F::operator+(const Vector3F& other ) const
 {
         return Vector3F(x+other.x, y+other.y, z+other.z);
-}
-
-Vector3F Vector3F::operator-(Vector3F other)
-{
-	return Vector3F(x-other.x, y-other.y, z-other.z);
 }
 
 Vector3F Vector3F::operator-(Vector3F& other ) const

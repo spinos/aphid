@@ -28,11 +28,9 @@ public:
 	Vector3F operator/( const float& scale ) const;	
 	Vector3F operator*( const Vector3F& other ) const;	
 	
-	Vector3F operator+( Vector3F other );
 	Vector3F operator+( Vector3F& other ) const;
 	Vector3F operator+( const Vector3F& other ) const;
 	
-	Vector3F operator-( Vector3F other );
 	Vector3F operator-( Vector3F& other ) const;		
 	Vector3F operator-( const Vector3F& other ) const;
 	

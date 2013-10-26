@@ -8,20 +8,21 @@
  */
 
 #pragma once
-
+#include <AllMath.h>
 #include <BaseFunction.h>
 
 class PowellMethod {
 public:
 	PowellMethod();
 	
-	void solve(BaseFunction & F, Vector2F & x);
+	void solve(BaseFunction & F, VectorN<double> & x);
 private:
-	void cycle(BaseFunction & F, Vector2F & x, Vector2F & S0, Vector2F & S1);
+	void cycle(BaseFunction & F, VectorN<double> & x, VectorN<double> * U);
 	double taxiCab(double x);
 	double goldenSectionSearch(double a, double b, double c, double tau);
-	double minimization(BaseFunction & F, const Vector2F & at, const Vector2F & along);
+	double minimization(BaseFunction & F, const VectorN<double> & at, const VectorN<double> & along);
 	
 	BaseFunction * m_f;
-	Vector2F m_at, m_along;
+	VectorN<double> m_at; 
+	VectorN<double> m_along;
 };
