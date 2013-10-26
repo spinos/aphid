@@ -125,7 +125,9 @@ HEADERS = ../shared/AllMath.h \
                 ../catmullclark/AccCorner.h \
                 ../catmullclark/AccEdge.h \
                 ../catmullclark/AccInterior.h \
-                ../catmullclark/BezierDrawer.h
+                ../catmullclark/BezierDrawer.h \
+				../powell/PowellMethod.h \
+				../powell/BaseFunction.h
 SOURCES = ../shared/Vector3F.cpp \
                 ../shared/Vector2F.cpp \
                 ../shared/Matrix44F.cpp \
@@ -242,7 +244,9 @@ SOURCES = ../shared/Vector3F.cpp \
                 ../catmullclark/AccCorner.cpp \
                 ../catmullclark/AccEdge.cpp \
                 ../catmullclark/AccInterior.cpp \
-                ../catmullclark/BezierDrawer.cpp
+                ../catmullclark/BezierDrawer.cpp \
+				../powell/PowellMethod.cpp \
+				../powell/BaseFunction.cpp
 
 TARGET  = aphid
 macx {

@@ -40,7 +40,6 @@ float BaseFunction::minimization(const Vector2F & x, const Vector2F & part)
 		i++;
 	}
 	
-	//std::cout<<"n step "<<i<<"\n";
 	return r;
 }
 

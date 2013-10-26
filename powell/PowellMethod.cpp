@@ -16,27 +16,25 @@ void PowellMethod::solve(BaseFunction & F, Vector2F & x)
 	//x.set(2.55, 1.75);
 	x.set(.5, .5);
 	//x.set(.99, 1.01);
-	std::cout<<"f[("<<x.x<<" , "<<x.y<<")] = "<<F.f(x)<<"\n";
+	
 	Vector2F x0 = x;
 	Vector2F S0(1, 0), S1(0, 1);
 	float y = F.f(x);
 	float y0 = y;
 	float Dx, Dy;
-	for(int i = 0; i < 15; i++) {
-		std::cout<<"i="<<i<<"\n";
+	for(int i = 0; i < 12; i++) {
+		std::cout<<"cycle "<<i<<"\n";
 		cycle(F, x, S0, S1);
 		
 		Dx = (x.x - x0.x) * (x.x - x0.x) + (x.y - x0.y) * (x.y - x0.y);
 		
-		if(Dx < 10e-11) break;
+		if(Dx < 10e-9) break;
 		
 		y = F.f(x);
 		
 		Dy = (y - y0) * (y - y0);
 		
-		if(Dy < 10e-11) break;
-		
-		std::cout<<"cycle end\n";
+		if(Dy < 10e-9) break;
 		
 		y0 = y;
 		x0 = x;
@@ -46,42 +44,45 @@ void PowellMethod::solve(BaseFunction & F, Vector2F & x)
 
 void PowellMethod::cycle(BaseFunction & F, Vector2F & x, Vector2F & S0, Vector2F & S1)
 {
-	Vector2F S, S11;
+	const Vector2F x0 = x;
+	std::cout<<"cycle begin\n f[("<<x.x<<" , "<<x.y<<")] = "<<F.f(x)<<"\n";
+	Vector2F S;
 	double a0, a1, a2;
 	int i = 0;
-	while(i < 3) {
+	while(i < 2) {
 
 		if(i == 0) {
 			S = S0;
-			S.verbose("S0");
 			a0 = minimization(F, x, S);
-			//std::cout<<" a0 "<<a0<<"\n";
 			x = x + S * a0;
+			
+			S.verbose("S0");
+			std::cout<<" a0 "<<a0<<"\n";
+			std::cout<<"f[("<<x.x<<" , "<<x.y<<")] = "<<F.f(x)<<"\n";
+			
 		}
 		else if(i==1) {
-			S = S11 = S1;
-			S.verbose("S1");
+			S = S1;
 			a1 = minimization(F, x, S);
-			//std::cout<<" a1 "<<a1<<"\n";
 			x = x + S * a1;
+			
+			S.verbose("S1");
+			std::cout<<" a1 "<<a1<<"\n";
+			std::cout<<"f[("<<x.x<<" , "<<x.y<<")] = "<<F.f(x)<<"\n";
 		}
-		else {
-			S.x = a0 * S0.x + a1 * S0.x;
-			S.y = a0 * S0.y + a1 * S1.x;
-			S.verbose("S2");
-			a2 = minimization(F, x, S);
-			//std::cout<<" a2 "<<a2<<"\n";
-			x = x + S * a2;
-		}
-
-		std::cout<<"f[("<<x.x<<" , "<<x.y<<")] = "<<F.f(x)<<"\n";
-		
 		i++;
 	}
+
+	S = x - x0;
+	a2 = minimization(F, x0, S);
+	x = x0 + S * a2;
+
+	S.verbose("S");
+	std::cout<<" a "<<a2<<"\n";
+	std::cout<<"cycle end\n f[("<<x.x<<" , "<<x.y<<")] = "<<F.f(x)<<"\n";;
 	
-	S0 = S11;
+	S0 = S1;
 	S1 = S;
-	return;
 }
 
 double PowellMethod::minimization(BaseFunction & F, const Vector2F & at, const Vector2F & along)
@@ -89,7 +90,7 @@ double PowellMethod::minimization(BaseFunction & F, const Vector2F & at, const V
 	m_f = &F;
 	m_at = at;
 	m_along = along;
-	return goldenSectionSearch(-10, 0, 10, 10e-7);
+	return goldenSectionSearch(-1000, 0, 1000, 10e-7);
 }
 
 double PowellMethod::taxiCab(double x)
