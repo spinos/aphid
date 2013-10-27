@@ -3,7 +3,6 @@
 BaseDeformer::BaseDeformer() : m_deformedV(0), m_restV(0) 
 {
 	m_numVertices = 0;
-	m_enabled = false;
 }
 
 BaseDeformer::~BaseDeformer() 
@@ -66,19 +65,4 @@ BoundingBox BaseDeformer::calculateBBox() const
 		b.updateMax(m_deformedV[i]);
 	}
     return b;
-}
-
-void BaseDeformer::enable()
-{
-	m_enabled = true;
-}
-
-void BaseDeformer::disable()
-{
-	m_enabled = false;
-}
-
-bool BaseDeformer::isEnabled() const
-{
-	return m_enabled;
 }

@@ -57,3 +57,11 @@ void SkeletonJoint::align()
 	((SkeletonJoint *)child(0))->setJointOrient(cj + angles.reversed());
 	
 }
+
+float SkeletonJoint::length() const
+{
+	if(numChildren() < 1) return 0.f;
+	
+	Vector3F cp = child(0)->translation();
+	return cp.x;
+}

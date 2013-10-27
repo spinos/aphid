@@ -22,6 +22,8 @@ public:
 	void align();
 	
 	virtual Vector3F rotationBaseAngles() const;
+	
+	float length() const;
 protected:
 	
 private:

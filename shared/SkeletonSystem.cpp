@@ -171,3 +171,82 @@ unsigned SkeletonSystem::closestJointIndex(const Vector3F & pt) const
 	
 	return res;
 }
+
+void SkeletonSystem::calculateBindWeights(const Vector3F & pt, VectorN<unsigned> & ids, VectorN<float> & weights) const
+{
+	Vector3F q = pt;
+	q.z = 0.f;
+	
+	unsigned i = closestJointIndex(q);
+	SkeletonJoint * jointA = jointByIndex(i);
+	Matrix44F spaceInv = jointA->worldSpace();
+	spaceInv.inverse();
+	
+	Vector3F subP = spaceInv.transform(q);
+	
+	if(subP.x < 0.f || jointA->numChildren() < 1) {
+		if(jointA->parent()) {
+			i = jointA->parent()->index();
+			jointA = jointByIndex(i);
+			spaceInv = jointA->worldSpace();
+			spaceInv.inverse();
+			subP = spaceInv.transform(q);
+		}
+	}
+	
+	float la = jointA->length();
+	
+	if(subP.x < 0.f) {
+		initIdWeight(1, ids, weights);
+		*ids.at(0) = jointA->index();
+		*weights.at(0) = 1.f;
+		return;
+	}
+	
+	float lowGate = la * .45f;
+	float highGate = la * .55f;
+	
+	if(subP.x >= lowGate && subP.x <= highGate) {
+		initIdWeight(1, ids, weights);
+		*ids.at(0) = jointA->index();
+		*weights.at(0) = 1.f;
+		return;
+	}
+	
+	SkeletonJoint * jointB;
+	float w;
+	
+	if(subP.x < lowGate) {
+		if(!jointA->parent()) {
+			initIdWeight(1, ids, weights);
+			*ids.at(0) = jointA->index();
+			*weights.at(0) = 1.f;
+			return;
+		}
+		
+		jointB = jointByIndex(jointA->parent()->index());
+		initIdWeight(2, ids, weights);
+		*ids.at(0) = jointA->index();
+		*ids.at(1) = jointB->index();
+		
+		w = .5f + .5f * subP.x / lowGate;
+		*weights.at(0) = w;
+		*weights.at(1) = 1.f - w;
+	}
+	else {
+		jointB = jointByIndex(jointA->child(0)->index());
+		initIdWeight(2, ids, weights);
+		*ids.at(0) = jointA->index();
+		*ids.at(1) = jointB->index();
+		
+		w = 1.f - .5f * (subP.x - highGate)/(la - highGate);
+		*weights.at(0) = w;
+		*weights.at(1) = 1.f - w;
+	}
+}
+
+void SkeletonSystem::initIdWeight(unsigned n, VectorN<unsigned> & ids, VectorN<float> & weights) const
+{
+	ids.setZero(n);
+	weights.setZero(n);
+}

@@ -124,7 +124,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	BezierCurve udir;
 	udir.addVertex(Vector3F(15.f, 0.f, 0.f));
-	udir.addVertex(Vector3F(50.f, 0.f, -10.f));
+	udir.addVertex(Vector3F(50.f, 0.f, -15.f));
 	udir.addVertex(Vector3F(80.f, 0.f, 0.f));
 	udir.addVertex(Vector3F(110.f, 0.f, 5.f));
 	udir.addVertex(Vector3F(140.f, 0.f, -5.f));
@@ -140,7 +140,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	vdir.finishAddVertex();
 	vdir.computeKnots();
 	
-	m_mesh = new PlaneMesh(udir, vdir, 20, 10);
+	m_mesh = new PlaneMesh(udir, vdir, 40, 20);
 	
 	m_deformer = new SkeletonSubspaceDeformer;
 	m_deformer->setMesh(m_mesh);

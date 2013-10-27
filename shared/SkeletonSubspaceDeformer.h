@@ -23,9 +23,11 @@ public:
 	void bindToSkeleton(SkeletonSystem * skeleton);
 
 protected:
-
+	void bindVertexToSkeleton(unsigned vi, std::vector<float> & wei);
+	void calculateSubspaceP();
 private:
-	unsigned * m_jointIds;
+	VectorN<unsigned> * m_jointIds;
+	float * m_jointWeights;
 	Vector3F * m_subspaceP;
 	SkeletonSystem * m_skeleton;
 };

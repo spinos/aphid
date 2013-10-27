@@ -1,8 +1,8 @@
 #pragma once
-
+#include <BaseState.h>
 #include <BaseMesh.h>
 
-class BaseDeformer
+class BaseDeformer : public BaseState
 {
 public:
     
@@ -24,14 +24,9 @@ public:
 	
 	BoundingBox calculateBBox() const;
 	
-	void enable();
-	void disable();
-	bool isEnabled() const;
-	
 private:
     unsigned m_numVertices;
 	Vector3F * m_deformedV;
 	Vector3F * m_restV;
 	BaseMesh * m_mesh;
-	bool m_enabled;
 };

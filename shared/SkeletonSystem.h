@@ -32,12 +32,14 @@ public:
 	SkeletonPose * pose(unsigned idx) const;
 	
 	unsigned closestJointIndex(const Vector3F & pt) const;
+	void calculateBindWeights(const Vector3F & pt, VectorN<unsigned> & ids, VectorN<float> & weights) const;
 protected:
 
 private:
 	unsigned maxPoseIndex() const;
 	void degreeOfFreedom(BaseTransform * j, std::vector<Float3> & dof) const;
 	void rotationAngles(BaseTransform * j, std::vector<Vector3F> & angles) const;
+	void initIdWeight(unsigned n, VectorN<unsigned> & ids, VectorN<float> & weights) const;
 private:
     std::vector<SkeletonJoint *> m_joints;
 	std::vector<SkeletonPose *> m_poses;
