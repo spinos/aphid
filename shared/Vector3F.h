@@ -31,7 +31,7 @@ public:
 	Vector3F operator+( Vector3F& other ) const;
 	Vector3F operator+( const Vector3F& other ) const;
 	
-	Vector3F operator-( Vector3F& other ) const;		
+	Vector3F operator-( Vector3F & other ) const;		
 	Vector3F operator-( const Vector3F& other ) const;
 	
 	float length() const;
@@ -56,6 +56,7 @@ public:
 	
 	float angleBetween(const Vector3F& another, const Vector3F& up) const;
 	float distance2To(const Vector3F& another) const;
+	void resize(float l);
 	
 	void verbose(const char * pref) const;
 	

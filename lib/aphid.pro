@@ -5,7 +5,7 @@ PARENTPROJ = ..
 SHAREDDIR = ../shared
 INCLUDEPATH = $${SHAREDDIR}
 
-INCLUDEPATH += ../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit
+INCLUDEPATH += ../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit ../powell
 
 HEADERS = ../shared/AllMath.h ../shared/ATypes.h \
                 ../shared/Vector3F.h \
