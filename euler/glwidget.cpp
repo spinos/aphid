@@ -61,6 +61,7 @@
 #include <BezierCurve.h>
 #include <BaseFunction.h>
 #include <PowellMethod.h>
+#include <MeshManipulator.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -146,6 +147,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_deformer->setMesh(m_mesh);
 	m_deformer->bindToSkeleton(m_skeleton);
 	solve();
+	
+	m_sculptor = new MeshManipulator;
+	m_sculptor->attachTo(m_mesh);
 }
 
 GLWidget::~GLWidget()

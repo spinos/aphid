@@ -47,6 +47,7 @@ class SkeletonJoint;
 class SkeletonSystem;
 class PlaneMesh;
 class SkeletonSubspaceDeformer;
+class MeshManipulator;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -72,6 +73,7 @@ private:
 	SkeletonSystem * m_skeleton;
 	PlaneMesh * m_mesh;
 	SkeletonSubspaceDeformer * m_deformer;
+	MeshManipulator * m_sculptor;
 private slots:
 	
 public slots:

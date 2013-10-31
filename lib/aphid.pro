@@ -111,6 +111,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h \
     ../shared/HFile.h \
     ../shared/HRFile.h \
 ../shared/TransformManipulator.h \
+../shared/MeshManipulator.h \
 	../shared/SkeletonJoint.h \
 	../shared/SkeletonSystem.h \
 	../shared/SkeletonPose.h \
@@ -230,6 +231,7 @@ SOURCES = ../shared/Vector3F.cpp \
     ../shared/HFile.cpp \
     ../shared/HRFile.cpp \
     ../shared/TransformManipulator.cpp \
+    ../shared/MeshManipulator.cpp \
 	../shared/SkeletonJoint.cpp \
 	../shared/SkeletonSystem.cpp \
 	../shared/SkeletonPose.cpp \

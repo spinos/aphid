@@ -7,10 +7,12 @@ HEADERS       = ../shared/Base3DView.h \
                 ../shared/QDouble3Edit.h \
                 ../shared/ActionIconFrame.h \
                 ../shared/QIconFrame.h \
+                ../shared/ContextIconFrame.h \
                 glwidget.h \
                 SkeletonJointEdit.h \
                 SkeletonPoseEdit.h \
                 PoseListModel.h \
+                EulerTools.h \
                 window.h
                 
 SOURCES       = ../shared/Base3DView.cpp \
@@ -18,11 +20,13 @@ SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/QDouble3Edit.cpp \
                 ../shared/ActionIconFrame.cpp \
                 ../shared/QIconFrame.cpp \
+                ../shared/ContextIconFrame.cpp \
                 glwidget.cpp \
                 main.cpp \
                 SkeletonJointEdit.cpp \
                 SkeletonPoseEdit.cpp \
                 PoseListModel.cpp \
+                EulerTools.cpp \
                 window.cpp
 
 win32 {

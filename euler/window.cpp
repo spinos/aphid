@@ -46,10 +46,13 @@
 #include <QDoubleEditSlider.h>
 #include "SkeletonJointEdit.h"
 #include "SkeletonPoseEdit.h"
+#include "EulerTools.h"
 //! [0]
 Window::Window()
 {
+    EulerTools * tools = new EulerTools;
     glWidget = new GLWidget;
+    glWidget->setInteractContext(tools);
 	alpha = new QDoubleEditSlider(tr("Rotate X"));
 	alpha->setLimit(0.0, 360.0);
 	alpha->setValue(0.0);
@@ -64,8 +67,15 @@ Window::Window()
 	
 	poseEdit = new SkeletonPoseEdit(glWidget->skeleton());
 	
+	QWidget * lft = new QWidget;
+	QVBoxLayout * llayout = new QVBoxLayout;
+	llayout->addWidget(tools);
+	llayout->addWidget(glWidget);
+	llayout->setStretch(1,1);
+	lft->setLayout(llayout);
+	
 	QSplitter * page = new QSplitter;
-	page->addWidget(glWidget);
+	page->addWidget(lft);
 	
 	QVBoxLayout * layout = new QVBoxLayout;
 	layout->addWidget(jointEdit);
