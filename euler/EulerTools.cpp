@@ -72,22 +72,22 @@ void EulerTools::createContext()
 {
     ContextIconFrame * createContour = new ContextIconFrame(this);
 	
-	createContour->addIconFile(":brush.png");
-	createContour->addIconFile(":brushActive.png");
+	createContour->addIconFile(":move.png");
+	createContour->addIconFile(":moveActive.png");
 	createContour->setIconIndex(1);
 	createContour->setContext(MoveTransform);
 	
 	ContextIconFrame * combContour = new ContextIconFrame(this);
 	
-	combContour->addIconFile(":comb.png");
-	combContour->addIconFile(":combActive.png");
+	combContour->addIconFile(":rotate.png");
+	combContour->addIconFile(":rotateActive.png");
 	combContour->setIconIndex(0);
 	combContour->setContext(RotateTransform);
 	
 	ContextIconFrame * eraseContour = new ContextIconFrame(this);
 	
-	eraseContour->addIconFile(":eraser.png");
-	eraseContour->addIconFile(":eraserActive.png");
+	eraseContour->addIconFile(":moveVertex.png");
+	eraseContour->addIconFile(":moveVertexActive.png");
 	eraseContour->setIconIndex(0);
 	eraseContour->setContext(MoveMeshComponent);
 	

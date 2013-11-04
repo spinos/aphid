@@ -48,5 +48,7 @@
         <file>addFileActive.png</file>
         <file>save.png</file>
         <file>saveActive.png</file>
+        <file>rotate.png</file>
+        <file>rotateActive.png</file>
     </qresource>
 </RCC>
