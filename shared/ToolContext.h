@@ -16,7 +16,8 @@ public:
 		MoveVertexInUV = 10,
 		MoveTransform = 11,
 		RotateTransform = 12,
-		MoveMeshComponent = 13
+		MoveMeshComponent = 13,
+		SmoothSurface = 14
     };
     
     enum ActionRank {

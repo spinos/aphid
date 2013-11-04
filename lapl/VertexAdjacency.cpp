@@ -434,6 +434,35 @@ void VertexAdjacency::getConnectedPolygons(std::vector<unsigned> & dst) const
 	}
 }
 
+Vector3F VertexAdjacency::center()
+{
+	char onBoundary = isOpen();
+	int numNeiOnBoundary = 0;
+	Vector3F c;
+	VertexAdjacency::VertexNeighbor *neighbor;
+    for(neighbor = firstNeighbor(); !isLastNeighbor(); neighbor = nextNeighbor()) {
+        if(onBoundary) {
+			if(isNeighborOnBoundary(*neighbor)) {
+				c += *(neighbor->v->m_v);
+				numNeiOnBoundary++;
+			}
+		}
+		else
+			c += *(neighbor->v->m_v) * neighbor->weight;
+    }
+	
+	if(numNeiOnBoundary > 0) c /= (float)numNeiOnBoundary;
+	return c;
+}
+
+char VertexAdjacency::isNeighborOnBoundary(VertexNeighbor & nei)
+{
+	Edge dummy, nouse;
+	findEdge(this->getIndex(), nei.v->getIndex(), dummy);
+	if(!findOppositeEdge(dummy, nouse)) return 1;
+	return 0;
+}
+
 void VertexAdjacency::verbose() const
 {
 	printf("\nv %i\n adjacent edge count: %i\n", getIndex(), (int)m_edges.size());

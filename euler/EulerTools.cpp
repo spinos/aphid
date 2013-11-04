@@ -91,9 +91,17 @@ void EulerTools::createContext()
 	eraseContour->setIconIndex(0);
 	eraseContour->setContext(MoveMeshComponent);
 	
+	ContextIconFrame * smooth = new ContextIconFrame(this);
+	
+	smooth->addIconFile(":smoothSurface.png");
+	smooth->addIconFile(":smoothSurfaceActive.png");
+	smooth->setIconIndex(0);
+	smooth->setContext(SmoothSurface);
+	
 	m_contextFrames.push_back(createContour);
 	m_contextFrames.push_back(combContour);
 	m_contextFrames.push_back(eraseContour);
+	m_contextFrames.push_back(smooth);
 }
 
 void EulerTools::createAction()

@@ -20,6 +20,7 @@ void IntersectionContext::reset()
 	m_success = 0;
 	m_cell = 0;
 	m_enableNormalRef = 0;
+	twoSided = 0;
 }
 
 void IntersectionContext::reset(const Ray & ray)

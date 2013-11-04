@@ -408,11 +408,20 @@ void BaseMesh::postIntersection(unsigned idx, IntersectionContext * ctx) const
 	    ctx->m_componentIdx = closestVertex(idx, ctx->m_hitP);
 }
 
-char BaseMesh::naiveIntersect(IntersectionContext * ctx) const
+char BaseMesh::selectComponent(IntersectionContext * ctx) const
 {   
-	unsigned nf = BaseMesh::getNumFaces();
+	Vector3F threeCorners[3];
+	unsigned fvi[3];
+	const unsigned nf = getNumTriangles();
 	for(unsigned i = 0; i < nf; i++) {
-		if(BaseMesh::intersect(i, ctx)) return 1;
+		getTriangle(i, fvi);
+		threeCorners[0] = _vertices[fvi[0]];
+		threeCorners[1] = _vertices[fvi[1]];
+		threeCorners[2] = _vertices[fvi[2]];
+		if(triangleIntersect(threeCorners, ctx)) {
+			ctx->m_componentIdx = BaseMesh::closestVertex(i, ctx->m_hitP);;
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -515,7 +524,7 @@ char BaseMesh::triangleIntersect(const Vector3F * threeCorners, IntersectionCont
 	Ray &ray = ctx->m_ray;
 	float ddotn = ray.m_dir.dot(nor);
 		
-	if(ddotn > 0.f) return 0;
+	if(!ctx->twoSided && ddotn > 0.f) return 0;
 	
 	float t = (a.dot(nor) - ray.m_origin.dot(nor)) / ddotn;
 	

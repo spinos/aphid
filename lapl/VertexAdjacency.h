@@ -55,6 +55,8 @@ public:
 	
 	void getConnectedPolygons(std::vector<unsigned> & dst) const;
 	
+	Vector3F center();
+	
 	void verbose() const;
 private:
 	char findOneRingNeighbors();
@@ -66,6 +68,7 @@ private:
 	char findIncomming(Edge & eout, Edge & ein) const;
 	void addNeighbor(Edge *e, char isOutgoing = 1);
     void getVijs(int idx, Vector3F &vij, Vector3F &vij0, Vector3F &vij1) const;
+	char isNeighborOnBoundary(VertexNeighbor & nei);
 	
 	std::vector<Edge *> m_edges;
 	std::vector<VertexNeighbor *> m_neighbors;

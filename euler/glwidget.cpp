@@ -179,7 +179,12 @@ void GLWidget::clientSelect()
 	        manipulator()->setToRotate();
 	        selectJoint();
 	        break;
+		case ToolContext::SmoothSurface:
+	        sculptor()->setToSmooth();
+	        selectVertex();
+	        break;
 	    default:
+			sculptor()->setToMove();
 	        selectVertex();
 	        break;
 	}
@@ -197,6 +202,9 @@ void GLWidget::clientMouseInput()
 	        break;
 	    case ToolContext::RotateTransform:
 	        changeJoint();
+	        break;
+		case ToolContext::SmoothSurface:
+	        changeMesh();
 	        break;
 	    default:
 	        changeMesh();

@@ -40,6 +40,7 @@ public:
 	unsigned m_componentIdx;
 	char m_success;
 	char m_enableNormalRef;
+	char twoSided;
 	char * m_cell;
 	float m_coord[3];
 private:

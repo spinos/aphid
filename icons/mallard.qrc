@@ -50,5 +50,7 @@
         <file>saveActive.png</file>
         <file>rotate.png</file>
         <file>rotateActive.png</file>
+        <file>smoothSurface.png</file>
+        <file>smoothSurfaceActive.png</file>
     </qresource>
 </RCC>
