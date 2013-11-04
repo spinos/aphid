@@ -47,7 +47,7 @@ class SkeletonJoint;
 class SkeletonSystem;
 class PlaneMesh;
 class SkeletonSubspaceDeformer;
-class MeshManipulator;
+
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -66,6 +66,10 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 private:
 	void solve();
+	void selectJoint();
+	void changeJoint();
+	void changeMesh();
+	void selectVertex();
 private:
 	Matrix33F m_space0, m_space1;
 	Vector3F m_angles;
@@ -73,7 +77,7 @@ private:
 	SkeletonSystem * m_skeleton;
 	PlaneMesh * m_mesh;
 	SkeletonSubspaceDeformer * m_deformer;
-	MeshManipulator * m_sculptor;
+	
 private slots:
 	
 public slots:

@@ -14,6 +14,7 @@ class QTimer;
 class BaseBrush;
 class BaseTransform;
 class TransformManipulator;
+class MeshManipulator;
 
 class Base3DView : public QGLWidget
 {
@@ -37,6 +38,7 @@ public:
 	BaseBrush * brush();
 	
 	TransformManipulator * manipulator();
+	MeshManipulator * sculptor();
 	
     void initializeGL();
     void paintGL();
@@ -87,6 +89,7 @@ private:
 	
 private:
 	TransformManipulator * m_manipulator;
+	MeshManipulator * m_sculptor;
 	Ray m_incidentRay;
 	QPoint m_lastPos;
     QColor m_backgroundColor;

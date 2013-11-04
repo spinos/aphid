@@ -73,7 +73,7 @@ public:
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
 	
 	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
-	char intersect(IntersectionContext * ctx) const;
+	virtual char naiveIntersect(IntersectionContext * ctx) const;
 	void postIntersection(unsigned idx, IntersectionContext * ctx) const;
 	virtual char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
 	char insideTriangle(const Vector3F & p, const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & n) const;

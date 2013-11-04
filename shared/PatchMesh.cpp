@@ -47,7 +47,7 @@ const BoundingBox PatchMesh::calculateBBox(const unsigned &idx) const
 char PatchMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 {
 	PointInsidePolygonTest pa = patchAt(idx);
-	
+
 	if(!patchIntersect(pa, ctx)) return 0;
 	
 	postIntersection(idx, ctx);
@@ -72,7 +72,7 @@ char PatchMesh::patchIntersect(PointInsidePolygonTest & pa, IntersectionContext 
 	ctx->m_minHitDistance = d;
 	ctx->m_geometry = (Geometry*)this;
 	ctx->m_success = 1;
-	
+
 	return 1;
 }
 
@@ -92,6 +92,7 @@ unsigned PatchMesh::closestVertex(unsigned idx, const Vector3F & px) const
 		}
 		qudi++;
 	}
+
 	return vert;
 }
 

@@ -62,7 +62,6 @@
 #include <BaseFunction.h>
 #include <PowellMethod.h>
 #include <MeshManipulator.h>
-
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	BaseFunction F; F.setLimit(-10, 10); 
@@ -141,15 +140,14 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	vdir.finishAddVertex();
 	vdir.computeKnots();
 	
-	m_mesh = new PlaneMesh(udir, vdir, 40, 20);
+	m_mesh = new PlaneMesh(udir, vdir, 20, 5);
 	
 	m_deformer = new SkeletonSubspaceDeformer;
 	m_deformer->setMesh(m_mesh);
 	m_deformer->bindToSkeleton(m_skeleton);
 	solve();
 	
-	m_sculptor = new MeshManipulator;
-	m_sculptor->attachTo(m_mesh);
+	sculptor()->attachTo(m_mesh);
 }
 
 GLWidget::~GLWidget()
@@ -172,13 +170,19 @@ void GLWidget::clientDraw()
 
 void GLWidget::clientSelect()
 {	
-	const Ray * ray = getIncidentRay();
-
-	SkeletonJoint * subject = m_skeleton->selectJoint(*ray);
-	if(!subject) return;
-	manipulator()->attachTo(subject);
-	manipulator()->start(ray);
-	emit jointSelected((int)subject->index());
+	switch(interactMode()) {
+	    case ToolContext::MoveTransform:
+	        manipulator()->setToMove();
+	        selectJoint();
+	        break;
+	    case ToolContext::RotateTransform:
+	        manipulator()->setToRotate();
+	        selectJoint();
+	        break;
+	    default:
+	        selectVertex();
+	        break;
+	}
 }
 
 void GLWidget::clientDeselect()
@@ -187,10 +191,17 @@ void GLWidget::clientDeselect()
 
 void GLWidget::clientMouseInput()
 {
-	const Ray * ray = getIncidentRay();
-	manipulator()->perform(ray);
-	solve();
-	emit jointChanged();
+    switch(interactMode()) {
+	    case ToolContext::MoveTransform:
+	        changeJoint();
+	        break;
+	    case ToolContext::RotateTransform:
+	        changeJoint();
+	        break;
+	    default:
+	        changeMesh();
+	        break;
+	}
 }
 
 void GLWidget::setAngleAlpha(double x)
@@ -247,4 +258,36 @@ void GLWidget::updateJoint()
 {
 	if(!manipulator()->isDetached()) manipulator()->reattach();
 	solve();
+}
+
+void GLWidget::selectJoint()
+{
+    const Ray * ray = getIncidentRay();
+
+	SkeletonJoint * subject = m_skeleton->selectJoint(*ray);
+	if(!subject) return;
+	manipulator()->attachTo(subject);
+	manipulator()->start(ray);
+	emit jointSelected((int)subject->index());
+}
+
+void GLWidget::selectVertex()
+{
+    const Ray * ray = getIncidentRay();
+    sculptor()->start(ray);
+}
+
+void GLWidget::changeJoint()
+{
+    const Ray * ray = getIncidentRay();
+	manipulator()->perform(ray);
+	solve();
+	emit jointChanged();
+}
+
+void GLWidget::changeMesh()
+{
+    const Ray * ray = getIncidentRay();
+	sculptor()->perform(ray);
+
 }

@@ -3,6 +3,7 @@
 #include <AllMath.h>
 class Ray;
 class BaseMesh;
+class IntersectionContext;
 class MeshManipulator {
 public:
     MeshManipulator();
@@ -14,5 +15,6 @@ public:
 	void stop();
 private:
     BaseMesh * m_mesh;
+    IntersectionContext * m_intersect;
     char m_started;
 };

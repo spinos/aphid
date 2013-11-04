@@ -404,17 +404,15 @@ void BaseMesh::postIntersection(unsigned idx, IntersectionContext * ctx) const
 {
     if(ctx->getComponentFilterType() == PrimitiveFilter::TFace)
 	    ctx->m_componentIdx = idx;
-	else
+	else 
 	    ctx->m_componentIdx = closestVertex(idx, ctx->m_hitP);
-		
-	//printf("hit comp %i ", idx);
 }
 
-char BaseMesh::intersect(IntersectionContext * ctx) const
-{
-	unsigned nf = getNumFaces();
+char BaseMesh::naiveIntersect(IntersectionContext * ctx) const
+{   
+	unsigned nf = BaseMesh::getNumFaces();
 	for(unsigned i = 0; i < nf; i++) {
-		if(intersect(i, ctx)) return 1;
+		if(BaseMesh::intersect(i, ctx)) return 1;
 	}
 	return 0;
 }

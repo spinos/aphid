@@ -11,6 +11,7 @@
 #include <KdTreeDrawer.h>
 #include <IntersectionContext.h>
 #include <TransformManipulator.h>
+#include <MeshManipulator.h>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -31,6 +32,7 @@ Base3DView::Base3DView(QWidget *parent)
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_brush = new BaseBrush;
 	m_manipulator = new TransformManipulator;
+	m_sculptor = new MeshManipulator;
 	
 	m_timer = new QTimer(this);
 	connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
@@ -429,6 +431,11 @@ BaseBrush * Base3DView::brush()
 TransformManipulator * Base3DView::manipulator()
 {
 	return m_manipulator;
+}
+
+MeshManipulator * Base3DView::sculptor()
+{
+    return m_sculptor;
 }
 
 void Base3DView::showBrush() const
