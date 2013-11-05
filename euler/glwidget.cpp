@@ -57,7 +57,7 @@
 #include <SkeletonJoint.h>
 #include <SkeletonSystem.h>
 #include <PlaneMesh.h>
-#include <SkeletonSubspaceDeformer.h>
+#include <PoseSpaceDeformer.h>
 #include <BezierCurve.h>
 #include <BaseFunction.h>
 #include <PowellMethod.h>
@@ -142,7 +142,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_mesh = new PlaneMesh(udir, vdir, 20, 5);
 	
-	m_deformer = new SkeletonSubspaceDeformer;
+	m_deformer = new PoseSpaceDeformer;
 	m_deformer->setMesh(m_mesh);
 	m_deformer->bindToSkeleton(m_skeleton);
 	solve();

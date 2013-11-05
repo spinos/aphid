@@ -45,12 +45,12 @@ void SkeletonSubspaceDeformer::bindToSkeleton(SkeletonSystem * skeleton)
 	for(unsigned i = 0; i < numVertices(); i++)
 		bindVertexToSkeleton(i, ws);
 	
-	const unsigned n = ws.size();
+	m_numRestP = ws.size();
 	
-	m_jointWeights = new float[n];
-	m_subspaceP = new Vector3F[n];
+	m_jointWeights = new float[m_numRestP];
+	m_subspaceP = new Vector3F[m_numRestP];
 	
-	for(unsigned i = 0; i < n; i++)
+	for(unsigned i = 0; i < m_numRestP; i++)
 		m_jointWeights[i] = ws[i];
 	
 	ws.clear();
@@ -73,7 +73,8 @@ void SkeletonSubspaceDeformer::bindVertexToSkeleton(unsigned vi, std::vector<flo
 	
 	for(unsigned i=0; i < n; i++) *m_jointIds[vi].at(i) = ids[i];
 
-	if(vi == 0) *m_jointIds[vi].at(n) = 0;
+	if(vi == 0) 
+		*m_jointIds[vi].at(n) = 0;
 	else {
 		n0 = m_jointIds[vi - 1]._ndim - 1;
 		*m_jointIds[vi].at(n) = m_jointIds[vi - 1][n0] + n0;
@@ -107,15 +108,26 @@ char SkeletonSubspaceDeformer::solve()
 	if(!m_skeleton) return 0;
 
 	Vector3F * p = deformedP();
-	for(unsigned i = 0; i < numVertices(); i++) {
+	for(unsigned i = 0; i < numVertices(); i++)
 	    p[i] = combine(i);
-	}
+
 	return 1;
+}
+
+unsigned SkeletonSubspaceDeformer::numRestP() const
+{
+	return m_numRestP;
 }
 
 unsigned SkeletonSubspaceDeformer::numBindJoints(unsigned idx) const
 {
     return m_jointIds[idx]._ndim - 1;
+}
+
+unsigned SkeletonSubspaceDeformer::bindStart(unsigned idx) const
+{
+	const unsigned nj = numBindJoints(idx);
+    return m_jointIds[idx][nj];
 }
 
 Matrix44F SkeletonSubspaceDeformer::bindS(unsigned idx, unsigned j) const
@@ -126,16 +138,12 @@ Matrix44F SkeletonSubspaceDeformer::bindS(unsigned idx, unsigned j) const
 
 Vector3F SkeletonSubspaceDeformer::bindP(unsigned idx, unsigned j) const
 {
-    const unsigned nj = numBindJoints(idx);
-    const unsigned vstart = m_jointIds[idx][nj];
-    return m_subspaceP[vstart + j];
+    return m_subspaceP[bindStart(idx) + j];
 }
 
 float SkeletonSubspaceDeformer::bindW(unsigned idx, unsigned j) const
 {
-    const unsigned nj = numBindJoints(idx);
-    const unsigned vstart = m_jointIds[idx][nj];
-    return m_jointWeights[vstart + j];
+    return m_jointWeights[bindStart(idx) + j];
 }
 
 Vector3F SkeletonSubspaceDeformer::combine(unsigned idx)

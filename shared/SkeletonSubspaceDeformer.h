@@ -20,13 +20,15 @@ public:
 	virtual void setMesh(BaseMesh * mesh);
 	virtual char solve();
 	
-	void bindToSkeleton(SkeletonSystem * skeleton);
+	virtual void bindToSkeleton(SkeletonSystem * skeleton);
 
 protected:
+	unsigned numRestP() const;
+	unsigned numBindJoints(unsigned idx) const;
+	unsigned bindStart(unsigned idx) const;
     Matrix44F bindS(unsigned idx, unsigned j) const;
-    Vector3F bindP(unsigned idx, unsigned j) const;
     float bindW(unsigned idx, unsigned j) const;
-    unsigned numBindJoints(unsigned idx) const;
+	virtual Vector3F bindP(unsigned idx, unsigned j) const;
     Vector3F combine(unsigned idx);
 	void bindVertexToSkeleton(unsigned vi, std::vector<float> & wei);
 	void calculateSubspaceP();
@@ -35,4 +37,5 @@ private:
 	float * m_jointWeights;
 	Vector3F * m_subspaceP;
 	SkeletonSystem * m_skeleton;
+	unsigned m_numRestP;
 };

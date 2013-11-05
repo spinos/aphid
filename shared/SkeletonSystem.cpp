@@ -97,6 +97,7 @@ void SkeletonSystem::addPose()
 	pose->setValues(dofs, angles);
 	
 	m_poses.push_back(pose);
+	m_activePose = pose;
 }
 
 void SkeletonSystem::selectPose(unsigned i)
@@ -144,6 +145,11 @@ unsigned SkeletonSystem::numPoses() const
 SkeletonPose * SkeletonSystem::pose(unsigned idx) const
 {
 	return m_poses[idx];
+}
+
+SkeletonPose * SkeletonSystem::currentPose() const
+{
+	return m_activePose;
 }
 
 unsigned SkeletonSystem::maxPoseIndex() const

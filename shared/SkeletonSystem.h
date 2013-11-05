@@ -30,6 +30,7 @@ public:
 	
 	unsigned numPoses() const;
 	SkeletonPose * pose(unsigned idx) const;
+	SkeletonPose * currentPose() const;
 	
 	unsigned closestJointIndex(const Vector3F & pt) const;
 	void calculateBindWeights(const Vector3F & pt, VectorN<unsigned> & ids, VectorN<float> & weights) const;
