@@ -105,21 +105,49 @@ void SkeletonSubspaceDeformer::calculateSubspaceP()
 char SkeletonSubspaceDeformer::solve()
 {
 	if(!m_skeleton) return 0;
-	unsigned i, j, n, nj, vstart;
-	Matrix44F space;
+
 	Vector3F * p = deformedP();
-	for(i = 0; i < numVertices(); i++) {
-		n = m_jointIds[i]._ndim;
-		nj = n - 1;
-		vstart = m_jointIds[i][nj];
-		
-		Vector3F &q = p[i];
-		q.setZero();
-		for(j = 0; j < nj; j++) {
-			SkeletonJoint * joint = m_skeleton->jointByIndex(m_jointIds[i][j]);
-			space = joint->worldSpace();
-			q += space.transform(m_subspaceP[vstart + j]) * m_jointWeights[vstart + j];
-		}
+	for(unsigned i = 0; i < numVertices(); i++) {
+	    p[i] = combine(i);
 	}
 	return 1;
+}
+
+unsigned SkeletonSubspaceDeformer::numBindJoints(unsigned idx) const
+{
+    return m_jointIds[idx]._ndim - 1;
+}
+
+Matrix44F SkeletonSubspaceDeformer::bindS(unsigned idx, unsigned j) const
+{
+    SkeletonJoint * joint = m_skeleton->jointByIndex(m_jointIds[idx][j]);
+    return joint->worldSpace();
+}
+
+Vector3F SkeletonSubspaceDeformer::bindP(unsigned idx, unsigned j) const
+{
+    const unsigned nj = numBindJoints(idx);
+    const unsigned vstart = m_jointIds[idx][nj];
+    return m_subspaceP[vstart + j];
+}
+
+float SkeletonSubspaceDeformer::bindW(unsigned idx, unsigned j) const
+{
+    const unsigned nj = numBindJoints(idx);
+    const unsigned vstart = m_jointIds[idx][nj];
+    return m_jointWeights[vstart + j];
+}
+
+Vector3F SkeletonSubspaceDeformer::combine(unsigned idx)
+{
+    const unsigned nj = numBindJoints(idx);
+    unsigned j;
+    Vector3F q;
+    Matrix44F space;
+    for(j = 0; j < nj; j++) {
+        space = bindS(idx, j);
+        q += space.transform(bindP(idx, j)) * bindW(idx, j);
+    }
+    
+    return q;
 }

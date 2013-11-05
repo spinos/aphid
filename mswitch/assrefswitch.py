@@ -38,6 +38,23 @@ def GetSelectedReference():
             
     return 'unknown'
     
+def GetAssNodeDSOName(dag):
+    fstandin = om.MFnDependencyNode(dag.node())
+    return fstandin.findPlug('dso').asString()
+   
+def GetAssNode(filename):
+    item = om.MDagPath()
+    it.om.MItDag()
+    while not it.isDone():
+        it.getDagPath(item)
+        item.extendToShape()
+        if om.MFnDagNode(item).typeName() == 'aiStandIn':
+            if GetAssNodeDSOName(item) == filename:
+                return (om.MFnDagNode(item).typeName(), item)
+        it.next()
+        
+    return ('unknown', item)
+    
 def GetSelectedStandin():
     l0 = om.MSelectionList()
     om.MGlobal.getActiveSelectionList(l0)
@@ -61,7 +78,10 @@ def GetSelectedTransform():
     it = om.MItSelectionList(l0)
     item = om.MDagPath()
     it.getDagPath(item)
-    ft = om.MFnDagNode(item.transform())
+    return GetDagTransform(item)
+    
+def GetDagTransform(dag):
+    ft = om.MFnDagNode(dag.transform())
     
     a = om.MCommandResult()
     om.MGlobal.executeCommand('getAttr '+ft.findPlug('translate').name(), a)
@@ -96,8 +116,15 @@ def SwitchFromReferenceToAss(assFile):
     if refFile == 'unknown':
         print 'no reference selected, do nothing'
         return False
-        
-    (t, r, s) = GetSelectedTransform()
+    return SwitchFromReferenceToAss2(refFile, assFile)
+
+def SwitchFromReferenceToAss2(refFile, assFile):
+    refedNodes = GetReferenceNodes(refFile)
+    it = om.MItSelectionList(refedNodes)
+    item = om.MDagPath()
+    it.getDagPath(item)
+
+    (t, r, s) = GetDagTransform(item)
    
     print 'remove reference ', refFile
     om.MFileIO.removeReference(refFile)
@@ -122,7 +149,7 @@ def SwitchFromReferenceToAss(assFile):
     om.MGlobal.executeCommand(c)
     return True
     
-def SwitchFromAssToReference(refFileName):        
+def SwitchFromAssToReference(refFileName):
     (typeName, standin) = GetSelectedStandin()
     if typeName is 'unknown':
         print 'no standin selected, do nothing'
@@ -143,6 +170,16 @@ def SwitchFromAssToReference(refFileName):
     SetTransform(trans, t, r, s)
     
     return True
+    
+def SwitchFromAssToReference2(assFileName, refFileName):
+    (typeName, standin) = GetAssNode(assFileName)
+    if typeName is 'unknown':
+        print 'no standin of',assFileName,', do nothing'
+        return False
+    
+    om.MGlobal.selectByName(standin.fullPathName(), om.MGlobal.kReplaceList)
+        
+    return SwitchFromAssToReference(refFileName)
     
 ## SwitchFromReferenceToAss('D:/man/facialRigExample/face_valleyGirl_class/scenes/test.ass')
 ## SwitchFromAssToReference('D:/man/facialRigExample/face_valleyGirl_class/scenes/test.ma')
