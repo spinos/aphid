@@ -1,4 +1,5 @@
 TEMPLATE = lib
+DESTDIR = ./
 CONFIG += staticlib thread release
 CONFIG   -= qt
 PARENTPROJ = ..

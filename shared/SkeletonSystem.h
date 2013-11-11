@@ -43,8 +43,8 @@ private:
 	void initIdWeight(unsigned n, VectorN<unsigned> & ids, VectorN<float> & weights) const;
 private:
     std::vector<SkeletonJoint *> m_joints;
-	std::vector<SkeletonPose *> m_poses;
-	SkeletonPose * m_activePose;
+	//std::vector<SkeletonPose *> m_poses;
+	//SkeletonPose * m_activePose;
 };
 
 

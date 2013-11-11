@@ -3,7 +3,6 @@
 #include <SkeletonPose.h>
 SkeletonSystem::SkeletonSystem() 
 {
-	m_activePose = 0;
 }
 
 SkeletonSystem::~SkeletonSystem() 
@@ -16,10 +15,6 @@ void SkeletonSystem::clear()
     std::vector<SkeletonJoint *>::iterator it = m_joints.begin();
     for(; it != m_joints.end(); ++it) delete (*it); 
     m_joints.clear();
-	
-	std::vector<SkeletonPose *>::iterator itp = m_poses.begin();
-    for(; itp != m_poses.end(); ++itp) delete (*itp); 
-    m_poses.clear();
 }
 
 void SkeletonSystem::addJoint(SkeletonJoint * j)
