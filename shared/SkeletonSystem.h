@@ -20,31 +20,19 @@ public:
     SkeletonJoint * selectJoint(const Ray & ray) const;
 	
 	unsigned degreeOfFreedom() const;
-	
-	void addPose();
-	void selectPose(unsigned i);
-	void selectPose(const std::string & name);
-	void updatePose();
-	void recoverPose();
-	void renamePose(const std::string & fromName, const std::string & toName);
-	
-	unsigned numPoses() const;
-	SkeletonPose * pose(unsigned idx) const;
-	SkeletonPose * currentPose() const;
+	void degreeOfFreedom(std::vector<Float3> & dof) const;
+	void rotationAngles(std::vector<Vector3F> & angles) const;
 	
 	unsigned closestJointIndex(const Vector3F & pt) const;
 	void calculateBindWeights(const Vector3F & pt, VectorN<unsigned> & ids, VectorN<float> & weights) const;
 protected:
-
+	void jointDegreeOfFreedom(BaseTransform * j, std::vector<Float3> & dof) const;
+	void jointRotationAngles(BaseTransform * j, std::vector<Vector3F> & angles) const;
+	
 private:
-	unsigned maxPoseIndex() const;
-	void degreeOfFreedom(BaseTransform * j, std::vector<Float3> & dof) const;
-	void rotationAngles(BaseTransform * j, std::vector<Vector3F> & angles) const;
 	void initIdWeight(unsigned n, VectorN<unsigned> & ids, VectorN<float> & weights) const;
 private:
     std::vector<SkeletonJoint *> m_joints;
-	//std::vector<SkeletonPose *> m_poses;
-	//SkeletonPose * m_activePose;
 };
 
 

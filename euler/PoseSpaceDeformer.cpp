@@ -8,6 +8,9 @@
  */
 
 #include "PoseSpaceDeformer.h"
+#include <SkeletonPose.h>
+#include <SkeletonSystem.h>
+#include <SkeletonJoint.h>
 
 PoseSpaceDeformer::PoseSpaceDeformer() 
 {
@@ -39,7 +42,7 @@ void PoseSpaceDeformer::addPose(unsigned idx)
 	PoseDelta * pose = new PoseDelta(idx, numRestP());
 	m_poses.push_back(pose);
 }
-
+/*
 void PoseSpaceDeformer::selectPose(unsigned idx)
 {
 	PoseDelta * pose = findPose(idx);
@@ -48,7 +51,7 @@ void PoseSpaceDeformer::selectPose(unsigned idx)
 	const unsigned n = numRestP();
 	for(unsigned i = 0; i < n; i++) m_delta[i] = pose->_delta[i];
 }
-
+*/
 void PoseSpaceDeformer::updatePose(unsigned idx)
 {
 	PoseDelta * pose = findPose(idx);
@@ -70,4 +73,84 @@ PoseSpaceDeformer::PoseDelta * PoseSpaceDeformer::findPose(unsigned idx)
 			pose = *it;
 	}
 	return pose;
+}
+
+void PoseSpaceDeformer::addPose()
+{
+	SkeletonPose *pose = new SkeletonPose;
+	pose->setName("pose", maxPoseIndex() + 1);
+	pose->setIndex(maxPoseIndex() + 1);
+	pose->setNumJoints(skeleton()->numJoints());
+	std::vector<Float3> dofs;
+	skeleton()->degreeOfFreedom(dofs);
+	pose->setDegreeOfFreedom(dofs);
+	std::vector<Vector3F> angles;
+	skeleton()->rotationAngles(angles);
+	pose->setValues(dofs, angles);
+	
+	PoseDelta * delta = new PoseDelta(pose);
+	m_poses.push_back(delta);
+	m_activePose = pose;
+}
+
+void PoseSpaceDeformer::selectPose(unsigned i)
+{
+	m_activePose = m_poses[i];
+}
+/*
+void PoseSpaceDeformer::selectPose(const std::string & name)
+{
+	m_activePose = 0;
+	std::vector<SkeletonPose *>::const_iterator it = m_poses.begin();
+	for(; it != m_poses.end(); ++it) {
+		if((*it)->name() == name) m_activePose = *it;
+	}
+}*/
+	
+void PoseSpaceDeformer::updatePose()
+{
+	if(!m_activePose) return;
+	std::vector<Float3> dofs;
+	degreeOfFreedom(m_joints[0], dofs);
+	std::vector<Vector3F> angles;
+	rotationAngles(m_joints[0], angles);
+	m_activePose->setValues(dofs, angles);
+}
+
+void PoseSpaceDeformer::recoverPose()
+{
+	if(!m_activePose) return;
+	m_activePose->recoverValues(m_joints);
+}
+
+void PoseSpaceDeformer::renamePose(const std::string & fromName, const std::string & toName)
+{
+	selectPose(fromName);
+	if(!m_activePose) return;
+	m_activePose->setName(toName);
+}
+
+unsigned PoseSpaceDeformer::numPoses() const
+{
+	return m_poses.size();
+}
+
+SkeletonPose * PoseSpaceDeformer::pose(unsigned idx) const
+{
+	return m_poses[idx];
+}
+
+SkeletonPose * PoseSpaceDeformer::currentPose() const
+{
+	return m_activePose;
+}
+
+unsigned PoseSpaceDeformer::maxPoseIndex() const
+{
+	unsigned mx = 0;
+	std::vector<SkeletonPose *>::const_iterator it = m_poses.begin();
+    for(; it != m_poses.end(); ++it) {
+		if((*it)->index() > mx) mx = (*it)->index();
+	}
+	return mx;
 }

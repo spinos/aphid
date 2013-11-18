@@ -21,6 +21,7 @@ public:
 	virtual char solve();
 	
 	virtual void bindToSkeleton(SkeletonSystem * skeleton);
+	SkeletonSystem * skeleton() const;
 
 protected:
 	unsigned numRestP() const;

@@ -98,3 +98,8 @@ void SkeletonPose::cleanup()
 	if(m_jointStart) delete[] m_jointStart;
 	if(m_angles) delete[] m_angles;
 }
+
+unsigned SkeletonPose::dof() const
+{
+	return m_dof;
+}

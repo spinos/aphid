@@ -21,6 +21,7 @@ public:
 	void setDegreeOfFreedom(const std::vector<Float3> & dof);
 	void setValues(const std::vector<Float3> & dof, const std::vector<Vector3F> & angles);
 	void recoverValues(const std::vector<SkeletonJoint *> & joints);
+	unsigned dof() const;
 protected:
 	
 private:

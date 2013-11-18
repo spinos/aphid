@@ -159,3 +159,8 @@ Vector3F SkeletonSubspaceDeformer::combine(unsigned idx)
     
     return q;
 }
+
+SkeletonSystem * SkeletonSubspaceDeformer::skeleton() const
+{
+	return m_skeleton;
+}

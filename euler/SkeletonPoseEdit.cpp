@@ -61,13 +61,13 @@ void SkeletonPoseEdit::selectPose()
 	
 	QModelIndex selectedIndex = poseList->selectionModel()->currentIndex();
 	QVariant varName = model->data(selectedIndex, Qt::DisplayRole);
-    m_skeleton->selectPose(varName.toString().toUtf8().data());
-	m_skeleton->recoverPose();
+    //m_skeleton->selectPose(varName.toString().toUtf8().data());
+	//m_skeleton->recoverPose();
 	emit poseChanged();
 }
 
 void SkeletonPoseEdit::savePose()
 {
 	if(poseList->selectionModel()->selection().isEmpty()) return;
-	m_skeleton->updatePose();
+	//m_skeleton->updatePose();
 }

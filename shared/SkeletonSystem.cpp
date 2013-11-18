@@ -54,7 +54,7 @@ SkeletonJoint * SkeletonSystem::selectJoint(const Ray & ray) const
 unsigned SkeletonSystem::degreeOfFreedom() const
 {
 	std::vector<Float3> dofs;
-	degreeOfFreedom(m_joints[0], dofs);
+	jointDegreeOfFreedom(m_joints[0], dofs);
 	unsigned ndof = 0;
 	std::vector<Float3>::iterator it = dofs.begin();
 	for(; it != dofs.end(); ++it) {
@@ -65,96 +65,27 @@ unsigned SkeletonSystem::degreeOfFreedom() const
 	return ndof;
 }
 
-void SkeletonSystem::degreeOfFreedom(BaseTransform * j, std::vector<Float3> & dof) const
+void SkeletonSystem::degreeOfFreedom(std::vector<Float3> & dof) const
+{
+	jointDegreeOfFreedom(m_joints[0], dof);
+}
+
+void SkeletonSystem::rotationAngles(std::vector<Vector3F> & angles) const
+{
+	jointRotationAngles(m_joints[0], angles); 
+}
+
+void SkeletonSystem::jointDegreeOfFreedom(BaseTransform * j, std::vector<Float3> & dof) const
 {
 	dof.push_back(j->rotateDOF());
 	
-	for(unsigned i = 0; i < j->numChildren(); i++) degreeOfFreedom(j->child(i), dof);
+	for(unsigned i = 0; i < j->numChildren(); i++) jointDegreeOfFreedom(j->child(i), dof);
 }
 
-void SkeletonSystem::rotationAngles(BaseTransform * j, std::vector<Vector3F> & angles) const
+void SkeletonSystem::jointRotationAngles(BaseTransform * j, std::vector<Vector3F> & angles) const
 {
 	angles.push_back(j->rotationAngles());
-	for(unsigned i = 0; i < j->numChildren(); i++) rotationAngles(j->child(i), angles);
-}
-
-void SkeletonSystem::addPose()
-{
-	SkeletonPose *pose = new SkeletonPose;
-	pose->setName("pose", maxPoseIndex() + 1);
-	pose->setIndex(maxPoseIndex() + 1);
-	pose->setNumJoints(numJoints());
-	std::vector<Float3> dofs;
-	degreeOfFreedom(m_joints[0], dofs);
-	pose->setDegreeOfFreedom(dofs);
-	std::vector<Vector3F> angles;
-	rotationAngles(m_joints[0], angles);
-	pose->setValues(dofs, angles);
-	
-	m_poses.push_back(pose);
-	m_activePose = pose;
-}
-
-void SkeletonSystem::selectPose(unsigned i)
-{
-	m_activePose = m_poses[i];
-}
-
-void SkeletonSystem::selectPose(const std::string & name)
-{
-	m_activePose = 0;
-	std::vector<SkeletonPose *>::const_iterator it = m_poses.begin();
-	for(; it != m_poses.end(); ++it) {
-		if((*it)->name() == name) m_activePose = *it;
-	}
-}
-	
-void SkeletonSystem::updatePose()
-{
-	if(!m_activePose) return;
-	std::vector<Float3> dofs;
-	degreeOfFreedom(m_joints[0], dofs);
-	std::vector<Vector3F> angles;
-	rotationAngles(m_joints[0], angles);
-	m_activePose->setValues(dofs, angles);
-}
-
-void SkeletonSystem::recoverPose()
-{
-	if(!m_activePose) return;
-	m_activePose->recoverValues(m_joints);
-}
-
-void SkeletonSystem::renamePose(const std::string & fromName, const std::string & toName)
-{
-	selectPose(fromName);
-	if(!m_activePose) return;
-	m_activePose->setName(toName);
-}
-
-unsigned SkeletonSystem::numPoses() const
-{
-	return m_poses.size();
-}
-
-SkeletonPose * SkeletonSystem::pose(unsigned idx) const
-{
-	return m_poses[idx];
-}
-
-SkeletonPose * SkeletonSystem::currentPose() const
-{
-	return m_activePose;
-}
-
-unsigned SkeletonSystem::maxPoseIndex() const
-{
-	unsigned mx = 0;
-	std::vector<SkeletonPose *>::const_iterator it = m_poses.begin();
-    for(; it != m_poses.end(); ++it) {
-		if((*it)->index() > mx) mx = (*it)->index();
-	}
-	return mx;
+	for(unsigned i = 0; i < j->numChildren(); i++) jointRotationAngles(j->child(i), angles);
 }
 
 unsigned SkeletonSystem::closestJointIndex(const Vector3F & pt) const
