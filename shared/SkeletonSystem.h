@@ -25,6 +25,8 @@ public:
 	
 	unsigned closestJointIndex(const Vector3F & pt) const;
 	void calculateBindWeights(const Vector3F & pt, VectorN<unsigned> & ids, VectorN<float> & weights) const;
+	
+	void recoverPose(const SkeletonPose * pose);
 protected:
 	void jointDegreeOfFreedom(BaseTransform * j, std::vector<Float3> & dof) const;
 	void jointRotationAngles(BaseTransform * j, std::vector<Vector3F> & angles) const;

@@ -262,6 +262,11 @@ SkeletonSystem * GLWidget::skeleton() const
 	return m_skeleton;
 }
 
+PoseSpaceDeformer * GLWidget::deformer() const
+{
+    return m_deformer;
+}
+
 void GLWidget::updateJoint()
 {
 	if(!manipulator()->isDetached()) manipulator()->reattach();

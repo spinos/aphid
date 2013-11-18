@@ -9,27 +9,15 @@
 
 #pragma once
 #include <SkeletonSubspaceDeformer.h>
+class PoseDelta;
 class SkeletonPose;
 class PoseSpaceDeformer : public SkeletonSubspaceDeformer {
 public:
-	struct PoseDelta {
-		PoseDelta(SkeletonPose * p) {
-			_pose = p;
-			_delta = new Vector3F[p->dof()];
-		}
-		~PoseDelta() {
-			delete _pose;
-			delete[] _delta;
-		}
-		SkeletonPose * _pose;
-		Vector3F * _delta;
-	};
-	
 	PoseSpaceDeformer();
 	virtual ~PoseSpaceDeformer();
 	virtual void bindToSkeleton(SkeletonSystem * skeleton);
 	
-	void addPose(unsigned idx);
+	//void addPose(unsigned idx);
 	//void selectPose(unsigned idx);
 	void updatePose(unsigned idx);
 	

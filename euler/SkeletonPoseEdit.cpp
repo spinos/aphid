@@ -8,15 +8,13 @@
  */
 #include <QtGui>
 #include "SkeletonPoseEdit.h"
-#include <SkeletonSystem.h>
+#include <PoseSpaceDeformer.h>
 #include <ActionIconFrame.h>
 #include <ToolContext.h>
 #include "PoseListModel.h"
 
-SkeletonPoseEdit::SkeletonPoseEdit(SkeletonSystem * skeleton, QWidget *parent) : QWidget(parent)
+SkeletonPoseEdit::SkeletonPoseEdit(PoseSpaceDeformer * deformer, QWidget *parent) : QWidget(parent)
 {
-	m_skeleton = skeleton;
-	
 	ActionIconFrame * addPoseBtn = new ActionIconFrame(this);
 	addPoseBtn->addIconFile(":addFile.png");
 	addPoseBtn->addIconFile(":addFileActive.png");
@@ -30,7 +28,7 @@ SkeletonPoseEdit::SkeletonPoseEdit(SkeletonSystem * skeleton, QWidget *parent) :
 	savePoseBtn->setAction(ToolContext::SaveSkeletonPose);
 	
 	model = new FileListModel(this);
-    model->setSkeleton(m_skeleton);
+    model->setDeformer(deformer);
 	
 	poseList = new QListView;
 	poseList->setModel(model);

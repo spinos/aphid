@@ -65,7 +65,7 @@ Window::Window()
 	
 	jointEdit = new SkeletonJointEdit(glWidget->skeleton());
 	
-	poseEdit = new SkeletonPoseEdit(glWidget->skeleton());
+	poseEdit = new SkeletonPoseEdit(glWidget->deformer());
 	
 	QWidget * lft = new QWidget;
 	QVBoxLayout * llayout = new QVBoxLayout;

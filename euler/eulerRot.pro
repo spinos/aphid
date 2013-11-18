@@ -15,6 +15,7 @@ HEADERS       = ../shared/Base3DView.h \
                 PoseListModel.h \
                 EulerTools.h \
 				PoseSpaceDeformer.h \
+				PoseDelta.h \
                 window.h
                 
 SOURCES       = ../shared/Base3DView.cpp \
@@ -30,6 +31,7 @@ SOURCES       = ../shared/Base3DView.cpp \
                 PoseListModel.cpp \
                 EulerTools.cpp \
 				PoseSpaceDeformer.cpp \
+				PoseDelta.cpp \
                 window.cpp
 
 win32 {

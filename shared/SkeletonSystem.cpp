@@ -182,3 +182,8 @@ void SkeletonSystem::initIdWeight(unsigned n, VectorN<unsigned> & ids, VectorN<f
 	ids.setZero(n);
 	weights.setZero(n);
 }
+
+void SkeletonSystem::recoverPose(const SkeletonPose * pose)
+{
+    pose->recoverValues(m_joints);
+}

@@ -18,10 +18,10 @@ public:
 	virtual ~SkeletonPose();
 	
 	void setNumJoints(unsigned x);
-	void setDegreeOfFreedom(const std::vector<Float3> & dof);
+	virtual void setDegreeOfFreedom(const std::vector<Float3> & dof);
 	void setValues(const std::vector<Float3> & dof, const std::vector<Vector3F> & angles);
-	void recoverValues(const std::vector<SkeletonJoint *> & joints);
-	unsigned dof() const;
+	void recoverValues(const std::vector<SkeletonJoint *> & joints) const;
+	unsigned degreeOfFreedom() const;
 protected:
 	
 private:

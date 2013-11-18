@@ -65,7 +65,7 @@ void SkeletonPose::setValues(const std::vector<Float3> & dof, const std::vector<
 	}
 }
 
-void SkeletonPose::recoverValues(const std::vector<SkeletonJoint *> & joints)
+void SkeletonPose::recoverValues(const std::vector<SkeletonJoint *> & joints) const
 {
 	unsigned i, j, k = 0;
 	for(i = 0; i < joints.size(); i++) {
@@ -99,7 +99,7 @@ void SkeletonPose::cleanup()
 	if(m_angles) delete[] m_angles;
 }
 
-unsigned SkeletonPose::dof() const
+unsigned SkeletonPose::degreeOfFreedom() const
 {
 	return m_dof;
 }

@@ -44,6 +44,7 @@
 #include <QBrush>
 #include <QDir>
 #include <SkeletonSystem.h>
+#include <PoseSpaceDeformer.h>
 #include <SkeletonPose.h>
 
 FileListModel::FileListModel(QObject *parent)
@@ -86,7 +87,7 @@ bool FileListModel::setData(const QModelIndex &index,
 
 	QString preName = fileList.at(index.row());
 	
-	m_skeleton->renamePose(preName.toUtf8().data(), value.toString().toUtf8().data());
+	m_deformer->renamePose(preName.toUtf8().data(), value.toString().toUtf8().data());
 	 fileList.replace(index.row(), value.toString());
 	 emit dataChanged(index, index);
 	 return true;
@@ -120,9 +121,9 @@ void FileListModel::fetchMore(const QModelIndex & /* index */)
 //![2]
 
 //![0]
-void FileListModel::setSkeleton(SkeletonSystem * skeleton)
+void FileListModel::setDeformer(PoseSpaceDeformer * deformer)
 {
-	m_skeleton = skeleton;
+	m_deformer = deformer;
     shoPoses();
 }
 
@@ -130,9 +131,9 @@ void FileListModel::shoPoses()
 {
 	fileList.clear();
 	
-	unsigned np = m_skeleton->numPoses();
+	unsigned np = m_deformer->numPoses();
 	for(unsigned i = 0; i < np; i++)
-		fileList<<tr(m_skeleton->pose(i)->name().c_str());
+		fileList<<tr(m_deformer->pose(i)->name().c_str());
 	
     fileCount = 0;
     reset();
@@ -140,7 +141,7 @@ void FileListModel::shoPoses()
 
 void FileListModel::addPose()
 {
-	m_skeleton->addPose();
+	m_deformer->addPose();
 	shoPoses();
 }
 //![0]

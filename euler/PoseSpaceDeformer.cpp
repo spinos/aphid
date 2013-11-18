@@ -8,6 +8,7 @@
  */
 
 #include "PoseSpaceDeformer.h"
+#include <PoseDelta.h>
 #include <SkeletonPose.h>
 #include <SkeletonSystem.h>
 #include <SkeletonJoint.h>
@@ -36,13 +37,13 @@ Vector3F PoseSpaceDeformer::bindP(unsigned idx, unsigned j) const
 {
 	return SkeletonSubspaceDeformer::bindP(idx, j) + m_delta[bindStart(idx) + j];
 }
-
+/*
 void PoseSpaceDeformer::addPose(unsigned idx)
 {
 	PoseDelta * pose = new PoseDelta(idx, numRestP());
 	m_poses.push_back(pose);
 }
-/*
+
 void PoseSpaceDeformer::selectPose(unsigned idx)
 {
 	PoseDelta * pose = findPose(idx);
@@ -60,16 +61,16 @@ void PoseSpaceDeformer::updatePose(unsigned idx)
 	const unsigned n = numRestP();
 	for(unsigned i = 0; i < n; i++) {
 // compute pose->_delta[i];
-		m_delta[i] = pose->_delta[i];
+		m_delta[i] = pose->delta()[i];
 	}
 }
 
-PoseSpaceDeformer::PoseDelta * PoseSpaceDeformer::findPose(unsigned idx)
+PoseDelta * PoseSpaceDeformer::findPose(unsigned idx)
 {
 	PoseDelta * pose = 0;
 	std::vector<PoseDelta *>::iterator it = m_poses.begin();
 	for(; it != m_poses.end(); ++it) {
-		if((*it)->_poseIdx == idx)
+		if((*it)->index() == idx)
 			pose = *it;
 	}
 	return pose;
@@ -77,7 +78,7 @@ PoseSpaceDeformer::PoseDelta * PoseSpaceDeformer::findPose(unsigned idx)
 
 void PoseSpaceDeformer::addPose()
 {
-	SkeletonPose *pose = new SkeletonPose;
+	PoseDelta * pose = new PoseDelta;
 	pose->setName("pose", maxPoseIndex() + 1);
 	pose->setIndex(maxPoseIndex() + 1);
 	pose->setNumJoints(skeleton()->numJoints());
@@ -88,39 +89,38 @@ void PoseSpaceDeformer::addPose()
 	skeleton()->rotationAngles(angles);
 	pose->setValues(dofs, angles);
 	
-	PoseDelta * delta = new PoseDelta(pose);
-	m_poses.push_back(delta);
+	m_poses.push_back(pose);
 	m_activePose = pose;
 }
-
+/*
 void PoseSpaceDeformer::selectPose(unsigned i)
 {
 	m_activePose = m_poses[i];
-}
-/*
+}*/
+
 void PoseSpaceDeformer::selectPose(const std::string & name)
 {
 	m_activePose = 0;
-	std::vector<SkeletonPose *>::const_iterator it = m_poses.begin();
+	std::vector<PoseDelta *>::const_iterator it = m_poses.begin();
 	for(; it != m_poses.end(); ++it) {
 		if((*it)->name() == name) m_activePose = *it;
 	}
-}*/
+}
 	
 void PoseSpaceDeformer::updatePose()
 {
 	if(!m_activePose) return;
 	std::vector<Float3> dofs;
-	degreeOfFreedom(m_joints[0], dofs);
+	skeleton()->degreeOfFreedom(dofs);
 	std::vector<Vector3F> angles;
-	rotationAngles(m_joints[0], angles);
+	skeleton()->rotationAngles(angles);
 	m_activePose->setValues(dofs, angles);
 }
 
 void PoseSpaceDeformer::recoverPose()
 {
 	if(!m_activePose) return;
-	m_activePose->recoverValues(m_joints);
+	skeleton()->recoverPose(m_activePose);
 }
 
 void PoseSpaceDeformer::renamePose(const std::string & fromName, const std::string & toName)
@@ -148,7 +148,7 @@ SkeletonPose * PoseSpaceDeformer::currentPose() const
 unsigned PoseSpaceDeformer::maxPoseIndex() const
 {
 	unsigned mx = 0;
-	std::vector<SkeletonPose *>::const_iterator it = m_poses.begin();
+	std::vector<PoseDelta *>::const_iterator it = m_poses.begin();
     for(; it != m_poses.end(); ++it) {
 		if((*it)->index() > mx) mx = (*it)->index();
 	}

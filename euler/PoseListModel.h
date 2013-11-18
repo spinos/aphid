@@ -45,7 +45,7 @@
 #include <QList>
 #include <QStringList>
 
-class SkeletonSystem;
+class PoseSpaceDeformer;
 
 //![0]
 class FileListModel : public QAbstractListModel
@@ -65,7 +65,7 @@ signals:
     void numberPopulated(int number);
 
 public slots:
-    void setSkeleton(SkeletonSystem * skeleton);
+    void setDeformer(PoseSpaceDeformer * deformer);
 	void addPose();
 
 protected:
@@ -76,7 +76,7 @@ private:
 	void shoPoses();
 private:
     QStringList fileList;
-	SkeletonSystem * m_skeleton;
+	PoseSpaceDeformer * m_deformer;
     int fileCount;
 };
 //![0]

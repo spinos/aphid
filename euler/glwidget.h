@@ -57,6 +57,7 @@ public:
     virtual ~GLWidget();
 	
 	SkeletonSystem * skeleton() const;
+	PoseSpaceDeformer * deformer() const;
 
 protected:
     virtual void clientDraw();
