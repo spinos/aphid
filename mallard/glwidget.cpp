@@ -581,6 +581,6 @@ void GLWidget::loadFeatherDistribution(const std::string & name)
 	makeCurrent();
 	m_featherDistrId = getDrawer()->loadTexture(m_featherDistrId, image);
 	doneCurrent();
-	skin()->setFeatherDistributionMap(image);
+	skin()->setDistributionMap(image);
 }
 //:~

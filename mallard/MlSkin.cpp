@@ -17,9 +17,6 @@ MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_numCreatedFeather(0
 {
     m_activeIndices.clear();
 	m_calamus = new MlCalamusArray; 
-	m_body = 0;
-	m_topo = 0;
-	m_distribution = 0;
 }
 
 MlSkin::~MlSkin()
@@ -46,15 +43,9 @@ void MlSkin::clearFeather()
 
 void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 {
-	m_body = mesh;
-	m_topo = topo;
+	CollisionRegion::setBodyMesh(mesh, topo);
 	m_faceCalamusStart = new unsigned[mesh->getNumFaces()];
 	resetFaceCalamusIndirection();
-}
-
-AccPatchMesh * MlSkin::bodyMesh() const
-{
-	return m_body;
 }
 
 void MlSkin::floodAround(MlCalamus floodC, unsigned floodFaceIdx, const Vector3F & floodPos, const Vector3F & floodNor, const float & floodMaxD, const float & floodMinD)
@@ -72,16 +63,16 @@ void MlSkin::floodAround(MlCalamus floodC, unsigned floodFaceIdx, const Vector3F
 	std::vector<Vector3F> darts;
 	for(i = 0; i < growOnFaces.size(); i++) {
 		iface = growOnFaces[i];
-		const unsigned ndart = 4 + m_body->calculateBBox(iface).area() / floodMinD / floodMinD;
+		const unsigned ndart = 4 + bodyMesh()->calculateBBox(iface).area() / floodMinD / floodMinD;
 		for(j = 0; j < ndart; j++) {
 		
 			u = ((float)(rand()%591))/591.f;
 			v = ((float)(rand()%593))/593.f;
-			m_body->pointOnPatch(iface, u, v, adart);
+			bodyMesh()->pointOnPatch(iface, u, v, adart);
 			
 			if(Vector3F(floodPos, adart).length() > floodMaxD) continue;
 			
-			m_body->normalOnPatch(iface, u, v, facing);
+			bodyMesh()->normalOnPatch(iface, u, v, facing);
 			
 			if(facing.dot(floodNor) < .23f) continue;
 			
@@ -128,15 +119,7 @@ void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & n
 	}
 }
 
-void MlSkin::selectRegion(unsigned idx, const Vector2F & patchUV)
-{
-    if(!m_distribution) return;
-    Vector3F meshUV;
-    bodyMesh()->texcoordOnPatch(idx, patchUV.x, patchUV.y, meshUV);
-    float samples[3];
-    m_distribution->sample(meshUV.x, meshUV.y, 3, samples);
-    
-}
+
 
 void MlSkin::discardActive()
 {
@@ -305,7 +288,7 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 void MlSkin::finishCreateFeather()
 {
 	if(!hasFeatherCreated()) return;
-	if(!m_body) return;
+	if(!bodyMesh()) return;
     computeFaceCalamusIndirection();
 	m_numCreatedFeather = 0;
 	std::cout<<" add to "<<numFeathers();
@@ -346,7 +329,7 @@ void MlSkin::computeFaceCalamusIndirection()
 		QuickSort::Sort(*m_calamus, 0, m_numFeather - 1);
 		
 	unsigned cur;
-	unsigned pre = m_body->getNumFaces();
+	unsigned pre = bodyMesh()->getNumFaces();
 	for(unsigned i = 0; i < m_numFeather; i++) {
 		cur = getCalamus(i)->faceIdx();
 		if(cur != pre) {
@@ -358,7 +341,7 @@ void MlSkin::computeFaceCalamusIndirection()
 
 void MlSkin::resetFaceCalamusIndirection()
 {
-	for(unsigned i = 0; i < m_body->getNumFaces(); i++) m_faceCalamusStart[i] = 0;
+	for(unsigned i = 0; i < bodyMesh()->getNumFaces(); i++) m_faceCalamusStart[i] = 0;
 }
 
 unsigned MlSkin::lastInactive() const
@@ -406,45 +389,6 @@ bool MlSkin::isDartCloseToExisting(const Vector3F & pos, const std::vector<Vecto
 	return false;
 }
 
-void MlSkin::resetCollisionRegion(unsigned idx)
-{
-	if(idx == regionElementStart()) return;
-	CollisionRegion::resetCollisionRegion(idx);
-	m_topo->growAroundQuad(idx, *regionElementIndices());
-}
-
-void MlSkin::resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d)
-{
-	CollisionRegion::resetCollisionRegion(idx);
-	m_topo->growAroundQuad(idx, *regionElementIndices());
-	for(unsigned i = 1; i < numRegionElements(); i++) {
-		BoundingBox bb = m_body->calculateBBox(regionElementIndex(i));
-		if(bb.isPointAround(p, d))
-			m_topo->growAroundQuad(regionElementIndex(i), *regionElementIndices());
-	}
-	for(unsigned i = 1; i < numRegionElements(); i++) {
-		BoundingBox bb = m_body->calculateBBox(regionElementIndex(i));
-		if(!bb.isPointAround(p, d)) {
-			regionElementIndices()->erase(regionElementIndices()->begin() + i);
-			i--;
-		}
-	}
-}
-
-void MlSkin::closestPoint(const Vector3F & origin, IntersectionContext * ctx) const
-{
-	for(unsigned i=0; i < numRegionElements(); i++) {
-		m_body->closestPoint(regionElementIndex(i), origin, ctx);
-	}
-}
-
-void MlSkin::pushPlane(Patch::PushPlaneContext * ctx) const
-{
-	for(unsigned i=0; i < numRegionElements(); i++) {
-		m_body->pushPlane(regionElementIndex(i), ctx);
-	}
-}
-
 unsigned MlSkin::numFeathers() const
 {
 	return m_numFeather;
@@ -467,17 +411,17 @@ MlCalamus * MlSkin::getActive(unsigned idx) const
 
 void MlSkin::getPointOnBody(MlCalamus * c, Vector3F &p) const
 {
-	m_body->pointOnPatch(c->faceIdx(), c->patchU(), c->patchV(), p);
+	bodyMesh()->pointOnPatch(c->faceIdx(), c->patchU(), c->patchV(), p);
 }
 
 void MlSkin::getNormalOnBody(MlCalamus * c, Vector3F &p) const
 {
-	m_body->normalOnPatch(c->faceIdx(), c->patchU(), c->patchV(), p);
+	bodyMesh()->normalOnPatch(c->faceIdx(), c->patchU(), c->patchV(), p);
 }
 
 void MlSkin::tangentSpace(MlCalamus * c, Matrix33F & frm) const
 {
-	m_body->tangentFrame(c->faceIdx(), c->patchU(), c->patchV(), frm);
+	bodyMesh()->tangentFrame(c->faceIdx(), c->patchU(), c->patchV(), frm);
 }
 
 void MlSkin::rotationFrame(MlCalamus * c, const Matrix33F & tang, Matrix33F & frm) const
@@ -507,11 +451,6 @@ MlCalamusArray * MlSkin::getCalamusArray() const
 	return m_calamus;
 }
 
-void MlSkin::setFeatherDistributionMap(BaseImage * image)
-{
-    m_distribution = image;
-}
-
 void MlSkin::verbose() const
 {
 	std::cout<<"face id\n";
@@ -521,7 +460,7 @@ void MlSkin::verbose() const
 	std::cout<<"\n";
 	
 	std::cout<<"face start\n";
-	for(unsigned i = 0; i < m_body->getNumFaces(); i++) {
+	for(unsigned i = 0; i < bodyMesh()->getNumFaces(); i++) {
 		if(m_faceCalamusStart[i] > 0) std::cout<<" "<<i<<":"<<m_faceCalamusStart[i];
 	}
 	std::cout<<"\n";
