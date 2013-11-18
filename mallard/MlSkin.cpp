@@ -10,6 +10,7 @@
 #include <AccPatchMesh.h>
 #include <MeshTopology.h>
 #include <QuickSort.h>
+#include <BaseImage.h>
 #include "MlCalamusArray.h"
 
 MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_numCreatedFeather(0)
@@ -18,6 +19,7 @@ MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_numCreatedFeather(0
 	m_calamus = new MlCalamusArray; 
 	m_body = 0;
 	m_topo = 0;
+	m_distribution = 0;
 }
 
 MlSkin::~MlSkin()
@@ -124,6 +126,16 @@ void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & n
 			ifeather++;
 		}
 	}
+}
+
+void MlSkin::selectRegion(unsigned idx, const Vector2F & patchUV)
+{
+    if(!m_distribution) return;
+    Vector3F meshUV;
+    bodyMesh()->texcoordOnPatch(idx, patchUV.x, patchUV.y, meshUV);
+    float samples[3];
+    m_distribution->sample(meshUV.x, meshUV.y, 3, samples);
+    
 }
 
 void MlSkin::discardActive()
@@ -493,6 +505,11 @@ MlCalamus * MlSkin::getCreated(unsigned idx) const
 MlCalamusArray * MlSkin::getCalamusArray() const
 {
 	return m_calamus;
+}
+
+void MlSkin::setFeatherDistributionMap(BaseImage * image)
+{
+    m_distribution = image;
 }
 
 void MlSkin::verbose() const

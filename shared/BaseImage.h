@@ -27,6 +27,7 @@ public:
 	int getHeight() const;
 	int pixelLoc(float s, float t, bool flipV = false) const;
 
+	virtual void sample(float u, float v, int count, float * dst) const;
 	virtual float sampleRed(float u, float v);
 	virtual float sampleRed(float u, float v) const;
 	virtual void setRed(float u, float v, float red);

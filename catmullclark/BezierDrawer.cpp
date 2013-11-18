@@ -42,10 +42,14 @@ void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
 		m_tess->evaluate(bez[i]);
 		Vector3F *pop = m_tess->_positions;
 		Vector3F *nor = m_tess->_normals;
+		Vector3F * texcoord = m_tess->_texcoords;
 		int *idr = m_tess->getVertices();
 		for(j = 0; j < vpf; j++) {
 			vertices()[curP] = pop[j];
 			normals()[curP] = nor[j];
+			texcoords()[curP * 2] = texcoord[j].x;
+			texcoords()[curP * 2 + 1] = texcoord[j].y;
+			
 			curP++;
 		}
 		faceStart = vpf * i;

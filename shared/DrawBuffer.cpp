@@ -9,6 +9,7 @@ DrawBuffer::DrawBuffer()
     m_vertices = 0;
     m_normals = 0;
     m_indices = 0;
+    m_texcoords = 0;
     m_numIndices = 0;
     m_numVertices = 0;
 }
@@ -26,6 +27,8 @@ void DrawBuffer::clearBuffer()
 	m_normals = 0;
 	if(m_indices) delete[] m_indices;
 	m_indices = 0;
+	if(m_texcoords) delete[] m_texcoords;
+	m_texcoords = 0;
 	m_numVertices = m_numIndices = 0;
 	
 }
@@ -39,6 +42,9 @@ void DrawBuffer::drawBuffer() const
 	glEnableClientState( GL_NORMAL_ARRAY );
 	glNormalPointer( GL_FLOAT, 0, m_normals );
 	
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, 0, m_texcoords);
+	
 	//glEnableClientState( GL_COLOR_ARRAY );
 	//glColorPointer(3, GL_FLOAT, 0, m_normals );
 	
@@ -46,6 +52,7 @@ void DrawBuffer::drawBuffer() const
 	
 	glDisableClientState( GL_NORMAL_ARRAY );
 	glDisableClientState( GL_VERTEX_ARRAY );
+	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
 	//glDisableClientState( GL_COLOR_ARRAY );
 }
 
@@ -54,6 +61,7 @@ void DrawBuffer::createBuffer(unsigned numVertices, unsigned numIndices)
     clearBuffer();
     m_vertices = new Vector3F[numVertices];
 	m_normals = new Vector3F[numVertices];
+	m_texcoords = new float[numVertices * 2];
 	m_indices = new unsigned[numIndices];
 	m_numVertices = numVertices;
 	m_numIndices = numIndices;
@@ -69,6 +77,11 @@ Vector3F * DrawBuffer::vertices()
 Vector3F * DrawBuffer::normals()
 {
 	return m_normals;
+}
+
+float * DrawBuffer::texcoords()
+{
+    return m_texcoords;
 }
 
 unsigned * DrawBuffer::indices()

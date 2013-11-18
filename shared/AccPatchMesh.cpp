@@ -226,6 +226,11 @@ void AccPatchMesh::normalOnPatch(unsigned idx, float u, float v, Vector3F & dst)
 	beziers()[idx].evaluateSurfaceNormal(u, v, &dst);
 }
 
+void AccPatchMesh::texcoordOnPatch(unsigned idx, float u, float v, Vector3F & dst) const
+{
+    beziers()[idx].evaluateSurfaceTexcoord(u, v, &dst);
+}
+
 void AccPatchMesh::tangentFrame(unsigned idx, float u, float v, Matrix33F & frm) const
 {
 	return beziers()[idx].tangentFrame(u, v, frm);

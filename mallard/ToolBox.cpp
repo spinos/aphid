@@ -65,12 +65,20 @@ void ToolBox::onActionFrameTriggered(int a)
 
 void ToolBox::createContext()
 {
+    
     ContextIconFrame * createContour = new ContextIconFrame(this);
 	
 	createContour->addIconFile(":brush.png");
 	createContour->addIconFile(":brushActive.png");
 	createContour->setIconIndex(1);
 	createContour->setContext(CreateBodyContourFeather);
+	
+	ContextIconFrame * selectRegion = new ContextIconFrame(this);
+	
+	selectRegion->addIconFile(":colorPicker.png");
+	selectRegion->addIconFile(":colorPickerActive.png");
+	selectRegion->setIconIndex(0);
+	selectRegion->setContext(SelectByColor);
 	
 	ContextIconFrame * combContour = new ContextIconFrame(this);
 	
@@ -101,6 +109,7 @@ void ToolBox::createContext()
 	bendContour->setContext(PitchBodyContourFeather);
 	
 	m_contextFrames.push_back(createContour);
+	m_contextFrames.push_back(selectRegion);
 	m_contextFrames.push_back(combContour);
 	m_contextFrames.push_back(scaleContour);
 	m_contextFrames.push_back(bendContour);

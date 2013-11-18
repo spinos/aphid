@@ -17,7 +17,8 @@ public:
 		MoveTransform = 11,
 		RotateTransform = 12,
 		MoveMeshComponent = 13,
-		SmoothSurface = 14
+		SmoothSurface = 14,
+		SelectByColor = 15
     };
     
     enum ActionRank {

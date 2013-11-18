@@ -54,8 +54,9 @@ public:
 	virtual void allWhite();
 	virtual void allBlack();
 	
+	virtual void sample(float u, float v, int count, float * dst) const;
+	
 	void sample(float u, float v, float level, int count, float * dst) const;
-	void sample(float u, float v, int count, float * dst) const;
 	
 	int getNumMipmaps() const;
 	

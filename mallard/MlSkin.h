@@ -16,10 +16,10 @@
 class AccPatchMesh;
 class MeshTopology;
 class MlCalamusArray;
+class BaseImage;
 
 class MlSkin : public CollisionRegion 
 {
-	//Q_OBJECT
 public:
 	MlSkin();
 	virtual ~MlSkin();
@@ -31,6 +31,7 @@ public:
 	void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
 	void floodAround(MlCalamus c, unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, const float & minD);
 	void selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD);
+	void selectRegion(unsigned idx, const Vector2F & patchUV);
 	void discardActive();
 	
 	void growFeather(const Vector3F & direction);
@@ -63,6 +64,8 @@ public:
 	unsigned numCreated() const;
 	MlCalamus * getCreated(unsigned idx) const;
 	MlCalamusArray * getCalamusArray() const;
+	
+	void setFeatherDistributionMap(BaseImage * image);
 	void verbose() const;
 	
 protected:
@@ -79,5 +82,6 @@ private:
 	unsigned m_numFeather, m_numCreatedFeather;
 	AccPatchMesh * m_body;
 	MeshTopology * m_topo;
+	BaseImage * m_distribution;
 	unsigned * m_faceCalamusStart;
 };

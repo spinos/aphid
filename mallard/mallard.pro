@@ -88,3 +88,4 @@ win32 {
 }
 QT           += opengl
 RESOURCES += ../icons/mallard.qrc
+DESTDIR = ./

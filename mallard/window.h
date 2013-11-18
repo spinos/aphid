@@ -82,6 +82,7 @@ private:
 	QAction * saveSceneAct;
 	QAction * saveSceneAsAct;
 	QAction * importMeshAct;
+	QAction * importFDMAct;
 	QAction * importBakeAct;
 	QAction * revertAct;
 	QAction * exportBakeAct;

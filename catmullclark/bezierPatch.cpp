@@ -16,13 +16,13 @@ BezierPatch::~BezierPatch() {}
 void BezierPatch::setTexcoord(float* u, float* v, unsigned* idx)
 {
 	_texcoords[0].x = u[idx[0]];
-	_texcoords[1].x = u[idx[3]];
-	_texcoords[2].x = u[idx[1]];
+	_texcoords[1].x = u[idx[1]];
+	_texcoords[2].x = u[idx[3]];
 	_texcoords[3].x = u[idx[2]];
 	
 	_texcoords[0].y = v[idx[0]];
-	_texcoords[1].y = v[idx[3]];
-	_texcoords[2].y = v[idx[1]];
+	_texcoords[1].y = v[idx[1]];
+	_texcoords[2].y = v[idx[3]];
 	_texcoords[3].y = v[idx[2]];
 	
 	float smin = _texcoords[0].x;

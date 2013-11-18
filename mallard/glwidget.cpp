@@ -69,7 +69,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	m_featherDrawer->create("mallard.mlc");
 	MlCalamus::FeatherLibrary = this;
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
-	m_featherTexId = -1;
+	m_featherTexId = m_featherDistrId = -1;
 }
 //! [0]
 
@@ -80,23 +80,33 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientDraw()
 {
-	getDrawer()->setGrey(1.f);
+	//getDrawer()->setGrey(1.f);
 	//getDrawer()->edge(mesh());
 	getDrawer()->m_surfaceProfile.apply();
-	getDrawer()->setColor(0.37f, .59f, .9f);
-	m_bezierDrawer->drawBuffer();
+	
 	//getDrawer()->drawKdTree(getTree());
 	
 	if(m_featherTexId > -1) {
 		getDrawer()->setColor(.8f, .8f, .8f);
-		m_featherDrawer->bindTexture(m_featherTexId);
+		getDrawer()->bindTexture(m_featherTexId);
 	}
 	else 
 		getDrawer()->setColor(0.f, .71f, .51f);
-	//getDrawer()->m_wireProfile.apply();
+	
 	m_featherDrawer->draw(skin());
 	m_featherDrawer->unbindTexture();
 	
+	getDrawer()->setColor(0.37f, .59f, .9f);
+	
+	if(m_featherDistrId > -1){
+		getDrawer()->setColor(.8f, .8f, .8f);
+		getDrawer()->bindTexture(m_featherDistrId);
+	}
+
+	m_bezierDrawer->drawBuffer();
+	m_bezierDrawer->unbindTexture();
+	
+	getDrawer()->m_wireProfile.apply();
 	//drawSelection();
 	showBrush();
 }
@@ -116,22 +126,29 @@ void GLWidget::clientSelect()
 {
     Vector3F hit;
 	Ray ray = *getIncidentRay();
-	if(interactMode() == ToolContext::SelectVertex) {
-		pickupComponent(ray, hit);
-	}
-	else if(interactMode() == ToolContext::CreateBodyContourFeather) {
-		hitTest(ray, hit);
-		floodFeather();
-	}
-	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
-		hitTest(ray, hit);
-		selectFeather();
-		m_featherDrawer->hideActive(skin());
-	}
-	else if(interactMode() == ToolContext::CombBodyContourFeather || interactMode() == ToolContext::ScaleBodyContourFeather || interactMode() == ToolContext::PitchBodyContourFeather) {
-		hitTest(ray, hit);
-		skin()->discardActive();
-		selectFeather();
+	switch (interactMode()) {
+	    case ToolContext::CreateBodyContourFeather :
+	        hitTest(ray, hit);
+	        floodFeather();
+	        break;
+	    case ToolContext::EraseBodyContourFeather :
+	        hitTest(ray, hit);
+	        selectFeather();
+	        m_featherDrawer->hideActive(skin());
+	        break;
+	    case ToolContext::SelectByColor :
+	        hitTest(ray, hit);
+	        selectRegion();
+	        break;
+        case ToolContext::CombBodyContourFeather :
+        case ToolContext::ScaleBodyContourFeather :
+        case ToolContext::PitchBodyContourFeather :
+            hitTest(ray, hit);
+            skin()->discardActive();
+            selectFeather();
+           break;
+	    default:
+			break;
 	}
 }
 
@@ -139,33 +156,38 @@ void GLWidget::clientMouseInput()
 {
     Vector3F hit;
 	Ray ray = *getIncidentRay();
-	if(interactMode() == ToolContext::SelectVertex) {
-		pickupComponent(ray, hit);
-	}
-	else if(interactMode() == ToolContext::CreateBodyContourFeather) {
-		brush()->setToeByIntersect(&ray);
-		skin()->growFeather(brush()->toeDisplacement());
-		m_featherDrawer->updateActive(skin());
-	}
-	else if(interactMode() == ToolContext::EraseBodyContourFeather) {
-		hitTest(ray, hit);
-		selectFeather();
-		m_featherDrawer->hideActive(skin());
-	}
-	else if(interactMode() == ToolContext::CombBodyContourFeather) {
-		brush()->setToeByIntersect(&ray);
-		skin()->combFeather(brush()->toeDisplacement(), brush()->heelPosition(), brush()->getRadius());
-		m_featherDrawer->updateActive(skin());
-	}
-	else if(interactMode() == ToolContext::ScaleBodyContourFeather) {
-		brush()->setToeByIntersect(&ray);
-		skin()->scaleFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
-		m_featherDrawer->updateActive(skin());
-	}
-	else if(interactMode() == ToolContext::PitchBodyContourFeather) {
-		brush()->setToeByIntersect(&ray);
-		skin()->pitchFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
-		m_featherDrawer->updateActive(skin());
+	switch (interactMode()) {
+	    case ToolContext::CreateBodyContourFeather :
+	        brush()->setToeByIntersect(&ray);
+	        skin()->growFeather(brush()->toeDisplacement());
+	        m_featherDrawer->updateActive(skin());
+	        break;
+	    case ToolContext::EraseBodyContourFeather :
+	        hitTest(ray, hit);
+	        selectFeather();
+	        m_featherDrawer->hideActive(skin());
+	        break;
+	    case ToolContext::SelectByColor :
+	        hitTest(ray, hit);
+	        selectRegion();
+	        break;
+        case ToolContext::CombBodyContourFeather :
+            brush()->setToeByIntersect(&ray);
+            skin()->combFeather(brush()->toeDisplacement(), brush()->heelPosition(), brush()->getRadius());
+            m_featherDrawer->updateActive(skin());
+		    break;
+        case ToolContext::ScaleBodyContourFeather :
+            brush()->setToeByIntersect(&ray);
+            skin()->scaleFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
+            m_featherDrawer->updateActive(skin());
+            break;
+        case ToolContext::PitchBodyContourFeather :
+            brush()->setToeByIntersect(&ray);
+            skin()->pitchFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
+            m_featherDrawer->updateActive(skin());
+            break;
+	    default:
+			break;
 	}
 }
 
@@ -193,6 +215,15 @@ void GLWidget::selectFeather()
 	skin()->selectAround(ctx->m_componentIdx, ctx->m_hitP, ctx->m_hitN, brush()->getRadius());
 	m_featherDrawer->clearCached();
 	setDirty();
+}
+
+void GLWidget::selectRegion()
+{
+    if(m_featherDistrId < 0) return;
+    IntersectionContext * ctx = getIntersectionContext();
+    if(!ctx->m_success) return;
+    
+    skin()->selectRegion(ctx->m_componentIdx, ctx->m_patchUV);
 }
 
 void GLWidget::floodFeather()
@@ -339,8 +370,12 @@ void GLWidget::doClear()
 {
 	MlScene::doClear();
 	if(m_featherTexId > -1) {
-		m_featherDrawer->clearTexture(m_featherTexId);
+		getDrawer()->clearTexture(m_featherTexId);
 		m_featherTexId = -1;
+	}
+	if(m_featherDistrId > -1) {
+		getDrawer()->clearTexture(m_featherDistrId);
+		m_featherDistrId = -1;
 	}
 	m_bezierDrawer->clearBuffer();
 	m_featherDrawer->initializeBuffer();
@@ -513,8 +548,39 @@ void GLWidget::setFeatherTexture(const std::string & name)
 	if(!image.open(name)) return;
 	image.verbose();
 	makeCurrent();
-	m_featherTexId = m_featherDrawer->loadTexture(m_featherTexId, &image);
+	m_featherTexId = getDrawer()->loadTexture(m_featherTexId, &image);
 	doneCurrent();
 	MlScene::setFeatherTexture(name);
+}
+
+void GLWidget::importFeatherDistributionMap()
+{
+    if(body()->isEmpty()) {
+		QMessageBox::information(this, tr("Warning"),
+                                    tr("Mesh not loaded. Cannot attach feather distribution map."));
+		return;
+	}
+	
+    QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this,
+							tr("Open .exr image file as the Feather Distribution Map"),
+							tr("info"),
+							tr("All Files (*);;EXR Files (*.exr)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName != "") {
+		loadFeatherDistribution(fileName.toUtf8().data());
+	}
+}
+
+void GLWidget::loadFeatherDistribution(const std::string & name)
+{
+    ZEXRImage *image = new ZEXRImage;
+	if(!image->open(name)) return;
+	image->verbose();
+	makeCurrent();
+	m_featherDistrId = getDrawer()->loadTexture(m_featherDistrId, image);
+	doneCurrent();
+	skin()->setFeatherDistributionMap(image);
 }
 //:~

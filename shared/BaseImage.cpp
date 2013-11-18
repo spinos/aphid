@@ -60,6 +60,10 @@ void BaseImage::allBlack()
 
 }
 
+void BaseImage::sample(float u, float v, int count, float * dst) const
+{   
+}
+
 float BaseImage::sampleRed(float u, float v)
 {
 	return 0.f;

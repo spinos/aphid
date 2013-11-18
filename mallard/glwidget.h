@@ -93,6 +93,7 @@ public slots:
 	void chooseBake();
 	void updateOnFrame(int x);
 	void exportBake();
+	void importFeatherDistributionMap();
 protected:
     virtual void clientDraw();
 	virtual void focusOutEvent(QFocusEvent * event);
@@ -100,14 +101,16 @@ protected:
 //! [3]
 private:
 	void selectFeather();
+	void selectRegion();
 	void floodFeather();
 	void beginBaking();
 	void endBaking();
 	bool isBaking() const;
+	void loadFeatherDistribution(const std::string & name);
 private:
 	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;
-	int m_featherTexId;
+	int m_featherTexId, m_featherDistrId;
 };
 //! [3]
 

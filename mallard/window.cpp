@@ -146,6 +146,10 @@ void Window::createActions()
 	importMeshAct->setStatusTip(tr("Load a mesh cache file as the body"));
 	connect(importMeshAct, SIGNAL(triggered()), glWidget, SLOT(open()));
 	
+	importFDMAct = new QAction(tr("&Import Feather Distribution Map"), this);
+	importFDMAct->setStatusTip(tr("Load an OpenEXR image as feather distribution"));
+	connect(importFDMAct, SIGNAL(triggered()), glWidget, SLOT(importFeatherDistributionMap()));
+	
 	openSceneAct = new QAction(tr("&Open"), this);
 	openSceneAct->setStatusTip(tr("Load a file as current scene"));
 	connect(openSceneAct, SIGNAL(triggered()), this, SLOT(openFile()));
@@ -186,6 +190,7 @@ void Window::createMenus()
 	
 	fileMenu->addSeparator();
 	fileMenu->addAction(importMeshAct);
+	fileMenu->addAction(importFDMAct);
 	fileMenu->addAction(importBakeAct);
 	fileMenu->addAction(exportBakeAct);
 	

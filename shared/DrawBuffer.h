@@ -15,10 +15,12 @@ public:
     
 	Vector3F * vertices();
 	Vector3F * normals();
+	float * texcoords();
 	unsigned * indices();
 private:
 	Vector3F * m_vertices;
     Vector3F * m_normals;
     unsigned * m_indices;
+    float * m_texcoords;
     unsigned m_numVertices, m_numIndices;
 };
