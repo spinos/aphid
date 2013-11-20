@@ -94,6 +94,7 @@ public slots:
 	void updateOnFrame(int x);
 	void exportBake();
 	void importFeatherDistributionMap();
+	void receiveFloodRegion(int state);
 protected:
     virtual void clientDraw();
 	virtual void focusOutEvent(QFocusEvent * event);

@@ -62,6 +62,11 @@ QWidget * BrushControl::pitchWidget()
 	return m_pitchValueC;
 }
 
+QWidget * BrushControl::floodRegionWidget()
+{
+	return m_floodAreaCheck;
+}
+
 void BrushControl::createGroup()
 {
 	controlsGroupC = new QGroupBox(tr("Create"));
@@ -75,10 +80,13 @@ void BrushControl::createGroup()
 	m_pitchValueC = new QDoubleEditSlider(tr("Pitch Angle"));
 	m_pitchValueC->setLimit(0.1, 1.1);
 	
+	m_floodAreaCheck = new QCheckBox(tr("Flood Selected Region"));
+	
 	QVBoxLayout * controlLayout = new QVBoxLayout;
 	controlLayout->addWidget(m_radiusValueC);
 	controlLayout->addWidget(m_pitchValueC);
 	controlLayout->addWidget(m_numSampleValueC);
+	controlLayout->addWidget(m_floodAreaCheck);
 	controlLayout->addStretch();
 	controlsGroupC->setLayout(controlLayout);
 	

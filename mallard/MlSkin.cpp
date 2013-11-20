@@ -18,6 +18,7 @@ MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_numCreatedFeather(0
     m_activeIndices.clear();
 	m_calamus = new MlCalamusArray; 
 	m_floodCondition = ByDistance;
+	m_floodRegion = 0;
 }
 
 MlSkin::~MlSkin()
@@ -49,31 +50,35 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 	resetFaceCalamusIndirection();
 }
 
-void MlSkin::floodAround(MlCalamus floodC, unsigned floodFaceIdx, const Vector3F & floodPos, const Vector3F & floodNor, const float & floodMaxD, const float & floodMinD)
+void MlSkin::floodAround(MlCalamus floodC, const Vector3F & floodPos, const Vector3F & floodNor, const float & floodMaxD, const float & floodMinD)
 {	
 	unsigned i, j, iface;
 	
+	char outsideMaxD;
 	float u, v;
 	Vector3F adart, facing;
 	std::vector<Vector3F> darts;
-	for(i = 0; i < m_activeFaces.size(); i++) {
-		iface = m_activeFaces[i];
-		const unsigned ndart = 4 + bodyMesh()->calculateBBox(iface).area() / floodMinD / floodMinD;
+	for(i = 0; i < m_floodFaces.size(); i++) {
+		iface = m_floodFaces[i];
+		const unsigned ndart = 4 + bodyMesh()->calculateBBox(iface).area() / 2 / floodMinD / floodMinD;
 		for(j = 0; j < ndart; j++) {
 		
 			u = ((float)(rand()%591))/591.f;
 			v = ((float)(rand()%593))/593.f;
 			bodyMesh()->pointOnPatch(iface, u, v, adart);
 			
+			outsideMaxD = Vector3F(floodPos, adart).length() > floodMaxD;
 			if(m_floodCondition == ByDistance) {
-				if(Vector3F(floodPos, adart).length() > floodMaxD) continue;
+				if(outsideMaxD) continue;
 			}
 			else {
+				if(!m_floodRegion) {
+					if(outsideMaxD) continue;
+				}
 				if(!sampleColorMatches(iface, u, v)) continue;
 			}
 			
 			//bodyMesh()->normalOnPatch(iface, u, v, facing);
-			
 			//if(facing.dot(floodNor) < .23f) continue;
 			
 			if(isPointTooCloseToExisting(adart, iface, floodMinD)) continue;
@@ -367,10 +372,12 @@ bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned face
 			MlCalamus *c = getCalamus(ifeather);
 			if(c->faceIdx() != regionElementIndex(i)) break;
 			
-			getPointOnBody(c, p);
+			if(ifeather < numFeathers()) {
+				getPointOnBody(c, p);
 			
-			d = p - pos;
-			if(d.length() < minDistance && ifeather < numFeathers()) return true;
+				d = p - pos;
+				if(d.length() < minDistance) return true;
+			}
 			
 			ifeather++;
 		}
@@ -465,6 +472,30 @@ void MlSkin::resetActiveFaces()
 	m_activeFaces.clear();
 	for(unsigned i = 0; i < numRegionElements(); i++)
 		m_activeFaces.push_back(regionElementIndex(i));
+}
+
+void MlSkin::resetFloodFaces()
+{
+	m_floodFaces.clear();
+	for(unsigned i = 0; i < numRegionElements(); i++)
+		m_floodFaces.push_back(regionElementIndex(i));
+}
+
+void MlSkin::restFloodFacesAsActive()
+{
+	m_floodFaces.clear();
+	for(unsigned i = 0; i < m_activeFaces.size(); i++)
+		m_floodFaces.push_back(m_activeFaces[i]);
+}
+
+void MlSkin::setFloodRegion(char on)
+{
+	m_floodRegion = on;
+}
+
+char MlSkin::floodRegion() const
+{
+	return m_floodRegion;
 }
 
 void MlSkin::verbose() const

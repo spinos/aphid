@@ -251,12 +251,15 @@ void GLWidget::floodFeather()
 	ac.setFeatherId(selectedFeatherExampleId());
 	ac.setRotateY(brush()->getPitch());
 	
-	if(skin()->floodCondition() == MlSkin::ByDistance) {
+	if(skin()->floodRegion() && skin()->floodCondition() == MlSkin::ByColor) {
+		skin()->restFloodFacesAsActive();
+	}
+	else {
 		skin()->resetCollisionRegionAround(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
-		skin()->resetActiveFaces();
+		skin()->resetFloodFaces();
 	}
 	
-	skin()->floodAround(ac, ctx->m_componentIdx, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
+	skin()->floodAround(ac, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
 	m_featherDrawer->addToBuffer(skin());
 	m_featherDrawer->clearCached();
 	setDirty();
@@ -595,5 +598,13 @@ void GLWidget::loadFeatherDistribution(const std::string & name)
 	m_featherDistrId = getDrawer()->loadTexture(m_featherDistrId, image);
 	doneCurrent();
 	skin()->setDistributionMap(image);
+}
+
+void GLWidget::receiveFloodRegion(int state)
+{
+	if(state == Qt::Unchecked)
+		skin()->setFloodRegion(0);
+	else
+		skin()->setFloodRegion(1);
 }
 //:~

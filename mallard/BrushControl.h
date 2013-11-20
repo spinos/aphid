@@ -15,6 +15,7 @@
 QT_BEGIN_NAMESPACE
 class QGroupBox;
 class QStackedLayout;
+class QCheckBox;
 QT_END_NAMESPACE
 
 class QIntEditSlider;
@@ -30,6 +31,7 @@ public:
 	QWidget * numSamplesWidget();
 	QWidget * radiusWidget();
 	QWidget * pitchWidget();
+	QWidget * floodRegionWidget();
 
 public slots:
 	void receiveToolContext(int c);
@@ -51,6 +53,7 @@ private:
 	QDoubleEditSlider * m_radiusValueC;
 	QDoubleEditSlider * m_pitchValueC;
 	QIntEditSlider * m_numSampleValueC;
+	QCheckBox * m_floodAreaCheck;
 	QGroupBox * controlsGroupE;
 	QDoubleEditSlider * m_radiusValueE;
 	QGroupBox * controlsGroupB;
