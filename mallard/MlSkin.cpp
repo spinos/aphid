@@ -17,6 +17,7 @@ MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_numCreatedFeather(0
 {
     m_activeIndices.clear();
 	m_calamus = new MlCalamusArray; 
+	m_floodCondition = ByDistance;
 }
 
 MlSkin::~MlSkin()
@@ -49,20 +50,14 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 }
 
 void MlSkin::floodAround(MlCalamus floodC, unsigned floodFaceIdx, const Vector3F & floodPos, const Vector3F & floodNor, const float & floodMaxD, const float & floodMinD)
-{
-
-	resetCollisionRegionAround(floodFaceIdx, floodPos, floodMaxD);
-	std::vector<unsigned> growOnFaces;
+{	
 	unsigned i, j, iface;
-	
-	for(i = 0; i < numRegionElements(); i++)
-		growOnFaces.push_back(regionElementIndex(i));
 	
 	float u, v;
 	Vector3F adart, facing;
 	std::vector<Vector3F> darts;
-	for(i = 0; i < growOnFaces.size(); i++) {
-		iface = growOnFaces[i];
+	for(i = 0; i < m_activeFaces.size(); i++) {
+		iface = m_activeFaces[i];
 		const unsigned ndart = 4 + bodyMesh()->calculateBBox(iface).area() / floodMinD / floodMinD;
 		for(j = 0; j < ndart; j++) {
 		
@@ -70,22 +65,26 @@ void MlSkin::floodAround(MlCalamus floodC, unsigned floodFaceIdx, const Vector3F
 			v = ((float)(rand()%593))/593.f;
 			bodyMesh()->pointOnPatch(iface, u, v, adart);
 			
-			if(Vector3F(floodPos, adart).length() > floodMaxD) continue;
+			if(m_floodCondition == ByDistance) {
+				if(Vector3F(floodPos, adart).length() > floodMaxD) continue;
+			}
+			else {
+				if(!sampleColorMatches(iface, u, v)) continue;
+			}
 			
-			bodyMesh()->normalOnPatch(iface, u, v, facing);
+			//bodyMesh()->normalOnPatch(iface, u, v, facing);
 			
-			if(facing.dot(floodNor) < .23f) continue;
+			//if(facing.dot(floodNor) < .23f) continue;
 			
 			if(isPointTooCloseToExisting(adart, iface, floodMinD)) continue;
 			
-			if(!isDartCloseToExisting(adart, darts, floodMinD)) {
-				darts.push_back(adart);
-				floodC.bindToFace(iface, u, v);
-				createFeather(floodC);
-			}
+			if(isDartCloseToExisting(adart, darts, floodMinD)) continue;
+				
+			darts.push_back(adart);
+			floodC.bindToFace(iface, u, v);
+			createFeather(floodC);
 		}
 	}
-	growOnFaces.clear();
 	darts.clear();
 }
 
@@ -371,7 +370,7 @@ bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned face
 			getPointOnBody(c, p);
 			
 			d = p - pos;
-			if(d.length() < minDistance) return true;
+			if(d.length() < minDistance && ifeather < numFeathers()) return true;
 			
 			ifeather++;
 		}
@@ -451,6 +450,23 @@ MlCalamusArray * MlSkin::getCalamusArray() const
 	return m_calamus;
 }
 
+void MlSkin::setFloodCondition(FloodCondition fc)
+{
+	m_floodCondition = fc;
+}
+
+MlSkin::FloodCondition MlSkin::floodCondition() const
+{
+	return m_floodCondition;
+}
+
+void MlSkin::resetActiveFaces()
+{
+	m_activeFaces.clear();
+	for(unsigned i = 0; i < numRegionElements(); i++)
+		m_activeFaces.push_back(regionElementIndex(i));
+}
+
 void MlSkin::verbose() const
 {
 	std::cout<<"face id\n";
@@ -465,3 +481,4 @@ void MlSkin::verbose() const
 	}
 	std::cout<<"\n";
 }
+//~:

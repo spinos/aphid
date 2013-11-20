@@ -19,6 +19,7 @@ class CollisionRegion : public LineBuffer {
 public:
 	CollisionRegion();
 	virtual ~CollisionRegion();
+	void clearCollisionRegion();
 	
 	AccPatchMesh * bodyMesh() const;
 	
@@ -41,9 +42,13 @@ public:
 	
 	std::vector<unsigned> * regionElementIndices();
 	
-	char faceColorMatches(unsigned idx, const Vector3F & refCol) const;
+	char faceColorMatches(unsigned idx) const;
 	
 	virtual void rebuildBuffer();
+	
+	void neighborFaces(unsigned idx, std::vector<unsigned> & dst);
+	
+	char sampleColorMatches(unsigned idx, float u, float v) const;
 private:
     void fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart);
 	MeshTopology * m_topo;
@@ -52,4 +57,5 @@ private:
 	unsigned m_regionElementStart;
 	BaseImage * m_distribution;
 	IntersectionContext * m_ctx;
+	Vector3F m_sampleColor;
 };

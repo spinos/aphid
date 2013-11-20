@@ -21,6 +21,11 @@ class BaseImage;
 class MlSkin : public CollisionRegion 
 {
 public:
+	enum FloodCondition {
+		ByDistance = 0,
+		ByColor = 1
+	};
+	
 	MlSkin();
 	virtual ~MlSkin();
 	void cleanup();
@@ -60,6 +65,11 @@ public:
 	MlCalamus * getCreated(unsigned idx) const;
 	MlCalamusArray * getCalamusArray() const;
 	
+	void setFloodCondition(FloodCondition fc);
+	FloodCondition floodCondition() const;
+	
+	void resetActiveFaces();
+	
 	void verbose() const;
 	
 protected:
@@ -75,4 +85,6 @@ private:
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather, m_numCreatedFeather;
 	unsigned * m_faceCalamusStart;
+	FloodCondition m_floodCondition;
+	std::vector<unsigned> m_activeFaces;
 };

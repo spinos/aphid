@@ -224,9 +224,15 @@ void GLWidget::selectRegion()
 {
     if(m_featherDistrId < 0) return;
     IntersectionContext * ctx = getIntersectionContext();
-    if(!ctx->m_success) return;
-    
+    if(!ctx->m_success) {
+		skin()->setFloodCondition(MlSkin::ByDistance);
+		skin()->clearCollisionRegion();
+		skin()->clearBuffer();
+		return;
+    }
     skin()->selectRegion(ctx->m_componentIdx, ctx->m_patchUV);
+	skin()->resetActiveFaces();
+	skin()->setFloodCondition(MlSkin::ByColor);
 }
 
 void GLWidget::floodFeather()
@@ -237,16 +243,20 @@ void GLWidget::floodFeather()
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
 	brush()->resetToe();
 	
-	Vector3F rr = getIncidentRay()->m_dir;
-	rr.reverse();
-	if(rr.dot(brush()->normal()) < .34f) return;
-	
-	const unsigned iface = ctx->m_componentIdx;
+	//Vector3F rr = getIncidentRay()->m_dir;
+	//rr.reverse();
+	//if(rr.dot(brush()->normal()) < .34f) return;
 	
 	MlCalamus ac;
 	ac.setFeatherId(selectedFeatherExampleId());
 	ac.setRotateY(brush()->getPitch());
-	skin()->floodAround(ac, iface, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
+	
+	if(skin()->floodCondition() == MlSkin::ByDistance) {
+		skin()->resetCollisionRegionAround(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
+		skin()->resetActiveFaces();
+	}
+	
+	skin()->floodAround(ac, ctx->m_componentIdx, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
 	m_featherDrawer->addToBuffer(skin());
 	m_featherDrawer->clearCached();
 	setDirty();
@@ -587,4 +597,3 @@ void GLWidget::loadFeatherDistribution(const std::string & name)
 	skin()->setDistributionMap(image);
 }
 //:~
-

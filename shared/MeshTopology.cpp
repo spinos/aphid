@@ -173,7 +173,7 @@ void MeshTopology::cleanup()
 
 unsigned MeshTopology::growAroundQuad(unsigned idx, std::vector<unsigned> & dst) const
 {
-	if(!IsElementIn(idx, dst)) dst.push_back(idx);
+	const unsigned presize = dst.size();
 	unsigned * pv = m_mesh->quadIndices();
 	pv += idx * 4;
 	
@@ -184,6 +184,6 @@ unsigned MeshTopology::growAroundQuad(unsigned idx, std::vector<unsigned> & dst)
 		adj.getConnectedPolygons(dst);
 	}
 	
-	return dst.size();
+	return dst.size() - presize;
 }
 //:~

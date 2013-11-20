@@ -26,6 +26,11 @@ CollisionRegion::~CollisionRegion()
 	delete m_ctx;
 }
 
+void CollisionRegion::clearCollisionRegion()
+{
+	m_regionElementIndices.clear();
+}
+
 AccPatchMesh * CollisionRegion::bodyMesh() const
 {
 	return m_body;
@@ -44,27 +49,36 @@ Vector3F CollisionRegion::getClosestPoint(const Vector3F & origin)
 	return m_ctx->m_closestP;
 }
 
+void CollisionRegion::neighborFaces(unsigned idx, std::vector<unsigned> & dst)
+{
+	dst.push_back(idx);
+	m_topo->growAroundQuad(idx, dst);
+}
+
 void CollisionRegion::resetCollisionRegion(unsigned idx)
 {
 	//if(idx == regionElementStart()) return;
 	m_regionElementStart = idx;
 	m_regionElementIndices.clear();
+	m_regionElementIndices.push_back(idx);
 	m_topo->growAroundQuad(idx, *regionElementIndices());
 }
 
 void CollisionRegion::resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d)
 {
 	resetCollisionRegion(idx);
-	for(unsigned i = 1; i < numRegionElements(); i++) {
-		BoundingBox bb = m_body->calculateBBox(regionElementIndex(i));
+	unsigned i, j, lastCreep = 0;
+	BoundingBox bb;
+	for(i = 1; i < numRegionElements(); i++) {
+		bb = m_body->calculateBBox(regionElementIndex(i));
 		if(bb.isPointAround(p, d))
-			m_topo->growAroundQuad(regionElementIndex(i), *regionElementIndices());
-	}
-	for(unsigned i = 1; i < numRegionElements(); i++) {
-		BoundingBox bb = m_body->calculateBBox(regionElementIndex(i));
-		if(!bb.isPointAround(p, d)) {
-			regionElementIndices()->erase(regionElementIndices()->begin() + i);
-			i--;
+			lastCreep = m_topo->growAroundQuad(regionElementIndex(i), *regionElementIndices());
+		for(j = numRegionElements() - 1 - lastCreep; j < numRegionElements(); j++) {
+			bb = m_body->calculateBBox(regionElementIndex(j));
+			if(!bb.isPointAround(p, d)) {
+				regionElementIndices()->erase(regionElementIndices()->begin() + j);
+				j--;
+			}
 		}
 	}
 }
@@ -118,34 +132,39 @@ void CollisionRegion::selectRegion(unsigned idx, const Vector2F & patchUV)
     if(!m_distribution) return;
     Vector3F meshUV;
     bodyMesh()->texcoordOnPatch(idx, patchUV.x, patchUV.y, meshUV);
-    Vector3F baseColor;
-    m_distribution->sample(meshUV.x, meshUV.y, 3, (float *)&baseColor);
+    m_distribution->sample(meshUV.x, meshUV.y, 3, (float *)&m_sampleColor);
 	resetCollisionRegion(idx);
-	for(unsigned i = 1; i < numRegionElements(); i++) {
-	    if(faceColorMatches(regionElementIndex(i), baseColor))
+	unsigned i;
+	for(i = 1; i < numRegionElements(); i++) {
+	    if(faceColorMatches(regionElementIndex(i)))
 			m_topo->growAroundQuad(regionElementIndex(i), *regionElementIndices());
 	}
+	
 	if(numRegionElements() > 0) {
-	    std::cout<<"n sel"<<numRegionElements();
 	    createBuffer(numRegionElements() * 32);
 	    rebuildBuffer();
 	}
 }
 
-char CollisionRegion::faceColorMatches(unsigned idx, const Vector3F & refCol) const
+char CollisionRegion::faceColorMatches(unsigned idx) const
 {
     float u, v;
-    Vector3F texcoord, curCol, difCol;
     unsigned i;
-    for(i = 0; i < 32; i++) {
+    for(i = 0; i < 29; i++) {
         u = ((float)(rand()%591))/591.f;
 		v = ((float)(rand()%593))/593.f;
-        m_body->texcoordOnPatch(idx, u, v, texcoord);
-        m_distribution->sample(texcoord.x, texcoord.y, 3, (float *)&curCol);
-        difCol = curCol - refCol;
-        if(difCol.length() < 0.067f) return 1;
+		if(sampleColorMatches(idx, u, v)) return 1;
     }
     return 0;
+}
+
+char CollisionRegion::sampleColorMatches(unsigned idx, float u, float v) const
+{
+	Vector3F texcoord, curCol, difCol;
+	m_body->texcoordOnPatch(idx, u, v, texcoord);
+	m_distribution->sample(texcoord.x, texcoord.y, 3, (float *)&curCol);
+    difCol = curCol - m_sampleColor;
+    return difCol.length() < 0.067f;    
 }
 
 void CollisionRegion::rebuildBuffer() 
