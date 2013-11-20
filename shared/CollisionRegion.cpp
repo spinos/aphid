@@ -55,7 +55,6 @@ void CollisionRegion::resetCollisionRegion(unsigned idx)
 void CollisionRegion::resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d)
 {
 	resetCollisionRegion(idx);
-	m_topo->growAroundQuad(idx, *regionElementIndices());
 	for(unsigned i = 1; i < numRegionElements(); i++) {
 		BoundingBox bb = m_body->calculateBBox(regionElementIndex(i));
 		if(bb.isPointAround(p, d))
@@ -119,6 +118,13 @@ void CollisionRegion::selectRegion(unsigned idx, const Vector2F & patchUV)
     if(!m_distribution) return;
     Vector3F meshUV;
     bodyMesh()->texcoordOnPatch(idx, patchUV.x, patchUV.y, meshUV);
-    float samples[3];
-    m_distribution->sample(meshUV.x, meshUV.y, 3, samples);
+    Vector3F baseColor;
+    m_distribution->sample(meshUV.x, meshUV.y, 3, (float *)&baseColor);
+	baseColor.verbose("bc");
+	resetCollisionRegion(idx);
+	for(unsigned i = 1; i < numRegionElements(); i++) {
+		//BoundingBox bb = m_body->calculateBBox(regionElementIndex(i));
+		//if(bb.isPointAround(p, d))
+			m_topo->growAroundQuad(regionElementIndex(i), *regionElementIndices());
+	}
 }
