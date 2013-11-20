@@ -30,7 +30,6 @@ void DrawBuffer::clearBuffer()
 	if(m_texcoords) delete[] m_texcoords;
 	m_texcoords = 0;
 	m_numVertices = m_numIndices = 0;
-	
 }
 
 void DrawBuffer::drawBuffer() const

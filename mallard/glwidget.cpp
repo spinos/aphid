@@ -107,6 +107,9 @@ void GLWidget::clientDraw()
 	m_bezierDrawer->unbindTexture();
 	
 	getDrawer()->m_wireProfile.apply();
+	getDrawer()->setColor(.2f, .8f, .4f);
+	getDrawer()->drawLineBuffer(skin());
+	
 	//drawSelection();
 	showBrush();
 }
@@ -584,3 +587,4 @@ void GLWidget::loadFeatherDistribution(const std::string & name)
 	skin()->setDistributionMap(image);
 }
 //:~
+

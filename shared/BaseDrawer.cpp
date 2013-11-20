@@ -19,6 +19,7 @@
 #include <BaseTransform.h>
 #include <TransformManipulator.h>
 #include <SkeletonJoint.h>
+#include <LineBuffer.h>
 
 BaseDrawer::BaseDrawer () : m_wired(0) 
 {
@@ -979,5 +980,17 @@ void BaseDrawer::bindTexture(int idx)
 void BaseDrawer::unbindTexture()
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void BaseDrawer::drawLineBuffer(LineBuffer * line) const
+{
+    if(line->numVertices() < 2) return;
+    glBegin(GL_LINES);
+    for(unsigned i = 0; i < line->numVertices(); i++)
+    {
+        Vector3F p = line->vertices()[i];
+        glVertex3f(p.x , p.y, p.z);
+    }
+    glEnd();
 }
 //:~

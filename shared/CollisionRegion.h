@@ -10,11 +10,12 @@
 #pragma once
 #include <AllMath.h>
 #include <Patch.h>
+#include <LineBuffer.h>
 class IntersectionContext;
 class MeshTopology;
 class AccPatchMesh;
 class BaseImage;
-class CollisionRegion {
+class CollisionRegion : public LineBuffer {
 public:
 	CollisionRegion();
 	virtual ~CollisionRegion();
@@ -39,7 +40,12 @@ public:
 	void selectRegion(unsigned idx, const Vector2F & patchUV);
 	
 	std::vector<unsigned> * regionElementIndices();
+	
+	char faceColorMatches(unsigned idx, const Vector3F & refCol) const;
+	
+	virtual void rebuildBuffer();
 private:
+    void fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart);
 	MeshTopology * m_topo;
 	AccPatchMesh * m_body;
 	std::vector<unsigned> m_regionElementIndices;

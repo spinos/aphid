@@ -120,11 +120,85 @@ void CollisionRegion::selectRegion(unsigned idx, const Vector2F & patchUV)
     bodyMesh()->texcoordOnPatch(idx, patchUV.x, patchUV.y, meshUV);
     Vector3F baseColor;
     m_distribution->sample(meshUV.x, meshUV.y, 3, (float *)&baseColor);
-	baseColor.verbose("bc");
 	resetCollisionRegion(idx);
 	for(unsigned i = 1; i < numRegionElements(); i++) {
-		//BoundingBox bb = m_body->calculateBBox(regionElementIndex(i));
-		//if(bb.isPointAround(p, d))
+	    if(faceColorMatches(regionElementIndex(i), baseColor))
 			m_topo->growAroundQuad(regionElementIndex(i), *regionElementIndices());
 	}
+	if(numRegionElements() > 0) {
+	    std::cout<<"n sel"<<numRegionElements();
+	    createBuffer(numRegionElements() * 32);
+	    rebuildBuffer();
+	}
+}
+
+char CollisionRegion::faceColorMatches(unsigned idx, const Vector3F & refCol) const
+{
+    float u, v;
+    Vector3F texcoord, curCol, difCol;
+    unsigned i;
+    for(i = 0; i < 32; i++) {
+        u = ((float)(rand()%591))/591.f;
+		v = ((float)(rand()%593))/593.f;
+        m_body->texcoordOnPatch(idx, u, v, texcoord);
+        m_distribution->sample(texcoord.x, texcoord.y, 3, (float *)&curCol);
+        difCol = curCol - refCol;
+        if(difCol.length() < 0.067f) return 1;
+    }
+    return 0;
+}
+
+void CollisionRegion::rebuildBuffer() 
+{
+    unsigned i, k;
+    for(i = 0; i < numRegionElements(); i++) {
+        for(k = 0; k < 4; k++)
+            fillPatchEdge(regionElementIndex(i), k, i * 32 + k * 8);
+    }
+}
+
+void CollisionRegion::fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart)
+{
+    Vector3F p;
+    float u, v;
+    unsigned i, acc = 0;
+    for(i = 0; i < 4; i++) {
+        if(iedge == 0) {
+            v = 0.f;
+            u = .25f * i;
+        }
+        else if(iedge == 1) {
+            u = 1.f;
+            v = .25f * i;
+        }
+        else if(iedge == 2) {
+            v = 1.f;
+            u = 1.f - .25f * i;
+        }
+        else {
+            u = 0.f;
+            v = 1.f - .25f * i;
+        }
+        
+        m_body->pointOnPatch(iface, u, v, p);
+        vertices()[acc + vstart] = p;
+        acc++;
+        
+        if(iedge == 0) {
+            u = .25f * i + .25;
+        }
+        else if(iedge == 1) {
+            v = .25f * i + .25;
+        }
+        else if(iedge == 2) {
+            u = 1.f - .25f * i - .25;
+        }
+        else {
+            v = 1.f - .25f * i - .25;
+        }
+        
+        m_body->pointOnPatch(iface, u, v, p);
+        vertices()[acc + vstart] = p;
+        acc++;
+    }
 }

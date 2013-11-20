@@ -25,6 +25,7 @@ class BaseTransform;
 class TransformManipulator;
 class SkeletonJoint;
 class ZEXRImage;
+class LineBuffer;
 class BaseDrawer {
 public:
 	BaseDrawer ();
@@ -56,6 +57,7 @@ public:
 	void boundingRectangle(const BoundingRectangle & b) const;
 	void boundingBox(const BoundingBox & b) const;
 	
+	void drawLineBuffer(LineBuffer * line) const;
 	void drawSphere();
 	void drawCircleAround(const Vector3F& center);
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0) const;
