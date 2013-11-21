@@ -47,7 +47,6 @@ public:
 	virtual void rebuildBuffer();
 	
 	void neighborFaces(unsigned idx, std::vector<unsigned> & dst);
-	
 	char sampleColorMatches(unsigned idx, float u, float v) const;
 private:
     void fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart);

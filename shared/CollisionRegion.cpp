@@ -164,7 +164,7 @@ char CollisionRegion::sampleColorMatches(unsigned idx, float u, float v) const
 	m_body->texcoordOnPatch(idx, u, v, texcoord);
 	m_distribution->sample(texcoord.x, texcoord.y, 3, (float *)&curCol);
     difCol = curCol - m_sampleColor;
-    return difCol.length() < 0.067f;    
+    return difCol.length() < .2f;    
 }
 
 void CollisionRegion::rebuildBuffer() 

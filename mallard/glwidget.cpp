@@ -258,7 +258,6 @@ void GLWidget::floodFeather()
 		skin()->resetCollisionRegionAround(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
 		skin()->resetFloodFaces();
 	}
-	
 	skin()->floodAround(ac, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
 	m_featherDrawer->addToBuffer(skin());
 	m_featherDrawer->clearCached();
