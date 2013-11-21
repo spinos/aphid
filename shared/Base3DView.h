@@ -52,7 +52,6 @@ public:
     
     void resetView();
 	void drawSelection();
-	void clearSelection();
 	void addHitToSelection();
 	void growSelection();
 	void shrinkSelection();
@@ -83,6 +82,7 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event);
 	virtual void focusInEvent(QFocusEvent * event);
 	virtual void focusOutEvent(QFocusEvent * event);
+	virtual void clearSelection();
 	
 private:
 	void computeIncidentRay(int x, int y);

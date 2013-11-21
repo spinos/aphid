@@ -98,6 +98,7 @@ public slots:
 protected:
     virtual void clientDraw();
 	virtual void focusOutEvent(QFocusEvent * event);
+	virtual void clearSelection();
 	
 //! [3]
 private:

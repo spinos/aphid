@@ -225,9 +225,7 @@ void GLWidget::selectRegion()
     if(m_featherDistrId < 0) return;
     IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) {
-		skin()->setFloodCondition(MlSkin::ByDistance);
-		skin()->clearCollisionRegion();
-		skin()->clearBuffer();
+		clearSelection();
 		return;
     }
     skin()->selectRegion(ctx->m_componentIdx, ctx->m_patchUV);
@@ -609,5 +607,12 @@ void GLWidget::receiveFloodRegion(int state)
 		skin()->setFloodRegion(0);
 	else
 		skin()->setFloodRegion(1);
+}
+
+void GLWidget::clearSelection()
+{
+	skin()->setFloodCondition(MlSkin::ByDistance);
+	skin()->clearCollisionRegion();
+	skin()->clearBuffer();
 }
 //:~
