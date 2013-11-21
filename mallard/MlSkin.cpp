@@ -59,8 +59,9 @@ void MlSkin::floodAround(MlCalamus floodC, const Vector3F & floodPos, const Vect
 	Vector3F adart, facing;
 	std::vector<Vector3F> darts;
 	for(i = 0; i < m_floodFaces.size(); i++) {
-		iface = m_floodFaces[i];
-		const unsigned ndart = 4 + bodyMesh()->calculateBBox(iface).area() / 2 / floodMinD / floodMinD;
+		iface = m_floodFaces[i].faceIdx;
+		m_floodFaces[i].dartBegin = m_floodFaces[i].dartEnd = darts.size();
+		const unsigned ndart = 4 + bodyMesh()->calculateBBox(iface).area() / floodMinD / floodMinD;
 		for(j = 0; j < ndart; j++) {
 		
 			u = ((float)(rand()%591))/591.f;
@@ -80,14 +81,16 @@ void MlSkin::floodAround(MlCalamus floodC, const Vector3F & floodPos, const Vect
 			
 			//bodyMesh()->normalOnPatch(iface, u, v, facing);
 			//if(facing.dot(floodNor) < .23f) continue;
-			
-			if(isPointTooCloseToExisting(adart, iface, floodMinD)) continue;
+			resetCollisionRegion(iface);
+	
+			if(isPointTooCloseToExisting(adart, floodMinD)) continue;
 			
 			if(isDartCloseToExisting(adart, darts, floodMinD)) continue;
 				
 			darts.push_back(adart);
 			floodC.bindToFace(iface, u, v);
 			createFeather(floodC);
+			m_floodFaces[i].dartEnd++;
 		}
 	}
 	darts.clear();
@@ -358,10 +361,8 @@ unsigned MlSkin::lastInactive() const
 	return i;
 }
 
-bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance)
+bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, float minDistance)
 {
-	resetCollisionRegion(faceIdx);
-	
 	const unsigned maxCountPerFace = m_numFeather / 2;
 	
 	Vector3F d, p;
@@ -388,9 +389,25 @@ bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, const unsigned face
 
 bool MlSkin::isDartCloseToExisting(const Vector3F & pos, const std::vector<Vector3F> & existing, float minDistance) const
 {
-	std::vector<Vector3F>::const_iterator it;
-	for(it = existing.begin(); it != existing.end(); ++it) {
-		if(Vector3F(pos, *it).length() < minDistance) return true;
+	unsigned dartBegin, dartEnd, i, j;
+	for(i=0; i < numRegionElements(); i++) {
+		if(!isFloodFace(regionElementIndex(i), dartBegin, dartEnd)) continue;
+		if(dartEnd == dartBegin) continue;
+		for(j = dartBegin; j < dartEnd; j++) {
+			if(Vector3F(pos, existing[j]).length() < minDistance) return true;
+		}
+	}
+	return false;
+}
+
+bool MlSkin::isFloodFace(unsigned idx, unsigned & dartBegin, unsigned & dartEnd) const
+{
+	for(unsigned i = 0; i < m_floodFaces.size(); i++) {
+		if(m_floodFaces[i].faceIdx == idx) {
+			dartBegin = m_floodFaces[i].dartBegin;
+			dartEnd = m_floodFaces[i].dartEnd;
+			return true;
+		}
 	}
 	return false;
 }
@@ -478,14 +495,14 @@ void MlSkin::resetFloodFaces()
 {
 	m_floodFaces.clear();
 	for(unsigned i = 0; i < numRegionElements(); i++)
-		m_floodFaces.push_back(regionElementIndex(i));
+		m_floodFaces.push_back(FloodTable(regionElementIndex(i)));
 }
 
 void MlSkin::restFloodFacesAsActive()
 {
 	m_floodFaces.clear();
 	for(unsigned i = 0; i < m_activeFaces.size(); i++)
-		m_floodFaces.push_back(m_activeFaces[i]);
+		m_floodFaces.push_back(FloodTable(m_activeFaces[i]));
 }
 
 void MlSkin::setFloodRegion(char on)

@@ -26,6 +26,15 @@ public:
 		ByColor = 1
 	};
 	
+	struct FloodTable {
+		FloodTable(unsigned i) {
+			faceIdx = i;
+			dartBegin = dartEnd = 0;
+		}
+		
+		unsigned faceIdx, dartBegin, dartEnd;
+	};
+	
 	MlSkin();
 	virtual ~MlSkin();
 	void cleanup();
@@ -81,8 +90,9 @@ protected:
 	
 private:
 	bool createFeather(MlCalamus & ori);
-	bool isPointTooCloseToExisting(const Vector3F & pos, const unsigned faceIdx, float minDistance);
+	bool isPointTooCloseToExisting(const Vector3F & pos, float minDistance);
 	bool isDartCloseToExisting(const Vector3F & pos, const std::vector<Vector3F> & existing, float minDistance) const;
+	bool isFloodFace(unsigned idx, unsigned & dartBegin, unsigned & dartEnd) const;
 	void resetFaceCalamusIndirection();
 	unsigned lastInactive() const;
 private:
@@ -92,6 +102,6 @@ private:
 	unsigned * m_faceCalamusStart;
 	FloodCondition m_floodCondition;
 	std::vector<unsigned> m_activeFaces;
-	std::vector<unsigned> m_floodFaces;
+	std::vector<FloodTable> m_floodFaces;
 	char m_floodRegion;
 };
