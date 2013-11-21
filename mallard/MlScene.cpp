@@ -91,6 +91,16 @@ std::string MlScene::featherEditBackground() const
 	return m_featherEditBackgroundName;
 }
 
+void MlScene::setFeatherDistributionMap(const std::string & name)
+{
+	m_featherDistributionName = name;
+}
+
+std::string MlScene::featherDistributionMap() const
+{
+	return m_featherDistributionName;
+}
+
 MlSkin * MlScene::skin()
 {
 	return m_skin;
@@ -132,6 +142,7 @@ void MlScene::doClear()
 	m_accmesh->cleanup();
 	disableDeformer();
 	m_featherEditBackgroundName = "unknown";
+	m_featherDistributionName = "unknown";
 	HFile::doClear();
 }
 
@@ -162,6 +173,8 @@ bool MlScene::doWrite(const std::string & fileName)
 		grpBody.addStringAttr(".bakefile", m_deformer->fileName().size());
 		grpBody.writeStringAttr(".bakefile", m_deformer->fileName());
 	}
+	
+	writeFeatherDistribution(&grpBody);
 	
 	grpBody.close();
 	
@@ -206,6 +219,15 @@ void MlScene::writeFeatherEidtBackground(HBase * g)
 	g->writeStringAttr(".bkgrd", m_featherEditBackgroundName);
 }
 
+void MlScene::writeFeatherDistribution(HBase * g)
+{
+	if(m_featherDistributionName == "unknown") return;
+	if(!g->hasNamedAttr(".distrmp"))
+		g->addStringAttr(".distrmp", m_featherDistributionName.size());
+		
+	g->writeStringAttr(".distrmp", m_featherDistributionName);
+}
+
 bool MlScene::doRead(const std::string & fileName)
 {
     if(!HFile::doRead(fileName)) return false;
@@ -226,6 +248,8 @@ bool MlScene::doRead(const std::string & fileName)
 	if(grpBody.hasNamedAttr(".bakefile")) {
 		grpBody.readStringAttr(".bakefile", m_bakeName);
 	}
+	
+	readFeatherDistribution(&grpBody);
 	
 	grpBody.close();
 	
@@ -273,6 +297,13 @@ void MlScene::readFeatherEidtBackground(HBase * g)
 	if(!g->hasNamedAttr(".bkgrd")) return;
 		
 	g->readStringAttr(".bkgrd", m_featherEditBackgroundName);
+}
+
+void MlScene::readFeatherDistribution(HBase * g)
+{
+	if(!g->hasNamedAttr(".distrmp")) return;
+		
+	g->readStringAttr(".distrmp", m_featherDistributionName);
 }
 
 bool MlScene::readBakeFromFile(const std::string & fileName)

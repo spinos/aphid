@@ -547,6 +547,9 @@ void GLWidget::afterOpen()
 		setFeatherTexture(febkgrd);
 		emit sendFeatherEditBackground(tr(febkgrd.c_str()));
 	}
+	std::string fedistr = featherDistributionMap();
+	if(fedistr != "unknown")
+		loadFeatherDistribution(fedistr);
 }
 
 void GLWidget::focusOutEvent(QFocusEvent * event)
@@ -597,6 +600,7 @@ void GLWidget::loadFeatherDistribution(const std::string & name)
 	m_featherDistrId = getDrawer()->loadTexture(m_featherDistrId, image);
 	doneCurrent();
 	skin()->setDistributionMap(image);
+	setFeatherDistributionMap(name);
 }
 
 void GLWidget::receiveFloodRegion(int state)
