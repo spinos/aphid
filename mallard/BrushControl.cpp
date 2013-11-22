@@ -67,6 +67,11 @@ QWidget * BrushControl::floodRegionWidget()
 	return m_floodAreaCheck;
 }
 
+QWidget * BrushControl::eraseRegionWidget()
+{
+    return m_eraseAreaCheck;
+}
+
 void BrushControl::createGroup()
 {
 	controlsGroupC = new QGroupBox(tr("Create"));
@@ -102,8 +107,11 @@ void BrushControl::eraseGroup()
 	m_radiusValueE = new QDoubleEditSlider(tr("Radius"));
 	m_radiusValueE->setLimit(0.1, 1000.0);
 	
+	m_eraseAreaCheck = new QCheckBox(tr("Erase Within Selected Region"));
+	
 	QVBoxLayout * controlLayout = new QVBoxLayout;
 	controlLayout->addWidget(m_radiusValueE);
+	controlLayout->addWidget(m_eraseAreaCheck);
 	controlLayout->addStretch();
 	controlsGroupE->setLayout(controlLayout);
 }

@@ -48,6 +48,8 @@ public:
 	
 	void neighborFaces(unsigned idx, std::vector<unsigned> & dst);
 	char sampleColorMatches(unsigned idx, float u, float v) const;
+	Vector3F sampleColor() const;
+	void colorAt(unsigned idx, float u, float v, Vector3F * dst) const;
 private:
     void fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart);
 	MeshTopology * m_topo;

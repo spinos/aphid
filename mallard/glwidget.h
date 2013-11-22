@@ -95,6 +95,7 @@ public slots:
 	void exportBake();
 	void importFeatherDistributionMap();
 	void receiveFloodRegion(int state);
+	void receiveEraseRegion(int state);
 protected:
     virtual void clientDraw();
 	virtual void focusOutEvent(QFocusEvent * event);
@@ -102,7 +103,7 @@ protected:
 	
 //! [3]
 private:
-	void selectFeather();
+	void selectFeather(char byRegion = 0);
 	void selectRegion();
 	void floodFeather();
 	void beginBaking();

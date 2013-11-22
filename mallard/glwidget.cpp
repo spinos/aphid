@@ -136,7 +136,7 @@ void GLWidget::clientSelect()
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
 	        hitTest(ray, hit);
-	        selectFeather();
+	        selectFeather(skin()->eraseRegion());
 	        m_featherDrawer->hideActive(skin());
 	        break;
 	    case ToolContext::SelectByColor :
@@ -167,7 +167,7 @@ void GLWidget::clientMouseInput()
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
 	        hitTest(ray, hit);
-	        selectFeather();
+	        selectFeather(skin()->eraseRegion());
 	        m_featherDrawer->hideActive(skin());
 	        break;
 	    case ToolContext::SelectByColor :
@@ -207,7 +207,7 @@ PatchMesh * GLWidget::mesh()
 	return body();
 }
 
-void GLWidget::selectFeather()
+void GLWidget::selectFeather(char byRegion)
 {
 	IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) return;
@@ -215,7 +215,7 @@ void GLWidget::selectFeather()
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
 	brush()->resetToe();
 	
-	skin()->selectAround(ctx->m_componentIdx, ctx->m_hitP, ctx->m_hitN, brush()->getRadius());
+	skin()->selectAround(ctx->m_componentIdx, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), byRegion);
 	m_featherDrawer->clearCached();
 	setDirty();
 }
@@ -609,10 +609,19 @@ void GLWidget::receiveFloodRegion(int state)
 		skin()->setFloodRegion(1);
 }
 
+void GLWidget::receiveEraseRegion(int state)
+{
+    if(state == Qt::Unchecked)
+		skin()->setEraseRegion(0);
+	else
+		skin()->setEraseRegion(1);
+}
+
 void GLWidget::clearSelection()
 {
 	skin()->setFloodCondition(MlSkin::ByDistance);
 	skin()->clearCollisionRegion();
 	skin()->clearBuffer();
+	skin()->clearActiveFaces();
 }
 //:~

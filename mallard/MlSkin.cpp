@@ -18,7 +18,7 @@ MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_numCreatedFeather(0
     m_activeIndices.clear();
 	m_calamus = new MlCalamusArray; 
 	m_floodCondition = ByDistance;
-	m_floodRegion = 0;
+	m_floodRegion = m_eraseRegion = 0;
 }
 
 MlSkin::~MlSkin()
@@ -96,10 +96,10 @@ void MlSkin::floodAround(MlCalamus floodC, const Vector3F & floodPos, const Vect
 	darts.clear();
 }
 
-void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD)
-{
+void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, char byRegion)
+{		    
 	resetCollisionRegionAround(idx, pos, maxD);
-	const unsigned maxCountPerFace = m_numFeather / 2;
+	const unsigned maxCountPerFace = m_numFeather / 4;
 	
 	Vector3F d, p, n;
 	for(unsigned i=0; i < numRegionElements(); i++) {
@@ -116,17 +116,19 @@ void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & n
 			getPointOnBody(c, p);
 			
 			d = p - pos;
-			if(d.length() < maxD) {
-				if(!IsElementIn(ifeather, m_activeIndices))
-					m_activeIndices.push_back(ifeather);
+			if(d.length() > maxD) continue;
+			    
+			if(hasActiveFaces() && byRegion) {
+			    if(!sampleColorMatches(c->faceIdx(), c->patchU(), c->patchV())) continue;
 			}
+			
+			if(!IsElementIn(ifeather, m_activeIndices))
+				m_activeIndices.push_back(ifeather);
 			
 			ifeather++;
 		}
 	}
 }
-
-
 
 void MlSkin::discardActive()
 {
@@ -484,6 +486,16 @@ MlSkin::FloodCondition MlSkin::floodCondition() const
 	return m_floodCondition;
 }
 
+char MlSkin::hasActiveFaces() const
+{
+    return m_activeFaces.size() > 0;
+}
+
+void MlSkin::clearActiveFaces()
+{
+    m_activeFaces.clear();
+}
+
 void MlSkin::resetActiveFaces()
 {
 	m_activeFaces.clear();
@@ -513,6 +525,16 @@ void MlSkin::setFloodRegion(char on)
 char MlSkin::floodRegion() const
 {
 	return m_floodRegion;
+}
+
+void MlSkin::setEraseRegion(char on)
+{
+    m_eraseRegion = on;
+}
+
+char MlSkin::eraseRegion() const
+{
+    return m_eraseRegion;
 }
 
 void MlSkin::verbose() const

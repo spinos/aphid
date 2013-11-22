@@ -158,6 +158,13 @@ char CollisionRegion::faceColorMatches(unsigned idx) const
     return 0;
 }
 
+void CollisionRegion::colorAt(unsigned idx, float u, float v, Vector3F * dst) const
+{
+    Vector3F texcoord;
+	m_body->texcoordOnPatch(idx, u, v, texcoord);
+	m_distribution->sample(texcoord.x, texcoord.y, 3, (float *)dst);
+}
+
 char CollisionRegion::sampleColorMatches(unsigned idx, float u, float v) const
 {
 	Vector3F texcoord, curCol, difCol;
@@ -220,4 +227,9 @@ void CollisionRegion::fillPatchEdge(unsigned iface, unsigned iedge, unsigned vst
         vertices()[acc + vstart] = p;
         acc++;
     }
+}
+
+Vector3F CollisionRegion::sampleColor() const
+{
+    return m_sampleColor;
 }

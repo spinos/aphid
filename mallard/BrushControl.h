@@ -32,6 +32,7 @@ public:
 	QWidget * radiusWidget();
 	QWidget * pitchWidget();
 	QWidget * floodRegionWidget();
+	QWidget * eraseRegionWidget();
 
 public slots:
 	void receiveToolContext(int c);
@@ -56,6 +57,7 @@ private:
 	QCheckBox * m_floodAreaCheck;
 	QGroupBox * controlsGroupE;
 	QDoubleEditSlider * m_radiusValueE;
+	QCheckBox * m_eraseAreaCheck;
 	QGroupBox * controlsGroupB;
 	QDoubleEditSlider * m_radiusValueB;
 	QGroupBox * controlsGroupS;

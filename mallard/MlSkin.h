@@ -45,7 +45,7 @@ public:
 	void setNumFeathers(unsigned num);
 	
 	void floodAround(MlCalamus c, const Vector3F & pos, const Vector3F & nor, const float & maxD, const float & minD);
-	void selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD);
+	void selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, char byRegion = 0);
 	void discardActive();
 	
 	void growFeather(const Vector3F & direction);
@@ -77,12 +77,17 @@ public:
 	void setFloodCondition(FloodCondition fc);
 	FloodCondition floodCondition() const;
 	
+	char hasActiveFaces() const;
+	void clearActiveFaces();
 	void resetActiveFaces();
 	void resetFloodFaces();
 	void restFloodFacesAsActive();
 	
 	void setFloodRegion(char on);
 	char floodRegion() const;
+	
+	void setEraseRegion(char on);
+	char eraseRegion() const;
 	
 	void verbose() const;
 	
@@ -103,5 +108,5 @@ private:
 	FloodCondition m_floodCondition;
 	std::vector<unsigned> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
-	char m_floodRegion;
+	char m_floodRegion, m_eraseRegion;
 };
