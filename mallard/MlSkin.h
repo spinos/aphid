@@ -100,7 +100,15 @@ private:
 	bool isFloodFace(unsigned idx, unsigned & dartBegin, unsigned & dartEnd) const;
 	void resetFaceCalamusIndirection();
 	unsigned lastInactive() const;
+	void selectFeatherByFace(unsigned faceIdx);
 private:
+	struct SelectCondition {
+		Vector3F center;
+		Vector3F normal;
+		float maxDistance;
+		char byRegion;
+	};
+	
 	MlCalamusArray * m_calamus;
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather, m_numCreatedFeather;
@@ -108,5 +116,6 @@ private:
 	FloodCondition m_floodCondition;
 	std::vector<unsigned> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
+	SelectCondition m_selectCondition;
 	char m_floodRegion, m_eraseRegion;
 };

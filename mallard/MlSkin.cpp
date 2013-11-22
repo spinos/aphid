@@ -97,36 +97,55 @@ void MlSkin::floodAround(MlCalamus floodC, const Vector3F & floodPos, const Vect
 }
 
 void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, char byRegion)
-{		    
-	resetCollisionRegionAround(idx, pos, maxD);
-	const unsigned maxCountPerFace = m_numFeather / 4;
+{	
+	m_selectCondition.center = pos;
+	m_selectCondition.normal = nor;
+	m_selectCondition.maxDistance = maxD;
+	m_selectCondition.byRegion = byRegion;
 	
+	resetCollisionRegionAround(idx, pos, maxD);
+	
+	for(unsigned i=0; i < numRegionElements(); i++)
+		selectFeatherByFace(regionElementIndex(i));
+}
+
+void MlSkin::selectFeatherByFace(unsigned faceIdx)
+{
 	Vector3F d, p, n;
-	for(unsigned i=0; i < numRegionElements(); i++) {
+	
+	const unsigned maxCountPerFace = numFeathers();
+	unsigned ifeather = m_faceCalamusStart[faceIdx];
+	for(unsigned j = 0; j < maxCountPerFace; j++) {
+		if(ifeather >= m_numFeather) return;
+				
+		MlCalamus *c = getCalamus(ifeather);
+		if(c->faceIdx() != faceIdx) return;
 		
-		unsigned ifeather = m_faceCalamusStart[regionElementIndex(i)];
-		for(unsigned j = 0; j < maxCountPerFace; j++) {
-			if(ifeather >= m_numFeather) break;
-			MlCalamus *c = getCalamus(ifeather);
-			if(c->faceIdx() != regionElementIndex(i)) break;
-			
-			getNormalOnBody(c, n);
-			if(n.dot(nor) < 0.f) continue;
-			
-			getPointOnBody(c, p);
-			
-			d = p - pos;
-			if(d.length() > maxD) continue;
-			    
-			if(hasActiveFaces() && byRegion) {
-			    if(!sampleColorMatches(c->faceIdx(), c->patchU(), c->patchV())) continue;
-			}
-			
-			if(!IsElementIn(ifeather, m_activeIndices))
-				m_activeIndices.push_back(ifeather);
-			
+		getNormalOnBody(c, n);
+		if(n.dot(m_selectCondition.normal) < 0.f) {
 			ifeather++;
+			continue;
 		}
+		
+		getPointOnBody(c, p);
+		
+		d = p - m_selectCondition.center;
+		if(d.length() > m_selectCondition.maxDistance) {
+			ifeather++;
+			continue;
+		}
+			
+		if(hasActiveFaces() && m_selectCondition.byRegion) {
+			if(!sampleColorMatches(c->faceIdx(), c->patchU(), c->patchV())) {
+				ifeather++;
+				continue;
+			}
+		}
+		
+		if(!IsElementIn(ifeather, m_activeIndices))
+			m_activeIndices.push_back(ifeather);
+		
+		ifeather++;
 	}
 }
 
