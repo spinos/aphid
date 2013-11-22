@@ -72,6 +72,11 @@ QWidget * BrushControl::eraseRegionWidget()
     return m_eraseAreaCheck;
 }
 
+QWidget * BrushControl::eraseStrengthWidget()
+{
+	return m_eraseStrengthValue;
+}
+
 void BrushControl::createGroup()
 {
 	controlsGroupC = new QGroupBox(tr("Create"));
@@ -106,11 +111,14 @@ void BrushControl::eraseGroup()
 	
 	m_radiusValueE = new QDoubleEditSlider(tr("Radius"));
 	m_radiusValueE->setLimit(0.1, 1000.0);
-	
+	m_eraseStrengthValue = new QDoubleEditSlider(tr("Strength"));
+	m_eraseStrengthValue->setLimit(0.01, 1.0);
+	m_eraseStrengthValue->setValue(1.0);
 	m_eraseAreaCheck = new QCheckBox(tr("Erase Within Selected Region"));
 	
 	QVBoxLayout * controlLayout = new QVBoxLayout;
 	controlLayout->addWidget(m_radiusValueE);
+	controlLayout->addWidget(m_eraseStrengthValue);
 	controlLayout->addWidget(m_eraseAreaCheck);
 	controlLayout->addStretch();
 	controlsGroupE->setLayout(controlLayout);

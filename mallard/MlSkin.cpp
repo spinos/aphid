@@ -99,7 +99,7 @@ void MlSkin::floodAround(MlCalamus floodC, const Vector3F & floodPos, const Vect
 
 void MlSkin::selectAround(unsigned idx, SelectCondition * selcon)
 {	
-	resetCollisionRegionAround(idx, selcon->center, selcon->maxDistance);
+	resetCollisionRegionAround(idx, selcon->center(), selcon->maxDistance());
 	
 	for(unsigned i=0; i < numRegionElements(); i++)
 		selectFeatherByFace(regionElementIndex(i), selcon);
@@ -116,34 +116,25 @@ void MlSkin::selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon)
 				
 		MlCalamus *c = getCalamus(ifeather);
 		if(c->faceIdx() != faceIdx) return;
-		
+		ifeather++;
 		if(selcon->byFacing()) {
 			getNormalOnBody(c, n);
-			if(selcon->filteredByFacing(n)) {
-				ifeather++;
-				continue;
-			}
+			if(selcon->filteredByFacing(n)) continue;
 		}
 		
 		if(selcon->byDistance()) {
 			getPointOnBody(c, p);
-			if(selcon->filteredByDistance(p)) {
-				ifeather++;
-				continue;
-			}
+			if(selcon->filteredByDistance(p)) continue;
 		}
 			
 		if(hasActiveFaces() && selcon->byRegion()) {
-			if(!sampleColorMatches(c->faceIdx(), c->patchU(), c->patchV())) {
-				ifeather++;
-				continue;
-			}
+			if(!sampleColorMatches(c->faceIdx(), c->patchU(), c->patchV())) continue;
 		}
 		
-		if(!IsElementIn(ifeather, m_activeIndices))
-			m_activeIndices.push_back(ifeather);
-		
-		ifeather++;
+		if(selcon->filteredByProbability()) continue;
+
+		if(!IsElementIn(ifeather - 1, m_activeIndices))
+			m_activeIndices.push_back(ifeather - 1);
 	}
 }
 

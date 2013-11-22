@@ -11,6 +11,7 @@
 #include <Plane.h>
 BaseBrush::BaseBrush() : m_radius(5.f), m_pitch(.5f), m_maxToeFactor(2.f), m_numDarts(25)
 {
+	m_strength = 1.f;
 }
 
 BaseBrush::~BaseBrush() 
@@ -31,6 +32,16 @@ void BaseBrush::setRadius(float x)
 void BaseBrush::setPitch(float x)
 {
 	m_pitch = x;
+}
+
+void BaseBrush::setStrength(float x)
+{
+	m_strength = x;
+}
+
+float BaseBrush::strength() const
+{
+	return m_strength;
 }
 
 void BaseBrush::setNumDarts(int x)

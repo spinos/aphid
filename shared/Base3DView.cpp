@@ -473,6 +473,11 @@ void Base3DView::receiveBrushNumSamples(int x)
 	update();
 }
 
+void Base3DView::receiveBrushStrength(double x)
+{
+	brush()->setStrength(x);
+}
+
 QPoint Base3DView::lastMousePos() const
 {
 	return m_lastPos;

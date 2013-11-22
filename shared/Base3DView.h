@@ -71,6 +71,7 @@ public slots:
 	void receiveBrushRadius(double x);
     void receiveBrushPitch(double x);
     void receiveBrushNumSamples(int x);
+	void receiveBrushStrength(double x);
 	
 protected:
 	virtual void processCamera(QMouseEvent *event);

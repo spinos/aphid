@@ -17,6 +17,7 @@ public:
 	void setSpace(const Vector3F & point, const Vector3F & facing);
 	void setRadius(float x);
 	void setPitch(float x);
+	void setStrength(float x);
 	void setMaxToeFactor(float x);
 	void setNumDarts(int x);
 	void resetToe();
@@ -25,6 +26,7 @@ public:
 	Matrix44F getSpace() const;
 	float getRadius() const;
 	float getPitch() const;
+	float strength() const;
 	float minDartDistance() const;
 	const Vector3F heelPosition() const;
 	const Vector3F toePosition() const;
@@ -39,6 +41,6 @@ private:
 private:
 	Matrix44F m_space;
 	Vector3F m_toeWorldPos, m_previousToeWorldP;
-	float m_radius, m_pitch, m_maxToeFactor;
+	float m_radius, m_pitch, m_maxToeFactor, m_strength;
 	unsigned m_numDarts;
 };

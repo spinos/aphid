@@ -217,9 +217,13 @@ void GLWidget::selectFeather(char byRegion)
 	brush()->resetToe();
 	
 	SelectCondition condition;
-	condition.center = ctx->m_hitP;
-	condition.normal = ctx->m_hitN;
-	condition.maxDistance = brush()->getRadius();
+	condition.setCenter(ctx->m_hitP);
+	condition.setNormal(ctx->m_hitN);
+	condition.setMaxDistance(brush()->getRadius());
+	
+	if(interactMode() == ToolContext::EraseBodyContourFeather) condition.setProbability(brush()->strength());
+	else condition.setProbability(1.f);
+	
 	condition.setRegionFilter(byRegion);
 	
 	skin()->selectAround(ctx->m_componentIdx, &condition);

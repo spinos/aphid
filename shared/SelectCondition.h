@@ -23,9 +23,20 @@ public:
 	
 	char filteredByFacing(const Vector3F & nor) const;
 	char filteredByDistance(const Vector3F & pos) const;
+	char filteredByProbability() const;
 	
-	Vector3F center;
-	Vector3F normal;
-	float maxDistance;
+	void setProbability(float p);
+	void setCenter(Vector3F c);
+	void setNormal(Vector3F n);
+	void setMaxDistance(float d);
+	
+	Vector3F center() const;
+	Vector3F normal() const;
+	float maxDistance() const;
+
+private:
+	Vector3F m_center;
+	Vector3F m_normal;
+	float m_maxDistance, m_probability;
 	bool m_byDistance, m_byRegion, m_byFacing;
 };
