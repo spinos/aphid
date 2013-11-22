@@ -240,7 +240,7 @@ void GLWidget::selectRegion()
 		return;
     }
     skin()->selectRegion(ctx->m_componentIdx, ctx->m_patchUV);
-	skin()->resetActiveFaces();
+	skin()->resetRegionFaces();
 	skin()->setFloodCondition(MlSkin::ByColor);
 }
 
@@ -633,6 +633,6 @@ void GLWidget::clearSelection()
 	skin()->setFloodCondition(MlSkin::ByDistance);
 	skin()->clearCollisionRegion();
 	skin()->clearBuffer();
-	skin()->clearActiveFaces();
+	skin()->clearRegionFaces();
 }
 //:~

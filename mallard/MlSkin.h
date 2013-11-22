@@ -28,7 +28,12 @@ public:
 	};
 	
 	struct FloodTable {
+		FloodTable() {}
 		FloodTable(unsigned i) {
+			reset(i);
+		}
+		
+		void reset(unsigned i) {
 			faceIdx = i;
 			dartBegin = dartEnd = 0;
 		}
@@ -78,9 +83,9 @@ public:
 	void setFloodCondition(FloodCondition fc);
 	FloodCondition floodCondition() const;
 	
-	char hasActiveFaces() const;
-	void clearActiveFaces();
-	void resetActiveFaces();
+	char hasRegionFaces() const;
+	void clearRegionFaces();
+	void resetRegionFaces();
 	void resetFloodFaces();
 	void restFloodFacesAsActive();
 	
@@ -99,16 +104,19 @@ private:
 	bool isPointTooCloseToExisting(const Vector3F & pos, float minDistance);
 	bool isDartCloseToExisting(const Vector3F & pos, const std::vector<Vector3F> & existing, float minDistance) const;
 	bool isFloodFace(unsigned idx, unsigned & dartBegin, unsigned & dartEnd) const;
+	bool isActiveFace(unsigned idx, std::vector<unsigned> & dartIndices) const;
+	bool isActiveFeather(unsigned idx) const;
 	void resetFaceCalamusIndirection();
-	unsigned lastInactive() const;
-	void selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon);
+	unsigned lastInactive(unsigned last) const;
+	unsigned selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon);
 private:	
 	MlCalamusArray * m_calamus;
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather, m_numCreatedFeather;
-	unsigned * m_faceCalamusStart;
+	FloodTable * m_faceCalamusTable;
 	FloodCondition m_floodCondition;
-	std::vector<unsigned> m_activeFaces;
+	std::vector<unsigned> m_regionFaces;
+	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
 	char m_floodRegion, m_eraseRegion;
 };
