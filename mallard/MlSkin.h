@@ -17,6 +17,7 @@ class AccPatchMesh;
 class MeshTopology;
 class MlCalamusArray;
 class BaseImage;
+class SelectCondition;
 
 class MlSkin : public CollisionRegion 
 {
@@ -45,7 +46,7 @@ public:
 	void setNumFeathers(unsigned num);
 	
 	void floodAround(MlCalamus c, const Vector3F & pos, const Vector3F & nor, const float & maxD, const float & minD);
-	void selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, char byRegion = 0);
+	void selectAround(unsigned idx, SelectCondition * selcon);
 	void discardActive();
 	
 	void growFeather(const Vector3F & direction);
@@ -100,15 +101,8 @@ private:
 	bool isFloodFace(unsigned idx, unsigned & dartBegin, unsigned & dartEnd) const;
 	void resetFaceCalamusIndirection();
 	unsigned lastInactive() const;
-	void selectFeatherByFace(unsigned faceIdx);
-private:
-	struct SelectCondition {
-		Vector3F center;
-		Vector3F normal;
-		float maxDistance;
-		char byRegion;
-	};
-	
+	void selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon);
+private:	
 	MlCalamusArray * m_calamus;
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather, m_numCreatedFeather;
@@ -116,6 +110,5 @@ private:
 	FloodCondition m_floodCondition;
 	std::vector<unsigned> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
-	SelectCondition m_selectCondition;
 	char m_floodRegion, m_eraseRegion;
 };

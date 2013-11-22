@@ -11,6 +11,7 @@
 #include <MeshTopology.h>
 #include <QuickSort.h>
 #include <BaseImage.h>
+#include <SelectCondition.h>
 #include "MlCalamusArray.h"
 
 MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusStart(0), m_numCreatedFeather(0)
@@ -96,22 +97,17 @@ void MlSkin::floodAround(MlCalamus floodC, const Vector3F & floodPos, const Vect
 	darts.clear();
 }
 
-void MlSkin::selectAround(unsigned idx, const Vector3F & pos, const Vector3F & nor, const float & maxD, char byRegion)
+void MlSkin::selectAround(unsigned idx, SelectCondition * selcon)
 {	
-	m_selectCondition.center = pos;
-	m_selectCondition.normal = nor;
-	m_selectCondition.maxDistance = maxD;
-	m_selectCondition.byRegion = byRegion;
-	
-	resetCollisionRegionAround(idx, pos, maxD);
+	resetCollisionRegionAround(idx, selcon->center, selcon->maxDistance);
 	
 	for(unsigned i=0; i < numRegionElements(); i++)
-		selectFeatherByFace(regionElementIndex(i));
+		selectFeatherByFace(regionElementIndex(i), selcon);
 }
 
-void MlSkin::selectFeatherByFace(unsigned faceIdx)
+void MlSkin::selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon)
 {
-	Vector3F d, p, n;
+	Vector3F p, n;
 	
 	const unsigned maxCountPerFace = numFeathers();
 	unsigned ifeather = m_faceCalamusStart[faceIdx];
@@ -121,21 +117,23 @@ void MlSkin::selectFeatherByFace(unsigned faceIdx)
 		MlCalamus *c = getCalamus(ifeather);
 		if(c->faceIdx() != faceIdx) return;
 		
-		getNormalOnBody(c, n);
-		if(n.dot(m_selectCondition.normal) < 0.f) {
-			ifeather++;
-			continue;
+		if(selcon->byFacing()) {
+			getNormalOnBody(c, n);
+			if(selcon->filteredByFacing(n)) {
+				ifeather++;
+				continue;
+			}
 		}
 		
-		getPointOnBody(c, p);
-		
-		d = p - m_selectCondition.center;
-		if(d.length() > m_selectCondition.maxDistance) {
-			ifeather++;
-			continue;
+		if(selcon->byDistance()) {
+			getPointOnBody(c, p);
+			if(selcon->filteredByDistance(p)) {
+				ifeather++;
+				continue;
+			}
 		}
 			
-		if(hasActiveFaces() && m_selectCondition.byRegion) {
+		if(hasActiveFaces() && selcon->byRegion()) {
 			if(!sampleColorMatches(c->faceIdx(), c->patchU(), c->patchV())) {
 				ifeather++;
 				continue;

@@ -59,6 +59,7 @@
 #include <BakeDeformer.h>
 #include <PlaybackControl.h>
 #include <zEXRImage.h>
+#include <SelectCondition.h>
 #include "MlCalamus.h"
 
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
@@ -215,7 +216,13 @@ void GLWidget::selectFeather(char byRegion)
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
 	brush()->resetToe();
 	
-	skin()->selectAround(ctx->m_componentIdx, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), byRegion);
+	SelectCondition condition;
+	condition.center = ctx->m_hitP;
+	condition.normal = ctx->m_hitN;
+	condition.maxDistance = brush()->getRadius();
+	condition.setRegionFilter(byRegion);
+	
+	skin()->selectAround(ctx->m_componentIdx, &condition);
 	m_featherDrawer->clearCached();
 	setDirty();
 }
