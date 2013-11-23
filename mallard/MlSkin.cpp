@@ -72,7 +72,7 @@ void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
 				if(condition->filteredByDistance(adart)) continue;
 			}
 			
-			if(hasRegionFaces() && condition->byRegion()) {
+			if(hasActiveRegion() && condition->byRegion()) {
 				if(!sampleColorMatches(iface, u, v)) continue;
 			}
 			
@@ -130,7 +130,7 @@ unsigned MlSkin::selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon)
 			if(selcon->filteredByDistance(p)) continue;
 		}
 			
-		if(hasRegionFaces() && selcon->byRegion()) {
+		if(hasActiveRegion() && selcon->byRegion()) {
 			if(!sampleColorMatches(c->faceIdx(), c->patchU(), c->patchV())) continue;
 		}
 		
@@ -514,23 +514,6 @@ MlCalamusArray * MlSkin::getCalamusArray() const
 	return m_calamus;
 }
 
-char MlSkin::hasRegionFaces() const
-{
-    return m_regionFaces.size() > 0;
-}
-
-void MlSkin::clearRegionFaces()
-{
-    m_regionFaces.clear();
-}
-
-void MlSkin::resetRegionFaces()
-{
-	m_regionFaces.clear();
-	for(unsigned i = 0; i < numRegionElements(); i++)
-		m_regionFaces.push_back(regionElementIndex(i));
-}
-
 void MlSkin::resetFloodFaces()
 {
 	m_floodFaces.clear();
@@ -541,8 +524,8 @@ void MlSkin::resetFloodFaces()
 void MlSkin::restFloodFacesAsActive()
 {
 	m_floodFaces.clear();
-	for(unsigned i = 0; i < m_regionFaces.size(); i++)
-		m_floodFaces.push_back(FloodTable(m_regionFaces[i]));
+	for(unsigned i = 0; i < numActiveRegionFaces(); i++)
+		m_floodFaces.push_back(FloodTable(activeRegionFace(i)));
 }
 
 void MlSkin::verbose() const

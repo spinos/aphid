@@ -242,7 +242,7 @@ void GLWidget::selectRegion()
 		return;
     }
     skin()->selectRegion(ctx->m_componentIdx, ctx->m_patchUV);
-	skin()->resetRegionFaces();
+	skin()->resetActiveRegion();
 	//skin()->setFloodCondition(MlSkin::ByColor);
 }
 
@@ -266,10 +266,10 @@ void GLWidget::floodFeather()
 	condition.setProbability(brush()->strength());
 	condition.setDistanceFilter(1);
 	
-	if(skin()->hasRegionFaces()) condition.setRegionFilter(1);
+	if(skin()->hasActiveRegion()) condition.setRegionFilter(1);
 	else condition.setRegionFilter(0);
 	
-	if(m_floodByRegion && skin()->hasRegionFaces()) {
+	if(m_floodByRegion && skin()->hasActiveRegion()) {
 		skin()->restFloodFacesAsActive();
 		condition.setDistanceFilter(0);
 	}
@@ -648,6 +648,6 @@ void GLWidget::clearSelection()
 	//skin()->setFloodCondition(MlSkin::ByDistance);
 	skin()->clearCollisionRegion();
 	skin()->clearBuffer();
-	skin()->clearRegionFaces();
+	skin()->clearActiveRegion();
 }
 //:~

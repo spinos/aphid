@@ -76,14 +76,10 @@ public:
 	MlCalamus * getCreated(unsigned idx) const;
 	MlCalamusArray * getCalamusArray() const;
 	
-	char hasRegionFaces() const;
-	void clearRegionFaces();
-	void resetRegionFaces();
 	void resetFloodFaces();
 	void restFloodFacesAsActive();
 	
 	void verbose() const;
-	
 protected:
 	
 private:
@@ -101,7 +97,6 @@ private:
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather, m_numCreatedFeather;
 	FloodTable * m_faceCalamusTable;
-	std::vector<unsigned> m_regionFaces;
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
 };

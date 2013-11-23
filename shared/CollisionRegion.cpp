@@ -233,3 +233,10 @@ Vector3F CollisionRegion::sampleColor() const
 {
     return m_sampleColor;
 }
+
+void CollisionRegion::resetActiveRegion()
+{
+	clearActiveRegion();
+	for(unsigned i = 0; i < numRegionElements(); i++)
+		addActiveRegionFace(regionElementIndex(i));
+}
