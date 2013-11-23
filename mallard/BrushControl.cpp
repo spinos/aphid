@@ -101,7 +101,7 @@ void BrushControl::createGroup()
 	controlLayout->addStretch();
 	controlsGroupC->setLayout(controlLayout);
 	
-	m_numSampleValueC->setValue(32);
+	m_numSampleValueC->setValue(99);
 	m_radiusValueC->setValue(4.0);
 	m_pitchValueC->setValue(0.35);
 }

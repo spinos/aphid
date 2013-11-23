@@ -62,6 +62,7 @@ void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
 		m_floodFaces[i].dartBegin = m_floodFaces[i].dartEnd = darts.size();
 		const unsigned ndart = 4 + bodyMesh()->calculateBBox(iface).area() / condition->minDistance() / condition->minDistance();
 		for(j = 0; j < ndart; j++) {
+			if(condition->filteredByProbability()) continue;
 		
 			u = ((float)(rand()%591))/591.f;
 			v = ((float)(rand()%593))/593.f;
@@ -74,8 +75,6 @@ void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
 			if(hasRegionFaces() && condition->byRegion()) {
 				if(!sampleColorMatches(iface, u, v)) continue;
 			}
-			
-			if(condition->filteredByProbability()) continue;
 			
 			//bodyMesh()->normalOnPatch(iface, u, v, facing);
 			//if(facing.dot(floodNor) < .23f) continue;
@@ -119,6 +118,8 @@ unsigned MlSkin::selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon)
 		MlCalamus *c = getCalamus(j);
 		if(c->faceIdx() != faceIdx) break;
 		
+		if(selcon->filteredByProbability()) continue;
+		
 		if(selcon->byFacing()) {
 			getNormalOnBody(c, n);
 			if(selcon->filteredByFacing(n)) continue;
@@ -133,8 +134,6 @@ unsigned MlSkin::selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon)
 			if(!sampleColorMatches(c->faceIdx(), c->patchU(), c->patchV())) continue;
 		}
 		
-		if(selcon->filteredByProbability()) continue;
-
 		if(!isActiveFeather(j))
 			m_activeIndices.push_back(j);
 	}
