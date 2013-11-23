@@ -73,10 +73,10 @@ Window::Window()
     connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
 	connect(m_brushControl->pitchWidget(), SIGNAL(valueChanged(double)), glWidget, SLOT(receiveBrushPitch(double)));
 	connect(m_brushControl, SIGNAL(brushRadiusChanged(double)), glWidget, SLOT(receiveBrushRadius(double)));
+	connect(m_brushControl, SIGNAL(brushStrengthChanged(double)), glWidget, SLOT(receiveBrushStrength(double)));
 	connect(m_brushControl->numSamplesWidget(), SIGNAL(valueChanged(int)), glWidget, SLOT(receiveBrushNumSamples(int)));
 	connect(m_brushControl->floodRegionWidget(), SIGNAL(stateChanged(int)), glWidget, SLOT(receiveFloodRegion(int)));
 	connect(m_brushControl->eraseRegionWidget(), SIGNAL(stateChanged(int)), glWidget, SLOT(receiveEraseRegion(int)));
-	connect(m_brushControl->eraseStrengthWidget(), SIGNAL(valueChanged(double)), glWidget, SLOT(receiveBrushStrength(double)));
 	connect(glWidget, SIGNAL(sceneNameChanged(QString)), this, SLOT(setWorkTitle(QString)));
 	connect(glWidget, SIGNAL(sendMessage(QString)), this, SLOT(showMessage(QString)));
 	connect(m_featherEdit, SIGNAL(textureLoaded(QString)), glWidget, SLOT(receiveFeatherEditBackground(QString)));

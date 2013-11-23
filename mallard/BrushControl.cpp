@@ -44,7 +44,8 @@ BrushControl::BrushControl(QWidget *parent)
 	connect(m_radiusValueB, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(m_radiusValueS, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(m_radiusValueD, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
-	
+	connect(m_createStrengthValue, SIGNAL(valueChanged(double)), this, SLOT(sendBrushStrength(double)));
+	connect(m_eraseStrengthValue, SIGNAL(valueChanged(double)), this, SLOT(sendBrushStrength(double)));
 }
 
 QWidget * BrushControl::numSamplesWidget()
@@ -72,11 +73,6 @@ QWidget * BrushControl::eraseRegionWidget()
     return m_eraseAreaCheck;
 }
 
-QWidget * BrushControl::eraseStrengthWidget()
-{
-	return m_eraseStrengthValue;
-}
-
 void BrushControl::createGroup()
 {
 	controlsGroupC = new QGroupBox(tr("Create"));
@@ -90,12 +86,17 @@ void BrushControl::createGroup()
 	m_pitchValueC = new QDoubleEditSlider(tr("Pitch Angle"));
 	m_pitchValueC->setLimit(0.1, 1.1);
 	
+	m_createStrengthValue = new QDoubleEditSlider(tr("Strength"));
+	m_createStrengthValue->setLimit(0.01, 1.0);
+	m_createStrengthValue->setValue(1.0);
+	
 	m_floodAreaCheck = new QCheckBox(tr("Flood Selected Region"));
 	
 	QVBoxLayout * controlLayout = new QVBoxLayout;
 	controlLayout->addWidget(m_radiusValueC);
 	controlLayout->addWidget(m_pitchValueC);
 	controlLayout->addWidget(m_numSampleValueC);
+	controlLayout->addWidget(m_createStrengthValue);
 	controlLayout->addWidget(m_floodAreaCheck);
 	controlLayout->addStretch();
 	controlsGroupC->setLayout(controlLayout);
@@ -166,6 +167,7 @@ void BrushControl::bendGroup()
 void BrushControl::receiveToolContext(int c)
 {
 	double r = m_radiusValueC->value();
+	double s = m_createStrengthValue->value();
 	switch(c) {
 		case ToolContext::CreateBodyContourFeather:
 			stackLayout->setCurrentIndex(0);
@@ -185,11 +187,13 @@ void BrushControl::receiveToolContext(int c)
 		case ToolContext::EraseBodyContourFeather:
 			stackLayout->setCurrentIndex(4);
 			r = m_radiusValueE->value();
+			s = m_eraseStrengthValue->value();
 			break;
 		default:
 			break;
 	}
-	emit brushRadiusChanged(r);
+	sendBrushRadius(r);
+	sendBrushStrength(s);
 }
 	
 void BrushControl::sendBrushRadius(double d)
@@ -197,3 +201,7 @@ void BrushControl::sendBrushRadius(double d)
 	emit brushRadiusChanged(d);
 }
 	
+void BrushControl::sendBrushStrength(double d)
+{
+	emit brushStrengthChanged(d);
+}

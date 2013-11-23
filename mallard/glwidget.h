@@ -114,6 +114,7 @@ private:
 	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;
 	int m_featherTexId, m_featherDistrId;
+	char m_floodByRegion, m_eraseByRegion;
 };
 //! [3]
 

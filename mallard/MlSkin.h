@@ -18,15 +18,11 @@ class MeshTopology;
 class MlCalamusArray;
 class BaseImage;
 class SelectCondition;
+class FloodCondition;
 
 class MlSkin : public CollisionRegion 
 {
-public:
-	enum FloodCondition {
-		ByDistance = 0,
-		ByColor = 1
-	};
-	
+public:	
 	struct FloodTable {
 		FloodTable() {}
 		FloodTable(unsigned i) {
@@ -50,7 +46,7 @@ public:
 	
 	void setNumFeathers(unsigned num);
 	
-	void floodAround(MlCalamus c, const Vector3F & pos, const Vector3F & nor, const float & maxD, const float & minD);
+	void floodAround(MlCalamus c, FloodCondition * condition);
 	void selectAround(unsigned idx, SelectCondition * selcon);
 	void discardActive();
 	
@@ -80,20 +76,11 @@ public:
 	MlCalamus * getCreated(unsigned idx) const;
 	MlCalamusArray * getCalamusArray() const;
 	
-	void setFloodCondition(FloodCondition fc);
-	FloodCondition floodCondition() const;
-	
 	char hasRegionFaces() const;
 	void clearRegionFaces();
 	void resetRegionFaces();
 	void resetFloodFaces();
 	void restFloodFacesAsActive();
-	
-	void setFloodRegion(char on);
-	char floodRegion() const;
-	
-	void setEraseRegion(char on);
-	char eraseRegion() const;
 	
 	void verbose() const;
 	
@@ -114,9 +101,7 @@ private:
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather, m_numCreatedFeather;
 	FloodTable * m_faceCalamusTable;
-	FloodCondition m_floodCondition;
 	std::vector<unsigned> m_regionFaces;
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
-	char m_floodRegion, m_eraseRegion;
 };

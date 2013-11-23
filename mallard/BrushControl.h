@@ -33,15 +33,16 @@ public:
 	QWidget * pitchWidget();
 	QWidget * floodRegionWidget();
 	QWidget * eraseRegionWidget();
-	QWidget * eraseStrengthWidget();
 
 public slots:
 	void receiveToolContext(int c);
 	
 private slots:
 	void sendBrushRadius(double d);
+	void sendBrushStrength(double d);
 signals:
 	void brushRadiusChanged(double d);
+	void brushStrengthChanged(double d);
 private:
 	void createGroup();
 	void eraseGroup();
@@ -55,6 +56,7 @@ private:
 	QDoubleEditSlider * m_radiusValueC;
 	QDoubleEditSlider * m_pitchValueC;
 	QIntEditSlider * m_numSampleValueC;
+	QDoubleEditSlider * m_createStrengthValue;
 	QCheckBox * m_floodAreaCheck;
 	QGroupBox * controlsGroupE;
 	QDoubleEditSlider * m_radiusValueE;

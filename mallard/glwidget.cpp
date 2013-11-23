@@ -60,6 +60,7 @@
 #include <PlaybackControl.h>
 #include <zEXRImage.h>
 #include <SelectCondition.h>
+#include <FloodCondition.h>
 #include "MlCalamus.h"
 
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
@@ -71,6 +72,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	MlCalamus::FeatherLibrary = this;
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 	m_featherTexId = m_featherDistrId = -1;
+	m_floodByRegion = m_eraseByRegion = 0;
 }
 //! [0]
 
@@ -137,7 +139,7 @@ void GLWidget::clientSelect()
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
 	        hitTest(ray, hit);
-	        selectFeather(skin()->eraseRegion());
+	        selectFeather(m_eraseByRegion);
 	        m_featherDrawer->hideActive(skin());
 	        break;
 	    case ToolContext::SelectByColor :
@@ -168,7 +170,7 @@ void GLWidget::clientMouseInput()
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
 	        hitTest(ray, hit);
-	        selectFeather(skin()->eraseRegion());
+	        selectFeather(m_eraseByRegion);
 	        m_featherDrawer->hideActive(skin());
 	        break;
 	    case ToolContext::SelectByColor :
@@ -241,7 +243,7 @@ void GLWidget::selectRegion()
     }
     skin()->selectRegion(ctx->m_componentIdx, ctx->m_patchUV);
 	skin()->resetRegionFaces();
-	skin()->setFloodCondition(MlSkin::ByColor);
+	//skin()->setFloodCondition(MlSkin::ByColor);
 }
 
 void GLWidget::floodFeather()
@@ -256,18 +258,31 @@ void GLWidget::floodFeather()
 	//rr.reverse();
 	//if(rr.dot(brush()->normal()) < .34f) return;
 	
-	MlCalamus ac;
-	ac.setFeatherId(selectedFeatherExampleId());
-	ac.setRotateY(brush()->getPitch());
+	FloodCondition condition;
+	condition.setCenter(ctx->m_hitP);
+	condition.setNormal(ctx->m_hitN);
+	condition.setMaxDistance(brush()->getRadius());
+	condition.setMinDistance(brush()->minDartDistance());
+	condition.setProbability(brush()->strength());
+	condition.setDistanceFilter(1);
 	
-	if(skin()->floodRegion() && skin()->floodCondition() == MlSkin::ByColor) {
+	if(skin()->hasRegionFaces()) condition.setRegionFilter(1);
+	else condition.setRegionFilter(0);
+	
+	if(m_floodByRegion && skin()->hasRegionFaces()) {
 		skin()->restFloodFacesAsActive();
+		condition.setDistanceFilter(0);
 	}
 	else {
 		skin()->resetCollisionRegionAround(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
 		skin()->resetFloodFaces();
 	}
-	skin()->floodAround(ac, ctx->m_hitP, ctx->m_hitN, brush()->getRadius(), brush()->minDartDistance());
+	
+	MlCalamus ac;
+	ac.setFeatherId(selectedFeatherExampleId());
+	ac.setRotateY(brush()->getPitch());
+	
+	skin()->floodAround(ac, &condition);
 	m_featherDrawer->addToBuffer(skin());
 	m_featherDrawer->clearCached();
 	setDirty();
@@ -615,22 +630,22 @@ void GLWidget::loadFeatherDistribution(const std::string & name)
 void GLWidget::receiveFloodRegion(int state)
 {
 	if(state == Qt::Unchecked)
-		skin()->setFloodRegion(0);
+		m_floodByRegion = 0;
 	else
-		skin()->setFloodRegion(1);
+		m_floodByRegion = 1;
 }
 
 void GLWidget::receiveEraseRegion(int state)
 {
     if(state == Qt::Unchecked)
-		skin()->setEraseRegion(0);
+		m_eraseByRegion = 0;
 	else
-		skin()->setEraseRegion(1);
+		m_eraseByRegion = 1;
 }
 
 void GLWidget::clearSelection()
 {
-	skin()->setFloodCondition(MlSkin::ByDistance);
+	//skin()->setFloodCondition(MlSkin::ByDistance);
 	skin()->clearCollisionRegion();
 	skin()->clearBuffer();
 	skin()->clearRegionFaces();

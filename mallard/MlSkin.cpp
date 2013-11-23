@@ -12,14 +12,13 @@
 #include <QuickSort.h>
 #include <BaseImage.h>
 #include <SelectCondition.h>
+#include <FloodCondition.h>
 #include "MlCalamusArray.h"
 
 MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusTable(0), m_numCreatedFeather(0)
 {
     m_activeIndices.clear();
-	m_calamus = new MlCalamusArray; 
-	m_floodCondition = ByDistance;
-	m_floodRegion = m_eraseRegion = 0;
+	m_calamus = new MlCalamusArray;
 }
 
 MlSkin::~MlSkin()
@@ -51,42 +50,40 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 	resetFaceCalamusIndirection();
 }
 
-void MlSkin::floodAround(MlCalamus floodC, const Vector3F & floodPos, const Vector3F & floodNor, const float & floodMaxD, const float & floodMinD)
+void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
 {	
 	unsigned i, j, iface;
 	
-	char outsideMaxD;
 	float u, v;
 	Vector3F adart, facing;
 	std::vector<Vector3F> darts;
 	for(i = 0; i < m_floodFaces.size(); i++) {
 		iface = m_floodFaces[i].faceIdx;
 		m_floodFaces[i].dartBegin = m_floodFaces[i].dartEnd = darts.size();
-		const unsigned ndart = 4 + bodyMesh()->calculateBBox(iface).area() / floodMinD / floodMinD;
+		const unsigned ndart = 4 + bodyMesh()->calculateBBox(iface).area() / condition->minDistance() / condition->minDistance();
 		for(j = 0; j < ndart; j++) {
 		
 			u = ((float)(rand()%591))/591.f;
 			v = ((float)(rand()%593))/593.f;
 			bodyMesh()->pointOnPatch(iface, u, v, adart);
 			
-			outsideMaxD = Vector3F(floodPos, adart).length() > floodMaxD;
-			if(m_floodCondition == ByDistance) {
-				if(outsideMaxD) continue;
+			if(condition->byDistance()) {
+				if(condition->filteredByDistance(adart)) continue;
 			}
-			else {
-				if(!m_floodRegion) {
-					if(outsideMaxD) continue;
-				}
+			
+			if(hasRegionFaces() && condition->byRegion()) {
 				if(!sampleColorMatches(iface, u, v)) continue;
 			}
+			
+			if(condition->filteredByProbability()) continue;
 			
 			//bodyMesh()->normalOnPatch(iface, u, v, facing);
 			//if(facing.dot(floodNor) < .23f) continue;
 			resetCollisionRegion(iface);
 	
-			if(isPointTooCloseToExisting(adart, floodMinD)) continue;
+			if(isPointTooCloseToExisting(adart, condition->minDistance())) continue;
 			
-			if(isDartCloseToExisting(adart, darts, floodMinD)) continue;
+			if(isDartCloseToExisting(adart, darts, condition->minDistance())) continue;
 				
 			darts.push_back(adart);
 			floodC.bindToFace(iface, u, v);
@@ -518,16 +515,6 @@ MlCalamusArray * MlSkin::getCalamusArray() const
 	return m_calamus;
 }
 
-void MlSkin::setFloodCondition(FloodCondition fc)
-{
-	m_floodCondition = fc;
-}
-
-MlSkin::FloodCondition MlSkin::floodCondition() const
-{
-	return m_floodCondition;
-}
-
 char MlSkin::hasRegionFaces() const
 {
     return m_regionFaces.size() > 0;
@@ -557,26 +544,6 @@ void MlSkin::restFloodFacesAsActive()
 	m_floodFaces.clear();
 	for(unsigned i = 0; i < m_regionFaces.size(); i++)
 		m_floodFaces.push_back(FloodTable(m_regionFaces[i]));
-}
-
-void MlSkin::setFloodRegion(char on)
-{
-	m_floodRegion = on;
-}
-
-char MlSkin::floodRegion() const
-{
-	return m_floodRegion;
-}
-
-void MlSkin::setEraseRegion(char on)
-{
-    m_eraseRegion = on;
-}
-
-char MlSkin::eraseRegion() const
-{
-    return m_eraseRegion;
 }
 
 void MlSkin::verbose() const
