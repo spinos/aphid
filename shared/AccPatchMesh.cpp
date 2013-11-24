@@ -169,6 +169,9 @@ char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionCont
 
 void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const
 {
+	BoundingBox controlbox = patch->controlBBox();
+	if(!controlbox.isPointAround(origin, ctx->m_minHitDistance)) return;
+	
 	Vector3F fourCorners[4];
 	fourCorners[0] = patch->_contorlPoints[0];
 	fourCorners[1] = patch->_contorlPoints[3];
@@ -179,11 +182,8 @@ void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPa
 	Vector3F px;
 	const float d = pl.distanceTo(origin, px);
 	
-	//char converged = 0;
-	//if(level > 0) {
-	if(d >= ctx->m_elementHitDistance /*|| !pl.isPointInside(px)*/) {
+	if(level > 4 || d >= ctx->m_elementHitDistance || controlbox.area() < .01f /*|| converged*/) {
 		if(d > ctx->m_minHitDistance) return;
-			
 		ctx->m_minHitDistance = d;
 		ctx->m_componentIdx = ctx->m_curComponentIdx;
 		ctx->m_closestP = px;
@@ -197,32 +197,8 @@ void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPa
 		ctx->m_patchUV = bili.interpolate2(ctx->m_patchUV.x, ctx->m_patchUV.y, split.patchUV);
 		return;
 	}
-	//else {
-	//	if(ctx->m_minHitDistance - d < 10e6)
-	//		converged = 1;
-	//}
-	//}
-		
+	
 	ctx->m_elementHitDistance = d;
-	
-	if(d > ctx->m_minHitDistance) return;
-		
-	BoundingBox controlbox = patch->controlBBox();
-	if(level > 4 /*|| !pl.isPointInside(px)*/ || controlbox.area() < .01f /*|| converged*/) {
-		if(d > ctx->m_minHitDistance) return;
-		ctx->m_minHitDistance = d;
-		ctx->m_componentIdx = ctx->m_curComponentIdx;
-		ctx->m_closestP = px;
-		ctx->m_hitP = px;
-		
-		InverseBilinearInterpolate invbil;
-		invbil.setVertices(pl.vertex(0), pl.vertex(1), pl.vertex(3), pl.vertex(2));
-	
-		ctx->m_patchUV = invbil(px);
-		BiLinearInterpolate bili;
-		ctx->m_patchUV = bili.interpolate2(ctx->m_patchUV.x, ctx->m_patchUV.y, split.patchUV);
-		return;
-	}
 	
 	level++;
 	

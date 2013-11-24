@@ -51,7 +51,7 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 	xdir = space.transform(xdir);
 	
 	Patch::PushPlaneContext ctx;
-	ctx.reset(xdir, oriP, zdir, radius);
+	ctx.reset(xdir, oriP, zdir, radius * .5f);
 	collide->pushPlane(&ctx);
 	float bounceAngle = ctx.m_maxAngle;
 	
@@ -73,7 +73,7 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 		
 	segSpace = localSpace;
 
-	for(unsigned i = 1; i < m_numSpace - 1; i++) {
+	for(unsigned i = 1; i < m_numSpace - 2; i++) {
 		invSpace = segSpace;
 		invSpace.inverse();
 
