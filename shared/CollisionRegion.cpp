@@ -46,7 +46,24 @@ Vector3F CollisionRegion::getClosestPoint(const Vector3F & origin)
 {
 	m_ctx->reset();
 	closestPoint(origin, m_ctx);
-	return m_ctx->m_closestP;
+	//return m_ctx->m_closestP;
+	Vector3F pos;
+	
+	m_body->pointOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, pos);
+
+	/*Vector3F de = pos - m_ctx->m_closestP;
+	float er = de.length() / m_body->calculateBBox(m_ctx->m_componentIdx).area() * 2;
+	if(er > 0.0001)std::cout<<"\n err "<<er;*/
+	return pos;
+}
+
+Vector3F CollisionRegion::getClosestNormal(const Vector3F & origin)
+{
+	m_ctx->reset();
+	closestPoint(origin, m_ctx);
+	Vector3F nor;
+	m_body->normalOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, nor);
+	return nor;
 }
 
 void CollisionRegion::neighborFaces(unsigned idx, std::vector<unsigned> & dst)

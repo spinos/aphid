@@ -112,7 +112,7 @@ bool Patch::pushPlane(PushPlaneContext * ctx) const
 		dp = pop - ctx->m_origin;
 		dp.normalize();
 		
-		ang = dp.angleBetween(dv, ctx->m_up);
+		ang = dp.angleBetween(dv, ctx->m_up) + .13f;
 		
 		if(ang > ctx->m_maxAngle) allBellow = false;
 		

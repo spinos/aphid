@@ -7,6 +7,7 @@
  */
 #include <cmath>
 #include "Matrix33F.h"
+#include <iostream>
 
 Matrix33F Matrix33F::IdentityMatrix;
 
@@ -260,3 +261,10 @@ void Matrix33F::rotateEuler(float phi, float theta, float psi, RotateOrder order
 	}
 }
 
+Vector3F Matrix33F::scale() const
+{
+	Vector3F vx(M(0, 0), M(0, 1), M(0, 2));
+	Vector3F vy(M(1, 0), M(1, 1), M(1, 2));
+	Vector3F vz(M(2, 0), M(2, 1), M(2, 2));
+	return Vector3F(vx.length(), vy.length(), vz.length());
+}

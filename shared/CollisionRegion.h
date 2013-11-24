@@ -24,6 +24,7 @@ public:
 	AccPatchMesh * bodyMesh() const;
 	
 	Vector3F getClosestPoint(const Vector3F & origin);
+	Vector3F getClosestNormal(const Vector3F & origin);
 	
 	virtual void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
 	virtual void resetCollisionRegion(unsigned idx);

@@ -37,7 +37,7 @@ public:
 	float m_minHitDistance, m_elementHitDistance;
 	int m_level;
 	Geometry * m_geometry;
-	unsigned m_componentIdx;
+	unsigned m_componentIdx, m_curComponentIdx;
 	char m_success;
 	char m_enableNormalRef;
 	char twoSided;

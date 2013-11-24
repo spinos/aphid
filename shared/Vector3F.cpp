@@ -176,7 +176,7 @@ void Vector3F::normalize()
 
 Vector3F Vector3F::normal() const
 {
-        double mag = sqrt( x * x + y * y + z * z ) + 10e-8;
+        double mag = sqrt( x * x + y * y + z * z );
         return Vector3F(x /(float)mag, y /(float)mag, z /(float)mag);
 }
 	
@@ -263,9 +263,8 @@ float Vector3F::angleY() const
 
 float Vector3F::angleBetween(const Vector3F& another, const Vector3F& up) const
 {
-	const Vector3F nn = another.normal();
-	float ang = acos(normal().dot(nn));
-	if(up.dot(nn) > 0.f) return ang;
+	float ang = acos(this->normal().dot(another.normal()));
+	if(up.dot(another) >= 0.f) return ang;
 	return -ang;
 }
 

@@ -319,14 +319,17 @@ void BezierPatch::tangentFrame(float u, float v, Matrix33F & frm) const
 	Vector3F du;
 	evaluateSurfaceTangent(u, v, &du);
 	du.normalize();
-    
+	
     Vector3F side;
 	evaluateSurfaceNormal(u, v, &side);
     side.normalize();
     
     Vector3F up = du.cross(side);
     up.normalize();
-    
+	
+	du = side.cross(up);
+	du.normalize();
+	
     frm.fill(side, up, du);
 }
 //:~

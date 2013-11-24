@@ -20,11 +20,12 @@ public:
 	void create(unsigned x);
 	void computeAngles(float * segL, float fullL);
 	void reset();
-	void update(const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide, const float & fullPitch);
+	void bend(const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide, const float & fullPitch);
 	
 	Matrix33F getSpace(short idx) const;
 private:
 	unsigned m_numSpace;
 	Matrix33F * m_spaces;
 	float * m_angles;
+	float * m_lengthPortions;
 };
