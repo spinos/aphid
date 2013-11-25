@@ -32,9 +32,9 @@ void MlRachis::create(unsigned x)
 
 void MlRachis::computeAngles(float * segL, float fullL)
 {
-	for(unsigned i = 0; i < m_numSpace; i++) {
-		m_angles[i] = sqrt(segL[i] / fullL) * .5f + segL[i] / fullL * .5f;
+    for(unsigned i = 0; i < m_numSpace; i++) {
 		m_lengthPortions[i] = segL[i] / fullL;
+		m_angles[i] = m_lengthPortions[i] * .8f + m_lengthPortions[i] * m_lengthPortions[i] * .2f;
 	}
 }
 
@@ -51,14 +51,14 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 	xdir = space.transform(xdir);
 	
 	Patch::PushPlaneContext ctx;
-	ctx.reset(xdir, oriP, zdir, radius * .5f);
+	ctx.reset(xdir, oriP, zdir, radius);
 	collide->pushPlane(&ctx);
 	float bounceAngle = ctx.m_maxAngle;
 	
 	reset();
 	
 	Matrix33F localSpace, invSpace, segSpace = space;
-	m_spaces[0].rotateY(fullPitch * m_angles[0] + bounceAngle);
+	m_spaces[0].rotateY(.1f + bounceAngle);
 	
 	Vector3F localD, localU, segU, segP = oriP;
 	float segRot;
@@ -70,9 +70,9 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 	localD = localSpace.transform(localD);
 		
 	segP += localD;
-		
+	
 	segSpace = localSpace;
-
+	float pitchPortion = 0.f;
 	for(unsigned i = 1; i < m_numSpace - 2; i++) {
 		invSpace = segSpace;
 		invSpace.inverse();
@@ -84,7 +84,8 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 		segRot = acos(segU.normal().dot(Vector3F::XAxis));
 		if(segU.z > 0.f) segRot *= -1.f;
 
-		m_spaces[i].rotateY(fullPitch * m_angles[i] + segRot);
+		pitchPortion += m_angles[i];
+		m_spaces[i].rotateY(bounceAngle * m_lengthPortions[0] + fullPitch * pitchPortion + segRot);
 
 		localSpace = m_spaces[i];
 		localSpace.multiply(segSpace);
@@ -95,6 +96,11 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 		segP += localD;
 		
 		segSpace = localSpace;
+	}
+	
+	for(unsigned i = m_numSpace - 2; i < m_numSpace; i++) {
+	    pitchPortion += m_angles[i];
+	    m_spaces[i].rotateY(fullPitch * pitchPortion);
 	}
 }
 

@@ -9,7 +9,7 @@
 
 #include "BaseBrush.h"
 #include <Plane.h>
-BaseBrush::BaseBrush() : m_radius(5.f), m_pitch(.5f), m_maxToeFactor(2.f), m_numDarts(99)
+BaseBrush::BaseBrush() : m_radius(5.f), m_pitch(0.1f), m_maxToeFactor(2.f), m_numDarts(99)
 {
 	m_strength = 1.f;
 }

@@ -180,9 +180,9 @@ void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, s
 	Vector3F p = origin;
 	Vector2F * vane = getVaneAt(seg, side);
 	
-	//const float tapper = getWidth(seg) * -.01f;
+	const float tapper = getWidth(seg) * -.01f;
 	for(short i = 0; i < 3; i++) {
-		Vector3F d(0.f, vane->x, vane->y);
+		Vector3F d(tapper * (i + 1), vane->x, vane->y);
 		d *= scale;
 		d = space.transform(d);
 		

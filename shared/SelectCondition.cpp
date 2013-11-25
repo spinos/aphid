@@ -58,7 +58,7 @@ char SelectCondition::filteredByDistance(const Vector3F & pos) const
 char SelectCondition::filteredByProbability() const
 {
 	if(m_probability == 1.f) return 0;
-	float r = ((float)(random() % 199))/199.f;
+	float r = ((float)(rand() % 199))/199.f;
 	return r > m_probability;
 }
 
