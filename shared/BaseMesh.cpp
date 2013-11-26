@@ -23,6 +23,7 @@ BaseMesh::BaseMesh()
 	m_v = 0;
 	m_uvIds = 0;
 	m_numUVs = m_numUVIds = 0;
+	m_pvv = 0;
 	setEntityType(TypedEntity::TTriangleMesh);
 }
 
@@ -52,6 +53,7 @@ void BaseMesh::cleanup()
 	m_numTriangleFaceVertices = 0;
 	m_numPolygons = 0;
 	m_numUVs = m_numUVIds = 0;
+	if(m_pvv) {delete m_pvv; m_pvv = 0;}
 }
 
 void BaseMesh::createVertices(unsigned num)
@@ -571,6 +573,16 @@ void BaseMesh::putIntoObjectSpace()
 	const unsigned nv = getNumVertices();
 	for(unsigned i = 0; i < nv; i++)
 		_vertices[i] -= c;
+}
+
+void BaseMesh::createPerVertexVector()
+{
+	m_pvv = new Vector3F[_numVertices];
+}
+
+Vector3F *BaseMesh::perVertexVector() const
+{
+	return m_pvv;
 }
 
 void BaseMesh::verbose() const

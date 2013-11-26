@@ -73,7 +73,6 @@ char MeshTopology::buildTopology(BaseMesh * mesh)
 		m_adjacency[i].connectEdges();
 		m_adjacency[i].computeWeights();
 		m_adjacency[i].computeDifferentialCoordinate();
-		//m_adjacency[i].verbose();
 	}
 	return 1;
 }
@@ -185,5 +184,23 @@ unsigned MeshTopology::growAroundQuad(unsigned idx, std::vector<unsigned> & dst)
 	}
 	
 	return dst.size() - presize;
+}
+
+void MeshTopology::calculateConcaveShell(BaseMesh * mesh)
+{
+	if(mesh->perVertexVector() ==0) mesh->createPerVertexVector();
+	
+	Vector3F * pvv = mesh->perVertexVector();
+	Vector3F * nor = mesh->normals();
+	Vector3F c, d;
+	float facing;
+	const unsigned nv = mesh->getNumVertices();
+	for(unsigned i = 0; i < nv; i++) {
+		c = m_adjacency[i].center();
+		d = c - * m_adjacency[i].m_v;
+		facing = nor[i].dot(d.normal());
+		if(facing > 0.f) pvv[i] = * m_adjacency[i].m_v + nor[i] * facing * 0.5f;
+		else pvv[i] = * m_adjacency[i].m_v;
+	}
 }
 //:~

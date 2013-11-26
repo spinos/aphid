@@ -291,8 +291,8 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 	activeMeanPitch /= num;
 	activeMeanDir /= (float)num;
 
-	if(direction.dot(activeMeanDir) < 0.f) activeMeanPitch -= .05f;
-	else activeMeanPitch += .05f;
+	if(direction.dot(activeMeanDir) < 0.f) activeMeanPitch -= .1f;
+	else activeMeanPitch += .1f;
 	
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);

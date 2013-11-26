@@ -82,6 +82,9 @@ public:
 	
 	void putIntoObjectSpace();
 	
+	void createPerVertexVector();
+	Vector3F *perVertexVector() const;
+	
 	void verbose() const;
 	
 	Vector3F * _vertices;
@@ -102,4 +105,5 @@ public:
 	float * m_v;
 	unsigned * m_uvIds;
 private:
+	Vector3F * m_pvv;
 };

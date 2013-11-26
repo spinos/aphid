@@ -24,6 +24,7 @@ public:
 	
 	char buildTopology(BaseMesh * mesh);
 	void calculateNormal(BaseMesh * mesh);
+	void calculateConcaveShell(BaseMesh * mesh);
 
 	VertexAdjacency * getTopology() const;
 	VertexAdjacency & getAdjacency(unsigned idx) const;

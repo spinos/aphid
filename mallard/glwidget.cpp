@@ -62,6 +62,7 @@
 #include <SelectCondition.h>
 #include <FloodCondition.h>
 #include "MlCalamus.h"
+#include <MeshTopology.h>
 
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
@@ -542,6 +543,7 @@ void GLWidget::updateOnFrame(int x)
 	if(!deformBody(x)) return;
 	
 	body()->update(m_topo);
+	m_topo->calculateConcaveShell(body());
 	m_featherDrawer->setCurrentFrame(x);
 	m_featherDrawer->setCurrentOrigin(bodyDeformer()->frameCenter());
 	m_featherDrawer->rebuildBuffer(skin());
@@ -556,6 +558,7 @@ void GLWidget::afterOpen()
 {
 	body()->putIntoObjectSpace();
 	buildTopology();
+	m_topo->calculateConcaveShell(body());
 	body()->setup(m_topo);
 	buildTree();
 	skin()->setBodyMesh(body(), m_topo);
