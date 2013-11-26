@@ -84,7 +84,8 @@ void BrushControl::createGroup()
 	m_radiusValueC->setLimit(0.1, 1000.0);
 	
 	m_pitchValueC = new QDoubleEditSlider(tr("Pitch Angle"));
-	m_pitchValueC->setLimit(0.1, 1.1);
+	m_pitchValueC->setValue(0.01);
+	m_pitchValueC->setLimit(0.0, 1.0);
 	
 	m_createStrengthValue = new QDoubleEditSlider(tr("Strength"));
 	m_createStrengthValue->setLimit(0.01, 1.0);
@@ -103,7 +104,7 @@ void BrushControl::createGroup()
 	
 	m_numSampleValueC->setValue(99);
 	m_radiusValueC->setValue(4.0);
-	m_pitchValueC->setValue(0.1);
+	m_pitchValueC->setValue(0.01);
 }
 
 void BrushControl::eraseGroup()

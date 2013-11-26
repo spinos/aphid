@@ -264,7 +264,7 @@ float Vector3F::angleY() const
 float Vector3F::angleBetween(const Vector3F& another, const Vector3F& up) const
 {
 	float ang = acos(this->normal().dot(another.normal()));
-	if(up.dot(another) >= 0.f) return ang;
+	if(another.dot(up) >= 0.f) return ang;
 	return -ang;
 }
 
