@@ -26,7 +26,7 @@ public:
 	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
 	
 	PointInsidePolygonTest patchAt(unsigned idx) const;
-
+	void perVertexVectorOfPatch(unsigned idx, Vector3F * dst) const;
 private:
 	
 };

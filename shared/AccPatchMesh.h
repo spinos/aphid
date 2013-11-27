@@ -10,20 +10,19 @@
 
 #include <PatchMesh.h>
 #include <Patch.h>
+#include <AccPatchGroup.h>
 class BezierPatch;
 class AccPatch;
 class MeshTopology;
 struct PatchSplitContext;
 
-class AccPatchMesh : public PatchMesh {
+class AccPatchMesh : public PatchMesh, public AccPatchGroup {
 public:
 	AccPatchMesh();
 	virtual ~AccPatchMesh();
 	
 	void setup(MeshTopology * topo);
 	void update(MeshTopology * topo);
-	
-	AccPatch* beziers() const;
 	
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
@@ -34,12 +33,11 @@ public:
 	void pointOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
 	void normalOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
 	void texcoordOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
+	void perVertexVectorOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
 	void tangentFrame(unsigned idx, float u, float v, Matrix33F & frm) const;
 	
 private:
 	char recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
 	void recursiveBezierClosestPoint(const Vector3F & origin, BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
 	void recursiveBezierPushPlane(BezierPatch* patch, Patch::PushPlaneContext * ctx, int level) const;
-	
-	AccPatch* m_bezier;
 };

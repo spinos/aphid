@@ -196,10 +196,18 @@ void BezierPatch::evaluateSurfaceTexcoord(float u, float v, Vector3F * texcoord)
 	Vector2F L0(1-u,1-v);
 	Vector2F L1(u,v);
 
-	Vector2F st = 
-		(tex(0, 0) * L0.x + tex(1, 0) * L1.x) * L0.y + 
+	Vector2F st = (tex(0, 0) * L0.x + tex(1, 0) * L1.x) * L0.y + 
 		(tex(0, 1) * L0.x + tex(1, 1) * L1.x) * L1.y;
 	*texcoord = Vector3F(st.x, st.y, 0.f);
+}
+
+void BezierPatch::evaluateSurfaceVector(float u, float v, Vector3F * src, Vector3F * dst) const
+{
+	Vector2F L0(1-u,1-v);
+	Vector2F L1(u,v);
+
+	*dst = (src[0] * L0.x + src[1] * L1.x) * L0.y + 
+		(src[2] * L0.x + src[3] * L1.x) * L1.y;
 }
 
 const BoundingBox BezierPatch::controlBBox() const

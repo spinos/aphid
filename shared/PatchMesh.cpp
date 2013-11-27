@@ -128,4 +128,16 @@ PointInsidePolygonTest PatchMesh::patchAt(unsigned idx) const
 	
 	return PointInsidePolygonTest(po[0], po[1], po[2], po[3]);
 }
+
+void PatchMesh::perVertexVectorOfPatch(unsigned idx, Vector3F * dst) const
+{
+	unsigned *qudi = &m_quadIndices[idx * 4];
+	dst[0] = perVertexVector()[*qudi];
+	qudi++;
+	dst[1] = perVertexVector()[*qudi];
+	qudi++;
+	dst[3] = perVertexVector()[*qudi];
+	qudi++;
+	dst[2] = perVertexVector()[*qudi];
+}
 //:~

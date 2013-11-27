@@ -34,6 +34,7 @@ public:
 	void evaluateSurfaceBinormal(float u, float v, Vector3F * binm) const;
 	void evaluateSurfaceNormal(float u, float v, Vector3F * nor) const;
 	void evaluateSurfaceTexcoord(float u, float v, Vector3F * tex) const;
+	void evaluateSurfaceVector(float u, float v, Vector3F * src, Vector3F * dst) const;
 	const BoundingBox controlBBox() const;
 	void decasteljauSplit(BezierPatch *dst) const;
 	void splitPatchUV(PatchSplitContext ctx, PatchSplitContext * child) const;

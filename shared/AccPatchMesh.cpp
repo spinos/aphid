@@ -17,15 +17,12 @@
 
 AccPatchMesh::AccPatchMesh() 
 {
-	if(!AccPatch::stencil) {
-		AccStencil* sten = new AccStencil();
-		AccPatch::stencil = sten;
-	}
+	
 }
 
 AccPatchMesh::~AccPatchMesh() 
 {
-	delete[] m_bezier;
+	
 }
 
 void AccPatchMesh::setup(MeshTopology * topo)
@@ -43,7 +40,8 @@ void AccPatchMesh::setup(MeshTopology * topo)
 	
 	sten->m_vertexAdjacency = topo->getTopology();
 
-	m_bezier = new AccPatch[numFace];
+	createAccPatches(numFace);
+	
 	unsigned * quadV = quadIndices();
 	for(unsigned j = 0; j < numFace; j++) {
 		sten->m_patchVertices[0] = quadV[0];
@@ -51,10 +49,10 @@ void AccPatchMesh::setup(MeshTopology * topo)
 		sten->m_patchVertices[2] = quadV[2];
 		sten->m_patchVertices[3] = quadV[3];
 		
-		m_bezier[j].setTexcoord(ucoord, vcoord, &uvs[j * 4]);
-		m_bezier[j].evaluateContolPoints();
-		m_bezier[j].evaluateTangents();
-		m_bezier[j].evaluateBinormals();
+		beziers()[j].setTexcoord(ucoord, vcoord, &uvs[j * 4]);
+		beziers()[j].evaluateContolPoints();
+		beziers()[j].evaluateTangents();
+		beziers()[j].evaluateBinormals();
 		
 		quadV += 4;
 	}
@@ -78,17 +76,12 @@ void AccPatchMesh::update(MeshTopology * topo)
 		sten->m_patchVertices[2] = quadV[2];
 		sten->m_patchVertices[3] = quadV[3];
 		
-		m_bezier[j].evaluateContolPoints();
-		m_bezier[j].evaluateTangents();
-		m_bezier[j].evaluateBinormals();
+		beziers()[j].evaluateContolPoints();
+		beziers()[j].evaluateTangents();
+		beziers()[j].evaluateBinormals();
 		
 		quadV += 4;
 	}
-}
-
-AccPatch* AccPatchMesh::beziers() const
-{
-	return m_bezier;
 }
 
 const BoundingBox AccPatchMesh::calculateBBox() const
@@ -226,6 +219,13 @@ void AccPatchMesh::normalOnPatch(unsigned idx, float u, float v, Vector3F & dst)
 void AccPatchMesh::texcoordOnPatch(unsigned idx, float u, float v, Vector3F & dst) const
 {
     beziers()[idx].evaluateSurfaceTexcoord(u, v, &dst);
+}
+
+void AccPatchMesh::perVertexVectorOnPatch(unsigned idx, float u, float v, Vector3F & dst) const
+{
+	Vector3F src[4];
+	perVertexVectorOfPatch(idx, src);
+	beziers()[idx].evaluateSurfaceVector(u, v, src, &dst);
 }
 
 void AccPatchMesh::tangentFrame(unsigned idx, float u, float v, Matrix33F & frm) const
