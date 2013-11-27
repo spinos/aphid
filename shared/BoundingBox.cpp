@@ -129,6 +129,16 @@ void BoundingBox::expandBy(const BoundingBox &another)
 	if(m_data[5] < another.m_data[5]) m_data[5] = another.m_data[5];
 }
 
+void BoundingBox::expandBy(const Vector3F & pos, float r)
+{
+    if(m_data[0] > pos.x - r) m_data[0] = pos.x - r;
+    if(m_data[1] > pos.y - r) m_data[1] = pos.y - r;
+    if(m_data[2] > pos.z - r) m_data[2] = pos.z - r;
+    if(m_data[3] < pos.x - r) m_data[3] = pos.x - r;
+    if(m_data[4] < pos.y - r) m_data[4] = pos.y - r;
+    if(m_data[5] < pos.z - r) m_data[5] = pos.z - r;
+}
+
 void BoundingBox::expand(float val)
 {
     m_data[0] -= val;
@@ -150,6 +160,15 @@ char BoundingBox::touch(const BoundingBox & b) const
 	if(m_data[1] > b.m_data[4] || m_data[4] < b.m_data[1]) return 0;
 	if(m_data[2] > b.m_data[5] || m_data[5] < b.m_data[2]) return 0;
 	return 1;
+}
+
+char BoundingBox::intersect(const BoundingBox & another) const
+{
+    for(int i=0; i < 3; i++) {
+        if(getMin(i) > another.getMax(i)) return 0;
+        if(getMax(i) < another.getMin(i)) return 0;    
+    }
+    return 1;
 }
 
 char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const 

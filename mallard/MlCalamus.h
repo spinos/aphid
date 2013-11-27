@@ -9,6 +9,7 @@
 #pragma once
 
 #include <AllMath.h>
+#include <BoundingBox.h>
 class MlFeather;
 class CollisionRegion;
 class MlFeatherCollection;
@@ -37,7 +38,7 @@ public:
 	void setScale(const float & x);
 	void setBufferStart(unsigned x);
 	
-	void collideWith(CollisionRegion * skin, const Vector3F & p);
+	void collideWith(CollisionRegion * skin, const BoundingBox & bbox);
 	
 	static MlFeatherCollection * FeatherLibrary;
 

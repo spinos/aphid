@@ -57,6 +57,7 @@ public:
 	
 	void computeFaceCalamusIndirection();
 	void computeFaceBounding();
+	void computeActiveFaceBounding();
 	void finishCreateFeather();
 	void finishEraseFeather();
 	unsigned numFeathers() const;
@@ -80,10 +81,13 @@ public:
 	void resetFloodFaces();
 	void restFloodFacesAsActive();
 	
+	BoundingBox faceBoundingBox(unsigned idx) const;
+	
 	void verbose() const;
 protected:
 	
 private:
+    void computeActiveFaceBounding(unsigned faceIdx);
 	bool createFeather(MlCalamus & ori);
 	bool isPointTooCloseToExisting(const Vector3F & pos, float minDistance);
 	bool isDartCloseToExisting(const Vector3F & pos, const std::vector<Vector3F> & existing, float minDistance) const;

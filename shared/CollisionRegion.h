@@ -24,11 +24,12 @@ public:
 	AccPatchMesh * bodyMesh() const;
 	
 	Vector3F getClosestPoint(const Vector3F & origin);
-	Vector3F getClosestNormal(const Vector3F & origin);
+	Vector3F getClosestNormal(const Vector3F & origin, float maxD);
 	
 	virtual void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
 	virtual void resetCollisionRegion(unsigned idx);
-	virtual void resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d);
+	virtual void resetCollisionRegionByDistance(unsigned idx, const Vector3F & center, float maxD);
+	virtual void resetCollisionRegionAround(unsigned idx, const BoundingBox & bbox);
 	virtual void closestPoint(const Vector3F & origin, IntersectionContext * ctx) const;
 	virtual void pushPlane(Patch::PushPlaneContext * ctx) const;
 	
@@ -52,6 +53,7 @@ public:
 	char sampleColorMatches(unsigned idx, float u, float v) const;
 	Vector3F sampleColor() const;
 	void colorAt(unsigned idx, float u, float v, Vector3F * dst) const;
+	
 private:
     void fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart);
 	MeshTopology * m_topo;

@@ -30,10 +30,12 @@ public:
 	
 	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
 	void expandBy(const BoundingBox &another);
+	void expandBy(const Vector3F & pos, float r);
 	void expand(float v);
 	Vector3F center() const;
 	char touch(const BoundingBox & b) const;
 	
+	char intersect(const BoundingBox & another) const;
 	char intersect(const Ray &ray, float *hitt0, float *hitt1) const;
 	char isPointInside(const Vector3F & p) const;
 	char isPointAround(const Vector3F & p, float threshold) const;

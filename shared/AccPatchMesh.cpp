@@ -121,7 +121,7 @@ char AccPatchMesh::closestPoint(unsigned idx, const Vector3F & origin, Intersect
 {
 	PatchSplitContext split;
 	split.reset();
-	ctx->m_elementHitDistance = 10e8;
+	ctx->m_elementHitDistance = ctx->m_minHitDistance;
 	ctx->m_curComponentIdx = idx;
 	recursiveBezierClosestPoint(origin, &beziers()[idx], ctx, split, 0);
 	return 1;
@@ -182,7 +182,7 @@ void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPa
 	Vector3F px;
 	const float d = pl.distanceTo(origin, px);
 	
-	if(level > 4 || d >= ctx->m_elementHitDistance || controlbox.area() < .01f /*|| converged*/) {
+	if(level > 4 || d >= ctx->m_elementHitDistance /*|| controlbox.area() < .01f || converged*/) {
 		if(d > ctx->m_minHitDistance) return;
 		ctx->m_minHitDistance = d;
 		ctx->m_componentIdx = ctx->m_curComponentIdx;

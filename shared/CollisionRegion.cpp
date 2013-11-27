@@ -40,6 +40,7 @@ void CollisionRegion::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 {
 	m_body = mesh;
 	m_topo = topo;
+	setRegionElementStart(mesh->getNumFaces());
 }
 
 Vector3F CollisionRegion::getClosestPoint(const Vector3F & origin)
@@ -57,9 +58,10 @@ Vector3F CollisionRegion::getClosestPoint(const Vector3F & origin)
 	return pos;
 }
 
-Vector3F CollisionRegion::getClosestNormal(const Vector3F & origin)
+Vector3F CollisionRegion::getClosestNormal(const Vector3F & origin, float maxD)
 {
 	m_ctx->reset();
+	m_ctx->m_minHitDistance = maxD;
 	closestPoint(origin, m_ctx);
 	Vector3F nor;
 	m_body->normalOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, nor);
@@ -81,18 +83,38 @@ void CollisionRegion::resetCollisionRegion(unsigned idx)
 	m_topo->growAroundQuad(idx, *regionElementIndices());
 }
 
-void CollisionRegion::resetCollisionRegionAround(unsigned idx, const Vector3F & p, const float & d)
+void CollisionRegion::resetCollisionRegionByDistance(unsigned idx, const Vector3F & center, float maxD)
 {
+    resetCollisionRegion(idx);
+	unsigned i, j, lastCreep = 0;
+	BoundingBox bb;
+	for(i = 1; i < numRegionElements(); i++) {
+		bb = m_body->calculateBBox(regionElementIndex(i));
+		if(bb.isPointAround(center, maxD))
+			lastCreep = m_topo->growAroundQuad(regionElementIndex(i), *regionElementIndices());
+		for(j = numRegionElements() - 1 - lastCreep; j < numRegionElements(); j++) {
+			bb = m_body->calculateBBox(regionElementIndex(j));
+			if(!bb.isPointAround(center, maxD)) {
+				regionElementIndices()->erase(regionElementIndices()->begin() + j);
+				j--;
+			}
+		}
+	}
+}
+
+void CollisionRegion::resetCollisionRegionAround(unsigned idx, const BoundingBox & bbox)
+{
+    if(regionElementStart() == idx) return;
 	resetCollisionRegion(idx);
 	unsigned i, j, lastCreep = 0;
 	BoundingBox bb;
 	for(i = 1; i < numRegionElements(); i++) {
 		bb = m_body->calculateBBox(regionElementIndex(i));
-		if(bb.isPointAround(p, d))
+		if(bb.intersect(bbox))
 			lastCreep = m_topo->growAroundQuad(regionElementIndex(i), *regionElementIndices());
 		for(j = numRegionElements() - 1 - lastCreep; j < numRegionElements(); j++) {
 			bb = m_body->calculateBBox(regionElementIndex(j));
-			if(!bb.isPointAround(p, d)) {
+			if(!bb.intersect(bbox)) {
 				regionElementIndices()->erase(regionElementIndices()->begin() + j);
 				j--;
 			}
@@ -257,3 +279,4 @@ void CollisionRegion::resetActiveRegion()
 	for(unsigned i = 0; i < numRegionElements(); i++)
 		addActiveRegionFace(regionElementIndex(i));
 }
+

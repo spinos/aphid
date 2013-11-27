@@ -65,7 +65,7 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 		localD.set(0.f, 0.f, radius * m_lengthPortions[i]);
 		localD = segSpace.transform(localD);
 
-		segU = collide->getClosestNormal(segP + localD);
+		segU = collide->getClosestNormal(segP + localD, radius);
 		segU = invSpace.transform(segU);
 		segU.y = 0.f;
 		

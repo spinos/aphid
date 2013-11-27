@@ -99,7 +99,7 @@ void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
 
 void MlSkin::selectAround(unsigned idx, SelectCondition * selcon)
 {	
-	resetCollisionRegionAround(idx, selcon->center(), selcon->maxDistance());
+	resetCollisionRegionByDistance(idx, selcon->center(), selcon->maxDistance());
 	
 	for(unsigned i=0; i < numRegionElements(); i++) {
 		unsigned preCount = m_activeIndices.size();
@@ -119,7 +119,9 @@ unsigned MlSkin::selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon)
 	const unsigned featherBegin = m_faceCalamusTable[faceIdx].dartBegin;
 	const unsigned featherEnd = m_faceCalamusTable[faceIdx].dartEnd;
 	for(unsigned j = featherBegin; j < featherEnd; j++) {
-		MlCalamus *c = getCalamus(j);
+		if(j >= numFeathers()) break;
+	    
+	    MlCalamus *c = getCalamus(j);
 		if(c->faceIdx() != faceIdx) break;
 		
 		if(selcon->filteredByProbability()) continue;
@@ -314,6 +316,7 @@ void MlSkin::finishCreateFeather()
 	if(!hasFeatherCreated()) return;
 	if(!bodyMesh()) return;
     computeFaceCalamusIndirection();
+    computeFaceBounding();
 	m_numCreatedFeather = 0;
 	std::cout<<" increase to "<<numFeathers();
 }
@@ -345,6 +348,7 @@ void MlSkin::finishEraseFeather()
 
 	m_calamus->setIndex(m_numFeather);
 	computeFaceCalamusIndirection();
+	computeFaceBounding();
 	discardActive();
 	std::cout<<" reduce to "<<numFeathers();
 }
@@ -392,9 +396,8 @@ bool MlSkin::isPointTooCloseToExisting(const Vector3F & pos, float minDistance)
 		featherEnd = m_faceCalamusTable[regionElementIndex(i)].dartEnd;
 		for(unsigned j = featherBegin; j < featherEnd; j++) {
 			MlCalamus *c = getCalamus(j);
-			if(c->faceIdx() != regionElementIndex(i)) break;
-			
 			if(j < numFeathers()) {
+			    if(c->faceIdx() != regionElementIndex(i)) break;
 				getPointOnBody(c, p);
 			
 				d = p - pos;
@@ -535,21 +538,42 @@ void MlSkin::restFloodFacesAsActive()
 void MlSkin::computeFaceBounding()
 {
 	const unsigned nf = bodyMesh()->getNumFaces();
-	unsigned featherBegin, featherEnd;
-	Vector3F d, p;
-	for(unsigned i=0; i < nf; i++) {
-		featherBegin = m_faceCalamusTable[i].dartBegin;
-		featherEnd = m_faceCalamusTable[i].dartEnd;
-		for(unsigned j = featherBegin; j < featherEnd; j++) {
-			MlCalamus *c = getCalamus(j);
-			if(j < numFeathers()) {
-				getPointOnBody(c, p);
-			
-				d = p - pos;
-				if(d.length() < minDistance) return true;
-			}
-		}
-	}
+	for(unsigned i= 0; i < nf; i++)
+	    computeActiveFaceBounding(i);
+}
+
+void MlSkin::computeActiveFaceBounding()
+{
+    const unsigned nf = m_activeFaces.size();
+    for(unsigned i = 0; i < nf; i++)
+        computeActiveFaceBounding(m_activeFaces[i].faceIdx);
+}
+
+void MlSkin::computeActiveFaceBounding(unsigned faceIdx)
+{
+    unsigned featherBegin, featherEnd;
+    Vector3F d, p;
+	Matrix33F tang, space;
+	m_faceBox[faceIdx] = bodyMesh()->calculateBBox(faceIdx);
+    featherBegin = m_faceCalamusTable[faceIdx].dartBegin;
+    featherEnd = m_faceCalamusTable[faceIdx].dartEnd;
+    for(unsigned j = featherBegin; j < featherEnd; j++) {
+        if(j < numFeathers()) {
+            MlCalamus *c = getCalamus(j);
+            tangentSpace(c, tang);
+            rotationFrame(c, tang, space);
+            getPointOnBody(c, p);
+            d.set(0.f, 0.f, c->realScale());
+            space.transform(d);
+            p += d;
+            m_faceBox[faceIdx].expandBy(p, c->realScale() * 0.29f);
+        }
+    }
+}
+
+BoundingBox MlSkin::faceBoundingBox(unsigned idx) const
+{
+    return m_faceBox[idx];
 }
 
 void MlSkin::verbose() const

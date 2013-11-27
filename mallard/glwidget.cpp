@@ -167,6 +167,7 @@ void GLWidget::clientMouseInput()
 	    case ToolContext::CreateBodyContourFeather :
 	        brush()->setToeByIntersect(&ray);
 	        skin()->growFeather(brush()->toeDisplacement());
+	        skin()->computeActiveFaceBounding();
 	        m_featherDrawer->updateActive(skin());
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
@@ -181,11 +182,13 @@ void GLWidget::clientMouseInput()
         case ToolContext::CombBodyContourFeather :
             brush()->setToeByIntersect(&ray);
             skin()->combFeather(brush()->toeDisplacement(), brush()->heelPosition(), brush()->getRadius());
+            skin()->computeActiveFaceBounding();
             m_featherDrawer->updateActive(skin());
 		    break;
         case ToolContext::ScaleBodyContourFeather :
             brush()->setToeByIntersect(&ray);
             skin()->scaleFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
+            skin()->computeActiveFaceBounding();
             m_featherDrawer->updateActive(skin());
             break;
         case ToolContext::PitchBodyContourFeather :
@@ -275,7 +278,7 @@ void GLWidget::floodFeather()
 		condition.setDistanceFilter(0);
 	}
 	else {
-		skin()->resetCollisionRegionAround(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
+		skin()->resetCollisionRegionByDistance(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
 		skin()->resetFloodFaces();
 	}
 	
@@ -544,6 +547,7 @@ void GLWidget::updateOnFrame(int x)
 	
 	body()->update(m_topo);
 	m_topo->calculateConcaveShell(body());
+	skin()->computeFaceBounding();
 	m_featherDrawer->setCurrentFrame(x);
 	m_featherDrawer->setCurrentOrigin(bodyDeformer()->frameCenter());
 	m_featherDrawer->rebuildBuffer(skin());
@@ -563,6 +567,7 @@ void GLWidget::afterOpen()
 	buildTree();
 	skin()->setBodyMesh(body(), m_topo);
 	skin()->computeFaceCalamusIndirection();
+	skin()->computeFaceBounding();
 	bodyDeformer()->setMesh(body());
 	m_featherDrawer->clearCached();
 	m_featherDrawer->computeBufferIndirection(skin());

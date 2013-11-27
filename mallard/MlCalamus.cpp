@@ -118,9 +118,9 @@ unsigned MlCalamus::bufferStart() const
 	return m_bufStart;
 }
 
-void MlCalamus::collideWith(CollisionRegion * skin, const Vector3F & p)
+void MlCalamus::collideWith(CollisionRegion * skin, const BoundingBox & bbox)
 {
-	skin->resetCollisionRegionAround(m_faceIdx, p, realScale());
+	skin->resetCollisionRegionAround(m_faceIdx, bbox);
 	feather()->setCollision(skin);
 }
 

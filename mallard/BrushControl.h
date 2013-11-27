@@ -69,5 +69,4 @@ private:
 	QGroupBox * controlsGroupD;
 	QDoubleEditSlider * m_radiusValueD;
 };
-
 #endif
