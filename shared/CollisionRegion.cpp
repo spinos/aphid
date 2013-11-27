@@ -58,13 +58,14 @@ Vector3F CollisionRegion::getClosestPoint(const Vector3F & origin)
 	return pos;
 }
 
-Vector3F CollisionRegion::getClosestNormal(const Vector3F & origin, float maxD)
+Vector3F CollisionRegion::getClosestNormal(const Vector3F & origin, float maxD, Vector3F & pos)
 {
 	m_ctx->reset();
 	m_ctx->m_minHitDistance = maxD;
 	closestPoint(origin, m_ctx);
 	Vector3F nor;
 	m_body->normalOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, nor);
+	m_body->pointOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, pos);
 	return nor;
 }
 

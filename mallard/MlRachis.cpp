@@ -55,26 +55,44 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 	xdir = space.transform(xdir);
 	
 	Matrix33F localSpace, invSpace, segSpace = space;
-	Vector3F localD, localU, segU, segP = oriP;
-	float segRot, curAngle;
+	Vector3F localD, localU, pop, topop, segU, segP = oriP;
+	float segRot, pushAngle, curAngle;
 
 	for(unsigned i = 0; i < m_numSpace; i++) {
 		invSpace = segSpace;
 		invSpace.inverse();
 
-		localD.set(0.f, 0.f, radius * m_lengthPortions[i]);
+		localD.set(0.f, 0.f, 1.f);
 		localD = segSpace.transform(localD);
-
-		segU = collide->getClosestNormal(segP + localD, radius);
+		localD.normalize();
+		
+		localU.set(1.f, 0.f, 0.f);
+		localU = segSpace.transform(localU);
+		localU.normalize();
+		
+		segU = collide->getClosestNormal(segP + localD * radius * m_lengthPortions[i], radius, pop);
+		
+		topop = pop - segP;
+		topop = invSpace.transform(topop);
+		if(topop.x > 0.f) {
+			topop.y = 0.f;
+			pushAngle = acos(Vector3F::ZAxis.dot(topop.normal()));
+		}
+		else
+			pushAngle = 0.f;
+		
 		segU = invSpace.transform(segU);
 		segU.y = 0.f;
 		
 		segRot = acos(segU.normal().dot(Vector3F::XAxis));
 		if(segU.z > 0.f) segRot *= -1.f;
 		
-		curAngle = segRot * ((1.f - m_angles[i]) * fullPitch + (1.f - fullPitch));
+		if(pushAngle > segRot && pushAngle > 0.f) curAngle = pushAngle;
+		else curAngle = segRot * (1.f - fullPitch);
 		
-		m_spaces[i].rotateY(curAngle + m_lengthPortions[i]);
+		curAngle += fullPitch + 0.5f * m_lengthPortions[i];
+		
+		m_spaces[i].rotateY(curAngle);
 
 		localSpace = m_spaces[i];
 		localSpace.multiply(segSpace);

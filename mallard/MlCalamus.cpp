@@ -79,7 +79,7 @@ void MlCalamus::setRotateX(const float& x)
 
 void MlCalamus::setRotateY(const float& y)
 {
-	if(y > -.1f)
+	if(y > 0.f && y < 1.f)
 	    m_rotY = y;
 }
 
