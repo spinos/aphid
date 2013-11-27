@@ -58,7 +58,7 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 	Vector3F localD, localU, segU, segP = oriP;
 	float segRot, curAngle;
 
-	for(unsigned i = 0; i < m_numSpace -1; i++) {
+	for(unsigned i = 0; i < m_numSpace; i++) {
 		invSpace = segSpace;
 		invSpace.inverse();
 

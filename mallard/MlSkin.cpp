@@ -15,7 +15,7 @@
 #include <FloodCondition.h>
 #include "MlCalamusArray.h"
 
-MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusTable(0), m_numCreatedFeather(0)
+MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusTable(0), m_numCreatedFeather(0), m_faceBox(0)
 {
     m_activeIndices.clear();
 	m_calamus = new MlCalamusArray;
@@ -33,7 +33,10 @@ void MlSkin::cleanup()
 		delete[] m_faceCalamusTable;
 		m_faceCalamusTable = 0;
 	}
-	
+	if(m_faceBox) {
+		delete[] m_faceBox;
+		m_faceBox = 0;
+	}
 }
 
 void MlSkin::clearFeather()
@@ -48,6 +51,7 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 	CollisionRegion::setBodyMesh(mesh, topo);
 	m_faceCalamusTable = new FloodTable[mesh->getNumFaces()];
 	resetFaceCalamusIndirection();
+	m_faceBox = new BoundingBox[mesh->getNumFaces()];
 }
 
 void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
@@ -526,6 +530,26 @@ void MlSkin::restFloodFacesAsActive()
 	m_floodFaces.clear();
 	for(unsigned i = 0; i < numActiveRegionFaces(); i++)
 		m_floodFaces.push_back(FloodTable(activeRegionFace(i)));
+}
+
+void MlSkin::computeFaceBounding()
+{
+	const unsigned nf = bodyMesh()->getNumFaces();
+	unsigned featherBegin, featherEnd;
+	Vector3F d, p;
+	for(unsigned i=0; i < nf; i++) {
+		featherBegin = m_faceCalamusTable[i].dartBegin;
+		featherEnd = m_faceCalamusTable[i].dartEnd;
+		for(unsigned j = featherBegin; j < featherEnd; j++) {
+			MlCalamus *c = getCalamus(j);
+			if(j < numFeathers()) {
+				getPointOnBody(c, p);
+			
+				d = p - pos;
+				if(d.length() < minDistance) return true;
+			}
+		}
+	}
 }
 
 void MlSkin::verbose() const

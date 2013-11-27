@@ -56,6 +56,7 @@ public:
 	void pitchFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	
 	void computeFaceCalamusIndirection();
+	void computeFaceBounding();
 	void finishCreateFeather();
 	void finishEraseFeather();
 	unsigned numFeathers() const;
@@ -97,6 +98,7 @@ private:
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather, m_numCreatedFeather;
 	FloodTable * m_faceCalamusTable;
+	BoundingBox * m_faceBox;
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
 };
