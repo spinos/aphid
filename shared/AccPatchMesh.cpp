@@ -175,7 +175,7 @@ void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPa
 	Vector3F px;
 	const float d = pl.distanceTo(origin, px);
 	
-	if(level > 4 || d >= ctx->m_elementHitDistance /*|| controlbox.area() < .01f || converged*/) {
+	if(level > 5 || d > ctx->m_elementHitDistance + 10e-6 /*|| controlbox.area() < .01f || converged*/) {
 		if(d > ctx->m_minHitDistance) return;
 		ctx->m_minHitDistance = d;
 		ctx->m_componentIdx = ctx->m_curComponentIdx;

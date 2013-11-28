@@ -116,6 +116,8 @@ void GLWidget::clientDraw()
 	
 	//drawSelection();
 	showBrush();
+	
+	testCurvature();
 }
 
 void GLWidget::loadMesh(std::string filename)
@@ -657,5 +659,28 @@ void GLWidget::clearSelection()
 	skin()->clearCollisionRegion();
 	skin()->clearBuffer();
 	skin()->clearActiveRegion();
+}
+
+void GLWidget::testCurvature()
+{
+	if(skin()->numRegionElements() < 1) return;
+	Vector3F p = brush()->heelPosition();
+	Vector3F n = brush()->normal();
+	//n = skin()->getClosestNormal(p, brush()->getRadius(), p);
+	Vector3F t = brush()->toeDisplacement();
+	Vector3F bn = t.cross(n);
+	bn.normalize();
+	t = n.cross(bn);
+	t.normalize();
+	Matrix33F m;
+	m.fill(n, bn, t);
+	getDrawer()->coordsys(m, 1.f, &p);
+	
+	Matrix33F m2, m1 = m;
+	for(unsigned i = 0; i < 6; i++) {
+		skin()->curvatureAt(m1, m2, p, .75f);
+		getDrawer()->coordsys(m2, .75f, &p);
+		m1 = m2;
+	}
 }
 //:~

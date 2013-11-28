@@ -54,6 +54,8 @@ public:
 	Vector3F sampleColor() const;
 	void colorAt(unsigned idx, float u, float v, Vector3F * dst) const;
 	
+	Vector2F CollisionRegion::curvatureAt(const Matrix33F & m0, Matrix33F & m1, Vector3F & pos, float creep);
+
 private:
     void fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart);
 	MeshTopology * m_topo;

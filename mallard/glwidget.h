@@ -115,6 +115,8 @@ private:
 	MlDrawer * m_featherDrawer;
 	int m_featherTexId, m_featherDistrId;
 	char m_floodByRegion, m_eraseByRegion;
+	
+	void testCurvature();
 };
 //! [3]
 

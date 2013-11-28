@@ -281,3 +281,40 @@ void CollisionRegion::resetActiveRegion()
 		addActiveRegionFace(regionElementIndex(i));
 }
 
+Vector2F CollisionRegion::curvatureAt(const Matrix33F & m0, Matrix33F & m1, Vector3F & pos, float creep)
+{
+	Vector3F n = m0.transform(Vector3F::XAxis);
+	Vector3F t = m0.transform(Vector3F::ZAxis);
+	Vector3F n1 = getClosestNormal(pos + t * creep, 1000.f, pos);
+	
+	Vector3F bn = t.cross(n1); bn.normalize();
+	Vector3F t1 = n1.cross(bn); t1.normalize();
+	//bn = t1.cross(n1); bn.normalize();
+	
+	Matrix33F inv = m0; inv.inverse();
+	t1 = inv.transform(t1);
+	t1.normalize();
+	t1.y = 0.f;
+	
+	float ry = acos(t1.dot(Vector3F::ZAxis));
+	if(t1.x < 0.f) ry = -ry;
+	
+	Matrix33F my;
+	my.rotateY(ry);
+	my.multiply(m0);
+	
+	inv = my; inv.inverse();
+	
+	n1 = inv.transform(n1);
+	n1.normalize();
+	n1.z = 0.f;
+	float rz = acos(n1.dot(Vector3F::XAxis));
+	if(n1.y < 0.f) rz = -rz;
+	
+	Matrix33F mz;
+	mz.rotateZ(rz);
+	mz.multiply(my);
+	m1 = mz;
+	
+	return Vector2F(ry, rz);
+}

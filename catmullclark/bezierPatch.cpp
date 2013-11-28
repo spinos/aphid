@@ -145,6 +145,7 @@ void BezierPatch::evaluateSurfaceTangent(float u, float v, Vector3F * tang) cons
 		(_tangents[0 ] * B0.y + _tangents[1 ] * B1.y + _tangents[2 ] * B2.y + _tangents[3 ] * B3.y) * Q0.x +
 		(_tangents[4 ] * B0.y + _tangents[5 ] * B1.y + _tangents[6 ] * B2.y + _tangents[7 ] * B3.y) * Q1.x +
 		(_tangents[8 ] * B0.y + _tangents[9 ] * B1.y + _tangents[10] * B2.y + _tangents[11] * B3.y) * Q2.x;
+	tang->normalize();
 }
 
 void BezierPatch::evaluateSurfaceBinormal(float u, float v, Vector3F * binm) const
@@ -165,17 +166,11 @@ void BezierPatch::evaluateSurfaceBinormal(float u, float v, Vector3F * binm) con
 		(_binormals[0 ] * B0.x + _binormals[1 ] * B1.x + _binormals[2 ] * B2.x + _binormals[3 ] * B3.x) * Q0.y +
 		(_binormals[4 ] * B0.x + _binormals[5 ] * B1.x + _binormals[6 ] * B2.x + _binormals[7 ] * B3.x) * Q1.y +
 		(_binormals[8 ] * B0.x + _binormals[9 ] * B1.x + _binormals[10] * B2.x + _binormals[11] * B3.x) * Q2.y;
-
+	binm->normalize();
 }
 
 void BezierPatch::evaluateSurfaceNormal(float u, float v, Vector3F * nor) const
 {
-	/*
-	Vector3F dpdu, dpdv;
-	evaluateSurfaceTangent(u, v, &dpdu);
-	evaluateSurfaceBinormal(u , v, &dpdv);
-	*nor = dpdv.cross(dpdu).normal();
-	*/
 	Vector2F L0(1.f-u,1.f-v);
 	Vector2F L1(u,v);
 
@@ -189,6 +184,7 @@ void BezierPatch::evaluateSurfaceNormal(float u, float v, Vector3F * nor) const
 		(normal(0,1) * B0.x + normal(1,1) * B1.x + normal(2,1) * B2.x + normal(3,1) * B3.x) * B1.y +
 		(normal(0,2) * B0.x + normal(1,2) * B1.x + normal(2,2) * B2.x + normal(3,2) * B3.x) * B2.y +
 		(normal(0,3) * B0.x + normal(1,3) * B1.x + normal(2,3) * B2.x + normal(3,3) * B3.x) * B3.y;
+	nor->normalize();
 }
 
 void BezierPatch::evaluateSurfaceTexcoord(float u, float v, Vector3F * texcoord) const
