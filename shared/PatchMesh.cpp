@@ -101,7 +101,8 @@ char PatchMesh::closestPoint(unsigned idx, const Vector3F & origin, Intersection
 	PointInsidePolygonTest pa = patchAt(idx);
 	
 	Vector3F px;
-	float d = pa.distanceTo(origin, px);
+	char inside = 1;
+	float d = pa.distanceTo(origin, px, inside);
 	
 	if(d > ctx->m_minHitDistance) 
 		return 0;

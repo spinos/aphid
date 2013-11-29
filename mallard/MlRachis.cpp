@@ -36,7 +36,7 @@ void MlRachis::computeAngles(float * segL, float fullL)
     for(unsigned i = 0; i < m_numSpace; i++) {
 		m_lengthPortions[i] = segL[i] / fullL;
 		acc += m_lengthPortions[i];
-		m_angles[i] = acc;// * acc * 0.5f + acc * 0.5f;
+		m_angles[i] = acc;
 	}
 }
 
@@ -56,8 +56,8 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 	
 	Matrix33F localSpace, invSpace, segSpace = space;
 	Vector3F localD, localU, pop, topop, segU, segP = oriP;
+	Vector2F rotAngles;
 	float segRot, pushAngle, curAngle;
-
 	for(unsigned i = 0; i < m_numSpace; i++) {
 		invSpace = segSpace;
 		invSpace.inverse();
@@ -90,7 +90,7 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 		if(pushAngle > segRot && pushAngle > 0.f) curAngle = pushAngle;
 		else curAngle = segRot * (1.f - fullPitch);
 		
-		curAngle += fullPitch + 0.5f * m_lengthPortions[i];
+		curAngle += fullPitch * m_angles[i] + m_lengthPortions[i];
 		
 		m_spaces[i].rotateY(curAngle);
 

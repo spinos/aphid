@@ -655,18 +655,16 @@ void GLWidget::receiveEraseRegion(int state)
 
 void GLWidget::clearSelection()
 {
-	//skin()->setFloodCondition(MlSkin::ByDistance);
 	skin()->clearCollisionRegion();
 	skin()->clearBuffer();
 	skin()->clearActiveRegion();
 }
 
 void GLWidget::testCurvature()
-{
+{return;
 	if(skin()->numRegionElements() < 1) return;
 	Vector3F p = brush()->heelPosition();
 	Vector3F n = brush()->normal();
-	//n = skin()->getClosestNormal(p, brush()->getRadius(), p);
 	Vector3F t = brush()->toeDisplacement();
 	Vector3F bn = t.cross(n);
 	bn.normalize();
@@ -677,10 +675,17 @@ void GLWidget::testCurvature()
 	getDrawer()->coordsys(m, 1.f, &p);
 	
 	Matrix33F m2, m1 = m;
-	for(unsigned i = 0; i < 6; i++) {
-		skin()->curvatureAt(m1, m2, p, .75f);
-		getDrawer()->coordsys(m2, .75f, &p);
+	Vector3F d;
+	Vector2F cvt;
+	float b = 0.f;
+	for(unsigned i = 0; i < 8; i++) {
+		cvt = skin()->curvatureAt(m1, m2, p, .5f);
+		getDrawer()->coordsys(m2, .5f, &p);
 		m1 = m2;
-	}
+		d = Vector3F::ZAxis;
+		d = m2.transform(d);      
+		p += d * .5f;  
+		b += cvt.x;   
+	} 
 }
 //:~

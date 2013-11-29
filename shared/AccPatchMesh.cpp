@@ -131,13 +131,7 @@ char AccPatchMesh::recursiveBezierIntersect(BezierPatch* patch, IntersectionCont
 	if(hitt1 > ctx->m_minHitDistance) return 0;
 	
 	if(level > 3 || controlbox.area() < .1f) {
-	    Vector3F fourCorners[4];
-	    fourCorners[0] = patch->_contorlPoints[0];
-	    fourCorners[1] = patch->_contorlPoints[3];
-	    fourCorners[2] = patch->_contorlPoints[15];
-	    fourCorners[3] = patch->_contorlPoints[12];
-		
-		PointInsidePolygonTest pa(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
+		PointInsidePolygonTest pa(patch->_contorlPoints[0], patch->_contorlPoints[3], patch->_contorlPoints[15], patch->_contorlPoints[12]);
 		if(!patchIntersect(pa, ctx)) return 0;
 		
 		BiLinearInterpolate bili;
@@ -165,17 +159,12 @@ void AccPatchMesh::recursiveBezierClosestPoint(const Vector3F & origin, BezierPa
 	BoundingBox controlbox = patch->controlBBox();
 	if(!controlbox.isPointAround(origin, ctx->m_minHitDistance)) return;
 	
-	Vector3F fourCorners[4];
-	fourCorners[0] = patch->_contorlPoints[0];
-	fourCorners[1] = patch->_contorlPoints[3];
-	fourCorners[2] = patch->_contorlPoints[15];
-	fourCorners[3] = patch->_contorlPoints[12];
-	
-	PointInsidePolygonTest pl(fourCorners[0], fourCorners[1], fourCorners[2], fourCorners[3]);
+	PointInsidePolygonTest pl(patch->_contorlPoints[0], patch->_contorlPoints[3], patch->_contorlPoints[15], patch->_contorlPoints[12]);
 	Vector3F px;
-	const float d = pl.distanceTo(origin, px);
+	char inside = 1;
+	const float d = pl.distanceTo(origin, px, inside);
 	
-	if(level > 5 || d > ctx->m_elementHitDistance + 10e-6 /*|| controlbox.area() < .01f || converged*/) {
+	if(level > 5 || !inside) {
 		if(d > ctx->m_minHitDistance) return;
 		ctx->m_minHitDistance = d;
 		ctx->m_componentIdx = ctx->m_curComponentIdx;

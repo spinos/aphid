@@ -46,12 +46,13 @@ bool PointInsidePolygonTest::isPointInside(const Vector3F & px) const
 	return theta > PI;
 }
 
-float PointInsidePolygonTest::distanceTo(const Vector3F & origin, Vector3F & closestP) const
+float PointInsidePolygonTest::distanceTo(const Vector3F & origin, Vector3F & closestP, char & inside) const
 {
 	Vector3F px;
 	projectPoint(origin, px);
 	
-	if(isPointInside(px)) {
+	inside = isPointInside(px);
+	if(inside) {
 		closestP = px;
 		return Vector3F(px, origin).length();
 	}

@@ -23,6 +23,7 @@ public:
 	
 	AccPatchMesh * bodyMesh() const;
 	
+	Vector3F getIntersectPoint(const Vector3F & origin, const Vector3F & dir);
 	Vector3F getClosestPoint(const Vector3F & origin);
 	Vector3F getClosestNormal(const Vector3F & origin, float maxD, Vector3F & pos);
 	
@@ -54,7 +55,8 @@ public:
 	Vector3F sampleColor() const;
 	void colorAt(unsigned idx, float u, float v, Vector3F * dst) const;
 	
-	Vector2F CollisionRegion::curvatureAt(const Matrix33F & m0, Matrix33F & m1, Vector3F & pos, float creep);
+	Vector2F curvatureAt(const Matrix33F & m0, Matrix33F & m1, const Vector3F & pos, float creep);
+	float curvatureAlong(const Matrix33F & m0, const Vector3F & pos, float * lengths, unsigned n, float * angles);
 
 private:
     void fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart);

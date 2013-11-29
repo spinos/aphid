@@ -43,6 +43,19 @@ void CollisionRegion::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 	setRegionElementStart(mesh->getNumFaces());
 }
 
+Vector3F CollisionRegion::getIntersectPoint(const Vector3F & origin, const Vector3F & dir)
+{
+	Ray ray(origin, dir);
+	m_ctx->reset(ray);
+	for(unsigned i=0; i < numRegionElements(); i++) {
+		m_body->intersect(regionElementIndex(i), m_ctx);
+	}
+	Vector3F pos;
+	
+	m_body->pointOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, pos);
+	return pos;
+}
+
 Vector3F CollisionRegion::getClosestPoint(const Vector3F & origin)
 {
 	m_ctx->reset();
@@ -281,15 +294,19 @@ void CollisionRegion::resetActiveRegion()
 		addActiveRegionFace(regionElementIndex(i));
 }
 
-Vector2F CollisionRegion::curvatureAt(const Matrix33F & m0, Matrix33F & m1, Vector3F & pos, float creep)
+Vector2F CollisionRegion::curvatureAt(const Matrix33F & m0, Matrix33F & m1, const Vector3F & pos, float creep)
 {
-	Vector3F n = m0.transform(Vector3F::XAxis);
-	Vector3F t = m0.transform(Vector3F::ZAxis);
-	Vector3F n1 = getClosestNormal(pos + t * creep, 1000.f, pos);
+	Vector3F pop = getClosestPoint(pos);
+	Vector3F n = m0.transform(Vector3F::XAxis); n.normalize();
+	Vector3F t = m0.transform(Vector3F::ZAxis); t.normalize();
+	Vector3F cls = getClosestPoint(pop + t * creep);
 	
-	Vector3F bn = t.cross(n1); bn.normalize();
-	Vector3F t1 = n1.cross(bn); t1.normalize();
-	//bn = t1.cross(n1); bn.normalize();
+	Vector3F bn, n1;
+
+	Vector3F t1 = cls - pop; t1.normalize();
+	
+	bn = t1.cross(n); bn.normalize();
+	n1 = bn.cross(t1); n1.normalize();
 	
 	Matrix33F inv = m0; inv.inverse();
 	t1 = inv.transform(t1);
@@ -302,6 +319,8 @@ Vector2F CollisionRegion::curvatureAt(const Matrix33F & m0, Matrix33F & m1, Vect
 	Matrix33F my;
 	my.rotateY(ry);
 	my.multiply(m0);
+	
+	m1 = my; return Vector2F(ry, 0.f);
 	
 	inv = my; inv.inverse();
 	
@@ -317,4 +336,22 @@ Vector2F CollisionRegion::curvatureAt(const Matrix33F & m0, Matrix33F & m1, Vect
 	m1 = mz;
 	
 	return Vector2F(ry, rz);
+}
+
+float CollisionRegion::curvatureAlong(const Matrix33F & m0, const Vector3F & pos, float * lengths, unsigned n, float * angles)
+{
+	Matrix33F m2, m1 = m0;
+	Vector3F d, p = pos;
+	Vector2F cvt;
+	float b = 0.f;
+	for(unsigned i = 0; i < n; i++) {
+		cvt = curvatureAt(m1, m2, p, lengths[i]);
+		m1 = m2;
+		d = Vector3F::ZAxis;
+		d = m2.transform(d);      
+		p += d * lengths[i];
+		b += cvt.x; 
+		angles[i] = cvt.x;
+	} 
+	return b;
 }
