@@ -91,7 +91,7 @@ void MlRachis::bend(const Vector3F & oriP, const Matrix33F & space, float radius
 		else curAngle = segRot * (1.f - fullPitch);
 		
 		curAngle += fullPitch * m_angles[i] + m_lengthPortions[i];
-		
+
 		m_spaces[i].rotateY(curAngle);
 
 		localSpace = m_spaces[i];

@@ -993,4 +993,21 @@ void BaseDrawer::drawLineBuffer(LineBuffer * line) const
     }
     glEnd();
 }
+
+void BaseDrawer::perVertexVector(BaseMesh * mesh, const std::string & name)
+{
+	Vector3F *pvv = mesh->perVertexVector(name);
+	if(!pvv) return;
+	Vector3F * p = mesh->getVertices();
+	Vector3F q;
+	const unsigned nv = mesh->getNumVertices();
+	glBegin(GL_LINES);
+	for(unsigned i = 0; i < nv; i++) {
+		q = p[i];
+		glVertex3fv((float *)&q);
+		q = pvv[i];
+		glVertex3fv((float *)&q);
+	}
+	glEnd();
+}
 //:~

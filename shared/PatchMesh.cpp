@@ -10,6 +10,7 @@
 #include "PatchMesh.h"
 #include <PointInsidePolygonTest.h>
 #include <InverseBilinearInterpolate.h>
+#include <BiLinearInterpolate.h>
 
 PatchMesh::PatchMesh() 
 {
@@ -140,5 +141,20 @@ void PatchMesh::perVertexVectorOfPatch(unsigned idx, Vector3F * dst) const
 	dst[3] = perVertexVector()[*qudi];
 	qudi++;
 	dst[2] = perVertexVector()[*qudi];
+}
+
+void PatchMesh::perVertexFloatOnPatch(unsigned idx, float u, float v, float * dst) const
+{
+	float pvf[4];
+	unsigned *qudi = &m_quadIndices[idx * 4];
+	pvf[0] = perVertexFloat()[*qudi];
+	qudi++;
+	pvf[1] = perVertexFloat()[*qudi];
+	qudi++;
+	pvf[3] = perVertexFloat()[*qudi];
+	qudi++;
+	pvf[2] = perVertexFloat()[*qudi];
+	BiLinearInterpolate bili;
+	*dst = bili.interpolate(u, v, pvf);
 }
 //:~

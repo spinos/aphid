@@ -24,6 +24,7 @@ BaseMesh::BaseMesh()
 	m_uvIds = 0;
 	m_numUVs = m_numUVIds = 0;
 	m_pvv = 0;
+	m_pvf = 0;
 	setEntityType(TypedEntity::TTriangleMesh);
 }
 
@@ -54,6 +55,7 @@ void BaseMesh::cleanup()
 	m_numPolygons = 0;
 	m_numUVs = m_numUVIds = 0;
 	if(m_pvv) {delete m_pvv; m_pvv = 0;}
+	if(m_pvf) {delete m_pvf; m_pvf = 0;}
 }
 
 void BaseMesh::createVertices(unsigned num)
@@ -583,6 +585,33 @@ void BaseMesh::createPerVertexVector()
 Vector3F *BaseMesh::perVertexVector() const
 {
 	return m_pvv;
+}
+
+void BaseMesh::createPerVertexFloat()
+{
+	m_pvf = new float[_numVertices];
+}
+
+float *BaseMesh::perVertexFloat() const
+{
+	return m_pvf;
+}
+
+char BaseMesh::hasVertexData(const std::string & name) const
+{
+	return m_vdg.hasEntry(name);
+}
+
+float * BaseMesh::perVertexFloat(const std::string & name)
+{
+	if(!m_vdg.hasEntry(name)) m_vdg.createEntry(name, _numVertices, 1);
+	return m_vdg.entry(name);
+}
+
+Vector3F * BaseMesh::perVertexVector(const std::string & name)
+{
+	if(!m_vdg.hasEntry(name)) m_vdg.createEntry(name, _numVertices, 3);
+	return (Vector3F *)m_vdg.entry(name);
 }
 
 void BaseMesh::verbose() const

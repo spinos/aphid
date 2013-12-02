@@ -188,9 +188,9 @@ unsigned MeshTopology::growAroundQuad(unsigned idx, std::vector<unsigned> & dst)
 
 void MeshTopology::calculateConcaveShell(BaseMesh * mesh)
 {
-	if(mesh->perVertexVector() ==0) mesh->createPerVertexVector();
+	if(mesh->perVertexFloat() ==0) mesh->createPerVertexFloat();
 	
-	Vector3F * pvv = mesh->perVertexVector();
+	float * pvf = mesh->perVertexFloat();
 	Vector3F * nor = mesh->normals();
 	Vector3F c, d;
 	float facing;
@@ -199,8 +199,8 @@ void MeshTopology::calculateConcaveShell(BaseMesh * mesh)
 		c = m_adjacency[i].center();
 		d = c - * m_adjacency[i].m_v;
 		facing = nor[i].dot(d.normal());
-		if(facing > 0.f) pvv[i] = * m_adjacency[i].m_v + nor[i] * facing * 0.5f;
-		else pvv[i] = * m_adjacency[i].m_v;
+		if(facing > 0.f) pvf[i] = d.length();
+		else pvf[i] = 0.f; 
 	}
 }
 //:~

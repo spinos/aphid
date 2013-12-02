@@ -33,6 +33,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
     FeatherEdit.h \
 	FeatherEditTool.h \
 	TimeControl.h \
+    LaplaceSmoother.h \
                 window.h
                 
 SOURCES       = ../shared/ContextIconFrame.cpp \
@@ -62,6 +63,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
     FeatherEdit.cpp \
 	FeatherEditTool.cpp \
 	TimeControl.cpp \
+    LaplaceSmoother.cpp \
     window.cpp \
                 main.cpp
                 
@@ -69,7 +71,8 @@ LIBS += -L../lib -laphid -L../easymodel -leasymodel -lIlmImf -lHalf -lhdf5 -lhdf
 macx {
     INCLUDEPATH += ../../Library/boost_1_44_0 \
                     ../../Library/hdf5/include \
-                    /usr/local/include/OpenEXR
+                    /usr/local/include/OpenEXR \
+                    /Users/jianzhang/Library/eigen2
     QMAKE_LIBDIR += ../../Library/boost_1_44_0/stage/lib \
                     ../../Library/hdf5/lib
     LIBS += -lboost_date_time -lboost_thread -lboost_filesystem -lboost_system -framework libxml

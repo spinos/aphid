@@ -12,6 +12,7 @@
 #include <Geometry.h>
 #include <IntersectionContext.h>
 #include <Ray.h>
+#include <VertexDataGroup.h>
 
 class BaseMesh : public Geometry {
 public:
@@ -85,6 +86,12 @@ public:
 	void createPerVertexVector();
 	Vector3F *perVertexVector() const;
 	
+	void createPerVertexFloat();
+	float *perVertexFloat() const;
+	char hasVertexData(const std::string & name) const;
+	float * perVertexFloat(const std::string & name);
+	Vector3F * perVertexVector(const std::string & name);
+	
 	void verbose() const;
 	
 	Vector3F * _vertices;
@@ -106,4 +113,6 @@ public:
 	unsigned * m_uvIds;
 private:
 	Vector3F * m_pvv;
+	float * m_pvf;
+	VertexDataGroup m_vdg;
 };

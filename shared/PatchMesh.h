@@ -27,6 +27,7 @@ public:
 	
 	PointInsidePolygonTest patchAt(unsigned idx) const;
 	void perVertexVectorOfPatch(unsigned idx, Vector3F * dst) const;
+	void perVertexFloatOnPatch(unsigned idx, float u, float v, float * dst) const;
 private:
 	
 };

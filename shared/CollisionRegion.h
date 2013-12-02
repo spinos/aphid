@@ -22,10 +22,12 @@ public:
 	void clearCollisionRegion();
 	
 	AccPatchMesh * bodyMesh() const;
+	MeshTopology * topology() const;
 	
 	Vector3F getIntersectPoint(const Vector3F & origin, const Vector3F & dir);
 	Vector3F getClosestPoint(const Vector3F & origin);
 	Vector3F getClosestNormal(const Vector3F & origin, float maxD, Vector3F & pos);
+	float getPerVertexFloat();
 	
 	virtual void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
 	virtual void resetCollisionRegion(unsigned idx);

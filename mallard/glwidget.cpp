@@ -117,7 +117,15 @@ void GLWidget::clientDraw()
 	//drawSelection();
 	showBrush();
 	
-	testCurvature();
+	//testCurvature();
+	if(body()->getNumVertices() > 1) {
+		getDrawer()->setColor(1.f, 0.f, 0.f);
+		getDrawer()->perVertexVector(body(), "b4shell");
+		getDrawer()->setColor(0.f, 1.f, 0.f);
+		getDrawer()->perVertexVector(body(), "aftshell");
+		getDrawer()->setColor(.3f, .5f, .4f);
+		getDrawer()->edge(body());
+	}
 }
 
 void GLWidget::loadMesh(std::string filename)
@@ -548,8 +556,9 @@ void GLWidget::updateOnFrame(int x)
 	if(!deformBody(x)) return;
 	
 	body()->update(m_topo);
-	m_topo->calculateConcaveShell(body());
+	//m_topo->calculateConcaveShell(body());
 	skin()->computeFaceBounding();
+	skin()->computeVertexDisplacement();
 	m_featherDrawer->setCurrentFrame(x);
 	m_featherDrawer->setCurrentOrigin(bodyDeformer()->frameCenter());
 	m_featherDrawer->rebuildBuffer(skin());
@@ -564,12 +573,12 @@ void GLWidget::afterOpen()
 {
 	body()->putIntoObjectSpace();
 	buildTopology();
-	m_topo->calculateConcaveShell(body());
 	body()->setup(m_topo);
 	buildTree();
 	skin()->setBodyMesh(body(), m_topo);
 	skin()->computeFaceCalamusIndirection();
 	skin()->computeFaceBounding();
+	skin()->computeVertexDisplacement();
 	bodyDeformer()->setMesh(body());
 	m_featherDrawer->clearCached();
 	m_featherDrawer->computeBufferIndirection(skin());

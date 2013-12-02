@@ -36,6 +36,11 @@ AccPatchMesh * CollisionRegion::bodyMesh() const
 	return m_body;
 }
 
+MeshTopology * CollisionRegion::topology() const
+{
+	return m_topo;
+}
+
 void CollisionRegion::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 {
 	m_body = mesh;
@@ -354,4 +359,11 @@ float CollisionRegion::curvatureAlong(const Matrix33F & m0, const Vector3F & pos
 		angles[i] = cvt.x;
 	} 
 	return b;
+}
+
+float CollisionRegion::getPerVertexFloat()
+{
+	float r;
+	m_body->perVertexFloatOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, &r);
+	return r;
 }

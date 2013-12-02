@@ -12,6 +12,7 @@
 #include <CollisionRegion.h>
 #include <MlCalamus.h>
 #include <Patch.h>
+#include <LaplaceSmoother.h>
 
 class AccPatchMesh;
 class MeshTopology;
@@ -58,6 +59,7 @@ public:
 	void computeFaceCalamusIndirection();
 	void computeFaceBounding();
 	void computeActiveFaceBounding();
+	void computeVertexDisplacement();
 	void finishCreateFeather();
 	void finishEraseFeather();
 	unsigned numFeathers() const;
@@ -98,6 +100,7 @@ private:
 	unsigned lastInactive(unsigned last) const;
 	unsigned selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon);
 private:	
+	LaplaceSmoother m_smoother;
 	MlCalamusArray * m_calamus;
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather, m_numCreatedFeather;
