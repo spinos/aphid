@@ -94,6 +94,8 @@ public:
 	void useSpace(const Matrix33F & s) const;
 	void useDepthTest(char on) const;
 	void perVertexVector(BaseMesh * mesh, const std::string & name);
+	void vertexNormal(BaseMesh * mesh);
+	void lines(const std::vector<Vector3F> & vs);
 	
 	int loadTexture(int idx, ZEXRImage * image);
 	void clearTexture(int idx);

@@ -29,7 +29,7 @@ void MlCalamus::bindToFace(unsigned faceIdx, float u, float v)
 
 void MlCalamus::computeFeatherWorldP(const Vector3F & origin, const Matrix33F& space)
 {
-	feather()->computeWorldP(origin, space, rotateY(), scale());
+	feather()->computeWorldP(m_faceIdx, m_patchU, m_patchV, origin, space, rotateY(), scale());
 }
 
 MlFeather * MlCalamus::feather() const

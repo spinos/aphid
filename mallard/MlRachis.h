@@ -20,7 +20,7 @@ public:
 	void create(unsigned x);
 	void computeAngles(float * segL, float fullL);
 	void reset();
-	void bend(const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide, const float & fullPitch);
+	void bend(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide, const float & fullPitch);
 	
 	Matrix33F getSpace(short idx) const;
 private:

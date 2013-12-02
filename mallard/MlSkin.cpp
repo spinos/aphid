@@ -57,6 +57,7 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 		const unsigned nv = bodyMesh()->getNumVertices();
 		for(unsigned i = 0; i < nv; i++) disw[i] = .99f;
 	}
+	CollisionRegion::useRegionElementVertexVector("aftshell");
 }
 
 void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
@@ -626,6 +627,19 @@ void MlSkin::computeVertexDisplacement()
 	m_smoother.solve(dis1);
 	
 	for(unsigned i = 0; i < nv; i++) dis1[i] = vp[i] + Vector3F(vp[i], dis1[i]).normal();
+}
+
+void MlSkin::shellUp(std::vector<Vector3F> & dst)
+{
+	const unsigned n = numActive();
+	Vector3F u;
+	for(unsigned i=0; i < n; i++) {
+		MlCalamus * c = getActive(i);
+		getPointOnBody(c, u);
+		dst.push_back(u);
+		interpolateVertexVector(c->faceIdx(), c->patchU(), c->patchV(), &u);
+		dst.push_back(u);
+	}
 }
 
 void MlSkin::verbose() const

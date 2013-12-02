@@ -381,3 +381,23 @@ void CollisionRegion::regionElementVertices(std::vector<unsigned> & dst) const
 		}
 	}
 }
+
+void CollisionRegion::useRegionElementVertexFloat(const std::string & name)
+{
+	m_perVertexFloat = m_body->perVertexFloat(name);
+}
+
+void CollisionRegion::useRegionElementVertexVector(const std::string & name)
+{
+	m_perVertexVector = m_body->perVertexVector(name);
+}
+
+void CollisionRegion::interpolateVertexVector(Vector3F * dst)
+{
+	m_body->interpolateVectorOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, m_perVertexVector, dst);
+}
+
+void CollisionRegion::interpolateVertexVector(unsigned faceIdx, float u, float v, Vector3F * dst)
+{
+	m_body->interpolateVectorOnPatch(faceIdx, u, v, m_perVertexVector, dst);
+}

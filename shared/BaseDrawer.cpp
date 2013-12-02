@@ -1010,4 +1010,29 @@ void BaseDrawer::perVertexVector(BaseMesh * mesh, const std::string & name)
 	}
 	glEnd();
 }
+
+void BaseDrawer::vertexNormal(BaseMesh * mesh)
+{
+	Vector3F *nor = mesh->getNormals();
+	Vector3F * p = mesh->getVertices();
+	const unsigned nv = mesh->getNumVertices();
+	Vector3F q;
+	glBegin(GL_LINES);
+	for(unsigned i = 0; i < nv; i++) {
+		q = p[i];
+		glVertex3fv((float *)&q);
+		q += nor[i];
+		glVertex3fv((float *)&q);
+	}
+	glEnd();
+}
+
+void BaseDrawer::lines(const std::vector<Vector3F> & vs)
+{
+	glBegin(GL_LINES);
+	std::vector<Vector3F>::const_iterator it = vs.begin();
+	for(; it != vs.end(); ++it)
+		glVertex3fv((float *)&(*it));
+	glEnd();
+}
 //:~

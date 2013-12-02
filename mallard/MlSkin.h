@@ -84,6 +84,7 @@ public:
 	void restFloodFacesAsActive();
 	
 	BoundingBox faceBoundingBox(unsigned idx) const;
+	void shellUp(std::vector<Vector3F> & dst);
 	
 	void verbose() const;
 protected:

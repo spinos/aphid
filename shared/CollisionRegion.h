@@ -61,6 +61,10 @@ public:
 	float curvatureAlong(const Matrix33F & m0, const Vector3F & pos, float * lengths, unsigned n, float * angles);
 
 	void regionElementVertices(std::vector<unsigned> & dst) const;
+	void useRegionElementVertexFloat(const std::string & name);
+	void useRegionElementVertexVector(const std::string & name);
+	void interpolateVertexVector(Vector3F * dst); 
+	void interpolateVertexVector(unsigned faceIdx, float u, float v, Vector3F * dst); 
 private:
     void fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart);
 	MeshTopology * m_topo;
@@ -70,4 +74,6 @@ private:
 	BaseImage * m_distribution;
 	IntersectionContext * m_ctx;
 	Vector3F m_sampleColor;
+	float * m_perVertexFloat;
+	Vector3F * m_perVertexVector;
 };

@@ -99,9 +99,9 @@ BoundingRectangle MlFeather::getBoundingRectangle() const
 	return m_brect;
 }
 
-void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale)
+void MlFeather::computeWorldP(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale)
 {
-	m_rachis->bend(oriPos, oriRot, scale * getLength(), m_skin, pitch);
+	m_rachis->bend(faceIdx, patchU, patchV, oriPos, oriRot, scale * getLength(), m_skin, pitch);
 	
 	Vector3F segOrigin = oriPos;
 	Matrix33F segSpace = oriRot;

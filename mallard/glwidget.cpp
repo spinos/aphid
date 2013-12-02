@@ -120,11 +120,15 @@ void GLWidget::clientDraw()
 	//testCurvature();
 	if(body()->getNumVertices() > 1) {
 		getDrawer()->setColor(1.f, 0.f, 0.f);
-		//getDrawer()->perVertexVector(body(), "b4shell");
+		getDrawer()->vertexNormal(body());
 		getDrawer()->setColor(0.f, 1.f, 0.f);
 		getDrawer()->perVertexVector(body(), "aftshell");
 		getDrawer()->setColor(.3f, .5f, .4f);
 		getDrawer()->edge(body());
+		getDrawer()->setColor(0.f, 1.f, 1.f);
+		std::vector<Vector3F> us;
+		skin()->shellUp(us);
+		getDrawer()->lines(us);
 	}
 }
 

@@ -24,3 +24,10 @@ Vector2F BiLinearInterpolate::interpolate2(float u, float v, const Vector2F * sr
     Vector2F hi = src[3] * (1.f - u) + src[2] * u;
     return lo * (1.f - v) + hi * v;
 }
+
+void BiLinearInterpolate::interpolate3(float u, float v, const Vector3F * src, Vector3F * dst) const
+{
+	Vector3F lo = src[0] * (1.f - u) + src[1] * u;
+    Vector3F hi = src[3] * (1.f - u) + src[2] * u;
+    *dst = lo * (1.f - v) + hi * v;
+}
