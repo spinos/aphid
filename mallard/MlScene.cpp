@@ -175,6 +175,7 @@ bool MlScene::doWrite(const std::string & fileName)
 	}
 	
 	writeFeatherDistribution(&grpBody);
+	writeSmoothWeight(&grpBody);
 	
 	grpBody.close();
 	
@@ -228,6 +229,16 @@ void MlScene::writeFeatherDistribution(HBase * g)
 	g->writeStringAttr(".distrmp", m_featherDistributionName);
 }
 
+void MlScene::writeSmoothWeight(HBase * g)
+{
+	if(m_accmesh->hasVertexData("weishell")) {
+		if(!g->hasNamedData("weishell"))
+			g->addFloatData("weishell", m_accmesh->getNumVertices());
+
+		g->writeFloatData("weishell", m_accmesh->getNumVertices(), m_accmesh->perVertexFloat("weishell"));
+	}
+}
+
 bool MlScene::doRead(const std::string & fileName)
 {
     if(!HFile::doRead(fileName)) return false;
@@ -250,6 +261,7 @@ bool MlScene::doRead(const std::string & fileName)
 	}
 	
 	readFeatherDistribution(&grpBody);
+	readSmoothWeight(&grpBody);
 	
 	grpBody.close();
 	
@@ -304,6 +316,13 @@ void MlScene::readFeatherDistribution(HBase * g)
 	if(!g->hasNamedAttr(".distrmp")) return;
 		
 	g->readStringAttr(".distrmp", m_featherDistributionName);
+}
+
+void MlScene::readSmoothWeight(HBase * g)
+{
+	if(!g->hasNamedData("weishell")) return;
+
+	g->readFloatData("weishell", m_accmesh->getNumVertices(), m_accmesh->perVertexFloat("weishell"));
 }
 
 bool MlScene::readBakeFromFile(const std::string & fileName)

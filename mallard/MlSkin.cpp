@@ -52,9 +52,11 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 	m_faceCalamusTable = new FloodTable[mesh->getNumFaces()];
 	resetFaceCalamusIndirection();
 	m_faceBox = new BoundingBox[mesh->getNumFaces()];
-	float * disw = bodyMesh()->perVertexFloat("weishell");
-	const unsigned nv = bodyMesh()->getNumVertices();
-	for(unsigned i = 0; i < nv; i++) disw[i] = .99f;
+	if(!bodyMesh()->hasVertexData("weishell")) {
+		float * disw = bodyMesh()->perVertexFloat("weishell");
+		const unsigned nv = bodyMesh()->getNumVertices();
+		for(unsigned i = 0; i < nv; i++) disw[i] = .99f;
+	}
 }
 
 void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
@@ -604,7 +606,6 @@ BoundingBox MlSkin::faceBoundingBox(unsigned idx) const
 void MlSkin::computeVertexDisplacement()
 {
 	const unsigned nv = bodyMesh()->getNumVertices();
-	Vector3F * dis0 = bodyMesh()->perVertexVector("b4shell");
 	Vector3F * dis1 = bodyMesh()->perVertexVector("aftshell");
 	float * disw = bodyMesh()->perVertexFloat("weishell");
 	
@@ -612,7 +613,7 @@ void MlSkin::computeVertexDisplacement()
 	Vector3F * vp = bodyMesh()->getVertices();
 	
 	for(unsigned i = 0; i < nv; i++) 
-		dis0[i] = dis1[i] = vp[i] + nor[i];
+		dis1[i] = vp[i] + nor[i] * 2.f;
 	
 	std::vector<unsigned> constraintIdx;
 	std::vector<float> constraintWei;

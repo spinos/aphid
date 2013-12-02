@@ -18,8 +18,17 @@ public:
 	void createEntry(const std::string & name, unsigned num, unsigned fpe);
 	char hasEntry(const std::string & name) const;
 	float * entry(const std::string & name);
+	float * entry(const unsigned & idx, std::string & name, unsigned & fpe);
+	unsigned fpe(const std::string & name);
+	
+	unsigned numEntries() const;
 private:
+	struct NameAndType {
+		std::string _name;
+		unsigned _type;
+	};
+	
 	int entryIdx(const std::string & name) const;
-	std::vector<std::string> m_names;
+	std::vector<NameAndType> m_names;
 	std::vector<float *> m_entries;
 };

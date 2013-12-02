@@ -54,6 +54,8 @@ private:
 	void readFeatherEidtBackground(HBase * g);
 	void writeFeatherDistribution(HBase * g);
 	void readFeatherDistribution(HBase * g);
+	void writeSmoothWeight(HBase * g);
+	void readSmoothWeight(HBase * g);
 private:
 	MlSkin * m_skin;
 	AccPatchMesh * m_accmesh;

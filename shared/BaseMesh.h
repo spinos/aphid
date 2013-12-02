@@ -91,6 +91,7 @@ public:
 	char hasVertexData(const std::string & name) const;
 	float * perVertexFloat(const std::string & name);
 	Vector3F * perVertexVector(const std::string & name);
+	VertexDataGroup * vertexData();
 	
 	void verbose() const;
 	

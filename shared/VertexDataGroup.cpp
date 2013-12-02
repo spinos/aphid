@@ -26,7 +26,10 @@ void VertexDataGroup::createEntry(const std::string & name, unsigned num, unsign
 {
 	float *p = new float[num * fpe];
 	m_entries.push_back(p);
-	m_names.push_back(name);
+	NameAndType nat;
+	nat._name = name;
+	nat._type = fpe;
+	m_names.push_back(nat);
 }
 
 char VertexDataGroup::hasEntry(const std::string & name) const
@@ -41,11 +44,31 @@ float * VertexDataGroup::entry(const std::string & name)
 	return m_entries[i];
 }
 
+float * VertexDataGroup::entry(const unsigned & idx, std::string & name, unsigned & fpe)
+{
+	name = m_names[idx]._name;
+	fpe = m_names[idx]._type;
+	return m_entries[idx];
+}
+
+unsigned VertexDataGroup::fpe(const std::string & name)
+{
+	int i = entryIdx(name);
+	if(i < 0) return 0;
+	return m_names[i]._type;
+}
+
 int VertexDataGroup::entryIdx(const std::string & name) const
 {
-	std::vector<std::string>::const_iterator it = m_names.begin();
+	std::vector<NameAndType>::const_iterator it = m_names.begin();
 	for(int i= 0;it != m_names.end(); ++it, ++i) {
-		if(*it == name) return i;
+		if((*it)._name == name) return i;
 	}
 	return -1;
 }
+
+unsigned VertexDataGroup::numEntries() const
+{
+	return m_names.size();
+}
+

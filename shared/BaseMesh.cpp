@@ -614,6 +614,11 @@ Vector3F * BaseMesh::perVertexVector(const std::string & name)
 	return (Vector3F *)m_vdg.entry(name);
 }
 
+VertexDataGroup * BaseMesh::vertexData()
+{
+	return &m_vdg;
+}
+
 void BaseMesh::verbose() const
 {
 	std::cout<<"mesh status:\n";
