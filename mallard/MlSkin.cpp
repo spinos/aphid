@@ -314,6 +314,28 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
     }
 }
 
+void MlSkin::smoothShell(const Vector3F & center, const float & radius)
+{
+	float * disw = bodyMesh()->perVertexFloat("weishell");
+	Vector3F d;
+	float l, drop;
+	std::vector<unsigned> vertices;
+	regionElementVertices(vertices);
+	std::vector<unsigned>::const_iterator it = vertices.begin();
+	for(; it != vertices.end(); ++it) {
+		Vector3F d = bodyMesh()->getVertices()[*it] - center;
+		l = d.length();
+		if(l < radius) {
+			drop = l / radius;
+			drop = 1.f - drop * drop;
+			disw[*it] *= .8f; 
+		}
+	}
+
+	vertices.clear();
+	computeVertexDisplacement();
+}
+
 void MlSkin::finishCreateFeather()
 {
 	if(!hasFeatherCreated()) return;
@@ -590,7 +612,7 @@ void MlSkin::computeVertexDisplacement()
 	Vector3F * vp = bodyMesh()->getVertices();
 	
 	for(unsigned i = 0; i < nv; i++) 
-		dis0[i] = dis1[i] = vp[i] + nor[i] * 4.f;
+		dis0[i] = dis1[i] = vp[i] + nor[i];
 	
 	std::vector<unsigned> constraintIdx;
 	std::vector<float> constraintWei;
@@ -601,6 +623,8 @@ void MlSkin::computeVertexDisplacement()
 	
 	m_smoother.precompute(nv, topology(), constraintIdx, constraintWei);
 	m_smoother.solve(dis1);
+	
+	for(unsigned i = 0; i < nv; i++) dis1[i] = vp[i] + Vector3F(vp[i], dis1[i]).normal();
 }
 
 void MlSkin::verbose() const

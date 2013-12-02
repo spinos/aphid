@@ -350,6 +350,8 @@ void MlScene::disableDeformer()
 
 void MlScene::delayLoadBake()
 {
-	if(m_bakeName != "")
+	if(m_bakeName != "") {
 		readBakeFromFile(m_bakeName);
+		skin()->computeVertexDisplacement();
+	}
 }

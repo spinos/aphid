@@ -367,3 +367,17 @@ float CollisionRegion::getPerVertexFloat()
 	m_body->perVertexFloatOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, &r);
 	return r;
 }
+
+void CollisionRegion::regionElementVertices(std::vector<unsigned> & dst) const
+{
+	unsigned * quad = m_body->quadIndices();
+	unsigned q, k;
+	for(unsigned i=0; i < numRegionElements(); i++) {
+		q = regionElementIndex(i) * 4;
+		for(unsigned j = 0; j < 4; j++) {
+			k = quad[q + j];
+			if(!IsElementIn(k, dst))
+				dst.push_back(k);
+		}
+	}
+}

@@ -108,12 +108,20 @@ void ToolBox::createContext()
 	bendContour->setIconIndex(0);
 	bendContour->setContext(PitchBodyContourFeather);
 	
+	ContextIconFrame * smoothContour = new ContextIconFrame(this);
+	
+	smoothContour->addIconFile(":deintersectInactive.png");
+	smoothContour->addIconFile(":deintersectActive.png");
+	smoothContour->setIconIndex(0);
+	smoothContour->setContext(Deintersect);
+	
 	m_contextFrames.push_back(createContour);
 	m_contextFrames.push_back(selectRegion);
 	m_contextFrames.push_back(combContour);
 	m_contextFrames.push_back(scaleContour);
 	m_contextFrames.push_back(bendContour);
 	m_contextFrames.push_back(eraseContour);
+	m_contextFrames.push_back(smoothContour);
 }
 
 void ToolBox::createAction()

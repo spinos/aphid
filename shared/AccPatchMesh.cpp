@@ -27,40 +27,22 @@ AccPatchMesh::~AccPatchMesh()
 
 void AccPatchMesh::setup(MeshTopology * topo)
 {
-	Vector3F* cvs = getVertices();
-	Vector3F* normal = getNormals();
 	float* ucoord = us();
 	float* vcoord = vs();
 	unsigned * uvs = uvIds();
 	const unsigned numFace = getNumFaces();
-
-	AccStencil* sten = AccPatch::stencil;
-	sten->setVertexPosition(cvs);
-	sten->setVertexNormal(normal);
 	
-	sten->m_vertexAdjacency = topo->getTopology();
-
 	createAccPatches(numFace);
 	
-	unsigned * quadV = quadIndices();
-	for(unsigned j = 0; j < numFace; j++) {
-		sten->m_patchVertices[0] = quadV[0];
-		sten->m_patchVertices[1] = quadV[1];
-		sten->m_patchVertices[2] = quadV[2];
-		sten->m_patchVertices[3] = quadV[3];
-		
+	for(unsigned j = 0; j < numFace; j++)
 		beziers()[j].setTexcoord(ucoord, vcoord, &uvs[j * 4]);
-		beziers()[j].evaluateContolPoints();
-		beziers()[j].evaluateTangents();
-		beziers()[j].evaluateBinormals();
-		
-		quadV += 4;
-	}
+	update(topo);
 }
 
 void AccPatchMesh::update(MeshTopology * topo)
 {
 	topo->calculateNormal(this);
+	topo->calculateWeight(getNumVertices());
 	Vector3F* cvs = getVertices();
 	Vector3F* normal = getNormals();
 	AccStencil* sten = AccPatch::stencil;

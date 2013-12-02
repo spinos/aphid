@@ -60,6 +60,7 @@ public:
 	Vector2F curvatureAt(const Matrix33F & m0, Matrix33F & m1, const Vector3F & pos, float creep);
 	float curvatureAlong(const Matrix33F & m0, const Vector3F & pos, float * lengths, unsigned n, float * angles);
 
+	void regionElementVertices(std::vector<unsigned> & dst) const;
 private:
     void fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart);
 	MeshTopology * m_topo;

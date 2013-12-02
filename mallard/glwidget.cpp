@@ -160,6 +160,7 @@ void GLWidget::clientSelect()
         case ToolContext::CombBodyContourFeather :
         case ToolContext::ScaleBodyContourFeather :
         case ToolContext::PitchBodyContourFeather :
+		case ToolContext::Deintersect :
             hitTest(ray, hit);
             skin()->discardActive();
             selectFeather();
@@ -206,6 +207,10 @@ void GLWidget::clientMouseInput()
             skin()->pitchFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
             m_featherDrawer->updateActive(skin());
             break;
+		case ToolContext::Deintersect :
+			skin()->smoothShell(brush()->heelPosition(), brush()->getRadius());
+            m_featherDrawer->updateActive(skin());
+			break;
 	    default:
 			break;
 	}
@@ -556,7 +561,6 @@ void GLWidget::updateOnFrame(int x)
 	if(!deformBody(x)) return;
 	
 	body()->update(m_topo);
-	//m_topo->calculateConcaveShell(body());
 	skin()->computeFaceBounding();
 	skin()->computeVertexDisplacement();
 	m_featherDrawer->setCurrentFrame(x);

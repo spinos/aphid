@@ -18,7 +18,8 @@ public:
 		RotateTransform = 12,
 		MoveMeshComponent = 13,
 		SmoothSurface = 14,
-		SelectByColor = 15
+		SelectByColor = 15,
+		Deintersect = 16
     };
     
     enum ActionRank {

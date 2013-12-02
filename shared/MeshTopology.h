@@ -23,6 +23,7 @@ public:
 	void cleanup();
 	
 	char buildTopology(BaseMesh * mesh);
+	void calculateWeight(const unsigned & nv);
 	void calculateNormal(BaseMesh * mesh);
 	void calculateConcaveShell(BaseMesh * mesh);
 

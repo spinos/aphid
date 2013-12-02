@@ -71,10 +71,18 @@ char MeshTopology::buildTopology(BaseMesh * mesh)
 	for(unsigned i = 0; i < nv; i++) {
 		m_adjacency[i].findNeighbors();
 		m_adjacency[i].connectEdges();
+	}
+	
+	calculateWeight(nv);
+	return 1;
+}
+
+void MeshTopology::calculateWeight(const unsigned & nv)
+{
+	for(unsigned i = 0; i < nv; i++) {
 		m_adjacency[i].computeWeights();
 		m_adjacency[i].computeDifferentialCoordinate();
 	}
-	return 1;
 }
 
 void MeshTopology::calculateNormal(BaseMesh * mesh)
