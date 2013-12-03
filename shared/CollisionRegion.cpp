@@ -95,7 +95,6 @@ void CollisionRegion::neighborFaces(unsigned idx, std::vector<unsigned> & dst)
 
 void CollisionRegion::resetCollisionRegion(unsigned idx)
 {
-	//if(idx == regionElementStart()) return;
 	m_regionElementStart = idx;
 	m_regionElementIndices.clear();
 	m_regionElementIndices.push_back(idx);

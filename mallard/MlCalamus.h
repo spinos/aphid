@@ -39,7 +39,7 @@ public:
 	void setBufferStart(unsigned x);
 	
 	void collideWith(CollisionRegion * skin, const BoundingBox & bbox);
-	
+	void collideWith(CollisionRegion * skin, const Vector3F & center);
 	static MlFeatherCollection * FeatherLibrary;
 
 private:

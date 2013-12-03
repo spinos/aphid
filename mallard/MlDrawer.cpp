@@ -204,7 +204,8 @@ void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c)
 {
     Vector3F p;
 	skin->getPointOnBody(c, p);
-	c->collideWith(skin, skin->faceBoundingBox(c->faceIdx()));
+	//c->collideWith(skin, skin->faceBoundingBox(c->faceIdx()));
+	c->collideWith(skin, p);
 	
 	Matrix33F space, tang;
 	skin->tangentSpace(c, tang);

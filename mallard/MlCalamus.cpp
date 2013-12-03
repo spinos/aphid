@@ -124,3 +124,9 @@ void MlCalamus::collideWith(CollisionRegion * skin, const BoundingBox & bbox)
 	feather()->setCollision(skin);
 }
 
+void MlCalamus::collideWith(CollisionRegion * skin, const Vector3F & center)
+{
+	skin->resetCollisionRegionByDistance(m_faceIdx, center, realScale());
+	feather()->setCollision(skin);
+}
+

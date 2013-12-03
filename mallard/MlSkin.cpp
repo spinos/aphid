@@ -631,14 +631,27 @@ void MlSkin::computeVertexDisplacement()
 void MlSkin::shellUp(std::vector<Vector3F> & dst)
 {
 	const unsigned n = numActive();
-	Vector3F u, d;
+	Vector3F p, u, d;
 	for(unsigned i=0; i < n; i++) {
 		MlCalamus * c = getActive(i);
-		getPointOnBody(c, u);
-		dst.push_back(u);
+		getPointOnBody(c, p);
+		dst.push_back(p);
 		interpolateVertexVector(c->faceIdx(), c->patchU(), c->patchV(), &d);
-		u += d;
+		//u += d;
+		//
+		Matrix33F space, tang;
+		tangentSpace(c, tang);
+		rotationFrame(c, tang, space);
+		Vector3F f = space.transform(Vector3F::ZAxis);
+		u = p + f * c->realScale();
 		dst.push_back(u);
+		
+		dst.push_back(u);
+		u = getClosestNormal(u, 1000.f, p);
+		dst.push_back(p);
+		dst.push_back(p);
+		
+		dst.push_back(p + u);
 	}
 }
 

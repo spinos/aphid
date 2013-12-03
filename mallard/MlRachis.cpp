@@ -54,102 +54,58 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 	Vector3F xdir(1.f, 0.f, 0.f);
 	xdir = space.transform(xdir);
 	
-	Matrix33F localSpace, invSpace, segSpace = space;
-	Vector3F localD, localU, pop, topop, segU, smoothU, segP = oriP;
+	Matrix33F invSpace, segSpace = space;
+	Vector3F pop, topop, segU, smoothU, testP, segP = oriP;
 	Vector2F rotAngles;
 	float segRot, pushAngle, curAngle, smoothAngle;
 	
 	invSpace = segSpace;
 	invSpace.inverse();
-
-	localD.set(0.f, 0.f, 1.f);
-	localD = segSpace.transform(localD);
-	localD.normalize();
-	
-	localU.set(1.f, 0.f, 0.f);
-	localU = segSpace.transform(localU);
-	localU.normalize();
 	
 	pushAngle = 0.f;
-	segU = collide->getClosestNormal(segP + localD * radius * m_lengthPortions[0], radius * 2.f, pop);
-	pop += segU * 0.1f * radius * m_lengthPortions[0];
 	
-	topop = pop - segP;
-	topop = invSpace.transform(topop);
-	if(topop.x > 0.f) {
-		topop.y = 0.f;
-		pushAngle = acos(Vector3F::ZAxis.dot(topop.normal()));
-	}
+	testP = segP;
+	moveForward(segSpace, radius * m_lengthPortions[0], testP);
+	segU = collide->getClosestNormal(testP, 1000.f, pop);
 
-	smoothAngle = 0.f;
+	topop = pop - segP;
+	pushAngle = pushToSurface(topop, invSpace);
+
 	collide->interpolateVertexVector(faceIdx, patchU, patchV, &smoothU);
 
-	smoothU = invSpace.transform(smoothU);
-
-	if(smoothU.z < 0.f) {
-		smoothU.y = 0.f;
-		smoothAngle = acos(Vector3F::XAxis.dot(smoothU.normal()));
-	}
-	
-	if(smoothAngle > 1.5f) smoothAngle = 1.5f;
+	smoothAngle = matchNormal(smoothU, invSpace);
 	
 	float smoothPortion = smoothAngle;
 	smoothPortion *= 0.66f;
 	
-	curAngle = pushAngle + smoothAngle * .5;
+	curAngle = pushAngle + smoothAngle;
 
 	m_spaces[0].rotateY(curAngle);
 
-	localSpace = m_spaces[0];
-	localSpace.multiply(segSpace);
-	segSpace = localSpace;
-	
-	localD.set(0.f, 0.f, radius * m_lengthPortions[0]);
-	localD = segSpace.transform(localD);
-	
-	segP += localD;
+	rotateForward(m_spaces[0], segSpace);
+	moveForward(segSpace, radius * m_lengthPortions[0], segP);
 	
 	for(unsigned i = 1; i < m_numSpace; i++) {
 		invSpace = segSpace;
 		invSpace.inverse();
-
-		localD.set(0.f, 0.f, 1.f);
-		localD = segSpace.transform(localD);
-		localD.normalize();
 		
-		localU.set(1.f, 0.f, 0.f);
-		localU = segSpace.transform(localU);
-		localU.normalize();
-		
-		pushAngle = 0.f;
-		segU = collide->getClosestNormal(segP + localD * radius * m_lengthPortions[i], radius * 2.f, pop);
+		testP = segP;
+		moveForward(segSpace, radius * m_lengthPortions[i], testP);
+		segU = collide->getClosestNormal(testP, 1000.f, pop);
 
-		pop += segU * 0.1f * radius * m_lengthPortions[i];
 		topop = pop - segP;
-		topop = invSpace.transform(topop);
-		if(topop.x > 0.f) {
-			topop.y = 0.f;
-			pushAngle = acos(Vector3F::ZAxis.dot(topop.normal()));
-		}
-	
-		segU = invSpace.transform(segU);
-		segU.y = 0.f;
+		pushAngle = pushToSurface(topop, invSpace);
+		segRot = matchNormal(segU, invSpace);
 		
-		segRot = acos(segU.normal().dot(Vector3F::XAxis));
-		if(segU.z > 0.f) segRot *= -1.f;
-		
-		curAngle = pushAngle + segRot * (1.f - fullPitch * 0.5f) * (1.f - smoothPortion) + 0.15f * (1.f - m_angles[i] * 0.5f) + smoothAngle * m_lengthPortions[i] * 0.5f;
-		
+		//curAngle = pushAngle + segRot * (1.f - fullPitch * 0.5f) * (1.f - smoothPortion) + 0.15f * (1.f - m_angles[i] * 0.5f) + smoothAngle * m_lengthPortions[i] * 0.5f;
+		curAngle = pushAngle;
+		curAngle += segRot;
+		curAngle += 0.15f;
+		curAngle += smoothAngle * m_lengthPortions[i] * 0.5f;
 		m_spaces[i].rotateY(curAngle);
 
-		localSpace = m_spaces[i];
-		localSpace.multiply(segSpace);
-		segSpace = localSpace;
-		
-		localD.set(0.f, 0.f, radius * m_lengthPortions[i]);
-		localD = segSpace.transform(localD);
-		
-		segP += localD;
+		rotateForward(m_spaces[i], segSpace);
+		moveForward(segSpace, radius * m_lengthPortions[i], segP);
 	}
 	
 	for(unsigned i = 1; i < m_numSpace; i++) m_spaces[i].rotateY(fullPitch * m_angles[i] * 0.5f);
@@ -158,4 +114,66 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 Matrix33F MlRachis::getSpace(short idx) const
 {
 	return m_spaces[idx];
+}
+
+char MlRachis::isInside(const Vector3F & t, const Vector3F & onp, const Vector3F & nor)
+{
+	return Vector3F(t, onp).dot(nor) > 0.f;
+}
+
+float MlRachis::pushToSurface(const Vector3F & wv, const Matrix33F & space)
+{
+	Vector3F ov = space.transform(wv);
+	ov.normalize();
+	ov.y = 0.f;
+	ov.x += 0.1f;
+	ov.normalize();
+	float a = acos(Vector3F::ZAxis.dot(ov));
+	if(ov.x < 0.f) a = 0.f;
+	return a;
+}
+
+float MlRachis::matchNormal(const Vector3F & wv, const Matrix33F & space)
+{
+	Vector3F ov = space.transform(wv);
+	ov.normalize();
+	ov.y = 0.f;
+	ov.z -= 0.1f;
+	ov.normalize();
+	float a = acos(Vector3F::XAxis.dot(ov));
+	if(ov.z > 0.f) a = -a;
+	return a;
+}
+
+float MlRachis::bouncing(const Vector3F & a, const Vector3F & b, const Vector3F & c)
+{
+	float alpha = Vector3F(a, b).normal().dot(Vector3F(a, c).normal());
+	if(alpha < 0.f) return 0.f;
+	float lac = Vector3F(a, c).length() * alpha - Vector3F(a, b).length();
+	float beta = asin(lac / Vector3F(a, c).length());
+	return 2.f - beta - alpha;
+}
+
+float MlRachis::distanceFactor(const Vector3F & a, const Vector3F & b, const Vector3F & c)
+{
+	float facing = Vector3F(a, b).normal().dot(Vector3F(a, c).normal());
+	float lac = Vector3F(a, c).length() * facing;
+	float lab = Vector3F(a, b).length();
+	if(lac > lab) return 0.f;
+	float ang = 1.f - lac / lab * (lac / lab);
+	return ang * 3;
+}
+
+void MlRachis::moveForward(const Matrix33F & space, float distance, Vector3F & dst)
+{
+	Vector3F wv = space.transform(Vector3F::ZAxis);
+	wv.normalize();
+	dst += wv * distance;
+}
+
+void MlRachis::rotateForward(const Matrix33F & space, Matrix33F & dst)
+{
+	Matrix33F s = space;
+	s.multiply(dst);
+	dst = s;
 }

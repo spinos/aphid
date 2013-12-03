@@ -64,7 +64,7 @@ public:
 	void useRegionElementVertexFloat(const std::string & name);
 	void useRegionElementVertexVector(const std::string & name);
 	void interpolateVertexVector(Vector3F * dst); 
-	void interpolateVertexVector(unsigned faceIdx, float u, float v, Vector3F * dst); 
+	void interpolateVertexVector(unsigned faceIdx, float u, float v, Vector3F * dst);
 private:
     void fillPatchEdge(unsigned iface, unsigned iedge, unsigned vstart);
 	MeshTopology * m_topo;
