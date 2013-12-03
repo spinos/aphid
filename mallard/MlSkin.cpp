@@ -331,7 +331,7 @@ void MlSkin::smoothShell(const Vector3F & center, const float & radius)
 		if(l < radius) {
 			drop = l / radius;
 			drop = 1.f - drop * drop;
-			disw[*it] *= .8f; 
+			disw[*it] *= drop + .9f * (1.f - drop); 
 		}
 	}
 
@@ -614,7 +614,7 @@ void MlSkin::computeVertexDisplacement()
 	Vector3F * vp = bodyMesh()->getVertices();
 	
 	for(unsigned i = 0; i < nv; i++) 
-		dis1[i] = vp[i] + nor[i] * 2.f;
+		dis1[i] = vp[i] + nor[i] * 4.f;
 	
 	std::vector<unsigned> constraintIdx;
 	std::vector<float> constraintWei;
@@ -632,12 +632,13 @@ void MlSkin::computeVertexDisplacement()
 void MlSkin::shellUp(std::vector<Vector3F> & dst)
 {
 	const unsigned n = numActive();
-	Vector3F u;
+	Vector3F u, d;
 	for(unsigned i=0; i < n; i++) {
 		MlCalamus * c = getActive(i);
 		getPointOnBody(c, u);
 		dst.push_back(u);
-		interpolateVertexVector(c->faceIdx(), c->patchU(), c->patchV(), &u);
+		interpolateVertexVector(c->faceIdx(), c->patchU(), c->patchV(), &d);
+		u += d;
 		dst.push_back(u);
 	}
 }

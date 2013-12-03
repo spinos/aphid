@@ -83,7 +83,7 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 
 	smoothAngle = 0.f;
 	collide->interpolateVertexVector(faceIdx, patchU, patchV, &smoothU);
-	smoothU -= oriP;
+
 	smoothU = invSpace.transform(smoothU);
 
 	if(smoothU.z < 0.f) {
@@ -96,7 +96,7 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 	float smoothPortion = smoothAngle;
 	smoothPortion *= 0.66f;
 	
-	curAngle = pushAngle;
+	curAngle = pushAngle + smoothAngle * .5;
 
 	m_spaces[0].rotateY(curAngle);
 
@@ -131,14 +131,14 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 			topop.y = 0.f;
 			pushAngle = acos(Vector3F::ZAxis.dot(topop.normal()));
 		}
-
+	
 		segU = invSpace.transform(segU);
 		segU.y = 0.f;
 		
 		segRot = acos(segU.normal().dot(Vector3F::XAxis));
 		if(segU.z > 0.f) segRot *= -1.f;
 		
-		curAngle = pushAngle + segRot * (1.f - fullPitch * 0.5f) * (1.f - smoothPortion * 0.5f) + 0.15f + smoothAngle * m_lengthPortions[i] * 0.5f;
+		curAngle = pushAngle + segRot * (1.f - fullPitch * 0.5f) * (1.f - smoothPortion) + 0.15f * (1.f - m_angles[i] * 0.5f) + smoothAngle * m_lengthPortions[i] * 0.5f;
 		
 		m_spaces[i].rotateY(curAngle);
 
