@@ -84,11 +84,7 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientDraw()
 {
-	//getDrawer()->setGrey(1.f);
-	//getDrawer()->edge(mesh());
 	getDrawer()->m_surfaceProfile.apply();
-	
-	//getDrawer()->drawKdTree(getTree());
 	
 	if(m_featherTexId > -1) {
 		getDrawer()->setColor(.8f, .8f, .8f);
@@ -114,18 +110,14 @@ void GLWidget::clientDraw()
 	getDrawer()->setColor(.2f, .8f, .4f);
 	getDrawer()->drawLineBuffer(skin());
 	
-	//drawSelection();
 	showBrush();
 	
-	//testCurvature();
-	if(body()->getNumVertices() > 1) {
+	if(body()->getNumVertices() > 1 && interactMode() == ToolContext::Deintersect) {
 		getDrawer()->setColor(1.f, 0.f, 0.f);
 		getDrawer()->vertexNormal(body());
 		getDrawer()->setColor(0.f, 1.f, 0.f);
 		getDrawer()->perVertexVector(body(), "aftshell");
-		getDrawer()->setColor(.3f, .5f, .4f);
-		getDrawer()->edge(body());
-		getDrawer()->setColor(0.f, 1.f, 1.f);
+		getDrawer()->setColor(0.f, .8f, .4f);
 		std::vector<Vector3F> us;
 		skin()->shellUp(us);
 		getDrawer()->lines(us);
@@ -212,7 +204,7 @@ void GLWidget::clientMouseInput()
             m_featherDrawer->updateActive(skin());
             break;
 		case ToolContext::Deintersect :
-			skin()->smoothShell(brush()->heelPosition(), brush()->getRadius());
+			skin()->smoothShell(brush()->heelPosition(), brush()->getRadius(), brush()->strength());
             m_featherDrawer->updateActive(skin());
 			break;
 	    default:
@@ -584,15 +576,19 @@ void GLWidget::afterOpen()
 	body()->setup(m_topo);
 	buildTree();
 	skin()->setBodyMesh(body(), m_topo);
+	
+	bodyDeformer()->setMesh(body());
+
+	delayLoadBake();
+	body()->update(m_topo);
 	skin()->computeFaceCalamusIndirection();
 	skin()->computeFaceBounding();
 	skin()->computeVertexDisplacement();
-	bodyDeformer()->setMesh(body());
 	m_featherDrawer->clearCached();
 	m_featherDrawer->computeBufferIndirection(skin());
 	m_featherDrawer->rebuildBuffer(skin(), true);
 	m_bezierDrawer->rebuildBuffer(body());
-	delayLoadBake();
+	
 	std::string febkgrd = featherEditBackground();
 	if(febkgrd != "unknown") {
 		setFeatherTexture(febkgrd);

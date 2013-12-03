@@ -82,11 +82,12 @@ win32 {
     SOURCES += ../shared/gExtension.cpp
     INCLUDEPATH += D:/usr/local/include D:/ofl/shared \
                    D:/usr/hdf5/include \
-                   D:/usr/libxml2x64/include D:/usr/eigen3
+                   D:/usr/libxml2x64/include \
+                   D:/usr/eigen2
     QMAKE_LIBDIR += D:/usr/local/lib64 
     LIBS += -LD:/usr/libxml2x64/lib -llibxml2 \
             -LD:/usr/hdf5/lib -lszip
-    DEFINES += OPENEXR_DLL NDEBUG
+    DEFINES += OPENEXR_DLL NDEBUG NOMINMAX
     CONFIG += console
 }
 QT           += opengl

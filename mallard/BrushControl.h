@@ -49,6 +49,7 @@ private:
 	void combGroup();
 	void scaleGroup();
 	void bendGroup();
+	void smoothGroup();
 	
 private:
 	QStackedLayout * stackLayout;
@@ -68,5 +69,8 @@ private:
 	QDoubleEditSlider * m_radiusValueS;
 	QGroupBox * controlsGroupD;
 	QDoubleEditSlider * m_radiusValueD;
+	QGroupBox * controlsGroupDeintersect;
+	QDoubleEditSlider * m_radiusValueDeintersect;
+	QDoubleEditSlider * m_smoothDirection;
 };
 #endif

@@ -55,7 +55,7 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 	if(!bodyMesh()->hasVertexData("weishell")) {
 		float * disw = bodyMesh()->perVertexFloat("weishell");
 		const unsigned nv = bodyMesh()->getNumVertices();
-		for(unsigned i = 0; i < nv; i++) disw[i] = .99f;
+		for(unsigned i = 0; i < nv; i++) disw[i] = .9f;
 	}
 	CollisionRegion::useRegionElementVertexVector("aftshell");
 }
@@ -317,11 +317,11 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
     }
 }
 
-void MlSkin::smoothShell(const Vector3F & center, const float & radius)
+void MlSkin::smoothShell(const Vector3F & center, const float & radius, const float & weight)
 {
 	float * disw = bodyMesh()->perVertexFloat("weishell");
 	Vector3F d;
-	float l, drop;
+	float l;
 	std::vector<unsigned> vertices;
 	regionElementVertices(vertices);
 	std::vector<unsigned>::const_iterator it = vertices.begin();
@@ -329,9 +329,8 @@ void MlSkin::smoothShell(const Vector3F & center, const float & radius)
 		Vector3F d = bodyMesh()->getVertices()[*it] - center;
 		l = d.length();
 		if(l < radius) {
-			drop = l / radius;
-			drop = 1.f - drop * drop;
-			disw[*it] *= drop + .9f * (1.f - drop); 
+			disw[*it] *= weight;
+			if(disw[*it] > .99f) disw[*it] = .99f;
 		}
 	}
 

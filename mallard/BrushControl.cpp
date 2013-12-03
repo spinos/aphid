@@ -21,6 +21,7 @@ BrushControl::BrushControl(QWidget *parent)
 	combGroup();
 	scaleGroup();
 	bendGroup();
+	smoothGroup();
 	
 	stackLayout = new QStackedLayout(this);
 	
@@ -29,6 +30,7 @@ BrushControl::BrushControl(QWidget *parent)
 	stackLayout->addWidget(controlsGroupS);
 	stackLayout->addWidget(controlsGroupD);
 	stackLayout->addWidget(controlsGroupE);
+	stackLayout->addWidget(controlsGroupDeintersect);
 	
 	stackLayout->setCurrentIndex(0);
 	setLayout(stackLayout);
@@ -44,8 +46,10 @@ BrushControl::BrushControl(QWidget *parent)
 	connect(m_radiusValueB, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(m_radiusValueS, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(m_radiusValueD, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
+	connect(m_radiusValueDeintersect, SIGNAL(valueChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(m_createStrengthValue, SIGNAL(valueChanged(double)), this, SLOT(sendBrushStrength(double)));
 	connect(m_eraseStrengthValue, SIGNAL(valueChanged(double)), this, SLOT(sendBrushStrength(double)));
+	connect(m_smoothDirection, SIGNAL(valueChanged(double)), this, SLOT(sendBrushStrength(double)));
 }
 
 QWidget * BrushControl::numSamplesWidget()
@@ -165,6 +169,21 @@ void BrushControl::bendGroup()
 	controlsGroupD->setLayout(controlLayout);
 }
 
+void BrushControl::smoothGroup()
+{
+    controlsGroupDeintersect = new QGroupBox(tr("De-intersection"));
+    m_smoothDirection = new QDoubleEditSlider(tr("Strength"));
+	m_smoothDirection->setLimit(0.5, 1.5);
+	m_smoothDirection->setValue(0.9);
+    m_radiusValueDeintersect = new QDoubleEditSlider(tr("Radius"));
+	m_radiusValueDeintersect->setLimit(0.1, 1000.0);
+	QVBoxLayout * controlLayout = new QVBoxLayout;
+	controlLayout->addWidget(m_radiusValueDeintersect);
+	controlLayout->addWidget(m_smoothDirection);
+	controlLayout->addStretch();
+	controlsGroupDeintersect->setLayout(controlLayout);
+}
+
 void BrushControl::receiveToolContext(int c)
 {
 	double r = m_radiusValueC->value();
@@ -189,6 +208,11 @@ void BrushControl::receiveToolContext(int c)
 			stackLayout->setCurrentIndex(4);
 			r = m_radiusValueE->value();
 			s = m_eraseStrengthValue->value();
+			break;
+		case ToolContext::Deintersect:
+			stackLayout->setCurrentIndex(5);
+			r = m_radiusValueDeintersect->value();
+			s = m_smoothDirection->value();
 			break;
 		default:
 			break;

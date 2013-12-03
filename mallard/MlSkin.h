@@ -55,7 +55,7 @@ public:
 	void combFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	void scaleFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	void pitchFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
-	void smoothShell(const Vector3F & center, const float & radius);
+	void smoothShell(const Vector3F & center, const float & radius, const float & weight);
 	void computeFaceCalamusIndirection();
 	void computeFaceBounding();
 	void computeActiveFaceBounding();
