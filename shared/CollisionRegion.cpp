@@ -394,7 +394,7 @@ void CollisionRegion::useRegionElementVertexVector(const std::string & name)
 
 void CollisionRegion::interpolateVertexVector(Vector3F * dst)
 {
-	m_body->interpolateVectorOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, m_perVertexVector, dst);
+    interpolateVertexVector(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, dst);
 }
 
 void CollisionRegion::interpolateVertexVector(unsigned faceIdx, float u, float v, Vector3F * dst)
