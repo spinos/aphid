@@ -65,11 +65,9 @@ Vector3F CollisionRegion::getClosestPoint(const Vector3F & origin)
 {
 	m_ctx->reset();
 	closestPoint(origin, m_ctx);
-	//return m_ctx->m_closestP;
 	Vector3F pos;
-	
 	m_body->pointOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, pos);
-
+	m_hitElement = m_ctx->m_componentIdx;
 	/*Vector3F de = pos - m_ctx->m_closestP;
 	float er = de.length() / m_body->calculateBBox(m_ctx->m_componentIdx).area() * 2;
 	if(er > 0.0001)std::cout<<"\n err "<<er;*/
@@ -84,6 +82,7 @@ Vector3F CollisionRegion::getClosestNormal(const Vector3F & origin, float maxD, 
 	Vector3F nor;
 	m_body->normalOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, nor);
 	m_body->pointOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, pos);
+	m_hitElement = m_ctx->m_componentIdx;
 	return nor;
 }
 
@@ -99,6 +98,7 @@ void CollisionRegion::resetCollisionRegion(unsigned idx)
 	m_regionElementIndices.clear();
 	m_regionElementIndices.push_back(idx);
 	m_topo->growAroundQuad(idx, *regionElementIndices());
+	m_hitElement = -1;
 }
 
 void CollisionRegion::resetCollisionRegionByDistance(unsigned idx, const Vector3F & center, float maxD)
@@ -161,8 +161,9 @@ void CollisionRegion::resetCollisionRegionAround(unsigned idx, const float & vic
 
 void CollisionRegion::closestPoint(const Vector3F & origin, IntersectionContext * ctx) const
 {
+    if(m_hitElement > -1) m_body->closestPoint(m_hitElement, origin, ctx);
 	for(unsigned i=0; i < numRegionElements(); i++) {
-		m_body->closestPoint(regionElementIndex(i), origin, ctx);
+		if(m_hitElement != regionElementIndex(i)) m_body->closestPoint(regionElementIndex(i), origin, ctx);
 	}
 }
 

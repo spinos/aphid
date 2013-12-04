@@ -27,7 +27,6 @@ class BrushControl : public QDialog
 
 public:
     BrushControl(QWidget *parent = 0);
-	
 	QWidget * numSamplesWidget();
 	QWidget * radiusWidget();
 	QWidget * pitchWidget();

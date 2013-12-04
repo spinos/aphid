@@ -73,6 +73,7 @@ private:
 	AccPatchMesh * m_body;
 	std::vector<unsigned> m_regionElementIndices;
 	unsigned m_regionElementStart;
+	int m_hitElement;
 	BaseImage * m_distribution;
 	IntersectionContext * m_ctx;
 	Vector3F m_sampleColor;
