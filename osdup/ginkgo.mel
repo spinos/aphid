@@ -1,0 +1,130 @@
+proc string firstSelected()
+{
+    string $sel[] = `ls -sl`;
+    if(size($sel)<1) {
+        print("ERROR: nothing selected!");
+        return "unknown";
+    }
+    return $sel[0];
+}
+
+proc string[] allDagInGroup(string $head)
+{
+    string $all[] = `listRelatives -ad -ni -f $head`;
+    return $all;
+}
+
+proc string bakePNodeConnected(string $mesh)
+{
+    string $all[] = `listConnections -type "opiumBakeP" $mesh`;
+    if(size($all) < 1) return "unknown";
+    return $all[0];
+}
+
+proc string bakeTNodeConnected(string $transform)
+{
+    string $all[] = `listConnections -type "opiumBakeT" $transform`;
+    if(size($all) < 1) return "unknown";
+    return $all[0];
+}
+
+proc string animCurveNodeConnectedToTime(string $node)
+{
+    string $attr = $node + ".currentTime";
+    string $all[] = `listConnections -type "animCurveTU" $attr`;
+    if(size($all) < 1) return "unknown";
+    return $all[0];
+}
+
+proc moveTimeKey(string $node, float $offset)
+{
+    string $anim = animCurveNodeConnectedToTime($node);
+    if($anim == "unknown") return;
+    
+    setAttr ($anim + ".postInfinity") 3;
+    setAttr ($anim + ".preInfinity") 3;
+    
+    float $start[] = `keyframe -index 0 -q $anim`;
+    $start[0] = $start[0] + $offset;
+    float $end[] = `keyframe -index 1 -q $anim`;
+    $end[0] = $end[0] + $offset;
+    
+    keyframe -option over -index 0 -absolute -timeChange $start[0] $anim;
+    keyframe -option over -index 1 -absolute -timeChange $end[0] $anim;
+    
+    print ("\noffset " + $anim + "to "+$start[0]+" "+$end[0]+"\n");
+}
+
+proc duplicateBakeWithOffset(string $base, float $offset)
+{
+    string $top[] = `duplicate -un $base`;
+    print("\nDuplicate "+$top[0] + " from " + $base + "\n");
+    
+    string $allNode[] = allDagInGroup($top[0]);
+    string $aNode, $bakeP, $bakeT;
+    for($aNode in $allNode) {
+        $bakeP = bakePNodeConnected($aNode);
+        if($bakeP != "unknown") moveTimeKey($bakeP, $offset);
+        $bakeT = bakeTNodeConnected($aNode);
+        if($bakeT != "unknown") moveTimeKey($bakeT, $offset);
+    }
+}
+
+proc ginkgoDuplicateBake(int $numDuplications, float $offsetInterval)
+{
+    string $base = firstSelected();
+    if($base=="unknown") return;
+    
+    int $i;
+    float $fullOffset;
+    for($i=0; $i < $numDuplications; $i++) {
+        $fullOffset = $offsetInterval * $i;
+        duplicateBakeWithOffset($base, $fullOffset);
+    }
+}
+
+global proc GinkgoDuplicateBakeDo()
+{
+    int $range = `intFieldGrp -q -value2 ginkgo_rangeValues` - `intFieldGrp -q -value1 ginkgo_rangeValues` + 1;
+    float $interval = `floatFieldGrp -q -value1 ginkgo_intervalValues`;
+    int $nd = $range / $interval;
+    if($nd < 1) {
+        print "ERROR: invalid range input";
+        return;
+    }
+    ginkgoDuplicateBake($nd, $interval);
+}
+
+global proc GinkgoDuplicateBakeWin()
+{
+//If such a window already exists, destory it.
+ 	if ( (`window -exists GinkgoDuplicateBakeNote`) == true ) deleteUI GinkgoDuplicateBakeNote;
+ 
+//Create the window.
+	window -title "Cache Offset Duplicate 0.1 Thursday December 5 2013" -wh 320 200 GinkgoDuplicateBakeNote;
+	
+	//Layout
+string $form = `formLayout -numberOfDivisions 100`;
+string $row = `rowColumnLayout -numberOfColumns 3 -columnWidth 1 120 -columnWidth 2 120 -columnWidth 3 120 -columnAttach 1 "both" 0 -columnAttach 2 "both" 0 -columnAttach 3 "both" 0`;
+string $scroll = `scrollLayout -p $form`;
+	
+	columnLayout -adjustableColumn true;
+	text - l "Select the highest Group of imported bakep cache";
+	intFieldGrp -numberOfFields 2 -label "Animation Begin/End" -value1 1 -value2 100 ginkgo_rangeValues;
+	floatFieldGrp -numberOfFields 1 -label "Duplicate Every" -value1 25 ginkgo_intervalValues;
+	button -l "Duplicate" -c "GinkgoDuplicateBakeDo";
+	setParent..;
+	
+	formLayout -edit
+        -attachNone  $row     "top"
+        -attachForm     $row     "left"   2
+        -attachForm    $row     "bottom" 2
+        -attachForm     $row     "right"  2
+
+        -attachForm     $scroll "top"    2
+        -attachForm    $scroll "left"   2
+        -attachControl    $scroll "bottom" 2 $row
+        -attachForm     $scroll "right"  2
+    $form;
+	showWindow GinkgoDuplicateBakeNote;
+}
