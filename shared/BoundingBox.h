@@ -39,6 +39,7 @@ public:
 	char intersect(const Ray &ray, float *hitt0, float *hitt1) const;
 	char isPointInside(const Vector3F & p) const;
 	char isPointAround(const Vector3F & p, float threshold) const;
+	char isBoxAround(const BoundingBox & b, float threshold) const;
 	char isValid() const;
 	void verbose() const;
 	float m_data[8];

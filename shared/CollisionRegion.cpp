@@ -122,8 +122,7 @@ void CollisionRegion::resetCollisionRegionByDistance(unsigned idx, const Vector3
 
 void CollisionRegion::resetCollisionRegionAround(unsigned idx, const BoundingBox & bbox)
 {
-    if(regionElementStart() == idx) return;
-	resetCollisionRegion(idx);
+    resetCollisionRegion(idx);
 	unsigned i, j, lastCreep = 0;
 	BoundingBox bb;
 	for(i = 1; i < numRegionElements(); i++) {
@@ -133,6 +132,26 @@ void CollisionRegion::resetCollisionRegionAround(unsigned idx, const BoundingBox
 		for(j = numRegionElements() - 1 - lastCreep; j < numRegionElements(); j++) {
 			bb = m_body->calculateBBox(regionElementIndex(j));
 			if(!bb.intersect(bbox)) {
+				regionElementIndices()->erase(regionElementIndices()->begin() + j);
+				j--;
+			}
+		}
+	}
+}
+
+void CollisionRegion::resetCollisionRegionAround(unsigned idx, const float & vicinity)
+{
+    resetCollisionRegion(idx);
+    BoundingBox bc = m_body->calculateBBox(idx);
+	unsigned i, j, lastCreep = 0;
+	BoundingBox bb;
+	for(i = 1; i < numRegionElements(); i++) {
+		bb = m_body->calculateBBox(regionElementIndex(i));
+		if(bb.isBoxAround(bc, vicinity))
+			lastCreep = m_topo->growAroundQuad(regionElementIndex(i), *regionElementIndices());
+		for(j = numRegionElements() - 1 - lastCreep; j < numRegionElements(); j++) {
+			bb = m_body->calculateBBox(regionElementIndex(j));
+			if(!bb.isBoxAround(bc, vicinity)) {
 				regionElementIndices()->erase(regionElementIndices()->begin() + j);
 				j--;
 			}

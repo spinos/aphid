@@ -130,3 +130,8 @@ void MlCalamus::collideWith(CollisionRegion * skin, const Vector3F & center)
 	feather()->setCollision(skin);
 }
 
+void MlCalamus::collideWith(CollisionRegion * skin)
+{
+	feather()->setCollision(skin);
+}
+

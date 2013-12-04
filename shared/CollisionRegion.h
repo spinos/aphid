@@ -33,6 +33,8 @@ public:
 	virtual void resetCollisionRegion(unsigned idx);
 	virtual void resetCollisionRegionByDistance(unsigned idx, const Vector3F & center, float maxD);
 	virtual void resetCollisionRegionAround(unsigned idx, const BoundingBox & bbox);
+	virtual void resetCollisionRegionAround(unsigned idx, const float & vicinity);
+	
 	virtual void closestPoint(const Vector3F & origin, IntersectionContext * ctx) const;
 	virtual void pushPlane(Patch::PushPlaneContext * ctx) const;
 	

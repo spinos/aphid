@@ -221,6 +221,17 @@ char BoundingBox::isPointAround(const Vector3F & p, float threshold) const
 	return 1;
 }
 
+char BoundingBox::isBoxAround(const BoundingBox & b, float threshold) const
+{
+    if(b.getMin(0) > getMax(0) + threshold) return 0;
+    if(b.getMax(0) < getMin(0) - threshold) return 0;
+    if(b.getMin(1) > getMax(1) + threshold) return 0;
+    if(b.getMax(1) < getMin(1) - threshold) return 0;
+    if(b.getMin(2) > getMax(2) + threshold) return 0;
+    if(b.getMax(2) < getMin(2) - threshold) return 0;
+    return 1;
+}
+
 char BoundingBox::isValid() const
 {
 	return (getMin(0) < getMax(0) && getMin(1) < getMax(1) && getMin(2) < getMax(2));

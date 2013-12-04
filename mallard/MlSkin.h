@@ -57,8 +57,6 @@ public:
 	void pitchFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	void smoothShell(const Vector3F & center, const float & radius, const float & weight);
 	void computeFaceCalamusIndirection();
-	void computeFaceBounding();
-	void computeActiveFaceBounding();
 	void computeVertexDisplacement();
 	void finishCreateFeather();
 	void finishEraseFeather();
@@ -83,15 +81,16 @@ public:
 	void resetFloodFaces();
 	void restFloodFacesAsActive();
 	
-	BoundingBox faceBoundingBox(unsigned idx) const;
+	void resetFaceVicinity();
+	void setFaceVicinity(unsigned idx, float val);
+	float faceVicinity(unsigned idx) const;
 	void shellUp(std::vector<Vector3F> & dst);
 	
 	void verbose() const;
 protected:
 	
 private:
-    void computeActiveFaceBounding(unsigned faceIdx);
-	bool createFeather(MlCalamus & ori);
+    bool createFeather(MlCalamus & ori);
 	bool isPointTooCloseToExisting(const Vector3F & pos, float minDistance);
 	bool isDartCloseToExisting(const Vector3F & pos, const std::vector<Vector3F> & existing, float minDistance) const;
 	bool isFloodFace(unsigned idx, unsigned & dartBegin, unsigned & dartEnd) const;
@@ -106,7 +105,7 @@ private:
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather, m_numCreatedFeather;
 	FloodTable * m_faceCalamusTable;
-	BoundingBox * m_faceBox;
+	float * m_perFaceVicinity;
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
 };

@@ -40,6 +40,8 @@ public:
 	
 	void collideWith(CollisionRegion * skin, const BoundingBox & bbox);
 	void collideWith(CollisionRegion * skin, const Vector3F & center);
+	void collideWith(CollisionRegion * skin);
+	
 	static MlFeatherCollection * FeatherLibrary;
 
 private:

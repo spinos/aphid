@@ -175,7 +175,6 @@ void GLWidget::clientMouseInput()
 	    case ToolContext::CreateBodyContourFeather :
 	        brush()->setToeByIntersect(&ray);
 	        skin()->growFeather(brush()->toeDisplacement());
-	        skin()->computeActiveFaceBounding();
 	        m_featherDrawer->updateActive(skin());
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
@@ -190,13 +189,11 @@ void GLWidget::clientMouseInput()
         case ToolContext::CombBodyContourFeather :
             brush()->setToeByIntersect(&ray);
             skin()->combFeather(brush()->toeDisplacement(), brush()->heelPosition(), brush()->getRadius());
-            skin()->computeActiveFaceBounding();
             m_featherDrawer->updateActive(skin());
 		    break;
         case ToolContext::ScaleBodyContourFeather :
             brush()->setToeByIntersect(&ray);
             skin()->scaleFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
-            skin()->computeActiveFaceBounding();
             m_featherDrawer->updateActive(skin());
             break;
         case ToolContext::PitchBodyContourFeather :
@@ -558,8 +555,8 @@ void GLWidget::updateOnFrame(int x)
 	if(!deformBody(x)) return;
 	
 	body()->update(m_topo);
-	skin()->computeFaceBounding();
 	skin()->computeVertexDisplacement();
+	skin()->resetFaceVicinity();
 	m_featherDrawer->setCurrentFrame(x);
 	m_featherDrawer->setCurrentOrigin(bodyDeformer()->frameCenter());
 	m_featherDrawer->rebuildBuffer(skin());
@@ -583,8 +580,8 @@ void GLWidget::afterOpen()
 	delayLoadBake();
 	body()->update(m_topo);
 	skin()->computeFaceCalamusIndirection();
-	skin()->computeFaceBounding();
 	skin()->computeVertexDisplacement();
+	skin()->resetFaceVicinity();
 	m_featherDrawer->clearCached();
 	m_featherDrawer->computeBufferIndirection(skin());
 	m_featherDrawer->rebuildBuffer(skin(), true);

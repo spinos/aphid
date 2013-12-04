@@ -204,8 +204,14 @@ void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c)
 {
     Vector3F p;
 	skin->getPointOnBody(c, p);
-	//c->collideWith(skin, skin->faceBoundingBox(c->faceIdx()));
-	c->collideWith(skin, p);
+	
+	const unsigned fi = c->faceIdx();
+	const float fv = c->realScale();
+	if(skin->regionElementStart() != fi || fv > skin->faceVicinity(fi)) {
+	    skin->resetCollisionRegionAround(fi, fv);
+	    skin->setFaceVicinity(fi, fv);
+	}
+	c->collideWith(skin);
 	
 	Matrix33F space, tang;
 	skin->tangentSpace(c, tang);
