@@ -10,6 +10,7 @@
 
 #include <AllMath.h>
 class AccPatch;
+class BezierPatchHirarchy;
 
 class AccPatchGroup {
 public:
@@ -17,7 +18,10 @@ public:
 	virtual ~AccPatchGroup();
 	void createAccPatches(unsigned n);
 	AccPatch* beziers() const;
+	BezierPatchHirarchy * hirarchies() const;
+	void createBezierHirarchy(unsigned idx);
 	
 private:
 	AccPatch* m_bezier;
+	BezierPatchHirarchy * m_hirarchy;
 };

@@ -14,7 +14,7 @@
 #include <PointInsidePolygonTest.h>
 #include <BiLinearInterpolate.h>
 #include <InverseBilinearInterpolate.h>
-
+#include <BezierPatchHirarchy.h>
 AccPatchMesh::AccPatchMesh() 
 {
 	
@@ -63,6 +63,8 @@ void AccPatchMesh::update(MeshTopology * topo)
 		beziers()[j].evaluateBinormals();
 		
 		quadV += 4;
+		
+		hirarchies()[j].cleanup();
 	}
 }
 

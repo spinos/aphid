@@ -10,7 +10,8 @@
 #include "AccPatchGroup.h"
 #include <accPatch.h>
 #include <accStencil.h>
-AccPatchGroup::AccPatchGroup() : m_bezier(0) 
+#include <BezierPatchHirarchy.h>
+AccPatchGroup::AccPatchGroup() : m_bezier(0), m_hirarchy(0)
 {
 	if(!AccPatch::stencil) {
 		AccStencil* sten = new AccStencil();
@@ -21,15 +22,28 @@ AccPatchGroup::AccPatchGroup() : m_bezier(0)
 AccPatchGroup::~AccPatchGroup() 
 {
 	if(m_bezier) delete[] m_bezier;
+	if(m_hirarchy) delete[] m_hirarchy;
 }
 
 void AccPatchGroup::createAccPatches(unsigned n)
 {
 	if(m_bezier) delete[] m_bezier;
 	m_bezier = new AccPatch[n];
+	if(m_hirarchy) delete[] m_hirarchy;
+	m_hirarchy = new BezierPatchHirarchy[n];
 }
 
 AccPatch* AccPatchGroup::beziers() const
 {
 	return m_bezier;
+}
+
+BezierPatchHirarchy * AccPatchGroup::hirarchies() const
+{
+	return m_hirarchy;
+}
+
+void AccPatchGroup::createBezierHirarchy(unsigned idx)
+{
+	m_hirarchy[idx].create(&m_bezier[idx]);
 }

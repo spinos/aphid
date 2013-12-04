@@ -579,6 +579,7 @@ void GLWidget::afterOpen()
 
 	delayLoadBake();
 	body()->update(m_topo);
+	body()->createBezierHirarchy(0);
 	skin()->computeFaceCalamusIndirection();
 	skin()->computeVertexDisplacement();
 	skin()->resetFaceVicinity();
