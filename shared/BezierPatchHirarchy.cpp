@@ -51,6 +51,7 @@ void BezierPatchHirarchy::create(BezierPatch * parent)
 void BezierPatchHirarchy::recursiveCreate(short level, unsigned & current, unsigned & start)
 {
 	BezierPatch * parent = &m_elm[current];
+	parent->setBBox(parent->controlBBox());
 	m_childIdx[current] = start;
 	m_planes[current].createEdges(parent->_contorlPoints[0], parent->_contorlPoints[3], parent->_contorlPoints[15], parent->_contorlPoints[12]);
 	m_invbil[current].setVertices(m_planes[current].vertex(0),m_planes[current].vertex(1), m_planes[current].vertex(3), m_planes[current].vertex(2));

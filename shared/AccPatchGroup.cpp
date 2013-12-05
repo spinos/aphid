@@ -51,7 +51,7 @@ BezierPatchHirarchy * AccPatchGroup::hirarchies() const
 void AccPatchGroup::recursiveBezierClosestPoint1(IntersectionContext * ctx, int level, unsigned current) const
 {
     BezierPatch* patch = m_activeHirarchy->patch(current);
-    BoundingBox controlbox = patch->controlBBox();
+    const BoundingBox controlbox = patch->getBBox();
 	if(!controlbox.isPointAround(ctx->m_originP, ctx->m_minHitDistance)) return;
 	PointInsidePolygonTest &pl = *m_activeHirarchy->plane(current);
 	Vector3F px;

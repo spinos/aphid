@@ -111,7 +111,7 @@ void GLWidget::clientDraw()
 	getDrawer()->drawLineBuffer(skin());
 	
 	showBrush();
-	
+	return;
 	if(body()->getNumVertices() > 1 /*&& interactMode() == ToolContext::Deintersect*/) {
 		getDrawer()->setColor(1.f, 0.f, 0.f);
 		// getDrawer()->vertexNormal(body());

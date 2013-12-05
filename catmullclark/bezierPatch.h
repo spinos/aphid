@@ -8,7 +8,7 @@
  */
 #pragma once
 #include <AllMath.h>
-class BoundingBox;
+#include <Geometry.h>
 
 struct PatchSplitContext {
 	Vector2F patchUV[4];
@@ -20,7 +20,7 @@ struct PatchSplitContext {
 	}
 };
 
-class BezierPatch
+class BezierPatch : public Geometry
 {
 public:
 	BezierPatch();
