@@ -23,9 +23,9 @@ public:
 	void cleanup();
 	
 	char buildTopology(BaseMesh * mesh);
-	void calculateWeight(const unsigned & nv);
-	void calculateNormal(BaseMesh * mesh);
-	void calculateConcaveShell(BaseMesh * mesh);
+	void calculateWeight();
+	void calculateNormal();
+	void calculateSmoothedNormal(Vector3F * dst);
 
 	VertexAdjacency * getTopology() const;
 	VertexAdjacency & getAdjacency(unsigned idx) const;

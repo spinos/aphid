@@ -55,7 +55,7 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 	if(!bodyMesh()->hasVertexData("weishell")) {
 		float * disw = bodyMesh()->perVertexFloat("weishell");
 		const unsigned nv = bodyMesh()->getNumVertices();
-		for(unsigned i = 0; i < nv; i++) disw[i] = .9f;
+		for(unsigned i = 0; i < nv; i++) disw[i] = .5f;
 	}
 	CollisionRegion::useRegionElementVertexVector("aftshell");
 }
@@ -318,6 +318,7 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 
 void MlSkin::smoothShell(const Vector3F & center, const float & radius, const float & weight)
 {
+	const float increase = (weight - 1.f) * 0.3f;
 	float * disw = bodyMesh()->perVertexFloat("weishell");
 	Vector3F d;
 	float l;
@@ -328,8 +329,9 @@ void MlSkin::smoothShell(const Vector3F & center, const float & radius, const fl
 		Vector3F d = bodyMesh()->getVertices()[*it] - center;
 		l = d.length();
 		if(l < radius) {
-			disw[*it] *= weight;
-			if(disw[*it] > .99f) disw[*it] = .99f;
+			disw[*it] += increase;
+			if(disw[*it] < 0.f) disw[*it] = 0.f;
+			else if(disw[*it] > 1.f) disw[*it] = 1.f;
 		}
 	}
 
@@ -582,22 +584,13 @@ void MlSkin::computeVertexDisplacement()
 	float * disw = bodyMesh()->perVertexFloat("weishell");
 	
 	Vector3F * nor = bodyMesh()->getNormals();
-	Vector3F * vp = bodyMesh()->getVertices();
 	
-	for(unsigned i = 0; i < nv; i++) 
-		dis1[i] = vp[i] + nor[i] * 4.f;
+	topology()->calculateSmoothedNormal(dis1);
 	
-	std::vector<unsigned> constraintIdx;
-	std::vector<float> constraintWei;
 	for(unsigned i = 0; i < nv; i++) {
-		constraintIdx.push_back(i);
-		constraintWei.push_back(disw[i]);
+		dis1[i] = dis1[i] * (1.f - disw[i]) + nor[i] * disw[i];
+		dis1[i].normalize();
 	}
-	
-	m_smoother.precompute(nv, topology(), constraintIdx, constraintWei);
-	m_smoother.solve(dis1);
-	
-	for(unsigned i = 0; i < nv; i++) dis1[i] = vp[i] + Vector3F(vp[i], dis1[i]).normal();
 }
 
 void MlSkin::shellUp(std::vector<Vector3F> & dst)

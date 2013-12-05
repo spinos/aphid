@@ -419,7 +419,4 @@ void CollisionRegion::interpolateVertexVector(Vector3F * dst)
 void CollisionRegion::interpolateVertexVector(unsigned faceIdx, float u, float v, Vector3F * dst)
 {
 	m_body->interpolateVectorOnPatch(faceIdx, u, v, m_perVertexVector, dst);
-	Vector3F p;
-	m_body->interpolateVectorOnPatch(faceIdx, u, v, m_body->getVertices(), &p);
-	*dst = *dst - p;
 }

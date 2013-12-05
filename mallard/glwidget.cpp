@@ -111,17 +111,17 @@ void GLWidget::clientDraw()
 	getDrawer()->drawLineBuffer(skin());
 	
 	showBrush();
-	return;
-	if(body()->getNumVertices() > 1 /*&& interactMode() == ToolContext::Deintersect*/) {
+
+	/*if(body()->getNumVertices() > 1 && interactMode() == ToolContext::Deintersect) {
 		getDrawer()->setColor(1.f, 0.f, 0.f);
-		// getDrawer()->vertexNormal(body());
+		getDrawer()->vertexNormal(body());
 		getDrawer()->setColor(0.f, 1.f, 0.f);
-		//getDrawer()->perVertexVector(body(), "aftshell");
+		getDrawer()->perVertexVector(body(), "aftshell");
 		getDrawer()->setColor(0.8f, .8f, .4f);
 		std::vector<Vector3F> us;
 		skin()->shellUp(us);
 		getDrawer()->lines(us);
-	}
+	}*/
 }
 
 void GLWidget::loadMesh(std::string filename)

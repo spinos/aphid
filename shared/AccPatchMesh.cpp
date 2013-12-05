@@ -41,8 +41,8 @@ void AccPatchMesh::setup(MeshTopology * topo)
 
 void AccPatchMesh::update(MeshTopology * topo)
 {
-	topo->calculateNormal(this);
-	topo->calculateWeight(getNumVertices());
+	topo->calculateNormal();
+	topo->calculateWeight();
 	Vector3F* cvs = getVertices();
 	Vector3F* normal = getNormals();
 	AccStencil* sten = AccPatch::stencil;

@@ -19,7 +19,7 @@ void MeshManipulator::attachTo(BaseMesh * mesh)
 {
     m_mesh = mesh;
 	m_topo->buildTopology(m_mesh);
-	m_topo->calculateNormal(m_mesh);
+	m_topo->calculateNormal();
 }
 
 void MeshManipulator::start(const Ray * r)

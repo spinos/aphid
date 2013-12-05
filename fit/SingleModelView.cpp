@@ -134,7 +134,7 @@ void SingleModelView::buildTopology()
 {
 	m_topo->buildTopology(mesh());
 	getActiveComponent()->setTopology(m_topo);
-    m_topo->calculateNormal(mesh());
+    m_topo->calculateNormal();
 }
 
 void SingleModelView::open()

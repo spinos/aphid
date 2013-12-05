@@ -1005,7 +1005,7 @@ void BaseDrawer::perVertexVector(BaseMesh * mesh, const std::string & name)
 	for(unsigned i = 0; i < nv; i++) {
 		q = p[i];
 		glVertex3fv((float *)&q);
-		q = pvv[i];
+		q += pvv[i];
 		glVertex3fv((float *)&q);
 	}
 	glEnd();

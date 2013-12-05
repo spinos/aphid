@@ -3,7 +3,7 @@
 #include <PointInsidePolygonTest.h>
 #include <InverseBilinearInterpolate.h>
 #include <BiLinearInterpolate.h>
-#define MaxBezierPatchHirarchy 3
+#define MaxBezierPatchHirarchy 5
 BezierPatchHirarchy::BezierPatchHirarchy()
 {
 	m_elm = 0;

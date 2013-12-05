@@ -73,27 +73,29 @@ char MeshTopology::buildTopology(BaseMesh * mesh)
 		m_adjacency[i].connectEdges();
 	}
 	
-	calculateWeight(nv);
+	calculateWeight();
 	return 1;
 }
 
-void MeshTopology::calculateWeight(const unsigned & nv)
+void MeshTopology::calculateWeight()
 {
+	const unsigned nv = m_mesh->getNumVertices();
+	
 	for(unsigned i = 0; i < nv; i++) {
 		m_adjacency[i].computeWeights();
 		m_adjacency[i].computeDifferentialCoordinate();
 	}
 }
 
-void MeshTopology::calculateNormal(BaseMesh * mesh)
+void MeshTopology::calculateNormal()
 {
 	for(std::vector<Facet *>::iterator it = m_faces.begin(); it != m_faces.end(); ++it) {
 		(*it)->update();
 	}
 	
-	const unsigned nv = mesh->getNumVertices();
+	const unsigned nv = m_mesh->getNumVertices();
 	for(unsigned i = 0; i < nv; i++) {
-		mesh->normals()[i] = m_adjacency[i].computeNormal();
+		m_mesh->normals()[i] = m_adjacency[i].computeNormal();
 	}
 }
 
@@ -194,21 +196,21 @@ unsigned MeshTopology::growAroundQuad(unsigned idx, std::vector<unsigned> & dst)
 	return dst.size() - presize;
 }
 
-void MeshTopology::calculateConcaveShell(BaseMesh * mesh)
+void MeshTopology::calculateSmoothedNormal(Vector3F * dst)
 {
-	if(mesh->perVertexFloat() ==0) mesh->createPerVertexFloat();
-	
-	float * pvf = mesh->perVertexFloat();
-	Vector3F * nor = mesh->normals();
-	Vector3F c, d;
-	float facing;
-	const unsigned nv = mesh->getNumVertices();
+	Vector3F * nor = m_mesh->normals();
+	Vector3F c;
+	const unsigned nv = m_mesh->getNumVertices();
+	int neighborIdx;
 	for(unsigned i = 0; i < nv; i++) {
-		c = m_adjacency[i].center();
-		d = c - * m_adjacency[i].m_v;
-		facing = nor[i].dot(d.normal());
-		if(facing > 0.f) pvf[i] = d.length();
-		else pvf[i] = 0.f; 
+		c.setZero();
+		VertexAdjacency & adj = getAdjacency(i);
+		VertexAdjacency::VertexNeighbor *neighbor;
+		for(neighbor = adj.firstNeighbor(); !adj.isLastNeighbor(); neighbor = adj.nextNeighbor()) {
+			neighborIdx = neighbor->v->getIndex();
+			c += nor[neighborIdx] * neighbor->weight;
+		}
+		dst[i] = c.normal();
 	}
 }
 //:~
