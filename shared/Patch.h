@@ -40,6 +40,7 @@ public:
 	Patch(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, const Vector3F & p3);
 	virtual ~Patch();
 	
+	void createEdges(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, const Vector3F & p3);
 	float planarDistanceTo(const Vector3F & po, Vector3F & closestP) const;
 	bool pushPlane(PushPlaneContext * ctx) const;
 	bool isBehind(const Vector3F & po, Vector3F & nr) const;

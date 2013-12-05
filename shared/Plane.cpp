@@ -24,6 +24,13 @@ Plane::Plane(const Vector3F & nor, const Vector3F & pop)
 
 Plane::Plane(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, const Vector3F & p3)
 {
+	create(p0, p1, p2, p3);
+}
+
+Plane::~Plane() {}
+
+void Plane::create(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, const Vector3F & p3)
+{
 	Vector3F cen = p0 * 0.25f + p1 * 0.25f + p2 * 0.25f + p3 * 0.25f;
 	Vector3F c0 = p2 - p0;
 	Vector3F c1 = p3 - p1;

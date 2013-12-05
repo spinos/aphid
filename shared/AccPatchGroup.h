@@ -19,11 +19,10 @@ public:
 	void createAccPatches(unsigned n);
 	AccPatch* beziers() const;
 	BezierPatchHirarchy * hirarchies() const;
-	void createBezierHirarchy(unsigned idx);
-
     void recursiveBezierClosestPoint1(IntersectionContext * ctx, int level, unsigned current) const;
-		
+	void setActiveHirarchy(unsigned idx);	
 private:
 	AccPatch* m_bezier;
 	BezierPatchHirarchy * m_hirarchy;
+	BezierPatchHirarchy * m_activeHirarchy;
 };

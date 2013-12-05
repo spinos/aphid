@@ -94,15 +94,19 @@ char AccPatchMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 	return 1;
 }
 
-char AccPatchMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const
+char AccPatchMesh::closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx)
 {
-	PatchSplitContext split;
-	split.reset();
 	ctx->m_elementHitDistance = ctx->m_minHitDistance;
 	ctx->m_curComponentIdx = idx;
 	ctx->m_originP = origin;
-	//recursiveBezierClosestPoint(origin, &beziers()[idx], ctx, split, 0);
+	/*
+	PatchSplitContext split;
+	split.reset();
+	recursiveBezierClosestPoint(origin, &beziers()[idx], ctx, split, 0);
+	*/
+	setActiveHirarchy(idx);
 	recursiveBezierClosestPoint1(ctx, 1, 0);
+	
 	return 1;
 }
 

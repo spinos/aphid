@@ -48,35 +48,23 @@ BezierPatchHirarchy * AccPatchGroup::hirarchies() const
 	return m_hirarchy;
 }
 
-void AccPatchGroup::createBezierHirarchy(unsigned idx)
-{
-	m_hirarchy[idx].create(&m_bezier[idx]);
-}
-
 void AccPatchGroup::recursiveBezierClosestPoint1(IntersectionContext * ctx, int level, unsigned current) const
 {
-    BezierPatchHirarchy &hir = hirarchies()[ctx->m_curComponentIdx];
-    BezierPatch* patch = hir.patch(current);
+    BezierPatch* patch = m_activeHirarchy->patch(current);
     BoundingBox controlbox = patch->controlBBox();
 	if(!controlbox.isPointAround(ctx->m_originP, ctx->m_minHitDistance)) return;
-	PointInsidePolygonTest pl(patch->_contorlPoints[0], patch->_contorlPoints[3], patch->_contorlPoints[15], patch->_contorlPoints[12]);
+	PointInsidePolygonTest &pl = *m_activeHirarchy->plane(current);
 	Vector3F px;
 	char inside = 1;
 	const float d = pl.distanceTo(ctx->m_originP, px, inside);
 	
-	if(hir.endLevel(level) || !inside) {
+	if(m_activeHirarchy->endLevel(level) || !inside) {
 		if(d > ctx->m_minHitDistance) return;
 		ctx->m_minHitDistance = d;
 		ctx->m_componentIdx = ctx->m_curComponentIdx;
 		ctx->m_closestP = px;
 		ctx->m_hitP = px;
-		
-		InverseBilinearInterpolate invbil;
-		invbil.setVertices(pl.vertex(0), pl.vertex(1), pl.vertex(3), pl.vertex(2));
-	
-		ctx->m_patchUV = invbil(px);
-		BiLinearInterpolate bili;
-		ctx->m_patchUV = bili.interpolate2(ctx->m_patchUV.x, ctx->m_patchUV.y, patch->_texcoords);
+		ctx->m_patchUV = m_activeHirarchy->restoreUV(current, px);
 		return;
 	}
 	
@@ -84,9 +72,15 @@ void AccPatchGroup::recursiveBezierClosestPoint1(IntersectionContext * ctx, int 
 	
 	level++;
 	
-	const unsigned cs = hir.childStart(current);
+	const unsigned cs = m_activeHirarchy->childStart(current);
 	recursiveBezierClosestPoint1(ctx, level, cs);
 	recursiveBezierClosestPoint1(ctx, level, cs + 1);
 	recursiveBezierClosestPoint1(ctx, level, cs + 2);
 	recursiveBezierClosestPoint1(ctx, level, cs + 3);
+}
+
+void AccPatchGroup::setActiveHirarchy(unsigned idx)
+{
+	m_activeHirarchy = &m_hirarchy[idx];
+	if(m_hirarchy[idx].isEmpty()) m_hirarchy[idx].create(&m_bezier[idx]);
 }

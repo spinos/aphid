@@ -27,7 +27,7 @@ public:
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
 	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
-	virtual char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx) const;
+	virtual char closestPoint(unsigned idx, const Vector3F & origin, IntersectionContext * ctx);
 	virtual void pushPlane(unsigned idx, Patch::PushPlaneContext * ctx) const;
 	
 	void pointOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;

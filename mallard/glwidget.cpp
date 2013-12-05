@@ -112,7 +112,6 @@ void GLWidget::clientDraw()
 	
 	showBrush();
 	
-	return;
 	if(body()->getNumVertices() > 1 /*&& interactMode() == ToolContext::Deintersect*/) {
 		getDrawer()->setColor(1.f, 0.f, 0.f);
 		// getDrawer()->vertexNormal(body());
@@ -579,7 +578,6 @@ void GLWidget::afterOpen()
 
 	delayLoadBake();
 	body()->update(m_topo);
-	body()->createBezierHirarchy(0);
 	skin()->computeFaceCalamusIndirection();
 	skin()->computeVertexDisplacement();
 	skin()->resetFaceVicinity();
