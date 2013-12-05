@@ -100,7 +100,7 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 		//curAngle = pushAngle + segRot * (1.f - fullPitch * 0.5f) * (1.f - smoothPortion) + 0.15f * (1.f - m_angles[i] * 0.5f) + smoothAngle * m_lengthPortions[i] * 0.5f;
 		curAngle = pushAngle;
 		curAngle += segRot;
-		curAngle += 0.15f;
+		curAngle += 0.15f * (1.f - m_angles[i]);
 		curAngle += smoothAngle * m_lengthPortions[i] * 0.5f;
 		m_spaces[i].rotateY(curAngle);
 

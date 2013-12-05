@@ -110,18 +110,8 @@ void GLWidget::clientDraw()
 	getDrawer()->setColor(.2f, .8f, .4f);
 	getDrawer()->drawLineBuffer(skin());
 	
-	showBrush();
-
-	/*if(body()->getNumVertices() > 1 && interactMode() == ToolContext::Deintersect) {
-		getDrawer()->setColor(1.f, 0.f, 0.f);
-		getDrawer()->vertexNormal(body());
-		getDrawer()->setColor(0.f, 1.f, 0.f);
-		getDrawer()->perVertexVector(body(), "aftshell");
-		getDrawer()->setColor(0.8f, .8f, .4f);
-		std::vector<Vector3F> us;
-		skin()->shellUp(us);
-		getDrawer()->lines(us);
-	}*/
+	IntersectionContext * ctx = getIntersectionContext();
+    if(ctx->m_success) showBrush();
 }
 
 void GLWidget::loadMesh(std::string filename)
@@ -571,12 +561,11 @@ void GLWidget::afterOpen()
 	body()->putIntoObjectSpace();
 	buildTopology();
 	body()->setup(m_topo);
-	buildTree();
 	skin()->setBodyMesh(body(), m_topo);
 	
 	bodyDeformer()->setMesh(body());
-
 	delayLoadBake();
+	
 	body()->update(m_topo);
 	skin()->computeFaceCalamusIndirection();
 	skin()->computeVertexDisplacement();
@@ -585,7 +574,7 @@ void GLWidget::afterOpen()
 	m_featherDrawer->computeBufferIndirection(skin());
 	m_featherDrawer->rebuildBuffer(skin(), true);
 	m_bezierDrawer->rebuildBuffer(body());
-	
+	buildTree();
 	std::string febkgrd = featherEditBackground();
 	if(febkgrd != "unknown") {
 		setFeatherTexture(febkgrd);
@@ -672,6 +661,16 @@ void GLWidget::clearSelection()
 
 void GLWidget::testCurvature()
 {return;
+	if(body()->getNumVertices() > 1 && interactMode() == ToolContext::Deintersect) {
+		getDrawer()->setColor(1.f, 0.f, 0.f);
+		getDrawer()->vertexNormal(body());
+		getDrawer()->setColor(0.f, 1.f, 0.f);
+		getDrawer()->perVertexVector(body(), "aftshell");
+		getDrawer()->setColor(0.8f, .8f, .4f);
+		std::vector<Vector3F> us;
+		skin()->shellUp(us);
+		getDrawer()->lines(us);
+	}
 	if(skin()->numRegionElements() < 1) return;
 	Vector3F p = brush()->heelPosition();
 	Vector3F n = brush()->normal();
