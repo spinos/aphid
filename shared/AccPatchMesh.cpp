@@ -100,7 +100,9 @@ char AccPatchMesh::closestPoint(unsigned idx, const Vector3F & origin, Intersect
 	split.reset();
 	ctx->m_elementHitDistance = ctx->m_minHitDistance;
 	ctx->m_curComponentIdx = idx;
-	recursiveBezierClosestPoint(origin, &beziers()[idx], ctx, split, 0);
+	ctx->m_originP = origin;
+	//recursiveBezierClosestPoint(origin, &beziers()[idx], ctx, split, 0);
+	recursiveBezierClosestPoint1(ctx, 1, 0);
 	return 1;
 }
 

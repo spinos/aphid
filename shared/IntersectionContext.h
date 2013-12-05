@@ -32,7 +32,7 @@ public:
 
 	BoundingBox m_bbox;
 	Ray m_ray;
-	Vector3F m_hitP, m_hitN, m_closestP, m_refN;
+	Vector3F m_hitP, m_hitN, m_closestP, m_refN, m_originP;
 	Vector2F m_patchUV;
 	float m_minHitDistance, m_elementHitDistance;
 	int m_level;

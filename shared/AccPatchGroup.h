@@ -11,7 +11,7 @@
 #include <AllMath.h>
 class AccPatch;
 class BezierPatchHirarchy;
-
+class IntersectionContext;
 class AccPatchGroup {
 public:
 	AccPatchGroup();
@@ -20,7 +20,9 @@ public:
 	AccPatch* beziers() const;
 	BezierPatchHirarchy * hirarchies() const;
 	void createBezierHirarchy(unsigned idx);
-	
+
+    void recursiveBezierClosestPoint1(IntersectionContext * ctx, int level, unsigned current) const;
+		
 private:
 	AccPatch* m_bezier;
 	BezierPatchHirarchy * m_hirarchy;

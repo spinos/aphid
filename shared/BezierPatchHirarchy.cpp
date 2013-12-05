@@ -32,6 +32,7 @@ void BezierPatchHirarchy::create(BezierPatch * parent)
     m_elm = new BezierPatch[ne];
     m_childIdx = new unsigned[ne];
     m_elm[0] = *parent;
+    m_elm[0].resetTexcoord();
     unsigned current = 0;
 	unsigned start = 1;
     recursiveCreate(parent, 1, current, start);
@@ -43,7 +44,7 @@ void BezierPatchHirarchy::recursiveCreate(BezierPatch * parent, short level, uns
     BezierPatch * children = m_elm;
     children += start;
     parent->decasteljauSplit(children);
-    
+    parent->splitPatchUV(children);
     m_childIdx[current] = start;
 	//std::cout<<"\n l/c/s "<<level<<" "<<current<<" "<<start<<"-"<<start+3;
     current++;
@@ -57,4 +58,24 @@ void BezierPatchHirarchy::recursiveCreate(BezierPatch * parent, short level, uns
 char BezierPatchHirarchy::isEmpty() const
 {
 	return m_elm == 0;
+}
+
+char BezierPatchHirarchy::endLevel(int level) const
+{
+    return level > MaxBezierPatchHirarchy;
+}
+
+BezierPatch * BezierPatchHirarchy::patch(unsigned idx) const
+{
+    return &m_elm[idx];
+}
+
+BezierPatch * BezierPatchHirarchy::childPatch(unsigned idx) const
+{
+    return &m_elm[m_childIdx[idx]];
+}
+
+unsigned BezierPatchHirarchy::childStart(unsigned idx) const
+{
+    return m_childIdx[idx];
 }

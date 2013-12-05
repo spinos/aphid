@@ -25,6 +25,7 @@ class BezierPatch
 public:
 	BezierPatch();
 	virtual ~BezierPatch();
+	void resetTexcoord();
 	virtual void setTexcoord(float* u, float* v, unsigned* idx);
 	virtual void evaluateContolPoints();
 	virtual void evaluateTangents();
@@ -37,6 +38,7 @@ public:
 	void evaluateSurfaceVector(float u, float v, Vector3F * src, Vector3F * dst) const;
 	const BoundingBox controlBBox() const;
 	void decasteljauSplit(BezierPatch *dst) const;
+	void splitPatchUV(BezierPatch *dst) const;
 	void splitPatchUV(PatchSplitContext ctx, PatchSplitContext * child) const;
 	void tangentFrame(float u, float v, Matrix33F & frm) const;
 	
