@@ -12,8 +12,9 @@
 #include <Plane.h>
 #include <Segment.h>
 #include <BoundingBox.h>
+#include <Geometry.h>
 
-class Patch : public Plane {
+class Patch : public Plane, public Geometry {
 public:
 	struct PushPlaneContext {
 		void reset(const Vector3F & n, const Vector3F & p, const Vector3F & f, const float & r) {
@@ -50,6 +51,9 @@ public:
 	Matrix33F tangentFrame() const;
 	Vector3F point(float u, float v) const;
 	
+	void setTexcoord(const Vector2F * src);
+	
+	Vector2F _texcoords[4];
 private:
 	Segment m_segs[4];
 };

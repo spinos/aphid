@@ -156,3 +156,11 @@ Vector3F Patch::point(float u, float v) const
     Vector3F hi = vertex(3) * (1.f - u) + vertex(2) * u;
     return lo * (1.f - v) + hi * v;
 }
+
+void Patch::setTexcoord(const Vector2F * src)
+{
+	_texcoords[0] = src[0];
+	_texcoords[1] = src[1];
+	_texcoords[2] = src[2];
+	_texcoords[3] = src[3];
+}
