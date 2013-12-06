@@ -5,6 +5,28 @@
  *  Created by jian zhang on 10/26/11.
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
+ *  Parameters
+ *
+ *  v
+ *  |
+ *   - u
+ *  
+ *  Control Points
+ *
+ *  12 - 13 - 14 - 15
+ *  |    |    |    |
+ *  8  - 9  - 10 - 11
+ *  |    |    |    |
+ *  4  - 5  - 6  - 7
+ *  |    |    |    |
+ *  0  - 1  - 2  - 3
+ *
+ * Texture CoordinatesL
+ *
+ *  2 - 3
+ *  |   |
+ *  0 - 1
+ *
  */
 #include <AllMath.h>
 #include <BoundingBox.h>
@@ -18,8 +40,8 @@ void BezierPatch::resetTexcoord()
 {
     _texcoords[0].set(0.f, 0.f);
 	_texcoords[1].set(1.f, 0.f);
-	_texcoords[2].set(1.f, 1.f);
-	_texcoords[3].set(0.f, 1.f);   
+	_texcoords[2].set(0.f, 1.f);
+	_texcoords[3].set(1.f, 1.f);  
 }
 
 void BezierPatch::setTexcoord(float* u, float* v, unsigned* idx)
@@ -284,7 +306,7 @@ void BezierPatch::decasteljauSplit(BezierPatch *dst) const
 }
 
 /*
- *  3 ---- c ---- 2
+ *  2 ---- c ---- 3
  *	|	   |      |
  *  |  3   |  2   |
  *  d ---- e ---- b
@@ -296,35 +318,35 @@ void BezierPatch::decasteljauSplit(BezierPatch *dst) const
 void BezierPatch::splitPatchUV(BezierPatch *dst) const
 {
     Vector2F a = _texcoords[0]/ 2.f + _texcoords[1]/2.f;
-	Vector2F b = _texcoords[1]/ 2.f + _texcoords[2]/2.f;
-	Vector2F c = _texcoords[2]/ 2.f + _texcoords[3]/2.f;
-	Vector2F d = _texcoords[3]/ 2.f + _texcoords[0]/2.f;
+	Vector2F b = _texcoords[1]/ 2.f + _texcoords[3]/2.f;
+	Vector2F c = _texcoords[3]/ 2.f + _texcoords[2]/2.f;
+	Vector2F d = _texcoords[2]/ 2.f + _texcoords[0]/2.f;
 	Vector2F e = _texcoords[0]/ 4.f + _texcoords[1]/4.f + _texcoords[2]/ 4.f + _texcoords[3]/4.f;
 		
 	BezierPatch *res = &dst[0];
 
 	res->_texcoords[0] = _texcoords[0];
 	res->_texcoords[1] = a;
-	res->_texcoords[2] = e;
-	res->_texcoords[3] = d;
+	res->_texcoords[2] = d;
+	res->_texcoords[3] = e;
 
 	res = &dst[1];
 	res->_texcoords[0] = a;
 	res->_texcoords[1] = _texcoords[1];
-	res->_texcoords[2] = b;
-	res->_texcoords[3] = e;
+	res->_texcoords[2] = e;
+	res->_texcoords[3] = b;
 
 	res = &dst[2];
 	res->_texcoords[0] = e;
 	res->_texcoords[1] = b;
-	res->_texcoords[2] = _texcoords[2];
-	res->_texcoords[3] = c;
+	res->_texcoords[2] = c;
+	res->_texcoords[3] = _texcoords[3];
 	
 	res = &dst[3];
 	res->_texcoords[0] = d;
 	res->_texcoords[1] = e;
-	res->_texcoords[2] = c;
-	res->_texcoords[3] = _texcoords[3];
+	res->_texcoords[2] = _texcoords[2];
+	res->_texcoords[3] = c;
 }
 
 void BezierPatch::splitPatchUV(PatchSplitContext ctx, PatchSplitContext * child) const

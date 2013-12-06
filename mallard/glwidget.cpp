@@ -112,6 +112,10 @@ void GLWidget::clientDraw()
 	
 	IntersectionContext * ctx = getIntersectionContext();
     if(ctx->m_success) showBrush();
+	
+	testCurvature();
+	//getDrawer()->setColor(.2f, .2f, .2f);
+	//getDrawer()->edge(mesh());
 }
 
 void GLWidget::loadMesh(std::string filename)
@@ -661,7 +665,29 @@ void GLWidget::clearSelection()
 
 void GLWidget::testCurvature()
 {return;
-	if(body()->getNumVertices() > 1 && interactMode() == ToolContext::Deintersect) {
+	
+	IntersectionContext * ctx = getIntersectionContext();
+    if(ctx->m_success) {
+		Vector3F p = brush()->toePosition();
+		Vector3F clsP, clsN;
+		clsN = skin()->getClosestNormal(p, 1000.f, clsP);
+		
+		std::vector<Vector3F> us;
+		us.push_back(p);
+		us.push_back(clsP);
+		us.push_back(clsP);
+		us.push_back(clsP + clsN);
+		
+		getDrawer()->setColor(0.8f, .8f, .4f);
+		getDrawer()->lines(us);
+		
+		us.clear();
+		getDrawer()->setColor(0.2f, .8f, .1f);
+		body()->getPatchHir(ctx->m_componentIdx, us);
+		getDrawer()->lines(us);
+	}
+
+	if(body()->getNumVertices() > 1 /*&& interactMode() == ToolContext::Deintersect*/) {
 		getDrawer()->setColor(1.f, 0.f, 0.f);
 		getDrawer()->vertexNormal(body());
 		getDrawer()->setColor(0.f, 1.f, 0.f);
@@ -670,6 +696,7 @@ void GLWidget::testCurvature()
 		std::vector<Vector3F> us;
 		skin()->shellUp(us);
 		getDrawer()->lines(us);
+		
 	}
 	if(skin()->numRegionElements() < 1) return;
 	Vector3F p = brush()->heelPosition();

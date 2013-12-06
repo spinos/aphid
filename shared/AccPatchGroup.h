@@ -20,7 +20,9 @@ public:
 	AccPatch* beziers() const;
 	BezierPatchHirarchy * hirarchies() const;
     void recursiveBezierClosestPoint1(IntersectionContext * ctx, int level, unsigned current) const;
-	void setActiveHirarchy(unsigned idx);	
+	void setActiveHirarchy(unsigned idx);
+	
+	void recursiveBezierPatch(int level, unsigned current, std::vector<Vector3F> & dst) const;	
 private:
 	AccPatch* m_bezier;
 	BezierPatchHirarchy * m_hirarchy;

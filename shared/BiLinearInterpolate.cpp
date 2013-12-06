@@ -5,6 +5,18 @@
  *  Created by jian zhang on 6/5/13.
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
+ *  Parameters
+ * 
+ *  v
+ *  |
+ *   - u
+ *
+ * Control Points Texture CoordinatesL
+ *
+ *  3 - 2
+ *  |   |
+ *  0 - 1
+ *
  */
 
 #include "BiLinearInterpolate.h"

@@ -248,4 +248,10 @@ void AccPatchMesh::recursiveBezierPushPlane(BezierPatch* patch, Patch::PushPlane
 	recursiveBezierPushPlane(&children[2], ctx, level);
 	recursiveBezierPushPlane(&children[3], ctx, level);
 }
+
+void AccPatchMesh::getPatchHir(unsigned idx, std::vector<Vector3F> & dst)
+{
+	setActiveHirarchy(idx);
+	recursiveBezierPatch(1, 0, dst);
+}
 //:~

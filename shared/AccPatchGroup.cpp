@@ -79,6 +79,30 @@ void AccPatchGroup::recursiveBezierClosestPoint1(IntersectionContext * ctx, int 
 	recursiveBezierClosestPoint1(ctx, level, cs + 3);
 }
 
+void AccPatchGroup::recursiveBezierPatch(int level, unsigned current, std::vector<Vector3F> & dst) const
+{
+	PointInsidePolygonTest &pl = *m_activeHirarchy->plane(current);
+	dst.push_back(pl.vertex(0));
+	dst.push_back(pl.vertex(1));
+	dst.push_back(pl.vertex(1));
+	dst.push_back(pl.vertex(2));
+	dst.push_back(pl.vertex(2));
+	dst.push_back(pl.vertex(3));
+	dst.push_back(pl.vertex(3));
+	dst.push_back(pl.vertex(0));
+	if(m_activeHirarchy->endLevel(level)) {
+		return;
+	}
+	
+	level++;
+	
+	const unsigned cs = m_activeHirarchy->childStart(current);
+	recursiveBezierPatch(level, cs, dst);
+	recursiveBezierPatch(level, cs + 1, dst);
+	recursiveBezierPatch(level, cs + 2, dst);
+	recursiveBezierPatch(level, cs + 3, dst);
+}
+
 void AccPatchGroup::setActiveHirarchy(unsigned idx)
 {
 	m_activeHirarchy = &m_hirarchy[idx];

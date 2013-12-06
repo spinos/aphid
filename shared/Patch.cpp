@@ -5,6 +5,18 @@
  *  Created by jian zhang on 9/6/13.
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
+ *  Parameters
+ * 
+ *  v
+ *  |
+ *   - u
+ *
+ * Control Points Texture CoordinatesL
+ *
+ *  3 - 2
+ *  |   |
+ *  0 - 1
+ *
  */
 
 #include "Patch.h"
@@ -157,10 +169,10 @@ Vector3F Patch::point(float u, float v) const
     return lo * (1.f - v) + hi * v;
 }
 
-void Patch::setTexcoord(const Vector2F * src)
+void Patch::setTexcoord(const Vector2F & t0, const Vector2F & t1, const Vector2F & t2, const Vector2F & t3)
 {
-	_texcoords[0] = src[0];
-	_texcoords[1] = src[1];
-	_texcoords[2] = src[2];
-	_texcoords[3] = src[3];
+	_texcoords[0] = t0;
+	_texcoords[1] = t1;
+	_texcoords[2] = t2;
+	_texcoords[3] = t3;
 }

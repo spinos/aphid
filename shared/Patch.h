@@ -51,7 +51,7 @@ public:
 	Matrix33F tangentFrame() const;
 	Vector3F point(float u, float v) const;
 	
-	void setTexcoord(const Vector2F * src);
+	void setTexcoord(const Vector2F & t0, const Vector2F & t1, const Vector2F & t2, const Vector2F & t3);
 	
 	Vector2F _texcoords[4];
 private:

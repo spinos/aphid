@@ -36,6 +36,7 @@ public:
 	void perVertexVectorOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
 	void tangentFrame(unsigned idx, float u, float v, Matrix33F & frm) const;
 	
+	void getPatchHir(unsigned idx, std::vector<Vector3F> & dst);
 private:
 	char recursiveBezierIntersect(BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
 	void recursiveBezierClosestPoint(const Vector3F & origin, BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
