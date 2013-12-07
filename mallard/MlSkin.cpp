@@ -14,11 +14,13 @@
 #include <SelectCondition.h>
 #include <FloodCondition.h>
 #include "MlCalamusArray.h"
+#include "MlCluster.h"
 
 MlSkin::MlSkin() : m_numFeather(0), m_faceCalamusTable(0), m_numCreatedFeather(0), m_perFaceVicinity(0)
 {
     m_activeIndices.clear();
 	m_calamus = new MlCalamusArray;
+	m_perFaceCluster = 0;
 }
 
 MlSkin::~MlSkin()
@@ -37,6 +39,10 @@ void MlSkin::cleanup()
 		delete[] m_perFaceVicinity;
 		m_perFaceVicinity = 0;
 	}
+	if(m_perFaceCluster) {
+		delete[] m_perFaceCluster;
+		m_perFaceCluster = 0;
+	}
 }
 
 void MlSkin::clearFeather()
@@ -49,9 +55,11 @@ void MlSkin::clearFeather()
 void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 {
 	CollisionRegion::setBodyMesh(mesh, topo);
-	m_faceCalamusTable = new FloodTable[mesh->getNumFaces()];
+	const unsigned nf = mesh->getNumFaces();
+	m_faceCalamusTable = new FloodTable[nf];
 	resetFaceCalamusIndirection();
-	m_perFaceVicinity = new float[mesh->getNumFaces()];
+	m_perFaceVicinity = new float[nf];
+	m_perFaceCluster = new MlCluster[nf];
 	if(!bodyMesh()->hasVertexData("weishell")) {
 		float * disw = bodyMesh()->perVertexFloat("weishell");
 		const unsigned nv = bodyMesh()->getNumVertices();
@@ -344,6 +352,7 @@ void MlSkin::finishCreateFeather()
 	if(!hasFeatherCreated()) return;
 	if(!bodyMesh()) return;
     computeFaceCalamusIndirection();
+	conputeFaceClustering();
 	m_numCreatedFeather = 0;
 	std::cout<<" increase to "<<numFeathers();
 }
@@ -375,6 +384,7 @@ void MlSkin::finishEraseFeather()
 
 	m_calamus->setIndex(m_numFeather);
 	computeFaceCalamusIndirection();
+	conputeFaceClustering();
 	discardActive();
 	std::cout<<" reduce to "<<numFeathers();
 }
@@ -590,6 +600,27 @@ void MlSkin::computeVertexDisplacement()
 	for(unsigned i = 0; i < nv; i++) {
 		dis1[i] = dis1[i] * (1.f - disw[i]) + nor[i] * disw[i];
 		dis1[i].normalize();
+	}
+}
+
+void MlSkin::conputeFaceClustering()
+{
+	const unsigned nf = bodyMesh()->getNumFaces();
+	for(unsigned i = 0; i < nf; i++) {
+		m_perFaceCluster[i].compute(m_calamus, bodyMesh(), m_faceCalamusTable[i].dartBegin, m_faceCalamusTable[i].dartEnd);
+	}
+}
+
+void MlSkin::getClustering(unsigned idx, std::vector<Vector3F> & dst)
+{
+	Vector3F p;
+	for(unsigned i = m_faceCalamusTable[idx].dartBegin; i < m_faceCalamusTable[idx].dartEnd; i++) {
+		MlCalamus * c = getCalamus(i);
+		getPointOnBody(c, p);
+		dst.push_back(p);
+		
+		p = m_perFaceCluster[idx].groupCenter(i - m_faceCalamusTable[idx].dartBegin);
+		dst.push_back(p);
 	}
 }
 

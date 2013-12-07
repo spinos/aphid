@@ -19,6 +19,7 @@ class MlCalamusArray;
 class BaseImage;
 class SelectCondition;
 class FloodCondition;
+class MlCluster;
 
 class MlSkin : public CollisionRegion 
 {
@@ -57,6 +58,7 @@ public:
 	void smoothShell(const Vector3F & center, const float & radius, const float & weight);
 	void computeFaceCalamusIndirection();
 	void computeVertexDisplacement();
+	void conputeFaceClustering();
 	void finishCreateFeather();
 	void finishEraseFeather();
 	unsigned numFeathers() const;
@@ -84,6 +86,7 @@ public:
 	void setFaceVicinity(unsigned idx, float val);
 	float faceVicinity(unsigned idx) const;
 	void shellUp(std::vector<Vector3F> & dst);
+	void getClustering(unsigned idx, std::vector<Vector3F> & dst);
 	
 	void verbose() const;
 protected:
@@ -103,6 +106,7 @@ private:
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numFeather, m_numCreatedFeather;
 	FloodTable * m_faceCalamusTable;
+	MlCluster * m_perFaceCluster;
 	float * m_perFaceVicinity;
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;

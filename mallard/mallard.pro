@@ -34,6 +34,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 	FeatherEditTool.h \
 	TimeControl.h \
     LaplaceSmoother.h \
+	MlCluster.h \
                 window.h
                 
 SOURCES       = ../shared/ContextIconFrame.cpp \
@@ -64,6 +65,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 	FeatherEditTool.cpp \
 	TimeControl.cpp \
     LaplaceSmoother.cpp \
+	MlCluster.cpp \
     window.cpp \
                 main.cpp
                 

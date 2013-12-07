@@ -123,6 +123,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h \
 	../shared/AccPatchGroup.h \
 	../shared/VertexDataGroup.h \
 	../shared/BezierPatchHirarchy.h \
+	../shared/KMeansClustering.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -250,6 +251,7 @@ SOURCES = ../shared/Vector3F.cpp \
 	../shared/AccPatchGroup.cpp \
 	../shared/VertexDataGroup.cpp \
 	../shared/BezierPatchHirarchy.cpp \
+	../shared/KMeansClustering.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \

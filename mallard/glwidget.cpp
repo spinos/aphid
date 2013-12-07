@@ -103,7 +103,7 @@ void GLWidget::clientDraw()
 		getDrawer()->bindTexture(m_featherDistrId);
 	}
 
-	m_bezierDrawer->drawBuffer();
+	//m_bezierDrawer->drawBuffer();
 	m_bezierDrawer->unbindTexture();
 	
 	getDrawer()->m_wireProfile.apply();
@@ -114,8 +114,8 @@ void GLWidget::clientDraw()
     if(ctx->m_success) showBrush();
 	
 	testCurvature();
-	//getDrawer()->setColor(.2f, .2f, .2f);
-	//getDrawer()->edge(mesh());
+	getDrawer()->setColor(.2f, .2f, .2f);
+	getDrawer()->edge(mesh());
 }
 
 void GLWidget::loadMesh(std::string filename)
@@ -572,6 +572,7 @@ void GLWidget::afterOpen()
 	
 	body()->update(m_topo);
 	skin()->computeFaceCalamusIndirection();
+	skin()->conputeFaceClustering();
 	skin()->computeVertexDisplacement();
 	skin()->resetFaceVicinity();
 	m_featherDrawer->clearCached();
@@ -664,10 +665,17 @@ void GLWidget::clearSelection()
 }
 
 void GLWidget::testCurvature()
-{return;
-	
+{
 	IntersectionContext * ctx = getIntersectionContext();
     if(ctx->m_success) {
+		std::vector<Vector3F> us;
+		skin()->getClustering(ctx->m_componentIdx, us);
+		getDrawer()->setColor(0.8f, .8f, .1f);
+		getDrawer()->lines(us);
+	}
+	return;
+	
+	if(ctx->m_success) {
 		Vector3F p = brush()->toePosition();
 		Vector3F clsP, clsN;
 		clsN = skin()->getClosestNormal(p, 1000.f, clsP);
