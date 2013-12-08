@@ -18,10 +18,10 @@ public:
 	~MlRachis();
 	
 	void create(unsigned x);
-	void computeAngles(float * segL, float fullL);
+	void computeLengths(float * segL, float fullL);
 	void reset();
-	void bend(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide, const float & fullPitch);
-	
+	void bend(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide);
+	void curl(const float & fullPitch);
 	Matrix33F getSpace(short idx) const;
 private:
 	char isInside(const Vector3F & t, const Vector3F & onp, const Vector3F & nor);
@@ -34,5 +34,6 @@ private:
 	unsigned m_numSpace;
 	Matrix33F * m_spaces;
 	float * m_angles;
+	float * m_lengths;
 	float * m_lengthPortions;
 };

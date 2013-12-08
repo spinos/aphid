@@ -11,11 +11,12 @@
 #include <CollisionRegion.h>
 #include <Patch.h>
 
-MlRachis::MlRachis() : m_spaces(0), m_angles(0), m_lengthPortions(0) {}
+MlRachis::MlRachis() : m_spaces(0), m_lengths(0), m_lengthPortions(0) {}
 MlRachis::~MlRachis() 
 {
 	if(m_spaces) delete[] m_spaces;
 	if(m_angles) delete[] m_angles;
+	if(m_lengths) delete[] m_lengths;
 	if(m_lengthPortions) delete[] m_lengthPortions;
 }
 
@@ -23,36 +24,36 @@ void MlRachis::create(unsigned x)
 {
 	if(m_spaces) delete[] m_spaces;
 	if(m_angles) delete[] m_angles;
+	if(m_lengths) delete[] m_lengths;
 	if(m_lengthPortions) delete[] m_lengthPortions;
 	m_numSpace = x;
 	m_spaces = new Matrix33F[x];
 	m_angles = new float[x];
+	m_lengths = new float[x];
 	m_lengthPortions = new float[x];
 }
 
-void MlRachis::computeAngles(float * segL, float fullL)
+void MlRachis::computeLengths(float * segL, float fullL)
 {
 	float acc = 0.f;
     for(unsigned i = 0; i < m_numSpace; i++) {
 		m_lengthPortions[i] = segL[i] / fullL;
 		acc += m_lengthPortions[i];
-		m_angles[i] = acc * acc;
+		m_lengths[i] = acc * acc;
 	}
 }
 
 void MlRachis::reset()
 {
-	for(unsigned i = 0; i < m_numSpace; i++) m_spaces[i].setIdentity(); 
+	for(unsigned i = 0; i < m_numSpace; i++) {
+		m_spaces[i].setIdentity();
+		m_angles[i] = 0.f;
+	}
 }
 
-void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide, const float & fullPitch)
+void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide)
 {
 	reset();
-	
-	Vector3F zdir(0.f, 0.f, 1.f);
-	zdir = space.transform(zdir);
-	Vector3F xdir(1.f, 0.f, 0.f);
-	xdir = space.transform(xdir);
 	
 	Matrix33F invSpace, segSpace = space;
 	Vector3F pop, topop, segU, smoothU, testP, segP = oriP;
@@ -81,7 +82,8 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 	curAngle = pushAngle + smoothAngle;
 
 	m_spaces[0].rotateY(curAngle);
-
+	m_angles[0] = curAngle;
+	
 	rotateForward(m_spaces[0], segSpace);
 	moveForward(segSpace, radius * m_lengthPortions[0], segP);
 	
@@ -97,18 +99,22 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 		pushAngle = pushToSurface(topop, invSpace);
 		segRot = matchNormal(segU, invSpace);
 		
-		//curAngle = pushAngle + segRot * (1.f - fullPitch * 0.5f) * (1.f - smoothPortion) + 0.15f * (1.f - m_angles[i] * 0.5f) + smoothAngle * m_lengthPortions[i] * 0.5f;
+		//curAngle = pushAngle + segRot * (1.f - fullPitch * 0.5f) * (1.f - smoothPortion) + 0.15f * (1.f - m_lengths[i] * 0.5f) + smoothAngle * m_lengthPortions[i] * 0.5f;
 		curAngle = pushAngle;
 		curAngle += segRot;
-		curAngle += 0.15f * (1.f - m_angles[i] * 0.5f);
+		curAngle += 0.15f * (1.f - m_lengths[i] * 0.5f);
 		curAngle += smoothAngle * m_lengthPortions[i] * 0.5f;
 		m_spaces[i].rotateY(curAngle);
+		m_angles[i] = curAngle;
 
 		rotateForward(m_spaces[i], segSpace);
 		moveForward(segSpace, radius * m_lengthPortions[i], segP);
 	}
-	
-	for(unsigned i = 1; i < m_numSpace; i++) m_spaces[i].rotateY(fullPitch * m_angles[i] * 0.5f);
+}
+
+void MlRachis::curl(const float & fullPitch)
+{
+	for(unsigned i = 1; i < m_numSpace; i++) m_spaces[i].rotateY(fullPitch * m_lengths[i] * 0.5f);
 }
 
 Matrix33F MlRachis::getSpace(short idx) const
