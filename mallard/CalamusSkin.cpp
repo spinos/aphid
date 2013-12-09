@@ -11,12 +11,28 @@
 #include <AccPatchMesh.h>
 #include <MlCalamus.h>
 #include <MlCalamusArray.h>
-CalamusSkin::CalamusSkin() : m_numFeather(0), m_perFaceVicinity(0)
+#include "MlCluster.h"
+#include <QuickSort.h>
+CalamusSkin::CalamusSkin() : m_numFeather(0), m_perFaceVicinity(0), m_perFaceCluster(0), m_faceCalamusTable(0)
 {
 	m_calamus = new MlCalamusArray;
 }
 
-CalamusSkin::~CalamusSkin() {}
+CalamusSkin::~CalamusSkin() { cleanup(); }
+
+void CalamusSkin::cleanup()
+{
+	clearFeather();
+	clearFaceVicinity();
+	if(m_faceCalamusTable) {
+		delete[] m_faceCalamusTable;
+		m_faceCalamusTable = 0;
+	}
+	if(m_perFaceCluster) {
+		delete[] m_perFaceCluster;
+		m_perFaceCluster = 0;
+	}
+}
 
 void CalamusSkin::clearFaceVicinity()
 {
@@ -125,4 +141,89 @@ void CalamusSkin::setFaceVicinity(unsigned idx, float val)
 float CalamusSkin::faceVicinity(unsigned idx) const
 {
     return m_perFaceVicinity[idx];
+}
+
+void CalamusSkin::createFaceCluster()
+{
+	m_perFaceCluster = new MlCluster[bodyMesh()->getNumFaces()];
+}
+
+void CalamusSkin::conputeFaceClustering()
+{
+	MlCalamusArray * ca = getCalamusArray();
+	const unsigned nf = bodyMesh()->getNumFaces();
+	for(unsigned i = 0; i < nf; i++) {
+		m_perFaceCluster[i].compute(ca, bodyMesh(), m_faceCalamusTable[i].dartBegin, m_faceCalamusTable[i].dartEnd);
+	}
+}
+
+void CalamusSkin::getClustering(unsigned idx, std::vector<Vector3F> & dst)
+{
+	Vector3F p;
+	for(unsigned i = m_faceCalamusTable[idx].dartBegin; i < m_faceCalamusTable[idx].dartEnd; i++) {
+		MlCalamus * c = getCalamus(i);
+		getPointOnBody(c, p);
+		dst.push_back(p);
+		
+		p = m_perFaceCluster[idx].groupCenter(i - m_faceCalamusTable[idx].dartBegin);
+		dst.push_back(p);
+	}
+}
+
+void CalamusSkin::createFaceCalamusIndirection()
+{ 
+	m_faceCalamusTable = new FloodTable[bodyMesh()->getNumFaces()];
+}
+
+void CalamusSkin::resetFaceCalamusIndirection()
+{
+	for(unsigned i = 0; i < bodyMesh()->getNumFaces(); i++) m_faceCalamusTable[i].reset(i);
+}
+
+void CalamusSkin::computeFaceCalamusIndirection()
+{
+	const unsigned numFeather = numFeathers();
+	if(numFeather > 1)
+		QuickSort::Sort(*getCalamusArray(), 0, numFeather - 1);
+		
+	unsigned cur;
+	unsigned pre = bodyMesh()->getNumFaces();
+	for(unsigned i = 0; i < numFeather; i++) {
+		cur = getCalamus(i)->faceIdx();
+		if(cur != pre) {
+			m_faceCalamusTable[cur].dartBegin = i;
+			if(pre < bodyMesh()->getNumFaces())
+				m_faceCalamusTable[pre].dartEnd = i;
+			pre = cur;
+		}
+	}
+	if(pre < bodyMesh()->getNumFaces())
+		m_faceCalamusTable[pre].dartEnd = numFeather;
+}
+
+void CalamusSkin::faceCalamusBeginEnd(unsigned faceIdx, unsigned & begin, unsigned & end) const
+{
+	begin = m_faceCalamusTable[faceIdx].dartBegin;
+	end = m_faceCalamusTable[faceIdx].dartEnd;
+}
+
+bool CalamusSkin::isPointTooCloseToExisting(const Vector3F & pos, float minDistance)
+{
+	unsigned featherBegin, featherEnd;
+	Vector3F d, p;	
+	for(unsigned i=0; i < numRegionElements(); i++) {
+		faceCalamusBeginEnd(regionElementIndex(i), featherBegin, featherEnd);
+		for(unsigned j = featherBegin; j < featherEnd; j++) {
+			MlCalamus *c = getCalamus(j);
+			if(j < numFeathers()) {
+			    if(c->faceIdx() != regionElementIndex(i)) break;
+				getPointOnBody(c, p);
+			
+				d = p - pos;
+				if(d.length() < minDistance) return true;
+			}
+		}
+	}
+
+	return false;
 }

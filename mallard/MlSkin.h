@@ -24,25 +24,11 @@ class MlCluster;
 
 class MlSkin : public CalamusSkin 
 {
-public:	
-	struct FloodTable {
-		FloodTable() {}
-		FloodTable(unsigned i) {
-			reset(i);
-		}
-		
-		void reset(unsigned i) {
-			faceIdx = i;
-			dartBegin = dartEnd = 0;
-		}
-		
-		unsigned faceIdx, dartBegin, dartEnd;
-	};
+public:
 	
 	MlSkin();
 	virtual ~MlSkin();
-	void cleanup();
-	
+
 	virtual void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
 	
 	void floodAround(MlCalamus c, FloodCondition * condition);
@@ -54,9 +40,7 @@ public:
 	void scaleFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	void pitchFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
 	void smoothShell(const Vector3F & center, const float & radius, const float & weight);
-	void computeFaceCalamusIndirection();
 	void computeVertexDisplacement();
-	void conputeFaceClustering();
 	void finishCreateFeather();
 	void finishEraseFeather();
 
@@ -71,26 +55,21 @@ public:
 	void restFloodFacesAsActive();
 	
 	void shellUp(std::vector<Vector3F> & dst);
-	void getClustering(unsigned idx, std::vector<Vector3F> & dst);
 	
 	void verbose() const;
 protected:
 	
 private:
     bool createFeather(MlCalamus & ori);
-	bool isPointTooCloseToExisting(const Vector3F & pos, float minDistance);
 	bool isDartCloseToExisting(const Vector3F & pos, const std::vector<Vector3F> & existing, float minDistance) const;
 	bool isFloodFace(unsigned idx, unsigned & dartBegin, unsigned & dartEnd) const;
 	bool isActiveFace(unsigned idx, std::vector<unsigned> & dartIndices) const;
 	bool isActiveFeather(unsigned idx) const;
-	void resetFaceCalamusIndirection();
 	unsigned lastInactive(unsigned last) const;
 	unsigned selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon);
 private:	
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numCreatedFeather;
-	FloodTable * m_faceCalamusTable;
-	MlCluster * m_perFaceCluster;
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
 };
