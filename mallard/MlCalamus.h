@@ -21,6 +21,7 @@ public:
 	void computeFeatherWorldP(const Vector3F & origin, const Matrix33F& space);
 	
 	MlFeather * feather() const;
+	short featherIdx() const;
 	unsigned faceIdx() const;
 	float patchU() const;
 	float patchV() const;

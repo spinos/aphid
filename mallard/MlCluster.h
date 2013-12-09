@@ -17,6 +17,15 @@ public:
 	virtual ~MlCluster();
 	
 	void compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned end);
-private:
+	
+	void computeAngles();
+	float * angles(unsigned idx) const;
+protected:
+    virtual void setK(unsigned k);
+	virtual void setN(unsigned n);
 
+private:
+    short * m_featherIndices;
+    unsigned * m_angleStart;
+    float * m_angles;
 };

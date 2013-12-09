@@ -37,6 +37,11 @@ MlFeather * MlCalamus::feather() const
 	return FeatherLibrary->featherExample(m_featherId);
 }
 
+short MlCalamus::featherIdx() const
+{
+    return feather()->featherId();
+}
+
 unsigned MlCalamus::faceIdx() const
 {
 	return m_faceIdx;
