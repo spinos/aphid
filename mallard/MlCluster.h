@@ -18,14 +18,13 @@ public:
 	
 	void compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned end);
 	
-	void computeAngles();
+	void computeAngles(MlCalamusArray * calamus);
 	float * angles(unsigned idx) const;
 protected:
     virtual void setK(unsigned k);
-	virtual void setN(unsigned n);
-
+	
 private:
-    short * m_featherIndices;
+    int * m_sampleIndices;
     unsigned * m_angleStart;
     float * m_angles;
 };

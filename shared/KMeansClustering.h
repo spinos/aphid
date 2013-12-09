@@ -21,7 +21,7 @@ public:
 	float moveCentroids();
 	void resetGroup();
 	Vector3F groupCenter(unsigned idx) const;
-	
+	unsigned K() const;
 protected:
     virtual void setK(unsigned k);
 	virtual void setN(unsigned n);

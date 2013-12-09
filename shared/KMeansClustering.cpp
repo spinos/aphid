@@ -85,3 +85,8 @@ Vector3F KMeansClustering::groupCenter(unsigned idx) const
 {
 	return m_centroid[m_group[idx]];
 }
+
+unsigned KMeansClustering::K() const
+{
+	return m_k;
+}

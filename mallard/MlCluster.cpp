@@ -13,14 +13,14 @@
 #include <mlFeather.h>
 MlCluster::MlCluster() 
 {
-    m_featherIndices = 0;
+    m_sampleIndices = 0;
     m_angleStart = 0;
     m_angles = 0;
 }
 
 MlCluster::~MlCluster() 
 {
-    if(m_featherIndices) delete[] m_featherIndices;
+    if(m_sampleIndices) delete[] m_sampleIndices;
     if(m_angleStart) delete[] m_angleStart;
     if(m_angles) delete[] m_angles;
 }
@@ -28,16 +28,11 @@ MlCluster::~MlCluster()
 void MlCluster::setK(unsigned k)
 {
     KMeansClustering::setK(k);
-    if(m_featherIndices) delete[] m_featherIndices;
-    m_featherIndices = new short[k];
-    for(unsigned i = 0; i < k; i++) m_featherIndices[i] = -1;
+    if(m_sampleIndices) delete[] m_sampleIndices;
+    m_sampleIndices = new int[k];
+    for(unsigned i = 0; i < k; i++) m_sampleIndices[i] = -1;
     if(m_angleStart) delete[] m_angleStart;
     m_angleStart = new unsigned[k];
-}
-
-void MlCluster::setN(unsigned n)
-{
-    KMeansClustering::setN(n);
 }
 
 void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned end)
@@ -76,8 +71,8 @@ void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned 
 	unsigned numAngles = 0;
 	for(i = 0; i < k; i++) {
 		MlCalamus * c = calamus->asCalamus(begin + i);
-		if(m_featherIndices[i] < 0) {
-		    m_featherIndices[i] = c->featherIdx();
+		if(m_sampleIndices[i] < 0) {
+		    m_sampleIndices[i] = begin + i;
 		    m_angleStart[i] = numAngles;
 		    numAngles += c->feather()->numSegment();
 		}
@@ -92,7 +87,10 @@ float * MlCluster::angles(unsigned idx) const
     return &m_angles[m_angleStart[idx]];
 }
 
-void MlCluster::computeAngles()
+void MlCluster::computeAngles(MlCalamusArray * calamus)
 {
-    
+    unsigned i, nk = K();
+	for(i = 0; i < nk; i++) {
+		MlCalamus * c = calamus->asCalamus(m_sampleIndices[i]);
+	}
 }

@@ -12,6 +12,7 @@
 #include <CollisionRegion.h>
 #include <MlCalamus.h>
 #include <Patch.h>
+#include "CalamusSkin.h"
 
 class AccPatchMesh;
 class MeshTopology;
@@ -21,7 +22,7 @@ class SelectCondition;
 class FloodCondition;
 class MlCluster;
 
-class MlSkin : public CollisionRegion 
+class MlSkin : public CalamusSkin 
 {
 public:	
 	struct FloodTable {
@@ -41,11 +42,8 @@ public:
 	MlSkin();
 	virtual ~MlSkin();
 	void cleanup();
-	void clearFeather();
 	
 	virtual void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
-	
-	void setNumFeathers(unsigned num);
 	
 	void floodAround(MlCalamus c, FloodCondition * condition);
 	void selectAround(unsigned idx, SelectCondition * selcon);
@@ -61,30 +59,17 @@ public:
 	void conputeFaceClustering();
 	void finishCreateFeather();
 	void finishEraseFeather();
-	unsigned numFeathers() const;
-	MlCalamus * getCalamus(unsigned idx) const;
-	
-	
+
 	unsigned numActive() const;
 	MlCalamus * getActive(unsigned idx) const;
-	
-	void getPointOnBody(MlCalamus * c, Vector3F &p) const;
-	void getNormalOnBody(MlCalamus * c, Vector3F &p) const;
-	
-	void tangentSpace(MlCalamus * c, Matrix33F & frm) const;
-	void rotationFrame(MlCalamus * c, const Matrix33F & tang, Matrix33F & frm) const;
 	
 	bool hasFeatherCreated() const;
 	unsigned numCreated() const;
 	MlCalamus * getCreated(unsigned idx) const;
-	MlCalamusArray * getCalamusArray() const;
 	
 	void resetFloodFaces();
 	void restFloodFacesAsActive();
 	
-	void resetFaceVicinity();
-	void setFaceVicinity(unsigned idx, float val);
-	float faceVicinity(unsigned idx) const;
 	void shellUp(std::vector<Vector3F> & dst);
 	void getClustering(unsigned idx, std::vector<Vector3F> & dst);
 	
@@ -102,12 +87,10 @@ private:
 	unsigned lastInactive(unsigned last) const;
 	unsigned selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon);
 private:	
-	MlCalamusArray * m_calamus;
 	std::vector<unsigned> m_activeIndices;
-	unsigned m_numFeather, m_numCreatedFeather;
+	unsigned m_numCreatedFeather;
 	FloodTable * m_faceCalamusTable;
 	MlCluster * m_perFaceCluster;
-	float * m_perFaceVicinity;
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
 };

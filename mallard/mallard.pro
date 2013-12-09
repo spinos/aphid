@@ -22,6 +22,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 				MlDrawer.h \
     MlCache.h \
 				MlTessellate.h \
+    CalamusSkin.h \
 				MlSkin.h \
                 MlRachis.h \
                 BrushControl.h \
@@ -53,6 +54,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 				MlDrawer.cpp \
     MlCache.cpp \
 				MlTessellate.cpp \
+    CalamusSkin.cpp \
 				MlSkin.cpp \
                 MlRachis.cpp \
                 BrushControl.cpp \
