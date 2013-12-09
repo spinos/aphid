@@ -11,7 +11,7 @@
 #include <CollisionRegion.h>
 #include <Patch.h>
 
-MlRachis::MlRachis() : m_spaces(0), m_lengths(0), m_lengthPortions(0) {}
+MlRachis::MlRachis() : m_spaces(0), m_lengths(0), m_lengthPortions(0), m_angles(0) {}
 MlRachis::~MlRachis() 
 {
 	if(m_spaces) delete[] m_spaces;

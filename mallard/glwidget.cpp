@@ -103,19 +103,16 @@ void GLWidget::clientDraw()
 		getDrawer()->bindTexture(m_featherDistrId);
 	}
 
-	//m_bezierDrawer->drawBuffer();
+	m_bezierDrawer->drawBuffer();
 	m_bezierDrawer->unbindTexture();
 	
 	getDrawer()->m_wireProfile.apply();
 	getDrawer()->setColor(.2f, .8f, .4f);
 	getDrawer()->drawLineBuffer(skin());
 	
-	IntersectionContext * ctx = getIntersectionContext();
-    if(ctx->m_success) showBrush();
+	showBrush();
 	
-	testCurvature();
-	getDrawer()->setColor(.2f, .2f, .2f);
-	getDrawer()->edge(mesh());
+	//testCurvature();
 }
 
 void GLWidget::loadMesh(std::string filename)
@@ -666,6 +663,8 @@ void GLWidget::clearSelection()
 
 void GLWidget::testCurvature()
 {
+    getDrawer()->setColor(.2f, .2f, .2f);
+	getDrawer()->edge(mesh());
 	IntersectionContext * ctx = getIntersectionContext();
     if(ctx->m_success) {
 		std::vector<Vector3F> us;
