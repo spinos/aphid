@@ -105,9 +105,12 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 
 		topop = pop - segP;
 		pushAngle = pushToSurface(topop, invSpace);
-		segRot = matchNormal(segU, invSpace);
 		
-		//curAngle = pushAngle + segRot * (1.f - fullPitch * 0.5f) * (1.f - smoothPortion) + 0.15f * (1.f - m_lengths[i] * 0.5f) + smoothAngle * m_lengthPortions[i] * 0.5f;
+		collide->interpolateVertexVector(&segU);
+		
+		segRot = matchNormal(segU, invSpace);
+		if(segRot > 0.f) segRot *= 0.67f;
+		
 		curAngle = pushAngle;
 		curAngle += segRot;
 		curAngle += 0.15f * (1.f - m_lengths[i] * 0.5f);
