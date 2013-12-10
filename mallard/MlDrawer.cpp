@@ -202,20 +202,23 @@ void MlDrawer::computeBufferIndirection(MlSkin * skin)
 
 void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c)
 {
-    Vector3F p;
+	skin->touchBy(c);
+
+	Vector3F p;
 	skin->getPointOnBody(c, p);
 	
-	const unsigned fi = c->faceIdx();
-	const float fv = c->realScale();
-	if(skin->regionElementStart() != fi || fv > skin->faceVicinity(fi)) {
-	    skin->resetCollisionRegionAround(fi, fv);
-	    skin->setFaceVicinity(fi, fv);
-	}
-	c->collideWith(skin);
-	
-	Matrix33F space, tang;
-	skin->tangentSpace(c, tang);
-	skin->rotationFrame(c, tang, space);
+	Matrix33F space;
+	skin->calamusSpace(c, space);
+	c->bendFeather(p, space);
+	c->curlFeather();
+	c->computeFeatherWorldP(p, space);
+}
+
+void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c, const Vector3F & p, const Matrix33F & space)
+{
+	skin->touchBy(c);
+	c->bendFeather(p, space);
+	c->curlFeather();
 	c->computeFeatherWorldP(p, space);
 }
 
@@ -227,14 +230,41 @@ void MlDrawer::tessellate(MlFeather * f)
 
 void MlDrawer::writeToCache(const std::string & sliceName)
 {
+	skin->computeClusterSamples();
+	
+	unsigned faceIdx = skin->bodyMesh()->getNumFaces();
+	unsigned perFaceIdx = 0;
 	const unsigned nc = skin->numFeathers();
 	const unsigned blockL = 2048;
 	Vector3F * wpb = new Vector3F[blockL];
 	unsigned i, j, iblock = 0, ifull = 0;
 	BoundingBox box;
+	Matrix33F space;
+	Vector3F p;
+	unsigned ncalc = 0;
+	unsigned nsamp = 0;
+	unsigned nreuse = 0;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin->getCalamus(i);
-		computeFeather(skin, c);
+		skin->calamusSpace(c, space);
+		skin->getPointOnBody(c, p);
+		
+		if(c->faceIdx() != faceIdx) {
+			faceIdx = c->faceIdx();
+			perFaceIdx = 0;
+			nsamp += skin->clusterK(faceIdx);
+		}
+		
+		if(skin->useClusterSamples(faceIdx, perFaceIdx, c, space)) {
+			c->bendFeather();
+			c->curlFeather();
+			c->computeFeatherWorldP(p, space);
+			nreuse++;
+		}
+		else {
+			computeFeather(skin, c, p, space);
+			ncalc++;
+		}
 		
 		MlFeather * f = c->feather();
 		f->getBoundingBox(box);
@@ -249,6 +279,8 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 		}
 		
 		updateBuffer(c);
+		
+		perFaceIdx++;
 	}
 	
 	if(iblock > 0)
@@ -260,6 +292,8 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 	setTranslation(sliceName, m_currentOrigin);
 	delete[] wpb;
 	flush();
+	
+	std::cout<<" full "<<nc<<" reuse "<<nreuse<<" calc "<<ncalc<<" samp "<<nsamp;
 }
 
 void MlDrawer::readFromCache(const std::string & sliceName)

@@ -20,9 +20,11 @@ public:
 	void create(unsigned x);
 	void computeLengths(float * segL, float fullL);
 	void reset();
+	void bend();
 	void bend(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide);
 	void curl(const float & fullPitch);
 	Matrix33F getSpace(short idx) const;
+	float * angles() const;
 private:
 	char isInside(const Vector3F & t, const Vector3F & onp, const Vector3F & nor);
 	float bouncing(const Vector3F & a, const Vector3F & b, const Vector3F & c);

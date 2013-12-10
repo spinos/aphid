@@ -90,6 +90,7 @@ public slots:
 	void saveSheetAs();
     void revertSheet();
 	void receiveFeatherEditBackground(QString name);
+	void receiveFeatherAdded();
 	void chooseBake();
 	void updateOnFrame(int x);
 	void exportBake();

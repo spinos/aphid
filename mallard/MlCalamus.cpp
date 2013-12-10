@@ -27,6 +27,21 @@ void MlCalamus::bindToFace(unsigned faceIdx, float u, float v)
 	setPatchV(v);
 }
 
+void MlCalamus::bendFeather()
+{
+	feather()->bend();
+}
+
+void MlCalamus::bendFeather(const Vector3F & origin, const Matrix33F& space)
+{
+	feather()->bendAt(m_faceIdx, m_patchU, m_patchV, origin, space, scale());
+}
+
+void MlCalamus::curlFeather()
+{
+	feather()->curl(rotateY());
+}
+
 void MlCalamus::computeFeatherWorldP(const Vector3F & origin, const Matrix33F& space)
 {
 	feather()->computeWorldP(m_faceIdx, m_patchU, m_patchV, origin, space, rotateY(), scale());
@@ -40,6 +55,11 @@ MlFeather * MlCalamus::feather() const
 short MlCalamus::featherIdx() const
 {
     return feather()->featherId();
+}
+
+short MlCalamus::featherNumSegment() const
+{
+	return feather()->numSegment();
 }
 
 unsigned MlCalamus::faceIdx() const
@@ -134,9 +154,3 @@ void MlCalamus::collideWith(CollisionRegion * skin, const Vector3F & center)
 	skin->resetCollisionRegionByDistance(m_faceIdx, center, realScale());
 	feather()->setCollision(skin);
 }
-
-void MlCalamus::collideWith(CollisionRegion * skin)
-{
-	feather()->setCollision(skin);
-}
-

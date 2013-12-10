@@ -51,6 +51,14 @@ void MlRachis::reset()
 	}
 }
 
+void MlRachis::bend()
+{
+	for(unsigned i = 0; i < m_numSpace; i++) {
+		m_spaces[i].setIdentity();
+		m_spaces[i].rotateY(m_angles[i]);
+	}
+}
+
 void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide)
 {
 	reset();
@@ -182,4 +190,9 @@ void MlRachis::rotateForward(const Matrix33F & space, Matrix33F & dst)
 	Matrix33F s = space;
 	s.multiply(dst);
 	dst = s;
+}
+
+float * MlRachis::angles() const
+{
+	return m_angles;
 }

@@ -36,6 +36,7 @@ protected:
 private:
 	void updateBuffer(MlCalamus * c);
     void computeFeather(MlSkin * skin, MlCalamus * c);
+	void computeFeather(MlSkin * skin, MlCalamus * c, const Vector3F & p, const Matrix33F & space);
 	void tessellate(MlFeather * f);
 	void writeToCache(const std::string & sliceName);
 	void readFromCache(const std::string & sliceName);

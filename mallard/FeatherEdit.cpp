@@ -40,6 +40,7 @@ void FeatherEdit::receiveToolAction(int a)
 	switch(a) {
 		case ToolContext::AddFeatherExample:
 			m_view->addFeather();
+			emit featherAdded();
 			break;
 		case ToolContext::RemoveFeatherExample:
 			m_view->removeSelectedFeather();

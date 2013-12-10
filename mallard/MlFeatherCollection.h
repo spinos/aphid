@@ -10,6 +10,7 @@
 #pragma once
 #include <map>
 class MlFeather;
+class CollisionRegion;
 
 class MlFeatherCollection {
 public:
@@ -32,6 +33,8 @@ public:
 	MlFeather* firstFeatherExample();
 	MlFeather* nextFeatherExample();
 	bool hasFeatherExample();
+	
+	void setCollision(CollisionRegion * skin);
 private:
 	unsigned numFeatherExamples() const;
 	bool featherIdExists(unsigned idx) const;

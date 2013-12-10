@@ -20,17 +20,11 @@ MlSkin::MlSkin() : m_numCreatedFeather(0)
     m_activeIndices.clear();
 }
 
-MlSkin::~MlSkin()
-{
-}
+MlSkin::~MlSkin() {}
 
 void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 {
-	CollisionRegion::setBodyMesh(mesh, topo);
-	createFaceCalamusIndirection();
-	resetFaceCalamusIndirection();
-	createFaceVicinity();
-	createFaceCluster();
+	CalamusSkin::setBodyMesh(mesh, topo);
 	if(!bodyMesh()->hasVertexData("weishell")) {
 		float * disw = bodyMesh()->perVertexFloat("weishell");
 		const unsigned nv = bodyMesh()->getNumVertices();
@@ -312,7 +306,7 @@ void MlSkin::finishCreateFeather()
 	if(!hasFeatherCreated()) return;
 	if(!bodyMesh()) return;
     computeFaceCalamusIndirection();
-	conputeFaceClustering();
+	computeFaceClustering();
 	m_numCreatedFeather = 0;
 	std::cout<<" increase to "<<numFeathers();
 }
@@ -343,7 +337,7 @@ void MlSkin::finishEraseFeather()
 	}
 
 	computeFaceCalamusIndirection();
-	conputeFaceClustering();
+	computeFaceClustering();
 	discardActive();
 	std::cout<<" reduce to "<<numFeathers();
 }

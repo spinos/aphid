@@ -24,6 +24,10 @@ public:
 	float getWidth(short seg) const;
 	BoundingRectangle getBoundingRectangle() const;
 	
+	void bend();
+	void bendAt(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
+	void curl(float val);
+	
 	void computeWorldP(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale);
 	Vector3F * worldP();
 	Vector3F * segmentOriginWP(short seg);
@@ -52,6 +56,7 @@ public:
 	
 	void changeNumSegment(int d);
 	void getBoundingBox(BoundingBox & box) const;
+	float * angles() const;
 	void verbose();
 private:
 	void computeBounding();

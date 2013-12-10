@@ -21,6 +21,7 @@ public:
 	
 signals:
 	void textureLoaded(QString name);
+	void featherAdded();
 	
 public slots:
 	void receiveToolAction(int a);

@@ -484,6 +484,11 @@ void GLWidget::receiveFeatherEditBackground(QString name)
 	update();
 }
 
+void GLWidget::receiveFeatherAdded()
+{
+	setCollision(skin());
+}
+
 void GLWidget::chooseBake()
 {
 	if(body()->isEmpty()) {
@@ -549,6 +554,7 @@ void GLWidget::updateOnFrame(int x)
 	skin()->resetFaceVicinity();
 	m_featherDrawer->setCurrentFrame(x);
 	m_featherDrawer->setCurrentOrigin(bodyDeformer()->frameCenter());
+	setCollision(skin());
 	m_featherDrawer->rebuildBuffer(skin());
 	m_bezierDrawer->rebuildBuffer(body());
 	
@@ -569,11 +575,12 @@ void GLWidget::afterOpen()
 	
 	body()->update(m_topo);
 	skin()->computeFaceCalamusIndirection();
-	skin()->conputeFaceClustering();
+	skin()->computeFaceClustering();
 	skin()->computeVertexDisplacement();
 	skin()->resetFaceVicinity();
 	m_featherDrawer->clearCached();
 	m_featherDrawer->computeBufferIndirection(skin());
+	setCollision(skin());
 	m_featherDrawer->rebuildBuffer(skin(), true);
 	m_bezierDrawer->rebuildBuffer(body());
 	buildTree();

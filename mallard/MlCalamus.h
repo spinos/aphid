@@ -18,10 +18,15 @@ class MlCalamus
 public:
 	MlCalamus();
 	void bindToFace(unsigned faceIdx, float u, float v);
+	
+	void bendFeather();
+	void bendFeather(const Vector3F & origin, const Matrix33F& space);
+	void curlFeather();
 	void computeFeatherWorldP(const Vector3F & origin, const Matrix33F& space);
 	
 	MlFeather * feather() const;
 	short featherIdx() const;
+	short featherNumSegment() const;
 	unsigned faceIdx() const;
 	float patchU() const;
 	float patchV() const;
@@ -41,7 +46,6 @@ public:
 	
 	void collideWith(CollisionRegion * skin, const BoundingBox & bbox);
 	void collideWith(CollisionRegion * skin, const Vector3F & center);
-	void collideWith(CollisionRegion * skin);
 	
 	static MlFeatherCollection * FeatherLibrary;
 

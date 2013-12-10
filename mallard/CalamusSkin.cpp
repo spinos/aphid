@@ -34,6 +34,15 @@ void CalamusSkin::cleanup()
 	}
 }
 
+void CalamusSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
+{
+	CollisionRegion::setBodyMesh(mesh, topo);
+	createFaceCalamusIndirection();
+	resetFaceCalamusIndirection();
+	createFaceVicinity();
+	createFaceCluster();
+}
+
 void CalamusSkin::clearFaceVicinity()
 {
 	if(m_perFaceVicinity) {
@@ -138,6 +147,16 @@ void CalamusSkin::setFaceVicinity(unsigned idx, float val)
     m_perFaceVicinity[idx] = val;
 }
 
+void CalamusSkin::touchBy(MlCalamus * c)
+{
+	const unsigned fi = c->faceIdx();
+	const float fv = c->realScale();
+	if(regionElementStart() != fi || fv > faceVicinity(fi)) {
+	    resetCollisionRegionAround(fi, fv);
+	    setFaceVicinity(fi, fv);
+	}
+}
+
 float CalamusSkin::faceVicinity(unsigned idx) const
 {
     return m_perFaceVicinity[idx];
@@ -148,13 +167,51 @@ void CalamusSkin::createFaceCluster()
 	m_perFaceCluster = new MlCluster[bodyMesh()->getNumFaces()];
 }
 
-void CalamusSkin::conputeFaceClustering()
+void CalamusSkin::computeFaceClustering()
 {
-	MlCalamusArray * ca = getCalamusArray();
 	const unsigned nf = bodyMesh()->getNumFaces();
-	for(unsigned i = 0; i < nf; i++) {
-		m_perFaceCluster[i].compute(ca, bodyMesh(), m_faceCalamusTable[i].dartBegin, m_faceCalamusTable[i].dartEnd);
+	for(unsigned i = 0; i < nf; i++)
+		m_perFaceCluster[i].compute(m_calamus, bodyMesh(), m_faceCalamusTable[i].dartBegin, m_faceCalamusTable[i].dartEnd);
+}
+
+void CalamusSkin::computeClusterSamples()
+{
+	unsigned nk;
+	Vector3F p;
+	Matrix33F space;
+	const unsigned nf = bodyMesh()->getNumFaces();
+	for(unsigned i = 0; i < nf; i++) { 
+		MlCluster & cluster = m_perFaceCluster[i];
+		if(!cluster.isValid()) continue;
+		nk = cluster.K(); 
+		for(unsigned j  =0; j < nk; j++) {
+			MlCalamus * c = getCalamus(cluster.sampleIdx(j));
+			touchBy(c);
+			getPointOnBody(c, p);
+			calamusSpace(c, space);
+			c->bendFeather(p, space);
+			m_perFaceCluster[i].recordAngles(c, j);
+		}
 	}
+}
+
+char CalamusSkin::useClusterSamples(unsigned faceIdx, unsigned perFaceIdx, MlCalamus * c, const Matrix33F & frm)
+{
+	MlCluster & cluster = m_perFaceCluster[faceIdx];
+	const unsigned grp = cluster.group(perFaceIdx);
+	const short nseg = cluster.sampleNSeg(grp);
+	if(c->featherNumSegment() != nseg) return 0;
+	const Vector3F sd = cluster.sampleDir(grp);
+	const Vector3F cd = frm.transform(Vector3F::ZAxis);
+	if(cd.dot(sd) < .8f) return 0;
+	
+	cluster.reuseAngles(c, grp);
+	return 1;
+}
+
+unsigned CalamusSkin::clusterK(unsigned faceIdx) const
+{
+	return m_perFaceCluster[faceIdx].K();
 }
 
 void CalamusSkin::getClustering(unsigned idx, std::vector<Vector3F> & dst)

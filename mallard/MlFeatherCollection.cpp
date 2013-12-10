@@ -8,7 +8,7 @@
  */
 
 #include "MlFeatherCollection.h"
-
+#include <CollisionRegion.h>
 #include <MlFeather.h>
 
 MlFeatherCollection::MlFeatherCollection()
@@ -135,4 +135,12 @@ MlFeather* MlFeatherCollection::nextFeatherExample()
 bool MlFeatherCollection::hasFeatherExample()
 {
 	return m_featherIt != m_feathers.end();
+}
+
+void MlFeatherCollection::setCollision(CollisionRegion * skin)
+{
+	std::map<unsigned, MlFeather *>::const_iterator it;
+	for(it = m_feathers.begin(); it != m_feathers.end(); it++) {
+		if(it->second) it->second->setCollision(skin);
+	}
 }

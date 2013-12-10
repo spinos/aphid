@@ -9,8 +9,10 @@
 
 #pragma once
 #include <KMeansClustering.h>
+class MlCalamus;
 class MlCalamusArray;
 class AccPatchMesh;
+class CollisionRegion;
 class MlCluster : public KMeansClustering {
 public:
 	MlCluster();
@@ -18,13 +20,22 @@ public:
 	
 	void compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned end);
 	
-	void computeAngles(MlCalamusArray * calamus);
 	float * angles(unsigned idx) const;
+	unsigned sampleIdx(unsigned idx) const;
+	void recordAngles(MlCalamus * c, unsigned idx);
+	void reuseAngles(MlCalamus * c, unsigned idx);
+	
+	short sampleNSeg(unsigned idx) const;
+	Vector3F sampleDir(unsigned idx) const;
 protected:
     virtual void setK(unsigned k);
 	
 private:
+	void createAngles(MlCalamusArray * calamus, unsigned begin);
+	void computeSampleDirs(MlCalamusArray * calamus, AccPatchMesh * mesh);
     int * m_sampleIndices;
+	Vector3F * m_sampleDirs;
+	short * m_sampleNSegs;
     unsigned * m_angleStart;
     float * m_angles;
 };

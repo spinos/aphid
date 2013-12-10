@@ -9,7 +9,7 @@
 
 #include "KMeansClustering.h"
 
-KMeansClustering::KMeansClustering() : m_centroid(0), m_group(0), m_sum(0) {}
+KMeansClustering::KMeansClustering() : m_centroid(0), m_group(0), m_sum(0), m_valid(0) {}
 
 KMeansClustering::~KMeansClustering() 
 {
@@ -86,7 +86,22 @@ Vector3F KMeansClustering::groupCenter(unsigned idx) const
 	return m_centroid[m_group[idx]];
 }
 
+unsigned KMeansClustering::group(unsigned idx) const
+{
+	return m_group[idx];
+}
+
 unsigned KMeansClustering::K() const
 {
 	return m_k;
+}
+
+char KMeansClustering::isValid() const
+{
+	return m_valid;
+}
+
+void KMeansClustering::setValid(char val)
+{
+	m_valid = val;
 }

@@ -33,6 +33,7 @@ public:
 	
 	void cleanup();
 	
+	void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
 	void getPointOnBody(MlCalamus * c, Vector3F &p) const;
 	void getNormalOnBody(MlCalamus * c, Vector3F &p) const;
 	
@@ -53,11 +54,15 @@ public:
 	void createFaceVicinity();
 	void resetFaceVicinity();
 	void setFaceVicinity(unsigned idx, float val);
+	void touchBy(MlCalamus * c);
 	float faceVicinity(unsigned idx) const;
 	
 	void createFaceCluster();
-	void conputeFaceClustering();
+	void computeFaceClustering();
+	void computeClusterSamples();
+	char useClusterSamples(unsigned faceIdx, unsigned perFaceIdx, MlCalamus * c, const Matrix33F & frm);
 	void getClustering(unsigned idx, std::vector<Vector3F> & dst);
+	unsigned clusterK(unsigned faceIdx) const;
 	
 	void createFaceCalamusIndirection();
 	void resetFaceCalamusIndirection();

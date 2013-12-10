@@ -99,10 +99,25 @@ BoundingRectangle MlFeather::getBoundingRectangle() const
 	return m_brect;
 }
 
-void MlFeather::computeWorldP(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale)
+void MlFeather::bend()
+{
+	m_rachis->bend();
+}
+
+void MlFeather::bendAt(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale)
 {
 	m_rachis->bend(faceIdx, patchU, patchV, oriPos, oriRot, scale * getLength(), m_skin);
-	m_rachis->curl(pitch);
+}
+
+void MlFeather::curl(float val)
+{
+	m_rachis->curl(val);
+}
+
+void MlFeather::computeWorldP(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale)
+{
+	//m_rachis->bend(faceIdx, patchU, patchV, oriPos, oriRot, scale * getLength(), m_skin);
+	//m_rachis->curl(pitch);
 	
 	Vector3F segOrigin = oriPos;
 	Matrix33F segSpace = oriRot;
@@ -452,6 +467,11 @@ void MlFeather::getBoundingBox(BoundingBox & box) const
 {
 	for(unsigned i = 0; i < numWorldP(); i++)
 		box.update(m_worldP[i]);
+}
+
+float * MlFeather::angles() const
+{
+	return m_rachis->angles();
 }
 
 void MlFeather::verbose()
