@@ -10,7 +10,7 @@
 #include "MlCluster.h"
 #include "MlCalamusArray.h"
 #include <AccPatchMesh.h>
-#include <mlFeather.h>
+#include <MlFeather.h>
 #include <CollisionRegion.h>
 MlCluster::MlCluster() 
 {
@@ -20,6 +20,7 @@ MlCluster::MlCluster()
 	m_sampleDirs = 0;
 	m_sampleNSegs = 0;
 	m_sampleLengths = 0;
+	m_sampleBend = 0;
 }
 
 MlCluster::~MlCluster() 
@@ -30,6 +31,7 @@ MlCluster::~MlCluster()
 	if(m_sampleDirs) delete[] m_sampleDirs;
 	if(m_sampleNSegs) delete[] m_sampleNSegs;
 	if(m_sampleLengths) delete[] m_sampleLengths;
+	if(m_sampleBend) delete[] m_sampleBend;
 }
 
 void MlCluster::setK(unsigned k)
@@ -45,6 +47,8 @@ void MlCluster::setK(unsigned k)
 	m_sampleNSegs = new short[k];
 	if(m_sampleLengths) delete[] m_sampleLengths;
 	m_sampleLengths = new float[k];
+	if(m_sampleBend) delete[] m_sampleBend;
+	m_sampleBend = new float[k];
 }
 
 void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned end)
@@ -154,6 +158,8 @@ void MlCluster::recordAngles(MlCalamus * c, unsigned idx)
 	float * src = c->feather()->angles();
 	const short ns = c->featherNumSegment();
 	for(short i = 0; i < ns; i++) dst[i] = src[i];
+	
+	m_sampleBend[idx] = c->feather()->bendDirection();
 }
 
 void MlCluster::reuseAngles(MlCalamus * c, unsigned idx)
@@ -177,4 +183,9 @@ Vector3F MlCluster::sampleDir(unsigned idx) const
 float MlCluster::sampleLength(unsigned idx) const
 {
 	return m_sampleLengths[idx];
+}
+
+float MlCluster::sampleBend(unsigned idx) const
+{
+	return m_sampleBend[idx];
 }

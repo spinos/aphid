@@ -25,6 +25,7 @@ public:
 	void curl(const float & fullPitch);
 	Matrix33F getSpace(short idx) const;
 	float * angles() const;
+	float bendDirection() const;
 private:
 	char isInside(const Vector3F & t, const Vector3F & onp, const Vector3F & nor);
 	float bouncing(const Vector3F & a, const Vector3F & b, const Vector3F & c);
@@ -38,4 +39,5 @@ private:
 	float * m_angles;
 	float * m_lengths;
 	float * m_lengthPortions;
+	float m_bendDirection;
 };

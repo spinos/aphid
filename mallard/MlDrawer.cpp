@@ -293,7 +293,7 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 	delete[] wpb;
 	flush();
 	
-	std::cout<<" full "<<nc<<" calc "<< (float)(nsamp + ncalc) / (float)nc;
+	std::cout<<"\n calculate "<< (float)(nsamp + ncalc) / (float)nc * 100 <<"%\n";
 }
 
 void MlDrawer::readFromCache(const std::string & sliceName)

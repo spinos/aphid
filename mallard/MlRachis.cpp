@@ -49,6 +49,7 @@ void MlRachis::reset()
 		m_spaces[i].setIdentity();
 		m_angles[i] = 0.f;
 	}
+	m_bendDirection = 0.f;
 }
 
 void MlRachis::bend()
@@ -71,6 +72,9 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 	invSpace = segSpace;
 	invSpace.inverse();
 	
+	const Vector3F rootUp = segSpace.transform(Vector3F::XAxis);
+	const Vector3F rootFront = segSpace.transform(Vector3F::ZAxis);
+
 	pushAngle = 0.f;
 	
 	testP = segP;
@@ -83,9 +87,6 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 	collide->interpolateVertexVector(faceIdx, patchU, patchV, &smoothU);
 
 	smoothAngle = matchNormal(smoothU, invSpace);
-	
-	float smoothPortion = smoothAngle;
-	smoothPortion *= 0.66f;
 	
 	curAngle = pushAngle + smoothAngle;
 
@@ -113,7 +114,7 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 		
 		curAngle = pushAngle;
 		curAngle += segRot;
-		curAngle += 0.15f * (1.f - m_lengths[i] * 0.5f);
+		curAngle += 0.15f * (1.f - m_lengths[i] * 0.4f);
 		curAngle += smoothAngle * m_lengthPortions[i] * 0.5f;
 		m_spaces[i].rotateY(curAngle);
 		m_angles[i] = curAngle;
@@ -121,6 +122,8 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 		rotateForward(m_spaces[i], segSpace);
 		moveForward(segSpace, radius * m_lengthPortions[i], segP);
 	}
+	
+	m_bendDirection = -rootUp.angleBetween(segU, rootFront);
 }
 
 void MlRachis::curl(const float & fullPitch)
@@ -198,4 +201,9 @@ void MlRachis::rotateForward(const Matrix33F & space, Matrix33F & dst)
 float * MlRachis::angles() const
 {
 	return m_angles;
+}
+
+float MlRachis::bendDirection() const
+{
+	return m_bendDirection;
 }

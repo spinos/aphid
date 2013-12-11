@@ -57,6 +57,7 @@ public:
 	void changeNumSegment(int d);
 	void getBoundingBox(BoundingBox & box) const;
 	float * angles() const;
+	float bendDirection() const;
 	void verbose();
 private:
 	void computeBounding();

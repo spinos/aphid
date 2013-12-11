@@ -474,6 +474,11 @@ float * MlFeather::angles() const
 	return m_rachis->angles();
 }
 
+float MlFeather::bendDirection() const
+{
+	return m_rachis->bendDirection();
+}
+
 void MlFeather::verbose()
 {
 	std::cout<<"feather status:\n id "<<featherId();
