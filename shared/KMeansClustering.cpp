@@ -103,6 +103,11 @@ unsigned KMeansClustering::K() const
 	return m_k;
 }
 
+unsigned KMeansClustering::N() const
+{
+	return m_n;
+}
+
 char KMeansClustering::isValid() const
 {
 	return m_valid;

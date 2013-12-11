@@ -19,7 +19,8 @@ public:
 	virtual ~MlCluster();
 	
 	void compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned end);
-	
+	void computeSampleDirs(MlCalamusArray * calamus, AccPatchMesh * mesh);
+    
 	float * angles(unsigned idx) const;
 	unsigned sampleIdx(unsigned idx) const;
 	void recordAngles(MlCalamus * c, unsigned idx);
@@ -32,9 +33,9 @@ protected:
     virtual void setK(unsigned k);
 	
 private:
-	void createAngles(MlCalamusArray * calamus, unsigned begin);
-	void computeSampleDirs(MlCalamusArray * calamus, AccPatchMesh * mesh);
-    int * m_sampleIndices;
+	void assignGroupSample(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned grp);
+	void createAngles(MlCalamusArray * calamus);
+	unsigned * m_sampleIndices;
 	Vector3F * m_sampleDirs;
 	short * m_sampleNSegs;
 	float * m_sampleLengths;

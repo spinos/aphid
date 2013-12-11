@@ -22,6 +22,7 @@ public:
 	void resetGroup();
 	Vector3F groupCenter(unsigned idx) const;
 	unsigned K() const;
+	unsigned N() const;
 	char isValid() const;
 	unsigned group(unsigned idx) const;
 	unsigned countPerGroup(unsigned idx) const;

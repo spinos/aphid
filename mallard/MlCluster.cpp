@@ -36,8 +36,7 @@ void MlCluster::setK(unsigned k)
 {
     KMeansClustering::setK(k);
     if(m_sampleIndices) delete[] m_sampleIndices;
-    m_sampleIndices = new int[k];
-    for(unsigned i = 0; i < k; i++) m_sampleIndices[i] = -1;
+    m_sampleIndices = new unsigned[k];
     if(m_angleStart) delete[] m_angleStart;
     m_angleStart = new unsigned[k];
 	if(m_sampleDirs) delete[] m_sampleDirs;
@@ -55,17 +54,19 @@ void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned 
 		return;
 	}
 	const unsigned n = end - begin;
+	unsigned i;
 	setN(n);
 	if(n < 6) {
 		setK(n);
 		resetGroup();
-		createAngles(calamus, begin);
+		for(i = 0; i < N(); i++) m_sampleIndices[i] = begin + i;
+		createAngles(calamus);
 		setValid(1);
 		return;
 	}
 	const unsigned k = 5 + (n - 1) / 6;
 	setK(k);
-	unsigned i, j;
+	unsigned j;
 	float d;
 	Vector3F pos;
 	const unsigned faceIdx = calamus->asCalamus(begin)->faceIdx();
@@ -86,22 +87,37 @@ void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned 
 		if(d < 10e-3) break;
 	}
 	
-	createAngles(calamus, begin);
+	for(unsigned i = 0; i < K(); i++)
+		assignGroupSample(calamus, mesh, begin, i);
+	createAngles(calamus);
 	computeSampleDirs(calamus, mesh);
 	setValid(1);
 }
 
-void MlCluster::createAngles(MlCalamusArray * calamus, unsigned begin)
+void MlCluster::assignGroupSample(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned grp)
+{
+	Vector3F pos;
+	float d, minD = 10e8;
+	for(unsigned i = 0; i < N(); i++) {
+		if(group(i) != grp) continue;
+		MlCalamus * c = calamus->asCalamus(begin + i);
+		mesh->pointOnPatch(c->faceIdx(), c->patchU(), c->patchV(), pos);
+		d = Vector3F(pos, groupCenter(grp)).length();
+		if(d < minD) {
+			minD = d;
+			m_sampleIndices[grp] = begin + i;
+		}
+	}
+}
+
+void MlCluster::createAngles(MlCalamusArray * calamus)
 {
 	unsigned numAngles = 0;
 	for(unsigned i = 0; i < K(); i++) {
-		MlCalamus * c = calamus->asCalamus(begin + i);
-		if(m_sampleIndices[i] < 0) {
-		    m_sampleIndices[i] = begin + i;
-		    m_angleStart[i] = numAngles;
-		    m_sampleNSegs[i] = c->feather()->numSegment();
-			numAngles += m_sampleNSegs[i];
-		}
+		m_angleStart[i] = numAngles;
+		MlCalamus * c = calamus->asCalamus(m_sampleIndices[i]);
+		m_sampleNSegs[i] = c->feather()->numSegment();
+		numAngles += m_sampleNSegs[i];
 	}
 	
 	if(m_angles) delete[] m_angles;

@@ -190,8 +190,9 @@ void CalamusSkin::computeClusterSamples()
 			getPointOnBody(c, p);
 			calamusSpace(c, space);
 			c->bendFeather(p, space);
-			m_perFaceCluster[i].recordAngles(c, j);
+			cluster.recordAngles(c, j);
 		}
+		cluster.computeSampleDirs(m_calamus, bodyMesh());
 	}
 }
 
@@ -213,7 +214,7 @@ char CalamusSkin::useClusterSamples(unsigned faceIdx, unsigned perFaceIdx, MlCal
 	
 	const Vector3F sd = cluster.sampleDir(grp);
 	const Vector3F cd = frm.transform(Vector3F::ZAxis);
-	if(cd.dot(sd) < .8f) return 0;
+	if(cd.dot(sd) < .96f) return 0;
 	
 	cluster.reuseAngles(c, grp);
 	return 1;
