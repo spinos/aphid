@@ -255,7 +255,7 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 			nsamp += skin->clusterK(faceIdx);
 		}
 		
-		if(skin->useClusterSamples(faceIdx, perFaceIdx, c)) {
+		if(skin->useClusterSamples(faceIdx, perFaceIdx, c, i)) {
 			c->bendFeather();
 			c->curlFeather();
 			c->computeFeatherWorldP(p, space);

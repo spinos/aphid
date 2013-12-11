@@ -196,16 +196,16 @@ void CalamusSkin::computeClusterSamples()
 	}
 }
 
-char CalamusSkin::useClusterSamples(unsigned faceIdx, unsigned perFaceIdx, MlCalamus * c)
+char CalamusSkin::useClusterSamples(unsigned faceIdx, unsigned perFaceIdx, MlCalamus * c, unsigned ci)
 {
 	MlCluster & cluster = m_perFaceCluster[faceIdx];
 	const unsigned grp = cluster.group(perFaceIdx);
-	if(cluster.countPerGroup(grp) < 2) {
+	if(cluster.sampleIdx(grp) == ci) {
 		cluster.reuseAngles(c, grp);
 		return 1;
 	}
 	
-	if(cluster.sampleBend(grp) > 0.f) return 0;
+	if(cluster.sampleBend(grp) > -0.01f) return 0;
 	
 	const short nseg = cluster.sampleNSeg(grp);
 	if(c->featherNumSegment() != nseg) return 0;

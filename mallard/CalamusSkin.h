@@ -60,7 +60,7 @@ public:
 	void createFaceCluster();
 	void computeFaceClustering();
 	void computeClusterSamples();
-	char useClusterSamples(unsigned faceIdx, unsigned perFaceIdx, MlCalamus * c);
+	char useClusterSamples(unsigned faceIdx, unsigned perFaceIdx, MlCalamus * c, unsigned ci);
 	void getClustering(unsigned idx, std::vector<Vector3F> & dst);
 	unsigned clusterK(unsigned faceIdx) const;
 	

@@ -60,7 +60,7 @@ void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned 
 	const unsigned n = end - begin;
 	unsigned i;
 	setN(n);
-	if(n < 6) {
+	if(n < 3) {
 		setK(n);
 		resetGroup();
 		for(i = 0; i < N(); i++) m_sampleIndices[i] = begin + i;
@@ -68,7 +68,7 @@ void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned 
 		setValid(1);
 		return;
 	}
-	const unsigned k = 5 + (n - 1) / 6;
+	const unsigned k = 2 + (n - 1) / 3;
 	setK(k);
 	unsigned j;
 	float d;
