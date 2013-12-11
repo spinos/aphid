@@ -27,6 +27,7 @@ public:
 	
 	short sampleNSeg(unsigned idx) const;
 	Vector3F sampleDir(unsigned idx) const;
+	float sampleLength(unsigned idx) const;
 protected:
     virtual void setK(unsigned k);
 	
@@ -36,6 +37,7 @@ private:
     int * m_sampleIndices;
 	Vector3F * m_sampleDirs;
 	short * m_sampleNSegs;
+	float * m_sampleLengths;
     unsigned * m_angleStart;
     float * m_angles;
 };

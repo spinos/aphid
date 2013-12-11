@@ -24,6 +24,7 @@ public:
 	unsigned K() const;
 	char isValid() const;
 	unsigned group(unsigned idx) const;
+	unsigned countPerGroup(unsigned idx) const;
 protected:
     virtual void setK(unsigned k);
 	virtual void setN(unsigned n);
@@ -33,6 +34,7 @@ private:
 	Vector3F * m_centroid;
 	Vector3F * m_sum;
 	unsigned * m_group;
+	unsigned * m_countPerGroup;
 	unsigned m_k, m_n;
 	char m_valid;
 };

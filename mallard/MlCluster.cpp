@@ -19,6 +19,7 @@ MlCluster::MlCluster()
     m_angles = 0;
 	m_sampleDirs = 0;
 	m_sampleNSegs = 0;
+	m_sampleLengths = 0;
 }
 
 MlCluster::~MlCluster() 
@@ -28,6 +29,7 @@ MlCluster::~MlCluster()
     if(m_angles) delete[] m_angles;
 	if(m_sampleDirs) delete[] m_sampleDirs;
 	if(m_sampleNSegs) delete[] m_sampleNSegs;
+	if(m_sampleLengths) delete[] m_sampleLengths;
 }
 
 void MlCluster::setK(unsigned k)
@@ -42,6 +44,8 @@ void MlCluster::setK(unsigned k)
 	m_sampleDirs = new Vector3F[k];
 	if(m_sampleNSegs) delete[] m_sampleNSegs;
 	m_sampleNSegs = new short[k];
+	if(m_sampleLengths) delete[] m_sampleLengths;
+	m_sampleLengths = new float[k];
 }
 
 void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned end)
@@ -114,6 +118,7 @@ void MlCluster::computeSampleDirs(MlCalamusArray * calamus, AccPatchMesh * mesh)
 		space.rotateX(c->rotateX());
 		space.multiply(tang);
 		m_sampleDirs[i] = space.transform(Vector3F::ZAxis);
+		m_sampleLengths[i] = c->realScale();
 	}
 }
 
@@ -153,3 +158,7 @@ Vector3F MlCluster::sampleDir(unsigned idx) const
 	return m_sampleDirs[idx];
 }
 
+float MlCluster::sampleLength(unsigned idx) const
+{
+	return m_sampleLengths[idx];
+}

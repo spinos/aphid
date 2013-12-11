@@ -199,8 +199,18 @@ char CalamusSkin::useClusterSamples(unsigned faceIdx, unsigned perFaceIdx, MlCal
 {
 	MlCluster & cluster = m_perFaceCluster[faceIdx];
 	const unsigned grp = cluster.group(perFaceIdx);
+	if(cluster.countPerGroup(grp) < 2) {
+		cluster.reuseAngles(c, grp);
+		return 1;
+	}
+	
 	const short nseg = cluster.sampleNSeg(grp);
 	if(c->featherNumSegment() != nseg) return 0;
+	
+	const float sl = cluster.sampleLength(grp);
+	const float dl = (sl - c->realScale()) / sl;
+	if(dl > 0.09f || dl < -0.09f) return 0;
+	
 	const Vector3F sd = cluster.sampleDir(grp);
 	const Vector3F cd = frm.transform(Vector3F::ZAxis);
 	if(cd.dot(sd) < .8f) return 0;

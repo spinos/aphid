@@ -9,13 +9,14 @@
 
 #include "KMeansClustering.h"
 
-KMeansClustering::KMeansClustering() : m_centroid(0), m_group(0), m_sum(0), m_valid(0) {}
+KMeansClustering::KMeansClustering() : m_centroid(0), m_group(0), m_sum(0), m_countPerGroup(0), m_valid(0) {}
 
 KMeansClustering::~KMeansClustering() 
 {
 	if(m_centroid) delete[] m_centroid;
 	if(m_sum) delete[] m_sum;
 	if(m_group) delete[] m_group;
+	if(m_countPerGroup) delete[] m_countPerGroup;
 }
 
 void KMeansClustering::setK(unsigned k)
@@ -25,6 +26,8 @@ void KMeansClustering::setK(unsigned k)
 	m_centroid = new Vector3F[k];
 	if(m_sum) delete[] m_sum;
 	m_sum = new Vector3F[k];
+	if(m_countPerGroup) delete[] m_countPerGroup;
+	m_countPerGroup = new unsigned[k];
 }
 
 void KMeansClustering::setN(unsigned n)
@@ -63,13 +66,12 @@ void KMeansClustering::assignToGroup(unsigned idx, const Vector3F & pos)
 float KMeansClustering::moveCentroids()
 {
 	float delta = 0.f;
-	unsigned * npc = new unsigned[m_k];
-	for(unsigned i = 0; i < m_k; i++) npc[i] = 0;
+	for(unsigned i = 0; i < m_k; i++) m_countPerGroup[i] = 0;
 	for(unsigned i = 0; i < m_n; i++) {
-		npc[m_group[i]] += 1;
+		m_countPerGroup[m_group[i]] += 1;
 	}
 	for(unsigned i = 0; i < m_k; i++) {
-		m_sum[i] *= 1.f/(float)npc[i];
+		m_sum[i] *= 1.f/(float)m_countPerGroup[i];
 		delta += Vector3F(m_centroid[i], m_sum[i]).length();
 		m_centroid[i] = m_sum[i];
 	}
@@ -89,6 +91,11 @@ Vector3F KMeansClustering::groupCenter(unsigned idx) const
 unsigned KMeansClustering::group(unsigned idx) const
 {
 	return m_group[idx];
+}
+
+unsigned KMeansClustering::countPerGroup(unsigned idx) const
+{
+	return m_countPerGroup[idx];
 }
 
 unsigned KMeansClustering::K() const
