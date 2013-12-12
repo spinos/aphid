@@ -163,7 +163,7 @@ void CollisionRegion::closestPoint(const Vector3F & origin, IntersectionContext 
 {
     if(m_hitElement > -1) m_body->closestPoint(m_hitElement, origin, ctx);
 	for(unsigned i=0; i < numRegionElements(); i++) {
-		if(m_hitElement != regionElementIndex(i)) m_body->closestPoint(regionElementIndex(i), origin, ctx);
+		m_body->closestPoint(regionElementIndex(i), origin, ctx);
 	}
 }
 
