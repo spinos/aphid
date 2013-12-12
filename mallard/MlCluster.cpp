@@ -17,9 +17,7 @@ MlCluster::MlCluster()
     m_sampleIndices = 0;
     m_angleStart = 0;
     m_angles = 0;
-	m_sampleDirs = 0;
 	m_sampleNSegs = 0;
-	m_sampleLengths = 0;
 	m_sampleBend = 0;
 }
 
@@ -28,9 +26,7 @@ MlCluster::~MlCluster()
     if(m_sampleIndices) delete[] m_sampleIndices;
     if(m_angleStart) delete[] m_angleStart;
     if(m_angles) delete[] m_angles;
-	if(m_sampleDirs) delete[] m_sampleDirs;
 	if(m_sampleNSegs) delete[] m_sampleNSegs;
-	if(m_sampleLengths) delete[] m_sampleLengths;
 	if(m_sampleBend) delete[] m_sampleBend;
 }
 
@@ -41,12 +37,8 @@ void MlCluster::setK(unsigned k)
     m_sampleIndices = new unsigned[k];
     if(m_angleStart) delete[] m_angleStart;
     m_angleStart = new unsigned[k];
-	if(m_sampleDirs) delete[] m_sampleDirs;
-	m_sampleDirs = new Vector3F[k];
 	if(m_sampleNSegs) delete[] m_sampleNSegs;
 	m_sampleNSegs = new short[k];
-	if(m_sampleLengths) delete[] m_sampleLengths;
-	m_sampleLengths = new float[k];
 	if(m_sampleBend) delete[] m_sampleBend;
 	m_sampleBend = new float[k];
 }
@@ -94,7 +86,6 @@ void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned 
 	for(unsigned i = 0; i < K(); i++)
 		assignGroupSample(calamus, mesh, begin, i);
 	createAngles(calamus);
-	//computeSampleDirs(calamus, mesh);
 	setValid(1);
 }
 
@@ -128,20 +119,6 @@ void MlCluster::createAngles(MlCalamusArray * calamus)
 	m_angles = new float[numAngles];
 }
 
-void MlCluster::computeSampleDirs(MlCalamusArray * calamus, AccPatchMesh * mesh)
-{
-	Matrix33F tang, space;
-	for(unsigned i = 0; i < K(); i++) {
-		MlCalamus * c = calamus->asCalamus(m_sampleIndices[i]);
-		mesh->tangentFrame(c->faceIdx(), c->patchU(), c->patchV(), tang);
-		space.setIdentity();
-		space.rotateX(c->rotateX());
-		space.multiply(tang);
-		m_sampleDirs[i] = space.transform(Vector3F::ZAxis);
-		m_sampleLengths[i] = c->realScale();
-	}
-}
-
 float * MlCluster::angles(unsigned idx) const
 {
     return &m_angles[m_angleStart[idx]];
@@ -173,16 +150,6 @@ void MlCluster::reuseAngles(MlCalamus * c, unsigned idx)
 short MlCluster::sampleNSeg(unsigned idx) const
 {
 	return m_sampleNSegs[idx];
-}
-
-Vector3F MlCluster::sampleDir(unsigned idx) const
-{
-	return m_sampleDirs[idx];
-}
-
-float MlCluster::sampleLength(unsigned idx) const
-{
-	return m_sampleLengths[idx];
 }
 
 float MlCluster::sampleBend(unsigned idx) const
