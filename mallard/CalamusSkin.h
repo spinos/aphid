@@ -12,6 +12,7 @@
 class MlCalamus;
 class MlCalamusArray;
 class MlCluster;
+class BaseSphere;
 class CalamusSkin : public CollisionRegion {
 public:
 	struct FloodTable {
@@ -55,6 +56,7 @@ public:
 	void resetFaceVicinity();
 	void setFaceVicinity(unsigned idx, float val);
 	void touchBy(MlCalamus * c);
+	void touchBy(MlCalamus * c, const Vector3F & pos, const Matrix33F & frm);
 	float faceVicinity(unsigned idx) const;
 	
 	void createFaceCluster();

@@ -12,6 +12,7 @@
 #include <MeshTopology.h>
 #include <AccPatchMesh.h>
 #include <BaseImage.h>
+#include <BaseSphere.h>
 CollisionRegion::CollisionRegion() : m_regionElementStart(UINT_MAX) 
 {
 	m_ctx = new IntersectionContext;
@@ -157,6 +158,27 @@ void CollisionRegion::resetCollisionRegionAround(unsigned idx, const float & vic
 			}
 		}
 	}
+	//std::cout<<"cnf1"<<numRegionElements();
+}
+
+void CollisionRegion::resetCollisionRegionAround(unsigned idx, const BaseSphere & sph)
+{
+    resetCollisionRegion(idx);
+	unsigned i, j, lastCreep = 0;
+	BoundingBox bb;
+	for(i = 1; i < numRegionElements(); i++) {
+		bb = m_body->calculateBBox(regionElementIndex(i));
+		if(bb.isPointAround(sph.center(), sph.radius()))
+			lastCreep = m_topo->growAroundQuad(regionElementIndex(i), *regionElementIndices());
+		for(j = numRegionElements() - 1 - lastCreep; j < numRegionElements(); j++) {
+			bb = m_body->calculateBBox(regionElementIndex(j));
+			if(!bb.isPointAround(sph.center(), sph.radius())) {
+				regionElementIndices()->erase(regionElementIndices()->begin() + j);
+				j--;
+			}
+		}
+	}
+	//std::cout<<"cnf"<<numRegionElements();
 }
 
 void CollisionRegion::closestPoint(const Vector3F & origin, IntersectionContext * ctx) const

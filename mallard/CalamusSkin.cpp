@@ -13,6 +13,7 @@
 #include <MlCalamusArray.h>
 #include "MlCluster.h"
 #include <QuickSort.h>
+#include <BaseSphere.h>
 CalamusSkin::CalamusSkin() : m_numFeather(0), m_perFaceVicinity(0), m_perFaceCluster(0), m_faceCalamusTable(0)
 {
 	m_calamus = new MlCalamusArray;
@@ -157,6 +158,21 @@ void CalamusSkin::touchBy(MlCalamus * c)
 	}
 }
 
+void CalamusSkin::touchBy(MlCalamus * c, const Vector3F & pos, const Matrix33F & frm)
+{
+	const unsigned fi = c->faceIdx();
+	const float fv = c->realScale();
+	Vector3F d = frm.transform(Vector3F::ZAxis);
+	d = pos + d * fv * 0.5f;
+	BaseSphere sph;
+	sph.setCenter(d);
+	sph.setRadius(fv * 0.5f);
+	//if(regionElementStart() != fi || fv > faceVicinity(fi)) {
+	    resetCollisionRegionAround(fi, sph);
+	//    setFaceVicinity(fi, fv);
+	//}
+}
+
 float CalamusSkin::faceVicinity(unsigned idx) const
 {
     return m_perFaceVicinity[idx];
@@ -186,9 +202,9 @@ void CalamusSkin::computeClusterSamples()
 		nk = cluster.K(); 
 		for(unsigned j  =0; j < nk; j++) {
 			MlCalamus * c = getCalamus(cluster.sampleIdx(j));
-			touchBy(c);
 			getPointOnBody(c, p);
 			calamusSpace(c, space);
+			touchBy(c, p, space);
 			c->bendFeather(p, space);
 			cluster.recordAngles(c, j);
 		}

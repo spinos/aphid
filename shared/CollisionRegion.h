@@ -15,6 +15,7 @@ class IntersectionContext;
 class MeshTopology;
 class AccPatchMesh;
 class BaseImage;
+class BaseSphere;
 class CollisionRegion : public ActiveRegion {
 public:
 	CollisionRegion();
@@ -34,7 +35,8 @@ public:
 	virtual void resetCollisionRegionByDistance(unsigned idx, const Vector3F & center, float maxD);
 	virtual void resetCollisionRegionAround(unsigned idx, const BoundingBox & bbox);
 	virtual void resetCollisionRegionAround(unsigned idx, const float & vicinity);
-	
+	virtual void resetCollisionRegionAround(unsigned idx, const BaseSphere & sph);
+
 	virtual void closestPoint(const Vector3F & origin, IntersectionContext * ctx) const;
 	virtual void pushPlane(Patch::PushPlaneContext * ctx) const;
 	

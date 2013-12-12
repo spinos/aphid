@@ -16,6 +16,7 @@
 #include <PointInsidePolygonTest.h>
 #include <HBase.h>
 #include <sstream>
+#include <boost/timer.hpp>
 MlDrawer::MlDrawer()
 {
 	std::cout<<"Feather buffer ";
@@ -202,13 +203,12 @@ void MlDrawer::computeBufferIndirection(MlSkin * skin)
 
 void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c)
 {
-	skin->touchBy(c);
-
 	Vector3F p;
 	skin->getPointOnBody(c, p);
 	
 	Matrix33F space;
 	skin->calamusSpace(c, space);
+	skin->touchBy(c, p, space);
 	c->bendFeather(p, space);
 	c->curlFeather();
 	c->computeFeatherWorldP(p, space);
@@ -216,7 +216,7 @@ void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c)
 
 void MlDrawer::computeFeather(MlSkin * skin, MlCalamus * c, const Vector3F & p, const Matrix33F & space)
 {
-	skin->touchBy(c);
+	skin->touchBy(c, p, space);
 	c->bendFeather(p, space);
 	c->curlFeather();
 	c->computeFeatherWorldP(p, space);
@@ -230,6 +230,8 @@ void MlDrawer::tessellate(MlFeather * f)
 
 void MlDrawer::writeToCache(const std::string & sliceName)
 {
+    boost::timer bTimer;
+	bTimer.restart();
 	skin->computeFaceClustering();
 	skin->computeClusterSamples();
 	
@@ -294,7 +296,7 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 	delete[] wpb;
 	flush();
 	
-	std::cout<<" sample "<< (float)(nsamp + ncalc) / (float)nc * 100 <<"%\n";
+	std::cout<<" sample "<< (float)(nsamp + ncalc) / (float)nc * 100 <<"% in "<<bTimer.elapsed()<<" seconds\n";
 }
 
 void MlDrawer::readFromCache(const std::string & sliceName)
