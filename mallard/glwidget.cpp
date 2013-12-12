@@ -93,7 +93,7 @@ void GLWidget::clientDraw()
 	else 
 		getDrawer()->setColor(0.f, .71f, .51f);
 	
-	m_featherDrawer->draw(skin());
+	m_featherDrawer->draw();
 	m_featherDrawer->unbindTexture();
 	
 	getDrawer()->setColor(0.37f, .59f, .9f);
@@ -138,7 +138,7 @@ void GLWidget::clientSelect()
 	    case ToolContext::EraseBodyContourFeather :
 	        hitTest(ray, hit);
 	        selectFeather(m_eraseByRegion);
-	        m_featherDrawer->hideActive(skin());
+	        m_featherDrawer->hideActive();
 	        break;
 	    case ToolContext::SelectByColor :
 	        hitTest(ray, hit);
@@ -165,12 +165,12 @@ void GLWidget::clientMouseInput()
 	    case ToolContext::CreateBodyContourFeather :
 	        brush()->setToeByIntersect(&ray);
 	        skin()->growFeather(brush()->toeDisplacement());
-	        m_featherDrawer->updateActive(skin());
+	        m_featherDrawer->updateActive();
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
 	        hitTest(ray, hit);
 	        selectFeather(m_eraseByRegion);
-	        m_featherDrawer->hideActive(skin());
+	        m_featherDrawer->hideActive();
 	        break;
 	    case ToolContext::SelectByColor :
 	        hitTest(ray, hit);
@@ -179,21 +179,21 @@ void GLWidget::clientMouseInput()
         case ToolContext::CombBodyContourFeather :
             brush()->setToeByIntersect(&ray);
             skin()->combFeather(brush()->toeDisplacement(), brush()->heelPosition(), brush()->getRadius());
-            m_featherDrawer->updateActive(skin());
+            m_featherDrawer->updateActive();
 		    break;
         case ToolContext::ScaleBodyContourFeather :
             brush()->setToeByIntersect(&ray);
             skin()->scaleFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
-            m_featherDrawer->updateActive(skin());
+            m_featherDrawer->updateActive();
             break;
         case ToolContext::PitchBodyContourFeather :
             brush()->setToeByIntersect(&ray);
             skin()->pitchFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
-            m_featherDrawer->updateActive(skin());
+            m_featherDrawer->updateActive();
             break;
 		case ToolContext::Deintersect :
 			skin()->smoothShell(brush()->heelPosition(), brush()->getRadius(), brush()->strength());
-            m_featherDrawer->updateActive(skin());
+            m_featherDrawer->updateActive();
 			break;
 	    default:
 			break;
@@ -286,7 +286,7 @@ void GLWidget::floodFeather()
 	ac.setRotateY(brush()->getPitch());
 	
 	skin()->floodAround(ac, &condition);
-	m_featherDrawer->addToBuffer(skin());
+	m_featherDrawer->addToBuffer();
 	m_featherDrawer->clearCached();
 	setDirty();
 }
@@ -304,8 +304,8 @@ void GLWidget::deselectFeather()
 void GLWidget::rebuildFeather()
 {
 	m_featherDrawer->initializeBuffer();
-	m_featherDrawer->computeBufferIndirection(skin());
-	m_featherDrawer->rebuildBuffer(skin(), true);
+	m_featherDrawer->computeBufferIndirection();
+	m_featherDrawer->rebuildBuffer(skin());
 	update();
 	setDirty();
 }
@@ -578,9 +578,10 @@ void GLWidget::afterOpen()
 	skin()->computeVertexDisplacement();
 	skin()->resetFaceVicinity();
 	m_featherDrawer->clearCached();
-	m_featherDrawer->computeBufferIndirection(skin());
+	m_featherDrawer->setSkin(skin());
+	m_featherDrawer->computeBufferIndirection();
 	setCollision(skin());
-	m_featherDrawer->rebuildBuffer(skin(), true);
+	m_featherDrawer->rebuildBuffer(skin());
 	m_bezierDrawer->rebuildBuffer(body());
 	buildTree();
 	std::string febkgrd = featherEditBackground();
