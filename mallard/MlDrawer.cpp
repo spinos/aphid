@@ -153,7 +153,7 @@ void MlDrawer::readBuffer()
 	
 	useDocument();
 	openEntry("/p");
-	openSlice("/p", sst.str());
+	openSliceVector3("/p", sst.str());
 	
 	readFromCache(sst.str());
 		
@@ -178,7 +178,7 @@ void MlDrawer::rebuildBuffer(MlSkin * skin, bool useCache)
 	
 	useDocument();
 	openEntry("/p");
-	openSlice("/p", sst.str());
+	openSliceVector3("/p", sst.str());
 	
 	if(isCached("/p", sst.str()))
 		readFromCache(sst.str());

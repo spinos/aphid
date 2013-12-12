@@ -41,7 +41,7 @@ void CacheFile::closeEntry(const std::string & name)
 	m_entries[name] = 0;
 }
 
-bool CacheFile::openSlice(const std::string & entryName, const std::string & sliceName)
+bool CacheFile::openSliceVector3(const std::string & entryName, const std::string & sliceName)
 {
 	HBase * g = getNamedEntry(entryName);
 	if(g == 0) return false;
@@ -50,6 +50,22 @@ bool CacheFile::openSlice(const std::string & entryName, const std::string & sli
 	    g->addVector3Data(sliceName.c_str(), 2048);
 	
 	VerticesHDataset * pset = new VerticesHDataset(sliceName.c_str());
+	pset->open(g->fObjectId);
+	
+	m_slices[HObject::FullPath(entryName, sliceName)] = pset;
+	
+	return true;
+}
+
+bool CacheFile::openSliceFloat(const std::string & entryName, const std::string & sliceName)
+{
+	HBase * g = getNamedEntry(entryName);
+	if(g == 0) return false;
+	
+	if(!g->hasNamedData(sliceName.c_str()))
+	    g->addFloatData(sliceName.c_str(), 2048);
+	
+	FloatsHDataset * pset = new FloatsHDataset(sliceName.c_str());
 	pset->open(g->fObjectId);
 	
 	m_slices[HObject::FullPath(entryName, sliceName)] = pset;
@@ -129,6 +145,48 @@ void CacheFile::readSliceVector3(const std::string & entryName, const std::strin
 	pt.start[0] = start * 3;
 	pt.count[0] = 1;
 	pt.block[0] = c * 3;
+	
+	p->read((char *)data, &pt);
+}
+
+void CacheFile::writeSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data)
+{
+	const std::string slicePath = HObject::FullPath(entryName, sliceName);
+	if(m_slices.find(slicePath) == m_slices.end()) return;
+	
+	FloatsHDataset * p = (FloatsHDataset *)m_slices[slicePath];
+	p->setNumFloats(start + count);
+	
+	if(!p->hasEnoughSpace()) p->resize();
+	
+	HDataset::SelectPart pt;
+	pt.start[0] = start;
+	pt.count[0] = 1;
+	pt.block[0] = count;
+
+	p->write((char *)data, &pt);
+}
+
+void CacheFile::readSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data)
+{
+	const std::string slicePath = HObject::FullPath(entryName, sliceName);
+	if(m_slices.find(slicePath) == m_slices.end()) return;
+	
+	FloatsHDataset * p = (FloatsHDataset *)m_slices[slicePath];
+	
+	unsigned maxcount = isCached(entryName, sliceName);
+	
+	if(maxcount < start) return;
+	
+	p->setNumFloats(maxcount);
+	
+	unsigned c = count;
+	if(c > maxcount - start) c = maxcount - start;
+	
+	HDataset::SelectPart pt;
+	pt.start[0] = start;
+	pt.count[0] = 1;
+	pt.block[0] = c;
 	
 	p->read((char *)data, &pt);
 }

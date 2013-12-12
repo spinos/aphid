@@ -77,9 +77,9 @@ bool MlCache::doCopy(const std::string & name)
 		std::string aslice = HObject::PartialPath("/p", sliceNames[i]);
 		if(aslice == "-9999") continue;
 		useDocument();
-		openSlice("/p", aslice);
+		openSliceVector3("/p", aslice);
 		tgt.useDocument();
-		tgt.openSlice("/p", aslice);
+		tgt.openSliceVector3("/p", aslice);
 		start = 0;
 		count = blockL;
 		for(j = 0; j <= psize / blockL; j++) {
