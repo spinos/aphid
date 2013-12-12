@@ -55,7 +55,7 @@ void CalamusSkin::clearFaceVicinity()
 void CalamusSkin::createFaceVicinity()
 {
 	clearFaceVicinity();
-	m_perFaceVicinity = new float[bodyMesh()->getNumFaces()];
+	m_perFaceVicinity = new BaseSphere[bodyMesh()->getNumFaces()];
 }
 
 void CalamusSkin::getPointOnBody(MlCalamus * c, Vector3F &p) const
@@ -140,42 +140,32 @@ void CalamusSkin::reduceFeather(unsigned num)
 void CalamusSkin::resetFaceVicinity()
 {
     const unsigned nf = bodyMesh()->getNumFaces();
-	for(unsigned i= 0; i < nf; i++) m_perFaceVicinity[i] = 0.f;
+	for(unsigned i= 0; i < nf; i++) m_perFaceVicinity[i].setRadius(0.f);
 }
 
-void CalamusSkin::setFaceVicinity(unsigned idx, float val)
+BaseSphere * CalamusSkin::faceVicinity(unsigned idx) const
 {
-    m_perFaceVicinity[idx] = val;
-}
-
-void CalamusSkin::touchBy(MlCalamus * c)
-{
-	const unsigned fi = c->faceIdx();
-	const float fv = c->realScale();
-	if(regionElementStart() != fi || fv > faceVicinity(fi)) {
-	    resetCollisionRegionAround(fi, fv);
-	    setFaceVicinity(fi, fv);
-	}
+    return &m_perFaceVicinity[idx];
 }
 
 void CalamusSkin::touchBy(MlCalamus * c, const Vector3F & pos, const Matrix33F & frm)
 {
 	const unsigned fi = c->faceIdx();
-	const float fv = c->realScale();
+	const float fv = c->realScale() * 0.5f;
 	Vector3F d = frm.transform(Vector3F::ZAxis);
-	d = pos + d * fv * 0.5f;
+	d = pos + d * fv;
 	BaseSphere sph;
 	sph.setCenter(d);
-	sph.setRadius(fv * 0.5f);
-	//if(regionElementStart() != fi || fv > faceVicinity(fi)) {
+	sph.setRadius(fv);
+	resetCollisionRegionAround(fi, sph);
+	/*
+	if(faceVicinity(fi)->radius() == 0.f) {
 	    resetCollisionRegionAround(fi, sph);
-	//    setFaceVicinity(fi, fv);
-	//}
-}
-
-float CalamusSkin::faceVicinity(unsigned idx) const
-{
-    return m_perFaceVicinity[idx];
+	    *faceVicinity(fi) = sph;
+	}
+	else if(regionElementStart() != fi || faceVicinity(fi)->expand(sph)) {
+	    resetCollisionRegionAround(fi, sph);
+	}*/
 }
 
 void CalamusSkin::createFaceCluster()

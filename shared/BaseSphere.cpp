@@ -1,6 +1,10 @@
 #include "BaseSphere.h"
 
-BaseSphere::BaseSphere() {}
+BaseSphere::BaseSphere() 
+{
+    m_radius = 0.f;
+}
+
 BaseSphere::~BaseSphere(){}
 
 void BaseSphere::setCenter(const Vector3F & pos)

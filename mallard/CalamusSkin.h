@@ -54,10 +54,9 @@ public:
 	void clearFaceVicinity();
 	void createFaceVicinity();
 	void resetFaceVicinity();
-	void setFaceVicinity(unsigned idx, float val);
-	void touchBy(MlCalamus * c);
+	BaseSphere * faceVicinity(unsigned idx) const;
+	
 	void touchBy(MlCalamus * c, const Vector3F & pos, const Matrix33F & frm);
-	float faceVicinity(unsigned idx) const;
 	
 	void createFaceCluster();
 	void computeFaceClustering();
@@ -77,6 +76,6 @@ private:
 	MlCalamusArray * m_calamus;
 	FloodTable * m_faceCalamusTable;
 	MlCluster * m_perFaceCluster;
-	float * m_perFaceVicinity;
+	BaseSphere * m_perFaceVicinity;
 	unsigned m_numFeather;
 };
