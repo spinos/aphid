@@ -306,7 +306,6 @@ void MlSkin::finishCreateFeather()
 	if(!hasFeatherCreated()) return;
 	if(!bodyMesh()) return;
     computeFaceCalamusIndirection();
-	computeFaceClustering();
 	m_numCreatedFeather = 0;
 	std::cout<<" increase to "<<numFeathers();
 }
@@ -337,7 +336,6 @@ void MlSkin::finishEraseFeather()
 	}
 
 	computeFaceCalamusIndirection();
-	computeFaceClustering();
 	discardActive();
 	std::cout<<" reduce to "<<numFeathers();
 }

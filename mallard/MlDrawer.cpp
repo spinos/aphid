@@ -230,6 +230,7 @@ void MlDrawer::tessellate(MlFeather * f)
 
 void MlDrawer::writeToCache(const std::string & sliceName)
 {
+	skin->computeFaceClustering();
 	skin->computeClusterSamples();
 	
 	unsigned faceIdx = skin->bodyMesh()->getNumFaces();
@@ -293,7 +294,7 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 	delete[] wpb;
 	flush();
 	
-	std::cout<<"\n calculate "<< (float)(nsamp + ncalc) / (float)nc * 100 <<"%\n";
+	std::cout<<" sample "<< (float)(nsamp + ncalc) / (float)nc * 100 <<"%\n";
 }
 
 void MlDrawer::readFromCache(const std::string & sliceName)

@@ -192,7 +192,7 @@ void CalamusSkin::computeClusterSamples()
 			c->bendFeather(p, space);
 			cluster.recordAngles(c, j);
 		}
-		cluster.computeSampleDirs(m_calamus, bodyMesh());
+		//cluster.computeSampleDirs(m_calamus, bodyMesh());
 	}
 }
 

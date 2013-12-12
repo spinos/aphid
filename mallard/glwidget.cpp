@@ -575,7 +575,6 @@ void GLWidget::afterOpen()
 	
 	body()->update(m_topo);
 	skin()->computeFaceCalamusIndirection();
-	skin()->computeFaceClustering();
 	skin()->computeVertexDisplacement();
 	skin()->resetFaceVicinity();
 	m_featherDrawer->clearCached();

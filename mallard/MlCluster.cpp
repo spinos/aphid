@@ -60,7 +60,7 @@ void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned 
 	const unsigned n = end - begin;
 	unsigned i;
 	setN(n);
-	if(n < 3) {
+	if(n < 4) {
 		setK(n);
 		resetGroup();
 		for(i = 0; i < N(); i++) m_sampleIndices[i] = begin + i;
@@ -68,7 +68,7 @@ void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned 
 		setValid(1);
 		return;
 	}
-	const unsigned k = 2 + (n - 1) / 3;
+	const unsigned k = 3 + (n - 1) / 4;
 	setK(k);
 	unsigned j;
 	float d;
@@ -94,7 +94,7 @@ void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned 
 	for(unsigned i = 0; i < K(); i++)
 		assignGroupSample(calamus, mesh, begin, i);
 	createAngles(calamus);
-	computeSampleDirs(calamus, mesh);
+	//computeSampleDirs(calamus, mesh);
 	setValid(1);
 }
 
