@@ -191,6 +191,7 @@ void MlDrawer::rebuildBuffer(MlSkin * skin, bool useCache)
 
 void MlDrawer::computeBufferIndirection()
 {
+	if(!m_skin) return;
 	const unsigned nc = m_skin->numFeathers();
 	unsigned i, nvpf;
 	unsigned loc = 0;
