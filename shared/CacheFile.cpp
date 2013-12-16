@@ -149,7 +149,7 @@ void CacheFile::readSliceVector3(const std::string & entryName, const std::strin
 	p->read((char *)data, &pt);
 }
 
-void CacheFile::writeSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data)
+void CacheFile::writeSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, float * data)
 {
 	const std::string slicePath = HObject::FullPath(entryName, sliceName);
 	if(m_slices.find(slicePath) == m_slices.end()) return;
@@ -167,7 +167,7 @@ void CacheFile::writeSliceFloat(const std::string & entryName, const std::string
 	p->write((char *)data, &pt);
 }
 
-void CacheFile::readSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data)
+void CacheFile::readSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, float * data)
 {
 	const std::string slicePath = HObject::FullPath(entryName, sliceName);
 	if(m_slices.find(slicePath) == m_slices.end()) return;

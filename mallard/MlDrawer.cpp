@@ -82,6 +82,7 @@ void MlDrawer::updateActive()
 		computeFeather(c);
 		updateBuffer(c);
 	}
+	disable();
 }
 
 void MlDrawer::updateBuffer(MlCalamus * c)
@@ -161,13 +162,13 @@ void MlDrawer::readBuffer()
 	closeEntry("/p");
 }
 
-void MlDrawer::rebuildBuffer(MlSkin * skin, bool useCache)
+void MlDrawer::rebuildBuffer(MlSkin * skin)
 {
 	m_skin = skin;
 	const unsigned nc = skin->numFeathers();
 	if(nc < 1) return;
 	
-	if(!useCache) {
+	if(!isEnabled()) {
 		rebuildIgnoreCache();
 		return;
 	}
@@ -177,16 +178,16 @@ void MlDrawer::rebuildBuffer(MlSkin * skin, bool useCache)
 	sst<<m_currentFrame;
 	
 	useDocument();
-	openEntry("/p");
-	openSliceVector3("/p", sst.str());
+	openEntry("/ang");
+	openSliceFloat("/ang", sst.str());
 	
-	if(isCached("/p", sst.str()))
+	if(isCached("/ang", sst.str()))
 		readFromCache(sst.str());
 	else
 		writeToCache(sst.str());
 		
-	closeSlice("/p", sst.str());
-	closeEntry("/p");
+	closeSlice("/ang", sst.str());
+	closeEntry("/ang");
 }
 
 void MlDrawer::computeBufferIndirection()
@@ -290,101 +291,90 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 {
     boost::timer bTimer;
 	bTimer.restart();
-	m_skin->computeFaceClustering();
-	m_skin->computeClusterSamples();
-	
-	unsigned faceIdx = m_skin->bodyMesh()->getNumFaces();
-	unsigned perFaceIdx = 0;
 	const unsigned nc = m_skin->numFeathers();
-	const unsigned blockL = 2048;
+	const unsigned blockL = 8192;
 	Vector3F * wpb = new Vector3F[blockL];
-	unsigned i, j, iblock = 0, ifull = 0;
+	unsigned i, iblock = 0, ifull = 0;
+	short j;
+	float * apb = new float[blockL];
+	
 	BoundingBox box;
 	Matrix33F space;
 	Vector3F p;
-	unsigned ncalc = 0;
-	unsigned nsamp = 0;
-	unsigned nreuse = 0;
+
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = m_skin->getCalamus(i);
 		m_skin->calamusSpace(c, space);
 		m_skin->getPointOnBody(c, p);
-		
-		if(c->faceIdx() != faceIdx) {
-			faceIdx = c->faceIdx();
-			perFaceIdx = 0;
-			nsamp += m_skin->clusterK(faceIdx);
-		}
-		
-		if(m_skin->useClusterSamples(faceIdx, perFaceIdx, c, i)) {
-			c->bendFeather();
-			c->curlFeather();
-			c->computeFeatherWorldP(p, space);
-			nreuse++;
-		}
-		else {
-			computeFeather(c, p, space);
-			ncalc++;
-		}
-		
+		computeFeather(c, p, space);
+
 		MlFeather * f = c->feather();
 		f->getBoundingBox(box);
-		for(j = 0; j < f->numWorldP(); j++) {
-			wpb[iblock] = f->worldP()[j];
+		
+		float * src = f->angles();
+		for(j = 0; j < f->numSegment(); j++) {
+			apb[iblock] = src[j];
 			iblock++;
 			ifull++;
 			if(iblock == blockL) {
-				writeSliceVector3("/p", sliceName, ifull - iblock, iblock, wpb);
+				writeSliceFloat("/ang", sliceName, ifull - iblock, iblock, apb);
 				iblock = 0;
 			}
 		}
-		
+
 		updateBuffer(c);
-		
-		perFaceIdx++;
 	}
 	
 	if(iblock > 0)
-		writeSliceVector3("/p", sliceName, ifull - iblock, iblock, wpb);
+		writeSliceFloat("/ang", sliceName, ifull - iblock, iblock, apb);
 		
-	saveEntrySize("/p", ifull);
-	setCached("/p", sliceName, ifull);
+	saveEntrySize("/ang", ifull);
+	setCached("/ang", sliceName, ifull);
 	setBounding(sliceName, box);
 	setTranslation(sliceName, m_currentOrigin);
 	delete[] wpb;
+	delete[] apb;
 	flush();
 	
-	std::cout<<" sample "<< (float)(nsamp + ncalc) / (float)nc * 100 <<"% in "<<bTimer.elapsed()<<" seconds\n";
+	std::cout<<" write "<< sliceName <<" in "<<bTimer.elapsed()<<" seconds\n";
 }
 
 void MlDrawer::readFromCache(const std::string & sliceName)
 {
 	const unsigned nc = m_skin->numFeathers();
-	const unsigned blockL = 2048;
-	Vector3F * wpb = new Vector3F[blockL];
-	unsigned i, j, iblock = 0, ifull = 0;
-	readSliceVector3("/p", sliceName, 0, blockL, wpb);
+	const unsigned blockL = 8192;
+	unsigned i, iblock = 0, ifull = 0;
+	short j;
+	float * apb = new float[blockL];
+	readSliceFloat("/ang", sliceName, 0, blockL, apb);
 	
+	Matrix33F space;
+	Vector3F p;
 	for(i = 0; i < nc; i++) {
 		
 		MlCalamus * c = m_skin->getCalamus(i);
-		
+		m_skin->calamusSpace(c, space);
+		m_skin->getPointOnBody(c, p);
 		MlFeather * f = c->feather();
 		
-		Vector3F * dst = f->worldP();
-		for(j = 0; j < f->numWorldP(); j++) {
-			dst[j] = wpb[iblock];
+		float *dst = f->angles();
+		for(j = 0; j < f->numSegment(); j++) {
+			dst[j] = apb[iblock];
 			iblock++;
 			ifull++;
 			if(iblock == blockL) {
-				readSliceVector3("/p", sliceName, ifull, blockL, wpb);
+				readSliceFloat("/ang", sliceName, ifull, blockL, apb);
 				iblock = 0;
 			}
 		}
 		
+		c->bendFeather();
+		c->curlFeather();
+		c->computeFeatherWorldP(p, space);
+		
 		updateBuffer(c);
 	}
-	delete[] wpb;
+	delete[] apb;
 }
 
 void MlDrawer::setCurrentFrame(int x)

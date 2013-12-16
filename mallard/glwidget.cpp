@@ -303,6 +303,7 @@ void GLWidget::deselectFeather()
 
 void GLWidget::rebuildFeather()
 {
+	m_featherDrawer->disable();
 	m_featherDrawer->initializeBuffer();
 	m_featherDrawer->computeBufferIndirection();
 	m_featherDrawer->rebuildBuffer(skin());
@@ -313,6 +314,8 @@ void GLWidget::rebuildFeather()
 void GLWidget::bakeFrames()
 {
 	if(!playback()->isEnabled()) return;
+	m_featherDrawer->clearCached();
+	m_featherDrawer->enable();
 	
 	const int bakeMin = playback()->playbackMin();
 	const int bakeMax = playback()->playbackMax();
@@ -330,6 +333,7 @@ void GLWidget::bakeFrames()
 	    }
 	    
 		updateOnFrame(i);
+		
 		progress->setLabelText(QString("Min %1 Max %2 Current %3").arg(bakeMin).arg(bakeMax).arg(i));
 		progress->setValue(i);
 	}

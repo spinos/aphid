@@ -28,7 +28,7 @@ public:
 	void addToBuffer();
 	void computeBufferIndirection();
 	void readBuffer();
-	void rebuildBuffer(MlSkin * skin, bool useCache = false);
+	void rebuildBuffer(MlSkin * skin);
 	void setCurrentFrame(int x);
 	void setCurrentOrigin(const Vector3F & at);
 	

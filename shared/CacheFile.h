@@ -36,8 +36,8 @@ public:
 	void writeSliceVector3(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data);
 	void readSliceVector3(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data);
 
-	void writeSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data);
-	void readSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Vector3F * data);
+	void writeSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, float * data);
+	void readSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, float * data);
 
 	void setCached(const std::string & entryName, const std::string & sliceName, unsigned size);
 	unsigned isCached(const std::string & entryName, const std::string & sliceName);
