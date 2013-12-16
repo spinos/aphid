@@ -532,6 +532,12 @@ void GLWidget::exportBake()
                                     tr("Animation not fully baked, cannot export."));
         return; 
     }
+	
+	if(isDirty()) {
+		QMessageBox::information(this, tr("Warning"),
+                                    tr("Current scene has unsaved changes, save before export."));
+        return; 
+	}
     
     QString selectedFilter;
 	QString fileName = QFileDialog::getSaveFileName(this,
