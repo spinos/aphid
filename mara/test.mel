@@ -1,4 +1,12 @@
-string $s = `createNode -n "mal" MallardViz`;
-setAttr -type "string" ($s +".cachePath") "/Users/jianzhang/aphid/mallard/build/Release/bak.mlb";
-string $d = `createNode transform`;
-connectAttr -f ($s+".outValue") ($d+".tx");
+global proc MaraImportCache()
+{
+	string $fileName = `fileDialog -dm "*.mlb"`;
+	if($fileName == "") return;
+
+	string $s = `createNode -n "mal" MallardViz`;
+	setAttr -type "string" ($s +".cachePath") $fileName;
+	string $d = `createNode transform`;
+	connectAttr -f ($s+".outValue") ($d+".tx");
+	setKeyframe -t 1 -v 1  ($s +".currentTime");
+	setKeyframe -t 24 -v 24  ($s +".currentTime");
+}

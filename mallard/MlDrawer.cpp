@@ -440,3 +440,8 @@ void MlDrawer::setCurrentOrigin(const Vector3F & at)
 {
     m_currentOrigin = at;
 }
+
+int MlDrawer::currentFrame() const
+{
+	return m_currentFrame;
+}

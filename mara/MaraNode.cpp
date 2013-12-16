@@ -58,16 +58,18 @@ MStatus MallardViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		loadCache(filename.asChar());
 		
-		m_cache->setCurrentFrame(iframe);
+		if(m_cache->currentFrame() != iframe) {
+			m_cache->setCurrentFrame(iframe);
 		
-		std::stringstream sst; sst.str("");
-		sst<<iframe;
+			std::stringstream sst; sst.str("");
+			sst<<iframe;
 		
-		m_cache->getBounding(sst.str(), m_bbox);
-		m_cache->getTranslation(sst.str(), m_bakeOrigin);
-		MGlobal::displayInfo("read buffer");
-		if(m_scene->isOpened()) m_cache->readBuffer();
-		MGlobal::displayInfo("read");
+			m_cache->getBounding(sst.str(), m_bbox);
+			m_cache->getTranslation(sst.str(), m_bakeOrigin);
+		
+			if(m_scene->isOpened()) m_cache->readBuffer();
+		}
+
 		float result = 1.f;
 
 		MDataHandle outputHandle = block.outputValue( outValue );
@@ -98,6 +100,7 @@ void MallardViz::draw( M3dView & view, const MDagPath & path,
 	
 	//if ( ( style == M3dView::kFlatShaded ) || 
 	//	    ( style == M3dView::kGouraudShaded ) ) {
+	glShadeModel(GL_SMOOTH);
 	glPushMatrix();
 		glPushAttrib(GL_LIGHTING_BIT);
 		glEnable(GL_LIGHTING);

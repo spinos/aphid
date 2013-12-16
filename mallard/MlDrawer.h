@@ -32,6 +32,7 @@ public:
 	void setCurrentFrame(int x);
 	void setCurrentOrigin(const Vector3F & at);
 	
+	int currentFrame() const;
 protected:
 	
 private:
