@@ -65,8 +65,9 @@ MStatus MallardViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		m_cache->getBounding(sst.str(), m_bbox);
 		m_cache->getTranslation(sst.str(), m_bakeOrigin);
-		
-		if(m_scene->isOpened()) m_cache->readBuffer(m_scene->skin());
+		MGlobal::displayInfo("read buffer");
+		if(m_scene->isOpened()) m_cache->readBuffer();
+		MGlobal::displayInfo("read");
 		float result = 1.f;
 
 		MDataHandle outputHandle = block.outputValue( outValue );
@@ -104,7 +105,7 @@ void MallardViz::draw( M3dView & view, const MDagPath & path,
 		
             
             glTranslatef(m_bakeOrigin.x, m_bakeOrigin.y, m_bakeOrigin.z);
-			if(m_scene->isOpened()) m_cache->draw(m_scene->skin());
+			if(m_scene->isOpened()) m_cache->draw();
 			
             
         
@@ -189,8 +190,10 @@ void MallardViz::loadCache(const char* filename)
 	    
 	if(m_scene->isOpened()) {
 		MlCalamus::FeatherLibrary = m_scene;
-		m_cache->computeBufferIndirection(m_scene->skin());
+		m_cache->setSkin(m_scene->skin());
+		m_cache->computeBufferIndirection();
 	}
+	MGlobal::displayInfo(MString("Loaded ") + filename);
 }
 
 void MallardViz::loadScene(const char* filename)

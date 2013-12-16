@@ -527,7 +527,7 @@ void GLWidget::exportBake()
         return;   
     }
     
-    if(playback()->rangeLength() > m_featherDrawer->numCachedSlices("/p")) {
+    if(!m_featherDrawer->isBaked(playback()->rangeLength())) {
         QMessageBox::information(this, tr("Warning"),
                                     tr("Animation not fully baked, cannot export."));
         return; 

@@ -1,0 +1,4 @@
+string $s = `createNode -n "mal" MallardViz`;
+setAttr -type "string" ($s +".cachePath") "/Users/jianzhang/aphid/mallard/build/Release/bak.mlb";
+string $d = `createNode transform`;
+connectAttr -f ($s+".outValue") ($d+".tx");

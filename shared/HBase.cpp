@@ -133,6 +133,16 @@ void HBase::writeVector3Data(const char * dataName, unsigned count, Vector3F *va
 	pset.close();
 }
 
+void HBase::writeMatrix33Data(const char * dataName, unsigned count, Matrix33F *value, HDataset::SelectPart * part)
+{
+	FloatsHDataset cset(dataName);
+	cset.setNumFloats(count * 9);
+	cset.open(fObjectId);
+
+	if(!cset.write((char *)value, part)) std::cout<<dataName<<" write failed";
+	cset.close();
+}
+
 void HBase::writeCharData(const char * dataName, unsigned count, char *value, HDataset::SelectPart * part)
 {
 	HCharData pset(dataName);
@@ -241,6 +251,22 @@ char HBase::readVector3Data(const char * dataName, unsigned count, Vector3F *dst
 	
 	pset.read((char *)dst, part);
 	pset.close();
+	return 1;
+}
+
+char HBase::readMatrix33Data(const char * dataName, unsigned count, Matrix33F *dst, HDataset::SelectPart * part)
+{
+	FloatsHDataset cset(dataName);
+	cset.setNumFloats(count * 9);
+	
+	if(!cset.open(fObjectId)) {
+		std::cout<<dataName<<" open failed";
+		return 0;
+	}
+	
+	cset.read((char *)dst, part);
+		
+	cset.close();
 	return 1;
 }
 

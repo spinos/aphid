@@ -21,6 +21,9 @@ public:
 	
 	void setSceneName(const std::string & name);
 	std::string sceneName();
+	
+	bool isBaked(unsigned n) const;
 private:
+	void setCachedSlices(const std::string & name);
 	std::string m_sceneName;
 };

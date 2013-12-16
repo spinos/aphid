@@ -150,16 +150,24 @@ void MlDrawer::readBuffer()
 	sst.str("");
 	sst<<m_currentFrame;
 	
-	if(!isCached("/p", sst.str())) return;
+	if(!isCached("/ang", sst.str())) return;
 	
 	useDocument();
+	openEntry("/ang");
+	openSliceFloat("/ang", sst.str());
 	openEntry("/p");
 	openSliceVector3("/p", sst.str());
+	openEntry("/tang");
+	openSliceMatrix33("/tang", sst.str());
 	
 	readFromCache(sst.str());
 		
+	closeSlice("/ang", sst.str());
+	closeEntry("/ang");
 	closeSlice("/p", sst.str());
 	closeEntry("/p");
+	closeSlice("/tang", sst.str());
+	closeEntry("/tang");
 }
 
 void MlDrawer::rebuildBuffer(MlSkin * skin)
@@ -180,6 +188,10 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 	useDocument();
 	openEntry("/ang");
 	openSliceFloat("/ang", sst.str());
+	openEntry("/p");
+	openSliceVector3("/p", sst.str());
+	openEntry("/tang");
+	openSliceMatrix33("/tang", sst.str());
 	
 	if(isCached("/ang", sst.str()))
 		readFromCache(sst.str());
@@ -188,6 +200,10 @@ void MlDrawer::rebuildBuffer(MlSkin * skin)
 		
 	closeSlice("/ang", sst.str());
 	closeEntry("/ang");
+	closeSlice("/p", sst.str());
+	closeEntry("/p");
+	closeSlice("/tang", sst.str());
+	closeEntry("/tang");
 }
 
 void MlDrawer::computeBufferIndirection()
@@ -292,11 +308,13 @@ void MlDrawer::writeToCache(const std::string & sliceName)
     boost::timer bTimer;
 	bTimer.restart();
 	const unsigned nc = m_skin->numFeathers();
-	const unsigned blockL = 8192;
+	const unsigned blockL = 4096;
 	Vector3F * wpb = new Vector3F[blockL];
-	unsigned i, iblock = 0, ifull = 0;
+	unsigned i, iblock = 0, ifull = 0, ipblock = 0, ipfull = 0;
 	short j;
 	float * apb = new float[blockL];
+	
+	Matrix33F * tangs = new Matrix33F[blockL];
 	
 	BoundingBox box;
 	Matrix33F space;
@@ -306,6 +324,17 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 		MlCalamus * c = m_skin->getCalamus(i);
 		m_skin->calamusSpace(c, space);
 		m_skin->getPointOnBody(c, p);
+		
+		wpb[ipblock] = p;
+		tangs[ipblock] = space;
+		ipblock++;
+		ipfull++;
+		if(ipblock == blockL) {
+			writeSliceVector3("/p", sliceName, ipfull - ipblock, ipblock, wpb);
+			writeSliceMatrix33("/tang", sliceName, ipfull - ipblock, ipblock, tangs);
+			ipblock = 0;
+		}
+		
 		computeFeather(c, p, space);
 
 		MlFeather * f = c->feather();
@@ -325,15 +354,25 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 		updateBuffer(c);
 	}
 	
+	if(ipblock > 0) {
+		writeSliceVector3("/p", sliceName, ipfull - ipblock, ipblock, wpb);
+		writeSliceMatrix33("/tang", sliceName, ipfull - ipblock, ipblock, tangs);
+	}
+	
 	if(iblock > 0)
 		writeSliceFloat("/ang", sliceName, ifull - iblock, iblock, apb);
 		
+	saveEntrySize("/p", ipfull);
+	setCached("/p", sliceName, ipfull);
+	saveEntrySize("/tang", ipfull);
+	setCached("/tang", sliceName, ipfull);
 	saveEntrySize("/ang", ifull);
 	setCached("/ang", sliceName, ifull);
 	setBounding(sliceName, box);
 	setTranslation(sliceName, m_currentOrigin);
 	delete[] wpb;
 	delete[] apb;
+	delete[] tangs;
 	flush();
 	
 	std::cout<<" write "<< sliceName <<" in "<<bTimer.elapsed()<<" seconds\n";
@@ -342,22 +381,35 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 void MlDrawer::readFromCache(const std::string & sliceName)
 {
 	const unsigned nc = m_skin->numFeathers();
-	const unsigned blockL = 8192;
+	const unsigned blockL = 4096;
 	unsigned i, iblock = 0, ifull = 0;
+	unsigned ipblock = 0, ipfull = 0;
 	short j;
 	float * apb = new float[blockL];
 	readSliceFloat("/ang", sliceName, 0, blockL, apb);
-	
+	Vector3F * wpb = new Vector3F[blockL];
+	readSliceVector3("/p", sliceName, 0, blockL, wpb);
+	Matrix33F * tangs = new Matrix33F[blockL];
+	readSliceMatrix33("/tang", sliceName, 0, blockL, tangs);
+
 	Matrix33F space;
 	Vector3F p;
 	for(i = 0; i < nc; i++) {
-		
 		MlCalamus * c = m_skin->getCalamus(i);
-		m_skin->calamusSpace(c, space);
-		m_skin->getPointOnBody(c, p);
+		space = tangs[ipblock];
+		p = wpb[ipblock];
+		ipblock++;
+		ipfull++;
+		if(ipblock == blockL) {
+			readSliceVector3("/p", sliceName, ipfull, blockL, wpb);
+			readSliceMatrix33("/tang", sliceName, ipfull, blockL, tangs);
+			ipblock = 0;
+		}
+		
 		MlFeather * f = c->feather();
 		
 		float *dst = f->angles();
+		
 		for(j = 0; j < f->numSegment(); j++) {
 			dst[j] = apb[iblock];
 			iblock++;
@@ -375,6 +427,8 @@ void MlDrawer::readFromCache(const std::string & sliceName)
 		updateBuffer(c);
 	}
 	delete[] apb;
+	delete[] wpb;
+	delete[] tangs;
 }
 
 void MlDrawer::setCurrentFrame(int x)

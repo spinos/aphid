@@ -28,6 +28,7 @@ public:
 	void closeEntry(const std::string & name);
 	bool openSliceFloat(const std::string & entryName, const std::string & sliceName);
 	bool openSliceVector3(const std::string & entryName, const std::string & sliceName);
+	bool openSliceMatrix33(const std::string & entryName, const std::string & sliceName);
 	void closeSlice(const std::string & entryName, const std::string & sliceName);
 	
 	void saveEntrySize(const std::string & entryName, unsigned size);
@@ -38,6 +39,9 @@ public:
 
 	void writeSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, float * data);
 	void readSliceFloat(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, float * data);
+
+	void writeSliceMatrix33(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Matrix33F * data);
+	void readSliceMatrix33(const std::string & entryName, const std::string & sliceName, unsigned start, unsigned count, Matrix33F * data);
 
 	void setCached(const std::string & entryName, const std::string & sliceName, unsigned size);
 	unsigned isCached(const std::string & entryName, const std::string & sliceName);
