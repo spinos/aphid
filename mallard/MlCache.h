@@ -22,8 +22,12 @@ public:
 	void setSceneName(const std::string & name);
 	std::string sceneName();
 	
+	void setBakeRange(int low, int high);
+	void bakeRange(int & low, int & high) const;
+	
 	bool isBaked(unsigned n) const;
 private:
 	void setCachedSlices(const std::string & name);
 	std::string m_sceneName;
+	int m_bakeRange[2];
 };

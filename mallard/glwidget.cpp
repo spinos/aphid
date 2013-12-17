@@ -548,6 +548,9 @@ void GLWidget::exportBake()
 							QFileDialog::DontUseNativeDialog);
 	if(fileName == "") return;
 	m_featherDrawer->setSceneName(MlScene::fileName());
+	int rangeMin, rangeMax;
+	bakeRange(rangeMin, rangeMax);
+	m_featherDrawer->setBakeRange(rangeMin, rangeMax);
 	if(m_featherDrawer->doCopy(fileName.toUtf8().data()))
 		emit sendMessage(QString("Exported feather cache to file %1").arg(fileName));
 }

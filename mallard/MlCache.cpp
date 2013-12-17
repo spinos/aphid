@@ -26,6 +26,8 @@ bool MlCache::doRead(const std::string & name)
 	HBase *info = getNamedEntry("/info");
 	if(info->hasNamedAttr(".scene"))
 	    info->readStringAttr(".scene", m_sceneName);
+	if(info->hasNamedAttr(".range"))
+	    info->readIntAttr(".range", m_bakeRange);
 	closeEntry("/info");
 	
 	setCachedSlices("/p");
@@ -62,6 +64,8 @@ bool MlCache::doCopy(const std::string & name)
 	HBase *info = tgt.getNamedEntry("/info");
 	info->addStringAttr(".scene", m_sceneName.size());
 	info->writeStringAttr(".scene", m_sceneName);
+	info->addIntAttr(".range", 2);
+	info->writeIntAttr(".range", m_bakeRange);
 	tgt.closeEntry("/info");
 	
 	tgt.openEntry("/ang");
@@ -188,4 +192,16 @@ void MlCache::setCachedSlices(const std::string & name)
 	}
 	
 	closeEntry(name);
+}
+
+void MlCache::setBakeRange(int low, int high)
+{
+    m_bakeRange[0] = low;
+    m_bakeRange[1] = high;
+}
+	
+void MlCache::bakeRange(int & low, int & high) const
+{
+    low = m_bakeRange[0];
+    high = m_bakeRange[1];
 }

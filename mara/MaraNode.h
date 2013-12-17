@@ -47,6 +47,8 @@ public:
 	static MObject acachename;
 	static MObject aframe;
 	static MObject ainmesh;
+	static MObject arangeLow;
+	static MObject arangeHigh;
 	static MObject outValue;
 	
 	void setCullMesh(MDagPath mesh);

@@ -28,6 +28,8 @@ MObject MallardViz::outValue;
 MObject MallardViz::aframe;
 MObject MallardViz::acachename;
 MObject MallardViz::ainmesh;
+MObject MallardViz::arangeLow;
+MObject MallardViz::arangeHigh;
 
 MallardViz::MallardViz() : fHasView(0) 
 {
@@ -172,6 +174,16 @@ MStatus MallardViz::initialize()
 	typedAttrFn.setConnectable(true);
 	addAttribute( ainmesh );
 	
+	arangeLow = numFn.create( "bakeMin", "bmn", MFnNumericData::kInt );
+	numFn.setStorable(false);
+	numFn.setWritable(false);
+	addAttribute(arangeLow);
+	
+	arangeHigh = numFn.create( "bakeMax", "bmx", MFnNumericData::kInt );
+	numFn.setStorable(false);
+	numFn.setWritable(false);
+	addAttribute(arangeHigh);
+	
 	attributeAffects(ainmesh, outValue);
 	attributeAffects(acachename, outValue);
 	attributeAffects(aframe, outValue);
@@ -196,6 +208,13 @@ void MallardViz::loadCache(const char* filename)
 		m_cache->setSkin(m_scene->skin());
 		m_cache->computeBufferIndirection();
 	}
+	int bakeRangeMin, bakeRangeMax;
+	m_cache->bakeRange(bakeRangeMin, bakeRangeMax);
+	MGlobal::displayInfo(MString("bake min/max frame: ") + bakeRangeMin + " " + bakeRangeMax);
+	
+	MFnDependencyNode fnode(thisMObject());
+	fnode.findPlug(arangeLow).setValue(bakeRangeMin);
+	fnode.findPlug(arangeHigh).setValue(bakeRangeMax);
 	MGlobal::displayInfo(MString("Loaded ") + filename);
 }
 
@@ -205,7 +224,6 @@ void MallardViz::loadScene(const char* filename)
         
     m_scene->open(filename);
 	MGlobal::displayInfo(MString("scene is opened ")+ m_scene->fileName().c_str());
-	
 }
 
 void MallardViz::setCullMesh(MDagPath mesh)

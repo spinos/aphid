@@ -1,3 +1,36 @@
+global proc maraSetupTimeAct()
+{
+    string $attr = `text -q -l mara_nodeLine` +".currentTime";
+    int $offset = `intFieldGrp -q -value1 mara_bakeOffset`;
+    int $low = `intFieldGrp -q -value1 mara_bakeRange`;
+    int $high = `intFieldGrp -q -value2 mara_bakeRange`;
+    setKeyframe -t ($low + $offset) -v $low $attr;
+	setKeyframe -t ($high + $offset) -v $high  $attr;
+	
+	string $anim = `text -q -l mara_nodeLine` +"_currentTime";
+	selectKey -clear ;
+	selectKey -add -k $anim;
+	keyTangent -itt linear -ott linear;
+}
+
+global proc maraSetupTimeUI(int $low, int $high, string $node)
+{
+    print (" "+$low + ":" + $high);
+	if ( (`window -exists mara_timeNote`) == true ) deleteUI mara_timeNote;
+	window -title "Setup Mallard Cache" -wh 480 320 mara_timeNote;
+	columnLayout -adjustableColumn true;
+	text -l $node mara_nodeLine;
+	intFieldGrp -numberOfFields 2
+                -label "Bake Min/Max"
+                -value1 $low -value2 $high mara_bakeRange;
+    intFieldGrp -numberOfFields 1
+                -label "Time Offset"
+                -value1 0 mara_bakeOffset;
+    button -l "Set" -c "maraSetupTimeAct; deleteUI mara_timeNote";
+	setParent..;
+	showWindow mara_timeNote;
+}
+
 global proc MaraImportCache()
 {
 	string $fileName = `fileDialog -dm "*.mlb"`;
@@ -7,6 +40,10 @@ global proc MaraImportCache()
 	setAttr -type "string" ($s +".cachePath") $fileName;
 	string $d = `createNode transform`;
 	connectAttr -f ($s+".outValue") ($d+".tx");
-	setKeyframe -t 1 -v 1  ($s +".currentTime");
-	setKeyframe -t 24 -v 24  ($s +".currentTime");
+	
+	refresh -f -cv;
+	
+	int $rangeMin = `getAttr ($s+".bakeMin")`;
+	int $rangeMax = `getAttr ($s+".bakeMax")`;
+	maraSetupTimeUI($rangeMin, $rangeMax, $s);
 }

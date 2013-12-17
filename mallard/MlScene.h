@@ -47,6 +47,7 @@ public:
 	void disableDeformer();
 	
 	void delayLoadBake();
+	void bakeRange(int & low, int & high) const;
 private:
 	void writeFeatherExamples();
 	void readFeatherExamples();

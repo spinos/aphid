@@ -374,3 +374,9 @@ void MlScene::delayLoadBake()
 		skin()->computeVertexDisplacement();
 	}
 }
+
+void MlScene::bakeRange(int & low, int & high) const
+{
+    low = m_deformer->minFrame();
+    high = m_deformer->maxFrame();
+}
