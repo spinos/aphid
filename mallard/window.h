@@ -54,6 +54,7 @@ class ToolBox;
 class BrushControl;
 class FeatherEdit;
 class TimeControl;
+class BarbEdit;
 
 class Window : public QMainWindow
 {
@@ -71,12 +72,14 @@ private:
 	BrushControl * m_brushControl;
 	FeatherEdit * m_featherEdit;
 	TimeControl * m_timeControl;
+	BarbEdit * m_barbEdit;
 	QMenu * fileMenu;
 	QMenu *recentFilesMenu;
 	QMenu * windowMenu;
 	QAction * showBrushControlAct;
 	QAction * showFeatherEditAct;
 	QAction * showTimeControlAct;
+	QAction * showBarbEditAct;
 	QAction * newSceneAct;
 	QAction * openSceneAct;
 	QAction * saveSceneAct;

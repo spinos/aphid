@@ -48,17 +48,18 @@
 #include "MlUVView.h"
 #include "window.h"
 #include "TimeControl.h"
-//! [0]
+#include "BarbEdit.h"
 Window::Window()
 {
 	std::cout<<"Initializing Mallard main window ";
     glWidget = new GLWidget;
 	m_tools = new ToolBox;
+	m_barbEdit = new BarbEdit(this);
 	
 	glWidget->setInteractContext(m_tools);
 	m_brushControl = new BrushControl(this);
 	m_featherEdit = new FeatherEdit(this);
-	MlUVView::FeatherLibrary = glWidget;
+	FeatherExample::FeatherLibrary = glWidget;
 	m_timeControl = new TimeControl(this);
 	glWidget->setPlayback(m_timeControl);
 	addToolBar(m_tools);
@@ -138,6 +139,10 @@ void Window::createActions()
 	showTimeControlAct->setStatusTip(tr("Show time control"));
     connect(showTimeControlAct, SIGNAL(triggered()), m_timeControl, SLOT(show()));
 	
+    showBarbEditAct = new QAction(tr("&Barb Preview"), this);
+    showBarbEditAct->setStatusTip(tr("Show barb preview"));
+    connect(showBarbEditAct, SIGNAL(triggered()), m_barbEdit, SLOT(show()));
+    
 	saveSceneAct = new QAction(tr("&Save"), this);
 	saveSceneAct->setStatusTip(tr("Save current scene file"));
     connect(saveSceneAct, SIGNAL(triggered()), glWidget, SLOT(saveSheet()));
@@ -202,6 +207,7 @@ void Window::createMenus()
     windowMenu->addAction(showFeatherEditAct);
 	windowMenu->addAction(showBrushControlAct);
 	windowMenu->addAction(showTimeControlAct);
+	windowMenu->addAction(showBarbEditAct);
 	
 	updateRecentFileActions();
 }

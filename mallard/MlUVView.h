@@ -9,10 +9,10 @@
 
 #pragma once
 #include <Base2DView.h>
-class MlFeatherCollection;
+#include <FeatherExample.h>
 class MlFeather;
 
-class MlUVView : public Base2DView {
+class MlUVView : public Base2DView, public FeatherExample {
 Q_OBJECT
 
 public:
@@ -28,9 +28,6 @@ public:
     void changeSelectedFeatherNSegment(int d);
 	void chooseImageBackground(std::string & name);
 	void loadImageBackground(const std::string & name);
-	
-	static MlFeatherCollection * FeatherLibrary;
-
 private:
 	bool pickupFeather(const Vector2F & p);
 	void drawFeather(MlFeather * f);
@@ -39,7 +36,6 @@ private:
 private:
 	float * m_selectedVert;
 	Vector2F m_selectVertWP;
-	int m_activeId;
 	int m_texId;
 	bool m_moveYOnly;
 };

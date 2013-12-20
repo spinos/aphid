@@ -15,12 +15,11 @@
 #include <QtGui>
 #include <ToolContext.h>
 #include <zEXRImage.h>
-MlFeatherCollection * MlUVView::FeatherLibrary = 0;
 
 MlUVView::MlUVView(QWidget *parent) : Base2DView(parent)
 {
 	std::cout<<"UVview ";
-	m_activeId = m_texId = -1;
+	m_texId = -1;
 	m_selectedVert = 0;
 }
 
@@ -45,8 +44,6 @@ void MlUVView::clientDraw()
 		drawFeather(f);
 	}
 	
-	if(m_activeId < 0) return;
-	
 	f = FeatherLibrary->selectedFeatherExample();
 	if(!f) return;
 	getDrawer()->boundingRectangle(f->getBoundingRectangle());
@@ -66,7 +63,6 @@ void MlUVView::clientSelect()
 	Vector2F p(ray->m_origin.x, ray->m_origin.y);
 	startTracking(p);
 	pickupFeather(p);
-	if(m_activeId < 0) return;
 	if(interactMode() ==  ToolContext::MoveVertexInUV) {
 		m_selectedVert = FeatherLibrary->selectedFeatherExample()->selectVertexInUV(p, m_moveYOnly, m_selectVertWP);
 	}
@@ -74,28 +70,28 @@ void MlUVView::clientSelect()
 
 bool MlUVView::pickupFeather(const Vector2F & p)
 {
-	m_activeId = -1;
+	int activeId = -1;
 	if(!FeatherLibrary) return false;
 	
 	for(MlFeather *f = FeatherLibrary->firstFeatherExample(); FeatherLibrary->hasFeatherExample(); f = FeatherLibrary->nextFeatherExample()) {
 		if(!f) continue;
 		
 		if(f->getBoundingRectangle().isPointInside(p)) {
-			m_activeId = f->featherId();
+			activeId = f->featherId();
 		}
 	}
 	
-	if(m_activeId < 0) return false;
+	if(activeId < 0) return false;
 	
-	if(!FeatherLibrary->selectFeatherExample(m_activeId))
-		std::cout<<"no feather["<<m_activeId<<"]\n";
+	if(!FeatherLibrary->selectFeatherExample(activeId))
+		std::cout<<"no feather["<<activeId<<"]\n";
 	
 	return true;
 }
 
 void MlUVView::clientMouseInput()
 {
-	if(m_activeId < 0) return;
+	if(!FeatherLibrary) return;
 	const Ray * ray = getIncidentRay();
 	Vector2F p(ray->m_origin.x, ray->m_origin.y);
 	Vector2F d = updateTracking(p);
@@ -256,9 +252,8 @@ void MlUVView::drawControlVectors(MlFeather * f)
 
 void MlUVView::drawActiveBound()
 {
-	if(m_activeId < 0 ) return;
 	if(!FeatherLibrary) return;
-	
+
 	MlFeather * f = FeatherLibrary->selectedFeatherExample();
 	if(!f) return;
 	
@@ -272,7 +267,7 @@ void MlUVView::addFeather()
 
 void MlUVView::removeSelectedFeather()
 {
-	if(m_activeId < 0 ) return;
+	if(!FeatherLibrary) return;
 	MlFeather * f = FeatherLibrary->selectedFeatherExample();
 	if(!f) return;
 	
@@ -290,7 +285,6 @@ void MlUVView::removeSelectedFeather()
 
 void MlUVView::changeSelectedFeatherNSegment(int d)
 {
-	if(m_activeId < 0 ) return;
 	if(!FeatherLibrary) return;
 	
 	MlFeather * f = FeatherLibrary->selectedFeatherExample();

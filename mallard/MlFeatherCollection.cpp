@@ -13,7 +13,7 @@
 
 MlFeatherCollection::MlFeatherCollection()
 {
-	initializeFeatherExample();
+    initializeFeatherExample();
 }
 
 MlFeatherCollection::~MlFeatherCollection()
@@ -48,8 +48,8 @@ MlFeather * MlFeatherCollection::addFeatherExampleId(unsigned idx)
 
 bool MlFeatherCollection::selectFeatherExample(unsigned x)
 {
-	if(!featherIdExists(x)) return false;
-		
+    if(!featherIdExists(x)) return false;
+	std::cout<<" select feather["<<x<<"]\n";	
 	m_selectedFeatherId = x;
 	return true;
 }

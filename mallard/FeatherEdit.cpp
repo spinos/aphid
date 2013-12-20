@@ -26,7 +26,7 @@ FeatherEdit::FeatherEdit(QWidget *parent)
 	layout->addWidget(m_view);
 	layout->setStretch(1, 1);
 	setLayout(layout);
-	setWindowTitle(tr("Feather Editor"));
+	setWindowTitle(tr("Feather UV Editor"));
 	
 	setContentsMargins(0, 0, 0, 0);
 	layout->setContentsMargins(0, 0, 0, 0);

@@ -33,7 +33,7 @@ public:
 	MlFeather* firstFeatherExample();
 	MlFeather* nextFeatherExample();
 	bool hasFeatherExample();
-	
+
 	void setCollision(CollisionRegion * skin);
 private:
 	unsigned numFeatherExamples() const;

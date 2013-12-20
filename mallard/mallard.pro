@@ -36,6 +36,10 @@ HEADERS       =	../shared/ContextIconFrame.h \
 	TimeControl.h \
     LaplaceSmoother.h \
 	MlCluster.h \
+	MlVane.h \
+	BarbEdit.h \
+	BarbView.h \
+	FeatherExample.h \
                 window.h
                 
 SOURCES       = ../shared/ContextIconFrame.cpp \
@@ -68,6 +72,10 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 	TimeControl.cpp \
     LaplaceSmoother.cpp \
 	MlCluster.cpp \
+	MlVane.cpp \
+	BarbEdit.cpp \
+	BarbView.cpp \
+	FeatherExample.cpp \
     window.cpp \
                 main.cpp
                 
