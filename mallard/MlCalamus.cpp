@@ -44,7 +44,7 @@ void MlCalamus::curlFeather()
 
 void MlCalamus::computeFeatherWorldP(const Vector3F & origin, const Matrix33F& space)
 {
-	feather()->computeWorldP(m_faceIdx, m_patchU, m_patchV, origin, space, rotateY(), scale());
+	feather()->computeWorldP(origin, space, scale());
 }
 
 MlFeather * MlCalamus::feather() const

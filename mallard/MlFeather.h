@@ -4,6 +4,7 @@
 #include <BoundingBox.h>
 class MlRachis;
 class CollisionRegion;
+class MlVane;
 class MlFeather {
 public:
     MlFeather();
@@ -28,10 +29,11 @@ public:
 	void bendAt(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
 	void curl(float val);
 	
-	void computeWorldP(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float& pitch, const float & scale);
+	void computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
 	Vector3F * worldP();
 	Vector3F * segmentOriginWP(short seg);
 	Vector3F * segmentVaneWP(short seg, short side, short idx);
+	Vector3F * segmentVaneWP1(unsigned seg, unsigned end, short side);
 	
 	Vector3F getSegmentOriginWP(short seg) const;
 	Vector3F getSegmentVaneWP(short seg, short side, short idx) const;
@@ -59,6 +61,11 @@ public:
 	float * angles() const;
 	float bendDirection() const;
 	void verbose();
+	
+	MlVane * vane(short side) const;
+	void setupVane();
+	void updateVane();
+
 private:
 	void computeBounding();
 	void simpleCreate(int ns = 5);
@@ -72,6 +79,7 @@ private:
     Vector2F * m_vaneVertices;
 	Vector3F * m_worldP;
 	Vector2F * m_st;
+	MlVane * m_vane;
 	float m_length;
     short m_numSeg, m_id;
 };

@@ -110,6 +110,7 @@ void MlUVView::clientMouseInput()
 				m_selectVertWP += d;
 			}
 			FeatherLibrary->selectedFeatherExample()->computeTexcoord();
+			FeatherLibrary->selectedFeatherExample()->updateVane();
 		}
 	}
 }

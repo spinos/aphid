@@ -1035,4 +1035,17 @@ void BaseDrawer::lines(const std::vector<Vector3F> & vs)
 		glVertex3fv((float *)&(*it));
 	glEnd();
 }
+
+void BaseDrawer::lineStripes(const unsigned & num, unsigned * nv, Vector3F * vs) const
+{
+	unsigned acc = 0;
+	for(unsigned i = 0; i < num; i++) {
+		glBegin(GL_LINE_STRIP);
+		for(unsigned j = 0; j < nv[i]; j++) {
+			glVertex3fv((float *)&vs[acc]);
+			acc++;
+		}
+		glEnd();
+	}
+}
 //:~

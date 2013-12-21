@@ -20,7 +20,7 @@ void MlVane::create(unsigned gridU, unsigned gridV)
 {
      if(m_rails) delete[] m_rails;
      m_rails = new BezierCurve[gridV + 1];
-     for(unsigned i=0; i < gridV; i++)
+     for(unsigned i=0; i <= gridV; i++)
          m_rails[i].createVertices(gridU + 1);
      m_gridU = gridU;
      m_gridV = gridV;
@@ -34,16 +34,24 @@ BezierCurve * MlVane::profile(unsigned idx) const
 
 void MlVane::computeKnots()
 {
-     for(unsigned i=0; i <= m_gridV; i++)
+	for(unsigned i=0; i <= m_gridV; i++)
          m_rails[i].computeKnots();
 }
 
-void MlVane::pointOnVane(float u, float v, Vector3F & dst)
+void MlVane::setU(float u)
 {
-    for(unsigned i=0; i <= m_gridV; i++) {
+	for(unsigned i=0; i <= m_gridV; i++) {
         m_profile.m_cvs[i] = m_rails[i].interpolate(u);
     }
     m_profile.computeKnots();
+}
+
+void MlVane::pointOnVane(float v, Vector3F & dst)
+{
     dst = m_profile.interpolate(v);
 }
 
+Vector3F * MlVane::railCV(unsigned u, unsigned v)
+{
+	return &m_rails[v].m_cvs[u];
+}

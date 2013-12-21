@@ -27,7 +27,7 @@ void BezierCurve::calculateCage(unsigned seg, Vector3F *p) const
 {
 	if(seg == 0) p[0] = m_cvs[0];
 	else p[0] = (m_cvs[seg] * 2.f + m_cvs[seg - 1] + m_cvs[seg + 1]) * .25f;
-	
+
 	if(seg >= numSegments() - 1) p[3] = m_cvs[numSegments()];
 	else p[3] = (m_cvs[seg + 1] * 2.f + m_cvs[seg] + m_cvs[seg + 2]) * .25f;
 

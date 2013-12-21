@@ -8,7 +8,9 @@ public:
     void create(unsigned gridU, unsigned gridV);
     BezierCurve * profile(unsigned idx) const;
     void computeKnots();
-    void pointOnVane(float u, float v, Vector3F & dst);
+	void setU(float u);
+    void pointOnVane(float v, Vector3F & dst);
+	Vector3F * railCV(unsigned u, unsigned v);
 private:
     BezierCurve m_profile;
     BezierCurve * m_rails;

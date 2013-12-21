@@ -95,6 +95,7 @@ char HFeather::load(MlFeather * feather)
 	feather->setBaseUV(uv);
 	feather->computeLength();
 	feather->computeTexcoord();
+	feather->setupVane();
 	feather->verbose();
 	
 	return 1;

@@ -59,7 +59,7 @@ unsigned BaseCurve::numSegments() const
 
 unsigned BaseCurve::segmentByParameter(float param) const
 {
-	if(param < 0.f) return 0;
+	if(param <= 0.f) return 0;
 	if(param >= 1.f) return numSegments() - 1;
 	return param * numSegments();
 }
