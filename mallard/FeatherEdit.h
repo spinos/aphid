@@ -18,7 +18,7 @@ class FeatherEdit : public QDialog
 	
 public:
 	FeatherEdit(QWidget *parent = 0);
-	
+	QWidget * uvView();
 signals:
 	void textureLoaded(QString name);
 	void featherAdded();

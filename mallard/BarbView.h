@@ -11,6 +11,8 @@ public:
 	virtual void clientDraw();
 	virtual void clientSelect();
 	virtual void clientMouseInput();
+public slots:
+	void receiveShapeChanged();
 
 private:
 

@@ -28,6 +28,8 @@ public:
     void changeSelectedFeatherNSegment(int d);
 	void chooseImageBackground(std::string & name);
 	void loadImageBackground(const std::string & name);
+signals:
+	void shapeChanged();
 private:
 	bool pickupFeather(const Vector2F & p);
 	void drawFeather(MlFeather * f);

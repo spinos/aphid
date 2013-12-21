@@ -9,6 +9,7 @@ class BarbEdit : public QDialog
 public:
 	BarbEdit(QWidget *parent = 0);
 	
+	QWidget * barbView();
 signals:
 	
 public slots:

@@ -84,6 +84,7 @@ Window::Window()
 	connect(m_featherEdit, SIGNAL(featherAdded()), glWidget, SLOT(receiveFeatherAdded()));
 	connect(glWidget, SIGNAL(sendFeatherEditBackground(QString)), m_featherEdit, SLOT(receiveTexture(QString)));
 	connect(m_timeControl, SIGNAL(currentFrameChanged(int)), glWidget, SLOT(updateOnFrame(int)));
+	connect(m_featherEdit->uvView(), SIGNAL(shapeChanged()), m_barbEdit->barbView(), SLOT(receiveShapeChanged()));
 	
 	std::cout<<"Ready\n";
 	statusBar()->showMessage(tr("Ready"));

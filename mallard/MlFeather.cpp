@@ -38,8 +38,8 @@ void MlFeather::setupVane()
 {
 	m_vane[0].create(m_numSeg, 3);
 	m_vane[1].create(m_numSeg, 3);
-	Vector3F oriP;
-	Matrix33F oriR;
+	Vector3F oriP(4.f, 0.f, 4.f);
+	Matrix33F oriR; oriR.fill(Vector3F::ZAxis, Vector3F::XAxis, Vector3F::YAxis);
 	float sc = 1.f;
 	m_rachis->reset();
 	computeWorldP(oriP, oriR, sc);
@@ -49,10 +49,9 @@ void MlFeather::setupVane()
 
 void MlFeather::updateVane()
 {
-	Vector3F oriP;
-	Matrix33F oriR;
+	Vector3F oriP(4.f, 0.f, 4.f);
+	Matrix33F oriR; oriR.fill(Vector3F::ZAxis, Vector3F::XAxis, Vector3F::YAxis);
 	float sc = 1.f;
-	m_rachis->reset();
 	computeWorldP(oriP, oriR, sc);
 }
 
@@ -147,7 +146,7 @@ void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot,
 		Matrix33F mat = m_rachis->getSpace(i);
 		mat.multiply(segSpace);
 		
-		*segmentOriginWP(i) = segOrigin;segOrigin.verbose("orip");
+		*segmentOriginWP(i) = segOrigin;
 		*segmentVaneWP1(i, 0, 0) = segOrigin;
 		*segmentVaneWP1(i, 0, 1) = segOrigin;
 		computeVaneWP(segOrigin, mat, i, 0, scale);

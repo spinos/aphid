@@ -83,8 +83,11 @@ bool MlUVView::pickupFeather(const Vector2F & p)
 	
 	if(activeId < 0) return false;
 	
-	if(!FeatherLibrary->selectFeatherExample(activeId))
+	if(!FeatherLibrary->selectFeatherExample(activeId)) {
 		std::cout<<"no feather["<<activeId<<"]\n";
+		return false;
+	}
+	emit shapeChanged();
 	
 	return true;
 }
@@ -110,9 +113,9 @@ void MlUVView::clientMouseInput()
 				m_selectVertWP += d;
 			}
 			FeatherLibrary->selectedFeatherExample()->computeTexcoord();
-			FeatherLibrary->selectedFeatherExample()->updateVane();
 		}
 	}
+	emit shapeChanged();
 }
 
 void MlUVView::drawFeather(MlFeather * f)
@@ -187,8 +190,8 @@ void MlUVView::drawFeather(MlFeather * f)
 	dr->smoothCurve(gRC, 4);
 	dr->smoothCurve(gLC, 4);
 	
-	const float delta = 1.f / 16.f;
-	for(int i=0; i <= 16; i++) {
+	const float delta = 1.f /(f->numSegment() * 2.f);
+	for(int i=0; i <= f->numSegment() * 2; i++) {
 		float t = delta * i;
 		BezierCurve vaneRC;
 		vaneRC.createVertices(4);
@@ -295,6 +298,7 @@ void MlUVView::changeSelectedFeatherNSegment(int d)
 	if(nseg < 4 || nseg > 32) return;
 	
 	f->changeNumSegment(d);
+	emit shapeChanged();
 }
 
 void MlUVView::chooseImageBackground(std::string & name)

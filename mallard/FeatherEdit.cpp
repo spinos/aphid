@@ -64,3 +64,8 @@ void FeatherEdit::receiveTexture(QString name)
 {
 	m_view->loadImageBackground(name.toUtf8().data());
 }
+
+QWidget * FeatherEdit::uvView()
+{
+	return m_view;
+}

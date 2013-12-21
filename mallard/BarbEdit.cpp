@@ -17,3 +17,8 @@ BarbEdit::BarbEdit(QWidget *parent)
 	
 	//connect(tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));*/
 }
+
+QWidget * BarbEdit::barbView()
+{
+	return m_view;
+}
