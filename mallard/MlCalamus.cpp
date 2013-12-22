@@ -110,7 +110,7 @@ void MlCalamus::setRotateY(const float& y)
 
 void MlCalamus::setScale(const float & x)
 {
-	m_scale = x / feather()->getLength();
+	m_scale = x / feather()->shaftLength();
 }
 
 void MlCalamus::setBufferStart(unsigned x)
@@ -135,7 +135,7 @@ float MlCalamus::scale() const
 
 float MlCalamus::realScale() const
 {
-	return m_scale * feather()->getLength();
+	return m_scale * feather()->shaftLength();
 }
 
 unsigned MlCalamus::bufferStart() const

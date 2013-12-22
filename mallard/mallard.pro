@@ -40,6 +40,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 	BarbEdit.h \
 	BarbView.h \
 	FeatherExample.h \
+    BaseFeather.h \
                 window.h
                 
 SOURCES       = ../shared/ContextIconFrame.cpp \
@@ -76,6 +77,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 	BarbEdit.cpp \
 	BarbView.cpp \
 	FeatherExample.cpp \
+    BaseFeather.cpp \
     window.cpp \
                 main.cpp
                 

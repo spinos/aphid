@@ -164,14 +164,14 @@ void MlUVView::drawFeather(MlFeather * f)
 	Vector2F pv;
 	for(int i = 0; i <= f->numSegment(); i++) {
 		b.set(0.f, quill[i], 0.f);
-		Vector2F * vanes = f->getVaneAt(i, 0);
+		Vector2F * vanes = f->getUvDisplaceAt(i, 0);
 		pv = vanes[0];
 	    eRC.m_cvs[i] = s.transform(Vector3F(pv));
 		pv += vanes[1];
 		fRC.m_cvs[i] = s.transform(Vector3F(pv));
 		pv += vanes[2];
 		gRC.m_cvs[i] = s.transform(Vector3F(pv));
-		vanes = f->getVaneAt(i, 1);
+		vanes = f->getUvDisplaceAt(i, 1);
 		pv = vanes[0];
 	    eLC.m_cvs[i] = s.transform(Vector3F(pv));
 		pv += vanes[1];
@@ -229,7 +229,7 @@ void MlUVView::drawControlVectors(MlFeather * f)
 	for(int i=0; i <= f->numSegment(); i++) {
 	    dr->useSpace(s);
 		
-		const Vector2F * vanes = f->getVaneAt(i, 0);
+		const Vector2F * vanes = f->getUvDisplaceAt(i, 0);
 		pv = vanes[0];
 		dr->arrow(Vector3F(0.f, 0.f, 0.f), pv);
 		pv += vanes[1];
@@ -237,7 +237,7 @@ void MlUVView::drawControlVectors(MlFeather * f)
 		pv += vanes[2];
 		dr->arrow(pv - vanes[2], pv);
 	    
-		vanes = f->getVaneAt(i, 1);
+		vanes = f->getUvDisplaceAt(i, 1);
 		pv = vanes[0];
 		dr->arrow(Vector3F(0.f, 0.f, 0.f), pv);
 		pv += vanes[1];

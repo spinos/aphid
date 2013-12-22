@@ -2,42 +2,34 @@
 #include "MlRachis.h"
 #include "MlVane.h"
 #include <CollisionRegion.h>
-MlFeather::MlFeather() : m_quilly(0), m_vaneVertices(0), m_worldP(0), m_st(0)
+MlFeather::MlFeather() : m_worldP(0)
 {
 	m_rachis = new MlRachis;
 	m_vane = new MlVane[2];
-	m_uv.set(4.f, 4.f);
+	
 	simpleCreate();
 }
 
 MlFeather::~MlFeather() 
 {
-    if(m_quilly) delete[] m_quilly;
-    if(m_vaneVertices) delete[] m_vaneVertices;
 	if(m_worldP) delete[] m_worldP;
-	if(m_st) delete[] m_st;
 	delete m_rachis;
 	delete[] m_vane;
 }
 
 void MlFeather::createNumSegment(short x)
 {
-	if(m_quilly) delete[] m_quilly;
-    if(m_vaneVertices) delete[] m_vaneVertices;
+	BaseFeather::createNumSegment(x);
 	if(m_worldP) delete[] m_worldP;
-	if(m_st) delete[] m_st;
-    m_numSeg = x;
-    m_quilly = new float[m_numSeg];
-    m_vaneVertices = new Vector2F[(m_numSeg + 1) * 6];
-	m_worldP = new Vector3F[(m_numSeg + 1) * 7];
-	m_st = new Vector2F[(m_numSeg + 1) * 7];
+	
+	m_worldP = new Vector3F[(numSegment() + 1) * 7];
 	m_rachis->create(x);
 }
 
 void MlFeather::setupVane()
 {
-	m_vane[0].create(m_numSeg, 3);
-	m_vane[1].create(m_numSeg, 3);
+	m_vane[0].create(numSegment(), 3);
+	m_vane[1].create(numSegment(), 3);
 	Vector3F oriP(4.f, 0.f, 4.f);
 	Matrix33F oriR; oriR.fill(Vector3F::ZAxis, Vector3F::XAxis, Vector3F::YAxis);
 	float sc = 1.f;
@@ -55,74 +47,6 @@ void MlFeather::updateVane()
 	computeWorldP(oriP, oriR, sc);
 }
 
-short MlFeather::numSegment() const
-{
-	return m_numSeg;
-}
-	
-unsigned MlFeather::numVaneVertices() const
-{
-	return (m_numSeg + 1) * 6;
-}
-	
-unsigned MlFeather::numWorldP() const
-{
-	return (m_numSeg + 1) * 7;
-}
-
-float * MlFeather::quilly()
-{
-    return m_quilly;
-}
-
-float * MlFeather::getQuilly() const
-{
-     return m_quilly;
-}
-
-Vector2F * MlFeather::vane()
-{
-	return m_vaneVertices;
-}
-
-Vector2F * MlFeather::vaneAt(short seg, short side)
-{
-    return &m_vaneVertices[seg * 6 + 3 * side];
-}
-
-Vector2F * MlFeather::getVaneAt(short seg, short side) const
-{
-    return &m_vaneVertices[seg * 6 + 3 * side];
-}
-
-float MlFeather::getLength() const
-{
-	return m_length;
-}
-
-float MlFeather::getWidth(short seg) const
-{
-	Vector2F * vane = getVaneAt(seg, 0);
-	float r = vane->x;
-	vane++;
-	r += vane->x;
-	vane++;
-	r += vane->x;
-
-	vane = getVaneAt(seg, 1);
-	r = - vane->x;
-	vane++;
-	r -= vane->x;
-	vane++;
-	r -= vane->x;
-	return r;
-}
-
-BoundingRectangle MlFeather::getBoundingRectangle() const
-{
-	return m_brect;
-}
-
 void MlFeather::bend()
 {
 	m_rachis->bend();
@@ -130,7 +54,7 @@ void MlFeather::bend()
 
 void MlFeather::bendAt(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale)
 {
-	m_rachis->bend(faceIdx, patchU, patchV, oriPos, oriRot, scale * getLength(), m_skin);
+	m_rachis->bend(faceIdx, patchU, patchV, oriPos, oriRot, scale * shaftLength(), m_skin);
 }
 
 void MlFeather::curl(float val)
@@ -142,7 +66,8 @@ void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot,
 {
 	Vector3F segOrigin = oriPos;
 	Matrix33F segSpace = oriRot;
-	for(short i = 0; i < m_numSeg; i++) {
+	const short numSeg = numSegment();
+	for(short i = 0; i < numSeg; i++) {
 		Matrix33F mat = m_rachis->getSpace(i);
 		mat.multiply(segSpace);
 		
@@ -152,18 +77,18 @@ void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot,
 		computeVaneWP(segOrigin, mat, i, 0, scale);
 		computeVaneWP(segOrigin, mat, i, 1, scale);
 		
-		Vector3F d(0.f, 0.f, m_quilly[i] * scale);
+		Vector3F d(0.f, 0.f, quilly()[i] * scale);
 		d = mat.transform(d);
 		
 		segOrigin += d;
 		segSpace = mat;
 	}
 	
-	*segmentOriginWP(m_numSeg) = segOrigin;
-	*segmentVaneWP1(m_numSeg, 0, 0) = segOrigin;
-	*segmentVaneWP1(m_numSeg, 0, 1) = segOrigin;
-	computeVaneWP(segOrigin, segSpace, m_numSeg, 0, scale);
-	computeVaneWP(segOrigin, segSpace, m_numSeg, 1, scale);
+	*segmentOriginWP(numSeg) = segOrigin;
+	*segmentVaneWP1(numSeg, 0, 0) = segOrigin;
+	*segmentVaneWP1(numSeg, 0, 1) = segOrigin;
+	computeVaneWP(segOrigin, segSpace, numSeg, 0, scale);
+	computeVaneWP(segOrigin, segSpace, numSeg, 1, scale);
 }
 
 Vector3F * MlFeather::worldP()
@@ -196,37 +121,12 @@ Vector3F MlFeather::getSegmentVaneWP(short seg, short side, short idx) const
 	return m_worldP[seg * 7 + 1 + side * 3 + idx];
 }
 
-Vector2F * MlFeather::texcoord()
-{
-	return m_st;
-}
-
-Vector2F * MlFeather::segmentQuillTexcoord(short seg)
-{
-	return &m_st[seg * 7];
-}
-
-Vector2F * MlFeather::segmentVaneTexcoord(short seg, short side, short idx)
-{
-	return &m_st[seg * 7 + 1 + side * 3 + idx];
-}
-
-Vector2F MlFeather::getSegmentQuillTexcoord(short seg) const
-{
-	return m_st[seg * 7];
-}
-
-Vector2F MlFeather::getSegmentVaneTexcoord(short seg, short side, short idx) const
-{
-	return m_st[seg * 7 + 1 + side * 3 + idx];
-}
-
 void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale)
 {
 	Vector3F p = origin;
-	Vector2F * vane = getVaneAt(seg, side);
+	Vector2F * vane = getUvDisplaceAt(seg, side);
 	
-	const float tapper = getWidth(seg) * -.005f;
+	const float tapper = width() * -.005f;
 	for(short i = 0; i < 3; i++) {
 		Vector3F d(tapper, vane->x, vane->y);
 		d *= scale;
@@ -257,242 +157,19 @@ short MlFeather::featherId() const
 
 void MlFeather::simpleCreate(int ns)
 {
-    createNumSegment(ns);
-	
-    float * quill = quilly();
-	int i;
-	for(i = 0; i < ns; i++) {
-		if(i < ns - 2)
-			quill[i] = 3.f;
-		else if(i < ns - 1)
-			quill[i] = 1.7f;
-		else
-			quill[i] = .8f;
-    }
-	
-	Vector2F * vanesR;
-	Vector2F * vanesL;
-	for(i = 0; i <= ns; i++) {
-		vanesR = vaneAt(i, 0);
-		vanesL = vaneAt(i, 1);
-		
-		if(i < ns - 2) {
-			vanesR[0].set(.9f, .8f);
-			vanesR[1].set(.8f, 1.1f);
-			vanesR[2].set(.2f, 1.3f);
-			
-			vanesL[0].set(-.9f, .8f);
-			vanesL[1].set(-.8f, 1.1f);
-			vanesL[2].set(-.2f, 1.3f);
-		}
-		else if(i < ns - 1) {
-			vanesR[0].set(.6f, .6f);
-			vanesR[1].set(.4f, .5f);
-			vanesR[2].set(.05f, .6f);
-			
-			vanesL[0].set(-.6f, .6f);
-			vanesL[1].set(-.4f, .5f);
-			vanesL[2].set(-.05f, .6f);
-		}
-		else if(i < ns) {
-			vanesR[0].set(.3f, .3f);
-			vanesR[1].set(.2f, .3f);
-			vanesR[2].set(0.f, .4f);
-			
-			vanesL[0].set(-.3f, .3f);
-			vanesL[1].set(-.2f, .3f);
-			vanesL[2].set(0.f, .4f);
-		}
-		else {
-			vanesR[0].set(0.f, .2f);
-			vanesR[1].set(0.f, .1f);
-			vanesR[2].set(0.f, .1f);
-			
-			vanesL[0].set(0.f, .2f);
-			vanesL[1].set(0.f, .1f);
-			vanesL[2].set(0.f, .1f);
-		}
-	}
-	
-	computeLength();
-	computeTexcoord();
+	BaseFeather::simpleCreate(ns);
 	setupVane();
 }
 
 void MlFeather::computeLength()
 {
-	m_length = 0.f;
-	for(short i=0; i < m_numSeg; i++)
-		m_length += m_quilly[i];
-	m_rachis->computeLengths(m_quilly, m_length);
-}
-
-void MlFeather::computeBounding()
-{
-	m_brect.reset();
-	for(unsigned i = 0; i < numWorldP(); i++) {
-		Vector2F p = texcoord()[i] * 32.f;
-		m_brect.update(p);
-	}
-}
-
-void MlFeather::computeTexcoord()
-{
-	Vector2F puv = m_uv;
-	float *q = quilly();
-	int i, j;
-	for(i=0; i <= numSegment(); i++) {
-		*segmentQuillTexcoord(i) = puv;
-		if(i < numSegment()) {
-			puv += Vector2F(0.f, *q);
-			q++;
-		}
-	}
-	
-	q = quilly();
-	puv = m_uv;
-	
-	Vector2F pvane;
-	for(i=0; i <= numSegment(); i++) {
-		
-		pvane = puv;
-		Vector2F * vanes = vaneAt(i, 0);
-		
-		for(j = 0; j < 3; j++) {
-			pvane += *vanes;
-			*segmentVaneTexcoord(i, 0, j) = pvane;
-			
-			vanes++;
-		}
-
-		pvane = puv;
-		vanes = getVaneAt(i, 1);
-		
-		for(j = 0; j < 3; j++) {
-			pvane += *vanes;
-			*segmentVaneTexcoord(i, 1, j) = pvane;
-			
-			vanes++;
-		}
-		
-		if(i < numSegment()) {
-			puv += Vector2F(0.f, *q);
-			q++;
-		}
-	}
-	
-	for(i = 0; i < numWorldP(); i++)
-
-		texcoord()[i] /= 32.f;
-		
-	computeBounding();
-}
-
-Vector2F MlFeather::baseUV() const
-{
-	return m_uv;
-}
-
-void MlFeather::setBaseUV(const Vector2F & d)
-{
-	m_uv = d;
-}
-
-void MlFeather::translateUV(const Vector2F & d)
-{
-	m_uv += d;
-	for(unsigned i = 0; i < numWorldP(); i++)
-		texcoord()[i] += d/32.f;
-
-	m_brect.translate(d);
-}
-
-float* MlFeather::selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp)
-{
-	float * r = 0;
-	float minD = 10e8;
-	yOnly = true;
-	
-	Vector2F puv;
-	short seg, side, j;
-	for(unsigned i = 1; i < numWorldP(); i++) {
-		seg = i / 7;
-		side = (i - seg*7 - 1) / 3;
-		j = i - seg * 7 - 1 - side * 3;
-		
-		puv = m_st[i];
-		puv *= 32.f;
-		
-		if(p.distantTo(puv) < minD) {
-			minD = p.distantTo(puv);
-			wp = puv;
-			
-			if(i % 7 == 0) {
-				r = &quilly()[seg - 1];
-				yOnly = true;
-			}
-			else {
-				r = (float *)&vaneAt(seg, side)[j];
-				yOnly = false;
-			}
-		}
-	}
-	
-	return r;
+	BaseFeather::computeLength();
+	m_rachis->computeLengths(quilly(), shaftLength());
 }
 
 void MlFeather::changeNumSegment(int d)
 {
-	float * bakQuilly = new float[m_numSeg];
-    Vector2F *bakVaneVertices = new Vector2F[(m_numSeg + 1) * 6];
-	
-	int i, j;
-	for(i = 0; i < m_numSeg; i++)
-		bakQuilly[i] = quilly()[i];
-		
-	for(i = 0; i < (m_numSeg + 1) * 6; i++)
-		bakVaneVertices[i] = vane()[i];
-		
-	createNumSegment(m_numSeg + d);
-	
-	if(d > 0) {
-		for(i = 0; i < m_numSeg; i++) {
-			if(i == 0) quilly()[i] = bakQuilly[0];
-			else quilly()[i] = bakQuilly[i - 1];
-		}
-		for(i = 0; i <= m_numSeg; i++) {
-			if(i == 0) {
-				for(j = 0; j < 6; j++)
-					vane()[i * 6 + j] = bakVaneVertices[j] ;
-			}
-			else {
-				for(j = 0; j < 6; j++)
-					vane()[i * 6 + j] = bakVaneVertices[(i - 1) * 6 + j] ;
-			}
-		}
-	}
-	else {
-		for(i = 0; i < m_numSeg; i++) {
-			if(i < m_numSeg -1) quilly()[i] = bakQuilly[i];
-			else quilly()[i] = bakQuilly[i + 1];
-		}
-		for(i = 0; i <= m_numSeg; i++) {
-			if(i < m_numSeg -1) {
-				for(j = 0; j < 6; j++)
-					vane()[i * 6 + j] = bakVaneVertices[i * 6 + j] ;
-			}
-			else {
-				for(j = 0; j < 6; j++)
-					vane()[i * 6 + j] = bakVaneVertices[(i + 1) * 6 + j] ;
-			}
-		}
-	}
-	
-	delete[] bakQuilly;
-	delete[] bakVaneVertices;
-	
-	computeLength();
-	computeTexcoord();
+	BaseFeather::changeNumSegment(d);
 	setupVane();
 }
 
@@ -520,7 +197,7 @@ MlVane * MlFeather::vane(short side) const
 void MlFeather::verbose()
 {
 	std::cout<<"feather status:\n id "<<featherId();
-	std::cout<<"\n n segment "<<numSegment();
-	std::cout<<"\n length "<<getLength();
-	std::cout<<"\n base uv ("<<m_uv.x<<","<<m_uv.y<<")\n";
+	//std::cout<<"\n n segment "<<numSegment();
+	//std::cout<<"\n length "<<getLength();
+	//std::cout<<"\n base uv ("<<m_uv.x<<","<<m_uv.y<<")\n";
 }
