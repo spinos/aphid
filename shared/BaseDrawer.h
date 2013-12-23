@@ -97,6 +97,7 @@ public:
 	void vertexNormal(BaseMesh * mesh);
 	void lines(const std::vector<Vector3F> & vs);
 	void lineStripes(const unsigned & num, unsigned * nv, Vector3F * vs) const;
+	void lineStripes(const unsigned & num, unsigned * nv, Vector3F * vs, Vector3F * cs) const;
 	
 	int loadTexture(int idx, ZEXRImage * image);
 	void clearTexture(int idx);

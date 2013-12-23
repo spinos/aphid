@@ -11,17 +11,20 @@ BarbView::BarbView(QWidget *parent) : Base3DView(parent)
 	m_numVerticesPerLine = new unsigned[m_numLines];
 	for(unsigned i = 0; i < m_numLines; i++) m_numVerticesPerLine[i] = 11;
 	m_vertices = new Vector3F[m_numLines * 11];
+	m_colors = new Vector3F[m_numLines * 11];
 }
 
 BarbView::~BarbView()
 {
-    
+    delete[] m_numVerticesPerLine;
+	delete[] m_vertices;
+	delete[] m_colors;
 }
 
 void BarbView::clientDraw()
 {
     if(!FeatherLibrary) return;
-	getDrawer()->lineStripes(m_numLines, m_numVerticesPerLine, m_vertices);
+	getDrawer()->lineStripes(m_numLines, m_numVerticesPerLine, m_vertices, m_colors);
 }
 
 void BarbView::clientSelect()
@@ -66,5 +69,7 @@ void BarbView::receiveShapeChanged()
 			acc++;
 		}
 	}
+	
+	f->sampleColor(100, 10, m_colors);
 	update();
 }

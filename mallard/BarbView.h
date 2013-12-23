@@ -20,4 +20,5 @@ private:
 	unsigned m_numLines;
 	unsigned * m_numVerticesPerLine;
 	Vector3F * m_vertices;
+	Vector3F * m_colors;
 };

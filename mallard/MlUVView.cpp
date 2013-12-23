@@ -318,11 +318,11 @@ void MlUVView::chooseImageBackground(std::string & name)
 
 void MlUVView::loadImageBackground(const std::string & name)
 {
-	ZEXRImage image;
-	if(!image.open(name)) return;
-	image.verbose();
+	if(!MlFeather::ColorTextureFile.open(name)) return;
+	MlFeather::ColorTextureFile.verbose();
 	makeCurrent();
-	m_texId = getDrawer()->loadTexture(m_texId, &image);
+	m_texId = getDrawer()->loadTexture(m_texId, &MlFeather::ColorTextureFile);
 	doneCurrent();
 	update();
+	emit shapeChanged();
 }

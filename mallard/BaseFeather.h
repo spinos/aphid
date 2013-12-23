@@ -19,6 +19,8 @@ public:
 	virtual void changeNumSegment(int d);
 	virtual void createNumSegment(short x);
 	virtual void computeLength();
+	virtual void computeTexcoord();
+	virtual void translateUV(const Vector2F & d);
 	
 	short numSegment() const;
 	BoundingRectangle getBoundingRectangle() const;
@@ -35,7 +37,6 @@ public:
 	
 	Vector2F baseUV() const;
 	void setBaseUV(const Vector2F & d);
-	void translateUV(const Vector2F & d);
 	
 	Vector2F * texcoord();
 	Vector2F * segmentQuillTexcoord(short seg);
@@ -43,7 +44,6 @@ public:
 	Vector2F getSegmentQuillTexcoord(short seg) const;
 	Vector2F getSegmentVaneTexcoord(short seg, short side, short idx) const;
 	
-	void computeTexcoord();
 	void computeBounding();
 	
 	unsigned numVaneVertices() const;

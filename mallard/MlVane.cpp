@@ -9,7 +9,7 @@
 
 #include "MlVane.h"
 
-MlVane::MlVane() : m_rails(0) {}
+MlVane::MlVane() : m_rails(0), m_gridU(0), m_gridV(0) {}
 
 MlVane::~MlVane() 
 {
@@ -54,4 +54,14 @@ void MlVane::pointOnVane(float v, Vector3F & dst)
 Vector3F * MlVane::railCV(unsigned u, unsigned v)
 {
 	return &m_rails[v].m_cvs[u];
+}
+
+unsigned MlVane::gridU() const
+{
+	return m_gridU;
+}
+	
+unsigned MlVane::gridV() const
+{
+	return m_gridV;
 }

@@ -136,20 +136,16 @@ void BaseFeather::computeTexcoord()
 		Vector2F * vanes = uvDisplaceAt(i, 0);
 		
 		for(j = 0; j < 3; j++) {
-			pvane += *vanes;
+			pvane += vanes[j];
 			*segmentVaneTexcoord(i, 0, j) = pvane;
-			
-			vanes++;
 		}
 
 		pvane = puv;
 		vanes = getUvDisplaceAt(i, 1);
 		
 		for(j = 0; j < 3; j++) {
-			pvane += *vanes;
+			pvane += vanes[j];
 			*segmentVaneTexcoord(i, 1, j) = pvane;
-			
-			vanes++;
 		}
 		
 		if(i < numSegment()) {
@@ -158,9 +154,10 @@ void BaseFeather::computeTexcoord()
 		}
 	}
 	
-	for(i = 0; i < numWorldP(); i++)
+	for(i = 0; i < numWorldP(); i++) {
 
 		texcoord()[i] /= 32.f;
+	}
 		
 	computeBounding();
 }
@@ -239,48 +236,53 @@ void BaseFeather::simpleCreate(int ns)
 
 void BaseFeather::changeNumSegment(int d)
 {
-	const short numSeg = numSegment();
-	float * bakQuilly = new float[numSeg];
-    Vector2F *bakVaneVertices = new Vector2F[(numSeg + 1) * 6];
-	Vector2F * vd = uvDisplace();
+	float * bakQuilly = new float[numSegment()];
+    Vector2F *bakVaneVertices = new Vector2F[(numSegment() + 1) * 6];
 	int i, j;
-	for(i = 0; i < numSeg; i++)
-		bakQuilly[i] = quilly()[i];
+	for(i = 0; i < numSegment(); i++) {
+		bakQuilly[i] = m_quilly[i];
+	}
 		
-	for(i = 0; i < (numSeg + 1) * 6; i++)
-		bakVaneVertices[i] = vd[i];
+	for(i = 0; i < (numSegment() + 1) * 6; i++) {
+		bakVaneVertices[i] = m_uvDisplace[i];
+	}
 		
-	createNumSegment(numSeg + d);
+	createNumSegment(numSegment() + d);
+	
+	const short numSeg = numSegment();
 	
 	if(d > 0) {
 		for(i = 0; i < numSeg; i++) {
-			if(i == 0) quilly()[i] = bakQuilly[0];
-			else quilly()[i] = bakQuilly[i - 1];
+			if(i == 0) m_quilly[i] = bakQuilly[0];
+			else m_quilly[i] = bakQuilly[i - 1];
 		}
 		for(i = 0; i <= numSeg; i++) {
 			if(i == 0) {
-				for(j = 0; j < 6; j++)
-					vd[i * 6 + j] = bakVaneVertices[j] ;
+				for(j = 0; j < 6; j++) {
+					m_uvDisplace[i * 6 + j] = bakVaneVertices[j];
+				}
 			}
 			else {
-				for(j = 0; j < 6; j++)
-					vd[i * 6 + j] = bakVaneVertices[(i - 1) * 6 + j] ;
+				for(j = 0; j < 6; j++) {
+					m_uvDisplace[i * 6 + j] = bakVaneVertices[(i - 1) * 6 + j];
+				}
 			}
 		}
+		
 	}
 	else {
 		for(i = 0; i < numSeg; i++) {
-			if(i < numSeg -1) quilly()[i] = bakQuilly[i];
-			else quilly()[i] = bakQuilly[i + 1];
+			if(i < numSeg -1) m_quilly[i] = bakQuilly[i];
+			else m_quilly[i] = bakQuilly[i + 1];
 		}
 		for(i = 0; i <= numSeg; i++) {
 			if(i < numSeg -1) {
 				for(j = 0; j < 6; j++)
-					vd[i * 6 + j] = bakVaneVertices[i * 6 + j] ;
+					m_uvDisplace[i * 6 + j] = bakVaneVertices[i * 6 + j] ;
 			}
 			else {
 				for(j = 0; j < 6; j++)
-					vd[i * 6 + j] = bakVaneVertices[(i + 1) * 6 + j] ;
+					m_uvDisplace[i * 6 + j] = bakVaneVertices[(i + 1) * 6 + j] ;
 			}
 		}
 	}

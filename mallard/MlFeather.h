@@ -1,16 +1,18 @@
 #pragma once
-#include "BaseFeather.h"
+#include "TexturedFeather.h"
 #include <BoundingBox.h>
 class MlRachis;
 class CollisionRegion;
 class MlVane;
-class MlFeather : public BaseFeather {
+class MlFeather : public TexturedFeather {
 public:
     MlFeather();
     virtual ~MlFeather();
     virtual void createNumSegment(short x);
 	virtual void changeNumSegment(int d);
 	virtual void computeLength();
+	
+	void setupVane();
 	
 	void bend();
 	void bendAt(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
@@ -36,7 +38,6 @@ public:
 	void verbose();
 	
 	MlVane * vane(short side) const;
-	void setupVane();
 	void updateVane();
 	
 protected:	
