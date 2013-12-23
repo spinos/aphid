@@ -3,6 +3,7 @@
 #include <MlFeather.h>
 #include <MlFeatherCollection.h>
 #include <KdTreeDrawer.h>
+#include <PseudoNoise.h>
 #include "MlVane.h"
 BarbView::BarbView(QWidget *parent) : Base3DView(parent)
 {
@@ -71,5 +72,12 @@ void BarbView::receiveShapeChanged()
 	}
 	
 	f->sampleColor(100, 10, m_colors);
+	
+	PseudoNoise noi;
+	for(unsigned i = 0; i < 202 * 11; i++) {
+		m_vertices[i].x = 0.01f * i;
+		m_vertices[i].z = 1.f;
+		m_vertices[i].y = noi.rfloat(i);
+	}
 	update();
 }

@@ -8,11 +8,13 @@
  */
 
 #include "PseudoNoise.h"
-#include <math.h>
+#include <cmath>
+#include <iostream>
+unsigned PseudoNoise::xRand;
+unsigned PseudoNoise::yRand;
+unsigned PseudoNoise::zRand;
 
-unsigned int PseudoNoise::xRand;
-unsigned int PseudoNoise::yRand;
-unsigned int PseudoNoise::zRand;
+PseudoNoise::PseudoNoise() {}
 
 void PseudoNoise::seedd(unsigned int nx, unsigned int ny, unsigned int nz)
 {
@@ -23,13 +25,13 @@ void PseudoNoise::seedd(unsigned int nx, unsigned int ny, unsigned int nz)
 
 unsigned PseudoNoise::randomize()
 {
-	unsigned a = xRand/1393137, b = xRand%1393137;
-    unsigned c = yRand/1393149, d = yRand%1393149;
-    unsigned e = zRand/1393151, f = zRand%1393151;
+	unsigned a = xRand & 1393137, b = xRand % 1393137;
+    unsigned c = yRand & 1393148, d = yRand % 1393148;
+    unsigned e = zRand & 1393151, f = zRand % 1393151;
 
-    xRand = (103 * b + 149 * a) % 1395253;
-    yRand = (161 * d + 123  * c) % 1396313;
-    zRand = (109 * f + 157 * e) % 1395329;
+    xRand = (103 * b + 149 * a) & 1395253;
+    yRand = (161 * d + 123  * c) & 1395314;
+    zRand = (109 * f + 157 * e) & 1395329;
 	
 	return xRand + yRand + zRand;
 }
@@ -37,12 +39,10 @@ unsigned PseudoNoise::randomize()
 float PseudoNoise::rfloat( int i )
 {
 	unsigned int seed = i;
-	seedd( seed, seed * 3, seed * 131 );
+	seedd( (seed + 1) * 217 , (seed + 3) * 129, (seed + 5) * 1031 );
 	randomize();
-	randomize();
-	randomize();	
-	float result;
-    result = (double) xRand/390253.0 + (double) yRand/390299.0 + (double) zRand/390313.0;
+	//randomize();
+	float result = (double) xRand/390253.0 + (double) yRand/390299.0 + (double) zRand/390313.0;
     return result - ((int) result);
 }
 

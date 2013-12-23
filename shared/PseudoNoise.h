@@ -13,14 +13,14 @@
 class PseudoNoise
 {
 public:
-	PseudoNoise() {}
+	PseudoNoise();
 	~PseudoNoise() {}
 	
 	float rfloat( int i );
 	int rint( int i );
 	void sphereRand(float& x, float& y, float& z, float r, unsigned int &i);
 private:
-	static unsigned int xRand, yRand, zRand;     /* seed */
+	static unsigned xRand, yRand, zRand;     /* seed */
 	void seedd(unsigned int nx, unsigned int ny, unsigned int nz);
 	unsigned randomize();
 };
