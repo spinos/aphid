@@ -73,9 +73,9 @@ unsigned BaseCurve::segmentByLength(float param) const
 
 void BaseCurve::computeKnots()
 {
-	float hullLength = 0;
+	m_hullLength = 0;
 	for(unsigned i = 1; i < numVertices(); i++) {
-		hullLength += (m_cvs[i] - m_cvs[i-1]).length();
+		m_hullLength += (m_cvs[i] - m_cvs[i-1]).length();
 	}
 	
 	m_knots = new float[numVertices()];
@@ -84,7 +84,7 @@ void BaseCurve::computeKnots()
 	float knotL = 0.f;
 	for(unsigned i = 1; i < numVertices(); i++) {
 		knotL += (m_cvs[i] - m_cvs[i-1]).length();
-		m_knots[i] = knotL / hullLength;
+		m_knots[i] = knotL / m_hullLength;
 	}
 }
 
@@ -135,4 +135,9 @@ void BaseCurve::findNeighborKnots(float param, unsigned & nei0, unsigned & nei1)
 Vector3F BaseCurve::calculateStraightPoint(float t, unsigned k0, unsigned k1, Vector3F * data) const
 {
 	return data[k0] * ( 1.f - t) + data[k1] * t;
+}
+
+float BaseCurve::length() const
+{
+	return m_hullLength;
 }

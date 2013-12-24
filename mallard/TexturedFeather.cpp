@@ -8,11 +8,11 @@
  */
 
 #include "TexturedFeather.h"
-#include "MlVane.h"
+#include "BaseVane.h"
 ZEXRImage TexturedFeather::ColorTextureFile;
 TexturedFeather::TexturedFeather() 
 {
-	m_vane = new MlVane[2];
+	m_vane = new BaseVane[2];
 }
 
 TexturedFeather::~TexturedFeather() 
@@ -57,7 +57,7 @@ void TexturedFeather::translateUV(const Vector2F & d)
 	}
 }
 
-MlVane * TexturedFeather::uvVane(short side) const
+BaseVane * TexturedFeather::uvVane(short side) const
 {
 	return &m_vane[side];
 }

@@ -41,9 +41,12 @@ public:
 	
 	void findNeighborKnots(float param, unsigned & nei0, unsigned & nei1) const;
 	
+	float length() const;
+	
 	static std::vector<Vector3F> BuilderVertices;
 	Vector3F * m_cvs;
 	float * m_knots;
 	unsigned m_numVertices;
+	float m_hullLength;
 private:
 };

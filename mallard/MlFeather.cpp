@@ -196,8 +196,38 @@ MlVane * MlFeather::vane(short side) const
 
 void MlFeather::verbose()
 {
-	std::cout<<"feather status:\n id "<<featherId();
-	//std::cout<<"\n n segment "<<numSegment();
-	//std::cout<<"\n length "<<getLength();
-	//std::cout<<"\n base uv ("<<m_uv.x<<","<<m_uv.y<<")\n";
+	std::cout<<"feather index:\n id "<<featherId();
+	std::cout<<"\n n segment "<<numSegment();
+	std::cout<<"\n length "<<shaftLength();
+	std::cout<<"\n base uv ("<<baseUV().x<<","<<baseUV().y<<")\n";
 }
+
+void MlFeather::samplePosition(unsigned gridU, unsigned gridV, Vector3F * dst)
+{
+	const float du = 1.f/(float)gridU;
+	const float dv = 1.f/(float)gridV;
+	
+	m_vane[0].setSeed(100);
+	m_vane[0].separate(17);
+	unsigned acc = 0;
+	for(unsigned i = 0; i <= gridU; i++) {
+		m_vane[0].setU(du*i);
+		for(unsigned j = 0; j <= gridV; j++) {
+			m_vane[0].pointOnVane(dv * j, dst[acc]);
+			acc++;
+		}
+		m_vane[0].modifyLength(du*i, gridV, &dst[acc - gridV - 1]);
+	}
+	
+	m_vane[1].setSeed(2900);
+	m_vane[1].separate(16);
+	for(unsigned i = 0; i <= gridU; i++) {
+		m_vane[1].setU(du*i);
+		for(unsigned j = 0; j <= gridV; j++) {
+			m_vane[1].pointOnVane(dv * j, dst[acc]);
+			acc++;
+		}
+		m_vane[1].modifyLength(du*i, gridV, &dst[acc - gridV - 1]);
+	}
+}
+

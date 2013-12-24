@@ -36,6 +36,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 	TimeControl.h \
     LaplaceSmoother.h \
 	MlCluster.h \
+	BaseVane.h \
 	MlVane.h \
 	BarbEdit.h \
 	BarbView.h \
@@ -74,6 +75,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 	TimeControl.cpp \
     LaplaceSmoother.cpp \
 	MlCluster.cpp \
+	BaseVane.cpp \
 	MlVane.cpp \
 	BarbEdit.cpp \
 	BarbView.cpp \

@@ -10,7 +10,7 @@
 #pragma once
 #include "BaseFeather.h"
 #include <zEXRImage.h>
-class MlVane;
+class BaseVane;
 class TexturedFeather : public BaseFeather {
 public:
 	TexturedFeather();
@@ -18,7 +18,7 @@ public:
 	virtual void computeTexcoord();
 	virtual void translateUV(const Vector2F & d);
 	
-	MlVane * uvVane(short side) const;
+	BaseVane * uvVane(short side) const;
 	
 	static ZEXRImage ColorTextureFile;
 	
@@ -26,5 +26,5 @@ public:
 protected:
 
 private:
-	MlVane * m_vane;
+	BaseVane * m_vane;
 };

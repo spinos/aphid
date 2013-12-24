@@ -50,34 +50,9 @@ void BarbView::receiveShapeChanged()
 	}
 	f->bend();
 	f->updateVane();
-    
-    MlVane * vane = f->vane(0);
-	float du = 1.f/(float)(m_numLines/2 - 1);
-	float dv = 1.f/10.f;
-	unsigned acc = 0;
-	for(unsigned i = 0; i < m_numLines/2; i++) {
-		vane->setU(du*i);
-		for(unsigned j = 0; j <= 10; j++) {
-			vane->pointOnVane(dv * j, m_vertices[acc]);
-			acc++;
-		}
-	}
-	vane = f->vane(1);
-	for(unsigned i = 0; i < m_numLines/2; i++) {
-		vane->setU(du*i);
-		for(unsigned j = 0; j <= 10; j++) {
-			vane->pointOnVane(dv * j, m_vertices[acc]);
-			acc++;
-		}
-	}
 	
 	f->sampleColor(100, 10, m_colors);
-	
-	PseudoNoise noi;
-	for(unsigned i = 0; i < 202 * 11; i++) {
-		m_vertices[i].x = 0.01f * i;
-		m_vertices[i].z = 1.f;
-		m_vertices[i].y = noi.rfloat(i);
-	}
+	f->samplePosition(100, 10, m_vertices);
+
 	update();
 }

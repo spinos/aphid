@@ -40,6 +40,7 @@ public:
 	MlVane * vane(short side) const;
 	void updateVane();
 	
+	void samplePosition(unsigned gridU, unsigned gridV, Vector3F * dst);
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	

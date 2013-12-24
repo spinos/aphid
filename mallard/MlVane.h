@@ -1,20 +1,26 @@
 #pragma once
-#include <BezierCurve.h>
-class MlVane {
+#include "BaseVane.h"
+class MlVane : public BaseVane {
 public:
     MlVane();
     virtual ~MlVane();
+	
+	virtual void setU(float u);
+	
+	void setSeed(unsigned s);
+	void separate(unsigned nsep);
+	void modifyLength(float u, unsigned gridV, Vector3F * dst);
     
-    void create(unsigned gridU, unsigned gridV);
-    BezierCurve * profile(unsigned idx) const;
-    void computeKnots();
-	void setU(float u);
-    void pointOnVane(float v, Vector3F & dst);
-	Vector3F * railCV(unsigned u, unsigned v);
-	unsigned gridU() const;
-	unsigned gridV() const;
 private:
-    BezierCurve m_profile;
-    BezierCurve * m_rails;
-    unsigned m_gridU, m_gridV;
+	void clear();
+	void computeSeparation();
+	void computeLengthChange();
+	float getSeparateU(float u, float * param) const;
+	void setU(float u0, float u1);
+private:
+	unsigned m_numSeparate;
+	float * m_separateBegin;
+	float * m_separateEnd;
+	float * m_lengthChange;
+	unsigned m_seed;
 };
