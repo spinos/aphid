@@ -15,6 +15,7 @@ MlVane::MlVane()
 	m_separateEnd = 0;
 	m_numSeparate = 0;
 	m_lengthChange = 0;
+	m_separateStrength = 0.5f;
 }
 
 MlVane::~MlVane() 
@@ -65,15 +66,15 @@ void MlVane::computeSeparation()
 	for(unsigned i = 0; i < m_numSeparate; i++) {
 		if(i < m_numSeparate - 1) barbW = m_barbBegin[i+1] - m_barbBegin[i];
 		else barbW = 1.f - m_barbBegin[i];
-			
-		r = noi.rfloat(m_seed + i * 13) - 0.5f;
-		m_separateEnd[i*2] = m_barbBegin[i] + barbW * r * 1.3f;
+
+		r = noi.rfloat(m_seed + i * 13) * 2.f - 1.f;
+		m_separateEnd[i*2] = m_barbBegin[i] + barbW * r * 2.f * m_separateStrength;
 		
 		if(m_separateEnd[i*2]< 0.f) m_separateEnd[i*2] = 0.f;
 		else if(m_separateEnd[i*2] > 1.f) m_separateEnd[i*2] = 1.f;
 		
-		r = noi.rfloat(m_seed + i * 15) * .9f + .1f;
-		m_separateEnd[i*2 + 1] = m_separateEnd[i*2] + barbW * r;
+		r = noi.rfloat(m_seed + i * 15) - 0.5f;
+		m_separateEnd[i*2 + 1] = m_separateEnd[i*2] + barbW * (1.f + r * m_separateStrength);
 		
 		if(m_separateEnd[i*2 + 1]< 0.f) m_separateEnd[i*2 + 1] = 0.f;
 		else if(m_separateEnd[i*2 + 1] > 1.f) m_separateEnd[i*2 + 1] = 1.f;
@@ -89,16 +90,16 @@ void MlVane::computeLengthChange()
 		l0 = profile()->length();
 		setU(m_barbBegin[i], m_separateEnd[i*2]);
 		l1 = profile()->length();
-		m_lengthChange[i*2] = l0 / l1 - 1.f;//std::cout<<"   "<<l0 / l1 - 1.f;
+		m_lengthChange[i*2] = l0 / l1 - 1.f; //std::cout<<"   "<<l0 / l1 - 1.f;
 		
 		if(i < m_numSeparate - 1) barbEnd = m_barbBegin[i + 1];
 		else barbEnd = 1.f;
-		
+
 		BaseVane::setU(barbEnd);
 		l0 = profile()->length();
 		setU(barbEnd, m_separateEnd[i*2+1]);
 		l1 = profile()->length();
-		m_lengthChange[i*2+1] = l0 / l1 - 1.f;//std::cout<<" "<<l0 / l1 - 1.f;
+		m_lengthChange[i*2+1] = l0 / l1 - 1.f; //std::cout<<" "<<l0 / l1 - 1.f;
 	}
 }
 
@@ -144,6 +145,7 @@ float MlVane::getSeparateU(float u, float * param) const
 
 void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst)
 {
+	if(u == 1.f) return;
 	float param;
 	getSeparateU(u, &param);
 	const int barb = (int)param;
@@ -153,10 +155,15 @@ void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst)
 	Vector3F dp;
 	for(unsigned i = 1; i < gridV; i++) {
 		dp = dst[i] - dst[i - 1];
-		dp *= dl;
+		dp *= dl; // if(u>0.98f)std::cout<<" "<<u<<" "<<dl;
 		for(unsigned j = i; j <= gridV; j++) {
 			dst[j] += dp;
 		}
 	}
+}
+
+void MlVane::setSeparateStrength(float k)
+{
+	m_separateStrength = k;
 }
 

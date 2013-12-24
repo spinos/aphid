@@ -13,7 +13,9 @@ public:
 	virtual void clientMouseInput();
 public slots:
 	void receiveShapeChanged();
-
+	void receiveSeed(int s);
+	void receiveNumSeparate(int n);
+	void receiveSeparateStrength(double k);
 private:
 
 private:
@@ -21,4 +23,7 @@ private:
 	unsigned * m_numVerticesPerLine;
 	Vector3F * m_vertices;
 	Vector3F * m_colors;
+	unsigned m_seed;
+	unsigned m_numSeparate;
+	float m_separateStrength;
 };

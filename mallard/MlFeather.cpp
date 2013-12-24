@@ -207,8 +207,7 @@ void MlFeather::samplePosition(unsigned gridU, unsigned gridV, Vector3F * dst)
 	const float du = 1.f/(float)gridU;
 	const float dv = 1.f/(float)gridV;
 	
-	m_vane[0].setSeed(1001);
-	m_vane[0].separate(27);
+	
 	unsigned acc = 0;
 	for(unsigned i = 0; i <= gridU; i++) {
 		m_vane[0].setU(du*i);
@@ -219,8 +218,7 @@ void MlFeather::samplePosition(unsigned gridU, unsigned gridV, Vector3F * dst)
 		m_vane[0].modifyLength(du*i, gridV, &dst[acc - gridV - 1]);
 	}
 	
-	m_vane[1].setSeed(1299);
-	m_vane[1].separate(26);
+	
 	for(unsigned i = 0; i <= gridU; i++) {
 		m_vane[1].setU(du*i);
 		for(unsigned j = 0; j <= gridV; j++) {
@@ -229,5 +227,23 @@ void MlFeather::samplePosition(unsigned gridU, unsigned gridV, Vector3F * dst)
 		}
 		m_vane[1].modifyLength(du*i, gridV, &dst[acc - gridV - 1]);
 	}
+}
+
+void MlFeather::setSeed(unsigned s)
+{
+	m_vane[0].setSeed(s);
+	m_vane[1].setSeed(s + 64873);
+}
+
+void MlFeather::setNumSeparate(unsigned n)
+{
+	m_vane[0].separate(n);
+	m_vane[1].separate(n);
+}
+
+void MlFeather::setSeparateStrength(float k)
+{
+	m_vane[0].setSeparateStrength(k);
+	m_vane[1].setSeparateStrength(k);
 }
 

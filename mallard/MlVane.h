@@ -9,6 +9,7 @@ public:
 	
 	void setSeed(unsigned s);
 	void separate(unsigned nsep);
+	void setSeparateStrength(float k);
 	void modifyLength(float u, unsigned gridV, Vector3F * dst);
     
 private:
@@ -23,4 +24,5 @@ private:
 	float * m_separateEnd;
 	float * m_lengthChange;
 	unsigned m_seed;
+	float m_separateStrength;
 };

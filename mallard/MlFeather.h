@@ -41,6 +41,9 @@ public:
 	void updateVane();
 	
 	void samplePosition(unsigned gridU, unsigned gridV, Vector3F * dst);
+	void setSeed(unsigned s);
+	void setNumSeparate(unsigned n);
+	void setSeparateStrength(float k);
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	
