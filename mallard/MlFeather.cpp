@@ -207,8 +207,8 @@ void MlFeather::samplePosition(unsigned gridU, unsigned gridV, Vector3F * dst)
 	const float du = 1.f/(float)gridU;
 	const float dv = 1.f/(float)gridV;
 	
-	m_vane[0].setSeed(100);
-	m_vane[0].separate(17);
+	m_vane[0].setSeed(1001);
+	m_vane[0].separate(27);
 	unsigned acc = 0;
 	for(unsigned i = 0; i <= gridU; i++) {
 		m_vane[0].setU(du*i);
@@ -219,8 +219,8 @@ void MlFeather::samplePosition(unsigned gridU, unsigned gridV, Vector3F * dst)
 		m_vane[0].modifyLength(du*i, gridV, &dst[acc - gridV - 1]);
 	}
 	
-	m_vane[1].setSeed(2900);
-	m_vane[1].separate(16);
+	m_vane[1].setSeed(1299);
+	m_vane[1].separate(26);
 	for(unsigned i = 0; i <= gridU; i++) {
 		m_vane[1].setU(du*i);
 		for(unsigned j = 0; j <= gridV; j++) {

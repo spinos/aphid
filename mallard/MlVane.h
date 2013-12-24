@@ -19,7 +19,7 @@ private:
 	void setU(float u0, float u1);
 private:
 	unsigned m_numSeparate;
-	float * m_separateBegin;
+	float * m_barbBegin;
 	float * m_separateEnd;
 	float * m_lengthChange;
 	unsigned m_seed;
