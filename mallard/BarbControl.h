@@ -32,10 +32,12 @@ private slots:
 	void sendSeed(int s);
 	void sendNumSeparate(int n);
 	void sendSeparateStrength(double k);
+	void sendFuzzy(double f);
 signals:
 	void seedChanged(int s);
 	void numSeparateChanged(int n);
 	void separateStrengthChanged(double k);
+	void fuzzyChanged(double f);
 private:
 	
 	
@@ -43,4 +45,5 @@ private:
 	QIntEditSlider * m_seedValue;
 	QIntEditSlider * m_separateCountValue;
 	QDoubleEditSlider * m_separateWeightValue;
+	QDoubleEditSlider * m_fuzzyValue;
 };

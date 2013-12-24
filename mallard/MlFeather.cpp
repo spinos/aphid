@@ -247,3 +247,8 @@ void MlFeather::setSeparateStrength(float k)
 	m_vane[1].setSeparateStrength(k);
 }
 
+void MlFeather::setFuzzy(float f)
+{
+	m_vane[0].setFuzzy(f);
+	m_vane[1].setFuzzy(f);
+}

@@ -15,7 +15,8 @@ MlVane::MlVane()
 	m_separateEnd = 0;
 	m_numSeparate = 0;
 	m_lengthChange = 0;
-	m_separateStrength = 0.5f;
+	m_separateStrength = 0.f;
+	m_fuzzy = 0.f;
 }
 
 MlVane::~MlVane() 
@@ -151,11 +152,17 @@ void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst)
 	const int barb = (int)param;
 	const float port = param - barb;
 	const float dl = m_lengthChange[barb * 2] * (1.f - port) + m_lengthChange[barb * 2 + 1] * port;
-	
+	PseudoNoise noi;
 	Vector3F dp;
+	float wei;
 	for(unsigned i = 1; i < gridV; i++) {
 		dp = dst[i] - dst[i - 1];
-		dp *= dl; // if(u>0.98f)std::cout<<" "<<u<<" "<<dl;
+		wei = dl;
+		if(m_fuzzy > 0.f)
+			wei += (noi.rfloat(m_seed + u * 109493) - 0.5f) * m_fuzzy * .2f;
+
+		dp *= wei; // if(u>0.98f)std::cout<<" "<<u<<" "<<dl;
+		
 		for(unsigned j = i; j <= gridV; j++) {
 			dst[j] += dp;
 		}
@@ -167,3 +174,7 @@ void MlVane::setSeparateStrength(float k)
 	m_separateStrength = k;
 }
 
+void MlVane::setFuzzy(float f)
+{
+	m_fuzzy = f;
+}

@@ -26,16 +26,22 @@ BarbControl::BarbControl(QWidget *parent)
 	m_separateWeightValue->setLimit(0.0, 1.0);
 	m_separateWeightValue->setValue(0.0);
 	
+	m_fuzzyValue = new QDoubleEditSlider(tr("Fuzziness"));
+	m_fuzzyValue->setLimit(0.0, 1.0);
+	m_fuzzyValue->setValue(0.0);
+	
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->addWidget(m_seedValue);
 	layout->addWidget(m_separateCountValue);
 	layout->addWidget(m_separateWeightValue);
+	layout->addWidget(m_fuzzyValue);
 	layout->addStretch(0);
 	setLayout(layout);
 	
 	connect(m_seedValue, SIGNAL(valueChanged(int)), this, SLOT(sendSeed(int)));
 	connect(m_separateCountValue, SIGNAL(valueChanged(int)), this, SLOT(sendNumSeparate(int)));
 	connect(m_separateWeightValue, SIGNAL(valueChanged(double)), this, SLOT(sendSeparateStrength(double)));
+	connect(m_fuzzyValue, SIGNAL(valueChanged(double)), this, SLOT(sendFuzzy(double)));
 }
 
 void BarbControl::sendSeed(int s)
@@ -51,4 +57,9 @@ void BarbControl::sendNumSeparate(int n)
 void BarbControl::sendSeparateStrength(double k)
 {
 	emit separateStrengthChanged(k);
+}
+
+void BarbControl::sendFuzzy(double f)
+{
+	emit fuzzyChanged(f);
 }

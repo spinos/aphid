@@ -15,7 +15,8 @@ BarbView::BarbView(QWidget *parent) : Base3DView(parent)
 	m_colors = new Vector3F[m_numLines * 11];
 	m_seed = 99;
 	m_numSeparate = 9;
-	m_separateStrength = 0.5f;
+	m_separateStrength = 0.f;
+	m_fuzzy = 0.f;
 }
 
 BarbView::~BarbView()
@@ -56,6 +57,7 @@ void BarbView::receiveShapeChanged()
 	f->setSeed(m_seed);
 	f->setNumSeparate(m_numSeparate);
 	f->setSeparateStrength(m_separateStrength);
+	f->setFuzzy(m_fuzzy);
 	f->sampleColor(100, 10, m_colors);
 	f->samplePosition(100, 10, m_vertices);
 
@@ -77,5 +79,11 @@ void BarbView::receiveNumSeparate(int n)
 void BarbView::receiveSeparateStrength(double k)
 {
 	m_separateStrength = k;
+	receiveShapeChanged();
+}
+
+void BarbView::receiveFuzzy(double f)
+{
+	m_fuzzy = f;
 	receiveShapeChanged();
 }

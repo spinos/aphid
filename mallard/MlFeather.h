@@ -44,6 +44,7 @@ public:
 	void setSeed(unsigned s);
 	void setNumSeparate(unsigned n);
 	void setSeparateStrength(float k);
+	void setFuzzy(float f);
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	

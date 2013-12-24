@@ -16,6 +16,7 @@ public slots:
 	void receiveSeed(int s);
 	void receiveNumSeparate(int n);
 	void receiveSeparateStrength(double k);
+	void receiveFuzzy(double f);
 private:
 
 private:
@@ -26,4 +27,5 @@ private:
 	unsigned m_seed;
 	unsigned m_numSeparate;
 	float m_separateStrength;
+	float m_fuzzy;
 };
