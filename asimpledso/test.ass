@@ -1,0 +1,84 @@
+options
+{
+ AA_samples 9
+ outputs
+  "RGBA RGBA /out/arnold1:gaussian_filter /out/arnold1:jpeg"
+ xres 960
+ yres 540
+ GI_diffuse_depth 1
+ GI_glossy_depth 1
+ GI_diffuse_samples 3
+}
+
+driver_jpeg
+{
+ name /out/arnold1:jpeg
+ filename "output.jpg"
+}
+
+gaussian_filter
+{
+ name /out/arnold1:gaussian_filter
+}
+
+persp_camera
+{
+ name /obj/cam1
+ fov 54.512329
+ focus_distance 1 2 FLOAT 3.0099871 3.01
+ aperture_size 0.004
+ aperture_blades 5
+ matrix 
+  1 0 0 0
+  0 1 0 0
+  0 0 1 0
+  0 0 10 1
+
+ shutter_start 0.25
+ shutter_end 0.75
+}
+
+utility
+{
+ name /shop/utility1
+ shade_mode "lambert"
+ color 0.5 0.5 0.5
+}
+
+standard
+{
+ name /shop/standard1
+ Kd 0.9
+ Kd_color 0.7 0.7 0.7
+ Ks 0.1
+ Ks_color 0.7 0.7 0.7
+ specular_roughness 0.167138
+}
+
+procedural
+{
+ name /obj/Simple_Procedural1
+ dso "D:/aphid/asimpledso/simpleDSO.dll"
+ min -2 -2 -2
+ max  2  2  2
+ matrix
+  1 0 0 0
+  0 1 0 0
+  0 0 1 0
+  0 0 0 1
+ shader "/shop/standard1"
+}
+
+point_light
+{
+ name /obj/arnold_light2
+ radius 5
+ matrix
+  1 0 0 0
+  0 1 0 0
+  0 0 1 0
+  -10 10 0 1
+ color 0.556 0.5996 0.9976
+ intensity 300
+ samples 2
+}
