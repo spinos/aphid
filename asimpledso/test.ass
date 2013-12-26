@@ -2,7 +2,7 @@ options
 {
  AA_samples 9
  outputs
-  "RGBA RGBA /out/arnold1:gaussian_filter /out/arnold1:jpeg"
+  "RGB RGB /out/arnold1:gaussian_filter /out/exr"
  xres 960
  yres 540
  GI_diffuse_depth 1
@@ -10,10 +10,10 @@ options
  GI_diffuse_samples 3
 }
 
-driver_jpeg
+driver_exr
 {
- name /out/arnold1:jpeg
- filename "output.jpg"
+ name /out/exr
+ filename "output.exr"
 }
 
 gaussian_filter
@@ -25,17 +25,11 @@ persp_camera
 {
  name /obj/cam1
  fov 54.512329
- focus_distance 1 2 FLOAT 3.0099871 3.01
- aperture_size 0.004
- aperture_blades 5
  matrix 
   1 0 0 0
   0 1 0 0
   0 0 1 0
   0 0 10 1
-
- shutter_start 0.25
- shutter_end 0.75
 }
 
 utility
