@@ -252,3 +252,8 @@ void MlFeather::setFuzzy(float f)
 	m_vane[0].setFuzzy(f);
 	m_vane[1].setFuzzy(f);
 }
+
+void MlFeather::setGrid(unsigned gridShaft, unsigned gridBarb)
+{
+
+}

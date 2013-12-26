@@ -22,6 +22,8 @@ BarbEdit::BarbEdit(QWidget *parent)
 	connect(m_control, SIGNAL(numSeparateChanged(int)), m_view, SLOT(receiveNumSeparate(int)));
 	connect(m_control, SIGNAL(separateStrengthChanged(double)), m_view, SLOT(receiveSeparateStrength(double)));
 	connect(m_control, SIGNAL(fuzzyChanged(double)), m_view, SLOT(receiveFuzzy(double)));
+	connect(m_control, SIGNAL(gridShaftChanged(int)), m_view, SLOT(receiveGridShaft(int)));
+	connect(m_control, SIGNAL(gridBarbChanged(int)), m_view, SLOT(receiveGridBarb(int)));
 }
 
 QWidget * BarbEdit::barbView()

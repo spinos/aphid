@@ -18,6 +18,14 @@ BarbControl::BarbControl(QWidget *parent)
 	m_seedValue->setLimit(0, 10000);
 	m_seedValue->setValue(99);
 	
+	m_gridShaftValue = new QIntEditSlider(tr("Grid Along Shaft"));
+	m_gridShaftValue->setLimit(10, 1000);
+	m_gridShaftValue->setValue(100);
+	
+	m_gridBarbValue = new QIntEditSlider(tr("Grid Along Barb"));
+	m_gridBarbValue->setLimit(2, 1000);
+	m_gridBarbValue->setValue(10);
+	
 	m_separateCountValue = new QIntEditSlider(tr("Num Separate"));
 	m_separateCountValue->setLimit(3, 64);
 	m_separateCountValue->setValue(11);
@@ -31,10 +39,12 @@ BarbControl::BarbControl(QWidget *parent)
 	m_fuzzyValue->setValue(0.0);
 	
 	QVBoxLayout *layout = new QVBoxLayout;
-	layout->addWidget(m_seedValue);
+	layout->addWidget(m_gridShaftValue);
+	layout->addWidget(m_gridBarbValue);
 	layout->addWidget(m_separateCountValue);
 	layout->addWidget(m_separateWeightValue);
 	layout->addWidget(m_fuzzyValue);
+	layout->addWidget(m_seedValue);
 	layout->addStretch(0);
 	setLayout(layout);
 	
@@ -42,6 +52,8 @@ BarbControl::BarbControl(QWidget *parent)
 	connect(m_separateCountValue, SIGNAL(valueChanged(int)), this, SLOT(sendNumSeparate(int)));
 	connect(m_separateWeightValue, SIGNAL(valueChanged(double)), this, SLOT(sendSeparateStrength(double)));
 	connect(m_fuzzyValue, SIGNAL(valueChanged(double)), this, SLOT(sendFuzzy(double)));
+	connect(m_gridShaftValue, SIGNAL(valueChanged(int)), this, SLOT(sendGridShaft(int)));
+	connect(m_gridBarbValue, SIGNAL(valueChanged(int)), this, SLOT(sendGridBarb(int)));
 }
 
 void BarbControl::sendSeed(int s)
@@ -62,4 +74,14 @@ void BarbControl::sendSeparateStrength(double k)
 void BarbControl::sendFuzzy(double f)
 {
 	emit fuzzyChanged(f);
+}
+
+void BarbControl::sendGridShaft(int g)
+{
+	emit gridShaftChanged(g);
+}
+
+void BarbControl::sendGridBarb(int g)
+{
+	emit gridBarbChanged(g);
 }

@@ -33,16 +33,22 @@ private slots:
 	void sendNumSeparate(int n);
 	void sendSeparateStrength(double k);
 	void sendFuzzy(double f);
+	void sendGridShaft(int g);
+	void sendGridBarb(int g);
 signals:
 	void seedChanged(int s);
 	void numSeparateChanged(int n);
 	void separateStrengthChanged(double k);
 	void fuzzyChanged(double f);
+	void gridShaftChanged(int g);
+	void gridBarbChanged(int g);
 private:
 	
 	
 private:
 	QIntEditSlider * m_seedValue;
+	QIntEditSlider * m_gridShaftValue;
+	QIntEditSlider * m_gridBarbValue;
 	QIntEditSlider * m_separateCountValue;
 	QDoubleEditSlider * m_separateWeightValue;
 	QDoubleEditSlider * m_fuzzyValue;

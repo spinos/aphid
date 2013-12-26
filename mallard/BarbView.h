@@ -17,8 +17,11 @@ public slots:
 	void receiveNumSeparate(int n);
 	void receiveSeparateStrength(double k);
 	void receiveFuzzy(double f);
+	void receiveGridShaft(int g);
+	void receiveGridBarb(int g);
 private:
-
+	void clear();
+	void createLines();
 private:
 	unsigned m_numLines;
 	unsigned * m_numVerticesPerLine;
@@ -28,4 +31,5 @@ private:
 	unsigned m_numSeparate;
 	float m_separateStrength;
 	float m_fuzzy;
+	unsigned m_gridShaft, m_gridBarb;
 };

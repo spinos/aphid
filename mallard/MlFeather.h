@@ -45,6 +45,7 @@ public:
 	void setNumSeparate(unsigned n);
 	void setSeparateStrength(float k);
 	void setFuzzy(float f);
+	void setGrid(unsigned gridShaft, unsigned gridBarb);
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	
