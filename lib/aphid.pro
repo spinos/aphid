@@ -126,6 +126,8 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h \
 	../shared/KMeansClustering.h \
 	../shared/BaseSphere.h \
 	../shared/PseudoNoise.h \
+	../shared/BaseServer.h \
+    ../shared/BaseClient.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -256,6 +258,8 @@ SOURCES = ../shared/Vector3F.cpp \
 	../shared/KMeansClustering.cpp \
 	../shared/BaseSphere.cpp \
 	../shared/PseudoNoise.cpp \
+	../shared/BaseServer.cpp \
+    ../shared/BaseClient.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \
