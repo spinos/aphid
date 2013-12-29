@@ -39,7 +39,8 @@ public:
 		LoadImage = 13,
 		BakeAnimation = 14,
 		AddSkeletonPose = 15,
-		SaveSkeletonPose = 16
+		SaveSkeletonPose = 16,
+		LaunchRender = 17
     };
     
     ToolContext();

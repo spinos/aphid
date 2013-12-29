@@ -143,8 +143,15 @@ void ToolBox::createAction()
 	b->addIconFile(":bakeActive.png");
 	b->setIconIndex(0);
 	b->setAction(BakeAnimation);
+	
+	ActionIconFrame * render = new ActionIconFrame(this);
+	render->addIconFile(":render.png");
+	render->addIconFile(":renderActive.png");
+	render->setIconIndex(0);
+	render->setAction(LaunchRender);
 
 	m_actionFrames.push_back(rb);
 	m_actionFrames.push_back(clr);
 	m_actionFrames.push_back(b);
+	m_actionFrames.push_back(render);
 }

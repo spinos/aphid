@@ -56,5 +56,7 @@
         <file>colorPickerActive.png</file>
         <file>deintersectInactive.png</file>
         <file>deintersectActive.png</file>
+		<file>render.png</file>
+        <file>renderActive.png</file>
     </qresource>
 </RCC>

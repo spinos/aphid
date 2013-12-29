@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 			boost::asio::write(s, boost::asio::buffer("transferEnd", 11));
 			reply_length = s.read_some(boost::asio::buffer(buf), error);
 			
-			t.expires_from_now(boost::posix_time::seconds(0.1));
+			t.expires_from_now(boost::posix_time::seconds(1));
 			t.wait();
 			
 		}

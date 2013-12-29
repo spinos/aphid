@@ -9,6 +9,10 @@
 #include <iostream>
 #include "BaseServer.h"
 #include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+
+boost::mutex io_mutex;
+
 using boost::asio::ip::tcp;
 BaseServer::BaseServer(short port) 
 {
@@ -55,6 +59,8 @@ void BaseServer::session(socket_ptr sock)
       else if (error)
         throw boost::system::system_error(error); // Some other error.
 		
+		//std::cout<<"thread id "<<boost::this_thread::get_id()<<"\n";
+		boost::mutex::scoped_lock lock(io_mutex);
 		processRead(buf.data(), length);
 		
 		boost::asio::write(*sock, boost::asio::buffer("beep.", 5));
