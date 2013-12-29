@@ -17,7 +17,7 @@
 
 using boost::asio::ip::tcp;
 
-const int max_length = 1024;
+const int max_length = 121024;
 
 typedef boost::shared_ptr<tcp::socket> socket_ptr;
 
@@ -37,10 +37,7 @@ void session(socket_ptr sock)
         throw boost::system::system_error(error); // Some other error.
 
 		std::clog<<"received info: "<<data<<" length is "<<length<<"\n";
-		boost::asio::io_service i;
-		boost::asio::deadline_timer t(i);
-		t.expires_from_now(boost::posix_time::seconds(1));
-		t.wait();
+		
 		boost::asio::write(*sock, boost::asio::buffer("greet", 5));
     }
   }

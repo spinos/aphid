@@ -7,7 +7,7 @@
 #include "MlVane.h"
 BarbView::BarbView(QWidget *parent) : Base3DView(parent)
 {
-	std::cout<<"Barbview ";
+	std::cout<<" Barbview ";
 	m_seed = 99;
 	m_numSeparate = 9;
 	m_separateStrength = 0.f;

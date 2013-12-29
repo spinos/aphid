@@ -49,12 +49,14 @@
 #include "window.h"
 #include "TimeControl.h"
 #include "BarbEdit.h"
+#include "RenderEdit.h"
 Window::Window()
 {
 	std::cout<<"Initializing Mallard main window ";
     glWidget = new GLWidget;
 	m_tools = new ToolBox;
 	m_barbEdit = new BarbEdit(this);
+	m_renderEdit = new RenderEdit(this);
 	
 	glWidget->setInteractContext(m_tools);
 	m_brushControl = new BrushControl(this);
@@ -143,6 +145,10 @@ void Window::createActions()
     showBarbEditAct = new QAction(tr("&Barb Preview"), this);
     showBarbEditAct->setStatusTip(tr("Show barb preview"));
     connect(showBarbEditAct, SIGNAL(triggered()), m_barbEdit, SLOT(show()));
+	
+	showRenderEditAct = new QAction(tr("&Render View"), this);
+    showRenderEditAct->setStatusTip(tr("Show render view"));
+    connect(showRenderEditAct, SIGNAL(triggered()), m_renderEdit, SLOT(show()));
     
 	saveSceneAct = new QAction(tr("&Save"), this);
 	saveSceneAct->setStatusTip(tr("Save current scene file"));
@@ -209,6 +215,7 @@ void Window::createMenus()
 	windowMenu->addAction(showBrushControlAct);
 	windowMenu->addAction(showTimeControlAct);
 	windowMenu->addAction(showBarbEditAct);
+	windowMenu->addAction(showRenderEditAct);
 	
 	updateRecentFileActions();
 }

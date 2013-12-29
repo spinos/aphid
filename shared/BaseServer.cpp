@@ -10,21 +10,28 @@
 #include "BaseServer.h"
 #include <boost/thread.hpp>
 using boost::asio::ip::tcp;
-const int max_length = 262160;
 BaseServer::BaseServer(short port) 
 {
-	boost::asio::io_service io_service;
-	server(io_service, port);
+	m_port = port;
 }
 
 BaseServer::~BaseServer() {}
 
-void BaseServer::server(boost::asio::io_service& io_service, short port)
+void BaseServer::start()
 {
+	std::cout<<" start server at port" << m_port<<" ";
+	boost::thread t(boost::bind(&BaseServer::server, this, m_port));
+}
+
+void BaseServer::server(short port)
+{
+	
+	boost::asio::io_service io_service;
   tcp::acceptor a(io_service, tcp::endpoint(tcp::v4(), port));
+    
   for (;;)
   {
-    socket_ptr sock(new tcp::socket(io_service));
+	socket_ptr sock(new tcp::socket(io_service));
     a.accept(*sock);
     boost::thread t(boost::bind(&BaseServer::session, this, sock));
   }
@@ -33,17 +40,22 @@ void BaseServer::server(boost::asio::io_service& io_service, short port)
 void BaseServer::session(socket_ptr sock)
 {
 	try {
+	std::clog<<"connection opened\n";
     for (;;) {
-      char data[max_length];
-
+      
+		boost::array<char, 4096> buf;
       boost::system::error_code error;
-      size_t length = sock->read_some(boost::asio::buffer(data), error);
-      if (error == boost::asio::error::eof)
-        break; // Connection closed cleanly by peer.
+      size_t length = sock->read_some(boost::asio::buffer(buf), error);
+      if (error == boost::asio::error::eof) {
+		// Connection closed cleanly by peer.
+		std::clog<<"connection closed\n";
+		break;
+	  }
+
       else if (error)
         throw boost::system::system_error(error); // Some other error.
-
-		processRead(data, length);
+		
+		processRead(buf.data(), length);
 		
 		boost::asio::write(*sock, boost::asio::buffer("beep.", 5));
     }

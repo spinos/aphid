@@ -18,8 +18,12 @@ public:
 	BaseServer(short port);
 	virtual ~BaseServer();
 	
+	void start();
+	
+protected:
 	virtual void processRead(const char * data, size_t length);
 private:
-	void server(boost::asio::io_service& io_service, short port);
+	void server(short port);
 	void session(socket_ptr sock);
+	short m_port;
 };
