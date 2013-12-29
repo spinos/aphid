@@ -21,7 +21,7 @@ public:
 signals:
 	
 public slots:
-	
+	void resizeRenderView(QSize s);
 private:
 	ImageView * m_view;
 };

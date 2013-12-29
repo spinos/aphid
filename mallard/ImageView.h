@@ -18,7 +18,7 @@ class ImageView : public QWidget, public BaseServer
 
 public:
     ImageView(QWidget *parent = 0);
-
+	void resizeImage(QSize s);
 protected:
 	virtual void processRead(const char * data, size_t length);
     void paintEvent(QPaintEvent *event);

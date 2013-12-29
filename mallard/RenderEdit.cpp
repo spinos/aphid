@@ -32,3 +32,8 @@ RenderEdit::RenderEdit(QWidget *parent)
 	//connect(m_control, SIGNAL(gridShaftChanged(int)), m_view, SLOT(receiveGridShaft(int)));
 	//connect(m_control, SIGNAL(gridBarbChanged(int)), m_view, SLOT(receiveGridBarb(int)));
 }
+
+void RenderEdit::resizeRenderView(QSize s)
+{
+	m_view->resizeImage(s);
+}

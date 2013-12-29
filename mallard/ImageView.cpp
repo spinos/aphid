@@ -44,9 +44,8 @@ void ImageView::paintEvent(QPaintEvent * /* event */)
 	painter.drawImage(QPoint(), *m_image);
 }
 
-void ImageView::resizeEvent(QResizeEvent * /* event */)
+void ImageView::resizeEvent(QResizeEvent *)
 {
-    //thread.render(size());
 }
 
 void ImageView::processRead(const char * data, size_t length)
@@ -116,5 +115,12 @@ void ImageView::endBucket()
 	}
 	
 	std::cout<<"bucket filled\n";
+	update();
+}
+
+void ImageView::resizeImage(QSize s)
+{
+	if(m_image) delete m_image;
+ 	m_image = new QImage(s, QImage::Format_RGB32);
 	update();
 }

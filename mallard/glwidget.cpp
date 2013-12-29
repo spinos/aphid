@@ -751,4 +751,10 @@ void GLWidget::testCurvature()
 		b += cvt.x;   
 	} 
 }
+
+void GLWidget::resizeEvent( QResizeEvent * event )
+{
+	emit renderResChanged(event->size());
+	SingleModelView::resizeEvent(event);
+}
 //:~

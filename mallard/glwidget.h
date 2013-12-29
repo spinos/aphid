@@ -83,6 +83,7 @@ signals:
 	void sceneNameChanged(QString name);
 	void sendMessage(QString msg);
 	void sendFeatherEditBackground(QString name);
+	void renderResChanged(QSize s);
 	
 public slots:
 	void cleanSheet();
@@ -101,6 +102,7 @@ protected:
     virtual void clientDraw();
 	virtual void focusOutEvent(QFocusEvent * event);
 	virtual void clearSelection();
+	virtual void resizeEvent( QResizeEvent * event );
 	
 //! [3]
 private:
