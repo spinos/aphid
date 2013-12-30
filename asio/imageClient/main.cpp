@@ -27,15 +27,20 @@ int main(int argc, char* argv[])
       std::cerr << "Usage: blocking_tcp_echo_client <host> <port>\n";
       return 1;
     }
-
+    
+    boost::posix_time::ptime tt(boost::posix_time::second_clock::local_time());
+    std::string ts("2002-01-20 23:59:59.000");
+    boost::posix_time::ptime tref(boost::posix_time::time_from_string(ts));
+    boost::posix_time::time_duration td = tt - tref;
+    std::cout<<"time elapse "<<td.total_seconds()<<"\n";
+    
     boost::asio::io_service io_service;
 
     tcp::resolver resolver(io_service);
     tcp::resolver::query query(tcp::v4(), argv[1], argv[2]);
     tcp::resolver::iterator iterator = resolver.resolve(query);
 
-    tcp::socket s(io_service);
-    s.connect(*iterator);
+    
 
     using namespace std; // For strlen.
     char reply[max_length];
@@ -56,7 +61,7 @@ int main(int argc, char* argv[])
 			rect[1] = rect[0] + bucketSize - 1;
 			if(rect[1] > imageSizeX - 1) rect[1] = imageSizeX - 1;
 			
-			const float grey = (float)(random() % 457) / 457.f;
+			const float grey = (float)((rand() + td.seconds() * 391) % 457) / 457.f;
 			std::cout<<"grey"<<grey<<"\n";
 
 			const unsigned npix = (rect[1] - rect[0] + 1) * (rect[3] - rect[2] + 1);
@@ -65,6 +70,8 @@ int main(int argc, char* argv[])
 			if((npix * 16) % 4096 > 0) npackage++;
 			std::cout<<"n packages "<<npackage<<"\n";
 			
+			tcp::socket s(io_service);
+			s.connect(*iterator);
 			boost::asio::write(s, boost::asio::buffer((char *)rect, 16));
 			boost::array<char, 128> buf;
 			boost::system::error_code error;
@@ -80,6 +87,8 @@ int main(int argc, char* argv[])
 				color[i * 4 + 3] = 1.f;
 			}
 			
+			
+			
 			for(int i=0; i < npackage; i++) {
 				boost::asio::write(s, boost::asio::buffer((char *)&(color[i * 256 * 4]), 4096));
 				reply_length = s.read_some(boost::asio::buffer(buf), error);
@@ -91,10 +100,11 @@ int main(int argc, char* argv[])
 			t.expires_from_now(boost::posix_time::seconds(1));
 			t.wait();
 			
+			s.close();
 		}
 	}
 	
-	s.close();
+	
   }
   catch (std::exception& e)
   {

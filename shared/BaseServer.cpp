@@ -44,9 +44,11 @@ void BaseServer::server(short port)
 void BaseServer::session(socket_ptr sock)
 {
 	try {
+	io_mutex.lock();
 	std::clog<<"connection opened\n";
-    for (;;) {
-      
+	
+	for (;;) {
+	    
 		boost::array<char, 4096> buf;
       boost::system::error_code error;
       size_t length = sock->read_some(boost::asio::buffer(buf), error);
@@ -59,12 +61,15 @@ void BaseServer::session(socket_ptr sock)
       else if (error)
         throw boost::system::system_error(error); // Some other error.
 		
+        
 		//std::cout<<"thread id "<<boost::this_thread::get_id()<<"\n";
-		boost::mutex::scoped_lock lock(io_mutex);
 		processRead(buf.data(), length);
 		
 		boost::asio::write(*sock, boost::asio::buffer("beep.", 5));
+		
+	
     }
+    io_mutex.unlock();
   }
   catch (std::exception& e) {
     std::cerr << "Exception in thread: " << e.what() << "\n";

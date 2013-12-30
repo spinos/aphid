@@ -8,7 +8,6 @@ CONFIG -= qt
 INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit
 SOURCES       = main.cpp
                 
-LIBS += -lIlmImf -lHalf
 macx {
     INCLUDEPATH += $$(HOME)/Library/boost_1_44_0 \
                     /usr/local/include/OpenEXR \
@@ -19,16 +18,11 @@ macx {
     CONFIG -= app_bundle
 }
 win32 {
-    HEADERS += ../shared/gExtension.h
-    SOURCES += ../shared/gExtension.cpp
-    INCLUDEPATH += D:/usr/local/include D:/ofl/shared \
-                   D:/usr/hdf5/include \
-                   D:/usr/libxml2x64/include \
-                   D:/usr/eigen2
-    QMAKE_LIBDIR += D:/usr/local/lib64 
-    LIBS += -LD:/usr/libxml2x64/lib -llibxml2 \
-            -LD:/usr/hdf5/lib -lszip
-    DEFINES += OPENEXR_DLL NDEBUG NOMINMAX
+    INCLUDEPATH += D:/usr/boost_1_51_0 \
+                    D:/ofl/shared 
+    QMAKE_LIBDIR += D:/usr/boost_1_51_0/stage/lib
+    LIBS += -LD:/usr/hdf5/lib -lszip
+    DEFINES += NDEBUG NOMINMAX _WIN32_WINDOWS
     CONFIG += console
 }
 DESTDIR = ./

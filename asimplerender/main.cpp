@@ -17,13 +17,13 @@ void logAMatrix(AtMatrix matrix)
         std::cout<<"m["<<i<<"]["<<j<<"] = "<<matrix[i][j]<<"\n";
 }
 
-void logRenderError(int error)
+void logRenderError(int status)
 {
-	if (ai_status == AI_SUCCESS) {
-		std::cout<<"no error\n";
+	if (status == AI_SUCCESS) {
+		std::cout<<"rendered without error\n";
 		return;
 	}
-	switch (ai_status) {
+	switch (status) {
 		case AI_ABORT:
 			std::cout<<"render aborted";
 			break;
@@ -72,13 +72,11 @@ int main(int argc, char *argv[])
     AiArraySetStr(outputs, 0, "RGBA RGBA output:gaussian_filter output:exr");
     AiNodeSetArray(options, "outputs", outputs);
     
-    logAStrArray(AiNodeGetArray(options, "outputs"));
-    
     AiNodeSetInt(options, "xres", 320);
     AiNodeSetInt(options, "yres", 240);
     AiNodeSetInt(options, "AA_samples", 3);
 	
-    AtNode* driver = AiNode("driver_exr");
+    AtNode* driver = AiNode("driver_display");
     AiNodeSetStr(driver, "name", "output:exr");
     AiNodeSetStr(driver, "filename", "output.exr");
     AiNodeSetFlt(driver, "gamma", 2.2f);
@@ -94,8 +92,7 @@ int main(int argc, char *argv[])
 	AiNodeSetMatrix(camera, "matrix", matrix);
 	
     AiNodeGetMatrix(camera, "matrix", matrix);
-    logAMatrix(matrix);
-	
+    
 	AiNodeSetPtr(options, "camera", camera);
     
 	AtNode * filter = AiNode("gaussian_filter");
@@ -103,12 +100,16 @@ int main(int argc, char *argv[])
 
     AtNode * standard = AiNode("standard");
     AiNodeSetStr(standard, "name", "/shop/standard1");
+    AiNodeSetRGB(standard, "Kd_color", 1, 0, 0);
 
     AtNode * sphere = AiNode("sphere");
     AiNodeSetPtr(sphere, "shader", standard);
     
     AtNode * light = AiNode("point_light");
     AiNodeSetStr(light, "name", "/obj/lit");
+    AiNodeSetFlt(light, "intensity", 1024);
+     matrix[3][0] = -10.f;
+    AiNodeSetMatrix(light, "matrix", matrix);
 
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
     AiEnd();

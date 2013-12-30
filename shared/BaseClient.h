@@ -9,7 +9,8 @@
 
 #pragma once
 #include <boost/asio.hpp>
-typedef boost::shared_ptr<boost::asio::ip::tcp::tcp::socket> socket_ptr;
+using boost::asio::ip::tcp;
+typedef boost::shared_ptr<tcp::socket> socket_ptr;
 
 class BaseClient {
 public:

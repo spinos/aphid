@@ -111,7 +111,7 @@ win32 {
     QMAKE_LIBDIR += D:/usr/local/lib64 
     LIBS += -LD:/usr/libxml2x64/lib -llibxml2 \
             -LD:/usr/hdf5/lib -lszip
-    DEFINES += OPENEXR_DLL NDEBUG NOMINMAX
+    DEFINES += OPENEXR_DLL NDEBUG NOMINMAX _WIN32_WINDOWS
     CONFIG += console
 }
 QT           += opengl

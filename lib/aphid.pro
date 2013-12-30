@@ -287,5 +287,5 @@ win32 {
     INCLUDEPATH += D:/usr/local/include D:/ofl/shared \
                    D:/usr/hdf5/include \
                    D:/usr/libxml2x64/include D:/usr/eigen3
-    DEFINES += OPENEXR_DLL NDEBUG
+    DEFINES += OPENEXR_DLL NDEBUG _WIN32_WINDOWS
 }
