@@ -88,7 +88,7 @@ Window::Window()
 	connect(m_timeControl, SIGNAL(currentFrameChanged(int)), glWidget, SLOT(updateOnFrame(int)));
 	connect(m_featherEdit->uvView(), SIGNAL(shapeChanged()), m_barbEdit->barbView(), SLOT(receiveShapeChanged()));
 	connect(glWidget, SIGNAL(renderResChanged(QSize)), m_renderEdit, SLOT(resizeRenderView(QSize)));
-	
+
 	std::cout<<"Ready\n";
 	statusBar()->showMessage(tr("Ready"));
 }
@@ -120,6 +120,10 @@ void Window::receiveToolAction(int a)
 		case ToolContext::BakeAnimation:
 			glWidget->bakeFrames();
 			break;
+		case ToolContext::LaunchRender:
+			glWidget->testRender();
+			m_renderEdit->show();
+			break;	
 		default:
 			break;
 	}

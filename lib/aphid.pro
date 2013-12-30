@@ -128,6 +128,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h \
 	../shared/PseudoNoise.h \
 	../shared/BaseServer.h \
     ../shared/BaseClient.h \
+	../shared/RenderEngine.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -260,6 +261,7 @@ SOURCES = ../shared/Vector3F.cpp \
 	../shared/PseudoNoise.cpp \
 	../shared/BaseServer.cpp \
     ../shared/BaseClient.cpp \
+	../shared/RenderEngine.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \

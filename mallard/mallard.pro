@@ -46,6 +46,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
     BarbControl.h \
 	RenderEdit.h \
     ImageView.h \
+	MlEngine.h \
                 window.h
                 
 SOURCES       = ../shared/ContextIconFrame.cpp \
@@ -88,6 +89,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
     BarbControl.cpp \
 	RenderEdit.cpp \
     ImageView.cpp \
+	MlEngine.cpp \
     window.cpp \
                 main.cpp
                 

@@ -36,4 +36,5 @@ RenderEdit::RenderEdit(QWidget *parent)
 void RenderEdit::resizeRenderView(QSize s)
 {
 	m_view->resizeImage(s);
+	resize(s);
 }

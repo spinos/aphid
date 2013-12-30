@@ -63,6 +63,7 @@
 #include <FloodCondition.h>
 #include "MlCalamus.h"
 #include <MeshTopology.h>
+#include "MlEngine.h"
 
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
@@ -70,6 +71,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	m_bezierDrawer = new BezierDrawer;
 	m_featherDrawer = new MlDrawer;
 	m_featherDrawer->create("mallard.mlc");
+	m_engine = new MlEngine;
 	MlCalamus::FeatherLibrary = this;
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 	m_featherTexId = m_featherDistrId = -1;
@@ -754,7 +756,16 @@ void GLWidget::testCurvature()
 
 void GLWidget::resizeEvent( QResizeEvent * event )
 {
-	emit renderResChanged(event->size());
+	const QSize sz = event->size();
+	m_engine->setResolution(sz.width(), sz.height());
 	SingleModelView::resizeEvent(event);
+}
+
+void GLWidget::testRender()
+{
+	const QSize sz(m_engine->resolutionX(), m_engine->resolutionY());
+	emit renderResChanged(sz);
+	m_engine->setCamera(getCamera());
+	m_engine->render();
 }
 //:~

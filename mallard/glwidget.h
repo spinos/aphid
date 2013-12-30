@@ -47,7 +47,7 @@
 
 class BezierDrawer;
 class MlDrawer;
-
+class MlEngine;
 //! [0]
 class GLWidget : public SingleModelView, public MlScene
 {
@@ -76,6 +76,7 @@ public:
 	void rebuildFeather();
 	void clearFeather();
 	void bakeFrames();
+	void testRender();
 	
 	QString openSheet(QString name);
 	
@@ -84,7 +85,6 @@ signals:
 	void sendMessage(QString msg);
 	void sendFeatherEditBackground(QString name);
 	void renderResChanged(QSize s);
-	
 public slots:
 	void cleanSheet();
 	void saveSheet();
@@ -116,6 +116,7 @@ private:
 private:
 	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;
+	MlEngine * m_engine;
 	int m_featherTexId, m_featherDistrId;
 	char m_floodByRegion, m_eraseByRegion;
 	
