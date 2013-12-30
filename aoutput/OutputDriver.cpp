@@ -32,19 +32,18 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+#include <ai.h>
+#include <ai_drivers.h>
+#include <iostream>
+#include <sstream>
+class DisplayDriver
+{
+public:
+    DisplayDriver() {}
+private:
+};
 
-#include "ai_drivers.h"
-
-#include "IECore/DisplayDriver.h"
-#include "IECore/BoxAlgo.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MessageHandler.h"
-
-#include "IECoreArnold/ToArnoldConverter.h"
-
-using namespace Imath;
-using namespace IECore;
-using namespace IECoreArnold;
+typedef DisplayDriver* DisplayDriverPtr;
 
 static AtVoid driverParameters( AtList *params, AtMetaDataStore *metaData )
 {
@@ -70,8 +69,6 @@ static bool driverSupportsPixelType( const AtNode *node, AtByte pixelType )
 	{
 		case AI_TYPE_RGB :
 		case AI_TYPE_RGBA :
-		case AI_TYPE_FLOAT :
-		case AI_TYPE_VECTOR :
 		case AI_TYPE_POINT :
 			return true;
 		default:
@@ -86,18 +83,21 @@ static const char **driverExtension()
 
 static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displayWindow, AtBBox2 dataWindow, int bucketSize )
 {	
-	std::vector<std::string> channelNames;
-	
+    std::vector<std::string> channelNames;
+	std::stringstream sst;
+	    
 	const char *name = 0;
 	int pixelType = 0;
-	while( AiOutputIteratorGetNext( iterator, &name, &pixelType, 0 ) )
-	{
+	while( AiOutputIteratorGetNext( iterator, &name, &pixelType, 0 ) ) {
+	    sst.str("");
+	    sst<<name;
 		std::string namePrefix;
-		if( strcmp( name, "RGB" ) && strcmp( name, "RGBA" ) )
+		if( sst.str() == "RGB" || sst.str() == "RGBA" )
 		{
-			namePrefix = std::string( name ) + ".";
+			//namePrefix = std::string( name ) + ".";
+			AiMsgInfo("\n\n\n\nfoo driver output name is RGB or RGBA \n\n\n\n");
 		}
-		
+		/*
 		switch( pixelType )
 		{
 			case AI_TYPE_RGB :
@@ -117,9 +117,21 @@ static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBo
 				// no need for prefix because it's not a compound type
 				channelNames.push_back( name );
 				break;
-		}
+		}*/
 	}
-
+	
+	sst.str("");
+	sst<<"displayWindow "<<displayWindow.minx<<" "<<displayWindow.maxx<<" "<<displayWindow.miny<<" "<<displayWindow.maxy;
+	AiMsgInfo(sst.str().c_str());
+	
+	sst.str("");
+	sst<<"dataWindow "<<dataWindow.minx<<" "<<dataWindow.maxx<<" "<<dataWindow.miny<<" "<<dataWindow.maxy;
+	AiMsgInfo(sst.str().c_str());
+	
+	sst.str("");
+	sst<<"bucketSize "<<bucketSize;
+	AiMsgInfo(sst.str().c_str());
+	/*
 	/// \todo Make Convert.h
 	Box2i cortexDisplayWindow(
 		V2i( displayWindow.minx, displayWindow.miny ),
@@ -146,7 +158,7 @@ static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBo
 		// we have to catch and report exceptions because letting them out into pure c land
 		// just causes aborts.
 		msg( Msg::Error, "ieOutputDriver:driverOpen", e.what() );
-	}
+	}*/
 }
 
 static AtVoid driverPrepareBucket( AtNode *node, AtInt x, AtInt y, AtInt sx, AtInt sy, AtInt tId )
@@ -161,6 +173,11 @@ static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator
 		return;
 	}
 	
+	std::stringstream sst;
+	sst<<"bucketCoornidate "<<x<<" "<<x + sx<<" "<<y<<" "<<y + sy;
+	AiMsgInfo(sst.str().c_str());
+	
+	/*
 	const int numOutputChannels = (*driver)->channelNames().size();
 
 	std::vector<float> interleavedData;
@@ -219,7 +236,7 @@ static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator
 		// we have to catch and report exceptions because letting them out into pure c land
 		// just causes aborts.
 		msg( Msg::Error, "ieOutputDriver:driverWriteBucket", e.what() );
-	}
+	}*/
 }
 
 static AtVoid driverClose( AtNode *node, struct AtOutputIterator *iterator )
@@ -229,13 +246,13 @@ static AtVoid driverClose( AtNode *node, struct AtOutputIterator *iterator )
 	{
 		try
 		{
-			(*driver)->imageClose(); 
+			//(*driver)->imageClose(); 
 		}
 		catch( const std::exception &e )
 		{
 			// we have to catch and report exceptions because letting them out into pure c land
 			// just causes aborts.
-			msg( Msg::Error, "ieOutputDriver:driverClose", e.what() );
+			//msg( Msg::Error, "ieOutputDriver:driverClose", e.what() );
 		}
 	}
 }
@@ -272,7 +289,7 @@ AI_EXPORT_LIB AtBoolean NodeLoader( int i, AtNodeLib *node )
 		
 		node->node_type = AI_NODE_DRIVER;
 		node->output_type = AI_TYPE_NONE;
-		node->name = "ieDisplay";
+		node->name = "driver_foo";
 		node->methods = &nodeMethods;
 		sprintf( node->version, AI_VERSION );
 		
