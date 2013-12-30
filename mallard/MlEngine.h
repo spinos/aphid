@@ -9,14 +9,19 @@
 
 #pragma once
 #include <RenderEngine.h>
+#include <boost/thread.hpp>
 class MlEngine : public RenderEngine {
 public:
 	MlEngine();
 	virtual ~MlEngine();
 	
 	virtual void render();
+	void interruptRender();
 protected:
 
 private:
+	void testOutput();
 	
+private:
+	boost::thread m_workingThread;
 };

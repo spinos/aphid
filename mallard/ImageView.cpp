@@ -12,7 +12,7 @@
 #include <BaseServer.h>
 #include <iostream>
 ImageView::ImageView(QWidget *parent)
-    : QWidget(parent), BaseServer(7979)
+    : QWidget(parent), BaseServer(7879)
 {
 	std::cout<<" Renderview ";
     qRegisterMetaType<QImage>("QImage");

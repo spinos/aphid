@@ -19,9 +19,13 @@ public:
 	RenderEdit(QWidget *parent = 0);
 	
 signals:
-	
+	void cancelRender();
 public slots:
 	void resizeRenderView(QSize s);
+	
+protected:
+	virtual void keyPressEvent(QKeyEvent *e);
+	virtual void reject();
 private:
 	ImageView * m_view;
 };

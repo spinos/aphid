@@ -98,12 +98,13 @@ public slots:
 	void importFeatherDistributionMap();
 	void receiveFloodRegion(int state);
 	void receiveEraseRegion(int state);
+	void receiveCancelRender();
 protected:
     virtual void clientDraw();
 	virtual void focusOutEvent(QFocusEvent * event);
 	virtual void clearSelection();
 	virtual void resizeEvent( QResizeEvent * event );
-	
+	virtual void closeEvent( QCloseEvent * event );
 //! [3]
 private:
 	void selectFeather(char byRegion = 0);

@@ -82,6 +82,9 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 //! [1]
 GLWidget::~GLWidget()
 {
+	delete m_engine;
+	delete m_featherDrawer;
+	delete m_bezierDrawer;
 }
 
 void GLWidget::clientDraw()
@@ -761,11 +764,22 @@ void GLWidget::resizeEvent( QResizeEvent * event )
 	SingleModelView::resizeEvent(event);
 }
 
+void GLWidget::closeEvent( QCloseEvent * event )
+{
+	m_engine->interruptRender();
+	SingleModelView::closeEvent(event);
+}
+
 void GLWidget::testRender()
 {
 	const QSize sz(m_engine->resolutionX(), m_engine->resolutionY());
 	emit renderResChanged(sz);
 	m_engine->setCamera(getCamera());
 	m_engine->render();
+}
+
+void GLWidget::receiveCancelRender()
+{
+	m_engine->interruptRender();
 }
 //:~

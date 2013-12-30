@@ -38,3 +38,15 @@ void RenderEdit::resizeRenderView(QSize s)
 	m_view->resizeImage(s);
 	resize(s);
 }
+
+void RenderEdit::keyPressEvent(QKeyEvent *e)
+{
+    if(e->key() == Qt::Key_Q) emit cancelRender();
+	QDialog::keyPressEvent(e);
+}
+
+void RenderEdit::reject()
+{
+	emit cancelRender();
+	QDialog::reject();
+}
