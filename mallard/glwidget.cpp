@@ -311,7 +311,7 @@ void GLWidget::rebuildFeather()
 	m_featherDrawer->disable();
 	m_featherDrawer->initializeBuffer();
 	m_featherDrawer->computeBufferIndirection();
-	m_featherDrawer->rebuildBuffer(skin());
+	m_featherDrawer->rebuildBuffer();
 	update();
 	setDirty();
 }
@@ -573,7 +573,7 @@ void GLWidget::updateOnFrame(int x)
 	m_featherDrawer->setCurrentFrame(x);
 	m_featherDrawer->setCurrentOrigin(bodyDeformer()->frameCenter());
 	setCollision(skin());
-	m_featherDrawer->rebuildBuffer(skin());
+	m_featherDrawer->rebuildBuffer();
 	m_bezierDrawer->rebuildBuffer(body());
 	
 	update();
@@ -599,7 +599,7 @@ void GLWidget::afterOpen()
 	m_featherDrawer->setSkin(skin());
 	m_featherDrawer->computeBufferIndirection();
 	setCollision(skin());
-	m_featherDrawer->rebuildBuffer(skin());
+	m_featherDrawer->rebuildBuffer();
 	m_bezierDrawer->rebuildBuffer(body());
 	buildTree();
 	std::string febkgrd = featherEditBackground();
