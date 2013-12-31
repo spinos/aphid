@@ -87,7 +87,7 @@ bool MlUVView::pickupFeather(const Vector2F & p)
 		std::cout<<"no feather["<<activeId<<"]\n";
 		return false;
 	}
-	emit shapeChanged();
+	emit selectionChanged();
 	
 	return true;
 }

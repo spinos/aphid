@@ -1,6 +1,7 @@
 #pragma once
 #include <Base3DView.h>
 #include <FeatherExample.h>
+
 class BarbView : public Base3DView, public FeatherExample {
 Q_OBJECT
 
@@ -13,23 +14,12 @@ public:
 	virtual void clientMouseInput();
 public slots:
 	void receiveShapeChanged();
-	void receiveSeed(int s);
-	void receiveNumSeparate(int n);
-	void receiveSeparateStrength(double k);
-	void receiveFuzzy(double f);
-	void receiveGridShaft(int g);
-	void receiveGridBarb(int g);
 private:
 	void clear();
-	void createLines();
+	void createLines(unsigned gridShaft, unsigned gridBarb);
 private:
-	unsigned m_numLines;
+	unsigned m_numLines, m_gridShaft, m_gridBarb;
 	unsigned * m_numVerticesPerLine;
 	Vector3F * m_vertices;
 	Vector3F * m_colors;
-	unsigned m_seed;
-	unsigned m_numSeparate;
-	float m_separateStrength;
-	float m_fuzzy;
-	unsigned m_gridShaft, m_gridBarb;
 };

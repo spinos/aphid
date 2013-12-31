@@ -11,6 +11,7 @@ public:
 	BarbEdit(QWidget *parent = 0);
 	
 	QWidget * barbView();
+	QWidget * barbControl();
 signals:
 	
 public slots:

@@ -9,6 +9,7 @@
 
 #include "BarbWorks.h"
 #include "MlSkin.h"
+#include "MlFeather.h"
 #include "MlCalamus.h"
 BarbWorks::BarbWorks() 
 {
@@ -74,4 +75,25 @@ void BarbWorks::closeCache(const std::string & stime)
 	closeEntry("/p");
 	closeSlice("/tang", stime);
 	closeEntry("/tang");
+}
+
+void BarbWorks::createBarbBuffer()
+{
+	const unsigned nc = numFeathers();
+	unsigned i;
+	
+	BoundingBox box;
+	Matrix33F space;
+	Vector3F p;
+
+	for(i = 0; i < nc; i++) {
+		MlCalamus * c = skin()->getCalamus(i);
+		skin()->calamusSpace(c, space);
+		skin()->getPointOnBody(c, p);
+		
+		computeFeather(c, p, space);
+
+		MlFeather * f = c->feather();
+		f->getBoundingBox(box);
+	}
 }

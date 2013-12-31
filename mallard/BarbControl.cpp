@@ -10,7 +10,8 @@
 #include "BarbControl.h"
 #include <QIntEditSlider.h>
 #include <QDoubleEditSlider.h>
-
+#include <MlFeather.h>
+#include <MlFeatherCollection.h>
 BarbControl::BarbControl(QWidget *parent)
     : QWidget(parent)
 {
@@ -58,30 +59,61 @@ BarbControl::BarbControl(QWidget *parent)
 
 void BarbControl::sendSeed(int s)
 {
-	emit seedChanged(s);
+	MlFeather *f = selectedExample();
+	if(!f) return;
+	f->setSeed(s);
+	emit shapeChanged();
 }
 
 void BarbControl::sendNumSeparate(int n)
 {
-	emit numSeparateChanged(n);
+	MlFeather *f = selectedExample();
+	if(!f) return;
+	f->setNumSeparate(n);
+	emit shapeChanged();
 }
 
 void BarbControl::sendSeparateStrength(double k)
 {
-	emit separateStrengthChanged(k);
+	MlFeather *f = selectedExample();
+	if(!f) return;
+	f->setSeparateStrength(k);
+	emit shapeChanged();
 }
 
-void BarbControl::sendFuzzy(double f)
+void BarbControl::sendFuzzy(double fuz)
 {
-	emit fuzzyChanged(f);
+	MlFeather *f = selectedExample();
+	if(!f) return;
+	f->setFuzzy(fuz);
+	emit shapeChanged();
 }
 
 void BarbControl::sendGridShaft(int g)
 {
-	emit gridShaftChanged(g);
+	MlFeather *f = selectedExample();
+	if(!f) return;
+	f->setGridShaft(g);
+	emit shapeChanged();
 }
 
 void BarbControl::sendGridBarb(int g)
 {
-	emit gridBarbChanged(g);
+	MlFeather *f = selectedExample();
+	if(!f) return;
+	f->setGridBarb(g);
+	emit shapeChanged();
+}
+
+void BarbControl::receiveSelectionChanged()
+{
+	MlFeather *f = selectedExample();
+	if(!f) return;
+	
+	m_gridShaftValue->setValue(f->gridShaft());
+	m_gridBarbValue->setValue(f->gridBarb());
+	m_separateCountValue->setValue(f->numSeparate());
+	m_separateWeightValue->setValue(f->separateStrength());
+	m_fuzzyValue->setValue(f->fuzzy());
+	emit shapeChanged();
 }

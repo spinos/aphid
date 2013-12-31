@@ -9,7 +9,7 @@
 
 #pragma once
 #include <QWidget>
-
+#include <FeatherExample.h>
 QT_BEGIN_NAMESPACE
 class QGroupBox;
 class QStackedLayout;
@@ -19,7 +19,7 @@ QT_END_NAMESPACE
 class QIntEditSlider;
 class QDoubleEditSlider;
 class QDoubleEditSlider;
-class BarbControl : public QWidget
+class BarbControl : public QWidget, public FeatherExample
 {
     Q_OBJECT
 
@@ -27,7 +27,7 @@ public:
 	BarbControl(QWidget *parent = 0);
 
 public slots:
-	
+	void receiveSelectionChanged();
 private slots:
 	void sendSeed(int s);
 	void sendNumSeparate(int n);
@@ -36,12 +36,7 @@ private slots:
 	void sendGridShaft(int g);
 	void sendGridBarb(int g);
 signals:
-	void seedChanged(int s);
-	void numSeparateChanged(int n);
-	void separateStrengthChanged(double k);
-	void fuzzyChanged(double f);
-	void gridShaftChanged(int g);
-	void gridBarbChanged(int g);
+	void shapeChanged();
 private:
 	
 	

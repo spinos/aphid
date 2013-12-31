@@ -17,6 +17,7 @@ public:
 	virtual ~BarbWorks();
 	void setSkin(MlSkin * skin);
 	MlSkin * skin() const;
+	void createBarbBuffer();
 protected:
 	unsigned numFeathers() const;
 	char isTimeCached(const std::string & stime);

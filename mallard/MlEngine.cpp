@@ -8,6 +8,7 @@
  */
 
 #include "MlEngine.h"
+#include "BarbWorks.h"
 #include <boost/asio.hpp>
 #include <boost/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -18,7 +19,13 @@ using boost::asio::ip::tcp;
 MlEngine::MlEngine() 
 {
 	std::cout<<" renderEngine ";
-	//std::cout<<" working thread"<<m_workingThread.get_id();
+	m_barb = 0;
+}
+
+MlEngine::MlEngine(BarbWorks * w)
+{
+	std::cout<<" renderEngine ";
+	setWorks(w);
 }
 
 MlEngine::~MlEngine() 
@@ -26,11 +33,15 @@ MlEngine::~MlEngine()
 	interruptRender();
 }
 
+void MlEngine::setWorks(BarbWorks * w)
+{
+	m_barb = w;
+}
+
 void MlEngine::render() 
 {
 	interruptRender();
 	m_workingThread = boost::thread(boost::bind(&MlEngine::testOutput, this));
-	std::cout<<"treadId"<<m_workingThread.get_id();
 }
 
 void MlEngine::interruptRender()
@@ -40,16 +51,31 @@ void MlEngine::interruptRender()
 	m_workingThread.interrupt();
 }
 
+void MlEngine::processBarbs()
+{
+	m_barb->createBarbBuffer();
+}
+
 void MlEngine::testOutput()
 {
+	if(!m_barb) return;
+	
 	ptime tt(second_clock::local_time());
-	std::cout<<"test output at "<<to_simple_string(tt)<<"\n";
+	std::cout<<"test output begins at "<<to_simple_string(tt)<<"\n";
 	
     std::string ts("2002-01-20 23:59:59.000");
     ptime tref(time_from_string(ts));
     time_duration td = tt - tref;
-    std::cout<<"time elapse "<<td.total_seconds()<<"\n";
 	
+	boost::timer met;
+	met.restart();
+
+	processBarbs();
+	
+	std::cout<<" barb processed in "<<met.elapsed()<<" seconds\n";
+	
+	boost::this_thread::interruption_point();
+
 	try
 	{
 		boost::asio::io_service io_service;
@@ -109,10 +135,8 @@ void MlEngine::testOutput()
 				
 				boost::this_thread::interruption_point();
 				
-				t.expires_from_now(boost::posix_time::seconds(1));
+				t.expires_from_now(boost::posix_time::seconds(0.5));
 				t.wait();
-				
-				
 			}
 		}
 

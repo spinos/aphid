@@ -40,12 +40,18 @@ public:
 	MlVane * vane(short side) const;
 	void updateVane();
 	
-	void samplePosition(unsigned gridU, unsigned gridV, Vector3F * dst);
+	void samplePosition(Vector3F * dst);
 	void setSeed(unsigned s);
 	void setNumSeparate(unsigned n);
 	void setSeparateStrength(float k);
 	void setFuzzy(float f);
-	void setGrid(unsigned gridShaft, unsigned gridBarb);
+	void setGridShaft(unsigned gridShaft);
+	void setGridBarb(unsigned gridBarb);
+	unsigned gridShaft() const;
+	unsigned gridBarb() const;
+	unsigned numSeparate() const;
+	float fuzzy() const;
+	float separateStrength() const;
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	
@@ -57,5 +63,7 @@ private:
 	MlRachis * m_rachis;
     Vector3F * m_worldP;
 	MlVane * m_vane;
+	unsigned m_gridShaft, m_gridBarb, m_numSeparate;
+	float m_fuzzy, m_separateStrength;
 	short m_id;
 };

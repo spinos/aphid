@@ -86,6 +86,7 @@ Window::Window()
 	connect(m_featherEdit, SIGNAL(featherAdded()), glWidget, SLOT(receiveFeatherAdded()));
 	connect(glWidget, SIGNAL(sendFeatherEditBackground(QString)), m_featherEdit, SLOT(receiveTexture(QString)));
 	connect(m_timeControl, SIGNAL(currentFrameChanged(int)), glWidget, SLOT(updateOnFrame(int)));
+	connect(m_featherEdit->uvView(), SIGNAL(selectionChanged()), m_barbEdit->barbControl(), SLOT(receiveSelectionChanged()));
 	connect(m_featherEdit->uvView(), SIGNAL(shapeChanged()), m_barbEdit->barbView(), SLOT(receiveShapeChanged()));
 	connect(glWidget, SIGNAL(renderResChanged(QSize)), m_renderEdit, SLOT(resizeRenderView(QSize)));
 	connect(m_renderEdit, SIGNAL(cancelRender()), glWidget, SLOT(receiveCancelRender()));

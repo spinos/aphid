@@ -8,7 +8,8 @@ public:
 	virtual void setU(float u);
 	
 	void setSeed(unsigned s);
-	void separate(unsigned nsep);
+	void setNumSparate(unsigned nsep);
+	void separate();
 	void setSeparateStrength(float k);
 	void setFuzzy(float f);
 	void modifyLength(float u, unsigned gridV, Vector3F * dst);

@@ -39,7 +39,7 @@ void MlVane::setSeed(unsigned s)
 	m_seed = s;
 }
 
-void MlVane::separate(unsigned nsep)
+void MlVane::setNumSparate(unsigned nsep)
 {
 	clear();
 	m_numSeparate = nsep;
@@ -47,6 +47,10 @@ void MlVane::separate(unsigned nsep)
 	m_barbBegin = new float[nsep];
 	m_separateEnd = new float[nsep * 2];
 	m_lengthChange = new float[nsep * 2];
+}
+
+void MlVane::separate()
+{
 	computeSeparation();
 	computeLengthChange();
 }

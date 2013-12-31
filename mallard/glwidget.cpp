@@ -71,7 +71,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	m_bezierDrawer = new BezierDrawer;
 	m_featherDrawer = new MlDrawer;
 	m_featherDrawer->create("mallard.mlc");
-	m_engine = new MlEngine;
+	m_engine = new MlEngine(m_featherDrawer);
 	MlCalamus::FeatherLibrary = this;
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 	m_featherTexId = m_featherDistrId = -1;

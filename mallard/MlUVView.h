@@ -29,6 +29,7 @@ public:
 	void chooseImageBackground(std::string & name);
 	void loadImageBackground(const std::string & name);
 signals:
+	void selectionChanged();
 	void shapeChanged();
 private:
 	bool pickupFeather(const Vector2F & p);

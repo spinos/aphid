@@ -8,6 +8,13 @@ MlFeather::MlFeather() : m_worldP(0)
 	m_vane = new MlVane[2];
 	
 	simpleCreate();
+	
+	setSeed(1);
+	setNumSeparate(5);
+	setSeparateStrength(0.f);
+	setFuzzy(0.f);
+	setGridShaft(50); 
+	setGridBarb(9);
 }
 
 MlFeather::~MlFeather() 
@@ -45,6 +52,8 @@ void MlFeather::updateVane()
 	Matrix33F oriR; oriR.fill(Vector3F::ZAxis, Vector3F::XAxis, Vector3F::YAxis);
 	float sc = 1.f;
 	computeWorldP(oriP, oriR, sc);
+	m_vane[0].separate();
+	m_vane[1].separate();
 }
 
 void MlFeather::bend()
@@ -202,8 +211,10 @@ void MlFeather::verbose()
 	std::cout<<"\n base uv ("<<baseUV().x<<","<<baseUV().y<<")\n";
 }
 
-void MlFeather::samplePosition(unsigned gridU, unsigned gridV, Vector3F * dst)
+void MlFeather::samplePosition(Vector3F * dst)
 {
+	const unsigned gridU = m_gridShaft;
+	const unsigned gridV = m_gridBarb;
 	const float du = 1.f/(float)gridU;
 	const float dv = 1.f/(float)gridV;
 	
@@ -237,23 +248,56 @@ void MlFeather::setSeed(unsigned s)
 
 void MlFeather::setNumSeparate(unsigned n)
 {
-	m_vane[0].separate(n);
-	m_vane[1].separate(n);
+	m_vane[0].setNumSparate(n);
+	m_vane[1].setNumSparate(n);
+	m_numSeparate = n;
 }
 
 void MlFeather::setSeparateStrength(float k)
 {
 	m_vane[0].setSeparateStrength(k);
 	m_vane[1].setSeparateStrength(k);
+	m_separateStrength = k;
 }
 
 void MlFeather::setFuzzy(float f)
 {
 	m_vane[0].setFuzzy(f);
 	m_vane[1].setFuzzy(f);
+	m_fuzzy = f;
 }
 
-void MlFeather::setGrid(unsigned gridShaft, unsigned gridBarb)
+void MlFeather::setGridShaft(unsigned gridShaft)
 {
+	m_gridShaft = gridShaft; 
+}
 
+void MlFeather::setGridBarb(unsigned gridBarb)
+{
+	m_gridBarb = gridBarb;
+}
+
+unsigned MlFeather::gridShaft() const
+{
+	return m_gridShaft;
+}
+
+unsigned MlFeather::gridBarb() const
+{
+	return m_gridBarb;
+}
+
+unsigned MlFeather::numSeparate() const
+{
+	return m_numSeparate;
+}
+
+float MlFeather::fuzzy() const
+{
+	return m_fuzzy;
+}
+
+float MlFeather::separateStrength() const
+{
+	return m_separateStrength;
 }
