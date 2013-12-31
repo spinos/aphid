@@ -50,7 +50,7 @@ void BarbView::receiveShapeChanged()
 		dst[s] = -0.4f * s / (float)ns;
 	}
 	f->bend();
-	f->updateVane();
+	f->testVane();
 	
 	f->sampleColor(f->gridShaft(), f->gridBarb(), m_colors);
 	f->samplePosition(m_vertices);

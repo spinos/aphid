@@ -46,16 +46,6 @@ void MlFeather::setupVane()
 	m_vane[1].computeKnots();
 }
 
-void MlFeather::updateVane()
-{
-	Vector3F oriP(4.f, 0.f, 4.f);
-	Matrix33F oriR; oriR.fill(Vector3F::ZAxis, Vector3F::XAxis, Vector3F::YAxis);
-	float sc = 1.f;
-	computeWorldP(oriP, oriR, sc);
-	m_vane[0].separate();
-	m_vane[1].separate();
-}
-
 void MlFeather::bend()
 {
 	m_rachis->bend();
@@ -300,4 +290,19 @@ float MlFeather::fuzzy() const
 float MlFeather::separateStrength() const
 {
 	return m_separateStrength;
+}
+
+void MlFeather::testVane()
+{
+	Vector3F oriP(4.f, 0.f, 4.f);
+	Matrix33F oriR; oriR.fill(Vector3F::ZAxis, Vector3F::XAxis, Vector3F::YAxis);
+	float sc = 1.f;
+	computeWorldP(oriP, oriR, sc);
+	separateVane();
+}
+
+void MlFeather::separateVane()
+{
+	m_vane[0].separate();
+	m_vane[1].separate();
 }

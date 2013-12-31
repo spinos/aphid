@@ -38,7 +38,6 @@ public:
 	void verbose();
 	
 	MlVane * vane(short side) const;
-	void updateVane();
 	
 	void samplePosition(Vector3F * dst);
 	void setSeed(unsigned s);
@@ -52,6 +51,8 @@ public:
 	unsigned numSeparate() const;
 	float fuzzy() const;
 	float separateStrength() const;
+	void testVane();
+	void separateVane();
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	

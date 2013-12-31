@@ -86,6 +86,7 @@ void BarbWorks::createBarbBuffer()
 	Matrix33F space;
 	Vector3F p;
 
+	unsigned sd = 1984;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin()->getCalamus(i);
 		skin()->calamusSpace(c, space);
@@ -95,5 +96,10 @@ void BarbWorks::createBarbBuffer()
 
 		MlFeather * f = c->feather();
 		f->getBoundingBox(box);
+		
+		f->setSeed(sd); sd++;
+		f->separateVane();
+		
+		
 	}
 }
