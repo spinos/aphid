@@ -13,8 +13,6 @@ MlFeather::MlFeather() : m_worldP(0)
 	setNumSeparate(5);
 	setSeparateStrength(0.f);
 	setFuzzy(0.f);
-	setGridShaft(49); 
-	setGridBarb(9);
 }
 
 MlFeather::~MlFeather() 
@@ -203,8 +201,8 @@ void MlFeather::verbose()
 
 void MlFeather::samplePosition(Vector3F * dst)
 {
-	const unsigned gridU = m_gridShaft;
-	const unsigned gridV = m_gridBarb;
+	const unsigned gridU = resShaft();
+	const unsigned gridV = resBarb();
 	const float du = 1.f/(float)gridU;
 	const float dv = 1.f/(float)gridV;
 	
@@ -255,26 +253,6 @@ void MlFeather::setFuzzy(float f)
 	m_vane[0].setFuzzy(f);
 	m_vane[1].setFuzzy(f);
 	m_fuzzy = f;
-}
-
-void MlFeather::setGridShaft(unsigned gridShaft)
-{
-	m_gridShaft = gridShaft; 
-}
-
-void MlFeather::setGridBarb(unsigned gridBarb)
-{
-	m_gridBarb = gridBarb;
-}
-
-unsigned MlFeather::gridShaft() const
-{
-	return m_gridShaft;
-}
-
-unsigned MlFeather::gridBarb() const
-{
-	return m_gridBarb;
 }
 
 unsigned MlFeather::numSeparate() const

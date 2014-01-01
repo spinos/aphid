@@ -8,8 +8,8 @@
 BarbView::BarbView(QWidget *parent) : Base3DView(parent)
 {
 	std::cout<<" Barbview ";
-	m_gridShaft = 0;
-	m_gridBarb = 0;
+	m_resShaft = 0;
+	m_resBarb = 0;
 	m_numLines = 0;
 	m_numVerticesPerLine = 0;
 	m_vertices = 0;
@@ -42,7 +42,7 @@ void BarbView::receiveShapeChanged()
 	MlFeather *f = selectedExample();
 	if(!f) return;
 	
-	createLines(f->gridShaft(), f->gridBarb());
+	createLines(f->resShaft(), f->resBarb());
 	
 	float * dst = f->angles();
 	const short ns = f->numSegment();
@@ -52,7 +52,7 @@ void BarbView::receiveShapeChanged()
 	f->bend();
 	f->testVane();
 	
-	f->sampleColor(f->gridShaft(), f->gridBarb(), m_colors);
+	f->sampleColor(f->resShaft(), f->resBarb(), m_colors);
 	f->samplePosition(m_vertices);
 
 	update();
@@ -68,17 +68,17 @@ void BarbView::clear()
 	m_colors = 0;
 }
 
-void BarbView::createLines(unsigned gridShaft, unsigned gridBarb)
+void BarbView::createLines(unsigned resShaft, unsigned resBarb)
 {
-	if(gridShaft == m_gridShaft && gridBarb == m_gridBarb) return;
+	if(resShaft == m_resShaft && resBarb == m_resBarb) return;
 	
 	clear();
 	
-	m_gridShaft = gridShaft;
-	m_gridBarb = gridBarb;
-	m_numLines = (m_gridShaft + 1) * 2;
+	m_resShaft = resShaft;
+	m_resBarb = resBarb;
+	m_numLines = (m_resShaft + 1) * 2;
 	m_numVerticesPerLine = new unsigned[m_numLines];
-	for(unsigned i = 0; i < m_numLines; i++) m_numVerticesPerLine[i] = m_gridBarb + 1;
-	m_vertices = new Vector3F[m_numLines * (m_gridBarb + 1)];
-	m_colors = new Vector3F[m_numLines * (m_gridBarb + 1)];
+	for(unsigned i = 0; i < m_numLines; i++) m_numVerticesPerLine[i] = m_resBarb + 1;
+	m_vertices = new Vector3F[m_numLines * (m_resBarb + 1)];
+	m_colors = new Vector3F[m_numLines * (m_resBarb + 1)];
 }

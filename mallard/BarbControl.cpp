@@ -28,8 +28,8 @@ BarbControl::BarbControl(QWidget *parent)
 	m_gridBarbValue->setValue(9);
 	
 	m_separateCountValue = new QIntEditSlider(tr("Num Separate"));
-	m_separateCountValue->setLimit(3, 64);
-	m_separateCountValue->setValue(11);
+	m_separateCountValue->setLimit(3, 100);
+	m_separateCountValue->setValue(5);
 	
 	m_separateWeightValue = new QDoubleEditSlider(tr("Separate Strength"));
 	m_separateWeightValue->setLimit(0.0, 1.0);
@@ -93,7 +93,7 @@ void BarbControl::sendGridShaft(int g)
 {
 	MlFeather *f = selectedExample();
 	if(!f) return;
-	f->setGridShaft(g);
+	f->setResShaft(g);
 	emit shapeChanged();
 }
 
@@ -101,7 +101,7 @@ void BarbControl::sendGridBarb(int g)
 {
 	MlFeather *f = selectedExample();
 	if(!f) return;
-	f->setGridBarb(g);
+	f->setResBarb(g);
 	emit shapeChanged();
 }
 
@@ -110,8 +110,8 @@ void BarbControl::receiveSelectionChanged()
 	MlFeather *f = selectedExample();
 	if(!f) return;
 	
-	m_gridShaftValue->setValue(f->gridShaft());
-	m_gridBarbValue->setValue(f->gridBarb());
+	m_gridShaftValue->setValue(f->resShaft());
+	m_gridBarbValue->setValue(f->resBarb());
 	m_separateCountValue->setValue(f->numSeparate());
 	m_separateWeightValue->setValue(f->separateStrength());
 	m_fuzzyValue->setValue(f->fuzzy());

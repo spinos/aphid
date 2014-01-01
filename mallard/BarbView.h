@@ -16,9 +16,9 @@ public slots:
 	void receiveShapeChanged();
 private:
 	void clear();
-	void createLines(unsigned gridShaft, unsigned gridBarb);
+	void createLines(unsigned resShaft, unsigned resBarb);
 private:
-	unsigned m_numLines, m_gridShaft, m_gridBarb;
+	unsigned m_numLines, m_resShaft, m_resBarb;
 	unsigned * m_numVerticesPerLine;
 	Vector3F * m_vertices;
 	Vector3F * m_colors;

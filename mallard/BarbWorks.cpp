@@ -79,7 +79,9 @@ void BarbWorks::closeCache(const std::string & stime)
 
 void BarbWorks::createBarbBuffer()
 {
+	if(!skin()) return;
 	const unsigned nc = numFeathers();
+	if(nc < 1) return;
 	unsigned i;
 	
 	BoundingBox box;
@@ -101,8 +103,8 @@ void BarbWorks::createBarbBuffer()
 		f->setSeed(sd); sd++;
 		f->separateVane();
 		
-		nline += (f->gridShaft() + 1)* 2;
-		nv += (f->gridShaft() + 1)* 2*(f->gridBarb() + 1);
+		nline += (f->resShaft() + 1)* 2;
+		nv += (f->resShaft() + 1)* 2*(f->resBarb() + 1);
 	}
 	
 	std::cout<<"n curve "<<nline<<" n p "<<nv<<"\n";

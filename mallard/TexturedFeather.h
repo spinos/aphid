@@ -10,6 +10,7 @@
 #pragma once
 #include "BaseFeather.h"
 #include <zEXRImage.h>
+class AdaptableStripeBuffer;
 class BaseVane;
 class TexturedFeather : public BaseFeather {
 public:
@@ -22,9 +23,16 @@ public:
 	
 	static ZEXRImage ColorTextureFile;
 	
+	void setResShaft(unsigned resShaft);
+	void setResBarb(unsigned resBarb);
+	unsigned resShaft() const;
+	unsigned resBarb() const;
+	
 	void sampleColor(unsigned gridU, unsigned gridV, Vector3F * dst);
 protected:
 
 private:
+	unsigned m_resShaft, m_resBarb;
 	BaseVane * m_vane;
+	AdaptableStripeBuffer * m_stripe;
 };

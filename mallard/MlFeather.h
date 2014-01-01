@@ -44,10 +44,7 @@ public:
 	void setNumSeparate(unsigned n);
 	void setSeparateStrength(float k);
 	void setFuzzy(float f);
-	void setGridShaft(unsigned gridShaft);
-	void setGridBarb(unsigned gridBarb);
-	unsigned gridShaft() const;
-	unsigned gridBarb() const;
+	
 	unsigned numSeparate() const;
 	float fuzzy() const;
 	float separateStrength() const;
@@ -64,7 +61,7 @@ private:
 	MlRachis * m_rachis;
     Vector3F * m_worldP;
 	MlVane * m_vane;
-	unsigned m_gridShaft, m_gridBarb, m_numSeparate;
+	unsigned m_numSeparate;
 	float m_fuzzy, m_separateStrength;
 	short m_id;
 };

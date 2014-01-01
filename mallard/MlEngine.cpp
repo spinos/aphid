@@ -41,6 +41,8 @@ void MlEngine::setWorks(BarbWorks * w)
 void MlEngine::render() 
 {
 	interruptRender();
+	processBarbs();
+	
 	m_workingThread = boost::thread(boost::bind(&MlEngine::testOutput, this));
 }
 
@@ -53,7 +55,11 @@ void MlEngine::interruptRender()
 
 void MlEngine::processBarbs()
 {
+	boost::timer met;
+	met.restart();
+
 	m_barb->createBarbBuffer();
+	std::cout<<" barb processed in "<<met.elapsed()<<" seconds\n";
 }
 
 void MlEngine::testOutput()
@@ -66,13 +72,6 @@ void MlEngine::testOutput()
     std::string ts("2002-01-20 23:59:59.000");
     ptime tref(time_from_string(ts));
     time_duration td = tt - tref;
-	
-	boost::timer met;
-	met.restart();
-
-	processBarbs();
-	
-	std::cout<<" barb processed in "<<met.elapsed()<<" seconds\n";
 	
 	boost::this_thread::interruption_point();
 

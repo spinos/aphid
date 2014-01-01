@@ -63,7 +63,7 @@ void MlVane::computeSeparation()
 	const float ds = 1.f / m_numSeparate;
 	float r;
 	for(unsigned i = 1; i < m_numSeparate; i++) {
-		r = noi.rfloat(m_seed + i * 19) * 0.6f;
+		r = noi.rfloat(m_seed + i * 19) * 0.7f;
 		m_barbBegin[i] = ds * i + ds * r;
 	}
 	

@@ -9,15 +9,23 @@
 
 #include "TexturedFeather.h"
 #include "BaseVane.h"
+#include <AdaptableStripeBuffer.h>
+
 ZEXRImage TexturedFeather::ColorTextureFile;
+
 TexturedFeather::TexturedFeather() 
 {
 	m_vane = new BaseVane[2];
+	m_stripe = new AdaptableStripeBuffer;
+	m_stripe->create(49 * 2, 9 + 1);
+	setResShaft(49); 
+	setResBarb(9);
 }
 
 TexturedFeather::~TexturedFeather() 
 {
 	delete[] m_vane;
+	delete m_stripe;
 }
 
 void TexturedFeather::computeTexcoord()
@@ -92,4 +100,26 @@ void TexturedFeather::sampleColor(unsigned gridU, unsigned gridV, Vector3F * dst
 			acc++;
 		}
 	}
+}
+
+void TexturedFeather::setResShaft(unsigned resShaft)
+{
+	m_resShaft = resShaft;
+	m_stripe->create(m_resShaft * 2, m_resBarb + 1);
+}
+
+void TexturedFeather::setResBarb(unsigned resBarb)
+{
+	m_resBarb = resBarb;
+	m_stripe->create(m_resShaft * 2, m_resBarb + 1);
+}
+
+unsigned TexturedFeather::resShaft() const
+{
+	return m_resShaft;
+}
+
+unsigned TexturedFeather::resBarb() const
+{
+	return m_resBarb;
 }
