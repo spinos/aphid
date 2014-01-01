@@ -13,7 +13,7 @@ MlFeather::MlFeather() : m_worldP(0)
 	setNumSeparate(5);
 	setSeparateStrength(0.f);
 	setFuzzy(0.f);
-	setGridShaft(50); 
+	setGridShaft(49); 
 	setGridBarb(9);
 }
 

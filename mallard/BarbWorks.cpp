@@ -85,7 +85,8 @@ void BarbWorks::createBarbBuffer()
 	BoundingBox box;
 	Matrix33F space;
 	Vector3F p;
-
+	unsigned nline = 0;
+	unsigned nv = 0;
 	unsigned sd = 1984;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin()->getCalamus(i);
@@ -100,6 +101,9 @@ void BarbWorks::createBarbBuffer()
 		f->setSeed(sd); sd++;
 		f->separateVane();
 		
-		
+		nline += (f->gridShaft() + 1)* 2;
+		nv += (f->gridShaft() + 1)* 2*(f->gridBarb() + 1);
 	}
+	
+	std::cout<<"n curve "<<nline<<" n p "<<nv<<"\n";
 }

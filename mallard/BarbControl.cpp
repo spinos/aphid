@@ -21,11 +21,11 @@ BarbControl::BarbControl(QWidget *parent)
 	
 	m_gridShaftValue = new QIntEditSlider(tr("Grid Along Shaft"));
 	m_gridShaftValue->setLimit(10, 1000);
-	m_gridShaftValue->setValue(100);
+	m_gridShaftValue->setValue(49);
 	
 	m_gridBarbValue = new QIntEditSlider(tr("Grid Along Barb"));
-	m_gridBarbValue->setLimit(2, 1000);
-	m_gridBarbValue->setValue(10);
+	m_gridBarbValue->setLimit(3, 100);
+	m_gridBarbValue->setValue(9);
 	
 	m_separateCountValue = new QIntEditSlider(tr("Num Separate"));
 	m_separateCountValue->setLimit(3, 64);

@@ -100,14 +100,9 @@ void MlEngine::testOutput()
 				if(rect[1] > imageSizeX - 1) rect[1] = imageSizeX - 1;
 				
 				const float grey = (float)((rand() + td.seconds() * 391) % 457) / 457.f;
-				std::cout<<"grey"<<grey<<"\n";
-
 				const unsigned npix = (rect[1] - rect[0] + 1) * (rect[3] - rect[2] + 1);
-				std::cout<<"n pixels "<<npix<<"\n";
 				int npackage = npix * 16 / 4096;
 				if((npix * 16) % 4096 > 0) npackage++;
-				std::cout<<"n packages "<<npackage<<"\n";
-				
 				tcp::socket s(io_service);
 				s.connect(*iterator);
 				boost::asio::write(s, boost::asio::buffer((char *)rect, 16));
@@ -115,7 +110,7 @@ void MlEngine::testOutput()
 				boost::system::error_code error;
 				size_t reply_length = s.read_some(boost::asio::buffer(buf), error);
 
-				std::cout<<" bucket("<<rect[0]<<","<<rect[1]<<","<<rect[2]<<","<<rect[3]<<")\n";
+				//std::cout<<" bucket("<<rect[0]<<","<<rect[1]<<","<<rect[2]<<","<<rect[3]<<")\n";
 				
 				float *color = new float[npackage * 256 * 4];
 				for(int i = 0; i < npix; i++) {
