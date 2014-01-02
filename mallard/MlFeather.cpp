@@ -2,6 +2,8 @@
 #include "MlRachis.h"
 #include "MlVane.h"
 #include <CollisionRegion.h>
+#include <AdaptableStripeBuffer.h>
+
 MlFeather::MlFeather() : m_worldP(0)
 {
 	m_rachis = new MlRachis;
@@ -61,6 +63,7 @@ void MlFeather::curl(float val)
 
 void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale)
 {
+	m_scale = scale;
 	Vector3F segOrigin = oriPos;
 	Matrix33F segSpace = oriRot;
 	const short numSeg = numSegment();
@@ -272,10 +275,9 @@ float MlFeather::separateStrength() const
 
 void MlFeather::testVane()
 {
-	Vector3F oriP(4.f, 0.f, 4.f);
+	Vector3F oriP(4.f, -2.f, 4.f);
 	Matrix33F oriR; oriR.fill(Vector3F::ZAxis, Vector3F::XAxis, Vector3F::YAxis);
-	float sc = 1.f;
-	computeWorldP(oriP, oriR, sc);
+	computeWorldP(oriP, oriR, 2.f);
 	separateVane();
 }
 
@@ -284,3 +286,36 @@ void MlFeather::separateVane()
 	m_vane[0].separate();
 	m_vane[1].separate();
 }
+
+void MlFeather::samplePosition(float lod)
+{
+	const unsigned nu = 1 + (resShaft() - 1) * lod;
+	const unsigned nv = 3 + (resBarb() - 3) * lod;
+	stripe()->begin();
+	
+	samplePosition(nu, nv, 0);
+	samplePosition(nu, nv, 1);
+}
+
+void MlFeather::samplePosition(unsigned nu, unsigned nv, int side)
+{
+	const float dl = m_scale * shaftLength() / (float)nu;
+	const float du = 1.f/(float)nu;
+	const float dv = 1.f/(float)nv;
+
+	for(unsigned i = 0; i < nu; i++) {
+		*stripe()->currentNumCvs() = nv + 1;
+		
+		Vector3F * coord = stripe()->currentPos();
+		float * w = stripe()->currentWidth();
+		
+		m_vane[side].setU(du*i);
+		for(unsigned j = 0; j <= nv; j++) {
+			m_vane[side].pointOnVane(dv * j, coord[j]);
+			w[j] = dl - dl * .6f * j / nv; 
+		}
+		m_vane[side].modifyLength(du*i, nv, coord);
+		stripe()->next();
+	}
+}
+

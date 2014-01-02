@@ -31,6 +31,7 @@ public:
 	void screenToWorldVector(int x, int y, Vector3F & worldVec) const;
 	virtual void incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const;
 	Vector3F eyePosition() const;
+	Vector3F eyeDirection() const;
 	float aspectRatio() const;
 	float nearClipPlane() const;
 	float farClipPlane() const;

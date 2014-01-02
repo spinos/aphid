@@ -9,7 +9,7 @@ class BarbEdit : public QDialog
 	
 public:
 	BarbEdit(QWidget *parent = 0);
-	
+	virtual ~BarbEdit();
 	QWidget * barbView();
 	QWidget * barbControl();
 signals:

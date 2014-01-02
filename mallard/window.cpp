@@ -282,5 +282,7 @@ void Window::updateRecentFileActions()
 
 void Window::closeEvent(QCloseEvent *event)
 {
-	if(!((MlScene *)glWidget)->close()) event->ignore();
+	glWidget->receiveCancelRender();
+	((MlScene *)glWidget)->close();
+	QMainWindow::closeEvent(event);
 }

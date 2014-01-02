@@ -17,9 +17,9 @@ TexturedFeather::TexturedFeather()
 {
 	m_vane = new BaseVane[2];
 	m_stripe = new AdaptableStripeBuffer;
+	m_resShaft = 49;
+	m_resBarb = 9;
 	m_stripe->create(49 * 2, 9 + 1);
-	setResShaft(49); 
-	setResBarb(9);
 }
 
 TexturedFeather::~TexturedFeather() 
@@ -102,6 +102,41 @@ void TexturedFeather::sampleColor(unsigned gridU, unsigned gridV, Vector3F * dst
 	}
 }
 
+void TexturedFeather::sampleColor(float lod)
+{
+	const unsigned nu = 1 + (m_resShaft - 1) * lod;
+	const unsigned nv = 3 + (m_resBarb - 3) * lod;
+	m_stripe->begin();
+	
+	sampleColor(nu, nv, 0);
+	sampleColor(nu, nv, 1);
+}
+
+void TexturedFeather::sampleColor(unsigned nu, unsigned nv, int side)
+{
+	const float du = 1.f/(float)nu;
+	const float dv = 1.f/(float)nv;
+
+	for(unsigned i = 0; i < nu; i++) {
+		*m_stripe->currentNumCvs() = nv + 1;
+		
+		Vector3F * coord = m_stripe->currentPos();
+		Vector3F * col = m_stripe->currentCol();
+		m_vane[side].setU(du*i);
+		for(unsigned j = 0; j <= nv; j++) {
+			if(!ColorTextureFile.isOpened()) {
+				col[j].set(1.f, 1.f, 1.f);
+			}
+			else {
+				m_vane[side].pointOnVane(dv * j, coord[j]);
+				ColorTextureFile.sample(coord[j].x, coord[j].y, 3, (float *)&col[j]);
+			}
+		}
+		
+		m_stripe->next();
+	}
+}
+
 void TexturedFeather::setResShaft(unsigned resShaft)
 {
 	m_resShaft = resShaft;
@@ -122,4 +157,9 @@ unsigned TexturedFeather::resShaft() const
 unsigned TexturedFeather::resBarb() const
 {
 	return m_resBarb;
+}
+
+AdaptableStripeBuffer * TexturedFeather::stripe()
+{
+	return m_stripe;
 }

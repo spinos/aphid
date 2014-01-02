@@ -26,6 +26,7 @@ class TransformManipulator;
 class SkeletonJoint;
 class ZEXRImage;
 class LineBuffer;
+class AdaptableStripeBuffer;
 class BaseDrawer {
 public:
 	BaseDrawer ();
@@ -98,7 +99,7 @@ public:
 	void lines(const std::vector<Vector3F> & vs);
 	void lineStripes(const unsigned & num, unsigned * nv, Vector3F * vs) const;
 	void lineStripes(const unsigned & num, unsigned * nv, Vector3F * vs, Vector3F * cs) const;
-	
+	void stripes(AdaptableStripeBuffer * data, const Vector3F & eyeDirection) const;
 	int loadTexture(int idx, ZEXRImage * image);
 	void clearTexture(int idx);
 	void texture(int idx);

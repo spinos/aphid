@@ -169,6 +169,11 @@ Vector3F BaseCamera::eyePosition() const
     return fSpace.getTranslation();
 }
 
+Vector3F BaseCamera::eyeDirection() const
+{
+	return Vector3F(fSpace.M(2, 0), fSpace.M(2, 1), fSpace.M(2, 2));
+}
+
 float BaseCamera::getHorizontalAperture() const
 {
 	return fHorizontalAperture;

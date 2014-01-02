@@ -40,6 +40,7 @@ public:
 	MlVane * vane(short side) const;
 	
 	void samplePosition(Vector3F * dst);
+	
 	void setSeed(unsigned s);
 	void setNumSeparate(unsigned n);
 	void setSeparateStrength(float k);
@@ -50,18 +51,20 @@ public:
 	float separateStrength() const;
 	void testVane();
 	void separateVane();
+	
+	void samplePosition(float lod);
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	
 private:
 	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale);
-
+	void samplePosition(unsigned nu, unsigned nv, int side);
 private:
 	CollisionRegion * m_skin;
 	MlRachis * m_rachis;
     Vector3F * m_worldP;
 	MlVane * m_vane;
 	unsigned m_numSeparate;
-	float m_fuzzy, m_separateStrength;
+	float m_fuzzy, m_separateStrength, m_scale;
 	short m_id;
 };

@@ -163,7 +163,7 @@ void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst)
 		dp = dst[i] - dst[i - 1];
 		wei = dl;
 		if(m_fuzzy > 0.f)
-			wei += (noi.rfloat(m_seed + u * 109493) - 0.5f) * m_fuzzy * .2f;
+			wei += (noi.rfloat(m_seed + u * 109493) - 0.5f) * m_fuzzy * .5f;
 
 		dp *= wei; // if(u>0.98f)std::cout<<" "<<u<<" "<<dl;
 		

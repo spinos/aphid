@@ -104,7 +104,6 @@ protected:
 	virtual void focusOutEvent(QFocusEvent * event);
 	virtual void clearSelection();
 	virtual void resizeEvent( QResizeEvent * event );
-	virtual void closeEvent( QCloseEvent * event );
 //! [3]
 private:
 	void selectFeather(char byRegion = 0);

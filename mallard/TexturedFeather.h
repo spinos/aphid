@@ -20,7 +20,7 @@ public:
 	virtual void translateUV(const Vector2F & d);
 	
 	BaseVane * uvVane(short side) const;
-	
+	AdaptableStripeBuffer * stripe();
 	static ZEXRImage ColorTextureFile;
 	
 	void setResShaft(unsigned resShaft);
@@ -29,6 +29,8 @@ public:
 	unsigned resBarb() const;
 	
 	void sampleColor(unsigned gridU, unsigned gridV, Vector3F * dst);
+	void sampleColor(float lod);
+	void sampleColor(unsigned nu, unsigned nv, int side);
 protected:
 
 private:

@@ -15,11 +15,5 @@ public:
 public slots:
 	void receiveShapeChanged();
 private:
-	void clear();
-	void createLines(unsigned resShaft, unsigned resBarb);
-private:
-	unsigned m_numLines, m_resShaft, m_resBarb;
-	unsigned * m_numVerticesPerLine;
-	Vector3F * m_vertices;
-	Vector3F * m_colors;
+
 };

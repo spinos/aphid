@@ -21,6 +21,12 @@ BarbEdit::BarbEdit(QWidget *parent)
 	connect(m_control, SIGNAL(shapeChanged()), m_view, SLOT(receiveShapeChanged()));
 }
 
+BarbEdit::~BarbEdit()
+{
+	delete m_view;
+	delete m_control;
+}
+
 QWidget * BarbEdit::barbView()
 {
 	return m_view;

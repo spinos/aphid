@@ -20,6 +20,7 @@
 #include <TransformManipulator.h>
 #include <SkeletonJoint.h>
 #include <LineBuffer.h>
+#include <AdaptableStripeBuffer.h>
 
 BaseDrawer::BaseDrawer () : m_wired(0) 
 {
@@ -1061,5 +1062,55 @@ void BaseDrawer::lineStripes(const unsigned & num, unsigned * nv, Vector3F * vs,
 		}
 		glEnd();
 	}
+}
+
+void BaseDrawer::stripes(AdaptableStripeBuffer * data, const Vector3F & eyeDirection) const
+{
+	const unsigned ns = data->numStripe();
+	unsigned * ncv = data->numCvs();
+	Vector3F * pos = data->pos();
+	Vector3F * col = data->col();
+	float * w = data->width();
+	Vector3F seg, nseg, straggle, q, q0, q1;
+	glBegin(GL_QUADS);
+	for(unsigned i = 0; i < ns; i++) {
+		for(unsigned j = 0; j < ncv[i] - 1; j++) {
+			seg = pos[j+1] - pos[j];
+			nseg = seg.normal();
+			straggle = nseg.cross(eyeDirection);
+			straggle.normalize();
+			straggle *= .5f;
+			
+			glColor3fv((float *)&col[j]);
+			
+			if(j< 1) {
+				q = pos[j] - straggle * w[j];
+				glVertex3fv((float *)&q);
+			
+				q = pos[j] + straggle * w[j];
+				glVertex3fv((float *)&q);
+			}
+			else {
+				glVertex3fv((float *)&q0);
+				glVertex3fv((float *)&q1);
+			}
+			
+			glColor3fv((float *)&col[j+1]);
+			
+			q = pos[j+1] + straggle * w[j+1];
+			glVertex3fv((float *)&q);
+			
+			q1 = q;
+			
+			q = pos[j+1] - straggle * w[j+1];
+			glVertex3fv((float *)&q);
+			
+			q0 = q;
+		}
+		pos += ncv[i];
+		col += ncv[i];
+		w += ncv[i];
+	}
+	glEnd();
 }
 //:~

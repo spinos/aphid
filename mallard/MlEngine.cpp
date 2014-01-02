@@ -30,7 +30,7 @@ MlEngine::MlEngine(BarbWorks * w)
 
 MlEngine::~MlEngine() 
 {
-	interruptRender();
+	//interruptRender();
 }
 
 void MlEngine::setWorks(BarbWorks * w)
