@@ -12,9 +12,10 @@ MlFeather::MlFeather() : m_worldP(0)
 	simpleCreate();
 	
 	setSeed(1);
-	setNumSeparate(5);
+	setNumSeparate(2);
 	setSeparateStrength(0.f);
 	setFuzzy(0.f);
+	setLevelOfDetail(1.f);
 }
 
 MlFeather::~MlFeather() 
@@ -258,6 +259,11 @@ void MlFeather::setFuzzy(float f)
 	m_fuzzy = f;
 }
 
+void MlFeather::setLevelOfDetail(float l)
+{
+	m_lod = l;
+}
+
 unsigned MlFeather::numSeparate() const
 {
 	return m_numSeparate;
@@ -271,6 +277,11 @@ float MlFeather::fuzzy() const
 float MlFeather::separateStrength() const
 {
 	return m_separateStrength;
+}
+
+float MlFeather::levelOfDetail() const
+{
+	return m_lod;
 }
 
 void MlFeather::testVane()
@@ -289,7 +300,7 @@ void MlFeather::separateVane()
 
 void MlFeather::samplePosition(float lod)
 {
-	const unsigned nu = 1 + (resShaft() - 1) * lod;
+	const unsigned nu = m_vane[0].gridU() * (2 + (resShaft() - 2) * lod);
 	const unsigned nv = 3 + (resBarb() - 3) * lod;
 	stripe()->begin();
 	
@@ -302,17 +313,19 @@ void MlFeather::samplePosition(unsigned nu, unsigned nv, int side)
 	const float dl = m_scale * shaftLength() / (float)nu;
 	const float du = 1.f/(float)nu;
 	const float dv = 1.f/(float)nv;
-
+	float scaling = 1.f;
 	for(unsigned i = 0; i < nu; i++) {
 		*stripe()->currentNumCvs() = nv + 1;
 		
 		Vector3F * coord = stripe()->currentPos();
 		float * w = stripe()->currentWidth();
 		
+		if(i> nu/2) scaling = 1.f - (i - nu/2) / nu;
+		
 		m_vane[side].setU(du*i);
 		for(unsigned j = 0; j <= nv; j++) {
 			m_vane[side].pointOnVane(dv * j, coord[j]);
-			w[j] = dl - dl * .6f * j / nv; 
+			w[j] = scaling * (dl - dl * .7f * j / nv); 
 		}
 		m_vane[side].modifyLength(du*i, nv, coord);
 		stripe()->next();

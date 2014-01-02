@@ -20,16 +20,16 @@ BarbControl::BarbControl(QWidget *parent)
 	m_seedValue->setValue(99);
 	
 	m_gridShaftValue = new QIntEditSlider(tr("Grid Along Shaft"));
-	m_gridShaftValue->setLimit(10, 1000);
-	m_gridShaftValue->setValue(49);
+	m_gridShaftValue->setLimit(2, 100);
+	m_gridShaftValue->setValue(10);
 	
 	m_gridBarbValue = new QIntEditSlider(tr("Grid Along Barb"));
 	m_gridBarbValue->setLimit(3, 100);
 	m_gridBarbValue->setValue(9);
 	
 	m_separateCountValue = new QIntEditSlider(tr("Num Separate"));
-	m_separateCountValue->setLimit(3, 100);
-	m_separateCountValue->setValue(5);
+	m_separateCountValue->setLimit(2, 20);
+	m_separateCountValue->setValue(2);
 	
 	m_separateWeightValue = new QDoubleEditSlider(tr("Separate Strength"));
 	m_separateWeightValue->setLimit(0.0, 1.0);
@@ -39,6 +39,10 @@ BarbControl::BarbControl(QWidget *parent)
 	m_fuzzyValue->setLimit(0.0, 1.0);
 	m_fuzzyValue->setValue(0.0);
 	
+	m_lodValue = new QDoubleEditSlider(tr("Level of Detail"));
+	m_lodValue->setLimit(0.05, 1.0);
+	m_lodValue->setValue(1.0);
+	
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->addWidget(m_gridShaftValue);
 	layout->addWidget(m_gridBarbValue);
@@ -46,6 +50,7 @@ BarbControl::BarbControl(QWidget *parent)
 	layout->addWidget(m_separateWeightValue);
 	layout->addWidget(m_fuzzyValue);
 	layout->addWidget(m_seedValue);
+	layout->addWidget(m_lodValue);
 	layout->addStretch(0);
 	setLayout(layout);
 	
@@ -55,6 +60,7 @@ BarbControl::BarbControl(QWidget *parent)
 	connect(m_fuzzyValue, SIGNAL(valueChanged(double)), this, SLOT(sendFuzzy(double)));
 	connect(m_gridShaftValue, SIGNAL(valueChanged(int)), this, SLOT(sendGridShaft(int)));
 	connect(m_gridBarbValue, SIGNAL(valueChanged(int)), this, SLOT(sendGridBarb(int)));
+	connect(m_lodValue, SIGNAL(valueChanged(double)), this, SLOT(sendLod(double)));
 }
 
 void BarbControl::sendSeed(int s)
@@ -102,6 +108,14 @@ void BarbControl::sendGridBarb(int g)
 	MlFeather *f = selectedExample();
 	if(!f) return;
 	f->setResBarb(g);
+	emit shapeChanged();
+}
+
+void BarbControl::sendLod(double l)
+{
+	MlFeather *f = selectedExample();
+	if(!f) return;
+	f->setLevelOfDetail(l);
 	emit shapeChanged();
 }
 

@@ -45,10 +45,12 @@ public:
 	void setNumSeparate(unsigned n);
 	void setSeparateStrength(float k);
 	void setFuzzy(float f);
+	void setLevelOfDetail(float l);
 	
 	unsigned numSeparate() const;
 	float fuzzy() const;
 	float separateStrength() const;
+	float levelOfDetail() const;
 	void testVane();
 	void separateVane();
 	
@@ -65,6 +67,6 @@ private:
     Vector3F * m_worldP;
 	MlVane * m_vane;
 	unsigned m_numSeparate;
-	float m_fuzzy, m_separateStrength, m_scale;
+	float m_fuzzy, m_separateStrength, m_scale, m_lod;
 	short m_id;
 };

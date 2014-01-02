@@ -17,23 +17,15 @@ BarbView::~BarbView() {}
 
 void BarbView::clientDraw()
 {
-    //if(m_numLines < 1) return;
-	//getDrawer()->lineStripes(m_numLines, m_numVerticesPerLine, m_vertices, m_colors);
-	MlFeather *f = selectedExample();
+   MlFeather *f = selectedExample();
 	if(!f) return;
 	
 	getDrawer()->stripes(f->stripe(), getCamera()->eyeDirection());
 }
 
-void BarbView::clientSelect()
-{
+void BarbView::clientSelect() {}
 
-}
-
-void BarbView::clientMouseInput()
-{
-	
-}
+void BarbView::clientMouseInput() {}
 
 void BarbView::receiveShapeChanged()
 {
@@ -48,8 +40,8 @@ void BarbView::receiveShapeChanged()
 	f->bend();
 	f->testVane();
 	
-	f->sampleColor(1.f);
-	f->samplePosition(1.f);
+	f->sampleColor(f->levelOfDetail());
+	f->samplePosition(f->levelOfDetail());
 
 	update();
 }

@@ -17,9 +17,8 @@ TexturedFeather::TexturedFeather()
 {
 	m_vane = new BaseVane[2];
 	m_stripe = new AdaptableStripeBuffer;
-	m_resShaft = 49;
+	m_resShaft = 10;
 	m_resBarb = 9;
-	m_stripe->create(49 * 2, 9 + 1);
 }
 
 TexturedFeather::~TexturedFeather() 
@@ -104,7 +103,9 @@ void TexturedFeather::sampleColor(unsigned gridU, unsigned gridV, Vector3F * dst
 
 void TexturedFeather::sampleColor(float lod)
 {
-	const unsigned nu = 1 + (m_resShaft - 1) * lod;
+	m_stripe->create(m_resShaft * m_vane[0].gridU() * 2, m_resBarb + 1);
+
+	const unsigned nu = m_vane[0].gridU() * (2 + (resShaft() - 2) * lod);
 	const unsigned nv = 3 + (m_resBarb - 3) * lod;
 	m_stripe->begin();
 	
@@ -140,13 +141,13 @@ void TexturedFeather::sampleColor(unsigned nu, unsigned nv, int side)
 void TexturedFeather::setResShaft(unsigned resShaft)
 {
 	m_resShaft = resShaft;
-	m_stripe->create(m_resShaft * 2, m_resBarb + 1);
+	if(m_resShaft < 2) m_resShaft = 2;
 }
 
 void TexturedFeather::setResBarb(unsigned resBarb)
 {
 	m_resBarb = resBarb;
-	m_stripe->create(m_resShaft * 2, m_resBarb + 1);
+	if(m_resBarb < 3) m_resShaft = 3;
 }
 
 unsigned TexturedFeather::resShaft() const

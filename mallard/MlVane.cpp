@@ -17,6 +17,7 @@ MlVane::MlVane()
 	m_lengthChange = 0;
 	m_separateStrength = 0.f;
 	m_fuzzy = 0.f;
+	m_noise = 0;
 }
 
 MlVane::~MlVane() 
@@ -29,9 +30,11 @@ void MlVane::clear()
 	if(m_barbBegin) delete[] m_barbBegin;
 	if(m_separateEnd) delete[] m_separateEnd;
 	if(m_lengthChange) delete[] m_lengthChange;
+	if(m_noise) delete[] m_noise;
 	m_barbBegin = 0;
 	m_separateEnd = 0;
 	m_lengthChange = 0;
+	m_noise = 0;
 }
 
 void MlVane::setSeed(unsigned s)
@@ -42,44 +45,40 @@ void MlVane::setSeed(unsigned s)
 void MlVane::setNumSparate(unsigned nsep)
 {
 	clear();
-	m_numSeparate = nsep;
-	if(nsep < 2) return;
-	m_barbBegin = new float[nsep];
-	m_separateEnd = new float[nsep * 2];
-	m_lengthChange = new float[nsep * 2];
+	if(nsep < 1) return;
+	m_numSeparate = nsep * gridU();
+	m_barbBegin = new float[m_numSeparate];
+	m_separateEnd = new float[m_numSeparate * 2];
+	m_lengthChange = new float[m_numSeparate * 2];
+	m_noise = new float[m_numSeparate * 4 + 1];
 }
 
 void MlVane::separate()
 {
 	computeSeparation();
 	computeLengthChange();
+	computeNoise();
 }
 
 void MlVane::computeSeparation()
 {
-	m_barbBegin[0] = 0.f;
 	PseudoNoise noi;
 	
 	const float ds = 1.f / m_numSeparate;
 	float r;
-	for(unsigned i = 1; i < m_numSeparate; i++) {
-		r = noi.rfloat(m_seed + i * 19) * 0.7f;
-		m_barbBegin[i] = ds * i + ds * r;
+	for(unsigned i = 0; i < m_numSeparate; i++) {
+		m_barbBegin[i] = ds * i;
 	}
 	
-	float barbW;
 	for(unsigned i = 0; i < m_numSeparate; i++) {
-		if(i < m_numSeparate - 1) barbW = m_barbBegin[i+1] - m_barbBegin[i];
-		else barbW = 1.f - m_barbBegin[i];
-
 		r = noi.rfloat(m_seed + i * 13) * 2.f - 1.f;
-		m_separateEnd[i*2] = m_barbBegin[i] + barbW * r * 2.f * m_separateStrength;
+		m_separateEnd[i*2] = m_barbBegin[i] + ds * r * 2.f * m_separateStrength;
 		
 		if(m_separateEnd[i*2]< 0.f) m_separateEnd[i*2] = 0.f;
 		else if(m_separateEnd[i*2] > 1.f) m_separateEnd[i*2] = 1.f;
 		
 		r = noi.rfloat(m_seed + i * 15) - 0.5f;
-		m_separateEnd[i*2 + 1] = m_separateEnd[i*2] + barbW * (1.f + r * m_separateStrength);
+		m_separateEnd[i*2 + 1] = m_separateEnd[i*2] + ds * (1.f + r * m_separateStrength);
 		
 		if(m_separateEnd[i*2 + 1]< 0.f) m_separateEnd[i*2 + 1] = 0.f;
 		else if(m_separateEnd[i*2 + 1] > 1.f) m_separateEnd[i*2 + 1] = 1.f;
@@ -108,6 +107,13 @@ void MlVane::computeLengthChange()
 	}
 }
 
+void MlVane::computeNoise()
+{
+	PseudoNoise noi;
+	for(unsigned i = 0; i <= m_numSeparate * 4; i++) 
+		m_noise[i] = noi.rfloat(m_seed + i * 17) - .5f;
+}
+
 void MlVane::setU(float u)
 {
 	if(m_numSeparate < 2) {
@@ -134,18 +140,19 @@ void MlVane::setU(float u0, float u1)
 
 float MlVane::getSeparateU(float u, float * param) const
 {
-	unsigned i;
-	float portion;
-	for(i= 0; i < m_numSeparate - 1; i++) {
-		if(u >= m_barbBegin[i] && u < m_barbBegin[i+1]) {
-			portion = (u - m_barbBegin[i]) / (m_barbBegin[i+1] - m_barbBegin[i]);
-			*param = i + portion;
-			return m_separateEnd[i * 2] + (m_separateEnd[i * 2 + 1] - m_separateEnd[i * 2]) * portion;
-		}
-	}
-	portion = (u - m_barbBegin[i]) / (1.f - m_barbBegin[i]);
+	const float ds = 1.f /(float)m_numSeparate;
+	unsigned i = u / ds;
+	float portion = (u - i * ds)/ds;
 	*param = i + portion;
 	return m_separateEnd[i * 2] + (m_separateEnd[i * 2 + 1] - m_separateEnd[i * 2]) * portion;
+}
+
+float MlVane::getNoise(float u) const
+{
+	const float ds = 1.f /(float)m_numSeparate/4.f;
+	unsigned i = u / ds;
+	float portion = (u - i * ds)/ds;
+	return m_noise[i] + (m_noise[i+1] - m_noise[i]) * portion;
 }
 
 void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst)
@@ -162,8 +169,10 @@ void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst)
 	for(unsigned i = 1; i < gridV; i++) {
 		dp = dst[i] - dst[i - 1];
 		wei = dl;
-		if(m_fuzzy > 0.f)
-			wei += (noi.rfloat(m_seed + u * 109493) - 0.5f) * m_fuzzy * .5f;
+		if(m_fuzzy > 0.f) {
+			//wei += (noi.rfloat(m_seed + u * 109493) - 0.5f) * m_fuzzy * .5f;
+			wei += getNoise(u) * m_fuzzy * .5f;
+		}
 
 		dp *= wei; // if(u>0.98f)std::cout<<" "<<u<<" "<<dl;
 		

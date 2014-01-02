@@ -18,13 +18,16 @@ private:
 	void clear();
 	void computeSeparation();
 	void computeLengthChange();
+	void computeNoise();
 	float getSeparateU(float u, float * param) const;
+	float getNoise(float u) const;
 	void setU(float u0, float u1);
 private:
 	unsigned m_numSeparate;
 	float * m_barbBegin;
 	float * m_separateEnd;
 	float * m_lengthChange;
+	float * m_noise;
 	unsigned m_seed;
 	float m_separateStrength, m_fuzzy;
 };

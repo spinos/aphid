@@ -35,6 +35,7 @@ private slots:
 	void sendFuzzy(double f);
 	void sendGridShaft(int g);
 	void sendGridBarb(int g);
+	void sendLod(double l);
 signals:
 	void shapeChanged();
 private:
@@ -47,4 +48,5 @@ private:
 	QIntEditSlider * m_separateCountValue;
 	QDoubleEditSlider * m_separateWeightValue;
 	QDoubleEditSlider * m_fuzzyValue;
+	QDoubleEditSlider * m_lodValue;
 };
