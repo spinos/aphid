@@ -12,6 +12,7 @@
 #include <LODFn.h>
 class MlSkin;
 class MlCalamus;
+class BlockStripeBuffer;
 class BarbWorks : public MlCache, public LODFn {
 public:
 	BarbWorks();
@@ -19,6 +20,7 @@ public:
 	void setSkin(MlSkin * skin);
 	MlSkin * skin() const;
 	void createBarbBuffer();
+	void clearBarbBuffer();
 protected:
 	unsigned numFeathers() const;
 	char isTimeCached(const std::string & stime);
@@ -28,5 +30,5 @@ protected:
 	void computeFeather(MlCalamus * c, const Vector3F & p, const Matrix33F & space);
 private:
 	MlSkin * m_skin;
-	
+	BlockStripeBuffer * m_stripes;
 };

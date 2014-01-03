@@ -11,9 +11,12 @@
 #include "MlSkin.h"
 #include "MlFeather.h"
 #include "MlCalamus.h"
+#include <AdaptableStripeBuffer.h>
+#include <BlockStripeBuffer.h>
 BarbWorks::BarbWorks() 
 {
 	m_skin = 0;
+	m_stripes = new BlockStripeBuffer;
 }
 
 BarbWorks::~BarbWorks() {}
@@ -82,6 +85,8 @@ void BarbWorks::createBarbBuffer()
 	if(!skin()) return;
 	const unsigned nc = numFeathers();
 	if(nc < 1) return;
+	
+	m_stripes->initialize();
 	unsigned i;
 	
 	BoundingBox box;
@@ -117,10 +122,19 @@ void BarbWorks::createBarbBuffer()
 		f->sampleColor(lod);
 		f->samplePosition(lod);
 		
+		AdaptableStripeBuffer * src = f->stripe();
+		m_stripes->append(src);
+		
 		nline += f->numStripe();
 		nv += f->numStripePoints();
 	}
 	
 	std::cout<<"n curve "<<nline<<" n p "<<nv<<"\n";
 	std::cout<<"lod range ("<<minLod<<" , "<<maxLod<<")\n";
+	std::cout<<"n blocks "<<m_stripes->numBlocks()<<"\n";
+}
+
+void BarbWorks::clearBarbBuffer()
+{
+	m_stripes->clear();
 }

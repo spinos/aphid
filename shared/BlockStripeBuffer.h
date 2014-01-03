@@ -15,7 +15,7 @@ class BlockStripeBuffer {
 public:
 	BlockStripeBuffer();
 	virtual ~BlockStripeBuffer();
-	
+	void clear();
 	void initialize();
 	void append(AdaptableStripeBuffer * buffer);
 	
@@ -26,8 +26,7 @@ public:
 protected:
 	AdaptableStripeBuffer * currentBlock();
 	AdaptableStripeBuffer * nextBlock();
-private:
-	void clear();
+	
 private:
 	std::vector<AdaptableStripeBuffer *> m_blocks;
 	unsigned m_currentBlockIdx;
