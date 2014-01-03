@@ -50,7 +50,7 @@ void MlVane::setNumSparate(unsigned nsep)
 	m_barbBegin = new float[m_numSeparate];
 	m_separateEnd = new float[m_numSeparate * 2];
 	m_lengthChange = new float[m_numSeparate * 2];
-	m_noise = new float[m_numSeparate * 4 + 1];
+	m_noise = new float[gridU() * 64 + 1];
 }
 
 void MlVane::separate()
@@ -110,7 +110,7 @@ void MlVane::computeLengthChange()
 void MlVane::computeNoise()
 {
 	PseudoNoise noi;
-	for(unsigned i = 0; i <= m_numSeparate * 4; i++) 
+	for(unsigned i = 0; i <= gridU() * 64; i++) 
 		m_noise[i] = noi.rfloat(m_seed + i * 17) - .5f;
 }
 
@@ -149,7 +149,7 @@ float MlVane::getSeparateU(float u, float * param) const
 
 float MlVane::getNoise(float u) const
 {
-	const float ds = 1.f /(float)m_numSeparate/4.f;
+	const float ds = 1.f / gridU() / 64.f;
 	unsigned i = u / ds;
 	float portion = (u - i * ds)/ds;
 	return m_noise[i] + (m_noise[i+1] - m_noise[i]) * portion;

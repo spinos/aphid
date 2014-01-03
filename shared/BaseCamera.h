@@ -43,6 +43,9 @@ public:
 	virtual void frameCorners(Vector3F & bottomLeft, Vector3F & bottomRight, Vector3F & topRight, Vector3F & topLeft) const;
 	void copyTransformFrom(BaseCamera * another);
 	
+	void setNearClipPlane(float x);
+	void setFarClipPlane(float x);
+	
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;
 	unsigned fPortWidth, fPortHeight;

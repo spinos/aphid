@@ -19,6 +19,7 @@ BarbEdit::BarbEdit(QWidget *parent)
 	layout->setContentsMargins(0, 0, 0, 0);
 	
 	connect(m_control, SIGNAL(shapeChanged()), m_view, SLOT(receiveShapeChanged()));
+	connect(m_control, SIGNAL(lodChanged(double)), m_view, SLOT(receiveLodChanged(double)));
 }
 
 BarbEdit::~BarbEdit()

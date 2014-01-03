@@ -15,7 +15,7 @@ MlFeather::MlFeather() : m_worldP(0)
 	setNumSeparate(2);
 	setSeparateStrength(0.f);
 	setFuzzy(0.f);
-	setLevelOfDetail(1.f);
+	m_scale = 1.f;
 }
 
 MlFeather::~MlFeather() 
@@ -259,11 +259,6 @@ void MlFeather::setFuzzy(float f)
 	m_fuzzy = f;
 }
 
-void MlFeather::setLevelOfDetail(float l)
-{
-	m_lod = l;
-}
-
 unsigned MlFeather::numSeparate() const
 {
 	return m_numSeparate;
@@ -277,11 +272,6 @@ float MlFeather::fuzzy() const
 float MlFeather::separateStrength() const
 {
 	return m_separateStrength;
-}
-
-float MlFeather::levelOfDetail() const
-{
-	return m_lod;
 }
 
 void MlFeather::testVane()
@@ -332,3 +322,7 @@ void MlFeather::samplePosition(unsigned nu, unsigned nv, int side)
 	}
 }
 
+float MlFeather::scaledShaftLength() const
+{
+	return m_scale * shaftLength();
+}

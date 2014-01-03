@@ -72,6 +72,16 @@ BaseCamera * Base3DView::getCamera() const
 	return fCamera;
 }
 
+BaseCamera * Base3DView::perspCamera()
+{
+	return m_perspCamera;
+}
+
+BaseCamera * Base3DView::orthoCamera()
+{
+	return m_orthoCamera;
+}
+	
 KdTreeDrawer * Base3DView::getDrawer() const
 {
 	return m_drawer;
@@ -493,5 +503,24 @@ int Base3DView::interactMode()
 	if(!m_interactContext) return ToolContext::SelectVertex;
 	
 	return m_interactContext->getContext();
+}
+
+void Base3DView::usePerspCamera()
+{
+	if(getCamera()->isOrthographic()) {
+		fCamera = m_perspCamera;
+		fCamera->copyTransformFrom(m_orthoCamera);
+		updatePerspProjection();
+	}
+		
+}
+
+void Base3DView::useOrthoCamera()
+{
+	if(!getCamera()->isOrthographic()) {
+		fCamera = m_orthoCamera;
+		fCamera->copyTransformFrom(m_perspCamera);
+		updateOrthoProjection();
+	}
 }
 //:~

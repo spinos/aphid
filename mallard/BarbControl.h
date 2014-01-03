@@ -38,6 +38,7 @@ private slots:
 	void sendLod(double l);
 signals:
 	void shapeChanged();
+	void lodChanged(double l);
 private:
 	
 	

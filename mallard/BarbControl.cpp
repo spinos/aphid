@@ -113,10 +113,7 @@ void BarbControl::sendGridBarb(int g)
 
 void BarbControl::sendLod(double l)
 {
-	MlFeather *f = selectedExample();
-	if(!f) return;
-	f->setLevelOfDetail(l);
-	emit shapeChanged();
+	emit lodChanged(l);
 }
 
 void BarbControl::receiveSelectionChanged()

@@ -29,6 +29,8 @@ public:
     QSize sizeHint() const;
 
 	BaseCamera * getCamera() const;
+	BaseCamera * perspCamera();
+	BaseCamera * orthoCamera();
 	KdTreeDrawer * getDrawer() const;
 	SelectionArray * getActiveComponent() const;
 	IntersectionContext * getIntersectionContext() const;
@@ -66,6 +68,9 @@ public:
 	
 	void setInteractContext(ToolContext * ctx);
 	int interactMode();
+	
+	void usePerspCamera();
+	void useOrthoCamera();
 	
 public slots:
 	void receiveBrushRadius(double x);

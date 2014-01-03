@@ -11,6 +11,9 @@
 BarbView::BarbView(QWidget *parent) : Base3DView(parent)
 {
 	std::cout<<" Barbview ";
+	perspCamera()->setNearClipPlane(1.f);
+	perspCamera()->setFarClipPlane(100000.f);
+	usePerspCamera();
 }
 
 BarbView::~BarbView() {}
@@ -22,8 +25,6 @@ void BarbView::clientDraw()
 	
 	getDrawer()->stripes(f->stripe(), getCamera()->eyeDirection());
 }
-
-void BarbView::clientSelect() {}
 
 void BarbView::clientMouseInput() {}
 
@@ -40,8 +41,31 @@ void BarbView::receiveShapeChanged()
 	f->bend();
 	f->testVane();
 	
-	f->sampleColor(f->levelOfDetail());
-	f->samplePosition(f->levelOfDetail());
+	const Vector3F rt(4.f, 0.f, 4.f);
+	const float rd = f->scaledShaftLength();
+	
+	const Vector3F eye = getCamera()->eyePosition();
+	const float fov = getCamera()->fieldOfView();
+	setEyePosition(eye);
+	setFieldOfView(fov);
+	float lod = computeLOD(rt, rd, f->numSegment() * 8);
+	std::cout<<" lod "<<lod;
+	
+	f->sampleColor(lod);
+	f->samplePosition(lod);
 
 	update();
+}
+
+void BarbView::clientSelect() {}
+
+void BarbView::clientDeselect()
+{
+	receiveShapeChanged();
+}
+
+void BarbView::receiveLodChanged(double l)
+{
+	setOverall(l);
+	receiveShapeChanged();
 }

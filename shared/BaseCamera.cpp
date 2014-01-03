@@ -245,4 +245,14 @@ void BaseCamera::copyTransformFrom(BaseCamera * another)
 	fInverseSpace = another->fInverseSpace;
 	fCenterOfInterest = another->fCenterOfInterest;
 }
+
+void BaseCamera::setNearClipPlane(float x)
+{
+	m_nearClipPlane = x;
+}
+
+void BaseCamera::setFarClipPlane(float x)
+{	
+	m_farClipPlane = x;
+}
 //:~
