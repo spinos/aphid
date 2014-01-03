@@ -130,6 +130,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h \
     ../shared/BaseClient.h \
 	../shared/RenderEngine.h \
 	../shared/AdaptableStripeBuffer.h \
+	../shared/BlockStripeBuffer.h \
 	../shared/LODFn.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
@@ -265,6 +266,7 @@ SOURCES = ../shared/Vector3F.cpp \
     ../shared/BaseClient.cpp \
 	../shared/RenderEngine.cpp \
 	../shared/AdaptableStripeBuffer.cpp \
+	../shared/BlockStripeBuffer.cpp \
 	../shared/LODFn.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \

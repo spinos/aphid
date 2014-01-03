@@ -38,13 +38,27 @@ void AdaptableStripeBuffer::clear()
 	m_width = 0;
 }
 
+void AdaptableStripeBuffer::create(unsigned maxNumPoint)
+{
+	unsigned ns = maxNumPoint / 2;
+	if(ns <= m_maxNumStripe &&  maxNumPoint <= m_maxNumCv) return;
+	clear();
+	m_maxNumStripe = ns;
+	m_maxNumCv = maxNumPoint;
+	init();
+}
+
 void AdaptableStripeBuffer::create(unsigned maxNumStripe, unsigned numCvPerStripe)
 {
 	if(maxNumStripe <= m_maxNumStripe && maxNumStripe * numCvPerStripe <= m_maxNumCv) return;
 	clear();
 	m_maxNumStripe = maxNumStripe;
 	m_maxNumCv = maxNumStripe * numCvPerStripe;
-	
+	init();
+}
+
+void AdaptableStripeBuffer::init()
+{
 	m_numCvs = new unsigned[m_maxNumStripe];
 	m_pos = new Vector3F[m_maxNumCv];
 	m_col = new Vector3F[m_maxNumCv];
@@ -59,6 +73,11 @@ unsigned AdaptableStripeBuffer::numStripe() const
 unsigned AdaptableStripeBuffer::numPoints() const
 {
 	return m_numCvs[m_useNumStripe - 1] + m_currentStripe;
+}
+
+char AdaptableStripeBuffer::canContain(unsigned x) const
+{
+	return m_maxNumCv > numPoints() + x;
 }
 
 void AdaptableStripeBuffer::begin()

@@ -15,9 +15,12 @@ class AdaptableStripeBuffer {
 public:
 	AdaptableStripeBuffer();
 	virtual ~AdaptableStripeBuffer();
+	void create(unsigned maxNumPoint);
 	void create(unsigned maxNumStripe, unsigned numCvPerStripe);
 	unsigned numStripe() const;
 	unsigned numPoints() const;
+	char canContain(unsigned x) const;
+
 	void begin();
 	void next();
 	char end() const;
@@ -31,9 +34,10 @@ public:
 	Vector3F * currentPos();
 	Vector3F * currentCol();
 	float * currentWidth();
-
+	
 private:
 	void clear();
+	void init();
 private:
 	unsigned * m_numCvs;
 	Vector3F * m_pos;
