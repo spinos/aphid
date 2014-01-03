@@ -22,6 +22,8 @@ MlVane::MlVane()
 
 MlVane::~MlVane() 
 {
+	if(m_noise) delete[] m_noise;
+	m_noise = 0;
 	clear();
 }
 
@@ -30,11 +32,17 @@ void MlVane::clear()
 	if(m_barbBegin) delete[] m_barbBegin;
 	if(m_separateEnd) delete[] m_separateEnd;
 	if(m_lengthChange) delete[] m_lengthChange;
-	if(m_noise) delete[] m_noise;
 	m_barbBegin = 0;
 	m_separateEnd = 0;
 	m_lengthChange = 0;
-	m_noise = 0;
+}
+
+void MlVane::create(unsigned gU, unsigned gV)
+{
+	BaseVane::create(gU, gV);
+	if(m_noise) delete[] m_noise;
+	m_noise = new float[gridU() * 64 + 1];
+	computeNoise();
 }
 
 void MlVane::setSeed(unsigned s)
@@ -50,14 +58,12 @@ void MlVane::setNumSparate(unsigned nsep)
 	m_barbBegin = new float[m_numSeparate];
 	m_separateEnd = new float[m_numSeparate * 2];
 	m_lengthChange = new float[m_numSeparate * 2];
-	m_noise = new float[gridU() * 64 + 1];
 }
 
 void MlVane::separate()
 {
 	computeSeparation();
 	computeLengthChange();
-	computeNoise();
 }
 
 void MlVane::computeSeparation()

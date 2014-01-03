@@ -6,19 +6,19 @@ public:
     virtual ~MlVane();
 	
 	virtual void setU(float u);
-	
+	virtual void create(unsigned gridU, unsigned gridV);
 	void setSeed(unsigned s);
 	void setNumSparate(unsigned nsep);
 	void separate();
 	void setSeparateStrength(float k);
 	void setFuzzy(float f);
 	void modifyLength(float u, unsigned gridV, Vector3F * dst);
+	void computeNoise();
     
 private:
 	void clear();
 	void computeSeparation();
 	void computeLengthChange();
-	void computeNoise();
 	float getSeparateU(float u, float * param) const;
 	float getNoise(float u) const;
 	void setU(float u0, float u1);

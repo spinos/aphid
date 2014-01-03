@@ -63,6 +63,7 @@
 #include <FloodCondition.h>
 #include "MlCalamus.h"
 #include <MeshTopology.h>
+#include <BaseCamera.h>
 #include "MlEngine.h"
 
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
@@ -76,6 +77,9 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	getIntersectionContext()->setComponentFilterType(PrimitiveFilter::TFace);
 	m_featherTexId = m_featherDistrId = -1;
 	m_floodByRegion = m_eraseByRegion = 0;
+	perspCamera()->setNearClipPlane(1.f);
+	perspCamera()->setFarClipPlane(100000.f);
+	usePerspCamera();
 }
 //! [0]
 

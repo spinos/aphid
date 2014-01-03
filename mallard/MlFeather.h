@@ -39,6 +39,7 @@ public:
 	
 	MlVane * vane(short side) const;
 	
+	void computeNoise();
 	void samplePosition(Vector3F * dst);
 	
 	void setSeed(unsigned s);

@@ -49,8 +49,8 @@ void MlEngine::render()
 
 void MlEngine::interruptRender()
 {
-	std::cout<<"treadId"<<m_workingThread.get_id();
-	std::cout<<"render cancelled";
+	//std::cout<<"treadId"<<m_workingThread.get_id();
+	//std::cout<<"render cancelled";
 	m_workingThread.interrupt();
 }
 

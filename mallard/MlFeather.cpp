@@ -288,6 +288,12 @@ void MlFeather::separateVane()
 	m_vane[1].separate();
 }
 
+void MlFeather::computeNoise()
+{
+	m_vane[0].computeNoise();
+	m_vane[1].computeNoise();
+}
+
 void MlFeather::samplePosition(float lod)
 {
 	const unsigned nu = m_vane[0].gridU() * (2 + (resShaft() - 2) * lod);

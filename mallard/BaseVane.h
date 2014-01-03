@@ -16,7 +16,7 @@ public:
 	
 	virtual void setU(float u);
     
-    void create(unsigned gridU, unsigned gridV);
+    virtual void create(unsigned gridU, unsigned gridV);
     BezierCurve * profile(unsigned idx) const;
     void computeKnots();
     void pointOnVane(float v, Vector3F & dst);
