@@ -164,3 +164,13 @@ AdaptableStripeBuffer * TexturedFeather::stripe()
 {
 	return m_stripe;
 }
+
+unsigned TexturedFeather::numStripe() const
+{
+	return m_stripe->numStripe();
+}
+
+unsigned TexturedFeather::numStripePoints() const
+{
+	return m_stripe->numPoints();
+}

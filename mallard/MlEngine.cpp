@@ -9,6 +9,7 @@
 
 #include "MlEngine.h"
 #include "BarbWorks.h"
+#include <BaseCamera.h>
 #include <boost/asio.hpp>
 #include <boost/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -57,7 +58,8 @@ void MlEngine::processBarbs()
 {
 	boost::timer met;
 	met.restart();
-
+	m_barb->setEyePosition(camera()->eyePosition());
+	m_barb->setFieldOfView(camera()->fieldOfView());
 	m_barb->createBarbBuffer();
 	std::cout<<" barb processed in "<<met.elapsed()<<" seconds\n";
 }

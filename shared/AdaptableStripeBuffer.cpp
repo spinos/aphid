@@ -56,6 +56,11 @@ unsigned AdaptableStripeBuffer::numStripe() const
 	return m_useNumStripe;
 }
 
+unsigned AdaptableStripeBuffer::numPoints() const
+{
+	return m_numCvs[m_useNumStripe - 1] + m_currentStripe;
+}
+
 void AdaptableStripeBuffer::begin()
 {
 	m_useNumStripe = 0;

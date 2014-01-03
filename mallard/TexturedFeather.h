@@ -31,6 +31,9 @@ public:
 	void sampleColor(unsigned gridU, unsigned gridV, Vector3F * dst);
 	void sampleColor(float lod);
 	void sampleColor(unsigned nu, unsigned nv, int side);
+	
+	unsigned numStripe() const;
+	unsigned numStripePoints() const;
 protected:
 
 private:

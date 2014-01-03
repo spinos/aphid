@@ -33,4 +33,9 @@ unsigned RenderEngine::resolutionY() const
 	return m_resolutionY;
 }
 
+BaseCamera * RenderEngine::camera() const
+{
+	return m_camera;
+}
+
 void RenderEngine::render() {}

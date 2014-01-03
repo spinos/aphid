@@ -17,6 +17,7 @@ public:
 	virtual ~AdaptableStripeBuffer();
 	void create(unsigned maxNumStripe, unsigned numCvPerStripe);
 	unsigned numStripe() const;
+	unsigned numPoints() const;
 	void begin();
 	void next();
 	char end() const;

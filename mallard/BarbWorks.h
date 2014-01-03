@@ -9,9 +9,10 @@
 
 #pragma once
 #include <MlCache.h>
+#include <LODFn.h>
 class MlSkin;
 class MlCalamus;
-class BarbWorks : public MlCache {
+class BarbWorks : public MlCache, public LODFn {
 public:
 	BarbWorks();
 	virtual ~BarbWorks();

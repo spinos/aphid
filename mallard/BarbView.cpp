@@ -49,8 +49,7 @@ void BarbView::receiveShapeChanged()
 	setEyePosition(eye);
 	setFieldOfView(fov);
 	float lod = computeLOD(rt, rd, f->numSegment() * 8);
-	std::cout<<" lod "<<lod;
-	
+
 	f->sampleColor(lod);
 	f->samplePosition(lod);
 

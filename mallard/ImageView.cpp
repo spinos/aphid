@@ -76,7 +76,7 @@ void ImageView::beginBucket(const char * data)
 	}
 	
 	const unsigned npix = (bucketRect[1] - bucketRect[0] + 1) * (bucketRect[3] - bucketRect[2] + 1);
-	std::cout<<"n pix "<<npix<<"\n";
+	
 	int pixLength = npix;
 	if(pixLength % 256) pixLength = (npix / 256 + 1 )* 256;
 
@@ -114,7 +114,6 @@ void ImageView::endBucket()
 		}
 	}
 	
-	std::cout<<"bucket filled\n";
 	update();
 }
 

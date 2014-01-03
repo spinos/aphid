@@ -45,7 +45,7 @@ void BaseServer::session(socket_ptr sock)
 {
 	try {
 	io_mutex.lock();
-	std::clog<<"connection opened\n";
+	//std::clog<<"connection opened\n";
 	
 	for (;;) {
 	    
@@ -54,7 +54,7 @@ void BaseServer::session(socket_ptr sock)
       size_t length = sock->read_some(boost::asio::buffer(buf), error);
       if (error == boost::asio::error::eof) {
 		// Connection closed cleanly by peer.
-		std::clog<<"connection closed\n";
+		//std::clog<<"connection closed\n";
 		break;
 	  }
 
@@ -67,7 +67,6 @@ void BaseServer::session(socket_ptr sock)
 		
 		boost::asio::write(*sock, boost::asio::buffer("beep.", 5));
 		
-	
     }
     io_mutex.unlock();
   }

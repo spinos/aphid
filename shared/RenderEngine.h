@@ -20,6 +20,8 @@ public:
 	unsigned resolutionX() const;
 	unsigned resolutionY() const;
 	
+	BaseCamera * camera() const;
+	
 	virtual void render();
 protected:
 

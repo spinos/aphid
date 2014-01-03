@@ -90,6 +90,9 @@ void BarbWorks::createBarbBuffer()
 	unsigned nline = 0;
 	unsigned nv = 0;
 	unsigned sd = 1984;
+	float rd, lod;
+	float minLod = 100;
+	float maxLod = -100;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin()->getCalamus(i);
 		skin()->calamusSpace(c, space);
@@ -103,9 +106,20 @@ void BarbWorks::createBarbBuffer()
 		f->setSeed(sd); sd++;
 		f->separateVane();
 		
-		nline += (f->resShaft() + 1)* 2;
-		nv += (f->resShaft() + 1)* 2*(f->resBarb() + 1);
+		rd = f->scaledShaftLength();
+		
+		lod = computeLOD(p, rd, f->numSegment() * 8);
+		
+		if(lod > maxLod) maxLod = lod;
+		if(lod < minLod) minLod = lod;
+		
+		f->sampleColor(lod);
+		f->samplePosition(lod);
+		
+		nline += f->numStripe();
+		nv += f->numStripePoints();
 	}
 	
 	std::cout<<"n curve "<<nline<<" n p "<<nv<<"\n";
+	std::cout<<"lod range ("<<minLod<<" , "<<maxLod<<")\n";
 }
