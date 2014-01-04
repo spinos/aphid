@@ -32,7 +32,6 @@ void ImageView::paintEvent(QPaintEvent * /* event */)
 {
     QPainter painter(this);
 	painter.fillRect(rect(), Qt::gray);
-	
     /*
     if (pixmap.isNull()) {
         painter.setPen(Qt::white);
@@ -52,7 +51,8 @@ void ImageView::processRead(const char * data, size_t length)
 {
 	if(length == 16) beginBucket(data);
 	else if(length == 4096) processPackage(data);
-	else endBucket();
+	else if(length == 11) endBucket();
+	else std::clog<<"received "<<length<<" ?";
 }
 
 void ImageView::beginBucket(const char * data)
@@ -96,6 +96,7 @@ void ImageView::processPackage(const char * data)
 void ImageView::endBucket()
 {
 	if(!m_colors) return;
+	std::clog<<"write bucket begin";
 	int r, g, b, a;
 	float *pixels = m_colors;
 	for (int y = bucketRect[2]; y <= bucketRect[3]; ++y) {
@@ -115,6 +116,7 @@ void ImageView::endBucket()
 	}
 	
 	update();
+	std::clog<<"write bucket end";
 }
 
 void ImageView::resizeImage(QSize s)

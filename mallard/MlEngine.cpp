@@ -84,6 +84,7 @@ void MlEngine::testOutput()
 		tcp::resolver resolver(io_service);
 		tcp::resolver::query query(tcp::v4(), "localhost", "7879");
 		tcp::resolver::iterator iterator = resolver.resolve(query);
+		tcp::socket s(io_service);
 		
 		boost::asio::deadline_timer t(io_service);
 	
@@ -105,14 +106,15 @@ void MlEngine::testOutput()
 				const unsigned npix = (rect[1] - rect[0] + 1) * (rect[3] - rect[2] + 1);
 				int npackage = npix * 16 / 4096;
 				if((npix * 16) % 4096 > 0) npackage++;
-				tcp::socket s(io_service);
+				
 				s.connect(*iterator);
+		
 				boost::asio::write(s, boost::asio::buffer((char *)rect, 16));
+				//std::cout<<"sent    bucket("<<rect[0]<<","<<rect[1]<<","<<rect[2]<<","<<rect[3]<<")\n";
+				
 				boost::array<char, 128> buf;
 				boost::system::error_code error;
 				size_t reply_length = s.read_some(boost::asio::buffer(buf), error);
-
-				//std::cout<<" bucket("<<rect[0]<<","<<rect[1]<<","<<rect[2]<<","<<rect[3]<<")\n";
 				
 				float *color = new float[npackage * 256 * 4];
 				for(int i = 0; i < npix; i++) {
@@ -128,15 +130,15 @@ void MlEngine::testOutput()
 				boost::asio::write(s, boost::asio::buffer("transferEnd", 11));
 				reply_length = s.read_some(boost::asio::buffer(buf), error);
 				
+				t.expires_from_now(boost::posix_time::seconds(0.2));
+				t.wait();
 				s.close();
-				
 				boost::this_thread::interruption_point();
 				
-				t.expires_from_now(boost::posix_time::seconds(1));
-				t.wait();
+				
 			}
 		}
-
+		
 	}
 	catch (std::exception& e)
 	{

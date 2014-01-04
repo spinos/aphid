@@ -45,7 +45,7 @@ void BaseServer::session(socket_ptr sock)
 {
 	try {
 	io_mutex.lock();
-	//std::clog<<"connection opened\n";
+	std::clog<<"connection opened\n";
 	
 	for (;;) {
 	    
@@ -54,14 +54,13 @@ void BaseServer::session(socket_ptr sock)
       size_t length = sock->read_some(boost::asio::buffer(buf), error);
       if (error == boost::asio::error::eof) {
 		// Connection closed cleanly by peer.
-		//std::clog<<"connection closed\n";
+		std::clog<<"connection closed\n";
 		break;
 	  }
 
       else if (error)
         throw boost::system::system_error(error); // Some other error.
-		
-        
+
 		//std::cout<<"thread id "<<boost::this_thread::get_id()<<"\n";
 		processRead(buf.data(), length);
 		
@@ -71,7 +70,8 @@ void BaseServer::session(socket_ptr sock)
     io_mutex.unlock();
   }
   catch (std::exception& e) {
-    std::cerr << "Exception in thread: " << e.what() << "\n";
+    std::cerr << "Exception in session: " << e.what() << "\n";
+    io_mutex.unlock();
   }
 }
 
