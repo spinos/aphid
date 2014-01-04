@@ -218,7 +218,7 @@ void MlFeather::samplePosition(Vector3F * dst)
 			m_vane[0].pointOnVane(dv * j, dst[acc]);
 			acc++;
 		}
-		m_vane[0].modifyLength(du*i, gridV, &dst[acc - gridV - 1]);
+		m_vane[0].modifyLength(du*i, gridV, &dst[acc - gridV - 1], 1.f);
 	}
 	
 	
@@ -228,7 +228,7 @@ void MlFeather::samplePosition(Vector3F * dst)
 			m_vane[1].pointOnVane(dv * j, dst[acc]);
 			acc++;
 		}
-		m_vane[1].modifyLength(du*i, gridV, &dst[acc - gridV - 1]);
+		m_vane[1].modifyLength(du*i, gridV, &dst[acc - gridV - 1], 1.f);
 	}
 }
 
@@ -300,30 +300,32 @@ void MlFeather::samplePosition(float lod)
 	const unsigned nv = 3 + (resBarb() - 3) * lod;
 	stripe()->begin();
 	
-	samplePosition(nu, nv, 0);
-	samplePosition(nu, nv, 1);
+	samplePosition(nu, nv, 0, lod);
+	samplePosition(nu, nv, 1, lod);
 }
 
-void MlFeather::samplePosition(unsigned nu, unsigned nv, int side)
+void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 {
-	const float dl = m_scale * shaftLength() / (float)nu;
+	const float rootWidth = m_scale * shaftLength() / (float)nu * .9f;
+	const float tipWidth = rootWidth * 0.3f;
 	const float du = 1.f/(float)nu;
 	const float dv = 1.f/(float)nv;
-	float scaling = 1.f;
+	float shrinking, tapering = 1.f;
 	for(unsigned i = 0; i < nu; i++) {
 		*stripe()->currentNumCvs() = nv + 1;
 		
 		Vector3F * coord = stripe()->currentPos();
 		float * w = stripe()->currentWidth();
 		
-		if(i> nu/2) scaling = 1.f - (i - nu/2) / nu;
-		
+		if(i > nu/2) tapering = 1.f - (float)(i - nu/2) / (float)nu * 1.5f;
+
 		m_vane[side].setU(du*i);
 		for(unsigned j = 0; j <= nv; j++) {
 			m_vane[side].pointOnVane(dv * j, coord[j]);
-			w[j] = scaling * (dl - dl * .7f * j / nv); 
+			shrinking = (float)j / (float)nv;
+			w[j] = (rootWidth * (1.f - shrinking) + tipWidth * shrinking) * tapering; 
 		}
-		m_vane[side].modifyLength(du*i, nv, coord);
+		m_vane[side].modifyLength(du*i, nv, coord, lod);
 		stripe()->next();
 	}
 }

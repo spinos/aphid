@@ -132,6 +132,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h \
 	../shared/AdaptableStripeBuffer.h \
 	../shared/BlockStripeBuffer.h \
 	../shared/LODFn.h \
+	../shared/NoisePlot.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -268,6 +269,7 @@ SOURCES = ../shared/Vector3F.cpp \
 	../shared/AdaptableStripeBuffer.cpp \
 	../shared/BlockStripeBuffer.cpp \
 	../shared/LODFn.cpp \
+	../shared/NoisePlot.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \

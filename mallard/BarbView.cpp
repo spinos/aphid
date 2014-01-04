@@ -14,6 +14,8 @@ BarbView::BarbView(QWidget *parent) : Base3DView(parent)
 	perspCamera()->setNearClipPlane(1.f);
 	perspCamera()->setFarClipPlane(100000.f);
 	usePerspCamera();
+	
+	test();
 }
 
 BarbView::~BarbView() {}
@@ -67,4 +69,22 @@ void BarbView::receiveLodChanged(double l)
 {
 	setOverall(l);
 	receiveShapeChanged();
+}
+
+void BarbView::test()
+{
+	float lod = .99f;
+	unsigned r = 512 / 16;
+	for(int i = 0; i < lod * 5; i++) {
+		r /= 2;
+		std::cout<<" r "<<r;
+	}
+	std::cout<<" lod "<<lod<<" full "<<512<<" ng "<<r<<"\n";
+	float u = 0.999f;
+	float coord = u * 512;
+	float portion = coord /(float)r;
+	int i = portion;
+	portion -= i;
+	std::cout<<" u "<<u<<" coord "<<coord<<" i "<<i<<" port "<<portion<<"\n";
+	std::cout<<" in "<<i*r<<" out "<<(i + 1)*r<<"\n";
 }

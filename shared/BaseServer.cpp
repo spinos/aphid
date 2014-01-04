@@ -51,11 +51,9 @@ void BaseServer::session(socket_ptr sock)
 	    
 		boost::array<char, 1024> buf;
       boost::system::error_code error;
-      //size_t length = sock->read_some(boost::asio::buffer(buf), error);
-	  size_t length = boost::asio::read(*sock, boost::asio::buffer(buf), boost::asio::transfer_at_least(1024), error); 
+      size_t length = boost::asio::read(*sock, boost::asio::buffer(buf), boost::asio::transfer_at_least(1024), error); 
       if (error == boost::asio::error::eof) {
-		// Connection closed cleanly by peer.
-		std::clog<<"connection closed\n";
+		std::clog<<"connection closed by peer\n";
 		break;
 	  }
       else if (error)

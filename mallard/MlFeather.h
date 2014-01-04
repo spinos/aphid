@@ -61,7 +61,7 @@ protected:
 	
 private:
 	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale);
-	void samplePosition(unsigned nu, unsigned nv, int side);
+	void samplePosition(unsigned nu, unsigned nv, int side, float lod);
 private:
 	CollisionRegion * m_skin;
 	MlRachis * m_rachis;

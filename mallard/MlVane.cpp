@@ -17,13 +17,10 @@ MlVane::MlVane()
 	m_lengthChange = 0;
 	m_separateStrength = 0.f;
 	m_fuzzy = 0.f;
-	m_noise = 0;
 }
 
 MlVane::~MlVane() 
 {
-	if(m_noise) delete[] m_noise;
-	m_noise = 0;
 	clear();
 }
 
@@ -40,8 +37,7 @@ void MlVane::clear()
 void MlVane::create(unsigned gU, unsigned gV)
 {
 	BaseVane::create(gU, gV);
-	if(m_noise) delete[] m_noise;
-	m_noise = new float[gridU() * 64 + 1];
+	createPlot(gridU() * 64);
 	computeNoise();
 }
 
@@ -113,13 +109,6 @@ void MlVane::computeLengthChange()
 	}
 }
 
-void MlVane::computeNoise()
-{
-	PseudoNoise noi;
-	for(unsigned i = 0; i <= gridU() * 64; i++) 
-		m_noise[i] = noi.rfloat(m_seed + i * 17) - .5f;
-}
-
 void MlVane::setU(float u)
 {
 	if(m_numSeparate < 2) {
@@ -153,15 +142,7 @@ float MlVane::getSeparateU(float u, float * param) const
 	return m_separateEnd[i * 2] + (m_separateEnd[i * 2 + 1] - m_separateEnd[i * 2]) * portion;
 }
 
-float MlVane::getNoise(float u) const
-{
-	const float ds = 1.f / gridU() / 64.f;
-	unsigned i = u / ds;
-	float portion = (u - i * ds)/ds;
-	return m_noise[i] + (m_noise[i+1] - m_noise[i]) * portion;
-}
-
-void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst)
+void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst, float lod)
 {
 	if(u == 1.f) return;
 	float param;
@@ -175,12 +156,9 @@ void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst)
 	for(unsigned i = 1; i < gridV; i++) {
 		dp = dst[i] - dst[i - 1];
 		wei = dl;
-		if(m_fuzzy > 0.f) {
-			//wei += (noi.rfloat(m_seed + u * 109493) - 0.5f) * m_fuzzy * .5f;
-			wei += getNoise(u) * m_fuzzy * .5f;
-		}
+		if(m_fuzzy > 0.f) wei += getNoise(u, lod) * m_fuzzy * .5f;
 
-		dp *= wei; // if(u>0.98f)std::cout<<" "<<u<<" "<<dl;
+		dp *= wei;
 		
 		for(unsigned j = i; j <= gridV; j++) {
 			dst[j] += dp;
@@ -196,4 +174,9 @@ void MlVane::setSeparateStrength(float k)
 void MlVane::setFuzzy(float f)
 {
 	m_fuzzy = f;
+}
+
+void MlVane::computeNoise()
+{
+	computePlot(m_seed);
 }

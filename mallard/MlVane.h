@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseVane.h"
-class MlVane : public BaseVane {
+#include <NoisePlot.h>
+class MlVane : public BaseVane, public NoisePlot {
 public:
     MlVane();
     virtual ~MlVane();
@@ -12,7 +13,7 @@ public:
 	void separate();
 	void setSeparateStrength(float k);
 	void setFuzzy(float f);
-	void modifyLength(float u, unsigned gridV, Vector3F * dst);
+	void modifyLength(float u, unsigned gridV, Vector3F * dst, float lod);
 	void computeNoise();
     
 private:
@@ -20,14 +21,12 @@ private:
 	void computeSeparation();
 	void computeLengthChange();
 	float getSeparateU(float u, float * param) const;
-	float getNoise(float u) const;
 	void setU(float u0, float u1);
 private:
 	unsigned m_numSeparate;
 	float * m_barbBegin;
 	float * m_separateEnd;
 	float * m_lengthChange;
-	float * m_noise;
 	unsigned m_seed;
 	float m_separateStrength, m_fuzzy;
 };

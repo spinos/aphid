@@ -19,5 +19,6 @@ protected:
 public slots:
 	void receiveShapeChanged();
 	void receiveLodChanged(double l);
+	void test();
 private:
 };
