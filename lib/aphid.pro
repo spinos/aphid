@@ -292,8 +292,11 @@ macx {
 win32 {
     HEADERS += ../shared/gExtension.h
     SOURCES += ../shared/gExtension.cpp
-    INCLUDEPATH += D:/usr/local/include D:/ofl/shared \
+    INCLUDEPATH += D:/usr/boost_1_51_0 \
+                    D:/usr/local/openEXR/include \
+                    D:/ofl/shared \
                    D:/usr/hdf5/include \
-                   D:/usr/libxml2x64/include D:/usr/eigen3
+                   D:/usr/libxml2x64/include \
+                   D:/usr/eigen3
     DEFINES += OPENEXR_DLL NDEBUG _WIN32_WINDOWS
 }

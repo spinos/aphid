@@ -85,7 +85,6 @@ void BarbWorks::createBarbBuffer()
 	if(!skin()) return;
 	const unsigned nc = numFeathers();
 	if(nc < 1) return;
-	
 	m_stripes->initialize();
 	unsigned i;
 	
@@ -98,6 +97,8 @@ void BarbWorks::createBarbBuffer()
 	float rd, lod;
 	float minLod = 100;
 	float maxLod = -100;
+	
+	std::clog<<"build feather count: "<<nc<<"\n";
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin()->getCalamus(i);
 		skin()->calamusSpace(c, space);
@@ -123,6 +124,7 @@ void BarbWorks::createBarbBuffer()
 		f->samplePosition(lod);
 		
 		AdaptableStripeBuffer * src = f->stripe();
+		
 		m_stripes->append(src);
 		
 		nline += f->numStripe();

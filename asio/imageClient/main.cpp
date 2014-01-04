@@ -14,6 +14,10 @@
 #include <boost/asio.hpp>
 #include <boost/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/convenience.hpp>
 using boost::asio::ip::tcp;
 
 enum { max_length = 1024 };
@@ -27,6 +31,8 @@ int main(int argc, char* argv[])
       std::cerr << "Usage: blocking_tcp_echo_client <host> <port>\n";
       return 1;
     }
+    
+    boost::filesystem::exists("foo");
     
     boost::posix_time::ptime tt(boost::posix_time::second_clock::local_time());
     std::string ts("2002-01-20 23:59:59.000");

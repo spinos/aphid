@@ -54,10 +54,10 @@ void BlockStripeBuffer::append(AdaptableStripeBuffer * src)
 	float * w = src->width();
 	unsigned ncvi;
 	AdaptableStripeBuffer * dst = currentBlock();
+	
 	for(unsigned i = 0; i < ns; i++) {
 		ncvi = ncv[i];
 		if(!dst->canContain(ncvi)) dst = nextBlock();
-		
 		*dst->currentNumCvs() = ncvi;
 		for(unsigned j = 0; j < ncvi; j++) {
 			dst->currentPos()[j] = pos[j];

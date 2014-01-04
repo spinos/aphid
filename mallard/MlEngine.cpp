@@ -132,7 +132,7 @@ void MlEngine::testOutput()
 				
 				boost::this_thread::interruption_point();
 				
-				t.expires_from_now(boost::posix_time::seconds(0.5));
+				t.expires_from_now(boost::posix_time::seconds(1));
 				t.wait();
 			}
 		}

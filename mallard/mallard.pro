@@ -95,7 +95,9 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
     window.cpp \
                 main.cpp
                 
-LIBS += -L../lib -laphid -L../easymodel -leasymodel -lIlmImf -lHalf -lhdf5 -lhdf5_hl
+LIBS += -L../easymodel -leasymodel \
+        -L../lib -laphid \
+        -lIlmImf -lHalf -lhdf5 -lhdf5_hl
 macx {
     INCLUDEPATH += ../../Library/boost_1_44_0 \
                     ../../Library/hdf5/include \
@@ -108,11 +110,14 @@ macx {
 win32 {
     HEADERS += ../shared/gExtension.h
     SOURCES += ../shared/gExtension.cpp
-    INCLUDEPATH += D:/usr/local/include D:/ofl/shared \
+    INCLUDEPATH += D:/usr/boost_1_51_0 \
+                    D:/usr/local/openEXR/include \
+                    D:/ofl/shared \
                    D:/usr/hdf5/include \
                    D:/usr/libxml2x64/include \
                    D:/usr/eigen2
-    QMAKE_LIBDIR += D:/usr/local/lib64 
+    QMAKE_LIBDIR += D:/usr/boost_1_51_0/stage/lib \
+                    D:/usr/local/openEXR/lib
     LIBS += -LD:/usr/libxml2x64/lib -llibxml2 \
             -LD:/usr/hdf5/lib -lszip
     DEFINES += OPENEXR_DLL NDEBUG NOMINMAX _WIN32_WINDOWS
