@@ -16,7 +16,7 @@
 
 using namespace boost::posix_time;
 using boost::asio::ip::tcp;
-
+#define PACKAGESIZE 1024
 MlEngine::MlEngine() 
 {
 	std::cout<<" renderEngine ";
@@ -77,6 +77,8 @@ void MlEngine::testOutput()
     time_duration td = tt - tref;
 	
 	boost::this_thread::interruption_point();
+	
+	char dataPackage[PACKAGESIZE];
 
 	try
 	{
@@ -91,48 +93,55 @@ void MlEngine::testOutput()
 		const int bucketSize = 64;
 		const int imageSizeX = resolutionX();
 		const int imageSizeY = resolutionY();
-		int rect[4];
 				
 		for(int by = 0; by <= imageSizeY/bucketSize; by++) {
-			rect[2] = by * bucketSize;
-			rect[3] = rect[2] + bucketSize - 1;
-			if(rect[3] > imageSizeY - 1) rect[3] = imageSizeY - 1;
 			for(int bx = 0; bx <= imageSizeX/bucketSize; bx++) {
+				int * rect = (int *)dataPackage;
+				
+				rect[2] = by * bucketSize;
+				rect[3] = rect[2] + bucketSize - 1;
+				if(rect[3] > imageSizeY - 1) rect[3] = imageSizeY - 1;
+			
 				rect[0] = bx * bucketSize;
 				rect[1] = rect[0] + bucketSize - 1;
 				if(rect[1] > imageSizeX - 1) rect[1] = imageSizeX - 1;
 				
 				const float grey = (float)((rand() + td.seconds() * 391) % 457) / 457.f;
 				const unsigned npix = (rect[1] - rect[0] + 1) * (rect[3] - rect[2] + 1);
-				int npackage = npix * 16 / 4096;
-				if((npix * 16) % 4096 > 0) npackage++;
+				int npackage = npix * 16 / PACKAGESIZE;
+				if((npix * 16) % PACKAGESIZE > 0) npackage++;
 				
 				s.connect(*iterator);
 		
-				boost::asio::write(s, boost::asio::buffer((char *)rect, 16));
+				dataPackage[16] = '\n';
+				boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
 				//std::cout<<"sent    bucket("<<rect[0]<<","<<rect[1]<<","<<rect[2]<<","<<rect[3]<<")\n";
 				
-				boost::array<char, 128> buf;
+				boost::array<char, 32> buf;
 				boost::system::error_code error;
+				
 				size_t reply_length = s.read_some(boost::asio::buffer(buf), error);
 				
-				float *color = new float[npackage * 256 * 4];
-				for(int i = 0; i < npix; i++) {
+				float *color = (float *)dataPackage;
+				for(int i = 0; i < PACKAGESIZE / 16; i++) {
 					color[i * 4] = color[i * 4 + 1] = color[i * 4 + 2] = grey;
 					color[i * 4 + 3] = 1.f;
 				}
-
+					
 				for(int i=0; i < npackage; i++) {
-					boost::asio::write(s, boost::asio::buffer((char *)&(color[i * 256 * 4]), 4096));
+					boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
 					reply_length = s.read_some(boost::asio::buffer(buf), error);
 				}
 				
-				boost::asio::write(s, boost::asio::buffer("transferEnd", 11));
-				reply_length = s.read_some(boost::asio::buffer(buf), error);
+				dataPackage[0] = '\n';
+				boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
 				
-				t.expires_from_now(boost::posix_time::seconds(0.2));
-				t.wait();
+				reply_length = s.read_some(boost::asio::buffer(buf), error);
+
 				s.close();
+				//t.expires_from_now(boost::posix_time::seconds(1));
+				//t.wait();
+				
 				boost::this_thread::interruption_point();
 				
 				

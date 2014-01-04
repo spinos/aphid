@@ -48,11 +48,15 @@ void ImageView::resizeEvent(QResizeEvent *)
 }
 
 void ImageView::processRead(const char * data, size_t length)
-{
-	if(length == 16) beginBucket(data);
-	else if(length == 4096) processPackage(data);
-	else if(length == 11) endBucket();
-	else std::clog<<"received "<<length<<" ?";
+{	
+	if(length != 1024) {
+		std::clog<<"unknown data size "<<length<<"\n";
+		return;
+	}
+	
+	if(data[16] == '\n') beginBucket(data);
+	else if(data[0] == '\n') endBucket();
+	else processPackage(data);
 }
 
 void ImageView::beginBucket(const char * data)
@@ -88,15 +92,14 @@ void ImageView::processPackage(const char * data)
 	if(!m_colors) return;
 	float * cdata = (float *)data;
 	float * dst = &m_colors[m_packageStart];
-	for(int i = 0; i < 1024; i++)
+	for(int i = 0; i < 256; i++)
 		dst[i] = cdata[i];
-	m_packageStart += 1024;	
+	m_packageStart += 256;
 }
 
 void ImageView::endBucket()
 {
 	if(!m_colors) return;
-	std::clog<<"write bucket begin";
 	int r, g, b, a;
 	float *pixels = m_colors;
 	for (int y = bucketRect[2]; y <= bucketRect[3]; ++y) {
@@ -116,7 +119,6 @@ void ImageView::endBucket()
 	}
 	
 	update();
-	std::clog<<"write bucket end";
 }
 
 void ImageView::resizeImage(QSize s)
