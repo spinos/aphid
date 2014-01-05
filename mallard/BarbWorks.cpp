@@ -110,7 +110,6 @@ void BarbWorks::createBarbBuffer()
 		f->getBoundingBox(box);
 		
 		f->setSeed(sd); sd++;
-		if(i % 4 == 0) f->computeNoise();
 		f->separateVane();
 		
 		rd = f->scaledShaftLength();

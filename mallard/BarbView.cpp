@@ -7,6 +7,7 @@
 #include <BaseCamera.h>
 #include "MlVane.h"
 #include <AdaptableStripeBuffer.h>
+#include <FractalPlot.h>
 
 BarbView::BarbView(QWidget *parent) : Base3DView(parent)
 {
@@ -14,8 +15,6 @@ BarbView::BarbView(QWidget *parent) : Base3DView(parent)
 	perspCamera()->setNearClipPlane(1.f);
 	perspCamera()->setFarClipPlane(100000.f);
 	usePerspCamera();
-	
-	test();
 }
 
 BarbView::~BarbView() {}
@@ -73,18 +72,27 @@ void BarbView::receiveLodChanged(double l)
 
 void BarbView::test()
 {
-	float lod = .99f;
-	unsigned r = 512 / 16;
-	for(int i = 0; i < lod * 5; i++) {
-		r /= 2;
-		std::cout<<" r "<<r;
+	MlFeather *f = selectedExample();
+	if(!f) return;
+	FractalPlot plot;
+	plot.createPlot(1024);
+	plot.computePlot(f->seed());
+	std::vector<Vector3F> pts;
+	float d = 1.f/512.f;
+	float noi;
+	Vector3F pt(0.f, 0.f, 1.f);
+	for(unsigned i=0; i < 512; i++) {
+		pts.push_back(pt);
+		noi = plot.getNoise(d*i, 64, overall(), f->seed());
+		pt = Vector3F(d * i * 128.f, noi * 10.f, 1.f);
+		pts.push_back(pt);
 	}
-	std::cout<<" lod "<<lod<<" full "<<512<<" ng "<<r<<"\n";
-	float u = 0.999f;
-	float coord = u * 512;
-	float portion = coord /(float)r;
-	int i = portion;
-	portion -= i;
-	std::cout<<" u "<<u<<" coord "<<coord<<" i "<<i<<" port "<<portion<<"\n";
-	std::cout<<" in "<<i*r<<" out "<<(i + 1)*r<<"\n";
+	
+	getDrawer()->lines(pts);
+}
+
+void BarbView::focusInEvent(QFocusEvent * event)
+{
+	receiveShapeChanged();
+	Base3DView::focusInEvent(event);
 }

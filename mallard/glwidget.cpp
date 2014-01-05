@@ -772,6 +772,7 @@ void GLWidget::testRender()
 {
 	const QSize sz(m_engine->resolutionX(), m_engine->resolutionY());
 	emit renderResChanged(sz);
+	prepareRender();
 	m_engine->setCamera(getCamera());
 	m_engine->render();
 }

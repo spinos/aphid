@@ -37,7 +37,7 @@ void MlVane::clear()
 void MlVane::create(unsigned gU, unsigned gV)
 {
 	BaseVane::create(gU, gV);
-	createPlot(gridU() * 64);
+	createPlot(2048);
 	computeNoise();
 }
 
@@ -153,10 +153,11 @@ void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst, float lod)
 	PseudoNoise noi;
 	Vector3F dp;
 	float wei;
+	const unsigned freq = 16 * gridU();
 	for(unsigned i = 1; i < gridV; i++) {
 		dp = dst[i] - dst[i - 1];
 		wei = dl;
-		if(m_fuzzy > 0.f) wei += getNoise(u, lod) * m_fuzzy * .5f;
+		if(m_fuzzy > 0.f) wei += getNoise(u, freq, lod, m_seed) * m_fuzzy * .5f;
 
 		dp *= wei;
 		
@@ -179,4 +180,9 @@ void MlVane::setFuzzy(float f)
 void MlVane::computeNoise()
 {
 	computePlot(m_seed);
+}
+
+unsigned MlVane::seed() const
+{
+	return m_seed;
 }

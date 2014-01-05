@@ -15,11 +15,9 @@ public:
 	void clear();
 	void createPlot(unsigned n);
 	void computePlot(unsigned seed);
-	float getNoise(float u, float lod) const;
-private:
-	unsigned getGridSize(float lod) const;
-	float getLevel(float u, unsigned ng) const;
-	float getFull(float u) const;
+protected:
+	float sample(unsigned idx) const;
+	unsigned numSamples() const;	
 private:
 	float * m_samps;
 	unsigned m_numSamps;

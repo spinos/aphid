@@ -380,3 +380,13 @@ void MlScene::bakeRange(int & low, int & high) const
     low = m_deformer->minFrame();
     high = m_deformer->maxFrame();
 }
+
+void MlScene::prepareRender()
+{
+	int i = 99;
+	for(MlFeather * f = firstFeatherExample(); hasFeatherExample(); f = nextFeatherExample()) {
+		if(!f) continue;
+		f->setSeed(i++);
+		f->computeNoise();
+	}
+}

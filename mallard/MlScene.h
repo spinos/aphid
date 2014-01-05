@@ -48,6 +48,8 @@ public:
 	
 	void delayLoadBake();
 	void bakeRange(int & low, int & high) const;
+protected:
+	void prepareRender();
 private:
 	void writeFeatherExamples();
 	void readFeatherExamples();

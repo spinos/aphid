@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseVane.h"
-#include <NoisePlot.h>
-class MlVane : public BaseVane, public NoisePlot {
+#include <FractalPlot.h>
+class MlVane : public BaseVane, public FractalPlot {
 public:
     MlVane();
     virtual ~MlVane();
@@ -15,7 +15,7 @@ public:
 	void setFuzzy(float f);
 	void modifyLength(float u, unsigned gridV, Vector3F * dst, float lod);
 	void computeNoise();
-    
+    unsigned seed() const;
 private:
 	void clear();
 	void computeSeparation();

@@ -73,7 +73,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
                 MlScene.cpp \
 				HFeather.cpp \
     HSkin.cpp \
-                MLFeatherCollection.cpp \
+                MlFeatherCollection.cpp \
     MlUVView.cpp \
     FeatherEdit.cpp \
 	FeatherEditTool.cpp \

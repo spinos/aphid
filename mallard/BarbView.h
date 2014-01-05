@@ -15,6 +15,7 @@ protected:
 	virtual void clientDeselect();
 	virtual void clientDraw();
 	virtual void clientMouseInput();
+	virtual void focusInEvent(QFocusEvent * event);
 	
 public slots:
 	void receiveShapeChanged();

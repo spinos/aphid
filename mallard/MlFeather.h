@@ -47,6 +47,7 @@ public:
 	void setSeparateStrength(float k);
 	void setFuzzy(float f);
 	
+	unsigned seed() const;
 	unsigned numSeparate() const;
 	float fuzzy() const;
 	float separateStrength() const;

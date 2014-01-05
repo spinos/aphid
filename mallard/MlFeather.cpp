@@ -259,6 +259,11 @@ void MlFeather::setFuzzy(float f)
 	m_fuzzy = f;
 }
 
+unsigned MlFeather::seed() const
+{
+	return m_vane[0].seed();
+}
+
 unsigned MlFeather::numSeparate() const
 {
 	return m_numSeparate;

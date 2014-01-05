@@ -17,6 +17,7 @@ public:
 	void setFieldOfView(const float & fov);
 	float computeLOD(const Vector3F & p, const float r, const unsigned npix) const;
 	void setOverall(float x);
+	float overall() const;
 protected:
 
 private:

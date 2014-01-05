@@ -45,3 +45,8 @@ void LODFn::setOverall(float x)
 	if(m_overall > 1.f) m_overall = 1.f;
 	else if(m_overall < 0.01f) m_overall = 0.01f;
 }
+
+float LODFn::overall() const
+{
+	return m_overall;
+}
