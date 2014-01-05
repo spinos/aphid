@@ -8,7 +8,6 @@
  */
 
 #include "MlVane.h"
-#include <PseudoNoise.h>
 MlVane::MlVane() 
 {
 	m_barbBegin = 0;
@@ -64,8 +63,6 @@ void MlVane::separate()
 
 void MlVane::computeSeparation()
 {
-	PseudoNoise noi;
-	
 	const float ds = 1.f / m_numSeparate;
 	float r;
 	for(unsigned i = 0; i < m_numSeparate; i++) {
@@ -73,13 +70,13 @@ void MlVane::computeSeparation()
 	}
 	
 	for(unsigned i = 0; i < m_numSeparate; i++) {
-		r = noi.rfloat(m_seed + i * 13) * 2.f - 1.f;
+		r = (sample(m_seed + i * 13) + .5f)* 2.f - 1.f;
 		m_separateEnd[i*2] = m_barbBegin[i] + ds * r * 2.f * m_separateStrength;
 		
 		if(m_separateEnd[i*2]< 0.f) m_separateEnd[i*2] = 0.f;
 		else if(m_separateEnd[i*2] > 1.f) m_separateEnd[i*2] = 1.f;
 		
-		r = noi.rfloat(m_seed + i * 15) - 0.5f;
+		r = sample(m_seed + i * 15);
 		m_separateEnd[i*2 + 1] = m_separateEnd[i*2] + ds * (1.f + r * m_separateStrength);
 		
 		if(m_separateEnd[i*2 + 1]< 0.f) m_separateEnd[i*2 + 1] = 0.f;
@@ -150,7 +147,6 @@ void MlVane::modifyLength(float u, unsigned gridV, Vector3F * dst, float lod)
 	const int barb = (int)param;
 	const float port = param - barb;
 	const float dl = m_lengthChange[barb * 2] * (1.f - port) + m_lengthChange[barb * 2 + 1] * port;
-	PseudoNoise noi;
 	Vector3F dp;
 	float wei;
 	const unsigned freq = 16 * gridU();

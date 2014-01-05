@@ -14,7 +14,7 @@ FractalPlot::~FractalPlot() {}
 
 float FractalPlot::getNoise(float u, unsigned frequency, float lod, unsigned seed) const
 {
-	int head = seed & 26431;
+	int head = seed;
 	const int level = lod * 5;
 	const float lft = lod * 5 - level;
 	float length = frequency;

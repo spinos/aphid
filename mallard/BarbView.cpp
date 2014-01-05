@@ -23,7 +23,6 @@ void BarbView::clientDraw()
 {
    MlFeather *f = selectedExample();
 	if(!f) return;
-	
 	getDrawer()->stripes(f->stripe(), getCamera()->eyeDirection());
 }
 
