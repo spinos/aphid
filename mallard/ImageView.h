@@ -35,4 +35,5 @@ private:
 	float * m_colors;
 	int bucketRect[4];
 	int m_packageStart;
+	unsigned numPix;
 };

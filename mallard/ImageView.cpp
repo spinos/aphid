@@ -64,7 +64,7 @@ void ImageView::beginBucket(const char * data)
 	if(m_colors) delete[] m_colors;
 	m_colors = 0;
 	m_packageStart = 0;
-	
+	numPix = 0;
 	int * box = (int *)data;
 	
 	bucketRect[0] = box[0];
@@ -79,12 +79,8 @@ void ImageView::beginBucket(const char * data)
 		return;
 	}
 	
-	const unsigned npix = (bucketRect[1] - bucketRect[0] + 1) * (bucketRect[3] - bucketRect[2] + 1);
-	
-	int pixLength = npix;
-	if(pixLength % 256) pixLength = (npix / 256 + 1 )* 256;
-
-	m_colors = new float[pixLength * 4];
+	numPix = (bucketRect[1] - bucketRect[0] + 1) * (bucketRect[3] - bucketRect[2] + 1);
+	m_colors = new float[numPix * 4];
 }
 
 void ImageView::processPackage(const char * data)
@@ -92,8 +88,11 @@ void ImageView::processPackage(const char * data)
 	if(!m_colors) return;
 	float * cdata = (float *)data;
 	float * dst = &m_colors[m_packageStart];
-	for(int i = 0; i < 256; i++)
+	for(int i = 0; i < 256; i++) {
+	    if((m_packageStart + i)/4 == numPix)
+	        return;
 		dst[i] = cdata[i];
+	}
 	m_packageStart += 256;
 }
 
@@ -102,17 +101,29 @@ void ImageView::endBucket()
 	if(!m_colors) return;
 	int r, g, b, a;
 	float *pixels = m_colors;
+	float gray;
 	for (int y = bucketRect[2]; y <= bucketRect[3]; ++y) {
 		uint *scanLine = reinterpret_cast<uint *>(m_image->scanLine(y));
 		scanLine += bucketRect[0];
 		for (int x = bucketRect[0]; x <= bucketRect[1]; ++x) {
-			r = *pixels * 255;
+		    gray = *pixels;
+		    if(gray > 1.f) gray = 1.f;
+			r = gray * 255;
 			pixels++;
-			g = *pixels * 255;
+			
+			gray = *pixels;
+		    if(gray > 1.f) gray = 1.f;
+			g = gray * 255;
 			pixels++;
-			b = *pixels * 255;
+			
+			gray = *pixels;
+		    if(gray > 1.f) gray = 1.f;
+			b = gray * 255;
 			pixels++;
-			a = *pixels * 255;
+			
+			gray = *pixels;
+		    if(gray > 1.f) gray = 1.f;
+			a = gray * 255;
 			pixels++;
 			*scanLine++ = qRgb(r, g, b);
 		}

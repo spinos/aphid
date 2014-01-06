@@ -36,11 +36,25 @@
 #include <ai_drivers.h>
 #include <iostream>
 #include <sstream>
+#include <boost/asio.hpp>
+#include <boost/timer.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
+using boost::asio::ip::tcp;
+#define PACKAGESIZE 1024
+#define NUMFLOATPERPACKAGE 256
 class DisplayDriver
 {
 public:
     DisplayDriver() {}
+    void setChannelNames(std::vector<std::string> channelNames) {
+        m_channels = channelNames;
+    }
+    unsigned numChannels() const {
+        return m_channels.size();
+    }
 private:
+    std::vector<std::string> m_channels;
 };
 
 typedef DisplayDriver* DisplayDriverPtr;
@@ -94,30 +108,21 @@ static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBo
 		std::string namePrefix;
 		if( sst.str() == "RGB" || sst.str() == "RGBA" )
 		{
-			//namePrefix = std::string( name ) + ".";
-			AiMsgInfo("\n\n\n\nfoo driver output name is RGB or RGBA \n\n\n\n");
+			namePrefix = sst.str() + ".";
+			AiMsgInfo( sst.str().c_str());
 		}
-		/*
+		
 		switch( pixelType )
 		{
-			case AI_TYPE_RGB :
-			case AI_TYPE_VECTOR :
-			case AI_TYPE_POINT :
-				channelNames.push_back( namePrefix + "R" );
-				channelNames.push_back( namePrefix + "G" );
-				channelNames.push_back( namePrefix + "B" );
-				break;
 			case AI_TYPE_RGBA :
 				channelNames.push_back( namePrefix + "R" );
 				channelNames.push_back( namePrefix + "G" );
 				channelNames.push_back( namePrefix + "B" );
 				channelNames.push_back( namePrefix + "A" );
 				break;
-			case AI_TYPE_FLOAT :
-				// no need for prefix because it's not a compound type
-				channelNames.push_back( name );
+			default :
 				break;
-		}*/
+		}
 	}
 	
 	sst.str("");
@@ -130,6 +135,10 @@ static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBo
 	
 	sst.str("");
 	sst<<"bucketSize "<<bucketSize;
+	AiMsgInfo(sst.str().c_str());
+	
+	sst.str("");
+	sst<<"nchannels "<<channelNames.size();
 	AiMsgInfo(sst.str().c_str());
 	/*
 	/// \todo Make Convert.h
@@ -145,10 +154,13 @@ static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBo
 		
 	CompoundDataPtr parameters = new CompoundData();
 	ToArnoldConverter::getParameters( node, parameters->writable() );	
-
-	const char *driverType = AiNodeGetStr( node, "driverType" );
+*/
+	//const char *driverType = AiNodeGetStr( node, "driverType" );
 	
 	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
+	*driver = new DisplayDriver;
+	(*driver)->setChannelNames(channelNames);
+	/*
 	try
 	{
 		*driver = IECore::DisplayDriver::create( driverType, cortexDisplayWindow, cortexDataWindow, channelNames, parameters );
@@ -168,18 +180,15 @@ static AtVoid driverPrepareBucket( AtNode *node, AtInt x, AtInt y, AtInt sx, AtI
 static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sampleIterator, AtInt x, AtInt y, AtInt sx, AtInt sy ) 
 {
 	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
-	if( !*driver )
-	{
-		return;
-	}
+	if( !*driver ) return;
+	if((*driver)->numChannels() != 4) return;
 	
 	std::stringstream sst;
-	sst<<"bucketCoornidate "<<x<<" "<<x + sx<<" "<<y<<" "<<y + sy;
+	sst<<"bucketCoornidate "<<x<<" "<<x + sx - 1<<" "<<y<<" "<<y + sy - 1;
 	AiMsgInfo(sst.str().c_str());
 	
-	/*
-	const int numOutputChannels = (*driver)->channelNames().size();
-
+	const int numOutputChannels = (*driver)->numChannels();
+    
 	std::vector<float> interleavedData;
 	interleavedData.resize( sx * sy * numOutputChannels );
 
@@ -204,24 +213,82 @@ static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator
 				break;
 		}
 		
-		for( int c = 0; c < numChannels; c++ )
-		{
-			float *in = (float *)(bucketData) + c;
-			float *out = &(interleavedData[0]) + outChannelOffset;
-			for( int j = 0; j < sy; j++ )
-			{
-				for( int i = 0; i < sx; i++ )
-				{
-					*out = *in;
-					out += numOutputChannels;
-					in += numChannels;
-				}
-			}
-			outChannelOffset += 1;
+		if(numChannels == 4) {
+            for( int c = 0; c < numChannels; c++ )
+            {
+                float *in = (float *)(bucketData) + c;
+                float *out = &(interleavedData[0]) + outChannelOffset;
+                for( int j = 0; j < sy; j++ )
+                {
+                    for( int i = 0; i < sx; i++ )
+                    {
+                        *out = *in;
+                        out += numOutputChannels;
+                        in += numChannels;
+                    }
+                }
+                outChannelOffset += 1;
+            }
+            break;
 		}
-		
+	}
+
+	char dataPackage[PACKAGESIZE];
+        
+    int * rect = (int *)dataPackage;			
+    rect[2] = y;
+    rect[3] = y + sy - 1;
+    rect[0] = x;
+    rect[1] = x + sx - 1;
+    dataPackage[16] = '\n';
+	const unsigned npix = (rect[1] - rect[0] + 1) * (rect[3] - rect[2] + 1);
+    int npackage = npix * 16 / PACKAGESIZE;
+    if((npix * 16) % PACKAGESIZE > 0) npackage++;
+    
+    sst.str("");
+    sst<<"npackage "<<npackage;
+    AiMsgInfo(sst.str().c_str());
+	
+	try {
+        boost::asio::io_service io_service;
+        tcp::resolver resolver(io_service);
+        tcp::resolver::query query(tcp::v4(), "localhost", "7879");
+        tcp::resolver::iterator sockIterator = resolver.resolve(query);
+        tcp::socket s(io_service);
+        s.connect(*sockIterator);
+    
+        boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
+                    
+        boost::array<char, 32> buf;
+        boost::system::error_code error;
+                    
+        size_t reply_length = s.read_some(boost::asio::buffer(buf), error);
+        
+        float *color = (float *)dataPackage;
+        unsigned packageStart = 0;
+        for(int i=0; i < npackage; i++) {
+            for(int i = 0; i < NUMFLOATPERPACKAGE; i++) {
+                if(packageStart + i == npix * 4) break;
+                color[i] = interleavedData[packageStart + i];
+            }
+            packageStart += NUMFLOATPERPACKAGE;
+            boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
+            reply_length = s.read_some(boost::asio::buffer(buf), error);
+        }
+        dataPackage[0] = '\n';
+        boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
+				
+        reply_length = s.read_some(boost::asio::buffer(buf), error);
+
+        s.close();
+    }
+    catch (std::exception& e)
+	{
+		AiMsgInfo(e.what());
 	}
 	
+	
+	/*
 	Box2i bucketBox(
 		V2i( x, y ),
 		V2i( x + sx - 1, y + sy - 1 )
