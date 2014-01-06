@@ -101,7 +101,6 @@ void BaseFeather::computeLength()
 	m_shaftLength = 0.f;
 	for(short i=0; i < m_numSeg; i++)
 		m_shaftLength += m_quilly[i];
-	std::cout<<"sc"<<shaftLength();
 }
 
 float BaseFeather::shaftLength() const

@@ -19,20 +19,14 @@ public:
 	void curl(float val);
 	
 	void computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
-	Vector3F * worldP();
-	Vector3F * segmentOriginWP(short seg);
-	Vector3F * segmentVaneWP(short seg, short side, short idx);
-	Vector3F * segmentVaneWP1(unsigned seg, unsigned end, short side);
-	
-	Vector3F getSegmentOriginWP(short seg) const;
-	Vector3F getSegmentVaneWP(short seg, short side, short idx) const;
+	Vector3F * segmentVaneWP(short seg, unsigned end, short side);
 	
 	void setCollision(CollisionRegion * skin);
 	
 	void setFeatherId(short x);
 	short featherId() const;
 	
-	void getBoundingBox(BoundingBox & box) const;
+	void getBoundingBox(BoundingBox & box);
 	float * angles() const;
 	float bendDirection() const;
 	void verbose();
@@ -66,8 +60,7 @@ private:
 private:
 	CollisionRegion * m_skin;
 	MlRachis * m_rachis;
-    Vector3F * m_worldP;
-	MlVane * m_vane;
+    MlVane * m_vane;
 	unsigned m_numSeparate;
 	float m_fuzzy, m_separateStrength, m_scale;
 	short m_id;

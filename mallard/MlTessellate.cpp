@@ -57,9 +57,9 @@ void MlTessellate::evaluate(MlFeather * feather)
 {
 	unsigned curF = 0;
 	for(short i = 0; i <= feather->numSegment(); i++) {
-		m_cvs[curF] = feather->getSegmentOriginWP(i);
-		m_cvs[curF + 1] = feather->getSegmentVaneWP(i, 0, 2);
-		m_cvs[curF + 2] = feather->getSegmentVaneWP(i, 1, 2);
+		m_cvs[curF] = *(feather->segmentVaneWP(i, 0, 0));
+		m_cvs[curF + 1] = *(feather->segmentVaneWP(i, 3, 0));
+		m_cvs[curF + 2] = *(feather->segmentVaneWP(i, 3, 1));
 		m_uvs[curF] = feather->getSegmentQuillTexcoord(i);
 		m_uvs[curF + 1] = feather->getSegmentVaneTexcoord(i, 0, 2);
 		m_uvs[curF + 2] = feather->getSegmentVaneTexcoord(i, 1, 2);

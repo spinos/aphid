@@ -4,7 +4,7 @@
 #include <CollisionRegion.h>
 #include <AdaptableStripeBuffer.h>
 
-MlFeather::MlFeather() : m_worldP(0)
+MlFeather::MlFeather()
 {
 	m_rachis = new MlRachis;
 	m_vane = new MlVane[2];
@@ -20,7 +20,6 @@ MlFeather::MlFeather() : m_worldP(0)
 
 MlFeather::~MlFeather() 
 {
-	if(m_worldP) delete[] m_worldP;
 	delete m_rachis;
 	delete[] m_vane;
 }
@@ -28,9 +27,6 @@ MlFeather::~MlFeather()
 void MlFeather::createNumSegment(short x)
 {
 	BaseFeather::createNumSegment(x);
-	if(m_worldP) delete[] m_worldP;
-	
-	m_worldP = new Vector3F[(numSegment() + 1) * 7];
 	m_rachis->create(x);
 }
 
@@ -72,9 +68,8 @@ void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot,
 		Matrix33F mat = m_rachis->getSpace(i);
 		mat.multiply(segSpace);
 		
-		*segmentOriginWP(i) = segOrigin;
-		*segmentVaneWP1(i, 0, 0) = segOrigin;
-		*segmentVaneWP1(i, 0, 1) = segOrigin;
+		*segmentVaneWP(i, 0, 0) = segOrigin;
+		*segmentVaneWP(i, 0, 1) = segOrigin;
 		computeVaneWP(segOrigin, mat, i, 0, scale);
 		computeVaneWP(segOrigin, mat, i, 1, scale);
 		
@@ -85,41 +80,15 @@ void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot,
 		segSpace = mat;
 	}
 	
-	*segmentOriginWP(numSeg) = segOrigin;
-	*segmentVaneWP1(numSeg, 0, 0) = segOrigin;
-	*segmentVaneWP1(numSeg, 0, 1) = segOrigin;
+	*segmentVaneWP(numSeg, 0, 0) = segOrigin;
+	*segmentVaneWP(numSeg, 0, 1) = segOrigin;
 	computeVaneWP(segOrigin, segSpace, numSeg, 0, scale);
 	computeVaneWP(segOrigin, segSpace, numSeg, 1, scale);
 }
 
-Vector3F * MlFeather::worldP()
-{
-	return m_worldP;
-}
-
-Vector3F * MlFeather::segmentOriginWP(short seg)
-{
-	return &m_worldP[seg * 7];
-}
-
-Vector3F * MlFeather::segmentVaneWP(short seg, short side, short idx)
-{
-	return &m_worldP[seg * 7 + 1 + side * 3 + idx];
-}
-
-Vector3F * MlFeather::segmentVaneWP1(unsigned seg, unsigned end, short side)
+Vector3F * MlFeather::segmentVaneWP(short seg, unsigned end, short side)
 {
 	return m_vane[side].railCV(seg, end);
-}
-
-Vector3F MlFeather::getSegmentOriginWP(short seg) const
-{
-	return m_worldP[seg * 7];
-}
-
-Vector3F MlFeather::getSegmentVaneWP(short seg, short side, short idx) const
-{
-	return m_worldP[seg * 7 + 1 + side * 3 + idx];
 }
 
 void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale)
@@ -134,8 +103,7 @@ void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, s
 		d = space.transform(d);
 		
 		p += d;
-		*segmentVaneWP(seg, side, i) = p;
-		*segmentVaneWP1(seg, i+1, side) = p;
+		*segmentVaneWP(seg, i+1, side) = p;
 		
 		vane++;
 	}
@@ -174,10 +142,13 @@ void MlFeather::changeNumSegment(int d)
 	setupVane();
 }
 
-void MlFeather::getBoundingBox(BoundingBox & box) const
+void MlFeather::getBoundingBox(BoundingBox & box)
 {
-	for(unsigned i = 0; i < numWorldP(); i++)
-		box.update(m_worldP[i]);
+	
+	for(short i = 0; i <= numSegment(); i++) {
+		box.update(*segmentVaneWP(i, 3, 0));
+		box.update(*segmentVaneWP(i, 1, 0));
+	}
 }
 
 float * MlFeather::angles() const
