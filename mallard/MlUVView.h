@@ -11,7 +11,7 @@
 #include <Base2DView.h>
 #include <FeatherExample.h>
 class MlFeather;
-
+class BaseVane;
 class MlUVView : public Base2DView, public FeatherExample {
 Q_OBJECT
 
@@ -35,6 +35,8 @@ private:
 	bool pickupFeather(const Vector2F & p);
 	void drawFeather(MlFeather * f);
 	void drawControlVectors(MlFeather * f);
+	void drawVaneVectors(BaseVane * vane);
+	void drawBindVectors(MlFeather * f);
 	void drawActiveBound();
 private:
 	float * m_selectedVert;

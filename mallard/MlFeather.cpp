@@ -61,6 +61,7 @@ void MlFeather::curl(float val)
 void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale)
 {
 	m_scale = scale;
+	const float xscale = scale * 32.f;
 	Vector3F segOrigin = oriPos;
 	Matrix33F segSpace = oriRot;
 	const short numSeg = numSegment();
@@ -68,44 +69,33 @@ void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot,
 		Matrix33F mat = m_rachis->getSpace(i);
 		mat.multiply(segSpace);
 		
-		*segmentVaneWP(i, 0, 0) = segOrigin;
-		*segmentVaneWP(i, 0, 1) = segOrigin;
-		computeVaneWP(segOrigin, mat, i, 0, scale);
-		computeVaneWP(segOrigin, mat, i, 1, scale);
-		
+		computeVaneWP(segOrigin, mat, i, xscale);
+
 		Vector3F d(0.f, 0.f, quilly()[i] * scale);
 		d = mat.transform(d);
 		
 		segOrigin += d;
 		segSpace = mat;
 	}
-	
-	*segmentVaneWP(numSeg, 0, 0) = segOrigin;
-	*segmentVaneWP(numSeg, 0, 1) = segOrigin;
-	computeVaneWP(segOrigin, segSpace, numSeg, 0, scale);
-	computeVaneWP(segOrigin, segSpace, numSeg, 1, scale);
 }
 
-Vector3F * MlFeather::segmentVaneWP(short seg, unsigned end, short side)
+Vector3F * MlFeather::segmentVaneWP(short u, short v, short side)
 {
-	return m_vane[side].railCV(seg, end);
+	return m_vane[side].railCV(u, v);
 }
 
-void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale)
+void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, float xscale)
 {
-	Vector3F p = origin;
-	Vector2F * vane = getUvDisplaceAt(seg, side);
-	
-	const float tapper = width() * -.005f;
-	for(short i = 0; i < 3; i++) {
-		Vector3F d(tapper, vane->x, vane->y);
-		d *= scale;
+	short u, v, side;
+	float t;
+	Vector3F objP, d;
+	for(short i=0; i < numBind(seg); i++) {
+		objP = getBind(seg, i, u, v, side, t);
+		d.set(- 0.001f * t, objP.x, objP.y);
+		d *= xscale;
 		d = space.transform(d);
-		
-		p += d;
-		*segmentVaneWP(seg, i+1, side) = p;
-		
-		vane++;
+		d = origin + d;
+		*segmentVaneWP(u, v, side) = d;
 	}
 }
 

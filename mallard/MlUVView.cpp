@@ -15,6 +15,7 @@
 #include <QtGui>
 #include <ToolContext.h>
 #include <zEXRImage.h>
+#include "BaseVane.h"
 
 MlUVView::MlUVView(QWidget *parent) : Base2DView(parent)
 {
@@ -215,41 +216,46 @@ void MlUVView::drawFeather(MlFeather * f)
 
 void MlUVView::drawControlVectors(MlFeather * f)
 {
+	drawVaneVectors(f->uvVane(0));
+	drawVaneVectors(f->uvVane(1));
+}
+
+void MlUVView::drawVaneVectors(BaseVane * vane)
+{
 	BaseDrawer * dr = getDrawer();
-	
-	Vector3F baseP(f->baseUV());
+	for(unsigned j = 0; j <= vane->gridU(); j++) {
+		for(unsigned k = 0; k < vane->gridV(); k++) {
+			Vector3F cv0 = *vane->railCV(j, k) * 32.f;
+			Vector3F cv1 = *vane->railCV(j, k+1) * 32.f;
+			
+			dr->arrow(cv0, cv1);
+		}
+	}
+}
+
+void MlUVView::drawBindVectors(MlFeather * f)
+{
+	BaseDrawer * dr = getDrawer();
+	short u, v, side;
+	float t;
+	const Vector3F baseP(f->baseUV());
 	
 	glPushMatrix();
     Matrix44F s;
 	s.setTranslation(baseP);
 	
 	float * quill = f->getQuilly();
-	Vector3F a, b;
-	Vector2F pv;
-	for(int i=0; i <= f->numSegment(); i++) {
+	Vector3F b;
+	for(short i=0; i < f->numSegment(); i++) {
 	    dr->useSpace(s);
 		
-		const Vector2F * vanes = f->getUvDisplaceAt(i, 0);
-		pv = vanes[0];
-		dr->arrow(Vector3F(0.f, 0.f, 0.f), pv);
-		pv += vanes[1];
-		dr->arrow(pv - vanes[1], pv);
-		pv += vanes[2];
-		dr->arrow(pv - vanes[2], pv);
-	    
-		vanes = f->getUvDisplaceAt(i, 1);
-		pv = vanes[0];
-		dr->arrow(Vector3F(0.f, 0.f, 0.f), pv);
-		pv += vanes[1];
-		dr->arrow(pv - vanes[1], pv);
-		pv += vanes[2];
-		dr->arrow(pv - vanes[2], pv);
-	    
-		if(i < f->numSegment()) {
-			b.set(0.f, quill[i], 0.f);
-			dr->arrow(Vector3F(0.f, 0.f, 0.f), b);
-			s.setTranslation(b);
+		for(short j=0; j < f->numBind(i); j++) {
+			const Vector3F vb = f->getBind(i, j, u, v, side, t);
+			dr->arrow(Vector3F(0.f, 0.f, 0.f), vb * 32.f);
 		}
+		
+		b.set(0.f, quill[i], 0.f);
+		s.setTranslation(b);
 	}
 	glPopMatrix();
 }

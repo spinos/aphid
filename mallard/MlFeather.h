@@ -1,10 +1,10 @@
 #pragma once
-#include "TexturedFeather.h"
+#include "DeformableFeather.h"
 #include <BoundingBox.h>
 class MlRachis;
 class CollisionRegion;
 class MlVane;
-class MlFeather : public TexturedFeather {
+class MlFeather : public DeformableFeather {
 public:
     MlFeather();
     virtual ~MlFeather();
@@ -19,7 +19,7 @@ public:
 	void curl(float val);
 	
 	void computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
-	Vector3F * segmentVaneWP(short seg, unsigned end, short side);
+	Vector3F * segmentVaneWP(short u, short v, short side);
 	
 	void setCollision(CollisionRegion * skin);
 	
@@ -55,7 +55,7 @@ protected:
 	virtual void simpleCreate(int ns = 5);
 	
 private:
-	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, short side, float scale);
+	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, float xscale);
 	void samplePosition(unsigned nu, unsigned nv, int side, float lod);
 private:
 	CollisionRegion * m_skin;
