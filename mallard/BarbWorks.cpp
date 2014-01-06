@@ -136,6 +136,7 @@ void BarbWorks::createBarbBuffer(RenderEngine * engine)
 		nv += f->numStripePoints();
 		
 		m_percentFinished = (float)i/(float)nc;
+		boost::this_thread::interruption_point();
 	}
 	std::cout<<" barb processed in "<<met.elapsed()<<" seconds\n";
 	std::cout<<"n curve "<<nline<<" n p "<<nv<<"\n";

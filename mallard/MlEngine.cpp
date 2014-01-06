@@ -58,6 +58,7 @@ void MlEngine::interruptRender()
 {
 	std::cout<<" interrupted ";
 	m_workingThread.interrupt();
+	m_progressingThread.interrupt();
 }
 
 void MlEngine::testOutput()
@@ -158,5 +159,6 @@ void MlEngine::monitorProgressing(BarbWorks * work)
 		t.wait();
 		std::clog<<" "<<work->percentFinished() * 100<<"% ";
 		if(work->percentFinished() == 1.f) break;
+		boost::this_thread::interruption_point();
 	}
 }
