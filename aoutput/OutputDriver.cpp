@@ -240,14 +240,10 @@ static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator
     rect[3] = y + sy - 1;
     rect[0] = x;
     rect[1] = x + sx - 1;
-    dataPackage[16] = '\n';
+
 	const unsigned npix = (rect[1] - rect[0] + 1) * (rect[3] - rect[2] + 1);
     int npackage = npix * 16 / PACKAGESIZE;
     if((npix * 16) % PACKAGESIZE > 0) npackage++;
-    
-    sst.str("");
-    sst<<"npackage "<<npackage;
-    AiMsgInfo(sst.str().c_str());
 	
 	try {
         boost::asio::io_service io_service;
@@ -257,7 +253,7 @@ static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator
         tcp::socket s(io_service);
         s.connect(*sockIterator);
     
-        boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
+        boost::asio::write(s, boost::asio::buffer(dataPackage, 16));
                     
         boost::array<char, 32> buf;
         boost::system::error_code error;
@@ -281,19 +277,19 @@ static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator
         reply_length = s.read_some(boost::asio::buffer(buf), error);
 
         s.close();
+        //boost::asio::deadline_timer t(io_service);
+        //t.expires_from_now(boost::posix_time::seconds(1));
+		//t.wait();
     }
     catch (std::exception& e)
 	{
 		AiMsgInfo(e.what());
 	}
-	
-	
 	/*
 	Box2i bucketBox(
 		V2i( x, y ),
 		V2i( x + sx - 1, y + sy - 1 )
 	);
-
 	try
 	{
 		(*driver)->imageData( bucketBox, &(interleavedData[0]), interleavedData.size() );

@@ -113,8 +113,7 @@ void MlEngine::testOutput()
 				
 				s.connect(*iterator);
 		
-				dataPackage[16] = '\n';
-				boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
+				boost::asio::write(s, boost::asio::buffer(dataPackage, 16));
 				//std::cout<<"sent    bucket("<<rect[0]<<","<<rect[1]<<","<<rect[2]<<","<<rect[3]<<")\n";
 				
 				boost::array<char, 32> buf;

@@ -49,12 +49,12 @@ void ImageView::resizeEvent(QResizeEvent *)
 
 void ImageView::processRead(const char * data, size_t length)
 {	
-	if(length != 1024) {
+	if(length != 1024 && length != 16) {
 		std::clog<<"unknown data size "<<length<<"\n";
 		return;
 	}
-	
-	if(data[16] == '\n') beginBucket(data);
+
+	if(length == 16) beginBucket(data);
 	else if(data[0] == '\n') endBucket();
 	else processPackage(data);
 }
@@ -89,8 +89,9 @@ void ImageView::processPackage(const char * data)
 	float * cdata = (float *)data;
 	float * dst = &m_colors[m_packageStart];
 	for(int i = 0; i < 256; i++) {
-	    if((m_packageStart + i)/4 == numPix)
+	    if((m_packageStart + i)/4 == numPix) {
 	        return;
+	    }
 		dst[i] = cdata[i];
 	}
 	m_packageStart += 256;
@@ -99,6 +100,8 @@ void ImageView::processPackage(const char * data)
 void ImageView::endBucket()
 {
 	if(!m_colors) return;
+	std::cout<<"end bucket("<<bucketRect[0]<<","<<bucketRect[1]<<","<<bucketRect[2]<<","<<bucketRect[3]<<")\n";
+	
 	int r, g, b, a;
 	float *pixels = m_colors;
 	float gray;
@@ -128,7 +131,6 @@ void ImageView::endBucket()
 			*scanLine++ = qRgb(r, g, b);
 		}
 	}
-	
 	update();
 }
 
