@@ -16,6 +16,7 @@
 #include <ToolContext.h>
 #include <zEXRImage.h>
 #include "BaseVane.h"
+#include "DeformableFeather.h"
 
 MlUVView::MlUVView(QWidget *parent) : Base2DView(parent)
 {
@@ -236,8 +237,6 @@ void MlUVView::drawVaneVectors(BaseVane * vane)
 void MlUVView::drawBindVectors(MlFeather * f)
 {
 	BaseDrawer * dr = getDrawer();
-	short u, v, side;
-	float t;
 	const Vector3F baseP(f->baseUV());
 	
 	glPushMatrix();
@@ -250,8 +249,8 @@ void MlUVView::drawBindVectors(MlFeather * f)
 	    dr->useSpace(s);
 		
 		for(short j=0; j < f->numBind(i); j++) {
-			const Vector3F vb = f->getBind(i, j, u, v, side, t);
-			dr->arrow(Vector3F(0.f, 0.f, 0.f), vb * 32.f);
+			DeformableFeather::BindCoord *bind = f->getBind(i, j);
+			dr->arrow(Vector3F(0.f, 0.f, 0.f), bind->_objP * 32.f);
 		}
 		
 		b.set(0.f, quill[i], 0.f);

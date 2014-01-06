@@ -75,12 +75,7 @@ short DeformableFeather::numBind(short seg) const
 	return m_group[seg]._numBind;
 }
 
-Vector3F DeformableFeather::getBind(short seg, short idx, short & u, short & v, short & side, float & taper) const
+DeformableFeather::BindCoord * DeformableFeather::getBind(short seg, short idx) const
 {
-	BindCoord & coord = m_group[seg]._bind[idx];
-	u = coord._u;
-	v = coord._v;
-	taper = coord._taper;
-	side = coord._rgt;
-	return coord._objP;
+	return &m_group[seg]._bind[idx];
 }

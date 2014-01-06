@@ -86,16 +86,14 @@ Vector3F * MlFeather::segmentVaneWP(short u, short v, short side)
 
 void MlFeather::computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, float xscale)
 {
-	short u, v, side;
-	float t;
-	Vector3F objP, d;
+	Vector3F d;
 	for(short i=0; i < numBind(seg); i++) {
-		objP = getBind(seg, i, u, v, side, t);
-		d.set(- 0.001f * t, objP.x, objP.y);
+		DeformableFeather::BindCoord *bind = getBind(seg, i);
+		d.set(- 0.001f * bind->_taper, bind->_objP.x, bind->_objP.y);
 		d *= xscale;
 		d = space.transform(d);
 		d = origin + d;
-		*segmentVaneWP(u, v, side) = d;
+		*segmentVaneWP(bind->_u,  bind->_v,  bind->_rgt) = d;
 	}
 }
 

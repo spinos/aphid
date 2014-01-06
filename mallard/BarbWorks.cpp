@@ -13,6 +13,9 @@
 #include "MlCalamus.h"
 #include <AdaptableStripeBuffer.h>
 #include <BlockStripeBuffer.h>
+#include <RenderEngine.h>
+#include <boost/thread.hpp>
+#include <boost/timer.hpp>
 BarbWorks::BarbWorks() 
 {
 	m_skin = 0;
@@ -80,9 +83,12 @@ void BarbWorks::closeCache(const std::string & stime)
 	closeEntry("/tang");
 }
 
-void BarbWorks::createBarbBuffer()
+void BarbWorks::createBarbBuffer(RenderEngine * engine)
 {
 	if(!skin()) return;
+	m_percentFinished = 0.f;
+	boost::timer met;
+	met.restart();
 	const unsigned nc = numFeathers();
 	if(nc < 1) return;
 	m_stripes->initialize();
@@ -128,14 +134,23 @@ void BarbWorks::createBarbBuffer()
 		
 		nline += f->numStripe();
 		nv += f->numStripePoints();
+		
+		m_percentFinished = (float)i/(float)nc;
 	}
-	
+	std::cout<<" barb processed in "<<met.elapsed()<<" seconds\n";
 	std::cout<<"n curve "<<nline<<" n p "<<nv<<"\n";
 	std::cout<<"lod range ("<<minLod<<" , "<<maxLod<<")\n";
 	std::cout<<"n blocks "<<m_stripes->numBlocks()<<"\n";
+	m_percentFinished = 1.f;
+	engine->render();
 }
 
 void BarbWorks::clearBarbBuffer()
 {
 	m_stripes->clear();
+}
+
+float BarbWorks::percentFinished() const
+{
+	return m_percentFinished;
 }

@@ -17,15 +17,16 @@ public:
 	MlEngine(BarbWorks * w);
 	virtual ~MlEngine();
 	void setWorks(BarbWorks * w);
+	virtual void preRender();
 	virtual void render();
 	void interruptRender();
 protected:
 
 private:
-	void processBarbs();
 	void testOutput();
-	
+	void monitorProgressing(BarbWorks * work);
 private:
 	boost::thread m_workingThread;
+	boost::thread m_progressingThread;
 	BarbWorks * m_barb;
 };

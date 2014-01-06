@@ -22,7 +22,9 @@ public:
 	
 	BaseCamera * camera() const;
 	
+	virtual void preRender();
 	virtual void render();
+	virtual void postRender();
 protected:
 
 private:

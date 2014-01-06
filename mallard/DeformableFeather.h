@@ -12,24 +12,24 @@
 #include "TexturedFeather.h"
 class DeformableFeather : public TexturedFeather {
 public:
-	DeformableFeather();
-	virtual ~DeformableFeather();
-	virtual void computeTexcoord();
-	
-	short numBind(short seg) const;
-	Vector3F getBind(short seg, short idx, short & u, short & v, short & side, float & taper) const;
-protected:
-
-private:
-	void computeBinding();
-	void bindVane(BaseVane * vane, short rgt);
-private:
 	struct BindCoord {
 		Vector3F _objP;
 		float _taper;
 		short _u, _v, _rgt;
 	};
 	
+	DeformableFeather();
+	virtual ~DeformableFeather();
+	virtual void computeTexcoord();
+	
+	short numBind(short seg) const;
+	BindCoord * getBind(short seg, short idx) const;
+protected:
+
+private:
+	void computeBinding();
+	void bindVane(BaseVane * vane, short rgt);
+private:
 	struct BindGroup {
 		BindGroup() {_bind = 0;}
 		~BindGroup() {
