@@ -11,6 +11,7 @@
 #include "ImageView.h"
 #include <BaseServer.h>
 #include <iostream>
+#include <boost/thread.hpp>
 ImageView::ImageView(QWidget *parent)
     : QWidget(parent), BaseServer(7879)
 {
@@ -49,13 +50,13 @@ void ImageView::resizeEvent(QResizeEvent *)
 
 void ImageView::processRead(const char * data, size_t length)
 {	
-	if(length != 1024 && length != 16) {
+	if(length != 1024 && length != 16 && length != 32) {
 		std::clog<<"unknown data size "<<length<<"\n";
 		return;
 	}
 
 	if(length == 16) beginBucket(data);
-	else if(data[0] == '\n') endBucket();
+	else if(length == 32) endBucket();
 	else processPackage(data);
 }
 
@@ -72,7 +73,7 @@ void ImageView::beginBucket(const char * data)
 	bucketRect[2] = box[2];
 	bucketRect[3] = box[3];
 	
-	std::cout<<"receive bucket("<<bucketRect[0]<<","<<bucketRect[1]<<","<<bucketRect[2]<<","<<bucketRect[3]<<")\n";
+	//std::cout<<"receive bucket("<<bucketRect[0]<<","<<bucketRect[1]<<","<<bucketRect[2]<<","<<bucketRect[3]<<")\n";
 	
 	if(bucketRect[1] >= m_image->width() || bucketRect[3] >= m_image->height()) {
 		std::cout<<" invalid bucket coordinate\n";
@@ -86,7 +87,14 @@ void ImageView::beginBucket(const char * data)
 void ImageView::processPackage(const char * data)
 {
 	if(!m_colors) return;
-	float * cdata = (float *)data;
+
+	boost::thread t(boost::bind(&ImageView::doProcessPackage, this, data));
+	t.join();
+}
+
+void ImageView::doProcessPackage(const char * data)
+{
+    float * cdata = (float *)data;
 	float * dst = &m_colors[m_packageStart];
 	for(int i = 0; i < 256; i++) {
 	    if((m_packageStart + i)/4 == numPix) {
@@ -100,8 +108,8 @@ void ImageView::processPackage(const char * data)
 void ImageView::endBucket()
 {
 	if(!m_colors) return;
-	std::cout<<"end bucket("<<bucketRect[0]<<","<<bucketRect[1]<<","<<bucketRect[2]<<","<<bucketRect[3]<<")\n";
-	
+	std::cout<<"fill bucket("<<bucketRect[0]<<","<<bucketRect[1]<<","<<bucketRect[2]<<","<<bucketRect[3]<<")\n";
+	if(m_packageStart/4 < numPix) std::clog<<"ERROR: buck not closed"<<m_packageStart/4<<" should be "<<numPix<<"\n";
 	int r, g, b, a;
 	float *pixels = m_colors;
 	float gray;

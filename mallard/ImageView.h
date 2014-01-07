@@ -30,6 +30,7 @@ private:
 	void beginBucket(const char * data);
 	void processPackage(const char * data);
 	void endBucket();
+	void doProcessPackage(const char * data);
 private:
 	QImage * m_image;
 	float * m_colors;

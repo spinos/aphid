@@ -156,8 +156,8 @@ void MlEngine::monitorProgressing(BarbWorks * work)
 	for(;;) {
 		t.expires_from_now(boost::posix_time::seconds(5));
 		t.wait();
+		boost::this_thread::interruption_point();
 		std::clog<<" "<<work->percentFinished() * 100<<"% ";
 		if(work->percentFinished() == 1.f) break;
-		boost::this_thread::interruption_point();
 	}
 }

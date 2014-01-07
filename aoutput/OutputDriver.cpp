@@ -271,9 +271,8 @@ static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator
             boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
             reply_length = s.read_some(boost::asio::buffer(buf), error);
         }
-        dataPackage[0] = '\n';
-        boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
-				
+        
+        boost::asio::write(s, boost::asio::buffer(dataPackage, 32));		
         reply_length = s.read_some(boost::asio::buffer(buf), error);
 
         s.close();
