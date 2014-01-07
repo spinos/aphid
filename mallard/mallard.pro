@@ -16,7 +16,6 @@ HEADERS       =	../shared/ContextIconFrame.h \
                 ../fit/SingleModelView.h \
                 ToolBox.h \
                 glwidget.h \
-                MlFeather.h \
 				MlCalamus.h \
 				MlCalamusArray.h \
 				MlDrawer.h \
@@ -43,6 +42,8 @@ HEADERS       =	../shared/ContextIconFrame.h \
 	FeatherExample.h \
     BaseFeather.h \
 	TexturedFeather.h \
+    DeformableFeather.h \
+    MlFeather.h \
     BarbControl.h \
 	RenderEdit.h \
     ImageView.h \
@@ -60,7 +61,6 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
                 ../fit/SingleModelView.cpp \
                 ToolBox.cpp \
                 glwidget.cpp \
-                MlFeather.cpp \
 				MlCalamus.cpp \
 				MlCalamusArray.cpp \
 				MlDrawer.cpp \
@@ -87,6 +87,8 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 	FeatherExample.cpp \
     BaseFeather.cpp \
 	TexturedFeather.cpp \
+        DeformableFeather.cpp \
+        MlFeather.cpp \
     BarbControl.cpp \
 	RenderEdit.cpp \
     ImageView.cpp \

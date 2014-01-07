@@ -123,8 +123,8 @@ void Window::receiveToolAction(int a)
 			glWidget->bakeFrames();
 			break;
 		case ToolContext::LaunchRender:
+		    m_renderEdit->show();
 			glWidget->testRender();
-			m_renderEdit->show();
 			break;	
 		default:
 			break;

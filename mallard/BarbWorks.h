@@ -12,6 +12,7 @@
 #include <LODFn.h>
 class MlSkin;
 class MlCalamus;
+class RenderEngine;
 class BlockStripeBuffer;
 class BarbWorks : public MlCache, public LODFn {
 public:
@@ -19,8 +20,9 @@ public:
 	virtual ~BarbWorks();
 	void setSkin(MlSkin * skin);
 	MlSkin * skin() const;
-	void createBarbBuffer();
+	void createBarbBuffer(RenderEngine * engine);
 	void clearBarbBuffer();
+	float percentFinished() const;
 protected:
 	unsigned numFeathers() const;
 	char isTimeCached(const std::string & stime);
@@ -31,4 +33,5 @@ protected:
 private:
 	MlSkin * m_skin;
 	BlockStripeBuffer * m_stripes;
+	float m_percentFinished;
 };

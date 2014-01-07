@@ -774,7 +774,7 @@ void GLWidget::testRender()
 	emit renderResChanged(sz);
 	prepareRender();
 	m_engine->setCamera(getCamera());
-	m_engine->render();
+	m_engine->preRender();
 }
 
 void GLWidget::receiveCancelRender()

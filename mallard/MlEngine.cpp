@@ -39,30 +39,26 @@ void MlEngine::setWorks(BarbWorks * w)
 	m_barb = w;
 }
 
-void MlEngine::render() 
+void MlEngine::preRender() 
 {
 	interruptRender();
-	processBarbs();
-	
+	m_barb->setEyePosition(camera()->eyePosition());
+	m_barb->setFieldOfView(camera()->fieldOfView());
+	m_barb->clearBarbBuffer();
+	m_workingThread = boost::thread(boost::bind(&BarbWorks::createBarbBuffer, this->m_barb, this));
+	m_progressingThread = boost::thread(boost::bind(&MlEngine::monitorProgressing, this, this->m_barb));
+}
+
+void MlEngine::render()
+{
 	m_workingThread = boost::thread(boost::bind(&MlEngine::testOutput, this));
 }
 
 void MlEngine::interruptRender()
 {
-	//std::cout<<"treadId"<<m_workingThread.get_id();
-	//std::cout<<"render cancelled";
+	std::cout<<" interrupted ";
 	m_workingThread.interrupt();
-}
-
-void MlEngine::processBarbs()
-{
-	boost::timer met;
-	met.restart();
-	m_barb->setEyePosition(camera()->eyePosition());
-	m_barb->setFieldOfView(camera()->fieldOfView());
-	m_barb->clearBarbBuffer();
-	m_barb->createBarbBuffer();
-	std::cout<<" barb processed in "<<met.elapsed()<<" seconds\n";
+	m_progressingThread.interrupt();
 }
 
 void MlEngine::testOutput()
@@ -142,8 +138,6 @@ void MlEngine::testOutput()
 				//t.wait();
 				
 				boost::this_thread::interruption_point();
-				
-				
 			}
 		}
 		
@@ -153,4 +147,17 @@ void MlEngine::testOutput()
 		std::cerr << "Exception: " << e.what() << "\n";
 	}
 	
+}
+
+void MlEngine::monitorProgressing(BarbWorks * work)
+{
+	boost::asio::io_service io_service;
+	boost::asio::deadline_timer t(io_service);
+	for(;;) {
+		t.expires_from_now(boost::posix_time::seconds(5));
+		t.wait();
+		std::clog<<" "<<work->percentFinished() * 100<<"% ";
+		if(work->percentFinished() == 1.f) break;
+		boost::this_thread::interruption_point();
+	}
 }

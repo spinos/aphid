@@ -38,4 +38,6 @@ BaseCamera * RenderEngine::camera() const
 	return m_camera;
 }
 
+void RenderEngine::preRender() {}
 void RenderEngine::render() {}
+void RenderEngine::postRender() {}
