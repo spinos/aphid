@@ -9,7 +9,7 @@
 
 #include "BaseFeather.h"
 
-BaseFeather::BaseFeather() : m_quilly(0), m_uvDisplace(0), m_st(0)
+BaseFeather::BaseFeather() : m_quilly(0), m_uvDisplace(0), m_st(0), m_segementNormals(0)
 {
 	m_uv.set(4.f, 4.f);
 }
@@ -19,6 +19,7 @@ BaseFeather::~BaseFeather()
 	if(m_quilly) delete[] m_quilly;
     if(m_uvDisplace) delete[] m_uvDisplace;
 	if(m_st) delete[] m_st;
+	if(m_segementNormals) delete[] m_segementNormals;
 }
 
 void BaseFeather::createNumSegment(short x)
@@ -26,10 +27,12 @@ void BaseFeather::createNumSegment(short x)
 	if(m_quilly) delete[] m_quilly;
     if(m_uvDisplace) delete[] m_uvDisplace;
 	if(m_st) delete[] m_st;
+	if(m_segementNormals) delete[] m_segementNormals;
     m_numSeg = x;
     m_quilly = new float[m_numSeg];
     m_uvDisplace = new Vector2F[(m_numSeg + 1) * 6];
 	m_st = new Vector2F[(numSegment() + 1) * 7];
+	m_segementNormals = new Vector3F[numSegment()];
 }
 
 short BaseFeather::numSegment() const
@@ -340,4 +343,9 @@ float* BaseFeather::selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F 
 	}
 	
 	return r;
+}
+
+Vector3F * BaseFeather::normal(unsigned seg)
+{
+	return &m_segementNormals[seg];
 }

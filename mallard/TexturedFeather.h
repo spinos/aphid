@@ -39,7 +39,7 @@ public:
 protected:
 
 private:
-	unsigned m_resShaft, m_resBarb;
 	BaseVane * m_vane;
 	AdaptableStripeBuffer * m_stripe;
+	unsigned m_resShaft, m_resBarb;
 };

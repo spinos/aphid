@@ -1,4 +1,5 @@
 #pragma once
+#include <AllMath.h>
 #include "DeformableFeather.h"
 #include <BoundingBox.h>
 class MlRachis;
@@ -52,7 +53,6 @@ public:
 	void samplePosition(float lod);
 	float scaledShaftLength() const;
 	
-	Vector3F * normal(unsigned seg);
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	
@@ -62,8 +62,7 @@ private:
 private:
 	CollisionRegion * m_skin;
 	MlRachis * m_rachis;
-    MlVane * m_vane;
-	Vector3F * m_normals;
+	MlVane * m_vane;
 	unsigned m_numSeparate;
 	float m_fuzzy, m_separateStrength, m_scale;
 	short m_id;

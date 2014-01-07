@@ -13,6 +13,7 @@
 
 MlFeatherCollection::MlFeatherCollection()
 {
+	std::cout<<" featherCollection ";
     initializeFeatherExample();
 }
 

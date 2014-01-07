@@ -47,7 +47,7 @@ public:
 	unsigned numWorldP() const;
 
 	float* selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp);
-	
+	Vector3F * normal(unsigned seg);
 protected:	
 	virtual void simpleCreate(int ns);
 
@@ -60,6 +60,7 @@ private:
 	Vector2F * m_uvDisplace;
 	float *m_quilly;
 	Vector2F * m_st;
+	Vector3F * m_segementNormals;
 	float m_shaftLength;
 	short m_numSeg;
 };
