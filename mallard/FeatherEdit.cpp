@@ -55,6 +55,9 @@ void FeatherEdit::receiveToolAction(int a)
 			m_view->chooseImageBackground(fname);
 			emit textureLoaded(tr(fname.c_str()));
 			break;
+		case ToolContext::ChangeFeatherType:
+			m_view->changeSelectedFeatherType();
+			break;
 		default:
 			break;
 	}

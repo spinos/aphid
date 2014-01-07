@@ -9,7 +9,7 @@
 
 #include "BaseFeather.h"
 
-BaseFeather::BaseFeather() : m_quilly(0), m_uvDisplace(0), m_st(0), m_segementNormals(0)
+BaseFeather::BaseFeather() : m_quilly(0), m_uvDisplace(0), m_st(0), m_segementNormals(0), m_type(0)
 {
 	m_uv.set(4.f, 4.f);
 }
@@ -348,4 +348,14 @@ float* BaseFeather::selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F 
 Vector3F * BaseFeather::normal(unsigned seg)
 {
 	return &m_segementNormals[seg];
+}
+
+void BaseFeather::setType(short x)
+{
+	m_type = x % 2;
+}
+
+short BaseFeather::type() const
+{
+	return m_type;
 }

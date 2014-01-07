@@ -40,7 +40,8 @@ public:
 		BakeAnimation = 14,
 		AddSkeletonPose = 15,
 		SaveSkeletonPose = 16,
-		LaunchRender = 17
+		LaunchRender = 17,
+		ChangeFeatherType = 18
     };
     
     ToolContext();

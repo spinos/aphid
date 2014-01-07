@@ -39,6 +39,10 @@ public:
 protected:
 
 private:
+	void createVanes();
+	void shapeVanes();
+
+private:
 	BaseVane * m_vane;
 	AdaptableStripeBuffer * m_stripe;
 	unsigned m_resShaft, m_resBarb;

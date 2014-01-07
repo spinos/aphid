@@ -28,6 +28,7 @@ public:
     void changeSelectedFeatherNSegment(int d);
 	void chooseImageBackground(std::string & name);
 	void loadImageBackground(const std::string & name);
+	void changeSelectedFeatherType();
 signals:
 	void selectionChanged();
 	void shapeChanged();

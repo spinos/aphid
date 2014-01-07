@@ -48,6 +48,8 @@ public:
 
 	float* selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp);
 	Vector3F * normal(unsigned seg);
+	void setType(short x);
+	short type() const;
 protected:	
 	virtual void simpleCreate(int ns);
 
@@ -62,5 +64,5 @@ private:
 	Vector2F * m_st;
 	Vector3F * m_segementNormals;
 	float m_shaftLength;
-	short m_numSeg;
+	short m_numSeg, m_type;
 };

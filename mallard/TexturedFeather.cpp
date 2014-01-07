@@ -31,20 +31,8 @@ void TexturedFeather::computeTexcoord()
 {
 	BaseFeather::computeTexcoord();
 	
-	if(m_vane[0].gridU() != numSegment())
-		m_vane[0].create(numSegment(), 3);
-	if(m_vane[1].gridU() != numSegment())
-		m_vane[1].create(numSegment(), 3);
-	
-	const short numSeg = numSegment();
-	for(short i = 0; i <= numSeg; i++) {	
-		*m_vane[0].railCV(i, 0) = Vector3F(*segmentQuillTexcoord(i));
-		*m_vane[1].railCV(i, 0) = Vector3F(*segmentQuillTexcoord(i));
-		for(short j = 0; j < 3; j++) {
-			*m_vane[0].railCV(i, j + 1) = Vector3F(*segmentVaneTexcoord(i, 0, j));
-			*m_vane[1].railCV(i, j + 1) = Vector3F(*segmentVaneTexcoord(i, 1, j));
-		}
-	}
+	createVanes();
+	shapeVanes();
 
 	m_vane[0].computeKnots();
 	m_vane[1].computeKnots();
@@ -53,13 +41,58 @@ void TexturedFeather::computeTexcoord()
 void TexturedFeather::translateUV(const Vector2F & d)
 {
 	BaseFeather::translateUV(d);
+	shapeVanes();
+}
+
+void TexturedFeather::createVanes()
+{
+	if(type() == 0) {
+		m_vane[0].create(numSegment(), 3);
+		m_vane[1].create(numSegment(), 3);
+	}
+	else {
+		m_vane[0].create(3, numSegment());
+		m_vane[1].create(3, numSegment());
+	}
+}
+
+void TexturedFeather::shapeVanes()
+{
 	const short numSeg = numSegment();
-	for(short i = 0; i <= numSeg; i++) {	
-		*m_vane[0].railCV(i, 0) = Vector3F(*segmentQuillTexcoord(i));
-		*m_vane[1].railCV(i, 0) = Vector3F(*segmentQuillTexcoord(i));
-		for(short j = 0; j < 3; j++) {
-			*m_vane[0].railCV(i, j + 1) = Vector3F(*segmentVaneTexcoord(i, 0, j));
-			*m_vane[1].railCV(i, j + 1) = Vector3F(*segmentVaneTexcoord(i, 1, j));
+	if(type() == 0) {
+		for(short i = 0; i <= numSeg; i++) {	
+			*m_vane[0].railCV(i, 0) = Vector3F(*segmentQuillTexcoord(i));
+			*m_vane[1].railCV(i, 0) = Vector3F(*segmentQuillTexcoord(i));
+			for(short j = 0; j < 3; j++) {
+				*m_vane[0].railCV(i, j + 1) = Vector3F(*segmentVaneTexcoord(i, 0, j));
+				*m_vane[1].railCV(i, j + 1) = Vector3F(*segmentVaneTexcoord(i, 1, j));
+			}
+		}
+	}
+	else {
+		Vector3F lo(*segmentQuillTexcoord(0));
+		Vector3F hi(*segmentQuillTexcoord(1));
+		
+		hi -= (hi - lo) * .35f;
+		Vector3F dv = lo - hi;
+
+		*m_vane[0].railCV(0, 0) = hi;
+		*m_vane[0].railCV(1, 0) = hi + dv * .33f;
+		*m_vane[0].railCV(2, 0) = hi + dv * .67f;
+		*m_vane[0].railCV(3, 0) = lo;
+		
+		*m_vane[1].railCV(0, 0) = hi;
+		*m_vane[1].railCV(1, 0) = hi + dv * .33f;
+		*m_vane[1].railCV(2, 0) = hi + dv * .67f;
+		*m_vane[1].railCV(3, 0) = lo;
+		
+		for(short i = 1; i <= numSeg; i++) {	
+			*m_vane[0].railCV(0, i) = Vector3F(*segmentQuillTexcoord(i));
+			*m_vane[1].railCV(0, i) = Vector3F(*segmentQuillTexcoord(i));
+			for(short j = 0; j < 3; j++) {
+				*m_vane[0].railCV(j + 1, i) = Vector3F(*segmentVaneTexcoord(i, 0, j));
+				*m_vane[1].railCV(j + 1, i) = Vector3F(*segmentVaneTexcoord(i, 1, j));
+			}
 		}
 	}
 }

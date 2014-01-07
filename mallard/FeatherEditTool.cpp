@@ -106,6 +106,12 @@ void FeatherEditTool::createAction()
 	rmFeather->setIconIndex(0);
 	rmFeather->setAction(RemoveFeatherExample);
 	
+	ActionIconFrame * changeType = new ActionIconFrame(this);
+	changeType->addIconFile(":downy.png");
+	changeType->addIconFile(":downyActive.png");
+	changeType->setIconIndex(0);
+	changeType->setAction(ChangeFeatherType);
+	
 	ActionIconFrame * increaseNSeg = new ActionIconFrame(this);
 	increaseNSeg->addIconFile(":increaseNSeg.png");
 	increaseNSeg->addIconFile(":increaseNSegActive.png");
@@ -128,5 +134,6 @@ void FeatherEditTool::createAction()
 	m_actionFrames.push_back(rmFeather);
 	m_actionFrames.push_back(increaseNSeg);
 	m_actionFrames.push_back(decreaseNSeg);
+	m_actionFrames.push_back(changeType);
 	m_actionFrames.push_back(loadImage);
 }
