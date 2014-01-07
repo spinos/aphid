@@ -8,10 +8,10 @@
  */
 
 #pragma once
-#include <RenderEngine.h>
+#include "AnorldFunc.h"
 #include <boost/thread.hpp>
 class BarbWorks;
-class MlEngine : public RenderEngine {
+class MlEngine : public AnorldFunc {
 public:
 	MlEngine();
 	MlEngine(BarbWorks * w);
@@ -23,6 +23,7 @@ public:
 protected:
 
 private:
+    void fineOutput();
 	void testOutput();
 	void monitorProgressing(BarbWorks * work);
 private:

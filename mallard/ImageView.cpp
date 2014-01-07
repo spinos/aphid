@@ -12,6 +12,7 @@
 #include <BaseServer.h>
 #include <iostream>
 #include <boost/thread.hpp>
+
 ImageView::ImageView(QWidget *parent)
     : QWidget(parent), BaseServer(7879)
 {
@@ -21,7 +22,7 @@ ImageView::ImageView(QWidget *parent)
       //      this, SLOT(updatePixmap(QImage)));
 
 	setMinimumSize(400, 300);
-    m_image = new QImage(400, 300, QImage::Format_RGB32);
+    m_image = new QImage(400, 300, QImage::Format_RGB888);
 	BaseServer::start();
 	//QTimer *timer = new QTimer(this);
 	//connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
@@ -32,7 +33,7 @@ ImageView::ImageView(QWidget *parent)
 void ImageView::paintEvent(QPaintEvent * /* event */)
 {
     QPainter painter(this);
-	painter.fillRect(rect(), Qt::gray);
+	painter.fillRect(rect(), Qt::black);
     /*
     if (pixmap.isNull()) {
         painter.setPen(Qt::white);
@@ -87,9 +88,7 @@ void ImageView::beginBucket(const char * data)
 void ImageView::processPackage(const char * data)
 {
 	if(!m_colors) return;
-
-	boost::thread t(boost::bind(&ImageView::doProcessPackage, this, data));
-	t.join();
+	doProcessPackage(data);
 }
 
 void ImageView::doProcessPackage(const char * data)
@@ -98,6 +97,7 @@ void ImageView::doProcessPackage(const char * data)
 	float * dst = &m_colors[m_packageStart];
 	for(int i = 0; i < 256; i++) {
 	    if((m_packageStart + i)/4 == numPix) {
+	        m_packageStart += i;
 	        return;
 	    }
 		dst[i] = cdata[i];
@@ -107,17 +107,24 @@ void ImageView::doProcessPackage(const char * data)
 
 void ImageView::endBucket()
 {
-	if(!m_colors) return;
+    if(!m_colors) return;
+    boost::thread t(boost::bind(&ImageView::doEndBucket, this));
+    t.join();
+}
+
+void ImageView::doEndBucket()
+{
 	std::cout<<"fill bucket("<<bucketRect[0]<<","<<bucketRect[1]<<","<<bucketRect[2]<<","<<bucketRect[3]<<")\n";
 	if(m_packageStart/4 < numPix) std::clog<<"ERROR: buck not closed"<<m_packageStart/4<<" should be "<<numPix<<"\n";
-	int r, g, b, a;
+	uchar r, g, b, a;
 	float *pixels = m_colors;
 	float gray;
 	for (int y = bucketRect[2]; y <= bucketRect[3]; ++y) {
-		uint *scanLine = reinterpret_cast<uint *>(m_image->scanLine(y));
-		scanLine += bucketRect[0];
+		uchar *scanLine = reinterpret_cast<uchar *>(m_image->scanLine(y));
+		scanLine += bucketRect[0] * 3;
 		for (int x = bucketRect[0]; x <= bucketRect[1]; ++x) {
 		    gray = *pixels;
+		    
 		    if(gray > 1.f) gray = 1.f;
 			r = gray * 255;
 			pixels++;
@@ -132,11 +139,14 @@ void ImageView::endBucket()
 			b = gray * 255;
 			pixels++;
 			
-			gray = *pixels;
-		    if(gray > 1.f) gray = 1.f;
-			a = gray * 255;
 			pixels++;
-			*scanLine++ = qRgb(r, g, b);
+			
+			*scanLine = r;
+			scanLine++;
+			*scanLine = g;
+			scanLine++;
+			*scanLine = b;
+			scanLine++;
 		}
 	}
 	update();
@@ -144,7 +154,8 @@ void ImageView::endBucket()
 
 void ImageView::resizeImage(QSize s)
 {
-	if(m_image) delete m_image;
- 	m_image = new QImage(s, QImage::Format_RGB32);
+    if(m_image) delete m_image;
+ 	m_image = new QImage(s, QImage::Format_RGB888);
+ 	m_image->fill(0);
 	update();
 }

@@ -14,8 +14,8 @@ public:
 	RenderEngine();
 	virtual ~RenderEngine();
 	
-	void setCamera(BaseCamera * camera);
-	void setResolution(unsigned resx, unsigned resy);
+	virtual void setCamera(BaseCamera * camera);
+	virtual void setResolution(unsigned resx, unsigned resy);
 	
 	unsigned resolutionX() const;
 	unsigned resolutionY() const;

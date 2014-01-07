@@ -9,6 +9,7 @@
 #pragma once
 #include <BaseServer.h>
 #include <QWidget>
+#include <boost/thread/mutex.hpp>
 class Qimage;
 class BaseServer;
 
@@ -31,8 +32,9 @@ private:
 	void processPackage(const char * data);
 	void endBucket();
 	void doProcessPackage(const char * data);
+	void doEndBucket();
 private:
-	QImage * m_image;
+    QImage * m_image;
 	float * m_colors;
 	int bucketRect[4];
 	int m_packageStart;

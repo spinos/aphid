@@ -51,7 +51,12 @@ void MlEngine::preRender()
 
 void MlEngine::render()
 {
+    AnorldFunc::render();
+#ifdef WIN32
+    m_workingThread = boost::thread(boost::bind(&MlEngine::fineOutput, this));
+#else
 	m_workingThread = boost::thread(boost::bind(&MlEngine::testOutput, this));
+#endif
 }
 
 void MlEngine::interruptRender()
@@ -59,6 +64,59 @@ void MlEngine::interruptRender()
 	std::cout<<" interrupted ";
 	m_workingThread.interrupt();
 	m_progressingThread.interrupt();
+}
+
+void MlEngine::fineOutput()
+{
+    ptime tt(second_clock::local_time());
+	std::cout<<"fine output begins at "<<to_simple_string(tt)<<"\n";
+	AiBegin();
+    loadPlugin("./driver_foo.dll");
+    
+    AtNode* options = AiNode("options");
+    AtArray* outputs  = AiArrayAllocate(1, 1, AI_TYPE_STRING);
+    AiArraySetStr(outputs, 0, "RGBA RGBA output:gaussian_filter output/foo");
+    AiNodeSetArray(options, "outputs", outputs);
+    
+    AiNodeSetInt(options, "xres", resolutionX());
+    AiNodeSetInt(options, "yres", resolutionY());
+    AiNodeSetInt(options, "AA_samples", 3);
+	
+    AtNode* driver = AiNode("driver_foo");
+    AiNodeSetStr(driver, "name", "output/foo");
+    
+    AtNode * acamera = AiNode("persp_camera");
+    AiNodeSetStr(acamera, "name", "/obj/cam");
+    AiNodeSetFlt(acamera, "fov", camera()->fieldOfView());
+    AiNodeSetFlt(acamera, "near_clip", camera()->nearClipPlane());
+    AiNodeSetFlt(acamera, "far_clip", camera()->farClipPlane());
+    
+    AtMatrix matrix;
+    setMatrix(camera()->fSpace, matrix);
+	AiNodeSetMatrix(acamera, "matrix", matrix);
+
+	AiNodeSetPtr(options, "camera", acamera);
+    
+	AtNode * filter = AiNode("gaussian_filter");
+    AiNodeSetStr(filter, "name", "output:gaussian_filter");
+
+    AtNode * standard = AiNode("standard");
+    AiNodeSetStr(standard, "name", "/shop/standard1");
+    AiNodeSetRGB(standard, "Kd_color", 1, 0, 0);
+
+    AtNode * sphere = AiNode("sphere");
+    AiNodeSetPtr(sphere, "shader", standard);
+    
+    AtNode * light = AiNode("point_light");
+    AiNodeSetStr(light, "name", "/obj/lit");
+    AiNodeSetFlt(light, "intensity", 1024);
+    AiM4Identity(matrix);
+    matrix[3][0] = -10.f;
+    AiNodeSetMatrix(light, "matrix", matrix);
+
+    logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
+    
+    AiEnd();
 }
 
 void MlEngine::testOutput()
@@ -128,9 +186,7 @@ void MlEngine::testOutput()
 					reply_length = s.read_some(boost::asio::buffer(buf), error);
 				}
 				
-				dataPackage[0] = '\n';
-				boost::asio::write(s, boost::asio::buffer(dataPackage, PACKAGESIZE));
-				
+				boost::asio::write(s, boost::asio::buffer(dataPackage, 32));
 				reply_length = s.read_some(boost::asio::buffer(buf), error);
 
 				s.close();

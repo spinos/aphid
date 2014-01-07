@@ -143,6 +143,7 @@ void BarbWorks::createBarbBuffer(RenderEngine * engine)
 	std::cout<<"lod range ("<<minLod<<" , "<<maxLod<<")\n";
 	std::cout<<"n blocks "<<m_stripes->numBlocks()<<"\n";
 	m_percentFinished = 1.f;
+	std::cout<<"start render";
 	engine->render();
 }
 

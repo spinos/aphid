@@ -67,28 +67,36 @@ int main(int argc, char *argv[])
 {
     AiBegin();
     
+    AiLoadPlugins("./driver_foo.dll");
+    
     AtNode* options = AiNode("options");
     AtArray* outputs  = AiArrayAllocate(1, 1, AI_TYPE_STRING);
-    AiArraySetStr(outputs, 0, "RGBA RGBA output:gaussian_filter output:exr");
+    AiArraySetStr(outputs, 0, "RGBA RGBA output:gaussian_filter output/foo");
     AiNodeSetArray(options, "outputs", outputs);
     
-    AiNodeSetInt(options, "xres", 320);
-    AiNodeSetInt(options, "yres", 240);
+    AiNodeSetInt(options, "xres", 400);
+    AiNodeSetInt(options, "yres", 300);
     AiNodeSetInt(options, "AA_samples", 3);
 	
-    AtNode* driver = AiNode("driver_display");
-    AiNodeSetStr(driver, "name", "output:exr");
-    AiNodeSetStr(driver, "filename", "output.exr");
-    AiNodeSetFlt(driver, "gamma", 2.2f);
+    AtNode* driver = AiNode("driver_foo");
+    AiNodeSetStr(driver, "name", "output/foo");
+    //AiNodeSetStr(driver, "filename", "output.exr");
+    //AiNodeSetFlt(driver, "gamma", 2.2f);
     
     AtNode * camera = AiNode("persp_camera");
     AiNodeSetStr(camera, "name", "/obj/cam");
-    AiNodeSetFlt(camera, "fov", 54.f);
+    AiNodeSetFlt(camera, "fov", 35.f);
     AiNodeSetFlt(camera, "near_clip", 0.100000001);
-    AiNodeSetFlt(camera, "far_clip", 10000);
+    AiNodeSetFlt(camera, "far_clip", 1000000);
     AtMatrix matrix;
     AiM4Identity(matrix);
-    matrix[3][2] = 10.f;
+    matrix[0][0] = 0.f;
+    matrix[0][1] = 0.f;
+    matrix[0][2] = 1.f;
+    matrix[2][0] = -1.f;
+    matrix[2][1] = 0.f;
+    matrix[2][2] = 0.f;
+    matrix[3][0] = -10.f;
 	AiNodeSetMatrix(camera, "matrix", matrix);
 	
     AiNodeGetMatrix(camera, "matrix", matrix);
@@ -108,7 +116,7 @@ int main(int argc, char *argv[])
     AtNode * light = AiNode("point_light");
     AiNodeSetStr(light, "name", "/obj/lit");
     AiNodeSetFlt(light, "intensity", 1024);
-     matrix[3][0] = -10.f;
+    matrix[3][0] = -10.f;
     AiNodeSetMatrix(light, "matrix", matrix);
 
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));

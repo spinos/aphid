@@ -48,6 +48,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 	RenderEdit.h \
     ImageView.h \
 	MlEngine.h \
+	AnorldFunc.h \
 	BarbWorks.h \
                 window.h
                 
@@ -94,6 +95,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
     ImageView.cpp \
 	MlEngine.cpp \
 	BarbWorks.cpp \
+	AnorldFunc.cpp \
     window.cpp \
                 main.cpp
                 
@@ -117,11 +119,13 @@ win32 {
                     D:/ofl/shared \
                    D:/usr/hdf5/include \
                    D:/usr/libxml2x64/include \
-                   D:/usr/eigen2
+                   D:/usr/eigen2 \
+                   D:/usr/arnoldSDK/arnold4014/include
     QMAKE_LIBDIR += D:/usr/boost_1_51_0/stage/lib \
                     D:/usr/local/openEXR/lib
     LIBS += -LD:/usr/libxml2x64/lib -llibxml2 \
-            -LD:/usr/hdf5/lib -lszip
+            -LD:/usr/hdf5/lib -lszip \
+            -LD:/usr/arnoldSDK/arnold4014/lib -lai
     DEFINES += OPENEXR_DLL NDEBUG NOMINMAX _WIN32_WINDOWS
     CONFIG += console
 }
