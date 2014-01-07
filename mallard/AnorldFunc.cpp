@@ -16,9 +16,11 @@ void AnorldFunc::render()
 
 void AnorldFunc::loadPlugin(const char * fileName)
 {
+#ifdef WIN32
     AiLoadPlugins(fileName);
+#endif
 }
-
+#ifdef WIN32
 void AnorldFunc::setMatrix(const Matrix44F & src, AtMatrix & dst) const
 {
     for(int i = 0; i < 4; i++)
@@ -85,3 +87,4 @@ void AnorldFunc::logRenderError(int status)
 			break;
 	}
 }
+#endif

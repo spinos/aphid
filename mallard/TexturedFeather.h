@@ -20,6 +20,8 @@ public:
 	virtual void translateUV(const Vector2F & d);
 	
 	BaseVane * uvVane(short side) const;
+	Vector3F * uvVaneCoord(short u, short v, short side);
+	
 	AdaptableStripeBuffer * stripe();
 	static ZEXRImage ColorTextureFile;
 	

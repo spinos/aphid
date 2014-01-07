@@ -308,16 +308,6 @@ Vector2F * BaseFeather::segmentVaneTexcoord(short seg, short side, short idx)
 	return &m_st[seg * 7 + 1 + side * 3 + idx];
 }
 
-Vector2F BaseFeather::getSegmentQuillTexcoord(short seg) const
-{
-	return m_st[seg * 7];
-}
-
-Vector2F BaseFeather::getSegmentVaneTexcoord(short seg, short side, short idx) const
-{
-	return m_st[seg * 7 + 1 + side * 3 + idx];
-}
-
 float* BaseFeather::selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp)
 {
 	float * r = 0;

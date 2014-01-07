@@ -69,6 +69,11 @@ BaseVane * TexturedFeather::uvVane(short side) const
 	return &m_vane[side];
 }
 
+Vector3F * TexturedFeather::uvVaneCoord(short u, short v, short side)
+{
+	return m_vane[side].railCV(u, v);
+}
+
 void TexturedFeather::sampleColor(unsigned gridU, unsigned gridV, Vector3F * dst)
 {
 	if(!ColorTextureFile.isOpened()) {

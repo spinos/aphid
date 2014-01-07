@@ -16,18 +16,22 @@ MlFeather::MlFeather()
 	setSeparateStrength(0.f);
 	setFuzzy(0.f);
 	m_scale = 1.f;
+	m_normals = 0;
 }
 
 MlFeather::~MlFeather() 
 {
 	delete m_rachis;
 	delete[] m_vane;
+	if(m_normals) delete[] m_normals;
 }
 
 void MlFeather::createNumSegment(short x)
 {
 	BaseFeather::createNumSegment(x);
 	m_rachis->create(x);
+	if(m_normals) delete[] m_normals;
+	m_normals = new Vector3F[x];
 }
 
 void MlFeather::setupVane()
@@ -68,6 +72,8 @@ void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot,
 	for(short i = 0; i < numSeg; i++) {
 		Matrix33F mat = m_rachis->getSpace(i);
 		mat.multiply(segSpace);
+		
+		m_normals[i].set(mat.M(0, 0), mat.M(0, 1), mat.M(0, 2));
 		
 		computeVaneWP(segOrigin, mat, i, xscale);
 
@@ -297,4 +303,9 @@ void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 float MlFeather::scaledShaftLength() const
 {
 	return m_scale * shaftLength();
+}
+
+Vector3F * MlFeather::normal(unsigned seg)
+{
+	return &m_normals[seg];
 }

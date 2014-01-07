@@ -70,6 +70,7 @@ void MlEngine::fineOutput()
 {
     ptime tt(second_clock::local_time());
 	std::cout<<"fine output begins at "<<to_simple_string(tt)<<"\n";
+#ifdef WIN32
 	AiBegin();
     loadPlugin("./driver_foo.dll");
     
@@ -117,6 +118,7 @@ void MlEngine::fineOutput()
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
     
     AiEnd();
+#endif
 }
 
 void MlEngine::testOutput()

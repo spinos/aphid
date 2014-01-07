@@ -38,12 +38,9 @@ public:
 	Vector2F baseUV() const;
 	void setBaseUV(const Vector2F & d);
 	
-	Vector2F * texcoord();
 	Vector2F * segmentQuillTexcoord(short seg);
 	Vector2F * segmentVaneTexcoord(short seg, short side, short idx);
-	Vector2F getSegmentQuillTexcoord(short seg) const;
-	Vector2F getSegmentVaneTexcoord(short seg, short side, short idx) const;
-	
+
 	void computeBounding();
 	
 	unsigned numVaneVertices() const;
@@ -53,7 +50,10 @@ public:
 	
 protected:	
 	virtual void simpleCreate(int ns);
-	
+
+private:
+	Vector2F * texcoord();
+		
 private:
 	BoundingRectangle m_brect;
 	Vector2F m_uv;
