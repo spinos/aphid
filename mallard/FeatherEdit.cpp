@@ -56,7 +56,7 @@ void FeatherEdit::receiveToolAction(int a)
 			emit textureLoaded(tr(fname.c_str()));
 			break;
 		case ToolContext::ChangeFeatherType:
-			m_view->changeSelectedFeatherType();
+			//m_view->changeSelectedFeatherType();
 			break;
 		default:
 			break;

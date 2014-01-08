@@ -166,3 +166,8 @@ AdaptableStripeBuffer * BarbWorks::block(unsigned idx) const
 {
     return m_stripes->block(idx);
 }
+
+void BarbWorks::clearBlock(unsigned idx)
+{
+    m_stripes->clearBlock(idx);
+}

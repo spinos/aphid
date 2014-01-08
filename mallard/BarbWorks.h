@@ -26,6 +26,7 @@ public:
 	float percentFinished() const;
 	unsigned numBlocks() const;
 	AdaptableStripeBuffer * block(unsigned idx) const;
+	void clearBlock(unsigned idx);
 protected:
 	unsigned numFeathers() const;
 	char isTimeCached(const std::string & stime);
