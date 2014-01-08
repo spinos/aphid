@@ -139,11 +139,11 @@ void TexturedFeather::sampleColor(unsigned gridU, unsigned gridV, Vector3F * dst
 
 void TexturedFeather::sampleColor(float lod)
 {
-	m_stripe->create(m_resShaft * m_vane[0].gridU() * 2, m_resBarb + 1 + 4);
+	m_stripe->create(m_resShaft * m_vane[0].gridU() * 2, m_resBarb + 1);
 
-	const unsigned nu = m_vane[0].gridU() * (2 + (resShaft() - 2) * lod);
-	const unsigned nv = 3 + (m_resBarb - 3) * lod;
-	m_stripe->begin();
+	unsigned nu, nv;
+	computeLODGrid(lod, nu, nv);
+	stripe()->begin();
 	
 	sampleColor(nu, nv, 0);
 	sampleColor(nu, nv, 1);
@@ -155,41 +155,22 @@ void TexturedFeather::sampleColor(unsigned nu, unsigned nv, int side)
 	const float dv = 1.f/(float)nv;
 
 	for(unsigned i = 0; i < nu; i++) {
-		*m_stripe->currentNumCvs() = nv + 1 + 4;
+		*m_stripe->currentNumCvs() = nv + 1;
 		
 		Vector3F * coord = m_stripe->currentPos();
 		Vector3F * col = m_stripe->currentCol();
-		m_vane[side].setU(du*i);
 		
-		for(unsigned j = 0; j < 2; j++) {
-            if(!ColorTextureFile.isOpened()) {
-                col[j].set(1.f, 1.f, 1.f);
-            }
-            else {
-                m_vane[side].pointOnVane(0.f, coord[j]);
-                ColorTextureFile.sample(coord[j].x, coord[j].y, 3, (float *)&col[j]);
-            }
-        }
+		m_vane[side].setU(du*i);
 			
 		for(unsigned j = 0; j <= nv; j++) {
 			if(!ColorTextureFile.isOpened()) {
-				col[j + 2].set(1.f, 1.f, 1.f);
+				col[j].set(1.f, 1.f, 1.f);
 			}
 			else {
-				m_vane[side].pointOnVane(dv * j, coord[j + 2]);
-				ColorTextureFile.sample(coord[j + 2].x, coord[j + 2].y, 3, (float *)&col[j + 2]);
+				m_vane[side].pointOnVane(dv * j, coord[j]);
+				ColorTextureFile.sample(coord[j].x, coord[j].y, 3, (float *)&col[j]);
 			}
 		}
-		
-		for(unsigned j = 0; j < 2; j++) {
-            if(!ColorTextureFile.isOpened()) {
-                col[nv + j + 2].set(1.f, 1.f, 1.f);
-            }
-            else {
-                m_vane[side].pointOnVane(1.f, coord[nv + j + 2]);
-                ColorTextureFile.sample(coord[nv + j + 2].x, coord[nv + j + 2].y, 3, (float *)&col[nv + j + 2]);
-            }
-        }
 		
 		m_stripe->next();
 	}
@@ -242,4 +223,10 @@ Vector3F * TexturedFeather::patchWingUV(short seg, short side)
 {
 	if(type() == 0) return m_vane[side].railCV(seg, 3);
 	return m_vane[side].railCV(3, seg);
+}
+
+void TexturedFeather::computeLODGrid(float lod, unsigned & u, unsigned & v)
+{
+	u = m_vane[0].gridU() * (2 + (resShaft() - 2) * lod);
+	v = 3 + (resBarb() - 3) * lod;
 }

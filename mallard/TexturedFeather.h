@@ -40,8 +40,9 @@ public:
 	
 	Vector3F * patchCenterUV(short seg);
 	Vector3F * patchWingUV(short seg, short side);
+	
 protected:
-
+	void computeLODGrid(float lod, unsigned & u, unsigned & v);
 private:
 	void shapeVanes();
 

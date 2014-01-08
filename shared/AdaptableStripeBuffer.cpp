@@ -72,8 +72,7 @@ unsigned AdaptableStripeBuffer::numStripe() const
 
 unsigned AdaptableStripeBuffer::numPoints() const
 {
-    if(m_useNumStripe < 1) return 0;
-	return m_numCvs[m_useNumStripe - 1] + m_currentStripe;
+    return m_currentStripe;
 }
 
 char AdaptableStripeBuffer::canContain(unsigned x) const

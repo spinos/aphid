@@ -1074,7 +1074,7 @@ void BaseDrawer::stripes(AdaptableStripeBuffer * data, const Vector3F & eyeDirec
 	Vector3F seg, nseg, straggle, q, q0, q1;
 	glBegin(GL_QUADS);
 	for(unsigned i = 0; i < ns; i++) {
-		for(unsigned j = 1; j < ncv[i] - 2; j++) {
+		for(unsigned j = 0; j < ncv[i] - 1; j++) {
 			seg = pos[j+1] - pos[j];
 			nseg = seg.normal();
 			straggle = nseg.cross(eyeDirection);
@@ -1082,7 +1082,7 @@ void BaseDrawer::stripes(AdaptableStripeBuffer * data, const Vector3F & eyeDirec
 			
 			glColor3fv((float *)&col[j]);
 			
-			if(j< 2) {
+			if(j< 1) {
 				q = pos[j] - straggle * w[j];
 				glVertex3fv((float *)&q);
 			

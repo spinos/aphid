@@ -254,8 +254,8 @@ void MlFeather::computeNoise()
 
 void MlFeather::samplePosition(float lod)
 {
-	const unsigned nu = m_vane[0].gridU() * (2 + (resShaft() - 2) * lod);
-	const unsigned nv = 3 + (resBarb() - 3) * lod;
+	unsigned nu, nv;
+	computeLODGrid(lod, nu, nv);
 	stripe()->begin();
 	
 	samplePosition(nu, nv, 0, lod);
@@ -264,7 +264,9 @@ void MlFeather::samplePosition(float lod)
 
 void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 {
-	float rootWidth = m_scale * shaftLength() / (float)nu * .9f;
+	float rootWidth = m_scale * shaftLength() * .9f;
+	if(type() == 0) rootWidth /= (float)nu;
+	else rootWidth /= (float)nv;
 	float tipWidth = rootWidth * 0.3f;
 	if(type() > 0) {
 		rootWidth /= numSegment();
@@ -274,8 +276,9 @@ void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 	const float du = 1.f/(float)nu;
 	const float dv = 1.f/(float)nv;
 	float shrinking, tapering = 1.f;
+	
 	for(unsigned i = 0; i < nu; i++) {
-		*stripe()->currentNumCvs() = nv + 1 + 4;
+		*stripe()->currentNumCvs() = nv + 1;
 		
 		Vector3F * coord = stripe()->currentPos();
 		float * w = stripe()->currentWidth();
@@ -284,22 +287,15 @@ void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 
 		m_vane[side].setU(du*i);
 		
-		m_vane[side].pointOnVane(0.f, coord[0]);
-		w[0] = rootWidth * .37f;
-		m_vane[side].pointOnVane(0.f, coord[1]);
-		w[1] = rootWidth * .37f;
 		for(unsigned j = 0; j <= nv; j++) {
-			m_vane[side].pointOnVane(dv * j, coord[j + 1]);
+			m_vane[side].pointOnVane(dv * j, coord[j]);
 			shrinking = (float)j / (float)nv;
-			w[j + 2] = (rootWidth * (1.f - shrinking) + tipWidth * shrinking) * tapering;
-			w[j + 2] *= .37f;
+			w[j] = (rootWidth * (1.f - shrinking) + tipWidth * shrinking) * tapering;
+			w[j] *= .37f;
 		}
-		m_vane[side].pointOnVane(1.f, coord[nv + 2]);
-		w[nv + 2] = tipWidth * .37f;
-		m_vane[side].pointOnVane(1.f, coord[nv + 3]);
-		w[nv + 3] = tipWidth * .37f;
 		
 		m_vane[side].modifyLength(du*i, nv + 2, coord, lod);
+		
 		stripe()->next();
 	}
 }

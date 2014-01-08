@@ -128,6 +128,8 @@ void MlEngine::testOutput()
 {
 	if(!m_barb) return;
 	
+	translateCurves();
+	
 	ptime tt(second_clock::local_time());
 	std::cout<<"test output begins at "<<to_simple_string(tt)<<"\n";
 	
@@ -235,8 +237,11 @@ void MlEngine::translateCurves()
 #include <sstream>
 void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 {
+	const unsigned ns = src->numStripe();
+	const unsigned np = src->numPoints();
+#ifdef WIN32
     AtNode *curveNode = AiNode("curves");
-    std::stringstream sst;
+	std::stringstream sst;
     sst.str("");
     sst<<"/obj/curve"<<rand()%19820;
     AiNodeSetStr(curveNode, "name", sst.str().c_str());
@@ -245,17 +250,17 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
     AiNodeSetInt(curveNode, "sidedness", 2);
     AiNodeSetFlt(curveNode, "min_pixel_width", .1f);
     //AiNodeSetInt(curveNode, "max_subdivs", 3);
-    const unsigned ns = src->numStripe();
     AtArray* counts = AiArrayAllocate(ns, 1, AI_TYPE_UINT);
-    
+#endif    
     unsigned * ncv = src->numCvs();
-    unsigned np = 0;
+    unsigned npt = 0;
 	for(unsigned i = 0; i < ns; i++) {
+#ifdef WIN32
 	    AiArraySetUInt(counts, i, ncv[i]);
-	    np += ncv[i];
+#endif
+	    npt += ncv[i];
 	}
-	
-    //const unsigned np = src->numPoints();
+#ifdef WIN32
     AtArray* points = AiArrayAllocate(np, 1, AI_TYPE_POINT);
     AtArray* radius = AiArrayAllocate(np, 1, AI_TYPE_FLOAT);
 	
@@ -286,11 +291,10 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
         }
 	}
 	
-	std::clog<<" ap "<<aw<<"\n";
-	
 	AiNodeSetArray(curveNode, "num_points", counts);
 	AiNodeSetArray(curveNode, "points", points);
 	AiNodeSetArray(curveNode, "radius", radius);
 	
 	std::clog<<sst.str()<<" n curves "<<ns<<" n points "<<np<<"\n";
+#endif
 }
