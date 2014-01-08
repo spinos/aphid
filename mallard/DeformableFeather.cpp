@@ -25,6 +25,11 @@ void DeformableFeather::computeTexcoord()
 	computeBinding();
 }
 
+void DeformableFeather::createVanes()
+{
+	TexturedFeather::createVanes();
+}
+
 void DeformableFeather::computeBinding()
 {
 	if(m_group) delete[] m_group;

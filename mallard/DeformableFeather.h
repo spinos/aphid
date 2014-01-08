@@ -21,6 +21,7 @@ public:
 	DeformableFeather();
 	virtual ~DeformableFeather();
 	virtual void computeTexcoord();
+	virtual void createVanes();
 	
 	short numBind(short seg) const;
 	BindCoord * getBind(short seg, short idx) const;

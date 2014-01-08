@@ -30,17 +30,11 @@ void MlFeather::createNumSegment(short x)
 	m_rachis->create(x);
 }
 
-void MlFeather::setupVane()
+void MlFeather::createVanes()
 {
-	m_vane[0].create(numSegment(), 3);
-	m_vane[1].create(numSegment(), 3);
-	Vector3F oriP(4.f, 0.f, 4.f);
-	Matrix33F oriR; oriR.fill(Vector3F::ZAxis, Vector3F::XAxis, Vector3F::YAxis);
-	float sc = 1.f;
-	m_rachis->reset();
-	computeWorldP(oriP, oriR, sc);
-	m_vane[0].computeKnots();
-	m_vane[1].computeKnots();
+	DeformableFeather::createVanes();
+	m_vane[0].copy(*uvVane(0));
+	m_vane[1].copy(*uvVane(1));
 }
 
 void MlFeather::bend()
@@ -117,7 +111,6 @@ short MlFeather::featherId() const
 void MlFeather::simpleCreate(int ns)
 {
 	BaseFeather::simpleCreate(ns);
-	setupVane();
 }
 
 void MlFeather::computeLength()
@@ -129,7 +122,6 @@ void MlFeather::computeLength()
 void MlFeather::changeNumSegment(int d)
 {
 	BaseFeather::changeNumSegment(d);
-	setupVane();
 }
 
 void MlFeather::getBoundingBox(BoundingBox & box)
@@ -272,8 +264,13 @@ void MlFeather::samplePosition(float lod)
 
 void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 {
-	const float rootWidth = m_scale * shaftLength() / (float)nu * .9f;
-	const float tipWidth = rootWidth * 0.3f;
+	float rootWidth = m_scale * shaftLength() / (float)nu * .9f;
+	float tipWidth = rootWidth * 0.3f;
+	if(type() > 0) {
+		rootWidth /= numSegment();
+		tipWidth = rootWidth * 0.9f;
+	}
+	
 	const float du = 1.f/(float)nu;
 	const float dv = 1.f/(float)nv;
 	float shrinking, tapering = 1.f;

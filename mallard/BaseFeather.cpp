@@ -179,62 +179,118 @@ void BaseFeather::simpleCreate(int ns)
 {
     createNumSegment(ns);
 	
-    float * quill = quilly();
-	int i;
-	for(i = 0; i < ns; i++) {
-		if(i < ns - 2)
-			quill[i] = 3.f;
-		else if(i < ns - 1)
-			quill[i] = 1.7f;
-		else
-			quill[i] = .8f;
-    }
-	
-	Vector2F * vanesR;
-	Vector2F * vanesL;
-	for(i = 0; i <= ns; i++) {
-		vanesR = uvDisplaceAt(i, 0);
-		vanesL = uvDisplaceAt(i, 1);
-		
-		if(i < ns - 2) {
-			vanesR[0].set(.9f, .8f);
-			vanesR[1].set(.8f, 1.1f);
-			vanesR[2].set(.2f, 1.3f);
-			
-			vanesL[0].set(-.9f, .8f);
-			vanesL[1].set(-.8f, 1.1f);
-			vanesL[2].set(-.2f, 1.3f);
-		}
-		else if(i < ns - 1) {
-			vanesR[0].set(.6f, .6f);
-			vanesR[1].set(.4f, .5f);
-			vanesR[2].set(.05f, .6f);
-			
-			vanesL[0].set(-.6f, .6f);
-			vanesL[1].set(-.4f, .5f);
-			vanesL[2].set(-.05f, .6f);
-		}
-		else if(i < ns) {
-			vanesR[0].set(.3f, .3f);
-			vanesR[1].set(.2f, .3f);
-			vanesR[2].set(0.f, .4f);
-			
-			vanesL[0].set(-.3f, .3f);
-			vanesL[1].set(-.2f, .3f);
-			vanesL[2].set(0.f, .4f);
-		}
-		else {
-			vanesR[0].set(0.f, .2f);
-			vanesR[1].set(0.f, .1f);
-			vanesR[2].set(0.f, .1f);
-			
-			vanesL[0].set(0.f, .2f);
-			vanesL[1].set(0.f, .1f);
-			vanesL[2].set(0.f, .1f);
-		}
-	}
+	presetQuill();
+    presetBarb();
 	
 	computeTexcoord();
+}
+
+void BaseFeather::presetQuill()
+{
+	float * quill = quilly();
+	int i;
+	if(type() == 0) {
+		for(i = 0; i < numSegment(); i++) {
+			if(i < numSegment() - 2)
+				quill[i] = 3.f;
+			else if(i < numSegment() - 1)
+				quill[i] = 1.7f;
+			else
+				quill[i] = .8f;
+		}
+	}
+	else {
+		for(i = 0; i < numSegment(); i++) {
+			if(i < 1)
+				quill[i] = 2.f;
+			else
+				quill[i] = 1.f;
+		}
+	}
+}
+
+void BaseFeather::presetBarb()
+{
+	const int ns = numSegment();
+	Vector2F * vanesR;
+	Vector2F * vanesL;
+	if(type() == 0) {
+		for(int i = 0; i <= ns; i++) {
+			vanesR = uvDisplaceAt(i, 0);
+			vanesL = uvDisplaceAt(i, 1);
+			
+			if(i < ns - 2) {
+				vanesR[0].set(.9f, .8f);
+				vanesR[1].set(.8f, 1.1f);
+				vanesR[2].set(.2f, 1.3f);
+				
+				vanesL[0].set(-.9f, .8f);
+				vanesL[1].set(-.8f, 1.1f);
+				vanesL[2].set(-.2f, 1.3f);
+			}
+			else if(i < ns - 1) {
+				vanesR[0].set(.6f, .6f);
+				vanesR[1].set(.4f, .5f);
+				vanesR[2].set(.05f, .6f);
+				
+				vanesL[0].set(-.6f, .6f);
+				vanesL[1].set(-.4f, .5f);
+				vanesL[2].set(-.05f, .6f);
+			}
+			else if(i < ns) {
+				vanesR[0].set(.3f, .3f);
+				vanesR[1].set(.2f, .3f);
+				vanesR[2].set(0.f, .4f);
+				
+				vanesL[0].set(-.3f, .3f);
+				vanesL[1].set(-.2f, .3f);
+				vanesL[2].set(0.f, .4f);
+			}
+			else {
+				vanesR[0].set(0.f, .2f);
+				vanesR[1].set(0.f, .1f);
+				vanesR[2].set(0.f, .1f);
+				
+				vanesL[0].set(0.f, .2f);
+				vanesL[1].set(0.f, .1f);
+				vanesL[2].set(0.f, .1f);
+			}
+		}
+	}
+	else {
+		for(int i = 0; i <= ns; i++) {
+			vanesR = uvDisplaceAt(i, 0);
+			vanesL = uvDisplaceAt(i, 1);
+			
+			if(i < 1) {
+				vanesR[0].set(.5f, 0.f);
+				vanesR[1].set(.5f, 0.f);
+				vanesR[2].set(.5f, 0.f);
+				
+				vanesL[0].set(-.5f, 0.f);
+				vanesL[1].set(-.5f, 0.f);
+				vanesL[2].set(-.5f, 0.f);
+			}
+			else if(i < 2) {
+				vanesR[0].set(.5f, -.1f);
+				vanesR[1].set(.5f, -.5f);
+				vanesR[2].set(.5f, -.7f);
+				
+				vanesL[0].set(-.5f, -.1f);
+				vanesL[1].set(-.5f, -.5f);
+				vanesL[2].set(-.5f, -.7f);
+			}
+			else {
+				vanesR[0].set(.5f, -.1f);
+				vanesR[1].set(.5f, -.3f);
+				vanesR[2].set(.5f, -.5f);
+				
+				vanesL[0].set(-.5f, -.1f);
+				vanesL[1].set(-.5f, -.3f);
+				vanesL[2].set(-.5f, -.5f);
+			}
+		}
+	}
 }
 
 void BaseFeather::changeNumSegment(int d)
@@ -353,6 +409,7 @@ Vector3F * BaseFeather::normal(unsigned seg)
 void BaseFeather::setType(short x)
 {
 	m_type = x % 2;
+	simpleCreate(numSegment());
 }
 
 short BaseFeather::type() const

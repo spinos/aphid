@@ -18,6 +18,7 @@ public:
 	virtual ~TexturedFeather();
 	virtual void computeTexcoord();
 	virtual void translateUV(const Vector2F & d);
+	virtual void createVanes();
 	
 	BaseVane * uvVane(short side) const;
 	Vector3F * uvVaneCoord(short u, short v, short side);
@@ -39,7 +40,6 @@ public:
 protected:
 
 private:
-	void createVanes();
 	void shapeVanes();
 
 private:

@@ -40,8 +40,7 @@ BezierCurve * BaseVane::profile(unsigned idx) const
 
 void BaseVane::computeKnots()
 {
-	for(unsigned i=0; i <= m_gridV; i++)
-         m_rails[i].computeKnots();
+	for(unsigned i=0; i <= m_gridV; i++) m_rails[i].computeKnots();
 }
 
 void BaseVane::setU(float u)
@@ -80,4 +79,17 @@ BezierCurve * BaseVane::profile()
 BezierCurve * BaseVane::rails()
 {
 	return m_rails;
+}
+
+void BaseVane::copy(BaseVane & another)
+{
+	const unsigned nu = another.gridU();
+	const unsigned nv = another.gridV();
+	create(nu, nv);
+	for(unsigned i = 0; i <= nu; i++) {
+		for(unsigned j = 0; j <=nv; j++) {
+			*railCV(i, j) = *(another.railCV(i, j));
+		}
+	}	
+	computeKnots();
 }

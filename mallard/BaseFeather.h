@@ -55,7 +55,8 @@ protected:
 
 private:
 	Vector2F * texcoord();
-		
+	void presetQuill();
+	void presetBarb();
 private:
 	BoundingRectangle m_brect;
 	Vector2F m_uv;

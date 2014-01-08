@@ -124,7 +124,22 @@ void MlUVView::drawFeather(MlFeather * f)
 {
 	BaseDrawer * dr = getDrawer();
 	
+	const unsigned nu = f->uvVane(0)->gridU() * 3;
+	const float du = 1.f / nu;
+	
+	glPushMatrix();
+	glScalef(32.f, 32.f, 32.f);
+	for(unsigned i=0; i <= nu; i++) {
+		f->uvVane(0)->setU(du * i);
+		dr->smoothCurve(*f->uvVane(0)->profile(), 2);
+		f->uvVane(1)->setU(du * i);
+		dr->smoothCurve(*f->uvVane(1)->profile(), 2);
+	}
+	glPopMatrix();
+	return;
+/*	
 	Vector3F baseP(f->baseUV());
+	
 	
 	glPushMatrix();
     Matrix44F s;
@@ -212,13 +227,46 @@ void MlUVView::drawFeather(MlFeather * f)
 		dr->smoothCurve(vaneRC, 4);
 	}
 
-    glPopMatrix();
+    glPopMatrix();*/
 }
 
 void MlUVView::drawControlVectors(MlFeather * f)
 {
-	drawVaneVectors(f->uvVane(0));
-	drawVaneVectors(f->uvVane(1));
+	Vector3F baseP(f->baseUV());
+	BaseDrawer * dr = getDrawer();
+	
+	glPushMatrix();
+    Matrix44F s;
+	s.setTranslation(baseP);
+	
+	float * quill = f->getQuilly();
+	Vector3F b, a;
+	Vector2F *d;
+	for(short i=0; i <= f->numSegment(); i++) {
+	    dr->useSpace(s);
+		
+		a.setZero();
+		d = f->uvDisplaceAt(i, 0);
+		for(short j = 0; j < 3; j++) {
+			b = d[j];
+			dr->arrow(a, a + b);
+			a += b;
+		}
+		
+		a.setZero();
+		d = f->uvDisplaceAt(i, 1);
+		for(short j = 0; j < 3; j++) {
+			b = d[j];
+			dr->arrow(a, a + b);
+			a += b;
+		}
+		
+		a.setZero();
+		b.set(0.f, quill[i], 0.f);
+		dr->arrow(a, b);
+		s.setTranslation(b);
+	}
+	glPopMatrix();
 }
 
 void MlUVView::drawVaneVectors(BaseVane * vane)
@@ -340,4 +388,5 @@ void MlUVView::changeSelectedFeatherType()
 	
 	f->setType(f->type() + 1);
 	emit shapeChanged();
+	update();
 }

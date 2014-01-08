@@ -30,12 +30,7 @@ TexturedFeather::~TexturedFeather()
 void TexturedFeather::computeTexcoord()
 {
 	BaseFeather::computeTexcoord();
-	
 	createVanes();
-	shapeVanes();
-
-	m_vane[0].computeKnots();
-	m_vane[1].computeKnots();
 }
 
 void TexturedFeather::translateUV(const Vector2F & d)
@@ -54,6 +49,9 @@ void TexturedFeather::createVanes()
 		m_vane[0].create(3, numSegment());
 		m_vane[1].create(3, numSegment());
 	}
+	shapeVanes();
+	m_vane[0].computeKnots();
+	m_vane[1].computeKnots();
 }
 
 void TexturedFeather::shapeVanes()

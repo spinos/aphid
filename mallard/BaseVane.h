@@ -26,6 +26,8 @@ public:
 	
 	BezierCurve * profile();
 	BezierCurve * rails();
+	
+	void copy(BaseVane & another);
 private:
     BezierCurve m_profile;
     BezierCurve * m_rails;

@@ -12,9 +12,8 @@ public:
     virtual void createNumSegment(short x);
 	virtual void changeNumSegment(int d);
 	virtual void computeLength();
-	
-	void setupVane();
-	
+	virtual void createVanes();
+
 	void bend();
 	void bendAt(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
 	void curl(float val);
