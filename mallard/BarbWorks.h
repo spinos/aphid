@@ -13,6 +13,7 @@
 class MlSkin;
 class MlCalamus;
 class RenderEngine;
+class AdaptableStripeBuffer;
 class BlockStripeBuffer;
 class BarbWorks : public MlCache, public LODFn {
 public:
@@ -23,6 +24,8 @@ public:
 	void createBarbBuffer(RenderEngine * engine);
 	void clearBarbBuffer();
 	float percentFinished() const;
+	unsigned numBlocks() const;
+	AdaptableStripeBuffer * block(unsigned idx) const;
 protected:
 	unsigned numFeathers() const;
 	char isTimeCached(const std::string & stime);

@@ -13,6 +13,7 @@
 #include <boost/asio.hpp>
 #include <boost/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <AdaptableStripeBuffer.h>
 
 using namespace boost::posix_time;
 using boost::asio::ip::tcp;
@@ -113,6 +114,8 @@ void MlEngine::fineOutput()
     AiM4Identity(matrix);
     matrix[3][0] = -10.f;
     AiNodeSetMatrix(light, "matrix", matrix);
+    
+    translateCurves();
 
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
     
@@ -216,4 +219,18 @@ void MlEngine::monitorProgressing(BarbWorks * work)
 		std::clog<<" "<<work->percentFinished() * 100<<"% ";
 		if(work->percentFinished() == 1.f) break;
 	}
+}
+
+void MlEngine::translateCurves()
+{
+    const unsigned n = m_barb->numBlocks();
+    if(n < 1) return;
+    for(unsigned i = n - 1; i >= 0; i--) {
+        translateBlock(m_barb->block(i));
+    }
+}
+
+void MlEngine::translateBlock(AdaptableStripeBuffer * src)
+{
+    
 }
