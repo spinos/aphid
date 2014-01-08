@@ -331,3 +331,13 @@ void MlUVView::loadImageBackground(const std::string & name)
 	update();
 	emit shapeChanged();
 }
+
+void MlUVView::changeSelectedFeatherType()
+{
+	if(!FeatherLibrary) return;
+	MlFeather * f = FeatherLibrary->selectedFeatherExample();
+	if(!f) return;
+	
+	f->setType(f->type() + 1);
+	emit shapeChanged();
+}

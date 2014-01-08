@@ -56,27 +56,29 @@ void MlTessellate::createIndices(MlFeather * feather)
 void MlTessellate::evaluate(MlFeather * feather)
 {
 	unsigned curF = 0;
+	Vector3F uvc;
 	for(short i = 0; i <= feather->numSegment(); i++) {
 		m_cvs[curF] = *(feather->segmentVaneWP(i, 0, 0));
 		m_cvs[curF + 1] = *(feather->segmentVaneWP(i, 3, 0));
 		m_cvs[curF + 2] = *(feather->segmentVaneWP(i, 3, 1));
-		m_uvs[curF] = feather->getSegmentQuillTexcoord(i);
-		m_uvs[curF + 1] = feather->getSegmentVaneTexcoord(i, 0, 2);
-		m_uvs[curF + 2] = feather->getSegmentVaneTexcoord(i, 1, 2);
+		uvc = *(feather->uvVaneCoord(i, 0, 0));
+		m_uvs[curF].set(uvc.x, uvc.y); 
+		uvc = *(feather->uvVaneCoord(i, 3, 0));
+		m_uvs[curF + 1].set(uvc.x, uvc.y); 
+		uvc = *(feather->uvVaneCoord(i, 3, 1));
+		m_uvs[curF + 2].set(uvc.x, uvc.y);
 		curF += 3;
 	}
 	curF = 0;
 	Vector3F N;
 	for(short i = 0; i < feather->numSegment(); i++) {
-		N = Vector3F(m_cvs[curF + 1], m_cvs[curF]).cross(Vector3F(m_cvs[curF], m_cvs[curF + 3])) + Vector3F(m_cvs[curF], m_cvs[curF+3]).cross(Vector3F(m_cvs[curF], m_cvs[curF + 2]));
-		m_normals[curF] = N.normal();
-		N = Vector3F(m_cvs[curF+1], m_cvs[curF + 1 + 3]).cross(Vector3F(m_cvs[curF+1], m_cvs[curF]));
-		m_normals[curF+1] = N.normal();
-		N = Vector3F(m_cvs[curF+2], m_cvs[curF]).cross(Vector3F(m_cvs[curF+2], m_cvs[curF + 2 + 3]));
-		m_normals[curF+2] = N.normal();
+		N = *feather->normal(i);
+		m_normals[curF] = N;
+		m_normals[curF+1] = N;
+		m_normals[curF+2] = N;
 		curF += 3;
 	}
-	m_normals[curF] = m_normals[curF-3];
-	m_normals[curF+1] = m_normals[curF-2];
-	m_normals[curF+2] = m_normals[curF-1];
+	m_normals[curF] = N;
+	m_normals[curF+1] = N;
+	m_normals[curF+2] = N;
 }

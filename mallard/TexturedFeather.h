@@ -20,6 +20,8 @@ public:
 	virtual void translateUV(const Vector2F & d);
 	
 	BaseVane * uvVane(short side) const;
+	Vector3F * uvVaneCoord(short u, short v, short side);
+	
 	AdaptableStripeBuffer * stripe();
 	static ZEXRImage ColorTextureFile;
 	
@@ -37,7 +39,11 @@ public:
 protected:
 
 private:
-	unsigned m_resShaft, m_resBarb;
+	void createVanes();
+	void shapeVanes();
+
+private:
 	BaseVane * m_vane;
 	AdaptableStripeBuffer * m_stripe;
+	unsigned m_resShaft, m_resBarb;
 };

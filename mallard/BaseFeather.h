@@ -38,28 +38,31 @@ public:
 	Vector2F baseUV() const;
 	void setBaseUV(const Vector2F & d);
 	
-	Vector2F * texcoord();
 	Vector2F * segmentQuillTexcoord(short seg);
 	Vector2F * segmentVaneTexcoord(short seg, short side, short idx);
-	Vector2F getSegmentQuillTexcoord(short seg) const;
-	Vector2F getSegmentVaneTexcoord(short seg, short side, short idx) const;
-	
+
 	void computeBounding();
 	
 	unsigned numVaneVertices() const;
 	unsigned numWorldP() const;
 
 	float* selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp);
-	
+	Vector3F * normal(unsigned seg);
+	void setType(short x);
+	short type() const;
 protected:	
 	virtual void simpleCreate(int ns);
-	
+
+private:
+	Vector2F * texcoord();
+		
 private:
 	BoundingRectangle m_brect;
 	Vector2F m_uv;
 	Vector2F * m_uvDisplace;
 	float *m_quilly;
 	Vector2F * m_st;
+	Vector3F * m_segementNormals;
 	float m_shaftLength;
-	short m_numSeg;
+	short m_numSeg, m_type;
 };

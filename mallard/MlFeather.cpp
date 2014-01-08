@@ -69,6 +69,8 @@ void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot,
 		Matrix33F mat = m_rachis->getSpace(i);
 		mat.multiply(segSpace);
 		
+		normal(i)->set(mat.M(0, 0), mat.M(0, 1), mat.M(0, 2));
+		
 		computeVaneWP(segOrigin, mat, i, xscale);
 
 		Vector3F d(0.f, 0.f, quilly()[i] * scale);

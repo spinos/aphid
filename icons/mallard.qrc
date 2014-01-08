@@ -58,5 +58,7 @@
         <file>deintersectActive.png</file>
 		<file>render.png</file>
         <file>renderActive.png</file>
+		<file>downy.png</file>
+        <file>downyActive.png</file>
     </qresource>
 </RCC>
