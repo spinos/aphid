@@ -210,3 +210,15 @@ unsigned TexturedFeather::numStripePoints() const
 {
 	return m_stripe->numPoints();
 }
+
+Vector3F * TexturedFeather::patchCenterUV(short seg)
+{
+	if(type() == 0) return m_vane[0].railCV(seg, 0);
+	return m_vane[0].railCV(0, seg);
+}
+
+Vector3F * TexturedFeather::patchWingUV(short seg, short side)
+{
+	if(type() == 0) return m_vane[side].railCV(seg, 3);
+	return m_vane[side].railCV(3, seg);
+}

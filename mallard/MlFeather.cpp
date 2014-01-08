@@ -297,3 +297,15 @@ float MlFeather::scaledShaftLength() const
 {
 	return m_scale * shaftLength();
 }
+
+Vector3F * MlFeather::patchCenterP(short seg)
+{
+	if(type() == 0) return m_vane[0].railCV(seg, 0);
+	return m_vane[0].railCV(0, seg);
+}
+
+Vector3F * MlFeather::patchWingP(short seg, short side)
+{
+	if(type() == 0) return m_vane[side].railCV(seg, 3);
+	return m_vane[side].railCV(3, seg);
+}

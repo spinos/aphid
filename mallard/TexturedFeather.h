@@ -37,6 +37,9 @@ public:
 	
 	unsigned numStripe() const;
 	unsigned numStripePoints() const;
+	
+	Vector3F * patchCenterUV(short seg);
+	Vector3F * patchWingUV(short seg, short side);
 protected:
 
 private:

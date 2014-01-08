@@ -52,6 +52,8 @@ public:
 	void samplePosition(float lod);
 	float scaledShaftLength() const;
 	
+	Vector3F * patchCenterP(short seg);
+	Vector3F * patchWingP(short seg, short side);
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	

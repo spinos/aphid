@@ -58,14 +58,14 @@ void MlTessellate::evaluate(MlFeather * feather)
 	unsigned curF = 0;
 	Vector3F uvc;
 	for(short i = 0; i <= feather->numSegment(); i++) {
-		m_cvs[curF] = *(feather->segmentVaneWP(i, 0, 0));
-		m_cvs[curF + 1] = *(feather->segmentVaneWP(i, 3, 0));
-		m_cvs[curF + 2] = *(feather->segmentVaneWP(i, 3, 1));
-		uvc = *(feather->uvVaneCoord(i, 0, 0));
-		m_uvs[curF].set(uvc.x, uvc.y); 
-		uvc = *(feather->uvVaneCoord(i, 3, 0));
+		m_cvs[curF] = *feather->patchCenterP(i);
+		m_cvs[curF + 1] = *feather->patchWingP(i, 0);
+		m_cvs[curF + 2] = *feather->patchWingP(i, 1);
+		uvc = *feather->patchCenterUV(i);
+		m_uvs[curF].set(uvc.x, uvc.y);
+		uvc = *feather->patchWingUV(i, 0);
 		m_uvs[curF + 1].set(uvc.x, uvc.y); 
-		uvc = *(feather->uvVaneCoord(i, 3, 1));
+		uvc = *feather->patchWingUV(i, 1);
 		m_uvs[curF + 2].set(uvc.x, uvc.y);
 		curF += 3;
 	}
