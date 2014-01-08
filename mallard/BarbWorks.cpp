@@ -141,7 +141,7 @@ void BarbWorks::createBarbBuffer(RenderEngine * engine)
 	std::cout<<" barb processed in "<<met.elapsed()<<" seconds\n";
 	std::cout<<"n curve "<<nline<<" n p "<<nv<<"\n";
 	std::cout<<"lod range ("<<minLod<<" , "<<maxLod<<")\n";
-	std::cout<<"n blocks "<<m_stripes->numBlocks()<<"\n";
+	std::cout<<"n blocks "<<numBlocks()<<"\n";
 	m_percentFinished = 1.f;
 	std::cout<<"start render";
 	engine->render();
@@ -155,4 +155,19 @@ void BarbWorks::clearBarbBuffer()
 float BarbWorks::percentFinished() const
 {
 	return m_percentFinished;
+}
+
+unsigned BarbWorks::numBlocks() const
+{
+    return m_stripes->numBlocks();
+}
+	
+AdaptableStripeBuffer * BarbWorks::block(unsigned idx) const
+{
+    return m_stripes->block(idx);
+}
+
+void BarbWorks::clearBlock(unsigned idx)
+{
+    m_stripes->clearBlock(idx);
 }

@@ -87,3 +87,11 @@ void BlockStripeBuffer::begin()
 	m_currentBlockIdx = 0;
 	m_blocks[0]->begin();
 }
+
+void BlockStripeBuffer::clearBlock(unsigned idx)
+{
+    std::vector<AdaptableStripeBuffer *>::iterator it = m_blocks.begin();
+    it += idx;
+    delete *it;
+    m_blocks.erase(it);
+}

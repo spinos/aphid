@@ -10,6 +10,7 @@
 #pragma once
 #include "AnorldFunc.h"
 #include <boost/thread.hpp>
+class AdaptableStripeBuffer;
 class BarbWorks;
 class MlEngine : public AnorldFunc {
 public:
@@ -26,6 +27,8 @@ private:
     void fineOutput();
 	void testOutput();
 	void monitorProgressing(BarbWorks * work);
+	void translateCurves();
+	void translateBlock(AdaptableStripeBuffer * src);
 private:
 	boost::thread m_workingThread;
 	boost::thread m_progressingThread;

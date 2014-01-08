@@ -23,6 +23,8 @@ public:
 	AdaptableStripeBuffer * block(unsigned idx) const;
 	
 	void begin();
+	
+	void clearBlock(unsigned idx);
 protected:
 	AdaptableStripeBuffer * currentBlock();
 	AdaptableStripeBuffer * nextBlock();

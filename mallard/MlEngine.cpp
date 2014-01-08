@@ -13,6 +13,7 @@
 #include <boost/asio.hpp>
 #include <boost/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <AdaptableStripeBuffer.h>
 
 using namespace boost::posix_time;
 using boost::asio::ip::tcp;
@@ -44,7 +45,6 @@ void MlEngine::preRender()
 	interruptRender();
 	m_barb->setEyePosition(camera()->eyePosition());
 	m_barb->setFieldOfView(camera()->fieldOfView());
-	m_barb->clearBarbBuffer();
 	m_workingThread = boost::thread(boost::bind(&BarbWorks::createBarbBuffer, this->m_barb, this));
 	m_progressingThread = boost::thread(boost::bind(&MlEngine::monitorProgressing, this, this->m_barb));
 }
@@ -107,6 +107,7 @@ void MlEngine::fineOutput()
 
     AtNode * sphere = AiNode("sphere");
     AiNodeSetPtr(sphere, "shader", standard);
+    AiNodeSetFlt(sphere, "radius", 1.f);
     
     AtNode * light = AiNode("point_light");
     AiNodeSetStr(light, "name", "/obj/lit");
@@ -114,6 +115,8 @@ void MlEngine::fineOutput()
     AiM4Identity(matrix);
     matrix[3][0] = -10.f;
     AiNodeSetMatrix(light, "matrix", matrix);
+    
+    translateCurves();
 
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
     
@@ -218,4 +221,76 @@ void MlEngine::monitorProgressing(BarbWorks * work)
 		std::clog<<" "<<work->percentFinished() * 100<<"% ";
 		if(work->percentFinished() == 1.f) break;
 	}
+}
+
+void MlEngine::translateCurves()
+{
+    const unsigned n = m_barb->numBlocks();
+    if(n < 1) return;
+    for(unsigned i = 0; i < n; i++) {
+        translateBlock(m_barb->block(0));
+        m_barb->clearBlock(0);
+    }
+}
+#include <sstream>
+void MlEngine::translateBlock(AdaptableStripeBuffer * src)
+{
+    AtNode *curveNode = AiNode("curves");
+    std::stringstream sst;
+    sst.str("");
+    sst<<"/obj/curve"<<rand()%19820;
+    AiNodeSetStr(curveNode, "name", sst.str().c_str());
+    AiNodeSetStr(curveNode, "basis", "catmull-rom");
+    //AiNodeSetStr(curveNode, "basis", "linear");
+    AiNodeSetInt(curveNode, "sidedness", 2);
+    AiNodeSetFlt(curveNode, "min_pixel_width", .1f);
+    //AiNodeSetInt(curveNode, "max_subdivs", 3);
+    const unsigned ns = src->numStripe();
+    AtArray* counts = AiArrayAllocate(ns, 1, AI_TYPE_UINT);
+    
+    unsigned * ncv = src->numCvs();
+    unsigned np = 0;
+	for(unsigned i = 0; i < ns; i++) {
+	    AiArraySetUInt(counts, i, ncv[i]);
+	    np += ncv[i];
+	}
+	
+    //const unsigned np = src->numPoints();
+    AtArray* points = AiArrayAllocate(np, 1, AI_TYPE_POINT);
+    AtArray* radius = AiArrayAllocate(np, 1, AI_TYPE_FLOAT);
+	
+    Vector3F * pos = src->pos();
+	Vector3F * col = src->col();
+	float * w = src->width();
+	
+	AtPoint sample;
+	unsigned ap = 0;
+	unsigned aw = 0;
+	for(unsigned j = 0; j < ns; j++) {
+	    for(unsigned i = 0; i < ncv[j]; i++) {
+	        
+	        if(i<2) sample.x = 0.f;
+	        else if(i > ncv[j]-3) sample.x = ncv[j]-3;
+            else sample.x = 1.f * (i-2);
+            sample.y = j+2;
+            sample.z = 0.f;
+                
+            //sample.x = pos[ap].x;
+            //sample.y = pos[ap].y;
+            //sample.z = pos[ap].z;
+           
+            AiArraySetPnt(points, ap, sample);
+            AiArraySetFlt(radius, aw, w[aw]);
+            aw++;     
+            ap++;
+        }
+	}
+	
+	std::clog<<" ap "<<aw<<"\n";
+	
+	AiNodeSetArray(curveNode, "num_points", counts);
+	AiNodeSetArray(curveNode, "points", points);
+	AiNodeSetArray(curveNode, "radius", radius);
+	
+	std::clog<<sst.str()<<" n curves "<<ns<<" n points "<<np<<"\n";
 }
