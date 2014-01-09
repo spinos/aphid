@@ -50,6 +50,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 	MlEngine.h \
 	AnorldFunc.h \
 	BarbWorks.h \
+	FeatherAttrib.h \
                 window.h
                 
 SOURCES       = ../shared/ContextIconFrame.cpp \
@@ -96,6 +97,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 	MlEngine.cpp \
 	BarbWorks.cpp \
 	AnorldFunc.cpp \
+	FeatherAttrib.cpp \
     window.cpp \
                 main.cpp
                 
