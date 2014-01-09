@@ -266,9 +266,11 @@ void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 {
 	float rootWidth = scaledShaftLength() * .91f;
 	rootWidth /= (float)nu;
-
-	float tipWidth = rootWidth * 0.23f;
 	
+	if(type() == 1) rootWidth /= (float)numSegment();
+
+	float tipWidth = rootWidth * 0.21f;
+	if(type() == 1) tipWidth = rootWidth * 0.81f;
 	
 	const float du = 1.f/(float)nu;
 	const float dv = 1.f/(float)nv;

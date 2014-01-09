@@ -263,7 +263,9 @@ void MlUVView::drawControlVectors(MlFeather * f)
 		
 		a.setZero();
 		b.set(0.f, quill[i], 0.f);
-		dr->arrow(a, b);
+		
+		if(i<f->numSegment()) dr->arrow(a, b);
+		
 		s.setTranslation(b);
 	}
 	glPopMatrix();

@@ -50,6 +50,30 @@ char HFeather::save(MlFeather * feather)
 	Vector2F uv = feather->baseUV();
 	writeFloatAttr(".uv", (float *)(&uv));
 	
+	if(!hasNamedAttr(".typ")) addIntAttr(".typ");
+	int typ = feather->type();
+	writeIntAttr(".typ", &typ);
+	
+	if(!hasNamedAttr(".rs")) addIntAttr(".rs");
+	int rs = feather->resShaft();
+	writeIntAttr(".rs", &rs);
+	
+	if(!hasNamedAttr(".rb")) addIntAttr(".rb");
+	int rb = feather->resBarb();
+	writeIntAttr(".rb", &rb);
+	
+	if(!hasNamedAttr(".nsep")) addIntAttr(".nsep");
+	int nsep = feather->numSeparate();
+	writeIntAttr(".nsep", &nsep);
+	
+	if(!hasNamedAttr(".kfuzz")) addFloatAttr(".kfuzz");
+	float kfuzz = feather->fuzzy();
+	writeFloatAttr(".kfuzz", &kfuzz);
+	
+	if(!hasNamedAttr(".ksep")) addFloatAttr(".ksep");
+	float ksep = feather->separateStrength();
+	writeFloatAttr(".ksep", &ksep);
+
 	return 1;
 }
 
@@ -62,6 +86,10 @@ char HFeather::load(MlFeather * feather)
 	readIntAttr(".featherId", &id);
 	
 	feather->setFeatherId(id);
+	
+	int typ = 0;
+	if(hasNamedAttr(".typ")) readIntAttr(".typ", &typ);
+	feather->setType(typ);
 	
 	int nseg = 4;
 	if(!hasNamedAttr(".nseg"))
@@ -93,6 +121,27 @@ char HFeather::load(MlFeather * feather)
 		readFloatAttr(".uv", (float *)(&uv));
 		
 	feather->setBaseUV(uv);
+	
+	int rs = 10;
+	if(hasNamedAttr(".rs")) readIntAttr(".rs", &rs);
+	feather->setResShaft(rs);
+	
+	int rb = 9;
+	if(hasNamedAttr(".rb")) readIntAttr(".rb", &rb);
+	feather->setResBarb(rb);
+	
+	int nsep = 2;
+	if(hasNamedAttr(".nsep")) readIntAttr(".nsep", &nsep);
+	feather->setNumSeparate(nsep);
+	
+	float kfuzz = 0.f;
+	if(hasNamedAttr(".kfuzz")) readFloatAttr(".kfuzz", &kfuzz);
+	feather->setFuzzy(kfuzz);
+	
+	float ksep = 0.f;
+	if(hasNamedAttr(".ksep")) readFloatAttr(".ksep", &ksep);
+	feather->setSeparateStrength(ksep);
+		
 	feather->computeLength();
 	feather->computeTexcoord();
 	feather->verbose();

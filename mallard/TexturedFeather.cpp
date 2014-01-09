@@ -225,5 +225,5 @@ Vector3F * TexturedFeather::patchWingUV(short seg, short side)
 void TexturedFeather::computeLODGrid(float lod, unsigned & u, unsigned & v)
 {
 	u = m_vane[0].gridU() * (2 + (resShaft() - 2) * lod);
-	v = 3 + (resBarb() - 3) * lod;
+	v = 2 + (resBarb() - 2) * lod;
 }
