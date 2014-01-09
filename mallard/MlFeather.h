@@ -64,7 +64,6 @@ private:
 	CollisionRegion * m_skin;
 	MlRachis * m_rachis;
 	MlVane * m_vane;
-	unsigned m_numSeparate;
-	float m_fuzzy, m_separateStrength, m_scale;
+	float m_scale;
 	short m_id;
 };

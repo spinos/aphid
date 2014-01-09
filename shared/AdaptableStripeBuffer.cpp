@@ -86,10 +86,12 @@ void AdaptableStripeBuffer::begin()
 	m_currentStripe = 0;
 }
 
-void AdaptableStripeBuffer::next()
+char AdaptableStripeBuffer::next()
 {
+    if(end()) return 0;
 	m_currentStripe += m_numCvs[m_useNumStripe];
 	m_useNumStripe++;
+	return 1;
 }
 
 char AdaptableStripeBuffer::end() const

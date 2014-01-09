@@ -144,11 +144,11 @@ void ImageView::doEndBucket()
 			a = gray * 255;
 			pixels++;
 			
-			*scanLine = a;
+			*scanLine = r;
 			scanLine++;
-			*scanLine = a;
+			*scanLine = g;
 			scanLine++;
-			*scanLine = a;
+			*scanLine = b;
 			scanLine++;
 		}
 	}

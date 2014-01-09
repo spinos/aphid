@@ -81,7 +81,8 @@ void MlEngine::fineOutput()
     
     AiNodeSetInt(options, "xres", resolutionX());
     AiNodeSetInt(options, "yres", resolutionY());
-    AiNodeSetInt(options, "AA_samples", 3);
+    AiNodeSetInt(options, "AA_samples", 5);
+    AiNodeSetInt(options, "GI_diffuse_samples", 3);
 	
     AtNode* driver = AiNode("driver_foo");
     AiNodeSetStr(driver, "name", "output/foo");
@@ -109,11 +110,13 @@ void MlEngine::fineOutput()
     AiNodeSetPtr(sphere, "shader", standard);
     AiNodeSetFlt(sphere, "radius", 1.f);
     
-    AtNode * light = AiNode("point_light");
+    AtNode * light = AiNode("distant_light");
+    AiNodeSetInt(light, "samples", 3);
     AiNodeSetStr(light, "name", "/obj/lit");
-    AiNodeSetFlt(light, "intensity", 1024);
+    AiNodeSetFlt(light, "intensity", 3);
     AiM4Identity(matrix);
     matrix[3][0] = -10.f;
+    matrix[3][2] = 100.f;
     AiNodeSetMatrix(light, "matrix", matrix);
     
     translateCurves();
@@ -245,62 +248,84 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
     sst.str("");
     sst<<"/obj/curve"<<rand()%19820;
     AiNodeSetStr(curveNode, "name", sst.str().c_str());
-    AiNodeSetStr(curveNode, "basis", "bezier");
+    AiNodeSetStr(curveNode, "basis", "catmull-rom");
     //AiNodeSetStr(curveNode, "basis", "linear");
-    AiNodeSetInt(curveNode, "sidedness", 2);
-    AiNodeSetFlt(curveNode, "min_pixel_width", .05f);
+    //AiNodeSetStr(curveNode, "basis", "bezier");
+    //AiNodeSetInt(curveNode, "sidedness", 2);
+    AiNodeSetInt(curveNode, "visibility", 65523);
+    AiNodeSetFlt(curveNode, "min_pixel_width", .9f);
     //AiNodeSetInt(curveNode, "max_subdivs", 3);
     AtArray* counts = AiArrayAllocate(ns, 1, AI_TYPE_UINT);
 #endif    
     unsigned * ncv = src->numCvs();
     unsigned npt = 0;
+    unsigned nw = 0;
 	for(unsigned i = 0; i < ns; i++) {
 #ifdef WIN32
-	    AiArraySetUInt(counts, i, ncv[i]);
+	    AiArraySetUInt(counts, i, ncv[i] + 2);
 #endif
-	    npt += ncv[i];
+	    npt += ncv[i] + 2;
+	    nw += ncv[i];
 	}
 #ifdef WIN32
-    AtArray* points = AiArrayAllocate(np, 1, AI_TYPE_POINT);
-    AtArray* radius = AiArrayAllocate(np, 1, AI_TYPE_FLOAT);
+
+    std::clog<<"np not matched "<<np<<" "<<npt<<"\n";
+    
+    AtArray* points = AiArrayAllocate(npt, 1, AI_TYPE_POINT);
+    AtArray* radius = AiArrayAllocate(nw, 1, AI_TYPE_FLOAT);
 	
     Vector3F * pos = src->pos();
 	Vector3F * col = src->col();
 	float * w = src->width();
 	
 	AtPoint sample;
-	/*
+	
+	unsigned asrc = 0;
 	unsigned ap = 0;
 	unsigned aw = 0;
 	for(unsigned j = 0; j < ns; j++) {
 	    for(unsigned i = 0; i < ncv[j]; i++) {
 	        
-	        if(i<2) sample.x = 0.f;
-	        else if(i > ncv[j]-3) sample.x = ncv[j]-3;
-            else sample.x = 1.f * (i-2);
-            sample.x = 1.f * i;
-            sample.y = j+2;
-            sample.z = 0.f;
+            sample.x = pos[asrc].x;
+            sample.y = pos[asrc].y;
+            sample.z = pos[asrc].z;
            
             AiArraySetPnt(points, ap, sample);
-            AiArraySetFlt(radius, aw, w[aw]);
-            aw++;     
             ap++;
+            
+            AiArraySetFlt(radius, aw, w[asrc]);
+            aw++;
+            
+            
+            if(i==0 || i== ncv[j] - 1) {
+                AiArraySetPnt(points, ap, sample);
+                ap++;
+           }
+            
+            asrc++;
         }
-	}*/
-	for(unsigned i = 0; i < np; i++) {
-	    sample.x = (*pos).x;
-        sample.y = (*pos).y;
-        sample.z = (*pos).z;
-        AiArraySetPnt(points, i, sample);
-        pos++;
-        AiArraySetFlt(radius, i, *w);
-        w++;
 	}
 	
 	AiNodeSetArray(curveNode, "num_points", counts);
 	AiNodeSetArray(curveNode, "points", points);
 	AiNodeSetArray(curveNode, "radius", radius);
+	
+	AtNode *hair = AiNode("hair");
+	AiNodeSetPtr(curveNode, "shader", hair);
+	
+	AiNodeDeclare(curveNode, "colors", "varying RGB");
+	AtArray* colors = AiArrayAllocate(np, 1, AI_TYPE_RGB);
+	
+	AtRGB acol;
+	for(unsigned i = 0; i < np; i++) {
+	    acol.r = col[i].x;
+	    acol.g = col[i].y;
+	    acol.b = col[i].z;
+	    AiArraySetRGB(colors, i, acol);
+	}
+	
+	AiNodeSetArray(curveNode, "colors", colors);
+	
 	
 	std::clog<<sst.str()<<" n curves "<<ns<<" n points "<<np<<"\n";
 #endif

@@ -22,7 +22,7 @@ public:
 	char canContain(unsigned x) const;
 
 	void begin();
-	void next();
+	char next();
 	char end() const;
 	
 	unsigned * numCvs();

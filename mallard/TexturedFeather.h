@@ -10,9 +10,10 @@
 #pragma once
 #include "BaseFeather.h"
 #include <zEXRImage.h>
+#include "FeatherAttrib.h"
 class AdaptableStripeBuffer;
 class BaseVane;
-class TexturedFeather : public BaseFeather {
+class TexturedFeather : public BaseFeather, public FeatherAttrib {
 public:
 	TexturedFeather();
 	virtual ~TexturedFeather();
@@ -49,5 +50,4 @@ private:
 private:
 	BaseVane * m_vane;
 	AdaptableStripeBuffer * m_stripe;
-	unsigned m_resShaft, m_resBarb;
 };

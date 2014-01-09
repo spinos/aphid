@@ -65,50 +65,32 @@ BarbControl::BarbControl(QWidget *parent)
 
 void BarbControl::sendSeed(int s)
 {
-	MlFeather *f = selectedExample();
-	if(!f) return;
-	f->setSeed(s);
-	emit shapeChanged();
+	emit seedChanged(s);
 }
 
 void BarbControl::sendNumSeparate(int n)
 {
-	MlFeather *f = selectedExample();
-	if(!f) return;
-	f->setNumSeparate(n);
-	emit shapeChanged();
+	emit numSeparateChanged(n);
 }
 
 void BarbControl::sendSeparateStrength(double k)
 {
-	MlFeather *f = selectedExample();
-	if(!f) return;
-	f->setSeparateStrength(k);
-	emit shapeChanged();
+	emit separateStrengthChanged(k);
 }
 
 void BarbControl::sendFuzzy(double fuz)
 {
-	MlFeather *f = selectedExample();
-	if(!f) return;
-	f->setFuzzy(fuz);
-	emit shapeChanged();
+	emit fuzzinessChanged(fuz);
 }
 
 void BarbControl::sendGridShaft(int g)
 {
-	MlFeather *f = selectedExample();
-	if(!f) return;
-	f->setResShaft(g);
-	emit shapeChanged();
+	emit resShaftChanged(g);
 }
 
 void BarbControl::sendGridBarb(int g)
 {
-	MlFeather *f = selectedExample();
-	if(!f) return;
-	f->setResBarb(g);
-	emit shapeChanged();
+	emit resBarbChanged(g);
 }
 
 void BarbControl::sendLod(double l)

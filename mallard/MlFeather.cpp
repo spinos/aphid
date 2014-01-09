@@ -264,14 +264,11 @@ void MlFeather::samplePosition(float lod)
 
 void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 {
-	float rootWidth = m_scale * shaftLength() * .9f;
-	if(type() == 0) rootWidth /= (float)nu;
-	else rootWidth /= (float)nv;
-	float tipWidth = rootWidth * 0.3f;
-	if(type() > 0) {
-		rootWidth /= numSegment();
-		tipWidth = rootWidth * 0.9f;
-	}
+	float rootWidth = scaledShaftLength() * .91f;
+	rootWidth /= (float)nu;
+
+	float tipWidth = rootWidth * 0.23f;
+	
 	
 	const float du = 1.f/(float)nu;
 	const float dv = 1.f/(float)nv;
@@ -283,7 +280,9 @@ void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 		Vector3F * coord = stripe()->currentPos();
 		float * w = stripe()->currentWidth();
 		
-		if(i > nu/2) tapering = 1.f - (float)(i - nu/2) / (float)nu * 1.5f;
+		if(type() == 0) {
+		    if(i > nu/2) tapering = 1.f - (float)(i - nu/2) / (float)nu * 1.5f;
+		}
 
 		m_vane[side].setU(du*i);
 		

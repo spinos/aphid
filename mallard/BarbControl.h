@@ -38,6 +38,12 @@ private slots:
 	void sendLod(double l);
 signals:
 	void shapeChanged();
+	void seedChanged(int s);
+	void numSeparateChanged(int n);
+	void separateStrengthChanged(double k);
+	void fuzzinessChanged(double f);
+	void resShaftChanged(int g);
+	void resBarbChanged(int g);
 	void lodChanged(double l);
 private:
 	
