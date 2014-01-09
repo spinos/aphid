@@ -137,8 +137,7 @@ void TexturedFeather::sampleColor(unsigned gridU, unsigned gridV, Vector3F * dst
 
 void TexturedFeather::sampleColor(float lod)
 {
-	m_stripe->create(m_resShaft * m_vane[0].gridU() * 2 + 1, m_resBarb + 1 + 1);
-
+	m_stripe->create(resShaft() * m_vane[0].gridU() * 2 + 1, resBarb() + 1);
 	unsigned nu, nv;
 	computeLODGrid(lod, nu, nv);
 	stripe()->begin();

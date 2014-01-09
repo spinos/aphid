@@ -115,7 +115,7 @@ void BarbWorks::createBarbBuffer(RenderEngine * engine)
 		MlFeather * f = c->feather();
 		f->getBoundingBox(box);
 		
-		f->setSeed(sd); sd++;
+		f->setSeed(sd++);
 		f->separateVane();
 		
 		rd = f->scaledShaftLength();
@@ -129,7 +129,7 @@ void BarbWorks::createBarbBuffer(RenderEngine * engine)
 		f->samplePosition(lod);
 		
 		AdaptableStripeBuffer * src = f->stripe();
-		
+
 		m_stripes->append(src);
 		
 		nline += f->numStripe();

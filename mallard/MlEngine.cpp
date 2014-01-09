@@ -212,7 +212,6 @@ void MlEngine::testOutput()
 	{
 		std::cerr << "Exception: " << e.what() << "\n";
 	}
-	
 }
 
 void MlEngine::monitorProgressing(BarbWorks * work)

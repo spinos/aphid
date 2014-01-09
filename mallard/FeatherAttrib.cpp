@@ -11,7 +11,7 @@
 
 FeatherAttrib::FeatherAttrib() 
 {
-	m_resShaft = 0;
+	m_resShaft = 10;
 	m_resBarb = 9;
 	m_numSeparate = 2;
 	m_seed = 1;

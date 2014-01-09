@@ -19,6 +19,9 @@ AdaptableStripeBuffer::AdaptableStripeBuffer()
 	m_maxNumCv = 0;
 	m_useNumStripe = 0;
 	m_currentStripe = 0;
+	m_curPos = 0;
+	m_curCol = 0;
+	m_curWidth = 0;
 }
 
 AdaptableStripeBuffer::~AdaptableStripeBuffer()
@@ -36,6 +39,9 @@ void AdaptableStripeBuffer::clear()
 	m_pos = 0;
 	m_col = 0;
 	m_width = 0;
+	m_curPos = 0;
+	m_curCol = 0;
+	m_curWidth = 0;
 }
 
 void AdaptableStripeBuffer::create(unsigned maxNumPoint)
@@ -84,13 +90,20 @@ void AdaptableStripeBuffer::begin()
 {
 	m_useNumStripe = 0;
 	m_currentStripe = 0;
+	m_curPos = m_pos;
+	m_curCol = m_col;
+	m_curWidth = m_width;
 }
 
 char AdaptableStripeBuffer::next()
 {
     if(end()) return 0;
-	m_currentStripe += m_numCvs[m_useNumStripe];
+	const unsigned cnc = * currentNumCvs();
+	m_currentStripe += cnc;
 	m_useNumStripe++;
+	m_curPos += cnc;
+	m_curCol += cnc;
+	m_curWidth += cnc;
 	return 1;
 }
 
@@ -126,15 +139,15 @@ unsigned * AdaptableStripeBuffer::currentNumCvs()
 
 Vector3F * AdaptableStripeBuffer::currentPos()
 {
-	return &m_pos[m_currentStripe];
+	return m_curPos;
 }
 
 Vector3F * AdaptableStripeBuffer::currentCol()
 {
-	return &m_col[m_currentStripe];
+	return m_curCol;
 }
 
 float * AdaptableStripeBuffer::currentWidth()
 {
-	return &m_width[m_currentStripe];
+	return m_curWidth;
 }

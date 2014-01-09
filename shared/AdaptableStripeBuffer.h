@@ -47,4 +47,7 @@ private:
 	unsigned m_maxNumCv;
 	unsigned m_useNumStripe;
 	unsigned m_currentStripe;
+	Vector3F * m_curPos;
+	Vector3F * m_curCol;
+	float * m_curWidth;
 };
