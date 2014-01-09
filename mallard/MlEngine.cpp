@@ -245,10 +245,10 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
     sst.str("");
     sst<<"/obj/curve"<<rand()%19820;
     AiNodeSetStr(curveNode, "name", sst.str().c_str());
-    AiNodeSetStr(curveNode, "basis", "catmull-rom");
+    AiNodeSetStr(curveNode, "basis", "bezier");
     //AiNodeSetStr(curveNode, "basis", "linear");
     AiNodeSetInt(curveNode, "sidedness", 2);
-    AiNodeSetFlt(curveNode, "min_pixel_width", .1f);
+    AiNodeSetFlt(curveNode, "min_pixel_width", .05f);
     //AiNodeSetInt(curveNode, "max_subdivs", 3);
     AtArray* counts = AiArrayAllocate(ns, 1, AI_TYPE_UINT);
 #endif    
@@ -269,6 +269,7 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 	float * w = src->width();
 	
 	AtPoint sample;
+	/*
 	unsigned ap = 0;
 	unsigned aw = 0;
 	for(unsigned j = 0; j < ns; j++) {
@@ -277,18 +278,24 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 	        if(i<2) sample.x = 0.f;
 	        else if(i > ncv[j]-3) sample.x = ncv[j]-3;
             else sample.x = 1.f * (i-2);
+            sample.x = 1.f * i;
             sample.y = j+2;
             sample.z = 0.f;
-                
-            //sample.x = pos[ap].x;
-            //sample.y = pos[ap].y;
-            //sample.z = pos[ap].z;
            
             AiArraySetPnt(points, ap, sample);
             AiArraySetFlt(radius, aw, w[aw]);
             aw++;     
             ap++;
         }
+	}*/
+	for(unsigned i = 0; i < np; i++) {
+	    sample.x = (*pos).x;
+        sample.y = (*pos).y;
+        sample.z = (*pos).z;
+        AiArraySetPnt(points, i, sample);
+        pos++;
+        AiArraySetFlt(radius, i, *w);
+        w++;
 	}
 	
 	AiNodeSetArray(curveNode, "num_points", counts);
