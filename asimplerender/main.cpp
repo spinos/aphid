@@ -78,9 +78,9 @@ int main(int argc, char *argv[])
     AiNodeSetInt(options, "yres", 300);
     AiNodeSetInt(options, "AA_samples", 3);
 	
-    AtNode* driver = AiNode("driver_foo");
+    AtNode* driver = AiNode("driver_jpeg");
     AiNodeSetStr(driver, "name", "output/foo");
-    //AiNodeSetStr(driver, "filename", "output.exr");
+    AiNodeSetStr(driver, "filename", "output.jpg");
     //AiNodeSetFlt(driver, "gamma", 2.2f);
     
     AtNode * camera = AiNode("persp_camera");
@@ -90,13 +90,13 @@ int main(int argc, char *argv[])
     AiNodeSetFlt(camera, "far_clip", 1000000);
     AtMatrix matrix;
     AiM4Identity(matrix);
-    matrix[0][0] = 0.f;
-    matrix[0][1] = 0.f;
-    matrix[0][2] = 1.f;
-    matrix[2][0] = -1.f;
-    matrix[2][1] = 0.f;
-    matrix[2][2] = 0.f;
-    matrix[3][0] = -10.f;
+    //matrix[0][0] = 0.f;
+    //matrix[0][1] = 0.f;
+    //matrix[0][2] = 1.f;
+    //matrix[2][0] = -1.f;
+    //matrix[2][0] = 0.f;
+    //matrix[2][1] = 0.f;
+    matrix[3][2] = 15.f;
 	AiNodeSetMatrix(camera, "matrix", matrix);
 	
     AiNodeGetMatrix(camera, "matrix", matrix);
@@ -110,15 +110,85 @@ int main(int argc, char *argv[])
     AiNodeSetStr(standard, "name", "/shop/standard1");
     AiNodeSetRGB(standard, "Kd_color", 1, 0, 0);
 
-    AtNode * sphere = AiNode("sphere");
-    AiNodeSetPtr(sphere, "shader", standard);
+    //AtNode * sphere = AiNode("sphere");
+    //AiNodeSetPtr(sphere, "shader", standard);
     
     AtNode * light = AiNode("point_light");
     AiNodeSetStr(light, "name", "/obj/lit");
     AiNodeSetFlt(light, "intensity", 1024);
     matrix[3][0] = -10.f;
     AiNodeSetMatrix(light, "matrix", matrix);
-
+    
+    AtNode *curveNode = AiNode("curves");
+    AiNodeSetStr(curveNode, "basis", "catmull-rom");
+    AtArray* counts = AiArrayAllocate(1, 1, AI_TYPE_UINT);
+    AiArraySetUInt(counts, 0, 4 + 2);
+    
+    AtArray* points = AiArrayAllocate(4 + 2, 1, AI_TYPE_POINT);
+    
+    AtPoint pt;
+    pt.x = 0.f;
+    pt.y = 0.f;
+    pt.z = 0.f;
+    AiArraySetPnt(points, 0, pt);
+    AiArraySetPnt(points, 1, pt);
+    pt.x = 0.f;
+    pt.y = 1.f;
+    AiArraySetPnt(points, 2, pt);
+    pt.x = 1.f;
+    pt.y = 1.f;
+    AiArraySetPnt(points, 3, pt);
+    pt.x = 1.f;
+    pt.y = 2.f;
+    AiArraySetPnt(points, 4, pt);
+    AiArraySetPnt(points, 5, pt);
+    
+    AtArray* radius = AiArrayAllocate(4, 1, AI_TYPE_FLOAT);
+    AiArraySetFlt(radius, 0, 0.04);
+    AiArraySetFlt(radius, 1, 0.02);
+    AiArraySetFlt(radius, 2, 0.02);
+    AiArraySetFlt(radius, 3, 0.01);
+    
+    AiNodeSetArray(curveNode, "num_points", counts);
+	AiNodeSetArray(curveNode, "points", points);
+	AiNodeSetArray(curveNode, "radius", radius);
+	
+	AiNodeDeclare(curveNode, "color", "varying RGB");
+	AtArray* colors = AiArrayAllocate(4, 1, AI_TYPE_RGB);
+	
+	AtRGB acol;
+	acol.r = 1.f;
+	acol.g = 1.f;
+	acol.b = 1.f;
+	
+	AiArraySetRGB(colors, 0, acol);
+	acol.r = .3f;
+	AiArraySetRGB(colors, 1, acol);
+	acol.r = .6f;
+	acol.g = .7f;
+	AiArraySetRGB(colors, 2, acol);
+	acol.g = .9f;
+	acol.b = .1f;
+	AiArraySetRGB(colors, 3, acol);
+	
+	AiNodeSetArray(curveNode, "color", colors);
+	
+	AtNode *hair = AiNode("MayaHair");
+	
+	AiNodeSetRGB(hair, "hairColor", 1, 1, 1);
+	
+	AtArray* cs = AiArrayAllocate(256, 1, AI_TYPE_RGB);
+	for(int i = 0; i < 256; i++) {
+	    acol.r = .5f + (float)i/256 * .5f;
+	    acol.g = acol.r;
+	    acol.b = acol.r;
+	    AiArraySetRGB(cs, i, acol);
+	}
+	
+	AiNodeSetArray(hair, "hairColorScale", cs);
+	
+	AiNodeSetPtr(curveNode, "shader", hair);
+    
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
     AiEnd();
     return 1;
