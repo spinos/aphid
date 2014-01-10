@@ -54,6 +54,7 @@ void MlDrawer::hideAFeather(MlCalamus * c)
 
 void MlDrawer::hideActive()
 {
+	if(!skin()) return;
 	const unsigned num = skin()->numActive();
 	if(num < 1) return;
 	
@@ -66,6 +67,7 @@ void MlDrawer::hideActive()
 
 void MlDrawer::updateActive()
 {
+	if(!skin()) return;
 	const unsigned num = skin()->numActive();
 	if(num < 1) return;
 	
@@ -154,6 +156,7 @@ void MlDrawer::readBuffer()
 
 void MlDrawer::rebuildBuffer()
 {
+	if(!skin()) return;
 	const unsigned nc = numFeathers();
 	if(nc < 1) return;
 	

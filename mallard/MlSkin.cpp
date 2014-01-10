@@ -280,6 +280,7 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 
 void MlSkin::smoothShell(const Vector3F & center, const float & radius, const float & weight)
 {
+	if(!bodyMesh()) return;
 	const float increase = (weight - 1.f) * 0.3f;
 	float * disw = bodyMesh()->perVertexFloat("weishell");
 	Vector3F d;

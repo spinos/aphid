@@ -9,6 +9,7 @@
 
 #pragma once
 #include <vector>
+#include <Ray.h>
 class BaseLight;
 class LightGroup {
 public:
@@ -17,8 +18,11 @@ public:
 	void addLight(BaseLight * l);
 	unsigned numLights() const;
 	BaseLight * getLight(unsigned idx) const;
+	void clearLights();
+	char selectLight(const Ray & incident);
 	
-	void defaultLighting();
+protected:
+	virtual void defaultLighting();
 private:
 	std::vector<BaseLight *> m_lights;
 };

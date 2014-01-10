@@ -115,6 +115,20 @@ void ToolBox::createContext()
 	smoothContour->setIconIndex(0);
 	smoothContour->setContext(Deintersect);
 	
+	ContextIconFrame * moveLight = new ContextIconFrame(this);
+	
+	moveLight->addIconFile(":move.png");
+	moveLight->addIconFile(":moveActive.png");
+	moveLight->setIconIndex(0);
+	moveLight->setContext(MoveTransform);
+	
+	ContextIconFrame * rotateLight = new ContextIconFrame(this);
+	
+	rotateLight->addIconFile(":rotate.png");
+	rotateLight->addIconFile(":rotateActive.png");
+	rotateLight->setIconIndex(0);
+	rotateLight->setContext(RotateTransform);
+	
 	m_contextFrames.push_back(createContour);
 	m_contextFrames.push_back(selectRegion);
 	m_contextFrames.push_back(combContour);
@@ -122,6 +136,8 @@ void ToolBox::createContext()
 	m_contextFrames.push_back(bendContour);
 	m_contextFrames.push_back(eraseContour);
 	m_contextFrames.push_back(smoothContour);
+	m_contextFrames.push_back(moveLight);
+	m_contextFrames.push_back(rotateLight);
 }
 
 void ToolBox::createAction()

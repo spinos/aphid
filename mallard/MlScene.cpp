@@ -145,6 +145,7 @@ void MlScene::doClear()
 	m_featherEditBackgroundName = "unknown";
 	m_featherDistributionName = "unknown";
 	HFile::doClear();
+	clearLights();
 }
 
 void MlScene::doClose() 

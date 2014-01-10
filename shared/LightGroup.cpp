@@ -13,11 +13,7 @@
 LightGroup::LightGroup() {}
 LightGroup::~LightGroup()
 {
-	std::vector<BaseLight *>::iterator it = m_lights.begin();
-	for(; it != m_lights.end(); ++it) {
-		delete *it;
-	}
-	m_lights.clear();
+	clearLights();
 }
 
 void LightGroup::addLight(BaseLight * l)
@@ -35,14 +31,23 @@ BaseLight * LightGroup::getLight(unsigned idx) const
 	return m_lights[idx];
 }
 
+void LightGroup::clearLights()
+{
+	std::vector<BaseLight *>::iterator it = m_lights.begin();
+	for(; it != m_lights.end(); ++it) {
+		delete *it;
+	}
+	m_lights.clear();
+}
+
 void LightGroup::defaultLighting()
 {
 	std::clog<<"default lighting\n";
 	DistantLight * keyLight = new DistantLight;
 	keyLight->setName("key_distant");
-	Vector3F t(-10.f, 0.f, 0.f);
+	Vector3F t(0.f, 0.f, 10.f);
 	keyLight->translate(t);
-	Vector3F r(-1.f, -1.f, 0.f);
+	Vector3F r(-.5f, -.3f, 0.f);
 	keyLight->rotate(r);
 	
 	m_lights.push_back(keyLight);
@@ -51,15 +56,24 @@ void LightGroup::defaultLighting()
 	backLight->setName("back_distant");
 	t.set(0.f, 10.f, -10.f);
 	backLight->translate(t);
-	r.set(.5f, -2.f, 0.f);
+	r.set(-.5f, -2.9f, 0.f);
 	backLight->rotate(r);
 	
 	m_lights.push_back(backLight);
 	
 	PointLight * fillLight = new PointLight;
 	fillLight->setName("back_distant");
-	t.set(0.f, 0.f, 10.f);
+	t.set(10.f, 0.f, 0.f);
 	fillLight->translate(t);
 	
 	m_lights.push_back(fillLight);
+}
+
+char LightGroup::selectLight(const Ray & incident)
+{
+	std::vector<BaseLight *>::iterator it = m_lights.begin();
+	for(; it != m_lights.end(); ++it) {
+		
+	}
+	return 0;
 }

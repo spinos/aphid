@@ -163,6 +163,12 @@ void GLWidget::clientSelect()
             skin()->discardActive();
             selectFeather();
            break;
+		case ToolContext::MoveTransform :
+			selectLight(ray);
+			break;
+		case ToolContext::RotateTransform :
+			selectLight(ray);
+			break;
 	    default:
 			break;
 	}
