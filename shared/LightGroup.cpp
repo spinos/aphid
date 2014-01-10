@@ -10,7 +10,11 @@
 #include "LightGroup.h"
 #include "DistantLight.h"
 #include "PointLight.h"
-LightGroup::LightGroup() {}
+LightGroup::LightGroup() 
+{
+	m_activeLight = 0;
+}
+
 LightGroup::~LightGroup()
 {
 	clearLights();
@@ -45,7 +49,7 @@ void LightGroup::defaultLighting()
 	std::clog<<"default lighting\n";
 	DistantLight * keyLight = new DistantLight;
 	keyLight->setName("key_distant");
-	Vector3F t(0.f, 0.f, 10.f);
+	Vector3F t(-10.f, 10.f, 30.f);
 	keyLight->translate(t);
 	Vector3F r(-.5f, -.3f, 0.f);
 	keyLight->rotate(r);
@@ -54,16 +58,16 @@ void LightGroup::defaultLighting()
 	
 	DistantLight * backLight = new DistantLight;
 	backLight->setName("back_distant");
-	t.set(0.f, 10.f, -10.f);
+	t.set(0.f, 10.f, -30.f);
 	backLight->translate(t);
-	r.set(-.5f, -2.9f, 0.f);
+	r.set(-.3f, -2.9f, 0.f);
 	backLight->rotate(r);
 	
 	m_lights.push_back(backLight);
 	
 	PointLight * fillLight = new PointLight;
-	fillLight->setName("back_distant");
-	t.set(10.f, 0.f, 0.f);
+	fillLight->setName("fill_point");
+	t.set(10.f, -4.f, 7.f);
 	fillLight->translate(t);
 	
 	m_lights.push_back(fillLight);
@@ -71,9 +75,18 @@ void LightGroup::defaultLighting()
 
 char LightGroup::selectLight(const Ray & incident)
 {
+	m_activeLight = 0;
 	std::vector<BaseLight *>::iterator it = m_lights.begin();
-	for(; it != m_lights.end(); ++it) {
-		
+	for(; it != m_lights.end(); it++) {
+		if((*it)->intersect(incident)) {
+			m_activeLight = *it;
+			return 1;
+		}
 	}
 	return 0;
+}
+
+BaseLight * LightGroup::selectedLight() const
+{
+	return m_activeLight;
 }

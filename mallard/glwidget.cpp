@@ -53,7 +53,6 @@
 #include <BezierCurve.h>
 #include <ToolContext.h>
 #include <bezierPatch.h>
-#include <InverseBilinearInterpolate.h>
 #include <MlFeather.h>
 #include <MlSkin.h>
 #include <BakeDeformer.h>
@@ -64,8 +63,9 @@
 #include "MlCalamus.h"
 #include <MeshTopology.h>
 #include <BaseCamera.h>
+#include <BaseLight.h>
 #include "MlEngine.h"
-
+#include <TransformManipulator.h>
 GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 {
 	std::cout<<"3Dview ";
@@ -122,8 +122,7 @@ void GLWidget::clientDraw()
 	getDrawer()->drawLights(*this);
 	
 	showBrush();
-	
-	//testCurvature();
+	getDrawer()->manipulator(manipulator());
 }
 
 void GLWidget::loadMesh(std::string filename)
@@ -164,9 +163,11 @@ void GLWidget::clientSelect()
             selectFeather();
            break;
 		case ToolContext::MoveTransform :
+			manipulator()->setToMove();
 			selectLight(ray);
 			break;
 		case ToolContext::RotateTransform :
+			manipulator()->setToRotate();
 			selectLight(ray);
 			break;
 	    default:
@@ -212,6 +213,10 @@ void GLWidget::clientMouseInput()
 			skin()->smoothShell(brush()->heelPosition(), brush()->getRadius(), brush()->strength());
             m_featherDrawer->updateActive();
 			break;
+		case ToolContext::MoveTransform :
+		case ToolContext::RotateTransform :
+			manipulator()->perform(&ray);
+			break;
 	    default:
 			break;
 	}
@@ -223,6 +228,7 @@ void GLWidget::clientDeselect()
 		skin()->finishCreateFeather();
 		skin()->discardActive();
 	}
+	manipulator()->detach();
 }
 
 PatchMesh * GLWidget::mesh()
@@ -374,6 +380,7 @@ void GLWidget::clearFeather()
 void GLWidget::cleanSheet()
 {
 	clear();
+	defaultLighting();
 }
 
 bool GLWidget::confirmDiscardChanges()
@@ -789,5 +796,15 @@ void GLWidget::testRender()
 void GLWidget::receiveCancelRender()
 {
 	m_engine->interruptRender();
+}
+
+char GLWidget::selectLight(const Ray & incident)
+{
+	if(!LightGroup::selectLight(incident)) return 0;
+
+	std::clog<<"selected "<<selectedLight()->name()<<"\n";
+	manipulator()->attachTo(selectedLight());
+	manipulator()->start(&incident);
+	return 1;
 }
 //:~

@@ -104,7 +104,7 @@ protected:
 	virtual void focusOutEvent(QFocusEvent * event);
 	virtual void clearSelection();
 	virtual void resizeEvent( QResizeEvent * event );
-//! [3]
+	virtual char selectLight(const Ray & incident);
 private:
 	void selectFeather(char byRegion = 0);
 	void selectRegion();

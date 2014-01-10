@@ -19,10 +19,11 @@ public:
 	unsigned numLights() const;
 	BaseLight * getLight(unsigned idx) const;
 	void clearLights();
-	char selectLight(const Ray & incident);
-	
+	virtual char selectLight(const Ray & incident);
+	BaseLight * selectedLight() const;
 protected:
 	virtual void defaultLighting();
 private:
 	std::vector<BaseLight *> m_lights;
+	BaseLight * m_activeLight;
 };

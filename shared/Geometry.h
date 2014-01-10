@@ -16,6 +16,8 @@ public:
 	
 	void setBBox(const BoundingBox &bbox);
 	const BoundingBox getBBox() const;
+protected:
+	BoundingBox * bbox();
 private:
 	BoundingBox m_bbox;
 };

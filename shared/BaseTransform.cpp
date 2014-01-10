@@ -118,17 +118,17 @@ Matrix44F BaseTransform::worldSpace() const
 }
 
 bool BaseTransform::intersect(const Ray & ray) const
-{
+{	
 	Matrix44F s = worldSpace();
-	Plane pl(ray.m_dir.reversed(), s.getTranslation());
-	Vector3F hit, d;
-    float t;
-	if(pl.rayIntersect(ray, hit, t)) {
-		d = hit - s.getTranslation();
-		if(d.length() < 8.f)
-			return true;
-	}
-	return false;
+	s.inverse();
+	Vector3F a = ray.m_origin + ray.m_dir * ray.m_tmin;
+	a = s.transform(a);
+	Vector3F b = ray.m_origin + ray.m_dir * ray.m_tmax;
+	b = s.transform(b);
+	Ray objR(a, b);
+	
+	float hit0, hit1;
+	return getBBox().intersect(objR, &hit0, &hit1);
 }
 
 Vector3F BaseTransform::translatePlane(RotateAxis a) const

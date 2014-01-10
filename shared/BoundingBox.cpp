@@ -21,6 +21,12 @@ void BoundingBox::reset()
 	m_data[3] = m_data[4] = m_data[5] = -10e8;
 }
 
+void BoundingBox::setOne()
+{
+	setMin(-1.f, -1.f, -1.f);
+	setMax(1.f, 1.f, 1.f);
+}
+
 void BoundingBox::setMin(float x, int axis)
 {
 	m_data[axis] = x;

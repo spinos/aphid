@@ -13,6 +13,7 @@ class BoundingBox {
 public:
 	BoundingBox();
 	void reset();
+	void setOne();
 	void setMin(float x, int axis);
 	void setMax(float x, int axis);
 	void setMin(float x, float y, float z);

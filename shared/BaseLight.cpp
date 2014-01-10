@@ -13,6 +13,8 @@ BaseLight::BaseLight()
 {
 	m_lightColor = Float3(1.f, 1.f, 1.f);
 	m_intensity = 1.f;
+	bbox()->setMin(-4.f, -4.f, -4.f);
+	bbox()->setMax(4.f, 4.f, 4.f);
 }
 
 BaseLight::~BaseLight() {}

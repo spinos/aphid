@@ -59,6 +59,7 @@ void TransformManipulator::start(const Ray * r)
 
 void TransformManipulator::perform(const Ray * r)
 {
+	if(isDetached()) return;
 	const Vector3F worldP = worldSpace().getTranslation();
 	Matrix44F ps;
 	parentSpace(ps);

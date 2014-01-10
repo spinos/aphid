@@ -19,3 +19,8 @@ const BoundingBox Geometry::getBBox() const
 {
 	return m_bbox;
 }
+
+BoundingBox * Geometry::bbox()
+{
+	return &m_bbox;
+}
