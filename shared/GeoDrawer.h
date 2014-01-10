@@ -19,9 +19,8 @@ class PyramidMesh;
 class CubeMesh;
 class CircleCurve;
 class SelectionArray;
-class BaseCurve;
 class Primitive;
-
+class DiscMesh;
 class GeoDrawer : public MeshDrawer {
 public:
 	GeoDrawer();
@@ -47,24 +46,24 @@ public:
 	void spaceHandle(SpaceHandle * hand);
 	void anchor(Anchor *a, char active = 0);
 	
-	void transform(BaseTransform * t);
+	void transform(BaseTransform * t) const;
 	
 	void skeletonJoint(SkeletonJoint * joint);
-	void moveHandle(int axis, bool active);
-	void spinHandle(TransformManipulator * m, bool active);
-	void spinPlanes(BaseTransform * t);
+	void moveHandle(int axis, bool active) const;
+	void spinHandle(TransformManipulator * m, bool active) const;
+	void spinPlanes(BaseTransform * t) const;
 	
 	void components(SelectionArray * arr);
 	
-	void linearCurve(const BaseCurve & curve);
-	void smoothCurve(BaseCurve & curve, short deg);
-	
 	void primitive(Primitive * prim);
 	
+	void drawDisc(float scale = 1.f) const;
+	void drawSquare(const BoundingRectangle & b) const;
 	
 private:
 	GeodesicSphereMesh * m_sphere;
 	PyramidMesh * m_pyramid;
 	CubeMesh * m_cube;
 	CircleCurve * m_circle;
+	DiscMesh * m_disc;
 };

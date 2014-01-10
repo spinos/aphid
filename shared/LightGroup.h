@@ -17,6 +17,8 @@ public:
 	void addLight(BaseLight * l);
 	unsigned numLights() const;
 	BaseLight * getLight(unsigned idx) const;
+	
+	void defaultLighting();
 private:
 	std::vector<BaseLight *> m_lights;
 };

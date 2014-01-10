@@ -40,7 +40,7 @@ void BaseDrawer::initializeProfile()
 	fillLit.activate();
 }
 
-void BaseDrawer::setGrey(float g)
+void BaseDrawer::setGrey(float g) const
 {
     glColor3f(g, g, g);
 }
@@ -48,6 +48,11 @@ void BaseDrawer::setGrey(float g)
 void BaseDrawer::setColor(float r, float g, float b) const
 {
 	glColor3f(r, g, b);
+}
+
+void BaseDrawer::useColor(const Float3 & c) const
+{
+	glColor3fv((float *)&c);
 }
 
 void BaseDrawer::end() const
@@ -165,6 +170,16 @@ void BaseDrawer::setCullFace(char var)
 {
 	if(var) glEnable(GL_CULL_FACE);
 	else glDisable(GL_CULL_FACE);
+}
+
+void BaseDrawer::useSolid() const
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void BaseDrawer::useWired() const
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void BaseDrawer::colorAsActive()

@@ -80,6 +80,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	perspCamera()->setNearClipPlane(1.f);
 	perspCamera()->setFarClipPlane(100000.f);
 	usePerspCamera();
+	defaultLighting();
 }
 //! [0]
 
@@ -118,6 +119,7 @@ void GLWidget::clientDraw()
 	getDrawer()->m_wireProfile.apply();
 	getDrawer()->setColor(.2f, .8f, .4f);
 	getDrawer()->drawLineBuffer(skin());
+	getDrawer()->drawLights(*this);
 	
 	showBrush();
 	
@@ -614,6 +616,7 @@ void GLWidget::afterOpen()
 	std::string fedistr = featherDistributionMap();
 	if(fedistr != "unknown")
 		loadFeatherDistribution(fedistr);
+	if(numLights() < 1) defaultLighting();
 }
 
 void GLWidget::focusOutEvent(QFocusEvent * event)

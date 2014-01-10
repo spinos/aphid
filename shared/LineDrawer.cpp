@@ -10,7 +10,7 @@
 #include "LineDrawer.h"
 #include <LineBuffer.h>
 #include <AdaptableStripeBuffer.h>
-
+#include <BaseCurve.h>
 LineDrawer::LineDrawer() {}
 LineDrawer::~LineDrawer() {}
 
@@ -109,4 +109,38 @@ void LineDrawer::stripes(AdaptableStripeBuffer * data, const Vector3F & eyeDirec
 		w += ncv[i];
 	}
 	glEnd();
+}
+
+void LineDrawer::linearCurve(const BaseCurve & curve) const
+{
+    glDisable(GL_DEPTH_TEST);
+	float t;
+	Vector3F p;
+	glBegin(GL_LINE_STRIP);
+	for(unsigned i = 0; i < curve.numVertices(); i++) {
+		p = curve.getCv(i);
+		t = curve.getKnot(i);
+		//setColor(1.f - t, 0.f, t);
+		glVertex3f(p.x, p.y, p.z);
+	}
+	glEnd();
+	glEnable(GL_DEPTH_TEST);
+}
+
+void LineDrawer::smoothCurve(BaseCurve & curve, short deg) const
+{
+	glDisable(GL_DEPTH_TEST);
+	float t;
+	const unsigned nseg = (curve.numVertices() - 1) * deg;
+	const float delta = 1.f / nseg;
+	Vector3F p;
+	glBegin(GL_LINE_STRIP);
+	for(unsigned i = 0; i <= nseg; i++) {
+		t = delta * i;
+		p = curve.interpolate(t);
+		setColor(1.f - t, 0.f, t);
+		glVertex3f(p.x, p.y, p.z);
+	}
+	glEnd();
+	glEnable(GL_DEPTH_TEST);
 }

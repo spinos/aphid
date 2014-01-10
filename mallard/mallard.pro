@@ -29,6 +29,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 				HFeather.h \
     HSkin.h \
                 MlFeatherCollection.h \
+	HLight.h \
     MlUVView.h \
     FeatherEdit.h \
 	FeatherEditTool.h \
@@ -76,6 +77,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 				HFeather.cpp \
     HSkin.cpp \
                 MlFeatherCollection.cpp \
+	HLight.cpp \
     MlUVView.cpp \
     FeatherEdit.cpp \
 	FeatherEditTool.cpp \

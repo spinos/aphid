@@ -22,8 +22,9 @@ public:
 	
 	virtual void initializeProfile();
 
-	void setGrey(float g);
+	void setGrey(float g) const;
 	void setColor(float r, float g, float b) const;
+	void useColor(const Float3 & c) const;
 	void end() const;
 	void beginSolidTriangle();
 	void beginWireTriangle();
@@ -37,6 +38,9 @@ public:
 	
 	void setWired(char var);
 	void setCullFace(char var);
+	
+	void useSolid() const;
+	void useWired() const;
 	
 	void colorAsActive();
 	void colorAsInert();

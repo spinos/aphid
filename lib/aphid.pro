@@ -58,6 +58,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h \
                 ../shared/GeodesicSphereMesh.h \
                                 ../shared/PyramidMesh.h \
                                 ../shared/CubeMesh.h \
+				../shared/DiscMesh.h \
                 ../shared/AnchorGroup.h \
                 ../shared/BaseCurve.h \
                 ../shared/VertexPath.h \
@@ -142,6 +143,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h \
 ../shared/LineDrawer.h \
 ../shared/MeshDrawer.h \
 ../shared/GeoDrawer.h \
+../shared/LightDrawer.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -205,6 +207,7 @@ SOURCES = ../shared/Vector3F.cpp \
                 ../shared/GeodesicSphereMesh.cpp \
                 ../shared/PyramidMesh.cpp \
                 ../shared/CubeMesh.cpp \
+				../shared/DiscMesh.cpp \
                 ../shared/AnchorGroup.cpp \
                 ../shared/BaseCurve.cpp \
                 ../shared/VertexPath.cpp \
@@ -288,6 +291,7 @@ SOURCES = ../shared/Vector3F.cpp \
 ../shared/LineDrawer.cpp \
 ../shared/MeshDrawer.cpp \
 ../shared/GeoDrawer.cpp \
+../shared/LightDrawer.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \

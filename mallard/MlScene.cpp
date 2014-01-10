@@ -16,6 +16,7 @@
 #include <HMesh.h>
 #include <HFeather.h>
 #include <HSkin.h>
+#include <HLight.h>
 #include <BakeDeformer.h>
 #include <PlaybackControl.h>
 #include <sstream>
@@ -185,6 +186,10 @@ bool MlScene::doWrite(const std::string & fileName)
 	grpSkin.save(m_skin);
 	grpSkin.close();
 	
+	HLight grpLight("/world/lights");
+	grpLight.save(this);
+	grpLight.close();
+	
 	grpWorld.close();
 
 	HObject::FileIO.close();
@@ -271,6 +276,10 @@ bool MlScene::doRead(const std::string & fileName)
 	HSkin grpSkin("/world/skin");
 	grpSkin.load(m_skin);
 	grpSkin.close();
+	
+	HLight grpLight("/world/lights");
+	grpLight.load(this);
+	grpLight.close();
 	
 	grpWorld.close();
 	//HObject::FileIO.close();

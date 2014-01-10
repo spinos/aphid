@@ -16,8 +16,8 @@
 #include <GeodesicSphereMesh.h>
 #include <PyramidMesh.h>
 #include <CubeMesh.h>
-#include <BaseCurve.h>
 #include <CircleCurve.h>
+#include <DiscMesh.h>
 
 GeoDrawer::GeoDrawer() 
 {
@@ -25,6 +25,7 @@ GeoDrawer::GeoDrawer()
 	m_pyramid = new PyramidMesh;
 	m_circle = new CircleCurve;
 	m_cube = new CubeMesh;
+	m_disc = new DiscMesh;
 }
 
 GeoDrawer::~GeoDrawer()
@@ -33,6 +34,7 @@ GeoDrawer::~GeoDrawer()
 	delete m_pyramid;
 	delete m_circle;
 	delete m_cube;
+	delete m_disc;
 }
 
 void GeoDrawer::box(float width, float height, float depth)
@@ -278,7 +280,7 @@ void GeoDrawer::anchor(Anchor *a, char active)
 	glPopMatrix();
 }
 
-void GeoDrawer::transform(BaseTransform * t)
+void GeoDrawer::transform(BaseTransform * t) const
 {
 	Matrix44F ws = t->worldSpace();
 	glPushMatrix();
@@ -333,7 +335,7 @@ void GeoDrawer::skeletonJoint(SkeletonJoint * joint)
 	glPopMatrix();
 }
 
-void GeoDrawer::moveHandle(int axis, bool active)
+void GeoDrawer::moveHandle(int axis, bool active) const
 {
 	if(axis != BaseTransform::AX && active)
 		glColor3f(1.f, 0.f, 0.f);
@@ -360,7 +362,7 @@ void GeoDrawer::moveHandle(int axis, bool active)
 	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 0.f, -8.f));
 }
 
-void GeoDrawer::spinPlanes(BaseTransform * t)
+void GeoDrawer::spinPlanes(BaseTransform * t) const
 {
 	m_circle->setRadius(8.f);
 	glPushMatrix();
@@ -393,7 +395,7 @@ void GeoDrawer::spinPlanes(BaseTransform * t)
 	glPopMatrix();
 }
 
-void GeoDrawer::spinHandle(TransformManipulator * m, bool active)
+void GeoDrawer::spinHandle(TransformManipulator * m, bool active) const
 {
 	m_circle->setRadius(8.f);
 	glPushMatrix();
@@ -460,40 +462,6 @@ void GeoDrawer::components(SelectionArray * arr)
     }
 }
 
-void GeoDrawer::linearCurve(const BaseCurve & curve)
-{
-    glDisable(GL_DEPTH_TEST);
-	float t;
-	Vector3F p;
-	glBegin(GL_LINE_STRIP);
-	for(unsigned i = 0; i < curve.numVertices(); i++) {
-		p = curve.getCv(i);
-		t = curve.getKnot(i);
-		//setColor(1.f - t, 0.f, t);
-		glVertex3f(p.x, p.y, p.z);
-	}
-	glEnd();
-	glEnable(GL_DEPTH_TEST);
-}
-
-void GeoDrawer::smoothCurve(BaseCurve & curve, short deg)
-{
-	glDisable(GL_DEPTH_TEST);
-	float t;
-	const unsigned nseg = (curve.numVertices() - 1) * deg;
-	const float delta = 1.f / nseg;
-	Vector3F p;
-	glBegin(GL_LINE_STRIP);
-	for(unsigned i = 0; i <= nseg; i++) {
-		t = delta * i;
-		p = curve.interpolate(t);
-		setColor(1.f - t, 0.f, t);
-		glVertex3f(p.x, p.y, p.z);
-	}
-	glEnd();
-	glEnable(GL_DEPTH_TEST);
-}
-
 void GeoDrawer::primitive(Primitive * prim)
 {
 	BaseMesh *geo = (BaseMesh *)prim->getGeometry();//printf("prim %i ", geo->entityType());
@@ -505,4 +473,20 @@ void GeoDrawer::primitive(Primitive * prim)
 		}
 }
 
+void GeoDrawer::drawDisc(float scale) const
+{
+	glPushMatrix();
+	glScalef(scale, scale, scale);
+	drawMesh(m_disc);
+	glPopMatrix();
+}
 
+void GeoDrawer::drawSquare(const BoundingRectangle & b) const
+{
+	glBegin(GL_QUADS);
+	glVertex3f(b.getMin(0), b.getMin(1), 0.f);
+	glVertex3f(b.getMax(0), b.getMin(1), 0.f);
+	glVertex3f(b.getMax(0), b.getMax(1), 0.f);
+	glVertex3f(b.getMin(0), b.getMax(1), 0.f);
+	glEnd();
+}
