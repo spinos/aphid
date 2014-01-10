@@ -18,7 +18,10 @@ public:
 		TKdTree = 3,
         TTransform = 4,
 		TJoint = 5,
-		TTransformManipulator = 6
+		TTransformManipulator = 6,
+		TDistantLight = 7,
+		TPointLight = 8,
+		TSquareLight = 9
     };
     
 	TypedEntity();

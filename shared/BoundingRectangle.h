@@ -13,6 +13,7 @@ public:
 	BoundingRectangle();
 	
 	void reset();
+	void set(float minx, float miny, float maxx, float maxy);
 	void update(const Vector2F & p);
 	void updateMin(const Vector2F & p);
 	void updateMax(const Vector2F & p);

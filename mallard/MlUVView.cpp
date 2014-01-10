@@ -122,7 +122,7 @@ void MlUVView::clientMouseInput()
 
 void MlUVView::drawFeather(MlFeather * f)
 {
-	BaseDrawer * dr = getDrawer();
+	GeoDrawer * dr = getDrawer();
 	
 	const unsigned nu = f->uvVane(0)->gridU() * 3;
 	const float du = 1.f / nu;
@@ -233,7 +233,7 @@ void MlUVView::drawFeather(MlFeather * f)
 void MlUVView::drawControlVectors(MlFeather * f)
 {
 	Vector3F baseP(f->baseUV());
-	BaseDrawer * dr = getDrawer();
+	GeoDrawer * dr = getDrawer();
 	
 	glPushMatrix();
     Matrix44F s;
@@ -273,7 +273,7 @@ void MlUVView::drawControlVectors(MlFeather * f)
 
 void MlUVView::drawVaneVectors(BaseVane * vane)
 {
-	BaseDrawer * dr = getDrawer();
+	GeoDrawer * dr = getDrawer();
 	for(unsigned j = 0; j <= vane->gridU(); j++) {
 		for(unsigned k = 0; k < vane->gridV(); k++) {
 			Vector3F cv0 = *vane->railCV(j, k) * 32.f;
@@ -286,7 +286,7 @@ void MlUVView::drawVaneVectors(BaseVane * vane)
 
 void MlUVView::drawBindVectors(MlFeather * f)
 {
-	BaseDrawer * dr = getDrawer();
+	GeoDrawer * dr = getDrawer();
 	const Vector3F baseP(f->baseUV());
 	
 	glPushMatrix();

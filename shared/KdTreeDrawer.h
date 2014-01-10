@@ -7,11 +7,11 @@
  *
  */
 #pragma once
-#include <BaseDrawer.h>
+#include <GeoDrawer.h>
 class KdTree;
 class BoundingBox;
 class KdTreeNode;
-class KdTreeDrawer : public BaseDrawer {
+class KdTreeDrawer : public GeoDrawer {
 public:
 	KdTreeDrawer();
 	virtual ~KdTreeDrawer();

@@ -20,6 +20,14 @@ void BoundingRectangle::reset()
 	m_data[2] = m_data[3] = -10e8;
 }
 
+void BoundingRectangle::set(float minx, float miny, float maxx, float maxy)
+{
+	m_data[0] = minx;
+	m_data[1] = miny;
+	m_data[2] = maxx;
+	m_data[3] = maxy;
+}
+
 void BoundingRectangle::update(const Vector2F & p)
 {
 	updateMin(p);
