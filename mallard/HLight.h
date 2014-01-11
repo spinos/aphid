@@ -10,11 +10,8 @@
 #pragma once
 
 #include <HBase.h>
-class LightGroup;
-class BaseLight;
-class DistantLight;
-class PointLight;
-class SquareLight;
+#include <AllLight.h>
+
 class HLight : public HBase {
 public:
 	HLight(const std::string & path);

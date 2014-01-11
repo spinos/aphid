@@ -30,7 +30,7 @@ ToolBox::ToolBox(QWidget *parent) : QToolBar(parent)
 		connect(*it, SIGNAL(actionTriggered(int)), this, SLOT(onActionFrameTriggered(int)));
 	}
 	
-	setContext(CreateBodyContourFeather);
+	setContext(CombBodyContourFeather);
 }
 
 ToolBox::~ToolBox() {}
@@ -70,7 +70,7 @@ void ToolBox::createContext()
 	
 	createContour->addIconFile(":brush.png");
 	createContour->addIconFile(":brushActive.png");
-	createContour->setIconIndex(1);
+	createContour->setIconIndex(0);
 	createContour->setContext(CreateBodyContourFeather);
 	
 	ContextIconFrame * selectRegion = new ContextIconFrame(this);
@@ -84,7 +84,7 @@ void ToolBox::createContext()
 	
 	combContour->addIconFile(":comb.png");
 	combContour->addIconFile(":combActive.png");
-	combContour->setIconIndex(0);
+	combContour->setIconIndex(1);
 	combContour->setContext(CombBodyContourFeather);
 	
 	ContextIconFrame * eraseContour = new ContextIconFrame(this);

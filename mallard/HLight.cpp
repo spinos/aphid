@@ -8,10 +8,6 @@
  */
 
 #include "HLight.h"
-#include <LightGroup.h>
-#include <DistantLight.h>
-#include <PointLight.h>
-#include <SquareLight.h>
 #include <boost/format.hpp>
 HLight::HLight(const std::string & path) : HBase(path) {}
 	
@@ -26,7 +22,7 @@ char HLight::save(LightGroup * g)
 	std::cout<<" num lights "<<nl<<"\n";
 	
 	if(nl < 1) return 0;
-	return 1;
+
 	for(int i = 0; i < nl; i++)
 		writeLight(g->getLight(i));
 	
@@ -59,15 +55,19 @@ void HLight::writeLight(BaseLight * l)
 	
 	if(!g.hasNamedAttr(".rgb")) g.addFloatAttr(".rgb", 3);
 	Float3 rgb =l->lightColor();
-	writeFloatAttr(".rgb", (float *)(&rgb));
-	
-	if(!g.hasNamedAttr(".mat")) g.addFloatAttr(".mat", 16);
-	Matrix44F mat = l->space();
-	writeFloatAttr(".mat", (float *)(&mat));
+	g.writeFloatAttr(".rgb", (float *)(&rgb));
 	
 	if(!g.hasNamedAttr(".intensity")) g.addFloatAttr(".intensity");
 	float intensity = l->intensity();
-	writeFloatAttr(".intensity", &intensity);
+	g.writeFloatAttr(".intensity", &intensity);
+	
+	if(!g.hasNamedAttr(".t")) g.addFloatAttr(".t", 3);
+	Vector3F t = l->translation();
+	g.writeFloatAttr(".t", (float *)(&t));
+	
+	if(!g.hasNamedAttr(".rot")) g.addFloatAttr(".rot", 3);
+	Vector3F rot = l->rotationAngles();
+	g.writeFloatAttr(".rot", (float *)(&rot));
 	
 	switch (l->entityType()) {
 		case TypedEntity::TDistantLight:
@@ -88,17 +88,23 @@ void HLight::writeLight(BaseLight * l)
 
 void HLight::writeDistantLight(DistantLight * l, HBase * g)
 {
-	
+	if(!g->hasNamedAttr(".typ")) g->addIntAttr(".typ");
+	int typ = 0;
+	g->writeIntAttr(".typ", (int *)(&typ));
 }
 
 void HLight::writePointLight(PointLight * l, HBase * g)
 {
-	
+	if(!g->hasNamedAttr(".typ")) g->addIntAttr(".typ");
+	int typ = 1;
+	g->writeIntAttr(".typ", (int *)(&typ));
 }
 
 void HLight::writeSquareLight(SquareLight * l, HBase * g)
 {
-	
+	if(!g->hasNamedAttr(".typ")) g->addIntAttr(".typ");
+	int typ = 2;
+	g->writeIntAttr(".typ", (int *)(&typ));
 }
 
 void HLight::readLight(HBase * c, LightGroup * g)
