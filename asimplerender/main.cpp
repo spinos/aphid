@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
     AiBegin();
     
     AiLoadPlugins("./driver_foo.dll");
+    AiLoadPlugins("./mtoa_shaders.dll");
     
     AtNode* options = AiNode("options");
     AtArray* outputs  = AiArrayAllocate(1, 1, AI_TYPE_STRING);
@@ -153,40 +154,44 @@ int main(int argc, char *argv[])
 	AiNodeSetArray(curveNode, "points", points);
 	AiNodeSetArray(curveNode, "radius", radius);
 	
-	AiNodeDeclare(curveNode, "color", "varying RGB");
+	AiNodeDeclare(curveNode, "colors", "varying RGB");
 	AtArray* colors = AiArrayAllocate(4, 1, AI_TYPE_RGB);
 	
 	AtRGB acol;
-	acol.r = 1.f;
+	acol.r = 0.f;
 	acol.g = 1.f;
-	acol.b = 1.f;
+	acol.b = 0.f;
 	
 	AiArraySetRGB(colors, 0, acol);
-	acol.r = .3f;
+	acol.r = .1f;
+	acol.g = .1f;
+	acol.b = 1.f;
 	AiArraySetRGB(colors, 1, acol);
-	acol.r = .6f;
-	acol.g = .7f;
+	acol.r = .99f;
+	acol.g = .1f;
+	acol.b = .0f;
 	AiArraySetRGB(colors, 2, acol);
-	acol.g = .9f;
+	acol.r = .1f;
+	acol.g = .99f;
 	acol.b = .1f;
 	AiArraySetRGB(colors, 3, acol);
 	
-	AiNodeSetArray(curveNode, "color", colors);
+	AiNodeSetArray(curveNode, "colors", colors);
 	
-	AtNode *hair = AiNode("MayaHair");
+	//AtNode *hair = AiNode("hair");
+	//AiNodeSetFlt(hair, "gloss", 1);
+	AtNode *hair = AiNode("utility");
 	
-	AiNodeSetRGB(hair, "hairColor", 1, 1, 1);
+	const AtNodeEntry* nodeEntry = AiNodeEntryLookUp("userDataColor");
+	if(nodeEntry != NULL) std::clog<<"userDataColor exists";
 	
-	AtArray* cs = AiArrayAllocate(256, 1, AI_TYPE_RGB);
-	for(int i = 0; i < 256; i++) {
-	    acol.r = .5f + (float)i/256 * .5f;
-	    acol.g = acol.r;
-	    acol.b = acol.r;
-	    AiArraySetRGB(cs, i, acol);
-	}
+	AtNode * usrCol = AiNode("userDataColor");
+	AiNodeSetStr(usrCol, "colorAttrName", "colors");
 	
-	AiNodeSetArray(hair, "hairColorScale", cs);
-	
+	//if(AiNodeLink(usrCol, "rootcolor", hair)) std::clog<<"linked";
+	//if(AiNodeLink(usrCol, "tipcolor", hair)) std::clog<<"linked";
+	if(AiNodeLink(usrCol, "color", hair)) std::clog<<"linked";
+
 	AiNodeSetPtr(curveNode, "shader", hair);
     
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));

@@ -73,6 +73,7 @@ void MlEngine::fineOutput()
 #ifdef WIN32
 	AiBegin();
     loadPlugin("./driver_foo.dll");
+    loadPlugin("./mtoa_shaders.dll");
     
     AtNode* options = AiNode("options");
     AtArray* outputs  = AiArrayAllocate(1, 1, AI_TYPE_STRING);
@@ -109,12 +110,24 @@ void MlEngine::fineOutput()
     AtNode * sphere = AiNode("sphere");
     AiNodeSetPtr(sphere, "shader", standard);
     AiNodeSetFlt(sphere, "radius", 1.f);
+    AiM4Identity(matrix);
+    matrix[3][0] = 0.f;
+    matrix[3][1] = 0.f;
+    matrix[3][2] = 50.f;
+    AiNodeSetMatrix(sphere, "matrix", matrix);
     
     AtNode * light = AiNode("distant_light");
     AiNodeSetInt(light, "samples", 3);
     AiNodeSetStr(light, "name", "/obj/lit");
     AiNodeSetFlt(light, "intensity", 3);
     AiM4Identity(matrix);
+    
+    matrix[1][0] = -1.f;
+    matrix[1][1] = 1.f;
+    matrix[1][2] = -1.f;
+    matrix[2][0] = 1.f;
+    matrix[2][1] = 1.f;
+    matrix[2][2] = 1.f;
     matrix[3][0] = -10.f;
     matrix[3][2] = 100.f;
     AiNodeSetMatrix(light, "matrix", matrix);
@@ -252,8 +265,9 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
     //AiNodeSetStr(curveNode, "basis", "bezier");
     //AiNodeSetInt(curveNode, "sidedness", 2);
     AiNodeSetInt(curveNode, "visibility", 65523);
-    AiNodeSetFlt(curveNode, "min_pixel_width", .9f);
-    //AiNodeSetInt(curveNode, "max_subdivs", 3);
+    AiNodeSetFlt(curveNode, "min_pixel_width", .5f);
+    AiNodeSetBool(curveNode, "opaque", false);
+    AiNodeSetInt(curveNode, "max_subdivs", 3);
     AtArray* counts = AiArrayAllocate(ns, 1, AI_TYPE_UINT);
 #endif    
     unsigned * ncv = src->numCvs();
@@ -304,13 +318,11 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
             asrc++;
         }
 	}
+	std::clog<<"asrc "<<asrc<<" np "<<np<<"\n";
 	
 	AiNodeSetArray(curveNode, "num_points", counts);
 	AiNodeSetArray(curveNode, "points", points);
 	AiNodeSetArray(curveNode, "radius", radius);
-	
-	AtNode *hair = AiNode("hair");
-	AiNodeSetPtr(curveNode, "shader", hair);
 	
 	AiNodeDeclare(curveNode, "colors", "varying RGB");
 	AtArray* colors = AiArrayAllocate(np, 1, AI_TYPE_RGB);
@@ -325,7 +337,28 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 	
 	AiNodeSetArray(curveNode, "colors", colors);
 	
+	const AtNodeEntry* nodeEntry = AiNodeEntryLookUp("userDataColor");
+	if(nodeEntry != NULL) std::clog<<"userDataColor exists";
 	
+	AtNode * usrCol = AiNode("userDataColor");
+	AiNodeSetStr(usrCol, "colorAttrName", "colors");
+	
+	AtNode *hair = AiNode("hair");
+	AiNodeSetFlt(hair, "ambdiff", 1.f);
+	AiNodeSetFlt(hair, "spec", 1.f);
+	AiNodeSetFlt(hair, "spec2", 2.f);
+	//AiNodeSetRGB(hair, "rootcolor", 0.2f, 0.2f, 0.2f);
+	//AiNodeSetRGB(hair, "tipcolor", 0.1f, 0.1f, 0.1f);
+	if(AiNodeLink(usrCol, "rootcolor", hair)) std::clog<<"linked";
+	if(AiNodeLink(usrCol, "tipcolor", hair)) std::clog<<"linked";
+	if(AiNodeLink(usrCol, "spec_color", hair)) std::clog<<"linked";
+	if(AiNodeLink(usrCol, "spec2_color", hair)) std::clog<<"linked";
+	//AtNode *hair = AiNode("utility");
+	//if(AiNodeLink(usrCol, "color", hair)) std::clog<<"linked";
+	
+	
+	
+	AiNodeSetPtr(curveNode, "shader", hair);
 	std::clog<<sst.str()<<" n curves "<<ns<<" n points "<<np<<"\n";
 #endif
 }

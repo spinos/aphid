@@ -26,7 +26,7 @@ char HLight::save(LightGroup * g)
 	std::cout<<" num lights "<<nl<<"\n";
 	
 	if(nl < 1) return 0;
-	
+	return 1;
 	for(int i = 0; i < nl; i++)
 		writeLight(g->getLight(i));
 	
