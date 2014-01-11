@@ -9,6 +9,7 @@
 
 #include "RenderEngine.h"
 #include "BaseCamera.h"
+#include "LightGroup.h"
 RenderEngine::RenderEngine() {}
 RenderEngine::~RenderEngine() {}
 
@@ -21,6 +22,11 @@ void RenderEngine::setResolution(unsigned resx, unsigned resy)
 {
 	m_resolutionX = resx;
 	m_resolutionY = resy;
+}
+
+void RenderEngine::setLights(LightGroup * lights)
+{
+	m_lights = lights;
 }
 
 unsigned RenderEngine::resolutionX() const
@@ -36,6 +42,11 @@ unsigned RenderEngine::resolutionY() const
 BaseCamera * RenderEngine::camera() const
 {
 	return m_camera;
+}
+
+LightGroup * RenderEngine::lights() const
+{
+	return m_lights;
 }
 
 void RenderEngine::preRender() {}

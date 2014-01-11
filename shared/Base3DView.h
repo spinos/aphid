@@ -59,7 +59,6 @@ public:
 	void shrinkSelection();
 	void frameAll();
 	virtual void drawIntersection() const;
-	void showBrush() const;
 	
 	void updateOrthoProjection();
 	void updatePerspProjection();
@@ -67,7 +66,7 @@ public:
 	QPoint lastMousePos() const;
 	
 	void setInteractContext(ToolContext * ctx);
-	int interactMode();
+	int interactMode() const;
 	
 	void usePerspCamera();
 	void useOrthoCamera();
@@ -89,7 +88,8 @@ protected:
 	virtual void focusInEvent(QFocusEvent * event);
 	virtual void focusOutEvent(QFocusEvent * event);
 	virtual void clearSelection();
-	
+	void showBrush() const;
+	void showManipulator() const;
 private:
 	void computeIncidentRay(int x, int y);
 	

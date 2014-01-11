@@ -456,6 +456,11 @@ void Base3DView::showBrush() const
         getDrawer()->arrow(brush()->heelPosition(), brush()->toePosition());
 }
 
+void Base3DView::showManipulator() const
+{
+	getDrawer()->manipulator(m_manipulator);
+}
+
 void Base3DView::computeIncidentRay(int x, int y)
 {
 	Vector3F origin, direct;
@@ -498,7 +503,7 @@ void Base3DView::setInteractContext(ToolContext * ctx)
 	m_interactContext = ctx;
 }
 
-int Base3DView::interactMode()
+int Base3DView::interactMode() const
 {
 	if(!m_interactContext) return ToolContext::SelectVertex;
 	

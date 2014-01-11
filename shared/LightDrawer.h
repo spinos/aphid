@@ -8,11 +8,7 @@
  */
 #pragma once
 #include "GeoDrawer.h"
-class LightGroup;
-class BaseLight;
-class DistantLight;
-class PointLight;
-class SquareLight;
+#include "AllLight.h"
 class LightDrawer : public GeoDrawer {
 public:
 	LightDrawer();

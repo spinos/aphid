@@ -8,10 +8,6 @@
  */
 
 #include "LightDrawer.h"
-#include "LightGroup.h"
-#include "DistantLight.h"
-#include "PointLight.h"
-#include "SquareLight.h"
 LightDrawer::LightDrawer() {}
 LightDrawer::~LightDrawer() {}
 
@@ -25,7 +21,6 @@ void LightDrawer::drawLights(const LightGroup & grp) const
 
 void LightDrawer::drawLight(BaseLight * l) const
 {
-	transform(l);
 	useSolid();
 	useColor(l->lightColor());
 	switch (l->entityType()) {

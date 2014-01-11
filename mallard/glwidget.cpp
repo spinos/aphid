@@ -119,10 +119,10 @@ void GLWidget::clientDraw()
 	getDrawer()->m_wireProfile.apply();
 	getDrawer()->setColor(.2f, .8f, .4f);
 	getDrawer()->drawLineBuffer(skin());
-	getDrawer()->drawLights(*this);
 	
+	showLights();
 	showBrush();
-	getDrawer()->manipulator(manipulator());
+	showManipulator();
 }
 
 void GLWidget::loadMesh(std::string filename)
@@ -790,6 +790,7 @@ void GLWidget::testRender()
 	emit renderResChanged(sz);
 	prepareRender();
 	m_engine->setCamera(getCamera());
+	m_engine->setLights(this);
 	m_engine->preRender();
 }
 
@@ -806,5 +807,13 @@ char GLWidget::selectLight(const Ray & incident)
 	manipulator()->attachTo(selectedLight());
 	manipulator()->start(&incident);
 	return 1;
+}
+
+void GLWidget::showLights() const
+{
+	getDrawer()->drawLights(*this);
+	if(interactMode() == ToolContext::MoveTransform || interactMode() == ToolContext::RotateTransform) {
+		for(unsigned i = 0; i < numLights(); i++) getDrawer()->transform(getLight(i));
+	}
 }
 //:~

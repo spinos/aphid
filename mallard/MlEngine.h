@@ -9,6 +9,7 @@
 
 #pragma once
 #include "AnorldFunc.h"
+#include <AllLight.h>
 #include <boost/thread.hpp>
 class AdaptableStripeBuffer;
 class BarbWorks;
@@ -29,6 +30,11 @@ private:
 	void monitorProgressing(BarbWorks * work);
 	void translateCurves();
 	void translateBlock(AdaptableStripeBuffer * src);
+	void translateLights();
+	void translateLight(BaseLight * l);
+	void translateDistantLight(DistantLight * l);
+	void translatePointLight(PointLight * l);
+	void translateSquareLight(SquareLight * l);
 private:
 	boost::thread m_workingThread;
 	boost::thread m_progressingThread;

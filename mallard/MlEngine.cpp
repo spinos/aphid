@@ -14,7 +14,7 @@
 #include <boost/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <AdaptableStripeBuffer.h>
-
+#include <boost/format.hpp>
 using namespace boost::posix_time;
 using boost::asio::ip::tcp;
 #define PACKAGESIZE 1024
@@ -73,7 +73,10 @@ void MlEngine::fineOutput()
 #ifdef WIN32
 	AiBegin();
     loadPlugin("./driver_foo.dll");
-    loadPlugin("./mtoa_shaders.dll");
+    loadPlugin("mtoa_shaders.dll");
+	
+	const AtNodeEntry* nodeEntry = AiNodeEntryLookUp("userDataColor");
+	if(nodeEntry == NULL) std::clog<<"\nWARNING: userDataColor node entry doesn't exist! Most likely mtoa_shaders.all is not loaded.\n";
     
     AtNode* options = AiNode("options");
     AtArray* outputs  = AiArrayAllocate(1, 1, AI_TYPE_STRING);
@@ -116,22 +119,7 @@ void MlEngine::fineOutput()
     matrix[3][2] = 50.f;
     AiNodeSetMatrix(sphere, "matrix", matrix);
     
-    AtNode * light = AiNode("distant_light");
-    AiNodeSetInt(light, "samples", 3);
-    AiNodeSetStr(light, "name", "/obj/lit");
-    AiNodeSetFlt(light, "intensity", 3);
-    AiM4Identity(matrix);
-    
-    matrix[1][0] = -1.f;
-    matrix[1][1] = 1.f;
-    matrix[1][2] = -1.f;
-    matrix[2][0] = 1.f;
-    matrix[2][1] = 1.f;
-    matrix[2][2] = 1.f;
-    matrix[3][0] = -10.f;
-    matrix[3][2] = 100.f;
-    AiNodeSetMatrix(light, "matrix", matrix);
-    
+    translateLights();
     translateCurves();
 
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
@@ -249,17 +237,16 @@ void MlEngine::translateCurves()
         m_barb->clearBlock(0);
     }
 }
-#include <sstream>
+
 void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 {
 	const unsigned ns = src->numStripe();
 	const unsigned np = src->numPoints();
+	const std::string curveName = (boost::format("/obj/curve%1%") % rand()).str();
 #ifdef WIN32
     AtNode *curveNode = AiNode("curves");
-	std::stringstream sst;
-    sst.str("");
-    sst<<"/obj/curve"<<rand()%19820;
-    AiNodeSetStr(curveNode, "name", sst.str().c_str());
+
+    AiNodeSetStr(curveNode, "name", curveName.c_str());
     AiNodeSetStr(curveNode, "basis", "catmull-rom");
     //AiNodeSetStr(curveNode, "basis", "linear");
     //AiNodeSetStr(curveNode, "basis", "bezier");
@@ -282,8 +269,6 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 	}
 #ifdef WIN32
 
-    std::clog<<"np not matched "<<np<<" "<<npt<<"\n";
-    
     AtArray* points = AiArrayAllocate(npt, 1, AI_TYPE_POINT);
     AtArray* radius = AiArrayAllocate(nw, 1, AI_TYPE_FLOAT);
 	
@@ -337,9 +322,6 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 	
 	AiNodeSetArray(curveNode, "colors", colors);
 	
-	const AtNodeEntry* nodeEntry = AiNodeEntryLookUp("userDataColor");
-	if(nodeEntry != NULL) std::clog<<"userDataColor exists";
-	
 	AtNode * usrCol = AiNode("userDataColor");
 	AiNodeSetStr(usrCol, "colorAttrName", "colors");
 	
@@ -355,10 +337,62 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 	if(AiNodeLink(usrCol, "spec2_color", hair)) std::clog<<"linked";
 	//AtNode *hair = AiNode("utility");
 	//if(AiNodeLink(usrCol, "color", hair)) std::clog<<"linked";
-	
-	
-	
+
 	AiNodeSetPtr(curveNode, "shader", hair);
-	std::clog<<sst.str()<<" n curves "<<ns<<" n points "<<np<<"\n";
 #endif
+	std::clog<<curveName<<" n curves "<<ns<<" n points "<<np<<"\n";
+}
+
+void MlEngine::translateLights()
+{
+	LightGroup * g = lights();
+	for(unsigned i = 0; i < g->numLights(); i++) 
+		translateLight(g->getLight(i));
+}
+
+void MlEngine::translateLight(BaseLight * l)
+{
+	switch (l->entityType()) {
+		case TypedEntity::TDistantLight:
+			translateDistantLight(static_cast<DistantLight *>(l));
+			break;
+		case TypedEntity::TPointLight:
+			translatePointLight(static_cast<PointLight *>(l));
+			break;
+		case TypedEntity::TSquareLight:
+			translateSquareLight(static_cast<SquareLight *>(l));
+			break;
+		default:
+			break;
+	}
+}
+
+void MlEngine::translateDistantLight(DistantLight * l)
+{
+#ifdef WIN32
+	AtNode * light = AiNode("distant_light");
+    //AiNodeSetInt(light, "samples", 3);
+    AiNodeSetStr(light, "name", l->name().c_str());
+    AiNodeSetFlt(light, "intensity", l->intensity());
+    AtMatrix matrix;
+	setMatrix(l->worldSpace(), matrix);
+    AiNodeSetMatrix(light, "matrix", matrix);
+#endif
+}
+
+void MlEngine::translatePointLight(PointLight * l)
+{
+#ifdef WIN32
+	AtNode * light = AiNode("point_light");
+    AiNodeSetStr(light, "name", l->name().c_str());
+    AiNodeSetFlt(light, "intensity", l->intensity());
+    AtMatrix matrix;
+	setMatrix(l->worldSpace(), matrix);
+    AiNodeSetMatrix(light, "matrix", matrix);
+#endif
+}
+
+void MlEngine::translateSquareLight(SquareLight * l)
+{
+
 }
