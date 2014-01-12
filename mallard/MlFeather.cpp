@@ -153,7 +153,9 @@ void MlFeather::verbose()
 	std::cout<<"feather index:\n id "<<featherId();
 	std::cout<<"\n n segment "<<numSegment();
 	std::cout<<"\n length "<<shaftLength();
-	std::cout<<"\n base uv ("<<baseUV().x<<","<<baseUV().y<<")\n";
+	std::cout<<"\n base uv ("<<baseUV().x<<","<<baseUV().y<<")";
+	std::cout<<"\n shaft shrink "<<m_shaftShrink<<"\n";
+	std::cout<<"\n barb shrink "<<m_barbShrink<<"\n";
 }
 
 void MlFeather::samplePosition(Vector3F * dst)
@@ -264,17 +266,16 @@ void MlFeather::samplePosition(float lod)
 
 void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 {
-	float rootWidth = scaledShaftLength() * .91f;
+	float rootWidth = scaledShaftLength();
+	if(type() == 1) rootWidth = quilly()[0] * m_scale;
+	
 	rootWidth /= (float)nu;
-	
-	if(type() == 1) rootWidth /= (float)numSegment();
 
-	float tipWidth = rootWidth * 0.23f;
-	if(type() == 1) tipWidth = rootWidth * 0.43f;
-	
+	float tipWidth = rootWidth * (1.f - m_barbShrink);
+
 	const float du = 1.f/(float)nu;
 	const float dv = 1.f/(float)nv;
-	float shrinking, tapering = 1.f;
+	float paramv, paramu, tapering;
 	
 	for(unsigned i = 0; i < nu; i++) {
 		*stripe()->currentNumCvs() = nv + 1;
@@ -282,17 +283,18 @@ void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 		Vector3F * coord = stripe()->currentPos();
 		float * w = stripe()->currentWidth();
 		
-		if(type() == 0) {
-		    if(i > nu/2) tapering = 1.f - (float)(i - nu/2) / (float)nu * 1.5f;
-		}
+		paramu = (float)i/(float)nu;
+		if(type() > 0) paramu = 1.f - paramu;
+		
+		tapering = 1.f - paramu * m_shaftShrink;
 
 		m_vane[side].setU(du*i);
 		
 		for(unsigned j = 0; j <= nv; j++) {
 			m_vane[side].pointOnVane(dv * j, coord[j]);
-			shrinking = (float)j / (float)nv;
-			w[j] = (rootWidth * (1.f - shrinking) + tipWidth * shrinking) * tapering;
-			w[j] *= .37f;
+			paramv = (float)j / (float)nv;
+			w[j] = rootWidth * (1.f - paramv) + tipWidth * paramv;
+			w[j] *= tapering * .5f;
 		}
 		
 		m_vane[side].modifyLength(du*i, nv + 2, coord, lod);

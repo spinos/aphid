@@ -36,6 +36,8 @@ private slots:
 	void sendGridShaft(int g);
 	void sendGridBarb(int g);
 	void sendLod(double l);
+	void sendBarbShrink(double x);
+	void sendShaftShrink(double x);
 signals:
 	void shapeChanged();
 	void seedChanged(int s);
@@ -45,6 +47,8 @@ signals:
 	void resShaftChanged(int g);
 	void resBarbChanged(int g);
 	void lodChanged(double l);
+	void barbShrinkChanged(double x);
+	void shaftShrinkChanged(double x);
 private:
 	
 	
@@ -56,4 +60,7 @@ private:
 	QDoubleEditSlider * m_separateWeightValue;
 	QDoubleEditSlider * m_fuzzyValue;
 	QDoubleEditSlider * m_lodValue;
+	QDoubleEditSlider * m_barbShrinkValue;
+	QDoubleEditSlider * m_shaftShrinkValue;
+	char m_waiting;
 };

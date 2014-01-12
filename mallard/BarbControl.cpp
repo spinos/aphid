@@ -43,12 +43,22 @@ BarbControl::BarbControl(QWidget *parent)
 	m_lodValue->setLimit(0.05, 1.0);
 	m_lodValue->setValue(1.0);
 	
+	m_barbShrinkValue = new QDoubleEditSlider(tr("Barb Shrink"));
+	m_barbShrinkValue->setLimit(0.0, .99);
+	m_barbShrinkValue->setValue(.5);
+	
+	m_shaftShrinkValue = new QDoubleEditSlider(tr("Shaft Shrink"));
+	m_shaftShrinkValue->setLimit(0.0, .99);
+	m_shaftShrinkValue->setValue(.5);
+	
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->addWidget(m_gridShaftValue);
 	layout->addWidget(m_gridBarbValue);
 	layout->addWidget(m_separateCountValue);
 	layout->addWidget(m_separateWeightValue);
 	layout->addWidget(m_fuzzyValue);
+	layout->addWidget(m_barbShrinkValue);
+	layout->addWidget(m_shaftShrinkValue);
 	layout->addWidget(m_seedValue);
 	layout->addWidget(m_lodValue);
 	layout->addStretch(0);
@@ -61,41 +71,62 @@ BarbControl::BarbControl(QWidget *parent)
 	connect(m_gridShaftValue, SIGNAL(valueChanged(int)), this, SLOT(sendGridShaft(int)));
 	connect(m_gridBarbValue, SIGNAL(valueChanged(int)), this, SLOT(sendGridBarb(int)));
 	connect(m_lodValue, SIGNAL(valueChanged(double)), this, SLOT(sendLod(double)));
+	connect(m_barbShrinkValue, SIGNAL(valueChanged(double)), this, SLOT(sendBarbShrink(double)));
+	connect(m_shaftShrinkValue, SIGNAL(valueChanged(double)), this, SLOT(sendShaftShrink(double)));
 }
 
 void BarbControl::sendSeed(int s)
 {
 	emit seedChanged(s);
+	if(!m_waiting) emit shapeChanged();
 }
 
 void BarbControl::sendNumSeparate(int n)
 {
 	emit numSeparateChanged(n);
+	if(!m_waiting) emit shapeChanged();
 }
 
 void BarbControl::sendSeparateStrength(double k)
 {
 	emit separateStrengthChanged(k);
+	if(!m_waiting) emit shapeChanged();
 }
 
 void BarbControl::sendFuzzy(double fuz)
 {
 	emit fuzzinessChanged(fuz);
+	if(!m_waiting) emit shapeChanged();
 }
 
 void BarbControl::sendGridShaft(int g)
 {
 	emit resShaftChanged(g);
+	if(!m_waiting) emit shapeChanged();
 }
 
 void BarbControl::sendGridBarb(int g)
 {
 	emit resBarbChanged(g);
+	if(!m_waiting) emit shapeChanged();
 }
 
 void BarbControl::sendLod(double l)
 {
 	emit lodChanged(l);
+	if(!m_waiting) emit shapeChanged();
+}
+
+void BarbControl::sendBarbShrink(double x)
+{
+	emit barbShrinkChanged(x);
+	if(!m_waiting) emit shapeChanged();
+}
+
+void BarbControl::sendShaftShrink(double x)
+{
+	emit shaftShrinkChanged(x);
+	if(!m_waiting) emit shapeChanged();
 }
 
 void BarbControl::receiveSelectionChanged()
@@ -103,10 +134,14 @@ void BarbControl::receiveSelectionChanged()
 	MlFeather *f = selectedExample();
 	if(!f) return;
 	
+	m_waiting = 1;
 	m_gridShaftValue->setValue(f->resShaft());
 	m_gridBarbValue->setValue(f->resBarb());
 	m_separateCountValue->setValue(f->numSeparate());
 	m_separateWeightValue->setValue(f->separateStrength());
 	m_fuzzyValue->setValue(f->fuzzy());
+	m_barbShrinkValue->setValue(f->m_barbShrink);
+	m_shaftShrinkValue->setValue(f->m_shaftShrink);
+	m_waiting = 0;
 	emit shapeChanged();
 }

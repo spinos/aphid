@@ -14,5 +14,5 @@ public:
 	FeatherAttrib();
 	
 	unsigned m_resShaft, m_resBarb, m_numSeparate, m_seed;
-	float m_fuzzy, m_separateStrength;
+	float m_fuzzy, m_separateStrength, m_barbShrink, m_shaftShrink;
 };

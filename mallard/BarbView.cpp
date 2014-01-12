@@ -41,13 +41,15 @@ void BarbView::receiveShapeChanged()
 void BarbView::sampleShape()
 {
     io_mutex.lock();
-    
+	
     m_f->setResShaft(m_resShaft);
     m_f->setResBarb(m_resBarb);
     m_f->setNumSeparate(m_numSeparate);
     m_f->setSeed(m_seed);
     m_f->setFuzzy(m_fuzzy);
     m_f->setSeparateStrength(m_separateStrength);
+	m_f->m_barbShrink = m_barbShrink;
+	m_f->m_shaftShrink = m_shaftShrink;
 
 	float * dst = m_f->angles();
 	const short ns = m_f->numSegment();
@@ -77,7 +79,6 @@ void BarbView::clientSelect() {}
 
 void BarbView::clientDeselect()
 {
-	receiveShapeChanged();
 }
 
 void BarbView::receiveLod(double l)
@@ -107,44 +108,42 @@ void BarbView::test()
 	getDrawer()->lines(pts);
 }
 
-void BarbView::focusInEvent(QFocusEvent * event)
-{
-	receiveShapeChanged();
-	Base3DView::focusInEvent(event);
-}
-
 void BarbView::receiveSeed(int s)
 {
     m_seed = s;
-    receiveShapeChanged();
 }
 
 void BarbView::receiveNumSeparate(int n)
 {
     m_numSeparate = n;
-    receiveShapeChanged();
 }
 
 void BarbView::receiveSeparateStrength(double k)
 {
     m_separateStrength = k;
-    receiveShapeChanged();
 }
 
 void BarbView::receiveFuzzy(double f)
 {
     m_fuzzy = f;
-    receiveShapeChanged();
 }
 
 void BarbView::receiveResShaft(int g)
 {
     m_resShaft = g;
-    receiveShapeChanged();
 }
 
 void BarbView::receiveResBarb(int g)
 {
     m_resBarb = g;
-    receiveShapeChanged();
+}
+
+void BarbView::receiveBarbShrink(double x)
+{
+	m_barbShrink = x;
+}
+
+void BarbView::receiveShaftShrink(double x)
+{
+	m_shaftShrink = x;
 }

@@ -26,7 +26,8 @@ BarbEdit::BarbEdit(QWidget *parent)
 	connect(m_control, SIGNAL(resShaftChanged(int)), m_view, SLOT(receiveResShaft(int)));
 	connect(m_control, SIGNAL(resBarbChanged(int)), m_view, SLOT(receiveResBarb(int)));
 	connect(m_control, SIGNAL(lodChanged(double)), m_view, SLOT(receiveLod(double)));
-	
+	connect(m_control, SIGNAL(barbShrinkChanged(double)), m_view, SLOT(receiveBarbShrink(double)));
+	connect(m_control, SIGNAL(shaftShrinkChanged(double)), m_view, SLOT(receiveShaftShrink(double)));
 }
 
 BarbEdit::~BarbEdit()

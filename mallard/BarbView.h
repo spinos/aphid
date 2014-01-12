@@ -18,7 +18,6 @@ protected:
 	virtual void clientDeselect();
 	virtual void clientDraw();
 	virtual void clientMouseInput();
-	virtual void focusInEvent(QFocusEvent * event);
 	
 public slots:
 	void receiveSeed(int s);
@@ -28,6 +27,8 @@ public slots:
 	void receiveResShaft(int g);
 	void receiveResBarb(int g);
 	void receiveLod(double l);
+	void receiveBarbShrink(double x);
+	void receiveShaftShrink(double x);
 	void receiveShapeChanged();
 	
 	void test();

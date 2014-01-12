@@ -17,4 +17,6 @@ FeatherAttrib::FeatherAttrib()
 	m_seed = 1;
 	m_fuzzy = 0.f; 
 	m_separateStrength = 0.f;
+	m_barbShrink = .5f;
+	m_shaftShrink = .5f;
 }

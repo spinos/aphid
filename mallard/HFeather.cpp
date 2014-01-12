@@ -73,7 +73,15 @@ char HFeather::save(MlFeather * feather)
 	if(!hasNamedAttr(".ksep")) addFloatAttr(".ksep");
 	float ksep = feather->separateStrength();
 	writeFloatAttr(".ksep", &ksep);
-
+	
+	if(!hasNamedAttr(".shrb")) addFloatAttr(".shrb");
+	float barbShrink = feather->m_barbShrink;
+	writeFloatAttr(".shrb", &barbShrink);
+	
+	if(!hasNamedAttr(".shrs")) addFloatAttr(".shrs");
+	float shaftShrink = feather->m_shaftShrink;
+	writeFloatAttr(".shrs", &shaftShrink);
+	
 	return 1;
 }
 
@@ -141,6 +149,14 @@ char HFeather::load(MlFeather * feather)
 	float ksep = 0.f;
 	if(hasNamedAttr(".ksep")) readFloatAttr(".ksep", &ksep);
 	feather->setSeparateStrength(ksep);
+	
+	float barbShrink = 0.5f;
+	if(hasNamedAttr(".shrb")) readFloatAttr(".shrb", &barbShrink);
+	feather->m_barbShrink = barbShrink;
+	
+	float shaftShrink = 0.5f;
+	if(hasNamedAttr(".shrs")) readFloatAttr(".shrs", &shaftShrink);
+	feather->m_shaftShrink = shaftShrink;
 		
 	feather->computeLength();
 	feather->computeTexcoord();

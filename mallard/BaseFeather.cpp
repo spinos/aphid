@@ -192,19 +192,16 @@ void BaseFeather::presetQuill()
 	if(type() == 0) {
 		for(i = 0; i < numSegment(); i++) {
 			if(i < numSegment() - 2)
-				quill[i] = 3.f;
+				quill[i] = 1.9f;
 			else if(i < numSegment() - 1)
-				quill[i] = 1.7f;
+				quill[i] = 1.3f;
 			else
 				quill[i] = .8f;
 		}
 	}
 	else {
 		for(i = 0; i < numSegment(); i++) {
-			if(i < 1)
-				quill[i] = 2.f;
-			else
-				quill[i] = 1.f;
+			quill[i] = 1.f;
 		}
 	}
 }
@@ -262,7 +259,7 @@ void BaseFeather::presetBarb()
 			vanesR = uvDisplaceAt(i, 0);
 			vanesL = uvDisplaceAt(i, 1);
 			
-			if(i < 1) {
+			if(i == 0) {
 				vanesR[0].set(.5f, 0.f);
 				vanesR[1].set(.5f, 0.f);
 				vanesR[2].set(.5f, 0.f);
@@ -271,14 +268,23 @@ void BaseFeather::presetBarb()
 				vanesL[1].set(-.5f, 0.f);
 				vanesL[2].set(-.5f, 0.f);
 			}
-			else if(i < 2) {
-				vanesR[0].set(.5f, -.1f);
-				vanesR[1].set(.5f, -.5f);
-				vanesR[2].set(.5f, -.7f);
+			else if(i == 1) {
+				vanesR[0].set(.15f, -.19f);
+				vanesR[1].set(.15f, -.19f);
+				vanesR[2].set(.15f, -.19f);
 				
-				vanesL[0].set(-.5f, -.1f);
-				vanesL[1].set(-.5f, -.5f);
-				vanesL[2].set(-.5f, -.7f);
+				vanesL[0].set(-.15f, -.19f);
+				vanesL[1].set(-.15f, -.19f);
+				vanesL[2].set(-.15f, -.19f);
+			}
+			else if(i == 2) {
+				vanesR[0].set(.24f, -.29f);
+				vanesR[1].set(.24f, -.29f);
+				vanesR[2].set(.24f, -.29f);
+				
+				vanesL[0].set(-.24f, -.2f);
+				vanesL[1].set(-.24f, -.2f);
+				vanesL[2].set(-.24f, -.2f);
 			}
 			else {
 				vanesR[0].set(.5f, -.1f);
