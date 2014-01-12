@@ -50,6 +50,7 @@
 #include "TimeControl.h"
 #include "BarbEdit.h"
 #include "RenderEdit.h"
+#include "SceneEdit.h"
 Window::Window()
 {
 	std::cout<<"Initializing Mallard main window ";
@@ -64,6 +65,9 @@ Window::Window()
 	FeatherExample::FeatherLibrary = glWidget;
 	m_timeControl = new TimeControl(this);
 	glWidget->setPlayback(m_timeControl);
+	
+	m_sceneEdit = new SceneEdit(glWidget, this);
+	
 	addToolBar(m_tools);
 
 	setCentralWidget(glWidget);
@@ -157,6 +161,10 @@ void Window::createActions()
 	showRenderEditAct = new QAction(tr("&Render View"), this);
     showRenderEditAct->setStatusTip(tr("Show render view"));
     connect(showRenderEditAct, SIGNAL(triggered()), m_renderEdit, SLOT(show()));
+	
+	showSceneEditAct = new QAction(tr("&Scene Tree"), this);
+    showSceneEditAct->setStatusTip(tr("Show scene edit"));
+    connect(showSceneEditAct, SIGNAL(triggered()), m_sceneEdit, SLOT(show()));
     
 	saveSceneAct = new QAction(tr("&Save"), this);
 	saveSceneAct->setStatusTip(tr("Save current scene file"));
@@ -221,6 +229,7 @@ void Window::createMenus()
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showFeatherEditAct);
 	windowMenu->addAction(showBrushControlAct);
+	windowMenu->addAction(showSceneEditAct);
 	windowMenu->addAction(showTimeControlAct);
 	windowMenu->addAction(showBarbEditAct);
 	windowMenu->addAction(showRenderEditAct);

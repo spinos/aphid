@@ -52,6 +52,9 @@ HEADERS       =	../shared/ContextIconFrame.h \
 	AnorldFunc.h \
 	BarbWorks.h \
 	FeatherAttrib.h \
+	SceneEdit.h \
+SceneTreeModel.h \
+SceneTreeItem.h \
                 window.h
                 
 SOURCES       = ../shared/ContextIconFrame.cpp \
@@ -100,6 +103,9 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 	BarbWorks.cpp \
 	AnorldFunc.cpp \
 	FeatherAttrib.cpp \
+	SceneEdit.cpp \
+SceneTreeModel.cpp \
+SceneTreeItem.cpp \
     window.cpp \
                 main.cpp
                 

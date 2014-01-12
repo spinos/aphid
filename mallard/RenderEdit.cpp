@@ -17,7 +17,6 @@ RenderEdit::RenderEdit(QWidget *parent)
 	m_view = new ImageView(this);
 	
 	QVBoxLayout *layout = new QVBoxLayout;
-	//layout->addWidget(l);
 	layout->addWidget(m_view);
 	setLayout(layout);
 	setWindowTitle(tr("Render View"));

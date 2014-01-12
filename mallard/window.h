@@ -56,7 +56,7 @@ class FeatherEdit;
 class TimeControl;
 class BarbEdit;
 class RenderEdit;
-
+class SceneEdit;
 class Window : public QMainWindow
 {
     Q_OBJECT
@@ -75,6 +75,7 @@ private:
 	TimeControl * m_timeControl;
 	BarbEdit * m_barbEdit;
 	RenderEdit * m_renderEdit;
+	SceneEdit * m_sceneEdit;
 	QMenu * fileMenu;
 	QMenu *recentFilesMenu;
 	QMenu * windowMenu;
@@ -83,6 +84,7 @@ private:
 	QAction * showTimeControlAct;
 	QAction * showBarbEditAct;
 	QAction * showRenderEditAct;
+	QAction * showSceneEditAct;
 	QAction * newSceneAct;
 	QAction * openSceneAct;
 	QAction * saveSceneAct;
