@@ -781,17 +781,19 @@ void GLWidget::testCurvature()
 void GLWidget::resizeEvent( QResizeEvent * event )
 {
 	const QSize sz = event->size();
-	m_engine->setResolution(sz.width(), sz.height());
+	setRenderImageWidth(sz.width());
+	setRenderImageHeight(sz.height());
 	SingleModelView::resizeEvent(event);
 }
 
 void GLWidget::testRender()
 {
-	const QSize sz(m_engine->resolutionX(), m_engine->resolutionY());
+	const QSize sz(renderImageWidth(), renderImageHeight());
 	emit renderResChanged(sz);
 	prepareRender();
 	m_engine->setCamera(getCamera());
 	m_engine->setLights(this);
+	m_engine->setOptions(this);
 	m_engine->preRender();
 }
 

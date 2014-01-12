@@ -10,6 +10,8 @@
 #include "MlEngine.h"
 #include "BarbWorks.h"
 #include <BaseCamera.h>
+#include <LightGroup.h>
+#include <RenderOptions.h>
 #include <boost/asio.hpp>
 #include <boost/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -70,6 +72,12 @@ void MlEngine::fineOutput()
 {
     ptime tt(second_clock::local_time());
 	std::cout<<"fine output begins at "<<to_simple_string(tt)<<"\n";
+	
+	RenderOptions * opts = options();
+	const int imageSizeX = opts->renderImageWidth();
+	const int imageSizeY = opts->renderImageHeight();
+	const int aas = opts->AASample();
+		
 #ifdef WIN32
 	AiBegin();
     loadPlugin("./driver_foo.dll");
@@ -83,9 +91,9 @@ void MlEngine::fineOutput()
     AiArraySetStr(outputs, 0, "RGBA RGBA output:gaussian_filter output/foo");
     AiNodeSetArray(options, "outputs", outputs);
     
-    AiNodeSetInt(options, "xres", resolutionX());
-    AiNodeSetInt(options, "yres", resolutionY());
-    AiNodeSetInt(options, "AA_samples", 5);
+    AiNodeSetInt(options, "xres", imageSizeX);
+    AiNodeSetInt(options, "yres", imageSizeY);
+    AiNodeSetInt(options, "AA_samples", aas);
     AiNodeSetInt(options, "GI_diffuse_samples", 3);
 	
     AtNode* driver = AiNode("driver_foo");
@@ -156,8 +164,9 @@ void MlEngine::testOutput()
 		boost::asio::deadline_timer t(io_service);
 	
 		const int bucketSize = 64;
-		const int imageSizeX = resolutionX();
-		const int imageSizeY = resolutionY();
+		RenderOptions * opts = options();
+		const int imageSizeX = opts->renderImageWidth();
+		const int imageSizeY = opts->renderImageHeight();
 				
 		for(int by = 0; by <= imageSizeY/bucketSize; by++) {
 			for(int bx = 0; bx <= imageSizeX/bucketSize; bx++) {

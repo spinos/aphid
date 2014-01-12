@@ -10,20 +10,19 @@
 #pragma once
 class BaseCamera;
 class LightGroup;
+class RenderOptions;
 class RenderEngine {
 public:
 	RenderEngine();
 	virtual ~RenderEngine();
 	
-	virtual void setCamera(BaseCamera * camera);
-	virtual void setResolution(unsigned resx, unsigned resy);
-	virtual void setLights(LightGroup * lights);
-	
-	unsigned resolutionX() const;
-	unsigned resolutionY() const;
+	void setCamera(BaseCamera * camera);
+	void setOptions(RenderOptions * options);
+	void setLights(LightGroup * lights);
 	
 	BaseCamera * camera() const;
 	LightGroup * lights() const;
+	RenderOptions * options() const;
 
 	virtual void preRender();
 	virtual void render();
@@ -33,5 +32,5 @@ protected:
 private:
 	BaseCamera * m_camera;
 	LightGroup * m_lights;
-	unsigned m_resolutionX, m_resolutionY;
+	RenderOptions * m_options;
 };
