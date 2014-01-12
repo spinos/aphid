@@ -9,6 +9,7 @@
 
 #include "HLight.h"
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 HLight::HLight(const std::string & path) : HBase(path) {}
 	
 char HLight::save(LightGroup * g)
@@ -69,6 +70,8 @@ void HLight::writeLight(BaseLight * l)
 	Vector3F rot = l->rotationAngles();
 	g.writeFloatAttr(".rot", (float *)(&rot));
 	
+	if(!g.hasNamedAttr(".typ")) g.addIntAttr(".typ");
+	
 	switch (l->entityType()) {
 		case TypedEntity::TDistantLight:
 			writeDistantLight(static_cast<DistantLight *>(l), &g);
@@ -88,21 +91,18 @@ void HLight::writeLight(BaseLight * l)
 
 void HLight::writeDistantLight(DistantLight * l, HBase * g)
 {
-	if(!g->hasNamedAttr(".typ")) g->addIntAttr(".typ");
 	int typ = 0;
 	g->writeIntAttr(".typ", (int *)(&typ));
 }
 
 void HLight::writePointLight(PointLight * l, HBase * g)
 {
-	if(!g->hasNamedAttr(".typ")) g->addIntAttr(".typ");
 	int typ = 1;
 	g->writeIntAttr(".typ", (int *)(&typ));
 }
 
 void HLight::writeSquareLight(SquareLight * l, HBase * g)
 {
-	if(!g->hasNamedAttr(".typ")) g->addIntAttr(".typ");
 	int typ = 2;
 	g->writeIntAttr(".typ", (int *)(&typ));
 }
@@ -110,4 +110,69 @@ void HLight::writeSquareLight(SquareLight * l, HBase * g)
 void HLight::readLight(HBase * c, LightGroup * g)
 {
 	std::cout<<boost::format("read %1%\n") % c->pathToObject();
+	if(!c->hasNamedAttr(".typ")) return;
+	int typ = 0;
+	c->readIntAttr(".typ", &typ);
+	BaseLight *l = 0;
+	switch (typ) {
+		case 0:
+			l = readDistantLight(c);
+			break;
+		case 1:
+			l = readPointLight(c);
+			break;
+		case 2:
+			l = readSquareLight(c);
+			break;
+		default:
+			break;
+	}
+	
+	if(!l) return;
+	std::string name = c->pathToObject();
+	boost::erase_first(name, pathToObject());
+	boost::erase_first(name, "/");
+	l->setName(name);
+	
+	Float3 rgb(1.f, 1.f, 1.f);
+		
+	if(c->hasNamedAttr(".rgb"))
+		c->readFloatAttr(".rgb", (float *)(&rgb));
+		
+	l->setLightColor(rgb);
+	
+	float intensity = 1.f;
+	if(c->hasNamedAttr(".intensity")) 
+		c->readFloatAttr(".intensity", &intensity);
+	l->setIntensity(intensity);
+	
+	Vector3F t;
+	if(c->hasNamedAttr(".t")) c->readFloatAttr(".t", (float *)(&t));
+	
+	l->translate(t);
+	
+	Vector3F rot;
+	if(c->hasNamedAttr(".rot")) c->readFloatAttr(".rot", (float *)(&rot));
+	
+	l->setRotationAngles(rot);
+	
+	g->addLight(l);
+}
+
+BaseLight * HLight::readDistantLight(HBase * c)
+{
+	DistantLight * l = new DistantLight;
+	return l;
+}
+
+BaseLight * HLight::readPointLight(HBase * c)
+{
+	PointLight * l = new PointLight;
+	return l;
+}
+
+BaseLight * HLight::readSquareLight(HBase * c)
+{
+	SquareLight * l = new SquareLight;
+	return l;
 }

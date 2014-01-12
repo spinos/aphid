@@ -216,6 +216,7 @@ void GLWidget::clientMouseInput()
 		case ToolContext::MoveTransform :
 		case ToolContext::RotateTransform :
 			manipulator()->perform(&ray);
+			setDirty();
 			break;
 	    default:
 			break;

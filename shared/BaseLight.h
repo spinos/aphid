@@ -15,6 +15,7 @@ public:
 	virtual ~BaseLight();
 	
 	void setLightColor(float r, float g, float b);
+	void setLightColor(const Float3 c);
 	Float3 lightColor() const;
 	
 	void setIntensity(float x);

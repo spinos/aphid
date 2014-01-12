@@ -26,6 +26,11 @@ void BaseLight::setLightColor(float r, float g, float b)
 	m_lightColor.z = b;
 }
 
+void BaseLight::setLightColor(const Float3 c)
+{
+	m_lightColor = c;
+}
+
 Float3 BaseLight::lightColor() const
 {
 	return m_lightColor;

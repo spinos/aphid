@@ -24,4 +24,7 @@ private:
 	void writePointLight(PointLight * l, HBase * g);
 	void writeSquareLight(SquareLight * l, HBase * g);
 	void readLight(HBase * c, LightGroup * g);
+	BaseLight * readDistantLight(HBase * c);
+	BaseLight * readPointLight(HBase * c);
+	BaseLight * readSquareLight(HBase * c);
 };
