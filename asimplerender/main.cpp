@@ -178,9 +178,12 @@ int main(int argc, char *argv[])
 	
 	AiNodeSetArray(curveNode, "colors", colors);
 	
-	//AtNode *hair = AiNode("hair");
-	//AiNodeSetFlt(hair, "gloss", 1);
-	AtNode *hair = AiNode("utility");
+	AtNode *hair = AiNode("hair");
+	AiNodeSetFlt(hair, "gloss", 20);
+	AiNodeSetFlt(hair, "gloss2", 8);
+	AiNodeSetFlt(hair, "spec", 0.f);
+	AiNodeSetFlt(hair, "spec2", 0.f);
+	//AtNode *hair = AiNode("utility");
 	
 	const AtNodeEntry* nodeEntry = AiNodeEntryLookUp("userDataColor");
 	if(nodeEntry != NULL) std::clog<<"userDataColor exists";
@@ -188,9 +191,10 @@ int main(int argc, char *argv[])
 	AtNode * usrCol = AiNode("userDataColor");
 	AiNodeSetStr(usrCol, "colorAttrName", "colors");
 	
-	//if(AiNodeLink(usrCol, "rootcolor", hair)) std::clog<<"linked";
-	//if(AiNodeLink(usrCol, "tipcolor", hair)) std::clog<<"linked";
-	if(AiNodeLink(usrCol, "color", hair)) std::clog<<"linked";
+	if(AiNodeLink(usrCol, "rootcolor", hair)) std::clog<<"linked";
+	if(AiNodeLink(usrCol, "tipcolor", hair)) std::clog<<"linked";
+	//if(AiNodeLink(usrCol, "spec_color", hair)) std::clog<<"linked";
+	//if(AiNodeLink(usrCol, "color", hair)) std::clog<<"linked";
 
 	AiNodeSetPtr(curveNode, "shader", hair);
     

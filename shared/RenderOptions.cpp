@@ -13,7 +13,7 @@ RenderOptions::RenderOptions()
 {
 	m_resX = 640;
 	m_resY = 480;
-	m_AASample = 5;
+	m_AASample = 4;
 }
 
 RenderOptions::~RenderOptions() {}

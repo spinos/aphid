@@ -64,6 +64,9 @@ void MlEngine::render()
 void MlEngine::interruptRender()
 {
 	std::cout<<" interrupted ";
+#ifdef WIN32
+	AiRenderInterrupt();
+#endif
 	m_workingThread.interrupt();
 	m_progressingThread.interrupt();
 }
@@ -81,7 +84,7 @@ void MlEngine::fineOutput()
 #ifdef WIN32
 	AiBegin();
     loadPlugin("./driver_foo.dll");
-    loadPlugin("mtoa_shaders.dll");
+    loadPlugin("./mtoa_shaders.dll");
 	
 	const AtNodeEntry* nodeEntry = AiNodeEntryLookUp("userDataColor");
 	if(nodeEntry == NULL) std::clog<<"\nWARNING: userDataColor node entry doesn't exist! Most likely mtoa_shaders.all is not loaded.\n";
@@ -94,7 +97,7 @@ void MlEngine::fineOutput()
     AiNodeSetInt(options, "xres", imageSizeX);
     AiNodeSetInt(options, "yres", imageSizeY);
     AiNodeSetInt(options, "AA_samples", aas);
-    AiNodeSetInt(options, "GI_diffuse_samples", 3);
+    AiNodeSetInt(options, "GI_diffuse_samples", 1);
 	
     AtNode* driver = AiNode("driver_foo");
     AiNodeSetStr(driver, "name", "output/foo");
@@ -116,7 +119,7 @@ void MlEngine::fineOutput()
 
     AtNode * standard = AiNode("standard");
     AiNodeSetStr(standard, "name", "/shop/standard1");
-    AiNodeSetRGB(standard, "Kd_color", 1, 0, 0);
+    AiNodeSetRGB(standard, "Kd_color", 1, 1, 1);
 
     AtNode * sphere = AiNode("sphere");
     AiNodeSetPtr(sphere, "shader", standard);
@@ -263,7 +266,7 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
     AiNodeSetInt(curveNode, "visibility", 65523);
     AiNodeSetFlt(curveNode, "min_pixel_width", .5f);
     AiNodeSetBool(curveNode, "opaque", false);
-    AiNodeSetInt(curveNode, "max_subdivs", 3);
+    AiNodeSetInt(curveNode, "max_subdivs", 2);
     AtArray* counts = AiArrayAllocate(ns, 1, AI_TYPE_UINT);
 #endif    
     unsigned * ncv = src->numCvs();
@@ -330,16 +333,18 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 	}
 	
 	AiNodeSetArray(curveNode, "colors", colors);
+
+	AtNode *hair = AiNode("hair");
+	AiNodeSetFlt(hair, "gloss", 3);
+	AiNodeSetFlt(hair, "gloss2", 100);
+	AiNodeSetFlt(hair, "spec", 10.f);
+	AiNodeSetFlt(hair, "spec2", 1.f);
+	//AiNodeSetRGB(hair, "rootcolor", 0.2f, 0.2f, 0.2f);
+	//AiNodeSetRGB(hair, "tipcolor", 0.1f, 0.1f, 0.1f);
 	
 	AtNode * usrCol = AiNode("userDataColor");
 	AiNodeSetStr(usrCol, "colorAttrName", "colors");
 	
-	AtNode *hair = AiNode("hair");
-	AiNodeSetFlt(hair, "ambdiff", 1.f);
-	AiNodeSetFlt(hair, "spec", 1.f);
-	AiNodeSetFlt(hair, "spec2", 2.f);
-	//AiNodeSetRGB(hair, "rootcolor", 0.2f, 0.2f, 0.2f);
-	//AiNodeSetRGB(hair, "tipcolor", 0.1f, 0.1f, 0.1f);
 	if(AiNodeLink(usrCol, "rootcolor", hair)) std::clog<<"linked";
 	if(AiNodeLink(usrCol, "tipcolor", hair)) std::clog<<"linked";
 	if(AiNodeLink(usrCol, "spec_color", hair)) std::clog<<"linked";
@@ -394,7 +399,7 @@ void MlEngine::translatePointLight(PointLight * l)
 #ifdef WIN32
 	AtNode * light = AiNode("point_light");
     AiNodeSetStr(light, "name", l->name().c_str());
-    AiNodeSetFlt(light, "intensity", l->intensity());
+    AiNodeSetFlt(light, "intensity", l->intensity() * 1000.f);
     AtMatrix matrix;
 	setMatrix(l->worldSpace(), matrix);
     AiNodeSetMatrix(light, "matrix", matrix);
