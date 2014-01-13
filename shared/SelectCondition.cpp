@@ -46,7 +46,7 @@ char SelectCondition::byFacing() const
 
 char SelectCondition::filteredByFacing(const Vector3F & nor) const
 {
-	return nor.dot(m_normal) < 0.f;
+	return nor.dot(m_normal) < 0.1f;
 }
 
 char SelectCondition::filteredByDistance(const Vector3F & pos) const
