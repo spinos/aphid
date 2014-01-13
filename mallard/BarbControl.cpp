@@ -15,6 +15,7 @@
 BarbControl::BarbControl(QWidget *parent)
     : QWidget(parent)
 {
+	m_waiting = 1;
 	m_seedValue = new QIntEditSlider(tr("Random Seed"));
 	m_seedValue->setLimit(0, 10000);
 	m_seedValue->setValue(99);
@@ -51,12 +52,17 @@ BarbControl::BarbControl(QWidget *parent)
 	m_shaftShrinkValue->setLimit(0.0, .99);
 	m_shaftShrinkValue->setValue(.5);
 	
+	m_barbWidthScaleValue = new QDoubleEditSlider(tr("Barb Width Scale"));
+	m_barbWidthScaleValue->setLimit(0.01, .99);
+	m_barbWidthScaleValue->setValue(.67);
+	
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->addWidget(m_gridShaftValue);
 	layout->addWidget(m_gridBarbValue);
 	layout->addWidget(m_separateCountValue);
 	layout->addWidget(m_separateWeightValue);
 	layout->addWidget(m_fuzzyValue);
+	layout->addWidget(m_barbWidthScaleValue);
 	layout->addWidget(m_barbShrinkValue);
 	layout->addWidget(m_shaftShrinkValue);
 	layout->addWidget(m_seedValue);
@@ -73,6 +79,7 @@ BarbControl::BarbControl(QWidget *parent)
 	connect(m_lodValue, SIGNAL(valueChanged(double)), this, SLOT(sendLod(double)));
 	connect(m_barbShrinkValue, SIGNAL(valueChanged(double)), this, SLOT(sendBarbShrink(double)));
 	connect(m_shaftShrinkValue, SIGNAL(valueChanged(double)), this, SLOT(sendShaftShrink(double)));
+	connect(m_barbWidthScaleValue, SIGNAL(valueChanged(double)), this, SLOT(sendWidthScale(double)));
 }
 
 void BarbControl::sendSeed(int s)
@@ -129,6 +136,12 @@ void BarbControl::sendShaftShrink(double x)
 	if(!m_waiting) emit shapeChanged();
 }
 
+void BarbControl::sendWidthScale(double x)
+{
+	emit widthScaleChanged(x);
+	if(!m_waiting) emit shapeChanged();
+}
+
 void BarbControl::receiveSelectionChanged()
 {
 	MlFeather *f = selectedExample();
@@ -142,6 +155,7 @@ void BarbControl::receiveSelectionChanged()
 	m_fuzzyValue->setValue(f->fuzzy());
 	m_barbShrinkValue->setValue(f->m_barbShrink);
 	m_shaftShrinkValue->setValue(f->m_shaftShrink);
+	m_barbWidthScaleValue->setValue(f->m_barbWidthScale);
 	m_waiting = 0;
-	emit shapeChanged();
+	emit exampleChanged();
 }

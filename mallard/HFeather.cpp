@@ -82,6 +82,10 @@ char HFeather::save(MlFeather * feather)
 	float shaftShrink = feather->m_shaftShrink;
 	writeFloatAttr(".shrs", &shaftShrink);
 	
+	if(!hasNamedAttr(".bws")) addFloatAttr(".bws");
+	float barbWidthScale = feather->m_barbWidthScale;
+	writeFloatAttr(".bws", &barbWidthScale);
+	
 	return 1;
 }
 
@@ -157,6 +161,10 @@ char HFeather::load(MlFeather * feather)
 	float shaftShrink = 0.5f;
 	if(hasNamedAttr(".shrs")) readFloatAttr(".shrs", &shaftShrink);
 	feather->m_shaftShrink = shaftShrink;
+	
+	float barbWidthScale = 0.67f;
+	if(hasNamedAttr(".bws")) readFloatAttr(".bws", &barbWidthScale);
+	feather->m_barbWidthScale = barbWidthScale;
 		
 	feather->computeLength();
 	feather->computeTexcoord();

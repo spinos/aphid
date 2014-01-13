@@ -50,6 +50,7 @@ void BarbView::sampleShape()
     m_f->setSeparateStrength(m_separateStrength);
 	m_f->m_barbShrink = m_barbShrink;
 	m_f->m_shaftShrink = m_shaftShrink;
+	m_f->m_barbWidthScale = m_barbWidthScale;
 
 	float * dst = m_f->angles();
 	const short ns = m_f->numSegment();
@@ -79,6 +80,12 @@ void BarbView::clientSelect() {}
 
 void BarbView::clientDeselect()
 {
+}
+
+void BarbView::focusInEvent(QFocusEvent * e)
+{
+	Base3DView::focusInEvent(e);
+	receiveShapeChanged();
 }
 
 void BarbView::receiveLod(double l)
@@ -146,4 +153,9 @@ void BarbView::receiveBarbShrink(double x)
 void BarbView::receiveShaftShrink(double x)
 {
 	m_shaftShrink = x;
+}
+
+void BarbView::receiveWidthScale(double x)
+{
+	m_barbWidthScale = x;
 }

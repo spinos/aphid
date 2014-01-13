@@ -91,10 +91,12 @@ Window::Window()
 	connect(glWidget, SIGNAL(sendFeatherEditBackground(QString)), m_featherEdit, SLOT(receiveTexture(QString)));
 	connect(m_timeControl, SIGNAL(currentFrameChanged(int)), glWidget, SLOT(updateOnFrame(int)));
 	connect(m_featherEdit->uvView(), SIGNAL(selectionChanged()), m_barbEdit->barbControl(), SLOT(receiveSelectionChanged()));
+	connect(glWidget, SIGNAL(featherSelectionChanged()), m_barbEdit->barbControl(), SLOT(receiveSelectionChanged()));
 	connect(m_featherEdit->uvView(), SIGNAL(shapeChanged()), m_barbEdit->barbView(), SLOT(receiveShapeChanged()));
 	connect(glWidget, SIGNAL(renderResChanged(QSize)), m_renderEdit, SLOT(resizeRenderView(QSize)));
 	connect(m_renderEdit, SIGNAL(cancelRender()), glWidget, SLOT(receiveCancelRender()));
-
+	connect(m_barbEdit->barbControl(), SIGNAL(shapeChanged()), glWidget, SLOT(receiveBarbChanged()));
+	
 	std::cout<<"Ready\n";
 	statusBar()->showMessage(tr("Ready"));
 }
@@ -228,10 +230,10 @@ void Window::createMenus()
 	
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showFeatherEditAct);
+	windowMenu->addAction(showBarbEditAct);
 	windowMenu->addAction(showBrushControlAct);
 	windowMenu->addAction(showSceneEditAct);
 	windowMenu->addAction(showTimeControlAct);
-	windowMenu->addAction(showBarbEditAct);
 	windowMenu->addAction(showRenderEditAct);
 	
 	updateRecentFileActions();

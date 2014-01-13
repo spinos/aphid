@@ -21,7 +21,6 @@ public:
 	
 	MlFeather * addFeatherExample();
 	MlFeather * addFeatherExampleId(unsigned idx);
-	bool selectFeatherExample(unsigned x);
 	
 	unsigned selectedFeatherExampleId() const;
 	bool removeSelectedFeatherExample();
@@ -35,6 +34,10 @@ public:
 	bool hasFeatherExample();
 
 	void setCollision(CollisionRegion * skin);
+	
+	virtual bool selectFeatherExample(unsigned x);
+protected:
+	
 private:
 	unsigned numFeatherExamples() const;
 	bool featherIdExists(unsigned idx) const;

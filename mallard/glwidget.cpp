@@ -80,7 +80,7 @@ GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
 	perspCamera()->setNearClipPlane(1.f);
 	perspCamera()->setFarClipPlane(100000.f);
 	usePerspCamera();
-	defaultLighting();
+	cleanSheet();
 }
 //! [0]
 
@@ -818,5 +818,17 @@ void GLWidget::showLights() const
 	if(interactMode() == ToolContext::MoveTransform || interactMode() == ToolContext::RotateTransform) {
 		for(unsigned i = 0; i < numLights(); i++) getDrawer()->transform(getLight(i));
 	}
+}
+
+bool GLWidget::selectFeatherExample(unsigned x)
+{
+	bool r = MlFeatherCollection::selectFeatherExample(x);
+	emit featherSelectionChanged();
+	return r;
+}
+
+void GLWidget::receiveBarbChanged()
+{
+	setDirty();
 }
 //:~

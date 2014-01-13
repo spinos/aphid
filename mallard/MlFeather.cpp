@@ -154,7 +154,7 @@ void MlFeather::verbose()
 	std::cout<<"\n n segment "<<numSegment();
 	std::cout<<"\n length "<<shaftLength();
 	std::cout<<"\n base uv ("<<baseUV().x<<","<<baseUV().y<<")";
-	std::cout<<"\n shaft shrink "<<m_shaftShrink<<"\n";
+	std::cout<<"\n shaft shrink "<<m_shaftShrink;
 	std::cout<<"\n barb shrink "<<m_barbShrink<<"\n";
 }
 
@@ -269,7 +269,7 @@ void MlFeather::samplePosition(unsigned nu, unsigned nv, int side, float lod)
 	float rootWidth = scaledShaftLength();
 	if(type() == 1) rootWidth = quilly()[0] * m_scale;
 	
-	rootWidth *= m_widthScale / (float)nu;
+	rootWidth *= m_barbWidthScale / (float)nu;
 
 	float tipWidth = rootWidth * (1.f - m_barbShrink);
 

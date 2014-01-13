@@ -80,11 +80,14 @@ public:
 	
 	QString openSheet(QString name);
 	
+	virtual bool selectFeatherExample(unsigned x);
+	
 signals:
 	void sceneNameChanged(QString name);
 	void sendMessage(QString msg);
 	void sendFeatherEditBackground(QString name);
 	void renderResChanged(QSize s);
+	void featherSelectionChanged();
 public slots:
 	void cleanSheet();
 	void saveSheet();
@@ -99,6 +102,7 @@ public slots:
 	void receiveFloodRegion(int state);
 	void receiveEraseRegion(int state);
 	void receiveCancelRender();
+	void receiveBarbChanged();
 protected:
     virtual void clientDraw();
 	virtual void focusOutEvent(QFocusEvent * event);

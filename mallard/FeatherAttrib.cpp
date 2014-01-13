@@ -19,5 +19,5 @@ FeatherAttrib::FeatherAttrib()
 	m_separateStrength = 0.f;
 	m_barbShrink = .5f;
 	m_shaftShrink = .5f;
-	m_widthScale = .67f;
+	m_barbWidthScale = .67f;
 }
