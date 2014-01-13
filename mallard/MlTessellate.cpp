@@ -70,15 +70,23 @@ void MlTessellate::evaluate(MlFeather * feather)
 		curF += 3;
 	}
 	curF = 0;
-	Vector3F N;
+	Vector3F N, deviateL, deviateR;
 	for(short i = 0; i < feather->numSegment(); i++) {
 		N = *feather->normal(i);
-		m_normals[curF] = N;
-		m_normals[curF+1] = N;
-		m_normals[curF+2] = N;
+		deviateR = m_cvs[curF + 1] - m_cvs[curF];
+		deviateL = m_cvs[curF + 2] - m_cvs[curF];
+		m_normals[curF] = (N + deviateR * 0.7f + deviateL * 0.7f).normal();
+		
+		deviateR = deviateR.cross(N);
+		deviateR.normalize();
+		m_normals[curF+1] = (N + deviateR * 0.23f).normal();
+		
+		deviateL = deviateL.cross(N);
+		deviateL.normalize();
+		m_normals[curF+2] = (N + deviateL * 0.23f).normal();
 		curF += 3;
 	}
-	m_normals[curF] = N;
-	m_normals[curF+1] = N;
-	m_normals[curF+2] = N;
+	m_normals[curF] = m_normals[curF - 3];
+	m_normals[curF+1] = m_normals[curF - 2];
+	m_normals[curF+2] = m_normals[curF - 1];
 }
