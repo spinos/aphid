@@ -133,7 +133,7 @@ void MlFeather::getBoundingBox(BoundingBox & box)
 	}
 }
 
-float * MlFeather::angles() const
+Float2 * MlFeather::angles() const
 {
 	return m_rachis->angles();
 }

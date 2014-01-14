@@ -52,10 +52,11 @@ void BarbView::sampleShape()
 	m_f->m_shaftShrink = m_shaftShrink;
 	m_f->m_barbWidthScale = m_barbWidthScale;
 
-	float * dst = m_f->angles();
+	Float2 * dst = m_f->angles();
 	const short ns = m_f->numSegment();
 	for(short s=0; s < ns; s++) {
-		dst[s] = -0.4f * s / (float)ns;
+		dst[s].x = -0.4f * s / (float)ns;
+		dst[s].y = 0.1f;
 	}
 	m_f->bend();
 	m_f->testVane();

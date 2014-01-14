@@ -20,7 +20,7 @@ public:
 	
 	void compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned end);
 
-	float * angles(unsigned idx) const;
+	Float2 * angles(unsigned idx) const;
 	unsigned sampleIdx(unsigned idx) const;
 	void recordAngles(MlCalamus * c, unsigned idx);
 	void reuseAngles(MlCalamus * c, unsigned idx);
@@ -36,6 +36,6 @@ private:
 	unsigned * m_sampleIndices;
 	short * m_sampleNSegs;
 	unsigned * m_angleStart;
-    float * m_angles;
+    Float2 * m_angles;
 	float * m_sampleBend;
 };

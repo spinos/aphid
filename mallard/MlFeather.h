@@ -27,7 +27,7 @@ public:
 	short featherId() const;
 	
 	void getBoundingBox(BoundingBox & box);
-	float * angles() const;
+	Float2 * angles() const;
 	float bendDirection() const;
 	void verbose();
 	

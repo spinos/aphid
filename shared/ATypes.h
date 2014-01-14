@@ -34,6 +34,17 @@ struct Float3 {
 	float x, y, z;
 };
 
+struct Float2 {
+	Float2(): x(0.f), y(0.f)
+	{}
+	
+	Float2(float a, float b)
+	: x(a), y(b)
+	{}
+	
+	float x, y;
+};
+
 template<typename T>
 struct VectorN {
 	VectorN() {

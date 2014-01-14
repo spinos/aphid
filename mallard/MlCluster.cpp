@@ -116,10 +116,10 @@ void MlCluster::createAngles(MlCalamusArray * calamus)
 	}
 	
 	if(m_angles) delete[] m_angles;
-	m_angles = new float[numAngles];
+	m_angles = new Float2[numAngles];
 }
 
-float * MlCluster::angles(unsigned idx) const
+Float2 * MlCluster::angles(unsigned idx) const
 {
     return &m_angles[m_angleStart[idx]];
 }
@@ -131,8 +131,8 @@ unsigned MlCluster::sampleIdx(unsigned idx) const
 
 void MlCluster::recordAngles(MlCalamus * c, unsigned idx)
 {
-	float * dst = angles(idx);
-	float * src = c->feather()->angles();
+	Float2 * dst = angles(idx);
+	Float2 * src = c->feather()->angles();
 	const short ns = c->featherNumSegment();
 	for(short i = 0; i < ns; i++) dst[i] = src[i];
 	
@@ -141,8 +141,8 @@ void MlCluster::recordAngles(MlCalamus * c, unsigned idx)
 
 void MlCluster::reuseAngles(MlCalamus * c, unsigned idx)
 {
-	float * src = angles(idx);
-	float * dst = c->feather()->angles();
+	Float2 * src = angles(idx);
+	Float2 * dst = c->feather()->angles();
 	const short ns = c->featherNumSegment();
 	for(short i = 0; i < ns; i++) dst[i] = src[i];
 }

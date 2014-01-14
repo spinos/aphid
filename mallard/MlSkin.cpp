@@ -28,7 +28,7 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 	if(!bodyMesh()->hasVertexData("weishell")) {
 		float * disw = bodyMesh()->perVertexFloat("weishell");
 		const unsigned nv = bodyMesh()->getNumVertices();
-		for(unsigned i = 0; i < nv; i++) disw[i] = .5f;
+		for(unsigned i = 0; i < nv; i++) disw[i] = 0.f;
 	}
 	CollisionRegion::useRegionElementVertexVector("aftshell");
 }
@@ -450,7 +450,7 @@ void MlSkin::computeVertexDisplacement()
 	topology()->calculateSmoothedNormal(dis1);
 	
 	for(unsigned i = 0; i < nv; i++) {
-		dis1[i] = dis1[i] * (1.f - disw[i]) + nor[i] * disw[i];
+		dis1[i] = dis1[i] * disw[i] + nor[i] * (1.f - disw[i]);
 		dis1[i].normalize();
 	}
 }

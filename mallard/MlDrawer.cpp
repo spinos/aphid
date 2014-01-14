@@ -292,11 +292,11 @@ void MlDrawer::writeToCache(const std::string & sliceName)
 		MlFeather * f = c->feather();
 		f->getBoundingBox(box);
 		
-		float * src = f->angles();
+		Float2 * src = f->angles();
 		for(j = 0; j < f->numSegment(); j++) {
-			apb[iblock] = src[j];
-			iblock++;
-			ifull++;
+			apb[iblock++] = src[j].x;
+			apb[iblock++] = src[j].y;
+			ifull += 2;
 			if(iblock == blockL) {
 				writeSliceFloat("/ang", sliceName, ifull - iblock, iblock, apb);
 				iblock = 0;
@@ -360,12 +360,13 @@ void MlDrawer::readFromCache(const std::string & sliceName)
 		
 		MlFeather * f = c->feather();
 		
-		float *dst = f->angles();
+		Float2 *dst = f->angles();
 		
 		for(j = 0; j < f->numSegment(); j++) {
-			dst[j] = apb[iblock];
-			iblock++;
-			ifull++;
+			dst[j].x = apb[iblock++];
+			dst[j].y = apb[iblock++];
+			
+			ifull += 2;
 			if(iblock == blockL) {
 				readSliceFloat("/ang", sliceName, ifull, blockL, apb);
 				iblock = 0;

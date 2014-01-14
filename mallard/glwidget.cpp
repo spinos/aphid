@@ -270,7 +270,6 @@ void GLWidget::selectRegion()
     }
     skin()->selectRegion(ctx->m_componentIdx, ctx->m_patchUV);
 	skin()->resetActiveRegion();
-	//skin()->setFloodCondition(MlSkin::ByColor);
 }
 
 void GLWidget::floodFeather()
@@ -280,10 +279,6 @@ void GLWidget::floodFeather()
 	
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
 	brush()->resetToe();
-	
-	//Vector3F rr = getIncidentRay()->m_dir;
-	//rr.reverse();
-	//if(rr.dot(brush()->normal()) < .34f) return;
 	
 	FloodCondition condition;
 	condition.setCenter(ctx->m_hitP);
