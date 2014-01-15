@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include <boost/timer.hpp>
 class BaseCamera;
 class LightGroup;
 class RenderOptions;
@@ -28,8 +29,10 @@ public:
 	virtual void render();
 	virtual void postRender();
 protected:
-	
+	void startTimer();
+	float elapsedTime();
 private:
+    boost::timer m_met;
 	BaseCamera * m_camera;
 	LightGroup * m_lights;
 	RenderOptions * m_options;

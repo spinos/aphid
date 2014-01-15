@@ -49,6 +49,7 @@ void MlEngine::preRender()
 	m_barb->setFieldOfView(camera()->fieldOfView());
 	m_workingThread = boost::thread(boost::bind(&BarbWorks::createBarbBuffer, this->m_barb, this));
 	m_progressingThread = boost::thread(boost::bind(&MlEngine::monitorProgressing, this, this->m_barb));
+	startTimer();
 }
 
 void MlEngine::render()
@@ -59,6 +60,11 @@ void MlEngine::render()
 #else
 	m_workingThread = boost::thread(boost::bind(&MlEngine::testOutput, this));
 #endif
+}
+
+void MlEngine::postRender()
+{
+    std::cout<<"render time: "<<elapsedTime()<<" seconds\n";
 }
 
 void MlEngine::interruptRender()
@@ -97,7 +103,8 @@ void MlEngine::fineOutput()
     AiNodeSetInt(options, "xres", imageSizeX);
     AiNodeSetInt(options, "yres", imageSizeY);
     AiNodeSetInt(options, "AA_samples", aas);
-    AiNodeSetInt(options, "GI_diffuse_samples", 1);
+    AiNodeSetInt(options, "GI_diffuse_samples", 2);
+    AiNodeSetInt(options, "auto_transparency_depth", 12);
 	
     AtNode* driver = AiNode("driver_foo");
     AiNodeSetStr(driver, "name", "output/foo");
@@ -137,6 +144,7 @@ void MlEngine::fineOutput()
     
     AiEnd();
 #endif
+    postRender();
 }
 
 void MlEngine::testOutput()
@@ -315,8 +323,7 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
             asrc++;
         }
 	}
-	std::clog<<"asrc "<<asrc<<" np "<<np<<"\n";
-	
+
 	AiNodeSetArray(curveNode, "num_points", counts);
 	AiNodeSetArray(curveNode, "points", points);
 	AiNodeSetArray(curveNode, "radius", radius);
@@ -335,10 +342,10 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 	AiNodeSetArray(curveNode, "colors", colors);
 
 	AtNode *hair = AiNode("hair");
-	AiNodeSetFlt(hair, "gloss", 3);
-	AiNodeSetFlt(hair, "gloss2", 100);
-	AiNodeSetFlt(hair, "spec", 10.f);
-	AiNodeSetFlt(hair, "spec2", 1.f);
+	AiNodeSetFlt(hair, "gloss", 5);
+	AiNodeSetFlt(hair, "gloss2", 50);
+	AiNodeSetFlt(hair, "spec", 2.f);
+	AiNodeSetFlt(hair, "spec2", 1.5f);
 	//AiNodeSetRGB(hair, "rootcolor", 0.2f, 0.2f, 0.2f);
 	//AiNodeSetRGB(hair, "tipcolor", 0.1f, 0.1f, 0.1f);
 	
@@ -385,9 +392,9 @@ void MlEngine::translateDistantLight(DistantLight * l)
 {
 #ifdef WIN32
 	AtNode * light = AiNode("distant_light");
-    //AiNodeSetInt(light, "samples", 3);
     AiNodeSetStr(light, "name", l->name().c_str());
     AiNodeSetFlt(light, "intensity", l->intensity());
+    AiNodeSetInt(light, "samples", 2);
     AtMatrix matrix;
 	setMatrix(l->worldSpace(), matrix);
     AiNodeSetMatrix(light, "matrix", matrix);
@@ -400,6 +407,8 @@ void MlEngine::translatePointLight(PointLight * l)
 	AtNode * light = AiNode("point_light");
     AiNodeSetStr(light, "name", l->name().c_str());
     AiNodeSetFlt(light, "intensity", l->intensity() * 1000.f);
+    AiNodeSetInt(light, "samples", 2);
+    AiNodeSetBool(light, "cast_shadows", false);
     AtMatrix matrix;
 	setMatrix(l->worldSpace(), matrix);
     AiNodeSetMatrix(light, "matrix", matrix);

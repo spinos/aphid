@@ -47,3 +47,13 @@ RenderOptions * RenderEngine::options() const
 void RenderEngine::preRender() {}
 void RenderEngine::render() {}
 void RenderEngine::postRender() {}
+
+void RenderEngine::startTimer()
+{
+    m_met.restart();
+}
+
+float RenderEngine::elapsedTime()
+{
+    return m_met.elapsed();
+}

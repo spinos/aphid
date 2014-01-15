@@ -21,6 +21,7 @@ public:
 	void setWorks(BarbWorks * w);
 	virtual void preRender();
 	virtual void render();
+	virtual void postRender();
 	void interruptRender();
 protected:
 
