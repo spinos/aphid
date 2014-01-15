@@ -8,7 +8,7 @@ SceneTreeModel::SceneTreeModel(MlScene * scene, QObject *parent)
     : QAbstractItemModel(parent)
 {
     QList<QVariant> rootData;
-    rootData << "Title" << "Summary";
+    rootData << "Attribute" << "Value";
     rootItem = new SceneTreeItem(rootData);
     setupModelData(scene, rootItem);
 }
@@ -168,4 +168,25 @@ void SceneTreeModel::setupModelData(MlScene * scene, SceneTreeItem *parent)
 
         number++;
     }*/
+    addBase(parents, "options", 0);
+    addBase(parents, "lights", 0);
+    addBase(parents, "key", 1);
+    addBase(parents, "kd", 2);
+    addBase(parents, "models", 0);
+    addBase(parents, "body", 1);
+    addBase(parents, "shaders", 0);
+    addBase(parents, "hair", 1);
+}
+
+void SceneTreeModel::addBase(QList<SceneTreeItem*> & parents, const std::string & baseName, int level)
+{
+    for(int i=0; i < level; i++) 
+        parents << parents.last()->child(parents.last()->childCount()-1);
+
+    QList<QVariant> columnData;
+    columnData << QString(tr(baseName.c_str())) << QString(tr("1"));
+    parents.last()->appendChild(new SceneTreeItem(columnData, parents.last()));
+    for(int i=0; i < level; i++) parents.pop_back();
+    qDebug()<<parents;
+    
 }

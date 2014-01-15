@@ -27,7 +27,7 @@ public:
 
 private:
     void setupModelData(MlScene * scene, SceneTreeItem *parent);
-
+    void addBase(QList<SceneTreeItem*> & parents, const std::string & baseName, int level);
     SceneTreeItem *rootItem;
 };
 
