@@ -9,7 +9,13 @@
 
 #include "KMeansClustering.h"
 
-KMeansClustering::KMeansClustering() : m_centroid(0), m_group(0), m_sum(0), m_countPerGroup(0), m_valid(0) {}
+KMeansClustering::KMeansClustering() : m_centroid(0), m_group(0), m_sum(0), m_countPerGroup(0), m_valid(0) 
+{
+	m_k = 4;
+	m_centroid = new Vector3F[m_k];
+	m_sum = new Vector3F[m_k];
+	m_countPerGroup = new unsigned[m_k];
+}
 
 KMeansClustering::~KMeansClustering() 
 {
@@ -17,11 +23,23 @@ KMeansClustering::~KMeansClustering()
 	if(m_sum) delete[] m_sum;
 	if(m_group) delete[] m_group;
 	if(m_countPerGroup) delete[] m_countPerGroup;
+	m_centroid = 0;
+	m_sum = 0;
+	m_group = 0;
+	m_countPerGroup = 0;
 }
 
 void KMeansClustering::setK(unsigned k)
 {
+	if(k == m_k) return;
+	
+	if(k < m_k) {
+		m_k = k;
+		return;
+	}
+	
 	m_k = k;
+	
 	if(m_centroid) delete[] m_centroid;
 	m_centroid = new Vector3F[k];
 	if(m_sum) delete[] m_sum;

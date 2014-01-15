@@ -195,7 +195,7 @@ void MlDrawer::computeBufferIndirection()
 		c->setBufferStart(loc);
 		
 		nvpf = m_featherTess->numIndices();
-
+		
 		expandBy(nvpf);
 		
 		loc += nvpf;

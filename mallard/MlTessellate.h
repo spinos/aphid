@@ -20,5 +20,6 @@ public:
 	void evaluate(MlFeather * feather);
 
 private:
+	void initIndices();
 	unsigned m_numSegment;
 };

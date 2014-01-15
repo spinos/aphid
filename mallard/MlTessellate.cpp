@@ -11,7 +11,12 @@
 #include <MeshTopology.h>
 #include <AccPatchMesh.h>
 #include <MlFeather.h>
-MlTessellate::MlTessellate() : m_numSegment(0) {}
+MlTessellate::MlTessellate() 
+{
+	m_numSegment = 8;
+	create((m_numSegment + 1) * 3, m_numSegment * 2 * 4);
+	initIndices();
+}
 
 MlTessellate::~MlTessellate() {}
 
@@ -39,9 +44,14 @@ void MlTessellate::setFeather(MlFeather * feather)
 	
 	create((m_numSegment + 1) * 3, m_numSegment * 2 * 4);
 	
+	initIndices();
+}
+
+void MlTessellate::initIndices()
+{
 	unsigned * ind = indices();
 	unsigned curF = 0;
-	for(short i = 0; i < feather->numSegment(); i++) {
+	for(short i = 0; i < m_numSegment; i++) {
 		ind[curF] = 3 * i;
 		ind[curF + 1] = 3 * i + 1;
 		ind[curF + 2] = 3 * (i + 1) + 1;
