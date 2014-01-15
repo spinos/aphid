@@ -112,11 +112,13 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 		
 		dL = Vector3F(testP, pop).length();
 	
-		if(dL < segL) bendWei = 1.f;
-		else bendWei = (dL - segL)/segL/10.f;
+		bendWei = dL/segL;
+		if(bendWei > 1.f) bendWei = 1.f;
 
 		toTestP = testP - segP;
 		topop = pop - segP;
+		
+		pushAngle = 0.f;
 		if(toTestP.dot(topop) > 0.f) pushAngle = pushToSurface(topop, invSpace);
 		else bendWei = 0.f;
 		
@@ -126,16 +128,15 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 		
 		segRot = rota.x;
 		if(segRot > 0.f) segRot *= 0.5f;
-		
-		curAngle = pushAngle * bendWei;
+
+		curAngle = pushAngle;
 		curAngle += segRot * bendWei;
-		curAngle += 0.17f * (1.f - m_lengths[i] * 0.4f);
-		curAngle += smoothAngle * m_lengthPortions[i] * 0.5f;
+		curAngle += 0.2f * m_lengths[i];
 		
-		m_spaces[i].rotateZ(rota.y * bendWei);
+		m_spaces[i].rotateZ(rota.y);
 		m_spaces[i].rotateY(curAngle);
 		m_angles[i].x = curAngle;
-		m_angles[i].y = rota.y * bendWei;
+		m_angles[i].y = rota.y;
 
 		rotateForward(m_spaces[i], segSpace);
 		moveForward(segSpace, segL, segP);
@@ -164,7 +165,7 @@ float MlRachis::pushToSurface(const Vector3F & wv, const Matrix33F & space)
 	Vector3F ov = space.transform(wv);
 	ov.normalize();
 	ov.y = 0.f;
-	ov.x += 0.1f;
+	ov.x += 0.05f;
 	ov.normalize();
 	float a = acos(Vector3F::ZAxis.dot(ov));
 	if(ov.x < 0.f) a = 0.f;
@@ -174,21 +175,18 @@ float MlRachis::pushToSurface(const Vector3F & wv, const Matrix33F & space)
 Float3 MlRachis::matchNormal(const Vector3F & wv, const Matrix33F & space)
 {
 	Vector3F ov = space.transform(wv);
-	ov.normalize();
-	
+
 	Vector3F va = ov;
 	va.y = 0.f;
-	va.z -= 0.1f;
+	va.z -= 0.05f;
 	va.normalize();
 	float a = acos(Vector3F::XAxis.dot(va));
-	//if(a > .5f) a = .5f;
 	if(va.z > 0.f) a = -a;
 	
 	Vector3F vb = ov;
 	vb.z = 0.f;
 	vb.normalize();
 	float b = acos(Vector3F::XAxis.dot(vb));
-	//if(b > .25f) b = .25f;
 	if(vb.y < 0.f) b = -b;
 	
 	return Float3(a, b, 0.f);
