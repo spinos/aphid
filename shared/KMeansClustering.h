@@ -27,7 +27,7 @@ public:
 	unsigned group(unsigned idx) const;
 	unsigned countPerGroup(unsigned idx) const;
 protected:
-    virtual void setK(unsigned k);
+    virtual void setK(const unsigned & k);
 	virtual void setN(unsigned n);
 	void setValid(char val);
 	

@@ -28,7 +28,7 @@ public:
 	short sampleNSeg(unsigned idx) const;
 	float sampleBend(unsigned idx) const;
 protected:
-    virtual void setK(unsigned k);
+    virtual void setK(const unsigned & k);
 	
 private:
 	void assignGroupSample(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned grp);

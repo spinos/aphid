@@ -19,13 +19,13 @@
 #include <boost/timer.hpp>
 MlDrawer::MlDrawer()
 {
-	m_featherTess = new MlTessellate;
+	//m_featherTess = new MlTessellate;
 	m_currentFrame = -9999;
 }
 
 MlDrawer::~MlDrawer() 
 {
-	delete m_featherTess;
+	//delete m_featherTess;
 }
 
 void MlDrawer::draw() const
@@ -40,7 +40,8 @@ void MlDrawer::hideAFeather(MlCalamus * c)
 	
 	setIndex(loc);
 	
-	m_featherTess->setFeather(c->feather());
+	//m_featherTess->setFeather(c->feather());
+	m_featherTess = c->feather()->tessellator();
 	
 	unsigned i;
 	const unsigned nvpf = m_featherTess->numIndices();
@@ -123,7 +124,8 @@ void MlDrawer::addToBuffer()
 	for(i = 0; i < num; i++) {
 		MlCalamus * c = skin()->getCreated(i);
 		
-		m_featherTess->setFeather(c->feather());
+		//m_featherTess->setFeather(c->feather());
+		m_featherTess = c->feather()->tessellator();
 		
 		setIndex(loc);
 		c->setBufferStart(loc);
@@ -189,13 +191,15 @@ void MlDrawer::computeBufferIndirection()
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin()->getCalamus(i);
 		
-		m_featherTess->setFeather(c->feather());
+		//m_featherTess->setFeather(c->feather());
+		m_featherTess = c->feather()->tessellator();
 		
 		setIndex(loc);
 		c->setBufferStart(loc);
 		
+		//nvpf = m_featherTess->numIndices();
 		nvpf = m_featherTess->numIndices();
-		
+
 		expandBy(nvpf);
 		
 		loc += nvpf;
@@ -206,7 +210,7 @@ void MlDrawer::computeBufferIndirection()
 
 void MlDrawer::tessellate(MlFeather * f)
 {
-	m_featherTess->setFeather(f);
+	//m_featherTess->setFeather(f);
 	m_featherTess->evaluate(f);
 }
 

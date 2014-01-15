@@ -24,7 +24,7 @@ public:
 	unsigned numElementPerBlock() const;
 	unsigned numBlock() const;
 	
-	void expandBy(unsigned size);
+	void expandBy(const unsigned & size);
 	
 	void begin();
 	void next();

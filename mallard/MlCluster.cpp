@@ -35,17 +35,18 @@ MlCluster::~MlCluster()
 	m_sampleBend = 0;
 }
 
-void MlCluster::setK(unsigned k)
+void MlCluster::setK(const unsigned & k)
 {
-    KMeansClustering::setK(k);
-    if(m_sampleIndices) delete[] m_sampleIndices;
-    m_sampleIndices = new unsigned[k];
-    if(m_angleStart) delete[] m_angleStart;
-    m_angleStart = new unsigned[k];
+	KMeansClustering::setK(k);
+	const int k2 = K()+1;
+	if(m_sampleIndices) delete[] m_sampleIndices;
+	m_sampleIndices = new unsigned[k2];
+	if(m_angleStart) delete[] m_angleStart;
+	m_angleStart = new unsigned[k2];
 	if(m_sampleNSegs) delete[] m_sampleNSegs;
-	m_sampleNSegs = new short[k];
+	m_sampleNSegs = new short[k2];
 	if(m_sampleBend) delete[] m_sampleBend;
-	m_sampleBend = new float[k];
+	m_sampleBend = new float[k2];
 }
 
 void MlCluster::compute(MlCalamusArray * calamus, AccPatchMesh * mesh, unsigned begin, unsigned end)

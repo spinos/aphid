@@ -15,6 +15,8 @@ KMeansClustering::KMeansClustering() : m_centroid(0), m_group(0), m_sum(0), m_co
 	m_centroid = new Vector3F[m_k];
 	m_sum = new Vector3F[m_k];
 	m_countPerGroup = new unsigned[m_k];
+	m_n = 64;
+	m_group = new unsigned[m_n];
 }
 
 KMeansClustering::~KMeansClustering() 
@@ -29,7 +31,7 @@ KMeansClustering::~KMeansClustering()
 	m_countPerGroup = 0;
 }
 
-void KMeansClustering::setK(unsigned k)
+void KMeansClustering::setK(const unsigned & k)
 {
 	if(k == m_k) return;
 	
@@ -40,16 +42,24 @@ void KMeansClustering::setK(unsigned k)
 	
 	m_k = k;
 	
+	int k1 = k;
+	if(k1 < 2) k1 = 2;
+	
 	if(m_centroid) delete[] m_centroid;
-	m_centroid = new Vector3F[k];
+	m_centroid = new Vector3F[k1];
 	if(m_sum) delete[] m_sum;
-	m_sum = new Vector3F[k];
+	m_sum = new Vector3F[k1];
 	if(m_countPerGroup) delete[] m_countPerGroup;
-	m_countPerGroup = new unsigned[k];
+	m_countPerGroup = new unsigned[k1];
 }
 
 void KMeansClustering::setN(unsigned n)
 {
+	if(m_n == n) return;
+	if(n < m_n) {
+		m_n = n;
+		return;
+	}
 	m_n = n;
 	if(m_group) delete[] m_group;
 	m_group = new unsigned[n];

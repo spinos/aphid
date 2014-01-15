@@ -3,12 +3,12 @@
 #include "MlVane.h"
 #include <CollisionRegion.h>
 #include <AdaptableStripeBuffer.h>
-
+#include <MlTessellate.h>
 MlFeather::MlFeather()
 {
 	m_rachis = new MlRachis;
 	m_vane = new MlVane[2];
-	
+	m_tessel = new MlTessellate; 
 	simpleCreate();
 	
 	setSeed(1);
@@ -22,12 +22,14 @@ MlFeather::~MlFeather()
 {
 	delete m_rachis;
 	delete[] m_vane;
+	delete m_tessel;
 }
 
 void MlFeather::createNumSegment(short x)
 {
 	BaseFeather::createNumSegment(x);
 	m_rachis->create(x);
+	m_tessel->setFeather(this);
 }
 
 void MlFeather::createVanes()
@@ -318,4 +320,9 @@ Vector3F * MlFeather::patchWingP(short seg, short side)
 {
 	if(type() == 0) return m_vane[side].railCV(seg, 3);
 	return m_vane[side].railCV(3, seg);
+}
+
+MlTessellate * MlFeather::tessellator() const
+{
+	return m_tessel;
 }

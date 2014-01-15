@@ -28,6 +28,9 @@ void BlockDrawBuffer::initializeBuffer()
 {
 	if(numBlock() > 0) clearBuffer();
 	m_blocks.push_back(new PtrTup);
+	m_blocks.push_back(new PtrTup);
+	m_blocks.push_back(new PtrTup);
+	m_blocks.push_back(new PtrTup);
 	begin();
 	m_taken = 0;
 }
@@ -56,12 +59,13 @@ unsigned BlockDrawBuffer::numBlock() const
 	return m_blocks.size();
 }
 
-void BlockDrawBuffer::expandBy(unsigned size)
+void BlockDrawBuffer::expandBy(const unsigned & size)
 {
 	if(m_current + size >= capacity()) {
-		unsigned blockToCreate = (m_current + size) / numElementPerBlock() + 1 - numBlock();
+		const unsigned blockToCreate = (m_current + size) / numElementPerBlock() + 1 - numBlock();
 		for(unsigned i = 0; i < blockToCreate; i++) {
-			m_blocks.push_back(new PtrTup);
+			PtrTup * t = new PtrTup();
+			m_blocks.push_back(t);
 		}
 	}
 	if(m_current + size > m_taken)

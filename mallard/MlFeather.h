@@ -5,6 +5,7 @@
 class MlRachis;
 class CollisionRegion;
 class MlVane;
+class MlTessellate;
 class MlFeather : public DeformableFeather {
 public:
     MlFeather();
@@ -54,6 +55,8 @@ public:
 	
 	Vector3F * patchCenterP(short seg);
 	Vector3F * patchWingP(short seg, short side);
+	
+	MlTessellate * tessellator() const;
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	
@@ -66,4 +69,5 @@ private:
 	MlVane * m_vane;
 	float m_scale;
 	short m_id;
+	MlTessellate * m_tessel;
 };
