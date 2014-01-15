@@ -182,6 +182,7 @@ void MlDrawer::rebuildBuffer()
 void MlDrawer::computeBufferIndirection()
 {
 	if(!skin()) return;
+	
 	const unsigned nc = numFeathers();
 	unsigned i, nvpf;
 	unsigned loc = 0;

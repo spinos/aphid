@@ -36,6 +36,6 @@ private:
 	unsigned * m_sampleIndices;
 	short * m_sampleNSegs;
 	unsigned * m_angleStart;
-    Float2 * m_angles;
-	float * m_sampleBend;
+    float * m_sampleBend;
+	Float2 * m_angles;
 };

@@ -25,14 +25,10 @@ void CalamusSkin::cleanup()
 {
 	clearFeather();
 	clearFaceVicinity();
-	if(m_faceCalamusTable) {
-		delete[] m_faceCalamusTable;
-		m_faceCalamusTable = 0;
-	}
-	if(m_perFaceCluster) {
-		delete[] m_perFaceCluster;
-		m_perFaceCluster = 0;
-	}
+	if(m_faceCalamusTable) delete[] m_faceCalamusTable;
+	m_faceCalamusTable = 0;
+	if(m_perFaceCluster) delete[] m_perFaceCluster;
+	m_perFaceCluster = 0;
 }
 
 void CalamusSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
@@ -158,14 +154,6 @@ void CalamusSkin::touchBy(MlCalamus * c, const Vector3F & pos, const Matrix33F &
 	sph.setCenter(d);
 	sph.setRadius(fv);
 	resetCollisionRegionAround(fi, sph);
-	/*
-	if(faceVicinity(fi)->radius() == 0.f) {
-	    resetCollisionRegionAround(fi, sph);
-	    *faceVicinity(fi) = sph;
-	}
-	else if(regionElementStart() != fi || faceVicinity(fi)->expand(sph)) {
-	    resetCollisionRegionAround(fi, sph);
-	}*/
 }
 
 void CalamusSkin::createFaceCluster()

@@ -14,21 +14,23 @@ public:
 	BaseTessellator();
 	virtual ~BaseTessellator();
 	
-	void cleanup();
+	virtual void cleanup();
+	void create(unsigned nv, unsigned ni);
 	
-	
-	Vector3F * vertices() const;
-	Vector3F * normals() const;
-	Vector2F * texcoords() const;
-	unsigned * indices() const;
+	void setNumVertices(unsigned x);
+	void setNumIndices(unsigned x);
+
+	Vector3F * vertices();
+	Vector3F * normals();
+	Vector2F * texcoords();
+	unsigned * indices();
 	unsigned numVertices() const;
 	unsigned numIndices() const;
 	
+private:
 	Vector3F * m_cvs;
 	Vector3F * m_normals;
 	Vector2F * m_uvs;
 	unsigned * m_indices;
 	unsigned m_numVertices, m_numIndices;
-private:
-
 };

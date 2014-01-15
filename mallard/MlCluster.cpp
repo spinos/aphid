@@ -23,11 +23,16 @@ MlCluster::MlCluster()
 
 MlCluster::~MlCluster() 
 {
-    if(m_sampleIndices) delete[] m_sampleIndices;
+	if(m_sampleIndices) delete[] m_sampleIndices;
     if(m_angleStart) delete[] m_angleStart;
     if(m_angles) delete[] m_angles;
 	if(m_sampleNSegs) delete[] m_sampleNSegs;
 	if(m_sampleBend) delete[] m_sampleBend;
+	m_sampleIndices = 0;
+    m_angleStart = 0;
+    m_angles = 0;
+	m_sampleNSegs = 0;
+	m_sampleBend = 0;
 }
 
 void MlCluster::setK(unsigned k)

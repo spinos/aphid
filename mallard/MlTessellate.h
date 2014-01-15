@@ -15,10 +15,10 @@ class MlTessellate : public BaseTessellator {
 public:
 	MlTessellate();
 	virtual ~MlTessellate();
+	virtual void cleanup();
 	void setFeather(MlFeather * feather);
 	void evaluate(MlFeather * feather);
-	void createVertices(MlFeather * feather);
-	void createIndices(MlFeather * feather);
+
 private:
 	unsigned m_numSegment;
 };
