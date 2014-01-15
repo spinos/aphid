@@ -36,9 +36,9 @@ public:
 	void discardActive();
 	
 	void growFeather(const Vector3F & direction);
-	void combFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
-	void scaleFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
-	void pitchFeather(const Vector3F & direction, const Vector3F & center, const float & radius);
+	void combFeather(const Vector3F & direction);
+	void scaleFeather(const Vector3F & direction);
+	void pitchFeather(const Vector3F & direction);
 	void smoothShell(const Vector3F & center, const float & radius, const float & weight);
 	void computeVertexDisplacement();
 	void finishCreateFeather();
@@ -67,9 +67,11 @@ private:
 	bool isActiveFeather(unsigned idx) const;
 	unsigned lastInactive(unsigned last) const;
 	unsigned selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon);
+	void computeAffectWeight(const Vector3F & center, const float & radius);
 private:	
 	std::vector<unsigned> m_activeIndices;
 	unsigned m_numCreatedFeather;
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
+	float * m_affectWeights;
 };

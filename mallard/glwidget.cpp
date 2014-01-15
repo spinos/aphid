@@ -196,17 +196,17 @@ void GLWidget::clientMouseInput()
 	        break;
         case ToolContext::CombBodyContourFeather :
             brush()->setToeByIntersect(&ray);
-            skin()->combFeather(brush()->toeDisplacement(), brush()->heelPosition(), brush()->getRadius());
+            skin()->combFeather(brush()->toeDisplacement());
             m_featherDrawer->updateActive();
 		    break;
         case ToolContext::ScaleBodyContourFeather :
             brush()->setToeByIntersect(&ray);
-            skin()->scaleFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
+            skin()->scaleFeather(brush()->toeDisplacementDelta());
             m_featherDrawer->updateActive();
             break;
         case ToolContext::PitchBodyContourFeather :
             brush()->setToeByIntersect(&ray);
-            skin()->pitchFeather(brush()->toeDisplacementDelta(), brush()->heelPosition(), brush()->getRadius());
+            skin()->pitchFeather(brush()->toeDisplacementDelta());
             m_featherDrawer->updateActive();
             break;
 		case ToolContext::Deintersect :

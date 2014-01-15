@@ -18,9 +18,13 @@
 MlSkin::MlSkin() : m_numCreatedFeather(0)
 {
     m_activeIndices.clear();
+	m_affectWeights = 0;
 }
 
-MlSkin::~MlSkin() {}
+MlSkin::~MlSkin() 
+{
+	if(m_affectWeights) delete[] m_affectWeights;
+}
 
 void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
 {
@@ -88,6 +92,7 @@ void MlSkin::selectAround(unsigned idx, SelectCondition * selcon)
 			m_activeFaces.push_back(t);
 		}
 	}
+	computeAffectWeight(selcon->center(), selcon->maxDistance());
 }
 
 unsigned MlSkin::selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon)
@@ -163,23 +168,19 @@ void MlSkin::growFeather(const Vector3F & direction)
     }
 }
 
-void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, const float & radius)
+void MlSkin::combFeather(const Vector3F & direction)
 {
 	if(direction.length() < 10e-4) return;
 	const unsigned num = numActive();
 	if(num < 1) return;
 	
 	Matrix33F space, rotfrm;
-	Vector3F p, div, zdir;
-	float rotX, drop;
+	Vector3F div, zdir;
+	float rotX;
 	unsigned i;
 	
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
-		
-		getPointOnBody(c, p);
-		drop = Vector3F(p, center).length() / radius;
-		drop = 1.f - drop * drop;
 		
 		tangentSpace(c, space);		
 		space.inverse();
@@ -189,7 +190,7 @@ void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, co
 		
 		zdir.set(0.f, 0.f, 1.f);
 		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
-		zdir += div * drop * .5f;
+		zdir += div * m_affectWeights[i] * .5f;
 		
 		rotX = zdir.angleX();
 
@@ -197,15 +198,14 @@ void MlSkin::combFeather(const Vector3F & direction, const Vector3F & center, co
     }
 }
 
-void MlSkin::scaleFeather(const Vector3F & direction, const Vector3F & center, const float & radius)
+void MlSkin::scaleFeather(const Vector3F & direction)
 {
 	if(direction.length() < 10e-4) return;
 	const unsigned num = numActive();
 	if(num < 1) return;
 	
 	Matrix33F space;
-	Vector3F p, zdir;
-	float drop;
+	Vector3F zdir;
 	unsigned i;
 	
 	float activeMeanScale = 0.f;
@@ -227,26 +227,23 @@ void MlSkin::scaleFeather(const Vector3F & direction, const Vector3F & center, c
 	if(direction.dot(activeMeanDir) < 0.f) activeMeanScale *= .9f;
 	else activeMeanScale *= 1.1f;
 	
+	float wei;
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
-		
-		getPointOnBody(c, p);
-		drop = Vector3F(p, center).length() / radius;
-		drop = 1.f - drop * drop;
 
-		c->setScale(activeMeanScale * drop + c->realScale() * (1.f - drop));
+		wei = m_affectWeights[i];
+		c->setScale(activeMeanScale * wei + c->realScale() * (1.f - wei));
     }
 }
 
-void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, const float & radius)
+void MlSkin::pitchFeather(const Vector3F & direction)
 {
 	if(direction.length() < 10e-4) return;
 	const unsigned num = numActive();
 	if(num < 1) return;
 	
 	Matrix33F space;
-	Vector3F p, zdir;
-	float drop;
+	Vector3F zdir;
 	unsigned i;
 	
 	float activeMeanPitch = 0.f;
@@ -267,14 +264,12 @@ void MlSkin::pitchFeather(const Vector3F & direction, const Vector3F & center, c
 	if(direction.dot(activeMeanDir) < 0.f) activeMeanPitch -= .1f;
 	else activeMeanPitch += .1f;
 	
+	float wei;
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
-		
-		getPointOnBody(c, p);
-		drop = Vector3F(p, center).length() / radius;
-		drop = 1.f - drop * drop;
 
-		c->setRotateY(activeMeanPitch * drop + c->rotateY() * (1.f - drop));
+		wei = m_affectWeights[i];
+		c->setRotateY(activeMeanPitch * wei + c->rotateY() * (1.f - wei));
     }
 }
 
@@ -479,6 +474,26 @@ void MlSkin::shellUp(std::vector<Vector3F> & dst)
 		dst.push_back(p);
 		dst.push_back(p + u);
 	}
+}
+
+void MlSkin::computeAffectWeight(const Vector3F & center, const float & radius)
+{
+	if(m_affectWeights) delete[] m_affectWeights;
+	m_affectWeights = 0;
+	const unsigned num = numActive();
+	if(num < 1) return;
+	m_affectWeights = new float[num];
+	float drop;
+	Vector3F p;
+	for(unsigned i =0; i < num; i++) {
+		MlCalamus * c = getActive(i);
+		
+		getPointOnBody(c, p);
+		drop = Vector3F(p, center).length() / radius;
+		drop = 1.f - drop * drop;
+
+		m_affectWeights[i] = drop;
+    }
 }
 
 void MlSkin::verbose() const
