@@ -176,6 +176,9 @@ void SceneTreeModel::setupModelData(MlScene * scene, SceneTreeItem *parent)
     addBase(parents, "body", 1);
     addBase(parents, "shaders", 0);
     addBase(parents, "hair", 1);
+	
+	int nb = rootItem->childCount();
+	for(int i=0; i < nb; i++) qDebug()<<" "<<rootItem->child(i)->data(0);
 }
 
 void SceneTreeModel::addBase(QList<SceneTreeItem*> & parents, const std::string & baseName, int level)
@@ -184,9 +187,7 @@ void SceneTreeModel::addBase(QList<SceneTreeItem*> & parents, const std::string 
         parents << parents.last()->child(parents.last()->childCount()-1);
 
     QList<QVariant> columnData;
-    columnData << QString(tr(baseName.c_str())) << QString(tr("1"));
+    columnData << QString(tr(baseName.c_str()));
     parents.last()->appendChild(new SceneTreeItem(columnData, parents.last()));
     for(int i=0; i < level; i++) parents.pop_back();
-    qDebug()<<parents;
-    
 }
