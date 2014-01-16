@@ -417,7 +417,7 @@ std::string GLWidget::chooseSaveFileName()
 							tr("All Files (*);;Mallard Files (*.mal)"),
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
-	return fileName.toUtf8().data();
+	return validateFileExtension(fileName.toUtf8().data());
 }
 
 void GLWidget::doClear()

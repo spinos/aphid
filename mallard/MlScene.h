@@ -54,6 +54,7 @@ protected:
 	void prepareRender();
 	virtual void importBody(const std::string & fileName);
 	virtual void afterOpen();
+	std::string validateFileExtension(const std::string & fileName) const;
 private:
 	void writeFeatherExamples();
 	void readFeatherExamples();

@@ -21,7 +21,7 @@
 #include <PlaybackControl.h>
 #include <sstream>
 #include <EasemodelUtil.h>
-
+#include <boost/filesystem.hpp>
 void test()
 {
 	std::cout<<"\nh io begin\n";
@@ -437,4 +437,11 @@ void MlScene::afterOpen()
 	m_skin->computeFaceCalamusIndirection();
 	m_skin->computeVertexDisplacement();
 	setCollision(m_skin);
+}
+
+std::string MlScene::validateFileExtension(const std::string & fileName) const
+{
+	boost::filesystem::path p(fileName);
+	if(p.extension() != ".mal") p = p.replace_extension(".mal");
+	return p.string();
 }
