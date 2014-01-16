@@ -139,11 +139,17 @@ void MlScene::doClear()
 {
 	clearFeatherExamples();
 	initializeFeatherExample();
-	m_skin->cleanup();
-	m_accmesh->cleanup();
-	disableDeformer();
+	
+	delete m_skin;
+	m_skin = new MlSkin;
+	delete m_accmesh;
+	m_accmesh = new AccPatchMesh;
+	delete m_deformer;
+	m_deformer = new BakeDeformer;
+	
 	m_featherEditBackgroundName = "unknown";
 	m_featherDistributionName = "unknown";
+	
 	HFile::doClear();
 	clearLights();
 }

@@ -24,6 +24,7 @@ MlSkin::MlSkin() : m_numCreatedFeather(0)
 MlSkin::~MlSkin() 
 {
 	if(m_affectWeights) delete[] m_affectWeights;
+	m_floodFaces.clear();
 }
 
 void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
