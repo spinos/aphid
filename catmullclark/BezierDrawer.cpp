@@ -17,25 +17,23 @@
 
 BezierDrawer::BezierDrawer()
 {
-	m_tess = 0;
+	m_tess = new Tessellator;
 }
 
 BezierDrawer::~BezierDrawer()
 {
-	if(m_tess) delete m_tess;
+	delete m_tess;
 }
 
 void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
 {
-	if(m_tess) delete m_tess;
-	m_tess = new Tessellator;
-    AccPatch* bez = mesh->beziers();
+	AccPatch* bez = mesh->beziers();
 	
 	m_tess->setNumSeg(4);
 	const unsigned numFace = mesh->getNumFaces();
 	const unsigned vpf = m_tess->numVertices();
 	const unsigned ipf = m_tess->numIndices();
-
+	
 	createBuffer(vpf * numFace, ipf * numFace);
 	
 	unsigned curP = 0, curI = 0, faceStart;

@@ -141,7 +141,7 @@ void MlScene::doClear()
 {
 	clearFeatherExamples();
 	initializeFeatherExample();
-	
+	disableDeformer();
 	delete m_skin;
 	m_skin = new MlSkin;
 	delete m_accmesh;
@@ -353,16 +353,17 @@ bool MlScene::readBakeFromFile(const std::string & fileName)
 	if(!m_deformer->open(fileName)) return false;
 		
 	m_deformer->verbose();
-	
+	m_deformer->setMesh(m_accmesh);
 	enableDeformer();
-	return false;
+	return true;
 }
 
 char MlScene::deformBody(int x)
 {
 	m_deformer->setCurrentFrame(x);
 	if(!m_deformer->solve()) return false;
-	
+	m_accmesh->update(m_skin->topology());
+	m_skin->computeVertexDisplacement();
 	return true;
 }
 
@@ -387,10 +388,8 @@ void MlScene::disableDeformer()
 
 void MlScene::delayLoadBake()
 {
-	if(m_bakeName != "") {
-		readBakeFromFile(m_bakeName);
-		skin()->computeVertexDisplacement();
-	}
+	if(m_bakeName == "") return;
+	readBakeFromFile(m_bakeName);
 }
 
 void MlScene::bakeRange(int & low, int & high) const
@@ -411,6 +410,7 @@ void MlScene::prepareRender()
 
 void MlScene::importBody(const std::string & fileName)
 {
+	disableDeformer();
 	delete m_skin;
 	m_skin = new MlSkin;
 	delete m_accmesh;

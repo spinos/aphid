@@ -568,8 +568,6 @@ void GLWidget::updateOnFrame(int x)
 	
 	if(!deformBody(x)) return;
 	
-	//body()->update(m_topo);
-	skin()->computeVertexDisplacement();
 	m_featherDrawer->setCurrentFrame(x);
 	m_featherDrawer->setCurrentOrigin(bodyDeformer()->frameCenter());
 	setCollision(skin());
