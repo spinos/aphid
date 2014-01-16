@@ -5,7 +5,7 @@ mac {
     Aphid = $$(HOME)/aphid
 }
 
-INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit
+INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium
 HEADERS       =	../shared/ContextIconFrame.h \
                                 ../shared/ActionIconFrame.h \
                                 ../shared/QIconFrame.h \
@@ -13,7 +13,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
                 ../shared/QDoubleEditSlider.h \
                 ../shared/Base3DView.h \
                 ../shared/Base2DView.h \
-                ../fit/SingleModelView.h \
+                ManipulateView.h \
                 ToolBox.h \
                 glwidget.h \
 				MlCalamus.h \
@@ -64,7 +64,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
                 ../shared/QDoubleEditSlider.cpp \
                 ../shared/Base3DView.cpp \
                 ../shared/Base2DView.cpp \
-                ../fit/SingleModelView.cpp \
+                ManipulateView.cpp \
                 ToolBox.cpp \
                 glwidget.cpp \
 				MlCalamus.cpp \

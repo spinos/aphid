@@ -10,8 +10,6 @@
 #include <PerspectiveCamera.h>
 #include <KdTreeDrawer.h>
 #include <IntersectionContext.h>
-#include <TransformManipulator.h>
-#include <MeshManipulator.h>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -31,8 +29,6 @@ Base3DView::Base3DView(QWidget *parent)
 	m_intersectCtx = new IntersectionContext;
 	m_intersectCtx->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_brush = new BaseBrush;
-	m_manipulator = new TransformManipulator;
-	m_sculptor = new MeshManipulator;
 	
 	m_timer = new QTimer(this);
 	connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
@@ -216,25 +212,11 @@ void Base3DView::processSelection(QMouseEvent *event)
 		m_activeComponent->disableVertexPath();
 	else 
 		m_activeComponent->enableVertexPath();
-		
-	switch (event->button()) {
-		case Qt::LeftButton:
-			manipulator()->setRotateAxis(TransformManipulator::AY);
-			break;
-		case Qt::MiddleButton:
-			manipulator()->setRotateAxis(TransformManipulator::AZ);
-			break;
-		default:
-			manipulator()->setRotateAxis(TransformManipulator::AX);
-			break;
-	}
-		
 	clientSelect();
 }
 
 void Base3DView::processDeselection(QMouseEvent *event)
 {
-	manipulator()->stop();
     clientDeselect();
 }
 
@@ -328,7 +310,6 @@ void Base3DView::drawSelection()
 void Base3DView::clearSelection()
 {
 	m_activeComponent->reset();
-	m_manipulator->detach();
 }
 
 void Base3DView::addHitToSelection()
@@ -391,12 +372,6 @@ void Base3DView::keyPressEvent(QKeyEvent *e)
 		case Qt::Key_G:
 			frameAll();
 			break;
-		case Qt::Key_T:
-			manipulator()->setToMove();
-			break;
-		case Qt::Key_R:
-			manipulator()->setToRotate();
-			break;
 		default:
 			break;
 	}
@@ -438,27 +413,12 @@ BaseBrush * Base3DView::brush()
 	return m_brush;
 }
 
-TransformManipulator * Base3DView::manipulator()
-{
-	return m_manipulator;
-}
-
-MeshManipulator * Base3DView::sculptor()
-{
-    return m_sculptor;
-}
-
 void Base3DView::showBrush() const
 {
 	getDrawer()->circleAt(brush()->getSpace(), brush()->getRadius());
 
     if(brush()->length() > 10e-3)
         getDrawer()->arrow(brush()->heelPosition(), brush()->toePosition());
-}
-
-void Base3DView::showManipulator() const
-{
-	getDrawer()->manipulator(m_manipulator);
 }
 
 void Base3DView::computeIncidentRay(int x, int y)

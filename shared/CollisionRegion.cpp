@@ -42,10 +42,11 @@ MeshTopology * CollisionRegion::topology() const
 	return m_topo;
 }
 
-void CollisionRegion::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
+void CollisionRegion::setBodyMesh(AccPatchMesh * mesh)
 {
 	m_body = mesh;
-	m_topo = topo;
+	if(m_topo) delete m_topo;
+	m_topo = new MeshTopology(m_body);
 	setRegionElementStart(mesh->getNumFaces());
 }
 

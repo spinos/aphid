@@ -178,7 +178,7 @@ void Window::createActions()
 	
 	importMeshAct = new QAction(tr("&Import Body Mesh"), this);
 	importMeshAct->setStatusTip(tr("Load a mesh cache file as the body"));
-	connect(importMeshAct, SIGNAL(triggered()), glWidget, SLOT(open()));
+	connect(importMeshAct, SIGNAL(triggered()), glWidget, SLOT(importBodyMesh()));
 	
 	importFDMAct = new QAction(tr("&Import Feather Distribution Map"), this);
 	importFDMAct->setStatusTip(tr("Load an OpenEXR image as feather distribution"));

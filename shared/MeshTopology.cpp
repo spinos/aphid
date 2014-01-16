@@ -13,23 +13,12 @@
 #include <Edge.h>
 #include <VertexAdjacency.h>
 
-MeshTopology::MeshTopology() 
+MeshTopology::MeshTopology(BaseMesh * mesh)
 {
-	m_adjacency = 0;
-}
-
-MeshTopology::~MeshTopology() 
-{
-	cleanup();
-}
-
-char MeshTopology::buildTopology(BaseMesh * mesh)
-{
-	cleanup();
 	m_mesh = mesh;
 	const unsigned nv = mesh->getNumVertices();
 	
-	m_adjacency = new VertexAdjacency[nv];
+	m_adjacency.reset(new VertexAdjacency[nv]);
 	
 	for(unsigned i = 0; i < nv; i++) {
 		VertexAdjacency & v = m_adjacency[i];
@@ -74,7 +63,11 @@ char MeshTopology::buildTopology(BaseMesh * mesh)
 	}
 	
 	calculateWeight();
-	return 1;
+}
+
+MeshTopology::~MeshTopology() 
+{
+	cleanup();
 }
 
 void MeshTopology::calculateWeight()
@@ -101,7 +94,7 @@ void MeshTopology::calculateNormal()
 
 VertexAdjacency * MeshTopology::getTopology() const
 {
-	return m_adjacency;
+	return m_adjacency.get();
 }
 
 VertexAdjacency & MeshTopology::getAdjacency(unsigned idx) const
@@ -172,8 +165,7 @@ char MeshTopology::parallelEdgeInQuad(unsigned *indices, unsigned v0, unsigned v
 
 void MeshTopology::cleanup()
 {
-	if(m_adjacency) delete[] m_adjacency;
-	m_adjacency = 0;
+	m_adjacency.reset();
 	for(std::vector<Facet *>::iterator it = m_faces.begin(); it != m_faces.end(); ++it) {
 		delete *it;
 	}

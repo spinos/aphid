@@ -20,6 +20,7 @@
 #include <BakeDeformer.h>
 #include <PlaybackControl.h>
 #include <sstream>
+#include <EasemodelUtil.h>
 
 void test()
 {
@@ -78,8 +79,9 @@ MlScene::MlScene()
 MlScene::~MlScene() 
 {
 	clearFeatherExamples();
-	m_skin->cleanup();
-	m_accmesh->cleanup();
+	delete m_skin;
+	delete m_accmesh;
+	delete m_deformer;
 }
 
 void MlScene::setFeatherTexture(const std::string & name)
@@ -405,4 +407,34 @@ void MlScene::prepareRender()
 		f->setSeed(i++);
 		f->computeNoise();
 	}
+}
+
+void MlScene::importBody(const std::string & fileName)
+{
+	delete m_skin;
+	m_skin = new MlSkin;
+	delete m_accmesh;
+	m_accmesh = new AccPatchMesh;
+	delete m_deformer;
+	m_deformer = new BakeDeformer;
+	ESMUtil::ImportPatch(fileName.c_str(), m_accmesh);
+	m_skin->setBodyMesh(m_accmesh);
+	m_accmesh->setup(m_skin->topology());
+	m_deformer->setMesh(m_accmesh);
+	m_skin->computeFaceCalamusIndirection();
+	m_skin->computeVertexDisplacement();
+	setCollision(m_skin);
+}
+
+void MlScene::afterOpen()
+{
+	m_accmesh->putIntoObjectSpace();
+	m_skin->setBodyMesh(m_accmesh);
+	m_accmesh->setup(m_skin->topology());
+	m_deformer->setMesh(m_accmesh);
+	delayLoadBake();
+	m_accmesh->update(m_skin->topology());
+	m_skin->computeFaceCalamusIndirection();
+	m_skin->computeVertexDisplacement();
+	setCollision(m_skin);
 }

@@ -9,6 +9,7 @@
 
 #pragma once
 #include <CollisionRegion.h>
+#include <boost/scoped_array.hpp>
 class MlCalamus;
 class MlCalamusArray;
 class MlCluster;
@@ -34,7 +35,7 @@ public:
 	
 	void cleanup();
 	
-	void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
+	void setBodyMesh(AccPatchMesh * mesh);
 	void getPointOnBody(MlCalamus * c, Vector3F &p) const;
 	void getNormalOnBody(MlCalamus * c, Vector3F &p) const;
 	
@@ -50,11 +51,6 @@ public:
 	void addFeather(MlCalamus & ori);
 	void zeroFeather();
 	void reduceFeather(unsigned num);
-	
-	void clearFaceVicinity();
-	void createFaceVicinity();
-	void resetFaceVicinity();
-	BaseSphere * faceVicinity(unsigned idx) const;
 	
 	void touchBy(MlCalamus * c, const Vector3F & pos, const Matrix33F & frm);
 	
@@ -75,7 +71,6 @@ protected:
 private:
 	MlCalamusArray * m_calamus;
 	FloodTable * m_faceCalamusTable;
-	MlCluster * m_perFaceCluster;
-	BaseSphere * m_perFaceVicinity;
+	boost::scoped_array<MlCluster> m_perFaceCluster;
 	unsigned m_numFeather;
 };

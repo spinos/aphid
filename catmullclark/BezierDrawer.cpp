@@ -17,16 +17,18 @@
 
 BezierDrawer::BezierDrawer()
 {
-	m_tess = new Tessellator;
+	m_tess = 0;
 }
 
 BezierDrawer::~BezierDrawer()
 {
-	delete m_tess;
+	if(m_tess) delete m_tess;
 }
 
 void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
 {
+	if(m_tess) delete m_tess;
+	m_tess = new Tessellator;
     AccPatch* bez = mesh->beziers();
 	
 	m_tess->setNumSeg(4);

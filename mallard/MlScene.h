@@ -52,6 +52,8 @@ public:
 	void bakeRange(int & low, int & high) const;
 protected:
 	void prepareRender();
+	virtual void importBody(const std::string & fileName);
+	virtual void afterOpen();
 private:
 	void writeFeatherExamples();
 	void readFeatherExamples();

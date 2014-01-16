@@ -13,8 +13,6 @@ class SelectionArray;
 class QTimer;
 class BaseBrush;
 class BaseTransform;
-class TransformManipulator;
-class MeshManipulator;
 
 class Base3DView : public QGLWidget
 {
@@ -39,18 +37,12 @@ public:
 	const BaseBrush * brush() const;
 	BaseBrush * brush();
 	
-	TransformManipulator * manipulator();
-	MeshManipulator * sculptor();
-	
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-    void processSelection(QMouseEvent *event);
-    void processDeselection(QMouseEvent *event);
-    void processMouseInput(QMouseEvent *event);
     
     void resetView();
 	void drawSelection();
@@ -78,6 +70,9 @@ public slots:
 	void receiveBrushStrength(double x);
 	
 protected:
+	virtual void processSelection(QMouseEvent *event);
+    virtual void processDeselection(QMouseEvent *event);
+    virtual void processMouseInput(QMouseEvent *event);
 	virtual void processCamera(QMouseEvent *event);
     virtual void clientDraw();
     virtual void clientSelect();
@@ -89,13 +84,11 @@ protected:
 	virtual void focusOutEvent(QFocusEvent * event);
 	virtual void clearSelection();
 	void showBrush() const;
-	void showManipulator() const;
+	
 private:
 	void computeIncidentRay(int x, int y);
 	
 private:
-	TransformManipulator * m_manipulator;
-	MeshManipulator * m_sculptor;
 	Ray m_incidentRay;
 	QPoint m_lastPos;
     QColor m_backgroundColor;

@@ -42,14 +42,14 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include <SingleModelView.h>
+#include <ManipulateView.h>
 #include <MlScene.h>
 
 class BezierDrawer;
 class MlDrawer;
 class MlEngine;
 //! [0]
-class GLWidget : public SingleModelView, public MlScene
+class GLWidget : public ManipulateView, public MlScene
 {
     Q_OBJECT
 
@@ -57,11 +57,10 @@ public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 	virtual void setFeatherTexture(const std::string & name);
-	virtual void loadMesh(std::string filename);
 	virtual void clientSelect();
 	virtual void clientMouseInput();
 	virtual void clientDeselect();
-    virtual PatchMesh * mesh();
+    virtual PatchMesh * activeMesh();
 	
 	virtual bool confirmDiscardChanges();
 	virtual std::string chooseOpenFileName();
@@ -69,7 +68,6 @@ public:
 	virtual void doClear();
 	virtual void doClose();
 	virtual void beforeSave();
-	virtual void afterOpen();
 	
 	void finishEraseFeather();
 	void deselectFeather();
@@ -89,6 +87,7 @@ signals:
 	void renderResChanged(QSize s);
 	void featherSelectionChanged();
 public slots:
+	void importBodyMesh();
 	void cleanSheet();
 	void saveSheet();
 	void saveSheetAs();
@@ -109,6 +108,8 @@ protected:
 	virtual void clearSelection();
 	virtual void resizeEvent( QResizeEvent * event );
 	virtual char selectLight(const Ray & incident);
+	virtual void importBody(const std::string & fileName);
+	virtual void afterOpen();
 private:
 	void selectFeather(char byRegion = 0);
 	void selectRegion();

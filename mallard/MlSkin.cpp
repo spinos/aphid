@@ -27,9 +27,9 @@ MlSkin::~MlSkin()
 	m_floodFaces.clear();
 }
 
-void MlSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
+void MlSkin::setBodyMesh(AccPatchMesh * mesh)
 {
-	CalamusSkin::setBodyMesh(mesh, topo);
+	CalamusSkin::setBodyMesh(mesh);
 	if(!bodyMesh()->hasVertexData("weishell")) {
 		float * disw = bodyMesh()->perVertexFloat("weishell");
 		const unsigned nv = bodyMesh()->getNumVertices();

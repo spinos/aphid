@@ -45,7 +45,6 @@
 #include <math.h>
 #include "glwidget.h"
 #include <AccPatchMesh.h>
-#include <EasemodelUtil.h>
 #include <BaseBrush.h>
 #include <KdTreeDrawer.h>
 #include <BezierDrawer.h>
@@ -66,7 +65,7 @@
 #include <BaseLight.h>
 #include "MlEngine.h"
 #include <TransformManipulator.h>
-GLWidget::GLWidget(QWidget *parent) : SingleModelView(parent)
+GLWidget::GLWidget(QWidget *parent) : ManipulateView(parent)
 {
 	std::cout<<"3Dview ";
 	m_bezierDrawer = new BezierDrawer;
@@ -123,17 +122,6 @@ void GLWidget::clientDraw()
 	showLights();
 	showBrush();
 	showManipulator();
-}
-
-void GLWidget::loadMesh(std::string filename)
-{
-	skin()->cleanup();
-	m_featherDrawer->initializeBuffer();
-	disableDeformer();
-	ESMUtil::ImportPatch(filename.c_str(), mesh());
-	afterOpen();
-	setDirty();
-	update();
 }
 
 void GLWidget::clientSelect()
@@ -232,7 +220,7 @@ void GLWidget::clientDeselect()
 	manipulator()->detach();
 }
 
-PatchMesh * GLWidget::mesh()
+PatchMesh * GLWidget::activeMesh()
 {
 	return body();
 }
@@ -445,8 +433,6 @@ void GLWidget::doClear()
 	}
 	m_bezierDrawer->clearBuffer();
 	m_featherDrawer->initializeBuffer();
-	clearTree();
-	clearTopology();
 	emit sceneNameChanged(tr("untitled"));
 	update();
 }
@@ -582,9 +568,8 @@ void GLWidget::updateOnFrame(int x)
 	
 	if(!deformBody(x)) return;
 	
-	body()->update(m_topo);
+	//body()->update(m_topo);
 	skin()->computeVertexDisplacement();
-	skin()->resetFaceVicinity();
 	m_featherDrawer->setCurrentFrame(x);
 	m_featherDrawer->setCurrentOrigin(bodyDeformer()->frameCenter());
 	setCollision(skin());
@@ -598,22 +583,11 @@ void GLWidget::updateOnFrame(int x)
 
 void GLWidget::afterOpen()
 {
-	body()->putIntoObjectSpace();
-	buildTopology();
-	body()->setup(m_topo);
-	skin()->setBodyMesh(body(), m_topo);
+	MlScene::afterOpen();
 	
-	bodyDeformer()->setMesh(body());
-	delayLoadBake();
-	
-	body()->update(m_topo);
-	skin()->computeFaceCalamusIndirection();
-	skin()->computeVertexDisplacement();
-	skin()->resetFaceVicinity();
 	m_featherDrawer->clearCached();
 	m_featherDrawer->setSkin(skin());
 	m_featherDrawer->computeBufferIndirection();
-	setCollision(skin());
 	m_featherDrawer->rebuildBuffer();
 	m_bezierDrawer->rebuildBuffer(body());
 	buildTree();
@@ -633,7 +607,7 @@ void GLWidget::focusOutEvent(QFocusEvent * event)
 	if(interactMode() == ToolContext::EraseBodyContourFeather)
 		finishEraseFeather();
 	deselectFeather();
-	SingleModelView::focusOutEvent(event);
+	ManipulateView::focusOutEvent(event);
 }
 
 void GLWidget::setFeatherTexture(const std::string & name)
@@ -705,7 +679,7 @@ void GLWidget::clearSelection()
 void GLWidget::testCurvature()
 {
     getDrawer()->setColor(.2f, .2f, .2f);
-	getDrawer()->edge(mesh());
+	getDrawer()->edge(activeMesh());
 	IntersectionContext * ctx = getIntersectionContext();
     if(ctx->m_success) {
 		std::vector<Vector3F> us;
@@ -778,7 +752,7 @@ void GLWidget::resizeEvent( QResizeEvent * event )
 	const QSize sz = event->size();
 	setRenderImageWidth(sz.width());
 	setRenderImageHeight(sz.height());
-	SingleModelView::resizeEvent(event);
+	ManipulateView::resizeEvent(event);
 }
 
 void GLWidget::testRender()
@@ -825,5 +799,27 @@ bool GLWidget::selectFeatherExample(unsigned x)
 void GLWidget::receiveBarbChanged()
 {
 	setDirty();
+}
+
+void GLWidget::importBodyMesh()
+{
+	QString temQStr = QFileDialog::getOpenFileName(this, 
+		tr("Open A Model File As Skin"), "../", tr("Mesh(*.m)"));
+	
+	if(temQStr == NULL)
+		return;
+		
+	importBody(temQStr.toStdString());
+}
+
+void GLWidget::importBody(const std::string & fileName)
+{
+	MlScene::importBody(fileName);
+	m_bezierDrawer->rebuildBuffer(body());
+	m_featherDrawer->clearCached();
+	m_featherDrawer->setSkin(skin());
+	buildTree();
+	setDirty();
+	update();
 }
 //:~

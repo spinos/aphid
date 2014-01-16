@@ -29,7 +29,7 @@ public:
 	MlSkin();
 	virtual ~MlSkin();
 
-	virtual void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
+	virtual void setBodyMesh(AccPatchMesh * mesh);
 	
 	void floodAround(MlCalamus c, FloodCondition * condition);
 	void selectAround(unsigned idx, SelectCondition * selcon);

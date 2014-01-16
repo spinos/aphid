@@ -14,7 +14,7 @@
 #include "MlCluster.h"
 #include <QuickSort.h>
 #include <BaseSphere.h>
-CalamusSkin::CalamusSkin() : m_numFeather(0), m_perFaceVicinity(0), m_perFaceCluster(0), m_faceCalamusTable(0)
+CalamusSkin::CalamusSkin() : m_numFeather(0), m_faceCalamusTable(0)
 {
 	m_calamus = new MlCalamusArray;
 }
@@ -24,34 +24,17 @@ CalamusSkin::~CalamusSkin() { cleanup(); }
 void CalamusSkin::cleanup()
 {
 	clearFeather();
-	clearFaceVicinity();
 	if(m_faceCalamusTable) delete[] m_faceCalamusTable;
 	m_faceCalamusTable = 0;
-	if(m_perFaceCluster) delete[] m_perFaceCluster;
-	m_perFaceCluster = 0;
+	m_perFaceCluster.reset();
 }
 
-void CalamusSkin::setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo)
+void CalamusSkin::setBodyMesh(AccPatchMesh * mesh)
 {
-	CollisionRegion::setBodyMesh(mesh, topo);
+	CollisionRegion::setBodyMesh(mesh);
 	createFaceCalamusIndirection();
 	resetFaceCalamusIndirection();
-	createFaceVicinity();
 	createFaceCluster();
-}
-
-void CalamusSkin::clearFaceVicinity()
-{
-	if(m_perFaceVicinity) {
-		delete[] m_perFaceVicinity;
-		m_perFaceVicinity = 0;
-	}
-}
-
-void CalamusSkin::createFaceVicinity()
-{
-	clearFaceVicinity();
-	m_perFaceVicinity = new BaseSphere[bodyMesh()->getNumFaces()];
 }
 
 void CalamusSkin::getPointOnBody(MlCalamus * c, Vector3F &p) const
@@ -133,17 +116,6 @@ void CalamusSkin::reduceFeather(unsigned num)
 	m_calamus->setIndex(m_numFeather);
 }
 
-void CalamusSkin::resetFaceVicinity()
-{
-    const unsigned nf = bodyMesh()->getNumFaces();
-	for(unsigned i= 0; i < nf; i++) m_perFaceVicinity[i].setRadius(0.f);
-}
-
-BaseSphere * CalamusSkin::faceVicinity(unsigned idx) const
-{
-    return &m_perFaceVicinity[idx];
-}
-
 void CalamusSkin::touchBy(MlCalamus * c, const Vector3F & pos, const Matrix33F & frm)
 {
 	const unsigned fi = c->faceIdx();
@@ -158,7 +130,7 @@ void CalamusSkin::touchBy(MlCalamus * c, const Vector3F & pos, const Matrix33F &
 
 void CalamusSkin::createFaceCluster()
 {
-	m_perFaceCluster = new MlCluster[bodyMesh()->getNumFaces()];
+	m_perFaceCluster.reset(new MlCluster[bodyMesh()->getNumFaces()]);
 }
 
 void CalamusSkin::computeFaceClustering()

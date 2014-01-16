@@ -30,7 +30,7 @@ public:
 	Vector3F getClosestNormal(const Vector3F & origin, float maxD, Vector3F & pos);
 	float getPerVertexFloat();
 	
-	virtual void setBodyMesh(AccPatchMesh * mesh, MeshTopology * topo);
+	virtual void setBodyMesh(AccPatchMesh * mesh);
 	virtual void resetCollisionRegion(unsigned idx);
 	virtual void resetCollisionRegionByDistance(unsigned idx, const Vector3F & center, float maxD);
 	virtual void resetCollisionRegionAround(unsigned idx, const BoundingBox & bbox);

@@ -8,7 +8,7 @@
 MeshManipulator::MeshManipulator() 
 {
     m_intersect = new IntersectionContext;
-	m_topo = new MeshTopology;
+	m_topo = 0;
 	m_started = 0;
 	m_mode = 0;
 }
@@ -18,7 +18,8 @@ MeshManipulator::~MeshManipulator() {}
 void MeshManipulator::attachTo(BaseMesh * mesh)
 {
     m_mesh = mesh;
-	m_topo->buildTopology(m_mesh);
+	if(m_topo) delete m_topo;
+	m_topo = new MeshTopology(m_mesh);
 	m_topo->calculateNormal();
 }
 

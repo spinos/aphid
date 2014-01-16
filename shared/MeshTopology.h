@@ -10,6 +10,7 @@
 #pragma once
 #include <AllMath.h>
 #include <vector>
+#include <boost/scoped_array.hpp>
 class VertexAdjacency;
 class Facet;
 class Edge;
@@ -17,12 +18,11 @@ class BaseMesh;
 
 class MeshTopology {
 public:
-	MeshTopology();
+	MeshTopology(BaseMesh * mesh);
 	virtual ~MeshTopology();
 	
 	void cleanup();
 	
-	char buildTopology(BaseMesh * mesh);
 	void calculateWeight();
 	void calculateNormal();
 	void calculateSmoothedNormal(Vector3F * dst);
@@ -36,7 +36,7 @@ public:
 	unsigned growAroundQuad(unsigned idx, std::vector<unsigned> & dst) const;
 private:
 	char parallelEdgeInQuad(unsigned *indices, unsigned v0, unsigned v1, unsigned & a, unsigned & b) const;
-	VertexAdjacency * m_adjacency;
+	boost::scoped_array<VertexAdjacency> m_adjacency;
 	std::vector<Facet *> m_faces;
 	BaseMesh * m_mesh;
 };
