@@ -68,8 +68,7 @@ int main(int argc, char *argv[])
     
     view.setModel(&model);
     view.setItemDelegate(&delegate);
-
-    view.setWindowTitle(QObject::tr("Simple Tree Model"));
+	view.setWindowTitle(QObject::tr("Simple Tree Model"));
     view.show();
 
     return app.exec();

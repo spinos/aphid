@@ -44,7 +44,7 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
-
+#include <map>
 class TreeItem;
 
 //! [0]
@@ -89,10 +89,16 @@ private:
     void setupModelData(TreeItem *parent);
     TreeItem *getItem(const QModelIndex &index) const;
 	void addBase(QList<TreeItem*> & parents, const std::string & baseName, int level);
-	void addOptions(QList<TreeItem*> & parents);
 	void addIntAttr(QList<TreeItem*> & parents, const std::string & attrName, int level, int value);
-
+	void addFltAttr(QList<TreeItem*> & parents, const std::string & attrName, int level, float value);
+	void addBolAttr(QList<TreeItem*> & parents, const std::string & attrName, int level, bool value);
+	void addRGBAttr(QList<TreeItem*> & parents, const std::string & attrName, int level, QColor value);
+	void addOptions(QList<TreeItem*> & parents);
+	void addLights(QList<TreeItem*> & parents);
+	
+	std::map<std::string, int> m_baseRows;
     TreeItem *rootItem;
+	int m_numRows;
 };
 //! [2]
 

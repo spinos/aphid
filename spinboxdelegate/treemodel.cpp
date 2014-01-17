@@ -42,7 +42,7 @@
 
 #include "treeitem.h"
 #include "treemodel.h"
-
+#include "delegate.h"
 //! [0]
 TreeModel::TreeModel(const QStringList &headers,
                      QObject *parent)
@@ -90,6 +90,12 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return 0;
 
+	if(index.column() == 0)
+		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+		
+	if(m_baseRows.find(getItem(index)->name()) != m_baseRows.end()) {
+		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	}
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 //! [3]
@@ -238,55 +244,11 @@ bool TreeModel::setHeaderData(int section, Qt::Orientation orientation,
 void TreeModel::setupModelData(TreeItem *parent)
 {
     QList<TreeItem*> parents;
-    QList<int> indentations;
     parents << parent;
-    indentations << 0;
-/*
-    int number = 0;
-
-    while (number < lines.count()) {
-        int position = 0;
-        while (position < lines[number].length()) {
-            if (lines[number].mid(position, 1) != " ")
-                break;
-            position++;
-        }
-
-        QString lineData = lines[number].mid(position).trimmed();
-
-        if (!lineData.isEmpty()) {
-            // Read the column data from the rest of the line.
-            QStringList columnStrings = lineData.split("\t", QString::SkipEmptyParts);
-            QVector<QVariant> columnData;
-            for (int column = 0; column < columnStrings.count(); ++column)
-                columnData << columnStrings[column];
-
-            if (position > indentations.last()) {
-                // The last child of the current parent is now the new parent
-                // unless the current parent has no children.
-
-                if (parents.last()->childCount() > 0) {
-                    parents << parents.last()->child(parents.last()->childCount()-1);
-                    indentations << position;
-                }
-            } else {
-                while (position < indentations.last() && parents.count() > 0) {
-                    parents.pop_back();
-                    indentations.pop_back();
-                }
-            }
-
-            // Append a new item to the current parent's list of children.
-            TreeItem *parent = parents.last();
-            parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
-            for (int column = 0; column < columnData.size(); ++column)
-                parent->child(parent->childCount() - 1)->setData(column, columnData[column]);
-        }
-
-        number++;
-    }*/
+	m_numRows = 0;
 	addOptions(parents);
-	
+	addLights(parents);
+	qDebug()<<"row count "<<m_numRows;
 }
 
 void TreeModel::addBase(QList<TreeItem*> & parents, const std::string & baseName, int level)
@@ -295,7 +257,7 @@ void TreeModel::addBase(QList<TreeItem*> & parents, const std::string & baseName
         parents << parents.last()->child(parents.last()->childCount()-1);
 
     QList<QVariant> columnData;
-    columnData << QString(tr(baseName.c_str()))<< QString(tr(" "));
+    columnData << QString(tr(baseName.c_str()));
     
 	TreeItem *parent = parents.last();
 	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
@@ -303,6 +265,8 @@ void TreeModel::addBase(QList<TreeItem*> & parents, const std::string & baseName
 		parent->child(parent->childCount() - 1)->setData(column, columnData[column]);
     
 	for(int i=0; i < level; i++) parents.pop_back();
+	m_baseRows[baseName] = 1;
+	m_numRows++;
 }
 
 void TreeModel::addIntAttr(QList<TreeItem*> & parents, const std::string & attrName, int level, int value)
@@ -315,12 +279,67 @@ void TreeModel::addIntAttr(QList<TreeItem*> & parents, const std::string & attrN
     
 	TreeItem *parent = parents.last();
 	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
+	parent->lastChild()->setValueType(0);
 	for (int column = 0; column < columnData.size(); ++column)
-		parent->child(parent->childCount() - 1)->setData(column, columnData[column]);
+		parent->lastChild()->setData(column, columnData[column]);
 		
     for(int i=0; i < level; i++) parents.pop_back();
+	m_numRows++;
 }
 
+void TreeModel::addFltAttr(QList<TreeItem*> & parents, const std::string & attrName, int level, float value)
+{
+    for(int i=0; i < level; i++) 
+        parents << parents.last()->child(parents.last()->childCount()-1);
+
+    QList<QVariant> columnData;
+    columnData << QString(tr(attrName.c_str()))<< QVariant(value);
+    
+	TreeItem *parent = parents.last();
+	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
+	parent->lastChild()->setValueType(1);
+	for (int column = 0; column < columnData.size(); ++column)
+		parent->lastChild()->setData(column, columnData[column]);
+		
+    for(int i=0; i < level; i++) parents.pop_back();
+	m_numRows++;
+}
+
+void TreeModel::addBolAttr(QList<TreeItem*> & parents, const std::string & attrName, int level, bool value)
+{
+    for(int i=0; i < level; i++) 
+        parents << parents.last()->child(parents.last()->childCount()-1);
+
+    QList<QVariant> columnData;
+    columnData << QString(tr(attrName.c_str()))<< QVariant(value);
+    
+	TreeItem *parent = parents.last();
+	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
+	parent->lastChild()->setValueType(2);
+	for (int column = 0; column < columnData.size(); ++column)
+		parent->lastChild()->setData(column, columnData[column]);
+		
+    for(int i=0; i < level; i++) parents.pop_back();
+	m_numRows++;
+}
+
+void TreeModel::addRGBAttr(QList<TreeItem*> & parents, const std::string & attrName, int level, QColor value)
+{
+	for(int i=0; i < level; i++) 
+        parents << parents.last()->child(parents.last()->childCount()-1);
+
+    QList<QVariant> columnData;
+    columnData << QString(tr(attrName.c_str()))<< QVariant(value);
+    
+	TreeItem *parent = parents.last();
+	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
+	parent->lastChild()->setValueType(3);
+	for (int column = 0; column < columnData.size(); ++column)
+		parent->lastChild()->setData(column, columnData[column]);
+		
+    for(int i=0; i < level; i++) parents.pop_back();
+	m_numRows++;
+}
 
 void TreeModel::addOptions(QList<TreeItem*> & parents)
 {
@@ -329,4 +348,16 @@ void TreeModel::addOptions(QList<TreeItem*> & parents)
 	addIntAttr(parents, "AA_samples", 1, 5);
 	addIntAttr(parents, "res_x", 1, 400);
 	addIntAttr(parents, "res_y", 1, 300);
+}
+
+void TreeModel::addLights(QList<TreeItem*> & parents)
+{
+	addBase(parents, "lights", 0);
+	addBase(parents, "distant_key", 1);
+	addFltAttr(parents, "intensity", 2, 1.1);
+	addIntAttr(parents, "samples", 2, 3);
+	addBolAttr(parents, "cast_shadow", 2, false);
+	QColor col;
+	col.setRgbF(1.0, 0.5, 0.4);
+	addRGBAttr(parents, "light_color", 2, col);
 }

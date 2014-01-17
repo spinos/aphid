@@ -49,10 +49,17 @@
 class TreeItem
 {
 public:
+	enum ValueType {
+		TInt = 0,
+		TFloat = 1,
+		TBool = 2,
+		TRGB = 3
+	};
     TreeItem(const QVector<QVariant> &data, TreeItem *parent = 0);
     ~TreeItem();
 
     TreeItem *child(int number);
+	TreeItem * lastChild();
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
@@ -63,11 +70,14 @@ public:
     bool removeColumns(int position, int columns);
     int childNumber() const;
     bool setData(int column, const QVariant &value);
-
+	std::string name() const;
+	void setValueType(int x);
+	int valueType() const;
 private:
     QList<TreeItem*> childItems;
     QVector<QVariant> itemData;
     TreeItem *parentItem;
+	int m_valueType;
 };
 //! [0]
 

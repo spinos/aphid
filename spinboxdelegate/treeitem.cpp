@@ -68,9 +68,13 @@ TreeItem *TreeItem::child(int number)
 {
     return childItems.value(number);
 }
-//! [2]
 
-//! [3]
+TreeItem * TreeItem::lastChild()
+{
+	if(childCount() < 1) return 0;
+	return child(childCount() - 1);
+}
+
 int TreeItem::childCount() const
 {
     return childItems.count();
@@ -177,3 +181,17 @@ bool TreeItem::setData(int column, const QVariant &value)
     return true;
 }
 //! [11]
+std::string TreeItem::name() const
+{
+	return data(0).toString().toStdString();
+}
+
+void TreeItem::setValueType(int x)
+{
+	m_valueType = x;
+}
+
+int TreeItem::valueType() const
+{
+	return m_valueType;
+}
