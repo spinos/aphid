@@ -53,18 +53,31 @@
 
 //! [0]
 SpinBoxDelegate::SpinBoxDelegate(QObject *parent)
-    : QItemDelegate(parent)
+    : QStyledItemDelegate(parent)
 {
 }
-//! [0]
 
-//! [1]
+void SpinBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+                         const QModelIndex &index) const
+{
+	TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+    if(item->valueType() == 3 && index.column() == 1) {
+		QVariant value = index.model()->data(index, Qt::EditRole);
+		QColor col = value.value<QColor>();
+		painter->fillRect(option.rect, col);
+        
+    } else {
+        QStyledItemDelegate::paint(painter, option, index);
+    }
+}
+
 QWidget *SpinBoxDelegate::createEditor(QWidget *parent,
-    const QStyleOptionViewItem &/* option */,
+    const QStyleOptionViewItem & option,
     const QModelIndex & index) const
 {
 	TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
-	qDebug()<<"deleg name"<<item->name().c_str()<<" type "<<item->valueType();
+	QVariant value = index.model()->data(index, Qt::EditRole);
+    
     QWidget *editor = 0;
 	
 	switch (item->valueType()) {
@@ -78,7 +91,7 @@ QWidget *SpinBoxDelegate::createEditor(QWidget *parent,
 			editor = createBoolEditor(parent);
 			break;
 		default:
-			editor = createColorEditor(parent);
+			editor = createColorEditor(parent, value.value<QColor>());
 			break;
 	}
     return editor;
@@ -103,7 +116,7 @@ void SpinBoxDelegate::setEditorData(QWidget *editor,
 			setBoolEditorValue(editor, value); 
 			break;
 		default:
-			setColorEditorValue(editor, value); 
+			setColorEditorValue(editor, value);
 			break;
 	}
 }
@@ -128,14 +141,6 @@ void SpinBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 			model->setData(index, getColorEditorValue(editor), Qt::EditRole);
 			break;
 	}
-}
-//! [3]
-
-//! [4]
-void SpinBoxDelegate::updateEditorGeometry(QWidget *editor,
-    const QStyleOptionViewItem &option, const QModelIndex &/* index */) const
-{
-    editor->setGeometry(option.rect);
 }
 
 QString SpinBoxDelegate::translateBoolToStr(const QVariant & src) const
@@ -169,9 +174,9 @@ QWidget * SpinBoxDelegate::createBoolEditor(QWidget *parent) const
     return new QLineEdit(parent);
 }
 
-QWidget * SpinBoxDelegate::createColorEditor(QWidget *parent) const
+QWidget * SpinBoxDelegate::createColorEditor(QWidget *parent, QColor col) const
 {
-	return new ColorEdit(parent);
+	return new ColorEdit(col, parent);
 }
 
 void SpinBoxDelegate::setIntEditorValue(QWidget *editor, QVariant & value) const
@@ -202,7 +207,6 @@ void SpinBoxDelegate::setBoolEditorValue(QWidget *editor, QVariant & value) cons
 void SpinBoxDelegate::setColorEditorValue(QWidget *editor, QVariant & value) const
 {
 	ColorEdit *le = static_cast<ColorEdit*>(editor);
-	qDebug()<<"in col"<<value.value<QColor>();
 	le->setColor(value.value<QColor>());
 }
 
@@ -229,6 +233,6 @@ QVariant SpinBoxDelegate::getBoolEditorValue(QWidget *editor) const
 QVariant SpinBoxDelegate::getColorEditorValue(QWidget *editor) const
 {
 	ColorEdit *le = static_cast<ColorEdit*>(editor);
-	qDebug()<<"col"<<le->color();
+	le->pickColor();
 	return QVariant(le->color());
 }

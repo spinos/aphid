@@ -41,7 +41,7 @@
 #ifndef DELEGATE_H
 #define DELEGATE_H
 
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 #include <QModelIndex>
 #include <QObject>
 #include <QSize>
@@ -50,13 +50,16 @@
 #include <QDoubleValidator>
 #include <map>
 //! [0]
-class SpinBoxDelegate : public QItemDelegate
+class SpinBoxDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 
 public:
     SpinBoxDelegate(QObject *parent = 0);
 
+	void paint(QPainter *painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const;
+			   
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const;
 
@@ -64,13 +67,13 @@ public:
     void setModelData(QWidget *editor, QAbstractItemModel *model,
                       const QModelIndex &index) const;
 
-    void updateEditorGeometry(QWidget *editor,
-        const QStyleOptionViewItem &option, const QModelIndex &index) const;
+private slots:
+
 private:
 	QWidget * createIntEditor(QWidget *parent) const;
 	QWidget * createDoubleEditor(QWidget *parent) const;
 	QWidget * createBoolEditor(QWidget *parent) const;
-	QWidget * createColorEditor(QWidget *parent) const;
+	QWidget * createColorEditor(QWidget *parent, QColor col) const;
 	
 	void setIntEditorValue(QWidget *editor, QVariant & value) const;
 	void setDoubleEditorValue(QWidget *editor, QVariant & value) const;

@@ -13,16 +13,16 @@ class ColorEdit : public QWidget
 {
     Q_OBJECT
 public:
-    ColorEdit(QWidget * parent = 0);
+    ColorEdit(QColor color, QWidget * parent = 0);
     void setColor(QColor color);
 	QColor color() const;
-    
+    QColor pickColor();
 public slots:
     
 signals:
-    
+    void editingFinished();
 protected:
-    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void paintEvent( QPaintEvent * event );
 private:
     QFrame *m_button;
     QColor m_color;
