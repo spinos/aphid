@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
 ** All rights reserved.
 ** Contact: Nokia Corporation (qt-info@nokia.com)
 **
@@ -43,26 +43,30 @@
 
 #include <QList>
 #include <QVariant>
+#include <QVector>
 
 //! [0]
 class TreeItem
 {
 public:
-    TreeItem(const QList<QVariant> &data, TreeItem *parent = 0);
+    TreeItem(const QVector<QVariant> &data, TreeItem *parent = 0);
     ~TreeItem();
 
-    void appendChild(TreeItem *child);
-
-    TreeItem *child(int row);
+    TreeItem *child(int number);
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
-    int row() const;
+    bool insertChildren(int position, int count, int columns);
+    bool insertColumns(int position, int columns);
     TreeItem *parent();
+    bool removeChildren(int position, int count);
+    bool removeColumns(int position, int columns);
+    int childNumber() const;
+    bool setData(int column, const QVariant &value);
 
 private:
     QList<TreeItem*> childItems;
-    QList<QVariant> itemData;
+    QVector<QVariant> itemData;
     TreeItem *parentItem;
 };
 //! [0]

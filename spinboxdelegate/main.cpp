@@ -60,16 +60,15 @@ int main(int argc, char *argv[])
     SpinBoxDelegate delegate;
     
     QTreeView view;
+	
+	QStringList headers;
+	headers<<"title"<<"value";
 
-    TreeModel model;
+	TreeModel model(headers);
+    
     view.setModel(&model);
     view.setItemDelegate(&delegate);
-    
-    QFile file("default.txt");
-    file.open(QIODevice::ReadOnly);
-    model.gen(file.readAll());
-    file.close();
-    
+
     view.setWindowTitle(QObject::tr("Simple Tree Model"));
     view.show();
 
