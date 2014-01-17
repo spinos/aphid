@@ -28,9 +28,6 @@ void BlockDrawBuffer::initializeBuffer()
 {
 	if(numBlock() > 0) clearBuffer();
 	m_blocks.push_back(new PtrTup);
-	m_blocks.push_back(new PtrTup);
-	m_blocks.push_back(new PtrTup);
-	m_blocks.push_back(new PtrTup);
 	begin();
 	m_taken = 0;
 }

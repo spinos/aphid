@@ -813,8 +813,8 @@ void GLWidget::importBodyMesh()
 void GLWidget::importBody(const std::string & fileName)
 {
 	MlScene::importBody(fileName);
+	m_featherDrawer->initializeBuffer();
 	m_bezierDrawer->rebuildBuffer(body());
-	m_featherDrawer->clearCached();
 	m_featherDrawer->setSkin(skin());
 	buildTree();
 	setDirty();

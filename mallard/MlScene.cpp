@@ -410,6 +410,8 @@ void MlScene::prepareRender()
 
 void MlScene::importBody(const std::string & fileName)
 {
+    m_skin->finishCreateFeather();
+	m_skin->discardActive();
 	disableDeformer();
 	delete m_skin;
 	m_skin = new MlSkin;
