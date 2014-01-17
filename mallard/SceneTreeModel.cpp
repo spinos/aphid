@@ -10,7 +10,8 @@ SceneTreeModel::SceneTreeModel(MlScene * scene, QObject *parent)
     QList<QVariant> rootData;
     rootData << "Attribute" << "Value";
     rootItem = new SceneTreeItem(rootData);
-    setupModelData(scene, rootItem);
+	m_scene = scene;
+    setupModelData(rootItem);
 }
 //! [0]
 
@@ -121,7 +122,7 @@ int SceneTreeModel::rowCount(const QModelIndex &parent) const
 }
 //! [8]
 
-void SceneTreeModel::setupModelData(MlScene * scene, SceneTreeItem *parent)
+void SceneTreeModel::setupModelData(SceneTreeItem *parent)
 {
     QList<SceneTreeItem*> parents;
     QList<int> indentations;
@@ -168,7 +169,7 @@ void SceneTreeModel::setupModelData(MlScene * scene, SceneTreeItem *parent)
 
         number++;
     }*/
-    addBase(parents, "options", 0);
+    addOptions(parents);
     addBase(parents, "lights", 0);
     addBase(parents, "key", 1);
     addBase(parents, "kd", 2);
@@ -187,7 +188,27 @@ void SceneTreeModel::addBase(QList<SceneTreeItem*> & parents, const std::string 
         parents << parents.last()->child(parents.last()->childCount()-1);
 
     QList<QVariant> columnData;
-    columnData << QString(tr(baseName.c_str()));
+    columnData << QString(tr(baseName.c_str()))<< QString(tr(" "));
     parents.last()->appendChild(new SceneTreeItem(columnData, parents.last()));
     for(int i=0; i < level; i++) parents.pop_back();
+}
+
+void SceneTreeModel::addIntAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, int value)
+{
+    for(int i=0; i < level; i++) 
+        parents << parents.last()->child(parents.last()->childCount()-1);
+
+    QList<QVariant> columnData;
+    columnData << QString(tr(attrName.c_str()))<< QVariant(value);
+    parents.last()->appendChild(new SceneTreeItem(columnData, parents.last()));
+    for(int i=0; i < level; i++) parents.pop_back();
+}
+
+void SceneTreeModel::addOptions(QList<SceneTreeItem*> & parents)
+{
+	addBase(parents, "options", 0);
+	addIntAttr(parents, "max_subdiv", 1, 3);
+	addIntAttr(parents, "AA_samples", 1, m_scene->AASample());
+	addIntAttr(parents, "res_x", 1, m_scene->renderImageWidth());
+	addIntAttr(parents, "res_y", 1, m_scene->renderImageHeight());
 }

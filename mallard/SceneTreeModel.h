@@ -26,8 +26,11 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
-    void setupModelData(MlScene * scene, SceneTreeItem *parent);
+    void setupModelData(SceneTreeItem *parent);
     void addBase(QList<SceneTreeItem*> & parents, const std::string & baseName, int level);
-    SceneTreeItem *rootItem;
+    void addOptions(QList<SceneTreeItem*> & parents);
+	void addIntAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, int value);
+	SceneTreeItem *rootItem;
+	MlScene * m_scene;
 };
 
