@@ -46,6 +46,14 @@ char HOption::save(RenderOptions * opt)
 		addIntAttr(".msd");
 	
 	writeIntAttr(".msd", &msd);
+	
+	int uds = 0;
+	if(opt->useDisplaySize()) uds = 1;
+	
+	if(!hasNamedAttr(".uds"))
+		addIntAttr(".uds");
+	
+	writeIntAttr(".uds", &uds);
 
 	return 1;
 }
@@ -71,6 +79,13 @@ char HOption::load(RenderOptions * opt)
 	if(hasNamedAttr(".msd"))
 		readIntAttr(".msd", &msd);
 	opt->setMaxSubdiv(msd);
+	
+	int uds = 0;
+	if(hasNamedAttr(".uds"))
+		readIntAttr(".uds", &uds);
+		
+	if(uds == 1) opt->setUseDisplaySize(true);
+	else opt->setUseDisplaySize(false);
 	
 	return 1;
 }

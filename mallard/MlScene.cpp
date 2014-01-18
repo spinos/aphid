@@ -23,6 +23,8 @@
 #include <sstream>
 #include <EasemodelUtil.h>
 #include <boost/filesystem.hpp>
+#include <BezierPatchHirarchy.h>
+
 void test()
 {
 	std::cout<<"\nh io begin\n";
@@ -269,9 +271,6 @@ bool MlScene::doRead(const std::string & fileName)
 	
 	HWorld grpWorld;
 	grpWorld.load();
-	
-	HOption grpOpt("/world/options");
-	grpOpt.load(this);
 
 	HMesh grpBody("/world/body");
 	grpBody.load(m_accmesh);
@@ -296,6 +295,9 @@ bool MlScene::doRead(const std::string & fileName)
 	HLight grpLight("/world/lights");
 	grpLight.load(this);
 	grpLight.close();
+	
+	HOption grpOpt("/world/options");
+	grpOpt.load(this);
 	
 	grpWorld.close();
 	//HObject::FileIO.close();
@@ -453,4 +455,15 @@ std::string MlScene::validateFileExtension(const std::string & fileName) const
 	boost::filesystem::path p(fileName);
 	if(p.extension() != ".mal") p = p.replace_extension(".mal");
 	return p.string();
+}
+
+void MlScene::setMaxSubdiv(int x)
+{
+	if(x < 0) x = 0;
+	else if(x > 4) x = 4;
+	if(BezierPatchHirarchy::MaxBezierPatchHirarchyLevel < x)
+		m_accmesh->setRebuildPatchHirarchy();
+
+	BezierPatchHirarchy::MaxBezierPatchHirarchyLevel = x;
+	RenderOptions::setMaxSubdiv(x);
 }

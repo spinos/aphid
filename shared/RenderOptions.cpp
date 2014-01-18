@@ -15,6 +15,7 @@ RenderOptions::RenderOptions()
 	m_resY = 480;
 	m_AASample = 4;
 	m_maxSubdiv = 3;
+	m_useDisplaySize = false;
 }
 
 RenderOptions::~RenderOptions() {}
@@ -39,6 +40,11 @@ int RenderOptions::maxSubdiv() const
 	return m_maxSubdiv;
 }
 
+bool RenderOptions::useDisplaySize() const
+{
+	return m_useDisplaySize;
+}
+
 void RenderOptions::setAASample(int x)
 {
 	m_AASample = x;
@@ -57,4 +63,9 @@ void RenderOptions::setRenderImageHeight(int y)
 void RenderOptions::setMaxSubdiv(int x)
 {
 	m_maxSubdiv = x;
+}
+
+void RenderOptions::setUseDisplaySize(bool x)
+{
+	m_useDisplaySize = x;
 }

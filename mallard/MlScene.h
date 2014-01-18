@@ -50,6 +50,8 @@ public:
 	
 	void delayLoadBake();
 	void bakeRange(int & low, int & high) const;
+	
+	virtual void setMaxSubdiv(int x);
 protected:
 	void prepareRender();
 	virtual void importBody(const std::string & fileName);

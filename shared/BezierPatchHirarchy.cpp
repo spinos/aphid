@@ -3,7 +3,7 @@
 #include <PointInsidePolygonTest.h>
 #include <InverseBilinearInterpolate.h>
 #include <BiLinearInterpolate.h>
-#define MaxBezierPatchHirarchy 3
+int BezierPatchHirarchy::MaxBezierPatchHirarchyLevel = 3;
 BezierPatchHirarchy::BezierPatchHirarchy()
 {
 	m_childIdx = 0;
@@ -30,7 +30,7 @@ void BezierPatchHirarchy::create(BezierPatch * parent)
 {
     int ne = 0;
     int npl = 1;
-    for(int i = 0; i <=MaxBezierPatchHirarchy; i++) {
+    for(int i = 0; i <= MaxBezierPatchHirarchyLevel; i++) {
         ne += npl;
         npl *= 4;
     }
@@ -55,7 +55,7 @@ void BezierPatchHirarchy::recursiveCreate(BezierPatch * parent, short level, uns
 	//std::cout<<"\n l/c/s "<<level<<" "<<current;
 	//if(level <= MaxBezierPatchHirarchy) std::cout<<" "<<start<<"-"<<start+3;	
 
-	if(level > MaxBezierPatchHirarchy) return;
+	if(level > MaxBezierPatchHirarchyLevel) return;
     BezierPatch children[4];
     parent->decasteljauSplit(children);
     parent->splitPatchUV(children);
@@ -75,7 +75,7 @@ char BezierPatchHirarchy::isEmpty() const
 
 char BezierPatchHirarchy::endLevel(int level) const
 {
-    return level > MaxBezierPatchHirarchy;
+    return level > MaxBezierPatchHirarchyLevel;
 }
 
 PointInsidePolygonTest * BezierPatchHirarchy::plane(unsigned idx) const
@@ -93,4 +93,9 @@ Vector2F BezierPatchHirarchy::restoreUV(unsigned idx, const Vector3F & p) const
 	Vector2F uv = m_invbil[idx](p);
 	BiLinearInterpolate bili;
 	return bili.interpolate2(uv.x, uv.y, m_planes[idx]._texcoords);
+}
+
+void BezierPatchHirarchy::setRebuild()
+{
+	cleanup();
 }

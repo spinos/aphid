@@ -18,12 +18,15 @@ public:
 	void setRenderImageWidth(int x);
 	void setRenderImageHeight(int y);
 	virtual void setMaxSubdiv(int x);
+	virtual void setUseDisplaySize(bool x);
 	int AASample() const;
 	int renderImageWidth() const;
 	int renderImageHeight() const;
 	int maxSubdiv() const;
+	bool useDisplaySize() const;
 protected:
 
 private:
 	int m_resX, m_resY, m_AASample, m_maxSubdiv;
+	bool m_useDisplaySize;
 };

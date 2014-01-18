@@ -15,6 +15,8 @@ public:
     PointInsidePolygonTest * plane(unsigned idx) const;
     unsigned childStart(unsigned idx) const;
 	Vector2F restoreUV(unsigned idx, const Vector3F & p) const;
+	void setRebuild();
+	static int MaxBezierPatchHirarchyLevel;
 private:
     void recursiveCreate(BezierPatch * parent, short level, unsigned current, unsigned & start);
     PointInsidePolygonTest * m_planes;

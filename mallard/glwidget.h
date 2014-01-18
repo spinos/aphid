@@ -79,7 +79,7 @@ public:
 	QString openSheet(QString name);
 	
 	virtual bool selectFeatherExample(unsigned x);
-	
+	virtual void setUseDisplaySize(bool x);
 signals:
 	void sceneNameChanged(QString name);
 	void sendMessage(QString msg);

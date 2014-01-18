@@ -18,6 +18,7 @@
 
 AccPatchGroup::AccPatchGroup() : m_bezier(0), m_hirarchy(0)
 {
+	m_numHirarchy = 0;
 	if(!AccPatch::stencil) {
 		AccStencil* sten = new AccStencil();
 		AccPatch::stencil = sten;
@@ -36,6 +37,7 @@ void AccPatchGroup::createAccPatches(unsigned n)
 	m_bezier = new AccPatch[n];
 	if(m_hirarchy) delete[] m_hirarchy;
 	m_hirarchy = new BezierPatchHirarchy[n];
+	m_numHirarchy = n;
 }
 
 AccPatch* AccPatchGroup::beziers() const
@@ -107,4 +109,9 @@ void AccPatchGroup::setActiveHirarchy(unsigned idx)
 {
 	m_activeHirarchy = &m_hirarchy[idx];
 	if(m_hirarchy[idx].isEmpty()) m_hirarchy[idx].create(&m_bezier[idx]);
+}
+
+void AccPatchGroup::setRebuildPatchHirarchy()
+{
+	for(unsigned i = 0; i < m_numHirarchy; i++) m_hirarchy[i].setRebuild();
 }

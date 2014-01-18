@@ -23,8 +23,10 @@ public:
 	void setActiveHirarchy(unsigned idx);
 	
 	void recursiveBezierPatch(int level, unsigned current, std::vector<Vector3F> & dst) const;	
+	void setRebuildPatchHirarchy();
 private:
 	AccPatch* m_bezier;
 	BezierPatchHirarchy * m_hirarchy;
 	BezierPatchHirarchy * m_activeHirarchy;
+	unsigned m_numHirarchy;
 };

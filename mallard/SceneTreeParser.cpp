@@ -43,6 +43,7 @@ void SceneTreeParser::addOptions(QList<SceneTreeItem*> & parents)
 	addIntAttr(parents, "AA_samples", 1, m_scene->AASample());
 	addIntAttr(parents, "res_x", 1, m_scene->renderImageWidth());
 	addIntAttr(parents, "res_y", 1, m_scene->renderImageHeight());
+	addBolAttr(parents, "use_display_size", 1, m_scene->useDisplaySize());
 }
 
 void SceneTreeParser::addLights(QList<SceneTreeItem*> & parents)
@@ -98,6 +99,10 @@ void SceneTreeParser::updateOptions(SceneTreeItem * item)
 	else if(attrName == "res_y") {
 		qDebug()<<"set resy "<<item->data(1).toInt();
 		m_scene->setRenderImageHeight(item->data(1).toInt());
+	}
+	else if(attrName == "use_display_size") {
+		qDebug()<<"set use display size "<<item->data(1).toBool();
+		m_scene->setUseDisplaySize(item->data(1).toBool());
 	}
 }
 

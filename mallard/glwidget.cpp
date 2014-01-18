@@ -65,6 +65,7 @@
 #include <BaseLight.h>
 #include "MlEngine.h"
 #include <TransformManipulator.h>
+
 GLWidget::GLWidget(QWidget *parent) : ManipulateView(parent)
 {
 	std::cout<<"3Dview ";
@@ -749,9 +750,11 @@ void GLWidget::testCurvature()
 
 void GLWidget::resizeEvent( QResizeEvent * event )
 {
-	const QSize sz = event->size();
-	setRenderImageWidth(sz.width());
-	setRenderImageHeight(sz.height());
+	if(useDisplaySize()) {
+		const QSize sz = event->size();
+		setRenderImageWidth(sz.width());
+		setRenderImageHeight(sz.height());
+	}
 	ManipulateView::resizeEvent(event);
 }
 
@@ -821,5 +824,15 @@ void GLWidget::importBody(const std::string & fileName)
 	buildTree();
 	setDirty();
 	update();
+}
+
+void GLWidget::setUseDisplaySize(bool x)
+{
+	if(x) {
+		const QSize sz = size();
+		setRenderImageWidth(sz.width());
+		setRenderImageHeight(sz.height());
+	}
+	RenderOptions::setUseDisplaySize(x);
 }
 //:~
