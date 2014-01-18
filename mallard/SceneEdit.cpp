@@ -8,7 +8,7 @@
  */
 #include <QtGui>
 #include "SceneEdit.h"
-#include "SceneTreeModel.h"
+#include "SceneTreeParser.h"
 #include "MlScene.h"
 #include "EditDelegate.h"
 
@@ -20,7 +20,7 @@ SceneEdit::SceneEdit(MlScene * scene, QWidget *parent) : QDialog(parent)
 	
 	QStringList headers;
 	headers<<"attribute"<<"value";
-	m_model = new SceneTreeModel(headers, scene);
+	m_model = new SceneTreeParser(headers, scene);
 	m_view->setModel(m_model);
 	
 	m_view->setItemDelegate(delegate);

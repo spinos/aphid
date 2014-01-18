@@ -60,6 +60,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 	FeatherAttrib.h \
 	SceneEdit.h \
 SceneTreeModel.h \
+SceneTreeParser.h \
 SceneTreeItem.h \
 EditDelegate.h \
                 window.h
@@ -117,6 +118,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 	FeatherAttrib.cpp \
 	SceneEdit.cpp \
 SceneTreeModel.cpp \
+SceneTreeParser.cpp \
 SceneTreeItem.cpp \
 EditDelegate.cpp \
     window.cpp \

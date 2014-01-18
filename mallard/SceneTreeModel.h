@@ -14,14 +14,13 @@
 #include <QVariant>
 #include <map>
 class SceneTreeItem;
-class MlScene;
-//! [0]
+
 class SceneTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    SceneTreeModel(const QStringList &headers, MlScene* scene, QObject *parent = 0);
+    SceneTreeModel(const QStringList &headers, QObject *parent = 0);
     ~SceneTreeModel();
 //! [0] //! [1]
 
@@ -54,24 +53,19 @@ public:
                     const QModelIndex &parent = QModelIndex());
 					
 public slots:
-	void receiveData(QWidget * editor);
+	
 
-private:
+protected:
+	SceneTreeItem * getRootItem();
     SceneTreeItem *getItem(const QModelIndex &index) const;
 	void addBase(QList<SceneTreeItem*> & parents, const std::string & baseName, int level);
 	void addIntAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, int value);
 	void addFltAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, float value);
 	void addBolAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, bool value);
 	void addRGBAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, QColor value);
-	void addOptions(QList<SceneTreeItem*> & parents);
-	void addLights(QList<SceneTreeItem*> & parents);
-	void setupModelData(SceneTreeItem *parent);
-    void updateScene(SceneTreeItem * item);
-	void updateOptions(SceneTreeItem * item);
-	void updateLights(SceneTreeItem * item);
+	
 private:	
 	std::map<std::string, int> m_baseRows;
     SceneTreeItem *rootItem;
-	MlScene * m_scene;
 };
 

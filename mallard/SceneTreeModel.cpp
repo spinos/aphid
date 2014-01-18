@@ -14,17 +14,15 @@
 #include "AllLight.h"
 #include "AllEdit.h"
 
-SceneTreeModel::SceneTreeModel(const QStringList &headers, MlScene* scene, 
+SceneTreeModel::SceneTreeModel(const QStringList &headers, 
                      QObject *parent)
     : QAbstractItemModel(parent)
 {
-	m_scene = scene;
-    QVector<QVariant> rootData;
+	QVector<QVariant> rootData;
     foreach (QString header, headers)
         rootData << header;
 
     rootItem = new SceneTreeItem(rootData);
-    setupModelData(rootItem);
 }
 //! [0]
 
@@ -69,9 +67,12 @@ Qt::ItemFlags SceneTreeModel::flags(const QModelIndex &index) const
 	}
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
-//! [3]
 
-//! [4]
+SceneTreeItem * SceneTreeModel::getRootItem()
+{
+	return rootItem;
+}
+
 SceneTreeItem *SceneTreeModel::getItem(const QModelIndex &index) const
 {
     if (index.isValid()) {
@@ -212,14 +213,6 @@ bool SceneTreeModel::setHeaderData(int section, Qt::Orientation orientation,
     return result;
 }
 
-void SceneTreeModel::setupModelData(SceneTreeItem *parent)
-{
-    QList<SceneTreeItem*> parents;
-    parents << parent;
-	addOptions(parents);
-	addLights(parents);
-}
-
 void SceneTreeModel::addBase(QList<SceneTreeItem*> & parents, const std::string & baseName, int level)
 {
     for(int i=0; i < level; i++) 
@@ -308,100 +301,4 @@ void SceneTreeModel::addRGBAttr(QList<SceneTreeItem*> & parents, const std::stri
 		parent->lastChild()->setData(column, columnData[column]);
 		
     for(int i=0; i < level; i++) parents.pop_back();
-}
-
-void SceneTreeModel::addOptions(QList<SceneTreeItem*> & parents)
-{
-	addBase(parents, "options", 0);
-	addIntAttr(parents, "max_subdiv", 1, m_scene->maxSubdiv());
-	addIntAttr(parents, "AA_samples", 1, m_scene->AASample());
-	addIntAttr(parents, "res_x", 1, m_scene->renderImageWidth());
-	addIntAttr(parents, "res_y", 1, m_scene->renderImageHeight());
-}
-
-void SceneTreeModel::addLights(QList<SceneTreeItem*> & parents)
-{
-	addBase(parents, "lights", 0);
-	unsigned nl = m_scene->numLights();
-	for(unsigned i = 0; i < nl; i++) {
-		BaseLight * l = m_scene->getLight(i);
-		addBase(parents, l->name(), 1);
-		addFltAttr(parents, "intensity", 2, l->intensity());
-		addIntAttr(parents, "samples", 2, l->samples());
-		addBolAttr(parents, "cast_shadow", 2, l->castShadow());
-		Float3 fc = l->lightColor();
-		QColor col;
-		col.setRgbF(fc.x, fc.y, fc.z);
-		addRGBAttr(parents, "light_color", 2, col);
-	}
-}
-
-void SceneTreeModel::receiveData(QWidget * editor)
-{
-	QModelEdit * me = static_cast<QModelEdit *>(editor);
-	SceneTreeItem *item = getItem(me->index());
-	updateScene(item);
-}
-
-void SceneTreeModel::updateScene(SceneTreeItem * item)
-{
-	const QString baseName = item->fullPathName().last();
-	if(baseName == "options") {
-		updateOptions(item);
-	}
-	else if(baseName == "lights") {
-		updateLights(item);
-	}
-}
-
-void SceneTreeModel::updateOptions(SceneTreeItem * item)
-{
-	const QString attrName = item->fullPathName().first();
-	if(attrName == "max_subdiv") {
-		qDebug()<<"set maxsubdiv "<<item->data(1).toInt();
-		m_scene->setMaxSubdiv(item->data(1).toInt());
-	}
-	else if(attrName == "AA_samples") {
-		qDebug()<<"set aa "<<item->data(1).toInt();
-		m_scene->setAASample(item->data(1).toInt());
-	}
-	else if(attrName == "res_x") {
-		qDebug()<<"set resx "<<item->data(1).toInt();
-		m_scene->setRenderImageWidth(item->data(1).toInt());
-	}
-	else if(attrName == "res_y") {
-		qDebug()<<"set resy "<<item->data(1).toInt();
-		m_scene->setRenderImageHeight(item->data(1).toInt());
-	}
-}
-
-void SceneTreeModel::updateLights(SceneTreeItem * item)
-{
-	const QString lightName = item->fullPathName()[1];
-	BaseLight * l = m_scene->getLight(lightName.toStdString());
-	if(!l) {
-		qDebug()<<"WARNING: cannot find light named "<<lightName;
-		return;
-	}
-	const QString attrName = item->fullPathName().first();
-	if(attrName == "intensity") {
-		qDebug()<<"set light intensity "<<item->data(1).toDouble();
-		l->setIntensity(item->data(1).toFloat());
-	}
-	else if(attrName == "samples") {
-		qDebug()<<"set light smaples "<<item->data(1).toInt();
-		l->setSamples(item->data(1).toInt());
-	}
-	else if(attrName == "cast_shadow") {
-		qDebug()<<"set light case shadow "<<item->data(1).toBool();
-		l->setCastShadow(item->data(1).toBool());
-	}
-	else if(attrName == "light_color") {
-		QColor c = item->data(1).value<QColor>();
-		qDebug()<<"set light color "<<c;
-		float r = c.redF();
-		float g = c.greenF();
-		float b = c.blueF();
-		l->setLightColor(r, g, b);
-	}
 }
