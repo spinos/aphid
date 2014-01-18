@@ -11,6 +11,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
                                 ../shared/QIconFrame.h \
                 ../shared/QIntEditSlider.h \
                 ../shared/QDoubleEditSlider.h \
+../shared/QColorEdit.h \
                 ../shared/Base3DView.h \
                 ../shared/Base2DView.h \
                 ManipulateView.h \
@@ -55,6 +56,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 	SceneEdit.h \
 SceneTreeModel.h \
 SceneTreeItem.h \
+EditDelegate.h \
                 window.h
                 
 SOURCES       = ../shared/ContextIconFrame.cpp \
@@ -62,6 +64,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 				../shared/QIconFrame.cpp \
 				../shared/QIntEditSlider.cpp \
                 ../shared/QDoubleEditSlider.cpp \
+../shared/QColorEdit.cpp \
                 ../shared/Base3DView.cpp \
                 ../shared/Base2DView.cpp \
                 ManipulateView.cpp \
@@ -106,6 +109,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 	SceneEdit.cpp \
 SceneTreeModel.cpp \
 SceneTreeItem.cpp \
+EditDelegate.cpp \
     window.cpp \
                 main.cpp
                 

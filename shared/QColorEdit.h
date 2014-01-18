@@ -1,5 +1,5 @@
 /*
- *  ColorEdit.h
+ *  QColorEdit.h
  *  spinboxdelegate
  *
  *  Created by jian zhang on 1/18/14.
@@ -9,11 +9,11 @@
 #pragma once
 #include <QtGui>
 
-class ColorEdit : public QWidget
+class QColorEdit : public QWidget
 {
     Q_OBJECT
 public:
-    ColorEdit(QColor color, QWidget * parent = 0);
+    QColorEdit(QColor color, QWidget * parent = 0);
     void setColor(QColor color);
 	QColor color() const;
     QColor pickColor();

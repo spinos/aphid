@@ -10,13 +10,20 @@
 #include "SceneEdit.h"
 #include "SceneTreeModel.h"
 #include "MlScene.h"
+#include "EditDelegate.h"
 
 SceneEdit::SceneEdit(MlScene * scene, QWidget *parent) : QDialog(parent) 
 {
 	setWindowTitle(tr("Scene Tree"));
 	m_view = new QTreeView;
-	m_model = new SceneTreeModel(scene);
+	EditDelegate * delegate = new EditDelegate;
+	
+	QStringList headers;
+	headers<<"attribute"<<"value";
+	m_model = new SceneTreeModel(headers, scene);
 	m_view->setModel(m_model);
+	
+	m_view->setItemDelegate(delegate);
 	
 	QHBoxLayout *layout = new QHBoxLayout;
 	layout->addWidget(m_view);

@@ -1,9 +1,18 @@
+/*
+ *  SceneTreeItem.cpp
+ *  mallard
+ *
+ *  Created by jian zhang on 1/18/14.
+ *  Copyright 2014 __MyCompanyName__. All rights reserved.
+ *
+ */
+
 #include <QStringList>
 
 #include "SceneTreeItem.h"
 
 //! [0]
-SceneTreeItem::SceneTreeItem(const QList<QVariant> &data, SceneTreeItem *parent)
+SceneTreeItem::SceneTreeItem(const QVector<QVariant> &data, SceneTreeItem *parent)
 {
     parentItem = parent;
     itemData = data;
@@ -18,23 +27,30 @@ SceneTreeItem::~SceneTreeItem()
 //! [1]
 
 //! [2]
-void SceneTreeItem::appendChild(SceneTreeItem *item)
+SceneTreeItem *SceneTreeItem::child(int number)
 {
-    childItems.append(item);
+    return childItems.value(number);
 }
-//! [2]
 
-//! [3]
-SceneTreeItem *SceneTreeItem::child(int row)
+SceneTreeItem * SceneTreeItem::lastChild()
 {
-    return childItems.value(row);
+	if(childCount() < 1) return 0;
+	return child(childCount() - 1);
+}
+
+int SceneTreeItem::childCount() const
+{
+    return childItems.count();
 }
 //! [3]
 
 //! [4]
-int SceneTreeItem::childCount() const
+int SceneTreeItem::childNumber() const
 {
-    return childItems.count();
+    if (parentItem)
+        return parentItem->childItems.indexOf(const_cast<SceneTreeItem*>(this));
+
+    return 0;
 }
 //! [4]
 
@@ -53,18 +69,92 @@ QVariant SceneTreeItem::data(int column) const
 //! [6]
 
 //! [7]
-SceneTreeItem *SceneTreeItem::parent()
+bool SceneTreeItem::insertChildren(int position, int count, int columns)
 {
-    return parentItem;
+    if (position < 0 || position > childItems.size())
+        return false;
+
+    for (int row = 0; row < count; ++row) {
+        QVector<QVariant> data(columns);
+        SceneTreeItem *item = new SceneTreeItem(data, this);
+        childItems.insert(position, item);
+    }
+
+    return true;
 }
 //! [7]
 
 //! [8]
-int SceneTreeItem::row() const
+bool SceneTreeItem::insertColumns(int position, int columns)
 {
-    if (parentItem)
-        return parentItem->childItems.indexOf(const_cast<SceneTreeItem*>(this));
+    if (position < 0 || position > itemData.size())
+        return false;
 
-    return 0;
+    for (int column = 0; column < columns; ++column)
+        itemData.insert(position, QVariant());
+
+    foreach (SceneTreeItem *child, childItems)
+        child->insertColumns(position, columns);
+
+    return true;
 }
 //! [8]
+
+//! [9]
+SceneTreeItem *SceneTreeItem::parent()
+{
+    return parentItem;
+}
+//! [9]
+
+//! [10]
+bool SceneTreeItem::removeChildren(int position, int count)
+{
+    if (position < 0 || position + count > childItems.size())
+        return false;
+
+    for (int row = 0; row < count; ++row)
+        delete childItems.takeAt(position);
+
+    return true;
+}
+//! [10]
+
+bool SceneTreeItem::removeColumns(int position, int columns)
+{
+    if (position < 0 || position + columns > itemData.size())
+        return false;
+
+    for (int column = 0; column < columns; ++column)
+        itemData.remove(position);
+
+    foreach (SceneTreeItem *child, childItems)
+        child->removeColumns(position, columns);
+
+    return true;
+}
+
+//! [11]
+bool SceneTreeItem::setData(int column, const QVariant &value)
+{
+    if (column < 0 || column >= itemData.size())
+        return false;
+
+    itemData[column] = value;
+    return true;
+}
+//! [11]
+std::string SceneTreeItem::name() const
+{
+	return data(0).toString().toStdString();
+}
+
+void SceneTreeItem::setValueType(int x)
+{
+	m_valueType = x;
+}
+
+int SceneTreeItem::valueType() const
+{
+	return m_valueType;
+}

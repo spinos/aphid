@@ -1,27 +1,49 @@
+/*
+ *  SceneTreeItem.h
+ *  mallard
+ *
+ *  Created by jian zhang on 1/18/14.
+ *  Copyright 2014 __MyCompanyName__. All rights reserved.
+ *
+ */
+ 
 #pragma once
 
 #include <QList>
 #include <QVariant>
+#include <QVector>
 
 //! [0]
 class SceneTreeItem
 {
 public:
-    SceneTreeItem(const QList<QVariant> &data, SceneTreeItem *parent = 0);
+	enum ValueType {
+		TInt = 0,
+		TFloat = 1,
+		TBool = 2,
+		TRGB = 3
+	};
+    SceneTreeItem(const QVector<QVariant> &data, SceneTreeItem *parent = 0);
     ~SceneTreeItem();
 
-    void appendChild(SceneTreeItem *child);
-
-    SceneTreeItem *child(int row);
+    SceneTreeItem *child(int number);
+	SceneTreeItem * lastChild();
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
-    int row() const;
+    bool insertChildren(int position, int count, int columns);
+    bool insertColumns(int position, int columns);
     SceneTreeItem *parent();
-
+    bool removeChildren(int position, int count);
+    bool removeColumns(int position, int columns);
+    int childNumber() const;
+    bool setData(int column, const QVariant &value);
+	std::string name() const;
+	void setValueType(int x);
+	int valueType() const;
 private:
     QList<SceneTreeItem*> childItems;
-    QList<QVariant> itemData;
+    QVector<QVariant> itemData;
     SceneTreeItem *parentItem;
+	int m_valueType;
 };
-

@@ -1,16 +1,27 @@
+/*
+ *  SceneSceneTreeItem.h
+ *  spinboxdelegate
+ *
+ *  Created by jian zhang on 1/18/14.
+ *  Copyright 2014 __MyCompanyName__. All rights reserved.
+ *
+ */
+ 
 #include <QtGui>
-#include "MlScene.h"
-#include "SceneTreeItem.h"
 #include "SceneTreeModel.h"
+#include "SceneTreeItem.h"
+#include "MlScene.h"
 
-//! [0]
-SceneTreeModel::SceneTreeModel(MlScene * scene, QObject *parent)
+SceneTreeModel::SceneTreeModel(const QStringList &headers, MlScene* scene, 
+                     QObject *parent)
     : QAbstractItemModel(parent)
 {
-    QList<QVariant> rootData;
-    rootData << "Attribute" << "Value";
-    rootItem = new SceneTreeItem(rootData);
 	m_scene = scene;
+    QVector<QVariant> rootData;
+    foreach (QString header, headers)
+        rootData << header;
+
+    rootItem = new SceneTreeItem(rootData);
     setupModelData(rootItem);
 }
 //! [0]
@@ -23,41 +34,52 @@ SceneTreeModel::~SceneTreeModel()
 //! [1]
 
 //! [2]
-int SceneTreeModel::columnCount(const QModelIndex &parent) const
+int SceneTreeModel::columnCount(const QModelIndex & /* parent */) const
 {
-    if (parent.isValid())
-        return static_cast<SceneTreeItem*>(parent.internalPointer())->columnCount();
-    else
-        return rootItem->columnCount();
+    return rootItem->columnCount();
 }
 //! [2]
 
-//! [3]
 QVariant SceneTreeModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
 
-    if (role != Qt::DisplayRole)
+    if (role != Qt::DisplayRole && role != Qt::EditRole)
         return QVariant();
 
-    SceneTreeItem *item = static_cast<SceneTreeItem*>(index.internalPointer());
+    SceneTreeItem *item = getItem(index);
 
     return item->data(index.column());
 }
-//! [3]
 
-//! [4]
+//! [3]
 Qt::ItemFlags SceneTreeModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return 0;
 
-    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	if(index.column() == 0)
+		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+		
+	if(m_baseRows.find(getItem(index)->name()) != m_baseRows.end()) {
+		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	}
+    return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+//! [3]
+
+//! [4]
+SceneTreeItem *SceneTreeModel::getItem(const QModelIndex &index) const
+{
+    if (index.isValid()) {
+        SceneTreeItem *item = static_cast<SceneTreeItem*>(index.internalPointer());
+        if (item) return item;
+    }
+    return rootItem;
 }
 //! [4]
 
-//! [5]
 QVariant SceneTreeModel::headerData(int section, Qt::Orientation orientation,
                                int role) const
 {
@@ -66,21 +88,16 @@ QVariant SceneTreeModel::headerData(int section, Qt::Orientation orientation,
 
     return QVariant();
 }
+
+//! [5]
+QModelIndex SceneTreeModel::index(int row, int column, const QModelIndex &parent) const
+{
+    if (parent.isValid() && parent.column() != 0)
+        return QModelIndex();
 //! [5]
 
 //! [6]
-QModelIndex SceneTreeModel::index(int row, int column, const QModelIndex &parent)
-            const
-{
-    if (!hasIndex(row, column, parent))
-        return QModelIndex();
-
-    SceneTreeItem *parentItem;
-
-    if (!parent.isValid())
-        parentItem = rootItem;
-    else
-        parentItem = static_cast<SceneTreeItem*>(parent.internalPointer());
+    SceneTreeItem *parentItem = getItem(parent);
 
     SceneTreeItem *childItem = parentItem->child(row);
     if (childItem)
@@ -90,96 +107,115 @@ QModelIndex SceneTreeModel::index(int row, int column, const QModelIndex &parent
 }
 //! [6]
 
+bool SceneTreeModel::insertColumns(int position, int columns, const QModelIndex &parent)
+{
+    bool success;
+
+    beginInsertColumns(parent, position, position + columns - 1);
+    success = rootItem->insertColumns(position, columns);
+    endInsertColumns();
+
+    return success;
+}
+
+bool SceneTreeModel::insertRows(int position, int rows, const QModelIndex &parent)
+{
+    SceneTreeItem *parentItem = getItem(parent);
+    bool success;
+
+    beginInsertRows(parent, position, position + rows - 1);
+    success = parentItem->insertChildren(position, rows, rootItem->columnCount());
+    endInsertRows();
+
+    return success;
+}
+
 //! [7]
 QModelIndex SceneTreeModel::parent(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QModelIndex();
 
-    SceneTreeItem *childItem = static_cast<SceneTreeItem*>(index.internalPointer());
+    SceneTreeItem *childItem = getItem(index);
     SceneTreeItem *parentItem = childItem->parent();
 
     if (parentItem == rootItem)
         return QModelIndex();
 
-    return createIndex(parentItem->row(), 0, parentItem);
+    return createIndex(parentItem->childNumber(), 0, parentItem);
 }
 //! [7]
+
+bool SceneTreeModel::removeColumns(int position, int columns, const QModelIndex &parent)
+{
+    bool success;
+
+    beginRemoveColumns(parent, position, position + columns - 1);
+    success = rootItem->removeColumns(position, columns);
+    endRemoveColumns();
+
+    if (rootItem->columnCount() == 0)
+        removeRows(0, rowCount());
+
+    return success;
+}
+
+bool SceneTreeModel::removeRows(int position, int rows, const QModelIndex &parent)
+{
+    SceneTreeItem *parentItem = getItem(parent);
+    bool success = true;
+
+    beginRemoveRows(parent, position, position + rows - 1);
+    success = parentItem->removeChildren(position, rows);
+    endRemoveRows();
+
+    return success;
+}
 
 //! [8]
 int SceneTreeModel::rowCount(const QModelIndex &parent) const
 {
-    SceneTreeItem *parentItem;
-    if (parent.column() > 0)
-        return 0;
-
-    if (!parent.isValid())
-        parentItem = rootItem;
-    else
-        parentItem = static_cast<SceneTreeItem*>(parent.internalPointer());
+    SceneTreeItem *parentItem = getItem(parent);
 
     return parentItem->childCount();
 }
 //! [8]
 
+bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value,
+                        int role)
+{
+    if (role != Qt::EditRole)
+        return false;
+
+    SceneTreeItem *item = getItem(index);
+    bool result = item->setData(index.column(), value);
+
+    if (result)
+        emit dataChanged(index, index);
+
+    return result;
+}
+
+bool SceneTreeModel::setHeaderData(int section, Qt::Orientation orientation,
+                              const QVariant &value, int role)
+{
+    if (role != Qt::EditRole || orientation != Qt::Horizontal)
+        return false;
+
+    bool result = rootItem->setData(section, value);
+
+    if (result)
+        emit headerDataChanged(orientation, section, section);
+
+    return result;
+}
+
 void SceneTreeModel::setupModelData(SceneTreeItem *parent)
 {
     QList<SceneTreeItem*> parents;
-    QList<int> indentations;
     parents << parent;
-    indentations << 0;
-
-    int number = 0;
-/*
-    while (number < lines.count()) {
-        int position = 0;
-        while (position < lines[number].length()) {
-            if (lines[number].mid(position, 1) != " ")
-                break;
-            position++;
-        }
-
-        QString lineData = lines[number].mid(position).trimmed();
-
-        if (!lineData.isEmpty()) {
-            // Read the column data from the rest of the line.
-            QStringList columnStrings = lineData.split("\t", QString::SkipEmptyParts);
-            QList<QVariant> columnData;
-            for (int column = 0; column < columnStrings.count(); ++column)
-                columnData << columnStrings[column];
-
-            if (position > indentations.last()) {
-                // The last child of the current parent is now the new parent
-                // unless the current parent has no children.
-
-                if (parents.last()->childCount() > 0) {
-                    parents << parents.last()->child(parents.last()->childCount()-1);
-                    indentations << position;
-                }
-            } else {
-                while (position < indentations.last() && parents.count() > 0) {
-                    parents.pop_back();
-                    indentations.pop_back();
-                }
-            }
-
-            // Append a new item to the current parent's list of children.
-            parents.last()->appendChild(new SceneTreeItem(columnData, parents.last()));
-        }
-
-        number++;
-    }*/
-    addOptions(parents);
-    addBase(parents, "lights", 0);
-    addBase(parents, "key", 1);
-    addBase(parents, "kd", 2);
-    addBase(parents, "models", 0);
-    addBase(parents, "body", 1);
-    addBase(parents, "shaders", 0);
-    addBase(parents, "hair", 1);
-	
-	int nb = rootItem->childCount();
-	for(int i=0; i < nb; i++) qDebug()<<" "<<rootItem->child(i)->data(0);
+	addOptions(parents);
+	addLights(parents);
 }
 
 void SceneTreeModel::addBase(QList<SceneTreeItem*> & parents, const std::string & baseName, int level)
@@ -188,9 +224,15 @@ void SceneTreeModel::addBase(QList<SceneTreeItem*> & parents, const std::string 
         parents << parents.last()->child(parents.last()->childCount()-1);
 
     QList<QVariant> columnData;
-    columnData << QString(tr(baseName.c_str()))<< QString(tr(" "));
-    parents.last()->appendChild(new SceneTreeItem(columnData, parents.last()));
-    for(int i=0; i < level; i++) parents.pop_back();
+    columnData << QString(tr(baseName.c_str()));
+    
+	SceneTreeItem *parent = parents.last();
+	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
+	for (int column = 0; column < columnData.size(); ++column)
+		parent->child(parent->childCount() - 1)->setData(column, columnData[column]);
+    
+	for(int i=0; i < level; i++) parents.pop_back();
+	m_baseRows[baseName] = 1;
 }
 
 void SceneTreeModel::addIntAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, int value)
@@ -200,7 +242,64 @@ void SceneTreeModel::addIntAttr(QList<SceneTreeItem*> & parents, const std::stri
 
     QList<QVariant> columnData;
     columnData << QString(tr(attrName.c_str()))<< QVariant(value);
-    parents.last()->appendChild(new SceneTreeItem(columnData, parents.last()));
+    
+	SceneTreeItem *parent = parents.last();
+	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
+	parent->lastChild()->setValueType(0);
+	for (int column = 0; column < columnData.size(); ++column)
+		parent->lastChild()->setData(column, columnData[column]);
+		
+    for(int i=0; i < level; i++) parents.pop_back();
+}
+
+void SceneTreeModel::addFltAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, float value)
+{
+    for(int i=0; i < level; i++) 
+        parents << parents.last()->child(parents.last()->childCount()-1);
+
+    QList<QVariant> columnData;
+    columnData << QString(tr(attrName.c_str()))<< QVariant(value);
+    
+	SceneTreeItem *parent = parents.last();
+	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
+	parent->lastChild()->setValueType(1);
+	for (int column = 0; column < columnData.size(); ++column)
+		parent->lastChild()->setData(column, columnData[column]);
+		
+    for(int i=0; i < level; i++) parents.pop_back();
+}
+
+void SceneTreeModel::addBolAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, bool value)
+{
+    for(int i=0; i < level; i++) 
+        parents << parents.last()->child(parents.last()->childCount()-1);
+
+    QList<QVariant> columnData;
+    columnData << QString(tr(attrName.c_str()))<< QVariant(value);
+    
+	SceneTreeItem *parent = parents.last();
+	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
+	parent->lastChild()->setValueType(2);
+	for (int column = 0; column < columnData.size(); ++column)
+		parent->lastChild()->setData(column, columnData[column]);
+		
+    for(int i=0; i < level; i++) parents.pop_back();
+}
+
+void SceneTreeModel::addRGBAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, QColor value)
+{
+	for(int i=0; i < level; i++) 
+        parents << parents.last()->child(parents.last()->childCount()-1);
+
+    QList<QVariant> columnData;
+    columnData << QString(tr(attrName.c_str()))<< QVariant(value);
+    
+	SceneTreeItem *parent = parents.last();
+	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
+	parent->lastChild()->setValueType(3);
+	for (int column = 0; column < columnData.size(); ++column)
+		parent->lastChild()->setData(column, columnData[column]);
+		
     for(int i=0; i < level; i++) parents.pop_back();
 }
 
@@ -211,4 +310,16 @@ void SceneTreeModel::addOptions(QList<SceneTreeItem*> & parents)
 	addIntAttr(parents, "AA_samples", 1, m_scene->AASample());
 	addIntAttr(parents, "res_x", 1, m_scene->renderImageWidth());
 	addIntAttr(parents, "res_y", 1, m_scene->renderImageHeight());
+}
+
+void SceneTreeModel::addLights(QList<SceneTreeItem*> & parents)
+{
+	addBase(parents, "lights", 0);
+	addBase(parents, "distant_key", 1);
+	addFltAttr(parents, "intensity", 2, 1.1);
+	addIntAttr(parents, "samples", 2, 3);
+	addBolAttr(parents, "cast_shadow", 2, false);
+	QColor col;
+	col.setRgbF(1.0, 0.5, 0.4);
+	addRGBAttr(parents, "light_color", 2, col);
 }

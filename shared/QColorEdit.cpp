@@ -1,5 +1,5 @@
 /*
- *  ColorEdit.cpp
+ *  QColorEdit.cpp
  *  spinboxdelegate
  *
  *  Created by jian zhang on 1/18/14.
@@ -7,9 +7,9 @@
  *
  */
 
-#include "ColorEdit.h"
+#include "QColorEdit.h"
 
-ColorEdit::ColorEdit(QColor color, QWidget * parent) : QWidget(parent)
+QColorEdit::QColorEdit(QColor color, QWidget * parent) : QWidget(parent)
 {
 	m_color = color;qDebug()<<"init col"<<color;
 	QHBoxLayout *layout = new QHBoxLayout;
@@ -28,17 +28,17 @@ ColorEdit::ColorEdit(QColor color, QWidget * parent) : QWidget(parent)
 	setFocusPolicy(Qt::NoFocus);
 }
 
-void ColorEdit::setColor(QColor color)
+void QColorEdit::setColor(QColor color)
 {
 	m_color = color;
 }
 
-QColor ColorEdit::color() const 
+QColor QColorEdit::color() const 
 {
 	return m_color;
 }
 
-QColor ColorEdit::pickColor()
+QColor QColorEdit::pickColor()
 {
 	QColorDialog dialog(m_color);
 	dialog.setOption(QColorDialog::ShowAlphaChannel, true);
