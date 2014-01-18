@@ -17,6 +17,7 @@
 #include <HFeather.h>
 #include <HSkin.h>
 #include <HLight.h>
+#include <HOption.h>
 #include <BakeDeformer.h>
 #include <PlaybackControl.h>
 #include <sstream>
@@ -173,6 +174,9 @@ bool MlScene::doWrite(const std::string & fileName)
 	HWorld grpWorld;
 	grpWorld.save();
 	
+	HOption grpOpt("/world/options");
+	grpOpt.save(this);
+	
 	HMesh grpBody("/world/body");
 	grpBody.save(m_accmesh);
 	
@@ -265,6 +269,9 @@ bool MlScene::doRead(const std::string & fileName)
 	
 	HWorld grpWorld;
 	grpWorld.load();
+	
+	HOption grpOpt("/world/options");
+	grpOpt.load(this);
 
 	HMesh grpBody("/world/body");
 	grpBody.load(m_accmesh);

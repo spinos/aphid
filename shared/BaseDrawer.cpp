@@ -192,6 +192,11 @@ void BaseDrawer::colorAsInert()
 	glColor3f(m_inertColor.x, m_inertColor.y, m_inertColor.z);
 }
 
+void BaseDrawer::colorAsReference() const
+{
+	glColor3f(0.1f, 0.23f, 0.34f);
+}
+
 void BaseDrawer::vertex(const Vector3F & v) const
 {
 	glVertex3f(v.x, v.y, v.z);

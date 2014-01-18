@@ -36,3 +36,8 @@ SceneEdit::SceneEdit(MlScene * scene, QWidget *parent) : QDialog(parent)
 }
 
 SceneEdit::~SceneEdit() {}
+
+void SceneEdit::reloadScene()
+{
+	m_model->rebuild();
+}

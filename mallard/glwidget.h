@@ -86,6 +86,7 @@ signals:
 	void sendFeatherEditBackground(QString name);
 	void renderResChanged(QSize s);
 	void featherSelectionChanged();
+	void sceneOpened();
 public slots:
 	void importBodyMesh();
 	void cleanSheet();

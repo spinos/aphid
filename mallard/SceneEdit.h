@@ -10,7 +10,7 @@
 #pragma once
 class MlScene;
 #include <QDialog>
-class SceneTreeModel;
+class SceneTreeParser;
 QT_BEGIN_NAMESPACE
 class QTreeView;
 QT_END_NAMESPACE
@@ -26,8 +26,8 @@ public:
 signals:
 	
 public slots:
-	
+	void reloadScene();
 private:
 	QTreeView * m_view;
-	SceneTreeModel * m_model;
+	SceneTreeParser * m_model;
 };

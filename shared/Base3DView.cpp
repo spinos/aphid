@@ -415,6 +415,7 @@ BaseBrush * Base3DView::brush()
 
 void Base3DView::showBrush() const
 {
+	getDrawer()->colorAsReference();
 	getDrawer()->circleAt(brush()->getSpace(), brush()->getRadius());
 
     if(brush()->length() > 10e-3)

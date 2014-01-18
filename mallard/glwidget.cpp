@@ -365,6 +365,7 @@ void GLWidget::cleanSheet()
 {
 	clear();
 	defaultLighting();
+	emit sceneOpened();
 }
 
 bool GLWidget::confirmDiscardChanges()
@@ -598,6 +599,7 @@ void GLWidget::afterOpen()
 	if(fedistr != "unknown")
 		loadFeatherDistribution(fedistr);
 	if(numLights() < 1) defaultLighting();
+	emit sceneOpened();
 }
 
 void GLWidget::focusOutEvent(QFocusEvent * event)

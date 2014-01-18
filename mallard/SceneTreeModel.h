@@ -56,6 +56,7 @@ public slots:
 	
 
 protected:
+	void clear();
 	SceneTreeItem * getRootItem();
     SceneTreeItem *getItem(const QModelIndex &index) const;
 	void addBase(QList<SceneTreeItem*> & parents, const std::string & baseName, int level);

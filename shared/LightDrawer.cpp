@@ -43,8 +43,7 @@ void LightDrawer::drawDistantLight(DistantLight * l) const
 	glPushMatrix();
 	useSpace(l->space());
 	drawDisc(1.f);
-	Float3 dark(0.1f, 0.23f, 0.34f);
-	useColor(dark);
+	colorAsReference();
 	Vector3F a(0.f, 0.f, 16.f);
 	Vector3F b(0.f, 0.f, -16.f);
 	arrow(a, b);

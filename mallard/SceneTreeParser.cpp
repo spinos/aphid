@@ -20,8 +20,12 @@ SceneTreeParser::SceneTreeParser(const QStringList &headers, MlScene* scene,
     setupModelData(getRootItem());
 }
 
-SceneTreeParser::~SceneTreeParser()
+SceneTreeParser::~SceneTreeParser() {}
+
+void SceneTreeParser::rebuild()
 {
+	clear();
+	setupModelData(getRootItem());
 }
 
 void SceneTreeParser::setupModelData(SceneTreeItem *parent)

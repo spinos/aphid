@@ -62,6 +62,15 @@ void HLight::writeLight(BaseLight * l)
 	float intensity = l->intensity();
 	g.writeFloatAttr(".intensity", &intensity);
 	
+	if(!g.hasNamedAttr(".samples")) g.addIntAttr(".samples");
+	int samples = l->samples();
+	g.writeIntAttr(".samples", &samples);
+	
+	if(!g.hasNamedAttr(".castShadow")) g.addIntAttr(".castShadow");
+	int cs = 0;
+	if(l->castShadow()) cs = 1;
+	g.writeIntAttr(".castShadow", &cs);
+	
 	if(!g.hasNamedAttr(".t")) g.addFloatAttr(".t", 3);
 	Vector3F t = l->translation();
 	g.writeFloatAttr(".t", (float *)(&t));
@@ -155,6 +164,15 @@ void HLight::readLight(HBase * c, LightGroup * g)
 	if(c->hasNamedAttr(".rot")) c->readFloatAttr(".rot", (float *)(&rot));
 	
 	l->setRotationAngles(rot);
+	
+	int samples = 1;
+	if(c->hasNamedAttr(".samples")) c->readIntAttr(".samples", &samples);
+	l->setSamples(samples);
+
+	int cs = 1;
+	if(c->hasNamedAttr(".castShadow")) c->readIntAttr(".castShadow", &cs);
+	if(cs == 1) l->setCastShadow(true);
+	else l->setCastShadow(false);
 	
 	g->addLight(l);
 }

@@ -44,6 +44,7 @@ public:
 	
 	void colorAsActive();
 	void colorAsInert();
+	void colorAsReference() const;
 	void vertex(const Vector3F & v) const;
 	void vertexWithOffset(const Vector3F & v, const Vector3F & o);
 	void useSpace(const Matrix44F & s) const;

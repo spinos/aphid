@@ -17,6 +17,7 @@ public:
 	SceneTreeParser(const QStringList &headers, MlScene* scene, QObject *parent = 0);
     ~SceneTreeParser();
 	
+	void rebuild();
 public slots:
 	void receiveData(QWidget * editor);
 	

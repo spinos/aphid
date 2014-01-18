@@ -302,3 +302,9 @@ void SceneTreeModel::addRGBAttr(QList<SceneTreeItem*> & parents, const std::stri
 		
     for(int i=0; i < level; i++) parents.pop_back();
 }
+
+void SceneTreeModel::clear()
+{
+	removeRows(0, rowCount());
+}
+
