@@ -26,12 +26,12 @@ public:
                       const QModelIndex &index) const;
 
 private slots:
-
+	void finishEditing();
 private:
-	QWidget * createIntEditor(QWidget *parent) const;
-	QWidget * createDoubleEditor(QWidget *parent) const;
-	QWidget * createBoolEditor(QWidget *parent) const;
-	QWidget * createColorEditor(QWidget *parent, QColor col) const;
+	QWidget * createIntEditor(const QModelIndex &index, QWidget *parent) const;
+	QWidget * createDoubleEditor(const QModelIndex &index, QWidget *parent) const;
+	QWidget * createBoolEditor(const QModelIndex &index, QWidget *parent) const;
+	QWidget * createColorEditor(const QModelIndex &index, QWidget *parent, QColor col) const;
 	
 	void setIntEditorValue(QWidget *editor, QVariant & value) const;
 	void setDoubleEditorValue(QWidget *editor, QVariant & value) const;
@@ -42,10 +42,5 @@ private:
 	QVariant getDoubleEditorValue(QWidget *editor) const;
 	QVariant getBoolEditorValue(QWidget *editor) const;
 	QVariant getColorEditorValue(QWidget *editor) const;
-	
-	QString translateBoolToStr(const QVariant & src) const;
-	QVariant translateStrToBool(const QString & src) const;
-	QIntValidator m_intValidate;
-	QDoubleValidator m_dlbValidate;
 };
 

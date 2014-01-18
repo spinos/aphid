@@ -9,22 +9,12 @@
 
 #include "QColorEdit.h"
 
-QColorEdit::QColorEdit(QColor color, QWidget * parent) : QWidget(parent)
+QColorEdit::QColorEdit(QColor color, const QModelIndex & idx, QWidget * parent) : QModelEdit(idx, parent)
 {
-	m_color = color;qDebug()<<"init col"<<color;
-	QHBoxLayout *layout = new QHBoxLayout;
-    setLayout(layout);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    m_button = new QFrame;
-    QPalette palette = m_button->palette();
-    palette.setColor(QPalette::Base, m_color);
-    m_button->setPalette(palette);
-    m_button->setAutoFillBackground(true);
-    m_button->setMinimumSize(parent->size());
-    m_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-    m_button->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-    layout->addWidget(m_button);
+	m_color = color;
+	QPalette palette;
+	palette.setColor(QPalette::Base, m_color);
+	setPalette(palette);
 	setFocusPolicy(Qt::NoFocus);
 }
 
@@ -47,5 +37,6 @@ QColor QColorEdit::pickColor()
 		return m_color;
 	QColor newColor = dialog.selectedColor().rgb();
 	setColor(newColor);
+	emit editingFinished();
 	return m_color;
 }

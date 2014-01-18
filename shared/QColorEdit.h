@@ -7,13 +7,13 @@
  *
  */
 #pragma once
-#include <QtGui>
+#include "QModelEdit.h"
 
-class QColorEdit : public QWidget
+class QColorEdit : public QModelEdit
 {
     Q_OBJECT
 public:
-    QColorEdit(QColor color, QWidget * parent = 0);
+    QColorEdit(QColor color, const QModelIndex & idx, QWidget * parent = 0);
     void setColor(QColor color);
 	QColor color() const;
     QColor pickColor();
@@ -24,6 +24,5 @@ signals:
 protected:
     
 private:
-    QFrame *m_button;
     QColor m_color;
 };

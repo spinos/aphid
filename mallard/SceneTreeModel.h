@@ -52,6 +52,9 @@ public:
                     const QModelIndex &parent = QModelIndex());
     bool removeRows(int position, int rows,
                     const QModelIndex &parent = QModelIndex());
+					
+public slots:
+	void receiveData(QWidget * editor);
 
 private:
     void setupModelData(SceneTreeItem *parent);

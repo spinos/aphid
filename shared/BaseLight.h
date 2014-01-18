@@ -20,9 +20,17 @@ public:
 	
 	void setIntensity(float x);
 	float intensity() const;
+	
+	void setSamples(int x);
+	int samples() const;
+	
+	void setCastShadow(bool x);
+	bool castShadow() const;
 protected:
 
 private:
 	Float3 m_lightColor;
 	float m_intensity;
+	int m_samples;
+	bool m_castShadow;
 };

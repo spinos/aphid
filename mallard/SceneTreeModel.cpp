@@ -11,6 +11,8 @@
 #include "SceneTreeModel.h"
 #include "SceneTreeItem.h"
 #include "MlScene.h"
+#include "AllLight.h"
+#include "AllEdit.h"
 
 SceneTreeModel::SceneTreeModel(const QStringList &headers, MlScene* scene, 
                      QObject *parent)
@@ -315,11 +317,23 @@ void SceneTreeModel::addOptions(QList<SceneTreeItem*> & parents)
 void SceneTreeModel::addLights(QList<SceneTreeItem*> & parents)
 {
 	addBase(parents, "lights", 0);
-	addBase(parents, "distant_key", 1);
-	addFltAttr(parents, "intensity", 2, 1.1);
-	addIntAttr(parents, "samples", 2, 3);
-	addBolAttr(parents, "cast_shadow", 2, false);
-	QColor col;
-	col.setRgbF(1.0, 0.5, 0.4);
-	addRGBAttr(parents, "light_color", 2, col);
+	unsigned nl = m_scene->numLights();
+	for(unsigned i = 0; i < nl; i++) {
+		BaseLight * l = m_scene->getLight(i);
+		addBase(parents, l->name(), 1);
+		addFltAttr(parents, "intensity", 2, l->intensity());
+		addIntAttr(parents, "samples", 2, l->samples());
+		addBolAttr(parents, "cast_shadow", 2, l->castShadow());
+		Float3 fc = l->lightColor();
+		QColor col;
+		col.setRgbF(fc.x, fc.y, fc.z);
+		addRGBAttr(parents, "light_color", 2, col);
+	}
+}
+
+void SceneTreeModel::receiveData(QWidget * editor)
+{
+	QModelEdit * me = static_cast<QModelEdit *>(editor);
+	SceneTreeItem *item = static_cast<SceneTreeItem*>(me->index().internalPointer());
+	qDebug()<<"recv name "<<item->name().c_str();
 }

@@ -13,6 +13,8 @@ BaseLight::BaseLight()
 {
 	m_lightColor = Float3(1.f, 1.f, 1.f);
 	m_intensity = 1.f;
+	m_samples = 1;
+	m_castShadow = true;
 	bbox()->setMin(-4.f, -4.f, -4.f);
 	bbox()->setMax(4.f, 4.f, 4.f);
 }
@@ -44,4 +46,24 @@ void BaseLight::setIntensity(float x)
 float BaseLight::intensity() const
 {
 	return m_intensity;
+}
+
+void BaseLight::setSamples(int x)
+{
+	m_samples = x;
+}
+
+int BaseLight::samples() const
+{
+	return m_samples;
+}
+	
+void BaseLight::setCastShadow(bool x)
+{
+	m_castShadow = x;
+}
+
+bool BaseLight::castShadow() const
+{
+	return m_castShadow;
 }

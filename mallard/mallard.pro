@@ -11,7 +11,12 @@ HEADERS       =	../shared/ContextIconFrame.h \
                                 ../shared/QIconFrame.h \
                 ../shared/QIntEditSlider.h \
                 ../shared/QDoubleEditSlider.h \
+../shared/AllEdit.h \
+../shared/QModelEdit.h \
 ../shared/QColorEdit.h \
+../shared/QIntEdit.h \
+../shared/QDoubleEdit.h \
+../shared/QBoolEdit.h \
                 ../shared/Base3DView.h \
                 ../shared/Base2DView.h \
                 ManipulateView.h \
@@ -64,7 +69,11 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 				../shared/QIconFrame.cpp \
 				../shared/QIntEditSlider.cpp \
                 ../shared/QDoubleEditSlider.cpp \
+../shared/QModelEdit.cpp \
 ../shared/QColorEdit.cpp \
+../shared/QIntEdit.cpp \
+../shared/QDoubleEdit.cpp \
+../shared/QBoolEdit.cpp \
                 ../shared/Base3DView.cpp \
                 ../shared/Base2DView.cpp \
                 ManipulateView.cpp \

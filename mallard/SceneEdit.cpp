@@ -30,6 +30,9 @@ SceneEdit::SceneEdit(MlScene * scene, QWidget *parent) : QDialog(parent)
 	setLayout(layout);
 	setContentsMargins(0, 0, 0, 0);
 	layout->setContentsMargins(0, 0, 0, 0);
+	
+	connect(delegate, SIGNAL(commitData(QWidget *)),
+            m_model, SLOT(receiveData(QWidget *)));
 }
 
 SceneEdit::~SceneEdit() {}

@@ -2,9 +2,8 @@
 
 #include "EditDelegate.h"
 #include "SceneTreeItem.h"
-#include <QColorEdit.h>
+#include <AllEdit.h>
 
-//! [0]
 EditDelegate::EditDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
 {
@@ -30,23 +29,25 @@ QWidget *EditDelegate::createEditor(QWidget *parent,
 {
 	SceneTreeItem *item = static_cast<SceneTreeItem*>(index.internalPointer());
 	QVariant value = index.model()->data(index, Qt::EditRole);
-    
+    //qDebug()<<" crt"<<item->parent()->name().c_str();
     QWidget *editor = 0;
 	
 	switch (item->valueType()) {
 		case 0:
-			editor = createIntEditor(parent);
+			editor = createIntEditor(index, parent);
 			break;
 		case 1:
-			editor = createDoubleEditor(parent);
+			editor = createDoubleEditor(index, parent);
 			break;
 		case 2:
-			editor = createBoolEditor(parent);
+			editor = createBoolEditor(index, parent);
 			break;
 		default:
-			editor = createColorEditor(parent, value.value<QColor>());
+			editor = createColorEditor(index, parent, value.value<QColor>());
 			break;
 	}
+	connect(editor, SIGNAL(editingFinished()),
+            this, SLOT(finishEditing())); 
     return editor;
 }
 //! [1]
@@ -94,67 +95,45 @@ void EditDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 			model->setData(index, getColorEditorValue(editor), Qt::EditRole);
 			break;
 	}
+	qDebug()<<"set mdl";
 }
 
-QString EditDelegate::translateBoolToStr(const QVariant & src) const
+QWidget * EditDelegate::createIntEditor(const QModelIndex &index, QWidget *parent) const
 {
-	if(src.toBool()) return tr("true");
-	return tr("false");
+	return new QIntEdit(index, parent);
 }
 
-QVariant EditDelegate::translateStrToBool(const QString & src) const
+QWidget * EditDelegate::createDoubleEditor(const QModelIndex &index, QWidget *parent) const
 {
-	if(src == "on" || src == "1" || src == "true") return QVariant(true);
-	return QVariant(false);
+	return new QDoubleEdit(index, parent);
 }
 
-QWidget * EditDelegate::createIntEditor(QWidget *parent) const
+QWidget * EditDelegate::createBoolEditor(const QModelIndex &index, QWidget *parent) const
 {
-	QLineEdit *editor = new QLineEdit(parent);
-	editor->setValidator(&m_intValidate);
-    return editor;
+    return new QBoolEdit(index, parent);
 }
 
-QWidget * EditDelegate::createDoubleEditor(QWidget *parent) const
+QWidget * EditDelegate::createColorEditor(const QModelIndex &index, QWidget *parent, QColor col) const
 {
-	QLineEdit *editor = new QLineEdit(parent);
-	editor->setValidator(&m_dlbValidate);
-    return editor;
-}
-
-QWidget * EditDelegate::createBoolEditor(QWidget *parent) const
-{
-    return new QLineEdit(parent);
-}
-
-QWidget * EditDelegate::createColorEditor(QWidget *parent, QColor col) const
-{
-	return new QColorEdit(col, parent);
+	return new QColorEdit(col, index, parent);
 }
 
 void EditDelegate::setIntEditorValue(QWidget *editor, QVariant & value) const
 {
-	QString t;
-	int intValue = value.toInt();
-	t.setNum(intValue);
-	QLineEdit *le = static_cast<QLineEdit*>(editor);
-	le->setText(t);
+	QIntEdit *le = static_cast<QIntEdit*>(editor);
+	le->setValue(value.toInt());
 }
 
 void EditDelegate::setDoubleEditorValue(QWidget *editor, QVariant & value) const
 {
-	QString t;
-	double dlbValue = value.toDouble();
-	t.setNum(dlbValue);
-	QLineEdit *le = static_cast<QLineEdit*>(editor);
-	le->setText(t);
+	QDoubleEdit *le = static_cast<QDoubleEdit*>(editor);
+	le->setValue(value.toDouble());
 }
 
 void EditDelegate::setBoolEditorValue(QWidget *editor, QVariant & value) const
 {
-	QString t = translateBoolToStr(value);
-	QLineEdit *le = static_cast<QLineEdit*>(editor);
-	le->setText(t);
+	QBoolEdit *le = static_cast<QBoolEdit*>(editor);
+	le->setValue(value.toBool());
 }
 
 void EditDelegate::setColorEditorValue(QWidget *editor, QVariant & value) const
@@ -165,22 +144,20 @@ void EditDelegate::setColorEditorValue(QWidget *editor, QVariant & value) const
 
 QVariant EditDelegate::getIntEditorValue(QWidget *editor) const
 {
-	QLineEdit *le = static_cast<QLineEdit*>(editor);
-	int value = le->text().toInt();
-	return QVariant(value);
+	QIntEdit *le = static_cast<QIntEdit*>(editor);
+	return QVariant(le->value());
 }
 
 QVariant EditDelegate::getDoubleEditorValue(QWidget *editor) const
 {
-	QLineEdit *le = static_cast<QLineEdit*>(editor);
-	double value = le->text().toDouble();
-	return QVariant(value);
+	QDoubleEdit *le = static_cast<QDoubleEdit*>(editor);
+	return QVariant(le->value());
 }
 
 QVariant EditDelegate::getBoolEditorValue(QWidget *editor) const
 {
-	QLineEdit *le = static_cast<QLineEdit*>(editor);
-	return QVariant(translateStrToBool(le->text()));
+	QBoolEdit *le = static_cast<QBoolEdit*>(editor);
+	return QVariant(le->value());
 }
 
 QVariant EditDelegate::getColorEditorValue(QWidget *editor) const
@@ -188,4 +165,10 @@ QVariant EditDelegate::getColorEditorValue(QWidget *editor) const
 	QColorEdit *le = static_cast<QColorEdit*>(editor);
 	le->pickColor();
 	return QVariant(le->color());
+}
+
+void EditDelegate::finishEditing()
+{
+	QModelEdit * editor = static_cast<QModelEdit *>(sender());
+	emit commitData(editor);
 }
