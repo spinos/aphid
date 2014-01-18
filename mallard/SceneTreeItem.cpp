@@ -16,6 +16,8 @@ SceneTreeItem::SceneTreeItem(const QVector<QVariant> &data, SceneTreeItem *paren
 {
     parentItem = parent;
     itemData = data;
+	m_level = 0;
+	m_valueType = 0;
 }
 //! [0]
 
@@ -105,9 +107,12 @@ SceneTreeItem *SceneTreeItem::parent()
 {
     return parentItem;
 }
-//! [9]
 
-//! [10]
+SceneTreeItem *SceneTreeItem::parent() const
+{
+	return parentItem;
+}
+
 bool SceneTreeItem::removeChildren(int position, int count)
 {
     if (position < 0 || position + count > childItems.size())
@@ -143,10 +148,27 @@ bool SceneTreeItem::setData(int column, const QVariant &value)
     itemData[column] = value;
     return true;
 }
-//! [11]
-std::string SceneTreeItem::name() const
+
+QString SceneTreeItem::name() const
 {
-	return data(0).toString().toStdString();
+	return data(0).toString();
+}
+
+QStringList SceneTreeItem::fullPathName() const
+{
+	QStringList r;
+	r << name();
+	SceneTreeItem * cur = parent();
+	for(int i = 0; i < m_level; i++) {
+		r << cur->name();
+		cur = cur->parent();
+	}
+	return r;
+}
+
+std::string SceneTreeItem::sname() const
+{
+	return name().toStdString();
 }
 
 void SceneTreeItem::setValueType(int x)
@@ -157,4 +179,9 @@ void SceneTreeItem::setValueType(int x)
 int SceneTreeItem::valueType() const
 {
 	return m_valueType;
+}
+
+void SceneTreeItem::setLevel(int x)
+{
+	m_level = x;
 }

@@ -64,7 +64,7 @@ Qt::ItemFlags SceneTreeModel::flags(const QModelIndex &index) const
 	if(index.column() == 0)
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 		
-	if(m_baseRows.find(getItem(index)->name()) != m_baseRows.end()) {
+	if(m_baseRows.find(getItem(index)->sname()) != m_baseRows.end()) {
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -230,6 +230,7 @@ void SceneTreeModel::addBase(QList<SceneTreeItem*> & parents, const std::string 
     
 	SceneTreeItem *parent = parents.last();
 	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
+	parent->lastChild()->setLevel(level);
 	for (int column = 0; column < columnData.size(); ++column)
 		parent->child(parent->childCount() - 1)->setData(column, columnData[column]);
     
@@ -248,6 +249,7 @@ void SceneTreeModel::addIntAttr(QList<SceneTreeItem*> & parents, const std::stri
 	SceneTreeItem *parent = parents.last();
 	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
 	parent->lastChild()->setValueType(0);
+	parent->lastChild()->setLevel(level);
 	for (int column = 0; column < columnData.size(); ++column)
 		parent->lastChild()->setData(column, columnData[column]);
 		
@@ -265,6 +267,7 @@ void SceneTreeModel::addFltAttr(QList<SceneTreeItem*> & parents, const std::stri
 	SceneTreeItem *parent = parents.last();
 	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
 	parent->lastChild()->setValueType(1);
+	parent->lastChild()->setLevel(level);
 	for (int column = 0; column < columnData.size(); ++column)
 		parent->lastChild()->setData(column, columnData[column]);
 		
@@ -282,6 +285,7 @@ void SceneTreeModel::addBolAttr(QList<SceneTreeItem*> & parents, const std::stri
 	SceneTreeItem *parent = parents.last();
 	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
 	parent->lastChild()->setValueType(2);
+	parent->lastChild()->setLevel(level);
 	for (int column = 0; column < columnData.size(); ++column)
 		parent->lastChild()->setData(column, columnData[column]);
 		
@@ -299,6 +303,7 @@ void SceneTreeModel::addRGBAttr(QList<SceneTreeItem*> & parents, const std::stri
 	SceneTreeItem *parent = parents.last();
 	parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
 	parent->lastChild()->setValueType(3);
+	parent->lastChild()->setLevel(level);
 	for (int column = 0; column < columnData.size(); ++column)
 		parent->lastChild()->setData(column, columnData[column]);
 		
@@ -308,7 +313,7 @@ void SceneTreeModel::addRGBAttr(QList<SceneTreeItem*> & parents, const std::stri
 void SceneTreeModel::addOptions(QList<SceneTreeItem*> & parents)
 {
 	addBase(parents, "options", 0);
-	addIntAttr(parents, "max_subdiv", 1, 3);
+	addIntAttr(parents, "max_subdiv", 1, m_scene->maxSubdiv());
 	addIntAttr(parents, "AA_samples", 1, m_scene->AASample());
 	addIntAttr(parents, "res_x", 1, m_scene->renderImageWidth());
 	addIntAttr(parents, "res_y", 1, m_scene->renderImageHeight());
@@ -334,6 +339,69 @@ void SceneTreeModel::addLights(QList<SceneTreeItem*> & parents)
 void SceneTreeModel::receiveData(QWidget * editor)
 {
 	QModelEdit * me = static_cast<QModelEdit *>(editor);
-	SceneTreeItem *item = static_cast<SceneTreeItem*>(me->index().internalPointer());
-	qDebug()<<"recv name "<<item->name().c_str();
+	SceneTreeItem *item = getItem(me->index());
+	updateScene(item);
+}
+
+void SceneTreeModel::updateScene(SceneTreeItem * item)
+{
+	const QString baseName = item->fullPathName().last();
+	if(baseName == "options") {
+		updateOptions(item);
+	}
+	else if(baseName == "lights") {
+		updateLights(item);
+	}
+}
+
+void SceneTreeModel::updateOptions(SceneTreeItem * item)
+{
+	const QString attrName = item->fullPathName().first();
+	if(attrName == "max_subdiv") {
+		qDebug()<<"set maxsubdiv "<<item->data(1).toInt();
+		m_scene->setMaxSubdiv(item->data(1).toInt());
+	}
+	else if(attrName == "AA_samples") {
+		qDebug()<<"set aa "<<item->data(1).toInt();
+		m_scene->setAASample(item->data(1).toInt());
+	}
+	else if(attrName == "res_x") {
+		qDebug()<<"set resx "<<item->data(1).toInt();
+		m_scene->setRenderImageWidth(item->data(1).toInt());
+	}
+	else if(attrName == "res_y") {
+		qDebug()<<"set resy "<<item->data(1).toInt();
+		m_scene->setRenderImageHeight(item->data(1).toInt());
+	}
+}
+
+void SceneTreeModel::updateLights(SceneTreeItem * item)
+{
+	const QString lightName = item->fullPathName()[1];
+	BaseLight * l = m_scene->getLight(lightName.toStdString());
+	if(!l) {
+		qDebug()<<"WARNING: cannot find light named "<<lightName;
+		return;
+	}
+	const QString attrName = item->fullPathName().first();
+	if(attrName == "intensity") {
+		qDebug()<<"set light intensity "<<item->data(1).toDouble();
+		l->setIntensity(item->data(1).toFloat());
+	}
+	else if(attrName == "samples") {
+		qDebug()<<"set light smaples "<<item->data(1).toInt();
+		l->setSamples(item->data(1).toInt());
+	}
+	else if(attrName == "cast_shadow") {
+		qDebug()<<"set light case shadow "<<item->data(1).toBool();
+		l->setCastShadow(item->data(1).toBool());
+	}
+	else if(attrName == "light_color") {
+		QColor c = item->data(1).value<QColor>();
+		qDebug()<<"set light color "<<c;
+		float r = c.redF();
+		float g = c.greenF();
+		float b = c.blueF();
+		l->setLightColor(r, g, b);
+	}
 }

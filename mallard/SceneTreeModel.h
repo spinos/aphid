@@ -57,7 +57,6 @@ public slots:
 	void receiveData(QWidget * editor);
 
 private:
-    void setupModelData(SceneTreeItem *parent);
     SceneTreeItem *getItem(const QModelIndex &index) const;
 	void addBase(QList<SceneTreeItem*> & parents, const std::string & baseName, int level);
 	void addIntAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, int value);
@@ -66,7 +65,11 @@ private:
 	void addRGBAttr(QList<SceneTreeItem*> & parents, const std::string & attrName, int level, QColor value);
 	void addOptions(QList<SceneTreeItem*> & parents);
 	void addLights(QList<SceneTreeItem*> & parents);
-	
+	void setupModelData(SceneTreeItem *parent);
+    void updateScene(SceneTreeItem * item);
+	void updateOptions(SceneTreeItem * item);
+	void updateLights(SceneTreeItem * item);
+private:	
 	std::map<std::string, int> m_baseRows;
     SceneTreeItem *rootItem;
 	MlScene * m_scene;

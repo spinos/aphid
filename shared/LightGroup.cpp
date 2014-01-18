@@ -35,6 +35,16 @@ BaseLight * LightGroup::getLight(unsigned idx) const
 	return m_lights[idx];
 }
 
+BaseLight * LightGroup::getLight(const std::string & name) const
+{
+	std::vector<BaseLight *>::const_iterator it = m_lights.begin();
+	for(; it != m_lights.end(); ++it) {
+		if((*it)->name() == name)
+			return *it;
+	}
+	return NULL;
+}
+
 void LightGroup::clearLights()
 {
 	std::vector<BaseLight *>::iterator it = m_lights.begin();

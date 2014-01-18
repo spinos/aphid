@@ -29,7 +29,6 @@ QWidget *EditDelegate::createEditor(QWidget *parent,
 {
 	SceneTreeItem *item = static_cast<SceneTreeItem*>(index.internalPointer());
 	QVariant value = index.model()->data(index, Qt::EditRole);
-    //qDebug()<<" crt"<<item->parent()->name().c_str();
     QWidget *editor = 0;
 	
 	switch (item->valueType()) {
@@ -95,7 +94,6 @@ void EditDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 			model->setData(index, getColorEditorValue(editor), Qt::EditRole);
 			break;
 	}
-	qDebug()<<"set mdl";
 }
 
 QWidget * EditDelegate::createIntEditor(const QModelIndex &index, QWidget *parent) const

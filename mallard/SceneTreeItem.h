@@ -34,16 +34,21 @@ public:
     bool insertChildren(int position, int count, int columns);
     bool insertColumns(int position, int columns);
     SceneTreeItem *parent();
+	SceneTreeItem *parent() const;
     bool removeChildren(int position, int count);
     bool removeColumns(int position, int columns);
     int childNumber() const;
     bool setData(int column, const QVariant &value);
-	std::string name() const;
+	QString name() const;
+	QStringList fullPathName() const;
+	std::string sname() const;
 	void setValueType(int x);
 	int valueType() const;
+	void setLevel(int x);
 private:
     QList<SceneTreeItem*> childItems;
     QVector<QVariant> itemData;
     SceneTreeItem *parentItem;
 	int m_valueType;
+	int m_level;
 };

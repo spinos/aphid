@@ -17,11 +17,13 @@ public:
 	void setAASample(int x);
 	void setRenderImageWidth(int x);
 	void setRenderImageHeight(int y);
+	virtual void setMaxSubdiv(int x);
 	int AASample() const;
 	int renderImageWidth() const;
 	int renderImageHeight() const;
+	int maxSubdiv() const;
 protected:
 
 private:
-	int m_resX, m_resY, m_AASample;
+	int m_resX, m_resY, m_AASample, m_maxSubdiv;
 };

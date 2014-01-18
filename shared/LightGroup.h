@@ -18,6 +18,7 @@ public:
 	void addLight(BaseLight * l);
 	unsigned numLights() const;
 	BaseLight * getLight(unsigned idx) const;
+	BaseLight * getLight(const std::string & name) const;
 	void clearLights();
 	virtual char selectLight(const Ray & incident);
 	BaseLight * selectedLight() const;
