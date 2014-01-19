@@ -9,7 +9,7 @@
 #include <EasyModelIn.h>
 #include <EasyModelOut.h>
 #include "EasemodelUtil.h"
-
+#include <map>
 namespace ESMUtil
 {
 void Import(const char * filename, BaseMesh * dst)
@@ -30,9 +30,6 @@ void ImportPatch(const char * filename, PatchMesh * dst)
 	
 	baseImport(esm, dst);	
 	
-	dst->processTriangleFromPolygon();
-	dst->processQuadFromPolygon();
-	
 	dst->createPolygonUV(esm->getNumUVs(), esm->getNumUVIds());
 	
 	for(unsigned i = 0; i < esm->getNumUVs(); i++) {
@@ -42,6 +39,9 @@ void ImportPatch(const char * filename, PatchMesh * dst)
 	
 	for(unsigned i = 0; i < esm->getNumUVIds(); i++)
 		dst->uvIds()[i] = esm->getUVIds()[i];
+	
+	dst->processTriangleFromPolygon();
+	dst->processQuadFromPolygon();
 	
 	delete esm;
 }
@@ -87,6 +87,17 @@ void baseImport(EasyModelIn *esm, BaseMesh * dst)
     int *faceConnection = esm->getFaceConnection();
 
 	unsigned i, j;
+	
+	std::map<unsigned, unsigned> faceCountList;
+	for(i = 0; i < nf; i++) {
+		if(faceCountList.find(faceCount[i]) == faceCountList.end()) faceCountList[faceCount[i]] = 1;
+		else faceCountList[faceCount[i]] += 1;
+	}
+	
+	std::map<unsigned, unsigned>::const_iterator it = faceCountList.begin();
+	for(; it != faceCountList.end(); ++it) {
+		std::clog<<" num "<<(*it).first<<" sided faces: "<<(*it).second<<"\n";
+	}
     
     dst->createPolygonCounts(nf);
     

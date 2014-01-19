@@ -34,6 +34,7 @@ public:
 	Edge * findEdge(unsigned a, unsigned b) const;
 	Edge * parallelEdge(Edge * src) const;
 	unsigned growAroundQuad(unsigned idx, std::vector<unsigned> & dst) const;
+	void checkVertexValency() const;
 private:
 	char parallelEdgeInQuad(unsigned *indices, unsigned v0, unsigned v1, unsigned & a, unsigned & b) const;
 	boost::scoped_array<VertexAdjacency> m_adjacency;

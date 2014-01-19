@@ -10,6 +10,7 @@
 #pragma once
 
 #include <BaseMesh.h>
+#include <boost/scoped_array.hpp>
 class PointInsidePolygonTest;
 class PatchMesh : public BaseMesh {
 public:
@@ -29,6 +30,16 @@ public:
 	void perVertexVectorOfPatch(unsigned idx, Vector3F * dst) const;
 	void perVertexFloatOnPatch(unsigned idx, float u, float v, float * dst) const;
 	void interpolateVectorOnPatch(unsigned idx, float u, float v, Vector3F * src, Vector3F * dst);
-private:
 	
+	virtual unsigned processQuadFromPolygon();
+	virtual unsigned * quadIndices();
+	virtual unsigned * getQuadIndices() const;
+	virtual unsigned numQuads() const;
+	
+	unsigned * quadUVIds();
+	unsigned * getQuadUVIds() const;
+private:
+	boost::scoped_array<unsigned> m_quadIndices;
+	boost::scoped_array<unsigned> m_quadUVIds;
+	unsigned m_numQuads;
 };

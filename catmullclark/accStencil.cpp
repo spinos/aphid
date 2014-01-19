@@ -27,12 +27,13 @@ void AccStencil::setVertexNormal(Vector3F* data)
 
 void AccStencil::findCorner(int vi)
 {
+	const int centerIdx = m_patchVertices[vi];
     AccCorner &topo = m_corners[vi];
-    topo._centerIndex = m_patchVertices[vi];
-    topo._centerPosition = _positions[m_patchVertices[vi]];
-    topo._centerNormal = _normals[m_patchVertices[vi]];
+    topo._centerIndex = centerIdx;
+    topo._centerPosition = _positions[centerIdx];
+    topo._centerNormal = _normals[centerIdx];
     
-    VertexAdjacency &adj = m_vertexAdjacency[m_patchVertices[vi]];
+    VertexAdjacency &adj = m_vertexAdjacency[centerIdx];
     
     std::vector<int> neis;
     VertexAdjacency::VertexNeighbor *neighbor;
@@ -43,8 +44,6 @@ void AccStencil::findCorner(int vi)
         neis.push_back(neighborIdx);
     }
     
-    //printf("one ring around %i: ", m_patchVertices[vi]);
-
     topo.reset();
     
     Edge dummy;
@@ -56,33 +55,27 @@ void AccStencil::findCorner(int vi)
             topo.addCornerNeighbor(*it, _positions, _normals);
     }
     
-	findFringeCornerNeighbors(m_patchVertices[vi], topo);
-	//topo.verbose();
+	findFringeCornerNeighbors(centerIdx, topo);
 }
 
 void AccStencil::findFringeCornerNeighbors(int c, AccCorner & topo)
 {
     Edge dummy;
     int fringeNei;
-    for(int i=0; i < topo._numEdgeNei; i++) {
+    for(int i=0; i < topo.valence(); i++) {
         int i1 = i + 1;
-        i1 = i1 % topo._numEdgeNei;
+        i1 = i1 % topo.valence();
         
         int nei0 = topo._edgeIndices[i];
         int nei1 = topo._edgeIndices[i1];
-        
+
         VertexAdjacency &adj0 = m_vertexAdjacency[nei0];
         
         if(adj0.findEdge(adj0.getIndex(), nei1, dummy)) {
-            if(dummy.isReal()) {
-                //printf("\ntri %i %i ", nei0, nei1);
+            if(dummy.isReal())
                 topo.addCornerNeighborBetween(nei0, nei1, _positions, _normals);
-            }
-            else {
-                if(findSharedNeighbor(nei0, nei1, c, fringeNei)) {
-                    topo.addCornerNeighbor(fringeNei, _positions, _normals);
-                }
-            }
+            else if(findSharedNeighbor(nei0, nei1, c, fringeNei))
+				topo.addCornerNeighbor(fringeNei, _positions, _normals);
         }
     }
 }
@@ -147,7 +140,6 @@ void AccStencil::findEdge(int vi)
 	topo._fringePositions[1] = _positions[b];
 	topo._fringeNormals[0] = _normals[a];
 	topo._fringeNormals[1] = _normals[b];
-
 
 	corner1.edgeNeighborBeside(e0, a, b);
 

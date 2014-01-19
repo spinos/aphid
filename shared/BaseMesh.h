@@ -24,14 +24,12 @@ public:
 	
 	void createVertices(unsigned num);
 	void createIndices(unsigned num);
-	void createQuadIndices(unsigned num);
 	void createPolygonCounts(unsigned num);
 	void createPolygonIndices(unsigned num);
 	void createPolygonUV(unsigned numUVs, unsigned numUVIds);
 	
 	unsigned processTriangleFromPolygon();
-	unsigned processQuadFromPolygon();
-
+	
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
 	const int faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const;
@@ -39,7 +37,6 @@ public:
 	Vector3F * vertices();
 	Vector3F * normals();
 	unsigned * indices();
-	unsigned * quadIndices();
 	unsigned * polygonCounts();
 	unsigned * polygonIndices();
 	float * us();
@@ -54,7 +51,6 @@ public:
 	
 	virtual unsigned getNumFaces() const;
 	unsigned getNumTriangles() const;
-	unsigned getNumQuads() const;
 	unsigned getNumPolygons() const;
 	unsigned getNumVertices() const;
 	unsigned getNumPolygonFaceVertices() const;
@@ -65,7 +61,6 @@ public:
 	Vector3F * getVertices() const;
 	Vector3F * getNormals() const;
 	unsigned * getIndices() const;
-	unsigned * getQuadIndices() const;
 	unsigned * getPolygonCounts() const;
 	unsigned * getPolygonIndices() const;
 	float * getUs() const;
@@ -93,18 +88,20 @@ public:
 	Vector3F * perVertexVector(const std::string & name);
 	VertexDataGroup * vertexData();
 	
+	virtual unsigned processQuadFromPolygon();
+	virtual unsigned * quadIndices();
+	virtual unsigned * getQuadIndices() const;
+	virtual unsigned numQuads() const;
+	
 	void verbose() const;
 	
 	Vector3F * _vertices;
 	Vector3F * m_normals;
 	unsigned * _indices;
-	unsigned * m_quadIndices;
 	unsigned _numVertices;
 	unsigned m_numTriangles;
 	unsigned m_numTriangleFaceVertices;
-	unsigned m_numQuadVertices;
 	unsigned m_numPolygons;
-	unsigned m_numQuads;
 	unsigned * m_polygonCounts;
 	unsigned m_numPolygonVertices;
 	unsigned * m_polygonIndices;

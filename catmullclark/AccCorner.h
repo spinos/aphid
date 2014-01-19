@@ -8,10 +8,11 @@
  */
 #pragma once
 #include <Vector3F.h>
-
+#include <vector>
 class AccCorner {
 public:
-	AccCorner() {}
+	AccCorner();
+	virtual ~AccCorner();
 	void reset();
 	void addEdgeNeighbor(int idx, Vector3F * positions, Vector3F * normals);
 	void addCornerNeighbor(int idx, Vector3F * positions, Vector3F * normals);
@@ -22,13 +23,13 @@ public:
 	Vector3F computeNormal() const;
 	Vector3F computePosition() const;
 	void verbose() const;
-	Vector3F _edgePositions[5];
-	Vector3F _cornerPositions[5];
-	Vector3F _edgeNormals[5];
-	Vector3F _cornerNormals[5];
+	
 	Vector3F _centerPosition, _centerNormal;
-	int _edgeIndices[5];
-	int _cornerIndices[5];
-	int _numEdgeNei, _numCornerNei;
+	std::vector<Vector3F> _edgePositions;
+	std::vector<Vector3F> _cornerPositions;
+	std::vector<Vector3F> _edgeNormals;
+	std::vector<Vector3F> _cornerNormals;
+	std::vector<int> _edgeIndices;
+	std::vector<int> _cornerIndices;
 	int _centerIndex;
 };

@@ -56,6 +56,7 @@ public:
 	void getConnectedPolygons(std::vector<unsigned> & dst) const;
 	
 	Vector3F center();
+	unsigned numRealEdgeNeighbors() const;
 	
 	void verbose() const;
 private:

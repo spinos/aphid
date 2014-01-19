@@ -205,4 +205,22 @@ void MeshTopology::calculateSmoothedNormal(Vector3F * dst)
 		dst[i] = c.normal();
 	}
 }
+
+void MeshTopology::checkVertexValency() const
+{
+	std::map<unsigned, unsigned> numNeighborGram;
+	const unsigned nv = m_mesh->getNumVertices();
+	
+	unsigned nnei;
+	for(unsigned i = 0; i < nv; i++) {
+		nnei = m_adjacency[i].numRealEdgeNeighbors();
+		if(numNeighborGram.find(nnei) == numNeighborGram.end()) numNeighborGram[nnei] = 1;
+		else numNeighborGram[nnei] += 1;
+	}
+	
+	std::map<unsigned, unsigned>::const_iterator it = numNeighborGram.begin();
+	for(; it != numNeighborGram.end(); ++it) {
+		std::clog<<" "<<(*it).second<<" vertices connected to "<<(*it).first<<" edges\n";
+	}
+}
 //:~

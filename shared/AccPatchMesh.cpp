@@ -27,14 +27,15 @@ AccPatchMesh::~AccPatchMesh()
 
 void AccPatchMesh::setup(MeshTopology * topo)
 {
+	topo->checkVertexValency();
 	float* ucoord = us();
 	float* vcoord = vs();
-	unsigned * uvs = uvIds();
-	const unsigned numFace = getNumFaces();
+	unsigned * uvs = quadUVIds();
+	const unsigned nq = numQuads();
 	
-	createAccPatches(numFace);
+	createAccPatches(nq);
 	
-	for(unsigned j = 0; j < numFace; j++)
+	for(unsigned j = 0; j < nq; j++)
 		beziers()[j].setTexcoord(ucoord, vcoord, &uvs[j * 4]);
 	update(topo);
 }

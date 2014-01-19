@@ -15,10 +15,13 @@
 PatchMesh::PatchMesh() 
 {
     setEntityType(TypedEntity::TPatchMesh);
+	m_numQuads = 0;
 }
 
 PatchMesh::~PatchMesh() 
 {
+	m_quadIndices.reset();
+	m_quadUVIds.reset();
 }
 
 unsigned PatchMesh::getNumFaces() const
@@ -171,5 +174,74 @@ void PatchMesh::interpolateVectorOnPatch(unsigned idx, float u, float v, Vector3
 	pvv[3] = src[*qudi];
 	BiLinearInterpolate bili;
 	bili.interpolate3(u, v, pvv, dst);
+}
+
+unsigned * PatchMesh::quadIndices()
+{
+    return m_quadIndices.get();
+}
+
+unsigned * PatchMesh::getQuadIndices() const
+{
+	return m_quadIndices.get();
+}
+
+unsigned PatchMesh::processQuadFromPolygon()
+{
+	unsigned i, j;
+	m_numQuads = 0;
+    for(i = 0; i < m_numPolygons; i++) {
+		if(m_polygonCounts[i] < 5)
+			m_numQuads++;
+	}
+		
+	if(m_numQuads < 1) return 0;
+	
+	m_quadIndices.reset(new unsigned[m_numQuads * 4]);
+	m_quadUVIds.reset(new unsigned[m_numQuads * 4]);
+	
+	unsigned * polygonIndir = polygonIndices();
+	unsigned * uvIndir = uvIds();
+	unsigned fc, ie = 0;
+	for(i = 0; i < m_numPolygons; i++) {
+		fc = m_polygonCounts[i];
+		if(fc == 4) {
+			for(j = 0; j < 4; j++) {
+				m_quadIndices[ie] = polygonIndir[j];
+				m_quadUVIds[ie] = uvIndir[j];
+				ie++;
+			}
+		}
+		else if(fc == 3) {
+			for(j = 0; j < 3; j++) {
+				m_quadIndices[ie] = polygonIndir[j];
+				m_quadUVIds[ie] = uvIndir[j];
+				ie++;
+			}
+			m_quadIndices[ie] = m_quadIndices[ie - 3];
+			m_quadUVIds[ie] = m_quadUVIds[ie - 3];
+			ie++;
+		}
+		
+		polygonIndir += fc;
+		uvIndir += fc;
+	}
+	
+	return m_numQuads;
+}
+
+unsigned PatchMesh::numQuads() const
+{
+	return m_numQuads;
+}
+
+unsigned * PatchMesh::quadUVIds()
+{
+	return m_quadUVIds.get();
+}
+
+unsigned * PatchMesh::getQuadUVIds() const
+{
+	return m_quadUVIds.get();
 }
 //:~

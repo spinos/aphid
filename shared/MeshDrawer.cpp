@@ -90,7 +90,7 @@ void MeshDrawer::showNormal(const BaseMesh * mesh, const BaseDeformer * deformer
 
 void MeshDrawer::edge(const BaseMesh * mesh, const BaseDeformer * deformer)
 {
-	if(mesh->m_numQuadVertices < 4) return;
+	if(mesh->numQuads() < 1) return;
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
@@ -101,7 +101,7 @@ void MeshDrawer::edge(const BaseMesh * mesh, const BaseDeformer * deformer)
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedP());
 
 // draw a cube
-	glDrawElements(GL_QUADS, mesh->m_numQuadVertices, GL_UNSIGNED_INT, mesh->m_quadIndices);
+	glDrawElements(GL_QUADS, mesh->numQuads() * 4, GL_UNSIGNED_INT, mesh->getQuadIndices());
 
 // deactivate vertex arrays after drawing
 	glDisableClientState(GL_VERTEX_ARRAY);

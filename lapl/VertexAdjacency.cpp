@@ -84,8 +84,8 @@ char VertexAdjacency::findOneRingNeighbors()
 
 void VertexAdjacency::computeWeights()
 {
+	const unsigned numNeighbors = getNumNeighbors();
 	if(isOpen()) {
-		const unsigned numNeighbors = m_neighbors.size();
 		for(unsigned i = 0; i < numNeighbors; i++) {
 			m_neighbors[i]->weight = 1.f / (float)numNeighbors;
 		}
@@ -95,7 +95,6 @@ void VertexAdjacency::computeWeights()
 	Vector3F vij, vij0, vij1;
 	float dist, theta0, theta1, wij;
 
-	const unsigned numNeighbors = m_neighbors.size();
 	for(unsigned i = 0; i < numNeighbors; i++) {
 		getVijs(i, vij, vij0, vij1);
 		
@@ -461,6 +460,18 @@ char VertexAdjacency::isNeighborOnBoundary(VertexNeighbor & nei)
 	findEdge(this->getIndex(), nei.v->getIndex(), dummy);
 	if(!findOppositeEdge(dummy, nouse)) return 1;
 	return 0;
+}
+
+unsigned VertexAdjacency::numRealEdgeNeighbors() const
+{
+	unsigned r = 0;
+	std::vector<VertexNeighbor *>::const_iterator it = m_neighbors.begin();
+	Edge dummy;
+	for(; it != m_neighbors.end(); ++it) {
+		findEdge(this->getIndex(), (*it)->v->getIndex(), dummy);
+		if(dummy.isReal()) r++;
+	}
+	return r;
 }
 
 void VertexAdjacency::verbose() const
