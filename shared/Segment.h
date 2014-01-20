@@ -7,12 +7,16 @@
  *
  */
 #pragma once
-#include <Ray.h>
+#include <AllMath.h>
 
-class Segment : public Ray {
+class Segment {
 public:
 	Segment();
 	Segment(const Vector3F& pfrom, const Vector3F& pto);
 	float distanceTo(const Vector3F & po, Vector3F & closestP) const;
+	float length() const;
+	Vector3F m_origin;
 private:
+	Vector3F m_dir;
+	float m_length;
 };

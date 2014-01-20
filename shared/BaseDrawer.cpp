@@ -89,11 +89,6 @@ void BaseDrawer::beginQuad()
 	glBegin(GL_QUADS);
 }
 
-void BaseDrawer::aVertex(float x, float y, float z)
-{
-	glVertex3f(x, y, z);
-}
-
 void BaseDrawer::boundingRectangle(const BoundingRectangle & b) const
 {
 	glBegin(GL_LINE_LOOP);
@@ -199,7 +194,7 @@ void BaseDrawer::colorAsReference() const
 
 void BaseDrawer::vertex(const Vector3F & v) const
 {
-	glVertex3f(v.x, v.y, v.z);
+	glVertex3fv((float *)&v);
 }
 
 void BaseDrawer::vertexWithOffset(const Vector3F & v, const Vector3F & o)
@@ -285,5 +280,13 @@ void BaseDrawer::bindTexture(int idx)
 void BaseDrawer::unbindTexture()
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void BaseDrawer::quad(Vector3F & a, Vector3F & b, Vector3F & c, Vector3F & d, char filled) const
+{
+	if(filled) glBegin(GL_QUADS);
+	else glBegin(GL_LINE_LOOP);
+	vertex(a); vertex(b); vertex(c); vertex(d);
+	glEnd();
 }
 //:~

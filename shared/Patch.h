@@ -50,6 +50,7 @@ public:
 	Vector3F center() const;
 	Matrix33F tangentFrame() const;
 	Vector3F point(float u, float v) const;
+	float segmentLength(int idx) const;
 	
 	void setTexcoord(const Vector2F & t0, const Vector2F & t1, const Vector2F & t2, const Vector2F & t3);
 	

@@ -60,7 +60,6 @@
 #include <SelectCondition.h>
 #include <FloodCondition.h>
 #include "MlCalamus.h"
-#include <MeshTopology.h>
 #include <BaseCamera.h>
 #include <BaseLight.h>
 #include "MlEngine.h"
@@ -834,5 +833,23 @@ void GLWidget::setUseDisplaySize(bool x)
 		setRenderImageHeight(sz.height());
 	}
 	RenderOptions::setUseDisplaySize(x);
+}
+#include <PointInsidePolygonTest.h>
+void GLWidget::testPatch()
+{
+	Vector3F a;
+	Vector3F b(10.f, 2.f, 0.f);
+	Vector3F c(10.f, 2.f, 0.f);
+	Vector3F d(0.f, 1.f, -10.f);
+	PointInsidePolygonTest pa(a, b, c, d);
+	
+	BaseLight *l = getLight(2);
+	Vector3F ts = l->translation();
+	Vector3F cs;
+	char inside = 0;
+	pa.distanceTo(ts, cs, inside);
+	getDrawer()->quad(a, b, c, d);
+	getDrawer()->arrow(pa.center(), pa.center() + pa.normal());
+	getDrawer()->arrow(ts, cs);
 }
 //:~

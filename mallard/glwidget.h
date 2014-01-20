@@ -120,6 +120,7 @@ private:
 	bool isBaking() const;
 	void loadFeatherDistribution(const std::string & name);
 	void showLights() const;
+	void testPatch();
 private:
 	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;

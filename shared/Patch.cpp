@@ -176,3 +176,8 @@ void Patch::setTexcoord(const Vector2F & t0, const Vector2F & t1, const Vector2F
 	_texcoords[2] = t2;
 	_texcoords[3] = t3;
 }
+
+float Patch::segmentLength(int idx) const
+{
+	return m_segs[idx].length();
+}

@@ -22,6 +22,7 @@ bool PointInsidePolygonTest::isPointInside(const Vector3F & px) const
 	Vector3F v1, v2, axis;
 	float mag1, mag2, magx;
 	for(int i = 0; i < 4; i++) {
+		if(segmentLength(i) < EPSILON) continue;
 		v1 = vertex(i) - px;
 		mag1 = v1.length();
 		if(mag1 < EPSILON) return true;

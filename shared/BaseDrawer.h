@@ -31,7 +31,6 @@ public:
 	void beginLine();
 	void beginPoint(float x) const;
 	void beginQuad();
-	void aVertex(float x, float y, float z);
 	
 	void boundingRectangle(const BoundingRectangle & b) const;
 	void boundingBox(const BoundingBox & b) const;
@@ -55,6 +54,8 @@ public:
 	void texture(int idx);
 	void bindTexture(int idx);
 	void unbindTexture();
+	
+	void quad(Vector3F & a, Vector3F & b, Vector3F & c, Vector3F & d, char filled = 0) const;
 public:
 	GProfile m_markerProfile;
 	GProfile m_surfaceProfile;

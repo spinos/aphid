@@ -23,5 +23,4 @@ public:
 	void stripes(AdaptableStripeBuffer * data, const Vector3F & eyeDirection) const;
 	void linearCurve(const BaseCurve & curve) const;
 	void smoothCurve(BaseCurve & curve, short deg) const;
-	
 };
