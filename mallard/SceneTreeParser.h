@@ -23,6 +23,7 @@ public slots:
 	
 protected:
 	void addOptions(QList<SceneTreeItem*> & parents);
+	void addCamera(QList<SceneTreeItem*> & parents);
 	void addLights(QList<SceneTreeItem*> & parents);
 	void setupModelData(SceneTreeItem *parent);
     void updateScene(SceneTreeItem * item);

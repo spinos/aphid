@@ -33,6 +33,7 @@ void SceneTreeParser::setupModelData(SceneTreeItem *parent)
     QList<SceneTreeItem*> parents;
     parents << parent;
 	addOptions(parents);
+	addCamera(parents);
 	addLights(parents);
 }
 
@@ -44,6 +45,11 @@ void SceneTreeParser::addOptions(QList<SceneTreeItem*> & parents)
 	addIntAttr(parents, "res_x", 1, m_scene->renderImageWidth());
 	addIntAttr(parents, "res_y", 1, m_scene->renderImageHeight());
 	addBolAttr(parents, "use_display_size", 1, m_scene->useDisplaySize());
+}
+
+void SceneTreeParser::addCamera(QList<SceneTreeItem*> & parents)
+{
+	//addBase(parents, "camera", 0);
 }
 
 void SceneTreeParser::addLights(QList<SceneTreeItem*> & parents)

@@ -41,9 +41,7 @@ public:
 	void update();
 	void setPolygonIndex(unsigned idx);
 	unsigned getPolygonIndex() const;
-	
-	Edge * findUnrealEdge(unsigned edgeIdx, char & found) const;
-	
+
 	static float cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c);
 private:
 	void createEdges();

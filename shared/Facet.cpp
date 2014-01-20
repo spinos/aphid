@@ -46,7 +46,6 @@ Facet::Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d)
 	createEdges();
 	
 	m_area = Facet::cumputeArea(a->m_v, b->m_v, c->m_v);
-	if(m_area < 10e-5) printf("WARNING: near zero face area!\n");
 }
 
 Facet::~Facet()
@@ -223,7 +222,6 @@ void Facet::update()
 	m_normal.normalize();
 	
 	m_area = Facet::cumputeArea(m_vertices[0]->m_v, m_vertices[1]->m_v, m_vertices[2]->m_v);
-	if(m_area < 10e-5) printf("WARNING: near zero face area!\n");
 }
 
 void Facet::setPolygonIndex(unsigned idx)
@@ -234,19 +232,6 @@ void Facet::setPolygonIndex(unsigned idx)
 unsigned Facet::getPolygonIndex() const
 {
 	return m_polyIndex;
-}
-
-Edge * Facet::findUnrealEdge(unsigned edgeIdx, char & found) const
-{
-    found = 0;
-    for(int i = 0; i < 3; i++) {
-        if(!m_edges[i]->isReal()) {
-            found = 1;
-            return m_edges[i];
-        }
-    }
-    
-    return 0;
 }
 
 float Facet::cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c)
