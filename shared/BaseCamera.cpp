@@ -255,4 +255,6 @@ void BaseCamera::setFarClipPlane(float x)
 {	
 	m_farClipPlane = x;
 }
+
+ void BaseCamera::setFieldOfView(float) {}
 //:~

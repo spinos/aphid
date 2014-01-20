@@ -20,7 +20,8 @@ public:
 	void rebuild();
 public slots:
 	void receiveData(QWidget * editor);
-	
+signals:
+	void cameraChanged();
 protected:
 	void addOptions(QList<SceneTreeItem*> & parents);
 	void addCamera(QList<SceneTreeItem*> & parents);
@@ -28,6 +29,7 @@ protected:
 	void setupModelData(SceneTreeItem *parent);
     void updateScene(SceneTreeItem * item);
 	void updateOptions(SceneTreeItem * item);
+	void updateCamera(SceneTreeItem * item);
 	void updateLights(SceneTreeItem * item);
 private:
 	MlScene * m_scene;

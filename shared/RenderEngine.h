@@ -17,7 +17,6 @@ public:
 	RenderEngine();
 	virtual ~RenderEngine();
 	
-	void setCamera(BaseCamera * camera);
 	void setOptions(RenderOptions * options);
 	void setLights(LightGroup * lights);
 	
@@ -33,7 +32,6 @@ protected:
 	float elapsedTime();
 private:
     boost::timer m_met;
-	BaseCamera * m_camera;
 	LightGroup * m_lights;
 	RenderOptions * m_options;
 };

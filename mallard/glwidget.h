@@ -103,6 +103,7 @@ public slots:
 	void receiveEraseRegion(int state);
 	void receiveCancelRender();
 	void receiveBarbChanged();
+	void receiveCameraChanged();
 protected:
     virtual void clientDraw();
 	virtual void focusOutEvent(QFocusEvent * event);

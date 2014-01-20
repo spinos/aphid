@@ -55,3 +55,8 @@ void PerspectiveCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & 
 	origin = fSpace.transform(origin);
 	worldVec = origin - eyePosition();
 }
+
+void PerspectiveCamera::setFieldOfView(float x)
+{
+	m_fov = x;
+}

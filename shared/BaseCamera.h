@@ -45,6 +45,7 @@ public:
 	
 	void setNearClipPlane(float x);
 	void setFarClipPlane(float x);
+	virtual void setFieldOfView(float x);
 	
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;

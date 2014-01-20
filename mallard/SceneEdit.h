@@ -22,7 +22,7 @@ class SceneEdit : public QDialog
 public:
 	SceneEdit(MlScene * scene, QWidget *parent = 0);
 	virtual ~SceneEdit();
-
+	QObject * model() const;
 signals:
 	
 public slots:

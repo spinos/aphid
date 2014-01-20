@@ -12,7 +12,7 @@
 #include "MlScene.h"
 #include "AllLight.h"
 #include "AllEdit.h"
-
+#include <BaseCamera.h>
 SceneTreeParser::SceneTreeParser(const QStringList &headers, MlScene* scene, 
                      QObject *parent) : SceneTreeModel(headers, parent)
 {
@@ -49,7 +49,11 @@ void SceneTreeParser::addOptions(QList<SceneTreeItem*> & parents)
 
 void SceneTreeParser::addCamera(QList<SceneTreeItem*> & parents)
 {
-	//addBase(parents, "camera", 0);
+	addBase(parents, "camera", 0);
+	BaseCamera * c = m_scene->renderCamera();
+	addFltAttr(parents, "fov", 1, c->fieldOfView());
+	addFltAttr(parents, "near_clip", 1, c->nearClipPlane());
+	addFltAttr(parents, "far_clip", 1, c->farClipPlane());
 }
 
 void SceneTreeParser::addLights(QList<SceneTreeItem*> & parents)
@@ -82,6 +86,9 @@ void SceneTreeParser::updateScene(SceneTreeItem * item)
 	if(baseName == "options") {
 		updateOptions(item);
 	}
+	else if(baseName == "camera") {
+		updateCamera(item);
+	}
 	else if(baseName == "lights") {
 		updateLights(item);
 	}
@@ -110,6 +117,25 @@ void SceneTreeParser::updateOptions(SceneTreeItem * item)
 		qDebug()<<"set use display size "<<item->data(1).toBool();
 		m_scene->setUseDisplaySize(item->data(1).toBool());
 	}
+}
+
+void SceneTreeParser::updateCamera(SceneTreeItem * item)
+{
+	BaseCamera * c = m_scene->renderCamera();
+	const QString attrName = item->fullPathName().first();
+	if(attrName == "fov") {
+		qDebug()<<"set fov "<<item->data(1).toDouble();
+		c->setFieldOfView(item->data(1).toDouble());
+	}
+	else if(attrName == "near_clip") {
+		qDebug()<<"set near clip "<<item->data(1).toDouble();
+		c->setNearClipPlane(item->data(1).toDouble());
+	}
+	else if(attrName == "far_clip") {
+		qDebug()<<"set far clip "<<item->data(1).toDouble();
+		c->setFarClipPlane(item->data(1).toDouble());
+	}
+	emit cameraChanged();
 }
 
 void SceneTreeParser::updateLights(SceneTreeItem * item)

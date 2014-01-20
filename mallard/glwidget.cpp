@@ -77,8 +77,9 @@ GLWidget::GLWidget(QWidget *parent) : ManipulateView(parent)
 	m_featherTexId = m_featherDistrId = -1;
 	m_floodByRegion = m_eraseByRegion = 0;
 	perspCamera()->setNearClipPlane(1.f);
-	perspCamera()->setFarClipPlane(100000.f);
+	perspCamera()->setFarClipPlane(1000.f);
 	usePerspCamera();
+	setRenderCamera(getCamera());
 	cleanSheet();
 }
 //! [0]
@@ -762,7 +763,6 @@ void GLWidget::testRender()
 	const QSize sz(renderImageWidth(), renderImageHeight());
 	emit renderResChanged(sz);
 	prepareRender();
-	m_engine->setCamera(getCamera());
 	m_engine->setLights(this);
 	m_engine->setOptions(this);
 	m_engine->preRender();
@@ -851,5 +851,11 @@ void GLWidget::testPatch()
 	getDrawer()->quad(a, b, c, d);
 	getDrawer()->arrow(pa.center(), pa.center() + pa.normal());
 	getDrawer()->arrow(ts, cs);
+}
+
+void GLWidget::receiveCameraChanged()
+{
+	updatePerspProjection();
+	update();
 }
 //:~

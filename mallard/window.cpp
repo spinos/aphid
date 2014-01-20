@@ -97,6 +97,7 @@ Window::Window()
 	connect(m_renderEdit, SIGNAL(cancelRender()), glWidget, SLOT(receiveCancelRender()));
 	connect(m_barbEdit->barbControl(), SIGNAL(shapeChanged()), glWidget, SLOT(receiveBarbChanged()));
 	connect(glWidget, SIGNAL(sceneOpened()), m_sceneEdit, SLOT(reloadScene()));
+	connect(m_sceneEdit->model(), SIGNAL(cameraChanged()), glWidget, SLOT(receiveCameraChanged()));
 	
 	std::cout<<"Ready\n";
 	statusBar()->showMessage(tr("Ready"));

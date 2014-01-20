@@ -14,11 +14,6 @@
 RenderEngine::RenderEngine() {}
 RenderEngine::~RenderEngine() {}
 
-void RenderEngine::setCamera(BaseCamera * camera)
-{
-	m_camera = camera;
-}
-
 void RenderEngine::setOptions(RenderOptions * options)
 {
 	m_options = options;
@@ -31,7 +26,7 @@ void RenderEngine::setLights(LightGroup * lights)
 
 BaseCamera * RenderEngine::camera() const
 {
-	return m_camera;
+	return m_options->renderCamera();
 }
 
 LightGroup * RenderEngine::lights() const

@@ -8,9 +8,10 @@
  */
 
 #include "RenderOptions.h"
-
+#include "BaseCamera.h"
 RenderOptions::RenderOptions() 
 {
+	m_camera = 0;
 	m_resX = 640;
 	m_resY = 480;
 	m_AASample = 4;
@@ -68,4 +69,14 @@ void RenderOptions::setMaxSubdiv(int x)
 void RenderOptions::setUseDisplaySize(bool x)
 {
 	m_useDisplaySize = x;
+}
+
+void RenderOptions::setRenderCamera(BaseCamera * camera)
+{
+	m_camera = camera;
+}
+
+BaseCamera * RenderOptions::renderCamera() const
+{
+	return m_camera;
 }

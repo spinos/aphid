@@ -8,7 +8,7 @@
  */
 
 #pragma once
-
+class BaseCamera;
 class RenderOptions {
 public:
 	RenderOptions();
@@ -24,9 +24,13 @@ public:
 	int renderImageHeight() const;
 	int maxSubdiv() const;
 	bool useDisplaySize() const;
+	
+	void setRenderCamera(BaseCamera * camera);
+	BaseCamera * renderCamera() const;
 protected:
 
 private:
+	BaseCamera * m_camera;
 	int m_resX, m_resY, m_AASample, m_maxSubdiv;
 	bool m_useDisplaySize;
 };

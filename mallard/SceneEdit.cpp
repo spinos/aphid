@@ -41,3 +41,8 @@ void SceneEdit::reloadScene()
 {
 	m_model->rebuild();
 }
+
+QObject * SceneEdit::model() const
+{
+	return m_model;
+}
