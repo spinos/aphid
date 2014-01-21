@@ -23,6 +23,13 @@ void SelectionContext::reset(const Vector3F & center, const float & radius)
 	m_center = center;
 	m_radius = radius;
 	m_indices.clear();
+	m_enableDirection = 0;
+}
+
+void SelectionContext::setDirection(const Vector3F & d)
+{
+	m_normal = d;
+	m_enableDirection = 1;
 }
 
 void SelectionContext::setCenter(const Vector3F & center)
@@ -30,7 +37,7 @@ void SelectionContext::setCenter(const Vector3F & center)
 	m_center = center;
 }
 
-Vector3F SelectionContext::center() const
+const Vector3F & SelectionContext::center() const
 {
 	return m_center;
 }
@@ -58,6 +65,12 @@ const BoundingBox & SelectionContext::getBBox() const
 char SelectionContext::closeTo(const BoundingBox & b) const
 {
 	return b.isPointAround(m_center, m_radius);
+}
+
+char SelectionContext::closeTo(const Vector3F & v) const
+{
+	if(!m_enableDirection) return 1;
+	return m_normal.dot(v) > 0.7f;
 }
 
 void SelectionContext::addToSelection(const unsigned idx)

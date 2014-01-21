@@ -18,6 +18,7 @@
 #include <TransformManipulator.h>
 #include <MeshManipulator.h>
 #include <SelectionContext.h>
+#include <BaseBrush.h>
 
 ManipulateView::ManipulateView(QWidget *parent) : Base3DView(parent)
 {
@@ -87,9 +88,10 @@ bool ManipulateView::hitTest(const Ray & ray, Vector3F & hit)
 	return true;
 }
 
-void ManipulateView::selectAround(const Vector3F & center, const float & radius)
+void ManipulateView::selectFaces()
 {
-	m_selectCtx->reset(center, radius);
+	m_selectCtx->reset(brush()->heelPosition(), brush()->getRadius());
+	m_selectCtx->setDirection(brush()->normal());
 	m_tree->select(m_selectCtx);
 }
 

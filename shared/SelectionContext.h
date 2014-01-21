@@ -20,8 +20,10 @@ public:
 	void reset(const Vector3F & center, const float & radius);
 	void finish();
 	
+	void setDirection(const Vector3F & d);
+	
 	void setCenter(const Vector3F & center);
-	Vector3F center() const;
+	const Vector3F & center() const;
 	
 	void setRadius(const float & radius);
 	float radius() const;
@@ -30,6 +32,7 @@ public:
 	const BoundingBox & getBBox() const;
 	
 	char closeTo(const BoundingBox & b) const;
+	char closeTo(const Vector3F & v) const;
 	void addToSelection(const unsigned idx);
 	
 	unsigned numSelected() const;
@@ -39,6 +42,7 @@ public:
 private:
 	std::deque<unsigned> m_indices;
 	BoundingBox m_bbox;
-	Vector3F m_center;
+	Vector3F m_center, m_normal;
 	float m_radius;
+	char m_enableDirection;
 };

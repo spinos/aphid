@@ -244,4 +244,10 @@ unsigned * PatchMesh::getQuadUVIds() const
 {
 	return m_quadUVIds.get();
 }
+
+Vector3F PatchMesh::getFaceNormal(const unsigned & idx) const
+{
+	PointInsidePolygonTest pa = patchAt(idx);
+	return pa.normal();
+}
 //:~

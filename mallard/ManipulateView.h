@@ -26,7 +26,7 @@ public:
 	
 	bool pickupComponent(const Ray & ray, Vector3F & hit);
 	bool hitTest(const Ray & ray, Vector3F & hit);
-	void selectAround(const Vector3F & center, const float & radius);
+	void selectFaces();
 	
 	virtual void clientDraw();
     virtual void clientSelect();

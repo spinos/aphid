@@ -232,10 +232,10 @@ void GLWidget::selectFeather(char byRegion)
 	IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) return;
 	
-	selectAround(ctx->m_hitP, brush()->getRadius());
-	
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
 	brush()->resetToe();
+	
+	selectFaces();
 	
 	SelectCondition condition;
 	condition.setCenter(ctx->m_hitP);
@@ -288,7 +288,7 @@ void GLWidget::floodFeather()
 		condition.setDistanceFilter(0);
 	}
 	else {
-		selectAround(ctx->m_hitP, brush()->getRadius());
+		selectFaces();
 		skin()->resetCollisionRegion(selectedQue());
 		skin()->resetFloodFaces();
 	}
@@ -821,6 +821,7 @@ void GLWidget::importBodyMesh()
 
 void GLWidget::importBody(const std::string & fileName)
 {
+	ManipulateView::clearSelection();
 	MlScene::importBody(fileName);
 	m_featherDrawer->initializeBuffer();
 	m_bezierDrawer->rebuildBuffer(body());

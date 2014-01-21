@@ -69,6 +69,7 @@ public:
 	float * getVs() const;
 	unsigned * getUvIds() const;
 	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
+	virtual Vector3F getFaceNormal(const unsigned & idx) const;
 	
 	virtual char intersect(unsigned idx, IntersectionContext * ctx) const;
 	void postIntersection(unsigned idx, IntersectionContext * ctx) const;
@@ -78,7 +79,7 @@ public:
 	char triangleIntersect(const Vector3F * threeCorners, IntersectionContext * ctx) const;
 	char selectComponent(IntersectionContext * ctx) const;
 	
-	virtual char selectFace(unsigned idx, SelectionContext * ctx) const;
+	virtual char selectFace(const unsigned & idx, SelectionContext * ctx) const;
 	
 	void putIntoObjectSpace();
 	

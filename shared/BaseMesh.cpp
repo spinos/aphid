@@ -331,6 +331,11 @@ Matrix33F BaseMesh::getTangentFrame(const unsigned&) const
 	return Matrix33F();
 }
 
+Vector3F BaseMesh::getFaceNormal(const unsigned & idx) const
+{
+	return Vector3F();
+}
+
 char BaseMesh::intersect(unsigned idx, IntersectionContext * ctx) const
 {
     Vector3F threeCorners[3];
@@ -576,13 +581,15 @@ unsigned * BaseMesh::getQuadIndices() const
 	return 0;
 }
 
-char BaseMesh::selectFace(unsigned idx, SelectionContext * ctx) const
+char BaseMesh::selectFace(const unsigned & idx, SelectionContext * ctx) const
 {
 	const BoundingBox b = calculateBBox(idx);
-	if(ctx->closeTo(b)) {
-		ctx->addToSelection(idx);
-	}
-	return 0;
+	if(!ctx->closeTo(b)) return 0;
+	if(!ctx->closeTo(getFaceNormal(idx))) return 0;
+		
+	ctx->addToSelection(idx);
+	
+	return 1;
 }
 
 void BaseMesh::verbose() const

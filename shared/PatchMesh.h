@@ -35,6 +35,7 @@ public:
 	virtual unsigned * quadIndices();
 	virtual unsigned * getQuadIndices() const;
 	virtual unsigned numQuads() const;
+	virtual Vector3F getFaceNormal(const unsigned & idx) const;
 	
 	unsigned * quadUVIds();
 	unsigned * getQuadUVIds() const;
