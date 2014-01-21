@@ -17,6 +17,7 @@
 #include <ToolContext.h>
 #include <TransformManipulator.h>
 #include <MeshManipulator.h>
+#include <SelectionContext.h>
 
 ManipulateView::ManipulateView(QWidget *parent) : Base3DView(parent)
 {
@@ -24,6 +25,7 @@ ManipulateView::ManipulateView(QWidget *parent) : Base3DView(parent)
 	m_manipulator = new TransformManipulator;
 	m_sculptor = new MeshManipulator;
 	m_shouldRebuildTree = false;
+	m_selectCtx = new SelectionContext;
 }
 //! [0]
 
@@ -83,6 +85,12 @@ bool ManipulateView::hitTest(const Ray & ray, Vector3F & hit)
 		return false;
 	hit = getIntersectionContext()->m_hitP;
 	return true;
+}
+
+void ManipulateView::selectAround(const Vector3F & center, const float & radius)
+{
+	m_selectCtx->reset(center, radius);
+	m_tree->select(m_selectCtx);
 }
 
 void ManipulateView::buildTree()
@@ -166,6 +174,7 @@ void ManipulateView::keyPressEvent(QKeyEvent *e)
 
 void ManipulateView::clearSelection()
 {
+	m_selectCtx->reset();
 	m_manipulator->detach();
 	Base3DView::clearSelection();
 }
@@ -192,4 +201,8 @@ void ManipulateView::processDeselection(QMouseEvent * event)
 	Base3DView::processDeselection(event);
 }
 
+const std::deque<unsigned> & ManipulateView::selectedQue() const
+{
+	return m_selectCtx->selectedQue();
+}
 //:~

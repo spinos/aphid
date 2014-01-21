@@ -32,7 +32,7 @@ BrushControl::BrushControl(QWidget *parent)
 	stackLayout->addWidget(controlsGroupE);
 	stackLayout->addWidget(controlsGroupDeintersect);
 	
-	stackLayout->setCurrentIndex(0);
+	stackLayout->setCurrentIndex(1);
 	setLayout(stackLayout);
 
     stackLayout->setSizeConstraint(QLayout::SetMinimumSize);

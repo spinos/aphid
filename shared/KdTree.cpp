@@ -11,6 +11,7 @@
 #include "KdTree.h"
 #include <Ray.h>
 #include <IntersectionContext.h>
+#include "SelectionContext.h"
 #include <boost/timer.hpp>
 
 KdTree::KdTree() 
@@ -346,4 +347,66 @@ char KdTree::leafClosestPoint(KdTreeNode *node, const Vector3F &origin, Intersec
 	}
 	if(anyHit) {ctx->m_success = 1; ctx->m_cell = (char *)node;}
 	return anyHit;
+}
+
+void KdTree::select(SelectionContext * ctx)
+{
+	KdTreeNode * root = getRoot();
+	if(!root) return;
+	
+	const BoundingBox b = getBBox();
+	if(!ctx->closeTo(b)) return;
+	
+	ctx->setBBox(b);
+
+	recursiveSelect(root, ctx);
+	
+	ctx->finish();
+}
+
+char KdTree::recursiveSelect(KdTreeNode *node, SelectionContext * ctx)
+{
+	if(node->isLeaf())
+		return leafSelect(node, ctx);
+		
+	const int axis = node->getAxis();
+	const float splitPos = node->getSplitPos();
+	
+	BoundingBox leftBox, rightBox;
+	const BoundingBox bigBox = ctx->getBBox();
+	bigBox.split(axis, splitPos, leftBox, rightBox);
+	
+	if(ctx->closeTo(leftBox)) {
+		ctx->setBBox(leftBox);
+		recursiveSelect(node->getLeft(), ctx);
+	}
+	
+	if(ctx->closeTo(rightBox)) {
+		ctx->setBBox(rightBox);
+		recursiveSelect(node->getRight(), ctx);
+	}
+	
+	return 1;
+}
+
+char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
+{
+	const unsigned num = node->getNumPrims();
+	if(num < 1) return 0;
+	unsigned start = node->getPrimStart();
+	IndexArray &indir = m_stream.indirection();
+	PrimitiveArray &prims = m_stream.primitives();
+	indir.setIndex(start);
+
+	for(unsigned i = 0; i < num; i++) {
+		unsigned *iprim = indir.asIndex();
+
+		Primitive * prim = prims.asPrimitive(*iprim);
+		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
+		unsigned iface = prim->getComponentIndex();
+		
+		mesh->selectFace(iface, ctx);
+		indir.next();
+	}
+	return 1;
 }

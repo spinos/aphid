@@ -80,6 +80,21 @@ void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
 	darts.clear();
 }
 
+void MlSkin::select(const std::deque<unsigned> & src, SelectCondition * selcon)
+{
+	resetCollisionRegion(src);
+	for(unsigned i=0; i < numRegionElements(); i++) {
+		unsigned preCount = m_activeIndices.size();
+		if(selectFeatherByFace(regionElementIndex(i), selcon) > 0) {
+			FloodTable t(regionElementIndex(i));
+			t.dartBegin = preCount;
+			t.dartEnd = m_activeIndices.size();
+			m_activeFaces.push_back(t);
+		}
+	}
+	computeAffectWeight(selcon->center(), selcon->maxDistance());
+}
+
 void MlSkin::selectAround(unsigned idx, SelectCondition * selcon)
 {	
 	resetCollisionRegionByDistance(idx, selcon->center(), selcon->maxDistance());

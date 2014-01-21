@@ -9,6 +9,7 @@
 #include <iostream>
 #include <BarycentricCoordinate.h>
 #include "BaseMesh.h"
+#include <SelectionContext.h>
 
 BaseMesh::BaseMesh()
 {
@@ -572,6 +573,15 @@ unsigned * BaseMesh::quadIndices()
 
 unsigned * BaseMesh::getQuadIndices() const
 {
+	return 0;
+}
+
+char BaseMesh::selectFace(unsigned idx, SelectionContext * ctx) const
+{
+	const BoundingBox b = calculateBBox(idx);
+	if(ctx->closeTo(b)) {
+		ctx->addToSelection(idx);
+	}
 	return 0;
 }
 

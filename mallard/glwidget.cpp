@@ -123,6 +123,9 @@ void GLWidget::clientDraw()
 	showLights();
 	showBrush();
 	showManipulator();
+	
+	getDrawer()->setWired(1);
+	getDrawer()->patch(activeMesh(), selectedQue());
 }
 
 void GLWidget::clientSelect()
@@ -231,6 +234,8 @@ void GLWidget::selectFeather(char byRegion)
 	IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) return;
 	
+	selectAround(ctx->m_hitP, brush()->getRadius());
+	
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
 	brush()->resetToe();
 	
@@ -244,7 +249,7 @@ void GLWidget::selectFeather(char byRegion)
 	
 	condition.setRegionFilter(byRegion);
 	
-	skin()->selectAround(ctx->m_componentIdx, &condition);
+	skin()->select(selectedQue(), &condition);
 	m_featherDrawer->clearCached();
 	setDirty();
 }
@@ -285,7 +290,8 @@ void GLWidget::floodFeather()
 		condition.setDistanceFilter(0);
 	}
 	else {
-		skin()->resetCollisionRegionByDistance(ctx->m_componentIdx, ctx->m_hitP, brush()->getRadius());
+		selectAround(ctx->m_hitP, brush()->getRadius());
+		skin()->resetCollisionRegion(selectedQue());
 		skin()->resetFloodFaces();
 	}
 	
@@ -424,6 +430,7 @@ std::string GLWidget::chooseSaveFileName()
 
 void GLWidget::doClear()
 {
+	ManipulateView::clearSelection();
 	MlScene::doClear();
 	if(m_featherTexId > -1) {
 		getDrawer()->clearTexture(m_featherTexId);

@@ -14,6 +14,8 @@
 #include <Ray.h>
 #include <VertexDataGroup.h>
 
+class SelectionContext;
+
 class BaseMesh : public Geometry {
 public:
 	BaseMesh();
@@ -75,6 +77,8 @@ public:
 	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
 	char triangleIntersect(const Vector3F * threeCorners, IntersectionContext * ctx) const;
 	char selectComponent(IntersectionContext * ctx) const;
+	
+	virtual char selectFace(unsigned idx, SelectionContext * ctx) const;
 	
 	void putIntoObjectSpace();
 	

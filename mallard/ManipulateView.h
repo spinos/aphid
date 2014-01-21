@@ -8,14 +8,14 @@
  */
 
 #pragma once
-
+#include <deque>
 #include <Base3DView.h>
 
 class PatchMesh;
 class KdTree;
 class TransformManipulator;
 class MeshManipulator;
-
+class SelectionContext;
 class ManipulateView : public Base3DView
 {
     Q_OBJECT
@@ -26,6 +26,7 @@ public:
 	
 	bool pickupComponent(const Ray & ray, Vector3F & hit);
 	bool hitTest(const Ray & ray, Vector3F & hit);
+	void selectAround(const Vector3F & center, const float & radius);
 	
 	virtual void clientDraw();
     virtual void clientSelect();
@@ -46,6 +47,8 @@ public:
 	TransformManipulator * manipulator();
 	MeshManipulator * sculptor();
 	
+	const std::deque<unsigned> & selectedQue() const;
+	
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
     virtual void focusInEvent(QFocusEvent * event);
@@ -60,5 +63,6 @@ private:
 	TransformManipulator * m_manipulator;
 	MeshManipulator * m_sculptor;
 	KdTree * m_tree;
+	SelectionContext * m_selectCtx;
 	bool m_shouldRebuildTree;
 };

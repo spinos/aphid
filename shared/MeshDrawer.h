@@ -9,6 +9,7 @@
 
 #pragma once
 #include "LineDrawer.h"
+#include <deque>
 class BaseMesh;
 class BaseDeformer;
 class BaseField;
@@ -25,6 +26,7 @@ public:
 	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void triangle(const BaseMesh * mesh, unsigned idx);
 	void patch(const BaseMesh * mesh, unsigned idx);
+	void patch(const BaseMesh * mesh, const std::deque<unsigned> & sel);
 	void perVertexVector(BaseMesh * mesh, const std::string & name);
 	void vertexNormal(BaseMesh * mesh);
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);

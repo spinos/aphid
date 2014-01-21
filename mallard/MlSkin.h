@@ -13,7 +13,7 @@
 #include <MlCalamus.h>
 #include <Patch.h>
 #include "CalamusSkin.h"
-
+#include <deque>
 class AccPatchMesh;
 class MeshTopology;
 class MlCalamusArray;
@@ -32,6 +32,7 @@ public:
 	virtual void setBodyMesh(AccPatchMesh * mesh);
 	
 	void floodAround(MlCalamus c, FloodCondition * condition);
+	void select(const std::deque<unsigned> & src, SelectCondition * selcon);
 	void selectAround(unsigned idx, SelectCondition * selcon);
 	void discardActive();
 	

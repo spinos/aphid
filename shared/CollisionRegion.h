@@ -11,6 +11,7 @@
 #include <AllMath.h>
 #include <Patch.h>
 #include <ActiveRegion.h>
+#include <deque>
 class IntersectionContext;
 class MeshTopology;
 class AccPatchMesh;
@@ -31,6 +32,7 @@ public:
 	float getPerVertexFloat();
 	
 	virtual void setBodyMesh(AccPatchMesh * mesh);
+	virtual void resetCollisionRegion(const std::deque<unsigned> & src);
 	virtual void resetCollisionRegion(unsigned idx);
 	virtual void resetCollisionRegionByDistance(unsigned idx, const Vector3F & center, float maxD);
 	virtual void resetCollisionRegionAround(unsigned idx, const BoundingBox & bbox);

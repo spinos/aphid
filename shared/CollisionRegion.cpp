@@ -94,6 +94,15 @@ void CollisionRegion::neighborFaces(unsigned idx, std::vector<unsigned> & dst)
 	m_topo->growAroundQuad(idx, dst);
 }
 
+void CollisionRegion::resetCollisionRegion(const std::deque<unsigned> & src)
+{
+	m_regionElementStart = src[0];
+	m_regionElementIndices.clear();
+	std::deque<unsigned>::const_iterator it = src.begin();
+	for(; it != src.end(); ++it) m_regionElementIndices.push_back(*it);
+	m_hitElement = -1;
+}
+
 void CollisionRegion::resetCollisionRegion(unsigned idx)
 {
 	m_regionElementStart = idx;

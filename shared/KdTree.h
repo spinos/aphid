@@ -13,7 +13,7 @@
 #include <KdTreeBuilder.h>
 
 class IntersectionContext;
-	
+class SelectionContext;
 class KdTree : public Geometry
 {
 public:
@@ -28,6 +28,7 @@ public:
 	
 	char intersect(IntersectionContext * ctx);
 	char closestPoint(const Vector3F & origin, IntersectionContext * ctx);
+	void select(SelectionContext * ctx);
 
 	Primitive * getPrim(unsigned idx);
 	
@@ -38,7 +39,8 @@ private:
 	char leafIntersect(KdTreeNode *node, IntersectionContext * ctx);
 	char recusiveClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx);
 	char leafClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx);
-	
+	char recursiveSelect(KdTreeNode *node, SelectionContext * ctx);
+	char leafSelect(KdTreeNode *node, SelectionContext * ctx);
 	BuildKdTreeStream m_stream;
 	KdTreeNode *m_root;
 };

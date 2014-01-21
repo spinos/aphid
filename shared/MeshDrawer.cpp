@@ -170,6 +170,29 @@ void MeshDrawer::patch(const BaseMesh * mesh, unsigned idx)
 	end();
 }
 
+void MeshDrawer::patch(const BaseMesh * mesh, const std::deque<unsigned> & sel)
+{
+	if(sel.size() < 1) return;
+	beginQuad();
+	Vector3F *v = mesh->getVertices();
+	unsigned *i = mesh->getQuadIndices();
+	unsigned j;
+	std::deque<unsigned>::const_iterator it = sel.begin();
+	for(; it != sel.end(); ++it) {
+		j = *it;
+		Vector3F & a = v[i[j * 4]];
+		Vector3F & b = v[i[j * 4 + 1]];
+		Vector3F & c = v[i[j * 4 + 2]];
+		Vector3F & d = v[i[j * 4 + 3]];
+		
+		glVertex3f(a.x, a.y, a.z);
+		glVertex3f(b.x, b.y, b.z);
+		glVertex3f(c.x, c.y, c.z);
+		glVertex3f(d.x, d.y, d.z);
+	}
+	end();
+}
+
 void MeshDrawer::vertexNormal(BaseMesh * mesh)
 {
 	Vector3F *nor = mesh->getNormals();
