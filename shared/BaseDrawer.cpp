@@ -84,7 +84,7 @@ void BaseDrawer::beginPoint(float x) const
 	glBegin(GL_POINTS);
 }
 
-void BaseDrawer::beginQuad()
+void BaseDrawer::beginQuad() const
 {
 	glBegin(GL_QUADS);
 }

@@ -26,7 +26,7 @@ public:
 	void hiddenLine(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void triangle(const BaseMesh * mesh, unsigned idx);
 	void patch(const BaseMesh * mesh, unsigned idx);
-	void patch(const BaseMesh * mesh, const std::deque<unsigned> & sel);
+	void patch(const BaseMesh * mesh, const std::deque<unsigned> & sel) const;
 	void perVertexVector(BaseMesh * mesh, const std::string & name);
 	void vertexNormal(BaseMesh * mesh);
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);

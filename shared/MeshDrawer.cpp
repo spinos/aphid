@@ -170,7 +170,7 @@ void MeshDrawer::patch(const BaseMesh * mesh, unsigned idx)
 	end();
 }
 
-void MeshDrawer::patch(const BaseMesh * mesh, const std::deque<unsigned> & sel)
+void MeshDrawer::patch(const BaseMesh * mesh, const std::deque<unsigned> & sel) const
 {
 	if(sel.size() < 1) return;
 	beginQuad();

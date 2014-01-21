@@ -15,7 +15,7 @@ void Geometry::setBBox(const BoundingBox &bbox)
 	m_bbox = bbox;
 }
 
-const BoundingBox Geometry::getBBox() const
+const BoundingBox & Geometry::getBBox() const
 {
 	return m_bbox;
 }

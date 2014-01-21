@@ -112,7 +112,7 @@ MlSkin * MlScene::skin()
 	return m_skin;
 }
 
-AccPatchMesh * MlScene::body()
+AccPatchMesh * MlScene::body() const
 {
 	return m_accmesh;
 }

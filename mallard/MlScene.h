@@ -31,7 +31,7 @@ public:
 	std::string featherDistributionMap() const;
 
 	MlSkin * skin();
-	AccPatchMesh * body();
+	AccPatchMesh * body() const;
 	BakeDeformer * bodyDeformer();
 	PlaybackControl * playback();
 	void setPlayback(PlaybackControl * p);

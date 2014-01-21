@@ -50,7 +50,7 @@ void SelectionContext::setBBox(const BoundingBox &bbox)
 	m_bbox = bbox;
 }
 
-const BoundingBox SelectionContext::getBBox() const
+const BoundingBox & SelectionContext::getBBox() const
 {
 	return m_bbox;
 }

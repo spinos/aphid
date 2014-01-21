@@ -126,7 +126,7 @@ KdTree * ManipulateView::getTree() const
 	return m_tree;
 }
 
-PatchMesh * ManipulateView::activeMesh()
+PatchMesh * ManipulateView::activeMesh() const
 {
 	return NULL;
 }

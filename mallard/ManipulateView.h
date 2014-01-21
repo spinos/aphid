@@ -42,7 +42,7 @@ public:
 	bool shouldRebuildTree() const;
 
 	KdTree * getTree() const;
-	virtual PatchMesh * activeMesh();
+	virtual PatchMesh * activeMesh() const;
 	
 	TransformManipulator * manipulator();
 	MeshManipulator * sculptor();

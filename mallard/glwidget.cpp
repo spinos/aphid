@@ -123,9 +123,7 @@ void GLWidget::clientDraw()
 	showLights();
 	showBrush();
 	showManipulator();
-	
-	getDrawer()->setWired(1);
-	getDrawer()->patch(activeMesh(), selectedQue());
+	showActiveFaces();
 }
 
 void GLWidget::clientSelect()
@@ -224,7 +222,7 @@ void GLWidget::clientDeselect()
 	manipulator()->detach();
 }
 
-PatchMesh * GLWidget::activeMesh()
+PatchMesh * GLWidget::activeMesh() const
 {
 	return body();
 }
@@ -841,6 +839,13 @@ void GLWidget::setUseDisplaySize(bool x)
 	}
 	RenderOptions::setUseDisplaySize(x);
 }
+
+void GLWidget::showActiveFaces() const
+{
+	getDrawer()->setWired(1);
+	getDrawer()->patch(activeMesh(), selectedQue());
+}
+
 #include <PointInsidePolygonTest.h>
 void GLWidget::testPatch()
 {

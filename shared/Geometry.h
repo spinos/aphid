@@ -15,7 +15,7 @@ public:
 	Geometry();
 	
 	void setBBox(const BoundingBox &bbox);
-	const BoundingBox getBBox() const;
+	const BoundingBox & getBBox() const;
 protected:
 	BoundingBox * bbox();
 private:

@@ -60,7 +60,7 @@ public:
 	virtual void clientSelect();
 	virtual void clientMouseInput();
 	virtual void clientDeselect();
-    virtual PatchMesh * activeMesh();
+    virtual PatchMesh * activeMesh() const;
 	
 	virtual bool confirmDiscardChanges();
 	virtual std::string chooseOpenFileName();
@@ -121,6 +121,7 @@ private:
 	bool isBaking() const;
 	void loadFeatherDistribution(const std::string & name);
 	void showLights() const;
+	void showActiveFaces() const;
 	void testPatch();
 private:
 	BezierDrawer * m_bezierDrawer;

@@ -30,7 +30,7 @@ public:
 	void beginWireTriangle();
 	void beginLine();
 	void beginPoint(float x) const;
-	void beginQuad();
+	void beginQuad() const;
 	
 	void boundingRectangle(const BoundingRectangle & b) const;
 	void boundingBox(const BoundingBox & b) const;

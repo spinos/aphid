@@ -27,7 +27,7 @@ public:
 	float radius() const;
 	
 	void setBBox(const BoundingBox &bbox);
-	const BoundingBox getBBox() const;
+	const BoundingBox & getBBox() const;
 	
 	char closeTo(const BoundingBox & b) const;
 	void addToSelection(const unsigned idx);
