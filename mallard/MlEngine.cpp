@@ -89,6 +89,7 @@ void MlEngine::fineOutput()
 		
 #ifdef WIN32
 	AiBegin();
+	logArnoldVersion();
     loadPlugin("./driver_foo.dll");
     loadPlugin("./mtoa_shaders.dll");
 	
@@ -352,10 +353,10 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 	AtNode * usrCol = AiNode("userDataColor");
 	AiNodeSetStr(usrCol, "colorAttrName", "colors");
 	
-	if(AiNodeLink(usrCol, "rootcolor", hair)) std::clog<<"linked";
-	if(AiNodeLink(usrCol, "tipcolor", hair)) std::clog<<"linked";
-	if(AiNodeLink(usrCol, "spec_color", hair)) std::clog<<"linked";
-	if(AiNodeLink(usrCol, "spec2_color", hair)) std::clog<<"linked";
+	if(!AiNodeLink(usrCol, "rootcolor", hair)) std::clog<<"WARNING: rootcolor not linked";
+	if(!AiNodeLink(usrCol, "tipcolor", hair)) std::clog<<"WARNING: tipcolor not linked";
+	if(!AiNodeLink(usrCol, "spec_color", hair)) std::clog<<"WARNING: spec_color not linked";
+	if(!AiNodeLink(usrCol, "spec2_color", hair)) std::clog<<"WARNING: spec2_color not linked";
 	//AtNode *hair = AiNode("utility");
 	//if(AiNodeLink(usrCol, "color", hair)) std::clog<<"linked";
 
@@ -373,49 +374,51 @@ void MlEngine::translateLights()
 
 void MlEngine::translateLight(BaseLight * l)
 {
+#ifdef WIN32
+    AtNode * light = 0;
 	switch (l->entityType()) {
 		case TypedEntity::TDistantLight:
-			translateDistantLight(static_cast<DistantLight *>(l));
+			light = translateDistantLight(static_cast<DistantLight *>(l));
 			break;
 		case TypedEntity::TPointLight:
-			translatePointLight(static_cast<PointLight *>(l));
+			light = translatePointLight(static_cast<PointLight *>(l));
 			break;
 		case TypedEntity::TSquareLight:
-			translateSquareLight(static_cast<SquareLight *>(l));
+			light = translateSquareLight(static_cast<SquareLight *>(l));
 			break;
 		default:
 			break;
 	}
+	if(!light) return;
+	AiNodeSetFlt(light, "intensity", l->intensity());
+    AiNodeSetInt(light, "samples", l->samples());
+    AiNodeSetBool(light, "cast_shadows", l->castShadow());
+    Float3 lc = l->lightColor();
+    AiNodeSetRGB(light, "color", lc.x, lc.y, lc.z);
+    AtMatrix matrix;
+	setMatrix(l->worldSpace(), matrix);
+    AiNodeSetMatrix(light, "matrix", matrix);
+#endif
 }
-
-void MlEngine::translateDistantLight(DistantLight * l)
-{
 #ifdef WIN32
+AtNode * MlEngine::translateDistantLight(DistantLight * l)
+{
 	AtNode * light = AiNode("distant_light");
     AiNodeSetStr(light, "name", l->name().c_str());
-    AiNodeSetFlt(light, "intensity", l->intensity());
-    AiNodeSetInt(light, "samples", 2);
-    AtMatrix matrix;
-	setMatrix(l->worldSpace(), matrix);
-    AiNodeSetMatrix(light, "matrix", matrix);
-#endif
+    return light;
 }
 
-void MlEngine::translatePointLight(PointLight * l)
+AtNode * MlEngine::translatePointLight(PointLight * l)
 {
-#ifdef WIN32
 	AtNode * light = AiNode("point_light");
     AiNodeSetStr(light, "name", l->name().c_str());
-    AiNodeSetFlt(light, "intensity", l->intensity() * 1000.f);
-    AiNodeSetInt(light, "samples", 2);
-    AiNodeSetBool(light, "cast_shadows", false);
-    AtMatrix matrix;
-	setMatrix(l->worldSpace(), matrix);
-    AiNodeSetMatrix(light, "matrix", matrix);
-#endif
+    return light;
 }
 
-void MlEngine::translateSquareLight(SquareLight * l)
+AtNode * MlEngine::translateSquareLight(SquareLight * l)
 {
-
+	AtNode * light = AiNode("quad_light");
+    AiNodeSetStr(light, "name", l->name().c_str());
+    return light;
 }
+#endif

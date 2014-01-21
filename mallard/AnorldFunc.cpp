@@ -14,6 +14,13 @@ void AnorldFunc::render()
     RenderEngine::render();
 }
 
+void AnorldFunc::logArnoldVersion() const
+{
+#ifdef WIN32
+    std::clog<<"\nRenderer is "<<AiGetVersionInfo()<<"\n";
+#endif  
+}
+
 void AnorldFunc::loadPlugin(const char * fileName)
 {
 #ifdef WIN32

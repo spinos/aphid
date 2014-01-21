@@ -33,9 +33,11 @@ private:
 	void translateBlock(AdaptableStripeBuffer * src);
 	void translateLights();
 	void translateLight(BaseLight * l);
-	void translateDistantLight(DistantLight * l);
-	void translatePointLight(PointLight * l);
-	void translateSquareLight(SquareLight * l);
+#ifdef WIN32
+	AtNode * translateDistantLight(DistantLight * l);
+	AtNode * translatePointLight(PointLight * l);
+	AtNode * translateSquareLight(SquareLight * l);
+#endif
 private:
 	boost::thread m_workingThread;
 	boost::thread m_progressingThread;
