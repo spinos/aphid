@@ -10,19 +10,20 @@
 #include "SelectionContext.h"
 #include "QuickSort.h"
 
-SelectionContext::SelectionContext() {}
+SelectionContext::SelectionContext() { m_mode = Replace; }
 SelectionContext::~SelectionContext() { m_indices.clear(); }
 
 void SelectionContext::reset()
 {
 	m_indices.clear();
+	m_removeIndices.clear();
 }
 
 void SelectionContext::reset(const Vector3F & center, const float & radius)
 {
 	m_center = center;
 	m_radius = radius;
-	m_indices.clear();
+	if(m_mode == Replace) m_indices.clear();
 	m_enableDirection = 0;
 }
 
@@ -75,10 +76,17 @@ char SelectionContext::closeTo(const Vector3F & v) const
 
 void SelectionContext::addToSelection(const unsigned idx)
 {
-	m_indices.push_back(idx);
+	if(m_mode == Replace || m_mode == Append) m_indices.push_back(idx);
+	else m_removeIndices.push_back(idx);
 }
 
 void SelectionContext::finish()
+{
+	if(m_mode == Replace || m_mode == Append) finishAdd();
+	else finishRemove();
+}
+
+void SelectionContext::finishAdd()
 {
 	if(numSelected() < 2) return;
 	QuickSort::Sort(m_indices, 0, numSelected() - 1);
@@ -97,6 +105,24 @@ void SelectionContext::finish()
 	}
 }
 
+void SelectionContext::finishRemove()
+{
+	if(m_removeIndices.size() < 1) return;
+	QuickSort::Sort(m_removeIndices, 0, m_removeIndices.size() - 1);
+	std::deque<unsigned>::iterator it = m_removeIndices.begin();
+	for(; it != m_removeIndices.end(); ++it) remove(*it);
+	m_removeIndices.clear();
+}
+
+void SelectionContext::remove(const unsigned & idx)
+{
+	std::deque<unsigned>::iterator it = m_indices.begin();
+	for(; it != m_indices.end(); ++it) {
+		if(*it == idx) it = m_indices.erase(it);
+		if(*it > idx) return;
+	}
+}
+
 unsigned SelectionContext::numSelected() const
 {
 	return m_indices.size();
@@ -105,6 +131,11 @@ unsigned SelectionContext::numSelected() const
 const std::deque<unsigned> & SelectionContext::selectedQue() const
 {
 	return m_indices;
+}
+
+void SelectionContext::setSelectMode(SelectionContext::SelectMode m)
+{
+	m_mode = m;
 }
 
 void SelectionContext::verbose() const

@@ -13,6 +13,12 @@
 #include <deque>
 class SelectionContext {
 public:
+	enum SelectMode {
+		Replace = 0,
+		Append = 1,
+		Remove = 2
+	};
+	
 	SelectionContext();
 	virtual ~SelectionContext();
 	
@@ -38,11 +44,19 @@ public:
 	unsigned numSelected() const;
 	const std::deque<unsigned> & selectedQue() const;
 	
+	void setSelectMode(SelectMode m);
+	
 	void verbose() const;
 private:
+	void finishAdd();
+	void finishRemove();
+	void remove(const unsigned & idx);
+private:
 	std::deque<unsigned> m_indices;
+	std::deque<unsigned> m_removeIndices;
 	BoundingBox m_bbox;
 	Vector3F m_center, m_normal;
 	float m_radius;
+	SelectMode m_mode;
 	char m_enableDirection;
 };
