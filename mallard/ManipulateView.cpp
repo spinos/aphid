@@ -44,18 +44,31 @@ void ManipulateView::clientDraw()
 //! [9]
 void ManipulateView::clientSelect()
 {
+	switch (interactMode()) {
+		case ToolContext::SelectFace :
+			hitTest();
+			selectFaces();
+			break;
+		default:
+			break;
+	}
 }
 //! [9]
 
-void ManipulateView::clientDeselect() {}
+void ManipulateView::clientDeselect() 
+{
+	manipulator()->detach();
+}
 
-//! [10]
 void ManipulateView::clientMouseInput()
 {
-	Vector3F hit;
-	Ray ray = *getIncidentRay();
-	if(interactMode() == ToolContext::SelectVertex) {
-		pickupComponent(ray, hit);
+	switch (interactMode()) {
+		case ToolContext::SelectFace :
+			hitTest();
+			selectFaces();
+			break;
+		default:
+			break;
 	}
 }
 
@@ -75,19 +88,23 @@ bool ManipulateView::pickupComponent(const Ray & ray, Vector3F & hit)
 	return true;
 }
 
-bool ManipulateView::hitTest(const Ray & ray, Vector3F & hit)
+bool ManipulateView::hitTest()
 {
+	Ray ray = *getIncidentRay();
 	getIntersectionContext()->reset(ray);
-	if(!m_tree->intersect(getIntersectionContext())) 
-		return false;
-	hit = getIntersectionContext()->m_hitP;
-	return true;
+	return m_tree->intersect(getIntersectionContext());
 }
 
 void ManipulateView::selectFaces()
 {
-	m_selectCtx->reset(brush()->heelPosition(), brush()->getRadius());
-	m_selectCtx->setDirection(brush()->normal());
+	IntersectionContext * ctx = getIntersectionContext();
+    if(!ctx->m_success) return;
+	
+	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
+	brush()->resetToe();
+	
+	m_selectCtx->reset(ctx->m_hitP, brush()->getRadius());
+	m_selectCtx->setDirection(ctx->m_hitN);
 	m_tree->select(m_selectCtx);
 }
 

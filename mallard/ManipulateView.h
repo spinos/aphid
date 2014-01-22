@@ -25,7 +25,7 @@ public:
     ~ManipulateView();
 	
 	bool pickupComponent(const Ray & ray, Vector3F & hit);
-	bool hitTest(const Ray & ray, Vector3F & hit);
+	bool hitTest();
 	void selectFaces();
 	
 	virtual void clientDraw();

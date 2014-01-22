@@ -30,7 +30,7 @@ ToolBox::ToolBox(QWidget *parent) : QToolBar(parent)
 		connect(*it, SIGNAL(actionTriggered(int)), this, SLOT(onActionFrameTriggered(int)));
 	}
 	
-	setContext(CombBodyContourFeather);
+	setContext(SelectFace);
 }
 
 ToolBox::~ToolBox() {}

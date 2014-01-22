@@ -38,7 +38,7 @@ BrushControl::BrushControl(QWidget *parent)
 	stackLayout->addWidget(eraseControl);
 	stackLayout->addWidget(selectFace);
 	
-	stackLayout->setCurrentIndex(6);
+	stackLayout->setCurrentIndex(5);
 	setLayout(stackLayout);
 
     stackLayout->setSizeConstraint(QLayout::SetMinimumSize);

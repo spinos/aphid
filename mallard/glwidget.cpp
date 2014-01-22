@@ -128,27 +128,26 @@ void GLWidget::clientDraw()
 
 void GLWidget::clientSelect()
 {
-    Vector3F hit;
-	Ray ray = *getIncidentRay();
+    Ray ray = *getIncidentRay();
 	switch (interactMode()) {
 	    case ToolContext::CreateBodyContourFeather :
-	        hitTest(ray, hit);
+	        hitTest();
 	        floodFeather();
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
-	        hitTest(ray, hit);
+	        hitTest();
 	        selectFeather(m_eraseByRegion);
 	        m_featherDrawer->hideActive();
 	        break;
 	    case ToolContext::SelectByColor :
-	        hitTest(ray, hit);
+	        hitTest();
 	        selectRegion();
 	        break;
         case ToolContext::CombBodyContourFeather :
         case ToolContext::ScaleBodyContourFeather :
         case ToolContext::PitchBodyContourFeather :
 		case ToolContext::Deintersect :
-            hitTest(ray, hit);
+            hitTest();
             skin()->discardActive();
             selectFeather();
            break;
@@ -163,12 +162,12 @@ void GLWidget::clientSelect()
 	    default:
 			break;
 	}
+	ManipulateView::clientSelect();
 }
 
 void GLWidget::clientMouseInput()
 {
-    Vector3F hit;
-	Ray ray = *getIncidentRay();
+    Ray ray = *getIncidentRay();
 	switch (interactMode()) {
 	    case ToolContext::CreateBodyContourFeather :
 	        brush()->setToeByIntersect(&ray);
@@ -176,12 +175,12 @@ void GLWidget::clientMouseInput()
 	        m_featherDrawer->updateActive();
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
-	        hitTest(ray, hit);
+	        hitTest();
 	        selectFeather(m_eraseByRegion);
 	        m_featherDrawer->hideActive();
 	        break;
 	    case ToolContext::SelectByColor :
-	        hitTest(ray, hit);
+	        hitTest();
 	        selectRegion();
 	        break;
         case ToolContext::CombBodyContourFeather :
@@ -211,6 +210,7 @@ void GLWidget::clientMouseInput()
 	    default:
 			break;
 	}
+	ManipulateView::clientMouseInput();
 }
 
 void GLWidget::clientDeselect()
@@ -219,7 +219,7 @@ void GLWidget::clientDeselect()
 		skin()->finishCreateFeather();
 		skin()->discardActive();
 	}
-	manipulator()->detach();
+	ManipulateView::clientDeselect();
 }
 
 PatchMesh * GLWidget::activeMesh() const
@@ -231,9 +231,6 @@ void GLWidget::selectFeather(char byRegion)
 {
 	IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) return;
-	
-	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
-	brush()->resetToe();
 	
 	selectFaces();
 	
