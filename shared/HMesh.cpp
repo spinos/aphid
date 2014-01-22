@@ -98,6 +98,11 @@ char HMesh::save(BaseMesh * mesh)
 		addIntData(".uvids", nuvid);
 		
 	writeIntData(".uvids", nuvid, (int *)mesh->getUvIds());
+	
+	if(!hasNamedData(".tggrow"))
+		addCharData(".tgfrow", mesh->getNumFaces());
+	
+	writeCharData(".tggrow",  mesh->getNumFaces(), mesh->perFaceTag("growon"));
 
 	return 1;
 }
@@ -138,6 +143,14 @@ char HMesh::load(BaseMesh * mesh)
 
 	mesh->processTriangleFromPolygon();
 	mesh->processQuadFromPolygon();
+	
+	char * g = mesh->perFaceTag("growon");
+	if(hasNamedData(".tggrow")) {
+		readCharData(".tggrow",  mesh->getNumFaces(), g);
+	}
+	else {
+		for(unsigned i =0; i < mesh->getNumFaces(); i++) g[i] = 1;
+	}
 	
 	mesh->verbose();
 	

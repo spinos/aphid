@@ -43,4 +43,5 @@ private:
 	char leafSelect(KdTreeNode *node, SelectionContext * ctx);
 	BuildKdTreeStream m_stream;
 	KdTreeNode *m_root;
+	int m_maxLeafLevel;
 };

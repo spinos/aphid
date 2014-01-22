@@ -434,6 +434,7 @@ void MlScene::importBody(const std::string & fileName)
 	m_deformer->setMesh(m_accmesh);
 	m_skin->computeFaceCalamusIndirection();
 	m_skin->computeVertexDisplacement();
+	m_skin->initGrowOnFaceTag();
 	setCollision(m_skin);
 }
 

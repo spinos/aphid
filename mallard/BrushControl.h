@@ -20,6 +20,12 @@ QT_END_NAMESPACE
 
 class QIntEditSlider;
 class QDoubleEditSlider;
+class SelectFaceBox;
+class CombBox;
+class CurlBox;
+class ScaleBox;
+class FloodBox;
+class EraseBox;
 
 class BrushControl : public QDialog
 {
@@ -27,11 +33,8 @@ class BrushControl : public QDialog
 
 public:
     BrushControl(QWidget *parent = 0);
-	QWidget * numSamplesWidget();
-	QWidget * radiusWidget();
-	QWidget * pitchWidget();
-	QWidget * floodRegionWidget();
-	QWidget * eraseRegionWidget();
+	QWidget * floodControlWidget();
+	QWidget * eraseControlWidget();
 
 public slots:
 	void receiveToolContext(int c);
@@ -42,34 +45,14 @@ private slots:
 signals:
 	void brushRadiusChanged(double d);
 	void brushStrengthChanged(double d);
-private:
-	void createGroup();
-	void eraseGroup();
-	void combGroup();
-	void scaleGroup();
-	void bendGroup();
-	void smoothGroup();
-	
+
 private:
 	QStackedLayout * stackLayout;
-	QGroupBox * controlsGroupC;
-	QDoubleEditSlider * m_radiusValueC;
-	QDoubleEditSlider * m_pitchValueC;
-	QIntEditSlider * m_numSampleValueC;
-	QDoubleEditSlider * m_createStrengthValue;
-	QCheckBox * m_floodAreaCheck;
-	QGroupBox * controlsGroupE;
-	QDoubleEditSlider * m_radiusValueE;
-	QCheckBox * m_eraseAreaCheck;
-	QDoubleEditSlider * m_eraseStrengthValue;
-	QGroupBox * controlsGroupB;
-	QDoubleEditSlider * m_radiusValueB;
-	QGroupBox * controlsGroupS;
-	QDoubleEditSlider * m_radiusValueS;
-	QGroupBox * controlsGroupD;
-	QDoubleEditSlider * m_radiusValueD;
-	QGroupBox * controlsGroupDeintersect;
-	QDoubleEditSlider * m_radiusValueDeintersect;
-	QDoubleEditSlider * m_smoothDirection;
+	SelectFaceBox * selectFace;
+	CombBox * comb;
+	CurlBox * curl;
+	ScaleBox * brushScale;
+	FloodBox * flood;
+	EraseBox * eraseControl;
 };
 #endif

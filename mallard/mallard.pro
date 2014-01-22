@@ -31,6 +31,12 @@ HEADERS       =	../shared/ContextIconFrame.h \
 				MlSkin.h \
                 MlRachis.h \
                 BrushControl.h \
+SelectFaceBox.h \
+CombBox.h \
+CurlBox.h \
+ScaleBox.h \
+FloodBox.h \
+EraseBox.h \
                 MlScene.h \
 				HFeather.h \
     HSkin.h \
@@ -90,6 +96,12 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 				MlSkin.cpp \
                 MlRachis.cpp \
                 BrushControl.cpp \
+SelectFaceBox.cpp \
+CombBox.cpp \
+CurlBox.cpp \
+ScaleBox.cpp \
+FloodBox.cpp \
+EraseBox.cpp \
                 MlScene.cpp \
 				HFeather.cpp \
     HSkin.cpp \

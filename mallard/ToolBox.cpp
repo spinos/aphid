@@ -65,7 +65,12 @@ void ToolBox::onActionFrameTriggered(int a)
 
 void ToolBox::createContext()
 {
-    
+    ContextIconFrame * selectFace = new ContextIconFrame(this);
+	selectFace->addIconFile(":selectFace.png");
+	selectFace->addIconFile(":selectFaceActive.png");
+	selectFace->setIconIndex(1);
+	selectFace->setContext(SelectFace);
+	
     ContextIconFrame * createContour = new ContextIconFrame(this);
 	
 	createContour->addIconFile(":brush.png");
@@ -84,7 +89,7 @@ void ToolBox::createContext()
 	
 	combContour->addIconFile(":comb.png");
 	combContour->addIconFile(":combActive.png");
-	combContour->setIconIndex(1);
+	combContour->setIconIndex(0);
 	combContour->setContext(CombBodyContourFeather);
 	
 	ContextIconFrame * eraseContour = new ContextIconFrame(this);
@@ -108,13 +113,6 @@ void ToolBox::createContext()
 	bendContour->setIconIndex(0);
 	bendContour->setContext(PitchBodyContourFeather);
 	
-	ContextIconFrame * smoothContour = new ContextIconFrame(this);
-	
-	smoothContour->addIconFile(":deintersectInactive.png");
-	smoothContour->addIconFile(":deintersectActive.png");
-	smoothContour->setIconIndex(0);
-	smoothContour->setContext(Deintersect);
-	
 	ContextIconFrame * moveLight = new ContextIconFrame(this);
 	
 	moveLight->addIconFile(":move.png");
@@ -129,13 +127,13 @@ void ToolBox::createContext()
 	rotateLight->setIconIndex(0);
 	rotateLight->setContext(RotateTransform);
 	
-	m_contextFrames.push_back(createContour);
+	m_contextFrames.push_back(selectFace);
 	m_contextFrames.push_back(selectRegion);
+	m_contextFrames.push_back(createContour);
 	m_contextFrames.push_back(combContour);
 	m_contextFrames.push_back(scaleContour);
 	m_contextFrames.push_back(bendContour);
 	m_contextFrames.push_back(eraseContour);
-	m_contextFrames.push_back(smoothContour);
 	m_contextFrames.push_back(moveLight);
 	m_contextFrames.push_back(rotateLight);
 }

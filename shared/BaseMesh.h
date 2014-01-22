@@ -53,9 +53,9 @@ public:
 	
 	virtual unsigned getNumFaces() const;
 	unsigned getNumTriangles() const;
-	unsigned getNumPolygons() const;
-	unsigned getNumVertices() const;
-	unsigned getNumPolygonFaceVertices() const;
+	const unsigned & getNumPolygons() const;
+	const unsigned & getNumVertices() const;
+	const unsigned & getNumPolygonFaceVertices() const;
 	unsigned getNumTriangleFaceVertices() const;
 	unsigned getNumUVs() const;
 	unsigned getNumUVIds() const;
@@ -83,14 +83,10 @@ public:
 	
 	void putIntoObjectSpace();
 	
-	void createPerVertexVector();
-	Vector3F *perVertexVector() const;
-	
-	void createPerVertexFloat();
-	float *perVertexFloat() const;
 	char hasVertexData(const std::string & name) const;
 	float * perVertexFloat(const std::string & name);
 	Vector3F * perVertexVector(const std::string & name);
+	char * perFaceTag(const std::string & name);
 	VertexDataGroup * vertexData();
 	
 	virtual unsigned processQuadFromPolygon();
@@ -99,11 +95,11 @@ public:
 	virtual unsigned numQuads() const;
 	
 	void verbose() const;
-	
+private:
+	VertexDataGroup m_vdg;
 	Vector3F * _vertices;
 	Vector3F * m_normals;
 	unsigned * _indices;
-	unsigned _numVertices;
 	unsigned m_numTriangles;
 	unsigned m_numTriangleFaceVertices;
 	unsigned m_numPolygons;
@@ -114,8 +110,5 @@ public:
 	float * m_u;
 	float * m_v;
 	unsigned * m_uvIds;
-private:
-	Vector3F * m_pvv;
-	float * m_pvf;
-	VertexDataGroup m_vdg;
+	unsigned _numVertices;
 };

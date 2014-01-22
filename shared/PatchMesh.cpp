@@ -11,6 +11,7 @@
 #include <PointInsidePolygonTest.h>
 #include <InverseBilinearInterpolate.h>
 #include <BiLinearInterpolate.h>
+#include <SelectionContext.h>
 
 PatchMesh::PatchMesh() 
 {
@@ -39,7 +40,7 @@ const BoundingBox PatchMesh::calculateBBox(const unsigned &idx) const
     BoundingBox box;
 	unsigned *qudi = &m_quadIndices[idx * 4];
 	for(int i=0; i < 4; i++) {
-		Vector3F *p0 = &_vertices[*qudi];
+		Vector3F *p0 = & getVertices()[*qudi];
 		qudi++;
 		box.updateMin(*p0);
 		box.updateMax(*p0);
@@ -86,7 +87,7 @@ unsigned PatchMesh::closestVertex(unsigned idx, const Vector3F & px) const
 	float mag, minDist = 10e8;
 	unsigned vert = 0;
 	for(int i = 0; i < 4; i++) {
-		Vector3F v = _vertices[*qudi] - px;
+		Vector3F v = getVertices()[*qudi] - px;
 		
 		mag = v.length();
 		
@@ -123,43 +124,17 @@ PointInsidePolygonTest PatchMesh::patchAt(unsigned idx) const
 {
 	Vector3F po[4];
 	unsigned *qudi = &m_quadIndices[idx * 4];
-	po[0] = _vertices[*qudi];
+	po[0] = getVertices()[*qudi];
 	qudi++;
-	po[1] = _vertices[*qudi];
+	po[1] = getVertices()[*qudi];
 	qudi++;
-	po[2] = _vertices[*qudi];
+	po[2] = getVertices()[*qudi];
 	qudi++;
-	po[3] = _vertices[*qudi];
+	po[3] = getVertices()[*qudi];
 	
 	return PointInsidePolygonTest(po[0], po[1], po[2], po[3]);
 }
 
-void PatchMesh::perVertexVectorOfPatch(unsigned idx, Vector3F * dst) const
-{
-	unsigned *qudi = &m_quadIndices[idx * 4];
-	dst[0] = perVertexVector()[*qudi];
-	qudi++;
-	dst[1] = perVertexVector()[*qudi];
-	qudi++;
-	dst[2] = perVertexVector()[*qudi];
-	qudi++;
-	dst[3] = perVertexVector()[*qudi];
-}
-
-void PatchMesh::perVertexFloatOnPatch(unsigned idx, float u, float v, float * dst) const
-{
-	float pvf[4];
-	unsigned *qudi = &m_quadIndices[idx * 4];
-	pvf[0] = perVertexFloat()[*qudi];
-	qudi++;
-	pvf[1] = perVertexFloat()[*qudi];
-	qudi++;
-	pvf[2] = perVertexFloat()[*qudi];
-	qudi++;
-	pvf[3] = perVertexFloat()[*qudi];
-	BiLinearInterpolate bili;
-	*dst = bili.interpolate(u, v, pvf);
-}
 
 void PatchMesh::interpolateVectorOnPatch(unsigned idx, float u, float v, Vector3F * src, Vector3F * dst)
 {
@@ -190,8 +165,8 @@ unsigned PatchMesh::processQuadFromPolygon()
 {
 	unsigned i, j;
 	m_numQuads = 0;
-    for(i = 0; i < m_numPolygons; i++) {
-		if(m_polygonCounts[i] < 5)
+    for(i = 0; i < getNumPolygons(); i++) {
+		if(polygonCounts()[i] < 5)
 			m_numQuads++;
 	}
 		
@@ -203,8 +178,8 @@ unsigned PatchMesh::processQuadFromPolygon()
 	unsigned * polygonIndir = polygonIndices();
 	unsigned * uvIndir = uvIds();
 	unsigned fc, ie = 0;
-	for(i = 0; i < m_numPolygons; i++) {
-		fc = m_polygonCounts[i];
+	for(i = 0; i < getNumPolygons(); i++) {
+		fc = polygonCounts()[i];
 		if(fc == 4) {
 			for(j = 0; j < 4; j++) {
 				m_quadIndices[ie] = polygonIndir[j];
@@ -249,5 +224,19 @@ Vector3F PatchMesh::getFaceNormal(const unsigned & idx) const
 {
 	PointInsidePolygonTest pa = patchAt(idx);
 	return pa.normal();
+}
+
+char PatchMesh::selectFace(const unsigned & idx, SelectionContext * ctx) const
+{
+	PointInsidePolygonTest pa = patchAt(idx);
+	if(!ctx->closeTo(pa.normal())) return 0;
+	
+	Vector3F closestP;
+	char inside;
+	if(pa.distanceTo(ctx->center(), closestP, inside) > ctx->radius()) return 0;
+	
+	ctx->addToSelection(idx);
+	
+	return 1;
 }
 //:~

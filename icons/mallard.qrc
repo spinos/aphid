@@ -60,5 +60,7 @@
         <file>renderActive.png</file>
 		<file>downy.png</file>
         <file>downyActive.png</file>
+		<file>selectFace.png</file>
+        <file>selectFaceActive.png</file>
     </qresource>
 </RCC>

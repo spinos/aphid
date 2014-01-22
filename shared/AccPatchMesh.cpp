@@ -201,13 +201,6 @@ void AccPatchMesh::texcoordOnPatch(unsigned idx, float u, float v, Vector3F & ds
     beziers()[idx].evaluateSurfaceTexcoord(u, v, &dst);
 }
 
-void AccPatchMesh::perVertexVectorOnPatch(unsigned idx, float u, float v, Vector3F & dst) const
-{
-	Vector3F src[4];
-	perVertexVectorOfPatch(idx, src);
-	beziers()[idx].evaluateSurfaceVector(u, v, src, &dst);
-}
-
 void AccPatchMesh::tangentFrame(unsigned idx, float u, float v, Matrix33F & frm) const
 {
 	return beziers()[idx].tangentFrame(u, v, frm);

@@ -28,7 +28,7 @@ MeshTopology::MeshTopology(BaseMesh * mesh)
 	
 	unsigned a, b, c;
 	
-	unsigned * polyC = mesh->m_polygonCounts;
+	unsigned * polyC = mesh->polygonCounts();
 	unsigned polyTri = *polyC - 2;
 	unsigned curTri = 0;
 	unsigned curPoly = 0;

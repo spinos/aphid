@@ -15,20 +15,20 @@ public:
 	VertexDataGroup();
 	virtual ~VertexDataGroup();
 	
-	void createEntry(const std::string & name, unsigned num, unsigned fpe);
+	void createEntry(const std::string & name, unsigned num, short bpe);
 	char hasEntry(const std::string & name) const;
-	float * entry(const std::string & name);
-	float * entry(const unsigned & idx, std::string & name, unsigned & fpe);
+	char * entry(const std::string & name);
+	char * entry(const unsigned & idx, std::string & name, short & bpe);
 	unsigned fpe(const std::string & name);
 	
 	unsigned numEntries() const;
 private:
 	struct NameAndType {
 		std::string _name;
-		unsigned _type;
+		short _type;
 	};
 	
 	int entryIdx(const std::string & name) const;
 	std::vector<NameAndType> m_names;
-	std::vector<float *> m_entries;
+	std::vector<char *> m_entries;
 };

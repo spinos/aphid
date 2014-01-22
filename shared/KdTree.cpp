@@ -56,12 +56,15 @@ void KdTree::create()
 	BuildKdTreeContext *ctx = new BuildKdTreeContext(m_stream);
 	ctx->setBBox(b);
 	
+	m_maxLeafLevel = 0;
+	
 	subdivide(m_root, *ctx, 0);
 	ctx->verbose();
 	delete ctx;
 	
 	m_stream.verbose();
-	std::cout << "kd tree constructed in " << bTimer.elapsed() << " secs\n";
+	std::cout << "Kd tree constructed in " << bTimer.elapsed() << " secs";
+	std::cout<<"\n max leaf level: "<<m_maxLeafLevel<<"\n";
 }
 
 void KdTree::cleanup()
@@ -73,7 +76,8 @@ void KdTree::cleanup()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 8 || level == 22) {
+	if(ctx.getNumPrimitives() < 8 || level == 32) {
+		if(level > m_maxLeafLevel) m_maxLeafLevel = level;
 		createLeaf(node, ctx);
 		return;
 	}
@@ -85,6 +89,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	//builder.verbose();
 	
 	if(plane->getCost() > ctx.visitCost()) {
+		if(level > m_maxLeafLevel) m_maxLeafLevel = level;
 		createLeaf(node, ctx);
 		return;
 	}

@@ -512,6 +512,13 @@ void MlSkin::computeAffectWeight(const Vector3F & center, const float & radius)
     }
 }
 
+void MlSkin::initGrowOnFaceTag()
+{
+	char * g = bodyMesh()->perFaceTag("growon");
+	const unsigned nf = bodyMesh()->getNumFaces();
+	for(unsigned i =0; i < nf; i++) g[i] = 1;
+}
+
 void MlSkin::verbose() const
 {
 	std::cout<<"face id\n";

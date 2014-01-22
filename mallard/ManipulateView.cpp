@@ -37,11 +37,7 @@ ManipulateView::~ManipulateView()
 
 void ManipulateView::clientDraw()
 {
-/*
-	KdTreeDrawer *drawer = getDrawer();
-	drawer->hiddenLine(mesh());	
-	drawSelection();
-	drawAnchors();*/
+	getDrawer()->drawKdTree(m_tree);
 }
 //! [7]
 

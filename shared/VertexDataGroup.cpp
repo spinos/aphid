@@ -15,20 +15,20 @@ VertexDataGroup::VertexDataGroup()
 
 VertexDataGroup::~VertexDataGroup() 
 {
-	std::vector<float *>::iterator it;
+	std::vector<char *>::iterator it;
 	for(it = m_entries.begin(); it != m_entries.end(); ++it)
 	    delete[] *it;
 	m_entries.clear();
 	m_names.clear();
 }
 
-void VertexDataGroup::createEntry(const std::string & name, unsigned num, unsigned fpe)
+void VertexDataGroup::createEntry(const std::string & name, unsigned num, short bpe)
 {
-	float *p = new float[num * fpe];
+	char *p = new char[num * bpe];
 	m_entries.push_back(p);
 	NameAndType nat;
 	nat._name = name;
-	nat._type = fpe;
+	nat._type = bpe;
 	m_names.push_back(nat);
 }
 
@@ -37,17 +37,17 @@ char VertexDataGroup::hasEntry(const std::string & name) const
 	return entryIdx(name) > -1;
 }
 
-float * VertexDataGroup::entry(const std::string & name)
+char * VertexDataGroup::entry(const std::string & name)
 {
 	int i = entryIdx(name);
 	if(i < 0) return 0;
 	return m_entries[i];
 }
 
-float * VertexDataGroup::entry(const unsigned & idx, std::string & name, unsigned & fpe)
+char * VertexDataGroup::entry(const unsigned & idx, std::string & name, short & bpe)
 {
 	name = m_names[idx]._name;
-	fpe = m_names[idx]._type;
+	bpe = m_names[idx]._type;
 	return m_entries[idx];
 }
 

@@ -56,7 +56,7 @@ public:
 	void restFloodFacesAsActive();
 	
 	void shellUp(std::vector<Vector3F> & dst);
-	
+	void initGrowOnFaceTag();
 	void verbose() const;
 protected:
 	

@@ -412,13 +412,6 @@ float CollisionRegion::curvatureAlong(const Matrix33F & m0, const Vector3F & pos
 	return b;
 }
 
-float CollisionRegion::getPerVertexFloat()
-{
-	float r;
-	m_body->perVertexFloatOnPatch(m_ctx->m_componentIdx, m_ctx->m_patchUV.x, m_ctx->m_patchUV.y, &r);
-	return r;
-}
-
 void CollisionRegion::regionElementVertices(std::vector<unsigned> & dst) const
 {
 	unsigned * quad = m_body->quadIndices();

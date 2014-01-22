@@ -52,16 +52,16 @@ void Export(const char * filename, BaseMesh * src)
 	
 	esm->begin();
 	
-	unsigned numPolygons = src->m_numPolygons;
+	unsigned numPolygons = src->getNumPolygons();
 	int * faceCounts = new int[numPolygons];
-	for(unsigned i = 0; i < numPolygons; i++) faceCounts[i] = src->m_polygonCounts[i];
+	for(unsigned i = 0; i < numPolygons; i++) faceCounts[i] = src->polygonCounts()[i];
 	
 	esm->writeFaceCount(numPolygons, faceCounts);
 	
-	unsigned numFaceVertices = src->m_numPolygonVertices;
+	unsigned numFaceVertices = src->getNumPolygonFaceVertices();
 	
 	int * faceVertices = new int[numFaceVertices];
-	for(unsigned i = 0; i < numFaceVertices; i++) faceVertices[i] = src->m_polygonIndices[i];
+	for(unsigned i = 0; i < numFaceVertices; i++) faceVertices[i] = src->polygonIndices()[i];
 	
 	esm->writeFaceConnection(numFaceVertices, faceVertices);
 	
@@ -103,7 +103,7 @@ void baseImport(EasyModelIn *esm, BaseMesh * dst)
     
     unsigned nfv = 0;
     for(i = 0; i < nf; i++) {
-        dst->m_polygonCounts[i] = faceCount[i];
+        dst->polygonCounts()[i] = faceCount[i];
         nfv += faceCount[i];
     }
     
@@ -112,7 +112,7 @@ void baseImport(EasyModelIn *esm, BaseMesh * dst)
     nfv = 0;
     for(i = 0; i < nf; i++) {
         for(j = 0; j < faceCount[i]; j++) {
-            dst->m_polygonIndices[nfv] = faceConnection[nfv];
+            dst->polygonIndices()[nfv] = faceConnection[nfv];
             nfv++;
         }
     }
@@ -122,10 +122,7 @@ void baseImport(EasyModelIn *esm, BaseMesh * dst)
     float* cvs = esm->getVertexPosition();
     dst->createVertices(esm->getNumVertex());
     
-    for(i = 0; i < dst->_numVertices; i++) {
-        dst->_vertices[i].x = cvs[i * 3];
-        dst->_vertices[i].y = cvs[i * 3 + 1];
-        dst->_vertices[i].z = cvs[i * 3 + 2];
-    }
+    for(i = 0; i < dst->getNumVertices(); i++)
+        dst->vertices()[i].set(cvs[i * 3], cvs[i * 3 + 1], cvs[i * 3 + 2]);
 }
 }

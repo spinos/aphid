@@ -27,8 +27,6 @@ public:
 	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
 	
 	PointInsidePolygonTest patchAt(unsigned idx) const;
-	void perVertexVectorOfPatch(unsigned idx, Vector3F * dst) const;
-	void perVertexFloatOnPatch(unsigned idx, float u, float v, float * dst) const;
 	void interpolateVectorOnPatch(unsigned idx, float u, float v, Vector3F * src, Vector3F * dst);
 	
 	virtual unsigned processQuadFromPolygon();
@@ -36,6 +34,7 @@ public:
 	virtual unsigned * getQuadIndices() const;
 	virtual unsigned numQuads() const;
 	virtual Vector3F getFaceNormal(const unsigned & idx) const;
+	virtual char selectFace(const unsigned & idx, SelectionContext * ctx) const;
 	
 	unsigned * quadUVIds();
 	unsigned * getQuadUVIds() const;

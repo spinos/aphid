@@ -23,8 +23,6 @@ BaseMesh::BaseMesh()
 	m_v = 0;
 	m_uvIds = 0;
 	m_numUVs = m_numUVIds = 0;
-	m_pvv = 0;
-	m_pvf = 0;
 	setEntityType(TypedEntity::TTriangleMesh);
 }
 
@@ -53,8 +51,6 @@ void BaseMesh::cleanup()
 	m_numTriangleFaceVertices = 0;
 	m_numPolygons = 0;
 	m_numUVs = m_numUVIds = 0;
-	if(m_pvv) {delete m_pvv; m_pvv = 0;}
-	if(m_pvf) {delete m_pvf; m_pvf = 0;}
 }
 
 void BaseMesh::createVertices(unsigned num)
@@ -256,17 +252,17 @@ unsigned BaseMesh::getNumTriangles() const
 	return m_numTriangles;
 }
 
-unsigned BaseMesh::getNumPolygons() const
+const unsigned & BaseMesh::getNumPolygons() const
 {
 	return m_numPolygons;
 }
 
-unsigned BaseMesh::getNumVertices() const
+const unsigned & BaseMesh::getNumVertices() const
 {
 	return _numVertices;
 }
 
-unsigned BaseMesh::getNumPolygonFaceVertices() const
+const unsigned & BaseMesh::getNumPolygonFaceVertices() const
 {
 	return m_numPolygonVertices;
 }
@@ -523,26 +519,6 @@ void BaseMesh::putIntoObjectSpace()
 		_vertices[i] -= c;
 }
 
-void BaseMesh::createPerVertexVector()
-{
-	m_pvv = new Vector3F[_numVertices];
-}
-
-Vector3F *BaseMesh::perVertexVector() const
-{
-	return m_pvv;
-}
-
-void BaseMesh::createPerVertexFloat()
-{
-	m_pvf = new float[_numVertices];
-}
-
-float *BaseMesh::perVertexFloat() const
-{
-	return m_pvf;
-}
-
 char BaseMesh::hasVertexData(const std::string & name) const
 {
 	return m_vdg.hasEntry(name);
@@ -550,14 +526,20 @@ char BaseMesh::hasVertexData(const std::string & name) const
 
 float * BaseMesh::perVertexFloat(const std::string & name)
 {
-	if(!m_vdg.hasEntry(name)) m_vdg.createEntry(name, _numVertices, 1);
-	return m_vdg.entry(name);
+	if(!m_vdg.hasEntry(name)) m_vdg.createEntry(name, _numVertices, 4);
+	return (float *)m_vdg.entry(name);
 }
 
 Vector3F * BaseMesh::perVertexVector(const std::string & name)
 {
-	if(!m_vdg.hasEntry(name)) m_vdg.createEntry(name, _numVertices, 3);
+	if(!m_vdg.hasEntry(name)) m_vdg.createEntry(name, _numVertices, 12);
 	return (Vector3F *)m_vdg.entry(name);
+}
+
+char * BaseMesh::perFaceTag(const std::string & name)
+{
+	if(!m_vdg.hasEntry(name)) m_vdg.createEntry(name, getNumFaces(), 1);
+	return m_vdg.entry(name);
 }
 
 VertexDataGroup * BaseMesh::vertexData()
@@ -584,8 +566,8 @@ unsigned * BaseMesh::getQuadIndices() const
 char BaseMesh::selectFace(const unsigned & idx, SelectionContext * ctx) const
 {
 	const BoundingBox b = calculateBBox(idx);
-	if(!ctx->closeTo(b)) return 0;
 	if(!ctx->closeTo(getFaceNormal(idx))) return 0;
+	if(!ctx->closeTo(b)) return 0;
 		
 	ctx->addToSelection(idx);
 	

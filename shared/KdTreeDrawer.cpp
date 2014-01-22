@@ -19,6 +19,7 @@ KdTreeDrawer::~KdTreeDrawer() {}
 
 void KdTreeDrawer::drawKdTree(KdTree * tree)
 {
+	if(tree->isEmpty()) return;
 	BoundingBox bbox = tree->getBBox();
 	KdTreeNode * root = tree->getRoot();
 	

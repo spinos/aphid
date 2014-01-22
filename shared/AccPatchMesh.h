@@ -33,7 +33,6 @@ public:
 	void pointOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
 	void normalOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
 	void texcoordOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
-	void perVertexVectorOnPatch(unsigned idx, float u, float v, Vector3F & dst) const;
 	void tangentFrame(unsigned idx, float u, float v, Matrix33F & frm) const;
 	
 	void getPatchHir(unsigned idx, std::vector<Vector3F> & dst);

@@ -21,7 +21,7 @@ PlaneMesh::PlaneMesh(const Vector3F & bottomLeft, const Vector3F & bottomRight, 
 	
 	for(j = 0; j <= gv; j++)
 	for(i = 0; i <= gu; i++) {
-		_vertices[j * (gu + 1) + i] = pl.point(du * i, dv * j);
+		vertices()[j * (gu + 1) + i] = pl.point(du * i, dv * j);
 	}
 	
 	processTriangleFromPolygon();
@@ -37,7 +37,7 @@ PlaneMesh::PlaneMesh(const BaseCurve & udir, const BaseCurve & vdir, unsigned gu
  
 	for(j = 0; j <= gv; j++)
 	for(i = 0; i <= gu; i++) {
-		_vertices[j * (gu + 1) + i] = udir.interpolate(du * i) + vdir.interpolate(dv * j);
+		vertices()[j * (gu + 1) + i] = udir.interpolate(du * i) + vdir.interpolate(dv * j);
 	}
 	
 	processTriangleFromPolygon();
@@ -53,15 +53,15 @@ void PlaneMesh::setFaceConnection(unsigned gu, unsigned gv)
 	createVertices((gu + 1) * (gv + 1));
 	
 	unsigned i, j, face;
-	for(i = 0; i < m_numPolygons; i++) m_polygonCounts[i] = 4;
+	for(i = 0; i < getNumPolygons(); i++) polygonCounts()[i] = 4;
 	
 	face = 0;
 	for(j = 0; j < gv; j++)
 	for(i = 0; i < gu; i++) {
-		m_polygonIndices[face * 4] = j * (gu + 1) + i;
-		m_polygonIndices[face * 4 + 1] = j * (gu + 1) + i + 1;
-		m_polygonIndices[face * 4 + 2] = (j + 1) * (gu + 1) + i + 1;
-		m_polygonIndices[face * 4 + 3] = (j + 1) * (gu + 1) + i;
+		polygonIndices()[face * 4] = j * (gu + 1) + i;
+		polygonIndices()[face * 4 + 1] = j * (gu + 1) + i + 1;
+		polygonIndices()[face * 4 + 2] = (j + 1) * (gu + 1) + i + 1;
+		polygonIndices()[face * 4 + 3] = (j + 1) * (gu + 1) + i;
 		face++;
 	}
 }
