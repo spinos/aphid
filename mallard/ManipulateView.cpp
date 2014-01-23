@@ -268,4 +268,13 @@ void ManipulateView::endTransform()
 	manipulator()->stop();
 	manipulator()->detach();
 }
+
+void  ManipulateView::showActiveFaces() const
+{
+	getDrawer()->setWired(1);
+	getDrawer()->useDepthTest(0);
+	getDrawer()->colorAsReference();
+	getDrawer()->patch(activeMesh(), selectedQue());
+	getDrawer()->useDepthTest(1);
+}
 //:~

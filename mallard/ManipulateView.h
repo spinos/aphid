@@ -57,7 +57,8 @@ protected:
 	virtual void clearSelection();
 	
 	void showManipulator() const;
-    
+    void showActiveFaces() const;
+	
 public slots:
 
 private:

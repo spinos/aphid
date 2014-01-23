@@ -42,96 +42,58 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include <ManipulateView.h>
-#include <MlScene.h>
+#include <ScenePort.h>
 
 class BezierDrawer;
 class MlDrawer;
 class MlEngine;
 //! [0]
-class GLWidget : public ManipulateView, public MlScene
+class GLWidget : public ScenePort
 {
     Q_OBJECT
 
 public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
-	virtual void setFeatherTexture(const std::string & name);
-
-	virtual bool confirmDiscardChanges();
-	virtual std::string chooseOpenFileName();
-	virtual std::string chooseSaveFileName();
+	
 	virtual void doClear();
 	virtual void doClose();
-	virtual void beforeSave();
 	
-	void finishEraseFeather();
-	void deselectFeather();
 	void rebuildFeather();
 	void clearFeather();
 	void bakeFrames();
 	void testRender();
 	
-	QString openSheet(QString name);
 	
-	virtual bool selectFeatherExample(unsigned x);
-	virtual void setUseDisplaySize(bool x);
 signals:
-	void sceneNameChanged(QString name);
-	void sendMessage(QString msg);
 	void sendFeatherEditBackground(QString name);
 	void renderResChanged(QSize s);
-	void featherSelectionChanged();
-	void sceneOpened();
+	
 public slots:
-	void importBodyMesh();
-	void cleanSheet();
-	void saveSheet();
-	void saveSheetAs();
-    void revertSheet();
-	void receiveFeatherEditBackground(QString name);
-	void receiveFeatherAdded();
-	void chooseBake();
 	void updateOnFrame(int x);
 	void exportBake();
-	void importFeatherDistributionMap();
 	void receiveFloodRegion(int state);
 	void receiveEraseRegion(int state);
 	void receiveCancelRender();
-	void receiveBarbChanged();
-	void receiveCameraChanged();
+	
 protected:
-	virtual PatchMesh * activeMesh() const;
 	
     virtual void clientDraw();
 	virtual void clientSelect(QMouseEvent *event);
 	virtual void clientMouseInput(QMouseEvent *event);
-	virtual void clientDeselect(QMouseEvent *event);
-	virtual void focusOutEvent(QFocusEvent * event);
-	virtual void clearSelection();
-	virtual void resizeEvent( QResizeEvent * event );
-	virtual char selectLight(const Ray & incident);
 	virtual void importBody(const std::string & fileName);
 	virtual void afterOpen();
 private:
-	void selectFeather(char byRegion = 0);
-	void selectRegion();
-	void floodFeather();
+	virtual char selectFeather(char byRegion = 0);
+	virtual char floodFeather();
 	void beginBaking();
 	void endBaking();
 	bool isBaking() const;
-	void loadFeatherDistribution(const std::string & name);
-	void showLights() const;
-	void showActiveFaces() const;
-	void testPatch();
+	
 private:
 	BezierDrawer * m_bezierDrawer;
 	MlDrawer * m_featherDrawer;
 	MlEngine * m_engine;
-	int m_featherTexId, m_featherDistrId;
-	char m_floodByRegion, m_eraseByRegion;
-	
-	void testCurvature();
 };
 //! [3]
 

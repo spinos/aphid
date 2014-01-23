@@ -21,6 +21,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
                 ../shared/Base2DView.h \
                 ManipulateView.h \
                 ToolBox.h \
+ScenePort.h \
                 glwidget.h \
 				MlCalamus.h \
 				MlCalamusArray.h \
@@ -86,6 +87,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
                 ../shared/Base2DView.cpp \
                 ManipulateView.cpp \
                 ToolBox.cpp \
+ScenePort.cpp \
                 glwidget.cpp \
 				MlCalamus.cpp \
 				MlCalamusArray.cpp \
