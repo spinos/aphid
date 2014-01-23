@@ -10,7 +10,7 @@
 #include <BarycentricCoordinate.h>
 #include "BaseMesh.h"
 #include <SelectionContext.h>
-
+#include <map>
 BaseMesh::BaseMesh()
 {
 	_vertices = 0;
@@ -579,6 +579,18 @@ void BaseMesh::verbose() const
 	std::cout<<"mesh status:\n";
 	std::cout<<" num vertices "<<getNumVertices()<<"\n";
 	std::cout<<" num polygons "<<getNumPolygons()<<"\n";
+	
+	std::map<unsigned, unsigned> faceCountList;
+	for(unsigned i = 0; i < getNumPolygons(); i++) {
+		if(faceCountList.find(m_polygonCounts[i]) == faceCountList.end()) faceCountList[m_polygonCounts[i]] = 1;
+		else faceCountList[m_polygonCounts[i]] += 1;
+	}
+	
+	std::map<unsigned, unsigned>::const_iterator it = faceCountList.begin();
+	for(; it != faceCountList.end(); ++it) {
+		std::clog<<"  "<<(*it).second<<" "<<(*it).first<<"-sided faces\n";
+	}
+	
 	std::cout<<" num polygon face vertices "<<getNumPolygonFaceVertices()<<"\n";
 	std::cout<<" num triangles "<<getNumTriangles()<<"\n";
 	std::cout<<" num quads "<<numQuads()<<"\n";

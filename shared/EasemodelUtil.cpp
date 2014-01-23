@@ -9,7 +9,7 @@
 #include <EasyModelIn.h>
 #include <EasyModelOut.h>
 #include "EasemodelUtil.h"
-#include <map>
+
 namespace ESMUtil
 {
 void Import(const char * filename, BaseMesh * dst)
@@ -22,6 +22,7 @@ void Import(const char * filename, BaseMesh * dst)
 	
 	dst->processTriangleFromPolygon();
 	dst->processQuadFromPolygon();
+	dst->verbose();
 }
 
 void ImportPatch(const char * filename, PatchMesh * dst)
@@ -44,6 +45,7 @@ void ImportPatch(const char * filename, PatchMesh * dst)
 	dst->processQuadFromPolygon();
 	
 	delete esm;
+	dst->verbose();
 }
 
 void Export(const char * filename, BaseMesh * src)
@@ -87,17 +89,6 @@ void baseImport(EasyModelIn *esm, BaseMesh * dst)
     int *faceConnection = esm->getFaceConnection();
 
 	unsigned i, j;
-	
-	std::map<unsigned, unsigned> faceCountList;
-	for(i = 0; i < nf; i++) {
-		if(faceCountList.find(faceCount[i]) == faceCountList.end()) faceCountList[faceCount[i]] = 1;
-		else faceCountList[faceCount[i]] += 1;
-	}
-	
-	std::map<unsigned, unsigned>::const_iterator it = faceCountList.begin();
-	for(; it != faceCountList.end(); ++it) {
-		std::clog<<" num "<<(*it).first<<" sided faces: "<<(*it).second<<"\n";
-	}
     
     dst->createPolygonCounts(nf);
     
