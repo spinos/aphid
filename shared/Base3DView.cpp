@@ -212,12 +212,12 @@ void Base3DView::processSelection(QMouseEvent *event)
 		m_activeComponent->disableVertexPath();
 	else 
 		m_activeComponent->enableVertexPath();
-	clientSelect();
+	clientSelect(event);
 }
 
 void Base3DView::processDeselection(QMouseEvent *event)
 {
-    clientDeselect();
+    clientDeselect(event);
 }
 
 void Base3DView::processMouseInput(QMouseEvent *event)
@@ -228,7 +228,7 @@ void Base3DView::processMouseInput(QMouseEvent *event)
     int dy = event->y() - m_lastPos.y();
     Vector3F injv;
     getCamera()->screenToWorldVector(dx, dy, injv);
-    clientMouseInput();
+    clientMouseInput(event);
 }
 
 void Base3DView::clientDraw()
@@ -236,17 +236,17 @@ void Base3DView::clientDraw()
     
 }
 
-void Base3DView::clientSelect()
+void Base3DView::clientSelect(QMouseEvent *)
 {
     
 }
 
-void Base3DView::clientDeselect()
+void Base3DView::clientDeselect(QMouseEvent *)
 {
     
 }
 
-void Base3DView::clientMouseInput()
+void Base3DView::clientMouseInput(QMouseEvent *)
 {
     
 }

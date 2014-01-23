@@ -20,8 +20,8 @@ public:
     ~MlUVView();
 	
 	virtual void clientDraw();
-	virtual void clientSelect();
-	virtual void clientMouseInput();
+	virtual void clientSelect(QMouseEvent *event);
+	virtual void clientMouseInput(QMouseEvent *event);
 	
 	void addFeather();
 	void removeSelectedFeather();

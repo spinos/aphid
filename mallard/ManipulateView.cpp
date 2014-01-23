@@ -17,7 +17,6 @@
 #include <ToolContext.h>
 #include <TransformManipulator.h>
 #include <MeshManipulator.h>
-#include <SelectionContext.h>
 #include <BaseBrush.h>
 
 ManipulateView::ManipulateView(QWidget *parent) : Base3DView(parent)
@@ -42,34 +41,22 @@ void ManipulateView::clientDraw()
 //! [7]
 
 //! [9]
-void ManipulateView::clientSelect()
+void ManipulateView::clientSelect(QMouseEvent *event)
 {
-	switch (interactMode()) {
-		case ToolContext::SelectFace :
-			hitTest();
-			selectFaces();
-			break;
-		default:
-			break;
-	}
+	if(isSelectingComponent()) selectComponent(event);
+	if(isTransforming()) startTransform(event);
 }
 //! [9]
 
-void ManipulateView::clientDeselect() 
+void ManipulateView::clientDeselect(QMouseEvent *event) 
 {
-	manipulator()->detach();
+	if(isTransforming()) endTransform();
 }
 
-void ManipulateView::clientMouseInput()
+void ManipulateView::clientMouseInput(QMouseEvent *event)
 {
-	switch (interactMode()) {
-		case ToolContext::SelectFace :
-			hitTest();
-			selectFaces();
-			break;
-		default:
-			break;
-	}
+	if(isSelectingComponent()) selectComponent(event);
+	if(isTransforming()) doTransform(event);
 }
 
 Vector3F ManipulateView::sceneCenter() const
@@ -93,19 +80,6 @@ bool ManipulateView::hitTest()
 	Ray ray = *getIncidentRay();
 	getIntersectionContext()->reset(ray);
 	return m_tree->intersect(getIntersectionContext());
-}
-
-void ManipulateView::selectFaces()
-{
-	IntersectionContext * ctx = getIntersectionContext();
-    if(!ctx->m_success) return;
-	
-	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
-	brush()->resetToe();
-	
-	m_selectCtx->reset(ctx->m_hitP, brush()->getRadius());
-	m_selectCtx->setDirection(ctx->m_hitN);
-	m_tree->select(m_selectCtx);
 }
 
 void ManipulateView::buildTree()
@@ -183,7 +157,7 @@ void ManipulateView::keyPressEvent(QKeyEvent *e)
 		default:
 			break;
 	}
-	
+		
 	Base3DView::keyPressEvent(e);
 }
 
@@ -194,8 +168,78 @@ void ManipulateView::clearSelection()
 	Base3DView::clearSelection();
 }
 
-void ManipulateView::processSelection(QMouseEvent *event)
+const std::deque<unsigned> & ManipulateView::selectedQue() const
 {
+	return m_selectCtx->selectedQue();
+}
+
+bool ManipulateView::isSelectingComponent() const
+{
+	return interactMode() == ToolContext::SelectFace;
+}
+
+void ManipulateView::selectComponent(QMouseEvent *event)
+{
+	SelectionContext::SelectMode selm = SelectionContext::Replace;
+	switch(event->modifiers()) {
+		case Qt::ShiftModifier:
+			selm = SelectionContext::Append;
+			break;
+#ifdef WIN32
+		case Qt::ControlModifier:
+#else
+		case Qt::MetaModifier:
+#endif
+			selm = SelectionContext::Remove;
+			break;
+		default:
+			break;
+	}
+	
+	switch (interactMode()) {
+		case ToolContext::SelectFace :
+			hitTest();
+			selectFaces(selm);
+			break;
+		default:
+			break;
+	}
+}
+
+void ManipulateView::selectFaces(SelectionContext::SelectMode m)
+{
+	IntersectionContext * ctx = getIntersectionContext();
+    if(!ctx->m_success) return;
+	
+	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
+	brush()->resetToe();
+	
+	m_selectCtx->setSelectMode(m);
+	m_selectCtx->reset(ctx->m_hitP, brush()->getRadius() + brush()->minDartDistance());
+	m_selectCtx->setDirection(ctx->m_hitN);
+	m_tree->select(m_selectCtx);
+	m_selectCtx->finish();
+}
+
+bool ManipulateView::isTransforming() const
+{
+	return interactMode() == ToolContext::MoveTransform || interactMode() == ToolContext::RotateTransform;
+}
+
+void ManipulateView::startTransform(QMouseEvent *event)
+{
+	if(manipulator()->isDetached()) return;
+	switch (interactMode()) {
+		case ToolContext::MoveTransform :
+			manipulator()->setToMove();
+			break;
+		case ToolContext::RotateTransform :
+			manipulator()->setToRotate();
+			break;
+	    default:
+			break;
+	}
+	
 	switch (event->button()) {
 		case Qt::LeftButton:
 			manipulator()->setRotateAxis(TransformManipulator::AY);
@@ -207,17 +251,21 @@ void ManipulateView::processSelection(QMouseEvent *event)
 			manipulator()->setRotateAxis(TransformManipulator::AX);
 			break;
 	}
-	Base3DView::processSelection(event);
+	
+	Ray ray = *getIncidentRay();
+	manipulator()->start(&ray);
 }
 
-void ManipulateView::processDeselection(QMouseEvent * event)
+void ManipulateView::doTransform(QMouseEvent *)
+{
+	if(manipulator()->isDetached()) return;
+	Ray ray = *getIncidentRay();
+	manipulator()->perform(&ray);
+}
+
+void ManipulateView::endTransform()
 {
 	manipulator()->stop();
-	Base3DView::processDeselection(event);
-}
-
-const std::deque<unsigned> & ManipulateView::selectedQue() const
-{
-	return m_selectCtx->selectedQue();
+	manipulator()->detach();
 }
 //:~

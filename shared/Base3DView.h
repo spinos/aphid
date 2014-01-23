@@ -75,9 +75,9 @@ protected:
     virtual void processMouseInput(QMouseEvent *event);
 	virtual void processCamera(QMouseEvent *event);
     virtual void clientDraw();
-    virtual void clientSelect();
-    virtual void clientDeselect();
-    virtual void clientMouseInput();
+    virtual void clientSelect(QMouseEvent *event);
+    virtual void clientDeselect(QMouseEvent *event);
+    virtual void clientMouseInput(QMouseEvent *event);
     virtual Vector3F sceneCenter() const;
     virtual void keyPressEvent(QKeyEvent *event);
 	virtual void focusInEvent(QFocusEvent * event);

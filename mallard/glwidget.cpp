@@ -126,7 +126,7 @@ void GLWidget::clientDraw()
 	showActiveFaces();
 }
 
-void GLWidget::clientSelect()
+void GLWidget::clientSelect(QMouseEvent *event)
 {
     Ray ray = *getIncidentRay();
 	switch (interactMode()) {
@@ -152,20 +152,18 @@ void GLWidget::clientSelect()
             selectFeather();
            break;
 		case ToolContext::MoveTransform :
-			manipulator()->setToMove();
 			selectLight(ray);
 			break;
 		case ToolContext::RotateTransform :
-			manipulator()->setToRotate();
 			selectLight(ray);
 			break;
 	    default:
 			break;
 	}
-	ManipulateView::clientSelect();
+	ManipulateView::clientSelect(event);
 }
 
-void GLWidget::clientMouseInput()
+void GLWidget::clientMouseInput(QMouseEvent *event)
 {
     Ray ray = *getIncidentRay();
 	switch (interactMode()) {
@@ -204,22 +202,21 @@ void GLWidget::clientMouseInput()
 			break;
 		case ToolContext::MoveTransform :
 		case ToolContext::RotateTransform :
-			manipulator()->perform(&ray);
 			setDirty();
 			break;
 	    default:
 			break;
 	}
-	ManipulateView::clientMouseInput();
+	ManipulateView::clientMouseInput(event);
 }
 
-void GLWidget::clientDeselect()
+void GLWidget::clientDeselect(QMouseEvent *event)
 {
     if(interactMode() == ToolContext::CreateBodyContourFeather) {
 		skin()->finishCreateFeather();
 		skin()->discardActive();
 	}
-	ManipulateView::clientDeselect();
+	ManipulateView::clientDeselect(event);
 }
 
 PatchMesh * GLWidget::activeMesh() const
@@ -781,7 +778,6 @@ char GLWidget::selectLight(const Ray & incident)
 
 	std::clog<<"selected "<<selectedLight()->name()<<"\n";
 	manipulator()->attachTo(selectedLight());
-	manipulator()->start(&incident);
 	return 1;
 }
 

@@ -15,8 +15,7 @@ SelectionContext::~SelectionContext() { m_indices.clear(); }
 
 void SelectionContext::reset()
 {
-	m_indices.clear();
-	m_removeIndices.clear();
+	if(m_mode == Replace) m_indices.clear();
 }
 
 void SelectionContext::reset(const Vector3F & center, const float & radius)
@@ -71,7 +70,7 @@ char SelectionContext::closeTo(const BoundingBox & b) const
 char SelectionContext::closeTo(const Vector3F & v) const
 {
 	if(!m_enableDirection) return 1;
-	return m_normal.dot(v) > 0.7f;
+	return m_normal.dot(v) > 0.9f;
 }
 
 void SelectionContext::addToSelection(const unsigned idx)
@@ -117,9 +116,10 @@ void SelectionContext::finishRemove()
 void SelectionContext::remove(const unsigned & idx)
 {
 	std::deque<unsigned>::iterator it = m_indices.begin();
-	for(; it != m_indices.end(); ++it) {
+	for(; it != m_indices.end();) {
 		if(*it == idx) it = m_indices.erase(it);
-		if(*it > idx) return;
+		else if(*it > idx) return;
+		else it++;
 	}
 }
 
@@ -136,6 +136,11 @@ const std::deque<unsigned> & SelectionContext::selectedQue() const
 void SelectionContext::setSelectMode(SelectionContext::SelectMode m)
 {
 	m_mode = m;
+}
+
+SelectionContext::SelectMode SelectionContext::getSelectMode() const
+{
+	return m_mode;
 }
 
 void SelectionContext::verbose() const

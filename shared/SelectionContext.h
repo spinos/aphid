@@ -45,6 +45,7 @@ public:
 	const std::deque<unsigned> & selectedQue() const;
 	
 	void setSelectMode(SelectMode m);
+	SelectMode getSelectMode() const;
 	
 	void verbose() const;
 private:

@@ -365,8 +365,6 @@ void KdTree::select(SelectionContext * ctx)
 	ctx->setBBox(b);
 
 	recursiveSelect(root, ctx);
-	
-	ctx->finish();
 }
 
 char KdTree::recursiveSelect(KdTreeNode *node, SelectionContext * ctx)

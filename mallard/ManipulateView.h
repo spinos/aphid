@@ -10,12 +10,13 @@
 #pragma once
 #include <deque>
 #include <Base3DView.h>
+#include <SelectionContext.h>
 
 class PatchMesh;
 class KdTree;
 class TransformManipulator;
 class MeshManipulator;
-class SelectionContext;
+
 class ManipulateView : public Base3DView
 {
     Q_OBJECT
@@ -24,15 +25,12 @@ public:
     ManipulateView(QWidget *parent = 0);
     ~ManipulateView();
 	
+protected:
 	bool pickupComponent(const Ray & ray, Vector3F & hit);
 	bool hitTest();
-	void selectFaces();
+	void selectFaces(SelectionContext::SelectMode m = SelectionContext::Replace);
 	
-	virtual void clientDraw();
-    virtual void clientSelect();
-    virtual void clientDeselect();
-    virtual void clientMouseInput();
-    virtual Vector3F sceneCenter() const;
+	virtual Vector3F sceneCenter() const;
     
 	virtual void buildTree();
 
@@ -49,16 +47,26 @@ public:
 	
 	const std::deque<unsigned> & selectedQue() const;
 	
-protected:
+	virtual void clientDraw();
+    virtual void clientSelect(QMouseEvent *event);
+    virtual void clientDeselect(QMouseEvent *event);
+    virtual void clientMouseInput(QMouseEvent *event);
+    
     virtual void keyPressEvent(QKeyEvent *event);
     virtual void focusInEvent(QFocusEvent * event);
 	virtual void clearSelection();
-	virtual void processSelection(QMouseEvent *event);
-    virtual void processDeselection(QMouseEvent *event);
+	
 	void showManipulator() const;
     
 public slots:
-	
+
+private:
+	bool isSelectingComponent() const;
+	void selectComponent(QMouseEvent *event);
+	bool isTransforming() const;
+	void startTransform(QMouseEvent *event);
+	void doTransform(QMouseEvent *event);
+	void endTransform();
 private:
 	TransformManipulator * m_manipulator;
 	MeshManipulator * m_sculptor;

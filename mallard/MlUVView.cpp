@@ -59,7 +59,7 @@ void MlUVView::clientDraw()
 	}
 }
 
-void MlUVView::clientSelect()
+void MlUVView::clientSelect(QMouseEvent *)
 {
     const Ray * ray = getIncidentRay();
 	Vector2F p(ray->m_origin.x, ray->m_origin.y);
@@ -94,7 +94,7 @@ bool MlUVView::pickupFeather(const Vector2F & p)
 	return true;
 }
 
-void MlUVView::clientMouseInput()
+void MlUVView::clientMouseInput(QMouseEvent *)
 {
 	if(!FeatherLibrary) return;
 	const Ray * ray = getIncidentRay();

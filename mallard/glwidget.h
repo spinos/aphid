@@ -57,11 +57,7 @@ public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 	virtual void setFeatherTexture(const std::string & name);
-	virtual void clientSelect();
-	virtual void clientMouseInput();
-	virtual void clientDeselect();
-    virtual PatchMesh * activeMesh() const;
-	
+
 	virtual bool confirmDiscardChanges();
 	virtual std::string chooseOpenFileName();
 	virtual std::string chooseSaveFileName();
@@ -105,7 +101,12 @@ public slots:
 	void receiveBarbChanged();
 	void receiveCameraChanged();
 protected:
+	virtual PatchMesh * activeMesh() const;
+	
     virtual void clientDraw();
+	virtual void clientSelect(QMouseEvent *event);
+	virtual void clientMouseInput(QMouseEvent *event);
+	virtual void clientDeselect(QMouseEvent *event);
 	virtual void focusOutEvent(QFocusEvent * event);
 	virtual void clearSelection();
 	virtual void resizeEvent( QResizeEvent * event );
