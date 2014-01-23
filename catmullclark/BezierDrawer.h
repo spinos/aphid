@@ -25,6 +25,10 @@ public:
 	void drawBezierPatch(BezierPatch * patch);
 	void drawBezierCage(BezierPatch * patch);
 
+	void useTag(const std::string & name);
+	
+	void tagColor(AccPatchMesh * mesh);
 private:
+	std::string m_tagName;
 	Tessellator* m_tess;
 };

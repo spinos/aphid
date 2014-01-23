@@ -209,6 +209,16 @@ void Window::createActions()
     exportBakeAct = new QAction(tr("&Export Baked Feather"), this);
 	exportBakeAct->setStatusTip(tr("Write feather cache"));
     connect(exportBakeAct, SIGNAL(triggered()), glWidget, SLOT(exportBake()));
+	
+	growOnAct = new QAction(tr("Eable Grow On Faces"), this);
+	growOnAct->setStatusTip(tr("Tag selected faces to grow feathers"));
+	connect(growOnAct, SIGNAL(triggered()), glWidget, SLOT(tagFaceOn()));
+	
+	growOffAct = new QAction(tr("Disable Grow On Faces"), this);
+	growOffAct->setStatusTip(tr("Tag selected faces NOT to grow feathers"));
+    connect(growOffAct, SIGNAL(triggered()), glWidget, SLOT(tagFaceOff()));
+	
+	QAction * growOffAct;
 }
 
 void Window::createMenus()
@@ -238,6 +248,10 @@ void Window::createMenus()
 	windowMenu->addAction(showSceneEditAct);
 	windowMenu->addAction(showTimeControlAct);
 	windowMenu->addAction(showRenderEditAct);
+	
+	skinMenu = menuBar()->addMenu(tr("&Skin"));
+	skinMenu->addAction(growOnAct);
+	skinMenu->addAction(growOffAct);
 	
 	updateRecentFileActions();
 }

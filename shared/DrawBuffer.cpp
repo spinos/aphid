@@ -21,6 +21,7 @@ DrawBuffer::~DrawBuffer()
 
 void DrawBuffer::clearBuffer()
 {
+	m_colors.reset();
     if(m_vertices) delete[] m_vertices;
 	m_vertices = 0;
 	if(m_normals) delete[] m_normals;
@@ -44,15 +45,15 @@ void DrawBuffer::drawBuffer() const
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glTexCoordPointer(2, GL_FLOAT, 0, m_texcoords);
 	
-	//glEnableClientState( GL_COLOR_ARRAY );
-	//glColorPointer(3, GL_FLOAT, 0, m_normals );
+	glEnableClientState( GL_COLOR_ARRAY );
+	glColorPointer(3, GL_FLOAT, 0, m_colors.get());
 	
 	glDrawElements( GL_QUADS, m_numIndices, GL_UNSIGNED_INT, m_indices);
 	
 	glDisableClientState( GL_NORMAL_ARRAY );
 	glDisableClientState( GL_VERTEX_ARRAY );
 	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-	//glDisableClientState( GL_COLOR_ARRAY );
+	glDisableClientState( GL_COLOR_ARRAY );
 }
 
 void DrawBuffer::createBuffer(unsigned numVertices, unsigned numIndices)
@@ -64,6 +65,7 @@ void DrawBuffer::createBuffer(unsigned numVertices, unsigned numIndices)
 	m_indices = new unsigned[numIndices];
 	m_numVertices = numVertices;
 	m_numIndices = numIndices;
+	m_colors.reset(new Float3[numVertices]);
 }
 
 void DrawBuffer::rebuildBuffer() {}
@@ -86,4 +88,14 @@ float * DrawBuffer::texcoords()
 unsigned * DrawBuffer::indices()
 {
 	return m_indices;
+}
+
+Float3 * DrawBuffer::colors()
+{
+	return m_colors.get();
+}
+
+const unsigned & DrawBuffer::numPoints() const
+{
+	return m_numVertices;
 }

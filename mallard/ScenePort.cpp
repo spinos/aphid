@@ -400,6 +400,27 @@ char ScenePort::floodFeather()
 	return 1;
 }
 
+void ScenePort::tagFaceOn() 
+{
+	tagFace("growon", 1);
+}
+
+void ScenePort::tagFaceOff()
+{
+	tagFace("growon", 0);
+}
+
+void ScenePort::tagFace(const std::string & name, char x)
+{
+	BaseMesh * m = body();
+	char * g = m->perFaceTag(name);
+	std::deque<unsigned>::const_iterator it = selectedQue().begin();
+	for(; it != selectedQue().end(); ++it) g[*it] = x;
+	faceTagged();
+}
+
+void ScenePort::faceTagged() {}
+
 #include <PointInsidePolygonTest.h>
 void ScenePort::testPatch()
 {

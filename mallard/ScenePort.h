@@ -50,6 +50,8 @@ public slots:
 	void saveSheet();
 	void saveSheetAs();
     void revertSheet();
+	void tagFaceOn();
+	void tagFaceOff();
 	
 protected:
 	virtual PatchMesh * activeMesh() const;
@@ -68,6 +70,10 @@ protected:
 	virtual char selectFeather(char byRegion = 0);
 	virtual char floodFeather();
 	
+	virtual void faceTagged();
+	
 	void testPatch();
 	void testCurvature();
+private:
+	void tagFace(const std::string & name, char x);
 };

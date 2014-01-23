@@ -79,6 +79,7 @@ private:
 	QMenu * fileMenu;
 	QMenu *recentFilesMenu;
 	QMenu * windowMenu;
+	QMenu * skinMenu;
 	QAction * showBrushControlAct;
 	QAction * showFeatherEditAct;
 	QAction * showTimeControlAct;
@@ -94,6 +95,8 @@ private:
 	QAction * importBakeAct;
 	QAction * revertAct;
 	QAction * exportBakeAct;
+	QAction * growOnAct;
+	QAction * growOffAct;
 	enum { MaxRecentFiles = 5 };
 	QAction *recentFileActs[MaxRecentFiles];
 private:

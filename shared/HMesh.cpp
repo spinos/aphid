@@ -102,6 +102,7 @@ char HMesh::save(BaseMesh * mesh)
 	if(!hasNamedData(".tggrow"))
 		addCharData(".tgfrow", mesh->getNumFaces());
 	
+	std::cout<<"write face tag";
 	writeCharData(".tggrow",  mesh->getNumFaces(), mesh->perFaceTag("growon"));
 
 	return 1;
@@ -145,10 +146,10 @@ char HMesh::load(BaseMesh * mesh)
 	mesh->processQuadFromPolygon();
 	
 	char * g = mesh->perFaceTag("growon");
-	if(hasNamedData(".tggrow")) {
+	if(hasNamedData(".tggrow")) {std::cout<<"has face tag";
 		readCharData(".tggrow",  mesh->getNumFaces(), g);
 	}
-	else {
+	else {std::cout<<"reset face tag";
 		for(unsigned i =0; i < mesh->getNumFaces(); i++) g[i] = 1;
 	}
 	

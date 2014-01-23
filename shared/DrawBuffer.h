@@ -1,7 +1,7 @@
 #pragma once
 
 #include <AllMath.h>
-
+#include <boost/scoped_array.hpp>
 class DrawBuffer {
 public:
     DrawBuffer();
@@ -15,9 +15,13 @@ public:
     
 	Vector3F * vertices();
 	Vector3F * normals();
+	Float3 * colors();
 	float * texcoords();
 	unsigned * indices();
+	
+	const unsigned & numPoints() const;
 private:
+	boost::scoped_array<Float3> m_colors;
 	Vector3F * m_vertices;
     Vector3F * m_normals;
     unsigned * m_indices;

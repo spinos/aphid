@@ -69,6 +69,7 @@ GLWidget::GLWidget(QWidget *parent) : ScenePort(parent)
 {
 	std::cout<<"3Dview ";
 	m_bezierDrawer = new BezierDrawer;
+	m_bezierDrawer->useTag("growon");
 	m_featherDrawer = new MlDrawer;
 	m_featherDrawer->create("mallard.mlc");
 	m_engine = new MlEngine(m_featherDrawer);
@@ -419,6 +420,12 @@ void GLWidget::importBody(const std::string & fileName)
 	m_bezierDrawer->rebuildBuffer(body());
 	m_featherDrawer->setSkin(skin());
 	buildTree();
+	update();
+}
+
+void GLWidget::faceTagged()
+{
+	m_bezierDrawer->tagColor(body());
 	update();
 }
 //:~
