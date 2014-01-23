@@ -13,6 +13,7 @@ BaseBrush::BaseBrush() : m_radius(1.f), m_pitch(0.01f), m_maxToeFactor(2.f), m_n
 {
 	m_strength = 1.f;
 	m_twoSided = false;
+	m_filterByColor = false;
 }
 
 BaseBrush::~BaseBrush() 
@@ -160,4 +161,14 @@ void BaseBrush::setTwoSided(bool b)
 bool BaseBrush::twoSided() const
 {
 	return m_twoSided;
+}
+
+void BaseBrush::setFilterByColor(bool b)
+{
+	m_filterByColor = b;
+}
+
+bool BaseBrush::filterByColor() const
+{
+	return m_filterByColor;
 }

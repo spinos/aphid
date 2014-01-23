@@ -64,7 +64,6 @@ public:
 	void bakeFrames();
 	void testRender();
 	
-	
 signals:
 	void sendFeatherEditBackground(QString name);
 	void renderResChanged(QSize s);
@@ -72,8 +71,6 @@ signals:
 public slots:
 	void updateOnFrame(int x);
 	void exportBake();
-	void receiveFloodRegion(int state);
-	void receiveEraseRegion(int state);
 	void receiveCancelRender();
 	
 protected:
@@ -84,7 +81,7 @@ protected:
 	virtual void importBody(const std::string & fileName);
 	virtual void afterOpen();
 private:
-	virtual char selectFeather(char byRegion = 0);
+	virtual char selectFeather();
 	virtual char floodFeather();
 	void beginBaking();
 	void endBaking();

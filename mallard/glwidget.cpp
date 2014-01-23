@@ -75,7 +75,6 @@ GLWidget::GLWidget(QWidget *parent) : ScenePort(parent)
 	m_engine = new MlEngine(m_featherDrawer);
 	MlCalamus::FeatherLibrary = this;
 	m_featherTexId = m_featherDistrId = -1;
-	m_floodByRegion = m_eraseByRegion = 0;
 	cleanSheet();
 }
 //! [0]
@@ -134,7 +133,7 @@ void GLWidget::clientSelect(QMouseEvent *event)
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
 	        hitTest();
-	        selectFeather(m_eraseByRegion);
+	        selectFeather();
 	        m_featherDrawer->hideActive();
 	        break;
 	    case ToolContext::SelectByColor :
@@ -172,7 +171,7 @@ void GLWidget::clientMouseInput(QMouseEvent *event)
 	        break;
 	    case ToolContext::EraseBodyContourFeather :
 	        hitTest();
-	        selectFeather(m_eraseByRegion);
+	        selectFeather();
 	        m_featherDrawer->hideActive();
 	        break;
 	    case ToolContext::SelectByColor :
@@ -208,9 +207,9 @@ void GLWidget::clientMouseInput(QMouseEvent *event)
 	ManipulateView::clientMouseInput(event);
 }
 
-char GLWidget::selectFeather(char byRegion)
+char GLWidget::selectFeather()
 {
-	if(!ScenePort::selectFeather(byRegion)) return 0;
+	if(!ScenePort::selectFeather()) return 0;
 	m_featherDrawer->clearCached();
 	return 1;
 }
@@ -380,22 +379,6 @@ void GLWidget::afterOpen()
 		loadFeatherDistribution(fedistr);
 	if(numLights() < 1) defaultLighting();
 	emit sceneOpened();
-}
-
-void GLWidget::receiveFloodRegion(int state)
-{
-	if(state == Qt::Unchecked)
-		m_floodByRegion = 0;
-	else
-		m_floodByRegion = 1;
-}
-
-void GLWidget::receiveEraseRegion(int state)
-{
-    if(state == Qt::Unchecked)
-		m_eraseByRegion = 0;
-	else
-		m_eraseByRegion = 1;
 }
 
 void GLWidget::testRender()

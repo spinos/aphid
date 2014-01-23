@@ -83,8 +83,8 @@ Window::Window()
 	connect(m_brushControl, SIGNAL(brushTwoSidedChanged(int)), glWidget, SLOT(receiveBrushTwoSided(int)));
 	connect(m_brushControl->floodControlWidget(), SIGNAL(initialCurlChanged(double)), glWidget, SLOT(receiveBrushPitch(double)));
 	connect(m_brushControl->floodControlWidget(), SIGNAL(numSampleChanged(int)), glWidget, SLOT(receiveBrushNumSamples(int)));
-	connect(m_brushControl->floodControlWidget(), SIGNAL(floodRegionChanged(int)), glWidget, SLOT(receiveFloodRegion(int)));
-	connect(m_brushControl->eraseControlWidget(), SIGNAL(eraseRegionChanged(int)), glWidget, SLOT(receiveEraseRegion(int)));
+	connect(m_brushControl, SIGNAL(brushFilterByColorChanged(int)), glWidget, SLOT(receiveBrushFilterByColor(int)));
+	connect(m_brushControl, SIGNAL(brushFilterByColorChanged(int)), glWidget, SLOT(receiveBrushFilterByColor(int)));
 	connect(glWidget, SIGNAL(sceneNameChanged(QString)), this, SLOT(setWorkTitle(QString)));
 	connect(glWidget, SIGNAL(sendMessage(QString)), this, SLOT(showMessage(QString)));
 	connect(m_featherEdit, SIGNAL(textureLoaded(QString)), glWidget, SLOT(receiveFeatherEditBackground(QString)));

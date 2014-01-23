@@ -24,6 +24,7 @@ public:
 	
 	double radius() const;
 	double strength() const;
+	int eraseRegion() const;
 	
 signals:
 	void radiusChanged(double x);

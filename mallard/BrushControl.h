@@ -34,8 +34,7 @@ class BrushControl : public QDialog
 public:
     BrushControl(QWidget *parent = 0);
 	QWidget * floodControlWidget();
-	QWidget * eraseControlWidget();
-
+	
 public slots:
 	void receiveToolContext(int c);
 	
@@ -43,10 +42,12 @@ private slots:
 	void sendBrushRadius(double d);
 	void sendBrushStrength(double d);
 	void sendBrushTwoSided(int x);
+	void sendBrushFilterByColor(int x);
 signals:
 	void brushRadiusChanged(double d);
 	void brushStrengthChanged(double d);
 	void brushTwoSidedChanged(int x);
+	void brushFilterByColorChanged(int x);
 private:
 	QStackedLayout * stackLayout;
 	SelectFaceBox * selectFace;

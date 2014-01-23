@@ -64,6 +64,11 @@ double FloodBox::strength() const
 	return m_strengthValue->value();
 }
 
+int FloodBox::floodRegion() const
+{
+	return m_floodAreaCheck->checkState();
+}
+
 void FloodBox::sendRadius(double x)
 {
 	emit radiusChanged(x);

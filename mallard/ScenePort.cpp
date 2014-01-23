@@ -135,7 +135,7 @@ void ScenePort::clientDeselect(QMouseEvent *event)
 {
     if(interactMode() == ToolContext::CreateBodyContourFeather)
 		finishCreateFeather();
-	deselectFeather();
+
 	ManipulateView::clientDeselect(event);
 }
 
@@ -238,8 +238,7 @@ void ScenePort::chooseBake()
 void ScenePort::beforeSave()
 {
 	if(interactMode() == ToolContext::EraseBodyContourFeather)
-		finishEraseFeather();
-		
+		finishEraseFeather();	
 	deselectFeather();
 }
 
@@ -341,7 +340,7 @@ std::string ScenePort::chooseSaveFileName()
 	return validateFileExtension(fileName.toUtf8().data());
 }
 
-char ScenePort::selectFeather(char byRegion)
+char ScenePort::selectFeather()
 {
 	IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) return 0;
@@ -352,11 +351,8 @@ char ScenePort::selectFeather(char byRegion)
 	condition.setCenter(ctx->m_hitP);
 	condition.setNormal(ctx->m_hitN);
 	condition.setMaxDistance(brush()->getRadius());
-	
-	if(interactMode() == ToolContext::EraseBodyContourFeather) condition.setProbability(brush()->strength());
-	else condition.setProbability(1.f);
-	
-	condition.setRegionFilter(byRegion);
+	condition.setProbability(brush()->strength());
+	condition.setRegionFilter(brush()->filterByColor());
 	
 	skin()->select(selectedQue(), &condition);
 	setDirty();
@@ -383,7 +379,7 @@ char ScenePort::floodFeather()
 	if(skin()->hasActiveRegion()) condition.setRegionFilter(1);
 	else condition.setRegionFilter(0);
 	
-	if(m_floodByRegion && skin()->hasActiveRegion()) {
+	if(brush()->filterByColor() && skin()->hasActiveRegion()) {
 		skin()->restFloodFacesAsActive();
 		condition.setDistanceFilter(0);
 	}

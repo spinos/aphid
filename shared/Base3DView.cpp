@@ -460,6 +460,12 @@ void Base3DView::receiveBrushTwoSided(int x)
 	else brush()->setTwoSided(false);
 }
 
+void Base3DView::receiveBrushFilterByColor(int x)
+{
+	if(x == Qt::Checked) brush()->setFilterByColor(true);
+	else brush()->setFilterByColor(false);
+}
+
 QPoint Base3DView::lastMousePos() const
 {
 	return m_lastPos;

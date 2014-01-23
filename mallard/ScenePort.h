@@ -32,7 +32,7 @@ public:
 	virtual void setFeatherTexture(const std::string & name);
 
 	int m_featherTexId, m_featherDistrId;
-	char m_floodByRegion, m_eraseByRegion;
+	
 signals:
 	void featherSelectionChanged();
 	void sendMessage(QString msg);
@@ -67,7 +67,7 @@ protected:
 	virtual void importBody(const std::string & fileName);
 	
 	void selectRegion();
-	virtual char selectFeather(char byRegion = 0);
+	virtual char selectFeather();
 	virtual char floodFeather();
 	
 	virtual void faceTagged();

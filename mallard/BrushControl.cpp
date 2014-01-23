@@ -48,7 +48,6 @@ BrushControl::BrushControl(QWidget *parent)
     setWindowTitle(tr("Brush Control"));
 	
 	connect(selectFace, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
-	connect(selectFace, SIGNAL(twoSidedChanged(int)), this, SLOT(sendBrushTwoSided(int)));
 	connect(flood, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(eraseControl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(comb, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
@@ -56,6 +55,9 @@ BrushControl::BrushControl(QWidget *parent)
 	connect(curl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(flood, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
 	connect(eraseControl, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
+	connect(selectFace, SIGNAL(twoSidedChanged(int)), this, SLOT(sendBrushTwoSided(int)));
+	connect(flood, SIGNAL(floodRegionChanged(int)), this, SLOT(sendBrushFilterByColor(int)));
+	connect(eraseControl, SIGNAL(eraseRegionChanged(int)), this, SLOT(sendBrushFilterByColor(int)));
 }
 
 QWidget * BrushControl::floodControlWidget()
@@ -63,19 +65,18 @@ QWidget * BrushControl::floodControlWidget()
 	return flood;
 }
 
-QWidget * BrushControl::eraseControlWidget()
-{
-    return eraseControl;
-}
-
 void BrushControl::receiveToolContext(int c)
 {
-	double r = flood->radius();
-	double s = flood->strength();
+	double r = 1.f;
+	double s = 1.f;
 	int ts = 0;
+	int byRegion = 0;
 	switch(c) {
 		case ToolContext::CreateBodyContourFeather:
 			stackLayout->setCurrentIndex(0);
+			r = flood->radius();
+			s = flood->strength();
+			byRegion = flood->floodRegion();
 			break;
 		case ToolContext::CombBodyContourFeather:
 			stackLayout->setCurrentIndex(1);
@@ -93,6 +94,7 @@ void BrushControl::receiveToolContext(int c)
 			stackLayout->setCurrentIndex(4);
 			r = eraseControl->radius();
 			s = eraseControl->strength();
+			byRegion = eraseControl->eraseRegion();
 			break;
 		case ToolContext::SelectFace:
 			stackLayout->setCurrentIndex(5);
@@ -105,6 +107,7 @@ void BrushControl::receiveToolContext(int c)
 	sendBrushRadius(r);
 	sendBrushStrength(s);
 	sendBrushTwoSided(ts);
+	sendBrushFilterByColor(byRegion);
 }
 	
 void BrushControl::sendBrushRadius(double d)
@@ -120,4 +123,9 @@ void BrushControl::sendBrushStrength(double d)
 void BrushControl::sendBrushTwoSided(int x)
 {
 	emit brushTwoSidedChanged(x);
+}
+
+void BrushControl::sendBrushFilterByColor(int x)
+{
+	emit brushFilterByColorChanged(x);
 }

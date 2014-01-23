@@ -308,6 +308,7 @@ void MlSkin::finishCreateFeather()
 	if(!bodyMesh()) return;
     computeFaceCalamusIndirection();
 	m_numCreatedFeather = 0;
+	discardActive();
 	std::cout<<" increase to "<<numFeathers();
 }
 

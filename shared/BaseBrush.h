@@ -23,6 +23,7 @@ public:
 	void resetToe();
 	void setToeByIntersect(const Ray * r, bool useNormal = true);
 	void setTwoSided(bool b);
+	void setFilterByColor(bool b);
 	
 	Matrix44F getSpace() const;
 	float getRadius() const;
@@ -37,6 +38,7 @@ public:
 	const float length() const;
 	void getDartPoint(unsigned idx, Vector3F & p) const;
 	bool twoSided() const;
+	bool filterByColor() const;
 	
 private:
 	char ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float d) const;
@@ -45,5 +47,5 @@ private:
 	Vector3F m_toeWorldPos, m_previousToeWorldP;
 	float m_radius, m_pitch, m_maxToeFactor, m_strength;
 	unsigned m_numDarts;
-	bool m_twoSided;
+	bool m_twoSided, m_filterByColor;
 };

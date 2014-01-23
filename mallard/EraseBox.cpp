@@ -52,6 +52,11 @@ double EraseBox::strength() const
 	return m_strengthValue->value();
 }
 
+int EraseBox::eraseRegion() const
+{
+	return m_areaCheck->checkState();
+}
+
 void EraseBox::sendRadius(double x)
 {
 	emit radiusChanged(x);
