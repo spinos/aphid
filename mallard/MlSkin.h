@@ -33,7 +33,6 @@ public:
 	
 	void floodAround(MlCalamus c, FloodCondition * condition);
 	void select(const std::deque<unsigned> & src, SelectCondition * selcon);
-	void selectAround(unsigned idx, SelectCondition * selcon);
 	void discardActive();
 	
 	void growFeather(const Vector3F & direction);

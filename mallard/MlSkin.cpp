@@ -40,6 +40,7 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh)
 
 void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
 {	
+	char * tagg = bodyMesh()->perFaceTag("growon");
 	unsigned i, j, faceInd;
 	
 	float u, v;
@@ -47,6 +48,8 @@ void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
 	std::vector<Vector3F> darts;
 	for(i = 0; i < m_floodFaces.size(); i++) {
 		faceInd = m_floodFaces[i].faceIdx;
+		if(tagg[faceInd] == 0) continue;
+		
 		m_floodFaces[i].dartBegin = m_floodFaces[i].dartEnd = darts.size();
 		const unsigned ndart = 4 + bodyMesh()->calculateBBox(faceInd).area() / condition->minDistance() / condition->minDistance();
 		for(j = 0; j < ndart; j++) {
@@ -82,24 +85,10 @@ void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
 
 void MlSkin::select(const std::deque<unsigned> & src, SelectCondition * selcon)
 {
+	char * tagg = bodyMesh()->perFaceTag("growon");
 	resetCollisionRegion(src);
 	for(unsigned i=0; i < numRegionElements(); i++) {
-		unsigned preCount = m_activeIndices.size();
-		if(selectFeatherByFace(regionElementIndex(i), selcon) > 0) {
-			FloodTable t(regionElementIndex(i));
-			t.dartBegin = preCount;
-			t.dartEnd = m_activeIndices.size();
-			m_activeFaces.push_back(t);
-		}
-	}
-	computeAffectWeight(selcon->center(), selcon->maxDistance());
-}
-
-void MlSkin::selectAround(unsigned idx, SelectCondition * selcon)
-{	
-	resetCollisionRegionByDistance(idx, selcon->center(), selcon->maxDistance());
-	
-	for(unsigned i=0; i < numRegionElements(); i++) {
+		if(tagg[regionElementIndex(i)] == 0) continue;
 		unsigned preCount = m_activeIndices.size();
 		if(selectFeatherByFace(regionElementIndex(i), selcon) > 0) {
 			FloodTable t(regionElementIndex(i));

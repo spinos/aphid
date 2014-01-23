@@ -173,6 +173,7 @@ void MeshDrawer::patch(const BaseMesh * mesh, unsigned idx)
 void MeshDrawer::patch(const BaseMesh * mesh, const std::deque<unsigned> & sel) const
 {
 	if(sel.size() < 1) return;
+	if(!mesh) return;
 	beginQuad();
 	Vector3F *v = mesh->getVertices();
 	unsigned *i = mesh->getQuadIndices();

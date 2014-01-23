@@ -169,6 +169,7 @@ void ScenePort::clearSelection()
 	skin()->clearCollisionRegion();
 	skin()->clearBuffer();
 	skin()->clearActiveRegion();
+	ManipulateView::clearSelection();
 }
 
 void ScenePort::setFeatherTexture(const std::string & name)
@@ -244,6 +245,7 @@ void ScenePort::beforeSave()
 
 void ScenePort::cleanSheet()
 {
+	clearSelection();
 	clear();
 	defaultLighting();
 	emit sceneOpened();
@@ -417,6 +419,7 @@ void ScenePort::tagFace(const std::string & name, char x)
 	std::deque<unsigned>::const_iterator it = selectedQue().begin();
 	for(; it != selectedQue().end(); ++it) g[*it] = x;
 	faceTagged();
+	setDirty();
 }
 
 void ScenePort::faceTagged() {}

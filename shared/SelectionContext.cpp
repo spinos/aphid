@@ -143,6 +143,12 @@ SelectionContext::SelectMode SelectionContext::getSelectMode() const
 	return m_mode;
 }
 
+void SelectionContext::discard()
+{
+	m_mode = Replace;
+	m_indices.clear();
+}
+
 void SelectionContext::verbose() const
 {
 	std::clog<<"n selected: "<<numSelected()<<"\n";

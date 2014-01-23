@@ -98,12 +98,6 @@ char HMesh::save(BaseMesh * mesh)
 		addIntData(".uvids", nuvid);
 		
 	writeIntData(".uvids", nuvid, (int *)mesh->getUvIds());
-	
-	if(!hasNamedData(".tggrow"))
-		addCharData(".tgfrow", mesh->getNumFaces());
-	
-	std::cout<<"write face tag";
-	writeCharData(".tggrow",  mesh->getNumFaces(), mesh->perFaceTag("growon"));
 
 	return 1;
 }
@@ -145,16 +139,31 @@ char HMesh::load(BaseMesh * mesh)
 	mesh->processTriangleFromPolygon();
 	mesh->processQuadFromPolygon();
 	
-	char * g = mesh->perFaceTag("growon");
-	if(hasNamedData(".tggrow")) {std::cout<<"has face tag";
-		readCharData(".tggrow",  mesh->getNumFaces(), g);
-	}
-	else {std::cout<<"reset face tag";
-		for(unsigned i =0; i < mesh->getNumFaces(); i++) g[i] = 1;
-	}
-	
 	mesh->verbose();
 	
+	return 1;
+}
+
+char HMesh::saveFaceTag(BaseMesh * mesh, const std::string & tagName, const std::string & dataName)
+{
+	if(!hasNamedData(dataName.c_str()))
+		addCharData(dataName.c_str(), mesh->getNumFaces());
+	
+	std::cout<<"write face tag"<<tagName;
+	writeCharData(dataName.c_str(),  mesh->getNumFaces(), mesh->perFaceTag(tagName));
+	return 1;
+}
+
+char HMesh::loadFaceTag(BaseMesh * mesh, const std::string & tagName, const std::string & dataName)
+{
+	char * g = mesh->perFaceTag(tagName);
+	if(hasNamedData(dataName.c_str())) {
+		readCharData(dataName.c_str(),  mesh->getNumFaces(), g);
+	}
+	else {
+		std::cout<<"WARNING: reset face tag "<<tagName;
+		for(unsigned i =0; i < mesh->getNumFaces(); i++) g[i] = 1;
+	}
 	return 1;
 }
 //:~

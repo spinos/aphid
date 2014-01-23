@@ -46,6 +46,7 @@ public:
 	
 	void setSelectMode(SelectMode m);
 	SelectMode getSelectMode() const;
+	void discard();
 	
 	void verbose() const;
 private:

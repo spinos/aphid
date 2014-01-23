@@ -181,6 +181,7 @@ bool MlScene::doWrite(const std::string & fileName)
 	
 	HMesh grpBody("/world/body");
 	grpBody.save(m_accmesh);
+	grpBody.saveFaceTag(m_accmesh, "growon", ".tggrowon");
 	
 	if(grpBody.hasNamedAttr(".bakefile"))
 		grpBody.discardNamedAttr(".bakefile");
@@ -274,6 +275,7 @@ bool MlScene::doRead(const std::string & fileName)
 
 	HMesh grpBody("/world/body");
 	grpBody.load(m_accmesh);
+	grpBody.loadFaceTag(m_accmesh, "growon", ".tggrowon");
 	
 	m_bakeName = std::string("");
 	if(grpBody.hasNamedAttr(".bakefile")) {

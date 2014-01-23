@@ -18,6 +18,9 @@ public:
 	char verifyType();
 	virtual char save(BaseMesh * mesh);
 	virtual char load(BaseMesh * mesh);
+	
+	char saveFaceTag(BaseMesh * mesh, const std::string & tagName, const std::string & dataName);
+	char loadFaceTag(BaseMesh * mesh, const std::string & tagName, const std::string & dataName);
 private:
 	
 };

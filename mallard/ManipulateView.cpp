@@ -163,7 +163,7 @@ void ManipulateView::keyPressEvent(QKeyEvent *e)
 
 void ManipulateView::clearSelection()
 {
-	m_selectCtx->reset();
+	m_selectCtx->discard();
 	m_manipulator->detach();
 	Base3DView::clearSelection();
 }
