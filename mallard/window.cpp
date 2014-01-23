@@ -80,6 +80,7 @@ Window::Window()
     connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
 	connect(m_brushControl, SIGNAL(brushRadiusChanged(double)), glWidget, SLOT(receiveBrushRadius(double)));
 	connect(m_brushControl, SIGNAL(brushStrengthChanged(double)), glWidget, SLOT(receiveBrushStrength(double)));
+	connect(m_brushControl, SIGNAL(brushTwoSidedChanged(int)), glWidget, SLOT(receiveBrushTwoSided(int)));
 	connect(m_brushControl->floodControlWidget(), SIGNAL(initialCurlChanged(double)), glWidget, SLOT(receiveBrushPitch(double)));
 	connect(m_brushControl->floodControlWidget(), SIGNAL(numSampleChanged(int)), glWidget, SLOT(receiveBrushNumSamples(int)));
 	connect(m_brushControl->floodControlWidget(), SIGNAL(floodRegionChanged(int)), glWidget, SLOT(receiveFloodRegion(int)));

@@ -70,7 +70,7 @@ char SelectionContext::closeTo(const BoundingBox & b) const
 char SelectionContext::closeTo(const Vector3F & v) const
 {
 	if(!m_enableDirection) return 1;
-	return m_normal.dot(v) > 0.1f;
+	return m_normal.dot(v) > 0.5f;
 }
 
 void SelectionContext::addToSelection(const unsigned idx)

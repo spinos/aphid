@@ -101,7 +101,6 @@ void GLWidget::clientDraw()
 	m_bezierDrawer->drawBuffer();
 	m_bezierDrawer->unbindTexture();
 	
-	getDrawer()->m_wireProfile.apply();
 	showActiveFaces();
 	
 	getDrawer()->m_surfaceProfile.apply();

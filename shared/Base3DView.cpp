@@ -454,6 +454,12 @@ void Base3DView::receiveBrushStrength(double x)
 	brush()->setStrength(x);
 }
 
+void Base3DView::receiveBrushTwoSided(int x)
+{
+	if(x == Qt::Checked) brush()->setTwoSided(true);
+	else brush()->setTwoSided(false);
+}
+
 QPoint Base3DView::lastMousePos() const
 {
 	return m_lastPos;

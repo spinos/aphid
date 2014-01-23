@@ -42,10 +42,11 @@ public slots:
 private slots:
 	void sendBrushRadius(double d);
 	void sendBrushStrength(double d);
+	void sendBrushTwoSided(int x);
 signals:
 	void brushRadiusChanged(double d);
 	void brushStrengthChanged(double d);
-
+	void brushTwoSidedChanged(int x);
 private:
 	QStackedLayout * stackLayout;
 	SelectFaceBox * selectFace;

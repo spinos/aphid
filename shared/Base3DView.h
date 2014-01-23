@@ -68,6 +68,7 @@ public slots:
     void receiveBrushPitch(double x);
     void receiveBrushNumSamples(int x);
 	void receiveBrushStrength(double x);
+	void receiveBrushTwoSided(int x);
 	
 protected:
 	virtual void processSelection(QMouseEvent *event);

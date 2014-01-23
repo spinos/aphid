@@ -12,6 +12,7 @@
 BaseBrush::BaseBrush() : m_radius(1.f), m_pitch(0.01f), m_maxToeFactor(2.f), m_numDarts(99)
 {
 	m_strength = 1.f;
+	m_twoSided = false;
 }
 
 BaseBrush::~BaseBrush() 
@@ -151,3 +152,12 @@ const Vector3F BaseBrush::toeDisplacementDelta()
 	return d1 - d0;
 }
 
+void BaseBrush::setTwoSided(bool b)
+{
+	m_twoSided = b;
+}
+
+bool BaseBrush::twoSided() const
+{
+	return m_twoSided;
+}

@@ -216,7 +216,7 @@ void ManipulateView::selectFaces(SelectionContext::SelectMode m)
 	
 	m_selectCtx->setSelectMode(m);
 	m_selectCtx->reset(ctx->m_hitP, brush()->getRadius() + brush()->minDartDistance());
-	m_selectCtx->setDirection(ctx->m_hitN);
+	if(!brush()->twoSided()) m_selectCtx->setDirection(ctx->m_hitN);
 	m_tree->select(m_selectCtx);
 	m_selectCtx->finish();
 }
@@ -271,7 +271,7 @@ void ManipulateView::endTransform()
 
 void  ManipulateView::showActiveFaces() const
 {
-	getDrawer()->setWired(1);
+	getDrawer()->m_wireProfile.apply();
 	getDrawer()->useDepthTest(0);
 	getDrawer()->colorAsReference();
 	getDrawer()->patch(activeMesh(), selectedQue());

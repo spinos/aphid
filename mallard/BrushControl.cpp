@@ -48,6 +48,7 @@ BrushControl::BrushControl(QWidget *parent)
     setWindowTitle(tr("Brush Control"));
 	
 	connect(selectFace, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
+	connect(selectFace, SIGNAL(twoSidedChanged(int)), this, SLOT(sendBrushTwoSided(int)));
 	connect(flood, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(eraseControl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(comb, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
@@ -71,6 +72,7 @@ void BrushControl::receiveToolContext(int c)
 {
 	double r = flood->radius();
 	double s = flood->strength();
+	int ts = 0;
 	switch(c) {
 		case ToolContext::CreateBodyContourFeather:
 			stackLayout->setCurrentIndex(0);
@@ -95,12 +97,14 @@ void BrushControl::receiveToolContext(int c)
 		case ToolContext::SelectFace:
 			stackLayout->setCurrentIndex(5);
 			r = selectFace->radius();
+			ts = selectFace->twoSided();
 			break;
 		default:
 			break;
 	}
 	sendBrushRadius(r);
 	sendBrushStrength(s);
+	sendBrushTwoSided(ts);
 }
 	
 void BrushControl::sendBrushRadius(double d)
@@ -111,4 +115,9 @@ void BrushControl::sendBrushRadius(double d)
 void BrushControl::sendBrushStrength(double d)
 {
 	emit brushStrengthChanged(d);
+}
+
+void BrushControl::sendBrushTwoSided(int x)
+{
+	emit brushTwoSidedChanged(x);
 }
