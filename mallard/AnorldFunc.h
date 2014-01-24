@@ -12,6 +12,7 @@ public:
     virtual void render();
     void logArnoldVersion() const;
     void loadPlugin(const char * fileName);
+	std::string arnoldVersionString();
 #ifdef WIN32    
     void logAStrArray(AtArray *arr);
     void logAMatrix(AtMatrix matrix);

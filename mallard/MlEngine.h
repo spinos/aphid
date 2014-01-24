@@ -23,6 +23,7 @@ public:
 	virtual void render();
 	virtual void postRender();
 	void interruptRender();
+	std::string rendererName();
 protected:
 
 private:

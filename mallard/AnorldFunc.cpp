@@ -24,9 +24,21 @@ void AnorldFunc::logArnoldVersion() const
 void AnorldFunc::loadPlugin(const char * fileName)
 {
 #ifdef WIN32
-    AiLoadPlugins(fileName);
+	AiLoadPlugins(fileName);
 #endif
 }
+
+std::string AnorldFunc::arnoldVersionString()
+{
+	std::string s("unknown");
+#ifdef WIN32
+	AiBegin();
+    s = AiGetVersionInfo();
+	AiEnd();
+#endif
+	return s;
+}
+
 #ifdef WIN32
 void AnorldFunc::setMatrix(const Matrix44F & src, AtMatrix & dst) const
 {

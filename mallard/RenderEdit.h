@@ -22,7 +22,8 @@ signals:
 	void cancelRender();
 public slots:
 	void resizeRenderView(QSize s);
-	
+	void setRenderEngine(QString name);
+	void startRender(QString name);
 protected:
 	virtual void keyPressEvent(QKeyEvent *e);
 	virtual void reject();

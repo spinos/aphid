@@ -18,31 +18,31 @@ ImageView::ImageView(QWidget *parent)
 {
 	std::cout<<" Renderview ";
     qRegisterMetaType<QImage>("QImage");
-    //connect(&thread, SIGNAL(renderedImage(QImage)),
-      //      this, SLOT(updatePixmap(QImage)));
 
 	setMinimumSize(400, 300);
     m_image = new QImage(400, 300, QImage::Format_RGB888);
 	BaseServer::start();
-	//QTimer *timer = new QTimer(this);
-	//connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	//timer->start(40);
+	
 	m_colors = 0;
+	m_status = Idle;
 }
 
 void ImageView::paintEvent(QPaintEvent * /* event */)
-{
+{	
     QPainter painter(this);
 	painter.fillRect(rect(), Qt::black);
-    /*
-    if (pixmap.isNull()) {
-        painter.setPen(Qt::white);
-        painter.drawText(rect(), Qt::AlignCenter,
-                         tr("Rendering initial image, please wait..."));
-        return;
-    }
-	*/
 	painter.drawImage(QPoint(), *m_image);
+	
+	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+	painter.setBrush(Qt::NoBrush);
+	painter.setPen(Qt::darkCyan);
+	
+	showImageName(painter);
+	showImageSize(painter);
+	showRenderer(painter);
+	showStatus(painter);
+	showRenderTime(painter);
+	showBucket(painter);
 }
 
 void ImageView::resizeEvent(QResizeEvent *)
@@ -114,7 +114,7 @@ void ImageView::endBucket()
 
 void ImageView::doEndBucket()
 {
-	std::cout<<"fill bucket("<<bucketRect[0]<<","<<bucketRect[1]<<","<<bucketRect[2]<<","<<bucketRect[3]<<")\n";
+	//std::cout<<"fill bucket("<<bucketRect[0]<<","<<bucketRect[1]<<","<<bucketRect[2]<<","<<bucketRect[3]<<")\n";
 	if(m_packageStart/4 < numPix) std::clog<<"ERROR: buck not closed"<<m_packageStart/4<<" should be "<<numPix<<"\n";
 	uchar r, g, b, a;
 	float *pixels = m_colors;
@@ -152,6 +152,8 @@ void ImageView::doEndBucket()
 			scanLine++;
 		}
 	}
+	m_numFinishedBucket++;
+	if(m_numFinishedBucket >= m_numBucket) m_status = Finished;
 	update();
 }
 
@@ -161,4 +163,100 @@ void ImageView::resizeImage(QSize s)
  	m_image = new QImage(s, QImage::Format_RGB888);
  	m_image->fill(0);
 	update();
+}
+
+void ImageView::setRendererName(QString name)
+{
+	m_rendererName = name;
+}
+
+void ImageView::startRender(QString name)
+{
+	m_imageName = name;
+	m_status = Active;
+	int nx = m_image->size().width() / 64;
+	if(m_image->size().width() % 64 > 0) nx++;
+	int ny = m_image->size().height() / 64;
+	if(m_image->size().height() % 64 > 0) ny++;
+	
+	m_numBucket = nx * ny;
+	m_numFinishedBucket = 0;
+	
+	m_renderBeginTime = boost::posix_time::ptime(boost::posix_time::second_clock::local_time());
+	update();
+}
+
+void ImageView::showImageName(QPainter & painter)
+{
+	if(m_status == Idle) return;
+	QString text = QString("image: %1").arg(m_imageName); 
+	QFontMetrics metrics = painter.fontMetrics();
+	painter.drawText(rect().width() / 2 - metrics.width(text) / 2, 4 + metrics.ascent(), text);
+}
+
+void ImageView::showImageSize(QPainter & painter)
+{
+	QFontMetrics metrics = painter.fontMetrics();
+	painter.drawText(8, rect().height() - metrics.ascent(),
+                         QString("size: %1x%2").arg(m_image->size().width()).arg(m_image->size().height()));
+}
+
+void ImageView::showRenderer(QPainter & painter)
+{
+	QString text = QString("renderer: %1").arg(m_rendererName); 
+	QFontMetrics metrics = painter.fontMetrics();
+	painter.drawText(rect().width() / 2 - metrics.width(text) / 2, rect().height() - metrics.ascent(), text);
+}
+
+void ImageView::showStatus(QPainter & painter)
+{
+	QString text = QString("status: %1").arg(statusString()); 
+	QFontMetrics metrics = painter.fontMetrics();
+	painter.drawText(rect().width() - 8 - metrics.width(text), rect().height() - metrics.ascent(), text);
+}
+
+QString ImageView::statusString() const
+{
+	if(m_status == Idle) return tr("idle");
+	if(m_status == Active) {
+		int percent = (float)m_numFinishedBucket/(float)m_numBucket * 100.f;
+		return QString("%1%").arg(percent); 
+	}
+	return tr("finished");
+}
+
+void ImageView::showRenderTime(QPainter & painter)
+{
+	if(m_status == Idle) return;
+	QString text = QString("render time: %1").arg(renderTimeString()); 
+	QFontMetrics metrics = painter.fontMetrics();
+	painter.drawText(rect().width() - 8 - metrics.width(text), 4 + metrics.ascent(), text);
+}
+
+QString ImageView::renderTimeString()
+{
+	boost::posix_time::time_duration td = boost::posix_time::seconds(renderTimeInt());
+	
+	int hh = td.hours();
+	int mm = td.minutes();
+	int ss = td.seconds();
+	
+	if(hh > 0) return QString("%1 h %2 m %3 s").arg(hh).arg(mm).arg(ss);
+	if(mm > 0) return QString("%1 m %2 s").arg(mm).arg(ss);
+	return QString("%1 s").arg(ss);
+}
+
+int ImageView::renderTimeInt()
+{
+	if(m_status == Idle) return 0;
+	if(m_status == Finished) return m_renderTimeSecs;
+	boost::posix_time::time_duration td = boost::posix_time::ptime(boost::posix_time::second_clock::local_time()) - m_renderBeginTime;
+	m_renderTimeSecs = td.total_seconds();
+	return m_renderTimeSecs;
+}
+
+void ImageView::showBucket(QPainter & painter)
+{
+	if(m_status == Idle || m_status == Finished) return;
+	painter.drawRect(bucketRect[0], bucketRect[2], bucketRect[1] - bucketRect[0], bucketRect[3] - bucketRect[2]);
 }

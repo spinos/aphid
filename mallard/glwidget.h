@@ -67,6 +67,8 @@ public:
 signals:
 	void sendFeatherEditBackground(QString name);
 	void renderResChanged(QSize s);
+	void renderEngineChanged(QString name);
+	void renderStarted(QString name);
 	
 public slots:
 	void updateOnFrame(int x);
@@ -86,6 +88,7 @@ private:
 	void beginBaking();
 	void endBaking();
 	bool isBaking() const;
+	QString renderName() const;
 	
 private:
 	BezierDrawer * m_bezierDrawer;

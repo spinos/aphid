@@ -222,8 +222,8 @@ void MlEngine::testOutput()
 				reply_length = s.read_some(boost::asio::buffer(buf), error);
 
 				s.close();
-				//t.expires_from_now(boost::posix_time::seconds(1));
-				//t.wait();
+				t.expires_from_now(boost::posix_time::seconds(1));
+				t.wait();
 				
 				boost::this_thread::interruption_point();
 			}
@@ -422,3 +422,12 @@ AtNode * MlEngine::translateSquareLight(SquareLight * l)
     return light;
 }
 #endif
+
+std::string MlEngine::rendererName()
+{
+#ifdef WIN32
+	return arnoldVersionString();
+#else
+	return "foo";
+#endif
+}

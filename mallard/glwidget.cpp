@@ -385,6 +385,9 @@ void GLWidget::testRender()
 {
 	const QSize sz(renderImageWidth(), renderImageHeight());
 	emit renderResChanged(sz);
+	QString engineName(m_engine->rendererName().c_str());
+	emit renderEngineChanged(engineName);
+	emit renderStarted(renderName());
 	prepareRender();
 	m_engine->setLights(this);
 	m_engine->setOptions(this);
@@ -410,5 +413,10 @@ void GLWidget::faceTagged()
 {
 	m_bezierDrawer->tagColor(body());
 	update();
+}
+
+QString GLWidget::renderName() const
+{
+	return QString("take_%1").arg(rand());
 }
 //:~
