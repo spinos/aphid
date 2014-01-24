@@ -9,17 +9,25 @@
 
 #include "accPatch.h"
 #include "accStencil.h"
-#include <iostream>
 
 AccPatch::AccPatch() {}
 AccPatch::~AccPatch() {}
 
 AccStencil* AccPatch::stencil = 0;
 
+void AccPatch::findCorners()
+{
+	for(int i = 0; i < 4; i++) {
+        stencil->findCorner(i);
+        m_corners[i].setEdges(stencil->m_corners[i].edgeIndices());
+		m_corners[i].setCorners(stencil->m_corners[i].cornerIndices(), stencil->m_corners[i].tagCornerIndices());
+    }
+}
+
 void AccPatch::evaluateContolPoints()
 {
     for(int i = 0; i < 4; i++) {
-        stencil->findCorner(i);
+        stencil->restoreCorners(i, &m_corners[i]);
         processCornerControlPoints(i);
     }
 	

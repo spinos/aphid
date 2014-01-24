@@ -8,12 +8,14 @@
  */
 #pragma once
 #include <bezierPatch.h>
-
+#include <PatchNeighborRec.h>
 class AccStencil;
 class AccPatch : public BezierPatch {
 public:
 	AccPatch();
 	virtual ~AccPatch();
+	
+	void findCorners();
 	virtual void evaluateContolPoints();
 	
 	void processCornerControlPoints(int i);
@@ -21,4 +23,6 @@ public:
 	void processInteriorControlPoints(int i);
 	
 	static AccStencil* stencil;
+private:
+	PatchNeighborRec m_corners[4];
 };

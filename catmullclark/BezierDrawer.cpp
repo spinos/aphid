@@ -28,7 +28,6 @@ BezierDrawer::~BezierDrawer()
 
 void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
 {
-	std::clog<<"buffering bezier patch...";
 	AccPatch* bez = mesh->beziers();
 	
 	m_tess->setNumSeg(4);
@@ -69,7 +68,6 @@ void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
 	}
 	
 	if(m_tagName != "unknown") tagColor(mesh);
-	std::clog<<"...done!\n";
 }
 
 void BezierDrawer::drawBezierPatch(BezierPatch * patch)

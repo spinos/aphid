@@ -11,6 +11,7 @@
 #include <AccInterior.h>
 class Vector3F;
 class VertexAdjacency;
+class PatchNeighborRec;
 class AccStencil {
 public:
     
@@ -20,6 +21,8 @@ public:
 	
 	void setVertexPosition(Vector3F* data);
 	void setVertexNormal(Vector3F* data);
+	
+	void restoreCorners(int ci, PatchNeighborRec * src);
 	
 	void findCorner(int vi);
 	void findEdge(int vi);
@@ -38,6 +41,7 @@ public:
 	AccInterior m_interiors[4];
 
 private:
+	void resetCorner(int i);
 	void findFringeCornerNeighbors(int c, AccCorner & topo);
 	char findSharedNeighbor(int a, int b, int c, int & dst);
 };

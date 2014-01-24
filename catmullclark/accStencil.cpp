@@ -6,11 +6,12 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include <Vector3F.h>
 #include "accStencil.h"
+#include <iostream>
+#include <Vector3F.h>
 #include <VertexAdjacency.h>
 #include "Edge.h"
-#include <iostream>
+#include <PatchNeighborRec.h>
 
 AccStencil::AccStencil() {}
 AccStencil::~AccStencil() {}
@@ -25,13 +26,43 @@ void AccStencil::setVertexNormal(Vector3F* data)
 	_normals = data;
 }
 
+void AccStencil::resetCorner(int i)
+{
+	AccCorner &topo = m_corners[i];
+	const int centerIdx = m_patchVertices[i];
+    topo.setCenterIndex(centerIdx);
+    topo.setCenterPosition(&_positions[centerIdx]);
+    topo.setCenterNormal(&_normals[centerIdx]);
+	
+	topo.reset();
+}
+
+void AccStencil::restoreCorners(int ci, PatchNeighborRec * rec)
+{
+	resetCorner(ci);
+	AccCorner &topo = m_corners[ci];
+	
+	const unsigned ne = rec->numEdges();
+	unsigned i;
+	for(i = 0; i < ne; i++) topo.addEdgeNeighbor(rec->edges()[i], _positions, _normals);
+		
+	const unsigned nc = rec->numCorners();
+	for(i = 0; i < nc; i++) {
+		if(rec->tagCorners()[i] == 1) {
+			topo.addCornerNeighbor(rec->corners()[i], _positions, _normals);
+		}
+		else {
+			topo.addCornerNeighborBetween(rec->corners()[i], rec->corners()[i+1], _positions, _normals);
+			i++;
+		}
+	}
+}
+
 void AccStencil::findCorner(int vi)
 {
+	resetCorner(vi);
+	AccCorner &topo = m_corners[vi];
 	const int centerIdx = m_patchVertices[vi];
-    AccCorner &topo = m_corners[vi];
-    topo._centerIndex = centerIdx;
-    topo._centerPosition = _positions[centerIdx];
-    topo._centerNormal = _normals[centerIdx];
     
     VertexAdjacency &adj = m_vertexAdjacency[centerIdx];
     
@@ -43,8 +74,6 @@ void AccStencil::findCorner(int vi)
         
         neis.push_back(neighborIdx);
     }
-    
-    topo.reset();
     
     Edge dummy;
     for(std::vector<int>::iterator it = neis.begin(); it != neis.end(); ++it) {
@@ -66,8 +95,8 @@ void AccStencil::findFringeCornerNeighbors(int c, AccCorner & topo)
         int i1 = i + 1;
         i1 = i1 % topo.valence();
         
-        int nei0 = topo._edgeIndices[i];
-        int nei1 = topo._edgeIndices[i1];
+        int nei0 = topo.edgeIndex(i);
+        int nei1 = topo.edgeIndex(i1);
 
         VertexAdjacency &adj0 = m_vertexAdjacency[nei0];
         
