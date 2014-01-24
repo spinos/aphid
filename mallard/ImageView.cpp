@@ -25,6 +25,7 @@ ImageView::ImageView(QWidget *parent)
 	
 	m_colors = 0;
 	m_status = Idle;
+	m_rendererName = tr("unknown");
 }
 
 void ImageView::paintEvent(QPaintEvent * /* event */)

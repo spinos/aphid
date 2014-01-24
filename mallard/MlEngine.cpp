@@ -181,7 +181,9 @@ void MlEngine::testOutput()
 		const int imageSizeY = opts->renderImageHeight();
 				
 		for(int by = 0; by <= imageSizeY/bucketSize; by++) {
+			if(by * bucketSize == imageSizeY) continue;
 			for(int bx = 0; bx <= imageSizeX/bucketSize; bx++) {
+				if(bx * bucketSize == imageSizeX) continue;
 				int * rect = (int *)dataPackage;
 				
 				rect[2] = by * bucketSize;
