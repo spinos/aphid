@@ -26,6 +26,7 @@ class CurlBox;
 class ScaleBox;
 class FloodBox;
 class EraseBox;
+class PaintBox;
 
 class BrushControl : public QDialog
 {
@@ -56,5 +57,6 @@ private:
 	ScaleBox * brushScale;
 	FloodBox * flood;
 	EraseBox * eraseControl;
+	PaintBox * paintControl;
 };
 #endif

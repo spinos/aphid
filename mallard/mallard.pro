@@ -40,6 +40,7 @@ CurlBox.h \
 ScaleBox.h \
 FloodBox.h \
 EraseBox.h \
+PaintBox.h \
 				HFeather.h \
     HSkin.h \
                 MlFeatherCollection.h \
@@ -107,6 +108,7 @@ CurlBox.cpp \
 ScaleBox.cpp \
 FloodBox.cpp \
 EraseBox.cpp \
+PaintBox.cpp \
 				HFeather.cpp \
     HSkin.cpp \
                 MlFeatherCollection.cpp \

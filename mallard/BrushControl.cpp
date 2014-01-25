@@ -18,6 +18,7 @@
 #include "ScaleBox.h"
 #include "FloodBox.h"
 #include "EraseBox.h"
+#include "PaintBox.h"
 
 BrushControl::BrushControl(QWidget *parent)
     : QDialog(parent)
@@ -28,6 +29,7 @@ BrushControl::BrushControl(QWidget *parent)
 	brushScale = new ScaleBox(this);
 	flood = new FloodBox(this);
 	eraseControl = new EraseBox(this);
+	paintControl = new PaintBox(this);
 
 	stackLayout = new QStackedLayout(this);
 	
@@ -37,6 +39,7 @@ BrushControl::BrushControl(QWidget *parent)
 	stackLayout->addWidget(curl);
 	stackLayout->addWidget(eraseControl);
 	stackLayout->addWidget(selectFace);
+	stackLayout->addWidget(paintControl);
 	
 	stackLayout->setCurrentIndex(5);
 	setLayout(stackLayout);
@@ -53,9 +56,13 @@ BrushControl::BrushControl(QWidget *parent)
 	connect(comb, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(brushScale, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(curl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
+	connect(paintControl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
+	
 	connect(flood, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
 	connect(eraseControl, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
+	
 	connect(selectFace, SIGNAL(twoSidedChanged(int)), this, SLOT(sendBrushTwoSided(int)));
+	
 	connect(flood, SIGNAL(floodRegionChanged(int)), this, SLOT(sendBrushFilterByColor(int)));
 	connect(eraseControl, SIGNAL(eraseRegionChanged(int)), this, SLOT(sendBrushFilterByColor(int)));
 }
@@ -100,6 +107,10 @@ void BrushControl::receiveToolContext(int c)
 			stackLayout->setCurrentIndex(5);
 			r = selectFace->radius();
 			ts = selectFace->twoSided();
+			break;
+		case ToolContext::PaintMap:
+			stackLayout->setCurrentIndex(6);
+			r = selectFace->radius();
 			break;
 		default:
 			break;
