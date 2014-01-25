@@ -73,8 +73,8 @@ void ToolBox::createContext()
 	
     ContextIconFrame * createContour = new ContextIconFrame(this);
 	
-	createContour->addIconFile(":brush.png");
-	createContour->addIconFile(":brushActive.png");
+	createContour->addIconFile(":createFeather.png");
+	createContour->addIconFile(":createFeatherActive.png");
 	createContour->setIconIndex(0);
 	createContour->setContext(CreateBodyContourFeather);
 	
@@ -127,7 +127,14 @@ void ToolBox::createContext()
 	rotateLight->setIconIndex(0);
 	rotateLight->setContext(RotateTransform);
 	
+	ContextIconFrame * paintMap = new ContextIconFrame(this);
+	paintMap->addIconFile(":brush.png");
+	paintMap->addIconFile(":brushActive.png");
+	paintMap->setIconIndex(0);
+	paintMap->setContext(PaintMap);
+	
 	m_contextFrames.push_back(selectFace);
+	m_contextFrames.push_back(paintMap);
 	m_contextFrames.push_back(selectRegion);
 	m_contextFrames.push_back(createContour);
 	m_contextFrames.push_back(combContour);

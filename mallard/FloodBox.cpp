@@ -15,7 +15,7 @@
 
 FloodBox::FloodBox(QWidget *parent) : QGroupBox(parent)
 {
-	QPixmap *pix = new QPixmap(":brushActive.png");
+	QPixmap *pix = new QPixmap(":createFeatherActive.png");
 	QLabel * img = new QLabel;
 	img->setPixmap(*pix);
 	m_radiusValue = new QDoubleEditSlider(tr("Radius"));

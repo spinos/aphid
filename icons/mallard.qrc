@@ -2,6 +2,8 @@
     <qresource prefix="/">
         <file>brush.png</file>
         <file>brushActive.png</file>
+		<file>createFeather.png</file>
+        <file>createFeatherActive.png</file>
         <file>comb.png</file>
         <file>combActive.png</file>
         <file>eraser.png</file>
