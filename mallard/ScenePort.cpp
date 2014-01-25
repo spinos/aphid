@@ -27,6 +27,7 @@ ScenePort::ScenePort(QWidget *parent) : ManipulateView(parent)
 	perspCamera()->setFarClipPlane(1000.f);
 	usePerspCamera();
 	setRenderCamera(getCamera());
+	m_displayFeather = true;
 }
 
 ScenePort::~ScenePort() {}
@@ -419,6 +420,11 @@ void ScenePort::tagFace(const std::string & name, char x)
 }
 
 void ScenePort::faceTagged() {}
+
+bool ScenePort::shouldDisplayFeather() const { return m_displayFeather; }
+
+void ScenePort::displayFeatherOn() { m_displayFeather = true; update(); }
+void ScenePort::displayFeatherOff() { m_displayFeather = false; update(); }
 
 #include <PointInsidePolygonTest.h>
 void ScenePort::testPatch()

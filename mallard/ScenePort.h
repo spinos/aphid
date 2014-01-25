@@ -52,6 +52,8 @@ public slots:
     void revertSheet();
 	void tagFaceOn();
 	void tagFaceOff();
+	void displayFeatherOn();
+	void displayFeatherOff();
 	
 protected:
 	virtual PatchMesh * activeMesh() const;
@@ -74,6 +76,9 @@ protected:
 	
 	void testPatch();
 	void testCurvature();
+	
+	bool shouldDisplayFeather() const;
 private:
 	void tagFace(const std::string & name, char x);
+	bool m_displayFeather;
 };

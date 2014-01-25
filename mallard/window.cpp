@@ -220,7 +220,13 @@ void Window::createActions()
 	growOffAct->setStatusTip(tr("Tag selected faces NOT to grow feathers"));
     connect(growOffAct, SIGNAL(triggered()), glWidget, SLOT(tagFaceOff()));
 	
-	QAction * growOffAct;
+	displayFeatherOnAct = new QAction(tr("&Show Feather"), this);
+	displayFeatherOnAct->setStatusTip(tr("Turn on feather display"));
+	connect(displayFeatherOnAct, SIGNAL(triggered()), glWidget, SLOT(displayFeatherOn()));
+	
+	displayFeatherOffAct = new QAction(tr("&Hide Feather"), this);
+	displayFeatherOffAct->setStatusTip(tr("Turn off feather display"));
+	connect(displayFeatherOffAct, SIGNAL(triggered()), glWidget, SLOT(displayFeatherOff()));
 }
 
 void Window::createMenus()
@@ -254,6 +260,8 @@ void Window::createMenus()
 	skinMenu = menuBar()->addMenu(tr("&Skin"));
 	skinMenu->addAction(growOnAct);
 	skinMenu->addAction(growOffAct);
+	skinMenu->addAction(displayFeatherOnAct);
+	skinMenu->addAction(displayFeatherOffAct);
 	
 	updateRecentFileActions();
 }

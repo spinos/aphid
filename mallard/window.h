@@ -97,6 +97,8 @@ private:
 	QAction * exportBakeAct;
 	QAction * growOnAct;
 	QAction * growOffAct;
+	QAction * displayFeatherOnAct;
+	QAction * displayFeatherOffAct;
 	enum { MaxRecentFiles = 5 };
 	QAction *recentFileActs[MaxRecentFiles];
 private:

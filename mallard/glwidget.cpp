@@ -103,16 +103,7 @@ void GLWidget::clientDraw()
 	
 	showActiveFaces();
 	
-	getDrawer()->m_surfaceProfile.apply();
-	if(m_featherTexId > -1) {
-		getDrawer()->setColor(.8f, .8f, .8f);
-		getDrawer()->bindTexture(m_featherTexId);
-	}
-	else 
-		getDrawer()->setColor(0.f, .71f, .51f);
-	
-	m_featherDrawer->draw();
-	m_featherDrawer->unbindTexture();
+	drawFeather();
 	
 	getDrawer()->m_wireProfile.apply();
 	getDrawer()->setColor(.2f, .8f, .4f);
@@ -418,5 +409,20 @@ void GLWidget::faceTagged()
 QString GLWidget::renderName() const
 {
 	return QString("take_%1").arg(rand());
+}
+
+void GLWidget::drawFeather()
+{
+	if(!shouldDisplayFeather()) return;
+	getDrawer()->m_surfaceProfile.apply();
+	if(m_featherTexId > -1) {
+		getDrawer()->setColor(.8f, .8f, .8f);
+		getDrawer()->bindTexture(m_featherTexId);
+	}
+	else 
+		getDrawer()->setColor(0.f, .71f, .51f);
+	
+	m_featherDrawer->draw();
+	m_featherDrawer->unbindTexture();
 }
 //:~

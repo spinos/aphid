@@ -89,6 +89,7 @@ private:
 	void endBaking();
 	bool isBaking() const;
 	QString renderName() const;
+	void drawFeather();
 	
 private:
 	BezierDrawer * m_bezierDrawer;
