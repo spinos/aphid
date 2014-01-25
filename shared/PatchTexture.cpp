@@ -10,8 +10,13 @@
 #include "PatchTexture.h"
 #include "PatchMesh.h"
 
-PatchTexture::PatchTexture() {}
-PatchTexture::~PatchTexture() {}
+PatchTexture::PatchTexture() 
+{ 
+	setTextureFormat(FFloat);
+	setTextureDepth(DThree);
+}
+
+PatchTexture::~PatchTexture() { m_colors.reset(); }
 
 void PatchTexture::create(PatchMesh * mesh)
 {
@@ -19,12 +24,14 @@ void PatchTexture::create(PatchMesh * mesh)
 	const unsigned nf = mesh->numQuads();
 	m_numColors = nf * ppp;
 	m_colors.reset(new Float3[m_numColors]);
-	for(unsigned i = 0; i < m_numColors; i++) m_colors[i].set(.75f, .75f, .75f);
+	for(unsigned i = 0; i < m_numColors; i++) m_colors[i].set(1.f, 1.f, 1.f);
 }
 
-const unsigned & PatchTexture::numColors() const { return m_numColors; }
+unsigned PatchTexture::numTexels() const { return m_numColors; }
 
-Float3 * PatchTexture::colors() { return m_colors.get(); }
+void * PatchTexture::data() { return m_colors.get(); }
+
+void * PatchTexture::data() const { return m_colors.get(); }
 
 Float3 * PatchTexture::patchColor(const unsigned & idx) { return &m_colors[25 * idx]; }
 
@@ -51,3 +58,22 @@ void PatchTexture::sample(const unsigned & faceIdx, const float & faceU, const f
 	dst.set(a.x * (1.f - pv) + c.x * pv, a.y * (1.f - pv) + c.y * pv, a.z * (1.f - pv) + c.z * pv);
 }
 
+void PatchTexture::fillPatchColor(const unsigned & faceIdx, const Float3 & fillColor)
+{
+	Float3 * pix = &m_colors[25 * faceIdx];
+	for(unsigned i = 0; i < 25; i++) pix[i] = fillColor;
+}
+
+void PatchTexture::toUChar(const Float3 & src, unsigned char * dst) const
+{
+	dst[0] = 255 * src.x;
+	dst[1] = 255 * src.y;
+	dst[2] = 255 * src.z;
+}
+
+void PatchTexture::toFloat(unsigned char * src, Float3 & dst) const
+{
+	dst.x = ((float)((int)src[0])) / 255.f;
+	dst.y = ((float)((int)src[1])) / 255.f;
+	dst.z = ((float)((int)src[2])) / 255.f;
+}

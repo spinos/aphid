@@ -12,6 +12,7 @@
 #include <MlFeatherCollection.h>
 #include <LightGroup.h>
 #include <RenderOptions.h>
+#include <BodyMaps.h>
 class AccPatchMesh;
 class MlSkin;
 class MlFeather;
@@ -19,7 +20,7 @@ class HBase;
 class BakeDeformer;
 class PlaybackControl;
 
-class MlScene : public HFile, public MlFeatherCollection, public LightGroup, public RenderOptions {
+class MlScene : public HFile, public MlFeatherCollection, public LightGroup, public RenderOptions, public BodyMaps {
 public:
 	MlScene();
 	virtual ~MlScene();

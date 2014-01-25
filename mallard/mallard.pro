@@ -21,6 +21,8 @@ HEADERS       =	../shared/ContextIconFrame.h \
                 ../shared/Base2DView.h \
                 ManipulateView.h \
                 ToolBox.h \
+BodyMaps.h \
+MlScene.h \
 ScenePort.h \
                 glwidget.h \
 				MlCalamus.h \
@@ -38,7 +40,6 @@ CurlBox.h \
 ScaleBox.h \
 FloodBox.h \
 EraseBox.h \
-                MlScene.h \
 				HFeather.h \
     HSkin.h \
                 MlFeatherCollection.h \
@@ -87,6 +88,8 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
                 ../shared/Base2DView.cpp \
                 ManipulateView.cpp \
                 ToolBox.cpp \
+BodyMaps.cpp \
+MlScene.cpp \
 ScenePort.cpp \
                 glwidget.cpp \
 				MlCalamus.cpp \
@@ -104,7 +107,6 @@ CurlBox.cpp \
 ScaleBox.cpp \
 FloodBox.cpp \
 EraseBox.cpp \
-                MlScene.cpp \
 				HFeather.cpp \
     HSkin.cpp \
                 MlFeatherCollection.cpp \

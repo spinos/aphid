@@ -76,8 +76,7 @@ public slots:
 	void receiveCancelRender();
 	
 protected:
-	virtual void faceTagged();
-    virtual void clientDraw();
+	virtual void clientDraw();
 	virtual void clientSelect(QMouseEvent *event);
 	virtual void clientMouseInput(QMouseEvent *event);
 	virtual void importBody(const std::string & fileName);

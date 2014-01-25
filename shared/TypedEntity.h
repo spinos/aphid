@@ -21,7 +21,8 @@ public:
 		TTransformManipulator = 6,
 		TDistantLight = 7,
 		TPointLight = 8,
-		TSquareLight = 9
+		TSquareLight = 9,
+		TTexture = 10
     };
     
 	TypedEntity();

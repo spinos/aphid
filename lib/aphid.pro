@@ -148,6 +148,8 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h ../shared/AllLight.h \
 ../shared/LightDrawer.h \
 ../shared/RenderOptions.h \
 ../shared/SelectionContext.h \
+../shared/BaseTexture.h \
+../shared/TextureGroup.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
                 ../catmullclark/BaseQuad.h \
@@ -300,6 +302,8 @@ SOURCES = ../shared/Vector3F.cpp \
 ../shared/LightDrawer.cpp \
 ../shared/RenderOptions.cpp \
 ../shared/SelectionContext.cpp \
+../shared/BaseTexture.cpp \
+../shared/TextureGroup.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \
                 ../catmullclark/BaseQuad.cpp \

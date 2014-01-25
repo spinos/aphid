@@ -9,21 +9,27 @@
 
 #pragma once
 #include <AllMath.h>
+#include <BaseTexture.h>
 #include <boost/scoped_array.hpp>
 class PatchMesh;
-class PatchTexture {
+class PatchTexture : public BaseTexture {
 public:
 	PatchTexture();
 	virtual ~PatchTexture();
 	void create(PatchMesh * mesh);
 	
-	const unsigned & numColors() const;
-	Float3 * colors();
+	virtual unsigned numTexels() const;
+	virtual void * data();
+	virtual void * data() const;
 	Float3 * patchColor(const unsigned & idx);
-	void sample(const unsigned & faceIdx, const float & faceU, const float & faceV, Float3 & dst) const;
+	void fillPatchColor(const unsigned & faceIdx, const Float3 & fillColor);
+	
+	virtual void sample(const unsigned & faceIdx, const float & faceU, const float & faceV, Float3 & dst) const;
 protected:
 
 private:
+	void toUChar(const Float3 & src, unsigned char * dst) const;
+	void toFloat(unsigned char * src, Float3 & dst) const;
 	boost::scoped_array<Float3> m_colors;
 	unsigned m_numColors;
 };

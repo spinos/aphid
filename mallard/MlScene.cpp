@@ -438,6 +438,7 @@ void MlScene::importBody(const std::string & fileName)
 	m_skin->computeVertexDisplacement();
 	m_skin->initGrowOnFaceTag();
 	setCollision(m_skin);
+	initializeTextures(m_accmesh);
 }
 
 void MlScene::afterOpen()
@@ -451,6 +452,8 @@ void MlScene::afterOpen()
 	m_skin->computeFaceCalamusIndirection();
 	m_skin->computeVertexDisplacement();
 	setCollision(m_skin);
+	initializeTextures(m_accmesh);
+	fillFaceTagMap(m_accmesh, m_accmesh->perFaceTag("growon"));
 }
 
 std::string MlScene::validateFileExtension(const std::string & fileName) const

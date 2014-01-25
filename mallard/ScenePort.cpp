@@ -415,11 +415,11 @@ void ScenePort::tagFace(const std::string & name, char x)
 	char * g = m->perFaceTag(name);
 	std::deque<unsigned>::const_iterator it = selectedQue().begin();
 	for(; it != selectedQue().end(); ++it) g[*it] = x;
-	faceTagged();
+	updateFaceTagMap(selectedQue(), g);
 	setDirty();
+	selectTexture(GrowOnTag);
+	update();
 }
-
-void ScenePort::faceTagged() {}
 
 bool ScenePort::shouldDisplayFeather() const { return m_displayFeather; }
 

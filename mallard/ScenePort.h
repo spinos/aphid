@@ -72,8 +72,6 @@ protected:
 	virtual char selectFeather();
 	virtual char floodFeather();
 	
-	virtual void faceTagged();
-	
 	void testPatch();
 	void testCurvature();
 	
