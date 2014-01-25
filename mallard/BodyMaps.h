@@ -15,7 +15,8 @@ class BodyMaps : public TextureGroup {
 public:
 	enum MapEntry {
 		GrowOnTag = 0,
-		GrowDensity = 1
+		GrowDistribute = 1,
+		GrowDensity = 2
 	};
 	
 	BodyMaps();

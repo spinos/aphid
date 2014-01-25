@@ -423,8 +423,13 @@ void ScenePort::tagFace(const std::string & name, char x)
 
 bool ScenePort::shouldDisplayFeather() const { return m_displayFeather; }
 
-void ScenePort::displayFeatherOn() { m_displayFeather = true; update(); }
-void ScenePort::displayFeatherOff() { m_displayFeather = false; update(); }
+void ScenePort::setDisplayFeather(bool x) { m_displayFeather = x; update(); }
+
+void ScenePort::selectMap(int i)
+{
+	selectTexture(i);
+	update();
+}
 
 #include <PointInsidePolygonTest.h>
 void ScenePort::testPatch()
@@ -513,5 +518,5 @@ void ScenePort::testCurvature()
 		d = m2.transform(d);      
 		p += d * .5f;  
 		b += cvt.x;   
-	} 
+	}
 }

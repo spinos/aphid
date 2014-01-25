@@ -80,6 +80,7 @@ private:
 	QMenu *recentFilesMenu;
 	QMenu * windowMenu;
 	QMenu * skinMenu;
+	QMenu * selectMapMenu;
 	QAction * showBrushControlAct;
 	QAction * showFeatherEditAct;
 	QAction * showTimeControlAct;
@@ -99,6 +100,8 @@ private:
 	QAction * growOffAct;
 	QAction * displayFeatherOnAct;
 	QAction * displayFeatherOffAct;
+	QAction * selectDistributeAct;
+	QAction * selectDensityAct;
 	enum { MaxRecentFiles = 5 };
 	QAction *recentFileActs[MaxRecentFiles];
 private:
@@ -115,6 +118,10 @@ public slots:
 private slots:
 	void openFile();
 	void openRecentFile();
+	void displayFeatherOn();
+	void displayFeatherOff();
+	void selectMap1();
+	void selectMap2();
 };
 //! [0]
 

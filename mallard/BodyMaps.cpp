@@ -15,10 +15,13 @@ BodyMaps::BodyMaps()
 	PatchTexture * ontag = new PatchTexture;
 	ontag->setName("growTag");
 	addTexture(ontag);
+	PatchTexture * distribute = new PatchTexture;
+	distribute->setName("growDistribute");
+	addTexture(distribute);
 	PatchTexture * density = new PatchTexture;
 	density->setName("growDensity");
 	addTexture(density);
-	selectTexture(0);
+	selectTexture(GrowOnTag);
 }
 
 BodyMaps::~BodyMaps() {}

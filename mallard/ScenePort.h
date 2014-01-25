@@ -52,8 +52,8 @@ public slots:
     void revertSheet();
 	void tagFaceOn();
 	void tagFaceOff();
-	void displayFeatherOn();
-	void displayFeatherOff();
+	void setDisplayFeather(bool x);
+	void selectMap(int i);
 	
 protected:
 	virtual PatchMesh * activeMesh() const;
