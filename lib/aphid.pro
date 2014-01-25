@@ -72,6 +72,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h ../shared/AllLight.h \
                 ../shared/PointInsidePolygonTest.h \
                                 ../shared/AccPatchMesh.h \
 								../shared/PatchNeighborRec.h \
+								../shared/PatchTexture.h \
                                 ../shared/CircleCurve.h \
                                 ../shared/InverseBilinearInterpolate.h \
                                 ../shared/Segment.h \
@@ -224,6 +225,7 @@ SOURCES = ../shared/Vector3F.cpp \
                 ../shared/PointInsidePolygonTest.cpp \
                                 ../shared/AccPatchMesh.cpp \
 								../shared/PatchNeighborRec.cpp \
+								../shared/PatchTexture.cpp \
                                 ../shared/CircleCurve.cpp \
                                 ../shared/InverseBilinearInterpolate.cpp \
                                 ../shared/Segment.cpp \

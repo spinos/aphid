@@ -31,6 +31,8 @@ struct Float3 {
 	: x(a), y(b), z(c)
 	{}
 	
+	void set(float a, float b, float c) { x = a; y = b; z = c; }
+	
 	float x, y, z;
 };
 
@@ -41,6 +43,8 @@ struct Float2 {
 	Float2(float a, float b)
 	: x(a), y(b)
 	{}
+	
+	void set(float a, float b) { x = a; y = b; }
 	
 	float x, y;
 };
