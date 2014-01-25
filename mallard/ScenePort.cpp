@@ -399,20 +399,10 @@ char ScenePort::floodFeather()
 	return 1;
 }
 
-void ScenePort::tagFaceOn() 
-{
-	tagFace("growon", 1);
-}
-
-void ScenePort::tagFaceOff()
-{
-	tagFace("growon", 0);
-}
-
-void ScenePort::tagFace(const std::string & name, char x)
+void ScenePort::tagFace(bool x)
 {
 	BaseMesh * m = body();
-	char * g = m->perFaceTag(name);
+	char * g = m->perFaceTag("growon");
 	std::deque<unsigned>::const_iterator it = selectedQue().begin();
 	for(; it != selectedQue().end(); ++it) g[*it] = x;
 	updateFaceTagMap(selectedQue(), g);

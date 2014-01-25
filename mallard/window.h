@@ -118,6 +118,8 @@ public slots:
 private slots:
 	void openFile();
 	void openRecentFile();
+	void tagFaceOn();
+	void tagFaceOff();
 	void displayFeatherOn();
 	void displayFeatherOff();
 	void selectMap1();

@@ -214,11 +214,11 @@ void Window::createActions()
 	
 	growOnAct = new QAction(tr("Eable Grow On Faces"), this);
 	growOnAct->setStatusTip(tr("Tag selected faces to grow feathers"));
-	connect(growOnAct, SIGNAL(triggered()), glWidget, SLOT(tagFaceOn()));
+	connect(growOnAct, SIGNAL(triggered()), this, SLOT(tagFaceOn()));
 	
 	growOffAct = new QAction(tr("Disable Grow On Faces"), this);
 	growOffAct->setStatusTip(tr("Tag selected faces NOT to grow feathers"));
-    connect(growOffAct, SIGNAL(triggered()), glWidget, SLOT(tagFaceOff()));
+    connect(growOffAct, SIGNAL(triggered()), this, SLOT(tagFaceOff()));
 	
 	displayFeatherOnAct = new QAction(tr("&Show Feather"), this);
 	displayFeatherOnAct->setStatusTip(tr("Turn on feather display"));
@@ -337,6 +337,9 @@ void Window::closeEvent(QCloseEvent *event)
 	((MlScene *)glWidget)->close();
 	QMainWindow::closeEvent(event);
 }
+
+void Window::tagFaceOn() { glWidget->tagFace(true); }
+void Window::tagFaceOff() { glWidget->tagFace(false); }
 
 void Window::displayFeatherOn() { glWidget->setDisplayFeather(true); }
 void Window::displayFeatherOff() { glWidget->setDisplayFeather(false); }

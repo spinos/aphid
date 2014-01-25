@@ -50,8 +50,7 @@ public slots:
 	void saveSheet();
 	void saveSheetAs();
     void revertSheet();
-	void tagFaceOn();
-	void tagFaceOff();
+	void tagFace(bool x);
 	void setDisplayFeather(bool x);
 	void selectMap(int i);
 	
@@ -77,6 +76,5 @@ protected:
 	
 	bool shouldDisplayFeather() const;
 private:
-	void tagFace(const std::string & name, char x);
 	bool m_displayFeather;
 };
