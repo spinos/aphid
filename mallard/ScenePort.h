@@ -70,6 +70,7 @@ protected:
 	void selectRegion();
 	virtual char selectFeather();
 	virtual char floodFeather();
+	void paintTexture();
 	
 	void testPatch();
 	void testCurvature();

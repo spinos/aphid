@@ -28,6 +28,7 @@ ScenePort::ScenePort(QWidget *parent) : ManipulateView(parent)
 	usePerspCamera();
 	setRenderCamera(getCamera());
 	m_displayFeather = true;
+	TexturePainter::setBrush(brush());
 }
 
 ScenePort::~ScenePort() {}
@@ -419,6 +420,16 @@ void ScenePort::selectMap(int i)
 {
 	selectTexture(i);
 	update();
+}
+
+void ScenePort::paintTexture()
+{
+	IntersectionContext * ctx = getIntersectionContext();
+    if(!ctx->m_success) return;
+	
+	selectFaces();
+	
+	paintOnMeshFaces(body(), selectedQue(), selectedTexture());
 }
 
 #include <PointInsidePolygonTest.h>

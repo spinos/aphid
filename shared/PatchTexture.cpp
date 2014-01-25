@@ -18,6 +18,8 @@ PatchTexture::PatchTexture()
 
 PatchTexture::~PatchTexture() { m_colors.reset(); }
 
+int PatchTexture::resolution() const { return 4; }
+
 void PatchTexture::create(PatchMesh * mesh)
 {
 	const int ppp = 5 * 5;

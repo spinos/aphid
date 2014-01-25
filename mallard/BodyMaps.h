@@ -9,9 +9,10 @@
 
 #pragma once
 #include <TextureGroup.h>
+#include <TexturePainter.h>
 #include <deque>
 class PatchMesh;
-class BodyMaps : public TextureGroup {
+class BodyMaps : public TextureGroup, public TexturePainter {
 public:
 	enum MapEntry {
 		GrowOnTag = 0,

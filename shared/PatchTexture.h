@@ -18,6 +18,8 @@ public:
 	virtual ~PatchTexture();
 	void create(PatchMesh * mesh);
 	
+	int resolution() const;
+	
 	virtual unsigned numTexels() const;
 	virtual void * data();
 	virtual void * data() const;
