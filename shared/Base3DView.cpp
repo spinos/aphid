@@ -431,39 +431,9 @@ void Base3DView::computeIncidentRay(int x, int y)
 }
 
 
-void Base3DView::receiveBrushRadius(double x)
+void Base3DView::receiveBrushChanged()
 {
-    brush()->setRadius(x);
-	update();
-}
-
-void Base3DView::receiveBrushPitch(double x)
-{
-    brush()->setPitch(x);
-	update();
-}
-
-void Base3DView::receiveBrushNumSamples(int x)
-{
-    brush()->setNumDarts(x);
-	update();
-}
-
-void Base3DView::receiveBrushStrength(double x)
-{
-	brush()->setStrength(x);
-}
-
-void Base3DView::receiveBrushTwoSided(int x)
-{
-	if(x == Qt::Checked) brush()->setTwoSided(true);
-	else brush()->setTwoSided(false);
-}
-
-void Base3DView::receiveBrushFilterByColor(int x)
-{
-	if(x == Qt::Checked) brush()->setFilterByColor(true);
-	else brush()->setFilterByColor(false);
+    update();
 }
 
 QPoint Base3DView::lastMousePos() const

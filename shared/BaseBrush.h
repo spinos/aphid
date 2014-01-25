@@ -40,11 +40,15 @@ public:
 	bool twoSided() const;
 	bool filterByColor() const;
 	
+	const Float3 & color() const;
+	void setColor(const Float3 & c);
+	
 private:
 	char ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float d) const;
 private:
 	Matrix44F m_space;
 	Vector3F m_toeWorldPos, m_previousToeWorldP;
+	Float3 m_color;
 	float m_radius, m_pitch, m_maxToeFactor, m_strength;
 	unsigned m_numDarts;
 	bool m_twoSided, m_filterByColor;

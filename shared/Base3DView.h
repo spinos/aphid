@@ -64,13 +64,8 @@ public:
 	void useOrthoCamera();
 	
 public slots:
-	void receiveBrushRadius(double x);
-    void receiveBrushPitch(double x);
-    void receiveBrushNumSamples(int x);
-	void receiveBrushStrength(double x);
-	void receiveBrushTwoSided(int x);
-	void receiveBrushFilterByColor(int x);
-	
+	void receiveBrushChanged();
+    
 protected:
 	virtual void processSelection(QMouseEvent *event);
     virtual void processDeselection(QMouseEvent *event);

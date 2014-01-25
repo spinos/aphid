@@ -27,14 +27,14 @@ class ScaleBox;
 class FloodBox;
 class EraseBox;
 class PaintBox;
+class BaseBrush;
 
 class BrushControl : public QDialog
 {
     Q_OBJECT
 
 public:
-    BrushControl(QWidget *parent = 0);
-	QWidget * floodControlWidget();
+    BrushControl(BaseBrush * brush, QWidget *parent = 0);
 	
 public slots:
 	void receiveToolContext(int c);
@@ -44,11 +44,11 @@ private slots:
 	void sendBrushStrength(double d);
 	void sendBrushTwoSided(int x);
 	void sendBrushFilterByColor(int x);
+	void sendBrushPitch(double d);
+	void sendBrushNumSamples(int x);
 signals:
-	void brushRadiusChanged(double d);
-	void brushStrengthChanged(double d);
-	void brushTwoSidedChanged(int x);
-	void brushFilterByColorChanged(int x);
+	void brushChanged();
+	
 private:
 	QStackedLayout * stackLayout;
 	SelectFaceBox * selectFace;
@@ -58,5 +58,6 @@ private:
 	FloodBox * flood;
 	EraseBox * eraseControl;
 	PaintBox * paintControl;
+	BaseBrush * m_brush;
 };
 #endif

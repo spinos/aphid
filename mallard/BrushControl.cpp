@@ -19,10 +19,12 @@
 #include "FloodBox.h"
 #include "EraseBox.h"
 #include "PaintBox.h"
+#include <BaseBrush.h>
 
-BrushControl::BrushControl(QWidget *parent)
+BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
     : QDialog(parent)
 {
+	m_brush = brush;
 	selectFace = new SelectFaceBox(this);
 	comb = new CombBox(this);
 	curl = new CurlBox(this);
@@ -65,11 +67,9 @@ BrushControl::BrushControl(QWidget *parent)
 	
 	connect(flood, SIGNAL(floodRegionChanged(int)), this, SLOT(sendBrushFilterByColor(int)));
 	connect(eraseControl, SIGNAL(eraseRegionChanged(int)), this, SLOT(sendBrushFilterByColor(int)));
-}
-
-QWidget * BrushControl::floodControlWidget()
-{
-	return flood;
+	
+	connect(flood, SIGNAL(initialCurlChanged(double)), this, SLOT(sendBrushPitch(double)));
+	connect(flood, SIGNAL(numSampleChanged(int)), this, SLOT(sendBrushNumSamples(int)));
 }
 
 void BrushControl::receiveToolContext(int c)
@@ -115,28 +115,50 @@ void BrushControl::receiveToolContext(int c)
 		default:
 			break;
 	}
-	sendBrushRadius(r);
-	sendBrushStrength(s);
+	m_brush->setRadius(r);
+	m_brush->setStrength(s);
 	sendBrushTwoSided(ts);
 	sendBrushFilterByColor(byRegion);
 }
 	
 void BrushControl::sendBrushRadius(double d)
 {
-	emit brushRadiusChanged(d);
+	m_brush->setRadius(d);
+	emit brushChanged();
 }
 	
 void BrushControl::sendBrushStrength(double d)
 {
-	emit brushStrengthChanged(d);
+	m_brush->setStrength(d);
+	emit brushChanged();
 }
 
 void BrushControl::sendBrushTwoSided(int x)
 {
-	emit brushTwoSidedChanged(x);
+	if(x == Qt::Checked)
+		m_brush->setTwoSided(true);
+	else
+		m_brush->setTwoSided(false);
+	emit brushChanged();
 }
 
 void BrushControl::sendBrushFilterByColor(int x)
 {
-	emit brushFilterByColorChanged(x);
+	if(x == Qt::Checked)
+		m_brush->setFilterByColor(true);
+	else
+		m_brush->setFilterByColor(false);
+	emit brushChanged();
+}
+
+void BrushControl::sendBrushPitch(double d)
+{
+	m_brush->setPitch(d);
+	emit brushChanged();
+}
+
+void BrushControl::sendBrushNumSamples(int x)
+{
+	m_brush->setNumDarts(x);
+	emit brushChanged();
 }

@@ -172,3 +172,6 @@ bool BaseBrush::filterByColor() const
 {
 	return m_filterByColor;
 }
+
+const Float3 & BaseBrush::color() const { return m_color; }
+void BaseBrush::setColor(const Float3 & c) { m_color = c; }

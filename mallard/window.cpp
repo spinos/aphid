@@ -60,7 +60,7 @@ Window::Window()
 	m_renderEdit = new RenderEdit(this);
 	
 	glWidget->setInteractContext(m_tools);
-	m_brushControl = new BrushControl(this);
+	m_brushControl = new BrushControl(glWidget->brush(), this);
 	m_featherEdit = new FeatherEdit(this);
 	FeatherExample::FeatherLibrary = glWidget;
 	m_timeControl = new TimeControl(this);
@@ -78,13 +78,7 @@ Window::Window()
 	connect(m_tools, SIGNAL(contextChanged(int)), this, SLOT(receiveToolContext(int)));
 	connect(m_tools, SIGNAL(contextChanged(int)), m_brushControl, SLOT(receiveToolContext(int)));
     connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
-	connect(m_brushControl, SIGNAL(brushRadiusChanged(double)), glWidget, SLOT(receiveBrushRadius(double)));
-	connect(m_brushControl, SIGNAL(brushStrengthChanged(double)), glWidget, SLOT(receiveBrushStrength(double)));
-	connect(m_brushControl, SIGNAL(brushTwoSidedChanged(int)), glWidget, SLOT(receiveBrushTwoSided(int)));
-	connect(m_brushControl->floodControlWidget(), SIGNAL(initialCurlChanged(double)), glWidget, SLOT(receiveBrushPitch(double)));
-	connect(m_brushControl->floodControlWidget(), SIGNAL(numSampleChanged(int)), glWidget, SLOT(receiveBrushNumSamples(int)));
-	connect(m_brushControl, SIGNAL(brushFilterByColorChanged(int)), glWidget, SLOT(receiveBrushFilterByColor(int)));
-	connect(m_brushControl, SIGNAL(brushFilterByColorChanged(int)), glWidget, SLOT(receiveBrushFilterByColor(int)));
+	connect(m_brushControl, SIGNAL(brushChanged()), glWidget, SLOT(receiveBrushChanged()));
 	connect(glWidget, SIGNAL(sceneNameChanged(QString)), this, SLOT(setWorkTitle(QString)));
 	connect(glWidget, SIGNAL(sendMessage(QString)), this, SLOT(showMessage(QString)));
 	connect(m_featherEdit, SIGNAL(textureLoaded(QString)), glWidget, SLOT(receiveFeatherEditBackground(QString)));
