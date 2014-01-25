@@ -21,6 +21,7 @@ public:
 	virtual ~BezierDrawer();
 	
 	virtual void rebuildBuffer(AccPatchMesh * mesh);
+	void updateBuffer(AccPatchMesh * mesh);
 	
 	void drawBezierPatch(BezierPatch * patch);
 	void drawBezierCage(BezierPatch * patch);

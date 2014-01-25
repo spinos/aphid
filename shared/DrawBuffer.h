@@ -16,7 +16,7 @@ public:
 	Vector3F * vertices();
 	Vector3F * normals();
 	Float3 * colors();
-	float * texcoords();
+	Float2 * texcoords();
 	unsigned * indices();
 	
 	const unsigned & numPoints() const;
@@ -25,6 +25,6 @@ private:
 	Vector3F * m_vertices;
     Vector3F * m_normals;
     unsigned * m_indices;
-    float * m_texcoords;
+    Float2 * m_texcoords;
     unsigned m_numVertices, m_numIndices;
 };

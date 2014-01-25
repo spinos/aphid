@@ -61,7 +61,7 @@ void DrawBuffer::createBuffer(unsigned numVertices, unsigned numIndices)
     clearBuffer();
     m_vertices = new Vector3F[numVertices];
 	m_normals = new Vector3F[numVertices];
-	m_texcoords = new float[numVertices * 2];
+	m_texcoords = new Float2[numVertices];
 	m_indices = new unsigned[numIndices];
 	m_numVertices = numVertices;
 	m_numIndices = numIndices;
@@ -80,7 +80,7 @@ Vector3F * DrawBuffer::normals()
 	return m_normals;
 }
 
-float * DrawBuffer::texcoords()
+Float2 * DrawBuffer::texcoords()
 {
     return m_texcoords;
 }

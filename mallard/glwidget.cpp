@@ -352,7 +352,7 @@ void GLWidget::updateOnFrame(int x)
 	m_featherDrawer->setCurrentOrigin(bodyDeformer()->frameCenter());
 	setCollision(skin());
 	m_featherDrawer->rebuildBuffer();
-	m_bezierDrawer->rebuildBuffer(body());
+	m_bezierDrawer->updateBuffer(body());
 	
 	update();
 	

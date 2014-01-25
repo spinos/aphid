@@ -19,6 +19,7 @@ BezierDrawer::BezierDrawer()
 {
 	m_tagName = "unknown";
 	m_tess = new Tessellator;
+	m_tess->setNumSeg(4);
 }
 
 BezierDrawer::~BezierDrawer()
@@ -30,17 +31,15 @@ void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
 {
 	AccPatch* bez = mesh->beziers();
 	
-	m_tess->setNumSeg(4);
 	const unsigned numFace = mesh->getNumFaces();
 	const unsigned vpf = m_tess->numVertices();
 	const unsigned ipf = m_tess->numIndices();
 	
 	createBuffer(vpf * numFace, ipf * numFace);
-	std::clog<<" n points "<<numPoints();
 	
 	Vector3F * cv = vertices();
 	Vector3F * normal = normals();
-	float * uv = texcoords();
+	Float2 * uv = texcoords();
 	Float3 * col = colors();
 	
 	unsigned curP = 0, curI = 0, faceStart;
@@ -55,8 +54,8 @@ void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
 			cv[curP] = pop[j];
 			normal[curP] = nor[j];
 			col[curP] = Float3(.75f, .75f, .75f);
-			uv[curP * 2] = texcoord[j].x;
-			uv[curP * 2 + 1] = texcoord[j].y;
+			uv[curP].x = texcoord[j].x;
+			uv[curP].y = texcoord[j].y;
 			
 			curP++;
 		}
@@ -68,6 +67,30 @@ void BezierDrawer::rebuildBuffer(AccPatchMesh * mesh)
 	}
 	
 	if(m_tagName != "unknown") tagColor(mesh);
+}
+
+void BezierDrawer::updateBuffer(AccPatchMesh * mesh)
+{
+	AccPatch* bez = mesh->beziers();
+	
+	const unsigned numFace = mesh->getNumFaces();
+	const unsigned vpf = m_tess->numVertices();
+	
+	Vector3F * cv = vertices();
+	Vector3F * normal = normals();
+	
+	unsigned curP = 0;
+	unsigned i, j;
+	for(i = 0; i < numFace; i++) {
+		m_tess->evaluate(bez[i]);
+		Vector3F *pop = m_tess->_positions;
+		Vector3F *nor = m_tess->_normals;
+		for(j = 0; j < vpf; j++) {
+			cv[curP] = pop[j];
+			normal[curP] = nor[j];
+			curP++;
+		}
+	}
 }
 
 void BezierDrawer::drawBezierPatch(BezierPatch * patch)
