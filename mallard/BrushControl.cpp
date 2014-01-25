@@ -70,6 +70,8 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	
 	connect(flood, SIGNAL(initialCurlChanged(double)), this, SLOT(sendBrushPitch(double)));
 	connect(flood, SIGNAL(numSampleChanged(int)), this, SLOT(sendBrushNumSamples(int)));
+	
+	connect(paintControl, SIGNAL(colorChanged(QColor)), this, SLOT(sendBrushColor(QColor)));
 }
 
 void BrushControl::receiveToolContext(int c)
@@ -78,6 +80,7 @@ void BrushControl::receiveToolContext(int c)
 	double s = 1.f;
 	int ts = 0;
 	int byRegion = 0;
+	QColor col = paintControl->color();
 	switch(c) {
 		case ToolContext::CreateBodyContourFeather:
 			stackLayout->setCurrentIndex(0);
@@ -110,13 +113,16 @@ void BrushControl::receiveToolContext(int c)
 			break;
 		case ToolContext::PaintMap:
 			stackLayout->setCurrentIndex(6);
-			r = selectFace->radius();
+			r = paintControl->radius();
 			break;
 		default:
 			break;
 	}
 	m_brush->setRadius(r);
 	m_brush->setStrength(s);
+	
+	
+	
 	sendBrushTwoSided(ts);
 	sendBrushFilterByColor(byRegion);
 }
@@ -162,3 +168,11 @@ void BrushControl::sendBrushNumSamples(int x)
 	m_brush->setNumDarts(x);
 	emit brushChanged();
 }
+
+void BrushControl::sendBrushColor(QColor c)
+{
+	Float3 colf(c.redF(), c.greenF(), c.blueF());
+	m_brush->setColor(colf);
+	emit brushChanged();
+}
+

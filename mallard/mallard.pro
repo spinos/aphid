@@ -11,6 +11,8 @@ HEADERS       =	../shared/ContextIconFrame.h \
                                 ../shared/QIconFrame.h \
                 ../shared/QIntEditSlider.h \
                 ../shared/QDoubleEditSlider.h \
+../shared/QColorBox.h \
+../shared/QColorEditSlider.h \
 ../shared/AllEdit.h \
 ../shared/QModelEdit.h \
 ../shared/QColorEdit.h \
@@ -80,6 +82,8 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 				../shared/QIconFrame.cpp \
 				../shared/QIntEditSlider.cpp \
                 ../shared/QDoubleEditSlider.cpp \
+../shared/QColorBox.cpp \
+../shared/QColorEditSlider.cpp \
 ../shared/QModelEdit.cpp \
 ../shared/QColorEdit.cpp \
 ../shared/QIntEdit.cpp \

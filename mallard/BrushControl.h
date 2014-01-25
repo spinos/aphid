@@ -46,6 +46,7 @@ private slots:
 	void sendBrushFilterByColor(int x);
 	void sendBrushPitch(double d);
 	void sendBrushNumSamples(int x);
+	void sendBrushColor(QColor c);
 signals:
 	void brushChanged();
 	
