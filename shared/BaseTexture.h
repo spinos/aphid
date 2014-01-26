@@ -14,13 +14,13 @@
 class BaseTexture : public TypedEntity, public NamedEntity {
 public:
 	enum TexelFormat {
-		FUChar = 0,
-		FFloat = 1
+		FUChar = 1,
+		FFloat = 4
 	};
 	
 	enum TexelDepth {
-		DOne = 0,
-		DThree = 1
+		DOne = 1,
+		DThree = 3
 	};
 	
 	BaseTexture();
@@ -37,6 +37,7 @@ public:
 	
 	void setAllWhite(bool x);
 	bool allWhite() const;
+	unsigned dataSize() const;
 protected:
 
 private:

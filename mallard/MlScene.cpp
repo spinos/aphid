@@ -207,6 +207,8 @@ bool MlScene::doWrite(const std::string & fileName)
 	grpLight.save(this);
 	grpLight.close();
 	
+	saveTextures("/world/tex");
+	
 	grpWorld.close();
 
 	HObject::FileIO.close();
@@ -283,10 +285,13 @@ bool MlScene::doRead(const std::string & fileName)
 		grpBody.readStringAttr(".bakefile", m_bakeName);
 	}
 	
-	//readFeatherDistribution(&grpBody);
 	readSmoothWeight(&grpBody);
 	
 	grpBody.close();
+	
+	initializeTextures(m_accmesh);
+	loadTextures("/world/tex");
+	fillFaceTagMap(m_accmesh, m_accmesh->perFaceTag("growon"));
 	
 	readFeatherExamples();
 	initializeFeatherExample();
@@ -454,8 +459,6 @@ void MlScene::afterOpen()
 	m_skin->computeFaceCalamusIndirection();
 	m_skin->computeVertexDisplacement();
 	setCollision(m_skin);
-	initializeTextures(m_accmesh);
-	fillFaceTagMap(m_accmesh, m_accmesh->perFaceTag("growon"));
 	m_skin->setDistributionMap(static_cast<PatchTexture *>(getTexture(GrowDistribute)));
 }
 

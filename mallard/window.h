@@ -100,6 +100,7 @@ private:
 	QAction * growOffAct;
 	QAction * displayFeatherOnAct;
 	QAction * displayFeatherOffAct;
+	QAction * selectGrowonAct;
 	QAction * selectDistributeAct;
 	QAction * selectDensityAct;
 	enum { MaxRecentFiles = 5 };
@@ -122,6 +123,7 @@ private slots:
 	void tagFaceOff();
 	void displayFeatherOn();
 	void displayFeatherOff();
+	void selectMap0();
 	void selectMap1();
 	void selectMap2();
 };

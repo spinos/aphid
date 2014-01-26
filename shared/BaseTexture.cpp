@@ -30,3 +30,5 @@ BaseTexture::TexelDepth BaseTexture::textureDepth() const { return m_depth; }
 
 void BaseTexture::setAllWhite(bool x) { m_allWhite = x; }
 bool BaseTexture::allWhite() const { return m_allWhite; }
+
+unsigned BaseTexture::dataSize() const { return numTexels() * m_format * m_depth; }

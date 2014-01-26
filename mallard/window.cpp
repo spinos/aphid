@@ -222,6 +222,10 @@ void Window::createActions()
 	displayFeatherOffAct->setStatusTip(tr("Turn off feather display"));
 	connect(displayFeatherOffAct, SIGNAL(triggered()), this, SLOT(displayFeatherOff()));
 	
+	selectGrowonAct = new QAction(tr("&Grow On/Off"), this);
+	selectGrowonAct->setStatusTip(tr("Choose to activate grow on map"));
+	connect(selectGrowonAct, SIGNAL(triggered()), this, SLOT(selectMap0()));
+	
 	selectDistributeAct = new QAction(tr("&Grow Distribution"), this);
 	selectDistributeAct->setStatusTip(tr("Choose to activate distribution map"));
 	connect(selectDistributeAct, SIGNAL(triggered()), this, SLOT(selectMap1()));
@@ -266,6 +270,7 @@ void Window::createMenus()
 	skinMenu->addAction(displayFeatherOffAct);
 	
 	selectMapMenu = skinMenu->addMenu(tr("&Select Map"));
+	selectMapMenu->addAction(selectGrowonAct);
 	selectMapMenu->addAction(selectDistributeAct);
 	selectMapMenu->addAction(selectDensityAct);
 	
@@ -338,5 +343,6 @@ void Window::tagFaceOff() { glWidget->tagFace(false); }
 void Window::displayFeatherOn() { glWidget->setDisplayFeather(true); }
 void Window::displayFeatherOff() { glWidget->setDisplayFeather(false); }
 
+void Window::selectMap0() { glWidget->selectMap(0); }
 void Window::selectMap1() { glWidget->selectMap(1); }
 void Window::selectMap2() { glWidget->selectMap(2); }

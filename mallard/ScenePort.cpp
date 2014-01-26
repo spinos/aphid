@@ -419,12 +419,14 @@ void ScenePort::selectMap(int i)
 
 void ScenePort::paintTexture()
 {
+	if(!isPaintable()) return;
 	IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) return;
 	
 	selectFaces();
 	
 	paintOnMeshFaces(body(), selectedQue(), selectedTexture());
+	setDirty();
 }
 
 #include <PointInsidePolygonTest.h>

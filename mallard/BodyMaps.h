@@ -22,9 +22,16 @@ public:
 	
 	BodyMaps();
 	virtual ~BodyMaps();
-	void initializeTextures(PatchMesh * mesh);
+	
+	void saveTextures(const std::string & groupName);
+	void loadTextures(const std::string & groupName);
+	
 protected:
+	void initializeTextures(PatchMesh * mesh);
 	void fillFaceTagMap(PatchMesh * mesh, char * tag);
 	void updateFaceTagMap(const std::deque<unsigned> & faces, char * tag);
+	bool isPaintable() const;
 private:
+	void saveTexture(const std::string & grpName, int texId);
+	void loadTexture(const std::string & grpName, int texId);
 };

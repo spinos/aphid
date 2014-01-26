@@ -10,6 +10,9 @@
 #include "BodyMaps.h"
 #include <PatchTexture.h>
 #include <PatchMesh.h>
+#include <HBase.h>
+#include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 BodyMaps::BodyMaps() 
 {
 	PatchTexture * ontag = new PatchTexture;
@@ -58,4 +61,73 @@ void BodyMaps::updateFaceTagMap(const std::deque<unsigned> & faces, char * tag)
 		if(tag[*it] == 1) tex->fillPatchColor(*it, bright);
 		else tex->fillPatchColor(*it, dark);
 	}
+}
+
+bool BodyMaps::isPaintable() const
+{
+	if(!selectedTexture()) return false;
+	if(selectedTexture()->name() == "growTag") return false;
+	return true;
+}
+
+void BodyMaps::saveTextures(const std::string & groupName)
+{
+	HBase grpTex(groupName.c_str());
+	saveTexture(groupName, GrowDistribute);
+	grpTex.close();
+}
+
+void BodyMaps::saveTexture(const std::string & grpName, int texId)
+{
+	BaseTexture * tex = getTexture(texId);
+	if(!tex) return;
+	HBase g((boost::format("%1%/%2%") % grpName % tex->name()).str());
+	
+	int ndata = tex->dataSize();
+	if(!g.hasNamedAttr(".size")) g.addIntAttr(".size");
+	g.writeIntAttr(".size", &ndata);
+	
+	if(!g.hasNamedData(".texdata")) g.addCharData(".texdata", ndata);
+	g.writeCharData(".texdata", ndata, (char *)tex->data());
+	std::cout<<boost::format("write %1%\n") % g.pathToObject();
+	g.close();
+}
+
+void BodyMaps::loadTextures(const std::string & groupName)
+{
+	HBase grpTex(groupName.c_str());
+	loadTexture(groupName, GrowDistribute);
+	grpTex.close();
+}
+
+void BodyMaps::loadTexture(const std::string & grpName, int texId)
+{
+	BaseTexture * tex = getTexture(texId);
+	if(!tex) return;
+	HBase g((boost::format("%1%/%2%") % grpName % tex->name()).str());
+	
+	int ndata = 0;
+	if(!g.hasNamedAttr(".size")) {
+		std::cout<<"ERROR: tex has no data size.\n";
+		g.close();
+		return;
+	}
+	
+	g.readIntAttr(".size", &ndata);
+	
+	if(ndata != tex->dataSize()) {
+		std::cout<<"ERROR: tex data size not matched.\n";
+		g.close();
+		return;
+	}
+	
+	if(!g.hasNamedData(".texdata")) {
+		std::cout<<"ERROR: tex has no data.\n";
+		g.close();
+		return;
+	}
+	
+	g.readCharData(".texdata", ndata, (char *)tex->data());
+	std::cout<<boost::format("read %1%\n") % g.pathToObject();
+	g.close();
 }
