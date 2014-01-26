@@ -12,6 +12,7 @@
 BaseBrush::BaseBrush() : m_radius(1.f), m_pitch(0.01f), m_maxToeFactor(2.f), m_numDarts(99)
 {
 	m_strength = 1.f;
+	m_dropoff = 0.f;
 	m_twoSided = false;
 	m_filterByColor = false;
 }
@@ -176,3 +177,7 @@ bool BaseBrush::filterByColor() const
 const Float3 & BaseBrush::color() const { return m_color; }
 void BaseBrush::setColor(const Float3 & c) { m_color = c; }
 const float & BaseBrush::radius() const { return m_radius; }
+
+void BaseBrush::setDropoff(float x) { m_dropoff = x; }
+const float & BaseBrush::dropoff() const { return m_dropoff; }
+

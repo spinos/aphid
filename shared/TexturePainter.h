@@ -10,11 +10,11 @@
 #pragma once
 #include <AllMath.h>
 #include <deque>
-#include <ColorBlend.h>
 class BaseBrush;
 class PatchMesh;
 class BaseTexture;
 class Patch;
+class ColorBlend;
 class TexturePainter {
 public:
 	TexturePainter();
@@ -26,6 +26,6 @@ public:
 protected:
 
 private:
-	ColorBlend m_blend;
+	ColorBlend * m_blend;
 	BaseBrush * m_brush;
 };

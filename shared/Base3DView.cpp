@@ -417,6 +417,9 @@ void Base3DView::showBrush() const
 {
 	getDrawer()->colorAsReference();
 	getDrawer()->circleAt(brush()->getSpace(), brush()->getRadius());
+	
+	if(m_brush->dropoff() > 0.f)
+		getDrawer()->circleAt(brush()->getSpace(), brush()->getRadius() * (1.f - m_brush->dropoff()));
 
     if(brush()->length() > 10e-3)
         getDrawer()->arrow(brush()->heelPosition(), brush()->toePosition());

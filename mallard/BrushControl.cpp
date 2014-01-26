@@ -62,6 +62,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	
 	connect(flood, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
 	connect(eraseControl, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
+	connect(paintControl, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
 	
 	connect(selectFace, SIGNAL(twoSidedChanged(int)), this, SLOT(sendBrushTwoSided(int)));
 	
@@ -72,20 +73,23 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	connect(flood, SIGNAL(numSampleChanged(int)), this, SLOT(sendBrushNumSamples(int)));
 	
 	connect(paintControl, SIGNAL(colorChanged(QColor)), this, SLOT(sendBrushColor(QColor)));
+	connect(paintControl, SIGNAL(dropoffChanged(double)), this, SLOT(sendBrushDropoff(double)));
 }
 
 void BrushControl::receiveToolContext(int c)
 {
 	double r = 1.f;
-	double s = 1.f;
+	double strength = 1.f;
 	int ts = 0;
 	int byRegion = 0;
 	QColor col = paintControl->color();
+	double dropoff = 0.0;
+	
 	switch(c) {
 		case ToolContext::CreateBodyContourFeather:
 			stackLayout->setCurrentIndex(0);
 			r = flood->radius();
-			s = flood->strength();
+			strength = flood->strength();
 			byRegion = flood->floodRegion();
 			break;
 		case ToolContext::CombBodyContourFeather:
@@ -103,7 +107,7 @@ void BrushControl::receiveToolContext(int c)
 		case ToolContext::EraseBodyContourFeather:
 			stackLayout->setCurrentIndex(4);
 			r = eraseControl->radius();
-			s = eraseControl->strength();
+			strength = eraseControl->strength();
 			byRegion = eraseControl->eraseRegion();
 			break;
 		case ToolContext::SelectFace:
@@ -114,15 +118,16 @@ void BrushControl::receiveToolContext(int c)
 		case ToolContext::PaintMap:
 			stackLayout->setCurrentIndex(6);
 			r = paintControl->radius();
+			dropoff = paintControl->dropoff();
+			strength = paintControl->strength();
 			break;
 		default:
 			break;
 	}
 	m_brush->setRadius(r);
-	m_brush->setStrength(s);
-	
-	
-	
+	m_brush->setStrength(strength);
+	m_brush->setDropoff(dropoff);
+
 	sendBrushTwoSided(ts);
 	sendBrushFilterByColor(byRegion);
 }
@@ -173,6 +178,12 @@ void BrushControl::sendBrushColor(QColor c)
 {
 	Float3 colf(c.redF(), c.greenF(), c.blueF());
 	m_brush->setColor(colf);
+	emit brushChanged();
+}
+
+void BrushControl::sendBrushDropoff(double x)
+{
+	m_brush->setDropoff(x);
 	emit brushChanged();
 }
 

@@ -24,6 +24,7 @@ public:
 	void setToeByIntersect(const Ray * r, bool useNormal = true);
 	void setTwoSided(bool b);
 	void setFilterByColor(bool b);
+	void setDropoff(float x);
 	
 	Matrix44F getSpace() const;
 	float getRadius() const;
@@ -44,6 +45,7 @@ public:
 	void setColor(const Float3 & c);
 	
 	const float & radius() const;
+	const float & dropoff() const;
 	
 private:
 	char ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float d) const;
@@ -51,7 +53,7 @@ private:
 	Matrix44F m_space;
 	Vector3F m_toeWorldPos, m_previousToeWorldP;
 	Float3 m_color;
-	float m_radius, m_pitch, m_maxToeFactor, m_strength;
+	float m_radius, m_pitch, m_maxToeFactor, m_strength, m_dropoff;
 	unsigned m_numDarts;
 	bool m_twoSided, m_filterByColor;
 };

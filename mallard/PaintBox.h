@@ -20,16 +20,24 @@ public:
 	
 	double radius() const;
 	QColor color() const;
+	double dropoff() const;
+	double strength() const;
 	
 signals:
 	void radiusChanged(double x);
 	void colorChanged(QColor c);
+	void dropoffChanged(double x);
+	void strengthChanged(double x);
 	
 private slots:
 	void sendRadius(double x);
 	void sendColor(QColor c);
+	void sendDropoff(double x);
+	void sendStrength(double x);
 	
 private:
 	QDoubleEditSlider * m_radiusValue;
+	QDoubleEditSlider * m_dropoffValue;
+	QDoubleEditSlider * m_strengthValue;
 	QColorEditSlider * m_colorValue;
 };
