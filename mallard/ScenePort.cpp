@@ -188,9 +188,9 @@ void ScenePort::setFeatherTexture(const std::string & name)
 
 void ScenePort::loadFeatherDistribution(const std::string & name)
 {
-    ZEXRImage *image = new ZEXRImage;
-	if(!image->open(name)) return;
-	image->verbose();
+    //ZEXRImage *image = new ZEXRImage;
+	//if(!image->open(name)) return;
+	//image->verbose();
 }
 
 void ScenePort::importBody(const std::string & fileName)

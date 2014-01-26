@@ -12,9 +12,9 @@
 GLight::GLight() 
 {
 	m_LightID = GL_LIGHT0;
-	m_Ambient = Color4( 0.1, 0.1, 0.1, 1.0 );
-	m_Diffuse = Color4( 1.0, 1.0, 1.0, 1.0 );
-	m_Specular = Color4( .9, .9, 1.0, 1.0 );
+	m_Ambient = Color4( 0.02, 0.02, 0.02, 1.0 );
+	m_Diffuse = Color4( .8, .8, .8, 1.0 );
+	m_Specular = Color4( .8, .8, .9, 1.0 );
 	m_Position = Float4( 100.0, 100.0, 100.0, 1.0 );
 }
 		

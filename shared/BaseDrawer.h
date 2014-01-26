@@ -60,7 +60,9 @@ public:
 	GProfile m_markerProfile;
 	GProfile m_surfaceProfile;
 	GProfile m_wireProfile;
+	GProfile m_paintProfile;
 	GMaterial *surfaceMat;
+	GMaterial *paintMat;
 	GLight majorLit;
 	GLight fillLit;
 	

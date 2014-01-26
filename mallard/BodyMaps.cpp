@@ -128,6 +128,7 @@ void BodyMaps::loadTexture(const std::string & grpName, int texId)
 	}
 	
 	g.readCharData(".texdata", ndata, (char *)tex->data());
+	tex->setAllWhite(false);
 	std::cout<<boost::format("read %1%\n") % g.pathToObject();
 	g.close();
 }

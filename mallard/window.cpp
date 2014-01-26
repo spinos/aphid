@@ -51,6 +51,7 @@
 #include "BarbEdit.h"
 #include "RenderEdit.h"
 #include "SceneEdit.h"
+#include "BodyMaps.h"
 Window::Window()
 {
 	std::cout<<"Initializing Mallard main window ";
@@ -113,6 +114,7 @@ void Window::receiveToolContext(int a)
 	if(m_tools->previousContext() == ToolContext::EraseBodyContourFeather)
 		glWidget->finishEraseFeather();
 	glWidget->deselectFeather();
+	if(a == ToolContext::SelectByColor) glWidget->selectTexture(BodyMaps::GrowDistribute);
 }
 
 void Window::receiveToolAction(int a)
@@ -251,7 +253,7 @@ void Window::createMenus()
 	
 	fileMenu->addSeparator();
 	fileMenu->addAction(importMeshAct);
-	fileMenu->addAction(importFDMAct);
+	//fileMenu->addAction(importFDMAct);
 	fileMenu->addAction(importBakeAct);
 	fileMenu->addAction(exportBakeAct);
 	
@@ -269,7 +271,7 @@ void Window::createMenus()
 	skinMenu->addAction(displayFeatherOnAct);
 	skinMenu->addAction(displayFeatherOffAct);
 	
-	selectMapMenu = skinMenu->addMenu(tr("&Select Map"));
+	selectMapMenu = skinMenu->addMenu(tr("&Select Attribute Map"));
 	selectMapMenu->addAction(selectGrowonAct);
 	selectMapMenu->addAction(selectDistributeAct);
 	selectMapMenu->addAction(selectDensityAct);

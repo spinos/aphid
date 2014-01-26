@@ -31,11 +31,17 @@ void BaseDrawer::initializeProfile()
 {
 	m_markerProfile = GProfile(false, true, false, false, false);
 	m_surfaceProfile = GProfile(true, true, false, false, true);
-	surfaceMat = new GMaterial(Color4(0.1, 0.1, 0.1, 1.0),Color4(0.8, 0.8, 0.8, 1.0),Color4(0.4, 0.4, 0.3, 1.0),Color4(0.0, 0.0, 0.0, 1.0), 64.f);
+	surfaceMat = new GMaterial(Color4(0.05, 0.05, 0.05, 1.0),Color4(0.8, 0.8, 0.8, 1.0),Color4(0.23, 0.23, 0.19, 1.0),Color4(0.0, 0.0, 0.0, 1.0), 100.f);
 	m_surfaceProfile.m_material = surfaceMat;
 	m_wireProfile = GProfile(false, true, true, false, false);
+	m_paintProfile = GProfile(true, true, false, false, false);
+	paintMat = new GMaterial(Color4(0.0, 0.0, 0.0, 1.0),Color4(0.8, 0.8, 0.8, 1.0),Color4(0.0, 0.0, 0.0, 1.0),Color4(0.0, 0.0, 0.0, 1.0), 100.f);
+	m_paintProfile.m_material = paintMat;
 	majorLit.activate();
 	fillLit.m_LightID = GL_LIGHT1;
+	fillLit.m_Ambient = Color4(0.f, 0.f, 0.f, 1.f);
+	fillLit.m_Diffuse = Color4(0.1f, 0.1f, 0.1f, 1.f);
+	fillLit.m_Specular = Color4(0.f, 0.1f, 0.f, 1.f);
 	fillLit.m_Position = Float4(0.f, 0.f, -1000.f, 1.f);
 	fillLit.activate();
 }

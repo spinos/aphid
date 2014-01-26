@@ -103,7 +103,7 @@ void Base3DView::initializeGL()
 	qglClearColor(m_backgroundColor.dark());
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_TEXTURE_2D);
 	glShadeModel(GL_SMOOTH);
 	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );

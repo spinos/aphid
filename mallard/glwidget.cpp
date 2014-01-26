@@ -45,20 +45,14 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientDraw()
 {
-	getDrawer()->m_surfaceProfile.apply();
+	if(interactMode() == ToolContext::PaintMap || interactMode() == ToolContext::SelectByColor) getDrawer()->m_paintProfile.apply();
+	else getDrawer()->m_surfaceProfile.apply();
 	
-	getDrawer()->setColor(0.37f, .59f, .9f);
-	
-	//if(m_featherDistrId > -1){
-	if(0){
-		//getDrawer()->setColor(.8f, .8f, .8f);
-		//getDrawer()->bindTexture(m_featherDistrId);
-	}
-
 	m_bezierDrawer->drawBuffer(selectedTexture());
-	m_bezierDrawer->unbindTexture();
+	//getDrawer()->setColor(.5f, .5f, .5f);
+	//m_bezierDrawer->drawBuffer();
 	
-	showActiveFaces();
+	if(interactMode() != ToolContext::PaintMap && interactMode() != ToolContext::SelectByColor) showActiveFaces();
 	
 	drawFeather();
 	
@@ -328,9 +322,7 @@ void GLWidget::afterOpen()
 		setFeatherTexture(febkgrd);
 		emit sendFeatherEditBackground(tr(febkgrd.c_str()));
 	}
-	//std::string fedistr = featherDistributionMap();
-	//if(fedistr != "unknown")
-	//	loadFeatherDistribution(fedistr);
+	
 	if(numLights() < 1) defaultLighting();
 	emit sceneOpened();
 }
