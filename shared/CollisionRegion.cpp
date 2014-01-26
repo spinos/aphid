@@ -11,14 +11,14 @@
 #include <IntersectionContext.h>
 #include <MeshTopology.h>
 #include <AccPatchMesh.h>
-#include <BaseImage.h>
+#include <PatchTexture.h>
 #include <BaseSphere.h>
 CollisionRegion::CollisionRegion() : m_regionElementStart(UINT_MAX) 
 {
 	m_ctx = new IntersectionContext;
 	m_topo = 0;
 	m_body = 0;
-	m_distribution = 0;
+	m_regionDistribution = 0;
 }
 
 CollisionRegion::~CollisionRegion() 
@@ -231,17 +231,17 @@ std::vector<unsigned> * CollisionRegion::regionElementIndices()
 	return &m_regionElementIndices;
 }
 
-void CollisionRegion::setDistributionMap(BaseImage * image)
+void CollisionRegion::setDistributionMap(PatchTexture * image)
 {
-    m_distribution = image;
+    m_regionDistribution = image;
 }
 
 void CollisionRegion::selectRegion(unsigned idx, const Vector2F & patchUV)
 {
-    if(!m_distribution) return;
-    Vector3F meshUV;
-    bodyMesh()->texcoordOnPatch(idx, patchUV.x, patchUV.y, meshUV);
-    m_distribution->sample(meshUV.x, meshUV.y, 3, (float *)&m_sampleColor);
+    if(!m_regionDistribution) return;
+	if(m_regionDistribution->allWhite()) return;
+    m_regionDistribution->sample(idx, patchUV.x, patchUV.y, m_sampleColor);
+	std::clog<<"select region by color ("<<m_sampleColor.x<<","<<m_sampleColor.y<<","<<m_sampleColor.z<<")\n";
 	resetCollisionRegion(idx);
 	unsigned i;
 	for(i = 1; i < numRegionElements(); i++) {
@@ -267,19 +267,11 @@ char CollisionRegion::faceColorMatches(unsigned idx) const
     return 0;
 }
 
-void CollisionRegion::colorAt(unsigned idx, float u, float v, Vector3F * dst) const
-{
-    Vector3F texcoord;
-	m_body->texcoordOnPatch(idx, u, v, texcoord);
-	m_distribution->sample(texcoord.x, texcoord.y, 3, (float *)dst);
-}
-
 char CollisionRegion::sampleColorMatches(unsigned idx, float u, float v) const
 {
-	Vector3F texcoord, curCol, difCol;
-	m_body->texcoordOnPatch(idx, u, v, texcoord);
-	m_distribution->sample(texcoord.x, texcoord.y, 3, (float *)&curCol);
-    difCol = curCol - m_sampleColor;
+	Float3 curCol;
+	m_regionDistribution->sample(idx, u, v, curCol);
+    Vector3F difCol(curCol.x - m_sampleColor.x, curCol.y - m_sampleColor.y, curCol.z - m_sampleColor.z);
     return difCol.length() < .2f;    
 }
 
@@ -338,7 +330,7 @@ void CollisionRegion::fillPatchEdge(unsigned iface, unsigned iedge, unsigned vst
     }
 }
 
-Vector3F CollisionRegion::sampleColor() const
+const Float3 & CollisionRegion::sampleColor() const
 {
     return m_sampleColor;
 }

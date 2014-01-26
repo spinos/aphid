@@ -31,7 +31,6 @@ GLWidget::GLWidget(QWidget *parent) : ScenePort(parent)
 	m_featherDrawer->create("mallard.mlc");
 	m_engine = new MlEngine(m_featherDrawer);
 	MlCalamus::FeatherLibrary = this;
-	m_featherTexId = m_featherDistrId = -1;
 	cleanSheet();
 }
 //! [0]
@@ -52,8 +51,8 @@ void GLWidget::clientDraw()
 	
 	//if(m_featherDistrId > -1){
 	if(0){
-		getDrawer()->setColor(.8f, .8f, .8f);
-		getDrawer()->bindTexture(m_featherDistrId);
+		//getDrawer()->setColor(.8f, .8f, .8f);
+		//getDrawer()->bindTexture(m_featherDistrId);
 	}
 
 	m_bezierDrawer->drawBuffer(selectedTexture());
@@ -238,10 +237,10 @@ void GLWidget::doClear()
 		getDrawer()->clearTexture(m_featherTexId);
 		m_featherTexId = -1;
 	}
-	if(m_featherDistrId > -1) {
-		getDrawer()->clearTexture(m_featherDistrId);
-		m_featherDistrId = -1;
-	}
+	//if(m_featherDistrId > -1) {
+	//	getDrawer()->clearTexture(m_featherDistrId);
+	//	m_featherDistrId = -1;
+	//}
 	m_bezierDrawer->clearBuffer();
 	m_featherDrawer->initializeBuffer();
 	emit sceneNameChanged(tr("untitled"));
@@ -329,9 +328,9 @@ void GLWidget::afterOpen()
 		setFeatherTexture(febkgrd);
 		emit sendFeatherEditBackground(tr(febkgrd.c_str()));
 	}
-	std::string fedistr = featherDistributionMap();
-	if(fedistr != "unknown")
-		loadFeatherDistribution(fedistr);
+	//std::string fedistr = featherDistributionMap();
+	//if(fedistr != "unknown")
+	//	loadFeatherDistribution(fedistr);
 	if(numLights() < 1) defaultLighting();
 	emit sceneOpened();
 }

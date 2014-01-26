@@ -15,7 +15,7 @@
 class IntersectionContext;
 class MeshTopology;
 class AccPatchMesh;
-class BaseImage;
+class PatchTexture;
 class BaseSphere;
 class CollisionRegion : public ActiveRegion {
 public:
@@ -47,7 +47,7 @@ public:
 	unsigned regionElementStart() const;
 	void setRegionElementStart(unsigned x);
 	
-	void setDistributionMap(BaseImage * image);
+	void setDistributionMap(PatchTexture * image);
 	void selectRegion(unsigned idx, const Vector2F & patchUV);
 	
 	std::vector<unsigned> * regionElementIndices();
@@ -59,8 +59,7 @@ public:
 	
 	void neighborFaces(unsigned idx, std::vector<unsigned> & dst);
 	char sampleColorMatches(unsigned idx, float u, float v) const;
-	Vector3F sampleColor() const;
-	void colorAt(unsigned idx, float u, float v, Vector3F * dst) const;
+	const Float3 & sampleColor() const;
 	
 	Vector2F curvatureAt(const Matrix33F & m0, Matrix33F & m1, const Vector3F & pos, float creep);
 	float curvatureAlong(const Matrix33F & m0, const Vector3F & pos, float * lengths, unsigned n, float * angles);
@@ -77,9 +76,9 @@ private:
 	std::vector<unsigned> m_regionElementIndices;
 	unsigned m_regionElementStart;
 	int m_hitElement;
-	BaseImage * m_distribution;
+	PatchTexture * m_regionDistribution;
 	IntersectionContext * m_ctx;
-	Vector3F m_sampleColor;
+	Float3 m_sampleColor;
 	float * m_perVertexFloat;
 	Vector3F * m_perVertexVector;
 };

@@ -28,8 +28,8 @@ public:
 	virtual void setFeatherTexture(const std::string & name);
 	std::string featherEditBackground() const;
 	
-	void setFeatherDistributionMap(const std::string & name);
-	std::string featherDistributionMap() const;
+	//void setFeatherDistributionMap(const std::string & name);
+	//std::string featherDistributionMap() const;
 
 	MlSkin * skin();
 	AccPatchMesh * body() const;
@@ -63,8 +63,8 @@ private:
 	void readFeatherExamples();
 	void writeFeatherEidtBackground(HBase * g);
 	void readFeatherEidtBackground(HBase * g);
-	void writeFeatherDistribution(HBase * g);
-	void readFeatherDistribution(HBase * g);
+	//void writeFeatherDistribution(HBase * g);
+	//void readFeatherDistribution(HBase * g);
 	void writeSmoothWeight(HBase * g);
 	void readSmoothWeight(HBase * g);
 private:
@@ -73,6 +73,6 @@ private:
 	BakeDeformer * m_deformer;
 	PlaybackControl * m_playback;
 	std::string m_featherEditBackgroundName;
-	std::string m_featherDistributionName;
+	//std::string m_featherDistributionName;
 	std::string m_bakeName;
 };

@@ -17,6 +17,7 @@ public:
 	
 	char equals(const Vector3F &other ) const;
 	char operator==( const Vector3F& other ) const;
+	char operator!=( const Vector3F& other ) const;
 	void operator+=( const Vector3F& other );	
 	void operator-=( const Vector3F& other );
 	
@@ -64,7 +65,9 @@ public:
 	static Vector3F XAxis;
 	static Vector3F YAxis;
 	static Vector3F ZAxis;
-
+	static Vector3F Zero;
+	static Vector3F One;
+	
 	float x,y,z;
 };
 #endif        //  #ifndef VECTOR3F_H

@@ -29,6 +29,8 @@ void TexturePainter::paintOnMeshFaces(PatchMesh * mesh, const std::deque<unsigne
 		Patch p = mesh->patchAt(*it);
 		paintOnFace(p, ptex->patchColor(*it), res);
 	}
+	
+	if(Vector3F((float *)&m_brush->color()) != Vector3F::One) tex->setAllWhite(false);
 }
 
 void TexturePainter::paintOnFace(const Patch & face, Float3 * tex, const int & ngrid)

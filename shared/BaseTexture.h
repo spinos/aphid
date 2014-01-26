@@ -34,9 +34,13 @@ public:
 	void setTextureDepth(TexelDepth d);
 	TexelFormat textureFormat() const;
 	TexelDepth textureDepth() const;
+	
+	void setAllWhite(bool x);
+	bool allWhite() const;
 protected:
 
 private:
 	TexelFormat m_format;
 	TexelDepth m_depth;
+	bool m_allWhite;
 };

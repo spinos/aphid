@@ -31,7 +31,7 @@ public:
 	
 	virtual void setFeatherTexture(const std::string & name);
 
-	int m_featherTexId, m_featherDistrId;
+	int m_featherTexId;
 	
 signals:
 	void featherSelectionChanged();

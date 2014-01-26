@@ -6,6 +6,8 @@
 Vector3F Vector3F::XAxis(1.f, 0.f, 0.f);
 Vector3F Vector3F::YAxis(0.f, 1.f, 0.f);
 Vector3F Vector3F::ZAxis(0.f, 0.f, 1.f);
+Vector3F Vector3F::Zero(0.f, 0.f, 0.f);
+Vector3F Vector3F::One(1.f, 1.f, 1.f);
 
 Vector3F::Vector3F() 
 {
@@ -74,6 +76,11 @@ char Vector3F::equals(const Vector3F &other ) const
 char Vector3F::operator==( const Vector3F& other ) const
 {
         return (x == other.x && y == other.y && z == other.z);
+}
+
+char Vector3F::operator!=( const Vector3F& other ) const
+{
+        return (x != other.x || y != other.y || z != other.z);
 }
 	
 void Vector3F::operator+=( const Vector3F& other )

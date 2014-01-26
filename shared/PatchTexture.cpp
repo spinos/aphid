@@ -27,6 +27,7 @@ void PatchTexture::create(PatchMesh * mesh)
 	m_numColors = nf * ppp;
 	m_colors.reset(new Float3[m_numColors]);
 	for(unsigned i = 0; i < m_numColors; i++) m_colors[i].set(1.f, 1.f, 1.f);
+	setAllWhite(true);
 }
 
 unsigned PatchTexture::numTexels() const { return m_numColors; }

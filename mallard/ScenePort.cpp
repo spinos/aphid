@@ -29,6 +29,7 @@ ScenePort::ScenePort(QWidget *parent) : ManipulateView(parent)
 	setRenderCamera(getCamera());
 	m_displayFeather = true;
 	TexturePainter::setBrush(brush());
+	m_featherTexId = -1;
 }
 
 ScenePort::~ScenePort() {}
@@ -190,11 +191,6 @@ void ScenePort::loadFeatherDistribution(const std::string & name)
     ZEXRImage *image = new ZEXRImage;
 	if(!image->open(name)) return;
 	image->verbose();
-	makeCurrent();
-	m_featherDistrId = getDrawer()->loadTexture(m_featherDistrId, image);
-	doneCurrent();
-	skin()->setDistributionMap(image);
-	setFeatherDistributionMap(name);
 }
 
 void ScenePort::importBody(const std::string & fileName)
@@ -207,13 +203,12 @@ void ScenePort::importBody(const std::string & fileName)
 
 void ScenePort::selectRegion()
 {
-    if(m_featherDistrId < 0) return;
     IntersectionContext * ctx = getIntersectionContext();
     if(!ctx->m_success) {
 		clearSelection();
 		return;
     }
-    skin()->selectRegion(ctx->m_componentIdx, ctx->m_patchUV);
+	skin()->selectRegion(ctx->m_componentIdx, ctx->m_patchUV);
 	skin()->resetActiveRegion();
 }
 

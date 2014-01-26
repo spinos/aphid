@@ -9,7 +9,7 @@
 
 #include "BaseTexture.h"
 
-BaseTexture::BaseTexture() { setEntityType(TTexture); }
+BaseTexture::BaseTexture() { setEntityType(TTexture); setAllWhite(true); }
 
 BaseTexture::~BaseTexture() {}
 
@@ -27,3 +27,6 @@ void BaseTexture::setTextureDepth(BaseTexture::TexelDepth d) { m_depth = d; }
 BaseTexture::TexelFormat BaseTexture::textureFormat() const { return m_format; }
 
 BaseTexture::TexelDepth BaseTexture::textureDepth() const { return m_depth; }
+
+void BaseTexture::setAllWhite(bool x) { m_allWhite = x; }
+bool BaseTexture::allWhite() const { return m_allWhite; }

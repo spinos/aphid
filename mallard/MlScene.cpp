@@ -24,6 +24,7 @@
 #include <EasemodelUtil.h>
 #include <boost/filesystem.hpp>
 #include <BezierPatchHirarchy.h>
+#include <PatchTexture.h>
 
 void test()
 {
@@ -96,7 +97,7 @@ std::string MlScene::featherEditBackground() const
 {
 	return m_featherEditBackgroundName;
 }
-
+/*
 void MlScene::setFeatherDistributionMap(const std::string & name)
 {
 	m_featherDistributionName = name;
@@ -105,7 +106,7 @@ void MlScene::setFeatherDistributionMap(const std::string & name)
 std::string MlScene::featherDistributionMap() const
 {
 	return m_featherDistributionName;
-}
+}*/
 
 MlSkin * MlScene::skin()
 {
@@ -153,7 +154,7 @@ void MlScene::doClear()
 	m_deformer = new BakeDeformer;
 	
 	m_featherEditBackgroundName = "unknown";
-	m_featherDistributionName = "unknown";
+	//m_featherDistributionName = "unknown";
 	
 	HFile::doClear();
 	clearLights();
@@ -191,7 +192,7 @@ bool MlScene::doWrite(const std::string & fileName)
 		grpBody.writeStringAttr(".bakefile", m_deformer->fileName());
 	}
 	
-	writeFeatherDistribution(&grpBody);
+	//writeFeatherDistribution(&grpBody);
 	writeSmoothWeight(&grpBody);
 	
 	grpBody.close();
@@ -240,7 +241,7 @@ void MlScene::writeFeatherEidtBackground(HBase * g)
 		
 	g->writeStringAttr(".bkgrd", m_featherEditBackgroundName);
 }
-
+/*
 void MlScene::writeFeatherDistribution(HBase * g)
 {
 	if(m_featherDistributionName == "unknown") return;
@@ -248,7 +249,7 @@ void MlScene::writeFeatherDistribution(HBase * g)
 		g->addStringAttr(".distrmp", m_featherDistributionName.size());
 		
 	g->writeStringAttr(".distrmp", m_featherDistributionName);
-}
+}*/
 
 void MlScene::writeSmoothWeight(HBase * g)
 {
@@ -282,7 +283,7 @@ bool MlScene::doRead(const std::string & fileName)
 		grpBody.readStringAttr(".bakefile", m_bakeName);
 	}
 	
-	readFeatherDistribution(&grpBody);
+	//readFeatherDistribution(&grpBody);
 	readSmoothWeight(&grpBody);
 	
 	grpBody.close();
@@ -339,13 +340,13 @@ void MlScene::readFeatherEidtBackground(HBase * g)
 		
 	g->readStringAttr(".bkgrd", m_featherEditBackgroundName);
 }
-
+/*
 void MlScene::readFeatherDistribution(HBase * g)
 {
 	if(!g->hasNamedAttr(".distrmp")) return;
 		
 	g->readStringAttr(".distrmp", m_featherDistributionName);
-}
+}*/
 
 void MlScene::readSmoothWeight(HBase * g)
 {
@@ -439,6 +440,7 @@ void MlScene::importBody(const std::string & fileName)
 	m_skin->initGrowOnFaceTag();
 	setCollision(m_skin);
 	initializeTextures(m_accmesh);
+	m_skin->setDistributionMap(static_cast<PatchTexture *>(getTexture(GrowDistribute)));
 }
 
 void MlScene::afterOpen()
@@ -454,6 +456,7 @@ void MlScene::afterOpen()
 	setCollision(m_skin);
 	initializeTextures(m_accmesh);
 	fillFaceTagMap(m_accmesh, m_accmesh->perFaceTag("growon"));
+	m_skin->setDistributionMap(static_cast<PatchTexture *>(getTexture(GrowDistribute)));
 }
 
 std::string MlScene::validateFileExtension(const std::string & fileName) const
