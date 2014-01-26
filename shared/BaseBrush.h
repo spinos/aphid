@@ -43,6 +43,8 @@ public:
 	const Float3 & color() const;
 	void setColor(const Float3 & c);
 	
+	const float & radius() const;
+	
 private:
 	char ignoreTooClose(Vector3F p, Vector3F *data, unsigned count, float d) const;
 private:

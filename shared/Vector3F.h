@@ -55,6 +55,7 @@ public:
 	float angleY() const;
 	
 	float angleBetween(const Vector3F& another, const Vector3F& up) const;
+	float distanceTo(const Vector3F& another) const;
 	float distance2To(const Vector3F& another) const;
 	void resize(float l);
 	

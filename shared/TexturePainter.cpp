@@ -31,7 +31,10 @@ void TexturePainter::paintOnMeshFaces(PatchMesh * mesh, const std::deque<unsigne
 
 void TexturePainter::paintOnFace(const Patch & face, Float3 * tex, const int & ngrid)
 {
-	Float3 dstCol = m_brush->color();
+	m_blend.setCenter(m_brush->heelPosition());
+	m_blend.setMaxDistance(m_brush->radius());
+	const Float3 dstCol = m_brush->color();
+	Vector3F pop;
 	const float du = 1.f / (float)ngrid;
 	const float dv = du;
 	float u, v;
@@ -40,7 +43,9 @@ void TexturePainter::paintOnFace(const Patch & face, Float3 * tex, const int & n
 		v = dv * j;
 		for(int i = 0; i <= ngrid; i++) {
 			u = du * i;
-			tex[acc++] = dstCol;
+			face.point(u, v, &pop);
+			
+			m_blend.blend(pop, dstCol, &tex[acc++]);
 		}
 	}
 }

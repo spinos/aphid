@@ -56,7 +56,7 @@ float Patch::planarDistanceTo(const Vector3F & po, Vector3F & closestP) const
 	return minD;
 }
 
-Vector3F Patch::vertex(int idx) const
+const Vector3F & Patch::vertex(int idx) const
 {
 	return m_segs[idx].m_origin;
 }
@@ -167,6 +167,13 @@ Vector3F Patch::point(float u, float v) const
 	Vector3F lo = vertex(0) * (1.f - u) + vertex(1) * u;
     Vector3F hi = vertex(3) * (1.f - u) + vertex(2) * u;
     return lo * (1.f - v) + hi * v;
+}
+
+void Patch::point(const float & u, const float & v, Vector3F * p) const
+{
+	Vector3F lo = vertex(0) * (1.f - u) + vertex(1) * u;
+    Vector3F hi = vertex(3) * (1.f - u) + vertex(2) * u;
+    *p = lo * (1.f - v) + hi * v;
 }
 
 void Patch::setTexcoord(const Vector2F & t0, const Vector2F & t1, const Vector2F & t2, const Vector2F & t3)

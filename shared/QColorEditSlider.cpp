@@ -53,7 +53,7 @@ QColor QColorEditSlider::value() const
 
 void QColorEditSlider::updateSlider(QColor c)
 {
-	int h = c.hue();
+	int h = c.value();
 	
 	m_slider->setValue(h);
 	emit valueChanged(c);

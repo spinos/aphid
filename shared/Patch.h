@@ -46,10 +46,11 @@ public:
 	bool pushPlane(PushPlaneContext * ctx) const;
 	bool isBehind(const Vector3F & po, Vector3F & nr) const;
 	
-	Vector3F vertex(int idx) const;
+	const Vector3F & vertex(int idx) const;
 	Vector3F center() const;
 	Matrix33F tangentFrame() const;
 	Vector3F point(float u, float v) const;
+	void point(const float & u, const float & v, Vector3F * p) const;
 	float segmentLength(int idx) const;
 	
 	void setTexcoord(const Vector2F & t0, const Vector2F & t1, const Vector2F & t2, const Vector2F & t3);

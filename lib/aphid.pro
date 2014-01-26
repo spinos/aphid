@@ -150,6 +150,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h ../shared/AllLight.h \
 ../shared/SelectionContext.h \
 ../shared/BaseTexture.h \
 ../shared/TextureGroup.h \
+../shared/ColorBlend.h \
 ../shared/TexturePainter.h \
                                 ../lapl/VertexAdjacency.h \
                 ../lapl/Anchor.h \
@@ -305,6 +306,7 @@ SOURCES = ../shared/Vector3F.cpp \
 ../shared/SelectionContext.cpp \
 ../shared/BaseTexture.cpp \
 ../shared/TextureGroup.cpp \
+../shared/ColorBlend.cpp \
 ../shared/TexturePainter.cpp \
                                 ../lapl/VertexAdjacency.cpp \
                 ../lapl/Anchor.cpp \

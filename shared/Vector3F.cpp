@@ -268,6 +268,13 @@ float Vector3F::angleBetween(const Vector3F& another, const Vector3F& up) const
 	return -ang;
 }
 
+float Vector3F::distanceTo(const Vector3F& another) const
+{
+	float d = distance2To(another);
+	if(d < 10e-8) return 0.f;
+	return sqrt(d);
+}
+
 float Vector3F::distance2To(const Vector3F& another) const
 {
 	return (x - another.x) * (x - another.x) + (y - another.y) * (y - another.y) + (z - another.z) * (z - another.z);
