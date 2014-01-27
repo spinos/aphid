@@ -54,7 +54,7 @@ float Segment::distanceTo(const Vector3F & po, Vector3F & closestP) const
 	return Vector3F(closestP, po).length();
 }
 
-float Segment::length() const
+const float & Segment::length() const
 {
 	return m_length;
 }

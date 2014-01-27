@@ -429,6 +429,18 @@ void ScenePort::paintTexture()
 	setDirty();
 }
 
+void ScenePort::receivePaintMode(int x) 
+{ 
+	switch(x) {
+		case 1:
+			setPaintMode(TexturePainter::MSmooth); 
+			break;
+		default:
+			setPaintMode(TexturePainter::MReplace); 
+			break;
+	}
+}
+
 #include <PointInsidePolygonTest.h>
 void ScenePort::testPatch()
 {

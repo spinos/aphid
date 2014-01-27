@@ -24,7 +24,7 @@ void ColorBlend::blend(const Vector3F & p, const Float3 & src, Float3 * dst) con
 	float weight = 1.f;
 	if(distance > m_minDistance) {
 		weight = 1.f - (distance - m_minDistance) / (m_maxDistance - m_minDistance);
-		weight = weight * weight;
+		weight *= weight;
 	}
 	
 	weight *= m_strength;

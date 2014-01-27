@@ -54,7 +54,7 @@ public:
 	float segmentLength(int idx) const;
 	
 	void setTexcoord(const Vector2F & t0, const Vector2F & t1, const Vector2F & t2, const Vector2F & t3);
-	
+	float size() const;
 	Vector2F _texcoords[4];
 private:
 	Segment m_segs[4];

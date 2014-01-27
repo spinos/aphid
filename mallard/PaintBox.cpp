@@ -31,8 +31,20 @@ PaintBox::PaintBox(QWidget *parent) : QGroupBox(parent)
 	m_strengthValue->setLimit(0.01, 1.0);
 	m_strengthValue->setValue(1.0);
 	
+	QLabel *modeLabel = new QLabel(tr("Mode"));
+	modeLabel->setMinimumWidth(100);
+	m_modeCombo = new QComboBox;
+	m_modeCombo->addItem(tr("Replace"));
+	m_modeCombo->addItem(tr("Smooth"));
+	
+	QHBoxLayout * modeLayout = new QHBoxLayout;
+	modeLayout->addWidget(modeLabel);
+	modeLayout->addWidget(m_modeCombo);
+	modeLayout->setStretch(1, 1);
+	
 	QVBoxLayout * controlLayout = new QVBoxLayout;
 	controlLayout->addWidget(img);
+	controlLayout->addLayout(modeLayout);
 	controlLayout->addWidget(m_radiusValue);
 	controlLayout->addWidget(m_colorValue);
 	controlLayout->addWidget(m_dropoffValue);
@@ -45,7 +57,7 @@ PaintBox::PaintBox(QWidget *parent) : QGroupBox(parent)
 	connect(m_colorValue, SIGNAL(valueChanged(QColor)), this, SLOT(sendColor(QColor)));
 	connect(m_dropoffValue, SIGNAL(valueChanged(double)), this, SLOT(sendDropoff(double)));
 	connect(m_strengthValue, SIGNAL(valueChanged(double)), this, SLOT(sendStrength(double)));
-	
+	connect(m_modeCombo, SIGNAL(activated(int)), this, SLOT(sendMode(int)));
 }
 
 double PaintBox::radius() const
@@ -66,3 +78,5 @@ void PaintBox::sendColor(QColor c) { emit colorChanged(c); }
 void PaintBox::sendDropoff(double x) { emit dropoffChanged(x); }
 
 void PaintBox::sendStrength(double x) { emit strengthChanged(x); }
+
+void PaintBox::sendMode(int x) { emit modeChanged(x); }

@@ -9,6 +9,11 @@
 
 #pragma once
 #include <QGroupBox>
+
+QT_BEGIN_NAMESPACE
+class QComboBox;
+QT_END_NAMESPACE
+
 class QDoubleEditSlider;
 class QColorEditSlider;
 
@@ -28,16 +33,19 @@ signals:
 	void colorChanged(QColor c);
 	void dropoffChanged(double x);
 	void strengthChanged(double x);
+	void modeChanged(int x);
 	
 private slots:
 	void sendRadius(double x);
 	void sendColor(QColor c);
 	void sendDropoff(double x);
 	void sendStrength(double x);
+	void sendMode(int x);
 	
 private:
 	QDoubleEditSlider * m_radiusValue;
 	QDoubleEditSlider * m_dropoffValue;
 	QDoubleEditSlider * m_strengthValue;
 	QColorEditSlider * m_colorValue;
+	QComboBox * m_modeCombo;
 };

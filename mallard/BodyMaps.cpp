@@ -74,6 +74,7 @@ void BodyMaps::saveTextures(const std::string & groupName)
 {
 	HBase grpTex(groupName.c_str());
 	saveTexture(groupName, GrowDistribute);
+	saveTexture(groupName, GrowDensity);
 	grpTex.close();
 }
 
@@ -97,6 +98,7 @@ void BodyMaps::loadTextures(const std::string & groupName)
 {
 	HBase grpTex(groupName.c_str());
 	loadTexture(groupName, GrowDistribute);
+	loadTexture(groupName, GrowDensity);
 	grpTex.close();
 }
 

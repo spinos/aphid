@@ -74,6 +74,8 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	
 	connect(paintControl, SIGNAL(colorChanged(QColor)), this, SLOT(sendBrushColor(QColor)));
 	connect(paintControl, SIGNAL(dropoffChanged(double)), this, SLOT(sendBrushDropoff(double)));
+	
+	connect(paintControl, SIGNAL(modeChanged(int)), this, SLOT(sendPaintMode(int)));
 }
 
 void BrushControl::receiveToolContext(int c)
@@ -187,3 +189,4 @@ void BrushControl::sendBrushDropoff(double x)
 	emit brushChanged();
 }
 
+void BrushControl::sendPaintMode(int x) { emit paintModeChanged(x); }

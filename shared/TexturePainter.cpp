@@ -14,25 +14,44 @@
 #include "PointInsidePolygonTest.h"
 #include <ColorBlend.h>
 
-TexturePainter::TexturePainter() { m_blend = new ColorBlend; m_mode = MReplace; }
+TexturePainter::TexturePainter() 
+{ 
+	m_blend = new ColorBlend; 
+	m_mode = MReplace;
+	m_lastPosition.set(-10e8, -10e8, -10e8);
+	m_averageFaceSize = 0.f;
+}
+
 TexturePainter::~TexturePainter() { delete m_blend; }
 
 void TexturePainter::setBrush(BaseBrush * brush) { m_brush = brush; }
 
+char TexturePainter::updatePaintPosition()
+{
+	if(m_lastPosition.distanceTo(m_brush->heelPosition()) < m_averageFaceSize) return 0;
+	m_lastPosition = m_brush->heelPosition();
+	return 1;
+}
+
 void TexturePainter::paintOnMeshFaces(PatchMesh * mesh, const std::deque<unsigned> & faceIds, BaseTexture * tex)
 {
+	if(!updatePaintPosition()) return;
+	
     if(m_mode == MReplace) m_destinyColor = m_brush->color();
     else m_destinyColor = averageColor(faceIds, tex);
 
 	PatchTexture * ptex = static_cast<PatchTexture *>(tex);
-		
+	
+	m_averageFaceSize = 0.f;
 	int res = ptex->resolution();
 	std::deque<unsigned>::const_iterator it = faceIds.begin();
 	for(; it != faceIds.end(); ++it) {
 		Patch p = mesh->patchAt(*it);
 		paintOnFace(p, ptex->patchColor(*it), res);
+		m_averageFaceSize += p.size();
 	}
-	
+	m_averageFaceSize /= (float)faceIds.size();
+	m_averageFaceSize *= .33f;
 	if(Vector3F((float *)&m_destinyColor) != Vector3F::One) tex->setAllWhite(false);
 }
 

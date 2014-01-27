@@ -30,11 +30,15 @@ public:
 	
 	void setPaintMode(PaintMode m);
 	PaintMode paintMode() const;
+	
 protected:
 
 private:
+	char updatePaintPosition();
     Float3 averageColor(const std::deque<unsigned> & faceIds, BaseTexture * tex) const;
     Float3 m_destinyColor;
+	Vector3F m_lastPosition;
+	float m_averageFaceSize;
     PaintMode m_mode;
 	ColorBlend * m_blend;
 	BaseBrush * m_brush;

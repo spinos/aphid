@@ -188,3 +188,8 @@ float Patch::segmentLength(int idx) const
 {
 	return m_segs[idx].length();
 }
+
+float Patch::size() const
+{
+	return .25f * (segmentLength(0) + segmentLength(1) + segmentLength(2) + segmentLength(3));
+}

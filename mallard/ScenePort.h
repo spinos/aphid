@@ -41,6 +41,7 @@ signals:
 public slots:
 	void receiveCameraChanged();
 	void receiveBarbChanged();
+	void receivePaintMode(int x);
 	void importBodyMesh();
 	void importFeatherDistributionMap();
 	void chooseBake();

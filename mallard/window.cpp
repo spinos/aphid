@@ -80,6 +80,7 @@ Window::Window()
 	connect(m_tools, SIGNAL(contextChanged(int)), m_brushControl, SLOT(receiveToolContext(int)));
     connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
 	connect(m_brushControl, SIGNAL(brushChanged()), glWidget, SLOT(receiveBrushChanged()));
+	connect(m_brushControl, SIGNAL(paintModeChanged(int)), glWidget, SLOT(receivePaintMode(int)));
 	connect(glWidget, SIGNAL(sceneNameChanged(QString)), this, SLOT(setWorkTitle(QString)));
 	connect(glWidget, SIGNAL(sendMessage(QString)), this, SLOT(showMessage(QString)));
 	connect(m_featherEdit, SIGNAL(textureLoaded(QString)), glWidget, SLOT(receiveFeatherEditBackground(QString)));

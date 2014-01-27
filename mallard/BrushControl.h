@@ -48,8 +48,10 @@ private slots:
 	void sendBrushNumSamples(int x);
 	void sendBrushColor(QColor c);
 	void sendBrushDropoff(double x);
+	void sendPaintMode(int x);
 signals:
 	void brushChanged();
+	void paintModeChanged(int x);
 	
 private:
 	QStackedLayout * stackLayout;
