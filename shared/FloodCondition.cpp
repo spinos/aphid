@@ -8,10 +8,11 @@
  */
 
 #include "FloodCondition.h"
-
+#include <BaseTexture.h>
 FloodCondition::FloodCondition() 
 {
 	m_minDistance = 0.1f;
+	m_density = 0;
 }
 
 void FloodCondition::setMinDistance(float d) 
@@ -23,3 +24,5 @@ float FloodCondition::minDistance() const
 {
 	return m_minDistance;
 }
+
+void FloodCondition::setDensityMap(BaseTexture * tex) { m_density = tex; }

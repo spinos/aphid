@@ -366,6 +366,7 @@ char ScenePort::floodFeather()
 	brush()->resetToe();
 	
 	FloodCondition condition;
+	condition.setDensityMap(getTexture(GrowDensity));
 	condition.setCenter(ctx->m_hitP);
 	condition.setNormal(ctx->m_hitN);
 	condition.setMaxDistance(brush()->getRadius());
