@@ -115,6 +115,7 @@ void Window::receiveToolContext(int a)
 		glWidget->finishEraseFeather();
 	glWidget->deselectFeather();
 	if(a == ToolContext::SelectByColor) glWidget->selectTexture(BodyMaps::GrowDistribute);
+	if(a == ToolContext::CreateBodyContourFeather) glWidget->setDisplayFeather(true);
 }
 
 void Window::receiveToolAction(int a)

@@ -14,13 +14,16 @@
 #include "PointInsidePolygonTest.h"
 #include <ColorBlend.h>
 
-TexturePainter::TexturePainter() { m_blend = new ColorBlend; }
+TexturePainter::TexturePainter() { m_blend = new ColorBlend; m_mode = MReplace; }
 TexturePainter::~TexturePainter() { delete m_blend; }
 
 void TexturePainter::setBrush(BaseBrush * brush) { m_brush = brush; }
 
 void TexturePainter::paintOnMeshFaces(PatchMesh * mesh, const std::deque<unsigned> & faceIds, BaseTexture * tex)
 {
+    if(m_mode == MReplace) m_destinyColor = m_brush->color();
+    else m_destinyColor = averageColor(faceIds, tex);
+
 	PatchTexture * ptex = static_cast<PatchTexture *>(tex);
 		
 	int res = ptex->resolution();
@@ -30,7 +33,7 @@ void TexturePainter::paintOnMeshFaces(PatchMesh * mesh, const std::deque<unsigne
 		paintOnFace(p, ptex->patchColor(*it), res);
 	}
 	
-	if(Vector3F((float *)&m_brush->color()) != Vector3F::One) tex->setAllWhite(false);
+	if(Vector3F((float *)&m_destinyColor) != Vector3F::One) tex->setAllWhite(false);
 }
 
 void TexturePainter::paintOnFace(const Patch & face, Float3 * tex, const int & ngrid)
@@ -39,7 +42,7 @@ void TexturePainter::paintOnFace(const Patch & face, Float3 * tex, const int & n
 	m_blend->setMaxDistance(m_brush->radius());
 	m_blend->setDropoff(m_brush->dropoff());
 	m_blend->setStrength(m_brush->strength());
-	const Float3 dstCol = m_brush->color();
+	
 	Vector3F pop;
 	const float du = 1.f / (float)ngrid;
 	const float dv = du;
@@ -51,7 +54,30 @@ void TexturePainter::paintOnFace(const Patch & face, Float3 * tex, const int & n
 			u = du * i;
 			face.point(u, v, &pop);
 			
-			m_blend->blend(pop, dstCol, &tex[acc++]);
+			m_blend->blend(pop, m_destinyColor, &tex[acc++]);
 		}
 	}
+}
+
+void TexturePainter::setPaintMode(TexturePainter::PaintMode m) { m_mode = m; }
+TexturePainter::PaintMode TexturePainter::paintMode() const { return m_mode; }
+
+Float3 TexturePainter::averageColor(const std::deque<unsigned> & faceIds, BaseTexture * tex) const
+{
+    Vector3F sum;
+    Float3 sample;
+    float u, v;
+    int j, nsamp = 0;
+    std::deque<unsigned>::const_iterator it = faceIds.begin();
+	for(; it != faceIds.end(); ++it) {
+	    for(j = 0; j < 4; j++) {
+	        u = (float)(rand() % 199) / 199.f;
+	        v = (float)(rand() % 199) / 199.f;
+	        tex->sample(*it, u, v, sample);
+	        sum += Vector3F((float *)&sample);
+	        nsamp++;
+	    }
+	}
+	sum /= (float)nsamp;
+	return Float3(sum.x, sum.y, sum.z);
 }

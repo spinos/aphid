@@ -8,8 +8,6 @@
  */
 
 #include "PaintBox.h"
-
-
 #include <QtGui>
 #include <QDoubleEditSlider.h>
 #include <QColorEditSlider.h>

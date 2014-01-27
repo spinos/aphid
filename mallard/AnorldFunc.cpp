@@ -1,6 +1,7 @@
 #include "AnorldFunc.h"
 #include <iostream>
 #include <BaseCamera.h>
+
 AnorldFunc::AnorldFunc() 
 {
 }
@@ -35,8 +36,10 @@ std::string AnorldFunc::arnoldVersionString()
 	AiBegin();
     s = AiGetVersionInfo();
 	AiEnd();
+	int found = s.find("windows", 1);
+	if(found > 1) s.erase(found);
 #endif
-	return s;
+    return s;
 }
 
 #ifdef WIN32
