@@ -30,6 +30,4 @@ void ContextIconFrame::mousePressEvent(QMouseEvent *event)
 		emit contextDisabled(m_context);
 }
 
-void ContextIconFrame::mouseReleaseEvent(QMouseEvent *event)
-{
-}
+void ContextIconFrame::mouseReleaseEvent(QMouseEvent *event) {}

@@ -98,8 +98,6 @@ private:
 	QAction * exportBakeAct;
 	QAction * growOnAct;
 	QAction * growOffAct;
-	QAction * displayFeatherOnAct;
-	QAction * displayFeatherOffAct;
 	QAction * selectGrowonAct;
 	QAction * selectDistributeAct;
 	QAction * selectDensityAct;
@@ -113,6 +111,7 @@ private:
 public slots:
 	void receiveToolContext(int a);
     void receiveToolAction(int a);
+	void receiveToolState(int a);
 	void setWorkTitle(QString name);
 	void showMessage(QString msg);
 	
@@ -121,11 +120,13 @@ private slots:
 	void openRecentFile();
 	void tagFaceOn();
 	void tagFaceOff();
-	void displayFeatherOn();
-	void displayFeatherOff();
 	void selectMap0();
 	void selectMap1();
 	void selectMap2();
+	void toggleDisplayFeather();
+	
+private:
+	bool m_shouldDisplayFeather; 
 };
 //! [0]
 

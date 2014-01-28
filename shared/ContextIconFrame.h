@@ -20,10 +20,9 @@ public:
 	
 	void setContext(int val);
 	int getContext() const;
-	
+protected:	
 	virtual void mousePressEvent(QMouseEvent *event);
 	virtual void mouseReleaseEvent(QMouseEvent *event);
-	
 signals:
 	void contextEnabled(int c);
 	void contextDisabled(int c);

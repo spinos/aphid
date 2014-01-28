@@ -61,15 +61,13 @@ public:
 	
 	char useNextIcon();
 	
-	virtual void mousePressEvent(QMouseEvent *event);
-	virtual void mouseReleaseEvent(QMouseEvent *event);
-	
 signals:
 
 public slots:
 
 protected:
-    
+    virtual void mousePressEvent(QMouseEvent *event);
+	virtual void mouseReleaseEvent(QMouseEvent *event);
 
 private:
     QList<QPixmap *> icons;

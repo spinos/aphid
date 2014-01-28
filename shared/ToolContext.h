@@ -44,6 +44,11 @@ public:
 		LaunchRender = 17,
 		ChangeFeatherType = 18
     };
+	
+	enum StateRank {
+		UnknownState = 0,
+		DisplayFeather = 1
+	};
     
     ToolContext();
     

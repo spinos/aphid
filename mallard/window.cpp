@@ -54,6 +54,7 @@
 #include "BodyMaps.h"
 Window::Window()
 {
+	m_shouldDisplayFeather = true;
 	std::cout<<"Initializing Mallard main window ";
     glWidget = new GLWidget;
 	m_tools = new ToolBox;
@@ -79,6 +80,7 @@ Window::Window()
 	connect(m_tools, SIGNAL(contextChanged(int)), this, SLOT(receiveToolContext(int)));
 	connect(m_tools, SIGNAL(contextChanged(int)), m_brushControl, SLOT(receiveToolContext(int)));
     connect(m_tools, SIGNAL(actionTriggered(int)), this, SLOT(receiveToolAction(int)));
+	connect(m_tools, SIGNAL(stateChanged(int)), this, SLOT(receiveToolState(int)));
 	connect(m_brushControl, SIGNAL(brushChanged()), glWidget, SLOT(receiveBrushChanged()));
 	connect(m_brushControl, SIGNAL(paintModeChanged(int)), glWidget, SLOT(receivePaintMode(int)));
 	connect(glWidget, SIGNAL(sceneNameChanged(QString)), this, SLOT(setWorkTitle(QString)));
@@ -136,6 +138,17 @@ void Window::receiveToolAction(int a)
 		    m_renderEdit->show();
 			glWidget->testRender();
 			break;	
+		default:
+			break;
+	}
+}
+
+void Window::receiveToolState(int a)
+{
+	switch (a) {
+		case ToolContext::DisplayFeather:
+			toggleDisplayFeather();
+			break;
 		default:
 			break;
 	}
@@ -218,14 +231,6 @@ void Window::createActions()
 	growOffAct->setStatusTip(tr("Tag selected faces NOT to grow feathers"));
     connect(growOffAct, SIGNAL(triggered()), this, SLOT(tagFaceOff()));
 	
-	displayFeatherOnAct = new QAction(tr("&Show Feather"), this);
-	displayFeatherOnAct->setStatusTip(tr("Turn on feather display"));
-	connect(displayFeatherOnAct, SIGNAL(triggered()), this, SLOT(displayFeatherOn()));
-	
-	displayFeatherOffAct = new QAction(tr("&Hide Feather"), this);
-	displayFeatherOffAct->setStatusTip(tr("Turn off feather display"));
-	connect(displayFeatherOffAct, SIGNAL(triggered()), this, SLOT(displayFeatherOff()));
-	
 	selectGrowonAct = new QAction(tr("&Grow On/Off"), this);
 	selectGrowonAct->setStatusTip(tr("Choose to activate grow on map"));
 	connect(selectGrowonAct, SIGNAL(triggered()), this, SLOT(selectMap0()));
@@ -270,8 +275,6 @@ void Window::createMenus()
 	skinMenu = menuBar()->addMenu(tr("&Skin"));
 	skinMenu->addAction(growOnAct);
 	skinMenu->addAction(growOffAct);
-	skinMenu->addAction(displayFeatherOnAct);
-	skinMenu->addAction(displayFeatherOffAct);
 	
 	selectMapMenu = skinMenu->addMenu(tr("&Select Attribute Map"));
 	selectMapMenu->addAction(selectGrowonAct);
@@ -343,10 +346,12 @@ void Window::closeEvent(QCloseEvent *event)
 
 void Window::tagFaceOn() { glWidget->tagFace(true); }
 void Window::tagFaceOff() { glWidget->tagFace(false); }
-
-void Window::displayFeatherOn() { glWidget->setDisplayFeather(true); }
-void Window::displayFeatherOff() { glWidget->setDisplayFeather(false); }
-
 void Window::selectMap0() { glWidget->selectMap(0); }
 void Window::selectMap1() { glWidget->selectMap(1); }
 void Window::selectMap2() { glWidget->selectMap(2); }
+
+void Window::toggleDisplayFeather()
+{
+	m_shouldDisplayFeather = !m_shouldDisplayFeather;
+	glWidget->setDisplayFeather(m_shouldDisplayFeather);
+}

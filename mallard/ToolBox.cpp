@@ -10,6 +10,7 @@
 #include "ToolBox.h"
 #include <ContextIconFrame.h>
 #include <ActionIconFrame.h>
+#include <StateIconFrame.h>
 
 ToolBox::ToolBox(QWidget *parent) : QToolBar(parent) 
 {
@@ -23,7 +24,14 @@ ToolBox::ToolBox(QWidget *parent) : QToolBar(parent)
 		connect(*it, SIGNAL(contextDisabled(int)), this, SLOT(onContextFrameChanged(int)));
 	}
 	
-	addSeparator();
+	//addSeparator();
+	
+	createState();
+	
+	for(std::vector<StateIconFrame *>::iterator it = m_stateFrames.begin(); it != m_stateFrames.end(); ++it) {
+		addWidget(*it);
+		connect(*it, SIGNAL(stateChanged(int)), this, SLOT(onStateFrameChanged(int)));
+	}
 	
 	for(std::vector<ActionIconFrame *>::iterator it = m_actionFrames.begin(); it != m_actionFrames.end(); ++it) {
 		addWidget(*it);
@@ -175,4 +183,19 @@ void ToolBox::createAction()
 	m_actionFrames.push_back(clr);
 	m_actionFrames.push_back(b);
 	m_actionFrames.push_back(render);
+}
+
+void ToolBox::createState()
+{
+	StateIconFrame * toggleFeather = new StateIconFrame(this);
+	toggleFeather->addIconFile(":eyeOpen.png");
+	toggleFeather->addIconFile(":eyeClose.png");
+	toggleFeather->setIconIndex(0);
+	toggleFeather->setState(DisplayFeather);
+	m_stateFrames.push_back(toggleFeather);
+}
+
+void ToolBox::onStateFrameChanged(int s)
+{
+	emit stateChanged(s);
 }

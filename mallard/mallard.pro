@@ -7,6 +7,7 @@ mac {
 
 INCLUDEPATH += ./ ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium
 HEADERS       =	../shared/ContextIconFrame.h \
+../shared/StateIconFrame.h \
                                 ../shared/ActionIconFrame.h \
                                 ../shared/QIconFrame.h \
                 ../shared/QIntEditSlider.h \
@@ -78,6 +79,7 @@ EditDelegate.h \
                 window.h
                 
 SOURCES       = ../shared/ContextIconFrame.cpp \
+../shared/StateIconFrame.cpp \
 				../shared/ActionIconFrame.cpp \
 				../shared/QIconFrame.cpp \
 				../shared/QIntEditSlider.cpp \

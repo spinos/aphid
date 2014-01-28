@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
+		<file>eyeOpen.png</file>
+		<file>eyeClose.png</file>
         <file>brush.png</file>
         <file>brushActive.png</file>
 		<file>createFeather.png</file>
