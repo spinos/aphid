@@ -33,22 +33,43 @@ char TexturePainter::updatePaintPosition()
 	return 1;
 }
 
+void TexturePainter::bufferFaces(PatchMesh * mesh, const std::deque<unsigned> & faceIds)
+{
+	m_faces.reset(new Patch[faceIds.size()]);
+	std::deque<unsigned>::const_iterator it = faceIds.begin();
+	for(unsigned i = 0; it != faceIds.end(); ++it, ++i) {
+		m_faces[i] = mesh->patchAt(*it);
+	}
+}
+
 void TexturePainter::paintOnMeshFaces(PatchMesh * mesh, const std::deque<unsigned> & faceIds, BaseTexture * tex)
 {
 	if(!updatePaintPosition()) return;
 	
-    if(m_mode == MReplace) m_destinyColor = m_brush->color();
-    else m_destinyColor = averageColor(faceIds, tex);
+	bufferFaces(mesh, faceIds);
+	
+    if(m_mode == MReplace) {
+		m_destinyColor = m_brush->color();
+		m_blend->setDropoff(m_brush->dropoff());
+		m_blend->setStrength(m_brush->strength());
+	}
+    else {
+		m_destinyColor = averageColor(faceIds, tex);
+		m_blend->setDropoff(1.f);
+		m_blend->setStrength(.25f);
+	}
+	
+	m_blend->setCenter(m_brush->heelPosition());
+	m_blend->setMaxDistance(m_brush->radius());
 
 	PatchTexture * ptex = static_cast<PatchTexture *>(tex);
 	
 	m_averageFaceSize = 0.f;
 	int res = ptex->resolution();
 	std::deque<unsigned>::const_iterator it = faceIds.begin();
-	for(; it != faceIds.end(); ++it) {
-		Patch p = mesh->patchAt(*it);
-		paintOnFace(p, ptex->patchColor(*it), res);
-		m_averageFaceSize += p.size();
+	for(unsigned i = 0; it != faceIds.end(); ++it, ++i) {
+		paintOnFace(m_faces[i], ptex->patchColor(*it), res);
+		m_averageFaceSize += m_faces[i].size();
 	}
 	m_averageFaceSize /= (float)faceIds.size();
 	m_averageFaceSize *= .33f;
@@ -57,11 +78,6 @@ void TexturePainter::paintOnMeshFaces(PatchMesh * mesh, const std::deque<unsigne
 
 void TexturePainter::paintOnFace(const Patch & face, Float3 * tex, const int & ngrid)
 {
-	m_blend->setCenter(m_brush->heelPosition());
-	m_blend->setMaxDistance(m_brush->radius());
-	m_blend->setDropoff(m_brush->dropoff());
-	m_blend->setStrength(m_brush->strength());
-	
 	Vector3F pop;
 	const float du = 1.f / (float)ngrid;
 	const float dv = du;
@@ -83,20 +99,29 @@ TexturePainter::PaintMode TexturePainter::paintMode() const { return m_mode; }
 
 Float3 TexturePainter::averageColor(const std::deque<unsigned> & faceIds, BaseTexture * tex) const
 {
-    Vector3F sum;
+    Vector3F sum, pop;
     Float3 sample;
-    float u, v;
-    int j, nsamp = 0;
+    float u, v, d, weight, nsamp = 0.f;
+    int j;
     std::deque<unsigned>::const_iterator it = faceIds.begin();
-	for(; it != faceIds.end(); ++it) {
+	for(unsigned i = 0; it != faceIds.end(); ++it, ++i) {
+		Patch & p = m_faces[i];
 	    for(j = 0; j < 4; j++) {
 	        u = (float)(rand() % 199) / 199.f;
 	        v = (float)(rand() % 199) / 199.f;
+			p.point(u, v, &pop);
+			
+			d = m_lastPosition.distanceTo(pop);
+			if(d >= m_brush->radius()) continue;
+			
+			weight = 1.f - d / m_brush->radius();
+			
 	        tex->sample(*it, u, v, sample);
-	        sum += Vector3F((float *)&sample);
-	        nsamp++;
+	        sum += Vector3F((float *)&sample) * weight;
+	        nsamp += weight;
 	    }
 	}
-	sum /= (float)nsamp;
+	if(nsamp < 10e-5) return Float3(0.f, 0.f, 0.f);
+	sum /= nsamp;
 	return Float3(sum.x, sum.y, sum.z);
 }

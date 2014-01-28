@@ -10,6 +10,7 @@
 #pragma once
 #include <AllMath.h>
 #include <deque>
+#include <boost/scoped_array.hpp>
 class BaseBrush;
 class PatchMesh;
 class BaseTexture;
@@ -35,8 +36,10 @@ protected:
 
 private:
 	char updatePaintPosition();
+	void bufferFaces(PatchMesh * mesh, const std::deque<unsigned> & faceIds);
     Float3 averageColor(const std::deque<unsigned> & faceIds, BaseTexture * tex) const;
-    Float3 m_destinyColor;
+    boost::scoped_array<Patch> m_faces;
+	Float3 m_destinyColor;
 	Vector3F m_lastPosition;
 	float m_averageFaceSize;
     PaintMode m_mode;
