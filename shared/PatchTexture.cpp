@@ -38,7 +38,24 @@ void * PatchTexture::data() const { return m_colors.get(); }
 
 Float3 * PatchTexture::patchColor(const unsigned & idx) { return &m_colors[25 * idx]; }
 
-void PatchTexture::sample(const unsigned & faceIdx, const float & faceU, const float & faceV, Float3 & dst) const
+void PatchTexture::sample(const unsigned & faceIdx, float * dst) const
+{
+	float u, v;
+	Float3 asample;
+	Vector3F average;
+	for(unsigned i = 0; i < 5; i++) {
+		u = ((float)(rand() % 199)) / 199.f;
+		v = ((float)(rand() % 199)) / 199.f;
+		sample(faceIdx, u, v, (float *)&asample);
+		average += Vector3F((float *)&asample);
+	}
+	average /= 5.f;
+	dst[0] = average.x;
+	dst[1] = average.y;
+	dst[2] = average.z;
+}
+
+void PatchTexture::sample(const unsigned & faceIdx, const float & faceU, const float & faceV, float * dst) const
 {
 	Float3 * pix = &m_colors[25 * faceIdx];
 	const int gu0 = faceU * 4.f;
@@ -58,7 +75,9 @@ void PatchTexture::sample(const unsigned & faceIdx, const float & faceU, const f
 	a.set(a.x * (1.f - pu) + b.x * pu, a.y * (1.f - pu) + b.y * pu, a.z * (1.f - pu) + b.z * pu);
 	c.set(c.x * (1.f - pu) + d.x * pu, c.y * (1.f - pu) + d.y * pu, c.z * (1.f - pu) + d.z * pu);
 	
-	dst.set(a.x * (1.f - pv) + c.x * pv, a.y * (1.f - pv) + c.y * pv, a.z * (1.f - pv) + c.z * pv);
+	dst[0] = a.x * (1.f - pv) + c.x * pv;
+	dst[1] = a.y * (1.f - pv) + c.y * pv;
+	dst[2] = a.z * (1.f - pv) + c.z * pv;
 }
 
 void PatchTexture::fillPatchColor(const unsigned & faceIdx, const Float3 & fillColor)

@@ -14,12 +14,12 @@
 #include <Patch.h>
 #include "CalamusSkin.h"
 #include <deque>
+#include <FloodCondition.h>
 class AccPatchMesh;
 class MeshTopology;
 class MlCalamusArray;
 class BaseImage;
 class SelectCondition;
-class FloodCondition;
 class MlCluster;
 
 class MlSkin : public CalamusSkin 
@@ -31,7 +31,7 @@ public:
 
 	virtual void setBodyMesh(AccPatchMesh * mesh);
 	
-	void floodAround(MlCalamus c, FloodCondition * condition);
+	void floodAround(MlCalamus c);
 	void select(const std::deque<unsigned> & src, SelectCondition * selcon);
 	void discardActive();
 	
@@ -57,6 +57,7 @@ public:
 	void shellUp(std::vector<Vector3F> & dst);
 	void initGrowOnFaceTag();
 	void verbose() const;
+	FloodCondition * createCondition();
 protected:
 	
 private:
@@ -74,4 +75,5 @@ private:
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
 	float * m_affectWeights;
+	FloodCondition m_floodCondition;
 };

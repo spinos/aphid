@@ -240,7 +240,7 @@ void CollisionRegion::selectRegion(unsigned idx, const Vector2F & patchUV)
 {
     if(!m_regionDistribution) return;
 	if(m_regionDistribution->allWhite()) return;
-    m_regionDistribution->sample(idx, patchUV.x, patchUV.y, m_sampleColor);
+    m_regionDistribution->sample(idx, patchUV.x, patchUV.y, (float *)&m_sampleColor);
 	std::clog<<"select region by color ("<<m_sampleColor.x<<","<<m_sampleColor.y<<","<<m_sampleColor.z<<")\n";
 	resetCollisionRegion(idx);
 	unsigned i;
@@ -270,7 +270,7 @@ char CollisionRegion::faceColorMatches(unsigned idx) const
 char CollisionRegion::sampleColorMatches(unsigned idx, float u, float v) const
 {
 	Float3 curCol;
-	m_regionDistribution->sample(idx, u, v, curCol);
+	m_regionDistribution->sample(idx, u, v, (float *)&curCol);
     Vector3F difCol(curCol.x - m_sampleColor.x, curCol.y - m_sampleColor.y, curCol.z - m_sampleColor.z);
     return difCol.length() < .2f;    
 }

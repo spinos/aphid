@@ -11,7 +11,6 @@
 #include <MeshTopology.h>
 #include <BaseImage.h>
 #include <SelectCondition.h>
-#include <FloodCondition.h>
 #include "MlCalamusArray.h"
 #include "MlCluster.h"
 
@@ -38,12 +37,12 @@ void MlSkin::setBodyMesh(AccPatchMesh * mesh)
 	CollisionRegion::useRegionElementVertexVector("aftshell");
 }
 
-void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
+void MlSkin::floodAround(MlCalamus floodC)
 {	
 	char * tagg = bodyMesh()->perFaceTag("growon");
 	unsigned i, j, faceInd;
 	
-	float u, v;
+	float u, v, minD;
 	Vector3F adart, facing;
 	std::vector<Vector3F> darts;
 	for(i = 0; i < m_floodFaces.size(); i++) {
@@ -51,28 +50,32 @@ void MlSkin::floodAround(MlCalamus floodC, FloodCondition * condition)
 		if(tagg[faceInd] == 0) continue;
 		
 		m_floodFaces[i].dartBegin = m_floodFaces[i].dartEnd = darts.size();
-		const unsigned ndart = 4 + bodyMesh()->calculateBBox(faceInd).area() / condition->minDistance() / condition->minDistance();
+		
+		minD = m_floodCondition.minDistance();
+		unsigned ndart = 4 + bodyMesh()->calculateBBox(faceInd).area() / minD / minD;
+		m_floodCondition.increaseNumSamples(faceInd, ndart);
+		
 		for(j = 0; j < ndart; j++) {
-			if(condition->filteredByProbability()) continue;
+			if(m_floodCondition.filteredByProbability()) continue;
 		
 			u = ((float)(rand()%591))/591.f;
 			v = ((float)(rand()%593))/593.f;
 			bodyMesh()->pointOnPatch(faceInd, u, v, adart);
 			
-			if(condition->byDistance()) {
-				if(condition->filteredByDistance(adart)) continue;
+			if(m_floodCondition.byDistance()) {
+				if(m_floodCondition.filteredByDistance(adart)) continue;
 			}
 			
-			if(hasActiveRegion() && condition->byRegion()) {
+			if(hasActiveRegion() && m_floodCondition.byRegion()) {
 				if(!sampleColorMatches(faceInd, u, v)) continue;
 			}
 			
-			//bodyMesh()->normalOnPatch(faceInd, u, v, facing);
-			//if(facing.dot(floodNor) < .23f) continue;
 			resetCollisionRegion(faceInd);
+			
+			minD = m_floodCondition.minDistance(faceInd, u, v);
 	
-			if(isPointTooCloseToExisting(adart, condition->minDistance())) continue;
-			if(isDartCloseToExisting(adart, darts, condition->minDistance())) continue;
+			if(isPointTooCloseToExisting(adart, minD)) continue;
+			if(isDartCloseToExisting(adart, darts, minD)) continue;
 				
 			darts.push_back(adart);
 			floodC.bindToFace(faceInd, u, v);
@@ -158,6 +161,8 @@ void MlSkin::growFeather(const Vector3F & direction)
 	const float scale = direction.length();
     if(scale < 10e-3) return;
 	
+	float dscale;
+	
 	Vector3F d;
 	Matrix33F space;
 	float rotX;
@@ -169,7 +174,10 @@ void MlSkin::growFeather(const Vector3F & direction)
 		d = space.transform(direction);
 		rotX = d.angleX();
 		c->setRotateX(rotX);
-		c->setScale(scale);
+		
+		dscale = scale;
+		m_floodCondition.reduceScale(c->faceIdx(), c->patchU(), c->patchV(), dscale);
+		c->setScale(dscale);
     }
 }
 
@@ -508,6 +516,8 @@ void MlSkin::initGrowOnFaceTag()
 	const unsigned nf = bodyMesh()->getNumFaces();
 	for(unsigned i =0; i < nf; i++) g[i] = 1;
 }
+
+FloodCondition * MlSkin::createCondition() { return &m_floodCondition; }
 
 void MlSkin::verbose() const
 {

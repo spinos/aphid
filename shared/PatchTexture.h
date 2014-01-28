@@ -26,7 +26,8 @@ public:
 	Float3 * patchColor(const unsigned & idx);
 	void fillPatchColor(const unsigned & faceIdx, const Float3 & fillColor);
 	
-	virtual void sample(const unsigned & faceIdx, const float & faceU, const float & faceV, Float3 & dst) const;
+	virtual void sample(const unsigned & faceIdx, float * dst) const;
+	virtual void sample(const unsigned & faceIdx, const float & faceU, const float & faceV, float * dst) const;
 protected:
 
 private:

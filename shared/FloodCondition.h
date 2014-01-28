@@ -14,9 +14,13 @@ class FloodCondition : public SelectCondition {
 public:	
 	FloodCondition();
 	void setMinDistance(float d);
-	float minDistance() const;
+	const float & minDistance() const;
+	float minDistance(const unsigned & faceIdx, const float & u, const float & v) const;
 
 	void setDensityMap(BaseTexture * tex);
+	
+	void increaseNumSamples(const unsigned & faceIdx, unsigned & dst) const;
+	void reduceScale(const unsigned & faceIdx, const float & u, const float & v, float & dst) const;
 private:
 	BaseTexture * m_density;
 	float m_minDistance;

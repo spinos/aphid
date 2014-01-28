@@ -28,7 +28,8 @@ public:
 	virtual unsigned numTexels() const;
 	virtual void * data();
 	virtual void * data() const;
-	virtual void sample(const unsigned & faceIdx, const float & faceU, const float & faceV, Float3 & dst) const;
+	virtual void sample(const unsigned & faceIdx, float * dst) const;
+	virtual void sample(const unsigned & faceIdx, const float & faceU, const float & faceV, float * dst) const;
 
 	void setTextureFormat(TexelFormat f);
 	void setTextureDepth(TexelDepth d);

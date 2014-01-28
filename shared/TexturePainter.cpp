@@ -56,7 +56,7 @@ void TexturePainter::paintOnMeshFaces(PatchMesh * mesh, const std::deque<unsigne
     else {
 		m_destinyColor = averageColor(faceIds, tex);
 		m_blend->setDropoff(1.f);
-		m_blend->setStrength(.25f);
+		m_blend->setStrength(.5f);
 	}
 	
 	m_blend->setCenter(m_brush->heelPosition());
@@ -116,7 +116,7 @@ Float3 TexturePainter::averageColor(const std::deque<unsigned> & faceIds, BaseTe
 			
 			weight = 1.f - d / m_brush->radius();
 			
-	        tex->sample(*it, u, v, sample);
+	        tex->sample(*it, u, v, (float *)&sample);
 	        sum += Vector3F((float *)&sample) * weight;
 	        nsamp += weight;
 	    }

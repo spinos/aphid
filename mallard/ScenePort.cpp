@@ -365,21 +365,21 @@ char ScenePort::floodFeather()
 	brush()->setSpace(ctx->m_hitP, ctx->m_hitN);
 	brush()->resetToe();
 	
-	FloodCondition condition;
-	condition.setDensityMap(getTexture(GrowDensity));
-	condition.setCenter(ctx->m_hitP);
-	condition.setNormal(ctx->m_hitN);
-	condition.setMaxDistance(brush()->getRadius());
-	condition.setMinDistance(brush()->minDartDistance());
-	condition.setProbability(brush()->strength());
-	condition.setDistanceFilter(1);
+	FloodCondition *condition = skin()->createCondition();
+	condition->setDensityMap(getTexture(GrowDensity));
+	condition->setCenter(ctx->m_hitP);
+	condition->setNormal(ctx->m_hitN);
+	condition->setMaxDistance(brush()->getRadius());
+	condition->setMinDistance(brush()->minDartDistance());
+	condition->setProbability(brush()->strength());
+	condition->setDistanceFilter(1);
 	
-	if(skin()->hasActiveRegion()) condition.setRegionFilter(1);
-	else condition.setRegionFilter(0);
+	if(skin()->hasActiveRegion()) condition->setRegionFilter(1);
+	else condition->setRegionFilter(0);
 	
 	if(brush()->filterByColor() && skin()->hasActiveRegion()) {
 		skin()->restFloodFacesAsActive();
-		condition.setDistanceFilter(0);
+		condition->setDistanceFilter(0);
 	}
 	else {
 		selectFaces();
@@ -391,7 +391,7 @@ char ScenePort::floodFeather()
 	ac.setFeatherId(selectedFeatherExampleId());
 	ac.setRotateY(brush()->getPitch());
 	
-	skin()->floodAround(ac, &condition);
+	skin()->floodAround(ac);
 	setDirty();
 	return 1;
 }

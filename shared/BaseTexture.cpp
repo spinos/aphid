@@ -18,7 +18,9 @@ unsigned BaseTexture::numTexels() const { return 0; }
 void * BaseTexture::data() { return 0; }
 void * BaseTexture::data() const { return 0; }
 
-void BaseTexture::sample(const unsigned & /*faceIdx*/, const float & /*faceU*/, const float & /*faceV*/, Float3 & /*dst*/) const {}
+void BaseTexture::sample(const unsigned & /*faceIdx*/, float * /*dst*/) const {}
+
+void BaseTexture::sample(const unsigned & /*faceIdx*/, const float & /*faceU*/, const float & /*faceV*/, float * /*dst*/) const {}
 
 void BaseTexture::setTextureFormat(BaseTexture::TexelFormat f) { m_format = f; }
 
