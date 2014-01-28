@@ -14,6 +14,7 @@
 #include <Patch.h>
 #include "CalamusSkin.h"
 #include <deque>
+#include <boost/scoped_array.hpp>
 #include <FloodCondition.h>
 class AccPatchMesh;
 class MeshTopology;
@@ -74,6 +75,6 @@ private:
 	unsigned m_numCreatedFeather;
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
-	float * m_affectWeights;
+	boost::scoped_array<float> m_affectWeights;
 	FloodCondition m_floodCondition;
 };

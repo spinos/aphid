@@ -17,12 +17,11 @@
 MlSkin::MlSkin() : m_numCreatedFeather(0)
 {
     m_activeIndices.clear();
-	m_affectWeights = 0;
 }
 
 MlSkin::~MlSkin() 
 {
-	if(m_affectWeights) delete[] m_affectWeights;
+	m_affectWeights.reset();
 	m_floodFaces.clear();
 }
 
@@ -220,19 +219,26 @@ void MlSkin::scaleFeather(const Vector3F & direction)
 	Matrix33F space;
 	Vector3F zdir;
 	unsigned i;
+	float dscale;
 	
 	float activeMeanScale = 0.f;
 	Vector3F activeMeanDir;
+	boost::scoped_array<float> densityScales(new float[num]);
 	for(i =0; i < num; i++) {
 		MlCalamus * c = getActive(i);
 		
 		tangentSpace(c, space);
 		
+		dscale = 1.f;
+		m_floodCondition.reduceScale(c->faceIdx(), c->patchU(), c->patchV(), dscale);
+		
+		densityScales[i] = dscale;
+		
 		zdir.set(0.f, 0.f, 1.f);
 		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
 		zdir = space.transform(zdir);
 		activeMeanDir += zdir;
-		activeMeanScale += c->realScale();
+		activeMeanScale += c->realScale() / dscale;
 	}
 	activeMeanScale /= num;
 	activeMeanDir /= (float)num;
@@ -245,7 +251,8 @@ void MlSkin::scaleFeather(const Vector3F & direction)
 		MlCalamus * c = getActive(i);
 
 		wei = m_affectWeights[i];
-		c->setScale(activeMeanScale * wei + c->realScale() * (1.f - wei));
+
+		c->setScale(activeMeanScale * densityScales[i] * wei + c->realScale() * (1.f - wei));
     }
 }
 
@@ -492,11 +499,9 @@ void MlSkin::shellUp(std::vector<Vector3F> & dst)
 
 void MlSkin::computeAffectWeight(const Vector3F & center, const float & radius)
 {
-	if(m_affectWeights) delete[] m_affectWeights;
-	m_affectWeights = 0;
 	const unsigned num = numActive();
 	if(num < 1) return;
-	m_affectWeights = new float[num];
+	m_affectWeights.reset(new float[num]);
 	float drop;
 	Vector3F p;
 	for(unsigned i =0; i < num; i++) {

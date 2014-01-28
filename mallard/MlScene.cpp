@@ -446,6 +446,8 @@ void MlScene::importBody(const std::string & fileName)
 	setCollision(m_skin);
 	initializeTextures(m_accmesh);
 	m_skin->setDistributionMap(static_cast<PatchTexture *>(getTexture(GrowDistribute)));
+	FloodCondition *condition = skin()->createCondition();
+	condition->setDensityMap(getTexture(GrowDensity));
 }
 
 void MlScene::afterOpen()
@@ -460,6 +462,8 @@ void MlScene::afterOpen()
 	m_skin->computeVertexDisplacement();
 	setCollision(m_skin);
 	m_skin->setDistributionMap(static_cast<PatchTexture *>(getTexture(GrowDistribute)));
+	FloodCondition *condition = skin()->createCondition();
+	condition->setDensityMap(getTexture(GrowDensity));
 }
 
 std::string MlScene::validateFileExtension(const std::string & fileName) const
