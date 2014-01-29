@@ -10,6 +10,7 @@
 
 #include <AllMath.h>
 #include <BoundingBox.h>
+#include <half.h>
 class MlFeather;
 class CollisionRegion;
 class MlFeatherCollection;
@@ -41,15 +42,17 @@ public:
 	void setPatchV(float v);
 	void setRotateX(const float& x);
 	void setRotateY(const float& y);
-	void setScale(const float & x);
 	void setBufferStart(unsigned x);
 	
 	void collideWith(CollisionRegion * skin, const BoundingBox & bbox);
 	void collideWith(CollisionRegion * skin, const Vector3F & center);
 	
 	static MlFeatherCollection * FeatherLibrary;
-
+	
+	void scaleLength(const float & x);
+	void setLength(const float & x);
 private:
 	unsigned m_faceIdx, m_featherId, m_bufStart;
-	float m_patchU, m_patchV, m_rotX, m_rotY, m_scale;
+	float m_patchU, m_patchV, m_rotX, m_rotY;
+	half m_scale, padding;
 };

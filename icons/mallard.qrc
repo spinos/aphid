@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
+		<file>roll.png</file>
+		<file>rollActive.png</file>
 		<file>eyeOpen.png</file>
 		<file>eyeClose.png</file>
         <file>brush.png</file>

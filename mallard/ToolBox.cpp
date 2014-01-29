@@ -116,8 +116,8 @@ void ToolBox::createContext()
 	
 	ContextIconFrame * bendContour = new ContextIconFrame(this);
 	
-	bendContour->addIconFile(":pitch.png");
-	bendContour->addIconFile(":pitchActive.png");
+	bendContour->addIconFile(":roll.png");
+	bendContour->addIconFile(":rollActive.png");
 	bendContour->setIconIndex(0);
 	bendContour->setContext(PitchBodyContourFeather);
 	

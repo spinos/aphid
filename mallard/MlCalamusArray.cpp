@@ -15,7 +15,6 @@ MlCalamusArray::MlCalamusArray()
 	setElementSize(sizeof(MlCalamus));
 	
 	//std::cout<<"size of calamus "<<sizeof(MlCalamus)<<"\n";
-	//std::cout<<"size of MlFeather * "<<sizeof(MlFeather *)<<"\n";
 }
 
 MlCalamusArray::~MlCalamusArray()

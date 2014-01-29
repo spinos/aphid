@@ -108,7 +108,7 @@ void MlCalamus::setRotateY(const float& y)
 	    m_rotY = y;
 }
 
-void MlCalamus::setScale(const float & x)
+void MlCalamus::scaleLength(const float & x)
 {
 	m_scale = x / feather()->shaftLength();
 }
@@ -154,3 +154,5 @@ void MlCalamus::collideWith(CollisionRegion * skin, const Vector3F & center)
 	skin->resetCollisionRegionByDistance(m_faceIdx, center, realScale());
 	feather()->setCollision(skin);
 }
+
+void MlCalamus::setLength(const float & x) { m_scale = x; }

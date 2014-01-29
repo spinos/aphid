@@ -176,7 +176,7 @@ void MlSkin::growFeather(const Vector3F & direction)
 		
 		dscale = scale;
 		m_floodCondition.reduceScale(c->faceIdx(), c->patchU(), c->patchV(), dscale);
-		c->setScale(dscale);
+		c->scaleLength(dscale);
     }
 }
 
@@ -252,7 +252,7 @@ void MlSkin::scaleFeather(const Vector3F & direction)
 
 		wei = m_affectWeights[i];
 
-		c->setScale(activeMeanScale * densityScales[i] * wei + c->realScale() * (1.f - wei));
+		c->scaleLength(activeMeanScale * densityScales[i] * wei + c->realScale() * (1.f - wei));
     }
 }
 
