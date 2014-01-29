@@ -34,6 +34,7 @@ ScenePort.h \
     MlCache.h \
 				MlTessellate.h \
     CalamusSkin.h \
+PaintFeather.h \
 				MlSkin.h \
                 MlRachis.h \
                 BrushControl.h \
@@ -105,6 +106,7 @@ ScenePort.cpp \
     MlCache.cpp \
 				MlTessellate.cpp \
     CalamusSkin.cpp \
+PaintFeather.cpp \
 				MlSkin.cpp \
                 MlRachis.cpp \
                 BrushControl.cpp \

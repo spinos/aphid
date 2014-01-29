@@ -12,12 +12,13 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include <deque>
 #include <ATypes.h>
 #include <Vector3F.h>
 #include <Matrix33F.h>
 #include <Matrix44F.h>
 #include <Vector2F.h>
-
+#include <boost/scoped_array.hpp>
 inline void Clamp01(float &v) {
 	if(v < 0.f) v = 0.f;
 	if(v > 1.f) v = 1.f;

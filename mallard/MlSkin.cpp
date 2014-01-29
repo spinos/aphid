@@ -16,12 +16,13 @@
 
 MlSkin::MlSkin() : m_numCreatedFeather(0)
 {
+	m_painter = new PaintFeather(this, &m_activeIndices, &m_floodCondition);
     m_activeIndices.clear();
 }
 
 MlSkin::~MlSkin() 
 {
-	m_affectWeights.reset();
+	delete m_painter;
 	m_floodFaces.clear();
 }
 
@@ -99,7 +100,7 @@ void MlSkin::select(const std::deque<unsigned> & src, SelectCondition * selcon)
 			m_activeFaces.push_back(t);
 		}
 	}
-	computeAffectWeight(selcon->center(), selcon->maxDistance());
+	m_painter->computeWeights(selcon->center(), selcon->maxDistance());
 }
 
 unsigned MlSkin::selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon)
@@ -180,117 +181,9 @@ void MlSkin::growFeather(const Vector3F & direction)
     }
 }
 
-void MlSkin::combFeather(const Vector3F & direction)
+void MlSkin::paint(PaintFeather::PaintMode mode, const Vector3F & brushInput)
 {
-	if(direction.length() < 10e-4) return;
-	const unsigned num = numActive();
-	if(num < 1) return;
-	
-	Matrix33F space, rotfrm;
-	Vector3F div, zdir;
-	float rotX;
-	unsigned i;
-	
-	for(i =0; i < num; i++) {
-		MlCalamus * c = getActive(i);
-		
-		tangentSpace(c, space);		
-		space.inverse();
-		
-		div = space.transform(direction);
-		div.x = 0.f;
-		
-		zdir.set(0.f, 0.f, 1.f);
-		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
-		zdir += div * m_affectWeights[i] * .5f;
-		
-		rotX = zdir.angleX();
-
-		c->setRotateX(rotX);
-    }
-}
-
-void MlSkin::scaleFeather(const Vector3F & direction)
-{
-	if(direction.length() < 10e-4) return;
-	const unsigned num = numActive();
-	if(num < 1) return;
-	
-	Matrix33F space;
-	Vector3F zdir;
-	unsigned i;
-	float dscale;
-	
-	float activeMeanScale = 0.f;
-	Vector3F activeMeanDir;
-	boost::scoped_array<float> densityScales(new float[num]);
-	for(i =0; i < num; i++) {
-		MlCalamus * c = getActive(i);
-		
-		tangentSpace(c, space);
-		
-		dscale = 1.f;
-		m_floodCondition.reduceScale(c->faceIdx(), c->patchU(), c->patchV(), dscale);
-		
-		densityScales[i] = dscale;
-		
-		zdir.set(0.f, 0.f, 1.f);
-		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
-		zdir = space.transform(zdir);
-		activeMeanDir += zdir;
-		activeMeanScale += c->realScale() / dscale;
-	}
-	activeMeanScale /= num;
-	activeMeanDir /= (float)num;
-
-	if(direction.dot(activeMeanDir) < 0.f) activeMeanScale *= .9f;
-	else activeMeanScale *= 1.1f;
-	
-	float wei;
-	for(i =0; i < num; i++) {
-		MlCalamus * c = getActive(i);
-
-		wei = m_affectWeights[i];
-
-		c->scaleLength(activeMeanScale * densityScales[i] * wei + c->realScale() * (1.f - wei));
-    }
-}
-
-void MlSkin::pitchFeather(const Vector3F & direction)
-{
-	if(direction.length() < 10e-4) return;
-	const unsigned num = numActive();
-	if(num < 1) return;
-	
-	Matrix33F space;
-	Vector3F zdir;
-	unsigned i;
-	
-	float activeMeanPitch = 0.f;
-	Vector3F activeMeanDir;
-	for(i =0; i < num; i++) {
-		MlCalamus * c = getActive(i);
-		activeMeanPitch += c->rotateY();
-		
-		tangentSpace(c, space);
-		zdir.set(0.f, 0.f, 1.f);
-		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
-		zdir = space.transform(zdir);
-		activeMeanDir += zdir;
-	}
-	activeMeanPitch /= num;
-	activeMeanDir /= (float)num;
-
-	if(direction.dot(activeMeanDir) < 0.f) activeMeanPitch -= .1f;
-	else activeMeanPitch += .1f;
-	
-	float wei;
-	for(i =0; i < num; i++) {
-		MlCalamus * c = getActive(i);
-
-		wei = m_affectWeights[i];
-		c->setRotateY(activeMeanPitch * wei + c->rotateY() * (1.f - wei));
-    }
+	m_painter->perform(mode, brushInput);
 }
 
 void MlSkin::smoothShell(const Vector3F & center, const float & radius, const float & weight)
@@ -495,24 +388,6 @@ void MlSkin::shellUp(std::vector<Vector3F> & dst)
 		dst.push_back(p);
 		dst.push_back(p + u);
 	}
-}
-
-void MlSkin::computeAffectWeight(const Vector3F & center, const float & radius)
-{
-	const unsigned num = numActive();
-	if(num < 1) return;
-	m_affectWeights.reset(new float[num]);
-	float drop;
-	Vector3F p;
-	for(unsigned i =0; i < num; i++) {
-		MlCalamus * c = getActive(i);
-		
-		getPointOnBody(c, p);
-		drop = Vector3F(p, center).length() / radius;
-		drop = 1.f - drop * drop;
-
-		m_affectWeights[i] = drop;
-    }
 }
 
 void MlSkin::initGrowOnFaceTag()

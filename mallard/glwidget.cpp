@@ -128,17 +128,17 @@ void GLWidget::clientMouseInput(QMouseEvent *event)
 	        break;
         case ToolContext::CombBodyContourFeather :
             brush()->setToeByIntersect(&ray);
-            skin()->combFeather(brush()->toeDisplacement());
+            skin()->paint(PaintFeather::MDirection, brush()->toeDisplacement());
             m_featherDrawer->updateActive();
 		    break;
         case ToolContext::ScaleBodyContourFeather :
             brush()->setToeByIntersect(&ray);
-            skin()->scaleFeather(brush()->toeDisplacementDelta());
+            skin()->paint(PaintFeather::MLength, brush()->toeDisplacementDelta());
             m_featherDrawer->updateActive();
             break;
         case ToolContext::PitchBodyContourFeather :
             brush()->setToeByIntersect(&ray);
-            skin()->pitchFeather(brush()->toeDisplacementDelta());
+            skin()->paint(PaintFeather::MRoll, brush()->toeDisplacementDelta());
             m_featherDrawer->updateActive();
             break;
 		case ToolContext::Deintersect :

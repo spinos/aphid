@@ -16,6 +16,8 @@
 #include <deque>
 #include <boost/scoped_array.hpp>
 #include <FloodCondition.h>
+#include "PaintFeather.h"
+
 class AccPatchMesh;
 class MeshTopology;
 class MlCalamusArray;
@@ -37,9 +39,7 @@ public:
 	void discardActive();
 	
 	void growFeather(const Vector3F & direction);
-	void combFeather(const Vector3F & direction);
-	void scaleFeather(const Vector3F & direction);
-	void pitchFeather(const Vector3F & direction);
+	void paint(PaintFeather::PaintMode mode, const Vector3F & brushInput);
 	void smoothShell(const Vector3F & center, const float & radius, const float & weight);
 	void computeVertexDisplacement();
 	void finishCreateFeather();
@@ -69,12 +69,11 @@ private:
 	bool isActiveFeather(unsigned idx) const;
 	unsigned lastInactive(unsigned last) const;
 	unsigned selectFeatherByFace(unsigned faceIdx, SelectCondition * selcon);
-	void computeAffectWeight(const Vector3F & center, const float & radius);
 private:	
-	std::vector<unsigned> m_activeIndices;
+	PaintFeather * m_painter;
+	std::deque<unsigned> m_activeIndices;
 	unsigned m_numCreatedFeather;
 	std::vector<FloodTable> m_activeFaces;
 	std::vector<FloodTable> m_floodFaces;
-	boost::scoped_array<float> m_affectWeights;
 	FloodCondition m_floodCondition;
 };
