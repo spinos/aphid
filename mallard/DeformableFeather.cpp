@@ -64,7 +64,7 @@ void DeformableFeather::bindVane(BaseVane * vane, short rgt)
 					coord._rgt = rgt;
 					coord._u = j;
 					coord._v = k;
-					coord._taper = (cv->x - segX) / width();
+					coord._taper = (cv->x - segX) / featherWidth();
 					if(coord._taper < 0.f) coord._taper = -coord._taper;
 					coord._objP = Vector3F(cv->x - segX, cv->y - minY, 0.f);
 					m_group[i]._numBind++;

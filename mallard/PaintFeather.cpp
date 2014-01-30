@@ -49,6 +49,9 @@ void PaintFeather::perform(PaintMode mode, const Vector3F & brushInput)
 		case MLength:
 			brushLength(brushInput);
 			break;
+		case MWidth:
+			brushWidth(brushInput);
+			break;
 		case MRoll:
 			brushRoll(brushInput);
 			break;
@@ -113,7 +116,7 @@ void PaintFeather::brushLength(const Vector3F & brushInput)
 		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
 		zdir = space.transform(zdir);
 		activeMeanDir += zdir;
-		activeMeanScale += c->realScale() / dscale;
+		activeMeanScale += c->realLength() / dscale;
 	}
 	activeMeanScale /= num;
 	activeMeanDir /= (float)num;
@@ -127,7 +130,45 @@ void PaintFeather::brushLength(const Vector3F & brushInput)
 
 		wei = m_weights[i];
 
-		c->scaleLength(activeMeanScale * densityScales[i] * wei + c->realScale() * (1.f - wei));
+		c->scaleLength(activeMeanScale * densityScales[i] * wei + c->realLength() * (1.f - wei));
+    }
+}
+
+void PaintFeather::brushWidth(const Vector3F & brushInput)
+{
+	const unsigned num = m_indices->size();
+	if(num < 1) return;
+	
+	Matrix33F space;
+	Vector3F zdir;
+	unsigned i;
+	
+	float activeMeanWidth = 0.f;
+	Vector3F activeMeanDir;
+	for(i =0; i < num; i++) {
+		MlCalamus * c = m_skin->getCalamus(m_indices->at(i));
+		
+		m_skin->tangentSpace(c, space);
+		
+		zdir.set(0.f, 0.f, 1.f);
+		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
+		zdir = space.transform(zdir);
+		activeMeanDir += zdir;
+		activeMeanWidth += c->width();
+	}
+	activeMeanWidth /= num;
+	activeMeanDir /= (float)num;
+
+	if(brushInput.dot(activeMeanDir) < 0.f) activeMeanWidth *= .9f;
+	else activeMeanWidth *= 1.1f;
+	
+	float wei;
+	for(i =0; i < num; i++) {
+		MlCalamus * c = m_skin->getCalamus(m_indices->at(i));
+
+		wei = m_weights[i];
+
+		c->setWidth(activeMeanWidth * wei + c->width() * (1.f - wei));
     }
 }
 

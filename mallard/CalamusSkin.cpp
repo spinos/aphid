@@ -119,7 +119,7 @@ void CalamusSkin::reduceFeather(unsigned num)
 void CalamusSkin::touchBy(MlCalamus * c, const Vector3F & pos, const Matrix33F & frm)
 {
 	const unsigned fi = c->faceIdx();
-	const float fv = c->realScale() * 0.5f;
+	const float fv = c->realLength() * 0.5f;
 	Vector3F d = frm.transform(Vector3F::ZAxis);
 	d = pos + d * fv;
 	BaseSphere sph;

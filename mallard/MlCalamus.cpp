@@ -16,8 +16,9 @@ MlFeatherCollection * MlCalamus::FeatherLibrary = 0;
 
 MlCalamus::MlCalamus() 
 {
-    m_rotX = m_rotY = m_scale = 0.f;
     m_featherId = 0;
+	m_scaleZ = m_scaleY = 1.f;
+	m_pitchAngle = 0.001f;
 }
 
 void MlCalamus::bindToFace(unsigned faceIdx, float u, float v)
@@ -34,7 +35,7 @@ void MlCalamus::bendFeather()
 
 void MlCalamus::bendFeather(const Vector3F & origin, const Matrix33F& space)
 {
-	feather()->bendAt(m_faceIdx, m_patchU, m_patchV, origin, space, scale());
+	feather()->bendAt(m_faceIdx, m_patchU, m_patchV, origin, space, length());
 }
 
 void MlCalamus::curlFeather()
@@ -44,7 +45,7 @@ void MlCalamus::curlFeather()
 
 void MlCalamus::computeFeatherWorldP(const Vector3F & origin, const Matrix33F& space)
 {
-	feather()->computeWorldP(origin, space, scale());
+	feather()->computeWorldP(origin, space, length(), width());
 }
 
 MlFeather * MlCalamus::feather() const
@@ -110,7 +111,7 @@ void MlCalamus::setRotateY(const float& y)
 
 void MlCalamus::scaleLength(const float & x)
 {
-	m_scale = x / feather()->shaftLength();
+	m_scaleZ = x / feather()->shaftLength();
 }
 
 void MlCalamus::setBufferStart(unsigned x)
@@ -128,14 +129,14 @@ float MlCalamus::rotateY() const
 	return m_rotY;
 }
 
-float MlCalamus::scale() const
+float MlCalamus::length() const
 {
-	return m_scale;
+	return m_scaleZ;
 }
 
-float MlCalamus::realScale() const
+float MlCalamus::realLength() const
 {
-	return m_scale * feather()->shaftLength();
+	return m_scaleZ * feather()->shaftLength();
 }
 
 unsigned MlCalamus::bufferStart() const
@@ -151,8 +152,14 @@ void MlCalamus::collideWith(CollisionRegion * skin, const BoundingBox & bbox)
 
 void MlCalamus::collideWith(CollisionRegion * skin, const Vector3F & center)
 {
-	skin->resetCollisionRegionByDistance(m_faceIdx, center, realScale());
+	skin->resetCollisionRegionByDistance(m_faceIdx, center, realLength());
 	feather()->setCollision(skin);
 }
 
-void MlCalamus::setLength(const float & x) { m_scale = x; }
+void MlCalamus::setLength(const float & x) { m_scaleZ = x; }
+
+float MlCalamus::width() const { return m_scaleY; }
+void MlCalamus::setWidth(const float & x) { m_scaleY = x; }
+
+float MlCalamus::pitchAngle() const { return m_pitchAngle; }
+void MlCalamus::setPitchAngle(const float & x) { m_pitchAngle = x; }

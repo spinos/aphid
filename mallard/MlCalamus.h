@@ -33,8 +33,6 @@ public:
 	float patchV() const;
 	float rotateX() const;
 	float rotateY() const;
-	float scale() const;
-	float realScale() const;
 	unsigned bufferStart() const;
 	
 	void setFeatherId(unsigned x);
@@ -51,8 +49,15 @@ public:
 	
 	void scaleLength(const float & x);
 	void setLength(const float & x);
+	float realLength() const;
+	float length() const;
+	float width() const;
+	void setWidth(const float & x);
+	
+	float pitchAngle() const;
+	void setPitchAngle(const float & x);
 private:
 	unsigned m_faceIdx, m_featherId, m_bufStart;
-	float m_patchU, m_patchV, m_rotX, m_rotY;
-	half m_scale, padding;
+	float m_patchU, m_patchV;
+	half m_rotX, m_rotY, m_scaleZ, m_scaleY, m_pitchAngle, padding1;
 };

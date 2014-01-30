@@ -10,7 +10,7 @@ public:
 		CreateBodyContourFeather = 4,
 		CombBodyContourFeather = 5,
 		EraseBodyContourFeather = 6,
-		ScaleBodyContourFeather = 7,
+		ScaleBodyContourFeatherLength = 7,
 		PitchBodyContourFeather = 8,
 		MoveInUV = 9,
 		MoveVertexInUV = 10,
@@ -20,7 +20,8 @@ public:
 		SmoothSurface = 14,
 		SelectByColor = 15,
 		Deintersect = 16,
-		PaintMap = 17
+		PaintMap = 17,
+		ScaleBodyContourFeatherWidth = 18
     };
     
     enum ActionRank {

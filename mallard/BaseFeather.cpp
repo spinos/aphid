@@ -111,7 +111,7 @@ float BaseFeather::shaftLength() const
 	return m_shaftLength;
 }
 
-float BaseFeather::width() const
+float BaseFeather::featherWidth() const
 {
 	return m_brect.distance(0);
 }

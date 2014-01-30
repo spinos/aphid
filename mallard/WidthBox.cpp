@@ -1,20 +1,20 @@
 /*
- *  ScaleBox.cpp
+ *  WidthBox.cpp
  *  mallard
  *
- *  Created by jian zhang on 1/23/14.
+ *  Created by jian zhang on 1/30/14.
  *  Copyright 2014 __MyCompanyName__. All rights reserved.
  *
  */
 
-#include "ScaleBox.h"
+#include "WidthBox.h"
 
 #include <QtGui>
 #include <QDoubleEditSlider.h>
 
-ScaleBox::ScaleBox(QWidget *parent) : QGroupBox(parent)
+WidthBox::WidthBox(QWidget *parent) : QGroupBox(parent)
 {
-	QPixmap *pix = new QPixmap(":rulerActive.png");
+	QPixmap *pix = new QPixmap(":scaleWidthActive.png");
 	QLabel * img = new QLabel;
 	img->setPixmap(*pix);
 	m_radiusValue = new QDoubleEditSlider(tr("Radius"));
@@ -25,17 +25,17 @@ ScaleBox::ScaleBox(QWidget *parent) : QGroupBox(parent)
 	controlLayout->addWidget(m_radiusValue);
 	controlLayout->addStretch();
 	setLayout(controlLayout);
-	setTitle(tr("Scale Length"));
+	setTitle(tr("Scale Width"));
 	
 	connect(m_radiusValue, SIGNAL(valueChanged(double)), this, SLOT(sendRadius(double)));
 }
 
-double ScaleBox::radius() const
+double WidthBox::radius() const
 {
 	return m_radiusValue->value();
 }
 
-void ScaleBox::sendRadius(double x)
+void WidthBox::sendRadius(double x)
 {
 	emit radiusChanged(x);
 }

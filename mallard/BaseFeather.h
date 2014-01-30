@@ -26,7 +26,7 @@ public:
 	BoundingRectangle getBoundingRectangle() const;
 	
 	float shaftLength() const;
-	float width() const;
+	float featherWidth() const;
 	
 	float * quilly();
     float * getQuilly() const;

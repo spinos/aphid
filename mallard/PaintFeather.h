@@ -16,7 +16,8 @@ public:
 	enum PaintMode {
 		MDirection = 0,
 		MLength = 1,
-		MRoll = 2
+		MWidth = 2,
+		MRoll = 3
 	};
 	
 	PaintFeather(CalamusSkin * skin, std::deque<unsigned> * indices, FloodCondition * density);
@@ -29,6 +30,7 @@ protected:
 private:
 	void brushDirection(const Vector3F & dv);
 	void brushLength(const Vector3F & dv);
+	void brushWidth(const Vector3F & dv);
 	void brushRoll(const Vector3F & dv);
 private:
 	std::deque<unsigned> * m_indices;

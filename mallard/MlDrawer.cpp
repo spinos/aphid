@@ -210,7 +210,6 @@ void MlDrawer::computeBufferIndirection()
 
 void MlDrawer::tessellate(MlFeather * f)
 {
-	//m_featherTess->setFeather(f);
 	m_featherTess->evaluate(f);
 }
 

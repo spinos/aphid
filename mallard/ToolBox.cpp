@@ -107,12 +107,19 @@ void ToolBox::createContext()
 	eraseContour->setIconIndex(0);
 	eraseContour->setContext(EraseBodyContourFeather);
 	
-	ContextIconFrame * scaleContour = new ContextIconFrame(this);
+	ContextIconFrame * lengthContour = new ContextIconFrame(this);
 	
-	scaleContour->addIconFile(":ruler.png");
-	scaleContour->addIconFile(":rulerActive.png");
-	scaleContour->setIconIndex(0);
-	scaleContour->setContext(ScaleBodyContourFeather);
+	lengthContour->addIconFile(":ruler.png");
+	lengthContour->addIconFile(":rulerActive.png");
+	lengthContour->setIconIndex(0);
+	lengthContour->setContext(ScaleBodyContourFeatherLength);
+	
+	ContextIconFrame * widthContour = new ContextIconFrame(this);
+	
+	widthContour->addIconFile(":scaleWidth.png");
+	widthContour->addIconFile(":scaleWidthActive.png");
+	widthContour->setIconIndex(0);
+	widthContour->setContext(ScaleBodyContourFeatherWidth);
 	
 	ContextIconFrame * bendContour = new ContextIconFrame(this);
 	
@@ -146,7 +153,8 @@ void ToolBox::createContext()
 	m_contextFrames.push_back(selectRegion);
 	m_contextFrames.push_back(createContour);
 	m_contextFrames.push_back(combContour);
-	m_contextFrames.push_back(scaleContour);
+	m_contextFrames.push_back(lengthContour);
+	m_contextFrames.push_back(widthContour);
 	m_contextFrames.push_back(bendContour);
 	m_contextFrames.push_back(eraseContour);
 	m_contextFrames.push_back(moveLight);

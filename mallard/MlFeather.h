@@ -19,7 +19,7 @@ public:
 	void bendAt(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
 	void curl(float val);
 	
-	void computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
+	void computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scaleLength, const float & scaleWidth);
 	Vector3F * segmentVaneWP(short u, short v, short side);
 	
 	void setCollision(CollisionRegion * skin);
@@ -61,7 +61,7 @@ protected:
 	virtual void simpleCreate(int ns = 5);
 	
 private:
-	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, float xscale);
+	void computeVaneWP(const Vector3F & origin, const Matrix33F& space, short seg, const float & xscale, const float & scaleWidth);
 	void samplePosition(unsigned nu, unsigned nv, int side, float lod);
 private:
 	CollisionRegion * m_skin;

@@ -1,12 +1,12 @@
 <RCC>
     <qresource prefix="/">
-		<file>roll.png</file>
-		<file>rollActive.png</file>
-		<file>eyeOpen.png</file>
-		<file>eyeClose.png</file>
+        <file>roll.png</file>
+        <file>rollActive.png</file>
+        <file>eyeOpen.png</file>
+        <file>eyeClose.png</file>
         <file>brush.png</file>
         <file>brushActive.png</file>
-		<file>createFeather.png</file>
+        <file>createFeather.png</file>
         <file>createFeatherActive.png</file>
         <file>comb.png</file>
         <file>combActive.png</file>
@@ -62,11 +62,13 @@
         <file>colorPickerActive.png</file>
         <file>deintersectInactive.png</file>
         <file>deintersectActive.png</file>
-		<file>render.png</file>
+        <file>render.png</file>
         <file>renderActive.png</file>
-		<file>downy.png</file>
+        <file>downy.png</file>
         <file>downyActive.png</file>
-		<file>selectFace.png</file>
+        <file>selectFace.png</file>
         <file>selectFaceActive.png</file>
+        <file>scaleWidth.png</file>
+        <file>scaleWidthActive.png</file>
     </qresource>
 </RCC>

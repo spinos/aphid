@@ -24,6 +24,7 @@ class SelectFaceBox;
 class CombBox;
 class CurlBox;
 class ScaleBox;
+class WidthBox;
 class FloodBox;
 class EraseBox;
 class PaintBox;
@@ -59,6 +60,7 @@ private:
 	CombBox * comb;
 	CurlBox * curl;
 	ScaleBox * brushScale;
+	WidthBox * brushWidth;
 	FloodBox * flood;
 	EraseBox * eraseControl;
 	PaintBox * paintControl;

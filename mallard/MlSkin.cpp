@@ -379,7 +379,7 @@ void MlSkin::shellUp(std::vector<Vector3F> & dst)
 		tangentSpace(c, tang);
 		rotationFrame(c, tang, space);
 		Vector3F f = space.transform(Vector3F::ZAxis);
-		u = p + f * c->realScale();
+		u = p + f * c->realLength();
 		dst.push_back(u);
 		
 		dst.push_back(u);

@@ -19,6 +19,7 @@
 #include "FloodBox.h"
 #include "EraseBox.h"
 #include "PaintBox.h"
+#include "WidthBox.h"
 #include <BaseBrush.h>
 
 BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
@@ -29,6 +30,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	comb = new CombBox(this);
 	curl = new CurlBox(this);
 	brushScale = new ScaleBox(this);
+	brushWidth = new WidthBox(this);
 	flood = new FloodBox(this);
 	eraseControl = new EraseBox(this);
 	paintControl = new PaintBox(this);
@@ -42,6 +44,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	stackLayout->addWidget(eraseControl);
 	stackLayout->addWidget(selectFace);
 	stackLayout->addWidget(paintControl);
+	stackLayout->addWidget(brushWidth);
 	
 	stackLayout->setCurrentIndex(5);
 	setLayout(stackLayout);
@@ -59,6 +62,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	connect(brushScale, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(curl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(paintControl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
+	connect(brushWidth, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	
 	connect(flood, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
 	connect(eraseControl, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
@@ -98,7 +102,7 @@ void BrushControl::receiveToolContext(int c)
 			stackLayout->setCurrentIndex(1);
 			r = comb->radius();
 			break;
-		case ToolContext::ScaleBodyContourFeather:
+		case ToolContext::ScaleBodyContourFeatherLength:
 			stackLayout->setCurrentIndex(2);
 			r = brushScale->radius();
 			break;
@@ -122,6 +126,10 @@ void BrushControl::receiveToolContext(int c)
 			r = paintControl->radius();
 			dropoff = paintControl->dropoff();
 			strength = paintControl->strength();
+			break;
+		case ToolContext::ScaleBodyContourFeatherWidth:
+			stackLayout->setCurrentIndex(7);
+			r = brushScale->radius();
 			break;
 		default:
 			break;

@@ -42,6 +42,7 @@ SelectFaceBox.h \
 CombBox.h \
 CurlBox.h \
 ScaleBox.h \
+WidthBox.h \
 FloodBox.h \
 EraseBox.h \
 PaintBox.h \
@@ -114,6 +115,7 @@ SelectFaceBox.cpp \
 CombBox.cpp \
 CurlBox.cpp \
 ScaleBox.cpp \
+WidthBox.cpp \
 FloodBox.cpp \
 EraseBox.cpp \
 PaintBox.cpp \
