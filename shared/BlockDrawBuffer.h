@@ -41,11 +41,11 @@ private:
 	struct PtrTup {
 		PtrTup() {
 			rawV = new char[32768 * 12 + 31];
-			alignedV = (char *)(((unsigned long)rawV + 32) & (0xffffffff - 31));
+			alignedV = (char *)((reinterpret_cast<uintptr_t>(rawV) + 32) & (0xffffffff - 31));
 			rawN = new char[32768 * 12 + 31];
-			alignedN = (char *)(((unsigned long)rawN + 32) & (0xffffffff - 31));
+			alignedN = (char *)((reinterpret_cast<uintptr_t>(rawN) + 32) & (0xffffffff - 31));
 			rawT = new char[32768 * 8 + 31];
-			alignedT = (char *)(((unsigned long)rawT + 32) & (0xffffffff - 31));
+			alignedT = (char *)((reinterpret_cast<uintptr_t>(rawT) + 32) & (0xffffffff - 31));
 		}
 		~PtrTup() {
 			delete[] rawV;

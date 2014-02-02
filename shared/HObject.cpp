@@ -10,7 +10,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string.hpp>
 #include "HObject.h"
-#include "hdf5_hl.h"
+#include "hdf5.h"
 #include <sstream>
 
 HDocument HObject::FileIO;

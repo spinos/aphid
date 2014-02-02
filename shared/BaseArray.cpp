@@ -186,8 +186,8 @@ void BaseArray::verbose() const
 	for (std::vector<PtrTup *>::const_iterator it = m_blocks.begin(); 
 				it != m_blocks.end(); ++it) {
 			if(i > 0)
-				printf("p[%i] at %i \n", i, (unsigned)(*it)->aligned - pre);
-			pre = (unsigned)(*it)->aligned;
+				printf("p[%i] at %i \n", i, reinterpret_cast<uintptr_t>((*it)->aligned) - pre);
+			pre = reinterpret_cast<uintptr_t>((*it)->aligned);
 			
 			printf("p[%i] at %s \n", i, byte_to_binary1(pre));
 			//printf("p[%i] at %s \n", i, byte_to_binary1((unsigned)(*it)->raw));

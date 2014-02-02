@@ -1,0 +1,86 @@
+How to build Boost
+
+.\b2 -a -q toolset=gcc toolset=gcc variant=release address-model=64 threading=multi --with-system --with-date_time --with-regex --with-filesystem --with-thread
+	--build-type=complete link=shared runtime-link=shared define=BOOST_USE_WINDOWS_H
+
+without add defien BOOST_USE_WINDOWS_H
+or
+error undefined reference to  InterlockedDecrement
+
+link and runtime-link must be shared
+or
+error undefined reference to __imp__%boost%thread%detach%
+
+specify lib to link
+LIBS += -lboost_thread-mgw48-mt-1_51.dll -lboost_system-mgw48-mt-1_51.dll
+
+How to build Qt
+
+Qt4 won't work with mingw, use Qt5
+
+configure.exe -release -opensource -opengl desktop
+
+http://qt-project.org/wiki/MinGW-64-bit
+
+How to build OpenEXR
+
+get zlib from http://www.hdfgroup.org/HDF5/release/cmakebuild.html
+
+In CMake
+set(ZLIB_INCLUDE_DIR  "D://usr//zlib_1_2_8" "D://usr//zlib_1_2_8//build//bin")
+set(ZLIB_LIBRARY zlib)
+
+
+https://github.com/openexr/openexr/issues/79
+
+This works in both, 32 bit and 64 bit mingw, for me:
+
+ImfSystemSpecific.h:
+
+#ifdef IMF_HAVE_SSE2
+
+#ifdef MINGW64
+
+#define EXR_FORCEINLINE inline
+#define EXR_RESTRICT __restrict
+
+static void* EXRAllocAligned(size_t size, size_t alignment)
+{
+__mingw_aligned_malloc(alignment, size);
+}
+
+static void EXRFreeAligned(void* ptr)
+{
+__mingw_aligned_free(ptr);
+}
+
+#elif defined GNUC
+// Causes issues on certain gcc versions
+//#define EXR_FORCEINLINE inline attribute((always_inline))
+#define EXR_FORCEINLINE inline
+#define EXR_RESTRICT __restrict
+
+static void* EXRAllocAligned(size_t size, size_t alignment)
+{
+void* ptr = 0;
+posix_memalign(&ptr, alignment, size);
+return ptr;
+}
+
+static void EXRFreeAligned(void* ptr)
+{
+free(ptr);
+}
+
+#elif defined MSCVER
+
+IlmImf/ImfOptimizedPixelReading.h:
+
+// GCC and Visual Studio SSE2 compiler flags
+#ifndef MINGW64
+#if defined SSE2 || (MSCVER >= 1300 && !MCEE_PURE)
+#define IMF_HAVE_SSE2 1
+#endif
+#endi
+
+

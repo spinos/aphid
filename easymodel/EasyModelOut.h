@@ -11,6 +11,7 @@
 
 #include <modelIO.h>
 #include <string>
+#include <AllMath.h>
 
 class EasyModelOut {
 public:

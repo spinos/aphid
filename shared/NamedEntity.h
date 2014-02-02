@@ -18,7 +18,7 @@ public:
 	void setName(const std::string & name);
 	void setName(const std::string & name, int i);
 	std::string name() const;
-	std::string NamedEntity::particalName() const;
+	std::string particalName() const;
 	
 	void setIndex(unsigned idx);
 	unsigned index() const;

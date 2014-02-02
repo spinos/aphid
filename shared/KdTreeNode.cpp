@@ -64,7 +64,8 @@ bool KdTreeNode::isLeaf() const
 
 void KdTreeNode::setLeft( KdTreeNode* a_Left )
 { 
-	inner.combined = (unsigned long)a_Left + (inner.combined & EIndirectionMask); 
+	uintptr_t rawInt = reinterpret_cast<uintptr_t>(a_Left);
+	inner.combined = rawInt + (inner.combined & EIndirectionMask); 
 }
 
 KdTreeNode* KdTreeNode::getLeft() const

@@ -18,8 +18,8 @@
 	Matrix44F(float x);
 	Matrix44F(const Matrix44F & a);
 	~Matrix44F();
-	float Matrix44F::operator() (int i, int j);
-	float Matrix44F::operator() (int i, int j) const;
+	float operator() (int i, int j);
+	float operator() (int i, int j) const;
 	Matrix44F operator* (const Matrix44F & a) const;
 	void operator*= (const Matrix44F & a);
 	void multiply(const Matrix44F & a);

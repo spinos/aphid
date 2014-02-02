@@ -10,7 +10,7 @@
 #include "HDocument.h"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include "hdf5_hl.h"
+#include "hdf5.h"
 using namespace boost::filesystem;
 char HDocument::open(const char * filename, OpenMode mode)
 {
