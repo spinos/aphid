@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include <stdint.h>
 #include <vector>
 class BaseArray {
 public:
@@ -49,7 +50,8 @@ private:
 	struct PtrTup {
 		PtrTup() {
 			raw = new char[524288 + 31];
-			aligned = (char *)(((unsigned long)raw + 32) & (0xffffffff - 31));
+			uintptr_t rawInt = reinterpret_cast<uintptr_t>(raw);
+			aligned = (char *)((rawInt + 32) & (0xffffffff - 31));
 		}
 		~PtrTup() {
 			delete[] raw;

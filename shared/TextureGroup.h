@@ -9,6 +9,7 @@
 
 #pragma once
 #include <vector>
+#include <string>
 class BaseTexture;
 class TextureGroup {
 public:

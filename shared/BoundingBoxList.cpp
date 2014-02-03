@@ -9,6 +9,7 @@
 
 #include "BoundingBoxList.h"
 #include <iostream>
+#include <stdint.h>
 BoundingBoxList::BoundingBoxList() {m_raw = 0;}
 BoundingBoxList::~BoundingBoxList() 
 {
@@ -18,7 +19,7 @@ BoundingBoxList::~BoundingBoxList()
 void BoundingBoxList::create(const unsigned &num)
 {
 	m_raw = new char[(num / 256 + 1) * 256 * 32 + 31];
-	m_aligned = (BoundingBox *)(((unsigned long)m_raw + 32) & (0xffffffff - 31));
+	m_aligned = (BoundingBox *)((reinterpret_cast<uintptr_t>(m_raw) + 32) & (0xffffffff - 31));
 }
 
 BoundingBox *BoundingBoxList::ptr()

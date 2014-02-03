@@ -8,7 +8,7 @@
  */
 
 #include "IndexList.h"
-
+#include <stdint.h>
 IndexList::IndexList() {m_raw = 0;}
 IndexList::~IndexList() 
 {
@@ -18,7 +18,7 @@ IndexList::~IndexList()
 void IndexList::create(const unsigned &num)
 {
 	m_raw = new char[(num / 256 + 1) * 256 * 4 + 31];
-	m_aligned = (unsigned *)(((unsigned long)m_raw + 32) & (0xffffffff - 31));
+	m_aligned = (unsigned *)((reinterpret_cast<uintptr_t>(m_raw) + 32) & (0xffffffff - 31));
 }
 
 unsigned *IndexList::ptr()
