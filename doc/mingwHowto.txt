@@ -22,6 +22,10 @@ configure.exe -release -opensource -opengl desktop
 
 http://qt-project.org/wiki/MinGW-64-bit
 
+How to build Ilmbase
+
+Turn on shared library (dll), add entry OPENEXR_DLL
+
 How to build OpenEXR
 
 get zlib from http://www.hdfgroup.org/HDF5/release/cmakebuild.html
