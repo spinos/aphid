@@ -14,21 +14,23 @@ then
 nmake
 nmake install
 
-Building zlib
+To build zlib
 
-download zlib125.zip
+download zlib128
 
 http://www.hdfgroup.org/ftp/lib-external/CMake/ZLib.tar.gz
 
-Building szip
+To build szip
 
-download szip
+download szip21
 
 http://www.hdfgroup.org/ftp/lib-external/CMake/SZip.tar.gz
 
-build hdf5
+To build hdf5
+
+doc: http://www.hdfgroup.org/ftp/HDF5/current/src/unpacked/release_docs/USING_HDF5_CMake.txt
 
 cmake -G "NMake Makefiles" -DSZIP_INCLUDE_DIR=D:/usr/szip_2_1/src -DZLIB_INCLUDE_DIR=D:/usr/zlib_1_2_8 -i
-
+enable Shared library (static library not working)
 enable ZLIB and SZIP support
 
