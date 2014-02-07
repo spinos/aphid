@@ -1,3 +1,26 @@
+First Install MinGW-builds
+
+select Architecture x64 on install settings, will have x64-4.8.1-posix_seh-rev5 subdir and Run terminal option
+
+add bin to PATH
+
+Use CMake, select HDF5 source code and build binary dirs, configure and generate project via MinGW Makefiles. 
+
+goto build dir, 
+
+edit H5pubconf.h to comment out line of
+
+#define H5_HAVE_GETHOStNAME 1
+
+otherwise H5Detect cannot be built
+
+CMake zlib and szip, enable them,
+
+add Entry SZIP_INCLUDE_DIR = <szip_2_1/src> AFTER Configure 
+
+mingw32-make
+
+
 How to build Boost
 
 .\b2 -a -q toolset=gcc toolset=gcc variant=release address-model=64 threading=multi --with-system --with-date_time --with-regex --with-filesystem --with-thread
