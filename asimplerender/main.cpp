@@ -1,5 +1,5 @@
 #include <ai.h>
-
+#include "SimpleRenderConfig.h"
 #include <iostream>
 #include <vector>
 
@@ -65,6 +65,8 @@ void logRenderError(int status)
 
 int main(int argc, char *argv[])
 {
+    std::clog<<"CMake Tutorial Version "<<SimpleRender_VERSION_MAJOR<<"."<<SimpleRender_VERSION_MINOR;
+    
     AiBegin();
     
     AiLoadPlugins("./driver_foo.dll");
@@ -197,7 +199,7 @@ int main(int argc, char *argv[])
 	//if(AiNodeLink(usrCol, "color", hair)) std::clog<<"linked";
 
 	AiNodeSetPtr(curveNode, "shader", hair);
-    
+	
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
     AiEnd();
     return 1;

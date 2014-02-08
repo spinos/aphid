@@ -1,0 +1,3 @@
+// the configured options and settings for Tutorial
+#define SimpleRender_VERSION_MAJOR @SimpleRender_VERSION_MAJOR@
+#define SimpleRender_VERSION_MINOR @SimpleRender_VERSION_MINOR@
