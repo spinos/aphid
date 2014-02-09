@@ -109,15 +109,15 @@ void ToolBox::createContext()
 	
 	ContextIconFrame * lengthContour = new ContextIconFrame(this);
 	
-	lengthContour->addIconFile(":ruler.png");
-	lengthContour->addIconFile(":rulerActive.png");
+	lengthContour->addIconFile(":featherLength.png");
+	lengthContour->addIconFile(":featherLengthActive.png");
 	lengthContour->setIconIndex(0);
 	lengthContour->setContext(ScaleBodyContourFeatherLength);
 	
 	ContextIconFrame * widthContour = new ContextIconFrame(this);
 	
-	widthContour->addIconFile(":scaleWidth.png");
-	widthContour->addIconFile(":scaleWidthActive.png");
+	widthContour->addIconFile(":featherWidth.png");
+	widthContour->addIconFile(":featherWidthActive.png");
 	widthContour->setIconIndex(0);
 	widthContour->setContext(ScaleBodyContourFeatherWidth);
 	

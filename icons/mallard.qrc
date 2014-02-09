@@ -70,5 +70,9 @@
         <file>selectFaceActive.png</file>
         <file>scaleWidth.png</file>
         <file>scaleWidthActive.png</file>
+        <file>featherWidthActive.png</file>
+        <file>featherLength.png</file>
+        <file>featherWidth.png</file>
+        <file>featherLengthActive.png</file>
     </qresource>
 </RCC>
