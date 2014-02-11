@@ -181,11 +181,11 @@ void PaintFeather::brushRoll(const Vector3F & brushInput)
 	Vector3F zdir;
 	unsigned i;
 	
-	float activeMeanPitch = 0.f;
+	float activeMeanCurl = 0.f;
 	Vector3F activeMeanDir;
 	for(i =0; i < num; i++) {
 		MlCalamus * c = m_skin->getCalamus(m_indices->at(i));
-		activeMeanPitch += c->rotateY();
+		activeMeanCurl += c->curlAngle();
 		
 		m_skin->tangentSpace(c, space);
 		zdir.set(0.f, 0.f, 1.f);
@@ -193,17 +193,17 @@ void PaintFeather::brushRoll(const Vector3F & brushInput)
 		zdir = space.transform(zdir);
 		activeMeanDir += zdir;
 	}
-	activeMeanPitch /= num;
+	activeMeanCurl /= num;
 	activeMeanDir /= (float)num;
 
-	if(brushInput.dot(activeMeanDir) < 0.f) activeMeanPitch -= .1f;
-	else activeMeanPitch += .1f;
+	if(brushInput.dot(activeMeanDir) < 0.f) activeMeanCurl -= .1f;
+	else activeMeanCurl += .1f;
 	
 	float wei;
 	for(i =0; i < num; i++) {
 		MlCalamus * c = m_skin->getCalamus(m_indices->at(i));
 
 		wei = m_weights[i];
-		c->setRotateY(activeMeanPitch * wei + c->rotateY() * (1.f - wei));
+		c->setCurlAngle(activeMeanCurl * wei + c->curlAngle() * (1.f - wei));
     }
 }

@@ -18,7 +18,8 @@ MlCalamus::MlCalamus()
 {
     m_featherId = 0;
 	m_scaleZ = m_scaleY = 1.f;
-	m_pitchAngle = 0.001f;
+	m_curlAngle = 0.f;
+	m_rotY = 0.f;
 }
 
 void MlCalamus::bindToFace(unsigned faceIdx, float u, float v)
@@ -40,7 +41,7 @@ void MlCalamus::bendFeather(const Vector3F & origin, const Matrix33F& space)
 
 void MlCalamus::curlFeather()
 {
-	feather()->curl(rotateY());
+	feather()->curl(curlAngle());
 }
 
 void MlCalamus::computeFeatherWorldP(const Vector3F & origin, const Matrix33F& space)
@@ -161,5 +162,5 @@ void MlCalamus::setLength(const float & x) { m_scaleZ = x; }
 float MlCalamus::width() const { return m_scaleY; }
 void MlCalamus::setWidth(const float & x) { m_scaleY = x; }
 
-float MlCalamus::pitchAngle() const { return m_pitchAngle; }
-void MlCalamus::setPitchAngle(const float & x) { m_pitchAngle = x; }
+float MlCalamus::curlAngle() const { return m_curlAngle; }
+void MlCalamus::setCurlAngle(const float & x) { m_curlAngle = x; }

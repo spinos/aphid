@@ -54,10 +54,10 @@ public:
 	float width() const;
 	void setWidth(const float & x);
 	
-	float pitchAngle() const;
-	void setPitchAngle(const float & x);
+	float curlAngle() const;
+	void setCurlAngle(const float & x);
 private:
 	unsigned m_faceIdx, m_featherId, m_bufStart;
 	float m_patchU, m_patchV;
-	half m_rotX, m_rotY, m_scaleZ, m_scaleY, m_pitchAngle, padding1;
+	half m_rotX, m_rotY, m_scaleZ, m_scaleY, m_curlAngle, padding1;
 };
