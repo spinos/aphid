@@ -14,7 +14,7 @@
 
 CurlBox::CurlBox(QWidget *parent) : QGroupBox(parent)
 {
-	QPixmap *pix = new QPixmap(":pitchActive.png");
+	QPixmap *pix = new QPixmap(":rollActive.png");
 	QLabel * img = new QLabel;
 	img->setPixmap(*pix);
 	m_radiusValue = new QDoubleEditSlider(tr("Radius"));

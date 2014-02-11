@@ -59,7 +59,7 @@ private:
 	SelectFaceBox * selectFace;
 	CombBox * comb;
 	CurlBox * curl;
-	ScaleBox * brushScale;
+	ScaleBox * brushLength;
 	WidthBox * brushWidth;
 	FloodBox * flood;
 	EraseBox * eraseControl;

@@ -14,7 +14,7 @@
 
 ScaleBox::ScaleBox(QWidget *parent) : QGroupBox(parent)
 {
-	QPixmap *pix = new QPixmap(":rulerActive.png");
+	QPixmap *pix = new QPixmap(":featherLengthActive.png");
 	QLabel * img = new QLabel;
 	img->setPixmap(*pix);
 	m_radiusValue = new QDoubleEditSlider(tr("Radius"));

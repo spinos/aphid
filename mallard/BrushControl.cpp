@@ -29,7 +29,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	selectFace = new SelectFaceBox(this);
 	comb = new CombBox(this);
 	curl = new CurlBox(this);
-	brushScale = new ScaleBox(this);
+	brushLength = new ScaleBox(this);
 	brushWidth = new WidthBox(this);
 	flood = new FloodBox(this);
 	eraseControl = new EraseBox(this);
@@ -39,7 +39,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	
 	stackLayout->addWidget(flood);
 	stackLayout->addWidget(comb);
-	stackLayout->addWidget(brushScale);
+	stackLayout->addWidget(brushLength);
 	stackLayout->addWidget(curl);
 	stackLayout->addWidget(eraseControl);
 	stackLayout->addWidget(selectFace);
@@ -59,7 +59,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	connect(flood, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(eraseControl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(comb, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
-	connect(brushScale, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
+	connect(brushLength, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(curl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(paintControl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(brushWidth, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
@@ -104,7 +104,7 @@ void BrushControl::receiveToolContext(int c)
 			break;
 		case ToolContext::ScaleBodyContourFeatherLength:
 			stackLayout->setCurrentIndex(2);
-			r = brushScale->radius();
+			r = brushLength->radius();
 			break;
 		case ToolContext::PitchBodyContourFeather:
 			stackLayout->setCurrentIndex(3);
@@ -129,7 +129,7 @@ void BrushControl::receiveToolContext(int c)
 			break;
 		case ToolContext::ScaleBodyContourFeatherWidth:
 			stackLayout->setCurrentIndex(7);
-			r = brushScale->radius();
+			r = brushWidth->radius();
 			break;
 		default:
 			break;

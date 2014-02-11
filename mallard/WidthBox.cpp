@@ -14,7 +14,7 @@
 
 WidthBox::WidthBox(QWidget *parent) : QGroupBox(parent)
 {
-	QPixmap *pix = new QPixmap(":scaleWidthActive.png");
+	QPixmap *pix = new QPixmap(":featherWidthActive.png");
 	QLabel * img = new QLabel;
 	img->setPixmap(*pix);
 	m_radiusValue = new QDoubleEditSlider(tr("Radius"));

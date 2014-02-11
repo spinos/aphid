@@ -88,6 +88,7 @@ void GLWidget::clientSelect(QMouseEvent *event)
 	        break;
         case ToolContext::CombBodyContourFeather :
         case ToolContext::ScaleBodyContourFeatherLength :
+        case ToolContext::ScaleBodyContourFeatherWidth :
         case ToolContext::PitchBodyContourFeather :
 		case ToolContext::Deintersect :
             hitTest();
@@ -134,6 +135,11 @@ void GLWidget::clientMouseInput(QMouseEvent *event)
         case ToolContext::ScaleBodyContourFeatherLength :
             brush()->setToeByIntersect(&ray);
             skin()->paint(PaintFeather::MLength, brush()->toeDisplacementDelta());
+            m_featherDrawer->updateActive();
+            break;
+		case ToolContext::ScaleBodyContourFeatherWidth :
+            brush()->setToeByIntersect(&ray);
+            skin()->paint(PaintFeather::MWidth, brush()->toeDisplacementDelta());
             m_featherDrawer->updateActive();
             break;
         case ToolContext::PitchBodyContourFeather :
