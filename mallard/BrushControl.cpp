@@ -20,6 +20,7 @@
 #include "EraseBox.h"
 #include "PaintBox.h"
 #include "WidthBox.h"
+#include "PitchBox.h"
 #include <BaseBrush.h>
 
 BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
@@ -34,6 +35,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	flood = new FloodBox(this);
 	eraseControl = new EraseBox(this);
 	paintControl = new PaintBox(this);
+	pitchControl = new PitchBox(this);
 
 	stackLayout = new QStackedLayout(this);
 	
@@ -45,6 +47,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	stackLayout->addWidget(selectFace);
 	stackLayout->addWidget(paintControl);
 	stackLayout->addWidget(brushWidth);
+	stackLayout->addWidget(pitchControl);
 	
 	stackLayout->setCurrentIndex(5);
 	setLayout(stackLayout);
@@ -63,6 +66,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	connect(curl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(paintControl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	connect(brushWidth, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
+	connect(pitchControl, SIGNAL(radiusChanged(double)), this, SLOT(sendBrushRadius(double)));
 	
 	connect(flood, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
 	connect(eraseControl, SIGNAL(strengthChanged(double)), this, SLOT(sendBrushStrength(double)));
@@ -73,7 +77,6 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	connect(flood, SIGNAL(floodRegionChanged(int)), this, SLOT(sendBrushFilterByColor(int)));
 	connect(eraseControl, SIGNAL(eraseRegionChanged(int)), this, SLOT(sendBrushFilterByColor(int)));
 	
-	connect(flood, SIGNAL(initialCurlChanged(double)), this, SLOT(sendBrushPitch(double)));
 	connect(flood, SIGNAL(numSampleChanged(int)), this, SLOT(sendBrushNumSamples(int)));
 	
 	connect(paintControl, SIGNAL(colorChanged(QColor)), this, SLOT(sendBrushColor(QColor)));
@@ -106,7 +109,7 @@ void BrushControl::receiveToolContext(int c)
 			stackLayout->setCurrentIndex(2);
 			r = brushLength->radius();
 			break;
-		case ToolContext::PitchBodyContourFeather:
+		case ToolContext::CurlBodyContourFeather:
 			stackLayout->setCurrentIndex(3);
 			r = curl->radius();
 			break;
@@ -130,6 +133,10 @@ void BrushControl::receiveToolContext(int c)
 		case ToolContext::ScaleBodyContourFeatherWidth:
 			stackLayout->setCurrentIndex(7);
 			r = brushWidth->radius();
+			break;
+		case ToolContext::PitchBodyContourFeather:
+			stackLayout->setCurrentIndex(8);
+			r = pitchControl->radius();
 			break;
 		default:
 			break;
@@ -169,12 +176,6 @@ void BrushControl::sendBrushFilterByColor(int x)
 		m_brush->setFilterByColor(true);
 	else
 		m_brush->setFilterByColor(false);
-	emit brushChanged();
-}
-
-void BrushControl::sendBrushPitch(double d)
-{
-	m_brush->setPitch(d);
 	emit brushChanged();
 }
 

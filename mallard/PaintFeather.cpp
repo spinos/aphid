@@ -55,6 +55,9 @@ void PaintFeather::perform(PaintMode mode, const Vector3F & brushInput)
 		case MRoll:
 			brushRoll(brushInput);
 			break;
+		case MPitch:
+			brushPitch(brushInput);
+			break;
 		default:
 			break;
 	}
@@ -205,5 +208,41 @@ void PaintFeather::brushRoll(const Vector3F & brushInput)
 
 		wei = m_weights[i];
 		c->setCurlAngle(activeMeanCurl * wei + c->curlAngle() * (1.f - wei));
+    }
+}
+
+void PaintFeather::brushPitch(const Vector3F & brushInput)
+{
+	const unsigned num = m_indices->size();
+	if(num < 1) return;
+	
+	Matrix33F space;
+	Vector3F zdir;
+	unsigned i;
+	
+	float activeMeanPitch = 0.f;
+	Vector3F activeMeanDir;
+	for(i =0; i < num; i++) {
+		MlCalamus * c = m_skin->getCalamus(m_indices->at(i));
+		activeMeanPitch += c->pitchAngle();
+		
+		m_skin->tangentSpace(c, space);
+		zdir.set(0.f, 0.f, 1.f);
+		zdir.rotateAroundAxis(Vector3F::XAxis, c->rotateX());
+		zdir = space.transform(zdir);
+		activeMeanDir += zdir;
+	}
+	activeMeanPitch /= num;
+	activeMeanDir /= (float)num;
+
+	if(brushInput.dot(activeMeanDir) < 0.f) activeMeanPitch -= .1f;
+	else activeMeanPitch += .1f;
+	
+	float wei;
+	for(i =0; i < num; i++) {
+		MlCalamus * c = m_skin->getCalamus(m_indices->at(i));
+
+		wei = m_weights[i];
+		c->setPitchAngle(activeMeanPitch * wei + c->pitchAngle() * (1.f - wei));
     }
 }

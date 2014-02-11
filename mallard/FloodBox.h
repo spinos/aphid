@@ -30,20 +30,17 @@ signals:
 	void radiusChanged(double x);
 	void strengthChanged(double x);
 	void numSampleChanged(int x);
-	void initialCurlChanged(double x);
 	void floodRegionChanged(int x);
 	
 private slots:
 	void sendRadius(double x);
 	void sendStrength(double x);
 	void sendNumSample(int x);
-	void sendCurl(double x);
 	void sendFloodRegion(int x);
 	
 private:
 	QDoubleEditSlider * m_radiusValue;
 	QIntEditSlider * m_numSampleValue;
-	QDoubleEditSlider * m_curlValue;
 	QDoubleEditSlider * m_strengthValue;
 	QCheckBox * m_floodAreaCheck;
 };

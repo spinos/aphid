@@ -26,10 +26,6 @@ FloodBox::FloodBox(QWidget *parent) : QGroupBox(parent)
 	m_numSampleValue->setLimit(8, 10000);
 	m_numSampleValue->setValue(99);
 	
-	m_curlValue = new QDoubleEditSlider(tr("Curl Angle"));
-	m_curlValue->setValue(0.01);
-	m_curlValue->setLimit(0.0, 1.0);
-	
 	m_strengthValue = new QDoubleEditSlider(tr("Strength"));
 	m_strengthValue->setLimit(0.01, 1.0);
 	m_strengthValue->setValue(1.0);
@@ -40,7 +36,6 @@ FloodBox::FloodBox(QWidget *parent) : QGroupBox(parent)
 	controlLayout->addWidget(img);
 	controlLayout->addWidget(m_radiusValue);
 	controlLayout->addWidget(m_numSampleValue);
-	controlLayout->addWidget(m_curlValue);
 	controlLayout->addWidget(m_strengthValue);
 	controlLayout->addWidget(m_floodAreaCheck);
 	controlLayout->addStretch();
@@ -49,7 +44,6 @@ FloodBox::FloodBox(QWidget *parent) : QGroupBox(parent)
 	
 	connect(m_radiusValue, SIGNAL(valueChanged(double)), this, SLOT(sendRadius(double)));
 	connect(m_numSampleValue, SIGNAL(valueChanged(int)), this, SLOT(sendNumSample(int)));
-	connect(m_curlValue, SIGNAL(valueChanged(double)), this, SLOT(sendCurl(double)));
 	connect(m_strengthValue, SIGNAL(valueChanged(double)), this, SLOT(sendStrength(double)));
 	connect(m_floodAreaCheck, SIGNAL(stateChanged(int)), this, SLOT(sendFloodRegion(int)));
 }
@@ -82,11 +76,6 @@ void FloodBox::sendStrength(double x)
 void FloodBox::sendNumSample(int x)
 {
 	emit numSampleChanged(x);
-}
-
-void FloodBox::sendCurl(double x)
-{
-	emit initialCurlChanged(x);
 }
 
 void FloodBox::sendFloodRegion(int x)

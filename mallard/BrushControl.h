@@ -28,6 +28,7 @@ class WidthBox;
 class FloodBox;
 class EraseBox;
 class PaintBox;
+class PitchBox;
 class BaseBrush;
 
 class BrushControl : public QDialog
@@ -45,7 +46,6 @@ private slots:
 	void sendBrushStrength(double d);
 	void sendBrushTwoSided(int x);
 	void sendBrushFilterByColor(int x);
-	void sendBrushPitch(double d);
 	void sendBrushNumSamples(int x);
 	void sendBrushColor(QColor c);
 	void sendBrushDropoff(double x);
@@ -64,6 +64,7 @@ private:
 	FloodBox * flood;
 	EraseBox * eraseControl;
 	PaintBox * paintControl;
+	PitchBox * pitchControl;
 	BaseBrush * m_brush;
 };
 #endif

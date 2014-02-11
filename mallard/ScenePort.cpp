@@ -388,7 +388,6 @@ char ScenePort::floodFeather()
 	
 	MlCalamus ac;
 	ac.setFeatherId(selectedFeatherExampleId());
-	ac.setRotateY(brush()->getPitch());
 	
 	skin()->floodAround(ac);
 	setDirty();

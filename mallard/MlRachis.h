@@ -22,7 +22,7 @@ public:
 	void reset();
 	void bend();
 	void bend(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriP, const Matrix33F & space, float radius, CollisionRegion * collide);
-	void curl(const float & fullPitch);
+	void pitchAndCurl(const float & pitchAngle, const float & curlAngle);
 	Matrix33F getSpace(short idx) const;
 	Float2 * angles() const;
 	float bendDirection() const;

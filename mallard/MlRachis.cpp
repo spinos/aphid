@@ -127,8 +127,8 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 		rota = matchNormal(segU, invSpace);
 		
 		segRot = rota.x;
-		if(segRot > 0.f) segRot *= 0.5f;
-
+		if(segRot > 0.f) segRot *= .5f;
+		
 		curAngle = pushAngle;
 		curAngle += segRot * bendWei;
 		curAngle += 0.2f * m_lengths[i];
@@ -145,9 +145,10 @@ void MlRachis::bend(unsigned faceIdx, float patchU, float patchV, const Vector3F
 	m_bendDirection = -rootUp.angleBetween(segU, rootFront);
 }
 
-void MlRachis::curl(const float & fullPitch)
+void MlRachis::pitchAndCurl(const float & pitchAngle, const float & curlAngle)
 {
-	for(unsigned i = 1; i < m_numSpace; i++) m_spaces[i].rotateY(fullPitch * m_lengths[i] * 0.5f);
+	m_spaces[0].rotateY(pitchAngle);
+	for(unsigned i = 1; i < m_numSpace; i++) m_spaces[i].rotateY(curlAngle * m_lengths[i] * 0.5f);
 }
 
 Matrix33F MlRachis::getSpace(short idx) const

@@ -17,7 +17,7 @@ public:
 
 	void bend();
 	void bendAt(unsigned faceIdx, float patchU, float patchV, const Vector3F & oriPos, const Matrix33F & oriRot, const float & scale);
-	void curl(float val);
+	void pitchAndCurl(const float & p, const float & c);
 	
 	void computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scaleLength, const float & scaleWidth);
 	Vector3F * segmentVaneWP(short u, short v, short side);

@@ -11,7 +11,7 @@ public:
 		CombBodyContourFeather = 5,
 		EraseBodyContourFeather = 6,
 		ScaleBodyContourFeatherLength = 7,
-		PitchBodyContourFeather = 8,
+		CurlBodyContourFeather = 8,
 		MoveInUV = 9,
 		MoveVertexInUV = 10,
 		MoveTransform = 11,
@@ -21,7 +21,8 @@ public:
 		SelectByColor = 15,
 		Deintersect = 16,
 		PaintMap = 17,
-		ScaleBodyContourFeatherWidth = 18
+		ScaleBodyContourFeatherWidth = 18,
+		PitchBodyContourFeather = 19
     };
     
     enum ActionRank {

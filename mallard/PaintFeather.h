@@ -17,7 +17,8 @@ public:
 		MDirection = 0,
 		MLength = 1,
 		MWidth = 2,
-		MRoll = 3
+		MRoll = 3,
+		MPitch = 4
 	};
 	
 	PaintFeather(CalamusSkin * skin, std::deque<unsigned> * indices, FloodCondition * density);
@@ -32,6 +33,7 @@ private:
 	void brushLength(const Vector3F & dv);
 	void brushWidth(const Vector3F & dv);
 	void brushRoll(const Vector3F & dv);
+	void brushPitch(const Vector3F & dv);
 private:
 	std::deque<unsigned> * m_indices;
 	boost::scoped_array<float> m_weights;

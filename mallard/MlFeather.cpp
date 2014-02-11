@@ -49,9 +49,9 @@ void MlFeather::bendAt(unsigned faceIdx, float patchU, float patchV, const Vecto
 	m_rachis->bend(faceIdx, patchU, patchV, oriPos, oriRot, scale * shaftLength(), m_skin);
 }
 
-void MlFeather::curl(float val)
+void MlFeather::pitchAndCurl(const float & p, const float & c)
 {
-	m_rachis->curl(val);
+	m_rachis->pitchAndCurl(p, c);
 }
 
 void MlFeather::computeWorldP(const Vector3F & oriPos, const Matrix33F & oriRot, const float & scaleLength, const float & scaleWidth)

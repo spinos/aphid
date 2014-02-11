@@ -143,6 +143,7 @@ void HSkin::readV0Data(MlCalamusArray * arr, const unsigned & num)
 			c[i].setLength(surrogate[i].m_scale);
 			c[i].setRotateX(surrogate[i].m_rotX);
 			c[i].setCurlAngle(surrogate[i].m_rotY);
+			c[i].setPitchAngle(0.001f);
 		}
 		
 		blockStart += arr->numElementPerBlock() * sizeof(MlCalamus);

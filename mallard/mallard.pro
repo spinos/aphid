@@ -46,6 +46,7 @@ WidthBox.h \
 FloodBox.h \
 EraseBox.h \
 PaintBox.h \
+PitchBox.h \
 				HFeather.h \
     HSkin.h \
                 MlFeatherCollection.h \
@@ -119,6 +120,7 @@ WidthBox.cpp \
 FloodBox.cpp \
 EraseBox.cpp \
 PaintBox.cpp \
+PitchBox.cpp \
 				HFeather.cpp \
     HSkin.cpp \
                 MlFeatherCollection.cpp \

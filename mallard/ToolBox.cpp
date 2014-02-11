@@ -126,7 +126,7 @@ void ToolBox::createContext()
 	bendContour->addIconFile(":roll.png");
 	bendContour->addIconFile(":rollActive.png");
 	bendContour->setIconIndex(0);
-	bendContour->setContext(PitchBodyContourFeather);
+	bendContour->setContext(CurlBodyContourFeather);
 	
 	ContextIconFrame * moveLight = new ContextIconFrame(this);
 	
@@ -148,6 +148,12 @@ void ToolBox::createContext()
 	paintMap->setIconIndex(0);
 	paintMap->setContext(PaintMap);
 	
+	ContextIconFrame * erect = new ContextIconFrame(this);
+	erect->addIconFile(":pitch.png");
+	erect->addIconFile(":pitchActive.png");
+	erect->setIconIndex(0);
+	erect->setContext(PitchBodyContourFeather);
+	
 	m_contextFrames.push_back(selectFace);
 	m_contextFrames.push_back(paintMap);
 	m_contextFrames.push_back(selectRegion);
@@ -156,6 +162,7 @@ void ToolBox::createContext()
 	m_contextFrames.push_back(lengthContour);
 	m_contextFrames.push_back(widthContour);
 	m_contextFrames.push_back(bendContour);
+	m_contextFrames.push_back(erect);
 	m_contextFrames.push_back(eraseContour);
 	m_contextFrames.push_back(moveLight);
 	m_contextFrames.push_back(rotateLight);

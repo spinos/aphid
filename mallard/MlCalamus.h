@@ -56,6 +56,9 @@ public:
 	
 	float curlAngle() const;
 	void setCurlAngle(const float & x);
+	
+	float pitchAngle() const;
+	void setPitchAngle(const float & x);
 private:
 	unsigned m_faceIdx, m_featherId, m_bufStart;
 	float m_patchU, m_patchV;
