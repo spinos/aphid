@@ -9,7 +9,7 @@
 
 #include "BoundingBoxList.h"
 #include <iostream>
-#include <stdint.h>
+
 BoundingBoxList::BoundingBoxList() {m_raw = 0;}
 BoundingBoxList::~BoundingBoxList() 
 {

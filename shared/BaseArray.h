@@ -8,7 +8,6 @@
  */
 
 #pragma once
-#include <stdint.h>
 #include <vector>
 class BaseArray {
 public:

@@ -2,26 +2,26 @@
 #define ZFN_EXR_H
 #include <BaseImage.h>
 #include <vector>
-#include <OpenEXR/ImfRgbaFile.h>
-#include <OpenEXR/ImfHeader.h>
-#include <OpenEXR/ImfOutputFile.h>
-#include <OpenEXR/ImfInputFile.h>
-#include <OpenEXR/ImfChannelList.h>
-#include <OpenEXR/ImfArray.h>
+#include <ImfRgbaFile.h>
+#include <ImfHeader.h>
+#include <ImfOutputFile.h>
+#include <ImfInputFile.h>
+#include <ImfChannelList.h>
+#include <ImfArray.h>
 
-#include <OpenEXR/ImfBoxAttribute.h>
-#include <OpenEXR/ImfChannelListAttribute.h>
-#include <OpenEXR/ImfCompressionAttribute.h>
-#include <OpenEXR/ImfChromaticitiesAttribute.h>
-#include <OpenEXR/ImfFloatAttribute.h>
-#include <OpenEXR/ImfEnvmapAttribute.h>
-#include <OpenEXR/ImfDoubleAttribute.h>
-#include <OpenEXR/ImfIntAttribute.h>
-#include <OpenEXR/ImfLineOrderAttribute.h>
-#include <OpenEXR/ImfMatrixAttribute.h>
-#include <OpenEXR/ImfOpaqueAttribute.h>
-#include <OpenEXR/ImfStringAttribute.h>
-#include <OpenEXR/ImfVecAttribute.h>
+#include <ImfBoxAttribute.h>
+#include <ImfChannelListAttribute.h>
+#include <ImfCompressionAttribute.h>
+#include <ImfChromaticitiesAttribute.h>
+#include <ImfFloatAttribute.h>
+#include <ImfEnvmapAttribute.h>
+#include <ImfDoubleAttribute.h>
+#include <ImfIntAttribute.h>
+#include <ImfLineOrderAttribute.h>
+#include <ImfMatrixAttribute.h>
+#include <ImfOpaqueAttribute.h>
+#include <ImfStringAttribute.h>
+#include <ImfVecAttribute.h>
 
 class ZEXRImage;
 

@@ -8,7 +8,7 @@
  */
 
 #include "IndexList.h"
-#include <stdint.h>
+#include <vector>
 IndexList::IndexList() {m_raw = 0;}
 IndexList::~IndexList() 
 {
