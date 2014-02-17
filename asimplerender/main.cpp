@@ -63,6 +63,88 @@ void logRenderError(int status)
 	}
 }
 
+void testTex()
+{
+    AtNode * mesh = AiNode("polymesh");
+    AiNodeSetStr(mesh, "name", "/obj/plane");
+    
+    AtArray * fcounts = AiArrayAllocate(1, 1, AI_TYPE_UINT);
+    AiArraySetUInt(fcounts, 0, 4);
+    
+    AtArray * points = AiArrayAllocate(4, 1, AI_TYPE_POINT);
+    AtPoint pt;
+    pt.x = -1.1f;
+    pt.y = 0.f;
+    pt.z = 0.f;
+    AiArraySetPnt(points, 0, pt);
+    pt.x = .9f;
+    pt.y = 0.f;
+    pt.z = 0.f;
+    AiArraySetPnt(points, 1, pt);
+    pt.x = .9f;
+    pt.y = 1.9f;
+    pt.z = 0.f;
+    AiArraySetPnt(points, 2, pt);
+    pt.x = -1.1f;
+    pt.y = 1.9f;
+    pt.z = 0.f;
+    AiArraySetPnt(points, 3, pt);
+    
+    AtArray * normals = AiArrayAllocate(4, 1, AI_TYPE_VECTOR);
+    AtVector nor; nor.x = 0.f; nor.y =0.f; nor.z = 1.f;
+    
+    AiArraySetVec(normals, 0, nor);
+    AiArraySetVec(normals, 1, nor);
+    AiArraySetVec(normals, 2, nor);
+    AiArraySetVec(normals, 3, nor);
+    
+    AtArray * vertices = AiArrayAllocate(4, 1, AI_TYPE_UINT);
+    AiArraySetUInt(vertices, 0, 0);
+    AiArraySetUInt(vertices, 1, 1);
+    AiArraySetUInt(vertices, 2, 2);
+    AiArraySetUInt(vertices, 3, 3);
+    
+    AtArray * nvertices = AiArrayAllocate(4, 1, AI_TYPE_UINT);
+    AiArraySetUInt(nvertices, 0, 0);
+    AiArraySetUInt(nvertices, 1, 1);
+    AiArraySetUInt(nvertices, 2, 2);
+    AiArraySetUInt(nvertices, 3, 3);
+    
+    AtArray * uvvertices = AiArrayAllocate(4, 1, AI_TYPE_UINT);
+    AiArraySetUInt(uvvertices, 0, 0);
+    AiArraySetUInt(uvvertices, 1, 1);
+    AiArraySetUInt(uvvertices, 2, 2);
+    AiArraySetUInt(uvvertices, 3, 3);
+    
+    AtArray * uvs = AiArrayAllocate(4, 1, AI_TYPE_POINT2);
+    AtPoint2 auv; 
+    auv.x = 0.f; auv.y = 0.f;
+    AiArraySetPnt2(uvs, 0, auv);
+    auv.x = 1.f; auv.y = 0.f;
+    AiArraySetPnt2(uvs, 1, auv);
+    auv.x = 1.f; auv.y = 1.f;
+    AiArraySetPnt2(uvs, 2, auv);
+    auv.x = 0.f; auv.y = 1.f;
+    AiArraySetPnt2(uvs, 3, auv);
+    
+    AiNodeSetArray(mesh, "nsides", fcounts);
+    AiNodeSetArray(mesh, "vidxs", vertices);
+    AiNodeSetArray(mesh, "nidxs", nvertices);
+    AiNodeSetArray(mesh, "uvidxs", uvvertices);
+    AiNodeSetArray(mesh, "vlist", points);
+    AiNodeSetArray(mesh, "nlist", normals);
+    AiNodeSetArray(mesh, "uvlist", uvs);
+    
+    AtNode * stnd = AiNode("standard");
+	AiNodeSetFlt(stnd, "Kd", .9f);
+
+	AtNode * img = AiNode("image");
+	AiNodeSetStr(img, "filename", "C:/Users/zhangjian/Desktop/LordsBird03.jpg");
+	if(AiNodeLink(img, "Kd_color", stnd)) std::clog<<"kd color linked";
+	else std::clog<<"kd color not linked";
+	AiNodeSetPtr(mesh, "shader", stnd);
+}
+
 int main(int argc, char *argv[])
 {
     std::clog<<"CMake Tutorial Version "<<SimpleRender_VERSION_MAJOR<<"."<<SimpleRender_VERSION_MINOR;
@@ -199,6 +281,8 @@ int main(int argc, char *argv[])
 	//if(AiNodeLink(usrCol, "color", hair)) std::clog<<"linked";
 
 	AiNodeSetPtr(curveNode, "shader", hair);
+	
+	testTex();
 	
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
     AiEnd();

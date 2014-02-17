@@ -34,3 +34,13 @@ cmake -G "NMake Makefiles" -DSZIP_INCLUDE_DIR=D:/usr/szip_2_1/src -DZLIB_INCLUDE
 enable Shared library (static library not working)
 enable ZLIB and SZIP support
 
+To build ilmbase-2
+
+edit IlmBaseConfig.h
+
+#define PLATFORM_WINDOWS
+
+edit IexMathFpu.cpp
+
+comment out #include <stdint.h>
+
