@@ -75,19 +75,19 @@ void testTex()
     AtPoint pt;
     pt.x = -1.1f;
     pt.y = 0.f;
-    pt.z = 0.f;
+    pt.z = -.5f;
     AiArraySetPnt(points, 0, pt);
     pt.x = .9f;
     pt.y = 0.f;
-    pt.z = 0.f;
+    pt.z = -.5f;
     AiArraySetPnt(points, 1, pt);
     pt.x = .9f;
     pt.y = 1.9f;
-    pt.z = 0.f;
+    pt.z = -.5f;
     AiArraySetPnt(points, 2, pt);
     pt.x = -1.1f;
     pt.y = 1.9f;
-    pt.z = 0.f;
+    pt.z = -.5f;
     AiArraySetPnt(points, 3, pt);
     
     AtArray * normals = AiArrayAllocate(4, 1, AI_TYPE_VECTOR);
@@ -206,83 +206,127 @@ int main(int argc, char *argv[])
     
     AtNode *curveNode = AiNode("curves");
     AiNodeSetStr(curveNode, "basis", "catmull-rom");
-    AtArray* counts = AiArrayAllocate(1, 1, AI_TYPE_UINT);
-    AiArraySetUInt(counts, 0, 4 + 2);
+    const int nlines = 99;
+    AtArray* counts = AiArrayAllocate(nlines, 1, AI_TYPE_UINT);
+    for(int i = 0 ; i < nlines; i++) AiArraySetUInt(counts, i, 4 + 2);
     
-    AtArray* points = AiArrayAllocate(4 + 2, 1, AI_TYPE_POINT);
+    AtArray* points = AiArrayAllocate((4 + 2)*nlines, 1, AI_TYPE_POINT);
     
     AtPoint pt;
-    pt.x = 0.f;
-    pt.y = 0.f;
-    pt.z = 0.f;
-    AiArraySetPnt(points, 0, pt);
-    AiArraySetPnt(points, 1, pt);
-    pt.x = 0.f;
-    pt.y = 1.f;
-    AiArraySetPnt(points, 2, pt);
-    pt.x = 1.f;
-    pt.y = 1.f;
-    AiArraySetPnt(points, 3, pt);
-    pt.x = 1.f;
-    pt.y = 2.f;
-    AiArraySetPnt(points, 4, pt);
-    AiArraySetPnt(points, 5, pt);
+    int offset = 0;
+    for(int i = 0 ; i < nlines; i++) {
+        offset = i * 6;
+        pt.x = 0.02f * i;
+        pt.y = 0.f;
+        pt.z = 0.f;
+        AiArraySetPnt(points, 0 + offset, pt);
+        AiArraySetPnt(points, 1 + offset, pt);
+        pt.x = 0.02f * i;
+        pt.y = 1.f;
+        pt.z = 1.f;
+        AiArraySetPnt(points, 2 + offset, pt);
+        pt.x = 1.f + 0.02f * i;
+        pt.y = 2.f;
+        pt.z = 1.f;
+        AiArraySetPnt(points, 3 + offset, pt);
+        pt.x = 1.f + 0.02f * i;
+        pt.y = 3.f;
+        pt.z = 0.f;
+        AiArraySetPnt(points, 4 + offset, pt);
+        AiArraySetPnt(points, 5 + offset, pt);
+    }
     
-    AtArray* radius = AiArrayAllocate(4, 1, AI_TYPE_FLOAT);
-    AiArraySetFlt(radius, 0, 0.04);
-    AiArraySetFlt(radius, 1, 0.02);
-    AiArraySetFlt(radius, 2, 0.02);
-    AiArraySetFlt(radius, 3, 0.01);
+    AtArray* radius = AiArrayAllocate(4 * nlines, 1, AI_TYPE_FLOAT);
+    for(int i = 0 ; i < nlines; i++) {
+        offset = i * 4;
+        AiArraySetFlt(radius, 0+ offset, 0.016);
+        AiArraySetFlt(radius, 1+ offset, 0.015);
+        AiArraySetFlt(radius, 2+ offset, 0.015);
+        AiArraySetFlt(radius, 3+ offset, 0.014);
+    }
     
     AiNodeSetArray(curveNode, "num_points", counts);
 	AiNodeSetArray(curveNode, "points", points);
 	AiNodeSetArray(curveNode, "radius", radius);
 	
 	AiNodeDeclare(curveNode, "colors", "varying RGB");
-	AtArray* colors = AiArrayAllocate(4, 1, AI_TYPE_RGB);
+	AtArray* colors = AiArrayAllocate(4 * nlines, 1, AI_TYPE_RGB);
 	
 	AtRGB acol;
-	acol.r = 0.f;
-	acol.g = 1.f;
-	acol.b = 0.f;
-	
-	AiArraySetRGB(colors, 0, acol);
-	acol.r = .1f;
-	acol.g = .1f;
-	acol.b = 1.f;
-	AiArraySetRGB(colors, 1, acol);
-	acol.r = .99f;
-	acol.g = .1f;
-	acol.b = .0f;
-	AiArraySetRGB(colors, 2, acol);
-	acol.r = .1f;
-	acol.g = .99f;
-	acol.b = .1f;
-	AiArraySetRGB(colors, 3, acol);
+	for(int i = 0 ; i < nlines; i++) {
+        offset = i * 4;
+        acol.r = 0.f;
+        acol.g = 1.f;
+        acol.b = 0.f;
+        
+        AiArraySetRGB(colors, 0 + offset, acol);
+        acol.r = .1f;
+        acol.g = .1f;
+        acol.b = 1.f;
+        AiArraySetRGB(colors, 1 + offset, acol);
+        acol.r = .99f;
+        acol.g = .1f;
+        acol.b = .0f;
+        AiArraySetRGB(colors, 2 + offset, acol);
+        acol.r = .1f;
+        acol.g = .99f;
+        acol.b = .1f;
+        AiArraySetRGB(colors, 3 + offset, acol);
+    }
 	
 	AiNodeSetArray(curveNode, "colors", colors);
 	
-	AtNode *hair = AiNode("hair");
+	AiNodeDeclare(curveNode, "uvparamcoord", "varying POINT2");
+ 
+    AtArray* uvcoords = AiArrayAllocate(4 * nlines, 1, AI_TYPE_POINT2);
+    AtPoint2 auv; 
+    for(int i = 0 ; i < nlines; i++) {
+	    offset = 4 * i;
+	    auv.x = 0.01f * i;
+	    auv.y = 0.01f;
+	    AiArraySetPnt2(uvcoords, 0 + offset, auv);
+	    auv.y = 0.33f;
+	    AiArraySetPnt2(uvcoords, 1 + offset, auv);
+	    auv.y = 0.66f;
+	    AiArraySetPnt2(uvcoords, 2 + offset, auv);
+	    auv.y = 0.99f;
+	    AiArraySetPnt2(uvcoords, 3 + offset, auv);
+	}
+	
+	AiNodeSetArray(curveNode, "uvparamcoord", uvcoords);
+
+	/*AtNode *hair = AiNode("hair");
 	AiNodeSetFlt(hair, "gloss", 20);
 	AiNodeSetFlt(hair, "gloss2", 8);
 	AiNodeSetFlt(hair, "spec", 0.f);
-	AiNodeSetFlt(hair, "spec2", 0.f);
-	//AtNode *hair = AiNode("utility");
+	AiNodeSetFlt(hair, "spec2", 0.f);*/
+	
+	AtNode *hair = AiNode("utility");
 	
 	const AtNodeEntry* nodeEntry = AiNodeEntryLookUp("userDataColor");
 	if(nodeEntry != NULL) std::clog<<"userDataColor exists";
 	
-	AtNode * usrCol = AiNode("userDataColor");
-	AiNodeSetStr(usrCol, "colorAttrName", "colors");
+	//AtNode * usrCol = AiNode("userDataColor");
+	//AiNodeSetStr(usrCol, "colorAttrName", "colors");
 	
-	if(AiNodeLink(usrCol, "rootcolor", hair)) std::clog<<"linked";
+	/*if(AiNodeLink(usrCol, "rootcolor", hair)) std::clog<<"linked";
 	if(AiNodeLink(usrCol, "tipcolor", hair)) std::clog<<"linked";
-	//if(AiNodeLink(usrCol, "spec_color", hair)) std::clog<<"linked";
-	//if(AiNodeLink(usrCol, "color", hair)) std::clog<<"linked";
+	if(AiNodeLink(usrCol, "spec_color", hair)) std::clog<<"linked";
+	*/
+	
+	AtNode * img = AiNode("image");
+	AiNodeSetStr(img, "filename", "C:/Users/zhangjian/Desktop/LordsBird03.jpg");
+	
+	//if(AiNodeLink(usrCol, "color", hair)) std::clog<<"\ncolor as color linked";
+	if(AiNodeLink(img, "color", hair)) std::clog<<"\nimage as color linked";
+	
+	AtNode * usrUV = AiNode("userDataPnt2");
+	AiNodeSetStr(usrUV, "pnt2AttrName", "uvparamcoord");
+	if(AiNodeLink(usrUV, "uvcoords", img)) std::clog<<"\nuv coords linked";
 
 	AiNodeSetPtr(curveNode, "shader", hair);
 	
-	testTex();
+	//testTex();
 	
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
     AiEnd();
