@@ -10,6 +10,7 @@
 #include "RenderEngine.h"
 #include "BaseCamera.h"
 #include "LightGroup.h"
+#include "ShaderGroup.h"
 #include "RenderOptions.h"
 RenderEngine::RenderEngine() {}
 RenderEngine::~RenderEngine() {}
@@ -24,6 +25,8 @@ void RenderEngine::setLights(LightGroup * lights)
 	m_lights = lights;
 }
 
+void RenderEngine::setShaders(ShaderGroup * shaders) { m_shaders = shaders; }
+
 BaseCamera * RenderEngine::camera() const
 {
 	return m_options->renderCamera();
@@ -33,6 +36,8 @@ LightGroup * RenderEngine::lights() const
 {
 	return m_lights;
 }
+
+ShaderGroup * RenderEngine::shaders() const { return m_shaders; }
 
 RenderOptions * RenderEngine::options() const
 {

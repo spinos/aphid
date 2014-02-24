@@ -20,6 +20,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 ../shared/QIntEdit.h \
 ../shared/QDoubleEdit.h \
 ../shared/QBoolEdit.h \
+../shared/QFileNameEdit.h \
                 ../shared/Base3DView.h \
                 ../shared/Base2DView.h \
                 ManipulateView.h \
@@ -79,6 +80,8 @@ SceneTreeModel.h \
 SceneTreeParser.h \
 SceneTreeItem.h \
 EditDelegate.h \
+MlShaders.h \
+FeatherShader.h \
                 window.h
                 
 SOURCES       = ../shared/ContextIconFrame.cpp \
@@ -94,6 +97,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 ../shared/QIntEdit.cpp \
 ../shared/QDoubleEdit.cpp \
 ../shared/QBoolEdit.cpp \
+../shared/QFileNameEdit.cpp \
                 ../shared/Base3DView.cpp \
                 ../shared/Base2DView.cpp \
                 ManipulateView.cpp \
@@ -153,6 +157,8 @@ SceneTreeModel.cpp \
 SceneTreeParser.cpp \
 SceneTreeItem.cpp \
 EditDelegate.cpp \
+MlShaders.cpp \
+FeatherShader.cpp \
     window.cpp \
                 main.cpp
                 

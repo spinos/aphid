@@ -348,6 +348,7 @@ void GLWidget::testRender()
 	emit renderStarted(renderName());
 	prepareRender();
 	m_engine->setLights(this);
+	m_engine->setShaders(this);
 	m_engine->setOptions(this);
 	m_engine->preRender();
 }

@@ -207,6 +207,10 @@ bool MlScene::doWrite(const std::string & fileName)
 	grpLight.save(this);
 	grpLight.close();
 	
+	HShader grpShader("/world/shaders");
+	grpShader.save(this);
+	grpShader.close();
+	
 	saveTextures("/world/tex");
 	
 	grpWorld.close();

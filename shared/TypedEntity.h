@@ -22,7 +22,8 @@ public:
 		TDistantLight = 7,
 		TPointLight = 8,
 		TSquareLight = 9,
-		TTexture = 10
+		TTexture = 10,
+		TShader= 11
     };
     
 	TypedEntity();

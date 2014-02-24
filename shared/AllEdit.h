@@ -11,3 +11,4 @@
 #include <QIntEdit.h>
 #include <QDoubleEdit.h>
 #include <QBoolEdit.h>
+#include <QFileNameEdit.h>

@@ -11,6 +11,7 @@
 #include "SceneTreeItem.h"
 #include "MlScene.h"
 #include "AllLight.h"
+#include "FeatherShader.h"
 #include "AllEdit.h"
 #include <BaseCamera.h>
 SceneTreeParser::SceneTreeParser(const QStringList &headers, MlScene* scene, 
@@ -35,6 +36,7 @@ void SceneTreeParser::setupModelData(SceneTreeItem *parent)
 	addOptions(parents);
 	addCamera(parents);
 	addLights(parents);
+	addShaders(parents);
 }
 
 void SceneTreeParser::addOptions(QList<SceneTreeItem*> & parents)
@@ -73,6 +75,25 @@ void SceneTreeParser::addLights(QList<SceneTreeItem*> & parents)
 	}
 }
 
+void SceneTreeParser::addShaders(QList<SceneTreeItem*> & parents)
+{
+	addBase(parents, "shaders", 0);
+	unsigned nl = m_scene->numShaders();
+	for(unsigned i = 0; i < nl; i++) {
+		BaseShader * s = m_scene->getShader(i);
+		addBase(parents, s->name(), 1);
+		if(s->shaderType() == BaseShader::TFeather)
+		    addFeatherShader(parents, s);
+	}
+}
+
+void SceneTreeParser::addFeatherShader(QList<SceneTreeItem*> & parents, BaseShader * s)
+{
+    FeatherShader * f = static_cast<FeatherShader *>(s);
+    addFltAttr(parents, "Gloss", 2, f->gloss());
+    addFltAttr(parents, "Gloss2", 2, f->gloss2());
+}
+
 void SceneTreeParser::receiveData(QWidget * editor)
 {
 	QModelEdit * me = static_cast<QModelEdit *>(editor);
@@ -91,6 +112,9 @@ void SceneTreeParser::updateScene(SceneTreeItem * item)
 	}
 	else if(baseName == "lights") {
 		updateLights(item);
+	}
+	else if(baseName == "shaders") {
+		updateShaders(item);
 	}
 }
 
@@ -168,3 +192,30 @@ void SceneTreeParser::updateLights(SceneTreeItem * item)
 		l->setLightColor(r, g, b);
 	}
 }
+
+void SceneTreeParser::updateShaders(SceneTreeItem * item)
+{
+	const QString shaderName = item->fullPathName()[1];
+	BaseShader * s = m_scene->getShader(shaderName.toStdString());
+	if(!s) {
+		qDebug()<<"WARNING: cannot find shader named "<<shaderName;
+		return;
+	}
+	if(s->shaderType() == BaseShader::TFeather)
+		updateFeatherShader(item, s);
+}
+
+void SceneTreeParser::updateFeatherShader(SceneTreeItem * item, BaseShader * s)
+{
+    FeatherShader * f = static_cast<FeatherShader *>(s);
+    const QString attrName = item->fullPathName().first();
+	if(attrName == "Gloss") {
+		qDebug()<<"set gloss "<<item->data(1).toDouble();
+		f->setGloss(item->data(1).toFloat());
+	}
+	else if(attrName == "Gloss2") {
+		qDebug()<<"set gloss2 "<<item->data(1).toDouble();
+		f->setGloss2(item->data(1).toFloat());
+	}
+}
+

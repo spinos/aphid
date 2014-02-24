@@ -10,7 +10,7 @@
 #pragma once
 #include "SceneTreeModel.h"
 class MlScene;
-
+class BaseShader;
 class SceneTreeParser : public SceneTreeModel {
 	Q_OBJECT
 public:
@@ -26,11 +26,15 @@ protected:
 	void addOptions(QList<SceneTreeItem*> & parents);
 	void addCamera(QList<SceneTreeItem*> & parents);
 	void addLights(QList<SceneTreeItem*> & parents);
+	void addShaders(QList<SceneTreeItem*> & parents);
+	void addFeatherShader(QList<SceneTreeItem*> & parents, BaseShader * s);
 	void setupModelData(SceneTreeItem *parent);
     void updateScene(SceneTreeItem * item);
 	void updateOptions(SceneTreeItem * item);
 	void updateCamera(SceneTreeItem * item);
 	void updateLights(SceneTreeItem * item);
+	void updateShaders(SceneTreeItem * item);
+	void updateFeatherShader(SceneTreeItem * item, BaseShader * s);
 private:
 	MlScene * m_scene;
 };

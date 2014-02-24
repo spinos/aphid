@@ -11,6 +11,7 @@
 #include <boost/timer.hpp>
 class BaseCamera;
 class LightGroup;
+class ShaderGroup;
 class RenderOptions;
 class RenderEngine {
 public:
@@ -19,9 +20,11 @@ public:
 	
 	void setOptions(RenderOptions * options);
 	void setLights(LightGroup * lights);
+	void setShaders(ShaderGroup * shaders);
 	
 	BaseCamera * camera() const;
 	LightGroup * lights() const;
+	ShaderGroup * shaders() const;
 	RenderOptions * options() const;
 
 	virtual void preRender();
@@ -33,5 +36,6 @@ protected:
 private:
     boost::timer m_met;
 	LightGroup * m_lights;
+	ShaderGroup * m_shaders;
 	RenderOptions * m_options;
 };
