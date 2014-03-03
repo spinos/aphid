@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     AiBegin();
     
     AiLoadPlugins("./driver_foo.dll");
-    AiLoadPlugins("./mtoa_shaders.dll");
+    AiLoadPlugins("./ExtendShaders.dll");
     
     AtNode* options = AiNode("options");
     AtArray* outputs  = AiArrayAllocate(1, 1, AI_TYPE_STRING);
@@ -320,8 +320,8 @@ int main(int argc, char *argv[])
 	//if(AiNodeLink(usrCol, "color", hair)) std::clog<<"\ncolor as color linked";
 	if(AiNodeLink(img, "color", hair)) std::clog<<"\nimage as color linked";
 	
-	AtNode * usrUV = AiNode("userDataPnt2");
-	AiNodeSetStr(usrUV, "pnt2AttrName", "uvparamcoord");
+	AtNode * usrUV = AiNode("featherUVCoord");
+	AiNodeSetStr(usrUV, "attrName", "uvparamcoord");
 	if(AiNodeLink(usrUV, "uvcoords", img)) std::clog<<"\nuv coords linked";
 
 	AiNodeSetPtr(curveNode, "shader", hair);
