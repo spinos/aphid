@@ -91,10 +91,10 @@ void MlEngine::fineOutput()
 	AiBegin();
 	logArnoldVersion();
     loadPlugin("./driver_foo.dll");
-    loadPlugin("./mtoa_shaders.dll");
+    loadPlugin("./ExtendShaders.dll");
 	
-	const AtNodeEntry* nodeEntry = AiNodeEntryLookUp("userDataColor");
-	if(nodeEntry == NULL) std::clog<<"\nWARNING: userDataColor node entry doesn't exist! Most likely mtoa_shaders.all is not loaded.\n";
+	const AtNodeEntry* nodeEntry = AiNodeEntryLookUp("featherUVCoord");
+	if(nodeEntry == NULL) std::clog<<"\nWARNING: featherUVCoord node entry doesn't exist! Most likely mtoa_shaders.all is not loaded.\n";
     
     AtNode* options = AiNode("options");
     AtArray* outputs  = AiArrayAllocate(1, 1, AI_TYPE_STRING);

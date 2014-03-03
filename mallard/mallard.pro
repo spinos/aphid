@@ -52,6 +52,7 @@ PitchBox.h \
     HSkin.h \
                 MlFeatherCollection.h \
 	HLight.h \
+HShader.h \
 	HOption.h \
     MlUVView.h \
     FeatherEdit.h \
@@ -129,6 +130,7 @@ PitchBox.cpp \
     HSkin.cpp \
                 MlFeatherCollection.cpp \
 	HLight.cpp \
+HShader.cpp \
 	HOption.cpp \
     MlUVView.cpp \
     FeatherEdit.cpp \

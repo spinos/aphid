@@ -17,6 +17,7 @@
 #include <HFeather.h>
 #include <HSkin.h>
 #include <HLight.h>
+#include <HShader.h>
 #include <HOption.h>
 #include <BakeDeformer.h>
 #include <PlaybackControl.h>
@@ -307,6 +308,10 @@ bool MlScene::doRead(const std::string & fileName)
 	HLight grpLight("/world/lights");
 	grpLight.load(this);
 	grpLight.close();
+	
+	HShader grpShader("/world/shaders");
+	grpShader.load(this);
+	grpShader.close();
 	
 	HOption grpOpt("/world/options");
 	grpOpt.load(this);
