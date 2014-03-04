@@ -4,13 +4,13 @@
 #include <sstream>
 
 using namespace std;
-
+namespace MY {
 Word::Word(const char *w)
 {
 	_the_word = w;
 }
 
-const char *Word::reverse()
+const char *Word::reverse() const
 {
 	string r(_the_word);
 	int count = r.size();
@@ -21,4 +21,4 @@ const char *Word::reverse()
 	
 	return r.c_str();
 }
-
+};

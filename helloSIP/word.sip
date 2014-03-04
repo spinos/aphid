@@ -1,7 +1,7 @@
 // Define the SIP wrapper to the word library.
 
 %Module word 0
-
+namespace MY {
 class Word {
 
 %TypeHeaderCode
@@ -12,4 +12,5 @@ public:
     Word(const char *);
 
     const char *reverse() const;
+};
 };

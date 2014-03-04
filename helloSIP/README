@@ -4,19 +4,11 @@ http://www.riverbankcomputing.co.uk/static/Docs/sip4/using.html
 
 Steps to test:
 
-g++ -o word.o -c word.cpp
-ar rcs libword.a word.o
-cp libword.a /usr/local/lib
-g++ -o foo main.cpp -lword
-./foo
-sip -c . word.sip
+use CMake to generate and build word library
+
+cp libword.dylib /usr/local/lib
+
 python configure.py
 make
 make install
-open python, and run:
-
-from word import Word
-a = 'Casablanca.1942'
-print 'reverse', a
-b = Word(a)
-print 'to', b.reverse()
+python test.py
