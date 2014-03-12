@@ -1,11 +1,11 @@
 // Define the interface to the word library.
 namespace MY {
 class Word {
-	const char* _the_word;
+	const char* the_word;
 
 public:
-    Word(const char *w);
+    Word();
 
-    const char *reverse() const;
+    char *reverse(const char *w) const;
 };
 };

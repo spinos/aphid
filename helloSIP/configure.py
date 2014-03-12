@@ -17,7 +17,7 @@ makefile = sipconfig.SIPModuleMakefile(config, build_file)
 # Add the library we are wrapping.  The name doesn't include any platform
 # specific prefixes or extensions (e.g. the "lib" prefix on UNIX, or the
 # ".dll" extension on Windows).
-makefile.extra_libs = ["word"]
-
+makefile.extra_libs = ["wordLibrary"]
+makefile.extra_lflags = ['/NODEFAULTLIB:LIBCMT.lib']
 # Generate the Makefile itself.
 makefile.generate()

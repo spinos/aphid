@@ -19,3 +19,8 @@ CMake
 set source to apiRoot/lib/Shotgun 
 set binary to musket
 gen and build
+
+To build plugin
+
+Edit sip/Shotgun.sip to remove const after deleteEntity()
+Edit mappedTypes.sip to replace 27000100 to 0100, replace time_t related long to long long
