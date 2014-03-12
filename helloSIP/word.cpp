@@ -5,20 +5,18 @@
 
 using namespace std;
 namespace MY {
-Word::Word(const char *w)
+Word::Word()
 {
-	_the_word = w;
 }
 
-const char *Word::reverse() const
+char *Word::reverse(const char *w) const
 {
-	string r(_the_word);
+	string r = string(w);
 	int count = r.size();
-
+	char *res = new char[count];
 	for(int i = 0; i < count; i++) {
-		r[i] = _the_word[count - 1  - i];	
+		res[i] = w[count - 1  - i];	
 	}
-	
-	return r.c_str();
+	return res;
 }
 };

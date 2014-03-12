@@ -1,6 +1,6 @@
 // Define the SIP wrapper to the word library.
 
-%Module word 0
+%Module (name=word, language="C++")
 namespace MY {
 class Word {
 
@@ -9,8 +9,8 @@ class Word {
 %End
 
 public:
-    Word(const char *);
+    Word();
 
-    const char *reverse() const;
+    char *reverse(const char * w) const;
 };
 };

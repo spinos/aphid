@@ -2,9 +2,9 @@
 # 
 
 cmake_minimum_required (VERSION 2.8)
-project (word)
+project (wordLibrary)
 
 include_directories (".")
     
-add_library(word SHARED word.cpp)
+add_library(wordLibrary STATIC word.cpp)
 
