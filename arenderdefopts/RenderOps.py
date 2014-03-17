@@ -29,7 +29,7 @@ class BaseRenderGlobalOps(BasePluginOps):
         else:
             print('ERROR: %s is not available' % rendererName)
         cmds.setAttr('defaultRenderGlobals.animation', 1)
-        cmds.setAttr('defaultRenderGlobals.outFormatControl', 2)
+        cmds.setAttr('defaultRenderGlobals.outFormatControl', 0)
         cmds.setAttr('defaultRenderGlobals.fieldExtControl', 2)
         cmds.setAttr('defaultRenderGlobals.putFrameBeforeExt', 1)
         cmds.setAttr('defaultRenderGlobals.extensionPadding', 4)
@@ -84,8 +84,8 @@ class ArnoldRenderOps(BaseRenderGlobalOps):
     def __init__(self, pluginName='mtoa', 
                         rendererName='arnold', 
                         imagePrefix='', 
-                        imageWidth=2550, 
-                        imageHeight=1080, 
+                        imageWidth=2048, 
+                        imageHeight=848, 
                         cameraName='perspShape', 
                         imageFormat='png', 
                         startFrame=0, 
@@ -95,14 +95,32 @@ class ArnoldRenderOps(BaseRenderGlobalOps):
         self.set_image_prefix(imagePrefix)
         self.set_image_size(imageWidth, imageHeight)
         self.use_camera(cameraName)
-        self.set_image_format(imageFormat)
         self.set_frame_range(startFrame, endFrame)
         if self.is_arnold_ready():
-            cmds.setAttr('defaultArnoldRenderOptions.motion_blur_enable', 1)
-    
+            self.create_ai_options()
+            self.create_ai_driver()
+            cmds.setAttr('defaultArnoldRenderOptions.motion_blur_enable', 1)   
+        self.set_image_format(imageFormat)
+
     def is_arnold_ready(self):
         return self.renderer() == 'arnold'
+        
+    def create_ai_options(self):
+        if not cmds.objExists('defaultArnoldRenderOptions'):
+            print('create default aiOptions')
+            cmds.createNode('aiOptions', name='defaultArnoldRenderOptions', skipSelect=True)
+            
+    def create_ai_driver(self):
+        if not cmds.objExists('defaultArnoldDriver'):
+            print('create default ai driver')
+            cmds.createNode('aiAOVDriver', name='defaultArnoldDriver', skipSelect=True)
 
+    def set_image_format(self, imageFormat):
+        cmds.setAttr('defaultArnoldDriver.aiTranslator', imageFormat, type='string')
+
+    def image_format(self):
+        return cmds.getAttr('defaultArnoldDriver.aiTranslator')
+        
 # a = ArnoldRenderOps(pluginName='Mayatomr', rendererName='mentalRay', imagePrefix='test')
 # a = ArnoldRenderOps(imagePrefix='foo')
 
