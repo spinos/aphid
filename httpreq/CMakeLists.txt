@@ -15,6 +15,8 @@ else()
 	set (Boost_LIBRARY_DIR "/users/jianzhang/Library/boost_1_55_0/stage/lib")
 	include_directories ("/users/jianzhang/Library/boost_1_55_0")
 	find_package(Boost 1.55 COMPONENTS system date_time regex)
+	include_directories ("/usr/local/include")
+	target_link_libraries (sync_client "xmlrpc" "xmlrpc_abyss" "xmlrpc_client++" "xmlrpc_cpp" "xmlrpc++" "xmlrpc_client" "xmlrpc_util" "xmlrpc_xmlparse")
 endif()
 
 message ("boost system is" ${Boost_SYSTEM_LIBRARY})

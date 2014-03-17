@@ -13,26 +13,23 @@
 #include <ostream>
 #include <string>
 #include <boost/asio.hpp>
+#include <xmlrpc.h>
+#include <xmlrpc_client.h>
+#include <xmlrpc-c/girerr.hpp>
+#include <xmlrpc-c/base.hpp>
+#include <xmlrpc-c/client.hpp>
+#include <xmlrpc-c/client_transport.hpp>
 
 using boost::asio::ip::tcp;
 
-int main(int argc, char* argv[])
+int testAsio(const char * hostURL, const char * dir)
 {
-  try
-  {
-    if (argc != 3)
-    {
-      std::cout << "Usage: sync_client <server> <path>\n";
-      std::cout << "Example:\n";
-      std::cout << "  sync_client www.boost.org /LICENSE_1_0.txt\n";
-      return 1;
-    }
-
-    boost::asio::io_service io_service;
+	try {
+	boost::asio::io_service io_service;
 
     // Get a list of endpoints corresponding to the server name.
     tcp::resolver resolver(io_service);
-    tcp::resolver::query query(argv[1], "http");
+    tcp::resolver::query query(hostURL, "http");
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
     // Try each endpoint until we successfully establish a connection.
@@ -44,11 +41,13 @@ int main(int argc, char* argv[])
     // allow us to treat all data up until the EOF as the content.
     boost::asio::streambuf request;
     std::ostream request_stream(&request);
-    request_stream << "GET " << argv[2] << " HTTP/1.0\r\n";
-    request_stream << "Host: " << argv[1] << "\r\n";
-    request_stream << "Accept: */*\r\n";
-    request_stream << "Connection: close\r\n\r\n";
-
+    request_stream << "POST " << dir << " HTTP/1.1\r\n";
+	request_stream << "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n";
+    request_stream << "Host: " << hostURL << "\r\n";
+    request_stream << "Accept-Language: en-us\r\n";
+	request_stream << "Accept-Encoding: gzip, deflate\r\n";
+    request_stream << "Connection: Keep-Alive\r\n\r\n";
+	
     // Send the request.
     boost::asio::write(socket, request);
 
@@ -102,6 +101,40 @@ int main(int argc, char* argv[])
   {
     std::cout << "Exception: " << e.what() << "\n";
   }
+  
+	return 0;
+}
 
+static void
+die_if_fault_occurred(xmlrpc_env * const envP) {
+    if (envP->fault_occurred) {
+        fprintf(stderr, "XML-RPC Fault: %s (%d)\n",
+                envP->fault_string, envP->fault_code);
+        exit(1);
+    }
+}
+
+int testRPC()
+{
+	xmlrpc_c::clientXmlTransport_curl transport;
+	xmlrpc_c::client_xml client = xmlrpc_c::client_xml(&transport);
+	xmlrpc_c::carriageParm_curl0 myCarriageParm("shotgun.of3d.com");
+	return 0;
+}
+
+int main(int argc, char* argv[])
+{
+  
+    if (argc != 3)
+    {
+      std::cout << "Usage: sync_client <server> <path>\n";
+      std::cout << "Example:\n";
+      std::cout << "  sync_client www.boost.org /LICENSE_1_0.txt\n";
+      return 1;
+    }
+
+	//testAsio(argv[1], argv[2]);
+	testRPC();
+    
   return 0;
 }
