@@ -118,7 +118,6 @@ int testRPC()
 {
 	xmlrpc_c::clientXmlTransport_curl transport;
 	xmlrpc_c::client_xml client = xmlrpc_c::client_xml(&transport);
-	xmlrpc_c::carriageParm_curl0 myCarriageParm("shotgun.of3d.com");
 	return 0;
 }
 
