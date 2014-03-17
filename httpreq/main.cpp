@@ -114,10 +114,30 @@ die_if_fault_occurred(xmlrpc_env * const envP) {
     }
 }
 
-int testRPC()
+void logParam(const std::map<std::string, xmlrpc_c::value> & in)
 {
+	std::map<std::string, xmlrpc_c::value>::const_iterator it = in.begin();
+	for(; it != in.end(); ++it) {
+		std::clog<<" "<<it->first<<" : "<<std::string(xmlrpc_c::value_string(it->second))<<"\n";
+	}
+}
+
+int testRPC(const char * serverURL)
+{
+	std::map<std::string, xmlrpc_c::value> auth_value;
+	auth_value["script_name"] = xmlrpc_c::value(xmlrpc_c::value_string("ClientApi"));
+	auth_value["script_key"] = xmlrpc_c::value(xmlrpc_c::value_string(""));
+	xmlrpc_c::paramList params;
+	params.add(xmlrpc_c::value(xmlrpc_c::value_struct(auth_value)));
+	
+	std::clog<<"param size "<<params.size()<<"\n";
+	for(int i = 0; i < params.size(); i++)
+		logParam(params.getStruct(i));
+		
 	xmlrpc_c::clientXmlTransport_curl transport;
 	xmlrpc_c::client_xml client = xmlrpc_c::client_xml(&transport);
+	xmlrpc_c::carriageParm_curl0 myCarriageParm(serverURL);
+	
 	return 0;
 }
 
@@ -133,7 +153,7 @@ int main(int argc, char* argv[])
     }
 
 	//testAsio(argv[1], argv[2]);
-	testRPC();
+	testRPC(argv[1]);
     
   return 0;
 }
