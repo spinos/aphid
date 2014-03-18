@@ -22,7 +22,7 @@ int main( int argc, char **argv )
 
     try
     {
-        Shotgun sg(shotgunURL, authName, authKey);
+        Shotgun sg;
 
         ProjectPtrs projects = sg.findEntities<Project>();
         std::cout << "\nlist all projects\n";
