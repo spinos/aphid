@@ -37,6 +37,8 @@ int main( int argc, char **argv )
         std::cout << "\nfind a project";
         std::cout << *project << std::endl;
 		delete project;
+		
+		std::cout<<sg.hello();
     }
     catch (const SgError & e)
     {
