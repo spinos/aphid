@@ -3,20 +3,37 @@
 #include <iostream>
 #include <sstream>
 
-using namespace std;
 namespace MY {
 Word::Word()
 {
 }
 
-char *Word::reverse(const char *w) const
+std::string Word::reversed(const std::string & w) const
 {
-	string r = string(w);
+	std::string r = std::string(w);
 	int count = r.size();
-	char *res = new char[count];
-	for(int i = 0; i < count; i++) {
-		res[i] = w[count - 1  - i];	
+	for(int i = 0; i < count; i++)
+		r[i] = w[count - 1  - i];	
+
+	return r;
+}
+
+std::string Word::str(const std::string & name) const
+{
+	std::string res("hello ");
+	res = res + name;
+	return res;
+}
+
+std::string Word::strvec(const std::vector<std::string> & name) const
+{
+	std::string res("hello ");
+	std::vector<std::string>::const_iterator it = name.begin();
+	for(; it != name.end(); ++it) {
+		res = res + " and ";
+		res = res + *it;
 	}
 	return res;
 }
+
 };

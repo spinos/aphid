@@ -1,4 +1,6 @@
 // Define the interface to the word library.
+#include <string>
+#include <vector>
 namespace MY {
 class Word {
 	const char* the_word;
@@ -6,6 +8,8 @@ class Word {
 public:
     Word();
 
-    char *reverse(const char *w) const;
+    std::string reversed(const std::string & w) const;
+	std::string str(const std::string & name) const;
+	std::string strvec(const std::vector<std::string> & name) const;
 };
 };
