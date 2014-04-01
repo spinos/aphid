@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 namespace MY {
+
 class Word {
 	const char* the_word;
 
