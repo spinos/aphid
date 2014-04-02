@@ -327,7 +327,26 @@ int main(int argc, char *argv[])
 	AiNodeSetPtr(curveNode, "shader", hair);
 	
 	//testTex();
-	
+	for(int i=1; i< 4; i++) {
+        AtNode * ball = AiNode("sphere");
+        
+        AtNode * inst = AiNode("ginstance");
+        AiNodeSetPtr(inst, "node", ball);
+        
+        AtMatrix mm;
+        AiM4Identity(mm);
+        mm[3][1] = i * 1.f;
+        
+        AtArray* mms = AiArrayAllocate(1, 1, AI_TYPE_MATRIX);
+        AiArraySetMtx(mms, 0, mm);
+        AiNodeSetArray(inst, "matrix", mms);
+    }
+    
+    AtNode * arch = AiNode("procedural");
+    AiNodeSetStr(arch, "dso", "D:/ofl/proxyPaint/plugins/spin.1.ass");
+    AiNodeSetPnt(arch, "min", -3.11693668, 0.36803484, -1.12230337);
+    AiNodeSetPnt(arch, "max", 3.13341951, 6.34418392, -0.452006936);
+        
     logRenderError(AiRender(AI_RENDER_MODE_CAMERA));
     AiEnd();
     return 1;
