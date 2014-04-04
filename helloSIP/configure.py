@@ -9,7 +9,7 @@ build_file = "word.sbf"
 config = sipconfig.Configuration()
 
 # Run SIP to generate the code.
-os.system(" ".join([config.sip_bin, "-c", ".", "-b", build_file, "word.sip"]))
+os.system(" ".join([config.sip_bin, "-e -c", ".", "-b", build_file, "word.sip"]))
 
 # Create the Makefile.
 makefile = sipconfig.SIPModuleMakefile(config, build_file)

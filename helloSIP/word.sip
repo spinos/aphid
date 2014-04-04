@@ -2,6 +2,20 @@
 
 %Module (name=word, language="C++")
 
+%Exception std::exception(SIP_Exception) /PyName=StdException/
+{
+%TypeHeaderCode
+#include <exception>
+%End
+%RaiseCode
+        const char *detail = sipExceptionRef.what();
+
+        SIP_BLOCK_THREADS
+        PyErr_SetString(sipException_std_exception, detail);
+        SIP_UNBLOCK_THREADS
+%End
+};
+
 %MappedType std::string
 {
 %TypeHeaderCode
@@ -118,6 +132,7 @@ class Word {
 
 %TypeHeaderCode
 #include <word.h>
+#include <exception>
 %End
 
 public:
@@ -126,5 +141,6 @@ public:
     std::string reversed(const std::string & w) const;
     std::string str(const std::string & name) const;
     std::string strvec(const std::vector<std::string> & name) const;
+    int someerr() const;
 };
 };
