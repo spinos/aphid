@@ -2,16 +2,17 @@
 
 %Module (name=word, language="C++")
 
-%Exception std::exception(SIP_Exception) /PyName=StdException/
+%Exception MY::Ooops(SIP_Exception) /PyName=StdException/
 {
 %TypeHeaderCode
 #include <exception>
+#include <iostream>
 %End
 %RaiseCode
         const char *detail = sipExceptionRef.what();
-
+        std::cout<<"thrown "<<detail<<"\n";
         SIP_BLOCK_THREADS
-        PyErr_SetString(sipException_std_exception, detail);
+        PyErr_SetString(PyExc_RuntimeError, detail);
         SIP_UNBLOCK_THREADS
 %End
 };

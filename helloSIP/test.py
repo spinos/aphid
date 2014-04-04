@@ -10,7 +10,8 @@ n = ['alisa','bob', 'kate']
 a = b.strvec(n)
 print(a)
 try:
-    print(b.someerr())
-except:
-    print('some error')
+    b.someerr()
+except StandardError, e:
+    print(e)
+
 print('program ended')

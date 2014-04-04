@@ -2,6 +2,11 @@
 #include <string>
 #include <vector>
 namespace MY {
+    
+class Ooops : public std::exception {
+public:
+  const char* what() const throw() {return "Ooops!\n";}
+};
 
 class Word {
 	const char* the_word;

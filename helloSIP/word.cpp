@@ -36,13 +36,9 @@ std::string Word::strvec(const std::vector<std::string> & name) const
 	return res;
 }
 
-struct ooops : std::exception {
-  const char* what() const throw() {return "Ooops!\n";}
-};
-
 int Word::someerr() const
 {
-    throw ooops();
+    throw Ooops();
 }
 
 };
