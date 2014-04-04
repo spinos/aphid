@@ -38,7 +38,6 @@ std::string Word::strvec(const std::vector<std::string> & name) const
 
 int Word::someerr() const
 {
-    throw Ooops();
+        throw Ooops();
 }
-
 };
