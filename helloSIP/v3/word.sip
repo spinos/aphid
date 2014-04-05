@@ -20,13 +20,15 @@
 {
 %TypeHeaderCode
 #include <string>
+#include <iostream>
 %End
 
 %ConvertFromTypeCode
     // convert an std::string to a Python string
     // I removed the part that converts to a Python unicode string.
     PyObject* newstring;
-    newstring = PyString_FromString(sipCpp->c_str());
+    newstring = PyUnicode_FromString(sipCpp->c_str());
+    
     return newstring;
 %End
 
@@ -37,7 +39,7 @@
     // If argument is a Python string, assume it's UTF-8
     if (sipIsErr == NULL)
     {
-        return (PyString_Check(sipPy) || PyUnicode_Check(sipPy));
+        return PyUnicode_Check(sipPy);
     }
     if (sipPy == Py_None)
     {
@@ -46,16 +48,11 @@
     }
     if (PyUnicode_Check(sipPy))
     {
-        PyObject* s = PyUnicode_AsEncodedString(sipPy, "UTF-8", "");
-        *sipCppPtr = new std::string(PyString_AS_STRING(s));
-        Py_DECREF(s);
+        *sipCppPtr = new std::string(PyUnicode_AsUTF8(sipPy));
+        Py_DECREF(sipPy);
         return 1;
     }
-    if (PyString_Check(sipPy))
-    {
-        *sipCppPtr = new std::string(PyString_AS_STRING(sipPy));
-        return 1;
-    }
+
     return 0;
 %End
 };
@@ -79,7 +76,7 @@
     {
         PyObject *pObj;
 
-        if ((pObj = PyString_FromString((*sipCpp)[i].c_str())) == NULL)
+        if ((pObj = PyUnicode_FromString((*sipCpp)[i].c_str())) == NULL)
         {
             Py_DECREF(pList);
 
@@ -114,7 +111,7 @@
             return 0;
         }
 
-        stdVector->push_back(PyString_AS_STRING(itm));
+        stdVector->push_back(PyUnicode_AsUTF8(itm));
 
         Py_DECREF(itm);
     }
