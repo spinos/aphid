@@ -15,6 +15,7 @@ class BTree
 public:
     BTree();
     void insert(int x);
+	void remove(int x);
     void display();
 	
 private:

@@ -10,8 +10,9 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#define PERNODEINDEXCOUNT 5
-#define PERNODEKEYCOUNT 4
+
+#define MAXPERNODEKEYCOUNT 4
+#define MINPERNODEKEYCOUNT 2
 
 class BNode;
 
@@ -34,12 +35,12 @@ public:
 	bool isFull() const;
 	
 	void insert(Pair x);
-    void bounce(Pair b);
+    void remove(Pair x);
 	
 	BNode *firstIndex() const;
 	int firstKey() const;
     BNode *nextIndex(int x) const;
-	void connect(BNode * another);
+	void connectSibling(BNode * another);
     void display() const;
 	void getChildren(BTreeDisplayMap & dst, int level) const;
 	
@@ -53,10 +54,9 @@ private:
 	void splitLeaf(Pair x);
 	
 	void insertData(Pair x);
-	void splitData(Pair x, Pair old[], BNode * lft, BNode * rgt);
 	
 	void partRoot(Pair x);
-	Pair partData(Pair x, Pair old[], BNode * lft, BNode * rgt);
+	Pair partData(Pair x, Pair old[], BNode * lft, BNode * rgt, bool doSplitLeaf = false);
 	
 	void partInterior(Pair x);
 	
@@ -64,8 +64,39 @@ private:
 	void connectChildren();
 	void setParent(BNode * parent);
 	
-    BNode *m_parent;
-    int m_numKeys;
-    Pair m_data[PERNODEKEYCOUNT];
+	void bounce(Pair b);
+	BNode * sibling() const;
+	BNode * parent() const;
+	bool shareSameParent(BNode * another) const;
+	
+	void balanceLeaf();
+	bool balanceLeafRight();
+	void balanceLeafLeft();
+	void rightData(int num, BNode * rgt);
+	void leftData(int num, BNode * lft);
+	
+	Pair lastData() const;
+	Pair firstData() const;
+	
+	void removeLastData();
+	void removeFirstData();
+	
+	int numKeys() const;
+	
+	void setLeaf();
+	void replaceKey(Pair x, Pair y);
+	
+	BNode * ancestor(const Pair & x, bool & found) const;
+	BNode * leftTo(const Pair & x) const;
+	BNode * leafLeftTo(Pair x);
+	
+	bool hasKey(Pair x) const;
+	int shouldBalance(BNode * lft, BNode * rgt) const;
+	
+private:
+    Pair m_data[MAXPERNODEKEYCOUNT];
     BNode *m_first;
+	BNode *m_parent;
+    int m_numKeys;
+	bool m_isLeaf;
 };

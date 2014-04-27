@@ -16,12 +16,20 @@ BTree::BTree()
 
 void BTree::insert(int x)
 {
-	std::cout<<"\ninsert key "<<x;
+	std::cout<<"\ninsert key "<<x<<"\n";
 	BNode::Pair mypair;
     mypair.key = x;
     mypair.index = NULL;
 	m_root->insert(mypair);
-	display();
+}
+
+void BTree::remove(int x)
+{
+	std::cout<<"\nremove key "<<x<<"\n";
+	BNode::Pair mypair;
+    mypair.key = x;
+    mypair.index = NULL;
+	m_root->remove(mypair);
 }
 
 void BTree::display()
@@ -34,12 +42,12 @@ void BTree::display()
 	BTreeDisplayMap::const_iterator it = nodes.begin();
 	for(; it != nodes.end(); ++it)
 		displayLevel((*it).first, (*it).second);
-	
+	std::cout<<"\n";
 }
 
 void BTree::displayLevel(const int & level, const std::vector<BNode *> & nodes)
 {
-	std::cout<<"\n  level: "<<level<<"\n";
+	std::cout<<"\n  level: "<<level<<"   ";
 	std::vector<BNode *>::const_iterator it = nodes.begin();
 	for(; it != nodes.end(); ++it)
 		(*it)->display();

@@ -10,33 +10,37 @@
 
 BNode::BNode(BNode * parent)
 {
-	for(int i=0;i< PERNODEKEYCOUNT;i++)
+	for(int i=0;i< MAXPERNODEKEYCOUNT;i++)
         m_data[i].index = NULL;
 		
     m_parent = parent;
     m_first = NULL;
 	m_numKeys = 0;
+	m_isLeaf = false;
 }
+
+int BNode::numKeys() const { return m_numKeys; }
 
 bool BNode::isRoot() const { return m_parent == NULL; }
 
-bool BNode::hasChildren() const { return m_first != NULL; }
+bool BNode::hasChildren() const 
+{ 
+	if(isLeaf()) return false; 
+	return m_first != NULL; 
+}
 
-bool BNode::isLeaf() const { return m_first == NULL; }
+bool BNode::isLeaf() const { return m_isLeaf; }
 
-bool BNode::isFull() const { return m_numKeys >= PERNODEKEYCOUNT; }
+bool BNode::isFull() const { return m_numKeys >= MAXPERNODEKEYCOUNT; }
+
+void BNode::setLeaf() { m_isLeaf = true; }
 
 BNode * BNode::nextIndex(int x) const
 {
-	//std::cout<<" "<<x<<" ";
-	//if(x < m_data[0].key)
-    //  return firstIndex();
-	
 	for(int i= m_numKeys - 1;i >= 0;i--) {
-        if(x >= m_data[i].key) {
+        if(x >= m_data[i].key)
 			//std::cout<<"route by key "<<m_data[i].key;
             return (m_data[i].index);
-		}
     }
     //return (m_data[m_numKeys-1].index);
 	return firstIndex();
@@ -56,6 +60,21 @@ void BNode::display() const
 BNode *BNode::firstIndex() const { return m_first; }
 
 int BNode::firstKey() const { return m_data[0].key; }
+
+BNode * BNode::sibling() const
+{
+	return m_first;
+}
+
+BNode * BNode::parent() const
+{
+	return m_parent;
+}
+
+bool BNode::shareSameParent(BNode * another) const
+{
+	return parent() == another->parent();
+}
 
 void BNode::insert(BNode::Pair x)
 {
@@ -87,8 +106,10 @@ void BNode::insertLeaf(Pair x)
 	if(isFull()) {
 		splitLeaf(x);
 	}
-	else 
+	else {
 		insertData(x);
+		//balanceLeaf();
+	}
 }
 
 void BNode::insertInterior(Pair x)
@@ -97,9 +118,13 @@ void BNode::insertInterior(Pair x)
 	n->insert(x);
 }
 
-void BNode::connect(BNode * another)
+void BNode::connectSibling(BNode * another)
 {
-	m_data[PERNODEKEYCOUNT - 1].index = another;
+	//std::cout<<"connect siblings";
+	//display();
+	//std::cout<<" to ";
+	//another->display();
+	m_first = another;
 }
 
 void BNode::insertData(Pair x)
@@ -117,10 +142,10 @@ void BNode::splitRoot(Pair x)
 {
 	std::cout<<"split root ";
 	display();
-	BNode * one = new BNode(this);
-	BNode * two = new BNode(this);
+	BNode * one = new BNode(this); one->setLeaf();
+	BNode * two = new BNode(this); two->setLeaf();
 	
-	splitData(x, m_data, one, two);
+	partData(x, m_data, one, two, true);
 	
 	std::cout<<"into ";
 	one->display();
@@ -129,8 +154,9 @@ void BNode::splitRoot(Pair x)
 	m_first = one;
 	m_data[0].key = two->firstKey();
 	m_data[0].index = two;
-	one->connect(two);
+	one->connectSibling(two);
 	m_numKeys = 1;
+	one->balanceLeafLeft();
 }
 
 void BNode::splitLeaf(Pair x)
@@ -138,21 +164,26 @@ void BNode::splitLeaf(Pair x)
 	std::cout<<"split leaf ";
 	display();
 	std::cout<<"into ";
-	BNode * two = new BNode(m_parent);
-	connect(two);
-	Pair old[PERNODEKEYCOUNT];
-	for(int i=0; i < PERNODEKEYCOUNT; i++)
+	BNode * oldRgt = sibling();
+	BNode * two = new BNode(m_parent); two->setLeaf();
+
+	Pair old[MAXPERNODEKEYCOUNT];
+	for(int i=0; i < MAXPERNODEKEYCOUNT; i++)
 		old[i] = m_data[i];
 		
 	m_numKeys = 0;
-	splitData(x, old, this, two);
+	partData(x, old, this, two, true);
 	display();
 	two->display();
+	
+	connectSibling(two);
+	if(oldRgt) two->connectSibling(oldRgt);
 	
 	Pair b;
 	b.key = two->firstKey();
 	b.index = two;
 	m_parent->bounce(b);
+	//balanceLeafLeft();
 }
 
 void BNode::bounce(Pair b)
@@ -168,32 +199,9 @@ void BNode::bounce(Pair b)
 		insertData(b);
 }
 
-void BNode::splitData(Pair x, Pair old[], BNode * lft, BNode * rgt)
-{
-	BNode * dst = rgt;
-	
-	int numKeysRight = 0;
-	bool inserted = false;
-	for(int i = PERNODEKEYCOUNT - 1;i >= 0; i--) {
-		if(x.key > old[i].key && !inserted) {
-			dst->insertData(x);
-			i++;
-			inserted = true;
-		}
-		else
-			dst->insertData(old[i]);
-			
-		numKeysRight++;
-		if(numKeysRight >= PERNODEKEYCOUNT / 2 + 1)
-			dst = lft;
-	}
-	
-	if(!inserted)
-		dst->insertData(x);
-}
-
 void BNode::getChildren(BTreeDisplayMap & dst, int level) const
 {
+	if(isLeaf()) return;
 	if(!hasChildren()) return;
 	dst[level].push_back(firstIndex());
 	for(int i = 0;i < m_numKeys; i++)
@@ -257,8 +265,8 @@ void BNode::partInterior(Pair x)
 	display();
 	BNode * rgt = new BNode(m_parent);
 	
-	Pair old[PERNODEKEYCOUNT];
-	for(int i=0; i < PERNODEKEYCOUNT; i++)
+	Pair old[MAXPERNODEKEYCOUNT];
+	for(int i=0; i < MAXPERNODEKEYCOUNT; i++)
 		old[i] = m_data[i];
 	
 	m_numKeys = 0;
@@ -279,14 +287,14 @@ void BNode::partInterior(Pair x)
 	m_parent->bounce(b);
 }
 
-BNode::Pair BNode::partData(Pair x, Pair old[], BNode * lft, BNode * rgt)
+BNode::Pair BNode::partData(Pair x, Pair old[], BNode * lft, BNode * rgt, bool doSplitLeaf)
 {
 	Pair res, q;
 	BNode * dst = rgt;
 	
 	int numKeysRight = 0;
 	bool inserted = false;
-	for(int i = PERNODEKEYCOUNT - 1;i >= 0; i--) {
+	for(int i = MAXPERNODEKEYCOUNT - 1;i >= 0; i--) {
 		if(x.key > old[i].key && !inserted) {
 			q = x;
 			i++;
@@ -297,13 +305,19 @@ BNode::Pair BNode::partData(Pair x, Pair old[], BNode * lft, BNode * rgt)
 			
 		numKeysRight++;
 		
-		if(numKeysRight == PERNODEKEYCOUNT / 2 + 1) {
+		if(numKeysRight == MAXPERNODEKEYCOUNT / 2 + 1) {
+			if(doSplitLeaf)
+				dst->insertData(q);
+				
 			dst = lft;
 			res = q;
 		}
 		else
 			dst->insertData(q);
 	}
+	
+	if(!inserted)
+		dst->insertData(x);
 			
 	return res;
 }
@@ -312,3 +326,153 @@ void BNode::setFirstIndex(BNode * another)
 {
 	m_first = another;
 }
+
+void BNode::balanceLeaf()
+{
+	if(!balanceLeafRight()) {
+		balanceLeafLeft();
+	}
+}
+
+bool BNode::balanceLeafRight()
+{
+	BNode * rgt = sibling();
+	if(!rgt) return false;
+	
+	const Pair s = rgt->firstData();
+	
+	bool found = false;
+	BNode * crossed = ancestor(s, found);
+	
+	if(!found) return false;
+	
+	int k = shouldBalance(this, rgt);
+	if(k == 0) return false;
+	
+	Pair old = rgt->firstData();
+	if(k < 0) rightData(-k, rgt);
+	else rgt->leftData(k, this);
+	
+	crossed->replaceKey(old, rgt->firstData());
+	
+	return true;
+}
+
+void BNode::balanceLeafLeft()
+{
+	const Pair s = firstData();
+	
+	bool found = false;
+	BNode * crossed = ancestor(s, found);
+	
+	if(!found) return;
+	
+	BNode * leftSibling = crossed->leafLeftTo(s);
+	
+	if(leftSibling == this) return;
+	
+	int k = shouldBalance(leftSibling, this);
+	if(k == 0) return;
+	
+	Pair old = firstData();
+	if(k < 0) leftSibling->rightData(-k, this);
+	else this->leftData(k, leftSibling);
+	
+	crossed->replaceKey(old, firstData());
+	
+	std::cout<<"\nbalanced ";
+	leftSibling->display();
+	display();
+}
+
+BNode * BNode::ancestor(const Pair & x, bool & found) const
+{
+	if(m_parent->hasKey(x)) {
+		found = true;
+		return m_parent;
+	}
+	
+	if(m_parent->isRoot()) return NULL;
+	return m_parent->ancestor(x, found);
+}
+
+bool BNode::hasKey(Pair x) const
+{
+	for(int i = 0; i < m_numKeys; i++) {
+		if(m_data[i].key == x.key)
+			return true;
+	}
+	return false;
+}
+
+int BNode::shouldBalance(BNode * lft, BNode * rgt) const
+{
+	return (lft->numKeys() + rgt->numKeys()) / 2 - lft->numKeys();
+}
+
+BNode * BNode::leftTo(const Pair & x) const
+{
+	int i;
+	for(i = m_numKeys - 1; i >= 0; i--) {		
+        if(m_data[i].key < x.key) {
+			return m_data[i].index;
+		}
+    }
+	return firstIndex();
+}
+
+BNode * BNode::leafLeftTo(Pair x)
+{
+	if(isLeaf()) return this;
+	
+	BNode * n = leftTo(x);
+	return n->leafLeftTo(x);
+}
+
+void BNode::rightData(int num, BNode * rgt)
+{
+	for(int i = 0; i < num; i++) {
+		rgt->insertData(lastData());
+		removeLastData();
+	}
+}
+
+void BNode::leftData(int num, BNode * lft)
+{
+	for(int i = 0; i < num; i++) {
+		lft->insertData(firstData());
+		removeFirstData();
+	}
+}
+
+BNode::Pair BNode::lastData() const { return m_data[m_numKeys - 1]; }
+BNode::Pair BNode::firstData() const { return m_data[0]; }
+
+void BNode::removeLastData()
+{
+	m_numKeys--;
+}
+
+void BNode::removeFirstData()
+{
+	for(int i = 0; i < m_numKeys-1; i++) {
+		m_data[i] = m_data[i+1];
+	}
+	m_numKeys--;
+}
+
+void BNode::replaceKey(Pair x, Pair y)
+{
+	for(int i = 0; i < m_numKeys; i++) {
+		if(m_data[i].key == x.key) {
+			m_data[i].key = y.key;
+			return;
+		}
+	}
+}
+
+void BNode::remove(Pair x)
+{
+	
+}
+//~:
