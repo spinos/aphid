@@ -473,6 +473,48 @@ void BNode::replaceKey(Pair x, Pair y)
 
 void BNode::remove(Pair x)
 {
+	if(isLeaf()) 
+		removeLeaf(x);
+	else {
+		BNode * n = nextIndex(x.key);
+		n->remove(x);
+	}
+}
+
+void BNode::removeLeaf(const Pair & x)
+{
+	if(removeData(x)) balanceLeaf();
+}
+
+bool BNode::removeData(const Pair & x)
+{
+	int i, found = -1;
+    for(i= 0;i < m_numKeys; i++) {
+        if(m_data[i].key == x.key) {
+			found = i;
+			break;
+		}
+	}
 	
+	std::cout<<"found "<<found;
+	
+	if(found < 0) return false;
+	
+	if(found == m_numKeys - 1) {
+		m_numKeys--;
+		return true;
+	}
+	
+	for(i= found; i < m_numKeys - 1; i++)
+        m_data[i] = m_data[i+1];
+		
+	if(found == 0) {
+		bool c = false;
+		BNode * crossed = ancestor(x, c);
+		if(c) crossed->replaceKey(x, firstData());
+	}
+		
+    m_numKeys--;
+	return true;
 }
 //~:

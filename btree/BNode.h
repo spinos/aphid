@@ -93,6 +93,9 @@ private:
 	bool hasKey(Pair x) const;
 	int shouldBalance(BNode * lft, BNode * rgt) const;
 	
+	void removeLeaf(const Pair & x);
+	bool removeData(const Pair & x);
+	
 private:
     Pair m_data[MAXPERNODEKEYCOUNT];
     BNode *m_first;
