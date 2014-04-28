@@ -31,7 +31,9 @@ bool BNode::hasChildren() const
 
 bool BNode::isLeaf() const { return m_isLeaf; }
 
-bool BNode::isFull() const { return m_numKeys >= MAXPERNODEKEYCOUNT; }
+bool BNode::isFull() const { return m_numKeys == MAXPERNODEKEYCOUNT; }
+
+bool BNode::underflow() const { return m_numKeys < MINPERNODEKEYCOUNT; }
 
 void BNode::setLeaf() { m_isLeaf = true; }
 
@@ -471,6 +473,11 @@ void BNode::replaceKey(Pair x, Pair y)
 	}
 }
 
+void BNode::replaceIndex(int n, Pair x)
+{
+	m_data[n].index = x.index;
+}
+
 void BNode::remove(Pair x)
 {
 	if(isLeaf()) 
@@ -483,7 +490,61 @@ void BNode::remove(Pair x)
 
 void BNode::removeLeaf(const Pair & x)
 {
-	if(removeData(x)) balanceLeaf();
+	if(!removeData(x)) return;
+	if(!underflow()) return;
+	
+	if(!mergeLeaf())
+		balanceLeaf();
+}
+
+bool BNode::mergeLeaf()
+{
+	if(mergeLeafRight())
+		return true;
+		
+	return mergeLeafLeft();
+}
+
+bool BNode::mergeLeafRight()
+{
+	BNode * rgt = sibling();
+	if(!rgt) return false;
+	
+	const Pair s = rgt->firstData();
+	
+	if(!shouldMerge(this, rgt)) return false;
+	
+	Pair old = rgt->firstData();
+	BNode * oldSibling = rgt->sibling();
+
+	rgt->leftData(rgt->numKeys(), this);
+	
+	BNode * up = rgt->parent();
+	
+	delete rgt;
+	
+	connectSibling(oldSibling);
+	
+	Pair k = up->dataRightTo(old);
+	up->pop(k);
+	
+	return true;
+}
+
+bool BNode::mergeLeafLeft()
+{
+	const Pair s = firstData();
+	
+	bool found = false;
+	BNode * crossed = ancestor(s, found);
+	
+	if(!found) return false;
+	
+	BNode * leftSibling = crossed->leafLeftTo(s);
+	
+	if(leftSibling == this) return false;
+	
+	return leftSibling->mergeLeafRight();
 }
 
 bool BNode::removeData(const Pair & x)
@@ -496,8 +557,6 @@ bool BNode::removeData(const Pair & x)
 		}
 	}
 	
-	std::cout<<"found "<<found;
-	
 	if(found < 0) return false;
 	
 	if(found == m_numKeys - 1) {
@@ -505,16 +564,93 @@ bool BNode::removeData(const Pair & x)
 		return true;
 	}
 	
+	if(found == 0) {
+		if(!isLeaf())
+			setFirstIndex(firstData().index);
+	}
+	
 	for(i= found; i < m_numKeys - 1; i++)
         m_data[i] = m_data[i+1];
 		
 	if(found == 0) {
-		bool c = false;
-		BNode * crossed = ancestor(x, c);
-		if(c) crossed->replaceKey(x, firstData());
+		if(isLeaf()) {
+			bool c = false;
+			BNode * crossed = ancestor(x, c);
+			if(c) crossed->replaceKey(x, firstData());
+		}
 	}
 		
     m_numKeys--;
 	return true;
+}
+
+bool BNode::shouldMerge(BNode * lft, BNode * rgt) const
+{
+	return (lft->numKeys() + rgt->numKeys()) <= MAXPERNODEKEYCOUNT;
+}
+
+void BNode::pop(const Pair & x)
+{
+	if(isRoot()) popRoot(x);
+	else popInterior(x);
+}
+
+void BNode::popRoot(const Pair & x)
+{
+	if(numKeys() > 1) removeData(x);
+	else {
+		BNode * lft = firstIndex();
+		m_numKeys = 0;
+		mergeData(lft);
+		
+		if(lft->isLeaf())
+			setFirstIndex(NULL);
+		else 
+			setFirstIndex(lft->firstIndex());
+			
+		delete lft;
+	}
+}
+
+void BNode::popInterior(const Pair & x)
+{
+	removeData(x);
+	if(!underflow()) return;
+	std::cout<<"interior underflow!\n";
+	if(!mergeInterior())
+		balanceInterior();
+}
+
+const BNode::Pair BNode::data(int x) const { return m_data[x]; }
+
+void BNode::mergeData(BNode * another, int start)
+{
+	const int num = another->numKeys();
+	for(int i = start; i < num; i++)
+		insertData(another->data(i));
+}
+
+const BNode::Pair BNode::dataRightTo(const Pair & x) const
+{
+	const int num = numKeys();
+	for(int i = 0; i < num; i++) {
+		if(m_data[i].key >= x.key) return m_data[i];
+	}
+	return lastData();
+}
+
+bool BNode::mergeInterior()
+{
+	
+}
+
+void BNode::balanceInterior()
+{
+
+}
+
+bool BNode::shouldInteriorMerge(BNode * lft, BNode * rgt) const
+{
+	return (lft->numKeys() + rgt->numKeys()) < MAXPERNODEKEYCOUNT;
 }
 //~:

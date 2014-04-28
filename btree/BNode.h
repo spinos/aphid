@@ -92,9 +92,30 @@ private:
 	
 	bool hasKey(Pair x) const;
 	int shouldBalance(BNode * lft, BNode * rgt) const;
+	bool shouldMerge(BNode * lft, BNode * rgt) const;
 	
 	void removeLeaf(const Pair & x);
 	bool removeData(const Pair & x);
+	
+	bool underflow() const;
+	
+	bool mergeLeaf();
+	bool mergeLeafRight();
+	bool mergeLeafLeft();
+	
+	void pop(const Pair & x);
+	void popRoot(const Pair & x);
+	void popInterior(const Pair & x);
+	
+	const Pair data(int x) const;
+	void mergeData(BNode * another, int start = 0);
+	void replaceIndex(int n, Pair x);
+	
+	const Pair dataRightTo(const Pair & x) const;
+	
+	bool mergeInterior();
+	void balanceInterior();
+	bool shouldInteriorMerge(BNode * lft, BNode * rgt) const;
 	
 private:
     Pair m_data[MAXPERNODEKEYCOUNT];

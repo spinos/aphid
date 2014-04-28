@@ -16,7 +16,7 @@ BTree::BTree()
 
 void BTree::insert(int x)
 {
-	std::cout<<"\ninsert key "<<x<<"\n";
+	std::cout<<"insert key "<<x<<"\n";
 	BNode::Pair mypair;
     mypair.key = x;
     mypair.index = NULL;
@@ -25,7 +25,7 @@ void BTree::insert(int x)
 
 void BTree::remove(int x)
 {
-	std::cout<<"\nremove key "<<x<<"\n";
+	std::cout<<"remove key "<<x<<"\n";
 	BNode::Pair mypair;
     mypair.key = x;
     mypair.index = NULL;
