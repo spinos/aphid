@@ -88,6 +88,7 @@ private:
 	
 	BNode * ancestor(const Pair & x, bool & found) const;
 	BNode * leftTo(const Pair & x) const;
+	BNode * rightTo(const Pair & x, Pair & k) const;
 	BNode * leafLeftTo(Pair x);
 	
 	bool hasKey(Pair x) const;
@@ -96,6 +97,7 @@ private:
 	
 	void removeLeaf(const Pair & x);
 	bool removeData(const Pair & x);
+	bool removeDataLeaf(const Pair & x);
 	
 	bool underflow() const;
 	
@@ -116,6 +118,19 @@ private:
 	bool mergeInterior();
 	void balanceInterior();
 	bool shouldInteriorMerge(BNode * lft, BNode * rgt) const;
+	
+	bool mergeInteriorRight();
+	bool mergeInteriorLeft();
+	
+	void setData(int k, const Pair & x);
+	int dataId(const Pair & x) const;
+	
+	bool dataLeftTo(const Pair & x, Pair & dst) const;
+	
+	BNode * leftInteriorNeighbor() const;
+	
+	bool balanceInteriorRight();
+	void balanceInteriorLeft();
 	
 private:
     Pair m_data[MAXPERNODEKEYCOUNT];

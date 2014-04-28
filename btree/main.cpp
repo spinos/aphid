@@ -34,21 +34,17 @@ int main()
 	tree.remove(4);
 	tree.remove(6);
 	tree.remove(112);tree.display();
-	tree.remove(1);
-	tree.display();
+	tree.remove(1);tree.display();
 	
 	tree.insert(13);
-	tree.insert(46);
-	tree.display();
+	tree.insert(46);tree.display();
 	
 	
 	tree.remove(13);
-	tree.remove(200);
-	tree.display();
+	tree.remove(200);tree.display();
 
 	tree.insert(36);
-	tree.insert(34);
-	tree.display();
+	tree.insert(34);tree.display();
 	
 	tree.insert(32);
 	tree.insert(35);
@@ -60,28 +56,26 @@ int main()
 	tree.insert(93);
 	tree.insert(99);
 	tree.insert(3);
-	tree.remove(36);
-	tree.display();
+	tree.remove(36);tree.display();
 
-	tree.insert(22);
+	tree.insert(22);tree.display();
 	tree.insert(10);
 	tree.insert(12);
 	tree.insert(19);
-	tree.insert(23);
-	tree.insert(20);
-	tree.display();
+	tree.insert(23);tree.display();
+	tree.insert(20);tree.display();
 	
-	tree.insert(76);
+	tree.insert(76);tree.display();
 	tree.insert(54);
 	tree.insert(73);
 	tree.insert(104);
-	tree.insert(111);
+	tree.insert(111);tree.display();
 	tree.insert(40);
 	tree.insert(42);
 	tree.insert(47);
 	tree.insert(44);
 	tree.insert(59);
-	tree.insert(55);
+	tree.insert(55);tree.display();
 	tree.insert(49);
 	tree.insert(41);
 	tree.insert(43);
@@ -93,7 +87,7 @@ int main()
 	tree.insert(7);
 	tree.insert(0);
 	tree.insert(2);
-	tree.insert(4);
+	tree.insert(4);tree.display();
 	tree.insert(-100);
 	tree.insert(-32);
 	tree.insert(-9);
@@ -105,8 +99,10 @@ int main()
 	tree.insert(-17);
 	tree.insert(-79);
 	tree.insert(-48);
-	tree.remove(32);
-	tree.remove(23);
-	tree.display();
+	tree.remove(32);tree.display();
+	tree.remove(23);tree.display();
+	tree.remove(40);tree.display();
+	tree.remove(80);tree.display();
+	tree.remove(46);tree.display();
 	return 0;
 }

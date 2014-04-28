@@ -142,16 +142,16 @@ void BNode::insertData(Pair x)
 
 void BNode::splitRoot(Pair x)
 {
-	std::cout<<"split root ";
+	//std::cout<<"split root ";
 	display();
 	BNode * one = new BNode(this); one->setLeaf();
 	BNode * two = new BNode(this); two->setLeaf();
 	
 	partData(x, m_data, one, two, true);
 	
-	std::cout<<"into ";
-	one->display();
-	two->display();
+	//std::cout<<"into ";
+	//one->display();
+	//two->display();
 	
 	m_first = one;
 	m_data[0].key = two->firstKey();
@@ -163,9 +163,9 @@ void BNode::splitRoot(Pair x)
 
 void BNode::splitLeaf(Pair x)
 {
-	std::cout<<"split leaf ";
-	display();
-	std::cout<<"into ";
+	//std::cout<<"split leaf ";
+	//display();
+	//std::cout<<"into ";
 	BNode * oldRgt = sibling();
 	BNode * two = new BNode(m_parent); two->setLeaf();
 
@@ -175,8 +175,8 @@ void BNode::splitLeaf(Pair x)
 		
 	m_numKeys = 0;
 	partData(x, old, this, two, true);
-	display();
-	two->display();
+	//display();
+	//two->display();
 	
 	connectSibling(two);
 	if(oldRgt) two->connectSibling(oldRgt);
@@ -237,16 +237,16 @@ void BNode::setParent(BNode * parent)
 
 void BNode::partRoot(Pair x)
 {
-	std::cout<<"part root ";
-	display();
+	//std::cout<<"part root ";
+	//display();
 	BNode * one = new BNode(this);
 	BNode * two = new BNode(this);
 	
 	Pair p = partData(x, m_data, one, two);
 	
-	std::cout<<"into ";
-	one->display();
-	two->display();
+	//std::cout<<"into ";
+	//one->display();
+	//two->display();
 	
 	one->setFirstIndex(m_first);
 	two->setFirstIndex(p.index);
@@ -414,6 +414,7 @@ int BNode::shouldBalance(BNode * lft, BNode * rgt) const
 
 BNode * BNode::leftTo(const Pair & x) const
 {
+	if(m_numKeys==1) return firstIndex();
 	int i;
 	for(i = m_numKeys - 1; i >= 0; i--) {		
         if(m_data[i].key < x.key) {
@@ -421,6 +422,18 @@ BNode * BNode::leftTo(const Pair & x) const
 		}
     }
 	return firstIndex();
+}
+
+BNode * BNode::rightTo(const Pair & x, Pair & k) const
+{
+	int i;
+	for(i = 0; i < m_numKeys; i++) {		
+        if(m_data[i].key >= x.key) {
+			k = m_data[i];
+			return m_data[i].index;
+		}
+    }
+	return NULL;
 }
 
 BNode * BNode::leafLeftTo(Pair x)
@@ -490,7 +503,7 @@ void BNode::remove(Pair x)
 
 void BNode::removeLeaf(const Pair & x)
 {
-	if(!removeData(x)) return;
+	if(!removeDataLeaf(x)) return;
 	if(!underflow()) return;
 	
 	if(!mergeLeaf())
@@ -514,18 +527,30 @@ bool BNode::mergeLeafRight()
 	
 	if(!shouldMerge(this, rgt)) return false;
 	
+	BNode * up = rgt->parent();
+
 	Pair old = rgt->firstData();
 	BNode * oldSibling = rgt->sibling();
-
-	rgt->leftData(rgt->numKeys(), this);
 	
-	BNode * up = rgt->parent();
+	rgt->leftData(rgt->numKeys(), this);
 	
 	delete rgt;
 	
 	connectSibling(oldSibling);
 	
 	Pair k = up->dataRightTo(old);
+	
+	if(m_parent == up) {
+		k.index = this;
+		int ki = up->dataId(k);
+		up->setData(ki, k);
+	}
+	else {
+		bool found = false;
+		BNode * crossed = ancestor(s, found);
+		crossed->replaceKey(s, k);
+	}
+	
 	up->pop(k);
 	
 	return true;
@@ -547,7 +572,7 @@ bool BNode::mergeLeafLeft()
 	return leftSibling->mergeLeafRight();
 }
 
-bool BNode::removeData(const Pair & x)
+bool BNode::removeDataLeaf(const Pair & x)
 {
 	int i, found = -1;
     for(i= 0;i < m_numKeys; i++) {
@@ -564,21 +589,43 @@ bool BNode::removeData(const Pair & x)
 		return true;
 	}
 	
-	if(found == 0) {
-		if(!isLeaf())
-			setFirstIndex(firstData().index);
-	}
-	
 	for(i= found; i < m_numKeys - 1; i++)
         m_data[i] = m_data[i+1];
 		
 	if(found == 0) {
-		if(isLeaf()) {
-			bool c = false;
-			BNode * crossed = ancestor(x, c);
-			if(c) crossed->replaceKey(x, firstData());
+		bool c = false;
+		BNode * crossed = ancestor(x, c);
+		if(c) crossed->replaceKey(x, firstData());
+	}
+		
+    m_numKeys--;
+	return true;
+}
+
+bool BNode::removeData(const Pair & x)
+{
+	int i, found = -1;
+    for(i= 0;i < m_numKeys; i++) {
+        if(m_data[i].key == x.key) {
+			found = i;
+			break;
 		}
 	}
+	
+	if(found < 0) return false;
+	
+	if(found == 0) 
+		m_first = m_data[found].index;
+	else
+		m_data[found - 1].index = m_data[found].index;
+
+	if(found == m_numKeys - 1) {
+		m_numKeys--;
+		return true;
+	}
+	
+	for(i= found; i < m_numKeys - 1; i++)
+		m_data[i] = m_data[i+1];
 		
     m_numKeys--;
 	return true;
@@ -609,6 +656,8 @@ void BNode::popRoot(const Pair & x)
 			setFirstIndex(lft->firstIndex());
 			
 		delete lft;
+		
+		connectChildren();
 	}
 }
 
@@ -616,7 +665,7 @@ void BNode::popInterior(const Pair & x)
 {
 	removeData(x);
 	if(!underflow()) return;
-	std::cout<<"interior underflow!\n";
+	std::cout<<"interior underflow! ";display();
 	if(!mergeInterior())
 		balanceInterior();
 }
@@ -641,16 +690,99 @@ const BNode::Pair BNode::dataRightTo(const Pair & x) const
 
 bool BNode::mergeInterior()
 {
-	
+	if(mergeInteriorRight()) return true;
+	return mergeInteriorLeft();
 }
 
 void BNode::balanceInterior()
 {
-
+	if(!balanceInteriorRight()) balanceInteriorLeft();
 }
 
 bool BNode::shouldInteriorMerge(BNode * lft, BNode * rgt) const
 {
 	return (lft->numKeys() + rgt->numKeys()) < MAXPERNODEKEYCOUNT;
+}
+
+bool BNode::mergeInteriorRight()
+{
+	Pair k;
+	BNode * rgt = m_parent->rightTo(lastData(), k);
+	if(!rgt) return false;
+	if(!shouldInteriorMerge(this, rgt)) return false;
+	
+	k.index = rgt->firstIndex();
+	
+	insertData(k);
+	
+	rgt->leftData(rgt->numKeys(), this);
+	
+	delete rgt;
+	
+	connectChildren();
+	
+	int ki = m_parent->dataId(k); 
+	k.index = this;
+	m_parent->setData(ki, k);
+	
+	m_parent->pop(k);
+	return true;
+}
+
+bool BNode::mergeInteriorLeft()
+{
+	BNode * lft =leftInteriorNeighbor();
+	if(!lft) return false;
+	
+	return lft->mergeInteriorRight();
+}
+
+BNode * BNode::leftInteriorNeighbor() const
+{
+	Pair k, j;
+	if(!m_parent->dataLeftTo(firstData(), k)) return NULL;
+	j = k;
+	if(j.index == this)
+		m_parent->dataLeftTo(k, j);
+	
+	if(j.index == this) return NULL;
+	return j.index;
+}
+
+void BNode::setData(int k, const Pair & x)
+{
+	m_data[k] = x;
+}
+
+int BNode::dataId(const Pair & x) const
+{
+	for(int i = 0; i < m_numKeys; i++) {		
+        if(m_data[i].key >= x.key) {
+			return i;
+		}
+    }
+	return -1;
+}
+
+bool BNode::dataLeftTo(const Pair & x, Pair & dst) const
+{
+	for(int i = m_numKeys - 1; i >= 0; i--) {		
+        if(m_data[i].key < x.key) {
+			dst = m_data[i];
+			return true;
+		}
+    }
+	dst.index = firstIndex();
+	return false;
+}
+
+bool BNode::balanceInteriorRight()
+{
+	return true;
+}
+
+void BNode::balanceInteriorLeft()
+{
+
 }
 //~:
