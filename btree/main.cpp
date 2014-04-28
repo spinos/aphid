@@ -104,5 +104,7 @@ int main()
 	tree.remove(40);tree.display();
 	tree.remove(80);tree.display();
 	tree.remove(46);tree.display();
+	tree.insert(106);
+	tree.insert(206);tree.display();
 	return 0;
 }

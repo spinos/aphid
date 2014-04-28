@@ -496,8 +496,12 @@ void BNode::remove(Pair x)
 	if(isLeaf()) 
 		removeLeaf(x);
 	else {
-		BNode * n = nextIndex(x.key);
-		n->remove(x);
+		if(hasChildren()) {
+			BNode * n = nextIndex(x.key);
+			n->remove(x);
+		}
+		else
+			removeData(x);
 	}
 }
 
@@ -778,11 +782,32 @@ bool BNode::dataLeftTo(const Pair & x, Pair & dst) const
 
 bool BNode::balanceInteriorRight()
 {
+	Pair k;
+	BNode * rgt = m_parent->rightTo(lastData(), k);
+	if(!rgt) return false;
+
+	k.index = rgt->firstIndex();
+	
+	insertData(k);
+	
+	m_parent->replaceKey(k, rgt->firstData());
+	
+	rgt->removeData(rgt->firstData());
+
 	return true;
 }
 
 void BNode::balanceInteriorLeft()
 {
-
+	BNode * lft = leftInteriorNeighbor();
+	if(!lft) return;
+	Pair k;
+	m_parent->rightTo(lft->lastData(), k);
+	k.index = firstIndex();
+	insertData(k);
+	Pair l = lft->lastData();
+	setFirstIndex(l.index);
+	m_parent->replaceKey(k, l);
+	lft->removeLastData();
 }
 //~:
