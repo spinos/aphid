@@ -8,6 +8,9 @@
  */
 #include <iostream>
 #include <BTree.h>
+
+using namespace sdb;
+
 int main()
 {
 	std::cout<<"b-tree test\ntry to insert a few keys\n";
@@ -106,5 +109,16 @@ int main()
 	tree.remove(46);tree.display();
 	tree.insert(106);
 	tree.insert(206);tree.display();
+	
+	std::cout<<"test\n";
+	Pair<Key3I, BNode> * a = new Pair<Key3I, BNode>();
+	
+	a->key = sdb::Key3I(1,1,1);
+	
+	Pair<Key3I, char>b;
+	b.key = Key3I(1,1,2);
+	
+	if(a->key < b.key) std::cout<<" a < b \n";
+	
 	return 0;
 }

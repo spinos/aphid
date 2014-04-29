@@ -14,6 +14,8 @@
 #define MAXPERNODEKEYCOUNT 4
 #define MINPERNODEKEYCOUNT 2
 
+#include <Pair.h>
+
 class BNode;
 
 typedef std::map<int, std::vector<BNode *> > BTreeDisplayMap;
