@@ -13,7 +13,7 @@ namespace sdb {
 
 BTree::BTree()
 {
-	m_root= new BNode<int, Entity>;
+	m_root= new BNode<int>;
 }
 
 void BTree::insert(int x)

@@ -15,15 +15,15 @@
 
 namespace sdb {
 
-template <typename KeyType, class IndexType>  
+template <typename KeyType>  
 class BNode : public Entity
 {
 public:
 	BNode(Entity * parent = NULL);
 	virtual ~BNode() {}
 	
-	void insert(Pair<KeyType, IndexType> x);
-    void remove(Pair<KeyType, IndexType> x);
+	void insert(Pair<KeyType, Entity> x);
+    void remove(Pair<KeyType, Entity> x);
 	
 	int firstKey() const;
     BNode *nextIndex(int x) const;
@@ -32,23 +32,23 @@ public:
 	void getChildren(std::map<int, std::vector<Entity *> > & dst, int level) const;
 	
 private:
-	void insertRoot(Pair<KeyType, IndexType> x);
-	void splitRoot(Pair<KeyType, IndexType> x);
+	void insertRoot(Pair<KeyType, Entity> x);
+	void splitRoot(Pair<KeyType, Entity> x);
 	
-	void insertLeaf(Pair<KeyType, IndexType> x);
-	void splitLeaf(Pair<KeyType, IndexType> x);
+	void insertLeaf(Pair<KeyType, Entity> x);
+	void splitLeaf(Pair<KeyType, Entity> x);
 	
-	void insertData(Pair<KeyType, IndexType> x);
+	void insertData(Pair<KeyType, Entity> x);
 	
-	void partRoot(Pair<KeyType, IndexType> x);
-	Pair<KeyType, IndexType> partData(Pair<KeyType, IndexType> x, Pair<KeyType, IndexType> old[], BNode * lft, BNode * rgt, bool doSplitLeaf = false);
+	void partRoot(Pair<KeyType, Entity> x);
+	Pair<KeyType, Entity> partData(Pair<KeyType, Entity> x, Pair<KeyType, Entity> old[], BNode * lft, BNode * rgt, bool doSplitLeaf = false);
 	
-	void partInterior(Pair<KeyType, IndexType> x);
+	void partInterior(Pair<KeyType, Entity> x);
 	
-	void insertInterior(Pair<KeyType, IndexType> x);
+	void insertInterior(Pair<KeyType, Entity> x);
 	void connectChildren();
 	
-	void bounce(Pair<KeyType, IndexType> b);
+	void bounce(Pair<KeyType, Entity> b);
 
 	void balanceLeaf();
 	bool balanceLeafRight();
@@ -56,38 +56,38 @@ private:
 	void rightData(int num, BNode * rgt);
 	void leftData(int num, BNode * lft);
 	
-	Pair<KeyType, IndexType> lastData() const;
-	Pair<KeyType, IndexType> firstData() const;
+	Pair<KeyType, Entity> lastData() const;
+	Pair<KeyType, Entity> firstData() const;
 	
 	void removeLastData();
 	void removeFirstData();
 
-	void replaceKey(Pair<KeyType, IndexType> x, Pair<KeyType, IndexType> y);
+	void replaceKey(Pair<KeyType, Entity> x, Pair<KeyType, Entity> y);
 	
-	BNode * ancestor(const Pair<KeyType, IndexType> & x, bool & found) const;
-	BNode * leftTo(const Pair<KeyType, IndexType> & x) const;
-	BNode * rightTo(const Pair<KeyType, IndexType> & x, Pair<KeyType, IndexType> & k) const;
-	BNode * leafLeftTo(Pair<KeyType, IndexType> x);
+	BNode * ancestor(const Pair<KeyType, Entity> & x, bool & found) const;
+	BNode * leftTo(const Pair<KeyType, Entity> & x) const;
+	BNode * rightTo(const Pair<KeyType, Entity> & x, Pair<KeyType, Entity> & k) const;
+	BNode * leafLeftTo(Pair<KeyType, Entity> x);
 	
-	bool hasKey(Pair<KeyType, IndexType> x) const;
+	bool hasKey(Pair<KeyType, Entity> x) const;
 	
-	void removeLeaf(const Pair<KeyType, IndexType> & x);
-	bool removeData(const Pair<KeyType, IndexType> & x);
-	bool removeDataLeaf(const Pair<KeyType, IndexType> & x);
+	void removeLeaf(const Pair<KeyType, Entity> & x);
+	bool removeData(const Pair<KeyType, Entity> & x);
+	bool removeDataLeaf(const Pair<KeyType, Entity> & x);
 
 	bool mergeLeaf();
 	bool mergeLeafRight();
 	bool mergeLeafLeft();
 	
-	void pop(const Pair<KeyType, IndexType> & x);
-	void popRoot(const Pair<KeyType, IndexType> & x);
-	void popInterior(const Pair<KeyType, IndexType> & x);
+	void pop(const Pair<KeyType, Entity> & x);
+	void popRoot(const Pair<KeyType, Entity> & x);
+	void popInterior(const Pair<KeyType, Entity> & x);
 	
-	const Pair<KeyType, IndexType> data(int x) const;
+	const Pair<KeyType, Entity> data(int x) const;
 	void mergeData(BNode * another, int start = 0);
-	void replaceIndex(int n, Pair<KeyType, IndexType> x);
+	void replaceIndex(int n, Pair<KeyType, Entity> x);
 	
-	const Pair<KeyType, IndexType> dataRightTo(const Pair<KeyType, IndexType> & x) const;
+	const Pair<KeyType, Entity> dataRightTo(const Pair<KeyType, Entity> & x) const;
 	
 	bool mergeInterior();
 	void balanceInterior();
@@ -95,10 +95,10 @@ private:
 	bool mergeInteriorRight();
 	bool mergeInteriorLeft();
 	
-	void setData(int k, const Pair<KeyType, IndexType> & x);
-	int dataId(const Pair<KeyType, IndexType> & x) const;
+	void setData(int k, const Pair<KeyType, Entity> & x);
+	int dataId(const Pair<KeyType, Entity> & x) const;
 	
-	bool dataLeftTo(const Pair<KeyType, IndexType> & x, Pair<KeyType, IndexType> & dst) const;
+	bool dataLeftTo(const Pair<KeyType, Entity> & x, Pair<KeyType, Entity> & dst) const;
 	
 	BNode * leftInteriorNeighbor() const;
 	
@@ -119,22 +119,21 @@ private:
 	bool shouldInteriorMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) < MAXPERNODEKEYCOUNT; }
 	int shouldBalance(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) / 2 - lft->numKeys(); }
 	
-	
 private:
-    Pair<KeyType, IndexType> m_data[MAXPERNODEKEYCOUNT];
+    Pair<KeyType, Entity> m_data[MAXPERNODEKEYCOUNT];
 	int m_numKeys;
 };
 
-template <typename KeyType, class IndexType>  
-BNode<KeyType, IndexType>::BNode(Entity * parent) : Entity(parent)
+template <typename KeyType>  
+BNode<KeyType>::BNode(Entity * parent) : Entity(parent)
 {
 	m_numKeys = 0;
 	for(int i=0;i< MAXPERNODEKEYCOUNT;i++)
         m_data[i].index = NULL;
 }
 
-template <typename KeyType, class IndexType>  
-BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::nextIndex(int x) const
+template <typename KeyType>  
+BNode<KeyType> * BNode<KeyType>::nextIndex(int x) const
 {
 	for(int i= numKeys() - 1;i >= 0;i--) {
         if(x >= m_data[i].key)
@@ -145,8 +144,8 @@ BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::nextIndex(int x) const
 	return static_cast<BNode *>(firstIndex());;
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::display() const
+template <typename KeyType> 
+void BNode<KeyType>::display() const
 {
     int i;
     std::cout<<"(";
@@ -157,11 +156,11 @@ void BNode<KeyType, IndexType>::display() const
     std::cout<<") ";
 }
 
-template <typename KeyType, class IndexType> 
-int BNode<KeyType, IndexType>::firstKey() const { return m_data[0].key; }
+template <typename KeyType> 
+int BNode<KeyType>::firstKey() const { return m_data[0].key; }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::insert(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::insert(Pair<KeyType, Entity> x)
 {
 	if(isRoot()) 
 		insertRoot(x);
@@ -171,8 +170,8 @@ void BNode<KeyType, IndexType>::insert(Pair<KeyType, IndexType> x)
 		insertInterior(x);
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::insertRoot(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::insertRoot(Pair<KeyType, Entity> x)
 {
 	if(hasChildren()) {
 		BNode * n = nextIndex(x.key);
@@ -187,8 +186,8 @@ void BNode<KeyType, IndexType>::insertRoot(Pair<KeyType, IndexType> x)
 	}
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::insertLeaf(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::insertLeaf(Pair<KeyType, Entity> x)
 {
 	if(isFull()) {
 		splitLeaf(x);
@@ -199,15 +198,15 @@ void BNode<KeyType, IndexType>::insertLeaf(Pair<KeyType, IndexType> x)
 	}
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::insertInterior(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::insertInterior(Pair<KeyType, Entity> x)
 {
 	BNode * n = nextIndex(x.key);
 	n->insert(x);
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::insertData(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::insertData(Pair<KeyType, Entity> x)
 {	
 	int i;
     for(i= numKeys() - 1;i >= 0 && m_data[i].key > x.key; i--)
@@ -218,8 +217,8 @@ void BNode<KeyType, IndexType>::insertData(Pair<KeyType, IndexType> x)
     increaseNumKeys();
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::splitRoot(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::splitRoot(Pair<KeyType, Entity> x)
 {
 	std::cout<<"split root ";
 	display();
@@ -240,8 +239,8 @@ void BNode<KeyType, IndexType>::splitRoot(Pair<KeyType, IndexType> x)
 	one->balanceLeafLeft();
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::splitLeaf(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::splitLeaf(Pair<KeyType, Entity> x)
 {
 	//std::cout<<"split leaf ";
 	//display();
@@ -249,7 +248,7 @@ void BNode<KeyType, IndexType>::splitLeaf(Pair<KeyType, IndexType> x)
 	Entity * oldRgt = sibling();
 	BNode * two = new BNode(parent()); two->setLeaf();
 
-	Pair<KeyType, IndexType> old[MAXPERNODEKEYCOUNT];
+	Pair<KeyType, Entity> old[MAXPERNODEKEYCOUNT];
 	for(int i=0; i < MAXPERNODEKEYCOUNT; i++)
 		old[i] = m_data[i];
 		
@@ -261,15 +260,15 @@ void BNode<KeyType, IndexType>::splitLeaf(Pair<KeyType, IndexType> x)
 	connectSibling(two);
 	if(oldRgt) two->connectSibling(oldRgt);
 	
-	Pair<KeyType, IndexType> b;
+	Pair<KeyType, Entity> b;
 	b.key = two->firstKey();
 	b.index = two;
 	parentNode()->bounce(b);
 	//balanceLeafLeft();
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::bounce(Pair<KeyType, IndexType> b)
+template <typename KeyType> 
+void BNode<KeyType>::bounce(Pair<KeyType, Entity> b)
 {	
 	//std::cout<<"bounce "<<b.key<<"\n";
 	if(isFull()) {
@@ -282,8 +281,8 @@ void BNode<KeyType, IndexType>::bounce(Pair<KeyType, IndexType> b)
 		insertData(b);
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::getChildren(std::map<int, std::vector<Entity *> > & dst, int level) const
+template <typename KeyType> 
+void BNode<KeyType>::getChildren(std::map<int, std::vector<Entity *> > & dst, int level) const
 {
 	if(isLeaf()) return;
 	if(!hasChildren()) return;
@@ -301,8 +300,8 @@ void BNode<KeyType, IndexType>::getChildren(std::map<int, std::vector<Entity *> 
 	}
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::connectChildren()
+template <typename KeyType> 
+void BNode<KeyType>::connectChildren()
 {
 	if(!hasChildren()) return;
 	Entity * n = firstIndex();
@@ -314,15 +313,15 @@ void BNode<KeyType, IndexType>::connectChildren()
 }
 
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::partRoot(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::partRoot(Pair<KeyType, Entity> x)
 {
 	//std::cout<<"part root ";
 	//display();
 	BNode * one = new BNode(this);
 	BNode * two = new BNode(this);
 	
-	Pair<KeyType, IndexType> p = partData(x, m_data, one, two);
+	Pair<KeyType, Entity> p = partData(x, m_data, one, two);
 	
 	//std::cout<<"into ";
 	//one->display();
@@ -341,19 +340,19 @@ void BNode<KeyType, IndexType>::partRoot(Pair<KeyType, IndexType> x)
 	two->connectChildren();
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::partInterior(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::partInterior(Pair<KeyType, Entity> x)
 {
 	std::cout<<"part interior ";
 	display();
 	BNode * rgt = new BNode(parent());
 	
-	Pair<KeyType, IndexType> old[MAXPERNODEKEYCOUNT];
+	Pair<KeyType, Entity> old[MAXPERNODEKEYCOUNT];
 	for(int i=0; i < MAXPERNODEKEYCOUNT; i++)
 		old[i] = m_data[i];
 	
 	setNumKeys(0);
-	Pair<KeyType, IndexType> p = partData(x, old, this, rgt);
+	Pair<KeyType, Entity> p = partData(x, old, this, rgt);
 	
 	std::cout<<"into ";
 	display();
@@ -364,16 +363,16 @@ void BNode<KeyType, IndexType>::partInterior(Pair<KeyType, IndexType> x)
 	rgt->setFirstIndex(p.index);
 	rgt->connectChildren();
 	
-	Pair<KeyType, IndexType> b;
+	Pair<KeyType, Entity> b;
 	b.key = p.key;
 	b.index = rgt;
 	parentNode()->bounce(b);
 }
 
-template <typename KeyType, class IndexType> 
-Pair<KeyType, IndexType> BNode<KeyType, IndexType>::partData(Pair<KeyType, IndexType> x, Pair<KeyType, IndexType> old[], BNode * lft, BNode * rgt, bool doSplitLeaf)
+template <typename KeyType> 
+Pair<KeyType, Entity> BNode<KeyType>::partData(Pair<KeyType, Entity> x, Pair<KeyType, Entity> old[], BNode * lft, BNode * rgt, bool doSplitLeaf)
 {
-	Pair<KeyType, IndexType> res, q;
+	Pair<KeyType, Entity> res, q;
 	BNode * dst = rgt;
 	
 	int numKeysRight = 0;
@@ -406,22 +405,22 @@ Pair<KeyType, IndexType> BNode<KeyType, IndexType>::partData(Pair<KeyType, Index
 	return res;
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::balanceLeaf()
+template <typename KeyType> 
+void BNode<KeyType>::balanceLeaf()
 {
 	if(!balanceLeafRight()) {
 		balanceLeafLeft();
 	}
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::balanceLeafRight()
+template <typename KeyType> 
+bool BNode<KeyType>::balanceLeafRight()
 {
 	Entity * rgt = sibling();
 	if(!rgt) return false;
 	
 	BNode * rgtNode = static_cast<BNode *>(rgt);
-	const Pair<KeyType, IndexType> s = rgtNode->firstData();
+	const Pair<KeyType, Entity> s = rgtNode->firstData();
 	
 	bool found = false;
 	BNode * crossed = ancestor(s, found);
@@ -431,7 +430,7 @@ bool BNode<KeyType, IndexType>::balanceLeafRight()
 	int k = shouldBalance(this, rgtNode);
 	if(k == 0) return false;
 	
-	Pair<KeyType, IndexType> old = rgtNode->firstData();
+	Pair<KeyType, Entity> old = rgtNode->firstData();
 	if(k < 0) rightData(-k, rgtNode);
 	else rgtNode->leftData(k, this);
 	
@@ -440,10 +439,10 @@ bool BNode<KeyType, IndexType>::balanceLeafRight()
 	return true;
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::balanceLeafLeft()
+template <typename KeyType> 
+void BNode<KeyType>::balanceLeafLeft()
 {
-	const Pair<KeyType, IndexType> s = firstData();
+	const Pair<KeyType, Entity> s = firstData();
 	
 	bool found = false;
 	BNode * crossed = ancestor(s, found);
@@ -457,7 +456,7 @@ void BNode<KeyType, IndexType>::balanceLeafLeft()
 	int k = shouldBalance(leftSibling, this);
 	if(k == 0) return;
 	
-	Pair<KeyType, IndexType> old = firstData();
+	Pair<KeyType, Entity> old = firstData();
 	if(k < 0) leftSibling->rightData(-k, this);
 	else this->leftData(k, leftSibling);
 	
@@ -468,8 +467,8 @@ void BNode<KeyType, IndexType>::balanceLeafLeft()
 	display();
 }
 
-template <typename KeyType, class IndexType> 
-BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::ancestor(const Pair<KeyType, IndexType> & x, bool & found) const
+template <typename KeyType> 
+BNode<KeyType> * BNode<KeyType>::ancestor(const Pair<KeyType, Entity> & x, bool & found) const
 {
 	if(parentNode()->hasKey(x)) {
 		found = true;
@@ -480,8 +479,8 @@ BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::ancestor(const Pair<KeyTy
 	return parentNode()->ancestor(x, found);
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::hasKey(Pair<KeyType, IndexType> x) const
+template <typename KeyType> 
+bool BNode<KeyType>::hasKey(Pair<KeyType, Entity> x) const
 {
 	for(int i = 0; i < numKeys(); i++) {
 		if(m_data[i].key == x.key)
@@ -490,8 +489,8 @@ bool BNode<KeyType, IndexType>::hasKey(Pair<KeyType, IndexType> x) const
 	return false;
 }
 
-template <typename KeyType, class IndexType> 
-BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::leftTo(const Pair<KeyType, IndexType> & x) const
+template <typename KeyType> 
+BNode<KeyType> * BNode<KeyType>::leftTo(const Pair<KeyType, Entity> & x) const
 {
 	if(numKeys()==1) return static_cast<BNode *>(firstIndex());
 	int i;
@@ -503,8 +502,8 @@ BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::leftTo(const Pair<KeyType
 	return static_cast<BNode *>(firstIndex());
 }
 
-template <typename KeyType, class IndexType> 
-BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::rightTo(const Pair<KeyType, IndexType> & x, Pair<KeyType, IndexType> & k) const
+template <typename KeyType> 
+BNode<KeyType> * BNode<KeyType>::rightTo(const Pair<KeyType, Entity> & x, Pair<KeyType, Entity> & k) const
 {
 	int i;
 	for(i = 0; i < numKeys(); i++) {		
@@ -516,8 +515,8 @@ BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::rightTo(const Pair<KeyTyp
 	return NULL;
 }
 
-template <typename KeyType, class IndexType> 
-BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::leafLeftTo(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+BNode<KeyType> * BNode<KeyType>::leafLeftTo(Pair<KeyType, Entity> x)
 {
 	if(isLeaf()) return this;
 	
@@ -525,8 +524,8 @@ BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::leafLeftTo(Pair<KeyType, 
 	return n->leafLeftTo(x);
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::rightData(int num, BNode * rgt)
+template <typename KeyType> 
+void BNode<KeyType>::rightData(int num, BNode * rgt)
 {
 	for(int i = 0; i < num; i++) {
 		rgt->insertData(lastData());
@@ -534,8 +533,8 @@ void BNode<KeyType, IndexType>::rightData(int num, BNode * rgt)
 	}
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::leftData(int num, BNode * lft)
+template <typename KeyType> 
+void BNode<KeyType>::leftData(int num, BNode * lft)
 {
 	for(int i = 0; i < num; i++) {
 		lft->insertData(firstData());
@@ -543,20 +542,20 @@ void BNode<KeyType, IndexType>::leftData(int num, BNode * lft)
 	}
 }
 
-template <typename KeyType, class IndexType> 
-Pair<KeyType, IndexType> BNode<KeyType, IndexType>::lastData() const { return m_data[numKeys() - 1]; }
+template <typename KeyType> 
+Pair<KeyType, Entity> BNode<KeyType>::lastData() const { return m_data[numKeys() - 1]; }
 
-template <typename KeyType, class IndexType> 
-Pair<KeyType, IndexType> BNode<KeyType, IndexType>::firstData() const { return m_data[0]; }
+template <typename KeyType> 
+Pair<KeyType, Entity> BNode<KeyType>::firstData() const { return m_data[0]; }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::removeLastData()
+template <typename KeyType> 
+void BNode<KeyType>::removeLastData()
 {
 	reduceNumKeys();
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::removeFirstData()
+template <typename KeyType> 
+void BNode<KeyType>::removeFirstData()
 {
 	for(int i = 0; i < numKeys() - 1; i++) {
 		m_data[i] = m_data[i+1];
@@ -564,8 +563,8 @@ void BNode<KeyType, IndexType>::removeFirstData()
 	reduceNumKeys();
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::replaceKey(Pair<KeyType, IndexType> x, Pair<KeyType, IndexType> y)
+template <typename KeyType> 
+void BNode<KeyType>::replaceKey(Pair<KeyType, Entity> x, Pair<KeyType, Entity> y)
 {
 	for(int i = 0; i < numKeys(); i++) {
 		if(m_data[i].key == x.key) {
@@ -575,14 +574,14 @@ void BNode<KeyType, IndexType>::replaceKey(Pair<KeyType, IndexType> x, Pair<KeyT
 	}
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::replaceIndex(int n, Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::replaceIndex(int n, Pair<KeyType, Entity> x)
 {
 	m_data[n].index = x.index;
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::remove(Pair<KeyType, IndexType> x)
+template <typename KeyType> 
+void BNode<KeyType>::remove(Pair<KeyType, Entity> x)
 {
 	if(isLeaf()) 
 		removeLeaf(x);
@@ -596,8 +595,8 @@ void BNode<KeyType, IndexType>::remove(Pair<KeyType, IndexType> x)
 	}
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::removeLeaf(const Pair<KeyType, IndexType> & x)
+template <typename KeyType> 
+void BNode<KeyType>::removeLeaf(const Pair<KeyType, Entity> & x)
 {
 	if(!removeDataLeaf(x)) return;
 	if(!underflow()) return;
@@ -606,8 +605,8 @@ void BNode<KeyType, IndexType>::removeLeaf(const Pair<KeyType, IndexType> & x)
 		balanceLeaf();
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::mergeLeaf()
+template <typename KeyType> 
+bool BNode<KeyType>::mergeLeaf()
 {
 	if(mergeLeafRight())
 		return true;
@@ -615,21 +614,21 @@ bool BNode<KeyType, IndexType>::mergeLeaf()
 	return mergeLeafLeft();
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::mergeLeafRight()
+template <typename KeyType> 
+bool BNode<KeyType>::mergeLeafRight()
 {
 	Entity * rgt = sibling();
 	if(!rgt) return false;
 	
 	BNode * rgtNode = static_cast<BNode *>(rgt);
 	
-	const Pair<KeyType, IndexType> s = rgtNode->firstData();
+	const Pair<KeyType, Entity> s = rgtNode->firstData();
 	
 	if(!shouldMerge(this, rgtNode)) return false;
 	
 	BNode * up = rgtNode->parentNode();
 
-	Pair<KeyType, IndexType> old = rgtNode->firstData();
+	Pair<KeyType, Entity> old = rgtNode->firstData();
 	Entity * oldSibling = rgt->sibling();
 	
 	rgtNode->leftData(rgtNode->numKeys(), this);
@@ -638,7 +637,7 @@ bool BNode<KeyType, IndexType>::mergeLeafRight()
 	
 	connectSibling(oldSibling);
 	
-	Pair<KeyType, IndexType> k = up->dataRightTo(old);
+	Pair<KeyType, Entity> k = up->dataRightTo(old);
 	
 	if(parent() == up) {
 		k.index = this;
@@ -656,10 +655,10 @@ bool BNode<KeyType, IndexType>::mergeLeafRight()
 	return true;
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::mergeLeafLeft()
+template <typename KeyType> 
+bool BNode<KeyType>::mergeLeafLeft()
 {
-	const Pair<KeyType, IndexType> s = firstData();
+	const Pair<KeyType, Entity> s = firstData();
 	
 	bool found = false;
 	BNode * crossed = ancestor(s, found);
@@ -673,8 +672,8 @@ bool BNode<KeyType, IndexType>::mergeLeafLeft()
 	return leftSibling->mergeLeafRight();
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::removeDataLeaf(const Pair<KeyType, IndexType> & x)
+template <typename KeyType> 
+bool BNode<KeyType>::removeDataLeaf(const Pair<KeyType, Entity> & x)
 {
 	int i, found = -1;
     for(i= 0;i < numKeys(); i++) {
@@ -704,8 +703,8 @@ bool BNode<KeyType, IndexType>::removeDataLeaf(const Pair<KeyType, IndexType> & 
 	return true;
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::removeData(const Pair<KeyType, IndexType> & x)
+template <typename KeyType> 
+bool BNode<KeyType>::removeData(const Pair<KeyType, Entity> & x)
 {
 	int i, found = -1;
     for(i= 0;i < numKeys(); i++) {
@@ -734,15 +733,15 @@ bool BNode<KeyType, IndexType>::removeData(const Pair<KeyType, IndexType> & x)
 	return true;
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::pop(const Pair<KeyType, IndexType> & x)
+template <typename KeyType> 
+void BNode<KeyType>::pop(const Pair<KeyType, Entity> & x)
 {
 	if(isRoot()) popRoot(x);
 	else popInterior(x);
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::popRoot(const Pair<KeyType, IndexType> & x)
+template <typename KeyType> 
+void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 {
 	if(numKeys() > 1) removeData(x);
 	else {
@@ -761,8 +760,8 @@ void BNode<KeyType, IndexType>::popRoot(const Pair<KeyType, IndexType> & x)
 	}
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::popInterior(const Pair<KeyType, IndexType> & x)
+template <typename KeyType> 
+void BNode<KeyType>::popInterior(const Pair<KeyType, Entity> & x)
 {
 	removeData(x);
 	if(!underflow()) return;
@@ -771,19 +770,19 @@ void BNode<KeyType, IndexType>::popInterior(const Pair<KeyType, IndexType> & x)
 		balanceInterior();
 }
 
-template <typename KeyType, class IndexType> 
-const Pair<KeyType, IndexType> BNode<KeyType, IndexType>::data(int x) const { return m_data[x]; }
+template <typename KeyType> 
+const Pair<KeyType, Entity> BNode<KeyType>::data(int x) const { return m_data[x]; }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::mergeData(BNode * another, int start)
+template <typename KeyType> 
+void BNode<KeyType>::mergeData(BNode * another, int start)
 {
 	const int num = another->numKeys();
 	for(int i = start; i < num; i++)
 		insertData(another->data(i));
 }
 
-template <typename KeyType, class IndexType> 
-const Pair<KeyType, IndexType> BNode<KeyType, IndexType>::dataRightTo(const Pair<KeyType, IndexType> & x) const
+template <typename KeyType> 
+const Pair<KeyType, Entity> BNode<KeyType>::dataRightTo(const Pair<KeyType, Entity> & x) const
 {
 	const int num = numKeys();
 	for(int i = 0; i < num; i++) {
@@ -792,25 +791,25 @@ const Pair<KeyType, IndexType> BNode<KeyType, IndexType>::dataRightTo(const Pair
 	return lastData();
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::mergeInterior()
+template <typename KeyType> 
+bool BNode<KeyType>::mergeInterior()
 {
 	if(mergeInteriorRight()) return true;
 	return mergeInteriorLeft();
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::balanceInterior()
+template <typename KeyType> 
+void BNode<KeyType>::balanceInterior()
 {
 	if(!balanceInteriorRight()) balanceInteriorLeft();
 }
 
 
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::mergeInteriorRight()
+template <typename KeyType> 
+bool BNode<KeyType>::mergeInteriorRight()
 {
-	Pair<KeyType, IndexType> k;
+	Pair<KeyType, Entity> k;
 	BNode * rgt = parentNode()->rightTo(lastData(), k);
 	if(!rgt) return false;
 	if(!shouldInteriorMerge(this, rgt)) return false;
@@ -833,8 +832,8 @@ bool BNode<KeyType, IndexType>::mergeInteriorRight()
 	return true;
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::mergeInteriorLeft()
+template <typename KeyType> 
+bool BNode<KeyType>::mergeInteriorLeft()
 {
 	BNode * lft =leftInteriorNeighbor();
 	if(!lft) return false;
@@ -842,10 +841,10 @@ bool BNode<KeyType, IndexType>::mergeInteriorLeft()
 	return lft->mergeInteriorRight();
 }
 
-template <typename KeyType, class IndexType> 
-BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::leftInteriorNeighbor() const
+template <typename KeyType> 
+BNode<KeyType> * BNode<KeyType>::leftInteriorNeighbor() const
 {
-	Pair<KeyType, IndexType> k, j;
+	Pair<KeyType, Entity> k, j;
 	if(!parentNode()->dataLeftTo(firstData(), k)) return NULL;
 	j = k;
 	if(j.index == this)
@@ -855,14 +854,14 @@ BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::leftInteriorNeighbor() co
 	return static_cast<BNode *>(j.index);
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::setData(int k, const Pair<KeyType, IndexType> & x)
+template <typename KeyType> 
+void BNode<KeyType>::setData(int k, const Pair<KeyType, Entity> & x)
 {
 	m_data[k] = x;
 }
 
-template <typename KeyType, class IndexType> 
-int BNode<KeyType, IndexType>::dataId(const Pair<KeyType, IndexType> & x) const
+template <typename KeyType> 
+int BNode<KeyType>::dataId(const Pair<KeyType, Entity> & x) const
 {
 	for(int i = 0; i < numKeys(); i++) {		
         if(m_data[i].key >= x.key) {
@@ -872,8 +871,8 @@ int BNode<KeyType, IndexType>::dataId(const Pair<KeyType, IndexType> & x) const
 	return -1;
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::dataLeftTo(const Pair<KeyType, IndexType> & x, Pair<KeyType, IndexType> & dst) const
+template <typename KeyType> 
+bool BNode<KeyType>::dataLeftTo(const Pair<KeyType, Entity> & x, Pair<KeyType, Entity> & dst) const
 {
 	for(int i = numKeys() - 1; i >= 0; i--) {		
         if(m_data[i].key < x.key) {
@@ -885,10 +884,10 @@ bool BNode<KeyType, IndexType>::dataLeftTo(const Pair<KeyType, IndexType> & x, P
 	return false;
 }
 
-template <typename KeyType, class IndexType> 
-bool BNode<KeyType, IndexType>::balanceInteriorRight()
+template <typename KeyType> 
+bool BNode<KeyType>::balanceInteriorRight()
 {
-	Pair<KeyType, IndexType> k;
+	Pair<KeyType, Entity> k;
 	BNode * rgt = parentNode()->rightTo(lastData(), k);
 	if(!rgt) return false;
 
@@ -903,23 +902,23 @@ bool BNode<KeyType, IndexType>::balanceInteriorRight()
 	return true;
 }
 
-template <typename KeyType, class IndexType> 
-void BNode<KeyType, IndexType>::balanceInteriorLeft()
+template <typename KeyType> 
+void BNode<KeyType>::balanceInteriorLeft()
 {
 	BNode * lft = leftInteriorNeighbor();
 	if(!lft) return;
-	Pair<KeyType, IndexType> k;
+	Pair<KeyType, Entity> k;
 	parentNode()->rightTo(lft->lastData(), k);
 	k.index = firstIndex();
 	insertData(k);
-	Pair<KeyType, IndexType> l = lft->lastData();
+	Pair<KeyType, Entity> l = lft->lastData();
 	setFirstIndex(l.index);
 	parentNode()->replaceKey(k, l);
 	lft->removeLastData();
 }
 
-template <typename KeyType, class IndexType> 
-BNode<KeyType, IndexType> * BNode<KeyType, IndexType>::parentNode() const
+template <typename KeyType> 
+BNode<KeyType> * BNode<KeyType>::parentNode() const
 {
 	return static_cast<BNode *>(parent());
 }

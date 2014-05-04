@@ -23,6 +23,6 @@ public:
 private:
 	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
 	
-	BNode<int, Entity> * m_root;
+	BNode<int> * m_root;
 };
 } // end of namespace sdb
