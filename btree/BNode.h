@@ -107,13 +107,28 @@ private:
 	
 	BNode * parentNode() const;
 	
+	bool isFull() const { return m_numKeys == MAXPERNODEKEYCOUNT; }
+	bool underflow() const { return m_numKeys < MINPERNODEKEYCOUNT; }
+	int numKeys() const  { return m_numKeys; }
+	
+	void reduceNumKeys() { m_numKeys--; }
+	void increaseNumKeys() { m_numKeys++; }
+	void setNumKeys(int x) { m_numKeys = x; }
+	
+	bool shouldMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) <= MAXPERNODEKEYCOUNT; }
+	bool shouldInteriorMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) < MAXPERNODEKEYCOUNT; }
+	int shouldBalance(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) / 2 - lft->numKeys(); }
+	
+	
 private:
     Pair<KeyType, IndexType> m_data[MAXPERNODEKEYCOUNT];
+	int m_numKeys;
 };
 
 template <typename KeyType, class IndexType>  
 BNode<KeyType, IndexType>::BNode(Entity * parent) : Entity(parent)
 {
+	m_numKeys = 0;
 	for(int i=0;i< MAXPERNODEKEYCOUNT;i++)
         m_data[i].index = NULL;
 }
@@ -206,16 +221,16 @@ void BNode<KeyType, IndexType>::insertData(Pair<KeyType, IndexType> x)
 template <typename KeyType, class IndexType> 
 void BNode<KeyType, IndexType>::splitRoot(Pair<KeyType, IndexType> x)
 {
-	//std::cout<<"split root ";
-	//display();
+	std::cout<<"split root ";
+	display();
 	BNode * one = new BNode(this); one->setLeaf();
 	BNode * two = new BNode(this); two->setLeaf();
 	
 	partData(x, m_data, one, two, true);
 	
-	//std::cout<<"into ";
-	//one->display();
-	//two->display();
+	std::cout<<"into ";
+	one->display();
+	two->display();
 	
 	setFirstIndex(one);
 	m_data[0].key = two->firstKey();
@@ -413,7 +428,7 @@ bool BNode<KeyType, IndexType>::balanceLeafRight()
 	
 	if(!found) return false;
 	
-	int k = shouldBalance(this, rgt);
+	int k = shouldBalance(this, rgtNode);
 	if(k == 0) return false;
 	
 	Pair<KeyType, IndexType> old = rgtNode->firstData();
@@ -610,14 +625,14 @@ bool BNode<KeyType, IndexType>::mergeLeafRight()
 	
 	const Pair<KeyType, IndexType> s = rgtNode->firstData();
 	
-	if(!shouldMerge(this, rgt)) return false;
+	if(!shouldMerge(this, rgtNode)) return false;
 	
 	BNode * up = rgtNode->parentNode();
 
 	Pair<KeyType, IndexType> old = rgtNode->firstData();
 	Entity * oldSibling = rgt->sibling();
 	
-	rgtNode->leftData(rgt->numKeys(), this);
+	rgtNode->leftData(rgtNode->numKeys(), this);
 	
 	delete rgt;
 	

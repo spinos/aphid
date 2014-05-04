@@ -68,13 +68,6 @@ Pair1<KeyType, IndexType> * Holder<KeyType, IndexType>::data(int x) const
 	return new Pair1<KeyType, IndexType>;
 }
 
-
-class Base
-{
-public:
-	void imp() {std::cout<<"imp base\n";}
-};
-
 class Leaf : public Base
 {
 public:
