@@ -10,6 +10,8 @@
 
 #include <BNode.h>
 
+namespace sdb {
+
 class BTree
 {
 public:
@@ -19,7 +21,8 @@ public:
     void display();
 	
 private:
-	void displayLevel(const int & level, const std::vector<BNode *> & nodes);
+	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
 	
-	BNode * m_root;
+	BNode<int, Entity> * m_root;
 };
+} // end of namespace sdb

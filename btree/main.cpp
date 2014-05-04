@@ -111,14 +111,22 @@ int main()
 	tree.insert(206);tree.display();
 	
 	std::cout<<"test\n";
-	Pair<Key3I, BNode> * a = new Pair<Key3I, BNode>();
+	Pair<Key3I, int> * a = new Pair<Key3I, int>();
 	
 	a->key = sdb::Key3I(1,1,1);
 	
-	Pair<Key3I, char>b;
+	Pair<Key3I, int>b;
 	b.key = Key3I(1,1,2);
 	
+	Holder<Key3I, float>h;
+	Pair1<Key3I, float> * c = h.data(0);
+	
+	Pair1<Key3I, unsigned int> d;
+	h.take(d);
+	
 	if(a->key < b.key) std::cout<<" a < b \n";
+	
+	A<int, NodeInterior, NodeLeaf> da; da.imp(); da.initChild(); da.pc(); da.initChildC(); da.pcc();
 	
 	return 0;
 }
