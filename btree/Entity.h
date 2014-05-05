@@ -7,16 +7,11 @@
  *
  */
 
-#pragma one
+#pragma once
 #include <iostream>
 namespace sdb {
 
-class Base
-{
-public:
-};
-
-class Entity : public Base
+class Entity
 {
 public:
 	Entity(Entity * parent = NULL);
@@ -30,4 +25,5 @@ public:
 private:
 	Entity *m_parent;
 };
+
 } // end of namespace sdb

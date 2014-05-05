@@ -44,7 +44,5 @@ void TreeNode::setFirstIndex(Entity * another)
 	m_first = another;
 }
 
-void TreeNode::display() const {}
-
 } // end of namespace sdb
 //~:

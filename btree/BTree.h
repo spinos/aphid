@@ -9,6 +9,7 @@
 #pragma once
 
 #include <BNode.h>
+#include <List.h>
 
 namespace sdb {
 
@@ -19,10 +20,11 @@ public:
     void insert(int x);
 	void remove(int x);
     void display();
+	void displayLeaves();
 	
 private:
 	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
 	
-	BNode<int> * m_root;
+	BNode<int, int, List<int> > * m_root;
 };
-} // end of namespace sdb
+} // end namespace sdb
