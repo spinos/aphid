@@ -10,13 +10,37 @@
 #include <iostream>
 #include <vector>
 #include <map>
-
+#include <Entity.h>
 #include <Pair.h>
 
 namespace sdb {
+#define MAXPERNODEKEYCOUNT 4
+#define MINPERNODEKEYCOUNT 2
+class TreeNode : public Entity
+{
+public:
+	TreeNode(Entity * parent = NULL);
+	virtual ~TreeNode() {}
+	
+	bool isRoot() const;
+	bool hasChildren() const;
+	bool isLeaf() const;
+	
+	Entity * sibling() const;
+	Entity * firstIndex() const;
+	
+	void setLeaf();
+	void connectSibling(Entity * another);
+	void setFirstIndex(Entity * another);
+	
+	virtual void display() const;
+private:
+	Entity *m_first;
+	bool m_isLeaf;
+};
 
-template <typename KeyType>  
-class BNode : public Entity
+template <typename KeyType>
+class BNode : public TreeNode
 {
 public:
 	BNode(Entity * parent = NULL);
@@ -25,13 +49,14 @@ public:
 	void insert(Pair<KeyType, Entity> x);
     void remove(Pair<KeyType, Entity> x);
 	
-	int firstKey() const;
-    BNode *nextIndex(int x) const;
+    void getChildren(std::map<int, std::vector<Entity *> > & dst, int level) const;
 	
-    virtual void display() const;
-	void getChildren(std::map<int, std::vector<Entity *> > & dst, int level) const;
+	virtual void display() const;
 	
 private:
+	KeyType firstKey() const;
+    BNode *nextIndex(int x) const;
+	
 	void insertRoot(Pair<KeyType, Entity> x);
 	void splitRoot(Pair<KeyType, Entity> x);
 	
@@ -125,7 +150,7 @@ private:
 };
 
 template <typename KeyType>  
-BNode<KeyType>::BNode(Entity * parent) : Entity(parent)
+BNode<KeyType>::BNode(Entity * parent) : TreeNode(parent)
 {
 	m_numKeys = 0;
 	for(int i=0;i< MAXPERNODEKEYCOUNT;i++)
@@ -157,7 +182,7 @@ void BNode<KeyType>::display() const
 }
 
 template <typename KeyType> 
-int BNode<KeyType>::firstKey() const { return m_data[0].key; }
+KeyType BNode<KeyType>::firstKey() const { return m_data[0].key; }
 
 template <typename KeyType> 
 void BNode<KeyType>::insert(Pair<KeyType, Entity> x)
@@ -194,7 +219,6 @@ void BNode<KeyType>::insertLeaf(Pair<KeyType, Entity> x)
 	}
 	else {
 		insertData(x);
-		//balanceLeaf();
 	}
 }
 
@@ -475,7 +499,7 @@ BNode<KeyType> * BNode<KeyType>::ancestor(const Pair<KeyType, Entity> & x, bool 
 		return parentNode();
 	}
 	
-	if(parent()->isRoot()) return NULL;
+	if(parentNode()->isRoot()) return NULL;
 	return parentNode()->ancestor(x, found);
 }
 
@@ -629,7 +653,7 @@ bool BNode<KeyType>::mergeLeafRight()
 	BNode * up = rgtNode->parentNode();
 
 	Pair<KeyType, Entity> old = rgtNode->firstData();
-	Entity * oldSibling = rgt->sibling();
+	Entity * oldSibling = rgtNode->sibling();
 	
 	rgtNode->leftData(rgtNode->numKeys(), this);
 	

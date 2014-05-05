@@ -119,14 +119,12 @@ int main()
 	b.key = Key3I(1,1,2);
 	
 	Holder<Key3I, float>h;
-	Pair1<Key3I, float> * c = h.data(0);
+	Pair<Key3I, float> * c = h.data(0);
 	
-	Pair1<Key3I, unsigned int> d;
+	Pair<Key3I, unsigned int> d;
 	h.take(d);
 	
 	if(a->key < b.key) std::cout<<" a < b \n";
-	
-	A<int, NodeInterior, NodeLeaf> da; da.imp(); da.initChild(); da.pc(); da.initChildC(); da.pcc();
 	
 	return 0;
 }
