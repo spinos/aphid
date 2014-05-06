@@ -28,19 +28,24 @@ public:
 	void nextGrid();
 	const bool gridEnd() const;
 	const BoundingBox gridBoundingBox() const;
+	const BoundingBox boundingBox() const;
+	void calculateBBox();
 private:
 	typedef BNode<Coord3, VertexP, List<VertexP> > C3NodeType;
 
 	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
 	const Coord3 inGrid(const V3 & p) const;
+	const BoundingBox coordToGridBBox(const Coord3 & c) const;
+	void updateBBox(const BoundingBox & b);
 	
 	void firstLeaf();
 	void nextLeaf();
 	const bool leafEnd() const;
 	
-	float m_gridSize;
+	BoundingBox m_bbox;
 	C3NodeType * m_root;
 	C3NodeType * m_current;
+	float m_gridSize;
 	int m_currentData, m_dataEnd;
 };
 } // end namespace sdb

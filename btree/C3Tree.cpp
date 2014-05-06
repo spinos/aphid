@@ -17,6 +17,7 @@ C3Tree::C3Tree()
     TreeNode::MinNumKeysPerNode = 32;
 	m_root= new C3NodeType;
 	m_gridSize = 1.f;
+	m_current = NULL;
 }
 
 void C3Tree::setGridSize(const float & x) { m_gridSize = x; }
@@ -113,11 +114,38 @@ const bool C3Tree::leafEnd() const
 
 const BoundingBox C3Tree::gridBoundingBox() const
 {
+	return coordToGridBBox(m_current->key(m_currentData));
+}
+
+const BoundingBox C3Tree::boundingBox() const
+{
+	return m_bbox;
+}
+
+void C3Tree::calculateBBox()
+{
+	m_bbox.reset();
+	firstLeaf();
+	if(leafEnd()) return;
+	
+	firstGrid();
+	while(!gridEnd()) {
+		updateBBox(gridBoundingBox());
+		nextGrid();
+	}
+}
+
+const BoundingBox C3Tree::coordToGridBBox(const Coord3 & c) const
+{
 	BoundingBox bb;
-	Coord3 c = m_current->key(m_currentData);
 	bb.setMin(m_gridSize * c.x, m_gridSize * c.y, m_gridSize * c.z);
 	bb.setMax(m_gridSize * (c.x + 1), m_gridSize * (c.y + 1), m_gridSize * (c.z + 1));
 	return bb;
+}
+
+void C3Tree::updateBBox(const BoundingBox & b)
+{
+	m_bbox.expandBy(b);
 }
 
 } // end namespace sdb

@@ -42,6 +42,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	}
 	
 	std::cout<<"grid count "<<i;
+	m_tree->calculateBBox();
 }
 
 GLWidget::~GLWidget()
@@ -70,4 +71,7 @@ void GLWidget::clientDraw()
 		dr->boundingBox(bb);
 		m_tree->nextGrid();
 	}
+	
+	bb = m_tree->boundingBox();
+	dr->boundingBox(bb);
 }
