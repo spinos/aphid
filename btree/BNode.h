@@ -58,6 +58,9 @@ public:
         return output;
     }
 	
+	const int numKeys() const  { return m_numKeys; }
+	const KeyType key(const int & i) const { return m_data[i].key; }
+	
 private:
 	KeyType firstKey() const;
     BNode *nextIndex(KeyType x) const;
@@ -142,7 +145,6 @@ private:
 	
 	bool isFull() const { return m_numKeys == MaxNumKeysPerNode; }
 	bool underflow() const { return m_numKeys < MinNumKeysPerNode; }
-	int numKeys() const  { return m_numKeys; }
 	
 	void reduceNumKeys() { m_numKeys--; }
 	void increaseNumKeys() { m_numKeys++; }

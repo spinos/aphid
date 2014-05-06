@@ -17,7 +17,7 @@ public slots:
 signals:
 
 protected:
-    
+    virtual void clientDraw();
 private:
     C3Tree * m_tree;
     V3 * m_pool;

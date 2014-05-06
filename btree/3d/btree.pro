@@ -1,8 +1,8 @@
 INCLUDEPATH += ../../shared ../ ./
 LIBS += -L../../lib -laphid -lIlmImf -lHalf			
 CONFIG += release
-HEADERS       = ../Types.h ../Entity.h ../List.h ../BNode.h ../BTree.h ../C3Tree.h glwidget.h window.h ../../shared/Base3DView.h
-SOURCES       = ../Types.cpp ../Entity.cpp ../List.cpp ../BNode.cpp ../BTree.cpp ../C3Tree.cpp glwidget.cpp window.cpp main.cpp ../../shared/Base3DView.cpp
+HEADERS       = ../Types.h ../Entity.h ../List.h ../BNode.h ../C3Tree.h glwidget.h window.h ../../shared/Base3DView.h
+SOURCES       = ../Types.cpp ../Entity.cpp ../List.cpp ../BNode.cpp ../C3Tree.cpp glwidget.cpp window.cpp main.cpp ../../shared/Base3DView.cpp
 QT           += opengl
 win32 {
     INCLUDEPATH += D:/usr/boost_1_51_0 /usr/local/include/OpenEXR
@@ -11,6 +11,5 @@ win32 {
 }
 macx {
     INCLUDEPATH += ../../../Library/boost_1_44_0
-	LIBS += -lboost_date_time\
-            -lboost_thread
+	LIBS += -lboost_date_time -lboost_system -lboost_thread -lboost_filesystem
 }
