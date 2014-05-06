@@ -8,6 +8,9 @@
  */
 #include "BNode.h"
 namespace sdb {
+    
+int TreeNode::MaxNumKeysPerNode = 8;
+int TreeNode::MinNumKeysPerNode = 4;
 
 TreeNode::TreeNode(Entity * parent) : Entity(parent)
 {

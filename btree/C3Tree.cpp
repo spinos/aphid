@@ -13,6 +13,8 @@ namespace sdb {
 
 C3Tree::C3Tree()
 {
+    TreeNode::MaxNumKeysPerNode = 32;
+    TreeNode::MinNumKeysPerNode = 16;
 	m_root= new BNode<Coord3, VertexP, List<VertexP> >;
 	m_gridSize = 1.f;
 }
@@ -59,7 +61,7 @@ void C3Tree::displayLevel(const int & level, const std::vector<Entity *> & nodes
 	std::cout<<"\n  level: "<<level<<"   ";
 	std::vector<Entity *>::const_iterator it = nodes.begin();
 	for(; it != nodes.end(); ++it)
-		(*it)->display();
+		std::cout<<*(static_cast<BNode<Coord3, VertexP, List<VertexP> > *>(*it));
 }
 
 const Coord3 C3Tree::inGrid(const V3 & p) const

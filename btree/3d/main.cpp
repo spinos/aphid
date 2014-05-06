@@ -7,11 +7,8 @@
  *
  */
 #include <iostream>
-#include <BTree.h>
-#include <Types.h>
 #include <QApplication>
 #include "window.h"
-using namespace sdb;
 
 int main(int argc, char *argv[])
 {	

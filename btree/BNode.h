@@ -15,8 +15,7 @@
 #include <sstream>
 
 namespace sdb {
-#define MAXPERNODEKEYCOUNT 4
-#define MINPERNODEKEYCOUNT 2
+
 class TreeNode : public Entity
 {
 public:
@@ -33,7 +32,8 @@ public:
 	void setLeaf();
 	void connectSibling(Entity * another);
 	void setFirstIndex(Entity * another);
-	
+	static int MaxNumKeysPerNode;
+	static int MinNumKeysPerNode;
 private:
 	Entity *m_first;
 	bool m_isLeaf;
@@ -44,7 +44,7 @@ class BNode : public TreeNode
 {
 public:
 	BNode(Entity * parent = NULL);
-	virtual ~BNode() {}
+	virtual ~BNode();
 	
 	void insert(Pair<KeyType, ValueType> x);
     void remove(Pair<KeyType, ValueType> x);
@@ -140,23 +140,23 @@ private:
 	
 	BNode * parentNode() const;
 	
-	bool isFull() const { return m_numKeys == MAXPERNODEKEYCOUNT; }
-	bool underflow() const { return m_numKeys < MINPERNODEKEYCOUNT; }
+	bool isFull() const { return m_numKeys == MaxNumKeysPerNode; }
+	bool underflow() const { return m_numKeys < MinNumKeysPerNode; }
 	int numKeys() const  { return m_numKeys; }
 	
 	void reduceNumKeys() { m_numKeys--; }
 	void increaseNumKeys() { m_numKeys++; }
 	void setNumKeys(int x) { m_numKeys = x; }
 	
-	bool shouldMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) <= MAXPERNODEKEYCOUNT; }
-	bool shouldInteriorMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) < MAXPERNODEKEYCOUNT; }
+	bool shouldMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) <= MaxNumKeysPerNode; }
+	bool shouldInteriorMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) < MaxNumKeysPerNode; }
 	int shouldBalance(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) / 2 - lft->numKeys(); }
 	
 	void setValue(const Pair<KeyType, ValueType> & x);
 	
 	const std::string str() const;
 private:
-    Pair<KeyType, Entity> m_data[MAXPERNODEKEYCOUNT];
+    Pair<KeyType, Entity> * m_data;
 	int m_numKeys;
 };
 
@@ -164,8 +164,15 @@ template <typename KeyType, typename ValueType, class LeafType>
 BNode<KeyType, ValueType, LeafType>::BNode(Entity * parent) : TreeNode(parent)
 {
 	m_numKeys = 0;
-	for(int i=0;i< MAXPERNODEKEYCOUNT;i++)
+	m_data = new Pair<KeyType, Entity>[MaxNumKeysPerNode];
+	for(int i=0;i< MaxNumKeysPerNode;i++)
         m_data[i].index = NULL;
+}
+
+template <typename KeyType, typename ValueType, class LeafType> 
+BNode<KeyType, ValueType, LeafType>::~BNode()
+{
+    delete[] m_data;
 }
 
 template <typename KeyType, typename ValueType, class LeafType>  
@@ -204,8 +211,11 @@ void BNode<KeyType, ValueType, LeafType>::remove(Pair<KeyType, ValueType> x)
 			BNode * n = nextIndex(x.key);
 			n->remove(x);
 		}
-		else
+		else {
+		    std::cout<<*this<<"has no child";
 			removeKey(x.key);
+			setFirstIndex(NULL);
+		}
 	}
 }
 
@@ -321,8 +331,8 @@ BNode<KeyType, ValueType, LeafType> * BNode<KeyType, ValueType, LeafType>::split
 	Entity * oldRgt = sibling();
 	BNode * two = new BNode(parent()); two->setLeaf();
 
-	Pair<KeyType, Entity> old[MAXPERNODEKEYCOUNT];
-	for(int i=0; i < MAXPERNODEKEYCOUNT; i++)
+	Pair<KeyType, Entity> *old = new Pair<KeyType, Entity>[MaxNumKeysPerNode];
+	for(int i=0; i < MaxNumKeysPerNode; i++)
 		old[i] = m_data[i];
 		
 	setNumKeys(0);
@@ -331,7 +341,7 @@ BNode<KeyType, ValueType, LeafType> * BNode<KeyType, ValueType, LeafType>::split
 	ex.key = x.key;
 	partData(ex, old, this, two, true);
 	//std::cout<<*this<<*two;
-	
+	delete[] old;
 	connectSibling(two);
 	if(oldRgt) two->connectSibling(oldRgt);
 	
@@ -439,12 +449,14 @@ void BNode<KeyType, ValueType, LeafType>::partInterior(Pair<KeyType, Entity> x)
 	
 	BNode * rgt = new BNode(parent());
 	
-	Pair<KeyType, Entity> old[MAXPERNODEKEYCOUNT];
-	for(int i=0; i < MAXPERNODEKEYCOUNT; i++)
+	Pair<KeyType, Entity> * old = new Pair<KeyType, Entity>[MaxNumKeysPerNode];
+	for(int i=0; i < MaxNumKeysPerNode; i++)
 		old[i] = m_data[i];
 	
 	setNumKeys(0);
 	Pair<KeyType, Entity> p = partData(x, old, this, rgt);
+	
+	delete[] old;
 	
 	std::cout<<"into "<<*this<<*rgt;
 	
@@ -467,7 +479,7 @@ Pair<KeyType, Entity> BNode<KeyType, ValueType, LeafType>::partData(Pair<KeyType
 	
 	int numKeysRight = 0;
 	bool inserted = false;
-	for(int i = MAXPERNODEKEYCOUNT - 1;i >= 0; i--) {
+	for(int i = MaxNumKeysPerNode - 1;i >= 0; i--) {
 		if(x.key > old[i].key && !inserted) {
 			q = x;
 			i++;
@@ -478,7 +490,7 @@ Pair<KeyType, Entity> BNode<KeyType, ValueType, LeafType>::partData(Pair<KeyType
 			
 		numKeysRight++;
 		
-		if(numKeysRight == MAXPERNODEKEYCOUNT / 2 + 1) {
+		if(numKeysRight == MaxNumKeysPerNode / 2 + 1) {
 			if(doSplitLeaf)
 				dst->insertData(q);
 				
@@ -826,7 +838,11 @@ void BNode<KeyType, ValueType, LeafType>::pop(const Pair<KeyType, Entity> & x)
 template <typename KeyType, typename ValueType, class LeafType> 
 void BNode<KeyType, ValueType, LeafType>::popRoot(const Pair<KeyType, Entity> & x)
 {
-	if(numKeys() > 1) removeKey(x.key);
+	if(numKeys() > 1) {
+	    const bool hc = hasChildren();
+	    removeKey(x.key);
+	    if(!hc) setFirstIndex(NULL);
+	}
 	else {
 		BNode * lft = static_cast<BNode *>(firstIndex());
 		setNumKeys(0);
