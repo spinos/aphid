@@ -113,34 +113,5 @@ int main()
 	
 	tree.displayLeaves();
 	
-	std::cout<<"test\n";
-	Pair<Coord3, int> * a = new Pair<Coord3, int>();
-	
-	a->key = sdb::Coord3(1,1,1);
-	
-	Pair<Coord3, int>b;
-	b.key = Coord3(1,2,1);
-	
-	Pair<Coord3, unsigned int> d;
-	
-	if(a->key < b.key) std::cout<<" a < b \n";
-	
-	float v[3]; v[0]=0.2482f; v[1]=4.68053f; v[2] = -9.278f;
-	V3 s;
-	s.set(v);
-	std::cout<<" s "<<s;
-	
-	V3 s1 = s;
-	std::cout<<" s1 "<<s1;
-	
-	Pair<int, V3> vex; vex.key = 0; vex.index = &s1;
-	
-	v[1]=6.4353f;
-	s.set(v);
-	std::cout<<" s "<<s;std::cout<<" s1 "<<s1;
-	
-	Pair<int, V3> vex1 = vex;
-	std::cout<<"vex1.index"<<*vex1.index;
-	
 	return 0;
 }

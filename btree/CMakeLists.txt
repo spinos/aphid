@@ -3,7 +3,7 @@ project (btree)
  
 include_directories (".")
 
-add_executable(btree Types.cpp Entity.cpp List.cpp BNode.cpp BTree.cpp C3Tree.cpp main.cpp)
+add_executable(btree Types.cpp Entity.cpp List.cpp BNode.cpp BTree.cpp main.cpp)
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
