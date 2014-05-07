@@ -39,6 +39,12 @@ private:
 	bool m_isLeaf;
 };
 
+class SearchResult
+{
+public:
+	int found, low, high;
+};
+
 template <typename KeyType, typename ValueType, class LeafType>
 class BNode : public TreeNode
 {
@@ -103,9 +109,9 @@ private:
 	void replaceKey(KeyType x, KeyType y);
 	
 	BNode * ancestor(const KeyType & x, bool & found) const;
-	BNode * leftTo(const Pair<KeyType, Entity> & x) const;
-	BNode * rightTo(const Pair<KeyType, Entity> & x, Pair<KeyType, Entity> & k) const;
-	BNode * leafLeftTo(Pair<KeyType, Entity> x);
+	BNode * leftTo(const KeyType & x) const;
+	BNode * rightTo(const KeyType & x, Pair<KeyType, Entity> & k) const;
+	BNode * leafLeftTo(const KeyType & x);
 	
 	bool hasKey(const KeyType & x) const;
 	
@@ -124,7 +130,7 @@ private:
 	void mergeData(BNode * another, int start = 0);
 	void replaceIndex(int n, Pair<KeyType, Entity> x);
 	
-	const Pair<KeyType, Entity> dataRightTo(const Pair<KeyType, Entity> & x) const;
+	const Pair<KeyType, Entity> dataRightTo(const KeyType & x) const;
 	
 	bool mergeInterior();
 	void balanceInterior();
@@ -133,9 +139,8 @@ private:
 	bool mergeInteriorLeft();
 	
 	void setData(int k, const Pair<KeyType, Entity> & x);
-	int keyLeft(const KeyType & x) const;
 	
-	bool dataLeftTo(const Pair<KeyType, Entity> & x, Pair<KeyType, Entity> & dst) const;
+	bool dataLeftTo(const KeyType & x, Pair<KeyType, Entity> & dst) const;
 	
 	BNode * leftInteriorNeighbor() const;
 	
@@ -157,7 +162,9 @@ private:
 	
 	void setValue(const Pair<KeyType, ValueType> & x);
 	
-	int findKey(const KeyType & x) const;
+	const SearchResult findKey(const KeyType & x) const;
+	int keyRight(const KeyType & x) const;
+	int keyLeft(const KeyType & x) const;
 	
 	const std::string str() const;
 private:
@@ -183,13 +190,15 @@ BNode<KeyType, ValueType, LeafType>::~BNode()
 template <typename KeyType, typename ValueType, class LeafType>  
 BNode<KeyType, ValueType, LeafType> * BNode<KeyType, ValueType, LeafType>::nextIndex(KeyType x) const
 {
-	for(int i= numKeys() - 1;i >= 0;i--) {
-        if(x >= m_data[i].key)
-			//std::cout<<"route by key "<<m_data[i].key;
-            return (static_cast<BNode *>(m_data[i].index));
-    }
-    //return (m_data[m_numKeys-1].index);
-	return static_cast<BNode *>(firstIndex());;
+	if(firstKey() > x) return static_cast<BNode *>(firstIndex());
+	int ii;
+	SearchResult s = findKey(x);
+	ii = s.low;
+	if(s.found > -1) ii = s.found;
+	else if(key(s.high) < x) ii = s.high;
+	
+	//std::cout<<"find "<<x<<" in "<<*this<<" i "<<ii<<"\n";
+	return (static_cast<BNode *>(m_data[ii].index));
 }
 
 template <typename KeyType, typename ValueType, class LeafType> 
@@ -251,7 +260,7 @@ void BNode<KeyType, ValueType, LeafType>::insertRoot(Pair<KeyType, ValueType> x)
 template <typename KeyType, typename ValueType, class LeafType> 
 void BNode<KeyType, ValueType, LeafType>::setValue(const Pair<KeyType, ValueType> & x)
 {
-	int i = findKey(x.key);
+	int i = findKey(x.key).found;
 	if(i<0) return;
 	if(!m_data[i].index) {
 		//std::cout<<"value index is null";
@@ -559,7 +568,7 @@ void BNode<KeyType, ValueType, LeafType>::balanceLeafLeft()
 	
 	if(!found) return;
 	
-	BNode * leftSibling = crossed->leafLeftTo(s);
+	BNode * leftSibling = crossed->leafLeftTo(s.key);
 	
 	if(leftSibling == this) return;
 	
@@ -591,37 +600,31 @@ template <typename KeyType, typename ValueType, class LeafType>
 bool BNode<KeyType, ValueType, LeafType>::hasKey(const KeyType & x) const
 {
     if(x > lastKey() || x < firstKey()) return false;
-	return findKey(x) > -1;
+	return findKey(x).found > -1;
 }
 
 template <typename KeyType, typename ValueType, class LeafType> 
-BNode<KeyType, ValueType, LeafType> * BNode<KeyType, ValueType, LeafType>::leftTo(const Pair<KeyType, Entity> & x) const
+BNode<KeyType, ValueType, LeafType> * BNode<KeyType, ValueType, LeafType>::leftTo(const KeyType & x) const
 {
 	if(numKeys()==1) return static_cast<BNode *>(firstIndex());
-	int i;
-	for(i = numKeys() - 1; i >= 0; i--) {		
-        if(m_data[i].key < x.key) {
-			return static_cast<BNode *>(m_data[i].index);
-		}
-    }
-	return static_cast<BNode *>(firstIndex());
+	int i = keyLeft(x);
+	if(i < 0) return static_cast<BNode *>(firstIndex());
+	return static_cast<BNode *>(m_data[i].index);
 }
 
 template <typename KeyType, typename ValueType, class LeafType> 
-BNode<KeyType, ValueType, LeafType> * BNode<KeyType, ValueType, LeafType>::rightTo(const Pair<KeyType, Entity> & x, Pair<KeyType, Entity> & k) const
+BNode<KeyType, ValueType, LeafType> * BNode<KeyType, ValueType, LeafType>::rightTo(const KeyType & x, Pair<KeyType, Entity> & k) const
 {
-	int i;
-	for(i = 0; i < numKeys(); i++) {		
-        if(m_data[i].key >= x.key) {
-			k = m_data[i];
-			return static_cast<BNode *>(m_data[i].index);
-		}
-    }
+	int ii = keyRight(x);
+	if(ii > -1) {
+		k = m_data[ii];
+		return static_cast<BNode *>(m_data[ii].index);
+	}
 	return NULL;
 }
 
 template <typename KeyType, typename ValueType, class LeafType> 
-BNode<KeyType, ValueType, LeafType> * BNode<KeyType, ValueType, LeafType>::leafLeftTo(Pair<KeyType, Entity> x)
+BNode<KeyType, ValueType, LeafType> * BNode<KeyType, ValueType, LeafType>::leafLeftTo(const KeyType & x)
 {
 	if(isLeaf()) return this;
 	
@@ -671,12 +674,8 @@ void BNode<KeyType, ValueType, LeafType>::removeFirstData()
 template <typename KeyType, typename ValueType, class LeafType> 
 void BNode<KeyType, ValueType, LeafType>::replaceKey(KeyType x, KeyType y)
 {
-	for(int i = 0; i < numKeys(); i++) {
-		if(m_data[i].key == x) {
-			m_data[i].key = y;
-			return;
-		}
-	}
+	SearchResult s = findKey(x);
+	if(s.found > -1) m_data[s.found].key = y;
 }
 
 template <typename KeyType, typename ValueType, class LeafType> 
@@ -727,11 +726,11 @@ bool BNode<KeyType, ValueType, LeafType>::mergeLeafRight()
 	
 	connectSibling(oldSibling);
 	
-	Pair<KeyType, Entity> k = up->dataRightTo(old);
+	Pair<KeyType, Entity> k = up->dataRightTo(old.key);
 	
 	if(parent() == up) {
 		k.index = this;
-		int ki = up->keyLeft(k.key);
+		int ki = up->keyRight(k.key);
 		up->setData(ki, k);
 	}
 	else {
@@ -755,7 +754,7 @@ bool BNode<KeyType, ValueType, LeafType>::mergeLeafLeft()
 	
 	if(!found) return false;
 	
-	BNode * leftSibling = crossed->leafLeftTo(s);
+	BNode * leftSibling = crossed->leafLeftTo(s.key);
 	
 	if(leftSibling == this) return false;
 	
@@ -765,22 +764,17 @@ bool BNode<KeyType, ValueType, LeafType>::mergeLeafLeft()
 template <typename KeyType, typename ValueType, class LeafType> 
 bool BNode<KeyType, ValueType, LeafType>::removeDataLeaf(const Pair<KeyType, ValueType> & x)
 {
-	int i, found = -1;
-    for(i= 0;i < numKeys(); i++) {
-        if(m_data[i].key == x.key) {
-			found = i;
-			break;
-		}
-	}
+	SearchResult s = findKey(x.key);
+	if(s.found < 0) return false;
 	
-	if(found < 0) return false;
+	int found = s.found;
 	
 	if(found == numKeys() - 1) {
 		reduceNumKeys();
 		return true;
 	}
 	
-	for(i= found; i < numKeys() - 1; i++)
+	for(int i= found; i < numKeys() - 1; i++)
         m_data[i] = m_data[i+1];
 		
 	if(found == 0) {
@@ -796,15 +790,11 @@ bool BNode<KeyType, ValueType, LeafType>::removeDataLeaf(const Pair<KeyType, Val
 template <typename KeyType, typename ValueType, class LeafType> 
 bool BNode<KeyType, ValueType, LeafType>::removeKey(const KeyType & x)
 {
-	int i, found = -1;
-    for(i= 0;i < numKeys(); i++) {
-        if(m_data[i].key == x) {
-			found = i;
-			break;
-		}
-	}
+	SearchResult s = findKey(x);
 	
-	if(found < 0) return false;
+	if(s.found < 0) return false;
+	
+	int found = s.found;
 	
 	if(found == 0) 
 		setFirstIndex(m_data[found].index);
@@ -816,7 +806,7 @@ bool BNode<KeyType, ValueType, LeafType>::removeKey(const KeyType & x)
 		return true;
 	}
 	
-	for(i= found; i < numKeys() - 1; i++)
+	for(int i= found; i < numKeys() - 1; i++)
 		m_data[i] = m_data[i+1];
 		
     reduceNumKeys();
@@ -876,13 +866,11 @@ void BNode<KeyType, ValueType, LeafType>::mergeData(BNode * another, int start)
 }
 
 template <typename KeyType, typename ValueType, class LeafType> 
-const Pair<KeyType, Entity> BNode<KeyType, ValueType, LeafType>::dataRightTo(const Pair<KeyType, Entity> & x) const
+const Pair<KeyType, Entity> BNode<KeyType, ValueType, LeafType>::dataRightTo(const KeyType & x) const
 {
-	const int num = numKeys();
-	for(int i = 0; i < num; i++) {
-		if(m_data[i].key >= x.key) return m_data[i];
-	}
-	return lastData();
+	int i = keyRight(x);
+	if(i < 0) return lastData();
+	return m_data[i];
 }
 
 template <typename KeyType, typename ValueType, class LeafType> 
@@ -904,7 +892,7 @@ template <typename KeyType, typename ValueType, class LeafType>
 bool BNode<KeyType, ValueType, LeafType>::mergeInteriorRight()
 {
 	Pair<KeyType, Entity> k;
-	BNode * rgt = parentNode()->rightTo(lastData(), k);
+	BNode * rgt = parentNode()->rightTo(lastData().key, k);
 	if(!rgt) return false;
 	if(!shouldInteriorMerge(this, rgt)) return false;
 	
@@ -918,7 +906,7 @@ bool BNode<KeyType, ValueType, LeafType>::mergeInteriorRight()
 	
 	connectChildren();
 	
-	int ki = parentNode()->keyLeft(k.key); 
+	int ki = parentNode()->keyRight(k.key); 
 	k.index = this;
 	parentNode()->setData(ki, k);
 	
@@ -939,10 +927,10 @@ template <typename KeyType, typename ValueType, class LeafType>
 BNode<KeyType, ValueType, LeafType> * BNode<KeyType, ValueType, LeafType>::leftInteriorNeighbor() const
 {
 	Pair<KeyType, Entity> k, j;
-	if(!parentNode()->dataLeftTo(firstData(), k)) return NULL;
+	if(!parentNode()->dataLeftTo(firstKey(), k)) return NULL;
 	j = k;
 	if(j.index == this)
-		parentNode()->dataLeftTo(k, j);
+		parentNode()->dataLeftTo(k.key, j);
 	
 	if(j.index == this) return NULL;
 	return static_cast<BNode *>(j.index);
@@ -955,25 +943,35 @@ void BNode<KeyType, ValueType, LeafType>::setData(int k, const Pair<KeyType, Ent
 }
 
 template <typename KeyType, typename ValueType, class LeafType> 
-int BNode<KeyType, ValueType, LeafType>::keyLeft(const KeyType & x) const
+int BNode<KeyType, ValueType, LeafType>::keyRight(const KeyType & x) const
 {
-	for(int i = 0; i < numKeys(); i++) {		
-        if(m_data[i].key >= x) {
-			return i;
-		}
-    }
-	return -1;
+	if(lastKey() < x) return -1;
+	SearchResult s = findKey(x);
+	if(s.found > -1) return s.found;
+	return s.high;
 }
 
 template <typename KeyType, typename ValueType, class LeafType> 
-bool BNode<KeyType, ValueType, LeafType>::dataLeftTo(const Pair<KeyType, Entity> & x, Pair<KeyType, Entity> & dst) const
+int BNode<KeyType, ValueType, LeafType>::keyLeft(const KeyType & x) const
 {
-	for(int i = numKeys() - 1; i >= 0; i--) {		
-        if(m_data[i].key < x.key) {
-			dst = m_data[i];
-			return true;
-		}
-    }
+	if(lastKey() < x) return numKeys() - 1;
+	if(firstKey() >= x) return -1;
+	SearchResult s = findKey(x);
+	int ii = s.low;
+	if(s.found > -1) ii = s.found - 1;
+	else if(key(s.high) < x) ii = s.high;
+	
+	return ii;
+}
+
+template <typename KeyType, typename ValueType, class LeafType> 
+bool BNode<KeyType, ValueType, LeafType>::dataLeftTo(const KeyType & x, Pair<KeyType, Entity> & dst) const
+{
+	int i = keyLeft(x);
+	if(i > -1) {
+		dst = m_data[i];
+		return true;
+	}
 	dst.index = firstIndex();
 	return false;
 }
@@ -982,7 +980,7 @@ template <typename KeyType, typename ValueType, class LeafType>
 bool BNode<KeyType, ValueType, LeafType>::balanceInteriorRight()
 {
 	Pair<KeyType, Entity> k;
-	BNode * rgt = parentNode()->rightTo(lastData(), k);
+	BNode * rgt = parentNode()->rightTo(lastData().key, k);
 	if(!rgt) return false;
 
 	k.index = rgt->firstIndex();
@@ -1002,7 +1000,7 @@ void BNode<KeyType, ValueType, LeafType>::balanceInteriorLeft()
 	BNode * lft = leftInteriorNeighbor();
 	if(!lft) return;
 	Pair<KeyType, Entity> k;
-	parentNode()->rightTo(lft->lastData(), k);
+	parentNode()->rightTo(lft->lastData().key, k);
 	k.index = firstIndex();
 	insertData(k);
 	Pair<KeyType, Entity> l = lft->lastData();
@@ -1041,28 +1039,31 @@ void BNode<KeyType, ValueType, LeafType>::getValues(std::vector<ValueType> & dst
 }
 
 template <typename KeyType, typename ValueType, class LeafType> 
-int BNode<KeyType, ValueType, LeafType>::findKey(const KeyType & x) const
+const SearchResult BNode<KeyType, ValueType, LeafType>::findKey(const KeyType & x) const
 {
-    int found = -1;
-    int lo = 0, hi = numKeys() - 1;
+	SearchResult r;
+    r.found = -1;
+    r.low = 0; 
+	r.high = numKeys() - 1;
     int mid;
         
-    while(lo <= hi) {
-        mid = (lo + hi) / 2;
+    while(r.low <= r.high) {
+        mid = (r.low + r.high) / 2;
         
-        if(key(lo) == x) found = lo;
-        else if(key(hi) == x) found = hi;
-        else if(key(mid) == x) found = mid;
+        if(key(r.low) == x) r.found = r.low;
+        else if(key(r.high) == x) r.found = r.high;
+        else if(key(mid) == x) r.found = mid;
         
-        if(found > -1) break;
+        if(r.found > -1) break;
+		
+        if(x < key(mid)) r.high = mid;
+        else r.low = mid;
         
-        if(x < key(mid)) hi = mid;
-        else lo = mid;
-        
-        if(lo >= hi - 1) break;
+		//std::cout<<" "<<r.low<<":"<<r.high<<"\n";
+        if(r.low >= r.high - 1) break;
     }
     
-    return found;
+    return r;
 }
 
 } // end of namespace sdb

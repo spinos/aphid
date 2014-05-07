@@ -87,10 +87,10 @@ int main()
 	tree.insert(21);
 	tree.insert(17);
 	tree.insert(1);
-	tree.insert(6);
 	tree.insert(7);
 	tree.insert(0);
 	tree.insert(2);
+	tree.insert(6);
 	tree.insert(4);tree.display();
 	tree.insert(-100);
 	tree.insert(-32);
@@ -109,7 +109,8 @@ int main()
 	tree.remove(80);tree.display();
 	tree.remove(46);tree.display();
 	tree.insert(106);
-	tree.insert(206);tree.display();
+	tree.insert(206);
+	tree.insert(246);tree.display();
 	
 	tree.displayLeaves();
 	
