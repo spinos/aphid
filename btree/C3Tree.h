@@ -23,7 +23,7 @@ public:
     void display();
 	
 	void setGridSize(const float & x);
-	
+	const float gridSize() const;
 	void firstGrid();
 	void nextGrid();
 	const bool gridEnd() const;

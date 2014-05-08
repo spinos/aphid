@@ -3,6 +3,7 @@
 
 #include <Base3DView.h>
 #include <C3Tree.h>
+#include <RayMarch.h>
 using namespace sdb;
 
 class GLWidget : public Base3DView
@@ -18,12 +19,15 @@ signals:
 
 protected:
     virtual void clientDraw();
-	
+	virtual void keyPressEvent(QKeyEvent *event);
 private:
 	void drawPoints(const List<VertexP> * ps);
 private:
+	RayMarch m_march;
     C3Tree * m_tree;
     V3 * m_pool;
+	Vector3F m_rayBegin, m_rayEnd;
+	
 private slots:
     
 

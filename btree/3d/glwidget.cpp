@@ -23,7 +23,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     }
     
     m_tree = new C3Tree;
-	m_tree->setGridSize(1.13f);
+	m_tree->setGridSize(1.43f);
     
     VertexP p;
     for(i = 0; i < NUMVERTEX; i++) {
@@ -43,6 +43,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	std::cout<<"grid count "<<i;
 	m_tree->calculateBBox();
+	
+	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());
+	m_rayBegin.set(-20.f, 15.f, 20.f);
+	m_rayEnd.set(12.f, -2.f, -11.f);
 }
 
 GLWidget::~GLWidget()
@@ -67,12 +71,25 @@ void GLWidget::clientDraw()
     m_tree->firstGrid();
 	while(!m_tree->gridEnd()) {
 		bb = m_tree->gridBoundingBox();
-		dr->boundingBox(bb);
+		//dr->boundingBox(bb);
 		m_tree->nextGrid();
 	}
 	
 	bb = m_tree->boundingBox();
 	dr->boundingBox(bb);
+	
+	std::vector<Vector3F> linevs;
+	linevs.push_back(m_rayBegin);
+	linevs.push_back(m_rayEnd);
+	
+	dr->lines(linevs);
+	
+	Ray inc(m_rayBegin, m_rayEnd);
+	if(!m_march.begin(inc)) return;
+	while(!m_march.end()) {
+		dr->boundingBox(m_march.gridBBox());
+		m_march.step();
+	}
 }
 
 void GLWidget::drawPoints(const List<VertexP> * d) 
@@ -88,5 +105,10 @@ void GLWidget::drawPoints(const List<VertexP> * d)
 		p.set(v->data[0], v->data[1], v->data[2]);
 		dr->vertex(p);
 	}
-	
+}
+
+void GLWidget::keyPressEvent(QKeyEvent *e)
+{
+	if(e->key() == Qt::Key_N) m_rayEnd.set(12.f + (float(rand()%694) / 694.f - 0.5f) * 15.f, -2.f + (float(rand()%694) / 694.f - 0.5f) * 25.f, -11.f + (float(rand()%694) / 694.f - 0.5f) * 15.f);
+	Base3DView::keyPressEvent(e);
 }

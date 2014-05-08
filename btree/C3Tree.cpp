@@ -154,4 +154,6 @@ const List<VertexP> * C3Tree::verticesInGrid() const
 	return static_cast<List<VertexP> *>(p);
 }
 
+const float C3Tree::gridSize() const { return m_gridSize; }
+
 } // end namespace sdb
