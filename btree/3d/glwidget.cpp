@@ -4,17 +4,17 @@
 #include "glwidget.h"
 #include <cmath>
 #include <KdTreeDrawer.h>
-#define NUMVERTEX 2048
+#define NUMVERTEX 12000
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
     int i;
-	float w = 19.3f, h = 3.f, d = 13.f;
+	float w = 29.3f, h = 3.f, d = 13.f;
     m_pool = new V3[NUMVERTEX];
     for(i = 0; i < NUMVERTEX; i++) {
         V3 & t = m_pool[i];
 		if(i > NUMVERTEX/2) {
 			w = 5.f;
-			h = 13.3f;
+			h = 16.3f;
 			d = 3.f;
 		}
         t.data[0] = (float(rand()%694) / 694.f - 0.5f) * w;
@@ -23,7 +23,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     }
     
     m_tree = new C3Tree;
-	m_tree->setGridSize(1.43f);
+	m_tree->setGridSize(1.33f);
     
     VertexP p;
     for(i = 0; i < NUMVERTEX; i++) {
@@ -60,13 +60,11 @@ void GLWidget::clientDraw()
 	KdTreeDrawer * dr = getDrawer();
 	BoundingBox bb;
 
-	dr->beginPoint(2.f);
 	m_tree->firstGrid();
 	while(!m_tree->gridEnd()) {
 		drawPoints(m_tree->verticesInGrid());
 		m_tree->nextGrid();
 	}
-	dr->end();
 	
     m_tree->firstGrid();
 	while(!m_tree->gridEnd()) {
@@ -82,12 +80,17 @@ void GLWidget::clientDraw()
 	linevs.push_back(m_rayBegin);
 	linevs.push_back(m_rayEnd);
 	
+	dr->setColor(0.f, 1.f, 0.f);
 	dr->lines(linevs);
 	
 	Ray inc(m_rayBegin, m_rayEnd);
 	if(!m_march.begin(inc)) return;
 	while(!m_march.end()) {
-		dr->boundingBox(m_march.gridBBox());
+		List<VertexP> * pl = m_tree->find(m_march.gridBBox().center());
+		if(pl) {
+			dr->boundingBox(m_march.gridBBox());
+			drawPoints(pl);
+		}
 		m_march.step();
 	}
 }
@@ -96,7 +99,7 @@ void GLWidget::drawPoints(const List<VertexP> * d)
 {
 	if(!d) return;
 	KdTreeDrawer * dr = getDrawer();
-	
+	dr->beginPoint(2.f);
 	int num = d->size();
 	VertexP v;
 	Vector3F p;
@@ -105,6 +108,7 @@ void GLWidget::drawPoints(const List<VertexP> * d)
 		p.set(v->data[0], v->data[1], v->data[2]);
 		dr->vertex(p);
 	}
+	dr->end();
 }
 
 void GLWidget::keyPressEvent(QKeyEvent *e)

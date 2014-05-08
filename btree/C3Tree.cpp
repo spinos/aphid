@@ -42,6 +42,20 @@ void C3Tree::remove(VertexP & v)
 	m_root->remove(k);
 }
 
+List<VertexP> * C3Tree::find(const Vector3F & p)
+{
+	V3 v;
+	v.data[0] = p.x;
+	v.data[1] = p.y;
+	v.data[2] = p.z;
+	
+	Coord3 k = inGrid(v);
+	
+	Pair<Entity *, Entity> g = m_root->find(k);
+	if(!g.index) return NULL;
+	return static_cast<List<VertexP> *>(g.index);
+}
+
 void C3Tree::display()
 {
 	std::cout<<"\ndisplay tree";

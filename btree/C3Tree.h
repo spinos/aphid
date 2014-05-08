@@ -20,6 +20,7 @@ public:
     C3Tree();
     void insert(VertexP & v);
 	void remove(VertexP & v);
+	List<VertexP> * find(const Vector3F & p);
     void display();
 	
 	void setGridSize(const float & x);

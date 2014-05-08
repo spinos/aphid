@@ -39,12 +39,12 @@ void BTree::remove(int x)
 bool BTree::find(int x)
 {
 	std::cout<<"search key "<<x<<"\n";
-	Entity * p = m_root->find(x);
-	if(!p) {
-		std::cout<<"not found";
+	Pair<Entity *, Entity> p = m_root->find(x);
+	if(!p.index) {
+		std::cout<<"not found"<<x<<" in node "<<* static_cast<BNode<int> * >(p.key);
 		return false;
 	}
-	std::cout<<"found";
+	std::cout<<"found "<<x<<" in node "<<* static_cast<BNode<int> * >(p.key);
 	return true;
 }
 

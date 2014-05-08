@@ -54,7 +54,7 @@ public:
 	
 	Pair<KeyType, Entity> * insert(const KeyType & x);
     void remove(const KeyType & x);
-	Entity * find(const KeyType & x);
+	Pair<Entity *, Entity> find(const KeyType & x);
 	
     void getChildren(std::map<int, std::vector<Entity *> > & dst, int level) const;
 	BNode * firstLeaf();
@@ -167,9 +167,9 @@ private:
 	int keyRight(const KeyType & x) const;
 	int keyLeft(const KeyType & x) const;
 	
-	Entity * findRoot(const KeyType & x);
-	Entity * findLeaf(const KeyType & x);
-	Entity * findInterior(const KeyType & x);
+	Pair<Entity *, Entity> findRoot(const KeyType & x);
+	Pair<Entity *, Entity> findLeaf(const KeyType & x);
+	Pair<Entity *, Entity> findInterior(const KeyType & x);
 		
 	const std::string str() const;
 private:
@@ -1047,7 +1047,7 @@ const SearchResult BNode<KeyType>::findKey(const KeyType & x) const
 }
 
 template <typename KeyType> 
-Entity * BNode<KeyType>::find(const KeyType & x)
+Pair<Entity *, Entity> BNode<KeyType>::find(const KeyType & x)
 {
 	if(isRoot()) 
 		return findRoot(x);
@@ -1058,7 +1058,7 @@ Entity * BNode<KeyType>::find(const KeyType & x)
 }
 
 template <typename KeyType> 
-Entity * BNode<KeyType>::findRoot(const KeyType & x)
+Pair<Entity *, Entity> BNode<KeyType>::findRoot(const KeyType & x)
 {
 	if(hasChildren()) {
 		BNode * n = nextIndex(x);
@@ -1069,16 +1069,20 @@ Entity * BNode<KeyType>::findRoot(const KeyType & x)
 }
 
 template <typename KeyType> 
-Entity * BNode<KeyType>::findLeaf(const KeyType & x)
+Pair<Entity *, Entity> BNode<KeyType>::findLeaf(const KeyType & x)
 {
+	Pair<Entity *, Entity> r;
+	r.key = this;
+	r.index = NULL;
 	int found = findKey(x).found;
 	
-	if(found < 0) return NULL;
-	return data(found).index;
+	if(found < 0) return r;
+	r.index = data(found).index;
+	return r;
 }
 
 template <typename KeyType> 
-Entity * BNode<KeyType>::findInterior(const KeyType & x)
+Pair<Entity *, Entity> BNode<KeyType>::findInterior(const KeyType & x)
 {
 	BNode * n = nextIndex(x);
 	return n->find(x);
