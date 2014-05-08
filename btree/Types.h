@@ -58,14 +58,4 @@ public:
 
 typedef Pair<int, V3> VertexP;
 
-template<typename T>
-class X {
-public:
-	X() {d=32;}
-	T* createC() {
-		return new T(d);
-	}
-	int d;
-};
-
 } // end namespace sdb

@@ -22,6 +22,7 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 private:
 	void drawPoints(const List<VertexP> * ps);
+	bool intersect(const List<VertexP> * ps, const Ray & ray, const float & threshold, List<VertexP> & dst);
 private:
 	RayMarch m_march;
     C3Tree * m_tree;

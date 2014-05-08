@@ -34,6 +34,8 @@ public:
 		it = m_v.begin();
 		for(; it != m_v.end(); ++it) dst.push_back(*it); 
 	}
+	
+	void clear() { m_v.clear(); }
 private:
 	
 private:

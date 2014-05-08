@@ -4,6 +4,7 @@
 #include "glwidget.h"
 #include <cmath>
 #include <KdTreeDrawer.h>
+
 #define NUMVERTEX 12000
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -45,7 +46,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_tree->calculateBBox();
 	
 	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());
-	m_rayBegin.set(-20.f, 15.f, 20.f);
+	m_rayBegin.set(-20.f, 5.f, 20.f);
 	m_rayEnd.set(12.f, -2.f, -11.f);
 }
 
@@ -83,16 +84,20 @@ void GLWidget::clientDraw()
 	dr->setColor(0.f, 1.f, 0.f);
 	dr->lines(linevs);
 	
+	List<VertexP> intube;
 	Ray inc(m_rayBegin, m_rayEnd);
 	if(!m_march.begin(inc)) return;
 	while(!m_march.end()) {
 		List<VertexP> * pl = m_tree->find(m_march.gridBBox().center());
 		if(pl) {
-			dr->boundingBox(m_march.gridBBox());
-			drawPoints(pl);
+			
+			//drawPoints(pl);
+			if(intersect(pl, inc, 1.2f, intube)) dr->boundingBox(m_march.gridBBox());
 		}
 		m_march.step();
 	}
+	drawPoints(&intube);
+	intube.clear();
 }
 
 void GLWidget::drawPoints(const List<VertexP> * d) 
@@ -100,7 +105,7 @@ void GLWidget::drawPoints(const List<VertexP> * d)
 	if(!d) return;
 	KdTreeDrawer * dr = getDrawer();
 	dr->beginPoint(2.f);
-	int num = d->size();
+	const int num = d->size();
 	VertexP v;
 	Vector3F p;
 	for(int i = 0; i < num; i++) {
@@ -113,6 +118,27 @@ void GLWidget::drawPoints(const List<VertexP> * d)
 
 void GLWidget::keyPressEvent(QKeyEvent *e)
 {
-	if(e->key() == Qt::Key_N) m_rayEnd.set(12.f + (float(rand()%694) / 694.f - 0.5f) * 15.f, -2.f + (float(rand()%694) / 694.f - 0.5f) * 25.f, -11.f + (float(rand()%694) / 694.f - 0.5f) * 15.f);
+	if(e->key() == Qt::Key_N) {
+		m_rayBegin.set(-20.f + (float(rand()%694) / 694.f - 0.5f) * 5.f, 5.f + (float(rand()%694) / 694.f - 0.5f) * 15.f, 20.f + (float(rand()%694) / 694.f - 0.5f) * 1.f);
+		m_rayEnd.set(12.f + (float(rand()%694) / 694.f - 0.5f) * 15.f, -2.f + (float(rand()%694) / 694.f - 0.5f) * 25.f, -11.f + (float(rand()%694) / 694.f - 0.5f) * 15.f);
+	}
 	Base3DView::keyPressEvent(e);
 }
+
+bool GLWidget::intersect(const List<VertexP> * d, const Ray & ray, const float & threshold, List<VertexP> & dst)
+{
+	if(!d) return false;
+	const int num = d->size();
+	const int ndst = dst.size();
+	Vector3F p, pop;
+	for(int i = 0; i < num; i++) {
+		V3 * v = d->value(i).index;
+		p.set(v->data[0], v->data[1], v->data[2]);
+		float tt = ray.m_origin.dot(ray.m_dir) - p.dot(ray.m_dir);
+		pop = ray.m_origin - ray.m_dir * tt;
+		if(p.distanceTo(pop) < threshold)
+			dst.insert(d->value(i));
+	}
+	return dst.size() > ndst;
+}
+
