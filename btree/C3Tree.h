@@ -30,8 +30,9 @@ public:
 	const BoundingBox gridBoundingBox() const;
 	const BoundingBox boundingBox() const;
 	void calculateBBox();
+	const List<VertexP> * verticesInGrid() const;
 private:
-	typedef BNode<Coord3, VertexP, List<VertexP> > C3NodeType;
+	typedef BNode<Coord3> C3NodeType;
 
 	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
 	const Coord3 inGrid(const V3 & p) const;

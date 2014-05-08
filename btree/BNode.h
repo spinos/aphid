@@ -75,9 +75,10 @@ private:
     BNode *nextIndex(KeyType x) const;
 	
 	Pair<KeyType, Entity> * insertRoot(const KeyType & x);
-	BNode *splitRoot(KeyType x);
-	
 	Pair<KeyType, Entity> * insertLeaf(const KeyType & x);
+	Pair<KeyType, Entity> * insertInterior(const KeyType & x);
+	
+	BNode *splitRoot(KeyType x);
 	BNode *splitLeaf(const KeyType & x);
 	
 	void insertData(Pair<KeyType, Entity> x);
@@ -90,7 +91,6 @@ private:
 	
 	void partInterior(Pair<KeyType, Entity> x);
 	
-	Pair<KeyType, Entity> * insertInterior(const KeyType & x);
 	void connectChildren();
 	
 	void bounce(Pair<KeyType, Entity> b);

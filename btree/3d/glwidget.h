@@ -18,6 +18,9 @@ signals:
 
 protected:
     virtual void clientDraw();
+	
+private:
+	void drawPoints(const List<VertexP> * ps);
 private:
     C3Tree * m_tree;
     V3 * m_pool;

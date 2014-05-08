@@ -26,10 +26,9 @@ void C3Tree::insert(VertexP & v)
 {
 	Coord3 k = inGrid(*v.index);
 	
-	Pair<Coord3, VertexP> mypair;
-	mypair.key = k;
-	mypair.index = &v;
-	m_root->insert(mypair);
+	Pair<Coord3, Entity> * p = m_root->insert(k);
+	if(!p->index) p->index = new List<VertexP>;
+	static_cast<List<VertexP> *>(p->index)->insert(v);
 }
 
 void C3Tree::remove(VertexP & v)
@@ -40,7 +39,7 @@ void C3Tree::remove(VertexP & v)
 	Pair<Coord3, VertexP> mypair;
 	mypair.key = k;
 	mypair.index = &v;
-	m_root->remove(mypair);
+	m_root->remove(k);
 }
 
 void C3Tree::display()
@@ -146,6 +145,13 @@ const BoundingBox C3Tree::coordToGridBBox(const Coord3 & c) const
 void C3Tree::updateBBox(const BoundingBox & b)
 {
 	m_bbox.expandBy(b);
+}
+
+const List<VertexP> * C3Tree::verticesInGrid() const
+{
+	Entity * p = m_current->index(m_currentData);
+	if(!p) return NULL;
+	return static_cast<List<VertexP> *>(p);
 }
 
 } // end namespace sdb
