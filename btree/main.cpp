@@ -114,5 +114,9 @@ int main()
 	
 	tree.displayLeaves();
 	
+	tree.find(106);
+	tree.find(22);
+	tree.find(92);
+	
 	return 0;
 }

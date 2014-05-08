@@ -19,12 +19,13 @@ public:
     BTree();
     void insert(int x);
 	void remove(int x);
+	bool find(int x);
     void display();
 	void displayLeaves();
 	
 private:
 	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
 	
-	BNode<int, int, List<int> > * m_root;
+	BNode<int> * m_root;
 };
 } // end namespace sdb
