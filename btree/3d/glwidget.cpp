@@ -5,7 +5,7 @@
 #include <cmath>
 #include <KdTreeDrawer.h>
 #include <Sequence.h>
-
+#include <Ordered.h>
 #define NUMVERTEX 12000
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -47,8 +47,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_tree->calculateBBox();
 	
 	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());
-	m_rayBegin.set(-20.f, 5.f, 20.f);
-	m_rayEnd.set(12.f, -2.f, -11.f);
+	
+	m_active.threshold = 1.87f;
+	m_active.gridSize = .9f;
 }
 
 GLWidget::~GLWidget()
@@ -78,35 +79,8 @@ void GLWidget::clientDraw()
 	bb = m_tree->boundingBox();
 	dr->boundingBox(bb);
 	
-	std::vector<Vector3F> linevs;
-	linevs.push_back(m_rayBegin);
-	linevs.push_back(m_rayEnd);
-	
-	dr->setColor(0.f, 1.f, 0.f);
-	dr->lines(linevs);
-	
-	Sequence<Coord3> added;
-	List<VertexP> intube;
-	Ray inc(m_rayBegin, m_rayEnd);
-	if(!m_march.begin(inc)) return;
-	while(!m_march.end()) {
-		const std::deque<Vector3F> coords = m_march.touched(1.82f);
-		std::deque<Vector3F>::const_iterator it = coords.begin();
-		for(; it != coords.end(); ++it) {
-			const Coord3 c = m_tree->gridCoord((const float *)&(*it));
-			if(added.find(c)) continue;
-			added.insert(c);
-			List<VertexP> * pl = m_tree->find((float *)&(*it));
-			intersect(pl, inc, 1.82f, intube);
-			//if(pl) {
-				//if(intersect(pl, inc, 1.82f, intube)) { 
-				//	dr->boundingBox(m_march.computeBBox(*it));
-				//}
-			//}
-		}
-		m_march.step();
-	}
-	drawPoints(&intube);
+	dr->setColor(0.f, 1.f, .3f);
+	drawPoints(m_active);
 }
 
 void GLWidget::drawPoints(const List<VertexP> * d) 
@@ -125,29 +99,73 @@ void GLWidget::drawPoints(const List<VertexP> * d)
 	dr->end();
 }
 
-void GLWidget::keyPressEvent(QKeyEvent *e)
+void GLWidget::drawPoints(const ActiveGroup & grp)
 {
-	if(e->key() == Qt::Key_N) {
-		m_rayBegin.set(-20.f + (float(rand()%694) / 694.f - 0.5f) * 5.f, 5.f + (float(rand()%694) / 694.f - 0.5f) * 15.f, 20.f + (float(rand()%694) / 694.f - 0.5f) * 1.f);
-		m_rayEnd.set(12.f + (float(rand()%694) / 694.f - 0.5f) * 15.f, -2.f + (float(rand()%694) / 694.f - 0.5f) * 25.f, -11.f + (float(rand()%694) / 694.f - 0.5f) * 15.f);
+	Ordered<int, VertexP> * ps = grp.vertices;
+	if(ps->size() < 1) return;
+	ps->begin();
+	while(!ps->end()) {
+		const List<VertexP> * vs = ps->value();
+		if((ps->key() - 1) * grp.gridSize - grp.depthMin > grp.threshold * 2.f) return;
+		drawPoints(vs);
+		ps->next();
 	}
-	Base3DView::keyPressEvent(e);
 }
 
-bool GLWidget::intersect(const List<VertexP> * d, const Ray & ray, const float & threshold, List<VertexP> & dst)
+bool GLWidget::intersect(List<VertexP> * d, const Ray & ray, ActiveGroup & dst)
 {
 	if(!d) return false;
 	const int num = d->size();
-	const int ndst = dst.size();
+	const int ndst = dst.vertices->size();
 	Vector3F p, pop;
 	for(int i = 0; i < num; i++) {
 		V3 * v = d->value(i).index;
 		p.set(v->data[0], v->data[1], v->data[2]);
 		float tt = ray.m_origin.dot(ray.m_dir) - p.dot(ray.m_dir);
 		pop = ray.m_origin - ray.m_dir * tt;
-		if(p.distanceTo(pop) < threshold)
-			dst.insert(d->value(i));
+		if(p.distanceTo(pop) < dst.threshold) {
+			int k = -tt / dst.gridSize;
+			dst.vertices->insert(k, d->value(i));
+			if(-tt > dst.depthMax) dst.depthMax = -tt;
+			if(-tt < dst.depthMin) dst.depthMin = -tt;
+		}
 	}
-	return dst.size() > ndst;
+	return dst.vertices->size() > ndst;
 }
 
+void GLWidget::clientSelect(QMouseEvent */*event*/)
+{
+	selectPoints(getIncidentRay());
+}
+
+void GLWidget::clientDeselect(QMouseEvent */*event*/) 
+{
+	deselectPoints();
+}
+
+void GLWidget::clientMouseInput(QMouseEvent */*event*/)
+{
+	selectPoints(getIncidentRay());
+}
+
+void GLWidget::selectPoints(const Ray * incident)
+{
+	deselectPoints();
+	
+	Sequence<Coord3> added;
+	if(!m_march.begin(*incident)) return;
+	while(!m_march.end()) {
+		const std::deque<Vector3F> coords = m_march.touched(m_active.gridSize);
+		std::deque<Vector3F>::const_iterator it = coords.begin();
+		for(; it != coords.end(); ++it) {
+			const Coord3 c = m_tree->gridCoord((const float *)&(*it));
+			if(added.find(c)) continue;
+			added.insert(c);
+			List<VertexP> * pl = m_tree->find((float *)&(*it));
+			intersect(pl, *incident, m_active);
+		}
+		m_march.step();
+	}
+}
+
+void GLWidget::deselectPoints() {m_active.reset();}

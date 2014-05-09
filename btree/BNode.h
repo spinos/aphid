@@ -1076,6 +1076,7 @@ Pair<Entity *, Entity> BNode<KeyType>::findLeaf(const KeyType & x)
 	Pair<Entity *, Entity> r;
 	r.key = this;
 	r.index = NULL;
+	if(numKeys() < 1) return r;
 	int found = findKey(x).found;
 	
 	if(found < 0) return r;

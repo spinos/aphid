@@ -22,6 +22,7 @@ public:
 	const BoundingBox gridBBox() const;
 	const std::deque<Vector3F> touched(const float & threshold) const;
 	const BoundingBox computeBBox(const Vector3F & p) const;
+
 private:
 	
 	Ray m_path;

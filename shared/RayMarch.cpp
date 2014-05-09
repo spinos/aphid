@@ -8,7 +8,7 @@
  */
 
 #include "RayMarch.h"
-
+#include <iostream>
 RayMarch::RayMarch() {}
 
 void RayMarch::initialize(const BoundingBox & bb, const float & gridSize) 
@@ -21,6 +21,8 @@ bool RayMarch::begin(const Ray & r)
 { 
 	float hitMin, hitMax;
 	if(!m_limit.intersect(r, &hitMin, &hitMax)) return false;
+	//std::cout<<"\nray box "<<hitMin<<","<<hitMax<<" ";
+	
 	m_path = r;
 	m_path.m_tmax = hitMax;
 	if(hitMin > 0.f) {
@@ -28,14 +30,14 @@ bool RayMarch::begin(const Ray & r)
 		m_path.m_tmax -= hitMin;
 	}
 	
-	m_path.m_origin += m_path.m_dir * 10e-6;
+	m_path.m_origin += m_path.m_dir * 10e-5;
 
 	return true;
 }
 
 bool RayMarch::end() 
 { 
-	if(m_path.m_tmax < 10e-6) return true;
+	if(m_path.m_tmax < 10e-5) return true;
 	
 	return false; 
 }
@@ -45,7 +47,12 @@ void RayMarch::step()
 	m_current = computeBBox(m_path.m_origin);
 	float hitMin, hitMax;
 	m_current.intersect(m_path, &hitMin, &hitMax);
-	hitMax += 10e-6;
+	
+	if(hitMax < 10e-5) {
+		std::cout<<" step "<<hitMin<<","<<hitMax<<","<<m_path.m_tmax;
+		hitMax = 10e-5;
+	}
+	hitMax += 10e-5;
 	m_path.m_origin += m_path.m_dir * hitMax;
 	m_path.m_tmax -= hitMax;
 }
