@@ -18,8 +18,8 @@ class C3Tree : public Ordered<Coord3, VertexP>
 {
 public:
     C3Tree(Entity * parent = NULL);
-    void insert(VertexP & v);
-	void remove(VertexP & v);
+    void insert(const VertexP & v);
+	void remove(const VertexP & v);
 	List<VertexP> * find(float * p);
     
 	void setGridSize(const float & x);

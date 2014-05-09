@@ -18,7 +18,7 @@ C3Tree::C3Tree(Entity * parent) : Ordered<Coord3, VertexP>(parent)
 
 void C3Tree::setGridSize(const float & x) { m_gridSize = x; }
 
-void C3Tree::insert(VertexP & v)
+void C3Tree::insert(const VertexP & v)
 {
 	Coord3 k = inGrid(*v.index);
 	
@@ -27,14 +27,9 @@ void C3Tree::insert(VertexP & v)
 	static_cast<List<VertexP> *>(p->index)->insert(v);
 }
 
-void C3Tree::remove(VertexP & v)
+void C3Tree::remove(const VertexP & v)
 {
 	Coord3 k = inGrid(*v.index);
-	
-	std::cout<<"remove key "<<k<<"\n";
-	Pair<Coord3, VertexP> mypair;
-	mypair.key = k;
-	mypair.index = &v;
 	Sequence<Coord3>::remove(k);
 }
 
