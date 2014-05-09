@@ -6,7 +6,7 @@
  *  Copyright 2014 __MyCompanyName__. All rights reserved.
  *
  */
-
+#pragma once
 #include <Entity.h>
 #include <vector>
 namespace sdb {
@@ -16,12 +16,11 @@ class List : public Entity {
 public:
 	List(Entity * parent = NULL) : Entity(parent) {}
 	
-	virtual ~List() {}
+	virtual ~List() { clear(); }
 	
 	int size() const { return m_v.size(); }
 	
 	void insert(const T & x) {
-		//std::cout<<"insert "<<x;
 		m_v.push_back(x);
 	}
 	

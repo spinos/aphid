@@ -16,6 +16,7 @@ int main()
 {
 	std::cout<<"b-tree test\ntry to insert a few keys\n";
 	BTree tree;
+	tree.find(99);
 	tree.insert(200);
 	tree.insert(112);
 	tree.insert(2);

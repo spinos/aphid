@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include <deque>
 #include <Ray.h>
 #include <BoundingBox.h>
 class RayMarch
@@ -19,6 +20,8 @@ public:
 	bool end();
 	void step();
 	const BoundingBox gridBBox() const;
+	const std::deque<Vector3F> touched(const float & threshold) const;
+	const BoundingBox computeBBox(const Vector3F & p) const;
 private:
 	
 	Ray m_path;

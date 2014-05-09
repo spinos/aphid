@@ -20,7 +20,7 @@ class TreeNode : public Entity
 {
 public:
 	TreeNode(Entity * parent = NULL);
-	virtual ~TreeNode() {}
+	virtual ~TreeNode();
 	
 	bool isRoot() const;
 	bool hasChildren() const;
@@ -58,6 +58,7 @@ public:
 	
     void getChildren(std::map<int, std::vector<Entity *> > & dst, int level) const;
 	BNode * firstLeaf();
+	BNode * nextLeaf() { return static_cast<BNode *>(sibling()); }
 	
 	friend std::ostream& operator<<(std::ostream &output, const BNode & p) {
         output << p.str();
@@ -189,7 +190,7 @@ BNode<KeyType>::BNode(Entity * parent) : TreeNode(parent)
 template <typename KeyType> 
 BNode<KeyType>::~BNode()
 {
-    delete[] m_data;
+	delete[] m_data;
 }
 
 template <typename KeyType>  
@@ -307,7 +308,7 @@ void BNode<KeyType>::insertKey(KeyType x)
 template <typename KeyType> 
 BNode<KeyType> * BNode<KeyType>::splitRoot(KeyType x)
 {
-	std::cout<<"split root "<<*this;
+	//std::cout<<"split root "<<*this;
 
 	BNode * one = new BNode(this); one->setLeaf();
 	BNode * two = new BNode(this); two->setLeaf();
@@ -316,7 +317,7 @@ BNode<KeyType> * BNode<KeyType>::splitRoot(KeyType x)
 	ex.key = x;
 	partData(ex, m_data, one, two, true);
 	
-	std::cout<<"into "<<*one<<*two;
+	//std::cout<<"into "<<*one<<*two;
 	
 	setFirstIndex(one);
 	m_data[0].key = two->firstKey();
@@ -408,7 +409,7 @@ BNode<KeyType> * BNode<KeyType>::firstLeaf()
 	if(isLeaf())
 		return this;
 	
-	return static_cast<BNode *>(firstIndex())->firstLeaf();;
+	return static_cast<BNode *>(firstIndex())->firstLeaf();
 }
 
 template <typename KeyType> 
@@ -451,7 +452,7 @@ void BNode<KeyType>::partRoot(Pair<KeyType, Entity> x)
 template <typename KeyType> 
 void BNode<KeyType>::partInterior(Pair<KeyType, Entity> x)
 {
-	std::cout<<"part interior "<<*this;
+	//std::cout<<"part interior "<<*this;
 	
 	BNode * rgt = new BNode(parent());
 	
@@ -464,7 +465,7 @@ void BNode<KeyType>::partInterior(Pair<KeyType, Entity> x)
 	
 	delete[] old;
 	
-	std::cout<<"into "<<*this<<*rgt;
+	//std::cout<<"into "<<*this<<*rgt;
 	
 	connectChildren();
 	
@@ -570,7 +571,7 @@ void BNode<KeyType>::balanceLeafLeft()
 	
 	crossed->replaceKey(old.key, firstData().key);
 	
-	std::cout<<"\nbalanced "<<*leftSibling<<*this;
+	//std::cout<<"\nbalanced "<<*leftSibling<<*this;
 }
 
 template <typename KeyType> 
@@ -1025,6 +1026,7 @@ const SearchResult BNode<KeyType>::findKey(const KeyType & x) const
     r.found = -1;
     r.low = 0; 
 	r.high = numKeys() - 1;
+	if(numKeys() < 1) return r;
     int mid;
         
     while(r.low <= r.high) {

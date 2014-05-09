@@ -42,12 +42,9 @@ void C3Tree::remove(VertexP & v)
 	m_root->remove(k);
 }
 
-List<VertexP> * C3Tree::find(const Vector3F & p)
+List<VertexP> * C3Tree::find(float * p)
 {
-	V3 v;
-	v.data[0] = p.x;
-	v.data[1] = p.y;
-	v.data[2] = p.z;
+	V3 v(p);
 	
 	Coord3 k = inGrid(v);
 	
@@ -79,10 +76,15 @@ void C3Tree::displayLevel(const int & level, const std::vector<Entity *> & nodes
 
 const Coord3 C3Tree::inGrid(const V3 & p) const
 {
+	return gridCoord(p.data);
+}
+
+const Coord3 C3Tree::gridCoord(const float * p) const
+{
 	Coord3 r;
-	r.x = p.data[0] / m_gridSize; if(p.data[0] < 0.f) r.x--;
-	r.y = p.data[1] / m_gridSize; if(p.data[1] < 0.f) r.y--;
-	r.z = p.data[2] / m_gridSize; if(p.data[2] < 0.f) r.z--;
+	r.x = p[0] / m_gridSize; if(p[0] < 0.f) r.x--;
+	r.y = p[1] / m_gridSize; if(p[1] < 0.f) r.y--;
+	r.z = p[2] / m_gridSize; if(p[2] < 0.f) r.z--;
 	return r;
 }
 

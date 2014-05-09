@@ -20,7 +20,7 @@ public:
     C3Tree();
     void insert(VertexP & v);
 	void remove(VertexP & v);
-	List<VertexP> * find(const Vector3F & p);
+	List<VertexP> * find(float * p);
     void display();
 	
 	void setGridSize(const float & x);
@@ -32,6 +32,7 @@ public:
 	const BoundingBox boundingBox() const;
 	void calculateBBox();
 	const List<VertexP> * verticesInGrid() const;
+	const Coord3 gridCoord(const float * p) const;
 private:
 	typedef BNode<Coord3> C3NodeType;
 

@@ -4,6 +4,7 @@
 #include "glwidget.h"
 #include <cmath>
 #include <KdTreeDrawer.h>
+#include <Sequence.h>
 
 #define NUMVERTEX 12000
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -24,7 +25,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     }
     
     m_tree = new C3Tree;
-	m_tree->setGridSize(1.33f);
+	m_tree->setGridSize(1.43f);
     
     VertexP p;
     for(i = 0; i < NUMVERTEX; i++) {
@@ -84,20 +85,28 @@ void GLWidget::clientDraw()
 	dr->setColor(0.f, 1.f, 0.f);
 	dr->lines(linevs);
 	
+	Sequence<Coord3> added;
 	List<VertexP> intube;
 	Ray inc(m_rayBegin, m_rayEnd);
 	if(!m_march.begin(inc)) return;
 	while(!m_march.end()) {
-		List<VertexP> * pl = m_tree->find(m_march.gridBBox().center());
-		if(pl) {
-			
-			//drawPoints(pl);
-			if(intersect(pl, inc, 1.2f, intube)) dr->boundingBox(m_march.gridBBox());
+		const std::deque<Vector3F> coords = m_march.touched(1.82f);
+		std::deque<Vector3F>::const_iterator it = coords.begin();
+		for(; it != coords.end(); ++it) {
+			const Coord3 c = m_tree->gridCoord((const float *)&(*it));
+			if(added.find(c)) continue;
+			added.insert(c);
+			List<VertexP> * pl = m_tree->find((float *)&(*it));
+			intersect(pl, inc, 1.82f, intube);
+			//if(pl) {
+				//if(intersect(pl, inc, 1.82f, intube)) { 
+				//	dr->boundingBox(m_march.computeBBox(*it));
+				//}
+			//}
 		}
 		m_march.step();
 	}
 	drawPoints(&intube);
-	intube.clear();
 }
 
 void GLWidget::drawPoints(const List<VertexP> * d) 

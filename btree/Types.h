@@ -31,6 +31,8 @@ public:
 
 class V3 {
 public:
+	V3() { data[0] = data[1] = data[2] = 0.f; }
+	V3(float *d) { set(d); }
 	void set(float *d) {data[0] = d[0]; data[1] = d[1]; data[2] = d[2];}
 	float data[3];
 	

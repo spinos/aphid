@@ -18,6 +18,11 @@ TreeNode::TreeNode(Entity * parent) : Entity(parent)
 	m_isLeaf = false;
 }
 
+TreeNode::~TreeNode() 
+{
+	if(m_first) delete m_first;
+}
+
 bool TreeNode::isRoot() const { return parent() == NULL; }
 
 bool TreeNode::hasChildren() const 
