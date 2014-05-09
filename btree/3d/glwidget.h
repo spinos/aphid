@@ -30,7 +30,10 @@ private:
 
 private:
 	Sculptor * m_sculptor;
-    V3 * m_pool;
+    Vector3F * m_pos;
+	Vector3F * m_nor;
+	Vector3F * m_ref;
+	PNPref * m_pool;
 	
 private slots:
     

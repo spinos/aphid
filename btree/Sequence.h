@@ -84,7 +84,7 @@ protected:
 	}
 	
 	const bool leafEnd() const {
-		return m_current == NULL;
+		return (m_current == NULL || m_root->numKeys() < 1);
 	}
 	
 	const int leafSize() const {

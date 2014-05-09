@@ -20,7 +20,7 @@ void C3Tree::setGridSize(const float & x) { m_gridSize = x; }
 
 void C3Tree::insert(const VertexP & v)
 {
-	Coord3 k = inGrid(*v.index);
+	Coord3 k = inGrid((float *)(v.index)->t1);
 	
 	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(k);
 	if(!p->index) p->index = new List<VertexP>;
@@ -29,7 +29,7 @@ void C3Tree::insert(const VertexP & v)
 
 void C3Tree::remove(const VertexP & v)
 {
-	Coord3 k = inGrid(*v.index);
+	Coord3 k = inGrid((float *)(v.index)->t1);
 	Sequence<Coord3>::remove(k);
 }
 

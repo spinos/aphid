@@ -22,6 +22,8 @@ public:
 			vertices->clear();
 		}
 		
+		int numSelected() { return vertices->numElements(); }
+		
 		float depthRange() {
 			return depthMax - depthMin;
 		}

@@ -14,6 +14,9 @@
 #include <BoundingBox.h>
 namespace sdb {
 
+typedef Triple<Vector3F, Vector3F, Vector3F > PNPref;
+typedef Pair<int, PNPref> VertexP;
+
 class C3Tree : public Ordered<Coord3, VertexP>
 {
 public:

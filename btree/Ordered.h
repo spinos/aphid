@@ -23,7 +23,7 @@ public:
 		static_cast<List<ValueType> *>(p->index)->insert(v);
 	}
 	
-	const List<ValueType> * value() const {
+	List<ValueType> * value() {
 		return static_cast<List<ValueType> *>(Sequence<KeyType>::currentIndex());
 	}
 	
@@ -31,7 +31,42 @@ public:
 		return Sequence<KeyType>::currentKey();
 	}
 	
-private:
+	int numElements() {
+		int r = 0;
+		Sequence<KeyType>::begin();
+		while(!Sequence<KeyType>::end()) {
+			r += value()->size();
+			Sequence<KeyType>::next();
+		}
+		return r;
+	}
 	
+	void elementBegin() {
+		Sequence<KeyType>::begin();
+		if(Sequence<KeyType>::end()) return;
+		m_elemI = 0;
+		m_elemSize = value()->size();
+	}
+	
+	void nextElement() {
+		m_elemI++;
+		if(m_elemI == m_elemSize) {
+			Sequence<KeyType>::next();
+			if(Sequence<KeyType>::end()) return;
+			m_elemI = 0;
+			m_elemSize = value()->size();
+		}
+	}
+	
+	const bool elementEnd() const {
+		return Sequence<KeyType>::end();
+	}
+	
+	ValueType * currentElement() {
+		return value()->valueP(m_elemI);
+	}
+	
+private:
+	int m_elemI, m_elemSize;
 };
 } //end namespace sdb

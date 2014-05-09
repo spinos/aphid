@@ -63,6 +63,41 @@ void Sculptor::selectPoints(const Ray * incident)
 		}
 		m_march.step();
 	}
+	
+	const int nsel = m_active->numSelected();
+	if(nsel < 1) return;
+	
+	std::deque<Vector3F> b4;
+	b4.resize(nsel);
+	int i = 0;
+	Ordered<int, VertexP> * vs = m_active->vertices;
+	vs->elementBegin();
+	while(!vs->elementEnd()) {
+		VertexP * vert = vs->currentElement();
+		Vector3F & pos = *(vert->index->t1);
+		b4[i] = pos;
+		i++;
+		vs->nextElement();
+	}
+
+	vs->elementBegin();
+	while(!vs->elementEnd()) {
+		VertexP * vert = vs->currentElement();
+		Vector3F & pos = *(vert->index->t1);
+		pos += Vector3F(0.04f, 0.03f, 0.05f);
+		vs->nextElement();
+	}
+	
+	i = 0;
+	vs->elementBegin();
+	while(!vs->elementEnd()) {
+		VertexP * vert = vs->currentElement();
+		Vector3F & pos = *(vert->index->t1);
+		pos += Vector3F(0.04f, 0.03f, 0.05f);
+		
+		i++;
+		vs->nextElement();
+	}
 }
 
 void Sculptor::deselectPoints() { m_active->reset(); }
@@ -72,10 +107,9 @@ bool Sculptor::intersect(List<VertexP> * d, const Ray & ray)
 	if(!d) return false;
 	const int num = d->size();
 	const int ndst = m_active->vertices->size();
-	Vector3F p, pop;
+	Vector3F pop;
 	for(int i = 0; i < num; i++) {
-		V3 * v = d->value(i).index;
-		p.set(v->data[0], v->data[1], v->data[2]);
+		Vector3F & p = *(d->value(i).index->t1);
 		float tt = ray.m_origin.dot(ray.m_dir) - p.dot(ray.m_dir);
 		pop = ray.m_origin - ray.m_dir * tt;
 		if(p.distanceTo(pop) < m_active->threshold) {

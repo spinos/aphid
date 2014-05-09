@@ -27,6 +27,7 @@ public:
 	void remove(const T & x) {}
 	
 	const T value(const int & i) const { return m_v[i]; }
+	T * valueP(const int & i) { return &m_v[i]; }
 	
 	void getValues(std::vector<T> & dst) const {
 		typename std::vector<T>::const_iterator it;
