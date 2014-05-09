@@ -9,46 +9,34 @@
 
 #pragma once
 
-#include <BNode.h>
+#include <Ordered.h>
 #include <List.h>
 #include <BoundingBox.h>
 namespace sdb {
 
-class C3Tree
+class C3Tree : public Ordered<Coord3, VertexP>
 {
 public:
-    C3Tree();
+    C3Tree(Entity * parent = NULL);
     void insert(VertexP & v);
 	void remove(VertexP & v);
 	List<VertexP> * find(float * p);
-    void display();
-	
+    
 	void setGridSize(const float & x);
 	const float gridSize() const;
-	void firstGrid();
-	void nextGrid();
-	const bool gridEnd() const;
+	
 	const BoundingBox gridBoundingBox() const;
 	const BoundingBox boundingBox() const;
 	void calculateBBox();
 	const List<VertexP> * verticesInGrid() const;
 	const Coord3 gridCoord(const float * p) const;
+	
 private:
-	typedef BNode<Coord3> C3NodeType;
-
-	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
 	const Coord3 inGrid(const V3 & p) const;
 	const BoundingBox coordToGridBBox(const Coord3 & c) const;
 	void updateBBox(const BoundingBox & b);
 	
-	void firstLeaf();
-	void nextLeaf();
-	const bool leafEnd() const;
-	
 	BoundingBox m_bbox;
-	C3NodeType * m_root;
-	C3NodeType * m_current;
 	float m_gridSize;
-	int m_currentData, m_dataEnd;
 };
 } // end namespace sdb

@@ -25,7 +25,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     }
     
     m_tree = new C3Tree;
-	m_tree->setGridSize(1.43f);
+	m_tree->setGridSize(1.51f);
     
     VertexP p;
     for(i = 0; i < NUMVERTEX; i++) {
@@ -34,16 +34,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
         m_tree->insert(p);
     }
     
-    //m_tree->display();
-	
-	i = 0;
-	m_tree->firstGrid();
-	while(!m_tree->gridEnd()) {
-		i++;
-		m_tree->nextGrid();
-	}
-	
-	std::cout<<"grid count "<<i;
+	std::cout<<"grid count "<<m_tree->size();
 	m_tree->calculateBBox();
 	
 	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());
@@ -63,17 +54,10 @@ void GLWidget::clientDraw()
 	KdTreeDrawer * dr = getDrawer();
 	BoundingBox bb;
 
-	m_tree->firstGrid();
-	while(!m_tree->gridEnd()) {
+	m_tree->begin();
+	while(!m_tree->end()) {
 		drawPoints(m_tree->verticesInGrid());
-		m_tree->nextGrid();
-	}
-	
-    m_tree->firstGrid();
-	while(!m_tree->gridEnd()) {
-		bb = m_tree->gridBoundingBox();
-		//dr->boundingBox(bb);
-		m_tree->nextGrid();
+		m_tree->next();
 	}
 	
 	bb = m_tree->boundingBox();
@@ -103,10 +87,11 @@ void GLWidget::drawPoints(const ActiveGroup & grp)
 {
 	Ordered<int, VertexP> * ps = grp.vertices;
 	if(ps->size() < 1) return;
+	const float mxr = grp.threshold * 2.f;
 	ps->begin();
 	while(!ps->end()) {
 		const List<VertexP> * vs = ps->value();
-		if((ps->key() - 1) * grp.gridSize - grp.depthMin > grp.threshold * 2.f) return;
+		if((ps->key() - 1) * grp.gridSize - grp.depthMin > mxr) return;
 		drawPoints(vs);
 		ps->next();
 	}

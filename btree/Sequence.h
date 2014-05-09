@@ -34,6 +34,10 @@ public:
 		return true;
 	}
 	
+	Pair<Entity *, Entity> findEntity(const T & x) {
+		return m_root->find(x);
+	}
+	
 	void begin() {
 		beginLeaf();
 		if(leafEnd()) return;

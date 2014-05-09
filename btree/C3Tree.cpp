@@ -11,13 +11,9 @@
 
 namespace sdb {
 
-C3Tree::C3Tree()
+C3Tree::C3Tree(Entity * parent) : Ordered<Coord3, VertexP>(parent)
 {
-    TreeNode::MaxNumKeysPerNode = 64;
-    TreeNode::MinNumKeysPerNode = 32;
-	m_root= new C3NodeType;
 	m_gridSize = 1.f;
-	m_current = NULL;
 }
 
 void C3Tree::setGridSize(const float & x) { m_gridSize = x; }
@@ -26,7 +22,7 @@ void C3Tree::insert(VertexP & v)
 {
 	Coord3 k = inGrid(*v.index);
 	
-	Pair<Coord3, Entity> * p = m_root->insert(k);
+	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(k);
 	if(!p->index) p->index = new List<VertexP>;
 	static_cast<List<VertexP> *>(p->index)->insert(v);
 }
@@ -39,7 +35,7 @@ void C3Tree::remove(VertexP & v)
 	Pair<Coord3, VertexP> mypair;
 	mypair.key = k;
 	mypair.index = &v;
-	m_root->remove(k);
+	Sequence<Coord3>::remove(k);
 }
 
 List<VertexP> * C3Tree::find(float * p)
@@ -48,30 +44,9 @@ List<VertexP> * C3Tree::find(float * p)
 	
 	Coord3 k = inGrid(v);
 	
-	Pair<Entity *, Entity> g = m_root->find(k);
+	Pair<Entity *, Entity> g = Sequence<Coord3>::findEntity(k);
 	if(!g.index) return NULL;
 	return static_cast<List<VertexP> *>(g.index);
-}
-
-void C3Tree::display()
-{
-	std::cout<<"\ndisplay tree";
-	std::map<int, std::vector<Entity *> > nodes;
-	nodes[0].push_back(m_root);
-	m_root->getChildren(nodes, 1);
-	
-	std::map<int, std::vector<Entity *> >::const_iterator it = nodes.begin();
-	for(; it != nodes.end(); ++it)
-		displayLevel((*it).first, (*it).second);
-	std::cout<<"\n";
-}
-
-void C3Tree::displayLevel(const int & level, const std::vector<Entity *> & nodes)
-{
-	std::cout<<"\n  level: "<<level<<"   ";
-	std::vector<Entity *>::const_iterator it = nodes.begin();
-	for(; it != nodes.end(); ++it)
-		std::cout<<*(static_cast<C3NodeType *>(*it));
 }
 
 const Coord3 C3Tree::inGrid(const V3 & p) const
@@ -88,48 +63,9 @@ const Coord3 C3Tree::gridCoord(const float * p) const
 	return r;
 }
 
-void C3Tree::firstGrid()
-{
-	firstLeaf();
-	if(leafEnd()) return;
-	m_currentData = 0;
-	m_dataEnd = m_current->numKeys();
-}
-
-void C3Tree::nextGrid()
-{
-	m_currentData++;
-	if(m_currentData == m_dataEnd) {
-		nextLeaf();
-		if(leafEnd()) return;
-		m_currentData = 0;
-		m_dataEnd = m_current->numKeys();
-	}
-}
-
-const bool C3Tree::gridEnd() const
-{
-	return leafEnd();
-}
-
-void C3Tree::firstLeaf()
-{
-	m_current = m_root->firstLeaf();
-}
-
-void C3Tree::nextLeaf()
-{
-	m_current = static_cast<C3NodeType *>(m_current->sibling()); 
-}
-
-const bool C3Tree::leafEnd() const
-{
-	return m_current == NULL;
-}
-
 const BoundingBox C3Tree::gridBoundingBox() const
 {
-	return coordToGridBBox(m_current->key(m_currentData));
+	return coordToGridBBox(Sequence<Coord3>::currentKey());
 }
 
 const BoundingBox C3Tree::boundingBox() const
@@ -140,13 +76,10 @@ const BoundingBox C3Tree::boundingBox() const
 void C3Tree::calculateBBox()
 {
 	m_bbox.reset();
-	firstLeaf();
-	if(leafEnd()) return;
-	
-	firstGrid();
-	while(!gridEnd()) {
+	begin();
+	while(!end()) {
 		updateBBox(gridBoundingBox());
-		nextGrid();
+		next();
 	}
 }
 
@@ -165,7 +98,7 @@ void C3Tree::updateBBox(const BoundingBox & b)
 
 const List<VertexP> * C3Tree::verticesInGrid() const
 {
-	Entity * p = m_current->index(m_currentData);
+	Entity * p = Sequence<Coord3>::currentIndex();
 	if(!p) return NULL;
 	return static_cast<List<VertexP> *>(p);
 }
