@@ -117,6 +117,7 @@ private:
 	
 	bool hasKey(const KeyType & x) const;
 	
+	void removeRoot(const KeyType & x);
 	void removeLeaf(const KeyType & x);
 	bool removeDataLeaf(const KeyType & x);
 
@@ -190,6 +191,9 @@ BNode<KeyType>::BNode(Entity * parent) : TreeNode(parent)
 template <typename KeyType> 
 BNode<KeyType>::~BNode()
 {
+	for(int i=0;i< numKeys();i++) {
+		if(m_data[i].index) delete m_data[i].index;
+	}
 	delete[] m_data;
 }
 
@@ -211,7 +215,7 @@ template <typename KeyType>
 const KeyType BNode<KeyType>::firstKey() const { return m_data[0].key; }
 
 template <typename KeyType> 
-const KeyType BNode<KeyType>::lastKey() const { return m_data[numKeys() - 1].key; }
+const KeyType BNode<KeyType>::lastKey() const { if(numKeys() > 64) std::cout<<"wrong num keys "<<numKeys(); return m_data[numKeys() - 1].key; }
 
 template <typename KeyType> 
 Pair<KeyType, Entity> * BNode<KeyType>::insert(const KeyType & x)
@@ -227,17 +231,30 @@ Pair<KeyType, Entity> * BNode<KeyType>::insert(const KeyType & x)
 template <typename KeyType> 
 void BNode<KeyType>::remove(const KeyType & x)
 {
-	if(isLeaf()) 
+	if(isRoot()) {
+		removeRoot(x);
+	}
+	else if(isLeaf()) {
 		removeLeaf(x);
+	}
 	else {
-		if(hasChildren()) {
-			BNode * n = nextIndex(x);
-			n->remove(x);
-		}
-		else {
-		    removeKey(x);
-			setFirstIndex(NULL);
-		}
+		BNode * n = nextIndex(x);
+		n->remove(x);
+	}
+}
+
+template <typename KeyType> 
+void BNode<KeyType>::removeRoot(const KeyType & x)
+{
+	if(hasChildren()) {
+		BNode * n = nextIndex(x);
+		n->remove(x);
+	}
+	else {
+		std::cout<<"reduce in root "<<numKeys();
+		removeKey(x);
+		
+		setFirstIndex(NULL);
 	}
 }
 
@@ -755,14 +772,20 @@ template <typename KeyType>
 bool BNode<KeyType>::removeDataLeaf(const KeyType & x)
 {
 	SearchResult s = findKey(x);
-	if(s.found < 0) return false;
+	if(s.found < 0) {
+		std::cout<<"cannot find key "<<x;
+		return false;
+	}
 	
 	int found = s.found;
 	
-	if(m_data[found].index) delete m_data[found].index;
+	if(m_data[found].index) {
+		delete m_data[found].index;
+		m_data[found].index = NULL;
+	}
 	
 	if(found == numKeys() - 1) {
-		reduceNumKeys();
+		reduceNumKeys();//std::cout<<"reduce last in leaf to "<<numKeys();
 		return true;
 	}
 	
@@ -775,7 +798,7 @@ bool BNode<KeyType>::removeDataLeaf(const KeyType & x)
 		if(c) crossed->replaceKey(x, firstData().key);
 	}
 		
-    reduceNumKeys();
+    reduceNumKeys();std::cout<<"reduce in leaf to "<<numKeys();
 	return true;
 }
 

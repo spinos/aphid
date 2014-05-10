@@ -9,6 +9,7 @@
 
 #pragma once
 #include <string>
+#include <Vector3F.h>
 namespace sdb {
 
 class Coord3
@@ -83,6 +84,15 @@ public:
 	T2 * t2;
 	T3 * t3;
 	T4 * t4;
+};
+
+typedef Triple<Vector3F, Vector3F, Vector3F > PNPref;
+class VertexP : public Pair<int, PNPref>
+{
+public:
+	const bool operator==(const VertexP & another) const {
+		return index == another.index;
+	}
 };
 
 } // end namespace sdb

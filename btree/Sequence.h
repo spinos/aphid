@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <BNode.h>
+#include <deque>
 namespace sdb {
 template<typename T>
 class Sequence : public Entity {
@@ -26,6 +27,7 @@ public:
 	
 	void remove(const T & x) {
 		m_root->remove(x);
+		m_current = NULL;
 	}
 	
 	bool find(const T & x) {
@@ -42,16 +44,14 @@ public:
 		beginLeaf();
 		if(leafEnd()) return;
 		m_currentData = 0;
-		m_dataEnd = leafSize();
 	}
 	
 	void next() {
 		m_currentData++;
-		if(m_currentData == m_dataEnd) {
+		if(m_currentData == leafSize()) {
 			nextLeaf();
 			if(leafEnd()) return;
 			m_currentData = 0;
-			m_dataEnd = leafSize();
 		} 
 	}
 	
@@ -88,15 +88,27 @@ protected:
 	}
 	
 	const int leafSize() const {
+		if(!m_current) return 0;
 		return m_current->numKeys();
 	}
 	
 	Entity * currentIndex() const {
+		if(!m_current) return NULL;
 		return m_current->index(m_currentData);
 	}
 	
 	const T currentKey() const {
 		return m_current->key(m_currentData);
+	}
+	
+	std::deque<T> allKeys() {
+		typename std::deque<T> r;
+		begin();
+		while(!end()) {
+			r.push_back(currentKey());
+			next();
+		}
+		return r;
 	}
 
 private:
@@ -104,6 +116,6 @@ private:
 private:
 	BNode<T> * m_root;
 	BNode<T> * m_current;
-	int m_currentData, m_dataEnd;
+	int m_currentData;
 };
 } //end namespace sdb

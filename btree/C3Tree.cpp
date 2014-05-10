@@ -30,7 +30,7 @@ void C3Tree::insert(const VertexP & v)
 void C3Tree::remove(const VertexP & v)
 {
 	Coord3 k = inGrid((float *)(v.index)->t1);
-	Sequence<Coord3>::remove(k);
+	Ordered<Coord3, VertexP>::remove(k, v);
 }
 
 List<VertexP> * C3Tree::find(float * p)
@@ -99,5 +99,14 @@ const List<VertexP> * C3Tree::verticesInGrid() const
 }
 
 const float C3Tree::gridSize() const { return m_gridSize; }
+
+void C3Tree::displace(const VertexP & v, const Vector3F & pref)
+{
+	Coord3 c1 = inGrid((float *)(v.index)->t1);
+	Coord3 c0 = inGrid((float *)&pref);
+	if(c0 == c1) return;
+	Ordered<Coord3, VertexP>::remove(c0, v);
+	insert(v);
+}		
 
 } // end namespace sdb

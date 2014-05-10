@@ -20,7 +20,7 @@ TreeNode::TreeNode(Entity * parent) : Entity(parent)
 
 TreeNode::~TreeNode() 
 {
-	if(m_first) delete m_first;
+	if(m_first && !isLeaf()) delete m_first;
 }
 
 bool TreeNode::isRoot() const { return parent() == NULL; }
@@ -28,7 +28,7 @@ bool TreeNode::isRoot() const { return parent() == NULL; }
 bool TreeNode::hasChildren() const 
 { 
 	if(isLeaf()) return false; 
-	return m_first != NULL; 
+	return m_first != NULL;
 }
 
 bool TreeNode::isLeaf() const { return m_isLeaf; }

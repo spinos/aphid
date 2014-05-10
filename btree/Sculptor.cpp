@@ -47,7 +47,7 @@ void Sculptor::setSelectRadius(const float & x)
 
 void Sculptor::selectPoints(const Ray * incident)
 {
-	deselectPoints();
+	m_active->reset(); 
 	
 	Sequence<Coord3> added;
 	if(!m_march.begin(*incident)) return;
@@ -67,40 +67,31 @@ void Sculptor::selectPoints(const Ray * incident)
 	const int nsel = m_active->numSelected();
 	if(nsel < 1) return;
 	
-	std::deque<Vector3F> b4;
-	b4.resize(nsel);
-	int i = 0;
-	Ordered<int, VertexP> * vs = m_active->vertices;
-	vs->elementBegin();
-	while(!vs->elementEnd()) {
-		VertexP * vert = vs->currentElement();
-		Vector3F & pos = *(vert->index->t1);
-		b4[i] = pos;
-		i++;
-		vs->nextElement();
-	}
-
-	vs->elementBegin();
-	while(!vs->elementEnd()) {
-		VertexP * vert = vs->currentElement();
-		Vector3F & pos = *(vert->index->t1);
-		pos += Vector3F(0.04f, 0.03f, 0.05f);
-		vs->nextElement();
-	}
+	added.clear();
 	
-	i = 0;
+	Ordered<int, VertexP> * vs = m_active->vertices;
+	
 	vs->elementBegin();
 	while(!vs->elementEnd()) {
 		VertexP * vert = vs->currentElement();
 		Vector3F & pos = *(vert->index->t1);
+		Vector3F p0(*(vert->index->t1));
 		pos += Vector3F(0.04f, 0.03f, 0.05f);
 		
-		i++;
+		m_tree->displace(*vert, p0);
+		
 		vs->nextElement();
 	}
 }
 
-void Sculptor::deselectPoints() { m_active->reset(); }
+void Sculptor::deselectPoints() 
+{ 
+	std::cout<<"grid count "<<m_tree->size();
+	//m_tree->removeEmpty();
+	m_tree->calculateBBox();
+	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());
+	m_active->reset(); 
+}
 
 bool Sculptor::intersect(List<VertexP> * d, const Ray & ray)
 {

@@ -101,8 +101,8 @@ void GLWidget::drawPoints(const List<VertexP> * d)
 	const int num = d->size();
 
 	for(int i = 0; i < num; i++) {
-		Vector3F & p = *(d->value(i).index->t1);
-		dr->vertex(p);
+		Vector3F * p = d->value(i).index->t1;
+		dr->vertex(*p);
 	}
 	dr->end();
 }
@@ -123,15 +123,21 @@ void GLWidget::drawPoints(const Sculptor::ActiveGroup & grp)
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)
 {
+	setUpdatesEnabled(false);
 	m_sculptor->selectPoints(getIncidentRay());
+	setUpdatesEnabled(true);
 }
 
 void GLWidget::clientDeselect(QMouseEvent */*event*/) 
 {
+	setUpdatesEnabled(false);
 	m_sculptor->deselectPoints();
+	setUpdatesEnabled(true);
 }
 
 void GLWidget::clientMouseInput(QMouseEvent */*event*/)
 {
+	setUpdatesEnabled(false);
 	m_sculptor->selectPoints(getIncidentRay());
+	setUpdatesEnabled(true);
 }

@@ -11,6 +11,7 @@
 #include <Sequence.h>
 #include <List.h>
 namespace sdb {
+
 template<typename KeyType, typename ValueType>
 class Ordered : public Sequence<KeyType>
 {
@@ -64,6 +65,31 @@ public:
 	
 	ValueType * currentElement() {
 		return value()->valueP(m_elemI);
+	}
+	
+	void remove(const KeyType & k, const ValueType & v) {
+		Pair<Entity *, Entity> e = findEntity(k);
+		if(!e.index) return;
+		List<ValueType> * l = static_cast<List<ValueType> *>(e.index);
+		l->remove(v);
+		if(l->size() < 1) {
+			std::cout<<" rm "<<k;
+			Sequence<KeyType>::remove(k);
+		}
+	}
+	
+	void removeEmpty() {
+		std::deque<KeyType> ks = Sequence<KeyType>::allKeys();
+		typename std::deque<KeyType>::iterator it;
+		it = ks.begin();
+		for(; it != ks.end(); ++it) {
+			Pair<Entity *, Entity> e = findEntity(*it);
+			List<ValueType> *l = static_cast<List<ValueType> *>(e.index);
+			if(l->size() < 1) {
+				std::cout<<*it<<" is empty";
+				Sequence<KeyType>::remove(*it);
+			}
+		}
 	}
 	
 private:

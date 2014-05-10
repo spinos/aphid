@@ -14,15 +14,13 @@
 #include <BoundingBox.h>
 namespace sdb {
 
-typedef Triple<Vector3F, Vector3F, Vector3F > PNPref;
-typedef Pair<int, PNPref> VertexP;
-
 class C3Tree : public Ordered<Coord3, VertexP>
 {
 public:
     C3Tree(Entity * parent = NULL);
     void insert(const VertexP & v);
 	void remove(const VertexP & v);
+	void displace(const VertexP & v, const Vector3F & pref);
 	List<VertexP> * find(float * p);
     
 	void setGridSize(const float & x);
