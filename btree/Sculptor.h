@@ -13,28 +13,26 @@
 namespace sdb {
 class Sculptor {
 public:
-	struct ActiveGroup {
-		ActiveGroup() { vertices = new Ordered<int, VertexP>; reset(); }
+	class ActiveGroup {
+	public:
+		ActiveGroup();
 		
-		void reset() {
-			depthMin = 10e8;
-			depthMax = -10e8;
-			vertices->clear();
-		}
+		void reset();
 		
-		int numSelected() { return vertices->numElements(); }
+		int numSelected();
 		
-		float depthRange() {
-			return depthMax - depthMin;
-		}
+		float depthRange();
 		
-		void updateDepthRange(const float & d) {
-			if(d > depthMax) depthMax = d;
-			if(d < depthMin) depthMin = d;
-		}
+		void updateDepthRange(const float & d);
+		
+		void finish();
+		
+		void average(const List<VertexP> * d);
 		
 		Ordered<int, VertexP> * vertices;
 		float depthMin, depthMax, gridSize, threshold;
+		Vector3F meanPosition, meanNormal;
+		int numActivePoints, numActiveBlocks;
 	};
 	
 	Sculptor();
@@ -51,6 +49,8 @@ public:
 	
 	C3Tree * allPoints() const;
 	ActiveGroup * activePoints() const;
+	
+	void pullPoints();
 	
 private:
 	bool intersect(List<VertexP> * ps, const Ray & ray);

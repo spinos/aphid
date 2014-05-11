@@ -9,6 +9,72 @@
 
 #include "Sculptor.h"
 namespace sdb {
+
+Sculptor::ActiveGroup::ActiveGroup() 
+{ 
+	vertices = new Ordered<int, VertexP>; 
+	reset(); 
+}
+
+void Sculptor::ActiveGroup::reset() 
+{
+	depthMin = 10e8;
+	depthMax = -10e8;
+	vertices->clear();
+	meanPosition.setZero();
+	meanNormal.setZero();
+	numActivePoints = 0;
+	numActiveBlocks = 0;
+}
+
+int Sculptor::ActiveGroup::numSelected() { return vertices->numElements(); }
+
+float Sculptor::ActiveGroup::depthRange() 
+{
+	return depthMax - depthMin;
+}
+
+void Sculptor::ActiveGroup::updateDepthRange(const float & d) 
+{
+	if(d > depthMax) depthMax = d;
+	if(d < depthMin) depthMin = d;
+}
+
+void Sculptor::ActiveGroup::finish() 
+{
+	if(vertices->size() < 1) return;
+	const float mxr = threshold * 2.f;
+
+	vertices->begin();
+	while(!vertices->end()) {
+		const List<VertexP> * vs = vertices->value();
+		if((vertices->key() - 1) * gridSize - depthMin > mxr) break;
+		
+		average(vs);
+		
+		numActiveBlocks++;
+		vertices->next();
+	}
+	
+	if(numActivePoints > 0) {
+		meanPosition *= 1.f / (float)numActivePoints;
+		meanNormal.normalize();
+	}
+}
+
+void Sculptor::ActiveGroup::average(const List<VertexP> * d)
+{
+	const int num = d->size();
+	if(num < 1) return;
+	for(int i = 0; i < num; i++) {
+		Vector3F * p = d->value(i).index->t1;
+		Vector3F * n = d->value(i).index->t2;
+		meanPosition += *p;
+		meanNormal += *n;
+		numActivePoints++;
+	}
+}
+		
 Sculptor::Sculptor() 
 {
 	m_tree = new C3Tree;
@@ -64,30 +130,12 @@ void Sculptor::selectPoints(const Ray * incident)
 		m_march.step();
 	}
 	
-	const int nsel = m_active->numSelected();
-	if(nsel < 1) return;
-	
-	added.clear();
-	
-	Ordered<int, VertexP> * vs = m_active->vertices;
-	
-	vs->elementBegin();
-	while(!vs->elementEnd()) {
-		VertexP * vert = vs->currentElement();
-		Vector3F & pos = *(vert->index->t1);
-		Vector3F p0(*(vert->index->t1));
-		pos += Vector3F(0.04f, 0.03f, 0.05f);
-		
-		m_tree->displace(*vert, p0);
-		
-		vs->nextElement();
-	}
+	m_active->finish();
 }
 
 void Sculptor::deselectPoints() 
 { 
 	std::cout<<"grid count "<<m_tree->size();
-	//m_tree->removeEmpty();
 	m_tree->calculateBBox();
 	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());
 	m_active->reset(); 
@@ -115,5 +163,24 @@ bool Sculptor::intersect(List<VertexP> * d, const Ray & ray)
 C3Tree * Sculptor::allPoints() const { return m_tree; }
 
 Sculptor::ActiveGroup * Sculptor::activePoints() const { return m_active; }
+
+void Sculptor::pullPoints()
+{
+	if(m_active->numSelected() < 1) return;
+	
+	Ordered<int, VertexP> * vs = m_active->vertices;
+	
+	vs->elementBegin();
+	while(!vs->elementEnd()) {
+		VertexP * vert = vs->currentElement();
+		Vector3F & pos = *(vert->index->t1);
+		Vector3F p0(*(vert->index->t1));
+		pos += m_active->meanNormal * 0.03f;
+		
+		m_tree->displace(*vert, p0);
+		
+		vs->nextElement();
+	}
+}
 
 } // end namespace sdb

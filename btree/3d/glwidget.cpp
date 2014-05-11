@@ -111,12 +111,14 @@ void GLWidget::drawPoints(const Sculptor::ActiveGroup & grp)
 {
 	Ordered<int, VertexP> * ps = grp.vertices;
 	if(ps->size() < 1) return;
-	const float mxr = grp.threshold * 2.f;
 	ps->begin();
+	int nblk = 0;
 	while(!ps->end()) {
 		const List<VertexP> * vs = ps->value();
-		if((ps->key() - 1) * grp.gridSize - grp.depthMin > mxr) return;
+		if(nblk >= grp.numActiveBlocks) return;
 		drawPoints(vs);
+		
+		nblk++;
 		ps->next();
 	}
 }
@@ -125,6 +127,7 @@ void GLWidget::clientSelect(QMouseEvent */*event*/)
 {
 	setUpdatesEnabled(false);
 	m_sculptor->selectPoints(getIncidentRay());
+	m_sculptor->pullPoints();
 	setUpdatesEnabled(true);
 }
 
@@ -139,5 +142,6 @@ void GLWidget::clientMouseInput(QMouseEvent */*event*/)
 {
 	setUpdatesEnabled(false);
 	m_sculptor->selectPoints(getIncidentRay());
+	m_sculptor->pullPoints();
 	setUpdatesEnabled(true);
 }
