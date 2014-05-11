@@ -72,10 +72,7 @@ public:
 		if(!e.index) return;
 		List<ValueType> * l = static_cast<List<ValueType> *>(e.index);
 		l->remove(v);
-		if(l->size() < 1) {
-			std::cout<<" rm "<<k;
-			Sequence<KeyType>::remove(k);
-		}
+		if(l->size() < 1) Sequence<KeyType>::remove(k);
 	}
 	
 	void removeEmpty() {
@@ -85,10 +82,7 @@ public:
 		for(; it != ks.end(); ++it) {
 			Pair<Entity *, Entity> e = findEntity(*it);
 			List<ValueType> *l = static_cast<List<ValueType> *>(e.index);
-			if(l->size() < 1) {
-				std::cout<<*it<<" is empty";
-				Sequence<KeyType>::remove(*it);
-			}
+			if(l->size() < 1) Sequence<KeyType>::remove(*it);
 		}
 	}
 	

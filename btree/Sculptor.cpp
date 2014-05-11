@@ -111,6 +111,11 @@ void Sculptor::setSelectRadius(const float & x)
 	m_active->gridSize = x * .25f;
 }
 
+const float Sculptor::selectRadius() const
+{
+	return m_active->threshold;
+}
+
 void Sculptor::selectPoints(const Ray * incident)
 {
 	m_active->reset(); 

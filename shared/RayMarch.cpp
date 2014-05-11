@@ -21,7 +21,6 @@ bool RayMarch::begin(const Ray & r)
 { 
 	float hitMin, hitMax;
 	if(!m_limit.intersect(r, &hitMin, &hitMax)) return false;
-	std::cout<<"\nray box "<<hitMin<<","<<hitMax<<" ";
 	
 	m_path = r;
 	m_path.m_tmax = hitMax;

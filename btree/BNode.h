@@ -215,7 +215,7 @@ template <typename KeyType>
 const KeyType BNode<KeyType>::firstKey() const { return m_data[0].key; }
 
 template <typename KeyType> 
-const KeyType BNode<KeyType>::lastKey() const { if(numKeys() > 64) std::cout<<"wrong num keys "<<numKeys(); return m_data[numKeys() - 1].key; }
+const KeyType BNode<KeyType>::lastKey() const { return m_data[numKeys() - 1].key; }
 
 template <typename KeyType> 
 Pair<KeyType, Entity> * BNode<KeyType>::insert(const KeyType & x)
@@ -251,7 +251,6 @@ void BNode<KeyType>::removeRoot(const KeyType & x)
 		n->remove(x);
 	}
 	else {
-		std::cout<<"reduce in root "<<numKeys();
 		removeKey(x);
 		
 		setFirstIndex(NULL);
@@ -773,7 +772,7 @@ bool BNode<KeyType>::removeDataLeaf(const KeyType & x)
 {
 	SearchResult s = findKey(x);
 	if(s.found < 0) {
-		std::cout<<"cannot find key "<<x;
+		//std::cout<<"cannot find key "<<x;
 		return false;
 	}
 	
@@ -798,7 +797,7 @@ bool BNode<KeyType>::removeDataLeaf(const KeyType & x)
 		if(c) crossed->replaceKey(x, firstData().key);
 	}
 		
-    reduceNumKeys();std::cout<<"reduce in leaf to "<<numKeys();
+    reduceNumKeys();//std::cout<<"reduce in leaf to "<<numKeys();
 	return true;
 }
 
@@ -864,7 +863,7 @@ void BNode<KeyType>::popInterior(const Pair<KeyType, Entity> & x)
 {
 	removeKey(x.key);
 	if(!underflow()) return;
-	std::cout<<"interior underflow! "<<*this;
+	//std::cout<<"interior underflow! "<<*this;
 	if(!mergeInterior())
 		balanceInterior();
 }

@@ -18,15 +18,10 @@ public:
 		ActiveGroup();
 		
 		void reset();
-		
 		int numSelected();
-		
 		float depthRange();
-		
 		void updateDepthRange(const float & d);
-		
 		void finish();
-		
 		void average(const List<VertexP> * d);
 		
 		Ordered<int, VertexP> * vertices;
@@ -43,6 +38,7 @@ public:
 	void endAddVertices();
 	
 	void setSelectRadius(const float & x);
+	const float selectRadius() const;
 	
 	void selectPoints(const Ray * incident);
 	void deselectPoints();
