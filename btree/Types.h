@@ -12,6 +12,24 @@
 #include <Vector3F.h>
 namespace sdb {
 
+class Coord2
+{
+public:
+	Coord2();
+	Coord2(int a, int b);
+	const bool operator==(const Coord2 & another) const;
+	const bool operator<(const Coord2 & another) const;
+	const bool operator>=(const Coord2 & another) const;
+	const bool operator>(const Coord2 & another) const;
+	const std::string str() const;
+	friend std::ostream& operator<<(std::ostream &output, const Coord2 & p)
+    {
+        output << p.str();
+        return output;
+    }
+	int x, y;
+};
+
 class Coord3
 {
 public:

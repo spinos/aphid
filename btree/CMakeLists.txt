@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 project (btree)
  
-include_directories (".")
+include_directories ("." "../shared")
 
 add_executable(btree Types.cpp Entity.cpp List.cpp BNode.cpp BTree.cpp main.cpp)
 
