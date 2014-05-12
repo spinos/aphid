@@ -53,6 +53,7 @@ public:
 	unsigned nextBoundaryNeighbor(unsigned idx);
 	char findEdge(int i, int j, Edge & dest) const;
 	
+	void getConnectedFacets(std::vector<unsigned> & dst) const;
 	void getConnectedPolygons(std::vector<unsigned> & dst) const;
 	
 	Vector3F center();

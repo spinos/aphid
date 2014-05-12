@@ -13,6 +13,46 @@
 #include <Edge.h>
 #include <VertexAdjacency.h>
 
+MeshTopology::MeshTopology(Vector3F * pos, Vector3F * nor, int * tri, const int & numV, const int & numTri)
+{
+    m_pos = pos;
+    m_nor = nor;
+    m_mesh = NULL;
+    const unsigned nv = numV;
+    m_adjacency.reset(new VertexAdjacency[nv]);
+    
+    for(unsigned i = 0; i < nv; i++) {
+		VertexAdjacency & v = m_adjacency[i];
+		v.setIndex(i);
+		v.m_v = &pos[i];
+	}
+	
+	unsigned a, b, c;
+	const unsigned nf = numTri;
+	for(unsigned i = 0; i < nf; i++) {
+		a = tri[i * 3];
+		b = tri[i * 3 + 1];
+		c = tri[i * 3 + 2];
+		Facet * f = new Facet(&m_adjacency[a], &m_adjacency[b], &m_adjacency[c]);
+		f->setIndex(i);
+		f->setPolygonIndex(i);
+		for(unsigned j = 0; j < 3; j++) {
+			Edge * e = f->edge(j);
+			m_adjacency[e->v0()->getIndex()].addEdge(e);
+			m_adjacency[e->v1()->getIndex()].addEdge(e);
+		}
+		m_faces.push_back(f);
+	}
+	
+	for(unsigned i = 0; i < nv; i++) {
+		m_adjacency[i].findNeighbors();
+		m_adjacency[i].connectEdges();
+	}
+	
+	for(unsigned i = 0; i < nv; i++)
+		m_adjacency[i].computeWeights();
+}
+
 MeshTopology::MeshTopology(BaseMesh * mesh)
 {
 	m_mesh = mesh;
@@ -90,6 +130,16 @@ void MeshTopology::calculateNormal()
 	for(unsigned i = 0; i < nv; i++) {
 		m_mesh->normals()[i] = m_adjacency[i].computeNormal();
 	}
+}
+
+void MeshTopology::calculateVertexNormal(const int & i)
+{
+    std::vector<unsigned> faceid;
+    m_adjacency[i].getConnectedFacets(faceid);
+    std::vector<unsigned>::iterator it = faceid.begin();
+    for(; it != faceid.end(); ++it) m_faces[(*it)]->update();
+    
+    m_nor[i] = m_adjacency[i].computeNormal();
 }
 
 VertexAdjacency * MeshTopology::getTopology() const

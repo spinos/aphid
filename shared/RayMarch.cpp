@@ -29,14 +29,14 @@ bool RayMarch::begin(const Ray & r)
 		m_path.m_tmax -= hitMin;
 	}
 	
-	m_path.m_origin += m_path.m_dir * 10e-5;
+	m_path.m_origin += m_path.m_dir * 10e-4;
 
 	return true;
 }
 
 bool RayMarch::end() 
 { 
-	if(m_path.m_tmax < 10e-5) return true;
+	if(m_path.m_tmax < 10e-4) return true;
 	
 	return false; 
 }
@@ -47,11 +47,11 @@ void RayMarch::step()
 	float hitMin, hitMax;
 	m_current.intersect(m_path, &hitMin, &hitMax);
 	
-	if(hitMax < 10e-5) {
-		std::cout<<" step "<<hitMin<<","<<hitMax<<","<<m_path.m_tmax;
-		hitMax = 10e-5;
+	if(hitMax < 10e-4) {
+		//std::cout<<" step "<<hitMin<<","<<hitMax<<","<<m_path.m_tmax;
+		hitMax = 10e-4;
 	}
-	hitMax += 10e-5;
+	hitMax += 10e-4;
 	m_path.m_origin += m_path.m_dir * hitMax;
 	m_path.m_tmax -= hitMax;
 }

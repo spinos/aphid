@@ -423,6 +423,16 @@ void VertexAdjacency::connectEdges()
 	}
 }
 
+void VertexAdjacency::getConnectedFacets(std::vector<unsigned> & dst) const
+{
+	const unsigned numNeighbors = m_neighbors.size();
+	for(unsigned i = 0; i < numNeighbors; i++) {
+		Facet *f = m_neighbors[i]->f;
+		const unsigned triIdx = f->getIndex();
+		if(!IsElementIn(triIdx, dst)) dst.push_back(triIdx);
+	}
+}
+
 void VertexAdjacency::getConnectedPolygons(std::vector<unsigned> & dst) const
 {
 	const unsigned numNeighbors = m_neighbors.size();

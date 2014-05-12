@@ -22,16 +22,18 @@ public:
 	void updateMin(const Vector3F & p);
 	void updateMax(const Vector3F & p);
 	
-	int getLongestAxis() const;
+	const int getLongestAxis() const;
 	const float getMin(int axis) const;
 	const float getMax(int axis) const;
+	const Vector3F getMin() const;
+	const Vector3F getMax() const;
 	const float area() const;
 	const float crossSectionArea(const int &axis) const;
 	const float distance(const int &axis) const;
 	
 	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
 	void expandBy(const BoundingBox &another);
-	void expandBy(const Vector3F & pos, float r);
+	void expandBy(const Vector3F & pos, float r = 0.f);
 	void expand(float v);
 	Vector3F center() const;
 	char touch(const BoundingBox & b) const;

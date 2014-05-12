@@ -18,6 +18,7 @@ class BaseMesh;
 
 class MeshTopology {
 public:
+    MeshTopology(Vector3F * pos, Vector3F * nor, int * tri, const int & numV, const int & numTri);
 	MeshTopology(BaseMesh * mesh);
 	virtual ~MeshTopology();
 	
@@ -26,6 +27,8 @@ public:
 	void calculateWeight();
 	void calculateNormal();
 	void calculateSmoothedNormal(Vector3F * dst);
+	
+	void calculateVertexNormal(const int & i);
 
 	VertexAdjacency * getTopology() const;
 	VertexAdjacency & getAdjacency(unsigned idx) const;
@@ -40,4 +43,6 @@ private:
 	boost::scoped_array<VertexAdjacency> m_adjacency;
 	std::vector<Facet *> m_faces;
 	BaseMesh * m_mesh;
+	Vector3F * m_pos;
+	Vector3F * m_nor;
 };
