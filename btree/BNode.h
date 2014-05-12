@@ -665,6 +665,7 @@ Pair<KeyType, Entity> BNode<KeyType>::firstData() const { return m_data[0]; }
 template <typename KeyType> 
 void BNode<KeyType>::removeLastData()
 {
+	m_data[numKeys() - 1].index = NULL;
 	reduceNumKeys();
 }
 
@@ -674,6 +675,7 @@ void BNode<KeyType>::removeFirstData()
 	for(int i = 0; i < numKeys() - 1; i++) {
 		m_data[i] = m_data[i+1];
 	}
+	m_data[numKeys() - 1].index = NULL;
 	reduceNumKeys();
 }
 
