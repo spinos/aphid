@@ -174,17 +174,26 @@ void Sculptor::pullPoints()
 	if(m_active->numSelected() < 1) return;
 	
 	Ordered<int, VertexP> * vs = m_active->vertices;
-	
-	vs->elementBegin();
-	while(!vs->elementEnd()) {
-		VertexP * vert = vs->currentElement();
-		Vector3F & pos = *(vert->index->t1);
-		Vector3F p0(*(vert->index->t1));
-		pos += m_active->meanNormal * 0.03f;
+	int nblk = 0;
+	vs->begin();
+	while(!vs->end()) {
+		if(nblk >= m_active->numActiveBlocks) return;
 		
-		m_tree->displace(*vert, p0);
+		List<VertexP> * l = vs->value();
+		const int num = l->size();
 		
-		vs->nextElement();
+		for(int i = 0; i < num; i++) {
+			VertexP vert = l->value(i);
+			
+			Vector3F & pos = *(vert.index->t1);
+			Vector3F p0(*(vert.index->t1));
+			pos += m_active->meanNormal * 0.02f;
+		
+			m_tree->displace(vert, p0);
+		}
+
+		nblk++;
+		vs->next();
 	}
 }
 
