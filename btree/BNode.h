@@ -852,7 +852,7 @@ void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 		else 
 			setFirstIndex(lft->firstIndex());
 			
-		delete lft;
+		//delete lft;
 		
 		connectChildren();
 	}
@@ -913,7 +913,7 @@ bool BNode<KeyType>::mergeInteriorRight()
 	
 	rgt->leftData(rgt->numKeys(), this);
 	
-	delete rgt;
+	//delete rgt;
 	
 	connectChildren();
 	
