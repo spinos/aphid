@@ -13,7 +13,15 @@ namespace sdb {
 Sculptor::ActiveGroup::ActiveGroup() 
 { 
 	vertices = new Ordered<int, VertexP>; 
-	reset(); 
+	reset();
+	m_drop = new DropoffLinear;
+	m_dropoffType = Dropoff::Linear;
+}
+
+Sculptor::ActiveGroup::~ActiveGroup() 
+{
+    m_weights.clear();
+    delete m_drop;
 }
 
 void Sculptor::ActiveGroup::reset() 
@@ -25,6 +33,7 @@ void Sculptor::ActiveGroup::reset()
 	meanNormal.setZero();
 	numActivePoints = 0;
 	numActiveBlocks = 0;
+	m_weights.clear();
 }
 
 int Sculptor::ActiveGroup::numSelected() { return vertices->numElements(); }
@@ -60,6 +69,8 @@ void Sculptor::ActiveGroup::finish()
 		meanPosition *= 1.f / (float)numActivePoints;
 		meanNormal.normalize();
 	}
+	
+	calculateWeight();
 }
 
 void Sculptor::ActiveGroup::average(const List<VertexP> * d)
@@ -73,6 +84,54 @@ void Sculptor::ActiveGroup::average(const List<VertexP> * d)
 		meanNormal += *n;
 		numActivePoints++;
 	}
+}
+
+void Sculptor::ActiveGroup::calculateWeight()
+{
+    int nblk = 0;
+    vertices->begin();
+	while(!vertices->end()) {
+		const List<VertexP> * vs = vertices->value();
+		if(nblk >= numActiveBlocks) return;
+		
+		calculateWeight(vs);
+		
+		nblk++;
+		vertices->next();
+	}
+}
+
+void Sculptor::ActiveGroup::calculateWeight(const List<VertexP> * d)
+{
+    const int num = d->size();
+	if(num < 1) return;
+	for(int i = 0; i < num; i++) {
+		Vector3F * p = d->value(i).index->t1;
+		float wei = m_drop->f(p->distanceTo(meanPosition), threshold);
+		m_weights.push_back(wei);
+	}
+}
+
+const float Sculptor::ActiveGroup::weight(const int & i) const 
+{
+    return m_weights[i];
+}
+
+void Sculptor::ActiveGroup::setDropoffFunction(Dropoff::DistanceFunction x)
+{
+    if(x == m_dropoffType) return;
+    delete m_drop;
+    switch(x) {
+        case Dropoff::Quadratic :
+            m_drop = new DropoffQuadratic;
+            break;
+        case Dropoff::Cubic :
+            m_drop = new DropoffCubic;
+            break;
+        default:
+            m_drop = new DropoffLinear;
+            break;
+    }
 }
 		
 Sculptor::Sculptor() 
@@ -174,7 +233,7 @@ void Sculptor::pullPoints()
 	if(m_active->numSelected() < 1) return;
 	
 	Ordered<int, VertexP> * vs = m_active->vertices;
-	int nblk = 0;
+	int nblk = 0, vi = 0;
 	vs->begin();
 	while(!vs->end()) {
 		if(nblk >= m_active->numActiveBlocks) return;
@@ -187,9 +246,10 @@ void Sculptor::pullPoints()
 			
 			Vector3F & pos = *(vert.index->t1);
 			Vector3F p0(*(vert.index->t1));
-			pos += m_active->meanNormal * 0.02f;
+			pos += m_active->meanNormal * 0.02f * m_active->weight(vi);
 		
 			m_tree->displace(vert, p0);
+			vi++;
 		}
 
 		nblk++;

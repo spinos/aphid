@@ -10,24 +10,33 @@
 #pragma once
 #include <C3Tree.h>
 #include <RayMarch.h>
+#include <Dropoff.h>
 namespace sdb {
 class Sculptor {
 public:
 	class ActiveGroup {
 	public:
 		ActiveGroup();
-		
+		~ActiveGroup();
 		void reset();
 		int numSelected();
 		float depthRange();
 		void updateDepthRange(const float & d);
 		void finish();
 		void average(const List<VertexP> * d);
+		const float weight(const int & i) const;
+		void setDropoffFunction(Dropoff::DistanceFunction x);
 		
 		Ordered<int, VertexP> * vertices;
 		float depthMin, depthMax, gridSize, threshold;
 		Vector3F meanPosition, meanNormal;
 		int numActivePoints, numActiveBlocks;
+	private:
+	    void calculateWeight();
+	    void calculateWeight(const List<VertexP> * d);
+	    std::deque<float> m_weights;
+	    Dropoff::DistanceFunction m_dropoffType;
+	    Dropoff *m_drop;
 	};
 	
 	Sculptor();
