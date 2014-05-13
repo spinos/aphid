@@ -40,11 +40,11 @@ protected:
 			_p = NULL;
 		}
 		
-		void take(Entity * src) {std::cout<<"___take";
+		void take(Entity * src) {
 			_p = src;
 		}
 		
-		Entity * give() {std::cout<<"___give";
+		Entity * give() {
 			return _p;
 		}
 		
@@ -346,7 +346,7 @@ BNode<KeyType> * BNode<KeyType>::splitRoot(KeyType x)
 	//std::cout<<"split root "<<*this;
 	Entity * dangling = SeparatedNodes.give();
 	BNode * one = static_cast<BNode *>(dangling);
-	if(one) {std::cout<<"_____reused";
+	if(one) {
 		one->setParent(this);
 		one->setNumKeys(0);
 		SeparatedNodes.reset();

@@ -27,7 +27,7 @@ private:
 };
 
 template<typename T>
-class Single
+class Single : public Entity
 {
 public:
 	Single(Entity * parent = NULL) : Entity(parent) {

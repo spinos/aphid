@@ -9,7 +9,7 @@
 #include <iostream>
 #include <BTree.h>
 #include <Types.h>
-
+#include <Array.h>
 using namespace sdb;
 
 int main()
@@ -118,6 +118,28 @@ int main()
 	tree.find(106);
 	tree.find(22);
 	tree.find(92);
+	std::cout<<"test array\n";
 	
+	Array<int, int>arr;
+	int p[32];
+	for(int i=0; i < 32; i++) {
+	    p[i] = rand() % 99;
+	    arr.insert(i, &p[i]);
+	}
+	arr.begin();
+	while(!arr.end()) {
+	    std::cout<<" "<<arr.key()<<":"<<*arr.value()<<" ";
+	    arr.next();   
+	}
+	std::cout<<"\n";
+	arr.remove(30);
+	arr.insert(30, &p[31]);
+	arr.insert(31, &p[0]);
+	arr.begin();
+	while(!arr.end()) {
+	    std::cout<<" "<<arr.key()<<":"<<*arr.value()<<" ";
+	    arr.next();   
+	}
+	std::cout<<"\npassed\n";
 	return 0;
 }
