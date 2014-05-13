@@ -81,11 +81,16 @@ void Sculptor::ActiveGroup::average(const List<VertexP> * d)
 	const int num = d->size();
 	if(num < 1) return;
 	for(int i = 0; i < num; i++) {
-		Vector3F * p = d->value(i).index->t1;
 		Vector3F * n = d->value(i).index->t2;
-		meanPosition += *p;
-		meanNormal += *n;
-		numActivePoints++;
+		
+		if(n->dot(incidentRay.m_dir) < 0.f) {
+		
+			Vector3F * p = d->value(i).index->t1;
+		
+			meanPosition += *p;
+			meanNormal += *n;
+			numActivePoints++;
+		}
 	}
 }
 
@@ -170,7 +175,7 @@ void Sculptor::endAddVertices()
 void Sculptor::setSelectRadius(const float & x)
 {
 	m_active->threshold = x;
-	m_active->gridSize = x * .25f;
+	m_active->gridSize = x * .2f;
 }
 
 const float Sculptor::selectRadius() const
