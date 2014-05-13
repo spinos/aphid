@@ -34,6 +34,23 @@ public:
 	void setFirstIndex(Entity * another);
 	static int MaxNumKeysPerNode;
 	static int MinNumKeysPerNode;
+protected:
+	struct NodeIndirection {
+		void reset() {
+			_p = NULL;
+		}
+		
+		void take(Entity * src) {std::cout<<"___take";
+			_p = src;
+		}
+		
+		Entity * give() {std::cout<<"___give";
+			return _p;
+		}
+		
+		Entity * _p;
+	};
+	static NodeIndirection SeparatedNodes;
 private:
 	Entity *m_first;
 	bool m_isLeaf;
@@ -69,7 +86,8 @@ public:
 	const KeyType key(const int & i) const { return m_data[i].key; }
 	Entity * index(const int & i) const { return m_data[i].index; }
 	
-private:
+private:	
+	
 	const KeyType firstKey() const;
 	const KeyType lastKey() const;
 	
@@ -232,6 +250,7 @@ template <typename KeyType>
 void BNode<KeyType>::remove(const KeyType & x)
 {
 	if(isRoot()) {
+		SeparatedNodes.reset();
 		removeRoot(x);
 	}
 	else if(isLeaf()) {
@@ -325,8 +344,18 @@ template <typename KeyType>
 BNode<KeyType> * BNode<KeyType>::splitRoot(KeyType x)
 {
 	//std::cout<<"split root "<<*this;
-
-	BNode * one = new BNode(this); one->setLeaf();
+	Entity * dangling = SeparatedNodes.give();
+	BNode * one = static_cast<BNode *>(dangling);
+	if(one) {std::cout<<"_____reused";
+		one->setParent(this);
+		one->setNumKeys(0);
+		SeparatedNodes.reset();
+	}
+	else
+		one = new BNode(this);
+	
+	//BNode * one = new BNode(this); 
+	one->setLeaf();
 	BNode * two = new BNode(this); two->setLeaf();
 	
 	Pair<KeyType, Entity> ex;
@@ -854,7 +883,8 @@ void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 		else 
 			setFirstIndex(lft->firstIndex());
 			
-		//delete lft;
+		// delete lft;
+		SeparatedNodes.take(lft);
 		
 		connectChildren();
 	}
@@ -915,7 +945,8 @@ bool BNode<KeyType>::mergeInteriorRight()
 	
 	rgt->leftData(rgt->numKeys(), this);
 	
-	//delete rgt;
+	// delete rgt;
+	SeparatedNodes.take(rgt);
 	
 	connectChildren();
 	

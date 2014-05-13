@@ -26,4 +26,24 @@ private:
 	Entity *m_parent;
 };
 
+template<typename T>
+class Single
+{
+public:
+	Single(Entity * parent = NULL) : Entity(parent) {
+		m_p = NULL;
+	}
+	
+	T * data() {
+		return m_p;
+	}
+	
+	void setData(T * x) {
+		m_p = x;
+	}
+	
+private:
+	T * m_p;
+};
+
 } // end of namespace sdb

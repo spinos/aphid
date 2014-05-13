@@ -12,6 +12,8 @@ namespace sdb {
 int TreeNode::MaxNumKeysPerNode = 4;
 int TreeNode::MinNumKeysPerNode = 2;
 
+TreeNode::NodeIndirection TreeNode::SeparatedNodes;
+
 TreeNode::TreeNode(Entity * parent) : Entity(parent)
 {
 	m_first = NULL;
