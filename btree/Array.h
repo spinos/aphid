@@ -28,5 +28,13 @@ public:
 	void remove(const KeyType & k) {
 		Sequence<KeyType>::remove(k);
 	}
+	
+	ValueType * find(const KeyType & k, MatchFunction::Condition mf = MatchFunction::mExact, KeyType * extraKey = NULL) {
+		Pair<Entity *, Entity> g = Sequence<KeyType>::findEntity(k, mf, extraKey);
+		if(!g.index) return NULL;
+		Single<ValueType> * s = static_cast<Single<ValueType> *>(g.index);
+		return s->data();
+	}
+
 };
 } //end namespace sdb

@@ -10,6 +10,15 @@
 #include <BNode.h>
 #include <deque>
 namespace sdb {
+
+class MatchFunction {
+public:
+	enum Condition {
+		mExact = 0,
+		mLequal = 1
+	};
+};
+	
 template<typename T>
 class Sequence : public Entity {
 public:
@@ -32,12 +41,34 @@ public:
 	
 	bool find(const T & x) {
 		Pair<Entity *, Entity> g = m_root->find(x);
-		if(!g.index) return false;
+		if(!g.index) 
+			return false;
+
 		return true;
 	}
 	
-	Pair<Entity *, Entity> findEntity(const T & x) {
-		return m_root->find(x);
+	Pair<Entity *, Entity> findEntity(const T & x, MatchFunction::Condition mf = MatchFunction::mExact, T * extraKey = NULL) {
+		Pair<Entity *, Entity> g = m_root->find(x);
+		if(mf == MatchFunction::mExact) return g;
+		if(!g.index) {
+			SearchResult sr = BNode<T>::LatestSearch;
+			BNode<T> * n = static_cast<BNode<T> *>(g.key);
+			if(n->key(sr.high) > x) {
+				g.index = n->index(sr.high);
+				if(extraKey) *extraKey = n->key(sr.high);
+				return g;
+			}
+			else {
+				BNode<T> * rgt = static_cast<BNode<T> *>(n->sibling());
+				if(rgt) {
+					g.key = rgt;
+					g.index = rgt->index(0);
+					if(extraKey) *extraKey = rgt->key(0);
+					return g;
+				}
+			}
+		}
+		return g;
 	}
 	
 	void begin() {

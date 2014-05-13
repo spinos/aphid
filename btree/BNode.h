@@ -85,9 +85,8 @@ public:
 	const int numKeys() const  { return m_numKeys; }
 	const KeyType key(const int & i) const { return m_data[i].key; }
 	Entity * index(const int & i) const { return m_data[i].index; }
-	
+	static SearchResult LatestSearch;
 private:	
-	
 	const KeyType firstKey() const;
 	const KeyType lastKey() const;
 	
@@ -196,6 +195,9 @@ private:
     Pair<KeyType, Entity> * m_data;
 	int m_numKeys;
 };
+
+template <typename KeyType>
+SearchResult BNode<KeyType>::LatestSearch;
 
 template <typename KeyType>  
 BNode<KeyType>::BNode(Entity * parent) : TreeNode(parent)
@@ -1077,7 +1079,7 @@ const std::string BNode<KeyType>::str() const
 template <typename KeyType> 
 const SearchResult BNode<KeyType>::findKey(const KeyType & x) const
 {
-	SearchResult r;
+	SearchResult & r = LatestSearch;
     r.found = -1;
     r.low = 0; 
 	r.high = numKeys() - 1;

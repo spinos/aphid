@@ -12,6 +12,25 @@
 #include <Array.h>
 using namespace sdb;
 
+void testFind(Array<int, int> & arr, int k)
+{
+	std::cout<<"\ntry to find "<<k<<"\n";
+	int * found = arr.find(k);
+	if(found) {
+		std::cout<<"found arr["<<k<<"] = "<<*found<<" exactly";
+		return;
+	}
+	
+	std::cout<<"no arr["<<k<<"] try lequal find";
+	int ek;
+	found = arr.find(k, MatchFunction::mLequal, &ek);
+	
+	if(found)
+		std::cout<<"found arr["<<ek<<"] = "<<*found;
+	else 
+		std::cout<<" "<<k<<" is out of range";
+}
+
 int main()
 {
 	std::cout<<"b-tree test\ntry to insert a few keys\n";
@@ -121,25 +140,26 @@ int main()
 	std::cout<<"test array\n";
 	
 	Array<int, int>arr;
-	int p[32];
-	for(int i=0; i < 32; i++) {
-	    p[i] = rand() % 99;
+	int p[132];
+	for(int i=0; i < 132; i++) {
+	    p[i] = rand() % 199;
 	    arr.insert(i, &p[i]);
 	}
-	arr.begin();
-	while(!arr.end()) {
-	    std::cout<<" "<<arr.key()<<":"<<*arr.value()<<" ";
-	    arr.next();   
-	}
+
 	std::cout<<"\n";
+	arr.remove(99);
 	arr.remove(30);
-	arr.insert(30, &p[31]);
+	//arr.insert(30, &p[31]);
 	arr.insert(31, &p[0]);
 	arr.begin();
 	while(!arr.end()) {
 	    std::cout<<" "<<arr.key()<<":"<<*arr.value()<<" ";
 	    arr.next();   
 	}
+	testFind(arr, 0);
+	testFind(arr, 30);
+	testFind(arr, 99);
+	testFind(arr, 199);
 	std::cout<<"\npassed\n";
 	return 0;
 }
