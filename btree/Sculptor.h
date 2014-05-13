@@ -31,6 +31,7 @@ public:
 		float depthMin, depthMax, gridSize, threshold;
 		Vector3F meanPosition, meanNormal;
 		int numActivePoints, numActiveBlocks;
+		Ray incidentRay;
 	private:
 	    void calculateWeight();
 	    void calculateWeight(const List<VertexP> * d);

@@ -65,8 +65,11 @@ void Sculptor::ActiveGroup::finish()
 		vertices->next();
 	}
 	
-	if(numActivePoints > 0) {
+	if(numActivePoints > 1) {
 		meanPosition *= 1.f / (float)numActivePoints;
+		
+		meanPosition = incidentRay.closetPointOnRay(meanPosition);
+		
 		meanNormal.normalize();
 	}
 	
@@ -177,7 +180,8 @@ const float Sculptor::selectRadius() const
 
 void Sculptor::selectPoints(const Ray * incident)
 {
-	m_active->reset(); 
+	m_active->reset();
+	m_active->incidentRay = *incident;
 	
 	Sequence<Coord3> added;
 	if(!m_march.begin(*incident)) return;
@@ -213,8 +217,9 @@ bool Sculptor::intersect(List<VertexP> * d, const Ray & ray)
 	Vector3F pop;
 	for(int i = 0; i < num; i++) {
 		Vector3F & p = *(d->value(i).index->t1);
-		float tt = ray.m_origin.dot(ray.m_dir) - p.dot(ray.m_dir);
-		pop = ray.m_origin - ray.m_dir * tt;
+		float tt;// = ray.m_origin.dot(ray.m_dir) - p.dot(ray.m_dir);
+		pop = ray.closetPointOnRay(p, &tt);
+		
 		if(p.distanceTo(pop) < m_active->threshold) {
 			int k = -tt / m_active->gridSize;
 			m_active->vertices->insert(k, d->value(i));
