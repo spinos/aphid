@@ -151,7 +151,7 @@ int main()
 	arr.remove(30);
 	//arr.insert(30, &p[31]);
 	arr.insert(31, &p[0]);
-	arr.begin();
+	arr.beginAt(31);
 	while(!arr.end()) {
 	    std::cout<<" "<<arr.key()<<":"<<*arr.value()<<" ";
 	    arr.next();   

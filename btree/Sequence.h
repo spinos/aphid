@@ -50,7 +50,10 @@ public:
 	Pair<Entity *, Entity> findEntity(const T & x, MatchFunction::Condition mf = MatchFunction::mExact, T * extraKey = NULL) {
 		Pair<Entity *, Entity> g = m_root->find(x);
 		if(mf == MatchFunction::mExact) return g;
-		if(!g.index) {
+		if(g.index) {
+			if(extraKey) *extraKey = x;
+		}
+		else {
 			SearchResult sr = BNode<T>::LatestSearch;
 			BNode<T> * n = static_cast<BNode<T> *>(g.key);
 			if(n->key(sr.high) > x) {
@@ -75,6 +78,14 @@ public:
 		beginLeaf();
 		if(leafEnd()) return;
 		m_currentData = 0;
+	}
+	
+	void beginAt(const T & x) {
+		Pair<Entity *, Entity> g = m_root->find(x);
+		m_current = static_cast<BNode<T> *>(g.key);
+		
+		SearchResult sr = BNode<T>::LatestSearch;
+		m_currentData = sr.found;
 	}
 	
 	void next() {
