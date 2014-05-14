@@ -30,7 +30,6 @@ public:
 		Ordered<int, VertexP> * vertices;
 		float depthMin, depthMax, gridSize, threshold;
 		Vector3F meanPosition, meanNormal;
-		int numActivePoints, numActiveBlocks;
 		Ray incidentRay;
 	private:
 	    void calculateWeight();
@@ -38,6 +37,7 @@ public:
 	    std::deque<float> m_weights;
 	    Dropoff::DistanceFunction m_dropoffType;
 	    Dropoff *m_drop;
+		int numActivePoints;
 	};
 	
 	Sculptor();
@@ -50,6 +50,8 @@ public:
 	void setSelectRadius(const float & x);
 	const float selectRadius() const;
 	
+	void setStrength(const float & x);
+	
 	void selectPoints(const Ray * incident);
 	void deselectPoints();
 	
@@ -57,12 +59,15 @@ public:
 	ActiveGroup * activePoints() const;
 	
 	void pullPoints();
+	void pushPoints();
 	
 private:
 	bool intersect(List<VertexP> * ps, const Ray & ray);
+	void movePointsAlong(const Vector3F & d);
 private:
 	RayMarch m_march;
 	ActiveGroup * m_active;
 	C3Tree * m_tree;
+	float m_strength;
 };
 } // end namespace sdb

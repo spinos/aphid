@@ -32,7 +32,6 @@ void Sculptor::ActiveGroup::reset()
 	meanPosition.setZero();
 	meanNormal.setZero();
 	numActivePoints = 0;
-	numActiveBlocks = 0;
 	m_weights.clear();
 }
 
@@ -61,7 +60,6 @@ void Sculptor::ActiveGroup::finish()
 		
 		average(vs);
 		
-		numActiveBlocks++;
 		vertices->next();
 	}
 	
@@ -96,15 +94,12 @@ void Sculptor::ActiveGroup::average(const List<VertexP> * d)
 
 void Sculptor::ActiveGroup::calculateWeight()
 {
-    int nblk = 0;
     vertices->begin();
 	while(!vertices->end()) {
 		const List<VertexP> * vs = vertices->value();
-		if(nblk >= numActiveBlocks) return;
 		
 		calculateWeight(vs);
 		
-		nblk++;
 		vertices->next();
 	}
 }
@@ -146,6 +141,7 @@ Sculptor::Sculptor()
 {
 	m_tree = new C3Tree;
 	m_active = new ActiveGroup;
+	m_strength = 0.5f;
 }
 
 Sculptor::~Sculptor()
@@ -175,13 +171,15 @@ void Sculptor::endAddVertices()
 void Sculptor::setSelectRadius(const float & x)
 {
 	m_active->threshold = x;
-	m_active->gridSize = x * .2f;
+	m_active->gridSize = x * .33f;
 }
 
 const float Sculptor::selectRadius() const
 {
 	return m_active->threshold;
 }
+
+void Sculptor::setStrength(const float & x) { m_strength = x; }
 
 void Sculptor::selectPoints(const Ray * incident)
 {
@@ -191,7 +189,12 @@ void Sculptor::selectPoints(const Ray * incident)
 	Sequence<Coord3> added;
 	if(!m_march.begin(*incident)) return;
 	while(!m_march.end()) {
-		const std::deque<Vector3F> coords = m_march.touched(m_active->gridSize);
+		BoundingBox touchedBox;
+		const std::deque<Vector3F> coords = m_march.touched(selectRadius(), touchedBox);
+		float tmin, tmax;
+		touchedBox.intersect(*incident, &tmin, &tmax);
+		if((tmin - m_active->depthMin) > selectRadius() * 3.f) break;
+		
 		std::deque<Vector3F>::const_iterator it = coords.begin();
 		for(; it != coords.end(); ++it) {
 			const Coord3 c = m_tree->gridCoord((const float *)&(*it));
@@ -225,7 +228,7 @@ bool Sculptor::intersect(List<VertexP> * d, const Ray & ray)
 		float tt;// = ray.m_origin.dot(ray.m_dir) - p.dot(ray.m_dir);
 		pop = ray.closetPointOnRay(p, &tt);
 		
-		if(p.distanceTo(pop) < m_active->threshold) {
+		if(p.distanceTo(pop) < selectRadius()) {
 			int k = -tt / m_active->gridSize;
 			m_active->vertices->insert(k, d->value(i));
 			m_active->updateDepthRange(-tt);
@@ -240,29 +243,37 @@ Sculptor::ActiveGroup * Sculptor::activePoints() const { return m_active; }
 
 void Sculptor::pullPoints()
 {
+	movePointsAlong(m_active->meanNormal);
+}
+
+void Sculptor::pushPoints()
+{
+	movePointsAlong(m_active->meanNormal.reversed());
+}
+
+void Sculptor::movePointsAlong(const Vector3F & d)
+{
 	if(m_active->numSelected() < 1) return;
-	
 	Ordered<int, VertexP> * vs = m_active->vertices;
-	int nblk = 0, vi = 0;
+	int vi = 0;
 	vs->begin();
 	while(!vs->end()) {
-		if(nblk >= m_active->numActiveBlocks) return;
 		
 		List<VertexP> * l = vs->value();
 		const int num = l->size();
 		
 		for(int i = 0; i < num; i++) {
-			VertexP vert = l->value(i);
+			const VertexP vert = l->value(i);
 			
 			Vector3F & pos = *(vert.index->t1);
 			Vector3F p0(*(vert.index->t1));
-			pos += m_active->meanNormal * 0.02f * m_active->weight(vi);
+			
+			pos += d * 0.02f * m_active->weight(vi) * m_strength * selectRadius();
 		
 			m_tree->displace(vert, p0);
 			vi++;
 		}
 
-		nblk++;
 		vs->next();
 	}
 }

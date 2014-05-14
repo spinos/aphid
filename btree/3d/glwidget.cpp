@@ -6,7 +6,7 @@
 #include <KdTreeDrawer.h>
 #include <Sequence.h>
 #include <Ordered.h>
-#define NUMVERTEX 12000
+#define NUMVERTEX 150000
 
 struct X {
 	int a, b;
@@ -36,7 +36,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_pool = new PNPref[NUMVERTEX];
 	
 	m_sculptor = new Sculptor;
-	m_sculptor->beginAddVertices(1.51f);
+	m_sculptor->beginAddVertices(.8f);
     
     VertexP p;
     for(i = 0; i < NUMVERTEX; i++) {
@@ -49,7 +49,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     }
 	
 	m_sculptor->endAddVertices();
-	m_sculptor->setSelectRadius(1.97f);
+	m_sculptor->setSelectRadius(1.6f);
 	
 	std::vector<X> xs;
 	X ax; ax.a = 10; ax.b = 11;
@@ -112,13 +112,10 @@ void GLWidget::drawPoints(const Sculptor::ActiveGroup & grp)
 	Ordered<int, VertexP> * ps = grp.vertices;
 	if(ps->size() < 1) return;
 	ps->begin();
-	int nblk = 0;
 	while(!ps->end()) {
 		const List<VertexP> * vs = ps->value();
-		if(nblk >= grp.numActiveBlocks) return;
 		drawPoints(vs);
 		
-		nblk++;
 		ps->next();
 	}
 }

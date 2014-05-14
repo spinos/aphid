@@ -61,7 +61,7 @@ const BoundingBox RayMarch::gridBBox() const
 	return m_current;
 }
 
-const std::deque<Vector3F> RayMarch::touched(const float & threshold) const
+const std::deque<Vector3F> RayMarch::touched(const float & threshold, BoundingBox & limit) const
 {
 	std::deque<Vector3F> r;
 	const Vector3F cen = gridBBox().center();
@@ -78,6 +78,15 @@ const std::deque<Vector3F> RayMarch::touched(const float & threshold) const
 			}
 		}
 	}
+	const Vector3F dp(l * m_gridSize, l * m_gridSize, l * m_gridSize);
+	const Vector3F plo = cen - dp;
+	const Vector3F phi = cen + dp;
+	const BoundingBox blo = computeBBox(plo);
+	const BoundingBox bhi = computeBBox(phi);
+	
+	limit.reset();
+	limit.expandBy(blo);
+	limit.expandBy(bhi);
 	return r;
 }
 
