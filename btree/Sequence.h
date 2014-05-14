@@ -101,6 +101,10 @@ public:
 		return leafEnd();
 	}
 	
+	void setToEnd() {
+		m_current = NULL;
+	}
+	
 	int size() {
 		int c = 0;
 		beginLeaf();
