@@ -273,4 +273,16 @@ void MeshTopology::checkVertexValency() const
 		std::clog<<" "<<(*it).second<<" vertices connected to "<<(*it).first<<" edges\n";
 	}
 }
+
+void MeshTopology::update(const int & nv)
+{
+	for(std::vector<Facet *>::iterator it = m_faces.begin(); it != m_faces.end(); ++it) {
+		(*it)->update();
+	}
+	
+	for(int i = 0; i < nv; i++) {
+		m_adjacency[i].computeWeights();
+		m_nor[i] = m_adjacency[i].computeNormal();
+	}
+}
 //:~
