@@ -78,7 +78,7 @@ const std::deque<Vector3F> RayMarch::touched(const float & threshold, BoundingBo
 			}
 		}
 	}
-	const Vector3F dp(l * m_gridSize, l * m_gridSize, l * m_gridSize);
+	const Vector3F dp(m_gridSize * l, m_gridSize * l, m_gridSize * l);
 	const Vector3F plo = cen - dp;
 	const Vector3F phi = cen + dp;
 	const BoundingBox blo = computeBBox(plo);
@@ -87,6 +87,7 @@ const std::deque<Vector3F> RayMarch::touched(const float & threshold, BoundingBo
 	limit.reset();
 	limit.expandBy(blo);
 	limit.expandBy(bhi);
+	limit.shrinkBy(m_limit);
 	return r;
 }
 

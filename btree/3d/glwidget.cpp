@@ -49,7 +49,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     }
 	
 	m_sculptor->endAddVertices();
-	m_sculptor->setSelectRadius(1.6f);
+	m_sculptor->setSelectRadius(1.7f);
 	
 	std::vector<X> xs;
 	X ax; ax.a = 10; ax.b = 11;

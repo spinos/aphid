@@ -26,6 +26,8 @@ public:
 		void average(const List<VertexP> * d);
 		const float weight(const int & i) const;
 		void setDropoffFunction(Dropoff::DistanceFunction x);
+		const int numActivePoints() const;
+		const int numActiveBlocks() const;
 		
 		Ordered<int, VertexP> * vertices;
 		float depthMin, depthMax, gridSize, threshold;
@@ -37,7 +39,7 @@ public:
 	    std::deque<float> m_weights;
 	    Dropoff::DistanceFunction m_dropoffType;
 	    Dropoff *m_drop;
-		int numActivePoints;
+		int m_numActivePoints, m_numActiveBlocks;
 	};
 	
 	Sculptor();

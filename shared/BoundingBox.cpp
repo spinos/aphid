@@ -148,6 +148,17 @@ void BoundingBox::expandBy(const Vector3F & pos, float r)
     if(m_data[5] < pos.z - r) m_data[5] = pos.z - r;
 }
 
+void BoundingBox::shrinkBy(const BoundingBox &another)
+{
+    if(m_data[0] < another.m_data[0]) m_data[0] = another.m_data[0];
+	if(m_data[1] < another.m_data[1]) m_data[1] = another.m_data[1];
+	if(m_data[2] < another.m_data[2]) m_data[2] = another.m_data[2];
+	
+	if(m_data[3] > another.m_data[3]) m_data[3] = another.m_data[3];
+	if(m_data[4] > another.m_data[4]) m_data[4] = another.m_data[4];
+	if(m_data[5] > another.m_data[5]) m_data[5] = another.m_data[5];
+}
+
 void BoundingBox::expand(float val)
 {
     m_data[0] -= val;
