@@ -25,6 +25,7 @@ public:
 	void cleanup();
 	
 	void update(const int & nv);
+	void getDifferentialCoord(const int & vertexId, Vector3F & dst);
 	void calculateWeight();
 	void calculateNormal();
 	void calculateSmoothedNormal(Vector3F * dst);

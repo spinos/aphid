@@ -11,6 +11,7 @@
 #include <C3Tree.h>
 #include <RayMarch.h>
 #include <Dropoff.h>
+#include <MeshTopology.h>
 namespace sdb {
 class Sculptor {
 public:
@@ -55,6 +56,8 @@ public:
 	
 	void setStrength(const float & x);
 	
+	void setMeshTopology(MeshTopology * topo);
+	
 	void selectPoints(const Ray * incident);
 	void deselectPoints();
 	
@@ -65,6 +68,7 @@ public:
 	void pushPoints();
 	void pinchPoints();
 	void smudgePoints(const Vector3F & x);
+	void smoothPoints();
 	
 private:
 	bool intersect(List<VertexP> * ps, const Ray & ray);
@@ -74,6 +78,7 @@ private:
 	RayMarch m_march;
 	ActiveGroup * m_active;
 	C3Tree * m_tree;
+	MeshTopology * m_topo;
 	float m_strength;
 };
 } // end namespace sdb

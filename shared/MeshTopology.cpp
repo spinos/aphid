@@ -285,4 +285,11 @@ void MeshTopology::update(const int & nv)
 		m_nor[i] = m_adjacency[i].computeNormal();
 	}
 }
+
+void MeshTopology::getDifferentialCoord(const int & vertexId, Vector3F & dst)
+{
+	VertexAdjacency & adj = m_adjacency[vertexId];
+	adj.computeDifferentialCoordinate();
+	dst = adj.getDifferentialCoordinate();
+}
 //:~

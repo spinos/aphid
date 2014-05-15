@@ -160,6 +160,7 @@ Sculptor::Sculptor()
 	m_tree = new C3Tree;
 	m_active = new ActiveGroup;
 	m_strength = 0.5f;
+	m_topo = NULL;
 }
 
 Sculptor::~Sculptor()
@@ -198,6 +199,8 @@ const float Sculptor::selectRadius() const
 }
 
 void Sculptor::setStrength(const float & x) { m_strength = x; }
+
+void Sculptor::setMeshTopology(MeshTopology * topo) { m_topo = topo; }
 
 void Sculptor::selectPoints(const Ray * incident)
 {
@@ -290,6 +293,43 @@ void Sculptor::smudgePoints(const Vector3F & x)
 	movePointsAlong(x, 0.09f);
 }
 
+void Sculptor::smoothPoints()
+{	
+	if(m_active->numSelected() < 1) return;
+	Ordered<int, VertexP> * vs = m_active->vertices;
+	Vector3F d;
+	int vi = 0;
+	int blk = 0;
+	vs->begin();
+	while(!vs->end()) {
+		
+		List<VertexP> * l = vs->value();
+		const int num = l->size();
+		
+		for(int i = 0; i < num; i++) {
+			if(m_active->weight(vi) < 10e-4) {
+				vi++;
+				continue;
+			}
+			
+			const VertexP vert = l->value(i);
+			
+			Vector3F & pos = *(vert.index->t1);
+			Vector3F p0(*(vert.index->t1));
+			
+			m_topo->getDifferentialCoord(vert.key, d);
+			
+			pos += d * 0.02f * m_active->weight(vi) * m_strength;
+		
+			m_tree->displace(vert, p0);
+			vi++;
+		}
+		blk++;
+		if(blk == m_active->numActiveBlocks()) return;
+		vs->next();
+	}
+}
+
 void Sculptor::movePointsAlong(const Vector3F & d, const float & fac)
 {
 	if(m_active->numSelected() < 1) return;
@@ -303,6 +343,11 @@ void Sculptor::movePointsAlong(const Vector3F & d, const float & fac)
 		const int num = l->size();
 		
 		for(int i = 0; i < num; i++) {
+			if(m_active->weight(vi) < 10e-4) {
+				vi++;
+				continue;
+			}
+			
 			const VertexP vert = l->value(i);
 			
 			Vector3F & pos = *(vert.index->t1);
@@ -333,6 +378,11 @@ void Sculptor::movePointsToward(const Vector3F & d, const float & fac)
 		const int num = l->size();
 		
 		for(int i = 0; i < num; i++) {
+			if(m_active->weight(vi) < 10e-4) {
+				vi++;
+				continue;
+			}
+			
 			const VertexP vert = l->value(i);
 			
 			Vector3F & pos = *(vert.index->t1);
