@@ -24,6 +24,7 @@ public:
 	
 	void cleanup();
 	
+	void update(const int & nv);
 	void calculateWeight();
 	void calculateNormal();
 	void calculateSmoothedNormal(Vector3F * dst);
