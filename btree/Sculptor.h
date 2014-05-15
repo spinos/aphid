@@ -28,6 +28,7 @@ public:
 		void setDropoffFunction(Dropoff::DistanceFunction x);
 		const int numActivePoints() const;
 		const int numActiveBlocks() const;
+		const float meanDepth() const;
 		
 		Ordered<int, VertexP> * vertices;
 		float depthMin, depthMax, gridSize, threshold;
@@ -62,10 +63,13 @@ public:
 	
 	void pullPoints();
 	void pushPoints();
+	void pinchPoints();
+	void smudgePoints(const Vector3F & x);
 	
 private:
 	bool intersect(List<VertexP> * ps, const Ray & ray);
-	void movePointsAlong(const Vector3F & d);
+	void movePointsAlong(const Vector3F & d, const float & fac);
+	void movePointsToward(const Vector3F & d, const float & fac);
 private:
 	RayMarch m_march;
 	ActiveGroup * m_active;

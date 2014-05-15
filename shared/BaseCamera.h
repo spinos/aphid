@@ -29,6 +29,7 @@ public:
 	
 	char screenToWorldPoint(int x, int y, Vector3F & worldPos) const;
 	void screenToWorldVector(int x, int y, Vector3F & worldVec) const;
+	virtual void screenToWorldVectorAt(int x, int y, float depth, Vector3F & worldVec) const;
 	virtual void incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const;
 	Vector3F eyePosition() const;
 	Vector3F eyeDirection() const;

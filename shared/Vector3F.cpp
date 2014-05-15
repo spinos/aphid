@@ -297,5 +297,13 @@ void Vector3F::resize(float l)
 
 void Vector3F::verbose(const char * pref) const
 {
-	std::cout<<pref<<" ("<<x<<","<<y<<","<<z<<")\n";
+	std::cout<<pref<<str()<<"\n";
+}
+
+const std::string Vector3F::str() const
+{
+	std::stringstream sst;
+	sst.str("");
+    sst<<"("<<x<<","<<y<<","<<z<<")";
+	return sst.str();
 }

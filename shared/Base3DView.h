@@ -81,6 +81,7 @@ protected:
 	virtual void focusOutEvent(QFocusEvent * event);
 	virtual void clearSelection();
 	void showBrush() const;
+	const Vector3F strokeVector(const float & depth) const;
 	
 private:
 	void computeIncidentRay(int x, int y);
@@ -98,6 +99,7 @@ private:
 	BaseBrush * m_brush;
 	QTimer *m_timer;
 	ToolContext * m_interactContext;
+	int m_dx, m_dy;
 	char m_isFocused;
 };
 #endif        //  #ifndef BASE3DVIEW_H

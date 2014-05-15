@@ -64,25 +64,25 @@ const BoundingBox RayMarch::gridBBox() const
 const std::deque<Vector3F> RayMarch::touched(const float & threshold, BoundingBox & limit) const
 {
 	std::deque<Vector3F> r;
-	const Vector3F cen = gridBBox().center();
-	const int l = 1 + threshold / m_gridSize;
+	const Vector3F u(threshold, threshold, threshold);
+	const Vector3F p0 = m_path.m_origin - u;
+	const Vector3F p1 = m_path.m_origin + u;
+	const int ng = threshold * 2.f / m_gridSize + 1;
 	int i, j, k;
 	Vector3F p;
-	for(k= -l; k <= l; k++) {
-		p.z = cen.z + m_gridSize * k;
-		for(j= -l; j <= l; j++) {
-			p.y = cen.y + m_gridSize * j;
-			for(i= -l; i <= l; i++) {
-				p.x = cen.x + m_gridSize * i;
+	for(k= 0; k <= ng; k++) {
+		p.z = p0.z + m_gridSize * k;
+		for(j= 0; j <= ng; j++) {
+			p.y = p0.y + m_gridSize * j;
+			for(i= 0; i <= ng; i++) {
+				p.x = p0.x + m_gridSize * i;
 				if(m_limit.isPointInside(p)) r.push_back(p);
 			}
 		}
 	}
-	const Vector3F dp(m_gridSize * l, m_gridSize * l, m_gridSize * l);
-	const Vector3F plo = cen - dp;
-	const Vector3F phi = cen + dp;
-	const BoundingBox blo = computeBBox(plo);
-	const BoundingBox bhi = computeBBox(phi);
+	
+	const BoundingBox blo = computeBBox(p0);
+	const BoundingBox bhi = computeBBox(p1);
 	
 	limit.reset();
 	limit.expandBy(blo);

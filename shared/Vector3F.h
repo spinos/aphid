@@ -35,6 +35,13 @@ public:
 	Vector3F operator-( Vector3F & other ) const;		
 	Vector3F operator-( const Vector3F& other ) const;
 	
+	friend std::ostream& operator<<(std::ostream &output, const Vector3F & p) {
+        output << p.str();
+        return output;
+    }
+
+	const std::string str() const;
+	
 	float length() const;
 	
 	float dot(const Vector3F& other) const;	

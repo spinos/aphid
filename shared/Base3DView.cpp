@@ -187,16 +187,16 @@ void Base3DView::mouseMoveEvent(QMouseEvent *event)
 
 void Base3DView::processCamera(QMouseEvent *event)
 {
-    int dx = event->x() - m_lastPos.x();
-    int dy = event->y() - m_lastPos.y();
+    m_dx = event->x() - m_lastPos.x();
+    m_dy = event->y() - m_lastPos.y();
     if (event->buttons() & Qt::LeftButton) {
-        getCamera()->tumble(dx, dy);
+        getCamera()->tumble(m_dx, m_dy);
     } 
 	else if (event->buttons() & Qt::MidButton) {
-		getCamera()->track(dx, dy);
+		getCamera()->track(m_dx, m_dy);
     }
 	else if (event->buttons() & Qt::RightButton) {
-		getCamera()->zoom(-dx / 2 + -dy / 2);
+		getCamera()->zoom(-m_dx / 2 + -m_dy / 2);
 		if(getCamera()->isOrthographic())
 			updateOrthoProjection();
 		else
@@ -224,10 +224,9 @@ void Base3DView::processMouseInput(QMouseEvent *event)
 {
     computeIncidentRay(event->x(), event->y());
 	
-    int dx = event->x() - m_lastPos.x();
-    int dy = event->y() - m_lastPos.y();
-    Vector3F injv;
-    getCamera()->screenToWorldVector(dx, dy, injv);
+    m_dx = event->x() - m_lastPos.x();
+    m_dy = event->y() - m_lastPos.y();
+
     clientMouseInput(event);
 }
 
@@ -473,5 +472,12 @@ void Base3DView::useOrthoCamera()
 		fCamera->copyTransformFrom(m_perspCamera);
 		updateOrthoProjection();
 	}
+}
+
+const Vector3F Base3DView::strokeVector(const float & depth) const
+{
+	Vector3F res;
+	getCamera()->screenToWorldVectorAt(m_dx, m_dy, depth, res);
+	return res;
 }
 //:~

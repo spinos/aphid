@@ -6,7 +6,7 @@
 #include <KdTreeDrawer.h>
 #include <Sequence.h>
 #include <Ordered.h>
-#define NUMVERTEX 150000
+#define NUMVERTEX 190000
 
 struct X {
 	int a, b;
@@ -49,16 +49,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     }
 	
 	m_sculptor->endAddVertices();
-	m_sculptor->setSelectRadius(1.7f);
-	
-	std::vector<X> xs;
-	X ax; ax.a = 10; ax.b = 11;
-	xs.push_back(ax);
-	std::cout<<"xs[0]:"<<xs[0].a<<","<<xs[0].b<<"\n";
-	X * bx = &xs[0];
-	bx->a = 9; bx->b = 8;
-	std::cout<<"xs[0]:"<<xs[0].a<<","<<xs[0].b<<"\n";
-	
+	m_sculptor->setSelectRadius(1.9f);
 }
 
 GLWidget::~GLWidget()
@@ -111,11 +102,14 @@ void GLWidget::drawPoints(const Sculptor::ActiveGroup & grp)
 {
 	Ordered<int, VertexP> * ps = grp.vertices;
 	if(ps->size() < 1) return;
+	const int maxNumBlk = grp.numActiveBlocks();
+	int blk = 0;
 	ps->begin();
 	while(!ps->end()) {
 		const List<VertexP> * vs = ps->value();
 		drawPoints(vs);
-		
+		blk++;
+		if(blk == maxNumBlk) return;
 		ps->next();
 	}
 }
@@ -124,7 +118,7 @@ void GLWidget::clientSelect(QMouseEvent */*event*/)
 {
 	setUpdatesEnabled(false);
 	m_sculptor->selectPoints(getIncidentRay());
-	m_sculptor->pullPoints();
+	// m_sculptor->pullPoints();
 	setUpdatesEnabled(true);
 }
 
@@ -139,6 +133,8 @@ void GLWidget::clientMouseInput(QMouseEvent */*event*/)
 {
 	setUpdatesEnabled(false);
 	m_sculptor->selectPoints(getIncidentRay());
-	m_sculptor->pullPoints();
+	// m_sculptor->pullPoints();
+	const Vector3F dv = strokeVector(m_sculptor->activePoints()->meanDepth());
+	m_sculptor->smudgePoints(dv);
 	setUpdatesEnabled(true);
 }

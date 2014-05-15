@@ -140,7 +140,7 @@ char BaseCamera::screenToWorldPoint(int x, int y, Vector3F & worldPos) const
 {	
 	worldPos.x = ((float)x/(float)fPortWidth - 0.5f) * frameWidth();
 	worldPos.y = -((float)y/(float)fPortHeight - 0.5f) * frameHeight();
-	worldPos.z = -1.f;
+	worldPos.z = -m_nearClipPlane;
 	
 	worldPos = fSpace.transform(worldPos);
 	return 1;
@@ -153,6 +153,11 @@ void BaseCamera::screenToWorldVector(int x, int y, Vector3F & worldVec) const
 	worldVec.z = 0.f;
 	
 	worldVec = fSpace.transformAsNormal(worldVec);
+}
+
+void BaseCamera::screenToWorldVectorAt(int x, int y, float depth, Vector3F & worldVec) const
+{
+	screenToWorldVector(x, y, worldVec);
 }
 
 void BaseCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const
