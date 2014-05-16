@@ -31,6 +31,14 @@ void testFind(Array<int, int> & arr, int k)
 		std::cout<<" "<<k<<" is out of range";
 }
 
+void printList(const List<int> & l)
+{
+	std::cout<<"\nlist: ";
+	int n = l.size();
+	for(int i=0; i< n; i++) std::cout<<" "<<l.value(i);
+	std::cout<<"\n";
+}
+
 int main()
 {
 	std::cout<<"b-tree test\ntry to insert a few keys\n";
@@ -160,6 +168,30 @@ int main()
 	testFind(arr, 30);
 	testFind(arr, 99);
 	testFind(arr, 199);
+	
+	List<int> ll;
+	ll.insert(99);
+	ll.insert(32);
+	ll.insert(34);
+	ll.insert(47);
+	printList(ll);
+	
+	*ll.valueP(2) = 2;
+	printList(ll);
+	ll.insert(34);
+	printList(ll);
+	ll.remove(3);
+	printList(ll);
+	ll.remove(47);
+	printList(ll);
+	ll.remove(99);
+	printList(ll);
+	ll.remove(32);
+	printList(ll);
+	ll.remove(34);
+	printList(ll);
+	ll.remove(0);
+	printList(ll);
 	std::cout<<"\npassed\n";
 	return 0;
 }
