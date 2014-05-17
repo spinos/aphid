@@ -39,30 +39,25 @@
 **
 ****************************************************************************/
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#include <QtGui>
 
-#include <QMainWindow>
+#include "glwidget.h"
+#include "window.h"
 
-QT_BEGIN_NAMESPACE
-class QSlider;
-QT_END_NAMESPACE
 //! [0]
-class GLWidget;
-
-class Window : public QMainWindow
+Window::Window()
 {
-    Q_OBJECT
+    glWidget = new GLWidget;
+	
+	setCentralWidget(glWidget);
+    setWindowTitle(tr("Bullet+Qt"));
+}
+//! [1]
 
-public:
-    Window();
+void Window::keyPressEvent(QKeyEvent *e)
+{
+	if (e->key() == Qt::Key_Escape)
+        close();
 
-protected:
-    void keyPressEvent(QKeyEvent *event);
-
-private:
-    GLWidget *glWidget;
-};
-//! [0]
-
-#endif
+	QWidget::keyPressEvent(e);
+}

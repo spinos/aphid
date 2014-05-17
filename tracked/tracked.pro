@@ -1,13 +1,11 @@
-mac:INCLUDEPATH += /Users/jianzhang/Library/bullet-2.78/src/
-mac:LIBS += -lBulletDynamics -L/Users/jianzhang/dyn/build/src/BulletDynamics/Release \
-        -lBulletCollision -L/Users/jianzhang/dyn/build/src/BulletCollision/Release \
-        -lLinearMath -L/Users/jianzhang/dyn/build/src/LinearMath/Release \
-        -lBulletSoftBody
 INCLUDEPATH += ../shared ../ ./
 LIBS += -L../lib -laphid -lIlmImf -lHalf
 macx {
-    INCLUDEPATH += $(HOME)/Library/boost_1_44_0
-    LIBS += -lboost_date_time -lboost_system -lboost_thread -lboost_filesystem
+    INCLUDEPATH += $(HOME)/Library/boost_1_55_0 $(HOME)/Library/bullet-2.81/src/ \
+        /usr/local/include/bullet
+    LIBS += -lboost_date_time -lboost_system -lboost_thread -lboost_filesystem \
+        -L/usr/local/lib -lBulletDynamics -lBulletCollision -lBulletSoftBody -lLinearMath
+
 }
 win32:INCLUDEPATH += D:/usr/bullet-2.81/src D:/ofl/shared D:/usr/libxml2x64/include
 win32:LIBS += -lBulletDynamics_vs2008_x64_release -lBulletCollision_vs2008_x64_release -lBulletSoftBody_vs2008_x64_release -lLinearMath_vs2008_x64_release\ 
@@ -15,15 +13,17 @@ win32:LIBS += -lBulletDynamics_vs2008_x64_release -lBulletCollision_vs2008_x64_r
                 -LD:/usr/local/lib64 -leasymodel -LD:/usr/libxml2x64/lib -llibxml2
 HEADERS       = glwidget.h \
                 window.h \
-                dynamicsSolver.h \
+                DynamicsSolver.h \
                 ../shared/Base3DView.h \
-                shapeDrawer.h
+                shapeDrawer.h \
+                TrackedPhysics.h
 SOURCES       = glwidget.cpp \
                 main.cpp \
                 window.cpp \
-                dynamicsSolver.cpp \
+                DynamicsSolver.cpp \
                 ../shared/Base3DView.cpp \
-                shapeDrawer.cpp
+                shapeDrawer.cpp \
+                TrackedPhysics.cpp
 QT           += opengl
 win32:CONFIG += console
 ##mac:CONFIG -= app_bundle

@@ -75,11 +75,4 @@ protected:
 	btAlignedObjectArray<btSoftSoftCollisionAlgorithm*> m_SoftSoftCollisionAlgorithms;
 
 	btAlignedObjectArray<btSoftRididCollisionAlgorithm*> m_SoftRigidCollisionAlgorithms;
-private:
-    
-    void initRope();
-    void relaxRope();
-    
-    btSoftBody* m_skin;
-
 };

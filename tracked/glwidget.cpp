@@ -39,30 +39,60 @@
 **
 ****************************************************************************/
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#include <QtGui>
+#include <QtOpenGL>
 
-#include <QMainWindow>
+#include "glwidget.h"
 
-QT_BEGIN_NAMESPACE
-class QSlider;
-QT_END_NAMESPACE
 //! [0]
-class GLWidget;
-
-class Window : public QMainWindow
+GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-    Q_OBJECT
-
-public:
-    Window();
-
-protected:
-    void keyPressEvent(QKeyEvent *event);
-
-private:
-    GLWidget *glWidget;
-};
+    _dynamics = new TrackedPhysics;
+	_dynamics->initPhysics();
+	QTimer *timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
+	timer->start(30);
+}
 //! [0]
 
-#endif
+//! [1]
+GLWidget::~GLWidget()
+{
+}
+//! [1]
+
+TrackedPhysics* GLWidget::getSolver()
+{
+    return _dynamics;
+}
+
+//! [7]
+void GLWidget::clientDraw()
+{
+    _dynamics->renderWorld();
+}
+//! [7]
+
+//! [9]
+void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
+{
+}
+//! [9]
+
+void GLWidget::clientDeselect()
+{
+}
+
+//! [10]
+void GLWidget::clientMouseInput(Vector3F & stir)
+{
+}
+//! [10]
+
+void GLWidget::simulate()
+{
+    update();
+    _dynamics->simulate();
+}
+
+

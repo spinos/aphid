@@ -39,30 +39,42 @@
 **
 ****************************************************************************/
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef GLWIDGET_H
+#define GLWIDGET_H
 
-#include <QMainWindow>
+#include <QGLWidget>
+#include "TrackedPhysics.h"
+#include <Base3DView.h>
 
-QT_BEGIN_NAMESPACE
-class QSlider;
-QT_END_NAMESPACE
 //! [0]
-class GLWidget;
-
-class Window : public QMainWindow
+class GLWidget : public Base3DView
 {
     Q_OBJECT
 
 public:
-    Window();
+    
+    GLWidget(QWidget *parent = 0);
+    ~GLWidget();
 
+    TrackedPhysics* getSolver();
+    
+    virtual void clientDraw();
+    virtual void clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit);
+    virtual void clientDeselect();
+    virtual void clientMouseInput(Vector3F & stir);
+
+//! [2]
 protected:
-    void keyPressEvent(QKeyEvent *event);
-
+    
+//! [3]
 private:
-    GLWidget *glWidget;
+    
+	TrackedPhysics* _dynamics;
+	
+private slots:
+    void simulate();
+
 };
-//! [0]
+//! [3]
 
 #endif

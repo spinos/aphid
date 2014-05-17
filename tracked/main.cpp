@@ -39,30 +39,17 @@
 **
 ****************************************************************************/
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#include <QApplication>
+#include <QDesktopWidget>
 
-#include <QMainWindow>
+#include "window.h"
 
-QT_BEGIN_NAMESPACE
-class QSlider;
-QT_END_NAMESPACE
-//! [0]
-class GLWidget;
-
-class Window : public QMainWindow
+int main(int argc, char *argv[])
 {
-    Q_OBJECT
-
-public:
-    Window();
-
-protected:
-    void keyPressEvent(QKeyEvent *event);
-
-private:
-    GLWidget *glWidget;
-};
-//! [0]
-
-#endif
+    QApplication app(argc, argv);
+    Window window;
+    //window.showMaximized();
+    window.resize(800, 600);
+    window.show();
+    return app.exec();
+}
