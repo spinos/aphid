@@ -91,7 +91,7 @@ void C3Tree::updateBBox(const BoundingBox & b)
 	m_bbox.expandBy(b);
 }
 
-const List<VertexP> * C3Tree::verticesInGrid() const
+List<VertexP> * C3Tree::verticesInGrid()
 {
 	Entity * p = Sequence<Coord3>::currentIndex();
 	if(!p) return NULL;

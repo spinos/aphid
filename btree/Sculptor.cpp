@@ -58,7 +58,7 @@ void Sculptor::ActiveGroup::finish()
 	m_numActiveBlocks = 0;
 	vertices->begin();
 	while(!vertices->end()) {
-		const List<VertexP> * vs = vertices->value();
+		List<VertexP> * vs = vertices->value();
 		average(vs);
 		m_numActiveBlocks++;
 		
@@ -83,21 +83,23 @@ void Sculptor::ActiveGroup::finish()
 	calculateWeight();
 }
 
-void Sculptor::ActiveGroup::average(const List<VertexP> * d)
+void Sculptor::ActiveGroup::average(List<VertexP> * d)
 {
 	const int num = d->size();
 	if(num < 1) return;
-	for(int i = 0; i < num; i++) {
-		Vector3F * n = d->value(i).index->t2;
+	d->begin();
+	while(!d->end()) {
+		Vector3F * n = d->value().index->t2;
 		
 		if(n->dot(incidentRay.m_dir) < 0.f) {
 		
-			Vector3F * p = d->value(i).index->t1;
+			Vector3F * p = d->value().index->t1;
 		
 			meanPosition += *p;
 			meanNormal += *n;
 			m_numActivePoints++;
 		}
+		d->next();
 	}
 }
 
@@ -106,7 +108,7 @@ void Sculptor::ActiveGroup::calculateWeight()
 	int blk = 0;
     vertices->begin();
 	while(!vertices->end()) {
-		const List<VertexP> * vs = vertices->value();
+		List<VertexP> * vs = vertices->value();
 		
 		calculateWeight(vs);
 		blk++;
@@ -115,14 +117,16 @@ void Sculptor::ActiveGroup::calculateWeight()
 	}
 }
 
-void Sculptor::ActiveGroup::calculateWeight(const List<VertexP> * d)
+void Sculptor::ActiveGroup::calculateWeight(List<VertexP> * d)
 {
     const int num = d->size();
 	if(num < 1) return;
-	for(int i = 0; i < num; i++) {
-		Vector3F * p = d->value(i).index->t1;
+	d->begin();
+	while(!d->end()) {
+		Vector3F * p = d->value().index->t1;
 		float wei = m_drop->f(p->distanceTo(meanPosition), threshold);
 		m_weights.push_back(wei);
+		d->next();
 	}
 }
 

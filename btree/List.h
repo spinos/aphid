@@ -8,7 +8,6 @@
  */
 #pragma once
 #include <Entity.h>
-#include <deque>
 #include <vector>
 namespace sdb {
 
@@ -18,56 +17,149 @@ public:
 	List(Entity * parent = NULL) : Entity(parent) 
 	{
 		m_numOccupied = 0;
+		m_firstBlock = new Block;
 	}
 	
-	virtual ~List() { clear(); }
+	virtual ~List() { 
+		clear(); 
+		delete m_firstBlock; 
+	}
 	
-	int size() const { return m_numOccupied; }
+	const int size() const { return m_numOccupied; }
+	
+	void begin() {
+		m_currentBlock = m_firstBlock;
+		m_currentIt = 0;
+	}
+	
+	bool end() {
+		return m_currentIt == m_numOccupied;
+	}
+	
+	void next() {
+		m_currentIt++;
+		if(m_currentIt == m_numOccupied) return;
+		if(m_currentIt % 256 == 0) m_currentBlock = m_currentBlock->next();
+	}
 	
 	void insert(const T & x) {
-		if(m_numOccupied == m_que.size())
-			m_que.push_back(x);
-		else
-			m_que[m_numOccupied] = x;
-			
+		Block * cur = findBlock(m_numOccupied);
+		const int inBlock = m_numOccupied % 256;
+		cur->m_data[inBlock] = x;
 		m_numOccupied++;
 	}
 	
-	void remove(const T & x) {
-		if(size() < 1) return;
-		int i = 0;
-		for(; i < size(); i++) {
-			if(m_que[i] == x)
-				break;
-		}
-		
-		if(i == size()) return;
+	int find(const T & x) {
+		if(size() < 1) return -1;
+		begin();
+		while(!end()) {
+			if(m_currentBlock->m_data[m_currentIt % 256] == x)
+				return m_currentIt;
 				
+			next();
+		}
+		return -1;
+	}
+	
+	void remove(const T & x) {
+		int found = find(x);
+		if(found < 0) return;
+		
+		T * rmed = &m_currentBlock->m_data[found % 256];
+		
+		T b = last();
+		
 		m_numOccupied--;
 		
 		if(size() == 0) return;
 		
-		m_que[i] = m_que[size()];
+		*rmed = b;
+		
+		if(m_numOccupied % 256 == 0) {
+			Block * b = findBlock(m_numOccupied - 1);
+			b->removeNext();
+		}
 	}
 	
-	const T value(const int & i) const { return m_que[i]; }
-	T * valueP(const int & i) { return &m_que[i]; }
+	const T value() const {
+		return m_currentBlock->m_data[m_currentIt % 256];
+	}
 	
-	void getValues(std::vector<T> & dst) const {
-		typename std::deque<T>::const_iterator it;
-		it = m_que.begin();
-		for(; it != m_que.end(); ++it) dst.push_back(*it); 
+	T * valueP() {
+		return &m_currentBlock->m_data[m_currentIt % 256];
+	}
+	
+	T last() {
+		return value(m_numOccupied - 1);
+	}
+	
+	T value(const int & i) const { 
+		Block * b = findBlock(i);
+		return b->m_data[i % 256];
+	}
+	
+	T * valueP(const int & i) { 
+		Block * b = findBlock(i);
+		return &b->m_data[i % 256]; 
+	}
+	
+	void getValues(std::vector<T> & dst) {
+		begin();
+		while(!end()) {
+			dst.push_back(m_currentBlock->m_data[m_currentIt % 256]); 
+			next();
+		}
 	}
 	
 	void clear() 
 	{ 
 		m_numOccupied = 0;
-		m_que.clear(); 
+		if(m_firstBlock->next()) m_firstBlock->removeNext();
 	}
 private:
+	class Block {
+	public:
+		Block() {
+			m_next = NULL;
+		}
+		
+		~Block() {
+			if(m_next) delete m_next;
+		}
+		
+		Block * next() {
+			return m_next;
+		}
+		
+		Block * addNext() {
+			m_next = new Block;
+			return m_next;
+		}
+		
+		void removeNext() {
+			if(m_next) {
+				delete m_next;
+				m_next = NULL;
+			}
+		}
+
+		Block * m_next;
+		T m_data[256];
+	};
 	
+	Block * findBlock(const int & x) const {
+		const int n = x / 256;
+		Block * b = m_firstBlock;		
+		for(int i = 0; i < n; i++) {
+			if(!b->next()) b = b->addNext();
+			else b = b->next();
+		}
+		return b;
+	}
 private:
-	std::deque<T> m_que;
+	Block * m_firstBlock;
+	Block * m_currentBlock;
+	int m_currentIt;
 	int m_numOccupied;
 };
 } //end namespace sdb

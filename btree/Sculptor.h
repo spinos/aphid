@@ -24,7 +24,7 @@ public:
 		float depthRange();
 		void updateDepthRange(const float & d);
 		void finish();
-		void average(const List<VertexP> * d);
+		void average(List<VertexP> * d);
 		const float weight(const int & i) const;
 		void setDropoffFunction(Dropoff::DistanceFunction x);
 		const int numActivePoints() const;
@@ -37,7 +37,7 @@ public:
 		Ray incidentRay;
 	private:
 	    void calculateWeight();
-	    void calculateWeight(const List<VertexP> * d);
+	    void calculateWeight(List<VertexP> * d);
 	    std::deque<float> m_weights;
 	    Dropoff::DistanceFunction m_dropoffType;
 	    Dropoff *m_drop;

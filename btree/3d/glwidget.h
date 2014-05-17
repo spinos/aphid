@@ -25,7 +25,7 @@ protected:
 	
 private:
 	void drawPoints(C3Tree * tree);
-	void drawPoints(const List<VertexP> * ps);
+	void drawPoints(List<VertexP> * ps);
 	void drawPoints(const Sculptor::ActiveGroup & grp);
 
 private:

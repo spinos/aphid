@@ -84,16 +84,17 @@ void GLWidget::drawPoints(C3Tree * tree)
 	}
 }
 
-void GLWidget::drawPoints(const List<VertexP> * d) 
+void GLWidget::drawPoints(List<VertexP> * d) 
 {
 	if(!d) return;
 	KdTreeDrawer * dr = getDrawer();
 	dr->beginPoint(2.f);
-	const int num = d->size();
-
-	for(int i = 0; i < num; i++) {
-		Vector3F * p = d->value(i).index->t1;
+	
+	d->begin();
+	while(!d->end()) {
+		Vector3F * p = d->value().index->t1;
 		dr->vertex(*p);
+		d->next();
 	}
 	dr->end();
 }
@@ -106,7 +107,7 @@ void GLWidget::drawPoints(const Sculptor::ActiveGroup & grp)
 	int blk = 0;
 	ps->begin();
 	while(!ps->end()) {
-		const List<VertexP> * vs = ps->value();
+		List<VertexP> * vs = ps->value();
 		drawPoints(vs);
 		blk++;
 		if(blk == maxNumBlk) return;

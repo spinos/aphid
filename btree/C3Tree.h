@@ -29,7 +29,7 @@ public:
 	const BoundingBox gridBoundingBox() const;
 	const BoundingBox boundingBox() const;
 	void calculateBBox();
-	const List<VertexP> * verticesInGrid() const;
+	List<VertexP> * verticesInGrid();
 	const Coord3 gridCoord(const float * p) const;
 	
 private:

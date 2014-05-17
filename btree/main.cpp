@@ -31,12 +31,17 @@ void testFind(Array<int, int> & arr, int k)
 		std::cout<<" "<<k<<" is out of range";
 }
 
-void printList(const List<int> & l)
+void printList(List<int> & l)
 {
 	std::cout<<"\nlist: ";
-	int n = l.size();
-	for(int i=0; i< n; i++) std::cout<<" "<<l.value(i);
-	std::cout<<"\n";
+	l.begin();
+	int i = 0;
+	while(!l.end()) {
+		std::cout<<" "<<l.value();
+		i++;
+		l.next();
+	}
+	std::cout<<" count "<<i<<"\n";
 }
 
 int main()
@@ -170,10 +175,9 @@ int main()
 	testFind(arr, 199);
 	
 	List<int> ll;
-	ll.insert(99);
-	ll.insert(32);
-	ll.insert(34);
-	ll.insert(47);
+	for(int i = 0; i < 256; i++)
+		ll.insert(rand() % 999);
+
 	printList(ll);
 	
 	*ll.valueP(2) = 2;
@@ -190,8 +194,14 @@ int main()
 	printList(ll);
 	ll.remove(34);
 	printList(ll);
-	ll.remove(0);
+	ll.remove(2);
 	printList(ll);
+	//for(int i = 0; i < 166 - 130; i++) ll.remove(ll.value(i));
+	std::cout<<"remove "<<ll.value(128);
+	ll.remove(ll.value(128));
+	printList(ll);
+	
+	ll.clear();
 	std::cout<<"\npassed\n";
 	return 0;
 }
