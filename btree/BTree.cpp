@@ -76,10 +76,16 @@ void BTree::displayLeaves()
 	std::cout<<"\nall leaves ";
 	while(l) {
 		std::cout<<(*l);
-		//l->getValues(d);
 		for(int i = 0; i < l->numKeys(); i++) {
 			if(!l->index(i)) std::cout<<"empty";
-			else static_cast<List<int> *>(l->index(i))->getValues(d);
+			else {
+				List<int> * cell = static_cast<List<int> *>(l->index(i));
+				cell->begin();
+				while(!cell->end()) {
+					d.push_back(cell->value()); 
+					cell->next();
+				}
+			}
 		}
 			
 		l = static_cast<BNode<int> *>(l->sibling());

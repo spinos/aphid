@@ -196,7 +196,6 @@ int main()
 	printList(ll);
 	ll.remove(2);
 	printList(ll);
-	//for(int i = 0; i < 166 - 130; i++) ll.remove(ll.value(i));
 	std::cout<<"remove "<<ll.value(128);
 	ll.remove(ll.value(128));
 	printList(ll);

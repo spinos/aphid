@@ -30,6 +30,7 @@ public:
 	void begin() {
 		m_currentBlock = m_firstBlock;
 		m_currentIt = 0;
+		m_currentValue = m_currentBlock->m_data;
 	}
 	
 	bool end() {
@@ -38,8 +39,12 @@ public:
 	
 	void next() {
 		m_currentIt++;
+		m_currentValue++;
 		if(m_currentIt == m_numOccupied) return;
-		if(m_currentIt % 256 == 0) m_currentBlock = m_currentBlock->next();
+		if(m_currentIt % 256 == 0) {
+			m_currentBlock = m_currentBlock->next();
+			m_currentValue = m_currentBlock->m_data;
+		}
 	}
 	
 	void insert(const T & x) {
@@ -53,7 +58,7 @@ public:
 		if(size() < 1) return -1;
 		begin();
 		while(!end()) {
-			if(m_currentBlock->m_data[m_currentIt % 256] == x)
+			if(value() == x)
 				return m_currentIt;
 				
 			next();
@@ -65,7 +70,7 @@ public:
 		int found = find(x);
 		if(found < 0) return;
 		
-		T * rmed = &m_currentBlock->m_data[found % 256];
+		T * rmed = valueP();
 		
 		T b = last();
 		
@@ -82,11 +87,11 @@ public:
 	}
 	
 	const T value() const {
-		return m_currentBlock->m_data[m_currentIt % 256];
+		return *m_currentValue;
 	}
 	
 	T * valueP() {
-		return &m_currentBlock->m_data[m_currentIt % 256];
+		return m_currentValue;
 	}
 	
 	T last() {
@@ -101,14 +106,6 @@ public:
 	T * valueP(const int & i) { 
 		Block * b = findBlock(i);
 		return &b->m_data[i % 256]; 
-	}
-	
-	void getValues(std::vector<T> & dst) {
-		begin();
-		while(!end()) {
-			dst.push_back(m_currentBlock->m_data[m_currentIt % 256]); 
-			next();
-		}
 	}
 	
 	void clear() 
@@ -159,6 +156,7 @@ private:
 private:
 	Block * m_firstBlock;
 	Block * m_currentBlock;
+	T * m_currentValue;
 	int m_currentIt;
 	int m_numOccupied;
 };
