@@ -67,6 +67,7 @@ public:
 	void pullPoints();
 	void pushPoints();
 	void pinchPoints();
+	void spreadPoints();
 	void smudgePoints(const Vector3F & x);
 	void smoothPoints();
 	

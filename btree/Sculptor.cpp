@@ -292,6 +292,11 @@ void Sculptor::pinchPoints()
 	movePointsToward(m_active->meanPosition, 0.02f);
 }
 
+void Sculptor::spreadPoints()
+{
+    movePointsToward(m_active->meanPosition, -0.02f);
+}
+
 void Sculptor::smudgePoints(const Vector3F & x)
 {
 	movePointsAlong(x, 0.09f);
@@ -323,7 +328,7 @@ void Sculptor::smoothPoints()
 			
 			m_topo->getDifferentialCoord(vert.key, d);
 			
-			pos += d * 0.02f * m_active->weight(vi) * m_strength;
+			pos -= d * 0.1f * m_active->weight(vi) * m_strength;
 		
 			m_tree->displace(vert, p0);
 			vi++;
