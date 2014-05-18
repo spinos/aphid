@@ -26,16 +26,23 @@ public:
 	const float width() const;
 	static float ShoeThickness;
 	static float PinThickness;
+	static float ShoeWidthFactor;
+	static float ShoeLengthFactor;
+	static float PinToShoeLengthRatio;
+	static float PinHingeFactor;
+	static float ShoeHingeFactor;
+	static float ShoeHingeRise;
 private:
 	struct Iterator {
+		Matrix33F rot;
 		Vector3F origin;
-		int numShoe, numPin;
-		float angle;
-		bool isShoe;
+		int numShoe, numPin, numOnSpan, numOnWheel;
+		float angle, spanTranslateDirection;
+		bool isShoe, isOnSpan;
 	};
 	Iterator m_it;
 	Vector3F m_origin;
-	int m_numShoes, m_numPins;
+	int m_numShoes, m_numPins, m_numOnSpan;
 	float m_span, m_radius, m_width, m_shoeLength;
 	
 };
