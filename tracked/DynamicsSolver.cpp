@@ -284,7 +284,14 @@ btBoxShape* DynamicsSolver::createBoxShape(const float & x, const float & y, con
 	return cubeShape;
 }
 
-btRigidBody* DynamicsSolver::createRigitBox(btCollisionShape* shape, const btTransform & transform, const float & mass)
+btCylinderShape* DynamicsSolver::createCylinderShape(const float & x, const float & y, const float & z)
+{
+	btCylinderShape* cyl = new btCylinderShape(btVector3(x, y, z));
+	m_collisionShapes.push_back(cyl);
+	return cyl;
+}
+
+btRigidBody* DynamicsSolver::createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass)
 {
 	btRigidBody* body = createRigidBody(mass, transform, shape);
 	m_dynamicsWorld->addRigidBody(body);

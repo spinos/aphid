@@ -7,9 +7,11 @@
  *
  */
 #include <QGLWidget>
+#include <AllMath.h>
 #include "shapeDrawer.h"
 
 inline void glDrawVector(const btVector3& v) { glVertex3d(v[0], v[1], v[2]); }
+inline void glDrawVector(const Vector3F& v) { glVertex3f(v.x, v.y, v.z); }
 inline void glDrawCoordsys() 
 {
     glBegin( GL_LINES );
@@ -91,7 +93,19 @@ void ShapeDrawer::drawRigidBody(const btRigidBody* body)
 
 void ShapeDrawer::drawShape(const btCollisionShape* shape)
 {
-	const btBoxShape* boxShape = static_cast<const btBoxShape*>(shape);
+	switch (shape->getShapeType()) {
+		case BOX_SHAPE_PROXYTYPE:
+			drawBox(static_cast<const btBoxShape*>(shape));
+			break;
+		case CYLINDER_SHAPE_PROXYTYPE:
+			drawCylinder(static_cast<const btCylinderShape*>(shape));
+		default:
+			break;
+	}
+}
+
+void ShapeDrawer::drawBox(btBoxShape * boxShape)
+{
 	btVector3 halfExtent = boxShape->getHalfExtentsWithMargin();
 	
 	btVector3 org(0,0,0);
@@ -122,6 +136,38 @@ void ShapeDrawer::drawShape(const btCollisionShape* shape)
 	glDrawVector(org - dx + dy - dz);
 	glDrawVector(org - dx - dy + dz);
 	glDrawVector(org - dx + dy + dz);
+	glEnd();
+}
+
+void ShapeDrawer::drawCylinder(btCylinderShape * shape)
+{
+	btVector3 halfExtent = shape->getHalfExtentsWithMargin();
+	const float depth = halfExtent[1];
+	const float radius = shape->getRadius();
+	Vector3F p, q;
+	glBegin(GL_LINES);
+	int i;
+	const float delta = PI / 12.f;
+	float alpha = 0.f;
+	for(i=0; i < 24; i++) {
+		p.x = cos(alpha) * radius;
+		p.z = sin(alpha) * radius;
+		q.x = cos(alpha + delta) * radius;
+		q.z = sin(alpha + delta) * radius;
+		p.y = depth;
+		q.y = depth;
+		glDrawVector(p);
+		glDrawVector(q);
+		p.y = -depth;
+		q.y = -depth;
+		glDrawVector(p);
+		glDrawVector(q);
+		q = p;
+		q.y = depth;
+		glDrawVector(p);
+		glDrawVector(q);
+		alpha += delta;
+	}
 	glEnd();
 }
 
