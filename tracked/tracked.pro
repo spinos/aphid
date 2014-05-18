@@ -16,6 +16,7 @@ HEADERS       = glwidget.h \
                 DynamicsSolver.h \
                 ../shared/Base3DView.h \
                 shapeDrawer.h \
+				Tread.h \
                 TrackedPhysics.h
 SOURCES       = glwidget.cpp \
                 main.cpp \
@@ -23,6 +24,7 @@ SOURCES       = glwidget.cpp \
                 DynamicsSolver.cpp \
                 ../shared/Base3DView.cpp \
                 shapeDrawer.cpp \
+				Tread.cpp \
                 TrackedPhysics.cpp
 QT           += opengl
 win32:CONFIG += console

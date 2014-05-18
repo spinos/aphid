@@ -8,6 +8,7 @@
  */
 #pragma once
 #include "DynamicsSolver.h"
+#include "Tread.h"
 
 class TrackedPhysics : public DynamicsSolver
 {
@@ -17,5 +18,9 @@ public:
 	
 protected:
 	virtual void clientBuildPhysics();
+private:
+	void createTread(Tread & t);
+private:
+	Tread m_leftTread, m_rightTread;
 };
 

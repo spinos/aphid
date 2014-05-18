@@ -14,37 +14,58 @@ TrackedPhysics::~TrackedPhysics() {}
 
 void TrackedPhysics::clientBuildPhysics()
 {
-	btCollisionShape* cubeShape = createBoxShape(4.f, .2f, 1.f);
-	
-	btTransform trans;
-	trans.setIdentity();
-	
-	trans.setOrigin(btVector3(3.5, 5.0, 2.0));
-	
-	createRigitBox(cubeShape, trans, 1.f);
-	
-	trans.setOrigin(btVector3(0.0, 10.0, 0.0));
-	
-	btRigidBody* a = createRigitBox(cubeShape, trans, 1.f);
-	
-	trans.setOrigin(btVector3(0.0, 10.0, 2.0));
-	
-	btRigidBody* b = createRigitBox(cubeShape, trans, 1.f);
-	
-	trans.setOrigin(btVector3(0.0, 10.0, 4.0));
-	
-	btRigidBody* c = createRigitBox(cubeShape, trans, 1.f);
-	btMatrix3x3 zToX(0.f, 0.f, -1.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f);
-	
-	btTransform frameInA(zToX), frameInB(zToX);
-	
-	frameInA.setOrigin(btVector3(0.0, 0.0, 1.5));
-	frameInB.setOrigin(btVector3(0.0, 0.0, -1.1));
-	
-	constrainByHinge(*a, *b, frameInA, frameInB);
+	m_leftTread.setOrigin(Vector3F(0.f, 10.f, -10.f));
+	int nsh = m_leftTread.computeNumShoes();
+	std::cout<<" num shoes "<<nsh;
+	createTread(m_leftTread);
 
-	frameInA.setOrigin(btVector3(0.0, 0.0, 1.1));
-	frameInB.setOrigin(btVector3(0.0, 0.0, -1.5));
+}
+
+void TrackedPhysics::createTread(Tread & tread)
+{
+	const float pinX = tread.width() * 0.5f;
+	const float shoeX = pinX * .9f;
+	const float shoeZ = tread.shoeLength() * 0.5f * 0.87f;
+	const float pinZ = shoeZ * 0.625f / 0.87f;
+	const float shoeY = shoeZ * tread.ShoeThickness;
+	const float pinY = pinZ * tread.PinThickness;
 	
-	constrainByHinge(*b, *c, frameInA, frameInB);
+	btCollisionShape* shoeShape = createBoxShape(shoeX, shoeY, shoeZ);
+	btCollisionShape* pinShape = createBoxShape(pinX, pinY, pinZ);
+
+	
+	btRigidBody* preBody = NULL;
+	btRigidBody* curBody;
+	btTransform trans;
+	const btMatrix3x3 zToX(0.f, 0.f, -1.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f);
+	
+	tread.begin();
+	while(!tread.end()) {
+		Vector3F at = tread.currentSpace().getTranslation();
+		trans.setIdentity();
+		trans.setOrigin(btVector3(at.x, at.y, at.z));
+		if(tread.currentIsShoe()) 
+			curBody = createRigitBox(shoeShape, trans, 1.f);
+		else
+			curBody = createRigitBox(pinShape, trans, 0.1f);
+			
+		if(preBody) {
+			btTransform frameInA(zToX), frameInB(zToX);
+	
+			if(tread.currentIsShoe()) {
+				frameInA.setOrigin(btVector3(0.0, 0.0, pinZ * 0.57));
+				frameInB.setOrigin(btVector3(0.0, shoeY * 0.25, shoeZ *  -0.68));
+				
+			}
+			else {
+				frameInA.setOrigin(btVector3(0.0, shoeY * 0.25, shoeZ *  0.68));
+				frameInB.setOrigin(btVector3(0.0, 0.0, pinZ *  -0.57));
+			}
+			
+			constrainByHinge(*preBody, *curBody, frameInA, frameInB, true);
+		}
+		
+		preBody = curBody;
+		tread.next();
+	}
 }

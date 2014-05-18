@@ -57,7 +57,7 @@ void DynamicsSolver::initPhysics()
 
 	m_dynamicsWorld->setGravity(btVector3(0,-1,0));
 */
-	addGroundPlane(100.f, -1.f);
+	addGroundPlane(1000.f, -1.f);
 	
 	clientBuildPhysics();
 	
@@ -293,9 +293,9 @@ btRigidBody* DynamicsSolver::createRigitBox(btCollisionShape* shape, const btTra
 
 void DynamicsSolver::clientBuildPhysics() {}
 
-btHingeConstraint* DynamicsSolver::constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame)
+btHingeConstraint* DynamicsSolver::constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies)
 {
 	btHingeConstraint* hinge = new btHingeConstraint(rbA, rbB, rbAFrame, rbBFrame);
-	m_dynamicsWorld->addConstraint(hinge);
+	m_dynamicsWorld->addConstraint(hinge, disableCollisionsBetweenLinkedBodies);
 	return hinge;
 }
