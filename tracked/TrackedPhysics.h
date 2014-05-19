@@ -24,7 +24,7 @@ private:
 	public:
 		btRigidBody * connectTo;
 		Vector3F worldP, objectP;
-		float radius, width, mass;
+		float radius, width, mass, gap;
 		bool isLeft;
 		btRigidBody * dstBody;
 		btGeneric6DofConstraint* dstHinge;
@@ -37,6 +37,12 @@ private:
 	void createRoadWheels(Chassis & c, btRigidBody * chassisBody, bool isLeft = true);
 	void createSupportRollers(Chassis & c, btRigidBody * chassisBody, bool isLeft = true);
 	void createWheel(CreateWheelProfile & profile);
+	void createCompoundWheel(CreateWheelProfile & profile);
+	btCollisionShape* simpleWheelShape(CreateWheelProfile & profile);
+	btCollisionShape* compoundWheelShape(CreateWheelProfile & profile);
+	void createWheel(btCollisionShape* wheelShape, CreateWheelProfile & profile);
+	btCollisionShape* createShoeShape(const float & x, const float &y, const float & z);
+	void threePointHinge(btTransform & frameInA, btTransform & frameInB, const float & side, btRigidBody* bodyA, btRigidBody* bodyB);
 private:
 	Tread m_leftTread, m_rightTread;
 	Chassis m_chassis;

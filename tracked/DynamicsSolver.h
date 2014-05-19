@@ -32,6 +32,7 @@ protected:
 	void addGroundPlane(const float & groundSize, const float & groundLevel);
 	btBoxShape* createBoxShape(const float & x, const float & y, const float & z);
 	btCylinderShape* createCylinderShape(const float & x, const float & y, const float & z);
+	btSphereShape* createSphereShape(const float & r);
 	
 	btRigidBody* createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
 	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 

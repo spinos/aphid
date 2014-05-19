@@ -16,6 +16,8 @@ float Tread::PinToShoeLengthRatio = 0.6f;
 float Tread::PinHingeFactor = 0.57f;
 float Tread::ShoeHingeFactor = 0.68f;
 float Tread::ShoeHingeRise = 0.27f;
+float Tread::ToothWidth = .9f;
+float Tread::ToothHeight = 1.f;
 Tread::Tread() 
 {
 	m_span = 80.f;

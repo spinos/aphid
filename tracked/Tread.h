@@ -32,6 +32,8 @@ public:
 	static float PinHingeFactor;
 	static float ShoeHingeFactor;
 	static float ShoeHingeRise;
+	static float ToothWidth;
+	static float ToothHeight;
 private:
 	struct Iterator {
 		Matrix33F rot;

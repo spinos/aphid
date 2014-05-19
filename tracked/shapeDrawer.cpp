@@ -29,12 +29,23 @@ inline void glDrawCoordsys()
 
 void ShapeDrawer::drawConstraint(const btTypedConstraint* constraint)
 {
-	if(constraint->getConstraintType() == HINGE_CONSTRAINT_TYPE) drawHingeConstraint(static_cast<const btHingeConstraint*>(constraint));
-	return;
-    const btRigidBody &bodyA =	constraint->getRigidBodyA();
-    const btRigidBody &bodyB =	constraint->getRigidBodyB(); 
+	switch (constraint->getConstraintType()) {
+		case HINGE_CONSTRAINT_TYPE:
+			drawHingeConstraint(static_cast<const btHingeConstraint*>(constraint));
+			break;
+		case D6_CONSTRAINT_TYPE:
+			drawD6Constraint(static_cast<const btGeneric6DofConstraint*>(constraint));
+			break;
+		default:
+			break;
+	}
+}
+
+void ShapeDrawer::drawD6Constraint(const btGeneric6DofConstraint* d6f)
+{
+    const btRigidBody &bodyA =	d6f->getRigidBodyA();
+    const btRigidBody &bodyB =	d6f->getRigidBodyB(); 
     
-    const btGeneric6DofConstraint* d6f = static_cast<const btGeneric6DofConstraint*>(constraint);
     btTransform transA = d6f->getCalculatedTransformA();
     btTransform transB = d6f->getCalculatedTransformB();
     
@@ -94,6 +105,9 @@ void ShapeDrawer::drawRigidBody(const btRigidBody* body)
 void ShapeDrawer::drawShape(const btCollisionShape* shape)
 {
 	switch (shape->getShapeType()) {
+		case COMPOUND_SHAPE_PROXYTYPE:
+			drawCompound(static_cast<const btCompoundShape*>(shape));
+			break;
 		case BOX_SHAPE_PROXYTYPE:
 			drawBox(static_cast<const btBoxShape*>(shape));
 			break;
@@ -147,9 +161,9 @@ void ShapeDrawer::drawCylinder(btCylinderShape * shape)
 	Vector3F p, q;
 	glBegin(GL_LINES);
 	int i;
-	const float delta = PI / 12.f;
+	const float delta = PI / 9.f;
 	float alpha = 0.f;
-	for(i=0; i < 24; i++) {
+	for(i=0; i < 18; i++) {
 		p.x = cos(alpha) * radius;
 		p.z = sin(alpha) * radius;
 		q.x = cos(alpha + delta) * radius;
@@ -341,4 +355,30 @@ void ShapeDrawer::drawHingeConstraint(const btHingeConstraint* constraint)
 	glDrawVector(pJ);
 	glDrawVector(pAx1);
 	glEnd();
+}
+
+void ShapeDrawer::drawCompound(btCompoundShape* shape)
+{
+	for (int i=0; i<shape->getNumChildShapes(); i++) {
+		btTransform childTrans = shape->getChildTransform(i);
+		glPushMatrix();
+		loadSpace(childTrans);
+		
+		const btCollisionShape* colShape = shape->getChildShape(i);
+		drawShape(colShape);
+		
+		glPopMatrix();
+	}
+}
+
+void ShapeDrawer::loadSpace(const btTransform & transform)
+{
+	btScalar m[16];
+    
+    m[0] = 1.0; m[1] = m[2] = m[3] = 0.0;
+    m[4] = 0.0; m[5] = 1.0; m[6] = m[7] = 0.0;
+    m[8] = m[9] = 0.0; m[10] = 1.0; m[11] = 0.0;
+    m[12] = m[13] = m[14] = 0.0; m[15] = 1.0;
+    transform.getOpenGLMatrix(m);
+    glMultMatrixf((const GLfloat*)m);
 }

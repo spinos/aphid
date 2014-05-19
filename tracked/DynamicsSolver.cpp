@@ -273,7 +273,7 @@ void DynamicsSolver::addGroundPlane(const float & groundSize, const float & grou
 	tr.setIdentity();
 	tr.setOrigin(btVector3(0, groundLevel - 1.f, 0));
 	btRigidBody* body = createRigidBody(0.f,tr,groundShape);
-
+	body->setFriction(btSqrt(1.414f));
 	m_dynamicsWorld->addRigidBody(body);
 }
 
@@ -289,6 +289,13 @@ btCylinderShape* DynamicsSolver::createCylinderShape(const float & x, const floa
 	btCylinderShape* cyl = new btCylinderShape(btVector3(x, y, z));
 	m_collisionShapes.push_back(cyl);
 	return cyl;
+}
+
+btSphereShape* DynamicsSolver::createSphereShape(const float & r)
+{
+	btSphereShape* spr = new btSphereShape(r);
+	m_collisionShapes.push_back(spr);
+	return spr;
 }
 
 btRigidBody* DynamicsSolver::createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass)

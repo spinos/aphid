@@ -28,6 +28,9 @@ public:
 	void drawAngularLimit(const btTransform& space, const btVector3& angularLower, const btVector3& angularUpper);
 private:
 	void drawHingeConstraint(const btHingeConstraint* constraint);
+	void drawD6Constraint(const btGeneric6DofConstraint* constraint);
 	void drawBox(btBoxShape * boxShape);
 	void drawCylinder(btCylinderShape * shape);
+	void drawCompound(btCompoundShape* shape);
+	void loadSpace(const btTransform & transform);
 };
