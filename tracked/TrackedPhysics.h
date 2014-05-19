@@ -42,6 +42,7 @@ private:
 	btCollisionShape* compoundWheelShape(CreateWheelProfile & profile);
 	void createWheel(btCollisionShape* wheelShape, CreateWheelProfile & profile);
 	btCollisionShape* createShoeShape(const float & x, const float &y, const float & z);
+	btCollisionShape* createSprocketShape(CreateWheelProfile & profile);
 	void threePointHinge(btTransform & frameInA, btTransform & frameInB, const float & side, btRigidBody* bodyA, btRigidBody* bodyB);
 private:
 	Tread m_leftTread, m_rightTread;

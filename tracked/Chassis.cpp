@@ -19,7 +19,7 @@ Chassis::Chassis()
 	m_tensionerRadius = 4.f;
 	m_roadWheelRadius = 4.f;
 	m_tensionerOriginRise = 0.f;
-	m_roadWheelY = -1.5f;
+	m_roadWheelY = -2.5f;
 	m_roadWheelZ = NULL;
 	m_numRoadWheels = 0;
 	m_supportRollerZ = NULL;

@@ -14,7 +14,7 @@ TrackedPhysics::~TrackedPhysics() {}
 
 void TrackedPhysics::clientBuildPhysics()
 {
-	m_chassis.setOrigin(Vector3F(0.f, 6.f, -10.f));
+	m_chassis.setOrigin(Vector3F(0.f, 10.f, -10.f));
 	m_chassis.setSpan(84.f);
 	m_chassis.setHeight(6.f);
 	m_chassis.setWidth(29.f);
@@ -48,8 +48,8 @@ void TrackedPhysics::clientBuildPhysics()
 	std::cout<<" num shoes "<<nsh;
 	createTread(m_rightTread);
 	
-	setEnablePhysics(false);
-	//setNumSubSteps(10);
+	 //setEnablePhysics(false);
+	// setNumSubSteps(10);
 }
 
 void TrackedPhysics::createTread(Tread & tread)
@@ -58,8 +58,8 @@ void TrackedPhysics::createTread(Tread & tread)
 	const float shoeX = tread.shoeWidth() * 0.5f;
 	const float shoeZ = tread.shoeLength() * 0.5f;
 	const float pinZ = tread.pinLength() * 0.5f;
-	const float shoeY = shoeZ * tread.ShoeThickness;
-	const float pinY = pinZ * tread.PinThickness;
+	const float shoeY = tread.shoeThickness() * 0.5f;
+	const float pinY = tread.pinThickness() * 0.5f;
 	
 	btCollisionShape* shoeShape = createShoeShape(shoeX, shoeY, shoeZ);
 	btCollisionShape* pinShape = createBoxShape(pinX, pinY, pinZ);
@@ -232,6 +232,32 @@ btCollisionShape* TrackedPhysics::compoundWheelShape(CreateWheelProfile & profil
 	return wheelShape;
 }
 	
+btCollisionShape* TrackedPhysics::createSprocketShape(CreateWheelProfile & profile)
+{
+	float rollWidth = (profile.width - profile.gap) * .5f;
+	btCollisionShape* rollShape = createCylinderShape(profile.radius, rollWidth * .5f, profile.radius);
+	btCollisionShape* toothShape = createCylinderShape(Tread::ToothWidth * 0.5f, Tread::ToothWidth * 0.45f, Tread::ToothWidth * 0.5f);
+	
+	btCompoundShape* wheelShape = new btCompoundShape();
+	
+	btTransform childT; childT.setIdentity();
+	childT.setOrigin(btVector3(0, rollWidth * 0.5 + profile.gap * 0.5, 0));
+	wheelShape->addChildShape(childT, rollShape);
+	childT.setOrigin(btVector3(0, rollWidth * -0.5 - profile.gap * 0.5, 0));
+	wheelShape->addChildShape(childT, rollShape);
+	
+	//const btMatrix3x3 yToX(0.f, -1.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+	
+	const float delta = PI * 2.f / 11.f;
+	for(int i = 0; i < 11; i++) {
+		childT.setOrigin(btVector3(cos(delta * i) * profile.radius, profile.width * 0.5f - Tread::ToothWidth * 0.5f, sin(delta * i) * profile.radius) );
+		wheelShape->addChildShape(childT, toothShape);
+		childT.getOrigin()[1] = profile.width * -0.5f + Tread::ToothWidth * 0.5f;
+		wheelShape->addChildShape(childT, toothShape);
+	}
+	
+	return wheelShape;
+}
 
 void TrackedPhysics::createDriveSprocket(Chassis & c, btRigidBody * chassisBody, bool isLeft)
 {
@@ -244,7 +270,9 @@ void TrackedPhysics::createDriveSprocket(Chassis & c, btRigidBody * chassisBody,
 	cwp.objectP = c.driveSprocketOriginObject(isLeft);
 	cwp.isLeft = isLeft;
 	cwp.gap = c.trackWidth() * .5f;
-	createCompoundWheel(cwp);
+	//createCompoundWheel(cwp);
+	btCollisionShape* sprocketShape = createSprocketShape(cwp);
+	createWheel(sprocketShape, cwp);
 	btGeneric6DofConstraint* hinge = cwp.dstHinge;
 	//if(isLeft) hinge->enableAngularMotor(true, -10.f, 100.f);
 	//else hinge->enableAngularMotor(true, 10.f, 100.f);

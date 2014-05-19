@@ -8,13 +8,10 @@
  */
 
 #include "Tread.h"
-float Tread::ShoeThickness = 0.3f;
-float Tread::PinThickness = 0.2f;
+
 float Tread::ShoeLengthFactor = 0.85f;
-float Tread::PinToShoeLengthRatio = 0.6f;
-float Tread::PinHingeFactor = 0.57f;
-float Tread::ShoeHingeFactor = 0.68f;
-float Tread::ShoeHingeRise = 0.27f;
+float Tread::PinHingeFactor = 0.58f;
+float Tread::ShoeHingeRise = 0.4f;
 float Tread::ToothWidth = .8f;
 float Tread::ToothHeight = 1.f;
 float Tread::SprocketRadius = 4.f;
@@ -24,6 +21,7 @@ Tread::Tread()
 	m_span = 80.f;
 	m_radius = 8.f;
 	m_width = 16.f;
+	m_thickness = 1.f;
 	m_origin.setZero();
 }
 
@@ -31,14 +29,15 @@ void Tread::setOrigin(const Vector3F & p) { m_origin = p; }
 void Tread::setSpan(const float & x) { m_span = x; }
 void Tread::setRadius(const float & x) { m_radius = x; }
 void Tread::setWidth(const float & x) { m_width = x; }
+void Tread::setThickness(const float & x) { m_thickness = x; } 
 
 const float Tread::width() const { return m_width; }
 const float Tread::shoeWidth() const { return m_width - ToothWidth * 2.f; }
-const float Tread::pinLength() const { return m_shoeLength * PinToShoeLengthRatio; }
+const float Tread::pinLength() const { return m_shoeLength - ToothWidth * 1.1f; }
 
 int Tread::computeNumShoes()
 {
-	m_shoeLength = 2.f * PI * (SprocketRadius + 0.2f) / 11.f;
+	m_shoeLength = 2.f * PI * (SprocketRadius + m_thickness * .5f) / 11.f;
 	m_numShoeOnWheel = 1 + m_radius * PI / m_shoeLength;
 	m_radius = m_shoeLength * m_numShoeOnWheel / PI;
 	
@@ -105,7 +104,7 @@ const Matrix44F Tread::currentSpace() const
 	if(m_it.isShoe)
 		obj.setTranslation(0.f, -m_radius, 0.f);
 	else
-		obj.setTranslation(0.f, -m_radius + shoeLength() * 0.5f * ShoeThickness * ShoeHingeRise, 0.f);
+		obj.setTranslation(0.f, -m_radius + 0.5f * m_thickness * ShoeHingeRise, 0.f);
 	obj *= mat;
 	return obj;
 }
@@ -117,3 +116,5 @@ const bool Tread::currentIsShoe() const
 
 const float Tread::shoeLength() const { return m_shoeLength * ShoeLengthFactor; }
 const float Tread::segLength() const { return m_shoeLength; }
+const float Tread::shoeThickness() const { return m_thickness; }
+const float Tread::pinThickness() const { return m_thickness * .5f; }

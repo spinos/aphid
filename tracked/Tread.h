@@ -16,6 +16,7 @@ public:
 	void setSpan(const float & x);
 	void setRadius(const float & x);
 	void setWidth(const float & x);
+	void setThickness(const float & x);
 	int computeNumShoes();
 	void begin();
 	bool end();
@@ -27,12 +28,10 @@ public:
 	const float shoeWidth() const;
 	const float pinLength() const;
 	const float segLength() const;
-	static float ShoeThickness;
-	static float PinThickness;
+	const float shoeThickness() const;
+	const float pinThickness() const;
 	static float ShoeLengthFactor;
-	static float PinToShoeLengthRatio;
 	static float PinHingeFactor;
-	static float ShoeHingeFactor;
 	static float ShoeHingeRise;
 	static float ToothWidth;
 	static float ToothHeight;
@@ -49,6 +48,6 @@ private:
 	Iterator m_it;
 	Vector3F m_origin;
 	int m_numShoes, m_numPins, m_numOnSpan, m_numShoeOnWheel;
-	float m_span, m_radius, m_width, m_shoeLength;
+	float m_span, m_radius, m_width, m_thickness, m_shoeLength;
 	
 };
