@@ -33,7 +33,7 @@ void Tread::setThickness(const float & x) { m_thickness = x; }
 
 const float Tread::width() const { return m_width; }
 const float Tread::shoeWidth() const { return m_width - ToothWidth * 2.f; }
-const float Tread::pinLength() const { return m_shoeLength - ToothWidth * 1.1f; }
+const float Tread::pinLength() const { return m_shoeLength - ToothWidth * 1.2f; }
 
 int Tread::computeNumShoes()
 {
@@ -117,4 +117,4 @@ const bool Tread::currentIsShoe() const
 const float Tread::shoeLength() const { return m_shoeLength * ShoeLengthFactor; }
 const float Tread::segLength() const { return m_shoeLength; }
 const float Tread::shoeThickness() const { return m_thickness; }
-const float Tread::pinThickness() const { return m_thickness * .5f; }
+const float Tread::pinThickness() const { return m_thickness * .4f; }

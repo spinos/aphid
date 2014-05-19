@@ -14,10 +14,12 @@ TrackedPhysics::~TrackedPhysics() {}
 
 void TrackedPhysics::clientBuildPhysics()
 {
+	createObstacles();
 	m_chassis.setOrigin(Vector3F(0.f, 10.f, -10.f));
-	m_chassis.setSpan(84.f);
+	m_chassis.setSpan(82.f);
 	m_chassis.setHeight(6.f);
-	m_chassis.setWidth(29.f);
+	m_chassis.setWidth(24.f);
+	m_chassis.setTensionerRadius(3.2);
 	m_chassis.setNumRoadWheels(7);
 	m_chassis.setRoadWheelZ(0, 29.f);
 	m_chassis.setRoadWheelZ(1, 18.f);
@@ -48,8 +50,17 @@ void TrackedPhysics::clientBuildPhysics()
 	std::cout<<" num shoes "<<nsh;
 	createTread(m_rightTread);
 	
-	 //setEnablePhysics(false);
+	// setEnablePhysics(false);
 	// setNumSubSteps(10);
+}
+
+void TrackedPhysics::createObstacles()
+{
+	btCollisionShape* obstacleShape = createBoxShape(20, 1, 2);
+	btTransform trans; trans.setIdentity(); trans.setOrigin(btVector3(10,0,50));
+	btRigidBody* obs = createRigitBody(obstacleShape, trans, 0.f);
+	obs->setDamping(0,0);
+	obs->setFriction(.5);
 }
 
 void TrackedPhysics::createTread(Tread & tread)
@@ -158,7 +169,7 @@ void TrackedPhysics::createChassis(Chassis & c)
 	btTransform trans;
 	trans.setIdentity();
 	trans.setOrigin(btVector3(origin.x, origin.y, origin.z));
-	btRigidBody* chassisBody = createRigitBody(chassisShape, trans, 4.f);
+	btRigidBody* chassisBody = createRigitBody(chassisShape, trans, 2.f);
 	chassisBody->setDamping(0.f, 0.f);
 	createDriveSprocket(c, chassisBody);
 	createDriveSprocket(c, chassisBody, false);
@@ -286,7 +297,7 @@ void TrackedPhysics::createTensioner(Chassis & c, btRigidBody * chassisBody, boo
 	CreateWheelProfile cwp;
 	cwp.connectTo = chassisBody;
 	cwp.radius = c.tensionerRadius();
-	cwp.width = c.trackWidth() * .5f;
+	cwp.width = c.trackWidth();
 	cwp.mass = 2.f;
 	cwp.worldP = c.tensionerOrigin(isLeft);
 	cwp.objectP = c.tensionerOriginObject(isLeft);

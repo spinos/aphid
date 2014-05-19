@@ -30,6 +30,7 @@ private:
 		btGeneric6DofConstraint* dstHinge;
 	};
 	
+	void createObstacles();
 	void createChassis(Chassis & c);
 	void createTread(Tread & t);
 	void createDriveSprocket(Chassis & c, btRigidBody * chassisBody, bool isLeft = true);

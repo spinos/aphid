@@ -39,7 +39,11 @@ void Chassis::setWidth(const float & x) { m_width = x; }
 void Chassis::setHeight(const float & x) { m_height = x; }
 void Chassis::setTrackWidth(const float & x) { m_trackWidth = x; }
 void Chassis::setDriveSprocketRadius(const float & x) { m_driveSprocketRadius = x; }
-void Chassis::setTensionerRadius(const float & x) { m_tensionerRadius = x; }
+void Chassis::setTensionerRadius(const float & x) 
+{ 
+	m_tensionerRadius = x; 
+	m_tensionerOriginRise = m_driveSprocketRadius - x;
+}
 
 void Chassis::setNumRoadWheels(const int & x)
 {
