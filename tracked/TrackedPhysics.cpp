@@ -9,7 +9,7 @@
 
 #include "TrackedPhysics.h"
 #define CONTACTFRICTION 1.414
-TrackedPhysics::TrackedPhysics() {}
+TrackedPhysics::TrackedPhysics() { m_targeVelocity = 0.f;}
 TrackedPhysics::~TrackedPhysics() {}
 
 void TrackedPhysics::clientBuildPhysics()
@@ -363,32 +363,32 @@ void TrackedPhysics::addTension(const float & x)
 	if(p[2] < 43)p1[2] += x * .1;
 }
 
-void TrackedPhysics::addPower(const float & lft, const float & rgt)
+void TrackedPhysics::addPower(const float & x)
 {
-	float f0 = lft;
-	if(f0 < 0.f) f0 = -f0;
-	
-	float f1 = rgt;
-	if(f1 < 0.f) f1 = -f1;
+	m_targeVelocity += x;
 	
 	m_drive[0]->getRotationalLimitMotor(2)->m_enableMotor = true;
-	m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity -= lft * .5f;
+	m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = -m_targeVelocity;
 	if(m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
-		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce += f0 * 100.f;
+		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce += 100.f;
 	m_drive[0]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_enableMotor = true;
-	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity += rgt * .5f;
+	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity += m_targeVelocity;
 	if(m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
-		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce += f1 * 100.f;
+		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce += 100.f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 }
 
-void TrackedPhysics::addBrake()
+void TrackedPhysics::addBrake(bool leftSide)
 {
-	m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
-	m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
-	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
-	m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
+	if(leftSide) {
+		m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
+		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 1000.f;
+	}
+	else {
+		m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
+		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 1000.f;
+	}
 }
 
 btRigidBody * TrackedPhysics::createRocker(btRigidBody * chassisBody, const int & i, bool isLeft)

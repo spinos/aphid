@@ -102,19 +102,20 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			_dynamics->addTension(0.5f);
 			break;
 		case Qt::Key_W:
-			_dynamics->addPower(0.1f, 0.1f);
+			_dynamics->addPower(0.1f);
 			break;
 		case Qt::Key_S:
-			_dynamics->addPower(-0.1f, -0.1f);
+			_dynamics->addPower(-0.1f);
 			break;
 		case Qt::Key_A:
-			_dynamics->addPower(-0.1f, 0.f);
+			_dynamics->addBrake(true);
 			break;
 		case Qt::Key_D:
-			_dynamics->addPower(0.f, -0.1f);
+			_dynamics->addBrake(false);
 			break;
 		case Qt::Key_B:
-			_dynamics->addBrake();
+			_dynamics->addBrake(true);
+			_dynamics->addBrake(false);
 			break;
 		default:
 			break;

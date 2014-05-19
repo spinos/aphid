@@ -17,8 +17,8 @@ public:
 	TrackedPhysics();
 	virtual ~TrackedPhysics();
 	void addTension(const float & x);
-	void addPower(const float & lft, const float & rgt);
-	void addBrake();
+	void addPower(const float & x);
+	void addBrake(bool leftSide);
 protected:
 	virtual void clientBuildPhysics();
 private:
@@ -53,5 +53,6 @@ private:
 	Chassis m_chassis;
 	btGeneric6DofConstraint* m_tension[2];
 	btGeneric6DofConstraint* m_drive[2];
+	float m_targeVelocity;
 };
 
