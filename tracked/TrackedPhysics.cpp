@@ -16,8 +16,8 @@ void TrackedPhysics::clientBuildPhysics()
 {
 	m_chassis.setOrigin(Vector3F(0.f, 6.f, -10.f));
 	m_chassis.setSpan(84.f);
-	m_chassis.setHeight(2.f);
-	m_chassis.setWidth(24.f);
+	m_chassis.setHeight(6.f);
+	m_chassis.setWidth(29.f);
 	m_chassis.setNumRoadWheels(7);
 	m_chassis.setRoadWheelZ(0, 29.f);
 	m_chassis.setRoadWheelZ(1, 18.f);
@@ -32,6 +32,7 @@ void TrackedPhysics::clientBuildPhysics()
 	m_chassis.setSupportRollerZ(2, -18.f);
 	createChassis(m_chassis);
 	
+	Tread::SprocketRadius = m_chassis.driveSprocketRadius();
 	m_leftTread.setOrigin(m_chassis.trackOrigin());
 	m_leftTread.setRadius(5.f);
 	m_leftTread.setWidth(m_chassis.trackWidth());
@@ -46,14 +47,17 @@ void TrackedPhysics::clientBuildPhysics()
 	int nsh = m_rightTread.computeNumShoes();
 	std::cout<<" num shoes "<<nsh;
 	createTread(m_rightTread);
+	
+	setEnablePhysics(false);
+	//setNumSubSteps(10);
 }
 
 void TrackedPhysics::createTread(Tread & tread)
 {
 	const float pinX = tread.width() * 0.5f;
-	const float shoeX = pinX * tread.ShoeWidthFactor;
-	const float shoeZ = tread.shoeLength() * 0.5f * tread.ShoeLengthFactor;
-	const float pinZ = tread.shoeLength() * 0.5f * tread.PinToShoeLengthRatio;
+	const float shoeX = tread.shoeWidth() * 0.5f;
+	const float shoeZ = tread.shoeLength() * 0.5f;
+	const float pinZ = tread.pinLength() * 0.5f;
 	const float shoeY = shoeZ * tread.ShoeThickness;
 	const float pinY = pinZ * tread.PinThickness;
 	
@@ -65,6 +69,8 @@ void TrackedPhysics::createTread(Tread & tread)
 	btRigidBody* curBody = NULL;
 	btTransform trans;
 	const btMatrix3x3 zToX(0.f, 0.f, -1.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f);
+	
+	const float hseg = tread.segLength() * .45f;
 	
 	tread.begin();
 	while(!tread.end()) {
@@ -86,12 +92,12 @@ void TrackedPhysics::createTread(Tread & tread)
 			btTransform frameInA(zToX), frameInB(zToX);
 	
 			if(tread.currentIsShoe()) {
-				frameInA.setOrigin(btVector3(0.0, 0.0, pinZ * tread.PinHingeFactor));
-				frameInB.setOrigin(btVector3(0.0, shoeY * tread.ShoeHingeRise, shoeZ *  -tread.ShoeHingeFactor));
+				frameInA.setOrigin(btVector3(0.0, 0.0, hseg * (1.f - Tread::PinHingeFactor)));
+				frameInB.setOrigin(btVector3(0.0, shoeY * tread.ShoeHingeRise, hseg * -1.f * Tread::PinHingeFactor));
 			}
 			else {
-				frameInA.setOrigin(btVector3(0.0, shoeY * tread.ShoeHingeRise, shoeZ *  tread.ShoeHingeFactor));
-				frameInB.setOrigin(btVector3(0.0, 0.0, pinZ *  -tread.PinHingeFactor));
+				frameInA.setOrigin(btVector3(0.0, shoeY * tread.ShoeHingeRise, hseg * Tread::PinHingeFactor));
+				frameInB.setOrigin(btVector3(0.0, 0.0, hseg * -1.f * (1.f - Tread::PinHingeFactor)));
 			}
 			threePointHinge(frameInA, frameInB, tread.width() * 0.5f, preBody, curBody);
 		}
@@ -101,8 +107,9 @@ void TrackedPhysics::createTread(Tread & tread)
 	}
 	
 	btTransform frameInShoe(zToX), frameInPin(zToX);
-	frameInShoe.setOrigin(btVector3(0.f, shoeY * tread.ShoeHingeRise, shoeZ *  -tread.ShoeHingeFactor));
-	frameInPin.setOrigin(btVector3(0.f, 0.0, pinZ * tread.PinHingeFactor));
+	frameInShoe.setOrigin(btVector3(0.f, shoeY * tread.ShoeHingeRise, hseg * -1.f * Tread::PinHingeFactor));
+	frameInPin.setOrigin(btVector3(0.f, 0.0, hseg * (1.f - Tread::PinHingeFactor)));
+
 
 	threePointHinge(frameInPin, frameInShoe, tread.width() * 0.5f, curBody, firstBody);
 }

@@ -24,9 +24,11 @@ public:
 	const bool currentIsShoe() const;
 	const float shoeLength() const;
 	const float width() const;
+	const float shoeWidth() const;
+	const float pinLength() const;
+	const float segLength() const;
 	static float ShoeThickness;
 	static float PinThickness;
-	static float ShoeWidthFactor;
 	static float ShoeLengthFactor;
 	static float PinToShoeLengthRatio;
 	static float PinHingeFactor;
@@ -34,6 +36,8 @@ public:
 	static float ShoeHingeRise;
 	static float ToothWidth;
 	static float ToothHeight;
+	static float SprocketRadius;
+	static float PinWidthFactor;
 private:
 	struct Iterator {
 		Matrix33F rot;
@@ -44,7 +48,7 @@ private:
 	};
 	Iterator m_it;
 	Vector3F m_origin;
-	int m_numShoes, m_numPins, m_numOnSpan;
+	int m_numShoes, m_numPins, m_numOnSpan, m_numShoeOnWheel;
 	float m_span, m_radius, m_width, m_shoeLength;
 	
 };

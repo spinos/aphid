@@ -10,14 +10,15 @@
 #include "Tread.h"
 float Tread::ShoeThickness = 0.3f;
 float Tread::PinThickness = 0.2f;
-float Tread::ShoeWidthFactor = 0.9f;
 float Tread::ShoeLengthFactor = 0.85f;
 float Tread::PinToShoeLengthRatio = 0.6f;
 float Tread::PinHingeFactor = 0.57f;
 float Tread::ShoeHingeFactor = 0.68f;
 float Tread::ShoeHingeRise = 0.27f;
-float Tread::ToothWidth = .9f;
+float Tread::ToothWidth = .8f;
 float Tread::ToothHeight = 1.f;
+float Tread::SprocketRadius = 4.f;
+
 Tread::Tread() 
 {
 	m_span = 80.f;
@@ -32,16 +33,19 @@ void Tread::setRadius(const float & x) { m_radius = x; }
 void Tread::setWidth(const float & x) { m_width = x; }
 
 const float Tread::width() const { return m_width; }
+const float Tread::shoeWidth() const { return m_width - ToothWidth * 2.f; }
+const float Tread::pinLength() const { return m_shoeLength * PinToShoeLengthRatio; }
 
 int Tread::computeNumShoes()
 {
-	m_shoeLength = PI * m_radius / 7.f;
-	m_radius = m_shoeLength * 7 / PI;
+	m_shoeLength = 2.f * PI * (SprocketRadius + 0.2f) / 11.f;
+	m_numShoeOnWheel = 1 + m_radius * PI / m_shoeLength;
+	m_radius = m_shoeLength * m_numShoeOnWheel / PI;
 	
 	m_numOnSpan = m_span / m_shoeLength + 1;
 	m_span = m_shoeLength * m_numOnSpan;
 	 
-	m_numShoes = m_numOnSpan * 2 + 7 * 2;
+	m_numShoes = m_numOnSpan * 2 + m_numShoeOnWheel * 2;
 	m_numPins = m_numShoes;
 	return m_numShoes;
 }
@@ -68,7 +72,7 @@ bool Tread::end()
 void Tread::next()
 {
 	if(m_it.isOnSpan) m_it.origin += Vector3F::ZAxis * m_shoeLength * 0.5f * m_it.spanTranslateDirection;
-	else m_it.rot.rotateX(-PI / 7.f * .5f);
+	else m_it.rot.rotateX(-PI / (float)m_numShoeOnWheel * .5f);
 	
 	if(m_it.isShoe) m_it.numShoe++;
 	else m_it.numPin++;
@@ -82,7 +86,7 @@ void Tread::next()
 	}
 	else {
 		if(m_it.isShoe) m_it.numOnWheel++;
-		if(m_it.numOnWheel == 7) {
+		if(m_it.numOnWheel == m_numShoeOnWheel) {
 			m_it.isOnSpan = true;
 			m_it.numOnSpan = 0;
 			m_it.spanTranslateDirection *= -1.f;
@@ -98,7 +102,10 @@ const Matrix44F Tread::currentSpace() const
 	mat.setRotation(m_it.rot);
 	mat.setTranslation(m_it.origin);
 	Matrix44F obj;
-	obj.setTranslation(0.f, -m_radius, 0.f);
+	if(m_it.isShoe)
+		obj.setTranslation(0.f, -m_radius, 0.f);
+	else
+		obj.setTranslation(0.f, -m_radius + shoeLength() * 0.5f * ShoeThickness * ShoeHingeRise, 0.f);
 	obj *= mat;
 	return obj;
 }
@@ -108,4 +115,5 @@ const bool Tread::currentIsShoe() const
 	return m_it.isShoe;
 }
 
-const float Tread::shoeLength() const { return m_shoeLength; }
+const float Tread::shoeLength() const { return m_shoeLength * ShoeLengthFactor; }
+const float Tread::segLength() const { return m_shoeLength; }

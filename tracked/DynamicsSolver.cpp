@@ -15,7 +15,7 @@
 #include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
 #include "BulletSoftBody/btSoftBodyHelpers.h"
 
-DynamicsSolver::DynamicsSolver()
+DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(1)
 {
     _drawer = new ShapeDrawer();
 }
@@ -24,6 +24,9 @@ DynamicsSolver::~DynamicsSolver()
 {
     killPhysics();
 }
+
+void DynamicsSolver::setEnablePhysics(bool x) { m_enablePhysics = x; }
+void DynamicsSolver::setNumSubSteps(int x) { m_numSubSteps = x; }
 	
 void DynamicsSolver::initPhysics()
 {
@@ -235,9 +238,10 @@ void DynamicsSolver::renderWorld()
 
 void DynamicsSolver::simulate()
 {
+	if(!m_enablePhysics) return;
 	btScalar dt = (btScalar)_clock.getTimeMicroseconds() / 1000000.f;
 	_clock.reset();
-	m_dynamicsWorld->stepSimulation(dt, 1);
+	m_dynamicsWorld->stepSimulation(dt, m_numSubSteps);
 }
 
 btRigidBody* DynamicsSolver::createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape)

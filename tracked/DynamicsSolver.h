@@ -25,6 +25,9 @@ public:
 	void renderWorld();
 	void simulate();
 	
+	void setEnablePhysics(bool x);
+	void setNumSubSteps(int x);
+	
 protected:
 	virtual void clientBuildPhysics();
 	btRigidBody* createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape);
@@ -58,4 +61,7 @@ private:
 	btAlignedObjectArray<btSoftSoftCollisionAlgorithm*> m_SoftSoftCollisionAlgorithms;
 
 	btAlignedObjectArray<btSoftRididCollisionAlgorithm*> m_SoftRigidCollisionAlgorithms;
+	
+	bool m_enablePhysics;
+	int m_numSubSteps;
 };
