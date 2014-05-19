@@ -8,8 +8,8 @@
  */
 
 #include "Tread.h"
-float Tread::ShoeThickness = 0.5f;
-float Tread::PinThickness = 0.5f;
+float Tread::ShoeThickness = 0.3f;
+float Tread::PinThickness = 0.2f;
 float Tread::ShoeWidthFactor = 0.9f;
 float Tread::ShoeLengthFactor = 0.85f;
 float Tread::PinToShoeLengthRatio = 0.6f;

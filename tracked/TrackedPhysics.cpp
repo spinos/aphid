@@ -77,8 +77,8 @@ void TrackedPhysics::createTread(Tread & tread)
 		else
 			curBody = createRigitBody(pinShape, trans, 5.2f);
 			
-		curBody->setDamping(0.0f, 0.0f);
-		curBody->setFriction(.8f);
+		curBody->setDamping(0.0f, 1.0f);
+		curBody->setFriction(1.0f);
 		
 		if(!firstBody) firstBody = curBody;
 			
@@ -88,13 +88,36 @@ void TrackedPhysics::createTread(Tread & tread)
 			if(tread.currentIsShoe()) {
 				frameInA.setOrigin(btVector3(0.0, 0.0, pinZ * tread.PinHingeFactor));
 				frameInB.setOrigin(btVector3(0.0, shoeY * tread.ShoeHingeRise, shoeZ *  -tread.ShoeHingeFactor));
+				
+				constrainByHinge(*preBody, *curBody, frameInA, frameInB, true);
+				
+				frameInA.setOrigin(btVector3(-tread.width() * 0.5f, 0.0, pinZ * tread.PinHingeFactor));
+				frameInB.setOrigin(btVector3(-tread.width() * 0.5f, shoeY * tread.ShoeHingeRise, shoeZ *  -tread.ShoeHingeFactor));
+				
+				constrainByHinge(*preBody, *curBody, frameInA, frameInB, true);
+				
+				frameInA.setOrigin(btVector3(tread.width() * 0.5f, 0.0, pinZ * tread.PinHingeFactor));
+				frameInB.setOrigin(btVector3(tread.width() * 0.5f, shoeY * tread.ShoeHingeRise, shoeZ *  -tread.ShoeHingeFactor));
+				
+				constrainByHinge(*preBody, *curBody, frameInA, frameInB, true);
 			}
 			else {
 				frameInA.setOrigin(btVector3(0.0, shoeY * tread.ShoeHingeRise, shoeZ *  tread.ShoeHingeFactor));
 				frameInB.setOrigin(btVector3(0.0, 0.0, pinZ *  -tread.PinHingeFactor));
+				
+				constrainByHinge(*preBody, *curBody, frameInA, frameInB, true);
+				
+				frameInA.setOrigin(btVector3(-tread.width() * 0.5f, shoeY * tread.ShoeHingeRise, shoeZ *  tread.ShoeHingeFactor));
+				frameInB.setOrigin(btVector3(-tread.width() * 0.5f, 0.0, pinZ *  -tread.PinHingeFactor));
+				
+				constrainByHinge(*preBody, *curBody, frameInA, frameInB, true);
+				
+				frameInA.setOrigin(btVector3(tread.width() * 0.5f, shoeY * tread.ShoeHingeRise, shoeZ *  tread.ShoeHingeFactor));
+				frameInB.setOrigin(btVector3(tread.width() * 0.5f, 0.0, pinZ *  -tread.PinHingeFactor));
+				
+				constrainByHinge(*preBody, *curBody, frameInA, frameInB, true);
+
 			}
-			
-			constrainByHinge(*preBody, *curBody, frameInA, frameInB, true);
 		}
 		
 		preBody = curBody;
@@ -139,7 +162,7 @@ void TrackedPhysics::createWheel(CreateWheelProfile & profile)
 	if(!profile.isLeft) trans = btTransform(yToX);
 	trans.setOrigin(btVector3(profile.worldP.x, profile.worldP.y, profile.worldP.z));
 	btRigidBody* wheelBody = createRigitBody(wheelShape, trans, profile.mass);
-	wheelBody->setDamping(.00001f, .00001f);
+	wheelBody->setDamping(.0f, .0f);
 	wheelBody->setFriction(1.0f);
 	
 	const btMatrix3x3 zToX(0.f, 0.f, -1.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f);
@@ -201,7 +224,7 @@ void TrackedPhysics::createRoadWheels(Chassis & c, btRigidBody * chassisBody, bo
 	CreateWheelProfile cwp;
 	cwp.connectTo = chassisBody;
 	cwp.radius = c.roadWheelRadius();
-	cwp.width = c.trackWidth() * .25f;
+	cwp.width = c.trackWidth() * .2f;
 	cwp.mass = 4.f;
 	cwp.isLeft = isLeft;
 	for(int i=0; i < c.numRoadWheels(); i++) {

@@ -15,16 +15,16 @@ Chassis::Chassis()
 	m_width = 20.f;
 	m_height = 10.f;
 	m_trackWidth = 8.f;
-	m_driveSprocketRadius = 4.2f;
+	m_driveSprocketRadius = 4.f;
 	m_tensionerRadius = 4.f;
 	m_roadWheelRadius = 4.f;
 	m_tensionerOriginRise = 0.f;
-	m_roadWheelY = -1.f;
+	m_roadWheelY = -1.5f;
 	m_roadWheelZ = NULL;
 	m_numRoadWheels = 0;
 	m_supportRollerZ = NULL;
 	m_numSupportRollers = 0;
-	m_supportRollerY = 2.f;
+	m_supportRollerY = 3.f;
 	m_supportRollerRadius = 1.3f;
 }
 
