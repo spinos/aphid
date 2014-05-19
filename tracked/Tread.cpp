@@ -9,9 +9,9 @@
 
 #include "Tread.h"
 float Tread::ShoeThickness = 0.5f;
-float Tread::PinThickness = 0.35f;
+float Tread::PinThickness = 0.5f;
 float Tread::ShoeWidthFactor = 0.9f;
-float Tread::ShoeLengthFactor = 0.87f;
+float Tread::ShoeLengthFactor = 0.85f;
 float Tread::PinToShoeLengthRatio = 0.6f;
 float Tread::PinHingeFactor = 0.57f;
 float Tread::ShoeHingeFactor = 0.68f;
@@ -33,13 +33,13 @@ const float Tread::width() const { return m_width; }
 
 int Tread::computeNumShoes()
 {
-	m_shoeLength = PI * m_radius / 13.f;
-	m_radius = m_shoeLength * 13 / PI;
+	m_shoeLength = PI * m_radius / 7.f;
+	m_radius = m_shoeLength * 7 / PI;
 	
-	m_numOnSpan = m_span / m_shoeLength;
+	m_numOnSpan = m_span / m_shoeLength + 1;
 	m_span = m_shoeLength * m_numOnSpan;
 	 
-	m_numShoes = m_numOnSpan * 2 + 13 * 2;
+	m_numShoes = m_numOnSpan * 2 + 7 * 2;
 	m_numPins = m_numShoes;
 	return m_numShoes;
 }
@@ -66,7 +66,7 @@ bool Tread::end()
 void Tread::next()
 {
 	if(m_it.isOnSpan) m_it.origin += Vector3F::ZAxis * m_shoeLength * 0.5f * m_it.spanTranslateDirection;
-	else m_it.rot.rotateX(-PI / 13.f * .5f);
+	else m_it.rot.rotateX(-PI / 7.f * .5f);
 	
 	if(m_it.isShoe) m_it.numShoe++;
 	else m_it.numPin++;
@@ -80,7 +80,7 @@ void Tread::next()
 	}
 	else {
 		if(m_it.isShoe) m_it.numOnWheel++;
-		if(m_it.numOnWheel == 13) {
+		if(m_it.numOnWheel == 7) {
 			m_it.isOnSpan = true;
 			m_it.numOnSpan = 0;
 			m_it.spanTranslateDirection *= -1.f;

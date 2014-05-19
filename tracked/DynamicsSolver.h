@@ -34,7 +34,7 @@ protected:
 	btCylinderShape* createCylinderShape(const float & x, const float & y, const float & z);
 	
 	btRigidBody* createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
-	btHingeConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
+	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
 private:
 	btDynamicsWorld* m_dynamicsWorld;
 	

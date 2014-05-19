@@ -62,7 +62,7 @@ public:
     virtual void clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit);
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & stir);
-
+	virtual void keyPressEvent(QKeyEvent *event);
 //! [2]
 protected:
     

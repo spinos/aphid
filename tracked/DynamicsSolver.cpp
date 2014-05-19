@@ -36,7 +36,7 @@ void DynamicsSolver::initPhysics()
 	m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_constraintSolver,m_collisionConfiguration);
 	//m_dynamicsWorld->setDebugDrawer(&gDebugDraw);
 	
-	//m_dynamicsWorld->setGravity(btVector3(0,-9.8,0));
+	m_dynamicsWorld->setGravity(btVector3(0,-9.8,0));
 	
 /*
 	btSoftBodyWorldInfo worldInfo;
@@ -237,7 +237,7 @@ void DynamicsSolver::simulate()
 {
 	btScalar dt = (btScalar)_clock.getTimeMicroseconds() / 1000000.f;
 	_clock.reset();
-	m_dynamicsWorld->stepSimulation(dt, 2);
+	m_dynamicsWorld->stepSimulation(dt, 30);
 }
 
 btRigidBody* DynamicsSolver::createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape)
@@ -300,9 +300,22 @@ btRigidBody* DynamicsSolver::createRigitBody(btCollisionShape* shape, const btTr
 
 void DynamicsSolver::clientBuildPhysics() {}
 
-btHingeConstraint* DynamicsSolver::constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies)
+btGeneric6DofConstraint* DynamicsSolver::constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies)
 {
-	btHingeConstraint* hinge = new btHingeConstraint(rbA, rbB, rbAFrame, rbBFrame);
+	//btHingeConstraint* hinge = new btHingeConstraint(rbA, rbB, rbAFrame, rbBFrame);
+	
+	btGeneric6DofConstraint* hinge = new btGeneric6DofConstraint(rbA, rbB, rbAFrame, rbBFrame, false);
+	hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -SIMD_PI));
+    hinge->setAngularUpperLimit(btVector3(0.0, 0.0, SIMD_PI));
+	hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
+    hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
+	
+	//hinge->getTranslationalLimitMotor()->m_limitSoftness = 0.f;		
+	//hinge->getTranslationalLimitMotor()->m_damping = 0.f;		
+	//hinge->getTranslationalLimitMotor()->m_currentLimitError[0] = 0.f;
+	//hinge->getTranslationalLimitMotor()->m_currentLimitError[1] = 0.f;
+	//hinge->getTranslationalLimitMotor()->m_currentLimitError[2] = 0.f;
+	
 	m_dynamicsWorld->addConstraint(hinge, disableCollisionsBetweenLinkedBodies);
 	return hinge;
 }

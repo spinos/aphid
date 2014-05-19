@@ -322,12 +322,12 @@ void ShapeDrawer::drawHingeConstraint(const btHingeConstraint* constraint)
 	btVector3 pJ = tJ.getOrigin();
 	
 	btTransform axis;
-	axis.setOrigin(btVector3(0.f, 0.f, 1.f));
+	axis.setOrigin(btVector3(0.f, 0.f, 2.f));
 	axis = tJ * axis;
 	btVector3 pAx = axis.getOrigin();
 	
-	axis.setOrigin(btVector3(0.f, 0.f, -1.f));
-	axis = tJ * axis;
+	axis.setOrigin(btVector3(0.f, 0.f, 2.f));
+	axis = tB * frmB * axis;
 	btVector3 pAx1 = axis.getOrigin();
     
     glBegin( GL_LINES );

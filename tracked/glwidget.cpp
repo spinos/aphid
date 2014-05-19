@@ -95,4 +95,15 @@ void GLWidget::simulate()
     _dynamics->simulate();
 }
 
-
+void GLWidget::keyPressEvent(QKeyEvent *e)
+{	
+	switch (e->key()) {
+		case Qt::Key_T:
+			_dynamics->addTension(0.5f);
+			break;
+		default:
+			break;
+	}
+	
+	Base3DView::keyPressEvent(e);
+}
