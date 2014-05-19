@@ -16,9 +16,9 @@ void TrackedPhysics::clientBuildPhysics()
 {
 	createObstacles();
 	m_chassis.setOrigin(Vector3F(0.f, 10.f, -10.f));
-	m_chassis.setSpan(82.f);
+	m_chassis.setSpan(81.f);
 	m_chassis.setHeight(6.f);
-	m_chassis.setWidth(24.f);
+	m_chassis.setWidth(27.f);
 	m_chassis.setTensionerRadius(3.2);
 	m_chassis.setNumRoadWheels(7);
 	m_chassis.setRoadWheelZ(0, 29.f);
@@ -46,19 +46,22 @@ void TrackedPhysics::clientBuildPhysics()
 	m_rightTread.setRadius(5.f);
 	m_rightTread.setWidth(m_chassis.trackWidth());
 	m_rightTread.setSpan(m_chassis.span());
-	int nsh = m_rightTread.computeNumShoes();
-	std::cout<<" num shoes "<<nsh;
+	m_rightTread.computeNumShoes();
 	createTread(m_rightTread);
 	
 	// setEnablePhysics(false);
-	// setNumSubSteps(10);
+	setNumSubSteps(20);
 }
 
 void TrackedPhysics::createObstacles()
 {
-	btCollisionShape* obstacleShape = createBoxShape(20, 1, 2);
-	btTransform trans; trans.setIdentity(); trans.setOrigin(btVector3(10,0,50));
+	btCollisionShape* obstacleShape = createBoxShape(20, 1, 4);
+	btTransform trans; trans.setIdentity(); trans.setOrigin(btVector3(10,1,50));
 	btRigidBody* obs = createRigitBody(obstacleShape, trans, 0.f);
+	obs->setDamping(0,0);
+	obs->setFriction(.5);
+	trans.setOrigin(btVector3(-10,1,80));
+	obs = createRigitBody(obstacleShape, trans, 0.f);
 	obs->setDamping(0,0);
 	obs->setFriction(.5);
 }
@@ -169,7 +172,7 @@ void TrackedPhysics::createChassis(Chassis & c)
 	btTransform trans;
 	trans.setIdentity();
 	trans.setOrigin(btVector3(origin.x, origin.y, origin.z));
-	btRigidBody* chassisBody = createRigitBody(chassisShape, trans, 2.f);
+	btRigidBody* chassisBody = createRigitBody(chassisShape, trans, 1.f);
 	chassisBody->setDamping(0.f, 0.f);
 	createDriveSprocket(c, chassisBody);
 	createDriveSprocket(c, chassisBody, false);
@@ -320,10 +323,13 @@ void TrackedPhysics::createRoadWheels(Chassis & c, btRigidBody * chassisBody, bo
 	cwp.isLeft = isLeft;
 	cwp.gap = Tread::ToothWidth * 1.1f;
 	for(int i=0; i < c.numRoadWheels(); i++) {
-		cwp.worldP = c.roadWheelOrigin(i, isLeft);
-		cwp.objectP = c.roadWheelOriginObject(i, isLeft);
+		btRigidBody * rocker = createRocker(chassisBody, i, isLeft);
+		Vector3F p = m_chassis.roadWheelOrigin(i, isLeft);
+		
+		cwp.connectTo = rocker;
+		cwp.worldP = p;
+		cwp.objectP = p - m_chassis.rockerHinge(i, isLeft) + Vector3F::ZAxis * m_chassis.rockerLength() * .5;
 		createCompoundWheel(cwp);
-		m_bearing.push_back(cwp.dstHinge);
 	}
 }
 
@@ -349,27 +355,84 @@ void TrackedPhysics::addTension(const float & x)
 	btGeneric6DofConstraint* te = m_tension[0];
 	btTransform & frm = te->getFrameOffsetA();
 	btVector3 & p = frm.getOrigin();
-	if(p[2] < 43)p[2] += x;
+	if(p[2] < 43)p[2] += x * .1;
 	
 	te = m_tension[1];
 	btTransform & frm1 = te->getFrameOffsetA();
 	btVector3 & p1 = frm1.getOrigin();
-	if(p[2] < 43)p1[2] += x;
+	if(p[2] < 43)p1[2] += x * .1;
+}
+
+void TrackedPhysics::addPower(const float & lft, const float & rgt)
+{
+	float f0 = lft;
+	if(f0 < 0.f) f0 = -f0;
 	
-	std::deque<btGeneric6DofConstraint*>::iterator it = m_bearing.begin();
-	for(; it != m_bearing.end(); ++it) {
-		btTransform & fa = (*it)->getFrameOffsetA();
-		btVector3 & p = fa.getOrigin();
-		if(p[1] > -6)p[1] -= x;
-		
-	}
+	float f1 = rgt;
+	if(f1 < 0.f) f1 = -f1;
 	
 	m_drive[0]->getRotationalLimitMotor(2)->m_enableMotor = true;
-	m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity -= x;
-	m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce += x * 100.f;
+	m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity -= lft * .5f;
+	if(m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
+		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce += f0 * 100.f;
 	m_drive[0]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_enableMotor = true;
-	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity += x;
-	m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce += x * 100.1f;
+	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity += rgt * .5f;
+	if(m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
+		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce += f1 * 100.f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_damping = 0.5f;
+}
+
+void TrackedPhysics::addBrake()
+{
+	m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
+	m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
+	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
+	m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
+}
+
+btRigidBody * TrackedPhysics::createRocker(btRigidBody * chassisBody, const int & i, bool isLeft)
+{
+	btCollisionShape* rockerShape = createBoxShape(m_chassis.rockerSize() * .5f, m_chassis.rockerSize() * .5f, m_chassis.rockerLength() * .5f);
+	btTransform trans;
+	trans.setIdentity();
+	Vector3F p = m_chassis.rockerHinge(i, isLeft);
+	p.z -= m_chassis.rockerLength() * .5f;
+	trans.setOrigin(btVector3(p.x, p.y, p.z));
+	btRigidBody * body = createRigitBody(rockerShape, trans, 1.f);
+	
+	p = m_chassis.rockerHingeObject(i, isLeft);
+	
+	const btMatrix3x3 zToX(0.f, 0.f, -1.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f);
+	const btMatrix3x3 zTonX(0.f, 0.f, 1.f, 0.f, 1.f, 0.f, -1.f, 0.f, 0.f);
+	
+	btTransform frameInA(zTonX);
+	if(!isLeft) frameInA.setBasis(zToX);
+	frameInA.setOrigin(btVector3(p.x, p.y, p.z));
+	
+	btTransform frameInB(zTonX);
+	if(!isLeft) frameInB.setBasis(zToX);
+	frameInB.setOrigin(btVector3(0, 0, m_chassis.rockerLength() * .5f));
+	
+	btGeneric6DofSpringConstraint* spring = constrainBySpring(*chassisBody, *body, frameInA, frameInB, true);
+	spring->setLinearUpperLimit(btVector3(0., 0., 0.));
+	spring->setLinearLowerLimit(btVector3(0., 0., 0.));
+	
+	if(isLeft) {
+		spring->setAngularLowerLimit(btVector3(0.f, 0.f, -.5f));
+		spring->setAngularUpperLimit(btVector3(0.f, 0.f, 1.f));
+	}
+	else {
+		spring->setAngularLowerLimit(btVector3(0.f, 0.f, -1.f));
+		spring->setAngularUpperLimit(btVector3(0.f, 0.f, 0.5f));
+	}
+	
+	spring->enableSpring(5, true);
+	spring->setStiffness(5, 8000.);
+	spring->setDamping(1., 1.);
+	if(isLeft)
+		spring->setEquilibriumPoint(5, 0.45);
+	else
+		spring->setEquilibriumPoint(5, -0.45);
+	return body;
 }

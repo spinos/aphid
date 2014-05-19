@@ -227,13 +227,13 @@ void DynamicsSolver::renderWorld()
 
 			//btSoftBodyHelpers::DrawFrame(psb,m_dynamicsWorld->getDebugDrawer());
 			//btSoftBodyHelpers::Draw(psb,m_dynamicsWorld->getDebugDrawer(),m_dynamicsWorld->getDrawFlags());
-	}*/
+	}
 	
 	const int numConstraints = m_dynamicsWorld->getNumConstraints();
 	for(int i=0;i< numConstraints;i++) {
 	    btTypedConstraint* constraint = m_dynamicsWorld->getConstraint(i);
 	    _drawer->drawConstraint(constraint);
-	}
+	}*/
 }
 
 void DynamicsSolver::simulate()
@@ -277,7 +277,7 @@ void DynamicsSolver::addGroundPlane(const float & groundSize, const float & grou
 	tr.setIdentity();
 	tr.setOrigin(btVector3(0, groundLevel - 1.f, 0));
 	btRigidBody* body = createRigidBody(0.f,tr,groundShape);
-	body->setFriction(btSqrt(1.414f));
+	body->setFriction(btSqrt(.1f));
 	m_dynamicsWorld->addRigidBody(body);
 }
 
@@ -329,4 +329,11 @@ btGeneric6DofConstraint* DynamicsSolver::constrainByHinge(btRigidBody& rbA, btRi
 	
 	m_dynamicsWorld->addConstraint(hinge, disableCollisionsBetweenLinkedBodies);
 	return hinge;
+}
+
+btGeneric6DofSpringConstraint* DynamicsSolver::constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies)
+{
+	btGeneric6DofSpringConstraint* spring = new btGeneric6DofSpringConstraint(rbA, rbB, rbAFrame, rbBFrame, false);
+	m_dynamicsWorld->addConstraint(spring, disableCollisionsBetweenLinkedBodies);
+	return spring;
 }

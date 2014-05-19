@@ -14,18 +14,20 @@ Chassis::Chassis()
 	m_span = 80.f;
 	m_width = 20.f;
 	m_height = 10.f;
-	m_trackWidth = 8.f;
+	m_trackWidth = 7.f;
 	m_driveSprocketRadius = 4.f;
 	m_tensionerRadius = 4.f;
 	m_roadWheelRadius = 4.f;
 	m_tensionerOriginRise = 0.f;
-	m_roadWheelY = -2.5f;
+	m_roadWheelY = -2.f;
 	m_roadWheelZ = NULL;
 	m_numRoadWheels = 0;
 	m_supportRollerZ = NULL;
 	m_numSupportRollers = 0;
 	m_supportRollerY = 3.f;
 	m_supportRollerRadius = 1.3f;
+	m_rockerLength = 7.f;
+	m_rockerSize = 1.2f;
 }
 
 Chassis::~Chassis()
@@ -138,4 +140,22 @@ const Vector3F Chassis::supportRollerOriginObject(const int & i, bool isLeft) co
 	float d = 1.f;
 	if(!isLeft) d = -d;
 	return Vector3F::YAxis * m_supportRollerY + Vector3F::ZAxis * m_supportRollerZ[i] + Vector3F::XAxis * ( m_width * .5f * d + m_trackWidth * .51f * d);
+}
+
+void Chassis::setRockerLength(const float & x) { m_rockerLength = x; }
+void Chassis::setRockerSize(const float & x) { m_rockerSize = x; }
+const float Chassis::rockerLength() const { return m_rockerLength; }
+const float Chassis::rockerSize() const { return m_rockerSize; }
+
+const Vector3F Chassis::rockerHingeObject(const int & i, bool isLeft) const
+{
+	float d = 1.f;
+	if(!isLeft) d = -d;
+	
+	return Vector3F::YAxis * m_roadWheelY + Vector3F::ZAxis * (m_roadWheelZ[i] + m_rockerLength) + Vector3F::XAxis * ( m_width * .5f * d + m_rockerSize * .7f * d);
+}
+
+const Vector3F Chassis::rockerHinge(const int & i, bool isLeft) const
+{
+	return rockerHingeObject(i, isLeft) + m_origin;
 }

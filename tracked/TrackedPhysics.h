@@ -17,6 +17,8 @@ public:
 	TrackedPhysics();
 	virtual ~TrackedPhysics();
 	void addTension(const float & x);
+	void addPower(const float & lft, const float & rgt);
+	void addBrake();
 protected:
 	virtual void clientBuildPhysics();
 private:
@@ -45,11 +47,11 @@ private:
 	btCollisionShape* createShoeShape(const float & x, const float &y, const float & z);
 	btCollisionShape* createSprocketShape(CreateWheelProfile & profile);
 	void threePointHinge(btTransform & frameInA, btTransform & frameInB, const float & side, btRigidBody* bodyA, btRigidBody* bodyB);
+	btRigidBody * createRocker(btRigidBody * chassisBody, const int & i, bool isLeft = true);
 private:
 	Tread m_leftTread, m_rightTread;
 	Chassis m_chassis;
 	btGeneric6DofConstraint* m_tension[2];
 	btGeneric6DofConstraint* m_drive[2];
-	std::deque<btGeneric6DofConstraint*> m_bearing;
 };
 

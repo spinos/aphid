@@ -38,7 +38,8 @@ protected:
 	btSphereShape* createSphereShape(const float & r);
 	
 	btRigidBody* createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
-	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
+	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
+	btGeneric6DofSpringConstraint* constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
 private:
 	btDynamicsWorld* m_dynamicsWorld;
 	
