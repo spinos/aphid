@@ -50,7 +50,7 @@ Window::Window()
     glWidget = new GLWidget;
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Bullet+Qt"));
+    setWindowTitle(tr("Bullet Tank"));
 }
 //! [1]
 

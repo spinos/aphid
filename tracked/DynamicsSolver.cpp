@@ -241,7 +241,7 @@ void DynamicsSolver::simulate()
 	if(!m_enablePhysics) return;
 	btScalar dt = (btScalar)_clock.getTimeMicroseconds() / 1000000.f;
 	_clock.reset();
-	m_dynamicsWorld->stepSimulation(dt, m_numSubSteps);
+	m_dynamicsWorld->stepSimulation(dt, m_numSubSteps, 1.f / 90.f);
 }
 
 btRigidBody* DynamicsSolver::createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape)

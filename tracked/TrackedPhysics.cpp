@@ -50,7 +50,7 @@ void TrackedPhysics::clientBuildPhysics()
 	createTread(m_rightTread);
 	
 	// setEnablePhysics(false);
-	setNumSubSteps(20);
+	setNumSubSteps(10);
 }
 
 void TrackedPhysics::createObstacles()
@@ -93,9 +93,9 @@ void TrackedPhysics::createTread(Tread & tread)
 		trans = btTransform(btMatrix3x3(rot.M(0, 0), rot.M(1, 0), rot.M(2, 0), rot.M(0, 1), rot.M(1, 1), rot.M(2, 1), rot.M(0, 2), rot.M(1, 2), rot.M(2, 2)));
 		trans.setOrigin(btVector3(at.x, at.y, at.z));
 		if(tread.currentIsShoe()) 
-			curBody = createRigitBody(shoeShape, trans, 1.f);
+			curBody = createRigitBody(shoeShape, trans, .5f);
 		else
-			curBody = createRigitBody(pinShape, trans, 1.f);
+			curBody = createRigitBody(pinShape, trans, .4f);
 			
 		curBody->setDamping(0.0f, 1.0f);
 		curBody->setFriction(CONTACTFRICTION);
@@ -166,13 +166,13 @@ btCollisionShape* TrackedPhysics::createShoeShape(const float & x, const float &
 void TrackedPhysics::createChassis(Chassis & c)
 {
 	const Vector3F dims = c.extends() * .5f;
-	btCollisionShape* chassisShape = createBoxShape(dims.x, dims.y, dims.z);
+	btCollisionShape* chassisShape = createBoxShape(dims.x - 0.1f, dims.y, dims.z);
 	
 	const Vector3F origin = c.center();
 	btTransform trans;
 	trans.setIdentity();
 	trans.setOrigin(btVector3(origin.x, origin.y, origin.z));
-	btRigidBody* chassisBody = createRigitBody(chassisShape, trans, 1.f);
+	btRigidBody* chassisBody = createRigitBody(chassisShape, trans, 10.f);
 	chassisBody->setDamping(0.f, 0.f);
 	createDriveSprocket(c, chassisBody);
 	createDriveSprocket(c, chassisBody, false);
@@ -373,7 +373,7 @@ void TrackedPhysics::addPower(const float & x)
 		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce += 100.f;
 	m_drive[0]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_enableMotor = true;
-	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity += m_targeVelocity;
+	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity  = m_targeVelocity;
 	if(m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
 		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce += 100.f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_damping = 0.5f;
@@ -429,10 +429,10 @@ btRigidBody * TrackedPhysics::createRocker(btRigidBody * chassisBody, const int 
 	
 	spring->enableSpring(5, true);
 	spring->setStiffness(5, 8000.);
-	spring->setDamping(1., 1.);
+	spring->setDamping(0., 0.);
 	if(isLeft)
-		spring->setEquilibriumPoint(5, 0.45);
+		spring->setEquilibriumPoint(5, 0.5);
 	else
-		spring->setEquilibriumPoint(5, -0.45);
+		spring->setEquilibriumPoint(5, -0.5);
 	return body;
 }

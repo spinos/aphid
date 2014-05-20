@@ -118,7 +118,7 @@ void ShapeDrawer::drawShape(const btCollisionShape* shape)
 	}
 }
 
-void ShapeDrawer::drawBox(btBoxShape * boxShape)
+void ShapeDrawer::drawBox(const btBoxShape * boxShape)
 {
 	btVector3 halfExtent = boxShape->getHalfExtentsWithMargin();
 	
@@ -153,7 +153,7 @@ void ShapeDrawer::drawBox(btBoxShape * boxShape)
 	glEnd();
 }
 
-void ShapeDrawer::drawCylinder(btCylinderShape * shape)
+void ShapeDrawer::drawCylinder(const btCylinderShape * shape)
 {
 	btVector3 halfExtent = shape->getHalfExtentsWithMargin();
 	const float depth = halfExtent[1];
@@ -357,7 +357,7 @@ void ShapeDrawer::drawHingeConstraint(const btHingeConstraint* constraint)
 	glEnd();
 }
 
-void ShapeDrawer::drawCompound(btCompoundShape* shape)
+void ShapeDrawer::drawCompound(const btCompoundShape* shape)
 {
 	for (int i=0; i<shape->getNumChildShapes(); i++) {
 		btTransform childTrans = shape->getChildTransform(i);
