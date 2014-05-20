@@ -93,9 +93,9 @@ void TrackedPhysics::createTread(Tread & tread)
 		trans = btTransform(btMatrix3x3(rot.M(0, 0), rot.M(1, 0), rot.M(2, 0), rot.M(0, 1), rot.M(1, 1), rot.M(2, 1), rot.M(0, 2), rot.M(1, 2), rot.M(2, 2)));
 		trans.setOrigin(btVector3(at.x, at.y, at.z));
 		if(tread.currentIsShoe()) 
-			curBody = createRigitBody(shoeShape, trans, .5f);
+			curBody = createRigitBody(shoeShape, trans, .8f);
 		else
-			curBody = createRigitBody(pinShape, trans, .4f);
+			curBody = createRigitBody(pinShape, trans, .7f);
 			
 		curBody->setDamping(0.0f, 1.0f);
 		curBody->setFriction(CONTACTFRICTION);
