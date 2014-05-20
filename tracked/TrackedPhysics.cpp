@@ -274,7 +274,7 @@ btCollisionShape* TrackedPhysics::createSprocketShape(CreateWheelProfile & profi
 {
 	float rollWidth = (profile.width - profile.gap) * .5f;
 	btCollisionShape* rollShape = createCylinderShape(profile.radius, rollWidth * .5f, profile.radius);
-	btCollisionShape* toothShape = createCylinderShape(Tread::ToothWidth * 0.44f, Tread::ToothWidth * 0.44f, Tread::ToothWidth * 0.44f);
+	btCollisionShape* toothShape = createCylinderShape(Tread::ToothWidth * 0.4f, Tread::ToothWidth * 0.5f, Tread::ToothWidth * 0.4f);
 	
 	btCompoundShape* wheelShape = new btCompoundShape();
 	
@@ -284,7 +284,7 @@ btCollisionShape* TrackedPhysics::createSprocketShape(CreateWheelProfile & profi
 	childT.setOrigin(btVector3(0, rollWidth * -0.5 - profile.gap * 0.5, 0));
 	wheelShape->addChildShape(childT, rollShape);
 	
-	const float toothR = profile.radius + Tread::ToothWidth * 0.25f;
+	const float toothR = profile.radius + Tread::ToothWidth * 0.5f;
 	
 	const float delta = PI * 2.f / 11.f;
 	for(int i = 0; i < 11; i++) {

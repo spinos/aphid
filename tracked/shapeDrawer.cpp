@@ -120,37 +120,29 @@ void ShapeDrawer::drawShape(const btCollisionShape* shape)
 
 void ShapeDrawer::drawBox(const btBoxShape * boxShape)
 {
-	btVector3 halfExtent = boxShape->getHalfExtentsWithMargin();
+	const btVector3 halfExtent = boxShape->getHalfExtentsWithMargin();
+	const float sx = halfExtent[0] * 2.f;
+	const float sy = halfExtent[1] * 2.f;
+	const float sz = halfExtent[2] * 2.f;
 	
-	btVector3 org(0,0,0);
-	btVector3 dx(1,0,0);
-	btVector3 dy(0,1,0);
-	btVector3 dz(0,0,1);
-	dx *= halfExtent[0];
-	dy *= halfExtent[1];
-	dz *= halfExtent[2];
+	glPushMatrix();
+	glScalef(sx, sy, sz);
 	
+	static const float p[24] = { -.5f, -.5f, -.5f,  .5f, -.5f, -.5f,
+								.5f,  .5f, -.5f, -.5f,  .5f, -.5f,
+								-.5f, -.5f,  .5f,  .5f, -.5f,  .5f,
+								.5f,  .5f,  .5f, -.5f,  .5f,  .5f};
+					 
+	static const int index[24] = { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 7, 3, 6, 2, 5, 1, 4, 0};
 	
-	glBegin(GL_LINE_LOOP);
-	glDrawVector(org - dx - dy - dz);
-	glDrawVector(org + dx - dy - dz);
-	glDrawVector(org + dx + dy - dz);
-	glDrawVector(org - dx + dy - dz);
-	glDrawVector(org - dx + dy + dz);
-	glDrawVector(org + dx + dy + dz);
-	glDrawVector(org + dx - dy + dz);
-	glDrawVector(org - dx - dy + dz);
-	glEnd();
 	glBegin(GL_LINES);
-	glDrawVector(org + dx - dy - dz);
-	glDrawVector(org + dx - dy + dz);
-	glDrawVector(org + dx + dy - dz);
-	glDrawVector(org + dx + dy + dz);
-	glDrawVector(org - dx - dy - dz);
-	glDrawVector(org - dx + dy - dz);
-	glDrawVector(org - dx - dy + dz);
-	glDrawVector(org - dx + dy + dz);
+	
+	for(int i = 0; i < 24; i++)
+		glVertex3fv(&p[index[i]  * 3 ]);
+	
 	glEnd();
+	
+	glPopMatrix();
 }
 
 void ShapeDrawer::drawCylinder(const btCylinderShape * shape)
@@ -159,30 +151,39 @@ void ShapeDrawer::drawCylinder(const btCylinderShape * shape)
 	const float depth = halfExtent[1];
 	const float radius = shape->getRadius();
 	Vector3F p, q;
+	glPushMatrix();
+	glScalef(radius, depth, radius);
 	glBegin(GL_LINES);
-	int i;
-	const float delta = PI / 9.f;
-	float alpha = 0.f;
-	for(i=0; i < 18; i++) {
-		p.x = cos(alpha) * radius;
-		p.z = sin(alpha) * radius;
-		q.x = cos(alpha + delta) * radius;
-		q.z = sin(alpha + delta) * radius;
-		p.y = depth;
-		q.y = depth;
+
+	static const float sins[25] = {0., 0.258819045103, 0.5, 0.707106781187, 0.866025403784, 0.965925826289, 1., 
+								0.965925826289, 0.866025403784, 0.707106781187, 0.5, 0.258819045103, 
+								0., -0.258819045103, -0.5, -0.707106781187, -0.866025403784, -0.965925826289, -1.,
+								-0.965925826289, -0.866025403784, -0.707106781187, -0.5, -0.258819045103, 0. };
+	static const float coss[25] = {1., 0.965925826289, 0.866025403784, 0.707106781187, 0.5, 0.258819045103, 0., 
+								-0.258819045103, -0.5, -0.707106781187, -0.866025403784, -0.965925826289, -1.,
+								-0.965925826289, -0.866025403784, -0.707106781187, -0.5, -0.258819045103, 
+								0., 0.258819045103, 0.5, 0.707106781187, 0.866025403784, 0.965925826289, 1.};
+
+	for(int i=0; i < 24; i++) {
+		p.x = coss[i];
+		p.z = sins[i];
+		q.x = coss[i+1];
+		q.z = sins[i+1];
+		p.y = 1.f;
+		q.y = 1.f;
 		glDrawVector(p);
 		glDrawVector(q);
-		p.y = -depth;
-		q.y = -depth;
+		p.y = -1.f;
+		q.y = -1.f;
 		glDrawVector(p);
 		glDrawVector(q);
 		q = p;
-		q.y = depth;
+		q.y = 1.f;
 		glDrawVector(p);
 		glDrawVector(q);
-		alpha += delta;
 	}
 	glEnd();
+	glPopMatrix();
 }
 
 void ShapeDrawer::drawSoftBody(const btSoftBody* body)
