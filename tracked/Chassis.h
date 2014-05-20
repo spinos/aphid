@@ -25,10 +25,10 @@ public:
 	void setRoadWheelZ(const int & i, const float & x);
 	void setNumSupportRollers(const int & x);
 	void setSupportRollerZ(const int & i, const float & x);
-	void setRockerLength(const float & x);
-	void setRockerSize(const float & x);
-	const float rockerLength() const;
-	const float rockerSize() const;
+	void setTorsionBarLength(const float & x);
+	void setTorsionBarSize(const float & x);
+	const float torsionBarLength() const;
+	const float torsionBarSize() const;
 	const float trackWidth() const;
 	const float span() const;
 	const float driveSprocketRadius() const;
@@ -48,13 +48,13 @@ public:
 	const Vector3F roadWheelOriginObject(const int & i, bool isLeft = true) const;
 	const Vector3F supportRollerOrigin(const int & i, bool isLeft = true) const;
 	const Vector3F supportRollerOriginObject(const int & i, bool isLeft = true) const;
-	const Vector3F rockerHingeObject(const int & i, bool isLeft = true) const;
-	const Vector3F rockerHinge(const int & i, bool isLeft = true) const;
+	const Vector3F torsionBarHingeObject(const int & i, bool isLeft = true) const;
+	const Vector3F torsionBarHinge(const int & i, bool isLeft = true) const;
 private:
 	Vector3F m_origin;
 	float m_span, m_width, m_height, m_trackWidth;
 	float m_driveSprocketRadius, m_tensionerRadius, m_roadWheelRadius, m_supportRollerRadius;
-	float m_tensionerOriginRise, m_roadWheelY, m_supportRollerY, m_rockerLength, m_rockerSize;
+	float m_tensionerOriginRise, m_roadWheelY, m_supportRollerY, m_torsionBarLength, m_torsionBarSize;
 	float * m_roadWheelZ;
 	float * m_supportRollerZ;
 	int m_numRoadWheels, m_numSupportRollers;

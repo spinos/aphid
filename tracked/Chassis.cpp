@@ -26,8 +26,8 @@ Chassis::Chassis()
 	m_numSupportRollers = 0;
 	m_supportRollerY = 3.f;
 	m_supportRollerRadius = 1.3f;
-	m_rockerLength = 7.f;
-	m_rockerSize = 1.2f;
+	m_torsionBarLength = 7.f;
+	m_torsionBarSize = 1.2f;
 }
 
 Chassis::~Chassis()
@@ -142,20 +142,20 @@ const Vector3F Chassis::supportRollerOriginObject(const int & i, bool isLeft) co
 	return Vector3F::YAxis * m_supportRollerY + Vector3F::ZAxis * m_supportRollerZ[i] + Vector3F::XAxis * ( m_width * .5f * d + m_trackWidth * .51f * d);
 }
 
-void Chassis::setRockerLength(const float & x) { m_rockerLength = x; }
-void Chassis::setRockerSize(const float & x) { m_rockerSize = x; }
-const float Chassis::rockerLength() const { return m_rockerLength; }
-const float Chassis::rockerSize() const { return m_rockerSize; }
+void Chassis::setTorsionBarLength(const float & x) { m_torsionBarLength = x; }
+void Chassis::setTorsionBarSize(const float & x) { m_torsionBarSize = x; }
+const float Chassis::torsionBarLength() const { return m_torsionBarLength; }
+const float Chassis::torsionBarSize() const { return m_torsionBarSize; }
 
-const Vector3F Chassis::rockerHingeObject(const int & i, bool isLeft) const
+const Vector3F Chassis::torsionBarHingeObject(const int & i, bool isLeft) const
 {
 	float d = 1.f;
 	if(!isLeft) d = -d;
 	
-	return Vector3F::YAxis * m_roadWheelY + Vector3F::ZAxis * (m_roadWheelZ[i] + m_rockerLength) + Vector3F::XAxis * ( m_width * .5f * d + m_rockerSize * .7f * d);
+	return Vector3F::YAxis * m_roadWheelY + Vector3F::ZAxis * (m_roadWheelZ[i] + m_torsionBarLength) + Vector3F::XAxis * ( m_width * .5f * d + m_torsionBarSize * .7f * d);
 }
 
-const Vector3F Chassis::rockerHinge(const int & i, bool isLeft) const
+const Vector3F Chassis::torsionBarHinge(const int & i, bool isLeft) const
 {
-	return rockerHingeObject(i, isLeft) + m_origin;
+	return torsionBarHingeObject(i, isLeft) + m_origin;
 }

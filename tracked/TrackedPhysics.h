@@ -45,9 +45,10 @@ private:
 	btCollisionShape* compoundWheelShape(CreateWheelProfile & profile);
 	void createWheel(btCollisionShape* wheelShape, CreateWheelProfile & profile);
 	btCollisionShape* createShoeShape(const float & x, const float &y, const float & z);
+	btCollisionShape* createPinShape(Tread & tread);
 	btCollisionShape* createSprocketShape(CreateWheelProfile & profile);
 	void threePointHinge(btTransform & frameInA, btTransform & frameInB, const float & side, btRigidBody* bodyA, btRigidBody* bodyB);
-	btRigidBody * createRocker(btRigidBody * chassisBody, const int & i, bool isLeft = true);
+	btRigidBody * createTorsionBar(btRigidBody * chassisBody, const int & i, bool isLeft = true);
 private:
 	Tread m_leftTread, m_rightTread;
 	Chassis m_chassis;

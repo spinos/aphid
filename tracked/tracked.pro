@@ -1,5 +1,5 @@
 INCLUDEPATH += ../shared ../ ./
-LIBS += -L../lib -laphid
+LIBS += -L../lib -laphid -lIlmImf -lHalf
 macx {
     INCLUDEPATH += $(HOME)/Library/boost_1_55_0 $(HOME)/Library/bullet-2.81/src/ \
         /usr/local/include/bullet
@@ -14,7 +14,6 @@ win32 {
     QMAKE_LIBDIR += D:/usr/boost_1_51_0/stage/lib \
                     D:/usr/local/openEXR/lib \
                     D:/usr/bullet-2.82/lib
-    LIBS += -lIlmImf -lHalf
     LIBS += -lBulletDynamics -lBulletCollision -lBulletSoftBody -lLinearMath 
     QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt  /NODEFAULTLIB:libcpmt
 }
