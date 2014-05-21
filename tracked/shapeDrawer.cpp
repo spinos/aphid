@@ -6,8 +6,21 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include <QGLWidget>
-#include <AllMath.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <OpenGL/glext.h>
+#include <GLUT/glut.h>
+#endif
+
+#ifdef WIN32
+#include <winsock2.h>
+#include <windows.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#endif
+
 #include "shapeDrawer.h"
 
 inline void glDrawVector(const btVector3& v) { glVertex3d(v[0], v[1], v[2]); }
@@ -25,6 +38,29 @@ inline void glDrawCoordsys()
 			glVertex3f( 0.f, 0.f, 0.f );
 			glVertex3f(0.f, 0.f, 1.f);		
 	glEnd();
+}
+
+void ShapeDrawer::drawGravity(const btVector3 & v)
+{
+	Vector3F dir(v[0], v[1], v[2]); 
+	const float sz = dir.length();
+	dir.normalize();
+	Matrix44F space;
+	space.setFrontOrientation(dir);
+	glPushMatrix();
+	loadSpace(space);
+	glScalef(sz, sz, sz);
+	static const float p[42] = { -.2f, 0.f, -2.f,  -.2f, 0.f, -.5f,
+								-.2f, 0.f, -.5f, -.4f, 0.f, -.5f,
+								-.4f, 0.f, -.5f,  0.f, 0.f,  0.f,
+								.2f, 0.f, -2.f, .2f, 0.f, -.5f,
+								.2f, 0.f, -.5f, .4f, 0.f, -.5f,
+								.4f, 0.f, -.5f,  0.f, 0.f,  0.f,
+								-.2f, 0.f, -2.f,  .2f, 0.f,  -2.f};
+	glBegin(GL_LINES);
+	for(int i=0; i < 14; i++) glVertex3fv(&p[i * 3]);
+	glEnd();
+	glPopMatrix();
 }
 
 void ShapeDrawer::drawConstraint(const btTypedConstraint* constraint)
@@ -382,4 +418,28 @@ void ShapeDrawer::loadSpace(const btTransform & transform)
     m[12] = m[13] = m[14] = 0.0; m[15] = 1.0;
     transform.getOpenGLMatrix(m);
     glMultMatrixf((const GLfloat*)m);
+}
+
+void ShapeDrawer::loadSpace(const Matrix44F & transform)
+{
+	float m[16];
+    
+    m[0] = transform.M(0, 0); 
+	m[1] = transform.M(0, 1); 
+	m[2] = transform.M(0, 2); 
+	m[3] = transform.M(0, 3); 
+    m[4] = transform.M(1, 0); 
+	m[5] = transform.M(1, 1); 
+	m[6] = transform.M(1, 2); 
+	m[7] = transform.M(1, 3); 
+	m[8] = transform.M(2, 0); 
+	m[9] = transform.M(2, 1); 
+	m[10] = transform.M(2, 2); 
+	m[11] = transform.M(2, 3); 
+	m[12] = transform.M(3, 0); 
+	m[13] = transform.M(3, 1); 
+	m[14] = transform.M(3, 2); 
+	m[15] = transform.M(3, 3); 
+    
+	glMultMatrixf((const GLfloat*)m);
 }

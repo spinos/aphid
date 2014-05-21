@@ -27,6 +27,7 @@ public:
 	
 	void setEnablePhysics(bool x);
 	void setNumSubSteps(int x);
+	const bool isWorldInitialized() const;
 	
 protected:
 	virtual void clientBuildPhysics();
@@ -64,5 +65,6 @@ private:
 	btAlignedObjectArray<btSoftRididCollisionAlgorithm*> m_SoftRigidCollisionAlgorithms;
 	
 	bool m_enablePhysics;
+	bool m_isWorldInitialized;
 	int m_numSubSteps;
 };

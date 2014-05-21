@@ -10,11 +10,13 @@
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftBody.h>
+#include <AllMath.h>
 class ShapeDrawer {
 public:
 	ShapeDrawer () {}
 	virtual ~ShapeDrawer () {}
 	
+	void drawGravity(const btVector3 & v);
 	void drawConstraint(const btTypedConstraint* constraint);
 	void drawObject(const btCollisionObject* object);
 	void drawRigidBody(const btRigidBody* body);
@@ -33,4 +35,5 @@ private:
 	void drawCylinder(const btCylinderShape * shape);
 	void drawCompound(const btCompoundShape* shape);
 	void loadSpace(const btTransform & transform);
+	void loadSpace(const Matrix44F & transform);
 };

@@ -17,6 +17,7 @@
 
 DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(1)
 {
+	m_isWorldInitialized = false;
     _drawer = new ShapeDrawer();
 }
 
@@ -30,7 +31,6 @@ void DynamicsSolver::setNumSubSteps(int x) { m_numSubSteps = x; }
 	
 void DynamicsSolver::initPhysics()
 {
-    
     // m_collisionConfiguration = new btSoftBodyRigidBodyCollisionConfiguration();
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
 	m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
@@ -60,8 +60,7 @@ void DynamicsSolver::initPhysics()
 
 	m_dynamicsWorld->setGravity(btVector3(0,-1,0));
 */
-	addGroundPlane(1000.f, -1.f);
-	
+
 	clientBuildPhysics();
 	
 	/*
@@ -168,11 +167,17 @@ void DynamicsSolver::initPhysics()
 	
 	*/
 	
-	//initRope();
+	m_isWorldInitialized = true;;
+}
+
+const bool DynamicsSolver::isWorldInitialized() const
+{
+	return m_isWorldInitialized;
 }
 
 void DynamicsSolver::killPhysics()
 {
+	if(!m_isWorldInitialized) return;
 	//remove the rigidbodies from the dynamics world and delete them
 	int i;
 	for (i=m_dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
@@ -210,10 +215,15 @@ void DynamicsSolver::killPhysics()
 	delete m_overlappingPairCache;
 	delete m_dispatcher;
 	delete m_collisionConfiguration;
+	m_isWorldInitialized = false;
 }
 
 void DynamicsSolver::renderWorld()
 {
+	if(!isWorldInitialized()) return;
+	
+	_drawer->drawGravity(m_dynamicsWorld->getGravity());	
+	
 	const int	numObjects= m_dynamicsWorld->getNumCollisionObjects();
 	btVector3 wireColor(1,0,0);
 	for(int i=0;i<numObjects;i++)

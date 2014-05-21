@@ -14,6 +14,7 @@ TrackedPhysics::~TrackedPhysics() {}
 
 void TrackedPhysics::clientBuildPhysics()
 {
+	addGroundPlane(1000.f, -1.f);
 	createObstacles();
 	m_chassis.setOrigin(Vector3F(0.f, 10.f, -10.f));
 	m_chassis.setSpan(81.f);
