@@ -5,9 +5,11 @@ namespace sdb {
 class Dropoff {
 public:
     enum DistanceFunction {
-        Linear = 0,
-        Quadratic = 1,
-        Cubic = 2
+        kLinear = 0,
+        kQuadratic = 1,
+        kCubic = 2,
+        kCosineCurve = 3,
+        kExponential = 4
     };
     virtual float f(const float & x, const float & scaling) {
         return 1.f;
@@ -15,6 +17,8 @@ public:
     static float linear(const float & x, const float & scaling);
     static float quadratic(const float & x, const float & scaling);
     static float cubic(const float & x, const float & scaling);
+    static float cosineCurve(const float & x, const float & scaling);
+    static float exponentialCurve(const float & x, const float & scaling);
 private:
     
 };
@@ -46,6 +50,20 @@ class DropoffCubic : public DropoffFunction<DropoffCubic> {
 public:
     float func(const float & x, const float & scaling) {
         return cubic(x, scaling);
+    }
+};
+
+class DropoffCosineCurve : public DropoffFunction<DropoffCosineCurve> {
+public:
+    float func(const float & x, const float & scaling) {
+        return cosineCurve(x, scaling);
+    }
+};
+
+class DropoffExponential : public DropoffFunction<DropoffExponential> {
+public:
+    float func(const float & x, const float & scaling) {
+        return exponentialCurve(x, scaling);
     }
 };
 
