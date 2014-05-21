@@ -27,6 +27,7 @@ public:
 		void average(List<VertexP> * d);
 		const float weight(const int & i) const;
 		void setDropoffFunction(Dropoff::DistanceFunction x);
+		const Dropoff::DistanceFunction dropoffFunction() const;
 		const int numActivePoints() const;
 		const int numActiveBlocks() const;
 		const float meanDepth() const;

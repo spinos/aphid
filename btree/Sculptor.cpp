@@ -14,8 +14,8 @@ Sculptor::ActiveGroup::ActiveGroup()
 { 
 	vertices = new Ordered<int, VertexP>; 
 	reset();
-	m_drop = new DropoffLinear;
-	m_dropoffType = Dropoff::Linear;
+	m_drop = new DropoffCosineCurve;
+	m_dropoffType = Dropoff::kCosineCurve;
 }
 
 Sculptor::ActiveGroup::~ActiveGroup() 
@@ -124,7 +124,8 @@ void Sculptor::ActiveGroup::calculateWeight(List<VertexP> * d)
 	d->begin();
 	while(!d->end()) {
 		Vector3F * p = d->value().index->t1;
-		float wei = m_drop->f(p->distanceTo(meanPosition), threshold);
+		const Vector3F por = incidentRay.closetPointOnRay(*p);
+		float wei = m_drop->f(p->distanceTo(por), threshold);
 		m_weights.push_back(wei);
 		d->next();
 	}
@@ -139,12 +140,19 @@ void Sculptor::ActiveGroup::setDropoffFunction(Dropoff::DistanceFunction x)
 {
     if(x == m_dropoffType) return;
     delete m_drop;
+    m_dropoffType = x;
     switch(x) {
-        case Dropoff::Quadratic :
+        case Dropoff::kQuadratic :
             m_drop = new DropoffQuadratic;
             break;
-        case Dropoff::Cubic :
+        case Dropoff::kCubic :
             m_drop = new DropoffCubic;
+            break;
+		case Dropoff::kCosineCurve :
+            m_drop = new DropoffCosineCurve;
+            break;
+        case Dropoff::kExponential :
+            m_drop = new DropoffExponential;
             break;
         default:
             m_drop = new DropoffLinear;
@@ -157,6 +165,11 @@ const int Sculptor::ActiveGroup::numActiveBlocks() const { return m_numActiveBlo
 const float Sculptor::ActiveGroup::meanDepth() const
 {
 	return (meanPosition - incidentRay.m_origin).length();
+}
+
+const Dropoff::DistanceFunction Sculptor::ActiveGroup::dropoffFunction() const
+{
+    return m_dropoffType;
 }
 
 Sculptor::Sculptor() 
@@ -299,7 +312,7 @@ void Sculptor::spreadPoints()
 
 void Sculptor::smudgePoints(const Vector3F & x)
 {
-	movePointsAlong(x, 0.09f);
+	movePointsAlong(x, 0.08f);
 }
 
 void Sculptor::smoothPoints()
