@@ -1,0 +1,12 @@
+createNode caterpillarSolver;
+connectAttr -f time1.outTime caterpillarSolver1.inTime;
+
+createNode caterpillarCondition;
+connectAttr -f time1.outTime caterpillarCondition1.inTime;
+connectAttr -f caterpillarCondition1.outSolver caterpillarSolver1.inConditions[0];
+
+createNode caterpillarRigidBody;
+createNode caterpillarRigidBody;
+
+connectAttr -f caterpillarSolver1.outRigidBodies caterpillarRigidBody1.inSolver;
+connectAttr -f caterpillarSolver1.outRigidBodies caterpillarRigidBody2.inSolver;
