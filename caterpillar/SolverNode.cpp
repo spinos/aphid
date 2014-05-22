@@ -16,17 +16,15 @@ MObject SolverNode::a_gravity;
 MObject SolverNode::a_enable;
 MObject SolverNode::a_numSubsteps;
 MObject SolverNode::a_frequency;
+MObject SolverNode::a_inConditions;
 MObject SolverNode::a_outRigidBodies;
-DynamicsSolver * SolverNode::engine = NULL;
 
 SolverNode::SolverNode() 
 {
-	engine = new DynamicsSolver;
 }
 
 SolverNode::~SolverNode() 
 {
-	delete engine;
 }
 
 MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
@@ -44,17 +42,22 @@ MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 		
 		if(curTime == startTime) {
 			MGlobal::displayInfo("init solver");
-			engine->killPhysics();
-			engine->initPhysics();
+			
+			PhysicsState::engine->killPhysics();
+			PhysicsState::engine->initPhysics();
+			PhysicsState::engineStatus = PhysicsState::sCreating;
+			computeConditions(block);
 			
 		}
 		else {
 			const double deltaFrame = (curTime - m_preTime).value();
 			if(deltaFrame > 0.0 && deltaFrame <= 1.0 && curTime > startTime) {
 				if(engine->isWorldInitialized()) {
+					PhysicsState::engineStatus = PhysicsState::sUpdating;
+					computeConditions(block);
 					MGlobal::displayInfo("sim step");
 					const float dt = (float)(curTime - m_preTime).as(MTime::kSeconds);
-					engine->simulate(dt, 10, 90.f);
+					PhysicsState::engine->simulate(dt, 10, 90.f);
 				}
 			}
 		}
@@ -135,12 +138,28 @@ MStatus SolverNode::initialize()
 	fnNumericAttr.setMax(6000);
     status = addAttribute(a_frequency);
 	
+	a_inConditions = fnMsgAttr.create("inConditions", "icdts", &status);
+	fnMsgAttr.setArray(true);
+    status = addAttribute(a_inConditions);
+	
 	a_outRigidBodies = fnMsgAttr.create("outRigidBodies", "orbds", &status);
     status = addAttribute(a_outRigidBodies);
 
 	attributeAffects(a_inTime, a_outRigidBodies);
 	attributeAffects(a_enable, a_outRigidBodies);
+
 	return MS::kSuccess;
+}
+
+void SolverNode::computeConditions(MDataBlock& block)
+{
+	MStatus status;
+	MArrayDataHandle hArray = block.inputArrayValue(a_inConditions);
+	const int numSlots = hArray.elementCount();
+	for(int i=0; i < numSlots; i++) {
+		hArray.inputValue(&status);
+		hArray.next();
+	}
 }
 
 }

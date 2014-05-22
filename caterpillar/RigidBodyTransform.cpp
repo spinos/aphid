@@ -278,7 +278,7 @@ MStatus RigidBodyTransformNode::validateAndSetValue(const MPlug& plug,
 		_tm[8] = _tm[9] = 0.f; _tm[10] = 1.f; _tm[11] = 0.f;
 		_tm[12] = _tm[13] = _tm[14] = 0.f; _tm[15] = 1.f;
 		
-	if ( plug == a_inSolver ) { MGlobal::displayInfo("tm validate and set insolver");
+	if ( plug == a_inSolver ) { // MGlobal::displayInfo("tm validate and set insolver");
 		block.inputValue(a_inSolver);
 		// Update the custom transformation matrix to the
 		// right rock value.  

@@ -10,6 +10,7 @@
 
 #include "SolverNode.h"
 #include "RigidBodyTransform.h"
+#include "ConditionNode.h"
 
 MStatus initializePlugin( MObject obj )
 {
@@ -22,6 +23,14 @@ MStatus initializePlugin( MObject obj )
 
 	status = plugin.registerNode( "caterpillarSolver", caterpillar::SolverNode::id, 
 						 &caterpillar::SolverNode::creator, &caterpillar::SolverNode::initialize,
+						 MPxNode::kLocatorNode );
+	if (!status) {
+		status.perror("registerNode");
+		return status;
+	}
+	
+	status = plugin.registerNode( "caterpillarCondition", caterpillar::ConditionNode::id, 
+						 &caterpillar::ConditionNode::creator, &caterpillar::ConditionNode::initialize,
 						 MPxNode::kLocatorNode );
 	if (!status) {
 		status.perror("registerNode");
@@ -48,6 +57,12 @@ MStatus uninitializePlugin( MObject obj )
 	MFnPlugin plugin( obj );
 	
 	status = plugin.deregisterNode(caterpillar::SolverNode::id );
+	if (!status) {
+		status.perror("deregisterNode");
+		return status;
+	}
+	
+	status = plugin.deregisterNode(caterpillar::ConditionNode::id );
 	if (!status) {
 		status.perror("deregisterNode");
 		return status;

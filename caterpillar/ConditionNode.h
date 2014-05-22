@@ -1,5 +1,5 @@
 /*
- *  SolverNode.h
+ *  ConditionNode.h
  *  caterpillar
  *
  *  Created by jian zhang on 3/1/12.
@@ -16,14 +16,15 @@
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
 #include <AllMath.h>
-#include "PhysicsState.h"
+
+class DynamicsSolver;
 
 namespace caterpillar {
-class SolverNode : public MPxLocatorNode, public PhysicsState
+class ConditionNode : public MPxLocatorNode
 {
 public:
-	SolverNode();
-	virtual ~SolverNode(); 
+	ConditionNode();
+	virtual ~ConditionNode(); 
 
     virtual MStatus   		compute( const MPlug& plug, MDataBlock& data );
 
@@ -37,18 +38,11 @@ public:
 	static  void *          creator();
 	static  MStatus         initialize();
 
+	static  MObject a_outSolver;
 	static  MObject a_inTime;
-	static  MObject a_startTime;
-	static  MObject a_gravity;
-	static  MObject a_enable;
-	static  MObject a_numSubsteps;
-	static  MObject a_frequency;
-	static  MObject a_inConditions;
-	static  MObject a_outRigidBodies;
+	static  MObject a_inDim;
 	static	MTypeId id;
 	
 private:
-	void computeConditions(MDataBlock& block);
-	MTime m_preTime;
 };
 }
