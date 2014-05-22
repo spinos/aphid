@@ -9,6 +9,7 @@
 #include <maya/MGlobal.h>
 
 #include "SolverNode.h"
+#include "RigidBodyTransform.h"
 
 MStatus initializePlugin( MObject obj )
 {
@@ -27,6 +28,17 @@ MStatus initializePlugin( MObject obj )
 		return status;
 	}
 	
+	status = plugin.registerTransform( "caterpillarRigidBody", 
+									caterpillar::RigidBodyTransformNode::id, 
+									&caterpillar::RigidBodyTransformNode::creator, 
+									&caterpillar::RigidBodyTransformNode::initialize,
+									&caterpillar::RigidBodyTransformMatrix::creator,
+									caterpillar::RigidBodyTransformMatrix::id);
+	if (!status) {
+		status.perror("registerNode");
+		return status;
+	}
+	
 	return status;
 }
 
@@ -36,6 +48,12 @@ MStatus uninitializePlugin( MObject obj )
 	MFnPlugin plugin( obj );
 	
 	status = plugin.deregisterNode(caterpillar::SolverNode::id );
+	if (!status) {
+		status.perror("deregisterNode");
+		return status;
+	}
+	
+	status = plugin.deregisterNode( caterpillar::RigidBodyTransformNode::id );
 	if (!status) {
 		status.perror("deregisterNode");
 		return status;

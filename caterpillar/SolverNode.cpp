@@ -1,27 +1,11 @@
-#include <Vector2F.h>
 #include "SolverNode.h"
-#include <maya/MString.h> 
-#include <maya/MGlobal.h>
 
-#include <maya/MVector.h>
 #include <maya/MFnMatrixAttribute.h>
 #include <maya/MDataHandle.h>
-#include <maya/MColor.h>
-#include <maya/MDistance.h>
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnUnitAttribute.h>
-#include <maya/MVectorArray.h>
-#include <maya/MFnVectorArrayData.h>
-#include <maya/MEulerRotation.h>
-#include <maya/MFnMatrixData.h>
-#include <maya/MFnDoubleArrayData.h>
-#include <maya/MIntArray.h>
-#include <maya/MPointArray.h>
-#include <maya/MFnMeshData.h>
-#include <maya/MItMeshPolygon.h>
 #include <maya/MFnMessageAttribute.h>
-#include <fstream> 
 #include <DynamicsSolver.h>
 namespace caterpillar {
 
@@ -48,7 +32,38 @@ SolverNode::~SolverNode()
 MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 {
 	if( plug == a_outRigidBodies ) {
-			return MS::kSuccess;
+		bool enabled = block.inputValue(a_enable).asBool();
+		if(!enabled) {
+			// block.outputValue(a_outRigidBodies).set(true);
+			// block.setClean(plug);
+			return MStatus::kUnknownParameter;
+		}
+		
+		MTime curTime = block.inputValue(a_inTime).asTime();
+		MTime startTime = block.inputValue(a_startTime).asTime();
+		
+		if(curTime == startTime) {
+			MGlobal::displayInfo("init solver");
+			engine->killPhysics();
+			engine->initPhysics();
+			
+		}
+		else {
+			const double deltaFrame = (curTime - m_preTime).value();
+			if(deltaFrame > 0.0 && deltaFrame <= 1.0 && curTime > startTime) {
+				if(engine->isWorldInitialized()) {
+					MGlobal::displayInfo("sim step");
+					const float dt = (float)(curTime - m_preTime).as(MTime::kSeconds);
+					engine->simulate(dt, 10, 90.f);
+				}
+			}
+		}
+
+		m_preTime = curTime;
+		
+		block.outputValue(a_outRigidBodies).set(true);
+        block.setClean(plug);
+		return MS::kSuccess;
 	}
 	return MStatus::kUnknownParameter;
 }
@@ -97,8 +112,8 @@ MStatus SolverNode::initialize()
 	a_inTime = fnUnitAttr.create( "inTime", "itm", MFnUnitAttribute::kTime, 0.0, &status );
 	status = addAttribute(a_inTime);
 	
-	a_inTime = fnUnitAttr.create( "startTime", "stm", MFnUnitAttribute::kTime, 1.0, &status );
-	status = addAttribute(a_inTime);
+	a_startTime = fnUnitAttr.create( "startTime", "stm", MFnUnitAttribute::kTime, 1.0, &status );
+	status = addAttribute(a_startTime);
 	
 	a_gravity = fnNumericAttr.createPoint("gravity", "grvt", &status);
     fnNumericAttr.setDefault(0.0, -9.81, 0.0);

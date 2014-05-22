@@ -12,10 +12,7 @@
 #include <maya/MPlug.h>
 #include <maya/MDataBlock.h>
 #include <maya/M3dView.h>
-#include <maya/MMatrixArray.h>
-#include <maya/MIntArray.h>
-#include <maya/MFloatArray.h>
-#include <maya/MFnMesh.h>
+#include <maya/MTime.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
 #include <AllMath.h>
@@ -52,6 +49,6 @@ public:
 	
 	static DynamicsSolver * engine;
 private:
-	
+	MTime m_preTime;
 };
 }

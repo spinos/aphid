@@ -254,6 +254,11 @@ void DynamicsSolver::simulate()
 	m_dynamicsWorld->stepSimulation(dt, m_numSubSteps, 1.f / 90.f);
 }
 
+void DynamicsSolver::simulate(const float & dt, const int & numSubsteps, const float & frequency)
+{
+	m_dynamicsWorld->stepSimulation(dt, numSubsteps, 1.f / frequency);
+}
+
 btRigidBody* DynamicsSolver::createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape)
 {
 	btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));

@@ -24,6 +24,7 @@ public:
 	void killPhysics();
 	void renderWorld();
 	void simulate();
+	void simulate(const float & dt, const int & numSubsteps, const float & frequency);
 	
 	void setEnablePhysics(bool x);
 	void setNumSubSteps(int x);
