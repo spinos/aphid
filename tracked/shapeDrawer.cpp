@@ -25,14 +25,8 @@
 
 class GlDrawcallback : public btTriangleCallback
 {
-
 public:
-
-	bool	m_wireframe;
-
-	GlDrawcallback()
-	{
-	}
+	GlDrawcallback() {}
 
 	virtual void processTriangle(btVector3* triangle,int partId, int triangleIndex)
 	{

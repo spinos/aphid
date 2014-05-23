@@ -18,16 +18,16 @@ public:
 	Ground();
 	virtual ~Ground();
 		
-protected:
-	void create(const int & numTri, int * triangleIndices,
-				const int & numVert, btVector3 * verticesPositions);
-				
+protected:			
 	btVector3 * createVertexPos(const int & nv);
-	int * createVertexIndex(const int & ni);
+	int * createTriangles(const int & ntri);
+	void create();
+	
 private:
     btTriangleIndexVertexArray* m_indexVertexArrays;
 	btVector3 * m_vertexPos;
 	int * m_indices;
+	int m_numTri, m_numVert;
 };
 
 }

@@ -9,8 +9,9 @@
 
 #pragma once
 #include <AllMath.h>
+#include "GroupId.h"
 namespace caterpillar {
-class Simple {
+class Simple : public GroupId {
 public:
 	Simple();
 	virtual ~Simple();

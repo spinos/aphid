@@ -31,11 +31,9 @@ MStatus GroundPlane::compute( const MPlug& plug, MDataBlock& block )
 {		
 	if( plug == a_outSolver ) {
 		if(PhysicsState::engineStatus == PhysicsState::sCreating) {
-			MGlobal::displayInfo("creating condition");
 			computeCreate(block);
 		}
 		else if(PhysicsState::engineStatus == PhysicsState::sUpdating) {
-			MGlobal::displayInfo("updating condition");
 			computeUpdate(block);
 		}
 		
@@ -128,7 +126,7 @@ void GroundPlane::computeCreate(MDataBlock& block)
 	
 	MGlobal::displayInfo(MString("ground plane triangle count: ")+numTri);
 	
-	int * indices = createVertexIndex(numTri * 3);
+	int * indices = createTriangles(numTri);
 	
 	j = 0;
 	for(i = 0; i < triangleVertices.length(); i++) {
@@ -149,7 +147,7 @@ void GroundPlane::computeCreate(MDataBlock& block)
 		vs[i][2] = q.z;
 	}
 	
-	create(numTri, indices, nv, vs);
+	create();
 	
 	triangleCounts.clear();
 	triangleVertices.clear();

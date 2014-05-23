@@ -108,6 +108,7 @@ void ConditionNode::computeCreate(MDataBlock& block)
 	MFloatVector &fV = hdim.asFloatVector(); 
 	setDim(fV.z, fV.y, fV.z);
 	create();
+	MGlobal::displayInfo(MString("group info ") + str().c_str());
 }
 
 void ConditionNode::computeUpdate(MDataBlock& data)

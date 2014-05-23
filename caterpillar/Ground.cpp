@@ -30,31 +30,32 @@ btVector3 * Ground::createVertexPos(const int & nv)
 {
 	if(m_vertexPos) delete[] m_vertexPos;
 	m_vertexPos = new btVector3[nv];
+	m_numVert = nv;
 	return m_vertexPos;
 }
 
-int * Ground::createVertexIndex(const int & ni)
+int * Ground::createTriangles(const int & ntri)
 {
 	if(m_indices) delete[] m_indices;
-	m_indices = new int[ni];
+	m_numTri = ntri;
+	m_indices = new int[ntri * 3];
 	return m_indices;
 }
 
-void Ground::create(const int & numTri, int * triangleIndices,
-                    const int & numVert, btVector3 * verticesPositions)
+void Ground::create()
 {
     if (m_indexVertexArrays)
 		delete m_indexVertexArrays;
 	
-	m_indexVertexArrays = new btTriangleIndexVertexArray(numTri, triangleIndices, 3 * sizeof(int),
-		numVert,(btScalar*)&verticesPositions[0][0], sizeof(btVector3));
+	m_indexVertexArrays = new btTriangleIndexVertexArray(m_numTri, m_indices, 3 * sizeof(int),
+		m_numVert,(btScalar*)&m_vertexPos[0][0], sizeof(btVector3));
 	
 	const bool useQuantizedAabbCompression = true;
 	const bool buildBvh = true;
 	btBvhTriangleMeshShape* trimeshShape = new btBvhTriangleMeshShape(m_indexVertexArrays, useQuantizedAabbCompression, buildBvh);
     PhysicsState::engine->addCollisionShape(trimeshShape);
     
-	int id = PhysicsState::engine->numCollisionObjects();
+	// int id = PhysicsState::engine->numCollisionObjects();
     btTransform trans; trans.setIdentity();
 	PhysicsState::engine->createRigitBody(trimeshShape, trans, 0.0);
 }
