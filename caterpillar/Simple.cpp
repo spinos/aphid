@@ -27,7 +27,7 @@ void Simple::create()
 	PhysicsState::engine->createRigitBody(obstacleShape, trans, 1.f);
 	
 	id = PhysicsState::engine->numCollisionObjects();
-	trans.setOrigin(btVector3(0.5,13,0));
+	trans.setOrigin(btVector3(1.5,13,0));
 	PhysicsState::engine->createRigitBody(obstacleShape, trans, 1.f);
 }
 }

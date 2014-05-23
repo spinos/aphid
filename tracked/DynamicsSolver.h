@@ -34,6 +34,7 @@ public:
 	btBoxShape* createBoxShape(const float & x, const float & y, const float & z);
 	btCylinderShape* createCylinderShape(const float & x, const float & y, const float & z);
 	btSphereShape* createSphereShape(const float & r);
+	void addCollisionShape(btCollisionShape* shape);
 	
 	btRigidBody* createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
 	

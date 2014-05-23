@@ -20,7 +20,6 @@ public:
                     const int & numVert, float * verticesPositions);
 private:
     btTriangleIndexVertexArray* m_indexVertexArrays;
-    btBvhTriangleMeshShape* m_trimeshShape;
 };
 
 }

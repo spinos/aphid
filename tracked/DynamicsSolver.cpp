@@ -336,6 +336,11 @@ btSphereShape* DynamicsSolver::createSphereShape(const float & r)
 	return spr;
 }
 
+void DynamicsSolver::addCollisionShape(btCollisionShape* shape)
+{
+    m_collisionShapes.push_back(shape);
+}
+
 btRigidBody* DynamicsSolver::createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass)
 {
 	btRigidBody* body = createRigidBody(mass, transform, shape);

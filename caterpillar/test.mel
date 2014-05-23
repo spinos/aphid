@@ -1,12 +1,23 @@
-createNode caterpillarSolver;
+playbackOptions -e -max 220
+playbackOptions -e -min 0
+createNode caterpillarSolver;
+
 connectAttr -f time1.outTime caterpillarSolver1.inTime;
 
 createNode caterpillarCondition;
 connectAttr -f time1.outTime caterpillarCondition1.inTime;
-connectAttr -f caterpillarCondition1.outSolver caterpillarSolver1.inConditions[0];
+connectAttr -f caterpillarCondition1.outSolver caterpillarSolver1.inConditions[0];
+
+createNode caterpillarGroundPlane;
+polyPlane -ch off -o on -w 32 -h 32 -sw 16 -sh 16;
+connectAttr -f pPlaneShape1.outMesh caterpillarGroundPlane1.inMesh;
+connectAttr -f time1.outTime caterpillarGroundPlane1.inTime;
+connectAttr -f caterpillarGroundPlane1.outSolver caterpillarSolver1.inConditions[1];
 
 createNode caterpillarRigidBody;
-createNode caterpillarRigidBody;
 
-connectAttr -f caterpillarSolver1.outRigidBodies caterpillarRigidBody1.inSolver;
+createNode caterpillarRigidBody;
+
+connectAttr -f caterpillarSolver1.outRigidBodies caterpillarRigidBody1.inSolver;
+
 connectAttr -f caterpillarSolver1.outRigidBodies caterpillarRigidBody2.inSolver;

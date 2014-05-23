@@ -15,7 +15,7 @@
 
 MStatus initializePlugin( MObject obj )
 {
-    MString buildInfo = MString("0.0.1 build Thu May 22 00:47:01 CST 2014 init");
+    MString buildInfo = MString("0.0.3 build Fri May 23 18:31:04 CST 2014 gound");
 
 	MStatus   status;
 
