@@ -126,8 +126,10 @@ void GroundPlane::computeCreate(MDataBlock& block)
 	for(i = 0; i < triangleCounts.length(); i++)
 	    numTri += triangleCounts[i];
 	
-	MGlobal::displayWarning(MString("ground plane triangle count: ")+numTri);
-	int * indices = new int[numTri * 3];
+	MGlobal::displayInfo(MString("ground plane triangle count: ")+numTri);
+	
+	int * indices = createVertexIndex(numTri * 3);
+	
 	j = 0;
 	for(i = 0; i < triangleVertices.length(); i++) {
 	    indices[j] = triangleVertices[i];
@@ -136,22 +138,21 @@ void GroundPlane::computeCreate(MDataBlock& block)
 	MPointArray vertexArray;
 	fmesh.getPoints(vertexArray);
 	const int nv = vertexArray.length();
-	MGlobal::displayWarning(MString("ground plane vertex count: ")+nv);
+	MGlobal::displayInfo(MString("ground plane vertex count: ")+nv);
 	
-	Vector3F * vs = new Vector3F[nv];
+	btVector3 * vs = createVertexPos(nv);
+	
 	for(i=0; i < nv; i++) {
 	    const MPoint & q = vertexArray[i];
-	    vs[i].set(q.x, q.y, q.z);
+	    vs[i][0] = q.x;
+		vs[i][1] = q.y;
+		vs[i][2] = q.z;
 	}
 	
-	create(numTri, indices, nv, (float *)vs);
-	
-	MGlobal::displayInfo("clean up");
+	create(numTri, indices, nv, vs);
 	
 	triangleCounts.clear();
 	triangleVertices.clear();
-	delete[] indices;
-	delete[] vs;
 }
 
 void GroundPlane::computeUpdate(MDataBlock& data)

@@ -11,6 +11,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftBody.h>
 #include <AllMath.h>
+
 class ShapeDrawer {
 public:
 	ShapeDrawer () {}
@@ -33,6 +34,7 @@ private:
 	void drawD6Constraint(const btGeneric6DofConstraint* constraint);
 	void drawBox(const btBoxShape * boxShape);
 	void drawCylinder(const btCylinderShape * shape);
+	void drawTriangleMesh(const btTriangleMeshShape * shape);
 	void drawCompound(const btCompoundShape* shape);
 	void loadSpace(const btTransform & transform);
 	void loadSpace(const Matrix44F & transform);

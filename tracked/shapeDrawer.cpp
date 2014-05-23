@@ -23,6 +23,35 @@
 
 #include "shapeDrawer.h"
 
+class GlDrawcallback : public btTriangleCallback
+{
+
+public:
+
+	bool	m_wireframe;
+
+	GlDrawcallback()
+	{
+	}
+
+	virtual void processTriangle(btVector3* triangle,int partId, int triangleIndex)
+	{
+
+		(void)triangleIndex;
+		(void)partId;
+			glColor3f(0, 0, 1);
+			
+			glBegin(GL_LINES);
+			glVertex3d(triangle[0].getX(), triangle[0].getY(), triangle[0].getZ());
+			glVertex3d(triangle[1].getX(), triangle[1].getY(), triangle[1].getZ());
+			glVertex3d(triangle[2].getX(), triangle[2].getY(), triangle[2].getZ());
+			glVertex3d(triangle[1].getX(), triangle[1].getY(), triangle[1].getZ());
+			glVertex3d(triangle[2].getX(), triangle[2].getY(), triangle[2].getZ());
+			glVertex3d(triangle[0].getX(), triangle[0].getY(), triangle[0].getZ());
+			glEnd();
+	}
+};
+
 inline void glDrawVector(const btVector3& v) { glVertex3d(v[0], v[1], v[2]); }
 inline void glDrawVector(const Vector3F& v) { glVertex3f(v.x, v.y, v.z); }
 inline void glDrawCoordsys() 
@@ -149,6 +178,8 @@ void ShapeDrawer::drawShape(const btCollisionShape* shape)
 			break;
 		case CYLINDER_SHAPE_PROXYTYPE:
 			drawCylinder(static_cast<const btCylinderShape*>(shape));
+		case TRIANGLE_MESH_SHAPE_PROXYTYPE:
+			drawTriangleMesh(static_cast<const btTriangleMeshShape*>(shape));
 		default:
 			break;
 	}
@@ -220,6 +251,15 @@ void ShapeDrawer::drawCylinder(const btCylinderShape * shape)
 	}
 	glEnd();
 	glPopMatrix();
+}
+
+void ShapeDrawer::drawTriangleMesh(const btTriangleMeshShape * shape)
+{
+	btVector3 aabbMin, aabbMax;
+	btTransform trans; trans.setIdentity();
+	shape->getAabb(trans, aabbMin, aabbMax);
+	GlDrawcallback drawCallback;
+	shape->processAllTriangles(&drawCallback, aabbMin, aabbMax);
 }
 
 void ShapeDrawer::drawSoftBody(const btSoftBody* body)
