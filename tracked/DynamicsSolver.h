@@ -38,6 +38,7 @@ public:
 	btRigidBody* createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
 	
 	btRigidBody* getRigidBody(const int & i) const;
+	
 protected:
     btCollisionObject * getCollisionObject(const int & i) const;
 	

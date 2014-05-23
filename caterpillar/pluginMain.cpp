@@ -11,6 +11,7 @@
 #include "SolverNode.h"
 #include "RigidBodyTransform.h"
 #include "ConditionNode.h"
+#include "GroundPlane.h"
 
 MStatus initializePlugin( MObject obj )
 {
@@ -31,6 +32,14 @@ MStatus initializePlugin( MObject obj )
 	
 	status = plugin.registerNode( "caterpillarCondition", caterpillar::ConditionNode::id, 
 						 &caterpillar::ConditionNode::creator, &caterpillar::ConditionNode::initialize,
+						 MPxNode::kLocatorNode );
+	if (!status) {
+		status.perror("registerNode");
+		return status;
+	}
+	
+	status = plugin.registerNode( "caterpillarGroundPlane", caterpillar::GroundPlane::id, 
+						 &caterpillar::GroundPlane::creator, &caterpillar::GroundPlane::initialize,
 						 MPxNode::kLocatorNode );
 	if (!status) {
 		status.perror("registerNode");
@@ -63,6 +72,12 @@ MStatus uninitializePlugin( MObject obj )
 	}
 	
 	status = plugin.deregisterNode(caterpillar::ConditionNode::id );
+	if (!status) {
+		status.perror("deregisterNode");
+		return status;
+	}
+	
+	status = plugin.deregisterNode(caterpillar::GroundPlane::id );
 	if (!status) {
 		status.perror("deregisterNode");
 		return status;

@@ -1,5 +1,5 @@
 /*
- *  ConditionNode.h
+ *  GroundPlane.h
  *  caterpillar
  *
  *  Created by jian zhang on 3/1/12.
@@ -15,14 +15,14 @@
 #include <maya/MTime.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
-#include "Simple.h"
+#include "Ground.h"
 
 namespace caterpillar {
-class ConditionNode : public MPxLocatorNode, public Simple
+class GroundPlane : public MPxLocatorNode, public Ground
 {
 public:
-	ConditionNode();
-	virtual ~ConditionNode(); 
+	GroundPlane();
+	virtual ~GroundPlane(); 
 
     virtual MStatus   		compute( const MPlug& plug, MDataBlock& data );
 
@@ -38,7 +38,7 @@ public:
 
 	static  MObject a_outSolver;
 	static  MObject a_inTime;
-	static  MObject a_inDim;
+	static  MObject a_inMesh;
 	static	MTypeId id;
 	
 private:
