@@ -8,10 +8,12 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnMessageAttribute.h>
 #include "RigidBodyTransform.h"
+#include "PhysicsState.h"
 
 namespace caterpillar {
 
 MObject RigidBodyTransformNode::a_inSolver;
+MObject RigidBodyTransformNode::a_objectId;
 MTypeId RigidBodyTransformNode::id(0xdb25c91);
 MTypeId RigidBodyTransformMatrix::id(0x22eb5607);
 
@@ -210,9 +212,13 @@ void *RigidBodyTransformNode::creator()
 MStatus RigidBodyTransformNode::initialize()
 {	
 	MStatus				status;
-	MFnNumericAttribute numAttr;
+	MFnNumericAttribute fnNumericAttr;
 	MFnUnitAttribute uAttr;
 	MFnMessageAttribute     fnMsgAttr;
+	
+	a_objectId = fnNumericAttr.create("objectId", "obi", MFnNumericData::kInt, 0, &status);
+    fnNumericAttr.setMin(0);
+	status = addAttribute(a_objectId);
 
 	a_inSolver = fnMsgAttr.create("inSolver", "isv", &status);
 	status = addAttribute(a_inSolver);
@@ -280,6 +286,7 @@ MStatus RigidBodyTransformNode::validateAndSetValue(const MPlug& plug,
 		
 	if ( plug == a_inSolver ) { // MGlobal::displayInfo("tm validate and set insolver");
 		block.inputValue(a_inSolver);
+		const int id = block.inputValue(a_objectId).asInt();
 		// Update the custom transformation matrix to the
 		// right rock value.  
 		RigidBodyTransformMatrix *ltm = getRigidBodyTransformMatrix();

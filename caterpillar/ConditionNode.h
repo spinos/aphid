@@ -15,12 +15,12 @@
 #include <maya/MTime.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
-#include <AllMath.h>
+#include "Simple.h"
 
 class DynamicsSolver;
 
 namespace caterpillar {
-class ConditionNode : public MPxLocatorNode
+class ConditionNode : public MPxLocatorNode, public Simple
 {
 public:
 	ConditionNode();
@@ -44,5 +44,7 @@ public:
 	static	MTypeId id;
 	
 private:
+	void computeCreate(MDataBlock& data);
+	void computeUpdate(MDataBlock& data);
 };
 }

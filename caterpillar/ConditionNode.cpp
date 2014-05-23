@@ -29,16 +29,16 @@ MStatus ConditionNode::compute( const MPlug& plug, MDataBlock& block )
 	if( plug == a_outSolver ) {
 		if(PhysicsState::engineStatus == PhysicsState::sCreating) {
 			MGlobal::displayInfo("creating condition");
+			computeCreate(block);
 		}
 		else if(PhysicsState::engineStatus == PhysicsState::sUpdating) {
 			MGlobal::displayInfo("updating condition");
+			computeUpdate(block);
 		}
 		
 		MTime curTime = block.inputValue(a_inTime).asTime();
 		
-		MDataHandle hdim = block.inputValue(a_inDim);
-		MFloatVector &fV = hdim.asFloatVector(); 
-		MGlobal::displayInfo(MString("inDIm is ")+ fV.x + " " + fV.y + " " + fV.z);
+		// MGlobal::displayInfo(MString("inDIm is ")+ fV.x + " " + fV.y + " " + fV.z);
 		
 		block.outputValue(a_outSolver).set(true);
         block.setClean(plug);
@@ -100,6 +100,19 @@ MStatus ConditionNode::initialize()
 	attributeAffects(a_inTime, a_outSolver);
 	
 	return MS::kSuccess;
+}
+
+void ConditionNode::computeCreate(MDataBlock& block)
+{
+	MDataHandle hdim = block.inputValue(a_inDim);
+	MFloatVector &fV = hdim.asFloatVector(); 
+	setDim(fV.z, fV.y, fV.z);
+	create();
+}
+
+void ConditionNode::computeUpdate(MDataBlock& data)
+{
+
 }
 
 }

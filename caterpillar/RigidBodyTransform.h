@@ -47,6 +47,7 @@ class RigidBodyTransformNode : public MPxTransform
 		static  MStatus	initialize();
 
 		static	MTypeId	id;
+		static MObject a_objectId;
 		static MObject a_inSolver;
 	protected:
 		typedef MPxTransform ParentClass;

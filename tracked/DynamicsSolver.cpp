@@ -218,6 +218,18 @@ void DynamicsSolver::killPhysics()
 	m_isWorldInitialized = false;
 }
 
+const int DynamicsSolver::numCollisionObjects() const
+{
+	if(!isWorldInitialized()) return 0;
+	return m_dynamicsWorld->getNumCollisionObjects();
+}
+
+btCollisionObject * DynamicsSolver::getCollisionObjects(const int & i) const
+{
+	if(!isWorldInitialized()) return NULL;
+	return m_dynamicsWorld->getCollisionObjectArray()[i];
+}
+
 void DynamicsSolver::renderWorld()
 {
 	if(!isWorldInitialized()) return;

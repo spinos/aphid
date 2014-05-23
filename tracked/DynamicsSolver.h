@@ -29,17 +29,21 @@ public:
 	void setEnablePhysics(bool x);
 	void setNumSubSteps(int x);
 	const bool isWorldInitialized() const;
+	const int numCollisionObjects() const;
+	btCollisionObject * getCollisionObjects(const int & i) const;
+	
+	btBoxShape* createBoxShape(const float & x, const float & y, const float & z);
+	btCylinderShape* createCylinderShape(const float & x, const float & y, const float & z);
+	btSphereShape* createSphereShape(const float & r);
+	
+	btRigidBody* createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
 	
 protected:
 	virtual void clientBuildPhysics();
 	btRigidBody* createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape);
 	
 	void addGroundPlane(const float & groundSize, const float & groundLevel);
-	btBoxShape* createBoxShape(const float & x, const float & y, const float & z);
-	btCylinderShape* createCylinderShape(const float & x, const float & y, const float & z);
-	btSphereShape* createSphereShape(const float & r);
 	
-	btRigidBody* createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
 	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
 	btGeneric6DofSpringConstraint* constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
 private:
