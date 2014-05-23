@@ -30,7 +30,6 @@ public:
 	void setNumSubSteps(int x);
 	const bool isWorldInitialized() const;
 	const int numCollisionObjects() const;
-	btCollisionObject * getCollisionObjects(const int & i) const;
 	
 	btBoxShape* createBoxShape(const float & x, const float & y, const float & z);
 	btCylinderShape* createCylinderShape(const float & x, const float & y, const float & z);
@@ -38,7 +37,10 @@ public:
 	
 	btRigidBody* createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
 	
+	btRigidBody* getRigidBody(const int & i) const;
 protected:
+    btCollisionObject * getCollisionObject(const int & i) const;
+	
 	virtual void clientBuildPhysics();
 	btRigidBody* createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape);
 	

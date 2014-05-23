@@ -8,6 +8,7 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnMessageAttribute.h>
 #include "RigidBodyTransform.h"
+#include <DynamicsSolver.h>
 #include "PhysicsState.h"
 
 namespace caterpillar {
@@ -178,7 +179,7 @@ void RigidBodyTransformNode::postConstructor()
 		baseTransformationMatrix = new MPxTransformationMatrix();
 	}
 
-	//MPlug aRockInXPlug(thisMObject(), aRockInX);
+	MPlug aRockInXPlug(thisMObject(), a_inSolver);
 }
 
 //
@@ -221,6 +222,7 @@ MStatus RigidBodyTransformNode::initialize()
 	status = addAttribute(a_objectId);
 
 	a_inSolver = fnMsgAttr.create("inSolver", "isv", &status);
+	fnMsgAttr.setAffectsWorldSpace(true);
 	status = addAttribute(a_inSolver);
 	//	This is required so that the validateAndSet method is called
 	mustCallValidateAndSet(a_inSolver);
@@ -268,48 +270,29 @@ MStatus RigidBodyTransformNode::validateAndSetValue(const MPlug& plug,
 												const MDataHandle& handle,
 												const MDGContext& context)
 {
-	MStatus status = MS::kSuccess;
-
-	//	Make sure that there is something interesting to process.
-	//
-	if (plug.isNull())
-		return MS::kFailure;
-		
-	MDataBlock block = forceCache(*(MDGContext *)&context);
-	//MDataHandle blockHandle = block.outputValue(plug, &status);
-
-	float _tm[16];
-		_tm[0] = 1.f; _tm[1] = _tm[2] = _tm[3] = 0.f;
-		_tm[4] = 0.f; _tm[5] = 1.f; _tm[6] = _tm[7] = 0.f;
-		_tm[8] = _tm[9] = 0.f; _tm[10] = 1.f; _tm[11] = 0.f;
-		_tm[12] = _tm[13] = _tm[14] = 0.f; _tm[15] = 1.f;
-		
-	if ( plug == a_inSolver ) { // MGlobal::displayInfo("tm validate and set insolver");
-		block.inputValue(a_inSolver);
-		const int id = block.inputValue(a_objectId).asInt();
-		// Update the custom transformation matrix to the
-		// right rock value.  
-		RigidBodyTransformMatrix *ltm = getRigidBodyTransformMatrix();
-		if(ltm)
-			ltm->setRockInX(_tm);
-		else 
-			MGlobal::displayError("Failed to get rock transform matrix");
-
-		// Mark the matrix as dirty so that DG information
-		// will update.
-		dirtyMatrix();
-	}
-
-	// Allow processing for other attributes
-	return ParentClass::validateAndSetValue(plug, handle, context);
+    return ParentClass::validateAndSetValue(plug, handle, context);
 }
 
-MStatus RigidBodyTransformNode::compute( const MPlug& plug, MDataBlock& data )
+MStatus RigidBodyTransformNode::compute( const MPlug& plug, MDataBlock& block )
 {
-    MStatus stat; 
-
-	// return MS::kUnknownParameter;
-
+    if(plug == a_inSolver) {
+        block.inputValue(a_inSolver);
+        const int id = block.inputValue(a_objectId).asInt();
+        
+        btRigidBody* rb = PhysicsState::engine->getRigidBody(id);
+        if(!rb) {
+            MGlobal::displayWarning(MString("cannot get rigid body[")+id+"]");
+            return MS::kSuccess;
+        }
+        
+        float _tm[16];
+        
+        rb->getWorldTransform().getOpenGLMatrix(_tm);
+        
+        RigidBodyTransformMatrix *ltm = getRigidBodyTransformMatrix();
+		if(ltm)
+			ltm->setRockInX(_tm);
+    }
     return MS::kSuccess;
 }
 

@@ -31,6 +31,9 @@ MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 {
 	if( plug == a_outRigidBodies ) {
 		bool enabled = block.inputValue(a_enable).asBool();
+		
+		MGlobal::displayInfo("compute solver");
+		
 		if(!enabled) {
 			// block.outputValue(a_outRigidBodies).set(true);
 			// block.setClean(plug);
@@ -64,7 +67,7 @@ MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 
 		m_preTime = curTime;
 		
-		block.outputValue(a_outRigidBodies).set(true);
+		block.outputValue(a_outRigidBodies).set(curTime.value());
         block.setClean(plug);
 		return MS::kSuccess;
 	}

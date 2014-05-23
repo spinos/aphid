@@ -224,10 +224,17 @@ const int DynamicsSolver::numCollisionObjects() const
 	return m_dynamicsWorld->getNumCollisionObjects();
 }
 
-btCollisionObject * DynamicsSolver::getCollisionObjects(const int & i) const
+btCollisionObject * DynamicsSolver::getCollisionObject(const int & i) const
 {
 	if(!isWorldInitialized()) return NULL;
 	return m_dynamicsWorld->getCollisionObjectArray()[i];
+}
+
+btRigidBody* DynamicsSolver::getRigidBody(const int & i) const
+{
+    btCollisionObject * obj = getCollisionObject(i);
+    if(!obj) return NULL;
+    return static_cast<btRigidBody *>(obj);
 }
 
 void DynamicsSolver::renderWorld()
