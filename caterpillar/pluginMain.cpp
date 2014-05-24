@@ -12,6 +12,7 @@
 #include "RigidBodyTransform.h"
 #include "ConditionNode.h"
 #include "GroundPlane.h"
+#include "UtilityCmd.h"
 
 MStatus initializePlugin( MObject obj )
 {
@@ -57,6 +58,13 @@ MStatus initializePlugin( MObject obj )
 		return status;
 	}
 	
+	status = plugin.registerCommand( "caterpillar", caterpillar::UtilityCmd::creator,
+									caterpillar::UtilityCmd::newSyntax);
+	if (!status) {
+		status.perror("registerCommand");
+		return status;
+	}
+	
 	return status;
 }
 
@@ -87,6 +95,12 @@ MStatus uninitializePlugin( MObject obj )
 	if (!status) {
 		status.perror("deregisterNode");
 		return status;
+	}
+	
+	status = plugin.deregisterCommand( "caterpillar" );
+	if (!status) {
+		  status.perror("deregisterCommand");
+		  return status;
 	}
 	
 	return status;
