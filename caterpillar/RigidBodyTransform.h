@@ -36,7 +36,6 @@ class RigidBodyTransformNode : public MPxTransform
 		virtual MStatus validateAndSetValue(const MPlug& plug,
 			const MDataHandle& handle, const MDGContext& context);
 		
-		virtual MStatus		compute( const MPlug& plug, MDataBlock& data );
 		virtual void  resetTransformation (MPxTransformationMatrix *);
 		virtual void  resetTransformation (const MMatrix &);
 					

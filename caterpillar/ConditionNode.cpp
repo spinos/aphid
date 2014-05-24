@@ -28,17 +28,13 @@ MStatus ConditionNode::compute( const MPlug& plug, MDataBlock& block )
 {		
 	if( plug == a_outSolver ) {
 		if(PhysicsState::engineStatus == PhysicsState::sCreating) {
-			MGlobal::displayInfo("creating condition");
 			computeCreate(block);
 		}
 		else if(PhysicsState::engineStatus == PhysicsState::sUpdating) {
-			MGlobal::displayInfo("updating condition");
 			computeUpdate(block);
 		}
 		
 		MTime curTime = block.inputValue(a_inTime).asTime();
-		
-		// MGlobal::displayInfo(MString("inDIm is ")+ fV.x + " " + fV.y + " " + fV.z);
 		
 		block.outputValue(a_outSolver).set(true);
         block.setClean(plug);

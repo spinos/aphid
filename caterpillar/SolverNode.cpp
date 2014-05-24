@@ -32,8 +32,6 @@ MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 	if( plug == a_outRigidBodies ) {
 		bool enabled = block.inputValue(a_enable).asBool();
 		
-		MGlobal::displayInfo("compute solver");
-		
 		if(!enabled) {
 			// block.outputValue(a_outRigidBodies).set(true);
 			// block.setClean(plug);
@@ -58,7 +56,7 @@ MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 				if(engine->isWorldInitialized()) {
 					PhysicsState::engineStatus = PhysicsState::sUpdating;
 					computeConditions(block);
-					MGlobal::displayInfo("sim step");
+					//MGlobal::displayInfo("sim step");
 					const float dt = (float)(curTime - m_preTime).as(MTime::kSeconds);
 					PhysicsState::engine->simulate(dt, 10, 90.f);
 				}

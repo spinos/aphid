@@ -15,9 +15,8 @@ connectAttr -f time1.outTime caterpillarGroundPlane1.inTime;
 connectAttr -f caterpillarGroundPlane1.outSolver caterpillarSolver1.inConditions[1];
 
 createNode caterpillarRigidBody;
-
-createNode caterpillarRigidBody;
-
 connectAttr -f caterpillarSolver1.outRigidBodies caterpillarRigidBody1.inSolver;
 
-connectAttr -f caterpillarSolver1.outRigidBodies caterpillarRigidBody2.inSolver;
+polySphere;
+
+caterpillar -at -gn "box_left" -mdn "|pSphere1"  "|transform3|caterpillarCondition1";

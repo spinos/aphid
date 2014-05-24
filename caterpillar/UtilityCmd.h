@@ -11,8 +11,10 @@
 #include <maya/MString.h>
 #include <maya/MSyntax.h>
 #include <maya/MObject.h>
+#include <maya/MPlug.h>
 
 namespace caterpillar {
+class GroupId;
 class UtilityCmd : public MPxCommand
 {
 public:
@@ -29,6 +31,9 @@ public:
 	static MSyntax newSyntax ();
 
 private:
+	GroupId * getGroupId() const;
+	const int getObjectId(const MObject & node) const;
+	MObject createRigidBody(const MPlug & src, const int & objectId, MObject & parent) const;
 	MString m_groupName;
 	MObject m_conditionNode;
 	MObject m_modelNode;

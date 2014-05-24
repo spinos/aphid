@@ -97,56 +97,7 @@ MMatrix RigidBodyTransformMatrix::asMatrix() const
 	// Let Maya know what the matrix should be
 	return tm.asMatrix();
 }
-/*
-MMatrix RigidBodyTransformMatrix::asMatrix(double percent) const
-{
-	MPxTransformationMatrix m(*this);
 
-	//	Apply the percentage to the matrix components
-	MVector trans = m.translation();
-	trans *= percent;
-	m.translateTo( trans );
-	MPoint rotatePivotTrans = m.rotatePivot();
-	rotatePivotTrans = rotatePivotTrans * percent;
-	m.setRotatePivot( rotatePivotTrans );
-	MPoint scalePivotTrans = m.scalePivotTranslation();
-	scalePivotTrans = scalePivotTrans * percent;
-	m.setScalePivotTranslation( scalePivotTrans );
-
-	//	Apply the percentage to the rotate value.  Same
-	// as above + the percentage gets applied
-	MQuaternion quat = rotation();
-	DegreeRadianConverter conv;
-	double newTheta = conv.degreesToRadians( getRockInX() );
-	quat.setToXAxis( newTheta );
-	m.rotateBy( quat );
-	MEulerRotation eulRotate = eulerRotation();
-	m.rotateTo(  eulRotate * percent, MSpace::kTransform);
-
-	//	Apply the percentage to the scale
-	MVector s(scale(MSpace::kTransform));
-	s.x = 1.0 + (s.x - 1.0)*percent;
-	s.y = 1.0 + (s.y - 1.0)*percent;
-	s.z = 1.0 + (s.z - 1.0)*percent;
-	m.scaleTo(s, MSpace::kTransform);
-    
-	return m.asMatrix();
-}
-
-MMatrix	RigidBodyTransformMatrix::asRotateMatrix() const
-{
-	// To be implemented
-	return ParentClass::asRotateMatrix();
-}
-*/
-
-//
-// Implementation of our custom transform
-//
-
-//
-//	Constructor of the transform node
-//
 RigidBodyTransformNode::RigidBodyTransformNode()
 : ParentClass()
 {
@@ -270,32 +221,39 @@ MStatus RigidBodyTransformNode::validateAndSetValue(const MPlug& plug,
 												const MDataHandle& handle,
 												const MDGContext& context)
 {
+	MStatus status;
+	
+	if (plug.isNull())
+		return MS::kFailure;
+	MDataBlock block = forceCache(*(MDGContext *)&context);
+	MDataHandle blockHandle = block.outputValue(plug, &status);
+	
+	if(plug == a_inSolver) {
+		double rockInX = handle.asDouble();
+		blockHandle.set(rockInX);
+		
+		const int id = block.inputValue(a_objectId).asInt();
+		
+		btRigidBody* rb = PhysicsState::engine->getRigidBody(id);
+		if(!rb) {
+			MGlobal::displayWarning(MString("cannot get rigid body[")+id+"]");
+			return MS::kSuccess;
+		}
+		
+		btScalar * _tm = new btScalar[16];
+		
+		const btTransform t = rb->getWorldTransform();
+		t.getOpenGLMatrix(_tm);
+		
+		RigidBodyTransformMatrix *ltm = getRigidBodyTransformMatrix();
+		if(ltm) ltm->setRockInX(_tm);
+		delete[] _tm;
+		blockHandle.setClean();
+		dirtyMatrix();
+	}
+		
     return ParentClass::validateAndSetValue(plug, handle, context);
 }
-
-MStatus RigidBodyTransformNode::compute( const MPlug& plug, MDataBlock& block )
-{
-    if(plug == a_inSolver) {
-        block.inputValue(a_inSolver);
-        const int id = block.inputValue(a_objectId).asInt();
-        
-        btRigidBody* rb = PhysicsState::engine->getRigidBody(id);
-        if(!rb) {
-            MGlobal::displayWarning(MString("cannot get rigid body[")+id+"]");
-            return MS::kSuccess;
-        }
-        
-        float _tm[16];
-        
-        rb->getWorldTransform().getOpenGLMatrix(_tm);
-        
-        RigidBodyTransformMatrix *ltm = getRigidBodyTransformMatrix();
-		if(ltm)
-			ltm->setRockInX(_tm);
-    }
-    return MS::kSuccess;
-}
-
 //
 //	Method for returning the current rocking transformation matrix
 //
