@@ -14,6 +14,7 @@ class Chassis {
 public:
 	Chassis();
 	virtual ~Chassis();
+	void setDim(const float & x, const float & y, const float & z);
 	void setOrigin(const Vector3F & p);
 	void setSpan(const float & x);
 	void setWidth(const float & x);
@@ -21,12 +22,18 @@ public:
 	void setTrackWidth(const float & x);
 	void setDriveSprocketRadius(const float & x);
 	void setTensionerRadius(const float & x);
+	void setRoadWheelRadius(const float & x);
+	void setSupportRollerRadius(const float & x);
 	void setNumRoadWheels(const int & x);
 	void setRoadWheelZ(const int & i, const float & x);
 	void setNumSupportRollers(const int & x);
 	void setSupportRollerZ(const int & i, const float & x);
 	void setTorsionBarLength(const float & x);
 	void setTorsionBarSize(const float & x);
+	void setDriveSprocketY(const float & x);
+	void setTensionerY(const float & x);
+	void setRoadWheelY(const float & x);
+	void setSupportRollerY(const float & x);
 	const float torsionBarLength() const;
 	const float torsionBarSize() const;
 	const float trackWidth() const;
@@ -54,7 +61,8 @@ private:
 	Vector3F m_origin;
 	float m_span, m_width, m_height, m_trackWidth;
 	float m_driveSprocketRadius, m_tensionerRadius, m_roadWheelRadius, m_supportRollerRadius;
-	float m_tensionerOriginRise, m_roadWheelY, m_supportRollerY, m_torsionBarLength, m_torsionBarSize;
+	float m_driveSprocketY, m_tensionerY, m_roadWheelY, m_supportRollerY;
+	float m_torsionBarLength, m_torsionBarSize;
 	float * m_roadWheelZ;
 	float * m_supportRollerZ;
 	int m_numRoadWheels, m_numSupportRollers;

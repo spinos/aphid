@@ -40,16 +40,17 @@ public:
 	
 	btRigidBody* getRigidBody(const int & i) const;
 	
+	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
+	btGeneric6DofSpringConstraint* constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
+	
+	void addGroundPlane(const float & groundSize, const float & groundLevel);
+	
 protected:
     btCollisionObject * getCollisionObject(const int & i) const;
 	
 	virtual void clientBuildPhysics();
 	btRigidBody* createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape);
 	
-	void addGroundPlane(const float & groundSize, const float & groundLevel);
-	
-	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
-	btGeneric6DofSpringConstraint* constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
 private:
 	btDynamicsWorld* m_dynamicsWorld;
 	

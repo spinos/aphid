@@ -133,7 +133,7 @@ void ShapeDrawer::drawD6Constraint(const btGeneric6DofConstraint* d6f)
 
 void ShapeDrawer::drawObject(const btCollisionObject* object)
 {
-    if(object->getInternalType() ==  btCollisionObject::CO_RIGID_BODY) {
+	if(object->getInternalType() == btCollisionObject::CO_RIGID_BODY) {
         drawRigidBody(btRigidBody::upcast(object));
     }
     else if(object->getInternalType() ==  btCollisionObject::CO_SOFT_BODY) {
@@ -172,8 +172,10 @@ void ShapeDrawer::drawShape(const btCollisionShape* shape)
 			break;
 		case CYLINDER_SHAPE_PROXYTYPE:
 			drawCylinder(static_cast<const btCylinderShape*>(shape));
+			break;
 		case TRIANGLE_MESH_SHAPE_PROXYTYPE:
 			drawTriangleMesh(static_cast<const btTriangleMeshShape*>(shape));
+			break;
 		default:
 			break;
 	}

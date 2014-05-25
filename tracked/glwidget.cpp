@@ -41,14 +41,38 @@
 
 #include <QtGui>
 #include <QtOpenGL>
-
+#include <DynamicsSolver.h>
 #include "glwidget.h"
 
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-    _dynamics = new TrackedPhysics;
-	_dynamics->initPhysics();
+	m_state = new caterpillar::PhysicsState;
+    _dynamics = new caterpillar::TrackedPhysics;
+	
+	caterpillar::PhysicsState::engine->initPhysics();
+	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, -1.f);
+	
+	_dynamics->setOrigin(Vector3F(0.f, 10.f, -10.f));
+	_dynamics->setSpan(81.f);
+	_dynamics->setHeight(6.f);
+	_dynamics->setWidth(27.f);
+	_dynamics->setTensionerRadius(3.2);
+	_dynamics->setNumRoadWheels(7);
+	_dynamics->setRoadWheelZ(0, 29.f);
+	_dynamics->setRoadWheelZ(1, 18.f);
+	_dynamics->setRoadWheelZ(2, 8.f);
+	_dynamics->setRoadWheelZ(3, -2.f);
+	_dynamics->setRoadWheelZ(4, -12.f);
+	_dynamics->setRoadWheelZ(5, -22.f);
+	_dynamics->setRoadWheelZ(6, -32.f);
+	_dynamics->setNumSupportRollers(3);
+	_dynamics->setSupportRollerZ(0, 24.f);
+	_dynamics->setSupportRollerZ(1, 2.f);
+	_dynamics->setSupportRollerZ(2, -18.f);
+	
+	_dynamics->create();
+	
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(30);
@@ -58,10 +82,12 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 //! [1]
 GLWidget::~GLWidget()
 {
+	delete _dynamics;
+	delete m_state;
 }
 //! [1]
 
-TrackedPhysics* GLWidget::getSolver()
+caterpillar::TrackedPhysics* GLWidget::getSolver()
 {
     return _dynamics;
 }
@@ -69,7 +95,7 @@ TrackedPhysics* GLWidget::getSolver()
 //! [7]
 void GLWidget::clientDraw()
 {
-    _dynamics->renderWorld();
+	caterpillar::PhysicsState::engine->renderWorld();
 }
 //! [7]
 
@@ -92,7 +118,7 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 void GLWidget::simulate()
 {
     update();
-    _dynamics->simulate();
+    caterpillar::PhysicsState::engine->simulate();
 }
 
 void GLWidget::keyPressEvent(QKeyEvent *e)

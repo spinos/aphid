@@ -45,7 +45,7 @@
 #include <QGLWidget>
 #include "TrackedPhysics.h"
 #include <Base3DView.h>
-
+#include <PhysicsState.h>
 //! [0]
 class GLWidget : public Base3DView
 {
@@ -56,7 +56,7 @@ public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 
-    TrackedPhysics* getSolver();
+    caterpillar::TrackedPhysics* getSolver();
     
     virtual void clientDraw();
     virtual void clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit);
@@ -68,8 +68,8 @@ protected:
     
 //! [3]
 private:
-    
-	TrackedPhysics* _dynamics;
+    caterpillar::PhysicsState * m_state;
+	caterpillar::TrackedPhysics* _dynamics;
 	
 private slots:
     void simulate();

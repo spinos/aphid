@@ -16,9 +16,10 @@ Chassis::Chassis()
 	m_height = 10.f;
 	m_trackWidth = 7.f;
 	m_driveSprocketRadius = 4.f;
+	m_driveSprocketY = 0.f;
 	m_tensionerRadius = 4.f;
 	m_roadWheelRadius = 4.f;
-	m_tensionerOriginRise = 0.f;
+	m_tensionerY = 0.f;
 	m_roadWheelY = -2.f;
 	m_roadWheelZ = NULL;
 	m_numRoadWheels = 0;
@@ -35,6 +36,13 @@ Chassis::~Chassis()
 	if(m_roadWheelZ) delete[] m_roadWheelZ;
 }
 
+void Chassis::setDim(const float & x, const float & y, const float & z)
+{
+	setWidth(x);
+	setHeight(y);
+	setSpan(z);
+}
+
 void Chassis::setOrigin(const Vector3F & p) { m_origin = p; }
 void Chassis::setSpan(const float & x) { m_span = x; }
 void Chassis::setWidth(const float & x) { m_width = x; }
@@ -44,8 +52,11 @@ void Chassis::setDriveSprocketRadius(const float & x) { m_driveSprocketRadius = 
 void Chassis::setTensionerRadius(const float & x) 
 { 
 	m_tensionerRadius = x; 
-	m_tensionerOriginRise = m_driveSprocketRadius - x;
+	// m_tensionerY = m_driveSprocketRadius - x;
 }
+
+void Chassis::setRoadWheelRadius(const float & x) { m_roadWheelRadius = x; }
+void Chassis::setSupportRollerRadius(const float & x) { m_supportRollerRadius = x; }
 
 void Chassis::setNumRoadWheels(const int & x)
 {
@@ -70,6 +81,11 @@ void Chassis::setSupportRollerZ(const int & i, const float & x)
 {
 	m_supportRollerZ[i] = x;
 }
+
+void Chassis::setDriveSprocketY(const float & x) { m_driveSprocketY = x; }
+void Chassis::setTensionerY(const float & x) { m_tensionerY = x; }
+void Chassis::setRoadWheelY(const float & x) { m_roadWheelY = x; }
+void Chassis::setSupportRollerY(const float & x) { m_supportRollerY = x; }
 
 const float Chassis::trackWidth() const { return m_trackWidth; }
 const float Chassis::span() const { return m_span; }
@@ -110,7 +126,7 @@ const Vector3F Chassis::driveSprocketOriginObject(bool isLeft) const
 
 const Vector3F Chassis::tensionerOrigin(bool isLeft) const
 {
-	return trackOrigin(isLeft) + Vector3F::ZAxis * m_span + Vector3F::YAxis * m_tensionerOriginRise;
+	return trackOrigin(isLeft) + Vector3F::ZAxis * m_span + Vector3F::YAxis * m_tensionerY;
 }
 
 const Vector3F Chassis::tensionerOriginObject(bool isLeft) const

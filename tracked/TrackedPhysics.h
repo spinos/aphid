@@ -7,11 +7,13 @@
  *
  */
 #pragma once
-#include "DynamicsSolver.h"
 #include "Tread.h"
 #include "Chassis.h"
-
-class TrackedPhysics : public DynamicsSolver
+#include "GroupId.h"
+#include "btBulletDynamicsCommon.h"
+#include "btBulletCollisionCommon.h"
+namespace caterpillar {
+class TrackedPhysics : public GroupId, public Chassis
 {
 public:
 	TrackedPhysics();
@@ -19,8 +21,8 @@ public:
 	void addTension(const float & x);
 	void addPower(const float & x);
 	void addBrake(bool leftSide);
-protected:
-	virtual void clientBuildPhysics();
+	void create();
+	
 private:
 	class CreateWheelProfile {
 	public:
@@ -51,9 +53,8 @@ private:
 	btRigidBody * createTorsionBar(btRigidBody * chassisBody, const int & i, bool isLeft = true);
 private:
 	Tread m_leftTread, m_rightTread;
-	Chassis m_chassis;
 	btGeneric6DofConstraint* m_tension[2];
 	btGeneric6DofConstraint* m_drive[2];
 	float m_targeVelocity;
 };
-
+}

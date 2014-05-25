@@ -15,7 +15,7 @@
 #include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
 #include "BulletSoftBody/btSoftBodyHelpers.h"
 
-DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(1)
+DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(2)
 {
 	m_isWorldInitialized = false;
     _drawer = new ShapeDrawer();
@@ -241,7 +241,7 @@ void DynamicsSolver::renderWorld()
 {
 	if(!isWorldInitialized()) return;
 	
-	_drawer->drawGravity(m_dynamicsWorld->getGravity());	
+	_drawer->drawGravity(m_dynamicsWorld->getGravity());
 	
 	const int	numObjects= m_dynamicsWorld->getNumCollisionObjects();
 	btVector3 wireColor(1,0,0);

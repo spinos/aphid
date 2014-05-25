@@ -1,4 +1,4 @@
-INCLUDEPATH += ../shared ../ ./
+INCLUDEPATH += ../shared ../ ./ ../caterpillar
 LIBS += -L../lib -laphid -lIlmImf -lHalf
 macx {
     INCLUDEPATH += $(HOME)/Library/boost_1_55_0 $(HOME)/Library/bullet-2.81/src/ \
@@ -22,6 +22,8 @@ HEADERS       = glwidget.h \
                 window.h \
                 DynamicsSolver.h \
                 ../shared/Base3DView.h \
+                ../caterpillar/GroupId.h \
+                ../caterpillar/PhysicsState.h \
                 shapeDrawer.h \
 				Tread.h \
                 Chassis.h \
@@ -31,6 +33,8 @@ SOURCES       = glwidget.cpp \
                 window.cpp \
                 DynamicsSolver.cpp \
                 ../shared/Base3DView.cpp \
+                ../caterpillar/GroupId.cpp \
+                ../caterpillar/PhysicsState.cpp \
                 shapeDrawer.cpp \
 				Tread.cpp \
                 Chassis.cpp \
