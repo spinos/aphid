@@ -28,6 +28,7 @@ DynamicsSolver::~DynamicsSolver()
 
 void DynamicsSolver::setEnablePhysics(bool x) { m_enablePhysics = x; }
 void DynamicsSolver::setNumSubSteps(int x) { m_numSubSteps = x; }
+const bool DynamicsSolver::isPhysicsEnabled() const { return m_enablePhysics; }
 	
 void DynamicsSolver::initPhysics()
 {
@@ -257,12 +258,12 @@ void DynamicsSolver::renderWorld()
 			//btSoftBodyHelpers::DrawFrame(psb,m_dynamicsWorld->getDebugDrawer());
 			//btSoftBodyHelpers::Draw(psb,m_dynamicsWorld->getDebugDrawer(),m_dynamicsWorld->getDrawFlags());
 	}
-	
+	*/
 	const int numConstraints = m_dynamicsWorld->getNumConstraints();
 	for(int i=0;i< numConstraints;i++) {
 	    btTypedConstraint* constraint = m_dynamicsWorld->getConstraint(i);
 	    _drawer->drawConstraint(constraint);
-	}*/
+	}
 }
 
 void DynamicsSolver::simulate()
@@ -270,7 +271,7 @@ void DynamicsSolver::simulate()
 	if(!m_enablePhysics) return;
 	btScalar dt = (btScalar)_clock.getTimeMicroseconds() / 1000000.f;
 	_clock.reset();
-	m_dynamicsWorld->stepSimulation(dt, m_numSubSteps, 1.f / 90.f);
+	simulate(dt, m_numSubSteps, 90.f);
 }
 
 void DynamicsSolver::simulate(const float & dt, const int & numSubsteps, const float & frequency)
@@ -278,7 +279,7 @@ void DynamicsSolver::simulate(const float & dt, const int & numSubsteps, const f
 	m_dynamicsWorld->stepSimulation(dt, numSubsteps, 1.f / frequency);
 }
 
-btRigidBody* DynamicsSolver::createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape)
+btRigidBody* DynamicsSolver::internalCreateRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape)
 {
 	btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
 
@@ -310,9 +311,8 @@ void DynamicsSolver::addGroundPlane(const float & groundSize, const float & grou
 	btTransform tr;
 	tr.setIdentity();
 	tr.setOrigin(btVector3(0, groundLevel - 1.f, 0));
-	btRigidBody* body = createRigidBody(0.f,tr,groundShape);
-	body->setFriction(btSqrt(.1f));
-	m_dynamicsWorld->addRigidBody(body);
+	btRigidBody* body = createRigidBody(groundShape,tr,0.f);
+	body->setFriction(btSqrt(.5f));
 }
 
 btBoxShape* DynamicsSolver::createBoxShape(const float & x, const float & y, const float & z)
@@ -341,9 +341,9 @@ void DynamicsSolver::addCollisionShape(btCollisionShape* shape)
     m_collisionShapes.push_back(shape);
 }
 
-btRigidBody* DynamicsSolver::createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass)
+btRigidBody* DynamicsSolver::createRigidBody(btCollisionShape* shape, const btTransform & transform, const float & mass)
 {
-	btRigidBody* body = createRigidBody(mass, transform, shape);
+	btRigidBody* body = internalCreateRigidBody(mass, transform, shape);
 	m_dynamicsWorld->addRigidBody(body);
 	return body;
 }

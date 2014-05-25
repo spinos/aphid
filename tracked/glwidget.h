@@ -69,7 +69,7 @@ protected:
 //! [3]
 private:
     caterpillar::PhysicsState * m_state;
-	caterpillar::TrackedPhysics* _dynamics;
+	caterpillar::TrackedPhysics* m_vehicle;
 	
 private slots:
     void simulate();

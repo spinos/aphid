@@ -28,6 +28,7 @@ public:
 	
 	void setEnablePhysics(bool x);
 	void setNumSubSteps(int x);
+	const bool isPhysicsEnabled() const;
 	const bool isWorldInitialized() const;
 	const int numCollisionObjects() const;
 	
@@ -36,7 +37,7 @@ public:
 	btSphereShape* createSphereShape(const float & r);
 	void addCollisionShape(btCollisionShape* shape);
 	
-	btRigidBody* createRigitBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
+	btRigidBody* createRigidBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
 	
 	btRigidBody* getRigidBody(const int & i) const;
 	
@@ -49,9 +50,10 @@ protected:
     btCollisionObject * getCollisionObject(const int & i) const;
 	
 	virtual void clientBuildPhysics();
-	btRigidBody* createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape);
 	
 private:
+	btRigidBody* internalCreateRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape);
+	
 	btDynamicsWorld* m_dynamicsWorld;
 	
 	btBroadphaseInterface*	m_overlappingPairCache;

@@ -48,31 +48,35 @@
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_state = new caterpillar::PhysicsState;
-    _dynamics = new caterpillar::TrackedPhysics;
+    m_vehicle = new caterpillar::TrackedPhysics;
 	
 	caterpillar::PhysicsState::engine->initPhysics();
 	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, -1.f);
 	
-	_dynamics->setOrigin(Vector3F(0.f, 10.f, -10.f));
-	_dynamics->setSpan(81.f);
-	_dynamics->setHeight(6.f);
-	_dynamics->setWidth(27.f);
-	_dynamics->setTensionerRadius(3.2);
-	_dynamics->setNumRoadWheels(7);
-	_dynamics->setRoadWheelZ(0, 29.f);
-	_dynamics->setRoadWheelZ(1, 18.f);
-	_dynamics->setRoadWheelZ(2, 8.f);
-	_dynamics->setRoadWheelZ(3, -2.f);
-	_dynamics->setRoadWheelZ(4, -12.f);
-	_dynamics->setRoadWheelZ(5, -22.f);
-	_dynamics->setRoadWheelZ(6, -32.f);
-	_dynamics->setNumSupportRollers(3);
-	_dynamics->setSupportRollerZ(0, 24.f);
-	_dynamics->setSupportRollerZ(1, 2.f);
-	_dynamics->setSupportRollerZ(2, -18.f);
+	m_vehicle->setOrigin(Vector3F(0.f, 10.f, -10.f));
+	m_vehicle->setSpan(81.f);
+	m_vehicle->setHeight(6.f);
+	m_vehicle->setWidth(27.f);
+	m_vehicle->setTensionerRadius(4.);
+	m_vehicle->setNumRoadWheels(7);
+	m_vehicle->setRoadWheelZ(0, 29.f);
+	m_vehicle->setRoadWheelZ(1, 18.f);
+	m_vehicle->setRoadWheelZ(2, 8.f);
+	m_vehicle->setRoadWheelZ(3, -2.f);
+	m_vehicle->setRoadWheelZ(4, -12.f);
+	m_vehicle->setRoadWheelZ(5, -22.f);
+	m_vehicle->setRoadWheelZ(6, -32.f);
+	m_vehicle->setNumSupportRollers(3);
+	m_vehicle->setSupportRollerZ(0, 24.f);
+	m_vehicle->setSupportRollerZ(1, 2.f);
+	m_vehicle->setSupportRollerZ(2, -18.f);
+	m_vehicle->setTensionerY(0.5f);
+	m_vehicle->setDriveSprocketY(.5f);
 	
-	_dynamics->create();
+	m_vehicle->create();
+	std::cout<<"object groups "<<m_vehicle->str();
 	
+	caterpillar::PhysicsState::engine->setEnablePhysics(false);
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(30);
@@ -82,14 +86,14 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 //! [1]
 GLWidget::~GLWidget()
 {
-	delete _dynamics;
+	delete m_vehicle;
 	delete m_state;
 }
 //! [1]
 
 caterpillar::TrackedPhysics* GLWidget::getSolver()
 {
-    return _dynamics;
+    return m_vehicle;
 }
 
 //! [7]
@@ -125,23 +129,27 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 {	
 	switch (e->key()) {
 		case Qt::Key_T:
-			_dynamics->addTension(0.5f);
+			m_vehicle->addTension(0.5f);
 			break;
 		case Qt::Key_W:
-			_dynamics->addPower(0.1f);
+			m_vehicle->addPower(0.1f);
 			break;
 		case Qt::Key_S:
-			_dynamics->addPower(-0.1f);
+			m_vehicle->addPower(-0.1f);
 			break;
 		case Qt::Key_A:
-			_dynamics->addBrake(true);
+			m_vehicle->addBrake(true);
 			break;
 		case Qt::Key_D:
-			_dynamics->addBrake(false);
+			m_vehicle->addBrake(false);
 			break;
 		case Qt::Key_B:
-			_dynamics->addBrake(true);
-			_dynamics->addBrake(false);
+			m_vehicle->addBrake(true);
+			m_vehicle->addBrake(false);
+			break;
+		case Qt::Key_Space:
+			const bool en = caterpillar::PhysicsState::engine->isPhysicsEnabled();
+			caterpillar::PhysicsState::engine->setEnablePhysics(!en);
 			break;
 		default:
 			break;

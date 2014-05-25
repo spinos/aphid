@@ -30,8 +30,10 @@ public:
 	const float segLength() const;
 	const float shoeThickness() const;
 	const float pinThickness() const;
+	const float pinHingeFactor() const;
 	static float ShoeLengthFactor;
-	static float PinHingeFactor;
+	static float PinLengthFactor;
+	//static float PinHingeFactor;
 	static float ShoeHingeRise;
 	static float ToothWidth;
 	static float ToothHeight;

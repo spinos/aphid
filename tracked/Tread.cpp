@@ -10,7 +10,8 @@
 #include "Tread.h"
 
 float Tread::ShoeLengthFactor = 0.85f;
-float Tread::PinHingeFactor = 0.58f;
+float Tread::PinLengthFactor = 0.58f;
+//float Tread::PinHingeFactor = 0.58f;
 float Tread::ShoeHingeRise = 0.4f;
 float Tread::ToothWidth = .8f;
 float Tread::ToothHeight = 1.5f;
@@ -33,7 +34,12 @@ void Tread::setThickness(const float & x) { m_thickness = x; }
 
 const float Tread::width() const { return m_width; }
 const float Tread::shoeWidth() const { return m_width - ToothWidth * 2.f; }
-const float Tread::pinLength() const { return m_shoeLength - ToothWidth * 1.2f; }
+const float Tread::pinLength() const { return m_shoeLength * PinLengthFactor; }
+
+const float Tread::pinHingeFactor() const
+{
+	return PinLengthFactor;
+}
 
 int Tread::computeNumShoes()
 {
