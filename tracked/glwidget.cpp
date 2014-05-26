@@ -54,9 +54,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, -1.f);
 	
 	m_vehicle->setOrigin(Vector3F(0.f, 10.f, -10.f));
-	m_vehicle->setSpan(81.f);
+	m_vehicle->setSpan(82.5f);
 	m_vehicle->setHeight(6.f);
 	m_vehicle->setWidth(27.f);
+	m_vehicle->setTrackWidth(7.8f);
 	m_vehicle->setTensionerRadius(4.);
 	m_vehicle->setNumRoadWheels(7);
 	m_vehicle->setRoadWheelZ(0, 29.f);
@@ -69,14 +70,15 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_vehicle->setNumSupportRollers(3);
 	m_vehicle->setSupportRollerZ(0, 24.f);
 	m_vehicle->setSupportRollerZ(1, 2.f);
-	m_vehicle->setSupportRollerZ(2, -18.f);
-	m_vehicle->setTensionerY(0.5f);
+	m_vehicle->setSupportRollerZ(2, -20.f);
+	m_vehicle->setTensionerY(.5f);
 	m_vehicle->setDriveSprocketY(.5f);
 	
 	m_vehicle->create();
 	std::cout<<"object groups "<<m_vehicle->str();
 	
 	caterpillar::PhysicsState::engine->setEnablePhysics(false);
+	caterpillar::PhysicsState::engine->setNumSubSteps(10);
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(30);

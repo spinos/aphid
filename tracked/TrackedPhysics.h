@@ -36,6 +36,7 @@ private:
 	
 	void createObstacles();
 	void createChassis(Chassis & c);
+	void addTreadSections(Tread & t, bool isLeft = true);
 	void createTread(Tread & t, bool isLeft = true);
 	void createDriveSprocket(Chassis & c, btRigidBody * chassisBody, bool isLeft = true);
 	void createTensioner(Chassis & c, btRigidBody * chassisBody, bool isLeft = true);

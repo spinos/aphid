@@ -9,9 +9,8 @@
 
 #include "Tread.h"
 
-float Tread::ShoeLengthFactor = 0.85f;
-float Tread::PinLengthFactor = 0.58f;
-//float Tread::PinHingeFactor = 0.58f;
+float Tread::ShoeLengthFactor = 0.86f;
+float Tread::PinLengthFactor = 0.68f;
 float Tread::ShoeHingeRise = 0.4f;
 float Tread::ToothWidth = .8f;
 float Tread::ToothHeight = 1.5f;
@@ -19,98 +18,89 @@ float Tread::SprocketRadius = 4.f;
 
 Tread::Tread() 
 {
-	m_span = 80.f;
-	m_radius = 8.f;
-	m_width = 16.f;
+	m_width = 8.f;
 	m_thickness = 1.f;
-	m_origin.setZero();
 }
 
-void Tread::setOrigin(const Vector3F & p) { m_origin = p; }
-void Tread::setSpan(const float & x) { m_span = x; }
-void Tread::setRadius(const float & x) { m_radius = x; }
 void Tread::setWidth(const float & x) { m_width = x; }
 void Tread::setThickness(const float & x) { m_thickness = x; } 
 
 const float Tread::width() const { return m_width; }
-const float Tread::shoeWidth() const { return m_width - ToothWidth * 2.f; }
-const float Tread::pinLength() const { return m_shoeLength * PinLengthFactor; }
+const float Tread::shoeWidth() const { return m_width - ToothWidth * 2.05f; }
+const float Tread::pinLength() const { return m_shoeLength - ToothWidth * 1.001f; }
 
 const float Tread::pinHingeFactor() const
 {
-	return PinLengthFactor;
-}
-
-int Tread::computeNumShoes()
-{
-	m_shoeLength = 2.f * PI * (SprocketRadius + m_thickness * .5f) / 11.f;
-	m_numShoeOnWheel = 1 + m_radius * PI / m_shoeLength;
-	m_radius = m_shoeLength * m_numShoeOnWheel / PI;
-	
-	m_numOnSpan = m_span / m_shoeLength + 1;
-	m_span = m_shoeLength * m_numOnSpan;
-	 
-	m_numShoes = m_numOnSpan * 2 + m_numShoeOnWheel * 2;
-	m_numPins = m_numShoes;
-	return m_numShoes;
+	return (pinLength() - pinThickness()) / segLength();
 }
 
 void Tread::begin() 
 {
-	m_it.origin = m_origin;
+	m_it.currentSection = 0;
+	m_it.origin = m_sections[0]._initialPosition;
 	m_it.isShoe = true;
-	m_it.isOnSpan = true;
+	//m_it.isOnSpan = true;
 	m_it.numShoe = 0;
 	m_it.numPin = 0;
-	m_it.numOnSpan = 0;
-	m_it.numOnWheel= 0;
-	m_it.angle = 0.f;
+	//m_it.numOnSpan = 0;
+	//m_it.numOnWheel= 0;
+	//m_it.angle = 0.f;
 	m_it.rot.setIdentity();
-	m_it.spanTranslateDirection = 1.f;
+	m_it.rot.rotateX(m_sections[0]._initialAngle);
+	//m_it.spanTranslateDirection = 1.f;
 }
 
 bool Tread::end() 
 {
-	return (m_it.numShoe == m_numShoes && m_it.numPin == m_numPins);
+	return m_it.currentSection >= (int)m_sections.size();
 }
 
 void Tread::next()
 {
-	if(m_it.isOnSpan) m_it.origin += Vector3F::ZAxis * m_shoeLength * 0.5f * m_it.spanTranslateDirection;
-	else m_it.rot.rotateX(-PI / (float)m_numShoeOnWheel * .5f);
+	const Section sect = m_sections[m_it.currentSection];
+	if(sect._type == Section::tLinear) {
+		m_it.origin += sect._deltaPosition * 0.5f;
+	}
+	else {
+		m_it.rot.rotateX(sect._deltaAngle * 0.5f);
+	}
 	
 	if(m_it.isShoe) m_it.numShoe++;
 	else m_it.numPin++;
 	
-	if(m_it.isOnSpan) {
-		if(m_it.isShoe) m_it.numOnSpan++;
-		if(m_it.numOnSpan == m_numOnSpan) {
-			m_it.isOnSpan = false;
-			m_it.numOnWheel = 0;
-		}
-	}
-	else {
-		if(m_it.isShoe) m_it.numOnWheel++;
-		if(m_it.numOnWheel == m_numShoeOnWheel) {
-			m_it.isOnSpan = true;
-			m_it.numOnSpan = 0;
-			m_it.spanTranslateDirection *= -1.f;
-		}
-	}
-	
 	m_it.isShoe = !m_it.isShoe;
+	
+	if(m_it.numPin >= sect._numSegments) {
+		m_it.currentSection++;
+		if(end()) return;
+		m_it.numShoe = 0;
+		m_it.numPin = 0;
+		m_it.origin = m_sections[m_it.currentSection]._initialPosition;
+		m_it.rot.rotateX(m_sections[m_it.currentSection]._initialAngle);
+	}
 }
 
 const Matrix44F Tread::currentSpace() const
 {
 	Matrix44F mat;
-	mat.setRotation(m_it.rot);
-	mat.setTranslation(m_it.origin);
 	Matrix44F obj;
-	if(m_it.isShoe)
-		obj.setTranslation(0.f, -m_radius, 0.f);
-	else
-		obj.setTranslation(0.f, -m_radius + 0.5f * m_thickness * ShoeHingeRise, 0.f);
+	mat.setRotation(m_it.rot);
+	const Section sect = m_sections[m_it.currentSection];
+	if(sect._type == Section::tLinear) {
+		mat.setTranslation(m_it.origin);
+		if(m_it.isShoe)
+			obj.setTranslation(0.f, -0.5f * m_thickness, 0.f);
+		else
+			obj.setTranslation(0.f, -0.5f * m_thickness + 0.5f * m_thickness * ShoeHingeRise, 0.f);
+	}
+	else {
+		mat.setTranslation(sect._rotateAround);
+		if(m_it.isShoe)
+			obj.setTranslation(0.f, - sect._rotateRadius - m_thickness * .5f, 0.f);
+		else
+			obj.setTranslation(0.f, - sect._rotateRadius - m_thickness * .5f +  m_thickness  * .5f * ShoeHingeRise, 0.f);
+	}
+	
 	obj *= mat;
 	return obj;
 }
@@ -124,3 +114,33 @@ const float Tread::shoeLength() const { return m_shoeLength * ShoeLengthFactor; 
 const float Tread::segLength() const { return m_shoeLength; }
 const float Tread::shoeThickness() const { return m_thickness; }
 const float Tread::pinThickness() const { return m_thickness * .4f; }
+
+void Tread::addSection(const Section & sect) { m_sections.push_back(sect); }
+void Tread::clearSections() { m_sections.clear(); }
+
+void Tread::computeSections()
+{
+	m_shoeLength = 2.f * PI * (SprocketRadius) / 11.f;
+	
+	std::deque<Section>::iterator it = m_sections.begin();
+	for(; it != m_sections.end(); ++it) {
+		Section & sect = *it;
+		if(sect._type == Section::tLinear) {
+			const Vector3F dp = sect._eventualPosition - sect._initialPosition;
+			const float fn = dp.length() / m_shoeLength;
+			sect._numSegments = fn;
+			//sect._numSegments++;
+			sect._deltaPosition = dp.normal() * m_shoeLength;
+		}
+		else {
+			float da = sect._eventualAngle - sect._initialAngle;
+			sect._numSegments = da * sect._rotateRadius / m_shoeLength;
+			if(sect._numSegments < 0) sect._numSegments = -sect._numSegments;
+			if(sect._numSegments < 1) sect._numSegments = 1;
+			sect._deltaAngle = da / sect._numSegments;
+		}
+	}
+	
+	it = m_sections.begin();
+	for(; it != m_sections.end(); ++it) std::cout<<" nseg "<<(*it)._numSegments;
+}

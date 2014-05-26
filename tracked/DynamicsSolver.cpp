@@ -271,7 +271,7 @@ void DynamicsSolver::simulate()
 	if(!m_enablePhysics) return;
 	btScalar dt = (btScalar)_clock.getTimeMicroseconds() / 1000000.f;
 	_clock.reset();
-	simulate(dt, m_numSubSteps, 90.f);
+	simulate(dt, m_numSubSteps, 120.f);
 }
 
 void DynamicsSolver::simulate(const float & dt, const int & numSubsteps, const float & frequency)
@@ -312,7 +312,7 @@ void DynamicsSolver::addGroundPlane(const float & groundSize, const float & grou
 	tr.setIdentity();
 	tr.setOrigin(btVector3(0, groundLevel - 1.f, 0));
 	btRigidBody* body = createRigidBody(groundShape,tr,0.f);
-	body->setFriction(btSqrt(.5f));
+	//body->setFriction(btSqrt(.5f));
 }
 
 btBoxShape* DynamicsSolver::createBoxShape(const float & x, const float & y, const float & z)

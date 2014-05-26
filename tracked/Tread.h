@@ -10,14 +10,29 @@
 #pragma once
 #include <AllMath.h>
 class Tread {
-public:	
+public:
+	struct Section {
+		enum SectionType {
+			tLinear = 0,
+			tAngular = 1
+		};
+		
+		SectionType _type;
+		float _initialAngle;
+		float _eventualAngle;
+		float _deltaAngle;
+		float _rotateRadius;
+		Vector3F _rotateAround;
+		Vector3F _initialPosition;
+		Vector3F _eventualPosition;
+		Vector3F _deltaPosition;
+		int _numSegments;
+	};
+	
 	Tread();
-	void setOrigin(const Vector3F & p);
-	void setSpan(const float & x);
-	void setRadius(const float & x);
+	
 	void setWidth(const float & x);
 	void setThickness(const float & x);
-	int computeNumShoes();
 	void begin();
 	bool end();
 	void next();
@@ -31,9 +46,12 @@ public:
 	const float shoeThickness() const;
 	const float pinThickness() const;
 	const float pinHingeFactor() const;
+	void addSection(const Section & sect);
+	void clearSections();
+	void computeSections();
+	
 	static float ShoeLengthFactor;
 	static float PinLengthFactor;
-	//static float PinHingeFactor;
 	static float ShoeHingeRise;
 	static float ToothWidth;
 	static float ToothHeight;
@@ -43,13 +61,11 @@ private:
 	struct Iterator {
 		Matrix33F rot;
 		Vector3F origin;
-		int numShoe, numPin, numOnSpan, numOnWheel;
-		float angle, spanTranslateDirection;
-		bool isShoe, isOnSpan;
+		int numShoe, numPin;
+		bool isShoe;
+		int currentSection;
 	};
 	Iterator m_it;
-	Vector3F m_origin;
-	int m_numShoes, m_numPins, m_numOnSpan, m_numShoeOnWheel;
-	float m_span, m_radius, m_width, m_thickness, m_shoeLength;
-	
+	float m_width, m_thickness, m_shoeLength;
+	std::deque<Section> m_sections;
 };
