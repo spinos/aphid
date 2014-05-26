@@ -12,7 +12,7 @@
 #include "PhysicsState.h"
 namespace caterpillar {
 #define CONTACTFRICTION 1.514
-#define WHEELMASS 4.0
+#define WHEELMASS 1.0
 TrackedPhysics::TrackedPhysics() 
 { 
 	addGroup("chassis");
@@ -57,7 +57,7 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 {
 	Vector3F p, q;
 	p = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
-	q = roadWheelOrigin(numRoadWheels() - 1, isLeft) - Vector3F::YAxis * roadWheelRadius() * .995f; 
+	q = roadWheelOrigin(numRoadWheels() - 1, isLeft) - Vector3F::YAxis * roadWheelRadius(); 
 	
 	Tread::Section sect;
 	sect._type = Tread::Section::tLinear;
@@ -69,7 +69,7 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	t.addSection(sect);
 	
 	p = q;
-	q = roadWheelOrigin(0, isLeft) - Vector3F::YAxis * roadWheelRadius() * .995f;
+	q = roadWheelOrigin(0, isLeft) - Vector3F::YAxis * roadWheelRadius();
 	sect._type = Tread::Section::tLinear;
 	sect._initialPosition = p;
 	sect._eventualPosition = q;
@@ -206,30 +206,78 @@ void TrackedPhysics::createTread(Tread & tread, bool isLeft)
 
 void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frameInB, const float & side, btRigidBody* bodyA, btRigidBody* bodyB)
 {
-	btGeneric6DofConstraint* hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
+	btGeneric6DofConstraint * hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
+	/*
+	PhysicsState::engine->constrainBySpring(*bodyA, *bodyB, frameInA, frameInB, true);
+	hinge->setLinearUpperLimit(btVector3(0., 0., -0.001));
+	hinge->setLinearLowerLimit(btVector3(0., 0., 0.001));
+	hinge->setAngularLowerLimit(btVector3(0.f, 0.f, -PI));
+	hinge->setAngularUpperLimit(btVector3(0.f, 0.f, PI));
+	hinge->enableSpring(2, true);
+	hinge->setStiffness(2, 400.);
+	hinge->setDamping(0.0, 0.5);
+	hinge->setEquilibriumPoint(2, 0.);
+*/
 	
-	hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -0.33));
+	//hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -0.33));
 	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
 	
 	btVector3 & p = frameInA.getOrigin();
-	p[0] = -side;
+	p[0] = -side * .9f;
 	btVector3 & p1 = frameInB.getOrigin();
-	p1[0] = -side;
+	p1[0] = -side* .9f;
 	
 	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
+	/*
+	PhysicsState::engine->constrainBySpring(*bodyA, *bodyB, frameInA, frameInB, true);
+	hinge->setLinearUpperLimit(btVector3(0., 0., -0.001));
+	hinge->setLinearLowerLimit(btVector3(0., 0., 0.001));
+	hinge->setAngularLowerLimit(btVector3(0.f, 0.f, -PI));
+	hinge->setAngularUpperLimit(btVector3(0.f, 0.f, PI));
+	hinge->enableSpring(2, true);
+	hinge->setStiffness(2, 400.);
+	hinge->setDamping(0.0, 0.5);
+	hinge->setEquilibriumPoint(2, 0.);
+*/
 	
-	hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -0.33));
+	btVector3 & p10 = frameInA.getOrigin();
+	p10[0] = -side * .8f;
+	btVector3 & p11 = frameInB.getOrigin();
+	p11[0] = -side * .8f;
+	
+	//hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
+	
+	//hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -0.33));
 	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
 	
 	btVector3 & p2 = frameInA.getOrigin();
-	p2[0] = side;
+	p2[0] = side* .9f;
 	btVector3 & p3 = frameInB.getOrigin();
-	p3[0] = side;
+	p3[0] = side* .9f;
 	
 	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
+	/*
+	PhysicsState::engine->constrainBySpring(*bodyA, *bodyB, frameInA, frameInB, true);
+	hinge->setLinearUpperLimit(btVector3(0., 0., -0.001));
+	hinge->setLinearLowerLimit(btVector3(0., 0., 0.001));
+	hinge->setAngularLowerLimit(btVector3(0.f, 0.f, -PI));
+	hinge->setAngularUpperLimit(btVector3(0.f, 0.f, PI));
+	hinge->enableSpring(2, true);
+	hinge->setStiffness(2, 400.);
+	hinge->setDamping(0.0, 0.5);
+	hinge->setEquilibriumPoint(2, 0.);
+*/
 	
-	hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -0.33));
+	//hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -0.33));
 	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
+	
+	btVector3 & p20 = frameInA.getOrigin();
+	p20[0] = side * .8f;
+	btVector3 & p21 = frameInB.getOrigin();
+	p21[0] = side * .8f;
+	
+	// hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
+	
 }
 
 btCollisionShape* TrackedPhysics::createShoeShape(const float & x, const float &y, const float & z)
@@ -362,24 +410,31 @@ btCollisionShape* TrackedPhysics::createSprocketShape(CreateWheelProfile & profi
 {
 	float rollWidth = (profile.width - profile.gap) * .5f;
 	btCollisionShape* rollShape = PhysicsState::engine->createCylinderShape(profile.radius, rollWidth * .5f, profile.radius);
-	btCollisionShape* toothShape = PhysicsState::engine->createCylinderShape(Tread::ToothWidth * 0.5f, Tread::ToothWidth * 0.5f, Tread::ToothWidth * 0.5f);
+	btCollisionShape* toothShape = PhysicsState::engine->createCylinderShape(Tread::ToothWidth * 0.4f, Tread::ToothWidth * 0.5f, Tread::ToothWidth * 0.4f);
+	btCollisionShape* tooth1Shape = PhysicsState::engine->createCylinderShape(Tread::ToothWidth * 0.5f, Tread::ToothWidth * 0.5f, Tread::ToothWidth * 0.5f );
 	
 	btCompoundShape* wheelShape = new btCompoundShape();
 	
 	btTransform childT; childT.setIdentity();
-	childT.setOrigin(btVector3(0, rollWidth * 0.5 + profile.gap * 0.5, 0));
+	childT.setOrigin(btVector3(0, profile.width * 0.5f + rollWidth * -0.5f, 0));
 	wheelShape->addChildShape(childT, rollShape);
-	childT.setOrigin(btVector3(0, rollWidth * -0.5 - profile.gap * 0.5, 0));
+	childT.setOrigin(btVector3(0, profile.width * -0.5f + rollWidth * 0.5f, 0));
 	wheelShape->addChildShape(childT, rollShape);
 	
-	const float toothR = profile.radius + m_leftTread.shoeThickness() * 0.46f * (1.f - Tread::ShoeHingeRise);
+	const float toothR = profile.radius + m_leftTread.shoeThickness() * 0.0f * (1.f - Tread::ShoeHingeRise);
+	const float tooth1R = profile.radius + m_leftTread.pinThickness() * 0.25f;
 	
 	const float delta = PI * 2.f / 11.f;
 	for(int i = 0; i < 11; i++) {
-		childT.setOrigin(btVector3(cos(delta * i) * toothR, profile.width * 0.5f - Tread::ToothWidth * 0.5f, sin(delta * i) * toothR) );
+		/*childT.setOrigin(btVector3(cos(delta * i) * toothR, profile.width * 0.5f - Tread::ToothWidth * 0.5f, sin(delta * i) * toothR) );
 		wheelShape->addChildShape(childT, toothShape);
 		childT.getOrigin()[1] = profile.width * -0.5f + Tread::ToothWidth * 0.5f;
-		wheelShape->addChildShape(childT, toothShape);
+		wheelShape->addChildShape(childT, toothShape);*/
+		
+		childT.setOrigin(btVector3(cos(delta * i) * tooth1R, profile.width * 0.5f - Tread::ToothWidth * 0.5f, sin(delta * i) * tooth1R) );
+		wheelShape->addChildShape(childT, tooth1Shape);
+		childT.getOrigin()[1] = profile.width * -0.5f + Tread::ToothWidth * 0.5f;
+		wheelShape->addChildShape(childT, tooth1Shape);
 	}
 	
 	return wheelShape;
@@ -401,6 +456,9 @@ void TrackedPhysics::createDriveSprocket(Chassis & c, btRigidBody * chassisBody,
 	
 	const int id = PhysicsState::engine->numCollisionObjects();
 	createWheel(sprocketShape, cwp);
+	
+	//cwp.dstBody->setFriction(.1f);
+	
 	if(isLeft) group("left_driveSprocket").push_back(id);
 	else group("right_driveSprocket").push_back(id);
 	
@@ -494,13 +552,13 @@ void TrackedPhysics::addPower(const float & x)
 	
 	m_drive[0]->getRotationalLimitMotor(2)->m_enableMotor = true;
 	m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = -m_targeVelocity;
-	if(m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce < 20000.f )
-		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce += 200.f;
+	//if(m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
+		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
 	m_drive[0]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_enableMotor = true;
 	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity  = m_targeVelocity;
-	if(m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce < 20000.f )
-		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce += 200.f;
+	//if(m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
+		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 }
 
@@ -508,11 +566,11 @@ void TrackedPhysics::addBrake(bool leftSide)
 {
 	if(leftSide) {
 		m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
-		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 1000.f;
+		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
 	}
 	else {
 		m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
-		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 1000.f;
+		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
 	}
 }
 
@@ -567,4 +625,6 @@ btRigidBody * TrackedPhysics::createTorsionBar(btRigidBody * chassisBody, const 
 		spring->setEquilibriumPoint(5, -0.55);
 	return body;
 }
+
+void TrackedPhysics::setTargetVelocity(const float & x) { m_targeVelocity = x; }
 }

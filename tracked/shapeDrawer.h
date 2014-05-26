@@ -28,8 +28,8 @@ public:
 	void drawTransform(const btTransform & t);
 	void drawForce(const btRigidBody* body);
 	void drawTranslateHandle(const btRigidBody* body);
-	void drawAngularLimit(const btTransform& space, const btVector3& angularLower, const btVector3& angularUpper);
 private:
+	void drawAngularLimit(const btTransform& space, const btTransform& space1, const btVector3& angularLower, const btVector3& angularUpper);
 	void drawHingeConstraint(const btHingeConstraint* constraint);
 	void drawD6Constraint(const btGeneric6DofConstraint* constraint);
 	void drawBox(const btBoxShape * boxShape);

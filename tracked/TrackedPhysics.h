@@ -22,6 +22,7 @@ public:
 	void addPower(const float & x);
 	void addBrake(bool leftSide);
 	void create();
+	void setTargetVelocity(const float & x);
 	
 private:
 	class CreateWheelProfile {

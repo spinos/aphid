@@ -271,7 +271,7 @@ void DynamicsSolver::simulate()
 	if(!m_enablePhysics) return;
 	btScalar dt = (btScalar)_clock.getTimeMicroseconds() / 1000000.f;
 	_clock.reset();
-	simulate(dt, m_numSubSteps, 120.f);
+	simulate(dt, m_numSubSteps, 60.f);
 }
 
 void DynamicsSolver::simulate(const float & dt, const int & numSubsteps, const float & frequency)

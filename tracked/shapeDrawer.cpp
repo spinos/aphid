@@ -111,7 +111,7 @@ void ShapeDrawer::drawD6Constraint(const btGeneric6DofConstraint* d6f)
     btVector3 angularLower, angularUpper;
     ((btGeneric6DofConstraint*)d6f)->getAngularLowerLimit(angularLower);
     ((btGeneric6DofConstraint*)d6f)->getAngularUpperLimit(angularUpper);
-    drawAngularLimit(transA, angularLower, angularUpper);
+    drawAngularLimit(transA, transB, angularLower, angularUpper);
     
     btTransform tA = bodyA.getWorldTransform();
     btTransform tB = bodyB.getWorldTransform();
@@ -332,7 +332,7 @@ void ShapeDrawer::drawTranslateHandle(const btRigidBody* body)
 	glEnd();
 }
 
-void ShapeDrawer::drawAngularLimit(const btTransform& space, const btVector3& angularLower, const btVector3& angularUpper)
+void ShapeDrawer::drawAngularLimit(const btTransform& space, const btTransform& space1, const btVector3& angularLower, const btVector3& angularUpper)
 {
     glPushMatrix();
     btScalar m[16];
@@ -389,6 +389,15 @@ void ShapeDrawer::drawAngularLimit(const btTransform& space, const btVector3& an
 	
 	glEnd();
     glPopMatrix();
+	glPushMatrix();
+	space1.getOpenGLMatrix(m);
+    glMultMatrixf((const GLfloat*)m);
+	glBegin( GL_LINES );
+	glColor3f(0.f, 1.f, 1.f);					
+	glVertex3f(0.f, 0.f, 0.f);
+	glVertex3f(1.f, 0.f, 0.f);	
+	glEnd();
+	glPopMatrix();
 }
 
 void ShapeDrawer::drawHingeConstraint(const btHingeConstraint* constraint)
