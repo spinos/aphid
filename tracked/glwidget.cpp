@@ -54,10 +54,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, -1.f);
 	
 	m_vehicle->setOrigin(Vector3F(0.f, 10.f, -10.f));
-	m_vehicle->setSpan(81.5f);
+	m_vehicle->setSpan(83.5f);
 	m_vehicle->setHeight(6.f);
 	m_vehicle->setWidth(29.f);
-	m_vehicle->setTrackWidth(7.8f);
+	m_vehicle->setTrackWidth(6.8f);
 	m_vehicle->setTensionerRadius(4.);
 	m_vehicle->setNumRoadWheels(7);
 	m_vehicle->setRoadWheelZ(0, 29.f);

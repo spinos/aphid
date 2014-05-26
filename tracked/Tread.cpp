@@ -19,7 +19,7 @@ float Tread::SprocketRadius = 4.f;
 Tread::Tread() 
 {
 	m_width = 8.f;
-	m_thickness = 1.f;
+	m_thickness = .8f;
 }
 
 void Tread::setWidth(const float & x) { m_width = x; }
@@ -129,7 +129,7 @@ void Tread::computeSections()
 			const Vector3F dp = sect._eventualPosition - sect._initialPosition;
 			const float fn = dp.length() / m_shoeLength;
 			sect._numSegments = fn;
-			// sect._numSegments++;
+			//sect._numSegments++;
 			sect._deltaPosition = dp.normal() * m_shoeLength;
 		}
 		else {

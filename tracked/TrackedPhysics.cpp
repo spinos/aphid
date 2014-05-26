@@ -11,8 +11,10 @@
 #include <DynamicsSolver.h>
 #include "PhysicsState.h"
 namespace caterpillar {
-#define CONTACTFRICTION 1.514
+#define CONTACTFRICTION .576
 #define WHEELMASS 1.0
+#define SHOEMASS 1.0
+#define PINMASS 1.0
 TrackedPhysics::TrackedPhysics() 
 { 
 	addGroup("chassis");
@@ -160,14 +162,14 @@ void TrackedPhysics::createTread(Tread & tread, bool isLeft)
 		
 		const int id = PhysicsState::engine->numCollisionObjects();
 		if(tread.currentIsShoe()) {
-			curBody = PhysicsState::engine->createRigidBody(shoeShape, trans, .35f);
+			curBody = PhysicsState::engine->createRigidBody(shoeShape, trans, SHOEMASS);
 			if(isLeft) group("left_trackShoe").push_back(id);
 			else group("right_trackShoe").push_back(id);
 			
 			curBody->setFriction(CONTACTFRICTION);
 		}
 		else {
-			curBody = PhysicsState::engine->createRigidBody(pinShape, trans, .35f);
+			curBody = PhysicsState::engine->createRigidBody(pinShape, trans, PINMASS);
 			if(isLeft) group("left_trackPin").push_back(id);
 			else group("right_trackPin").push_back(id);
 			
@@ -220,12 +222,12 @@ void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frame
 */
 	
 	//hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -0.33));
-	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
+	//hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
 	
 	btVector3 & p = frameInA.getOrigin();
-	p[0] = -side * .9f;
+	p[0] = -side + Tread::ToothWidth * .5f;
 	btVector3 & p1 = frameInB.getOrigin();
-	p1[0] = -side* .9f;
+	p1[0] = -side + Tread::ToothWidth * .5f;
 	
 	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
 	/*
@@ -248,12 +250,12 @@ void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frame
 	//hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
 	
 	//hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -0.33));
-	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
+	//hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
 	
 	btVector3 & p2 = frameInA.getOrigin();
-	p2[0] = side* .9f;
+	p2[0] = side - Tread::ToothWidth * .5f;
 	btVector3 & p3 = frameInB.getOrigin();
-	p3[0] = side* .9f;
+	p3[0] = side - Tread::ToothWidth * .5f;
 	
 	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
 	/*
@@ -269,7 +271,7 @@ void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frame
 */
 	
 	//hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -0.33));
-	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
+	//hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
 	
 	btVector3 & p20 = frameInA.getOrigin();
 	p20[0] = side * .8f;
@@ -553,12 +555,12 @@ void TrackedPhysics::addPower(const float & x)
 	m_drive[0]->getRotationalLimitMotor(2)->m_enableMotor = true;
 	m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = -m_targeVelocity;
 	//if(m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
-		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
+		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 1000.f;
 	m_drive[0]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_enableMotor = true;
 	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity  = m_targeVelocity;
 	//if(m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
-		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
+		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 1000.f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 }
 
@@ -566,11 +568,11 @@ void TrackedPhysics::addBrake(bool leftSide)
 {
 	if(leftSide) {
 		m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
-		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
+		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 1000.f;
 	}
 	else {
 		m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
-		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 10000.f;
+		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 1000.f;
 	}
 }
 
@@ -620,9 +622,9 @@ btRigidBody * TrackedPhysics::createTorsionBar(btRigidBody * chassisBody, const 
 	spring->setStiffness(5, 8000.);
 	spring->setDamping(0., 0.5);
 	if(isLeft)
-		spring->setEquilibriumPoint(5, 0.55);
+		spring->setEquilibriumPoint(5, 0.5);
 	else
-		spring->setEquilibriumPoint(5, -0.55);
+		spring->setEquilibriumPoint(5, -0.5);
 	return body;
 }
 
