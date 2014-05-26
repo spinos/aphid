@@ -46,6 +46,7 @@ public:
 	
 	void addGroundPlane(const float & groundSize, const float & groundLevel);
 	
+	ShapeDrawer* getDrawer();
 protected:
     btCollisionObject * getCollisionObject(const int & i) const;
 	

@@ -11,15 +11,17 @@
 
 Chassis::Chassis() 
 {
-	m_span = 80.f;
-	m_width = 20.f;
-	m_height = 10.f;
-	m_trackWidth = 7.f;
-	m_driveSprocketRadius = 4.f;
+	m_span = 77.15f;
+	m_width = 30.55f;
+	m_height = 8.6f;
+	m_trackWidth = 8.21f;
+	m_driveSprocketRadius = 3.8f;
 	m_driveSprocketY = 0.f;
-	m_tensionerRadius = 4.f;
-	m_roadWheelRadius = 4.f;
+	m_driveSprocketZ = -38.8f;
+	m_tensionerRadius = 3.8f;
+	m_roadWheelRadius = 3.8f;
 	m_tensionerY = 0.f;
+	m_tensionerZ = 38.4f;
 	m_roadWheelY = -2.f;
 	m_roadWheelZ = NULL;
 	m_numRoadWheels = 0;
@@ -194,3 +196,12 @@ const Vector3F Chassis::roadWheelRestPosition(const int & i, bool isLeft) const
 	return p;
 }
 
+const Vector3F Chassis::computeWheelOrigin(const float & chassisWidth, const float & trackWidth, const float & y, const float & z, bool isLeft) const
+{
+	float d = 1.f;
+	if(!isLeft) d = -d;
+	
+	Vector3F p(0.f, y, z);
+	p.x = d * (chassisWidth + trackWidth) * .5f;
+	return p;
+}

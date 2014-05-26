@@ -57,6 +57,6 @@ void Ground::create()
     
 	// int id = PhysicsState::engine->numCollisionObjects();
     btTransform trans; trans.setIdentity();
-	PhysicsState::engine->createRigitBody(trimeshShape, trans, 0.0);
+	PhysicsState::engine->createRigidBody(trimeshShape, trans, 0.0);
 }
 }

@@ -60,11 +60,12 @@ public:
 	const Vector3F torsionBarHinge(const int & i, bool isLeft = true) const;
 	const float torsionBarRestAngle() const;
 	const Vector3F roadWheelRestPosition(const int & i, bool isLeft = true) const;
+	const Vector3F computeWheelOrigin(const float & chassisWidth, const float & trackWidth, const float & y, const float & z, bool isLeft = true) const;
 private:
 	Vector3F m_origin;
 	float m_span, m_width, m_height, m_trackWidth;
 	float m_driveSprocketRadius, m_tensionerRadius, m_roadWheelRadius, m_supportRollerRadius;
-	float m_driveSprocketY, m_tensionerY, m_roadWheelY, m_supportRollerY;
+	float m_driveSprocketY, m_driveSprocketZ, m_tensionerY, m_tensionerZ, m_roadWheelY, m_supportRollerY;
 	float m_torsionBarLength, m_torsionBarSize, m_torsionBarRestAngle;
 	float * m_roadWheelZ;
 	float * m_supportRollerZ;

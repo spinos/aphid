@@ -13,7 +13,7 @@ float Tread::ShoeLengthFactor = 0.86f;
 float Tread::PinLengthFactor = 0.68f;
 float Tread::ShoeHingeRise = 0.4f;
 float Tread::ToothWidth = .8f;
-float Tread::ToothHeight = 1.5f;
+float Tread::ToothHeight = 1.f;
 float Tread::SprocketRadius = 4.f;
 
 Tread::Tread() 

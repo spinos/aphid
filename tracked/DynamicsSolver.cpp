@@ -376,3 +376,6 @@ btGeneric6DofSpringConstraint* DynamicsSolver::constrainBySpring(btRigidBody& rb
 	m_dynamicsWorld->addConstraint(spring, disableCollisionsBetweenLinkedBodies);
 	return spring;
 }
+
+ShapeDrawer* DynamicsSolver::getDrawer() { return _drawer; }
+

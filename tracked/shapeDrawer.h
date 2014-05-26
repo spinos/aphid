@@ -17,6 +17,10 @@ public:
 	ShapeDrawer () {}
 	virtual ~ShapeDrawer () {}
 	
+	void box(const float & x, const float & y, const float & z);
+	void cylinder(const float & x, const float & y, const float & z);
+	void cylinder(const Matrix44F & mat, const float & x, const float & y, const float & z);
+	
 	void drawGravity(const btVector3 & v);
 	void drawConstraint(const btTypedConstraint* constraint);
 	void drawObject(const btCollisionObject* object);
