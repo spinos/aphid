@@ -59,7 +59,7 @@ public:
 	const Vector3F torsionBarHingeObject(const int & i, bool isLeft = true) const;
 	const Vector3F torsionBarHinge(const int & i, bool isLeft = true) const;
 	const float torsionBarRestAngle() const;
-	const float torsionBarDropDistance() const;
+	const Vector3F roadWheelRestPosition(const int & i, bool isLeft = true) const;
 private:
 	Vector3F m_origin;
 	float m_span, m_width, m_height, m_trackWidth;

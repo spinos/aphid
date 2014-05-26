@@ -27,9 +27,9 @@ Chassis::Chassis()
 	m_numSupportRollers = 0;
 	m_supportRollerY = 3.f;
 	m_supportRollerRadius = 1.3f;
-	m_torsionBarLength = 7.f;
+	m_torsionBarLength = 6.f;
 	m_torsionBarSize = 1.2f;
-	m_torsionBarRestAngle = .5f;
+	m_torsionBarRestAngle = .49f;
 }
 
 Chassis::~Chassis()
@@ -182,4 +182,15 @@ const Vector3F Chassis::torsionBarHinge(const int & i, bool isLeft) const
 
 void Chassis::setTorsionBarRestAngle(const float & x) { m_torsionBarRestAngle = x; }
 const float Chassis::torsionBarRestAngle() const { return m_torsionBarRestAngle; }
-const float Chassis::torsionBarDropDistance() const { return m_torsionBarLength * sin(m_torsionBarRestAngle); }
+
+const Vector3F Chassis::roadWheelRestPosition(const int & i, bool isLeft) const
+{
+	Vector3F p = torsionBarHinge(i, isLeft);
+	float d = 1.f;
+	if(!isLeft) d = -d;
+	p.x += m_trackWidth * .5f * d - m_torsionBarSize * .7f * d; 
+	p.y -= m_torsionBarLength * sin(m_torsionBarRestAngle);
+	p.z -= m_torsionBarLength * cos(m_torsionBarRestAngle);
+	return p;
+}
+
