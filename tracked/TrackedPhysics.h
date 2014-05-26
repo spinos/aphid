@@ -23,7 +23,7 @@ public:
 	void addBrake(bool leftSide);
 	void create();
 	void setTargetVelocity(const float & x);
-	
+	void displayStatistics() const;
 private:
 	class CreateWheelProfile {
 	public:

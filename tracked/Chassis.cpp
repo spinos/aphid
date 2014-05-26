@@ -29,6 +29,7 @@ Chassis::Chassis()
 	m_supportRollerRadius = 1.3f;
 	m_torsionBarLength = 7.f;
 	m_torsionBarSize = 1.2f;
+	m_torsionBarRestAngle = .5f;
 }
 
 Chassis::~Chassis()
@@ -106,13 +107,6 @@ const Vector3F Chassis::extends() const
 	return Vector3F(m_width, m_height, m_span);
 }
 
-const float Chassis::trackRadius() const
-{
-	float h1 = m_driveSprocketY + m_driveSprocketRadius;
-	float h0 = m_roadWheelY - m_roadWheelRadius;
-	return h1 - (h1 + h0) * .5f;
-}
-
 const Vector3F Chassis::trackOrigin(bool isLeft) const
 {
 	return driveSprocketOrigin(isLeft);
@@ -185,3 +179,7 @@ const Vector3F Chassis::torsionBarHinge(const int & i, bool isLeft) const
 {
 	return torsionBarHingeObject(i, isLeft) + m_origin;
 }
+
+void Chassis::setTorsionBarRestAngle(const float & x) { m_torsionBarRestAngle = x; }
+const float Chassis::torsionBarRestAngle() const { return m_torsionBarRestAngle; }
+const float Chassis::torsionBarDropDistance() const { return m_torsionBarLength * sin(m_torsionBarRestAngle); }

@@ -54,10 +54,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, -1.f);
 	
 	m_vehicle->setOrigin(Vector3F(0.f, 10.f, -10.f));
-	m_vehicle->setSpan(83.5f);
-	m_vehicle->setHeight(6.f);
-	m_vehicle->setWidth(29.f);
-	m_vehicle->setTrackWidth(6.8f);
+	m_vehicle->setDim(29.f, 6.f, 81.5f);
+	m_vehicle->setTrackWidth(8.8f);
 	m_vehicle->setTensionerRadius(4.);
 	m_vehicle->setNumRoadWheels(7);
 	m_vehicle->setRoadWheelZ(0, 29.f);
@@ -71,8 +69,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_vehicle->setSupportRollerZ(0, 24.f);
 	m_vehicle->setSupportRollerZ(1, 2.f);
 	m_vehicle->setSupportRollerZ(2, -20.f);
-	m_vehicle->setTensionerY(.5f);
-	m_vehicle->setDriveSprocketY(.5f);
+	m_vehicle->setTensionerY(.6f);
+	m_vehicle->setDriveSprocketY(.6f);
 	
 	m_vehicle->create();
 	std::cout<<"object groups "<<m_vehicle->str();
@@ -123,6 +121,7 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::simulate()
 {
+	// m_vehicle->displayStatistics();
     update();
     caterpillar::PhysicsState::engine->simulate();
 }

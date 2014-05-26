@@ -32,6 +32,13 @@ std::deque<int> & GroupId::group(const std::string & name)
 	return m_data[name];
 }
 
+const std::deque<int> GroupId::getGroup(const std::string & name) const
+{
+	std::map<std::string, std::deque<int> >::const_iterator it = m_data.find(name);
+	if(it == m_data.end()) return std::deque<int>();
+	return (*it).second;
+}
+
 void GroupId::resetGroups()
 {
 	std::map<std::string, std::deque<int> >::iterator it = m_data.begin();

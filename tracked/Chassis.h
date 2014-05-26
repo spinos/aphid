@@ -34,6 +34,7 @@ public:
 	void setTensionerY(const float & x);
 	void setRoadWheelY(const float & x);
 	void setSupportRollerY(const float & x);
+	void setTorsionBarRestAngle(const float & x);
 	const float torsionBarLength() const;
 	const float torsionBarSize() const;
 	const float trackWidth() const;
@@ -57,13 +58,14 @@ public:
 	const Vector3F supportRollerOriginObject(const int & i, bool isLeft = true) const;
 	const Vector3F torsionBarHingeObject(const int & i, bool isLeft = true) const;
 	const Vector3F torsionBarHinge(const int & i, bool isLeft = true) const;
-	const float trackRadius() const;
+	const float torsionBarRestAngle() const;
+	const float torsionBarDropDistance() const;
 private:
 	Vector3F m_origin;
 	float m_span, m_width, m_height, m_trackWidth;
 	float m_driveSprocketRadius, m_tensionerRadius, m_roadWheelRadius, m_supportRollerRadius;
 	float m_driveSprocketY, m_tensionerY, m_roadWheelY, m_supportRollerY;
-	float m_torsionBarLength, m_torsionBarSize;
+	float m_torsionBarLength, m_torsionBarSize, m_torsionBarRestAngle;
 	float * m_roadWheelZ;
 	float * m_supportRollerZ;
 	int m_numRoadWheels, m_numSupportRollers;

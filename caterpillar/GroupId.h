@@ -20,6 +20,7 @@ public:
 	void addGroup(const std::string & name);
 	const bool hasGroup(const std::string & name) const;
 	std::deque<int> & group(const std::string & name);
+	const std::deque<int> getGroup(const std::string & name) const;
 	void resetGroups();
 	const std::string str() const;
 private:
