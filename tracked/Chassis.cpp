@@ -11,26 +11,26 @@
 
 Chassis::Chassis() 
 {
-	m_span = 77.15f;
+	m_span = 70.75f;
 	m_width = 30.55f;
-	m_height = 8.6f;
+	m_height = 12.5f;
 	m_trackWidth = 8.21f;
 	m_driveSprocketRadius = 3.8f;
-	m_driveSprocketY = 0.f;
-	m_driveSprocketZ = -38.8f;
+	m_driveSprocketY = -.9f;
+	m_driveSprocketZ = -39.8f;
 	m_tensionerRadius = 3.8f;
 	m_roadWheelRadius = 3.8f;
-	m_tensionerY = 0.f;
+	m_tensionerY = -.9f;
 	m_tensionerZ = 38.4f;
 	m_roadWheelY = -6.5f;
 	m_roadWheelZ = NULL;
 	m_numRoadWheels = 0;
 	m_supportRollerZ = NULL;
 	m_numSupportRollers = 0;
-	m_supportRollerY = 3.f;
-	m_supportRollerRadius = 1.3f;
+	m_supportRollerY = 1.5f;
+	m_supportRollerRadius = 1.2f;
 	m_bogieArmLength = 7.f;
-	m_bogieArmWidth = 1.2f;
+	m_bogieArmWidth = 1.f;
 	m_torsionBarRestAngle = .49f;
 	m_torsionBarTargetAngle = .67f;
 	m_toothWidth = .8;

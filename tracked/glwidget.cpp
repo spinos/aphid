@@ -54,12 +54,6 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, -1.f);
 	
 	m_vehicle->setOrigin(Vector3F(0.f, 10.f, -10.f));
-	m_vehicle->setDim(21.95f, 6.f, 79.25f);
-	m_vehicle->setTrackWidth(8.21f);
-	m_vehicle->setTensionerRadius(3.8);
-	m_vehicle->setDriveSprocketRadius(3.8);
-	m_vehicle->setRoadWheelRadius(3.8);
-	m_vehicle->setRoadWheelY(-6.5);
 	m_vehicle->setNumRoadWheels(7);
 	m_vehicle->setRoadWheelZ(0, 24.7f);
 	m_vehicle->setRoadWheelZ(1, 14.f);
@@ -72,9 +66,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_vehicle->setSupportRollerY(1.6f);
 	m_vehicle->setSupportRollerZ(0, 19.3f);
 	m_vehicle->setSupportRollerZ(1, .8f);
-	m_vehicle->setSupportRollerZ(2, -16.5f);
-	m_vehicle->setTensionerY(-.8f);
-	m_vehicle->setDriveSprocketY(-.8f);
+	m_vehicle->setSupportRollerZ(2, -18.5f);
 	
 	m_vehicle->create();
 	std::cout<<"object groups "<<m_vehicle->str();

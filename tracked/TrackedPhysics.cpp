@@ -11,10 +11,10 @@
 #include <DynamicsSolver.h>
 #include "PhysicsState.h"
 namespace caterpillar {
-#define CONTACTFRICTION .618
-#define WHEELMASS 1.
-#define SHOEMASS .1
-#define PINMASS .1
+#define CONTACTFRICTION .576
+#define WHEELMASS .5
+#define SHOEMASS .2
+#define PINMASS .3
 #define SPROCKETTEETHPROTRUDE 0.075
 
 static btTransform CopyFromMatrix44F(const Matrix44F & tm)
@@ -246,7 +246,7 @@ void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frame
 {
 	btGeneric6DofConstraint * hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
 	
-	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
+	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.0));
 	
 	btVector3 & p = frameInA.getOrigin();
 	p[0] = -side + toothWidth() * .5f;
@@ -255,7 +255,7 @@ void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frame
 	
 	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
 
-	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
+	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.0));
 	
 	btVector3 & p2 = frameInA.getOrigin();
 	p2[0] = side - toothWidth() * .5f;
@@ -264,7 +264,7 @@ void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frame
 	
 	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
 	
-	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.00023));
+	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.0));
 }
 
 btCollisionShape* TrackedPhysics::createShoeShape(Tread & tread)
@@ -327,16 +327,16 @@ btCollisionShape* TrackedPhysics::createPinShape(Tread & tread)
 void TrackedPhysics::createChassis(Chassis & c)
 {
 	const Vector3F dims = c.extends() * .5f;
-	btCollisionShape* chassisShape = PhysicsState::engine->createBoxShape(dims.x - 0.1f, dims.y, dims.z);
-	btCollisionShape* mudShape = PhysicsState::engine->createBoxShape(dims.x + trackWidth(), .5f, dims.z);
+	btCollisionShape* hullShape = PhysicsState::engine->createBoxShape(dims.x - 0.2f, dims.y * .5, dims.z);
+	btCollisionShape* guardShape = PhysicsState::engine->createBoxShape(dims.x + trackWidth(), .5f, dims.z);
 	
 	btCompoundShape* compShape = new btCompoundShape();
 	
 	btTransform childT; childT.setIdentity();
-	compShape->addChildShape(childT, chassisShape);
+	compShape->addChildShape(childT, hullShape);
 	
-	childT.setOrigin(btVector3(0, dims.y + 3.f, 0.f));
-	compShape->addChildShape(childT, mudShape);
+	childT.setOrigin(btVector3(0, dims.y - .5, 0));
+	compShape->addChildShape(childT, guardShape);
 	
 	const Vector3F origin = c.center();
 	btTransform trans;
@@ -455,7 +455,7 @@ void TrackedPhysics::createDriveSprocket(Chassis & c, btRigidBody * chassisBody,
 	cwp.connectTo = chassisBody;
 	cwp.radius = c.driveSprocketRadius();
 	cwp.width = c.trackWidth();
-	cwp.mass = WHEELMASS;
+	cwp.mass = WHEELMASS * 2.;
 	cwp.worldP = c.driveSprocketOrigin(isLeft);
 	cwp.objectP = c.driveSprocketOriginObject(isLeft);
 	cwp.isLeft = isLeft;
