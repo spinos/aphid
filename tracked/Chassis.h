@@ -35,9 +35,13 @@ public:
 	void setRoadWheelY(const float & x);
 	void setSupportRollerY(const float & x);
 	void setTorsionBarRestAngle(const float & x);
+	void setTorsionBarTargetAngle(const float & x);
+	void setToothWidth(const float & x);
+	
 	const float torsionBarLength() const;
 	const float torsionBarSize() const;
 	const float trackWidth() const;
+	const float tensionerWidth() const;
 	const float span() const;
 	const float driveSprocketRadius() const;
 	const float tensionerRadius() const;
@@ -57,16 +61,19 @@ public:
 	const Vector3F supportRollerOriginObject(const int & i, bool isLeft = true) const;
 	const Vector3F torsionBarHingeObject(const int & i, bool isLeft = true) const;
 	const Vector3F torsionBarHinge(const int & i, bool isLeft = true) const;
+	const Matrix44F bogieArmOrigin(const int & i, bool isLeft = true) const;
 	const float torsionBarRestAngle() const;
-	const Vector3F roadWheelRestPosition(const int & i, bool isLeft = true) const;
+	const float torsionBarTargetAngle() const;
+	const float toothWidth() const;
 	const Vector3F computeWheelOrigin(const float & chassisWidth, const float & trackWidth, const float & y, const float & z, bool isLeft = true) const;
+	const Vector3F roadWheelOriginToBogie(bool isLeft = true) const;
 	const bool isBackdrive() const;
 private:
 	Vector3F m_origin;
-	float m_span, m_width, m_height, m_trackWidth;
+	float m_span, m_width, m_height, m_trackWidth, m_toothWidth;
 	float m_driveSprocketRadius, m_tensionerRadius, m_roadWheelRadius, m_supportRollerRadius;
 	float m_driveSprocketY, m_driveSprocketZ, m_tensionerY, m_tensionerZ, m_roadWheelY, m_supportRollerY;
-	float m_torsionBarLength, m_torsionBarSize, m_torsionBarRestAngle;
+	float m_torsionBarLength, m_torsionBarSize, m_torsionBarRestAngle, m_torsionBarTargetAngle;
 	float * m_roadWheelZ;
 	float * m_supportRollerZ;
 	int m_numRoadWheels, m_numSupportRollers;

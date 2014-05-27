@@ -22,16 +22,18 @@ Chassis::Chassis()
 	m_roadWheelRadius = 3.8f;
 	m_tensionerY = 0.f;
 	m_tensionerZ = 38.4f;
-	m_roadWheelY = -2.f;
+	m_roadWheelY = -6.5f;
 	m_roadWheelZ = NULL;
 	m_numRoadWheels = 0;
 	m_supportRollerZ = NULL;
 	m_numSupportRollers = 0;
 	m_supportRollerY = 3.f;
 	m_supportRollerRadius = 1.3f;
-	m_torsionBarLength = 6.f;
+	m_torsionBarLength = 7.f;
 	m_torsionBarSize = 1.2f;
 	m_torsionBarRestAngle = .49f;
+	m_torsionBarTargetAngle = .57f;
+	m_toothWidth = .8;
 }
 
 Chassis::~Chassis()
@@ -52,11 +54,7 @@ void Chassis::setWidth(const float & x) { m_width = x; }
 void Chassis::setHeight(const float & x) { m_height = x; }
 void Chassis::setTrackWidth(const float & x) { m_trackWidth = x; }
 void Chassis::setDriveSprocketRadius(const float & x) { m_driveSprocketRadius = x; }
-void Chassis::setTensionerRadius(const float & x) 
-{ 
-	m_tensionerRadius = x; 
-	// m_tensionerY = m_driveSprocketRadius - x;
-}
+void Chassis::setTensionerRadius(const float & x) { m_tensionerRadius = x; }
 
 void Chassis::setRoadWheelRadius(const float & x) { m_roadWheelRadius = x; }
 void Chassis::setSupportRollerRadius(const float & x) { m_supportRollerRadius = x; }
@@ -77,6 +75,10 @@ void Chassis::setNumSupportRollers(const int & x)
 {
 	if(m_supportRollerZ) delete[] m_supportRollerZ;
 	m_numSupportRollers = x;
+	if(x < 1) {
+	     m_supportRollerZ = NULL;
+	     return;
+	}
 	m_supportRollerZ = new float[x];
 }
 
@@ -89,8 +91,9 @@ void Chassis::setDriveSprocketY(const float & x) { m_driveSprocketY = x; }
 void Chassis::setTensionerY(const float & x) { m_tensionerY = x; }
 void Chassis::setRoadWheelY(const float & x) { m_roadWheelY = x; }
 void Chassis::setSupportRollerY(const float & x) { m_supportRollerY = x; }
-
+void Chassis::setToothWidth(const float & x) { m_toothWidth = x; }
 const float Chassis::trackWidth() const { return m_trackWidth; }
+const float Chassis::tensionerWidth() const { return m_trackWidth - m_toothWidth * 2.f; }
 const float Chassis::span() const { return m_span; }
 const float Chassis::driveSprocketRadius() const { return m_driveSprocketRadius; }
 const float Chassis::tensionerRadius() const { return m_tensionerRadius; }
@@ -166,30 +169,22 @@ const float Chassis::torsionBarSize() const { return m_torsionBarSize; }
 
 const Vector3F Chassis::torsionBarHingeObject(const int & i, bool isLeft) const
 {
-	float d = 1.f;
-	if(!isLeft) d = -d;
-	
-	return Vector3F::YAxis * m_roadWheelY + Vector3F::ZAxis * (m_roadWheelZ[i] + m_torsionBarLength) + Vector3F::XAxis * ( m_width * .5f * d + m_torsionBarSize * .7f * d);
+	return torsionBarHinge(i, isLeft) - m_origin;
 }
 
 const Vector3F Chassis::torsionBarHinge(const int & i, bool isLeft) const
 {
-	return torsionBarHingeObject(i, isLeft) + m_origin;
+    const Matrix44F mat = bogieArmOrigin(i, isLeft);
+    Vector3F p = mat.getTranslation();
+    p.z += 0.5f * m_torsionBarLength * cos(m_torsionBarRestAngle);
+    p.y += 0.5f * m_torsionBarLength * sin(m_torsionBarRestAngle);
+	return p;
 }
 
 void Chassis::setTorsionBarRestAngle(const float & x) { m_torsionBarRestAngle = x; }
 const float Chassis::torsionBarRestAngle() const { return m_torsionBarRestAngle; }
-
-const Vector3F Chassis::roadWheelRestPosition(const int & i, bool isLeft) const
-{
-	Vector3F p = torsionBarHinge(i, isLeft);
-	float d = 1.f;
-	if(!isLeft) d = -d;
-	p.x += m_trackWidth * .5f * d - m_torsionBarSize * .7f * d; 
-	p.y -= m_torsionBarLength * sin(m_torsionBarRestAngle);
-	p.z -= m_torsionBarLength * cos(m_torsionBarRestAngle);
-	return p;
-}
+void Chassis::setTorsionBarTargetAngle(const float & x) { m_torsionBarTargetAngle = x; }
+const float Chassis::torsionBarTargetAngle() const { return m_torsionBarTargetAngle; }
 
 const Vector3F Chassis::computeWheelOrigin(const float & chassisWidth, const float & trackWidth, const float & y, const float & z, bool isLeft) const
 {
@@ -202,3 +197,26 @@ const Vector3F Chassis::computeWheelOrigin(const float & chassisWidth, const flo
 }
 
 const bool Chassis::isBackdrive() const { return m_driveSprocketZ < m_tensionerZ; }
+
+const Matrix44F  Chassis::bogieArmOrigin(const int & i, bool isLeft) const
+{
+    Matrix44F res;
+    res.rotateX(m_torsionBarRestAngle);
+    Vector3F cen = roadWheelOrigin(i, isLeft);
+    float d = 1.f;
+	if(!isLeft) d = -d;
+	cen.x = m_width * .5f * d + m_torsionBarSize * .7f * d;
+    cen.z += 0.5f * m_torsionBarLength * cos(m_torsionBarRestAngle);
+    cen.y += 0.5f * m_torsionBarLength * sin(m_torsionBarRestAngle);
+    res.setTranslation(cen);
+    return res;
+}
+
+const Vector3F Chassis::roadWheelOriginToBogie(bool isLeft) const
+{
+    float d = 1.f;
+	if(!isLeft) d = -d;
+    return Vector3F::ZAxis * -0.5f * m_torsionBarLength + Vector3F::XAxis * m_trackWidth * .5f * d;
+}
+
+const float Chassis::toothWidth() const { return m_toothWidth; }

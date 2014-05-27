@@ -59,7 +59,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_vehicle->setTensionerRadius(3.8);
 	m_vehicle->setDriveSprocketRadius(3.8);
 	m_vehicle->setRoadWheelRadius(3.8);
-	m_vehicle->setRoadWheelY(-3.5);
+	m_vehicle->setRoadWheelY(-6.5);
 	m_vehicle->setNumRoadWheels(7);
 	m_vehicle->setRoadWheelZ(0, 24.7f);
 	m_vehicle->setRoadWheelZ(1, 14.f);
@@ -132,6 +132,7 @@ void GLWidget::simulate()
 
 void GLWidget::keyPressEvent(QKeyEvent *e)
 {	
+    bool enabled;
 	switch (e->key()) {
 		case Qt::Key_T:
 			m_vehicle->addTension(0.5f);
@@ -153,8 +154,8 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->addBrake(false);
 			break;
 		case Qt::Key_Space:
-			const bool en = caterpillar::PhysicsState::engine->isPhysicsEnabled();
-			caterpillar::PhysicsState::engine->setEnablePhysics(!en);
+			enabled = caterpillar::PhysicsState::engine->isPhysicsEnabled();
+			caterpillar::PhysicsState::engine->setEnablePhysics(!enabled);
 			break;
 		default:
 			break;
