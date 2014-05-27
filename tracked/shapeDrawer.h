@@ -18,6 +18,7 @@ public:
 	virtual ~ShapeDrawer () {}
 	
 	void box(const float & x, const float & y, const float & z);
+	void box(const Matrix44F & mat, const float & x, const float & y, const float & z);
 	void cylinder(const float & x, const float & y, const float & z);
 	void cylinder(const Matrix44F & mat, const float & x, const float & y, const float & z);
 	

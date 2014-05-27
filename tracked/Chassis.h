@@ -31,17 +31,21 @@ public:
 	void setTorsionBarLength(const float & x);
 	void setTorsionBarSize(const float & x);
 	void setDriveSprocketY(const float & x);
+	void setDriveSprocketZ(const float & x);
 	void setTensionerY(const float & x);
+	void setTensionerZ(const float & x);
 	void setRoadWheelY(const float & x);
 	void setSupportRollerY(const float & x);
 	void setTorsionBarRestAngle(const float & x);
 	void setTorsionBarTargetAngle(const float & x);
 	void setToothWidth(const float & x);
-	
+
 	const float torsionBarLength() const;
 	const float torsionBarSize() const;
 	const float trackWidth() const;
 	const float tensionerWidth() const;
+	const float roadWheelWidth() const;
+	const float supportRollerWidth() const;
 	const float span() const;
 	const float driveSprocketRadius() const;
 	const float tensionerRadius() const;
@@ -62,6 +66,7 @@ public:
 	const Vector3F torsionBarHingeObject(const int & i, bool isLeft = true) const;
 	const Vector3F torsionBarHinge(const int & i, bool isLeft = true) const;
 	const Matrix44F bogieArmOrigin(const int & i, bool isLeft = true) const;
+	const Matrix44F computeBogieArmOrigin(const float & chassisWidth, const Vector3F & wheelP, const float & l, const float & s, const float & ang) const;
 	const float torsionBarRestAngle() const;
 	const float torsionBarTargetAngle() const;
 	const float toothWidth() const;

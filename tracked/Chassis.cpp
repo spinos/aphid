@@ -93,7 +93,9 @@ void Chassis::setRoadWheelY(const float & x) { m_roadWheelY = x; }
 void Chassis::setSupportRollerY(const float & x) { m_supportRollerY = x; }
 void Chassis::setToothWidth(const float & x) { m_toothWidth = x; }
 const float Chassis::trackWidth() const { return m_trackWidth; }
-const float Chassis::tensionerWidth() const { return m_trackWidth - m_toothWidth * 2.f; }
+const float Chassis::tensionerWidth() const { return m_trackWidth - m_toothWidth * 4.f; }
+const float Chassis::roadWheelWidth() const { return m_trackWidth - m_toothWidth * 4.f; }
+const float Chassis::supportRollerWidth() const { return m_trackWidth - m_toothWidth * 4.f; }
 const float Chassis::span() const { return m_span; }
 const float Chassis::driveSprocketRadius() const { return m_driveSprocketRadius; }
 const float Chassis::tensionerRadius() const { return m_tensionerRadius; }
@@ -220,3 +222,18 @@ const Vector3F Chassis::roadWheelOriginToBogie(bool isLeft) const
 }
 
 const float Chassis::toothWidth() const { return m_toothWidth; }
+
+const Matrix44F Chassis::computeBogieArmOrigin(const float & chassisWidth, const Vector3F & wheelP, const float & l, const float & s, const float & ang) const
+{
+    Matrix44F tm;
+    tm.rotateX(-ang);
+    Vector3F p;
+    p.x = chassisWidth * .5f + s * .5f;
+    p.y = wheelP.y + l * .5f * sin(ang);
+    p.z = wheelP.z + l * .5f * cos(ang);
+    tm.setTranslation(p);
+    return tm;
+}
+
+void Chassis::setDriveSprocketZ(const float & x) { m_driveSprocketZ = x; }
+void Chassis::setTensionerZ(const float & x) { m_tensionerZ = x; }

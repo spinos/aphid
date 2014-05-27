@@ -47,12 +47,14 @@ TrackedPhysics::TrackedPhysics()
 	addGroup("left_trackPin");
 	addGroup("right_trackPin");
 	m_targeVelocity = 0.f;
+	m_firstMotion = true;
 }
 
 TrackedPhysics::~TrackedPhysics() {}
 
 void TrackedPhysics::create()
 {
+    m_firstMotion = true;
 	resetGroups();
 
 	createChassis(*this);
@@ -71,6 +73,7 @@ void TrackedPhysics::create()
 
 void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 {
+    t.clearSections();
 	Vector3F p, q;
 	if(isBackdrive())
 		p = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
@@ -268,15 +271,11 @@ void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frame
 btCollisionShape* TrackedPhysics::createShoeShape(const float & x, const float &y, const float & z)
 {
 	btCollisionShape* pad = PhysicsState::engine->createBoxShape(x, y, z);
-	btCollisionShape* tooth = PhysicsState::engine->createCylinderShape(toothWidth()* .5f, Tread::ToothHeight * .5f, toothWidth()* .5f);
 	btCompoundShape* shoeShape = new btCompoundShape();
 	
 	btTransform childT; childT.setIdentity();
 	shoeShape->addChildShape(childT, pad);
 	
-	childT.setOrigin(btVector3(0, Tread::ToothHeight * .5f,0));
-	
-	shoeShape->addChildShape(childT, tooth);
 	return shoeShape;
 }
 
@@ -289,6 +288,7 @@ btCollisionShape* TrackedPhysics::createPinShape(Tread & tread)
 	
 	btCollisionShape* pad = PhysicsState::engine->createBoxShape(pinX, pinY, pinZ);
 	btCollisionShape* pin = PhysicsState::engine->createCylinderShape(pinY, pinX, pinY);
+	btCollisionShape* tooth = PhysicsState::engine->createCylinderShape(toothWidth()* .5f, Tread::ToothHeight * .5f, toothWidth()* .5f);
 	
 	btCompoundShape* pinShape = new btCompoundShape();
 	const btMatrix3x3 yTonX(0.f, 1.f, 0.f, -1.f, 0.f, 0.f, 0.f, 0.f, 1.f);
@@ -312,6 +312,11 @@ btCollisionShape* TrackedPhysics::createPinShape(Tread & tread)
 	pinShape->addChildShape(childT, pin);
 	childT.setOrigin(btVector3(-side, 0, -pinZ));
 	pinShape->addChildShape(childT, pin);
+	
+	childT.setIdentity();
+	childT.setOrigin(btVector3(0, Tread::ToothHeight * .5f,0));
+	
+	pinShape->addChildShape(childT, tooth);
 	
 	return pinShape;
 }
@@ -484,7 +489,7 @@ void TrackedPhysics::createRoadWheels(Chassis & c, btRigidBody * chassisBody, bo
 	CreateWheelProfile cwp;
 	cwp.connectTo = chassisBody;
 	cwp.radius = c.roadWheelRadius();
-	cwp.width = c.trackWidth() * .5f;
+	cwp.width = c.roadWheelWidth();
 	cwp.mass = WHEELMASS;
 	cwp.isLeft = isLeft;
 	cwp.gap = toothWidth() * 1.2f;
@@ -509,7 +514,7 @@ void TrackedPhysics::createSupportRollers(Chassis & c, btRigidBody * chassisBody
 	CreateWheelProfile cwp;
 	cwp.connectTo = chassisBody;
 	cwp.radius = c.supportRollerRadius();
-	cwp.width = c.trackWidth() * .5f;
+	cwp.width = c.supportRollerWidth();
 	cwp.mass = 1.f;
 	cwp.isLeft = isLeft;
 	cwp.gap = toothWidth() * 1.2f;
@@ -629,6 +634,30 @@ void TrackedPhysics::displayStatistics() const
 	std::cout<<"target velocity (sprocked angular / vehicle linear): "<<m_targeVelocity<<" / "<<driveSprocketRadius() * m_targeVelocity<<" \n";
 	std::cout<<"sprocket angular velocity (left / right): "<<leftSprocketVel.length()<<" / "<<rightSprocketVel.length()<<" \n";
 	std::cout<<"vehicle linear velocity: "<<chasisVel.length()<<" \n";
+}
+
+void TrackedPhysics::setTrackThickness(const float & x) 
+{ 
+    m_leftTread.setThickness(x);
+    m_rightTread.setThickness(x);
+}
+
+void TrackedPhysics::setTargetSpeed(const float & lft, const float & rgt)
+{
+    if(m_firstMotion && lft == 0. && rgt == 0.) return;
+    m_firstMotion = false;
+    const float lftRps = lft / driveSprocketRadius();
+    const float rgtRps = rgt / driveSprocketRadius();
+    
+    m_drive[0]->getRotationalLimitMotor(2)->m_enableMotor = true;
+	m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = -lftRps;
+	m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 100.f;
+	m_drive[0]->getRotationalLimitMotor(2)->m_damping = 0.5f;
+	
+	m_drive[1]->getRotationalLimitMotor(2)->m_enableMotor = true;
+	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity  = rgtRps;
+	m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 100.f;
+	m_drive[1]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 }
 
 }

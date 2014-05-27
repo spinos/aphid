@@ -18,11 +18,13 @@ class TrackedPhysics : public GroupId, public Chassis
 public:
 	TrackedPhysics();
 	virtual ~TrackedPhysics();
+	void setTrackThickness(const float & x);
 	void addTension(const float & x);
 	void addPower(const float & x);
 	void addBrake(bool leftSide);
 	void create();
 	void setTargetVelocity(const float & x);
+	void setTargetSpeed(const float & lft, const float & rgt);
 	void displayStatistics() const;
 private:
 	class CreateWheelProfile {
@@ -58,5 +60,6 @@ private:
 	btGeneric6DofConstraint* m_tension[2];
 	btGeneric6DofConstraint* m_drive[2];
 	float m_targeVelocity;
+	bool m_firstMotion;
 };
 }

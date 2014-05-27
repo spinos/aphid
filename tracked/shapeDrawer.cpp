@@ -85,6 +85,14 @@ void ShapeDrawer::box(const float & x, const float & y, const float & z)
 	glPopMatrix();
 }
 
+void ShapeDrawer::box(const Matrix44F & mat, const float & x, const float & y, const float & z)
+{
+    glPushMatrix();
+	loadSpace(mat);
+	box(x, y, z);
+	glPopMatrix();
+}
+
 void ShapeDrawer::cylinder(const Matrix44F & mat, const float & x, const float & y, const float & z)
 {
 	glPushMatrix();

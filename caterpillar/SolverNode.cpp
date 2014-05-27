@@ -38,8 +38,10 @@ MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 			return MStatus::kUnknownParameter;
 		}
 		
-		MTime curTime = block.inputValue(a_inTime).asTime();
-		MTime startTime = block.inputValue(a_startTime).asTime();
+		const MTime curTime = block.inputValue(a_inTime).asTime();
+		const MTime startTime = block.inputValue(a_startTime).asTime();
+		const int numss = block.inputValue(a_numSubsteps).asInt();
+		const float freq = block.inputValue(a_frequency).asFloat();
 		
 		if(curTime == startTime) {
 			MGlobal::displayInfo("init solver");
@@ -58,7 +60,7 @@ MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 					computeConditions(block);
 					//MGlobal::displayInfo("sim step");
 					const float dt = (float)(curTime - m_preTime).as(MTime::kSeconds);
-					PhysicsState::engine->simulate(dt, 10, 90.f);
+					PhysicsState::engine->simulate(dt, numss, freq);
 				}
 			}
 		}
@@ -127,16 +129,16 @@ MStatus SolverNode::initialize()
 	a_enable = fnNumericAttr.create("enabled", "enbl", MFnNumericData::kBoolean, true, &status);
     status = addAttribute(a_enable);
 	
-	a_numSubsteps = fnNumericAttr.create("substeps", "sbs", MFnNumericData::kInt, 1, &status);
+	a_numSubsteps = fnNumericAttr.create("substeps", "sbs", MFnNumericData::kInt, 8, &status);
     fnNumericAttr.setKeyable(true);
-	fnNumericAttr.setMin(1);
+	fnNumericAttr.setMin(2);
 	fnNumericAttr.setMax(100);
     status = addAttribute(a_numSubsteps);
 
-	a_frequency = fnNumericAttr.create("frequency", "fqc", MFnNumericData::kInt, 240, &status); //MB
+	a_frequency = fnNumericAttr.create("frequency", "fqc", MFnNumericData::kFloat, 90., &status); //MB
     fnNumericAttr.setKeyable(true);
-	fnNumericAttr.setMin(60);
-	fnNumericAttr.setMax(6000);
+	fnNumericAttr.setMin(60.);
+	fnNumericAttr.setMax(6000.);
     status = addAttribute(a_frequency);
 	
 	a_inConditions = fnMsgAttr.create("inConditions", "icdts", &status);
