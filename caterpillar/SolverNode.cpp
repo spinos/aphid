@@ -16,6 +16,7 @@ MObject SolverNode::a_gravity;
 MObject SolverNode::a_enable;
 MObject SolverNode::a_numSubsteps;
 MObject SolverNode::a_frequency;
+MObject SolverNode::a_timeScale;
 MObject SolverNode::a_inConditions;
 MObject SolverNode::a_outRigidBodies;
 
@@ -42,6 +43,7 @@ MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 		const MTime startTime = block.inputValue(a_startTime).asTime();
 		const int numss = block.inputValue(a_numSubsteps).asInt();
 		const float freq = block.inputValue(a_frequency).asFloat();
+		const float tsl = block.inputValue(a_timeScale).asFloat();
 		
 		if(curTime == startTime) {
 			MGlobal::displayInfo("init solver");
@@ -59,7 +61,7 @@ MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 					PhysicsState::engineStatus = PhysicsState::sUpdating;
 					computeConditions(block);
 					//MGlobal::displayInfo("sim step");
-					const float dt = (float)(curTime - m_preTime).as(MTime::kSeconds);
+					const float dt = (float)(curTime - m_preTime).as(MTime::kSeconds) * tsl;
 					PhysicsState::engine->simulate(dt, numss, freq);
 				}
 			}
@@ -81,7 +83,6 @@ void SolverNode::draw( M3dView & view, const MDagPath & path,
 	view.beginGL();
 	glPushAttrib( GL_ALL_ATTRIB_BITS );
     glDisable(GL_LIGHTING);
-	glColor3f(1.0, 1.0, 0.0);
 	
 	engine->renderWorld();
 	
@@ -123,11 +124,11 @@ MStatus SolverNode::initialize()
 	
 	a_gravity = fnNumericAttr.createPoint("gravity", "grvt", &status);
     fnNumericAttr.setDefault(0.0, -9.81, 0.0);
-    fnNumericAttr.setKeyable(true);
     status = addAttribute(a_gravity);
 	
 	a_enable = fnNumericAttr.create("enabled", "enbl", MFnNumericData::kBoolean, true, &status);
-    status = addAttribute(a_enable);
+    fnNumericAttr.setKeyable(true);
+	status = addAttribute(a_enable);
 	
 	a_numSubsteps = fnNumericAttr.create("substeps", "sbs", MFnNumericData::kInt, 8, &status);
     fnNumericAttr.setKeyable(true);
@@ -135,11 +136,17 @@ MStatus SolverNode::initialize()
 	fnNumericAttr.setMax(100);
     status = addAttribute(a_numSubsteps);
 
-	a_frequency = fnNumericAttr.create("frequency", "fqc", MFnNumericData::kFloat, 90., &status); //MB
+	a_frequency = fnNumericAttr.create("frequency", "fqc", MFnNumericData::kFloat, 90., &status);
     fnNumericAttr.setKeyable(true);
 	fnNumericAttr.setMin(60.);
 	fnNumericAttr.setMax(6000.);
     status = addAttribute(a_frequency);
+	
+	a_timeScale = fnNumericAttr.create("timeScale", "tsl", MFnNumericData::kFloat, 1., &status);
+    fnNumericAttr.setKeyable(true);
+	fnNumericAttr.setMin(0.01);
+	fnNumericAttr.setMax(100.);
+    status = addAttribute(a_timeScale);
 	
 	a_inConditions = fnMsgAttr.create("inConditions", "icdts", &status);
 	fnMsgAttr.setArray(true);

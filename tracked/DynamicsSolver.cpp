@@ -258,18 +258,18 @@ void DynamicsSolver::renderWorld()
 			//btSoftBodyHelpers::DrawFrame(psb,m_dynamicsWorld->getDebugDrawer());
 			//btSoftBodyHelpers::Draw(psb,m_dynamicsWorld->getDebugDrawer(),m_dynamicsWorld->getDrawFlags());
 	}
-	*/
+	
 	const int numConstraints = m_dynamicsWorld->getNumConstraints();
 	for(int i=0;i< numConstraints;i++) {
 	    btTypedConstraint* constraint = m_dynamicsWorld->getConstraint(i);
 	    _drawer->drawConstraint(constraint);
-	}
+	}*/
 }
 
 void DynamicsSolver::simulate()
 {
 	if(!m_enablePhysics) return;
-	btScalar dt = (btScalar)_clock.getTimeMicroseconds() / 1000000.f;
+	btScalar dt = (btScalar)_clock.getTimeMicroseconds() / 1000000.f; // std::cout<<"dt "<<dt;
 	_clock.reset();
 	simulate(dt, m_numSubSteps, 120.f);
 }
@@ -297,7 +297,6 @@ btRigidBody* DynamicsSolver::internalCreateRigidBody(float mass, const btTransfo
 
 	btRigidBody::btRigidBodyConstructionInfo cInfo(mass,myMotionState,shape,localInertia);
 	
-
 	btRigidBody* body = new btRigidBody(cInfo);
 	body->setContactProcessingThreshold(_defaultContactProcessingThreshold);
 
@@ -312,7 +311,7 @@ void DynamicsSolver::addGroundPlane(const float & groundSize, const float & grou
 	tr.setIdentity();
 	tr.setOrigin(btVector3(0, groundLevel - 1.f, 0));
 	btRigidBody* body = createRigidBody(groundShape,tr,0.f);
-	body->setFriction(btSqrt(.732f));
+	body->setFriction(.9);
 }
 
 btBoxShape* DynamicsSolver::createBoxShape(const float & x, const float & y, const float & z)

@@ -41,6 +41,8 @@ public:
 	const float shoeLength() const;
 	const float width() const;
 	const float shoeWidth() const;
+	const float padWidth() const;
+	const float padX() const;
 	const float pinLength() const;
 	const float segLength() const;
 	const float shoeThickness() const;
@@ -51,7 +53,6 @@ public:
 	void computeSections();
 	
 	static float ShoeLengthFactor;
-	static float PinLengthFactor;
 	static float ShoeHingeRise;
 	static float ToothWidth;
 	static float ToothHeight;

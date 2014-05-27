@@ -43,6 +43,7 @@ public:
 	static  MObject a_enable;
 	static  MObject a_numSubsteps;
 	static  MObject a_frequency;
+	static MObject a_timeScale;
 	static  MObject a_inConditions;
 	static  MObject a_outRigidBodies;
 	static	MTypeId id;

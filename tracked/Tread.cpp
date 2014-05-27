@@ -10,10 +10,9 @@
 #include "Tread.h"
 
 float Tread::ShoeLengthFactor = 0.86f;
-float Tread::PinLengthFactor = 0.68f;
 float Tread::ShoeHingeRise = 0.4f;
 float Tread::ToothWidth = .8f;
-float Tread::ToothHeight = 1.f;
+float Tread::ToothHeight = 1.2f;
 float Tread::SprocketRadius = 4.f;
 
 Tread::Tread() 
@@ -27,6 +26,8 @@ void Tread::setThickness(const float & x) { m_thickness = x; }
 
 const float Tread::width() const { return m_width; }
 const float Tread::shoeWidth() const { return m_width - ToothWidth * 2.05f; }
+const float Tread::padWidth() const { return .5f * (shoeWidth() - ToothWidth); }
+const float Tread::padX() const { return .5f * (padWidth() + ToothWidth); }
 const float Tread::pinLength() const { return m_shoeLength - ToothWidth * 1.001f; }
 
 const float Tread::pinHingeFactor() const
@@ -39,15 +40,10 @@ void Tread::begin()
 	m_it.currentSection = 0;
 	m_it.origin = m_sections[0]._initialPosition;
 	m_it.isShoe = true;
-	//m_it.isOnSpan = true;
 	m_it.numShoe = 0;
 	m_it.numPin = 0;
-	//m_it.numOnSpan = 0;
-	//m_it.numOnWheel= 0;
-	//m_it.angle = 0.f;
 	m_it.rot.setIdentity();
 	m_it.rot.rotateX(m_sections[0]._initialAngle);
-	//m_it.spanTranslateDirection = 1.f;
 }
 
 bool Tread::end() 
@@ -129,7 +125,7 @@ void Tread::computeSections()
 			const Vector3F dp = sect._eventualPosition - sect._initialPosition;
 			const float fn = dp.length() / m_shoeLength;
 			sect._numSegments = fn;
-			if(fn - (int)fn > .9f) sect._numSegments++;
+			if(fn - (int)fn > .8f) sect._numSegments++;
 			sect._deltaPosition = dp.normal() * m_shoeLength;
 		}
 		else {
@@ -140,7 +136,4 @@ void Tread::computeSections()
 			sect._deltaAngle = da / sect._numSegments;
 		}
 	}
-	
-	it = m_sections.begin();
-	for(; it != m_sections.end(); ++it) std::cout<<" nseg "<<(*it)._numSegments;
 }

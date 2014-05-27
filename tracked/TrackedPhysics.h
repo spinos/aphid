@@ -26,6 +26,7 @@ public:
 	void setTargetVelocity(const float & x);
 	void setTargetSpeed(const float & lft, const float & rgt);
 	void displayStatistics() const;
+	const float vehicleSpeed() const;
 private:
 	class CreateWheelProfile {
 	public:
@@ -50,7 +51,7 @@ private:
 	btCollisionShape* simpleWheelShape(CreateWheelProfile & profile);
 	btCollisionShape* compoundWheelShape(CreateWheelProfile & profile);
 	void createWheel(btCollisionShape* wheelShape, CreateWheelProfile & profile);
-	btCollisionShape* createShoeShape(const float & x, const float &y, const float & z);
+	btCollisionShape* createShoeShape(Tread & tread);
 	btCollisionShape* createPinShape(Tread & tread);
 	btCollisionShape* createSprocketShape(CreateWheelProfile & profile);
 	void threePointHinge(btTransform & frameInA, btTransform & frameInB, const float & side, btRigidBody* bodyA, btRigidBody* bodyB);

@@ -29,10 +29,10 @@ Chassis::Chassis()
 	m_numSupportRollers = 0;
 	m_supportRollerY = 3.f;
 	m_supportRollerRadius = 1.3f;
-	m_torsionBarLength = 7.f;
-	m_torsionBarSize = 1.2f;
+	m_bogieArmLength = 7.f;
+	m_bogieArmWidth = 1.2f;
 	m_torsionBarRestAngle = .49f;
-	m_torsionBarTargetAngle = .57f;
+	m_torsionBarTargetAngle = .67f;
 	m_toothWidth = .8;
 }
 
@@ -164,10 +164,10 @@ const Vector3F Chassis::supportRollerOriginObject(const int & i, bool isLeft) co
 	return Vector3F::YAxis * m_supportRollerY + Vector3F::ZAxis * m_supportRollerZ[i] + Vector3F::XAxis * ( m_width * .5f * d + m_trackWidth * .51f * d);
 }
 
-void Chassis::setTorsionBarLength(const float & x) { m_torsionBarLength = x; }
-void Chassis::setTorsionBarSize(const float & x) { m_torsionBarSize = x; }
-const float Chassis::torsionBarLength() const { return m_torsionBarLength; }
-const float Chassis::torsionBarSize() const { return m_torsionBarSize; }
+void Chassis::setBogieArmLength(const float & x) { m_bogieArmLength = x; }
+void Chassis::setBogieArmWidth(const float & x) { m_bogieArmWidth = x; }
+const float Chassis::bogieArmLength() const { return m_bogieArmLength; }
+const float Chassis::bogieArmWidth() const { return m_bogieArmWidth; }
 
 const Vector3F Chassis::torsionBarHingeObject(const int & i, bool isLeft) const
 {
@@ -178,8 +178,8 @@ const Vector3F Chassis::torsionBarHinge(const int & i, bool isLeft) const
 {
     const Matrix44F mat = bogieArmOrigin(i, isLeft);
     Vector3F p = mat.getTranslation();
-    p.z += 0.5f * m_torsionBarLength * cos(m_torsionBarRestAngle);
-    p.y += 0.5f * m_torsionBarLength * sin(m_torsionBarRestAngle);
+    p.z += 0.5f * m_bogieArmLength * cos(m_torsionBarRestAngle);
+    p.y += 0.5f * m_bogieArmLength * sin(m_torsionBarRestAngle);
 	return p;
 }
 
@@ -207,9 +207,9 @@ const Matrix44F  Chassis::bogieArmOrigin(const int & i, bool isLeft) const
     Vector3F cen = roadWheelOrigin(i, isLeft);
     float d = 1.f;
 	if(!isLeft) d = -d;
-	cen.x = m_width * .5f * d + m_torsionBarSize * .7f * d;
-    cen.z += 0.5f * m_torsionBarLength * cos(m_torsionBarRestAngle);
-    cen.y += 0.5f * m_torsionBarLength * sin(m_torsionBarRestAngle);
+	cen.x = m_width * .5f * d + m_bogieArmWidth * .7f * d;
+    cen.z += 0.5f * m_bogieArmLength * cos(m_torsionBarRestAngle);
+    cen.y += 0.5f * m_bogieArmLength * sin(m_torsionBarRestAngle);
     res.setTranslation(cen);
     return res;
 }
@@ -218,7 +218,7 @@ const Vector3F Chassis::roadWheelOriginToBogie(bool isLeft) const
 {
     float d = 1.f;
 	if(!isLeft) d = -d;
-    return Vector3F::ZAxis * -0.5f * m_torsionBarLength + Vector3F::XAxis * m_trackWidth * .5f * d;
+    return Vector3F::ZAxis * -0.5f * m_bogieArmLength + Vector3F::XAxis * (m_trackWidth * .5f * d - m_bogieArmWidth * .5f * d);
 }
 
 const float Chassis::toothWidth() const { return m_toothWidth; }

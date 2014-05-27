@@ -28,8 +28,8 @@ public:
 	void setRoadWheelZ(const int & i, const float & x);
 	void setNumSupportRollers(const int & x);
 	void setSupportRollerZ(const int & i, const float & x);
-	void setTorsionBarLength(const float & x);
-	void setTorsionBarSize(const float & x);
+	void setBogieArmLength(const float & x);
+	void setBogieArmWidth(const float & x);
 	void setDriveSprocketY(const float & x);
 	void setDriveSprocketZ(const float & x);
 	void setTensionerY(const float & x);
@@ -40,8 +40,8 @@ public:
 	void setTorsionBarTargetAngle(const float & x);
 	void setToothWidth(const float & x);
 
-	const float torsionBarLength() const;
-	const float torsionBarSize() const;
+	const float bogieArmLength() const;
+	const float bogieArmWidth() const;
 	const float trackWidth() const;
 	const float tensionerWidth() const;
 	const float roadWheelWidth() const;
@@ -78,7 +78,7 @@ private:
 	float m_span, m_width, m_height, m_trackWidth, m_toothWidth;
 	float m_driveSprocketRadius, m_tensionerRadius, m_roadWheelRadius, m_supportRollerRadius;
 	float m_driveSprocketY, m_driveSprocketZ, m_tensionerY, m_tensionerZ, m_roadWheelY, m_supportRollerY;
-	float m_torsionBarLength, m_torsionBarSize, m_torsionBarRestAngle, m_torsionBarTargetAngle;
+	float m_bogieArmLength, m_bogieArmWidth, m_torsionBarRestAngle, m_torsionBarTargetAngle;
 	float * m_roadWheelZ;
 	float * m_supportRollerZ;
 	int m_numRoadWheels, m_numSupportRollers;
