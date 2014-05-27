@@ -15,6 +15,7 @@ namespace caterpillar {
 #define WHEELMASS 1.0
 #define SHOEMASS .5
 #define PINMASS .5
+#define SPROCKETTEETHPROTRUDE 0.05
 TrackedPhysics::TrackedPhysics() 
 { 
 	addGroup("chassis");
@@ -58,7 +59,11 @@ void TrackedPhysics::create()
 void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 {
 	Vector3F p, q;
-	p = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
+	if(isBackdrive())
+		p = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
+	else
+		p = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
+		
 	q = roadWheelRestPosition(numRoadWheels() - 1, isLeft) - Vector3F::YAxis * roadWheelRadius(); 
 	
 	Tread::Section sect;
@@ -80,7 +85,10 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	t.addSection(sect);
 
 	p = q;
-	q = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
+	if(isBackdrive())
+		q = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
+	else 
+		p = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
 	
 	float na = asin((p.y - q.y) / (p - q).length());
 	
@@ -92,11 +100,18 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	t.addSection(sect);
 	
 	sect._type = Tread::Section::tAngular;
-	sect._rotateAround = tensionerOrigin(isLeft);
 	sect._initialAngle = 0.f;
 	sect._eventualAngle = - PI - na;
-	sect._rotateRadius = tensionerRadius();
-	sect._initialPosition = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
+	if(isBackdrive()) {
+		sect._rotateAround = tensionerOrigin(isLeft);
+		sect._rotateRadius = tensionerRadius();
+		sect._initialPosition = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
+	}
+	else {
+		sect._rotateAround = driveSprocketOrigin(isLeft);
+		sect._rotateRadius = driveSprocketRadius();
+		sect._initialPosition = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
+	}
 	
 	t.addSection(sect);
 	
@@ -110,11 +125,18 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	t.addSection(sect);
 	
 	sect._type = Tread::Section::tAngular;
-	sect._rotateAround = driveSprocketOrigin(isLeft);
 	sect._initialAngle = - nb * .5f;
 	sect._eventualAngle = - PI - na + nb *.5f;
-	sect._rotateRadius = driveSprocketRadius();
-	sect._initialPosition = driveSprocketOrigin(isLeft) + Vector3F::YAxis * driveSprocketRadius();
+	if(isBackdrive()) {
+		sect._rotateAround = driveSprocketOrigin(isLeft);
+		sect._rotateRadius = driveSprocketRadius();
+		sect._initialPosition = driveSprocketOrigin(isLeft) + Vector3F::YAxis * driveSprocketRadius();
+	}
+	else {
+		sect._rotateAround = tensionerOrigin(isLeft);
+		sect._rotateRadius = tensionerRadius();
+		sect._initialPosition = tensionerOrigin(isLeft) + Vector3F::YAxis * tensionerRadius();
+	}
 	
 	t.addSection(sect);
 	
@@ -387,7 +409,7 @@ btCollisionShape* TrackedPhysics::createSprocketShape(CreateWheelProfile & profi
 	childT.setOrigin(btVector3(0, -profile.width * 0.5f + rollWidth * 0.5f, 0));
 	wheelShape->addChildShape(childT, rollShape);
 	
-	const float tooth1R = profile.radius + Tread::ToothWidth * 0.1f;
+	const float tooth1R = profile.radius + Tread::ToothWidth * SPROCKETTEETHPROTRUDE;
 	//const float tooth2R = profile.radius + m_leftTread.pinThickness();
 	const float delta = PI * 2.f / 11.f;
 	for(int i = 0; i < 11; i++) {		

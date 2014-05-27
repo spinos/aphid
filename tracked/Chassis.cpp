@@ -109,16 +109,11 @@ const Vector3F Chassis::extends() const
 	return Vector3F(m_width, m_height, m_span);
 }
 
-const Vector3F Chassis::trackOrigin(bool isLeft) const
-{
-	return driveSprocketOrigin(isLeft);
-}
-
 const Vector3F Chassis::driveSprocketOrigin(bool isLeft) const
 {
 	float d = 1.f;
 	if(!isLeft) d = -d;
-	Vector3F r = m_origin - Vector3F::ZAxis * m_span * 0.5f + Vector3F::XAxis * ( m_width * .5f * d + m_trackWidth * .51f * d) + Vector3F::YAxis * m_driveSprocketY; 
+	Vector3F r = m_origin + Vector3F::ZAxis * m_driveSprocketZ + Vector3F::XAxis * ( m_width * .5f * d + m_trackWidth * .51f * d) + Vector3F::YAxis * m_driveSprocketY; 
 	return r;
 }
 
@@ -131,7 +126,7 @@ const Vector3F Chassis::tensionerOrigin(bool isLeft) const
 {
 	float d = 1.f;
 	if(!isLeft) d = -d;
-	Vector3F r = m_origin + Vector3F::ZAxis * m_span * 0.5f + Vector3F::XAxis * ( m_width * .5f * d + m_trackWidth * .51f * d) + Vector3F::YAxis * m_tensionerY; 
+	Vector3F r = m_origin + Vector3F::ZAxis * m_tensionerZ + Vector3F::XAxis * ( m_width * .5f * d + m_trackWidth * .51f * d) + Vector3F::YAxis * m_tensionerY; 
 	return r;
 }
 
@@ -205,3 +200,5 @@ const Vector3F Chassis::computeWheelOrigin(const float & chassisWidth, const flo
 	p.x = d * (chassisWidth + trackWidth) * .5f;
 	return p;
 }
+
+const bool Chassis::isBackdrive() const { return m_driveSprocketZ < m_tensionerZ; }
