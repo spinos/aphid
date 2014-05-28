@@ -125,7 +125,7 @@ void Tread::computeSections()
 			const Vector3F dp = sect._eventualPosition - sect._initialPosition;
 			const float fn = dp.length() / m_shoeLength;
 			sect._numSegments = fn;
-			if(fn - (int)fn > 0.4f) sect._numSegments++;
+			if(fn - (int)fn > 0.95f) sect._numSegments++;
 			sect._deltaPosition = dp.normal() * m_shoeLength;
 		}
 		else {
