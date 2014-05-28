@@ -73,7 +73,10 @@ public:
 	const Vector3F computeWheelOrigin(const float & chassisWidth, const float & trackWidth, const float & y, const float & z, bool isLeft = true) const;
 	const Vector3F roadWheelOriginToBogie(bool isLeft = true) const;
 	const bool isBackdrive() const;
-	const bool needSupportRollerSection(bool isFront) const;
+	const bool aroundFirstSupportRoller(Vector3F & p, float & r, bool isLeft = true) const;
+	const bool aroundLastSupportRoller(Vector3F & p, float & r, bool isLeft = true) const;
+	void getBackWheel(Vector3F & p, float & r, bool isLeft = true) const;
+	void getFrontWheel(Vector3F & p, float & r, bool isLeft = true) const;
 private:
 	Vector3F m_origin;
 	float m_span, m_width, m_height, m_trackWidth, m_toothWidth;

@@ -28,7 +28,7 @@ Chassis::Chassis()
 	m_supportRollerZ = NULL;
 	m_numSupportRollers = 0;
 	m_supportRollerY = 1.5f;
-	m_supportRollerRadius = 1.2f;
+	m_supportRollerRadius = 1.5f;
 	m_bogieArmLength = 7.f;
 	m_bogieArmWidth = 1.f;
 	m_torsionBarRestAngle = .49f;
@@ -94,8 +94,8 @@ void Chassis::setSupportRollerY(const float & x) { m_supportRollerY = x; }
 void Chassis::setToothWidth(const float & x) { m_toothWidth = x; }
 const float Chassis::trackWidth() const { return m_trackWidth; }
 const float Chassis::tensionerWidth() const { return m_trackWidth - m_toothWidth * 4.f; }
-const float Chassis::roadWheelWidth() const { return m_trackWidth - m_toothWidth * 4.f; }
-const float Chassis::supportRollerWidth() const { return m_trackWidth - m_toothWidth * 4.f; }
+const float Chassis::roadWheelWidth() const { return tensionerWidth(); }
+const float Chassis::supportRollerWidth() const { return tensionerWidth() * .6f; }
 const float Chassis::span() const { return m_span; }
 const float Chassis::driveSprocketRadius() const { return m_driveSprocketRadius; }
 const float Chassis::tensionerRadius() const { return m_tensionerRadius; }
@@ -238,14 +238,52 @@ const Matrix44F Chassis::computeBogieArmOrigin(const float & chassisWidth, const
 void Chassis::setDriveSprocketZ(const float & x) { m_driveSprocketZ = x; }
 void Chassis::setTensionerZ(const float & x) { m_tensionerZ = x; }
 
-const bool Chassis::needSupportRollerSection(bool isFront) const
+const bool Chassis::aroundFirstSupportRoller(Vector3F & p, float & r, bool isLeft) const
 {
     if(numSupportRollers() < 1) return false;
-    const float ry = m_supportRollerY + m_supportRollerRadius;
-    if(isFront) {
-        if(isBackdrive()) return ry > (m_tensionerY + m_tensionerRadius);
-        else return ry > (m_driveSprocketY + m_driveSprocketRadius);
-    }
-    if(isBackdrive()) return ry > (m_driveSprocketY + m_driveSprocketRadius);
-    return ry > (m_tensionerY + m_tensionerRadius);
+	
+	Vector3F fp; float fr;
+	getFrontWheel(fp, fr);
+	if(fp.y + fr > supportRollerOrigin(0, isLeft).y + supportRollerRadius())
+		return false;
+		
+	p = supportRollerOrigin(0, isLeft);
+	r = supportRollerRadius();
+	return true;
+}
+
+const bool Chassis::aroundLastSupportRoller(Vector3F & p, float & r, bool isLeft) const
+{
+    if(numSupportRollers() < 2) return false;
+	
+	Vector3F bp; float br;
+	getBackWheel(bp, br);
+	if(bp.y + br > supportRollerOrigin(numSupportRollers() - 1, isLeft).y + supportRollerRadius())
+		return false;
+		
+	p = supportRollerOrigin(numSupportRollers() - 1, isLeft);
+	r = supportRollerRadius();
+	return true;
+}
+
+void Chassis::getBackWheel(Vector3F & p, float & r, bool isLeft) const
+{
+	if(isBackdrive()) {
+		p = driveSprocketOrigin(isLeft);
+		r = driveSprocketRadius();
+		return;
+	}
+	p = tensionerOrigin(isLeft);
+	r = tensionerRadius();
+}
+
+void Chassis::getFrontWheel(Vector3F & p, float & r, bool isLeft) const
+{
+	if(isBackdrive()) {
+		p = tensionerOrigin(isLeft);
+		r = tensionerRadius();
+		return;
+	}
+	p = driveSprocketOrigin(isLeft);
+	r = driveSprocketRadius();
 }

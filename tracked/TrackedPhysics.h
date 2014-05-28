@@ -27,6 +27,8 @@ public:
 	void setTargetSpeed(const float & lft, const float & rgt);
 	void displayStatistics() const;
 	const float vehicleSpeed() const;
+	void createObstacles();
+	
 private:
 	class CreateWheelProfile {
 	public:
@@ -38,7 +40,6 @@ private:
 		btGeneric6DofConstraint* dstHinge;
 	};
 	
-	void createObstacles();
 	void createChassis(Chassis & c);
 	void addTreadSections(Tread & t, bool isLeft = true);
 	void createTread(Tread & t, bool isLeft = true);

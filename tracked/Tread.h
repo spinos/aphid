@@ -50,7 +50,7 @@ public:
 	const float pinHingeFactor() const;
 	void addSection(const Section & sect);
 	void clearSections();
-	void computeSections();
+	void computeSections(const float & addThreshold = .5f);
 	
 	static float ShoeLengthFactor;
 	static float ShoeHingeRise;

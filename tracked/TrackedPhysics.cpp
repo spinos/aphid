@@ -59,7 +59,7 @@ void TrackedPhysics::create()
 	
 	Tread::SprocketRadius = driveSprocketRadius();
 	Tread::ToothWidth = toothWidth();
-	Tread::ToothHeight = toothWidth() * .7;
+	Tread::ToothHeight = toothWidth() * 1.2;
 	
 	m_leftTread.setWidth(trackWidth());
 	m_rightTread.setWidth(trackWidth());
@@ -77,22 +77,16 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 {
     t.clearSections();
 	Vector3F p, q;
-	if(isBackdrive())
-		p = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
-	else
-		p = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
-		
+	float r;
+	getBackWheel(p, r, isLeft);
+	
+	p = p - Vector3F::YAxis * r;		
 	q = roadWheelOrigin(numRoadWheels() - 1, isLeft) - Vector3F::YAxis * roadWheelRadius(); 
 	
 	const float nb = asin((p.y - q.y) / (p - q).length());
-	if(isBackdrive()) {
-	    p.z -= sin(nb) * driveSprocketRadius();
-	    p.y += (1.f - cos(nb)) * driveSprocketRadius();
-	}
-	else {
-	    p.z -= sin(nb) * tensionerRadius();
-	    p.y += (1.f - cos(nb)) * tensionerRadius();
-	}
+	
+	p.z -= sin(nb) * r;
+	p.y += (1.f - cos(nb)) * r;
 	
 	q.z -= sin(nb) * roadWheelRadius(); 
 	q.y += (1.f - cos(nb)) * roadWheelRadius();
@@ -105,17 +99,19 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	
 	t.addSection(sect);
 	
-	p = q;
-	q = roadWheelOrigin(numRoadWheels() - 1, isLeft) - Vector3F::YAxis * roadWheelRadius();
-	sect._type = Tread::Section::tAngular;
-	sect._initialPosition = p;
-	sect._eventualPosition = q;
-	sect._initialAngle = 0.f;
-	sect._eventualAngle = -nb;
-	sect._rotateAround = roadWheelOrigin(numRoadWheels() - 1, isLeft);
-	sect._rotateRadius = roadWheelRadius();
-	
-	t.addSection(sect);
+	if(nb > .1) {
+		p = q;
+		q = roadWheelOrigin(numRoadWheels() - 1, isLeft) - Vector3F::YAxis * roadWheelRadius();
+		sect._type = Tread::Section::tAngular;
+		sect._initialPosition = p;
+		sect._eventualPosition = q;
+		sect._initialAngle = 0.f;
+		sect._eventualAngle = -nb;
+		sect._rotateAround = roadWheelOrigin(numRoadWheels() - 1, isLeft);
+		sect._rotateRadius = roadWheelRadius();
+		
+		t.addSection(sect);
+	}
 	
 	p = roadWheelOrigin(numRoadWheels() - 1, isLeft) - Vector3F::YAxis * roadWheelRadius(); 
 	q = roadWheelOrigin(0, isLeft) - Vector3F::YAxis * roadWheelRadius();
@@ -127,38 +123,34 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	t.addSection(sect);
 	
 	p = q;
-	if(isBackdrive())
-		q = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
-	else 
-		q = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
 	
-	float na = asin((p.y - q.y) / (p - q).length());
+	getFrontWheel(q, r, isLeft);
+	q = q - Vector3F::YAxis * r;
 	
-	q = roadWheelOrigin(0, isLeft) - Vector3F::YAxis * roadWheelRadius(); 
+	const float na = asin((p.y - q.y) / (p - q).length());
+	
+	q = roadWheelOrigin(0, isLeft) - Vector3F::YAxis * roadWheelRadius();
 	q.z -= sin(na) * roadWheelRadius();
 	q.y += (1.f - cos(na)) * roadWheelRadius();
-	
-	sect._type = Tread::Section::tAngular;
-	sect._initialPosition = p;
-	sect._eventualPosition = q;
-	sect._initialAngle = 0.f;
-	sect._eventualAngle = na;
-	sect._rotateAround = roadWheelOrigin(0, isLeft);
-	sect._rotateRadius = roadWheelRadius();
-	
-	t.addSection(sect);
+
+	if(na < -.1) {
+		sect._type = Tread::Section::tAngular;
+		sect._initialPosition = p;
+		sect._eventualPosition = q;
+		sect._initialAngle = 0.f;
+		sect._eventualAngle = na;
+		sect._rotateAround = roadWheelOrigin(0, isLeft);
+		sect._rotateRadius = roadWheelRadius();
+		
+		t.addSection(sect);
+	}
 	
 	p = q;
-	if(isBackdrive()) {
-		q = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
-		q.z -= sin(na) * tensionerRadius();
-	    q.y += (1.f - cos(na)) * tensionerRadius();
-	}
-	else {
-		q = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
-		q.z -= sin(nb) * driveSprocketRadius();
-	    q.y += (1.f - cos(na)) * driveSprocketRadius();
-	}
+	
+	getFrontWheel(q, r, isLeft);
+	q = q - Vector3F::YAxis * r;
+	q.z -= sin(na) * r;
+	q.y += (1.f - cos(na)) * r;
 	
 	sect._type = Tread::Section::tLinear;
 	sect._initialPosition = p;
@@ -170,36 +162,21 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	sect._type = Tread::Section::tAngular;
 	sect._initialAngle = 0.f;
 	sect._eventualAngle = - PI - na;
-	if(isBackdrive()) {
-		sect._rotateAround = tensionerOrigin(isLeft);
-		sect._rotateRadius = tensionerRadius();
-		sect._initialPosition = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
-	}
-	else {
-		sect._rotateAround = driveSprocketOrigin(isLeft);
-		sect._rotateRadius = driveSprocketRadius();
-		sect._initialPosition = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
-	}
+	
+	getFrontWheel(sect._rotateAround, sect._rotateRadius, isLeft);
+	sect._initialPosition = q;
 	
 	t.addSection(sect);
 	
-	if(!needSupportRollerSection(true)) {
-	p = tensionerOrigin(isLeft) + Vector3F::YAxis * tensionerRadius();
-	q = driveSprocketOrigin(isLeft) + Vector3F::YAxis * driveSprocketRadius();
-	sect._type = Tread::Section::tLinear;
-	sect._initialAngle = 0.f;
-	sect._initialPosition = p;
-	sect._eventualPosition = q;
-	
-	t.addSection(sect);
-	}
-	else {
-	    if(isBackdrive())
-	        p = tensionerOrigin(isLeft) + Vector3F::YAxis * tensionerRadius();
-	    else 
-	        p = driveSprocketOrigin(isLeft) + Vector3F::YAxis * driveSprocketRadius();
-        q = supportRollerOrigin(0, isLeft) + Vector3F::YAxis * supportRollerRadius();
+	Vector3F rollerP; float rollerR;
+	if(aroundFirstSupportRoller(rollerP, rollerR, isLeft)) {
+		getFrontWheel(p, r, isLeft);
+		p = p + Vector3F::YAxis * r;
+		
+        q = rollerP + Vector3F::YAxis * rollerR;
+		
         const float angF = asin((p.y - q.y) / (p - q).length());
+
         sect._type = Tread::Section::tLinear;
         sect._initialAngle = -angF;
         sect._initialPosition = p;
@@ -217,10 +194,8 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
         }
         
         p = q;
-        if(isBackdrive())
-	        q = driveSprocketOrigin(isLeft) + Vector3F::YAxis * driveSprocketRadius(); 
-	    else 
-	        q = tensionerOrigin(isLeft) + Vector3F::YAxis * tensionerRadius();
+		getBackWheel(q, r, isLeft);
+		q = q + Vector3F::YAxis * r;
 	        
 	    const float angB = asin((p.y - q.y) / (p - q).length());
 	    sect._type = Tread::Section::tLinear;
@@ -229,34 +204,52 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
         sect._eventualPosition = q;
         t.addSection(sect);
 	}
+	else {
+		getFrontWheel(p, r, isLeft);
+		p = p + Vector3F::YAxis * r;
+		if(aroundLastSupportRoller(rollerP, rollerR, isLeft)) {
+			q = rollerP + Vector3F::YAxis * rollerR;
+			sect._type = Tread::Section::tLinear;
+			sect._initialAngle = 0.f;
+			sect._initialPosition = p;
+			sect._eventualPosition = q;
+			
+			t.addSection(sect);
+			
+			p = q;
+		}
+		
+		getBackWheel(q, r, isLeft);
+		q = q + Vector3F::YAxis * r;
+		
+		const float angB = asin((p.y - q.y) / (p - q).length());
+	    
+		sect._type = Tread::Section::tLinear;
+		sect._initialAngle = -angB;
+		sect._initialPosition = p;
+		sect._eventualPosition = q;
+		
+		t.addSection(sect);
+	}
 	
 	sect._type = Tread::Section::tAngular;
-	sect._initialAngle = - nb * .5f;
-	sect._eventualAngle = - PI - na + nb *.5f;
-	if(isBackdrive()) {
-		sect._rotateAround = driveSprocketOrigin(isLeft);
-		sect._rotateRadius = driveSprocketRadius();
-		sect._initialPosition = driveSprocketOrigin(isLeft) + Vector3F::YAxis * driveSprocketRadius();
-	}
-	else {
-		sect._rotateAround = tensionerOrigin(isLeft);
-		sect._rotateRadius = tensionerRadius();
-		sect._initialPosition = tensionerOrigin(isLeft) + Vector3F::YAxis * tensionerRadius();
-	}
+	sect._initialAngle = 0.f;
+	sect._eventualAngle = - PI + nb * 2.f;
+	getBackWheel(sect._rotateAround, sect._rotateRadius, isLeft);
 	
 	t.addSection(sect);
 	
-	t.computeSections();
+	t.computeSections(.7);
 }
 
 void TrackedPhysics::createObstacles()
 {
-	btCollisionShape* obstacleShape = PhysicsState::engine->createBoxShape(40, 1, 4);
-	btTransform trans; trans.setIdentity(); trans.setOrigin(btVector3(10,1,50));
+	btCollisionShape* obstacleShape = PhysicsState::engine->createBoxShape(40, 2, 4);
+	btTransform trans; trans.setIdentity(); trans.setOrigin(btVector3(10,2,50));
 	btRigidBody* obs = PhysicsState::engine->createRigidBody(obstacleShape, trans, 0.f);
 	obs->setDamping(0,0);
 	obs->setFriction(.5);
-	trans.setOrigin(btVector3(-10,1,80));
+	trans.setOrigin(btVector3(-10,2,80));
 	obs = PhysicsState::engine->createRigidBody(obstacleShape, trans, 0.f);
 	obs->setDamping(0,0);
 	obs->setFriction(.5);

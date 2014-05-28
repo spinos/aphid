@@ -114,7 +114,7 @@ const float Tread::pinThickness() const { return m_thickness * .5f; }
 void Tread::addSection(const Section & sect) { m_sections.push_back(sect); }
 void Tread::clearSections() { m_sections.clear(); }
 
-void Tread::computeSections()
+void Tread::computeSections(const float & addThreshold)
 {
 	m_shoeLength = 2.f * PI * (SprocketRadius) / 11.f;
 	
@@ -125,7 +125,7 @@ void Tread::computeSections()
 			const Vector3F dp = sect._eventualPosition - sect._initialPosition;
 			const float fn = dp.length() / m_shoeLength;
 			sect._numSegments = fn;
-			if(fn - (int)fn > 0.95f) sect._numSegments++;
+			if(fn - (int)fn > addThreshold) sect._numSegments++;
 			sect._deltaPosition = dp.normal() * m_shoeLength;
 		}
 		else {
