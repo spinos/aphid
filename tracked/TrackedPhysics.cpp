@@ -56,8 +56,6 @@ void TrackedPhysics::create()
 {
     m_firstMotion = true;
 	resetGroups();
-
-	createChassis(*this);
 	
 	Tread::SprocketRadius = driveSprocketRadius();
 	Tread::ToothWidth = toothWidth();
@@ -71,6 +69,8 @@ void TrackedPhysics::create()
 	
 	createTread(m_leftTread);
 	createTread(m_rightTread, false);
+	
+	createChassis(*this);
 }
 
 void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
@@ -84,16 +84,40 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 		
 	q = roadWheelOrigin(numRoadWheels() - 1, isLeft) - Vector3F::YAxis * roadWheelRadius(); 
 	
+	const float nb = asin((p.y - q.y) / (p - q).length());
+	if(isBackdrive()) {
+	    p.z -= sin(nb) * driveSprocketRadius();
+	    p.y += (1.f - cos(nb)) * driveSprocketRadius();
+	}
+	else {
+	    p.z -= sin(nb) * tensionerRadius();
+	    p.y += (1.f - cos(nb)) * tensionerRadius();
+	}
+	
+	q.z -= sin(nb) * roadWheelRadius(); 
+	q.y += (1.f - cos(nb)) * roadWheelRadius();
+	
 	Tread::Section sect;
 	sect._type = Tread::Section::tLinear;
 	sect._initialPosition = p;
 	sect._eventualPosition = q;
-	const float nb = asin((p.y - q.y) / (p - q).length());
 	sect._initialAngle = nb;
 	
 	t.addSection(sect);
 	
 	p = q;
+	q = roadWheelOrigin(numRoadWheels() - 1, isLeft) - Vector3F::YAxis * roadWheelRadius();
+	sect._type = Tread::Section::tAngular;
+	sect._initialPosition = p;
+	sect._eventualPosition = q;
+	sect._initialAngle = 0.f;
+	sect._eventualAngle = -nb;
+	sect._rotateAround = roadWheelOrigin(numRoadWheels() - 1, isLeft);
+	sect._rotateRadius = roadWheelRadius();
+	
+	t.addSection(sect);
+	
+	p = roadWheelOrigin(numRoadWheels() - 1, isLeft) - Vector3F::YAxis * roadWheelRadius(); 
 	q = roadWheelOrigin(0, isLeft) - Vector3F::YAxis * roadWheelRadius();
 	sect._type = Tread::Section::tLinear;
 	sect._initialPosition = p;
@@ -101,19 +125,45 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	sect._initialAngle *= -1.f;
 	
 	t.addSection(sect);
-
+	
 	p = q;
 	if(isBackdrive())
 		q = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
 	else 
-		p = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
+		q = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
 	
 	float na = asin((p.y - q.y) / (p - q).length());
+	
+	q = roadWheelOrigin(0, isLeft) - Vector3F::YAxis * roadWheelRadius(); 
+	q.z -= sin(na) * roadWheelRadius();
+	q.y += (1.f - cos(na)) * roadWheelRadius();
+	
+	sect._type = Tread::Section::tAngular;
+	sect._initialPosition = p;
+	sect._eventualPosition = q;
+	sect._initialAngle = 0.f;
+	sect._eventualAngle = na;
+	sect._rotateAround = roadWheelOrigin(0, isLeft);
+	sect._rotateRadius = roadWheelRadius();
+	
+	t.addSection(sect);
+	
+	p = q;
+	if(isBackdrive()) {
+		q = tensionerOrigin(isLeft) - Vector3F::YAxis * tensionerRadius();
+		q.z -= sin(na) * tensionerRadius();
+	    q.y += (1.f - cos(na)) * tensionerRadius();
+	}
+	else {
+		q = driveSprocketOrigin(isLeft) - Vector3F::YAxis * driveSprocketRadius();
+		q.z -= sin(nb) * driveSprocketRadius();
+	    q.y += (1.f - cos(na)) * driveSprocketRadius();
+	}
 	
 	sect._type = Tread::Section::tLinear;
 	sect._initialPosition = p;
 	sect._eventualPosition = q;
-	sect._initialAngle = na;
+	sect._initialAngle = 0.;
 	
 	t.addSection(sect);
 	
@@ -133,6 +183,7 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	
 	t.addSection(sect);
 	
+	if(!needSupportRollerSection(true)) {
 	p = tensionerOrigin(isLeft) + Vector3F::YAxis * tensionerRadius();
 	q = driveSprocketOrigin(isLeft) + Vector3F::YAxis * driveSprocketRadius();
 	sect._type = Tread::Section::tLinear;
@@ -141,6 +192,43 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	sect._eventualPosition = q;
 	
 	t.addSection(sect);
+	}
+	else {
+	    if(isBackdrive())
+	        p = tensionerOrigin(isLeft) + Vector3F::YAxis * tensionerRadius();
+	    else 
+	        p = driveSprocketOrigin(isLeft) + Vector3F::YAxis * driveSprocketRadius();
+        q = supportRollerOrigin(0, isLeft) + Vector3F::YAxis * supportRollerRadius();
+        const float angF = asin((p.y - q.y) / (p - q).length());
+        sect._type = Tread::Section::tLinear;
+        sect._initialAngle = -angF;
+        sect._initialPosition = p;
+        sect._eventualPosition = q;
+        t.addSection(sect);
+        
+        if(numSupportRollers() > 1) {
+            p = q;
+            q = supportRollerOrigin(numSupportRollers() - 1, isLeft) + Vector3F::YAxis * supportRollerRadius();
+            sect._type = Tread::Section::tLinear;
+            sect._initialAngle = angF;
+            sect._initialPosition = p;
+            sect._eventualPosition = q;
+            t.addSection(sect);
+        }
+        
+        p = q;
+        if(isBackdrive())
+	        q = driveSprocketOrigin(isLeft) + Vector3F::YAxis * driveSprocketRadius(); 
+	    else 
+	        q = tensionerOrigin(isLeft) + Vector3F::YAxis * tensionerRadius();
+	        
+	    const float angB = asin((p.y - q.y) / (p - q).length());
+	    sect._type = Tread::Section::tLinear;
+        sect._initialAngle = -angB;
+        sect._initialPosition = p;
+        sect._eventualPosition = q;
+        t.addSection(sect);
+	}
 	
 	sect._type = Tread::Section::tAngular;
 	sect._initialAngle = - nb * .5f;
@@ -263,6 +351,7 @@ void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frame
 	p3[0] = side - toothWidth() * .5f;
 	
 	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
+	
 	
 	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.0));
 }

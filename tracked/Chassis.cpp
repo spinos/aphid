@@ -237,3 +237,15 @@ const Matrix44F Chassis::computeBogieArmOrigin(const float & chassisWidth, const
 
 void Chassis::setDriveSprocketZ(const float & x) { m_driveSprocketZ = x; }
 void Chassis::setTensionerZ(const float & x) { m_tensionerZ = x; }
+
+const bool Chassis::needSupportRollerSection(bool isFront) const
+{
+    if(numSupportRollers() < 1) return false;
+    const float ry = m_supportRollerY + m_supportRollerRadius;
+    if(isFront) {
+        if(isBackdrive()) return ry > (m_tensionerY + m_tensionerRadius);
+        else return ry > (m_driveSprocketY + m_driveSprocketRadius);
+    }
+    if(isBackdrive()) return ry > (m_driveSprocketY + m_driveSprocketRadius);
+    return ry > (m_tensionerY + m_tensionerRadius);
+}

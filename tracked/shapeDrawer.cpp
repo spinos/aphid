@@ -187,7 +187,7 @@ void ShapeDrawer::drawD6Constraint(const btGeneric6DofConstraint* d6f)
     btVector3 angularLower, angularUpper;
     ((btGeneric6DofConstraint*)d6f)->getAngularLowerLimit(angularLower);
     ((btGeneric6DofConstraint*)d6f)->getAngularUpperLimit(angularUpper);
-    drawAngularLimit(transA, transB, angularLower, angularUpper);
+    //drawAngularLimit(transA, transB, angularLower, angularUpper);
     
     btTransform tA = bodyA.getWorldTransform();
     btTransform tB = bodyB.getWorldTransform();
@@ -204,6 +204,9 @@ void ShapeDrawer::drawD6Constraint(const btGeneric6DofConstraint* d6f)
     glDrawVector(frmA);
     glDrawVector(oriB);
     glDrawVector(frmB);
+    glColor3f(.1f, 1.f, .8f);
+    glDrawVector(oriA);
+    glDrawVector(oriB);
 	glEnd();
 }
 

@@ -258,12 +258,12 @@ void DynamicsSolver::renderWorld()
 			//btSoftBodyHelpers::DrawFrame(psb,m_dynamicsWorld->getDebugDrawer());
 			//btSoftBodyHelpers::Draw(psb,m_dynamicsWorld->getDebugDrawer(),m_dynamicsWorld->getDrawFlags());
 	}
-	
+	*/
 	const int numConstraints = m_dynamicsWorld->getNumConstraints();
 	for(int i=0;i< numConstraints;i++) {
 	    btTypedConstraint* constraint = m_dynamicsWorld->getConstraint(i);
 	    _drawer->drawConstraint(constraint);
-	}*/
+	}
 }
 
 void DynamicsSolver::simulate()
