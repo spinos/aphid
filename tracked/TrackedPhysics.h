@@ -19,6 +19,8 @@ public:
 	TrackedPhysics();
 	virtual ~TrackedPhysics();
 	void setTrackThickness(const float & x);
+	const float trackStiffness() const;
+	void setTrackStiffness(const float & x);
 	void addTension(const float & x);
 	void addPower(const float & x);
 	void addBrake(bool leftSide);
@@ -32,12 +34,15 @@ public:
 private:
 	class CreateWheelProfile {
 	public:
-		btRigidBody * connectTo;
+		CreateWheelProfile() { isSpringConstraint = false; }
 		Vector3F worldP, objectP;
-		float radius, width, mass, gap;
-		bool isLeft;
+		btRigidBody * connectTo;
 		btRigidBody * dstBody;
 		btGeneric6DofConstraint* dstHinge;
+		btGeneric6DofSpringConstraint* dstSpringHinge;
+		float radius, width, mass, gap;
+		bool isLeft;
+		bool isSpringConstraint;
 	};
 	
 	void createChassis(Chassis & c);
@@ -59,9 +64,9 @@ private:
 	btRigidBody * createTorsionBar(btRigidBody * chassisBody, const int & i, bool isLeft = true);
 private:
 	Tread m_leftTread, m_rightTread;
-	btGeneric6DofConstraint* m_tension[2];
+	btGeneric6DofSpringConstraint* m_tension[2];
 	btGeneric6DofConstraint* m_drive[2];
-	float m_targeVelocity;
+	float m_targeVelocity, m_trackStiffness;
 	bool m_firstMotion;
 };
 }

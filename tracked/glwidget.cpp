@@ -67,9 +67,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_vehicle->setSupportRollerZ(0, 19.3f);
 	m_vehicle->setSupportRollerZ(1, .8f);
 	m_vehicle->setSupportRollerZ(2, -18.5f);
-	m_vehicle->setDriveSprocketY(-2);
-	m_vehicle->setTensionerY(-2);
-	m_vehicle->setRoadWheelY(-8);
+	//m_vehicle->setDriveSprocketY(-2);
+	//m_vehicle->setTensionerY(-2);
+	//m_vehicle->setRoadWheelY(-8);
 	
 	m_vehicle->create();
 	m_vehicle->createObstacles();
@@ -131,7 +131,10 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
     bool enabled;
 	switch (e->key()) {
 		case Qt::Key_T:
-			m_vehicle->addTension(0.5f);
+			m_vehicle->addTension(100.f);
+			break;
+		case Qt::Key_R:
+			m_vehicle->addTension(-100.f);
 			break;
 		case Qt::Key_W:
 			m_vehicle->addPower(0.1f);

@@ -16,6 +16,7 @@ namespace caterpillar {
 #define SHOEMASS .2
 #define PINMASS .3
 #define SPROCKETTEETHPROTRUDE 0.075
+#define MINTRACKSTIFFNESS 400
 
 static btTransform CopyFromMatrix44F(const Matrix44F & tm)
 {
@@ -47,7 +48,12 @@ TrackedPhysics::TrackedPhysics()
 	addGroup("left_trackPin");
 	addGroup("right_trackPin");
 	m_targeVelocity = 0.f;
+	m_trackStiffness = 1000.f;
 	m_firstMotion = true;
+	m_tension[0] = NULL;
+	m_tension[1] = NULL;
+	m_drive[0] = NULL;
+	m_drive[1] = NULL;
 }
 
 TrackedPhysics::~TrackedPhysics() {}
@@ -239,7 +245,7 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	
 	t.addSection(sect);
 	
-	t.computeSections(.7);
+	t.computeSections(.5);
 }
 
 void TrackedPhysics::createObstacles()
@@ -478,9 +484,16 @@ void TrackedPhysics::createWheel(btCollisionShape* wheelShape, CreateWheelProfil
 	const btMatrix3x3 zTonY(1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, -1.f, 0.f);
 	
 	btTransform frameInB(zTonY);
-	btGeneric6DofConstraint* hinge = PhysicsState::engine->constrainByHinge(*profile.connectTo, *wheelBody, frameInA, frameInB, true);
+	if(!profile.isSpringConstraint) {
+		btGeneric6DofConstraint* hinge = PhysicsState::engine->constrainByHinge(*profile.connectTo, *wheelBody, frameInA, frameInB, true);
+		profile.dstHinge = hinge;
+	}
+	else {
+		btGeneric6DofSpringConstraint* spring = PhysicsState::engine->constrainBySpring(*profile.connectTo, *wheelBody, frameInA, frameInB, true);
+		profile.dstSpringHinge = spring;
+	}
 	profile.dstBody = wheelBody;
-	profile.dstHinge = hinge;
+	
 }
 
 btCollisionShape* TrackedPhysics::simpleWheelShape(CreateWheelProfile & profile)
@@ -567,13 +580,30 @@ void TrackedPhysics::createTensioner(Chassis & c, btRigidBody * chassisBody, boo
 	cwp.objectP = c.tensionerOriginObject(isLeft);
 	cwp.isLeft = isLeft;
 	cwp.gap = toothWidth() * 1.1f;
+	cwp.isSpringConstraint = true;
 	const int id = PhysicsState::engine->numCollisionObjects();
 	createCompoundWheel(cwp);
 	if(isLeft) group("left_tensioner").push_back(id);
 	else group("right_tensioner").push_back(id);
+	
+	btGeneric6DofSpringConstraint* spring = cwp.dstSpringHinge;
+	spring->setAngularLowerLimit(btVector3(0.f, 0.f, -PI));
+	spring->setAngularUpperLimit(btVector3(0.f, 0.f, PI));
 
-	if(isLeft) m_tension[0] = cwp.dstHinge;
-	else m_tension[1] = cwp.dstHinge;
+	spring->enableSpring(0, true);
+	spring->setStiffness(0, 1000.);
+	spring->setDamping(0, .5);
+	
+	const float horl = tensionerRadius() * 1.2;
+	spring->setLinearLowerLimit(btVector3(-horl, 0., 0.));
+	spring->setLinearUpperLimit(btVector3(horl, 0., 0.));
+	if(isLeft)
+		spring->setEquilibriumPoint(0, -horl * .5);
+	else
+		spring->setEquilibriumPoint(0, horl * .5);
+		
+	if(isLeft) m_tension[0] = spring;
+	else m_tension[1] = spring;
 	
 }
 
@@ -624,35 +654,30 @@ void TrackedPhysics::createSupportRollers(Chassis & c, btRigidBody * chassisBody
 
 void TrackedPhysics::addTension(const float & x)
 {
-	btGeneric6DofConstraint* te = m_tension[0];
-	btTransform & frm = te->getFrameOffsetA();
-	btVector3 & p = frm.getOrigin();
-	if(p[2] < 43)p[2] += x * .1;
-	
-	te = m_tension[1];
-	btTransform & frm1 = te->getFrameOffsetA();
-	btVector3 & p1 = frm1.getOrigin();
-	if(p[2] < 43)p1[2] += x * .1;
+	m_trackStiffness += x;
+	if(m_trackStiffness < MINTRACKSTIFFNESS) m_trackStiffness = MINTRACKSTIFFNESS;
+	m_tension[0]->setStiffness(0, m_trackStiffness);
+	m_tension[1]->setStiffness(0, m_trackStiffness);
 }
 
 void TrackedPhysics::addPower(const float & x)
 {
+	if(!m_drive[0] || !m_drive[1]) return;
 	m_targeVelocity += x;
 	
 	m_drive[0]->getRotationalLimitMotor(2)->m_enableMotor = true;
 	m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = -m_targeVelocity;
-	//if(m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
-		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 100.f;
+	m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 100.f;
 	m_drive[0]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_enableMotor = true;
 	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity  = m_targeVelocity;
-	//if(m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce < 10000.f )
-		m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 100.f;
+	m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 100.f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 }
 
 void TrackedPhysics::addBrake(bool leftSide)
 {
+	if(!m_drive[0] || !m_drive[1]) return;
 	if(leftSide) {
 		m_drive[0]->getRotationalLimitMotor(2)->m_targetVelocity = 0.;
 		m_drive[0]->getRotationalLimitMotor(2)->m_maxMotorForce = 100.f;
@@ -695,7 +720,7 @@ btRigidBody * TrackedPhysics::createTorsionBar(btRigidBody * chassisBody, const 
 
 	spring->enableSpring(5, true);
 	spring->setStiffness(5, 3000.);
-	spring->setDamping(0., .7);
+	spring->setDamping(5, .5);
 	
 	const float tgt = torsionBarTargetAngle();
 	if(isLeft) {
@@ -746,6 +771,7 @@ void TrackedPhysics::setTrackThickness(const float & x)
 
 void TrackedPhysics::setTargetSpeed(const float & lft, const float & rgt)
 {
+	if(!m_drive[0] || !m_drive[1]) return;
     if(m_firstMotion && lft == 0. && rgt == 0.) return;
     m_firstMotion = false;
     const float lftRps = lft / driveSprocketRadius();
@@ -760,6 +786,15 @@ void TrackedPhysics::setTargetSpeed(const float & lft, const float & rgt)
 	m_drive[1]->getRotationalLimitMotor(2)->m_targetVelocity  = rgtRps;
 	m_drive[1]->getRotationalLimitMotor(2)->m_maxMotorForce = 100.f;
 	m_drive[1]->getRotationalLimitMotor(2)->m_damping = 0.5f;
+}
+
+const float TrackedPhysics::trackStiffness() const { return m_trackStiffness; }
+void TrackedPhysics::setTrackStiffness(const float & x)
+{
+	m_trackStiffness = x;
+	if(m_trackStiffness < MINTRACKSTIFFNESS) m_trackStiffness = MINTRACKSTIFFNESS;
+	if(m_tension[0]) m_tension[0]->setStiffness(0, m_trackStiffness);
+	if(m_tension[1]) m_tension[1]->setStiffness(0, m_trackStiffness);
 }
 
 }
