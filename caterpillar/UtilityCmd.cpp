@@ -19,12 +19,14 @@ namespace caterpillar {
 
 static const char * attachFlag			= "-at";
 static const char * attachFlagLong		= "-attach";
+static const char * lsGroupFlag			= "-lgn";
+static const char * lsGroupFlagLong		= "-lsGroupName";
 static const char * groupNameFlag		= "-gn";
 static const char * groupNameFlagLong	= "-groupName";
 static const char * modelNameFlag		= "-mdn";
 static const char * modelNameFlagLong	= "-modelName";
-static const int numRegisteredNames = 1;
-static const MString registeredNames[] = {"caterpillarCondition"};
+static const int numRegisteredNames = 2;
+static const MString registeredNames[] = {"caterpillarCondition", "caterpillarTrackedVehicle"};
 
 UtilityCmd::UtilityCmd() 
 {
@@ -58,6 +60,7 @@ MSyntax UtilityCmd::newSyntax ()
 	syntax.setMaxObjects(1);
 	syntax.setObjectType(MSyntax::kStringObjects);
 	status = marg::AddFlag(syntax, attachFlag, attachFlagLong, MSyntax::kNoArg);
+	status = marg::AddFlag(syntax, lsGroupFlag, lsGroupFlagLong, MSyntax::kNoArg);
 	status = marg::AddFlag(syntax, groupNameFlag, groupNameFlagLong, MSyntax::kString);
 	status = marg::AddFlag(syntax, modelNameFlag, modelNameFlagLong, MSyntax::kString);
 
@@ -66,17 +69,29 @@ MSyntax UtilityCmd::newSyntax ()
 
 MStatus UtilityCmd::parseArgs( const MArgList& args )
 {
+    m_operation = tUnknown;
 	m_groupName = "";
-	MString conditionName, modelName;
+
+	MArgDatabase argData(syntax(), args);
+	
+	if(marg::HasFlag(argData, attachFlag)) {
+		return checkAttachOpt(args);
+	}
+	else if(marg::HasFlag(argData, lsGroupFlag)) {
+	    return checkListOpt(args);
+	}
+	
+	MGlobal::displayWarning("caterpillar has no -attach  or -lsGroupName flag");
+	return MS::kFailure;
+}
+
+MStatus UtilityCmd::checkAttachOpt(const MArgList& args)
+{
+    MString conditionName, modelName;
 	MStatus     	status;
 	MArgDatabase argData(syntax(), args);
 	
-	if(!marg::HasFlag(argData, attachFlag)) {
-		MGlobal::displayWarning("caterpillar has no -attach flag");
-		return MS::kFailure;
-	}
-	
-	if(!marg::GetLast<MString>(args, conditionName)) {
+    if(!marg::GetLast<MString>(args, conditionName)) {
 		MGlobal::displayWarning("caterpillar has no subject");
 		return MS::kFailure;
 	}
@@ -100,23 +115,66 @@ MStatus UtilityCmd::parseArgs( const MArgList& args )
 		MGlobal::displayWarning(MString("caterpillar cannot find model ") + modelName);
 		return MS::kFailure;
 	}
-
+	m_operation = tAttachModel;
 	return MS::kSuccess;
 }
 
+MStatus UtilityCmd::checkListOpt(const MArgList& args)
+{
+    MString conditionName;
+    if(!marg::GetLast<MString>(args, conditionName)) {
+		MGlobal::displayWarning("caterpillar has no subject");
+		return MS::kFailure;
+	}
+	
+	if(!mdag::FindObjByName(conditionName, m_conditionNode)) {
+		MGlobal::displayWarning(MString("caterpillar cannot find condition ") + conditionName);
+		return MS::kFailure;
+	}
+	m_operation = tLsGroup;
+    return MS::kSuccess;
+}
 
 MStatus UtilityCmd::doIt( const MArgList& args )
 {
     MStatus stat = parseArgs(args);
 	if (stat != MS::kSuccess) {
-		return stat;
+	    return stat;
 	}
-	if(m_conditionNode == MObject::kNullObj || m_modelNode == MObject::kNullObj) return stat;
 	return redoIt();
 }
 
 MStatus UtilityCmd::redoIt()
 {
+    if(m_operation == tLsGroup) return doLsGroup();
+    else if(m_operation == tAttachModel) return doAttachModel();
+    return MS::kFailure;
+}
+
+MStatus UtilityCmd::doLsGroup()
+{
+    if(m_conditionNode == MObject::kNullObj) return MS::kFailure;
+    MFnDependencyNode fcondition(m_conditionNode);
+    
+    GroupId * g = getGroupId();
+	if(!g) {
+		MGlobal::displayWarning(MString("caterpillar cannot cast groupId from ")+fcondition.name());
+		return MS::kFailure;
+	}
+	
+	const std::deque<std::string > allNames = g->getGroupNames();
+	MStringArray res;
+	std::deque<std::string >::const_iterator it = allNames.begin();
+	for(; it != allNames.end(); ++it) 
+	    res.append(MString((*it).c_str()));
+	setResult(res);
+	MGlobal::displayInfo(MString("caterpillar list group names in ") + fcondition.name());
+    return MS::kSuccess;
+}
+
+MStatus UtilityCmd::doAttachModel()
+{
+	if(m_conditionNode == MObject::kNullObj || m_modelNode == MObject::kNullObj) return MS::kFailure;
 	MFnDependencyNode fcondition(m_conditionNode);
 	MStatus status;
 	MPlug pos = fcondition.findPlug("outSolver", &status);

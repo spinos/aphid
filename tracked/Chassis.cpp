@@ -207,7 +207,7 @@ const Matrix44F  Chassis::bogieArmOrigin(const int & i, bool isLeft) const
     Vector3F cen = roadWheelOrigin(i, isLeft);
     float d = 1.f;
 	if(!isLeft) d = -d;
-	cen.x = m_width * .5f * d + m_bogieArmWidth * .7f * d;
+	cen.x += -m_trackWidth * .5f * d + m_bogieArmWidth * .7f * d;
     cen.z += 0.5f * m_bogieArmLength * cos(m_torsionBarRestAngle);
     cen.y += 0.5f * m_bogieArmLength * sin(m_torsionBarRestAngle);
     res.setTranslation(cen);

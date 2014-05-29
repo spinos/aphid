@@ -30,7 +30,7 @@ public:
 	void displayStatistics() const;
 	const float vehicleSpeed() const;
 	void createObstacles();
-	
+
 private:
 	class CreateWheelProfile {
 	public:

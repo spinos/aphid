@@ -31,11 +31,21 @@ public:
 	static MSyntax newSyntax ();
 
 private:
+    enum OperationType {
+        tUnknown = 0,
+        tLsGroup = 1,
+        tAttachModel = 2
+    };
+    MStatus checkAttachOpt(const MArgList& args);
+    MStatus checkListOpt(const MArgList& args);
+    MStatus doAttachModel();
+    MStatus doLsGroup();
 	GroupId * getGroupId() const;
 	const int getObjectId(const MObject & node) const;
 	MObject createRigidBody(const MPlug & src, const int & objectId, MObject & parent) const;
 	MString m_groupName;
 	MObject m_conditionNode;
 	MObject m_modelNode;
+	OperationType m_operation;
 };
 }

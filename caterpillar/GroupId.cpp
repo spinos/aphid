@@ -64,4 +64,12 @@ const std::string GroupId::str() const
 	return sst.str();
 }
 
+const std::deque<std::string > GroupId::getGroupNames() const
+{
+    std::deque<std::string > res;
+    std::map<std::string, std::deque<int> >::const_iterator it = m_data.begin();
+	for(; it != m_data.end(); ++it) res.push_back((*it).first);
+    return res;
+}
+
 }

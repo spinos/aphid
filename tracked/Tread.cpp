@@ -137,3 +137,24 @@ void Tread::computeSections(const float & addThreshold)
 		}
 	}
 }
+
+const float Tread::computeShoeLength(const float & sprocketR)
+{
+    return 2.f * PI * (sprocketR) / 11.f  * ShoeLengthFactor;
+}
+
+const float Tread::computePinLength(const float & sprocketR, const float & toothW)
+{
+    return 2.f * PI * (sprocketR) / 11.f  - toothW * 1.001f;
+}
+
+const float Tread::computeShoeWidth(const float & trackW, const float & toothW)
+{
+    return trackW - toothW * 2.05f;
+}
+
+const float Tread::computePinThickness(const float & trackH)
+{
+    return trackH * .5;
+}
+

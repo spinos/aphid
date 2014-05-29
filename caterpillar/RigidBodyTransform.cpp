@@ -130,7 +130,7 @@ void RigidBodyTransformNode::postConstructor()
 		baseTransformationMatrix = new MPxTransformationMatrix();
 	}
 
-	MPlug aRockInXPlug(thisMObject(), a_inSolver);
+	//MPlug aRockInXPlug(thisMObject(), a_inSolver);
 }
 
 //
@@ -172,8 +172,9 @@ MStatus RigidBodyTransformNode::initialize()
     fnNumericAttr.setMin(0);
 	status = addAttribute(a_objectId);
 
-	a_inSolver = fnMsgAttr.create("inSolver", "isv", &status);
-	fnMsgAttr.setAffectsWorldSpace(true);
+	a_inSolver = fnNumericAttr.create("inSolver", "isv", MFnNumericData::kDouble, 0., &status);
+	fnNumericAttr.setStorable(false);
+	// fnMsgAttr.setAffectsWorldSpace(true);
 	status = addAttribute(a_inSolver);
 	//	This is required so that the validateAndSet method is called
 	mustCallValidateAndSet(a_inSolver);
@@ -222,7 +223,6 @@ MStatus RigidBodyTransformNode::validateAndSetValue(const MPlug& plug,
 												const MDGContext& context)
 {
 	MStatus status;
-	
 	if (plug.isNull())
 		return MS::kFailure;
 	MDataBlock block = forceCache(*(MDGContext *)&context);

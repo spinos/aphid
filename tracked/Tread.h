@@ -52,6 +52,11 @@ public:
 	void clearSections();
 	void computeSections(const float & addThreshold = .5f);
 	
+	static const float computeShoeLength(const float & sprocketR);
+	static const float computePinLength(const float & sprocketR, const float & toothW);
+	static const float computeShoeWidth(const float & trackW, const float & toothW);
+	static const float computePinThickness(const float & trackH);
+	
 	static float ShoeLengthFactor;
 	static float ShoeHingeRise;
 	static float ToothWidth;

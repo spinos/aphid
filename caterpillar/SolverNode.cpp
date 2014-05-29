@@ -152,8 +152,9 @@ MStatus SolverNode::initialize()
 	fnMsgAttr.setArray(true);
     status = addAttribute(a_inConditions);
 	
-	a_outRigidBodies = fnMsgAttr.create("outRigidBodies", "orbds", &status);
-    status = addAttribute(a_outRigidBodies);
+	a_outRigidBodies = fnNumericAttr.create("outRigidBodies", "orbds", MFnNumericData::kDouble, 0., &status);
+    fnNumericAttr.setStorable(false);
+	status = addAttribute(a_outRigidBodies);
 
 	attributeAffects(a_inTime, a_outRigidBodies);
 	attributeAffects(a_enable, a_outRigidBodies);

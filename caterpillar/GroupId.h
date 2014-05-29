@@ -21,6 +21,7 @@ public:
 	const bool hasGroup(const std::string & name) const;
 	std::deque<int> & group(const std::string & name);
 	const std::deque<int> getGroup(const std::string & name) const;
+	const std::deque<std::string > getGroupNames() const;
 	void resetGroups();
 	const std::string str() const;
 private:
