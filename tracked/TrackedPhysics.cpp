@@ -48,7 +48,7 @@ TrackedPhysics::TrackedPhysics()
 	addGroup("left_trackPin");
 	addGroup("right_trackPin");
 	m_targeVelocity = 0.f;
-	m_trackStiffness = 1000.f;
+	m_trackTension = 1000.f;
 	m_firstMotion = true;
 	m_tension[0] = NULL;
 	m_tension[1] = NULL;
@@ -240,12 +240,12 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	
 	sect._type = Tread::Section::tAngular;
 	sect._initialAngle = 0.f;
-	sect._eventualAngle = - PI + nb * 2.f;
+	sect._eventualAngle = - PI + nb;
 	getBackWheel(sect._rotateAround, sect._rotateRadius, isLeft);
 	
 	t.addSection(sect);
 	
-	t.computeSections(.5);
+	t.computeSections(.7);
 }
 
 void TrackedPhysics::createObstacles()
@@ -591,7 +591,7 @@ void TrackedPhysics::createTensioner(Chassis & c, btRigidBody * chassisBody, boo
 	spring->setAngularUpperLimit(btVector3(0.f, 0.f, PI));
 
 	spring->enableSpring(0, true);
-	spring->setStiffness(0, 1000.);
+	spring->setStiffness(0, m_trackTension);
 	spring->setDamping(0, .5);
 	
 	const float horl = tensionerRadius() * 1.2;
@@ -654,10 +654,10 @@ void TrackedPhysics::createSupportRollers(Chassis & c, btRigidBody * chassisBody
 
 void TrackedPhysics::addTension(const float & x)
 {
-	m_trackStiffness += x;
-	if(m_trackStiffness < MINTRACKSTIFFNESS) m_trackStiffness = MINTRACKSTIFFNESS;
-	m_tension[0]->setStiffness(0, m_trackStiffness);
-	m_tension[1]->setStiffness(0, m_trackStiffness);
+	m_trackTension += x;
+	if(m_trackTension < MINTRACKSTIFFNESS) m_trackTension = MINTRACKSTIFFNESS;
+	m_tension[0]->setStiffness(0, m_trackTension);
+	m_tension[1]->setStiffness(0, m_trackTension);
 }
 
 void TrackedPhysics::addPower(const float & x)
@@ -719,7 +719,7 @@ btRigidBody * TrackedPhysics::createTorsionBar(btRigidBody * chassisBody, const 
 	spring->setLinearLowerLimit(btVector3(0., 0., 0.));
 
 	spring->enableSpring(5, true);
-	spring->setStiffness(5, 3000.);
+	spring->setStiffness(5, 4000.);
 	spring->setDamping(5, .5);
 	
 	const float tgt = torsionBarTargetAngle();
@@ -788,13 +788,13 @@ void TrackedPhysics::setTargetSpeed(const float & lft, const float & rgt)
 	m_drive[1]->getRotationalLimitMotor(2)->m_damping = 0.5f;
 }
 
-const float TrackedPhysics::trackStiffness() const { return m_trackStiffness; }
-void TrackedPhysics::setTrackStiffness(const float & x)
+const float TrackedPhysics::trackTension() const { return m_trackTension; }
+void TrackedPhysics::setTrackTension(const float & x)
 {
-	m_trackStiffness = x;
-	if(m_trackStiffness < MINTRACKSTIFFNESS) m_trackStiffness = MINTRACKSTIFFNESS;
-	if(m_tension[0]) m_tension[0]->setStiffness(0, m_trackStiffness);
-	if(m_tension[1]) m_tension[1]->setStiffness(0, m_trackStiffness);
+	m_trackTension = x;
+	if(m_trackTension < MINTRACKSTIFFNESS) m_trackTension = MINTRACKSTIFFNESS;
+	if(m_tension[0]) m_tension[0]->setStiffness(0, m_trackTension);
+	if(m_tension[1]) m_tension[1]->setStiffness(0, m_trackTension);
 }
 
 }

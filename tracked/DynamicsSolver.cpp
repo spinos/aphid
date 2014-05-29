@@ -18,6 +18,7 @@
 DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(2)
 {
 	m_isWorldInitialized = false;
+	m_enableDrawConstraint = false;
     _drawer = new ShapeDrawer();
 }
 
@@ -259,6 +260,7 @@ void DynamicsSolver::renderWorld()
 			//btSoftBodyHelpers::Draw(psb,m_dynamicsWorld->getDebugDrawer(),m_dynamicsWorld->getDrawFlags());
 	}
 	*/
+	if(!m_enableDrawConstraint) return;
 	const int numConstraints = m_dynamicsWorld->getNumConstraints();
 	for(int i=0;i< numConstraints;i++) {
 	    btTypedConstraint* constraint = m_dynamicsWorld->getConstraint(i);
@@ -377,4 +379,6 @@ btGeneric6DofSpringConstraint* DynamicsSolver::constrainBySpring(btRigidBody& rb
 }
 
 ShapeDrawer* DynamicsSolver::getDrawer() { return _drawer; }
+
+void DynamicsSolver::setEnableDrawConstraint(bool x) { m_enableDrawConstraint = x; }
 

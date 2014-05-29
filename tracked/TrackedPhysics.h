@@ -19,8 +19,8 @@ public:
 	TrackedPhysics();
 	virtual ~TrackedPhysics();
 	void setTrackThickness(const float & x);
-	const float trackStiffness() const;
-	void setTrackStiffness(const float & x);
+	const float trackTension() const;
+	void setTrackTension(const float & x);
 	void addTension(const float & x);
 	void addPower(const float & x);
 	void addBrake(bool leftSide);
@@ -66,7 +66,7 @@ private:
 	Tread m_leftTread, m_rightTread;
 	btGeneric6DofSpringConstraint* m_tension[2];
 	btGeneric6DofConstraint* m_drive[2];
-	float m_targeVelocity, m_trackStiffness;
+	float m_targeVelocity, m_trackTension;
 	bool m_firstMotion;
 };
 }

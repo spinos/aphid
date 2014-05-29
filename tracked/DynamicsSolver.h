@@ -27,6 +27,7 @@ public:
 	void simulate(const float & dt, const int & numSubsteps, const float & frequency);
 	
 	void setEnablePhysics(bool x);
+	void setEnableDrawConstraint(bool x);
 	void setNumSubSteps(int x);
 	const bool isPhysicsEnabled() const;
 	const bool isWorldInitialized() const;
@@ -77,7 +78,8 @@ private:
 
 	btAlignedObjectArray<btSoftRididCollisionAlgorithm*> m_SoftRigidCollisionAlgorithms;
 	
+	int m_numSubSteps;
 	bool m_enablePhysics;
 	bool m_isWorldInitialized;
-	int m_numSubSteps;
+	bool m_enableDrawConstraint;
 };
