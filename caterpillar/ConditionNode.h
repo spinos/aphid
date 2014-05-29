@@ -39,6 +39,7 @@ public:
 	static  MObject a_outSolver;
 	static  MObject a_inTime;
 	static  MObject a_inDim;
+	static MObject a_objectType;
 	static	MTypeId id;
 	
 private:
