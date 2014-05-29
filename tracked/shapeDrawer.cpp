@@ -42,6 +42,11 @@ public:
 			glVertex3d(triangle[1].getX(), triangle[1].getY(), triangle[1].getZ());
 			glVertex3d(triangle[2].getX(), triangle[2].getY(), triangle[2].getZ());
 			glVertex3d(triangle[0].getX(), triangle[0].getY(), triangle[0].getZ());
+			/*glColor3f(0.5, 0.5, .43);
+			glBegin(GL_TRIANGLES);
+			glVertex3d(triangle[0].getX(), triangle[0].getY(), triangle[0].getZ());
+			glVertex3d(triangle[1].getX(), triangle[1].getY(), triangle[1].getZ());
+			glVertex3d(triangle[2].getX(), triangle[2].getY(), triangle[2].getZ());*/
 			glEnd();
 	}
 };

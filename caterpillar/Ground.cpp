@@ -50,9 +50,10 @@ void Ground::create()
 	m_indexVertexArrays = new btTriangleIndexVertexArray(m_numTri, m_indices, 3 * sizeof(int),
 		m_numVert,(btScalar*)&m_vertexPos[0][0], sizeof(btVector3));
 	
-	const bool useQuantizedAabbCompression = true;
+	const bool useQuantizedAabbCompression = false;
 	const bool buildBvh = true;
 	btBvhTriangleMeshShape* trimeshShape = new btBvhTriangleMeshShape(m_indexVertexArrays, useQuantizedAabbCompression, buildBvh);
+    trimeshShape->setMargin(1.f); 
     PhysicsState::engine->addCollisionShape(trimeshShape);
     
 	// int id = PhysicsState::engine->numCollisionObjects();
