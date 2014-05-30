@@ -17,6 +17,8 @@ Ground::Ground()
     m_indexVertexArrays = NULL;
 	m_vertexPos = NULL;
 	m_indices = NULL;
+	m_friction = .732; 
+	m_margin = 1.;
 }
 
 Ground::~Ground() 
@@ -53,11 +55,15 @@ void Ground::create()
 	const bool useQuantizedAabbCompression = true;
 	const bool buildBvh = true;
 	btBvhTriangleMeshShape* trimeshShape = new btBvhTriangleMeshShape(m_indexVertexArrays, useQuantizedAabbCompression, buildBvh);
-    PhysicsState::engine->addCollisionShape(trimeshShape);
+    trimeshShape->setMargin(m_margin);
+	PhysicsState::engine->addCollisionShape(trimeshShape);
     
 	// int id = PhysicsState::engine->numCollisionObjects();
     btTransform trans; trans.setIdentity();
 	btRigidBody * bd = PhysicsState::engine->createRigidBody(trimeshShape, trans, 0.0);
-	bd->setFriction(.732f);
+	bd->setFriction(m_friction);
 }
+
+void Ground::setMargin(const float & x) { m_margin = x; }
+void Ground::setFriction(const float & x) { m_friction = x; }
 }

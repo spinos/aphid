@@ -17,6 +17,8 @@ namespace caterpillar {
 MTypeId GroundPlane::id(0x170d562d);
 MObject GroundPlane::a_inMesh;
 MObject GroundPlane::a_inTime;
+MObject GroundPlane::a_inFriction;
+MObject GroundPlane::a_inMargin;
 MObject GroundPlane::a_outSolver;
 
 GroundPlane::GroundPlane() 
@@ -98,6 +100,16 @@ MStatus GroundPlane::initialize()
 	a_outSolver = fnMsgAttr.create("outSolver", "osv", &status);
     status = addAttribute(a_outSolver);
 	
+	a_inMargin = fnNumericAttr.create("collisionMargin", "clmg", MFnNumericData::kFloat, 1.f, &status);
+	fnNumericAttr.setDefault(1.f);
+	fnNumericAttr.setMin(0.1f);
+	status = addAttribute(a_inMargin);
+	
+	a_inFriction = fnNumericAttr.create("friction", "frct", MFnNumericData::kFloat, .732f, &status);
+	fnNumericAttr.setDefault(.732f);
+	fnNumericAttr.setMin(0.f);
+	status = addAttribute(a_inFriction);
+	
 	attributeAffects(a_inTime, a_outSolver);
 	
 	return MS::kSuccess;
@@ -147,6 +159,10 @@ void GroundPlane::computeCreate(MDataBlock& block)
 		vs[i][2] = q.z;
 	}
 	
+	const float margin = block.inputValue(a_inMargin).asFloat();
+	setMargin(margin);
+	const float friction = block.inputValue(a_inFriction).asFloat();
+	setFriction(friction);
 	create();
 	
 	triangleCounts.clear();

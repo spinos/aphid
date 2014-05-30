@@ -39,6 +39,8 @@ public:
 	static  MObject a_outSolver;
 	static  MObject a_inTime;
 	static  MObject a_inMesh;
+	static MObject a_inFriction;
+	static MObject a_inMargin;
 	static	MTypeId id;
 	
 private:
