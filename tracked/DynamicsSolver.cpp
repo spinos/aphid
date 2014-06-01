@@ -18,7 +18,7 @@
 DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(2)
 {
 	m_isWorldInitialized = false;
-	m_enableDrawConstraint = false;
+	m_enableDrawConstraint = true;
     _drawer = new ShapeDrawer();
 }
 
@@ -369,6 +369,13 @@ btGeneric6DofConstraint* DynamicsSolver::constrainByHinge(btRigidBody& rbA, btRi
 	
 	m_dynamicsWorld->addConstraint(hinge, disableCollisionsBetweenLinkedBodies);
 	return hinge;
+}
+
+btGeneric6DofConstraint* DynamicsSolver::constrainBy6Dof(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies)
+{
+	btGeneric6DofConstraint* spring = new btGeneric6DofConstraint(rbA, rbB, rbAFrame, rbBFrame, false);
+	m_dynamicsWorld->addConstraint(spring, disableCollisionsBetweenLinkedBodies);
+	return spring;
 }
 
 btGeneric6DofSpringConstraint* DynamicsSolver::constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies)

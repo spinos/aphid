@@ -28,7 +28,7 @@ public:
 	const float width() const;
 	
 	void createShape();
-	void create(const Matrix44F & tm);
+	btRigidBody* create(const Matrix44F & tm);
 private:
 	Profile m_profile;
 	TireMesh m_tire;

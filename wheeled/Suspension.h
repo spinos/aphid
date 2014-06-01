@@ -15,17 +15,17 @@ public:
 	struct Profile {
 		Profile() {
 			_upperWishboneAngle[0] = -.36f;
-			_upperWishboneAngle[1] = .39f;
+			_upperWishboneAngle[1] = .79f;
 			_lowerWishboneAngle[0] = -.36f;
-			_lowerWishboneAngle[1] = .39f;
-			_wheelHubX = 1.f;
+			_lowerWishboneAngle[1] = .79f;
+			_wheelHubX = .6f;
 			_wheelHubR = 1.41f;
 			_upperJointY = 1.73f; 
 			_lowerJointY = -1.f;
-			_upperWishboneLength = 3.1f;
-			_lowerWishboneLength = 4.3f;
-			_upperWishboneTilt = -0.1f;
-			_lowerWishboneTilt = 0.07f;
+			_upperWishboneLength = 2.7f;
+			_lowerWishboneLength = 5.3f;
+			_upperWishboneTilt = -.2f;
+			_lowerWishboneTilt = .1f;
 			_steerable = false;
 		}
 		
@@ -43,15 +43,21 @@ public:
 	virtual ~Suspension();
 	void setProfile(const Profile & info);
 	const float width() const;
+	const float wheelHubX() const;
 	
-	void create(const Vector3F & pos, bool isLeft = true);
+	btRigidBody* create(const Vector3F & pos, bool isLeft = true);
 	
 	static float RodRadius;
+	static btRigidBody * ChassisBody;
+	static Vector3F ChassisOrigin;
 private:
-	void createCarrier(const Matrix44F & tm, bool isLeft);
-	void createUpperWishbone(const Matrix44F & tm, bool isLeft);
-	void createLowerWishbone(const Matrix44F & tm, bool isLeft);
+	btRigidBody* createCarrier(const Matrix44F & tm, bool isLeft);
+	btRigidBody* createUpperWishbone(const Vector3F & pos, bool isLeft);
+	btRigidBody* createLowerWishbone(const Vector3F & pos, bool isLeft);
 	btCompoundShape* createWishboneShape(bool isUpper, bool isLeft);
+	const Matrix44F wishboneHingTMLocal(bool isUpper, bool isLeft, bool isFront) const;
+	void wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, float & a) const;
+	void connectArm(btRigidBody* arm, const Vector3F & pos, bool isUpper, bool isLeft, bool isFront);
 	Profile m_profile;
 };
 }

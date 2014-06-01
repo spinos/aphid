@@ -68,12 +68,10 @@ void Matrix44F::transformBy(const Matrix44F & a)
 {
 	Matrix44F t(*this);
 	setZero();
-	for(int i = 0; i < 3; i++) {
-		for(int j = 0; j < 3; j++)
-			*m(i, j) = a.M(i, 0) * t.M(0, j) + a.M(i, 1) * t.M(1, j) + a.M(i, 2) * t.M(2, j) + a.M(i, 3) * t.M(3, j);
-		*m(3, i) = a.M(3, i) + t.M(3, i);	
+	for(int i = 0; i < 4; i++) {
+		for(int j = 0; j < 4; j++)
+			*m(i, j) = a.M(i, 0) * t.M(0, j) + a.M(i, 1) * t.M(1, j) + a.M(i, 2) * t.M(2, j) + a.M(i, 3) * t.M(3, j);	
 	}
-	*m(3, 3) = 1.f;
 }
 
 float* Matrix44F::m(int i, int j)

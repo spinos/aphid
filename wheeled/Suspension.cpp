@@ -13,6 +13,8 @@
 #include <Common.h>
 namespace caterpillar {
 float Suspension::RodRadius = .29f;
+btRigidBody * Suspension::ChassisBody;
+Vector3F Suspension::ChassisOrigin;
 Suspension::Suspension() {}
 Suspension::~Suspension() {}
 void Suspension::setProfile(const Profile & info)
@@ -28,7 +30,7 @@ const float Suspension::width() const
 	return wishboneU + m_profile._wheelHubX;
 }
 
-void Suspension::create(const Vector3F & pos, bool isLeft) 
+btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft) 
 {
 	Matrix44F tm;
 	if(!isLeft) tm.rotateY(PI);
@@ -40,12 +42,23 @@ void Suspension::create(const Vector3F & pos, bool isLeft)
 	
 	tm.translate(pos);
 
-	createCarrier(tm, isLeft);
-	createUpperWishbone(tm, isLeft);
-	createLowerWishbone(tm, isLeft);
+	btRigidBody* carrier = createCarrier(tm, isLeft);
+	btRigidBody* upperArm = createUpperWishbone(tm.getTranslation(), isLeft);
+	btRigidBody* lowerArm = createLowerWishbone(tm.getTranslation(), isLeft);
+	
+	btTransform frmCarrier; frmCarrier.setIdentity();
+	frmCarrier.getOrigin()[1] = m_profile._upperJointY;
+	
+	btTransform frmArm; frmArm.setIdentity();
+	
+	btGeneric6DofConstraint* ball = PhysicsState::engine->constrainBy6Dof(*carrier, *upperArm, frmCarrier, frmArm, true);
+	frmCarrier.getOrigin()[1] = m_profile._lowerJointY;
+	ball = PhysicsState::engine->constrainBy6Dof(*carrier, *lowerArm, frmCarrier, frmArm, true);
+	
+	return carrier;
 }
 
-void Suspension::createCarrier(const Matrix44F & tm, bool isLeft)
+btRigidBody* Suspension::createCarrier(const Matrix44F & tm, bool isLeft)
 {
 	btCollisionShape* armShape = PhysicsState::engine->createCylinderShape(RodRadius, (m_profile._upperJointY - m_profile._lowerJointY) * .5f, RodRadius);
 	btCollisionShape* hubShape = PhysicsState::engine->createCylinderShape(m_profile._wheelHubR, m_profile._wheelHubX * .5f, m_profile._wheelHubR);
@@ -70,40 +83,134 @@ void Suspension::createCarrier(const Matrix44F & tm, bool isLeft)
 	btTransform trans = Common::CopyFromMatrix44F(tm);
 	btRigidBody* carrierBody = PhysicsState::engine->createRigidBody(carrierShape, trans, 1.f);
 	carrierBody->setDamping(0.f, 0.f);
+	
+	return carrierBody;
 }
 
-void Suspension::createUpperWishbone(const Matrix44F & tm, bool isLeft)
+btRigidBody* Suspension::createUpperWishbone(const Vector3F & pos, bool isLeft)
 {
 	Matrix44F btm;
+	if(!isLeft) btm.rotateY(PI);
+	
 	btm.rotateZ(m_profile._upperWishboneTilt);
+	
 	btm.translate(Vector3F(0.f, m_profile._upperJointY, 0.f));
-	btm.transformBy(tm);
+	btm.translate(pos);
 	
 	btCompoundShape* wishboneShape = createWishboneShape(true, isLeft);
 	
 	btTransform trans = Common::CopyFromMatrix44F(btm);
 	btRigidBody* wishboneBody = PhysicsState::engine->createRigidBody(wishboneShape, trans, 1.f);
 	wishboneBody->setDamping(0.f, 0.f);
+	
+	connectArm(wishboneBody, pos, true, isLeft, true);
+	connectArm(wishboneBody, pos, true, isLeft, false);
+	
+	return wishboneBody;
 }
 
-void Suspension::createLowerWishbone(const Matrix44F & tm, bool isLeft)
+btRigidBody* Suspension::createLowerWishbone(const Vector3F & pos, bool isLeft)
 {
 	Matrix44F btm;
+	if(!isLeft) btm.rotateY(PI);
+	
 	btm.rotateZ(m_profile._lowerWishboneTilt);
+	
 	btm.translate(Vector3F(0.f, m_profile._lowerJointY, 0.f));
-	btm.transformBy(tm);
+	btm.translate(pos);
 	
 	btCompoundShape* wishboneShape = createWishboneShape(false, isLeft);
 	
 	btTransform trans = Common::CopyFromMatrix44F(btm);
 	btRigidBody* wishboneBody = PhysicsState::engine->createRigidBody(wishboneShape, trans, 1.f);
 	wishboneBody->setDamping(0.f, 0.f);
+	
+	connectArm(wishboneBody, pos, false, isLeft, true);
+	connectArm(wishboneBody, pos, false, isLeft, false);
+	
+	return wishboneBody;
+}
+
+void Suspension::connectArm(btRigidBody* arm, const Vector3F & pos, bool isUpper, bool isLeft, bool isFront)
+{
+	Matrix44F localBone = wishboneHingTMLocal(isUpper, isLeft, isFront);
+	btTransform frmB = Common::CopyFromMatrix44F(localBone);
+	
+	Matrix44F hingeTM = localBone;
+	if(!isLeft) hingeTM.rotateY(PI);
+	
+	if(isUpper) {
+		if(isLeft) hingeTM.rotateZ(-m_profile._upperWishboneTilt);
+		else hingeTM.rotateZ(m_profile._upperWishboneTilt);
+		hingeTM.translate(Vector3F(0.f, m_profile._upperJointY, 0.f));
+	}
+	else {
+		if(isLeft) hingeTM.rotateZ(-m_profile._lowerWishboneTilt);
+		else hingeTM.rotateZ(m_profile._lowerWishboneTilt);
+		hingeTM.translate(Vector3F(0.f, m_profile._lowerJointY, 0.f));
+	}
+	
+	hingeTM.translate(pos);
+	
+	Matrix44F localChas;
+	localChas.setTranslation(hingeTM.getTranslation() - ChassisOrigin);
+		
+	btTransform frmA = Common::CopyFromMatrix44F(localChas);
+	
+	btGeneric6DofSpringConstraint* hinge = PhysicsState::engine->constrainBySpring(*ChassisBody, *arm, frmA, frmB, true);
+	//hinge->setAngularLowerLimit(btVector3(-PI, 0, -PI));
+	//hinge->setAngularUpperLimit(btVector3(PI, 0, PI));
+	//hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
+	//hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
 }
 
 btCompoundShape* Suspension::createWishboneShape(bool isUpper, bool isLeft)
 {
 	btCompoundShape* shape = new btCompoundShape();
 	
+	float l, ang;
+	wishboneLA(isUpper, isLeft, true, l, ang);
+		
+	Matrix44F tm;
+	tm.rotateY(ang);
+	tm.rotateZ(PI * .5f);
+	tm.setTranslation(Vector3F(-l * .5f * cos(ang), 0.f, -l * .5f * sin(ang)));
+	
+	btTransform childT = Common::CopyFromMatrix44F(tm);
+	
+	btCollisionShape* armShape = PhysicsState::engine->createCylinderShape(RodRadius, l * .5f, RodRadius);
+	
+	shape->addChildShape(childT, armShape);
+	
+	wishboneLA(isUpper, isLeft, false, l, ang);
+	
+	tm.setIdentity();
+	tm.rotateY(ang);
+	tm.rotateZ(PI * .5f);
+	tm.setTranslation(Vector3F(-l * .5f * cos(ang), 0.f, -l * .5f * sin(ang)));
+	
+	childT = Common::CopyFromMatrix44F(tm);
+	
+	armShape = PhysicsState::engine->createCylinderShape(RodRadius, l * .5f, RodRadius);
+	
+	shape->addChildShape(childT, armShape);
+	
+	return shape;
+}
+
+const Matrix44F Suspension::wishboneHingTMLocal(bool isUpper, bool isLeft, bool isFront) const
+{	
+	float l, ang;
+	wishboneLA(isUpper, isLeft, isFront, l, ang);
+	
+	Matrix44F local;
+	local.setTranslation(Vector3F(-l * cos(ang), 0.f, -l  * sin(ang)));
+	
+	return local;
+}
+
+void Suspension::wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, float & a) const
+{
 	float lA, lB, angA, angB;
 	if(isUpper) {
 		angA = m_profile._upperWishboneAngle[0];
@@ -121,33 +228,18 @@ btCompoundShape* Suspension::createWishboneShape(bool isUpper, bool isLeft)
 	}
 	
 	if(!isLeft) {
-		angA = -angA;
-		angB = -angB;
+		angA *= -1.f;
+		angB *= -1.f;
 	}
 	
-	Matrix44F tm;
-	tm.rotateY(angA);
-	tm.rotateZ(PI * .5f);
-	tm.setTranslation(Vector3F(-lA * .5f * cos(angA), 0.f, -lA * .5f * sin(angA)));
-	
-	btTransform childT = Common::CopyFromMatrix44F(tm);
-	
-	btCollisionShape* armShape = PhysicsState::engine->createCylinderShape(RodRadius, lA * .5f, RodRadius);
-	
-	shape->addChildShape(childT, armShape);
-	
-	tm.setIdentity();
-	tm.rotateY(angB);
-	tm.rotateZ(PI * .5f);
-	tm.setTranslation(Vector3F(-lB * .5f * cos(angB), 0.f, -lB * .5f * sin(angB)));
-	
-	childT = Common::CopyFromMatrix44F(tm);
-	
-	armShape = PhysicsState::engine->createCylinderShape(RodRadius, lB * .5f, RodRadius);
-	
-	shape->addChildShape(childT, armShape);
-	
-	return shape;
+	l = lA;
+	a = angA;
+	if(!isFront) {
+		l = lB;
+		a = angB;
+	}
 }
+
+const float Suspension::wheelHubX() const { return m_profile._wheelHubX; }
 
 }

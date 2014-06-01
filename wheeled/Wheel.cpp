@@ -23,12 +23,14 @@ void Wheel::createShape()
 	m_shape = m_tire.create(m_profile._radiusMajor, m_profile._radiusMinor, m_profile._width);
 }
 
-void Wheel::create(const Matrix44F & tm) 
+btRigidBody* Wheel::create(const Matrix44F & tm) 
 {
 	btTransform trans = Common::CopyFromMatrix44F(tm);
 	btRigidBody* wheelBody = PhysicsState::engine->createRigidBody(m_shape, trans, 1.f);
 	wheelBody->setDamping(0.f, 0.f);
 	wheelBody->setFriction(.732f);
+	
+	return wheelBody;
 }
 
 }

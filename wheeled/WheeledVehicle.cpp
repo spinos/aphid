@@ -36,13 +36,30 @@ void WheeledVehicle::create()
 	
 	group("chassis").push_back(id);
 	
+	Suspension::ChassisBody = chassisBody;
+	Suspension::ChassisOrigin = origin();
+	
 	for(int i = 0; i < numAxis(); i++) {
-		suspension(i).create(wheelOrigin(i));
-		suspension(i).create(wheelOrigin(i, false), false);
+		btRigidBody* hubL = suspension(i).create(wheelOrigin(i));
+		btRigidBody* hubR = suspension(i).create(wheelOrigin(i, false), false);
 		
 		wheel(i).createShape();
-		wheel(i).create(wheelTM(i));
-		wheel(i).create(wheelTM(i, false));
+		btRigidBody* wheL = wheel(i).create(wheelTM(i));
+		btRigidBody* wheR = wheel(i).create(wheelTM(i, false));
+		btTransform frmA; frmA.setIdentity();
+		frmA.getOrigin()[0] = suspension(i).wheelHubX();
+		
+		btTransform frmB; frmB.setIdentity();
+		btGeneric6DofConstraint* drv = PhysicsState::engine->constrainBy6Dof(*hubL, *wheL, frmA, frmB, true);
+		drv->setAngularLowerLimit(btVector3(-SIMD_PI, 0.0, 0.0));
+		drv->setAngularUpperLimit(btVector3(SIMD_PI, 0.0, 0.0));
+		drv->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
+		drv->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
+		drv = PhysicsState::engine->constrainBy6Dof(*hubR, *wheR, frmA, frmB, true);
+		drv->setAngularLowerLimit(btVector3(-SIMD_PI, 0.0, 0.0));
+		drv->setAngularUpperLimit(btVector3(SIMD_PI, 0.0, 0.0));
+		drv->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
+		drv->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
 	}
 }
 

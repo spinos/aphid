@@ -174,6 +174,7 @@ void ShapeDrawer::drawConstraint(const btTypedConstraint* constraint)
 			drawHingeConstraint(static_cast<const btHingeConstraint*>(constraint));
 			break;
 		case D6_CONSTRAINT_TYPE:
+		case D6_SPRING_CONSTRAINT_TYPE:
 			drawD6Constraint(static_cast<const btGeneric6DofConstraint*>(constraint));
 			break;
 		default:
@@ -192,7 +193,7 @@ void ShapeDrawer::drawD6Constraint(const btGeneric6DofConstraint* d6f)
     btVector3 angularLower, angularUpper;
     ((btGeneric6DofConstraint*)d6f)->getAngularLowerLimit(angularLower);
     ((btGeneric6DofConstraint*)d6f)->getAngularUpperLimit(angularUpper);
-    //drawAngularLimit(transA, transB, angularLower, angularUpper);
+    // drawAngularLimit(transA, transB, angularLower, angularUpper);
     
     btTransform tA = bodyA.getWorldTransform();
     btTransform tB = bodyB.getWorldTransform();
