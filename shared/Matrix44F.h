@@ -34,6 +34,7 @@
 	Vector3F transform(const Vector3F& p);
 	Vector3F transformAsNormal(const Vector3F& p) const;
 	Vector3F transformAsNormal(const Vector3F& p);
+	void transformBy(const Matrix44F & a);
 	void translate(const Vector3F& p);
 	void translate(float x, float y, float z);
 	void setTranslation(const Vector3F& p);

@@ -14,6 +14,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_vehicle->setOrigin(Vector3F(0.f, 20.f, -20.f));
 	
+	caterpillar::Wheel::Profile rearWheelInfo;
+	rearWheelInfo._width = 2.89f;
+	m_vehicle->setWheelInfo(1, rearWheelInfo);
+	
 	m_vehicle->create();
 	std::cout<<"object groups "<<m_vehicle->str();
 	
