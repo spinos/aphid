@@ -29,14 +29,12 @@ const float Suspension::width() const
 
 void Suspension::create(const Vector3F & pos, bool isLeft) 
 {
-	Matrix44F tm; tm.rotateY(PI);
-	
+	Matrix44F tm;
+	if(!isLeft) tm.rotateY(PI);
 	if(isLeft) {
-		tm.rotateZ(PI * -.5f);
 		tm.setTranslation(-m_profile._wheelHubX * .5f, 0.f, 0.f);
 	}
 	else {
-		tm.rotateZ(PI * .5f);
 		tm.setTranslation(m_profile._wheelHubX * .5f, 0.f, 0.f);
 	}
 	

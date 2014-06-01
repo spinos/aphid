@@ -9,15 +9,14 @@
 
 #pragma once
 #include <GroupId.h>
-#include <AllMath.h>
+#include "WheeledChassis.h"
 namespace caterpillar {
-class WheeledVehicle : public GroupId {
+class WheeledVehicle : public WheeledChassis, public GroupId {
 public:
 	WheeledVehicle();
 	virtual ~WheeledVehicle();
-	void setOrigin(const Vector3F & p);
 	void create();
 private:
-	Vector3F m_origin;
+	
 };
 }

@@ -18,14 +18,17 @@ void Wheel::setProfile(const Profile & info) { m_profile = info; }
 
 const float Wheel::width() const { return m_profile._width; }
 
+void Wheel::createShape()
+{
+	m_shape = m_tire.create(m_profile._radiusMajor, m_profile._radiusMinor, m_profile._width);
+}
+
 void Wheel::create(const Matrix44F & tm) 
 {
-	btCollisionShape* wheelShape = PhysicsState::engine->createCylinderShape(m_profile._radiusMajor, m_profile._width * .5f, m_profile._radiusMajor);
 	btTransform trans = Common::CopyFromMatrix44F(tm);
-	btRigidBody* wheelBody = PhysicsState::engine->createRigidBody(wheelShape, trans, 1.f);
+	btRigidBody* wheelBody = PhysicsState::engine->createRigidBody(m_shape, trans, 1.f);
 	wheelBody->setDamping(0.f, 0.f);
 	wheelBody->setFriction(.732f);
-	
 }
 
 }

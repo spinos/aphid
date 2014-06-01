@@ -130,6 +130,11 @@ void ShapeDrawer::cylinder(const float & x, const float & y, const float & z)
 		q.y = -1.f;
 		glDrawVector(p);
 		glDrawVector(q);
+	}
+	for(int i=0; i < 24; i+=3) {
+		p.x = coss[i];
+		p.z = sins[i];
+		p.y = -1.f;
 		q = p;
 		q.y = 1.f;
 		glDrawVector(p);

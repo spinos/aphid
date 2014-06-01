@@ -50,7 +50,7 @@ Window::Window()
     glWidget = new GLWidget;
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Bullet Tank"));
+    setWindowTitle(tr("Wheeled Vehicle"));
 }
 //! [1]
 

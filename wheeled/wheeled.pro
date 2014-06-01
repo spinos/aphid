@@ -24,7 +24,14 @@ HEADERS       = glwidget.h \
                 ../shared/Base3DView.h \
                 ../caterpillar/GroupId.h \
                 ../caterpillar/PhysicsState.h \
-                ../tracked/shapeDrawer.h
+				../caterpillar/Common.h \
+                ../tracked/shapeDrawer.h \
+				MeshShape.h \
+TireMesh.h \
+				Suspension.h\
+				Wheel.h \
+WheeledChassis.h \
+				WheeledVehicle.h
 SOURCES       = glwidget.cpp \
                 main.cpp \
                 window.cpp \
@@ -32,7 +39,13 @@ SOURCES       = glwidget.cpp \
                 ../shared/Base3DView.cpp \
                 ../caterpillar/GroupId.cpp \
                 ../caterpillar/PhysicsState.cpp \
-                ../tracked/shapeDrawer.cpp
+                ../tracked/shapeDrawer.cpp \
+				MeshShape.cpp \
+TireMesh.cpp \
+				Suspension.cpp \
+				Wheel.cpp \
+WheeledChassis.cpp \
+				WheeledVehicle.cpp
 QT           += opengl
 win32:CONFIG += console
 ##mac:CONFIG -= app_bundle

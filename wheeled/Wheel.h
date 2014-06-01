@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <AllMath.h>
+#include "TireMesh.h"
 namespace caterpillar {
 class Wheel {
 public:
@@ -16,7 +16,7 @@ public:
 		Profile() {
 			_width = 2.67f;
 			_radiusMajor = 4.57f;
-			_radiusMinor = .212f;
+			_radiusMinor = .312f;
 		}
 		float _width, _radiusMajor, _radiusMinor;
 	};
@@ -27,8 +27,11 @@ public:
 	void setProfile(const Profile & info);
 	const float width() const;
 	
+	void createShape();
 	void create(const Matrix44F & tm);
 private:
 	Profile m_profile;
+	TireMesh m_tire;
+	btCollisionShape* m_shape;
 };
 }

@@ -7,7 +7,7 @@
  *
  */
  
-
+#pragma once
 #include "shapeDrawer.h"
 #include <AllMath.h>
 class btSoftRigidDynamicsWorld;
