@@ -597,10 +597,12 @@ void TrackedPhysics::createTensioner(Chassis & c, btRigidBody * chassisBody, boo
 	const float horl = tensionerRadius() * 1.2;
 	spring->setLinearLowerLimit(btVector3(-horl, 0., 0.));
 	spring->setLinearUpperLimit(btVector3(horl, 0., 0.));
+	float d = -1.f;
+	if(isBackdrive()) d = 1.f;
 	if(isLeft)
-		spring->setEquilibriumPoint(0, -horl * .5);
+		spring->setEquilibriumPoint(0, -horl * .5 * d);
 	else
-		spring->setEquilibriumPoint(0, horl * .5);
+		spring->setEquilibriumPoint(0, horl * .5 * d);
 		
 	if(isLeft) m_tension[0] = spring;
 	else m_tension[1] = spring;

@@ -189,6 +189,9 @@ void ShapeDrawer::drawD6Constraint(const btGeneric6DofConstraint* d6f)
     
     btTransform transA = d6f->getCalculatedTransformA();
     btTransform transB = d6f->getCalculatedTransformB();
+	
+	drawCoordsys(transA);
+	drawCoordsys(transB);
     
     btVector3 angularLower, angularUpper;
     ((btGeneric6DofConstraint*)d6f)->getAngularLowerLimit(angularLower);
@@ -522,4 +525,12 @@ void ShapeDrawer::loadSpace(const Matrix44F & transform)
 	m[15] = transform.M(3, 3); 
     
 	glMultMatrixf((const GLfloat*)m);
+}
+
+void ShapeDrawer::drawCoordsys(const btTransform & transform)
+{
+	glPushMatrix();
+    loadSpace(transform);
+    glDrawCoordsys();
+	glPopMatrix();
 }

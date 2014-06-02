@@ -43,4 +43,5 @@ private:
 	void drawCompound(const btCompoundShape* shape);
 	void loadSpace(const btTransform & transform);
 	void loadSpace(const Matrix44F & transform);
+	void drawCoordsys(const btTransform & transform);
 };

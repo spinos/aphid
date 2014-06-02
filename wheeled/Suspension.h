@@ -12,23 +12,9 @@
 namespace caterpillar {
 class Suspension {
 public:
-	struct Profile {
-		Profile() {
-			_upperWishboneAngle[0] = -.36f;
-			_upperWishboneAngle[1] = .79f;
-			_lowerWishboneAngle[0] = -.36f;
-			_lowerWishboneAngle[1] = .79f;
-			_wheelHubX = .6f;
-			_wheelHubR = 1.41f;
-			_upperJointY = 1.73f; 
-			_lowerJointY = -1.f;
-			_upperWishboneLength = 2.7f;
-			_lowerWishboneLength = 5.3f;
-			_upperWishboneTilt = -.2f;
-			_lowerWishboneTilt = .1f;
-			_steerable = false;
-		}
-		
+	class Profile {
+	public:
+		Profile();		
 		float _upperWishboneAngle[2];
 		float _lowerWishboneAngle[2];
 		float _wheelHubX;

@@ -12,7 +12,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	caterpillar::PhysicsState::engine->initPhysics();
 	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, -1.f);
 	
-	m_vehicle->setOrigin(Vector3F(10.f, 20.f, -20.f));
+	m_vehicle->setOrigin(Vector3F(-12.f, 10.f, -20.f));
 	
 	caterpillar::Wheel::Profile rearWheelInfo;
 	rearWheelInfo._width = 2.89f;

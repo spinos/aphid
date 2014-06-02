@@ -12,6 +12,24 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
+
+Suspension::Profile::Profile() 
+{
+	_upperWishboneAngle[0] = -.36f;
+	_upperWishboneAngle[1] = .49f;
+	_lowerWishboneAngle[0] = -.36f;
+	_lowerWishboneAngle[1] = .49f;
+	_wheelHubX = .6f;
+	_wheelHubR = 1.41f;
+	_upperJointY = 1.73f; 
+	_lowerJointY = -1.f;
+	_upperWishboneLength = 3.f;
+	_lowerWishboneLength = 5.3f;
+	_upperWishboneTilt = -.01f;
+	_lowerWishboneTilt = .11f;
+	_steerable = false;
+}
+
 float Suspension::RodRadius = .29f;
 btRigidBody * Suspension::ChassisBody;
 Vector3F Suspension::ChassisOrigin;
@@ -49,10 +67,22 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	btTransform frmCarrier; frmCarrier.setIdentity();
 	frmCarrier.getOrigin()[1] = m_profile._upperJointY;
 	
-	btTransform frmArm; frmArm.setIdentity();
+	Matrix33F rot; 
+	rot.rotateZ(-m_profile._upperWishboneTilt);
+	
+	Matrix44F armTM; 
+	armTM.setRotation(rot); 
+	
+	btTransform frmArm = Common::CopyFromMatrix44F(armTM);
 	
 	btGeneric6DofConstraint* ball = PhysicsState::engine->constrainBy6Dof(*carrier, *upperArm, frmCarrier, frmArm, true);
 	frmCarrier.getOrigin()[1] = m_profile._lowerJointY;
+	
+	rot.setIdentity();
+	rot.rotateZ(-m_profile._lowerWishboneTilt);
+	armTM.setRotation(rot);
+	frmArm = Common::CopyFromMatrix44F(armTM);
+	
 	ball = PhysicsState::engine->constrainBy6Dof(*carrier, *lowerArm, frmCarrier, frmArm, true);
 	
 	return carrier;
@@ -133,10 +163,15 @@ btRigidBody* Suspension::createLowerWishbone(const Vector3F & pos, bool isLeft)
 
 void Suspension::connectArm(btRigidBody* arm, const Vector3F & pos, bool isUpper, bool isLeft, bool isFront)
 {
-	Matrix44F localBone = wishboneHingTMLocal(isUpper, isLeft, isFront);
-	btTransform frmB = Common::CopyFromMatrix44F(localBone);
+	Matrix44F localTM = wishboneHingTMLocal(isUpper, isLeft, isFront);
+	Matrix44F hingeTM = localTM;
 	
-	Matrix44F hingeTM = localBone;
+	Matrix33F rot; 
+	if(isUpper) rot.rotateZ(-m_profile._upperWishboneTilt);
+	else rot.rotateZ(-m_profile._lowerWishboneTilt);
+	localTM.setRotation(rot);
+	btTransform frmB = Common::CopyFromMatrix44F(localTM);
+	
 	if(!isLeft) hingeTM.rotateY(PI);
 	
 	if(isUpper) {
@@ -152,16 +187,24 @@ void Suspension::connectArm(btRigidBody* arm, const Vector3F & pos, bool isUpper
 	
 	hingeTM.translate(pos);
 	
-	Matrix44F localChas;
-	localChas.setTranslation(hingeTM.getTranslation() - ChassisOrigin);
-		
-	btTransform frmA = Common::CopyFromMatrix44F(localChas);
+	rot.setIdentity();
+	if(!isLeft) rot.rotateY(PI);
+	hingeTM.setTranslation(hingeTM.getTranslation() - ChassisOrigin);
+	hingeTM.setRotation(rot);	
+	btTransform frmA = Common::CopyFromMatrix44F(hingeTM);
 	
 	btGeneric6DofSpringConstraint* hinge = PhysicsState::engine->constrainBySpring(*ChassisBody, *arm, frmA, frmB, true);
-	//hinge->setAngularLowerLimit(btVector3(-PI, 0, -PI));
-	//hinge->setAngularUpperLimit(btVector3(PI, 0, PI));
-	//hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
-	//hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
+	hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -PI *.1f));
+	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, PI *.1f));
+	hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
+	hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
+	
+	if(isUpper) return;
+	
+	hinge->enableSpring(5, true);
+	hinge->setStiffness(5, 3000.f);
+	hinge->setDamping(5, 1.5f);
+	hinge->setEquilibriumPoint(5, 0.f);
 }
 
 btCompoundShape* Suspension::createWishboneShape(bool isUpper, bool isLeft)
