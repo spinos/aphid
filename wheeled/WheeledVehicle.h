@@ -16,7 +16,10 @@ public:
 	WheeledVehicle();
 	virtual ~WheeledVehicle();
 	void create();
+	void update();
+	void setTargetSpeed(const float & x);
+	void addTargetSpeed(const float & x);
 private:
-	
+	float m_targetSpeed;
 };
 }

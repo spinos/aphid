@@ -18,6 +18,11 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	rearWheelInfo._width = 2.89f;
 	m_vehicle->setWheelInfo(1, rearWheelInfo);
 	
+	caterpillar::Suspension::Profile rearBridgeInfo;
+	rearBridgeInfo._steerable = false;
+	rearBridgeInfo._powered = true;
+	m_vehicle->setSuspensionInfo(1, rearBridgeInfo);
+	
 	m_vehicle->create();
 	std::cout<<"object groups "<<m_vehicle->str();
 	
@@ -63,6 +68,7 @@ void GLWidget::simulate()
 {
 	//m_vehicle->displayStatistics();
     update();
+	m_vehicle->update();
     caterpillar::PhysicsState::engine->simulate();
 }
 
@@ -77,10 +83,10 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			//m_vehicle->addTension(-100.f);
 			break;
 		case Qt::Key_W:
-			//m_vehicle->addPower(0.1f);
+			m_vehicle->addTargetSpeed(1.f);
 			break;
 		case Qt::Key_S:
-			//m_vehicle->addPower(-0.1f);
+			m_vehicle->addTargetSpeed(-1.f);
 			break;
 		case Qt::Key_A:
 			//m_vehicle->addBrake(true);
@@ -89,8 +95,7 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			//m_vehicle->addBrake(false);
 			break;
 		case Qt::Key_B:
-			//m_vehicle->addBrake(true);
-			//m_vehicle->addBrake(false);
+			m_vehicle->setTargetSpeed(0.f);
 			break;
 		case Qt::Key_Space:
 			enabled = caterpillar::PhysicsState::engine->isPhysicsEnabled();

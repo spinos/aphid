@@ -22,7 +22,7 @@ public:
 		float _upperJointY, _lowerJointY;
 		float _upperWishboneLength, _lowerWishboneLength;
 		float _upperWishboneTilt, _lowerWishboneTilt;
-		bool _steerable;
+		bool _steerable, _powered;
 	};
 	
 	Suspension();
@@ -30,8 +30,11 @@ public:
 	void setProfile(const Profile & info);
 	const float width() const;
 	const float wheelHubX() const;
+	const bool isPowered() const;
 	
 	btRigidBody* create(const Vector3F & pos, bool isLeft = true);
+	void connectWheel(btRigidBody* hub, btRigidBody* wheel, bool isLeft);
+	void powerDrive(const float & speed, const float & wheelR);
 	
 	static float RodRadius;
 	static btRigidBody * ChassisBody;
@@ -43,6 +46,10 @@ private:
 	const Matrix44F wishboneHingTMLocal(bool isUpper, bool isLeft, bool isFront) const;
 	void wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, float & a) const;
 	void connectArm(btRigidBody* arm, const Matrix44F & tm, bool isUpper, bool isLeft, bool isFront);
+	void applyBrake(bool enable);
+	void applyMotor(float rps);
 	Profile m_profile;
+	btGeneric6DofConstraint* m_steerJoint[2];
+	btGeneric6DofConstraint* m_driveJoint[2];
 };
 }

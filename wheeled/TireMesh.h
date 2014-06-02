@@ -10,7 +10,7 @@
 #pragma once
 #include "MeshShape.h"
 namespace caterpillar {
-class TireMesh : public MeshShape {
+class TireMesh {
 public:
 	TireMesh();
 	virtual ~TireMesh();

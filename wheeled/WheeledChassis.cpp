@@ -13,7 +13,7 @@ WheeledChassis::WheeledChassis()
 {
 	m_hullDim.set(20.3f, 6.f, 44.3f);
 	setAxisCoord(0, 17.f, -2.f, 13.f);
-	setAxisCoord(1, 17.f, -2.f, -17.f);
+	setAxisCoord(1, 17.f, -2.f, -16.1f);
 	m_numAxis = 2;
 }
 

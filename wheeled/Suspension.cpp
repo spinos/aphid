@@ -27,7 +27,8 @@ Suspension::Profile::Profile()
 	_lowerWishboneLength = 5.3f;
 	_upperWishboneTilt = .04f;
 	_lowerWishboneTilt = -.11f;
-	_steerable = false;
+	_steerable = true;
+	_powered = false;
 }
 
 float Suspension::RodRadius = .29f;
@@ -84,6 +85,10 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	frmArm = Common::CopyFromMatrix44F(armTM);
 	
 	ball = PhysicsState::engine->constrainBy6Dof(*carrier, *lowerArm, frmCarrier, frmArm, true);
+	ball->setAngularLowerLimit(btVector3(- .5f, 0.f, - .5f));
+	ball->setAngularUpperLimit(btVector3(.5f, 0.f, .5f));
+	if(isLeft) m_steerJoint[0] = ball;
+	else m_steerJoint[1] = ball;
 	
 	return carrier;
 }
@@ -254,5 +259,57 @@ void Suspension::wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, 
 }
 
 const float Suspension::wheelHubX() const { return m_profile._wheelHubX; }
+
+void Suspension::connectWheel(btRigidBody* hub, btRigidBody* wheel, bool isLeft)
+{
+	btTransform frmA; frmA.setIdentity();
+	frmA.getOrigin()[0] = wheelHubX();
+	
+	btTransform frmB; frmB.setIdentity();
+	btGeneric6DofConstraint* drv = PhysicsState::engine->constrainBy6Dof(*hub, *wheel, frmA, frmB, true);
+	drv->setAngularLowerLimit(btVector3(-SIMD_PI, 0.0, 0.0));
+	drv->setAngularUpperLimit(btVector3(SIMD_PI, 0.0, 0.0));
+	drv->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
+	drv->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
+	
+	if(isLeft) m_driveJoint[0] = drv;
+	else m_driveJoint[1] = drv;
+}
+
+const bool Suspension::isPowered() const { return m_profile._powered; }
+
+void Suspension::powerDrive(const float & speed, const float & wheelR)
+{
+	if(speed == 0.f) return applyBrake(true);
+	else applyBrake(false);
+	
+	if(!isPowered()) return;
+	const float rps = speed / wheelR;
+	applyMotor(rps);
+}
+
+void Suspension::applyBrake(bool enable)
+{
+	if(enable) {
+		applyMotor(0.f);
+		return;
+	}
+	if(!isPowered()) {
+		m_driveJoint[0]->getRotationalLimitMotor(0)->m_enableMotor = false;
+		m_driveJoint[1]->getRotationalLimitMotor(0)->m_enableMotor = false;
+	}
+}
+
+void Suspension::applyMotor(float rps)
+{
+	m_driveJoint[0]->getRotationalLimitMotor(0)->m_enableMotor = true;
+	m_driveJoint[0]->getRotationalLimitMotor(0)->m_targetVelocity = -rps;
+	m_driveJoint[0]->getRotationalLimitMotor(0)->m_maxMotorForce = 100.f;
+	m_driveJoint[0]->getRotationalLimitMotor(0)->m_damping = 0.5f;
+	m_driveJoint[1]->getRotationalLimitMotor(0)->m_enableMotor = true;
+	m_driveJoint[1]->getRotationalLimitMotor(0)->m_targetVelocity = rps;
+	m_driveJoint[1]->getRotationalLimitMotor(0)->m_maxMotorForce = 100.f;
+	m_driveJoint[1]->getRotationalLimitMotor(0)->m_damping = 0.5f;
+}
 
 }

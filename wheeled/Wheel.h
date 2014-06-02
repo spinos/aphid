@@ -26,6 +26,7 @@ public:
 	
 	void setProfile(const Profile & info);
 	const float width() const;
+	const float radius() const;
 	
 	void createShape();
 	btRigidBody* create(const Matrix44F & tm);

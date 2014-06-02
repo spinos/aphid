@@ -14,6 +14,7 @@ namespace caterpillar {
 WheeledVehicle::WheeledVehicle() 
 {
 	addGroup("chassis");
+	m_targetSpeed = 0;
 }
 
 WheeledVehicle::~WheeledVehicle() {}
@@ -31,7 +32,7 @@ void WheeledVehicle::create()
 	trans.setOrigin(btVector3(origin().x, origin().y, origin().z));
 	
 	const int id = PhysicsState::engine->numCollisionObjects();
-	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, 4.f);
+	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, 10.f);
 	chassisBody->setDamping(0.f, 0.f);
 	
 	group("chassis").push_back(id);
@@ -39,28 +40,25 @@ void WheeledVehicle::create()
 	Suspension::ChassisBody = chassisBody;
 	Suspension::ChassisOrigin = origin();
 	
-	for(int i = 0; i < numAxis(); i++) {
+	for(int i = 0; i < numAxis(); i++) {std::cout<<"c c";
 		btRigidBody* hubL = suspension(i).create(wheelOrigin(i));
 		btRigidBody* hubR = suspension(i).create(wheelOrigin(i, false), false);
 		
-		wheel(i).createShape();
+		wheel(i).createShape();std::cout<<"c w";
 		btRigidBody* wheL = wheel(i).create(wheelTM(i));
 		btRigidBody* wheR = wheel(i).create(wheelTM(i, false));
-		btTransform frmA; frmA.setIdentity();
-		frmA.getOrigin()[0] = suspension(i).wheelHubX();
 		
-		btTransform frmB; frmB.setIdentity();
-		btGeneric6DofConstraint* drv = PhysicsState::engine->constrainBy6Dof(*hubL, *wheL, frmA, frmB, true);
-		drv->setAngularLowerLimit(btVector3(-SIMD_PI, 0.0, 0.0));
-		drv->setAngularUpperLimit(btVector3(SIMD_PI, 0.0, 0.0));
-		drv->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
-		drv->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
-		drv = PhysicsState::engine->constrainBy6Dof(*hubR, *wheR, frmA, frmB, true);
-		drv->setAngularLowerLimit(btVector3(-SIMD_PI, 0.0, 0.0));
-		drv->setAngularUpperLimit(btVector3(SIMD_PI, 0.0, 0.0));
-		drv->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
-		drv->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
+		suspension(i).connectWheel(hubL, wheL, true);
+		suspension(i).connectWheel(hubR, wheR, false);
 	}
 }
 
+void WheeledVehicle::setTargetSpeed(const float & x) { m_targetSpeed = x; }
+void WheeledVehicle::addTargetSpeed(const float & x) { m_targetSpeed += x; }
+
+void WheeledVehicle::update() 
+{
+	for(int i = 0; i < numAxis(); i++)
+		suspension(i).powerDrive(m_targetSpeed, wheel(i).radius());
+}
 }
