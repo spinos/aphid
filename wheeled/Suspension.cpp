@@ -175,7 +175,7 @@ void Suspension::connectArm(btRigidBody* arm, const Matrix44F & tm, bool isUpper
 	if(isUpper) return;
 	
 	hinge->enableSpring(5, true);
-	hinge->setStiffness(5, 3000.f);
+	hinge->setStiffness(5, 5000.f);
 	hinge->setDamping(5, 1.5f);
 	hinge->setEquilibriumPoint(5, 0.f);
 }
