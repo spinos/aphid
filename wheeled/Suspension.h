@@ -38,8 +38,7 @@ public:
 	static Vector3F ChassisOrigin;
 private:
 	btRigidBody* createCarrier(const Matrix44F & tm, bool isLeft);
-	btRigidBody* createUpperWishbone(const Matrix44F & tm, bool isLeft);
-	btRigidBody* createLowerWishbone(const Matrix44F & tm, bool isLeft);
+	btRigidBody* Suspension::createWishbone(const Matrix44F & tm, bool isUpper, bool isLeft);
 	btCompoundShape* createWishboneShape(bool isUpper, bool isLeft);
 	const Matrix44F wishboneHingTMLocal(bool isUpper, bool isLeft, bool isFront) const;
 	void wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, float & a) const;

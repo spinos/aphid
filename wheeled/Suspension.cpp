@@ -16,9 +16,9 @@ namespace caterpillar {
 Suspension::Profile::Profile() 
 {
 	_upperWishboneAngle[0] = -.56f;
-	_upperWishboneAngle[1] = .59f;
+	_upperWishboneAngle[1] = .19f;
 	_lowerWishboneAngle[0] = -.56f;
-	_lowerWishboneAngle[1] = .59f;
+	_lowerWishboneAngle[1] = .19f;
 	_wheelHubX = .6f;
 	_wheelHubR = 1.41f;
 	_upperJointY = 1.73f; 
@@ -61,8 +61,8 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	tm.translate(pos);
 
 	btRigidBody* carrier = createCarrier(tm, isLeft);
-	btRigidBody* upperArm = createUpperWishbone(tm, isLeft);
-	btRigidBody* lowerArm = createLowerWishbone(tm, isLeft);
+	btRigidBody* upperArm = createWishbone(tm, true, isLeft);
+	btRigidBody* lowerArm = createWishbone(tm, false, isLeft);
 	
 	btTransform frmCarrier; frmCarrier.setIdentity();
 	frmCarrier.getOrigin()[1] = m_profile._upperJointY;
@@ -117,46 +117,27 @@ btRigidBody* Suspension::createCarrier(const Matrix44F & tm, bool isLeft)
 	return carrierBody;
 }
 
-btRigidBody* Suspension::createUpperWishbone(const Matrix44F & tm, bool isLeft)
+btRigidBody* Suspension::createWishbone(const Matrix44F & tm, bool isUpper, bool isLeft)
 {
 	Matrix44F btm;
 	
-	btm.rotateZ(m_profile._upperWishboneTilt);
+	if(isUpper) btm.rotateZ(m_profile._upperWishboneTilt);
+	else btm.rotateZ(m_profile._lowerWishboneTilt);
 	if(!isLeft) btm.rotateY(PI);
 	
-	btm.translate(Vector3F(0.f, m_profile._upperJointY, 0.f));
+	if(isUpper) btm.translate(Vector3F(0.f, m_profile._upperJointY, 0.f));
+	else btm.translate(Vector3F(0.f, m_profile._lowerJointY, 0.f));
+	
 	btm.translate(tm.getTranslation());
 	
-	btCompoundShape* wishboneShape = createWishboneShape(true, isLeft);
+	btCompoundShape* wishboneShape = createWishboneShape(isUpper, isLeft);
 	
 	btTransform trans = Common::CopyFromMatrix44F(btm);
 	btRigidBody* wishboneBody = PhysicsState::engine->createRigidBody(wishboneShape, trans, 1.f);
 	wishboneBody->setDamping(0.f, 0.f);
 	
-	connectArm(wishboneBody, btm, true, isLeft, true);
-	connectArm(wishboneBody, btm, true, isLeft, false);
-	
-	return wishboneBody;
-}
-
-btRigidBody* Suspension::createLowerWishbone(const Matrix44F & tm, bool isLeft)
-{
-	Matrix44F btm;
-	
-	btm.rotateZ(m_profile._lowerWishboneTilt);
-	if(!isLeft) btm.rotateY(PI);
-	
-	btm.translate(Vector3F(0.f, m_profile._lowerJointY, 0.f));
-	btm.translate(tm.getTranslation());
-	
-	btCompoundShape* wishboneShape = createWishboneShape(false, isLeft);
-	
-	btTransform trans = Common::CopyFromMatrix44F(btm);
-	btRigidBody* wishboneBody = PhysicsState::engine->createRigidBody(wishboneShape, trans, 1.f);
-	wishboneBody->setDamping(0.f, 0.f);
-	
-	connectArm(wishboneBody, btm, false, isLeft, true);
-	connectArm(wishboneBody, btm, false, isLeft, false);
+	connectArm(wishboneBody, btm, isUpper, isLeft, true);
+	connectArm(wishboneBody, btm, isUpper, isLeft, false);
 	
 	return wishboneBody;
 }
@@ -259,7 +240,7 @@ void Suspension::wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, 
 		lB = m_profile._lowerWishboneLength / cos(angB);
 	}
 	
-	if(isLeft) {
+	if(!isLeft) {
 		angA = -angA;
 		angB = -angB;
 	}

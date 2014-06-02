@@ -76,6 +76,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	std::cout<<"object groups "<<m_vehicle->str();
 	
 	caterpillar::PhysicsState::engine->setEnablePhysics(false);
+	caterpillar::PhysicsState::engine->setEnableDrawConstraint(false);
 	caterpillar::PhysicsState::engine->setNumSubSteps(10);
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));

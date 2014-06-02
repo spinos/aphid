@@ -10,6 +10,7 @@
 #include "TrackedPhysics.h"
 #include <DynamicsSolver.h>
 #include "PhysicsState.h"
+#include <Common.h>
 namespace caterpillar {
 #define CONTACTFRICTION .576
 #define WHEELMASS .5
@@ -17,18 +18,6 @@ namespace caterpillar {
 #define PINMASS .3
 #define SPROCKETTEETHPROTRUDE 0.075
 #define MINTRACKSTIFFNESS 400
-
-static btTransform CopyFromMatrix44F(const Matrix44F & tm)
-{
-    const btMatrix3x3 rot(tm.M(0, 0), tm.M(0, 1), tm.M(0, 2), 
-                    tm.M(1, 0), tm.M(1, 1), tm.M(1, 2),
-                    tm.M(2, 0), tm.M(2, 1), tm.M(2, 2));
-    btTransform r;
-    r.setBasis(rot);
-    const btVector3 pos(tm.M(3, 0), tm.M(3, 1), tm.M(3, 2));
-    r.setOrigin(pos);
-    return r;
-}
 
 TrackedPhysics::TrackedPhysics() 
 { 
@@ -694,7 +683,7 @@ btRigidBody * TrackedPhysics::createTorsionBar(btRigidBody * chassisBody, const 
 {
     btCollisionShape* torsionBarShape = PhysicsState::engine->createBoxShape(bogieArmWidth() * .5f, bogieArmWidth() * .5f, bogieArmLength() * .5f);
 	const Matrix44F tm = bogieArmOrigin(i, isLeft);
-	btTransform trans = CopyFromMatrix44F(tm);
+	btTransform trans = Common::CopyFromMatrix44F(tm);
 
 	const int id = PhysicsState::engine->numCollisionObjects();
 	btRigidBody * body = PhysicsState::engine->createRigidBody(torsionBarShape, trans, 1.f);
