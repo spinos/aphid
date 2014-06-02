@@ -26,8 +26,7 @@ HEADERS       = glwidget.h \
                 ../caterpillar/PhysicsState.h \
 				../caterpillar/Common.h \
                 ../tracked/shapeDrawer.h \
-				MeshShape.h \
-TireMesh.h \
+Tire.h \
 				Suspension.h\
 				Wheel.h \
 WheeledChassis.h \
@@ -40,8 +39,7 @@ SOURCES       = glwidget.cpp \
                 ../caterpillar/GroupId.cpp \
                 ../caterpillar/PhysicsState.cpp \
                 ../tracked/shapeDrawer.cpp \
-				MeshShape.cpp \
-TireMesh.cpp \
+Tire.cpp \
 				Suspension.cpp \
 				Wheel.cpp \
 WheeledChassis.cpp \

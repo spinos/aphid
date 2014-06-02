@@ -66,7 +66,7 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::simulate()
 {
-	//m_vehicle->displayStatistics();
+	m_vehicle->displayStatistics();
     update();
 	m_vehicle->update();
     caterpillar::PhysicsState::engine->simulate();
@@ -89,10 +89,10 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->addTargetSpeed(-1.f);
 			break;
 		case Qt::Key_A:
-			//m_vehicle->addBrake(true);
+			m_vehicle->addSteerAngle(-0.03f);
 			break;
 		case Qt::Key_D:
-			//m_vehicle->addBrake(false);
+			m_vehicle->addSteerAngle(0.03f);
 			break;
 		case Qt::Key_B:
 			m_vehicle->setTargetSpeed(0.f);

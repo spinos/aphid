@@ -82,4 +82,28 @@ const Vector3F WheeledChassis::wheelOrigin(const int & i, bool isLeft) const
 	return t;
 }
 
+void WheeledChassis::computeDriveCenterZ()
+{
+	m_driveCenterZ = 0.f;
+	int numDrv = 0;
+	for(int i = 0; i < numAxis(); i++) {
+		m_driveCenterZ += m_axisCoord[i].z;
+		numDrv++;
+	}
+	if(numDrv > 0) m_driveCenterZ /= (float)numDrv;
+}
+
+const Vector3F WheeledChassis::turnAround(const int & i, const float & ang) const
+{
+	const float z = m_axisCoord[i].z - m_driveCenterZ;
+	if(ang < 10e-4 && ang > -10e-4) return Vector3F(0.f, 0.f, z);
+	const float x = z / tan(ang);
+	return Vector3F(x, 0.f, z);
+}
+
+const float WheeledChassis::wheelSpan(const int & i) const
+{
+	return m_hullDim.x - m_wheel[i].width();
+}
+
 }

@@ -12,7 +12,7 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-
+float Suspension::SteerAngle;
 Suspension::Profile::Profile() 
 {
 	_upperWishboneAngle[0] = -.56f;
@@ -277,6 +277,7 @@ void Suspension::connectWheel(btRigidBody* hub, btRigidBody* wheel, bool isLeft)
 }
 
 const bool Suspension::isPowered() const { return m_profile._powered; }
+const bool Suspension::isSteerable() const { return m_profile._steerable; }
 
 void Suspension::powerDrive(const float & speed, const float & wheelR)
 {
@@ -310,6 +311,30 @@ void Suspension::applyMotor(float rps)
 	m_driveJoint[1]->getRotationalLimitMotor(0)->m_targetVelocity = rps;
 	m_driveJoint[1]->getRotationalLimitMotor(0)->m_maxMotorForce = 100.f;
 	m_driveJoint[1]->getRotationalLimitMotor(0)->m_damping = 0.5f;
+}
+
+void Suspension::steer(const Vector3F & around, const float & wheelSpan)
+{
+	if(!isSteerable()) return;
+	
+	const float hspan = wheelSpan * .5f - wheelHubX();
+	if(around.x < hspan && around.x > -hspan) return;
+	
+	float lx = hspan + around.x;
+	
+	float rx = -hspan + around.x;
+	
+	steerWheel(atan(around.z / lx), 0);
+	steerWheel(atan(around.z / rx), 1);
+}
+
+void Suspension::steerWheel(const float & ang, int i)
+{
+	btTransform & frmA = m_steerJoint[i]->getFrameOffsetA();
+	Matrix44F tm;
+	tm.rotateY(ang);
+	frmA = Common::CopyFromMatrix44F(tm);
+	frmA.getOrigin()[1] = m_profile._lowerJointY;
 }
 
 }

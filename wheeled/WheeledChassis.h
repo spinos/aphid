@@ -33,13 +33,16 @@ protected:
 	
 	const Matrix44F wheelTM(const int & i, bool isLeft = true) const;
 	const Vector3F wheelOrigin(const int & i, bool isLeft = true) const;
-	
+	void computeDriveCenterZ();
+	const Vector3F turnAround(const int & i, const float & ang) const;
+	const float wheelSpan(const int & i) const;
 private:
 	#define MAXNUMAXIS 9
 	Vector3F m_origin, m_hullDim;
 	Vector3F m_axisCoord[MAXNUMAXIS];
 	Suspension m_suspension[MAXNUMAXIS];
 	Wheel m_wheel[MAXNUMAXIS];
+	float m_driveCenterZ;
 	int m_numAxis;
 };
 }

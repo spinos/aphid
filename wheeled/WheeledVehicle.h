@@ -19,7 +19,10 @@ public:
 	void update();
 	void setTargetSpeed(const float & x);
 	void addTargetSpeed(const float & x);
+	void addSteerAngle(const float & x);
+	void setSteerAngle(const float & x);
+	void displayStatistics();
 private:
-	float m_targetSpeed;
+	float m_targetSpeed, m_steerAngle;
 };
 }

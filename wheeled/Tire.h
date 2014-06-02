@@ -10,10 +10,10 @@
 #pragma once
 #include "MeshShape.h"
 namespace caterpillar {
-class TireMesh {
+class Tire {
 public:
-	TireMesh();
-	virtual ~TireMesh();
+	Tire();
+	virtual ~Tire();
 	
 	btCollisionShape* create(const float & radiusMajor, const float & radiusMinor, const float & width);
 protected:

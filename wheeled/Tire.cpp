@@ -1,5 +1,5 @@
 /*
- *  TireMesh.cpp
+ *  Tire.cpp
  *  wheeled
  *
  *  Created by jian zhang on 6/1/14.
@@ -7,7 +7,7 @@
  *
  */
 
-#include "TireMesh.h"
+#include "Tire.h"
 #include <DynamicsSolver.h>
 #include "PhysicsState.h"
 #include <Common.h>
@@ -16,9 +16,9 @@ namespace caterpillar {
 #define DELTARAD .1121997376282069f
 #define NUMGRIDX 10
 	
-TireMesh::TireMesh() {}
-TireMesh::~TireMesh() {}
-btCollisionShape* TireMesh::create(const float & radiusMajor, const float & radiusMinor, const float & width)
+Tire::Tire() {}
+Tire::~Tire() {}
+btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMinor, const float & width)
 {
 	const float sy = (radiusMajor - radiusMinor) * PI * 2.f / NUMGRIDRAD;
 	btCompoundShape* wheelShape = new btCompoundShape();

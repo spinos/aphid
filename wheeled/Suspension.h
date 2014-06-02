@@ -31,14 +31,18 @@ public:
 	const float width() const;
 	const float wheelHubX() const;
 	const bool isPowered() const;
+	const bool isSteerable() const;
 	
 	btRigidBody* create(const Vector3F & pos, bool isLeft = true);
 	void connectWheel(btRigidBody* hub, btRigidBody* wheel, bool isLeft);
 	void powerDrive(const float & speed, const float & wheelR);
+	void steer(const Vector3F & around, const float & wheelSpan);
+	void steerWheel(const float & ang, int i);
 	
 	static float RodRadius;
 	static btRigidBody * ChassisBody;
 	static Vector3F ChassisOrigin;
+	static float SteerAngle;
 private:
 	btRigidBody* createCarrier(const Matrix44F & tm, bool isLeft);
 	btRigidBody* Suspension::createWishbone(const Matrix44F & tm, bool isUpper, bool isLeft);

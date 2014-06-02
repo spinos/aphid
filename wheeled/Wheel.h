@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include "TireMesh.h"
+#include "Tire.h"
 namespace caterpillar {
 class Wheel {
 public:
@@ -32,7 +32,7 @@ public:
 	btRigidBody* create(const Matrix44F & tm);
 private:
 	Profile m_profile;
-	TireMesh m_tire;
+	Tire m_tire;
 	btCollisionShape* m_shape;
 };
 }
