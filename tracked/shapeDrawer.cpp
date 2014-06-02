@@ -534,3 +534,11 @@ void ShapeDrawer::drawCoordsys(const btTransform & transform)
     glDrawCoordsys();
 	glPopMatrix();
 }
+
+void ShapeDrawer::drawCoordsys(const Matrix44F & transform)
+{
+	glPushMatrix();
+    loadSpace(transform);
+    glDrawCoordsys();
+	glPopMatrix();
+}

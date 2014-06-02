@@ -64,14 +64,17 @@ void Matrix44F::multiply(const Matrix44F & a)
 	}
 }
 
-void Matrix44F::transformBy(const Matrix44F & a)
+const Matrix44F Matrix44F::transformBy(const Matrix44F & a) const
 {
-	Matrix44F t(*this);
-	setZero();
-	for(int i = 0; i < 4; i++) {
-		for(int j = 0; j < 4; j++)
-			*m(i, j) = a.M(i, 0) * t.M(0, j) + a.M(i, 1) * t.M(1, j) + a.M(i, 2) * t.M(2, j) + a.M(i, 3) * t.M(3, j);	
+	Matrix44F t; 
+	int i, j;
+	for(i = 0; i < 4; i++) {
+		for(j = 0; j < 4; j++) {
+			*t.m(i, j) = M(i, 0) * a.M(0, j) + M(i, 1) * a.M(1, j) + M(i, 2) * a.M(2, j) + M(i, 3) * a.M(3, j);
+		}
 	}
+
+	return t;
 }
 
 float* Matrix44F::m(int i, int j)

@@ -33,6 +33,8 @@ public:
 	void drawTransform(const btTransform & t);
 	void drawForce(const btRigidBody* body);
 	void drawTranslateHandle(const btRigidBody* body);
+	
+	void drawCoordsys(const Matrix44F & transform);
 private:
 	void drawAngularLimit(const btTransform& space, const btTransform& space1, const btVector3& angularLower, const btVector3& angularUpper);
 	void drawHingeConstraint(const btHingeConstraint* constraint);
