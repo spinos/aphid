@@ -14,10 +14,11 @@
 namespace caterpillar {
 #define CONTACTFRICTION .576
 #define WHEELMASS .5
-#define SHOEMASS .2
-#define PINMASS .3
+#define SHOEMASS .4
+#define PINMASS .4
 #define SPROCKETTEETHPROTRUDE 0.075
 #define MINTRACKSTIFFNESS 400
+#define TORSIONBARDAMPING 0.01
 
 TrackedPhysics::TrackedPhysics() 
 { 
@@ -242,12 +243,12 @@ void TrackedPhysics::createObstacles()
 	btCollisionShape* obstacleShape = PhysicsState::engine->createBoxShape(40, 2, 4);
 	btTransform trans; trans.setIdentity(); trans.setOrigin(btVector3(10,2,50));
 	btRigidBody* obs = PhysicsState::engine->createRigidBody(obstacleShape, trans, 0.f);
-	obs->setDamping(0,0);
-	obs->setFriction(.5);
+	obs->setDamping(0.f,0.f);
+	obs->setFriction(.5f);
 	trans.setOrigin(btVector3(-10,2,80));
 	obs = PhysicsState::engine->createRigidBody(obstacleShape, trans, 0.f);
-	obs->setDamping(0,0);
-	obs->setFriction(.5);
+	obs->setDamping(0.f,0.f);
+	obs->setFriction(.5f);
 }
 
 void TrackedPhysics::createTread(Tread & tread, bool isLeft)
@@ -289,7 +290,7 @@ void TrackedPhysics::createTread(Tread & tread, bool isLeft)
 			curBody->setFriction(0.);
 		}
 			
-		curBody->setDamping(.09f, .99f);
+		curBody->setDamping(0.f, 0.f);
 		
 		if(!firstBody) firstBody = curBody;
 			
@@ -581,9 +582,9 @@ void TrackedPhysics::createTensioner(Chassis & c, btRigidBody * chassisBody, boo
 
 	spring->enableSpring(0, true);
 	spring->setStiffness(0, m_trackTension);
-	spring->setDamping(0, .5);
+	spring->setDamping(0, .5f);
 	
-	const float horl = tensionerRadius() * 1.2;
+	const float horl = tensionerRadius() * 1.23f;
 	spring->setLinearLowerLimit(btVector3(-horl, 0., 0.));
 	spring->setLinearUpperLimit(btVector3(horl, 0., 0.));
 	float d = -1.f;
@@ -690,7 +691,7 @@ btRigidBody * TrackedPhysics::createTorsionBar(btRigidBody * chassisBody, const 
 	if(isLeft) group("left_bogieArm").push_back(id);
 	else group("right_bogieArm").push_back(id);
 	
-	body->setDamping(0., 1.);
+	body->setDamping(0.f, 0.f);
 	
 	const btMatrix3x3 zToX(0.f, 0.f, -1.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f);
 	const btMatrix3x3 zTonX(0.f, 0.f, 1.f, 0.f, 1.f, 0.f, -1.f, 0.f, 0.f);
@@ -710,8 +711,8 @@ btRigidBody * TrackedPhysics::createTorsionBar(btRigidBody * chassisBody, const 
 	spring->setLinearLowerLimit(btVector3(0., 0., 0.));
 
 	spring->enableSpring(5, true);
-	spring->setStiffness(5, 4000.);
-	spring->setDamping(5, .5);
+	spring->setStiffness(5, 5500.f);
+	spring->setDamping(5, TORSIONBARDAMPING);
 	
 	const float tgt = torsionBarTargetAngle();
 	if(isLeft) {

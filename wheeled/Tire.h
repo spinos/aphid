@@ -15,7 +15,7 @@ public:
 	Tire();
 	virtual ~Tire();
 	
-	btCollisionShape* create(const float & radiusMajor, const float & radiusMinor, const float & width, btCollisionShape* padShape);
+	btCollisionShape* create(const float & radiusMajor, const float & radiusMinor, const float & width);
 	void attachPad(btRigidBody* wheelBody, const Matrix44F & origin, const float & radiusMajor, const float & radiusMinor, bool isLeft);
 protected:
 	

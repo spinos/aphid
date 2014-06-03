@@ -15,12 +15,11 @@ namespace caterpillar {
 	
 Tire::Tire() {}
 Tire::~Tire() {}
-btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMinor, const float & width, btCollisionShape* padShape)
+btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMinor, const float & width)
 {
 	const float sy = (radiusMajor - radiusMinor) * PI / NUMGRIDRAD;
 	btCompoundShape* wheelShape = new btCompoundShape();
 	m_padShape = PhysicsState::engine->createBoxShape(width * .5f, sy, radiusMinor * .5);
-	//PhysicsState::engine->addCollisionShape(m_padShape);
 	const float delta = PI * 2.f / (float)NUMGRIDRAD;
 	int i;
 	Matrix44F rot;

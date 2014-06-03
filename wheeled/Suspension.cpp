@@ -15,18 +15,18 @@ namespace caterpillar {
 float Suspension::SteerAngle;
 Suspension::Profile::Profile() 
 {
-	_upperWishboneAngle[0] = -.56f;
-	_upperWishboneAngle[1] = .19f;
-	_lowerWishboneAngle[0] = -.56f;
-	_lowerWishboneAngle[1] = .19f;
+	_upperWishboneAngle[0] = -.44f;
+	_upperWishboneAngle[1] = .44f;
+	_lowerWishboneAngle[0] = -.44f;
+	_lowerWishboneAngle[1] = .44f;
 	_wheelHubX = .6f;
 	_wheelHubR = 1.41f;
 	_upperJointY = 2.03f; 
-	_lowerJointY = -1.f;
+	_lowerJointY = -2.f;
 	_upperWishboneLength = 3.3f;
 	_lowerWishboneLength = 4.7f;
-	_upperWishboneTilt = .07f;
-	_lowerWishboneTilt = -.11f;
+	_upperWishboneTilt = .2f;
+	_lowerWishboneTilt = -.2f;
 	_steerable = true;
 	_powered = false;
 }
@@ -175,9 +175,9 @@ void Suspension::connectArm(btRigidBody* arm, const Matrix44F & tm, bool isUpper
 	if(isUpper) return;
 	
 	hinge->enableSpring(5, true);
-	hinge->setStiffness(5, 1000.f);
-	hinge->setDamping(5, 0.02f);
-	hinge->setEquilibriumPoint(5, 0.1f);
+	hinge->setStiffness(5, 3000.f);
+	hinge->setDamping(5, 0.001f);
+	hinge->setEquilibriumPoint(5, 0.f);
 }
 
 btCompoundShape* Suspension::createWishboneShape(bool isUpper, bool isLeft)

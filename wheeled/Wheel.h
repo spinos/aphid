@@ -34,6 +34,5 @@ private:
 	Profile m_profile;
 	Tire m_tire;
 	btCollisionShape* m_shape;
-	btCollisionShape* m_padShape;
 };
 }

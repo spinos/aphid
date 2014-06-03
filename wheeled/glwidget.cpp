@@ -83,7 +83,7 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->setSteerAngle(0.f);
 			break;
 		case Qt::Key_W:
-			m_vehicle->addTargetSpeed(.31f);
+			m_vehicle->addTargetSpeed(.99f);
 			break;
 		case Qt::Key_S:
 			m_vehicle->addTargetSpeed(-.31f);
