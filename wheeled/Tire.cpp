@@ -12,9 +12,7 @@
 #include "PhysicsState.h"
 #include <Common.h>
 namespace caterpillar {
-#define NUMGRIDRAD 56
-#define DELTARAD .1121997376282069f
-#define NUMGRIDX 10
+#define NUMGRIDRAD 83
 	
 Tire::Tire() {}
 Tire::~Tire() {}
@@ -23,7 +21,7 @@ btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMi
 	const float sy = (radiusMajor - radiusMinor) * PI * 2.f / NUMGRIDRAD;
 	btCompoundShape* wheelShape = new btCompoundShape();
 	btCollisionShape* rollShape = PhysicsState::engine->createBoxShape(width * .5f, sy, radiusMinor);
-	
+	const float delta = PI * 2.f / (float)NUMGRIDRAD;
 	int i;
 	Matrix44F rot;
 	for(i = 0; i < NUMGRIDRAD; i++) {
@@ -33,7 +31,7 @@ btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMi
 		btTransform frm = Common::CopyFromMatrix44F(ctm);
 		wheelShape->addChildShape(frm, rollShape);
 	
-		rot.rotateX(DELTARAD);
+		rot.rotateX(delta);
 	}
 	
 	return wheelShape;

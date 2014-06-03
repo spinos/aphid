@@ -21,11 +21,11 @@ Suspension::Profile::Profile()
 	_lowerWishboneAngle[1] = .19f;
 	_wheelHubX = .6f;
 	_wheelHubR = 1.41f;
-	_upperJointY = 1.73f; 
+	_upperJointY = 2.03f; 
 	_lowerJointY = -1.f;
 	_upperWishboneLength = 3.f;
 	_lowerWishboneLength = 5.3f;
-	_upperWishboneTilt = .04f;
+	_upperWishboneTilt = .07f;
 	_lowerWishboneTilt = -.11f;
 	_steerable = true;
 	_powered = false;
@@ -175,9 +175,9 @@ void Suspension::connectArm(btRigidBody* arm, const Matrix44F & tm, bool isUpper
 	if(isUpper) return;
 	
 	hinge->enableSpring(5, true);
-	hinge->setStiffness(5, 5000.f);
-	hinge->setDamping(5, 1.5f);
-	hinge->setEquilibriumPoint(5, 0.f);
+	hinge->setStiffness(5, 200.f);
+	hinge->setDamping(5, .632f);
+	hinge->setEquilibriumPoint(5, 0.3f);
 }
 
 btCompoundShape* Suspension::createWishboneShape(bool isUpper, bool isLeft)
@@ -318,7 +318,11 @@ void Suspension::steer(const Vector3F & around, const float & wheelSpan)
 	if(!isSteerable()) return;
 	
 	const float hspan = wheelSpan * .5f - wheelHubX();
-	if(around.x < hspan && around.x > -hspan) return;
+	if(around.x < hspan && around.x > -hspan) {
+	    steerWheel(0.f, 0);
+	    steerWheel(0.f, 1);
+	    return;
+	}
 	
 	float lx = hspan + around.x;
 	

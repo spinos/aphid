@@ -80,6 +80,7 @@ private:
 	btAlignedObjectArray<btSoftRididCollisionAlgorithm*> m_SoftRigidCollisionAlgorithms;
 	
 	int m_numSubSteps;
+	float m_simulateFrequency;
 	bool m_enablePhysics;
 	bool m_isWorldInitialized;
 	bool m_enableDrawConstraint;

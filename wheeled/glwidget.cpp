@@ -2,7 +2,7 @@
 #include <QtOpenGL>
 #include <DynamicsSolver.h>
 #include "glwidget.h"
-
+#include <Obstacle.h>
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -10,7 +10,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_vehicle = new caterpillar::WheeledVehicle;
 	
 	caterpillar::PhysicsState::engine->initPhysics();
-	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, -1.f);
+	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, 0.f);
+	
+	caterpillar::Obstacle obst;
+	obst.create(1000.f);
 	
 	m_vehicle->setOrigin(Vector3F(-12.f, 17.f, -20.f));
 	
@@ -76,17 +79,14 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 {	
     bool enabled;
 	switch (e->key()) {
-		case Qt::Key_T:
-			//m_vehicle->addTension(100.f);
-			break;
-		case Qt::Key_R:
-			//m_vehicle->addTension(-100.f);
+		case Qt::Key_C:
+			m_vehicle->setSteerAngle(0.f);
 			break;
 		case Qt::Key_W:
-			m_vehicle->addTargetSpeed(1.f);
+			m_vehicle->addTargetSpeed(.31f);
 			break;
 		case Qt::Key_S:
-			m_vehicle->addTargetSpeed(-1.f);
+			m_vehicle->addTargetSpeed(-.31f);
 			break;
 		case Qt::Key_A:
 			m_vehicle->addSteerAngle(-0.03f);

@@ -11,9 +11,9 @@
 namespace caterpillar {
 WheeledChassis::WheeledChassis() 
 {
-	m_hullDim.set(20.3f, 6.f, 44.3f);
-	setAxisCoord(0, 17.f, -2.f, 13.f);
-	setAxisCoord(1, 17.f, -2.f, -16.1f);
+	m_hullDim.set(20.3f, 4.f, 44.3f);
+	setAxisCoord(0, 17.f, -.5f, 13.f);
+	setAxisCoord(1, 17.f, -.5f, -16.1f);
 	m_numAxis = 2;
 }
 
@@ -87,10 +87,13 @@ void WheeledChassis::computeDriveCenterZ()
 	m_driveCenterZ = 0.f;
 	int numDrv = 0;
 	for(int i = 0; i < numAxis(); i++) {
-		m_driveCenterZ += m_axisCoord[i].z;
-		numDrv++;
+		if(!suspension(i).isSteerable()) {
+		    m_driveCenterZ += m_axisCoord[i].z;
+		    numDrv++;
+		}
 	}
 	if(numDrv > 0) m_driveCenterZ /= (float)numDrv;
+	else m_driveCenterZ = 0.f;
 }
 
 const Vector3F WheeledChassis::turnAround(const int & i, const float & ang) const

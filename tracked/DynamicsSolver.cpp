@@ -20,6 +20,7 @@ DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(2)
 	m_isWorldInitialized = false;
 	m_enableDrawConstraint = true;
     _drawer = new ShapeDrawer();
+    m_simulateFrequency = 180.f;
 }
 
 DynamicsSolver::~DynamicsSolver()
@@ -273,7 +274,7 @@ void DynamicsSolver::simulate()
 	if(!m_enablePhysics) return;
 	btScalar dt = (btScalar)_clock.getTimeMicroseconds() / 1000000.f; // std::cout<<"dt "<<dt;
 	_clock.reset();
-	simulate(dt, m_numSubSteps, 150.f);
+	simulate(dt, m_numSubSteps, m_simulateFrequency);
 }
 
 void DynamicsSolver::simulate(const float & dt, const int & numSubsteps, const float & frequency)
