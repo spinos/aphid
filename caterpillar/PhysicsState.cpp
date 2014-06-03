@@ -8,7 +8,6 @@
  */
 
 #include "PhysicsState.h"
-#include <DynamicsSolver.h>
 namespace caterpillar {
 DynamicsSolver * PhysicsState::engine = NULL;
 PhysicsState::EngineStatus PhysicsState::engineStatus = sUnkown;

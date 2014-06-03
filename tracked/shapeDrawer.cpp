@@ -135,6 +135,11 @@ void ShapeDrawer::cylinder(const float & x, const float & y, const float & z)
 		q.y = -1.f;
 		glDrawVector(p);
 		glDrawVector(q);
+	}
+	for(int i=0; i < 24; i+=3) {
+		p.x = coss[i];
+		p.z = sins[i];
+		p.y = -1.f;
 		q = p;
 		q.y = 1.f;
 		glDrawVector(p);
@@ -174,6 +179,7 @@ void ShapeDrawer::drawConstraint(const btTypedConstraint* constraint)
 			drawHingeConstraint(static_cast<const btHingeConstraint*>(constraint));
 			break;
 		case D6_CONSTRAINT_TYPE:
+		case D6_SPRING_CONSTRAINT_TYPE:
 			drawD6Constraint(static_cast<const btGeneric6DofConstraint*>(constraint));
 			break;
 		default:
@@ -188,11 +194,14 @@ void ShapeDrawer::drawD6Constraint(const btGeneric6DofConstraint* d6f)
     
     btTransform transA = d6f->getCalculatedTransformA();
     btTransform transB = d6f->getCalculatedTransformB();
+	
+	drawCoordsys(transA);
+	drawCoordsys(transB);
     
     btVector3 angularLower, angularUpper;
     ((btGeneric6DofConstraint*)d6f)->getAngularLowerLimit(angularLower);
     ((btGeneric6DofConstraint*)d6f)->getAngularUpperLimit(angularUpper);
-    //drawAngularLimit(transA, transB, angularLower, angularUpper);
+    // drawAngularLimit(transA, transB, angularLower, angularUpper);
     
     btTransform tA = bodyA.getWorldTransform();
     btTransform tB = bodyB.getWorldTransform();
@@ -521,4 +530,20 @@ void ShapeDrawer::loadSpace(const Matrix44F & transform)
 	m[15] = transform.M(3, 3); 
     
 	glMultMatrixf((const GLfloat*)m);
+}
+
+void ShapeDrawer::drawCoordsys(const btTransform & transform)
+{
+	glPushMatrix();
+    loadSpace(transform);
+    glDrawCoordsys();
+	glPopMatrix();
+}
+
+void ShapeDrawer::drawCoordsys(const Matrix44F & transform)
+{
+	glPushMatrix();
+    loadSpace(transform);
+    glDrawCoordsys();
+	glPopMatrix();
 }

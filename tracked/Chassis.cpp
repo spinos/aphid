@@ -203,7 +203,7 @@ const bool Chassis::isBackdrive() const { return m_driveSprocketZ < m_tensionerZ
 const Matrix44F  Chassis::bogieArmOrigin(const int & i, bool isLeft) const
 {
     Matrix44F res;
-    res.rotateX(m_torsionBarRestAngle);
+    res.rotateX(-m_torsionBarRestAngle);
     Vector3F cen = roadWheelOrigin(i, isLeft);
     float d = 1.f;
 	if(!isLeft) d = -d;

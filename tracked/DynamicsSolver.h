@@ -7,7 +7,7 @@
  *
  */
  
-
+#pragma once
 #include "shapeDrawer.h"
 #include <AllMath.h>
 class btSoftRigidDynamicsWorld;
@@ -43,6 +43,7 @@ public:
 	btRigidBody* getRigidBody(const int & i) const;
 	
 	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
+	btGeneric6DofConstraint* constrainBy6Dof(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
 	btGeneric6DofSpringConstraint* constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
 	
 	void addGroundPlane(const float & groundSize, const float & groundLevel);

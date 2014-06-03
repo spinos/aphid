@@ -1,34 +1,31 @@
 /*
- *  Ground.cpp
- *  caterpillar
+ *  MeshShape.cpp
+ *  wheeled
  *
- *  Created by jian zhang on 5/23/14.
+ *  Created by jian zhang on 6/1/14.
  *  Copyright 2014 __MyCompanyName__. All rights reserved.
  *
  */
 
-#include "Ground.h"
-#include <DynamicsSolver.h>
-#include "PhysicsState.h"
+#include "MeshShape.h"
+#include <PhysicsState.h>
 namespace caterpillar {
-
-Ground::Ground() 
+MeshShape::MeshShape() 
 {
-    m_indexVertexArrays = NULL;
+	m_indexVertexArrays = NULL;
 	m_vertexPos = NULL;
 	m_indices = NULL;
-	m_friction = .732; 
-	m_margin = 1.;
+	m_margin = .1f;
 }
 
-Ground::~Ground() 
+MeshShape::~MeshShape() 
 {
-    if(m_indexVertexArrays) delete m_indexVertexArrays;
+	if(m_indexVertexArrays) delete m_indexVertexArrays;
 	if(m_vertexPos) delete[] m_vertexPos;
 	if(m_indices) delete[] m_indices;
 }
 
-btVector3 * Ground::createVertexPos(const int & nv)
+btVector3 * MeshShape::createVertexPos(const int & nv)
 {
 	if(m_vertexPos) delete[] m_vertexPos;
 	m_vertexPos = new btVector3[nv];
@@ -36,7 +33,7 @@ btVector3 * Ground::createVertexPos(const int & nv)
 	return m_vertexPos;
 }
 
-int * Ground::createTriangles(const int & ntri)
+int * MeshShape::createTriangles(const int & ntri)
 {
 	if(m_indices) delete[] m_indices;
 	m_numTri = ntri;
@@ -44,7 +41,9 @@ int * Ground::createTriangles(const int & ntri)
 	return m_indices;
 }
 
-void Ground::create()
+void MeshShape::setMargin(const float & x) { m_margin = x; }
+
+btBvhTriangleMeshShape* MeshShape::createCollisionShape()
 {
     if (m_indexVertexArrays)
 		delete m_indexVertexArrays;
@@ -52,19 +51,12 @@ void Ground::create()
 	m_indexVertexArrays = new btTriangleIndexVertexArray(m_numTri, m_indices, 3 * sizeof(int),
 		m_numVert,(btScalar*)&m_vertexPos[0][0], sizeof(btVector3));
 	
-	const bool useQuantizedAabbCompression = false;
+	const bool useQuantizedAabbCompression = true;
 	const bool buildBvh = true;
 	btBvhTriangleMeshShape* trimeshShape = new btBvhTriangleMeshShape(m_indexVertexArrays, useQuantizedAabbCompression, buildBvh);
-
     trimeshShape->setMargin(m_margin);
 	PhysicsState::engine->addCollisionShape(trimeshShape);
-    
-	// int id = PhysicsState::engine->numCollisionObjects();
-    btTransform trans; trans.setIdentity();
-	btRigidBody * bd = PhysicsState::engine->createRigidBody(trimeshShape, trans, 0.0);
-	bd->setFriction(m_friction);
+	return trimeshShape;
 }
 
-void Ground::setMargin(const float & x) { m_margin = x; }
-void Ground::setFriction(const float & x) { m_friction = x; }
 }

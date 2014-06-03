@@ -120,6 +120,7 @@ MStatus SolverNode::initialize()
 	status = addAttribute(a_inTime);
 	
 	a_startTime = fnUnitAttr.create( "startTime", "stm", MFnUnitAttribute::kTime, 1.0, &status );
+	fnUnitAttr.setKeyable(true);
 	status = addAttribute(a_startTime);
 	
 	a_gravity = fnNumericAttr.createPoint("gravity", "grvt", &status);

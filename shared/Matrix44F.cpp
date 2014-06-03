@@ -64,6 +64,19 @@ void Matrix44F::multiply(const Matrix44F & a)
 	}
 }
 
+const Matrix44F Matrix44F::transformBy(const Matrix44F & a) const
+{
+	Matrix44F t; 
+	int i, j;
+	for(i = 0; i < 4; i++) {
+		for(j = 0; j < 4; j++) {
+			*t.m(i, j) = M(i, 0) * a.M(0, j) + M(i, 1) * a.M(1, j) + M(i, 2) * a.M(2, j) + M(i, 3) * a.M(3, j);
+		}
+	}
+
+	return t;
+}
+
 float* Matrix44F::m(int i, int j)
 {
 	return &v[i * 4 + j];

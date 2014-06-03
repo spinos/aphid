@@ -8,7 +8,7 @@
  */
 
 #pragma once
-class DynamicsSolver;
+#include <DynamicsSolver.h>
 namespace caterpillar {
 class PhysicsState {
 public:

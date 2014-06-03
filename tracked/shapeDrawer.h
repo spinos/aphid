@@ -6,7 +6,7 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
- 
+#pragma once
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftBody.h>
@@ -33,6 +33,8 @@ public:
 	void drawTransform(const btTransform & t);
 	void drawForce(const btRigidBody* body);
 	void drawTranslateHandle(const btRigidBody* body);
+	
+	void drawCoordsys(const Matrix44F & transform);
 private:
 	void drawAngularLimit(const btTransform& space, const btTransform& space1, const btVector3& angularLower, const btVector3& angularUpper);
 	void drawHingeConstraint(const btHingeConstraint* constraint);
@@ -43,4 +45,5 @@ private:
 	void drawCompound(const btCompoundShape* shape);
 	void loadSpace(const btTransform & transform);
 	void loadSpace(const Matrix44F & transform);
+	void drawCoordsys(const btTransform & transform);
 };
