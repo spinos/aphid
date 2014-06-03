@@ -23,8 +23,8 @@ Suspension::Profile::Profile()
 	_wheelHubR = 1.41f;
 	_upperJointY = 2.03f; 
 	_lowerJointY = -1.f;
-	_upperWishboneLength = 3.f;
-	_lowerWishboneLength = 5.3f;
+	_upperWishboneLength = 3.3f;
+	_lowerWishboneLength = 4.7f;
 	_upperWishboneTilt = .07f;
 	_lowerWishboneTilt = -.11f;
 	_steerable = true;
@@ -175,9 +175,9 @@ void Suspension::connectArm(btRigidBody* arm, const Matrix44F & tm, bool isUpper
 	if(isUpper) return;
 	
 	hinge->enableSpring(5, true);
-	hinge->setStiffness(5, 200.f);
-	hinge->setDamping(5, .632f);
-	hinge->setEquilibriumPoint(5, 0.3f);
+	hinge->setStiffness(5, 1000.f);
+	hinge->setDamping(5, 0.02f);
+	hinge->setEquilibriumPoint(5, 0.1f);
 }
 
 btCompoundShape* Suspension::createWishboneShape(bool isUpper, bool isLeft)

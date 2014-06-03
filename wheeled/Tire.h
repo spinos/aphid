@@ -8,17 +8,18 @@
  */
 
 #pragma once
-#include "MeshShape.h"
+#include <Common.h>
 namespace caterpillar {
 class Tire {
 public:
 	Tire();
 	virtual ~Tire();
 	
-	btCollisionShape* create(const float & radiusMajor, const float & radiusMinor, const float & width);
+	btCollisionShape* create(const float & radiusMajor, const float & radiusMinor, const float & width, btCollisionShape* padShape);
+	void attachPad(btRigidBody* wheelBody, const Matrix44F & origin, const float & radiusMajor, const float & radiusMinor, bool isLeft);
 protected:
 	
 private:
-
+    btCollisionShape* m_padShape;
 };
 }

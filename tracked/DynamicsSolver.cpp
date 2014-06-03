@@ -20,7 +20,7 @@ DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(2)
 	m_isWorldInitialized = false;
 	m_enableDrawConstraint = true;
     _drawer = new ShapeDrawer();
-    m_simulateFrequency = 180.f;
+    m_simulateFrequency = 120.f;
 }
 
 DynamicsSolver::~DynamicsSolver()
