@@ -22,11 +22,11 @@ Suspension::Profile::Profile()
 	_wheelHubX = .6f;
 	_wheelHubR = 1.41f;
 	_upperJointY = 2.03f; 
-	_lowerJointY = -2.03f;
+	_lowerJointY = -1.f;
 	_upperWishboneLength = 3.3f;
 	_lowerWishboneLength = 4.7f;
 	_upperWishboneTilt = .2f;
-	_lowerWishboneTilt = -.1f;
+	_lowerWishboneTilt = 0.f;
 	_steerable = true;
 	_powered = false;
 }
@@ -76,15 +76,16 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	
 	btTransform frmArm = Common::CopyFromMatrix44F(armTM);
 	
-	btGeneric6DofSpringConstraint* ball = PhysicsState::engine->constrainBySpring(*carrier, *upperArm, frmCarrier, frmArm, true);
-	ball->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball->setAngularLowerLimit(btVector3(-.05f, 0.0f, -.05f));
-	ball->setAngularUpperLimit(btVector3(0.05f, 0.0f, .05f));
-	ball->enableSpring(4, true);
-	ball->setStiffness(4, 5000.f);
-	ball->setDamping(4, 0.001f);
-	ball->setEquilibriumPoint(4, 0.f);
+	btGeneric6DofConstraint* ball = PhysicsState::engine->constrainBy6Dof(*carrier, *upperArm, frmCarrier, frmArm, true);
+	//ball->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
+	//ball->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
+	ball->setAngularLowerLimit(btVector3(0.0f, 0.0f, .0f));
+	ball->setAngularUpperLimit(btVector3(0.0f, 0.0f, .0f));
+	//ball->enableSpring(4, true);
+	//ball->setStiffness(4, 5000.f);
+	//ball->setDamping(4, 0.001f);
+	//ball->setEquilibriumPoint(4, 0.f);
+	
 	frmCarrier.getOrigin()[1] = m_profile._lowerJointY;
 	
 	rot.setIdentity();
@@ -92,15 +93,15 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	armTM.setRotation(rot);
 	frmArm = Common::CopyFromMatrix44F(armTM);
 	
-	btGeneric6DofSpringConstraint*ball1 = PhysicsState::engine->constrainBySpring(*carrier, *lowerArm, frmCarrier, frmArm, true);
-	ball1->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball1->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball1->setAngularLowerLimit(btVector3(-.05f, 0.0f, -.05f));
-	ball1->setAngularUpperLimit(btVector3(0.05f, 0.0f, .05f));
-	ball1->enableSpring(4, true);
-	ball1->setStiffness(4, 5000.f);
-	ball1->setDamping(4, 0.001f);
-	ball1->setEquilibriumPoint(4, 0.f);
+	btGeneric6DofConstraint*ball1 = PhysicsState::engine->constrainBy6Dof(*carrier, *lowerArm, frmCarrier, frmArm, true);
+	// ball1->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
+	// ball1->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
+	ball1->setAngularLowerLimit(btVector3(0.0f, 0.0f, .0f));
+	ball1->setAngularUpperLimit(btVector3(0.0f, 0.0f, .0f));
+	//ball1->enableSpring(4, true);
+	//ball1->setStiffness(4, 5000.f);
+	//ball1->setDamping(4, 0.001f);
+	//ball1->setEquilibriumPoint(4, 0.f);
 	
 	if(isLeft) m_steerJoint[0] = ball1;
 	else m_steerJoint[1] = ball1;
@@ -185,16 +186,16 @@ void Suspension::connectArm(btRigidBody* arm, const Matrix44F & tm, bool isUpper
 	btTransform frmA = Common::CopyFromMatrix44F(hingeTM);
 	
 	btGeneric6DofSpringConstraint* hinge = PhysicsState::engine->constrainBySpring(*ChassisBody, *arm, frmA, frmB, true);
-	hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -.6f));
-	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, .6f));
-	hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
-	hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
+	hinge->setAngularLowerLimit(btVector3(0.0, 0.0, -.4f));
+	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, .4f));
+	//hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
+	//hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
 	
 	if(isUpper) return;
 
 	hinge->enableSpring(5, true);
-	hinge->setStiffness(5, 50.f);
-	hinge->setDamping(5, 0.2f);
+	hinge->setStiffness(5, 10.f);
+	hinge->setDamping(5, 0.1f);
 	hinge->setEquilibriumPoint(5, 0.f);
 }
 
