@@ -22,6 +22,8 @@ public:
 	void addSteerAngle(const float & x);
 	void setSteerAngle(const float & x);
 	void displayStatistics();
+	const Vector3F vehicleVelocity() const;
+	const Matrix44F vehicleTM() const;
 private:
 	float m_targetSpeed, m_steerAngle;
 };

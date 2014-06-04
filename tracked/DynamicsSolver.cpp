@@ -30,6 +30,7 @@ DynamicsSolver::~DynamicsSolver()
 
 void DynamicsSolver::setEnablePhysics(bool x) { m_enablePhysics = x; }
 void DynamicsSolver::setNumSubSteps(int x) { m_numSubSteps = x; }
+void DynamicsSolver::setSimulateFrequency(float x) { m_simulateFrequency = x; }
 const bool DynamicsSolver::isPhysicsEnabled() const { return m_enablePhysics; }
 	
 void DynamicsSolver::initPhysics()

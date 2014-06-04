@@ -29,6 +29,7 @@ public:
 	void setEnablePhysics(bool x);
 	void setEnableDrawConstraint(bool x);
 	void setNumSubSteps(int x);
+	void setSimulateFrequency(float x);
 	const bool isPhysicsEnabled() const;
 	const bool isWorldInitialized() const;
 	const int numCollisionObjects() const;

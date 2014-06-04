@@ -10,12 +10,12 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_vehicle = new caterpillar::WheeledVehicle;
 	
 	caterpillar::PhysicsState::engine->initPhysics();
-	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, 0.f);
+	caterpillar::PhysicsState::engine->addGroundPlane(5000.f, 0.f);
 	
 	caterpillar::Obstacle obst;
 	obst.create(1000.f);
 	
-	m_vehicle->setOrigin(Vector3F(-12.f, 17.f, -20.f));
+	m_vehicle->setOrigin(Vector3F(-12.f, 17.f, -100.f));
 	
 	caterpillar::Wheel::Profile rearWheelInfo;
 	rearWheelInfo._width = 2.89f;
@@ -31,6 +31,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	caterpillar::PhysicsState::engine->setEnablePhysics(false);
 	caterpillar::PhysicsState::engine->setNumSubSteps(10);
+	caterpillar::PhysicsState::engine->setSimulateFrequency(180.f);
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(30);
@@ -83,10 +84,10 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->setSteerAngle(0.f);
 			break;
 		case Qt::Key_W:
-			m_vehicle->addTargetSpeed(.99f);
+			m_vehicle->addTargetSpeed(1.99f);
 			break;
 		case Qt::Key_S:
-			m_vehicle->addTargetSpeed(-.31f);
+			m_vehicle->addTargetSpeed(-1.31f);
 			break;
 		case Qt::Key_A:
 			m_vehicle->addSteerAngle(-0.03f);

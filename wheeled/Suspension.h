@@ -35,14 +35,14 @@ public:
 	
 	btRigidBody* create(const Vector3F & pos, bool isLeft = true);
 	void connectWheel(btRigidBody* hub, btRigidBody* wheel, bool isLeft);
-	void powerDrive(const float & speed, const float & wheelR);
+	void powerDrive(const Vector3F & targetVelocity, const float & wheelR);
 	void steer(const Vector3F & around, const float & wheelSpan);
 	void steerWheel(const float & ang, int i);
 	
 	static float RodRadius;
 	static btRigidBody * ChassisBody;
 	static Vector3F ChassisOrigin;
-	static float SteerAngle;
+
 private:
 	btRigidBody* createCarrier(const Matrix44F & tm, bool isLeft);
 	btRigidBody* Suspension::createWishbone(const Matrix44F & tm, bool isUpper, bool isLeft);
@@ -51,9 +51,14 @@ private:
 	void wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, float & a) const;
 	void connectArm(btRigidBody* arm, const Matrix44F & tm, bool isUpper, bool isLeft, bool isFront);
 	void applyBrake(bool enable);
-	void applyMotor(float rps);
+	void applyMotor(float rps, const int & i);
+	const Matrix44F wheelHubTM(const int & i) const;
+	const Vector3F wheelHubVel(const int & i) const;
+	const Vector3F wheelVelocity(const int & i) const;
+	float limitDrive(const int & i, const float & targetSpeed, const float & r);
 	Profile m_profile;
 	btGeneric6DofConstraint* m_steerJoint[2];
 	btGeneric6DofConstraint* m_driveJoint[2];
+	btRigidBody * m_wheelHub[2];
 };
 }
