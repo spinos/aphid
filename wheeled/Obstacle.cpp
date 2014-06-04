@@ -7,7 +7,7 @@ Obstacle::Obstacle() {}
 Obstacle::~Obstacle() {}
 void Obstacle::create(const float & dim)
 {
-    btCollisionShape* rollShape = PhysicsState::engine->createCylinderShape(.33f, 32.f, .33f);
+    btCollisionShape* rollShape = PhysicsState::engine->createCylinderShape(.32f, 32.f, .32f);
 	Matrix44F tm;
 	tm.rotateZ(PI * .5f);
 	for(int i =0; i < 1024; i++) {

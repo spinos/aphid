@@ -53,12 +53,13 @@ private:
 	void applyBrake(bool enable);
 	void applyMotor(float rps, const int & i);
 	const Matrix44F wheelHubTM(const int & i) const;
-	const Vector3F wheelHubVel(const int & i) const;
+	const Vector3F wheelVel(const int & i) const;
 	const Vector3F wheelVelocity(const int & i) const;
 	float limitDrive(const int & i, const float & targetSpeed, const float & r);
 	Profile m_profile;
 	btGeneric6DofConstraint* m_steerJoint[2];
 	btGeneric6DofConstraint* m_driveJoint[2];
 	btRigidBody * m_wheelHub[2];
+	btRigidBody * m_wheel[2];
 };
 }

@@ -11,24 +11,40 @@
 #include "PhysicsState.h"
 #include <DynamicsSolver.h>
 namespace caterpillar {
-#define NUMGRIDRAD 91
+#define NUMGRIDRAD 160
 	
 Tire::Tire() {}
 Tire::~Tire() {}
 btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMinor, const float & width)
 {
+	const float hw = .5f * width;
 	const float sy = (radiusMajor - radiusMinor) * PI / NUMGRIDRAD;
 	btCompoundShape* wheelShape = new btCompoundShape();
-	m_padShape = PhysicsState::engine->createBoxShape(width * .5f, sy, radiusMinor * .5);
+	m_padShape = PhysicsState::engine->createBoxShape(hw * .23f, sy, radiusMinor * .5);
+	Matrix44F tm[4];
+	tm[0].rotateY(-.1f);
+	tm[0].translate(-.75f * hw, 0.f, radiusMajor - radiusMinor * .5f - .75f * hw * sin(.05f));
+	
+	tm[1].rotateY(-.05f);
+	tm[1].translate(-.25f * hw, 0.f, radiusMajor - radiusMinor * .5f);
+	
+	tm[2].rotateY(.05f);
+	tm[2].translate(.25f * hw, 0.f, radiusMajor - radiusMinor * .5f);
+	
+	tm[3].rotateY(.1f);
+	tm[3].translate(.75f * hw, 0.f, radiusMajor - radiusMinor * .5f - .75f * hw * sin(.05f));
+	
+	
 	const float delta = PI * 2.f / (float)NUMGRIDRAD;
-	int i;
+	int i, j;
 	Matrix44F rot;
 	for(i = 0; i < NUMGRIDRAD; i++) {
-		Matrix44F ctm;
-		ctm.translate(0.f, 0.f, radiusMajor - radiusMinor * .5f);
-		ctm *= rot;
-		btTransform frm = Common::CopyFromMatrix44F(ctm);
-		wheelShape->addChildShape(frm, m_padShape);
+		for(j = 0; j < 4; j++) {
+			Matrix44F ctm = tm[j];
+			ctm *= rot;
+			btTransform frm = Common::CopyFromMatrix44F(ctm);
+			wheelShape->addChildShape(frm, m_padShape);
+		}
 		rot.rotateX(delta);
 	}
 	PhysicsState::engine->addCollisionShape(wheelShape);

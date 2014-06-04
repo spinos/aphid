@@ -12,8 +12,8 @@ namespace caterpillar {
 WheeledChassis::WheeledChassis() 
 {
 	m_hullDim.set(20.3f, 4.f, 44.3f);
-	setAxisCoord(0, 17.f, -2.25f, 13.f);
-	setAxisCoord(1, 17.f, -2.25f, -16.1f);
+	setAxisCoord(0, 17.f, -2.75f, 13.f);
+	setAxisCoord(1, 17.f, -2.75f, -16.1f);
 	m_numAxis = 2;
 }
 
@@ -70,7 +70,7 @@ const Matrix44F WheeledChassis::wheelTM(const int & i, bool isLeft) const
 	if(!isLeft)
 		tm.rotateY(PI);
 		
-	tm.setTranslation(wheelOrigin(i, isLeft));
+	tm.setTranslation(wheelOrigin(i, isLeft));std::cout<<"arm "<<isLeft<<" "<<tm.getTranslation().str()<<"\n";
 	return tm;
 }
 

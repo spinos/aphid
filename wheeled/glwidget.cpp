@@ -15,7 +15,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	caterpillar::Obstacle obst;
 	obst.create(1000.f);
 	
-	m_vehicle->setOrigin(Vector3F(-12.f, 17.f, -100.f));
+	m_vehicle->setOrigin(Vector3F(0.f, 17.f, 0.f));
 	
 	caterpillar::Wheel::Profile rearWheelInfo;
 	rearWheelInfo._width = 2.89f;
@@ -30,8 +30,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	std::cout<<"object groups "<<m_vehicle->str();
 	
 	caterpillar::PhysicsState::engine->setEnablePhysics(false);
-	caterpillar::PhysicsState::engine->setNumSubSteps(10);
-	caterpillar::PhysicsState::engine->setSimulateFrequency(180.f);
+	caterpillar::PhysicsState::engine->setNumSubSteps(12);
+	caterpillar::PhysicsState::engine->setSimulateFrequency(90.f);
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(30);
