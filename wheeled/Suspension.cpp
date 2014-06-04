@@ -15,18 +15,19 @@ namespace caterpillar {
 #define SPEEDLIMIT 3.14f
 Suspension::Profile::Profile() 
 {
-	_upperWishboneAngle[0] = -.5254f;
-	_upperWishboneAngle[1] = .75f;
-	_lowerWishboneAngle[0] = -.5254f;
-	_lowerWishboneAngle[1] = .75f;
+	_upperWishboneAngle[0] = -.354f;
+	_upperWishboneAngle[1] = .35f;
+	_lowerWishboneAngle[0] = -.354f;
+	_lowerWishboneAngle[1] = .35f;
 	_wheelHubX = .6f;
 	_wheelHubR = 1.41f;
 	_upperJointY = 2.03f; 
 	_lowerJointY = -1.f;
+	_steerArmJointZ = 2.f;
 	_upperWishboneLength = 3.4f;
 	_lowerWishboneLength = 5.7f;
 	_upperWishboneTilt = .01f;
-	_lowerWishboneTilt = -0.2f;
+	_lowerWishboneTilt = -0.19f;
 	_steerable = true;
 	_powered = false;
 }
@@ -80,8 +81,8 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	btGeneric6DofConstraint* ball = PhysicsState::engine->constrainBy6Dof(*carrier, *upperArm, frmCarrier, frmArm, true);
 	ball->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
 	ball->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball->setAngularLowerLimit(btVector3(-fra, -fra, -fra));
-	ball->setAngularUpperLimit(btVector3(fra, fra, fra));
+	ball->setAngularLowerLimit(btVector3(-fra, -1.f, -fra));
+	ball->setAngularUpperLimit(btVector3(fra, 1.f, fra));
 	/*ball->enableSpring(5, true);
 	ball->setStiffness(5, 50.f);
 	ball->setDamping(5, 0.5f);
@@ -97,17 +98,14 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	btGeneric6DofConstraint*ball1 = PhysicsState::engine->constrainBy6Dof(*carrier, *lowerArm, frmCarrier, frmArm, true);
 	ball1->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
 	ball1->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball1->setAngularLowerLimit(btVector3(-fra, -fra, -fra));
-	ball1->setAngularUpperLimit(btVector3(fra, fra, fra));
+	ball1->setAngularLowerLimit(btVector3(-fra, -1.f, -fra));
+	ball1->setAngularUpperLimit(btVector3(fra, 1.f, fra));
 	/*ball1->enableSpring(5, true);
 	ball1->setStiffness(5, 50.f);
 	ball1->setDamping(5, 0.5f);
 	ball1->setEquilibriumPoint(5, 0.f);*/
 	
-	if(isLeft) m_steerJoint[0] = ball1;
-	else m_steerJoint[1] = ball1;
-	
-	btRigidBody* steeringArm = createSteeringArm(carrier, tm, isLeft);
+	createSteeringArm(carrier, tm, isLeft);
 	
 	return carrier;
 }
@@ -287,7 +285,7 @@ btRigidBody* Suspension::createSteeringArm(btRigidBody* carrier, const Matrix44F
 	btm.rotateZ(m_profile._lowerWishboneTilt);
 	if(!isLeft) btm.rotateY(PI);
 	
-	btm.translate(Vector3F(0.f, 0.f, (m_profile._upperJointY - m_profile._lowerJointY) * .5f));
+	btm.translate(Vector3F(0.f, 0.f, m_profile._steerArmJointZ));
 	
 	btm.translate(tm.getTranslation());
 	
@@ -297,7 +295,7 @@ btRigidBody* Suspension::createSteeringArm(btRigidBody* carrier, const Matrix44F
 	Matrix44F atm;
 	atm.rotateZ(PI * .5f);
 
-	atm.setTranslation(Vector3F(-l * .5f * cos(ang), 0.f, -l * .5f * sin(ang)));
+	atm.setTranslation(Vector3F(-l * .5f * cos(ang), 0.f, 0.f));
 	
 	atm *= btm;
 	
@@ -332,7 +330,8 @@ btRigidBody* Suspension::createSteeringArm(btRigidBody* carrier, const Matrix44F
 	hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
 	
 	tmA.setIdentity();
-	tmA.translate(0.f, 0.f, -l * sin(ang));
+	if(isLeft) tmA.translate(0.f, 0.f, m_profile._steerArmJointZ);
+	else tmA.translate(0.f, 0.f, -m_profile._steerArmJointZ);
 	frmA = Common::CopyFromMatrix44F(tmA);
 	
 	tmB.translate(0.f, l * -1.f * cos(ang), 0.f);
@@ -344,6 +343,9 @@ btRigidBody* Suspension::createSteeringArm(btRigidBody* carrier, const Matrix44F
 	hinge->setAngularUpperLimit(btVector3(.2f, .2f, .2f));
 	hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
 	hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
+	
+	if(isLeft) m_steerJoint[0] = hinge;
+	else m_steerJoint[1] = hinge;
 	
 	return armBody;
 }
@@ -445,10 +447,14 @@ void Suspension::steer(const Vector3F & around, const float & wheelSpan)
 void Suspension::steerWheel(const float & ang, int i)
 {
 	btTransform & frmA = m_steerJoint[i]->getFrameOffsetA();
-	Matrix44F tm;
-	tm.rotateY(ang);
-	frmA = Common::CopyFromMatrix44F(tm);
-	frmA.getOrigin()[1] = m_profile._lowerJointY;
+	if(i == 0) {
+		frmA.getOrigin()[0] = sin(ang) * m_profile._steerArmJointZ;
+		frmA.getOrigin()[2] = cos(ang) * m_profile._steerArmJointZ;
+	}
+	else {
+		frmA.getOrigin()[0] = -sin(ang) * m_profile._steerArmJointZ;
+		frmA.getOrigin()[2] = -cos(ang) * m_profile._steerArmJointZ;
+	}
 }
 
 const Matrix44F Suspension::wheelHubTM(const int & i) const

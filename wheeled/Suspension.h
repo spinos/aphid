@@ -20,6 +20,7 @@ public:
 		float _wheelHubX;
 		float _wheelHubR;
 		float _upperJointY, _lowerJointY;
+		float _steerArmJointZ;
 		float _upperWishboneLength, _lowerWishboneLength;
 		float _upperWishboneTilt, _lowerWishboneTilt;
 		bool _steerable, _powered;

@@ -30,7 +30,7 @@ btRigidBody* Wheel::create(const Matrix44F & tm)
 	btTransform trans = Common::CopyFromMatrix44F(tm);
 	btRigidBody* wheelBody = PhysicsState::engine->createRigidBody(m_shape, trans, 2.f);
 	wheelBody->setDamping(0.f, 0.f);
-	wheelBody->setFriction(9.99f);
+	wheelBody->setFriction(19.99f);
 	wheelBody->setActivationState(DISABLE_DEACTIVATION);
 	
 	return wheelBody;
