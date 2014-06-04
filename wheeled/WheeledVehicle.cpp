@@ -34,7 +34,7 @@ void WheeledVehicle::create()
 	trans.setOrigin(btVector3(origin().x, origin().y, origin().z));
 	
 	const int id = PhysicsState::engine->numCollisionObjects();
-	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, 180.f);
+	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, 128.f);
 	chassisBody->setDamping(0.f, 0.f);
 	
 	group("chassis").push_back(id);

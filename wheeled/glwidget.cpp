@@ -31,7 +31,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	caterpillar::PhysicsState::engine->setEnablePhysics(false);
 	caterpillar::PhysicsState::engine->setNumSubSteps(12);
-	caterpillar::PhysicsState::engine->setSimulateFrequency(90.f);
+	caterpillar::PhysicsState::engine->setSimulateFrequency(180.f);
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(30);

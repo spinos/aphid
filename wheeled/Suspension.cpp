@@ -12,7 +12,7 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-#define SPEEDLIMIT 1.57f
+#define SPEEDLIMIT 3.14f
 Suspension::Profile::Profile() 
 {
 	_upperWishboneAngle[0] = -.5254f;
@@ -23,15 +23,15 @@ Suspension::Profile::Profile()
 	_wheelHubR = 1.41f;
 	_upperJointY = 2.03f; 
 	_lowerJointY = -1.f;
-	_upperWishboneLength = 3.1f;
-	_lowerWishboneLength = 4.7f;
+	_upperWishboneLength = 3.4f;
+	_lowerWishboneLength = 5.7f;
 	_upperWishboneTilt = .01f;
 	_lowerWishboneTilt = -0.2f;
 	_steerable = true;
 	_powered = false;
 }
 
-float Suspension::RodRadius = .29f;
+float Suspension::RodRadius = .17f;
 btRigidBody * Suspension::ChassisBody;
 Vector3F Suspension::ChassisOrigin;
 Suspension::Suspension() {}
@@ -76,8 +76,8 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	
 	btTransform frmArm = Common::CopyFromMatrix44F(armTM);
 	
-	const float fra = 0.01f;
-	btGeneric6DofSpringConstraint* ball = PhysicsState::engine->constrainBySpring(*carrier, *upperArm, frmCarrier, frmArm, true);
+	const float fra = 0.1f;
+	btGeneric6DofConstraint* ball = PhysicsState::engine->constrainBy6Dof(*carrier, *upperArm, frmCarrier, frmArm, true);
 	ball->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
 	ball->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
 	ball->setAngularLowerLimit(btVector3(-fra, -fra, -fra));
@@ -94,11 +94,11 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	armTM.setRotation(rot);
 	frmArm = Common::CopyFromMatrix44F(armTM);
 	
-	btGeneric6DofSpringConstraint*ball1 = PhysicsState::engine->constrainBySpring(*carrier, *lowerArm, frmCarrier, frmArm, true);
+	btGeneric6DofConstraint*ball1 = PhysicsState::engine->constrainBy6Dof(*carrier, *lowerArm, frmCarrier, frmArm, true);
 	ball1->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
 	ball1->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball1->setAngularLowerLimit(btVector3(-fra, 0.0f, -fra));
-	ball1->setAngularUpperLimit(btVector3(fra, 0.0f, fra));
+	ball1->setAngularLowerLimit(btVector3(-fra, -fra, -fra));
+	ball1->setAngularUpperLimit(btVector3(fra, fra, fra));
 	/*ball1->enableSpring(5, true);
 	ball1->setStiffness(5, 50.f);
 	ball1->setDamping(5, 0.5f);
@@ -106,6 +106,8 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	
 	if(isLeft) m_steerJoint[0] = ball1;
 	else m_steerJoint[1] = ball1;
+	
+	btRigidBody* steeringArm = createSteeringArm(carrier, tm, isLeft);
 	
 	return carrier;
 }
@@ -133,7 +135,7 @@ btRigidBody* Suspension::createCarrier(const Matrix44F & tm, bool isLeft)
 	carrierShape->addChildShape(childT, hubShape);
 	
 	btTransform trans = Common::CopyFromMatrix44F(tm);
-	btRigidBody* carrierBody = PhysicsState::engine->createRigidBody(carrierShape, trans, 1.f);
+	btRigidBody* carrierBody = PhysicsState::engine->createRigidBody(carrierShape, trans, 4.f);
 	carrierBody->setDamping(0.f, 0.f);
 	
 	if(isLeft) m_wheelHub[0] = carrierBody;
@@ -193,9 +195,9 @@ void Suspension::connectArm(btRigidBody* arm, const Matrix44F & tm, bool isUpper
 	hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
 	
 	if(isUpper) return;
-
+	
 	hinge->enableSpring(5, true);
-	hinge->setStiffness(5, 2.f);
+	hinge->setStiffness(5, 90.f);
 	hinge->setDamping(5, 0.1f);
 	hinge->setEquilibriumPoint(5, 0.f);
 }
@@ -278,6 +280,74 @@ void Suspension::wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, 
 	}
 }
 
+btRigidBody* Suspension::createSteeringArm(btRigidBody* carrier, const Matrix44F & tm, bool isLeft)
+{
+	Matrix44F btm;
+	
+	btm.rotateZ(m_profile._lowerWishboneTilt);
+	if(!isLeft) btm.rotateY(PI);
+	
+	btm.translate(Vector3F(0.f, 0.f, (m_profile._upperJointY - m_profile._lowerJointY) * .5f));
+	
+	btm.translate(tm.getTranslation());
+	
+	float l, ang;
+	wishboneLA(false, isLeft, true, l, ang);
+	
+	Matrix44F atm;
+	atm.rotateZ(PI * .5f);
+
+	atm.setTranslation(Vector3F(-l * .5f * cos(ang), 0.f, -l * .5f * sin(ang)));
+	
+	atm *= btm;
+	
+	btCollisionShape* armShape = PhysicsState::engine->createCylinderShape(RodRadius, l * .5f * cos(ang), RodRadius);
+	
+	btTransform trans = Common::CopyFromMatrix44F(atm);
+	btRigidBody* armBody = PhysicsState::engine->createRigidBody(armShape, trans, 1.f);
+	armBody->setDamping(0.f, 0.f);
+	
+	Matrix44F tmB; 
+	
+	if(isLeft) tmB.rotateZ(-m_profile._lowerWishboneTilt - PI* .5f);
+	else tmB.rotateZ(- PI* .5f - m_profile._lowerWishboneTilt);
+	
+	tmB.translate(0.f, l * .5f * cos(ang), 0.f);
+	btTransform frmB = Common::CopyFromMatrix44F(tmB);
+	
+	Matrix44F tmA;
+	if(!isLeft) tmA.rotateY(PI);
+	
+	Vector3F pobj(0.f, l * .5f * cos(ang), 0.f);
+	pobj = atm.transform(pobj);
+	pobj -= ChassisOrigin;
+	tmA.translate(pobj);
+	btTransform frmA = Common::CopyFromMatrix44F(tmA);
+	
+	btGeneric6DofSpringConstraint* hinge = PhysicsState::engine->constrainBySpring(*ChassisBody, *armBody, frmA, frmB, true);
+	
+	hinge->setAngularLowerLimit(btVector3(-.2f, -.2f, -.2f));
+	hinge->setAngularUpperLimit(btVector3(.2f, .2f, .2f));
+	hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
+	hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
+	
+	tmA.setIdentity();
+	tmA.translate(0.f, 0.f, -l * sin(ang));
+	frmA = Common::CopyFromMatrix44F(tmA);
+	
+	tmB.translate(0.f, l * -1.f * cos(ang), 0.f);
+	frmB = Common::CopyFromMatrix44F(tmB);
+	
+	hinge = PhysicsState::engine->constrainBySpring(*carrier, *armBody, frmA, frmB, true);
+	
+	hinge->setAngularLowerLimit(btVector3(-.2f, -.2f, -.2f));
+	hinge->setAngularUpperLimit(btVector3(.2f, .2f, .2f));
+	hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
+	hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
+	
+	return armBody;
+}
+
 const float Suspension::wheelHubX() const { return m_profile._wheelHubX; }
 
 void Suspension::connectWheel(btRigidBody* hub, btRigidBody* wheel, bool isLeft)
@@ -318,10 +388,10 @@ float Suspension::limitDrive(const int & i, const float & targetSpeed, const flo
 	float wheelSpeed = wheelVelocity(i).length();
 	float diff = targetSpeed - wheelSpeed;
 	
-	float low = (80.f - wheelSpeed) / 80.f;
-	if(low < 0.f) low = 0.f;
+	//float low = (80.f - wheelSpeed) / 80.f;
+	//if(low < 0.f) low = 0.f;
 	
-	const float lmt = r * SPEEDLIMIT;
+	const float lmt = r * SPEEDLIMIT;// * (1.f - .5f * low);
 	if(diff > lmt) diff = lmt;
 	else if(diff < -lmt) diff = -lmt;
 	
@@ -349,7 +419,7 @@ void Suspension::applyMotor(float rps, const int & i)
 	m_driveJoint[i]->getRotationalLimitMotor(0)->m_enableMotor = true;
 	if(i==0) m_driveJoint[i]->getRotationalLimitMotor(0)->m_targetVelocity = -rps;
 	else m_driveJoint[i]->getRotationalLimitMotor(0)->m_targetVelocity = rps;
-	m_driveJoint[i]->getRotationalLimitMotor(0)->m_maxMotorForce = 100.f;
+	m_driveJoint[i]->getRotationalLimitMotor(0)->m_maxMotorForce = 10.f;
 	m_driveJoint[i]->getRotationalLimitMotor(0)->m_damping = 0.5f;
 }
 
@@ -401,12 +471,10 @@ const Vector3F Suspension::wheelVelocity(const int & i) const
 	Vector3F hubx(tm.M(0,0), tm.M(0,1),tm.M(0,2));
 	btTransform wtm = m_wheel[i]->getWorldTransform();
 	Vector3F welx(wtm.getBasis()[0][0], wtm.getBasis()[1][0],wtm.getBasis()[2][0]);
-	std::cout<<"x dev "<<hubx.dot(welx)<<"\n";
 	
 	Vector3F front = Vector3F::ZAxis * 100.f;
 	if(i > 0) front *= -1.f;
 	front = tm.transformAsNormal(front);
-	std::cout<<" dot "<<i<<" "<<vel.normal().dot(front.normal());
 	vel *= vel.normal().dot(front.normal());
 	return vel;
 }

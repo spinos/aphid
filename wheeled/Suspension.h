@@ -45,7 +45,8 @@ public:
 
 private:
 	btRigidBody* createCarrier(const Matrix44F & tm, bool isLeft);
-	btRigidBody* Suspension::createWishbone(const Matrix44F & tm, bool isUpper, bool isLeft);
+	btRigidBody* createWishbone(const Matrix44F & tm, bool isUpper, bool isLeft);
+	btRigidBody* createSteeringArm(btRigidBody* carrier, const Matrix44F & tm, bool isLeft);
 	btCompoundShape* createWishboneShape(bool isUpper, bool isLeft);
 	const Matrix44F wishboneHingTMLocal(bool isUpper, bool isLeft, bool isFront) const;
 	void wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, float & a) const;
