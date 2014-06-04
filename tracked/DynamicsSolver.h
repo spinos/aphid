@@ -50,6 +50,7 @@ public:
 	void addGroundPlane(const float & groundSize, const float & groundLevel);
 	
 	ShapeDrawer* getDrawer();
+	const float deltaTime() const;
 protected:
     btCollisionObject * getCollisionObject(const int & i) const;
 	
@@ -85,4 +86,5 @@ private:
 	bool m_enablePhysics;
 	bool m_isWorldInitialized;
 	bool m_enableDrawConstraint;
+	float m_dt;
 };

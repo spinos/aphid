@@ -36,7 +36,7 @@ public:
 	
 	btRigidBody* create(const Vector3F & pos, bool isLeft = true);
 	void connectWheel(btRigidBody* hub, btRigidBody* wheel, bool isLeft);
-	void powerDrive(const Vector3F & targetVelocity, const float & wheelR);
+	void powerDrive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, const float & wheelR);
 	void steer(const Vector3F & around, const float & wheelSpan);
 	void steerWheel(const float & ang, int i);
 	
@@ -57,7 +57,7 @@ private:
 	const Matrix44F wheelHubTM(const int & i) const;
 	const Vector3F wheelVel(const int & i) const;
 	const Vector3F wheelVelocity(const int & i) const;
-	float limitDrive(const int & i, const float & targetSpeed, const float & r);
+	float limitDrive(const int & i, const float & targetSpeed, const float & r, const float & differential = 0.f);
 	Profile m_profile;
 	btGeneric6DofConstraint* m_steerJoint[2];
 	btGeneric6DofConstraint* m_driveJoint[2];

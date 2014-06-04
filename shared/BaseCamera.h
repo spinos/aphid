@@ -48,6 +48,8 @@ public:
 	void setFarClipPlane(float x);
 	virtual void setFieldOfView(float x);
 	
+	void traverse(const Vector3F & v);
+	
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;
 	unsigned fPortWidth, fPortHeight;

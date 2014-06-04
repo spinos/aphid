@@ -78,10 +78,10 @@ void WheeledVehicle::update()
 	//std::cout<<"v "<<vel.x<<" "<<vel.y<<" "<<vel.z<<"\n";
 	//std::cout<<"vel "<<vvel.x<<" "<<vvel.y<<" "<<vvel.z<<"\n";
 	//std::cout<<"v * vel "<<vel.normal().dot(vvel.normal())<<"\n";
-	
 	for(int i = 0; i < numAxis(); i++) {
-		suspension(i).steer(turnAround(i, ang), wheelSpan(i));
-		suspension(i).powerDrive(vel, wheel(i).radius());
+		const Vector3F around = turnAround(i, ang);
+		suspension(i).steer(around, wheelSpan(i));
+		suspension(i).powerDrive(ang, wheelSpan(i), vel, wheel(i).radius());
 	}
 }
 
@@ -113,6 +113,13 @@ void WheeledVehicle::displayStatistics()
 	std::cout<<"target velocity: "<<m_targetSpeed<<"\n";
 	std::cout<<"turn angle: "<<m_steerAngle<<"\n";
 	std::cout<<"vehicle linear velocity: "<<vehicleVelocity().length()<<"\n";
+}
+
+const Vector3F WheeledVehicle::vehicleTraverse() const
+{
+	Vector3F r = vehicleVelocity();
+	const float t = PhysicsState::engine->deltaTime();
+	return r * t;
 }
 
 }

@@ -21,6 +21,7 @@ DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(2)
 	m_enableDrawConstraint = true;
     _drawer = new ShapeDrawer();
     m_simulateFrequency = 120.f;
+	m_dt = 0.f;
 }
 
 DynamicsSolver::~DynamicsSolver()
@@ -276,6 +277,7 @@ void DynamicsSolver::simulate()
 	btScalar dt = (btScalar)_clock.getTimeMicroseconds() / 1000000.f; // std::cout<<"dt "<<dt;
 	_clock.reset();
 	simulate(dt, m_numSubSteps, m_simulateFrequency);
+	m_dt = dt;
 }
 
 void DynamicsSolver::simulate(const float & dt, const int & numSubsteps, const float & frequency)
@@ -390,4 +392,6 @@ btGeneric6DofSpringConstraint* DynamicsSolver::constrainBySpring(btRigidBody& rb
 ShapeDrawer* DynamicsSolver::getDrawer() { return _drawer; }
 
 void DynamicsSolver::setEnableDrawConstraint(bool x) { m_enableDrawConstraint = x; }
+
+const float DynamicsSolver::deltaTime() const { return m_dt; }
 

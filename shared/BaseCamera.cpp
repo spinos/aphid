@@ -116,6 +116,15 @@ void BaseCamera::track(int x, int y)
 	updateInverseSpace();
 }
 
+void BaseCamera::traverse(const Vector3F & v)
+{
+	Vector3F eye = fSpace.getTranslation();
+	eye += v;
+	fCenterOfInterest += v;
+	fSpace.setTranslation(eye);
+	updateInverseSpace();
+}
+
 void BaseCamera::zoom(int y)
 {
 	fHorizontalAperture *= (float)(fPortWidth + fPortHeight + y * 3)/(float)(fPortWidth + fPortHeight);
