@@ -28,6 +28,7 @@ HEADERS       = glwidget.h \
                 ../tracked/shapeDrawer.h \
                 Obstacle.h \
 Tire.h \
+Damper.h \
 				Suspension.h\
 				Wheel.h \
 WheeledChassis.h \
@@ -42,6 +43,7 @@ SOURCES       = glwidget.cpp \
                 ../tracked/shapeDrawer.cpp \
                 Obstacle.cpp \
 Tire.cpp \
+Damper.cpp \
 				Suspension.cpp \
 				Wheel.cpp \
 WheeledChassis.cpp \

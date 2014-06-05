@@ -80,6 +80,7 @@ void WheeledVehicle::update()
 	//std::cout<<"v * vel "<<vel.normal().dot(vvel.normal())<<"\n";
 	for(int i = 0; i < numAxis(); i++) {
 		const Vector3F around = turnAround(i, ang);
+		suspension(i).update();
 		suspension(i).steer(around, wheelSpan(i));
 		suspension(i).powerDrive(ang, wheelSpan(i), vel, wheel(i).radius(), m_targetSpeed > 0.f);
 	}

@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <Common.h>
+#include "Damper.h"
 namespace caterpillar {
 class Suspension {
 public:
@@ -40,6 +40,7 @@ public:
 	void powerDrive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, const float & wheelR, bool goForward = true);
 	void steer(const Vector3F & around, const float & wheelSpan);
 	void steerWheel(const float & ang, int i);
+	void update();
 	
 	static float RodRadius;
 	static btRigidBody * ChassisBody;
@@ -49,7 +50,7 @@ private:
 	btRigidBody* createCarrier(const Matrix44F & tm, bool isLeft);
 	btRigidBody* createWishbone(btRigidBody* carrier, const Matrix44F & tm, bool isUpper, bool isLeft);
 	btRigidBody* createSteeringArm(btRigidBody* carrier, const Matrix44F & tm, bool isLeft);
-	btRigidBody* createDamper(btRigidBody * lowerArm, const Matrix44F & tm);
+	btRigidBody* createDamper(btRigidBody * lowerArm, const Matrix44F & tm, bool isLeft);
 	btRigidBody* createSwayBar(const Matrix44F & tm, btRigidBody * arm, bool isLeft);
 	void connectSwayBar(const Matrix44F & tm, btRigidBody * bar);
 	btCompoundShape* createWishboneShape(bool isUpper, bool isLeft);
@@ -68,5 +69,6 @@ private:
 	btRigidBody * m_wheelHub[2];
 	btRigidBody * m_wheel[2];
 	btRigidBody * m_swayBarLeft;
+	Damper * m_damper[2];
 };
 }

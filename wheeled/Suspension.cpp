@@ -28,7 +28,7 @@ Suspension::Profile::Profile()
 	_lowerWishboneLength = 5.7f;
 	_upperWishboneTilt = .01f;
 	_lowerWishboneTilt = -0.19f;
-	_damperY = 4.f;
+	_damperY = 4.3f;
 	_steerable = true;
 	_powered = false;
 }
@@ -66,7 +66,7 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	btRigidBody* carrier = createCarrier(tm, isLeft);
 	createWishbone(carrier, tm, true, isLeft);
 	btRigidBody* lowerArm = createWishbone(carrier, tm, false, isLeft);
-	createDamper(lowerArm, tm);
+	createDamper(lowerArm, tm, isLeft);
 	
 	createSteeringArm(carrier, tm, isLeft);
 	
@@ -331,7 +331,7 @@ btRigidBody* Suspension::createSteeringArm(btRigidBody* carrier, const Matrix44F
 	return armBody;
 }
 
-btRigidBody* Suspension::createDamper(btRigidBody * lowerArm, const Matrix44F & tm)
+btRigidBody* Suspension::createDamper(btRigidBody * lowerArm, const Matrix44F & tm, bool isLeft)
 {
 	Matrix44F lowerJntTm;
 	
@@ -387,23 +387,10 @@ btRigidBody* Suspension::createDamper(btRigidBody * lowerArm, const Matrix44F & 
 	hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
 	hinge->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
 	
-	damperTm.setIdentity();
-	damperTm.translate(0.f, l * .25f, 0.f);
-	frmA = Common::CopyFromMatrix44F(damperTm);
+	Damper * shockAbsorber = new Damper(damperLowBody, damperHighBody, l * .25f);
 	
-	damperTm.translate(0.f, l * -.5f, 0.f);
-	frmB = Common::CopyFromMatrix44F(damperTm);
-	
-	btGeneric6DofSpringConstraint* slid = PhysicsState::engine->constrainBySpring(*damperLowBody, *damperHighBody, frmA, frmB, true);
-	slid->setAngularLowerLimit(btVector3(0.f, 0.f, 0.f));
-	slid->setAngularUpperLimit(btVector3(0.f, 0.f, 0.f));
-	slid->setLinearLowerLimit(btVector3(0.0, -1.5f, 0.0));
-	slid->setLinearUpperLimit(btVector3(0.0, 1.5f, 0.0));
-	
-	slid->enableSpring(1, true);
-	slid->setStiffness(1, 600.f);
-	slid->setDamping(1, 0.05f);
-	slid->setEquilibriumPoint(1, 1.f);
+	if(isLeft) m_damper[0] = shockAbsorber;
+	else m_damper[1] = shockAbsorber;
 	
 	return damperHighBody;
 }
@@ -643,6 +630,12 @@ const Vector3F Suspension::wheelVelocity(const int & i) const
 	front = tm.transformAsNormal(front);
 	vel *= vel.normal().dot(front.normal());
 	return vel;
+}
+
+void Suspension::update()
+{
+	m_damper[0]->update();
+	m_damper[1]->update();
 }
 
 }
