@@ -12,7 +12,7 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-#define SPEEDLIMIT 3.14f
+#define SPEEDLIMIT 2.14f
 Suspension::Profile::Profile() 
 {
 	_upperWishboneAngle[0] = -.354f;
@@ -493,7 +493,7 @@ void Suspension::connectSwayBar(const Matrix44F & tm, btRigidBody * bar)
 	ball->setAngularUpperLimit(btVector3(0.f, PI, 0.f));
 	
 	ball->enableSpring(4, true);
-	ball->setStiffness(4, 800.f);
+	ball->setStiffness(4, 600.f);
 	ball->setDamping(4, 0.05f);
 	ball->setEquilibriumPoint(4, 0.f);
 }
@@ -522,7 +522,7 @@ void Suspension::connectWheel(btRigidBody* hub, btRigidBody* wheel, bool isLeft)
 const bool Suspension::isPowered() const { return m_profile._powered; }
 const bool Suspension::isSteerable() const { return m_profile._steerable; }
 
-void Suspension::powerDrive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, const float & wheelR)
+void Suspension::powerDrive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, const float & wheelR, bool goForward)
 {
 	const float speed = targetVelocity.length();
 	if(speed == 0.f) return applyBrake(true);
@@ -532,17 +532,17 @@ void Suspension::powerDrive(const float & ang, const float & wheelSpan, const Ve
 	
 	if(ang < -0.001f || ang > 0.001f) {
 		const float ds = wheelSpan * .5f / (speed / tan(ang));
-		std::cout<<"lft/rgt "<<ds<<" / "<<-ds<<"\n";
-		limitDrive(0, speed, wheelR, ds);
-		limitDrive(1, speed, wheelR, -ds);
+		// std::cout<<"lft/rgt "<<ds<<" / "<<-ds<<"\n";
+		limitDrive(0, speed, wheelR, ds, goForward);
+		limitDrive(1, speed, wheelR, -ds, goForward);
 	}
 	else {
-		limitDrive(0, speed, wheelR);
-		limitDrive(1, speed, wheelR);
+		limitDrive(0, speed, wheelR, 0.f, goForward);
+		limitDrive(1, speed, wheelR, 0.f, goForward);
 	}
 }
 
-float Suspension::limitDrive(const int & i, const float & targetSpeed, const float & r, const float & differential)
+float Suspension::limitDrive(const int & i, const float & targetSpeed, const float & r, const float & differential, bool goForward)
 {
 	float wheelSpeed = wheelVelocity(i).length();
 	float diff = targetSpeed - wheelSpeed;
@@ -557,7 +557,8 @@ float Suspension::limitDrive(const int & i, const float & targetSpeed, const flo
 	wheelSpeed += diff;
 	wheelSpeed *= 1.f + differential;
 	std::cout<<"limit ["<<i<<"] "<<wheelSpeed;
-	const float rps = wheelSpeed / r;
+	float rps = wheelSpeed / r;
+	if(!goForward) rps = -rps;
 	applyMotor(rps, i);
 	return rps;
 }
@@ -580,7 +581,7 @@ void Suspension::applyMotor(float rps, const int & i)
 	m_driveJoint[i]->getRotationalLimitMotor(0)->m_enableMotor = true;
 	if(i==0) m_driveJoint[i]->getRotationalLimitMotor(0)->m_targetVelocity = -rps;
 	else m_driveJoint[i]->getRotationalLimitMotor(0)->m_targetVelocity = rps;
-	m_driveJoint[i]->getRotationalLimitMotor(0)->m_maxMotorForce = 10.f;
+	m_driveJoint[i]->getRotationalLimitMotor(0)->m_maxMotorForce = 33.f;
 	m_driveJoint[i]->getRotationalLimitMotor(0)->m_damping = 0.5f;
 }
 

@@ -34,7 +34,7 @@ void WheeledVehicle::create()
 	trans.setOrigin(btVector3(origin().x, origin().y, origin().z));
 	
 	const int id = PhysicsState::engine->numCollisionObjects();
-	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, 150.f);
+	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, 190.f);
 	chassisBody->setDamping(0.f, 0.f);
 	
 	group("chassis").push_back(id);
@@ -81,7 +81,7 @@ void WheeledVehicle::update()
 	for(int i = 0; i < numAxis(); i++) {
 		const Vector3F around = turnAround(i, ang);
 		suspension(i).steer(around, wheelSpan(i));
-		suspension(i).powerDrive(ang, wheelSpan(i), vel, wheel(i).radius());
+		suspension(i).powerDrive(ang, wheelSpan(i), vel, wheel(i).radius(), m_targetSpeed > 0.f);
 	}
 }
 
