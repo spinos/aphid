@@ -12,7 +12,7 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-#define SPEEDLIMIT 3.14f
+#define SPEEDLIMIT 2.44f
 Suspension::Profile::Profile() 
 {
 	_upperWishboneAngle[0] = -.354f;
@@ -407,7 +407,7 @@ btRigidBody* Suspension::createDamper(btRigidBody * lowerArm, const Matrix44F & 
 	slid->setLinearUpperLimit(btVector3(0.0, 1.5f, 0.0));
 	
 	slid->enableSpring(1, true);
-	slid->setStiffness(1, 400.f);
+	slid->setStiffness(1, 600.f);
 	slid->setDamping(1, 0.1f);
 	slid->setEquilibriumPoint(1, 1.f);
 	
