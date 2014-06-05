@@ -22,7 +22,7 @@ btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMi
 	const float hw = .5f * width;
 	const float sy = (radiusMajor - radiusMinor) * PI / NUMGRIDRAD;
 	btCompoundShape* wheelShape = new btCompoundShape();
-	m_padShape = PhysicsState::engine->createBoxShape(hw * .22f, sy * .8f, radiusMinor * .5);
+	m_padShape = PhysicsState::engine->createBoxShape(hw * .23f, sy * .8f, radiusMinor * .5);
 	Matrix44F tm[4];
 	tm[0].rotateZ(.5f);
 	tm[0].rotateY(-bent2);
@@ -32,11 +32,11 @@ btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMi
 	tm[1].rotateY(-bent);
 	tm[1].translate(-.25f * hw, 0.f, radiusMajor - radiusMinor * .5f);
 	
-	tm[2].rotateZ(.5f);
+	tm[2].rotateZ(.6f);
 	tm[2].rotateY(bent);
 	tm[2].translate(.25f * hw, 0.f, radiusMajor - radiusMinor * .5f);
 	
-	tm[3].rotateZ(-.5f);
+	tm[3].rotateZ(-.7f);
 	tm[3].rotateY(bent2);
 	tm[3].translate(.75f * hw, 0.f, radiusMajor - radiusMinor * .5f - .75f * hw * sin(bent));
 	

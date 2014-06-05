@@ -12,7 +12,7 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-#define SPEEDLIMIT 2.44f
+#define SPEEDLIMIT 3.14f
 Suspension::Profile::Profile() 
 {
 	_upperWishboneAngle[0] = -.354f;
@@ -64,42 +64,16 @@ btRigidBody* Suspension::create(const Vector3F & pos, bool isLeft)
 	tm.translate(pos);
 
 	btRigidBody* carrier = createCarrier(tm, isLeft);
-	btRigidBody* upperArm = createWishbone(tm, true, isLeft);
-	btRigidBody* lowerArm = createWishbone(tm, false, isLeft);
-	btRigidBody* damper = createDamper(lowerArm, tm);
-	
-	btTransform frmCarrier; frmCarrier.setIdentity();
-	frmCarrier.getOrigin()[1] = m_profile._upperJointY;
-	
-	Matrix33F rot; 
-	rot.rotateZ(-m_profile._upperWishboneTilt);
-	
-	Matrix44F armTM; 
-	armTM.setRotation(rot); 
-	
-	btTransform frmArm = Common::CopyFromMatrix44F(armTM);
-	
-	const float fra = 0.4f;
-	btGeneric6DofConstraint* ball = PhysicsState::engine->constrainBy6Dof(*carrier, *upperArm, frmCarrier, frmArm, true);
-	ball->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball->setAngularLowerLimit(btVector3(-fra, -1.f, -fra));
-	ball->setAngularUpperLimit(btVector3(fra, 1.f, fra));
-	
-	frmCarrier.getOrigin()[1] = m_profile._lowerJointY;
-	
-	rot.setIdentity();
-	rot.rotateZ(-m_profile._lowerWishboneTilt);
-	armTM.setRotation(rot);
-	frmArm = Common::CopyFromMatrix44F(armTM);
-	
-	btGeneric6DofConstraint*ball1 = PhysicsState::engine->constrainBy6Dof(*carrier, *lowerArm, frmCarrier, frmArm, true);
-	ball1->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball1->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball1->setAngularLowerLimit(btVector3(-fra, -1.f, -fra));
-	ball1->setAngularUpperLimit(btVector3(fra, 1.f, fra));
+	createWishbone(carrier, tm, true, isLeft);
+	btRigidBody* lowerArm = createWishbone(carrier, tm, false, isLeft);
+	createDamper(lowerArm, tm);
 	
 	createSteeringArm(carrier, tm, isLeft);
+	
+	btRigidBody * bar = createSwayBar(tm, lowerArm, isLeft);
+	
+	if(isLeft) m_swayBarLeft = bar;
+	else connectSwayBar(tm, bar);
 	
 	return carrier;
 }
@@ -136,7 +110,7 @@ btRigidBody* Suspension::createCarrier(const Matrix44F & tm, bool isLeft)
 	return carrierBody;
 }
 
-btRigidBody* Suspension::createWishbone(const Matrix44F & tm, bool isUpper, bool isLeft)
+btRigidBody* Suspension::createWishbone(btRigidBody* carrier, const Matrix44F & tm, bool isUpper, bool isLeft)
 {
 	Matrix44F btm;
 	
@@ -157,6 +131,26 @@ btRigidBody* Suspension::createWishbone(const Matrix44F & tm, bool isUpper, bool
 	
 	connectArm(wishboneBody, btm, isUpper, isLeft, true);
 	connectArm(wishboneBody, btm, isUpper, isLeft, false);
+	
+	btTransform frmCarrier; frmCarrier.setIdentity();
+	if(isUpper) frmCarrier.getOrigin()[1] = m_profile._upperJointY;
+	else frmCarrier.getOrigin()[1] = m_profile._lowerJointY;
+	
+	Matrix33F rot; 
+	if(isUpper) rot.rotateZ(-m_profile._upperWishboneTilt);
+	else rot.rotateZ(-m_profile._lowerWishboneTilt);
+	
+	Matrix44F armTM; 
+	armTM.setRotation(rot); 
+	
+	btTransform frmArm = Common::CopyFromMatrix44F(armTM);
+	
+	const float fra = 0.2f;
+	btGeneric6DofConstraint* ball = PhysicsState::engine->constrainBy6Dof(*carrier, *wishboneBody, frmCarrier, frmArm, true);
+	ball->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
+	ball->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
+	ball->setAngularLowerLimit(btVector3(-fra, -1.5f, -fra));
+	ball->setAngularUpperLimit(btVector3(fra, 1.5f, fra));
 	
 	return wishboneBody;
 }
@@ -309,7 +303,7 @@ btRigidBody* Suspension::createSteeringArm(btRigidBody* carrier, const Matrix44F
 	tmA.translate(pobj);
 	btTransform frmA = Common::CopyFromMatrix44F(tmA);
 	
-	btGeneric6DofSpringConstraint* hinge = PhysicsState::engine->constrainBySpring(*ChassisBody, *armBody, frmA, frmB, true);
+	btGeneric6DofConstraint* hinge = PhysicsState::engine->constrainBy6Dof(*ChassisBody, *armBody, frmA, frmB, true);
 	
 	hinge->setAngularLowerLimit(btVector3(0.f, 0.f, -.2f));
 	hinge->setAngularUpperLimit(btVector3(0.f, 0.f, .2f));
@@ -324,7 +318,7 @@ btRigidBody* Suspension::createSteeringArm(btRigidBody* carrier, const Matrix44F
 	tmB.translate(0.f, l * -1.f * cos(ang), 0.f);
 	frmB = Common::CopyFromMatrix44F(tmB);
 	
-	hinge = PhysicsState::engine->constrainBySpring(*carrier, *armBody, frmA, frmB, true);
+	hinge = PhysicsState::engine->constrainBy6Dof(*carrier, *armBody, frmA, frmB, true);
 	
 	hinge->setAngularLowerLimit(btVector3(-.2f, -.2f, -.2f));
 	hinge->setAngularUpperLimit(btVector3(.2f, .2f, .2f));
@@ -373,7 +367,7 @@ btRigidBody* Suspension::createDamper(btRigidBody * lowerArm, const Matrix44F & 
 	Matrix44F armTm; armTm.translate(RodRadius * -5.f, 0.f, 0.f);
 	armTm.rotateZ(-m_profile._lowerWishboneTilt);
 	btTransform frmB = Common::CopyFromMatrix44F(armTm);
-	btGeneric6DofSpringConstraint* hinge = PhysicsState::engine->constrainBySpring(*damperLowBody, *lowerArm, frmA, frmB, true);
+	btGeneric6DofConstraint* hinge = PhysicsState::engine->constrainBy6Dof(*damperLowBody, *lowerArm, frmA, frmB, true);
 	hinge->setAngularLowerLimit(btVector3(0.f, 0.f, -.5f));
 	hinge->setAngularUpperLimit(btVector3(0.f, 0.f, .5f));
 	hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
@@ -387,7 +381,7 @@ btRigidBody* Suspension::createDamper(btRigidBody * lowerArm, const Matrix44F & 
 	chassisTm *= tm;
 	chassisTm.setTranslation(chassisTm.getTranslation() - ChassisOrigin);
 	frmB = Common::CopyFromMatrix44F(chassisTm);
-	hinge = PhysicsState::engine->constrainBySpring(*damperHighBody, *ChassisBody, frmA, frmB, true);
+	hinge = PhysicsState::engine->constrainBy6Dof(*damperHighBody, *ChassisBody, frmA, frmB, true);
 	hinge->setAngularLowerLimit(btVector3(0.f, 0.f, -.5f));
 	hinge->setAngularUpperLimit(btVector3(0.f, 0.f, .5f));
 	hinge->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
@@ -408,10 +402,100 @@ btRigidBody* Suspension::createDamper(btRigidBody * lowerArm, const Matrix44F & 
 	
 	slid->enableSpring(1, true);
 	slid->setStiffness(1, 600.f);
-	slid->setDamping(1, 0.1f);
+	slid->setDamping(1, 0.05f);
 	slid->setEquilibriumPoint(1, 1.f);
 	
 	return damperHighBody;
+}
+
+btRigidBody* Suspension::createSwayBar(const Matrix44F & tm, btRigidBody * arm, bool isLeft)
+{
+	const float l = tm.getTranslation().x - ChassisOrigin.x;
+	
+	float bl = l;
+	if(bl < 0.f) bl = -bl;
+	
+	btCollisionShape* barShape = PhysicsState::engine->createCylinderShape(RodRadius, bl* .5f - 5.f * RodRadius, RodRadius);
+	
+	Matrix44F barTm; 
+	barTm.rotateZ(PI * .5f);
+	barTm *= tm;
+	
+	float xoff = -l * .5f - 5.f * RodRadius;
+	if(!isLeft) xoff = -l * .5f + 5.f * RodRadius;
+	
+	const float zoff = m_profile._lowerWishboneLength * sin(m_profile._lowerWishboneAngle[1]);
+	
+	barTm.translate(xoff, m_profile._lowerJointY, -zoff);
+	
+	const Vector3F jnt = barTm.getTranslation();
+
+	btTransform trans = Common::CopyFromMatrix44F(barTm);
+	btRigidBody* barBody = PhysicsState::engine->createRigidBody(barShape, trans, 1.f);
+	barBody->setDamping(0.f, 0.f);
+	
+	barTm.setIdentity();
+	barTm.translate(0.f, bl* .5f - 5.f * RodRadius -bl, 0.f);
+	if(isLeft) barTm.translate(0.f, 0.f, zoff);
+	else barTm.translate(0.f, 0.f, -zoff);
+	
+	btTransform frmBar = Common::CopyFromMatrix44F(barTm);
+	btTransform frmArm = Common::CopyFromMatrix44F(Matrix44F());
+	
+	btGeneric6DofConstraint* ball = PhysicsState::engine->constrainBy6Dof(*barBody, *arm, frmBar, frmArm, true);
+	ball->setLinearLowerLimit(btVector3(0.f, 0.f, 0.f));
+	ball->setLinearUpperLimit(btVector3(0.f, 0.f, 0.f));
+	ball->setAngularLowerLimit(btVector3(-PI, -PI, -PI));
+	ball->setAngularUpperLimit(btVector3(PI, PI, PI));
+	
+	barTm.setIdentity();
+	
+	Matrix44F chassisTm;
+	chassisTm.rotateZ(PI * .5f);
+	if(!isLeft) {
+		Matrix44F flipX; flipX.rotateY(PI);
+		chassisTm *= flipX;
+	}
+	
+	chassisTm.setTranslation(jnt - ChassisOrigin);
+	
+	frmBar = Common::CopyFromMatrix44F(barTm);
+	btTransform frmChassis = Common::CopyFromMatrix44F(chassisTm);
+	
+	ball = PhysicsState::engine->constrainBy6Dof(*barBody, *ChassisBody, frmBar, frmChassis, true);
+	ball->setLinearLowerLimit(btVector3(0.f, 0.f, 0.f));
+	ball->setLinearUpperLimit(btVector3(0.f, 0.f, 0.f));
+	ball->setAngularLowerLimit(btVector3(0.f, -PI, 0.f));
+	ball->setAngularUpperLimit(btVector3(0.f, PI, 0.f));
+	
+	return barBody;
+}
+
+void Suspension::connectSwayBar(const Matrix44F & tm, btRigidBody * bar)
+{
+	const float l = tm.getTranslation().x - ChassisOrigin.x;
+	
+	float bl = l;
+	if(bl < 0.f) bl = -bl;
+	bl *= .5f;
+	bl -= 5.f * RodRadius;
+	
+	btTransform frmA; frmA.setIdentity(); frmA.getOrigin()[1] = bl;
+	
+	Matrix44F bTm; bTm.rotateX(PI);
+	bTm.translate(0.f, bl, 0.f);
+	btTransform frmB = Common::CopyFromMatrix44F(bTm);
+	
+	btGeneric6DofSpringConstraint* ball = PhysicsState::engine->constrainBySpring(*m_swayBarLeft, *bar, frmA, frmB, true);
+	ball->setLinearLowerLimit(btVector3(0.f, -1.f, 0.f));
+	ball->setLinearUpperLimit(btVector3(0.f, 1.f, 0.f));
+	ball->setAngularLowerLimit(btVector3(0.f, -PI, 0.f));
+	ball->setAngularUpperLimit(btVector3(0.f, PI, 0.f));
+	
+	ball->enableSpring(4, true);
+	ball->setStiffness(4, 800.f);
+	ball->setDamping(4, 0.05f);
+	ball->setEquilibriumPoint(4, 0.f);
 }
 
 const float Suspension::wheelHubX() const { return m_profile._wheelHubX; }

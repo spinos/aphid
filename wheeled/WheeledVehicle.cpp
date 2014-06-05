@@ -119,7 +119,7 @@ const Vector3F WheeledVehicle::vehicleTraverse() const
 {
 	Vector3F r = vehicleVelocity();
 	const float t = PhysicsState::engine->deltaTime();
-	return r * t;
+	return r * t * .98f;
 }
 
 }

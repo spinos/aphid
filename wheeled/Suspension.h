@@ -47,9 +47,11 @@ public:
 
 private:
 	btRigidBody* createCarrier(const Matrix44F & tm, bool isLeft);
-	btRigidBody* createWishbone(const Matrix44F & tm, bool isUpper, bool isLeft);
+	btRigidBody* createWishbone(btRigidBody* carrier, const Matrix44F & tm, bool isUpper, bool isLeft);
 	btRigidBody* createSteeringArm(btRigidBody* carrier, const Matrix44F & tm, bool isLeft);
 	btRigidBody* createDamper(btRigidBody * lowerArm, const Matrix44F & tm);
+	btRigidBody* createSwayBar(const Matrix44F & tm, btRigidBody * arm, bool isLeft);
+	void connectSwayBar(const Matrix44F & tm, btRigidBody * bar);
 	btCompoundShape* createWishboneShape(bool isUpper, bool isLeft);
 	const Matrix44F wishboneHingTMLocal(bool isUpper, bool isLeft, bool isFront) const;
 	void wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, float & a) const;
@@ -65,5 +67,6 @@ private:
 	btGeneric6DofConstraint* m_driveJoint[2];
 	btRigidBody * m_wheelHub[2];
 	btRigidBody * m_wheel[2];
+	btRigidBody * m_swayBarLeft;
 };
 }
