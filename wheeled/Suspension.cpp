@@ -21,14 +21,14 @@ Suspension::Profile::Profile()
 	_lowerWishboneAngle[1] = .35f;
 	_wheelHubX = .6f;
 	_wheelHubR = 1.41f;
-	_upperJointY = 2.03f; 
+	_upperJointY = 2.02f; 
 	_lowerJointY = -1.f;
 	_steerArmJointZ = 2.f;
 	_upperWishboneLength = 3.4f;
 	_lowerWishboneLength = 5.7f;
 	_upperWishboneTilt = .01f;
 	_lowerWishboneTilt = -0.19f;
-	_damperY = 4.3f;
+	_damperY = 4.2f;
 	_steerable = true;
 	_powered = false;
 }
@@ -145,12 +145,12 @@ btRigidBody* Suspension::createWishbone(btRigidBody* carrier, const Matrix44F & 
 	
 	btTransform frmArm = Common::CopyFromMatrix44F(armTM);
 	
-	const float fra = 0.2f;
+	const float fra = 1.5f;
 	btGeneric6DofConstraint* ball = PhysicsState::engine->constrainBy6Dof(*carrier, *wishboneBody, frmCarrier, frmArm, true);
 	ball->setLinearLowerLimit(btVector3(0.0f, 0.0f,0.0f));
 	ball->setLinearUpperLimit(btVector3(0.0f, 0.0f,0.0f));
-	ball->setAngularLowerLimit(btVector3(-fra, -1.5f, -fra));
-	ball->setAngularUpperLimit(btVector3(fra, 1.5f, fra));
+	ball->setAngularLowerLimit(btVector3(-fra, -fra, -fra));
+	ball->setAngularUpperLimit(btVector3(fra, fra, fra));
 	
 	return wishboneBody;
 }

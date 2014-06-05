@@ -11,14 +11,15 @@
 #include "PhysicsState.h"
 #include <DynamicsSolver.h>
 namespace caterpillar {
-#define NUMGRIDRAD 80
+#define NUMGRIDRAD 60
 	
 Tire::Tire() {}
 Tire::~Tire() {}
 btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMinor, const float & width)
 {
-	const float bent = .07f;
+	const float bent = .06f;
 	const float bent2 = .15f;
+	const float bent15 = .072f;
 	const float hw = .5f * width;
 	const float sy = (radiusMajor - radiusMinor) * PI / NUMGRIDRAD;
 	btCompoundShape* wheelShape = new btCompoundShape();
@@ -26,7 +27,7 @@ btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMi
 	Matrix44F tm[4];
 	tm[0].rotateZ(.5f);
 	tm[0].rotateY(-bent2);
-	tm[0].translate(-.75f * hw, 0.f, radiusMajor - radiusMinor * .5f - .75f * hw * sin(bent));
+	tm[0].translate(-.75f * hw, 0.f, radiusMajor - radiusMinor * .5f - .75f * hw * sin(bent15));
 	
 	tm[1].rotateZ(-.5f);
 	tm[1].rotateY(-bent);
@@ -38,7 +39,7 @@ btCollisionShape* Tire::create(const float & radiusMajor, const float & radiusMi
 	
 	tm[3].rotateZ(-.7f);
 	tm[3].rotateY(bent2);
-	tm[3].translate(.75f * hw, 0.f, radiusMajor - radiusMinor * .5f - .75f * hw * sin(bent));
+	tm[3].translate(.75f * hw, 0.f, radiusMajor - radiusMinor * .5f - .75f * hw * sin(bent15));
 	
 	
 	const float delta = PI * 2.f / (float)NUMGRIDRAD;
