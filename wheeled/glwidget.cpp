@@ -11,12 +11,13 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_vehicle = new caterpillar::WheeledVehicle;
 	
 	caterpillar::PhysicsState::engine->initPhysics();
-	caterpillar::PhysicsState::engine->addGroundPlane(2000.f, 0.f);
+	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, 0.f);
 	
 	caterpillar::Obstacle obst;
-	obst.create(2000.f);
+	obst.create(1000.f);
 	
-	m_vehicle->setOrigin(Vector3F(0.f, 17.f, 0.f));
+	m_vehicle->setOrigin(Vector3F(0.f, 17.f, -900.f));
+	getCamera()->traverse(Vector3F(0.f, 17.f, -900.f));
 	
 	caterpillar::Wheel::Profile rearWheelInfo;
 	rearWheelInfo._width = 2.89f;
@@ -71,11 +72,11 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::simulate()
 {
+	getCamera()->traverse(m_vehicle->vehicleTraverse());
 	m_vehicle->displayStatistics();
     update();
 	m_vehicle->update();
     caterpillar::PhysicsState::engine->simulate();
-	getCamera()->traverse(m_vehicle->vehicleTraverse());
 }
 
 void GLWidget::keyPressEvent(QKeyEvent *e)
