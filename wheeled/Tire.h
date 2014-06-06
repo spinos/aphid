@@ -15,12 +15,11 @@ public:
 	Tire();
 	virtual ~Tire();
 	
-	btCollisionShape* create(const float & radiusMajor, const float & radiusMinor, const float & width, bool isLeft);
-	void attachPad(btRigidBody* wheelBody, const Matrix44F & origin, const float & radiusMajor, const float & radiusMinor, bool isLeft);
-protected:
+	btRigidBody* create(const float & radiusMajor, const float & radiusMinor, const float & width, const float & mass, const Matrix44F & tm, bool isLeft);
 	
+protected:
+	void attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const Matrix44F & origin, const float & radiusMajor, const float & radiusMinor, bool isLeft);
 private:
-    btCollisionShape* m_padShape;
     float m_hw;
 };
 }

@@ -378,6 +378,11 @@ void Base3DView::keyPressEvent(QKeyEvent *e)
 	QWidget::keyPressEvent(e);
 }
 
+void Base3DView::keyReleaseEvent(QKeyEvent *event)
+{
+	QWidget::keyReleaseEvent(event);
+}
+
 void Base3DView::focusInEvent(QFocusEvent * event)
 {
 	m_isFocused = 1;

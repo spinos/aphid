@@ -42,15 +42,16 @@ void WheeledChassis::setSuspensionInfo(const int & i, const Suspension::Profile 
 
 void WheeledChassis::setWheelInfo(const int & i, const Wheel::Profile & profile)
 {
-	m_wheel[i].setProfile(profile);
+	m_wheel[i][0].setProfile(profile);
+	m_wheel[i][1].setProfile(profile);
 }
 
 const Vector3F WheeledChassis::getChassisDim() const
 {
 	Vector3F res = m_hullDim;
-	float mxWheelSuspensionL = m_wheel[0].width() * .5f + m_suspension[0].width();
+	float mxWheelSuspensionL = wheel(0, 0).width() * .5f + m_suspension[0].width();
 	for(int i = 1; i < numAxis(); i++) {
-		const float l = m_wheel[i].width() * .5f + m_suspension[i].width();
+		const float l = wheel(i, 0).width() * .5f + m_suspension[i].width();
 		if(mxWheelSuspensionL < l) mxWheelSuspensionL = l;
 	}
 	
@@ -61,7 +62,8 @@ const Vector3F WheeledChassis::getChassisDim() const
 const Vector3F WheeledChassis::origin() const { return m_origin; }
 
 Suspension & WheeledChassis::suspension(const int & i) { return m_suspension[i]; }
-Wheel & WheeledChassis::wheel(const int & i) { return m_wheel[i]; }
+Wheel & WheeledChassis::wheel(const int & i, const int & side) { return m_wheel[i][side]; }
+const Wheel & WheeledChassis::wheel(const int & i, const int & side) const { return m_wheel[i][side]; }
 
 const Matrix44F WheeledChassis::wheelTM(const int & i, bool isLeft) const
 {
@@ -77,8 +79,8 @@ const Matrix44F WheeledChassis::wheelTM(const int & i, bool isLeft) const
 const Vector3F WheeledChassis::wheelOrigin(const int & i, bool isLeft) const
 {
 	Vector3F t = m_axisCoord[i] + m_origin;
-	if(isLeft) t.x = m_origin.x + m_hullDim.x * .5f- m_wheel[i].width() * .5f;
-	else t.x = m_origin.x - m_hullDim.x * .5f + m_wheel[i].width() * .5f;
+	if(isLeft) t.x = m_origin.x + m_hullDim.x * .5f- wheel(i, 0).width() * .5f;
+	else t.x = m_origin.x - m_hullDim.x * .5f + wheel(i, 0).width() * .5f;
 	return t;
 }
 
@@ -106,7 +108,8 @@ const Vector3F WheeledChassis::turnAround(const int & i, const float & ang) cons
 
 const float WheeledChassis::wheelSpan(const int & i) const
 {
-	return m_hullDim.x - m_wheel[i].width();
+	return m_hullDim.x - wheel(i, 0).width();
 }
+
 
 }

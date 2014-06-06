@@ -77,6 +77,7 @@ protected:
     virtual void clientMouseInput(QMouseEvent *event);
     virtual Vector3F sceneCenter() const;
     virtual void keyPressEvent(QKeyEvent *event);
+	virtual void keyReleaseEvent(QKeyEvent *event);
 	virtual void focusInEvent(QFocusEvent * event);
 	virtual void focusOutEvent(QFocusEvent * event);
 	virtual void clearSelection();

@@ -21,12 +21,14 @@ public:
 	void addTargetSpeed(const float & x);
 	void addSteerAngle(const float & x);
 	void setSteerAngle(const float & x);
+	void setBrakeStrength(const float & x);
+	void addBrakeStrength(const float & x);
 	void displayStatistics();
 	const Vector3F vehicleVelocity() const;
 	const Matrix44F vehicleTM() const;
 	const Vector3F vehicleTraverse();
 private:
     Vector3F m_prevOrigin;
-	float m_targetSpeed, m_steerAngle;
+	float m_targetSpeed, m_steerAngle, m_brakeStrength;
 };
 }

@@ -29,7 +29,8 @@ public:
 	const Vector3F getChassisDim() const; 
 protected:
 	Suspension & suspension(const int & i);
-	Wheel & wheel(const int & i);
+	Wheel & wheel(const int & i, const int & side);
+	const Wheel & wheel(const int & i, const int & side) const;
 	
 	const Matrix44F wheelTM(const int & i, bool isLeft = true) const;
 	const Vector3F wheelOrigin(const int & i, bool isLeft = true) const;
@@ -41,7 +42,7 @@ private:
 	Vector3F m_origin, m_hullDim;
 	Vector3F m_axisCoord[MAXNUMAXIS];
 	Suspension m_suspension[MAXNUMAXIS];
-	Wheel m_wheel[MAXNUMAXIS];
+	Wheel m_wheel[MAXNUMAXIS][2];
 	float m_driveCenterZ;
 	int m_numAxis;
 };

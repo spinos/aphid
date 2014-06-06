@@ -9,6 +9,7 @@
 
 #pragma once
 #include "Tire.h"
+#include <Common.h>
 namespace caterpillar {
 class Wheel {
 public:
@@ -17,8 +18,9 @@ public:
 			_width = 2.67f;
 			_radiusMajor = 4.57f;
 			_radiusMinor = .312f;
+			_mass = 1.f;
 		}
-		float _width, _radiusMajor, _radiusMinor;
+		float _width, _radiusMajor, _radiusMinor, _mass;
 	};
 	
 	Wheel();
@@ -28,11 +30,13 @@ public:
 	const float width() const;
 	const float radius() const;
 	
-	void createShape();
 	btRigidBody* create(const Matrix44F & tm, bool isLeft);
+	btRigidBody* body();
+	const Vector3F velocity() const;
+	const btTransform tm() const;
 private:
 	Profile m_profile;
 	Tire m_tire;
-	btCollisionShape* m_shape;
+	btRigidBody * m_body;
 };
 }

@@ -12,7 +12,7 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-#define SPEEDLIMIT 2.14f
+#define SPEEDLIMIT 3.14f
 Suspension::Profile::Profile() 
 {
 	_upperWishboneAngle[0] = -.354f;
@@ -487,13 +487,16 @@ void Suspension::connectSwayBar(const Matrix44F & tm, btRigidBody * bar)
 
 const float Suspension::wheelHubX() const { return m_profile._wheelHubX; }
 
-void Suspension::connectWheel(btRigidBody* hub, btRigidBody* wheel, bool isLeft)
+void Suspension::connectWheel(Wheel* wheel, bool isLeft)
 {
 	btTransform frmA; frmA.setIdentity();
 	frmA.getOrigin()[0] = wheelHubX();
 	
 	btTransform frmB; frmB.setIdentity();
-	btGeneric6DofConstraint* drv = PhysicsState::engine->constrainBy6Dof(*hub, *wheel, frmA, frmB, true);
+	
+	btRigidBody * hub = m_wheelHub[1];
+	if(isLeft) hub = m_wheelHub[0];
+	btGeneric6DofConstraint* drv = PhysicsState::engine->constrainBy6Dof(*hub, *wheel->body(), frmA, frmB, true);
 	drv->setLinearLowerLimit(btVector3(0.0, 0.0, 0.0));
 	drv->setLinearUpperLimit(btVector3(0.0, 0.0, 0.0));
 	drv->setAngularLowerLimit(btVector3(-SIMD_PI, 0.0, 0.0));
@@ -512,12 +515,10 @@ const bool Suspension::isSteerable() const { return m_profile._steerable; }
 void Suspension::powerDrive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, const float & wheelR, bool goForward)
 {
 	const float speed = targetVelocity.length();
-	if(speed == 0.f) return applyBrake(true);
-	else applyBrake(false);
+
+	applyBrake(false);
 	
-	if(!isPowered()) return;
-	
-	if(ang < -0.001f || ang > 0.001f) {
+	if(ang < -.001f || ang > .001f) {
 		const float ds = wheelSpan * .5f / (speed / tan(ang));
 		// std::cout<<"lft/rgt "<<ds<<" / "<<-ds<<"\n";
 		limitDrive(0, speed, wheelR, ds, goForward);
@@ -534,10 +535,15 @@ float Suspension::limitDrive(const int & i, const float & targetSpeed, const flo
 	float wheelSpeed = wheelVelocity(i).length();
 	float diff = targetSpeed - wheelSpeed;
 	
-	//float low = (80.f - wheelSpeed) / 80.f;
-	//if(low < 0.f) low = 0.f;
+	if(!isPowered() && diff > 0.f) return 0.f;
 	
-	const float lmt = r * SPEEDLIMIT;// * (1.f - .5f * low);
+	float force = 33.f;
+	if(diff < 0.f) {
+		std::cout<<"decelerating ";
+		// force = 43.f;
+	}
+	
+	const float lmt = r * SPEEDLIMIT;
 	if(diff > lmt) diff = lmt;
 	else if(diff < -lmt) diff = -lmt;
 	
@@ -546,15 +552,15 @@ float Suspension::limitDrive(const int & i, const float & targetSpeed, const flo
 	std::cout<<"limit ["<<i<<"] "<<wheelSpeed;
 	float rps = wheelSpeed / r;
 	if(!goForward) rps = -rps;
-	applyMotor(rps, i);
+	applyMotor(rps, i, force);
 	return rps;
 }
 
 void Suspension::applyBrake(bool enable)
 {
 	if(enable) {
-		applyMotor(0.f, 0);
-		applyMotor(0.f, 1);
+		applyMotor(0.f, 0, 100.f);
+		applyMotor(0.f, 1, 100.f);
 		return;
 	}
 	if(!isPowered()) {
@@ -563,12 +569,12 @@ void Suspension::applyBrake(bool enable)
 	}
 }
 
-void Suspension::applyMotor(float rps, const int & i)
+void Suspension::applyMotor(float rps, const int & i, float force)
 {
 	m_driveJoint[i]->getRotationalLimitMotor(0)->m_enableMotor = true;
 	if(i==0) m_driveJoint[i]->getRotationalLimitMotor(0)->m_targetVelocity = -rps;
 	else m_driveJoint[i]->getRotationalLimitMotor(0)->m_targetVelocity = rps;
-	m_driveJoint[i]->getRotationalLimitMotor(0)->m_maxMotorForce = 33.f;
+	m_driveJoint[i]->getRotationalLimitMotor(0)->m_maxMotorForce = force;
 	m_driveJoint[i]->getRotationalLimitMotor(0)->m_damping = 0.5f;
 }
 
@@ -610,21 +616,13 @@ const Matrix44F Suspension::wheelHubTM(const int & i) const
 	return Common::CopyFromBtTransform(tm);
 }
 
-const Vector3F Suspension::wheelVel(const int & i) const
-{
-	const btVector3 vel = m_wheel[i]->getLinearVelocity(); 
-	return Vector3F(vel[0], vel[1], vel[2]);
-}
-
 const Vector3F Suspension::wheelVelocity(const int & i) const
 {
-	Vector3F vel = wheelVel(i);
+	Vector3F vel = m_wheel[i]->velocity();
 	Matrix44F tm = wheelHubTM(i); 
 	
 	Vector3F hubx(tm.M(0,0), tm.M(0,1),tm.M(0,2));
-	btTransform wtm = m_wheel[i]->getWorldTransform();
-	Vector3F welx(wtm.getBasis()[0][0], wtm.getBasis()[1][0],wtm.getBasis()[2][0]);
-	
+
 	Vector3F front = Vector3F::ZAxis * 100.f;
 	if(i > 0) front *= -1.f;
 	front = tm.transformAsNormal(front);
@@ -636,6 +634,12 @@ void Suspension::update()
 {
 	m_damper[0]->update();
 	m_damper[1]->update();
+}
+
+void Suspension::steerAndDrive(const Vector3F & turnAround, const float & turnAngle, const float & wheelSpan, const Vector3F & targetVelocity, const float & wheelR, bool goForward)
+{
+	steer(turnAround, wheelSpan);
+	powerDrive(turnAngle, wheelSpan, targetVelocity, wheelR, goForward);
 }
 
 }

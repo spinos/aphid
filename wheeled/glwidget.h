@@ -13,14 +13,14 @@ public:
     
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
-    
+	
+protected:    
     virtual void clientDraw();
     virtual void clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit);
     virtual void clientDeselect();
     virtual void clientMouseInput(Vector3F & stir);
 	virtual void keyPressEvent(QKeyEvent *event);
-//! [2]
-protected:
+	virtual void keyReleaseEvent(QKeyEvent *event);
     
 //! [3]
 private:

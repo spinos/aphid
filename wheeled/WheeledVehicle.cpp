@@ -17,6 +17,7 @@ WheeledVehicle::WheeledVehicle()
 	addGroup("chassis");
 	m_targetSpeed = 0.f;
 	m_steerAngle = 0.f;
+	m_brakeStrength = 0.f;
 }
 
 WheeledVehicle::~WheeledVehicle() {}
@@ -44,14 +45,14 @@ void WheeledVehicle::create()
 	Suspension::ChassisOrigin = origin();
 	
 	for(int i = 0; i < numAxis(); i++) {
-		btRigidBody* hubL = suspension(i).create(wheelOrigin(i));
-		btRigidBody* hubR = suspension(i).create(wheelOrigin(i, false), false);
+		suspension(i).create(wheelOrigin(i));
+		suspension(i).create(wheelOrigin(i, false), false);
 		
-		btRigidBody* wheL = wheel(i).create(wheelTM(i), true);
-		btRigidBody* wheR = wheel(i).create(wheelTM(i, false), false);
+		wheel(i, 0).create(wheelTM(i), true);
+		wheel(i, 1).create(wheelTM(i, false), false);
 		
-		suspension(i).connectWheel(hubL, wheL, true);
-		suspension(i).connectWheel(hubR, wheR, false);
+		suspension(i).connectWheel(&wheel(i, 0), true);
+		suspension(i).connectWheel(&wheel(i, 1), false);
 	}
 	
 	computeDriveCenterZ();
@@ -74,15 +75,15 @@ void WheeledVehicle::update()
 	vel.normalize();
 	vel *= m_targetSpeed;
 	
-	//const Vector3F vvel = vehicleVelocity();
-	//std::cout<<"v "<<vel.x<<" "<<vel.y<<" "<<vel.z<<"\n";
-	//std::cout<<"vel "<<vvel.x<<" "<<vvel.y<<" "<<vvel.z<<"\n";
-	//std::cout<<"v * vel "<<vel.normal().dot(vvel.normal())<<"\n";
+	if(m_brakeStrength > 0.f) {
+		vel.normalize(); 
+		vel *= vehicleVelocity().length() * (1.f - m_brakeStrength);
+	}
+	
 	for(int i = 0; i < numAxis(); i++) {
-		const Vector3F around = turnAround(i, ang);
 		suspension(i).update();
-		suspension(i).steer(around, wheelSpan(i));
-		suspension(i).powerDrive(ang, wheelSpan(i), vel, wheel(i).radius(), m_targetSpeed > 0.f);
+		const Vector3F around = turnAround(i, ang);
+		suspension(i).steerAndDrive(around, ang, wheelSpan(i), vel, wheel(i, 0).radius(), m_targetSpeed > 0.f);
 	}
 }
 
@@ -111,9 +112,10 @@ void WheeledVehicle::displayStatistics()
 {
 	if(!PhysicsState::engine->isPhysicsEnabled()) return;
 	
-	std::cout<<"target velocity: "<<m_targetSpeed<<"\n";
+	std::cout<<"\ntarget speed: "<<m_targetSpeed<<"\n";
+	std::cout<<"actual speed: "<<vehicleVelocity().length()<<"\n";
+	std::cout<<"brake strength: "<<m_brakeStrength<<"\n";
 	std::cout<<"turn angle: "<<m_steerAngle<<"\n";
-	std::cout<<"vehicle linear velocity: "<<vehicleVelocity().length()<<"\n";
 }
 
 const Vector3F WheeledVehicle::vehicleTraverse()
@@ -124,5 +126,8 @@ const Vector3F WheeledVehicle::vehicleTraverse()
 	m_prevOrigin = cur;
 	return r;
 }
+
+void WheeledVehicle::setBrakeStrength(const float & x) { m_brakeStrength = x; }
+void WheeledVehicle::addBrakeStrength(const float & x) { m_brakeStrength += x; if(m_brakeStrength > 1.f) m_brakeStrength = 1.f; }
 
 }

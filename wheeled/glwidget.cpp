@@ -32,7 +32,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	std::cout<<"object groups "<<m_vehicle->str();
 	
 	caterpillar::PhysicsState::engine->setEnablePhysics(false);
-	caterpillar::PhysicsState::engine->setNumSubSteps(12);
+	caterpillar::PhysicsState::engine->setNumSubSteps(15);
 	caterpillar::PhysicsState::engine->setEnableDrawConstraint(false);
 	caterpillar::PhysicsState::engine->setSimulateFrequency(180.f);
 	QTimer *timer = new QTimer(this);
@@ -91,7 +91,7 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->addTargetSpeed(2.99f);
 			break;
 		case Qt::Key_S:
-			m_vehicle->addTargetSpeed(-1.31f);
+			m_vehicle->addTargetSpeed(-2.99f);
 			break;
 		case Qt::Key_A:
 			m_vehicle->addSteerAngle(-0.01f);
@@ -100,6 +100,10 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->addSteerAngle(0.01f);
 			break;
 		case Qt::Key_B:
+			m_vehicle->addBrakeStrength(.1f);
+			break;
+		case Qt::Key_F:
+			m_vehicle->setBrakeStrength(1.f);
 			m_vehicle->setTargetSpeed(0.f);
 			break;
 		case Qt::Key_Space:
@@ -112,3 +116,20 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 	
 	Base3DView::keyPressEvent(e);
 }
+
+void GLWidget::keyReleaseEvent(QKeyEvent *event)
+{
+	switch (event->key()) {
+		case Qt::Key_B:
+			m_vehicle->setBrakeStrength(0.f);
+			break;
+		case Qt::Key_F:
+			m_vehicle->setBrakeStrength(0.f);
+			break;
+		default:
+			break;
+	}
+	
+	Base3DView::keyReleaseEvent(event);
+}
+

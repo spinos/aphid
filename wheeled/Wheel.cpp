@@ -20,22 +20,23 @@ const float Wheel::width() const { return m_profile._width; }
 
 const float Wheel::radius() const { return m_profile._radiusMajor; }
 
-void Wheel::createShape()
-{
-	
-}
-
 btRigidBody* Wheel::create(const Matrix44F & tm, bool isLeft)
 {
-    m_shape = m_tire.create(m_profile._radiusMajor, m_profile._radiusMinor, m_profile._width, isLeft);
-    
-	btTransform trans = Common::CopyFromMatrix44F(tm);
-	btRigidBody* wheelBody = PhysicsState::engine->createRigidBody(m_shape, trans, 3.f);
-	wheelBody->setDamping(0.f, 0.f);
-	wheelBody->setFriction(19.99f);
-	wheelBody->setActivationState(DISABLE_DEACTIVATION);
-	m_tire.attachPad(wheelBody, tm, m_profile._radiusMajor, m_profile._radiusMinor, isLeft);
-	return wheelBody;
+    m_body = m_tire.create(m_profile._radiusMajor, m_profile._radiusMinor, m_profile._width, m_profile._mass, tm, isLeft);
+	return m_body;
+}
+
+btRigidBody* Wheel::body() { return m_body; }
+
+const Vector3F Wheel::velocity() const 
+{
+	const btVector3 vel = m_body->getLinearVelocity(); 
+	return Vector3F(vel[0], vel[1], vel[2]);
+}
+
+const btTransform Wheel::tm() const 
+{
+	return m_body->getWorldTransform(); 
 }
 
 }
