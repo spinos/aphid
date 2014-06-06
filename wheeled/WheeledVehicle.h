@@ -24,8 +24,9 @@ public:
 	void displayStatistics();
 	const Vector3F vehicleVelocity() const;
 	const Matrix44F vehicleTM() const;
-	const Vector3F vehicleTraverse() const;
+	const Vector3F vehicleTraverse();
 private:
+    Vector3F m_prevOrigin;
 	float m_targetSpeed, m_steerAngle;
 };
 }

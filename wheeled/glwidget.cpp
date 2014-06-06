@@ -11,13 +11,13 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_vehicle = new caterpillar::WheeledVehicle;
 	
 	caterpillar::PhysicsState::engine->initPhysics();
-	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, 0.f);
+	caterpillar::PhysicsState::engine->addGroundPlane(2000.f, 0.f);
 	
 	caterpillar::Obstacle obst;
-	obst.create(1000.f);
+	obst.create(2000.f);
 	
-	m_vehicle->setOrigin(Vector3F(7.f, 17.f, -900.f));
-	getCamera()->traverse(Vector3F(7.f, 17.f, -900.f));
+	m_vehicle->setOrigin(Vector3F(7.f, 17.f, -1900.f));
+	getCamera()->traverse(Vector3F(7.f, 17.f, -1900.f));
 	
 	caterpillar::Wheel::Profile rearWheelInfo;
 	rearWheelInfo._width = 2.89f;
@@ -33,6 +33,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	caterpillar::PhysicsState::engine->setEnablePhysics(false);
 	caterpillar::PhysicsState::engine->setNumSubSteps(12);
+	caterpillar::PhysicsState::engine->setEnableDrawConstraint(false);
 	caterpillar::PhysicsState::engine->setSimulateFrequency(180.f);
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));

@@ -29,7 +29,7 @@ public:
 	const float radius() const;
 	
 	void createShape();
-	btRigidBody* create(const Matrix44F & tm);
+	btRigidBody* create(const Matrix44F & tm, bool isLeft);
 private:
 	Profile m_profile;
 	Tire m_tire;

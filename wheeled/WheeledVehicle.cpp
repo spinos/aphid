@@ -24,6 +24,7 @@ WheeledVehicle::~WheeledVehicle() {}
 void WheeledVehicle::create() 
 {
 	resetGroups();
+	m_prevOrigin = origin();
 	
 	const Vector3F dims = getChassisDim() * .5f; 
 	dims.verbose("hulldim");
@@ -46,9 +47,8 @@ void WheeledVehicle::create()
 		btRigidBody* hubL = suspension(i).create(wheelOrigin(i));
 		btRigidBody* hubR = suspension(i).create(wheelOrigin(i, false), false);
 		
-		wheel(i).createShape();
-		btRigidBody* wheL = wheel(i).create(wheelTM(i));
-		btRigidBody* wheR = wheel(i).create(wheelTM(i, false));
+		btRigidBody* wheL = wheel(i).create(wheelTM(i), true);
+		btRigidBody* wheR = wheel(i).create(wheelTM(i, false), false);
 		
 		suspension(i).connectWheel(hubL, wheL, true);
 		suspension(i).connectWheel(hubR, wheR, false);
@@ -116,11 +116,13 @@ void WheeledVehicle::displayStatistics()
 	std::cout<<"vehicle linear velocity: "<<vehicleVelocity().length()<<"\n";
 }
 
-const Vector3F WheeledVehicle::vehicleTraverse() const
+const Vector3F WheeledVehicle::vehicleTraverse()
 {
-	Vector3F r = vehicleVelocity();
-	const float t = PhysicsState::engine->deltaTime();
-	return r * t * .98f;
+    if(!PhysicsState::engine->isPhysicsEnabled()) return Vector3F::Zero;
+	const Vector3F cur = vehicleTM().getTranslation();
+	const Vector3F r = cur - m_prevOrigin;
+	m_prevOrigin = cur;
+	return r;
 }
 
 }
