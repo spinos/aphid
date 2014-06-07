@@ -41,8 +41,9 @@ public:
 	
 	void update();
 	
-	void steer(const Vector3F & around, const float & wheelSpan);
-	void drive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, bool goForward);
+	void computeDifferential(const Vector3F & turnAround, const float & z, const float & wheelSpan);
+	void steer(const Vector3F & turnAround, const float & z, const float & wheelSpan);
+	void drive(const Vector3F & targetVelocity, bool goForward);
 	void brake(const float & strength, bool goForward);
 	
 	static float RodRadius;
@@ -63,10 +64,10 @@ private:
 	void steerWheel(const float & ang, int i);
 	void releaseBrake();
 	void applyMotor(float rps, const int & i, float force);
-	void brake(const float & i, const float & strength, bool goForward);
+	void brake(const int & i, const float & strength, bool goForward);
 	const Matrix44F wheelHubTM(const int & i) const;
 	const Vector3F wheelVelocity(const int & i) const;
-	float limitDrive(const int & i, const float & targetSpeed, const float & differential = 0.f, bool goForward = true);
+	float limitDrive(const int & i, const float & targetSpeed, bool goForward = true);
 	Profile m_profile;
 	btGeneric6DofConstraint* m_steerJoint[2];
 	btGeneric6DofConstraint* m_driveJoint[2];
@@ -74,5 +75,6 @@ private:
 	Wheel * m_wheel[2];
 	btRigidBody * m_swayBarLeft;
 	Damper * m_damper[2];
+	float m_differential[2];
 };
 }

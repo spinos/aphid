@@ -62,6 +62,7 @@ const Vector3F WheeledChassis::getChassisDim() const
 const Vector3F WheeledChassis::origin() const { return m_origin; }
 
 Suspension & WheeledChassis::suspension(const int & i) { return m_suspension[i]; }
+const Suspension & WheeledChassis::suspension(const int & i) const {return m_suspension[i];}
 Wheel & WheeledChassis::wheel(const int & i, const int & side) { return m_wheel[i][side]; }
 const Wheel & WheeledChassis::wheel(const int & i, const int & side) const { return m_wheel[i][side]; }
 
@@ -84,7 +85,7 @@ const Vector3F WheeledChassis::wheelOrigin(const int & i, bool isLeft) const
 	return t;
 }
 
-void WheeledChassis::computeDriveCenterZ()
+void WheeledChassis::computeDriveZ()
 {
 	m_driveCenterZ = 0.f;
 	int numDrv = 0;
@@ -94,16 +95,40 @@ void WheeledChassis::computeDriveCenterZ()
 		    numDrv++;
 		}
 	}
-	if(numDrv > 0) m_driveCenterZ /= (float)numDrv;
-	else m_driveCenterZ = 0.f;
+	if(numDrv > 0) {
+		m_driveCenterZ /= (float)numDrv;
+		return;
+	}
+	
+	m_driveCenterZ = 0.f;
+	for(int i = 0; i < numAxis(); i++) {
+		m_driveCenterZ += m_axisCoord[i].z;
+	}
+	
+	m_driveCenterZ /= (float)numAxis();
 }
 
-const Vector3F WheeledChassis::turnAround(const int & i, const float & ang) const
+void WheeledChassis::computeSteerBase()
 {
-	const float z = m_axisCoord[i].z - m_driveCenterZ;
-	if(ang < 10e-4 && ang > -10e-4) return Vector3F(0.f, 0.f, z);
-	const float x = z / tan(ang);
-	return Vector3F(x, 0.f, z);
+	float steerZ = 0.f;
+	if(suspension(0).isSteerable())
+		steerZ = m_axisCoord[0].z;
+		
+	if(suspension(numAxis() - 1).isSteerable()) {
+		float a = m_axisCoord[numAxis() - 1].z;
+		if(a < 0) a = -a;
+		if(a > steerZ)
+			steerZ = m_axisCoord[numAxis() - 1].z;
+	}
+		
+	m_steerBase = steerZ - m_driveCenterZ;
+}
+
+const Vector3F WheeledChassis::turnAround(const float & ang) const
+{
+	if(ang < .001f && ang > -.001f) return Vector3F(0.f, 0.f, m_driveCenterZ);
+	
+	return Vector3F(m_steerBase / tan(ang), 0.f, m_driveCenterZ);
 }
 
 const float WheeledChassis::wheelSpan(const int & i) const
@@ -111,5 +136,5 @@ const float WheeledChassis::wheelSpan(const int & i) const
 	return m_hullDim.x - wheel(i, 0).width();
 }
 
-
+const float WheeledChassis::axisZ(const int & i) const { return m_axisCoord[i].z;}
 }

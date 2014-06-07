@@ -512,27 +512,7 @@ void Suspension::connectWheel(Wheel* wheel, bool isLeft)
 const bool Suspension::isPowered() const { return m_profile._powered; }
 const bool Suspension::isSteerable() const { return m_profile._steerable; }
 
-void Suspension::drive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, bool goForward)
-{
-	const float speed = targetVelocity.length();
-
-	releaseBrake();
-	
-	if(!isPowered()) return;
-	
-	if(ang < -.001f || ang > .001f) {
-		const float ds = wheelSpan * .5f / (speed / tan(ang));
-		// std::cout<<"lft/rgt "<<ds<<" / "<<-ds<<"\n";
-		limitDrive(0, speed, ds, goForward);
-		limitDrive(1, speed, -ds, goForward);
-	}
-	else {
-		limitDrive(0, speed, 0.f, goForward);
-		limitDrive(1, speed, 0.f, goForward);
-	}
-}
-
-float Suspension::limitDrive(const int & i, const float & targetSpeed, const float & differential, bool goForward)
+float Suspension::limitDrive(const int & i, const float & targetSpeed, bool goForward)
 {
 	float wheelSpeed = wheelVelocity(i).length();
 	float diff = targetSpeed - wheelSpeed;
@@ -548,9 +528,8 @@ float Suspension::limitDrive(const int & i, const float & targetSpeed, const flo
 	if(diff > lmt) diff = lmt;
 	else if(diff < -lmt) diff = -lmt;
 	
-	wheelSpeed += diff;
-	wheelSpeed *= 1.f + differential;
-	std::cout<<"limit ["<<i<<"] "<<wheelSpeed;
+	wheelSpeed += diff * m_differential[i];
+	std::cout<<"drive ["<<i<<"] "<<wheelSpeed;
 	float rps = wheelSpeed / r;
 	if(!goForward) rps = -rps;
 	applyMotor(rps, i, force);
@@ -574,34 +553,15 @@ void Suspension::applyMotor(float rps, const int & i, float force)
 	m_driveJoint[i]->getRotationalLimitMotor(0)->m_damping = 0.5f;
 }
 
-void Suspension::steer(const Vector3F & around, const float & wheelSpan)
-{
-	if(!isSteerable()) return;
-	
-	const float hspan = wheelSpan * .5f - wheelHubX();
-	if(around.x < hspan && around.x > -hspan) {
-	    steerWheel(0.f, 0);
-	    steerWheel(0.f, 1);
-	    return;
-	}
-	
-	float lx = hspan + around.x;
-	
-	float rx = -hspan + around.x;
-	
-	steerWheel(atan(around.z / lx), 0);
-	steerWheel(atan(around.z / rx), 1);
-}
-
 void Suspension::steerWheel(const float & ang, int i)
 {
 	btTransform & frmA = m_steerJoint[i]->getFrameOffsetA();
 	if(i == 0) {
-		frmA.getOrigin()[0] = sin(ang) * m_profile._steerArmJointZ;
+		frmA.getOrigin()[0] = -sin(ang) * m_profile._steerArmJointZ;
 		frmA.getOrigin()[2] = cos(ang) * m_profile._steerArmJointZ;
 	}
 	else {
-		frmA.getOrigin()[0] = -sin(ang) * m_profile._steerArmJointZ;
+		frmA.getOrigin()[0] = sin(ang) * m_profile._steerArmJointZ;
 		frmA.getOrigin()[2] = -cos(ang) * m_profile._steerArmJointZ;
 	}
 }
@@ -638,12 +598,11 @@ void Suspension::brake(const float & strength, bool goForward)
 	brake(1, strength, goForward);
 }
 
-void Suspension::brake(const float & i, const float & strength, bool goForward)
+void Suspension::brake(const int & i, const float & strength, bool goForward)
 {
 	float wheelSpeed = wheelVelocity(i).length();
-	float diff = wheelSpeed * strength;
-	if(diff > m_wheel[0]->radius() * SPEEDLIMIT)
-		diff = m_wheel[0]->radius() * SPEEDLIMIT;
+	
+	float diff = m_wheel[0]->radius() * SPEEDLIMIT * 2.f * strength * m_differential[i];
 	
 	float force = 33.f;
 	
@@ -653,6 +612,64 @@ void Suspension::brake(const float & i, const float & strength, bool goForward)
 	float rps = wheelSpeed / m_wheel[0]->radius();
 	if(!goForward) rps = -rps;
 	applyMotor(rps, i, force);
+}
+
+void Suspension::drive(const Vector3F & targetVelocity, bool goForward)
+{
+	const float speed = targetVelocity.length();
+
+	releaseBrake();
+	
+	if(!isPowered()) return;
+	
+	limitDrive(0, speed, goForward);
+	limitDrive(1, speed, goForward);
+
+}
+
+void Suspension::computeDifferential(const Vector3F & turnAround, const float & z, const float & wheelSpan)
+{
+	m_differential[0] = 1.f;
+	m_differential[1] = 1.f;
+	const float r = turnAround.x;
+	
+	const float h = wheelSpan * .5f;
+	if(r > h || r < -h) {
+		const float turnArm = z - turnAround.z;
+	
+		float lL = sqrt((r - h) * (r - h) + turnArm * turnArm);
+		float rL = sqrt((r + h) * (r + h) + turnArm * turnArm);
+		float cL = sqrt(r * r + turnArm * turnArm);
+	
+		m_differential[0] = lL / cL;
+		m_differential[1] = rL / cL;
+	}
+	//std::cout<<"differential lft/rgt "<<m_differential[0]<<" / "<<m_differential[1]<<"\n";
+}
+
+void Suspension::steer(const Vector3F & turnAround, const float & z, const float & wheelSpan)
+{
+	if(!isSteerable()) return;
+	const float r = turnAround.x;
+	const float h = wheelSpan * .5f - wheelHubX();
+	if(r > h || r < -h) {
+		const float turnArm = z - turnAround.z;
+	
+		float lL = (r - h);
+		float rL = (r + h);
+		
+		float lA = atan(turnArm / lL);
+		float rA = atan(turnArm / rL);
+		
+		//std::cout<<"angle lft/rgt "<<lA<<" / "<<rA<<"\n";
+		
+		steerWheel(lA, 0);
+		steerWheel(rA, 1);
+	}
+	else {
+		steerWheel(0.f, 0);
+		steerWheel(0.f, 1);
+	}
 }
 
 }

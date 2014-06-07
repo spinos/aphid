@@ -55,7 +55,8 @@ void WheeledVehicle::create()
 		suspension(i).connectWheel(&wheel(i, 1), false);
 	}
 	
-	computeDriveCenterZ();
+	computeDriveZ();
+	computeSteerBase();
 }
 
 void WheeledVehicle::setTargetSpeed(const float & x) { m_targetSpeed = x; }
@@ -73,19 +74,24 @@ void WheeledVehicle::update()
 	Vector3F vel = Vector3F::ZAxis * 8.f;
 	vel = t.transformAsNormal(vel);
 	vel.normalize();
-	vel *= m_targetSpeed;
+	vel *= m_targetSpeed * cos(ang);
 	
 	const bool goForward = m_targetSpeed > 0.f;
+	const Vector3F around = turnAround(ang);
+	
+	const float actvs = vehicleVelocity().length();
+	float ts = m_targetSpeed; if(ts < 0.f) ts = -ts;
 	
 	for(int i = 0; i < numAxis(); i++) {
 		suspension(i).update();
 		
-		const Vector3F around = turnAround(i, ang);
-		suspension(i).steer(around, wheelSpan(i));
-		if(m_targetSpeed == 0.f) suspension(i).brake(1.f, goForward);
+		suspension(i).steer(around, axisZ(i), wheelSpan(i));
+		suspension(i).computeDifferential(around, axisZ(i), wheelSpan(i));
+		
+		if(ts < actvs) suspension(i).brake(1.f - ts / actvs, goForward);
 		else {
 			if(m_brakeStrength > 0.f) suspension(i).brake(m_brakeStrength, goForward); 
-			else suspension(i).drive(ang, wheelSpan(i), vel, goForward);
+			else suspension(i).drive(vel, goForward);
 		}
 	}
 }
