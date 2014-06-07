@@ -13,6 +13,7 @@ class SelectionArray;
 class QTimer;
 class BaseBrush;
 class BaseTransform;
+class GLHUD;
 
 class Base3DView : public QGLWidget
 {
@@ -84,6 +85,8 @@ protected:
 	void showBrush() const;
 	const Vector3F strokeVector(const float & depth) const;
 	
+	void hudText(const std::string & t, const int & row) const;
+	
 private:
 	void computeIncidentRay(int x, int y);
 	
@@ -102,6 +105,7 @@ private:
 	ToolContext * m_interactContext;
 	int m_dx, m_dy;
 	char m_isFocused;
+	GLHUD * m_hud;
 };
 #endif        //  #ifndef BASE3DVIEW_H
 

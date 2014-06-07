@@ -10,7 +10,7 @@
 #include <PerspectiveCamera.h>
 #include <KdTreeDrawer.h>
 #include <IntersectionContext.h>
-
+#include <GLHUD.h>
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
 #endif
@@ -36,6 +36,8 @@ Base3DView::Base3DView(QWidget *parent)
 	setFocusPolicy(Qt::ClickFocus);
 	m_isFocused = 0;
 	m_interactContext = 0;
+	m_hud = new GLHUD;
+	m_hud->setCamera(fCamera);
 }
 //! [0]
 
@@ -111,6 +113,7 @@ void Base3DView::initializeGL()
     glEnable(GL_MULTISAMPLE);
 	glDepthFunc(GL_LEQUAL);
 	getDrawer()->initializeProfile();
+	m_hud->reset();
 }
 //! [6]
 
@@ -341,11 +344,13 @@ void Base3DView::keyPressEvent(QKeyEvent *e)
 			fCamera = m_perspCamera;
 			fCamera->copyTransformFrom(m_orthoCamera);
 			updatePerspProjection();
+			m_hud->setCamera(fCamera);
 		}
 		else {
 			fCamera = m_orthoCamera;
 			fCamera->copyTransformFrom(m_perspCamera);
 			updateOrthoProjection();
+			m_hud->setCamera(fCamera);
 		}
 	}
 	
@@ -484,5 +489,10 @@ const Vector3F Base3DView::strokeVector(const float & depth) const
 	Vector3F res;
 	getCamera()->screenToWorldVectorAt(m_dx, m_dy, depth, res);
 	return res;
+}
+
+void Base3DView::hudText(const std::string & t, const int & row) const
+{
+	m_hud->drawString(t, row);
 }
 //:~

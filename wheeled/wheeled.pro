@@ -22,6 +22,7 @@ HEADERS       = glwidget.h \
                 window.h \
                 ../tracked/DynamicsSolver.h \
                 ../shared/Base3DView.h \
+				../shared/GLHUD.h \
                 ../caterpillar/GroupId.h \
                 ../caterpillar/PhysicsState.h \
 				../caterpillar/Common.h \
@@ -38,6 +39,7 @@ SOURCES       = glwidget.cpp \
                 window.cpp \
                 ../tracked/DynamicsSolver.cpp \
                 ../shared/Base3DView.cpp \
+				../shared/GLHUD.cpp \
                 ../caterpillar/GroupId.cpp \
                 ../caterpillar/PhysicsState.cpp \
                 ../tracked/shapeDrawer.cpp \

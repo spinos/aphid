@@ -74,7 +74,7 @@ void WheeledVehicle::update()
 	Vector3F vel = Vector3F::ZAxis * 8.f;
 	vel = t.transformAsNormal(vel);
 	vel.normalize();
-	vel *= m_targetSpeed * cos(ang);
+	vel *= m_targetSpeed;
 	
 	const bool goForward = m_targetSpeed > 0.f;
 	const Vector3F around = turnAround(ang);
@@ -116,6 +116,12 @@ const Vector3F WheeledVehicle::vehicleVelocity() const
 	const btVector3 chasisVel = chassisBody->getLinearVelocity(); 
 	return Vector3F(chasisVel[0], chasisVel[1], chasisVel[2]);
 }
+
+const float WheeledVehicle::targetSpeed() const { return m_targetSpeed; }
+
+const float WheeledVehicle::brakeStrength() const { return m_brakeStrength; }
+
+const float WheeledVehicle::turnAngle() const { return m_steerAngle; }
 
 void WheeledVehicle::displayStatistics()
 {

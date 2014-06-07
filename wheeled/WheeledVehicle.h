@@ -28,6 +28,9 @@ public:
 	const Matrix44F vehicleTM() const;
 	const Vector3F vehicleTraverse();
 	const bool goingForward() const;
+	const float targetSpeed() const;
+	const float turnAngle() const;
+	const float brakeStrength() const;
 private:
     Vector3F m_prevOrigin;
 	float m_targetSpeed, m_steerAngle, m_brakeStrength;

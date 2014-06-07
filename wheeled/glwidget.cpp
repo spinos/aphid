@@ -52,6 +52,20 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	caterpillar::PhysicsState::engine->renderWorld();
+
+	std::stringstream sst;
+	sst.str("");
+	sst<<"target speed: "<<m_vehicle->targetSpeed();
+	hudText(sst.str(), 0);
+	sst.str("");
+	sst<<"actual speed: "<<m_vehicle->vehicleVelocity().length();
+	hudText(sst.str(), 1);
+	sst.str("");
+	sst<<"bake strength: "<<m_vehicle->brakeStrength();
+	hudText(sst.str(), 2);
+	sst.str("");
+	sst<<"turn angle: "<<m_vehicle->turnAngle();
+	hudText(sst.str(), 3);
 }
 //! [7]
 
@@ -74,7 +88,6 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 void GLWidget::simulate()
 {
 	getCamera()->traverse(m_vehicle->vehicleTraverse());
-	m_vehicle->displayStatistics();
     update();
 	m_vehicle->update();
     caterpillar::PhysicsState::engine->simulate();
@@ -100,7 +113,7 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->addSteerAngle(-0.017f);
 			break;
 		case Qt::Key_B:
-			m_vehicle->addBrakeStrength(.04f);
+			m_vehicle->addBrakeStrength(.13f);
 			break;
 		case Qt::Key_F:
 			m_vehicle->setTargetSpeed(0.f);
