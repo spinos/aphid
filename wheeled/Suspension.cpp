@@ -512,30 +512,30 @@ void Suspension::connectWheel(Wheel* wheel, bool isLeft)
 const bool Suspension::isPowered() const { return m_profile._powered; }
 const bool Suspension::isSteerable() const { return m_profile._steerable; }
 
-void Suspension::powerDrive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, const float & wheelR, bool goForward)
+void Suspension::drive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, bool goForward)
 {
 	const float speed = targetVelocity.length();
 
-	applyBrake(false);
+	releaseBrake();
+	
+	if(!isPowered()) return;
 	
 	if(ang < -.001f || ang > .001f) {
 		const float ds = wheelSpan * .5f / (speed / tan(ang));
 		// std::cout<<"lft/rgt "<<ds<<" / "<<-ds<<"\n";
-		limitDrive(0, speed, wheelR, ds, goForward);
-		limitDrive(1, speed, wheelR, -ds, goForward);
+		limitDrive(0, speed, ds, goForward);
+		limitDrive(1, speed, -ds, goForward);
 	}
 	else {
-		limitDrive(0, speed, wheelR, 0.f, goForward);
-		limitDrive(1, speed, wheelR, 0.f, goForward);
+		limitDrive(0, speed, 0.f, goForward);
+		limitDrive(1, speed, 0.f, goForward);
 	}
 }
 
-float Suspension::limitDrive(const int & i, const float & targetSpeed, const float & r, const float & differential, bool goForward)
+float Suspension::limitDrive(const int & i, const float & targetSpeed, const float & differential, bool goForward)
 {
 	float wheelSpeed = wheelVelocity(i).length();
 	float diff = targetSpeed - wheelSpeed;
-	
-	if(!isPowered() && diff > 0.f) return 0.f;
 	
 	float force = 33.f;
 	if(diff < 0.f) {
@@ -543,6 +543,7 @@ float Suspension::limitDrive(const int & i, const float & targetSpeed, const flo
 		// force = 43.f;
 	}
 	
+	const float r = m_wheel[0]->radius();
 	const float lmt = r * SPEEDLIMIT;
 	if(diff > lmt) diff = lmt;
 	else if(diff < -lmt) diff = -lmt;
@@ -556,13 +557,8 @@ float Suspension::limitDrive(const int & i, const float & targetSpeed, const flo
 	return rps;
 }
 
-void Suspension::applyBrake(bool enable)
+void Suspension::releaseBrake()
 {
-	if(enable) {
-		applyMotor(0.f, 0, 100.f);
-		applyMotor(0.f, 1, 100.f);
-		return;
-	}
 	if(!isPowered()) {
 		m_driveJoint[0]->getRotationalLimitMotor(0)->m_enableMotor = false;
 		m_driveJoint[1]->getRotationalLimitMotor(0)->m_enableMotor = false;
@@ -636,10 +632,27 @@ void Suspension::update()
 	m_damper[1]->update();
 }
 
-void Suspension::steerAndDrive(const Vector3F & turnAround, const float & turnAngle, const float & wheelSpan, const Vector3F & targetVelocity, const float & wheelR, bool goForward)
+void Suspension::brake(const float & strength, bool goForward)
 {
-	steer(turnAround, wheelSpan);
-	powerDrive(turnAngle, wheelSpan, targetVelocity, wheelR, goForward);
+	brake(0, strength, goForward);
+	brake(1, strength, goForward);
+}
+
+void Suspension::brake(const float & i, const float & strength, bool goForward)
+{
+	float wheelSpeed = wheelVelocity(i).length();
+	float diff = wheelSpeed * strength;
+	if(diff > m_wheel[0]->radius() * SPEEDLIMIT)
+		diff = m_wheel[0]->radius() * SPEEDLIMIT;
+	
+	float force = 33.f;
+	
+	wheelSpeed -= diff;
+	if(wheelSpeed < 0.f) wheelSpeed = 0.f;
+	std::cout<<"brake ["<<i<<"] "<<wheelSpeed;
+	float rps = wheelSpeed / m_wheel[0]->radius();
+	if(!goForward) rps = -rps;
+	applyMotor(rps, i, force);
 }
 
 }

@@ -40,7 +40,10 @@ public:
 	void connectWheel(Wheel * wheel, bool isLeft);
 	
 	void update();
-	void steerAndDrive(const Vector3F & turnAround, const float & turnAngle, const float & wheelSpan, const Vector3F & targetVelocity, const float & wheelR, bool goForward = true);
+	
+	void steer(const Vector3F & around, const float & wheelSpan);
+	void drive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, bool goForward);
+	void brake(const float & strength, bool goForward);
 	
 	static float RodRadius;
 	static btRigidBody * ChassisBody;
@@ -57,14 +60,13 @@ private:
 	const Matrix44F wishboneHingTMLocal(bool isUpper, bool isLeft, bool isFront) const;
 	void wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, float & a) const;
 	void connectArm(btRigidBody* arm, const Matrix44F & tm, bool isUpper, bool isLeft, bool isFront);
-	void powerDrive(const float & ang, const float & wheelSpan, const Vector3F & targetVelocity, const float & wheelR, bool goForward = true);
-	void steer(const Vector3F & around, const float & wheelSpan);
 	void steerWheel(const float & ang, int i);
-	void applyBrake(bool enable);
+	void releaseBrake();
 	void applyMotor(float rps, const int & i, float force);
+	void brake(const float & i, const float & strength, bool goForward);
 	const Matrix44F wheelHubTM(const int & i) const;
 	const Vector3F wheelVelocity(const int & i) const;
-	float limitDrive(const int & i, const float & targetSpeed, const float & r, const float & differential = 0.f, bool goForward = true);
+	float limitDrive(const int & i, const float & targetSpeed, const float & differential = 0.f, bool goForward = true);
 	Profile m_profile;
 	btGeneric6DofConstraint* m_steerJoint[2];
 	btGeneric6DofConstraint* m_driveJoint[2];

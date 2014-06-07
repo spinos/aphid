@@ -100,10 +100,9 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->addSteerAngle(0.01f);
 			break;
 		case Qt::Key_B:
-			m_vehicle->addBrakeStrength(.1f);
+			m_vehicle->addBrakeStrength(.04f);
 			break;
 		case Qt::Key_F:
-			m_vehicle->setBrakeStrength(1.f);
 			m_vehicle->setTargetSpeed(0.f);
 			break;
 		case Qt::Key_Space:

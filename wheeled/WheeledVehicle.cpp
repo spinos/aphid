@@ -75,15 +75,18 @@ void WheeledVehicle::update()
 	vel.normalize();
 	vel *= m_targetSpeed;
 	
-	if(m_brakeStrength > 0.f) {
-		vel.normalize(); 
-		vel *= vehicleVelocity().length() * (1.f - m_brakeStrength);
-	}
+	const bool goForward = m_targetSpeed > 0.f;
 	
 	for(int i = 0; i < numAxis(); i++) {
 		suspension(i).update();
+		
 		const Vector3F around = turnAround(i, ang);
-		suspension(i).steerAndDrive(around, ang, wheelSpan(i), vel, wheel(i, 0).radius(), m_targetSpeed > 0.f);
+		suspension(i).steer(around, wheelSpan(i));
+		if(m_targetSpeed == 0.f) suspension(i).brake(1.f, goForward);
+		else {
+			if(m_brakeStrength > 0.f) suspension(i).brake(m_brakeStrength, goForward); 
+			else suspension(i).drive(ang, wheelSpan(i), vel, goForward);
+		}
 	}
 }
 
@@ -129,5 +132,15 @@ const Vector3F WheeledVehicle::vehicleTraverse()
 
 void WheeledVehicle::setBrakeStrength(const float & x) { m_brakeStrength = x; }
 void WheeledVehicle::addBrakeStrength(const float & x) { m_brakeStrength += x; if(m_brakeStrength > 1.f) m_brakeStrength = 1.f; }
+
+const bool WheeledVehicle::goingForward() const
+{
+	if(!PhysicsState::engine->isPhysicsEnabled()) return false;
+	Matrix44F tm = vehicleTM();
+	tm.inverse();
+	Vector3F vel = vehicleVelocity();
+	vel = tm.transformAsNormal(vel);
+	return vel.z > 0.f;
+}
 
 }
