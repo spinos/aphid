@@ -13,6 +13,9 @@
 #include <Common.h>
 namespace caterpillar {
 #define SPEEDLIMIT 1.57f
+#define BRAKEFORCE 50.f
+#define POWERFORCE 50.f
+
 Suspension::Profile::Profile() 
 {
 	_upperWishboneAngle[0] = -.354f;
@@ -28,7 +31,7 @@ Suspension::Profile::Profile()
 	_lowerWishboneLength = 5.7f;
 	_upperWishboneTilt = .01f;
 	_lowerWishboneTilt = -0.19f;
-	_damperY = 4.2f;
+	_damperY = 4.3f;
 	_steerable = true;
 	_powered = false;
 }
@@ -39,6 +42,7 @@ Vector3F Suspension::ChassisOrigin;
 Suspension::Suspension() 
 {
 	m_differential[0] = m_differential[1] = 1.f;
+	m_wheelForce[0] = m_wheelForce[1] = 0.f;
 }
 
 Suspension::~Suspension() {}
@@ -607,31 +611,32 @@ void Suspension::brake(const int & i, const float & strength, bool goForward)
 {
 	float wheelSpeed = wheelVelocity(i).length();
 	
-	float diff = m_wheel[0]->radius() * SPEEDLIMIT * 2.f * strength * m_differential[i];
+	m_wheelForce[i] = -SPEEDLIMIT * strength * 4.f * m_differential[i];
+		
+	float diff = m_wheel[0]->radius() * m_wheelForce[i];
 	
-	float force = 43.f;
-	
-	wheelSpeed -= diff;
+	wheelSpeed += diff;
 	if(wheelSpeed < 0.f) wheelSpeed = 0.f;
-	// std::cout<<"brake ["<<i<<"] "<<wheelSpeed;
+
 	float rps = wheelSpeed / m_wheel[0]->radius();
 	if(!goForward) rps = -rps;
-	applyMotor(rps, i, force);
+	applyMotor(rps, i, BRAKEFORCE);
 }
 
 void Suspension::power(const int & i, const float & strength, bool goForward)
 {
 	float wheelSpeed = wheelVelocity(i).length();
-	float diff = m_wheel[0]->radius() * SPEEDLIMIT * strength * m_differential[i];
 	
-	float force = 33.f;
+	m_wheelForce[i] = SPEEDLIMIT * strength * m_differential[i];
+
+	float diff = m_wheel[0]->radius() * m_wheelForce[i];
 	
 	wheelSpeed += diff;
 	if(wheelSpeed < 0.f) wheelSpeed = 0.f;
-	std::cout<<"power ["<<i<<"] "<<wheelSpeed;
+	
 	float rps = wheelSpeed / m_wheel[0]->radius();
 	if(!goForward) rps = -rps;
-	applyMotor(rps, i, force);
+	applyMotor(rps, i, POWERFORCE);
 }
 
 void Suspension::power(const float & strength, bool goForward)
@@ -642,6 +647,9 @@ void Suspension::power(const float & strength, bool goForward)
 
 void Suspension::drive(const float & gasStrength, const float & brakeStrength, bool goForward)
 {
+	m_wheelForce[0] = 0.f;
+	m_wheelForce[1] = 0.f;
+	
 	releaseBrake();
 	
 	if(!isPowered()) {
@@ -649,7 +657,8 @@ void Suspension::drive(const float & gasStrength, const float & brakeStrength, b
 		return;
 	}
 	
-	if(gasStrength >= brakeStrength) power(gasStrength, goForward);
+	const float k = gasStrength - brakeStrength;
+	if(k >= 0.f) power(gasStrength, goForward);
 	else brake(brakeStrength, goForward);
 }
 
@@ -670,7 +679,6 @@ void Suspension::computeDifferential(const Vector3F & turnAround, const float & 
 		m_differential[0] = lL / cL;
 		m_differential[1] = rL / cL;
 	}
-	//std::cout<<"differential lft/rgt "<<m_differential[0]<<" / "<<m_differential[1]<<"\n";
 }
 
 void Suspension::steer(const Vector3F & turnAround, const float & z, const float & wheelSpan)
@@ -702,6 +710,50 @@ void Suspension::differential(float * dst) const
 {
 	dst[0] = m_differential[0];
 	dst[1] = m_differential[1];
+}
+
+void Suspension::wheelForce(float * dst) const
+{
+	dst[0] = m_wheelForce[0];
+	dst[1] = m_wheelForce[1];
+}
+
+void Suspension::wheelSlip(float * dst) const
+{
+	dst[0] = wheelSlip(0);
+	dst[1] = wheelSlip(1);
+}
+
+const float Suspension::wheelSlip(const int & i) const
+{
+	if(!PhysicsState::engine->isPhysicsEnabled()) return 0.f;
+	
+	Vector3F vel = m_wheel[i]->velocity();
+	if(vel.length() < 0.01f) return 0.f;
+	Matrix44F tm = wheelHubTM(i);
+	tm.inverse();
+	vel = tm.transformAsNormal(vel);
+	vel.normalize();
+	return atan(vel.x / vel.z);
+}
+
+void Suspension::wheelSkid(float * dst) const
+{
+	dst[0] = wheelSkid(0);
+	dst[1] = wheelSkid(1);
+}
+
+const float Suspension::wheelSkid(const int & i) const
+{
+	if(!PhysicsState::engine->isPhysicsEnabled()) return 0.f;
+	
+	float wheelSpeed = wheelVelocity(i).length();
+	
+	if(wheelSpeed < 0.01f) return 0.f;
+	
+	float a = m_wheel[i]->angularVelocity().length();
+	
+	return (a * m_wheel[i]->radius() - wheelSpeed) / wheelSpeed;
 }
 
 }

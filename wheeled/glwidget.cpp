@@ -52,29 +52,51 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	caterpillar::PhysicsState::engine->renderWorld();
-
+	int i = 1;
 	std::stringstream sst;
 	sst.str("");
 	sst<<"vehicle speed: "<<m_vehicle->vehicleVelocity().length();
-	hudText(sst.str(), 1);
+	hudText(sst.str(), i++);
+	sst.str("");
+	sst<<"vehicle acceleration: "<<m_vehicle->acceleration();
+	hudText(sst.str(), i++);
+	sst.str("");
+	sst<<"vehicle drifting: "<<m_vehicle->drifting();
+	hudText(sst.str(), i++);
 	sst.str("");
 	sst<<"gas strength: "<<m_vehicle->gasStrength();
-	hudText(sst.str(), 2);
+	hudText(sst.str(), i++);
 	sst.str("");
 	sst<<"bake strength: "<<m_vehicle->brakeStrength();
-	hudText(sst.str(), 3);
+	hudText(sst.str(), i++);
 	sst.str("");
 	sst<<"turn angle: "<<m_vehicle->turnAngle();
-	hudText(sst.str(), 4);
+	hudText(sst.str(), i++);
 	sst.str("");
-	float diff[2];
-	m_vehicle->differential(0, diff);
-	sst<<"differential[0]: "<<diff[0]<<","<<diff[1];
-	hudText(sst.str(), 5);
-	m_vehicle->differential(1, diff);
+	float t[2];
+	m_vehicle->wheelForce(0, t);
+	sst<<"force front wheel: "<<t[0]<<","<<t[1];
+	hudText(sst.str(), i++);
+	m_vehicle->wheelForce(1, t);
 	sst.str("");
-	sst<<"differential[1]: "<<diff[0]<<","<<diff[1];
-	hudText(sst.str(), 6);
+	sst<<"force back wheel: "<<t[0]<<","<<t[1];
+	hudText(sst.str(), i++);
+	m_vehicle->wheelSlip(0, t);
+	sst.str("");
+	sst<<"slip front wheel: "<<t[0]<<","<<t[1];
+	hudText(sst.str(), i++);
+	m_vehicle->wheelSlip(1, t);
+	sst.str("");
+	sst<<"slip back wheel: "<<t[0]<<","<<t[1];
+	hudText(sst.str(), i++);
+	m_vehicle->wheelSkid(0, t);
+	sst.str("");
+	sst<<"skid front wheel: "<<t[0]<<","<<t[1];
+	hudText(sst.str(), i++);
+	m_vehicle->wheelSkid(1, t);
+	sst.str("");
+	sst<<"skid back wheel: "<<t[0]<<","<<t[1];
+	hudText(sst.str(), i++);
 }
 //! [7]
 
@@ -115,14 +137,17 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 		case Qt::Key_B:
 			m_vehicle->addBrakeStrength(.23f);
 			break;
+		case Qt::Key_N:
+			m_vehicle->setSteerAngle(.99f);
+			break;
 		case Qt::Key_S:
 			m_vehicle->setGoForward(!m_vehicle->goingForward());
 			break;
 		case Qt::Key_A:
-			m_vehicle->addSteerAngle(0.019f);
+			m_vehicle->addSteerAngle(0.013f);
 			break;
 		case Qt::Key_D:
-			m_vehicle->addSteerAngle(-0.019f);
+			m_vehicle->addSteerAngle(-0.013f);
 			break;
 		case Qt::Key_F:
 			m_vehicle->setBrakeStrength(1.f);
@@ -146,6 +171,9 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 			break;
 		case Qt::Key_B:
 			m_vehicle->setBrakeStrength(0.f);
+			break;
+		case Qt::Key_N:
+			m_vehicle->setSteerAngle(0.f);
 			break;
 		case Qt::Key_F:
 			m_vehicle->setBrakeStrength(0.f);

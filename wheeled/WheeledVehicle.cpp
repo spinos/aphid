@@ -27,6 +27,7 @@ void WheeledVehicle::create()
 {
 	resetGroups();
 	m_prevOrigin = origin();
+	m_prevVelocity.setZero();
 	
 	const Vector3F dims = getChassisDim() * .5f; 
 	dims.verbose("hulldim");
@@ -83,12 +84,6 @@ void WheeledVehicle::update()
 	
 	const Vector3F around = turnAround(ang);
 	
-	/*Vector3F vel = vehicleVelocity();
-	const Matrix44F space = vehicleTM();
-	Vector3F front = space.transformAsNormal(Vector3F::ZAxis);
-	float speed = vel.length();
-	speed *= vel.normal().dot(front.normal());*/
-	
 	for(int i = 0; i < numAxis(); i++) {
 		suspension(i).update();
 		
@@ -97,6 +92,9 @@ void WheeledVehicle::update()
 		
 		suspension(i).drive(m_gasStrength, m_brakeStrength, goingForward());
 	}
+	
+	m_acceleration = vehicleVelocity().length() - m_prevVelocity.length();
+	m_prevVelocity = vehicleVelocity();
 }
 
 const Matrix44F WheeledVehicle::vehicleTM() const
@@ -129,6 +127,37 @@ const Vector3F WheeledVehicle::vehicleTraverse()
 void WheeledVehicle::differential(int i, float * dst) const
 {
 	suspension(i).differential(dst);
+}
+
+void WheeledVehicle::wheelForce(int i, float * dst) const
+{
+	suspension(i).wheelForce(dst);
+}
+
+void WheeledVehicle::wheelSlip(int i, float * dst) const
+{
+	suspension(i).wheelSlip(dst);
+}
+
+void WheeledVehicle::wheelSkid(int i, float * dst) const
+{
+	suspension(i).wheelSkid(dst);
+}
+
+const float WheeledVehicle::drifting() const
+{
+	Vector3F vel = vehicleVelocity(); 
+	if(vel.length() < 0.1f) return 0.f;
+	vel.normalize();
+	Matrix44F space = vehicleTM();
+	space.inverse();
+	vel = space.transformAsNormal(vel);
+	return vel.x;
+}
+
+const float WheeledVehicle::acceleration() const
+{
+	return m_acceleration;
 }
 
 }

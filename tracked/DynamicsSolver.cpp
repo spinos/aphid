@@ -317,7 +317,7 @@ void DynamicsSolver::addGroundPlane(const float & groundSize, const float & grou
 	tr.setIdentity();
 	tr.setOrigin(btVector3(0, groundLevel - 1.f, 0));
 	btRigidBody* body = createRigidBody(groundShape,tr,0.f);
-	body->setFriction(1.414);
+	body->setFriction(.576f);
 }
 
 btBoxShape* DynamicsSolver::createBoxShape(const float & x, const float & y, const float & z)

@@ -33,6 +33,7 @@ public:
 	btRigidBody* create(const Matrix44F & tm, bool isLeft);
 	btRigidBody* body();
 	const Vector3F velocity() const;
+	const Vector3F angularVelocity() const;
 	const btTransform tm() const;
 private:
 	Profile m_profile;

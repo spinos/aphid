@@ -32,9 +32,15 @@ public:
 	const float brakeStrength() const;
 	const bool goingForward() const;
 	void differential(int i, float * dst) const;
+	const float drifting() const;
+	void wheelForce(int i, float * dst) const;
+	void wheelSlip(int i, float * dst) const;
+	void wheelSkid(int i, float * dst) const;
+	const float acceleration() const;
 	
 private:
-    Vector3F m_prevOrigin;
+    Vector3F m_prevOrigin, m_prevVelocity;
+	float m_acceleration;
 	float m_gasStrength, m_steerAngle, m_brakeStrength;
 	bool m_goForward;
 };

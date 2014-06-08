@@ -12,8 +12,8 @@ namespace caterpillar {
 WheeledChassis::WheeledChassis() 
 {
 	m_hullDim.set(20.3f, 4.f, 44.3f);
-	setAxisCoord(0, 17.f, -1.95f, 13.f);
-	setAxisCoord(1, 17.f, -1.95f, -16.1f);
+	setAxisCoord(0, 17.f, -1.55f, 13.f);
+	setAxisCoord(1, 17.f, -1.55f, -16.1f);
 	m_numAxis = 2;
 }
 

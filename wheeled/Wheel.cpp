@@ -34,6 +34,12 @@ const Vector3F Wheel::velocity() const
 	return Vector3F(vel[0], vel[1], vel[2]);
 }
 
+const Vector3F Wheel::angularVelocity() const
+{
+	const btVector3 vel = m_body->getAngularVelocity(); 
+	return Vector3F(vel[0], vel[1], vel[2]);
+}
+
 const btTransform Wheel::tm() const 
 {
 	return m_body->getWorldTransform(); 

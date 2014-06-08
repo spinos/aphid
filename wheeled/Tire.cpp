@@ -11,15 +11,15 @@
 #include "PhysicsState.h"
 #include <DynamicsSolver.h>
 namespace caterpillar {
-#define NUMGRIDRAD 30
-#define PADROLL .3f
+#define NUMGRIDRAD 32
+#define PADROLL .23f
 Tire::Tire() {}
 Tire::~Tire() {}
 btRigidBody* Tire::create(const float & radiusMajor, const float & radiusMinor, const float & width, const float & mass, const Matrix44F & tm, bool isLeft)
 {
 	const float hw = .5f * width; m_hw = hw;
 	const float sy = (radiusMajor - radiusMinor) * PI / NUMGRIDRAD;
-	btCollisionShape * padShape = PhysicsState::engine->createBoxShape(hw * .4f, sy * .5f, radiusMinor * .5);
+	btCollisionShape * padShape = PhysicsState::engine->createBoxShape(hw * .4f, sy * .7f, radiusMinor * .5);
 	
 	btCompoundShape* wheelShape = new btCompoundShape();
 
@@ -50,7 +50,7 @@ btRigidBody* Tire::create(const float & radiusMajor, const float & radiusMinor, 
 	btTransform trans = Common::CopyFromMatrix44F(tm);
 	btRigidBody* wheelBody = PhysicsState::engine->createRigidBody(wheelShape, trans, mass);
 	wheelBody->setDamping(0.f, 0.f);
-	wheelBody->setFriction(2.99f);
+	wheelBody->setFriction(1.99f);
 	wheelBody->setActivationState(DISABLE_DEACTIVATION);
 	
 	attachPad(wheelBody, padShape, tm, radiusMajor, radiusMinor, isLeft);
