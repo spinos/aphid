@@ -11,8 +11,8 @@
 #include "PhysicsState.h"
 #include <DynamicsSolver.h>
 namespace caterpillar {
-#define NUMGRIDRAD 32
-#define PADROLL .23f
+#define NUMGRIDRAD 30
+#define PADROLL .3f
 Tire::Tire() {}
 Tire::~Tire() {}
 btRigidBody* Tire::create(const float & radiusMajor, const float & radiusMinor, const float & width, const float & mass, const Matrix44F & tm, bool isLeft)
@@ -93,8 +93,8 @@ void Tire::attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const 
 		
 		spring->setLinearUpperLimit(btVector3(0., 0., -.5f * radiusMinor));
 		spring->setLinearLowerLimit(btVector3(0., 0., .5f * radiusMinor));
-		spring->setAngularLowerLimit(btVector3( -0.1f, -0.3f, 0.f));
-	    spring->setAngularUpperLimit(btVector3(0.1f, 0.3f, 0.f));
+		spring->setAngularLowerLimit(btVector3( -0.1f, -0.1f, 0.f));
+	    spring->setAngularUpperLimit(btVector3(0.1f, 0.1f, 0.f));
 	    spring->enableSpring(2, true);
 	    spring->setStiffness(2, 1900.f);
 	    spring->setDamping(2, 0.001f);

@@ -13,7 +13,7 @@
 #include <Common.h>
 namespace caterpillar {
 #define SPEEDLIMIT 1.57f
-#define BRAKEFORCE 50.f
+#define BRAKEFORCE 500.f
 #define POWERFORCE 50.f
 
 Suspension::Profile::Profile() 
@@ -611,7 +611,8 @@ void Suspension::brake(const int & i, const float & strength, bool goForward)
 {
 	float wheelSpeed = wheelVelocity(i).length();
 	
-	m_wheelForce[i] = -SPEEDLIMIT * strength * 4.f * m_differential[i];
+	m_wheelForce[i] = -wheelSpeed * strength * m_differential[i];
+	if(m_wheelForce[i] < -SPEEDLIMIT) m_wheelForce[i] = -SPEEDLIMIT;
 		
 	float diff = m_wheel[0]->radius() * m_wheelForce[i];
 	
@@ -754,6 +755,12 @@ const float Suspension::wheelSkid(const int & i) const
 	float a = m_wheel[i]->angularVelocity().length();
 	
 	return (a * m_wheel[i]->radius() - wheelSpeed) / wheelSpeed;
+}
+
+void Suspension::parkingBrake()
+{
+	applyMotor(0.f, 0, BRAKEFORCE);
+	applyMotor(0.f, 1, BRAKEFORCE);
 }
 
 }

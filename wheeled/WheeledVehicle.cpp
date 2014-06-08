@@ -19,6 +19,7 @@ WheeledVehicle::WheeledVehicle()
 	m_steerAngle = 0.f;
 	m_brakeStrength = 0.f;
 	m_goForward = true;
+	m_parkingBrake = false;
 }
 
 WheeledVehicle::~WheeledVehicle() {}
@@ -68,6 +69,7 @@ void WheeledVehicle::setBrakeStrength(const float & x) { m_brakeStrength = x; }
 void WheeledVehicle::addBrakeStrength(const float & x) { m_brakeStrength += x; if(m_brakeStrength > 1.f) m_brakeStrength = 1.f; }
 void WheeledVehicle::addSteerAngle(const float & x) { m_steerAngle += x; }
 void WheeledVehicle::setSteerAngle(const float & x) { m_steerAngle = x; }
+void WheeledVehicle::setParkingBrake(bool x) { m_parkingBrake = x; }
 
 const float WheeledVehicle::gasStrength() const { return m_gasStrength; }
 const float WheeledVehicle::brakeStrength() const { return m_brakeStrength; }
@@ -92,6 +94,8 @@ void WheeledVehicle::update()
 		
 		suspension(i).drive(m_gasStrength, m_brakeStrength, goingForward());
 	}
+	
+	if(m_parkingBrake) suspension(numAxis() - 1).parkingBrake();
 	
 	m_acceleration = vehicleVelocity().length() - m_prevVelocity.length();
 	m_prevVelocity = vehicleVelocity();

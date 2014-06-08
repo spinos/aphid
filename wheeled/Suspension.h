@@ -44,6 +44,7 @@ public:
 	void computeDifferential(const Vector3F & turnAround, const float & z, const float & wheelSpan);
 	void steer(const Vector3F & turnAround, const float & z, const float & wheelSpan);
 	void drive(const float & gasStrength, const float & brakeStrength, bool goForward);
+	void parkingBrake();
 	
 	void differential(float * dst) const;
 	void wheelForce(float * dst) const;

@@ -128,23 +128,23 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 {	
     bool enabled;
 	switch (e->key()) {
-		case Qt::Key_C:
-			m_vehicle->setSteerAngle(0.f);
-			break;
 		case Qt::Key_W:
 			m_vehicle->addGas(.13f);
 			break;
 		case Qt::Key_B:
 			m_vehicle->addBrakeStrength(.23f);
 			break;
-		case Qt::Key_N:
-			m_vehicle->setSteerAngle(.99f);
+		case Qt::Key_P:
+			m_vehicle->setParkingBrake(true);
 			break;
-		case Qt::Key_S:
+		case Qt::Key_C:
 			m_vehicle->setGoForward(!m_vehicle->goingForward());
 			break;
 		case Qt::Key_A:
 			m_vehicle->addSteerAngle(0.013f);
+			break;
+		case Qt::Key_S:
+			m_vehicle->setSteerAngle(0.f);
 			break;
 		case Qt::Key_D:
 			m_vehicle->addSteerAngle(-0.013f);
@@ -172,8 +172,8 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 		case Qt::Key_B:
 			m_vehicle->setBrakeStrength(0.f);
 			break;
-		case Qt::Key_N:
-			m_vehicle->setSteerAngle(0.f);
+		case Qt::Key_P:
+			m_vehicle->setParkingBrake(false);
 			break;
 		case Qt::Key_F:
 			m_vehicle->setBrakeStrength(0.f);
