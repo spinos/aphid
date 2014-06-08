@@ -15,9 +15,10 @@ namespace caterpillar {
 WheeledVehicle::WheeledVehicle() 
 {
 	addGroup("chassis");
-	m_targetSpeed = 0.f;
+	m_gasStrength = 0.f;
 	m_steerAngle = 0.f;
 	m_brakeStrength = 0.f;
+	m_goForward = true;
 }
 
 WheeledVehicle::~WheeledVehicle() {}
@@ -36,7 +37,7 @@ void WheeledVehicle::create()
 	trans.setOrigin(btVector3(origin().x, origin().y, origin().z));
 	
 	const int id = PhysicsState::engine->numCollisionObjects();
-	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, 190.f);
+	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, 200.f);
 	chassisBody->setDamping(0.f, 0.f);
 	
 	group("chassis").push_back(id);
@@ -59,8 +60,18 @@ void WheeledVehicle::create()
 	computeSteerBase();
 }
 
-void WheeledVehicle::setTargetSpeed(const float & x) { m_targetSpeed = x; }
-void WheeledVehicle::addTargetSpeed(const float & x) { m_targetSpeed += x; }
+void WheeledVehicle::setGas(const float & x) { m_gasStrength = x; }
+void WheeledVehicle::addGas(const float & x) { m_gasStrength += x; if(m_gasStrength > 1.f) m_gasStrength = 1.f; }
+void WheeledVehicle::setGoForward(bool x) { m_goForward = x; }
+void WheeledVehicle::setBrakeStrength(const float & x) { m_brakeStrength = x; }
+void WheeledVehicle::addBrakeStrength(const float & x) { m_brakeStrength += x; if(m_brakeStrength > 1.f) m_brakeStrength = 1.f; }
+void WheeledVehicle::addSteerAngle(const float & x) { m_steerAngle += x; }
+void WheeledVehicle::setSteerAngle(const float & x) { m_steerAngle = x; }
+
+const float WheeledVehicle::gasStrength() const { return m_gasStrength; }
+const float WheeledVehicle::brakeStrength() const { return m_brakeStrength; }
+const float WheeledVehicle::turnAngle() const { return m_steerAngle; }
+const bool WheeledVehicle::goingForward() const { return m_goForward; }
 
 void WheeledVehicle::update() 
 {
@@ -70,17 +81,13 @@ void WheeledVehicle::update()
 	if(ang < -1.f) ang = -1.f;
 	else if(ang > 1.f) ang = 1.f;
 	
-	const Matrix44F t = vehicleTM();
-	Vector3F vel = Vector3F::ZAxis * 8.f;
-	vel = t.transformAsNormal(vel);
-	vel.normalize();
-	vel *= m_targetSpeed;
-	
-	const bool goForward = m_targetSpeed > 0.f;
 	const Vector3F around = turnAround(ang);
 	
-	const float actvs = vehicleVelocity().length();
-	float ts = m_targetSpeed; if(ts < 0.f) ts = -ts;
+	/*Vector3F vel = vehicleVelocity();
+	const Matrix44F space = vehicleTM();
+	Vector3F front = space.transformAsNormal(Vector3F::ZAxis);
+	float speed = vel.length();
+	speed *= vel.normal().dot(front.normal());*/
 	
 	for(int i = 0; i < numAxis(); i++) {
 		suspension(i).update();
@@ -88,16 +95,9 @@ void WheeledVehicle::update()
 		suspension(i).steer(around, axisZ(i), wheelSpan(i));
 		suspension(i).computeDifferential(around, axisZ(i), wheelSpan(i));
 		
-		if(ts < actvs) suspension(i).brake(1.f - ts / actvs, goForward);
-		else {
-			if(m_brakeStrength > 0.f) suspension(i).brake(m_brakeStrength, goForward); 
-			else suspension(i).drive(vel, goForward);
-		}
+		suspension(i).drive(m_gasStrength, m_brakeStrength, goingForward());
 	}
 }
-
-void WheeledVehicle::addSteerAngle(const float & x) { m_steerAngle += x; }
-void WheeledVehicle::setSteerAngle(const float & x) { m_steerAngle = x; }
 
 const Matrix44F WheeledVehicle::vehicleTM() const
 {
@@ -117,22 +117,6 @@ const Vector3F WheeledVehicle::vehicleVelocity() const
 	return Vector3F(chasisVel[0], chasisVel[1], chasisVel[2]);
 }
 
-const float WheeledVehicle::targetSpeed() const { return m_targetSpeed; }
-
-const float WheeledVehicle::brakeStrength() const { return m_brakeStrength; }
-
-const float WheeledVehicle::turnAngle() const { return m_steerAngle; }
-
-void WheeledVehicle::displayStatistics()
-{
-	if(!PhysicsState::engine->isPhysicsEnabled()) return;
-	
-	std::cout<<"\ntarget speed: "<<m_targetSpeed<<"\n";
-	std::cout<<"actual speed: "<<vehicleVelocity().length()<<"\n";
-	std::cout<<"brake strength: "<<m_brakeStrength<<"\n";
-	std::cout<<"turn angle: "<<m_steerAngle<<"\n";
-}
-
 const Vector3F WheeledVehicle::vehicleTraverse()
 {
     if(!PhysicsState::engine->isPhysicsEnabled()) return Vector3F::Zero;
@@ -142,17 +126,9 @@ const Vector3F WheeledVehicle::vehicleTraverse()
 	return r;
 }
 
-void WheeledVehicle::setBrakeStrength(const float & x) { m_brakeStrength = x; }
-void WheeledVehicle::addBrakeStrength(const float & x) { m_brakeStrength += x; if(m_brakeStrength > 1.f) m_brakeStrength = 1.f; }
-
-const bool WheeledVehicle::goingForward() const
+void WheeledVehicle::differential(int i, float * dst) const
 {
-	if(!PhysicsState::engine->isPhysicsEnabled()) return false;
-	Matrix44F tm = vehicleTM();
-	tm.inverse();
-	Vector3F vel = vehicleVelocity();
-	vel = tm.transformAsNormal(vel);
-	return vel.z > 0.f;
+	suspension(i).differential(dst);
 }
 
 }

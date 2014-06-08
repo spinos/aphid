@@ -17,22 +17,25 @@ public:
 	virtual ~WheeledVehicle();
 	void create();
 	void update();
-	void setTargetSpeed(const float & x);
-	void addTargetSpeed(const float & x);
+	void setGas(const float & x);
+	void addGas(const float & x);
 	void addSteerAngle(const float & x);
 	void setSteerAngle(const float & x);
 	void setBrakeStrength(const float & x);
 	void addBrakeStrength(const float & x);
-	void displayStatistics();
+	void setGoForward(bool x);
 	const Vector3F vehicleVelocity() const;
 	const Matrix44F vehicleTM() const;
 	const Vector3F vehicleTraverse();
-	const bool goingForward() const;
-	const float targetSpeed() const;
 	const float turnAngle() const;
+	const float gasStrength() const;
 	const float brakeStrength() const;
+	const bool goingForward() const;
+	void differential(int i, float * dst) const;
+	
 private:
     Vector3F m_prevOrigin;
-	float m_targetSpeed, m_steerAngle, m_brakeStrength;
+	float m_gasStrength, m_steerAngle, m_brakeStrength;
+	bool m_goForward;
 };
 }

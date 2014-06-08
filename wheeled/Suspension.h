@@ -43,8 +43,9 @@ public:
 	
 	void computeDifferential(const Vector3F & turnAround, const float & z, const float & wheelSpan);
 	void steer(const Vector3F & turnAround, const float & z, const float & wheelSpan);
-	void drive(const Vector3F & targetVelocity, bool goForward);
-	void brake(const float & strength, bool goForward);
+	void drive(const float & gasStrength, const float & brakeStrength, bool goForward);
+	
+	void differential(float * dst) const;
 	
 	static float RodRadius;
 	static btRigidBody * ChassisBody;
@@ -68,6 +69,9 @@ private:
 	const Matrix44F wheelHubTM(const int & i) const;
 	const Vector3F wheelVelocity(const int & i) const;
 	float limitDrive(const int & i, const float & targetSpeed, bool goForward = true);
+	void brake(const float & strength, bool goForward);
+	void power(const float & strength, bool goForward);
+	void power(const int & i, const float & strength, bool goForward);
 	Profile m_profile;
 	btGeneric6DofConstraint* m_steerJoint[2];
 	btGeneric6DofConstraint* m_driveJoint[2];

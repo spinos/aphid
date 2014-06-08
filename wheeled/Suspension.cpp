@@ -12,7 +12,7 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-#define SPEEDLIMIT 3.14f
+#define SPEEDLIMIT 1.57f
 Suspension::Profile::Profile() 
 {
 	_upperWishboneAngle[0] = -.354f;
@@ -36,7 +36,11 @@ Suspension::Profile::Profile()
 float Suspension::RodRadius = .17f;
 btRigidBody * Suspension::ChassisBody;
 Vector3F Suspension::ChassisOrigin;
-Suspension::Suspension() {}
+Suspension::Suspension() 
+{
+	m_differential[0] = m_differential[1] = 1.f;
+}
+
 Suspension::~Suspension() {}
 void Suspension::setProfile(const Profile & info)
 {
@@ -529,7 +533,7 @@ float Suspension::limitDrive(const int & i, const float & targetSpeed, bool goFo
 	else if(diff < -lmt) diff = -lmt;
 	
 	wheelSpeed += diff * m_differential[i];
-	std::cout<<"drive ["<<i<<"] "<<wheelSpeed;
+	// std::cout<<"drive ["<<i<<"] "<<wheelSpeed;
 	float rps = wheelSpeed / r;
 	if(!goForward) rps = -rps;
 	applyMotor(rps, i, force);
@@ -594,6 +598,7 @@ void Suspension::update()
 
 void Suspension::brake(const float & strength, bool goForward)
 {
+	if(strength < .001f) return;
 	brake(0, strength, goForward);
 	brake(1, strength, goForward);
 }
@@ -604,27 +609,48 @@ void Suspension::brake(const int & i, const float & strength, bool goForward)
 	
 	float diff = m_wheel[0]->radius() * SPEEDLIMIT * 2.f * strength * m_differential[i];
 	
-	float force = 33.f;
+	float force = 43.f;
 	
 	wheelSpeed -= diff;
 	if(wheelSpeed < 0.f) wheelSpeed = 0.f;
-	std::cout<<"brake ["<<i<<"] "<<wheelSpeed;
+	// std::cout<<"brake ["<<i<<"] "<<wheelSpeed;
 	float rps = wheelSpeed / m_wheel[0]->radius();
 	if(!goForward) rps = -rps;
 	applyMotor(rps, i, force);
 }
 
-void Suspension::drive(const Vector3F & targetVelocity, bool goForward)
+void Suspension::power(const int & i, const float & strength, bool goForward)
 {
-	const float speed = targetVelocity.length();
+	float wheelSpeed = wheelVelocity(i).length();
+	float diff = m_wheel[0]->radius() * SPEEDLIMIT * strength * m_differential[i];
+	
+	float force = 33.f;
+	
+	wheelSpeed += diff;
+	if(wheelSpeed < 0.f) wheelSpeed = 0.f;
+	std::cout<<"power ["<<i<<"] "<<wheelSpeed;
+	float rps = wheelSpeed / m_wheel[0]->radius();
+	if(!goForward) rps = -rps;
+	applyMotor(rps, i, force);
+}
 
+void Suspension::power(const float & strength, bool goForward)
+{
+	power(0, strength, goForward);
+	power(1, strength, goForward);
+}
+
+void Suspension::drive(const float & gasStrength, const float & brakeStrength, bool goForward)
+{
 	releaseBrake();
 	
-	if(!isPowered()) return;
+	if(!isPowered()) {
+		brake(brakeStrength, goForward);
+		return;
+	}
 	
-	limitDrive(0, speed, goForward);
-	limitDrive(1, speed, goForward);
-
+	if(gasStrength >= brakeStrength) power(gasStrength, goForward);
+	else brake(brakeStrength, goForward);
 }
 
 void Suspension::computeDifferential(const Vector3F & turnAround, const float & z, const float & wheelSpan)
@@ -670,6 +696,12 @@ void Suspension::steer(const Vector3F & turnAround, const float & z, const float
 		steerWheel(0.f, 0);
 		steerWheel(0.f, 1);
 	}
+}
+
+void Suspension::differential(float * dst) const
+{
+	dst[0] = m_differential[0];
+	dst[1] = m_differential[1];
 }
 
 }

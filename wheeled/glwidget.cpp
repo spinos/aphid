@@ -55,17 +55,26 @@ void GLWidget::clientDraw()
 
 	std::stringstream sst;
 	sst.str("");
-	sst<<"target speed: "<<m_vehicle->targetSpeed();
-	hudText(sst.str(), 0);
-	sst.str("");
-	sst<<"actual speed: "<<m_vehicle->vehicleVelocity().length();
+	sst<<"vehicle speed: "<<m_vehicle->vehicleVelocity().length();
 	hudText(sst.str(), 1);
 	sst.str("");
-	sst<<"bake strength: "<<m_vehicle->brakeStrength();
+	sst<<"gas strength: "<<m_vehicle->gasStrength();
 	hudText(sst.str(), 2);
 	sst.str("");
-	sst<<"turn angle: "<<m_vehicle->turnAngle();
+	sst<<"bake strength: "<<m_vehicle->brakeStrength();
 	hudText(sst.str(), 3);
+	sst.str("");
+	sst<<"turn angle: "<<m_vehicle->turnAngle();
+	hudText(sst.str(), 4);
+	sst.str("");
+	float diff[2];
+	m_vehicle->differential(0, diff);
+	sst<<"differential[0]: "<<diff[0]<<","<<diff[1];
+	hudText(sst.str(), 5);
+	m_vehicle->differential(1, diff);
+	sst.str("");
+	sst<<"differential[1]: "<<diff[0]<<","<<diff[1];
+	hudText(sst.str(), 6);
 }
 //! [7]
 
@@ -101,22 +110,22 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->setSteerAngle(0.f);
 			break;
 		case Qt::Key_W:
-			m_vehicle->addTargetSpeed(2.99f);
-			break;
-		case Qt::Key_S:
-			m_vehicle->addTargetSpeed(-2.99f);
-			break;
-		case Qt::Key_A:
-			m_vehicle->addSteerAngle(0.017f);
-			break;
-		case Qt::Key_D:
-			m_vehicle->addSteerAngle(-0.017f);
+			m_vehicle->addGas(.13f);
 			break;
 		case Qt::Key_B:
-			m_vehicle->addBrakeStrength(.13f);
+			m_vehicle->addBrakeStrength(.23f);
+			break;
+		case Qt::Key_S:
+			m_vehicle->setGoForward(!m_vehicle->goingForward());
+			break;
+		case Qt::Key_A:
+			m_vehicle->addSteerAngle(0.019f);
+			break;
+		case Qt::Key_D:
+			m_vehicle->addSteerAngle(-0.019f);
 			break;
 		case Qt::Key_F:
-			m_vehicle->setTargetSpeed(0.f);
+			m_vehicle->setBrakeStrength(1.f);
 			break;
 		case Qt::Key_Space:
 			enabled = caterpillar::PhysicsState::engine->isPhysicsEnabled();
@@ -132,6 +141,9 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 void GLWidget::keyReleaseEvent(QKeyEvent *event)
 {
 	switch (event->key()) {
+		case Qt::Key_W:
+			m_vehicle->setGas(0.f);
+			break;
 		case Qt::Key_B:
 			m_vehicle->setBrakeStrength(0.f);
 			break;
