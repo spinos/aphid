@@ -61,6 +61,9 @@ void GLWidget::clientDraw()
 	sst<<"vehicle acceleration: "<<m_vehicle->acceleration();
 	hudText(sst.str(), i++);
 	sst.str("");
+	sst<<"gear: "<<m_vehicle->gear();
+	hudText(sst.str(), i++);
+	sst.str("");
 	sst<<"vehicle drifting: "<<m_vehicle->drifting();
 	hudText(sst.str(), i++);
 	sst.str("");
@@ -137,9 +140,6 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 		case Qt::Key_P:
 			m_vehicle->setParkingBrake(true);
 			break;
-		case Qt::Key_C:
-			m_vehicle->setGoForward(!m_vehicle->goingForward());
-			break;
 		case Qt::Key_A:
 			m_vehicle->addSteerAngle(0.013f);
 			break;
@@ -150,7 +150,10 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->addSteerAngle(-0.013f);
 			break;
 		case Qt::Key_F:
-			m_vehicle->setBrakeStrength(1.f);
+			m_vehicle->changeGear(1);
+			break;
+		case Qt::Key_C:
+			m_vehicle->changeGear(-1);
 			break;
 		case Qt::Key_Space:
 			enabled = caterpillar::PhysicsState::engine->isPhysicsEnabled();
@@ -174,9 +177,6 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 			break;
 		case Qt::Key_P:
 			m_vehicle->setParkingBrake(false);
-			break;
-		case Qt::Key_F:
-			m_vehicle->setBrakeStrength(0.f);
 			break;
 		default:
 			break;

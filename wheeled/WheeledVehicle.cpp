@@ -18,7 +18,7 @@ WheeledVehicle::WheeledVehicle()
 	m_gasStrength = 0.f;
 	m_steerAngle = 0.f;
 	m_brakeStrength = 0.f;
-	m_goForward = true;
+	m_gear = 0;
 	m_parkingBrake = false;
 }
 
@@ -64,7 +64,6 @@ void WheeledVehicle::create()
 
 void WheeledVehicle::setGas(const float & x) { m_gasStrength = x; }
 void WheeledVehicle::addGas(const float & x) { m_gasStrength += x; if(m_gasStrength > 1.f) m_gasStrength = 1.f; }
-void WheeledVehicle::setGoForward(bool x) { m_goForward = x; }
 void WheeledVehicle::setBrakeStrength(const float & x) { m_brakeStrength = x; }
 void WheeledVehicle::addBrakeStrength(const float & x) { m_brakeStrength += x; if(m_brakeStrength > 1.f) m_brakeStrength = 1.f; }
 void WheeledVehicle::addSteerAngle(const float & x) { m_steerAngle += x; }
@@ -74,11 +73,13 @@ void WheeledVehicle::setParkingBrake(bool x) { m_parkingBrake = x; }
 const float WheeledVehicle::gasStrength() const { return m_gasStrength; }
 const float WheeledVehicle::brakeStrength() const { return m_brakeStrength; }
 const float WheeledVehicle::turnAngle() const { return m_steerAngle; }
-const bool WheeledVehicle::goingForward() const { return m_goForward; }
+const bool WheeledVehicle::goingForward() const { return m_gear != 6; }
 
 void WheeledVehicle::update() 
 {
 	if(!PhysicsState::engine->isPhysicsEnabled()) return;
+	
+	Suspension::Gear = gear();
 	
 	float ang = m_steerAngle;
 	if(ang < -1.f) ang = -1.f;
@@ -163,5 +164,14 @@ const float WheeledVehicle::acceleration() const
 {
 	return m_acceleration;
 }
+
+void WheeledVehicle::changeGear(int x) 
+{ 
+	m_gear += x; 
+	if(m_gear < 0) m_gear = 6;
+	m_gear = m_gear % 7; 
+}
+
+const int WheeledVehicle::gear() const { return m_gear; }
 
 }

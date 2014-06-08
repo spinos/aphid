@@ -13,7 +13,7 @@
 #include <Common.h>
 namespace caterpillar {
 #define SPEEDLIMIT 1.57f
-#define BRAKEFORCE 500.f
+#define BRAKEFORCE 100.f
 #define POWERFORCE 50.f
 
 Suspension::Profile::Profile() 
@@ -39,6 +39,10 @@ Suspension::Profile::Profile()
 float Suspension::RodRadius = .17f;
 btRigidBody * Suspension::ChassisBody;
 Vector3F Suspension::ChassisOrigin;
+int Suspension::Gear = 0;
+
+static float gearRatio[] = { 1.f, 1.3f, 1.7f, 1.9f, 2.3f, 2.9f, .5f };
+
 Suspension::Suspension() 
 {
 	m_differential[0] = m_differential[1] = 1.f;
@@ -612,7 +616,8 @@ void Suspension::brake(const int & i, const float & strength, bool goForward)
 	float wheelSpeed = wheelVelocity(i).length();
 	
 	m_wheelForce[i] = -wheelSpeed * strength * m_differential[i];
-	if(m_wheelForce[i] < -SPEEDLIMIT) m_wheelForce[i] = -SPEEDLIMIT;
+	if(m_wheelForce[i] < -SPEEDLIMIT * 2.f) m_wheelForce[i] = -SPEEDLIMIT * 2.f;
+	// m_wheelForce[i] = -SPEEDLIMIT * strength * m_differential[i];
 		
 	float diff = m_wheel[0]->radius() * m_wheelForce[i];
 	
@@ -628,7 +633,7 @@ void Suspension::power(const int & i, const float & strength, bool goForward)
 {
 	float wheelSpeed = wheelVelocity(i).length();
 	
-	m_wheelForce[i] = SPEEDLIMIT * strength * m_differential[i];
+	m_wheelForce[i] = SPEEDLIMIT * gearRatio[Gear] * strength * m_differential[i];
 
 	float diff = m_wheel[0]->radius() * m_wheelForce[i];
 	

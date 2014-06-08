@@ -54,6 +54,7 @@ public:
 	static float RodRadius;
 	static btRigidBody * ChassisBody;
 	static Vector3F ChassisOrigin;
+	static int Gear;
 
 private:
 	btRigidBody* createCarrier(const Matrix44F & tm, bool isLeft);

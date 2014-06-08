@@ -38,11 +38,13 @@ public:
 	void wheelSlip(int i, float * dst) const;
 	void wheelSkid(int i, float * dst) const;
 	const float acceleration() const;
-	
+	void changeGear(int x);
+	const int gear() const;
 private:
     Vector3F m_prevOrigin, m_prevVelocity;
 	float m_acceleration;
 	float m_gasStrength, m_steerAngle, m_brakeStrength;
-	bool m_goForward, m_parkingBrake;
+	int m_gear;
+	bool m_parkingBrake;
 };
 }
