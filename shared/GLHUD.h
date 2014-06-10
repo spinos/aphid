@@ -7,7 +7,6 @@
 #endif
 
 #ifdef WIN32
-#include <winsock2.h>
 #include <windows.h>
 #include <GL/gl.h>
 #include <GL/glu.h>

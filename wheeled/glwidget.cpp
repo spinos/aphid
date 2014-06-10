@@ -4,6 +4,7 @@
 #include <DynamicsSolver.h>
 #include "glwidget.h"
 #include <Obstacle.h>
+
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -13,11 +14,14 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	caterpillar::PhysicsState::engine->initPhysics();
 	caterpillar::PhysicsState::engine->addGroundPlane(2000.f, 0.f);
 	
-	caterpillar::Obstacle obst;
-	obst.create(2000.f);
+	//caterpillar::Obstacle obst;
+	//obst.create(2000.f);
 	
-	m_vehicle->setOrigin(Vector3F(7.f, 17.f, -1900.f));
-	getCamera()->traverse(Vector3F(7.f, 17.f, -1900.f));
+	m_circuit = new caterpillar::RaceCircuit;
+	m_circuit->create();
+	
+	m_vehicle->setOrigin(Vector3F(0.f, 20.f, -10.f));
+	getCamera()->traverse(Vector3F(0.f, 20.f, -10.f));
 	
 	caterpillar::Wheel::Profile rearWheelInfo;
 	rearWheelInfo._width = 2.89f;
@@ -121,10 +125,10 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::simulate()
 {
-	getCamera()->traverse(m_vehicle->vehicleTraverse());
-    update();
+	update();
 	m_vehicle->update();
     caterpillar::PhysicsState::engine->simulate();
+    getCamera()->traverse(m_vehicle->vehicleTraverse());
 }
 
 void GLWidget::keyPressEvent(QKeyEvent *e)
@@ -132,7 +136,7 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
     bool enabled;
 	switch (e->key()) {
 		case Qt::Key_W:
-			m_vehicle->addGas(.13f);
+		    m_vehicle->addGas(.13f);
 			break;
 		case Qt::Key_B:
 			m_vehicle->addBrakeStrength(.23f);
@@ -141,13 +145,13 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->setParkingBrake(true);
 			break;
 		case Qt::Key_A:
-			m_vehicle->addSteerAngle(0.013f);
+			m_vehicle->addSteerAngle(0.007f);
 			break;
 		case Qt::Key_S:
 			m_vehicle->setSteerAngle(0.f);
 			break;
 		case Qt::Key_D:
-			m_vehicle->addSteerAngle(-0.013f);
+			m_vehicle->addSteerAngle(-0.007f);
 			break;
 		case Qt::Key_F:
 			m_vehicle->changeGear(1);
@@ -170,13 +174,16 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 {
 	switch (event->key()) {
 		case Qt::Key_W:
-			m_vehicle->setGas(0.f);
+		    if(event->isAutoRepeat()) event->ignore();
+			else m_vehicle->setGas(0.f);
 			break;
 		case Qt::Key_B:
-			m_vehicle->setBrakeStrength(0.f);
+			if(event->isAutoRepeat()) event->ignore();
+			else m_vehicle->setBrakeStrength(0.f);
 			break;
 		case Qt::Key_P:
-			m_vehicle->setParkingBrake(false);
+			if(event->isAutoRepeat()) event->ignore();
+			else m_vehicle->setParkingBrake(false);
 			break;
 		default:
 			break;

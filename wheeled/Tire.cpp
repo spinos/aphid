@@ -85,7 +85,7 @@ void Tire::attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const 
 		
 		btTransform frm = Common::CopyFromMatrix44F(ctm);
 		btRigidBody* padBody = PhysicsState::engine->createRigidBody(padShape, frm, .1f);
-		padBody->setFriction(1.99f);
+		padBody->setFriction(3.99f);
 		padBody->setDamping(0.f, 0.f);
 		
 		btTransform frameInB; frameInB.setIdentity();

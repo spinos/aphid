@@ -47,7 +47,9 @@ btBvhTriangleMeshShape* MeshShape::createCollisionShape()
 {
     if (m_indexVertexArrays)
 		delete m_indexVertexArrays;
-	
+	std::cout<<"num triangle: "<<m_numTri<<"\n";
+	std::cout<<"num vertex: "<<m_numVert<<"\n";
+	std::cout<<"sizeof btVector3: "<<sizeof(btVector3)<<"\n";
 	m_indexVertexArrays = new btTriangleIndexVertexArray(m_numTri, m_indices, 3 * sizeof(int),
 		m_numVert,(btScalar*)&m_vertexPos[0][0], sizeof(btVector3));
 	

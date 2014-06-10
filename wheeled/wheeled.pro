@@ -28,6 +28,8 @@ HEADERS       = glwidget.h \
 				../caterpillar/Common.h \
                 ../tracked/shapeDrawer.h \
                 Obstacle.h \
+                MeshShape.h \
+                RaceCircuit.h \
 Tire.h \
 Damper.h \
 				Suspension.h\
@@ -44,6 +46,8 @@ SOURCES       = glwidget.cpp \
                 ../caterpillar/PhysicsState.cpp \
                 ../tracked/shapeDrawer.cpp \
                 Obstacle.cpp \
+                MeshShape.cpp \
+                RaceCircuit.cpp \
 Tire.cpp \
 Damper.cpp \
 				Suspension.cpp \
