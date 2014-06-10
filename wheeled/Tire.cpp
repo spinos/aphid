@@ -19,6 +19,7 @@ btRigidBody* Tire::create(const float & radiusMajor, const float & radiusMinor, 
 	const float hw = .5f * width; m_hw = hw;
 	const float sy = (radiusMajor - radiusMinor) * PI / NUMGRIDRAD;
 	btCollisionShape * padShape = PhysicsState::engine->createBoxShape(hw, sy * .8f, radiusMinor * .5);
+	// btCollisionShape * padShape = PhysicsState::engine->createCylinderShape(sy * .9f, hw, sy * .9f);
 	
 	btCompoundShape* wheelShape = new btCompoundShape();
 
@@ -26,10 +27,11 @@ btRigidBody* Tire::create(const float & radiusMajor, const float & radiusMinor, 
 	if(isLeft) d= 1.f;
 	Matrix44F ptm[2];
 	ptm[0].rotateZ(PADROLL * d);
-	ptm[0].translate(-0.f * hw, 0.f, radiusMajor - radiusMinor * 2.f);
+	// ptm[0].rotateZ(PI * .5f);
+	ptm[0].translate(-0.f * hw, 0.f, radiusMajor - radiusMinor * 1.5f);
 	
 	ptm[1].rotateZ(-PADROLL * d);
-	ptm[1].translate(.5f * hw, 0.f, radiusMajor - radiusMinor * 2.f);
+	ptm[1].translate(.5f * hw, 0.f, radiusMajor - radiusMinor * 1.5f);
 
 	const float delta = PI * 2.f / (float)NUMGRIDRAD;
 	int i;
@@ -65,6 +67,7 @@ void Tire::attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const 
 	
 	Matrix44F tm[2];
 	tm[0].rotateZ(PADROLL * d);
+	// tm[0].rotateZ(PI * .5f);
 	tm[0].translate(-0.f * m_hw, 0.f, radiusMajor - radiusMinor * .5f);
 	
 	tm[1].rotateZ(-PADROLL * d);
@@ -88,23 +91,23 @@ void Tire::attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const 
 		btTransform frameInB; frameInB.setIdentity();
 		btGeneric6DofSpringConstraint* spring = PhysicsState::engine->constrainBySpring(*wheelBody, *padBody, frameInA, frameInB, true);
 		
-		spring->setLinearUpperLimit(btVector3(0., 0., -.0625f * radiusMinor));
-		spring->setLinearLowerLimit(btVector3(0., 0., .0625f * radiusMinor));
-		spring->setAngularLowerLimit(btVector3(0.f, -0.2f, 0.f));
-	    spring->setAngularUpperLimit(btVector3(0.f, 0.2f, 0.f));
+		spring->setLinearUpperLimit(btVector3(0., 0., -.25f * radiusMinor));
+		spring->setLinearLowerLimit(btVector3(0., 0., .25f * radiusMinor));
+		spring->setAngularLowerLimit(btVector3(0.f, -0.05f, 0.f));
+	    spring->setAngularUpperLimit(btVector3(0.f, 0.05f, 0.f));
 	    spring->enableSpring(2, true);
 	    spring->setStiffness(2, 1900.f);
 	    spring->setDamping(2, 0.001f);
 		spring->setEquilibriumPoint(2, 0.0f);
 		
-		//spring->enableSpring(3, true);
-	    //spring->setStiffness(3, 1900.f);
-	    //spring->setDamping(3, 0.001f);
-		//spring->setEquilibriumPoint(3, 0.0f);
-		
+		/* spring->enableSpring(3, true);
+				spring->setStiffness(3, 1900.f);
+				spring->setDamping(3, 0.001f);
+				spring->setEquilibriumPoint(3, 0.0f);
+		 */		
 		spring->enableSpring(4, true);
-	    spring->setStiffness(4, 800.f);
-	    spring->setDamping(4, 0.01f);
+	    spring->setStiffness(4, 1900.f);
+	    spring->setDamping(4, 0.001f);
 		spring->setEquilibriumPoint(4, 0.0f);
 		
 		rot.rotateX(delta);

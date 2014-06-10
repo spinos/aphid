@@ -50,11 +50,11 @@ void Wheel::setFriction(const float & slipAngle)
     float ang = slipAngle;
     if(ang < 0.f) ang = - ang;
     
-    float alpha = (ang - 0.05f) * 4.44f;
+    float alpha = (ang - 0.01f) * 1.1f;
     if(alpha < 0.f) alpha = 0.f;
     if(alpha > 1.57f) alpha = 1.57f;
     alpha = sin(alpha);
-    m_friction = 3.99f - 3.f * alpha;
+    m_friction = 2.99f - 2.5f * alpha;
     m_tire.setFriction(m_friction);
 }
 

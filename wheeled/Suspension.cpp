@@ -31,7 +31,7 @@ Suspension::Profile::Profile()
 	_lowerWishboneLength = 5.7f;
 	_upperWishboneTilt = .01f;
 	_lowerWishboneTilt = -0.19f;
-	_damperY = 4.3f;
+	_damperY = 4.f;
 	_steerable = true;
 	_powered = false;
 }

@@ -12,7 +12,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_vehicle = new caterpillar::WheeledVehicle;
 	
 	caterpillar::PhysicsState::engine->initPhysics();
-	caterpillar::PhysicsState::engine->addGroundPlane(2000.f, 0.f);
+	//åcaterpillar::PhysicsState::engine->addGroundPlane(2000.f, 0.f);
 	
 	//caterpillar::Obstacle obst;
 	//obst.create(2000.f);
@@ -40,7 +40,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	std::cout<<"object groups "<<m_vehicle->str();
 	
 	caterpillar::PhysicsState::engine->setEnablePhysics(false);
-	caterpillar::PhysicsState::engine->setNumSubSteps(15);
+	caterpillar::PhysicsState::engine->setNumSubSteps(18);
 	caterpillar::PhysicsState::engine->setEnableDrawConstraint(false);
 	caterpillar::PhysicsState::engine->setSimulateFrequency(180.f);
 	QTimer *timer = new QTimer(this);
@@ -149,13 +149,13 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->setParkingBrake(true);
 			break;
 		case Qt::Key_A:
-			m_vehicle->addSteerAngle(0.007f);
+			m_vehicle->addSteerAngle(0.009f);
 			break;
 		case Qt::Key_S:
 			m_vehicle->setSteerAngle(0.f);
 			break;
 		case Qt::Key_D:
-			m_vehicle->addSteerAngle(-0.007f);
+			m_vehicle->addSteerAngle(-0.009f);
 			break;
 		case Qt::Key_F:
 			m_vehicle->changeGear(1);

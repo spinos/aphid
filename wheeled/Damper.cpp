@@ -31,7 +31,7 @@ Damper::Damper(btRigidBody * lower, btRigidBody * upper, const float & l)
 	slid->setLinearUpperLimit(btVector3(0.0, m_range, 0.0));
 	
 	slid->enableSpring(1, true);
-	slid->setStiffness(1, 400.f);
+	slid->setStiffness(1, 500.f);
 	slid->setDamping(1, 0.05f);
 	slid->setEquilibriumPoint(1, 0.f);
 	m_slid = slid;
