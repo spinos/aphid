@@ -12,7 +12,7 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-#define SPEEDLIMIT 1.5f
+#define SPEEDLIMIT 3.1f
 #define BRAKEFORCE 50.f
 #define POWERFORCE 30.f
 
@@ -606,7 +606,7 @@ void Suspension::update()
 	m_wheel[0]->setFriction(wheelSlip(0));
 	m_wheel[1]->setFriction(wheelSlip(1));
 	
-	std::cout<<"friction l/r "<<m_wheel[0]->friction()<<" "<<m_wheel[1]->friction()<<"\n";
+	// std::cout<<"friction l/r "<<m_wheel[0]->friction()<<" "<<m_wheel[1]->friction()<<"\n";
 }
 
 void Suspension::brake(const float & strength, bool goForward)
@@ -621,7 +621,7 @@ void Suspension::brake(const int & i, const float & strength, bool goForward)
 	float wheelSpeed = wheelVelocity(i).length();
 	
 	m_wheelForce[i] = -wheelSpeed * strength * m_differential[i];
-	if(m_wheelForce[i] < -SPEEDLIMIT * m_differential[i]) m_wheelForce[i] = -SPEEDLIMIT * 2.f * m_differential[i];
+	if(m_wheelForce[i] < -SPEEDLIMIT * m_differential[i]) m_wheelForce[i] = -SPEEDLIMIT * m_differential[i];
 	// m_wheelForce[i] = -SPEEDLIMIT * strength * m_differential[i];
 		
 	float diff = m_wheel[0]->radius() * m_wheelForce[i];
@@ -744,7 +744,7 @@ const float Suspension::wheelSlip(const int & i) const
 	Matrix44F tm = wheelHubTM(i);
 	tm.inverse();
 	vel = tm.transformAsNormal(vel);
-	vel.normalize();
+	// vel.normalize();
 	return atan(vel.x / vel.z);
 }
 

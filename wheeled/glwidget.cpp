@@ -22,6 +22,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_vehicle->setOrigin(Vector3F(0.f, 20.f, -10.f));
 	getCamera()->traverse(Vector3F(0.f, 20.f, -10.f));
+	perspCamera()->setFarClipPlane(20000.f);
+	perspCamera()->setNearClipPlane(1.f);
+	orthoCamera()->setFarClipPlane(20000.f);
+	orthoCamera()->setNearClipPlane(1.f);
 	
 	caterpillar::Wheel::Profile rearWheelInfo;
 	rearWheelInfo._width = 2.89f;

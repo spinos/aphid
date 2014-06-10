@@ -12,8 +12,7 @@
 namespace caterpillar {
 class Tire {
 public:
-    #define NUMGRIDRAD 30
-    #define NUMPAD 60
+    #define NUMGRIDRAD 50
 	Tire();
 	virtual ~Tire();
 	
@@ -23,6 +22,6 @@ protected:
 	void attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const Matrix44F & origin, const float & radiusMajor, const float & radiusMinor, bool isLeft);
 private:
     float m_hw;
-    btRigidBody * m_bd[NUMPAD];
+    btRigidBody * m_bd[NUMGRIDRAD];
 };
 }
