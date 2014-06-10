@@ -17,7 +17,7 @@ public:
 		Profile() {
 			_width = 2.67f;
 			_radiusMajor = 4.57f;
-			_radiusMinor = .312f;
+			_radiusMinor = .612f;
 			_mass = 1.f;
 		}
 		float _width, _radiusMajor, _radiusMinor, _mass;
@@ -29,15 +29,18 @@ public:
 	void setProfile(const Profile & info);
 	const float width() const;
 	const float radius() const;
+	const float friction() const;
 	
 	btRigidBody* create(const Matrix44F & tm, bool isLeft);
 	btRigidBody* body();
 	const Vector3F velocity() const;
 	const Vector3F angularVelocity() const;
 	const btTransform tm() const;
+	void setFriction(const float & slipAngle);
 private:
 	Profile m_profile;
 	Tire m_tire;
 	btRigidBody * m_body;
+	float m_friction;
 };
 }

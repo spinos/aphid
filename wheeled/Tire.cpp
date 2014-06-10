@@ -11,7 +11,6 @@
 #include "PhysicsState.h"
 #include <DynamicsSolver.h>
 namespace caterpillar {
-#define NUMGRIDRAD 30
 #define PADROLL .3f
 Tire::Tire() {}
 Tire::~Tire() {}
@@ -19,7 +18,7 @@ btRigidBody* Tire::create(const float & radiusMajor, const float & radiusMinor, 
 {
 	const float hw = .5f * width; m_hw = hw;
 	const float sy = (radiusMajor - radiusMinor) * PI / NUMGRIDRAD;
-	btCollisionShape * padShape = PhysicsState::engine->createBoxShape(hw * .4f, sy * .7f, radiusMinor * .5);
+	btCollisionShape * padShape = PhysicsState::engine->createBoxShape(hw * .4f, sy * .8f, radiusMinor * .5);
 	
 	btCompoundShape* wheelShape = new btCompoundShape();
 
@@ -87,6 +86,7 @@ void Tire::attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const 
 		btRigidBody* padBody = PhysicsState::engine->createRigidBody(padShape, frm, .1f);
 		padBody->setFriction(3.99f);
 		padBody->setDamping(0.f, 0.f);
+		m_bd[i * 2 + j] = padBody;
 		
 		btTransform frameInB; frameInB.setIdentity();
 		btGeneric6DofSpringConstraint* spring = PhysicsState::engine->constrainBySpring(*wheelBody, *padBody, frameInA, frameInB, true);
@@ -114,4 +114,10 @@ void Tire::attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const 
 		rot.rotateX(delta);
 	}
 }
+
+void Tire::setFriction(const float & x)
+{
+    for(int i = 0; i < NUMPAD; i++) m_bd[i]->setFriction(x);;
+}
+
 }

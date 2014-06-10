@@ -45,4 +45,19 @@ const btTransform Wheel::tm() const
 	return m_body->getWorldTransform(); 
 }
 
+void Wheel::setFriction(const float & slipAngle)
+{
+    float ang = slipAngle;
+    if(ang < 0.f) ang = - ang;
+    
+    float alpha = (ang - 0.05f) * 4.44f;
+    if(alpha < 0.f) alpha = 0.f;
+    if(alpha > 1.57f) alpha = 1.57f;
+    alpha = sin(alpha);
+    m_friction = 3.99f - 3.f * alpha;
+    m_tire.setFriction(m_friction);
+}
+
+const float Wheel::friction() const { return m_friction; }
+
 }

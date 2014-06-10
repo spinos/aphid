@@ -12,9 +12,9 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-#define SPEEDLIMIT 1.57f
-#define BRAKEFORCE 100.f
-#define POWERFORCE 50.f
+#define SPEEDLIMIT 1.5f
+#define BRAKEFORCE 50.f
+#define POWERFORCE 30.f
 
 Suspension::Profile::Profile() 
 {
@@ -36,7 +36,7 @@ Suspension::Profile::Profile()
 	_powered = false;
 }
 
-float Suspension::RodRadius = .17f;
+float Suspension::RodRadius = .3f;
 btRigidBody * Suspension::ChassisBody;
 Vector3F Suspension::ChassisOrigin;
 int Suspension::Gear = 0;
@@ -602,6 +602,11 @@ void Suspension::update()
 {
 	m_damper[0]->update();
 	m_damper[1]->update();
+	
+	m_wheel[0]->setFriction(wheelSlip(0));
+	m_wheel[1]->setFriction(wheelSlip(1));
+	
+	std::cout<<"friction l/r "<<m_wheel[0]->friction()<<" "<<m_wheel[1]->friction()<<"\n";
 }
 
 void Suspension::brake(const float & strength, bool goForward)
@@ -616,7 +621,7 @@ void Suspension::brake(const int & i, const float & strength, bool goForward)
 	float wheelSpeed = wheelVelocity(i).length();
 	
 	m_wheelForce[i] = -wheelSpeed * strength * m_differential[i];
-	if(m_wheelForce[i] < -SPEEDLIMIT * 2.f * m_differential[i]) m_wheelForce[i] = -SPEEDLIMIT * 2.f * m_differential[i];
+	if(m_wheelForce[i] < -SPEEDLIMIT * m_differential[i]) m_wheelForce[i] = -SPEEDLIMIT * 2.f * m_differential[i];
 	// m_wheelForce[i] = -SPEEDLIMIT * strength * m_differential[i];
 		
 	float diff = m_wheel[0]->radius() * m_wheelForce[i];

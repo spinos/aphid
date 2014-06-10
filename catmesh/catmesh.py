@@ -40,7 +40,11 @@ def CatchSelectedMesh(fileName):
     rec.write('static const int sMeshTriangleIndices[] = {')
 
     for i in range(0, triangleVertices.length() / 3):
-        rec.write("%i, %i, %i,\n" % (triangleVertices[i * 3], triangleVertices[i * 3 + 1], triangleVertices[i * 3 + 2]))
+        if i == (triangleVertices.length() / 3 - 1):
+            rec.write("%i, %i, %i\n" % (triangleVertices[i * 3], triangleVertices[i * 3 + 1], triangleVertices[i * 3 + 2]))
+        else:
+            rec.write("%i, %i, %i,\n" % (triangleVertices[i * 3], triangleVertices[i * 3 + 1], triangleVertices[i * 3 + 2]))
+        
     rec.write('};\n')
     
     vertexArray = om.MPointArray()
@@ -48,7 +52,10 @@ def CatchSelectedMesh(fileName):
     
     rec.write('static const float sMeshVertices[] = {')
     for i in range(0, vertexArray.length()):
-        rec.write("%ff, %ff, %ff,\n" % (vertexArray[i].x, vertexArray[i].y, vertexArray[i].z))
+        if i == (vertexArray.length() - 1):
+            rec.write("%ff, %ff, %ff\n" % (vertexArray[i].x, vertexArray[i].y, vertexArray[i].z))
+        else:
+            rec.write("%ff, %ff, %ff,\n" % (vertexArray[i].x, vertexArray[i].y, vertexArray[i].z))
     rec.write('};\n')
     
     itv = om.MItMeshVertex(mesh);
@@ -65,4 +72,4 @@ def CatchSelectedMesh(fileName):
     return True
     
 
-CatchSelectedMesh('/Users/jianzhang/Desktop/out.h')
+CatchSelectedMesh('D:/aphid/wheeled/Silverstone.h')

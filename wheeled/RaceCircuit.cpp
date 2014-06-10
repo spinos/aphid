@@ -17,7 +17,7 @@ void RaceCircuit::create()
         idx[i] = sMeshTriangleIndices[i];
     }
     
-    setMargin(1.f);
+    setMargin(2.f);
 	btBvhTriangleMeshShape* shp = createCollisionShape();
 	
 	btTransform trans; trans.setIdentity();
