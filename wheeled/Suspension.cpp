@@ -12,7 +12,7 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-#define SPEEDLIMIT 3.1f
+#define SPEEDLIMIT 6.28f
 #define BRAKEFORCE 50.f
 #define POWERFORCE 30.f
 

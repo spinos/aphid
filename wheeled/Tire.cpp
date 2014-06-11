@@ -93,18 +93,18 @@ void Tire::attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const 
 		
 		spring->setLinearUpperLimit(btVector3(0., 0., -.25f * radiusMinor));
 		spring->setLinearLowerLimit(btVector3(0., 0., .25f * radiusMinor));
-		spring->setAngularLowerLimit(btVector3(0.f, -0.05f, 0.f));
-	    spring->setAngularUpperLimit(btVector3(0.f, 0.05f, 0.f));
+		spring->setAngularLowerLimit(btVector3(-0.05f, -0.05f, 0.f));
+	    spring->setAngularUpperLimit(btVector3(0.05f, 0.05f, 0.f));
 	    spring->enableSpring(2, true);
 	    spring->setStiffness(2, 1900.f);
 	    spring->setDamping(2, 0.001f);
 		spring->setEquilibriumPoint(2, 0.0f);
 		
-		/* spring->enableSpring(3, true);
-				spring->setStiffness(3, 1900.f);
-				spring->setDamping(3, 0.001f);
-				spring->setEquilibriumPoint(3, 0.0f);
-		 */		
+		spring->enableSpring(3, true);
+		spring->setStiffness(3, 1900.f);
+		spring->setDamping(3, 0.001f);
+		spring->setEquilibriumPoint(3, 0.0f);
+		
 		spring->enableSpring(4, true);
 	    spring->setStiffness(4, 1900.f);
 	    spring->setDamping(4, 0.001f);
