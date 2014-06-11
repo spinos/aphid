@@ -12,7 +12,11 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-Wheel::Wheel() {}
+Wheel::Wheel() 
+{
+    m_friction = 2.99f;
+}
+
 Wheel::~Wheel() {}
 void Wheel::setProfile(const Profile & info) { m_profile = info; }
 
@@ -45,17 +49,18 @@ const btTransform Wheel::tm() const
 	return m_body->getWorldTransform(); 
 }
 
-void Wheel::setFriction(const float & slipAngle)
+float Wheel::computeFriction(const float & slipAngle)
 {
     float ang = slipAngle;
     if(ang < 0.f) ang = - ang;
     
-    float alpha = (ang - 0.01f) * 1.1f;
+    float alpha = (ang - 0.03f) * 1.1f;
     if(alpha < 0.f) alpha = 0.f;
     if(alpha > 1.57f) alpha = 1.57f;
     alpha = sin(alpha);
     m_friction = 2.99f - 2.5f * alpha;
     m_tire.setFriction(m_friction);
+    return m_friction;
 }
 
 const float Wheel::friction() const { return m_friction; }

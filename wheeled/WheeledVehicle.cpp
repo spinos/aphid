@@ -20,6 +20,8 @@ WheeledVehicle::WheeledVehicle()
 	m_brakeStrength = 0.f;
 	m_gear = 0;
 	m_parkingBrake = false;
+	m_downForce = 0.f;
+	m_mass = 200.f;
 }
 
 WheeledVehicle::~WheeledVehicle() {}
@@ -39,7 +41,7 @@ void WheeledVehicle::create()
 	trans.setOrigin(btVector3(origin().x, origin().y, origin().z));
 	
 	const int id = PhysicsState::engine->numCollisionObjects();
-	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, 240.f);
+	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, m_mass);
 	chassisBody->setDamping(0.f, 0.f);
 	
 	group("chassis").push_back(id);
@@ -98,8 +100,9 @@ void WheeledVehicle::update()
 	
 	if(m_parkingBrake) suspension(numAxis() - 1).parkingBrake();
 	
-	m_acceleration = vehicleVelocity().length() - m_prevVelocity.length();
-	m_prevVelocity = vehicleVelocity();
+	computeAcceleration();
+	computeDifting();
+	applyDownForce();
 }
 
 const Matrix44F WheeledVehicle::vehicleTM() const
@@ -149,15 +152,32 @@ void WheeledVehicle::wheelSkid(int i, float * dst) const
 	suspension(i).wheelSkid(dst);
 }
 
-const float WheeledVehicle::drifting() const
+void WheeledVehicle::wheelFriction(int i, float * dst) const
 {
-	Vector3F vel = vehicleVelocity(); 
-	if(vel.length() < 0.1f) return 0.f;
+    suspension(i).wheelFriction(dst);
+}
+
+void WheeledVehicle::computeAcceleration()
+{
+    const Vector3F curV = vehicleVelocity();
+    m_acceleration = curV.length() - m_prevVelocity.length();
+	m_prevVelocity = curV;
+}
+
+void WheeledVehicle::computeDifting()
+{
+ 	Vector3F vel = vehicleVelocity(); 
+	if(vel.length() < 0.1f) return;
 	vel.normalize();
 	Matrix44F space = vehicleTM();
 	space.inverse();
 	vel = space.transformAsNormal(vel);
-	return vel.x;
+	m_drifting = vel.x;   
+}
+
+const float WheeledVehicle::drifting() const
+{
+	return m_drifting;
 }
 
 const float WheeledVehicle::acceleration() const
@@ -173,5 +193,32 @@ void WheeledVehicle::changeGear(int x)
 }
 
 const int WheeledVehicle::gear() const { return m_gear; }
+
+const float WheeledVehicle::downForce() const { return m_downForce; }
+
+void WheeledVehicle::applyDownForce()
+{
+    if(!PhysicsState::engine->isPhysicsEnabled()) return;
+    
+    Vector3F vel = m_prevVelocity; 
+	if(vel.length() < 0.1f) {
+	    m_downForce = 0.f;
+	    return;
+	}
+
+	Matrix44F space = vehicleTM();
+	
+	Vector3F down = space.transformAsNormal(Vector3F(0.f, -1.f, 0.f));
+	space.inverse();
+	vel = space.transformAsNormal(vel);
+	float facing = vel.z;
+	if(facing < 0.f) facing = -facing;
+	
+	m_downForce = facing * getChassisDim().x * getChassisDim().y * .001f;
+	if(m_downForce > 1.5f) m_downForce = 1.5f;
+	down *= m_downForce * m_mass;
+	btRigidBody * chassisBody = PhysicsState::engine->getRigidBody(getGroup("chassis")[0]);
+	chassisBody->applyCentralForce(btVector3(down.x, down.y, down.z));
+}
 
 }

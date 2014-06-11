@@ -50,6 +50,7 @@ public:
 	void wheelForce(float * dst) const;
 	void wheelSlip(float * dst) const;
 	void wheelSkid(float * dst) const;
+	void wheelFriction(float * dst) const;
 	
 	static float RodRadius;
 	static btRigidBody * ChassisBody;
@@ -77,8 +78,8 @@ private:
 	void brake(const float & strength, bool goForward);
 	void power(const float & strength, bool goForward);
 	void power(const int & i, const float & strength, bool goForward);
-	const float wheelSlip(const int & i) const;
-	const float wheelSkid(const int & i) const;
+	const float computeWheelSlip(const int & i) const;
+	const float computeWheelSkid(const int & i) const;
 	Profile m_profile;
 	btGeneric6DofConstraint* m_steerJoint[2];
 	btGeneric6DofConstraint* m_driveJoint[2];
@@ -88,5 +89,7 @@ private:
 	Damper * m_damper[2];
 	float m_differential[2];
 	float m_wheelForce[2];
+	float m_wheelSlip[2];
+	float m_wheelSkid[2];
 };
 }

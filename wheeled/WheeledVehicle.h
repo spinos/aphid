@@ -37,13 +37,20 @@ public:
 	void wheelForce(int i, float * dst) const;
 	void wheelSlip(int i, float * dst) const;
 	void wheelSkid(int i, float * dst) const;
+	void wheelFriction(int i, float * dst) const;
 	const float acceleration() const;
+	const float downForce() const;
 	void changeGear(int x);
 	const int gear() const;
 private:
+    void computeAcceleration();
+    void computeDifting();
+    void applyDownForce();
+private:
     Vector3F m_prevOrigin, m_prevVelocity;
-	float m_acceleration;
+	float m_acceleration, m_drifting, m_downForce;
 	float m_gasStrength, m_steerAngle, m_brakeStrength;
+	float m_mass;
 	int m_gear;
 	bool m_parkingBrake;
 };

@@ -42,7 +42,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	caterpillar::PhysicsState::engine->setEnablePhysics(false);
 	caterpillar::PhysicsState::engine->setNumSubSteps(18);
 	caterpillar::PhysicsState::engine->setEnableDrawConstraint(false);
-	caterpillar::PhysicsState::engine->setSimulateFrequency(180.f);
+	caterpillar::PhysicsState::engine->setSimulateFrequency(200.f);
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(30);
@@ -94,19 +94,30 @@ void GLWidget::clientDraw()
 	hudText(sst.str(), i++);
 	m_vehicle->wheelSlip(0, t);
 	sst.str("");
-	sst<<"slip front wheel: "<<t[0]<<","<<t[1];
+	sst<<"front wheel slip: "<<t[0]<<","<<t[1];
 	hudText(sst.str(), i++);
 	m_vehicle->wheelSlip(1, t);
 	sst.str("");
-	sst<<"slip back wheel: "<<t[0]<<","<<t[1];
+	sst<<"back wheel slip: "<<t[0]<<","<<t[1];
 	hudText(sst.str(), i++);
 	m_vehicle->wheelSkid(0, t);
 	sst.str("");
-	sst<<"skid front wheel: "<<t[0]<<","<<t[1];
+	sst<<"front wheel skid: "<<t[0]<<","<<t[1];
 	hudText(sst.str(), i++);
 	m_vehicle->wheelSkid(1, t);
 	sst.str("");
-	sst<<"skid back wheel: "<<t[0]<<","<<t[1];
+	sst<<"back wheel skid: "<<t[0]<<","<<t[1];
+	hudText(sst.str(), i++);
+	m_vehicle->wheelFriction(0, t);
+	sst.str("");
+	sst<<"front wheel friction: "<<t[0]<<","<<t[1];
+	hudText(sst.str(), i++);
+	m_vehicle->wheelFriction(1, t);
+	sst.str("");
+	sst<<"back wheel friction: "<<t[0]<<","<<t[1];
+	hudText(sst.str(), i++);
+	sst.str("");
+	sst<<"downward force: "<<m_vehicle->downForce();
 	hudText(sst.str(), i++);
 }
 //! [7]

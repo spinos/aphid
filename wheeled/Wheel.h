@@ -36,7 +36,7 @@ public:
 	const Vector3F velocity() const;
 	const Vector3F angularVelocity() const;
 	const btTransform tm() const;
-	void setFriction(const float & slipAngle);
+	float computeFriction(const float & slipAngle);
 private:
 	Profile m_profile;
 	Tire m_tire;

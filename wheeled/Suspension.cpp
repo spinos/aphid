@@ -12,7 +12,7 @@
 #include <PhysicsState.h>
 #include <Common.h>
 namespace caterpillar {
-#define SPEEDLIMIT 6.28f
+#define SPEEDLIMIT 6.2f
 #define BRAKEFORCE 50.f
 #define POWERFORCE 30.f
 
@@ -41,7 +41,7 @@ btRigidBody * Suspension::ChassisBody;
 Vector3F Suspension::ChassisOrigin;
 int Suspension::Gear = 0;
 
-static float gearRatio[] = { 1.f, 1.3f, 1.7f, 1.9f, 2.3f, 2.9f, .5f };
+static float gearRatio[] = { 1.f, .9f, .7f, .5f, .3f, .2f, 1.f };
 
 Suspension::Suspension() 
 {
@@ -603,9 +603,15 @@ void Suspension::update()
 	m_damper[0]->update();
 	m_damper[1]->update();
 	
-	m_wheel[0]->setFriction(wheelSlip(0));
-	m_wheel[1]->setFriction(wheelSlip(1));
+	const float slip0 = computeWheelSlip(0);
+	const float slip1 = computeWheelSlip(1);
+	m_wheel[0]->computeFriction(slip0);
+	m_wheel[1]->computeFriction(slip1);
 	
+	m_wheelSkid[0] = computeWheelSkid(0);
+	m_wheelSkid[1] = computeWheelSkid(1);
+	m_wheelSlip[0] = slip0;
+	m_wheelSlip[1] = slip1;
 	// std::cout<<"friction l/r "<<m_wheel[0]->friction()<<" "<<m_wheel[1]->friction()<<"\n";
 }
 
@@ -731,11 +737,17 @@ void Suspension::wheelForce(float * dst) const
 
 void Suspension::wheelSlip(float * dst) const
 {
-	dst[0] = wheelSlip(0);
-	dst[1] = wheelSlip(1);
+	dst[0] = m_wheelSlip[0];
+	dst[1] = m_wheelSlip[1];
 }
 
-const float Suspension::wheelSlip(const int & i) const
+void Suspension::wheelFriction(float * dst) const
+{
+    dst[0] = m_wheel[0]->friction();
+	dst[1] = m_wheel[1]->friction();
+}
+
+const float Suspension::computeWheelSlip(const int & i) const
 {
 	if(!PhysicsState::engine->isPhysicsEnabled()) return 0.f;
 	
@@ -750,11 +762,11 @@ const float Suspension::wheelSlip(const int & i) const
 
 void Suspension::wheelSkid(float * dst) const
 {
-	dst[0] = wheelSkid(0);
-	dst[1] = wheelSkid(1);
+	dst[0] = m_wheelSkid[0];
+	dst[1] = m_wheelSkid[1];
 }
 
-const float Suspension::wheelSkid(const int & i) const
+const float Suspension::computeWheelSkid(const int & i) const
 {
 	if(!PhysicsState::engine->isPhysicsEnabled()) return 0.f;
 	
@@ -764,7 +776,7 @@ const float Suspension::wheelSkid(const int & i) const
 	
 	float a = m_wheel[i]->angularVelocity().length();
 	
-	return (a * m_wheel[i]->radius() - wheelSpeed) / wheelSpeed;
+	return (a - wheelSpeed / m_wheel[i]->radius());
 }
 
 void Suspension::parkingBrake()
