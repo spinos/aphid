@@ -63,7 +63,7 @@ void GLWidget::clientDraw()
 	int i = 1;
 	std::stringstream sst;
 	sst.str("");
-	sst<<"vehicle speed: "<<m_vehicle->vehicleVelocity().length();
+	sst<<"vehicle speed: "<<m_vehicle->velocity().length();
 	hudText(sst.str(), i++);
 	sst.str("");
 	sst<<"vehicle acceleration: "<<m_vehicle->acceleration();
@@ -160,13 +160,13 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_vehicle->setParkingBrake(true);
 			break;
 		case Qt::Key_A:
-			m_vehicle->addSteerAngle(0.009f);
+			m_vehicle->addSteerAngle(0.013f);
 			break;
 		case Qt::Key_S:
 			m_vehicle->setSteerAngle(0.f);
 			break;
 		case Qt::Key_D:
-			m_vehicle->addSteerAngle(-0.009f);
+			m_vehicle->addSteerAngle(-0.013f);
 			break;
 		case Qt::Key_F:
 			m_vehicle->changeGear(1);

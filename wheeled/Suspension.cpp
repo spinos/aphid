@@ -42,7 +42,7 @@ Vector3F Suspension::ChassisOrigin;
 int Suspension::Gear = 0;
 
 static float gearRatio[] = { 1.f, .9f, .83f, .79f, .7f, .61f, 1.f };
-static float gearForce[] = { 31.f, 31.f, 31.f, 31.f, 31.f, 31.f, 31.f };
+static float gearForce[] = { 27.f, 29.f, 29.f, 29.f, 29.f, 29.f, 27.f };
 
 Suspension::Suspension() 
 {

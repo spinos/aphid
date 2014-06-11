@@ -22,6 +22,7 @@ WheeledVehicle::WheeledVehicle()
 	m_parkingBrake = false;
 	m_downForce = 0.f;
 	m_mass = 200.f;
+	m_downForceCoef = 1.f;
 }
 
 WheeledVehicle::~WheeledVehicle() {}
@@ -292,11 +293,14 @@ void WheeledVehicle::applyDownForce()
 	float facing = vel.z;
 	if(facing < 0.f) facing = -facing;
 	
-	m_downForce = facing * getChassisDim().x * getChassisDim().y * .0002f;
+	m_downForce = facing * getChassisDim().x * getChassisDim().y * .0002f * m_downForceCoef;
 	if(m_downForce > 1.f) m_downForce = 1.f;
 	down *= m_downForce * m_mass * 9.8f;
 	btRigidBody * chassisBody = PhysicsState::engine->getRigidBody(getGroup("chassis")[0]);
 	chassisBody->applyCentralForce(btVector3(down.x, down.y, down.z));
 }
+
+const Vector3F WheeledVehicle::velocity() const { return m_prevVelocity; }
+void WheeledVehicle::setDownForceCoef(const float & x) { m_downForceCoef = x; }
 
 }

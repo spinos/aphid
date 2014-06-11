@@ -17,6 +17,7 @@ public:
 	virtual ~WheeledVehicle();
 	void create();
 	void update();
+	void setDownForceCoef(const float & x);
 	void setGas(const float & x);
 	void addGas(const float & x);
 	void addSteerAngle(const float & x);
@@ -25,7 +26,6 @@ public:
 	void addBrakeStrength(const float & x);
 	void setGoForward(bool x);
 	void setParkingBrake(bool x);
-	const Vector3F vehicleVelocity() const;
 	const Matrix44F vehicleTM() const;
 	const Vector3F vehicleTraverse();
 	const float turnAngle() const;
@@ -42,7 +42,9 @@ public:
 	const float downForce() const;
 	void changeGear(int x);
 	const int gear() const;
+	const Vector3F velocity() const;
 private:
+	const Vector3F vehicleVelocity() const;
     btCollisionShape* createChassisShape();
     void computeAcceleration();
     void computeDifting();
@@ -51,7 +53,7 @@ private:
     Vector3F m_prevOrigin, m_prevVelocity;
 	float m_acceleration, m_drifting, m_downForce;
 	float m_gasStrength, m_steerAngle, m_brakeStrength;
-	float m_mass;
+	float m_mass, m_downForceCoef;
 	int m_gear;
 	bool m_parkingBrake;
 };
