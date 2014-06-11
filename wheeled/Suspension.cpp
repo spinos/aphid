@@ -41,7 +41,8 @@ btRigidBody * Suspension::ChassisBody;
 Vector3F Suspension::ChassisOrigin;
 int Suspension::Gear = 0;
 
-static float gearRatio[] = { 1.f, .9f, .7f, .5f, .3f, .2f, 1.f };
+static float gearRatio[] = { 1.f, .9f, .83f, .79f, .7f, .61f, 1.f };
+static float gearForce[] = { 31.f, 31.f, 31.f, 31.f, 31.f, 31.f, 31.f };
 
 Suspension::Suspension() 
 {
@@ -653,7 +654,7 @@ void Suspension::power(const int & i, const float & strength, bool goForward)
 	
 	float rps = wheelSpeed / m_wheel[0]->radius();
 	if(!goForward) rps = -rps;
-	applyMotor(rps, i, POWERFORCE);
+	applyMotor(rps, i, gearForce[Gear]);
 }
 
 void Suspension::power(const float & strength, bool goForward)
