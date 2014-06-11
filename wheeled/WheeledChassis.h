@@ -23,10 +23,16 @@ public:
 	void setAxisCoord(const int & i, const float & span, const float & y, const float & z);
 	void setSuspensionInfo(const int & i, const Suspension::Profile & profile);
 	void setWheelInfo(const int & i, const Wheel::Profile & profile);
+	void setHasRollCage(bool x);
+	void setRollCagePosition(const float & x, const float & y, const float & z);
+	void setRollCageDim(const float & x, const float & y, const float & z);
+	void setRollCageAngles(const float & aMin, const float & aMax, const float & aSide);
 	
 	const int numAxis() const;
 	const Vector3F origin() const;
-	const Vector3F getChassisDim() const; 
+	const Vector3F getChassisDim() const;
+	const bool hasRollCage() const;
+	void getRollCageParam(Vector3F & pos, Vector3F & dim, Vector3F & ang) const;
 protected:
 	Suspension & suspension(const int & i);
 	const Suspension & suspension(const int & i) const;
@@ -46,7 +52,9 @@ private:
 	Vector3F m_axisCoord[MAXNUMAXIS];
 	Suspension m_suspension[MAXNUMAXIS];
 	Wheel m_wheel[MAXNUMAXIS][2];
+	Vector3F m_rollCagePos, m_rollCageDim, m_rollCageAng;
 	float m_driveCenterZ, m_steerBase;
 	int m_numAxis;
+	bool m_hasRollCage;
 };
 }

@@ -15,6 +15,10 @@ WheeledChassis::WheeledChassis()
 	setAxisCoord(0, 17.f, -1.f, 13.f);
 	setAxisCoord(1, 17.f, -1.f, -16.1f);
 	m_numAxis = 2;
+	m_hasRollCage = true;
+	m_rollCagePos.set(0.f, 4.f, -4.f);
+	m_rollCageDim.set(19.f, 5.f, 5.f);
+	m_rollCageAng.set(.49f, .05f, .3f);
 }
 
 WheeledChassis::~WheeledChassis() {}
@@ -27,6 +31,9 @@ void WheeledChassis::setNumAxis(const int & x)
 	if(m_numAxis < 2) m_numAxis = 2;
 	if(m_numAxis > MAXNUMAXIS) m_numAxis = MAXNUMAXIS;
 }
+
+void WheeledChassis::setHasRollCage(bool x) { m_hasRollCage = x; }
+const bool WheeledChassis::hasRollCage() const { return m_hasRollCage; }
 
 const int WheeledChassis::numAxis() const { return m_numAxis; }
 
@@ -137,4 +144,27 @@ const float WheeledChassis::wheelSpan(const int & i) const
 }
 
 const float WheeledChassis::axisZ(const int & i) const { return m_axisCoord[i].z;}
+
+void WheeledChassis::setRollCagePosition(const float & x, const float & y, const float & z)
+{
+    m_rollCagePos.set(x, y, z);
+}
+
+void WheeledChassis::setRollCageDim(const float & x, const float & y, const float & z)
+{
+    m_rollCageDim.set(x, y, z);
+}
+
+void WheeledChassis::setRollCageAngles(const float & aMin, const float & aMax, const float & aSide)
+{
+    m_rollCageAng.set(aMin, aMax, aSide);
+}
+
+void WheeledChassis::getRollCageParam(Vector3F & pos, Vector3F & dim, Vector3F & ang) const
+{
+    pos = m_rollCagePos;
+    dim = m_rollCageDim;
+    ang = m_rollCageAng;
+}
+	
 }

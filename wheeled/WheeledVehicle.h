@@ -43,6 +43,7 @@ public:
 	void changeGear(int x);
 	const int gear() const;
 private:
+    btCollisionShape* createChassisShape();
     void computeAcceleration();
     void computeDifting();
     void applyDownForce();

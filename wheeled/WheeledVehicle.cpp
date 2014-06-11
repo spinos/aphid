@@ -32,13 +32,12 @@ void WheeledVehicle::create()
 	m_prevOrigin = origin();
 	m_prevVelocity.setZero();
 	
-	const Vector3F dims = getChassisDim() * .5f; 
-	dims.verbose("hulldim");
-	btCollisionShape* chassisShape = PhysicsState::engine->createBoxShape(dims.x, dims.y, dims.z);
+	btCollisionShape* chassisShape = createChassisShape();
 	
+	const Vector3F ori = origin();
 	btTransform trans;
 	trans.setIdentity();
-	trans.setOrigin(btVector3(origin().x, origin().y, origin().z));
+	trans.setOrigin(btVector3(ori.x, ori.y, ori.z));
 	
 	const int id = PhysicsState::engine->numCollisionObjects();
 	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, m_mass);
@@ -62,6 +61,85 @@ void WheeledVehicle::create()
 	
 	computeDriveZ();
 	computeSteerBase();
+}
+
+btCollisionShape* WheeledVehicle::createChassisShape()
+{
+    const Vector3F dimH = getChassisDim() * .5f; 
+    btBoxShape* box = PhysicsState::engine->createBoxShape(dimH.x, dimH.y, dimH.z);
+    if(!hasRollCage()) return box;
+    
+    btCompoundShape* comp = new btCompoundShape();
+    btTransform frm; frm.setIdentity();
+    comp->addChildShape(frm, box);
+    
+    Vector3F pos, dim, ang;
+    getRollCageParam(pos, dim, ang);
+    
+    const float barR = .31f;
+    const float xfac = dim.y * tan(ang.z);
+    Matrix44F tm;
+    
+    btCylinderShape * bar = PhysicsState::engine->createCylinderShape(barR, dim.x * .5f - xfac, barR);
+    
+    tm.setIdentity();
+    tm.rotateZ(PI * .5f);
+    tm.setTranslation(pos.x, pos.y + dim.y * .5f, pos.z - dim.z * .5f);
+    frm = Common::CopyFromMatrix44F(tm);
+    comp->addChildShape(frm, bar);
+    
+    tm.setTranslation(pos.x, pos.y + dim.y * .5f, pos.z + dim.z * .5f);
+    frm = Common::CopyFromMatrix44F(tm);
+    comp->addChildShape(frm, bar);
+    
+    const float zfac0 = dim.y * tan(ang.x);
+    const float l0 = sqrt(dim.y * dim.y + xfac * xfac + zfac0 * zfac0);
+    
+    bar = PhysicsState::engine->createCylinderShape(barR, l0 * .5f, barR);
+    
+    Matrix44F rotx; rotx.rotateX(-ang.x);
+    
+    tm.setIdentity();
+    tm *= rotx;
+    tm.rotateZ(ang.z);
+    tm.setTranslation(pos.x + dim.x * .5f - xfac * .5f, pos.y, pos.z + dim.z * .5f + zfac0 * .5f);
+    
+    frm = Common::CopyFromMatrix44F(tm);
+    comp->addChildShape(frm, bar);
+    
+    tm.setIdentity();
+    tm *= rotx;
+    tm.rotateZ(-ang.z);
+    tm.setTranslation(pos.x - dim.x * .5f + xfac * .5f, pos.y, pos.z + dim.z * .5f + zfac0 * .5f);
+    
+    frm = Common::CopyFromMatrix44F(tm);
+    comp->addChildShape(frm, bar);
+    
+    const float zfac1 = dim.y * tan(ang.y);
+    const float l1 = sqrt(dim.y * dim.y + xfac * xfac + zfac1 * zfac1);
+    
+    bar = PhysicsState::engine->createCylinderShape(barR, l1 * .5f, barR);
+    
+    rotx.setIdentity(); rotx.rotateX(ang.y);
+    
+    tm.setIdentity();
+    tm *= rotx;
+    tm.rotateZ(ang.z);
+    tm.setTranslation(pos.x + dim.x * .5f - xfac * .5f, pos.y, pos.z - dim.z * .5f - zfac1 * .5f);
+    
+    frm = Common::CopyFromMatrix44F(tm);
+    comp->addChildShape(frm, bar);
+    
+    tm.setIdentity();
+    tm *= rotx;
+    tm.rotateZ(-ang.z);
+    tm.setTranslation(pos.x - dim.x * .5f + xfac * .5f, pos.y, pos.z - dim.z * .5f - zfac1 * .5f);
+    
+    frm = Common::CopyFromMatrix44F(tm);
+    comp->addChildShape(frm, bar);
+    
+    PhysicsState::engine->addCollisionShape(comp);
+	return comp;
 }
 
 void WheeledVehicle::setGas(const float & x) { m_gasStrength = x; }
@@ -214,9 +292,9 @@ void WheeledVehicle::applyDownForce()
 	float facing = vel.z;
 	if(facing < 0.f) facing = -facing;
 	
-	m_downForce = facing * getChassisDim().x * getChassisDim().y * .001f;
-	if(m_downForce > 1.5f) m_downForce = 1.5f;
-	down *= m_downForce * m_mass;
+	m_downForce = facing * getChassisDim().x * getChassisDim().y * .0002f;
+	if(m_downForce > 1.f) m_downForce = 1.f;
+	down *= m_downForce * m_mass * 9.8f;
 	btRigidBody * chassisBody = PhysicsState::engine->getRigidBody(getGroup("chassis")[0]);
 	chassisBody->applyCentralForce(btVector3(down.x, down.y, down.z));
 }
