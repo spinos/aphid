@@ -37,10 +37,12 @@ public:
 	const Vector3F angularVelocity() const;
 	const btTransform tm() const;
 	float computeFriction(const float & slipAngle);
+	const int rigidBodyId() const;
 private:
 	Profile m_profile;
 	Tire m_tire;
 	btRigidBody * m_body;
 	float m_friction;
+	int m_rigidBodyId;
 };
 }

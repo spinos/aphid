@@ -49,6 +49,7 @@ private:
     void computeAcceleration();
     void computeDifting();
     void applyDownForce();
+    const std::string wheelGrpName(int i) const;
 private:
     Vector3F m_prevOrigin, m_prevVelocity;
 	float m_acceleration, m_drifting, m_downForce;

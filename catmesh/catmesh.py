@@ -15,7 +15,7 @@ def GetSelectedMesh(dst):
         return False
     return True
    
-def CatchSelectedMesh(fileName):
+def CatchSelectedMesh(fileName, prefix):
     mesh = om.MDagPath()
     if not GetSelectedMesh(mesh):
         return False
@@ -27,7 +27,7 @@ def CatchSelectedMesh(fileName):
     fmesh = om.MFnMesh(mesh.node())
     print('vertex count: %i' % fmesh.numVertices())
     
-    rec.write('static const int sNumVertices = %i;\n' % fmesh.numVertices())
+    rec.write('static const int s%sNumVertices = %i;\n' % (prefix, fmesh.numVertices()))
     
     triangleCounts = om.MIntArray()
     triangleVertices = om.MIntArray()
@@ -35,9 +35,9 @@ def CatchSelectedMesh(fileName):
     fmesh.getTriangles(triangleCounts, triangleVertices)
     print('triangle count: %i' % int(triangleVertices.length() / 3))
     
-    rec.write('static const int sNumTriangleIndices = %i;\n' % triangleVertices.length())
+    rec.write('static const int s%sNumTriangleIndices = %i;\n' % (prefix, triangleVertices.length()))
     
-    rec.write('static const int sMeshTriangleIndices[] = {')
+    rec.write('static const int s%sMeshTriangleIndices[] = {' % prefix)
 
     for i in range(0, triangleVertices.length() / 3):
         if i == (triangleVertices.length() / 3 - 1):
@@ -50,7 +50,7 @@ def CatchSelectedMesh(fileName):
     vertexArray = om.MPointArray()
     fmesh.getPoints(vertexArray, om.MSpace.kObject)
     
-    rec.write('static const float sMeshVertices[] = {')
+    rec.write('static const float s%sMeshVertices[] = {' % prefix)
     for i in range(0, vertexArray.length()):
         if i == (vertexArray.length() - 1):
             rec.write("%ff, %ff, %ff\n" % (vertexArray[i].x, vertexArray[i].y, vertexArray[i].z))
@@ -60,7 +60,7 @@ def CatchSelectedMesh(fileName):
     
     itv = om.MItMeshVertex(mesh);
     
-    rec.write('static const float sMeshNormals[] = {')
+    rec.write('static const float s%sMeshNormals[] = {' % prefix)
     while not itv.isDone():
         nor = om.MVector()
         itv.getNormal(nor, om.MSpace.kObject)
@@ -72,4 +72,4 @@ def CatchSelectedMesh(fileName):
     return True
     
 
-CatchSelectedMesh('D:/aphid/wheeled/Silverstone.h')
+CatchSelectedMesh('D:/aphid/wheeled/Silverstone.h', 'Silverstone')

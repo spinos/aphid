@@ -15,6 +15,7 @@ namespace caterpillar {
 Wheel::Wheel() 
 {
     m_friction = 2.99f;
+    m_rigidBodyId = 0;
 }
 
 Wheel::~Wheel() {}
@@ -26,6 +27,7 @@ const float Wheel::radius() const { return m_profile._radiusMajor; }
 
 btRigidBody* Wheel::create(const Matrix44F & tm, bool isLeft)
 {
+    m_rigidBodyId = PhysicsState::engine->numCollisionObjects();
     m_body = m_tire.create(m_profile._radiusMajor, m_profile._radiusMinor, m_profile._width, m_profile._mass, tm, isLeft);
 	return m_body;
 }
@@ -64,5 +66,7 @@ float Wheel::computeFriction(const float & slipAngle)
 }
 
 const float Wheel::friction() const { return m_friction; }
+
+const int Wheel::rigidBodyId() const {return m_rigidBodyId;}
 
 }

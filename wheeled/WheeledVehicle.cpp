@@ -15,6 +15,15 @@ namespace caterpillar {
 WheeledVehicle::WheeledVehicle() 
 {
 	addGroup("chassis");
+	addGroup("wheel0");
+	addGroup("wheel1");
+	addGroup("wheel2");
+	addGroup("wheel3");
+	addGroup("wheel4");
+	addGroup("wheel5");
+	addGroup("wheel6");
+	addGroup("wheel7");
+	addGroup("wheel8");
 	m_gasStrength = 0.f;
 	m_steerAngle = 0.f;
 	m_brakeStrength = 0.f;
@@ -53,8 +62,13 @@ void WheeledVehicle::create()
 		suspension(i).create(wheelOrigin(i));
 		suspension(i).create(wheelOrigin(i, false), false);
 		
+		const std::string wgn = wheelGrpName(i);
+		
 		wheel(i, 0).create(wheelTM(i), true);
+		group(wgn).push_back(wheel(i, 0).rigidBodyId());
+		
 		wheel(i, 1).create(wheelTM(i, false), false);
+		group(wgn).push_back(wheel(i, 1).rigidBodyId());
 		
 		suspension(i).connectWheel(&wheel(i, 0), true);
 		suspension(i).connectWheel(&wheel(i, 1), false);
@@ -302,5 +316,13 @@ void WheeledVehicle::applyDownForce()
 
 const Vector3F WheeledVehicle::velocity() const { return m_prevVelocity; }
 void WheeledVehicle::setDownForceCoef(const float & x) { m_downForceCoef = x; }
+
+const std::string WheeledVehicle::wheelGrpName(int i) const
+{
+    std::stringstream sst;
+    sst.str("");
+    sst<<"wheel"<<i;
+    return sst.str();
+}
 
 }

@@ -9,7 +9,7 @@
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_state = new caterpillar::PhysicsState;
-    m_vehicle = new caterpillar::WheeledVehicle;
+    m_vehicle = new caterpillar::Automobile;
 	
 	caterpillar::PhysicsState::engine->initPhysics();
 	//åcaterpillar::PhysicsState::engine->addGroundPlane(2000.f, 0.f);
@@ -28,7 +28,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
 	
 	caterpillar::Wheel::Profile rearWheelInfo;
-	rearWheelInfo._width = 2.89f;
+	rearWheelInfo._width = 2.9f;
 	m_vehicle->setWheelInfo(1, rearWheelInfo);
 	
 	caterpillar::Suspension::Profile rearBridgeInfo;
@@ -60,6 +60,7 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	caterpillar::PhysicsState::engine->renderWorld();
+	m_vehicle->render();
 	int i = 1;
 	std::stringstream sst;
 	sst.str("");

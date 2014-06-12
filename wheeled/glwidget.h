@@ -4,7 +4,7 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 #include <PhysicsState.h>
-#include "WheeledVehicle.h"
+#include "Automobile.h"
 #include <RaceCircuit.h>
 class GLWidget : public Base3DView
 {
@@ -26,7 +26,7 @@ protected:
 //! [3]
 private:
     caterpillar::PhysicsState * m_state;
-	caterpillar::WheeledVehicle* m_vehicle;
+	caterpillar::Automobile* m_vehicle;
 	caterpillar::RaceCircuit * m_circuit;
 private slots:
     void simulate();

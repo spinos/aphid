@@ -28,6 +28,7 @@ HEADERS       = glwidget.h \
 				../caterpillar/Common.h \
                 ../tracked/shapeDrawer.h \
                 Obstacle.h \
+                Mesh.h \
                 MeshShape.h \
                 RaceCircuit.h \
 Tire.h \
@@ -35,7 +36,8 @@ Damper.h \
 				Suspension.h\
 				Wheel.h \
 WheeledChassis.h \
-				WheeledVehicle.h
+				WheeledVehicle.h \
+				Automobile.h
 SOURCES       = glwidget.cpp \
                 main.cpp \
                 window.cpp \
@@ -46,6 +48,7 @@ SOURCES       = glwidget.cpp \
                 ../caterpillar/PhysicsState.cpp \
                 ../tracked/shapeDrawer.cpp \
                 Obstacle.cpp \
+                Mesh.cpp \
                 MeshShape.cpp \
                 RaceCircuit.cpp \
 Tire.cpp \
@@ -53,7 +56,8 @@ Damper.cpp \
 				Suspension.cpp \
 				Wheel.cpp \
 WheeledChassis.cpp \
-				WheeledVehicle.cpp
+				WheeledVehicle.cpp \
+				Automobile.cpp
 QT           += opengl
 win32:CONFIG += console
 ##mac:CONFIG -= app_bundle
