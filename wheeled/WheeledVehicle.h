@@ -43,6 +43,9 @@ public:
 	void changeGear(int x);
 	const int gear() const;
 	const Vector3F velocity() const;
+	
+protected:
+    const Matrix44F rigidBodyTM(const int & i) const;
 private:
 	const Vector3F vehicleVelocity() const;
     btCollisionShape* createChassisShape();

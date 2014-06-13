@@ -4,6 +4,7 @@
 #include <DynamicsSolver.h>
 #include "glwidget.h"
 #include <Obstacle.h>
+#include <KdTreeDrawer.h>
 
 //! [0]
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -26,15 +27,45 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
 	orthoCamera()->setNearClipPlane(1.f);
-	
+
+#ifdef PORSCHE	
 	caterpillar::Wheel::Profile rearWheelInfo;
 	rearWheelInfo._width = 2.9f;
 	m_vehicle->setWheelInfo(1, rearWheelInfo);
-	
 	caterpillar::Suspension::Profile rearBridgeInfo;
 	rearBridgeInfo._steerable = false;
 	rearBridgeInfo._powered = true;
 	m_vehicle->setSuspensionInfo(1, rearBridgeInfo);
+#else
+    caterpillar::Wheel::Profile frontWheelInfo;
+    frontWheelInfo._radiusMajor = 3.25f;
+    frontWheelInfo._radiusMinor = .6f;
+    frontWheelInfo._width = 2.9f;
+	m_vehicle->setWheelInfo(0, frontWheelInfo);
+    caterpillar::Wheel::Profile rearWheelInfo;
+    rearWheelInfo._radiusMajor = 3.38f;
+    rearWheelInfo._radiusMinor = .55f;
+    rearWheelInfo._width = 2.9f;
+	m_vehicle->setWheelInfo(1, rearWheelInfo);
+	
+	caterpillar::Suspension::Profile susp;
+	caterpillar::Suspension::RodRadius = .3f;
+	susp._damperY = 2.f;
+	susp._upperJointY = 1.5f;
+	susp._lowerJointY = -1.37f;
+	susp._steerArmJointZ = 1.43f;
+	susp._upperWishboneLength = 4.4f;
+	susp._lowerWishboneLength = 5.7f;
+	m_vehicle->setSuspensionInfo(0, susp);
+	susp._steerable = false;
+	susp._powered = true;
+	m_vehicle->setSuspensionInfo(1, susp);
+	
+	m_vehicle->setHullDim(Vector3F(20.f, 4.f, 40.f));
+	m_vehicle->setAxisCoord(0, 17.f, -.25f, 8.12f);
+	m_vehicle->setAxisCoord(1, 17.f, -.25f, -10.63f);
+	
+#endif
 	
 	m_vehicle->create();
 	std::cout<<"object groups "<<m_vehicle->str();
@@ -60,6 +91,7 @@ GLWidget::~GLWidget()
 void GLWidget::clientDraw()
 {
 	caterpillar::PhysicsState::engine->renderWorld();
+	getDrawer()->m_paintProfile.apply();
 	m_vehicle->render();
 	int i = 1;
 	std::stringstream sst;

@@ -325,4 +325,11 @@ const std::string WheeledVehicle::wheelGrpName(int i) const
     return sst.str();
 }
 
+const Matrix44F WheeledVehicle::rigidBodyTM(const int & i) const
+{
+    btRigidBody * bd = PhysicsState::engine->getRigidBody(i);
+	btTransform tm = bd->getWorldTransform();
+	return Common::CopyFromBtTransform(tm);
+}
+
 }

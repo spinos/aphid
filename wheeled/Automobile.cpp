@@ -18,6 +18,9 @@
 #include <GL/glext.h>
 #endif
 
+#include <DynamicsSolver.h>
+#include <PhysicsState.h>
+
 namespace caterpillar {
 Automobile::Automobile() 
 {
@@ -52,13 +55,13 @@ void Automobile::fillMesh(Mesh * m,
         const int * indices,
         const float * pos, const float * nor) const
 {
-    btVector3 * p = m->createVertexPos(nv);
+    Vector3F * p = m->createVertexPoint(nv);
     Vector3F * n = m->createVertexNormal(nv);
     int * idx = m->createTriangles(ntv / 3);
 	
     int i;
     for(i = 0; i < nv; i++) {
-        p[i] = btVector3(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]);
+        p[i].set(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]);
         n[i].set(nor[i * 3], nor[i * 3 + 1], nor[i * 3 + 2]);
     }
 	for(i = 0; i < ntv; i++) {
@@ -68,23 +71,32 @@ void Automobile::fillMesh(Mesh * m,
 
 void Automobile::render() 
 {
-    drawMesh(m_chassisMesh);
-    drawMesh(m_wheelMesh[0]);
-    drawMesh(m_wheelMesh[1]);
+    drawMesh(rigidBodyTM(getGroup("chassis")[0]), m_chassisMesh);
+    drawMesh(rigidBodyTM(getGroup("wheel0")[0]), m_wheelMesh[0]);
+    drawMesh(rigidBodyTM(getGroup("wheel0")[1]), m_wheelMesh[0]);
+    drawMesh(rigidBodyTM(getGroup("wheel1")[0]), m_wheelMesh[1]);
+    drawMesh(rigidBodyTM(getGroup("wheel1")[1]), m_wheelMesh[1]);
 }
 
-void Automobile::drawMesh(Mesh * m)
+void Automobile::drawMesh(const Matrix44F & mat, Mesh * msh)
 {
+    float m[16];
+	mat.glMatrix(m);
+	
+	glPushMatrix();
+	glMultMatrixf((const GLfloat*)m);
+	
+    glColor3f(1.f, 1.f, 1.f);
     glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(4, GL_FLOAT, 0, (GLfloat*)&m->vertexPos()[0][0]);
+    glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)msh->vertexPoint());
 	
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)m->vertexNormal());
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)msh->vertexNormal());
 	
-	glDrawElements(GL_TRIANGLES, m->getNumTri() * 3, GL_UNSIGNED_INT, m->indices());
+	glDrawElements(GL_TRIANGLES, msh->numTri() * 3, GL_UNSIGNED_INT, msh->indices());
 
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
+	glPopMatrix();
 }
-
 }

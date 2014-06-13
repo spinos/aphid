@@ -11,7 +11,6 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftBody.h>
 #include <AllMath.h>
-
 class ShapeDrawer {
 public:
 	ShapeDrawer () {}
@@ -46,4 +45,6 @@ private:
 	void loadSpace(const btTransform & transform);
 	void loadSpace(const Matrix44F & transform);
 	void drawCoordsys(const btTransform & transform);
+private:
+
 };
