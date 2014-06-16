@@ -18,7 +18,7 @@ public:
 protected:
 	btBvhTriangleMeshShape* createCollisionShape();
 	void setMargin(const float & x);
-	
+	const float margin() const;
 private:
 	btTriangleIndexVertexArray* m_indexVertexArrays;
 	float m_margin;

@@ -10,6 +10,7 @@
 #include <maya/MFnMesh.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MPointArray.h>
+#include <maya/MFloatVectorArray.h>
 #include <DynamicsSolver.h>
 #include "PhysicsState.h"
 namespace caterpillar {
@@ -103,10 +104,12 @@ MStatus GroundPlane::initialize()
 	a_inMargin = fnNumericAttr.create("collisionMargin", "clmg", MFnNumericData::kFloat, 1.f, &status);
 	fnNumericAttr.setDefault(1.f);
 	fnNumericAttr.setMin(0.1f);
+	fnNumericAttr.setKeyable(true);
 	status = addAttribute(a_inMargin);
 	
 	a_inFriction = fnNumericAttr.create("friction", "frct", MFnNumericData::kFloat, .732f, &status);
 	fnNumericAttr.setDefault(.732f);
+	fnNumericAttr.setKeyable(true);
 	fnNumericAttr.setMin(0.f);
 	status = addAttribute(a_inFriction);
 	
@@ -150,17 +153,21 @@ void GroundPlane::computeCreate(MDataBlock& block)
 	const int nv = vertexArray.length();
 	MGlobal::displayInfo(MString("ground plane vertex count: ")+nv);
 	
+	MFloatVectorArray normalArray;
+	fmesh.getNormals(normalArray);
+	
+	const float fmargin = block.inputValue(a_inMargin).asFloat();
+	
 	btVector3 * vs = createVertexPos(nv);
 	
 	for(i=0; i < nv; i++) {
 	    const MPoint & q = vertexArray[i];
-	    vs[i][0] = q.x;
-		vs[i][1] = q.y;
-		vs[i][2] = q.z;
+	    vs[i][0] = q.x - normalArray[i].x * fmargin;
+		vs[i][1] = q.y - normalArray[i].y * fmargin;
+		vs[i][2] = q.z - normalArray[i].z * fmargin;
 	}
 	
-	const float margin = block.inputValue(a_inMargin).asFloat();
-	setMargin(margin);
+	setMargin(fmargin);
 	const float friction = block.inputValue(a_inFriction).asFloat();
 	setFriction(friction);
 	create();

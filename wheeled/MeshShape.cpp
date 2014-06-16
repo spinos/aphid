@@ -22,6 +22,7 @@ MeshShape::~MeshShape()
 }
 
 void MeshShape::setMargin(const float & x) { m_margin = x; }
+const float MeshShape::margin() const { return m_margin; }
 
 btBvhTriangleMeshShape* MeshShape::createCollisionShape()
 {
