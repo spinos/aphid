@@ -240,14 +240,16 @@ MStatus RigidBodyTransformNode::validateAndSetValue(const MPlug& plug,
 			return MS::kSuccess;
 		}
 		
-		btScalar * _tm = new btScalar[16];
-		
 		const btTransform t = rb->getWorldTransform();
-		t.getOpenGLMatrix(_tm);
+		
+		Matrix44F scaled = PhysicsState::engine->restoreTM(t);
+		
+		float _tm[16];
+		scaled.glMatrix(_tm);
 		
 		RigidBodyTransformMatrix *ltm = getRigidBodyTransformMatrix();
 		if(ltm) ltm->setRockInX(_tm);
-		delete[] _tm;
+		
 		blockHandle.setClean();
 		dirtyMatrix();
 	}

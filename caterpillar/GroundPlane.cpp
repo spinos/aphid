@@ -160,11 +160,12 @@ void GroundPlane::computeCreate(MDataBlock& block)
 	
 	btVector3 * vs = createVertexPos(nv);
 	
+	const float scal = scaling();
 	for(i=0; i < nv; i++) {
 	    const MPoint & q = vertexArray[i];
-	    vs[i][0] = q.x - normalArray[i].x * fmargin;
-		vs[i][1] = q.y - normalArray[i].y * fmargin;
-		vs[i][2] = q.z - normalArray[i].z * fmargin;
+	    vs[i][0] = (q.x - normalArray[i].x * fmargin) * scal;
+		vs[i][1] = (q.y - normalArray[i].y * fmargin) * scal;
+		vs[i][2] = (q.z - normalArray[i].z * fmargin) * scal;
 	}
 	
 	setMargin(fmargin);

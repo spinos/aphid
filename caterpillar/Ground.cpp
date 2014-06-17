@@ -60,11 +60,12 @@ void Ground::create()
 	PhysicsState::engine->addCollisionShape(trimeshShape);
     
 	// int id = PhysicsState::engine->numCollisionObjects();
-    btTransform trans; trans.setIdentity();
+    Matrix44F trans;
 	btRigidBody * bd = PhysicsState::engine->createRigidBody(trimeshShape, trans, 0.0);
 	bd->setFriction(m_friction);
 }
 
 void Ground::setMargin(const float & x) { m_margin = x; }
 void Ground::setFriction(const float & x) { m_friction = x; }
+const float Ground::scaling() const { return PhysicsState::engine->simulateScale(); }
 }

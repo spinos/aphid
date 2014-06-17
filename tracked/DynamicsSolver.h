@@ -30,6 +30,8 @@ public:
 	void setEnableDrawConstraint(bool x);
 	void setNumSubSteps(int x);
 	void setSimulateFrequency(float x);
+	void setSimulateScale(const float & x);
+	const float simulateScale() const;
 	const bool isPhysicsEnabled() const;
 	const bool isWorldInitialized() const;
 	const int numCollisionObjects() const;
@@ -39,24 +41,30 @@ public:
 	btSphereShape* createSphereShape(const float & r);
 	void addCollisionShape(btCollisionShape* shape);
 	
-	btRigidBody* createRigidBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
-	
 	btRigidBody* getRigidBody(const int & i) const;
-	
-	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
-	btGeneric6DofConstraint* constrainBy6Dof(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
-	btGeneric6DofSpringConstraint* constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
+	const Matrix44F restoreTM(const btTransform & tm) const;
 	
 	void addGroundPlane(const float & groundSize, const float & groundLevel);
 	
 	ShapeDrawer* getDrawer();
 	const float deltaTime() const;
+	
+	btRigidBody* createRigidBody(btCollisionShape* shape, const Matrix44F & transform, const float & mass, bool multiplyTM = false);
+	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const Matrix44F & rbAFrame, const Matrix44F & rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
+	btGeneric6DofConstraint* constrainBy6Dof(btRigidBody& rbA, btRigidBody& rbB, const Matrix44F & rbAFrame, const Matrix44F & rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
+	btGeneric6DofSpringConstraint* constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const Matrix44F & rbAFrame, const Matrix44F & rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
+	
 protected:
     btCollisionObject * getCollisionObject(const int & i) const;
 	
 	virtual void clientBuildPhysics();
 	
 private:
+    btRigidBody* createRigidBody(btCollisionShape* shape, const btTransform & transform, const float & mass);
+	btGeneric6DofConstraint* constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
+	btGeneric6DofConstraint* constrainBy6Dof(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false);
+	btGeneric6DofSpringConstraint* constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool disableCollisionsBetweenLinkedBodies=false); 
+	
 	btRigidBody* internalCreateRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape);
 	
 	btDynamicsWorld* m_dynamicsWorld;
@@ -81,10 +89,12 @@ private:
 
 	btAlignedObjectArray<btSoftRididCollisionAlgorithm*> m_SoftRigidCollisionAlgorithms;
 	
+	Matrix44F m_simulateSpace;
 	int m_numSubSteps;
 	float m_simulateFrequency;
+	float m_dt;
+	float m_simulateScale;
 	bool m_enablePhysics;
 	bool m_isWorldInitialized;
 	bool m_enableDrawConstraint;
-	float m_dt;
 };

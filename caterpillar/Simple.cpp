@@ -30,12 +30,12 @@ void Simple::create()
 	resetGroups();
 	int id = PhysicsState::engine->numCollisionObjects();
 	btCollisionShape* obstacleShape = PhysicsState::engine->createBoxShape(m_dim.x, m_dim.y, m_dim.z);
-	btTransform trans; trans.setIdentity(); trans.setOrigin(btVector3(0,10,0));
+	Matrix44F trans; trans.setTranslation(0.f,10.f,0.f);
 	PhysicsState::engine->createRigidBody(obstacleShape, trans, 1.f);
 	group("box_left").push_back(id);
 	
 	id = PhysicsState::engine->numCollisionObjects();
-	trans.setOrigin(btVector3(1.5,13,0));
+	trans.setTranslation(1.5f,13.f,0.f);
 	PhysicsState::engine->createRigidBody(obstacleShape, trans, 1.f);
 	group("box_right").push_back(id);
 }

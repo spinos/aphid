@@ -24,7 +24,7 @@ protected:
 	void create();
 	void setMargin(const float & x);
 	void setFriction(const float & x);
-	
+	const float scaling() const;
 private:
     btTriangleIndexVertexArray* m_indexVertexArrays;
 	btVector3 * m_vertexPos;

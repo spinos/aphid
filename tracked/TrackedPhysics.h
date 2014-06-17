@@ -40,7 +40,7 @@ private:
 		btRigidBody * dstBody;
 		btGeneric6DofConstraint* dstHinge;
 		btGeneric6DofSpringConstraint* dstSpringHinge;
-		float radius, width, mass, gap;
+		float radius, width, mass, gap, scaling;
 		bool isLeft;
 		bool isSpringConstraint;
 	};
@@ -48,20 +48,22 @@ private:
 	void createChassis(Chassis & c);
 	void addTreadSections(Tread & t, bool isLeft = true);
 	void createTread(Tread & t, bool isLeft = true);
-	void createDriveSprocket(Chassis & c, btRigidBody * chassisBody, bool isLeft = true);
-	void createTensioner(Chassis & c, btRigidBody * chassisBody, bool isLeft = true);
-	void createRoadWheels(Chassis & c, btRigidBody * chassisBody, bool isLeft = true);
-	void createSupportRollers(Chassis & c, btRigidBody * chassisBody, bool isLeft = true);
+	void createDriveSprocket(Chassis & c, btRigidBody * chassisBody, const float & scaling, bool isLeft = true);
+	void createTensioner(Chassis & c, btRigidBody * chassisBody, const float & scaling, bool isLeft = true);
+	void createRoadWheels(Chassis & c, btRigidBody * chassisBodyy, const float & scaling, bool isLeft = true);
+	void createSupportRollers(Chassis & c, btRigidBody * chassisBody, const float & scaling, bool isLeft = true);
 	void createWheel(CreateWheelProfile & profile);
 	void createCompoundWheel(CreateWheelProfile & profile);
 	btCollisionShape* simpleWheelShape(CreateWheelProfile & profile);
 	btCollisionShape* compoundWheelShape(CreateWheelProfile & profile);
 	void createWheel(btCollisionShape* wheelShape, CreateWheelProfile & profile);
-	btCollisionShape* createShoeShape(Tread & tread);
-	btCollisionShape* createPinShape(Tread & tread);
-	btCollisionShape* createSprocketShape(CreateWheelProfile & profile);
+	btCollisionShape* createShoeShape(Tread & tread, const float & scale);
+	btCollisionShape* createPinShape(Tread & tread, const float & scale);
+	btCollisionShape* createSprocketShape(CreateWheelProfile & profile, const float & scaling);
 	void threePointHinge(btTransform & frameInA, btTransform & frameInB, const float & side, btRigidBody* bodyA, btRigidBody* bodyB);
-	btRigidBody * createTorsionBar(btRigidBody * chassisBody, const int & i, bool isLeft = true);
+	btRigidBody * createTorsionBar(btRigidBody * chassisBody, const int & i, const float & scaling, bool isLeft = true);
+    const float scaling() const;
+    
 private:
 	Tread m_leftTread, m_rightTread;
 	btGeneric6DofSpringConstraint* m_tension[2];

@@ -48,6 +48,11 @@ TrackedPhysics::TrackedPhysics()
 
 TrackedPhysics::~TrackedPhysics() {}
 
+const float TrackedPhysics::scaling() const
+{
+    return PhysicsState::engine->simulateScale();
+}
+
 void TrackedPhysics::create()
 {
     m_firstMotion = true;
@@ -235,27 +240,30 @@ void TrackedPhysics::addTreadSections(Tread & t, bool isLeft)
 	
 	t.addSection(sect);
 	
-	t.computeSections(.7);
+	t.computeSections(.6);
 }
 
 void TrackedPhysics::createObstacles()
 {
 	btCollisionShape* obstacleShape = PhysicsState::engine->createBoxShape(40, 2, 4);
-	btTransform trans; trans.setIdentity(); trans.setOrigin(btVector3(10,2,50));
-	btRigidBody* obs = PhysicsState::engine->createRigidBody(obstacleShape, trans, 0.f);
+	Matrix44F tm; 
+	tm.setTranslation(10.f, 2.f, 50.f);
+	btRigidBody* obs = PhysicsState::engine->createRigidBody(obstacleShape, tm, 0.f);
 	obs->setDamping(0.f,0.f);
 	obs->setFriction(.5f);
-	trans.setOrigin(btVector3(-10,2,80));
-	obs = PhysicsState::engine->createRigidBody(obstacleShape, trans, 0.f);
+	
+	tm.setTranslation(-10.f, 2.f, 80.f);
+	obs = PhysicsState::engine->createRigidBody(obstacleShape, tm, 0.f);
 	obs->setDamping(0.f,0.f);
 	obs->setFriction(.5f);
 }
 
 void TrackedPhysics::createTread(Tread & tread, bool isLeft)
 {		
-	const float shoeY = tread.shoeThickness() * 0.5f;
-	btCollisionShape* shoeShape = createShoeShape(tread);
-	btCollisionShape* pinShape = createPinShape(tread);
+    const float simScale = scaling();
+	const float shoeY = tread.shoeThickness() * 0.5f * simScale;
+	btCollisionShape* shoeShape = createShoeShape(tread, simScale);
+	btCollisionShape* pinShape = createPinShape(tread, simScale);
 
 	btRigidBody* preBody = NULL;
 	btRigidBody* firstBody = NULL;
@@ -269,21 +277,21 @@ void TrackedPhysics::createTread(Tread & tread, bool isLeft)
 	
 	tread.begin();
 	while(!tread.end()) {
-		Vector3F at = tread.currentSpace().getTranslation();
+		Vector3F at = tread.currentSpace().getTranslation() * simScale;
 		Matrix33F rot = tread.currentSpace().rotation();
 		trans = btTransform(btMatrix3x3(rot.M(0, 0), rot.M(1, 0), rot.M(2, 0), rot.M(0, 1), rot.M(1, 1), rot.M(2, 1), rot.M(0, 2), rot.M(1, 2), rot.M(2, 2)));
 		trans.setOrigin(btVector3(at.x, at.y, at.z));
 		
 		const int id = PhysicsState::engine->numCollisionObjects();
 		if(tread.currentIsShoe()) {
-			curBody = PhysicsState::engine->createRigidBody(shoeShape, trans, SHOEMASS);
+			curBody = PhysicsState::engine->createRigidBody(shoeShape, Common::CopyFromBtTransform(trans), SHOEMASS);
 			if(isLeft) group("left_trackShoe").push_back(id);
 			else group("right_trackShoe").push_back(id);
 			
 			curBody->setFriction(CONTACTFRICTION);
 		}
 		else {
-			curBody = PhysicsState::engine->createRigidBody(pinShape, trans, PINMASS);
+			curBody = PhysicsState::engine->createRigidBody(pinShape, Common::CopyFromBtTransform(trans), PINMASS);
 			if(isLeft) group("left_trackPin").push_back(id);
 			else group("right_trackPin").push_back(id);
 			
@@ -321,7 +329,7 @@ void TrackedPhysics::createTread(Tread & tread, bool isLeft)
 
 void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frameInB, const float & side, btRigidBody* bodyA, btRigidBody* bodyB)
 {
-	btGeneric6DofConstraint * hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
+	btGeneric6DofConstraint * hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, Common::CopyFromBtTransform(frameInA), Common::CopyFromBtTransform(frameInB), true);
 	
 	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.0));
 	
@@ -330,7 +338,7 @@ void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frame
 	btVector3 & p1 = frameInB.getOrigin();
 	p1[0] = -side + toothWidth() * .5f;
 	
-	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
+	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, Common::CopyFromBtTransform(frameInA), Common::CopyFromBtTransform(frameInB), true);
 
 	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.0));
 	
@@ -339,20 +347,19 @@ void TrackedPhysics::threePointHinge(btTransform & frameInA, btTransform & frame
 	btVector3 & p3 = frameInB.getOrigin();
 	p3[0] = side - toothWidth() * .5f;
 	
-	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, frameInA, frameInB, true);
-	
-	
+	hinge = PhysicsState::engine->constrainByHinge(*bodyA, *bodyB, Common::CopyFromBtTransform(frameInA), Common::CopyFromBtTransform(frameInB), true);
+
 	hinge->setAngularUpperLimit(btVector3(0.0, 0.0, 0.0));
 }
 
-btCollisionShape* TrackedPhysics::createShoeShape(Tread & tread)
+btCollisionShape* TrackedPhysics::createShoeShape(Tread & tread, const float & scale)
 {	
 	btCollisionShape* pad = PhysicsState::engine->createBoxShape(tread.padWidth() * 0.5f, tread.shoeThickness() * 0.5f, tread.shoeLength() * 0.5f);
 	btCompoundShape* shoeShape = new btCompoundShape();
 	
 	btTransform childT; childT.setIdentity();
 	btVector3 & p = childT.getOrigin();
-	p[0] = tread.padX();
+	p[0] = tread.padX() * scale;
 	shoeShape->addChildShape(childT, pad);
 	p[0] *= -1.;
 	shoeShape->addChildShape(childT, pad);
@@ -360,12 +367,12 @@ btCollisionShape* TrackedPhysics::createShoeShape(Tread & tread)
 	return shoeShape;
 }
 
-btCollisionShape* TrackedPhysics::createPinShape(Tread & tread)
+btCollisionShape* TrackedPhysics::createPinShape(Tread & tread, const float & scale)
 {
-	const float side = tread.width() * .5f - toothWidth() * .5f;
-	const float pinX = toothWidth() * .5f;
-	const float pinZ = (tread.pinLength() - tread.pinThickness())  * 0.5f;
-	const float pinY = tread.pinThickness() * .5f;
+	const float side = (tread.width() * .5f - toothWidth() * .5f)  * scale;
+	const float pinX = toothWidth() * .5f  * scale;
+	const float pinZ = (tread.pinLength() - tread.pinThickness())  * 0.5f * scale;
+	const float pinY = tread.pinThickness() * .5f * scale;
 	
 	btCollisionShape* pad = PhysicsState::engine->createBoxShape(pinX, pinY, pinZ);
 	btCollisionShape* pin = PhysicsState::engine->createCylinderShape(pinY, pinX, pinY);
@@ -395,7 +402,7 @@ btCollisionShape* TrackedPhysics::createPinShape(Tread & tread)
 	pinShape->addChildShape(childT, pin);
 	
 	childT.setIdentity();
-	childT.setOrigin(btVector3(0, tread.pinThickness() * .5f + Tread::ToothHeight * .5f,0));
+	childT.setOrigin(btVector3(0, (tread.pinThickness() * .5f + Tread::ToothHeight * .5f) * scale,0));
 	
 	pinShape->addChildShape(childT, tooth);
 	
@@ -413,28 +420,29 @@ void TrackedPhysics::createChassis(Chassis & c)
 	btTransform childT; childT.setIdentity();
 	compShape->addChildShape(childT, hullShape);
 	
-	childT.setOrigin(btVector3(0, dims.y - .5, 0));
+	const float simScale = scaling();
+	childT.setOrigin(btVector3(0, (dims.y - .5f) * simScale, 0));
 	compShape->addChildShape(childT, guardShape);
 	
-	const Vector3F origin = c.center();
-	btTransform trans;
-	trans.setIdentity();
-	trans.setOrigin(btVector3(origin.x, origin.y, origin.z));
+	const Vector3F origin = c.center() * simScale;
+
+	Matrix44F tm;
+	tm.setTranslation(origin);
 	
 	const int id = PhysicsState::engine->numCollisionObjects();
-	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(compShape, trans, 40.f);
+	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(compShape, tm, 100.f);
 	group("chassis").push_back(id);
 	
 	chassisBody->setDamping(0.f, 0.f);
 	
-	createDriveSprocket(c, chassisBody);
-	createDriveSprocket(c, chassisBody, false);
-	createTensioner(c, chassisBody);
-	createTensioner(c, chassisBody, false);
-	createRoadWheels(c, chassisBody);
-	createRoadWheels(c, chassisBody, false);
-	createSupportRollers(c, chassisBody);
-	createSupportRollers(c, chassisBody, false);
+	createDriveSprocket(c, chassisBody, simScale);
+	createDriveSprocket(c, chassisBody, simScale, false);
+	createTensioner(c, chassisBody, simScale);
+	createTensioner(c, chassisBody, simScale, false);
+	createRoadWheels(c, chassisBody, simScale);
+	createRoadWheels(c, chassisBody, simScale, false);
+	createSupportRollers(c, chassisBody, simScale);
+	createSupportRollers(c, chassisBody, simScale, false);
 }
 
 void TrackedPhysics::createWheel(CreateWheelProfile & profile)
@@ -459,7 +467,7 @@ void TrackedPhysics::createWheel(btCollisionShape* wheelShape, CreateWheelProfil
 	btTransform trans(yTonX);
 	if(!profile.isLeft) trans = btTransform(yToX);
 	trans.setOrigin(btVector3(profile.worldP.x, profile.worldP.y, profile.worldP.z));
-	btRigidBody* wheelBody = PhysicsState::engine->createRigidBody(wheelShape, trans, profile.mass);
+	btRigidBody* wheelBody = PhysicsState::engine->createRigidBody(wheelShape, Common::CopyFromBtTransform(trans), profile.mass);
 	wheelBody->setDamping(0.f, 0.f);
 	wheelBody->setFriction(CONTACTFRICTION);
 	
@@ -475,11 +483,11 @@ void TrackedPhysics::createWheel(btCollisionShape* wheelShape, CreateWheelProfil
 	
 	btTransform frameInB(zTonY);
 	if(!profile.isSpringConstraint) {
-		btGeneric6DofConstraint* hinge = PhysicsState::engine->constrainByHinge(*profile.connectTo, *wheelBody, frameInA, frameInB, true);
+		btGeneric6DofConstraint* hinge = PhysicsState::engine->constrainByHinge(*profile.connectTo, *wheelBody, Common::CopyFromBtTransform(frameInA), Common::CopyFromBtTransform(frameInB), true);
 		profile.dstHinge = hinge;
 	}
 	else {
-		btGeneric6DofSpringConstraint* spring = PhysicsState::engine->constrainBySpring(*profile.connectTo, *wheelBody, frameInA, frameInB, true);
+		btGeneric6DofSpringConstraint* spring = PhysicsState::engine->constrainBySpring(*profile.connectTo, *wheelBody, Common::CopyFromBtTransform(frameInA), Common::CopyFromBtTransform(frameInB), true);
 		profile.dstSpringHinge = spring;
 	}
 	profile.dstBody = wheelBody;
@@ -499,17 +507,17 @@ btCollisionShape* TrackedPhysics::compoundWheelShape(CreateWheelProfile & profil
 	btCompoundShape* wheelShape = new btCompoundShape();
 	
 	btTransform childT; childT.setIdentity();
-	childT.setOrigin(btVector3(0, rollWidth * 0.5 + profile.gap * 0.5, 0));
+	childT.setOrigin(btVector3(0, (rollWidth + profile.gap) * .5f * profile.scaling, 0));
 	wheelShape->addChildShape(childT, rollShape);
-	childT.setOrigin(btVector3(0, rollWidth * -0.5 - profile.gap * 0.5, 0));
+	childT.setOrigin(btVector3(0, (-rollWidth - profile.gap) * .5f * profile.scaling, 0));
 	wheelShape->addChildShape(childT, rollShape);
 	return wheelShape;
 }
 	
-btCollisionShape* TrackedPhysics::createSprocketShape(CreateWheelProfile & profile)
+btCollisionShape* TrackedPhysics::createSprocketShape(CreateWheelProfile & profile, const float & scaling)
 {
-	float rollWidth = (profile.width - profile.gap) * .5f;
-	const float side = profile.width * 0.5f - toothWidth() * 0.4f;
+	float rollWidth = profile.width * .5f - profile.gap;
+	const float side = (profile.width * 0.5f - toothWidth() * 0.4f) * scaling;
 	
 	btCollisionShape* rollShape = PhysicsState::engine->createCylinderShape(profile.radius, rollWidth * .5f, profile.radius);
 	btCollisionShape* tooth1Shape = PhysicsState::engine->createCylinderShape(toothWidth() * 0.5f, toothWidth() * 0.5f, toothWidth() * 0.5f );
@@ -517,12 +525,12 @@ btCollisionShape* TrackedPhysics::createSprocketShape(CreateWheelProfile & profi
 	btCompoundShape* wheelShape = new btCompoundShape();
 	
 	btTransform childT; childT.setIdentity();
-	childT.setOrigin(btVector3(0, profile.width * 0.5f - rollWidth * 0.5f, 0));
+	childT.setOrigin(btVector3(0, (profile.width - rollWidth) * scaling * 0.5f, 0));
 	wheelShape->addChildShape(childT, rollShape);
-	childT.setOrigin(btVector3(0, -profile.width * 0.5f + rollWidth * 0.5f, 0));
+	childT.setOrigin(btVector3(0, (-profile.width + rollWidth) * scaling * 0.5f, 0));
 	wheelShape->addChildShape(childT, rollShape);
 	
-	const float tooth1R = profile.radius + toothWidth() * SPROCKETTEETHPROTRUDE;
+	const float tooth1R = (profile.radius + toothWidth() * SPROCKETTEETHPROTRUDE) * scaling;
 	const float delta = PI * 2.f / 11.f;
 	for(int i = 0; i < 11; i++) {		
 		childT.setOrigin(btVector3(cos(delta * i) * tooth1R, side, sin(delta * i) * tooth1R) );
@@ -534,19 +542,20 @@ btCollisionShape* TrackedPhysics::createSprocketShape(CreateWheelProfile & profi
 	return wheelShape;
 }
 
-void TrackedPhysics::createDriveSprocket(Chassis & c, btRigidBody * chassisBody, bool isLeft)
+void TrackedPhysics::createDriveSprocket(Chassis & c, btRigidBody * chassisBody, const float & scaling, bool isLeft)
 {
 	CreateWheelProfile cwp;
 	cwp.connectTo = chassisBody;
 	cwp.radius = c.driveSprocketRadius();
 	cwp.width = c.trackWidth();
 	cwp.mass = WHEELMASS * 2.;
-	cwp.worldP = c.driveSprocketOrigin(isLeft);
+	cwp.worldP = c.driveSprocketOrigin(isLeft) * scaling;
 	cwp.objectP = c.driveSprocketOriginObject(isLeft);
 	cwp.isLeft = isLeft;
 	cwp.gap = toothWidth() * 1.1f;
-	
-	btCollisionShape* sprocketShape = createSprocketShape(cwp);
+	cwp.scaling = scaling;
+	btCollisionShape* sprocketShape = createSprocketShape(cwp, scaling);
+	PhysicsState::engine->addCollisionShape(sprocketShape);
 	
 	const int id = PhysicsState::engine->numCollisionObjects();
 	createWheel(sprocketShape, cwp);
@@ -559,17 +568,18 @@ void TrackedPhysics::createDriveSprocket(Chassis & c, btRigidBody * chassisBody,
 	else m_drive[1] = hinge;
 }
 
-void TrackedPhysics::createTensioner(Chassis & c, btRigidBody * chassisBody, bool isLeft)
+void TrackedPhysics::createTensioner(Chassis & c, btRigidBody * chassisBody, const float & scaling, bool isLeft)
 {
 	CreateWheelProfile cwp;
 	cwp.connectTo = chassisBody;
 	cwp.radius = c.tensionerRadius();
 	cwp.width = c.tensionerWidth();
 	cwp.mass = WHEELMASS;
-	cwp.worldP = c.tensionerOrigin(isLeft);
+	cwp.worldP = c.tensionerOrigin(isLeft) * scaling;
 	cwp.objectP = c.tensionerOriginObject(isLeft);
 	cwp.isLeft = isLeft;
 	cwp.gap = toothWidth() * 1.1f;
+	cwp.scaling = scaling;
 	cwp.isSpringConstraint = true;
 	const int id = PhysicsState::engine->numCollisionObjects();
 	createCompoundWheel(cwp);
@@ -584,7 +594,7 @@ void TrackedPhysics::createTensioner(Chassis & c, btRigidBody * chassisBody, boo
 	spring->setStiffness(0, m_trackTension);
 	spring->setDamping(0, .5f);
 	
-	const float horl = tensionerRadius() * 1.23f;
+	const float horl = tensionerRadius() * 1.23f * scaling;
 	spring->setLinearLowerLimit(btVector3(-horl, 0., 0.));
 	spring->setLinearUpperLimit(btVector3(horl, 0., 0.));
 	float d = -1.f;
@@ -599,7 +609,7 @@ void TrackedPhysics::createTensioner(Chassis & c, btRigidBody * chassisBody, boo
 	
 }
 
-void TrackedPhysics::createRoadWheels(Chassis & c, btRigidBody * chassisBody, bool isLeft)
+void TrackedPhysics::createRoadWheels(Chassis & c, btRigidBody * chassisBody, const float & scaling, bool isLeft)
 {
 	if(c.numRoadWheels() < 1) return;
 	CreateWheelProfile cwp;
@@ -609,12 +619,13 @@ void TrackedPhysics::createRoadWheels(Chassis & c, btRigidBody * chassisBody, bo
 	cwp.mass = WHEELMASS;
 	cwp.isLeft = isLeft;
 	cwp.gap = toothWidth() * 1.1f;
+	cwp.scaling = scaling;
 	for(int i=0; i < c.numRoadWheels(); i++) {
-		btRigidBody * torsionBar = createTorsionBar(chassisBody, i, isLeft);
+		btRigidBody * torsionBar = createTorsionBar(chassisBody, i, scaling, isLeft);
 		Vector3F p = roadWheelOrigin(i, isLeft);
 		
 		cwp.connectTo = torsionBar;
-		cwp.worldP = p;
+		cwp.worldP = p * scaling;
 		cwp.objectP = roadWheelOriginToBogie(isLeft);
 		
 		const int id = PhysicsState::engine->numCollisionObjects();
@@ -624,7 +635,7 @@ void TrackedPhysics::createRoadWheels(Chassis & c, btRigidBody * chassisBody, bo
 	}
 }
 
-void TrackedPhysics::createSupportRollers(Chassis & c, btRigidBody * chassisBody, bool isLeft)
+void TrackedPhysics::createSupportRollers(Chassis & c, btRigidBody * chassisBody, const float & scaling, bool isLeft)
 {
 	if(c.numSupportRollers() < 1) return;
 	CreateWheelProfile cwp;
@@ -634,8 +645,9 @@ void TrackedPhysics::createSupportRollers(Chassis & c, btRigidBody * chassisBody
 	cwp.mass = .7f;
 	cwp.isLeft = isLeft;
 	cwp.gap = toothWidth() * 1.1f;
+	cwp.scaling = scaling;
 	for(int i=0; i < c.numSupportRollers(); i++) {
-		cwp.worldP = c.supportRollerOrigin(i, isLeft);
+		cwp.worldP = c.supportRollerOrigin(i, isLeft) * scaling;
 		cwp.objectP = c.supportRollerOriginObject(i, isLeft);
 		const int id = PhysicsState::engine->numCollisionObjects();
 		createCompoundWheel(cwp);
@@ -680,14 +692,15 @@ void TrackedPhysics::addBrake(bool leftSide)
 	}
 }
 
-btRigidBody * TrackedPhysics::createTorsionBar(btRigidBody * chassisBody, const int & i, bool isLeft)
+btRigidBody * TrackedPhysics::createTorsionBar(btRigidBody * chassisBody, const int & i, const float & scaling, bool isLeft)
 {
     btCollisionShape* torsionBarShape = PhysicsState::engine->createBoxShape(bogieArmWidth() * .5f, bogieArmWidth() * .5f, bogieArmLength() * .5f);
-	const Matrix44F tm = bogieArmOrigin(i, isLeft);
-	btTransform trans = Common::CopyFromMatrix44F(tm);
+	Matrix44F tm = bogieArmOrigin(i, isLeft);
+	const Vector3F ts = tm.getTranslation() * scaling;
+	tm.setTranslation(ts);
 
 	const int id = PhysicsState::engine->numCollisionObjects();
-	btRigidBody * body = PhysicsState::engine->createRigidBody(torsionBarShape, trans, 1.f);
+	btRigidBody * body = PhysicsState::engine->createRigidBody(torsionBarShape, tm, 1.f);
 	if(isLeft) group("left_bogieArm").push_back(id);
 	else group("right_bogieArm").push_back(id);
 	
@@ -706,12 +719,12 @@ btRigidBody * TrackedPhysics::createTorsionBar(btRigidBody * chassisBody, const 
 	if(!isLeft) frameInB.setBasis(zToX);
 	frameInB.setOrigin(btVector3(0., 0., .5 * bogieArmLength()));
 	
-	btGeneric6DofSpringConstraint* spring = PhysicsState::engine->constrainBySpring(*chassisBody, *body, frameInA, frameInB, true);
+	btGeneric6DofSpringConstraint* spring = PhysicsState::engine->constrainBySpring(*chassisBody, *body, Common::CopyFromBtTransform(frameInA), Common::CopyFromBtTransform(frameInB), true);
 	spring->setLinearUpperLimit(btVector3(0., 0., 0.));
 	spring->setLinearLowerLimit(btVector3(0., 0., 0.));
 
 	spring->enableSpring(5, true);
-	spring->setStiffness(5, 5500.f);
+	spring->setStiffness(5, 8500.f);
 	spring->setDamping(5, TORSIONBARDAMPING);
 	
 	const float tgt = torsionBarTargetAngle();

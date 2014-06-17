@@ -17,6 +17,7 @@ MObject SolverNode::a_enable;
 MObject SolverNode::a_numSubsteps;
 MObject SolverNode::a_frequency;
 MObject SolverNode::a_timeScale;
+MObject SolverNode::a_linearScale;
 MObject SolverNode::a_inConditions;
 MObject SolverNode::a_outRigidBodies;
 
@@ -44,10 +45,11 @@ MStatus SolverNode::compute( const MPlug& plug, MDataBlock& block )
 		const int numss = block.inputValue(a_numSubsteps).asInt();
 		const float freq = block.inputValue(a_frequency).asFloat();
 		const float tsl = block.inputValue(a_timeScale).asFloat();
+		const float lsl = block.inputValue(a_linearScale).asFloat();
 		
 		if(curTime == startTime) {
 			MGlobal::displayInfo("init solver");
-			
+			PhysicsState::engine->setSimulateScale(lsl);
 			PhysicsState::engine->killPhysics();
 			PhysicsState::engine->initPhysics();
 			PhysicsState::engineStatus = PhysicsState::sCreating;
@@ -148,6 +150,12 @@ MStatus SolverNode::initialize()
 	fnNumericAttr.setMin(0.01);
 	fnNumericAttr.setMax(100.);
     status = addAttribute(a_timeScale);
+    
+    a_linearScale = fnNumericAttr.create("linearScale", "lsl", MFnNumericData::kFloat, 1., &status);
+    fnNumericAttr.setKeyable(true);
+	fnNumericAttr.setMin(0.01);
+	fnNumericAttr.setMax(100.);
+    status = addAttribute(a_linearScale);
 	
 	a_inConditions = fnMsgAttr.create("inConditions", "icdts", &status);
 	fnMsgAttr.setArray(true);

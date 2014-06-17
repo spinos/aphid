@@ -50,6 +50,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_state = new caterpillar::PhysicsState;
     m_vehicle = new caterpillar::TrackedPhysics;
 	
+    caterpillar::PhysicsState::engine->setSimulateScale(.63f);
 	caterpillar::PhysicsState::engine->initPhysics();
 	caterpillar::PhysicsState::engine->addGroundPlane(1000.f, -1.f);
 	

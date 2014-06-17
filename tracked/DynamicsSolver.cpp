@@ -14,6 +14,7 @@
 #include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
 #include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
 #include "BulletSoftBody/btSoftBodyHelpers.h"
+#include <Common.h>
 
 DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(2)
 {
@@ -21,6 +22,7 @@ DynamicsSolver::DynamicsSolver() : m_enablePhysics(true), m_numSubSteps(2)
 	m_enableDrawConstraint = true;
     _drawer = new ShapeDrawer();
     m_simulateFrequency = 120.f;
+    m_simulateScale = 1.f;
 	m_dt = 0.f;
 }
 
@@ -32,6 +34,17 @@ DynamicsSolver::~DynamicsSolver()
 void DynamicsSolver::setEnablePhysics(bool x) { m_enablePhysics = x; }
 void DynamicsSolver::setNumSubSteps(int x) { m_numSubSteps = x; }
 void DynamicsSolver::setSimulateFrequency(float x) { m_simulateFrequency = x; }
+void DynamicsSolver::setSimulateScale(const float & x) 
+{ 
+    m_simulateScale = x;
+    m_simulateSpace.setIdentity();
+    *m_simulateSpace.m(0, 0) = x;
+    *m_simulateSpace.m(1, 1) = x;
+    *m_simulateSpace.m(2, 2) = x;
+}
+
+const float DynamicsSolver::simulateScale() const { return m_simulateScale; } 
+
 const bool DynamicsSolver::isPhysicsEnabled() const { return m_enablePhysics; }
 	
 void DynamicsSolver::initPhysics()
@@ -322,21 +335,21 @@ void DynamicsSolver::addGroundPlane(const float & groundSize, const float & grou
 
 btBoxShape* DynamicsSolver::createBoxShape(const float & x, const float & y, const float & z)
 {
-	btBoxShape* cubeShape = new btBoxShape(btVector3(x, y, z));
+	btBoxShape* cubeShape = new btBoxShape(btVector3(x * m_simulateScale, y * m_simulateScale, z * m_simulateScale));
 	m_collisionShapes.push_back(cubeShape);
 	return cubeShape;
 }
 
 btCylinderShape* DynamicsSolver::createCylinderShape(const float & x, const float & y, const float & z)
 {
-	btCylinderShape* cyl = new btCylinderShape(btVector3(x, y, z));
+	btCylinderShape* cyl = new btCylinderShape(btVector3(x * m_simulateScale, y * m_simulateScale, z * m_simulateScale));
 	m_collisionShapes.push_back(cyl);
 	return cyl;
 }
 
 btSphereShape* DynamicsSolver::createSphereShape(const float & r)
 {
-	btSphereShape* spr = new btSphereShape(r);
+	btSphereShape* spr = new btSphereShape(r * m_simulateScale);
 	m_collisionShapes.push_back(spr);
 	return spr;
 }
@@ -395,3 +408,45 @@ void DynamicsSolver::setEnableDrawConstraint(bool x) { m_enableDrawConstraint = 
 
 const float DynamicsSolver::deltaTime() const { return m_dt; }
 
+btRigidBody* DynamicsSolver::createRigidBody(btCollisionShape* shape, const Matrix44F & transform, const float & mass, bool multiplyTM)
+{
+    Matrix44F tm = transform;
+    if(multiplyTM) tm *= m_simulateSpace;
+    return createRigidBody(shape, caterpillar::Common::CopyFromMatrix44F(tm), mass);
+}
+
+btGeneric6DofConstraint* DynamicsSolver::constrainByHinge(btRigidBody& rbA, btRigidBody& rbB, const Matrix44F & rbAFrame, const Matrix44F & rbBFrame, bool disableCollisionsBetweenLinkedBodies)
+{
+    Matrix44F tmA = rbAFrame;
+    tmA *= m_simulateSpace;
+    Matrix44F tmB = rbBFrame;
+    tmB *= m_simulateSpace;
+    return constrainByHinge(rbA, rbB, caterpillar::Common::CopyFromMatrix44F(tmA), caterpillar::Common::CopyFromMatrix44F(tmB), disableCollisionsBetweenLinkedBodies);
+}
+
+btGeneric6DofConstraint* DynamicsSolver::constrainBy6Dof(btRigidBody& rbA, btRigidBody& rbB, const Matrix44F & rbAFrame, const Matrix44F& rbBFrame, bool disableCollisionsBetweenLinkedBodies)
+{
+    Matrix44F tmA = rbAFrame;
+    tmA *= m_simulateSpace;
+    Matrix44F tmB = rbBFrame;
+    tmB *= m_simulateSpace;
+    return constrainBy6Dof(rbA, rbB, caterpillar::Common::CopyFromMatrix44F(tmA), caterpillar::Common::CopyFromMatrix44F(tmB), disableCollisionsBetweenLinkedBodies);
+}
+
+btGeneric6DofSpringConstraint* DynamicsSolver::constrainBySpring(btRigidBody& rbA, btRigidBody& rbB, const Matrix44F & rbAFrame, const Matrix44F & rbBFrame, bool disableCollisionsBetweenLinkedBodies)
+{
+    Matrix44F tmA = rbAFrame;
+    tmA *= m_simulateSpace;
+    Matrix44F tmB = rbBFrame;
+    tmB *= m_simulateSpace;
+    return constrainBySpring(rbA, rbB, caterpillar::Common::CopyFromMatrix44F(tmA), caterpillar::Common::CopyFromMatrix44F(tmB), disableCollisionsBetweenLinkedBodies);
+}
+
+const Matrix44F DynamicsSolver::restoreTM(const btTransform & tm) const
+{
+    Matrix44F r = caterpillar::Common::CopyFromBtTransform(tm);
+    Vector3F t = r.getTranslation();
+    t /= m_simulateScale;
+    r.setTranslation(t);
+    return r;  
+}
