@@ -36,7 +36,7 @@ public:
 	const bool isPowered() const;
 	const bool isSteerable() const;
 	
-	btRigidBody* create(const Vector3F & pos, bool isLeft = true);
+	btRigidBody* create(const Vector3F & pos, const float & scaling, bool isLeft = true);
 	void connectWheel(Wheel * wheel, bool isLeft);
 	
 	void update();
@@ -58,16 +58,16 @@ public:
 	static int Gear;
 
 private:
-	btRigidBody* createCarrier(const Matrix44F & tm, bool isLeft);
-	btRigidBody* createWishbone(btRigidBody* carrier, const Matrix44F & tm, bool isUpper, bool isLeft);
-	btRigidBody* createSteeringArm(btRigidBody* carrier, const Matrix44F & tm, bool isLeft);
+	btRigidBody* createCarrier(const Matrix44F & tm, const float & scaling, bool isLeft);
+	btRigidBody* createWishbone(btRigidBody* carrier, const Matrix44F & tm, const float & scaling, bool isUpper, bool isLeft);
+	btRigidBody* createSteeringArm(btRigidBody* carrier, const Matrix44F & tm, const float & scaling, bool isLeft);
 	btRigidBody* createDamper(btRigidBody * lowerArm, const Matrix44F & tm, bool isLeft);
 	btRigidBody* createSwayBar(const Matrix44F & tm, btRigidBody * arm, bool isLeft);
 	void connectSwayBar(const Matrix44F & tm, btRigidBody * bar);
-	btCompoundShape* createWishboneShape(bool isUpper, bool isLeft);
-	const Matrix44F wishboneHingTMLocal(bool isUpper, bool isLeft, bool isFront) const;
+	btCompoundShape* createWishboneShape(const float & scaling, bool isUpper, bool isLeft);
+	const Matrix44F wishboneHingTMLocal(const float & scaling, bool isUpper, bool isLeft, bool isFront) const;
 	void wishboneLA(bool isUpper, bool isLeft, bool isFront, float & l, float & a) const;
-	void connectArm(btRigidBody* arm, const Matrix44F & tm, bool isUpper, bool isLeft, bool isFront);
+	void connectArm(btRigidBody* arm, const Matrix44F & tm, const float & scaling, bool isUpper, bool isLeft, bool isFront);
 	void steerWheel(const float & ang, int i);
 	void releaseBrake();
 	void applyMotor(float rps, const int & i, float force);

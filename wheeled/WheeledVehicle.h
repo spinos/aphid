@@ -48,7 +48,7 @@ protected:
     const Matrix44F rigidBodyTM(const int & i) const;
 private:
 	const Vector3F vehicleVelocity() const;
-    btCollisionShape* createChassisShape();
+    btCollisionShape* createChassisShape(const float scaling);
     void computeAcceleration();
     void computeDifting();
     void applyDownForce();

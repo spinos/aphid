@@ -12,6 +12,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_state = new caterpillar::PhysicsState;
     m_vehicle = new caterpillar::Automobile;
 	
+    caterpillar::PhysicsState::engine->setSimulateScale(.5f);
 	caterpillar::PhysicsState::engine->initPhysics();
 	//åcaterpillar::PhysicsState::engine->addGroundPlane(2000.f, 0.f);
 	
@@ -21,8 +22,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_circuit = new caterpillar::RaceCircuit;
 	m_circuit->create();
 	
-	m_vehicle->setOrigin(Vector3F(0.f, 20.f, -10.f));
-	getCamera()->traverse(Vector3F(0.f, 20.f, -10.f));
+	m_vehicle->setOrigin(Vector3F(-10.f, 10.f, -10.f));
+	getCamera()->traverse(Vector3F(-10.f, 10.f, -10.f));
 	perspCamera()->setFarClipPlane(20000.f);
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
@@ -72,7 +73,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	caterpillar::PhysicsState::engine->setEnablePhysics(false);
 	caterpillar::PhysicsState::engine->setNumSubSteps(18);
-	caterpillar::PhysicsState::engine->setEnableDrawConstraint(false);
+	caterpillar::PhysicsState::engine->setEnableDrawConstraint(true);
 	caterpillar::PhysicsState::engine->setSimulateFrequency(200.f);
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
@@ -92,7 +93,7 @@ void GLWidget::clientDraw()
 {
 	caterpillar::PhysicsState::engine->renderWorld();
 	getDrawer()->m_paintProfile.apply();
-	m_vehicle->render();
+	// m_vehicle->render();
 	int i = 1;
 	std::stringstream sst;
 	sst.str("");

@@ -42,12 +42,11 @@ void WheeledVehicle::create()
 	m_prevOrigin = origin();
 	m_prevVelocity.setZero();
 	
-	btCollisionShape* chassisShape = createChassisShape();
+	const float scaling = PhysicsState::engine->simulateScale();
+	btCollisionShape* chassisShape = createChassisShape(scaling);
 	
-	const Vector3F ori = origin();
-	btTransform trans;
-	trans.setIdentity();
-	trans.setOrigin(btVector3(ori.x, ori.y, ori.z));
+	const Vector3F ori = origin() * scaling;
+	Matrix44F trans; trans.translate(ori);
 	
 	const int id = PhysicsState::engine->numCollisionObjects();
 	btRigidBody* chassisBody = PhysicsState::engine->createRigidBody(chassisShape, trans, m_mass);
@@ -59,15 +58,15 @@ void WheeledVehicle::create()
 	Suspension::ChassisOrigin = origin();
 	
 	for(int i = 0; i < numAxis(); i++) {
-		suspension(i).create(wheelOrigin(i));
-		suspension(i).create(wheelOrigin(i, false), false);
+		suspension(i).create(wheelOrigin(i), scaling);
+		suspension(i).create(wheelOrigin(i, false), scaling, false);
 		
 		const std::string wgn = wheelGrpName(i);
 		
-		wheel(i, 0).create(wheelTM(i), true);
+		wheel(i, 0).create(wheelTM(i), scaling, true);
 		group(wgn).push_back(wheel(i, 0).rigidBodyId());
 		
-		wheel(i, 1).create(wheelTM(i, false), false);
+		wheel(i, 1).create(wheelTM(i, false), scaling, false);
 		group(wgn).push_back(wheel(i, 1).rigidBodyId());
 		
 		suspension(i).connectWheel(&wheel(i, 0), true);
@@ -78,7 +77,7 @@ void WheeledVehicle::create()
 	computeSteerBase();
 }
 
-btCollisionShape* WheeledVehicle::createChassisShape()
+btCollisionShape* WheeledVehicle::createChassisShape(const float scaling)
 {
     const Vector3F dimH = getChassisDim() * .5f; 
     btBoxShape* box = PhysicsState::engine->createBoxShape(dimH.x, dimH.y, dimH.z);
@@ -99,11 +98,11 @@ btCollisionShape* WheeledVehicle::createChassisShape()
     
     tm.setIdentity();
     tm.rotateZ(PI * .5f);
-    tm.setTranslation(pos.x, pos.y + dim.y * .5f, pos.z - dim.z * .5f);
+    tm.setTranslation(Vector3F(pos.x, pos.y + dim.y * .5f, pos.z - dim.z * .5f) * scaling);
     frm = Common::CopyFromMatrix44F(tm);
     comp->addChildShape(frm, bar);
     
-    tm.setTranslation(pos.x, pos.y + dim.y * .5f, pos.z + dim.z * .5f);
+    tm.setTranslation(Vector3F(pos.x, pos.y + dim.y * .5f, pos.z + dim.z * .5f) * scaling);
     frm = Common::CopyFromMatrix44F(tm);
     comp->addChildShape(frm, bar);
     
@@ -117,7 +116,7 @@ btCollisionShape* WheeledVehicle::createChassisShape()
     tm.setIdentity();
     tm *= rotx;
     tm.rotateZ(ang.z);
-    tm.setTranslation(pos.x + dim.x * .5f - xfac * .5f, pos.y, pos.z + dim.z * .5f + zfac0 * .5f);
+    tm.setTranslation(Vector3F(pos.x + dim.x * .5f - xfac * .5f, pos.y, pos.z + dim.z * .5f + zfac0 * .5f) * scaling);
     
     frm = Common::CopyFromMatrix44F(tm);
     comp->addChildShape(frm, bar);
@@ -125,7 +124,7 @@ btCollisionShape* WheeledVehicle::createChassisShape()
     tm.setIdentity();
     tm *= rotx;
     tm.rotateZ(-ang.z);
-    tm.setTranslation(pos.x - dim.x * .5f + xfac * .5f, pos.y, pos.z + dim.z * .5f + zfac0 * .5f);
+    tm.setTranslation(Vector3F(pos.x - dim.x * .5f + xfac * .5f, pos.y, pos.z + dim.z * .5f + zfac0 * .5f) * scaling);
     
     frm = Common::CopyFromMatrix44F(tm);
     comp->addChildShape(frm, bar);
@@ -140,7 +139,7 @@ btCollisionShape* WheeledVehicle::createChassisShape()
     tm.setIdentity();
     tm *= rotx;
     tm.rotateZ(ang.z);
-    tm.setTranslation(pos.x + dim.x * .5f - xfac * .5f, pos.y, pos.z - dim.z * .5f - zfac1 * .5f);
+    tm.setTranslation(Vector3F(pos.x + dim.x * .5f - xfac * .5f, pos.y, pos.z - dim.z * .5f - zfac1 * .5f) * scaling);
     
     frm = Common::CopyFromMatrix44F(tm);
     comp->addChildShape(frm, bar);
@@ -148,7 +147,7 @@ btCollisionShape* WheeledVehicle::createChassisShape()
     tm.setIdentity();
     tm *= rotx;
     tm.rotateZ(-ang.z);
-    tm.setTranslation(pos.x - dim.x * .5f + xfac * .5f, pos.y, pos.z - dim.z * .5f - zfac1 * .5f);
+    tm.setTranslation(Vector3F(pos.x - dim.x * .5f + xfac * .5f, pos.y, pos.z - dim.z * .5f - zfac1 * .5f) * scaling);
     
     frm = Common::CopyFromMatrix44F(tm);
     comp->addChildShape(frm, bar);

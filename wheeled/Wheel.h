@@ -31,7 +31,7 @@ public:
 	const float radius() const;
 	const float friction() const;
 	
-	btRigidBody* create(const Matrix44F & tm, bool isLeft);
+	btRigidBody* create(const Matrix44F & tm, const float & scaling, bool isLeft);
 	btRigidBody* body();
 	const Vector3F velocity() const;
 	const Vector3F angularVelocity() const;

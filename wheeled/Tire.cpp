@@ -14,7 +14,7 @@ namespace caterpillar {
 #define PADROLL 0.f
 Tire::Tire() {}
 Tire::~Tire() {}
-btRigidBody* Tire::create(const float & radiusMajor, const float & radiusMinor, const float & width, const float & mass, const Matrix44F & tm, bool isLeft)
+btRigidBody* Tire::create(const float & radiusMajor, const float & radiusMinor, const float & width, const float & mass, const Matrix44F & tm, const float & scaling, bool isLeft)
 {
 	const float hw = .5f * width; m_hw = hw;
 	const float sy = (radiusMajor - radiusMinor) * PI / NUMGRIDRAD;
@@ -28,10 +28,10 @@ btRigidBody* Tire::create(const float & radiusMajor, const float & radiusMinor, 
 	Matrix44F ptm[2];
 	ptm[0].rotateZ(PADROLL * d);
 	// ptm[0].rotateZ(PI * .5f);
-	ptm[0].translate(-0.f * hw, 0.f, radiusMajor - radiusMinor * 1.5f);
+	ptm[0].translate(Vector3F(-0.f * hw, 0.f, radiusMajor - radiusMinor * 1.5f) * scaling);
 	
 	ptm[1].rotateZ(-PADROLL * d);
-	ptm[1].translate(.5f * hw, 0.f, radiusMajor - radiusMinor * 1.5f);
+	ptm[1].translate(Vector3F(.5f * hw, 0.f, radiusMajor - radiusMinor * 1.5f) * scaling);
 
 	const float delta = PI * 2.f / (float)NUMGRIDRAD;
 	int i;
@@ -46,18 +46,17 @@ btRigidBody* Tire::create(const float & radiusMajor, const float & radiusMinor, 
 	
 	PhysicsState::engine->addCollisionShape(wheelShape);
 	
-	btTransform trans = Common::CopyFromMatrix44F(tm);
-	btRigidBody* wheelBody = PhysicsState::engine->createRigidBody(wheelShape, trans, mass);
+	btRigidBody* wheelBody = PhysicsState::engine->createRigidBody(wheelShape, tm, mass);
 	wheelBody->setDamping(0.f, 0.f);
 	wheelBody->setFriction(1.99f);
 	wheelBody->setActivationState(DISABLE_DEACTIVATION);
 	
-	attachPad(wheelBody, padShape, tm, radiusMajor, radiusMinor, isLeft);
+	attachPad(wheelBody, padShape, tm, radiusMajor, radiusMinor, scaling, isLeft);
 	
 	return wheelBody;
 }
 
-void Tire::attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const Matrix44F & origin, const float & radiusMajor, const float & radiusMinor, bool isLeft)
+void Tire::attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const Matrix44F & origin, const float & radiusMajor, const float & radiusMinor, const float & scaling, bool isLeft)
 {
     const float delta = PI * 2.f / (float)NUMGRIDRAD;
 	int i;
@@ -68,31 +67,31 @@ void Tire::attachPad(btRigidBody* wheelBody, btCollisionShape * padShape, const 
 	Matrix44F tm[2];
 	tm[0].rotateZ(PADROLL * d);
 	// tm[0].rotateZ(PI * .5f);
-	tm[0].translate(-0.f * m_hw, 0.f, radiusMajor - radiusMinor * .5f);
+	tm[0].translate(Vector3F(-0.f * m_hw, 0.f, radiusMajor - radiusMinor * .5f) * scaling);
 	
 	tm[1].rotateZ(-PADROLL * d);
-	tm[1].translate(.5f * m_hw, 0.f, radiusMajor - radiusMinor * .5f);
+	tm[1].translate(Vector3F(.5f * m_hw, 0.f, radiusMajor - radiusMinor * .5f) * scaling);
 
 	Matrix44F rot;
 	for(i = 0; i < NUMGRIDRAD; i++) {
 	    Matrix44F ctm = tm[0];
 		ctm *= rot;
 		
-		btTransform frameInA = Common::CopyFromMatrix44F(ctm);
+		Matrix44F frameInA = ctm;
 		
 		ctm *= origin;
 		
-		btTransform frm = Common::CopyFromMatrix44F(ctm);
-		btRigidBody* padBody = PhysicsState::engine->createRigidBody(padShape, frm, .1f);
+		btRigidBody* padBody = PhysicsState::engine->createRigidBody(padShape, ctm, .1f);
 		padBody->setFriction(3.99f);
 		padBody->setDamping(0.f, 0.f);
 		m_bd[i] = padBody;
 		
-		btTransform frameInB; frameInB.setIdentity();
+		Matrix44F frameInB;
+		
 		btGeneric6DofSpringConstraint* spring = PhysicsState::engine->constrainBySpring(*wheelBody, *padBody, frameInA, frameInB, true);
 		
-		spring->setLinearUpperLimit(btVector3(0., 0., -.25f * radiusMinor));
-		spring->setLinearLowerLimit(btVector3(0., 0., .25f * radiusMinor));
+		spring->setLinearUpperLimit(btVector3(0., 0., -.25f * radiusMinor * scaling));
+		spring->setLinearLowerLimit(btVector3(0., 0., .25f * radiusMinor * scaling));
 		spring->setAngularLowerLimit(btVector3(-delta, -0.05f, 0.f));
 	    spring->setAngularUpperLimit(btVector3(delta, 0.05f, 0.f));
 	    spring->enableSpring(2, true);

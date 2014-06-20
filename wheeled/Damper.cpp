@@ -17,12 +17,11 @@ Damper::Damper(btRigidBody * lower, btRigidBody * upper, const float & l)
 	m_body[1] = upper;
 	m_range = l;
 	
-	Matrix44F damperTm;
-	damperTm.translate(0.f, l, 0.f);
-	btTransform frmA = Common::CopyFromMatrix44F(damperTm);
+	Matrix44F frmA;
+	frmA.translate(0.f, l, 0.f);
 	
-	damperTm.translate(0.f, l * -2.f - m_range, 0.f);
-	btTransform frmB = Common::CopyFromMatrix44F(damperTm);
+	Matrix44F frmB;
+	frmB.translate(0.f, l * -1.f - m_range, 0.f);
 	
 	btGeneric6DofSpringConstraint* slid = PhysicsState::engine->constrainBySpring(*lower, *upper, frmA, frmB, true);
 	slid->setAngularLowerLimit(btVector3(0.f, 0.f, 0.f));

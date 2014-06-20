@@ -25,10 +25,12 @@ const float Wheel::width() const { return m_profile._width; }
 
 const float Wheel::radius() const { return m_profile._radiusMajor; }
 
-btRigidBody* Wheel::create(const Matrix44F & tm, bool isLeft)
+btRigidBody* Wheel::create(const Matrix44F & tm, const float & scaling, bool isLeft)
 {
     m_rigidBodyId = PhysicsState::engine->numCollisionObjects();
-    m_body = m_tire.create(m_profile._radiusMajor, m_profile._radiusMinor, m_profile._width, m_profile._mass, tm, isLeft);
+    Matrix44F scaledTm = tm;
+    scaledTm.setTranslation(scaledTm.getTranslation() * scaling);
+    m_body = m_tire.create(m_profile._radiusMajor, m_profile._radiusMinor, m_profile._width, m_profile._mass, scaledTm, scaling, isLeft);
 	return m_body;
 }
 
