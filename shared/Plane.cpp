@@ -62,6 +62,11 @@ void Plane::projectPoint(const Vector3F & p0, Vector3F & dst) const
 	dst.z = p0.z - m_c * tt;
 }
 
+float Plane::pointTo(const Vector3F & p0) const
+{
+	return -(p0.x * m_a + p0.y * m_b + p0.z * m_c + m_d) / ( - m_a * m_a - m_b * m_b - m_c * m_c);
+}
+
 bool Plane::rayIntersect(const Ray & ray, Vector3F & dst, float & t, bool twoSided) const
 {
 	float below = ray.m_dir.x * m_a + ray.m_dir.y * m_b + ray.m_dir.z * m_c;

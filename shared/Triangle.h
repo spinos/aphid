@@ -13,10 +13,12 @@
 
 class Triangle {
 public:
+    Triangle(const Vector3F& a, const Vector3F& b, const Vector3F& c);
 	Triangle(const Vector3F& a, const Vector3F& b, const Vector3F& c, const Vector3F& n);
-
+	
 	char intersects(const Triangle * another) const;
 	char intersects(const Vector3F& origin, const Vector3F& ray, float maxDistance, Vector3F &position, Vector3F &normal) const;
+	bool intersect(const BoundingBox & bb) const;
 	char frontIntersects(const Vector3F& origin, const Vector3F& ray, float maxDistance, Vector3F &position, Vector3F &normal) const;
 	char backIntersects(const Vector3F& origin, const Vector3F& ray, float maxDistance, Vector3F &position, Vector3F &normal) const;
 	char closestHit(const Vector3F& origin, Vector3F& dest, float maxDistance) const;
@@ -29,5 +31,7 @@ public:
 	Vector3F center() const;
 	Vector3F randomOnPlane() const;
 	Vector3F normal() const;
+	const Vector3F edge(const int & i) const;
+	const Vector3F corner(const int & i) const;
 	Vector3F p0, p1, p2, nor;
 };

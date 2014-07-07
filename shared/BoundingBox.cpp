@@ -9,10 +9,31 @@
 #include "Aphid.h"
 #include "BoundingBox.h"
 #include <Ray.h>
-
+#include <Plane.h>
 BoundingBox::BoundingBox()
 {
 	reset();
+}
+
+BoundingBox::BoundingBox(const float & x0, const float & y0, const float & z0,
+	            const float & x1, const float & y1, const float & z1)
+{
+    m_data[0] = x0;
+    m_data[1] = y0;
+    m_data[2] = z0;
+    m_data[3] = x1;
+    m_data[4] = y1;
+    m_data[5] = z1;
+}
+
+BoundingBox::BoundingBox(const float * d)
+{
+    m_data[0] = d[0];
+    m_data[1] = d[1];
+    m_data[2] = d[2];
+    m_data[3] = d[3];
+    m_data[4] = d[4];
+    m_data[5] = d[5];
 }
 
 void BoundingBox::reset()
@@ -255,6 +276,48 @@ char BoundingBox::isBoxAround(const BoundingBox & b, float threshold) const
 char BoundingBox::isValid() const
 {
 	return (getMin(0) < getMax(0) && getMin(1) < getMax(1) && getMin(2) < getMax(2));
+}
+
+/*
+// z0
+// 2 - 3
+// |   |
+// 0 - 1
+// 
+// z1
+// 6 - 7
+// |   |
+// 4 - 5
+*/
+
+const Vector3F BoundingBox::corner(const int & i) const
+{
+    const int iz = i / 4;
+    const int iy = (i - iz * 4) / 2;
+    const int ix = i - iy * 2 - iz * 4;
+    return Vector3F(m_data[3 * ix], m_data[1 + 3 * iy], m_data[2 + 3 * iz]);
+}
+
+bool BoundingBox::intersect(const Plane & p, float & tmin, float & tmax) const
+{
+    float t;
+    tmin = 10e8;
+    tmax = -10e8;
+    for(int i = 0; i < 8; i++) {
+        t = p.pointTo(corner(i));
+        if(t < tmin) tmin = t;
+        if(t > tmax) tmax = t;
+    }
+    
+    if(tmin > 0.f || tmax < 0.f) return false;
+    return true;
+}
+
+const Vector3F BoundingBox::normal(const int & i) const
+{
+    if(i<1) return Vector3F::XAxis;
+    if(i<2) return Vector3F::YAxis;
+    return Vector3F::ZAxis;
 }
 
 void BoundingBox::verbose() const

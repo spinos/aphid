@@ -28,6 +28,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h ../shared/AllLight.h \
                 ../shared/BaseMesh.h \
 				../shared/PlaneMesh.h \
                 ../shared/TriangleMesh.h \
+                ../shared/Triangle.h \
                 ../shared/GeoElement.h \
                 ../shared/Vertex.h \
                 ../shared/Edge.h \
@@ -188,6 +189,7 @@ SOURCES = ../shared/Vector3F.cpp \
                 ../shared/BaseMesh.cpp \
 				../shared/PlaneMesh.cpp \
                 ../shared/TriangleMesh.cpp \
+                ../shared/Triangle.cpp \
                 ../shared/GeoElement.cpp \
                 ../shared/Vertex.cpp \
                 ../shared/Edge.cpp \

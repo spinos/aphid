@@ -8,7 +8,7 @@
  */
 #include <iostream>
 #include "Triangle.h"
-
+#include <Plane.h>
 //#include <maya/MGlobal.h>
 
 void project_point_on_line(const Vector3F & p, const Vector3F & lineDir, const Vector3F & onLine, float & l)
@@ -28,6 +28,24 @@ char ray_plane_intersect(const Vector3F & origin, const Vector3F & ray, const Ve
 	hit = origin + ray * t;
 	
 	return t >= 0.f;
+}
+
+/* 
+//  (vc)
+//  c
+//  | \
+//  a - b (vb)
+*/
+
+Triangle::Triangle(const Vector3F& a, const Vector3F& b, const Vector3F& c)
+{
+    p0 = a;
+	p1 = b;
+	p2 = c;
+	const Vector3F vb = b - c;
+	const Vector3F vc = c - a;
+	nor = vb.cross(vc);
+	nor.normalize();
 }
 
 Triangle::Triangle(const Vector3F& a, const Vector3F& b, const Vector3F& c, const Vector3F& n) 
@@ -317,3 +335,62 @@ void Triangle::expandBBox(BoundingBox & bbox) const
 	bbox.updateMax(p1);
 	bbox.updateMax(p2);
 }
+
+bool Triangle::intersect(const BoundingBox & bb) const
+{
+    BoundingBox tribb;
+    expandBBox(tribb);
+    if(!tribb.intersect(bb)) return false;
+    
+    Plane pl(nor, p1);
+    float boxMin, boxMax;
+    if(!bb.intersect(pl, boxMin, boxMax)) return false;
+    
+    Vector3F triEdge[3];
+    triEdge[0] = edge(0);
+    triEdge[1] = edge(1);
+    triEdge[2] = edge(2);
+    
+    Vector3F boxNormal[3];
+    boxNormal[0] = bb.normal(0);
+    boxNormal[1] = bb.normal(1);
+    boxNormal[2] = bb.normal(2);
+    
+    int i, j, k;
+    Vector3F axis;
+    float tangentMin, tangentMax, tangentD;
+    for(j = 0; j < 3; j++) {
+        for(i=0; i < 3; i++) {
+            axis = triEdge[i].cross(boxNormal[j]);
+            if(axis.length() < 10e-6) continue;
+            
+            axis.normalize();
+            Plane tangentPlane(axis, corner(i));
+            bb.intersect(tangentPlane, boxMin, boxMax);
+            tangentMax = -10e8;
+            tangentMin = 10e8;
+            for(k = 0; k < 3; k++) {
+                tangentD = tangentPlane.pointTo(corner(k));
+                if(tangentD < tangentMin) tangentMin = tangentD;
+                if(tangentD > tangentMax) tangentMax = tangentD;
+            }
+            if(tangentMax <= boxMin || tangentMin >= boxMax) return false;
+        }
+    }
+    return true;
+}
+
+const Vector3F Triangle::edge(const int & i) const
+{
+    if(i<1) return p1 - p0;
+    if(i<2) return p2 - p1;
+    return p0 - p2;
+}
+
+const Vector3F Triangle::corner(const int & i) const
+{
+    if(i<1) return p0;
+    if(i<2) return p1;
+    return p2;
+}
+
