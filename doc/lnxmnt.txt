@@ -1,0 +1,7 @@
+id
+
+show current user name and group
+
+mount -t cifs srcdir dstdir -o uid=user -o gid=group -o username=login
+
+mount a windows srcdir to dstdir, give up ownership to user\group
