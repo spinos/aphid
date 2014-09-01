@@ -1,10 +1,16 @@
 cmake_minimum_required (VERSION 2.8)
-project (btree)
+project (randomAccess)
  
-include_directories ("." "../shared")
+include_directories ("." "../" "../../shared")
 
-add_executable(btree Types.cpp Entity.cpp List.cpp BNode.cpp BTree.cpp Array.cpp 
-../shared/PseudoNoise.cpp
+add_executable(randomAccess 
+../Types.cpp
+../Entity.cpp 
+../List.cpp 
+../BNode.cpp 
+../BTree.cpp 
+../Array.cpp 
+../../shared/PseudoNoise.cpp
 main.cpp)
 
 if(WIN32)
@@ -33,7 +39,7 @@ message ("boost date_time is" ${Boost_DATE_TIME_LIBRARY})
 message ("boost regex is" ${Boost_REGEX_LIBRARY})
 message ("boost filesystem is" ${Boost_FILESYSTEM_LIBRARY})
 
-target_link_libraries (btree ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (btree ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (btree ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (btree ${Boost_REGEX_LIBRARY})
+target_link_libraries (randomAccess ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (randomAccess ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (randomAccess ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (randomAccess ${Boost_REGEX_LIBRARY})

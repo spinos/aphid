@@ -56,6 +56,22 @@ int PseudoNoise::rint( int i )
 	return xRand + yRand + zRand;
 }
 
+int PseudoNoise::rint2(int i, int j)
+{
+	seedd( i, j * 3, i * 3 + j * 7);
+	randomize();
+
+	return xRand + yRand + zRand;
+}
+
+int PseudoNoise::rint3(int i, int j, int k)
+{
+	seedd( i, j * 3, k * 131 );
+	randomize();
+
+	return xRand + yRand + zRand;
+}
+
 void PseudoNoise::sphereRand(float& x, float& y, float& z, float r, unsigned int &i)
 {
 	unsigned int seed = i;
