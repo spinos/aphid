@@ -10,6 +10,7 @@
 #include <BTree.h>
 #include <Types.h>
 #include <Array.h>
+#include "../shared/PseudoNoise.h"
 using namespace sdb;
 
 void testFind(Array<int, int> & arr, int k)
@@ -152,10 +153,12 @@ int main()
 	tree.find(92);
 	std::cout<<"test array\n";
 	
+	PseudoNoise noi;
+
 	Array<int, int>arr;
 	int p[132];
 	for(int i=0; i < 132; i++) {
-	    p[i] = rand() % 199;
+	    p[i] = noi.rint(i) % 199;
 	    arr.insert(i, &p[i]);
 	}
 
@@ -175,8 +178,8 @@ int main()
 	testFind(arr, 199);
 	
 	List<int> ll;
-	for(int i = 0; i < 256; i++)
-		ll.insert(rand() % 999);
+	for(int i = 0; i < 199; i++)
+		ll.insert(noi.rint(i) % 999);
 
 	printList(ll);
 	

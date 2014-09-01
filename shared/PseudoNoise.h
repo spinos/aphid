@@ -18,6 +18,8 @@ public:
 	
 	float rfloat( int i );
 	int rint( int i );
+	int rint2(int i, int j);
+	int rint3(int i, int j, int k);
 	void sphereRand(float& x, float& y, float& z, float r, unsigned int &i);
 private:
 	static unsigned xRand, yRand, zRand;     /* seed */
