@@ -5,6 +5,7 @@
  *  Created by jian zhang on 5/5/14.
  *  Copyright 2014 __MyCompanyName__. All rights reserved.
  *
+ *  3-dimensional map to a list of vertexP resides each grid
  */
 
 #pragma once
