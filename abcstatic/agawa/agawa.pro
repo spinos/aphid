@@ -1,5 +1,5 @@
 TEMPLATE = lib
-TARGET = alembic
+TARGET = agawa
 CONFIG += staticlib thread release
 CONFIG -= qt
 ABC_SRC = D:/usr/Alembic/lib/Alembic
@@ -158,106 +158,35 @@ HEADERS       = $$ABC_SRC/Abc/All.h \
                 $$ABC_SRC/AbcMaterial/MaterialFlatten.h \
                 $$ABC_SRC/AbcMaterial/MaterialAssignment.h 
                 
-SOURCES       = $$ABC_SRC/Abc/ArchiveInfo.cpp \
-                $$ABC_SRC/Abc/ErrorHandler.cpp \
-                $$ABC_SRC/Abc/IArchive.cpp \
-                $$ABC_SRC/Abc/IArrayProperty.cpp \
-                $$ABC_SRC/Abc/ICompoundProperty.cpp \
-                $$ABC_SRC/Abc/IObject.cpp \
-                $$ABC_SRC/Abc/ISampleSelector.cpp \
-                $$ABC_SRC/Abc/IScalarProperty.cpp \
-                $$ABC_SRC/Abc/OArchive.cpp \
-                $$ABC_SRC/Abc/OArrayProperty.cpp \
-                $$ABC_SRC/Abc/OCompoundProperty.cpp \
-                $$ABC_SRC/Abc/OObject.cpp \
-                $$ABC_SRC/Abc/OScalarProperty.cpp \
-                $$ABC_SRC/Abc/Reference.cpp \
-                $$ABC_SRC/Abc/SourceName.cpp \
-                $$ABC_SRC/AbcCollection/ICollections.cpp \
-                $$ABC_SRC/AbcCollection/OCollections.cpp \
-                $$ABC_SRC/AbcCoreAbstract/Foundation.cpp \
-                $$ABC_SRC/AbcCoreAbstract/TimeSampling.cpp \
-                $$ABC_SRC/AbcCoreAbstract/TimeSamplingType.cpp \
-                $$ABC_SRC/AbcCoreAbstract/ArraySample.cpp \
-                $$ABC_SRC/AbcCoreAbstract/ReadArraySampleCache.cpp \
-                $$ABC_SRC/AbcCoreAbstract/ScalarSample.cpp \
-                $$ABC_SRC/AbcCoreAbstract/BasePropertyWriter.cpp \
-                $$ABC_SRC/AbcCoreAbstract/ScalarPropertyWriter.cpp \
-                $$ABC_SRC/AbcCoreAbstract/ArrayPropertyWriter.cpp \
-                $$ABC_SRC/AbcCoreAbstract/CompoundPropertyWriter.cpp \
-                $$ABC_SRC/AbcCoreAbstract/ObjectWriter.cpp  \
-                $$ABC_SRC/AbcCoreAbstract/ArchiveWriter.cpp  \
-                $$ABC_SRC/AbcCoreAbstract/BasePropertyReader.cpp \
-                $$ABC_SRC/AbcCoreAbstract/ScalarPropertyReader.cpp \
-                $$ABC_SRC/AbcCoreAbstract/ArrayPropertyReader.cpp \
-                $$ABC_SRC/AbcCoreAbstract/CompoundPropertyReader.cpp \
-                $$ABC_SRC/AbcCoreAbstract/ObjectReader.cpp  \
-                $$ABC_SRC/AbcCoreAbstract/ArchiveReader.cpp  \
-                $$ABC_SRC/AbcCoreFactory/IFactory.cpp \
-                $$ABC_SRC/AbcCoreHDF5/AprImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/ApwImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/ArImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/AwImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/CacheImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/CprData.cpp \
-                $$ABC_SRC/AbcCoreHDF5/CprImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/CpwData.cpp \
-                $$ABC_SRC/AbcCoreHDF5/CpwImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/DataTypeRegistry.cpp \
-                $$ABC_SRC/AbcCoreHDF5/HDF5Hierarchy.cpp \
-                $$ABC_SRC/AbcCoreHDF5/HDF5HierarchyReader.cpp \
-                $$ABC_SRC/AbcCoreHDF5/HDF5HierarchyWriter.cpp \
-                $$ABC_SRC/AbcCoreHDF5/HDF5Util.cpp \
-                $$ABC_SRC/AbcCoreHDF5/OrData.cpp \
-                $$ABC_SRC/AbcCoreHDF5/OrImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/OwData.cpp \
-                $$ABC_SRC/AbcCoreHDF5/OwImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/ReadUtil.cpp \
-                $$ABC_SRC/AbcCoreHDF5/ReadWrite.cpp \
-                $$ABC_SRC/AbcCoreHDF5/SprImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/SpwImpl.cpp \
-                $$ABC_SRC/AbcCoreHDF5/StringReadUtil.cpp \
-                $$ABC_SRC/AbcCoreHDF5/StringWriteUtil.cpp \
-                $$ABC_SRC/AbcCoreHDF5/WriteUtil.cpp \
-                $$ABC_SRC/Util/Murmur3.cpp \
-     $$ABC_SRC/Util/Naming.cpp \
-     $$ABC_SRC/Util/SpookyV2.cpp \
-     $$ABC_SRC/Util/TokenMap.cpp \
-                $$ABC_SRC/AbcGeom/ArchiveBounds.cpp \
-                $$ABC_SRC/AbcGeom/GeometryScope.cpp \
-                $$ABC_SRC/AbcGeom/FilmBackXformOp.cpp \
-                $$ABC_SRC/AbcGeom/CameraSample.cpp \
-                $$ABC_SRC/AbcGeom/ICamera.cpp \
-                $$ABC_SRC/AbcGeom/OCamera.cpp \
-                $$ABC_SRC/AbcGeom/Basis.cpp \
-                $$ABC_SRC/AbcGeom/ICurves.cpp \
-                $$ABC_SRC/AbcGeom/OCurves.cpp \
-                $$ABC_SRC/AbcGeom/OFaceSet.cpp \
-                $$ABC_SRC/AbcGeom/IFaceSet.cpp \
-                $$ABC_SRC/AbcGeom/OLight.cpp \
-                $$ABC_SRC/AbcGeom/ILight.cpp \
-                $$ABC_SRC/AbcGeom/ONuPatch.cpp \
-                $$ABC_SRC/AbcGeom/INuPatch.cpp \
-                $$ABC_SRC/AbcGeom/OPoints.cpp \
-                $$ABC_SRC/AbcGeom/IPoints.cpp \
-                $$ABC_SRC/AbcGeom/OPolyMesh.cpp \
-                $$ABC_SRC/AbcGeom/IPolyMesh.cpp \
-                $$ABC_SRC/AbcGeom/OSubD.cpp \
-                $$ABC_SRC/AbcGeom/ISubD.cpp \
-                $$ABC_SRC/AbcGeom/Visibility.cpp \
-                $$ABC_SRC/AbcGeom/XformOp.cpp \
-                $$ABC_SRC/AbcGeom/XformSample.cpp \
-                $$ABC_SRC/AbcGeom/IXform.cpp \
-                $$ABC_SRC/AbcGeom/OXform.cpp \
-                $$ABC_SRC/AbcMaterial/OMaterial.cpp \
-                $$ABC_SRC/AbcMaterial/IMaterial.cpp \
-                $$ABC_SRC/AbcMaterial/MaterialFlatten.cpp \
-                $$ABC_SRC/AbcMaterial/MaterialAssignment.cpp \
-                $$ABC_SRC/AbcMaterial/InternalUtil.cpp
+SOURCES       = $$ABC_SRC/AbcCoreOgawa/AprImpl.cpp \
+  $$ABC_SRC/AbcCoreOgawa/ApwImpl.cpp \
+   $$ABC_SRC/AbcCoreOgawa/ArImpl.cpp \
+   $$ABC_SRC/AbcCoreOgawa/AwImpl.cpp \
+   $$ABC_SRC/AbcCoreOgawa/CprData.cpp \
+   $$ABC_SRC/AbcCoreOgawa/CprImpl.cpp \
+   $$ABC_SRC/AbcCoreOgawa/CpwData.cpp \
+   $$ABC_SRC/AbcCoreOgawa/CpwImpl.cpp \
+   $$ABC_SRC/AbcCoreOgawa/MetaDataMap.cpp \
+   $$ABC_SRC/AbcCoreOgawa/OrData.cpp \
+   $$ABC_SRC/AbcCoreOgawa/OrImpl.cpp \
+   $$ABC_SRC/AbcCoreOgawa/OwData.cpp \
+   $$ABC_SRC/AbcCoreOgawa/OwImpl.cpp \
+   $$ABC_SRC/AbcCoreOgawa/ReadUtil.cpp \
+   $$ABC_SRC/AbcCoreOgawa/ReadWrite.cpp \
+   $$ABC_SRC/AbcCoreOgawa/SprImpl.cpp \
+   $$ABC_SRC/AbcCoreOgawa/SpwImpl.cpp \
+   $$ABC_SRC/AbcCoreOgawa/StreamManager.cpp \
+   $$ABC_SRC/AbcCoreOgawa/WriteUtil.cpp \
+    $$ABC_SRC/Ogawa/IArchive.cpp \
+      $$ABC_SRC/Ogawa/IData.cpp \
+      $$ABC_SRC/Ogawa/IGroup.cpp \
+      $$ABC_SRC/Ogawa/IStreams.cpp \
+      $$ABC_SRC/Ogawa/OArchive.cpp \
+      $$ABC_SRC/Ogawa/OData.cpp \
+      $$ABC_SRC/Ogawa/OGroup.cpp \
+      $$ABC_SRC/Ogawa/OStream.cpp
                 
 DEFINES += OPENEXR_DLL NDEBUG NOMINMAX
-CONFIG += object_with_source
-##LIBS += -lhdf5 -lhdf5_hl -lszip -lHalf -lIex -lIlmImf -lImath -lIlmThread
 
 
 
