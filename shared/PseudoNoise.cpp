@@ -46,7 +46,7 @@ float PseudoNoise::rfloat( int i )
     return result - ((int) result);
 }
 
-int PseudoNoise::rint( int i, int mmn )
+int PseudoNoise::rint1(int i, int mmn )
 {
 	return mmn * rfloat(i);
 }

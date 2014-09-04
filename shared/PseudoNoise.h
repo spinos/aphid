@@ -17,7 +17,7 @@ public:
 	~PseudoNoise() {}
 	
 	float rfloat(int i);
-	int rint(int i, int mmn = 1000);
+	int rint1(int i, int mmn = 1000);
 	int rint2(int i, int j, int mmn = 1000);
 	int rint3(int i, int j, int k, int mmn = 1000);
 	void sphereRand(float& x, float& y, float& z, float r, unsigned int &i);
