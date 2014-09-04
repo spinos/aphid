@@ -2,19 +2,33 @@ TEMPLATE = lib
 TARGET = alembic
 CONFIG += staticlib thread release
 CONFIG -= qt
+win32 {
 ABC_SRC = D:/usr/Alembic/lib/Alembic
 HDF5_ROOT = D:/usr/hdf5
 BOOST_ROOT = D:/usr/boost_1_51_0
+}
+unix {
+ABC_SRC = /home/OF3D/zhangjian/Documents/alembic/lib/Alembic
+HDF5_ROOT = /home/OF3D/zhangjian/Documents/hdf5-1.8.9/hdf5
+BOOST_ROOT = /home/OF3D/zhangjian/Documents/boost_1_51_0
+}
 
-INCLUDEPATH += D:/usr/Alembic/lib \
-                D:/usr/openEXR/include \
-                D:/usr/local/include/boost/tr1/tr1 \
-                $$HDF5_ROOT/include \
+INCLUDEPATH += $$HDF5_ROOT/include \
                 $$MAYA_ROOT/include \
-                $$BOOST_ROOT
+                $$BOOST_ROOT 
+
+win32 {
+INCLUDEPATH += D:/usr/alembic/lib \
+		D:/usr/openEXR/include \
+                D:/usr/local/include/boost/tr1/tr1
+}
+
+unix {
+INCLUDEPATH += /usr/local/include/OpenEXR \
+		/home/OF3D/zhangjian/Documents/alembic/lib
+}
                 
-QMAKE_LIBDIR += $$HDF5_ROOT/lib \
-                D:/usr/local/lib64
+QMAKE_LIBDIR += $$HDF5_ROOT/lib
 
 HEADERS       = $$ABC_SRC/Abc/All.h \
                 $$ABC_SRC/Abc/ArchiveInfo.h \
@@ -255,9 +269,9 @@ SOURCES       = $$ABC_SRC/Abc/ArchiveInfo.cpp \
                 $$ABC_SRC/AbcMaterial/MaterialAssignment.cpp \
                 $$ABC_SRC/AbcMaterial/InternalUtil.cpp
                 
+win32 {
 DEFINES += OPENEXR_DLL NDEBUG NOMINMAX
+}
 CONFIG += object_with_source
-##LIBS += -lhdf5 -lhdf5_hl -lszip -lHalf -lIex -lIlmImf -lImath -lIlmThread
-
 
 

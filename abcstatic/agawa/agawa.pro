@@ -2,19 +2,31 @@ TEMPLATE = lib
 TARGET = agawa
 CONFIG += staticlib thread release
 CONFIG -= qt
+win32 {
 ABC_SRC = D:/usr/Alembic/lib/Alembic
 HDF5_ROOT = D:/usr/hdf5
 BOOST_ROOT = D:/usr/boost_1_51_0
+}
+unix {
+ABC_SRC = /home/OF3D/zhangjian/Documents/alembic/lib/Alembic
+HDF5_ROOT = /home/OF3D/zhangjian/Documents/hdf5-1.8.9/hdf5
+BOOST_ROOT = /home/OF3D/zhangjian/Documents/boost_1_51_0
+}
 
-INCLUDEPATH += D:/usr/Alembic/lib \
-                D:/usr/openEXR/include \
-                D:/usr/local/include/boost/tr1/tr1 \
-                $$HDF5_ROOT/include \
+INCLUDEPATH += $$HDF5_ROOT/include \
                 $$MAYA_ROOT/include \
-                $$BOOST_ROOT
-                
-QMAKE_LIBDIR += $$HDF5_ROOT/lib \
-                D:/usr/local/lib64
+                $$BOOST_ROOT 
+
+win32 {
+INCLUDEPATH += D:/usr/alembic/lib \
+		D:/usr/openEXR/include \
+                D:/usr/local/include/boost/tr1/tr1
+}
+
+unix {
+INCLUDEPATH += /usr/local/include/OpenEXR \
+		/home/OF3D/zhangjian/Documents/alembic/lib
+}
 
 HEADERS       = $$ABC_SRC/Abc/All.h \
                 $$ABC_SRC/Abc/ArchiveInfo.h \
@@ -185,8 +197,9 @@ SOURCES       = $$ABC_SRC/AbcCoreOgawa/AprImpl.cpp \
       $$ABC_SRC/Ogawa/OData.cpp \
       $$ABC_SRC/Ogawa/OGroup.cpp \
       $$ABC_SRC/Ogawa/OStream.cpp
-                
-DEFINES += OPENEXR_DLL NDEBUG NOMINMAX
 
+win32 {                
+DEFINES += OPENEXR_DLL NDEBUG NOMINMAX
+}
 
 
