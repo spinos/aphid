@@ -24,7 +24,7 @@ INCLUDEPATH += D:/usr/alembic/lib \
 }
 
 unix {
-INCLUDEPATH += /usr/local/include/OpenEXR \
+INCLUDEPATH += /usr/autodesk/maya/devkit/Alembic/include/AlembicPrivate/OpenEXR \
 		/home/OF3D/zhangjian/Documents/alembic/lib
 }
                 
@@ -234,9 +234,9 @@ SOURCES       = $$ABC_SRC/Abc/ArchiveInfo.cpp \
                 $$ABC_SRC/AbcCoreHDF5/StringWriteUtil.cpp \
                 $$ABC_SRC/AbcCoreHDF5/WriteUtil.cpp \
                 $$ABC_SRC/Util/Murmur3.cpp \
-     $$ABC_SRC/Util/Naming.cpp \
-     $$ABC_SRC/Util/SpookyV2.cpp \
-     $$ABC_SRC/Util/TokenMap.cpp \
+     		$$ABC_SRC/Util/Naming.cpp \
+		$$ABC_SRC/Util/TokenMap.cpp \
+     		$$ABC_SRC/Util/SpookyV2.cpp \
                 $$ABC_SRC/AbcGeom/ArchiveBounds.cpp \
                 $$ABC_SRC/AbcGeom/GeometryScope.cpp \
                 $$ABC_SRC/AbcGeom/FilmBackXformOp.cpp \
@@ -272,6 +272,6 @@ SOURCES       = $$ABC_SRC/Abc/ArchiveInfo.cpp \
 win32 {
 DEFINES += OPENEXR_DLL NDEBUG NOMINMAX
 }
-CONFIG += object_with_source
+
 
 

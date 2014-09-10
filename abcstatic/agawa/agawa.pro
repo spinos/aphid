@@ -24,7 +24,7 @@ INCLUDEPATH += D:/usr/alembic/lib \
 }
 
 unix {
-INCLUDEPATH += /usr/local/include/OpenEXR \
+INCLUDEPATH += /usr/autodesk/maya/devkit/Alembic/include/AlembicPrivate/OpenEXR  \
 		/home/OF3D/zhangjian/Documents/alembic/lib
 }
 
