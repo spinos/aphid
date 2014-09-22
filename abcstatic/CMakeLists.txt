@@ -173,9 +173,7 @@ set (LINK_FLAGS ${LINK_FLAGS} -fPIC -Wl)
 ##${OPENEXR_LIB}/libIlmThread.a
 ##${OPENEXR_LIB}/libIex.a)
 
-##set (HDF5LIB "/home/OF3D/zhangjian/Documents/hdf5-1.8.9/hdf5/lib")
-##target_link_libraries (alembic ${HDF5LIB}/libhdf5.a
-##${HDF5LIB}/libhdf5_hl.a)
-
-
+set (HDF5LIB "/home/OF3D/zhangjian/Documents/hdf5-1.8.9/hdf5/lib")
+target_link_libraries (alembic ${HDF5LIB}/libhdf5.a
+${HDF5LIB}/libhdf5_hl.a)
 
