@@ -326,3 +326,48 @@ MlTessellate * MlFeather::tessellator() const
 {
 	return m_tessel;
 }
+
+void MlFeather::dumpWP(Vector3F * p, float * u, float * v, unsigned & cp)
+{
+    Vector3F uvc;
+    for(short i = 0; i <= numSegment(); i++) {
+        p[cp] = *patchCenterP(i);
+        uvc = *patchCenterUV(i);
+        u[cp] = uvc.x;
+        v[cp] = uvc.y;
+        cp++;
+        p[cp] = *patchWingP(i, 0);
+        uvc = *patchWingUV(i, 0);
+        u[cp] = uvc.x;
+        v[cp] = uvc.y;
+        cp++;
+        p[cp] = *patchWingP(i, 1);
+        uvc = *patchWingUV(i, 1);
+        u[cp] = uvc.x;
+        v[cp] = uvc.y;
+        cp++;
+	}
+}
+
+void MlFeather::dumpFV(unsigned * fv, unsigned & cfv)
+{
+    for(short i = 0; i < numSegment(); i++) {
+        fv[cfv] = i * 3;
+        cfv++;
+        fv[cfv] = i * 3 + 1;
+        cfv++;
+        fv[cfv] = (i + 1) * 3 + 1;
+        cfv++;
+        fv[cfv] = (i + 1) * 3;
+        cfv++;
+        
+        fv[cfv] = i * 3;
+        cfv++;
+        fv[cfv] = (i + 1) * 3;
+        cfv++;
+        fv[cfv] = (i + 1) * 3 + 2;
+        cfv++;
+        fv[cfv] = i * 3 + 2;
+        cfv++;
+    }
+}

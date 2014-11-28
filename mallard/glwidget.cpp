@@ -301,6 +301,26 @@ void GLWidget::exportBake()
 		emit sendMessage(QString("Exported feather cache to file %1").arg(fileName));
 }
 
+void GLWidget::exportModel()
+{
+    if(skin()->numFeathers() < 1) {
+        QMessageBox::information(this, tr("Warning"),
+                                    tr("No feather to export."));
+        return;
+    }
+    QString selectedFilter;
+	QString fileName = QFileDialog::getSaveFileName(this,
+							tr("Export Model to File"),
+							tr("info"),
+							tr("All Files (*);;Feather Bake Files (*.m)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName == "") return;
+	
+	if(m_featherDrawer->dumpModel(fileName.toUtf8().data()))
+	    emit sendMessage(QString("Exported feather model to file %1").arg(fileName));
+}
+
 void GLWidget::updateOnFrame(int x)
 {
 	if(!playback()->isEnabled()) return;

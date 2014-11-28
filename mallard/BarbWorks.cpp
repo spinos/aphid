@@ -171,3 +171,98 @@ void BarbWorks::clearBlock(unsigned idx)
 {
     m_stripes->clearBlock(idx);
 }
+
+bool BarbWorks::dumpModel(const std::string & name)
+{
+    if(!skin()) return false;
+	// m_percentFinished = 0.f;
+	boost::timer met;
+	met.restart();
+	const unsigned nc = numFeathers();
+	if(nc < 1) return false;
+	m_stripes->initialize();
+	unsigned i;
+	
+	BoundingBox box;
+	Matrix33F space;
+	//
+	//unsigned nline = 0;
+	unsigned np = 0;
+	unsigned nfv = 0;
+	unsigned nf = 0;
+	//unsigned sd = 1984;
+	//float rd, lod;
+	//float minLod = 100;
+	//float maxLod = -100;
+	
+	std::clog<<"build feather count: "<<nc<<"\n";
+	for(i = 0; i < nc; i++) {
+		MlCalamus * c = skin()->getCalamus(i);
+		//skin()->calamusSpace(c, space);
+		//skin()->getPointOnBody(c, p);
+		
+		//computeFeather(c, p, space);
+
+		MlFeather * f = c->feather();
+		np += f->numOnEdgeP();
+		nfv += f->numOnEdgeFV();
+		nf += f->numOnEdgeF();
+		/*f->getBoundingBox(box);
+		
+		f->setSeed(sd++);
+		f->separateVane();
+		
+		rd = f->scaledShaftLength();
+		
+		lod = computeLOD(p, rd, f->numSegment() * 8);
+		
+		if(lod > maxLod) maxLod = lod;
+		if(lod < minLod) minLod = lod;
+		
+		f->sampleColor(lod);
+		f->samplePosition(lod);
+		
+		AdaptableStripeBuffer * src = f->stripe();
+
+		m_stripes->append(src);
+		
+		nline += f->numStripe();
+		nv += f->numStripePoints();*/
+		
+		// m_percentFinished = (float)i/(float)nc;
+	}
+	std::cout<<" n p "<<np<<"\n";
+	std::cout<<" n face "<<nf<<"\n";
+	std::cout<<" n face vertex "<<nfv<<"\n";
+	
+	unsigned * fv = new unsigned[nfv];
+	Vector3F * p = new Vector3F[np];
+	float * u = new float[np];
+	float * v = new float[np];
+	
+	unsigned cp = 0;
+	unsigned cfv = 0;
+	Vector3F q;
+	for(i = 0; i < nc; i++) {
+		MlCalamus * c = skin()->getCalamus(i);
+		skin()->calamusSpace(c, space);
+		skin()->getPointOnBody(c, q);
+		
+		computeFeather(c, q, space);
+
+		MlFeather * f = c->feather();
+		
+		f->dumpWP(p, u, v, cp);
+		f->dumpFV(fv, cfv);
+	}
+	
+	delete[] fv;
+	delete[] p;
+	delete[] u;
+	delete[] v;
+	std::cout<<" model processed in "<<met.elapsed()<<" seconds\n";
+	
+	//std::cout<<"n blocks "<<numBlocks()<<"\n";
+	// m_percentFinished = 1.f;
+    return true;
+}

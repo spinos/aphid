@@ -45,6 +45,9 @@ public:
 	
 	unsigned numVaneVertices() const;
 	unsigned numWorldP() const;
+	unsigned numOnEdgeP() const;
+	unsigned numOnEdgeFV() const;
+	unsigned numOnEdgeF() const;
 
 	float* selectVertexInUV(const Vector2F & p, bool & yOnly, Vector2F & wp);
 	Vector3F * normal(unsigned seg);

@@ -27,6 +27,7 @@ public:
 	unsigned numBlocks() const;
 	AdaptableStripeBuffer * block(unsigned idx) const;
 	void clearBlock(unsigned idx);
+	bool dumpModel(const std::string & name);
 protected:
 	unsigned numFeathers() const;
 	char isTimeCached(const std::string & stime);

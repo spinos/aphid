@@ -92,9 +92,10 @@ void MlEngine::fineOutput()
 	logArnoldVersion();
     loadPlugin("./driver_foo.dll");
     loadPlugin("./ExtendShaders.dll");
+    loadPlugin("./mtoa_shaders.dll");
 	
 	const AtNodeEntry* nodeEntry = AiNodeEntryLookUp("featherUVCoord");
-	if(nodeEntry == NULL) std::clog<<"\nWARNING: featherUVCoord node entry doesn't exist! Most likely mtoa_shaders.all is not loaded.\n";
+	if(nodeEntry == NULL) std::clog<<"\nWARNING: featherUVCoord node entry doesn't exist! Most likely ExtendShaders.dll is not loaded.\n";
     
     AtNode* options = AiNode("options");
     AtArray* outputs  = AiArrayAllocate(1, 1, AI_TYPE_STRING);
@@ -354,6 +355,7 @@ void MlEngine::translateBlock(AdaptableStripeBuffer * src)
 	
 	AtNode * usrCol = AiNode("userDataColor");
 	AiNodeSetStr(usrCol, "colorAttrName", "colors");
+	if(usrCol == NULL) std::clog<<"\nWARNING: userDataColor node entry doesn't exist! Most likely mtoa_shaders.dll is not loaded.\n";
 	
 	if(!AiNodeLink(usrCol, "rootcolor", hair)) std::clog<<"WARNING: rootcolor not linked";
 	if(!AiNodeLink(usrCol, "tipcolor", hair)) std::clog<<"WARNING: tipcolor not linked";

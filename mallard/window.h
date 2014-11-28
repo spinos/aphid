@@ -96,6 +96,7 @@ private:
 	QAction * importBakeAct;
 	QAction * revertAct;
 	QAction * exportBakeAct;
+	QAction * exportStatAct;
 	QAction * growOnAct;
 	QAction * growOffAct;
 	QAction * selectGrowonAct;

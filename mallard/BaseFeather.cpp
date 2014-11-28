@@ -50,6 +50,21 @@ unsigned BaseFeather::numWorldP() const
 	return (numSegment() + 1) * 7;
 }
 
+unsigned BaseFeather::numOnEdgeP() const
+{
+    return (numSegment() + 1) * 3;
+}
+
+unsigned BaseFeather::numOnEdgeFV() const
+{
+    return numSegment() * 2 * 4;
+}
+
+unsigned BaseFeather::numOnEdgeF() const
+{
+    return numSegment() * 2;
+}
+
 BoundingRectangle BaseFeather::getBoundingRectangle() const
 {
 	return m_brect;

@@ -57,6 +57,9 @@ public:
 	Vector3F * patchWingP(short seg, short side);
 	
 	MlTessellate * tessellator() const;
+	
+	void dumpWP(Vector3F * p, float * u, float * v, unsigned & cp);
+	void dumpFV(unsigned * fv, unsigned & cfv);
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	

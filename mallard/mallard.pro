@@ -23,6 +23,7 @@ HEADERS       =	../shared/ContextIconFrame.h \
 ../shared/QFileNameEdit.h \
                 ../shared/Base3DView.h \
                 ../shared/Base2DView.h \
+../shared/GLHUD.h \
                 ManipulateView.h \
                 ToolBox.h \
 BodyMaps.h \
@@ -101,6 +102,7 @@ SOURCES       = ../shared/ContextIconFrame.cpp \
 ../shared/QFileNameEdit.cpp \
                 ../shared/Base3DView.cpp \
                 ../shared/Base2DView.cpp \
+../shared/GLHUD.cpp \
                 ManipulateView.cpp \
                 ToolBox.cpp \
 BodyMaps.cpp \

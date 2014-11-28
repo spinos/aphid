@@ -41,6 +41,7 @@ signals:
 public slots:
 	void updateOnFrame(int x);
 	void exportBake();
+	void exportModel();
 	void receiveCancelRender();
 	
 protected:

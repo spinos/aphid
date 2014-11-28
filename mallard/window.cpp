@@ -222,6 +222,10 @@ void Window::createActions()
     exportBakeAct = new QAction(tr("&Export Baked Feather"), this);
 	exportBakeAct->setStatusTip(tr("Write feather cache"));
     connect(exportBakeAct, SIGNAL(triggered()), glWidget, SLOT(exportBake()));
+    
+    exportStatAct = new QAction(tr("&Export Feather Model"), this);
+	exportStatAct->setStatusTip(tr("Write feather model"));
+    connect(exportStatAct, SIGNAL(triggered()), glWidget, SLOT(exportModel()));
 	
 	growOnAct = new QAction(tr("Eable Grow On Faces"), this);
 	growOnAct->setStatusTip(tr("Tag selected faces to grow feathers"));
@@ -263,6 +267,7 @@ void Window::createMenus()
 	//fileMenu->addAction(importFDMAct);
 	fileMenu->addAction(importBakeAct);
 	fileMenu->addAction(exportBakeAct);
+	fileMenu->addAction(exportStatAct);
 	
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showFeatherEditAct);
