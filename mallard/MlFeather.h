@@ -59,7 +59,7 @@ public:
 	MlTessellate * tessellator() const;
 	
 	void dumpWP(Vector3F * p, float * u, float * v, unsigned & cp);
-	void dumpFV(unsigned * fv, unsigned & cfv);
+	void dumpFV(unsigned * fv, unsigned & cfv, unsigned & offset);
 protected:	
 	virtual void simpleCreate(int ns = 5);
 	

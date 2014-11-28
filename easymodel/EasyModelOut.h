@@ -24,6 +24,7 @@ public:
 	void writeFaceCount(unsigned numPolygon, int * faceCounts); 
 	void writeFaceConnection(unsigned numFaceVertices, int * faceVertices);
 	void writeP(unsigned numVertices, Vector3F * vertexPositions);
+	void writeUV(const char * name, const unsigned & c, float * u, float * v, const unsigned & cid, unsigned * id);
 
 	void flush();
 private:

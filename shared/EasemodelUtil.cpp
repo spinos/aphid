@@ -79,6 +79,25 @@ void Export(const char * filename, BaseMesh * src)
 	delete esm;
 }
 
+void Export(const char * filename, 
+            const unsigned np, const unsigned nf, const unsigned nfv, 
+            Vector3F *p, unsigned * fc, unsigned * fv, 
+            float * u, float * v, unsigned * uvfv)
+{
+    EasyModelOut * esm = new EasyModelOut(filename);
+	
+	esm->begin();
+	
+	esm->writeFaceCount(nf, (int *)fc);
+	esm->writeFaceConnection(nfv, (int *)fv);
+	esm->writeP(np, p);
+	esm->writeUV("map1", np, u, v, nfv, uvfv);
+	esm->end();
+	esm->flush();
+	
+	delete esm;
+}
+
 void baseImport(EasyModelIn *esm, BaseMesh * dst)
 {
 	dst->cleanup();

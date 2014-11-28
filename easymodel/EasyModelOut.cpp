@@ -46,6 +46,15 @@ void EasyModelOut::writeP(unsigned numVertices, Vector3F * vertexPositions)
 	_doc.addP(numVertices, vertexPositions);
 }
 
+void EasyModelOut::writeUV(const char * name, const unsigned & c, float * u, float * v, const unsigned & cid, unsigned * id)
+{
+    _doc.uvSetBegin(name);
+	_doc.addS("s", c, u);
+	_doc.addT("t", c, v);
+	_doc.addUVId(cid, (const int *)id);
+	_doc.uvSetEnd();
+}
+
 void EasyModelOut::flush()
 {
 	_doc.recordDataSize();

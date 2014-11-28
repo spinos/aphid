@@ -16,6 +16,7 @@
 #include <RenderEngine.h>
 #include <boost/thread.hpp>
 #include <boost/timer.hpp>
+#include <EasemodelUtil.h>
 BarbWorks::BarbWorks() 
 {
 	m_skin = 0;
@@ -239,9 +240,12 @@ bool BarbWorks::dumpModel(const std::string & name)
 	Vector3F * p = new Vector3F[np];
 	float * u = new float[np];
 	float * v = new float[np];
+	unsigned * fc = new unsigned[nf];
+	for(i = 0; i < nf; i++) fc[i] = 4;
 	
 	unsigned cp = 0;
 	unsigned cfv = 0;
+	unsigned offset = 0;
 	Vector3F q;
 	for(i = 0; i < nc; i++) {
 		MlCalamus * c = skin()->getCalamus(i);
@@ -253,13 +257,18 @@ bool BarbWorks::dumpModel(const std::string & name)
 		MlFeather * f = c->feather();
 		
 		f->dumpWP(p, u, v, cp);
-		f->dumpFV(fv, cfv);
+		f->dumpFV(fv, cfv, offset);
 	}
+	
+	ESMUtil::Export(name.c_str(), np, nf, nfv,
+	                p, fc, fv,
+	                u, v, fv);
 	
 	delete[] fv;
 	delete[] p;
 	delete[] u;
 	delete[] v;
+	delete[] fc;
 	std::cout<<" model processed in "<<met.elapsed()<<" seconds\n";
 	
 	//std::cout<<"n blocks "<<numBlocks()<<"\n";

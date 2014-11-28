@@ -349,25 +349,26 @@ void MlFeather::dumpWP(Vector3F * p, float * u, float * v, unsigned & cp)
 	}
 }
 
-void MlFeather::dumpFV(unsigned * fv, unsigned & cfv)
+void MlFeather::dumpFV(unsigned * fv, unsigned & cfv, unsigned & offset)
 {
     for(short i = 0; i < numSegment(); i++) {
-        fv[cfv] = i * 3;
+        fv[cfv] = i * 3 + offset;
         cfv++;
-        fv[cfv] = i * 3 + 1;
+        fv[cfv] = i * 3 + 1 + offset;
         cfv++;
-        fv[cfv] = (i + 1) * 3 + 1;
+        fv[cfv] = (i + 1) * 3 + 1 + offset;
         cfv++;
-        fv[cfv] = (i + 1) * 3;
+        fv[cfv] = (i + 1) * 3 + offset;
         cfv++;
         
-        fv[cfv] = i * 3;
+        fv[cfv] = i * 3 + offset;
         cfv++;
-        fv[cfv] = (i + 1) * 3;
+        fv[cfv] = (i + 1) * 3 + offset;
         cfv++;
-        fv[cfv] = (i + 1) * 3 + 2;
+        fv[cfv] = (i + 1) * 3 + 2 + offset;
         cfv++;
-        fv[cfv] = i * 3 + 2;
+        fv[cfv] = i * 3 + 2 + offset;
         cfv++;
     }
+    offset += (numSegment() + 1) * 3;
 }
