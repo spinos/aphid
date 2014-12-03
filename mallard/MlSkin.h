@@ -35,6 +35,7 @@ public:
 	virtual void setBodyMesh(AccPatchMesh * mesh);
 	
 	void floodAround(MlCalamus c);
+	void pinAt(IntersectionContext * ctx, MlCalamus c);
 	void select(const std::deque<unsigned> & src, SelectCondition * selcon);
 	void discardActive();
 	

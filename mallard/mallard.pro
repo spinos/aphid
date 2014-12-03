@@ -170,11 +170,11 @@ LIBS += -L../easymodel -leasymodel \
         -L../lib -laphid \
         -lIlmImf -lHalf -lhdf5 -lhdf5_hl
 macx {
-    INCLUDEPATH += ../../Library/boost_1_44_0 \
+    INCLUDEPATH += ../../Library/boost_1_55_0 \
                     ../../Library/hdf5/include \
                     /usr/local/include/OpenEXR \
                     /Users/jianzhang/Library/eigen2
-    QMAKE_LIBDIR += ../../Library/boost_1_44_0/stage/lib \
+    QMAKE_LIBDIR += ../../Library/boost_1_55_0/stage/lib \
                     ../../Library/hdf5/lib
     LIBS += -lboost_date_time -lboost_thread -lboost_filesystem -lboost_system -framework libxml
 }

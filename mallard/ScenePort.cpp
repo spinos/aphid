@@ -389,7 +389,8 @@ char ScenePort::floodFeather()
 	MlCalamus ac;
 	ac.setFeatherId(selectedFeatherExampleId());
 	
-	skin()->floodAround(ac);
+	if(brush()->pinpoint()) skin()->pinAt(ctx, ac);
+	else skin()->floodAround(ac);
 	setDirty();
 	return 1;
 }

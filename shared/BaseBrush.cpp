@@ -15,6 +15,7 @@ BaseBrush::BaseBrush() : m_radius(1.f), m_pitch(0.01f), m_maxToeFactor(2.f), m_n
 	m_dropoff = 0.f;
 	m_twoSided = false;
 	m_filterByColor = false;
+	m_pinpoint = false;
 }
 
 BaseBrush::~BaseBrush() 
@@ -181,3 +182,6 @@ const float & BaseBrush::radius() const { return m_radius; }
 void BaseBrush::setDropoff(float x) { m_dropoff = x; }
 const float & BaseBrush::dropoff() const { return m_dropoff; }
 
+void BaseBrush::setPinpoint(bool b) { m_pinpoint = b; }
+bool BaseBrush::pinpoint() const { return m_pinpoint; }
+//:~

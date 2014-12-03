@@ -31,6 +31,7 @@ FloodBox::FloodBox(QWidget *parent) : QGroupBox(parent)
 	m_strengthValue->setValue(1.0);
 	
 	m_floodAreaCheck = new QCheckBox(tr("Flood Within Selected Region"));
+	m_pinCheck = new QCheckBox(tr("Pinpoint Create"));
 	
 	QVBoxLayout * controlLayout = new QVBoxLayout;
 	controlLayout->addWidget(img);
@@ -38,6 +39,7 @@ FloodBox::FloodBox(QWidget *parent) : QGroupBox(parent)
 	controlLayout->addWidget(m_numSampleValue);
 	controlLayout->addWidget(m_strengthValue);
 	controlLayout->addWidget(m_floodAreaCheck);
+	controlLayout->addWidget(m_pinCheck);
 	controlLayout->addStretch();
 	setLayout(controlLayout);
 	setTitle(tr("Create"));
@@ -46,6 +48,7 @@ FloodBox::FloodBox(QWidget *parent) : QGroupBox(parent)
 	connect(m_numSampleValue, SIGNAL(valueChanged(int)), this, SLOT(sendNumSample(int)));
 	connect(m_strengthValue, SIGNAL(valueChanged(double)), this, SLOT(sendStrength(double)));
 	connect(m_floodAreaCheck, SIGNAL(stateChanged(int)), this, SLOT(sendFloodRegion(int)));
+	connect(m_pinCheck, SIGNAL(stateChanged(int)), this, SLOT(sendPinpoint(int)));
 }
 
 double FloodBox::radius() const
@@ -81,4 +84,9 @@ void FloodBox::sendNumSample(int x)
 void FloodBox::sendFloodRegion(int x)
 {
 	emit floodRegionChanged(x);
+}
+
+void FloodBox::sendPinpoint(int x)
+{
+	emit pinpointChanged(x);
 }

@@ -86,6 +86,33 @@ void MlSkin::floodAround(MlCalamus floodC)
 	darts.clear();
 }
 
+void MlSkin::pinAt(IntersectionContext * ctx, MlCalamus c)
+{
+	IntersectionContext pinctx;
+	pinctx.reset(Ray(ctx->m_hitP + ctx->m_hitN, ctx->m_hitP - ctx->m_hitN));
+	unsigned i, faceInd;
+	
+	float u, v;
+	Vector3F adart;
+	for(i = 0; i < m_floodFaces.size(); i++) {
+		faceInd = m_floodFaces[i].faceIdx;
+
+		m_floodFaces[i].dartBegin = m_floodFaces[i].dartEnd = 0;
+		
+		if(!bodyMesh()->intersect(faceInd, &pinctx)) continue;
+	
+		u = ctx->m_patchUV.x;
+		v = ctx->m_patchUV.y;
+		bodyMesh()->pointOnPatch(faceInd, u, v, adart);
+		
+		resetCollisionRegion(faceInd);
+		
+		c.bindToFace(faceInd, u, v);
+		createFeather(c);
+		m_floodFaces[i].dartEnd++;
+	}
+}
+
 void MlSkin::select(const std::deque<unsigned> & src, SelectCondition * selcon)
 {
 	char * tagg = bodyMesh()->perFaceTag("growon");

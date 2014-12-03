@@ -333,7 +333,7 @@ SOURCES = ../shared/Vector3F.cpp \
 
 TARGET  = aphid
 macx {
-    INCLUDEPATH += ../../Library/boost_1_44_0 \
+    INCLUDEPATH += ../../Library/boost_1_55_0 \
                     ../../Library/hdf5/include \
                     /usr/local/include/OpenEXR
 }

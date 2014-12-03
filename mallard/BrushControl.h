@@ -50,6 +50,7 @@ private slots:
 	void sendBrushColor(QColor c);
 	void sendBrushDropoff(double x);
 	void sendPaintMode(int x);
+	void sendPinpointCreate(int x);
 signals:
 	void brushChanged();
 	void paintModeChanged(int x);

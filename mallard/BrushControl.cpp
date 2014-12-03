@@ -83,6 +83,7 @@ BrushControl::BrushControl(BaseBrush * brush, QWidget *parent)
 	connect(paintControl, SIGNAL(dropoffChanged(double)), this, SLOT(sendBrushDropoff(double)));
 	
 	connect(paintControl, SIGNAL(modeChanged(int)), this, SLOT(sendPaintMode(int)));
+	connect(flood, SIGNAL(pinpointChanged(int)), this, SLOT(sendPinpointCreate(int)));
 }
 
 void BrushControl::receiveToolContext(int c)
@@ -199,3 +200,13 @@ void BrushControl::sendBrushDropoff(double x)
 }
 
 void BrushControl::sendPaintMode(int x) { emit paintModeChanged(x); }
+
+void BrushControl::sendPinpointCreate(int x)
+{
+	if(x == Qt::Checked)
+		m_brush->setPinpoint(true);
+	else
+		m_brush->setPinpoint(false);
+	emit brushChanged();
+}
+//:~

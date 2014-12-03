@@ -31,16 +31,19 @@ signals:
 	void strengthChanged(double x);
 	void numSampleChanged(int x);
 	void floodRegionChanged(int x);
+	void pinpointChanged(int x);
 	
 private slots:
 	void sendRadius(double x);
 	void sendStrength(double x);
 	void sendNumSample(int x);
 	void sendFloodRegion(int x);
+	void sendPinpoint(int x);
 	
 private:
 	QDoubleEditSlider * m_radiusValue;
 	QIntEditSlider * m_numSampleValue;
 	QDoubleEditSlider * m_strengthValue;
 	QCheckBox * m_floodAreaCheck;
+	QCheckBox * m_pinCheck;
 };

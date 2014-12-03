@@ -25,6 +25,7 @@ public:
 	void setTwoSided(bool b);
 	void setFilterByColor(bool b);
 	void setDropoff(float x);
+	void setPinpoint(bool b);
 	
 	Matrix44F getSpace() const;
 	float getRadius() const;
@@ -40,6 +41,7 @@ public:
 	void getDartPoint(unsigned idx, Vector3F & p) const;
 	bool twoSided() const;
 	bool filterByColor() const;
+	bool pinpoint() const;
 	
 	const Float3 & color() const;
 	void setColor(const Float3 & c);
@@ -55,5 +57,5 @@ private:
 	Float3 m_color;
 	float m_radius, m_pitch, m_maxToeFactor, m_strength, m_dropoff;
 	unsigned m_numDarts;
-	bool m_twoSided, m_filterByColor;
+	bool m_twoSided, m_filterByColor, m_pinpoint;
 };
