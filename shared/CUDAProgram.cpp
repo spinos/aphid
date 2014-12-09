@@ -8,6 +8,8 @@
  */
 
 #include "CUDAProgram.h"
+#include <cutil_inline.h>
+#include <cutil_gl_inline.h>
 
 CUDAProgram::CUDAProgram() {}
 CUDAProgram::~CUDAProgram() {}

@@ -7,8 +7,6 @@
  *
  */
 #pragma once
-#include <cutil_inline.h>
-#include <cutil_gl_inline.h>
 #include <CUDABuffer.h>
 class CUDAProgram {
 public:
