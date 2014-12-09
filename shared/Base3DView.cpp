@@ -114,6 +114,8 @@ void Base3DView::initializeGL()
 	glDepthFunc(GL_LEQUAL);
 	getDrawer()->initializeProfile();
 	m_hud->reset();
+	
+	clientInit();
 }
 //! [6]
 
@@ -232,6 +234,8 @@ void Base3DView::processMouseInput(QMouseEvent *event)
 
     clientMouseInput(event);
 }
+
+void Base3DView::clientInit() {}
 
 void Base3DView::clientDraw()
 {

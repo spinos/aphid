@@ -45,7 +45,6 @@
 #include <QGLWidget>
 #include <BaseCamera.h>
 #include <CUDABuffer.h>
-#include <CUDABuffer.h>
 #include <BRDFProgram.h>
 #include <shapeDrawer.h>
 #include <GeodesicHemisphereMesh.h>

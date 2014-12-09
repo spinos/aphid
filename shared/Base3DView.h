@@ -72,6 +72,7 @@ protected:
     virtual void processDeselection(QMouseEvent *event);
     virtual void processMouseInput(QMouseEvent *event);
 	virtual void processCamera(QMouseEvent *event);
+	virtual void clientInit();
     virtual void clientDraw();
     virtual void clientSelect(QMouseEvent *event);
     virtual void clientDeselect(QMouseEvent *event);
