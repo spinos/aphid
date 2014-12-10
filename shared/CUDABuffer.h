@@ -15,11 +15,18 @@ public:
 	
 	virtual void create(float * data, unsigned size);
 	virtual void destroy();
+	void create(unsigned size);
 	
 	struct cudaGraphicsResource ** resource();
+	void * bufferOnDevice();
+	void hostToDevice(void * src, unsigned size);
+	
+	void map(void ** p);
+	void unmap();
 	
 	static void setDevice();
 	
+private:
 	struct cudaGraphicsResource *_cuda_vbo_resource;
 	void *_device_vbo_buffer;
 };

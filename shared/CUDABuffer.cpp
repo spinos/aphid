@@ -15,26 +15,52 @@ CUDABuffer::~CUDABuffer() {}
 
 void CUDABuffer::create(float * data, unsigned size)
 {
-    if(_buffereName != 0) destroy();
-	createVBO(data, size);
-	if(_buffereName == 0) return;
-	
-	cutilSafeCall(cudaGraphicsGLRegisterBuffer(&_cuda_vbo_resource, _buffereName, cudaGraphicsMapFlagsWriteDiscard));
+	BaseBuffer::create(data, size);
+	cutilSafeCall(cudaGraphicsGLRegisterBuffer(&_cuda_vbo_resource, bufferName(), cudaGraphicsMapFlagsWriteDiscard)); 
+}
+
+void CUDABuffer::create(unsigned size)
+{
 	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, size));
+	setBufferType(kSimple);
 }
 
 void CUDABuffer::destroy()
 {
-    cudaGraphicsUnregisterResource(_cuda_vbo_resource);
-	destroyVBO();
-	if(_device_vbo_buffer == 0) return;
-	cudaFree(_device_vbo_buffer);
-	_device_vbo_buffer = 0;
+    if(bufferType() == kVBO) {
+		cudaGraphicsUnregisterResource(_cuda_vbo_resource);
+		BaseBuffer::destroyVBO();
+	}
+	else if(bufferType() == kSimple) {
+		if(_device_vbo_buffer == 0) return;
+		cudaFree(_device_vbo_buffer);
+		_device_vbo_buffer = 0;
+	}
 }
 
 struct cudaGraphicsResource ** CUDABuffer::resource()
 {
     return &_cuda_vbo_resource;
+}
+
+void * CUDABuffer::bufferOnDevice() { return _device_vbo_buffer; }
+
+void CUDABuffer::hostToDevice(void * src, unsigned size)
+{
+	cutilSafeCall( cudaMemcpy(_device_vbo_buffer, src, size, cudaMemcpyHostToDevice) );   
+}
+
+void CUDABuffer::map(void ** p)
+{
+	cutilSafeCall(cudaGraphicsMapResources(1, resource(), 0));
+	size_t num_bytes; 
+    cutilSafeCall(cudaGraphicsResourceGetMappedPointer(p, &num_bytes,  
+						       *resource()));
+}
+
+void CUDABuffer::unmap()
+{
+	cutilSafeCall(cudaGraphicsUnmapResources(1, resource(), 0));
 }
 
 void CUDABuffer::setDevice()

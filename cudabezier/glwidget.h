@@ -4,6 +4,7 @@
 #include <Base3DView.h>
 #include <CUDABuffer.h>
 #include <BezierProgram.h>
+#include <BaseCurve.h>
 
 class GLWidget : public Base3DView
 {
@@ -27,7 +28,9 @@ private:
 	
 private:
 	CUDABuffer * m_vertexBuffer;
+	CUDABuffer * m_cvs;
 	BezierProgram * m_program;
+	BaseCurve * m_curve;
 private slots:
     
 

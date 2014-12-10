@@ -13,14 +13,20 @@
 #endif
 #include "BaseBuffer.h"
 
-BaseBuffer::BaseBuffer() : _buffereName(0) {}
+BaseBuffer::BaseBuffer() : m_bufferName(0), m_bufferSize(0) 
+{
+	m_bufferType = kUnknown;
+}
+
 BaseBuffer::~BaseBuffer() 
 {
 }
 
 void BaseBuffer::create(float * data, unsigned size)
 {
+	m_bufferSize = size;
 	createVBO(data, size);
+	setBufferType(kVBO);
 }
 
 void BaseBuffer::destroy()
@@ -30,11 +36,9 @@ void BaseBuffer::destroy()
 
 void BaseBuffer::createVBO(float * data, unsigned size)
 {
-	if(!data) return;
+	glGenBuffers(1, &m_bufferName);
 	
-	glGenBuffers(1, &_buffereName);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, _buffereName);
+	glBindBuffer(GL_ARRAY_BUFFER, m_bufferName);
 	
 	glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
 	
@@ -43,13 +47,15 @@ void BaseBuffer::createVBO(float * data, unsigned size)
 
 void BaseBuffer::destroyVBO()
 {
-	if(_buffereName == 0) return;
+	if(m_bufferName == 0) return;
 	
-	glBindBuffer(1, _buffereName);
-	glDeleteBuffers(1, &_buffereName);
+	glBindBuffer(1, m_bufferName);
+	glDeleteBuffers(1, &m_bufferName);
 }
 
-unsigned BaseBuffer::getBufferName() const
-{
-	return _buffereName;
-}
+const unsigned BaseBuffer::bufferName() const { return m_bufferName; }
+
+const unsigned BaseBuffer::bufferSize() const { return m_bufferSize; }
+
+void BaseBuffer::setBufferType(BaseBuffer::BufferType t) { m_bufferType = t; }
+const BaseBuffer::BufferType BaseBuffer::bufferType() const { return m_bufferType; }

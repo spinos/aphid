@@ -1,21 +1,29 @@
 #include "bezier_implement.h"
 
 __global__ void 
-hemisphere_kernel(float3* pos, unsigned width)
+hemisphere_kernel(float4* pos, float3 * cvs, unsigned width)
 {
     unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
     unsigned int y = blockIdx.y*blockDim.y + threadIdx.y;
 
-    float3 pin = pos[y*width+x];
+	unsigned seg = (y*width+x) / 100;
 
-    pos[y*width+x] = pin;
+	float wei = (float)((y*width+x)) / 100.f - seg;
+	
+	float4 sum;
+	sum.x = cvs[seg].x * (1.f - wei) + cvs[seg + 1].x * wei;
+	sum.y = cvs[seg].y * (1.f - wei) + cvs[seg + 1].y * wei;
+	sum.z = cvs[seg].z * (1.f - wei) + cvs[seg + 1].z * wei;
+	sum.w = 1.f;
+	
+	pos[y*width+x] = sum;
 }
 
-extern "C" void hemisphere(float3 *pos, unsigned numVertices)
+extern "C" void hemisphere(float4 *pos, float3 * cvs, unsigned numCvs)
 {
-    dim3 block(8, 8, 1);
+    dim3 block(16, 16, 1);
     unsigned width = 128;
-    unsigned height = numVertices / width;
-    dim3 grid(width / block.x, height / block.y, 1);
-    hemisphere_kernel<<< grid, block>>>(pos, width);
+    unsigned height = (numCvs - 1) * 100 / width;
+    dim3 grid(width, height, 1);
+    hemisphere_kernel<<< grid, block >>>(pos, cvs, width);
 }

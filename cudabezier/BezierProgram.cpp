@@ -13,12 +13,13 @@
 BezierProgram::BezierProgram() {}
 BezierProgram::~BezierProgram() {}
 
-void BezierProgram::run(CUDABuffer * buffer, BaseMesh * mesh)
+void BezierProgram::run(CUDABuffer * buffer, CUDABuffer * cvs, BaseCurve * curve)
 {
-	float3 *dptr;
-	map(buffer, (void **)&dptr);
+	void *dptr;
+	buffer->map(&dptr);
+	cvs->hostToDevice(curve->m_cvs, curve->numVertices() * 12);
 	
-	hemisphere(dptr, mesh->getNumVertices());
+	hemisphere((float4 *)dptr, (float3 *)cvs->bufferOnDevice(), curve->numVertices());
 
-	unmap(buffer);
+	buffer->unmap();
 }

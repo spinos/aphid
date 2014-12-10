@@ -119,7 +119,7 @@ void LineDrawer::linearCurve(const BaseCurve & curve) const
 	glBegin(GL_LINE_STRIP);
 	for(unsigned i = 0; i < curve.numVertices(); i++) {
 		p = curve.getCv(i);
-		t = curve.getKnot(i);
+		//t = curve.getKnot(i);
 		//setColor(1.f - t, 0.f, t);
 		glVertex3f(p.x, p.y, p.z);
 	}

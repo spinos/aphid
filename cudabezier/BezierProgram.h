@@ -9,12 +9,12 @@
 #pragma once
 
 #include <CUDAProgram.h>
-#include <HemisphereMesh.h>
+#include <BaseCurve.h>
 
 class BezierProgram : public CUDAProgram {
 public:
 	BezierProgram();
 	virtual ~BezierProgram();
 	
-	virtual void run(CUDABuffer * buffer, BaseMesh * mesh);
+	virtual void run(CUDABuffer * buffer, CUDABuffer * cvs, BaseCurve * curve);
 };

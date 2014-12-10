@@ -10,6 +10,7 @@
 #include "CUDAProgram.h"
 #include <cutil_inline.h>
 #include <cutil_gl_inline.h>
+#include <iostream>
 
 CUDAProgram::CUDAProgram() {}
 CUDAProgram::~CUDAProgram() {}
@@ -23,7 +24,7 @@ void CUDAProgram::run(CUDABuffer * buffer)
 
 void CUDAProgram::map(CUDABuffer * buffer, void ** p)
 {
-    cutilSafeCall(cudaGraphicsResourceSetMapFlags(*buffer->resource(), cudaGraphicsMapFlagsNone));
+    // cutilSafeCall(cudaGraphicsResourceSetMapFlags(*buffer->resource(), cudaGraphicsMapFlagsNone));
 	cutilSafeCall(cudaGraphicsMapResources(1, buffer->resource(), 0));
 	size_t num_bytes; 
     cutilSafeCall(cudaGraphicsResourceGetMappedPointer(p, &num_bytes,  

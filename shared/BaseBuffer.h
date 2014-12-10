@@ -11,16 +11,30 @@
 
 class BaseBuffer {
 public:
+	enum BufferType {
+		kUnknown = 0,
+		kVBO = 1,
+		kSimple = 2
+	};
+	
 	BaseBuffer();
 	virtual ~BaseBuffer();
 	
 	virtual void create(float * data, unsigned size);
 	virtual void destroy();
 	
+	const unsigned bufferName() const;
+	const unsigned bufferSize() const;
+
+protected:
 	void createVBO(float * data, unsigned size);
 	void destroyVBO();
 	
-	unsigned getBufferName() const;
+	void setBufferType(BufferType t);
+	const BufferType bufferType() const;
 	
-	unsigned _buffereName;
+private:
+	BufferType m_bufferType;
+    unsigned m_bufferName;
+	unsigned m_bufferSize;
 };
