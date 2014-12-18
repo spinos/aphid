@@ -9,7 +9,7 @@
 
 #ifndef HEMISPHERE_IMPLEMENT_H
 #define HEMISPHERE_IMPLEMENT_H
-#include <cutil_inline.h>
+
 #include <cuda_runtime_api.h>
 
 extern "C" void hemisphere(float4 *pos, float3 * cvs, unsigned numSegments);

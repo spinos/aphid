@@ -7,7 +7,9 @@
  *
  */
 #include "CUDABuffer.h"
+
 #include <cutil_inline.h>
+#include <gl_heads.h>
 #include <cutil_gl_inline.h>
 
 CUDABuffer::CUDABuffer() : _device_vbo_buffer(0) {} 

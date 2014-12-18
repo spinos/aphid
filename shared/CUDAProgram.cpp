@@ -8,6 +8,9 @@
  */
 
 #include "CUDAProgram.h"
+
+#include <gl_heads.h>
+
 #include <cutil_inline.h>
 #include <cutil_gl_inline.h>
 #include <iostream>
@@ -15,7 +18,7 @@
 CUDAProgram::CUDAProgram() {}
 CUDAProgram::~CUDAProgram() {}
 
-void CUDAProgram::run(CUDABuffer * buffer)
+void CUDAProgram::run(CUDABuffer * /*buffer*/)
 {	
 	// float3 *dptr;
 	// map(buffer, (void **)&dptr);

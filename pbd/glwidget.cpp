@@ -26,6 +26,7 @@ float iniHeight = 30.f;
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
+    qDebug()<<"glview";
 	perspCamera()->setFarClipPlane(20000.f);
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
@@ -143,6 +144,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(33);
+	qDebug()<<"view..";
 }
 //! [0]
 
@@ -156,7 +158,9 @@ void GLWidget::clientInit()
 }
 
 void GLWidget::clientDraw()
-{
+{  
+    //qDebug()<<"dr";
+    //return;
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glColor3f(1,1,1);
@@ -203,7 +207,7 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::simulate()
 {
-	for(int i=0; i< 8; i++)stepPhysics(timeStep);
+    for(int i=0; i< 8; i++)stepPhysics(timeStep);
 }
 
 void GLWidget::keyPressEvent(QKeyEvent *e)

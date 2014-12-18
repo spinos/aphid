@@ -2,9 +2,10 @@
 #define GLWIDGET_H
 
 #include <Base3DView.h>
-#include <CUDABuffer.h>
 #include <BezierProgram.h>
 #include <BaseCurve.h>
+
+class CUDABuffer;
 
 class GLWidget : public Base3DView
 {

@@ -6,11 +6,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#ifdef WIN32
-#include <gExtension.h>
-#else
 #include <gl_heads.h>
-#endif
 #include "BaseBuffer.h"
 
 BaseBuffer::BaseBuffer() : m_bufferName(0), m_bufferSize(0) 

@@ -15,8 +15,10 @@ win32 {
 
 HEADERS       = glwidget.h \
                 window.h \
-                ../shared/Base3DView.h
+                ../shared/Base3DView.h \
+                 ../shared/GLHUD.h
 SOURCES       = ../shared/Base3DView.cpp \
+                ../shared/GLHUD.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp

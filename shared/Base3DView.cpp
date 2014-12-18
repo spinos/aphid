@@ -1,5 +1,6 @@
 
 #include <QtGui>
+#include <gl_heads.h>
 #include <QtOpenGL>
 
 #include "Base3DView.h"
@@ -19,6 +20,7 @@
 Base3DView::Base3DView(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
+    qDebug()<<"base3dview";
     m_backgroundColor = QColor::fromCmykF(0.29, 0.29, 0.20, 0.0);
 	m_orthoCamera = new BaseCamera;
 	m_perspCamera = new PerspectiveCamera;
@@ -36,6 +38,7 @@ Base3DView::Base3DView(QWidget *parent)
 	setFocusPolicy(Qt::ClickFocus);
 	m_isFocused = 0;
 	m_interactContext = 0;
+		
 	m_hud = new GLHUD;
 	m_hud->setCamera(fCamera);
 }
@@ -102,6 +105,9 @@ const Ray * Base3DView::getIncidentRay() const
 
 void Base3DView::initializeGL()
 {
+#ifdef WIN32   
+    if(gExtensionInit()) qDebug()<<"GL Extensions checked.";
+#endif
 	qglClearColor(m_backgroundColor.dark());
 
     glEnable(GL_DEPTH_TEST);

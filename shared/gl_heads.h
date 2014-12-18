@@ -12,3 +12,7 @@
 #include <OpenGL/glext.h>
 #include <GLUT/glut.h>
 #endif
+
+#ifdef WIN32
+#include <gExtension.h>
+#endif

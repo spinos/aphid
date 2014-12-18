@@ -1,8 +1,10 @@
 #include <QtGui>
-#include <QtOpenGL>
 
+#include <gl_heads.h>
 #include "glwidget.h"
+
 #include <KdTreeDrawer.h>
+#include <CUDABuffer.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -26,15 +28,14 @@ void GLWidget::clientInit()
     CUDABuffer::setDevice();
 	m_vertexBuffer->create(0, m_curve->numSegments() * 100 * 16);
 	m_cvs->create(m_curve->numVertices() * 12);
+	m_cvs->hostToDevice(m_curve->m_cvs, m_curve->numVertices() * 12);
+	m_program->run(m_vertexBuffer, m_cvs, m_curve);
 }
 
 void GLWidget::clientDraw()
 {
-	// m_vertexBuffer->create(m_data, m_curve->numSegments() * 100 * 16);
-	m_program->run(m_vertexBuffer, m_cvs, m_curve);
 	// GeoDrawer * dr = getDrawer();
 	// dr->linearCurve(*m_curve);
-	// qDebug()<<" "<<m_vertexBuffer->bufferSize()<<" "<<m_vertexBuffer->_buffereName;
 	glBindBuffer(GL_ARRAY_BUFFER, (GLuint)m_vertexBuffer->bufferName());
     glVertexPointer(4, GL_FLOAT, 0, 0);
 	
@@ -44,7 +45,7 @@ void GLWidget::clientDraw()
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
-	// glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

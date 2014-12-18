@@ -6,6 +6,8 @@ macx {
     LIBS += -lboost_date_time -lboost_system -lboost_thread -lboost_filesystem 
 }
 win32 {
+    HEADERS += ../shared/gExtension.h
+    SOURCES += ../shared/gExtension.cpp
     INCLUDEPATH += D:/usr/boost_1_51_0 \
                     D:/usr/local/openEXR/include
     QMAKE_LIBDIR += D:/usr/boost_1_51_0/stage/lib \

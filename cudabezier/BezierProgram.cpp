@@ -17,7 +17,6 @@ void BezierProgram::run(CUDABuffer * buffer, CUDABuffer * cvs, BaseCurve * curve
 {
 	void *dptr;
 	buffer->map(&dptr);
-	cvs->hostToDevice(curve->m_cvs, curve->numVertices() * 12);
 	
 	hemisphere((float4 *)dptr, (float3 *)cvs->bufferOnDevice(), curve->numVertices());
 

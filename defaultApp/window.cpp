@@ -6,6 +6,7 @@
 //! [0]
 Window::Window()
 {
+    qDebug()<<"window";
     glWidget = new GLWidget;
 	
 	setCentralWidget(glWidget);
