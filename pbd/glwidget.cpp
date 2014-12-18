@@ -3,9 +3,10 @@
 #include <BaseCamera.h>
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
+#include <BoxProgram.h>
 
-#define NU 44
-#define NV 44
+#define NU 34
+#define NV 34
 #define NF (NU * NV)
 #define NTri (NF * 2)
 #define NI (NTri * 3)
@@ -16,9 +17,9 @@
 #define BEND_SPRING 2
 
 const float DEFAULT_DAMPING =  -0.0225f;
-float	KsStruct = 50.75f,KdStruct = -0.25f;
+float	KsStruct = 10.75f,KdStruct = -0.25f;
 float	KsShear = 50.75f,KdShear = -0.25f;
-float	KsBend = 50.95f,KdBend = -0.24f;
+float	KsBend = 10.95f,KdBend = -0.24f;
 float timeStep = 1.f/30.f;
 Vector3F gravity(0.0f,-.0981f,0.0f);
 float mass = 1.f;
@@ -140,10 +141,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 			spr++;
 		}
 	}
-	 
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(33);
+	m_program = new BoxProgram;
 	qDebug()<<"view..";
 }
 //! [0]
@@ -155,10 +153,19 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientInit()
 {
+    m_program->createCvs(NP);
+    m_program->createIndices(NI, m_indices);
+    m_program->createAabb(NTri);
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
+	timer->start(33);
 }
 
 void GLWidget::clientDraw()
-{  
+{
+    Vector3F bbox[NTri * 2];
+    m_program->getAabb(bbox, NTri);
+    // simulate();
     //qDebug()<<"dr";
     //return;
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -175,7 +182,17 @@ void GLWidget::clientDraw()
 		glVertex3f(p3.x,p3.y,p3.z);
 	}
 	glEnd();
+
 	return;
+	GeoDrawer * dr = getDrawer();
+	dr->setColor(0.f, 0.5f, 0.f);
+	for(i=0; i< NTri; i++) {
+	    BoundingBox bb;
+	    bb.updateMin(bbox[i*2]);
+	    bb.updateMax(bbox[i*2 + 1]);
+	    dr->boundingBox(bb);
+	}
+	
 	glColor3f(1,0,0);
 	glBegin(GL_LINES);
 	for(i=0; i< m_numSpring; i++) {
@@ -207,7 +224,9 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::simulate()
 {
-    for(int i=0; i< 8; i++)stepPhysics(timeStep);
+    //setUpdatesEnabled(false);
+	for(int i=0; i< 8; i++)stepPhysics(timeStep);
+	//setUpdatesEnabled(true);
 }
 
 void GLWidget::keyPressEvent(QKeyEvent *e)
@@ -235,6 +254,7 @@ void GLWidget::stepPhysics(float dt)
 {
 	computeForces(dt);
 	integrateVerlet(dt);
+	m_program->run(m_pos, NTri, NP);
 }
 
 void GLWidget::computeForces(float dt) 

@@ -4,6 +4,7 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 
+class BoxProgram;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -35,6 +36,7 @@ private:
 	unsigned * m_indices;
 	Spring * m_spring;
 	unsigned m_numSpring;
+	BoxProgram * m_program;
 	void setSpring(Spring * dest, unsigned a, unsigned b, float ks, float kd, int type);
 	void stepPhysics(float dt);
 	void computeForces(float dt);
