@@ -32,9 +32,10 @@ SOURCES       = ../shared/Base3DView.cpp \
                 BoxProgram.cpp
 QT           += opengl
 win32:CONFIG += console
+macx:CONFIG -= app_bundle
 DESTDIR = ./
 
-CUSOURCES = box.cu
+CUSOURCES = bbox.cu
 macx {
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda
@@ -54,6 +55,7 @@ QMAKE_LIBDIR += $$CUDA_DIR/lib \
     $$CUDA_COMMON/lib/darwin \
     $$CUDA_DEV/lib \
     $$CUDA_SHARED/lib
+CUDA_MACHINE_FLAG = -m32
 }
 win32 {
 CUDA_CC =D:/usr/cuda4/v4.0/bin/nvcc.exe
@@ -69,6 +71,7 @@ QMAKE_LIBDIR += $$CUDA_DIR/lib/x64 \
                 $$CUDA_COMMON/lib/x64
 QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt  /NODEFAULTLIB:libcpmt
 LIBS += -lcuda -lcudart
+CUDA_MACHINE_FLAG = -m64
 }
 
 cuda.name = CUDA
@@ -78,7 +81,7 @@ cuda.variable_out = OBJECTS
 cuda.output = ${QMAKE_FILE_IN}$$QMAKE_EXT_OBJ
 cuda.commands = $$CUDA_CC \
     -c \
-    -m64 \
+    $$CUDA_MACHINE_FLAG \
     -arch sm_11 \
     $$join(INCLUDEPATH,'" -I "','-I "','"') \
     ${QMAKE_FILE_IN} \

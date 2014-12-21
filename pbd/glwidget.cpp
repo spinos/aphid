@@ -5,8 +5,8 @@
 #include <KdTreeDrawer.h>
 #include <BoxProgram.h>
 
-#define NU 34
-#define NV 34
+#define NU 44
+#define NV 33
 #define NF (NU * NV)
 #define NTri (NF * 2)
 #define NI (NTri * 3)
@@ -155,7 +155,7 @@ void GLWidget::clientInit()
 {
     m_program->createCvs(NP);
     m_program->createIndices(NI, m_indices);
-    m_program->createAabb(NTri);
+    m_program->createAabbs(NTri);
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	timer->start(33);
@@ -163,8 +163,6 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-    Vector3F bbox[NTri * 2];
-    m_program->getAabb(bbox, NTri);
     // simulate();
     //qDebug()<<"dr";
     //return;
@@ -182,8 +180,11 @@ void GLWidget::clientDraw()
 		glVertex3f(p3.x,p3.y,p3.z);
 	}
 	glEnd();
+	
+	
+	Vector3F bbox[NTri * 2];
+    m_program->getAabbs(bbox, NTri);
 
-	return;
 	GeoDrawer * dr = getDrawer();
 	dr->setColor(0.f, 0.5f, 0.f);
 	for(i=0; i< NTri; i++) {
@@ -192,6 +193,7 @@ void GLWidget::clientDraw()
 	    bb.updateMax(bbox[i*2 + 1]);
 	    dr->boundingBox(bb);
 	}
+	return;
 	
 	glColor3f(1,0,0);
 	glBegin(GL_LINES);

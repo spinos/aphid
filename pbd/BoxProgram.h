@@ -11,8 +11,8 @@ public:
 	
 	void createCvs(unsigned numCvs);
     void createIndices(unsigned numIndices, unsigned * src);
-	void createAabb(unsigned n);
-	void getAabb(Vector3F * dst, unsigned nbox);
+	void createAabbs(unsigned n);
+	void getAabbs(Vector3F * dst, unsigned nbox);
 	
 	virtual void run(Vector3F * pos, unsigned numTriangle, unsigned numVertices);
 private:
