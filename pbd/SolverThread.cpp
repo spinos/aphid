@@ -1,8 +1,8 @@
 #include <QtCore>
 #include "SolverThread.h"
 #include <BoxProgram.h>
-#define NU 28
-#define NV 28
+#define NU 50
+#define NV 50
 #define NF (NU * NV)
 #define NTri (NF * 2)
 #define NI (NTri * 3)
@@ -11,17 +11,18 @@
 #define STRUCTURAL_SPRING 0
 #define SHEAR_SPRING 1
 #define BEND_SPRING 2
+#define EPSILON  0.0000001f
 
 const float DEFAULT_DAMPING =  -0.0825f;
-float	KsStruct = .9f,KdStruct = -.499f;
-float	KsShear = .9f,KdShear = -.499f;
-float	KsBend = .9f,KdBend = -.499f;
-float timeStep = 1.f / 30.f / 2.f;
+float	KsStruct = 180.5f,KdStruct = -.25f;
+float	KsShear = 180.5f,KdShear = -.25f;
+float	KsBend = 80.5f,KdBend = -.25f;
+float timeStep = 1.f / 60.f;
 float divG = 9.81f / 24.f;
 Vector3F gravity(0.0f,-divG,0.0f);
 float mass = 1.f;
-float iniHeight = 30.f;
-float gridSize = 68.f / (float)NU;
+float iniHeight = 24.f;
+float gridSize = 24.f / (float)NU;
 
 SolverThread::SolverThread(QObject *parent)
     : QThread(parent)
@@ -137,6 +138,9 @@ SolverThread::SolverThread(QObject *parent)
 			spr++;
 		}
 	}
+	
+	qDebug()<<"total mass "<<mass * NP;
+	
 	m_program = new BoxProgram;
 }
 
@@ -173,11 +177,11 @@ void SolverThread::simulate()
 void SolverThread::run()
 {
    forever {
-        qDebug()<<"run";
+        // qDebug()<<"run";
 	
 	for(int i=0; i< 30; i++) {
 	    if(restart) {
-	        qDebug()<<"restart ";
+	        // qDebug()<<"restart ";
             break;
 	    }
 	        
@@ -191,7 +195,7 @@ void SolverThread::run()
 	}
  
 		//if (!restart) {
-		    qDebug()<<"end";
+		    // qDebug()<<"end";
             
 		    emit doneStep();
 		//}
@@ -220,7 +224,7 @@ void SolverThread::computeForces(float dt)
 		m_force[i] += V * DEFAULT_DAMPING;
 	}
 	
-	float tf = 0.f;
+	// float tf = 0.f;
 	for(i=0;i< m_numSpring; i++) {
 		pbd::Spring & spring = m_spring[i];
 		Vector3F p1 = m_pos[spring.p1];
@@ -234,9 +238,10 @@ void SolverThread::computeForces(float dt)
 		Vector3F deltaP = p1-p2;
 		Vector3F deltaV = v1-v2;
 		float dist = deltaP.length();
+		if(dist < EPSILON) continue;
 
-		float leftTerm = -spring.Ks * (dist - spring.rest_length) / spring.rest_length * 200.f;
-		tf += leftTerm;
+		float leftTerm = -spring.Ks * (dist - spring.rest_length);
+		// tf += leftTerm;
 		float rightTerm = spring.Kd * (deltaV.dot(deltaP)/dist);
 		Vector3F springForce = deltaP.normal() * (leftTerm + rightTerm);
 
@@ -245,7 +250,7 @@ void SolverThread::computeForces(float dt)
 		if(spring.p2 != 0 && spring.p2 != NU )
 			m_force[spring.p2] -= springForce;
 	}
-	qDebug()<<" "<<tf;
+	// qDebug()<<" "<<tf;
 }
 
 void SolverThread::integrateVerlet(float deltaTime) 

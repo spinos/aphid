@@ -61,14 +61,10 @@ class SimpleTree(QtGui.QTreeWidget):
         if not child:
             return
             
-        print 'start dragging', child.text(0)
+        print('start dragging{0}'.format(child.text(0)))
         
-        itemData = QtCore.QByteArray()
-        dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-        dataValue = QtCore.QStringList()
-        dataValue << child.text(0)
-        dataStream << dataValue
- 
+        itemData = QtCore.QByteArray(child.text(0))
+
         mimeData = QtCore.QMimeData()
         mimeData.setData('application/x-dnditemdata', itemData)
  
@@ -80,26 +76,25 @@ class SimpleTree(QtGui.QTreeWidget):
             pass
             
     def dropEvent(self, event):
-        if not event.mimeData().hasFormat('application/x-dnditemdata'):
-            event.ignore()
-            
         itemData = event.mimeData().data('application/x-dnditemdata')
-        dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
-            
-        sourceAttrib = QtCore.QStringList()
-        dataStream >> sourceAttrib
+        if not itemData:
+            event.ignore()
 
+        sitem = ''
+        for i in range(0, itemData.size()):
+            sitem += itemData.at(i)
+        
         hit = self.itemAt(event.pos())
         
         if not hit:
-            print 'hit nothing'
+            print('hit nothing')
             event.ignore()
             
-        print 'drop %s onto %s' % ( sourceAttrib[0], hit.text(0) )
+        print('drop {0} onto {1}'.format(sitem, hit.text(0) ))
         
         
         spawn = DragableItem(hit)
-        spawn.set_name(sourceAttrib[0])
+        spawn.set_name(sitem)
         self.expandItem(hit)
         
         if event.source() == self:

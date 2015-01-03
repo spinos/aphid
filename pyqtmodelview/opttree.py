@@ -1,3 +1,4 @@
+import sys
 from PyQt4 import QtCore, QtGui
 
 class OptTreeItem(object):
@@ -147,7 +148,7 @@ class Window(QtGui.QWidget):
         model = OptTreeModel('root', {'abc':{'def':'ghi'}, 'jkl':{}}, self)
         
         view = QtGui.QTreeView()
-        view.setModel(self.model)
+        view.setModel(model)
         
         layout = QtGui.QVBoxLayout()
         layout.addWidget(view, 0)
