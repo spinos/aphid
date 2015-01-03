@@ -27,6 +27,7 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
+    QTimer * internalTimer();
 	BaseCamera * getCamera() const;
 	BaseCamera * perspCamera();
 	BaseCamera * orthoCamera();

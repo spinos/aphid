@@ -33,8 +33,8 @@ Base3DView::Base3DView(QWidget *parent)
 	m_brush = new BaseBrush;
 	
 	m_timer = new QTimer(this);
-	connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
-	m_timer->start(30);
+	//connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
+	m_timer->start(33);
 	setFocusPolicy(Qt::ClickFocus);
 	m_isFocused = 0;
 	m_interactContext = 0;
@@ -52,9 +52,9 @@ Base3DView::~Base3DView()
 	delete m_activeComponent;
 	delete m_intersectCtx;
 }
-//! [1]
 
-//! [2]
+QTimer * Base3DView::internalTimer() { return m_timer; }
+
 QSize Base3DView::minimumSizeHint() const
 {
     return QSize(50, 50);

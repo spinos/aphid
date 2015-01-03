@@ -3,19 +3,15 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
+#include <pbd_common.h>
 
-class BoxProgram;
+class SolverThread;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
 
 public:
-	struct Spring {
-		unsigned p1, p2;
-		float rest_length;
-		float Ks, Kd;
-		int type;
-	};
+
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
 	
@@ -30,20 +26,9 @@ protected:
     
 //! [3]
 private:
-	Vector3F * m_pos;
-	Vector3F * m_posLast;
-	Vector3F * m_force;
-	unsigned * m_indices;
-	Spring * m_spring;
-	unsigned m_numSpring;
-	BoxProgram * m_program;
-	void setSpring(Spring * dest, unsigned a, unsigned b, float ks, float kd, int type);
-	void stepPhysics(float dt);
-	void computeForces(float dt);
-	void integrateVerlet(float dt);
-	static Vector3F getVerletVelocity(Vector3F x_i, Vector3F xi_last, float dt );
+    SolverThread * m_solver;
+	
 private slots:
-    void simulate();
 
 };
 //! [3]

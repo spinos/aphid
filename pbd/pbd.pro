@@ -13,14 +13,15 @@ win32 {
     QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt  /NODEFAULTLIB:libcpmt
 }
 
-HEADERS       = glwidget.h \
+HEADERS       = pbd_common.h glwidget.h \
                 window.h \
                 ../shared/Base3DView.h \
                  ../shared/GLHUD.h \
                  ../shared/BaseBuffer.h \
                 ../shared/CUDABuffer.h \
                 ../shared/CUDAProgram.h \
-                 BoxProgram.h
+                 BoxProgram.h \
+                 SolverThread.h
 SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/GLHUD.cpp \
                 ../shared/BaseBuffer.cpp \
@@ -29,7 +30,8 @@ SOURCES       = ../shared/Base3DView.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp \
-                BoxProgram.cpp
+                BoxProgram.cpp \
+                SolverThread.cpp
 QT           += opengl
 win32:CONFIG += console
 macx:CONFIG -= app_bundle
