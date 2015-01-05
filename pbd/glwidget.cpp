@@ -8,9 +8,9 @@
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
     qDebug()<<"glview";
-	perspCamera()->setFarClipPlane(20000.f);
+	perspCamera()->setFarClipPlane(2000.f);
 	perspCamera()->setNearClipPlane(1.f);
-	orthoCamera()->setFarClipPlane(20000.f);
+	orthoCamera()->setFarClipPlane(2000.f);
 	orthoCamera()->setNearClipPlane(1.f);
 	
 	m_solver = new SolverThread;

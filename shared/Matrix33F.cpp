@@ -92,6 +92,14 @@ void Matrix33F::fill(const Vector3F& a, const Vector3F& b, const Vector3F& c)
 	*m(2, 2) = c.z;
 }
 
+/*
+   i
+   00 01 02
+   10 11 12
+   20 21 22
+           j
+*/
+
 void Matrix33F::transpose()
 {
     float tmp;

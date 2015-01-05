@@ -35,19 +35,30 @@ private:
     QWaitCondition condition;
     BoxProgram * m_program;
     Vector3F * m_pos;
+	Vector3F * m_projectedPos;
 	Vector3F * m_posLast;
 	Vector3F * m_force;
+	Vector3F * m_velocity;
 	unsigned * m_indices;
+	float * m_invMass;
+	Vector3F * m_Ri;
 	pbd::Spring * m_spring;
-	unsigned m_numSpring;
+	pbd::DistanceConstraint * m_distanceConstraint;
+	unsigned m_numBendingConstraint, m_numDistanceConstraint;
 	
     bool restart;
     bool abort;
 	
     void stepPhysics(float dt);
 	void setSpring(pbd::Spring * dest, unsigned a, unsigned b, float ks, float kd, int type);
-	void computeForces(float dt);
+	void setDistanceConstraint(pbd::DistanceConstraint * dest, unsigned a, unsigned b, float k);
+	void computeForces();
+	void integrateExplicitWithDamping(float dt);
 	void integrateVerlet(float dt);
+	void updateConstraints(float dt);
+	void updateDistanceConstraint(unsigned i);
+	void groundCollision();
+	void integrate(float deltaTime);
 	
 	static Vector3F getVerletVelocity(Vector3F x_i, Vector3F xi_last, float dt );
 public slots:
