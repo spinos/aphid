@@ -17,16 +17,16 @@ const float DEFAULT_DAMPING =  -0.0825f;
 float	KsStruct = 180.5f,KdStruct = -.25f;
 float	KsShear = 180.5f,KdShear = -.25f;
 float	KsBend = 80.5f,KdBend = -.25f;
-float timeStep = 1.f / 60.f;
-Vector3F gravity(0.0f,-9.81f/100.f,0.0f);
-float mass = .0008f;
-float iniHeight = 389.f;
+float timeStep = 1.f / 720.f;
+Vector3F gravity(0.0f,-981.f,0.0f);
+float mass = 1.f;
+float iniHeight = 99.f;
 float gridSize = iniHeight / (float)NU;
-const unsigned solver_iterations = 4;
-float kBend = 0.5f; 
+const unsigned solver_iterations = 2;
+float kBend = 0.5f;
 float kStretch = 1.f; 
-float kDamp = 0.00125f;
-float global_dampening = 0.99f;
+float kDamp = 0.0125f;
+float global_dampening = 0.98f;
 
 SolverThread::SolverThread(QObject *parent)
     : QThread(parent)
@@ -46,7 +46,7 @@ SolverThread::SolverThread(QObject *parent)
 	unsigned i, j;
 	for(i=0; i < NP; i++) m_invMass[i] = 1.f / mass;
 	
-	// for(i=0; i < NU; i+=10) m_invMass[i] = 0.f;
+	// for(i=0; i < NU; i++) m_invMass[i] = 0.f;
 	m_invMass[0] = 0.f;
 	m_invMass[NU] = 0.f;
 
@@ -98,7 +98,7 @@ SolverThread::SolverThread(QObject *parent)
 	
 	for(j=0; j< NV; j++) {
 		for(i=0; i < NU; i++) {
-			m_numDistanceConstraint += 2;
+			m_numDistanceConstraint += 1;
 		}
 	}
 	
@@ -139,10 +139,11 @@ SolverThread::SolverThread(QObject *parent)
 	
 	for(j=0; j< NV; j++) {
 		for(i=0; i < NU; i++) {
-			setDistanceConstraint(d, nl * j + i, nl * (j + 1) + i + 1, kStretch);
+			if ((j+i)%2) setDistanceConstraint(d, nl * j + i, nl * (j + 1) + i + 1, kStretch);
+			else setDistanceConstraint(d, nl * j + i + 1, nl * (j + 1) + i, kStretch);
 			d++;
-			setDistanceConstraint(d, nl * j + i + 1, nl * (j + 1) + i, kStretch);
-			d++;
+			//setDistanceConstraint(d, nl * j + i + 1, nl * (j + 1) + i, kStretch);
+			//d++;
 		}
 	}
 /*	
@@ -200,7 +201,7 @@ void SolverThread::run()
    forever {
         // qDebug()<<"run";
 	
-	for(int i=0; i< 2; i++) {
+	for(int i=0; i< 24; i++) {
 	    if(restart) {
 	        // qDebug()<<"restart ";
             // break;
@@ -237,7 +238,8 @@ void SolverThread::computeForces()
 	
 	for(i=0;i< NP;i++) {
 		m_force[i].setZero();
-		if(m_invMass[i] > 0.f) m_force[i] += gravity;
+		if(m_invMass[i] > 0.f) 
+		    m_force[i] += gravity / m_invMass[i];
 	}
 }
 
@@ -251,13 +253,15 @@ void SolverThread::integrateExplicitWithDamping(float dt)
 	for(i=0;i< NP; i++) {
 
 		m_velocity[i] *= global_dampening; //global velocity dampening !!!		
-		m_velocity[i] = m_velocity[i] + (m_force[i] * dt) * m_invMass[i];
+		m_velocity[i] += (m_force[i] * dt) * m_invMass[i];
+		
+		// qDebug()<<" acc "<<m_force[i].length() * m_invMass[i];
 		
 		//calculate the center of mass's position 
 		//and velocity for damping calc
-		Xcm += (m_pos[i] * mass);
-		Vcm += (m_velocity[i] * mass);
-		sumM += mass;
+		Xcm += m_pos[i];
+		Vcm += m_velocity[i];
+		sumM += 1.f;
 	}
 	Xcm /= sumM; 
 	Vcm /= sumM;
@@ -330,13 +334,13 @@ void SolverThread::updateDistanceConstraint(unsigned i)
 	if(invMass <= EPSILON) 
 		return;
  
-	Vector3F dP = (dir / len) * (1.f / invMass) * (len - c.rest_length) * c.k_prime;
+	Vector3F dP = (dir / len) * (len - c.rest_length) * c.k_prime;
+	
+	// qDebug()<<" "<<invMass<<" "<<dP.length()<<" "<<len - c.rest_length<<" "<<w1/invMass<<" "<<w2/invMass;
 
-	if(w1 > 0.f)
-		m_projectedPos[c.p1] -= dP*w1;
+	m_projectedPos[c.p1] -= dP*w1/invMass;
 
-	if(w2 > 0.f)
-		m_projectedPos[c.p2] += dP*w2;
+	m_projectedPos[c.p2] += dP*w2/invMass;
 }
 
 void SolverThread::groundCollision()
@@ -425,7 +429,7 @@ Vector3F SolverThread::getVerletVelocity(Vector3F x_i, Vector3F xi_last, float d
 
 void SolverThread::stepPhysics(float dt)
 {
-	computeForces();
+    computeForces();
 	integrateExplicitWithDamping(dt);
 	updateConstraints(dt);
 	integrate(dt);
