@@ -21,6 +21,7 @@
 	float operator() (int i, int j);
 	float operator() (int i, int j) const;
 	Vector3F operator*( Vector3F other ) const;
+	void operator*= (float scaling);
 	Matrix33F operator+( Matrix33F other ) const;	
 	void setIdentity();
 	void setZero();
@@ -45,6 +46,8 @@
 	Vector3F scale() const;
 	
 	static Matrix33F IdentityMatrix;
+	
+	const std::string Matrix33F::str() const;
 	
 	float v[9];
  };

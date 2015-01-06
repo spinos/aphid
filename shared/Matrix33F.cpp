@@ -58,6 +58,11 @@ Matrix33F Matrix33F::operator+( Matrix33F other ) const
 	return a;
 }
 
+void Matrix33F::operator*= (float scaling)
+{
+    for(int i = 0; i < 9; i++) v[i] *= scaling;
+}
+
 float* Matrix33F::m(int i, int j)
 {
 	return &v[i * 3 + j];
@@ -276,3 +281,15 @@ Vector3F Matrix33F::scale() const
 	Vector3F vz(M(2, 0), M(2, 1), M(2, 2));
 	return Vector3F(vx.length(), vy.length(), vz.length());
 }
+
+const std::string Matrix33F::str() const
+{
+	std::stringstream sst;
+	sst.str("");
+    sst<<"["<<v[0]<<" "<<v[1]<<" "<<v[2]<<"]\n";
+    sst<<"["<<v[3]<<" "<<v[4]<<" "<<v[5]<<"]\n";
+	sst<<"["<<v[6]<<" "<<v[7]<<" "<<v[8]<<"]\n";
+	
+	return sst.str();
+}
+
