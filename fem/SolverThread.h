@@ -80,6 +80,12 @@ private:
     void computeForces();
     void updateOrientation();
     void resetOrientation();
+    void stiffnessAssembly();
+    void addPlasticityForce(float dt);
+	void dynamicsAssembly(float dt);
+	void conjugateGradientSolver(float dt);
+	void updatePosition(float dt);
+	void groundCollision();
     
     void stepPhysics(float dt);
     

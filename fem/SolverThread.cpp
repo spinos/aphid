@@ -10,13 +10,16 @@ float d15 = Y / (1.0f + nu) / (1.0f - 2 * nu);
 float d16 = (1.0f - nu) * d15;
 float d17 = nu * d15;
 float d18 = Y / 2 / (1.0f + nu);
+Vector3F D(d16, d17, d18); //Isotropic elasticity matrix D
+
 
 float density =1000.0f;
 float creep = 0.20f;
 float yield = 0.04f;
-float mass_damping=1.0f;
+float mass_damping=1.f;
 float m_max = 0.2f;
 Vector3F gravity(0.0f,-9.81f,0.0f); 
+int i_max = 20;
 
 bool bUseStiffnessWarping = true;
 
@@ -26,7 +29,7 @@ SolverThread::SolverThread(QObject *parent)
     restart = false;
     abort = false;
     
-    generateBlocks(10,3,3, 0.5f,0.5f,0.5f);
+    generateBlocks(12,3,3, .25f,.25f,.25f);
     
     m_mass = new float[m_totalPoints];
 	
@@ -119,19 +122,19 @@ void SolverThread::stepPhysics(float dt)
 		updateOrientation();
 	else
 		resetOrientation();
-/*
-	StiffnessAssembly();
- 
-	AddPlasticityForce(dt);
- 
-	DynamicsAssembly(dt);
- 
-	ConjugateGradientSolver(dt);
- 
-	UpdatePosition(dt);
 
-	GroundCollision();
-*/
+	stiffnessAssembly();
+ 
+	addPlasticityForce(dt);
+ 
+	dynamicsAssembly(dt);
+ 
+	conjugateGradientSolver(dt);
+ 
+	updatePosition(dt);
+
+	// groundCollision();
+
 }
 
 void SolverThread::generateBlocks(unsigned xdim, unsigned ydim, unsigned zdim, float width, float height, float depth)
@@ -161,7 +164,7 @@ void SolverThread::generateBlocks(unsigned xdim, unsigned ydim, unsigned zdim, f
 	//offset the m_tetrahedronl mesh by 0.5 units on y axis
 	//and 0.5 of the depth in z axis
 	for(unsigned i=0;i< m_totalPoints;i++) {
-		m_X[i].y += 0.5;		
+		m_X[i].y += 2.5;		
 		m_X[i].z -= hzdim*depth; 
 	}
 	
@@ -405,7 +408,7 @@ void SolverThread::updateOrientation()
 		*Re.m(2, 1) = e1.z * n1.y + e2.z * n2.y + e3.z * n3.y;  
 		*Re.m(2, 2) = e1.z * n1.z + e2.z * n2.z + e3.z * n3.z;
 		
-		// ? m_tetrahedron[k].Re = ortho_normalize(m_tetrahedron[k].Re);
+		Re.orthoNormalize();
 		
 	}
 }
@@ -415,3 +418,293 @@ void SolverThread::resetOrientation() {
 		m_tetrahedron[k].Re.setIdentity();
 	}
 }
+
+void SolverThread::stiffnessAssembly() 
+{ 
+	for(unsigned k=0;k<m_totalTetrahedrons;k++) {
+		Matrix33F Re = m_tetrahedron[k].Re;
+		Matrix33F ReT = Re; ReT.transpose();
+ 
+
+		for (unsigned i = 0; i < 4; ++i) {
+			//Based on pseudocode given in Fig. 10.11 on page 361
+			Vector3F f(0.0f,0.0f,0.0f);
+			for (unsigned j = 0; j < 4; ++j) {
+				Matrix33F tmpKe = m_tetrahedron[k].Ke[i][j];
+				Vector3F x0 = m_Xi[m_tetrahedron[k].indices[j]];
+				Vector3F prod = tmpKe * x0;
+				// Vector3F(tmpKe.M(0, 0)*x0.x+ tmpKe.M(0, 1)*x0.y+tmpKe.M(0, 2)*x0.z, //tmpKe*x0;
+					//					   tmpKe.M(1, 0)*x0.x+ tmpKe.M(1, 1)*x0.y+tmpKe.M(1, 2)*x0.z,
+						//				   tmpKe.M(2, 0)*x0.x+ tmpKe.M(2, 1)*x0.y+tmpKe.M(2, 2)*x0.z);
+				f += prod;				   
+				if (j >= i) {
+					//Based on pseudocode given in Fig. 10.12 on page 361
+					Matrix33F tmp = (Re*tmpKe)*ReT;
+					Matrix33F tmpT = tmp; tmpT.transpose();
+					int index = m_tetrahedron[k].indices[i]; 		
+					 
+					m_K_row[index][m_tetrahedron[k].indices[j]]+=(tmp);
+					 
+					if (j > i) {
+						index = m_tetrahedron[k].indices[j];
+						m_K_row[index][m_tetrahedron[k].indices[i]]+= tmpT;
+					}
+				}
+
+			}
+			unsigned idx = m_tetrahedron[k].indices[i];
+			m_F0[idx] -= Re*f;		
+		}  	
+	} 
+}
+
+void SolverThread::addPlasticityForce(float dt) 
+{
+	for(int k=0;k<m_totalTetrahedrons;k++) {
+		float e_total[6];
+		float e_elastic[6];
+		for(int i=0;i<6;++i)
+			e_elastic[i] = e_total[i] = 0;
+
+		//--- Compute total strain: e_total  = Be (Re^{-1} x - x0)
+		for(unsigned int j=0;j<4;++j) {
+
+			Vector3F x_j  =  m_X[m_tetrahedron[k].indices[j]];
+			Vector3F x0_j = m_Xi[m_tetrahedron[k].indices[j]];
+			Matrix33F ReT  = m_tetrahedron[k].Re; ReT.transpose();
+			Vector3F prod = ReT * x_j;
+			//Vector3F(ReT[0][0]*x_j.x+ ReT[0][1]*x_j.y+ReT[0][2]*x_j.z, //tmpKe*x0;
+			//						   ReT[1][0]*x_j.x+ ReT[1][1]*x_j.y+ReT[1][2]*x_j.z,
+				//					   ReT[2][0]*x_j.x+ ReT[2][1]*x_j.y+ReT[2][2]*x_j.z);
+				
+			Vector3F tmp = prod - x0_j;
+
+			//B contains Jacobian of shape funcs. B=SN
+			float bj = m_tetrahedron[k].B[j].x;
+			float cj = m_tetrahedron[k].B[j].y;
+			float dj = m_tetrahedron[k].B[j].z;
+
+			e_total[0] += bj*tmp.x;
+			e_total[1] +=            cj*tmp.y;
+			e_total[2] +=                       dj*tmp.z;
+			e_total[3] += cj*tmp.x + bj*tmp.y;
+			e_total[4] += dj*tmp.x            + bj*tmp.z;
+			e_total[5] +=            dj*tmp.y + cj*tmp.z;
+		}
+
+		//--- Compute elastic strain
+		for(int i=0;i<6;++i)
+			e_elastic[i] = e_total[i] - m_tetrahedron[k].plastic[i];
+
+		//--- if elastic strain exceeds c_yield then it is added to plastic strain by c_creep
+		float norm_elastic = 0;
+		for(int i=0;i<6;++i)
+			norm_elastic += e_elastic[i]*e_elastic[i];
+		norm_elastic = sqrt(norm_elastic);
+		if(norm_elastic > yield) {
+		    float creepdt = 1.f /dt;
+		    if(creepdt > creep) creepdt = creep;
+			float amount = dt * creepdt;  //--- make sure creep do not exceed 1/dt
+			for(int i=0;i<6;++i)
+				m_tetrahedron[k].plastic[i] += amount*e_elastic[i];
+		}
+
+		//--- if plastic strain exceeds c_max then it is clamped to maximum magnitude
+		float norm_plastic = 0;
+		for(int i=0;i<6;++i)
+			norm_plastic += m_tetrahedron[k].plastic[i]* m_tetrahedron[k].plastic[i];
+		norm_plastic = sqrt(norm_plastic);
+
+		if(norm_plastic > m_max) { 
+			float scale = m_max/norm_plastic;
+			for(int i=0;i<6;++i)
+				m_tetrahedron[k].plastic[i] *= scale;
+		}
+
+		for(unsigned n=0;n<4;++n) {
+			float* e_plastic = m_tetrahedron[k].plastic;
+			//bn, cn and dn are the shape function derivative wrt. x,y and z axis
+			//These were calculated in CalculateK function
+
+			//Eq. 10.140(a) & (b) on page 365
+			float bn = m_tetrahedron[k].B[n].x;
+			float cn = m_tetrahedron[k].B[n].y;
+			float dn = m_tetrahedron[k].B[n].z;
+			float D0 = D.x;
+			float D1 = D.y;
+			float D2 = D.z;
+			Vector3F f  = Vector3F::Zero;
+
+			float  bnD0 = bn*D0;
+			float  bnD1 = bn*D1;
+			float  bnD2 = bn*D2;
+			float  cnD0 = cn*D0;
+			float  cnD1 = cn*D1;
+			float  cnD2 = cn*D2;
+			float  dnD0 = dn*D0;
+			float  dnD1 = dn*D1;
+			float  dnD2 = dn*D2;
+			
+			//Eq. 10.141 on page 365
+			f.x = bnD0*e_plastic[0] + bnD1*e_plastic[1] + bnD1*e_plastic[2] + cnD2*e_plastic[3] + dnD2*e_plastic[4];
+			f.y = cnD1*e_plastic[0] + cnD0*e_plastic[1] + cnD1*e_plastic[2] + bnD2*e_plastic[3] +                  + dnD2*e_plastic[5];
+			f.z = dnD1*e_plastic[0] + dnD1*e_plastic[1] + dnD0*e_plastic[2] +                    bnD2*e_plastic[4] + cnD2*e_plastic[5];
+			
+			f *= m_tetrahedron[k].volume;
+			int idx = m_tetrahedron[k].indices[n];
+			m_F[idx] += m_tetrahedron[k].Re*f;
+		}
+	}
+}
+
+void SolverThread::dynamicsAssembly(float dt) {
+	float dt2 = dt*dt;
+	
+	for(unsigned k=0;k<m_totalPoints;k++) {
+
+		float m_i = m_mass[k];
+		m_b[k].setZero();
+		
+		MatrixMap tmp = m_K_row[k];
+		MatrixMap::iterator Kbegin = tmp.begin();
+        MatrixMap::iterator Kend   = tmp.end();
+		for (MatrixMap::iterator K = Kbegin; K != Kend;++K)
+		{
+            unsigned j  = K->first;
+			Matrix33F K_ij  = K->second;
+			Vector3F x_j   = m_X[j];	
+			Matrix33F& A_ij = m_A_row[k][j];
+ 
+			A_ij = K_ij * dt2; 
+			Vector3F prod = K_ij * x_j;
+			//Vector3F(	K_ij[0][0]*x_j.x + K_ij[0][1]*x_j.y + K_ij[0][2]*x_j.z, 
+								//		K_ij[1][0]*x_j.x + K_ij[1][1]*x_j.y + K_ij[1][2]*x_j.z,
+									//	K_ij[2][0]*x_j.x + K_ij[2][1]*x_j.y + K_ij[2][2]*x_j.z);
+
+            m_b[k] -= prod;//K_ij * x_j;
+			 
+            if (k == j)
+            {
+              float c_i = mass_damping*m_i;
+              float tmp = m_i + dt*c_i;
+              *A_ij.m(0, 0) += tmp; 
+			  *A_ij.m(1, 1) += tmp;  
+			  *A_ij.m(2, 2) += tmp;
+			}
+		}
+	  
+		m_b[k] -= m_F0[k];
+		m_b[k] += m_F[k];
+		m_b[k] *= dt;
+		m_b[k] += m_V[k]*m_i;
+	} 
+}
+
+ 
+
+
+
+void SolverThread::conjugateGradientSolver(float dt) 
+{	
+	for(unsigned k=0;k<m_totalPoints;k++) {
+		if(m_IsFixed[k])
+			continue;
+		m_residual[k] = m_b[k];
+ 
+		MatrixMap::iterator Abegin = m_A_row[k].begin();
+        MatrixMap::iterator Aend   = m_A_row[k].end();
+		for (MatrixMap::iterator A = Abegin; A != Aend;++A)
+		{
+            unsigned j   = A->first;
+			Matrix33F& A_ij  = A->second;
+			//float v_jx = m_V[j].x;	
+			//float v_jy = m_V[j].y;
+			//float v_jz = m_V[j].z;
+			Vector3F prod = A_ij * m_V[j];
+			                // Vector3F(	A_ij[0][0] * v_jx+A_ij[0][1] * v_jy+A_ij[0][2] * v_jz, //A_ij * prev[j]
+							//			A_ij[1][0] * v_jx+A_ij[1][1] * v_jy+A_ij[1][2] * v_jz,			
+							//			A_ij[2][0] * v_jx+A_ij[2][1] * v_jy+A_ij[2][2] * v_jz);
+			m_residual[k] -= prod;//  A_ij * v_j;
+			
+		}
+		m_prev[k]= m_residual[k];
+	}
+	
+	for(int i=0;i<i_max;i++) {
+		float d =0;
+		float d2=0;
+		
+	 	for(unsigned k=0;k<m_totalPoints;k++) {
+
+			if(m_IsFixed[k])
+				continue;
+
+			m_update[k].setZero();
+			 
+			MatrixMap::iterator Abegin = m_A_row[k].begin();
+			MatrixMap::iterator Aend   = m_A_row[k].end();
+			for (MatrixMap::iterator A = Abegin; A != Aend;++A) {
+				unsigned j   = A->first;
+				Matrix33F& A_ij  = A->second;
+				// float prevx = prev[j].x;
+				// float prevy = prev[j].y;
+				// float prevz = prev[j].z;
+				Vector3F prod = A_ij * m_prev[j];
+				// Vector3F(	A_ij[0][0] * prevx+A_ij[0][1] * prevy+A_ij[0][2] * prevz, //A_ij * prev[j]
+									//		A_ij[1][0] * prevx+A_ij[1][1] * prevy+A_ij[1][2] * prevz,			
+										//	A_ij[2][0] * prevx+A_ij[2][1] * prevy+A_ij[2][2] * prevz);
+				m_update[k] += prod;//A_ij*prev[j];
+				 
+			}
+			d += m_residual[k].dot(m_residual[k]);
+			d2 += m_prev[k].dot(m_update[k]);
+		} 
+		
+		if(fabs(d2)< 1e-10f)
+			d2 = 1e-10f;
+
+		float d3 = d/d2;
+		float d1 = 0.f;
+
+		
+		for(unsigned k=0;k<m_totalPoints;k++) {
+			if(m_IsFixed[k])
+				continue;
+
+			m_V[k] += m_prev[k]* d3;
+			m_residual[k] -= m_update[k]*d3;
+			d1 += m_residual[k].dot(m_residual[k]);
+		}
+		
+		if(i >= i_max && d1 < 0.001f)
+			break;
+
+		if(fabs(d)<1e-10f)
+			d = 1e-10f;
+
+		float d4 = d1/d;
+		
+		for(unsigned k=0;k<m_totalPoints;k++) {
+			if(m_IsFixed[k])
+				continue;
+			m_prev[k] = m_residual[k] + m_prev[k]*d4;
+		}		
+	}	
+}
+
+void SolverThread::updatePosition(float dt) {
+	for(unsigned k=0;k<m_totalPoints;k++) {
+		if(m_IsFixed[k])
+			continue;
+		m_X[k] += m_V[k] * dt;
+	}
+}
+
+void SolverThread::groundCollision()  
+{
+	for(unsigned i=0;i<m_totalPoints;i++) {	
+		if(m_X[i].y<0) //collision with ground
+			m_X[i].y=0;
+	}
+}
+
