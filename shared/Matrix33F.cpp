@@ -21,6 +21,11 @@ Matrix33F::Matrix33F(const Matrix33F & a)
 	for(int i = 0; i < 9; i++) v[i] = a.v[i];
 }
 
+Matrix33F::Matrix33F(const Vector3F& r0, const Vector3F & r1, const Vector3F & r2)
+{
+    fill(r0, r1, r2);
+}
+
 Matrix33F::~Matrix33F() {}
 
 float Matrix33F::operator() (int i, int j)
@@ -43,6 +48,18 @@ Vector3F Matrix33F::operator*( Vector3F other ) const
 	return v;
 }
 
+Matrix33F Matrix33F::operator*( Matrix33F other ) const
+{
+    return multiply(other);
+}
+
+Matrix33F Matrix33F::operator*( float scaling ) const
+{
+    Matrix33F t(*this);
+    t *= scaling;
+    return t;
+}
+
 Matrix33F Matrix33F::operator+( Matrix33F other ) const
 {
 	Matrix33F a;
@@ -56,6 +73,16 @@ Matrix33F Matrix33F::operator+( Matrix33F other ) const
 	*a.m(2, 1) = M(2,1) + other.M(2,1);
 	*a.m(2, 2) = M(2,2) + other.M(2,2);
 	return a;
+}
+
+void Matrix33F::operator*= (float scaling)
+{
+    for(int i = 0; i < 9; i++) v[i] *= scaling;
+}
+
+void Matrix33F::operator+=(Matrix33F other)
+{
+    for(int i = 0; i < 9; i++) v[i] += other.v[i];
 }
 
 float* Matrix33F::m(int i, int j)
@@ -276,3 +303,32 @@ Vector3F Matrix33F::scale() const
 	Vector3F vz(M(2, 0), M(2, 1), M(2, 2));
 	return Vector3F(vx.length(), vy.length(), vz.length());
 }
+
+void Matrix33F::orthoNormalize()
+{
+    Vector3F r0(M(0, 0), M(0, 1), M(0, 2));
+    Vector3F r1(M(1, 0), M(1, 1), M(1, 2));
+    Vector3F r2(M(2, 0), M(2, 1), M(2, 2));
+    
+    float l0 = r0.length();
+    if(l0 > 0.f) r0 /= l0;
+    
+    r1 -= r0 * r0.dot(r1);
+    float l1 = r1.length();
+    if(l1 > 0.f) r1 /= l1;
+    
+    r2 = r0.cross(r1);
+    fill(r0, r1, r2);
+}
+
+const std::string Matrix33F::str() const
+{
+	std::stringstream sst;
+	sst.str("");
+    sst<<"["<<v[0]<<" "<<v[1]<<" "<<v[2]<<"]\n";
+    sst<<"["<<v[3]<<" "<<v[4]<<" "<<v[5]<<"]\n";
+	sst<<"["<<v[6]<<" "<<v[7]<<" "<<v[8]<<"]\n";
+	
+	return sst.str();
+}
+

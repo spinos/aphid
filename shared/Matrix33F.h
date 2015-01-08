@@ -17,11 +17,16 @@
 	
 	Matrix33F();
 	Matrix33F(const Matrix33F & a);
+	Matrix33F(const Vector3F& r0, const Vector3F & r1, const Vector3F & r2);
 	~Matrix33F();
 	float operator() (int i, int j);
 	float operator() (int i, int j) const;
 	Vector3F operator*( Vector3F other ) const;
-	Matrix33F operator+( Matrix33F other ) const;	
+	void operator*= (float scaling);
+	void operator+=(Matrix33F other);
+	Matrix33F operator+( Matrix33F other ) const;
+	Matrix33F operator*( Matrix33F other ) const;
+	Matrix33F operator*( float scaling ) const;	
 	void setIdentity();
 	void setZero();
 	void inverse();
@@ -43,8 +48,11 @@
 	void rotateEuler(float phi, float theta, float psi, RotateOrder order = XYZ);
 	
 	Vector3F scale() const;
+	void orthoNormalize();
 	
 	static Matrix33F IdentityMatrix;
+	
+	const std::string Matrix33F::str() const;
 	
 	float v[9];
  };
