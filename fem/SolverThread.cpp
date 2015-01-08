@@ -15,7 +15,6 @@ float yield = 0.04f;
 float mass_damping=1.f;
 float m_max = 0.2f;
 Vector3F gravity(0.0f,-9.81f,0.0f); 
-int i_max = 20;
 
 bool bUseStiffnessWarping = true;
 
@@ -27,32 +26,29 @@ SolverThread::SolverThread(QObject *parent)
     m_mesh->setDensity(100.f);
     
     unsigned totalPoints = m_mesh->numPoints();
+	
+	ConjugateGradientSolver::init(totalPoints);
     
-    m_IsFixed= new bool[totalPoints];
-    m_A_row = new MatrixMap[totalPoints];
-	m_K_row = new MatrixMap[totalPoints];
-	m_b = new Vector3F[totalPoints];
+    m_K_row = new MatrixMap[totalPoints];
 	m_V = new Vector3F[totalPoints];
 	m_F = new Vector3F[totalPoints]; 
 	m_F0 = new Vector3F[totalPoints]; 
-	m_residual = new Vector3F[totalPoints];
-	m_update = new Vector3F[totalPoints];
-	m_prev = new Vector3F[totalPoints];
 	
+	bool * fixed = isFixed();
 	unsigned i;
 	for(i=0; i < totalPoints; i++) m_V[i].setZero();
 	
 	Vector3F * Xi = m_mesh->Xi();
 	for(i=0; i < totalPoints; i++) {
 	    if(Xi[i].x<.1f)
-            m_IsFixed[i]=true;
+            fixed[i]=true;
         else
-            m_IsFixed[i]=false;   
+            fixed[i]=false;   
 	}
 	
 	calculateK();
 	clearStiffnessAssembly();
-	m_mesh->recalcMassMatrix(m_IsFixed);
+	m_mesh->recalcMassMatrix(fixed);
 	initializePlastic();
 	
 	qDebug()<<"num points "<<m_mesh->numPoints();
@@ -62,13 +58,10 @@ SolverThread::SolverThread(QObject *parent)
 	
 }
 
-SolverThread::~SolverThread()
-{
-}
+SolverThread::~SolverThread() {}
 
 void SolverThread::stepPhysics(float dt)
 {
-    
 	computeForces();
 
 	clearStiffnessAssembly();	
@@ -84,7 +77,7 @@ void SolverThread::stepPhysics(float dt)
  
 	dynamicsAssembly(dt);
  
-	conjugateGradientSolver(dt);
+	solve(m_V);
  
 	updatePosition(dt);
 
@@ -192,9 +185,7 @@ void SolverThread::clearStiffnessAssembly()
 {	 
     unsigned totalPoints = m_mesh->numPoints();
 	for(unsigned k=0;k<totalPoints;k++) {
-		m_F0[k].x=0.0f;
-		m_F0[k].y=0.0f;
-		m_F0[k].z=0.0f;
+		m_F0[k].setZero();
 		
 		for (MatrixMap::iterator Kij = m_K_row[k].begin() ; Kij != m_K_row[k].end(); ++Kij )
 			Kij->second.setZero();
@@ -294,7 +285,6 @@ void SolverThread::stiffnessAssembly()
 	for(unsigned k=0;k<totalTetrahedra;k++) {
 		Matrix33F Re = tetrahedra[k].Re;
 		Matrix33F ReT = Re; ReT.transpose();
- 
 
 		for (unsigned i = 0; i < 4; ++i) {
 			//Based on pseudocode given in Fig. 10.11 on page 361
@@ -335,7 +325,7 @@ void SolverThread::addPlasticityForce(float dt)
     Vector3F * Xi = m_mesh->Xi();
     FEMTetrahedronMesh::Tetrahedron * tetrahedra = m_mesh->tetrahedra();
 	
-    for(int k=0;k<totalTetrahedra;k++) {
+    for(unsigned k=0;k<totalTetrahedra;k++) {
 		float e_total[6];
 		float e_elastic[6];
 		for(int i=0;i<6;++i)
@@ -432,15 +422,17 @@ void SolverThread::addPlasticityForce(float dt)
 	}
 }
 
-void SolverThread::dynamicsAssembly(float dt) {
+void SolverThread::dynamicsAssembly(float dt) 
+{
 	float dt2 = dt*dt;
 	unsigned totalPoints = m_mesh->numPoints();
 	Vector3F * X = m_mesh->X();
     float * mass = m_mesh->M();
+	Vector3F * b = rightHandSide();
 	for(unsigned k=0;k<totalPoints;k++) {
 
 		float m_i = mass[k];
-		m_b[k].setZero();
+		b[k].setZero();
 		
 		MatrixMap tmp = m_K_row[k];
 		MatrixMap::iterator Kbegin = tmp.begin();
@@ -450,129 +442,40 @@ void SolverThread::dynamicsAssembly(float dt) {
             unsigned j  = K->first;
 			Matrix33F K_ij  = K->second;
 			Vector3F x_j   = X[j];	
-			Matrix33F& A_ij = m_A_row[k][j];
+			Matrix33F * A_ij = A(k,j);
  
-			A_ij = K_ij * dt2; 
+			*A_ij = K_ij * dt2; 
 			Vector3F prod = K_ij * x_j;
 			//Vector3F(	K_ij[0][0]*x_j.x + K_ij[0][1]*x_j.y + K_ij[0][2]*x_j.z, 
 								//		K_ij[1][0]*x_j.x + K_ij[1][1]*x_j.y + K_ij[1][2]*x_j.z,
 									//	K_ij[2][0]*x_j.x + K_ij[2][1]*x_j.y + K_ij[2][2]*x_j.z);
 
-            m_b[k] -= prod;//K_ij * x_j;
+            b[k] -= prod;//K_ij * x_j;
 			 
             if (k == j)
             {
               float c_i = mass_damping*m_i;
               float tmp = m_i + dt*c_i;
-              *A_ij.m(0, 0) += tmp; 
-			  *A_ij.m(1, 1) += tmp;  
-			  *A_ij.m(2, 2) += tmp;
+              *(*A_ij).m(0, 0) += tmp; 
+			  *(*A_ij).m(1, 1) += tmp;  
+			  *(*A_ij).m(2, 2) += tmp;
 			}
 		}
 	  
-		m_b[k] -= m_F0[k];
-		m_b[k] += m_F[k];
-		m_b[k] *= dt;
-		m_b[k] += m_V[k]*m_i;
+		b[k] -= m_F0[k];
+		b[k] += m_F[k];
+		b[k] *= dt;
+		b[k] += m_V[k]*m_i;
 	} 
-}
-
-void SolverThread::conjugateGradientSolver(float dt) 
-{	
-    unsigned totalPoints = m_mesh->numPoints();
-	for(unsigned k=0;k<totalPoints;k++) {
-		if(m_IsFixed[k])
-			continue;
-		m_residual[k] = m_b[k];
- 
-		MatrixMap::iterator Abegin = m_A_row[k].begin();
-        MatrixMap::iterator Aend   = m_A_row[k].end();
-		for (MatrixMap::iterator A = Abegin; A != Aend;++A)
-		{
-            unsigned j   = A->first;
-			Matrix33F& A_ij  = A->second;
-			//float v_jx = m_V[j].x;	
-			//float v_jy = m_V[j].y;
-			//float v_jz = m_V[j].z;
-			Vector3F prod = A_ij * m_V[j];
-			                // Vector3F(	A_ij[0][0] * v_jx+A_ij[0][1] * v_jy+A_ij[0][2] * v_jz, //A_ij * prev[j]
-							//			A_ij[1][0] * v_jx+A_ij[1][1] * v_jy+A_ij[1][2] * v_jz,			
-							//			A_ij[2][0] * v_jx+A_ij[2][1] * v_jy+A_ij[2][2] * v_jz);
-			m_residual[k] -= prod;//  A_ij * v_j;
-			
-		}
-		m_prev[k]= m_residual[k];
-	}
-	
-	for(int i=0;i<i_max;i++) {
-		float d =0;
-		float d2=0;
-		
-	 	for(unsigned k=0;k<totalPoints;k++) {
-
-			if(m_IsFixed[k])
-				continue;
-
-			m_update[k].setZero();
-			 
-			MatrixMap::iterator Abegin = m_A_row[k].begin();
-			MatrixMap::iterator Aend   = m_A_row[k].end();
-			for (MatrixMap::iterator A = Abegin; A != Aend;++A) {
-				unsigned j   = A->first;
-				Matrix33F& A_ij  = A->second;
-				// float prevx = prev[j].x;
-				// float prevy = prev[j].y;
-				// float prevz = prev[j].z;
-				Vector3F prod = A_ij * m_prev[j];
-				// Vector3F(	A_ij[0][0] * prevx+A_ij[0][1] * prevy+A_ij[0][2] * prevz, //A_ij * prev[j]
-									//		A_ij[1][0] * prevx+A_ij[1][1] * prevy+A_ij[1][2] * prevz,			
-										//	A_ij[2][0] * prevx+A_ij[2][1] * prevy+A_ij[2][2] * prevz);
-				m_update[k] += prod;//A_ij*prev[j];
-				 
-			}
-			d += m_residual[k].dot(m_residual[k]);
-			d2 += m_prev[k].dot(m_update[k]);
-		} 
-		
-		if(fabs(d2)< 1e-10f)
-			d2 = 1e-10f;
-
-		float d3 = d/d2;
-		float d1 = 0.f;
-
-		
-		for(unsigned k=0;k<totalPoints;k++) {
-			if(m_IsFixed[k])
-				continue;
-
-			m_V[k] += m_prev[k]* d3;
-			m_residual[k] -= m_update[k]*d3;
-			d1 += m_residual[k].dot(m_residual[k]);
-		}
-		
-		if(i >= i_max && d1 < 0.001f)
-			break;
-
-		if(fabs(d)<1e-10f)
-			d = 1e-10f;
-
-		float d4 = d1/d;
-		
-		for(unsigned k=0;k<totalPoints;k++) {
-			if(m_IsFixed[k])
-				continue;
-			m_prev[k] = m_residual[k] + m_prev[k]*d4;
-		}		
-	}	
 }
 
 void SolverThread::updatePosition(float dt) 
 {
     unsigned totalPoints = m_mesh->numPoints();
     Vector3F * X = m_mesh->X();
-    
+    bool * fixed = isFixed();
 	for(unsigned k=0;k<totalPoints;k++) {
-		if(m_IsFixed[k])
+		if(fixed[k])
 			continue;
 		X[k] += m_V[k] * dt;
 	}
@@ -588,4 +491,4 @@ void SolverThread::groundCollision()
 			X[i].y=0;
 	}
 }
-
+//:~

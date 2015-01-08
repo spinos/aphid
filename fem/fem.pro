@@ -19,6 +19,7 @@ HEADERS       = glwidget.h \
                  ../shared/GLHUD.h \
                  ../shared/BaseSolverThread.h \
                  FEMTetrahedronMesh.h \
+                    ConjugateGradientSolver.h \
                  SolverThread.h
 SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/GLHUD.cpp \
@@ -27,6 +28,7 @@ SOURCES       = ../shared/Base3DView.cpp \
                 main.cpp \
                 window.cpp \
                 FEMTetrahedronMesh.cpp \
+                ConjugateGradientSolver.cpp \
                 SolverThread.cpp
 QT           += opengl
 win32:CONFIG += console
