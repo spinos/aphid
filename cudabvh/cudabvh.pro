@@ -5,7 +5,9 @@ INCLUDEPATH += ./ ../shared
 HEADERS       = glWidget.h \
                 window.h \
                 BvhSolver.h \
+                bvh_common.h \
                 plane_implement.h \
+                createBvh_implement.h \
                 ../shared/GLHUD.h \
                 ../shared/CudaBase.h \
                 ../shared/Base3DView.h \
@@ -37,7 +39,7 @@ macx {
 QT           += opengl
 LIBS += -L../lib -laphid -lIlmImf -lHalf
 DESTDIR = ./
-CUSOURCES = plane.cu
+CUSOURCES = plane.cu createBvh.cu
 macx {
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda

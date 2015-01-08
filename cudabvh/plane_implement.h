@@ -9,10 +9,8 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
+#include "bvh_common.h"
 
-
-#include <cuda_runtime_api.h>
-typedef unsigned int uint;
 extern "C" void wavePlane(float4 *pos, unsigned numGrids, float gridSize, float alpha);
 
 #endif        //  #ifndef PLANE_IMPLEMENT_H

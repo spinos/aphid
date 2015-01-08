@@ -2,10 +2,6 @@
 #include <cutil_inline.h>
 #include "plane_implement.h"
 
-static uint iDivUp(uint dividend, uint divisor){
-    return ( (dividend % divisor) == 0 ) ? (dividend / divisor) : (dividend / divisor + 1);
-}
-
 __global__ void 
 hemisphere_kernel(float4* pos, unsigned width, unsigned dim, unsigned maxInd, float gridSize, float alpha)
 {
