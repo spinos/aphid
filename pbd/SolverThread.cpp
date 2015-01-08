@@ -26,7 +26,7 @@ const unsigned solver_iterations = 2;
 float kBend = 0.5f;
 float kStretch = 1.f; 
 float kDamp = 0.0125f;
-float global_dampening = 0.98f;
+float global_dampening = 0.99f;
 
 SolverThread::SolverThread(QObject *parent)
     : QThread(parent)

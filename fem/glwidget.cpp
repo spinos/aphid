@@ -31,13 +31,14 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw()
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    unsigned nt = m_solver->numTetrahedrons();
-	Tetrahedron * t = m_solver->tetrahedron();
-	Vector3F * p = m_solver->X();
+    FEMTetrahedronMesh * mesh = m_solver->mesh();
+    unsigned nt = mesh->numTetrahedra();
+    FEMTetrahedronMesh::Tetrahedron * t = mesh->tetrahedra();
+	Vector3F * p = mesh->X();
 	Vector3F a, b, c, d;
 	glBegin(GL_LINES);
 	for(unsigned i = 0; i < nt; i++) {
-	    Tetrahedron tet = t[i];
+	    FEMTetrahedronMesh::Tetrahedron tet = t[i];
 	    a = p[tet.indices[0]];
 	    b = p[tet.indices[1]];
 	    c = p[tet.indices[2]];

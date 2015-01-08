@@ -17,12 +17,16 @@ HEADERS       = glwidget.h \
                 window.h \
                 ../shared/Base3DView.h \
                  ../shared/GLHUD.h \
+                 ../shared/BaseSolverThread.h \
+                 FEMTetrahedronMesh.h \
                  SolverThread.h
 SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/GLHUD.cpp \
+                ../shared/BaseSolverThread.cpp \
                 glwidget.cpp \
                 main.cpp \
                 window.cpp \
+                FEMTetrahedronMesh.cpp \
                 SolverThread.cpp
 QT           += opengl
 win32:CONFIG += console
