@@ -15,12 +15,13 @@
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
 #endif
+#include "boost/date_time/posix_time/posix_time.hpp"
 
-//! [0]
+const boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2010,1,1));
+
 Base3DView::Base3DView(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
-    qDebug()<<"base3dview";
     m_backgroundColor = QColor::fromCmykF(0.29, 0.29, 0.20, 0.0);
 	m_orthoCamera = new BaseCamera;
 	m_perspCamera = new PerspectiveCamera;
@@ -41,6 +42,8 @@ Base3DView::Base3DView(QWidget *parent)
 		
 	m_hud = new GLHUD;
 	m_hud->setCamera(fCamera);
+	
+	m_lastTime = m_startTime = (boost::posix_time::ptime(boost::posix_time::microsec_clock::local_time()) - time_t_epoch).total_milliseconds();
 }
 //! [0]
 
@@ -504,5 +507,19 @@ const Vector3F Base3DView::strokeVector(const float & depth) const
 void Base3DView::hudText(const std::string & t, const int & row) const
 {
 	m_hud->drawString(t, row);
+}
+
+float Base3DView::deltaTime() 
+{
+	long tnow = (boost::posix_time::ptime(boost::posix_time::microsec_clock::local_time()) - time_t_epoch).total_milliseconds();
+	float dt = ((float) ( tnow - m_lastTime ) );
+	m_lastTime = tnow;
+	return dt; 
+}
+
+float Base3DView::elapsedTime() const 
+{
+	long tnow = (boost::posix_time::ptime(boost::posix_time::microsec_clock::local_time()) - time_t_epoch).total_milliseconds();
+	return ((float) ( tnow - m_startTime ) ); 
 }
 //:~

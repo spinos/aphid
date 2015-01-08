@@ -7,7 +7,7 @@ public:
     CudaBase();
     virtual ~CudaBase();
     
-    char checkCUDevice();
+    static char CheckCUDevice();
 private:
     
 };

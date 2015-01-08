@@ -4,6 +4,7 @@
 #include <QGLWidget>
 #include <AllMath.h>
 #include <Ray.h>
+
 class BaseCamera;
 class PerspectiveCamera;
 class KdTreeDrawer;
@@ -65,6 +66,9 @@ public:
 	void usePerspCamera();
 	void useOrthoCamera();
 	
+	float deltaTime();
+	float elapsedTime() const;
+	
 public slots:
 	void receiveBrushChanged();
     
@@ -108,6 +112,7 @@ private:
 	int m_dx, m_dy;
 	char m_isFocused;
 	GLHUD * m_hud;
+	long m_startTime, m_lastTime;
 };
 #endif        //  #ifndef BASE3DVIEW_H
 

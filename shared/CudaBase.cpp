@@ -11,7 +11,7 @@ CudaBase::~CudaBase()
     
 }
 
-char CudaBase::checkCUDevice()
+char CudaBase::CheckCUDevice()
 {
     int deviceCount = 0;
     if (cudaGetDeviceCount(&deviceCount) != cudaSuccess) {

@@ -6,8 +6,8 @@ float BaseSolverThread::TimeStep = 1.f / 60.f;
 BaseSolverThread::BaseSolverThread(QObject *parent)
     : QThread(parent)
 {
-    restart = false;
     abort = false;
+	restart = false;
 }
 
 BaseSolverThread::~BaseSolverThread()
@@ -27,44 +27,30 @@ void BaseSolverThread::simulate()
     if (!isRunning()) {
         start(LowPriority);
     } else {
-        restart = true;
-        //qDebug()<<"wait";
+		restart = true;
         condition.wakeOne();
     }
 }
 
 void BaseSolverThread::run()
-{
-   forever {
-        // qDebug()<<"run";
-	
-	//for(int i=0; i< 2; i++) {
-	    if(restart) {
-	        // qDebug()<<"restart ";
-            // break;
-	    }
-	        
+{	 
+	forever {
 	    if (abort) {
             // destroySolverData();
             qDebug()<<"abort";
             return;
         }
         
-	    stepPhysics(TimeStep);
-	//}
- 
-		//if (!restart) {
-		    // qDebug()<<"end";
-            
-		    emit doneStep();
-		//}
+		stepPhysics(TimeStep);
+
+		emit doneStep();
 
 		mutex.lock();
 		
         if (!restart)
-            condition.wait(&mutex);
+			condition.wait(&mutex);
 			
-        restart = false;
+		restart = false;
         mutex.unlock();
    }
 }
