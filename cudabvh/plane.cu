@@ -3,13 +3,10 @@
 #include "plane_implement.h"
 
 __global__ void 
-hemisphere_kernel(float4* pos, unsigned width, unsigned dim, unsigned maxInd, float gridSize, float alpha)
+hemisphere_kernel(float4* pos, unsigned dim, unsigned maxInd, float gridSize, float alpha)
 {
-    unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
-    unsigned int y = blockIdx.y*blockDim.y + threadIdx.y;
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 
-	unsigned ind = y*width+x;
-	
 	if(ind >= maxInd) return;
 
 	unsigned gv = ind / (dim + 1);
@@ -26,12 +23,11 @@ hemisphere_kernel(float4* pos, unsigned width, unsigned dim, unsigned maxInd, fl
 
 extern "C" void wavePlane(float4 *pos, unsigned numGrids, float gridSize, float alpha)
 {
-	dim3 block(8, 8, 1);
+	dim3 block(256, 1, 1);
 	
 	unsigned np = (numGrids + 1) * (numGrids + 1);
-    unsigned nblk = iDivUp(np, 64);
-    unsigned width = nblk * 8;
+    unsigned nblk = iDivUp(np, 256);
     
     dim3 grid(nblk, 1, 1);
-	hemisphere_kernel<<< grid, block >>>(pos, width, numGrids, np, gridSize, alpha);
+	hemisphere_kernel<<< grid, block >>>(pos, numGrids, np, gridSize, alpha);
 }

@@ -9,6 +9,8 @@
 #pragma once
 #include <BaseSolverThread.h>
 
+// #define BVHSOLVER_DBG_DRAW 1
+
 class BaseBuffer;
 class CUDABuffer;
 struct EdgeContact;

@@ -16,12 +16,10 @@ inline __device__ void expandAabb(Aabb & dst, float4 p)
     if(p.z > dst.high.z) dst.high.z = p.z;
 }
 
-__global__ void calculateAabbs_kernel(Aabb *dst, float4 * cvs, EdgeContact * edges, unsigned width, unsigned maxEdgeInd, unsigned maxVertInd)
+__global__ void calculateAabbs_kernel(Aabb *dst, float4 * cvs, EdgeContact * edges, unsigned maxEdgeInd, unsigned maxVertInd)
 {
-    unsigned x = blockIdx.x*blockDim.x + threadIdx.x;
-    unsigned y = blockIdx.y*blockDim.y + threadIdx.y;
+    unsigned idx = blockIdx.x*blockDim.x + threadIdx.x;
 
-	unsigned idx = y*width+x;
 	if(idx >= maxEdgeInd) return;
 	
 	EdgeContact e = edges[idx];
@@ -42,10 +40,9 @@ __global__ void calculateAabbs_kernel(Aabb *dst, float4 * cvs, EdgeContact * edg
 
 extern "C" void bvhCalculateAabbs(Aabb *dst, float4 * cvs, EdgeContact * edges, unsigned numEdges, unsigned numVertices)
 {
-    dim3 block(8, 8, 1);
-    unsigned nblk = iDivUp(numEdges, 64);
-    unsigned width = nblk * 8;
+    dim3 block(256, 1, 1);
+    unsigned nblk = iDivUp(numEdges, 256);
     
     dim3 grid(nblk, 1, 1);
-    calculateAabbs_kernel<<< grid, block >>>(dst, cvs, edges, width, numEdges, numVertices);
+    calculateAabbs_kernel<<< grid, block >>>(dst, cvs, edges, numEdges, numVertices);
 }

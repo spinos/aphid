@@ -7,6 +7,9 @@
 #include <CUDABuffer.h>
 #include <BvhSolver.h>
 #include "plane_implement.h"
+
+//#define BVHSOLVER_DBG_DRAW 1
+
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_solver = new BvhSolver;
@@ -43,7 +46,7 @@ void GLWidget::clientDraw()
 	showAabbs();
 #endif
 	m_solver->setAlpha((float)elapsedTime()/300.f);
-	// qDebug()<<"drawn in "<<deltaTime();
+	//qDebug()<<"drawn in "<<deltaTime();
 }
 
 void GLWidget::showEdgeContacts()
