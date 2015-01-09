@@ -8,6 +8,7 @@ public:
     virtual ~CudaBase();
     
     static char CheckCUDevice();
+    static void SetDevice();
 private:
     
 };

@@ -14,7 +14,7 @@
 
 BvhSolver::BvhSolver(QObject *parent) : BaseSolverThread(parent) 
 {
-	m_vertexBuffer = new CUDABuffer;
+	m_alpha = 0;
 }
 
 BvhSolver::~BvhSolver() {}
@@ -28,14 +28,15 @@ BvhSolver::~BvhSolver() {}
 //		i1,j  
 // i,j1 i1,j1
 
-
 void BvhSolver::init()
 {
 	CudaBase::CheckCUDevice();
-	CUDABuffer::setDevice();
+	CudaBase::SetDevice();
 	qDebug()<<"solverinit";
 	m_vertexBuffer = new CUDABuffer;
-	m_vertexBuffer->create(0, (32 + 1 ) * (32 + 1) * 16);
+	m_vertexBuffer->create(numVertices() * 16);
+	m_displayVertex = new BaseBuffer;
+	m_displayVertex->create(numVertices() * 16);
 	m_numTriIndices = 32 * 32 * 2 * 3;
 	m_triIndices = new unsigned[m_numTriIndices];
 	unsigned i, j;
@@ -61,25 +62,28 @@ void BvhSolver::init()
 	}
 }
 
-
 void BvhSolver::stepPhysics(float dt)
 {
 	// qDebug()<<"step phy";
+	formPlane(m_alpha);
 }
 
 void BvhSolver::formPlane(float alpha)
 {
 	// qDebug()<<"map";
-	void *dptr;
-	m_vertexBuffer->map(&dptr);
+	void *dptr = m_vertexBuffer->bufferOnDevice();
+	// m_vertexBuffer->map(&dptr);
 	
 	wavePlane((float4 *)dptr, 32, 2.0, alpha);
-	// qDebug()<<"upmap";
-	m_vertexBuffer->unmap();
+	//qDebug()<<"out";
+	// m_vertexBuffer->unmap();
+	m_vertexBuffer->deviceToHost(m_displayVertex->data(), m_vertexBuffer->bufferSize());
 }
 
-const unsigned BvhSolver::vertexBufferName() const { return m_vertexBuffer->bufferName(); }
+// const unsigned BvhSolver::vertexBufferName() const { return m_vertexBuffer->bufferName(); }
 const unsigned BvhSolver::numVertices() const { return (32 + 1 ) * (32 + 1); }
 
 unsigned BvhSolver::getNumTriangleFaceVertices() const { return m_numTriIndices; }
 unsigned * BvhSolver::getIndices() const { return m_triIndices; }
+float * BvhSolver::displayVertex() { return (float *)m_displayVertex->data(); }
+void BvhSolver::setAlpha(float x) { m_alpha = x; }

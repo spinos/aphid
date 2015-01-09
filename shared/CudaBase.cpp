@@ -1,6 +1,9 @@
 #include <QtCore>
+#include <gl_heads.h>
 #include "CudaBase.h"
 #include <cuda_runtime_api.h>
+#include <cutil_inline.h>
+#include <cutil_gl_inline.h>
 CudaBase::CudaBase()
 {
     
@@ -39,4 +42,9 @@ char CudaBase::CheckCUDevice()
         return 1;               
     }
     return 0;
+}
+
+void CudaBase::SetDevice()
+{
+	cudaGLSetGLDevice(cutGetMaxGflopsDeviceId());
 }

@@ -25,8 +25,6 @@ public:
 	void map(void ** p);
 	void unmap();
 	
-	static void setDevice();
-	
 private:
 	struct cudaGraphicsResource *_cuda_vbo_resource;
 	void *_device_vbo_buffer;

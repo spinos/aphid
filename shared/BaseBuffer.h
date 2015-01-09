@@ -13,18 +13,21 @@ class BaseBuffer {
 public:
 	enum BufferType {
 		kUnknown = 0,
-		kVBO = 1,
-		kSimple = 2
+	    kOnHost = 1,
+		kVBO = 2,
+		kOnDevice = 3
 	};
 	
 	BaseBuffer();
 	virtual ~BaseBuffer();
 	
 	virtual void create(float * data, unsigned size);
+	virtual void create(unsigned size);
 	virtual void destroy();
 	
 	const unsigned bufferName() const;
 	const unsigned bufferSize() const;
+	char * data() const;
 
 protected:
 	void createVBO(float * data, unsigned size);
@@ -32,9 +35,11 @@ protected:
 	
 	void setBufferType(BufferType t);
 	const BufferType bufferType() const;
+	void setBufferSize(unsigned size);
 	
 private:
-	BufferType m_bufferType;
-    unsigned m_bufferName;
+    char * m_native;
+	unsigned m_bufferName;
 	unsigned m_bufferSize;
+	BufferType m_bufferType;
 };

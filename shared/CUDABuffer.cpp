@@ -23,7 +23,8 @@ void CUDABuffer::create(float * data, unsigned size)
 void CUDABuffer::create(unsigned size)
 {
 	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, size));
-	setBufferType(kSimple);
+	setBufferType(kOnDevice);
+	setBufferSize(size);
 }
 
 void CUDABuffer::destroy()
@@ -32,7 +33,7 @@ void CUDABuffer::destroy()
 		cudaGraphicsUnregisterResource(_cuda_vbo_resource);
 		BaseBuffer::destroyVBO();
 	}
-	else if(bufferType() == kSimple) {
+	else if(bufferType() == kOnDevice) {
 		if(_device_vbo_buffer == 0) return;
 		cudaFree(_device_vbo_buffer);
 		_device_vbo_buffer = 0;
@@ -67,9 +68,4 @@ void CUDABuffer::map(void ** p)
 void CUDABuffer::unmap()
 {
 	cutilSafeCall(cudaGraphicsUnmapResources(1, resource(), 0));
-}
-
-void CUDABuffer::setDevice()
-{
-	cudaGLSetGLDevice(cutGetMaxGflopsDeviceId());
 }

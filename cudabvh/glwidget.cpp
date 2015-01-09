@@ -31,23 +31,23 @@ void GLWidget::clientDraw()
 {
 	// GeoDrawer * dr = getDrawer();
 	// dr->linearCurve(*m_curve);
-	m_solver->formPlane((float)elapsedTime()/320.f);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnableClientState(GL_VERTEX_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, (GLuint)m_solver->vertexBufferName());
-    glVertexPointer(4, GL_FLOAT, 0, 0);
+	// glBindBuffer(GL_ARRAY_BUFFER, (GLuint)m_solver->vertexBufferName());
+    // glVertexPointer(4, GL_FLOAT, 0, 0);
 	
 	//
 	
 	// glDrawArrays(GL_POINTS, 0, m_solver->numVertices());
-	// glVertexPointer(4, GL_FLOAT, 0, (GLfloat*)m_solver->numVertices());
+	glVertexPointer(4, GL_FLOAT, 0, (GLfloat*)m_solver->displayVertex());
 	
 	glDrawElements(GL_TRIANGLES, m_solver->getNumTriangleFaceVertices(), GL_UNSIGNED_INT, m_solver->getIndices());
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
+	m_solver->setAlpha((float)elapsedTime()/300.f);
 	// qDebug()<<"drawn in "<<deltaTime();
 }
 
