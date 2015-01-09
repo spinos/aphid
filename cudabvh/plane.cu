@@ -14,7 +14,7 @@ hemisphere_kernel(float4* pos, unsigned dim, unsigned maxInd, float gridSize, fl
 	
 	float4 sum;
 	sum.x = gridSize * gu - gridSize * dim / 2;
-	sum.y = -10.0 + 1.5 * gridSize * sin(alpha + 3.14 * 2.0 * gu / dim) + .5 *  gridSize * cos(alpha * 1.25 - 3.14 * 3.0 * gv / dim);
+	sum.y = -10.0 + 2.5 * gridSize * sin(alpha + 3.14 * 2.0 * gu / dim) + .75 *  gridSize * cos(alpha * 1.25 - 3.14 * 3.0 * gv / dim);
 	sum.z = gridSize * gv - gridSize * dim / 2;
 	sum.w = 1.f;
 	

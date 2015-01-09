@@ -12,9 +12,10 @@
 #include "BvhSolver.h"
 #include "plane_implement.h"
 #include "createBvh_implement.h"
+#include "reduceBox_implement.h"
 
-unsigned UDIM = 60;
-unsigned UDIM1 = 61;
+unsigned UDIM = 100;
+unsigned UDIM1 = 101;
 
 BvhSolver::BvhSolver(QObject *parent) : BaseSolverThread(parent) 
 {
@@ -141,18 +142,19 @@ void BvhSolver::init()
 	m_allAabbs = new CUDABuffer;
 	m_allAabbs->create(m_numEdges * sizeof(Aabb));
 	m_combinedAabb = new CUDABuffer;
-	m_combinedAabb->create(64 * sizeof(Aabb));
+	m_combinedAabb->create(ReduceMaxBlocks * sizeof(Aabb));
 
 #ifdef BVHSOLVER_DBG_DRAW	
 	m_displayAabbs = new BaseBuffer;
 	m_displayAabbs->create(m_numEdges * sizeof(Aabb));
 	m_displayCombinedAabb = new BaseBuffer;
-	m_displayCombinedAabb->create(64 * sizeof(Aabb));
+	m_displayCombinedAabb->create(ReduceMaxBlocks * sizeof(Aabb));
 #endif
 
 	m_lastReduceBlk = new BaseBuffer;
 	m_lastReduceBlk->create(lastNThreads(m_numEdges) * sizeof(Aabb));
 
+	qDebug()<<"num points "<<numVertices();
 	qDebug()<<"num triangles "<<m_numTriangles;
 	qDebug()<<"num edges "<<m_numEdges;
 }
@@ -185,16 +187,16 @@ void BvhSolver::formAabbs()
 #include <iostream>
 void BvhSolver::combineAabb()
 {
-	void * psrc = m_allAabbs->bufferOnDevice();
+	void * psrc = m_vertexBuffer->bufferOnDevice();
     void * pdst = m_combinedAabb->bufferOnDevice();
 	
-	unsigned n = m_numEdges;
+	unsigned n = numVertices();
 	unsigned threads, blocks;
 	getReduceBlockThread(blocks, threads, n);
 	
 	// std::cout<<"n0 "<<n<<" blocks X threads : "<<blocks<<" X "<<threads<<"\n";
 	
-	bvhReduceAabb((Aabb *)pdst, (Aabb *)psrc, n, blocks, threads);
+	bvhReduceAabbByPoints((Aabb *)pdst, (float4 *)psrc, n, blocks, threads);
 	
 	n = blocks;
 	while(n > 1) {
@@ -202,7 +204,7 @@ void BvhSolver::combineAabb()
 		
 		// std::cout<<"n "<<n<<" blocks X threads : "<<blocks<<" X "<<threads<<"\n";
 	
-		bvhReduceAabb((Aabb *)pdst, (Aabb *)psrc, n, blocks, threads);
+		bvhReduceAabbByAabb((Aabb *)pdst, (Aabb *)pdst, n, blocks, threads);
 		
 		n = (n + (threads*2-1)) / (threads*2);
 	}
@@ -210,8 +212,8 @@ void BvhSolver::combineAabb()
 	m_combinedAabb->deviceToHost(m_lastReduceBlk->data(), m_lastReduceBlk->bufferSize());
 	Aabb * c = (Aabb *)m_lastReduceBlk->data();
 	m_bigAabb = c[0];
-	for(uint i = 1; i < threads; i++)
-		m_bigAabb.combine(c[i]);
+	//for(uint i = 1; i < threads; i++)
+	//	m_bigAabb.combine(c[i]);
 	
 #ifdef BVHSOLVER_DBG_DRAW
 	m_combinedAabb->deviceToHost(m_displayCombinedAabb->data(), m_combinedAabb->bufferSize());
