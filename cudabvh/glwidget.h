@@ -24,8 +24,11 @@ protected:
     virtual void clientMouseInput(QMouseEvent *event);
 	virtual void focusInEvent(QFocusEvent * event);
 	virtual void focusOutEvent(QFocusEvent * event);
+	
 private:
 	void showEdgeContacts();
+	void showAabbs();
+
 private:
 	BvhSolver * m_solver;
 private slots:

@@ -11,6 +11,7 @@
 #include <CUDABuffer.h>
 #include "BvhSolver.h"
 #include "plane_implement.h"
+#include "createBvh_implement.h"
 
 BvhSolver::BvhSolver(QObject *parent) : BaseSolverThread(parent) 
 {
@@ -24,7 +25,6 @@ BvhSolver::~BvhSolver() {}
 //
 // i,j  i1,j  
 // i,j1
-//
 //		i1,j  
 // i,j1 i1,j1
 
@@ -131,29 +131,48 @@ void BvhSolver::init()
 		edge++;
 	}
 	
+	m_edgeContactIndices = new CUDABuffer;
+	m_edgeContactIndices->create(m_numEdges * sizeof(EdgeContact));
+	m_edgeContactIndices->hostToDevice(m_edges->data(), m_edgeContactIndices->bufferSize());
+	
+	m_allAabbs = new CUDABuffer;
+	m_allAabbs->create(m_numEdges * sizeof(Aabb));
+
+#ifdef BVHSOLVER_DBG_DRAW	
+	m_displayAabbs = new BaseBuffer;
+	m_displayAabbs->create(m_numEdges * sizeof(Aabb));
+#endif
+
 	qDebug()<<"num triangles "<<m_numTriangles;
 	qDebug()<<"num edges "<<m_numTriangles;
 }
 
 void BvhSolver::stepPhysics(float dt)
 {
-	// qDebug()<<"step phy";
 	formPlane(m_alpha);
+	formAabbs();
 }
 
 void BvhSolver::formPlane(float alpha)
 {
-	// qDebug()<<"map";
 	void *dptr = m_vertexBuffer->bufferOnDevice();
-	// m_vertexBuffer->map(&dptr);
-	
 	wavePlane((float4 *)dptr, 32, 2.0, alpha);
-	//qDebug()<<"out";
-	// m_vertexBuffer->unmap();
 	m_vertexBuffer->deviceToHost(m_displayVertex->data(), m_vertexBuffer->bufferSize());
 }
 
-// const unsigned BvhSolver::vertexBufferName() const { return m_vertexBuffer->bufferName(); }
+void BvhSolver::formAabbs()
+{
+    void * cvs = m_vertexBuffer->bufferOnDevice();
+    void * edges = m_edgeContactIndices->bufferOnDevice();
+    void * dst = m_allAabbs->bufferOnDevice();
+    bvhCalculateAabbs((Aabb *)dst, (float4 *)cvs, (EdgeContact *)edges, m_numEdges, numVertices());
+    
+#ifdef BVHSOLVER_DBG_DRAW
+    m_allAabbs->deviceToHost(m_displayAabbs->data(), m_allAabbs->bufferSize());
+#endif
+
+}
+
 const unsigned BvhSolver::numVertices() const { return (32 + 1 ) * (32 + 1); }
 
 unsigned BvhSolver::getNumTriangleFaceVertices() const { return m_numTriIndices; }
@@ -161,4 +180,9 @@ unsigned * BvhSolver::getIndices() const { return m_triIndices; }
 float * BvhSolver::displayVertex() { return (float *)m_displayVertex->data(); }
 EdgeContact * BvhSolver::edgeContacts() { return (EdgeContact *)m_edges->data(); }
 unsigned BvhSolver::numEdges() const { return m_numEdges; }
+
+#ifdef BVHSOLVER_DBG_DRAW
+Aabb * BvhSolver::displayAabbs() { return (Aabb *)m_displayAabbs->data(); }
+#endif
+
 void BvhSolver::setAlpha(float x) { m_alpha = x; }

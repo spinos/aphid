@@ -29,7 +29,6 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	// GeoDrawer * dr = getDrawer();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -40,6 +39,9 @@ void GLWidget::clientDraw()
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
 	// showEdgeContacts();
+#ifdef BVHSOLVER_DBG_DRAW
+	showAabbs();
+#endif
 	m_solver->setAlpha((float)elapsedTime()/300.f);
 	// qDebug()<<"drawn in "<<deltaTime();
 }
@@ -97,6 +99,22 @@ void GLWidget::showEdgeContacts()
 	    }
 	}
 	glEnd();
+}
+void GLWidget::showAabbs()
+{
+#ifdef BVHSOLVER_DBG_DRAW
+    Aabb * boxes = m_solver->displayAabbs();
+    unsigned ne = m_solver->numEdges();
+    glColor3f(0.f, 0.5f, 0.2f);
+    GeoDrawer * dr = getDrawer();
+    for(unsigned i=0; i < ne; i++) {
+        Aabb ab = boxes[i];
+        BoundingBox bb; 
+        bb.setMin(ab.low.x, ab.low.y, ab.low.z);
+        bb.setMax(ab.high.x, ab.high.y, ab.high.z);
+        dr->boundingBox(bb);
+    }
+#endif
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

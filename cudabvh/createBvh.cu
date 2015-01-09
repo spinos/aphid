@@ -6,7 +6,7 @@ inline __device__ void resetAabb(Aabb & dst)
     dst.high = make_float3(-10e8, -10e8, -10e8);
 }
 
-inline __device__ void expandAabb(Aabb & dst, float3 p)
+inline __device__ void expandAabb(Aabb & dst, float4 p)
 {
     if(p.x < dst.low.x) dst.low.x = p.x;
     if(p.y < dst.low.y) dst.low.y = p.y;
@@ -16,33 +16,36 @@ inline __device__ void expandAabb(Aabb & dst, float3 p)
     if(p.z > dst.high.z) dst.high.z = p.z;
 }
 
-__global__ void calculateAabbs_kernel(Aabb *dst, float3 * cvs, unsigned * indices, unsigned width, unsigned maxIdx)
+__global__ void calculateAabbs_kernel(Aabb *dst, float4 * cvs, EdgeContact * edges, unsigned width, unsigned maxEdgeInd, unsigned maxVertInd)
 {
     unsigned x = blockIdx.x*blockDim.x + threadIdx.x;
     unsigned y = blockIdx.y*blockDim.y + threadIdx.y;
 
 	unsigned idx = y*width+x;
-	if(idx >= maxIdx) return;
+	if(idx >= maxEdgeInd) return;
 	
-	unsigned v0 = indices[idx * 3];
-	unsigned v1 = indices[idx * 3 + 1];
-	unsigned v2 = indices[idx * 3 + 2];
+	EdgeContact e = edges[idx];
+	unsigned v0 = e.v[0];
+	unsigned v1 = e.v[1];
+	unsigned v2 = e.v[2];
+	unsigned v3 = e.v[3];
 	
 	Aabb res;
 	resetAabb(res);
-	expandAabb(res, cvs[v0]);
-	expandAabb(res, cvs[v1]);
-	expandAabb(res, cvs[v2]);
+	if(v0 < maxVertInd) expandAabb(res, cvs[v0]);
+	if(v1 < maxVertInd) expandAabb(res, cvs[v1]);
+	if(v2 < maxVertInd) expandAabb(res, cvs[v2]);
+	if(v3 < maxVertInd) expandAabb(res, cvs[v3]);
 	
 	dst[idx] = res;
 }
 
-extern "C" void calculateAabbs(Aabb *dst, float3 * cvs, unsigned * indices, unsigned numTriangle)
+extern "C" void bvhCalculateAabbs(Aabb *dst, float4 * cvs, EdgeContact * edges, unsigned numEdges, unsigned numVertices)
 {
     dim3 block(8, 8, 1);
-    unsigned nblk = iDivUp(numTriangle, 64);
+    unsigned nblk = iDivUp(numEdges, 64);
     unsigned width = nblk * 8;
     
     dim3 grid(nblk, 1, 1);
-    calculateAabbs_kernel<<< grid, block >>>(dst, cvs, indices, width, numTriangle);
+    calculateAabbs_kernel<<< grid, block >>>(dst, cvs, edges, width, numEdges, numVertices);
 }

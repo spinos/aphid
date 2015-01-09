@@ -3,7 +3,7 @@
 
 #include "bvh_common.h"
 
-extern "C" void calculateAabbs(Aabb *dst, float3 * cvs, unsigned * indices, unsigned numTriangle);
+extern "C" void bvhCalculateAabbs(Aabb *dst, float4 * cvs, EdgeContact * edges, unsigned numEdges, unsigned numVertices);
 
 #endif        //  #ifndef CREATEBVH_IMPLEMENT_H
 

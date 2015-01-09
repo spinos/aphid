@@ -8,9 +8,11 @@
  */
 #pragma once
 #include <BaseSolverThread.h>
+
 class BaseBuffer;
 class CUDABuffer;
 struct EdgeContact;
+struct Aabb;
 class BvhSolver : public BaseSolverThread
 {
 public:
@@ -28,16 +30,25 @@ public:
 	EdgeContact * edgeContacts();
 	void setAlpha(float x);
 	
+#ifdef BVHSOLVER_DBG_DRAW
+	Aabb * displayAabbs();
+#endif
+
 protected:
     virtual void stepPhysics(float dt);	
 private:
 	void formPlane(float alpha);
-	
+	void formAabbs();
 private:
     float m_alpha;
     BaseBuffer * m_displayVertex;
 	CUDABuffer * m_vertexBuffer;
+	CUDABuffer * m_edgeContactIndices;
 	unsigned m_numTriIndices, m_numTriangles, m_numEdges;
 	unsigned * m_triIndices;
 	BaseBuffer * m_edges;
+	CUDABuffer * m_allAabbs;
+#ifdef BVHSOLVER_DBG_DRAW
+	BaseBuffer * m_displayAabbs;
+#endif
 };
