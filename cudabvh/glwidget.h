@@ -22,8 +22,6 @@ protected:
 	virtual void clientSelect(QMouseEvent *event);
     virtual void clientDeselect(QMouseEvent *event);
     virtual void clientMouseInput(QMouseEvent *event);
-	virtual void focusInEvent(QFocusEvent * event);
-	virtual void focusOutEvent(QFocusEvent * event);
 	
 private:
 	void showEdgeContacts();

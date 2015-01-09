@@ -8,13 +8,11 @@
  */
 #pragma once
 #include <BaseSolverThread.h>
-
-// #define BVHSOLVER_DBG_DRAW 1
+#include <bvh_common.h>
 
 class BaseBuffer;
 class CUDABuffer;
-struct EdgeContact;
-struct Aabb;
+
 class BvhSolver : public BaseSolverThread
 {
 public:
@@ -31,9 +29,11 @@ public:
 	float * displayVertex();
 	EdgeContact * edgeContacts();
 	void setAlpha(float x);
+	const Aabb combinedAabb() const; 
 	
 #ifdef BVHSOLVER_DBG_DRAW
 	Aabb * displayAabbs();
+	Aabb * displayCombinedAabb();
 #endif
 
 protected:
@@ -41,8 +41,10 @@ protected:
 private:
 	void formPlane(float alpha);
 	void formAabbs();
+	void combineAabb();
+	unsigned lastNThreads(unsigned n);
 private:
-    float m_alpha;
+	Aabb m_bigAabb;
     BaseBuffer * m_displayVertex;
 	CUDABuffer * m_vertexBuffer;
 	CUDABuffer * m_edgeContactIndices;
@@ -50,7 +52,12 @@ private:
 	unsigned * m_triIndices;
 	BaseBuffer * m_edges;
 	CUDABuffer * m_allAabbs;
+	CUDABuffer * m_combinedAabb;
+	BaseBuffer * m_lastReduceBlk;
+	float m_alpha;
+    
 #ifdef BVHSOLVER_DBG_DRAW
 	BaseBuffer * m_displayAabbs;
+	BaseBuffer * m_displayCombinedAabb;
 #endif
 };

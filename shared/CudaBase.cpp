@@ -30,10 +30,14 @@ char CudaBase::CheckCUDevice()
     cudaGetDeviceProperties(&deviceProp, 0);
             cudaDriverGetVersion(&driverVersion);
             cudaRuntimeGetVersion(&runtimeVersion);
-            std::cout << "Device name: " << deviceProp.name<<"\n";
+            std::cout << "  Device name: " << deviceProp.name<<"\n";
             std::cout << "  Diver Version: " << driverVersion<<"\n";
             std::cout << "  Runtime Version: " << runtimeVersion<<"\n";
-            
+            std::cout << "  Capability Major/Minor version number: "<<deviceProp.major<<"."<<deviceProp.minor<<"\n";
+            std::cout << "  Total amount of global memory: "<<(unsigned long long)deviceProp.totalGlobalMem<<" bytes\n";
+            std::cout << "  Total amount of constant memory: "<<deviceProp.totalConstMem<<"bytes\n"; 
+            std::cout << "  Total amount of shared memory per block: "<<deviceProp.sharedMemPerBlock<<" bytes\n";
+        
             std::stringstream sst;
             sst<<"  Maximum sizes of each dimension of a grid: "<<deviceProp.maxGridSize[0]<<" x "<<deviceProp.maxGridSize[1]<<" x "<<deviceProp.maxGridSize[2];
             std::cout<<sst.str()<<"\n";

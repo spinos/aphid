@@ -12,6 +12,8 @@
 #include <cuda_runtime_api.h>
 typedef unsigned int uint;
 
+// #define BVHSOLVER_DBG_DRAW 1
+
 static uint iDivUp(uint dividend, uint divisor)
 {
     return ( (dividend % divisor) == 0 ) ? (dividend / divisor) : (dividend / divisor + 1);
@@ -27,9 +29,22 @@ static uint nextPow2( uint x ) {
     return ++x;
 }
 
+static bool isPow2(unsigned int x)
+{
+    return ((x&(x-1))==0);
+}
+
 struct Aabb {
     float3 low;
     float3 high;
+	void combine(Aabb & a) {
+		if(a.low.x < low.x) low.x = a.low.x;
+		if(a.low.y < low.y) low.y = a.low.y;
+		if(a.low.z < low.z) low.z = a.low.z;
+		if(a.high.x > high.x) high.x = a.high.x;
+		if(a.high.y > high.y) high.y = a.high.y;
+		if(a.high.z > high.z) high.z = a.high.z;
+	}
 };
 
 struct EdgeContact {

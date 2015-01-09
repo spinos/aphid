@@ -6,9 +6,7 @@
 #include <KdTreeDrawer.h>
 #include <CUDABuffer.h>
 #include <BvhSolver.h>
-#include "plane_implement.h"
-
-//#define BVHSOLVER_DBG_DRAW 1
+#include "bvh_common.h"
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -42,9 +40,7 @@ void GLWidget::clientDraw()
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
 	// showEdgeContacts();
-#ifdef BVHSOLVER_DBG_DRAW
 	showAabbs();
-#endif
 	m_solver->setAlpha((float)elapsedTime()/300.f);
 	//qDebug()<<"drawn in "<<deltaTime();
 }
@@ -105,13 +101,27 @@ void GLWidget::showEdgeContacts()
 }
 void GLWidget::showAabbs()
 {
+	Aabb ab = m_solver->combinedAabb();
+	GeoDrawer * dr = getDrawer();
+    BoundingBox bb; 
+	bb.setMin(ab.low.x, ab.low.y, ab.low.z);
+	bb.setMax(ab.high.x, ab.high.y, ab.high.z);
+	glColor3f(0.f, 0.5f, 0.2f);
+    dr->boundingBox(bb);
 #ifdef BVHSOLVER_DBG_DRAW
     Aabb * boxes = m_solver->displayAabbs();
     unsigned ne = m_solver->numEdges();
-    glColor3f(0.f, 0.5f, 0.2f);
-    GeoDrawer * dr = getDrawer();
     for(unsigned i=0; i < ne; i++) {
-        Aabb ab = boxes[i];
+        ab = boxes[i];
+        BoundingBox bb; 
+        bb.setMin(ab.low.x, ab.low.y, ab.low.z);
+        bb.setMax(ab.high.x, ab.high.y, ab.high.z);
+        dr->boundingBox(bb);
+    }
+	
+	boxes = m_solver->displayCombinedAabb();
+    for(unsigned i=0; i < 8; i++) {
+        ab = boxes[3];
         BoundingBox bb; 
         bb.setMin(ab.low.x, ab.low.y, ab.low.z);
         bb.setMax(ab.high.x, ab.high.y, ab.high.z);
@@ -141,14 +151,3 @@ void GLWidget::clientMouseInput(QMouseEvent */*event*/)
 	setUpdatesEnabled(true);
 }
 
-void GLWidget::focusInEvent(QFocusEvent * event)
-{
-	qDebug()<<"focus in";
-	Base3DView::focusInEvent(event);
-}
-
-void GLWidget::focusOutEvent(QFocusEvent * event)
-{
-	qDebug()<<"focus out";
-	Base3DView::focusOutEvent(event);
-}
