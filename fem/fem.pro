@@ -16,13 +16,11 @@ win32 {
 HEADERS       = glwidget.h \
                 window.h \
                 ../shared/Base3DView.h \
-                 ../shared/GLHUD.h \
                  ../shared/BaseSolverThread.h \
                  FEMTetrahedronMesh.h \
                     ConjugateGradientSolver.h \
                  SolverThread.h
 SOURCES       = ../shared/Base3DView.cpp \
-                ../shared/GLHUD.cpp \
                 ../shared/BaseSolverThread.cpp \
                 glwidget.cpp \
                 main.cpp \

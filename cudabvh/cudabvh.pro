@@ -8,7 +8,6 @@ HEADERS       = glWidget.h \
                 bvh_common.h \
                 plane_implement.h \
                 createBvh_implement.h \
-                ../shared/GLHUD.h \
                 ../shared/CudaBase.h \
                 ../shared/Base3DView.h \
                 ../shared/BaseBuffer.h \
@@ -18,7 +17,6 @@ SOURCES       = main.cpp \
                 glWidget.cpp \
                 window.cpp \
                 BvhSolver.cpp \
-                ../shared/GLHUD.cpp \
                 ../shared/CudaBase.cpp \
                 ../shared/Base3DView.cpp \
                 ../shared/BaseBuffer.cpp \

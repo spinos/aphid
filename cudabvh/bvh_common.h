@@ -32,5 +32,11 @@ struct Aabb {
     float3 high;
 };
 
+struct EdgeContact {
+    uint v[4];   
+};
+
+#define MAX_INDEX 999999999
+
 #endif        //  #ifndef BVH_COMMON_H
 

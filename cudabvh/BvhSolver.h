@@ -10,6 +10,7 @@
 #include <BaseSolverThread.h>
 class BaseBuffer;
 class CUDABuffer;
+struct EdgeContact;
 class BvhSolver : public BaseSolverThread
 {
 public:
@@ -22,8 +23,9 @@ public:
 	
 	unsigned getNumTriangleFaceVertices() const;
 	unsigned * getIndices() const;
+	unsigned numEdges() const;
 	float * displayVertex();
-	
+	EdgeContact * edgeContacts();
 	void setAlpha(float x);
 	
 protected:
@@ -35,6 +37,7 @@ private:
     float m_alpha;
     BaseBuffer * m_displayVertex;
 	CUDABuffer * m_vertexBuffer;
-	unsigned m_numTriIndices;
+	unsigned m_numTriIndices, m_numTriangles, m_numEdges;
 	unsigned * m_triIndices;
+	BaseBuffer * m_edges;
 };

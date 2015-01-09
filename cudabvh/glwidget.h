@@ -25,7 +25,7 @@ protected:
 	virtual void focusInEvent(QFocusEvent * event);
 	virtual void focusOutEvent(QFocusEvent * event);
 private:
-	
+	void showEdgeContacts();
 private:
 	BvhSolver * m_solver;
 private slots:
