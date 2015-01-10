@@ -153,6 +153,9 @@ void BvhSolver::init()
 
 	m_lastReduceBlk = new BaseBuffer;
 	m_lastReduceBlk->create(lastNThreads(m_numEdges) * sizeof(Aabb));
+	
+	m_internalNodes = m_numEdges - 1;
+	
 
 	qDebug()<<"num points "<<numVertices();
 	qDebug()<<"num triangles "<<m_numTriangles;

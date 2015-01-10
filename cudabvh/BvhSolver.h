@@ -48,7 +48,7 @@ private:
     BaseBuffer * m_displayVertex;
 	CUDABuffer * m_vertexBuffer;
 	CUDABuffer * m_edgeContactIndices;
-	unsigned m_numTriIndices, m_numTriangles, m_numEdges;
+	unsigned m_numTriIndices, m_numTriangles, m_numEdges, m_internalNodes;
 	unsigned * m_triIndices;
 	BaseBuffer * m_edges;
 	CUDABuffer * m_allAabbs;
