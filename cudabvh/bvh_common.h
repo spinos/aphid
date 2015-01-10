@@ -9,10 +9,9 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+#include <iostream>
 #include <cuda_runtime_api.h>
 typedef unsigned int uint;
-
-// #define BVHSOLVER_DBG_DRAW 1
 
 static uint iDivUp(uint dividend, uint divisor)
 {
@@ -37,14 +36,6 @@ static bool isPow2(unsigned int x)
 struct Aabb {
     float3 low;
     float3 high;
-	void combine(Aabb & a) {
-		if(a.low.x < low.x) low.x = a.low.x;
-		if(a.low.y < low.y) low.y = a.low.y;
-		if(a.low.z < low.z) low.z = a.low.z;
-		if(a.high.x > high.x) high.x = a.high.x;
-		if(a.high.y > high.y) high.y = a.high.y;
-		if(a.high.z > high.z) high.z = a.high.z;
-	}
 };
 
 struct EdgeContact {
@@ -52,6 +43,7 @@ struct EdgeContact {
 };
 
 #define MAX_INDEX 999999999
+#define TINY_VALUE 10e-6
 
 #endif        //  #ifndef BVH_COMMON_H
 

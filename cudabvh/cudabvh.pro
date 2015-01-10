@@ -1,14 +1,16 @@
 CONFIG -= app_bundle
 CONFIG += release
 message(QMAKE with CUDA)
-INCLUDEPATH += ./ ../shared
+INCLUDEPATH += ./ ../shared ../radixsort
 HEADERS       = glWidget.h \
                 window.h \
                 BvhSolver.h \
                 bvh_common.h \
+				app_define.h \
                 plane_implement.h \
                 createBvh_implement.h \
 		reduceBox_implement.h \
+		../radixsort/radixsort_implement.h \
                 ../shared/CudaBase.h \
                 ../shared/Base3DView.h \
                 ../shared/BaseBuffer.h \
@@ -38,7 +40,7 @@ macx {
 QT           += opengl
 LIBS += -L../lib -laphid -lIlmImf -lHalf
 DESTDIR = ./
-CUSOURCES = plane.cu createBvh.cu reduceBox.cu
+CUSOURCES = plane.cu createBvh.cu reduceBox.cu ../radixsort/radixsort.cu
 macx {
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda

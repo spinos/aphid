@@ -9,6 +9,8 @@
 #pragma once
 #include <BaseSolverThread.h>
 #include <bvh_common.h>
+#include <radixsort_implement.h>
+#include <app_define.h>
 
 class BaseBuffer;
 class CUDABuffer;
@@ -20,44 +22,51 @@ public:
 	virtual ~BvhSolver();
 	
 	void init();
-	// const unsigned vertexBufferName() const;
+	
 	const unsigned numVertices() const;
 	
 	unsigned getNumTriangleFaceVertices() const;
 	unsigned * getIndices() const;
-	unsigned numEdges() const;
+	const unsigned numEdges() const;
 	float * displayVertex();
 	EdgeContact * edgeContacts();
 	void setAlpha(float x);
 	const Aabb combinedAabb() const; 
 	
+	const unsigned numLeafNodes() const;
+	
 #ifdef BVHSOLVER_DBG_DRAW
 	Aabb * displayAabbs();
 	Aabb * displayCombinedAabb();
+	KeyValuePair * displayLeafHash();
 #endif
 
 protected:
     virtual void stepPhysics(float dt);	
 private:
 	void formPlane(float alpha);
-	void formAabbs();
+	void formLeafAabbs();
 	void combineAabb();
-	unsigned lastNThreads(unsigned n);
+	void calcLeafHash();
+	
 private:
 	Aabb m_bigAabb;
     BaseBuffer * m_displayVertex;
 	CUDABuffer * m_vertexBuffer;
 	CUDABuffer * m_edgeContactIndices;
-	unsigned m_numTriIndices, m_numTriangles, m_numEdges, m_internalNodes;
 	unsigned * m_triIndices;
 	BaseBuffer * m_edges;
-	CUDABuffer * m_allAabbs;
+	CUDABuffer * m_leafAabbs;
 	CUDABuffer * m_combinedAabb;
 	BaseBuffer * m_lastReduceBlk;
-	float m_alpha;
+	CUDABuffer * m_leafHash[2];
     
 #ifdef BVHSOLVER_DBG_DRAW
 	BaseBuffer * m_displayAabbs;
 	BaseBuffer * m_displayCombinedAabb;
+	BaseBuffer * m_displayLeafHash;
 #endif
+
+	unsigned m_numTriIndices, m_numTriangles, m_numEdges, m_internalNodes;
+	float m_alpha;
 };

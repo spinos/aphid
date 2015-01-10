@@ -11,6 +11,6 @@
  */
 #include "bvh_common.h"
 
-extern "C" void wavePlane(float4 *pos, unsigned numGrids, float gridSize, float alpha);
+extern "C" void wavePlane(float3 *pos, unsigned numGrids, float gridSize, float alpha);
 
 #endif        //  #ifndef PLANE_IMPLEMENT_H

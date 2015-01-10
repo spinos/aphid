@@ -53,5 +53,7 @@ public:
 	char isBoxAround(const BoundingBox & b, float threshold) const;
 	char isValid() const;
 	void verbose() const;
+	void verbose(const char * pref) const;
+	const std::string str() const;
 	float m_data[8];
 };

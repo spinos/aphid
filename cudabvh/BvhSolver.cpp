@@ -14,8 +14,8 @@
 #include "createBvh_implement.h"
 #include "reduceBox_implement.h"
 
-unsigned UDIM = 100;
-unsigned UDIM1 = 101;
+unsigned UDIM = 71;
+unsigned UDIM1 = 72;
 
 BvhSolver::BvhSolver(QObject *parent) : BaseSolverThread(parent) 
 {
@@ -38,9 +38,9 @@ void BvhSolver::init()
 	CudaBase::SetDevice();
 	qDebug()<<"solverinit";
 	m_vertexBuffer = new CUDABuffer;
-	m_vertexBuffer->create(numVertices() * 16);
+	m_vertexBuffer->create(numVertices() * 12);
 	m_displayVertex = new BaseBuffer;
-	m_displayVertex->create(numVertices() * 16);
+	m_displayVertex->create(numVertices() * 12);
 	m_numTriangles = UDIM * UDIM * 2;
 	m_numTriIndices = m_numTriangles * 3;
 	m_triIndices = new unsigned[m_numTriIndices];
@@ -131,32 +131,39 @@ void BvhSolver::init()
 		    edge->v[1] = j * UDIM1 + i1;
 		    edge->v[2] = j  * UDIM1 + i;
 		    edge->v[3] = j1 * UDIM1 + i1;
+			edge++;
 		}
-		edge++;
 	}
+	
 	
 	m_edgeContactIndices = new CUDABuffer;
 	m_edgeContactIndices->create(m_numEdges * sizeof(EdgeContact));
 	m_edgeContactIndices->hostToDevice(m_edges->data(), m_edgeContactIndices->bufferSize());
 	
-	m_allAabbs = new CUDABuffer;
-	m_allAabbs->create(m_numEdges * sizeof(Aabb));
+	m_leafAabbs = new CUDABuffer;
+	m_leafAabbs->create(numLeafNodes() * sizeof(Aabb));
 	m_combinedAabb = new CUDABuffer;
 	m_combinedAabb->create(ReduceMaxBlocks * sizeof(Aabb));
+	
+	m_leafHash[0] = new CUDABuffer;
+	m_leafHash[0]->create(numLeafNodes() * sizeof(KeyValuePair));
+	m_leafHash[1] = new CUDABuffer;
+	m_leafHash[1]->create(numLeafNodes() * sizeof(KeyValuePair));
 
 #ifdef BVHSOLVER_DBG_DRAW	
 	m_displayAabbs = new BaseBuffer;
 	m_displayAabbs->create(m_numEdges * sizeof(Aabb));
 	m_displayCombinedAabb = new BaseBuffer;
 	m_displayCombinedAabb->create(ReduceMaxBlocks * sizeof(Aabb));
+	m_displayLeafHash = new BaseBuffer;
+	m_displayLeafHash->create(numLeafNodes() * sizeof(KeyValuePair));
 #endif
 
 	m_lastReduceBlk = new BaseBuffer;
-	m_lastReduceBlk->create(lastNThreads(m_numEdges) * sizeof(Aabb));
+	m_lastReduceBlk->create(getReduceLastNThreads(m_numEdges) * sizeof(Aabb));
 	
 	m_internalNodes = m_numEdges - 1;
 	
-
 	qDebug()<<"num points "<<numVertices();
 	qDebug()<<"num triangles "<<m_numTriangles;
 	qDebug()<<"num edges "<<m_numEdges;
@@ -165,29 +172,30 @@ void BvhSolver::init()
 void BvhSolver::stepPhysics(float dt)
 {
 	formPlane(m_alpha);
-	formAabbs();
 	combineAabb();
+	formLeafAabbs();
+	calcLeafHash();
 }
 
 void BvhSolver::formPlane(float alpha)
 {
 	void *dptr = m_vertexBuffer->bufferOnDevice();
-	wavePlane((float4 *)dptr, UDIM, 2.0, alpha);
+	wavePlane((float3 *)dptr, UDIM, 2.0, alpha);
 	m_vertexBuffer->deviceToHost(m_displayVertex->data(), m_vertexBuffer->bufferSize());
 }
 
-void BvhSolver::formAabbs()
+void BvhSolver::formLeafAabbs()
 {
     void * cvs = m_vertexBuffer->bufferOnDevice();
     void * edges = m_edgeContactIndices->bufferOnDevice();
-    void * dst = m_allAabbs->bufferOnDevice();
-    bvhCalculateAabbs((Aabb *)dst, (float4 *)cvs, (EdgeContact *)edges, m_numEdges, numVertices());
+    void * dst = m_leafAabbs->bufferOnDevice();
+    bvhCalculateLeafAabbs((Aabb *)dst, (float3 *)cvs, (EdgeContact *)edges, m_numEdges, numVertices());
     
 #ifdef BVHSOLVER_DBG_DRAW
-    m_allAabbs->deviceToHost(m_displayAabbs->data(), m_allAabbs->bufferSize());
+    m_leafAabbs->deviceToHost(m_displayAabbs->data(), m_leafAabbs->bufferSize());
 #endif
 }
-#include <iostream>
+
 void BvhSolver::combineAabb()
 {
 	void * psrc = m_vertexBuffer->bufferOnDevice();
@@ -199,7 +207,7 @@ void BvhSolver::combineAabb()
 	
 	// std::cout<<"n0 "<<n<<" blocks X threads : "<<blocks<<" X "<<threads<<"\n";
 	
-	bvhReduceAabbByPoints((Aabb *)pdst, (float4 *)psrc, n, blocks, threads);
+	bvhReduceAabbByPoints((Aabb *)pdst, (float3 *)psrc, n, blocks, threads);
 	
 	n = blocks;
 	while(n > 1) {
@@ -215,11 +223,23 @@ void BvhSolver::combineAabb()
 	m_combinedAabb->deviceToHost(m_lastReduceBlk->data(), m_lastReduceBlk->bufferSize());
 	Aabb * c = (Aabb *)m_lastReduceBlk->data();
 	m_bigAabb = c[0];
-	//for(uint i = 1; i < threads; i++)
-	//	m_bigAabb.combine(c[i]);
+
 	
 #ifdef BVHSOLVER_DBG_DRAW
 	m_combinedAabb->deviceToHost(m_displayCombinedAabb->data(), m_combinedAabb->bufferSize());
+#endif
+}
+
+void BvhSolver::calcLeafHash()
+{
+	void * dst = m_leafHash[0]->bufferOnDevice();
+	void * src = m_leafAabbs->bufferOnDevice();
+	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, numLeafNodes(), m_bigAabb);
+	void * tmp = m_leafHash[1]->bufferOnDevice();
+	RadixSort((KeyValuePair *)dst, (KeyValuePair *)tmp, numLeafNodes(), 32);
+	
+#ifdef BVHSOLVER_DBG_DRAW
+	m_leafHash[0]->deviceToHost(m_displayLeafHash->data(), m_leafHash[0]->bufferSize()); 
 #endif
 }
 
@@ -229,31 +249,16 @@ unsigned BvhSolver::getNumTriangleFaceVertices() const { return m_numTriIndices;
 unsigned * BvhSolver::getIndices() const { return m_triIndices; }
 float * BvhSolver::displayVertex() { return (float *)m_displayVertex->data(); }
 EdgeContact * BvhSolver::edgeContacts() { return (EdgeContact *)m_edges->data(); }
-unsigned BvhSolver::numEdges() const { return m_numEdges; }
+const unsigned BvhSolver::numEdges() const { return m_numEdges; }
 
 #ifdef BVHSOLVER_DBG_DRAW
 Aabb * BvhSolver::displayAabbs() { return (Aabb *)m_displayAabbs->data(); }
 Aabb * BvhSolver::displayCombinedAabb() { return (Aabb *)m_displayCombinedAabb->data(); }
+KeyValuePair * BvhSolver::displayLeafHash() { return (KeyValuePair *)m_displayLeafHash->data(); }
 #endif
 
 void BvhSolver::setAlpha(float x) { m_alpha = x; }
 
-const Aabb BvhSolver::combinedAabb() const
-{
-	return m_bigAabb;
-}
+const Aabb BvhSolver::combinedAabb() const { return m_bigAabb; }
 
-unsigned BvhSolver::lastNThreads(unsigned n)
-{
-	unsigned threads, blocks;
-	getReduceBlockThread(blocks, threads, n);
-	
-	n = blocks;
-	while(n > 1) {
-		getReduceBlockThread(blocks, threads, n);
-		
-		n = (n + (threads*2-1)) / (threads*2);
-	}
-	return threads;
-}
-
+const unsigned BvhSolver::numLeafNodes() const { return m_numEdges; }

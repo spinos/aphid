@@ -6,34 +6,44 @@ inline __device__ void resetAabb(Aabb & dst)
     dst.high = make_float3(-10e9, -10e9, -10e9);
 }
 
-inline __device__ void expandAabb(Aabb & dst, float4 p)
+inline __device__ void expandAabb(Aabb & dst, float3 p)
 {
-    if(p.x < dst.low.x) dst.low.x = p.x;
-    if(p.y < dst.low.y) dst.low.y = p.y;
-    if(p.z < dst.low.z) dst.low.z = p.z;
-    if(p.x > dst.high.x) dst.high.x = p.x;
-    if(p.y > dst.high.y) dst.high.y = p.y;
-    if(p.z > dst.high.z) dst.high.z = p.z;
+    if(p.x < dst.low.x) dst.low.x = p.x - TINY_VALUE;
+    if(p.y < dst.low.y) dst.low.y = p.y - TINY_VALUE;
+    if(p.z < dst.low.z) dst.low.z = p.z - TINY_VALUE;
+    if(p.x > dst.high.x) dst.high.x = p.x + TINY_VALUE;
+    if(p.y > dst.high.y) dst.high.y = p.y + TINY_VALUE;
+    if(p.z > dst.high.z) dst.high.z = p.z + TINY_VALUE;
 }
 
-inline __device__ void expandAabb(Aabb & dst, Aabb src)
+inline __device__ void expandAabb(Aabb & dst, float4 p)
 {
-    if(src.low.x < dst.low.x) dst.low.x = src.low.x;
-    if(src.low.y < dst.low.y) dst.low.y = src.low.y;
-    if(src.low.z < dst.low.z) dst.low.z = src.low.z;
-    if(src.high.x > dst.high.x) dst.high.x = src.high.x;
-    if(src.high.y > dst.high.y) dst.high.y = src.high.y;
-    if(src.high.z > dst.high.z) dst.high.z = src.high.z;
+    if(p.x < dst.low.x) dst.low.x = p.x - TINY_VALUE;
+    if(p.y < dst.low.y) dst.low.y = p.y - TINY_VALUE;
+    if(p.z < dst.low.z) dst.low.z = p.z - TINY_VALUE;
+    if(p.x > dst.high.x) dst.high.x = p.x + TINY_VALUE;
+    if(p.y > dst.high.y) dst.high.y = p.y + TINY_VALUE;
+    if(p.z > dst.high.z) dst.high.z = p.z + TINY_VALUE;
+}
+
+inline __device__ void expandAabb(Aabb & dst, const Aabb & src)
+{
+    if(src.low.x < dst.low.x) dst.low.x = src.low.x - TINY_VALUE;
+    if(src.low.y < dst.low.y) dst.low.y = src.low.y - TINY_VALUE;
+    if(src.low.z < dst.low.z) dst.low.z = src.low.z - TINY_VALUE;
+    if(src.high.x > dst.high.x) dst.high.x = src.high.x + TINY_VALUE;
+    if(src.high.y > dst.high.y) dst.high.y = src.high.y + TINY_VALUE;
+    if(src.high.z > dst.high.z) dst.high.z = src.high.z + TINY_VALUE;
 }
 
 inline __device__ void expandAabb(Aabb & dst, volatile Aabb * src)
 {
-    if(src->low.x < dst.low.x) dst.low.x = src->low.x;
-    if(src->low.y < dst.low.y) dst.low.y = src->low.y;
-    if(src->low.z < dst.low.z) dst.low.z = src->low.z;
-    if(src->high.x > dst.high.x) dst.high.x = src->high.x;
-    if(src->high.y > dst.high.y) dst.high.y = src->high.y;
-    if(src->high.z > dst.high.z) dst.high.z = src->high.z;
+    if(src->low.x < dst.low.x) dst.low.x = src->low.x - TINY_VALUE;
+    if(src->low.y < dst.low.y) dst.low.y = src->low.y - TINY_VALUE;
+    if(src->low.z < dst.low.z) dst.low.z = src->low.z - TINY_VALUE;
+    if(src->high.x > dst.high.x) dst.high.x = src->high.x + TINY_VALUE;
+    if(src->high.y > dst.high.y) dst.high.y = src->high.y + TINY_VALUE;
+    if(src->high.z > dst.high.z) dst.high.z = src->high.z + TINY_VALUE;
 }
 
 inline __device__ void copyVola(volatile Aabb * dst, const Aabb & src)
@@ -44,28 +54,6 @@ inline __device__ void copyVola(volatile Aabb * dst, const Aabb & src)
     dst->high.x = src.high.x;
     dst->high.y = src.high.y;
     dst->high.z = src.high.z;
-}
-
-__global__ void calculateAabbs_kernel(Aabb *dst, float4 * cvs, EdgeContact * edges, unsigned maxEdgeInd, unsigned maxVertInd)
-{
-    unsigned idx = blockIdx.x*blockDim.x + threadIdx.x;
-
-	if(idx >= maxEdgeInd) return;
-	
-	EdgeContact e = edges[idx];
-	unsigned v0 = e.v[0];
-	unsigned v1 = e.v[1];
-	unsigned v2 = e.v[2];
-	unsigned v3 = e.v[3];
-	
-	Aabb res;
-	resetAabb(res);
-	if(v0 < maxVertInd) expandAabb(res, cvs[v0]);
-	if(v1 < maxVertInd) expandAabb(res, cvs[v1]);
-	if(v2 < maxVertInd) expandAabb(res, cvs[v2]);
-	if(v3 < maxVertInd) expandAabb(res, cvs[v3]);
-	
-	dst[idx] = res;
 }
 
 template <unsigned int blockSize, bool nIsPow2>
@@ -164,7 +152,7 @@ __global__ void reduceAabbByAabb_kernel(Aabb *g_idata, Aabb *g_odata, unsigned i
 }
 
 template <unsigned int blockSize, bool nIsPow2>
-__global__ void reduceAabbByPoints_kernel(float4 *g_idata, Aabb *g_odata, unsigned int n)
+__global__ void reduceAabbByPoints_kernel(float3 *g_idata, Aabb *g_odata, unsigned int n)
 {
     extern __shared__ Aabb sdata[];
 
@@ -258,15 +246,6 @@ __global__ void reduceAabbByPoints_kernel(float4 *g_idata, Aabb *g_odata, unsign
         g_odata[blockIdx.x] = sdata[0];
 }
 
-extern "C" void bvhCalculateAabbs(Aabb *dst, float4 * cvs, EdgeContact * edges, unsigned numEdges, unsigned numVertices)
-{
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(numEdges, 512);
-    
-    dim3 grid(nblk, 1, 1);
-    calculateAabbs_kernel<<< grid, block >>>(dst, cvs, edges, numEdges, numVertices);
-}
-
 extern "C" void bvhReduceAabbByAabb(Aabb *dst, Aabb *src, unsigned numAabbs, unsigned numBlocks, unsigned numThreads)
 {
 	dim3 dimBlock(numThreads, 1, 1);
@@ -325,7 +304,7 @@ extern "C" void bvhReduceAabbByAabb(Aabb *dst, Aabb *src, unsigned numAabbs, uns
 	}
 }
 
-extern "C" void bvhReduceAabbByPoints(Aabb *dst, float4 *src, unsigned numPoints, unsigned numBlocks, unsigned numThreads)
+extern "C" void bvhReduceAabbByPoints(Aabb *dst, float3 *src, unsigned numPoints, unsigned numBlocks, unsigned numThreads)
 {
 	dim3 dimBlock(numThreads, 1, 1);
     dim3 dimGrid(numBlocks, 1, 1);
@@ -388,4 +367,18 @@ extern "C" void getReduceBlockThread(uint & blocks, uint & threads, uint n)
 	threads = (n < ReduceMaxThreads*2) ? nextPow2((n + 1)/ 2) : ReduceMaxThreads;
 	blocks = (n + (threads * 2 - 1)) / (threads * 2);
 	if(blocks > ReduceMaxBlocks) blocks = ReduceMaxBlocks;
+}
+
+extern "C" unsigned getReduceLastNThreads(unsigned n)
+{
+	unsigned threads, blocks;
+	getReduceBlockThread(blocks, threads, n);
+	
+	n = blocks;
+	while(n > 1) {
+		getReduceBlockThread(blocks, threads, n);
+		
+		n = (n + (threads*2-1)) / (threads*2);
+	}
+	return threads;
 }

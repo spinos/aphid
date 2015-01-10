@@ -7,6 +7,8 @@
 #include <CUDABuffer.h>
 #include <BvhSolver.h>
 #include "bvh_common.h"
+#include <radixsort_implement.h>
+#include <app_define.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -34,7 +36,7 @@ void GLWidget::clientDraw()
 	
     glEnableClientState(GL_VERTEX_ARRAY);
 
-	glVertexPointer(4, GL_FLOAT, 0, (GLfloat*)m_solver->displayVertex());
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_solver->displayVertex());
 	glDrawElements(GL_TRIANGLES, m_solver->getNumTriangleFaceVertices(), GL_UNSIGNED_INT, m_solver->getIndices());
 
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -106,27 +108,59 @@ void GLWidget::showAabbs()
     BoundingBox bb; 
 	bb.setMin(ab.low.x, ab.low.y, ab.low.z);
 	bb.setMax(ab.high.x, ab.high.y, ab.high.z);
-	glColor3f(0.f, 0.5f, 0.2f);
+	glColor3f(0.1f, 0.4f, 0.3f);
     dr->boundingBox(bb);
 #ifdef BVHSOLVER_DBG_DRAW
     Aabb * boxes = m_solver->displayAabbs();
-    unsigned ne = m_solver->numEdges();
+    unsigned ne = m_solver->numLeafNodes();
+#ifdef BVHSOLVER_DBG_DRAW_LEAFBOX
+	glColor3f(0.2f, 0.2f, 0.3f);
+	int ninvalidbox = 0;
     for(unsigned i=0; i < ne; i++) {
         ab = boxes[i];
-        BoundingBox bb; 
-        bb.setMin(ab.low.x, ab.low.y, ab.low.z);
+        
+		bb.setMin(ab.low.x, ab.low.y, ab.low.z);
         bb.setMax(ab.high.x, ab.high.y, ab.high.z);
+		
+		if(!bb.isValid() || bb.area() < 0.1f) {
+			qDebug()<<bb.str().c_str();
+			ninvalidbox++;
+		}
+		
         dr->boundingBox(bb);
     }
-	
-	boxes = m_solver->displayCombinedAabb();
-    for(unsigned i=0; i < 8; i++) {
-        ab = boxes[3];
-        BoundingBox bb; 
-        bb.setMin(ab.low.x, ab.low.y, ab.low.z);
+	if(ninvalidbox > 0) qDebug()<<"n invalid box "<<ninvalidbox;
+#endif	
+
+#ifdef BVHSOLVER_DBG_DRAW_LEAFHASH
+	KeyValuePair * leafHash = m_solver->displayLeafHash();
+	glColor3f(0.8f, 0.1f, 0.f);
+	glBegin(GL_LINES);
+	int nzero = 0;
+	for(unsigned i=0; i < ne-1; i++) {
+		float red = (float)i/(float)ne;
+		
+		if(leafHash[i].value < 0 || leafHash[i].value >= ne) {
+			qDebug()<<"invalid hash value "<<leafHash[i].value;
+			nzero++;
+		}
+		
+		ab = boxes[leafHash[i].value];
+        
+		bb.setMin(ab.low.x, ab.low.y, ab.low.z);
         bb.setMax(ab.high.x, ab.high.y, ab.high.z);
-        dr->boundingBox(bb);
-    }
+		
+		glColor3f(red, 1.f - red, 0.f);
+		Aabb a0 = boxes[leafHash[i].value];
+		glVertex3f(a0.low.x * 0.5f + a0.high.x * 0.5f, a0.low.y * 0.5f + a0.high.y * 0.5f + 0.2f, a0.low.z * 0.5f + a0.high.z * 0.5f);
+        
+		Aabb a1 = boxes[leafHash[i+1].value];
+		glVertex3f(a1.low.x * 0.5f + a1.high.x * 0.5f, a1.low.y * 0.5f + a1.high.y * 0.5f + 0.2f, a1.low.z * 0.5f + a1.high.z * 0.5f);
+        
+	}
+	glEnd();	
+	if(nzero > 0) qDebug()<<"n zero code "<<nzero;
+#endif	
 #endif
 }
 

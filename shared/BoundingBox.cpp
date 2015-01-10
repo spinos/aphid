@@ -322,6 +322,19 @@ const Vector3F BoundingBox::normal(const int & i) const
 
 void BoundingBox::verbose() const
 {
-	printf("bounding box min max: (%f, %f, %f) (%f, %f, %f)\n", m_data[0], m_data[1], m_data[2], m_data[3], m_data[4], m_data[5]);
-}	
+	std::cout<<str()<<"\n";
+}
+
+void BoundingBox::verbose(const char * pref) const
+{
+	std::cout<<pref<<str()<<"\n";
+}
+
+const std::string BoundingBox::str() const
+{
+	std::stringstream sst;
+	sst.str("");
+    sst<<"(("<<m_data[0]<<","<<m_data[1]<<","<<m_data[2]<<"),("<<m_data[3]<<","<<m_data[4]<<","<<m_data[5]<<"))";
+	return sst.str();
+}
 //:~
