@@ -44,7 +44,7 @@ void GLWidget::clientDraw()
 	// showEdgeContacts();
 	showAabbs();
 	m_solver->setAlpha((float)elapsedTime()/300.f);
-	//qDebug()<<"drawn in "<<deltaTime();
+	// qDebug()<<"drawn in "<<deltaTime();
 }
 
 void GLWidget::showEdgeContacts()

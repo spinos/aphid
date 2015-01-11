@@ -142,7 +142,7 @@ __global__ void calculateLeafHash_kernel(KeyValuePair *dst, Aabb * leafBoxes, ui
 	dst[idx].value = idx;
 }
 
-__global__ void computeAdjacentPairCommonPrefix(KeyValuePair * mortonCodesAndAabbIndices,
+__global__ void computeAdjacentPairCommonPrefix_kernel(KeyValuePair * mortonCodesAndAabbIndices,
 											uint64* out_commonPrefixes,
 											int* out_commonPrefixLengths,
 											uint numInternalNodes)
@@ -171,7 +171,7 @@ __global__ void computeAdjacentPairCommonPrefix(KeyValuePair * mortonCodesAndAab
 	out_commonPrefixLengths[internalNodeIndex] = computeCommonPrefixLength(nonduplicateLeftMortonCode, nonduplicateRightMortonCode);
 }
 
-__global__ void buildBinaryRadixTreeLeafNodes(int* commonPrefixLengths, int* out_leafNodeParentNodes,
+__global__ void connectLeafNodesToInternalTree_kernel(int* commonPrefixLengths, int* out_leafNodeParentNodes,
 											int2* out_childNodes, int numLeafNodes)
 {
 	int leafNodeIndex = blockIdx.x*blockDim.x + threadIdx.x;
@@ -206,7 +206,7 @@ __global__ void buildBinaryRadixTreeLeafNodes(int* commonPrefixLengths, int* out
 	out_childNodesAsInt[isRightChild] = getIndexWithInternalNodeMarkerSet(isLeaf, leafNodeIndex);	
 }
 
-__global__ void buildBinaryRadixTreeInternalNodes(uint64* commonPrefixes, int* commonPrefixLengths,
+__global__ void connectInternalTreeNodes_kernel(uint64* commonPrefixes, int* commonPrefixLengths,
 												int2* out_childNodes,
 												int* out_internalNodeParentNodes,
 												int* out_rootNodeIndex,
@@ -217,7 +217,33 @@ __global__ void buildBinaryRadixTreeInternalNodes(uint64* commonPrefixes, int* c
 	
 	uint64 nodePrefix = commonPrefixes[internalNodeIndex];
 	int nodePrefixLength = commonPrefixLengths[internalNodeIndex];
+/*	
+	int leftIndex = -1;
+	int rightIndex = -1;
 	
+	//Find nearest element to left with a lower common prefix
+	for(int i = internalNodeIndex - 1; i >= 0; --i)
+	{
+		int nodeLeftSharedPrefixLength = getSharedPrefixLength(nodePrefix, nodePrefixLength, commonPrefixes[i], commonPrefixLengths[i]);
+		if(nodeLeftSharedPrefixLength < nodePrefixLength)
+		{
+			leftIndex = i;
+			break;
+		}
+	}
+	
+	//Find nearest element to right with a lower common prefix
+	for(int i = internalNodeIndex + 1; i < numInternalNodes; ++i)
+	{
+		int nodeRightSharedPrefixLength = getSharedPrefixLength(nodePrefix, nodePrefixLength, commonPrefixes[i], commonPrefixLengths[i]);
+		if(nodeRightSharedPrefixLength < nodePrefixLength)
+		{
+			rightIndex = i;
+			break;
+		}
+	}
+*/
+
 	// binary search
 
 	//Find nearest element to left with a lower common prefix
@@ -421,3 +447,41 @@ extern "C" void bvhCalculateLeafHash(KeyValuePair * dst, Aabb * leafBoxes, uint 
     dim3 grid(nblk, 1, 1);
 	calculateLeafHash_kernel<<< grid, block >>>(dst, leafBoxes, numLeaves, bigBox);
 }
+
+extern "C" void bvhComputeAdjacentPairCommonPrefix(KeyValuePair * mortonCode,
+													uint64 * o_commonPrefix,
+													int * o_commonPrefixLength,
+													uint numInternalNodes)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numInternalNodes, 512);
+    
+    dim3 grid(nblk, 1, 1);
+	computeAdjacentPairCommonPrefix_kernel<<< grid, block >>>(mortonCode, o_commonPrefix, o_commonPrefixLength, numInternalNodes);
+}
+
+extern "C" void bvhConnectLeafNodesToInternalTree(int * commonPrefixLengths, 
+								int * o_leafNodeParentIndex,
+								int2 * o_internalNodeChildIndex, 
+								uint numLeafNodes)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numLeafNodes, 512);
+    
+    dim3 grid(nblk, 1, 1);
+    connectLeafNodesToInternalTree_kernel<<< grid, block >>>(commonPrefixLengths, o_leafNodeParentIndex, o_internalNodeChildIndex, numLeafNodes);
+}
+
+extern "C" void bvhConnectInternalTreeNodes(uint64 * commonPrefix, int * commonPrefixLengths,
+											int2 * o_internalNodeChildIndex,
+											int * o_internalNodeParentIndex,
+											int * o_rootNodeIndex,
+											uint numInternalNodes)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numInternalNodes, 512);
+    
+    dim3 grid(nblk, 1, 1);
+    connectInternalTreeNodes_kernel<<< grid, block >>>(commonPrefix, commonPrefixLengths, o_internalNodeChildIndex, o_internalNodeParentIndex, o_rootNodeIndex, numInternalNodes);
+}
+

@@ -14,8 +14,8 @@
 #include "createBvh_implement.h"
 #include "reduceBox_implement.h"
 
-unsigned UDIM = 71;
-unsigned UDIM1 = 72;
+unsigned UDIM = 121;
+unsigned UDIM1 = 122;
 
 BvhSolver::BvhSolver(QObject *parent) : BaseSolverThread(parent) 
 {
@@ -149,6 +149,20 @@ void BvhSolver::init()
 	m_leafHash[0]->create(numLeafNodes() * sizeof(KeyValuePair));
 	m_leafHash[1] = new CUDABuffer;
 	m_leafHash[1]->create(numLeafNodes() * sizeof(KeyValuePair));
+	
+	m_internalNodeCommonPrefixValues = new CUDABuffer;
+	m_internalNodeCommonPrefixValues->create(numInternalNodes() * sizeof(uint64));
+	m_internalNodeCommonPrefixLengths = new CUDABuffer;
+	m_internalNodeCommonPrefixLengths->create(numInternalNodes() * sizeof(int));
+	
+	m_leafNodeParentIndices = new CUDABuffer;
+	m_leafNodeParentIndices->create(numLeafNodes() * sizeof(int));
+	m_internalNodeChildIndices = new CUDABuffer;
+	m_internalNodeChildIndices->create(numInternalNodes() * sizeof(int2));
+	m_internalNodeParentIndices = new CUDABuffer;
+	m_internalNodeParentIndices->create(numInternalNodes() * sizeof(int));
+	m_rootNodeIndexOnDevice = new CUDABuffer;
+	m_rootNodeIndexOnDevice->create(sizeof(int));
 
 #ifdef BVHSOLVER_DBG_DRAW	
 	m_displayAabbs = new BaseBuffer;
@@ -246,7 +260,38 @@ void BvhSolver::calcLeafHash()
 
 void BvhSolver::buildInternalTree()
 {
+	void * morton = m_leafHash[0]->bufferOnDevice();
+	void * commonPrefix = m_internalNodeCommonPrefixValues->bufferOnDevice();
+	void * commonPrefixLengths = m_internalNodeCommonPrefixLengths->bufferOnDevice();
 	
+	bvhComputeAdjacentPairCommonPrefix((KeyValuePair *)morton,
+										(uint64 *)commonPrefix,
+										(int *)commonPrefixLengths,
+										numInternalNodes());
+	
+	void * leafNodeParentIndex = m_leafNodeParentIndices->bufferOnDevice();
+	void * internalNodeChildIndex = m_internalNodeChildIndices->bufferOnDevice();
+	
+	bvhConnectLeafNodesToInternalTree((int *)commonPrefixLengths, 
+								(int *)leafNodeParentIndex,
+								(int2 *)internalNodeChildIndex, 
+								numLeafNodes());
+								
+	void * internalNodeParentIndex = m_internalNodeParentIndices->bufferOnDevice();
+	
+	bvhConnectInternalTreeNodes((uint64 *)commonPrefix, (int *)commonPrefixLengths,
+								(int2 *)internalNodeChildIndex,
+								(int *)internalNodeParentIndex,
+								(int *)m_rootNodeIndexOnDevice->bufferOnDevice(),
+								numInternalNodes());
+								
+	// TODO findDistanceFromRoot
+	// TODO buildBinaryRadixTreeAabbsRecursive
+	
+	// m_rootNodeIndexOnDevice->deviceToHost((void *)&m_rootNodeIndex, m_rootNodeIndexOnDevice->bufferSize());
+	// qDebug()<<"root node index "<<(m_rootNodeIndex & (~0x80000000));
+	// printLeafInternalNodeConnection();
+	// printInternalNodeConnection();
 }
 
 const unsigned BvhSolver::numVertices() const { return UDIM1 * UDIM1; }
@@ -269,3 +314,44 @@ const Aabb BvhSolver::combinedAabb() const { return m_bigAabb; }
 
 const unsigned BvhSolver::numLeafNodes() const { return m_numEdges; }
 const unsigned BvhSolver::numInternalNodes() const { return numLeafNodes() - 1; }
+
+void BvhSolver::printLeafInternalNodeConnection()
+{
+	int * pfl = new int[numInternalNodes()];
+	m_internalNodeCommonPrefixLengths->deviceToHost(pfl, m_internalNodeCommonPrefixLengths->bufferSize());
+	
+	int * lp = new int[numLeafNodes()];
+	m_leafNodeParentIndices->deviceToHost(lp,  m_leafNodeParentIndices->bufferSize());
+	 
+	int2 * cp = new int2[numInternalNodes()];
+	m_internalNodeChildIndices->deviceToHost(cp,  m_internalNodeChildIndices->bufferSize());
+	
+	qDebug()<<"\n leaf - internal node connection:\n";
+	int ind = -1;
+	for(unsigned i=0; i < numLeafNodes(); i++) {
+		if(lp[i] != ind) {
+			ind = lp[i];
+			qDebug()<<"leaf["<<i<<"] : itl["<<ind<<"] <- ("<<cp[ind].x<<" , "<<cp[ind].y<<") "<<pfl[ind];
+		}
+		else 
+			qDebug()<<"leaf["<<i<<"]";
+	}
+	delete[] lp;delete[] cp;
+}
+
+void BvhSolver::printInternalNodeConnection()
+{
+	int * ipi = new int[numInternalNodes()];
+	m_internalNodeParentIndices->deviceToHost(ipi, m_internalNodeParentIndices->bufferSize());
+	
+	int2 * cp = new int2[numInternalNodes()];
+	m_internalNodeChildIndices->deviceToHost(cp,  m_internalNodeChildIndices->bufferSize());
+	
+	qDebug()<<"\n internal node connection:\n";
+	for(unsigned i=0; i < numInternalNodes(); i++) {
+		qDebug()<<ipi[i]<<" <- i["<<i<<"] <- ("<<cp[i].x<<" , "<<cp[i].y<<")";
+	}
+	
+	delete[] cp;
+	delete[] ipi;
+}

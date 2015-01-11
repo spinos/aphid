@@ -51,6 +51,9 @@ private:
 	void calcLeafHash();
 	void buildInternalTree();
 	
+	void printLeafInternalNodeConnection();
+	void printInternalNodeConnection();
+	
 private:
 	Aabb m_bigAabb;
     BaseBuffer * m_displayVertex;
@@ -62,13 +65,19 @@ private:
 	CUDABuffer * m_combinedAabb;
 	BaseBuffer * m_lastReduceBlk;
 	CUDABuffer * m_leafHash[2];
+	CUDABuffer * m_internalNodeCommonPrefixValues;
+	CUDABuffer * m_internalNodeCommonPrefixLengths;
+	CUDABuffer * m_leafNodeParentIndices;
+	CUDABuffer * m_internalNodeChildIndices;
+	CUDABuffer * m_internalNodeParentIndices;
+	CUDABuffer * m_rootNodeIndexOnDevice;
     
 #ifdef BVHSOLVER_DBG_DRAW
 	BaseBuffer * m_displayAabbs;
 	BaseBuffer * m_displayCombinedAabb;
 	BaseBuffer * m_displayLeafHash;
 #endif
-
+	int m_rootNodeIndex;
 	unsigned m_numTriIndices, m_numTriangles, m_numEdges;
 	float m_alpha;
 };
