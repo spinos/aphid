@@ -7,6 +7,15 @@
 #define B3_PLBVH_INVALID_COMMON_PREFIX 128
 #define B3_PLBVH_ROOT_NODE_MARKER -1
 
+inline __device__ int isLeafNode(int index) 
+{ return (index >> 31 == 0); }
+
+inline __device__ int getIndexWithInternalNodeMarkerSet(int isLeaf, int index) 
+{ return (isLeaf) ? index : (index | 0x80000000); }
+
+inline __device__ int getIndexWithInternalNodeMarkerRemoved(int index) 
+{ return index & (~0x80000000); }
+
 inline __device__ int computeCommonPrefixLength(uint64 i, uint64 j) 
 { return (int)__clzll(i ^ j); }
 
@@ -64,7 +73,7 @@ inline __device__ void normalizeByBoundary(float & x, float low, float high)
 	else if(x >= high) x = 1.0;
 	else {
 		float dx = high - low;
-		if(dx < TINY_VALUE) x = 0.0;
+		if(dx < TINY_VALUE2) x = 0.0;
 		else x = (x - low) / dx;
 	}
 }
@@ -83,6 +92,12 @@ inline __device__ void expandAabb(Aabb & dst, float3 p)
     if(p.x > dst.high.x) dst.high.x = p.x + TINY_VALUE;
     if(p.y > dst.high.y) dst.high.y = p.y + TINY_VALUE;
     if(p.z > dst.high.z) dst.high.z = p.z + TINY_VALUE;
+}
+
+inline __device__ void expandAabb(Aabb & dst, const Aabb & b)
+{
+	expandAabb(dst, b.low);
+	expandAabb(dst, b.high);
 }
 
 inline __device__ float3 centroidOfAabb(const Aabb & box)
@@ -115,7 +130,7 @@ __global__ void calculateAabbs_kernel(Aabb *dst, float3 * cvs, EdgeContact * edg
 __global__ void calculateLeafHash_kernel(KeyValuePair *dst, Aabb * leafBoxes, uint maxInd, Aabb boundary)
 {
 	unsigned idx = blockIdx.x*blockDim.x + threadIdx.x;
-
+	
 	if(idx >= maxInd) return;
 	
 	float3 c = centroidOfAabb(leafBoxes[idx]);
@@ -154,6 +169,239 @@ __global__ void computeAdjacentPairCommonPrefix(KeyValuePair * mortonCodesAndAab
 	
 	out_commonPrefixes[internalNodeIndex] = computeCommonPrefix(nonduplicateLeftMortonCode, nonduplicateRightMortonCode);
 	out_commonPrefixLengths[internalNodeIndex] = computeCommonPrefixLength(nonduplicateLeftMortonCode, nonduplicateRightMortonCode);
+}
+
+__global__ void buildBinaryRadixTreeLeafNodes(int* commonPrefixLengths, int* out_leafNodeParentNodes,
+											int2* out_childNodes, int numLeafNodes)
+{
+	int leafNodeIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if (leafNodeIndex >= numLeafNodes) return;
+	
+	int numInternalNodes = numLeafNodes - 1;
+	
+	int leftSplitIndex = leafNodeIndex - 1;
+	int rightSplitIndex = leafNodeIndex;
+	
+	int leftCommonPrefix = (leftSplitIndex >= 0) ? commonPrefixLengths[leftSplitIndex] : B3_PLBVH_INVALID_COMMON_PREFIX;
+	int rightCommonPrefix = (rightSplitIndex < numInternalNodes) ? commonPrefixLengths[rightSplitIndex] : B3_PLBVH_INVALID_COMMON_PREFIX;
+	
+	//Parent node is the highest adjacent common prefix that is lower than the node's common prefix
+	//Leaf nodes are considered as having the highest common prefix
+	int isLeftHigherCommonPrefix = (leftCommonPrefix > rightCommonPrefix);
+	
+	//Handle cases for the edge nodes; the first and last node
+	//For leaf nodes, leftCommonPrefix and rightCommonPrefix should never both be B3_PLBVH_INVALID_COMMON_PREFIX
+	if(leftCommonPrefix == B3_PLBVH_INVALID_COMMON_PREFIX) isLeftHigherCommonPrefix = false;
+	if(rightCommonPrefix == B3_PLBVH_INVALID_COMMON_PREFIX) isLeftHigherCommonPrefix = true;
+	
+	int parentNodeIndex = (isLeftHigherCommonPrefix) ? leftSplitIndex : rightSplitIndex;
+	out_leafNodeParentNodes[leafNodeIndex] = parentNodeIndex;
+	
+	int isRightChild = (isLeftHigherCommonPrefix);	//If the left node is the parent, then this node is its right child and vice versa
+	
+	//out_childNodesAsInt[0] == int2.x == left child
+	//out_childNodesAsInt[1] == int2.y == right child
+	int isLeaf = 1;
+	int* out_childNodesAsInt = (int*)(&out_childNodes[parentNodeIndex]);
+	out_childNodesAsInt[isRightChild] = getIndexWithInternalNodeMarkerSet(isLeaf, leafNodeIndex);	
+}
+
+__global__ void buildBinaryRadixTreeInternalNodes(uint64* commonPrefixes, int* commonPrefixLengths,
+												int2* out_childNodes,
+												int* out_internalNodeParentNodes,
+												int* out_rootNodeIndex,
+												uint numInternalNodes)
+{
+	uint internalNodeIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if(internalNodeIndex >= numInternalNodes) return;
+	
+	uint64 nodePrefix = commonPrefixes[internalNodeIndex];
+	int nodePrefixLength = commonPrefixLengths[internalNodeIndex];
+	
+	// binary search
+
+	//Find nearest element to left with a lower common prefix
+	int leftIndex = -1;
+	{
+		int lower = 0;
+		int upper = internalNodeIndex - 1;
+		
+		while(lower <= upper)
+		{
+			int mid = (lower + upper) / 2;
+			uint64 midPrefix = commonPrefixes[mid];
+			int midPrefixLength = commonPrefixLengths[mid];
+			
+			int nodeMidSharedPrefixLength = getSharedPrefixLength(nodePrefix, nodePrefixLength, midPrefix, midPrefixLength);
+			if(nodeMidSharedPrefixLength < nodePrefixLength) 
+			{
+				int right = mid + 1;
+				if(right < internalNodeIndex)
+				{
+					uint64 rightPrefix = commonPrefixes[right];
+					int rightPrefixLength = commonPrefixLengths[right];
+					
+					int nodeRightSharedPrefixLength = getSharedPrefixLength(nodePrefix, nodePrefixLength, rightPrefix, rightPrefixLength);
+					if(nodeRightSharedPrefixLength < nodePrefixLength) 
+					{
+						lower = right;
+						leftIndex = right;
+					}
+					else 
+					{
+						leftIndex = mid;
+						break;
+					}
+				}
+				else 
+				{
+					leftIndex = mid;
+					break;
+				}
+			}
+			else upper = mid - 1;
+		}
+	}
+	
+	//Find nearest element to right with a lower common prefix
+	int rightIndex = -1;
+	{
+		int lower = internalNodeIndex + 1;
+		int upper = numInternalNodes - 1;
+		
+		while(lower <= upper)
+		{
+			int mid = (lower + upper) / 2;
+			uint64 midPrefix = commonPrefixes[mid];
+			int midPrefixLength = commonPrefixLengths[mid];
+			
+			int nodeMidSharedPrefixLength = getSharedPrefixLength(nodePrefix, nodePrefixLength, midPrefix, midPrefixLength);
+			if(nodeMidSharedPrefixLength < nodePrefixLength) 
+			{
+				int left = mid - 1;
+				if(left > internalNodeIndex)
+				{
+					uint64 leftPrefix = commonPrefixes[left];
+					int leftPrefixLength = commonPrefixLengths[left];
+				
+					int nodeLeftSharedPrefixLength = getSharedPrefixLength(nodePrefix, nodePrefixLength, leftPrefix, leftPrefixLength);
+					if(nodeLeftSharedPrefixLength < nodePrefixLength) 
+					{
+						upper = left;
+						rightIndex = left;
+					}
+					else 
+					{
+						rightIndex = mid;
+						break;
+					}
+				}
+				else 
+				{
+					rightIndex = mid;
+					break;
+				}
+			}
+			else lower = mid + 1;
+		}
+	}
+
+	//Select parent
+	{
+		int leftPrefixLength = (leftIndex != -1) ? commonPrefixLengths[leftIndex] : B3_PLBVH_INVALID_COMMON_PREFIX;
+		int rightPrefixLength =  (rightIndex != -1) ? commonPrefixLengths[rightIndex] : B3_PLBVH_INVALID_COMMON_PREFIX;
+		
+		int isLeftHigherPrefixLength = (leftPrefixLength > rightPrefixLength);
+		
+		if(leftPrefixLength == B3_PLBVH_INVALID_COMMON_PREFIX) isLeftHigherPrefixLength = false;
+		else if(rightPrefixLength == B3_PLBVH_INVALID_COMMON_PREFIX) isLeftHigherPrefixLength = true;
+		
+		int parentNodeIndex = (isLeftHigherPrefixLength) ? leftIndex : rightIndex;
+		
+		int isRootNode = (leftIndex == -1 && rightIndex == -1);
+		out_internalNodeParentNodes[internalNodeIndex] = (!isRootNode) ? parentNodeIndex : B3_PLBVH_ROOT_NODE_MARKER;
+		
+		int isLeaf = 0;
+		if(!isRootNode)
+		{
+			int isRightChild = (isLeftHigherPrefixLength);	//If the left node is the parent, then this node is its right child and vice versa
+			
+			//out_childNodesAsInt[0] == int2.x == left child
+			//out_childNodesAsInt[1] == int2.y == right child
+			int* out_childNodesAsInt = (int*)(&out_childNodes[parentNodeIndex]);
+			out_childNodesAsInt[isRightChild] = getIndexWithInternalNodeMarkerSet(isLeaf, internalNodeIndex);
+		}
+		else *out_rootNodeIndex = getIndexWithInternalNodeMarkerSet(isLeaf, internalNodeIndex);
+	}
+}
+
+__global__ void findDistanceFromRoot(int* rootNodeIndex, int* internalNodeParentNodes,
+									int* out_maxDistanceFromRoot, 
+									int* out_distanceFromRoot, 
+									uint numInternalNodes)
+{
+	uint internalNodeIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	
+	// need reduce here if( internalNodeIndex == 0 ) atomic_xchg(out_maxDistanceFromRoot, 0);
+
+	if(internalNodeIndex >= numInternalNodes) return;
+	
+	int distanceFromRoot = 0;
+	{
+		int parentIndex = internalNodeParentNodes[internalNodeIndex];
+		while(parentIndex != B3_PLBVH_ROOT_NODE_MARKER)
+		{
+			parentIndex = internalNodeParentNodes[parentIndex];
+			++distanceFromRoot;
+		}
+	}
+	out_distanceFromRoot[internalNodeIndex] = distanceFromRoot;
+	
+	/* need reduce here
+	__local int localMaxDistanceFromRoot;
+	if( get_local_id(0) == 0 ) localMaxDistanceFromRoot = 0;
+	barrier(CLK_LOCAL_MEM_FENCE);
+	
+	atomic_max(&localMaxDistanceFromRoot, distanceFromRoot);
+	barrier(CLK_LOCAL_MEM_FENCE);
+	
+	if( get_local_id(0) == 0 ) atomic_max(out_maxDistanceFromRoot, localMaxDistanceFromRoot);
+	*/
+}
+
+__global__ void buildBinaryRadixTreeAabbsRecursive(int * distanceFromRoot, KeyValuePair * mortonCodesAndAabbIndices,
+												int2 * childNodes,
+												Aabb * leafNodeAabbs, Aabb * internalNodeAabbs,
+												int maxDistanceFromRoot, int processedDistance, 
+												uint numInternalNodes)
+{
+	uint internalNodeIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if(internalNodeIndex >= numInternalNodes) return;
+	
+	int distance = distanceFromRoot[internalNodeIndex];
+	
+	if(distance == processedDistance)
+	{
+		int leftChildIndex = childNodes[internalNodeIndex].x;
+		int rightChildIndex = childNodes[internalNodeIndex].y;
+		
+		int isLeftChildLeaf = isLeafNode(leftChildIndex);
+		int isRightChildLeaf = isLeafNode(rightChildIndex);
+		
+		leftChildIndex = getIndexWithInternalNodeMarkerRemoved(leftChildIndex);
+		rightChildIndex = getIndexWithInternalNodeMarkerRemoved(rightChildIndex);
+		
+		//leftRigidIndex/rightRigidIndex is not used if internal node
+		int leftRigidIndex = (isLeftChildLeaf) ? mortonCodesAndAabbIndices[leftChildIndex].value : -1;
+		int rightRigidIndex = (isRightChildLeaf) ? mortonCodesAndAabbIndices[rightChildIndex].value : -1;
+		
+		Aabb leftChildAabb = (isLeftChildLeaf) ? leafNodeAabbs[leftRigidIndex] : internalNodeAabbs[leftChildIndex];
+		Aabb rightChildAabb = (isRightChildLeaf) ? leafNodeAabbs[rightRigidIndex] : internalNodeAabbs[rightChildIndex];
+		
+		Aabb mergedAabb = leftChildAabb;
+		expandAabb(mergedAabb, rightChildAabb);
+		internalNodeAabbs[internalNodeIndex] = mergedAabb;
+	}
 }
 
 extern "C" void bvhCalculateLeafAabbs(Aabb *dst, float3 * cvs, EdgeContact * edges, unsigned numEdges, unsigned numVertices)

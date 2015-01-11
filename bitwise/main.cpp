@@ -111,7 +111,10 @@ int main(int argc, char * const argv[])
 	uint64 sharedBits = u0 & u1;
 	std::cout<<boost::format("shared bits: %1%\n") % byte_to_binary64(sharedBits);
 	std::cout<<boost::format("common prefix: %1%\n") % byte_to_binary64(sharedBits & bitMask);
-	
+	std::cout<<boost::format("mask 0x80000000: %1%\n") % byte_to_binary(0x80000000);
+	std::cout<<boost::format("~mask ~0x80000000: %1%\n") % byte_to_binary(~0x80000000);
+	std::cout<<boost::format("8 masked: %1%\n") % byte_to_binary(8 | 0x80000000);
+	std::cout<<boost::format("8 unmasked: %1%\n") % byte_to_binary(8 & (~0x80000000));
 	std::cout<<"end of test\n";
 	return 0;
 }

@@ -48,7 +48,8 @@ struct EdgeContact {
 };
 
 #define MAX_INDEX 999999999
-#define TINY_VALUE 10e-6
+#define TINY_VALUE 10e-7
+#define TINY_VALUE2 10e-6
 
 #endif        //  #ifndef BVH_COMMON_H
 
