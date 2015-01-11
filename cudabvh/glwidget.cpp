@@ -110,9 +110,11 @@ void GLWidget::showAabbs()
 	bb.setMax(ab.high.x, ab.high.y, ab.high.z);
 	glColor3f(0.1f, 0.4f, 0.3f);
     dr->boundingBox(bb);
+	
 #ifdef BVHSOLVER_DBG_DRAW
     Aabb * boxes = m_solver->displayAabbs();
     unsigned ne = m_solver->numLeafNodes();
+	
 #ifdef BVHSOLVER_DBG_DRAW_LEAFBOX
 	glColor3f(0.2f, 0.2f, 0.3f);
 	int ninvalidbox = 0;
@@ -140,7 +142,7 @@ void GLWidget::showAabbs()
 	for(unsigned i=0; i < ne-1; i++) {
 		float red = (float)i/(float)ne;
 		
-		if(leafHash[i].value < 0 || leafHash[i].value >= ne) {
+		if(leafHash[i].value >= ne) {
 			qDebug()<<"invalid hash value "<<leafHash[i].value;
 			nzero++;
 		}
@@ -160,7 +162,8 @@ void GLWidget::showAabbs()
 	}
 	glEnd();	
 	if(nzero > 0) qDebug()<<"n zero code "<<nzero;
-#endif	
+#endif
+
 #endif
 }
 

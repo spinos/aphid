@@ -12,6 +12,11 @@
 #include <iostream>
 #include <cuda_runtime_api.h>
 typedef unsigned int uint;
+#ifdef __APPLE__
+typedef unsigned long long uint64;
+#else
+typedef unsigned long uint64;
+#endif
 
 static uint iDivUp(uint dividend, uint divisor)
 {

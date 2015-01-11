@@ -1,5 +1,39 @@
 #include "createBvh_implement.h"
 
+//Set so that it is always greater than the actual common prefixes, and never selected as a parent node.
+//If there are no duplicates, then the highest common prefix is 32 or 64, depending on the number of bits used for the z-curve.
+//Duplicate common prefixes increase the highest common prefix at most by the number of bits used to index the leaf node.
+//Since 32 bit ints are used to index leaf nodes, the max prefix is 64(32 + 32 bit z-curve) or 96(32 + 64 bit z-curve).
+#define B3_PLBVH_INVALID_COMMON_PREFIX 128
+#define B3_PLBVH_ROOT_NODE_MARKER -1
+
+inline __device__ int computeCommonPrefixLength(uint64 i, uint64 j) 
+{ return (int)__clzll(i ^ j); }
+
+inline __device__ uint64 computeCommonPrefix(uint64 i, uint64 j) 
+{
+	//This function only needs to return (i & j) in order for the algorithm to work,
+	//but it may help with debugging to mask out the lower bits.
+
+	uint64 commonPrefixLength = (uint64)computeCommonPrefixLength(i, j);
+
+	uint64 sharedBits = i & j;
+	
+	//Set all bits after the common prefix to 0
+	uint64 bitmask = ((uint64)(~0)) << (64 - commonPrefixLength);	
+	
+	return sharedBits & bitmask;
+}
+
+//Same as computeCommonPrefixLength(), but allows for prefixes with different lengths
+inline __device__ int getSharedPrefixLength(uint64 prefixA, int prefixLengthA, uint64 prefixB, int prefixLengthB)
+{
+	return min( computeCommonPrefixLength(prefixA, prefixB), min(prefixLengthA, prefixLengthB) );
+}
+
+inline __device__ uint64 upsample(uint a, uint b) 
+{ return ((uint64)a << 32) | (uint64)b; }
+
 // Expands a 10-bit integer into 30 bits 
 // by inserting 2 zeros after each bit. 
 inline __device__ uint expandBits(uint v) 
@@ -91,6 +125,35 @@ __global__ void calculateLeafHash_kernel(KeyValuePair *dst, Aabb * leafBoxes, ui
 	
 	dst[idx].key = morton3D(c.x, c.y, c.z);
 	dst[idx].value = idx;
+}
+
+__global__ void computeAdjacentPairCommonPrefix(KeyValuePair * mortonCodesAndAabbIndices,
+											uint64* out_commonPrefixes,
+											int* out_commonPrefixLengths,
+											uint numInternalNodes)
+{
+	uint internalNodeIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if(internalNodeIndex >= numInternalNodes) return;
+	
+	//Here, (internalNodeIndex + 1) is never out of bounds since it is a leaf node index,
+	//and the number of internal nodes is always numLeafNodes - 1
+	uint leftLeafIndex = internalNodeIndex;
+	uint rightLeafIndex = internalNodeIndex + 1;
+	
+	uint leftLeafMortonCode = mortonCodesAndAabbIndices[leftLeafIndex].key;
+	uint rightLeafMortonCode = mortonCodesAndAabbIndices[rightLeafIndex].key;
+	
+	//Binary radix tree construction algorithm does not work if there are duplicate morton codes.
+	//Append the index of each leaf node to each morton code so that there are no duplicates.
+	//The algorithm also requires that the morton codes are sorted in ascending order; this requirement
+	//is also satisfied with this method, as (leftLeafIndex < rightLeafIndex) is always true.
+	//
+	//
+	uint64 nonduplicateLeftMortonCode = upsample(leftLeafMortonCode, leftLeafIndex);
+	uint64 nonduplicateRightMortonCode = upsample(rightLeafMortonCode, rightLeafIndex);
+	
+	out_commonPrefixes[internalNodeIndex] = computeCommonPrefix(nonduplicateLeftMortonCode, nonduplicateRightMortonCode);
+	out_commonPrefixLengths[internalNodeIndex] = computeCommonPrefixLength(nonduplicateLeftMortonCode, nonduplicateRightMortonCode);
 }
 
 extern "C" void bvhCalculateLeafAabbs(Aabb *dst, float3 * cvs, EdgeContact * edges, unsigned numEdges, unsigned numVertices)

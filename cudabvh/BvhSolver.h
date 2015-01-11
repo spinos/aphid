@@ -34,6 +34,7 @@ public:
 	const Aabb combinedAabb() const; 
 	
 	const unsigned numLeafNodes() const;
+	const unsigned numInternalNodes() const;
 	
 #ifdef BVHSOLVER_DBG_DRAW
 	Aabb * displayAabbs();
@@ -48,6 +49,7 @@ private:
 	void formLeafAabbs();
 	void combineAabb();
 	void calcLeafHash();
+	void buildInternalTree();
 	
 private:
 	Aabb m_bigAabb;
@@ -67,6 +69,6 @@ private:
 	BaseBuffer * m_displayLeafHash;
 #endif
 
-	unsigned m_numTriIndices, m_numTriangles, m_numEdges, m_internalNodes;
+	unsigned m_numTriIndices, m_numTriangles, m_numEdges;
 	float m_alpha;
 };

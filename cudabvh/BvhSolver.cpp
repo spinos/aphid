@@ -162,11 +162,11 @@ void BvhSolver::init()
 	m_lastReduceBlk = new BaseBuffer;
 	m_lastReduceBlk->create(getReduceLastNThreads(m_numEdges) * sizeof(Aabb));
 	
-	m_internalNodes = m_numEdges - 1;
-	
 	qDebug()<<"num points "<<numVertices();
 	qDebug()<<"num triangles "<<m_numTriangles;
 	qDebug()<<"num edges "<<m_numEdges;
+	qDebug()<<"num internal nodes "<<numInternalNodes();
+	qDebug()<<"num leaf nodes "<<numLeafNodes();
 }
 
 void BvhSolver::stepPhysics(float dt)
@@ -175,6 +175,7 @@ void BvhSolver::stepPhysics(float dt)
 	combineAabb();
 	formLeafAabbs();
 	calcLeafHash();
+	buildInternalTree();
 }
 
 void BvhSolver::formPlane(float alpha)
@@ -243,6 +244,11 @@ void BvhSolver::calcLeafHash()
 #endif
 }
 
+void BvhSolver::buildInternalTree()
+{
+	
+}
+
 const unsigned BvhSolver::numVertices() const { return UDIM1 * UDIM1; }
 
 unsigned BvhSolver::getNumTriangleFaceVertices() const { return m_numTriIndices; }
@@ -262,3 +268,4 @@ void BvhSolver::setAlpha(float x) { m_alpha = x; }
 const Aabb BvhSolver::combinedAabb() const { return m_bigAabb; }
 
 const unsigned BvhSolver::numLeafNodes() const { return m_numEdges; }
+const unsigned BvhSolver::numInternalNodes() const { return numLeafNodes() - 1; }
