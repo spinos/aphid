@@ -41,6 +41,7 @@ public:
 	Aabb * displayLeafAabbs();
 	Aabb * displayInternalAabbs();
 	KeyValuePair * displayLeafHash();
+	int * displayInternalDistances();
 #endif
 
 protected:
@@ -80,6 +81,7 @@ private:
 #ifdef BVHSOLVER_DBG_DRAW
 	BaseBuffer * m_displayLeafAabbs;
 	BaseBuffer * m_displayInternalAabbs;
+	BaseBuffer * m_displayInternalDistance;
 	BaseBuffer * m_displayLeafHash;
 #endif
 	int m_rootNodeIndex;

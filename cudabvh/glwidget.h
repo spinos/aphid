@@ -22,13 +22,14 @@ protected:
 	virtual void clientSelect(QMouseEvent *event);
     virtual void clientDeselect(QMouseEvent *event);
     virtual void clientMouseInput(QMouseEvent *event);
-	
+	virtual void keyPressEvent(QKeyEvent *event);
 private:
 	void showEdgeContacts();
 	void showAabbs();
 
 private:
 	BvhSolver * m_solver;
+	int m_displayLevel;
 private slots:
     
 };

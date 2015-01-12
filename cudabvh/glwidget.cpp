@@ -13,6 +13,7 @@
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_solver = new BvhSolver;
+	m_displayLevel = 0;
 }
 
 GLWidget::~GLWidget()
@@ -112,23 +113,29 @@ void GLWidget::showAabbs()
     // dr->boundingBox(bb);
 	
 #ifdef BVHSOLVER_DBG_DRAW
-    Aabb * boxes = m_solver->displayInternalAabbs();
-    unsigned ne = m_solver->numInternalNodes();
 	
-#ifdef BVHSOLVER_DBG_DRAW_LEAFBOX
-	glColor3f(0.2f, 0.2f, 0.3f);
+#ifdef BVHSOLVER_DBG_DRAW_INTERNALBOX
+	Aabb * boxes = m_solver->displayInternalAabbs();
+	int * levels = m_solver->displayInternalDistances();
+    unsigned ne = m_solver->numInternalNodes();
+
 	int ninvalidbox = 0;
     for(unsigned i=0; i < ne; i++) {
+		if(levels[i] >  m_displayLevel) continue;
         ab = boxes[i];
         
 		bb.setMin(ab.low.x, ab.low.y, ab.low.z);
         bb.setMax(ab.high.x, ab.high.y, ab.high.z);
 		
 		if(!bb.isValid() || bb.area() < 0.1f) {
-			qDebug()<<bb.str().c_str();
+			// qDebug()<<bb.str().c_str();
 			ninvalidbox++;
 		}
 		
+		float redc = ((float)(levels[i] % 22))/22.f;
+		
+		glColor3f(redc, 1.f - redc, 0.f);
+	
         dr->boundingBox(bb);
     }
 	if(ninvalidbox > 0) qDebug()<<"n invalid box "<<ninvalidbox;
@@ -189,3 +196,24 @@ void GLWidget::clientMouseInput(QMouseEvent */*event*/)
 	setUpdatesEnabled(true);
 }
 
+void GLWidget::keyPressEvent(QKeyEvent *event)
+{
+	switch (event->key()) {
+		case Qt::Key_A:
+			m_displayLevel++;
+			break;
+		case Qt::Key_D:
+			m_displayLevel--;
+			break;
+		case Qt::Key_W:
+			internalTimer()->stop();
+			break;
+		case Qt::Key_S:
+			internalTimer()->start();
+			break;
+		default:
+			break;
+	}
+	
+	Base3DView::keyPressEvent(event);
+}

@@ -178,6 +178,8 @@ void BvhSolver::init()
 	m_displayInternalAabbs->create(numInternalNodes() * sizeof(Aabb));
 	m_displayLeafHash = new BaseBuffer;
 	m_displayLeafHash->create(numLeafNodes() * sizeof(KeyValuePair));
+	m_displayInternalDistance = new BaseBuffer;
+	m_displayInternalDistance->create(numInternalNodes() * sizeof(int));
 #endif
 
 	m_lastReduceBlk = new BaseBuffer;
@@ -325,6 +327,9 @@ void BvhSolver::findMaxDistanceFromRoot()
 		qDebug()<<" node["<<i<<"] "<<p[i];
 	delete[] p;
 	*/
+#ifdef BVHSOLVER_DBG_DRAW
+	m_distanceInternalNodeFromRoot->deviceToHost(m_displayInternalDistance->data(), m_distanceInternalNodeFromRoot->bufferSize());
+#endif
 }
 
 void BvhSolver::formInternalTreeAabbsIterative()
@@ -365,6 +370,7 @@ const unsigned BvhSolver::numEdges() const { return m_numEdges; }
 Aabb * BvhSolver::displayLeafAabbs() { return (Aabb *)m_displayLeafAabbs->data(); }
 Aabb * BvhSolver::displayInternalAabbs() { return (Aabb *)m_displayInternalAabbs->data(); }
 KeyValuePair * BvhSolver::displayLeafHash() { return (KeyValuePair *)m_displayLeafHash->data(); }
+int * BvhSolver::displayInternalDistances() { return (int *)m_displayInternalDistance->data(); }
 #endif
 
 void BvhSolver::setAlpha(float x) { m_alpha = x; }
