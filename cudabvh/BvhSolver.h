@@ -50,6 +50,7 @@ private:
 	void combineAabb();
 	void calcLeafHash();
 	void buildInternalTree();
+	void findMaxDistanceFromRoot();
 	
 	void printLeafInternalNodeConnection();
 	void printInternalNodeConnection();
@@ -71,6 +72,8 @@ private:
 	CUDABuffer * m_internalNodeChildIndices;
 	CUDABuffer * m_internalNodeParentIndices;
 	CUDABuffer * m_rootNodeIndexOnDevice;
+    CUDABuffer * m_distanceInternalNodeFromRoot;
+	CUDABuffer * m_reducedMaxDistance;
     
 #ifdef BVHSOLVER_DBG_DRAW
 	BaseBuffer * m_displayAabbs;

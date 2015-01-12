@@ -361,8 +361,8 @@ __global__ void connectInternalTreeNodes_kernel(uint64* commonPrefixes, int* com
 	}
 }
 
-__global__ void findDistanceFromRoot(int* rootNodeIndex, int* internalNodeParentNodes,
-									int* out_maxDistanceFromRoot, 
+__global__ void findDistanceFromRoot_kernel(int* rootNodeIndex, int* internalNodeParentNodes,
+									// int* out_maxDistanceFromRoot, 
 									int* out_distanceFromRoot, 
 									uint numInternalNodes)
 {
@@ -483,5 +483,18 @@ extern "C" void bvhConnectInternalTreeNodes(uint64 * commonPrefix, int * commonP
     
     dim3 grid(nblk, 1, 1);
     connectInternalTreeNodes_kernel<<< grid, block >>>(commonPrefix, commonPrefixLengths, o_internalNodeChildIndex, o_internalNodeParentIndex, o_rootNodeIndex, numInternalNodes);
+}
+
+extern "C" void bvhFindDistanceFromRoot(int* rootNodeIndex, int* internalNodeParentNodes,
+									int* out_distanceFromRoot, 
+									uint numInternalNodes)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numInternalNodes, 512);
+    
+    dim3 grid(nblk, 1, 1);
+    findDistanceFromRoot_kernel<<< grid, block >>>(rootNodeIndex, internalNodeParentNodes,
+								out_distanceFromRoot, 
+								numInternalNodes);
 }
 

@@ -5,11 +5,14 @@
 #include <radixsort_implement.h>
 
 extern "C" void bvhCalculateLeafAabbs(Aabb *dst, float3 * cvs, EdgeContact * edges, unsigned numEdges, unsigned numVertices);
+
 extern "C" void bvhCalculateLeafHash(KeyValuePair * dst, Aabb * leafBoxes, uint numLeaves, Aabb bigBox);
+
 extern "C" void bvhComputeAdjacentPairCommonPrefix(KeyValuePair * mortonCode,
 													uint64 * o_commonPrefix,
 													int * o_commonPrefixLength,
 													uint numInternalNodes);
+													
 extern "C" void bvhConnectLeafNodesToInternalTree(int * commonPrefixLengths, 
 								int * o_leafNodeParentIndex,
 								int2 * o_internalNodeChildIndex, 
@@ -20,5 +23,10 @@ extern "C" void bvhConnectInternalTreeNodes(uint64 * commonPrefix, int * commonP
 											int * o_internalNodeParentIndex,
 											int * o_rootNodeIndex,
 											uint numInternalNodes);
+											
+extern "C" void bvhFindDistanceFromRoot(int* rootNodeIndex, int* internalNodeParentNodes,
+									int* out_distanceFromRoot, 
+									uint numInternalNodes);
+									
 #endif        //  #ifndef CREATEBVH_IMPLEMENT_H
 

@@ -13,6 +13,7 @@
 #include "plane_implement.h"
 #include "createBvh_implement.h"
 #include "reduceBox_implement.h"
+#include "reduceRange_implement.h"
 
 unsigned UDIM = 121;
 unsigned UDIM1 = 122;
@@ -163,6 +164,11 @@ void BvhSolver::init()
 	m_internalNodeParentIndices->create(numInternalNodes() * sizeof(int));
 	m_rootNodeIndexOnDevice = new CUDABuffer;
 	m_rootNodeIndexOnDevice->create(sizeof(int));
+	m_distanceInternalNodeFromRoot = new CUDABuffer;
+	m_distanceInternalNodeFromRoot->create(numInternalNodes() * sizeof(int));
+	
+	m_reducedMaxDistance = new CUDABuffer;
+	m_reducedMaxDistance->create(ReduceMaxBlocks * sizeof(int));
 
 #ifdef BVHSOLVER_DBG_DRAW	
 	m_displayAabbs = new BaseBuffer;
@@ -235,10 +241,7 @@ void BvhSolver::combineAabb()
 		n = (n + (threads*2-1)) / (threads*2);
 	}
 	
-	m_combinedAabb->deviceToHost(m_lastReduceBlk->data(), m_lastReduceBlk->bufferSize());
-	Aabb * c = (Aabb *)m_lastReduceBlk->data();
-	m_bigAabb = c[0];
-
+	m_combinedAabb->deviceToHost(&m_bigAabb, sizeof(Aabb));
 	
 #ifdef BVHSOLVER_DBG_DRAW
 	m_combinedAabb->deviceToHost(m_displayCombinedAabb->data(), m_combinedAabb->bufferSize());
@@ -278,20 +281,50 @@ void BvhSolver::buildInternalTree()
 								numLeafNodes());
 								
 	void * internalNodeParentIndex = m_internalNodeParentIndices->bufferOnDevice();
-	
+	void * rootInd = m_rootNodeIndexOnDevice->bufferOnDevice();
 	bvhConnectInternalTreeNodes((uint64 *)commonPrefix, (int *)commonPrefixLengths,
 								(int2 *)internalNodeChildIndex,
 								(int *)internalNodeParentIndex,
-								(int *)m_rootNodeIndexOnDevice->bufferOnDevice(),
+								(int *)rootInd,
 								numInternalNodes());
-								
-	// TODO findDistanceFromRoot
+	
+	void * distanceFromRoot = m_distanceInternalNodeFromRoot->bufferOnDevice();
+	bvhFindDistanceFromRoot((int *)rootInd, (int *)internalNodeParentIndex,
+							(int *)distanceFromRoot, 
+							numInternalNodes());
+							
+	findMaxDistanceFromRoot();						
 	// TODO buildBinaryRadixTreeAabbsRecursive
 	
 	// m_rootNodeIndexOnDevice->deviceToHost((void *)&m_rootNodeIndex, m_rootNodeIndexOnDevice->bufferSize());
 	// qDebug()<<"root node index "<<(m_rootNodeIndex & (~0x80000000));
 	// printLeafInternalNodeConnection();
 	// printInternalNodeConnection();
+}
+
+void BvhSolver::findMaxDistanceFromRoot()
+{
+	void * psrc = m_distanceInternalNodeFromRoot->bufferOnDevice();
+    void * pdst = m_reducedMaxDistance->bufferOnDevice();
+	
+	unsigned n = numInternalNodes();
+	unsigned threads, blocks;
+	getReduceBlockThread(blocks, threads, n);
+	
+	bvhReduceFindMax((int *)pdst, (int *)psrc, n, blocks, threads);
+	
+	n = blocks;
+	while(n > 1) {
+		getReduceBlockThread(blocks, threads, n);
+		
+		bvhReduceFindMax((int *)pdst, (int *)pdst, n, blocks, threads);
+		
+		n = (n + (threads*2-1)) / (threads*2);
+	}
+	
+	// int tmax = -1;
+	// m_reducedMaxDistance->deviceToHost(&tmax, sizeof(int));
+	// qDebug()<<"max level "<<tmax;
 }
 
 const unsigned BvhSolver::numVertices() const { return UDIM1 * UDIM1; }

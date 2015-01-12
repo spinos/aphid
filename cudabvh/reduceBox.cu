@@ -8,42 +8,42 @@ inline __device__ void resetAabb(Aabb & dst)
 
 inline __device__ void expandAabb(Aabb & dst, float3 p)
 {
-    if(p.x < dst.low.x) dst.low.x = p.x - TINY_VALUE;
-    if(p.y < dst.low.y) dst.low.y = p.y - TINY_VALUE;
-    if(p.z < dst.low.z) dst.low.z = p.z - TINY_VALUE;
-    if(p.x > dst.high.x) dst.high.x = p.x + TINY_VALUE;
-    if(p.y > dst.high.y) dst.high.y = p.y + TINY_VALUE;
-    if(p.z > dst.high.z) dst.high.z = p.z + TINY_VALUE;
+    if(p.x < dst.low.x) dst.low.x = p.x;
+    if(p.y < dst.low.y) dst.low.y = p.y;
+    if(p.z < dst.low.z) dst.low.z = p.z;
+    if(p.x > dst.high.x) dst.high.x = p.x;
+    if(p.y > dst.high.y) dst.high.y = p.y;
+    if(p.z > dst.high.z) dst.high.z = p.z;
 }
 
 inline __device__ void expandAabb(Aabb & dst, float4 p)
 {
-    if(p.x < dst.low.x) dst.low.x = p.x - TINY_VALUE;
-    if(p.y < dst.low.y) dst.low.y = p.y - TINY_VALUE;
-    if(p.z < dst.low.z) dst.low.z = p.z - TINY_VALUE;
-    if(p.x > dst.high.x) dst.high.x = p.x + TINY_VALUE;
-    if(p.y > dst.high.y) dst.high.y = p.y + TINY_VALUE;
-    if(p.z > dst.high.z) dst.high.z = p.z + TINY_VALUE;
+    if(p.x < dst.low.x) dst.low.x = p.x;
+    if(p.y < dst.low.y) dst.low.y = p.y;
+    if(p.z < dst.low.z) dst.low.z = p.z;
+    if(p.x > dst.high.x) dst.high.x = p.x;
+    if(p.y > dst.high.y) dst.high.y = p.y;
+    if(p.z > dst.high.z) dst.high.z = p.z;
 }
 
 inline __device__ void expandAabb(Aabb & dst, const Aabb & src)
 {
-    if(src.low.x < dst.low.x) dst.low.x = src.low.x - TINY_VALUE;
-    if(src.low.y < dst.low.y) dst.low.y = src.low.y - TINY_VALUE;
-    if(src.low.z < dst.low.z) dst.low.z = src.low.z - TINY_VALUE;
-    if(src.high.x > dst.high.x) dst.high.x = src.high.x + TINY_VALUE;
-    if(src.high.y > dst.high.y) dst.high.y = src.high.y + TINY_VALUE;
-    if(src.high.z > dst.high.z) dst.high.z = src.high.z + TINY_VALUE;
+    if(src.low.x < dst.low.x) dst.low.x = src.low.x;
+    if(src.low.y < dst.low.y) dst.low.y = src.low.y;
+    if(src.low.z < dst.low.z) dst.low.z = src.low.z;
+    if(src.high.x > dst.high.x) dst.high.x = src.high.x;
+    if(src.high.y > dst.high.y) dst.high.y = src.high.y;
+    if(src.high.z > dst.high.z) dst.high.z = src.high.z;
 }
 
 inline __device__ void expandAabb(Aabb & dst, volatile Aabb * src)
 {
-    if(src->low.x < dst.low.x) dst.low.x = src->low.x - TINY_VALUE;
-    if(src->low.y < dst.low.y) dst.low.y = src->low.y - TINY_VALUE;
-    if(src->low.z < dst.low.z) dst.low.z = src->low.z - TINY_VALUE;
-    if(src->high.x > dst.high.x) dst.high.x = src->high.x + TINY_VALUE;
-    if(src->high.y > dst.high.y) dst.high.y = src->high.y + TINY_VALUE;
-    if(src->high.z > dst.high.z) dst.high.z = src->high.z + TINY_VALUE;
+    if(src->low.x < dst.low.x) dst.low.x = src->low.x;
+    if(src->low.y < dst.low.y) dst.low.y = src->low.y;
+    if(src->low.z < dst.low.z) dst.low.z = src->low.z;
+    if(src->high.x > dst.high.x) dst.high.x = src->high.x;
+    if(src->high.y > dst.high.y) dst.high.y = src->high.y;
+    if(src->high.z > dst.high.z) dst.high.z = src->high.z;
 }
 
 inline __device__ void copyVola(volatile Aabb * dst, const Aabb & src)
@@ -362,23 +362,3 @@ extern "C" void bvhReduceAabbByPoints(Aabb *dst, float3 *src, unsigned numPoints
 	}
 }
 
-extern "C" void getReduceBlockThread(uint & blocks, uint & threads, uint n)
-{
-	threads = (n < ReduceMaxThreads*2) ? nextPow2((n + 1)/ 2) : ReduceMaxThreads;
-	blocks = (n + (threads * 2 - 1)) / (threads * 2);
-	if(blocks > ReduceMaxBlocks) blocks = ReduceMaxBlocks;
-}
-
-extern "C" unsigned getReduceLastNThreads(unsigned n)
-{
-	unsigned threads, blocks;
-	getReduceBlockThread(blocks, threads, n);
-	
-	n = blocks;
-	while(n > 1) {
-		getReduceBlockThread(blocks, threads, n);
-		
-		n = (n + (threads*2-1)) / (threads*2);
-	}
-	return threads;
-}
