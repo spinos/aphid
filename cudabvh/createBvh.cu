@@ -86,12 +86,12 @@ inline __device__ void resetAabb(Aabb & dst)
 
 inline __device__ void expandAabb(Aabb & dst, float3 p)
 {
-    if(p.x < dst.low.x) dst.low.x = p.x - TINY_VALUE;
-    if(p.y < dst.low.y) dst.low.y = p.y - TINY_VALUE;
-    if(p.z < dst.low.z) dst.low.z = p.z - TINY_VALUE;
-    if(p.x > dst.high.x) dst.high.x = p.x + TINY_VALUE;
-    if(p.y > dst.high.y) dst.high.y = p.y + TINY_VALUE;
-    if(p.z > dst.high.z) dst.high.z = p.z + TINY_VALUE;
+    if(p.x < dst.low.x) dst.low.x = p.x;
+    if(p.y < dst.low.y) dst.low.y = p.y;
+    if(p.z < dst.low.z) dst.low.z = p.z;
+    if(p.x > dst.high.x) dst.high.x = p.x;
+    if(p.y > dst.high.y) dst.high.y = p.y;
+    if(p.z > dst.high.z) dst.high.z = p.z;
 }
 
 inline __device__ void expandAabb(Aabb & dst, const Aabb & b)
@@ -395,7 +395,7 @@ __global__ void findDistanceFromRoot_kernel(int* rootNodeIndex, int* internalNod
 	*/
 }
 
-__global__ void buildBinaryRadixTreeAabbsRecursive(int * distanceFromRoot, KeyValuePair * mortonCodesAndAabbIndices,
+__global__ void formInternalNodeAabbsAtDistance_kernel(int * distanceFromRoot, KeyValuePair * mortonCodesAndAabbIndices,
 												int2 * childNodes,
 												Aabb * leafNodeAabbs, Aabb * internalNodeAabbs,
 												int maxDistanceFromRoot, int processedDistance, 
@@ -496,5 +496,22 @@ extern "C" void bvhFindDistanceFromRoot(int* rootNodeIndex, int* internalNodePar
     findDistanceFromRoot_kernel<<< grid, block >>>(rootNodeIndex, internalNodeParentNodes,
 								out_distanceFromRoot, 
 								numInternalNodes);
+}
+
+extern "C" void bvhFormInternalNodeAabbsAtDistance(int * distanceFromRoot, KeyValuePair * mortonCodesAndAabbIndices,
+												int2 * childNodes,
+												Aabb * leafNodeAabbs, Aabb * internalNodeAabbs,
+												int maxDistanceFromRoot, int processedDistance, 
+												uint numInternalNodes)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numInternalNodes, 512);
+    
+    dim3 grid(nblk, 1, 1);
+    formInternalNodeAabbsAtDistance_kernel<<< grid, block >>>(distanceFromRoot, mortonCodesAndAabbIndices,
+										childNodes,
+										leafNodeAabbs, internalNodeAabbs,
+										maxDistanceFromRoot, processedDistance, 
+										numInternalNodes);
 }
 

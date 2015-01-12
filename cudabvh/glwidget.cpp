@@ -109,11 +109,11 @@ void GLWidget::showAabbs()
 	bb.setMin(ab.low.x, ab.low.y, ab.low.z);
 	bb.setMax(ab.high.x, ab.high.y, ab.high.z);
 	glColor3f(0.1f, 0.4f, 0.3f);
-    dr->boundingBox(bb);
+    // dr->boundingBox(bb);
 	
 #ifdef BVHSOLVER_DBG_DRAW
-    Aabb * boxes = m_solver->displayAabbs();
-    unsigned ne = m_solver->numLeafNodes();
+    Aabb * boxes = m_solver->displayInternalAabbs();
+    unsigned ne = m_solver->numInternalNodes();
 	
 #ifdef BVHSOLVER_DBG_DRAW_LEAFBOX
 	glColor3f(0.2f, 0.2f, 0.3f);
@@ -133,7 +133,7 @@ void GLWidget::showAabbs()
     }
 	if(ninvalidbox > 0) qDebug()<<"n invalid box "<<ninvalidbox;
 #endif	
-
+/*
 #ifdef BVHSOLVER_DBG_DRAW_LEAFHASH
 	KeyValuePair * leafHash = m_solver->displayLeafHash();
 	glColor3f(0.8f, 0.1f, 0.f);
@@ -163,8 +163,9 @@ void GLWidget::showAabbs()
 	glEnd();	
 	if(nzero > 0) qDebug()<<"n zero code "<<nzero;
 #endif
-
+*/
 #endif
+
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

@@ -27,6 +27,7 @@ public:
 	
 	unsigned getNumTriangleFaceVertices() const;
 	unsigned * getIndices() const;
+	const unsigned numTriangles() const;
 	const unsigned numEdges() const;
 	float * displayVertex();
 	EdgeContact * edgeContacts();
@@ -37,8 +38,8 @@ public:
 	const unsigned numInternalNodes() const;
 	
 #ifdef BVHSOLVER_DBG_DRAW
-	Aabb * displayAabbs();
-	Aabb * displayCombinedAabb();
+	Aabb * displayLeafAabbs();
+	Aabb * displayInternalAabbs();
 	KeyValuePair * displayLeafHash();
 #endif
 
@@ -51,19 +52,20 @@ private:
 	void calcLeafHash();
 	void buildInternalTree();
 	void findMaxDistanceFromRoot();
+	void formInternalTreeAabbsIterative();
 	
 	void printLeafInternalNodeConnection();
 	void printInternalNodeConnection();
 	
 private:
 	Aabb m_bigAabb;
-    BaseBuffer * m_displayVertex;
+	BaseBuffer * m_displayVertex;
 	CUDABuffer * m_vertexBuffer;
 	CUDABuffer * m_edgeContactIndices;
 	unsigned * m_triIndices;
 	BaseBuffer * m_edges;
 	CUDABuffer * m_leafAabbs;
-	CUDABuffer * m_combinedAabb;
+	CUDABuffer * m_internalNodeAabbs;
 	BaseBuffer * m_lastReduceBlk;
 	CUDABuffer * m_leafHash[2];
 	CUDABuffer * m_internalNodeCommonPrefixValues;
@@ -76,8 +78,8 @@ private:
 	CUDABuffer * m_reducedMaxDistance;
     
 #ifdef BVHSOLVER_DBG_DRAW
-	BaseBuffer * m_displayAabbs;
-	BaseBuffer * m_displayCombinedAabb;
+	BaseBuffer * m_displayLeafAabbs;
+	BaseBuffer * m_displayInternalAabbs;
 	BaseBuffer * m_displayLeafHash;
 #endif
 	int m_rootNodeIndex;

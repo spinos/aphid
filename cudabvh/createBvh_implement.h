@@ -27,6 +27,12 @@ extern "C" void bvhConnectInternalTreeNodes(uint64 * commonPrefix, int * commonP
 extern "C" void bvhFindDistanceFromRoot(int* rootNodeIndex, int* internalNodeParentNodes,
 									int* out_distanceFromRoot, 
 									uint numInternalNodes);
+
+extern "C" void bvhFormInternalNodeAabbsAtDistance(int * distanceFromRoot, KeyValuePair * mortonCodesAndAabbIndices,
+												int2 * childNodes,
+												Aabb * leafNodeAabbs, Aabb * internalNodeAabbs,
+												int maxDistanceFromRoot, int processedDistance, 
+												uint numInternalNodes);
 									
 #endif        //  #ifndef CREATEBVH_IMPLEMENT_H
 

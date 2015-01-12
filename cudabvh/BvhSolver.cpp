@@ -15,8 +15,8 @@
 #include "reduceBox_implement.h"
 #include "reduceRange_implement.h"
 
-unsigned UDIM = 121;
-unsigned UDIM1 = 122;
+unsigned UDIM = 61;
+unsigned UDIM1 = 62;
 
 BvhSolver::BvhSolver(QObject *parent) : BaseSolverThread(parent) 
 {
@@ -143,8 +143,9 @@ void BvhSolver::init()
 	
 	m_leafAabbs = new CUDABuffer;
 	m_leafAabbs->create(numLeafNodes() * sizeof(Aabb));
-	m_combinedAabb = new CUDABuffer;
-	m_combinedAabb->create(ReduceMaxBlocks * sizeof(Aabb));
+	m_internalNodeAabbs = new CUDABuffer;
+	// assume numInternalNodes() >> ReduceMaxBlocks
+	m_internalNodeAabbs->create(numInternalNodes() * sizeof(Aabb));
 	
 	m_leafHash[0] = new CUDABuffer;
 	m_leafHash[0]->create(numLeafNodes() * sizeof(KeyValuePair));
@@ -171,10 +172,10 @@ void BvhSolver::init()
 	m_reducedMaxDistance->create(ReduceMaxBlocks * sizeof(int));
 
 #ifdef BVHSOLVER_DBG_DRAW	
-	m_displayAabbs = new BaseBuffer;
-	m_displayAabbs->create(m_numEdges * sizeof(Aabb));
-	m_displayCombinedAabb = new BaseBuffer;
-	m_displayCombinedAabb->create(ReduceMaxBlocks * sizeof(Aabb));
+	m_displayLeafAabbs = new BaseBuffer;
+	m_displayLeafAabbs->create(numLeafNodes() * sizeof(Aabb));
+	m_displayInternalAabbs = new BaseBuffer;
+	m_displayInternalAabbs->create(numInternalNodes() * sizeof(Aabb));
 	m_displayLeafHash = new BaseBuffer;
 	m_displayLeafHash->create(numLeafNodes() * sizeof(KeyValuePair));
 #endif
@@ -183,8 +184,8 @@ void BvhSolver::init()
 	m_lastReduceBlk->create(getReduceLastNThreads(m_numEdges) * sizeof(Aabb));
 	
 	qDebug()<<"num points "<<numVertices();
-	qDebug()<<"num triangles "<<m_numTriangles;
-	qDebug()<<"num edges "<<m_numEdges;
+	qDebug()<<"num triangles "<<numTriangles();
+	qDebug()<<"num edges "<<numEdges();
 	qDebug()<<"num internal nodes "<<numInternalNodes();
 	qDebug()<<"num leaf nodes "<<numLeafNodes();
 }
@@ -213,14 +214,14 @@ void BvhSolver::formLeafAabbs()
     bvhCalculateLeafAabbs((Aabb *)dst, (float3 *)cvs, (EdgeContact *)edges, m_numEdges, numVertices());
     
 #ifdef BVHSOLVER_DBG_DRAW
-    m_leafAabbs->deviceToHost(m_displayAabbs->data(), m_leafAabbs->bufferSize());
+    m_leafAabbs->deviceToHost(m_displayLeafAabbs->data(), m_leafAabbs->bufferSize());
 #endif
 }
 
 void BvhSolver::combineAabb()
 {
 	void * psrc = m_vertexBuffer->bufferOnDevice();
-    void * pdst = m_combinedAabb->bufferOnDevice();
+    void * pdst = m_internalNodeAabbs->bufferOnDevice();
 	
 	unsigned n = numVertices();
 	unsigned threads, blocks;
@@ -240,12 +241,7 @@ void BvhSolver::combineAabb()
 		
 		n = (n + (threads*2-1)) / (threads*2);
 	}
-	
-	m_combinedAabb->deviceToHost(&m_bigAabb, sizeof(Aabb));
-	
-#ifdef BVHSOLVER_DBG_DRAW
-	m_combinedAabb->deviceToHost(m_displayCombinedAabb->data(), m_combinedAabb->bufferSize());
-#endif
+	m_internalNodeAabbs->deviceToHost(&m_bigAabb, sizeof(Aabb));
 }
 
 void BvhSolver::calcLeafHash()
@@ -294,7 +290,7 @@ void BvhSolver::buildInternalTree()
 							numInternalNodes());
 							
 	findMaxDistanceFromRoot();						
-	// TODO buildBinaryRadixTreeAabbsRecursive
+	formInternalTreeAabbsIterative();
 	
 	// m_rootNodeIndexOnDevice->deviceToHost((void *)&m_rootNodeIndex, m_rootNodeIndexOnDevice->bufferSize());
 	// qDebug()<<"root node index "<<(m_rootNodeIndex & (~0x80000000));
@@ -321,14 +317,44 @@ void BvhSolver::findMaxDistanceFromRoot()
 		
 		n = (n + (threads*2-1)) / (threads*2);
 	}
+	/*
+	int * p = new int[numInternalNodes()];
+	m_distanceInternalNodeFromRoot->deviceToHost(p, m_distanceInternalNodeFromRoot->bufferSize());
 	
-	// int tmax = -1;
-	// m_reducedMaxDistance->deviceToHost(&tmax, sizeof(int));
-	// qDebug()<<"max level "<<tmax;
+	for(int i=0; i< numInternalNodes(); i++) 
+		qDebug()<<" node["<<i<<"] "<<p[i];
+	delete[] p;
+	*/
+}
+
+void BvhSolver::formInternalTreeAabbsIterative()
+{
+	int maxDistance = -1;
+	m_reducedMaxDistance->deviceToHost(&maxDistance, sizeof(int));
+	// qDebug()<<"max level "<<maxDistance;
+	if(maxDistance < 0) 
+		return;
+	
+	void * distances = m_distanceInternalNodeFromRoot->bufferOnDevice();
+	void * boxes = m_leafHash[0]->bufferOnDevice();
+	void * internalNodeChildIndex = m_internalNodeChildIndices->bufferOnDevice();
+	void * leafNodeAabbs = m_leafAabbs->bufferOnDevice();
+	void * internalNodeAabbs = m_internalNodeAabbs->bufferOnDevice();
+	
+	for(int distanceFromRoot = maxDistance; distanceFromRoot >= 0; --distanceFromRoot) {		
+		bvhFormInternalNodeAabbsAtDistance((int *)distances, (KeyValuePair *)boxes,
+											(int2 *)internalNodeChildIndex,
+											(Aabb *)leafNodeAabbs, (Aabb *)internalNodeAabbs,
+											maxDistance, distanceFromRoot, 
+											numInternalNodes());
+	}
+#ifdef BVHSOLVER_DBG_DRAW
+	m_internalNodeAabbs->deviceToHost(m_displayInternalAabbs->data(), m_internalNodeAabbs->bufferSize());
+#endif
 }
 
 const unsigned BvhSolver::numVertices() const { return UDIM1 * UDIM1; }
-
+const unsigned BvhSolver::numTriangles() const { return m_numTriangles; }
 unsigned BvhSolver::getNumTriangleFaceVertices() const { return m_numTriIndices; }
 unsigned * BvhSolver::getIndices() const { return m_triIndices; }
 float * BvhSolver::displayVertex() { return (float *)m_displayVertex->data(); }
@@ -336,8 +362,8 @@ EdgeContact * BvhSolver::edgeContacts() { return (EdgeContact *)m_edges->data();
 const unsigned BvhSolver::numEdges() const { return m_numEdges; }
 
 #ifdef BVHSOLVER_DBG_DRAW
-Aabb * BvhSolver::displayAabbs() { return (Aabb *)m_displayAabbs->data(); }
-Aabb * BvhSolver::displayCombinedAabb() { return (Aabb *)m_displayCombinedAabb->data(); }
+Aabb * BvhSolver::displayLeafAabbs() { return (Aabb *)m_displayLeafAabbs->data(); }
+Aabb * BvhSolver::displayInternalAabbs() { return (Aabb *)m_displayInternalAabbs->data(); }
 KeyValuePair * BvhSolver::displayLeafHash() { return (KeyValuePair *)m_displayLeafHash->data(); }
 #endif
 
