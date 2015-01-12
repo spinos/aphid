@@ -42,6 +42,8 @@ void GLWidget::clientDraw()
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
+	// showRays();
+	
 	// showEdgeContacts();
 	showAabbs();
 	m_solver->setAlpha((float)elapsedTime()/300.f);
@@ -121,7 +123,7 @@ void GLWidget::showAabbs()
 
 	int ninvalidbox = 0;
     for(unsigned i=0; i < ne; i++) {
-		if(levels[i] >  m_displayLevel) continue;
+		if(levels[i] != m_displayLevel) continue;
         ab = boxes[i];
         
 		bb.setMin(ab.low.x, ab.low.y, ab.low.z);
@@ -173,6 +175,23 @@ void GLWidget::showAabbs()
 */
 #endif
 
+}
+
+void GLWidget::showRays()
+{
+	RayInfo * rays = m_solver->displayRays();
+	const unsigned nr = m_solver->numRays();
+	glColor3f(0.1f, 0.6f, 0.f);
+	glBegin(GL_LINES);
+	for(unsigned i=0; i < nr; i++) {
+		RayInfo & r = rays[i];
+		glVertex3f(r.origin.x, r.origin.y, r.origin.z);
+		glVertex3f(r.destiny.x, r.destiny.y, r.destiny.z);
+		
+		Vector3F a(r.destiny.x - r.origin.x, r.destiny.y - r.origin.y, r.destiny.z - r.origin.z);
+		// qDebug()<<" "<<a.length();
+	}
+	glEnd();
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

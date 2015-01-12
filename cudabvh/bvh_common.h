@@ -47,9 +47,15 @@ struct EdgeContact {
     uint v[4];   
 };
 
-#define MAX_INDEX 999999999
-#define TINY_VALUE 10e-7
-#define TINY_VALUE2 10e-6
+struct RayInfo {
+    float3 origin;
+    float3 destiny;
+};
+
+#define MAX_INDEX 2147483647
+#define TINY_VALUE 1e-10
+#define TINY_VALUE2 1e-8
+#define HUGE_VALUE 1e12
 
 #endif        //  #ifndef BVH_COMMON_H
 

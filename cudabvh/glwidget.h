@@ -26,6 +26,7 @@ protected:
 private:
 	void showEdgeContacts();
 	void showAabbs();
+	void showRays();
 
 private:
 	BvhSolver * m_solver;

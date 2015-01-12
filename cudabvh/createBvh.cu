@@ -37,7 +37,7 @@ inline __device__ uint64 computeCommonPrefix(uint64 i, uint64 j)
 //Same as computeCommonPrefixLength(), but allows for prefixes with different lengths
 inline __device__ int getSharedPrefixLength(uint64 prefixA, int prefixLengthA, uint64 prefixB, int prefixLengthB)
 {
-	return min( computeCommonPrefixLength(prefixA, prefixB), min(prefixLengthA, prefixLengthB) );
+    return min( computeCommonPrefixLength(prefixA, prefixB), min(prefixLengthA, prefixLengthB) );
 }
 
 inline __device__ uint64 upsample(uint a, uint b) 
@@ -80,8 +80,8 @@ inline __device__ void normalizeByBoundary(float & x, float low, float high)
 
 inline __device__ void resetAabb(Aabb & dst)
 {
-    dst.low = make_float3(10e9, 10e9, 10e9);
-    dst.high = make_float3(-10e9, -10e9, -10e9);
+    dst.low = make_float3(HUGE_VALUE, HUGE_VALUE, HUGE_VALUE);
+    dst.high = make_float3(-HUGE_VALUE, -HUGE_VALUE, -HUGE_VALUE);
 }
 
 inline __device__ void expandAabb(Aabb & dst, float3 p)
@@ -129,7 +129,7 @@ __global__ void calculateAabbs_kernel(Aabb *dst, float3 * cvs, EdgeContact * edg
 
 __global__ void calculateLeafHash_kernel(KeyValuePair *dst, Aabb * leafBoxes, uint maxInd, Aabb boundary)
 {
-	unsigned idx = blockIdx.x*blockDim.x + threadIdx.x;
+	uint idx = blockIdx.x*blockDim.x + threadIdx.x;
 	
 	if(idx >= maxInd) return;
 	

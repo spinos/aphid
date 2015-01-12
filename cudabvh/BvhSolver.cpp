@@ -12,6 +12,7 @@
 #include "BvhSolver.h"
 #include "plane_implement.h"
 #include "createBvh_implement.h"
+#include "traverseBvh_implement.h"
 #include "reduceBox_implement.h"
 #include "reduceRange_implement.h"
 
@@ -185,6 +186,13 @@ void BvhSolver::init()
 	m_lastReduceBlk = new BaseBuffer;
 	m_lastReduceBlk->create(getReduceLastNThreads(m_numEdges) * sizeof(Aabb));
 	
+	m_rays = new CUDABuffer;
+	m_rays->create(32 * 32 * sizeof(RayInfo));
+	m_displayRays = new BaseBuffer;
+	m_displayRays->create(32 * 32 * sizeof(RayInfo));
+	m_ntests = new CUDABuffer;
+	m_ntests->create(32 * 32 * sizeof(float));
+	
 	qDebug()<<"num points "<<numVertices();
 	qDebug()<<"num triangles "<<numTriangles();
 	qDebug()<<"num edges "<<numEdges();
@@ -194,17 +202,19 @@ void BvhSolver::init()
 
 void BvhSolver::stepPhysics(float dt)
 {
-	formPlane(m_alpha);
+	formPlane();
 	combineAabb();
 	formLeafAabbs();
 	calcLeafHash();
 	buildInternalTree();
+	formRays();
+	// rayTraverse();
 }
 
-void BvhSolver::formPlane(float alpha)
+void BvhSolver::formPlane()
 {
 	void *dptr = m_vertexBuffer->bufferOnDevice();
-	wavePlane((float3 *)dptr, UDIM, 2.0, alpha);
+	wavePlane((float3 *)dptr, UDIM, 2.0, m_alpha);
 	m_vertexBuffer->deviceToHost(m_displayVertex->data(), m_vertexBuffer->bufferSize());
 }
 
@@ -345,7 +355,6 @@ void BvhSolver::formInternalTreeAabbsIterative()
 	void * internalNodeChildIndex = m_internalNodeChildIndices->bufferOnDevice();
 	void * leafNodeAabbs = m_leafAabbs->bufferOnDevice();
 	void * internalNodeAabbs = m_internalNodeAabbs->bufferOnDevice();
-	
 	for(int distanceFromRoot = maxDistance; distanceFromRoot >= 0; --distanceFromRoot) {		
 		bvhFormInternalNodeAabbsAtDistance((int *)distances, (KeyValuePair *)boxes,
 											(int2 *)internalNodeChildIndex,
@@ -356,6 +365,47 @@ void BvhSolver::formInternalTreeAabbsIterative()
 #ifdef BVHSOLVER_DBG_DRAW
 	m_internalNodeAabbs->deviceToHost(m_displayInternalAabbs->data(), m_internalNodeAabbs->bufferSize());
 #endif
+}
+
+void BvhSolver::formRays()
+{
+	void * rays = m_rays->bufferOnDevice();
+	
+	float3 ori; 
+	ori.x = sin(m_alpha * 0.2f) * 60.f;
+	ori.y = 60.f;
+	ori.z = cos(m_alpha * 0.2f) * 30.f;
+	bvhTestRay((RayInfo *)rays, ori, 10.f, 32);
+	
+	m_rays->deviceToHost(m_displayRays->data(), m_rays->bufferSize());
+}
+
+void BvhSolver::rayTraverse()
+{
+	void * rays = m_rays->bufferOnDevice();
+	void * rootNodeIndex = m_rootNodeIndexOnDevice->bufferOnDevice();
+	void * internalNodeChildIndex = m_internalNodeChildIndices->bufferOnDevice();
+	void * internalNodeAabbs = m_internalNodeAabbs->bufferOnDevice();
+	void * leafNodeAabbs = m_leafAabbs->bufferOnDevice();
+	void * mortonCodesAndAabbIndices = m_leafHash[0]->bufferOnDevice();
+	void * o_nts = m_ntests->bufferOnDevice();
+	bvhRayTraverseIterative((RayInfo *)rays,
+								(int *)rootNodeIndex, 
+								(int2 *)internalNodeChildIndex, 
+								(Aabb *)internalNodeAabbs, 
+								(Aabb *)leafNodeAabbs,
+								(KeyValuePair *)mortonCodesAndAabbIndices,								
+								(float *) o_nts,
+								numRays());
+								
+	m_rays->deviceToHost(m_displayRays->data(), m_rays->bufferSize());
+	
+	float * hnts = new float[32 * 32];
+	m_ntests->deviceToHost(hnts, m_ntests->bufferSize());
+	for(int i =0 ; i<1024; i++)
+		qDebug()<<" n hiti "<<hnts[i];
+	
+	delete[] hnts;
 }
 
 const unsigned BvhSolver::numVertices() const { return UDIM1 * UDIM1; }
@@ -379,6 +429,9 @@ const Aabb BvhSolver::combinedAabb() const { return m_bigAabb; }
 
 const unsigned BvhSolver::numLeafNodes() const { return m_numEdges; }
 const unsigned BvhSolver::numInternalNodes() const { return numLeafNodes() - 1; }
+
+const unsigned BvhSolver::numRays() const { return 32 * 32; }
+RayInfo * BvhSolver::displayRays() { return (RayInfo *)m_displayRays->data(); }
 
 void BvhSolver::printLeafInternalNodeConnection()
 {

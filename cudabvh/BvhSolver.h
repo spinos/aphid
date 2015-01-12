@@ -43,17 +43,21 @@ public:
 	KeyValuePair * displayLeafHash();
 	int * displayInternalDistances();
 #endif
+	const unsigned numRays() const;
+	RayInfo * displayRays();
 
 protected:
     virtual void stepPhysics(float dt);	
 private:
-	void formPlane(float alpha);
+	void formPlane();
 	void formLeafAabbs();
 	void combineAabb();
 	void calcLeafHash();
 	void buildInternalTree();
 	void findMaxDistanceFromRoot();
 	void formInternalTreeAabbsIterative();
+	void formRays();
+	void rayTraverse();
 	
 	void printLeafInternalNodeConnection();
 	void printInternalNodeConnection();
@@ -77,6 +81,9 @@ private:
 	CUDABuffer * m_rootNodeIndexOnDevice;
     CUDABuffer * m_distanceInternalNodeFromRoot;
 	CUDABuffer * m_reducedMaxDistance;
+	CUDABuffer * m_rays;
+	BaseBuffer * m_displayRays;
+	CUDABuffer * m_ntests;
     
 #ifdef BVHSOLVER_DBG_DRAW
 	BaseBuffer * m_displayLeafAabbs;

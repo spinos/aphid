@@ -9,6 +9,7 @@ HEADERS       = glWidget.h \
 				app_define.h \
                 plane_implement.h \
                 createBvh_implement.h \
+                traverseBvh_implement.h \
         reduce_common.h \
 		reduceBox_implement.h \
 		reduceRange_implement.h \
@@ -42,7 +43,7 @@ macx {
 QT           += opengl
 LIBS += -L../lib -laphid -lIlmImf -lHalf
 DESTDIR = ./
-CUSOURCES = plane.cu createBvh.cu reduceBox.cu reduceRange.cu \
+CUSOURCES = plane.cu createBvh.cu traverseBvh.cu reduceBox.cu reduceRange.cu \
             ../radixsort/radixsort.cu
 macx {
 CUDA_CC = /usr/local/cuda/bin/nvcc
