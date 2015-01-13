@@ -9,19 +9,153 @@
 #include "bvh_common.h"
 #include <radixsort_implement.h>
 #include <app_define.h>
+#include <CudaBase.h>
+
+#define IDIM 101
+#define IDIM1 102
+#define IRAYDIM 42
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_solver = new BvhSolver;
 	m_displayLevel = 0;
+	
+	m_displayVertex = new BaseBuffer;
+	m_displayVertex->create(numVertices() * 12);
+	
+	m_triangleIndices = new BaseBuffer;
+	m_triangleIndices->create(numTriangleFaceVertices() * 4);
+	
+// i,j  i1,j  
+// i,j1 i1,j1
+//
+// i,j  i1,j  
+// i,j1
+//		i1,j  
+// i,j1 i1,j1
+
+	unsigned i, j, i1, j1;
+	unsigned *ind = (unsigned *)m_triangleIndices->data();
+	for(j=0; j < IDIM; j++) {
+	    j1 = j + 1;
+		for(i=0; i < IDIM; i++) {
+		    i1 = i + 1;
+			*ind = j * IDIM1 + i;
+			ind++;
+			*ind = j1 * IDIM1 + i;
+			ind++;
+			*ind = j * IDIM1 + i1;
+			ind++;
+
+			*ind = j * IDIM1 + i1;
+			ind++;
+			*ind = j1 * IDIM1 + i;
+			ind++;
+			*ind = j1 * IDIM1 + i1;
+			ind++;
+		}
+	}
+	
+	m_edges = new BaseBuffer;
+	m_edges->create(numEdges() * sizeof(EdgeContact));
+	
+	EdgeContact * edge = (EdgeContact *)m_edges->data();
+	
+	for(j=0; j < IDIM1; j++) {
+	    j1 = j + 1;
+		for(i=0; i < IDIM; i++) {
+		    i1 = i + 1;
+		    if(j==0) {
+		        edge->v[0] = i1;
+		        edge->v[1] = i;
+		        edge->v[2] = IDIM1 + i;
+		        edge->v[3] = MAX_INDEX;
+		    }
+		    else if(j==IDIM) {
+		        edge->v[0] = j * IDIM1 + i;
+		        edge->v[1] = j * IDIM1 + i1;
+		        edge->v[2] = (j - 1) * IDIM1 + i1;
+		        edge->v[3] = MAX_INDEX;
+		    }
+		    else {
+		        edge->v[0] = j * IDIM1 + i;
+		        edge->v[1] = j * IDIM1 + i1;
+		        edge->v[2] = (j - 1) * IDIM1 + i1;
+		        edge->v[3] = j1 * IDIM1 + i;
+		    }
+		    edge++;
+		}
+	}
+	
+	for(j=0; j < IDIM; j++) {
+	    j1 = j + 1;
+		for(i=0; i < IDIM1; i++) {
+		    i1 = i + 1;
+		    if(i==0) {
+		        edge->v[0] = j * IDIM1 + i;
+		        edge->v[1] = j1 * IDIM1 + i;
+		        edge->v[2] = j * IDIM1 + i1;
+		        edge->v[3] = MAX_INDEX;
+		    }
+		    else if(i==IDIM) {
+		        edge->v[0] = j1 * IDIM1 + i;
+		        edge->v[1] = j * IDIM1 + i;
+		        edge->v[2] = j1 * IDIM1 + i - 1;
+		        edge->v[3] = MAX_INDEX;
+		    }
+		    else {
+		        edge->v[0] = j1 * IDIM1 + i;
+		        edge->v[1] = j * IDIM1 + i;
+		        edge->v[2] = j1 * IDIM1 + i - 1;
+		        edge->v[3] = j * IDIM1 + i1;
+		    }
+		    edge++;
+		}
+	}
+	
+	for(j=0; j < IDIM; j++) {
+	    j1 = j + 1;
+		for(i=0; i < IDIM; i++) {
+		    i1 = i + 1;
+		    edge->v[0] = j1 * IDIM1 + i;
+		    edge->v[1] = j * IDIM1 + i1;
+		    edge->v[2] = j  * IDIM1 + i;
+		    edge->v[3] = j1 * IDIM1 + i1;
+			edge++;
+		}
+	}
+	
+	m_displayRays = new BaseBuffer;
+	m_displayRays->create(IRAYDIM * IRAYDIM * sizeof(RayInfo));
+	
+	qDebug()<<"num vertoces "<<numVertices();
+	qDebug()<<"num triangles "<<numTriangles();
+	qDebug()<<"num edges "<<numEdges();
 }
 
 GLWidget::~GLWidget()
 {
 }
 
+const unsigned GLWidget::numVertices() const 
+{ return IDIM1 * IDIM1; }
+
+const unsigned GLWidget::numTriangles() const
+{ return IDIM * IDIM * 2; }
+
+const unsigned GLWidget::numTriangleFaceVertices() const
+{ return numTriangles() * 3; }
+
+const unsigned GLWidget::numEdges() const
+{ return IDIM * IDIM1 + IDIM * IDIM1 + IDIM * IDIM; }
+
 void GLWidget::clientInit()
 {
+	CudaBase::SetDevice();
+	m_solver->setPlaneUDim(IDIM);
+	m_solver->createPoint(numVertices());
+	m_solver->createEdges(m_edges, numEdges());
+	m_solver->createRays(IRAYDIM, IRAYDIM);
 	m_solver->init();
 	//m_cvs->create(m_curve->numVertices() * 12);
 	//m_cvs->hostToDevice(m_curve->m_cvs, m_curve->numVertices() * 12);
@@ -33,13 +167,14 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+	m_solver->getPoints(m_displayVertex);
 	//internalTimer()->stop();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
     glEnableClientState(GL_VERTEX_ARRAY);
 
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_solver->displayVertex());
-	glDrawElements(GL_TRIANGLES, m_solver->getNumTriangleFaceVertices(), GL_UNSIGNED_INT, m_solver->getIndices());
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_displayVertex->data());
+	glDrawElements(GL_TRIANGLES, numTriangleFaceVertices(), GL_UNSIGNED_INT, (unsigned *)m_triangleIndices->data());
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
@@ -57,12 +192,12 @@ void GLWidget::showEdgeContacts()
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_LINE);
     
-    float * dsyV = m_solver->displayVertex();
-	EdgeContact * ec = m_solver->edgeContacts();
-	unsigned ne = m_solver->numEdges();
+    float * dsyV = (float *)m_displayVertex->data();
+	EdgeContact * ec = (EdgeContact *)m_edges->data();
+	unsigned ne = m_solver->numLeafNodes();
 	unsigned a, b, c, d;
 	const float h = 0.2f;
-	const unsigned maxI = m_solver->numVertices();
+	const unsigned maxI = m_solver->numPoints();
 	float * p;
 	glBegin(GL_TRIANGLES);
 	for(unsigned i=0; i < ne; i++) {
@@ -116,7 +251,8 @@ inline int getIndexWithInternalNodeMarkerRemoved(int index)
 
 void GLWidget::showAabbs()
 {
-	Aabb ab = m_solver->combinedAabb();
+	Aabb ab;
+	m_solver->getRootNodeAabb(&ab);
 	GeoDrawer * dr = getDrawer();
     BoundingBox bb; 
 	bb.setMin(ab.low.x, ab.low.y, ab.low.z);
@@ -250,7 +386,8 @@ void GLWidget::showAabbs()
 
 void GLWidget::showRays()
 {
-	RayInfo * rays = m_solver->displayRays();
+	m_solver->getRays(m_displayRays);
+	RayInfo * rays = (RayInfo *)m_displayRays->data();
 	const unsigned nr = m_solver->numRays();
 	glColor3f(0.1f, 0.6f, 0.f);
 	glBegin(GL_LINES);

@@ -22,22 +22,22 @@ public:
 	virtual ~BvhSolver();
 	
 	void init();
+	void createPoint(uint n);
+	void createEdges(BaseBuffer * onhost, uint n);
+	void createRays(uint m, uint n);
 	
-	const unsigned numVertices() const;
-	
-	unsigned getNumTriangleFaceVertices() const;
-	unsigned * getIndices() const;
-	const unsigned numTriangles() const;
-	const unsigned numEdges() const;
-	float * displayVertex();
-	EdgeContact * edgeContacts();
-	void setAlpha(float x);
-	const Aabb combinedAabb() const; 
-	
+	const unsigned numPoints() const;
 	const unsigned numLeafNodes() const;
 	const unsigned numInternalNodes() const;
+	const unsigned numRays() const;
+	
+	void setAlpha(float x);
+	void setPlaneUDim(uint x);
 	
 	int getRootNodeIndex();
+	void getRootNodeAabb(Aabb * dst); 
+	void getPoints(BaseBuffer * dst);
+	void getRays(BaseBuffer * dst);
 	
 #ifdef BVHSOLVER_DBG_DRAW
 	Aabb * displayLeafAabbs();
@@ -46,8 +46,8 @@ public:
 	int * displayInternalDistances();
 	void hostInternalNodeChildIndex(int2 * ptr);
 #endif
-	const unsigned numRays() const;
-	RayInfo * displayRays();
+	
+	
 
 protected:
     virtual void stepPhysics(float dt);	
@@ -66,15 +66,10 @@ private:
 	void printInternalNodeConnection();
 	
 private:
-	Aabb m_bigAabb;
-	BaseBuffer * m_displayVertex;
 	CUDABuffer * m_vertexBuffer;
 	CUDABuffer * m_edgeContactIndices;
-	unsigned * m_triIndices;
-	BaseBuffer * m_edges;
 	CUDABuffer * m_leafAabbs;
 	CUDABuffer * m_internalNodeAabbs;
-	BaseBuffer * m_lastReduceBlk;
 	CUDABuffer * m_leafHash[2];
 	CUDABuffer * m_internalNodeCommonPrefixValues;
 	CUDABuffer * m_internalNodeCommonPrefixLengths;
@@ -85,7 +80,6 @@ private:
     CUDABuffer * m_distanceInternalNodeFromRoot;
 	CUDABuffer * m_reducedMaxDistance;
 	CUDABuffer * m_rays;
-	BaseBuffer * m_displayRays;
 	CUDABuffer * m_ntests;
     
 #ifdef BVHSOLVER_DBG_DRAW
@@ -94,6 +88,6 @@ private:
 	BaseBuffer * m_displayInternalDistance;
 	BaseBuffer * m_displayLeafHash;
 #endif
-	unsigned m_numTriIndices, m_numTriangles, m_numEdges;
+	unsigned m_numPoints, m_numLeafNodes, m_numRays, m_rayDim, m_planeUDim;
 	float m_alpha;
 };

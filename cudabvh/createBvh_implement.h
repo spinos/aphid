@@ -6,7 +6,7 @@
 
 extern "C" void bvhCalculateLeafAabbs(Aabb *dst, float3 * cvs, EdgeContact * edges, unsigned numEdges, unsigned numVertices);
 
-extern "C" void bvhCalculateLeafHash(KeyValuePair * dst, Aabb * leafBoxes, uint numLeaves, Aabb bigBox);
+extern "C" void bvhCalculateLeafHash(KeyValuePair * dst, Aabb * leafBoxes, uint numLeaves, Aabb * bigBox);
 
 extern "C" void bvhComputeAdjacentPairCommonPrefix(KeyValuePair * mortonCode,
 													uint64 * o_commonPrefix,

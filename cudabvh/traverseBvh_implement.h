@@ -13,7 +13,7 @@ extern "C" void bvhRayTraverseIterative(RayInfo * rays,
 								float * o_ntests,
 								uint numRays);
 
-extern "C" void bvhTestRay(RayInfo * o_rays, float3 origin, float boxSize, uint n);
+extern "C" void bvhTestRay(RayInfo * o_rays, float3 origin, float boxSize, uint w, uint n);
 
 #endif        //  #ifndef TRAVERSEBVH_IMPLEMENT_H
 

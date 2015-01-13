@@ -183,10 +183,10 @@ extern "C" void bvhRayTraverseIterative(RayInfo * rays,
 								numRays);
 }
 
-extern "C" void bvhTestRay(RayInfo * o_rays, float3 origin, float boxSize, uint n)
+extern "C" void bvhTestRay(RayInfo * o_rays, float3 origin, float boxSize, uint w, uint n)
 {
     dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(n * n, 512);
+    unsigned nblk = iDivUp(n, 512);
     
     dim3 grid(nblk, 1, 1);
     
@@ -195,5 +195,5 @@ extern "C" void bvhTestRay(RayInfo * o_rays, float3 origin, float boxSize, uint 
     Aabb box;
     box.low.x = -boxSize + 1; box.low.y = 0.f; box.low.z = -boxSize;
     box.high.x = boxSize + 1; box.high.y = boxSize; box.high.z = boxSize;
-    testRay_kernel<<< grid, block >>>(o_rays, box, origin, h, n, n * n);
+    testRay_kernel<<< grid, block >>>(o_rays, box, origin, h, w, n);
 }
