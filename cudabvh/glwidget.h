@@ -2,6 +2,7 @@
 #define GLWIDGET_H
 
 #include <Base3DView.h>
+#include <app_define.h>
 
 class BvhSolver;
 class BaseBuffer;
@@ -40,6 +41,15 @@ private:
 	BaseBuffer * m_displayRays;
 	BaseBuffer * m_edges;
 	int m_displayLevel;
+	
+#ifdef BVHSOLVER_DBG_DRAW
+	BaseBuffer * m_displayLeafAabbs;
+	BaseBuffer * m_displayInternalAabbs;
+	BaseBuffer * m_displayInternalDistance;
+	BaseBuffer * m_displayLeafHash;
+	BaseBuffer * m_internalChildIndices;
+#endif
+
 private slots:
     
 };

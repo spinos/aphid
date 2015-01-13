@@ -82,17 +82,6 @@ void BvhSolver::init()
 	
 	m_reducedMaxDistance = new CUDABuffer;
 	m_reducedMaxDistance->create(ReduceMaxBlocks * sizeof(int));
-
-#ifdef BVHSOLVER_DBG_DRAW	
-	m_displayLeafAabbs = new BaseBuffer;
-	m_displayLeafAabbs->create(numLeafNodes() * sizeof(Aabb));
-	m_displayInternalAabbs = new BaseBuffer;
-	m_displayInternalAabbs->create(numInternalNodes() * sizeof(Aabb));
-	m_displayLeafHash = new BaseBuffer;
-	m_displayLeafHash->create(numLeafNodes() * sizeof(KeyValuePair));
-	m_displayInternalDistance = new BaseBuffer;
-	m_displayInternalDistance->create(numInternalNodes() * sizeof(int));
-#endif
 	
 	qDebug()<<"num points "<<numPoints();
 	qDebug()<<"num internal nodes "<<numInternalNodes();
@@ -122,10 +111,6 @@ void BvhSolver::formLeafAabbs()
     void * edges = m_edgeContactIndices->bufferOnDevice();
     void * dst = m_leafAabbs->bufferOnDevice();
     bvhCalculateLeafAabbs((Aabb *)dst, (float3 *)cvs, (EdgeContact *)edges, numLeafNodes(), numPoints());
-    
-#ifdef BVHSOLVER_DBG_DRAW
-    m_leafAabbs->deviceToHost(m_displayLeafAabbs->data(), m_leafAabbs->bufferSize());
-#endif
 }
 
 void BvhSolver::combineAabb()
@@ -161,10 +146,6 @@ void BvhSolver::calcLeafHash()
 	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, numLeafNodes(), (Aabb *)box);
 	void * tmp = m_leafHash[1]->bufferOnDevice();
 	RadixSort((KeyValuePair *)dst, (KeyValuePair *)tmp, numLeafNodes(), 32);
-	
-#ifdef BVHSOLVER_DBG_DRAW
-	m_leafHash[0]->deviceToHost(m_displayLeafHash->data(), m_leafHash[0]->bufferSize()); 
-#endif
 }
 
 void BvhSolver::buildInternalTree()
@@ -225,17 +206,6 @@ void BvhSolver::findMaxDistanceFromRoot()
 		
 		n = (n + (threads*2-1)) / (threads*2);
 	}
-	/*
-	int * p = new int[numInternalNodes()];
-	m_distanceInternalNodeFromRoot->deviceToHost(p, m_distanceInternalNodeFromRoot->bufferSize());
-	
-	for(int i=0; i< numInternalNodes(); i++) 
-		qDebug()<<" node["<<i<<"] "<<p[i];
-	delete[] p;
-	*/
-#ifdef BVHSOLVER_DBG_DRAW
-	m_distanceInternalNodeFromRoot->deviceToHost(m_displayInternalDistance->data(), m_distanceInternalNodeFromRoot->bufferSize());
-#endif
 }
 
 void BvhSolver::formInternalTreeAabbsIterative()
@@ -258,9 +228,6 @@ void BvhSolver::formInternalTreeAabbsIterative()
 											maxDistance, distanceFromRoot, 
 											numInternalNodes());
 	}
-#ifdef BVHSOLVER_DBG_DRAW
-	m_internalNodeAabbs->deviceToHost(m_displayInternalAabbs->data(), m_internalNodeAabbs->bufferSize());
-#endif
 }
 
 void BvhSolver::formRays()
@@ -302,17 +269,23 @@ void BvhSolver::getRays(BaseBuffer * dst)
 void BvhSolver::getRootNodeAabb(Aabb * dst)
 { m_internalNodeAabbs->deviceToHost(dst, sizeof(Aabb)); }
 
+void BvhSolver::getLeafAabbs(BaseBuffer * dst)
+{ m_leafAabbs->deviceToHost(dst->data(), m_leafAabbs->bufferSize()); }
+
+void BvhSolver::getInternalAabbs(BaseBuffer * dst)
+{ m_internalNodeAabbs->deviceToHost(dst->data(), m_internalNodeAabbs->bufferSize()); }
+
+void BvhSolver::getLeafHash(BaseBuffer * dst)
+{ m_leafHash[0]->deviceToHost(dst->data(), m_leafHash[0]->bufferSize()); }
+
+void BvhSolver::getInternalDistances(BaseBuffer * dst)
+{ m_distanceInternalNodeFromRoot->deviceToHost(dst->data(), m_distanceInternalNodeFromRoot->bufferSize()); }
+
+void BvhSolver::getInternalChildIndex(BaseBuffer * dst)
+{ m_internalNodeChildIndices->deviceToHost(dst->data(), m_internalNodeChildIndices->bufferSize()); }
+
 const unsigned BvhSolver::numPoints() const 
 { return m_numPoints; }
-
-#ifdef BVHSOLVER_DBG_DRAW
-Aabb * BvhSolver::displayLeafAabbs() { return (Aabb *)m_displayLeafAabbs->data(); }
-Aabb * BvhSolver::displayInternalAabbs() { return (Aabb *)m_displayInternalAabbs->data(); }
-KeyValuePair * BvhSolver::displayLeafHash() { return (KeyValuePair *)m_displayLeafHash->data(); }
-int * BvhSolver::displayInternalDistances() { return (int *)m_displayInternalDistance->data(); }
-void BvhSolver::hostInternalNodeChildIndex(int2 * ptr) 
-{ m_internalNodeChildIndices->deviceToHost(ptr, m_internalNodeChildIndices->bufferSize()); }
-#endif
 
 void BvhSolver::setAlpha(float x) 
 { m_alpha = x; }
@@ -320,9 +293,14 @@ void BvhSolver::setAlpha(float x)
 void BvhSolver::setPlaneUDim(uint x)
 { m_planeUDim = x; }
 
-const unsigned BvhSolver::numLeafNodes() const { return m_numLeafNodes; }
-const unsigned BvhSolver::numInternalNodes() const { return numLeafNodes() - 1; }
-const unsigned BvhSolver::numRays() const { return m_numRays; }
+const unsigned BvhSolver::numLeafNodes() const 
+{ return m_numLeafNodes; }
+
+const unsigned BvhSolver::numInternalNodes() const 
+{ return numLeafNodes() - 1; }
+
+const unsigned BvhSolver::numRays() const 
+{ return m_numRays; }
 
 void BvhSolver::printLeafInternalNodeConnection()
 {

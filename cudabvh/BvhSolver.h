@@ -10,7 +10,6 @@
 #include <BaseSolverThread.h>
 #include <bvh_common.h>
 #include <radixsort_implement.h>
-#include <app_define.h>
 
 class BaseBuffer;
 class CUDABuffer;
@@ -37,17 +36,12 @@ public:
 	int getRootNodeIndex();
 	void getRootNodeAabb(Aabb * dst); 
 	void getPoints(BaseBuffer * dst);
-	void getRays(BaseBuffer * dst);
-	
-#ifdef BVHSOLVER_DBG_DRAW
-	Aabb * displayLeafAabbs();
-	Aabb * displayInternalAabbs();
-	KeyValuePair * displayLeafHash();
-	int * displayInternalDistances();
-	void hostInternalNodeChildIndex(int2 * ptr);
-#endif
-	
-	
+	void getRays(BaseBuffer * dst);	
+	void getLeafAabbs(BaseBuffer * dst);
+	void getInternalAabbs(BaseBuffer * dst);
+	void getLeafHash(BaseBuffer * dst);
+	void getInternalDistances(BaseBuffer * dst);
+	void getInternalChildIndex(BaseBuffer * dst);
 
 protected:
     virtual void stepPhysics(float dt);	
@@ -82,12 +76,6 @@ private:
 	CUDABuffer * m_rays;
 	CUDABuffer * m_ntests;
     
-#ifdef BVHSOLVER_DBG_DRAW
-	BaseBuffer * m_displayLeafAabbs;
-	BaseBuffer * m_displayInternalAabbs;
-	BaseBuffer * m_displayInternalDistance;
-	BaseBuffer * m_displayLeafHash;
-#endif
 	unsigned m_numPoints, m_numLeafNodes, m_numRays, m_rayDim, m_planeUDim;
 	float m_alpha;
 };
