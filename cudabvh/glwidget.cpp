@@ -2,7 +2,7 @@
 
 #include <gl_heads.h>
 #include "glwidget.h"
-
+#include "BvhTriangleMesh.h"
 #include <KdTreeDrawer.h>
 #include <CUDABuffer.h>
 #include <BvhSolver.h>
@@ -16,15 +16,13 @@
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
+	m_mesh = new BvhTriangleMesh;
+	m_mesh->createVertices(IDIM1 * IDIM1);
+	m_mesh->createTriangles(IDIM * IDIM * 2);
+	
 	m_solver = new BvhSolver;
 	m_displayLevel = 0;
-	
-	m_displayVertex = new BaseBuffer;
-	m_displayVertex->create(numVertices() * 12);
-	
-	m_triangleIndices = new BaseBuffer;
-	m_triangleIndices->create(numTriangleFaceVertices() * 4);
-	
+		
 // i,j  i1,j  
 // i,j1 i1,j1
 //
@@ -34,7 +32,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 // i,j1 i1,j1
 
 	unsigned i, j, i1, j1;
-	unsigned *ind = (unsigned *)m_triangleIndices->data();
+	unsigned *ind = m_mesh->triangleIndices();
 	for(j=0; j < IDIM; j++) {
 	    j1 = j + 1;
 		for(i=0; i < IDIM; i++) {
@@ -127,8 +125,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_displayRays = new BaseBuffer;
 	m_displayRays->create(IRAYDIM * IRAYDIM * sizeof(RayInfo));
 	
-	qDebug()<<"num vertoces "<<numVertices();
-	qDebug()<<"num triangles "<<numTriangles();
+	qDebug()<<"num vertices "<<m_mesh->numVertices();
+	qDebug()<<"num triangles "<<m_mesh->numTriangles();
 	qDebug()<<"num edges "<<numEdges();
 	qDebug()<<"num ray tests "<<(IRAYDIM * IRAYDIM);
 }
@@ -137,15 +135,6 @@ GLWidget::~GLWidget()
 {
 }
 
-const unsigned GLWidget::numVertices() const 
-{ return IDIM1 * IDIM1; }
-
-const unsigned GLWidget::numTriangles() const
-{ return IDIM * IDIM * 2; }
-
-const unsigned GLWidget::numTriangleFaceVertices() const
-{ return numTriangles() * 3; }
-
 const unsigned GLWidget::numEdges() const
 { return IDIM * IDIM1 + IDIM * IDIM1 + IDIM * IDIM; }
 
@@ -153,7 +142,7 @@ void GLWidget::clientInit()
 {
 	CudaBase::SetDevice();
 	m_solver->setPlaneUDim(IDIM);
-	m_solver->createPoint(numVertices());
+	m_solver->createPoint(m_mesh->numVertices());
 	m_solver->createEdges(m_edges, numEdges());
 	m_solver->createRays(IRAYDIM, IRAYDIM);
 	m_solver->init();
@@ -178,19 +167,18 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	m_solver->getPoints(m_displayVertex);
+	m_solver->getPoints(m_mesh->vertexBuffer());
 	//internalTimer()->stop();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
     glEnableClientState(GL_VERTEX_ARRAY);
 
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_displayVertex->data());
-	glDrawElements(GL_TRIANGLES, numTriangleFaceVertices(), GL_UNSIGNED_INT, (unsigned *)m_triangleIndices->data());
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_mesh->vertices());
+	glDrawElements(GL_TRIANGLES, m_mesh->numTriangleFaceVertices(), GL_UNSIGNED_INT, m_mesh->triangleIndices());
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
-	showRays();
-	
+	showRays();	
 	// showEdgeContacts();
 	showAabbs();
 	m_solver->setAlpha((float)elapsedTime()/300.f);
@@ -203,7 +191,7 @@ void GLWidget::showEdgeContacts()
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_LINE);
     
-    float * dsyV = (float *)m_displayVertex->data();
+    float * dsyV = (float *)m_mesh->vertices();
 	EdgeContact * ec = (EdgeContact *)m_edges->data();
 	unsigned ne = m_solver->numLeafNodes();
 	unsigned a, b, c, d;

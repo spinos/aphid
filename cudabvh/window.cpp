@@ -8,7 +8,7 @@ Window::Window()
 	glWidget = new GLWidget;
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("GPU Geometry"));
+    setWindowTitle(tr("Linear BVH"));
 }
 
 void Window::keyPressEvent(QKeyEvent *e)

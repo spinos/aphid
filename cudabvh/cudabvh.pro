@@ -4,6 +4,7 @@ message(QMAKE with CUDA)
 INCLUDEPATH += ./ ../shared ../radixsort
 HEADERS       = glWidget.h \
                 window.h \
+                BvhTriangleMesh.h \
                 BvhSolver.h \
                 bvh_common.h \
 				app_define.h \
@@ -22,6 +23,7 @@ HEADERS       = glWidget.h \
 SOURCES       = main.cpp \
                 glWidget.cpp \
                 window.cpp \
+                BvhTriangleMesh.cpp \
                 BvhSolver.cpp \
                 ../shared/CudaBase.cpp \
                 ../shared/Base3DView.cpp \

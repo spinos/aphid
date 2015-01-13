@@ -6,6 +6,8 @@
 
 class BvhSolver;
 class BaseBuffer;
+class BvhTriangleMesh;
+
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -29,15 +31,11 @@ private:
 	void showAabbs();
 	void showRays();
 	
-	const unsigned numVertices() const;
-	const unsigned numTriangles() const;
-	const unsigned numTriangleFaceVertices() const;
 	const unsigned numEdges() const;
 
 private:
+	BvhTriangleMesh * m_mesh;
 	BvhSolver * m_solver;
-	BaseBuffer * m_displayVertex;
-	BaseBuffer * m_triangleIndices;
 	BaseBuffer * m_displayRays;
 	BaseBuffer * m_edges;
 	int m_displayLevel;
