@@ -1,3 +1,6 @@
+#ifndef BVHSOLVER_H
+#define BVHSOLVER_H
+
 /*
  *  BvhSolver.h
  *  
@@ -6,13 +9,14 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#pragma once
+
 #include <BaseSolverThread.h>
 #include <bvh_common.h>
 #include <radixsort_implement.h>
 
 class BaseBuffer;
 class CUDABuffer;
+class BvhTriangleMesh;
 
 class BvhSolver : public BaseSolverThread
 {
@@ -21,7 +25,7 @@ public:
 	virtual ~BvhSolver();
 	
 	void init();
-	void createPoint(uint n);
+	void setMesh(BvhTriangleMesh * mesh);
 	void createEdges(BaseBuffer * onhost, uint n);
 	void createRays(uint m, uint n);
 	
@@ -60,7 +64,7 @@ private:
 	void printInternalNodeConnection();
 	
 private:
-	CUDABuffer * m_vertexBuffer;
+	BvhTriangleMesh * m_mesh;
 	CUDABuffer * m_edgeContactIndices;
 	CUDABuffer * m_leafAabbs;
 	CUDABuffer * m_internalNodeAabbs;
@@ -76,6 +80,7 @@ private:
 	CUDABuffer * m_rays;
 	CUDABuffer * m_ntests;
     
-	unsigned m_numPoints, m_numLeafNodes, m_numRays, m_rayDim, m_planeUDim;
+	unsigned m_numLeafNodes, m_numRays, m_rayDim, m_planeUDim;
 	float m_alpha;
 };
+#endif        //  #ifndef BVHSOLVER_H

@@ -9,6 +9,8 @@
 #include <QtCore>
 #include <CudaBase.h>
 #include <CUDABuffer.h>
+#include "BvhTriangleMesh.h"
+
 #include "BvhSolver.h"
 #include "plane_implement.h"
 #include "createBvh_implement.h"
@@ -23,12 +25,8 @@ BvhSolver::BvhSolver(QObject *parent) : BaseSolverThread(parent)
 
 BvhSolver::~BvhSolver() {}
 
-void BvhSolver::createPoint(uint n)
-{
-	m_numPoints = n;
-	m_vertexBuffer = new CUDABuffer;
-	m_vertexBuffer->create(n * 12);
-}
+void BvhSolver::setMesh(BvhTriangleMesh * mesh)
+{ m_mesh = mesh; }
 
 void BvhSolver::createEdges(BaseBuffer * onhost, uint n)
 {
@@ -101,13 +99,13 @@ void BvhSolver::stepPhysics(float dt)
 
 void BvhSolver::formPlane()
 {
-	void *dptr = m_vertexBuffer->bufferOnDevice();
+	void *dptr = m_mesh->verticesOnDevice();
 	wavePlane((float3 *)dptr, m_planeUDim, 2.0, m_alpha);
 }
 
 void BvhSolver::formLeafAabbs()
 {
-    void * cvs = m_vertexBuffer->bufferOnDevice();
+    void * cvs = m_mesh->verticesOnDevice();
     void * edges = m_edgeContactIndices->bufferOnDevice();
     void * dst = m_leafAabbs->bufferOnDevice();
     bvhCalculateLeafAabbs((Aabb *)dst, (float3 *)cvs, (EdgeContact *)edges, numLeafNodes(), numPoints());
@@ -115,7 +113,7 @@ void BvhSolver::formLeafAabbs()
 
 void BvhSolver::combineAabb()
 {
-	void * psrc = m_vertexBuffer->bufferOnDevice();
+	void * psrc = m_mesh->verticesOnDevice();
     void * pdst = m_internalNodeAabbs->bufferOnDevice();
 	
 	unsigned n = numPoints();
@@ -261,7 +259,7 @@ void BvhSolver::rayTraverse()
 }
 
 void BvhSolver::getPoints(BaseBuffer * dst)
-{ m_vertexBuffer->deviceToHost(dst->data(), m_vertexBuffer->bufferSize()); }
+{ m_mesh->getVerticesOnDevice(dst); }
 
 void BvhSolver::getRays(BaseBuffer * dst) 
 { m_rays->deviceToHost(dst->data(), m_rays->bufferSize()); }
@@ -285,7 +283,7 @@ void BvhSolver::getInternalChildIndex(BaseBuffer * dst)
 { m_internalNodeChildIndices->deviceToHost(dst->data(), m_internalNodeChildIndices->bufferSize()); }
 
 const unsigned BvhSolver::numPoints() const 
-{ return m_numPoints; }
+{ return m_mesh->numVertices(); }
 
 void BvhSolver::setAlpha(float x) 
 { m_alpha = x; }

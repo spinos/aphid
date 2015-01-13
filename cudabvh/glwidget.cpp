@@ -141,8 +141,9 @@ const unsigned GLWidget::numEdges() const
 void GLWidget::clientInit()
 {
 	CudaBase::SetDevice();
+	m_mesh->initOnDevice();
+	m_solver->setMesh(m_mesh);
 	m_solver->setPlaneUDim(IDIM);
-	m_solver->createPoint(m_mesh->numVertices());
 	m_solver->createEdges(m_edges, numEdges());
 	m_solver->createRays(IRAYDIM, IRAYDIM);
 	m_solver->init();

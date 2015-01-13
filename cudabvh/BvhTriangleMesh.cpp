@@ -8,7 +8,7 @@
  */
 
 #include "BvhTriangleMesh.h"
-#include <BaseBuffer.h>
+#include <CUDABuffer.h>
 
 BvhTriangleMesh::BvhTriangleMesh() 
 {
@@ -19,6 +19,15 @@ BvhTriangleMesh::BvhTriangleMesh()
 BvhTriangleMesh::~BvhTriangleMesh() 
 {
 
+}
+
+void BvhTriangleMesh::initOnDevice()
+{
+	m_verticesOnDevice = new CUDABuffer;
+	m_verticesOnDevice->create(m_vertices->bufferSize());
+	m_triangleIndicesOnDevice = new CUDABuffer;
+	m_triangleIndicesOnDevice->create(m_triangleIndices->bufferSize());
+	m_triangleIndicesOnDevice->hostToDevice(m_triangleIndices->data(), m_triangleIndices->bufferSize());
 }
 
 void BvhTriangleMesh::createVertices(unsigned n)
@@ -45,8 +54,17 @@ const unsigned BvhTriangleMesh::numTriangleFaceVertices() const
 BaseBuffer * BvhTriangleMesh::vertexBuffer()
 { return m_vertices; }
 
+CUDABuffer * BvhTriangleMesh::vertexBufferOnDevice()
+{ return m_verticesOnDevice; }
+
+void * BvhTriangleMesh::verticesOnDevice()
+{ return m_verticesOnDevice->bufferOnDevice(); }
+
 Vector3F * BvhTriangleMesh::vertices()
 { return (Vector3F *)m_vertices->data(); }
 
 unsigned * BvhTriangleMesh::triangleIndices()
 { return (unsigned *)m_triangleIndices->data(); }
+
+void BvhTriangleMesh::getVerticesOnDevice(BaseBuffer * dst)
+{ m_verticesOnDevice->deviceToHost(dst->data(), m_verticesOnDevice->bufferSize()); }
