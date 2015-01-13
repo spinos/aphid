@@ -5,6 +5,11 @@
 #include <cuda_runtime_api.h>
 #include <cutil_inline.h>
 #include <cutil_gl_inline.h>
+
+int CudaBase::MaxThreadPerBlock = 512;
+int CudaBase::MaxRegisterPerBlock = 8192;
+int CudaBase::MaxSharedMemoryPerBlock = 16384;
+
 CudaBase::CudaBase()
 {
     
@@ -37,6 +42,7 @@ char CudaBase::CheckCUDevice()
             std::cout << "  Total amount of global memory: "<<(unsigned long long)deviceProp.totalGlobalMem<<" bytes\n";
             std::cout << "  Total amount of constant memory: "<<deviceProp.totalConstMem<<"bytes\n"; 
             std::cout << "  Total amount of shared memory per block: "<<deviceProp.sharedMemPerBlock<<" bytes\n";
+            std::cout << "  Total number of registers available per block: "<<deviceProp.regsPerBlock<<"\n";
         
             std::stringstream sst;
             sst<<"  Maximum sizes of each dimension of a grid: "<<deviceProp.maxGridSize[0]<<" x "<<deviceProp.maxGridSize[1]<<" x "<<deviceProp.maxGridSize[2];
@@ -45,6 +51,10 @@ char CudaBase::CheckCUDevice()
             sst<<"  Maximum sizes of each dimension of a block: "<<deviceProp.maxThreadsDim[0]<<" x "<<deviceProp.maxThreadsDim[1]<<" x "<<deviceProp.maxThreadsDim[2];
             std::cout<<sst.str()<<"\n";
             std::cout << "  Maximum number of threads per block: " << deviceProp.maxThreadsPerBlock<<"\n";
+            
+            MaxThreadPerBlock = deviceProp.maxThreadsPerBlock;
+            MaxRegisterPerBlock = deviceProp.regsPerBlock;
+            MaxSharedMemoryPerBlock = deviceProp.sharedMemPerBlock;
         return 1;               
     }
     return 0;
@@ -52,5 +62,16 @@ char CudaBase::CheckCUDevice()
 
 void CudaBase::SetDevice()
 {
+    CheckCUDevice();
 	cudaGLSetGLDevice(cutGetMaxGflopsDeviceId());
+}
+
+int CudaBase::LimitNThreadPerBlock(int regPT, int memPT)
+{
+    int tpb = MaxThreadPerBlock;
+    const int byReg = MaxRegisterPerBlock / regPT;
+    const int byMem = MaxSharedMemoryPerBlock / memPT;
+    if(byReg < tpb) tpb = byReg;
+    if(byMem < tpb) tpb = byMem;
+    return tpb - tpb % 2;
 }

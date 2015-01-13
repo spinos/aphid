@@ -1,6 +1,7 @@
 #include "traverseBvh_implement.h"
 #include <radixsort_implement.h>
 #include <bvh_math.cu>
+#include <CudaBase.h>
 
 #define B3_PLVBH_TRAVERSE_MAX_STACK_SIZE 128
 
@@ -165,8 +166,10 @@ extern "C" void bvhRayTraverseIterative(RayInfo * rays,
 								float * o_ntests,
 								uint numRays)
 {
-    dim3 block(256, 1, 1);
-    unsigned nblk = iDivUp(numRays, 256);
+    int tpb = CudaBase::LimitNThreadPerBlock(26, 48);
+    
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numRays, tpb);
     
     dim3 grid(nblk, 1, 1);
     
