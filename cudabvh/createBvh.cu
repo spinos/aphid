@@ -1,20 +1,11 @@
 #include "createBvh_implement.h"
-
+#include <bvh_math.cu>
 //Set so that it is always greater than the actual common prefixes, and never selected as a parent node.
 //If there are no duplicates, then the highest common prefix is 32 or 64, depending on the number of bits used for the z-curve.
 //Duplicate common prefixes increase the highest common prefix at most by the number of bits used to index the leaf node.
 //Since 32 bit ints are used to index leaf nodes, the max prefix is 64(32 + 32 bit z-curve) or 96(32 + 64 bit z-curve).
 #define B3_PLBVH_INVALID_COMMON_PREFIX 128
 #define B3_PLBVH_ROOT_NODE_MARKER -1
-
-inline __device__ int isLeafNode(int index) 
-{ return (index >> 31 == 0); }
-
-inline __device__ int getIndexWithInternalNodeMarkerSet(int isLeaf, int index) 
-{ return (isLeaf) ? index : (index | 0x80000000); }
-
-inline __device__ int getIndexWithInternalNodeMarkerRemoved(int index) 
-{ return index & (~0x80000000); }
 
 inline __device__ int computeCommonPrefixLength(uint64 i, uint64 j) 
 { return (int)__clzll(i ^ j); }
@@ -76,33 +67,6 @@ inline __device__ void normalizeByBoundary(float & x, float low, float high)
 		if(dx < TINY_VALUE2) x = 0.0;
 		else x = (x - low) / dx;
 	}
-}
-
-inline __device__ void resetAabb(Aabb & dst)
-{
-    dst.low = make_float3(HUGE_VALUE, HUGE_VALUE, HUGE_VALUE);
-    dst.high = make_float3(-HUGE_VALUE, -HUGE_VALUE, -HUGE_VALUE);
-}
-
-inline __device__ void expandAabb(Aabb & dst, float3 p)
-{
-    if(p.x < dst.low.x) dst.low.x = p.x;
-    if(p.y < dst.low.y) dst.low.y = p.y;
-    if(p.z < dst.low.z) dst.low.z = p.z;
-    if(p.x > dst.high.x) dst.high.x = p.x;
-    if(p.y > dst.high.y) dst.high.y = p.y;
-    if(p.z > dst.high.z) dst.high.z = p.z;
-}
-
-inline __device__ void expandAabb(Aabb & dst, const Aabb & b)
-{
-	expandAabb(dst, b.low);
-	expandAabb(dst, b.high);
-}
-
-inline __device__ float3 centroidOfAabb(const Aabb & box)
-{
-	return make_float3(box.low.x * 0.5 + box.high.x * 0.5, box.low.y * 0.5 + box.high.y * 0.5, box.low.z * 0.5 + box.high.z * 0.5);
 }
 
 __global__ void calculateAabbs_kernel(Aabb *dst, float3 * cvs, EdgeContact * edges, unsigned maxEdgeInd, unsigned maxVertInd)

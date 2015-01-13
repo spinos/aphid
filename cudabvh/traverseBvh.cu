@@ -1,46 +1,8 @@
 #include "traverseBvh_implement.h"
 #include <radixsort_implement.h>
+#include <bvh_math.cu>
 
 #define B3_PLVBH_TRAVERSE_MAX_STACK_SIZE 128
-
-__device__ int isLeafNode(int index) 
-{ return (index >> 31 == 0); }
-
-__device__ int getIndexWithInternalNodeMarkerRemoved(int index) 
-{ return index & (~0x80000000); }
-
-__device__ float float3_length(float3 v) 
-{ return sqrtf(v.x*v.x + v.y*v.y + v.z*v.z); }
-
-__device__ float float3_length2(float3 v) 
-{ return (v.x*v.x + v.y*v.y + v.z*v.z); }
-
-__device__ float3 float3_normalize(float3 v)
-{
-	float l = float3_length(v);
-	l = 1.0 / l;
-	return make_float3(v.x * l, v.y * l, v.z * l);
-}
-
-__device__ float3 float3_difference(float3 v1, float3 v0)
-{ return make_float3(v1.x - v0.x, v1.y - v0.y, v1.z - v0.z); }
-
-__device__ float3 float3_add(float3 v1, float3 v0)
-{ return make_float3(v1.x + v0.x, v1.y + v0.y, v1.z + v0.z); }
-
-__device__ float3 scale_float3_by(float3 & v, float s)
-{ return make_float3(v.x * s, v.y * s, v.z * s); }
-
-__device__ int3 isless(float3 v, float3 threshold)
-{ return make_int3(v.x < threshold.x, v.y < threshold.y, v.z < threshold.z); }
-
-__device__ float3 select(float3 a, float3 b, int3 con)
-{
-    float x = con.x ? a.x : b.x;
-    float y = con.y ? a.y : b.y;
-    float z = con.z ? a.z : b.z;
-    return make_float3(x, y, z);
-}
 
 __device__ int rayIntersectsAabb(float3 rayOrigin, float rayLength, 
                                 float3 rayNormalizedDirection, 

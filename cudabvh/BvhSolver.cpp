@@ -376,7 +376,7 @@ void BvhSolver::formRays()
 	ori.z = cos(m_alpha * 0.2f) * 30.f;
 	bvhTestRay((RayInfo *)rays, ori, 10.f, RAYDIM);
 	
-	m_rays->deviceToHost(m_displayRays->data(), m_rays->bufferSize());
+	// m_rays->deviceToHost(m_displayRays->data(), m_rays->bufferSize());
 }
 
 void BvhSolver::rayTraverse()

@@ -33,7 +33,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	internalTimer()->stop();
+	//internalTimer()->stop();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -46,10 +46,10 @@ void GLWidget::clientDraw()
 	showRays();
 	
 	// showEdgeContacts();
-	showAabbs();
+	// showAabbs();
 	m_solver->setAlpha((float)elapsedTime()/300.f);
 	// qDebug()<<"drawn in "<<deltaTime();
-	internalTimer()->start();
+	//internalTimer()->start();
 }
 
 void GLWidget::showEdgeContacts()

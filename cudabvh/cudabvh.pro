@@ -43,7 +43,7 @@ macx {
 QT           += opengl
 LIBS += -L../lib -laphid -lIlmImf -lHalf
 DESTDIR = ./
-CUSOURCES = plane.cu createBvh.cu traverseBvh.cu reduceBox.cu reduceRange.cu \
+CUSOURCES = bvh_math.cu plane.cu createBvh.cu traverseBvh.cu reduceBox.cu reduceRange.cu \
             ../radixsort/radixsort.cu
 macx {
 CUDA_CC = /usr/local/cuda/bin/nvcc
