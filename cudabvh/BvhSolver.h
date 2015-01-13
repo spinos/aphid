@@ -37,11 +37,14 @@ public:
 	const unsigned numLeafNodes() const;
 	const unsigned numInternalNodes() const;
 	
+	int getRootNodeIndex();
+	
 #ifdef BVHSOLVER_DBG_DRAW
 	Aabb * displayLeafAabbs();
 	Aabb * displayInternalAabbs();
 	KeyValuePair * displayLeafHash();
 	int * displayInternalDistances();
+	void hostInternalNodeChildIndex(int2 * ptr);
 #endif
 	const unsigned numRays() const;
 	RayInfo * displayRays();
@@ -91,7 +94,6 @@ private:
 	BaseBuffer * m_displayInternalDistance;
 	BaseBuffer * m_displayLeafHash;
 #endif
-	int m_rootNodeIndex;
 	unsigned m_numTriIndices, m_numTriangles, m_numEdges;
 	float m_alpha;
 };

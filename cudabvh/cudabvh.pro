@@ -90,6 +90,7 @@ cuda.variable_out = OBJECTS
 cuda.output = ${QMAKE_FILE_IN}$$QMAKE_EXT_OBJ
 cuda.commands = $$CUDA_CC \
     -c \
+    --ptxas-options=-v \
     $$CUDA_MACHINE_FLAG \
     -arch sm_11 \
     $$join(INCLUDEPATH,'" -I "','-I "','"') \

@@ -33,6 +33,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+	internalTimer()->stop();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -42,12 +43,13 @@ void GLWidget::clientDraw()
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
-	// showRays();
+	showRays();
 	
 	// showEdgeContacts();
 	showAabbs();
 	m_solver->setAlpha((float)elapsedTime()/300.f);
 	// qDebug()<<"drawn in "<<deltaTime();
+	internalTimer()->start();
 }
 
 void GLWidget::showEdgeContacts()
@@ -104,6 +106,14 @@ void GLWidget::showEdgeContacts()
 	}
 	glEnd();
 }
+
+inline int isLeafNode(int index) 
+{ return (index >> 31 == 0); }
+
+inline int getIndexWithInternalNodeMarkerRemoved(int index) 
+{ return index & (~0x80000000); }
+
+
 void GLWidget::showAabbs()
 {
 	Aabb ab = m_solver->combinedAabb();
@@ -118,9 +128,69 @@ void GLWidget::showAabbs()
 	
 #ifdef BVHSOLVER_DBG_DRAW_INTERNALBOX
 	Aabb * boxes = m_solver->displayInternalAabbs();
+	KeyValuePair * leafHash = m_solver->displayLeafHash();
+	Aabb * leaves = m_solver->displayLeafAabbs();
 	int * levels = m_solver->displayInternalDistances();
     unsigned ne = m_solver->numInternalNodes();
+	int root = m_solver->getRootNodeIndex();
+	// qDebug()<<" root at "<< (root & (~0x80000000));
+	int2 * internalNodeChildIndices = new int2[ne];
+	m_solver->hostInternalNodeChildIndex(internalNodeChildIndices);
+	int stack[128];
+	stack[0] = root;
+	int stackSize = 1;
+	int maxStack = 1;
+	int touchedLeaf = 0;
+	int touchedInternal = 0;
+	while(stackSize > 0) {
+		int internalOrLeafNodeIndex = stack[ stackSize - 1 ];
+		stackSize--;
+		
+		int isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
+		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
+		
+		int bvhRigidIndex = (isLeaf) ? leafHash[bvhNodeIndex].value : -1;
+		
+		Aabb bvhNodeAabb = (isLeaf) ? leaves[bvhRigidIndex] : boxes[bvhNodeIndex];
 
+		{
+			if(isLeaf) {
+				glColor3f(.5, 0., 0.);
+				ab = bvhNodeAabb;
+				bb.setMin(ab.low.x, ab.low.y, ab.low.z);
+				bb.setMax(ab.high.x, ab.high.y, ab.high.z);
+				dr->boundingBox(bb);
+				touchedLeaf++;
+			}
+			else {
+				glColor3f(.5, .5, 0.);
+				//if(levels[bvhNodeIndex] > m_displayLevel) continue;
+				ab = bvhNodeAabb;
+				bb.setMin(ab.low.x, ab.low.y, ab.low.z);
+				bb.setMax(ab.high.x, ab.high.y, ab.high.z);
+				//dr->boundingBox(bb);
+				touchedInternal++;
+				if(stackSize + 2 > 128)
+				{
+					//Error
+				}
+				else
+				{
+				    stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+					stackSize++;
+					stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+					stackSize++;
+					
+					if(stackSize > maxStack) maxStack = stackSize;
+				}
+			}
+		}
+		
+	} 
+	
+	delete[] internalNodeChildIndices;
+	qDebug()<<"max stack "<<maxStack<<" touch leaf "<<touchedLeaf<<" touchedInternal "<<touchedInternal;
+	/*
 	int ninvalidbox = 0;
     for(unsigned i=0; i < ne; i++) {
 		if(levels[i] != m_displayLevel) continue;
@@ -141,6 +211,7 @@ void GLWidget::showAabbs()
         dr->boundingBox(bb);
     }
 	if(ninvalidbox > 0) qDebug()<<"n invalid box "<<ninvalidbox;
+	*/
 #endif	
 /*
 #ifdef BVHSOLVER_DBG_DRAW_LEAFHASH
