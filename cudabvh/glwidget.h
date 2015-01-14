@@ -6,7 +6,7 @@
 
 class BvhSolver;
 class BaseBuffer;
-class BvhTriangleMesh;
+class SimpleMesh;
 
 class GLWidget : public Base3DView
 {
@@ -34,7 +34,7 @@ private:
 	const unsigned numEdges() const;
 
 private:
-	BvhTriangleMesh * m_mesh;
+	SimpleMesh * m_mesh;
 	BvhSolver * m_solver;
 	BaseBuffer * m_displayRays;
 	BaseBuffer * m_edges;

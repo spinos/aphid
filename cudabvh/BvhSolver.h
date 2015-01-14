@@ -50,7 +50,6 @@ public:
 protected:
     virtual void stepPhysics(float dt);	
 private:
-	void formPlane();
 	void formLeafAabbs();
 	void combineAabb();
 	void calcLeafHash();
@@ -80,7 +79,7 @@ private:
 	CUDABuffer * m_rays;
 	CUDABuffer * m_ntests;
     
-	unsigned m_numLeafNodes, m_numRays, m_rayDim, m_planeUDim;
+	unsigned m_numLeafNodes, m_numRays, m_rayDim;
 	float m_alpha;
 };
 #endif        //  #ifndef BVHSOLVER_H

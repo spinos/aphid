@@ -12,7 +12,6 @@
 #include "BvhTriangleMesh.h"
 
 #include "BvhSolver.h"
-#include "plane_implement.h"
 #include "createBvh_implement.h"
 #include "traverseBvh_implement.h"
 #include "reduceBox_implement.h"
@@ -88,19 +87,13 @@ void BvhSolver::init()
 
 void BvhSolver::stepPhysics(float dt)
 {
-	formPlane();
+	m_mesh->update();
 	combineAabb();
 	formLeafAabbs();
 	calcLeafHash();
 	buildInternalTree();
 	formRays();
 	rayTraverse();
-}
-
-void BvhSolver::formPlane()
-{
-	void *dptr = m_mesh->verticesOnDevice();
-	wavePlane((float3 *)dptr, m_planeUDim, 2.0, m_alpha);
 }
 
 void BvhSolver::formLeafAabbs()
@@ -287,9 +280,6 @@ const unsigned BvhSolver::numPoints() const
 
 void BvhSolver::setAlpha(float x) 
 { m_alpha = x; }
-
-void BvhSolver::setPlaneUDim(uint x)
-{ m_planeUDim = x; }
 
 const unsigned BvhSolver::numLeafNodes() const 
 { return m_numLeafNodes; }

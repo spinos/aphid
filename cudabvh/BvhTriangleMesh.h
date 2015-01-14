@@ -34,6 +34,8 @@ public:
 	Vector3F * vertices();
 	unsigned * triangleIndices();
 	
+	virtual void update();
+	
 protected:
 
 private:

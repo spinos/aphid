@@ -2,7 +2,7 @@
 
 #include <gl_heads.h>
 #include "glwidget.h"
-#include "BvhTriangleMesh.h"
+#include "simpleMesh.h"
 #include <KdTreeDrawer.h>
 #include <CUDABuffer.h>
 #include <BvhSolver.h>
@@ -16,7 +16,7 @@
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-	m_mesh = new BvhTriangleMesh;
+	m_mesh = new SimpleMesh;
 	m_mesh->createVertices(IDIM1 * IDIM1);
 	m_mesh->createTriangles(IDIM * IDIM * 2);
 	
@@ -142,8 +142,8 @@ void GLWidget::clientInit()
 {
 	CudaBase::SetDevice();
 	m_mesh->initOnDevice();
+	m_mesh->setPlaneUDim(IDIM);
 	m_solver->setMesh(m_mesh);
-	m_solver->setPlaneUDim(IDIM);
 	m_solver->createEdges(m_edges, numEdges());
 	m_solver->createRays(IRAYDIM, IRAYDIM);
 	m_solver->init();
@@ -182,7 +182,10 @@ void GLWidget::clientDraw()
 	showRays();	
 	// showEdgeContacts();
 	showAabbs();
-	m_solver->setAlpha((float)elapsedTime()/300.f);
+	
+	const float t = (float)elapsedTime();
+	m_mesh->setAlpha(t/290.f);
+	m_solver->setAlpha(t/230.f);
 	// qDebug()<<"drawn in "<<deltaTime();
 	//internalTimer()->start();
 }
