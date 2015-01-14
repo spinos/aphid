@@ -66,7 +66,6 @@ private:
 	
 private:
 	BvhTriangleMesh * m_mesh;
-	CUDABuffer * m_edgeContactIndices;
 	CUDABuffer * m_leafAabbs;
 	CUDABuffer * m_internalNodeAabbs;
 	CUDABuffer * m_leafHash[2];
@@ -81,7 +80,7 @@ private:
 	CUDABuffer * m_rays;
 	CUDABuffer * m_ntests;
     
-	unsigned m_numLeafNodes, m_numRays, m_rayDim;
+	unsigned m_numRays, m_rayDim;
 	float m_alpha;
 	bool m_isValid;
 };

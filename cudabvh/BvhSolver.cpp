@@ -28,14 +28,6 @@ BvhSolver::~BvhSolver() {}
 void BvhSolver::setMesh(BvhTriangleMesh * mesh)
 { m_mesh = mesh; }
 
-void BvhSolver::createEdges(BaseBuffer * onhost, uint n)
-{
-	m_numLeafNodes = n;
-	m_edgeContactIndices = new CUDABuffer;
-	m_edgeContactIndices->create(onhost->bufferSize());
-	m_edgeContactIndices->hostToDevice(onhost->data(), onhost->bufferSize());
-}
-
 void BvhSolver::createRays(uint m, uint n)
 {
 	m_numRays = m * n;
@@ -101,9 +93,9 @@ void BvhSolver::stepPhysics(float dt)
 void BvhSolver::formLeafAabbs()
 {
     void * cvs = m_mesh->verticesOnDevice();
-    void * edges = m_edgeContactIndices->bufferOnDevice();
+    void * tri = m_mesh->triangleIndicesOnDevice();
     void * dst = m_leafAabbs->bufferOnDevice();
-    bvhCalculateLeafAabbs((Aabb *)dst, (float3 *)cvs, (EdgeContact *)edges, numLeafNodes(), numPoints());
+    bvhCalculateLeafAabbsTriangle((Aabb *)dst, (float3 *)cvs, (uint3 *)tri, numLeafNodes());
 }
 
 void BvhSolver::combineAabb()
@@ -284,7 +276,7 @@ void BvhSolver::setAlpha(float x)
 { m_alpha = x; }
 
 const unsigned BvhSolver::numLeafNodes() const 
-{ return m_numLeafNodes; }
+{ return m_mesh->numTriangles(); }
 
 const unsigned BvhSolver::numInternalNodes() const 
 { return numLeafNodes() - 1; }

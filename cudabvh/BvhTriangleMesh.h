@@ -31,6 +31,7 @@ public:
 	BaseBuffer * vertexBuffer();
 	CUDABuffer * vertexBufferOnDevice();
 	void * verticesOnDevice();
+	void * triangleIndicesOnDevice();
 	Vector3F * vertices();
 	unsigned * triangleIndices();
 	

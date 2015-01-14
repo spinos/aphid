@@ -27,16 +27,12 @@ protected:
     virtual void clientMouseInput(QMouseEvent *event);
 	virtual void keyPressEvent(QKeyEvent *event);
 private:
-	void showEdgeContacts();
 	void debugDraw();
 	
-	const unsigned numEdges() const;
-
 private:
 	SimpleMesh * m_mesh;
 	BvhSolver * m_solver;
 	BaseBuffer * m_displayRays;
-	BaseBuffer * m_edges;
 	int m_displayLevel;
 	
 #ifdef BVHSOLVER_DBG_DRAW

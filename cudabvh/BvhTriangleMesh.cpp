@@ -63,6 +63,9 @@ void * BvhTriangleMesh::verticesOnDevice()
 Vector3F * BvhTriangleMesh::vertices()
 { return (Vector3F *)m_vertices->data(); }
 
+void * BvhTriangleMesh::triangleIndicesOnDevice()
+{ return m_triangleIndicesOnDevice->bufferOnDevice(); }
+
 unsigned * BvhTriangleMesh::triangleIndices()
 { return (unsigned *)m_triangleIndices->data(); }
 

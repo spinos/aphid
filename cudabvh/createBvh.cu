@@ -68,6 +68,23 @@ inline __device__ void normalizeByBoundary(float & x, float low, float width)
 	}
 }
 
+__global__ void calculateAabbsTriangle_kernel(Aabb *dst, float3 * cvs, uint3 * tris, unsigned maxTriInd)
+{
+    unsigned idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(idx >= maxTriInd) return;
+	
+	uint3 t = tris[idx];
+
+	Aabb res;
+	resetAabb(res);
+	expandAabb(res, cvs[t.x]);
+	expandAabb(res, cvs[t.y]);
+	expandAabb(res, cvs[t.z]);
+	
+	dst[idx] = res;
+}
+
 __global__ void calculateAabbs_kernel(Aabb *dst, float3 * cvs, EdgeContact * edges, unsigned maxEdgeInd, unsigned maxVertInd)
 {
     unsigned idx = blockIdx.x*blockDim.x + threadIdx.x;
@@ -393,6 +410,15 @@ __global__ void formInternalNodeAabbsAtDistance_kernel(int * distanceFromRoot, K
 		expandAabb(mergedAabb, rightChildAabb);
 		internalNodeAabbs[internalNodeIndex] = mergedAabb;
 	}
+}
+
+extern "C" void bvhCalculateLeafAabbsTriangle(Aabb *dst, float3 * cvs, uint3 * tris, unsigned numTriangles)
+{
+	dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numTriangles, 512);
+    
+    dim3 grid(nblk, 1, 1);
+    calculateAabbsTriangle_kernel<<< grid, block >>>(dst, cvs, tris, numTriangles);
 }
 
 extern "C" void bvhCalculateLeafAabbs(Aabb *dst, float3 * cvs, EdgeContact * edges, unsigned numEdges, unsigned numVertices)

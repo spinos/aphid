@@ -19,13 +19,10 @@ public:
 	void setAlpha(float x);
 	const float alpha() const;
 	
-	void setPlaneUDim(unsigned x);
-	
 	virtual void update();
 protected:
 
 private:
-	unsigned m_planeUDim;
 	float m_alpha;
 };
 

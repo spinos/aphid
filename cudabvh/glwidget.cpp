@@ -10,124 +10,19 @@
 #include <radixsort_implement.h>
 #include <CudaBase.h>
 
-#define IDIM 75
-#define IDIM1 76
 #define IRAYDIM 33
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_mesh = new SimpleMesh;
-	m_mesh->createVertices(IDIM1 * IDIM1);
-	m_mesh->createTriangles(IDIM * IDIM * 2);
-	
 	m_solver = new BvhSolver;
 	m_displayLevel = 0;
-		
-// i,j  i1,j  
-// i,j1 i1,j1
-//
-// i,j  i1,j  
-// i,j1
-//		i1,j  
-// i,j1 i1,j1
 
-	unsigned i, j, i1, j1;
-	unsigned *ind = m_mesh->triangleIndices();
-	for(j=0; j < IDIM; j++) {
-	    j1 = j + 1;
-		for(i=0; i < IDIM; i++) {
-		    i1 = i + 1;
-			*ind = j * IDIM1 + i;
-			ind++;
-			*ind = j1 * IDIM1 + i;
-			ind++;
-			*ind = j * IDIM1 + i1;
-			ind++;
-
-			*ind = j * IDIM1 + i1;
-			ind++;
-			*ind = j1 * IDIM1 + i;
-			ind++;
-			*ind = j1 * IDIM1 + i1;
-			ind++;
-		}
-	}
-	
-	m_edges = new BaseBuffer;
-	m_edges->create(numEdges() * sizeof(EdgeContact));
-	
-	EdgeContact * edge = (EdgeContact *)m_edges->data();
-	
-	for(j=0; j < IDIM1; j++) {
-	    j1 = j + 1;
-		for(i=0; i < IDIM; i++) {
-		    i1 = i + 1;
-		    if(j==0) {
-		        edge->v[0] = i1;
-		        edge->v[1] = i;
-		        edge->v[2] = IDIM1 + i;
-		        edge->v[3] = MAX_INDEX;
-		    }
-		    else if(j==IDIM) {
-		        edge->v[0] = j * IDIM1 + i;
-		        edge->v[1] = j * IDIM1 + i1;
-		        edge->v[2] = (j - 1) * IDIM1 + i1;
-		        edge->v[3] = MAX_INDEX;
-		    }
-		    else {
-		        edge->v[0] = j * IDIM1 + i;
-		        edge->v[1] = j * IDIM1 + i1;
-		        edge->v[2] = (j - 1) * IDIM1 + i1;
-		        edge->v[3] = j1 * IDIM1 + i;
-		    }
-		    edge++;
-		}
-	}
-	
-	for(j=0; j < IDIM; j++) {
-	    j1 = j + 1;
-		for(i=0; i < IDIM1; i++) {
-		    i1 = i + 1;
-		    if(i==0) {
-		        edge->v[0] = j * IDIM1 + i;
-		        edge->v[1] = j1 * IDIM1 + i;
-		        edge->v[2] = j * IDIM1 + i1;
-		        edge->v[3] = MAX_INDEX;
-		    }
-		    else if(i==IDIM) {
-		        edge->v[0] = j1 * IDIM1 + i;
-		        edge->v[1] = j * IDIM1 + i;
-		        edge->v[2] = j1 * IDIM1 + i - 1;
-		        edge->v[3] = MAX_INDEX;
-		    }
-		    else {
-		        edge->v[0] = j1 * IDIM1 + i;
-		        edge->v[1] = j * IDIM1 + i;
-		        edge->v[2] = j1 * IDIM1 + i - 1;
-		        edge->v[3] = j * IDIM1 + i1;
-		    }
-		    edge++;
-		}
-	}
-	
-	for(j=0; j < IDIM; j++) {
-	    j1 = j + 1;
-		for(i=0; i < IDIM; i++) {
-		    i1 = i + 1;
-		    edge->v[0] = j1 * IDIM1 + i;
-		    edge->v[1] = j * IDIM1 + i1;
-		    edge->v[2] = j  * IDIM1 + i;
-		    edge->v[3] = j1 * IDIM1 + i1;
-			edge++;
-		}
-	}
-	
 	m_displayRays = new BaseBuffer;
 	m_displayRays->create(IRAYDIM * IRAYDIM * sizeof(RayInfo));
 	
 	qDebug()<<"num vertices "<<m_mesh->numVertices();
 	qDebug()<<"num triangles "<<m_mesh->numTriangles();
-	qDebug()<<"num edges "<<numEdges();
 	qDebug()<<"num ray tests "<<(IRAYDIM * IRAYDIM);
 }
 
@@ -135,16 +30,11 @@ GLWidget::~GLWidget()
 {
 }
 
-const unsigned GLWidget::numEdges() const
-{ return IDIM * IDIM1 + IDIM * IDIM1 + IDIM * IDIM; }
-
 void GLWidget::clientInit()
 {
 	CudaBase::SetDevice();
 	m_mesh->initOnDevice();
-	m_mesh->setPlaneUDim(IDIM);
 	m_solver->setMesh(m_mesh);
-	m_solver->createEdges(m_edges, numEdges());
 	m_solver->createRays(IRAYDIM, IRAYDIM);
 	m_solver->init();
 	
@@ -186,61 +76,6 @@ void GLWidget::clientDraw()
 	m_solver->setAlpha(t/230.f);
 	// qDebug()<<"drawn in "<<deltaTime();
 	//internalTimer()->start();
-}
-
-void GLWidget::showEdgeContacts()
-{
-    glPolygonMode(GL_FRONT, GL_FILL);
-    glPolygonMode(GL_BACK, GL_LINE);
-    
-    float * dsyV = (float *)m_mesh->vertices();
-	EdgeContact * ec = (EdgeContact *)m_edges->data();
-	unsigned ne = m_solver->numLeafNodes();
-	unsigned a, b, c, d;
-	const float h = 0.2f;
-	const unsigned maxI = m_solver->numPoints();
-	float * p;
-	glBegin(GL_TRIANGLES);
-	for(unsigned i=0; i < ne; i++) {
-	    EdgeContact & ae = ec[i];
-	    a = ae.v[0];
-	    b = ae.v[1];
-	    c = ae.v[2];
-	    d = ae.v[3];
-	    
-	    if(c < maxI && d < maxI) {
-	        p = &dsyV[a * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	        p = &dsyV[b * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	        p = &dsyV[c * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	        
-	        p = &dsyV[b * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	        p = &dsyV[a * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	        p = &dsyV[d * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	    }
-	    else if(c < maxI) {
-	        p = &dsyV[a * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	        p = &dsyV[b * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	        p = &dsyV[c * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	    }
-	    else if(d < maxI) {
-	        p = &dsyV[a * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	        p = &dsyV[b * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	        p = &dsyV[d * 4];
-	        glVertex3f(p[0], p[1] + h, p[2]);
-	    }
-	}
-	glEnd();
 }
 
 inline int isLeafNode(int index) 
