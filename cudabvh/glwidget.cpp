@@ -304,16 +304,18 @@ void GLWidget::debugDraw()
 
 		{
 			if(isLeaf) {
+#ifdef BVHSOLVER_DBG_DRAW_LEAFBOX
 				glColor3f(.5, 0., 0.);
 				ab = bvhNodeAabb;
 				bb.setMin(ab.low.x, ab.low.y, ab.low.z);
 				bb.setMax(ab.high.x, ab.high.y, ab.high.z);
 				dr->boundingBox(bb);
+#endif
 				touchedLeaf++;
 			}
 			else {
 #ifdef BVHSOLVER_DBG_DRAW_INTERNALBOX_TO_LEVEL
-				glColor3f(.5, .5, 0.);
+				glColor3f(.5, .65, 0.);
 				if(levels[bvhNodeIndex] > m_displayLevel) continue;
 				ab = bvhNodeAabb;
 				bb.setMin(ab.low.x, ab.low.y, ab.low.z);

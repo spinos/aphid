@@ -100,4 +100,13 @@ inline __device__ float3 centroidOfAabb(const Aabb & box)
 	return make_float3(box.low.x * 0.5 + box.high.x * 0.5, box.low.y * 0.5 + box.high.y * 0.5, box.low.z * 0.5 + box.high.z * 0.5);
 }
 
+inline __device__ float longestSideOfAabb(const Aabb & box)
+{
+	float x = box.high.x - box.low.x;
+	float y = box.high.y - box.low.y;
+	float z = box.high.z - box.low.z;
+	x = (x > y) ? x : y;
+	return (z > x) ? z : x;
+}
+
 #endif

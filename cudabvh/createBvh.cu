@@ -58,14 +58,13 @@ inline __device__ uint morton3D(float x, float y, float z)
     return xx * 4 + yy * 2 + zz; 
 } 
 
-inline __device__ void normalizeByBoundary(float & x, float low, float high)
+inline __device__ void normalizeByBoundary(float & x, float low, float width)
 {
 	if(x < low) x = 0.0;
-	else if(x >= high) x = 1.0;
+	else if(x > low + width) x = 1.0;
 	else {
-		float dx = high - low;
-		if(dx < TINY_VALUE2) x = 0.0;
-		else x = (x - low) / dx;
+		if(width < TINY_VALUE2) x = 0.0;
+		else x = (x - low) / width;
 	}
 }
 
@@ -99,9 +98,10 @@ __global__ void calculateLeafHash_kernel(KeyValuePair *dst, Aabb * leafBoxes, ui
 	
 	float3 c = centroidOfAabb(leafBoxes[idx]);
 	Aabb & bound = boundary[0];
-	normalizeByBoundary(c.x, bound.low.x, bound.high.x);
-	normalizeByBoundary(c.y, bound.low.y, bound.high.y);
-	normalizeByBoundary(c.z, bound.low.z, bound.high.z);
+	float side = longestSideOfAabb(bound);
+	normalizeByBoundary(c.x, bound.low.x, side);
+	normalizeByBoundary(c.y, bound.low.y, side);
+	normalizeByBoundary(c.z, bound.low.z, side);
 	
 	dst[idx].key = morton3D(c.x, c.y, c.z);
 	dst[idx].value = idx;
