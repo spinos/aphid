@@ -1,3 +1,6 @@
+#ifndef CUDALINEARBVH_H
+#define CUDALINEARBVH_H
+
 /*
  *  CudaLinearBvh.h
  *  cudabvh
@@ -63,3 +66,4 @@ private:
     CUDABuffer * m_distanceInternalNodeFromRoot;
 	CUDABuffer * m_reducedMaxDistance;
 };
+#endif        //  #ifndef CUDALINEARBVH_H

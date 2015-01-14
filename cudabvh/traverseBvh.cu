@@ -60,7 +60,6 @@ __global__ void rayTraverseIterative_kernel(RayInfo * rays,
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, Aabb * leafAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,								
-								float * o_ntests,
 								uint numRays)
 {
 	uint rayIndex = blockIdx.x*blockDim.x + threadIdx.x;
@@ -163,7 +162,6 @@ extern "C" void bvhRayTraverseIterative(RayInfo * rays,
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,								
-								float * o_ntests,
 								uint numRays)
 {
     int tpb = CudaBase::LimitNThreadPerBlock(26, 48);
@@ -179,7 +177,6 @@ extern "C" void bvhRayTraverseIterative(RayInfo * rays,
 								internalNodeAabbs, 
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,								
-								o_ntests,
 								numRays);
 }
 

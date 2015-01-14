@@ -10,7 +10,6 @@ extern "C" void bvhRayTraverseIterative(RayInfo * rays,
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,								
-								float * o_ntests,
 								uint numRays);
 
 extern "C" void bvhTestRay(RayInfo * o_rays, float3 origin, float boxSize, uint w, uint n);

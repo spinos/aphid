@@ -7,6 +7,7 @@
 class BvhSolver;
 class BaseBuffer;
 class SimpleMesh;
+class RayTest;
 
 class GLWidget : public Base3DView
 {
@@ -31,6 +32,7 @@ private:
 	
 private:
 	SimpleMesh * m_mesh;
+	RayTest * m_ray;
 	BvhSolver * m_solver;
 	BaseBuffer * m_displayRays;
 	int m_displayLevel;

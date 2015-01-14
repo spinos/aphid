@@ -8,6 +8,7 @@ HEADERS       = glWidget.h \
                 BvhSolver.h \
                 CudaLinearBvh.h \
                 simpleMesh.h \
+                rayTest.h \
                 bvh_common.h \
 				app_define.h \
                 plane_implement.h \
@@ -29,6 +30,7 @@ SOURCES       = main.cpp \
                 BvhSolver.cpp \
                 CudaLinearBvh.cpp \
                 simpleMesh.cpp \
+                rayTest.cpp \
                 ../shared/CudaBase.cpp \
                 ../shared/Base3DView.cpp \
                 ../shared/BaseBuffer.cpp \

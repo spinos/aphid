@@ -11,13 +11,12 @@
  */
 
 #include <BaseSolverThread.h>
-#include <bvh_common.h>
-#include <radixsort_implement.h>
 
 class BaseBuffer;
 class CUDABuffer;
 class BvhTriangleMesh;
 class CudaLinearBvh;
+class RayTest;
 
 class BvhSolver : public BaseSolverThread
 {
@@ -26,30 +25,20 @@ public:
 	virtual ~BvhSolver();
 	
 	void setMesh(BvhTriangleMesh * mesh);
-	void createRays(uint m, uint n);
+	void setRay(RayTest * ray);
 	
-	const unsigned numRays() const;
-	
-	void setAlpha(float x);
-	void getRays(BaseBuffer * dst);
 	CudaLinearBvh * bvh();
 	
 	const bool isValid() const;
 
 protected:
     virtual void stepPhysics(float dt);	
+
 private:
-	void formRays();
-	void rayTraverse();
-	
-private:
-	CUDABuffer * m_rays;
-	CUDABuffer * m_ntests;
 	BvhTriangleMesh * m_mesh;
 	CudaLinearBvh * m_bvh;
+	RayTest * m_ray;
     
-	unsigned m_numRays, m_rayDim;
-	float m_alpha;
 	bool m_isValid;
 };
 #endif        //  #ifndef BVHSOLVER_H

@@ -10,12 +10,14 @@
 #include <radixsort_implement.h>
 #include <CudaBase.h>
 #include "CudaLinearBvh.h"
+#include "rayTest.h"
 
 #define IRAYDIM 33
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_mesh = new SimpleMesh;
+	m_ray = new RayTest;
 	m_solver = new BvhSolver;
 	m_displayLevel = 0;
 
@@ -36,7 +38,8 @@ void GLWidget::clientInit()
 	CudaBase::SetDevice();
 	m_mesh->initOnDevice();
 	m_solver->setMesh(m_mesh);
-	m_solver->createRays(IRAYDIM, IRAYDIM);
+	m_ray->createRays(IRAYDIM, IRAYDIM);
+	m_solver->setRay(m_ray);
 	
 #ifdef BVHSOLVER_DBG_DRAW	
 	CudaLinearBvh * bvh = m_solver->bvh();
@@ -75,7 +78,7 @@ void GLWidget::clientDraw()
 	
 	const float t = (float)elapsedTime();
 	m_mesh->setAlpha(t/290.f);
-	m_solver->setAlpha(t/230.f);
+	m_ray->setAlpha(t/230.f);
 	// qDebug()<<"drawn in "<<deltaTime();
 	//internalTimer()->start();
 }
@@ -209,9 +212,9 @@ void GLWidget::debugDraw()
 #endif
 
 #ifdef BVHSOLVER_DBG_DRAW_RAY
-	m_solver->getRays(m_displayRays);
+    m_ray->getRays(m_displayRays);
 	RayInfo * rays = (RayInfo *)m_displayRays->data();
-	const unsigned nr = m_solver->numRays();
+	const unsigned nr = m_ray->numRays();
 	glColor3f(0.1f, 0.6f, 0.f);
 	glBegin(GL_LINES);
 	for(unsigned i=0; i < nr; i++) {
