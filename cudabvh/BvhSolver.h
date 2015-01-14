@@ -17,6 +17,7 @@
 class BaseBuffer;
 class CUDABuffer;
 class BvhTriangleMesh;
+class CudaLinearBvh;
 
 class BvhSolver : public BaseSolverThread
 {
@@ -24,61 +25,28 @@ public:
 	BvhSolver(QObject *parent = 0);
 	virtual ~BvhSolver();
 	
-	void init();
 	void setMesh(BvhTriangleMesh * mesh);
-	void createEdges(BaseBuffer * onhost, uint n);
 	void createRays(uint m, uint n);
 	
-	const unsigned numPoints() const;
-	const unsigned numLeafNodes() const;
-	const unsigned numInternalNodes() const;
 	const unsigned numRays() const;
 	
 	void setAlpha(float x);
-	void setPlaneUDim(uint x);
-	
-	void getRootNodeIndex(int * dst);
-	void getRootNodeAabb(Aabb * dst); 
-	void getPoints(BaseBuffer * dst);
-	void getRays(BaseBuffer * dst);	
-	void getLeafAabbs(BaseBuffer * dst);
-	void getInternalAabbs(BaseBuffer * dst);
-	void getLeafHash(BaseBuffer * dst);
-	void getInternalDistances(BaseBuffer * dst);
-	void getInternalChildIndex(BaseBuffer * dst);
+	void getRays(BaseBuffer * dst);
+	CudaLinearBvh * bvh();
 	
 	const bool isValid() const;
 
 protected:
     virtual void stepPhysics(float dt);	
 private:
-	void formLeafAabbs();
-	void combineAabb();
-	void calcLeafHash();
-	void buildInternalTree();
-	void findMaxDistanceFromRoot();
-	void formInternalTreeAabbsIterative();
 	void formRays();
 	void rayTraverse();
 	
-	void printLeafInternalNodeConnection();
-	void printInternalNodeConnection();
-	
 private:
-	BvhTriangleMesh * m_mesh;
-	CUDABuffer * m_leafAabbs;
-	CUDABuffer * m_internalNodeAabbs;
-	CUDABuffer * m_leafHash[2];
-	CUDABuffer * m_internalNodeCommonPrefixValues;
-	CUDABuffer * m_internalNodeCommonPrefixLengths;
-	CUDABuffer * m_leafNodeParentIndices;
-	CUDABuffer * m_internalNodeChildIndices;
-	CUDABuffer * m_internalNodeParentIndices;
-	CUDABuffer * m_rootNodeIndexOnDevice;
-    CUDABuffer * m_distanceInternalNodeFromRoot;
-	CUDABuffer * m_reducedMaxDistance;
 	CUDABuffer * m_rays;
 	CUDABuffer * m_ntests;
+	BvhTriangleMesh * m_mesh;
+	CudaLinearBvh * m_bvh;
     
 	unsigned m_numRays, m_rayDim;
 	float m_alpha;

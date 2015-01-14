@@ -9,6 +9,7 @@
 #include "bvh_common.h"
 #include <radixsort_implement.h>
 #include <CudaBase.h>
+#include "CudaLinearBvh.h"
 
 #define IRAYDIM 33
 
@@ -36,19 +37,19 @@ void GLWidget::clientInit()
 	m_mesh->initOnDevice();
 	m_solver->setMesh(m_mesh);
 	m_solver->createRays(IRAYDIM, IRAYDIM);
-	m_solver->init();
 	
 #ifdef BVHSOLVER_DBG_DRAW	
+	CudaLinearBvh * bvh = m_solver->bvh();
 	m_displayLeafAabbs = new BaseBuffer;
-	m_displayLeafAabbs->create(m_solver->numLeafNodes() * sizeof(Aabb));
+	m_displayLeafAabbs->create(bvh->numLeafNodes() * sizeof(Aabb));
 	m_displayInternalAabbs = new BaseBuffer;
-	m_displayInternalAabbs->create(m_solver->numInternalNodes() * sizeof(Aabb));
+	m_displayInternalAabbs->create(bvh->numInternalNodes() * sizeof(Aabb));
 	m_displayLeafHash = new BaseBuffer;
-	m_displayLeafHash->create(m_solver->numLeafNodes() * sizeof(KeyValuePair));
+	m_displayLeafHash->create(bvh->numLeafNodes() * sizeof(KeyValuePair));
 	m_displayInternalDistance = new BaseBuffer;
-	m_displayInternalDistance->create(m_solver->numInternalNodes() * sizeof(int));
+	m_displayInternalDistance->create(bvh->numInternalNodes() * sizeof(int));
 	m_internalChildIndices = new BaseBuffer;
-	m_internalChildIndices->create(m_solver->numInternalNodes() * sizeof(int2));
+	m_internalChildIndices->create(bvh->numInternalNodes() * sizeof(int2));
 #endif
 
 	connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
@@ -58,7 +59,8 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	m_solver->getPoints(m_mesh->vertexBuffer());
+	CudaLinearBvh * bvh = m_solver->bvh();
+	bvh->getPoints(m_mesh->vertexBuffer());
 	//internalTimer()->stop();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
@@ -89,7 +91,8 @@ void GLWidget::debugDraw()
 {
 	if(!m_solver->isValid()) return;
 	Aabb ab;
-	m_solver->getRootNodeAabb(&ab);
+	CudaLinearBvh * bvh = m_solver->bvh();
+	bvh->getRootNodeAabb(&ab);
 	GeoDrawer * dr = getDrawer();
     BoundingBox bb; 
 	bb.setMin(ab.low.x, ab.low.y, ab.low.z);
@@ -100,24 +103,24 @@ void GLWidget::debugDraw()
 #ifdef BVHSOLVER_DBG_DRAW
 	
 #ifdef BVHSOLVER_DBG_DRAW_BOX
-	m_solver->getInternalAabbs(m_displayInternalAabbs);
+	bvh->getInternalAabbs(m_displayInternalAabbs);
 	Aabb * internalBoxes = (Aabb *)m_displayInternalAabbs->data();
 	
-	m_solver->getLeafAabbs(m_displayLeafAabbs);
+	bvh->getLeafAabbs(m_displayLeafAabbs);
 	Aabb * leafBoxes = (Aabb *)m_displayLeafAabbs->data();
 	
-	m_solver->getInternalDistances(m_displayInternalDistance);
+	bvh->getInternalDistances(m_displayInternalDistance);
 	int * levels = (int *)m_displayInternalDistance->data();
     
-	m_solver->getLeafHash(m_displayLeafHash);
+	bvh->getLeafHash(m_displayLeafHash);
 	KeyValuePair * leafHash = (KeyValuePair *)m_displayLeafHash->data();
 	
-	const uint numInternal = m_solver->numInternalNodes();
+	const uint numInternal = bvh->numInternalNodes();
 	int rootInd = 0;
-	m_solver->getRootNodeIndex(&rootInd);
+	bvh->getRootNodeIndex(&rootInd);
 	// qDebug()<<" root at "<< (rootInd & (~0x80000000));
 	
-	m_solver->getInternalChildIndex(m_internalChildIndices);
+	bvh->getInternalChildIndex(m_internalChildIndices);
 	int2 * internalNodeChildIndices = (int2 *)m_internalChildIndices->data();
 	
 	int stack[128];

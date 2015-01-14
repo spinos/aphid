@@ -6,6 +6,7 @@ HEADERS       = glWidget.h \
                 window.h \
                 BvhTriangleMesh.h \
                 BvhSolver.h \
+                CudaLinearBvh.h \
                 simpleMesh.h \
                 bvh_common.h \
 				app_define.h \
@@ -26,6 +27,7 @@ SOURCES       = main.cpp \
                 window.cpp \
                 BvhTriangleMesh.cpp \
                 BvhSolver.cpp \
+                CudaLinearBvh.cpp \
                 simpleMesh.cpp \
                 ../shared/CudaBase.cpp \
                 ../shared/Base3DView.cpp \
