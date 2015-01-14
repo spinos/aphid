@@ -28,8 +28,7 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 private:
 	void showEdgeContacts();
-	void showAabbs();
-	void showRays();
+	void debugDraw();
 	
 	const unsigned numEdges() const;
 

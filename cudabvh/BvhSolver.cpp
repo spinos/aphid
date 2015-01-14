@@ -20,6 +20,7 @@
 BvhSolver::BvhSolver(QObject *parent) : BaseSolverThread(parent) 
 {
 	m_alpha = 0;
+	m_isValid = 0;
 }
 
 BvhSolver::~BvhSolver() {}
@@ -94,6 +95,7 @@ void BvhSolver::stepPhysics(float dt)
 	buildInternalTree();
 	formRays();
 	rayTraverse();
+	m_isValid = 1;
 }
 
 void BvhSolver::formLeafAabbs()
@@ -109,7 +111,7 @@ void BvhSolver::combineAabb()
 	void * psrc = m_mesh->verticesOnDevice();
     void * pdst = m_internalNodeAabbs->bufferOnDevice();
 	
-	unsigned n = numPoints();
+	unsigned n = numLeafNodes();
 	unsigned threads, blocks;
 	getReduceBlockThread(blocks, threads, n);
 	
@@ -331,9 +333,10 @@ void BvhSolver::printInternalNodeConnection()
 	delete[] ipi;
 }
 
-int BvhSolver::getRootNodeIndex()
+void BvhSolver::getRootNodeIndex(int * dst)
 {
-	int tmp;
-	m_rootNodeIndexOnDevice->deviceToHost((void *)&tmp, m_rootNodeIndexOnDevice->bufferSize());
-	return tmp;	
+	m_rootNodeIndexOnDevice->deviceToHost((void *)dst, m_rootNodeIndexOnDevice->bufferSize());	
 }
+
+const bool BvhSolver::isValid() const
+{ return m_isValid; }

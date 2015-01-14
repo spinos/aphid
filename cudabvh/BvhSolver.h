@@ -37,7 +37,7 @@ public:
 	void setAlpha(float x);
 	void setPlaneUDim(uint x);
 	
-	int getRootNodeIndex();
+	void getRootNodeIndex(int * dst);
 	void getRootNodeAabb(Aabb * dst); 
 	void getPoints(BaseBuffer * dst);
 	void getRays(BaseBuffer * dst);	
@@ -46,6 +46,8 @@ public:
 	void getLeafHash(BaseBuffer * dst);
 	void getInternalDistances(BaseBuffer * dst);
 	void getInternalChildIndex(BaseBuffer * dst);
+	
+	const bool isValid() const;
 
 protected:
     virtual void stepPhysics(float dt);	
@@ -81,5 +83,6 @@ private:
     
 	unsigned m_numLeafNodes, m_numRays, m_rayDim;
 	float m_alpha;
+	bool m_isValid;
 };
 #endif        //  #ifndef BVHSOLVER_H
