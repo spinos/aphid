@@ -21,9 +21,6 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_solver = new BvhSolver;
 	m_displayLevel = 0;
 
-	m_displayRays = new BaseBuffer;
-	m_displayRays->create(IRAYDIM * IRAYDIM * sizeof(RayInfo));
-	
 	qDebug()<<"num vertices "<<m_mesh->numVertices();
 	qDebug()<<"num triangles "<<m_mesh->numTriangles();
 	qDebug()<<"num ray tests "<<(IRAYDIM * IRAYDIM);
@@ -212,10 +209,9 @@ void GLWidget::debugDraw()
 #endif
 
 #ifdef BVHSOLVER_DBG_DRAW_RAY
-    m_ray->getRays(m_displayRays);
-	RayInfo * rays = (RayInfo *)m_displayRays->data();
+    RayInfo * rays = m_ray->getRays();
 	const unsigned nr = m_ray->numRays();
-	glColor3f(0.1f, 0.6f, 0.f);
+	glColor3f(0.f, 0.5f, 0.2f);
 	glBegin(GL_LINES);
 	for(unsigned i=0; i < nr; i++) {
 		RayInfo & r = rays[i];

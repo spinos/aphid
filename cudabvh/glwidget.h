@@ -34,7 +34,6 @@ private:
 	SimpleMesh * m_mesh;
 	RayTest * m_ray;
 	BvhSolver * m_solver;
-	BaseBuffer * m_displayRays;
 	int m_displayLevel;
 	
 #ifdef BVHSOLVER_DBG_DRAW

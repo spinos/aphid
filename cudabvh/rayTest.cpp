@@ -16,6 +16,9 @@ void RayTest::createRays(uint m, uint n)
 	m_rayDim = m;
 	m_rays = new CUDABuffer;
 	m_rays->create(m_numRays * sizeof(RayInfo));
+	
+	m_displayRays = new BaseBuffer;
+	m_displayRays->create(m_numRays * sizeof(RayInfo));
 }
 
 const unsigned RayTest::numRays() const
@@ -24,9 +27,11 @@ const unsigned RayTest::numRays() const
 void RayTest::setAlpha(float x)
 { m_alpha = x; }
 
-void RayTest::getRays(BaseBuffer * dst)
-{ m_rays->deviceToHost(dst->data(), m_rays->bufferSize()); }
-
+RayInfo * RayTest::getRays()
+{ 
+    m_rays->deviceToHost(m_displayRays->data(), m_rays->bufferSize()); 
+    return (RayInfo *)m_displayRays->data();
+}
 
 void RayTest::update()
 {

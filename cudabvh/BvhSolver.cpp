@@ -36,14 +36,14 @@ void BvhSolver::setMesh(BvhTriangleMesh * mesh)
 void BvhSolver::setRay(RayTest * ray)
 { 
     m_ray = ray;
-    // m_ray->setBvh(m_bvh);
+    m_ray->setBvh(m_bvh);
 }
 
 void BvhSolver::stepPhysics(float dt)
 {
 	m_mesh->update();
 	m_bvh->update();
-	// m_ray->update();
+	m_ray->update();
 	m_isValid = 1;
 }
 

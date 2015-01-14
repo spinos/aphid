@@ -1,8 +1,11 @@
 #ifndef RAY_TEST_H
 #define RAY_TEST_H
 
+#include "bvh_common.h"
+
 class CudaLinearBvh;
 class CUDABuffer;
+class BaseBuffer;
 
 class RayTest
 {
@@ -16,7 +19,7 @@ public:
 	const unsigned numRays() const;
 	
 	void setAlpha(float x);
-	void getRays(BaseBuffer * dst);
+	RayInfo * getRays();
 	
 	void update();
 	
@@ -29,7 +32,8 @@ private:
 private:
 	CUDABuffer * m_rays;
 	CudaLinearBvh * m_bvh;
-    
+    BaseBuffer * m_displayRays;
+	
 	unsigned m_numRays, m_rayDim;
 	float m_alpha;
 };
