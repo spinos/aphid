@@ -18,6 +18,7 @@ class CUDABuffer;
 class BvhTriangleMesh;
 class CudaLinearBvh;
 class RayTest;
+class CudaParticleSystem;
 
 class BvhSolver : public BaseSolverThread
 {
@@ -27,6 +28,7 @@ public:
 	
 	void setMesh(BvhTriangleMesh * mesh);
 	void setRay(RayTest * ray);
+	void setParticleSystem(CudaParticleSystem * particles);
 	
 	CudaLinearBvh * bvh();
 	
@@ -52,6 +54,7 @@ private:
 	BvhTriangleMesh * m_mesh;
 	CudaLinearBvh * m_bvh;
 	RayTest * m_ray;
+	CudaParticleSystem * m_particles;
 	
 #ifdef BVHSOLVER_DBG_DRAW
     BaseBuffer * m_hostLeafAabbs;

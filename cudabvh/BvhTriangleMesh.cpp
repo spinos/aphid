@@ -72,4 +72,7 @@ unsigned * BvhTriangleMesh::triangleIndices()
 void BvhTriangleMesh::getVerticesOnDevice(BaseBuffer * dst)
 { m_verticesOnDevice->deviceToHost(dst->data(), m_verticesOnDevice->bufferSize()); }
 
+void BvhTriangleMesh::deviceToHost()
+{ m_verticesOnDevice->deviceToHost(m_vertices->data(), m_verticesOnDevice->bufferSize()); }
+
 void BvhTriangleMesh::update() {}

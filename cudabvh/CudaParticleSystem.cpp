@@ -1,5 +1,5 @@
 #include "CudaParticleSystem.h"
-
+#include "particleSystem_implement.h"
 #include <CUDABuffer.h>
 #include <BaseBuffer.h>
 
@@ -55,12 +55,15 @@ void * CudaParticleSystem::forceOnDevice()
 void CudaParticleSystem::deviceToHost()
 { m_X->deviceToHost(m_hostX->data(), m_X->bufferSize()); }
 
-void CudaParticleSystem::update() 
+void CudaParticleSystem::update(float dt) 
 {
     computeForce();
-    integrate();
+    integrate(dt);
 }
 
-void CudaParticleSystem::computeForce() {}
-void CudaParticleSystem::integrate() {}
+void CudaParticleSystem::computeForce() 
+{ particleSystemSimpleGravityForce((float3 *)forceOnDevice(), numParticles()); }
+
+void CudaParticleSystem::integrate(float dt) 
+{ particleSystemIntegrate((float3 *)positionOnDevice(), (float3 *)velocityOnDevice(), (float3 *)forceOnDevice(), dt, numParticles()); }
 

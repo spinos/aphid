@@ -12,6 +12,7 @@
 #include "BvhTriangleMesh.h"
 #include "CudaLinearBvh.h"
 #include "rayTest.h"
+#include "CudaParticleSystem.h"
 
 #include "BvhSolver.h"
 #include "createBvh_implement.h"
@@ -39,11 +40,17 @@ void BvhSolver::setRay(RayTest * ray)
     m_ray->setBvh(m_bvh);
 }
 
+void BvhSolver::setParticleSystem(CudaParticleSystem * particles)
+{
+    m_particles = particles;
+}
+
 void BvhSolver::stepPhysics(float dt)
 {
 	m_mesh->update();
 	m_bvh->update();
 	m_ray->update();
+	m_particles->update(dt);
 #ifdef BVHSOLVER_DBG_DRAW
     cudaDeviceSynchronize();
     sendDataToHost();
@@ -75,13 +82,14 @@ void BvhSolver::setHostPtrs(BaseBuffer * leafAabbs,
 
 void BvhSolver::sendDataToHost()
 {
-    m_mesh->getVerticesOnDevice(m_mesh->vertexBuffer());
+    m_mesh->deviceToHost();
     m_bvh->getLeafAabbs(m_hostLeafAabbs);
 	m_bvh->getInternalAabbs(m_hostInternalAabbs);
     m_bvh->getInternalDistances(m_hostInternalDistance);
 	m_bvh->getLeafHash(m_hostLeafHash);
 	m_bvh->getInternalChildIndex(m_hostInternalChildIndices);
 	m_bvh->getRootNodeIndex(m_hostRootNodeInd);
+	m_particles->deviceToHost();
 }
 
 #endif

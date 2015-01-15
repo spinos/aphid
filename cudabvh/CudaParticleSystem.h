@@ -17,7 +17,7 @@ public:
 	
 	const unsigned numParticles() const;
 	
-	void update();
+	void update(float dt);
 	void deviceToHost();
 	
 	void * position();
@@ -33,7 +33,7 @@ protected:
     
 private:
 	void computeForce();
-    void integrate();
+    void integrate(float dt);
 	
 private:
 	CUDABuffer * m_X;

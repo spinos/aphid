@@ -27,6 +27,7 @@ public:
 	const unsigned numTriangleFaceVertices() const;
 	
 	void getVerticesOnDevice(BaseBuffer * dst);
+	void deviceToHost();
 	
 	BaseBuffer * vertexBuffer();
 	CUDABuffer * vertexBufferOnDevice();

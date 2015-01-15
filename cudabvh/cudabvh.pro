@@ -19,6 +19,7 @@ bvh_dbg.h \
         reduce_common.h \
 		reduceBox_implement.h \
 		reduceRange_implement.h \
+		particleSystem_implement.h \
 		../radixsort/radixsort_implement.h \
                 ../shared/CudaBase.h \
                 ../shared/Base3DView.h \
@@ -55,7 +56,8 @@ QT           += opengl
 LIBS += -L../lib -laphid -lIlmImf -lHalf
 DESTDIR = ./
 CUSOURCES = bvh_math.cu plane.cu createBvh.cu traverseBvh.cu reduceBox.cu reduceRange.cu \
-            ../radixsort/radixsort.cu
+            ../radixsort/radixsort.cu \
+            particleSystem.cu
 macx {
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda

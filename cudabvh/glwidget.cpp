@@ -34,7 +34,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	            p++;
 	        }
 	Vector3F * v = (Vector3F *)m_particles->velocity();
-	for(i=0; i < 2000; i++) v[i].setZero();
+	for(i=0; i < 2000; i++) v[i].set(0.f, 10.f, 10.f);
 	Vector3F * f = (Vector3F *)m_particles->force();
 	for(i=0; i < 2000; i++) f[i].setZero();
 	
@@ -58,6 +58,7 @@ void GLWidget::clientInit()
 	m_solver->setMesh(m_mesh);
 	m_ray->createRays(IRAYDIM, IRAYDIM);
 	m_solver->setRay(m_ray);
+	m_solver->setParticleSystem(m_particles);
 	
 #ifdef BVHSOLVER_DBG_DRAW	
 	CudaLinearBvh * bvh = m_solver->bvh();
