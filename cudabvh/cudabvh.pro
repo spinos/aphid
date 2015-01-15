@@ -7,6 +7,7 @@ HEADERS       = glWidget.h \
                 BvhTriangleMesh.h \
                 BvhSolver.h \
                 CudaLinearBvh.h \
+                CudaParticleSystem.h \
                 simpleMesh.h \
                 rayTest.h \
                 bvh_common.h \
@@ -30,6 +31,7 @@ SOURCES       = main.cpp \
                 BvhTriangleMesh.cpp \
                 BvhSolver.cpp \
                 CudaLinearBvh.cpp \
+                CudaParticleSystem.cpp \
                 simpleMesh.cpp \
                 rayTest.cpp \
                 ../shared/CudaBase.cpp \

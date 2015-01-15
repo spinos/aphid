@@ -10,6 +10,7 @@
 #include <radixsort_implement.h>
 #include <CudaBase.h>
 #include "CudaLinearBvh.h"
+#include "CudaParticleSystem.h"
 #include "rayTest.h"
 #include "bvh_dbg.h"
 
@@ -19,6 +20,24 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_mesh = new SimpleMesh;
 	m_ray = new RayTest;
+	m_particles = new CudaParticleSystem;
+	m_particles->createParticles(10 * 20 * 10);
+
+	int i, j, k;
+	Vector3F * p = (Vector3F *)m_particles->position();
+	for(k=0; k < 10; k++)
+	    for(j=0; j < 20; j++)
+	        for(i=0; i < 10; i++) {
+	            p->x = 2.5f * i;
+	            p->y = 2.5f * j + 100.f;
+	            p->z = 2.5f * k;
+	            p++;
+	        }
+	Vector3F * v = (Vector3F *)m_particles->velocity();
+	for(i=0; i < 2000; i++) v[i].setZero();
+	Vector3F * f = (Vector3F *)m_particles->force();
+	for(i=0; i < 2000; i++) f[i].setZero();
+	
 	m_solver = new BvhSolver;
 	m_displayLevel = 3;
 
@@ -35,6 +54,7 @@ void GLWidget::clientInit()
 {
 	CudaBase::SetDevice();
 	m_mesh->initOnDevice();
+	m_particles->initOnDevice();
 	m_solver->setMesh(m_mesh);
 	m_ray->createRays(IRAYDIM, IRAYDIM);
 	m_solver->setRay(m_ray);
@@ -102,6 +122,15 @@ void GLWidget::clientDraw()
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 #endif
+
+    glColor3f(0.f, 0.9f, 0.3f);
+    
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_particles->position());
+    glDrawArrays(GL_POINTS, 0, m_particles->numParticles());
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	const float t = (float)elapsedTime();
 	m_mesh->setAlpha(t/290.f);
