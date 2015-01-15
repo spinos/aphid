@@ -85,16 +85,6 @@ inline __device__ void expandAabb(Aabb & dst, volatile Aabb * src)
     if(src->high.z > dst.high.z) dst.high.z = src->high.z;
 }
 
-inline __device__ void copyVola(volatile Aabb * dst, const Aabb & src)
-{
-    dst->low.x = src.low.x;
-    dst->low.y = src.low.y;
-    dst->low.z = src.low.z;
-    dst->high.x = src.high.x;
-    dst->high.y = src.high.y;
-    dst->high.z = src.high.z;
-}
-
 inline __device__ float3 centroidOfAabb(const Aabb & box)
 {
 	return make_float3(box.low.x * 0.5 + box.high.x * 0.5, box.low.y * 0.5 + box.high.y * 0.5, box.low.z * 0.5 + box.high.z * 0.5);

@@ -11,7 +11,7 @@
  */
 #include "reduce_common.h"
 
-extern "C" void bvhReduceAabbByPoints(Aabb *dst, float3 *src, unsigned numPoints, unsigned numBlocks, unsigned numThreads);
+extern "C" void bvhReduceAabbByPoints(Aabb *dst, float3 *src, unsigned numPoints, unsigned numBlocks, unsigned numThreads, unsigned maxPInd);
 extern "C" void bvhReduceAabbByAabb(Aabb *dst, Aabb *src, unsigned numAabbs, unsigned numBlocks, unsigned numThreads);
 
 #endif        //  #ifndef REDUCEBOX_IMPLEMENT_H

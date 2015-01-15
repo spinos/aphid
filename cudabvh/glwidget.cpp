@@ -11,6 +11,7 @@
 #include <CudaBase.h>
 #include "CudaLinearBvh.h"
 #include "rayTest.h"
+#include "bvh_dbg.h"
 
 #define IRAYDIM 33
 
@@ -59,8 +60,32 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+    cudaDeviceSynchronize();
+	m_mesh->getVerticesOnDevice(m_mesh->vertexBuffer());
 	CudaLinearBvh * bvh = m_solver->bvh();
-	bvh->getPoints(m_mesh->vertexBuffer());
+	unsigned numInternal = bvh->numInternalNodes();
+	Aabb ab = bvh->bound();
+	std::cout<<" big box "<<aabb_str(ab);
+	
+#ifdef BVHSOLVER_DBG_DRAW
+    bvh->getInternalAabbs(m_displayInternalAabbs);
+    bvh->getLeafAabbs(m_displayLeafAabbs);
+	bvh->getInternalDistances(m_displayInternalDistance);
+	bvh->getLeafHash(m_displayLeafHash);
+	bvh->getInternalChildIndex(m_internalChildIndices);
+	int rootInd = 0;
+	bvh->getRootNodeIndex(&rootInd);
+	// qDebug()<<" root at "<< (rootInd & (~0x80000000));
+	debugDraw(rootInd, numInternal);
+#else
+	GeoDrawer * dr = getDrawer();
+    BoundingBox bb; 
+	bb.setMin(ab.low.x, ab.low.y, ab.low.z);
+	bb.setMax(ab.high.x, ab.high.y, ab.high.z);
+	
+    dr->boundingBox(bb);
+#endif
+    glColor3f(0.f, 0.3f, 0.5f);
 	//internalTimer()->stop();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
@@ -71,7 +96,7 @@ void GLWidget::clientDraw()
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
-	debugDraw();
+	
 	
 	const float t = (float)elapsedTime();
 	m_mesh->setAlpha(t/290.f);
@@ -87,41 +112,22 @@ inline int getIndexWithInternalNodeMarkerRemoved(int index)
 { return index & (~0x80000000); }
 
 
-void GLWidget::debugDraw()
+void GLWidget::debugDraw(unsigned rootInd, unsigned numInternal)
 {
 	if(!m_solver->isValid()) return;
-	Aabb ab;
-	CudaLinearBvh * bvh = m_solver->bvh();
-	bvh->getRootNodeAabb(&ab);
+	
 	GeoDrawer * dr = getDrawer();
-    BoundingBox bb; 
-	bb.setMin(ab.low.x, ab.low.y, ab.low.z);
-	bb.setMax(ab.high.x, ab.high.y, ab.high.z);
-	glColor3f(0.1f, 0.4f, 0.3f);
-    // dr->boundingBox(bb);
 	
 #ifdef BVHSOLVER_DBG_DRAW
-	
+	Aabb ab; BoundingBox bb; 
 #ifdef BVHSOLVER_DBG_DRAW_BOX
-	bvh->getInternalAabbs(m_displayInternalAabbs);
 	Aabb * internalBoxes = (Aabb *)m_displayInternalAabbs->data();
-	
-	bvh->getLeafAabbs(m_displayLeafAabbs);
 	Aabb * leafBoxes = (Aabb *)m_displayLeafAabbs->data();
-	
-	bvh->getInternalDistances(m_displayInternalDistance);
 	int * levels = (int *)m_displayInternalDistance->data();
-    
-	bvh->getLeafHash(m_displayLeafHash);
 	KeyValuePair * leafHash = (KeyValuePair *)m_displayLeafHash->data();
-	
-	const uint numInternal = bvh->numInternalNodes();
-	int rootInd = 0;
-	bvh->getRootNodeIndex(&rootInd);
-	// qDebug()<<" root at "<< (rootInd & (~0x80000000));
-	
-	bvh->getInternalChildIndex(m_internalChildIndices);
 	int2 * internalNodeChildIndices = (int2 *)m_internalChildIndices->data();
+	
+	std::cout<<" "<<numInternal/2<<" "<<byte_to_binary(leafHash[numInternal/2].key)<<" "<<leafHash[numInternal/2].value<<"\n";
 	
 	int stack[128];
 	stack[0] = rootInd;

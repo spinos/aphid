@@ -6,9 +6,20 @@
 #define ReduceMaxBlocks 64
 #define ReduceMaxThreads 512
 
+static uint factorBy2(uint x)
+{
+    uint y = 4;
+    uint b = (x + y - 1) / y;
+    while(y < b) {
+        y = y << 1;
+        b = (x + y - 1) / y;
+    }
+    return y;
+}
+
 static void getReduceBlockThread(uint & blocks, uint & threads, uint n)
 {
-	threads = (n < ReduceMaxThreads*2) ? nextPow2((n + 1)/ 2) : ReduceMaxThreads;
+    threads = (n < ReduceMaxThreads*2) ? nextPow2((n + 1)/ 2) : ReduceMaxThreads;	
 	blocks = (n + (threads * 2 - 1)) / (threads * 2);
 	if(blocks > ReduceMaxBlocks) blocks = ReduceMaxBlocks;
 }

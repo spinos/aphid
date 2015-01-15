@@ -10,6 +10,7 @@ HEADERS       = glWidget.h \
                 simpleMesh.h \
                 rayTest.h \
                 bvh_common.h \
+bvh_dbg.h \
 				app_define.h \
                 plane_implement.h \
                 createBvh_implement.h \

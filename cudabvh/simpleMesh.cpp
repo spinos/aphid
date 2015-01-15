@@ -10,8 +10,8 @@
 #include "simpleMesh.h"
 #include "plane_implement.h"
 
-#define IDIM 125
-#define IDIM1 126
+#define IDIM 50
+#define IDIM1 51
 
 SimpleMesh::SimpleMesh() 
 { 

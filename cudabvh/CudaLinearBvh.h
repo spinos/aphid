@@ -25,11 +25,11 @@ public:
 	const unsigned numPoints() const;
 	const unsigned numLeafNodes() const;
 	const unsigned numInternalNodes() const;
+	const Aabb bound() const;
 	
 	void update();
 	
 	void getRootNodeIndex(int * dst);
-	void getRootNodeAabb(Aabb * dst); 
 	void getPoints(BaseBuffer * dst);
 	void getLeafAabbs(BaseBuffer * dst);
 	void getInternalAabbs(BaseBuffer * dst);
@@ -53,6 +53,7 @@ private:
 	void formInternalTreeAabbsIterative();
 	
 private:
+    Aabb m_bound;
 	BvhTriangleMesh * m_mesh;
 	CUDABuffer * m_leafAabbs;
 	CUDABuffer * m_internalNodeAabbs;

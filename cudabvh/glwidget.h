@@ -28,7 +28,7 @@ protected:
     virtual void clientMouseInput(QMouseEvent *event);
 	virtual void keyPressEvent(QKeyEvent *event);
 private:
-	void debugDraw();
+	void debugDraw(unsigned rootInd, unsigned numInternal);
 	
 private:
 	SimpleMesh * m_mesh;

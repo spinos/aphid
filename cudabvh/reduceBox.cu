@@ -1,6 +1,16 @@
 #include "reduceBox_implement.h"
 #include <bvh_math.cu>
 
+inline __device__ void copyVola(volatile Aabb * dst, const Aabb & src)
+{
+    dst->low.x = src.low.x;
+    dst->low.y = src.low.y;
+    dst->low.z = src.low.z;
+    dst->high.x = src.high.x;
+    dst->high.y = src.high.y;
+    dst->high.z = src.high.z;
+}
+
 template <unsigned int blockSize, bool nIsPow2>
 __global__ void reduceAabbByAabb_kernel(Aabb *g_idata, Aabb *g_odata, unsigned int n)
 {
@@ -97,7 +107,7 @@ __global__ void reduceAabbByAabb_kernel(Aabb *g_idata, Aabb *g_odata, unsigned i
 }
 
 template <unsigned int blockSize, bool nIsPow2>
-__global__ void reduceAabbByPoints_kernel(float3 *g_idata, Aabb *g_odata, unsigned int n)
+__global__ void reduceAabbByPoints_kernel(float3 *g_idata, Aabb *g_odata, unsigned int n, unsigned maxInd)
 {
     extern __shared__ Aabb sdata[];
 
@@ -105,6 +115,7 @@ __global__ void reduceAabbByPoints_kernel(float3 *g_idata, Aabb *g_odata, unsign
     // reading from global memory, writing to shared memory
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x*blockSize*2 + threadIdx.x;
+    if(i >= maxInd) return;
     unsigned int gridSize = blockSize*2*gridDim.x;
     
     Aabb mySum; resetAabb(mySum);
@@ -112,13 +123,16 @@ __global__ void reduceAabbByPoints_kernel(float3 *g_idata, Aabb *g_odata, unsign
     // we reduce multiple elements per thread.  The number is determined by the 
     // number of active thread blocks (via gridDim).  More blocks will result
     // in a larger gridSize and therefore fewer elements per thread
+    // n <= maxInd
     while (i < n)
     {         
         expandAabb(mySum, g_idata[i]);
         // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
-        if (nIsPow2 || i + blockSize < n) 
-            expandAabb(mySum, g_idata[i+blockSize]);  
+        if (nIsPow2 || i + blockSize < n) {
+            expandAabb(mySum, g_idata[i+blockSize]); 
+        }
         i += gridSize;
+        if(i >= maxInd) break;
     } 
 
     // each thread puts its local sum into shared memory 
@@ -249,7 +263,7 @@ extern "C" void bvhReduceAabbByAabb(Aabb *dst, Aabb *src, unsigned numAabbs, uns
 	}
 }
 
-extern "C" void bvhReduceAabbByPoints(Aabb *dst, float3 *src, unsigned numPoints, unsigned numBlocks, unsigned numThreads)
+extern "C" void bvhReduceAabbByPoints(Aabb *dst, float3 *src, unsigned numPoints, unsigned numBlocks, unsigned numThreads, unsigned maxPInd)
 {
 	dim3 dimBlock(numThreads, 1, 1);
     dim3 dimGrid(numBlocks, 1, 1);
@@ -259,50 +273,50 @@ extern "C" void bvhReduceAabbByPoints(Aabb *dst, float3 *src, unsigned numPoints
 		switch (numThreads)
 		{
 		case 512:
-			reduceAabbByPoints_kernel<512, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<512, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case 256:
-			reduceAabbByPoints_kernel<256, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<256, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case 128:
-			reduceAabbByPoints_kernel<128, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<128, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case 64:
-			reduceAabbByPoints_kernel<64, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<64, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case 32:
-			reduceAabbByPoints_kernel<32, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<32, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case 16:
-			reduceAabbByPoints_kernel<16, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<16, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case  8:
-			reduceAabbByPoints_kernel< 8, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel< 8, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case  4:
-			reduceAabbByPoints_kernel< 4, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel< 4, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case  2:
-			reduceAabbByPoints_kernel< 2, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel< 2, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case  1:
-			reduceAabbByPoints_kernel< 1, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel< 1, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		}
 	}
 	else {
 		switch (numThreads)
 		{
 		case 512:
-			reduceAabbByPoints_kernel<512, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<512, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case 256:
-			reduceAabbByPoints_kernel<256, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<256, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case 128:
-			reduceAabbByPoints_kernel<128, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<128, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case 64:
-			reduceAabbByPoints_kernel<64, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<64, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case 32:
-			reduceAabbByPoints_kernel<32, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<32, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case 16:
-			reduceAabbByPoints_kernel<16, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel<16, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case  8:
-			reduceAabbByPoints_kernel< 8, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel< 8, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case  4:
-			reduceAabbByPoints_kernel< 4, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel< 4, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case  2:
-			reduceAabbByPoints_kernel< 2, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel< 2, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		case  1:
-			reduceAabbByPoints_kernel< 1, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints); break;
+			reduceAabbByPoints_kernel< 1, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numPoints, maxPInd); break;
 		}
 	}
 }

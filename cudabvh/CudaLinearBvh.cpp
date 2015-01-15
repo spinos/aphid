@@ -14,6 +14,7 @@
 #include "createBvh_implement.h"
 #include "reduceBox_implement.h"
 #include "reduceRange_implement.h"
+#include "bvh_dbg.h"
 
 CudaLinearBvh::CudaLinearBvh() {}
 CudaLinearBvh::~CudaLinearBvh() {}
@@ -66,11 +67,11 @@ const unsigned CudaLinearBvh::numLeafNodes() const
 const unsigned CudaLinearBvh::numInternalNodes() const 
 { return numLeafNodes() - 1; }
 
+const Aabb CudaLinearBvh::bound() const
+{ return m_bound; }
+
 void CudaLinearBvh::getRootNodeIndex(int * dst)
 { m_rootNodeIndexOnDevice->deviceToHost((void *)dst, m_rootNodeIndexOnDevice->bufferSize()); }
-
-void CudaLinearBvh::getRootNodeAabb(Aabb * dst)
-{ m_internalNodeAabbs->deviceToHost(dst, sizeof(Aabb)); }
 
 void CudaLinearBvh::getPoints(BaseBuffer * dst)
 { m_mesh->getVerticesOnDevice(dst); }
@@ -124,34 +125,48 @@ void CudaLinearBvh::formLeafAabbs()
 void CudaLinearBvh::combineAabb()
 {
 	void * psrc = m_mesh->verticesOnDevice();
-    void * pdst = m_internalNodeAabbs->bufferOnDevice();
+    void * pdst = m_leafAabbs->bufferOnDevice();
 	
-	unsigned n = numLeafNodes();
+	unsigned n = nextPow2(numPoints());
 	unsigned threads, blocks;
 	getReduceBlockThread(blocks, threads, n);
 	
-	// std::cout<<"n0 "<<n<<" blocks X threads : "<<blocks<<" X "<<threads<<"\n";
+	if(blocks < 8) {
+	    //blocks<<=1;
+	    //threads>>=1;
+	}
 	
-	bvhReduceAabbByPoints((Aabb *)pdst, (float3 *)psrc, n, blocks, threads);
+	std::cout<<"n0 "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(Aabb)<<"\n";
+	
+	bvhReduceAabbByPoints((Aabb *)pdst, (float3 *)psrc, n, blocks, threads, numPoints());
+	
+	 cudaError_t err = cudaGetLastError();								\
+ if(err != cudaSuccess) std::cout<<"\ncuda error\n";
+
+	// cudaMemcpy(&m_bound, pdst, sizeof(Aabb), cudaMemcpyDeviceToHost);
+	// std::cout<<" small box "<<aabb_str(m_bound);
 	
 	n = blocks;
 	while(n > 1) {
 		getReduceBlockThread(blocks, threads, n);
 		
-		// std::cout<<"n "<<n<<" blocks X threads : "<<blocks<<" X "<<threads<<"\n";
+		std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(Aabb)<<"\n";
 	
 		bvhReduceAabbByAabb((Aabb *)pdst, (Aabb *)pdst, n, blocks, threads);
 		
 		n = (n + (threads*2-1)) / (threads*2);
+		
+		std::cout<<"new n "<<n;
 	}
+	
+	cudaMemcpy(&m_bound, pdst, sizeof(Aabb), cudaMemcpyDeviceToHost);
 }
 
 void CudaLinearBvh::calcLeafHash()
 {
 	void * dst = m_leafHash[0]->bufferOnDevice();
 	void * src = m_leafAabbs->bufferOnDevice();
-	void * box = m_internalNodeAabbs->bufferOnDevice();
-	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, numLeafNodes(), (Aabb *)box);
+	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, numLeafNodes(), m_bound);
 	void * tmp = m_leafHash[1]->bufferOnDevice();
 	RadixSort((KeyValuePair *)dst, (KeyValuePair *)tmp, numLeafNodes(), 32);
 }
