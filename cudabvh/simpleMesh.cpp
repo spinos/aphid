@@ -9,9 +9,11 @@
 
 #include "simpleMesh.h"
 #include "plane_implement.h"
+#include "app_define.h"
 
-#define IDIM 50
-#define IDIM1 51
+#define IDIM  156
+#define IDIM1 157
+#define WAVE_AMPLITUDE 1.9
 
 SimpleMesh::SimpleMesh() 
 { 
@@ -61,5 +63,5 @@ const float SimpleMesh::alpha() const
 void SimpleMesh::update()
 {
 	void *dptr = verticesOnDevice();
-	wavePlane((float3 *)dptr, IDIM, 2.0, m_alpha);
+	wavePlane((float3 *)dptr, IDIM, 2.0, m_alpha, WAVE_AMPLITUDE);
 }

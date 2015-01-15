@@ -11,6 +11,7 @@
  */
 
 #include <BaseSolverThread.h>
+#include <app_define.h>
 
 class BaseBuffer;
 class CUDABuffer;
@@ -30,14 +31,36 @@ public:
 	CudaLinearBvh * bvh();
 	
 	const bool isValid() const;
+	
+#ifdef BVHSOLVER_DBG_DRAW
+    void setHostPtrs(BaseBuffer * leafAabbs,
+                    BaseBuffer * internalAabbs,
+                    BaseBuffer * internalDistance,
+                    BaseBuffer * leafHash,
+                    BaseBuffer * internalChildIndices,
+                    int * rootNodeInd);
+#endif
 
 protected:
     virtual void stepPhysics(float dt);	
 
 private:
+#ifdef BVHSOLVER_DBG_DRAW
+    void sendDataToHost();
+#endif
+private:
 	BvhTriangleMesh * m_mesh;
 	CudaLinearBvh * m_bvh;
 	RayTest * m_ray;
+	
+#ifdef BVHSOLVER_DBG_DRAW
+    BaseBuffer * m_hostLeafAabbs;
+	BaseBuffer * m_hostInternalAabbs;
+	BaseBuffer * m_hostInternalDistance;
+	BaseBuffer * m_hostLeafHash;
+	BaseBuffer * m_hostInternalChildIndices;
+	int * m_hostRootNodeInd;
+#endif
     
 	bool m_isValid;
 };

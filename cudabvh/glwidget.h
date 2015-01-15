@@ -42,6 +42,7 @@ private:
 	BaseBuffer * m_displayInternalDistance;
 	BaseBuffer * m_displayLeafHash;
 	BaseBuffer * m_internalChildIndices;
+	int * m_rootNodeInd;
 #endif
 
 private slots:

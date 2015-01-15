@@ -20,7 +20,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_mesh = new SimpleMesh;
 	m_ray = new RayTest;
 	m_solver = new BvhSolver;
-	m_displayLevel = 0;
+	m_displayLevel = 3;
 
 	qDebug()<<"num vertices "<<m_mesh->numVertices();
 	qDebug()<<"num triangles "<<m_mesh->numTriangles();
@@ -51,6 +51,13 @@ void GLWidget::clientInit()
 	m_displayInternalDistance->create(bvh->numInternalNodes() * sizeof(int));
 	m_internalChildIndices = new BaseBuffer;
 	m_internalChildIndices->create(bvh->numInternalNodes() * sizeof(int2));
+	m_rootNodeInd = new int[1];
+	m_solver->setHostPtrs(m_displayLeafAabbs,
+                m_displayInternalAabbs,
+                m_displayInternalDistance,
+                m_displayLeafHash,
+                m_internalChildIndices,
+                m_rootNodeInd);
 #endif
 
 	connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
@@ -60,23 +67,20 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-    cudaDeviceSynchronize();
-	m_mesh->getVerticesOnDevice(m_mesh->vertexBuffer());
 	CudaLinearBvh * bvh = m_solver->bvh();
-	unsigned numInternal = bvh->numInternalNodes();
 	Aabb ab = bvh->bound();
-	std::cout<<" big box "<<aabb_str(ab);
+	if(ab.low.x < -1e8 || ab.low.x > 1e8) std::cout<<" invalid big box "<<aabb_str(ab);
 	
 #ifdef BVHSOLVER_DBG_DRAW
-    bvh->getInternalAabbs(m_displayInternalAabbs);
-    bvh->getLeafAabbs(m_displayLeafAabbs);
-	bvh->getInternalDistances(m_displayInternalDistance);
-	bvh->getLeafHash(m_displayLeafHash);
-	bvh->getInternalChildIndex(m_internalChildIndices);
-	int rootInd = 0;
-	bvh->getRootNodeIndex(&rootInd);
-	// qDebug()<<" root at "<< (rootInd & (~0x80000000));
-	debugDraw(rootInd, numInternal);
+    // bvh->getInternalAabbs(m_displayInternalAabbs);
+    // bvh->getLeafAabbs(m_displayLeafAabbs);
+	// bvh->getInternalDistances(m_displayInternalDistance);
+	// bvh->getLeafHash(m_displayLeafHash);
+	// bvh->getInternalChildIndex(m_internalChildIndices);
+	// int rootInd = 0;
+	// bvh->getRootNodeIndex(&rootInd);
+	unsigned numInternal = bvh->numInternalNodes();
+	debugDraw(*m_rootNodeInd, numInternal);
 #else
 	GeoDrawer * dr = getDrawer();
     BoundingBox bb; 
@@ -85,6 +89,8 @@ void GLWidget::clientDraw()
 	
     dr->boundingBox(bb);
 #endif
+
+#ifdef BVHSOLVER_DRAW_MESH
     glColor3f(0.f, 0.3f, 0.5f);
 	//internalTimer()->stop();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -95,9 +101,8 @@ void GLWidget::clientDraw()
 	glDrawElements(GL_TRIANGLES, m_mesh->numTriangleFaceVertices(), GL_UNSIGNED_INT, m_mesh->triangleIndices());
 
 	glDisableClientState(GL_VERTEX_ARRAY);
-	
-	
-	
+#endif
+
 	const float t = (float)elapsedTime();
 	m_mesh->setAlpha(t/290.f);
 	m_ray->setAlpha(t/230.f);
@@ -114,11 +119,11 @@ inline int getIndexWithInternalNodeMarkerRemoved(int index)
 
 void GLWidget::debugDraw(unsigned rootInd, unsigned numInternal)
 {
+#ifdef BVHSOLVER_DBG_DRAW
 	if(!m_solver->isValid()) return;
 	
 	GeoDrawer * dr = getDrawer();
-	
-#ifdef BVHSOLVER_DBG_DRAW
+	// qDebug()<<" root at "<< (*m_rootNodeInd & (~0x80000000));
 	Aabb ab; BoundingBox bb; 
 #ifdef BVHSOLVER_DBG_DRAW_BOX
 	Aabb * internalBoxes = (Aabb *)m_displayInternalAabbs->data();
@@ -127,7 +132,7 @@ void GLWidget::debugDraw(unsigned rootInd, unsigned numInternal)
 	KeyValuePair * leafHash = (KeyValuePair *)m_displayLeafHash->data();
 	int2 * internalNodeChildIndices = (int2 *)m_internalChildIndices->data();
 	
-	std::cout<<" "<<numInternal/2<<" "<<byte_to_binary(leafHash[numInternal/2].key)<<" "<<leafHash[numInternal/2].value<<"\n";
+	// std::cout<<" "<<numInternal/2<<" "<<byte_to_binary(leafHash[numInternal/2].key)<<" "<<leafHash[numInternal/2].value<<"\n";
 	
 	int stack[128];
 	stack[0] = rootInd;

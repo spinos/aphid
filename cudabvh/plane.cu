@@ -20,7 +20,7 @@ hemisphere_kernel(float3* pos, unsigned dim, unsigned maxInd, float gridSize, fl
 	pos[ind] = sum;
 }
 
-extern "C" void wavePlane(float3 *pos, unsigned numGrids, float gridSize, float alpha)
+extern "C" void wavePlane(float3 *pos, unsigned numGrids, float gridSize, float alpha, float amplitude)
 {
 	dim3 block(512, 1, 1);
 	
@@ -28,5 +28,5 @@ extern "C" void wavePlane(float3 *pos, unsigned numGrids, float gridSize, float 
     unsigned nblk = iDivUp(np, 512);
     
     dim3 grid(nblk, 1, 1);
-	hemisphere_kernel<<< grid, block >>>(pos, numGrids, np, gridSize, alpha, 0.33);
+	hemisphere_kernel<<< grid, block >>>(pos, numGrids, np, gridSize, alpha, amplitude);
 }

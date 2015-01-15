@@ -131,32 +131,19 @@ void CudaLinearBvh::combineAabb()
 	unsigned threads, blocks;
 	getReduceBlockThread(blocks, threads, n);
 	
-	if(blocks < 8) {
-	    //blocks<<=1;
-	    //threads>>=1;
-	}
-	
-	std::cout<<"n0 "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(Aabb)<<"\n";
+	// std::cout<<"n0 "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(Aabb)<<"\n";
 	
 	bvhReduceAabbByPoints((Aabb *)pdst, (float3 *)psrc, n, blocks, threads, numPoints());
-	
-	 cudaError_t err = cudaGetLastError();								\
- if(err != cudaSuccess) std::cout<<"\ncuda error\n";
-
-	// cudaMemcpy(&m_bound, pdst, sizeof(Aabb), cudaMemcpyDeviceToHost);
-	// std::cout<<" small box "<<aabb_str(m_bound);
 	
 	n = blocks;
 	while(n > 1) {
 		getReduceBlockThread(blocks, threads, n);
 		
-		std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(Aabb)<<"\n";
+		// std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(Aabb)<<"\n";
 	
 		bvhReduceAabbByAabb((Aabb *)pdst, (Aabb *)pdst, n, blocks, threads);
 		
 		n = (n + (threads*2-1)) / (threads*2);
-		
-		std::cout<<"new n "<<n;
 	}
 	
 	cudaMemcpy(&m_bound, pdst, sizeof(Aabb), cudaMemcpyDeviceToHost);

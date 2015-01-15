@@ -44,6 +44,10 @@ void BvhSolver::stepPhysics(float dt)
 	m_mesh->update();
 	m_bvh->update();
 	m_ray->update();
+#ifdef BVHSOLVER_DBG_DRAW
+    cudaDeviceSynchronize();
+    sendDataToHost();
+#endif
 	m_isValid = 1;
 }
 
@@ -52,4 +56,33 @@ CudaLinearBvh * BvhSolver::bvh()
 
 const bool BvhSolver::isValid() const
 { return m_isValid; }
+
+#ifdef BVHSOLVER_DBG_DRAW
+void BvhSolver::setHostPtrs(BaseBuffer * leafAabbs,
+                BaseBuffer * internalAabbs,
+                BaseBuffer * internalDistance,
+                BaseBuffer * leafHash,
+                BaseBuffer * internalChildIndices,
+                int * rootNodeInd)
+{
+    m_hostLeafAabbs = leafAabbs;
+    m_hostInternalAabbs = internalAabbs;
+    m_hostInternalDistance = internalDistance;
+    m_hostLeafHash = leafHash;
+    m_hostInternalChildIndices = internalChildIndices;
+    m_hostRootNodeInd = rootNodeInd;
+}
+
+void BvhSolver::sendDataToHost()
+{
+    m_mesh->getVerticesOnDevice(m_mesh->vertexBuffer());
+    m_bvh->getLeafAabbs(m_hostLeafAabbs);
+	m_bvh->getInternalAabbs(m_hostInternalAabbs);
+    m_bvh->getInternalDistances(m_hostInternalDistance);
+	m_bvh->getLeafHash(m_hostLeafHash);
+	m_bvh->getInternalChildIndex(m_hostInternalChildIndices);
+	m_bvh->getRootNodeIndex(m_hostRootNodeInd);
+}
+
+#endif
 
