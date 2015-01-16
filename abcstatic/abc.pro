@@ -270,7 +270,7 @@ SOURCES       = $$ABC_SRC/Abc/ArchiveInfo.cpp \
                 $$ABC_SRC/AbcMaterial/InternalUtil.cpp
                 
 win32 {
-DEFINES += OPENEXR_DLL NDEBUG NOMINMAX
+DEFINES += OPENEXR_DLL NDEBUG NOMINMAX _WIN64 WIN64
 }
 
 

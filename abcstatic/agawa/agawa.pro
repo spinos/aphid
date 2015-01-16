@@ -199,7 +199,7 @@ SOURCES       = $$ABC_SRC/AbcCoreOgawa/AprImpl.cpp \
       $$ABC_SRC/Ogawa/OStream.cpp
 
 win32 {                
-DEFINES += OPENEXR_DLL NDEBUG NOMINMAX
+DEFINES += OPENEXR_DLL NDEBUG NOMINMAX _WIN64 WIN64
 }
 
 
