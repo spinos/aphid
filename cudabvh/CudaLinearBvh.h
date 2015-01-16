@@ -43,6 +43,8 @@ public:
 	void * leafAabbs();
 	void * leafHash();
 	
+	const unsigned usedMemory() const;
+	
 private:
 	void init();
 	void formLeafAabbs();

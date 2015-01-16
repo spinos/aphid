@@ -239,3 +239,19 @@ void CudaLinearBvh::formInternalTreeAabbsIterative()
 											numInternalNodes());
 	}
 }
+
+const unsigned CudaLinearBvh::usedMemory() const
+{
+	unsigned n = m_leafAabbs->bufferSize();
+	n += m_internalNodeAabbs->bufferSize();
+	n += m_leafHash[0]->bufferSize() * 2;
+	n += m_internalNodeCommonPrefixValues->bufferSize();
+	n += m_internalNodeCommonPrefixLengths->bufferSize();
+	n += m_leafNodeParentIndices->bufferSize();
+	n += m_internalNodeChildIndices->bufferSize();
+	n += m_internalNodeParentIndices->bufferSize();
+	n += m_rootNodeIndexOnDevice->bufferSize();
+    n += m_distanceInternalNodeFromRoot->bufferSize();
+	n += m_reducedMaxDistance->bufferSize();
+	return n;
+}

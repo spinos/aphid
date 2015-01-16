@@ -16,26 +16,32 @@ BaseBuffer::BaseBuffer() : m_bufferName(0), m_bufferSize(0), m_native(0)
 
 BaseBuffer::~BaseBuffer() 
 {
-    if(m_native) delete[] m_native;
+    destroy();
 }
 
 void BaseBuffer::create(float * data, unsigned size)
 {
-	m_bufferSize = size;
+	destroyVBO();
 	createVBO(data, size);
 	setBufferType(kVBO);
+	setBufferSize(size);
 }
 
 void BaseBuffer::create(unsigned size)
 {
-    m_bufferSize = size;
+	if(canResize(size)) return;
+	destroy();
     m_native = new char[size];
     setBufferType(kOnHost);
+	setBufferSize(size);
 }
 
 void BaseBuffer::destroy()
 {
-	destroyVBO();
+	if(bufferType() == kVBO) destroyVBO();
+	else {
+		if(m_native) delete[] m_native;
+	}
 }
 
 void BaseBuffer::createVBO(float * data, unsigned size)
@@ -65,3 +71,10 @@ void BaseBuffer::setBufferType(BaseBuffer::BufferType t) { m_bufferType = t; }
 const BaseBuffer::BufferType BaseBuffer::bufferType() const { return m_bufferType; }
 void BaseBuffer::setBufferSize(unsigned x) { m_bufferSize = x; }
 char * BaseBuffer::data() const {return m_native; }
+
+bool BaseBuffer::canResize(unsigned n)
+{
+	if(n > bufferSize()) return false;
+	setBufferSize(n);
+	return true;
+}

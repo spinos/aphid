@@ -36,6 +36,7 @@ protected:
 	void setBufferType(BufferType t);
 	const BufferType bufferType() const;
 	void setBufferSize(unsigned size);
+	bool canResize(unsigned n);
 	
 private:
     char * m_native;

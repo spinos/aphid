@@ -22,6 +22,8 @@ void CUDABuffer::create(float * data, unsigned size)
 
 void CUDABuffer::create(unsigned size)
 {
+	if(canResize(size)) return;
+	destroy();
 	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, size));
 	setBufferType(kOnDevice);
 	setBufferSize(size);

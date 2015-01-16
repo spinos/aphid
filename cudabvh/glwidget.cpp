@@ -62,6 +62,7 @@ void GLWidget::clientInit()
 	
 #ifdef BVHSOLVER_DBG_DRAW	
 	CudaLinearBvh * bvh = m_solver->bvh();
+	qDebug()<<" bvh used memory "<<bvh->usedMemory()<<" bytes";
 	m_displayLeafAabbs = new BaseBuffer;
 	m_displayLeafAabbs->create(bvh->numLeafNodes() * sizeof(Aabb));
 	m_displayInternalAabbs = new BaseBuffer;
