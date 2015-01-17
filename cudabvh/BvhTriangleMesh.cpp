@@ -43,6 +43,9 @@ void BvhTriangleMesh::updateBvh()
     CollisionObject::updateBvh();
 }
 
+void BvhTriangleMesh::update()
+{ CollisionObject::updateBvh(); }
+
 void BvhTriangleMesh::formTriangleAabbs()
 {
     void * cvs = verticesOnDevice();
@@ -54,7 +57,7 @@ void BvhTriangleMesh::formTriangleAabbs()
 void BvhTriangleMesh::combineAabbFirst()
 {
     void * psrc = verticesOnDevice();
-    void * pdst = bvh()->internalNodeAabbs();
+    void * pdst = bvh()->combineAabbsBuffer();
 	
 	unsigned n = nextPow2(numVertices());
 	unsigned threads, blocks;
@@ -112,4 +115,3 @@ void BvhTriangleMesh::getVerticesOnDevice(BaseBuffer * dst)
 void BvhTriangleMesh::deviceToHost()
 { m_verticesOnDevice->deviceToHost(m_vertices->data(), m_verticesOnDevice->bufferSize()); }
 
-void BvhTriangleMesh::update() {}

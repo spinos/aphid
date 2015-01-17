@@ -32,7 +32,6 @@ public:
 	void update();
 	
 	void getRootNodeIndex(int * dst);
-	//void getPoints(BaseBuffer * dst);
 	void getLeafAabbs(BaseBuffer * dst);
 	void getInternalAabbs(BaseBuffer * dst);
 	void getLeafHash(BaseBuffer * dst);
@@ -44,11 +43,11 @@ public:
 	void * internalNodeAabbs();
 	void * leafAabbs();
 	void * leafHash();
+	void * combineAabbsBuffer();
 	
 	const unsigned usedMemory() const;
 	
 private:
-	// void formLeafAabbs();
 	void combineAabbSecond();
 	void calcLeafHash();
 	void buildInternalTree();

@@ -64,4 +64,6 @@ void SimpleMesh::update()
 {
 	void *dptr = verticesOnDevice();
 	wavePlane((float3 *)dptr, IDIM, 2.0, m_alpha, WAVE_AMPLITUDE);
+	
+	BvhTriangleMesh::update();
 }

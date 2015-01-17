@@ -26,12 +26,6 @@ void CudaLinearBvh::setNumLeafNodes(unsigned n)
 
 void CudaLinearBvh::setCombineAabbSecondBlocks(unsigned n)
 { m_combineAabbSecondBlocks = n; }
-/*
-void CudaLinearBvh::setMesh(BvhTriangleMesh * mesh)
-{ 
-	m_mesh = mesh; 
-	init();
-}*/
 
 void CudaLinearBvh::create()
 {
@@ -66,9 +60,6 @@ void CudaLinearBvh::create()
 	m_reducedMaxDistance->create(ReduceMaxBlocks * sizeof(int));
 }
 
-//const unsigned CudaLinearBvh::numPoints() const 
-//{ return m_mesh->numVertices(); }
-
 const unsigned CudaLinearBvh::numLeafNodes() const 
 { return m_numLeafNodes; }
 
@@ -80,9 +71,6 @@ const Aabb CudaLinearBvh::bound() const
 
 void CudaLinearBvh::getRootNodeIndex(int * dst)
 { m_rootNodeIndexOnDevice->deviceToHost((void *)dst, m_rootNodeIndexOnDevice->bufferSize()); }
-
-//void CudaLinearBvh::getPoints(BaseBuffer * dst)
-//{ m_mesh->getVerticesOnDevice(dst); }
 
 void CudaLinearBvh::getLeafAabbs(BaseBuffer * dst)
 { m_leafAabbs->deviceToHost(dst->data(), m_leafAabbs->bufferSize()); }
@@ -114,39 +102,19 @@ void * CudaLinearBvh::leafAabbs()
 void * CudaLinearBvh::leafHash()
 { return m_leafHash[0]->bufferOnDevice(); }
 
+void * CudaLinearBvh::combineAabbsBuffer()
+{ return m_internalNodeAabbs->bufferOnDevice(); }
+ 
 void CudaLinearBvh::update()
 {
 	combineAabbSecond();
-	// formLeafAabbs();
 	calcLeafHash();
 	buildInternalTree();
 }
 
-/*
-void CudaLinearBvh::formLeafAabbs()
-{
-    void * cvs = m_mesh->verticesOnDevice();
-    void * tri = m_mesh->triangleIndicesOnDevice();
-    void * dst = m_leafAabbs->bufferOnDevice();
-    bvhCalculateLeafAabbsTriangle((Aabb *)dst, (float3 *)cvs, (uint3 *)tri, numLeafNodes());
-}
-*/
 void CudaLinearBvh::combineAabbSecond()
 {
-	// void * psrc = m_mesh->verticesOnDevice();
-    // void * pdst = m_leafAabbs->bufferOnDevice();
-	// 
-	// unsigned n = nextPow2(numPoints());
-	// unsigned threads, blocks;
-	// getReduceBlockThread(blocks, threads, n);
-	// 
-	// // std::cout<<"n0 "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(Aabb)<<"\n";
-	// 
-	// bvhReduceAabbByPoints((Aabb *)pdst, (float3 *)psrc, n, blocks, threads, numPoints());
-	// 
-	// n = blocks;
-	
-	void * pdst = internalNodeAabbs();
+	void * pdst = combineAabbsBuffer();
 	unsigned threads, blocks;
 	unsigned n = m_combineAabbSecondBlocks;
 	while(n > 1) {

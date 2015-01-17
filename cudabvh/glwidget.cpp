@@ -94,14 +94,7 @@ void GLWidget::clientDraw()
 	if(ab.low.x < -1e8 || ab.low.x > 1e8) std::cout<<" invalid big box "<<aabb_str(ab);
 	
 #ifdef BVHSOLVER_DBG_DRAW
-    // bvh->getInternalAabbs(m_displayInternalAabbs);
-    // bvh->getLeafAabbs(m_displayLeafAabbs);
-	// bvh->getInternalDistances(m_displayInternalDistance);
-	// bvh->getLeafHash(m_displayLeafHash);
-	// bvh->getInternalChildIndex(m_internalChildIndices);
-	// int rootInd = 0;
-	// bvh->getRootNodeIndex(&rootInd);
-	unsigned numInternal = bvh->numInternalNodes();
+    unsigned numInternal = bvh->numInternalNodes();
 	debugDraw(*m_rootNodeInd, numInternal);
 #else
 	GeoDrawer * dr = getDrawer();

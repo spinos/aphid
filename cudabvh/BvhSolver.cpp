@@ -23,16 +23,13 @@
 BvhSolver::BvhSolver(QObject *parent) : BaseSolverThread(parent) 
 {
 	m_isValid = 0;
-	// m_bvh = new CudaLinearBvh;
 }
 
 BvhSolver::~BvhSolver() {}
 
 void BvhSolver::setMesh(BvhTriangleMesh * mesh)
 { 
-	m_mesh = mesh;
-	// m_bvh->setNumLeafNodes(mesh->numTriangles());
-	// m_bvh->create(); 
+	m_mesh = mesh; 
 }
 
 void BvhSolver::setRay(RayTest * ray)
@@ -49,7 +46,7 @@ void BvhSolver::setParticleSystem(CudaParticleSystem * particles)
 void BvhSolver::stepPhysics(float dt)
 {
 	m_mesh->update();
-	// m_bvh->update();
+	m_mesh->updateBvh();
 	m_ray->update();
 	m_particles->update(dt);
 #ifdef BVHSOLVER_DBG_DRAW

@@ -50,7 +50,6 @@ private:
 #endif
 private:
 	BvhTriangleMesh * m_mesh;
-	// CudaLinearBvh * m_bvh;
 	RayTest * m_ray;
 	CudaParticleSystem * m_particles;
 	

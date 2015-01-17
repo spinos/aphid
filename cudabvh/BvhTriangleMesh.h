@@ -23,6 +23,7 @@ public:
 	
 	virtual void initOnDevice();
 	virtual void updateBvh();
+	virtual void update();
 	
 	const unsigned numVertices() const;
 	const unsigned numTriangles() const;
@@ -37,8 +38,6 @@ public:
 	void * triangleIndicesOnDevice();
 	Vector3F * vertices();
 	unsigned * triangleIndices();
-	
-	virtual void update();
 	
 protected:
     
