@@ -10,9 +10,10 @@
  *
  */
 #include <AllMath.h>
+#include "CollisionObject.h"
 class BaseBuffer;
 class CUDABuffer;
-class BvhTriangleMesh {
+class BvhTriangleMesh : public CollisionObject {
 public:
 	BvhTriangleMesh();
 	virtual ~BvhTriangleMesh();
@@ -20,7 +21,8 @@ public:
 	void createVertices(unsigned n);
 	void createTriangles(unsigned n);
 	
-	void initOnDevice();
+	virtual void initOnDevice();
+	virtual void updateBvh();
 	
 	const unsigned numVertices() const;
 	const unsigned numTriangles() const;
@@ -39,6 +41,10 @@ public:
 	virtual void update();
 	
 protected:
+    
+private:
+    void formTriangleAabbs();
+    void combineAabbFirst();
 
 private:
 	BaseBuffer * m_vertices;

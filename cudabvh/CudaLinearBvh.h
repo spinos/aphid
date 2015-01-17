@@ -20,9 +20,11 @@ public:
 	CudaLinearBvh();
 	virtual ~CudaLinearBvh();
 	
-	void setMesh(BvhTriangleMesh * mesh);
+	void setNumLeafNodes(unsigned n);
+	void setCombineAabbSecondBlocks(unsigned n);
+	void create();
 	
-	const unsigned numPoints() const;
+	// const unsigned numPoints() const;
 	const unsigned numLeafNodes() const;
 	const unsigned numInternalNodes() const;
 	const Aabb bound() const;
@@ -30,7 +32,7 @@ public:
 	void update();
 	
 	void getRootNodeIndex(int * dst);
-	void getPoints(BaseBuffer * dst);
+	//void getPoints(BaseBuffer * dst);
 	void getLeafAabbs(BaseBuffer * dst);
 	void getInternalAabbs(BaseBuffer * dst);
 	void getLeafHash(BaseBuffer * dst);
@@ -46,9 +48,8 @@ public:
 	const unsigned usedMemory() const;
 	
 private:
-	void init();
-	void formLeafAabbs();
-	void combineAabb();
+	// void formLeafAabbs();
+	void combineAabbSecond();
 	void calcLeafHash();
 	void buildInternalTree();
 	void findMaxDistanceFromRoot();
@@ -56,7 +57,6 @@ private:
 	
 private:
     Aabb m_bound;
-	BvhTriangleMesh * m_mesh;
 	CUDABuffer * m_leafAabbs;
 	CUDABuffer * m_internalNodeAabbs;
 	CUDABuffer * m_leafHash[2];
@@ -68,5 +68,6 @@ private:
 	CUDABuffer * m_rootNodeIndexOnDevice;
     CUDABuffer * m_distanceInternalNodeFromRoot;
 	CUDABuffer * m_reducedMaxDistance;
+	unsigned m_numLeafNodes, m_combineAabbSecondBlocks;
 };
 #endif        //  #ifndef CUDALINEARBVH_H

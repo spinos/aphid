@@ -25,7 +25,8 @@ bvh_dbg.h \
                 ../shared/Base3DView.h \
                 ../shared/BaseBuffer.h \
                 ../shared/CUDABuffer.h \
-                ../shared/BaseSolverThread.h
+                ../shared/BaseSolverThread.h \
+                CollisionObject.h
 SOURCES       = main.cpp \
                 glWidget.cpp \
                 window.cpp \
@@ -39,7 +40,8 @@ SOURCES       = main.cpp \
                 ../shared/Base3DView.cpp \
                 ../shared/BaseBuffer.cpp \
                 ../shared/CUDABuffer.cpp \
-                ../shared/BaseSolverThread.cpp
+                ../shared/BaseSolverThread.cpp \
+                CollisionObject.cpp
 
 win32 {
     HEADERS += ../shared/gExtension.h

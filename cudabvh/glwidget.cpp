@@ -61,7 +61,7 @@ void GLWidget::clientInit()
 	m_solver->setParticleSystem(m_particles);
 	
 #ifdef BVHSOLVER_DBG_DRAW	
-	CudaLinearBvh * bvh = m_solver->bvh();
+	CudaLinearBvh * bvh = m_mesh->bvh();
 	qDebug()<<" bvh used memory "<<bvh->usedMemory()<<" bytes";
 	m_displayLeafAabbs = new BaseBuffer;
 	m_displayLeafAabbs->create(bvh->numLeafNodes() * sizeof(Aabb));
@@ -89,7 +89,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	CudaLinearBvh * bvh = m_solver->bvh();
+	CudaLinearBvh * bvh = m_mesh->bvh();
 	Aabb ab = bvh->bound();
 	if(ab.low.x < -1e8 || ab.low.x > 1e8) std::cout<<" invalid big box "<<aabb_str(ab);
 	

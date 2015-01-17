@@ -30,8 +30,6 @@ public:
 	void setRay(RayTest * ray);
 	void setParticleSystem(CudaParticleSystem * particles);
 	
-	CudaLinearBvh * bvh();
-	
 	const bool isValid() const;
 	
 #ifdef BVHSOLVER_DBG_DRAW
@@ -52,7 +50,7 @@ private:
 #endif
 private:
 	BvhTriangleMesh * m_mesh;
-	CudaLinearBvh * m_bvh;
+	// CudaLinearBvh * m_bvh;
 	RayTest * m_ray;
 	CudaParticleSystem * m_particles;
 	
