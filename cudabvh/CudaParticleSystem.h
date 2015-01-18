@@ -2,33 +2,28 @@
 #define CUDAPARTICLESYSTEM_H
 
 #include "bvh_common.h"
-
+#include <CudaDynamicSystem.h>
 class CUDABuffer;
 class BaseBuffer;
 
-class CudaParticleSystem
+class CudaParticleSystem : public CudaDynamicSystem
 {
 public:
 	CudaParticleSystem();
 	virtual ~CudaParticleSystem();
 	
 	void createParticles(uint n);
-	void initOnDevice();
+	virtual void initOnDevice();
 	
 	const unsigned numParticles() const;
 	
-	void update(float dt);
+	virtual void update(float dt);
 	void deviceToHost();
 	
 	void * position();
-	void * positionOnDevice();
-	
 	void * velocity();
-	void * velocityOnDevice();
-	
 	void * force();
-	void * forceOnDevice();
-	
+
 protected:
     
 private:
@@ -36,15 +31,9 @@ private:
     void integrate(float dt);
 	
 private:
-	CUDABuffer * m_X;
-	CUDABuffer * m_V;
-    CUDABuffer * m_F;
-    
     BaseBuffer * m_hostX;
     BaseBuffer * m_hostV;
     BaseBuffer * m_hostF;
-	
-	unsigned m_numParticles;
 };
 
 
