@@ -10,7 +10,6 @@ public:
     virtual ~CollisionObject();
     
     virtual void initOnDevice();
-    virtual void updateBvh();
     virtual void update();
     
     CudaLinearBvh * bvh();

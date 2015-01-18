@@ -15,6 +15,7 @@ void CudaParticleSystem::createParticles(uint n)
     m_hostF = new BaseBuffer;
     m_hostF->create(n * 12);
     setNumPoints(n);
+    setNumPrimitives(n);
 }
     
 void CudaParticleSystem::initOnDevice()
@@ -39,18 +40,14 @@ void * CudaParticleSystem::force()
 { return m_hostF->data(); }
 
 void CudaParticleSystem::deviceToHost()
-{ X()->deviceToHost(m_hostX->data(), X()->bufferSize()); }
+{ X()->deviceToHost(m_hostX->data()); }
 
 void CudaParticleSystem::update(float dt) 
 {
     computeForce();
-    integrate(dt);
     CudaDynamicSystem::update(dt);
 }
 
 void CudaParticleSystem::computeForce() 
 { particleSystemSimpleGravityForce((float3 *)forceOnDevice(), numParticles()); }
-
-void CudaParticleSystem::integrate(float dt) 
-{ particleSystemIntegrate((float3 *)positionOnDevice(), (float3 *)velocityOnDevice(), (float3 *)forceOnDevice(), dt, numParticles()); }
 

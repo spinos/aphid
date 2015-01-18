@@ -46,7 +46,6 @@ void BvhSolver::setParticleSystem(CudaParticleSystem * particles)
 void BvhSolver::stepPhysics(float dt)
 {
 	m_mesh->update();
-	m_mesh->updateBvh();
 	m_ray->update();
 	m_particles->update(dt);
 #ifdef BVHSOLVER_DBG_DRAW

@@ -36,15 +36,12 @@ void BvhTriangleMesh::initOnDevice()
 	CollisionObject::initOnDevice();
 }
 
-void BvhTriangleMesh::updateBvh()
-{
+void BvhTriangleMesh::update()
+{ 
     formTriangleAabbs();
     combineAabbFirst();
-    CollisionObject::updateBvh();
+    CollisionObject::update(); 
 }
-
-void BvhTriangleMesh::update()
-{ CollisionObject::updateBvh(); }
 
 void BvhTriangleMesh::formTriangleAabbs()
 {

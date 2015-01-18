@@ -22,7 +22,6 @@ public:
 	void createTriangles(unsigned n);
 	
 	virtual void initOnDevice();
-	virtual void updateBvh();
 	virtual void update();
 	
 	const unsigned numVertices() const;

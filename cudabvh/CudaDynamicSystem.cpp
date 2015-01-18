@@ -1,5 +1,7 @@
 #include "CudaDynamicSystem.h"
 #include <CUDABuffer.h>
+#include "particleSystem_implement.h"
+
 CudaDynamicSystem::CudaDynamicSystem() 
 {
     m_X = new CUDABuffer;
@@ -20,9 +22,11 @@ void CudaDynamicSystem::initOnDevice()
     m_X->create(numPoints() * 12);
     m_V->create(numPoints() * 12);
     m_F->create(numPoints() * 12);
+    CollisionQuery::initOnDevice();
 }
 
-void CudaDynamicSystem::update(float dt) {}
+void CudaDynamicSystem::update(float dt) 
+{ integrate(dt); }
 
 void * CudaDynamicSystem::positionOnDevice()
 { return m_X->bufferOnDevice(); }
@@ -41,4 +45,7 @@ CUDABuffer * CudaDynamicSystem::V()
 
 CUDABuffer * CudaDynamicSystem::F()
 { return m_F; }
+
+void CudaDynamicSystem::integrate(float dt) 
+{ particleSystemIntegrate((float3 *)positionOnDevice(), (float3 *)velocityOnDevice(), (float3 *)forceOnDevice(), dt, numPoints()); }
 

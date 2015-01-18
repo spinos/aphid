@@ -27,6 +27,7 @@ bvh_dbg.h \
                 ../shared/CUDABuffer.h \
                 ../shared/BaseSolverThread.h \
                 CudaDynamicSystem.h  \
+		CollisionQuery.h \
 		CollisionObject.h
 SOURCES       = main.cpp \
                 glWidget.cpp \
@@ -43,6 +44,7 @@ SOURCES       = main.cpp \
                 ../shared/CUDABuffer.cpp \
                 ../shared/BaseSolverThread.cpp \
                 CudaDynamicSystem.cpp \
+		CollisionQuery.cpp \
 		 CollisionObject.cpp
 
 win32 {

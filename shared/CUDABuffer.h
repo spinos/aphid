@@ -21,6 +21,8 @@ public:
 	void * bufferOnDevice();
 	void hostToDevice(void * src, unsigned size);
 	void deviceToHost(void * dst, unsigned size);
+	void hostToDevice(void * src);
+	void deviceToHost(void * dst);
 	
 	void map(void ** p);
 	void unmap();
