@@ -18,12 +18,35 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_tetrahedron[3].set(0.f, 2.f, 0.f);
 
     m_alpha = 0.f;
+    m_drawLevel = 1;
 }
 //! [0]
 
 //! [1]
 GLWidget::~GLWidget()
 {
+}
+
+void GLWidget::testLine()
+{
+    Matrix44F mat;
+    Vector3F line[2];
+    mat.rotateZ(m_alpha);
+    mat.rotateX(m_alpha);
+    mat.translate(1.f, 10.f, 1.f);
+    
+    line[0] = mat.transform(Vector3F(-3.f, 0.f, 2.f));
+    line[1] = mat.transform(Vector3F(3.f, 0.f, -2.f));
+    
+    glBegin(GL_LINES);
+    glColor3f(0.f, 0.f, 1.f);
+    glVertex3f(line[0].x ,line[0].y, line[0].z);
+    glVertex3f(line[1].x ,line[1].y, line[1].z);
+    glColor3f(0.f, 1.f, 1.f);
+    glVertex3f(0.f ,0.f, 0.f);
+    Vector3F q = closestToOriginOnLine(line[0], line[1]);
+    glVertex3f(q.x, q.y, q.z);
+    glEnd();
 }
 
 void GLWidget::testTetrahedron()
@@ -162,7 +185,7 @@ void GLWidget::testGjk()
     
     int k = 0;
 	Vector3F w;
-	Vector3F v = A.X[0] - B.X[0];
+	Vector3F v = A.X[0];
 	
 	char contacted = 0;
 	Simplex W;
@@ -182,7 +205,7 @@ void GLWidget::testGjk()
 	    
 	    addToSimplex(W, w);
 	    
-	    drawSimplex(W);
+	    
 	    
 	    if(isOriginInsideSimplex(W)) {
 	        std::cout<<" simplex W"<<k<<" contains origin, intersected\n";
@@ -193,14 +216,18 @@ void GLWidget::testGjk()
 	    // std::cout<<" W"<<k<<" d="<<W.d<<"\n";
 	    
 	    v = closestToOriginWithinSimplex(W);
-	    
-	    glColor3f(1.f, 0.f, 0.f);
-	    glBegin(GL_LINES);
-	    glVertex3f(0.f, 0.f, 0.f);
-	    glVertex3f(v.x, v.y, v.z);
-	    glEnd();
-	    
+
 	    k++;
+	    
+	    if(k == m_drawLevel) {
+	        drawSimplex(W);
+	        glColor3f(1.f, 0.f, 0.f);
+            glBegin(GL_LINES);
+            glVertex3f(0.f, 0.f, 0.f);
+            glVertex3f(v.x, v.y, v.z);
+            glEnd();
+            break;
+	    }
 	}
 	
 	glBegin(GL_TRIANGLES);
@@ -232,6 +259,7 @@ void GLWidget::testGjk()
 void GLWidget::clientDraw()
 {
     testGjk();
+    testLine();
     testTetrahedron();
     m_alpha += 0.02f;
 }
@@ -259,6 +287,16 @@ void GLWidget::simulate()
 
 void GLWidget::keyPressEvent(QKeyEvent *e)
 {
+    switch (e->key()) {
+		case Qt::Key_A:
+			m_drawLevel++;
+			break;
+		case Qt::Key_D:
+			m_drawLevel--;
+			break;
+		default:
+			break;
+	}
 	Base3DView::keyPressEvent(e);
 }
 

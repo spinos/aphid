@@ -291,10 +291,10 @@ Vector3F closestToOriginWithinSimplex(Simplex & s)
     if(s.d < 2) {
         return s.p[0];
     }
-    if(s.d < 3) {
+    else if(s.d < 3) {
         return closestToOriginOnLine(s.p[0], s.p[1]);
     }
-    if(s.d < 4) {
+    else if(s.d < 4) {
         return closestToOriginOnTriangle(s.p[0], s.p[1], s.p[2]);
     }
     

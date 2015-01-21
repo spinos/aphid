@@ -25,10 +25,12 @@ protected:
 private:
     void testTetrahedron();
     void testGjk();
+    void testLine();
 private:
     PointSet A, B;
     Vector3F m_tetrahedron[4];
     float m_alpha;
+    int m_drawLevel;
 private slots:
     void simulate();
 
