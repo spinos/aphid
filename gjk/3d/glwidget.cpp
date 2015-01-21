@@ -3,6 +3,7 @@
 #include <BaseCamera.h>
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
+#include <GjkContactSolver.h>
 	
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -73,11 +74,11 @@ void GLWidget::testTetrahedron()
     
     glBegin(GL_LINES);
     Vector3F p;
-    int nouse;
+
     glColor3f(0.f, 0.f ,0.5f);
 // to closest point from origin
     glVertex3f(0.f ,0.f, 0.f);
-    p = closestToOriginOnTetrahedron(q, nouse);
+    p = closestToOriginOnTetrahedron(q);
     glVertex3f(p.x, p.y, p.z);
    
     glColor3f(0.f, 0.5f ,0.f);
@@ -166,84 +167,32 @@ void drawSimplex(const Simplex & s)
 
 void GLWidget::testGjk()
 {
-    Matrix44F mat;
-
     Vector3F pa[3]; 
-    pa[0].set(-1.f, 0.f, -1.f);
-	pa[1].set(0.f, 0.f, 3.f);
-	pa[2].set(3.f, 0.f, 0.f);
+    pa[0].set(-2.f, -2.f, 0.f);
+	pa[1].set(2.f, -2.f, 0.f);
+	pa[2].set(0.f, 2.f, 0.f);
 	
 	Vector3F pb[3];
-	pb[0].set(2.f, -1.1f, -.5f);
-	pb[1].set(3.f, 2.f, 0.5f);
-	pb[2].set(-1.3f, 0.f, 0.f);
+	pb[0].set(-2.f, -2.f, 0.f);
+	pb[1].set(2.f, -2.f, 0.f);
+	pb[2].set(2.f, 2.f, 0.f);
 	
-	mat.rotateZ(m_alpha);
-    mat.rotateX(m_alpha * 1.5f);
-    mat.translate(2.f, 2.f, 2.f);
+	Matrix44F mat;
+    mat.rotateZ(m_alpha);
+    mat.rotateX(m_alpha);
+    mat.translate(2.f, 2.f, 3.f);
 	for(int i = 0; i < 3; i++)
 	    A.X[i] = mat.transform(pa[i]);
 	
 	mat.setIdentity();
-	mat.rotateY(m_alpha * .5f);
-    mat.rotateX(m_alpha);
-    mat.translate(2.f + 4.f * sin(m_alpha * 2.f), 2.f, 2.f);
+	mat.rotateZ(-m_alpha);
+    mat.rotateY(m_alpha);
+    mat.translate(2.f + 3.f * sin(m_alpha * 2.f), 2.f, 3.f + 1.f * cos(m_alpha * 2.f));
 	for(int i = 0; i < 3; i++)
 	    B.X[i] = mat.transform(pb[i]);
-    
-    int k = 0;
-	Vector3F w;
-	Vector3F v = A.X[0];
-	
-	char contacted = 0;
-	Simplex W;
-	for(int i=0; i < 99; i++) {
-	    v.reverse();
-	    w = A.supportPoint(v) - B.supportPoint(v.reversed());
-	    
-	    // std::cout<<" v"<<k<<" "<<v.str()<<"\n";	
-	    // std::cout<<" w"<<k<<" "<<w.str()<<"\n";	
-	    // std::cout<<" wTv "<<w.dot(v)<<"\n";
-	    
-	    if(w.dot(v) < 0.f) {
-	        // std::cout<<" minkowski difference contains the origin\n";
-	        // std::cout<<"separating axis ||v"<<k<<"|| "<<v.length()<<"\n";
-			glColor3f(1.f, 0.f, 0.f);
-            glBegin(GL_LINES);
-            glVertex3f(0.f, 0.f, 0.f);
-            glVertex3f(v.x, v.y, v.z);
-            glEnd();
-	        break;
-	    }
-	    
-	    addToSimplex(W, w);
-	    
-	    
-	    
-	    if(isOriginInsideSimplex(W)) {
-	        // std::cout<<" simplex W"<<k<<" contains origin, intersected\n";
-	        contacted = 1;
-			drawSimplex(W);
-	        break;
-	    }
-	    
-	    // std::cout<<" W"<<k<<" d="<<W.d<<"\n";
-	    
-	    v = closestToOriginWithinSimplex(W);
-
-	    k++;
-	    
-	    if(k == m_drawLevel) {
-	        drawSimplex(W);
-	        glColor3f(1.f, 0.f, 0.f);
-            glBegin(GL_LINES);
-            glVertex3f(0.f, 0.f, 0.f);
-            glVertex3f(v.x, v.y, v.z);
-            glEnd();
-			
-			if(W.d == 2) drawLine(W.p[0], W.p[1]);
-	    }
-	}
+		
+	GjkContactSolver gjk;
+	char contacted = gjk.pairContacted(A, B);
 	
 	glBegin(GL_TRIANGLES);
 	

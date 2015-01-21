@@ -19,12 +19,14 @@ win32 {
 HEADERS       = glwidget.h \
                 window.h \
                 ../../shared/Base3DView.h \
-                ../Gjk.h
+                ../Gjk.h \
+				../GjkContactSolver.h
 SOURCES       = ../../shared/Base3DView.cpp \
 				glwidget.cpp \
                 main.cpp \
                 window.cpp \
-                ../Gjk.cpp
+                ../Gjk.cpp \
+				../GjkContactSolver.cpp 
 QT           += opengl
 win32:CONFIG += console
 macx:CONFIG -= app_bundle 

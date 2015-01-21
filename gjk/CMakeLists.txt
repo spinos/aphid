@@ -4,7 +4,7 @@ project (gjk)
 set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
 
-add_executable(gjk main.cpp)
+add_executable(gjk main.cpp Gjk.cpp)
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -41,6 +41,7 @@ endif()
 	
 endif()
 
+include_directories (".")
 include_directories (${Aphid_INCLUDE_DIR})
 
 find_library(Aphid aphid ${Aphid_LIBRARY_DIR})

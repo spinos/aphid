@@ -32,7 +32,62 @@ char isTetrahedronDegenerate(const Vector3F * v)
     return (D0 == 0.f);
 }
 
-BarycentricCoordinate getBarycentricCoordinate(const Vector3F & p, const Vector3F * v)
+char isTriangleDegenerate(const Vector3F * v)
+{
+	Vector3F n = Vector3F(v[1], v[0]).cross( Vector3F(v[2], v[0]) );
+	
+    float D0 = n.length2();
+    return (D0 == 0.f);
+}
+
+BarycentricCoordinate getBarycentricCoordinate2(const Vector3F & p, const Vector3F * v)
+{
+	BarycentricCoordinate coord;
+	Vector3F dv = v[1] - v[0];
+	float D0 = dv.length();
+	if(D0 == 0.f) {
+        std::cout<<"line is degenerate\n";
+        coord.x = coord.y = coord.z = coord.w = -1.f;
+        return coord;
+    }  
+	Vector3F dp = p - v[0];
+	coord.x = dp.length() / D0;
+	coord.y = 1.f - coord.x;
+	
+	return coord;
+}
+
+BarycentricCoordinate getBarycentricCoordinate3(const Vector3F & p, const Vector3F * v)
+{
+    Matrix33F mat;
+    
+    BarycentricCoordinate coord;
+    
+    Vector3F n = Vector3F(v[1] - v[0]).cross( Vector3F(v[2] - v[0]) );
+	
+    float D0 = n.length2();
+    if(D0 == 0.f) {
+        std::cout<<"tiangle is degenerate\n";
+        coord.x = coord.y = coord.z = coord.w = -1.f;
+        return coord;
+    }  
+    
+	Vector3F na = Vector3F(v[2] - v[1]).cross( Vector3F(p - v[1]) );
+    float D1 = n.dot(na);
+	Vector3F nb = Vector3F(v[0] - v[2]).cross( Vector3F(p - v[2]) );  
+    float D2 = n.dot(nb);
+	Vector3F nc = Vector3F(v[1] - v[0]).cross( Vector3F(p - v[0]) );
+    float D3 = n.dot(nc);
+    
+    coord.x = D1/D0;
+    coord.y = D2/D0;
+    coord.z = D3/D0;
+    coord.w = 1.f;
+    
+    return coord;
+}
+
+BarycentricCoordinate getBarycentricCoordinate4(const Vector3F & p, const Vector3F * v)
 {
     Matrix44F mat;
     
@@ -140,20 +195,18 @@ Vector3F closestToOriginOnTriangle(const Vector3F & a, const Vector3F & b, const
     return online;
 }
 
-Vector3F closestToOriginOnTetrahedron(const Vector3F * p, int & farthest)
+Vector3F closestToOriginOnTetrahedron(const Vector3F * p)
 {
     Vector3F q = closestToOriginOnTriangle(p[0], p[1], p[2]);
     float d = q.length();
     float minD = d;
     Vector3F r = q;
-    farthest = 3;
     
     q = closestToOriginOnTriangle(p[0], p[1], p[3]);
     d = q.length();
     if(d < minD) {
         minD = d;
         r = q;
-        farthest = 2;
     }
     
     q = closestToOriginOnTriangle(p[0], p[2], p[3]);
@@ -161,7 +214,6 @@ Vector3F closestToOriginOnTetrahedron(const Vector3F * p, int & farthest)
     if(d < minD) {
         minD = d;
         r = q;
-        farthest = 1;
     }
     
     q = closestToOriginOnTriangle(p[1], p[2], p[3]);
@@ -169,7 +221,6 @@ Vector3F closestToOriginOnTetrahedron(const Vector3F * p, int & farthest)
     if(d < minD) {
         minD = d;
         r = q;
-        farthest = 0;
     }
     
     return r;
@@ -232,25 +283,39 @@ void addToSimplex(Simplex & s, const Vector3F & p)
     else if(s.d < 3) {
 		s.p[2] = p;
 		s.d = 3;
+		if(isTriangleDegenerate(s.p)) {
+			std::cout<<" tri is degenerate";
+			std::cout<<" ("<<s.p[0].str()<<","<<s.p[1].str()<<","<<s.p[2].str()<<")\n";
+		}
     }
     else {
         s.p[3] = p;
         s.d = 4;
+		if(isTetrahedronDegenerate(s.p))
+			std::cout<<" tet is degenerate";
     }
 }
 
-void removeFromSimplex(Simplex & s, int ind)
+void removeFromSimplex(Simplex & s, BarycentricCoordinate coord)
 {
-    // std::cout<<"remove vertex "<<ind;   
-    for(int i = ind; i < 3; i++) {
-        s.p[i] = s.p[i+1];
+	float * bar = &coord.x;
+    for(int i = 0; i < s.d; i++) {
+		if(fabs(bar[i]) < TINY_VALUE) {
+			std::cout<<" zero "<<bar[i]<<" remove vertex "<<i<<"\n";
+			for(int j = i; j < s.d - 1; j++) {
+				s.p[j] = s.p[j+1];
+				bar[j] = bar[j+1];
+			}
+			i--;
+			s.d--;
+		}
     }
-    s.d--;
+	// std::cout<<"s.d "<<s.d<<"\n";
 }
 
 char pointInsideTetrahedronTest(const Vector3F & p, const Vector3F * v)
 {
-    BarycentricCoordinate coord = getBarycentricCoordinate(p, v);
+    BarycentricCoordinate coord = getBarycentricCoordinate4(p, v);
     // std::cout<<"sum "<<coord.x + coord.y + coord.z + coord.w<<"\n";
     
     //Vector3F proof = v[0] * coord.x + v[1] * coord.y + v[2] * coord.z + v[3] * coord.w;
@@ -271,11 +336,33 @@ char isOriginInsideSimplex(const Simplex & s)
     return pointInsideTetrahedronTest(Vector3F::Zero, s.p);
 }
 
+Vector3F closestToOriginOnLine(Simplex & s)
+{
+	Vector3F p = closestToOriginOnLine(s.p[0], s.p[1]);
+		
+	BarycentricCoordinate bar = getBarycentricCoordinate2(p, s.p);
+	// std::cout<<" line bar "<<bar.x<<" "<<bar.y<<"\n";
+    removeFromSimplex(s, bar);
+    return p;
+}
+
+Vector3F closestToOriginOnTriangle(Simplex & s)
+{
+	Vector3F p = closestToOriginOnTriangle(s.p[0], s.p[1], s.p[2]);
+		
+	BarycentricCoordinate bar = getBarycentricCoordinate3(p, s.p);
+	// std::cout<<" tri bar "<<bar.x<<" "<<bar.y<<" "<<bar.z<<"\n";
+    removeFromSimplex(s, bar);
+    return p;
+}
+
 Vector3F closestToOriginOnTetrahedron(Simplex & s)
 {
-    int farthest;
-    Vector3F p = closestToOriginOnTetrahedron(s.p, farthest);
-    removeFromSimplex(s, farthest);
+    Vector3F p = closestToOriginOnTetrahedron(s.p);
+	
+	BarycentricCoordinate bar = getBarycentricCoordinate4(p, s.p);
+	// std::cout<<" tet bar "<<bar.x<<" "<<bar.y<<" "<<bar.z<<" "<<bar.w<<"\n";
+    removeFromSimplex(s, bar);
     return p;
 }
 
@@ -285,10 +372,10 @@ Vector3F closestToOriginWithinSimplex(Simplex & s)
         return s.p[0];
     }
     else if(s.d < 3) {
-        return closestToOriginOnLine(s.p[0], s.p[1]);
+        return closestToOriginOnLine(s);
     }
     else if(s.d < 4) {
-        return closestToOriginOnTriangle(s.p[0], s.p[1], s.p[2]);
+		return closestToOriginOnTriangle(s);
     }
     
     return closestToOriginOnTetrahedron(s);

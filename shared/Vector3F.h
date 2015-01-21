@@ -42,7 +42,8 @@ public:
 
 	const std::string str() const;
 	
-	float length() const;
+	const float length() const;
+	const float length2() const;
 	
 	float dot(const Vector3F& other) const;	
 	Vector3F cross(const Vector3F& other) const;

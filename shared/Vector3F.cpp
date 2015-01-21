@@ -151,9 +151,14 @@ Vector3F Vector3F::operator-(const Vector3F& other ) const
         return Vector3F(x-other.x, y-other.y, z-other.z);
 }
 	
-float Vector3F::length() const
+const float Vector3F::length() const
 {
         return (float)sqrt(x*x + y*y + z*z);
+}
+
+const float Vector3F::length2() const
+{
+        return (x*x + y*y + z*z);
 }
 	
 float Vector3F::dot(const Vector3F& other) const

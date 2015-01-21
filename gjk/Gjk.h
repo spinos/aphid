@@ -3,7 +3,7 @@
 
 #include <AllMath.h>
 
-#define TINY_VALUE 1e-8
+#define TINY_VALUE 1e-7
 
 struct BarycentricCoordinate {
     float x, y, z, w;
@@ -11,7 +11,9 @@ struct BarycentricCoordinate {
 
 float determinantTetrahedron(Matrix44F & mat, const Vector3F & v1, const Vector3F & v2, const Vector3F & v3, const Vector3F & v4);
 
-BarycentricCoordinate getBarycentricCoordinate(const Vector3F & p, const Vector3F * v);
+BarycentricCoordinate getBarycentricCoordinate2(const Vector3F & p, const Vector3F * v);
+BarycentricCoordinate getBarycentricCoordinate3(const Vector3F & p, const Vector3F * v);
+BarycentricCoordinate getBarycentricCoordinate4(const Vector3F & p, const Vector3F * v);
 
 class PointSet {
 public:
@@ -49,11 +51,14 @@ char closestPointToOriginInsideTriangle(Vector3F & onplane, const Vector3F & p0,
 
 Vector3F closestToOriginOnTriangle(const Vector3F & a, const Vector3F & b, const Vector3F & c);
 
-Vector3F closestToOriginOnTetrahedron(const Vector3F * p, int & farthest);
+Vector3F closestToOriginOnTetrahedron(const Vector3F * p);
+Vector3F closestToOriginOnTetrahedron(Simplex & s);
 
 void addToSimplex(Simplex & s, const Vector3F & p);
-void removeFromSimplex(Simplex & s, int ind);
+void removeFromSimplex(Simplex & s, BarycentricCoordinate coord);
 char isOriginInsideSimplex(const Simplex & s);
+Vector3F closestToOriginOnLine(Simplex & s);
+Vector3F closestToOriginOnTriangle(Simplex & s);
 Vector3F closestToOriginWithinSimplex(Simplex & s);
 char pointInsideTetrahedronTest(const Vector3F & p, const Vector3F * v);
 #endif        //  #ifndef GJK_H
