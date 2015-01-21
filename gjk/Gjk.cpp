@@ -270,6 +270,11 @@ int farthestP(const Vector3F * v, const Vector3F & p)
     return ind;
 }
 
+void resetSimplex(Simplex & s)
+{
+    s.d = 0;
+}
+
 void addToSimplex(Simplex & s, const Vector3F & p)
 {
     if(s.d < 1) {
@@ -301,7 +306,7 @@ void removeFromSimplex(Simplex & s, BarycentricCoordinate coord)
 	float * bar = &coord.x;
     for(int i = 0; i < s.d; i++) {
 		if(fabs(bar[i]) < TINY_VALUE) {
-			std::cout<<" zero "<<bar[i]<<" remove vertex "<<i<<"\n";
+			// std::cout<<" zero "<<bar[i]<<" remove vertex "<<i<<"\n";
 			for(int j = i; j < s.d - 1; j++) {
 				s.p[j] = s.p[j+1];
 				bar[j] = bar[j+1];

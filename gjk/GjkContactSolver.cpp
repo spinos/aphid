@@ -11,15 +11,14 @@
 
 GjkContactSolver::GjkContactSolver() {}
 
-char GjkContactSolver::pairContacted(const PointSet & A, const PointSet & B)
+char GjkContactSolver::pairContacted(const PointSet & A, const PointSet & B, ContactResult * result)
 {
     int k = 0;
 	Vector3F w;
 	Vector3F v = A.X[0];
 	if(v.length2() < TINY_VALUE) v = A.X[1];
 	
-	char contacted = 0;
-	Simplex W;
+	resetSimplex(m_W);
 	for(int i=0; i < 99; i++) {
 	    v.reverse();
 	    w = A.supportPoint(v) - B.supportPoint(v.reversed());
@@ -29,46 +28,36 @@ char GjkContactSolver::pairContacted(const PointSet & A, const PointSet & B)
 	    // std::cout<<" wTv "<<w.dot(v)<<"\n";
 	    
 	    if(w.dot(v) < 0.f) {
+			result->normal = v;
+			result->point = w;
 	        // std::cout<<" minkowski difference contains the origin\n";
 	        // std::cout<<"separating axis ||v"<<k<<"|| "<<v.length()<<"\n";
-			//glColor3f(1.f, 0.f, 0.f);
-            //glBegin(GL_LINES);
-            //glVertex3f(0.f, 0.f, 0.f);
-            //glVertex3f(v.x, v.y, v.z);
-            //glEnd();
 	        return 0;
 	    }
 	    
-	    addToSimplex(W, w);
+	    addToSimplex(m_W, w);
  
-	    if(isOriginInsideSimplex(W)) {
+	    if(isOriginInsideSimplex(m_W)) {
 	        // std::cout<<" simplex W"<<k<<" contains origin, intersected\n";
-	        contacted = 1;
-			// drawSimplex(W);
-	        return 1;
+	        result->normal = v;
+			result->point = w;
+			return 1;
 	    }
 	    
 	    // std::cout<<" W"<<k<<" d="<<W.d<<"\n";
 	    
-	    v = closestToOriginWithinSimplex(W);
+	    v = closestToOriginWithinSimplex(m_W);
 		
-		if(v.length2() < TINY_VALUE) {
-			contacted = 1;
+		if(v.length2() < 0.01f) {
+			result->normal = v;
+			result->point = w;
 			return 1;
 		}
 
 	    k++;
-	    /*
-	    if(k == m_drawLevel) {
-	        drawSimplex(W);
-	        glColor3f(1.f, 0.f, 0.f);
-            glBegin(GL_LINES);
-            glVertex3f(0.f, 0.f, 0.f);
-            glVertex3f(v.x, v.y, v.z);
-            glEnd();
-			
-			if(W.d == 2) drawLine(W.p[0], W.p[1]);
-	    }*/
 	}
 	return 0;
 }
+
+const Simplex GjkContactSolver::W() const
+{ return m_W; }

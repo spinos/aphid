@@ -168,8 +168,8 @@ void drawSimplex(const Simplex & s)
 void GLWidget::testGjk()
 {
     Vector3F pa[3]; 
-    pa[0].set(-2.f, -2.f, 0.f);
-	pa[1].set(2.f, -2.f, 0.f);
+    pa[0].set(-3.f, -2.f, 0.f);
+	pa[1].set(3.f, -2.f, 0.f);
 	pa[2].set(0.f, 2.f, 0.f);
 	
 	Vector3F pb[3];
@@ -185,14 +185,15 @@ void GLWidget::testGjk()
 	    A.X[i] = mat.transform(pa[i]);
 	
 	mat.setIdentity();
-	mat.rotateZ(-m_alpha);
+	mat.rotateZ(-m_alpha * .5f);
     mat.rotateY(m_alpha);
     mat.translate(2.f + 3.f * sin(m_alpha * 2.f), 2.f, 3.f + 1.f * cos(m_alpha * 2.f));
 	for(int i = 0; i < 3; i++)
 	    B.X[i] = mat.transform(pb[i]);
 		
 	GjkContactSolver gjk;
-	char contacted = gjk.pairContacted(A, B);
+	ContactResult result;
+	char contacted = gjk.pairContacted(A, B, &result);
 	
 	glBegin(GL_TRIANGLES);
 	
@@ -218,6 +219,17 @@ void GLWidget::testGjk()
     glVertex3f(q.x, q.y, q.z);
     
     glEnd();
+	
+	if(contacted) drawSimplex(gjk.W());
+	
+	glColor3f(1.f, 1.f, 1.f);
+	glBegin(GL_LINES);
+	q = Vector3F::Zero;
+	glVertex3f(q.x, q.y, q.z);
+	q -= result.normal;
+	glVertex3f(q.x, q.y, q.z);
+	glEnd();
+
 }
 
 void GLWidget::clientDraw()

@@ -3,7 +3,7 @@
 
 #include <AllMath.h>
 
-#define TINY_VALUE 1e-7
+#define TINY_VALUE 1e-6
 
 struct BarycentricCoordinate {
     float x, y, z, w;
@@ -38,11 +38,8 @@ public:
 };
 
 struct Simplex {
-    Simplex() {
-        d = 0; 
-    }
-    int d;
     Vector3F p[4];
+    int d;
 };
 
 Vector3F closestToOriginOnLine(const Vector3F & p0, const Vector3F & p1);
@@ -54,6 +51,7 @@ Vector3F closestToOriginOnTriangle(const Vector3F & a, const Vector3F & b, const
 Vector3F closestToOriginOnTetrahedron(const Vector3F * p);
 Vector3F closestToOriginOnTetrahedron(Simplex & s);
 
+void resetSimplex(Simplex & s);
 void addToSimplex(Simplex & s, const Vector3F & p);
 void removeFromSimplex(Simplex & s, BarycentricCoordinate coord);
 char isOriginInsideSimplex(const Simplex & s);

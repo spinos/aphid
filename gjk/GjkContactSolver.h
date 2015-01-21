@@ -12,11 +12,19 @@
 
 #include "Gjk.h"
 
+struct ContactResult {
+	Vector3F normal;
+	Vector3F point;
+};
+
 class GjkContactSolver {
 public:
 	GjkContactSolver();
 	
-	char pairContacted(const PointSet & A, const PointSet & B);
+	char pairContacted(const PointSet & A, const PointSet & B, ContactResult * result);
+	
+	const Simplex W() const;
 private:
+	Simplex m_W;
 };
 #endif        //  #ifndef GJKCONTACTSOLVER_H
