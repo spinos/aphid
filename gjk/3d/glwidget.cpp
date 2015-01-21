@@ -27,26 +27,37 @@ GLWidget::~GLWidget()
 {
 }
 
+void drawLine(const Vector3F & a, const Vector3F & b)
+{
+	glBegin(GL_LINES);
+    glColor3f(0.f, 0.f, 1.f);
+    glVertex3f(a.x , a.y, a.z);
+    glVertex3f(b.x , b.y, b.z);
+    glColor3f(0.f, 1.f, 1.f);
+    glVertex3f(0.f ,0.f, 0.f);
+    Vector3F q = closestToOriginOnLine(a, b);
+    glVertex3f(q.x, q.y, q.z);
+    glEnd();
+	
+	Vector3F dp = b - a;
+	Vector3F v = q;
+	v.normalize();
+	dp.normalize();
+	// qDebug()<<" dot "<<dp.dot(v);
+}
+
 void GLWidget::testLine()
 {
     Matrix44F mat;
     Vector3F line[2];
     mat.rotateZ(m_alpha);
     mat.rotateX(m_alpha);
-    mat.translate(1.f, 10.f, 1.f);
+    mat.translate(10.f, 10.f, 1.f);
     
     line[0] = mat.transform(Vector3F(-3.f, 0.f, 2.f));
     line[1] = mat.transform(Vector3F(3.f, 0.f, -2.f));
     
-    glBegin(GL_LINES);
-    glColor3f(0.f, 0.f, 1.f);
-    glVertex3f(line[0].x ,line[0].y, line[0].z);
-    glVertex3f(line[1].x ,line[1].y, line[1].z);
-    glColor3f(0.f, 1.f, 1.f);
-    glVertex3f(0.f ,0.f, 0.f);
-    Vector3F q = closestToOriginOnLine(line[0], line[1]);
-    glVertex3f(q.x, q.y, q.z);
-    glEnd();
+    drawLine(line[0], line[1]);
 }
 
 void GLWidget::testTetrahedron()
@@ -54,7 +65,7 @@ void GLWidget::testTetrahedron()
     Matrix44F mat;
     // mat.rotateZ(m_alpha);
     mat.rotateX(m_alpha);
-    mat.translate(1.f, 1.f, 10.f);
+    mat.translate(20.f, 10.f, 1.f);
     
     Vector3F q[4];
     for(int i = 0; i < 4; i++)
@@ -126,13 +137,10 @@ void drawSimplex(const Simplex & s)
     }
     if(s.d == 3) {
         glColor3f(0.f, 1.f, 1.f);
-        glBegin(GL_LINES);
+        glBegin(GL_TRIANGLES);
         glVertex3f(s.p[0].x, s.p[0].y, s.p[0].z);
         glVertex3f(s.p[1].x, s.p[1].y, s.p[1].z);
-        glVertex3f(s.p[1].x, s.p[1].y, s.p[1].z);
         glVertex3f(s.p[2].x, s.p[2].y, s.p[2].z);
-        glVertex3f(s.p[2].x, s.p[2].y, s.p[2].z);
-        glVertex3f(s.p[0].x, s.p[0].y, s.p[0].z);
         glEnd();
         return;
     }
@@ -171,15 +179,15 @@ void GLWidget::testGjk()
 	pb[2].set(-1.3f, 0.f, 0.f);
 	
 	mat.rotateZ(m_alpha);
-    mat.rotateX(m_alpha);
+    mat.rotateX(m_alpha * 1.5f);
     mat.translate(2.f, 2.f, 2.f);
 	for(int i = 0; i < 3; i++)
 	    A.X[i] = mat.transform(pa[i]);
 	
 	mat.setIdentity();
-	mat.rotateY(m_alpha);
+	mat.rotateY(m_alpha * .5f);
     mat.rotateX(m_alpha);
-    mat.translate(2.f, 2.f + 4.f * sin(m_alpha * 2.f), 2.f);
+    mat.translate(2.f + 4.f * sin(m_alpha * 2.f), 2.f, 2.f);
 	for(int i = 0; i < 3; i++)
 	    B.X[i] = mat.transform(pb[i]);
     
@@ -198,8 +206,13 @@ void GLWidget::testGjk()
 	    // std::cout<<" wTv "<<w.dot(v)<<"\n";
 	    
 	    if(w.dot(v) < 0.f) {
-	        std::cout<<" minkowski difference contains the origin\n";
-	        std::cout<<"separating axis ||v"<<k<<"|| "<<v.length()<<"\n";
+	        // std::cout<<" minkowski difference contains the origin\n";
+	        // std::cout<<"separating axis ||v"<<k<<"|| "<<v.length()<<"\n";
+			glColor3f(1.f, 0.f, 0.f);
+            glBegin(GL_LINES);
+            glVertex3f(0.f, 0.f, 0.f);
+            glVertex3f(v.x, v.y, v.z);
+            glEnd();
 	        break;
 	    }
 	    
@@ -208,8 +221,9 @@ void GLWidget::testGjk()
 	    
 	    
 	    if(isOriginInsideSimplex(W)) {
-	        std::cout<<" simplex W"<<k<<" contains origin, intersected\n";
+	        // std::cout<<" simplex W"<<k<<" contains origin, intersected\n";
 	        contacted = 1;
+			drawSimplex(W);
 	        break;
 	    }
 	    
@@ -226,7 +240,8 @@ void GLWidget::testGjk()
             glVertex3f(0.f, 0.f, 0.f);
             glVertex3f(v.x, v.y, v.z);
             glEnd();
-            break;
+			
+			if(W.d == 2) drawLine(W.p[0], W.p[1]);
 	    }
 	}
 	
@@ -261,7 +276,7 @@ void GLWidget::clientDraw()
     testGjk();
     testLine();
     testTetrahedron();
-    m_alpha += 0.02f;
+    m_alpha += 0.01f;
 }
 //! [7]
 

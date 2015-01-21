@@ -27,3 +27,4 @@ SOURCES       = ../../shared/Base3DView.cpp \
                 ../Gjk.cpp
 QT           += opengl
 win32:CONFIG += console
+macx:CONFIG -= app_bundle 

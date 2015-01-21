@@ -60,27 +60,33 @@ BarycentricCoordinate getBarycentricCoordinate(const Vector3F & p, const Vector3
 
 Vector3F closestToOriginOnLine(const Vector3F & p0, const Vector3F & p1)
 {
-    // std::cout<<" closest on line "<<p0.str()<<" "<<p1.str()<<"\n";
-    Vector3F p = p0;
-    float lp = p.length();
-    if(lp < 0.000001f) return p;
-    
+    const float d0 = p0.length();
+    if(d0 < TINY_VALUE) return p0;
+	
+	const float d1 = p1.length();
+	if(d1 < TINY_VALUE) return p1;
+	
+	Vector3F r = p0;
     Vector3F dir = p1 - p0;
-    //std::cout<<" dir "<<dir.str();
-    const float l01 = dir.length();
-    if(l01 < 0.000001f) return p;
+	float d = d0;
+	
+	const float l01 = dir.length();
+    if(l01 < TINY_VALUE) return r;
+	
+	if(d1 < d0) {
+		r = p1;
+		dir = p0 - p1;
+		d = d1;
+	}
     
-    if(dir.dot(p) > 0.f) return p;
+    if(dir.dot(r) > 0.f) return r;
     
-    p.normalize(); p.reverse();
-    dir.normalize();
+    r /= d;
+    dir /= l01;
     
-    const float factor = dir.dot(p);
+    const float factor = dir.dot(r);
     
-    p = p0 + dir * l01 * factor;
-    // std::cout<<" p "<<p.str()<<"\n";
-    
-    return p;
+    return r * d - dir * d * factor;
 }
 
 char closestPointToOriginInsideTriangle(Vector3F & onplane, const Vector3F & p0, const Vector3F & p1, const Vector3F & p2)
@@ -224,25 +230,12 @@ void addToSimplex(Simplex & s, const Vector3F & p)
         s.d = 2;
     }
     else if(s.d < 3) {
-        if(checkCoplanar(s.p[0], s.p[1], p)) {
-             s.p[0] = s.p[1];
-             s.p[1] = p;
-        }
-        else {
-            s.p[2] = p;
-            s.d = 3;
-        }
+		s.p[2] = p;
+		s.d = 3;
     }
     else {
         s.p[3] = p;
         s.d = 4;
-        if(isTetrahedronDegenerate(s.p)) {
-            std::cout<<"\n degenerate when add to simplex!\n";
-            int removeV = farthestP(s.p, p);
-            std::cout<<"\n remove"<<removeV<<"\n";
-            s.p[removeV] = p;
-            s.d = 3;
-        }
     }
 }
 

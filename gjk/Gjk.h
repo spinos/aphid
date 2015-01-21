@@ -3,6 +3,8 @@
 
 #include <AllMath.h>
 
+#define TINY_VALUE 1e-8
+
 struct BarycentricCoordinate {
     float x, y, z, w;
 };
