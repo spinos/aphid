@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <boost/format.hpp>
-#include <Gjk.h>
+#include "GjkContactSolver.h"
 
 void testBarycentric3()
 {
@@ -48,15 +48,39 @@ void testBarycentric4()
 	addToSimplex(S, tet[2]);
 	addToSimplex(S, tet[3]);
 	
-	Vector3F cls = closestToOriginOnTetrahedron(S);
+	Vector3F cls = closestToOriginWithinSimplex(S);
 	std::cout<<"cloest test "<<cls.str()<<"\n";
+}
+
+void testRayCast()
+{
+    std::cout<<"\n test CSO ray cast\n";
+    PointSet A, B;
+    A.X[0].set(-3.f, -2.f, 0.f);
+	A.X[1].set(3.f, -2.f, 0.f);
+	A.X[2].set(0.f, 2.f, 0.f);
+	
+	B.X[0].set(-2.f, -2.f, 10.12f);
+	B.X[1].set(2.f, -2.f, 10.11f);
+	B.X[2].set(3.f, 2.f, 10.f);
+	
+	GjkContactSolver gjk;
+	ContactResult result;
+	gjk.distance(A, B, &result);
+	
+	if(result.contacted) std::cout<<" contacted \n";
+	else {
+	    std::cout<<" not contacted \n";
+	    std::cout<<" separating axis "<<result.normal.str()<<"\n";
+	}
 }
 
 int main(int argc, char * const argv[])
 {
-	std::cout<<"GJK intersection test\n";
-	testBarycentric3();
-	testBarycentric4();
+	std::cout<<"GJK intersection test";
+	// testBarycentric3();
+	// testBarycentric4();
+	testRayCast();
 	std::cout<<"end of test\n";
 	return 0;
 }

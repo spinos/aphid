@@ -254,15 +254,17 @@ void addToSimplex(Simplex & s, const Vector3F & p)
 		s.p[2] = p;
 		s.d = 3;
 		if(isTriangleDegenerate(s.p)) {
-			std::cout<<" tri is degenerate";
+			std::cout<<" triangle is degenerate";
 			std::cout<<" ("<<s.p[0].str()<<","<<s.p[1].str()<<","<<s.p[2].str()<<")\n";
 		}
     }
     else {
         s.p[3] = p;
         s.d = 4;
-		if(isTetrahedronDegenerate(s.p))
-			std::cout<<" tet is degenerate";
+		if(isTetrahedronDegenerate(s.p)) {
+			std::cout<<" tetrahedron is degenerate";
+		    std::cout<<" ("<<s.p[0].str()<<","<<s.p[1].str()<<","<<s.p[2].str()<<","<<s.p[3].str()<<")\n";
+		}
     }
 }
 
@@ -285,6 +287,9 @@ void removeFromSimplex(Simplex & s, BarycentricCoordinate coord)
 
 char pointInsideTetrahedronTest(const Vector3F & p, const Vector3F * v)
 {
+    if(isTetrahedronDegenerate(v)) 
+        return 1;
+        
     BarycentricCoordinate coord = getBarycentricCoordinate4(p, v);
     // std::cout<<"sum "<<coord.x + coord.y + coord.z + coord.w<<"\n";
     
