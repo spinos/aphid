@@ -20,17 +20,18 @@ char GjkContactSolver::pairContacted(const PointSet & A, const PointSet & B, Con
 	
 	resetSimplex(m_W);
 	for(int i=0; i < 99; i++) {
-	    v.reverse();
-	    w = A.supportPoint(v) - B.supportPoint(v.reversed());
+	    //v.reverse();
+	    w = A.supportPoint(v.reversed()) - B.supportPoint(v);
 	    
 	    // std::cout<<" v"<<k<<" "<<v.str()<<"\n";	
 	    // std::cout<<" w"<<k<<" "<<w.str()<<"\n";	
 	    // std::cout<<" wTv "<<w.dot(v)<<"\n";
-	    
-	    if(w.dot(v) < 0.f) {
+		// v is not close enough to v(A − B).
+	    // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
+	    if(v.length2() - w.dot(v) < 0.01f * v.length2()) {
 			result->normal = v;
 			result->point = w;
-	        // std::cout<<" minkowski difference contains the origin\n";
+	        // std::cout<<" v is close to separate plane w.v\n";
 	        // std::cout<<"separating axis ||v"<<k<<"|| "<<v.length()<<"\n";
 	        return 0;
 	    }
@@ -47,12 +48,6 @@ char GjkContactSolver::pairContacted(const PointSet & A, const PointSet & B, Con
 	    // std::cout<<" W"<<k<<" d="<<W.d<<"\n";
 	    
 	    v = closestToOriginWithinSimplex(m_W);
-		
-		if(v.length2() < 0.01f) {
-			result->normal = v;
-			result->point = w;
-			return 1;
-		}
 
 	    k++;
 	}
