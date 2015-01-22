@@ -31,7 +31,7 @@ char VertexPath::recursiveFindClosestNeighbor(unsigned vert, unsigned endVert, c
         }
         
         Vector3F p = *(nei->v->m_v);
-        float dist = (p - endPoint).length() + (vertP - p).length();
+        float dist = p.distanceTo(endPoint) + vertP.distanceTo(p);
         if(dist < minDist) {
             minDist = dist;
             closestNei = nei->v->getIndex();

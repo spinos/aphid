@@ -39,7 +39,7 @@ float PerspectiveCamera::frameWidthRel() const
 {
 	Vector3F eye = fSpace.getTranslation();	
 	Vector3F view = eye - fCenterOfInterest;
-	return frameWidth() * view.length() / fPortWidth;
+	return frameWidth() * ( view.length() / fPortWidth );
 }
 
 void PerspectiveCamera::zoom(int y)

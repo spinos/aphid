@@ -76,7 +76,7 @@ void BaseCamera::tumble(int x, int y)
 	Vector3F front = fSpace.getFront();
 	Vector3F eye = fSpace.getTranslation();	
 	Vector3F view = eye - fCenterOfInterest;
-	const float dist = view.length();
+	float dist = view.length();
 	const float scaleing = dist / fPortWidth * 2.f;
 	eye -= side * (float)x * scaleing;
 	eye += up * (float)y * scaleing;

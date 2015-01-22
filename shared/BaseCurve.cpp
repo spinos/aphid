@@ -75,7 +75,7 @@ void BaseCurve::computeKnots()
 {
 	m_hullLength = 0;
 	for(unsigned i = 1; i < numVertices(); i++) {
-		m_hullLength += (m_cvs[i] - m_cvs[i-1]).length();
+		m_hullLength += m_cvs[i].distanceTo(m_cvs[i-1]);
 	}
 	
 	m_knots = new float[numVertices()];
@@ -83,7 +83,7 @@ void BaseCurve::computeKnots()
 	
 	float knotL = 0.f;
 	for(unsigned i = 1; i < numVertices(); i++) {
-		knotL += (m_cvs[i] - m_cvs[i-1]).length();
+		knotL += m_cvs[i].distanceTo( m_cvs[i-1]);
 		m_knots[i] = knotL / m_hullLength;
 	}
 }
