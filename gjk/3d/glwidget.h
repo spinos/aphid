@@ -26,6 +26,7 @@ private:
     void testTetrahedron();
     void testGjk();
     void testLine();
+	void testTriangle();
 private:
     PointSet A, B;
     Vector3F m_tetrahedron[4];

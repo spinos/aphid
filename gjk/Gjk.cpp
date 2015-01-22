@@ -50,7 +50,7 @@ BarycentricCoordinate getBarycentricCoordinate2(const Vector3F & p, const Vector
         coord.x = coord.y = coord.z = coord.w = -1.f;
         return coord;
     }  
-	Vector3F dp = p - v[0];
+	Vector3F dp = p - v[1];
 	coord.x = dp.length() / D0;
 	coord.y = 1.f - coord.x;
 	
@@ -113,161 +113,126 @@ BarycentricCoordinate getBarycentricCoordinate4(const Vector3F & p, const Vector
     return coord;
 }
 
-Vector3F closestToOriginOnLine(const Vector3F & p0, const Vector3F & p1)
+void closestOnLine(const Vector3F * p, ClosestTestContext * io)
 {
-    const float d0 = p0.length();
-    if(d0 < TINY_VALUE) return p0;
+    Vector3F vr = io->referencePoint - p[0];
+    Vector3F v1 = p[1] - p[0];
+	const float dr = vr.length();
+	if(dr < TINY_VALUE) {
+        io->resultPoint = p[0];
+		if(io->needContributes) {
+			io->contributes.x = 1.f;
+			io->contributes.y = 0.f;
+			io->distance = 0.f;
+		}
+        return;
+    }
 	
-	const float d1 = p1.length();
-	if(d1 < TINY_VALUE) return p1;
+	const float d1 = v1.length();
+	vr.normalize();
+	v1.normalize();
+	float vrdv1 = vr.dot(v1) * dr;
+	if(vrdv1 < 0.f) vrdv1 = 0.f;
+	if(vrdv1 > d1) vrdv1 = d1;
 	
-	Vector3F r = p0;
-    Vector3F dir = p1 - p0;
-	float d = d0;
+	v1 = p[0] + v1 * vrdv1;
+	const float dc = v1.distanceTo(io->referencePoint);
 	
-	const float l01 = dir.length();
-    if(l01 < TINY_VALUE) return r;
+	if(dc > io->distance) return;
 	
-	if(d1 < d0) {
-		r = p1;
-		dir = p0 - p1;
-		d = d1;
+	io->hasResult = 1;
+	io->resultPoint = v1;
+	if(io->needContributes) {
+		io->contributes.x = v1.distanceTo(p[1]) / d1;
+		io->contributes.y = 1.f - io->contributes.x;
 	}
-    
-    if(dir.dot(r) > 0.f) return r;
-    
-    r /= d;
-    dir /= l01;
-    
-    const float factor = dir.dot(r);
-    
-    return r * d - dir * d * factor;
+	io->distance = dc;
 }
 
-char closestPointToOriginInsideTriangle(Vector3F & onplane, const Vector3F & p0, const Vector3F & p1, const Vector3F & p2)
+void closestPointToOriginInsideTriangle(const Vector3F * p, ClosestTestContext * io)
 {
-    Vector3F ab = p1 - p0;
-    Vector3F ac = p2 - p0;
+	io->hasResult = 0;
+    Vector3F ab = p[1] - p[0];
+    Vector3F ac = p[2] - p[0];
     Vector3F nor = ab.cross(ac);
     nor.normalize();
     
-    float t = p0.dot(nor);
-    onplane = nor * t;
+    float t = p[0].dot(nor);
+    Vector3F onplane = nor * t;
     
-    Vector3F e01 = p1 - p0;
-	Vector3F x0 = onplane - p0;
-	if(e01.cross(x0).dot(nor) < 0.f) return 0;
+    Vector3F e01 = p[1] - p[0];
+	Vector3F x0 = onplane - p[0];
+	if(e01.cross(x0).dot(nor) < 0.f) return;
 	
-	Vector3F e12 = p2 - p1;
-	Vector3F x1 = onplane - p1;
-	if(e12.cross(x1).dot(nor) < 0.f) return 0;
+	Vector3F e12 = p[2] - p[1];
+	Vector3F x1 = onplane - p[1];
+	if(e12.cross(x1).dot(nor) < 0.f) return;
 	
-	Vector3F e20 = p0 - p2;
-	Vector3F x2 = onplane - p2;
-	if(e20.cross(x2).dot(nor) < 0.f) return 0;
+	Vector3F e20 = p[0] - p[2];
+	Vector3F x2 = onplane - p[2];
+	if(e20.cross(x2).dot(nor) < 0.f) return;
 	
-	return 1;
+	const float dc = onplane.length();
+	if(dc > io->distance) return;
+	
+	io->hasResult = 1;
+	io->resultPoint = onplane + io->referencePoint;
+	if(io->needContributes)
+		io->contributes = getBarycentricCoordinate3(onplane, p);
+	io->distance = dc;
 }
 
-Vector3F closestToOriginOnTriangle(const Vector3F & a, const Vector3F & b, const Vector3F & c)
-{
-    // std::cout<<" closest on triangle "<<a.str()<<" "<<b.str()<<" "<<c.str()<<"\n";
-    Vector3F onplane;
-    if(closestPointToOriginInsideTriangle(onplane, a, b, c)) {
-        // std::cout<<" inside tri ";
-        return onplane;
-    }
-    
-    Vector3F online = closestToOriginOnLine(a, b);
-    float minDistance = online.length();
-    Vector3F l = closestToOriginOnLine(b, c);
-    float ll = l.length();
-    if(ll < minDistance) {
-        online = l;
-        minDistance = ll;
-    }
-    l = closestToOriginOnLine(c, a);
-    ll = l.length();
-    if(ll < minDistance) {
-        online = l;
-        minDistance = ll;
-    }
-    return online;
+void closestOnTriangle(const Vector3F * p, ClosestTestContext * io)
+{	
+	Vector3F pr[3];
+	pr[0] = p[0] - io->referencePoint;
+	pr[1] = p[1] - io->referencePoint;
+	pr[2] = p[2] - io->referencePoint;
+	
+    closestPointToOriginInsideTriangle(pr, io); 
+	if(io->hasResult) return;
+	
+	pr[0] = p[0];
+	pr[1] = p[1];
+	closestOnLine(pr, io);
+	
+	pr[0] = p[1];
+	pr[1] = p[2];
+	closestOnLine(pr, io);
+	
+	pr[0] = p[2];
+	pr[1] = p[0];
+	closestOnLine(pr, io);
+	
+	if(io->needContributes)
+		io->contributes = getBarycentricCoordinate3(io->resultPoint, p);
 }
 
-Vector3F closestToOriginOnTetrahedron(const Vector3F * p)
+void closestOnTetrahedron(const Vector3F * p, ClosestTestContext * io)
 {
-    Vector3F q = closestToOriginOnTriangle(p[0], p[1], p[2]);
-    float d = q.length();
-    float minD = d;
-    Vector3F r = q;
-    
-    q = closestToOriginOnTriangle(p[0], p[1], p[3]);
-    d = q.length();
-    if(d < minD) {
-        minD = d;
-        r = q;
-    }
-    
-    q = closestToOriginOnTriangle(p[0], p[2], p[3]);
-    d = q.length();
-    if(d < minD) {
-        minD = d;
-        r = q;
-    }
-    
-    q = closestToOriginOnTriangle(p[1], p[2], p[3]);
-    d = q.length();
-    if(d < minD) {
-        minD = d;
-        r = q;
-    }
-    
-    return r;
-}
-
-bool checkCoplanar(const Vector3F & a, const Vector3F & b, const Vector3F & c)
-{
-    Vector3F ab = b - a;
-   // std::cout<<"ab length "<<ab.length();
-    if(ab.length() < 0.00001f) {
-        std::cout<<" too close";
-        return 1;
-    }
-    
-    Vector3F bc = c - b;
-    // std::cout<<"cb length "<<bc.length();
-    if(bc.length() < 0.00001f) {
-        std::cout<<" too close";
-        return 1;
-    }
-    
-    ab.normalize();
-    bc.normalize();
-    
-    if(ab.dot(bc) > 0.999999f || ab.dot(bc) < -0.999999f) {
-        // std::cout<<" dot "<<ab.dot(bc)<<" is coplanar\n";
-        return 1;
-    }
-    
-    return 0;
-}
-
-int farthestP(const Vector3F * v, const Vector3F & p)
-{
-    int ind = 0;
-    Vector3F d = p - v[0];
-    float dist = d.length();
-    float minDist = dist;
-    for(int i = 1; i < 3; i++) {
-        d = p - v[i];
-        dist = d.length();
-        if(dist < minDist) {
-            minDist = dist;
-            ind = i;
-        }
-    }
-    return ind;
+	Vector3F pr[3];
+	// pr[0] = p[0];
+	// pr[1] = p[1];
+	// pr[2] = p[2];
+	closestOnTriangle(p, io);
+	
+	pr[0] = p[0];
+	pr[1] = p[1];
+	pr[2] = p[3];
+	closestOnTriangle(pr, io);
+	
+	pr[0] = p[0];
+	pr[1] = p[2];
+	pr[2] = p[3];
+	closestOnTriangle(pr, io);
+	
+	pr[0] = p[1];
+	pr[1] = p[2];
+	pr[2] = p[3];
+	closestOnTriangle(pr, io);
+	
+	if(io->needContributes)
+		io->contributes = getBarycentricCoordinate4(io->resultPoint, p);
 }
 
 void resetSimplex(Simplex & s)
@@ -341,47 +306,29 @@ char isOriginInsideSimplex(const Simplex & s)
     return pointInsideTetrahedronTest(Vector3F::Zero, s.p);
 }
 
-Vector3F closestToOriginOnLine(Simplex & s)
-{
-	Vector3F p = closestToOriginOnLine(s.p[0], s.p[1]);
-		
-	BarycentricCoordinate bar = getBarycentricCoordinate2(p, s.p);
-	// std::cout<<" line bar "<<bar.x<<" "<<bar.y<<"\n";
-    removeFromSimplex(s, bar);
-    return p;
-}
-
-Vector3F closestToOriginOnTriangle(Simplex & s)
-{
-	Vector3F p = closestToOriginOnTriangle(s.p[0], s.p[1], s.p[2]);
-		
-	BarycentricCoordinate bar = getBarycentricCoordinate3(p, s.p);
-	// std::cout<<" tri bar "<<bar.x<<" "<<bar.y<<" "<<bar.z<<"\n";
-    removeFromSimplex(s, bar);
-    return p;
-}
-
-Vector3F closestToOriginOnTetrahedron(Simplex & s)
-{
-    Vector3F p = closestToOriginOnTetrahedron(s.p);
-	
-	BarycentricCoordinate bar = getBarycentricCoordinate4(p, s.p);
-	// std::cout<<" tet bar "<<bar.x<<" "<<bar.y<<" "<<bar.z<<" "<<bar.w<<"\n";
-    removeFromSimplex(s, bar);
-    return p;
-}
-
 Vector3F closestToOriginWithinSimplex(Simplex & s)
 {
-    if(s.d < 2) {
+    if(s.d < 2)
         return s.p[0];
-    }
-    else if(s.d < 3) {
-        return closestToOriginOnLine(s);
-    }
-    else if(s.d < 4) {
-		return closestToOriginOnTriangle(s);
-    }
     
-    return closestToOriginOnTetrahedron(s);
+	ClosestTestContext result;
+	result.hasResult = 0;
+	result.distance = 1e9;
+	result.needContributes = 1;
+	result.referencePoint = Vector3F::Zero;
+	
+	if(s.d == 2)
+        closestOnLine(s.p, &result);
+    else if(s.d == 3)
+		closestOnTriangle(s.p, &result);
+	else
+		closestOnTetrahedron(s.p, &result);
+		
+	removeFromSimplex(s, result.contributes);
+    return result.resultPoint;
+}
+
+Vector3F supportMapping(const PointSet & A, const PointSet & B, const Vector3F & v)
+{
+	return (A.supportPoint(v) - B.supportPoint(v.reversed()));
 }

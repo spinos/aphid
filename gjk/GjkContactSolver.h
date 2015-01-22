@@ -15,13 +15,14 @@
 struct ContactResult {
 	Vector3F normal;
 	Vector3F point;
+	char contacted;
 };
 
 class GjkContactSolver {
 public:
 	GjkContactSolver();
 	
-	char pairContacted(const PointSet & A, const PointSet & B, ContactResult * result);
+	void distance(const PointSet & A, const PointSet & B, ContactResult * result);
 	
 	const Simplex W() const;
 private:

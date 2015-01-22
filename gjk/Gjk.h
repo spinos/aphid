@@ -9,6 +9,15 @@ struct BarycentricCoordinate {
     float x, y, z, w;
 };
 
+struct ClosestTestContext {
+	BarycentricCoordinate contributes;
+    Vector3F referencePoint;
+    Vector3F resultPoint;
+	float distance;
+	char needContributes;
+	char hasResult;
+};
+
 float determinantTetrahedron(Matrix44F & mat, const Vector3F & v1, const Vector3F & v2, const Vector3F & v3, const Vector3F & v4);
 
 BarycentricCoordinate getBarycentricCoordinate2(const Vector3F & p, const Vector3F * v);
@@ -42,22 +51,17 @@ struct Simplex {
     int d;
 };
 
-Vector3F closestToOriginOnLine(const Vector3F & p0, const Vector3F & p1);
-
-char closestPointToOriginInsideTriangle(Vector3F & onplane, const Vector3F & p0, const Vector3F & p1, const Vector3F & p2);
-
-Vector3F closestToOriginOnTriangle(const Vector3F & a, const Vector3F & b, const Vector3F & c);
-
-Vector3F closestToOriginOnTetrahedron(const Vector3F * p);
-Vector3F closestToOriginOnTetrahedron(Simplex & s);
+void closestOnLine(const Vector3F * p, ClosestTestContext * io);
+void closestOnTriangle(const Vector3F * p, ClosestTestContext * io);
+void closestPointToOriginInsideTriangle(const Vector3F * p, ClosestTestContext * io);
+void closestOnTetrahedron(const Vector3F * p, ClosestTestContext * io);
 
 void resetSimplex(Simplex & s);
 void addToSimplex(Simplex & s, const Vector3F & p);
 void removeFromSimplex(Simplex & s, BarycentricCoordinate coord);
 char isOriginInsideSimplex(const Simplex & s);
-Vector3F closestToOriginOnLine(Simplex & s);
-Vector3F closestToOriginOnTriangle(Simplex & s);
 Vector3F closestToOriginWithinSimplex(Simplex & s);
 char pointInsideTetrahedronTest(const Vector3F & p, const Vector3F * v);
+Vector3F supportMapping(const PointSet & A, const PointSet & B, const Vector3F & v);
 #endif        //  #ifndef GJK_H
 
