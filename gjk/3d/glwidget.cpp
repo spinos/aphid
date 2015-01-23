@@ -250,25 +250,32 @@ void GLWidget::testGjk()
 	Matrix44F mat;
     mat.rotateZ(m_alpha);
     mat.rotateX(m_alpha);
-    mat.translate(2.f, 2.f, 3.f);
+    mat.translate(12.f, 2.f, 3.f);
 	for(int i = 0; i < 3; i++)
 	    A.X[i] = mat.transform(pa[i]);
 	
 	mat.setIdentity();
 	mat.rotateZ(-m_alpha * .5f);
     mat.rotateY(-m_alpha);
-    mat.translate(2.f + 3.f * sin(m_alpha * 2.f), 2.f, 3.f + 1.f * cos(m_alpha * 2.f));
+    mat.translate(12.f + 3.f * sin(m_alpha * 2.f), 2.f, 3.f + 1.f * cos(m_alpha * 2.f));
 	for(int i = 0; i < 3; i++)
 	    B.X[i] = mat.transform(pb[i]);
 		
 	GjkContactSolver gjk;
-	ContactResult result;
+	ClosestTestContext result;
+	result.referencePoint.setZero();
+	result.needContributes = 1;
+	result.distance = 1e9;
+	result.hasResult = 0;
+	
+	resetSimplex(result.W);
+	
 	gjk.distance(A, B, &result);
 	
 	glBegin(GL_TRIANGLES);
 	
 	float grey = 0.f;
-	if(result.contacted) grey = .3f;
+	if(result.hasResult) grey = .3f;
     
     Vector3F q;
     
@@ -290,29 +297,145 @@ void GLWidget::testGjk()
     
     glEnd();
 	
-	if(result.contacted) drawSimplex(gjk.W());
+	if(result.hasResult) drawSimplex(result.W);
 	
 	glColor3f(1.f, 1.f, 1.f);
 	glBegin(GL_LINES);
 	q = Vector3F::Zero;
 	glVertex3f(q.x, q.y, q.z);
-	q -= result.normal;
+	q -= result.resultPoint;
 	glVertex3f(q.x, q.y, q.z);
 	glEnd();
+	
+}
 
+void GLWidget::testShapeCast()
+{
+	Vector3F pa[3]; 
+    pa[0].set(-1.5f, -3.f, 0.f);
+	pa[1].set(2.f, -2.5f, 0.1f);
+	pa[2].set(-2.f, 2.5f, 0.f);
+	
+	Vector3F pb[3];
+	pb[0].set(-2.f, 2.f, 0.f);
+	pb[1].set(2.f, 2.f, 0.f);
+	pb[2].set(2.f, -2.f, 0.f);
+	
+	Matrix44F mat;
+    mat.rotateZ(sin(m_alpha)* 3.f);
+	mat.rotateX(-m_alpha);
+    
+	mat.translate(1.f, 1.f, -1.f);
+	for(int i = 0; i < 3; i++)
+	    A.X[i] = mat.transform(pa[i]);
+		
+	mat.setIdentity();
+	mat.rotateZ(-m_alpha * 1.5f);
+	mat.rotateY(0.2 * sin(m_alpha));
+     
+    mat.translate(1.f, 1.f, 8.f);
+	for(int i = 0; i < 3; i++)
+	    B.X[i] = mat.transform(pb[i]);
+		
+	Vector3F rayDir(.99f * sin(m_alpha * 2.f), .2f * cos(m_alpha), -1.4f);
+	rayDir.normalize();
+	Vector3F rayBegin= B.X[0];
+	Vector3F rayEnd = rayBegin + rayDir * 16.f;
+	getDrawer()->arrow(rayBegin, rayEnd);
+	
+	rayBegin= B.X[1];
+	rayEnd = rayBegin + rayDir * 16.f;
+	getDrawer()->arrow(rayBegin, rayEnd);
+	
+	rayBegin= B.X[2];
+	rayEnd = rayBegin + rayDir * 16.f;
+	getDrawer()->arrow(rayBegin, rayEnd);
+		
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_TRIANGLES);
+	
+    Vector3F q;
+    
+    glColor3f(1.f, 0.f, 0.f);
+    q = A.X[0];
+    glVertex3f(q.x, q.y, q.z);
+    q = A.X[1];
+    glVertex3f(q.x, q.y, q.z);
+    q = A.X[2];
+    glVertex3f(q.x, q.y, q.z);
+    
+    glColor3f(0.f, 1.f, 0.f);
+    q = B.X[0];
+    glVertex3f(q.x, q.y, q.z);
+    q = B.X[1];
+    glVertex3f(q.x, q.y, q.z);
+    q = B.X[2];
+    glVertex3f(q.x, q.y, q.z);
+    
+    glEnd();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+	GjkContactSolver gjk;
+	
+	ClosestTestContext result;
+	result.rayDirection = rayDir;
+	result.referencePoint.setZero();
+	result.needContributes = 1;
+	result.distance = 1e9;
+	result.hasResult = 0;
+	
+	resetSimplex(result.W);
+	
+	gjk.rayCast(A, B, &result);
+	
+	if(!result.hasResult) return;
+	
+	glBegin(GL_TRIANGLES);
+    
+    glColor3f(1.f, 0.f, 0.f);
+    q = A.X[0];
+    glVertex3f(q.x, q.y, q.z);
+    q = A.X[1];
+    glVertex3f(q.x, q.y, q.z);
+    q = A.X[2];
+    glVertex3f(q.x, q.y, q.z);
+	
+	glColor3f(0.f, 1.f, 0.f);
+    q = B.X[0] + result.rayDirection * result.distance;
+    glVertex3f(q.x, q.y, q.z);
+    q = B.X[1] + result.rayDirection * result.distance;
+    glVertex3f(q.x, q.y, q.z);
+    q = B.X[2] + result.rayDirection * result.distance;
+    glVertex3f(q.x, q.y, q.z);
+    
+    glEnd();
+	
+	rayBegin= B.X[0];
+	rayEnd = rayBegin + rayDir * result.distance;
+	getDrawer()->arrow(rayBegin, rayEnd);
+	
+	rayBegin= B.X[1];
+	rayEnd = rayBegin + rayDir * result.distance;
+	getDrawer()->arrow(rayBegin, rayEnd);
+	
+	rayBegin= B.X[2];
+	rayEnd = rayBegin + rayDir * result.distance;
+	getDrawer()->arrow(rayBegin, rayEnd);
+	
+	getDrawer()->arrow(Vector3F::Zero, result.resultPoint);
+	
 }
 
 void GLWidget::clientDraw()
 {
+	testShapeCast();
 	testGjk();
     testLine();
 	testTriangle();
     testTetrahedron();
     m_alpha += 0.01f;
 }
-//! [7]
 
-//! [9]
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
 {
 }

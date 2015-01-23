@@ -17,9 +17,8 @@ public:
 	GjkContactSolver();
 	
 	void distance(const PointSet & A, const PointSet & B, ClosestTestContext * result);
+	void rayCast(const PointSet & A, const PointSet & B, ClosestTestContext * result);
 	
-	const Simplex W() const;
 private:
-	Simplex m_W;
 };
 #endif        //  #ifndef GJKCONTACTSOLVER_H

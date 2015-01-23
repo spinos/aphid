@@ -25,6 +25,7 @@ protected:
 private:
     void testTetrahedron();
     void testGjk();
+	void testShapeCast();
     void testLine();
 	void testTriangle();
 private:

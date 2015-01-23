@@ -29,7 +29,9 @@ char isTetrahedronDegenerate(const Vector3F * v)
 {
     Matrix44F mat;
     float D0 = determinantTetrahedron(mat, v[0], v[1], v[2], v[3]);
-    return (D0 == 0.f);
+	if(D0 < 0.f) D0 = -D0;
+	// std::cout<<" D0 "<<D0<<"\n";
+    return (D0 < 1e-5);
 }
 
 char isTriangleDegenerate(const Vector3F * v)
@@ -37,7 +39,8 @@ char isTriangleDegenerate(const Vector3F * v)
 	Vector3F n = Vector3F(v[1], v[0]).cross( Vector3F(v[2], v[0]) );
 	
     float D0 = n.length2();
-    return (D0 == 0.f);
+	// std::cout<<" D0 "<<D0<<"\n";
+    return (D0 < 1e-5);
 }
 
 BarycentricCoordinate getBarycentricCoordinate2(const Vector3F & p, const Vector3F * v)
@@ -46,7 +49,7 @@ BarycentricCoordinate getBarycentricCoordinate2(const Vector3F & p, const Vector
 	Vector3F dv = v[1] - v[0];
 	float D0 = dv.length();
 	if(D0 == 0.f) {
-        std::cout<<"line is degenerate\n";
+        std::cout<<" line is degenerate ("<<v[0].str()<<","<<v[1].str()<<")\n";
         coord.x = coord.y = coord.z = coord.w = -1.f;
         return coord;
     }  
@@ -67,7 +70,7 @@ BarycentricCoordinate getBarycentricCoordinate3(const Vector3F & p, const Vector
 	
     float D0 = n.length2();
     if(D0 == 0.f) {
-        std::cout<<"tiangle is degenerate\n";
+        std::cout<<" tiangle is degenerate ("<<v[0].str()<<","<<v[1].str()<<","<<v[2].str()<<")\n";
         coord.x = coord.y = coord.z = coord.w = -1.f;
         return coord;
     }  
@@ -95,7 +98,7 @@ BarycentricCoordinate getBarycentricCoordinate4(const Vector3F & p, const Vector
     
     float D0 = determinantTetrahedron(mat, v[0], v[1], v[2], v[3]);
     if(D0 == 0.f) {
-        std::cout<<"tetrahedron is degenerate\n";
+        std::cout<<" tetrahedron is degenerate ("<<v[0].str()<<","<<v[1].str()<<","<<v[2].str()<<","<<v[3].str()<<")\n";
         coord.x = coord.y = coord.z = coord.w = -1.f;
         return coord;
     }  
@@ -150,7 +153,7 @@ void closestOnLine(const Vector3F * p, ClosestTestContext * io)
 }
 
 void closestPointToOriginInsideTriangle(const Vector3F * p, ClosestTestContext * io)
-{
+{// std::cout<<" p in tri test ";
 	io->hasResult = 0;
     Vector3F ab = p[1] - p[0];
     Vector3F ac = p[2] - p[0];
@@ -182,8 +185,17 @@ void closestPointToOriginInsideTriangle(const Vector3F * p, ClosestTestContext *
 	io->distance = dc;
 }
 
+void printPoints(const Vector3F * p, int n)
+{
+	for(int i = 0; i < n; i++)
+		std::cout<<p[i].str();
+	std::cout<<"\n";
+}
+
 void closestOnTriangle(const Vector3F * p, ClosestTestContext * io)
 {	
+// std::cout<<" closest on tri test ";
+// printPoints(p, 3);
 	Vector3F pr[3];
 	pr[0] = p[0] - io->referencePoint;
 	pr[1] = p[1] - io->referencePoint;
@@ -191,7 +203,7 @@ void closestOnTriangle(const Vector3F * p, ClosestTestContext * io)
 	
     closestPointToOriginInsideTriangle(pr, io); 
 	if(io->hasResult) return;
-	
+// std::cout<<" p on tri edge test ";
 	pr[0] = p[0];
 	pr[1] = p[1];
 	closestOnLine(pr, io);
@@ -210,12 +222,11 @@ void closestOnTriangle(const Vector3F * p, ClosestTestContext * io)
 
 void closestOnTetrahedron(const Vector3F * p, ClosestTestContext * io)
 {
-	Vector3F pr[3];
-	// pr[0] = p[0];
-	// pr[1] = p[1];
-	// pr[2] = p[2];
+// std::cout<<" closest on tet test ";
+// printPoints(p, 4);
 	closestOnTriangle(p, io);
 	
+	Vector3F pr[3];
 	pr[0] = p[0];
 	pr[1] = p[1];
 	pr[2] = p[3];
@@ -241,12 +252,13 @@ void resetSimplex(Simplex & s)
 }
 
 void addToSimplex(Simplex & s, const Vector3F & p)
-{
+{// std::cout<<"\n add\n";
     if(s.d < 1) {
         s.p[0] = p;
         s.d = 1;
     }
     else if(s.d < 2) {
+		if(p.distanceTo(s.p[0]) < TINY_VALUE) return;
         s.p[1] = p;
         s.d = 2;
     }
@@ -254,26 +266,35 @@ void addToSimplex(Simplex & s, const Vector3F & p)
 		s.p[2] = p;
 		s.d = 3;
 		if(isTriangleDegenerate(s.p)) {
-			std::cout<<" triangle is degenerate";
-			std::cout<<" ("<<s.p[0].str()<<","<<s.p[1].str()<<","<<s.p[2].str()<<")\n";
+			// std::cout<<" degenerate triangle";
+			// printTri(s.p);
+			s.d--;
 		}
+		// else { std::cout<<" new tri ";
+		//	printTri(s.p);
+		//}
     }
     else {
         s.p[3] = p;
         s.d = 4;
 		if(isTetrahedronDegenerate(s.p)) {
-			std::cout<<" tetrahedron is degenerate";
-		    std::cout<<" ("<<s.p[0].str()<<","<<s.p[1].str()<<","<<s.p[2].str()<<","<<s.p[3].str()<<")\n";
+			// std::cout<<" degenerate tetrahedron";
+		    // printTet(s.p);
+		    s.d--;
 		}
+		// else  { std::cout<<" new tet ";
+			// printTet(s.p);
+		// }
     }
 }
 
 void removeFromSimplex(Simplex & s, BarycentricCoordinate coord)
 {
     if(s.d < 2) return;
+	// int od = s.d;
 	float * bar = &coord.x;
     for(int i = 0; i < s.d; i++) {
-		if(fabs(bar[i]) < TINY_VALUE) {
+		if(bar[i] < TINY_VALUE) {
 			// std::cout<<" zero "<<bar[i]<<" remove vertex "<<i<<"\n";
 			for(int j = i; j < s.d - 1; j++) {
 				s.p[j] = s.p[j+1];
@@ -283,13 +304,21 @@ void removeFromSimplex(Simplex & s, BarycentricCoordinate coord)
 			s.d--;
 		}
     }
-	// std::cout<<"s.d "<<s.d<<"\n";
+	// if(s.d < od) {
+	// 	std::cout<<"  reduce from "<<od<<" to "<<s.d<<"\n";
+	// 	for(int i = 0; i < s.d; i++) {
+	// 		std::cout<<s.p[i].str();
+	// 	}
+	// 	std::cout<<"\n";
+	// }
 }
 
 char pointInsideTetrahedronTest(const Vector3F & p, const Vector3F * v)
 {
-    if(isTetrahedronDegenerate(v)) 
-        return 1;
+    if(isTetrahedronDegenerate(v)) {
+		
+        return 0;
+	}
         
     BarycentricCoordinate coord = getBarycentricCoordinate4(p, v);
     // std::cout<<"sum "<<coord.x + coord.y + coord.z + coord.w<<"\n";

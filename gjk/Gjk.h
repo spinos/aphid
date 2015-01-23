@@ -9,15 +9,6 @@ struct BarycentricCoordinate {
     float x, y, z, w;
 };
 
-struct ClosestTestContext {
-	BarycentricCoordinate contributes;
-    Vector3F referencePoint;
-    Vector3F resultPoint;
-	float distance;
-	char needContributes;
-	char hasResult;
-};
-
 float determinantTetrahedron(Matrix44F & mat, const Vector3F & v1, const Vector3F & v2, const Vector3F & v3, const Vector3F & v4);
 
 BarycentricCoordinate getBarycentricCoordinate2(const Vector3F & p, const Vector3F * v);
@@ -49,6 +40,17 @@ public:
 struct Simplex {
     Vector3F p[4];
     int d;
+};
+
+struct ClosestTestContext {
+	Simplex W;
+	BarycentricCoordinate contributes;
+    Vector3F referencePoint;
+    Vector3F rayDirection;
+    Vector3F resultPoint;
+	float distance;
+	char needContributes;
+	char hasResult;
 };
 
 void closestOnLine(const Vector3F * p, ClosestTestContext * io);

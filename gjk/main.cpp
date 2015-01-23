@@ -69,7 +69,8 @@ void testRayCast()
 	result.referencePoint.setZero();
 	result.needContributes = 1;
 	result.distance = 1e9;
-	result.hasResult = 0;    
+	result.hasResult = 0;
+	resetSimplex(result.W);
 	
 	gjk.distance(A, B, &result);
 	
@@ -80,7 +81,7 @@ void testRayCast()
 	}
 	
 	// direction of relative velocity
-	Vector3F r(0.f, -.3f, -1.f); r.normalize();
+	Vector3F r(1.f, 0.f, -1.f); r.normalize();
 	std::cout<<" r "<<r.str()<<"\n";
 	// ray length
 	float lamda = 0.f;
@@ -90,6 +91,7 @@ void testRayCast()
 	Vector3F hitN; hitN.setZero();
 	Vector3F v = hitP - result.resultPoint;
 	Vector3F w, p;
+	resetSimplex(result.W);
 
 	float vdotw, vdotr;
 	int k = 0;
