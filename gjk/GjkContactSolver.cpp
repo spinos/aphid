@@ -21,7 +21,7 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
 	
 	for(int i=0; i < 99; i++) {
 	    // SA-B(-v)
-		w = supportMapping(A, B, v.reversed());
+		w = supportMapping(A, B, v.reversed()) + v.normal() * MARGIN_DISTANCE;
 	    
 		// terminate when v is close enough to v(A - B).
 	    // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
@@ -41,7 +41,7 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
 	    }
 	    
 	    closestOnSimplex(result->W, result);
-	    v = result->resultPoint - result->referencePoint;
+	    v = result->contactPoint - result->referencePoint;
 	    k++;
 	}
 }
@@ -59,16 +59,18 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 	const Vector3F startP = Vector3F::Zero;
 	Vector3F hitP = startP;
 	Vector3F hitN; hitN.setZero();
-	Vector3F v = hitP - result->resultPoint;
-	Vector3F w, p;
+	Vector3F v = hitP - result->contactPoint;
+	Vector3F w, p, pa, pb;
 	
 	float vdotw, vdotr;
 	int k = 0;
-	for(; k < 99; k++) {
+	for(; k < 39; k++) {
 	    vdotr = v.dot(r);
 	    
 	    // SA-B(v)
-	    p = supportMapping(A, B, v);
+		pa = A.supportPoint(v);
+		pb = B.supportPoint(v.reversed());
+	    p = pa - pb + v.normal() * MARGIN_DISTANCE;
 	    
 		w = hitP - p;
 	    vdotw = v.dot(w); 
@@ -85,7 +87,7 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 			hitN = v;
 		}
 		
-	    addToSimplex(result->W, p);
+	    addToSimplex(result->W, p, pb);
 	    
 	    result->hasResult = 0;
 	    result->distance = 1e9;
@@ -93,13 +95,14 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 	    
 	    closestOnSimplex(result->W, result);
 	    
-	    v = hitP - result->resultPoint;
+	    v = hitP - result->contactPoint;
 		if(v.length2() < TINY_VALUE) break; 
 	}
 	
-	if(k==99) std::cout<<"    max iterations reached!\n";
-	std::cout<<"||v|| "<<k<<" "<<v.length()<<"\n";
+	if(k==39) std::cout<<"    max iterations reached!\n";
+	std::cout<<" k"<<k<<" ||v|| "<<v.length()<<"\n";
 	result->hasResult = 1;
-	result->resultPoint = hitN;
+	result->contactPoint = result->contactNormal;
+	result->contactNormal = hitN.normal();
 	result->distance = lamda;
 }

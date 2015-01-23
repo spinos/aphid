@@ -55,7 +55,7 @@ void GLWidget::testLine()
 
 	glColor3f(0.f, 1.f, 1.f);
     glVertex3f(result.referencePoint.x, result.referencePoint.y, result.referencePoint.z);
-    Vector3F q = result.resultPoint;
+    Vector3F q = result.contactPoint;
     glVertex3f(q.x, q.y, q.z);
     glEnd();
 }
@@ -83,7 +83,7 @@ void GLWidget::testTriangle()
 	glBegin(GL_LINES);
 	glColor3f(0.f, 1.f, 1.f);
 	glVertex3f(result.referencePoint.x, result.referencePoint.y, result.referencePoint.z);
-    glVertex3f(result.resultPoint.x, result.resultPoint.y, result.resultPoint.z);
+    glVertex3f(result.contactPoint.x, result.contactPoint.y, result.contactPoint.z);
 	glEnd();
 	
 	glBegin(GL_LINE_LOOP);
@@ -120,7 +120,7 @@ void GLWidget::testTetrahedron()
 
     glColor3f(0.f, 1.f, 1.f);
 	glVertex3f(result.referencePoint.x, result.referencePoint.y, result.referencePoint.z);
-    glVertex3f(result.resultPoint.x, result.resultPoint.y, result.resultPoint.z);
+    glVertex3f(result.contactPoint.x, result.contactPoint.y, result.contactPoint.z);
 	
     //glVertex3f(0.f ,0.f, 0.f);
     //p = closestToOriginOnTetrahedron(q);
@@ -303,7 +303,7 @@ void GLWidget::testGjk()
 	glBegin(GL_LINES);
 	q = Vector3F::Zero;
 	glVertex3f(q.x, q.y, q.z);
-	q -= result.resultPoint;
+	q -= result.contactPoint;
 	glVertex3f(q.x, q.y, q.z);
 	glEnd();
 	
@@ -312,9 +312,9 @@ void GLWidget::testGjk()
 void GLWidget::testShapeCast()
 {
 	Vector3F pa[3]; 
-    pa[0].set(-1.5f, -3.f, 0.f);
-	pa[1].set(2.f, -2.5f, 0.1f);
-	pa[2].set(-2.f, 2.5f, 0.f);
+    pa[0].set(-1.5f, -3.5f, 0.f);
+	pa[1].set(2.f, -3.5f, 0.1f);
+	pa[2].set(-2.f, 3.5f, 0.f);
 	
 	Vector3F pb[3];
 	pb[0].set(-2.f, 2.f, 0.f);
@@ -322,7 +322,7 @@ void GLWidget::testShapeCast()
 	pb[2].set(2.f, -2.f, 0.f);
 	
 	Matrix44F mat;
-    mat.rotateZ(sin(m_alpha)* 3.f);
+    mat.rotateZ(sin(m_alpha)* 1.2f);
 	mat.rotateX(-m_alpha);
     
 	mat.translate(1.f, 1.f, -1.f);
@@ -422,7 +422,10 @@ void GLWidget::testShapeCast()
 	rayEnd = rayBegin + rayDir * result.distance;
 	getDrawer()->arrow(rayBegin, rayEnd);
 	
-	getDrawer()->arrow(Vector3F::Zero, result.resultPoint);
+	glColor3f(1.f, 1.f, 1.f);
+	rayBegin = result.contactPoint + rayDir * result.distance;
+	rayEnd = rayBegin + result.contactNormal * 4.f;
+	getDrawer()->arrow(rayBegin, rayEnd);
 	
 }
 
