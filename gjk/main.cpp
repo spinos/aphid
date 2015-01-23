@@ -56,22 +56,84 @@ void testRayCast()
 {
     std::cout<<"\n test CSO ray cast\n";
     PointSet A, B;
-    A.X[0].set(-3.f, -2.f, 0.f);
-	A.X[1].set(3.f, -2.f, 0.f);
-	A.X[2].set(0.f, 2.f, 0.f);
+    A.X[0].set(-2.f, -2.f, 0.1f);
+	A.X[1].set(2.f, -2.f, 0.1f);
+	A.X[2].set(-2.f, 2.f, 0.1f);
 	
-	B.X[0].set(-2.f, -2.f, 10.12f);
-	B.X[1].set(2.f, -2.f, 10.11f);
-	B.X[2].set(3.f, 2.f, 10.f);
+	B.X[0].set(-1.9f, 2.1f, 4.01f);
+	B.X[1].set(2.1f, 2.2f, 4.01f);
+	B.X[2].set(2.1f, -2.3f, 4.01f);
 	
 	GjkContactSolver gjk;
-	ContactResult result;
+	ClosestTestContext result;
+	result.referencePoint.setZero();
+	result.needContributes = 1;
+	result.distance = 1e9;
+	result.hasResult = 0;    
+	
 	gjk.distance(A, B, &result);
 	
-	if(result.contacted) std::cout<<" contacted \n";
+	if(result.hasResult) std::cout<<" contacted \n";
 	else {
 	    std::cout<<" not contacted \n";
-	    std::cout<<" separating axis "<<result.normal.str()<<"\n";
+	    std::cout<<" separating axis from B to A "<<result.resultPoint.str()<<"\n";
+	}
+	
+	// direction of relative velocity
+	Vector3F r(0.f, -.3f, -1.f); r.normalize();
+	std::cout<<" r "<<r.str()<<"\n";
+	// ray length
+	float lamda = 0.f;
+	// ray started at origin
+	const Vector3F startP = Vector3F::Zero;
+	Vector3F hitP = startP;
+	Vector3F hitN; hitN.setZero();
+	Vector3F v = hitP - result.resultPoint;
+	Vector3F w, p;
+
+	float vdotw, vdotr;
+	int k = 0;
+	while(v.length2() > TINY_VALUE) {
+	    std::cout<<" v"<<k<<" "<<v.str()<<" len "<<v.length()<<"\n";
+	    vdotr = v.dot(r);
+	    
+	    // SA-B(v)
+	    p = supportMapping(A, B, v);
+	    std::cout<<" p "<<p.str()<<"\n";
+	    w = hitP - p;
+	    vdotw = v.dot(w); 
+	    
+	    std::cout<<" w"<<k<<" "<<w.str()<<" len "<<w.length()<<"\n";
+	    std::cout<<" v.w "<<vdotw<<" v.r "<<vdotr<<"\n";
+	    std::cout<<" v.w / w.r "<<vdotw / vdotr<<"\n";
+	    
+	    if(vdotr > 0.f) {
+	        std::cout<<" v.r > 0 missed\n";
+	        break;
+	    }
+	    
+	    if(vdotw < TINY_VALUE) {
+	        std::cout<<" v.w < 0 missed\n";
+	        break;
+	    }
+	    
+	    lamda -= vdotw / vdotr;
+	    std::cout<<" lamda "<<lamda<<"\n";
+	    hitP = startP + r * lamda;
+	    std::cout<<" hit p "<<hitP.str()<<"\n";
+	    hitN = v;
+	    
+	    result.hasResult = 0;
+	    result.distance = 1e9;
+	    result.referencePoint = hitP;
+	
+	    // update normal
+	    gjk.distance(A, B, &result);
+	    
+	    std::cout<<"closest p "<<result.resultPoint.str()<<"\n";
+	    v = hitP - result.resultPoint;
+	    std::cout<<"||v|| "<<v.length()<<"\n";
+	    k++;
 	}
 }
 

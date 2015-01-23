@@ -55,11 +55,13 @@ void closestOnLine(const Vector3F * p, ClosestTestContext * io);
 void closestOnTriangle(const Vector3F * p, ClosestTestContext * io);
 void closestPointToOriginInsideTriangle(const Vector3F * p, ClosestTestContext * io);
 void closestOnTetrahedron(const Vector3F * p, ClosestTestContext * io);
+void closestOnSimplex(Simplex & s, ClosestTestContext * io);
 
 void resetSimplex(Simplex & s);
 void addToSimplex(Simplex & s, const Vector3F & p);
 void removeFromSimplex(Simplex & s, BarycentricCoordinate coord);
 char isOriginInsideSimplex(const Simplex & s);
+char isPointInsideSimplex(const Simplex & s, const Vector3F & p);
 Vector3F closestToOriginWithinSimplex(Simplex & s);
 char pointInsideTetrahedronTest(const Vector3F & p, const Vector3F * v);
 Vector3F supportMapping(const PointSet & A, const PointSet & B, const Vector3F & v);

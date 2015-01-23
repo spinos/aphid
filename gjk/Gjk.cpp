@@ -270,6 +270,7 @@ void addToSimplex(Simplex & s, const Vector3F & p)
 
 void removeFromSimplex(Simplex & s, BarycentricCoordinate coord)
 {
+    if(s.d < 2) return;
 	float * bar = &coord.x;
     for(int i = 0; i < s.d; i++) {
 		if(fabs(bar[i]) < TINY_VALUE) {
@@ -311,6 +312,12 @@ char isOriginInsideSimplex(const Simplex & s)
     return pointInsideTetrahedronTest(Vector3F::Zero, s.p);
 }
 
+char isPointInsideSimplex(const Simplex & s, const Vector3F & p)
+{
+    if(s.d < 4) return 0;
+    return pointInsideTetrahedronTest(p, s.p);
+}
+
 Vector3F closestToOriginWithinSimplex(Simplex & s)
 {
     if(s.d < 2)
@@ -331,6 +338,21 @@ Vector3F closestToOriginWithinSimplex(Simplex & s)
 		
 	removeFromSimplex(s, result.contributes);
     return result.resultPoint;
+}
+
+void closestOnSimplex(Simplex & s, ClosestTestContext * io)
+{
+    if(s.d == 1) {
+        io->resultPoint = s.p[0];
+        io->distance = io->resultPoint.distanceTo(io->referencePoint);
+    }
+    else if(s.d == 2)
+        closestOnLine(s.p, io);
+    else if(s.d == 3)
+		closestOnTriangle(s.p, io);
+	else
+		closestOnTetrahedron(s.p, io);
+	removeFromSimplex(s, io->contributes);
 }
 
 Vector3F supportMapping(const PointSet & A, const PointSet & B, const Vector3F & v)

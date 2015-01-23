@@ -11,7 +11,7 @@
 
 GjkContactSolver::GjkContactSolver() {}
 
-void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ContactResult * result)
+void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestTestContext * result)
 {
     int k = 0;
 	float v2;
@@ -24,27 +24,27 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ContactR
 	    // SA-B(-v)
 		w = supportMapping(A, B, v.reversed());
 	    
-		// terminate when v is close enough to v(A − B).
+		// terminate when v is close enough to v(A - B).
 	    // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
 		v2 = v.length2();
 	    if(v2 - w.dot(v) < 0.01f * v2) {
-			result->contacted = 0;
+	        std::cout<<" v is close to w "<<v2 - w.dot(v)<<"\n";
+			result->hasResult = 0;
 			break;
 	    }
 	    
 	    addToSimplex(m_W, w);
  
-	    if(isOriginInsideSimplex(m_W)) {
-	        result->contacted = 1;
+	    if(isPointInsideSimplex(m_W, result->referencePoint)) {
+	        std::cout<<" Minkowski difference contains the reference point\n";
+			result->hasResult = 1;
 			break;
 	    }
 	    
-	    v = closestToOriginWithinSimplex(m_W);
-
+	    closestOnSimplex(m_W, result);
+	    v = result->resultPoint - result->referencePoint;
 	    k++;
 	}
-	result->normal = v;
-	result->point = w;
 }
 
 const Simplex GjkContactSolver::W() const
