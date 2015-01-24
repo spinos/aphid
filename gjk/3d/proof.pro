@@ -18,6 +18,7 @@ win32 {
 
 HEADERS       = glwidget.h \
                 window.h \
+		SimpleSystem.h \
                 ../../shared/Base3DView.h \
                 ../Gjk.h \
 				../GjkContactSolver.h
@@ -25,6 +26,7 @@ SOURCES       = ../../shared/Base3DView.cpp \
 				glwidget.cpp \
                 main.cpp \
                 window.cpp \
+		SimpleSystem.cpp \
                 ../Gjk.cpp \
 				../GjkContactSolver.cpp 
 QT           += opengl

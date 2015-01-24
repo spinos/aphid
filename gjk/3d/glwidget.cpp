@@ -4,6 +4,7 @@
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
 #include <GjkContactSolver.h>
+#include "SimpleSystem.h"
 	
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -17,6 +18,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_tetrahedron[1].set(-2.5f, -2.5f, 2.5f);
     m_tetrahedron[2].set(2.f, -2.5f, -2.5f);
     m_tetrahedron[3].set(0.f, 2.5f, 0.f);
+	
+	m_system = new SimpleSystem;
 
     m_alpha = 0.f;
     m_drawLevel = 1;
@@ -440,6 +443,38 @@ void GLWidget::testShapeCast()
 	getDrawer()->arrow(rayBegin, rayEnd);
 }
 
+void GLWidget::testCollision()
+{
+	glColor3f(0.f, 0.f, 0.5f);
+	
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_system->Vline());
+	glDrawElements(GL_LINES, m_system->numVlineVertices(), GL_UNSIGNED_INT, m_system->vlineIndices());
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	glColor3f(0.f, 0.5f, 0.f);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_system->X());
+	glDrawElements(GL_TRIANGLES, m_system->numFaceVertices(), GL_UNSIGNED_INT, m_system->indices());
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	glColor3f(0.5f, 0.f, 0.f);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_system->groundX());
+	glDrawElements(GL_TRIANGLES, m_system->numGroundFaceVertices(), GL_UNSIGNED_INT, m_system->groundIndices());
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void GLWidget::clientDraw()
 {
 	testShapeCast();
@@ -447,6 +482,8 @@ void GLWidget::clientDraw()
     testLine();
 	testTriangle();
     testTetrahedron();
+	testCollision();
+	m_system->progress();
     m_alpha += 0.01f;
 }
 

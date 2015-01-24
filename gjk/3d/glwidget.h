@@ -4,7 +4,7 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 #include <Gjk.h>
-
+class SimpleSystem;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -28,9 +28,11 @@ private:
 	void testShapeCast();
     void testLine();
 	void testTriangle();
+	void testCollision();
 private:
     PointSet A, B;
     Vector3F m_tetrahedron[4];
+	SimpleSystem * m_system;
     float m_alpha;
     int m_drawLevel;
 private slots:
