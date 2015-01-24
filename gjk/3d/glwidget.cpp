@@ -45,7 +45,11 @@ void GLWidget::testLine()
 	result.needContributes = 1;
 	result.referencePoint = Vector3F(8.f, 8.f * sin(m_alpha) + 2.f, 4.f * cos(m_alpha) + 4.f);
 	
-    closestOnLine(line, &result);
+	Simplex & s = result.W;
+	s.d = 2;
+	s.p[0] = line[0];
+	s.p[1] = line[1];
+    closestOnSimplex(&result);
     
 	glBegin(GL_LINES);
     glColor3f(result.contributes.x, 1.f - result.contributes.x, 0.f);
@@ -77,8 +81,12 @@ void GLWidget::testTriangle()
 	result.distance = 1e9;
 	result.needContributes = 1;
 	result.referencePoint = Vector3F(20.f + 5.f * sin(-m_alpha), 4.f * cos(m_alpha) + 1.f, 0.f);
-	
-	closestOnTriangle(tri, &result);
+	Simplex & s = result.W;
+	s.d = 3;
+	s.p[0] = tri[0];
+	s.p[1] = tri[1];
+	s.p[2] = tri[2];
+    closestOnSimplex(&result);
 	
 	glBegin(GL_LINES);
 	glColor3f(0.f, 1.f, 1.f);
@@ -107,19 +115,25 @@ void GLWidget::testTetrahedron()
     for(int i = 0; i < 4; i++)
         q[i] = mat.transform(m_tetrahedron[i]);
 		
-	q[0].set(2.05031,0.705789,-6.46018);
-	q[1].set(-5.69273,2.36286,-9.89069);
-	q[2].set(-2.90515,-2.54066,-10.3207);
-	q[3].set(-0.737269,5.6093,-6.03012);
+	// q[0].set(2.05031,0.705789,-6.46018);
+	// q[1].set(-5.69273,2.36286,-9.89069);
+	// q[2].set(-2.90515,-2.54066,-10.3207);
+	// q[3].set(-0.737269,5.6093,-6.03012);
 			
 	ClosestTestContext result;
 	result.hasResult = 0;
 	result.distance = 1e9;
 	result.needContributes = 1;
-	// result.referencePoint = Vector3F(28.f + 1.f * sin(-m_alpha), 1.f * cos(-m_alpha) + 1.f, 1.f);
-	result.referencePoint = Vector3F(-5.69624,-0.751777,-11.0967);
+	result.referencePoint = Vector3F(28.f + 1.f * sin(-m_alpha), 1.f * cos(-m_alpha) + 1.f, 1.f);
+	// result.referencePoint = Vector3F(-5.69624,-0.751777,-11.0967);
 	
-	closestOnTetrahedron(q, &result);
+	Simplex & s = result.W;
+	s.d = 4;
+	s.p[0] = q[0];
+	s.p[1] = q[1];
+	s.p[2] = q[2];
+	s.p[3] = q[3];
+    closestOnSimplex(&result);
 	
     glBegin(GL_LINES);
     Vector3F p;
