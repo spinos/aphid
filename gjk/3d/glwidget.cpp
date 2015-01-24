@@ -55,7 +55,7 @@ void GLWidget::testLine()
 
 	glColor3f(0.f, 1.f, 1.f);
     glVertex3f(result.referencePoint.x, result.referencePoint.y, result.referencePoint.z);
-    Vector3F q = result.contactPoint;
+    Vector3F q = result.closestPoint;
     glVertex3f(q.x, q.y, q.z);
     glEnd();
 }
@@ -83,7 +83,7 @@ void GLWidget::testTriangle()
 	glBegin(GL_LINES);
 	glColor3f(0.f, 1.f, 1.f);
 	glVertex3f(result.referencePoint.x, result.referencePoint.y, result.referencePoint.z);
-    glVertex3f(result.contactPoint.x, result.contactPoint.y, result.contactPoint.z);
+    glVertex3f(result.closestPoint.x, result.closestPoint.y, result.closestPoint.z);
 	glEnd();
 	
 	glBegin(GL_LINE_LOOP);
@@ -107,20 +107,27 @@ void GLWidget::testTetrahedron()
     for(int i = 0; i < 4; i++)
         q[i] = mat.transform(m_tetrahedron[i]);
 		
+	q[0].set(2.05031,0.705789,-6.46018);
+	q[1].set(-5.69273,2.36286,-9.89069);
+	q[2].set(-2.90515,-2.54066,-10.3207);
+	q[3].set(-0.737269,5.6093,-6.03012);
+			
 	ClosestTestContext result;
 	result.hasResult = 0;
 	result.distance = 1e9;
 	result.needContributes = 1;
-	result.referencePoint = Vector3F(28.f + 1.f * sin(-m_alpha), 1.f * cos(-m_alpha) + 1.f, 1.f);
+	// result.referencePoint = Vector3F(28.f + 1.f * sin(-m_alpha), 1.f * cos(-m_alpha) + 1.f, 1.f);
+	result.referencePoint = Vector3F(-5.69624,-0.751777,-11.0967);
 	
 	closestOnTetrahedron(q, &result);
-
+	
     glBegin(GL_LINES);
     Vector3F p;
 
     glColor3f(0.f, 1.f, 1.f);
 	glVertex3f(result.referencePoint.x, result.referencePoint.y, result.referencePoint.z);
-    glVertex3f(result.contactPoint.x, result.contactPoint.y, result.contactPoint.z);
+    glColor3f(1.f, 1.f, 1.f);
+	glVertex3f(result.closestPoint.x, result.closestPoint.y, result.closestPoint.z);
 	
     //glVertex3f(0.f ,0.f, 0.f);
     //p = closestToOriginOnTetrahedron(q);
@@ -298,23 +305,14 @@ void GLWidget::testGjk()
     glEnd();
 	
 	if(result.hasResult) drawSimplex(result.W);
-	
-	glColor3f(1.f, 1.f, 1.f);
-	glBegin(GL_LINES);
-	q = Vector3F::Zero;
-	glVertex3f(q.x, q.y, q.z);
-	q -= result.contactPoint;
-	glVertex3f(q.x, q.y, q.z);
-	glEnd();
-	
 }
 
 void GLWidget::testShapeCast()
 {
 	Vector3F pa[3]; 
-    pa[0].set(-1.5f, -3.5f, 0.f);
-	pa[1].set(2.f, -3.5f, 0.1f);
-	pa[2].set(-2.f, 3.5f, 0.f);
+    pa[0].set(-3.5f, -3.5f, 0.f);
+	pa[1].set(3.5f, -3.5f, 0.f);
+	pa[2].set(-2.5f, 3.5f, 0.f);
 	
 	Vector3F pb[3];
 	pb[0].set(-2.f, 2.f, 0.f);
@@ -325,7 +323,7 @@ void GLWidget::testShapeCast()
     mat.rotateZ(sin(m_alpha)* 1.2f);
 	mat.rotateX(-m_alpha);
     
-	mat.translate(1.f, 1.f, -1.f);
+	mat.translate(1.f, 1.f, -2.f);
 	for(int i = 0; i < 3; i++)
 	    A.X[i] = mat.transform(pa[i]);
 		
@@ -337,7 +335,7 @@ void GLWidget::testShapeCast()
 	for(int i = 0; i < 3; i++)
 	    B.X[i] = mat.transform(pb[i]);
 		
-	Vector3F rayDir(.99f * sin(m_alpha * 2.f), .2f * cos(m_alpha), -1.4f);
+	Vector3F rayDir(.99f * sin(m_alpha * 2.f), .2f * cos(m_alpha), -1.9f);
 	rayDir.normalize();
 	Vector3F rayBegin= B.X[0];
 	Vector3F rayEnd = rayBegin + rayDir * 16.f;
@@ -423,10 +421,9 @@ void GLWidget::testShapeCast()
 	getDrawer()->arrow(rayBegin, rayEnd);
 	
 	glColor3f(1.f, 1.f, 1.f);
-	rayBegin = result.contactPoint + rayDir * result.distance;
+	rayBegin = result.contactPointB + rayDir * result.distance;
 	rayEnd = rayBegin + result.contactNormal * 4.f;
 	getDrawer()->arrow(rayBegin, rayEnd);
-	
 }
 
 void GLWidget::clientDraw()

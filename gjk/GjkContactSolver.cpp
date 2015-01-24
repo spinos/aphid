@@ -40,8 +40,9 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
 			break;
 	    }
 	    
-	    closestOnSimplex(result->W, result);
-	    v = result->contactPoint - result->referencePoint;
+	    closestOnSimplex(result);
+	    v = result->closestPoint - result->referencePoint;
+		smallestSimplex(result);
 	    k++;
 	}
 }
@@ -59,7 +60,7 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 	const Vector3F startP = Vector3F::Zero;
 	Vector3F hitP = startP;
 	Vector3F hitN; hitN.setZero();
-	Vector3F v = hitP - result->contactPoint;
+	Vector3F v = hitP - result->closestPoint;
 	Vector3F w, p, pa, pb;
 	
 	float vdotw, vdotr;
@@ -93,16 +94,20 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 	    result->distance = 1e9;
 	    result->referencePoint = hitP;
 	    
-	    closestOnSimplex(result->W, result);
+	    closestOnSimplex(result);
 	    
-	    v = hitP - result->contactPoint;
-		if(v.length2() < TINY_VALUE) break; 
+	    v = hitP - result->closestPoint;
+		
+		interpolatePointB(result);
+		
+		if(v.length2() < TINY_VALUE) break;
+		
+		smallestSimplex(result);
 	}
 	
 	if(k==39) std::cout<<"    max iterations reached!\n";
-	std::cout<<" k"<<k<<" ||v|| "<<v.length()<<"\n";
+	// std::cout<<" k"<<k<<" ||v|| "<<v.length()<<"\n";
 	result->hasResult = 1;
-	result->contactPoint = result->contactNormal;
 	result->contactNormal = hitN.normal();
 	result->distance = lamda;
 }

@@ -31,7 +31,7 @@ char isTetrahedronDegenerate(const Vector3F * v)
     float D0 = determinantTetrahedron(mat, v[0], v[1], v[2], v[3]);
 	if(D0 < 0.f) D0 = -D0;
 	// std::cout<<" D0 "<<D0<<"\n";
-    return (D0 < 1e-5);
+    return (D0 < 1e-2);
 }
 
 char isTriangleDegenerate(const Vector3F * v)
@@ -40,7 +40,7 @@ char isTriangleDegenerate(const Vector3F * v)
 	
     float D0 = n.length2();
 	// std::cout<<" D0 "<<D0<<"\n";
-    return (D0 < 1e-5);
+    return (D0 < 1e-6);
 }
 
 BarycentricCoordinate getBarycentricCoordinate2(const Vector3F & p, const Vector3F * v)
@@ -122,7 +122,7 @@ void closestOnLine(const Vector3F * p, ClosestTestContext * io)
     Vector3F v1 = p[1] - p[0];
 	const float dr = vr.length();
 	if(dr < TINY_VALUE) {
-        io->contactPoint = p[0];
+        io->closestPoint = p[0];
 		if(io->needContributes) {
 			io->contributes.x = 1.f;
 			io->contributes.y = 0.f;
@@ -145,7 +145,7 @@ void closestOnLine(const Vector3F * p, ClosestTestContext * io)
 	if(dc > io->distance) return;
 	
 	io->hasResult = 1;
-	io->contactPoint = v1;
+	io->closestPoint = v1;
 	if(io->needContributes) {
 		io->contributes.x = v1.distanceTo(p[1]) / d1;
 		io->contributes.y = 1.f - io->contributes.x;
@@ -181,9 +181,7 @@ void closestPointToOriginInsideTriangle(const Vector3F * p, ClosestTestContext *
 	if(dc > io->distance) return;
 	
 	io->hasResult = 1;
-	io->contactPoint = onplane + io->referencePoint;
-	if(io->needContributes)
-		io->contributes = getBarycentricCoordinate3(onplane, p);
+	io->closestPoint = onplane + io->referencePoint;
 	io->distance = dc;
 }
 
@@ -203,8 +201,10 @@ void closestOnTriangle(const Vector3F * p, ClosestTestContext * io)
 	pr[1] = p[1] - io->referencePoint;
 	pr[2] = p[2] - io->referencePoint;
 	
-    closestPointToOriginInsideTriangle(pr, io); 
-	if(io->hasResult) return;
+    closestPointToOriginInsideTriangle(pr, io);
+	
+	if(!io->hasResult) {
+		
 // std::cout<<" p on tri edge test ";
 	pr[0] = p[0];
 	pr[1] = p[1];
@@ -217,9 +217,25 @@ void closestOnTriangle(const Vector3F * p, ClosestTestContext * io)
 	pr[0] = p[2];
 	pr[1] = p[0];
 	closestOnLine(pr, io);
-	
+	}
 	if(io->needContributes)
-		io->contributes = getBarycentricCoordinate3(io->contactPoint, p);
+		io->contributes = getBarycentricCoordinate3(io->closestPoint, p);
+}
+
+void checkTet(const Vector3F * p, ClosestTestContext * io)
+{
+	float sum = io->contributes.x + io->contributes.y + io->contributes.z + io->contributes.w;
+	if(sum > 1.01f) {
+		std::cout<<" tet contrib "<<io->contributes.x<<" "<<io->contributes.y<<" "<<io->contributes.z<<" "<<io->contributes.w;
+		std::cout<<" "<<sum<<"\n";
+		std::cout<<" ref point "<<io->referencePoint.str()<<"\n";
+		std::cout<<" closet point "<<io->closestPoint.str()<<"\n";
+		std::cout<<" tex point "<<p[0].str()<<" "<<p[1].str()<<" "<<p[2].str()<<" "<<p[3].str()<<"\n";
+		
+		Matrix44F mat;
+		float D0 = determinantTetrahedron(mat, p[0], p[1], p[2], p[3]);
+		std::cout<<" det "<<D0<<"\n";
+	}
 }
 
 void closestOnTetrahedron(const Vector3F * p, ClosestTestContext * io)
@@ -245,7 +261,7 @@ void closestOnTetrahedron(const Vector3F * p, ClosestTestContext * io)
 	closestOnTriangle(pr, io);
 	
 	if(io->needContributes)
-		io->contributes = getBarycentricCoordinate4(io->contactPoint, p);
+		io->contributes = getBarycentricCoordinate4(io->closestPoint, p);
 }
 
 void resetSimplex(Simplex & s)
@@ -325,16 +341,18 @@ void addToSimplex(Simplex & s, const Vector3F & p, const Vector3F & pb)
     }
 }
 
-void removeFromSimplex(Simplex & s, BarycentricCoordinate coord)
+void smallestSimplex(ClosestTestContext * io)
 {
+	Simplex & s = io->W;
     if(s.d < 2) return;
 	// int od = s.d;
-	float * bar = &coord.x;
-    for(int i = 0; i < s.d; i++) {
+	float * bar = &io->contributes.x;
+	for(int i = 0; i < s.d; i++) {
 		if(bar[i] < TINY_VALUE) {
 			// std::cout<<" zero "<<bar[i]<<" remove vertex "<<i<<"\n";
 			for(int j = i; j < s.d - 1; j++) {
 				s.p[j] = s.p[j+1];
+				s.pB[j] = s.pB[j+1];
 				bar[j] = bar[j+1];
 			}
 			i--;
@@ -401,16 +419,17 @@ Vector3F closestToOriginWithinSimplex(Simplex & s)
 		closestOnTriangle(s.p, &result);
 	else
 		closestOnTetrahedron(s.p, &result);
-		
-	removeFromSimplex(s, result.contributes);
-    return result.contactPoint;
+	
+    return result.closestPoint;
 }
 
-void closestOnSimplex(Simplex & s, ClosestTestContext * io)
+void closestOnSimplex(ClosestTestContext * io)
 {
+	Simplex & s = io->W;
     if(s.d == 1) {
-        io->contactPoint = s.p[0];
-        io->distance = io->contactPoint.distanceTo(io->referencePoint);
+        io->closestPoint = s.p[0];
+        io->distance = io->closestPoint.distanceTo(io->referencePoint);
+		io->contributes.x = 1.f;
     }
     else if(s.d == 2)
         closestOnLine(s.p, io);
@@ -418,10 +437,6 @@ void closestOnSimplex(Simplex & s, ClosestTestContext * io)
 		closestOnTriangle(s.p, io);
 	else
 		closestOnTetrahedron(s.p, io);
-		
-	io->contactNormal = interpolatePointB(s, io->contributes);
-	
-	removeFromSimplex(s, io->contributes);
 }
 
 Vector3F supportMapping(const PointSet & A, const PointSet & B, const Vector3F & v)
@@ -429,12 +444,20 @@ Vector3F supportMapping(const PointSet & A, const PointSet & B, const Vector3F &
 	return (A.supportPoint(v) - B.supportPoint(v.reversed()));
 }
 
-Vector3F interpolatePointB(const Simplex & s, const BarycentricCoordinate & coord)
+void interpolatePointB(ClosestTestContext * io)
 {
+	Simplex & s = io->W;
+	// std::cout<<" contact b "<<s.d<<" ";
 	Vector3F sum = Vector3F::Zero;
-	const float * wei = &coord.x;
+	const float * wei = &io->contributes.x;
+	float one = 0.f;
 	for(int i =0; i < s.d; i++) {
-		if(wei[i] > TINY_VALUE) sum += s.pB[i] * wei[i];
+		// std::cout<<" "<<wei[i];
+		if(wei[i] > TINY_VALUE) {
+			sum += s.pB[i] * wei[i];
+			one += wei[i];
+		}
 	}
-	return sum;
+	io->contactPointB = sum;
+	// std::cout<<" "<<one<<"\n";
 }
