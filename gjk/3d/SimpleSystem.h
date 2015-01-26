@@ -19,6 +19,26 @@ struct RigidBody {
 	PointSet * shape;
 };
 
+class TetrahedronShape : public PointSet {
+public:
+	TetrahedronShape() {}
+	virtual const Vector3F supportPoint(const Vector3F & v) const
+    {
+		float maxD = -1e8;
+		float d;
+		Vector3F r;
+		for(int i=0; i < 4; i++) {
+			d = p[i].dot(v);
+			if(d > maxD) {
+				maxD = d;
+				r = p[i];
+			}
+		}
+		return r;
+	}
+	Vector3F p[4];
+};
+
 class CuboidShape : public PointSet {
 public:
 	CuboidShape(float w, float h, float d)
@@ -108,11 +128,13 @@ public:
 	void progress();
 	
 	RigidBody * rb();
+	RigidBody * ground();
 private:
 	void applyGravity();
 	void applyVelocity();
 private:
 	RigidBody m_rb;
+	RigidBody m_ground;
 	Vector3F * m_X;
 	unsigned * m_indices;
 	

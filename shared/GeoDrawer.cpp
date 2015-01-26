@@ -532,3 +532,26 @@ void GeoDrawer::aabb(const Vector3F & low, const Vector3F & high) const
 	glVertex3f(high.x, high.y, high.z);
 	glEnd();
 }
+
+void GeoDrawer::tetrahedron(const Vector3F * p) const
+{
+    glBegin(GL_LINES);
+    vertex(p[0]);
+	vertex(p[1]);
+	
+	vertex(p[1]);
+	vertex(p[2]);
+	
+	vertex(p[2]);
+	vertex(p[0]);
+	
+	vertex(p[0]);
+	vertex(p[3]);
+	
+	vertex(p[1]);
+	vertex(p[3]);
+	
+	vertex(p[2]);
+	vertex(p[3]);
+    glEnd();
+}

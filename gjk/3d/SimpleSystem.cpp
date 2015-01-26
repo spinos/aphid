@@ -74,6 +74,17 @@ SimpleSystem::SimpleSystem()
 	m_rb.linearVelocity.setZero();
 	m_rb.angularVelocity.setZero();
 	m_rb.shape = new CuboidShape(2.3f, 1.f, 2.f);
+	
+	m_ground.position.set(0.f, -10.f, 10.f);
+	m_ground.orientation.set(1.f, 0.f, 0.f, 0.f);
+	m_ground.linearVelocity.setZero();
+	m_ground.angularVelocity.setZero();
+	TetrahedronShape * tet = new TetrahedronShape;
+	tet->p[0].set(0.f, 4.f, -20.f);
+	tet->p[1].set(0.f, 4.f, 20.f);
+	tet->p[2].set(40.f, 0.f, 0.f);
+	tet->p[3].set(0.f, 0.f, -20.f);
+	m_ground.shape = tet;
 }
 
 Vector3F * SimpleSystem::groundX() const
@@ -125,6 +136,9 @@ void SimpleSystem::progress()
 
 RigidBody * SimpleSystem::rb()
 { return &m_rb; }
+
+RigidBody * SimpleSystem::ground()
+{ return &m_ground; }
 
 void SimpleSystem::applyGravity()
 { m_rb.linearVelocity += Vector3F(0.f, -9.8f, 0.f) * timeStep; }

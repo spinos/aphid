@@ -60,6 +60,7 @@ public:
 	void drawDisc(float scale = 1.f) const;
 	void drawSquare(const BoundingRectangle & b) const;
 	void aabb(const Vector3F & low, const Vector3F & high) const;
+	void tetrahedron(const Vector3F * p) const;
 	
 private:
 	GeodesicSphereMesh * m_sphere;

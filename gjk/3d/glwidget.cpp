@@ -498,13 +498,26 @@ void GLWidget::testRotation()
 	getDrawer()->coordsys(mat, 8.f, &at);
 	CuboidShape * cub = static_cast<CuboidShape *>(rb->shape);
 	
-	glColor3f(0.5f, 0.5f, 0.5f);
+	glColor3f(0.f, 0.5f, 0.f);
 	glPushMatrix();
 	Matrix44F space;
 	space.setRotation(mat);
 	space.setTranslation(at);
 	getDrawer()->useSpace(space);
 	getDrawer()->aabb(Vector3F(-cub->m_w, -cub->m_h, -cub->m_d), Vector3F(cub->m_w, cub->m_h, cub->m_d));
+	glPopMatrix();
+	
+	RigidBody * grd = m_system->ground();
+	at = grd->position;
+	mat.set(grd->orientation);
+	TetrahedronShape * tet = static_cast<TetrahedronShape *>(grd->shape);
+	
+	glColor3f(0.f, 0.f, 0.5f);
+	glPushMatrix();
+	space.setRotation(mat);
+	space.setTranslation(at);
+	getDrawer()->useSpace(space);
+	getDrawer()->tetrahedron(tet->p);
 	glPopMatrix();
 }
 
