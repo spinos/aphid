@@ -29,6 +29,7 @@ private:
     void testLine();
 	void testTriangle();
 	void testCollision();
+	void testRotation();
 private:
     PointSet A, B;
     Vector3F m_tetrahedron[4];

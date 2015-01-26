@@ -20,7 +20,7 @@ class PointSet {
 public:
     Vector3F X[3];
     
-    const Vector3F supportPoint(const Vector3F & v) const
+    virtual const Vector3F supportPoint(const Vector3F & v) const
     {
         Vector3F res = X[0];
         float mdotv = X[0].dot(v);

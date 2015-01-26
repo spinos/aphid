@@ -7,6 +7,8 @@
  *
  */
 #include "Vector3F.h"
+#include "Quaternion.h"
+
  class Matrix33F
  {
  public:
@@ -49,6 +51,7 @@
 	
 	Vector3F scale() const;
 	void orthoNormalize();
+	void set(const Quaternion & q);
 	
 	static Matrix33F IdentityMatrix;
 	

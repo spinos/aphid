@@ -490,3 +490,45 @@ void GeoDrawer::drawSquare(const BoundingRectangle & b) const
 	glVertex3f(b.getMin(0), b.getMax(1), 0.f);
 	glEnd();
 }
+
+void GeoDrawer::aabb(const Vector3F & low, const Vector3F & high) const
+{
+    glBegin(GL_LINES);
+
+	glVertex3f(low.x,  low.y, low.z);
+	glVertex3f(high.x, low.y, low.z);
+	
+	glVertex3f(low.x,  high.y, low.z);
+	glVertex3f(high.x, high.y, low.z);
+	
+	glVertex3f(low.x,  low.y, high.z);
+	glVertex3f(high.x, low.y, high.z);
+	
+	glVertex3f(low.x,  high.y, high.z);
+	glVertex3f(high.x, high.y, high.z);
+	
+	glVertex3f(low.x,  low.y, low.z);
+	glVertex3f(low.x, high.y, low.z);
+	
+	glVertex3f(high.x,  low.y, low.z);
+	glVertex3f(high.x, high.y, low.z);
+	
+	glVertex3f(low.x,  low.y, high.z);
+	glVertex3f(low.x, high.y, high.z);
+	
+	glVertex3f(high.x,  low.y, high.z);
+	glVertex3f(high.x, high.y, high.z);
+	
+	glVertex3f(low.x,  low.y, low.z);
+	glVertex3f(low.x,  low.y, high.z);
+	
+	glVertex3f(high.x,  low.y, low.z);
+	glVertex3f(high.x,  low.y, high.z);
+	
+	glVertex3f(low.x,  high.y, low.z);
+	glVertex3f(low.x,  high.y, high.z);
+	
+	glVertex3f(high.x, high.y, low.z);
+	glVertex3f(high.x, high.y, high.z);
+	glEnd();
+}

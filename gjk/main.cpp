@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <boost/format.hpp>
+#include "./3d/SimpleSystem.h"
 #include "GjkContactSolver.h"
 
 void testBarycentric3()
@@ -24,32 +25,6 @@ void testBarycentric3()
 	std::cout<<"test "<<test.str()<<"\n";
     
     std::cout<<"coord "<<coord.x<<" "<<coord.y<<" "<<coord.z<<"\n";  
-}
-
-void testBarycentric4()
-{
-    std::cout<<"\n test barycentric coordinate in tetrahedron\n";
-    Vector3F tet[4];
-	tet[0].set(0.f, -1.f, 0.f);
-	tet[1].set(1.f, -1.f, 0.f);
-	tet[2].set(0.f, -1.f, 1.f);
-	tet[3].set(0.f, 1.f, 0.f);
-	
-	Vector3F test(0.f, .5f, 0.f);
-	BarycentricCoordinate coord = getBarycentricCoordinate4(test, tet);
-	
-	std::cout<<"test "<<test.str()<<"\n";
-    
-    std::cout<<"coord "<<coord.x<<" "<<coord.y<<" "<<coord.z<<" "<<coord.w<<"\n";
-    
-	Simplex S;
-	addToSimplex(S, tet[0]);
-	addToSimplex(S, tet[1]);
-	addToSimplex(S, tet[2]);
-	addToSimplex(S, tet[3]);
-	
-	Vector3F cls = closestToOriginWithinSimplex(S);
-	std::cout<<"cloest test "<<cls.str()<<"\n";
 }
 
 void testRayCast()
@@ -77,7 +52,7 @@ void testRayCast()
 	if(result.hasResult) std::cout<<" contacted \n";
 	else {
 	    std::cout<<" not contacted \n";
-	    std::cout<<" separating axis from B to A "<<result.resultPoint.str()<<"\n";
+	    std::cout<<" separating axis from B to A "<<result.closestPoint.str()<<"\n";
 	}
 	
 	// direction of relative velocity
@@ -89,7 +64,7 @@ void testRayCast()
 	const Vector3F startP = Vector3F::Zero;
 	Vector3F hitP = startP;
 	Vector3F hitN; hitN.setZero();
-	Vector3F v = hitP - result.resultPoint;
+	Vector3F v = hitP - result.closestPoint;
 	Vector3F w, p;
 	resetSimplex(result.W);
 
@@ -121,7 +96,7 @@ void testRayCast()
 	    
 	    lamda -= vdotw / vdotr;
 	    std::cout<<" lamda "<<lamda<<"\n";
-	    hitP = startP + r * lamda;
+	    hitP = startP + r * lamda;              
 	    std::cout<<" hit p "<<hitP.str()<<"\n";
 	    hitN = v;
 	    
@@ -132,19 +107,60 @@ void testRayCast()
 	    // update normal
 	    gjk.distance(A, B, &result);
 	    
-	    std::cout<<"closest p "<<result.resultPoint.str()<<"\n";
-	    v = hitP - result.resultPoint;
+	    std::cout<<"closest p "<<result.closestPoint.str()<<"\n";
+	    v = hitP - result.closestPoint;
 	    std::cout<<"||v|| "<<v.length()<<"\n";
 	    k++;
 	}
 }
 
+void testM()
+{
+    Matrix44F mat;
+    mat.setIdentity();
+    *mat.m(0,0) = 2.f;
+    *mat.m(1,1) = 2.f;
+    *mat.m(2,2) = 2.f;
+    mat.inverse();
+    std::cout<<"M"<<mat.str();
+    
+    Quaternion q; 
+	Vector3F axis(1.f, 0.f, 1.f); axis.normalize();
+	float theta = 0.5f;
+	q.x = axis.x * sin(theta);
+	q.y = axis.y * sin(theta);
+	q.z = axis.z * sin(theta);
+	q.w = cos(theta);
+	
+	float mag = sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
+	q.x /= mag;
+	q.y /= mag;
+	q.z /= mag;
+	q.w /= mag;
+	std::cout<<" mag "<<mag<<"\n";
+	
+	Matrix33F matt;
+	const float w2 = q.w * q.w;
+	const float x2 = q.x * q.x;
+	const float y2 = q.y * q.y;
+	const float z2 = q.z * q.z;
+	*matt.m(0, 0) = 1.f - 2.f * y2 - 2.f * z2; 
+	*matt.m(0, 1) = 2.f * q.x * q.y - 2.f * q.w * q.z; 
+	*matt.m(0, 2) = 2.f * q.x * q.z + 2.f * q.w * q.y;  
+	*matt.m(1, 0) = 2.f * q.x * q.y + 2.f * q.w * q.z; 
+	*matt.m(1, 1) = 1.f - 2.f * x2 - 2.f * z2; 
+	*matt.m(1, 2) = 2.f * q.y * q.z + 2.f * q.w * q.x;  
+	*matt.m(2, 0) = 2.f * q.x * q.z - 2.f * q.w * q.y; 
+	*matt.m(2, 1) = 2.f * q.y * q.z - 2.f * q.w * q.x; 
+	*matt.m(2, 2) = 1.f - 2.f * x2 - 2.f * y2;
+	
+	std::cout<<"mat3 "<<matt.str();
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"GJK intersection test";
-	// testBarycentric3();
-	// testBarycentric4();
-	testRayCast();
+	testM();
 	std::cout<<"end of test\n";
 	return 0;
 }

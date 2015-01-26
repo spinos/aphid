@@ -68,6 +68,12 @@ SimpleSystem::SimpleSystem()
 		m_vIndices[i*2] = i*2;
 		m_vIndices[i*2+1] = i*2+1;
 	}
+	
+	m_rb.position.set(20.f, 20.f, 10.f);
+	m_rb.orientation.set(1.f, 0.f, 0.f, 0.f);
+	m_rb.linearVelocity.setZero();
+	m_rb.angularVelocity.setZero();
+	m_rb.shape = new CuboidShape(2.3f, 1.f, 2.f);
 }
 
 Vector3F * SimpleSystem::groundX() const
@@ -112,4 +118,26 @@ void SimpleSystem::progress()
 		m_Vline[i*2] = m_X[i];
 		m_Vline[i*2 + 1] = m_X[i] + m_V[i] * timeStep;
 	}
+	
+	applyGravity();
+	applyVelocity();
+}
+
+RigidBody * SimpleSystem::rb()
+{ return &m_rb; }
+
+void SimpleSystem::applyGravity()
+{ m_rb.linearVelocity += Vector3F(0.f, -9.8f, 0.f) * timeStep; }
+
+void SimpleSystem::applyVelocity()
+{
+	m_rb.position += m_rb.linearVelocity * timeStep;
+	
+	Vector3F va = m_rb.angularVelocity;
+	float mva = va.length();
+	if(mva < TINY_VALUE) return;
+	va.normalize();
+	float theta = mva * timeStep;
+	Quaternion q(theta, va);
+	m_rb.orientation = q * m_rb.orientation;
 }

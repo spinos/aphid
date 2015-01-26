@@ -57,6 +57,13 @@
 	static float Determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i );
 	static Matrix44F Identitiy;
 	
+	friend std::ostream& operator<<(std::ostream &output, const Matrix44F & p) {
+        output << p.str();
+        return output;
+    }
+
+	const std::string str() const;
+	
 	float v[16];
  };
  

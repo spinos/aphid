@@ -13,6 +13,7 @@ HEADERS = ../shared/AllMath.h ../shared/ATypes.h ../shared/AllLight.h \
                 ../shared/Vector2F.h \
                 ../shared/Matrix44F.h \
                 ../shared/Matrix33F.h \
+                ../shared/Quaternion.h \
                 ../shared/Ray.h \
                 ../shared/RayIntersectionContext.h \
                 ../shared/IntersectionContext.h \
@@ -175,6 +176,7 @@ SOURCES = ../shared/Vector3F.cpp \
                 ../shared/Vector2F.cpp \
                 ../shared/Matrix44F.cpp \
                 ../shared/Matrix33F.cpp \
+                ../shared/Quaternion.cpp \
                 ../shared/Ray.cpp \
                 ../shared/RayIntersectionContext.cpp \
                 ../shared/IntersectionContext.cpp \

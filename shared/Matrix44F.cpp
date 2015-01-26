@@ -351,4 +351,15 @@ const float Matrix44F::determinant() const
 			- M(3, 0) * determinant33( M(0, 1), M(1, 1), M(2, 1), M(0, 2), M(1, 2), M(2, 2), M(0, 3), M(1, 3), M(2, 3) ) );
 
 }
+
+const std::string Matrix44F::str() const
+{
+	std::stringstream sst;
+	sst.str("");
+    sst<<"\n|"<<v[0]<<","<<v[1]<<","<<v[2]<<","<<v[3]<<"|\n";
+    sst<<"|"<<v[4]<<","<<v[5]<<","<<v[6]<<","<<v[7]<<"|\n";
+    sst<<"|"<<v[8]<<","<<v[9]<<","<<v[10]<<","<<v[11]<<"|\n";
+    sst<<"|"<<v[12]<<","<<v[13]<<","<<v[14]<<","<<v[15]<<"|\n";
+	return sst.str();
+}
 //:~

@@ -475,6 +475,39 @@ void GLWidget::testCollision()
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+void GLWidget::testRotation()
+{
+	Quaternion q;
+	Vector3F axis(cos(m_alpha), sin(m_alpha), 0.f); 
+	axis.normalize();
+	float theta = .5f;
+	q.set(theta, axis);
+	q.normalize();
+	
+	Matrix33F mat;
+	mat.set(q);
+	
+	Vector3F at(-13.f, 0.f, 0.f);
+	
+	getDrawer()->arrow(at, at + axis * 12.f);
+	getDrawer()->coordsys(mat, 12.f, &at);
+	
+	RigidBody * rb = m_system->rb();
+	at = rb->position;
+	mat.set(rb->orientation);
+	getDrawer()->coordsys(mat, 8.f, &at);
+	CuboidShape * cub = static_cast<CuboidShape *>(rb->shape);
+	
+	glColor3f(0.5f, 0.5f, 0.5f);
+	glPushMatrix();
+	Matrix44F space;
+	space.setRotation(mat);
+	space.setTranslation(at);
+	getDrawer()->useSpace(space);
+	getDrawer()->aabb(Vector3F(-cub->m_w, -cub->m_h, -cub->m_d), Vector3F(cub->m_w, cub->m_h, cub->m_d));
+	glPopMatrix();
+}
+
 void GLWidget::clientDraw()
 {
 	testShapeCast();
@@ -483,6 +516,7 @@ void GLWidget::clientDraw()
 	testTriangle();
     testTetrahedron();
 	testCollision();
+	testRotation();
 	m_system->progress();
     m_alpha += 0.01f;
 }
