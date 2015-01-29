@@ -53,8 +53,57 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
 	}
 	
 	if(result->hasResult) {
-	    EpaPenetrationSolver penet;
-	    penet.depth(A, B, result);
+		resetSimplex(result->W);
+	    const Vector3F r = result->rayDirection;
+		const Vector3F startP = Vector3F::Zero - result->rayDirection * 99.f;
+		Vector3F hitP = startP;
+		// from origin to startP
+		v = hitP;
+		Vector3F p;
+		float lamda = 0.f;
+		float vdotw, vdotr;
+
+		k = 0;
+		for(; k < 39; k++) {
+			vdotr = v.dot(r);
+	    
+			// SA-B(v)
+			pa = A.supportPoint(v, result->transformA, localA);
+			pb = B.supportPoint(v.reversed(), result->transformB, localB);
+			p = pa - pb;
+			w = hitP - p;
+			vdotw = v.dot(w); 
+			
+			if(vdotw > 0.f) {
+                if(vdotr >= 0.f) {
+                    break;
+                }
+                lamda -= vdotw / vdotr;
+                hitP = startP + r * lamda;
+            }
+					
+			addToSimplex(result->W, p, localB);
+	    
+			result->hasResult = 0;
+			result->distance = 1e9;
+			result->referencePoint = hitP;
+	    
+			closestOnSimplex(result);
+	    
+            v = hitP - result->closestPoint;
+			
+			interpolatePointB(result);
+		
+			if(v.length2() < TINY_VALUE) break;
+			
+			result->contactNormal = v;
+		
+			smallestSimplex(result);
+		}
+		
+		result->hasResult = 1;
+		result->penetrateDepth = hitP.length();
+		result->contactNormal.normalize();
 	}
 }
 

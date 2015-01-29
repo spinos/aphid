@@ -74,6 +74,7 @@ struct ClosestTestContext {
     Vector3F contactNormal;
 	Vector3F contactPointB;
 	Vector3F closestPoint;
+	float penetrateDepth;
 	float distance;
 	char needContributes;
 	char hasResult;

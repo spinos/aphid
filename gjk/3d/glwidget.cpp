@@ -296,6 +296,8 @@ void GLWidget::testGjk()
 	result.hasResult = 0;
 	result.transformA = matA;
 	result.transformB = matB;
+	result.rayDirection.set(1.f, -1.f, 0.f);
+	result.rayDirection.normalize();
 	
 	resetSimplex(result.W);
 	
@@ -322,6 +324,7 @@ void GLWidget::testGjk()
 	
 	glPushMatrix();
 	getDrawer()->useSpace(matB);
+	
 	glBegin(GL_TRIANGLES);
     glColor3f(0.f, 0.5f + grey ,0.5f);
     q = B.X[0];
@@ -333,17 +336,27 @@ void GLWidget::testGjk()
     glEnd();
 	
 	glPopMatrix();
-
-	if(result.hasResult) glColor3f(1.f, 0.f, 0.f);
-	else glColor3f(0.f, 0.f, 1.f);
 	
-	Vector3F wb = matB.transform(result.contactPointB);
-	getDrawer()->arrow(wb, wb + result.contactNormal);
-
 	if(result.hasResult) {
 	    getDrawer()->arrow(Vector3F::Zero, result.contactNormal);
-	    drawSimplex(result.W);
+		matB.translate(result.rayDirection.reversed() * result.penetrateDepth);
+	    glPushMatrix();
+		getDrawer()->useSpace(matB);
+		glBegin(GL_TRIANGLES);
+		glColor3f(0.f, 0.5f, 0.5f);
+		q = B.X[0];
+		glVertex3f(q.x, q.y, q.z);
+		q = B.X[1];
+		glVertex3f(q.x, q.y, q.z);
+		q = B.X[2];
+		glVertex3f(q.x, q.y, q.z);
+		glEnd();
+		glPopMatrix();
 	}
+	Vector3F wb = matB.transform(result.contactPointB);
+	if(result.hasResult) glColor3f(1.f, 0.f, 0.f);
+	else glColor3f(0.f, 0.f, 1.f);
+	getDrawer()->arrow(wb, wb + result.contactNormal);
 }
 
 void GLWidget::testShapeCast()
