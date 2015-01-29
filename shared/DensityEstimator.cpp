@@ -26,10 +26,13 @@ const float DensityEstimator::weightPoly6(const float & r2) const
     return d * d * d;
 }
 
-const float DensityEstimator::weightSpiky(const float & r) const
+const Vector3F DensityEstimator::weightSpiky(const Vector3F & pi, const Vector3F & pj) const
 {
-    const float d = m_smoothRadius - r;
-    return d * d;
+	Vector3F r = pi - pj;
+	const float l = r.length();
+    const float d = m_smoothRadius - l;
+
+    return r / (l + 0.001f) * d * d;
 }
 
 const float DensityEstimator::kernelPoly6() const
