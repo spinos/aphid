@@ -20,6 +20,27 @@ class PointSet {
 public:
     Vector3F X[3];
     
+    virtual const Vector3F supportPoint(const Vector3F & v, const Matrix44F & space, Vector3F & localP) const
+    {
+        float maxdotv = -1e8;
+        float dotv;
+        
+        Vector3F res;
+        Vector3F worldP;
+        
+        for(int i=0; i < 3; i++) {
+            worldP = space.transform(X[i]);
+            dotv = worldP.dot(v);
+            if(dotv > maxdotv) {
+                maxdotv = dotv;
+                res = worldP;
+                localP = X[i];
+            }
+        }
+        
+        return res;
+    }
+    
     virtual const Vector3F supportPoint(const Vector3F & v) const
     {
         Vector3F res = X[0];
@@ -45,6 +66,7 @@ struct Simplex {
 };
 
 struct ClosestTestContext {
+    Matrix44F transformA, transformB;
 	Simplex W;
 	BarycentricCoordinate contributes;
     Vector3F referencePoint;
@@ -65,7 +87,7 @@ void resetSimplex(Simplex & s);
 void addToSimplex(Simplex & s, const Vector3F & p);
 void addToSimplex(Simplex & s, const Vector3F & p, const Vector3F & pb);
 char isPointInsideSimplex(const Simplex & s, const Vector3F & p);
-Vector3F supportMapping(const PointSet & A, const PointSet & B, const Vector3F & v);
+// Vector3F supportMapping(const PointSet & A, const PointSet & B, const Vector3F & v);
 
 #endif        //  #ifndef GJK_H
 

@@ -15,13 +15,15 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
 {
     int k = 0;
 	float v2;
-	Vector3F w;
+	Vector3F w, pa, pb;
 	Vector3F v = A.X[0];
-	if(v.length2() < TINY_VALUE) v = A.X[1];
+	Vector3F localA, localB;
 	
 	for(int i=0; i < 99; i++) {
-	    // SA-B(-v)
-		w = supportMapping(A, B, v.reversed()) + v.normal() * MARGIN_DISTANCE;
+		// SA-B(-v)
+	    pa = A.supportPoint(v.reversed(), result->transformA, localA);
+		pb = B.supportPoint(v, result->transformB, localB);
+		w = pa - pb;// + v.normal() * MARGIN_DISTANCE;
 	    
 		// terminate when v is close enough to v(A - B).
 	    // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
@@ -32,7 +34,7 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
 			break;
 	    }
 	    
-	    addToSimplex(result->W, w);
+	    addToSimplex(result->W, w, localB);
  
 	    if(isPointInsideSimplex(result->W, result->referencePoint)) {
 	        // std::cout<<" Minkowski difference contains the reference point\n";
@@ -42,6 +44,8 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
 	    
 	    closestOnSimplex(result);
 	    v = result->closestPoint - result->referencePoint;
+		interpolatePointB(result);
+		result->contactNormal = v;
 		smallestSimplex(result);
 	    k++;
 	}

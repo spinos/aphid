@@ -262,28 +262,30 @@ void drawSimplex(const Simplex & s)
 void GLWidget::testGjk()
 {
     Vector3F pa[3]; 
-    pa[0].set(-3.f, -2.f, 0.f);
-	pa[1].set(3.f, -2.f, 0.f);
-	pa[2].set(0.f, 2.f, 0.f);
+    pa[0].set(-3.f, -2.f, -1.f);
+	pa[1].set(3.f, -2.f, 1.f);
+	pa[2].set(0.f, 2.f, 1.f);
+	
+	for(int i = 0; i < 3; i++)
+	    A.X[i] = pa[i];
 	
 	Vector3F pb[3];
-	pb[0].set(-2.f, -2.f, 0.f);
+	pb[0].set(-2.f, -2.f, 1.f);
 	pb[1].set(2.f, -2.f, 0.f);
 	pb[2].set(3.f, 2.f, 0.f);
 	
-	Matrix44F mat;
-    mat.rotateZ(m_alpha);
-    mat.rotateX(m_alpha);
-    mat.translate(12.f, 2.f, 3.f);
 	for(int i = 0; i < 3; i++)
-	    A.X[i] = mat.transform(pa[i]);
+	    B.X[i] = pb[i];
 	
-	mat.setIdentity();
-	mat.rotateZ(-m_alpha * .5f);
-    mat.rotateY(-m_alpha);
-    mat.translate(12.f + 3.f * sin(m_alpha * 2.f), 2.f, 3.f + 1.f * cos(m_alpha * 2.f));
-	for(int i = 0; i < 3; i++)
-	    B.X[i] = mat.transform(pb[i]);
+	Matrix44F matA;
+    matA.rotateZ(m_alpha);
+    matA.rotateX(m_alpha);
+    matA.translate(12.f, 2.f, 3.f);
+		
+	Matrix44F matB;
+	matB.rotateZ(-m_alpha * .5f);
+    matB.rotateY(-m_alpha);
+    matB.translate(12.f + 3.f * sin(m_alpha * 2.f), 2.f, 3.f + 1.f * cos(m_alpha * 2.f));
 		
 	GjkContactSolver gjk;
 	ClosestTestContext result;
@@ -291,18 +293,21 @@ void GLWidget::testGjk()
 	result.needContributes = 1;
 	result.distance = 1e9;
 	result.hasResult = 0;
+	result.transformA = matA;
+	result.transformB = matB;
 	
 	resetSimplex(result.W);
 	
 	gjk.distance(A, B, &result);
-	
-	glBegin(GL_TRIANGLES);
-	
+
 	float grey = 0.f;
 	if(result.hasResult) grey = .3f;
     
     Vector3F q;
-    
+	
+	glPushMatrix();
+    getDrawer()->useSpace(matA);
+	glBegin(GL_TRIANGLES);
     glColor3f(0.5f + grey, 0.5f ,0.f);
     q = A.X[0];
     glVertex3f(q.x, q.y, q.z);
@@ -310,7 +315,13 @@ void GLWidget::testGjk()
     glVertex3f(q.x, q.y, q.z);
     q = A.X[2];
     glVertex3f(q.x, q.y, q.z);
-    
+	glEnd();
+	
+    glPopMatrix();
+	
+	glPushMatrix();
+	getDrawer()->useSpace(matB);
+	glBegin(GL_TRIANGLES);
     glColor3f(0.f, 0.5f + grey ,0.5f);
     q = B.X[0];
     glVertex3f(q.x, q.y, q.z);
@@ -318,10 +329,16 @@ void GLWidget::testGjk()
     glVertex3f(q.x, q.y, q.z);
     q = B.X[2];
     glVertex3f(q.x, q.y, q.z);
-    
     glEnd();
 	
-	if(result.hasResult) drawSimplex(result.W);
+	glPopMatrix();
+	
+	glColor3f(1.f, 0.f, 0.f);
+	
+	Vector3F wb = matB.transform(result.contactPointB);
+	getDrawer()->arrow(wb, wb + result.contactNormal);
+	
+	// if(result.hasResult) drawSimplex(result.W);
 }
 
 void GLWidget::testShapeCast()
@@ -523,14 +540,14 @@ void GLWidget::testRotation()
 
 void GLWidget::clientDraw()
 {
-	testShapeCast();
+	// testShapeCast();
 	testGjk();
     testLine();
 	testTriangle();
     testTetrahedron();
-	testCollision();
-	testRotation();
-	m_system->progress();
+	// testCollision();
+	// testRotation();
+	// m_system->progress();
     m_alpha += 0.01f;
 }
 
