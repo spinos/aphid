@@ -17,6 +17,7 @@ public:
 	GjkContactSolver();
 	
 	void distance(const PointSet & A, const PointSet & B, ClosestTestContext * result);
+	void penetration(const PointSet & A, const PointSet & B, ClosestTestContext * result);
 	void rayCast(const PointSet & A, const PointSet & B, ClosestTestContext * result);
 	
 private:

@@ -18,6 +18,7 @@ BarycentricCoordinate getBarycentricCoordinate4(const Vector3F & p, const Vector
 
 class PointSet {
 public:
+	virtual ~PointSet() {}
     Vector3F X[3];
     
     virtual const Vector3F supportPoint(const Vector3F & v, const Matrix44F & space, Vector3F & localP) const

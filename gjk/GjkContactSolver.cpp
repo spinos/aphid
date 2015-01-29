@@ -8,7 +8,6 @@
  */
 
 #include "GjkContactSolver.h"
-#include "EpaPenetrationSolver.h"
 
 GjkContactSolver::GjkContactSolver() {}
 
@@ -17,7 +16,8 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
     int k = 0;
 	float v2;
 	Vector3F w, pa, pb;
-	Vector3F v = A.X[0];
+	Vector3F v = result->transformA.transform(A.X[0]);
+	if(v.length2() < TINY_VALUE) v = result->transformA.transform(A.X[1]);
 	Vector3F localA, localB;
 	
 	for(int i=0; i < 99; i++) {
@@ -52,59 +52,61 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
 	    k++;
 	}
 	
-	if(result->hasResult) {
-		resetSimplex(result->W);
-	    const Vector3F r = result->rayDirection;
-		const Vector3F startP = Vector3F::Zero - result->rayDirection * 99.f;
-		Vector3F hitP = startP;
-		// from origin to startP
-		v = hitP;
-		Vector3F p;
-		float lamda = 0.f;
-		float vdotw, vdotr;
+	if(result->hasResult) penetration(A, B, result);
+}
 
-		k = 0;
-		for(; k < 39; k++) {
-			vdotr = v.dot(r);
-	    
-			// SA-B(v)
-			pa = A.supportPoint(v, result->transformA, localA);
-			pb = B.supportPoint(v.reversed(), result->transformB, localB);
-			p = pa - pb;
-			w = hitP - p;
-			vdotw = v.dot(w); 
-			
-			if(vdotw > 0.f) {
-                if(vdotr >= 0.f) {
-                    break;
-                }
-                lamda -= vdotw / vdotr;
-                hitP = startP + r * lamda;
-            }
-					
-			addToSimplex(result->W, p, localB);
-	    
-			result->hasResult = 0;
-			result->distance = 1e9;
-			result->referencePoint = hitP;
-	    
-			closestOnSimplex(result);
-	    
-            v = hitP - result->closestPoint;
-			
-			interpolatePointB(result);
+void GjkContactSolver::penetration(const PointSet & A, const PointSet & B, ClosestTestContext * result)
+{
+	resetSimplex(result->W);
+	const Vector3F r = result->rayDirection;
+	const Vector3F startP = Vector3F::Zero - result->rayDirection * 99.f;
+	Vector3F hitP = startP;
+	// from origin to startP
+	Vector3F v = hitP;
+	Vector3F w, p, pa, pb, localA, localB;
+	float lamda = 0.f;
+	float vdotw, vdotr;
+
+	int k = 0;
+	for(; k < 39; k++) {
+		vdotr = v.dot(r);
+	
+		// SA-B(v)
+		pa = A.supportPoint(v, result->transformA, localA);
+		pb = B.supportPoint(v.reversed(), result->transformB, localB);
+		p = pa - pb;
+		w = hitP - p;
+		vdotw = v.dot(w); 
 		
-			if(v.length2() < TINY_VALUE) break;
-			
-			result->contactNormal = v;
-		
-			smallestSimplex(result);
+		if(vdotw > 0.f) {
+			if(vdotr >= 0.f)
+				break;
+			lamda -= vdotw / vdotr;
+			hitP = startP + r * lamda;
 		}
+				
+		addToSimplex(result->W, p, localB);
+	
+		result->hasResult = 0;
+		result->distance = 1e9;
+		result->referencePoint = hitP;
+	
+		closestOnSimplex(result);
+	
+		v = hitP - result->closestPoint;
 		
-		result->hasResult = 1;
-		result->penetrateDepth = hitP.length();
-		result->contactNormal.normalize();
+		interpolatePointB(result);
+	
+		if(v.length2() < TINY_VALUE) break;
+		
+		result->contactNormal = v;
+	
+		smallestSimplex(result);
 	}
+	
+	result->hasResult = 1;
+	result->penetrateDepth = hitP.length();
+	result->contactNormal.normalize();
 }
 
 void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTestContext * result)
@@ -121,7 +123,7 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 	Vector3F hitP = startP;
 	Vector3F hitN; hitN.setZero();
 	Vector3F v = hitP - result->closestPoint;
-	Vector3F w, p, pa, pb;
+	Vector3F w, p, pa, pb, localA, localB;
 	
 	float vdotw, vdotr;
 	int k = 0;
@@ -129,9 +131,9 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 	    vdotr = v.dot(r);
 	    
 	    // SA-B(v)
-		pa = A.supportPoint(v);
-		pb = B.supportPoint(v.reversed());
-	    p = pa - pb + v.normal() * MARGIN_DISTANCE;
+		pa = A.supportPoint(v, result->transformA, localA);
+		pb = B.supportPoint(v.reversed(), result->transformB, localB);
+	    p = pa - pb;// + v.normal() * MARGIN_DISTANCE;
 	    
 		w = hitP - p;
 	    vdotw = v.dot(w); 
@@ -148,7 +150,7 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 			hitN = v;
 		}
 		
-	    addToSimplex(result->W, p, pb);
+	    addToSimplex(result->W, p, localB);
 	    
 	    result->hasResult = 0;
 	    result->distance = 1e9;

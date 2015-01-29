@@ -338,8 +338,7 @@ void GLWidget::testGjk()
 	glPopMatrix();
 	
 	if(result.hasResult) {
-	    getDrawer()->arrow(Vector3F::Zero, result.contactNormal);
-		matB.translate(result.rayDirection.reversed() * result.penetrateDepth);
+	    matB.translate(result.rayDirection.reversed() * result.penetrateDepth);
 	    glPushMatrix();
 		getDrawer()->useSpace(matB);
 		glBegin(GL_TRIANGLES);
@@ -366,42 +365,35 @@ void GLWidget::testShapeCast()
 	pa[1].set(3.5f, -3.5f, 0.f);
 	pa[2].set(-2.5f, 3.5f, 0.f);
 	
+	for(int i = 0; i < 3; i++)
+	    A.X[i] = pa[i];
+	
 	Vector3F pb[3];
 	pb[0].set(-2.f, 2.f, 0.f);
 	pb[1].set(2.f, 2.f, 0.f);
 	pb[2].set(2.f, -2.f, 0.f);
 	
-	Matrix44F mat;
-    mat.rotateZ(sin(m_alpha)* 1.2f);
-	mat.rotateX(-m_alpha);
-    
-	mat.translate(1.f, 1.f, -2.f);
 	for(int i = 0; i < 3; i++)
-	    A.X[i] = mat.transform(pa[i]);
+	    B.X[i] = pb[i];
+	
+	Matrix44F matA;
+    matA.rotateZ(sin(m_alpha)* 1.2f);
+	matA.rotateX(-m_alpha);
+	matA.translate(1.f, 1.f, -2.f);
+	
 		
-	mat.setIdentity();
-	mat.rotateZ(-m_alpha * 1.5f);
-	mat.rotateY(0.2 * sin(m_alpha));
-     
-    mat.translate(1.f, 1.f, 8.f);
-	for(int i = 0; i < 3; i++)
-	    B.X[i] = mat.transform(pb[i]);
+	Matrix44F matB;
+	matB.rotateZ(-m_alpha * 1.5f);
+	matB.rotateY(0.2 * sin(m_alpha));
+    matB.translate(1.f, 1.f, 8.f);
+	
 		
-	Vector3F rayDir(.99f * sin(m_alpha * 2.f), .2f * cos(m_alpha), -1.9f);
+	Vector3F rayDir(.79f * sin(m_alpha * .5f), .23f * cos(m_alpha), -1.9f);
 	rayDir.normalize();
-	Vector3F rayBegin= B.X[0];
-	Vector3F rayEnd = rayBegin + rayDir * 16.f;
-	getDrawer()->arrow(rayBegin, rayEnd);
 	
-	rayBegin= B.X[1];
-	rayEnd = rayBegin + rayDir * 16.f;
-	getDrawer()->arrow(rayBegin, rayEnd);
-	
-	rayBegin= B.X[2];
-	rayEnd = rayBegin + rayDir * 16.f;
-	getDrawer()->arrow(rayBegin, rayEnd);
-		
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPushMatrix();
+    getDrawer()->useSpace(matA);
+    
 	glBegin(GL_TRIANGLES);
 	
     Vector3F q;
@@ -414,6 +406,14 @@ void GLWidget::testShapeCast()
     q = A.X[2];
     glVertex3f(q.x, q.y, q.z);
     
+    glEnd();
+    glPopMatrix();
+    
+    glPushMatrix();
+	getDrawer()->useSpace(matB);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
+	glBegin(GL_TRIANGLES);
     glColor3f(0.f, 1.f, 0.f);
     q = B.X[0];
     glVertex3f(q.x, q.y, q.z);
@@ -423,6 +423,8 @@ void GLWidget::testShapeCast()
     glVertex3f(q.x, q.y, q.z);
     
     glEnd();
+    glPopMatrix();
+    
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
 	GjkContactSolver gjk;
@@ -433,49 +435,53 @@ void GLWidget::testShapeCast()
 	result.needContributes = 1;
 	result.distance = 1e9;
 	result.hasResult = 0;
+	result.transformA = matA;
+	result.transformB = matB;
 	
 	resetSimplex(result.W);
 	
 	gjk.rayCast(A, B, &result);
 	
+	Vector3F rayBegin= B.X[0] * .33f + B.X[1] * .33f + B.X[2] * .33f;
+	rayBegin = matB.transform(rayBegin);
+	
+	Vector3F rayEnd = rayBegin + rayDir * 20.f;
+	
+	glColor3f(0.f, 0.f, 0.f);
+	glBegin(GL_LINES);
+	glVertex3f(rayBegin.x, rayBegin.y, rayBegin.z);
+	glVertex3f(rayEnd.x, rayEnd.y, rayEnd.z);
+	glEnd();
+	
 	if(!result.hasResult) return;
 	
+	rayEnd = rayBegin + rayDir * result.distance;
+	glColor3f(0.f, 0.35f, .24f);
+	getDrawer()->arrow(rayBegin, rayEnd);
+	
+	glPushMatrix();
+	matB.translate(result.rayDirection * result.distance);
+	getDrawer()->useSpace(matB);
+    
 	glBegin(GL_TRIANGLES);
     
-    glColor3f(1.f, 0.f, 0.f);
-    q = A.X[0];
-    glVertex3f(q.x, q.y, q.z);
-    q = A.X[1];
-    glVertex3f(q.x, q.y, q.z);
-    q = A.X[2];
-    glVertex3f(q.x, q.y, q.z);
-	
 	glColor3f(0.f, 1.f, 0.f);
-    q = B.X[0] + result.rayDirection * result.distance;
+    q = B.X[0];
     glVertex3f(q.x, q.y, q.z);
-    q = B.X[1] + result.rayDirection * result.distance;
+    q = B.X[1];
     glVertex3f(q.x, q.y, q.z);
-    q = B.X[2] + result.rayDirection * result.distance;
+    q = B.X[2];
     glVertex3f(q.x, q.y, q.z);
     
     glEnd();
+    
+    glPopMatrix();
 	
-	rayBegin= B.X[0];
-	rayEnd = rayBegin + rayDir * result.distance;
+	rayBegin = matB.transform(result.contactPointB);
+	rayEnd = rayBegin + result.contactNormal;
+	glColor3f(0.f, 0.35f, 0.25f);
 	getDrawer()->arrow(rayBegin, rayEnd);
-	
-	rayBegin= B.X[1];
-	rayEnd = rayBegin + rayDir * result.distance;
-	getDrawer()->arrow(rayBegin, rayEnd);
-	
-	rayBegin= B.X[2];
-	rayEnd = rayBegin + rayDir * result.distance;
-	getDrawer()->arrow(rayBegin, rayEnd);
-	
-	glColor3f(1.f, 1.f, 1.f);
-	rayBegin = result.contactPointB + rayDir * result.distance;
-	rayEnd = rayBegin + result.contactNormal * 4.f;
-	getDrawer()->arrow(rayBegin, rayEnd);
+
 }
 
 void GLWidget::testCollision()
@@ -558,7 +564,7 @@ void GLWidget::testRotation()
 
 void GLWidget::clientDraw()
 {
-	// testShapeCast();
+	testShapeCast();
 	testGjk();
     testLine();
 	testTriangle();
