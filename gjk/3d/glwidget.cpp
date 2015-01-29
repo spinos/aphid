@@ -23,6 +23,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 
     m_alpha = 0.f;
     m_drawLevel = 1;
+    m_isRunning = 1;
 }
 //! [0]
 
@@ -332,12 +333,13 @@ void GLWidget::testGjk()
     glEnd();
 	
 	glPopMatrix();
-	
-	glColor3f(1.f, 0.f, 0.f);
+
+	if(result.hasResult) glColor3f(1.f, 0.f, 0.f);
+	else glColor3f(0.f, 0.f, 1.f);
 	
 	Vector3F wb = matB.transform(result.contactPointB);
 	getDrawer()->arrow(wb, wb + result.contactNormal);
-	
+
 	// if(result.hasResult) drawSimplex(result.W);
 }
 
@@ -548,7 +550,7 @@ void GLWidget::clientDraw()
 	// testCollision();
 	// testRotation();
 	// m_system->progress();
-    m_alpha += 0.01f;
+    if(m_isRunning) m_alpha += 0.01f;
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
@@ -578,6 +580,12 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			break;
 		case Qt::Key_D:
 			m_drawLevel--;
+			break;
+		case Qt::Key_S:
+			if(m_isRunning)
+			    m_isRunning = 0;
+			else
+			    m_isRunning = 1;
 			break;
 		default:
 			break;

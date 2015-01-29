@@ -45,6 +45,7 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
 	    closestOnSimplex(result);
 	    v = result->closestPoint - result->referencePoint;
 		interpolatePointB(result);
+		// in world space
 		result->contactNormal = v;
 		smallestSimplex(result);
 	    k++;

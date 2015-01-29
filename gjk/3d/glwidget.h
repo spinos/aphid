@@ -36,6 +36,7 @@ private:
 	SimpleSystem * m_system;
     float m_alpha;
     int m_drawLevel;
+    int m_isRunning;
 private slots:
     void simulate();
 
