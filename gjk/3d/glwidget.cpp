@@ -340,7 +340,10 @@ void GLWidget::testGjk()
 	Vector3F wb = matB.transform(result.contactPointB);
 	getDrawer()->arrow(wb, wb + result.contactNormal);
 
-	// if(result.hasResult) drawSimplex(result.W);
+	if(result.hasResult) {
+	    getDrawer()->arrow(Vector3F::Zero, result.contactNormal);
+	    drawSimplex(result.W);
+	}
 }
 
 void GLWidget::testShapeCast()

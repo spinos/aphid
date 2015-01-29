@@ -8,6 +8,7 @@
  */
 
 #include "GjkContactSolver.h"
+#include "EpaPenetrationSolver.h"
 
 GjkContactSolver::GjkContactSolver() {}
 
@@ -49,6 +50,11 @@ void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestT
 		result->contactNormal = v;
 		smallestSimplex(result);
 	    k++;
+	}
+	
+	if(result->hasResult) {
+	    EpaPenetrationSolver penet;
+	    penet.depth(A, B, result);
 	}
 }
 
