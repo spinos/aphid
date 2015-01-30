@@ -47,3 +47,13 @@ Quaternion Quaternion::operator*( const Quaternion & b ) const
     return Quaternion(qw, qx, qy, qz);
 }
 
+Quaternion Quaternion::progress(const Vector3F & angularVelocity, const float & timeStep) const
+{
+	float mva = angularVelocity.length();
+	if(mva < 1e-6) return *this;
+	Vector3F axis = angularVelocity / mva;
+	float theta = mva * timeStep;
+	Quaternion q(theta, axis);
+	return q * *this;
+}
+

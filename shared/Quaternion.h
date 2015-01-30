@@ -14,7 +14,7 @@ public:
 	void normalize();
 	
 	Quaternion operator*( const Quaternion & b ) const;	
-	
+	Quaternion progress(const Vector3F & angularVelocity, const float & timeStep) const;
 	
 	float w, x, y, z;
 };

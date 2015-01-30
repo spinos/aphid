@@ -300,6 +300,11 @@ void Vector3F::resize(float l)
     z *= l;
 }
 
+Vector3F Vector3F::progress(const Vector3F& linearVelocity, const float & timeStep) const
+{
+    return *this + linearVelocity * timeStep;
+}
+
 void Vector3F::verbose(const char * pref) const
 {
 	std::cout<<pref<<str()<<"\n";

@@ -19,7 +19,7 @@ public:
 	void distance(const PointSet & A, const PointSet & B, ClosestTestContext * result);
 	void penetration(const PointSet & A, const PointSet & B, ClosestTestContext * result);
 	void rayCast(const PointSet & A, const PointSet & B, ClosestTestContext * result);
-	
+	void timeOfImpact(const PointSet & A, const PointSet & B, ClosestTestContext * result);
 private:
 };
 #endif        //  #ifndef GJKCONTACTSOLVER_H

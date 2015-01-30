@@ -299,8 +299,6 @@ void GLWidget::testGjk()
 	result.rayDirection.set(1.f, -1.f, 0.f);
 	result.rayDirection.normalize();
 	
-	resetSimplex(result.W);
-	
 	gjk.distance(A, B, &result);
 
 	float grey = 0.f;
@@ -438,8 +436,6 @@ void GLWidget::testShapeCast()
 	result.transformA = matA;
 	result.transformB = matB;
 	
-	resetSimplex(result.W);
-	
 	gjk.rayCast(A, B, &result);
 	
 	Vector3F rayBegin= B.X[0] * .33f + B.X[1] * .33f + B.X[2] * .33f;
@@ -562,8 +558,115 @@ void GLWidget::testRotation()
 	glPopMatrix();
 }
 
+void GLWidget::testTOI()
+{
+    A.X[0].set(-3.5f, -3.5f, 0.f);
+	A.X[1].set(3.5f, -3.5f, 0.f);
+	A.X[2].set(-2.5f, 3.5f, 0.f);
+
+	B.X[0].set(-2.f, 2.f, 0.f);
+	B.X[1].set(2.f, 2.f, 0.f);
+	B.X[2].set(2.f, -2.f, 0.f);
+
+	Vector3F pa(24.f, -1.f, 0.f);
+	Vector3F pb(22.f, 1.f, 1.f);
+	Quaternion qa(1.f, 0.f, 0.f, 0.f);
+	Quaternion qb(1.f, 0.f, 0.f, 0.f);
+	Vector3F lva(0.f, 0.f, 20.f);
+	Vector3F lvb(0.f, -3.f, -30.f);
+	Vector3F ava(-2.f, 0.f, 3.f);
+	Vector3F avb(10.f, -10.f, 15.f);
+	
+	Matrix44F transA;
+	transA.setTranslation(pa);
+	transA.setRotation(qa);
+	
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glColor3f(.5f, 0.f, 0.f);
+	drawPointSet(A, transA);
+
+	Matrix44F transB;
+	transB.setTranslation(pb);
+	transB.setRotation(qb);
+	
+	glColor3f(0.f, 0.5f, 0.f);
+    drawPointSet(B, transB);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+	ClosestTestContext result;
+	result.referencePoint.setZero();
+	result.needContributes = 1;
+	result.distance = 1e9;
+	result.hasResult = 0;
+	result.transformA = transA;
+	result.transformB = transB;
+	result.linearVelocityA = lva;
+	result.linearVelocityB = lvb;
+	result.angularVelocityA = ava;
+	result.angularVelocityB = avb;
+	result.orientationA = qa;
+	result.orientationB = qb;
+	
+	GjkContactSolver gjk;
+	gjk.timeOfImpact(A, B, &result);
+	
+	float lamda = result.TOI;
+	
+	transA.setTranslation(pa.progress(lva, lamda));
+    transA.setRotation(qa.progress(ava, lamda));
+        
+    transB.setTranslation(pb.progress(lvb, lamda));
+    transB.setRotation(qb.progress(avb, lamda));
+        
+	glColor3f(.7f, 0.2f, 0.f);
+	drawPointSet(A, transA);
+	
+	glColor3f(0.f, 0.7f, 0.2f);
+    drawPointSet(B, transB);
+	
+	Vector3F rayBegin = transB.transform(result.contactPointB);
+	Vector3F rayEnd = rayBegin + result.contactNormal;
+	glColor3f(0.f, 0.35f, 0.25f);
+	getDrawer()->arrow(rayBegin, rayEnd);
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
+	lamda = 1.f / 60.f;
+	transA.setTranslation(pa.progress(lva, lamda));
+    transA.setRotation(qa.progress(ava, lamda));
+        
+    transB.setTranslation(pb.progress(lvb, lamda));
+    transB.setRotation(qb.progress(avb, lamda));
+        
+	glColor3f(.5f, 0.2f, 0.f);
+	drawPointSet(A, transA);
+	
+	glColor3f(0.f, 0.5f, 0.2f);
+    drawPointSet(B, transB);
+}
+
+void GLWidget::drawPointSet(PointSet & p, const Matrix44F & mat)
+{
+	glPushMatrix();
+    getDrawer()->useSpace(mat);
+    
+	glBegin(GL_TRIANGLES);
+	
+    Vector3F q = p.X[0];
+    glVertex3f(q.x, q.y, q.z);
+    q = p.X[1];
+    glVertex3f(q.x, q.y, q.z);
+    q = p.X[2];
+    glVertex3f(q.x, q.y, q.z);
+    
+    glEnd();
+    glPopMatrix();
+}
+
 void GLWidget::clientDraw()
 {
+	testTOI();
 	testShapeCast();
 	testGjk();
     testLine();

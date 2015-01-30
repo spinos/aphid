@@ -352,6 +352,22 @@ const float Matrix44F::determinant() const
 
 }
 
+void Matrix44F::setRotation(const Quaternion & q)
+{
+    const float xx = q.x * q.x;
+	const float yy = q.y * q.y;
+	const float zz = q.z * q.z;
+	*m(0, 0) = 1.f - 2.f * yy - 2.f * zz; 
+	*m(0, 1) = 2.f * q.x * q.y - 2.f * q.w * q.z; 
+	*m(0, 2) = 2.f * q.x * q.z + 2.f * q.w * q.y;  
+	*m(1, 0) = 2.f * q.x * q.y + 2.f * q.w * q.z; 
+	*m(1, 1) = 1.f - 2.f * xx - 2.f * zz; 
+	*m(1, 2) = 2.f * q.y * q.z - 2.f * q.w * q.x;  
+	*m(2, 0) = 2.f * q.x * q.z - 2.f * q.w * q.y; 
+	*m(2, 1) = 2.f * q.y * q.z + 2.f * q.w * q.x; 
+	*m(2, 2) = 1.f - 2.f * xx - 2.f * yy;
+}
+
 const std::string Matrix44F::str() const
 {
 	std::stringstream sst;

@@ -13,6 +13,7 @@ GjkContactSolver::GjkContactSolver() {}
 
 void GjkContactSolver::distance(const PointSet & A, const PointSet & B, ClosestTestContext * result)
 {
+	resetSimplex(result->W);
     int k = 0;
 	float v2;
 	Vector3F w, pa, pb;
@@ -172,4 +173,91 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 	result->hasResult = 1;
 	result->contactNormal = hitN.normal();
 	result->distance = lamda;
+}
+
+void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, ClosestTestContext * result)
+{
+    const Vector3F relativeLinearVelocity = result->linearVelocityB - result->linearVelocityA;
+    const float angularMotionSize = result->angularVelocityA.length() * A.angularMotionDisc()
+                                    + result->angularVelocityB.length() * B.angularMotionDisc();
+    // no relative motion
+    if(relativeLinearVelocity.length() + angularMotionSize < TINY_VALUE)
+        return;
+    
+    distance(A, B, result);
+    
+    result->TOI = 0.f;
+    
+    // already contacted
+    if(result->hasResult)
+        return;
+    
+    float separateDistance = result->contactNormal.length();
+    Vector3F separateN = result->contactNormal / separateDistance;
+    
+    float closeInSpeed = relativeLinearVelocity.dot(separateN);
+    
+    // going apart
+    if(closeInSpeed + angularMotionSize < TINY_VALUE)
+        return;
+    
+    const Vector3F position0A = result->transformA.getTranslation();
+    const Vector3F position0B = result->transformB.getTranslation();
+    const Quaternion orientation0A = result->orientationA;
+    const Quaternion orientation0B = result->orientationB;
+    
+    float lamda = 0.f;
+	float lastLamda;
+    const float maxLamda = 1.f / 60.f;
+    int k = 0;
+    for(; k < 39; k++) {
+		lastLamda = lamda;
+        lamda += separateDistance / (closeInSpeed + angularMotionSize);
+		std::cout<<"lamda "<<lamda<<"\n";
+        
+        if(lamda < 0.f) {
+			std::cout<<"lamda < 0\n";
+			return;
+		}
+        if(lamda > maxLamda) {
+			std::cout<<"lamda > time step\n";
+			return;
+		}
+        
+        result->transformA.setTranslation(position0A.progress(result->linearVelocityA, lamda));
+        result->transformA.setRotation(orientation0A.progress(result->angularVelocityA, lamda));
+        
+        result->transformB.setTranslation(position0B.progress(result->linearVelocityB, lamda));
+        result->transformB.setRotation(orientation0B.progress(result->angularVelocityB, lamda));
+        
+        distance(A, B, result);
+        
+        if(result->hasResult) {
+			std::cout<<"contacted at time "<<lamda<<"\n";
+			lamda = lastLamda;
+            break;
+		}
+		
+        separateDistance = result->contactNormal.length();
+        
+        if(separateDistance < 0.001f) {
+			std::cout<<"close enough at time "<<lamda<<"\n";
+			break;
+		}
+		
+		std::cout<<"separated by "<<separateDistance<<"\n";
+        
+        separateN = result->contactNormal / separateDistance;
+        
+        closeInSpeed = relativeLinearVelocity.dot(separateN);
+    
+        if(closeInSpeed + angularMotionSize < TINY_VALUE) {
+			std::cout<<"go apart at time "<<lamda<<"\n";
+            return;
+		}
+    }
+    
+	std::cout<<" time of impact "<<lastLamda<<"\n";
+    result->TOI = lamda;
+	result->contactNormal = separateN;
 }

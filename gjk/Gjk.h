@@ -21,6 +21,23 @@ public:
 	virtual ~PointSet() {}
     Vector3F X[3];
     
+    virtual const float angularMotionDisc() const
+    {
+        Vector3F low(1e8, 1e8, 1e8);
+        Vector3F high(-1e8, -1e8, -1e8);
+        for(int i=0; i < 3; i++) {
+            if(X[i].x < low.x) low.x = X[i].x;
+            if(X[i].x > high.x) high.x = X[i].x;
+            if(X[i].y < low.y) low.y = X[i].y;
+            if(X[i].y > high.y) high.y = X[i].y;
+            if(X[i].z < low.z) low.z = X[i].z;
+            if(X[i].z > high.z) high.z = X[i].z;
+        }
+        const Vector3F center = low * 0.5f + high * 0.5f;
+        const Vector3F d = high - low;
+        return center.length() + d.length() * 0.5f;
+    }
+    
     virtual const Vector3F supportPoint(const Vector3F & v, const Matrix44F & space, Vector3F & localP) const
     {
         float maxdotv = -1e8;
@@ -70,13 +87,20 @@ struct ClosestTestContext {
     Matrix44F transformA, transformB;
 	Simplex W;
 	BarycentricCoordinate contributes;
+	Quaternion orientationA;
+	Quaternion orientationB;
     Vector3F referencePoint;
     Vector3F rayDirection;
     Vector3F contactNormal;
 	Vector3F contactPointB;
 	Vector3F closestPoint;
+	Vector3F linearVelocityA;
+	Vector3F linearVelocityB;
+	Vector3F angularVelocityA;
+	Vector3F angularVelocityB;
 	float penetrateDepth;
 	float distance;
+	float TOI;
 	char needContributes;
 	char hasResult;
 };

@@ -65,7 +65,7 @@ void testRayCast()
 	Vector3F hitP = startP;
 	Vector3F hitN; hitN.setZero();
 	Vector3F v = hitP - result.closestPoint;
-	Vector3F w, p, pa, pb;
+	Vector3F w, p, pa, pb, localA, localB;
 	resetSimplex(result.W);
 
 	float vdotw, vdotr;
@@ -75,8 +75,8 @@ void testRayCast()
 	    vdotr = v.dot(r);
 	    
 	    // SA-B(v)
-	    pa = A.supportPoint(v, result.transformA);
-		pb = B.supportPoint(v.reversed(), result.transformB);
+	    pa = A.supportPoint(v, result.transformA, localA);
+		pb = B.supportPoint(v.reversed(), result.transformB, localB);
 	    p = pa - pb;
 	    std::cout<<" p "<<p.str()<<"\n";
 	    w = hitP - p;
