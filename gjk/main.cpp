@@ -47,7 +47,7 @@ void testRayCast()
 	result.hasResult = 0;
 	resetSimplex(result.W);
 	
-	gjk.distance(A, B, &result);
+	gjk.separateDistance(A, B, &result);
 	
 	if(result.hasResult) std::cout<<" contacted \n";
 	else {
@@ -107,7 +107,7 @@ void testRayCast()
 	    result.referencePoint = hitP;
 	
 	    // update normal
-	    gjk.distance(A, B, &result);
+	    gjk.separateDistance(A, B, &result);
 	    
 	    std::cout<<"closest p "<<result.closestPoint.str()<<"\n";
 	    v = hitP - result.closestPoint;

@@ -35,6 +35,7 @@ private:
 private:
     PointSet A, B;
     Vector3F m_tetrahedron[4];
+	Vector3F m_lastAxis;
 	SimpleSystem * m_system;
     float m_alpha;
     int m_drawLevel;

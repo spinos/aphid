@@ -84,26 +84,31 @@ struct Simplex {
 };
 
 struct ClosestTestContext {
-    Matrix44F transformA, transformB;
-	Simplex W;
+    Simplex W;
+	Matrix44F transformA, transformB;
 	BarycentricCoordinate contributes;
-	Quaternion orientationA;
-	Quaternion orientationB;
-    Vector3F referencePoint;
+	Vector3F referencePoint;
     Vector3F rayDirection;
-    Vector3F contactNormal;
-	Vector3F contactPointB;
+    Vector3F contactPointB;
 	Vector3F closestPoint;
-	Vector3F linearVelocityA;
+	Vector3F separateAxis;
+	float distance;
+	char needContributes;
+	char hasResult;
+};
+
+struct ContinuousCollisionContext {
+    Quaternion orientationA;
+	Quaternion orientationB;
+	Vector3F positionA;
+	Vector3F positionB;
+    Vector3F linearVelocityA;
 	Vector3F linearVelocityB;
 	Vector3F angularVelocityA;
 	Vector3F angularVelocityB;
-	float penetrateDepth;
-	float distance;
+	Vector3F contactNormal;
+	Vector3F contactPointB;
 	float TOI;
-	char needContributes;
-	char hasResult;
-	int state; // 0: missed 1: contacted 2: penetrated
 };
 
 void closestOnSimplex(ClosestTestContext * io);
