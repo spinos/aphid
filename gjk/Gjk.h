@@ -103,6 +103,7 @@ struct ClosestTestContext {
 	float TOI;
 	char needContributes;
 	char hasResult;
+	int state; // 0: missed 1: contacted 2: penetrated
 };
 
 void closestOnSimplex(ClosestTestContext * io);

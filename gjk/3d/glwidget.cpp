@@ -562,20 +562,41 @@ void GLWidget::testTOI()
 {
     A.X[0].set(-3.5f, -3.5f, 0.f);
 	A.X[1].set(3.5f, -3.5f, 0.f);
-	A.X[2].set(-2.5f, 3.5f, 0.f);
+	A.X[2].set(-1.5f, 3.5f, 0.f);
 
 	B.X[0].set(-2.f, 2.f, 0.f);
 	B.X[1].set(2.f, 2.f, 0.f);
 	B.X[2].set(2.f, -2.f, 0.f);
 
-	Vector3F pa(24.f, -1.f, 0.f);
-	Vector3F pb(22.f, 1.f, 1.f);
+	Vector3F pa(34.f, 0.f, 0.f);
+	Vector3F pb(32.f + 3.35f * sin(m_alpha * 1.24f), cos(m_alpha * .56f), 1.01f);
 	Quaternion qa(1.f, 0.f, 0.f, 0.f);
 	Quaternion qb(1.f, 0.f, 0.f, 0.f);
-	Vector3F lva(0.f, 0.f, 20.f);
-	Vector3F lvb(0.f, -3.f, -30.f);
-	Vector3F ava(-2.f, 0.f, 3.f);
-	Vector3F avb(10.f, -10.f, 15.f);
+	
+	const float gTimeStep = 1.f / 60.f;
+	
+	Vector3F dva(sin(m_alpha), cos(m_alpha), 2.f + sin(m_alpha * .5f)*0.f);
+	Vector3F lva = dva.normal() * 30.f;
+	Vector3F dvb(cos(m_alpha), sin(m_alpha), -2.f + cos(m_alpha * .5f)*0.f);
+	Vector3F lvb = dvb.normal() * 40.f;
+	Vector3F ava(15.f * sin(m_alpha), 0.f, 0.f);
+	Vector3F avb(35.f * cos(m_alpha), -10.f, 25.f);
+	// ava.setZero();
+	// avb.setZero();
+	
+	lva *= gTimeStep;
+	lvb *= gTimeStep;
+	ava *= gTimeStep;
+	avb *= gTimeStep;
+	
+	Vector3F rayBegin = pa;
+	Vector3F rayEnd = pa + lva * 2.f;
+	glColor3f(0.f, 0.35f, 0.25f);
+	getDrawer()->arrow(rayBegin, rayEnd);
+	
+	rayBegin = pb;
+	rayEnd = pb + lvb * 2.f;
+	getDrawer()->arrow(rayBegin, rayEnd);
 	
 	Matrix44F transA;
 	transA.setTranslation(pa);
@@ -592,8 +613,6 @@ void GLWidget::testTOI()
 	glColor3f(0.f, 0.5f, 0.f);
     drawPointSet(B, transB);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
 	ClosestTestContext result;
 	result.referencePoint.setZero();
 	result.needContributes = 1;
@@ -607,32 +626,36 @@ void GLWidget::testTOI()
 	result.angularVelocityB = avb;
 	result.orientationA = qa;
 	result.orientationB = qb;
+	result.rayDirection = lvb.normal();
 	
 	GjkContactSolver gjk;
 	gjk.timeOfImpact(A, B, &result);
 	
 	float lamda = result.TOI;
-	
-	transA.setTranslation(pa.progress(lva, lamda));
-    transA.setRotation(qa.progress(ava, lamda));
-        
-    transB.setTranslation(pb.progress(lvb, lamda));
-    transB.setRotation(qb.progress(avb, lamda));
-        
-	glColor3f(.7f, 0.2f, 0.f);
-	drawPointSet(A, transA);
-	
-	glColor3f(0.f, 0.7f, 0.2f);
-    drawPointSet(B, transB);
-	
-	Vector3F rayBegin = transB.transform(result.contactPointB);
-	Vector3F rayEnd = rayBegin + result.contactNormal;
-	glColor3f(0.f, 0.35f, 0.25f);
-	getDrawer()->arrow(rayBegin, rayEnd);
+	if(result.hasResult) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		
+		transA.setTranslation(pa.progress(lva, lamda));
+		transA.setRotation(qa.progress(ava, lamda));
+			
+		transB.setTranslation(pb.progress(lvb, lamda));
+		transB.setRotation(qb.progress(avb, lamda));
+			
+		glColor3f(.7f, 0.2f, 0.f);
+		drawPointSet(A, transA);
+		
+		glColor3f(0.f, 0.7f, 0.2f);
+		drawPointSet(B, transB);
+		
+		rayBegin = transB.transform(result.contactPointB);
+		rayEnd = rayBegin - result.contactNormal;
+		glColor3f(0.f, 0.35f, 0.25f);
+		getDrawer()->arrow(rayBegin, rayEnd);
+	}
 	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
-	lamda = 1.f / 60.f;
+	lamda = 1.f;
 	transA.setTranslation(pa.progress(lva, lamda));
     transA.setRotation(qa.progress(ava, lamda));
         

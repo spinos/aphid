@@ -184,13 +184,16 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Clos
     if(relativeLinearVelocity.length() + angularMotionSize < TINY_VALUE)
         return;
     
+	result->referencePoint.setZero();
     distance(A, B, result);
     
     result->TOI = 0.f;
     
     // already contacted
-    if(result->hasResult)
+    if(result->hasResult) {
+		std::cout<<" contacted at t0\n";
         return;
+	}
     
     float separateDistance = result->contactNormal.length();
     Vector3F separateN = result->contactNormal / separateDistance;
@@ -198,8 +201,10 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Clos
     float closeInSpeed = relativeLinearVelocity.dot(separateN);
     
     // going apart
-    if(closeInSpeed + angularMotionSize < TINY_VALUE)
+    if(closeInSpeed + angularMotionSize < TINY_VALUE) {
+		std::cout<<" going away\n";
         return;
+	}
     
     const Vector3F position0A = result->transformA.getTranslation();
     const Vector3F position0B = result->transformB.getTranslation();
@@ -208,19 +213,19 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Clos
     
     float lamda = 0.f;
 	float lastLamda;
-    const float maxLamda = 1.f / 60.f;
+
     int k = 0;
-    for(; k < 39; k++) {
+    for(; k < 64; k++) {
 		lastLamda = lamda;
-        lamda += separateDistance / (closeInSpeed + angularMotionSize);
+        lamda += separateDistance * .9999f / (closeInSpeed + angularMotionSize);
 		std::cout<<"lamda "<<lamda<<"\n";
         
         if(lamda < 0.f) {
-			std::cout<<"lamda < 0\n";
+			// std::cout<<"lamda < 0\n";
 			return;
 		}
-        if(lamda > maxLamda) {
-			std::cout<<"lamda > time step\n";
+        if(lamda > 1.f) {
+			// std::cout<<"lamda > 1\n";
 			return;
 		}
         
@@ -230,22 +235,24 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Clos
         result->transformB.setTranslation(position0B.progress(result->linearVelocityB, lamda));
         result->transformB.setRotation(orientation0B.progress(result->angularVelocityB, lamda));
         
+		result->referencePoint.setZero();
         distance(A, B, result);
         
         if(result->hasResult) {
-			std::cout<<"contacted at time "<<lamda<<"\n";
+			std::cout<<" "<<k<<" contacted at time "<<lamda<<"\n";
 			lamda = lastLamda;
-            break;
+			separateDistance *= 0.5f;
+			continue;
 		}
 		
         separateDistance = result->contactNormal.length();
         
         if(separateDistance < 0.001f) {
-			std::cout<<"close enough at time "<<lamda<<"\n";
+			std::cout<<" "<<k<<" close enough at time "<<lamda<<"\n";
 			break;
 		}
 		
-		std::cout<<"separated by "<<separateDistance<<"\n";
+		// std::cout<<"separated by "<<separateDistance<<"\n";
         
         separateN = result->contactNormal / separateDistance;
         
@@ -256,8 +263,8 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Clos
             return;
 		}
     }
-    
-	std::cout<<" time of impact "<<lastLamda<<"\n";
-    result->TOI = lamda;
+	if(k==64) std::cout<<"max n iteration reached!\n";
+    result->hasResult = 1;
+	result->TOI = lamda;
 	result->contactNormal = separateN;
 }
