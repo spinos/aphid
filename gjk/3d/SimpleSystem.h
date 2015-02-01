@@ -11,23 +11,46 @@
  */
 #include "GjkContactSolver.h"
 
-struct RigidBody {
-	Quaternion orientation;
-	Vector3F position;
-	Vector3F linearVelocity;
-	Vector3F angularVelocity;
-	PointSet * shape;
+class MassShape : public PointSet
+{
+public:
+    MassShape() {}
+    virtual ~MassShape() {}
+    virtual void setMass(float mass) {}
+    Vector3F linearMassM;
+	Matrix33F angularMassM;
 };
 
-class TetrahedronShape : public PointSet {
+class TetrahedronShape : public MassShape {
 public:
 	TetrahedronShape() {}
-	virtual const float angularMotionDisc() const
-    {
-		Aabb box;
+	
+	Aabb computeAabb() const {
+	    Aabb box;
 		resetAabb(box);
         for(int i=0; i < 4; i++) 
 			expandAabb(box, p[i]);
+		return box;
+	}
+	
+	virtual void setMass(float mass)
+	{
+	    linearMassM.x = linearMassM.y = linearMassM.z = 1.f / mass;
+	    angularMassM.setIdentity();
+	    
+	    Aabb box = computeAabb();
+	    Vector3F sz = box.high - box.low;
+	    sz *= 0.5f;
+		
+	    // cuboid approximation
+	    *angularMassM.m(0, 0) = 12.f / ( mass * (sz.y * sz.y + sz.z * sz.z));
+	    *angularMassM.m(1, 1) = 12.f / ( mass * (sz.x * sz.x + sz.z * sz.z));
+	    *angularMassM.m(2, 2) = 12.f / ( mass * (sz.x * sz.x + sz.y * sz.y));
+	}
+	
+	virtual const float angularMotionDisc() const
+    {
+		Aabb box = computeAabb();
 
         const Vector3F center = box.low * 0.5f + box.high * 0.5f;
         const Vector3F d = box.high - box.low;
@@ -58,13 +81,22 @@ public:
 	Vector3F p[4];
 };
 
-class CuboidShape : public PointSet {
+class CuboidShape : public MassShape {
 public:
 	CuboidShape(float w, float h, float d)
 	{
 		m_w = w;
 		m_h = h;
 		m_d = d;
+	}
+	
+	virtual void setMass(float mass)
+	{
+	    linearMassM.x = linearMassM.y = linearMassM.z = 1.f / mass;
+	    angularMassM.setIdentity();
+	    *angularMassM.m(0, 0) = 12.f / ( mass * (m_h * m_h + m_d * m_d));
+	    *angularMassM.m(1, 1) = 12.f / ( mass * (m_w * m_w + m_d * m_d));
+	    *angularMassM.m(2, 2) = 12.f / ( mass * (m_w * m_w + m_h * m_h));
 	}
 	
 	virtual const float angularMotionDisc() const
@@ -109,6 +141,14 @@ public:
 	}
 
 	float m_w, m_h, m_d; 
+};
+
+struct RigidBody {
+	Quaternion orientation;
+	Vector3F position;
+	Vector3F linearVelocity;
+	Vector3F angularVelocity;
+	MassShape * shape;
 };
 
 class SimpleSystem {

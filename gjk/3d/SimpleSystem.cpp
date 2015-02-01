@@ -10,8 +10,7 @@
 #include "SimpleSystem.h"
 #define IDIM  10
 #define IDIM1 11
-// #define timeStep 0.0166667f
-#define timeStep 0.0041667f
+#define timeStep 0.0166667f
 SimpleSystem::SimpleSystem()
 {
 	m_groundX = new Vector3F[IDIM1 * IDIM1];
@@ -70,22 +69,24 @@ SimpleSystem::SimpleSystem()
 		m_vIndices[i*2+1] = i*2+1;
 	}
 	
-	m_rb.position.set(3.f, 16.f, 10.f);
+	m_rb.position.set(-10.f, 16.f, 15.f);
 	m_rb.orientation.set(1.f, 0.f, 0.f, 0.f);
-	m_rb.linearVelocity.set(3.f, 0.f, 0.f);
+	m_rb.linearVelocity.set(1.f, 0.f, 0.f);
 	m_rb.angularVelocity.setZero();
 	m_rb.shape = new CuboidShape(2.3f, 1.f, 2.f);
+	m_rb.shape->setMass(2.f);
 	
-	m_ground.position.set(0.f, -10.f, 10.f);
+	m_ground.position.set(-15.f, -10.f, 15.f);
 	m_ground.orientation.set(1.f, 0.f, 0.f, 0.f);
 	m_ground.linearVelocity.setZero();
 	m_ground.angularVelocity.setZero();
 	TetrahedronShape * tet = new TetrahedronShape;
 	tet->p[0].set(0.f, 12.f, -20.f);
-	tet->p[1].set(0.f, 12.f, 20.f);
+	tet->p[1].set(0.f, 2.f, 20.f);
 	tet->p[2].set(40.f, 0.f, 0.f);
 	tet->p[3].set(0.f, 0.f, -20.f);
 	m_ground.shape = tet;
+	m_ground.shape->setMass(10.f);
 }
 
 Vector3F * SimpleSystem::groundX() const
@@ -151,7 +152,26 @@ void SimpleSystem::applyImpulse()
 	if(m_ccd.TOI == 0.f) return;
 	
 	Vector3F linearJ = m_ccd.contactNormal.reversed();
-	Vector3F angularJ = m_ccd.contactPointB.cross(linearJ);
+	Vector3F angularJ = m_ccd.contactPointB.cross(linearJ);angularJ.reverse();
+	
+	Vector3F linearM = m_rb.shape->linearMassM;
+	Matrix33F angularM = m_rb.shape->angularMassM;
+	
+	Vector3F linearJMinv(linearJ.x * linearM.x, linearJ.y * linearM.y, linearJ.z * linearM.z);
+	Vector3F angularJMinv = angularM.transform(angularJ);
+	
+	float JMinvJt = linearJMinv.dot(linearJ) + angularJMinv.dot(angularJ);
+					
+	float Jv = linearJ.dot(m_rb.linearVelocity) + angularJ.dot(m_rb.angularVelocity);
+	float lamda = Jv / -JMinvJt;
+	
+	Vector3F linearMinvJt(linearM.x * linearJ.x, linearM.y * linearJ.y, linearM.z * linearJ.z);
+	Vector3F angularMinJt = angularM * angularJ;
+	
+	linearMinvJt.verbose("linMinvJt");
+	angularMinJt.verbose("angMinvJt");
+	m_rb.linearVelocity += linearMinvJt * lamda;
+	m_rb.angularVelocity += angularMinJt * lamda;
 }
 
 void SimpleSystem::continuousCollisionDetection(const RigidBody & A, const RigidBody & B)

@@ -441,8 +441,8 @@ void GLWidget::drawSystem()
 	
 	Vector3F at(-13.f, 0.f, 0.f);
 	
-	getDrawer()->arrow(at, at + axis * 12.f);
-	getDrawer()->coordsys(mat, 12.f, &at);
+	// getDrawer()->arrow(at, at + axis * 12.f);
+	// getDrawer()->coordsys(mat, 12.f, &at);
 	
 	RigidBody * rb = m_system->rb();
 	at = rb->position;
@@ -602,7 +602,7 @@ void GLWidget::drawPointSet(PointSet & p, const Matrix44F & mat)
 
 void GLWidget::clientDraw()
 {
-	testTOI();
+	// testTOI();
 	testShapeCast();
 	testGjk();
     testLine();

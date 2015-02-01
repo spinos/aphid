@@ -123,6 +123,8 @@ void testM()
     *mat.m(0,0) = 2.f;
     *mat.m(1,1) = 2.f;
     *mat.m(2,2) = 2.f;
+    *mat.m(2,1) = 1.f;
+    *mat.m(1,2) = 1.f;
     
     std::cout<<"M"<<mat.str();
     
@@ -131,7 +133,13 @@ void testM()
     std::cout<<"M-1"<<matInv.str();
     
     Matrix33F mmi = mat * matInv;
-    std::cout<<"M M-1"<<mmi.str();
+    std::cout<<"MM-1"<<mmi.str();
+    
+    Vector3F v(1.f, 2.f, 3.f);
+    v.verbose("v");
+    
+    v = matInv * v;
+    v.verbose("M-1v");
 }
 
 int main(int argc, char * const argv[])

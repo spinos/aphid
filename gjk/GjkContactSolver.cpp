@@ -26,7 +26,7 @@ void GjkContactSolver::separateDistance(const PointSet & A, const PointSet & B, 
 		// SA-B(-v)
 	    pa = A.supportPoint(v.reversed(), result->transformA, localA);
 		pb = B.supportPoint(v, result->transformB, localB);
-		w = pa - pb;// + v.normal() * MARGIN_DISTANCE;
+		w = pa - pb + v.normal() * MARGIN_DISTANCE;
 	    
 		// terminate when v is close enough to v(A - B).
 	    // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
@@ -75,7 +75,7 @@ void GjkContactSolver::penetration(const PointSet & A, const PointSet & B, Close
 		// SA-B(v)
 		pa = A.supportPoint(v, result->transformA, localA);
 		pb = B.supportPoint(v.reversed(), result->transformB, localB);
-		p = pa - pb + v.normal() * MARGIN_DISTANCE;
+		p = pa - pb;// + v.normal() * MARGIN_DISTANCE;
 		w = hitP - p;
 		vdotw = v.dot(w); 
 		
