@@ -264,21 +264,13 @@ void drawSimplex(const Simplex & s)
 
 void GLWidget::testGjk()
 {
-    Vector3F pa[3]; 
-    pa[0].set(-3.f, -2.f, -1.f);
-	pa[1].set(3.f, -2.f, 1.f);
-	pa[2].set(0.f, 2.f, 1.f);
+    A.X[0].set(-3.f, -2.f, -1.f);
+	A.X[1].set(3.f, -2.f, 1.f);
+	A.X[2].set(0.f, 2.f, 1.f);
 	
-	for(int i = 0; i < 3; i++)
-	    A.X[i] = pa[i];
-	
-	Vector3F pb[3];
-	pb[0].set(-2.f, -2.f, 1.f);
-	pb[1].set(2.f, -2.f, 0.f);
-	pb[2].set(3.f, 2.f, 0.f);
-	
-	for(int i = 0; i < 3; i++)
-	    B.X[i] = pb[i];
+	B.X[0].set(-2.f, -2.f, 1.f);
+	B.X[1].set(2.f, -2.f, 0.f);
+	B.X[2].set(3.f, 2.f, 0.f);
 	
 	Matrix44F matA;
     matA.rotateZ(m_alpha);
@@ -304,36 +296,11 @@ void GLWidget::testGjk()
 	float grey = 0.f;
 	if(result.hasResult) grey = .3f;
     
-    Vector3F q;
+	glColor3f(0.5f + grey, 0.5f ,0.f);
+	drawPointSet(A, matA);
 	
-	glPushMatrix();
-    getDrawer()->useSpace(matA);
-	glBegin(GL_TRIANGLES);
-    glColor3f(0.5f + grey, 0.5f ,0.f);
-    q = A.X[0];
-    glVertex3f(q.x, q.y, q.z);
-    q = A.X[1];
-    glVertex3f(q.x, q.y, q.z);
-    q = A.X[2];
-    glVertex3f(q.x, q.y, q.z);
-	glEnd();
-	
-    glPopMatrix();
-	
-	glPushMatrix();
-	getDrawer()->useSpace(matB);
-	
-	glBegin(GL_TRIANGLES);
-    glColor3f(0.f, 0.5f + grey ,0.5f);
-    q = B.X[0];
-    glVertex3f(q.x, q.y, q.z);
-    q = B.X[1];
-    glVertex3f(q.x, q.y, q.z);
-    q = B.X[2];
-    glVertex3f(q.x, q.y, q.z);
-    glEnd();
-	
-	glPopMatrix();
+	glColor3f(0.f, 0.5f + grey ,0.5f);
+	drawPointSet(B, matB);
 	
 	if(result.hasResult) {
 		result.rayDirection = m_lastAxis.normal();
@@ -459,8 +426,9 @@ void GLWidget::testCollision()
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLWidget::testRotation()
+void GLWidget::drawSystem()
 {
+	m_system->setDrawer(getDrawer());
 	Quaternion q;
 	Vector3F axis(cos(m_alpha), sin(m_alpha), 0.f); 
 	axis.normalize();
@@ -503,11 +471,13 @@ void GLWidget::testRotation()
 	getDrawer()->useSpace(space);
 	getDrawer()->tetrahedron(tet->p);
 	glPopMatrix();
+	
+	if(m_isRunning) m_system->progress();
 }
 
 void GLWidget::testTOI()
 {
-    A.X[0].set(-4.5f, -3.5f, 0.f);
+	A.X[0].set(-4.5f, -3.5f, 0.f);
 	A.X[1].set(3.5f, -4.5f, 0.f);
 	A.X[2].set(-1.5f, 3.5f, 0.f);
 
@@ -571,6 +541,7 @@ void GLWidget::testTOI()
 	result.angularVelocityB = avb;
 	
 	GjkContactSolver gjk;
+	gjk.m_dbgDrawer = getDrawer();
 	gjk.timeOfImpact(A, B, &result);
 	
 	float lamda = result.TOI;
@@ -638,9 +609,8 @@ void GLWidget::clientDraw()
 	testTriangle();
     testTetrahedron();
 	// testCollision();
-	// testRotation();
-	// m_system->progress();
-    if(m_isRunning) m_alpha += 0.01f;
+	drawSystem();
+	if(m_isRunning) m_alpha += 0.01f;
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

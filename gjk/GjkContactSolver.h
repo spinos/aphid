@@ -11,10 +11,12 @@
  */
 
 #include "Gjk.h"
-
+class KdTreeDrawer;
 class GjkContactSolver {
 public:
 	GjkContactSolver();
+	
+	KdTreeDrawer * m_dbgDrawer;
 	
 	void separateDistance(const PointSet & A, const PointSet & B, ClosestTestContext * result);
 	void penetration(const PointSet & A, const PointSet & B, ClosestTestContext * result);

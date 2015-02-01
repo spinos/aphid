@@ -10,7 +10,8 @@
 #include "SimpleSystem.h"
 #define IDIM  10
 #define IDIM1 11
-#define timeStep 0.0166667f
+// #define timeStep 0.0166667f
+#define timeStep 0.0041667f
 SimpleSystem::SimpleSystem()
 {
 	m_groundX = new Vector3F[IDIM1 * IDIM1];
@@ -69,9 +70,9 @@ SimpleSystem::SimpleSystem()
 		m_vIndices[i*2+1] = i*2+1;
 	}
 	
-	m_rb.position.set(20.f, 20.f, 10.f);
+	m_rb.position.set(3.f, 16.f, 10.f);
 	m_rb.orientation.set(1.f, 0.f, 0.f, 0.f);
-	m_rb.linearVelocity.setZero();
+	m_rb.linearVelocity.set(3.f, 0.f, 0.f);
 	m_rb.angularVelocity.setZero();
 	m_rb.shape = new CuboidShape(2.3f, 1.f, 2.f);
 	
@@ -80,8 +81,8 @@ SimpleSystem::SimpleSystem()
 	m_ground.linearVelocity.setZero();
 	m_ground.angularVelocity.setZero();
 	TetrahedronShape * tet = new TetrahedronShape;
-	tet->p[0].set(0.f, 4.f, -20.f);
-	tet->p[1].set(0.f, 4.f, 20.f);
+	tet->p[0].set(0.f, 12.f, -20.f);
+	tet->p[1].set(0.f, 12.f, 20.f);
 	tet->p[2].set(40.f, 0.f, 0.f);
 	tet->p[3].set(0.f, 0.f, -20.f);
 	m_ground.shape = tet;
@@ -131,6 +132,7 @@ void SimpleSystem::progress()
 	}
 	
 	applyGravity();
+	applyImpulse();
 	applyVelocity();
 }
 
@@ -143,15 +145,35 @@ RigidBody * SimpleSystem::ground()
 void SimpleSystem::applyGravity()
 { m_rb.linearVelocity += Vector3F(0.f, -9.8f, 0.f) * timeStep; }
 
+void SimpleSystem::applyImpulse()
+{
+	continuousCollisionDetection(m_ground, m_rb);
+	if(m_ccd.TOI == 0.f) return;
+	
+	
+}
+
+void SimpleSystem::continuousCollisionDetection(const RigidBody & A, const RigidBody & B)
+{
+	ContinuousCollisionContext &io = m_ccd;
+	io.positionA = A.position;
+	io.positionB = B.position;
+	io.orientationA = A.orientation;
+	io.orientationB = B.orientation;
+	io.linearVelocityA = A.linearVelocity * timeStep;
+	io.linearVelocityB = B.linearVelocity * timeStep;
+	io.angularVelocityA = A.angularVelocity * timeStep;
+	io.angularVelocityB = B.angularVelocity * timeStep;
+	m_gjk.timeOfImpact(*A.shape, *B.shape, &m_ccd);
+}
+
 void SimpleSystem::applyVelocity()
 {
-	m_rb.position += m_rb.linearVelocity * timeStep;
-	
-	Vector3F va = m_rb.angularVelocity;
-	float mva = va.length();
-	if(mva < TINY_VALUE) return;
-	va.normalize();
-	float theta = mva * timeStep;
-	Quaternion q(theta, va);
-	m_rb.orientation = q * m_rb.orientation;
+	m_rb.position = m_rb.position.progress(m_rb.linearVelocity, timeStep);
+	m_rb.orientation = m_rb.orientation.progress(m_rb.angularVelocity, timeStep);
+}
+
+void SimpleSystem::setDrawer(KdTreeDrawer * d)
+{
+	m_gjk.m_dbgDrawer = d;
 }

@@ -29,7 +29,7 @@ private:
     void testLine();
 	void testTriangle();
 	void testCollision();
-	void testRotation();
+	void drawSystem();
 	void testTOI();
 	void drawPointSet(PointSet & p, const Matrix44F & mat);
 private:

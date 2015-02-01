@@ -9,7 +9,7 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-#include "Gjk.h"
+#include "GjkContactSolver.h"
 
 struct RigidBody {
 	Quaternion orientation;
@@ -22,20 +22,39 @@ struct RigidBody {
 class TetrahedronShape : public PointSet {
 public:
 	TetrahedronShape() {}
-	virtual const Vector3F supportPoint(const Vector3F & v) const
+	virtual const float angularMotionDisc() const
     {
-		float maxD = -1e8;
-		float d;
-		Vector3F r;
-		for(int i=0; i < 4; i++) {
-			d = p[i].dot(v);
-			if(d > maxD) {
-				maxD = d;
-				r = p[i];
-			}
-		}
-		return r;
-	}
+		Aabb box;
+		resetAabb(box);
+        for(int i=0; i < 4; i++) 
+			expandAabb(box, p[i]);
+
+        const Vector3F center = box.low * 0.5f + box.high * 0.5f;
+        const Vector3F d = box.high - box.low;
+        return center.length() + d.length() * 0.5f;
+    }
+	
+	virtual const Vector3F supportPoint(const Vector3F & v, const Matrix44F & space, Vector3F & localP) const
+    {
+        float maxdotv = -1e8;
+        float dotv;
+        
+        Vector3F res;
+        Vector3F worldP;
+        
+        for(int i=0; i < 4; i++) {
+            worldP = space.transform(p[i]);
+            dotv = worldP.dot(v);
+            if(dotv > maxdotv) {
+                maxdotv = dotv;
+                res = worldP;
+                localP = p[i];
+            }
+        }
+        
+        return res;
+    }
+	
 	Vector3F p[4];
 };
 
@@ -48,63 +67,46 @@ public:
 		m_d = d;
 	}
 	
-	virtual const Vector3F supportPoint(const Vector3F & v) const
+	virtual const float angularMotionDisc() const
     {
-		Vector3F p(-m_w, -m_h, -m_d);
+        return Vector3F(m_w, m_h, m_d).length();
+    }
+	
+	virtual const Vector3F supportPoint(const Vector3F & v, const Matrix44F & space, Vector3F & localP) const
+    {
+        float maxdotv = -1e8;
+        float dotv;
+        
+        Vector3F res;
+        Vector3F worldP;
 		
-        Vector3F res = p;
-        float mdotv = p.dot(v);
-		
-		p.set(m_w, -m_h, -m_d);
-        float dotv = p.dot(v);
-        if(dotv > mdotv) {
-            mdotv = dotv;
-            res = p;
+		Vector3F p[8];
+		fillP(p);
+        
+        for(int i=0; i < 8; i++) {
+            worldP = space.transform(p[i]);
+            dotv = worldP.dot(v);
+            if(dotv > maxdotv) {
+                maxdotv = dotv;
+                res = worldP;
+                localP = p[i];
+            }
         }
         
-		p.set(-m_w, m_h, -m_d);
-        dotv = p.dot(v);
-        if(dotv > mdotv) {
-            mdotv = dotv;
-            res = p;
-        }
-		
-		p.set(m_w, m_h, -m_d);
-        dotv = p.dot(v);
-        if(dotv > mdotv) {
-            mdotv = dotv;
-            res = p;
-        }
-		
-		p.set(-m_w, -m_h, m_d);
-        dotv = p.dot(v);
-        if(dotv > mdotv) {
-            mdotv = dotv;
-            res = p;
-        }
-		
-		p.set(m_w, -m_h, m_d);
-        dotv = p.dot(v);
-        if(dotv > mdotv) {
-            mdotv = dotv;
-            res = p;
-        }
-        
-		p.set(-m_w, m_h, m_d);
-        dotv = p.dot(v);
-        if(dotv > mdotv) {
-            mdotv = dotv;
-            res = p;
-        }
-		
-		p.set(m_w, m_h, m_d);
-        dotv = p.dot(v);
-        if(dotv > mdotv) {
-            mdotv = dotv;
-            res = p;
-        }
         return res;
     }
+	
+	void fillP(Vector3F * p) const
+	{
+		p[0].set(-m_w, -m_h, -m_d);
+        p[1].set( m_w, -m_h, -m_d);
+        p[2].set(-m_w,  m_h, -m_d);
+        p[3].set( m_w,  m_h, -m_d);
+        p[4].set(-m_w, -m_h,  m_d);
+        p[5].set( m_w, -m_h,  m_d);
+        p[6].set(-m_w,  m_h,  m_d);
+        p[7].set( m_w,  m_h,  m_d);
+	}
 
 	float m_w, m_h, m_d; 
 };
@@ -125,16 +127,22 @@ public:
 	const unsigned numVlineVertices() const;
 	unsigned * vlineIndices() const;
 	
+	void setDrawer(KdTreeDrawer * d);
+	
 	void progress();
 	
 	RigidBody * rb();
 	RigidBody * ground();
 private:
 	void applyGravity();
+	void applyImpulse();
 	void applyVelocity();
+	void continuousCollisionDetection(const RigidBody & A, const RigidBody & B);
 private:
 	RigidBody m_rb;
 	RigidBody m_ground;
+	GjkContactSolver m_gjk;
+	ContinuousCollisionContext m_ccd;
 	Vector3F * m_X;
 	unsigned * m_indices;
 	

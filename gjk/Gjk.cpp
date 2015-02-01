@@ -404,11 +404,6 @@ void closestOnSimplex(ClosestTestContext * io)
 		io->contributes = getBarycentricCoordinate4(io->closestPoint, s.p);
 }
 
-Vector3F supportMapping(const PointSet & A, const PointSet & B, const Vector3F & v)
-{
-	return (A.supportPoint(v) - B.supportPoint(v.reversed()));
-}
-
 void interpolatePointB(ClosestTestContext * io)
 {
 	Simplex & s = io->W;
@@ -425,4 +420,20 @@ void interpolatePointB(ClosestTestContext * io)
 	}
 	io->contactPointB = sum;
 	// std::cout<<" "<<one<<"\n";
+}
+
+void resetAabb(Aabb & dst)
+{
+	dst.low.set(1e8, 1e8, 1e8);
+	dst.high.set(-1e8, -1e8, -1e8);
+}
+
+void expandAabb(Aabb & dst, const Vector3F & p)
+{
+	if(p.x < dst.low.x) dst.low.x = p.x;
+	if(p.x > dst.high.x) dst.high.x = p.x;
+	if(p.y < dst.low.y) dst.low.y = p.y;
+	if(p.y > dst.high.y) dst.high.y = p.y;
+	if(p.z < dst.low.z) dst.low.z = p.z;
+	if(p.z > dst.high.z) dst.high.z = p.z;
 }

@@ -8,7 +8,7 @@
  */
 
 #include "GjkContactSolver.h"
-
+#include <KdTreeDrawer.h>
 GjkContactSolver::GjkContactSolver() {}
 
 void GjkContactSolver::separateDistance(const PointSet & A, const PointSet & B, ClosestTestContext * result)
@@ -183,7 +183,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
     // no relative motion
     if(relativeLinearVelocity.length() + angularMotionSize < TINY_VALUE)
         return;
-    
+		
     ClosestTestContext separateIo;
 	separateIo.needContributes = 1;
     
@@ -232,6 +232,16 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		separateN = separateIo.separateAxis / distance;
 				
 		closeInSpeed = relativeLinearVelocity.dot(separateN);
+		
+		Vector3F lineB = separateIo.transformB.transform(separateIo.contactPointB);
+		Vector3F lineE = lineB + separateIo.separateAxis;
+		glColor3f(1.f, 0.f, 0.f);
+		m_dbgDrawer->arrow(lineB, lineE);
+		
+		lineB = lineE;
+		lineE = lineB + separateN;
+		glColor3f(.5f, 0.f, 1.f);
+		m_dbgDrawer->arrow(lineB, lineE);
 		
         if(closeInSpeed + angularMotionSize < 0.f) {
 			// std::cout<<"go apart at time "<<lamda<<"\n";

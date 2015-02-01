@@ -16,6 +16,13 @@ BarycentricCoordinate getBarycentricCoordinate2(const Vector3F & p, const Vector
 BarycentricCoordinate getBarycentricCoordinate3(const Vector3F & p, const Vector3F * v);
 BarycentricCoordinate getBarycentricCoordinate4(const Vector3F & p, const Vector3F * v);
 
+struct Aabb {
+	Vector3F low, high;
+};
+
+void resetAabb(Aabb & dst);
+void expandAabb(Aabb & dst, const Vector3F & p);
+
 class PointSet {
 public:
 	virtual ~PointSet() {}
@@ -23,18 +30,13 @@ public:
     
     virtual const float angularMotionDisc() const
     {
-        Vector3F low(1e8, 1e8, 1e8);
-        Vector3F high(-1e8, -1e8, -1e8);
-        for(int i=0; i < 3; i++) {
-            if(X[i].x < low.x) low.x = X[i].x;
-            if(X[i].x > high.x) high.x = X[i].x;
-            if(X[i].y < low.y) low.y = X[i].y;
-            if(X[i].y > high.y) high.y = X[i].y;
-            if(X[i].z < low.z) low.z = X[i].z;
-            if(X[i].z > high.z) high.z = X[i].z;
-        }
-        const Vector3F center = low * 0.5f + high * 0.5f;
-        const Vector3F d = high - low;
+		Aabb box;
+		resetAabb(box);
+        for(int i=0; i < 3; i++) 
+			expandAabb(box, X[i]);
+
+        const Vector3F center = box.low * 0.5f + box.high * 0.5f;
+        const Vector3F d = box.high - box.low;
         return center.length() + d.length() * 0.5f;
     }
     
@@ -56,23 +58,6 @@ public:
             }
         }
         
-        return res;
-    }
-    
-    virtual const Vector3F supportPoint(const Vector3F & v) const
-    {
-        Vector3F res = X[0];
-        float mdotv = X[0].dot(v);
-        float dotv = X[1].dot(v);
-        if(dotv > mdotv) {
-            mdotv = dotv;
-            res = X[1];
-        }
-        dotv = X[2].dot(v);
-        if(dotv > mdotv) {
-            mdotv = dotv;
-            res = X[2];
-        }
         return res;
     }
 };
@@ -119,7 +104,5 @@ void resetSimplex(Simplex & s);
 void addToSimplex(Simplex & s, const Vector3F & p);
 void addToSimplex(Simplex & s, const Vector3F & p, const Vector3F & pb);
 char isPointInsideSimplex(const Simplex & s, const Vector3F & p);
-// Vector3F supportMapping(const PointSet & A, const PointSet & B, const Vector3F & v);
-
 #endif        //  #ifndef GJK_H
 
