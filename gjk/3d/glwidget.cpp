@@ -516,18 +516,18 @@ void GLWidget::testTOI()
 	B.X[2].set(2.f, -2.f, 0.f);
 
 	Vector3F pa(34.f, 0.f, 0.f);
-	Vector3F pb(32.f + 4.35f * sin(m_alpha * 1.24f), 2.f * cos(m_alpha * .56f), 1.01f);
+	Vector3F pb(32.f + 5.35f * sin(m_alpha * 1.24f), 2.f * cos(m_alpha * .56f), 1.91f);
 	Quaternion qa(1.f, 0.f, 0.f, 0.f);
 	Quaternion qb(1.f, 0.f, 0.f, 0.f);
 	
 	const float gTimeStep = 1.f / 60.f;
 	
 	Vector3F dva(sin(m_alpha), cos(m_alpha), 2.f + sin(m_alpha * .5f)*0.f);
-	Vector3F lva = dva.normal() * 50.f;
+	Vector3F lva = dva.normal() * 30.f;
 	Vector3F dvb(cos(m_alpha), sin(m_alpha), -2.f + cos(m_alpha * .5f)*0.f);
-	Vector3F lvb = dvb.normal() * 60.f;
-	Vector3F ava(3.f * sin(m_alpha), 0.f, 0.f);
-	Vector3F avb(3.f * cos(m_alpha), 0.f, 1.1f);
+	Vector3F lvb = dvb.normal() * 130.f;
+	Vector3F ava(2.1f * sin(m_alpha), -1.f, 1.f);
+	Vector3F avb(2.1f * cos(m_alpha), 1.f, 1.f);
 	// ava.setZero();
 	// avb.setZero();
 	
@@ -631,7 +631,7 @@ void GLWidget::drawPointSet(PointSet & p, const Matrix44F & mat)
 
 void GLWidget::clientDraw()
 {
-	// testTOI();
+	testTOI();
 	testShapeCast();
 	testGjk();
     testLine();
