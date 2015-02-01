@@ -11,13 +11,15 @@
  */
 
 #include "Gjk.h"
+#ifdef DBG_DRAW
 class KdTreeDrawer;
+#endif
 class GjkContactSolver {
 public:
 	GjkContactSolver();
-	
+#ifdef DBG_DRAW	
 	KdTreeDrawer * m_dbgDrawer;
-	
+#endif	
 	void separateDistance(const PointSet & A, const PointSet & B, ClosestTestContext * result);
 	void penetration(const PointSet & A, const PointSet & B, ClosestTestContext * result);
 	void rayCast(const PointSet & A, const PointSet & B, ClosestTestContext * result);

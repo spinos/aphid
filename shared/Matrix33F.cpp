@@ -191,11 +191,15 @@ void Matrix33F::glMatrix(float m[16]) const
 
 /*
  *
- *  | a00 a01 a02 |-1             |   a22a11-a21a12  -(a22a01-a21a02)   a12a01-a11a02  |
- *  | a10 a11 a12 |    =  1/DET * | -(a22a10-a20a12)   a22a00-a20a02  -(a12a00-a10a02) |
- *  | a20 a21 a22 |               |   a21a10-a20a11  -(a21a00-a20a01)   a11a00-a10a01  |
- *
- *  with DET  =  a00(a22a11-a21a12)-a10(a22a01-a21a02)+a20(a12a01-a11a02)
+ *  | a00 a01 a02 |-1  
+ *  | a10 a11 a12 |    
+ *  | a20 a21 a22 |    
+ *  
+ *  | +  -  + |
+ *  | -  +  - |
+ *  | +  -  + |
+ *  
+ *  http://www.mathsisfun.com/algebra/matrix-inverse-minors-cofactors-adjugate.html
  *
  */
 
@@ -203,29 +207,49 @@ void Matrix33F::inverse()
 {
     const float det = determinant();
     
-    *m(0, 0) =  determinant22(M(2, 2), M(1, 1), M(2, 1), M(1, 2)) / det;
-    *m(0, 1) = -determinant22(M(2, 2), M(1, 0), M(2, 0), M(1, 2)) / det;
-    *m(0, 2) =  determinant22(M(2, 1), M(1, 0), M(2, 0), M(1, 1)) / det;
+    const float m00 =  determinant22(M(2, 2), M(1, 1), M(2, 1), M(1, 2));
+    const float m01 = -determinant22(M(2, 2), M(1, 0), M(2, 0), M(1, 2));
+    const float m02 =  determinant22(M(2, 1), M(1, 0), M(2, 0), M(1, 1));
 	
-	*m(1, 0) = -determinant22(M(2, 2), M(0, 1), M(2, 1), M(0, 2)) / det;
-	*m(1, 1) =  determinant22(M(2, 2), M(0, 0), M(2, 0), M(0, 2)) / det;
-	*m(1, 2) = -determinant22(M(2, 1), M(0, 0), M(2, 0), M(0, 1)) / det;
+	const float m10 = -determinant22(M(2, 2), M(0, 1), M(2, 1), M(0, 2));
+	const float m11 =  determinant22(M(2, 2), M(0, 0), M(2, 0), M(0, 2));
+	const float m12 = -determinant22(M(2, 1), M(0, 0), M(2, 0), M(0, 1));
 	
-	*m(2, 0) =  determinant22(M(1, 2), M(0, 1), M(1, 1), M(0, 2)) / det;
-	*m(2, 1) = -determinant22(M(1, 2), M(0, 0), M(1, 0), M(0, 2)) / det;
-	*m(2, 2) =  determinant22(M(1, 1), M(0, 0), M(1, 0), M(0, 1)) / det;
+	const float m20 =  determinant22(M(1, 2), M(0, 1), M(1, 1), M(0, 2));
+	const float m21 = -determinant22(M(1, 2), M(0, 0), M(1, 0), M(0, 2));
+	const float m22 =  determinant22(M(1, 1), M(0, 0), M(1, 0), M(0, 1));
+    
+    *m(0, 0) = m00 / det;
+    *m(0, 1) = m10 / det;
+    *m(0, 2) = m20 / det;
 	
-	transpose();
+	*m(1, 0) = m01 / det;
+	*m(1, 1) = m11 / det;
+	*m(1, 2) = m21 / det;
+	
+	*m(2, 0) = m02 / det;
+	*m(2, 1) = m12 / det;
+	*m(2, 2) = m22 / det;
 }
+
+/*
+ *  | + - + |
+ */
 
 float Matrix33F::determinant() const
 {
-    return M(0, 0) * determinant22(M(2, 2), M(1, 1), M(2, 1), M(1, 2)) - M(1, 0) * determinant22(M(2, 2), M(0, 1), M(2, 1), M(0, 2)) + M(2, 0) * determinant22(M(1, 2), M(0, 1), M(1, 1), M(0, 2));
+    return M(0, 0) * determinant22(M(2, 2), M(1, 1), M(2, 1), M(1, 2)) - M(0, 1) * determinant22(M(2, 2), M(1, 0), M(2, 0), M(1, 2)) + M(0, 1) * determinant22(M(2, 1), M(0, 1), M(2, 0), M(1, 1));
 }
 
-float Matrix33F::determinant22(float a, float b, float c, float d) const
+/*  |a b|
+ *  |c d|
+ *  
+ *  det = ad - bc
+ */
+ 
+float Matrix33F::determinant22(float a, float d, float b, float c) const
 {
-    return a * b - c * d;
+    return a * d - b * c;
 }
 
 void Matrix33F::rotateX(float alpha)

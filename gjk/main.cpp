@@ -118,50 +118,25 @@ void testRayCast()
 
 void testM()
 {
-    Matrix44F mat;
+    Matrix33F mat;
     mat.setIdentity();
     *mat.m(0,0) = 2.f;
     *mat.m(1,1) = 2.f;
     *mat.m(2,2) = 2.f;
-    mat.inverse();
+    
     std::cout<<"M"<<mat.str();
     
-    Quaternion q; 
-	Vector3F axis(1.f, 0.f, 1.f); axis.normalize();
-	float theta = 0.5f;
-	q.x = axis.x * sin(theta);
-	q.y = axis.y * sin(theta);
-	q.z = axis.z * sin(theta);
-	q.w = cos(theta);
-	
-	float mag = sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
-	q.x /= mag;
-	q.y /= mag;
-	q.z /= mag;
-	q.w /= mag;
-	std::cout<<" mag "<<mag<<"\n";
-	
-	Matrix33F matt;
-	const float w2 = q.w * q.w;
-	const float x2 = q.x * q.x;
-	const float y2 = q.y * q.y;
-	const float z2 = q.z * q.z;
-	*matt.m(0, 0) = 1.f - 2.f * y2 - 2.f * z2; 
-	*matt.m(0, 1) = 2.f * q.x * q.y - 2.f * q.w * q.z; 
-	*matt.m(0, 2) = 2.f * q.x * q.z + 2.f * q.w * q.y;  
-	*matt.m(1, 0) = 2.f * q.x * q.y + 2.f * q.w * q.z; 
-	*matt.m(1, 1) = 1.f - 2.f * x2 - 2.f * z2; 
-	*matt.m(1, 2) = 2.f * q.y * q.z + 2.f * q.w * q.x;  
-	*matt.m(2, 0) = 2.f * q.x * q.z - 2.f * q.w * q.y; 
-	*matt.m(2, 1) = 2.f * q.y * q.z - 2.f * q.w * q.x; 
-	*matt.m(2, 2) = 1.f - 2.f * x2 - 2.f * y2;
-	
-	std::cout<<"mat3 "<<matt.str();
+    Matrix33F matInv = mat;
+    matInv.inverse();
+    std::cout<<"M-1"<<matInv.str();
+    
+    Matrix33F mmi = mat * matInv;
+    std::cout<<"M M-1"<<mmi.str();
 }
 
 int main(int argc, char * const argv[])
 {
-	std::cout<<"GJK intersection test";
+	std::cout<<"GJK intersection test\n";
 	testM();
 	std::cout<<"end of test\n";
 	return 0;

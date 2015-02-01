@@ -150,7 +150,8 @@ void SimpleSystem::applyImpulse()
 	continuousCollisionDetection(m_ground, m_rb);
 	if(m_ccd.TOI == 0.f) return;
 	
-	
+	Vector3F linearJ = m_ccd.contactNormal.reversed();
+	Vector3F angularJ = m_ccd.contactPointB.cross(linearJ);
 }
 
 void SimpleSystem::continuousCollisionDetection(const RigidBody & A, const RigidBody & B)
@@ -172,8 +173,9 @@ void SimpleSystem::applyVelocity()
 	m_rb.position = m_rb.position.progress(m_rb.linearVelocity, timeStep);
 	m_rb.orientation = m_rb.orientation.progress(m_rb.angularVelocity, timeStep);
 }
-
+#ifdef DBG_DRAW
 void SimpleSystem::setDrawer(KdTreeDrawer * d)
 {
 	m_gjk.m_dbgDrawer = d;
 }
+#endif

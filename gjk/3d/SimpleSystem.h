@@ -126,9 +126,9 @@ public:
 	Vector3F * Vline() const;
 	const unsigned numVlineVertices() const;
 	unsigned * vlineIndices() const;
-	
+#ifdef DBG_DRAW	
 	void setDrawer(KdTreeDrawer * d);
-	
+#endif	
 	void progress();
 	
 	RigidBody * rb();
