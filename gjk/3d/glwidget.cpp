@@ -469,8 +469,8 @@ void GLWidget::testTOI()
 	Vector3F lva = dva.normal() * 30.f;
 	Vector3F dvb(cos(m_alpha), sin(m_alpha), -2.f + cos(m_alpha * .5f)*0.f);
 	Vector3F lvb = dvb.normal() * 130.f;
-	Vector3F ava(2.1f * sin(m_alpha), -1.f, 1.f);
-	Vector3F avb(2.1f * cos(m_alpha), 1.f, 1.f);
+	Vector3F ava(4.1f * sin(m_alpha), -1.f, 1.f);
+	Vector3F avb(4.1f * cos(m_alpha), 1.f, 1.f);
 	// ava.setZero();
 	// avb.setZero();
 	

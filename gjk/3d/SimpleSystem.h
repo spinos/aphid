@@ -64,9 +64,10 @@ public:
         
         Vector3F res;
         Vector3F worldP;
+        Vector3F margin = v.normal() * 0.05f;
         
         for(int i=0; i < 4; i++) {
-            worldP = space.transform(p[i]);
+            worldP = space.transform(p[i]) + margin;
             dotv = worldP.dot(v);
             if(dotv > maxdotv) {
                 maxdotv = dotv;
@@ -111,12 +112,13 @@ public:
         
         Vector3F res;
         Vector3F worldP;
-		
+		Vector3F margin = v.normal() * 0.05f;
+        
 		Vector3F p[8];
 		fillP(p);
         
         for(int i=0; i < 8; i++) {
-            worldP = space.transform(p[i]);
+            worldP = space.transform(p[i]) + margin;
             dotv = worldP.dot(v);
             if(dotv > maxdotv) {
                 maxdotv = dotv;
@@ -148,7 +150,18 @@ struct RigidBody {
 	Vector3F position;
 	Vector3F linearVelocity;
 	Vector3F angularVelocity;
+	Vector3F projectedLinearVelocity;
+	Vector3F projectedAngularVelocity;
+	float TOI;
 	MassShape * shape;
+	void integrateP(const float & h) {
+		position = position.progress(linearVelocity, h * TOI);
+		orientation = orientation.progress(angularVelocity, h * TOI);
+		if(TOI < 1.f) {
+			position = position.progress(projectedLinearVelocity, h * (1.f - TOI));
+			orientation = orientation.progress(projectedAngularVelocity, h * (1.f - TOI));
+		}
+	}
 };
 
 class SimpleSystem {

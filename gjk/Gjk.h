@@ -47,9 +47,10 @@ public:
         
         Vector3F res;
         Vector3F worldP;
+		Vector3F margin = v.normal() * 0.05f;
         
         for(int i=0; i < 3; i++) {
-            worldP = space.transform(X[i]);
+            worldP = space.transform(X[i]) + margin;
             dotv = worldP.dot(v);
             if(dotv > maxdotv) {
                 maxdotv = dotv;
