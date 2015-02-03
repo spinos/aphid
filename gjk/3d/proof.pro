@@ -1,5 +1,6 @@
 INCLUDEPATH += ../../shared ../ ./
 LIBS += -L../../lib -laphid -lIlmImf -lHalf
+DEFINES += DBG_DRAW
 DESTDIR = ./
 macx {
     INCLUDEPATH += $(HOME)/Library/boost_1_55_0 \

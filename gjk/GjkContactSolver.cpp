@@ -224,8 +224,8 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
             // std::cout<<" "<<k<<"     contacted "<<lamda<<"\n";
             if(k==0) {
                 // separateIo.rayDirection = relativeLinearVelocity.normal();
-				separateIo.rayDirection = Vector3F(0, -1, 0).normal();
-				// separateIo.rayDirection = Vector3F(-0.351123,-0.936329, 0).normal();
+				//separateIo.rayDirection = Vector3F(0, -1, 0).normal();
+				separateIo.rayDirection = Vector3F(0,-10, 0).normal();
             }
             else {
 				separateIo.rayDirection = separateN;
@@ -236,9 +236,13 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
             
             separateN = separateIo.separateAxis;
             
-            result->penetrateDepth = distance * separateIo.rayDirection.reversed().dot(separateN);
+            result->penetrateDepth = distance + 1.f;
+            
             // std::cout<<"pen d "<<result->penetrateDepth;
             result->contactPointB = separateIo.contactPointB;
+            result->hasContact = 1;
+            result->TOI = lamda;
+            result->contactNormal = separateN;
             
 #ifdef DBG_DRAW		
 		Vector3F lineB = separateIo.transformB.transform(separateIo.contactPointB);
@@ -252,14 +256,14 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		m_dbgDrawer->arrow(lineB, lineE);
 #endif
             
-            break;
+            return;
 		}
 		
 		result->contactPointB = separateIo.contactPointB;
 		
 		distance = separateIo.separateAxis.length();
 		
-        if(distance < 0.001f) {
+        if(distance < .001f) {
 			// std::cout<<" "<<k<<" close enough at "<<lamda<<"\n";
 			break;
 		}
@@ -315,8 +319,9 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
     }
 	
     //if(distance < 1.f) 
+    result->penetrateDepth = distance + 1.f;
     result->hasContact = 1;
 	result->TOI = lamda;
-	result->contactNormal = separateN;
+	result->contactNormal = separateN.normal().reversed();
 	// std::cout<<" "<<k<<" "<<lamda<<" "<<distance<<"\n";
 }

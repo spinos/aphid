@@ -170,6 +170,7 @@ public:
 	void setDrawer(KdTreeDrawer * d);
 #endif	
 	void progress();
+	void drawWorld();
 	
 	RigidBody * rb();
 	RigidBody * ground();

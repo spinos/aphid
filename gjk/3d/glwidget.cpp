@@ -444,35 +444,8 @@ void GLWidget::drawSystem()
 	// getDrawer()->arrow(at, at + axis * 12.f);
 	// getDrawer()->coordsys(mat, 12.f, &at);
 	
-	RigidBody * rb = m_system->rb();
-	at = rb->position;
-	mat.set(rb->orientation);
-	getDrawer()->coordsys(mat, 8.f, &at);
-	CuboidShape * cub = static_cast<CuboidShape *>(rb->shape);
-	
-	glColor3f(0.f, 0.5f, 0.f);
-	glPushMatrix();
-	Matrix44F space;
-	space.setRotation(mat);
-	space.setTranslation(at);
-	getDrawer()->useSpace(space);
-	getDrawer()->aabb(Vector3F(-cub->m_w, -cub->m_h, -cub->m_d), Vector3F(cub->m_w, cub->m_h, cub->m_d));
-	glPopMatrix();
-	
-	RigidBody * grd = m_system->ground();
-	at = grd->position;
-	mat.set(grd->orientation);
-	TetrahedronShape * tet = static_cast<TetrahedronShape *>(grd->shape);
-	
-	glColor3f(0.f, 0.f, 0.5f);
-	glPushMatrix();
-	space.setRotation(mat);
-	space.setTranslation(at);
-	getDrawer()->useSpace(space);
-	getDrawer()->tetrahedron(tet->p);
-	glPopMatrix();
-	
 	if(m_isRunning) m_system->progress();
+	m_system->drawWorld();
 }
 
 void GLWidget::testTOI()
