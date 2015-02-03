@@ -227,7 +227,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
         
         if(separateIo.hasResult) {
             if(k>0) {
-				std::cout<<"     contacted at "<<lamda<<"\n";
+				//std::cout<<"     contacted at "<<lamda<<"\n";
 				lamda = lastLamda;
 				
 			}
