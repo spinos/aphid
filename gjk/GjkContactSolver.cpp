@@ -32,17 +32,16 @@ void GjkContactSolver::separateDistance(const PointSet & A, const PointSet & B, 
 	    // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
 		v2 = v.length2();
 	    if(v2 - w.dot(v) < 0.0001f * v2) {
-	        // std::cout<<" v is close to w "<<v2 - w.dot(v)<<"\n";
-			result->hasResult = 0;
+	        std::cout<<" v is close to w "<<v2 - w.dot(v)<<"\n";
 			break;
 	    }
 	    
 	    addToSimplex(result->W, w, localB);
  
 	    if(isPointInsideSimplex(result->W, result->referencePoint)) {
-	        // std::cout<<" Minkowski difference contains the reference point\n";
+	        std::cout<<" Minkowski difference contains the reference point\n";
 			result->hasResult = 1;
-			break;
+			return;
 	    }
 	    
 	    result->hasResult = 0;
@@ -54,6 +53,7 @@ void GjkContactSolver::separateDistance(const PointSet & A, const PointSet & B, 
 		// in world space
 		smallestSimplex(result);
 	}
+	result->hasResult = 0;
 }
 
 void GjkContactSolver::penetration(const PointSet & A, const PointSet & B, ClosestTestContext * result)
@@ -221,13 +221,14 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		separateDistance(A, B, &separateIo);
         
         if(separateIo.hasResult) {
-            // std::cout<<" "<<k<<"     contacted "<<lamda<<"\n";
             if(k==0) {
+                std::cout<<"     contacted first \n";
                 // separateIo.rayDirection = relativeLinearVelocity.normal();
 				//separateIo.rayDirection = Vector3F(0, -1, 0).normal();
-				separateIo.rayDirection = Vector3F(0,-10, 0).normal();
+				separateIo.rayDirection = Vector3F(90,-30, 0).normal().cross(Vector3F::ZAxis);
             }
             else {
+                std::cout<<"     contacted at "<<k<<"\n";
 				separateIo.rayDirection = separateN;
 			}
             
@@ -236,7 +237,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
             
             separateN = separateIo.separateAxis;
             
-            result->penetrateDepth = distance + 1.f;
+            result->penetrateDepth = distance;
             
             // std::cout<<"pen d "<<result->penetrateDepth;
             result->contactPointB = separateIo.contactPointB;
@@ -318,10 +319,9 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		// std::cout<<" "<<k<<" "<<lamda<<" "<<distance<<" "<<dDistanceaLamda<<"\n";
     }
 	
-    //if(distance < 1.f) 
-    result->penetrateDepth = distance + 1.f;
+    result->penetrateDepth = 0.f;
     result->hasContact = 1;
 	result->TOI = lamda;
 	result->contactNormal = separateN.normal().reversed();
-	// std::cout<<" "<<k<<" "<<lamda<<" "<<distance<<"\n";
+	std::cout<<" "<<k<<"\n";
 }

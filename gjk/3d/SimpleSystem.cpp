@@ -84,10 +84,10 @@ SimpleSystem::SimpleSystem()
 	m_ground.linearVelocity.setZero();
 	m_ground.angularVelocity.setZero();
 	TetrahedronShape * tet = new TetrahedronShape;
-	tet->p[0].set(-100.f, 10.f, -200.f);
-	tet->p[1].set(-100.f, 10.f, 100.f);
-	tet->p[2].set(800.f, 10.f, -200.f);
-	tet->p[3].set(0.f, -220.f, -200.f);
+	tet->p[0].set(-10.f, 10.f, -20.f);
+	tet->p[1].set(-10.f, 10.f, 120.f);
+	tet->p[2].set(80.f, -20.f, -20.f);
+	tet->p[3].set(0.f, -20.f, -20.f);
 	m_ground.shape = tet;
 	m_ground.shape->setMass(10.f);
 }
@@ -194,7 +194,7 @@ void SimpleSystem::applyImpulse()
 
 	float lamda = 0.f;
 	float lastLamda;
-	for(int i=0; i<1; i++) {
+	for(int i=0; i<4; i++) {
 	continuousCollisionDetection(m_ground, m_rb);
 	if(!m_ccd.hasContact) return;
 	lastLamda = lamda;
@@ -202,20 +202,18 @@ void SimpleSystem::applyImpulse()
 	Vector3F angularJ;
 	
 	linearJ = m_ccd.contactNormal;
-	linearJ.set(0.f, 1.f, 0.f);
-
+	
 	Matrix33F R; R.set(m_rb.orientation); R.inverse();
     Vector3F ro = R.transform(linearJ);
     
-	angularJ = m_ccd.contactPointB.reversed().cross(ro);
+	angularJ = m_ccd.contactPointB.cross(ro).reversed();
 	
 	if(m_ccd.penetrateDepth > 0.f) {
 	    std::cout<<" pen d "<<m_ccd.penetrateDepth;
-	    linearJ *= 1.f + m_ccd.penetrateDepth * 60.f;
-	    
-	    ro = R.transform(Vector3F(0.f, 1.f - m_ccd.penetrateDepth,0.f));
-    
-	    angularJ = m_ccd.contactPointB.reversed().cross(ro);
+	    //linearJ *= 1.f + m_ccd.penetrateDepth * 60.f;
+	    //linearJ -= m_rb.linearVelocity * m_rb.linearVelocity.normal().dot(m_ccd.contactNormal);
+	    //angularJ *= 1.f + m_ccd.penetrateDepth * 60.f;
+	    //angularJ *= 1.f - m_ccd.penetrateDepth;
 	}
 	
 #ifdef DBG_DRAW
@@ -267,7 +265,7 @@ void SimpleSystem::applyImpulse()
 	lamda = lamda - (Jv + m_ccd.penetrateDepth * 0.f) / JMinvJt;
 	
 	char showStop = 0;
-	std::cout<<"\n k"<<i<<" lamda "<<lamda<<"\n";
+	std::cout<<"\n k "<<i<<" lamda "<<lamda<<"\n";
 	if(lamda< 0.f) {
 		lamda = 0.f;
 		std::cout<<" clamped\n";
