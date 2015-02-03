@@ -11,6 +11,7 @@
 #define IDIM  10
 #define IDIM1 11
 #define timeStep 0.0166667f
+
 SimpleSystem::SimpleSystem()
 {
 	m_groundX = new Vector3F[IDIM1 * IDIM1];
@@ -69,22 +70,22 @@ SimpleSystem::SimpleSystem()
 		m_vIndices[i*2+1] = i*2+1;
 	}
 	
-	m_rb.position.set(-10.f, 16.f, 15.f);
+	m_rb.position.set(-10.f, 17.f, 15.f);
 	m_rb.orientation.set(1.f, 0.f, 0.f, 0.f);
 	m_rb.linearVelocity.set(1.f, 0.f, 0.f);
 	m_rb.angularVelocity.setZero();
-	m_rb.shape = new CuboidShape(2.3f, 1.f, 2.f);
-	m_rb.shape->setMass(2.f);
+	m_rb.shape = new CuboidShape(4.f, 4.f, 4.f);
+	m_rb.shape->setMass(4.f);
 	
-	m_ground.position.set(-15.f, -10.f, 15.f);
+	m_ground.position.set(-15.f, -7.f, 15.f);
 	m_ground.orientation.set(1.f, 0.f, 0.f, 0.f);
 	m_ground.linearVelocity.setZero();
 	m_ground.angularVelocity.setZero();
 	TetrahedronShape * tet = new TetrahedronShape;
-	tet->p[0].set(0.f, 12.f, -20.f);
-	tet->p[1].set(0.f, 2.f, 20.f);
-	tet->p[2].set(40.f, 0.f, 0.f);
-	tet->p[3].set(0.f, 0.f, -20.f);
+	tet->p[0].set(0.f, -10.f, -20.f);
+	tet->p[1].set(0.f, -10.f, 120.f);
+	tet->p[2].set(80.f, -10.f, -20.f);
+	tet->p[3].set(0.f, -22.f, -20.f);
 	m_ground.shape = tet;
 	m_ground.shape->setMass(10.f);
 }
@@ -120,7 +121,7 @@ void SimpleSystem::progress()
 {
 	int i;
 	for(i = 0; i< 3; i++) {
-		m_V[i] += Vector3F(0.f, -9.8f, 0.f) * timeStep;
+		m_V[i] += Vector3F(0.f, -980.f, 0.f) * timeStep;
 	}
 	
 	for(i = 0; i< 3; i++) {
@@ -148,11 +149,28 @@ void SimpleSystem::applyGravity()
 
 void SimpleSystem::applyImpulse()
 {
+	float lamda = 0.f;
+	float lastLamda;
+	for(int i=0; i<4; i++) {
 	continuousCollisionDetection(m_ground, m_rb);
-	if(m_ccd.TOI == 0.f) return;
+	if(!m_ccd.hasContact) return;
+	lastLamda = lamda;
+	Vector3F linearJ;
+	Vector3F angularJ;
+	m_ccd.contactPointB.verbose("\ncontactB");
 	
-	Vector3F linearJ = m_ccd.contactNormal.reversed();
-	Vector3F angularJ = m_ccd.contactPointB.cross(linearJ);angularJ.reverse();
+	if(m_ccd.penetrateDepth > 0.f) {
+		linearJ = m_ccd.contactNormal;
+		std::cout<<" pen d "<<m_ccd.penetrateDepth;
+		
+	}
+	else {
+		linearJ = m_ccd.contactNormal.reversed();
+	}
+	
+	angularJ = m_ccd.contactPointB.cross(linearJ).reversed();
+
+	if(m_ccd.penetrateDepth > 0.f) linearJ *= 1.f + m_ccd.penetrateDepth * 60.f;
 	
 	Vector3F linearM = m_rb.shape->linearMassM;
 	Matrix33F angularM = m_rb.shape->angularMassM;
@@ -161,17 +179,40 @@ void SimpleSystem::applyImpulse()
 	Vector3F angularJMinv = angularM.transform(angularJ);
 	
 	float JMinvJt = linearJMinv.dot(linearJ) + angularJMinv.dot(angularJ);
+	
+	std::cout<<" JMinvJt "<<JMinvJt<<"\n";
+	if(JMinvJt < TINY_VALUE) continue;
 					
 	float Jv = linearJ.dot(m_rb.linearVelocity) + angularJ.dot(m_rb.angularVelocity);
-	float lamda = Jv / -JMinvJt;
+	
+	std::cout<<" Jv l "<<linearJ.dot(m_rb.linearVelocity)<<" a "<<angularJ.dot(m_rb.angularVelocity);
+	
+	std::cout<<" Jv "<<Jv;
+	
+	lamda = lamda - Jv / JMinvJt;
+	lamda += m_ccd.penetrateDepth * 60.f / JMinvJt;
+	
+	char showStop = 0;
+	std::cout<<"\n k"<<i<<" lamda "<<lamda<<"\n";
+	if(lamda< 0.f) {
+		lamda = 0.f;
+		std::cout<<" clamped\n";
+		showStop = 1;
+	}
 	
 	Vector3F linearMinvJt(linearM.x * linearJ.x, linearM.y * linearJ.y, linearM.z * linearJ.z);
 	Vector3F angularMinJt = angularM * angularJ;
-	
-	linearMinvJt.verbose("linMinvJt");
-	angularMinJt.verbose("angMinvJt");
-	m_rb.linearVelocity += linearMinvJt * lamda;
-	m_rb.angularVelocity += angularMinJt * lamda;
+
+	m_rb.linearVelocity += linearMinvJt * (lamda - lastLamda);
+	m_rb.angularVelocity += angularMinJt * (lamda - lastLamda);
+		
+	if(showStop) {
+		//m_rb.linearVelocity.setZero();
+		//m_rb.angularVelocity.setZero();
+		//linearMinvJt.verbose("linMinvJt");
+		//angularMinJt.verbose("angMinvJt");
+	}
+}
 }
 
 void SimpleSystem::continuousCollisionDetection(const RigidBody & A, const RigidBody & B)

@@ -94,6 +94,8 @@ struct ContinuousCollisionContext {
 	Vector3F contactNormal;
 	Vector3F contactPointB;
 	float TOI;
+	float penetrateDepth;
+	char hasContact;
 };
 
 void closestOnSimplex(ClosestTestContext * io);

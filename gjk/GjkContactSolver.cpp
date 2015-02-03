@@ -105,7 +105,6 @@ void GjkContactSolver::penetration(const PointSet & A, const PointSet & B, Close
 		smallestSimplex(result);
 	}
 	
-	result->hasResult = 1;
 	result->distance = hitP.length();
 	result->separateAxis.normalize();
 }
@@ -177,9 +176,16 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 
 void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, ContinuousCollisionContext * result)
 {
+    result->hasContact = 0;
+    result->penetrateDepth = 0.f;
     result->TOI = 0.f;
     
     const Vector3F relativeLinearVelocity = result->linearVelocityB - result->linearVelocityA;
+    
+    // std::cout<<" velocityA "<<result->linearVelocityA.str();
+	// std::cout<<" velocityB "<<result->linearVelocityB.str();
+    // std::cout<<" relativeLinearVelocity "<<relativeLinearVelocity.str();
+		
     const float angularMotionSize = result->angularVelocityA.length() * A.angularMotionDisc()
                                     + result->angularVelocityB.length() * B.angularMotionDisc();
     // no relative motion
@@ -215,7 +221,37 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		separateDistance(A, B, &separateIo);
         
         if(separateIo.hasResult) {
-            std::cout<<" "<<k<<"     contacted "<<lamda<<"\n";
+            // std::cout<<" "<<k<<"     contacted "<<lamda<<"\n";
+            if(k==0) {
+                // separateIo.rayDirection = relativeLinearVelocity.normal();
+				separateIo.rayDirection = Vector3F(0, -1, 0).normal();
+				// separateIo.rayDirection = Vector3F(-0.351123,-0.936329, 0).normal();
+            }
+            else {
+				separateIo.rayDirection = separateN;
+			}
+            
+            penetration(A, B, &separateIo);
+            distance = separateIo.distance;
+            
+            separateN = separateIo.separateAxis;
+            
+            result->penetrateDepth = distance * separateIo.rayDirection.reversed().dot(separateN);
+            // std::cout<<"pen d "<<result->penetrateDepth;
+            result->contactPointB = separateIo.contactPointB;
+            
+#ifdef DBG_DRAW		
+		Vector3F lineB = separateIo.transformB.transform(separateIo.contactPointB);
+		Vector3F lineE = lineB + separateIo.rayDirection.reversed() * distance;
+		glColor3f(1.f, 1.f, 0.f);
+		m_dbgDrawer->arrow(lineB, lineE);
+		
+		lineB = lineE;
+		lineE = lineB + separateN;
+		glColor3f(1.f, 0.f, 1.f);
+		m_dbgDrawer->arrow(lineB, lineE);
+#endif
+            
             break;
 		}
 		
@@ -231,9 +267,14 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		dDistanceaLamda = (distance - lastDistance) / deltaLamda;
 		lastDistance = distance;
 		
+		// std::cout<<" sep ax "<<separateIo.separateAxis.str();
+		// std::cout<<" dist "<<distance;
 		separateN = separateIo.separateAxis / distance;
+		// std::cout<<" sep n "<<separateN.str();
 				
 		closeInSpeed = relativeLinearVelocity.dot(separateN);
+		// std::cout<<" closeInSpeed "<<closeInSpeed;
+		
 #ifdef DBG_DRAW		
 		Vector3F lineB = separateIo.transformB.transform(separateIo.contactPointB);
 		Vector3F lineE = lineB + separateIo.separateAxis;
@@ -245,6 +286,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		glColor3f(.5f, 0.f, 1.f);
 		m_dbgDrawer->arrow(lineB, lineE);
 #endif		
+
         if(closeInSpeed + angularMotionSize < 0.f) {
 			// std::cout<<"go apart at time "<<lamda<<"\n";
             return;
@@ -272,7 +314,9 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		// std::cout<<" "<<k<<" "<<lamda<<" "<<distance<<" "<<dDistanceaLamda<<"\n";
     }
 	
+    //if(distance < 1.f) 
+    result->hasContact = 1;
 	result->TOI = lamda;
 	result->contactNormal = separateN;
-	std::cout<<" "<<k<<" "<<lamda<<" "<<distance<<"\n";
+	// std::cout<<" "<<k<<" "<<lamda<<" "<<distance<<"\n";
 }
