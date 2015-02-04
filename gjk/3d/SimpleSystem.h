@@ -116,7 +116,7 @@ public:
 		
 		Vector3F p[8];
 		fillP(p);
-        
+		
         for(int i=0; i < 8; i++) {
             worldP = space.transform(p[i]) + mar;
             dotv = worldP.dot(v);
@@ -162,6 +162,12 @@ struct RigidBody {
 			orientation = orientation.progress(projectedAngularVelocity, h * (1.f - TOI));
 		}
 	}
+	void updateState() {
+		if(TOI < 1.f) {
+			linearVelocity = projectedLinearVelocity;
+			angularVelocity = projectedAngularVelocity;
+		}
+	}
 };
 
 class SimpleSystem {
@@ -192,6 +198,7 @@ private:
 	void applyImpulse();
 	void applyVelocity();
 	void continuousCollisionDetection(const RigidBody & A, const RigidBody & B);
+	void updateStates();
 private:
 	RigidBody m_rb;
 	RigidBody m_ground;

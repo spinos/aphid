@@ -443,9 +443,9 @@ void GLWidget::drawSystem()
 	
 	// getDrawer()->arrow(at, at + axis * 12.f);
 	// getDrawer()->coordsys(mat, 12.f, &at);
-	
-	if(m_isRunning) m_system->progress();
 	m_system->drawWorld();
+	if(m_isRunning) m_system->progress();
+	
 }
 
 void GLWidget::testTOI()
@@ -532,11 +532,6 @@ void GLWidget::testTOI()
 		
 		glColor3f(0.f, 0.7f, 0.2f);
 		drawPointSet(B, transB);
-		
-		rayBegin = transB.transform(result.contactPointB);
-		rayEnd = rayBegin - result.contactNormal;
-		glColor3f(0.f, 0.35f, 0.25f);
-		getDrawer()->arrow(rayBegin, rayEnd);
 	}
 	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -575,14 +570,14 @@ void GLWidget::drawPointSet(PointSet & p, const Matrix44F & mat)
 
 void GLWidget::clientDraw()
 {
-	testTOI();
-	testShapeCast();
-	testGjk();
-    testLine();
-	testTriangle();
-    testTetrahedron();
+	// testTOI();
+	// testShapeCast();
+	// testGjk();
+    // testLine();
+	// testTriangle();
+    // testTetrahedron();
 	// testCollision();
-	// drawSystem();
+	drawSystem();
 	if(m_isRunning) m_alpha += 0.01f;
 }
 

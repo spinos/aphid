@@ -74,7 +74,7 @@ SimpleSystem::SimpleSystem()
 	
 	m_rb.position.set(-10.f, 17.f, 15.f);
 	m_rb.orientation.set(1.f, 0.f, 0.f, 0.f);
-	m_rb.linearVelocity.set(0.f, 0.f, 0.f);
+	m_rb.linearVelocity.set(2.f, 0.f, 0.f);
 	m_rb.angularVelocity.setZero();
 	m_rb.shape = new CuboidShape(4.f, 4.f, 4.f);
 	m_rb.shape->setMass(1.f);
@@ -86,7 +86,7 @@ SimpleSystem::SimpleSystem()
 	TetrahedronShape * tet = new TetrahedronShape;
 	tet->p[0].set(-10.f, 10.f, -20.f);
 	tet->p[1].set(-10.f, 10.f, 120.f);
-	tet->p[2].set(80.f, -10.f, -20.f);
+	tet->p[2].set(80.f, 10.f, -20.f);
 	tet->p[3].set(0.f, -20.f, -20.f);
 	m_ground.shape = tet;
 	m_ground.shape->setMass(10.f);
@@ -138,6 +138,7 @@ void SimpleSystem::progress()
 	applyGravity();
 	applyImpulse();
 	applyVelocity();
+	updateStates();
 }
 
 RigidBody * SimpleSystem::rb()
@@ -193,29 +194,47 @@ void SimpleSystem::applyImpulse()
     m_rb.linearVelocity += linearMinvJt * lamda;
     m_rb.angularVelocity += angularMinvJt * lamda;
     */
+	m_rb.TOI = 1.f;
+	continuousCollisionDetection(m_ground, m_rb);
+	if(!m_ccd.hasContact) {
+		return;
+	}
+	if(m_ccd.TOI == 0.f) {
+		// m_rb.linearVelocity.setZero();
+		// m_rb.angularVelocity.setZero();
+		// m_rb.projectedLinearVelocity.setZero();
+		// m_rb.projectedAngularVelocity.setZero();
+		// return;
+	}
+	
+	if(m_ccd.TOI > 0.f) std::cout<<" toi "<<m_ccd.TOI<<"\n";
+	
+	m_rb.TOI = m_ccd.TOI;
+
+// B at impact position
+	m_ccd.positionB = m_rb.position.progress(m_rb.linearVelocity, m_rb.TOI * timeStep);
+	m_ccd.orientationB = m_rb.orientation.progress(m_rb.angularVelocity, m_rb.TOI * timeStep);
+	
 	m_rb.projectedLinearVelocity = m_rb.linearVelocity;
 	m_rb.projectedAngularVelocity = m_rb.angularVelocity;
-	m_rb.TOI = 1.f;
+	
 	float lastLamda;
 	float lamda = 0.f;
 	for(int i=0; i<4; i++) {
-		continuousCollisionDetection(m_ground, m_rb);
-		if(!m_ccd.hasContact) return;
-		if(i < 1) {
-			if(m_ccd.TOI == 0.f) return;
-			std::cout<<" toi "<<m_ccd.TOI<<"\n";
-			m_rb.TOI = m_ccd.TOI;
+		if(!m_ccd.hasContact) {
+			// std::cout<<" no contact this iteration\n";
+			continue;
 		}
-	
+		// std::cout<<"contact n"<<m_ccd.contactNormal.str();
+		
 		lastLamda = lamda;
+		
 		Vector3F linearJ;
 		Vector3F angularJ;
 	
 		linearJ = m_ccd.contactNormal;
-		
-		
-	
-		Matrix33F R; R.set(m_rb.orientation/*.progress(m_rb.projectedAngularVelocity, timeStep)*/); R.inverse();
+
+		Matrix33F R; R.set(m_ccd.orientationB/*.progress(m_rb.projectedAngularVelocity, timeStep)*/); R.inverse();
 		
 		// std::cout<<"o("<<m_rb.orientation.x<<","<<m_rb.orientation.y<<","<<m_rb.orientation.z<<")"; 
 		// std::cout<<"R"<<R.str();
@@ -224,9 +243,9 @@ void SimpleSystem::applyImpulse()
 		ro.normalize(); 
 		// std::cout<<"||r||"<<ro.str();
 		angularJ = m_ccd.contactPointB.reversed().cross(ro);
-		std::cout<<"contact b"<<m_ccd.contactPointB.str();
-		std::cout<<"linearJ"<<linearJ.str();
-		std::cout<<"angularJ"<<angularJ.str();
+		// std::cout<<"contact p"<<m_ccd.contactPointB.str();
+		// std::cout<<"linearJ"<<linearJ.str();
+		// std::cout<<"angularJ"<<angularJ.str();
 	
 #ifdef DBG_DRAW
     KdTreeDrawer * drawer = m_gjk.m_dbgDrawer;
@@ -269,37 +288,50 @@ void SimpleSystem::applyImpulse()
 	
 		float JMinvJt = linearJMinv.dot(linearJ) + angularJMinv.dot(angularJ);
 	
-		std::cout<<" JMinvJt "<<JMinvJt<<"\n";
+		// std::cout<<" JMinvJt "<<JMinvJt<<"\n";
 		if(JMinvJt < TINY_VALUE) continue;
 					
 		float Jv = linearJ.dot(m_rb.projectedLinearVelocity) + angularJ.dot(m_rb.projectedAngularVelocity);
 	
 		// std::cout<<" Jv l "<<linearJ.dot(m_rb.linearVelocity)<<" a "<<angularJ.dot(m_rb.angularVelocity);
-		std::cout<<" Jv "<<Jv;
+		// std::cout<<" Jv "<<Jv;
 	
 		lamda = - Jv / JMinvJt;
 	
 		char showStop = 0;
-		std::cout<<"\n impulse "<<lamda<<"\n";
+		// std::cout<<"\n impulse "<<lamda<<"\n";
 		if(lamda< 0.f) {
 			lamda = 0.f;
 			showStop = 1;
 		}
 	
 		Vector3F linearMinvJt(linearM.x * linearJ.x, linearM.y * linearJ.y, linearM.z * linearJ.z);
-		linearMinvJt.verbose("linearMinvJt");
+		//linearMinvJt.verbose("linearMinvJt");
 		Vector3F angularMinvJt = angularM * angularJ;
 		// angularJ.verbose("angularJ");
-		angularMinvJt.verbose("angularMinvJt");
+		// angularMinvJt.verbose("angularMinvJt");
 		
 // http://www.cs.uu.nl/docs/vakken/mgp/lectures/lecture%207%20Collision%20Resolution.pdf		
-		float Jb = -(1.f + 1.f) * m_rb.projectedLinearVelocity.reversed().dot(m_ccd.contactNormal);
+		float Jb = -(1.f + .49f) * m_rb.projectedLinearVelocity.reversed().dot(m_ccd.contactNormal);
 		
-		m_rb.projectedLinearVelocity -= m_ccd.contactNormal * Jb;
-		m_rb.projectedAngularVelocity += angularMinvJt * (lamda - lastLamda);
+		if(m_ccd.penetrateDepth > 0.f) {
+			// std::cout<<" penetrate d "<<m_ccd.penetrateDepth;
+			Jb += m_ccd.penetrateDepth * 60.f;
+		}
 		
-		m_rb.projectedLinearVelocity.verbose("pv");
-		m_rb.projectedAngularVelocity.verbose("pav");
+		Vector3F bigI = m_ccd.contactNormal * -Jb;
+#ifdef DBG_DRAW
+	glBegin(GL_LINES);
+	glColor3f(1,1,1);
+	glVertex3f(m_rb.position.x, m_rb.position.y, m_rb.position.z);
+	glVertex3f(m_rb.position.x + bigI.x, m_rb.position.y + bigI.y, m_rb.position.z + bigI.z);
+	glEnd();
+#endif		
+		m_rb.projectedLinearVelocity += bigI;
+		// m_rb.projectedAngularVelocity += angularMinvJt * (lamda - lastLamda);
+		
+		//m_rb.projectedLinearVelocity.verbose("pv");
+		// m_rb.projectedAngularVelocity.verbose("pav");
 
 #ifdef DBG_DRAW
 	glBegin(GL_LINES);
@@ -314,11 +346,17 @@ void SimpleSystem::applyImpulse()
 	drawer->arrow(Vector3F::Zero, angularMinvJt);
 	glPopMatrix();
 #endif
+		
+// collision at impact position
+		m_ccd.linearVelocityB = m_rb.projectedLinearVelocity * timeStep;
+		m_ccd.angularVelocityB = m_rb.projectedAngularVelocity * timeStep;
+		// std::cout<<" test at impact point ";
+		m_gjk.timeOfImpact(*m_ground.shape, *m_rb.shape, &m_ccd);
 	}
-	m_rb.linearVelocity.verbose("v");
-	m_rb.angularVelocity.verbose("av");
-	m_rb.projectedLinearVelocity.verbose("pv");
-	m_rb.projectedAngularVelocity.verbose("pav");
+	// m_rb.linearVelocity.verbose("v");
+	// m_rb.angularVelocity.verbose("av");
+	// m_rb.projectedLinearVelocity.verbose("pv");
+	// m_rb.projectedAngularVelocity.verbose("pav");
 	
 	//m_rb.projectedLinearVelocity.set(0, 100, 0);
 	//m_rb.linearVelocity = m_rb.projectedLinearVelocity;
@@ -333,9 +371,9 @@ void SimpleSystem::continuousCollisionDetection(const RigidBody & A, const Rigid
 	io.orientationA = A.orientation;
 	io.orientationB = B.orientation;
 	io.linearVelocityA = A.linearVelocity * timeStep;
-	io.linearVelocityB = B.projectedLinearVelocity * timeStep;
+	io.linearVelocityB = B.linearVelocity * timeStep;
 	io.angularVelocityA = A.angularVelocity * timeStep;
-	io.angularVelocityB = B.projectedAngularVelocity * timeStep;
+	io.angularVelocityB = B.angularVelocity * timeStep;
 	m_gjk.timeOfImpact(*A.shape, *B.shape, &m_ccd);
 }
 
@@ -390,4 +428,9 @@ void SimpleSystem::drawWorld()
 	drawer->tetrahedron(tet->p);
 	glPopMatrix();
 #endif
+}
+
+void SimpleSystem::updateStates()
+{
+	m_rb.updateState();
 }

@@ -37,6 +37,26 @@ void GjkContactSolver::separateDistance(const PointSet & A, const PointSet & B, 
 	    }
 	    
 	    addToSimplex(result->W, w, localB);
+		
+#ifdef DBG_DRAW
+		glPushMatrix();
+		m_dbgDrawer->useSpace(result->transformB);
+		glColor3f(0.f, .5f, 0.f);
+		m_dbgDrawer->arrow(Vector3F::Zero, localB);
+		glPopMatrix();
+		
+		glPushMatrix();
+		m_dbgDrawer->useSpace(result->transformA);
+		glColor3f(.5f, 0.f, 0.f);
+		m_dbgDrawer->arrow(Vector3F::Zero, localA);
+		glPopMatrix();
+		
+		glPushMatrix();
+		m_dbgDrawer->useSpace(result->transformA);
+		glColor3f(.5f, .5f, 0.f);
+		m_dbgDrawer->arrow(Vector3F::Zero, w + result->transformB.transform(localB));
+		glPopMatrix();
+#endif
  
 	    if(isPointInsideSimplex(result->W, result->referencePoint)) {
 	        // std::cout<<" Minkowski difference contains the reference point\n";
@@ -49,6 +69,10 @@ void GjkContactSolver::separateDistance(const PointSet & A, const PointSet & B, 
 		closestOnSimplex(result);
 	    v = result->closestPoint - result->referencePoint;
 		result->separateAxis = v;
+#ifdef DBG_DRAW
+		glColor3f(.1f, 3.f, 0.f);
+		m_dbgDrawer->arrow(Vector3F::Zero, v);
+#endif
 		interpolatePointB(result);
 		// in world space
 		smallestSimplex(result);
@@ -190,11 +214,22 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
                                     + result->angularVelocityB.length() * B.angularMotionDisc();
     // no relative motion
     if(relativeLinearVelocity.length() + angularMotionSize < TINY_VALUE)
-        return;
+		return;
+		
+#ifdef DBG_DRAW		
+	Vector3F lineB = result->positionB;
+	Vector3F lineE = lineB + relativeLinearVelocity;
+	glColor3f(0.f, .1f, .6f);
+	m_dbgDrawer->arrow(lineB, lineE);
+	lineB = result->positionA;
+	lineE = lineB - relativeLinearVelocity;
+	glColor3f(0.f, .1f, .6f);
+	m_dbgDrawer->arrow(lineB, lineE);
+#endif
 		
     ClosestTestContext separateIo;
 	separateIo.needContributes = 1;
-	separateIo.margin = 0.2f;
+	separateIo.margin = 0.05f;
     
     Vector3F separateN;
     
@@ -216,62 +251,85 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
         
         separateIo.transformA.setTranslation(position0A.progress(result->linearVelocityA, lamda));
 		Quaternion ra = orientation0A.progress(result->angularVelocityA, lamda);
-		ra.normalize();
+		//ra.normalize();
         separateIo.transformA.setRotation(ra);
         separateIo.transformB.setTranslation(position0B.progress(result->linearVelocityB, lamda));
 		Quaternion rb = orientation0B.progress(result->angularVelocityB, lamda);
-		rb.normalize();
+		//rb.normalize();
         separateIo.transformB.setRotation(rb);
         separateIo.referencePoint.setZero();
 		separateIo.distance = 1e9;
 		separateDistance(A, B, &separateIo);
         
         if(separateIo.hasResult) {
-            if(k>0) {
-				lamda = lastLamda;
-				break;
-			}
-			else {	
+            if(k<1) {	
+				// std::cout<<"     contact at t0 try zero margin\n";
                 separateIo.margin = 0.f;
 				separateIo.distance = 1e9;
 				separateDistance(A, B, &separateIo);
 				if(separateIo.hasResult) {
-					std::cout<<"     contact at t0\n";
-					break;
-				}	
-            }
+					std::cout<<"     intersected\n";
+					result->hasContact = 0;
+					return;
+				}
+				
+				result->contactPointB = separateIo.contactPointB;
+				distance = separateIo.separateAxis.length();
+				result->penetrateDepth = 0.1 - distance;
+				separateN = separateIo.separateAxis / -distance;
+#ifdef DBG_DRAW		
+		lineB = separateIo.transformB.transform(separateIo.contactPointB);
+		lineE = lineB + separateN;
+		glColor3f(1.f, 0.f, 0.f);
+		m_dbgDrawer->arrow(lineB, lineE);
+#endif
+				break;
+            } else {
+				// std::cout<<" contact at "<<lamda;;
+				lamda = lastLamda;
+				break;
+			} 
 		}
 		
 		result->contactPointB = separateIo.contactPointB;
 		
 		distance = separateIo.separateAxis.length();
-		
+				
         if(distance < .001f) {
 			// std::cout<<" "<<k<<" close enough at "<<lamda<<"\n";
+			if(k<1) {
+				separateIo.margin = 0.f;
+				separateIo.distance = 1e9;
+				separateDistance(A, B, &separateIo);
+				result->contactPointB = separateIo.contactPointB;
+				distance = separateIo.separateAxis.length();
+				separateN = separateIo.separateAxis / -distance;
+			}
 			break;
 		}
 		
+		separateN = separateIo.separateAxis / distance;
+		
+#ifdef DBG_DRAW		
+		lineB = separateIo.transformB.transform(separateIo.contactPointB);
+		lineE = lineB + separateN;
+		glColor3f(1.f, 0.f, 0.f);
+		m_dbgDrawer->arrow(lineB, lineE);
+#endif
+
 		dDistanceaLamda = (distance - lastDistance) / deltaLamda;
 		lastDistance = distance;
 		
 		// std::cout<<" sep ax "<<separateIo.separateAxis.str();
 		// std::cout<<" dist "<<distance;
-		separateN = separateIo.separateAxis / distance;
 		// std::cout<<" sep n "<<separateN.str();
 				
 		closeInSpeed = relativeLinearVelocity.dot(separateN);
 		// std::cout<<" closeInSpeed "<<closeInSpeed;
-		
-#ifdef DBG_DRAW		
-		Vector3F lineB = separateIo.transformB.transform(separateIo.contactPointB);
-		Vector3F lineE = lineB + separateIo.separateAxis;
-		glColor3f(1.f, 0.f, 0.f);
-		m_dbgDrawer->arrow(lineB, lineE);
-#endif		
 
         if(closeInSpeed + angularMotionSize < 0.f) {
 			// std::cout<<"go apart at time "<<lamda<<"\n";
-            return;
+			return;
 		}
 		
 		deltaLamda = distance / (closeInSpeed + angularMotionSize);
@@ -295,14 +353,13 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		}
     }
 	
-    result->penetrateDepth = 0.f;
     result->hasContact = 1;
 	result->TOI = lamda;
-	result->contactNormal = separateN.normal().reversed();
+	result->contactNormal = separateN.reversed();
 #ifdef DBG_DRAW		
-		Vector3F lineB = separateIo.transformB.transform(separateIo.contactPointB);
-		Vector3F lineE = lineB + result->contactNormal;
-		glColor3f(0.f, 1.f, .3f);
-		m_dbgDrawer->arrow(lineB, lineE);
+	lineB = separateIo.transformB.transform(separateIo.contactPointB);
+	lineE = lineB + result->contactNormal;
+	glColor3f(.2f, 1.f, .1f);
+	m_dbgDrawer->arrow(lineB, lineE);
 #endif
 }
