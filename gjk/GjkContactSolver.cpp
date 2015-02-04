@@ -38,7 +38,7 @@ void GjkContactSolver::separateDistance(const PointSet & A, const PointSet & B, 
 	    
 	    addToSimplex(result->W, w, localB);
 		
-#ifdef DBG_DRAW
+#ifdef DBG_GJK_DRAW
 		glPushMatrix();
 		m_dbgDrawer->useSpace(result->transformB);
 		glColor3f(0.f, .5f, 0.f);
@@ -69,7 +69,7 @@ void GjkContactSolver::separateDistance(const PointSet & A, const PointSet & B, 
 		closestOnSimplex(result);
 	    v = result->closestPoint - result->referencePoint;
 		result->separateAxis = v;
-#ifdef DBG_DRAW
+#ifdef DBG_GJK_DRAW
 		glColor3f(.1f, 3.f, 0.f);
 		m_dbgDrawer->arrow(Vector3F::Zero, v);
 #endif
@@ -268,7 +268,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 				separateIo.distance = 1e9;
 				separateDistance(A, B, &separateIo);
 				if(separateIo.hasResult) {
-					// std::cout<<"     intersected\n";
+					std::cout<<"     penetrated\n";
 					result->hasContact = 0;
 					return;
 				}
@@ -277,7 +277,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 				distance = separateIo.separateAxis.length();
 				result->penetrateDepth = 0.1 - distance;
 				separateN = separateIo.separateAxis / distance;
-#ifdef DBG_DRAW		
+#ifdef DBG_GJK_DRAW		
 		lineB = separateIo.transformB.transform(separateIo.contactPointB);
 		lineE = lineB + separateN;
 		glColor3f(1.f, 0.f, 0.f);
@@ -310,7 +310,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		
 		separateN = separateIo.separateAxis / distance;
 		
-#ifdef DBG_DRAW		
+#ifdef DBG_GJK_DRAW		
 		lineB = separateIo.transformB.transform(separateIo.contactPointB);
 		lineE = lineB + separateN;
 		glColor3f(1.f, 0.f, 0.f);
@@ -356,10 +356,10 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
     result->hasContact = 1;
 	result->TOI = lamda;
 	result->contactNormal = separateN.reversed();
-	std::cout<<" v.n "<<result->contactNormal.dot(relativeLinearVelocity); 
-	std::cout<<" TOI "<<result->TOI;
-	result->contactNormal.verbose(" N");
-	relativeLinearVelocity.verbose(" Vrel");
+	// std::cout<<" v.n "<<result->contactNormal.dot(relativeLinearVelocity); 
+	// std::cout<<" TOI "<<result->TOI;
+	// result->contactNormal.verbose(" N");
+	// relativeLinearVelocity.verbose(" Vrel");
 #ifdef DBG_DRAW		
 	lineB = separateIo.transformB.transform(separateIo.contactPointB);
 	lineE = lineB + result->contactNormal;

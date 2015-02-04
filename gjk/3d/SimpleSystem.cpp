@@ -72,14 +72,15 @@ SimpleSystem::SimpleSystem()
 		m_vIndices[i*2+1] = i*2+1;
 	}
 	
-	m_rb.position.set(-10.f, 17.f, 15.f);
+	m_rb.position.set(-10.f, 27.f, 15.f);
 	m_rb.orientation.set(1.f, 0.f, 0.f, 0.f);
 	m_rb.linearVelocity.set(2.f, 0.f, 0.f);
 	m_rb.angularVelocity.setZero();
 	m_rb.projectedLinearVelocity.setZero();
 	m_rb.projectedAngularVelocity.setZero();
 	m_rb.shape = new CuboidShape(4.f, 4.f, 4.f);
-	m_rb.shape->setMass(1.f);
+	m_rb.shape->setMass(1.5f);
+	m_rb.Crestitution = .7f;
 	
 	m_ground.position.set(-15.f, -7.f, 15.f);
 	m_ground.orientation.set(1.f, 0.f, 0.f, 0.f);
@@ -90,10 +91,11 @@ SimpleSystem::SimpleSystem()
 	TetrahedronShape * tet = new TetrahedronShape;
 	tet->p[0].set(-10.f, 10.f, -20.f);
 	tet->p[1].set(-10.f, 10.f, 120.f);
-	tet->p[2].set(80.f, 10.f, -20.f);
+	tet->p[2].set(30.f, -10.f, -20.f);
 	tet->p[3].set(0.f, -20.f, -20.f);
 	m_ground.shape = tet;
 	m_ground.shape->setMass(10.f);
+	m_ground.Crestitution = .7f;
 }
 
 Vector3F * SimpleSystem::groundX() const
@@ -221,6 +223,8 @@ void SimpleSystem::applyImpulse()
 	
 	float lastLamda;
 	float lamda = 0.f;
+	float angLamda = 0.f;
+	float lastAngLamda;
 	for(int i=0; i<4; i++) {
 		if(!coll.hasContact()) {
 			// std::cout<<" no contact this iteration\n";
@@ -229,9 +233,10 @@ void SimpleSystem::applyImpulse()
 		// std::cout<<"contact n"<<m_ccd.contactNormal.str();
 		
 		lastLamda = lamda;
+		lastAngLamda = angLamda;
 		/*
-		Vector3F linearJ;
-		Vector3F angularJ = m_ccd.contactNormal;
+		Vector3F linearJ = m_ccd.contactNormal;
+		Vector3F angularJ;
 
 		Matrix33F R; R.set(m_ccd.orientationB//.progress(m_rb.projectedAngularVelocity, timeStep)//); R.inverse();
 		
@@ -245,40 +250,6 @@ void SimpleSystem::applyImpulse()
 		// std::cout<<"contact p"<<m_ccd.contactPointB.str();
 		// std::cout<<"linearJ"<<linearJ.str();
 		// std::cout<<"angularJ"<<angularJ.str();
-	
-#ifdef DBG_DRAW
-    KdTreeDrawer * drawer = m_dbgDrawer;
-    Matrix44F space;
-	space.setRotation(m_rb.orientation);
-	space.setTranslation(m_rb.position);
-    
-    Vector3F wb = space.transform(m_ccd.contactPointB);
-	glBegin(GL_LINES);
-	glColor3f(0.f, 1.f, 0.f);
-	glVertex3f(wb.x, wb.y, wb.z);
-	glVertex3f(wb.x + linearJ.x, wb.y + linearJ.y, wb.z + linearJ.z);
-	glEnd();
-	
-	if(m_ccd.TOI == 0.f) {
-		glColor3f(1.f, 0.f, 0.f);
-		drawer->circleAt(wb, m_ccd.contactNormal);
-	}
-    
-	glPushMatrix();
-	drawer->useSpace(space);
-	glBegin(GL_LINES);
-	glColor3f(1.f, 0.f, 0.f);
-	glVertex3f(m_ccd.contactPointB.x, m_ccd.contactPointB.y, m_ccd.contactPointB.z);
-	glVertex3f(0.f, 0.f, 0.f);
-	glColor3f(1.f, 1.f, 0.f);
-	glVertex3f(m_ccd.contactPointB.x, m_ccd.contactPointB.y, m_ccd.contactPointB.z);
-	glVertex3f(m_ccd.contactPointB.x + linearJ.x, m_ccd.contactPointB.y + linearJ.y, m_ccd.contactPointB.z + linearJ.z);
-	glColor3f(0.f, 1.f, .3f);
-	glVertex3f(m_ccd.contactPointB.x, m_ccd.contactPointB.y, m_ccd.contactPointB.z);
-	glVertex3f(m_ccd.contactPointB.x + angularJ.x, m_ccd.contactPointB.y + angularJ.y, m_ccd.contactPointB.z + angularJ.z);
-	glEnd();
-	glPopMatrix();
-#endif
 
 		Vector3F linearM = m_rb.shape->linearMassM; 
 		Matrix33F angularM = m_rb.shape->angularMassM;	
@@ -308,13 +279,21 @@ void SimpleSystem::applyImpulse()
 		
 		coll.computeLinearImpulse(MinvJa, MinvJb, N);
 		
+		Vector3F IinvJa, IinvJb;
+		float JA, JB;
+		coll.computeAngularImpulse(IinvJa, JA, IinvJb, JB);
+		
 // MinvJb will oscillate around zero, 
 		lamda -= -MinvJb;
 		if(lamda < 0.f) lamda = 0.f;
 		if(MinvJb < 0.f) MinvJb = 0.f;
 		Vector3F bigI = N * (lamda - lastLamda);
 		
-		lastLamda = lamda;
+		angLamda -= -JB;
+		if(angLamda < 0.f) angLamda = 0.f;
+		std::cout<<"\n J "<<JB<<" angLamda "<<angLamda<<" z "<<IinvJb.z;
+		
+		Vector3F bigOmega = IinvJb * (angLamda - lastAngLamda);
 
 #ifdef DBG_DRAW
 	glBegin(GL_LINES);
@@ -324,6 +303,7 @@ void SimpleSystem::applyImpulse()
 	glEnd();
 #endif		
 		m_rb.projectedLinearVelocity += bigI;
+		m_rb.projectedAngularVelocity += bigOmega;
 		// m_rb.projectedAngularVelocity += angularMinvJt * (lamda - lastLamda);
 		
 		//m_rb.projectedLinearVelocity.verbose("pv");
@@ -389,6 +369,18 @@ void SimpleSystem::drawWorld()
 	space.setTranslation(at);
 	drawer->useSpace(space);
 	drawer->aabb(Vector3F(-cub->m_w, -cub->m_h, -cub->m_d), Vector3F(cub->m_w, cub->m_h, cub->m_d));
+	
+	glColor3f(0.7f, 0.1f, 0.f);
+	drawer->arrow(m_rb.r, Vector3F::Zero);
+	
+	glColor3f(0.7f, 0.2f, 0.f);
+	drawer->arrow(m_rb.r, m_rb.r + m_rb.J);
+	
+	glBegin(GL_LINES);
+	glVertex3f(m_rb.r.x - 0.1f, m_rb.r.y, m_rb.r.z - 0.1f);
+	glVertex3f(m_rb.r.x - 0.1f, m_rb.r.y + m_rb.Jsize * 10.f, m_rb.r.z - 0.1f);
+	glEnd();
+	
 	glPopMatrix();
 	
 	Vector3F vel = m_rb.linearVelocity;

@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <boost/format.hpp>
-#include "./3d/SimpleSystem.h"
+#include "./3d/CollisionPair.h"
 #include "GjkContactSolver.h"
 
 void testBarycentric3()
@@ -75,8 +75,8 @@ void testRayCast()
 	    vdotr = v.dot(r);
 	    
 	    // SA-B(v)
-	    pa = A.supportPoint(v, result.transformA, localA);
-		pb = B.supportPoint(v.reversed(), result.transformB, localB);
+	    pa = A.supportPoint(v, result.transformA, localA, 1.f);
+		pb = B.supportPoint(v.reversed(), result.transformB, localB, 1.f);
 	    p = pa - pb;
 	    std::cout<<" p "<<p.str()<<"\n";
 	    w = hitP - p;
@@ -142,10 +142,20 @@ void testM()
     v.verbose("M-1v");
 }
 
+void testR()
+{
+   Vector3F r(-1, 3, -1);
+   r.verbose("r");
+   Vector3F omega(0, 0, 1);
+   omega.verbose("angular velocity");
+   Vector3F linV = r.cross(omega);
+   linV.verbose("linear vel");
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"GJK intersection test\n";
-	testM();
+	testR();
 	std::cout<<"end of test\n";
 	return 0;
 }

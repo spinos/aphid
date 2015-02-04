@@ -151,7 +151,11 @@ struct RigidBody {
 	Vector3F angularVelocity;
 	Vector3F projectedLinearVelocity;
 	Vector3F projectedAngularVelocity;
-	float TOI;
+	float TOI, Crestitution;
+#ifdef DBG_DRAW
+	Vector3F r, J;
+	float Jsize;
+#endif
 	MassShape * shape;
 	void integrateP(const float & h) {
 		position = position.progress(linearVelocity, h * TOI);
@@ -177,8 +181,10 @@ public:
 	void detectAtImpactPosition(const float & h);
 	const char hasContact() const;
 	const float TOI() const;
-	void computeLinearImpulse(float & MinvJa, float & MinvJb, Vector3F & N);
 	const Vector3F relativeVelocity() const;
+	void computeLinearImpulse(float & MinvJa, float & MinvJb, Vector3F & N);
+	void computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vector3F & IinvJb, float & MinvJb);
+	
 #ifdef DBG_DRAW	
 	void setDrawer(KdTreeDrawer * d);
 #endif
