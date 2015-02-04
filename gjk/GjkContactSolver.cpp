@@ -24,9 +24,9 @@ void GjkContactSolver::separateDistance(const PointSet & A, const PointSet & B, 
 	
 	for(int i=0; i < 99; i++) {
 		// SA-B(-v)
-	    pa = A.supportPoint(v.reversed(), result->transformA, localA);
-		pb = B.supportPoint(v, result->transformB, localB);
-		w = pa - pb + v.normal() * MARGIN_DISTANCE;
+	    pa = A.supportPoint(v.reversed(), result->transformA, localA, result->margin);
+		pb = B.supportPoint(v, result->transformB, localB, result->margin);
+		w = pa - pb;
 	    
 		// terminate when v is close enough to v(A - B).
 	    // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
@@ -73,8 +73,8 @@ void GjkContactSolver::penetration(const PointSet & A, const PointSet & B, Close
 		vdotr = v.dot(r);
 	
 		// SA-B(v)
-		pa = A.supportPoint(v, result->transformA, localA);
-		pb = B.supportPoint(v.reversed(), result->transformB, localB);
+		pa = A.supportPoint(v, result->transformA, localA, result->margin);
+		pb = B.supportPoint(v.reversed(), result->transformB, localB, result->margin);
 		p = pa - pb;// + v.normal() * MARGIN_DISTANCE;
 		w = hitP - p;
 		vdotw = v.dot(w); 
@@ -131,9 +131,9 @@ void GjkContactSolver::rayCast(const PointSet & A, const PointSet & B, ClosestTe
 	    vdotr = v.dot(r);
 	    
 	    // SA-B(v)
-		pa = A.supportPoint(v, result->transformA, localA);
-		pb = B.supportPoint(v.reversed(), result->transformB, localB);
-	    p = pa - pb;// + v.normal() * MARGIN_DISTANCE;
+		pa = A.supportPoint(v, result->transformA, localA, result->margin);
+		pb = B.supportPoint(v.reversed(), result->transformB, localB, result->margin);
+	    p = pa - pb;
 	    
 		w = hitP - p;
 	    vdotw = v.dot(w); 
@@ -194,6 +194,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 		
     ClosestTestContext separateIo;
 	separateIo.needContributes = 1;
+	separateIo.margin = 0.2f;
     
     Vector3F separateN;
     
@@ -227,21 +228,18 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
         
         if(separateIo.hasResult) {
             if(k>0) {
-				//std::cout<<"     contacted at "<<lamda<<"\n";
 				lamda = lastLamda;
-				
+				break;
 			}
 			else {	
-                std::cout<<"     contacted first t0\n";
+                separateIo.margin = 0.f;
+				separateIo.distance = 1e9;
+				separateDistance(A, B, &separateIo);
+				if(separateIo.hasResult) {
+					std::cout<<"     contact at t0\n";
+					break;
+				}	
             }
-			
-#ifdef DBG_DRAW		
-			Vector3F lineB = separateIo.transformB.transform(separateIo.contactPointB);
-			Vector3F lineE = lineB + Vector3F::YAxis;
-			glColor3f(.5f, 1.f, 0.f);
-			m_dbgDrawer->arrow(lineB, lineE);
-#endif
-			break;
 		}
 		
 		result->contactPointB = separateIo.contactPointB;

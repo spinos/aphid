@@ -40,17 +40,17 @@ public:
         return center.length() + d.length() * 0.5f;
     }
     
-    virtual const Vector3F supportPoint(const Vector3F & v, const Matrix44F & space, Vector3F & localP) const
+    virtual const Vector3F supportPoint(const Vector3F & v, const Matrix44F & space, Vector3F & localP, const float & margin) const
     {
         float maxdotv = -1e8;
         float dotv;
         
         Vector3F res;
         Vector3F worldP;
-		Vector3F margin = v.normal() * 0.05f;
-        
+		const Vector3F mar = v.normal() * margin;
+		
         for(int i=0; i < 3; i++) {
-            worldP = space.transform(X[i]) + margin;
+            worldP = space.transform(X[i]) + mar;
             dotv = worldP.dot(v);
             if(dotv > maxdotv) {
                 maxdotv = dotv;
@@ -78,6 +78,7 @@ struct ClosestTestContext {
     Vector3F contactPointB;
 	Vector3F closestPoint;
 	Vector3F separateAxis;
+	float margin;
 	float distance;
 	char needContributes;
 	char hasResult;

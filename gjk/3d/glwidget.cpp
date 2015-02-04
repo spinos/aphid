@@ -575,14 +575,14 @@ void GLWidget::drawPointSet(PointSet & p, const Matrix44F & mat)
 
 void GLWidget::clientDraw()
 {
-	// testTOI();
+	testTOI();
 	testShapeCast();
 	testGjk();
     testLine();
 	testTriangle();
     testTetrahedron();
 	// testCollision();
-	drawSystem();
+	// drawSystem();
 	if(m_isRunning) m_alpha += 0.01f;
 }
 
