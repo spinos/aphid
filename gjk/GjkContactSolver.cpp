@@ -268,7 +268,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 				separateIo.distance = 1e9;
 				separateDistance(A, B, &separateIo);
 				if(separateIo.hasResult) {
-					std::cout<<"     intersected\n";
+					// std::cout<<"     intersected\n";
 					result->hasContact = 0;
 					return;
 				}
@@ -276,7 +276,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 				result->contactPointB = separateIo.contactPointB;
 				distance = separateIo.separateAxis.length();
 				result->penetrateDepth = 0.1 - distance;
-				separateN = separateIo.separateAxis / -distance;
+				separateN = separateIo.separateAxis / distance;
 #ifdef DBG_DRAW		
 		lineB = separateIo.transformB.transform(separateIo.contactPointB);
 		lineE = lineB + separateN;
@@ -303,7 +303,7 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
 				separateDistance(A, B, &separateIo);
 				result->contactPointB = separateIo.contactPointB;
 				distance = separateIo.separateAxis.length();
-				separateN = separateIo.separateAxis / -distance;
+				separateN = separateIo.separateAxis / distance;
 			}
 			break;
 		}
@@ -356,6 +356,10 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
     result->hasContact = 1;
 	result->TOI = lamda;
 	result->contactNormal = separateN.reversed();
+	std::cout<<" v.n "<<result->contactNormal.dot(relativeLinearVelocity); 
+	std::cout<<" TOI "<<result->TOI;
+	result->contactNormal.verbose(" N");
+	relativeLinearVelocity.verbose(" Vrel");
 #ifdef DBG_DRAW		
 	lineB = separateIo.transformB.transform(separateIo.contactPointB);
 	lineE = lineB + result->contactNormal;

@@ -22,14 +22,16 @@ HEADERS       = glwidget.h \
 		SimpleSystem.h \
                 ../../shared/Base3DView.h \
                 ../Gjk.h \
-				../GjkContactSolver.h
+				../GjkContactSolver.h \
+				CollisionPair.h
 SOURCES       = ../../shared/Base3DView.cpp \
 				glwidget.cpp \
                 main.cpp \
                 window.cpp \
 		SimpleSystem.cpp \
                 ../Gjk.cpp \
-				../GjkContactSolver.cpp 
+				../GjkContactSolver.cpp \
+				CollisionPair.cpp
 QT           += opengl
 win32:CONFIG += console
 macx:CONFIG -= app_bundle 
