@@ -74,12 +74,12 @@ SimpleSystem::SimpleSystem()
 	
 	m_rb.position.set(-10.f, 27.f, 15.f);
 	m_rb.orientation.set(1.f, 0.f, 0.f, 0.f);
-	m_rb.linearVelocity.set(5.f, 0.f, 0.f);
-	m_rb.angularVelocity.set(0.33, 1, 0);
+	m_rb.linearVelocity.set(0.f, 0.f, 0.f);
+	m_rb.angularVelocity.set(0, 0, -1);
 	m_rb.projectedLinearVelocity.setZero();
 	m_rb.projectedAngularVelocity.setZero();
-	m_rb.shape = new CuboidShape(4.f, 4.f, 4.f);
-	m_rb.shape->setMass(1.5f);
+	m_rb.shape = new CuboidShape(2.f, 4.f, 2.f);
+	m_rb.shape->setMass(1.f);
 	m_rb.Crestitution = .7f;
 	
 	m_ground.position.set(-15.f, -7.f, 15.f);
@@ -232,7 +232,10 @@ void SimpleSystem::applyImpulse()
 			// std::cout<<" no contact this iteration\n";
 			continue;
 		}
-		// std::cout<<"contact n"<<m_ccd.contactNormal.str();
+		if(i > 0 && coll.TOI() > 0.f) {
+			std::cout<<" x toi "<<coll.TOI();
+			coll.progressOnImpactPostion(timeStep * (1.f - toi) * .99f);
+		}
 		
 		lastLamda = lamda;
 		lastAngLamda = angLamda;
@@ -293,7 +296,7 @@ void SimpleSystem::applyImpulse()
 		
 		angLamda -= -JB;
 		if(angLamda < 0.f) angLamda = 0.f;
-		// std::cout<<"\n J "<<JB<<" angLamda "<<angLamda<<" z "<<IinvJb.z;
+		std::cout<<"\n J "<<JB<<" angLamda "<<angLamda;
 		
 		Vector3F bigOmega = IinvJb * (angLamda - lastAngLamda);
 

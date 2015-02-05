@@ -94,9 +94,9 @@ public:
 	{
 	    linearMassM.x = linearMassM.y = linearMassM.z = 1.f / mass;
 	    angularMassM.setIdentity();
-	    *angularMassM.m(0, 0) = 12.f / ( mass * (m_h * m_h + m_d * m_d));
-	    *angularMassM.m(1, 1) = 12.f / ( mass * (m_w * m_w + m_d * m_d));
-	    *angularMassM.m(2, 2) = 12.f / ( mass * (m_w * m_w + m_h * m_h));
+	    *angularMassM.m(0, 0) = 3.f / ( mass * (m_h * m_h + m_d * m_d));
+	    *angularMassM.m(1, 1) = 3.f / ( mass * (m_w * m_w + m_d * m_d));
+	    *angularMassM.m(2, 2) = 3.f / ( mass * (m_w * m_w + m_h * m_h));
 	}
 	
 	virtual const float angularMotionDisc() const
@@ -145,6 +145,7 @@ public:
 };
 
 struct RigidBody {
+	Matrix33F inertiaTensor;
 	Quaternion orientation;
 	Vector3F position;
 	Vector3F linearVelocity;
@@ -170,6 +171,16 @@ struct RigidBody {
 			linearVelocity = projectedLinearVelocity;
 			angularVelocity = projectedAngularVelocity;
 		}
+		
+		computeInertiaTensor();
+	}
+	void computeInertiaTensor()
+	{
+		Matrix33F A; A.set(orientation);
+		Matrix33F At = A; At.transpose();
+		Matrix33F AAt = A * At;
+		inertiaTensor = A * shape->angularMassM *At;
+		// std::cout<<" AIinvAt "<<inertiaTensor.str();
 	}
 };
 
@@ -178,6 +189,7 @@ public:
 	CollisionPair(RigidBody * a, RigidBody * b);
 	void continuousCollisionDetection(const float & h);
 	void progressToImpactPostion(const float & h);
+	void progressOnImpactPostion(const float & h);
 	void detectAtImpactPosition(const float & h);
 	const char hasContact() const;
 	const float TOI() const;
@@ -186,6 +198,8 @@ public:
 	const Vector3F velocityAtContactB() const;
 	void computeLinearImpulse(float & MinvJa, float & MinvJb, Vector3F & N);
 	void computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vector3F & IinvJb, float & MinvJb);
+	void getTransformA(Matrix44F & t) const;
+	void getTransformB(Matrix44F & t) const;
 	
 #ifdef DBG_DRAW	
 	void setDrawer(KdTreeDrawer * d);

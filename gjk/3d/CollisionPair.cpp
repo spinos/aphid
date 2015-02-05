@@ -37,6 +37,13 @@ void CollisionPair::progressToImpactPostion(const float & h)
 	m_ccd.orientationB = m_B->orientation.progress(m_B->angularVelocity, h);
 }
 
+void CollisionPair::progressOnImpactPostion(const float & h)
+{
+// only B at impact position
+	m_ccd.positionB = m_B->position.progress(m_B->projectedLinearVelocity, h);
+	m_ccd.orientationB = m_B->orientation.progress(m_B->projectedAngularVelocity, h);
+}
+
 void CollisionPair::detectAtImpactPosition(const float & h)
 {
 	m_ccd.linearVelocityB = m_B->projectedLinearVelocity * h;
@@ -58,9 +65,9 @@ const float CollisionPair::TOI() const
 void CollisionPair::computeLinearImpulse(float & MinvJa, float & MinvJb, Vector3F & N)
 {
 // http://www.cs.uu.nl/docs/vakken/mgp/lectures/lecture%207%20Collision%20Resolution.pdf	
-	Vector3F Vrel = relativeVelocity();
+	Vector3F Vrel = m_B->projectedLinearVelocity.reversed();
 	
-	const float massinvA = m_A->shape->linearMassM.x * 0.f;
+	const float massinvA = 0.f;
 	const float massinvB = m_B->shape->linearMassM.x;
 	
 	float MinvJ = Vrel.dot(m_ccd.contactNormal) / (massinvA + massinvB);
@@ -88,8 +95,7 @@ const Vector3F CollisionPair::velocityAtContactA() const
 const Vector3F CollisionPair::velocityAtContactB() const
 {
 	Matrix44F R;
-	R.setTranslation(m_ccd.positionB);
-	R.setRotation(m_ccd.orientationB);
+	getTransformB(R);
 	Vector3F ro = m_ccd.contactPointB;
 	
 #ifdef DBG_DRAW
@@ -104,26 +110,37 @@ const Vector3F CollisionPair::velocityAtContactB() const
 void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vector3F & IinvJb, float & MinvJb)
 {
 	const Vector3F Vrel = relativeVelocity();
-	Matrix33F R; 
-	R.set(m_ccd.orientationB);
-	R.inverse();
-	//Vector3F na = R.transform(m_ccd.contactNormal); na.normalize();
-	//R.set(m_ccd.orientationB); R.inverse();
-	Vector3F nb = R.transform(m_ccd.contactNormal + Vrel); nb.normalize();
-	// Vector3F nb = m_ccd.contactNormal;
-	const Vector3F rb = m_ccd.contactPointB.reversed();// R.transform(m_ccd.contactPointB.reversed());//
+	Matrix44F R; 
+	getTransformB(R);
+	Matrix44F Ri = R;
+	Ri.inverse();
+	
+// N in object space
+	Vector3F nb = Ri.transformAsNormal(m_ccd.contactNormal);
+
+// from contact point to center in object space	
+	const Vector3F rb = m_ccd.contactPointB.reversed();
+
+// torque in object space	
+	IinvJb = m_B->shape->angularMassM * rb.cross(nb);
+	rb.cross(nb).verbose(" angular impulse ");
+	IinvJb.verbose(" angular impulse / I");
+	std::cout<<"1/I"<<m_B->shape->angularMassM.str();
 		
 	const float massinv = m_B->shape->linearMassM.x;
 	
-	IinvJb = rb.cross(nb);
+	const Vector3F wr = R.transformAsNormal(m_ccd.contactPointB.reversed());
 	
-	float up = (m_A->projectedAngularVelocity - m_B->projectedAngularVelocity).dot(IinvJb)/(m_B->shape->angularMassM.transform(rb.cross(nb)).dot(IinvJb));
-	if(up==0.f) up = 1.f;
-	const float MinvJ =  (up) / ( IinvJb.cross(rb).dot(nb));
+	
+	const float MinvJ =  Vrel.dot(m_ccd.contactNormal) / (massinv + (m_B->inertiaTensor * wr.cross(m_ccd.contactNormal)).cross(wr).dot(m_ccd.contactNormal));
 
-	MinvJb = (1.f + .5f) * MinvJ * 0.f;
-	IinvJb.set(.33,0.f,0);
-	MinvJb = .0f;
+	MinvJb = (1.f + m_B->Crestitution) * MinvJ;
+	// MinvJb = 0.1f;
+	//if(Vrel.dot(m_ccd.contactNormal)<0.f) MinvJb = 0.f;
+	std::cout<<" dot "<<Vrel.dot(m_ccd.contactNormal);
+	
+	std::cout<<" size "<<MinvJb;
+	std::cout<<" tensor "<<(m_B->inertiaTensor * wr.cross(m_ccd.contactNormal)).str();
 	
 #ifdef DBG_DRAW
 	m_B->r = m_ccd.contactPointB;
@@ -131,10 +148,9 @@ void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vec
 	m_B->Jsize = MinvJb;
     KdTreeDrawer * drawer = m_gjk.m_dbgDrawer;
 	
+    Matrix44F space; 
+	getTransformB(space);
 	
-    Matrix44F space;
-	space.setRotation(m_ccd.orientationB);
-	space.setTranslation(m_ccd.positionB);
     Vector3F wp = space.transform(m_ccd.contactPointB);
 	if(m_ccd.TOI == 0.f) {
 		glColor3f(1.f, 0.f, 0.f);
@@ -151,6 +167,9 @@ void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vec
 	glColor3f(1.f, 0.f, 0.f);
 	drawer->arrow(m_ccd.contactPointB, Vector3F::Zero);
     
+	glColor3f(.5f, 0.f, 0.f);
+	drawer->arrow(m_ccd.contactPointB - rb.cross(nb) * .5f, m_ccd.contactPointB + rb.cross(nb) * .5f);
+    
 	// glBegin(GL_LINES);
 	
 	// glColor3f(1.f, 0.f, 1.f);
@@ -162,4 +181,16 @@ void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vec
 	// glEnd();
 	glPopMatrix();
 #endif
+}
+
+void CollisionPair::getTransformA(Matrix44F & t) const
+{
+	t.setRotation(m_ccd.orientationA);
+	t.setTranslation(m_ccd.positionA);
+}
+	
+void CollisionPair::getTransformB(Matrix44F & t) const
+{
+	t.setRotation(m_ccd.orientationB);
+	t.setTranslation(m_ccd.positionB);
 }
