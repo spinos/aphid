@@ -159,7 +159,10 @@ void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vec
 	const Vector3F rb = m_ccd.contactPointB.reversed();
 
 // torque in object space	
-	IinvJb = m_B->shape->angularMassM * rb.cross(nb);
+	IinvJb = m_B->shape->angularMassM * rb.cross(nb); 
+	
+	IinvJb.verbose("objI");std::cout<<"||objI||"<<IinvJb.length();
+	
 	//rb.cross(nb).verbose(" angular impulse ");
 	//IinvJb.verbose(" angular impulse / I");
 	//std::cout<<"1/I"<<m_B->shape->angularMassM.str();
@@ -168,10 +171,12 @@ void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vec
 	
 	const Vector3F wr = R.transformAsNormal(m_ccd.contactPointB.reversed());
 	
+	const Vector3F test = m_B->inertiaTensor * wr.cross(m_ccd.contactNormal);
+	test.verbose("worldI");std::cout<<"||worldI||"<<test.length();
 	
 	const float MinvJ =  vdotn / (massinv + (m_B->inertiaTensor * wr.cross(m_ccd.contactNormal)).cross(wr).dot(m_ccd.contactNormal));
 
-	MinvJb = (1.f + 1.f) * MinvJ;
+	MinvJb = (1.f + m_B->Crestitution) * MinvJ;
 	//std::cout<<" dot "<<Vrel.dot(m_ccd.contactNormal);
 	
 	//std::cout<<" size "<<MinvJb;
