@@ -194,6 +194,8 @@ public:
 	const char hasContact() const;
 	const float TOI() const;
 	const Vector3F relativeVelocity() const;
+	const Vector3F relativeLinearVelocity() const;
+	const Vector3F relativeAngularVelocity() const;
 	const Vector3F velocityAtContactA() const;
 	const Vector3F velocityAtContactB() const;
 	const Vector3F angularMotionAtContactB() const;
