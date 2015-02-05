@@ -49,6 +49,10 @@ void CollisionPair::detectAtImpactPosition(const float & h)
 	m_ccd.linearVelocityB = m_B->projectedLinearVelocity * h;
 	m_ccd.angularVelocityB = m_B->projectedAngularVelocity * h;
 	m_gjk.timeOfImpact(*m_A->shape, *m_B->shape, &m_ccd);
+	
+	std::cout<<"\nb test v"<<m_ccd.linearVelocityB;
+	std::cout<<"\nb test w"<<m_ccd.angularVelocityB;
+	std::cout<<" toi"<<m_ccd.TOI;
 }
 
 #ifdef DBG_DRAW
@@ -65,7 +69,7 @@ const float CollisionPair::TOI() const
 void CollisionPair::computeLinearImpulse(float & MinvJa, float & MinvJb, Vector3F & N)
 {
 // http://www.cs.uu.nl/docs/vakken/mgp/lectures/lecture%207%20Collision%20Resolution.pdf	
-	Vector3F Vrel = m_B->projectedLinearVelocity.reversed();
+	Vector3F Vrel = m_B->projectedLinearVelocity.reversed();//relativeVelocity();//
 	
 	const float massinvA = 0.f;
 	const float massinvB = m_B->shape->linearMassM.x;
@@ -94,17 +98,21 @@ const Vector3F CollisionPair::velocityAtContactA() const
 
 const Vector3F CollisionPair::velocityAtContactB() const
 {
+	return m_B->projectedLinearVelocity + angularMotionAtContactB();
+}
+
+const Vector3F CollisionPair::angularMotionAtContactB() const
+{
 	Matrix44F R;
 	getTransformB(R);
 	Vector3F ro = m_ccd.contactPointB;
-	
 #ifdef DBG_DRAW
 	KdTreeDrawer * drawer = m_gjk.m_dbgDrawer;	
 	glColor3f(.3, .5, .8);
 	Vector3F wp = R.transform(m_ccd.contactPointB);
 	drawer->arrow(wp, wp + R.transformAsNormal(ro.cross(m_B->projectedAngularVelocity)));
 #endif
-	return m_B->projectedLinearVelocity + R.transformAsNormal(ro.cross(m_B->projectedAngularVelocity));
+	return R.transformAsNormal(ro.cross(m_B->projectedAngularVelocity));
 }
 
 void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vector3F & IinvJb, float & MinvJb)
@@ -115,6 +123,16 @@ void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vec
 	Matrix44F Ri = R;
 	Ri.inverse();
 	
+	std::cout<<" b at "<<m_ccd.positionB<<"\n";
+	std::cout<<" real at"<<m_B->position<<"\n";
+	std::cout<<" contact p"<<m_ccd.contactPointB.str()<<"\n";
+	std::cout<<" linear v"<<m_B->projectedLinearVelocity.str()<<"\n";
+	std::cout<<" angular w"<<m_B->projectedAngularVelocity.str()<<"\n";
+	std::cout<<" angular motion"<<angularMotionAtContactB().str()<<"\n";
+	std::cout<<" linear motion rel"<<m_B->projectedLinearVelocity.dot(m_ccd.contactNormal)<<"\n";
+	std::cout<<" angular motion rel"<<angularMotionAtContactB().dot(m_ccd.contactNormal)<<"\n";
+	std::cout<<" relative vel"<<Vrel.dot(m_ccd.contactNormal)<<"\n";
+	
 // N in object space
 	Vector3F nb = Ri.transformAsNormal(m_ccd.contactNormal);
 
@@ -123,9 +141,9 @@ void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vec
 
 // torque in object space	
 	IinvJb = m_B->shape->angularMassM * rb.cross(nb);
-	rb.cross(nb).verbose(" angular impulse ");
-	IinvJb.verbose(" angular impulse / I");
-	std::cout<<"1/I"<<m_B->shape->angularMassM.str();
+	//rb.cross(nb).verbose(" angular impulse ");
+	//IinvJb.verbose(" angular impulse / I");
+	//std::cout<<"1/I"<<m_B->shape->angularMassM.str();
 		
 	const float massinv = m_B->shape->linearMassM.x;
 	
@@ -134,13 +152,11 @@ void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vec
 	
 	const float MinvJ =  Vrel.dot(m_ccd.contactNormal) / (massinv + (m_B->inertiaTensor * wr.cross(m_ccd.contactNormal)).cross(wr).dot(m_ccd.contactNormal));
 
-	MinvJb = (1.f + m_B->Crestitution) * MinvJ;
-	// MinvJb = 0.1f;
-	//if(Vrel.dot(m_ccd.contactNormal)<0.f) MinvJb = 0.f;
-	std::cout<<" dot "<<Vrel.dot(m_ccd.contactNormal);
+	MinvJb = (1.f + 1.f) * MinvJ;
+	//std::cout<<" dot "<<Vrel.dot(m_ccd.contactNormal);
 	
-	std::cout<<" size "<<MinvJb;
-	std::cout<<" tensor "<<(m_B->inertiaTensor * wr.cross(m_ccd.contactNormal)).str();
+	//std::cout<<" size "<<MinvJb;
+	//std::cout<<" tensor "<<(m_B->inertiaTensor * wr.cross(m_ccd.contactNormal)).str();
 	
 #ifdef DBG_DRAW
 	m_B->r = m_ccd.contactPointB;

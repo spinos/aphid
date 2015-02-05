@@ -150,6 +150,12 @@ void testR()
    omega.verbose("angular velocity");
    Vector3F linV = r.cross(omega);
    linV.verbose("linear vel");
+   
+   r.set(0.9, 9.5, -.5); r.verbose("r");
+    Vector3F h(0.7, 0.3, -.7); h.verbose("h");
+    r.cross(h).verbose("r x h");
+    h *= 2.f;
+    r.cross(h).verbose("r x 2h");
 }
 
 int main(int argc, char * const argv[])

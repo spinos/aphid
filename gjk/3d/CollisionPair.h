@@ -159,8 +159,8 @@ struct RigidBody {
 #endif
 	MassShape * shape;
 	void integrateP(const float & h) {
-		position = position.progress(linearVelocity, h * TOI);
-		orientation = orientation.progress(angularVelocity, h * TOI);
+		position = position.progress(linearVelocity, h * TOI * .99f);
+		orientation = orientation.progress(angularVelocity, h * TOI * .99f);
 		if(TOI < 1.f) {
 			position = position.progress(projectedLinearVelocity, h * (1.f - TOI));
 			orientation = orientation.progress(projectedAngularVelocity, h * (1.f - TOI));
@@ -196,6 +196,7 @@ public:
 	const Vector3F relativeVelocity() const;
 	const Vector3F velocityAtContactA() const;
 	const Vector3F velocityAtContactB() const;
+	const Vector3F angularMotionAtContactB() const;
 	void computeLinearImpulse(float & MinvJa, float & MinvJb, Vector3F & N);
 	void computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vector3F & IinvJb, float & MinvJb);
 	void getTransformA(Matrix44F & t) const;

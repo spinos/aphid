@@ -75,12 +75,12 @@ SimpleSystem::SimpleSystem()
 	m_rb.position.set(-10.f, 27.f, 15.f);
 	m_rb.orientation.set(1.f, 0.f, 0.f, 0.f);
 	m_rb.linearVelocity.set(0.f, 0.f, 0.f);
-	m_rb.angularVelocity.set(0, 0, -1);
+	m_rb.angularVelocity.set(0, 0, 0);
 	m_rb.projectedLinearVelocity.setZero();
 	m_rb.projectedAngularVelocity.setZero();
-	m_rb.shape = new CuboidShape(2.f, 4.f, 2.f);
-	m_rb.shape->setMass(1.f);
-	m_rb.Crestitution = .7f;
+	m_rb.shape = new CuboidShape(6.f, 7.f, 1.f);
+	m_rb.shape->setMass(3.f);
+	m_rb.Crestitution = .27f;
 	
 	m_ground.position.set(-15.f, -7.f, 15.f);
 	m_ground.orientation.set(1.f, 0.f, 0.f, 0.f);
@@ -95,7 +95,7 @@ SimpleSystem::SimpleSystem()
 	tet->p[3].set(0.f, -20.f, -20.f);
 	m_ground.shape = tet;
 	m_ground.shape->setMass(10.f);
-	m_ground.Crestitution = .7f;
+	m_ground.Crestitution = .27f;
 }
 
 Vector3F * SimpleSystem::groundX() const
@@ -215,11 +215,8 @@ void SimpleSystem::applyImpulse()
 	
 	m_rb.TOI = toi;
 
-	coll.progressToImpactPostion(timeStep * toi * .99f);
+	// coll.progressToImpactPostion(timeStep * toi * .99f);
 
-	// m_ccd.positionB = m_rb.position.progress(m_rb.linearVelocity, m_rb.TOI * timeStep);
-	// m_ccd.orientationB = m_rb.orientation.progress(m_rb.angularVelocity, m_rb.TOI * timeStep);
-	
 	m_rb.projectedLinearVelocity = m_rb.linearVelocity;
 	m_rb.projectedAngularVelocity = m_rb.angularVelocity;
 	
@@ -232,9 +229,10 @@ void SimpleSystem::applyImpulse()
 			// std::cout<<" no contact this iteration\n";
 			continue;
 		}
+		std::cout<<"\nx "<<i<<"\n";
 		if(i > 0 && coll.TOI() > 0.f) {
-			std::cout<<" x toi "<<coll.TOI();
-			coll.progressOnImpactPostion(timeStep * (1.f - toi) * .99f);
+			// std::cout<<" toi "<<coll.TOI();
+			// coll.progressOnImpactPostion(timeStep * (1.f - toi) * .99f);
 		}
 		
 		lastLamda = lamda;
@@ -296,7 +294,7 @@ void SimpleSystem::applyImpulse()
 		
 		angLamda -= -JB;
 		if(angLamda < 0.f) angLamda = 0.f;
-		std::cout<<"\n J "<<JB<<" angLamda "<<angLamda;
+		// std::cout<<"\n J "<<JB<<" angLamda "<<angLamda;
 		
 		Vector3F bigOmega = IinvJb * (angLamda - lastAngLamda);
 
@@ -307,8 +305,11 @@ void SimpleSystem::applyImpulse()
 	glVertex3f(m_rb.position.x + bigI.x, m_rb.position.y + bigI.y, m_rb.position.z + bigI.z);
 	glEnd();
 #endif		
-		m_rb.projectedLinearVelocity += bigI;
-		m_rb.projectedAngularVelocity += bigOmega;
+		m_rb.projectedLinearVelocity += bigI; bigI.verbose("I");
+		m_rb.projectedAngularVelocity += bigOmega; bigOmega.verbose("J");
+		
+		const float am = m_rb.projectedAngularVelocity.length();
+		if(am > 6.f) m_rb.projectedAngularVelocity *= 6.f/am;
 		// m_rb.projectedAngularVelocity += angularMinvJt * (lamda - lastLamda);
 		
 		//m_rb.projectedLinearVelocity.verbose("pv");
