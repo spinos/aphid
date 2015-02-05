@@ -74,8 +74,8 @@ SimpleSystem::SimpleSystem()
 	
 	m_rb.position.set(-10.f, 27.f, 15.f);
 	m_rb.orientation.set(1.f, 0.f, 0.f, 0.f);
-	m_rb.linearVelocity.set(2.f, 0.f, 0.f);
-	m_rb.angularVelocity.setZero();
+	m_rb.linearVelocity.set(5.f, 0.f, 0.f);
+	m_rb.angularVelocity.set(0.33, 1, 0);
 	m_rb.projectedLinearVelocity.setZero();
 	m_rb.projectedAngularVelocity.setZero();
 	m_rb.shape = new CuboidShape(4.f, 4.f, 4.f);
@@ -91,7 +91,7 @@ SimpleSystem::SimpleSystem()
 	TetrahedronShape * tet = new TetrahedronShape;
 	tet->p[0].set(-10.f, 10.f, -20.f);
 	tet->p[1].set(-10.f, 10.f, 120.f);
-	tet->p[2].set(30.f, -10.f, -20.f);
+	tet->p[2].set(90.f, 10.f, -20.f);
 	tet->p[3].set(0.f, -20.f, -20.f);
 	m_ground.shape = tet;
 	m_ground.shape->setMass(10.f);
@@ -211,9 +211,11 @@ void SimpleSystem::applyImpulse()
 	
 	if(coll.TOI() > 0.f) std::cout<<" toi "<<coll.TOI()<<"\n";
 	
-	m_rb.TOI = coll.TOI();
+	const float toi = coll.TOI();
+	
+	m_rb.TOI = toi;
 
-	coll.progressToImpactPostion(timeStep);
+	coll.progressToImpactPostion(timeStep * toi * .99f);
 
 	// m_ccd.positionB = m_rb.position.progress(m_rb.linearVelocity, m_rb.TOI * timeStep);
 	// m_ccd.orientationB = m_rb.orientation.progress(m_rb.angularVelocity, m_rb.TOI * timeStep);
@@ -291,7 +293,7 @@ void SimpleSystem::applyImpulse()
 		
 		angLamda -= -JB;
 		if(angLamda < 0.f) angLamda = 0.f;
-		std::cout<<"\n J "<<JB<<" angLamda "<<angLamda<<" z "<<IinvJb.z;
+		// std::cout<<"\n J "<<JB<<" angLamda "<<angLamda<<" z "<<IinvJb.z;
 		
 		Vector3F bigOmega = IinvJb * (angLamda - lastAngLamda);
 
@@ -328,7 +330,7 @@ void SimpleSystem::applyImpulse()
 		//m_ccd.angularVelocityB = m_rb.projectedAngularVelocity * timeStep;
 		// std::cout<<" test at impact point ";
 		//m_gjk.timeOfImpact(*m_ground.shape, *m_rb.shape, &m_ccd);
-		coll.detectAtImpactPosition(timeStep);
+		coll.detectAtImpactPosition(timeStep * (1.f - toi));
 	}
 	// m_rb.linearVelocity.verbose("v");
 	// m_rb.angularVelocity.verbose("av");
@@ -358,8 +360,12 @@ void SimpleSystem::drawWorld()
     Matrix33F mat;
     
     Vector3F at = m_rb.position;
+	
+	glColor3f(0.7f, 0.1f, 0.f);
+	// drawer->arrow(m_rb.r, at);
+	
 	mat.set(m_rb.orientation);
-	drawer->coordsys(mat, 8.f, &at);
+	drawer->coordsys(mat, 4.f, &at);
 	CuboidShape * cub = static_cast<CuboidShape *>(m_rb.shape);
 	
 	glColor3f(0.f, 0.5f, 0.f);
@@ -370,16 +376,13 @@ void SimpleSystem::drawWorld()
 	drawer->useSpace(space);
 	drawer->aabb(Vector3F(-cub->m_w, -cub->m_h, -cub->m_d), Vector3F(cub->m_w, cub->m_h, cub->m_d));
 	
-	glColor3f(0.7f, 0.1f, 0.f);
-	drawer->arrow(m_rb.r, Vector3F::Zero);
+	// glColor3f(0.7f, 0.2f, 0.f);
+	//drawer->arrow(m_rb.r, m_rb.r + m_rb.J);
 	
-	glColor3f(0.7f, 0.2f, 0.f);
-	drawer->arrow(m_rb.r, m_rb.r + m_rb.J);
-	
-	glBegin(GL_LINES);
-	glVertex3f(m_rb.r.x - 0.1f, m_rb.r.y, m_rb.r.z - 0.1f);
-	glVertex3f(m_rb.r.x - 0.1f, m_rb.r.y + m_rb.Jsize * 10.f, m_rb.r.z - 0.1f);
-	glEnd();
+	// glBegin(GL_LINES);
+	// glVertex3f(m_rb.r.x - 0.1f, m_rb.r.y, m_rb.r.z - 0.1f);
+	// glVertex3f(m_rb.r.x - 0.1f, m_rb.r.y + m_rb.Jsize * 10.f, m_rb.r.z - 0.1f);
+	// glEnd();
 	
 	glPopMatrix();
 	
@@ -388,8 +391,17 @@ void SimpleSystem::drawWorld()
 	drawer->arrow(at, at + vel);
 	
 	vel = m_rb.angularVelocity;
-	glColor3f(0.f, 0.5f, 0.f);
+	glColor3f(0.f, .35f, .5f);
 	drawer->arrow(at, at + vel);
+	
+	Matrix33F R; 
+	R.set(m_rb.orientation);
+	
+	Vector3F rb(-4,-4,-4);
+	Vector3F lin = rb.cross(vel);
+	at = space.transform(rb);
+	lin = R.transform(lin);
+	drawer->arrow(at, at + lin);
 	
 	at = m_ground.position;
 	mat.set(m_ground.orientation);

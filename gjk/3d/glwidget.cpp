@@ -315,7 +315,7 @@ void GLWidget::testGjk()
 		glColor3f(0.f, 0.f, 1.f);
 	}
 	
-	Vector3F wb = matB.transform(result.contactPointB); 
+	Vector3F wb = result.contactPointB; 
 	getDrawer()->arrow(wb, wb + result.separateAxis);
 }
 

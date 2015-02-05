@@ -182,6 +182,8 @@ public:
 	const char hasContact() const;
 	const float TOI() const;
 	const Vector3F relativeVelocity() const;
+	const Vector3F velocityAtContactA() const;
+	const Vector3F velocityAtContactB() const;
 	void computeLinearImpulse(float & MinvJa, float & MinvJb, Vector3F & N);
 	void computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vector3F & IinvJb, float & MinvJb);
 	
