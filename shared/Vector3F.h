@@ -68,6 +68,7 @@ public:
 	float distance2To(const Vector3F& another) const;
 	void resize(float l);
 	Vector3F progress(const Vector3F& linearVelocity, const float & timeStep) const;
+	void clamp(const float & limit);
 	void verbose(const char * pref) const;
 	
 	static Vector3F XAxis;

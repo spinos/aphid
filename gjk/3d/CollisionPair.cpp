@@ -145,6 +145,7 @@ void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vec
 	std::cout<<" b at "<<m_ccd.positionB<<"\n";
 	std::cout<<" real at"<<m_B->position<<"\n";
 	std::cout<<" contact p"<<m_ccd.contactPointB.str()<<"\n";
+	std::cout<<" contact n"<<m_ccd.contactNormal.str()<<"\n";
 	std::cout<<" linear v"<<m_B->projectedLinearVelocity.str()<<"\n";
 	std::cout<<" angular w"<<m_B->projectedAngularVelocity.str()<<"\n";
 	std::cout<<" angular motion"<<angularMotionAtContactB().str()<<"\n";

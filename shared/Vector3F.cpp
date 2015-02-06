@@ -305,6 +305,16 @@ Vector3F Vector3F::progress(const Vector3F& linearVelocity, const float & timeSt
     return *this + linearVelocity * timeStep;
 }
 
+void Vector3F::clamp(const float & limit)
+{
+	if(x > limit) x = limit;
+	if(x < -limit) x = -limit;
+	if(y > limit) y = limit;
+	if(y < -limit) y = -limit;
+	if(z > limit) z = limit;
+	if(z < -limit) z = -limit;
+}
+
 void Vector3F::verbose(const char * pref) const
 {
 	std::cout<<pref<<str()<<"\n";

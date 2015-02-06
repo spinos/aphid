@@ -72,13 +72,13 @@ SimpleSystem::SimpleSystem()
 		m_vIndices[i*2+1] = i*2+1;
 	}
 	
-	m_rb.position.set(-10.f, 27.f, 15.f);
+	m_rb.position.set(-10.f, 37.f, 15.f);
 	m_rb.orientation.set(1.f, 0.f, 0.f, 0.f);
 	m_rb.linearVelocity.set(0.f, 0.f, 0.f);
-	m_rb.angularVelocity.set(-10, 0, 0);
+	m_rb.angularVelocity.set(0, 0, 0);
 	m_rb.projectedLinearVelocity.setZero();
 	m_rb.projectedAngularVelocity.setZero();
-	m_rb.shape = new CuboidShape(1.f, 6.f, 1.f);
+	m_rb.shape = new CuboidShape(1.f, 11.f, 1.f);
 	m_rb.shape->setMass(1.f);
 	m_rb.Crestitution = .27f;
 	
@@ -91,7 +91,7 @@ SimpleSystem::SimpleSystem()
 	TetrahedronShape * tet = new TetrahedronShape;
 	tet->p[0].set(-10.f, 10.f, -20.f);
 	tet->p[1].set(-10.f, 10.f, 120.f);
-	tet->p[2].set(90.f, 3.f, -20.f);
+	tet->p[2].set(90.f, 10.f, -20.f);
 	tet->p[3].set(0.f, -20.f, -20.f);
 	m_ground.shape = tet;
 	m_ground.shape->setMass(10.f);
@@ -291,6 +291,7 @@ void SimpleSystem::applyImpulse()
 		if(lamda < 0.f) lamda = 0.f;
 		if(MinvJb < 0.f) MinvJb = 0.f;
 		Vector3F bigI = N * (lamda - lastLamda);
+		std::cout<<" linJ "<<N<<" "<<lamda<<" "<<lastLamda;
 		
 		angLamda -= -JB;
 		if(angLamda < 0.f) angLamda = 0.f;
@@ -308,8 +309,7 @@ void SimpleSystem::applyImpulse()
 		m_rb.projectedLinearVelocity += bigI; bigI.verbose("I");
 		m_rb.projectedAngularVelocity += bigOmega; bigOmega.verbose("J");
 		
-		const float am = m_rb.projectedAngularVelocity.length();
-		if(am > 7.f) m_rb.projectedAngularVelocity *= 7.f/am;
+		m_rb.projectedAngularVelocity.clamp(7.f);
 		// m_rb.projectedAngularVelocity += angularMinvJt * (lamda - lastLamda);
 		
 		//m_rb.projectedLinearVelocity.verbose("pv");
