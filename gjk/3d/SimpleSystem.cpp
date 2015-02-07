@@ -78,11 +78,11 @@ SimpleSystem::SimpleSystem()
 	m_rb.angularVelocity.set(0, 0, 0);
 	m_rb.projectedLinearVelocity.setZero();
 	m_rb.projectedAngularVelocity.setZero();
-	m_rb.shape = new CuboidShape(1.f, 11.f, 1.f);
-	m_rb.shape->setMass(1.f);
-	m_rb.Crestitution = .27f;
+	m_rb.shape = new CuboidShape(4.f, 4.f, 4.f);
+	m_rb.shape->setMass(10.1f);
+	m_rb.Crestitution = .19f;
 	
-	m_ground.position.set(-15.f, -7.f, 15.f);
+	m_ground.position.set(-15.f, -5.f, 15.f);
 	m_ground.orientation.set(1.f, 0.f, 0.f, 0.f);
 	m_ground.linearVelocity.setZero();
 	m_ground.angularVelocity.setZero();
@@ -214,8 +214,9 @@ void SimpleSystem::applyImpulse()
 	const float toi = coll.TOI();
 	
 	m_rb.TOI = toi;
+	m_rb.TOI1 = 1.f - toi;
 
-	coll.progressToImpactPostion(timeStep * toi * .99f);
+	coll.progressToImpactPostion(timeStep * toi);
 
 	m_rb.projectedLinearVelocity = m_rb.linearVelocity;
 	m_rb.projectedAngularVelocity = m_rb.angularVelocity;
@@ -224,12 +225,13 @@ void SimpleSystem::applyImpulse()
 	float lamda = 0.f;
 	float angLamda = 0.f;
 	float lastAngLamda;
-	for(int i=0; i<4; i++) {
+	for(int i=0; i<9; i++) {
+		std::cout<<"\nx "<<i<<"\n";
 		if(!coll.hasContact()) {
 			// std::cout<<" no contact this iteration\n";
 			continue;
 		}
-		std::cout<<"\nx "<<i<<"\n";
+		
 		if(i > 0 && coll.TOI() > 0.f) {
 			// std::cout<<" toi "<<coll.TOI();
 			// coll.progressOnImpactPostion(timeStep * (1.f - toi) * .99f);
@@ -286,18 +288,21 @@ void SimpleSystem::applyImpulse()
 		float JA, JB;
 		coll.computeAngularImpulse(IinvJa, JA, IinvJb, JB);
 		
-// MinvJb will oscillate around zero, 
-		lamda -= -MinvJb;
+// MinvJb will oscillate around zero, accumulate and clamp 
+		lamda += MinvJb;
 		if(lamda < 0.f) lamda = 0.f;
-		if(MinvJb < 0.f) MinvJb = 0.f;
+
 		Vector3F bigI = N * (lamda - lastLamda);
-		std::cout<<" linJ "<<N<<" "<<lamda<<" "<<lastLamda;
-		
-		angLamda -= -JB;
+		std::cout<<"\n lamda "<<lamda<<" "<<lastLamda<<"\n";
+		// lamda -= lastLamda;
+
+		angLamda += JB;
 		if(angLamda < 0.f) angLamda = 0.f;
-		// std::cout<<"\n J "<<JB<<" angLamda "<<angLamda;
+		std::cout<<"\n angJ "<<IinvJb<<" angLamda "<<angLamda<<"\n";
 		
 		Vector3F bigOmega = IinvJb * (angLamda - lastAngLamda);
+	// angLamda -= lastAngLamda;
+		
 
 #ifdef DBG_DRAW
 	glBegin(GL_LINES);
@@ -335,6 +340,7 @@ void SimpleSystem::applyImpulse()
 		// std::cout<<" test at impact point ";
 		//m_gjk.timeOfImpact(*m_ground.shape, *m_rb.shape, &m_ccd);
 		coll.detectAtImpactPosition(timeStep * (1.f - toi));
+		if(coll.TOI() < m_rb.TOI1) m_rb.TOI1 = coll.TOI();
 	}
 	// m_rb.linearVelocity.verbose("v");
 	// m_rb.angularVelocity.verbose("av");
@@ -388,24 +394,32 @@ void SimpleSystem::drawWorld()
 	// glVertex3f(m_rb.r.x - 0.1f, m_rb.r.y + m_rb.Jsize * 10.f, m_rb.r.z - 0.1f);
 	// glEnd();
 	
+	
+	
+	
 	glPopMatrix();
 	
-	Vector3F vel = m_rb.linearVelocity;
+	glColor3f(0.f, .25f, .54f);
+	drawer->arrow(m_rb.position, m_rb.position + m_rb.angularVelocity);
+	
+	
+	Vector3F r(4,4,4);
+	r = space.transform(r);
+	r = r - m_rb.position;
+	
+	Vector3F lin = m_rb.angularVelocity.cross(r);
+	drawer->arrow(m_rb.position + r, m_rb.position + r + lin);
+	
+	Vector3F vell = m_rb.linearVelocity;
 	glColor3f(0.f, 0.f, .5f);
-	drawer->arrow(at, at + vel);
+	drawer->arrow(at, at + vell);
 	
-	vel = m_rb.angularVelocity;
-	glColor3f(0.f, .35f, .5f);
-	drawer->arrow(at, at + vel);
+	// vel = m_rb.angularVelocity;
 	
-	Matrix33F R; 
-	R.set(m_rb.orientation);
 	
-	Vector3F rb(-4,-4,-4);
-	Vector3F lin = rb.cross(vel);
-	at = space.transform(rb);
-	lin = R.transform(lin);
-	drawer->arrow(at, at + lin);
+	Matrix44F R;
+	R.setTranslation(m_rb.position); 
+	R.setRotation(m_rb.orientation);
 	
 	at = m_ground.position;
 	mat.set(m_ground.orientation);

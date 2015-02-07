@@ -351,21 +351,39 @@ const float Matrix44F::determinant() const
 			- M(3, 0) * determinant33( M(0, 1), M(1, 1), M(2, 1), M(0, 2), M(1, 2), M(2, 2), M(0, 3), M(1, 3), M(2, 3) ) );
 
 }
-
+// #include <iostream>
 void Matrix44F::setRotation(const Quaternion & q)
 {
-    const float xx = q.x * q.x;
-	const float yy = q.y * q.y;
-	const float zz = q.z * q.z;
-	*m(0, 0) = 1.f - 2.f * yy - 2.f * zz; 
-	*m(0, 1) = 2.f * q.x * q.y - 2.f * q.w * q.z; 
-	*m(0, 2) = 2.f * q.x * q.z + 2.f * q.w * q.y;  
-	*m(1, 0) = 2.f * q.x * q.y + 2.f * q.w * q.z; 
-	*m(1, 1) = 1.f - 2.f * xx - 2.f * zz; 
-	*m(1, 2) = 2.f * q.y * q.z - 2.f * q.w * q.x;  
-	*m(2, 0) = 2.f * q.x * q.z - 2.f * q.w * q.y; 
-	*m(2, 1) = 2.f * q.y * q.z + 2.f * q.w * q.x; 
-	*m(2, 2) = 1.f - 2.f * xx - 2.f * yy;
+	// std::cout<<"q("<<q.w<<" "<<q.x<<" "<<q.y<<" "<<q.z<<")"<<q.magnitude()<<"\n";
+	float qx, qy, qz, qw, qx2, qy2, qz2, qxqx2, qyqy2, qzqz2, qxqy2, qyqz2, qzqw2, qxqz2, qyqw2, qxqw2;
+    qx = q.x;
+    qy = q.y;
+    qz = q.z;
+    qw = q.w;
+    qx2 = ( qx + qx );
+    qy2 = ( qy + qy );
+    qz2 = ( qz + qz );
+    qxqx2 = ( qx * qx2 );
+    qxqy2 = ( qx * qy2 );
+    qxqz2 = ( qx * qz2 );
+    qxqw2 = ( qw * qx2 );
+    qyqy2 = ( qy * qy2 );
+    qyqz2 = ( qy * qz2 );
+    qyqw2 = ( qw * qy2 );
+    qzqz2 = ( qz * qz2 );
+    qzqw2 = ( qw * qz2 );
+
+	*m(0, 0) = 1.0f - qyqy2 - qzqz2; 
+	*m(0, 1) = qxqy2 + qzqw2; 
+	*m(0, 2) = qxqz2 - qyqw2;
+	 
+	*m(1, 0) = qxqy2 - qzqw2; 
+	*m(1, 1) = 1.0f - qxqx2 - qzqz2; 
+	*m(1, 2) = qyqz2 + qxqw2;
+	 
+	*m(2, 0) = qxqz2 + qyqw2; 
+	*m(2, 1) = qyqz2 - qxqw2; 
+	*m(2, 2) = 1.0f - qxqx2 - qyqy2;
 }
 
 const std::string Matrix44F::str() const

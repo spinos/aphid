@@ -203,6 +203,10 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
     result->hasContact = 0;
     result->penetrateDepth = 0.f;
     result->TOI = 0.f;
+	
+	// std::cout<<"\nb test p"<<result->positionB;
+	// std::cout<<"\nb test v"<<result->linearVelocityB * 60.f;
+	// std::cout<<"\nb test w"<<result->angularVelocityB * 60.f;
     
     const Vector3F relativeLinearVelocity = result->linearVelocityB - result->linearVelocityA;
     
@@ -251,19 +255,23 @@ void GjkContactSolver::timeOfImpact(const PointSet & A, const PointSet & B, Cont
         
         separateIo.transformA.setTranslation(position0A.progress(result->linearVelocityA, lamda));
 		Quaternion ra = orientation0A.progress(result->angularVelocityA, lamda);
-		//ra.normalize();
+		ra.normalize();
         separateIo.transformA.setRotation(ra);
         separateIo.transformB.setTranslation(position0B.progress(result->linearVelocityB, lamda));
 		Quaternion rb = orientation0B.progress(result->angularVelocityB, lamda);
-		//rb.normalize();
-        separateIo.transformB.setRotation(rb);
+		rb.normalize();
+		separateIo.transformB.setRotation(rb);
+		// std::cout<<"\nk "<<k;
+		// std::cout<<"\nb at p"<<separateIo.transformB.getTranslation();
+		// std::cout<<"\nmat"<<separateIo.transformB.str();
+        
         separateIo.referencePoint.setZero();
 		separateIo.distance = 1e9;
 		separateDistance(A, B, &separateIo);
         
         if(separateIo.hasResult) {
             if(k<1) {	
-				// std::cout<<"     contact at t0 try zero margin\n";
+				std::cout<<"     contact at t0 try zero margin\n";
                 separateIo.margin = 0.f;
 				separateIo.distance = 1e9;
 				separateDistance(A, B, &separateIo);

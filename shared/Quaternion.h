@@ -10,7 +10,7 @@ public:
     Quaternion(const float & angle, const Vector3F & axis);
 	void set(const float & angle, const Vector3F & axis);
 	void set(float d, float a, float b, float c);
-	const float magnidute() const;
+	const float magnitude() const;
 	void normalize();
 	
 	Quaternion operator*( const Quaternion & b ) const;	

@@ -28,12 +28,12 @@ void Quaternion::set(float d, float a, float b, float c)
     z = c;
 }
 
-const float Quaternion::magnidute() const
+const float Quaternion::magnitude() const
 { return sqrt(w * w + x * x + y * y + z * z); }
 
 void Quaternion::normalize()
 {
-    const float mag = magnidute();
+    const float mag = magnitude();
     x /= mag;
     y /= mag;
     z /= mag;
@@ -42,7 +42,9 @@ void Quaternion::normalize()
 
 Quaternion Quaternion::operator*( const Quaternion & b ) const
 {
-    const float qw = w * b.w - x * b.x - y * b.y - z * b.z;const float qx = w * b.x + x * b.w + y * b.z - z * b.y;const float qy = w * b.y - x * b.z + y * b.w + z * b.x;
+    const float qw = w * b.w - x * b.x - y * b.y - z * b.z;
+	const float qx = w * b.x + x * b.w + y * b.z - z * b.y;
+	const float qy = w * b.y - x * b.z + y * b.w + z * b.x;
     const float qz = w * b.z + x * b.y - y * b.x + z * b.w;
     return Quaternion(qw, qx, qy, qz);
 }

@@ -49,9 +49,7 @@ void CollisionPair::detectAtImpactPosition(const float & h)
 	m_ccd.linearVelocityB = m_B->projectedLinearVelocity * h;
 	m_ccd.angularVelocityB = m_B->projectedAngularVelocity * h;
 	m_gjk.timeOfImpact(*m_A->shape, *m_B->shape, &m_ccd);
-	
-	std::cout<<"\nb test v"<<m_ccd.linearVelocityB * 60.f;
-	std::cout<<"\nb test w"<<m_ccd.angularVelocityB * 60.f;
+	std::cout<<" velocity b after impact "<<m_B->projectedLinearVelocity;
 	std::cout<<" toi"<<m_ccd.TOI;
 }
 
@@ -80,10 +78,12 @@ void CollisionPair::computeLinearImpulse(float & MinvJa, float & MinvJb, Vector3
 	MinvJb = (1.f + m_B->Crestitution) * MinvJ * massinvB;
 	if(m_ccd.penetrateDepth > 0.f) {
 		// std::cout<<" penetrate d add relative velocity"<<m_ccd.penetrateDepth;
-		MinvJb += m_ccd.penetrateDepth * 60.f;
+		MinvJb += m_ccd.penetrateDepth * 80.f;
 	}
-	// std::cout<<" MinvJb "<<MinvJb;
+		
 	N = m_ccd.contactNormal;
+	std::cout<<"\n linVrel "<<Vrel<<" N "<<N<<" k "<<MinvJb<<"\n";
+	
 }
 
 const Vector3F CollisionPair::relativeVelocity() const
@@ -115,14 +115,14 @@ const Vector3F CollisionPair::angularMotionAtContactB() const
 {
 	Matrix44F R;
 	getTransformB(R);
-	Vector3F ro = m_ccd.contactPointB;
+	Vector3F rw = R.transform(m_ccd.contactPointB) - m_ccd.positionB;
 #ifdef DBG_DRAW
 	KdTreeDrawer * drawer = m_gjk.m_dbgDrawer;	
 	glColor3f(.3, .5, .8);
 	Vector3F wp = R.transform(m_ccd.contactPointB);
-	drawer->arrow(wp, wp + R.transformAsNormal(ro.cross(m_B->projectedAngularVelocity)));
+	// drawer->arrow(wp, wp + R.transformAsNormal(ro.cross(m_B->projectedAngularVelocity)));
 #endif
-	return R.transformAsNormal(ro.cross(m_B->projectedAngularVelocity));
+	return m_B->projectedAngularVelocity.cross(rw);
 }
 
 void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vector3F & IinvJb, float & MinvJb)
@@ -132,52 +132,41 @@ void CollisionPair::computeAngularImpulse(Vector3F & IinvJa, float & MinvJa, Vec
 		Vrel = relativeLinearVelocity();
 	}
 	
-	const float maxTorqueSize = m_ccd.contactPointB.length() * 2.f;
+	const float maxTorqueSize = m_ccd.contactPointB.length() * 4.f;
 	float vdotn = Vrel.dot(m_ccd.contactNormal);
 	if(vdotn > maxTorqueSize) vdotn = maxTorqueSize;
 	if(vdotn < -maxTorqueSize) vdotn = -maxTorqueSize;
 	
 	Matrix44F R; 
 	getTransformB(R);
-	Matrix44F Ri = R;
-	Ri.inverse();
 	
-	std::cout<<" b at "<<m_ccd.positionB<<"\n";
+	std::cout<<" b pos "<<m_ccd.positionB<<"\n";
+	std::cout<<" b rot "<<m_ccd.orientationB.w<<" "<<m_ccd.orientationB.x<<" "<<m_ccd.orientationB.y<<" "<<m_ccd.orientationB.z<<"\n";
 	std::cout<<" real at"<<m_B->position<<"\n";
 	std::cout<<" contact p"<<m_ccd.contactPointB.str()<<"\n";
 	std::cout<<" contact n"<<m_ccd.contactNormal.str()<<"\n";
-	std::cout<<" linear v"<<m_B->projectedLinearVelocity.str()<<"\n";
+	/*std::cout<<" linear v"<<m_B->projectedLinearVelocity.str()<<"\n";
 	std::cout<<" angular w"<<m_B->projectedAngularVelocity.str()<<"\n";
 	std::cout<<" angular motion"<<angularMotionAtContactB().str()<<"\n";
 	std::cout<<" linear motion rel"<<m_B->projectedLinearVelocity.dot(m_ccd.contactNormal)<<"\n";
 	std::cout<<" angular motion rel"<<angularMotionAtContactB().dot(m_ccd.contactNormal)<<"\n";
-	std::cout<<" relative vel"<<Vrel.dot(m_ccd.contactNormal)<<"\n";
+	std::cout<<" relative vel"<<Vrel.dot(m_ccd.contactNormal)<<"\n";*/
 	
-// N in object space
-	Vector3F nb = Ri.transformAsNormal(m_ccd.contactNormal);
+// N in world space
+	Vector3F nb = m_ccd.contactNormal;
 
-// from contact point to center in object space	
-	const Vector3F rb = m_ccd.contactPointB.reversed();
+// from contact point from center in world space	
+	const Vector3F rb = R.transform(m_ccd.contactPointB) - m_ccd.positionB;
 
-// torque in object space	
-	IinvJb = m_B->shape->angularMassM * rb.cross(nb); 
-	
-	IinvJb.verbose("objI");std::cout<<"||objI||"<<IinvJb.length();
-	
-	//rb.cross(nb).verbose(" angular impulse ");
-	//IinvJb.verbose(" angular impulse / I");
-	//std::cout<<"1/I"<<m_B->shape->angularMassM.str();
+// torque in world space	
+	IinvJb = m_B->inertiaTensor * rb.cross(nb); 
 		
 	const float massinv = m_B->shape->linearMassM.x;
 	
-	const Vector3F wr = R.transformAsNormal(m_ccd.contactPointB.reversed());
-	
-	const Vector3F test = m_B->inertiaTensor * wr.cross(m_ccd.contactNormal);
-	test.verbose("worldI");std::cout<<"||worldI||"<<test.length();
-	
-	const float MinvJ =  vdotn / (massinv + (m_B->inertiaTensor * wr.cross(m_ccd.contactNormal)).cross(wr).dot(m_ccd.contactNormal));
+	const float MinvJ =  vdotn / (massinv + (m_B->inertiaTensor * rb.cross(m_ccd.contactNormal)).cross(rb).dot(m_ccd.contactNormal));
 
 	MinvJb = (1.f + m_B->Crestitution) * MinvJ;
+
 	//std::cout<<" dot "<<Vrel.dot(m_ccd.contactNormal);
 	
 	//std::cout<<" size "<<MinvJb;

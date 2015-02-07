@@ -152,19 +152,20 @@ struct RigidBody {
 	Vector3F angularVelocity;
 	Vector3F projectedLinearVelocity;
 	Vector3F projectedAngularVelocity;
-	float TOI, Crestitution;
+	float TOI, TOI1, Crestitution;
 #ifdef DBG_DRAW
 	Vector3F r, J;
 	float Jsize;
 #endif
 	MassShape * shape;
 	void integrateP(const float & h) {
+		if(TOI < 1.f) std::cout<<"\nupdate p from"<<position;
 		position = position.progress(linearVelocity, h * TOI * .99f);
 		orientation = orientation.progress(angularVelocity, h * TOI * .99f);
-		if(TOI < 1.f) {
-			position = position.progress(projectedLinearVelocity, h * (1.f - TOI));
-			orientation = orientation.progress(projectedAngularVelocity, h * (1.f - TOI));
-		}
+		if(TOI < 1.f) std::cout<<"\nimpact at "<<position;
+		position = position.progress(projectedLinearVelocity, h * (1.f - TOI) * .99f);
+		orientation = orientation.progress(projectedAngularVelocity, h * (1.f - TOI) * .99f);
+		if(TOI < 1.f) std::cout<<"\nonto "<<position<<"\n";
 	}
 	void updateState() {
 		if(TOI < 1.f) {
