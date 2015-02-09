@@ -119,7 +119,7 @@ void Base3DView::initializeGL()
 	glShadeModel(GL_SMOOTH);
 	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
 	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-    glEnable(GL_MULTISAMPLE);
+    // glEnable(GL_MULTISAMPLE);
 	glDepthFunc(GL_LEQUAL);
 	getDrawer()->initializeProfile();
 	m_hud->reset();
@@ -131,7 +131,7 @@ void Base3DView::initializeGL()
 //! [7]
 void Base3DView::paintGL()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
     glLoadIdentity();
 
     float m[16];

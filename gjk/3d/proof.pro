@@ -1,4 +1,4 @@
-INCLUDEPATH += ../../shared ../ ./
+INCLUDEPATH += ../../shared ../ ./ ../
 LIBS += -L../../lib -laphid -lIlmImf -lHalf
 DEFINES += DBG_DRAW
 DESTDIR = ./
@@ -31,7 +31,8 @@ SOURCES       = ../../shared/Base3DView.cpp \
 		SimpleSystem.cpp \
                 ../Gjk.cpp \
 				../GjkContactSolver.cpp \
-				CollisionPair.cpp
+				CollisionPair.cpp \
+				../../shared/GlslBase.cpp
 QT           += opengl
 win32:CONFIG += console
 macx:CONFIG -= app_bundle 

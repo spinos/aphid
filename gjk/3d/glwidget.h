@@ -4,8 +4,9 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 #include <Gjk.h>
+#include <glslBase.h>
 class SimpleSystem;
-class GLWidget : public Base3DView
+class GLWidget : public Base3DView, public GLSLBase
 {
     Q_OBJECT
 
@@ -15,6 +16,7 @@ public:
     ~GLWidget();
 	
 protected:    
+	virtual void clientInit();
     virtual void clientDraw();
     virtual void clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit);
     virtual void clientDeselect();
@@ -43,6 +45,13 @@ private:
     int m_isRunning;
 private slots:
     void simulate();
+	
+protected:
+    virtual const char* vertexProgramSource() const;
+	virtual const char* fragmentProgramSource() const;
+	virtual void updateShaderParameters() const;
+private:
+    GLuint m_depthImg;
 
 };
 //! [3]

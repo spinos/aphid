@@ -571,6 +571,16 @@ void GLWidget::drawPointSet(PointSet & p, const Matrix44F & mat)
 
 void GLWidget::testNDC()
 {
+	glColor3f(1,0,1);
+	glBegin(GL_TRIANGLES);
+	glVertex3f(0, 0, 0);
+    glVertex3f(0, 1, 0);
+    glVertex3f(-1, 1, 0);
+	glVertex3f(-100, -10, -100);
+    glVertex3f(-100, -10, 100);
+    glVertex3f(100, -10, 0);
+	glEnd();
+	
 // http://glprogramming.com/red/chapter03.html
     GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
@@ -583,6 +593,76 @@ void GLWidget::testNDC()
     // qDebug()<<"model view matrix"<<mmv.str().c_str();
     Matrix44F mproj(projmatrix);
     // qDebug()<<"project matrix"<<mproj.str().c_str();
+	
+	const GLint width = viewport[2];
+    const GLint height = viewport[3];
+	
+	// glReadBuffer(GL_FRONT);
+    
+	GLfloat *pixels = new GLfloat[width * height];
+	
+for(int i=0; i < width * height; i++) pixels[i] = ((float)(rand() % 99))/99.f; 
+    
+    //glPixelStorei(GL_UNPACK_ROW_LENGTH, viewport[2]);
+    //int rowSkip = 0;
+    //int pixelSkip = 0;
+    //glPixelStorei(GL_UNPACK_SKIP_PIXELS, pixelSkip);
+    //glPixelStorei(GL_UNPACK_SKIP_ROWS, rowSkip);
+	
+	//glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT,GL_FLOAT, pixels);
+	//qDebug()<<"d "<<pixels[width * height / 2 + width /2];
+	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_depthImg);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // set up hardware shadow mapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, 0);
+
+
+// https://www.opengl.org/wiki/Common_Mistakes	
+/*
+	glCopyTexImage2D(GL_TEXTURE_2D, 
+	0,
+ 	// GL_RGBA,
+	GL_DEPTH_COMPONENT32,
+ 	0,
+ 	0,
+ 	width,
+ 	height,
+ 	0);
+*/	
+	
+	
+	glCopyTexSubImage2D(GL_TEXTURE_2D,
+ 	0,
+ 	0,
+ 	0,
+ 	0,
+ 	0,
+ 	width,
+ 	height);
+	
+		
+	switch (glGetError()) {
+		case GL_NO_ERROR:
+			//qDebug()<<"no GL error";
+			break;
+		case GL_INVALID_OPERATION:
+			qDebug()<<"no components";
+			break;
+		default:
+			qDebug()<<"gl error";
+			break;
+	}
+	
+	delete[] pixels;
     
 // http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf    
     Plane pnear(mproj.M(0,2), 
@@ -618,16 +698,37 @@ void GLWidget::testNDC()
     // qDebug()<<"bottom"<<leftP.str().c_str();
     const float bottomMost = leftP.y;
     
+	glDisable(GL_TEXTURE_2D);
+	
+	programBegin();
+    glEnable(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, m_depthImg);
     glPushMatrix();
     float t[16];
     mmvinv.glMatrix(t);
     glMultMatrixf(t);
     glBegin(GL_TRIANGLES);
-    glVertex3f(leftMost,bottomMost, zPlane);
-    glVertex3f(-leftMost,bottomMost, zPlane);
-    glVertex3f(-leftMost,-bottomMost, zPlane);
+	glColor3f(0,0,1);
+    glTexCoord2f(0, 0); glVertex3f(leftMost,bottomMost, zPlane);
+    glTexCoord2f(1, 0); glVertex3f(-leftMost,bottomMost, zPlane);
+    glTexCoord2f(1, 1); glVertex3f(-leftMost,-bottomMost, zPlane);
     glEnd();
     glPopMatrix();
+	
+	programEnd();
+	//glDisable(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, m_depthImg);
+	//glDeleteTextures(1, &m_depthImg);
+	
+}
+
+void GLWidget::clientInit()
+{
+	std::string log;
+	diagnose(log);
+	qDebug()<<log.c_str();
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(1, &m_depthImg);
 }
 
 void GLWidget::clientDraw()
@@ -689,3 +790,37 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 	Base3DView::keyReleaseEvent(event);
 }
 
+void GLWidget::updateShaderParameters() const
+{
+    glUniform1iARB(glGetUniformLocationARB(program_object, "color_texture"), 0);
+    glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_depthImg);
+}
+
+const char* GLWidget::vertexProgramSource() const
+{
+	return "varying vec3 PCAM;"
+"void main()"
+"{"
+"		gl_Position = ftransform();"
+"		gl_FrontColor = gl_Color;"
+"gl_TexCoord[0] = gl_MultiTexCoord0;"
+"	PCAM = vec3 (gl_ModelViewMatrix * gl_Vertex);"
+"}";
+}
+
+const char* GLWidget::fragmentProgramSource() const
+{
+	return "varying vec3 PCAM;"
+"uniform sampler2D color_texture;"
+"void main()"
+"{"
+"	float d = -PCAM.z; "
+//"		gl_FragColor = vec4 (d,d,d, 1.0);"
+//"vec2 col = texture2D(color_texture, gl_TexCoord[0].xy).rg;"
+"d = texture2D(color_texture, gl_TexCoord[0].xy).r;"
+//"gl_FragColor = vec4(texture2D(color_texture, gl_TexCoord[0].xy), 1.0);"
+"gl_FragColor = vec4(d, d, d,1.0);"
+"}";
+}
