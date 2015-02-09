@@ -31,6 +31,7 @@ private:
 	void testCollision();
 	void drawSystem();
 	void testTOI();
+	void testNDC();
 	void drawPointSet(PointSet & p, const Matrix44F & mat);
 private:
     PointSet A, B;

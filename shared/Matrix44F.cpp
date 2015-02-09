@@ -26,6 +26,11 @@ Matrix44F::Matrix44F(const Matrix44F & a)
 	for(int i = 0; i < 16; i++) v[i] = a.v[i];
 }
 
+Matrix44F::Matrix44F(double * mat)
+{
+    for(int i = 0; i < 16; i++) v[i] = mat[i];
+}
+
 Matrix44F::~Matrix44F() {}
 
 float Matrix44F::operator() (int i, int j)
@@ -40,7 +45,7 @@ float Matrix44F::operator() (int i, int j) const
 
 Matrix44F Matrix44F::operator* (const Matrix44F & a) const
 {
-	Matrix44F r(0.f);
+	Matrix44F r(*this);
 	r.multiply(a);
 	return r;
 }

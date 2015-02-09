@@ -13,6 +13,7 @@
 class Plane {
 public:
 	Plane();
+	Plane(float a, float b, float c, float d);
 	Plane(const Vector3F & nor, const Vector3F & pop);
 	Plane(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, const Vector3F & p3);
 	virtual ~Plane();

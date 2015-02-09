@@ -13,6 +13,14 @@ Plane::Plane()
 {
 }
 
+Plane::Plane(float a, float b, float c, float d)
+{
+    m_a = a;
+    m_b = b;
+    m_c = c;
+    m_d = d;
+}
+
 Plane::Plane(const Vector3F & nor, const Vector3F & pop)
 {
 	Vector3F nn = nor.normal();

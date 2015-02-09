@@ -28,9 +28,9 @@
 #include <maya/MSelectionList.h>
 #include <maya/MFnCamera.h>
 #include <maya/MGlobal.h>
- 
-
-class heatherNode : public MPxLocatorNode
+#include <Plane.h>
+#include <glslBase.h>
+class heatherNode : public MPxLocatorNode, public GLSLBase
 {
 public:
 	heatherNode();
@@ -58,6 +58,13 @@ public:
 
 public: 
 	static	MTypeId		id;
+	
+protected:
+    virtual const char* vertexProgramSource() const;
+	virtual const char* fragmentProgramSource() const;
+	virtual void updateShaderParameters() const;
+private:
+    GLuint m_depthImg;
 };
 
 MTypeId heatherNode::id( 0x0002919 );
@@ -162,20 +169,106 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	MPoint corner_h(nright,-ntop,-near_clip);
 	corner_h *= cmat;
 
+	view.beginGL();
 	
-	view.beginGL(); 
-	MMatrix modelViewMatrix;
-	view.modelViewMatrix (modelViewMatrix );
+#ifdef WIN32
+    if(!isDiagnosed()) {
+        MGlobal::displayInfo("init glext on win32");
+		gExtensionInit();
+		std::string log;
+		diagnose(log);
+		MGlobal::displayInfo(MString("glsl diagnose log: ") + log.c_str());
+	}
+#endif	
 	
-	MPoint p0(-1.f, 0.f, 0.f); p0 *= modelViewMatrix;
-				
+	GLint viewport[4];
+    GLdouble mvmatrix[16], projmatrix[16];
+    glGetDoublev (GL_MODELVIEW_MATRIX, mvmatrix);
+    glGetDoublev (GL_PROJECTION_MATRIX, projmatrix);
+    glGetIntegerv (GL_VIEWPORT, viewport);
+	Matrix44F mmv(mvmatrix);
+    Matrix44F mmvinv(mvmatrix); mmvinv.inverse();
+    Matrix44F mproj(projmatrix);
+    
+    const GLint width = viewport[2];
+    const GLint height = viewport[3];
+    GLfloat *pixels = new GLfloat[width * height];
+    
+    MGlobal::displayInfo(MString("port wh")+width+" "+height);
+    
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, viewport[2]);
+    int rowSkip = 0;
+    int pixelSkip = 0;
+    glPixelStorei(GL_UNPACK_SKIP_PIXELS, pixelSkip);
+    glPixelStorei(GL_UNPACK_SKIP_ROWS, rowSkip);
+    glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT,GL_FLOAT, pixels);
+    
+    // for(int i =0; i < 1024; i++) pixels[i]= ((float)(rand() % 99)) / 99.f;
+    MGlobal::displayInfo(MString("read pix")+width+" "+height);
+    
+	glGenTextures(1, &m_depthImg);
+	glBindTexture(GL_TEXTURE_2D, m_depthImg);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_FLOAT, GL_FLOAT, pixels);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	
+	MGlobal::displayInfo(MString("tex pix")+width+" "+height);
+	
+	float tt;
+    Vector3F leftP;
+    
+    Plane pnear(mproj.M(0,2), 
+               mproj.M(1,2),
+               mproj.M(2,2), 
+               mproj.M(3,2));
+    
+    Ray toNear(Vector3F(0,0,0), Vector3F(0,0,1), 0.f, 1000.f);
+    
+    pnear.rayIntersect(toNear, leftP, tt);
+    // qDebug()<<"near"<<leftP.str().c_str();
+
+    Plane pleft(mproj.M(0,3) + mproj.M(0,0), 
+               mproj.M(1,3) + mproj.M(1,0),
+               mproj.M(2,3) + mproj.M(2,0), 
+               mproj.M(3,3) + mproj.M(3,0));
+    
+    const float zPlane = leftP.z * 1.01f;
+    Ray toleft(Vector3F(0.f, 0.f, zPlane), Vector3F(-1,0,0), 0.f, 1000.f );
+    pleft.rayIntersect(toleft, leftP, tt);
+    // qDebug()<<"left"<<leftP.str().c_str();
+    const float leftMost = leftP.x;
+    
+    Plane pbottom(mproj.M(0,3) + mproj.M(0,1), 
+               mproj.M(1,3) + mproj.M(1,1),
+               mproj.M(2,3) + mproj.M(2,1), 
+               mproj.M(3,3) + mproj.M(3,1));
+    
+    Ray tobottom(Vector3F(0.f, 0.f, zPlane), Vector3F(0,-1,0), 0.f, 1000.f );
+    pbottom.rayIntersect(tobottom, leftP, tt);
+    // qDebug()<<"bottom"<<leftP.str().c_str();
+    const float bottomMost = leftP.y;
+	
+    programBegin();
+    
+	glPushMatrix();
+	float tmat[16];
+    mmvinv.glMatrix(tmat);
+    glMultMatrixf(tmat);
+    
     glEnable(GL_TEXTURE_2D);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0); glVertex3f(p0.x, p0.y, p0.z);
-    glTexCoord2f(1, 0); glVertex2f(1, 0);
-    glTexCoord2f(1, 1); glVertex2f(1, 1);
-    glTexCoord2f(0, 1); glVertex2f(0, 1);
+    glBegin(GL_TRIANGLES);
+    glTexCoord2f(0, 0); glVertex3f(leftMost,bottomMost, zPlane);
+    glTexCoord2f(1, 0); glVertex3f(-leftMost,bottomMost, zPlane);
+    glTexCoord2f(1, 1); glVertex3f(-leftMost,-bottomMost, zPlane);
     glEnd();
+    
+    glPopMatrix();
+    
+	programEnd();
+	delete[] pixels;
+	glDeleteTextures(1, &m_depthImg);
 	
 	view.endGL();
 	
@@ -242,6 +335,38 @@ MStatus heatherNode::initialize()
 	return MS::kSuccess;
 }
 
+void heatherNode::updateShaderParameters() const
+{
+    glActiveTexture(GL_TEXTURE0);
+    //int texture_location = glGetUniformLocationARB(program_object, "color_texture");
+    //glUniform1iARB(texture_location, 0);
+    //glBindTexture(GL_TEXTURE_2D, m_depthImg);
+}
+
+const char* heatherNode::vertexProgramSource() const
+{
+	return "varying vec3 PCAM;"
+"void main()"
+"{"
+"		gl_Position = ftransform();"
+"		gl_FrontColor = gl_Color;"
+"gl_TexCoord[0] = gl_MultiTexCoord0;"
+"	PCAM = vec3 (gl_ModelViewMatrix * gl_Vertex);"
+"}";
+}
+
+const char* heatherNode::fragmentProgramSource() const
+{
+	return "varying vec3 PCAM;"
+"uniform sampler2D color_texture;"
+"void main()"
+"{"
+"	float d = -PCAM.z; "
+"		gl_FragColor = vec4 (vec3(gl_FragCoord.z / 10.f), 1.0);"
+"gl_FragColor = texture2D(color_texture, gl_TexCoord[0].st);"
+"}";
+}
+
 MStatus initializePlugin( MObject obj )
 { 
 	MStatus   stat;
@@ -275,3 +400,4 @@ MStatus uninitializePlugin( MObject obj)
 
 	return stat;
 }
+

@@ -5,6 +5,7 @@
 #include <KdTreeDrawer.h>
 #include <GjkContactSolver.h>
 #include "SimpleSystem.h"
+#include <Plane.h>
 	
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -568,6 +569,67 @@ void GLWidget::drawPointSet(PointSet & p, const Matrix44F & mat)
     glPopMatrix();
 }
 
+void GLWidget::testNDC()
+{
+// http://glprogramming.com/red/chapter03.html
+    GLint viewport[4];
+    GLdouble mvmatrix[16], projmatrix[16];
+    glGetDoublev (GL_MODELVIEW_MATRIX, mvmatrix);
+    glGetDoublev (GL_PROJECTION_MATRIX, projmatrix);
+    glGetIntegerv (GL_VIEWPORT, viewport);
+    // qDebug()<<"viewport "<<viewport[0]<<","<<viewport[1]<<","<<viewport[2]<<","<<viewport[3];
+    Matrix44F mmv(mvmatrix);
+    Matrix44F mmvinv(mvmatrix); mmvinv.inverse();
+    // qDebug()<<"model view matrix"<<mmv.str().c_str();
+    Matrix44F mproj(projmatrix);
+    // qDebug()<<"project matrix"<<mproj.str().c_str();
+    
+// http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf    
+    Plane pnear(mproj.M(0,2), 
+               mproj.M(1,2),
+               mproj.M(2,2), 
+               mproj.M(3,2));
+    
+    Ray toNear(Vector3F(0,0,0), Vector3F(0,0,1), 0.f, 1000.f);
+    
+    float tt;
+    Vector3F leftP;
+    pnear.rayIntersect(toNear, leftP, tt);
+    // qDebug()<<"near"<<leftP.str().c_str();
+
+    Plane pleft(mproj.M(0,3) + mproj.M(0,0), 
+               mproj.M(1,3) + mproj.M(1,0),
+               mproj.M(2,3) + mproj.M(2,0), 
+               mproj.M(3,3) + mproj.M(3,0));
+    
+    const float zPlane = leftP.z * 1.01f;
+    Ray toleft(Vector3F(0.f, 0.f, zPlane), Vector3F(-1,0,0), 0.f, 1000.f );
+    pleft.rayIntersect(toleft, leftP, tt);
+    // qDebug()<<"left"<<leftP.str().c_str();
+    const float leftMost = leftP.x;
+    
+    Plane pbottom(mproj.M(0,3) + mproj.M(0,1), 
+               mproj.M(1,3) + mproj.M(1,1),
+               mproj.M(2,3) + mproj.M(2,1), 
+               mproj.M(3,3) + mproj.M(3,1));
+    
+    Ray tobottom(Vector3F(0.f, 0.f, zPlane), Vector3F(0,-1,0), 0.f, 1000.f );
+    pbottom.rayIntersect(tobottom, leftP, tt);
+    // qDebug()<<"bottom"<<leftP.str().c_str();
+    const float bottomMost = leftP.y;
+    
+    glPushMatrix();
+    float t[16];
+    mmvinv.glMatrix(t);
+    glMultMatrixf(t);
+    glBegin(GL_TRIANGLES);
+    glVertex3f(leftMost,bottomMost, zPlane);
+    glVertex3f(-leftMost,bottomMost, zPlane);
+    glVertex3f(-leftMost,-bottomMost, zPlane);
+    glEnd();
+    glPopMatrix();
+}
+
 void GLWidget::clientDraw()
 {
 	// testTOI();
@@ -577,7 +639,8 @@ void GLWidget::clientDraw()
 	// testTriangle();
     // testTetrahedron();
 	// testCollision();
-	drawSystem();
+	// drawSystem();
+	testNDC();
 	if(m_isRunning) m_alpha += 0.01f;
 }
 
