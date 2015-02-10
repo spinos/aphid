@@ -16,3 +16,10 @@
 #ifdef WIN32
 #include <gExtension.h>
 #endif
+
+#ifdef LINUX
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#include <X11/Intrinsic.h>
+#endif

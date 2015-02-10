@@ -4,7 +4,7 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 #include <Gjk.h>
-#include <glslBase.h>
+#include <GlslBase.h>
 class SimpleSystem;
 class GLWidget : public Base3DView, public GLSLBase
 {

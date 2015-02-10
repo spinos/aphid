@@ -601,7 +601,7 @@ void GLWidget::testNDC()
     
 	GLfloat *pixels = new GLfloat[width * height];
 	
-for(int i=0; i < width * height; i++) pixels[i] = ((float)(rand() % 99))/99.f; 
+//for(int i=0; i < width * height; i++) pixels[i] = ((float)(rand() % 99))/99.f; 
     
     //glPixelStorei(GL_UNPACK_ROW_LENGTH, viewport[2]);
     //int rowSkip = 0;
@@ -609,12 +609,12 @@ for(int i=0; i < width * height; i++) pixels[i] = ((float)(rand() % 99))/99.f;
     //glPixelStorei(GL_UNPACK_SKIP_PIXELS, pixelSkip);
     //glPixelStorei(GL_UNPACK_SKIP_ROWS, rowSkip);
 	
-	//glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT,GL_FLOAT, pixels);
+	glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT,GL_FLOAT, pixels);
 	//qDebug()<<"d "<<pixels[width * height / 2 + width /2];
 	
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_depthImg);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -622,24 +622,23 @@ for(int i=0; i < width * height; i++) pixels[i] = ((float)(rand() % 99))/99.f;
     // set up hardware shadow mapping
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, 0);
-
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_RED, GL_FLOAT, pixels);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16_ARB, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, pixels);
 
 // https://www.opengl.org/wiki/Common_Mistakes	
 /*
 	glCopyTexImage2D(GL_TEXTURE_2D, 
 	0,
  	// GL_RGBA,
-	GL_DEPTH_COMPONENT32,
+	GL_DEPTH_COMPONENT16_ARB,
  	0,
  	0,
  	width,
  	height,
  	0);
-*/	
-	
-	
+*/
+/*	
 	glCopyTexSubImage2D(GL_TEXTURE_2D,
  	0,
  	0,
@@ -648,7 +647,7 @@ for(int i=0; i < width * height; i++) pixels[i] = ((float)(rand() % 99))/99.f;
  	0,
  	width,
  	height);
-	
+*/	
 		
 	switch (glGetError()) {
 		case GL_NO_ERROR:
@@ -670,7 +669,7 @@ for(int i=0; i < width * height; i++) pixels[i] = ((float)(rand() % 99))/99.f;
                mproj.M(2,2), 
                mproj.M(3,2));
     
-    Ray toNear(Vector3F(0,0,0), Vector3F(0,0,1), 0.f, 1000.f);
+    Ray toNear(Vector3F(0,0,0), Vector3F(0,0,-1), 0.f, 1000.f);
     
     float tt;
     Vector3F leftP;
@@ -800,26 +799,22 @@ void GLWidget::updateShaderParameters() const
 
 const char* GLWidget::vertexProgramSource() const
 {
-	return "varying vec3 PCAM;"
-"void main()"
+	return "void main()"
 "{"
 "		gl_Position = ftransform();"
 "		gl_FrontColor = gl_Color;"
 "gl_TexCoord[0] = gl_MultiTexCoord0;"
-"	PCAM = vec3 (gl_ModelViewMatrix * gl_Vertex);"
 "}";
 }
 
 const char* GLWidget::fragmentProgramSource() const
 {
-	return "varying vec3 PCAM;"
-"uniform sampler2D color_texture;"
+	return "uniform sampler2D color_texture;"
 "void main()"
 "{"
-"	float d = -PCAM.z; "
 //"		gl_FragColor = vec4 (d,d,d, 1.0);"
 //"vec2 col = texture2D(color_texture, gl_TexCoord[0].xy).rg;"
-"d = texture2D(color_texture, gl_TexCoord[0].xy).r;"
+"float d = texture2D(color_texture, gl_TexCoord[0].xy).r;"
 //"gl_FragColor = vec4(texture2D(color_texture, gl_TexCoord[0].xy), 1.0);"
 "gl_FragColor = vec4(d, d, d,1.0);"
 "}";

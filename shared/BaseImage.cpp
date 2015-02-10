@@ -78,6 +78,9 @@ void BaseImage::setRed(float u, float v, float red) {}
 
 void BaseImage::applyMask(BaseImage * another) {}
 
+bool BaseImage::isRGBAZ() const 
+{ return m_channelRank == RGBAZ; }
+
 void BaseImage::verbose() const
 {
 	std::cout<<"Image file: "<<fileName()<<"\n";
@@ -85,8 +88,10 @@ void BaseImage::verbose() const
 	std::cout<<" size: ("<<m_imageWidth<<", "<<m_imageHeight<<")\n";
 	if(m_channelRank == RGB)
 		std::cout<<" channels: RGB\n";
-	else
+	else if(m_channelRank == RGBA)
 		std::cout<<" channels: RGBA\n";
+	else
+	    std::cout<<" channels: RGBAZ\n";
 	
 	if(isOpened())
 		std::cout<<" image is verified\n";

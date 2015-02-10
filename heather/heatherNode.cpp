@@ -29,7 +29,8 @@
 #include <maya/MFnCamera.h>
 #include <maya/MGlobal.h>
 #include <Plane.h>
-#include <glslBase.h>
+#include <GlslBase.h>
+#include "zEXRImage.h"
 class heatherNode : public MPxLocatorNode, public GLSLBase
 {
 public:
@@ -43,7 +44,7 @@ public:
 								  M3dView::DisplayStatus status );
 
 	virtual bool            isBounded() const;
-
+	
 	static  void *          creator();
 	static  MStatus         initialize();
 
@@ -55,7 +56,9 @@ public:
 	static	MObject		afocallength;
 	static	MObject		aorthographic;
 	static	MObject		aorthographicwidth;
-
+	static MObject adepthImageName;
+	static MObject aframeNumber;
+	static MObject outValue;
 public: 
 	static	MTypeId		id;
 	
@@ -64,7 +67,11 @@ protected:
 	virtual const char* fragmentProgramSource() const;
 	virtual void updateShaderParameters() const;
 private:
+    void preLoadImage(const char * name, int frame);
+private:
+    float * m_zdata;
     GLuint m_depthImg;
+    bool m_needLoadImage;
 };
 
 MTypeId heatherNode::id( 0x0002919 );
@@ -77,13 +84,50 @@ MObject heatherNode::avapeture;
 MObject heatherNode::afocallength;
 MObject heatherNode::aorthographic;
 MObject heatherNode::aorthographicwidth;
+MObject heatherNode::adepthImageName;
+MObject heatherNode::aframeNumber;
+MObject heatherNode::outValue;
 
-heatherNode::heatherNode() {}
-heatherNode::~heatherNode() {}
+heatherNode::heatherNode() 
+{
+    m_needLoadImage = 0;
+    m_zdata = 0;
+}
+heatherNode::~heatherNode() 
+{
+    if(m_zdata) delete[] m_zdata;
+}
 
-MStatus heatherNode::compute( const MPlug& /*plug*/, MDataBlock& /*data*/ )
+MStatus heatherNode::compute( const MPlug& plug, MDataBlock& block )
 { 
-	return MS::kUnknownParameter;
+    if( plug == outValue ) {
+        MString filename =  block.inputValue(adepthImageName).asString();
+        int frame = block.inputValue(aframeNumber).asInt();
+        preLoadImage(filename.asChar(), frame);
+        MDataHandle outputHandle = block.outputValue( outValue );
+		outputHandle.set(0.0);
+    }
+	return MS::kSuccess;
+}
+
+void heatherNode::preLoadImage(const char * name, int frame)
+{
+    std::string fileName(name);
+    if(fileName.size() < 3) return;
+    
+    ZEXRImage image(fileName.c_str());
+    if(!image.isOpened()) return;
+
+    MGlobal::displayInfo(MString("loading image ")+ name+" at frame "+frame);
+       
+    if(!image.isRGBAZ()) {
+        MGlobal::displayWarning("image is not RGBAZ format.");
+        
+        return;
+    }
+    
+    
+    m_needLoadImage = 1;
 }
 
 void heatherNode::draw( M3dView & view, const MDagPath & /*path*/, 
@@ -192,15 +236,16 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     
     const GLint width = viewport[2];
     const GLint height = viewport[3];
+    
     GLfloat *pixels = new GLfloat[width * height];
     
     MGlobal::displayInfo(MString("port wh")+width+" "+height);
     
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, viewport[2]);
-    int rowSkip = 0;
-    int pixelSkip = 0;
-    glPixelStorei(GL_UNPACK_SKIP_PIXELS, pixelSkip);
-    glPixelStorei(GL_UNPACK_SKIP_ROWS, rowSkip);
+    //glPixelStorei(GL_UNPACK_ROW_LENGTH, viewport[2]);
+    //int rowSkip = 0;
+    //int pixelSkip = 0;
+    //glPixelStorei(GL_UNPACK_SKIP_PIXELS, pixelSkip);
+    //glPixelStorei(GL_UNPACK_SKIP_ROWS, rowSkip);
     glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT,GL_FLOAT, pixels);
     
     // for(int i =0; i < 1024; i++) pixels[i]= ((float)(rand() % 99)) / 99.f;
@@ -208,34 +253,38 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     
 	glGenTextures(1, &m_depthImg);
 	glBindTexture(GL_TEXTURE_2D, m_depthImg);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_FLOAT, GL_FLOAT, pixels);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_RED, GL_FLOAT, pixels);
 	
 	MGlobal::displayInfo(MString("tex pix")+width+" "+height);
+	delete[] pixels;
 	
 	float tt;
     Vector3F leftP;
     
-    Plane pnear(mproj.M(0,2), 
-               mproj.M(1,2),
-               mproj.M(2,2), 
-               mproj.M(3,2));
+    Plane pfar(mproj.M(0,3) - mproj.M(0,2), 
+               mproj.M(1,3) - mproj.M(1,2),
+               mproj.M(2,3) - mproj.M(2,2), 
+               mproj.M(3,3) - mproj.M(3,2));
+    // MGlobal::displayInfo(MString("proj")+mproj.str().c_str());
+    Ray toFar(Vector3F(0,0,0), Vector3F(0,0,-1), 0.f, 1e8);
     
-    Ray toNear(Vector3F(0,0,0), Vector3F(0,0,1), 0.f, 1000.f);
-    
-    pnear.rayIntersect(toNear, leftP, tt);
-    // qDebug()<<"near"<<leftP.str().c_str();
+    pfar.rayIntersect(toFar, leftP, tt);
+    MGlobal::displayInfo(MString("far")+leftP.str().c_str());
 
     Plane pleft(mproj.M(0,3) + mproj.M(0,0), 
                mproj.M(1,3) + mproj.M(1,0),
                mproj.M(2,3) + mproj.M(2,0), 
                mproj.M(3,3) + mproj.M(3,0));
     
-    const float zPlane = leftP.z * 1.01f;
-    Ray toleft(Vector3F(0.f, 0.f, zPlane), Vector3F(-1,0,0), 0.f, 1000.f );
+    const float zPlane = leftP.z * .999f;
+    Ray toleft(Vector3F(0.f, 0.f, zPlane), Vector3F(-1,0,0), 0.f, 1e8);
     pleft.rayIntersect(toleft, leftP, tt);
     // qDebug()<<"left"<<leftP.str().c_str();
     const float leftMost = leftP.x;
@@ -245,7 +294,7 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
                mproj.M(2,3) + mproj.M(2,1), 
                mproj.M(3,3) + mproj.M(3,1));
     
-    Ray tobottom(Vector3F(0.f, 0.f, zPlane), Vector3F(0,-1,0), 0.f, 1000.f );
+    Ray tobottom(Vector3F(0.f, 0.f, zPlane), Vector3F(0,-1,0), 0.f, 1e8);
     pbottom.rayIntersect(tobottom, leftP, tt);
     // qDebug()<<"bottom"<<leftP.str().c_str();
     const float bottomMost = leftP.y;
@@ -257,6 +306,7 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     mmvinv.glMatrix(tmat);
     glMultMatrixf(tmat);
     
+    glDisable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
     glBegin(GL_TRIANGLES);
     glTexCoord2f(0, 0); glVertex3f(leftMost,bottomMost, zPlane);
@@ -267,9 +317,9 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     glPopMatrix();
     
 	programEnd();
-	delete[] pixels;
-	glDeleteTextures(1, &m_depthImg);
 	
+	glDeleteTextures(1, &m_depthImg);
+	glEnable(GL_DEPTH_TEST);
 	view.endGL();
 	
 }
@@ -278,7 +328,6 @@ bool heatherNode::isBounded() const
 { 
 	return false;
 }
-
 
 void* heatherNode::creator()
 {
@@ -332,45 +381,60 @@ MStatus heatherNode::initialize()
 	numAttr.setStorable(true);
 	addAttribute( aorthographic );
 	
+	adepthImageName = matAttr.create( "depthImage", "dmg", MFnData::kString );
+ 	matAttr.setStorable(true);
+	// stringAttr.setArray(true);
+	addAttribute(adepthImageName);
+	
+	aframeNumber = numAttr.create( "frameNumber", "fnb", MFnNumericData::kInt );
+	numAttr.setStorable(true);
+	numAttr.setKeyable(true);
+	addAttribute(aframeNumber);
+	
+	outValue = numAttr.create( "outValue", "ov", MFnNumericData::kFloat );
+	numAttr.setStorable(false);
+	numAttr.setWritable(false);
+	addAttribute(outValue);
+	
+	attributeAffects(adepthImageName, outValue);
+	attributeAffects(aframeNumber, outValue);
+	
 	return MS::kSuccess;
 }
 
 void heatherNode::updateShaderParameters() const
 {
+    glUniform1iARB(glGetUniformLocationARB(program_object, "color_texture"), 0);
     glActiveTexture(GL_TEXTURE0);
-    //int texture_location = glGetUniformLocationARB(program_object, "color_texture");
-    //glUniform1iARB(texture_location, 0);
-    //glBindTexture(GL_TEXTURE_2D, m_depthImg);
+    glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_depthImg);
 }
 
 const char* heatherNode::vertexProgramSource() const
 {
-	return "varying vec3 PCAM;"
-"void main()"
+	return "void main()"
 "{"
 "		gl_Position = ftransform();"
 "		gl_FrontColor = gl_Color;"
 "gl_TexCoord[0] = gl_MultiTexCoord0;"
-"	PCAM = vec3 (gl_ModelViewMatrix * gl_Vertex);"
 "}";
 }
 
 const char* heatherNode::fragmentProgramSource() const
 {
-	return "varying vec3 PCAM;"
-"uniform sampler2D color_texture;"
+	return "uniform sampler2D color_texture;"
 "void main()"
 "{"
-"	float d = -PCAM.z; "
-"		gl_FragColor = vec4 (vec3(gl_FragCoord.z / 10.f), 1.0);"
-"gl_FragColor = texture2D(color_texture, gl_TexCoord[0].st);"
+"float d = texture2D(color_texture, gl_TexCoord[0].xy).r;"
+"gl_FragColor = vec4(d, d, d,1.0);"
 "}";
 }
 
 MStatus initializePlugin( MObject obj )
 { 
 	MStatus   stat;
-	MFnPlugin plugin( obj, "ZHANG JIAN - Free Downlaod", "3.0", "Any");
+	MFnPlugin plugin( obj, "ZHANG JIAN - Free Downlaod", "3.1", "Any");
 
 	stat = plugin.registerNode( "heatherNode", heatherNode::id, 
 						 &heatherNode::creator, &heatherNode::initialize,

@@ -2,16 +2,10 @@
 #define OPENGL_EXTENSION_H
 
 #ifdef WIN32
-#include <winsock2.h>
+//#include <winsock2.h>
 #include <windows.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glext.h>
-#endif
-
-#ifdef LINUX
-#include <GL/glx.h>
-#include <GL/glxext.h>
 #include <GL/glext.h>
 #endif
 

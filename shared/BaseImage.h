@@ -12,7 +12,8 @@ class BaseImage : public BaseFile {
 public:
 	enum ChannelRank {
 		RGB = 3,
-		RGBA = 4
+		RGBA = 4,
+		RGBAZ = 5
 	};
 	
 	BaseImage();
@@ -32,6 +33,7 @@ public:
 	virtual float sampleRed(float u, float v) const;
 	virtual void setRed(float u, float v, float red);
 	virtual void applyMask(BaseImage * another);
+	bool isRGBAZ() const;
 	void verbose() const;
 	
 	int m_imageWidth, m_imageHeight;

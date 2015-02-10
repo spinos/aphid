@@ -63,14 +63,20 @@ public:
 	virtual void applyMask(BaseImage * another);
 	
 	static bool isAnOpenExrFile(const std::string& filename);
+	static void showExrChannels(const std::string& filename, std::vector<std::string>& dst);
 	
 	half *_pixels;
+	float * m_zData;
 	
 	std::vector<ZEXRSampler*>_mipmaps;
 	int _numMipmaps;
 	
 private:
 	void readPixels(Imf::InputFile& file);
+	void readZ(Imf::InputFile& file);
 	void setupMipmaps();
+	bool findZChannel(Imf::InputFile & file);
+private:
+    std::string m_zChannelName;
 };
 #endif

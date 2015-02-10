@@ -19,6 +19,7 @@ ZEXRSampler::~ZEXRSampler()
 void ZEXRSampler::setPixels(ZEXRImage * src)
 {
 	_rank = src->m_channelRank;
+	if(_rank>4) _rank = 4;
 	float * p = new float[_rank];
 	_pixels = new half[_width * _width * _rank];
 	float u, v;
@@ -95,15 +96,17 @@ void ZEXRSampler::sample(float u, float v, int count, float * dst) const
 					+ (_pixels[y1 * ystride + x0 * _rank + k] * ( 1.f - alphau) + _pixels[y1 * ystride + x1 * _rank + k] * alphau) * alphav);
 }
 
-ZEXRImage::ZEXRImage() : _pixels(0) {}
+ZEXRImage::ZEXRImage() : _pixels(0), m_zData(0) {}
 
-ZEXRImage::ZEXRImage(const char* filename) : _pixels(0)
+ZEXRImage::ZEXRImage(const char* filename) : _pixels(0), m_zData(0)
 {
 	open(filename);
 }
 
 ZEXRImage::~ZEXRImage(void)
 {
+    if(m_zData) delete[] m_zData;
+    if(_pixels) delete[] _pixels;
 }
 
 bool ZEXRImage::doRead(const std::string & filename)
@@ -124,9 +127,22 @@ bool ZEXRImage::doRead(const std::string & filename)
 	const Imf::ChannelList &channels = file.header().channels(); 
 	const Imf::Channel *channelAPtr = channels.findChannel("A");
 	if(channelAPtr) m_channelRank = RGBA;
+	const Imf::Channel *channelZPtr = channels.findChannel("Z");
+	if(channelZPtr) {
+	    m_channelRank = RGBAZ;
+	    m_zChannelName = "Z";
+	}
+	else {
+	    if(findZChannel(file))
+	        m_channelRank = RGBAZ;
+	}
 	
 	readPixels(file);
 	setupMipmaps();
+// http://code.woboq.org/appleseed/appleseed/openexr/include/OpenEXR/ImfPixelType.h.html#Imf::PixelType
+	if( m_channelRank == RGBAZ)
+	    readZ(file);
+
 	}
 	catch (const std::exception &exc) { 
 		std::cout<<"ERROR: "<<filename<<" cannot be loaded as an openEXR image\n";
@@ -134,6 +150,19 @@ bool ZEXRImage::doRead(const std::string & filename)
 	}
 
 	return true;
+}
+
+bool ZEXRImage::findZChannel(Imf::InputFile & file)
+{
+    const Imf::ChannelList &channels = file.header().channels(); 
+	Imf::ChannelList::ConstIterator it = channels.begin();
+	for(; it!= channels.end(); ++it) {
+	    if(std::string(it.name()).find_last_of('Z') != std::string::npos) {
+	        m_zChannelName = it.name();
+	        return true;
+	    }
+	}
+	return false;
 }
 
 void ZEXRImage::doClear()
@@ -162,6 +191,30 @@ bool ZEXRImage::isAnOpenExrFile (const std::string& fileName)
 	return !!f && b[0] == 0x76 && b[1] == 0x2f && b[2] == 0x31 && b[3] == 0x01; 
 }
 
+void ZEXRImage::showExrChannels(const std::string& filename, std::vector<std::string>& dst)
+{
+    if(!isAnOpenExrFile(filename)) {
+		std::cout<<"ERROR: "<<filename<<" is not an openEXR image\n";
+		return;
+	}
+	try {
+	    //std::cout<<"begin exr channels:\n";
+	    dst.clear();
+	Imf::InputFile file(filename.c_str());
+	const Imf::ChannelList &channels = file.header().channels(); 
+	Imf::ChannelList::ConstIterator it = channels.begin();
+	for(; it!= channels.end(); ++it) {
+	    //std::cout<<"channel name "<<it.name()<<"\n";
+	    dst.push_back(it.name());
+	}
+	    //std::cout<<"end exr channels:\n";
+	}
+	catch (const std::exception &exc) { 
+		std::cout<<"ERROR: "<<filename<<" cannot be loaded as an openEXR image\n";
+		return; 
+	}
+}
+
 void ZEXRImage::setupMipmaps()
 {
 	_numMipmaps = Log2((double)m_imageWidth);
@@ -183,8 +236,10 @@ void ZEXRImage::readPixels(Imf::InputFile& file)
 {
 	Imath::Box2i dw = file.header().dataWindow();
 	
-	const int size = getWidth() * getHeight() * m_channelRank;
-	const int stride = m_channelRank;
+	int colorRank = m_channelRank;
+	if(colorRank > 4) colorRank = 4;
+	const int size = getWidth() * getHeight() * colorRank;
+	const int stride = colorRank;
 	
 	_pixels = new half[size];
 	
@@ -220,7 +275,36 @@ void ZEXRImage::readPixels(Imf::InputFile& file)
 	_pixels--;
 							   
 	file.setFrameBuffer (frameBuffer); 
-	file.readPixels (dw.min.y, dw.max.y); 
+	file.readPixels (dw.min.y, dw.max.y);
+}
+
+void ZEXRImage::readZ(Imf::InputFile& file)
+{
+    const Imf::ChannelList &channels = file.header().channels(); 
+	const Imf::Channel *channelZPtr = channels.findChannel(m_zChannelName.c_str());
+// http://code.woboq.org/appleseed/appleseed/openexr/include/OpenEXR/ImfPixelType.h.html#Imf::PixelType
+	if(channelZPtr->type != Imf::FLOAT) {
+	    std::cout<<"Warning: z channel is not float\n";
+	    // std::cout<<"z type "<<channelZPtr->type<<"\n";
+	    return;
+	}
+	
+	Imath::Box2i dw = file.header().dataWindow();
+	
+	const int size = getWidth() * getHeight();
+	const int stride = 1;
+	
+	m_zData = new float[size];
+	
+	Imf::FrameBuffer frameBuffer; 
+	frameBuffer.insert (m_zChannelName.c_str(),                                  // name 
+		Imf::Slice (Imf::FLOAT,                          // type 
+							   (char *) m_zData, 
+							   sizeof (*m_zData) * stride,    // xStride 
+							   sizeof (*m_zData) * getWidth() * stride));                         // fillValue 
+							   
+	file.setFrameBuffer (frameBuffer); 
+	file.readPixels (dw.min.y, dw.max.y);
 }
 
 void ZEXRImage::allWhite()
