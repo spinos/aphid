@@ -1,0 +1,5 @@
+loadPlugin heather;
+string $dummy = `createNode transform`;
+string $heath = `createNode heatherNode`;
+connectAttr -f ($heath + ".outValue") ($dummy + ".tx");
+setAttr -type "string" ($heath + ".depthImage") "/Users/jianzhang/aphid/heather/testAov.0001.exr";

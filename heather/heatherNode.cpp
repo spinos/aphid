@@ -3,78 +3,9 @@
 // Zhang Jian
 // 07/12/05
 
-#include <math.h>
-#include <maya/MIOStream.h>
-#include <maya/MPxLocatorNode.h> 
-#include <maya/MString.h> 
-#include <maya/MTypeId.h> 
-#include <maya/MPlug.h>
-#include <maya/MVector.h>
-#include <maya/MDataBlock.h>
-#include <maya/MDataHandle.h>
-#include <maya/MColor.h>
-#include <maya/M3dView.h>
-#include <maya/MFnPlugin.h>
-#include <maya/MDistance.h>
-#include <maya/MFnUnitAttribute.h>
-#include <maya/MFnTypedAttribute.h>
-#include <maya/MMatrix.h>
-#include <maya/MFnDependencyNode.h>
-#include <maya/MFnMatrixData.h>
-#include <maya/MFnNumericAttribute.h>
-#include <maya/MPoint.h>
-#include <maya/MString.h>
-#include <maya/MDagPath.h>
-#include <maya/MSelectionList.h>
-#include <maya/MFnCamera.h>
-#include <maya/MGlobal.h>
-#include <Plane.h>
-#include <GlslBase.h>
-#include "zEXRImage.h"
-class heatherNode : public MPxLocatorNode, public GLSLBase
-{
-public:
-	heatherNode();
-	virtual ~heatherNode(); 
+#include "heatherNode.h"
 
-    virtual MStatus   		compute( const MPlug& plug, MDataBlock& data );
-
-	virtual void            draw( M3dView & view, const MDagPath & path, 
-								  M3dView::DisplayStyle style,
-								  M3dView::DisplayStatus status );
-
-	virtual bool            isBounded() const;
-	
-	static  void *          creator();
-	static  MStatus         initialize();
-
-	static  MObject         amatrix;
-	static  MObject         anear;
-	static  MObject         afar;
-	static	MObject		ahapeture;
-	static	MObject		avapeture;
-	static	MObject		afocallength;
-	static	MObject		aorthographic;
-	static	MObject		aorthographicwidth;
-	static MObject adepthImageName;
-	static MObject aframeNumber;
-	static MObject outValue;
-public: 
-	static	MTypeId		id;
-	
-protected:
-    virtual const char* vertexProgramSource() const;
-	virtual const char* fragmentProgramSource() const;
-	virtual void updateShaderParameters() const;
-private:
-    void preLoadImage(const char * name, int frame);
-private:
-    float * m_zdata;
-    GLuint m_depthImg;
-    bool m_needLoadImage;
-};
-
-MTypeId heatherNode::id( 0x0002919 );
+MTypeId heatherNode::id( 0x7065d6 );
 
 MObject heatherNode::amatrix;
 MObject heatherNode::anear;
@@ -91,11 +22,11 @@ MObject heatherNode::outValue;
 heatherNode::heatherNode() 
 {
     m_needLoadImage = 0;
-    m_zdata = 0;
+    m_exr = 0;
 }
 heatherNode::~heatherNode() 
 {
-    if(m_zdata) delete[] m_zdata;
+    if(m_exr) delete m_exr;
 }
 
 MStatus heatherNode::compute( const MPlug& plug, MDataBlock& block )
@@ -115,17 +46,19 @@ void heatherNode::preLoadImage(const char * name, int frame)
     std::string fileName(name);
     if(fileName.size() < 3) return;
     
-    ZEXRImage image(fileName.c_str());
-    if(!image.isOpened()) return;
+	if(m_exr)
+		delete m_exr;
+	
+    m_exr = new ZEXRImage(fileName.c_str());
+    if(!m_exr->isOpened()) return;
 
     MGlobal::displayInfo(MString("loading image ")+ name+" at frame "+frame);
-       
-    if(!image.isRGBAZ()) {
+	
+    if(!m_exr->isRGBAZ()) {
         MGlobal::displayWarning("image is not RGBAZ format.");
         
         return;
     }
-    
     
     m_needLoadImage = 1;
 }
@@ -431,37 +364,5 @@ const char* heatherNode::fragmentProgramSource() const
 "}";
 }
 
-MStatus initializePlugin( MObject obj )
-{ 
-	MStatus   stat;
-	MFnPlugin plugin( obj, "ZHANG JIAN - Free Downlaod", "3.1", "Any");
 
-	stat = plugin.registerNode( "heatherNode", heatherNode::id, 
-						 &heatherNode::creator, &heatherNode::initialize,
-						 MPxNode::kLocatorNode );
-	if (!stat) {
-		stat.perror("registerNode");
-		return stat;
-	}
-
-	// MGlobal::executeCommand ( "source cameraFrustumMenus.mel;cameraFrustumCreateMenus" );
-
-	return stat;
-}
-
-MStatus uninitializePlugin( MObject obj)
-{
-	MStatus   stat;
-	MFnPlugin plugin( obj );
-
-	stat = plugin.deregisterNode( heatherNode::id );
-	if (!stat) {
-		stat.perror("deregisterNode");
-		return stat;
-	}
-
-	// MGlobal::executeCommand ( "cameraFrustumRemoveMenus" );
-
-	return stat;
-}
 
