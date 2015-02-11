@@ -31,10 +31,15 @@
 #include <maya/MSelectionList.h>
 #include <maya/MFnCamera.h>
 #include <maya/MGlobal.h>
+#include <maya/MObjectArray.h>
+#include <maya/MDagPathArray.h>
 #include <Plane.h>
-#include <GlslBase.h>
+#include <GlFramebuffer.h>
 #include "zEXRImage.h"
-class heatherNode : public MPxLocatorNode, public GLSLBase
+#include "ClampShader.h"
+#include "DepthShader.h"
+
+class heatherNode : public MPxLocatorNode
 {
 public:
 	heatherNode();
@@ -61,19 +66,30 @@ public:
 	static	MObject		aorthographicwidth;
 	static MObject adepthImageName;
 	static MObject aframeNumber;
+	static MObject aframePadding;
+	static MObject aenableMultiFrames;
+	static MObject ablockSetName;
 	static MObject outValue;
+	
 public: 
 	static	MTypeId		id;
 	
-protected:
-    virtual const char* vertexProgramSource() const;
-	virtual const char* fragmentProgramSource() const;
-	virtual void updateShaderParameters() const;
 private:
-    void preLoadImage(const char * name, int frame);
+    void preLoadImage(const char * name, int frame, int padding, bool useImageSequence);
+	void cacheBlocks(const MString & setname);
+	void cacheMeshFromNode(const MString & name);
+	void cacheMeshFromNode(const MObject & node);
+	void drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvinv, const float & aspectRatio);
+	void drawBlocks();
+	void cacheMeshes();
 private:
+	MDagPathArray m_meshes;
+	//Vector3F * m_blockVs;
+	//unsigned * m_blockTriIndices;
     ZEXRImage * m_exr;
-    GLuint m_bgdImg, m_depthImg, m_colorImg;
-    float m_farClipping;
+	GlFramebuffer * m_framebuffer;
+	ClampShader m_clamp;
+	DepthShader m_depth;
+    GLuint m_bgdCImg, m_depthImg, m_colorImg;
     bool m_needLoadImage;
 };

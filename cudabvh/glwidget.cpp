@@ -89,6 +89,15 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+	const float t = (float)elapsedTime();
+	m_mesh->setAlpha(t/290.f);
+	m_ray->setAlpha(t/230.f);
+	// qDebug()<<"drawn in "<<deltaTime();
+	//internalTimer()->start();
+}
+
+void GLWidget::drawMesh()
+{
 	CudaLinearBvh * bvh = m_mesh->bvh();
 	Aabb ab = bvh->bound();
 	if(ab.low.x < -1e8 || ab.low.x > 1e8) std::cout<<" invalid big box "<<aabb_str(ab);
@@ -117,8 +126,11 @@ void GLWidget::clientDraw()
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 #endif
+}
 
-    glColor3f(0.f, 0.9f, 0.3f);
+void GLWidget::drawParticles()
+{
+	glColor3f(0.f, 0.9f, 0.3f);
     
     glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -126,12 +138,6 @@ void GLWidget::clientDraw()
     glDrawArrays(GL_POINTS, 0, m_particles->numParticles());
 
 	glDisableClientState(GL_VERTEX_ARRAY);
-
-	const float t = (float)elapsedTime();
-	m_mesh->setAlpha(t/290.f);
-	m_ray->setAlpha(t/230.f);
-	// qDebug()<<"drawn in "<<deltaTime();
-	//internalTimer()->start();
 }
 
 inline int isLeafNode(int index) 

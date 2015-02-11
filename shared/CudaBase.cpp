@@ -9,6 +9,7 @@
 int CudaBase::MaxThreadPerBlock = 512;
 int CudaBase::MaxRegisterPerBlock = 8192;
 int CudaBase::MaxSharedMemoryPerBlock = 16384;
+int CudaBase::WarpSize = 32;
 
 CudaBase::CudaBase()
 {
@@ -43,6 +44,7 @@ char CudaBase::CheckCUDevice()
             std::cout << "  Total amount of constant memory: "<<deviceProp.totalConstMem<<"bytes\n"; 
             std::cout << "  Total amount of shared memory per block: "<<deviceProp.sharedMemPerBlock<<" bytes\n";
             std::cout << "  Total number of registers available per block: "<<deviceProp.regsPerBlock<<"\n";
+			std::cout << "  Warp size: "<<deviceProp.warpSize<<"\n";
         
             std::stringstream sst;
             sst<<"  Maximum sizes of each dimension of a grid: "<<deviceProp.maxGridSize[0]<<" x "<<deviceProp.maxGridSize[1]<<" x "<<deviceProp.maxGridSize[2];
@@ -55,6 +57,7 @@ char CudaBase::CheckCUDevice()
             MaxThreadPerBlock = deviceProp.maxThreadsPerBlock;
             MaxRegisterPerBlock = deviceProp.regsPerBlock;
             MaxSharedMemoryPerBlock = deviceProp.sharedMemPerBlock;
+			WarpSize = deviceProp.warpSize;
         return 1;               
     }
     return 0;
@@ -73,5 +76,7 @@ int CudaBase::LimitNThreadPerBlock(int regPT, int memPT)
     const int byMem = MaxSharedMemoryPerBlock / memPT;
     if(byReg < tpb) tpb = byReg;
     if(byMem < tpb) tpb = byMem;
-    return tpb - tpb % 2;
+	int nwarp = tpb / WarpSize;
+	if(nwarp < 1) nwarp = 1;
+    return nwarp*WarpSize;
 }

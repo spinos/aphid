@@ -26,11 +26,12 @@ public:
 	void programBegin() const;
 	void programEnd() const;
 	
+protected:	
 	virtual const char* vertexProgramSource() const;
 	virtual const char* fragmentProgramSource() const;
-	virtual void defaultShaderParameters();
 	virtual void updateShaderParameters() const;
-	
+	virtual void defaultShaderParameters();
+
 	char fHasDiagnosis, fHasExtensions;
 	GLhandleARB vertex_shader, fragment_shader, program_object;
 };

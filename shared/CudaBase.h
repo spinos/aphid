@@ -13,6 +13,7 @@ public:
     static int MaxThreadPerBlock;
     static int MaxRegisterPerBlock;
     static int MaxSharedMemoryPerBlock;
+	static int WarpSize;
     static int LimitNThreadPerBlock(int regPT, int memPT);
 private:
     

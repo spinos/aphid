@@ -164,7 +164,7 @@ extern "C" void bvhRayTraverseIterative(RayInfo * rays,
 								KeyValuePair * mortonCodesAndAabbIndices,								
 								uint numRays)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(26, 48);
+    int tpb = CudaBase::LimitNThreadPerBlock(24, 40);
     
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numRays, tpb);

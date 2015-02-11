@@ -18,6 +18,7 @@ public:
 	static void cutByLastDot(std::string& res);
 	static void cutByLastSlash(std::string& res);
 	static void changeFrameNumber(std::string& res, int frame);
+	static void changeFrameNumber(std::string& res, int frame, int padding);
 	static int safeConvertToInt(const double a);
 	static int getFrameNumber(std::string& name);
 	static int compareFilenameExtension(std::string& name, const char* other);

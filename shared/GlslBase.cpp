@@ -9,9 +9,6 @@
 
 #include "GlslBase.h"
 
-
-
-
 typedef struct glExtensionEntry {
     char* name;
     GLfloat promoted;

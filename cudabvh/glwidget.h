@@ -30,7 +30,8 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 private:
 	void debugDraw(unsigned rootInd, unsigned numInternal);
-	
+	void drawParticles();
+	void drawMesh();
 private:
 	SimpleMesh * m_mesh;
 	RayTest * m_ray;

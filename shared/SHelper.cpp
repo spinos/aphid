@@ -3,7 +3,6 @@
 #include <time.h>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/replace.hpp>
-class MString;
 #include <string>
 #include <vector>
 #include <sstream>
@@ -90,6 +89,28 @@ void SHelper::changeFrameNumber(std::string& res, int frame)
 	
 	res.erase(first, last-first+1);
 	res.insert(first, mid);
+}
+
+void SHelper::changeFrameNumber(std::string& res, int frame, int padding)
+{
+	int first = res.find('.', 0);
+	if(first < 0) return;
+		
+	int last = res.rfind('.', res.size());
+	if(last < 0) return;
+	
+	std::stringstream sst;
+	sst<<frame;
+	const std::string number = sst.str();
+	int zerosToFill = padding - number.size();
+	if(zerosToFill < 0) zerosToFill = 0;
+	
+	sst.str("");
+	for(int i=0; i<zerosToFill; i++) sst<<'0';
+	sst<<number;
+	
+	res.erase(first, last-first+1);
+	res.insert(first, sst.str());
 }
 
 int SHelper::safeConvertToInt(const double a)
