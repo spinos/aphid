@@ -38,7 +38,10 @@ int BaseImage::getHeight() const
 	return m_imageHeight;
 }
 
-int BaseImage::pixelLoc(float s, float t, bool flipV) const
+const float BaseImage::aspectRation() const
+{ return (float)m_imageHeight/(float)m_imageWidth; }
+
+int BaseImage::pixelLoc(float s, float t, bool flipV, int pixelRank) const
 {
 	if(flipV) t = 1.f - t;
 	int x = m_imageWidth * s;
@@ -47,7 +50,7 @@ int BaseImage::pixelLoc(float s, float t, bool flipV) const
 	if(y < 0) y = 0;
 	if(x > m_imageWidth - 1) x = m_imageWidth - 1;
 	if(y > m_imageHeight - 1) y = m_imageHeight - 1;
-	return y * m_imageWidth * m_channelRank + x * m_channelRank;
+	return (y * m_imageWidth + x) * pixelRank;
 }
 
 void BaseImage::allWhite()

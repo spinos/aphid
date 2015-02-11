@@ -46,17 +46,20 @@ void heatherNode::preLoadImage(const char * name, int frame)
     std::string fileName(name);
     if(fileName.size() < 3) return;
     
-	if(m_exr)
-		delete m_exr;
-	
-    m_exr = new ZEXRImage(fileName.c_str());
+	if(!m_exr) m_exr = new ZEXRImage(fileName.c_str(), false);
+	else m_exr->open(fileName.c_str());
     if(!m_exr->isOpened()) return;
 
     MGlobal::displayInfo(MString("loading image ")+ name+" at frame "+frame);
 	
+    std::vector<std::string> names;
+    ZEXRImage::listExrChannelNames(fileName, names);
+    
+    std::vector<std::string>::const_iterator it = names.begin();
+    for(;it != names.end();++it) MGlobal::displayWarning((*it).c_str());
+
     if(!m_exr->isRGBAZ()) {
         MGlobal::displayWarning("image is not RGBAZ format.");
-        
         return;
     }
     
@@ -155,8 +158,15 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 		std::string log;
 		diagnose(log);
 		MGlobal::displayInfo(MString("glsl diagnose log: ") + log.c_str());
+		glGenTextures(1, &m_bgdImg);
+		glGenTextures(1, &m_depthImg);
+		glGenTextures(1, &m_colorImg);
 	}
 #endif	
+
+    if(!m_exr) return;
+    
+    const float imageAspectRatio = m_exr->aspectRation();
 	
 	GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
@@ -168,24 +178,24 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     Matrix44F mproj(projmatrix);
     
     const GLint width = viewport[2];
-    const GLint height = viewport[3];
+    const GLint portHeight = viewport[3];
     
-    GLfloat *pixels = new GLfloat[width * height];
+    int height = width * imageAspectRatio;
+    if(height < 2) height = 2;
+    if(height > portHeight) height = portHeight;
     
-    MGlobal::displayInfo(MString("port wh")+width+" "+height);
+    const float realRatio = (float)height/(float)width;
     
-    //glPixelStorei(GL_UNPACK_ROW_LENGTH, viewport[2]);
-    //int rowSkip = 0;
-    //int pixelSkip = 0;
-    //glPixelStorei(GL_UNPACK_SKIP_PIXELS, pixelSkip);
-    //glPixelStorei(GL_UNPACK_SKIP_ROWS, rowSkip);
-    glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT,GL_FLOAT, pixels);
+    float *pixels = new float[width * height];
     
-    // for(int i =0; i < 1024; i++) pixels[i]= ((float)(rand() % 99)) / 99.f;
-    MGlobal::displayInfo(MString("read pix")+width+" "+height);
+// 8-bit only?
+// only GL_DEPTH_COMPONENT works
+    glReadPixels(0, (portHeight - height)/2, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, pixels);
     
-	glGenTextures(1, &m_depthImg);
-	glBindTexture(GL_TEXTURE_2D, m_depthImg);
+    MGlobal::displayInfo(MString("dep")+pixels[128]);
+    
+    glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_bgdImg);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -195,8 +205,28 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_RED, GL_FLOAT, pixels);
 	
-	MGlobal::displayInfo(MString("tex pix")+width+" "+height);
 	delete[] pixels;
+	
+	if(m_needLoadImage) {
+	    glActiveTexture(GL_TEXTURE1);
+	    glBindTexture(GL_TEXTURE_2D, m_colorImg);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RGBA, GL_HALF_FLOAT, m_exr->_pixels);
+	    glActiveTexture(GL_TEXTURE2);
+	    glBindTexture(GL_TEXTURE_2D, m_depthImg);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RED, GL_FLOAT, m_exr->m_zData);
+	    m_needLoadImage = 0;
+	}
 	
 	float tt;
     Vector3F leftP;
@@ -209,8 +239,9 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     Ray toFar(Vector3F(0,0,0), Vector3F(0,0,-1), 0.f, 1e8);
     
     pfar.rayIntersect(toFar, leftP, tt);
-    MGlobal::displayInfo(MString("far")+leftP.str().c_str());
-
+    // MGlobal::displayInfo(MString("far")+leftP.str().c_str());
+    m_farClipping = -leftP.z;
+    
     Plane pleft(mproj.M(0,3) + mproj.M(0,0), 
                mproj.M(1,3) + mproj.M(1,0),
                mproj.M(2,3) + mproj.M(2,0), 
@@ -219,18 +250,10 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     const float zPlane = leftP.z * .999f;
     Ray toleft(Vector3F(0.f, 0.f, zPlane), Vector3F(-1,0,0), 0.f, 1e8);
     pleft.rayIntersect(toleft, leftP, tt);
-    // qDebug()<<"left"<<leftP.str().c_str();
+    
     const float leftMost = leftP.x;
     
-    Plane pbottom(mproj.M(0,3) + mproj.M(0,1), 
-               mproj.M(1,3) + mproj.M(1,1),
-               mproj.M(2,3) + mproj.M(2,1), 
-               mproj.M(3,3) + mproj.M(3,1));
-    
-    Ray tobottom(Vector3F(0.f, 0.f, zPlane), Vector3F(0,-1,0), 0.f, 1e8);
-    pbottom.rayIntersect(tobottom, leftP, tt);
-    // qDebug()<<"bottom"<<leftP.str().c_str();
-    const float bottomMost = leftP.y;
+    const float bottomMost = leftMost * realRatio;
 	
     programBegin();
     
@@ -240,18 +263,28 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     glMultMatrixf(tmat);
     
     glDisable(GL_DEPTH_TEST);
-    glEnable(GL_TEXTURE_2D);
+    
     glBegin(GL_TRIANGLES);
     glTexCoord2f(0, 0); glVertex3f(leftMost,bottomMost, zPlane);
     glTexCoord2f(1, 0); glVertex3f(-leftMost,bottomMost, zPlane);
     glTexCoord2f(1, 1); glVertex3f(-leftMost,-bottomMost, zPlane);
+    
+    glTexCoord2f(0, 0); glVertex3f(leftMost,bottomMost, zPlane);
+    glTexCoord2f(1, 1); glVertex3f(-leftMost,-bottomMost, zPlane);
+    glTexCoord2f(0, 1); glVertex3f(leftMost,-bottomMost, zPlane);
     glEnd();
     
     glPopMatrix();
     
 	programEnd();
 	
-	glDeleteTextures(1, &m_depthImg);
+	glActiveTexture(GL_TEXTURE0);
+    glDisable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE1);
+    glDisable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE2);
+    glDisable(GL_TEXTURE_2D);
+	
 	glEnable(GL_DEPTH_TEST);
 	view.endGL();
 	
@@ -337,11 +370,23 @@ MStatus heatherNode::initialize()
 
 void heatherNode::updateShaderParameters() const
 {
-    glUniform1iARB(glGetUniformLocationARB(program_object, "color_texture"), 0);
     glActiveTexture(GL_TEXTURE0);
-    glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_bgdImg);
+    glUniform1iARB(glGetUniformLocationARB(program_object, "bgd_texture"), 0);
+    
+	glActiveTexture(GL_TEXTURE1);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_colorImg);
+	glUniform1iARB(glGetUniformLocationARB(program_object, "color_texture"), 1);
+	
+	glActiveTexture(GL_TEXTURE2);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_depthImg);
+	glUniform1iARB(glGetUniformLocationARB(program_object, "depth_texture"), 2);
+	
+	glUniform1fARB(glGetUniformLocationARB(program_object, "farClipping"), m_farClipping);
+	MGlobal::displayInfo(MString("far")+m_farClipping);
 }
 
 const char* heatherNode::vertexProgramSource() const
@@ -356,11 +401,24 @@ const char* heatherNode::vertexProgramSource() const
 
 const char* heatherNode::fragmentProgramSource() const
 {
-	return "uniform sampler2D color_texture;"
+	return "uniform sampler2D bgd_texture;"
+"uniform sampler2D depth_texture;"
+"uniform sampler2D color_texture;"
+"uniform float farClipping;"
 "void main()"
 "{"
-"float d = texture2D(color_texture, gl_TexCoord[0].xy).r;"
-"gl_FragColor = vec4(d, d, d,1.0);"
+"float bgd = texture2D(bgd_texture, gl_TexCoord[0].xy).r;"
+// http://tulrich.com/geekstuff/log_depth_buffer.txt
+//      (1<<N) * ( a + b / z )
+//      N = number of bits of Z precision
+//     a = zFar / ( zFar - zNear )
+//     b = zFar * zNear / ( zNear - zFar )
+//     z = distance from the eye to the object
+"float a = farClipping/(farClipping - 0.1);"
+"float b = farClipping * 0.1 /(farClipping - 0.1);"
+"float dep = ( a + b / texture2D(depth_texture, gl_TexCoord[0].xy).r);"
+"if(dep >= bgd) gl_FragColor = vec4(bgd, bgd, bgd, 1.0);"
+"else gl_FragColor = texture2D(color_texture, gl_TexCoord[0].xy);"
 "}";
 }
 

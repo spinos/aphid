@@ -98,8 +98,9 @@ void ZEXRSampler::sample(float u, float v, int count, float * dst) const
 
 ZEXRImage::ZEXRImage() : _pixels(0), m_zData(0) {}
 
-ZEXRImage::ZEXRImage(const char* filename) : _pixels(0), m_zData(0)
+ZEXRImage::ZEXRImage(const char* filename, bool loadMipmap) : _pixels(0), m_zData(0)
 {
+    m_hasMipmap = loadMipmap;
 	open(filename);
 }
 
@@ -138,7 +139,7 @@ bool ZEXRImage::doRead(const std::string & filename)
 	}
 	
 	readPixels(file);
-	setupMipmaps();
+	if(m_hasMipmap) setupMipmaps();
 // http://code.woboq.org/appleseed/appleseed/openexr/include/OpenEXR/ImfPixelType.h.html#Imf::PixelType
 	if( m_channelRank == RGBAZ)
 	    readZ(file);
@@ -169,6 +170,8 @@ void ZEXRImage::doClear()
 {
     if(_pixels) delete[] _pixels;
 	_pixels = 0;
+	if(m_zData) delete[] m_zData;
+	m_zData = 0;
 	std::vector<ZEXRSampler *>::iterator it;
 	for(it = _mipmaps.begin(); it != _mipmaps.end(); ++it)
 		delete *it;
@@ -191,7 +194,7 @@ bool ZEXRImage::isAnOpenExrFile (const std::string& fileName)
 	return !!f && b[0] == 0x76 && b[1] == 0x2f && b[2] == 0x31 && b[3] == 0x01; 
 }
 
-void ZEXRImage::showExrChannels(const std::string& filename, std::vector<std::string>& dst)
+void ZEXRImage::listExrChannelNames(const std::string& filename, std::vector<std::string>& dst)
 {
     if(!isAnOpenExrFile(filename)) {
 		std::cout<<"ERROR: "<<filename<<" is not an openEXR image\n";
@@ -223,7 +226,7 @@ void ZEXRImage::setupMipmaps()
 	mipmap->setWidth(m_imageWidth);
 	mipmap->setPixels(this);
 	_mipmaps.push_back(mipmap);
-	
+
 	for(int i=1; i <_numMipmaps; i++) {
 		ZEXRSampler* submap = new ZEXRSampler();
 		submap->reduceFrom(_mipmaps[i-1]);
@@ -305,6 +308,10 @@ void ZEXRImage::readZ(Imf::InputFile& file)
 							   
 	file.setFrameBuffer (frameBuffer); 
 	file.readPixels (dw.min.y, dw.max.y);
+	
+	//for(int i=0; i < size; i++) {
+	//    if(m_zData[i] < 10000) std::cout<<" "<<m_zData[i];
+	//}
 }
 
 void ZEXRImage::allWhite()
@@ -340,6 +347,8 @@ void ZEXRImage::applyMask(BaseImage * another)
 {
 	const float du = 1.f / (float)m_imageWidth;
 	const float dv = 1.f / (float)m_imageHeight;
+	int pixelRank = m_channelRank;
+	if(pixelRank > 4) pixelRank = 4;
 	for(int j = 0; j < m_imageHeight; j++)
 	{
 		for(int i = 0; i < m_imageWidth; i++)
@@ -348,7 +357,7 @@ void ZEXRImage::applyMask(BaseImage * another)
 			float v = dv * j;
 			
 			const float msk = another->sampleRed(u, v);
-			const float ori = _pixels[pixelLoc(u, v)];
+			const float ori = _pixels[pixelLoc(u, v, 0, pixelRank)];
 			setRed(u, v, ori * msk);
 		}
 	}
@@ -386,7 +395,7 @@ void ZEXRImage::sample(float u, float v, float level, int count, float * dst) co
 void ZEXRImage::sample(float u, float v, int count, float * dst) const
 {
     if(!_pixels) return;
-	int loc = pixelLoc(u, v, true);
+	int loc = pixelLoc(u, v, true, count);
 	for(int i = 0; i < count; i++)
 		dst[i] = _pixels[loc + i];
 }

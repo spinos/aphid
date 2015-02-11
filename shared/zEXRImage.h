@@ -44,7 +44,7 @@ class ZEXRImage : public BaseImage
 {
 public:
 	ZEXRImage();
-	ZEXRImage(const char* filename);
+	ZEXRImage(const char* filename, bool loadMipmap = false);
 	~ZEXRImage(void);
 	
 	virtual bool doRead(const std::string & filename);
@@ -63,7 +63,7 @@ public:
 	virtual void applyMask(BaseImage * another);
 	
 	static bool isAnOpenExrFile(const std::string& filename);
-	static void showExrChannels(const std::string& filename, std::vector<std::string>& dst);
+	static void listExrChannelNames(const std::string& filename, std::vector<std::string>& dst);
 	
 	half *_pixels;
 	float * m_zData;
@@ -78,5 +78,6 @@ private:
 	bool findZChannel(Imf::InputFile & file);
 private:
     std::string m_zChannelName;
+    bool m_hasMipmap;
 };
 #endif

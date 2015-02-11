@@ -26,7 +26,8 @@ public:
 	
 	int getWidth() const;
 	int getHeight() const;
-	int pixelLoc(float s, float t, bool flipV = false) const;
+	const float aspectRation() const;
+	int pixelLoc(float s, float t, bool flipV, int pixelRank) const;
 
 	virtual void sample(float u, float v, int count, float * dst) const;
 	virtual float sampleRed(float u, float v);

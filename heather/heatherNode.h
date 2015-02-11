@@ -73,6 +73,7 @@ private:
     void preLoadImage(const char * name, int frame);
 private:
     ZEXRImage * m_exr;
-    GLuint m_depthImg;
+    GLuint m_bgdImg, m_depthImg, m_colorImg;
+    float m_farClipping;
     bool m_needLoadImage;
 };
