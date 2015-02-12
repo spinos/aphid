@@ -140,10 +140,6 @@ bool ZEXRImage::doRead(const std::string & filename)
 	
 	readPixels(file);
 	if(m_hasMipmap) setupMipmaps();
-// http://code.woboq.org/appleseed/appleseed/openexr/include/OpenEXR/ImfPixelType.h.html#Imf::PixelType
-	if( m_channelRank == RGBAZ)
-	    readZ(file);
-
 	}
 	catch (const std::exception &exc) { 
 		std::cout<<"ERROR: "<<filename<<" cannot be loaded as an openEXR image\n";
@@ -155,14 +151,20 @@ bool ZEXRImage::doRead(const std::string & filename)
 
 bool ZEXRImage::findZChannel(Imf::InputFile & file)
 {
-    const Imf::ChannelList &channels = file.header().channels(); 
+	const Imf::ChannelList &channels = file.header().channels(); 
 	Imf::ChannelList::ConstIterator it = channels.begin();
 	for(; it!= channels.end(); ++it) {
 	    if(std::string(it.name()).find_last_of('Z') != std::string::npos) {
 	        m_zChannelName = it.name();
-	        return true;
+	        break;
 	    }
 	}
+	
+	const Imf::Channel *channelZPtr = channels.findChannel(m_zChannelName.c_str());
+// http://code.woboq.org/appleseed/appleseed/openexr/include/OpenEXR/ImfPixelType.h.html#Imf::PixelType
+	if(channelZPtr->type == Imf::FLOAT)
+	    return true;
+
 	return false;
 }
 
@@ -276,6 +278,16 @@ void ZEXRImage::readPixels(Imf::InputFile& file)
 	}
 	_pixels--;
 	_pixels--;
+	
+	if(m_channelRank == RGBAZ) {
+	    m_zData = new float[getWidth() * getHeight()];
+		frameBuffer.insert (m_zChannelName.c_str(),                                  // name 
+		Imf::Slice (Imf::FLOAT,                          // type 
+							   (char *) m_zData, 
+							   sizeof (*m_zData) * 1,    // xStride 
+							   sizeof (*m_zData) * getWidth() * 1));                         // fillValue 
+							   
+	}
 							   
 	file.setFrameBuffer (frameBuffer); 
 	file.readPixels (dw.min.y, dw.max.y);

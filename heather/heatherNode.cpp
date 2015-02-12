@@ -25,6 +25,8 @@ heatherNode::heatherNode()
     m_needLoadImage = 0;
     m_exr = 0;
 	m_framebuffer = 0;
+	m_portWidth = 0;
+	m_portHeight = 0;
 	// m_blockVs = 0;
 	// m_blockTriIndices = 0;
 }
@@ -63,6 +65,11 @@ void heatherNode::preLoadImage(const char * name, int frame, int padding, bool u
 	if(!m_exr) m_exr = new ZEXRImage(fileName.c_str(), false);
 	else m_exr->open(fileName.c_str());
     if(!m_exr->isOpened()) {
+		MGlobal::displayInfo(MString("cannot open image ") + fileName.c_str());
+		return;
+	}
+	
+	if(m_exr->fileName() != fileName) {
 		MGlobal::displayInfo(MString("cannot open image ") + fileName.c_str());
 		return;
 	}
@@ -238,8 +245,8 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	    glBindTexture(GL_TEXTURE_2D, m_depthImg);
 	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
@@ -248,7 +255,7 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	}	
 
     if(!m_exr) return;
-    
+	
     const float imageAspectRatio = m_exr->aspectRation();
 	
 	GLint viewport[4];
@@ -262,6 +269,18 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     
     const GLint portWidth = viewport[2];
     const GLint portHeight = viewport[3];
+	
+	if(portWidth != m_portWidth || portHeight != m_portHeight) {
+		m_portWidth = portWidth;
+		m_portHeight = portHeight;
+		
+		if(m_framebuffer) delete m_framebuffer;
+		m_framebuffer = new GlFramebuffer(portWidth, portHeight);
+		// if(m_framebuffer->hasFbo()) MGlobal::displayInfo("fbo created");
+		m_clamp.setTextures(m_framebuffer->colorTexture(), m_bgdCImg,
+				m_depthImg, 
+				m_colorImg);
+	}
     
     int gateWidth = (double)portWidth / overscan;
     
@@ -286,7 +305,7 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	delete[] pixels;
 	
 	if(m_needLoadImage) {
-	    MGlobal::displayInfo(MString("heather to load image ")+m_exr->fileName().c_str());
+	    // MGlobal::displayInfo(MString("heather to load image ")+m_exr->fileName().c_str());
     
 	    glBindTexture(GL_TEXTURE_2D, m_colorImg);
 //#ifdef WIN32
@@ -301,13 +320,6 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RED, GL_FLOAT, m_exr->m_zData);
 	    
 		// for(int i=0; i < m_exr->getWidth() * m_exr->getHeight(); i+=999) MGlobal::displayInfo(MString("z ")+m_exr->m_zData[i]);
-		int fbw = portWidth;
-		int fbh = portHeight;
-		
-		if(m_framebuffer) delete m_framebuffer;
-		m_framebuffer = new GlFramebuffer(fbw, fbh);
-		// if(m_framebuffer->hasFbo()) MGlobal::displayInfo("fbo created");
-				
 		m_clamp.setTextures(m_framebuffer->colorTexture(), m_bgdCImg,
 				m_depthImg, 
 				m_colorImg);

@@ -85,5 +85,6 @@ private:
 	ClampShader m_clamp;
 	DepthShader m_depth;
     GLuint m_bgdCImg, m_depthImg, m_colorImg;
+	int m_portWidth, m_portHeight;
     bool m_needLoadImage;
 };
