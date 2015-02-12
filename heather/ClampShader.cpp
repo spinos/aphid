@@ -34,6 +34,8 @@ const char* ClampShader::vertexProgramSource() const
 "{"
 "		gl_Position = ftransform();"
 "gl_TexCoord[0] = gl_MultiTexCoord0;"
+"gl_TexCoord[1] = gl_MultiTexCoord1;"
+"gl_TexCoord[2] = gl_MultiTexCoord2;"
 "}";
 }
 
@@ -46,11 +48,20 @@ const char* ClampShader::fragmentProgramSource() const
 "uniform float farClipping;"
 "void main()"
 "{"
-"float bgdZ = texture2D(bgdZ_texture, gl_TexCoord[0].xy).r;"
-"float fogZ = texture2D(depth_texture, gl_TexCoord[0].xy).r;"
-"if(fogZ < bgdZ) gl_FragColor = texture2D(color_texture, gl_TexCoord[0].xy);"
+"vec4 bgdC = texture2D(bgdC_texture, gl_TexCoord[0].xy);"
+"float fogZ = texture2D(depth_texture, gl_TexCoord[2].xy).r;"
+"if(fogZ < 0.001) {"
+"gl_FragColor = bgdC;"
+"return;"
+"}"
+"float bgdZ = texture2D(bgdZ_texture, gl_TexCoord[1].xy).r;"
+"if(fogZ < bgdZ) gl_FragColor = texture2D(color_texture, gl_TexCoord[2].xy);"
 "else gl_FragColor = texture2D(bgdC_texture, gl_TexCoord[0].xy);"
-//"gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);"
+//"gl_FragColor = texture2D(color_texture, gl_TexCoord[2].xy);"
+//"gl_FragColor = vec4(gl_TexCoord[2].xy, 0, 1);"
+//"gl_FragColor = vec4(bgdZ, bgdZ, bgdZ, 1);"
+//"gl_FragColor = bgdC;"
+// "if(bgdZ<1000) gl_FragColor = vec4(gl_TexCoord[1].x, gl_TexCoord[1].y, 0.0, 1.0);"
 // http://tulrich.com/geekstuff/log_depth_buffer.txt
 //      (1<<N) * ( a + b / z )
 //      N = number of bits of Z precision

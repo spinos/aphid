@@ -5,6 +5,6 @@ string $dummy = `createNode transform`;
 string $heath = `createNode heatherNode`;
 setAttr ($heath + ".template") 1;
 connectAttr -f ($heath + ".outValue") ($dummy + ".tx");
-setAttr -type "string" ($heath + ".depthImage") "/Users/jianzhang/aphid/heather/testAov.0001.exr";
+setAttr -type "string" ($heath + ".depthImage") "E:/public/shot014_final_v001_fozhu_yuzhouRN.0151.exr";
 setAttr -type "string" ($heath + ".blockSet") "set1";
 

@@ -13,14 +13,6 @@
 #include <SHelper.h>
 MTypeId heatherNode::id( 0x7065d6 );
 
-MObject heatherNode::amatrix;
-MObject heatherNode::anear;
-MObject heatherNode::afar;
-MObject heatherNode::ahapeture;
-MObject heatherNode::avapeture;
-MObject heatherNode::afocallength;
-MObject heatherNode::aorthographic;
-MObject heatherNode::aorthographicwidth;
 MObject heatherNode::adepthImageName;
 MObject heatherNode::aenableMultiFrames;
 MObject heatherNode::aframeNumber;
@@ -210,84 +202,11 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
 { 
-
-	MObject thisNode = thisMObject();
-	MFnDependencyNode nodeFn(thisNode);
-
-	MPlug matPlug = nodeFn.findPlug( "cameraMatrix" );
-	
-	MObject mat_obj;
-	matPlug.getValue( mat_obj );
-	MFnMatrixData mat_data( mat_obj );
-	MMatrix cmat = mat_data.matrix();
-	
-	MPoint eye;
-	eye *= cmat;
-	
-	double near_clip, far_clip;
-	
-	MPlug nearPlug = nodeFn.findPlug( "nearClip" );
-	nearPlug.getValue( near_clip );
-	near_clip -= 0.001;
-	
-	MPlug farPlug = nodeFn.findPlug( "farClip" );
-	farPlug.getValue( far_clip );
-	far_clip += 0.001;
-	
-	double h_apeture, v_apeture;
-	MPlug hfaPlug = nodeFn.findPlug( "horizontalFilmAperture" );
-	hfaPlug.getValue( h_apeture );
-	
-	MPlug vfaPlug = nodeFn.findPlug( "verticalFilmAperture" );
-	vfaPlug.getValue( v_apeture );
-	
-	double fl;
-	MPlug flPlug = nodeFn.findPlug( "focalLength" );
-	flPlug.getValue( fl );
-	
-	double orthwidth;
-	MPlug owPlug = nodeFn.findPlug( "orthographicWidth" );
-	owPlug.getValue( orthwidth );
-	
-	bool orth;
-	MPlug orthPlug = nodeFn.findPlug( "orthographic" );
-	orthPlug.getValue( orth );
-
-	double h_fov = h_apeture * 0.5 / ( fl * 0.03937 );
-	double v_fov = v_apeture * 0.5 / ( fl * 0.03937 );
-	
-	float fright = far_clip * h_fov;
-	float ftop = far_clip * v_fov;
-	
-	float nright = near_clip * h_fov;
-	float ntop = near_clip * v_fov;
-	
-	if(orth) fright = ftop = nright = ntop = orthwidth/2.0;
-	
-	
-	MPoint corner_a(fright,ftop,-far_clip);
-	corner_a *= cmat;
-	
-	MPoint corner_b(-fright,ftop,-far_clip);
-	corner_b *= cmat;
-	
-	MPoint corner_c(-fright,-ftop,-far_clip);
-	corner_c *= cmat;
-	
-	MPoint corner_d(fright,-ftop,-far_clip);
-	corner_d *= cmat;
-	
-	MPoint corner_e(nright,ntop,-near_clip);
-	corner_e *= cmat;
-	
-	MPoint corner_f(-nright,ntop,-near_clip);
-	corner_f *= cmat;
-	
-	MPoint corner_g(-nright,-ntop,-near_clip);
-	corner_g *= cmat;
-	
-	MPoint corner_h(nright,-ntop,-near_clip);
-	corner_h *= cmat;
+    MDagPath dagCam;
+    view.getCamera(dagCam);
+    MFnCamera fCam(dagCam);
+    if(fCam.isOrtho()) return;
+    const double overscan = fCam.overscan();
 
 	view.beginGL();
 	
@@ -302,7 +221,29 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 		glGenTextures(1, &m_bgdCImg);
 		glGenTextures(1, &m_depthImg);
 		glGenTextures(1, &m_colorImg);
+		
+		glBindTexture(GL_TEXTURE_2D, m_bgdCImg);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 						
+		glBindTexture(GL_TEXTURE_2D, m_colorImg);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	    glBindTexture(GL_TEXTURE_2D, m_depthImg);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
 		m_depth.diagnose(log);
 	}	
 
@@ -319,63 +260,49 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     Matrix44F mmvinv(mvmatrix); mmvinv.inverse();
     Matrix44F mproj(projmatrix);
     
-    const GLint width = viewport[2];
+    const GLint portWidth = viewport[2];
     const GLint portHeight = viewport[3];
     
-    int height = width * imageAspectRatio;
-    if(height < 2) height = 2;
-    if(height > portHeight) height = portHeight;
+    int gateWidth = (double)portWidth / overscan;
     
-    const float realRatio = (float)height/(float)width;
+    int gateHeight = gateWidth * imageAspectRatio;
+    if(gateHeight < 2) gateHeight = 2;
+    if(gateHeight > portHeight) gateHeight = portHeight;
     
-    unsigned char *pixels = new unsigned char[width * height * 4];
+    const float realRatio = (float)gateHeight/(float)gateWidth;
+    
+    unsigned char *pixels = new unsigned char[gateWidth * gateHeight * 4];
     
 // 8-bit only?
 // only GL_DEPTH_COMPONENT works
-    glReadPixels(0, (portHeight - height)/2, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glReadPixels((portWidth - gateWidth)/2, (portHeight - gateHeight)/2, gateWidth, gateHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     
     //MGlobal::displayInfo(MString("dep")+pixels[128]);
     
     glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_bgdCImg);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, gateWidth, gateHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	
 	delete[] pixels;
 	
 	if(m_needLoadImage) {
-	    glActiveTexture(GL_TEXTURE1);
+	    MGlobal::displayInfo(MString("heather to load image ")+m_exr->fileName().c_str());
+    
 	    glBindTexture(GL_TEXTURE_2D, m_colorImg);
-	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-#ifdef WIN32
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RGBA, GL_HALF_FLOAT, m_exr->_pixels);
-#else
+//#ifdef WIN32
+//	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RGBA, GL_HALF_FLOAT, m_exr->_pixels);
+//#else
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RGBA, GL_HALF_FLOAT_ARB, m_exr->_pixels);
-#endif	
-	    glActiveTexture(GL_TEXTURE2);
+//#endif	
 	    glBindTexture(GL_TEXTURE_2D, m_depthImg);
 	    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
         // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RED, GL_FLOAT, m_exr->m_zData);
 	    
 		// for(int i=0; i < m_exr->getWidth() * m_exr->getHeight(); i+=999) MGlobal::displayInfo(MString("z ")+m_exr->m_zData[i]);
-		int fbw = m_exr->getWidth();
-		if(fbw > 2048) fbw = 2048;
-		int fbh = fbw * m_exr->aspectRation();
+		int fbw = portWidth;
+		int fbh = portHeight;
 		
 		if(m_framebuffer) delete m_framebuffer;
 		m_framebuffer = new GlFramebuffer(fbw, fbh);
@@ -392,7 +319,9 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	m_depth.programBegin();
 	glColor3f(1,1,1);
 	
-	drawBackPlane(mproj, mmvinv, realRatio);
+	const float gatePortRatioW = (float)gateWidth/(float)portWidth;
+	const float gatePortRatioH = (float)gateHeight/(float)portHeight;
+	drawBackPlane(mproj, mmvinv, realRatio, overscan, 1.0, 1.0);
 	drawBlocks();
 	
 	m_depth.programEnd();
@@ -417,7 +346,7 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 
     glDisable(GL_DEPTH_TEST);
     
-	drawBackPlane(mproj, mmvinv, realRatio);
+	drawBackPlane(mproj, mmvinv, realRatio, overscan, gatePortRatioW, gatePortRatioH);
     
 	m_clamp.programEnd();
 	
@@ -435,7 +364,8 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	
 }
 
-void heatherNode::drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvinv, const float & aspectRatio)
+void heatherNode::drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvinv, const float & aspectRatio, const double & overscan,
+	                   const float & gatePortRatioW, const float & gatePortRatioH)
 {
 	float tt;
     Vector3F leftP;
@@ -454,11 +384,11 @@ void heatherNode::drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvin
                mproj.M(2,3) + mproj.M(2,0), 
                mproj.M(3,3) + mproj.M(3,0));
     
-    const float zPlane = leftP.z * .999f;
+    const float zPlane = leftP.z * .991f;
     Ray toleft(Vector3F(0.f, 0.f, zPlane), Vector3F(-1,0,0), 0.f, 1e8);
     pleft.rayIntersect(toleft, leftP, tt);
     
-    const float leftMost = leftP.x;
+    const float leftMost = leftP.x / overscan;
     
     const float bottomMost = leftMost * aspectRatio;
     
@@ -467,15 +397,42 @@ void heatherNode::drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvin
     mmvinv.glMatrix(tmat);
     glMultMatrixf(tmat);
     
+    const float portL = (1.f - gatePortRatioW) * .5f;
+    const float portR = portL + gatePortRatioW;
+    const float portB = (1.f - gatePortRatioH) * .5f;
+    const float portT = portB + gatePortRatioH;
+    
 	glColor3f(1,1,1);
     glBegin(GL_TRIANGLES);
-    glTexCoord2f(0, 0); glVertex3f(leftMost,bottomMost, zPlane);
-    glTexCoord2f(1, 0); glVertex3f(-leftMost,bottomMost, zPlane);
-    glTexCoord2f(1, 1); glVertex3f(-leftMost,-bottomMost, zPlane);
+    glMultiTexCoord2f(GL_TEXTURE0, 0, 0); 
+    glMultiTexCoord2f(GL_TEXTURE1, portL, portB); 
+    glMultiTexCoord2f(GL_TEXTURE2, 0, 1); 
+    glVertex3f(leftMost,bottomMost, zPlane);
     
-    glTexCoord2f(0, 0); glVertex3f(leftMost,bottomMost, zPlane);
-    glTexCoord2f(1, 1); glVertex3f(-leftMost,-bottomMost, zPlane);
-    glTexCoord2f(0, 1); glVertex3f(leftMost,-bottomMost, zPlane);
+    glMultiTexCoord2f(GL_TEXTURE0, 1, 0);
+    glMultiTexCoord2f(GL_TEXTURE1, portR, portB); 
+    glMultiTexCoord2f(GL_TEXTURE2, 1, 1); 
+    glVertex3f(-leftMost,bottomMost, zPlane);
+    
+    glMultiTexCoord2f(GL_TEXTURE0, 1, 1);
+    glMultiTexCoord2f(GL_TEXTURE1, portR, portT); 
+    glMultiTexCoord2f(GL_TEXTURE2, 1, 0); 
+    glVertex3f(-leftMost,-bottomMost, zPlane);
+    
+    glMultiTexCoord2f(GL_TEXTURE0, 0, 0); 
+    glMultiTexCoord2f(GL_TEXTURE1, portL, portB); 
+    glMultiTexCoord2f(GL_TEXTURE2, 0, 1); 
+    glVertex3f(leftMost,bottomMost, zPlane);
+    
+    glMultiTexCoord2f(GL_TEXTURE0, 1, 1); 
+    glMultiTexCoord2f(GL_TEXTURE1, portR, portT); 
+    glMultiTexCoord2f(GL_TEXTURE2, 1, 0); 
+    glVertex3f(-leftMost,-bottomMost, zPlane);
+    
+    glMultiTexCoord2f(GL_TEXTURE0, 0, 1); 
+    glMultiTexCoord2f(GL_TEXTURE1, portL, portT); 
+    glMultiTexCoord2f(GL_TEXTURE2, 0, 0); 
+    glVertex3f(leftMost,-bottomMost, zPlane);
     glEnd();
     
     glPopMatrix();
@@ -514,47 +471,6 @@ MStatus heatherNode::initialize()
 	MFnTypedAttribute matAttr;
 	MFnNumericAttribute numAttr;
 	MStatus			 stat;
-	
-	amatrix = matAttr.create( "cameraMatrix", "cm", MFnData::kMatrix );
-	matAttr.setStorable(false);
-	matAttr.setConnectable(true);
-	addAttribute( amatrix );
-	
-	anear = numAttr.create( "nearClip", "nc", MFnNumericData::kDouble, 0.1 );
-	numAttr.setStorable(true);
-	numAttr.setConnectable(true);
-	numAttr.setKeyable(true);
-	addAttribute( anear );
-	
-	afar = numAttr.create( "farClip", "fc", MFnNumericData::kDouble, 1000.0 );
-	numAttr.setStorable(true);
-	numAttr.setConnectable(true);
-	numAttr.setKeyable(true);
-	addAttribute( afar );
-	
-	ahapeture = numAttr.create( "horizontalFilmAperture", "hfa", MFnNumericData::kDouble );
-	numAttr.setStorable(false);
-	numAttr.setConnectable(true);
-	addAttribute( ahapeture );
-	
-	avapeture = numAttr.create( "verticalFilmAperture", "vfa", MFnNumericData::kDouble );
-	numAttr.setStorable(false);
-	numAttr.setConnectable(true);
-	addAttribute( avapeture );
-	
-	afocallength = numAttr.create( "focalLength", "fl", MFnNumericData::kDouble );
-	numAttr.setStorable(false);
-	numAttr.setConnectable(true);
-	addAttribute( afocallength );
-	
-	aorthographicwidth = numAttr.create( "orthographicWidth", "ow", MFnNumericData::kDouble );
-	numAttr.setStorable(false);
-	numAttr.setConnectable(true);
-	addAttribute( aorthographicwidth );
-	
-	aorthographic = numAttr.create( "orthographic", "orh", MFnNumericData::kBoolean );
-	numAttr.setStorable(true);
-	addAttribute( aorthographic );
 	
 	adepthImageName = matAttr.create( "depthImage", "dmg", MFnData::kString );
  	matAttr.setStorable(true);

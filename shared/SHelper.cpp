@@ -106,8 +106,10 @@ void SHelper::changeFrameNumber(std::string& res, int frame, int padding)
 	if(zerosToFill < 0) zerosToFill = 0;
 	
 	sst.str("");
+	sst<<'.';
 	for(int i=0; i<zerosToFill; i++) sst<<'0';
 	sst<<number;
+	sst<<'.';
 	
 	res.erase(first, last-first+1);
 	res.insert(first, sst.str());

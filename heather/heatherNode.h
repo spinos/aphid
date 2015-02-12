@@ -56,14 +56,6 @@ public:
 	static  void *          creator();
 	static  MStatus         initialize();
 
-	static  MObject         amatrix;
-	static  MObject         anear;
-	static  MObject         afar;
-	static	MObject		ahapeture;
-	static	MObject		avapeture;
-	static	MObject		afocallength;
-	static	MObject		aorthographic;
-	static	MObject		aorthographicwidth;
 	static MObject adepthImageName;
 	static MObject aframeNumber;
 	static MObject aframePadding;
@@ -79,7 +71,9 @@ private:
 	void cacheBlocks(const MString & setname);
 	void cacheMeshFromNode(const MString & name);
 	void cacheMeshFromNode(const MObject & node);
-	void drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvinv, const float & aspectRatio);
+	void drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvinv, const float & aspectRatio, 
+	                   const double & overscan,
+	                   const float & gatePortRatioW, const float & gatePortRatioH);
 	void drawBlocks();
 	void cacheMeshes();
 private:
