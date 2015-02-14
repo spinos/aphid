@@ -61,6 +61,7 @@ public:
 	static MObject aframePadding;
 	static MObject aenableMultiFrames;
 	static MObject ablockSetName;
+	static MObject acameraName;
 	static MObject outValue;
 	
 public: 
@@ -73,11 +74,13 @@ private:
 	void cacheMeshFromNode(const MObject & node);
 	void drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvinv, const float & aspectRatio, 
 	                   const double & overscan,
-	                   const float & gatePortRatioW, const float & gatePortRatioH);
+	                   const float & gatePortRatioW, const float & gatePortRatioH, char isHorizontalFit = true,
+	                   float gateSqueezeX = 1.f, float gateSqueezeY = 1.f);
 	void drawBlocks();
 	void cacheMeshes();
 private:
 	MDagPathArray m_meshes;
+	MString m_carmeraName;
 	//Vector3F * m_blockVs;
 	//unsigned * m_blockTriIndices;
     ZEXRImage * m_exr;

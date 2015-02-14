@@ -18,6 +18,7 @@ MObject heatherNode::aenableMultiFrames;
 MObject heatherNode::aframeNumber;
 MObject heatherNode::aframePadding;
 MObject heatherNode::ablockSetName;
+MObject heatherNode::acameraName;
 MObject heatherNode::outValue;
 
 heatherNode::heatherNode() 
@@ -27,6 +28,7 @@ heatherNode::heatherNode()
 	m_framebuffer = 0;
 	m_portWidth = 0;
 	m_portHeight = 0;
+	m_carmeraName = "";
 	// m_blockVs = 0;
 	// m_blockTriIndices = 0;
 }
@@ -39,7 +41,7 @@ heatherNode::~heatherNode()
 }
 
 MStatus heatherNode::compute( const MPlug& plug, MDataBlock& block )
-{ 
+{
     if( plug == outValue ) {
         MString filename = block.inputValue(adepthImageName).asString();
         int frame = block.inputValue(aframeNumber).asInt();
@@ -47,6 +49,7 @@ MStatus heatherNode::compute( const MPlug& plug, MDataBlock& block )
 		bool enableSequence = block.inputValue(aenableMultiFrames).asBool();
         preLoadImage(filename.asChar(), frame, padding, enableSequence);
 		MString setname = block.inputValue(ablockSetName).asString();
+		m_carmeraName = block.inputValue(acameraName).asString();
 		cacheBlocks(setname);
         MDataHandle outputHandle = block.outputValue( outValue );
 		outputHandle.set(0.0);
@@ -213,6 +216,12 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     view.getCamera(dagCam);
     MFnCamera fCam(dagCam);
     if(fCam.isOrtho()) return;
+    
+    if(m_carmeraName.length() > 3) {
+        const MString camName = fCam.name();
+        if(camName != m_carmeraName) return;
+    }
+    
     const double overscan = fCam.overscan();
 
 	view.beginGL();
@@ -281,12 +290,28 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 				m_depthImg, 
 				m_colorImg);
 	}
-    
-    int gateWidth = (double)portWidth / overscan;
-    
-    int gateHeight = gateWidth * imageAspectRatio;
-    if(gateHeight < 2) gateHeight = 2;
-    if(gateHeight > portHeight) gateHeight = portHeight;
+	
+	MFnCamera::FilmFit 	fit = fCam.filmFit();
+    int gateWidth, gateHeight;
+    float gateSqueezeX = 1.f, gateSqueezeY = 1.f;
+    if(fit==MFnCamera::kHorizontalFilmFit) {
+        gateWidth = (double)portWidth / overscan;
+        gateHeight = gateWidth * imageAspectRatio;
+        if(gateHeight < 2) gateHeight = 2;
+        if(gateHeight > portHeight) {
+            gateSqueezeY = (float)portHeight / (float)gateHeight;
+            gateHeight = portHeight;
+        }
+    }
+    else { // assuming it is kVerticalFilmFit
+        gateHeight = (double)portHeight / overscan;
+        gateWidth = gateHeight / imageAspectRatio;
+        if(gateWidth < 2) gateWidth = 2;
+        if(gateWidth > portWidth) {
+            gateSqueezeX = (float)portWidth / (float)gateWidth;
+            gateWidth = portWidth;
+        }
+    }
     
     const float realRatio = (float)gateHeight/(float)gateWidth;
     
@@ -333,7 +358,7 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	
 	const float gatePortRatioW = (float)gateWidth/(float)portWidth;
 	const float gatePortRatioH = (float)gateHeight/(float)portHeight;
-	drawBackPlane(mproj, mmvinv, realRatio, overscan, 1.0, 1.0);
+	drawBackPlane(mproj, mmvinv, realRatio, overscan, 1.0, 1.0, fit==MFnCamera::kHorizontalFilmFit);
 	drawBlocks();
 	
 	m_depth.programEnd();
@@ -358,7 +383,7 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 
     glDisable(GL_DEPTH_TEST);
     
-	drawBackPlane(mproj, mmvinv, realRatio, overscan, gatePortRatioW, gatePortRatioH);
+	drawBackPlane(mproj, mmvinv, realRatio, overscan, gatePortRatioW, gatePortRatioH, fit==MFnCamera::kHorizontalFilmFit, gateSqueezeX, gateSqueezeY);
     
 	m_clamp.programEnd();
 	
@@ -377,7 +402,8 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 }
 
 void heatherNode::drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvinv, const float & aspectRatio, const double & overscan,
-	                   const float & gatePortRatioW, const float & gatePortRatioH)
+	                   const float & gatePortRatioW, const float & gatePortRatioH, char isHorizontalFit,
+	                   float gateSqueezeX, float gateSqueezeY)
 {
 	float tt;
     Vector3F leftP;
@@ -390,19 +416,34 @@ void heatherNode::drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvin
     Ray toFar(Vector3F(0,0,0), Vector3F(0,0,-1), 0.f, 1e8);
     
     pfar.rayIntersect(toFar, leftP, tt);
+    const float zPlane = leftP.z * .991f;
     
-    Plane pleft(mproj.M(0,3) + mproj.M(0,0), 
+    float leftMost, bottomMost;
+    
+    if(isHorizontalFit) {
+        Plane pleft(mproj.M(0,3) + mproj.M(0,0), 
                mproj.M(1,3) + mproj.M(1,0),
                mproj.M(2,3) + mproj.M(2,0), 
                mproj.M(3,3) + mproj.M(3,0));
     
-    const float zPlane = leftP.z * .991f;
-    Ray toleft(Vector3F(0.f, 0.f, zPlane), Vector3F(-1,0,0), 0.f, 1e8);
-    pleft.rayIntersect(toleft, leftP, tt);
+        Ray toleft(Vector3F(0.f, 0.f, zPlane), Vector3F(-1,0,0), 0.f, 1e8);
+        pleft.rayIntersect(toleft, leftP, tt);
+        
+        leftMost = leftP.x / overscan;
+        bottomMost = leftMost * aspectRatio;
+    }
+    else {
+        Plane pbottom(mproj.M(0,3) + mproj.M(0,1), 
+               mproj.M(1,3) + mproj.M(1,1),
+               mproj.M(2,3) + mproj.M(2,1), 
+               mproj.M(3,3) + mproj.M(3,1));
     
-    const float leftMost = leftP.x / overscan;
-    
-    const float bottomMost = leftMost * aspectRatio;
+        Ray tobottom(Vector3F(0.f, 0.f, zPlane), Vector3F(0,-1,0), 0.f, 1e8);
+        pbottom.rayIntersect(tobottom, leftP, tt);
+        
+        bottomMost = leftP.y / overscan;
+        leftMost = bottomMost / aspectRatio;
+    }
     
 	glPushMatrix();
 	float tmat[16];
@@ -414,36 +455,41 @@ void heatherNode::drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvin
     const float portB = (1.f - gatePortRatioH) * .5f;
     const float portT = portB + gatePortRatioH;
     
+    const float gateL = (1.f - gateSqueezeX) * .5f;
+    const float gateR = gateL + gateSqueezeX;
+    const float gateB = (1.f - gateSqueezeY) * .5f;
+    const float gateT = gateB + gateSqueezeY;
+    
 	glColor3f(1,1,1);
     glBegin(GL_TRIANGLES);
-    glMultiTexCoord2f(GL_TEXTURE0, 0, 0); 
+    glMultiTexCoord2f(GL_TEXTURE0, gateL, gateB); 
     glMultiTexCoord2f(GL_TEXTURE1, portL, portB); 
-    glMultiTexCoord2f(GL_TEXTURE2, 0, 1); 
+    glMultiTexCoord2f(GL_TEXTURE2, gateL, gateT); 
     glVertex3f(leftMost,bottomMost, zPlane);
     
-    glMultiTexCoord2f(GL_TEXTURE0, 1, 0);
+    glMultiTexCoord2f(GL_TEXTURE0, gateR, gateB);
     glMultiTexCoord2f(GL_TEXTURE1, portR, portB); 
-    glMultiTexCoord2f(GL_TEXTURE2, 1, 1); 
+    glMultiTexCoord2f(GL_TEXTURE2, gateR, gateT); 
     glVertex3f(-leftMost,bottomMost, zPlane);
     
-    glMultiTexCoord2f(GL_TEXTURE0, 1, 1);
+    glMultiTexCoord2f(GL_TEXTURE0, gateR, gateT);
     glMultiTexCoord2f(GL_TEXTURE1, portR, portT); 
-    glMultiTexCoord2f(GL_TEXTURE2, 1, 0); 
+    glMultiTexCoord2f(GL_TEXTURE2, gateR, gateB); 
     glVertex3f(-leftMost,-bottomMost, zPlane);
     
-    glMultiTexCoord2f(GL_TEXTURE0, 0, 0); 
+    glMultiTexCoord2f(GL_TEXTURE0, gateL, gateB); 
     glMultiTexCoord2f(GL_TEXTURE1, portL, portB); 
-    glMultiTexCoord2f(GL_TEXTURE2, 0, 1); 
+    glMultiTexCoord2f(GL_TEXTURE2, gateL, gateT); 
     glVertex3f(leftMost,bottomMost, zPlane);
     
-    glMultiTexCoord2f(GL_TEXTURE0, 1, 1); 
+    glMultiTexCoord2f(GL_TEXTURE0, gateR, gateT); 
     glMultiTexCoord2f(GL_TEXTURE1, portR, portT); 
-    glMultiTexCoord2f(GL_TEXTURE2, 1, 0); 
+    glMultiTexCoord2f(GL_TEXTURE2, gateR, gateB); 
     glVertex3f(-leftMost,-bottomMost, zPlane);
     
-    glMultiTexCoord2f(GL_TEXTURE0, 0, 1); 
+    glMultiTexCoord2f(GL_TEXTURE0, gateL, gateT); 
     glMultiTexCoord2f(GL_TEXTURE1, portL, portT); 
-    glMultiTexCoord2f(GL_TEXTURE2, 0, 0); 
+    glMultiTexCoord2f(GL_TEXTURE2, gateL, gateB); 
     glVertex3f(leftMost,-bottomMost, zPlane);
     glEnd();
     
@@ -503,6 +549,10 @@ MStatus heatherNode::initialize()
 	numAttr.setStorable(true);
 	addAttribute(aframePadding);
 	
+	acameraName = matAttr.create( "lookCameraName", "lcm", MFnData::kString );
+ 	matAttr.setStorable(true);
+	addAttribute(acameraName);
+	
 	ablockSetName = matAttr.create( "blockSet", "bks", MFnData::kString );
  	matAttr.setStorable(true);
 	addAttribute(ablockSetName);
@@ -516,6 +566,7 @@ MStatus heatherNode::initialize()
 	attributeAffects(aenableMultiFrames, outValue);
 	attributeAffects(aframeNumber, outValue);
 	attributeAffects(ablockSetName, outValue);
+	attributeAffects(acameraName, outValue);
 	
 	return MS::kSuccess;
 }

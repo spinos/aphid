@@ -12,7 +12,7 @@
 MStatus initializePlugin( MObject obj )
 { 
 	MStatus   stat;
-	MFnPlugin plugin( obj, "ZHANG JIAN - Free Downlaod", "3.1", "Any");
+	MFnPlugin plugin( obj, "ZHANG JIAN | OF3D", "1.1 Sat Feb 14 18:27:07 CST 2015", "Any");
 
 	stat = plugin.registerNode( "heatherNode", heatherNode::id, 
 						 &heatherNode::creator, &heatherNode::initialize,
