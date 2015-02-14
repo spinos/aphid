@@ -11,6 +11,7 @@
 #include <CudaBase.h>
 #include "CudaLinearBvh.h"
 #include "CudaParticleSystem.h"
+#include "TetrahedronSystem.h"
 #include "rayTest.h"
 #include "bvh_dbg.h"
 
@@ -44,6 +45,40 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	qDebug()<<"num vertices "<<m_mesh->numVertices();
 	qDebug()<<"num triangles "<<m_mesh->numTriangles();
 	qDebug()<<"num ray tests "<<(IRAYDIM * IRAYDIM);
+	
+	m_tetra = new TetrahedronSystem;
+	m_tetra->create(1200, 1.f, 1.f);
+	
+	for(j=0; j < 32; j++) {
+		for(i=0; i<32; i++) {
+			Vector3F base(2.f * i, 2.f * j, 1.f);
+			Vector3F right = base + Vector3F(1.55f, 0.f, 0.f);
+			Vector3F front = base + Vector3F(0.f, 0.f, 1.55f);
+			Vector3F top = base + Vector3F(0.f, 1.55f, 0.f);
+			
+			m_tetra->addPoint(&base.x);
+			m_tetra->addPoint(&right.x);
+			m_tetra->addPoint(&top.x);
+			m_tetra->addPoint(&front.x);
+
+			unsigned b = (j * 32 + i) * 4;
+			m_tetra->addTetrahedron(b, b+1, b+2, b+3);
+			
+			m_tetra->addTriangle(b, b+2, b+1);
+			m_tetra->addTriangle(b, b+1, b+3);
+			m_tetra->addTriangle(b, b+3, b+2);
+			m_tetra->addTriangle(b+1, b+2, b+3);
+//	 2
+//	 | \ 
+//	 |  \
+//	 0 - 1
+//  /
+// 3 		
+		}
+	}	
+	qDebug()<<"tetra n tet "<<m_tetra->numTetradedrons();
+	qDebug()<<"tetra n p "<<m_tetra->numPoints();
+	qDebug()<<"tetra n tri "<<m_tetra->numTriangles();
 }
 
 GLWidget::~GLWidget()
@@ -89,6 +124,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+	drawTetra();
 	const float t = (float)elapsedTime();
 	m_mesh->setAlpha(t/290.f);
 	m_ray->setAlpha(t/230.f);
@@ -264,6 +300,20 @@ void GLWidget::debugDraw(unsigned rootInd, unsigned numInternal)
 	}
 	glEnd();
 #endif
+}
+
+void GLWidget::drawTetra()
+{
+	glColor3f(0.f, 0.9f, 0.3f);
+    
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_tetra->hostX());
+	glDrawElements(GL_TRIANGLES, m_tetra->numTriangleFaceVertices(), GL_UNSIGNED_INT, m_tetra->hostTriangleIndices());
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

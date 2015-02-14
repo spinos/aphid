@@ -21,6 +21,7 @@ public:
 	const unsigned numTetradedrons() const;
 	const unsigned numPoints() const;
 	const unsigned numTriangles() const;
+	const unsigned numTriangleFaceVertices() const;
 	float * hostX();
 	unsigned * hostTretradhedronIndices();
 	unsigned * hostTriangleIndices();

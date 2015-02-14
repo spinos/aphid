@@ -58,7 +58,7 @@ void TetrahedronSystem::addTetrahedron(unsigned a, unsigned b, unsigned c, unsig
 void TetrahedronSystem::addTriangle(unsigned a, unsigned b, unsigned c)
 {
 	if(m_numTriangles == m_maxNumTriangles) return;
-	unsigned *idx = &hostTretradhedronIndices()[m_numTriangles * 3];
+	unsigned *idx = &hostTriangleIndices()[m_numTriangles * 3];
 	idx[0] = a;
 	idx[1] = b;
 	idx[2] = c;
@@ -74,11 +74,14 @@ const unsigned TetrahedronSystem::numPoints() const
 const unsigned TetrahedronSystem::numTriangles() const
 { return m_numTriangles; }
 
+const unsigned TetrahedronSystem::numTriangleFaceVertices() const
+{ return m_numTriangles * 3; }
+
 float * TetrahedronSystem::hostX()
 { return (float *)m_hostX->data(); }
 
 unsigned * TetrahedronSystem::hostTretradhedronIndices()
-{ return (unsigned *)m_hostTretradhedronIndices; }
+{ return (unsigned *)m_hostTretradhedronIndices->data(); }
 
 unsigned * TetrahedronSystem::hostTriangleIndices()
-{ return (unsigned *)m_hostTriangleIndices; }
+{ return (unsigned *)m_hostTriangleIndices->data(); }

@@ -9,6 +9,7 @@ class BaseBuffer;
 class SimpleMesh;
 class RayTest;
 class CudaParticleSystem;
+class TetrahedronSystem;
 
 class GLWidget : public Base3DView
 {
@@ -32,10 +33,12 @@ private:
 	void debugDraw(unsigned rootInd, unsigned numInternal);
 	void drawParticles();
 	void drawMesh();
+	void drawTetra();
 private:
 	SimpleMesh * m_mesh;
 	RayTest * m_ray;
 	CudaParticleSystem * m_particles;
+	TetrahedronSystem * m_tetra;
 	BvhSolver * m_solver;
 	int m_displayLevel;
 	
