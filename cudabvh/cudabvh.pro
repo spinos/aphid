@@ -28,7 +28,8 @@ bvh_dbg.h \
                 ../shared/BaseSolverThread.h \
                 CudaDynamicSystem.h  \
 		CollisionQuery.h \
-		CollisionObject.h
+		CollisionObject.h \
+		TetrahedronSystem.h
 SOURCES       = main.cpp \
                 glWidget.cpp \
                 window.cpp \
@@ -45,7 +46,8 @@ SOURCES       = main.cpp \
                 ../shared/BaseSolverThread.cpp \
                 CudaDynamicSystem.cpp \
 		CollisionQuery.cpp \
-		 CollisionObject.cpp
+		 CollisionObject.cpp \
+		 TetrahedronSystem.cpp
 
 win32 {
     HEADERS += ../shared/gExtension.h
@@ -61,6 +63,11 @@ macx {
 QT           += opengl
 LIBS += -L../lib -laphid -lIlmImf -lHalf
 DESTDIR = ./
+OBJECTS_DIR = release/obj
+MOC_DIR = release/moc
+RCC_DIR = release/rcc
+UI_DIR = release/ui
+
 CUSOURCES = bvh_math.cu plane.cu createBvh.cu traverseBvh.cu reduceBox.cu reduceRange.cu \
             ../radixsort/radixsort.cu \
             particleSystem.cu
