@@ -24,8 +24,6 @@ public:
 	virtual void initOnDevice();
 	virtual void update();
 	
-	void setCombineAabbSecondBlocks(unsigned n);
-	
 	const unsigned numLeafNodes() const;
 	const unsigned numInternalNodes() const;
 	const Aabb bound() const;
@@ -47,7 +45,7 @@ public:
 	const unsigned usedMemory() const;
 	
 private:
-	void combineAabbSecond();
+    void combineAabb();
 	void calcLeafHash();
 	void buildInternalTree();
 	void findMaxDistanceFromRoot();
@@ -66,6 +64,6 @@ private:
 	CUDABuffer * m_rootNodeIndexOnDevice;
     CUDABuffer * m_distanceInternalNodeFromRoot;
 	CUDABuffer * m_reducedMaxDistance;
-	unsigned m_numLeafNodes, m_combineAabbSecondBlocks;
+	unsigned m_numLeafNodes;
 };
 #endif        //  #ifndef CUDALINEARBVH_H

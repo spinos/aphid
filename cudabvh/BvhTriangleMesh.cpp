@@ -39,7 +39,6 @@ void BvhTriangleMesh::initOnDevice()
 void BvhTriangleMesh::update()
 { 
     formTriangleAabbs();
-    combineAabbFirst();
     CollisionObject::update(); 
 }
 
@@ -49,22 +48,6 @@ void BvhTriangleMesh::formTriangleAabbs()
     void * tri = triangleIndicesOnDevice();
     void * dst = bvh()->leafAabbs();
     bvhCalculateLeafAabbsTriangle((Aabb *)dst, (float3 *)cvs, (uint3 *)tri, numTriangles());
-}
-
-void BvhTriangleMesh::combineAabbFirst()
-{
-    void * psrc = verticesOnDevice();
-    void * pdst = bvh()->combineAabbsBuffer();
-	
-	unsigned n = nextPow2(numVertices());
-	unsigned threads, blocks;
-	getReduceBlockThread(blocks, threads, n);
-	
-	// std::cout<<"n0 "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(Aabb)<<"\n";
-	
-	bvhReduceAabbByPoints((Aabb *)pdst, (float3 *)psrc, n, blocks, threads, numVertices());
-	
-	bvh()->setCombineAabbSecondBlocks(blocks);
 }
 
 void BvhTriangleMesh::createVertices(unsigned n)

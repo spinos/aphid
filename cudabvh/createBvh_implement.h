@@ -4,6 +4,8 @@
 #include "bvh_common.h"
 #include <radixsort_implement.h>
 
+extern "C" void bvhCalculateLeafAabbsTetrahedron2(Aabb *dst, float3 * pos, float3 * vel, float timeStep, uint4 * tets, unsigned numTetrahedrons);
+
 extern "C" void bvhCalculateLeafAabbsTetrahedron(Aabb *dst, float3 * cvs, uint4 * tets, unsigned numTetrahedrons);
 
 extern "C" void bvhCalculateLeafAabbsTriangle(Aabb *dst, float3 * cvs, uint3 * tris, unsigned numTriangles);

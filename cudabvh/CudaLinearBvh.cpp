@@ -60,9 +60,6 @@ void CudaLinearBvh::initOnDevice()
 	m_reducedMaxDistance->create(ReduceMaxBlocks * sizeof(int));
 }
 
-void CudaLinearBvh::setCombineAabbSecondBlocks(unsigned n)
-{ m_combineAabbSecondBlocks = n; }
-
 const unsigned CudaLinearBvh::numLeafNodes() const 
 { return m_numLeafNodes; }
 
@@ -110,16 +107,20 @@ void * CudaLinearBvh::combineAabbsBuffer()
  
 void CudaLinearBvh::update()
 {
-	combineAabbSecond();
+	combineAabb();
 	calcLeafHash();
 	buildInternalTree();
 }
 
-void CudaLinearBvh::combineAabbSecond()
+void CudaLinearBvh::combineAabb()
 {
-	void * pdst = combineAabbsBuffer();
-	unsigned threads, blocks;
-	unsigned n = m_combineAabbSecondBlocks;
+    void * pdst = combineAabbsBuffer();
+    unsigned threads, blocks;
+    unsigned n = numLeafNodes();
+	getReduceBlockThread(blocks, threads, n);
+	bvhReduceAabbByAabb((Aabb *)pdst, (Aabb *)leafAabbs(), numLeafNodes(), blocks, threads);
+	
+	n = blocks;
 	while(n > 1) {
 		getReduceBlockThread(blocks, threads, n);
 		

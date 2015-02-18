@@ -50,17 +50,35 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_tetra = new CudaTetrahedronSystem;
 	m_tetra->create(1200, 1.f, 1.f);
 	
+	float * hv = &m_tetra->hostV()[0];
+	
 	for(j=0; j < 32; j++) {
 		for(i=0; i<32; i++) {
-			Vector3F base(2.f * i, 2.f * j, 1.f);
-			Vector3F right = base + Vector3F(1.55f, 0.f, 0.f);
-			Vector3F front = base + Vector3F(0.f, 0.f, 1.55f);
-			Vector3F top = base + Vector3F(0.f, 1.55f, 0.f);
+			Vector3F base(2.f * i, 2.f * j, 2.f);
+			Vector3F right = base + Vector3F(1.75f, 0.f, 0.f);
+			Vector3F front = base + Vector3F(0.f, 0.f, 1.75f);
+			Vector3F top = base + Vector3F(0.f, 1.75f, 0.f);
 			
 			m_tetra->addPoint(&base.x);
+			hv[0] = 20.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 20.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[2] = 23.f * (((float)(rand() % 199))/199.f - .5f);
+			hv+=3;
 			m_tetra->addPoint(&right.x);
+			hv[0] = 20.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 28.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[2] = 25.f * (((float)(rand() % 199))/199.f - .5f);
+			hv+=3;
 			m_tetra->addPoint(&top.x);
+			hv[0] = 20.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 28.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[2] = 25.f * (((float)(rand() % 199))/199.f - .5f);
+			hv+=3;
 			m_tetra->addPoint(&front.x);
+			hv[0] = 20.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 28.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[2] = 25.f * (((float)(rand() % 199))/199.f - .5f);
+			hv+=3;
 
 			unsigned b = (j * 32 + i) * 4;
 			m_tetra->addTetrahedron(b, b+1, b+2, b+3);
@@ -77,6 +95,13 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 // 3 		
 		}
 	}	
+	
+	/*for(j=0; j < 32; j++) {
+		for(i=0; i<32; i++) {
+		    float * v = &m_tetra->hostV()[(j*32 + i)*3];
+		    std::cout<<" "<<v[0]<<" "<<v[1]<<" "<<v[2]<<"\n";
+		}	
+	}*/
 	qDebug()<<"tetra n tet "<<m_tetra->numTetradedrons();
 	qDebug()<<"tetra n p "<<m_tetra->numPoints();
 	qDebug()<<"tetra n tri "<<m_tetra->numTriangles();
@@ -125,11 +150,6 @@ void GLWidget::clientInit()
 	m_tetra->initOnDevice();
 	m_tetra->update();
 	
-	int rtind;
-	m_tetra->getRootNodeIndex(&rtind);
-	
-	qDebug()<<" "<<(rtind & (~0x80000000));
-	
 	// connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	// connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
@@ -151,11 +171,6 @@ void GLWidget::drawMesh()
 	CudaLinearBvh * bvh = m_mesh->bvh();
 	Aabb ab = bvh->bound();
 	if(ab.low.x < -1e8 || ab.low.x > 1e8) std::cout<<" invalid big box "<<aabb_str(ab);
-	
-	int rtind;
-	bvh->getRootNodeIndex(&rtind);
-	
-	qDebug()<<" "<<rtind;
 	
 #ifdef BVHSOLVER_DBG_DRAW
     unsigned numInternal = bvh->numInternalNodes();

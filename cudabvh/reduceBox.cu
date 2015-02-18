@@ -320,4 +320,3 @@ extern "C" void bvhReduceAabbByPoints(Aabb *dst, float3 *src, unsigned numPoints
 		}
 	}
 }
-

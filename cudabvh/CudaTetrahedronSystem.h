@@ -20,12 +20,13 @@ public:
 	virtual void update();
 protected:
 	void * deviceX();
+	void * deviceV();
 	void * deviceTretradhedronIndices();
 private:
 	void formTetrahedronAabbs();
-	void combineAabbFirst();
 private:
 	CUDABuffer * m_deviceX;
+	CUDABuffer * m_deviceV;
 	CUDABuffer * m_deviceTretradhedronIndices;
 };
 #endif        //  #ifndef CUDATETRAHEDRONSYSTEM_H

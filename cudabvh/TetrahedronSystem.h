@@ -23,6 +23,7 @@ public:
 	const unsigned numTriangles() const;
 	const unsigned numTriangleFaceVertices() const;
 	float * hostX();
+	float * hostV();
 	unsigned * hostTretradhedronIndices();
 	unsigned * hostTriangleIndices();
 protected:
@@ -30,6 +31,7 @@ protected:
 	const unsigned maxNumTetradedrons() const;
 private:
 	BaseBuffer * m_hostX;
+	BaseBuffer * m_hostV;
 	BaseBuffer * m_hostTretradhedronIndices;
 	BaseBuffer * m_hostTriangleIndices;
 	unsigned m_numTetradedrons, m_numPoints, m_numTriangles;

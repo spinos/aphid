@@ -1,5 +1,6 @@
 #include "createBvh_implement.h"
 #include <bvh_math.cu>
+#include <CudaBase.h>
 //Set so that it is always greater than the actual common prefixes, and never selected as a parent node.
 //If there are no duplicates, then the highest common prefix is 32 or 64, depending on the number of bits used for the z-curve.
 //Duplicate common prefixes increase the highest common prefix at most by the number of bits used to index the leaf node.
@@ -66,6 +67,29 @@ inline __device__ void normalizeByBoundary(float & x, float low, float width)
 		if(width < TINY_VALUE2) x = 0.0;
 		else x = (x - low) / width;
 	}
+}
+
+__global__ void calculateAabbsTetrahedron2_kernel(Aabb *dst, float3 * pos, float3 * vel, float h, uint4 * tets, unsigned maxTetInd)
+{
+    unsigned idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(idx >= maxTetInd) return;
+	
+	uint4 t = tets[idx];
+
+	Aabb res;
+	resetAabb(res);
+	expandAabb(res, pos[t.x]);
+	expandAabb(res, pos[t.y]);
+	expandAabb(res, pos[t.z]);
+	expandAabb(res, pos[t.w]);
+	
+	expandAabb(res, float3_progress(pos[t.x], vel[t.x], h));
+	expandAabb(res, float3_progress(pos[t.y], vel[t.y], h));
+	expandAabb(res, float3_progress(pos[t.z], vel[t.z], h));
+	expandAabb(res, float3_progress(pos[t.w], vel[t.w], h));
+	
+	dst[idx] = res;
 }
 
 __global__ void calculateAabbsTetrahedron_kernel(Aabb *dst, float3 * cvs, uint4 * tets, unsigned maxTetInd)
@@ -428,6 +452,17 @@ __global__ void formInternalNodeAabbsAtDistance_kernel(int * distanceFromRoot, K
 		expandAabb(mergedAabb, rightChildAabb);
 		internalNodeAabbs[internalNodeIndex] = mergedAabb;
 	}
+}
+
+extern "C" void bvhCalculateLeafAabbsTetrahedron2(Aabb *dst, float3 * pos, float3 * vel, float timeStep, uint4 * tets, unsigned numTetrahedrons)
+{
+    int tpb = CudaBase::LimitNThreadPerBlock(24, 40);
+
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numTetrahedrons, tpb);
+    
+    dim3 grid(nblk, 1, 1);
+    calculateAabbsTetrahedron2_kernel<<< grid, block >>>(dst, pos, vel, timeStep, tets, numTetrahedrons);
 }
 
 extern "C" void bvhCalculateLeafAabbsTetrahedron(Aabb *dst, float3 * cvs, uint4 * tets, unsigned numTetrahedrons)

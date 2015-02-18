@@ -42,8 +42,7 @@ protected:
     
 private:
     void formTriangleAabbs();
-    void combineAabbFirst();
-
+    
 private:
 	BaseBuffer * m_vertices;
 	BaseBuffer * m_triangleIndices;
