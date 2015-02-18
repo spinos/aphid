@@ -27,7 +27,9 @@ CudaTetrahedronSystem::~CudaTetrahedronSystem()
 void CudaTetrahedronSystem::initOnDevice() 
 {
 	m_deviceX->create(maxNumPoints() * 12);
+	m_deviceX->hostToDevice(hostX(), numPoints() * 12);
 	m_deviceTretradhedronIndices->create(maxNumTetradedrons() * 16);
+	m_deviceTretradhedronIndices->hostToDevice(hostTretradhedronIndices(), numTetradedrons() * 16);
 	setNumLeafNodes(numTetradedrons());
 	CudaLinearBvh::initOnDevice();
 }
@@ -60,7 +62,7 @@ void CudaTetrahedronSystem::combineAabbFirst()
 	
 	bvhReduceAabbByPoints((Aabb *)pdst, (float3 *)psrc, n, blocks, threads, numPoints());
 	
-	// bvh()->setCombineAabbSecondBlocks(blocks);
+	setCombineAabbSecondBlocks(blocks);
 }
 
 void * CudaTetrahedronSystem::deviceX()

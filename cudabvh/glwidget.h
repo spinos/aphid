@@ -10,6 +10,7 @@ class SimpleMesh;
 class RayTest;
 class CudaParticleSystem;
 class CudaTetrahedronSystem;
+class DrawBvh;
 
 class GLWidget : public Base3DView
 {
@@ -40,6 +41,7 @@ private:
 	CudaParticleSystem * m_particles;
 	CudaTetrahedronSystem * m_tetra;
 	BvhSolver * m_solver;
+	DrawBvh * m_drawBvh;
 	int m_displayLevel;
 	
 #ifdef BVHSOLVER_DBG_DRAW

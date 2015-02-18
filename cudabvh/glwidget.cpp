@@ -12,6 +12,7 @@
 #include "CudaLinearBvh.h"
 #include "CudaParticleSystem.h"
 #include "CudaTetrahedronSystem.h"
+#include "DrawBvh.h"
 #include "rayTest.h"
 #include "bvh_dbg.h"
 
@@ -79,6 +80,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	qDebug()<<"tetra n tet "<<m_tetra->numTetradedrons();
 	qDebug()<<"tetra n p "<<m_tetra->numPoints();
 	qDebug()<<"tetra n tri "<<m_tetra->numTriangles();
+	
+	m_drawBvh = new DrawBvh;
+	m_drawBvh->setDrawer(getDrawer());
+	m_drawBvh->setBvh(m_tetra);
 }
 
 GLWidget::~GLWidget()
@@ -118,20 +123,27 @@ void GLWidget::clientInit()
 #endif
 
 	m_tetra->initOnDevice();
+	m_tetra->update();
 	
-	connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
-	connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
-	// connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+	int rtind;
+	m_tetra->getRootNodeIndex(&rtind);
+	
+	qDebug()<<" "<<(rtind & (~0x80000000));
+	
+	// connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
+	// connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
+	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 }
 
 void GLWidget::clientDraw()
 {
+	// drawMesh();
 	drawTetra();
 	const float t = (float)elapsedTime();
 	m_mesh->setAlpha(t/290.f);
 	m_ray->setAlpha(t/230.f);
 	// qDebug()<<"drawn in "<<deltaTime();
-	//internalTimer()->start();
+	// internalTimer()->start();
 }
 
 void GLWidget::drawMesh()
@@ -139,6 +151,11 @@ void GLWidget::drawMesh()
 	CudaLinearBvh * bvh = m_mesh->bvh();
 	Aabb ab = bvh->bound();
 	if(ab.low.x < -1e8 || ab.low.x > 1e8) std::cout<<" invalid big box "<<aabb_str(ab);
+	
+	int rtind;
+	bvh->getRootNodeIndex(&rtind);
+	
+	qDebug()<<" "<<rtind;
 	
 #ifdef BVHSOLVER_DBG_DRAW
     unsigned numInternal = bvh->numInternalNodes();
@@ -316,6 +333,12 @@ void GLWidget::drawTetra()
 	glDrawElements(GL_TRIANGLES, m_tetra->numTriangleFaceVertices(), GL_UNSIGNED_INT, m_tetra->hostTriangleIndices());
 
 	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	glColor3f(0.2f, 0.2f, 0.3f);
+    m_drawBvh->bound();
+	m_drawBvh->leaf();
+	m_drawBvh->hash();
+	m_drawBvh->hierarch();
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)
@@ -344,9 +367,11 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 	switch (event->key()) {
 		case Qt::Key_A:
 			m_displayLevel++;
+			m_drawBvh->addDispalyLevel();
 			break;
 		case Qt::Key_D:
 			m_displayLevel--;
+			m_drawBvh->minusDispalyLevel();
 			break;
 		case Qt::Key_W:
 			internalTimer()->stop();
