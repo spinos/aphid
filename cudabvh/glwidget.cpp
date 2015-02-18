@@ -11,7 +11,7 @@
 #include <CudaBase.h>
 #include "CudaLinearBvh.h"
 #include "CudaParticleSystem.h"
-#include "TetrahedronSystem.h"
+#include "CudaTetrahedronSystem.h"
 #include "rayTest.h"
 #include "bvh_dbg.h"
 
@@ -46,7 +46,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	qDebug()<<"num triangles "<<m_mesh->numTriangles();
 	qDebug()<<"num ray tests "<<(IRAYDIM * IRAYDIM);
 	
-	m_tetra = new TetrahedronSystem;
+	m_tetra = new CudaTetrahedronSystem;
 	m_tetra->create(1200, 1.f, 1.f);
 	
 	for(j=0; j < 32; j++) {
@@ -117,6 +117,8 @@ void GLWidget::clientInit()
                 m_rootNodeInd);
 #endif
 
+	m_tetra->initOnDevice();
+	
 	connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 	// connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));

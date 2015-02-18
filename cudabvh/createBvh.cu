@@ -68,6 +68,24 @@ inline __device__ void normalizeByBoundary(float & x, float low, float width)
 	}
 }
 
+__global__ void calculateAabbsTetrahedron_kernel(Aabb *dst, float3 * cvs, uint4 * tets, unsigned maxTetInd)
+{
+    unsigned idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(idx >= maxTetInd) return;
+	
+	uint4 t = tets[idx];
+
+	Aabb res;
+	resetAabb(res);
+	expandAabb(res, cvs[t.x]);
+	expandAabb(res, cvs[t.y]);
+	expandAabb(res, cvs[t.z]);
+	expandAabb(res, cvs[t.w]);
+	
+	dst[idx] = res;
+}
+
 __global__ void calculateAabbsTriangle_kernel(Aabb *dst, float3 * cvs, uint3 * tris, unsigned maxTriInd)
 {
     unsigned idx = blockIdx.x*blockDim.x + threadIdx.x;
@@ -410,6 +428,15 @@ __global__ void formInternalNodeAabbsAtDistance_kernel(int * distanceFromRoot, K
 		expandAabb(mergedAabb, rightChildAabb);
 		internalNodeAabbs[internalNodeIndex] = mergedAabb;
 	}
+}
+
+extern "C" void bvhCalculateLeafAabbsTetrahedron(Aabb *dst, float3 * cvs, uint4 * tets, unsigned numTetrahedrons)
+{
+	dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numTetrahedrons, 512);
+    
+    dim3 grid(nblk, 1, 1);
+    calculateAabbsTetrahedron_kernel<<< grid, block >>>(dst, cvs, tets, numTetrahedrons);
 }
 
 extern "C" void bvhCalculateLeafAabbsTriangle(Aabb *dst, float3 * cvs, uint3 * tris, unsigned numTriangles)

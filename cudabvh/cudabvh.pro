@@ -29,7 +29,8 @@ bvh_dbg.h \
                 CudaDynamicSystem.h  \
 		CollisionQuery.h \
 		CollisionObject.h \
-		TetrahedronSystem.h
+		TetrahedronSystem.h \
+		CudaTetrahedronSystem.h
 SOURCES       = main.cpp \
                 glWidget.cpp \
                 window.cpp \
@@ -47,7 +48,8 @@ SOURCES       = main.cpp \
                 CudaDynamicSystem.cpp \
 		CollisionQuery.cpp \
 		 CollisionObject.cpp \
-		 TetrahedronSystem.cpp
+		 TetrahedronSystem.cpp \
+		 CudaTetrahedronSystem.cpp
 
 win32 {
     HEADERS += ../shared/gExtension.h

@@ -74,6 +74,12 @@ const unsigned TetrahedronSystem::numPoints() const
 const unsigned TetrahedronSystem::numTriangles() const
 { return m_numTriangles; }
 
+const unsigned TetrahedronSystem::maxNumPoints() const
+{ return m_maxNumPoints; }
+
+const unsigned TetrahedronSystem::maxNumTetradedrons() const
+{ return m_maxNumTetrahedrons; }
+
 const unsigned TetrahedronSystem::numTriangleFaceVertices() const
 { return m_numTriangles * 3; }
 

@@ -10,7 +10,7 @@ CollisionObject::CollisionObject()
 CollisionObject::~CollisionObject() {}
 
 void CollisionObject::initOnDevice() 
-{ m_bvh->create(); }
+{ m_bvh->initOnDevice(); }
 
 void CollisionObject::update() 
 { m_bvh->update(); }

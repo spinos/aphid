@@ -26,7 +26,8 @@ public:
 	unsigned * hostTretradhedronIndices();
 	unsigned * hostTriangleIndices();
 protected:
-
+	const unsigned maxNumPoints() const;
+	const unsigned maxNumTetradedrons() const;
 private:
 	BaseBuffer * m_hostX;
 	BaseBuffer * m_hostTretradhedronIndices;

@@ -17,48 +17,51 @@
 #include "bvh_dbg.h"
 
 CudaLinearBvh::CudaLinearBvh() 
-{ m_numLeafNodes = 0; }
+{ 
+	m_numLeafNodes = 0; 
+	m_leafAabbs = new CUDABuffer;
+	m_internalNodeAabbs = new CUDABuffer;
+	m_leafHash[0] = new CUDABuffer;
+	m_leafHash[1] = new CUDABuffer;
+	m_internalNodeCommonPrefixValues = new CUDABuffer;
+	m_internalNodeCommonPrefixLengths = new CUDABuffer;
+	m_leafNodeParentIndices = new CUDABuffer;
+	m_internalNodeChildIndices = new CUDABuffer;
+	m_internalNodeParentIndices = new CUDABuffer;
+	m_rootNodeIndexOnDevice = new CUDABuffer;
+	m_distanceInternalNodeFromRoot = new CUDABuffer;
+	m_reducedMaxDistance = new CUDABuffer;
+	
+}
 
 CudaLinearBvh::~CudaLinearBvh() {}
 
 void CudaLinearBvh::setNumLeafNodes(unsigned n)
 { m_numLeafNodes = n; }
 
-void CudaLinearBvh::setCombineAabbSecondBlocks(unsigned n)
-{ m_combineAabbSecondBlocks = n; }
-
-void CudaLinearBvh::create()
+void CudaLinearBvh::initOnDevice()
 {
-	m_leafAabbs = new CUDABuffer;
 	m_leafAabbs->create(numLeafNodes() * sizeof(Aabb));
-	m_internalNodeAabbs = new CUDABuffer;
 	// assume numInternalNodes() >> ReduceMaxBlocks
 	m_internalNodeAabbs->create(numInternalNodes() * sizeof(Aabb));
 	
-	m_leafHash[0] = new CUDABuffer;
 	m_leafHash[0]->create(numLeafNodes() * sizeof(KeyValuePair));
-	m_leafHash[1] = new CUDABuffer;
 	m_leafHash[1]->create(numLeafNodes() * sizeof(KeyValuePair));
 	
-	m_internalNodeCommonPrefixValues = new CUDABuffer;
 	m_internalNodeCommonPrefixValues->create(numInternalNodes() * sizeof(uint64));
-	m_internalNodeCommonPrefixLengths = new CUDABuffer;
 	m_internalNodeCommonPrefixLengths->create(numInternalNodes() * sizeof(int));
 	
-	m_leafNodeParentIndices = new CUDABuffer;
 	m_leafNodeParentIndices->create(numLeafNodes() * sizeof(int));
-	m_internalNodeChildIndices = new CUDABuffer;
 	m_internalNodeChildIndices->create(numInternalNodes() * sizeof(int2));
-	m_internalNodeParentIndices = new CUDABuffer;
 	m_internalNodeParentIndices->create(numInternalNodes() * sizeof(int));
-	m_rootNodeIndexOnDevice = new CUDABuffer;
 	m_rootNodeIndexOnDevice->create(sizeof(int));
-	m_distanceInternalNodeFromRoot = new CUDABuffer;
 	m_distanceInternalNodeFromRoot->create(numInternalNodes() * sizeof(int));
 	
-	m_reducedMaxDistance = new CUDABuffer;
 	m_reducedMaxDistance->create(ReduceMaxBlocks * sizeof(int));
 }
+
+void CudaLinearBvh::setCombineAabbSecondBlocks(unsigned n)
+{ m_combineAabbSecondBlocks = n; }
 
 const unsigned CudaLinearBvh::numLeafNodes() const 
 { return m_numLeafNodes; }
@@ -130,11 +133,10 @@ void CudaLinearBvh::combineAabbSecond()
 	cudaMemcpy(&m_bound, pdst, sizeof(Aabb), cudaMemcpyDeviceToHost);
 }
 
-
 void CudaLinearBvh::calcLeafHash()
 {
 	void * dst = m_leafHash[0]->bufferOnDevice();
-	void * src = m_leafAabbs->bufferOnDevice();
+	void * src = leafAabbs();
 	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, numLeafNodes(), m_bound);
 	void * tmp = m_leafHash[1]->bufferOnDevice();
 	RadixSort((KeyValuePair *)dst, (KeyValuePair *)tmp, numLeafNodes(), 32);

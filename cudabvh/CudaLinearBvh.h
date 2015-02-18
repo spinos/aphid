@@ -21,15 +21,14 @@ public:
 	virtual ~CudaLinearBvh();
 	
 	void setNumLeafNodes(unsigned n);
-	void setCombineAabbSecondBlocks(unsigned n);
-	void create();
+	virtual void initOnDevice();
+	virtual void update();
 	
-	// const unsigned numPoints() const;
+	void setCombineAabbSecondBlocks(unsigned n);
+	
 	const unsigned numLeafNodes() const;
 	const unsigned numInternalNodes() const;
 	const Aabb bound() const;
-	
-	void update();
 	
 	void getRootNodeIndex(int * dst);
 	void getLeafAabbs(BaseBuffer * dst);
