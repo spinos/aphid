@@ -31,7 +31,8 @@ bvh_dbg.h \
 		CollisionObject.h \
 		TetrahedronSystem.h \
 		CudaTetrahedronSystem.h \
-		DrawBvh.h
+		DrawBvh.h \
+		CudaBroadphase.h
 SOURCES       = main.cpp \
                 glWidget.cpp \
                 window.cpp \
@@ -51,7 +52,8 @@ SOURCES       = main.cpp \
 		 CollisionObject.cpp \
 		 TetrahedronSystem.cpp \
 		 CudaTetrahedronSystem.cpp \
-		 DrawBvh.cpp
+		 DrawBvh.cpp \
+		 CudaBroadphase.cpp
 
 win32 {
     HEADERS += ../shared/gExtension.h
@@ -74,7 +76,8 @@ UI_DIR = release/ui
 
 CUSOURCES = bvh_math.cu plane.cu createBvh.cu traverseBvh.cu reduceBox.cu reduceRange.cu \
             ../radixsort/radixsort.cu \
-            particleSystem.cu
+            particleSystem.cu \
+            broadphase.cu
 macx {
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda

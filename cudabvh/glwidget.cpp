@@ -12,6 +12,7 @@
 #include "CudaLinearBvh.h"
 #include "CudaParticleSystem.h"
 #include "CudaTetrahedronSystem.h"
+#include "CudaBroadphase.h"
 #include "DrawBvh.h"
 #include "rayTest.h"
 #include "bvh_dbg.h"
@@ -109,6 +110,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_drawBvh = new DrawBvh;
 	m_drawBvh->setDrawer(getDrawer());
 	m_drawBvh->setBvh(m_tetra);
+	
+	m_broadphase = new CudaBroadphase;
+	m_broadphase->addBvh(m_tetra);
 }
 
 GLWidget::~GLWidget()
@@ -147,9 +151,7 @@ void GLWidget::clientInit()
                 m_rootNodeInd);
 #endif
 
-	m_tetra->initOnDevice();
-	m_tetra->update();
-	
+	m_broadphase->initOnDevice();
 	// connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	// connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
@@ -338,6 +340,8 @@ void GLWidget::debugDraw(unsigned rootInd, unsigned numInternal)
 
 void GLWidget::drawTetra()
 {
+	m_broadphase->update();
+	
 	glColor3f(0.f, 0.9f, 0.3f);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

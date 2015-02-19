@@ -30,8 +30,7 @@ CudaLinearBvh::CudaLinearBvh()
 	m_internalNodeParentIndices = new CUDABuffer;
 	m_rootNodeIndexOnDevice = new CUDABuffer;
 	m_distanceInternalNodeFromRoot = new CUDABuffer;
-	m_reducedMaxDistance = new CUDABuffer;
-	
+	m_reducedMaxDistance = new CUDABuffer;	
 }
 
 CudaLinearBvh::~CudaLinearBvh() {}
