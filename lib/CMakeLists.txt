@@ -1,0 +1,169 @@
+cmake_minimum_required (VERSION 2.8)
+project (aphid)
+set (CMAKE_BUILD_TYPE RELEASE)
+ADD_DEFINITIONS(-DOPENEXR_DLL -DNDEBUG -D_WIN32_WINDOWS)
+include_directories(../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit ../powell ../../ofl/shared)
+include_directories(D:/usr/boost_1_55_0 D:/usr/local/openEXR/include/OpenEXR D:/usr/libxml2/include D:/usr/HDF5/include)
+add_library(aphid STATIC D:/aphid/shared/Vector3F.cpp 
+                ../shared/Vector2F.cpp 
+                ../shared/Matrix44F.cpp 
+                ../shared/Matrix33F.cpp 
+                ../shared/Quaternion.cpp 
+                ../shared/Ray.cpp 
+                ../shared/RayIntersectionContext.cpp 
+                ../shared/IntersectionContext.cpp 
+                ../shared/BaseCamera.cpp 
+                ../shared/PerspectiveCamera.cpp 
+                ../shared/BaseDrawer.cpp 
+                ../shared/KdTreeDrawer.cpp 
+                ../shared/SpaceHandle.cpp 
+                ../shared/TypedEntity.cpp 
+				../shared/NamedEntity.cpp 
+				../shared/BaseTransform.cpp 
+                ../shared/Geometry.cpp 
+                ../shared/BaseMesh.cpp 
+				../shared/PlaneMesh.cpp 
+                ../shared/TriangleMesh.cpp 
+                ../shared/Triangle.cpp 
+                ../shared/GeoElement.cpp 
+                ../shared/Vertex.cpp 
+                ../shared/Edge.cpp 
+                ../shared/Facet.cpp 
+                ../shared/BaseField.cpp 
+                ../shared/BaseDeformer.cpp 
+    ../shared/SkeletonSubspaceDeformer.cpp 
+                ../shared/KdTreeNode.cpp 
+                ../shared/Primitive.cpp 
+                ../shared/PrimitiveFilter.cpp 
+                ../shared/BuildKdTreeContext.cpp 
+                ../shared/KdTreeNodeArray.cpp 
+                ../shared/KdTree.cpp 
+                ../shared/PrimitiveArray.cpp 
+                ../shared/IndexArray.cpp 
+                ../shared/BaseArray.cpp 
+                ../shared/ClassificationStorage.cpp 
+                ../shared/KdTreeBuilder.cpp 
+                ../shared/SplitEvent.cpp 
+                ../shared/MinMaxBins.cpp 
+                ../shared/BuildKdTreeStream.cpp 
+                ../shared/IndexList.cpp 
+                ../shared/BoundingBoxList.cpp 
+                ../shared/SelectionArray.cpp 
+                ../shared/ComponentConversion.cpp 
+                ../shared/BarycentricCoordinate.cpp 
+                ../shared/EasemodelUtil.cpp 
+                ../shared/GeodesicSphereMesh.cpp 
+                ../shared/PyramidMesh.cpp 
+                ../shared/CubeMesh.cpp 
+				../shared/DiscMesh.cpp 
+                ../shared/AnchorGroup.cpp 
+                ../shared/BaseCurve.cpp 
+                ../shared/VertexPath.cpp 
+                ../shared/MeshTopology.cpp 
+                ../shared/PatchMesh.cpp 
+                                ../shared/BezierCurve.cpp 
+                                ../shared/ToolContext.cpp 
+                                ../shared/BiLinearInterpolate.cpp 
+                                ../shared/LinearInterpolate.cpp 
+                ../shared/Plane.cpp 
+                ../shared/PointInsidePolygonTest.cpp 
+                                ../shared/AccPatchMesh.cpp 
+								../shared/PatchNeighborRec.cpp 
+								../shared/PatchTexture.cpp 
+                                ../shared/CircleCurve.cpp 
+                                ../shared/InverseBilinearInterpolate.cpp 
+                                ../shared/Segment.cpp 
+                                ../shared/Patch.cpp 
+                                ../shared/BaseBrush.cpp 
+                                ../shared/QuickSort.cpp 
+                                ../shared/GLight.cpp 
+                                ../shared/GMaterial.cpp 
+                                ../shared/GProfile.cpp 
+                                ../shared/BaseTessellator.cpp 
+                                ../shared/CollisionRegion.cpp 
+                                ../shared/DrawBuffer.cpp 
+                                ../shared/BlockDrawBuffer.cpp 
+                ../shared/BaseScene.cpp 
+    ../shared/BoundingBox.cpp 
+    ../shared/BoundingRectangle.cpp 
+    ../shared/HObject.cpp 
+    ../shared/HDocument.cpp 
+    ../shared/HGroup.cpp 
+    ../shared/HDataset.cpp 
+    ../shared/HAttribute.cpp 
+    ../shared/VerticesHDataset.cpp 
+    ../shared/IndicesHDataset.cpp 
+        ../shared/FloatsHDataset.cpp 
+    ../shared/HIntAttribute.cpp 
+    ../shared/HFloatAttribute.cpp 
+    ../shared/HStringAttribute.cpp 
+    ../shared/HCharData.cpp 
+    ../shared/HBase.cpp 
+    ../shared/HWorld.cpp 
+    ../shared/HMesh.cpp 
+    ../shared/BaseImage.cpp 
+    ../shared/zEXRImage.cpp 
+        ../shared/BaseFile.cpp 
+    ../shared/BakeDeformer.cpp 
+    ../shared/PlaybackControl.cpp 
+    ../shared/CacheFile.cpp 
+    ../shared/BaseState.cpp 
+    ../shared/HFile.cpp 
+    ../shared/HRFile.cpp 
+    ../shared/TransformManipulator.cpp 
+    ../shared/MeshManipulator.cpp 
+	../shared/SkeletonJoint.cpp 
+	../shared/SkeletonSystem.cpp 
+	../shared/SkeletonPose.cpp 
+	../shared/LineBuffer.cpp 
+	../shared/SelectCondition.cpp 
+    ../shared/FloodCondition.cpp 
+	../shared/ActiveRegion.cpp 
+	../shared/AccPatchGroup.cpp 
+	../shared/VertexDataGroup.cpp 
+	../shared/BezierPatchHirarchy.cpp 
+	../shared/KMeansClustering.cpp 
+	../shared/BaseSphere.cpp 
+	../shared/PseudoNoise.cpp 
+	../shared/BaseServer.cpp 
+    ../shared/BaseClient.cpp 
+	../shared/RenderEngine.cpp 
+	../shared/AdaptableStripeBuffer.cpp 
+	../shared/BlockStripeBuffer.cpp 
+	../shared/LODFn.cpp 
+	../shared/NoisePlot.cpp 
+	../shared/FractalPlot.cpp 
+	../shared/BaseLight.cpp 
+	../shared/DistantLight.cpp 
+	../shared/PointLight.cpp 
+	../shared/SquareLight.cpp 
+../shared/LightGroup.cpp 
+../shared/LineDrawer.cpp 
+../shared/MeshDrawer.cpp 
+../shared/GeoDrawer.cpp 
+../shared/LightDrawer.cpp 
+../shared/RenderOptions.cpp 
+../shared/SelectionContext.cpp 
+../shared/BaseTexture.cpp 
+../shared/TextureGroup.cpp 
+../shared/ColorBlend.cpp 
+../shared/TexturePainter.cpp 
+../shared/BaseShader.cpp 
+../shared/ShaderGroup.cpp 
+../shared/RayMarch.cpp 
+../shared/GLHUD.cpp 
+                                ../lapl/VertexAdjacency.cpp 
+                ../lapl/Anchor.cpp 
+                ../catmullclark/BaseQuad.cpp 
+                ../catmullclark/LODQuad.cpp 
+                ../catmullclark/accPatch.cpp 
+                ../catmullclark/accStencil.cpp 
+                ../catmullclark/bezierPatch.cpp 
+                ../catmullclark/tessellator.cpp 
+                ../catmullclark/AccCorner.cpp 
+                ../catmullclark/AccEdge.cpp 
+                ../catmullclark/AccInterior.cpp 
+                ../catmullclark/BezierDrawer.cpp 
+				../powell/PowellMethod.cpp 
+				../powell/BaseFunction.cpp)
+

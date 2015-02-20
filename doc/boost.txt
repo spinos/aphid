@@ -1,0 +1,3 @@
+build boost with 64-bit address model
+
+.\b2 -q toolset=msvc variant=release address-model=64 threading=multi --with-system --with-date_time --with-regex --with-filesystem --with-thread ...

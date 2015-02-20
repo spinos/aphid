@@ -1,4 +1,4 @@
-CONFIG -= app_bundle
+macx:CONFIG -= app_bundle
 CONFIG += release
 message(QMAKE with CUDA)
 INCLUDEPATH += ./ ../shared ../radixsort
@@ -19,7 +19,7 @@ bvh_dbg.h \
         reduce_common.h \
 		reduceBox_implement.h \
 		reduceRange_implement.h \
-		particleSystem_implement.h \
+		particleSystem_implement.h \                                                                                 
 		../radixsort/radixsort_implement.h \
                 ../shared/CudaBase.h \
                 ../shared/Base3DView.h \
@@ -58,8 +58,9 @@ SOURCES       = main.cpp \
 win32 {
     HEADERS += ../shared/gExtension.h
     SOURCES += ../shared/gExtension.cpp
-    INCLUDEPATH += D:/usr/boost_1_51_0 /usr/local/include/OpenEXR
-    QMAKE_LIBDIR += D:/usr/boost_1_51_0/stage/lib D:/usr/local/openEXR/lib
+    INCLUDEPATH += D:/usr/boost_1_55_0 /usr/local/include/OpenEXR
+    LIBS += -LD:/usr/local/openEXR/lib
+    LIBS += -LD:/usr/boost_1_55_0/stage/lib
     CONFIG += console
 }
 macx {
@@ -103,6 +104,11 @@ win32 {
 CUDA_CC =D:/usr/cuda4/v4.0/bin/nvcc.exe
 CUDA_DIR = D:/usr/cuda4/v4.0
 CUDA_DEV = "D:/usr/cuda4_sdk/C"
+
+CUDA_CC =C:/CUDA/bin64/nvcc.exe
+CUDA_DIR = C:/CUDA
+CUDA_DEV = "C:/ProgramData/NVIDIA Corporation/NVIDIA GPU Computing SDK/C"
+
 CUDA_COMMON = $$CUDA_DEV/common
 CUDA_INC_PATH = $$CUDA_DIR/include
 message("nvcc resides in :" $$CUDA_CC)

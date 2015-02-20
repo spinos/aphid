@@ -1,6 +1,6 @@
 TEMPLATE = lib
 DESTDIR = ./
-CONFIG += staticlib thread release
+CONFIG += staticlib release
 CONFIG   -= qt
 PARENTPROJ = ..
 SHAREDDIR = ../shared
