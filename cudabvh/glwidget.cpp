@@ -49,13 +49,14 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	qDebug()<<"num ray tests "<<(IRAYDIM * IRAYDIM);
 	
 	m_tetra = new CudaTetrahedronSystem;
-	m_tetra->create(1200, 1.f, 1.f);
+	m_tetra->create(2200, 1.f, 1.f);
 	
 	float * hv = &m_tetra->hostV()[0];
 	
+	const unsigned grdx = 43;
 	for(j=0; j < 32; j++) {
-		for(i=0; i<32; i++) {
-			Vector3F base(2.f * i, 2.f * j, 2.f);
+		for(i=0; i<grdx; i++) {
+			Vector3F base(2.f * i, 2.f * j, 0.5f * i);
 			Vector3F right = base + Vector3F(1.75f, 0.f, 0.f);
 			Vector3F front = base + Vector3F(0.f, 0.f, 1.75f);
 			Vector3F top = base + Vector3F(0.f, 1.75f, 0.f);
@@ -81,7 +82,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 			hv[2] = 25.f * (((float)(rand() % 199))/199.f - .5f);
 			hv+=3;
 
-			unsigned b = (j * 32 + i) * 4;
+			unsigned b = (j * grdx + i) * 4;
 			m_tetra->addTetrahedron(b, b+1, b+2, b+3);
 			
 			m_tetra->addTriangle(b, b+2, b+1);
@@ -152,6 +153,8 @@ void GLWidget::clientInit()
 #endif
 
 	m_broadphase->initOnDevice();
+	// m_broadphase->update();
+	
 	// connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	// connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
@@ -342,7 +345,7 @@ void GLWidget::drawTetra()
 {
 	m_broadphase->update();
 	
-	glColor3f(0.f, 0.9f, 0.3f);
+	glColor3f(0.1f, 0.4f, 0.3f);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
@@ -354,7 +357,8 @@ void GLWidget::drawTetra()
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
 	glColor3f(0.2f, 0.2f, 0.3f);
-    m_drawBvh->bound();
+    
+	m_drawBvh->bound();
 	m_drawBvh->leaf();
 	m_drawBvh->hash();
 	m_drawBvh->hierarch();

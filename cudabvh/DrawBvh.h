@@ -23,6 +23,8 @@ public:
 	void leaf();
 	void hash();
 	void hierarch();
+	
+	void printHash();
 private:
 	GeoDrawer * m_drawer;
 	CudaLinearBvh * m_bvh;

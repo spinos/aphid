@@ -45,7 +45,7 @@ void DrawBvh::bound()
 	bb.setMin(ab.low.x, ab.low.y, ab.low.z);
 	bb.setMax(ab.high.x, ab.high.y, ab.high.z);
 	
-    m_drawer->boundingBox(bb);
+	m_drawer->boundingBox(bb);
 }
 
 void DrawBvh::leaf()
@@ -178,3 +178,13 @@ void DrawBvh::hierarch()
 	}
 	
 }
+
+void DrawBvh::printHash()
+{
+    m_displayLeafHash->create(m_bvh->numLeafNodes() * sizeof(KeyValuePair));
+	m_bvh->getLeafHash(m_displayLeafHash);
+	KeyValuePair * leafHash = (KeyValuePair *)m_displayLeafHash->data();
+	for(unsigned i=0; i< m_bvh->numLeafNodes(); i++)
+	    std::cout<<" "<<i<<" "<<leafHash[i].key<<" "<<leafHash[i].value<<" ";
+}
+

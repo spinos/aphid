@@ -10,6 +10,7 @@ int CudaBase::MaxThreadPerBlock = 512;
 int CudaBase::MaxRegisterPerBlock = 8192;
 int CudaBase::MaxSharedMemoryPerBlock = 16384;
 int CudaBase::WarpSize = 32;
+int CudaBase::RuntimeVersion = 4000;
 
 CudaBase::CudaBase()
 {
@@ -58,6 +59,7 @@ char CudaBase::CheckCUDevice()
             MaxRegisterPerBlock = deviceProp.regsPerBlock;
             MaxSharedMemoryPerBlock = deviceProp.sharedMemPerBlock;
 			WarpSize = deviceProp.warpSize;
+			RuntimeVersion = runtimeVersion;
         return 1;               
     }
     return 0;
@@ -71,7 +73,7 @@ void CudaBase::SetDevice()
 
 int CudaBase::LimitNThreadPerBlock(int regPT, int memPT)
 {
-    int tpb = MaxThreadPerBlock;
+	int tpb = MaxThreadPerBlock;
     const int byReg = MaxRegisterPerBlock / regPT;
     const int byMem = MaxSharedMemoryPerBlock / memPT;
     if(byReg < tpb) tpb = byReg;

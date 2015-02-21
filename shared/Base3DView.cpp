@@ -173,7 +173,7 @@ void Base3DView::resizeGL(int width, int height)
 
 //! [9]
 void Base3DView::mousePressEvent(QMouseEvent *event)
-{
+{	
     m_lastPos = event->pos();
     if(event->modifiers() == Qt::AltModifier) 
         return;

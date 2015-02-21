@@ -267,7 +267,7 @@ extern "C" void bvhReduceAabbByPoints(Aabb *dst, float3 *src, unsigned numPoints
 {
 	dim3 dimBlock(numThreads, 1, 1);
     dim3 dimGrid(numBlocks, 1, 1);
-	int smemSize = (numThreads <= 2) ? 2 * numThreads * sizeof(Aabb) : numThreads * sizeof(Aabb);
+	int smemSize = (numThreads < 2) ? 2 * numThreads * sizeof(Aabb) : numThreads * sizeof(Aabb);
 	
 	if (isPow2(numPoints)) {
 		switch (numThreads)

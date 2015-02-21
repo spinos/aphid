@@ -49,7 +49,13 @@ void BvhSolver::stepPhysics(float dt)
 	m_ray->update();
 	m_particles->update(dt);
 #ifdef BVHSOLVER_DBG_DRAW
+
+#ifdef CUDA_V3
+    cudaThreadSynchronize();
+#else
     cudaDeviceSynchronize();
+#endif
+
     sendDataToHost();
 #endif
 	m_isValid = 1;

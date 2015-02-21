@@ -46,7 +46,7 @@ public:
 	
 private:
     void combineAabb();
-	void calcLeafHash();
+	void computeAndSortLeafHash();
 	void buildInternalTree();
 	void findMaxDistanceFromRoot();
 	void formInternalTreeAabbsIterative();
