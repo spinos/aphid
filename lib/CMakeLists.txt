@@ -1,10 +1,14 @@
 cmake_minimum_required (VERSION 2.8)
 project (aphid)
 set (CMAKE_BUILD_TYPE RELEASE)
-ADD_DEFINITIONS(-DOPENEXR_DLL -DNDEBUG -D_WIN32_WINDOWS)
 include_directories(../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit ../powell ../../ofl/shared)
+IF (WIN32)
 include_directories(D:/usr/boost_1_55_0 D:/usr/local/openEXR/include/OpenEXR D:/usr/libxml2/include D:/usr/HDF5/include)
-add_library(aphid STATIC D:/aphid/shared/Vector3F.cpp 
+ADD_DEFINITIONS(-DOPENEXR_DLL -DNDEBUG -D_WIN32_WINDOWS)
+ELSE ()
+include_directories(../../Library/boost_1_55_0 ../../Library/hdf5/include /usr/local/include/OpenEXR)
+ENDIF()
+add_library(aphid STATIC ../shared/Vector3F.cpp 
                 ../shared/Vector2F.cpp 
                 ../shared/Matrix44F.cpp 
                 ../shared/Matrix33F.cpp 
