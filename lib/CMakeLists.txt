@@ -107,7 +107,8 @@ add_library(aphid STATIC ../shared/Vector3F.cpp
     ../shared/HMesh.cpp 
     ../shared/BaseImage.cpp 
     ../shared/zEXRImage.cpp 
-        ../shared/BaseFile.cpp 
+        ../shared/BaseFile.cpp
+    ../shared/BaseFileGroup.cpp
     ../shared/BakeDeformer.cpp 
     ../shared/PlaybackControl.cpp 
     ../shared/CacheFile.cpp 
