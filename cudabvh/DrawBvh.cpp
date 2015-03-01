@@ -10,6 +10,7 @@
 #include "DrawBvh.h"
 #include <GeoDrawer.h>
 #include "CudaLinearBvh.h"
+#include "CudaBroadphase.h"
 #include <BaseBuffer.h>
 #include "bvh_common.h"
 #include <radixsort_implement.h>
@@ -21,6 +22,7 @@ DrawBvh::DrawBvh()
 	m_displayLeafHash = new BaseBuffer;
 	m_displayInternalDistance = new BaseBuffer;
 	m_internalChildIndices = new BaseBuffer;
+	m_pairCounts = new BaseBuffer;
 	m_displayLevel = 3;
 }
 
@@ -31,6 +33,9 @@ void DrawBvh::setDrawer(GeoDrawer * drawer)
 
 void DrawBvh::setBvh(CudaLinearBvh * bvh)
 { m_bvh = bvh; }
+
+void DrawBvh::setBroadphase(CudaBroadphase * broadphase)
+{ m_broadphase = broadphase; }
 
 void DrawBvh::addDispalyLevel()
 { m_displayLevel++; }
@@ -188,3 +193,13 @@ void DrawBvh::printHash()
 	    std::cout<<" "<<i<<" "<<leafHash[i].key<<" "<<leafHash[i].value<<" ";
 }
 
+void DrawBvh::printPairCounts()
+{
+	const unsigned nb = m_broadphase->numBoxes();
+	m_pairCounts->create(nb * sizeof(unsigned));
+	m_broadphase->getOverlappingPairCounts(m_pairCounts);
+	
+	unsigned * count = (unsigned *)m_pairCounts->data();
+	for(unsigned i=0; i < nb; i++)
+		std::cout<<" "<<i<<" "<<count[i]<<" ";
+}

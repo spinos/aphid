@@ -14,6 +14,9 @@ public:
 	CudaBroadphase();
 	virtual ~CudaBroadphase();
 	
+	const unsigned numBoxes() const;
+	void getOverlappingPairCounts(BaseBuffer * dst);
+	
 	void addBvh(CudaLinearBvh * bvh);
 	void initOnDevice();
 	void update();

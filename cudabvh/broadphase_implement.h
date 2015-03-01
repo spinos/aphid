@@ -8,9 +8,16 @@
  */
 
 #include "bvh_common.h"
+#include <radixsort_implement.h>
 
 extern "C" {
 
 void broadphaseResetPairCounts(uint * dst, uint num);
-
+void broadphaseComputePairCounts(uint * dst, Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								int isSelfCollision);
 }

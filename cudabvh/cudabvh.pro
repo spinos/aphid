@@ -137,5 +137,5 @@ cuda.commands = $$CUDA_CC \
     -o \
     ${QMAKE_FILE_OUT} # Note the -O0
 QMAKE_EXTRA_COMPILERS += cuda
-DEFINES += CUDA_V3
+## DEFINES += CUDA_V3
 

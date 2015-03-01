@@ -9,6 +9,7 @@
 class GeoDrawer;
 class CudaLinearBvh;
 class BaseBuffer;
+class CudaBroadphase;
 class DrawBvh {
 public:
 	DrawBvh();
@@ -16,6 +17,7 @@ public:
 	
 	void setDrawer(GeoDrawer * drawer);
 	void setBvh(CudaLinearBvh * bvh);
+	void setBroadphase(CudaBroadphase * broadphase);
 	void addDispalyLevel();
 	void minusDispalyLevel();
 	
@@ -25,14 +27,17 @@ public:
 	void hierarch();
 	
 	void printHash();
+	void printPairCounts();
 private:
 	GeoDrawer * m_drawer;
 	CudaLinearBvh * m_bvh;
+	CudaBroadphase * m_broadphase;
 	BaseBuffer * m_displayLeafAabbs;
 	BaseBuffer * m_displayInternalAabbs;
 	BaseBuffer * m_displayInternalDistance;
 	BaseBuffer * m_displayLeafHash;
 	BaseBuffer * m_internalChildIndices;
+	BaseBuffer * m_pairCounts;
 	int m_hostRootNodeInd;
 	int m_displayLevel;
 };

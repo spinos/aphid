@@ -96,8 +96,7 @@ __global__ void rayTraverseIterative_kernel(RayInfo * rays,
 		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
 
 		if( rayIntersectsAabb(rayFrom, rayLength, rayNormalizedDirection, bvhNodeAabb, testDistance.x, testDistance.y)  )
-		{    
-		    
+		{     
 			if(isLeaf)
 			{
 			    if(testDistance.y < minHitDistanct) minHitDistanct = testDistance.y;

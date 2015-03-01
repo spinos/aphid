@@ -18,6 +18,12 @@ CudaBroadphase::CudaBroadphase()
 
 CudaBroadphase::~CudaBroadphase() {}
 
+const unsigned CudaBroadphase::numBoxes() const
+{ return m_numBoxes; }
+
+void CudaBroadphase::getOverlappingPairCounts(BaseBuffer * dst)
+{ m_pairCounts->deviceToHost(dst->data(), m_pairCounts->bufferSize()); }
+
 void CudaBroadphase::addBvh(CudaLinearBvh * bvh)
 {
 	if(m_numObjects==CUDABROADPHASE_MAX_NUMOBJECTS) return;
@@ -64,4 +70,24 @@ void CudaBroadphase::countOverlappingPairs(unsigned a, unsigned b)
 {
 	uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
+	
+	CudaLinearBvh * query = m_objects[a];
+	CudaLinearBvh * tree = m_objects[b];
+	
+	void * boxes = (Aabb *)query->leafAabbs();
+	const unsigned numBoxes = query->numLeafNodes();
+	
+	void * rootNodeIndex = tree->rootNodeIndex();
+	void * internalNodeChildIndex = tree->internalNodeChildIndices();
+	void * internalNodeAabbs = tree->internalNodeAabbs();
+	void * leafNodeAabbs = tree->leafAabbs();
+	void * mortonCodesAndAabbIndices = tree->leafHash();
+	
+	broadphaseComputePairCounts(counts, (Aabb *)boxes, numBoxes,
+							(int *)rootNodeIndex, 
+							(int2 *)internalNodeChildIndex, 
+							(Aabb *)internalNodeAabbs, 
+							(Aabb *)leafNodeAabbs,
+							(KeyValuePair *)mortonCodesAndAabbIndices,
+							(a == b));							
 }

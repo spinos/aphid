@@ -114,6 +114,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_broadphase = new CudaBroadphase;
 	m_broadphase->addBvh(m_tetra);
+	
+	m_drawBvh->setBroadphase(m_broadphase);
 }
 
 GLWidget::~GLWidget()
@@ -153,7 +155,9 @@ void GLWidget::clientInit()
 #endif
 
 	m_broadphase->initOnDevice();
+	
 	// m_broadphase->update();
+	// m_drawBvh->printPairCounts();
 	
 	// connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	// connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
