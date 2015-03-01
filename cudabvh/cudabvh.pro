@@ -32,7 +32,9 @@ bvh_dbg.h \
 		TetrahedronSystem.h \
 		CudaTetrahedronSystem.h \
 		DrawBvh.h \
-		CudaBroadphase.h
+		CudaBroadphase.h \
+		broadphase_implement.h \
+		scan_implement.h
 SOURCES       = main.cpp \
                 glWidget.cpp \
                 window.cpp \
@@ -78,7 +80,8 @@ UI_DIR = release/ui
 CUSOURCES = bvh_math.cu plane.cu createBvh.cu traverseBvh.cu reduceBox.cu reduceRange.cu \
             ../radixsort/radixsort.cu \
             particleSystem.cu \
-            broadphase.cu
+            broadphase.cu \
+            scan.cu
 macx {
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda
