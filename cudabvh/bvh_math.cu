@@ -2,6 +2,10 @@
 #define _BVH_MATH_H_
 #include "bvh_common.h"
 
+template<typename T>
+inline __device__ void ascent(T in)
+{}
+
 inline __device__ uint combineObjectElementInd(uint objectIdx, uint elementIdx)
 { return (objectIdx<<24 | elementIdx); }
 

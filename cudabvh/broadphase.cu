@@ -124,7 +124,6 @@ __global__ void writePairCache_kernel(uint2 * dst, uint * cacheStarts, uint * ov
 			        dst[writeLoc].y = combineObjectElementInd(treeIdx, bvhRigidIndex);
                     writeLoc++;
 			    }
-			    
 			    //if((writeLoc - startLoc)==cacheSize) { // cache if full
 			    //    return;
 			    //}
