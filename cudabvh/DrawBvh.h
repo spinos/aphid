@@ -38,6 +38,7 @@ private:
 	BaseBuffer * m_displayLeafHash;
 	BaseBuffer * m_internalChildIndices;
 	BaseBuffer * m_pairCounts;
+	BaseBuffer * m_scanCounts;
 	int m_hostRootNodeInd;
 	int m_displayLevel;
 };

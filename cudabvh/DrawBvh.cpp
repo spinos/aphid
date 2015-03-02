@@ -23,6 +23,7 @@ DrawBvh::DrawBvh()
 	m_displayInternalDistance = new BaseBuffer;
 	m_internalChildIndices = new BaseBuffer;
 	m_pairCounts = new BaseBuffer;
+	m_scanCounts = new BaseBuffer;
 	m_displayLevel = 3;
 }
 
@@ -199,7 +200,12 @@ void DrawBvh::printPairCounts()
 	m_pairCounts->create(nb * sizeof(unsigned));
 	m_broadphase->getOverlappingPairCounts(m_pairCounts);
 	
+	m_scanCounts->create(nb * sizeof(unsigned));
+	m_broadphase->getScanCounts(m_scanCounts);
+	
 	unsigned * count = (unsigned *)m_pairCounts->data();
+	unsigned * sum = (unsigned *)m_scanCounts->data();
+	
 	for(unsigned i=0; i < nb; i++)
-		std::cout<<" "<<i<<" "<<count[i]<<" ";
+		std::cout<<" "<<i<<" "<<count[i]<<" "<<sum[i]<<" ";
 }

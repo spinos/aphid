@@ -219,12 +219,4 @@ extern "C" void scanExclusive(
     // cutilSafeCall( 
     cudaFree(d_intermediate);
     //);
-    
-// get the number of valid elements by adding up last count and its prefix_sum
-// need access to device memory
-    // thrust::device_ptr<uint>dp_scanMerge(d_Dst);
-    // thrust::device_ptr<uint>dp_count(d_Src);
-    // uint num_scan = dp_scanMerge[batchSize * arrayLength-1] + dp_count[batchSize * arrayLength-1];
-    
-    // return num_scan;
 }

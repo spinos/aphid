@@ -6,14 +6,19 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+#include <BaseBuffer.h>
 #include <CUDABuffer.h>
 #include "CudaLinearBvh.h"
 #include "CudaBroadphase.h"
 #include "broadphase_implement.h"
+#include "scan_implement.h"
 CudaBroadphase::CudaBroadphase() 
 {
 	m_numObjects = 0;
 	m_pairCounts = new CUDABuffer;
+	m_scanCounts = new CUDABuffer;
+	m_hostPairCounts = new BaseBuffer;
+	m_hostScanCounts = new BaseBuffer;
 }
 
 CudaBroadphase::~CudaBroadphase() {}
@@ -22,7 +27,10 @@ const unsigned CudaBroadphase::numBoxes() const
 { return m_numBoxes; }
 
 void CudaBroadphase::getOverlappingPairCounts(BaseBuffer * dst)
-{ m_pairCounts->deviceToHost(dst->data(), m_pairCounts->bufferSize()); }
+{ m_pairCounts->deviceToHost(dst->data(), dst->bufferSize()); }
+
+void CudaBroadphase::getScanCounts(BaseBuffer * dst)
+{ m_scanCounts->deviceToHost(dst->data(), dst->bufferSize()); }
 
 void CudaBroadphase::addBvh(CudaLinearBvh * bvh)
 {
@@ -43,7 +51,11 @@ void CudaBroadphase::initOnDevice()
 			m_objectStart[i+1] = m_numBoxes;
 		}
 	}
-	m_pairCounts->create(m_numBoxes * 4);
+	m_scanBufferLength = iDivUp(m_numBoxes, 1024) * 1024;
+	m_pairCounts->create(m_scanBufferLength * 4);
+	m_scanCounts->create(m_scanBufferLength * 4);
+	m_hostPairCounts->create(m_scanBufferLength * 4);
+	m_hostScanCounts->create(m_scanBufferLength * 4);
 }
 
 void CudaBroadphase::update()
@@ -59,11 +71,16 @@ void CudaBroadphase::update()
 			countOverlappingPairs(j, i);
 		}
 	}
+	prefixSumPairCounts();
+	
+	const unsigned n = numOverlappings();
+	if(n < 1) return;
+	
 }
 
 void CudaBroadphase::resetPairCounts()
 {
-	broadphaseResetPairCounts((uint *)m_pairCounts->bufferOnDevice(), m_numBoxes);
+	broadphaseResetPairCounts((uint *)m_pairCounts->bufferOnDevice(), m_scanBufferLength);
 }
 
 void CudaBroadphase::countOverlappingPairs(unsigned a, unsigned b)
@@ -91,3 +108,20 @@ void CudaBroadphase::countOverlappingPairs(unsigned a, unsigned b)
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							(a == b));							
 }
+
+void CudaBroadphase::prefixSumPairCounts()
+{
+    void * scanInput = m_pairCounts->bufferOnDevice();
+    void * scanResult = m_scanCounts->bufferOnDevice();
+    scanExclusive((uint *)scanResult, (uint *)scanInput, m_scanBufferLength / 1024, 1024);
+}
+
+unsigned CudaBroadphase::numOverlappings()
+{
+    m_pairCounts->deviceToHost(m_hostPairCounts->data(), m_pairCounts->bufferSize());
+    m_scanCounts->deviceToHost(m_hostScanCounts->data(), m_scanCounts->bufferSize());
+    unsigned * a = (unsigned *)m_hostPairCounts->data();
+    unsigned * b = (unsigned *)m_hostScanCounts->data();
+    return a[m_scanBufferLength - 1] + b[m_scanBufferLength - 1];   
+}
+
