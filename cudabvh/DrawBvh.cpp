@@ -254,13 +254,18 @@ void DrawBvh::pairs()
 	unsigned * pc = (unsigned *)m_pairCache->data();
 	
 	Vector3F a, b;
+	unsigned objectI;
 	for(i=0; i < cacheLength; i++) {
-	    abox = boxes[extractElementInd(pc[i * 2])];
+	    objectI = extractObjectInd(pc[i * 2]);
+	    abox = boxes[m_broadphase->objectStart(objectI) + extractElementInd(pc[i * 2])];
 	    a.set(abox.low.x +abox.high.x, abox.low.y +abox.high.y, abox.low.z +abox.high.z);
 	    a *= 0.5f;
-	    abox = boxes[extractElementInd(pc[i * 2 + 1])];
+	    
+	    objectI = extractObjectInd(pc[i * 2 + 1]);
+	    abox = boxes[m_broadphase->objectStart(objectI) + extractElementInd(pc[i * 2 + 1])];
 	    b.set(abox.low.x +abox.high.x, abox.low.y +abox.high.y, abox.low.z +abox.high.z);
 	    b *= 0.5f;
+	    
 	    m_drawer->arrow(a, b);
 	}
 }

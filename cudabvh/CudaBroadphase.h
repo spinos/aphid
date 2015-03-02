@@ -17,6 +17,7 @@ public:
 	
 	const unsigned numBoxes() const;
 	const unsigned pairCacheLength() const;
+	const unsigned objectStart(unsigned ind) const;
 	void getOverlappingPairCounts(BaseBuffer * dst);
 	void getOverlappingPairCache(BaseBuffer * dst);
 	void getScanCounts(BaseBuffer * dst);

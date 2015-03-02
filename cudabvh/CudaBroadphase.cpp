@@ -31,6 +31,9 @@ const unsigned CudaBroadphase::numBoxes() const
 const unsigned CudaBroadphase::pairCacheLength() const
 { return m_pairCacheLength; }
 
+const unsigned CudaBroadphase::objectStart(unsigned ind) const
+{ return m_objectStart[ind]; }
+
 void CudaBroadphase::getOverlappingPairCounts(BaseBuffer * dst)
 { m_pairCounts->deviceToHost(dst->data(), dst->bufferSize()); }
 
