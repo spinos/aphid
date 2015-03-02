@@ -62,24 +62,24 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 			Vector3F top = base + Vector3F(0.f, 1.75f, 0.f);
 			
 			m_tetra->addPoint(&base.x);
-			hv[0] = 20.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 20.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[2] = 23.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = 30.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 30.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[2] = 33.f * (((float)(rand() % 199))/199.f - .5f);
 			hv+=3;
 			m_tetra->addPoint(&right.x);
-			hv[0] = 20.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 28.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[2] = 25.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = 30.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 38.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[2] = 35.f * (((float)(rand() % 199))/199.f - .5f);
 			hv+=3;
 			m_tetra->addPoint(&top.x);
-			hv[0] = 20.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 28.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[2] = 25.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = 30.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 38.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[2] = 35.f * (((float)(rand() % 199))/199.f - .5f);
 			hv+=3;
 			m_tetra->addPoint(&front.x);
-			hv[0] = 20.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 28.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[2] = 25.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = 30.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 38.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[2] = 35.f * (((float)(rand() % 199))/199.f - .5f);
 			hv+=3;
 
 			unsigned b = (j * grdx + i) * 4;
@@ -364,8 +364,9 @@ void GLWidget::drawTetra()
     
 	m_drawBvh->bound();
 	m_drawBvh->leaf();
-	m_drawBvh->hash();
-	m_drawBvh->hierarch();
+	// m_drawBvh->hash();
+	// m_drawBvh->hierarch();
+	m_drawBvh->pairs();
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

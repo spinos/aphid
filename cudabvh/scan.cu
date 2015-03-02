@@ -184,6 +184,7 @@ mergeScanGroups(uint *in, uint *element, uint *out)
 extern "C" void scanExclusive(
     uint *d_Dst,
     uint *d_Src,
+    uint *d_intermediate,
     uint batchSize,
     uint arrayLength
 )
@@ -191,21 +192,16 @@ extern "C" void scanExclusive(
     //Check power-of-two factorization
     uint log2L;
     uint factorizationRemainder = factorRadix2(log2L, arrayLength);
-    assert( factorizationRemainder == 1 );
+    // assert( factorizationRemainder == 1 );
 
     //Check supported size range
-    assert( (arrayLength >= MIN_SHORT_ARRAY_SIZE) && (arrayLength <= MAX_SHORT_ARRAY_SIZE) );
+    // assert( (arrayLength >= MIN_SHORT_ARRAY_SIZE) && (arrayLength <= MAX_SHORT_ARRAY_SIZE) );
 
     //Check total batch size limit
-    assert( (batchSize * arrayLength) <= MAX_BATCH_ELEMENTS );
+    // assert( (batchSize * arrayLength) <= MAX_BATCH_ELEMENTS );
 
     //Check all threadblocks to be fully packed with data
-    assert( (batchSize * arrayLength) % (4 * THREADBLOCK_SIZE) == 0 );
-
-    uint *d_intermediate;
-    // cutilSafeCall( 
-        cudaMalloc((void **)&d_intermediate, sizeof(uint) * (batchSize * arrayLength) );
-        //);
+    // assert( (batchSize * arrayLength) % (4 * THREADBLOCK_SIZE) == 0 );
     
     scanExclusiveShared<<<(batchSize * arrayLength) / (4 * THREADBLOCK_SIZE), THREADBLOCK_SIZE>>>(
         (uint4 *)d_intermediate,
@@ -214,9 +210,4 @@ extern "C" void scanExclusive(
     );
     
     mergeScanGroups<<<(batchSize * arrayLength)/32, 32>>>(d_intermediate, d_Src, d_Dst);
-    
-    
-    // cutilSafeCall( 
-    cudaFree(d_intermediate);
-    //);
 }

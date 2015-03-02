@@ -12,13 +12,15 @@
 #include "CudaBroadphase.h"
 #include "broadphase_implement.h"
 #include "scan_implement.h"
+#include <CudaBase.h>
 CudaBroadphase::CudaBroadphase() 
 {
 	m_numObjects = 0;
+	m_pairCacheLength = 0;
 	m_pairCounts = new CUDABuffer;
-	m_scanCounts = new CUDABuffer;
-	m_hostPairCounts = new BaseBuffer;
-	m_hostScanCounts = new BaseBuffer;
+	m_pairStart = new CUDABuffer;
+	m_scanIntermediate = new CUDABuffer;
+	m_pairCache = new CUDABuffer;
 }
 
 CudaBroadphase::~CudaBroadphase() {}
@@ -26,11 +28,17 @@ CudaBroadphase::~CudaBroadphase() {}
 const unsigned CudaBroadphase::numBoxes() const
 { return m_numBoxes; }
 
+const unsigned CudaBroadphase::pairCacheLength() const
+{ return m_pairCacheLength; }
+
 void CudaBroadphase::getOverlappingPairCounts(BaseBuffer * dst)
 { m_pairCounts->deviceToHost(dst->data(), dst->bufferSize()); }
 
+void CudaBroadphase::getOverlappingPairCache(BaseBuffer * dst)
+{ m_pairCache->deviceToHost(dst->data(), dst->bufferSize()); }
+
 void CudaBroadphase::getScanCounts(BaseBuffer * dst)
-{ m_scanCounts->deviceToHost(dst->data(), dst->bufferSize()); }
+{ m_pairStart->deviceToHost(dst->data(), dst->bufferSize()); }
 
 void CudaBroadphase::addBvh(CudaLinearBvh * bvh)
 {
@@ -53,9 +61,8 @@ void CudaBroadphase::initOnDevice()
 	}
 	m_scanBufferLength = iDivUp(m_numBoxes, 1024) * 1024;
 	m_pairCounts->create(m_scanBufferLength * 4);
-	m_scanCounts->create(m_scanBufferLength * 4);
-	m_hostPairCounts->create(m_scanBufferLength * 4);
-	m_hostScanCounts->create(m_scanBufferLength * 4);
+	m_pairStart->create(m_scanBufferLength * 4);
+	m_scanIntermediate->create(m_scanBufferLength * 4);
 }
 
 void CudaBroadphase::update()
@@ -71,11 +78,19 @@ void CudaBroadphase::update()
 			countOverlappingPairs(j, i);
 		}
 	}
+	
 	prefixSumPairCounts();
 	
-	const unsigned n = numOverlappings();
-	if(n < 1) return;
+	m_pairCacheLength = numOverlappings();
+	if(m_pairCacheLength < 1) return;
 	
+	m_pairCache->create(m_pairCacheLength * 8);
+	
+	for(j = 0; j<m_numObjects; j++) {
+		for(i = 0; i<m_numObjects; i++) {
+			writeOverlappingPairs(j, i);
+		}
+	}
 }
 
 void CudaBroadphase::resetPairCounts()
@@ -112,16 +127,58 @@ void CudaBroadphase::countOverlappingPairs(unsigned a, unsigned b)
 void CudaBroadphase::prefixSumPairCounts()
 {
     void * scanInput = m_pairCounts->bufferOnDevice();
-    void * scanResult = m_scanCounts->bufferOnDevice();
-    scanExclusive((uint *)scanResult, (uint *)scanInput, m_scanBufferLength / 1024, 1024);
+    void * scanResult = m_pairStart->bufferOnDevice();
+    void * scanIntermediate = m_scanIntermediate->bufferOnDevice();
+    scanExclusive((uint *)scanResult, (uint *)scanInput, (uint *)scanIntermediate, m_scanBufferLength / 1024, 1024);
 }
 
 unsigned CudaBroadphase::numOverlappings()
 {
-    m_pairCounts->deviceToHost(m_hostPairCounts->data(), m_pairCounts->bufferSize());
-    m_scanCounts->deviceToHost(m_hostScanCounts->data(), m_scanCounts->bufferSize());
-    unsigned * a = (unsigned *)m_hostPairCounts->data();
-    unsigned * b = (unsigned *)m_hostScanCounts->data();
-    return a[m_scanBufferLength - 1] + b[m_scanBufferLength - 1];   
+    unsigned a, b;
+    m_pairCounts->deviceToHost(&a, 4*(m_scanBufferLength -1), 4);
+    m_pairStart->deviceToHost(&b, 4*(m_scanBufferLength -1), 4);
+    return a + b;   
 }
 
+void CudaBroadphase::writeOverlappingPairs(unsigned a, unsigned b)
+{
+    uint * counts = (uint *)m_pairCounts->bufferOnDevice();
+	counts += m_objectStart[a];
+	
+	uint * starts = (uint *)m_pairStart->bufferOnDevice();
+	starts += m_objectStart[a];
+	
+	CudaLinearBvh * query = m_objects[a];
+	CudaLinearBvh * tree = m_objects[b];
+	
+	void * boxes = (Aabb *)query->leafAabbs();
+	const unsigned numBoxes = query->numLeafNodes();
+	
+	void * rootNodeIndex = tree->rootNodeIndex();
+	void * internalNodeChildIndex = tree->internalNodeChildIndices();
+	void * internalNodeAabbs = tree->internalNodeAabbs();
+	void * leafNodeAabbs = tree->leafAabbs();
+	void * mortonCodesAndAabbIndices = tree->leafHash();
+	
+	void * cache = m_pairCache->bufferOnDevice();
+	
+	broadphaseWritePairCache((uint2 *)cache, starts, counts, 
+	                         (Aabb *)boxes, numBoxes,
+							(int *)rootNodeIndex, 
+							(int2 *)internalNodeChildIndex, 
+							(Aabb *)internalNodeAabbs, 
+							(Aabb *)leafNodeAabbs,
+							(KeyValuePair *)mortonCodesAndAabbIndices,
+							a, b);
+}
+
+void CudaBroadphase::getBoxes(BaseBuffer * dst)
+{
+    char * hbox = (char *)dst->data();
+    unsigned i;
+    for(i = 0; i<m_numObjects; i++) {
+        const unsigned numBoxes = m_objects[i]->numLeafNodes();
+        m_objects[i]->getLeafAabbsAt(hbox);
+		hbox += numBoxes * 24;
+	}
+}

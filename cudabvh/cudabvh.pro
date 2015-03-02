@@ -60,9 +60,8 @@ SOURCES       = main.cpp \
 win32 {
     HEADERS += ../shared/gExtension.h
     SOURCES += ../shared/gExtension.cpp
-    INCLUDEPATH += D:/usr/boost_1_55_0 /usr/local/include/OpenEXR
-    LIBS += -LD:/usr/local/openEXR/lib
-    LIBS += -LD:/usr/boost_1_55_0/stage/lib
+    INCLUDEPATH += D:/usr/boost_1_51_0 /usr/OpenEXR/include
+    LIBS += -LD:/usr/openEXR/lib -LD:/usr/boost_1_51_0/stage/lib
     CONFIG += console
 }
 macx {
@@ -108,9 +107,9 @@ CUDA_CC =D:/usr/cuda4/v4.0/bin/nvcc.exe
 CUDA_DIR = D:/usr/cuda4/v4.0
 CUDA_DEV = "D:/usr/cuda4_sdk/C"
 
-CUDA_CC =C:/CUDA/bin64/nvcc.exe
-CUDA_DIR = C:/CUDA
-CUDA_DEV = "C:/ProgramData/NVIDIA Corporation/NVIDIA GPU Computing SDK/C"
+## CUDA_CC =C:/CUDA/bin64/nvcc.exe
+## CUDA_DIR = C:/CUDA
+## CUDA_DEV = "C:/ProgramData/NVIDIA Corporation/NVIDIA GPU Computing SDK/C"
 
 CUDA_COMMON = $$CUDA_DEV/common
 CUDA_INC_PATH = $$CUDA_DIR/include

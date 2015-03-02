@@ -30,6 +30,7 @@ public:
 	
 	void getRootNodeIndex(int * dst);
 	void getLeafAabbs(BaseBuffer * dst);
+	void getLeafAabbsAt(char * dst);
 	void getInternalAabbs(BaseBuffer * dst);
 	void getLeafHash(BaseBuffer * dst);
 	void getInternalDistances(BaseBuffer * dst);

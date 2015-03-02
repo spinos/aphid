@@ -20,4 +20,13 @@ void broadphaseComputePairCounts(uint * dst, Aabb * boxes, uint numBoxes,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								int isSelfCollision);
+
+void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
+                              Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								unsigned queryIdx, unsigned treeIdx);
 }

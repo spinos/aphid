@@ -115,6 +115,15 @@ int main(int argc, char * const argv[])
 	std::cout<<boost::format("~mask ~0x80000000: %1%\n") % byte_to_binary(~0x80000000);
 	std::cout<<boost::format("8 masked: %1%\n") % byte_to_binary(8 | 0x80000000);
 	std::cout<<boost::format("8 unmasked: %1%\n") % byte_to_binary(8 & (~0x80000000));
+	std::cout<<boost::format("12: %1%\n") % byte_to_binary(12);
+	std::cout<<boost::format("12 left 24 masked: %1%\n") % byte_to_binary(12<<24 | 0x80000000);
+	std::cout<<boost::format("12 right 24 unmasked: %1%\n") % byte_to_binary(((12<<24 | 0x80000000)&(~0x80000000))>>24);
+	
+	std::cout<<boost::format("12 left 24 with 1923 masked: %1%\n") % byte_to_binary((12<<24 | 1923) | 0x80000000);
+	std::cout<<boost::format("12 right 24 with 1923 unmasked: %1%\n") % byte_to_binary((((12<<24 | 1923) | 0x80000000)&(~0x80000000))>>24);
+	std::cout<<boost::format("id masked: %1%\n") % byte_to_binary(~0x800000);
+	std::cout<<boost::format("1923: %1%\n") % byte_to_binary(1923);
+	std::cout<<boost::format("<<7 >>7: %1%\n") % byte_to_binary((((12<<24 | 1923) | 0x80000000)<<7)>>7);
 	std::cout<<"end of test\n";
 	return 0;
 }

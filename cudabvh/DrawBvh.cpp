@@ -24,6 +24,8 @@ DrawBvh::DrawBvh()
 	m_internalChildIndices = new BaseBuffer;
 	m_pairCounts = new BaseBuffer;
 	m_scanCounts = new BaseBuffer;
+	m_pairCache = new BaseBuffer;
+	m_boxes = new BaseBuffer;
 	m_displayLevel = 3;
 }
 
@@ -206,6 +208,60 @@ void DrawBvh::printPairCounts()
 	unsigned * count = (unsigned *)m_pairCounts->data();
 	unsigned * sum = (unsigned *)m_scanCounts->data();
 	
-	for(unsigned i=0; i < nb; i++)
-		std::cout<<" "<<i<<" "<<count[i]<<" "<<sum[i]<<" ";
+	unsigned i;
+	for(i=0; i < nb; i++)
+		std::cout<<" "<<i<<": "<<count[i]<<" "<<sum[i]<<" ";
+	
+	std::cout<<" "<<count[nb - 1]+sum[nb - 1]<<"overlapping pairs";
+	
+	const unsigned cacheLength = m_broadphase->pairCacheLength();
+	if(cacheLength < 1) return;
+	m_pairCache->create(cacheLength * 8);
+	m_broadphase->getOverlappingPairCache(m_pairCache);
+	
+	unsigned * pc = (unsigned *)m_pairCache->data();
+	for(i=0; i < cacheLength; i++)
+	    std::cout<<" "<<i<<": "<<pc[i * 2]<<" "<<pc[i * 2 + 1]<<" ";
 }
+
+unsigned extractElementInd(unsigned combined)
+{ return ((combined<<7)>>7); }
+
+unsigned extractObjectInd(unsigned combined)
+{ return (combined>>24); }
+
+void DrawBvh::pairs()
+{
+    const unsigned cacheLength = m_broadphase->pairCacheLength();
+	if(cacheLength < 1) return;
+	
+	// std::cout<<" num overlapping pairs "<<cacheLength<<"\n";
+	
+	const unsigned nb = m_broadphase->numBoxes();
+	m_boxes->create(nb * 24);
+	
+	m_broadphase->getBoxes(m_boxes);
+
+	Aabb * boxes = (Aabb *)m_boxes->data();
+	Aabb abox;
+	BoundingBox bb;
+	unsigned i;
+	m_drawer->setColor(0.f, 0.1f, 0.4f);
+
+	m_pairCache->create(cacheLength * 8);
+	m_broadphase->getOverlappingPairCache(m_pairCache);
+	
+	unsigned * pc = (unsigned *)m_pairCache->data();
+	
+	Vector3F a, b;
+	for(i=0; i < cacheLength; i++) {
+	    abox = boxes[extractElementInd(pc[i * 2])];
+	    a.set(abox.low.x +abox.high.x, abox.low.y +abox.high.y, abox.low.z +abox.high.z);
+	    a *= 0.5f;
+	    abox = boxes[extractElementInd(pc[i * 2 + 1])];
+	    b.set(abox.low.x +abox.high.x, abox.low.y +abox.high.y, abox.low.z +abox.high.z);
+	    b *= 0.5f;
+	    m_drawer->arrow(a, b);
+	}
+}
+

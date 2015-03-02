@@ -16,8 +16,11 @@ public:
 	virtual ~CudaBroadphase();
 	
 	const unsigned numBoxes() const;
+	const unsigned pairCacheLength() const;
 	void getOverlappingPairCounts(BaseBuffer * dst);
+	void getOverlappingPairCache(BaseBuffer * dst);
 	void getScanCounts(BaseBuffer * dst);
+	void getBoxes(BaseBuffer * dst);
 	
 	void addBvh(CudaLinearBvh * bvh);
 	void initOnDevice();
@@ -29,12 +32,13 @@ private:
 	void countOverlappingPairs(unsigned a, unsigned b);
 	void prefixSumPairCounts();
 	unsigned numOverlappings();
+	void writeOverlappingPairs(unsigned a, unsigned b);
 private:
 	CUDABuffer * m_pairCounts;
-	CUDABuffer * m_scanCounts;
-	BaseBuffer * m_hostPairCounts;
-	BaseBuffer * m_hostScanCounts;
+	CUDABuffer * m_pairStart;
+	CUDABuffer * m_scanIntermediate;
+	CUDABuffer * m_pairCache;
 	CudaLinearBvh * m_objects[CUDABROADPHASE_MAX_NUMOBJECTS];
 	unsigned m_objectStart[CUDABROADPHASE_MAX_NUMOBJECTS];
-	unsigned m_numObjects, m_numBoxes, m_scanBufferLength;
+	unsigned m_numObjects, m_numBoxes, m_scanBufferLength, m_pairCacheLength;
 };

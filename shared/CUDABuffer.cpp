@@ -65,6 +65,13 @@ void CUDABuffer::hostToDevice(void * src)
 void CUDABuffer::deviceToHost(void * dst)
 { cutilSafeCall( cudaMemcpy(dst, _device_vbo_buffer, bufferSize(), cudaMemcpyDeviceToHost) ); }
 
+void CUDABuffer::deviceToHost(void * dst, unsigned loc, unsigned size)
+{
+    char * p = (char *)bufferOnDevice();
+    p += loc;
+    cudaMemcpy(dst, p, size, cudaMemcpyDeviceToHost);
+}
+
 void CUDABuffer::map(void ** p)
 {
 	cutilSafeCall(cudaGraphicsMapResources(1, resource(), 0));

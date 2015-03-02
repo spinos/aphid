@@ -98,6 +98,9 @@ void * CudaLinearBvh::internalNodeAabbs()
 void * CudaLinearBvh::leafAabbs()
 { return m_leafAabbs->bufferOnDevice(); }
 
+void CudaLinearBvh::getLeafAabbsAt(char * dst)
+{ m_leafAabbs->deviceToHost(dst, 0, m_leafAabbs->bufferSize()); }
+
 void * CudaLinearBvh::leafHash()
 { return m_leafHash[0]->bufferOnDevice(); }
 

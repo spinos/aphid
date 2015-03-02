@@ -6,6 +6,7 @@
 extern "C" void scanExclusive(
     uint *d_Dst,
     uint *d_Src,
+    uint *d_intermediate,
     uint batchSize,
     uint arrayLength
 );

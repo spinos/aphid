@@ -23,7 +23,7 @@ public:
 	void deviceToHost(void * dst, unsigned size);
 	void hostToDevice(void * src);
 	void deviceToHost(void * dst);
-	
+	void deviceToHost(void * dst, unsigned loc, unsigned size);
 	void map(void ** p);
 	void unmap();
 	

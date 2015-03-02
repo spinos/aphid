@@ -25,6 +25,7 @@ public:
 	void leaf();
 	void hash();
 	void hierarch();
+	void pairs();
 	
 	void printHash();
 	void printPairCounts();
@@ -39,6 +40,8 @@ private:
 	BaseBuffer * m_internalChildIndices;
 	BaseBuffer * m_pairCounts;
 	BaseBuffer * m_scanCounts;
+	BaseBuffer * m_pairCache;
+	BaseBuffer * m_boxes;
 	int m_hostRootNodeInd;
 	int m_displayLevel;
 };
