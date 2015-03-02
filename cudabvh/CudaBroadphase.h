@@ -18,10 +18,14 @@ public:
 	const unsigned numBoxes() const;
 	const unsigned pairCacheLength() const;
 	const unsigned objectStart(unsigned ind) const;
+	const unsigned numUniquePairs() const;
 	void getOverlappingPairCounts(BaseBuffer * dst);
 	void getOverlappingPairCache(BaseBuffer * dst);
 	void getScanCounts(BaseBuffer * dst);
 	void getBoxes(BaseBuffer * dst);
+	void getUniquePairs(BaseBuffer * dst);
+	void getScanUniquePairs(BaseBuffer * dst);
+	void getOverlappingPairs(BaseBuffer * dst);
 	
 	void addBvh(CudaLinearBvh * bvh);
 	void initOnDevice();
@@ -32,14 +36,18 @@ private:
 	void resetPairCounts();
 	void countOverlappingPairs(unsigned a, unsigned b);
 	void prefixSumPairCounts();
-	unsigned numOverlappings();
+	unsigned getScanResult(CUDABuffer * counts, CUDABuffer * sums, unsigned n);
 	void writeOverlappingPairs(unsigned a, unsigned b);
+	void squeezeOverlappingPairs();
 private:
 	CUDABuffer * m_pairCounts;
 	CUDABuffer * m_pairStart;
 	CUDABuffer * m_scanIntermediate;
-	CUDABuffer * m_pairCache;
+	CUDABuffer * m_pairCache[2];
+	CUDABuffer * m_uniquePair;
+	CUDABuffer * m_scanUniquePair;
 	CudaLinearBvh * m_objects[CUDABROADPHASE_MAX_NUMOBJECTS];
 	unsigned m_objectStart[CUDABROADPHASE_MAX_NUMOBJECTS];
-	unsigned m_numObjects, m_numBoxes, m_scanBufferLength, m_pairCacheLength;
+	unsigned m_numObjects, m_numBoxes, m_scanBufferLength, m_pairCacheLength,
+	        m_numUniquePairs;
 };

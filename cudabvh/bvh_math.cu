@@ -3,8 +3,15 @@
 #include "bvh_common.h"
 
 template<typename T>
-inline __device__ void ascent(T in)
-{}
+inline __device__ void ascentOrder(T & in)
+{ 
+    if(in.x > in.y) {
+        T c;
+        c.x = in.x;
+        in.x = in.y;
+        in.y = c.x;
+    }
+}
 
 inline __device__ uint combineObjectElementInd(uint objectIdx, uint elementIdx)
 { return (objectIdx<<24 | elementIdx); }

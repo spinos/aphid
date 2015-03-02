@@ -26,6 +26,8 @@ DrawBvh::DrawBvh()
 	m_scanCounts = new BaseBuffer;
 	m_pairCache = new BaseBuffer;
 	m_boxes = new BaseBuffer;
+	m_uniquePairs = new BaseBuffer;
+	m_scanUniquePairs = new BaseBuffer;
 	m_displayLevel = 3;
 }
 
@@ -218,10 +220,18 @@ void DrawBvh::printPairCounts()
 	if(cacheLength < 1) return;
 	m_pairCache->create(cacheLength * 8);
 	m_broadphase->getOverlappingPairCache(m_pairCache);
+	m_uniquePairs->create(cacheLength * 4);
+	m_broadphase->getUniquePairs(m_uniquePairs);
+	
+	m_scanUniquePairs->create(cacheLength * 4);
+	m_broadphase->getScanUniquePairs(m_scanUniquePairs);
 	
 	unsigned * pc = (unsigned *)m_pairCache->data();
+	unsigned * u = (unsigned *)m_uniquePairs->data();
+	unsigned * s = (unsigned *)m_scanUniquePairs->data();
+	
 	for(i=0; i < cacheLength; i++)
-	    std::cout<<" "<<i<<": "<<pc[i * 2]<<" "<<pc[i * 2 + 1]<<" ";
+	    std::cout<<" "<<i<<": "<<pc[i * 2]<<" "<<pc[i * 2 + 1]<<" is "<<u[i]<<" "<<s[i]<<" \n";
 }
 
 unsigned extractElementInd(unsigned combined)
@@ -235,7 +245,7 @@ void DrawBvh::pairs()
     const unsigned cacheLength = m_broadphase->pairCacheLength();
 	if(cacheLength < 1) return;
 	
-	// std::cout<<" num overlapping pairs "<<cacheLength<<"\n";
+	// std::cout<<" num overlapping pairs "<<cacheLength<<" squeezed to "<<m_broadphase->numUniquePairs()<<"\n";
 	
 	const unsigned nb = m_broadphase->numBoxes();
 	m_boxes->create(nb * 24);
@@ -248,8 +258,8 @@ void DrawBvh::pairs()
 	unsigned i;
 	m_drawer->setColor(0.f, 0.1f, 0.4f);
 
-	m_pairCache->create(cacheLength * 8);
-	m_broadphase->getOverlappingPairCache(m_pairCache);
+	m_pairCache->create(m_broadphase->numUniquePairs() * 8);
+	m_broadphase->getOverlappingPairs(m_pairCache);
 	
 	unsigned * pc = (unsigned *)m_pairCache->data();
 	
@@ -268,5 +278,7 @@ void DrawBvh::pairs()
 	    
 	    m_drawer->arrow(a, b);
 	}
+	
+	
 }
 

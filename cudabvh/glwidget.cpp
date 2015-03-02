@@ -156,8 +156,8 @@ void GLWidget::clientInit()
 
 	m_broadphase->initOnDevice();
 	
-	// m_broadphase->update();
-	// m_drawBvh->printPairCounts();
+	m_broadphase->update();
+	m_drawBvh->printPairCounts();
 	
 	// connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	// connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));

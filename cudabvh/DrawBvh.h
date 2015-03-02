@@ -42,6 +42,8 @@ private:
 	BaseBuffer * m_scanCounts;
 	BaseBuffer * m_pairCache;
 	BaseBuffer * m_boxes;
+	BaseBuffer * m_uniquePairs;
+	BaseBuffer * m_scanUniquePairs;
 	int m_hostRootNodeInd;
 	int m_displayLevel;
 };

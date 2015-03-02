@@ -13,6 +13,16 @@ __global__ void resetPairCounts_kernel(uint * dst, uint maxInd)
 	dst[ind] = 0;
 }
 
+__global__ void resetPairCache_kernel(uint2 * dst, uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(ind >= maxInd) return;
+
+	dst[ind].x = 0x80000000;
+	dst[ind].y = 0x80000000;
+}
+
 __global__ void computePairCounts_kernel(uint * overlappingCounts, Aabb * boxes,
                                 uint maxBoxInd,
 								int * rootNodeIndex, 
@@ -108,20 +118,24 @@ __global__ void writePairCache_kernel(uint2 * dst, uint * cacheStarts, uint * ov
 		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
 		
 		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
-
+		uint2 pair;
 		if(isAabbOverlapping(box, bvhNodeAabb))
 		{
 			if(isLeaf)
 			{
 			    if(isSelfCollision) { // todo: connected elements shared same vertices
 			        if(bvhRigidIndex != boxIndex) {
-			            dst[writeLoc].x = combineObjectElementInd(queryIdx, boxIndex);
-			            dst[writeLoc].y = combineObjectElementInd(treeIdx, bvhRigidIndex);
+			            pair.x = combineObjectElementInd(queryIdx, boxIndex);
+			            pair.y = combineObjectElementInd(treeIdx, bvhRigidIndex);
+			            ascentOrder<uint2>(pair);
+			            dst[writeLoc] = pair;
 			            writeLoc++;
 			        }
 			    } else {
-			        dst[writeLoc].x = combineObjectElementInd(queryIdx, boxIndex);
-			        dst[writeLoc].y = combineObjectElementInd(treeIdx, bvhRigidIndex);
+			        pair.x = combineObjectElementInd(queryIdx, boxIndex);
+			        pair.y = combineObjectElementInd(treeIdx, bvhRigidIndex);
+                    ascentOrder<uint2>(pair);
+                    dst[writeLoc] = pair;
                     writeLoc++;
 			    }
 			    //if((writeLoc - startLoc)==cacheSize) { // cache if full
@@ -138,6 +152,47 @@ __global__ void writePairCache_kernel(uint2 * dst, uint * cacheStarts, uint * ov
 	}
 }
 
+__global__ void uniquePair_kernel(uint * dst, uint2 * pairs, uint pairLength, uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(ind >= maxInd) return;
+	
+	if(ind >= pairLength) {
+	    dst[ind] = 0;
+	    return;
+	}
+	
+// assume it is unique
+	dst[ind] = 1;
+	
+	uint a = pairs[ind].x;
+	uint b = pairs[ind].y;
+
+	unsigned cur = ind;
+// check forward
+	for(;;) {
+	    if(cur < 1) return;
+	    cur--;
+	    if(pairs[cur].x != a) return;
+	    if(pairs[cur].y == b) {
+	        dst[ind] = 0;
+	        return;
+	    }
+	}
+}
+
+__global__ void compactUniquePairs_kernel(uint2 * dst, uint2 * pairs, uint * unique, uint * dstLoc, uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(ind >= maxInd) return;
+	
+	if(unique[ind] > 0) {
+	    dst[dstLoc[ind]] = pairs[ind];
+	}
+}
+
 extern "C" {
 
 void broadphaseResetPairCounts(uint * dst, uint num)
@@ -146,6 +201,14 @@ void broadphaseResetPairCounts(uint * dst, uint num)
     unsigned nblk = iDivUp(num, 512);
     dim3 grid(nblk, 1, 1);
     resetPairCounts_kernel<<< grid, block >>>(dst, num);
+}
+
+void broadphaseResetPairCache(uint2 * dst, uint num)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(num, 512);
+    dim3 grid(nblk, 1, 1);
+    resetPairCache_kernel<<< grid, block >>>(dst, num);
 }
 
 void broadphaseComputePairCounts(uint * dst,
@@ -199,6 +262,23 @@ void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,
 								isSelfCollision, queryIdx, treeIdx);
+}
+
+void broadphaseUniquePair(uint * dst, uint2 * pairs, uint pairLength, uint bufLength)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(bufLength, 512);
+    dim3 grid(nblk, 1, 1);
+    uniquePair_kernel<<< grid, block >>>(dst, pairs, pairLength, bufLength);
+}
+
+void broadphaseCompactUniquePairs(uint2 * dst, uint2 * pairs, uint * unique, uint * loc, uint pairLength)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(pairLength, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    compactUniquePairs_kernel<<< grid, block >>>(dst, pairs, unique, loc, pairLength);
 }
 
 }
