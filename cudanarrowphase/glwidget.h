@@ -4,6 +4,9 @@
 #include <Base3DView.h>
 class CudaTetrahedronSystem;
 class DrawNp;
+class BaseBuffer;
+class CUDABuffer;
+class CudaNarrowphase;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -29,6 +32,9 @@ private:
 private:
     CudaTetrahedronSystem * m_tetra;
 	DrawNp * m_dbgDraw;
+	BaseBuffer * m_hostPairs;
+	CUDABuffer * m_devicePairs;
+	CudaNarrowphase * m_narrowphase;
 private slots:
     
 };

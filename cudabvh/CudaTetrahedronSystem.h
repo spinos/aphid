@@ -18,10 +18,13 @@ public:
 	virtual ~CudaTetrahedronSystem();
 	virtual void initOnDevice();
 	virtual void update();
-protected:
+
 	void * deviceX();
 	void * deviceV();
 	void * deviceTretradhedronIndices();
+	
+protected:
+    
 private:
 	void formTetrahedronAabbs();
 private:

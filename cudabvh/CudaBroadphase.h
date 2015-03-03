@@ -29,7 +29,7 @@ public:
 	
 	void addBvh(CudaLinearBvh * bvh);
 	void initOnDevice();
-	void update();
+	void computeOverlappingPairs();
 protected:
 
 private:

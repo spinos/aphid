@@ -9,6 +9,7 @@
 class GeoDrawer;
 class TetrahedronSystem;
 class BaseBuffer;
+class CudaNarrowphase;
 class DrawNp {
 public:
 	DrawNp();
@@ -18,7 +19,9 @@ public:
 
 	void drawTetra(TetrahedronSystem * tetra);
 	void drawTetraAtFrameEnd(TetrahedronSystem * tetra);
+	void drawSeparateAxis(CudaNarrowphase * phase);
 private:
 	GeoDrawer * m_drawer;
 	BaseBuffer * m_x1;
+	BaseBuffer * m_separateAxis;
 };

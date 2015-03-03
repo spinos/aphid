@@ -53,7 +53,7 @@ inline __device__ float3 float3_add(float3 v1, float3 v0)
 inline __device__ float3 float3_progress(float3 p0, float3 v0, float h)
 { return make_float3(p0.x + v0.x * h, p0.y + v0.y * h, p0.z + v0.z * h); }
 
-inline __device__ float3 scale_float3_by(float3 & v, float s)
+inline __device__ float3 scale_float3_by(float3 v, float s)
 { return make_float3(v.x * s, v.y * s, v.z * s); }
 
 inline __device__ int3 isless(float3 v, float3 threshold)

@@ -154,9 +154,10 @@ void GLWidget::clientInit()
                 m_rootNodeInd);
 #endif
 
+    m_tetra->initOnDevice();
 	m_broadphase->initOnDevice();
 	
-	m_broadphase->update();
+	m_broadphase->computeOverlappingPairs();
 	m_drawBvh->printPairCounts();
 	
 	// connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
@@ -347,7 +348,7 @@ void GLWidget::debugDraw(unsigned rootInd, unsigned numInternal)
 
 void GLWidget::drawTetra()
 {
-	m_broadphase->update();
+	m_broadphase->computeOverlappingPairs();
 	
 	glColor3f(0.1f, 0.4f, 0.3f);
     

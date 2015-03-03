@@ -11,10 +11,12 @@
 #include <GeoDrawer.h>
 #include <TetrahedronSystem.h>
 #include <BaseBuffer.h>
+#include <CudaNarrowphase.h>
 
 DrawNp::DrawNp() 
 {
 	m_x1 = new BaseBuffer;
+	m_separateAxis = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -49,7 +51,7 @@ void DrawNp::drawTetraAtFrameEnd(TetrahedronSystem * tetra)
 	for(i=0; i < nf; i++)
 		x1[i] = x0[i] + vel[i] * 0.01667f;
 		
-	glColor3f(0.1f, 0.1f, 0.14f);
+	glColor3f(0.21f, 0.21f, 0.24f);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
@@ -59,4 +61,20 @@ void DrawNp::drawTetraAtFrameEnd(TetrahedronSystem * tetra)
 	glDrawElements(GL_TRIANGLES, tetra->numTriangleFaceVertices(), GL_UNSIGNED_INT, tetra->hostTriangleIndices());
 
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void DrawNp::drawSeparateAxis(CudaNarrowphase * phase)
+{
+	m_separateAxis->create(phase->numContacts() * 12);
+	phase->getSeparateAxis(m_separateAxis);
+	
+	Vector3F * sa = (Vector3F *)m_separateAxis->data();
+	unsigned i;
+	glColor3f(0.2f, 0.01f, 0.f);
+	glBegin(GL_LINES);
+	for(i=0; i < phase->numContacts(); i++) {
+		glVertex3f(0.f, -100.f, -100.f);
+		glVertex3f(sa[i].x, sa[i].y, sa[i].z);
+	}
+	glEnd();
 }

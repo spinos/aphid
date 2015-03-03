@@ -19,7 +19,8 @@ HEADERS       = ../shared/Base3DView.h \
                 glWidget.h \
                 window.h \
                 DrawNp.h \
-                CudaNarrowphase.h
+                CudaNarrowphase.h \
+                narrowphase_implement.h
 SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/CudaBase.cpp \
                 ../shared/BaseBuffer.cpp \
@@ -56,7 +57,8 @@ CUSOURCES = ../cudabvh/bvh_math.cu \
             ../cudabvh/createBvh.cu \
             ../cudabvh/reduceBox.cu \
             ../cudabvh/reduceRange.cu \
-            ../radixsort/radixsort.cu
+            ../radixsort/radixsort.cu \
+            narrowphase.cu
 macx {
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda

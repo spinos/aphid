@@ -71,7 +71,6 @@ void CudaBroadphase::initOnDevice()
 	m_objectStart[0] = 0;
 	m_numBoxes = 0;
 	for(unsigned i = 0; i<m_numObjects; i++) {
-		m_objects[i]->initOnDevice();
 		m_numBoxes += m_objects[i]->numLeafNodes();
 		if(i<m_numObjects-1) {
 			m_objectStart[i+1] = m_numBoxes;
@@ -83,13 +82,11 @@ void CudaBroadphase::initOnDevice()
 	m_scanIntermediate->create(m_scanBufferLength * 4);
 }
 
-void CudaBroadphase::update()
+void CudaBroadphase::computeOverlappingPairs()
 {
 	if(m_numObjects < 1) return;
 	unsigned i, j;
-	for(i = 0; i<m_numObjects; i++)
-		m_objects[i]->update();
-		
+	
 	resetPairCounts();
 	for(j = 0; j<m_numObjects; j++) {
 		for(i = 0; i<m_numObjects; i++) {

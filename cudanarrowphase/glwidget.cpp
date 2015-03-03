@@ -6,6 +6,8 @@
 #include <CudaBase.h>
 #include <CudaTetrahedronSystem.h>
 #include "DrawNp.h"
+#include <CUDABuffer.h>
+#include <CudaNarrowphase.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -14,7 +16,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	float * hv = &m_tetra->hostV()[0];
 	
 	unsigned i, j;
-	const unsigned grdx = 93;
+	const unsigned grdx = 99;
 	float vy = 1.f;
 	for(j=0; j < 2; j++) {
 		for(i=0; i<grdx; i++) {
@@ -68,6 +70,19 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_dbgDraw = new DrawNp;
     m_dbgDraw->setDrawer(getDrawer());
+	
+	m_hostPairs = new BaseBuffer;
+	m_devicePairs = new CUDABuffer;
+	
+	m_hostPairs->create(99 * 8);
+	unsigned * pab = (unsigned *)m_hostPairs->data();
+	for(i=0; i<grdx; i++) {
+		pab[i*2] = i;
+		pab[i*2 + 1] = i + 99;
+	}
+	
+	m_narrowphase = new CudaNarrowphase;
+	m_narrowphase->addTetrahedronSystem(m_tetra);
 }
 
 GLWidget::~GLWidget()
@@ -78,6 +93,14 @@ void GLWidget::clientInit()
 {
 	CudaBase::SetDevice();
 	
+	m_tetra->initOnDevice();
+	m_narrowphase->initOnDevice();
+	
+	m_devicePairs->create(99 * 8);
+	m_devicePairs->hostToDevice(m_hostPairs->data(), 99 *8);
+	
+	m_narrowphase->computeContacts(m_devicePairs, 99);
+	
 	// connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	// connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
@@ -87,6 +110,7 @@ void GLWidget::clientDraw()
 {
 	m_dbgDraw->drawTetra(m_tetra);
 	m_dbgDraw->drawTetraAtFrameEnd(m_tetra);
+	m_dbgDraw->drawSeparateAxis(m_narrowphase);
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)
@@ -129,6 +153,3 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 	
 	Base3DView::keyPressEvent(event);
 }
-
-
-
