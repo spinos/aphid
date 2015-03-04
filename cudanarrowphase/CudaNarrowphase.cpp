@@ -91,7 +91,7 @@ void CudaNarrowphase::writeObjectCache(CudaTetrahedronSystem * tetra,
     dstPos += pointAt * 12;
     dstVel += pointAt * 12;
     dstInd += indexAt * 16;
-    
+
     narrowphaseWriteObjectToCache((float3 *)dstPos,
         (float3 *)dstVel,
         (uint4 *)dstInd,

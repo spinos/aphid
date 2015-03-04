@@ -58,7 +58,8 @@ CUSOURCES = ../cudabvh/bvh_math.cu \
             ../cudabvh/reduceBox.cu \
             ../cudabvh/reduceRange.cu \
             ../radixsort/radixsort.cu \
-            narrowphase.cu
+            narrowphase.cu \
+            gjk_math.cu
 macx {
 CUDA_CC = /usr/local/cuda/bin/nvcc
 CUDA_DIR = /usr/local/cuda

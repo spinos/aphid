@@ -1,5 +1,23 @@
 #include "narrowphase_implement.h"
 #include <bvh_math.cu>
+#include <gjk_math.cu>
+#include <CudaBase.h>
+
+inline __device__ void extractTetrahedron(TetrahedronProxy & tet, uint start, uint4 vertices, float3 * pos, float3 * vel)
+{
+    uint ind = start + vertices.x;
+    tet.p[0] = pos[ind];
+    tet.v[0] = vel[ind];
+    ind = start + vertices.y;
+    tet.p[1] = pos[ind];
+    tet.v[1] = vel[ind];
+    ind = start + vertices.z;
+    tet.p[2] = pos[ind];
+    tet.v[2] = vel[ind];
+    ind = start + vertices.w;
+    tet.p[3] = pos[ind];
+    tet.v[3] = vel[ind];
+}
 
 __global__ void writeObjectPointToCache_kernel(float3 * dstPos,
         float3 * dstVel,
@@ -40,11 +58,22 @@ __global__ void computeSeparateAxis_kernel(float3 * dst,
 	uint elmA = extractElementInd(pairs[ind].x);
 	uint elmB = extractElementInd(pairs[ind].y);
 	
-	uint indA = pointStart[objA] + tetrahedron[indexStart[objA] + elmA].z;
-	uint indB = pointStart[objB] + tetrahedron[indexStart[objB] + elmB].z;
+	TetrahedronProxy prxA;
+	TetrahedronProxy prxB;
 	
-	float3 pa = float3_add(pos[indA], scale_float3_by(vel[indA], 0.01667) );
-	float3 pb = float3_add(pos[indB], scale_float3_by(vel[indB], 0.01667));
+	extractTetrahedron(prxA, pointStart[objA], tetrahedron[indexStart[objA] + elmA], pos, vel);
+	extractTetrahedron(prxB, pointStart[objB], tetrahedron[indexStart[objB] + elmB], pos, vel);
+
+	Simplex s;
+	resetSimplex(s);
+	
+	float3 Pref = make_float3(0.0f, 0.0f, 0.0f);
+
+	computeSeparateDistance(s, Pref, prxA, prxB);
+	
+	float3 pa = float3_add(prxA.p[3], scale_float3_by(prxA.v[3], 0.01667f));
+	float3 pb = float3_add(prxB.p[3], scale_float3_by(prxB.v[3], 0.01667f));
+	
 	dst[ind] = scale_float3_by(float3_add(pa, pb), 0.5);
 }
 
@@ -78,7 +107,8 @@ void narrowphaseComputeSeparateAxis(float3 * dst,
 		uint * pointStart, uint * indexStart,
 		uint numOverlappingPairs)
 {
-    dim3 block(512, 1, 1);
+    int tpb = CudaBase::LimitNThreadPerBlock(60, 60);
+    dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numOverlappingPairs, 512);
     dim3 grid(nblk, 1, 1);
     

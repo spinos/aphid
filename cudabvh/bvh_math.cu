@@ -44,6 +44,9 @@ inline __device__ float3 float3_normalize(float3 v)
 	return make_float3(v.x * l, v.y * l, v.z * l);
 }
 
+inline __device__ float3 float3_reverse(float3 v)
+{ return make_float3(-v.x, -v.y, -v.z); }
+
 inline __device__ float3 float3_difference(float3 v1, float3 v0)
 { return make_float3(v1.x - v0.x, v1.y - v0.y, v1.z - v0.z); }
 
@@ -56,6 +59,16 @@ inline __device__ float3 float3_progress(float3 p0, float3 v0, float h)
 inline __device__ float3 scale_float3_by(float3 v, float s)
 { return make_float3(v.x * s, v.y * s, v.z * s); }
 
+inline __device__ float distance_between(float3 v1, float3 v0)
+{
+    return float3_length(float3_difference(v1, v0)); 
+}
+
+inline __device__ float distance2_between(float3 v1, float3 v0)
+{
+    return float3_length2(float3_difference(v1, v0)); 
+}
+
 inline __device__ int3 isless(float3 v, float3 threshold)
 { return make_int3(v.x < threshold.x, v.y < threshold.y, v.z < threshold.z); }
 
@@ -66,6 +79,13 @@ inline __device__ float3 select(float3 a, float3 b, int3 con)
     float z = con.z ? a.z : b.z;
     return make_float3(x, y, z);
 }
+
+inline __device__ float float3_dot(float3 v1, float3 v0)
+{ return (v1.x * v0.x + v1.y * v0.y + v1.z * v0.z); }
+
+inline __device__ float3 float3_cross(float3 v1, float3 v2)
+{ return make_float3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x); }
+
 
 inline __device__ void resetAabb(Aabb & dst)
 {
