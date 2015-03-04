@@ -1,6 +1,6 @@
-#ifndef GJK_MATH_CU
-#define GJK_MATH_CU
-
+#ifndef _GJK_MATH_H_
+#define _GJK_MATH_H_
+#include "bvh_common.h"
 #include "bvh_math.cu"
 
 typedef float4 BarycentricCoordinate;
@@ -134,5 +134,5 @@ inline __device__ void computeSeparateDistance(Simplex & s, float3 Pref,
 	}
 }
 
-#endif        //  #ifndef GJK_MATH_CU
+#endif        //  #ifndef _GJK_MATH_H_
 
