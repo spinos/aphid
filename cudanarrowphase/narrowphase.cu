@@ -71,10 +71,15 @@ __global__ void computeSeparateAxis_kernel(float3 * dst,
 
 	computeSeparateDistance(s, Pref, prxA, prxB);
 	
-	float3 pa = float3_add(prxA.p[3], scale_float3_by(prxA.v[3], 0.01667f));
-	float3 pb = float3_add(prxB.p[3], scale_float3_by(prxB.v[3], 0.01667f));
+	float3 pa = float3_add(prxA.p[0], scale_float3_by(prxA.v[0], 0.01667f));
+	float3 pb = float3_add(prxB.p[0], scale_float3_by(prxB.v[0], 0.01667f));
 	
-	dst[ind] = scale_float3_by(float3_add(pa, pb), 0.5);
+	// dst[ind] = scale_float3_by(float3_add(pa, pb), 0.5);
+	
+	ClosestTestContext ctc;
+	checkClosestDistance(s, prxA, prxB, ctc);
+	
+	dst[ind] = ctc.closestPoint;
 }
 
 extern "C" {
@@ -107,7 +112,7 @@ void narrowphaseComputeSeparateAxis(float3 * dst,
 		uint * pointStart, uint * indexStart,
 		uint numOverlappingPairs)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(60, 60);
+    int tpb = CudaBase::LimitNThreadPerBlock(60, 48);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numOverlappingPairs, 512);
     dim3 grid(nblk, 1, 1);
