@@ -15,6 +15,14 @@
 typedef unsigned int uint;
 typedef unsigned long long uint64;
 
+struct mat33 {
+    float3 v[3];
+};
+
+struct mat44 {
+    float4 v[4];
+};
+
 static uint iDivUp(uint dividend, uint divisor)
 {
     return ( (dividend % divisor) == 0 ) ? (dividend / divisor) : (dividend / divisor + 1);

@@ -59,6 +59,7 @@ CUSOURCES = ../cudabvh/bvh_math.cu \
             ../cudabvh/reduceRange.cu \
             ../radixsort/radixsort.cu \
             gjk_math.cu \
+            matrix_math.cu \
             narrowphase.cu
             
 macx {

@@ -1,7 +1,8 @@
 #ifndef _GJK_MATH_H_
 #define _GJK_MATH_H_
-#include "bvh_common.h"
+
 #include "bvh_math.cu"
+#include "matrix_math.cu"
 
 typedef float4 BarycentricCoordinate;
 
@@ -27,7 +28,12 @@ inline __device__ int isTriangleDegenerate(float3 a, float3 b, float3 c)
 
 inline __device__ int isTetrahedronDegenerate(float3 a, float3 b, float3 c, float3 d)
 {
-    return 0;
+    mat44 m;
+    fill_mat44(m, a, b, c, d);
+    
+    float D0 = determinant44(m) ;
+    if(D0 < 0.f) D0 = -D0;
+    return (D0 < 0.01f);
 }
 
 inline __device__ void resetSimplex(Simplex & s)
@@ -106,6 +112,48 @@ inline __device__ float3 supportPoint(TetrahedronProxy tet, float3 ref, float ma
     return res;
 }
 
+inline __device__ BarycentricCoordinate getBarycentricCoordinate4(float3 p, float3 * v)
+{
+    BarycentricCoordinate coord;
+    
+    mat44 m;
+    fill_mat44(m, v[0], v[1], v[2], v[3]);
+    
+    float D0 = determinant44(m);
+    if(D0 == 0.f) {
+        coord.x = coord.y = coord.z = coord.w = -1.f;
+        return coord;
+    }  
+    
+    fill_mat44(m, p, v[1], v[2], v[3]);
+    coord.x = determinant44(m) / D0;
+    fill_mat44(m, v[0], p, v[2], v[3]);
+    coord.y = determinant44(m) / D0;
+    fill_mat44(m, v[0], v[1], p, v[3]);
+    coord.z = determinant44(m) / D0;
+    fill_mat44(m, v[0], v[1], v[2], p);
+    coord.w = determinant44(m) / D0;
+    
+    return coord;
+}
+
+inline __device__ int pointInsideTetrahedronTest(float3 p, float3 * tet)
+{
+    BarycentricCoordinate coord = getBarycentricCoordinate4(p, tet);
+    return (coord.x >=0 && coord.x <=1 && 
+        coord.y >=0 && coord.y <=1 &&
+        coord.z >=0 && coord.z <=1 &&
+        coord.w >=0 && coord.w <=1);
+}
+
+inline __device__ int isPointInsideSimplex(Simplex & s, float3 p)
+{
+    if(s.dimension > 3) {
+        return pointInsideTetrahedronTest(p, s.p);
+    }
+    return 0;
+}
+
 inline __device__ void computeSeparateDistance(Simplex & s, float3 Pref, 
                                                TetrahedronProxy prxA,
                                                TetrahedronProxy prxB)
@@ -129,6 +177,10 @@ inline __device__ void computeSeparateDistance(Simplex & s, float3 Pref,
 	    }
 	    
 	    addToSimplex(s, w, localA, localB);
+	    
+	    if(isPointInsideSimplex(s, Pref)) {
+	        return;
+	    }
 	    
 	    i++;
 	}
