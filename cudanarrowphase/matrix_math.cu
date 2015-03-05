@@ -16,7 +16,7 @@ inline __device__ float determinant33( float a, float b, float c, float d, float
     return ( a*( e*i - h*f ) - b*( d*i - g*f ) + c*( d*h - g*e ) );
 }
 
-inline __device__ float determinant44(mat44 M)
+inline __device__ float determinant44(const mat44 & M)
 {
     return  ( M.v[0].x * determinant33( M.v[1].y, M.v[2].y, M.v[3].y, M.v[1].z, M.v[2].z, M.v[3].z, M.v[1].w, M.v[2].w, M.v[3].w )
 			- M.v[1].x * determinant33( M.v[0].y, M.v[2].y, M.v[3].y, M.v[0].z, M.v[2].z, M.v[3].z, M.v[0].w, M.v[2].w, M.v[3].w )

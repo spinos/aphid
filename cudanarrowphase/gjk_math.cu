@@ -167,15 +167,11 @@ inline __device__ BarycentricCoordinate getBarycentricCoordinate3(const float3 &
     }  
     
 	float3 na = float3_cross( float3_difference(v[2], v[1]), float3_difference(p, v[1]) );
-    float D1 = float3_dot(n, na);
+    coord.x = float3_dot(n, na) / D0;
 	float3 nb = float3_cross( float3_difference(v[0], v[2]), float3_difference(p, v[2]) );  
-    float D2 = float3_dot(n, nb);
+    coord.y = float3_dot(n, nb) / D0;
 	float3 nc = float3_cross( float3_difference(v[1], v[0]), float3_difference(p, v[0]) );
-    float D3 = float3_dot(n, nc);
-    
-    coord.x = D1/D0;
-    coord.y = D2/D0;
-    coord.z = D3/D0;
+    coord.z = float3_dot(n, nc) / D0;
     coord.w = -1.f;
     
     return coord;
@@ -343,7 +339,7 @@ inline __device__ void computeClosestPointOnSimplex(Simplex & s, float3 p, Close
 inline __device__ void computeContributionSimplex(BarycentricCoordinate & dst, const Simplex & s, const float3 & q)
 {
     if(s.dimension < 2) {
-        dst = make_float4(1.f, 0.f, 0.f, 0.f);
+        dst = make_float4(1.f, -1.f, -1.f, -1.f);
     }
     else if(s.dimension < 3) {
         dst = getBarycentricCoordinate2(q, s.p);
@@ -362,26 +358,35 @@ inline __device__ void interpolatePointAB(Simplex & s,
 {
 	pA = make_float3(0.f, 0.f, 0.f);
 	pB = make_float3(0.f, 0.f, 0.f);
+	/*
+	if(contributes.x > 0.f) {
+	    pA = float3_add(pA, scale_float3_by(s.pA[0], contributes.x));
+	    pB = float3_add(pB, scale_float3_by(s.pB[0], contributes.x));
+	}
 	
-	pA = float3_add(pA, scale_float3_by(s.pA[0], contributes.x));
-	pA = float3_add(pA, scale_float3_by(s.pA[1], contributes.y));
-	pA = float3_add(pA, scale_float3_by(s.pA[2], contributes.z));
-	pA = float3_add(pA, scale_float3_by(s.pA[3], contributes.w));
+	if(contributes.y > 0.f) {
+	    pA = float3_add(pA, scale_float3_by(s.pA[1], contributes.y));
+	    pB = float3_add(pB, scale_float3_by(s.pB[1], contributes.y));
+	}
 	
-	pB = float3_add(pB, scale_float3_by(s.pB[0], contributes.x));
-	pB = float3_add(pB, scale_float3_by(s.pB[1], contributes.y));
-	pB = float3_add(pB, scale_float3_by(s.pB[2], contributes.z));
-	pB = float3_add(pB, scale_float3_by(s.pB[3], contributes.w));
+	if(contributes.z > 0.f) {
+	    pA = float3_add(pA, scale_float3_by(s.pA[2], contributes.z));
+	    pB = float3_add(pB, scale_float3_by(s.pB[2], contributes.z));
+	}
 	
-	//const float * wei = &contributes.x;
-	//int i;
-	//for(i =0; i < 4; i++) {
-		//if(wei[i] > 1e-5) {
-		    //pA = a[i];
-			//pA = float3_add(pA, scale_float3_by(a[i], wei[i]));
-			//pB = float3_add(pB, scale_float3_by(b[i], wei[i]));
-		//}
-	//}
+	if(contributes.w > 0.f) {
+	    pA = float3_add(pA, scale_float3_by(s.pA[3], contributes.w));
+	    pB = float3_add(pB, scale_float3_by(s.pB[3], contributes.w));
+	}
+	*/
+	const float * wei = &contributes.x;
+	int i;
+	for(i =0; i < s.dimension; i++) {
+		if(wei[i] > 1e-5) {
+		    pA = float3_add(pA, scale_float3_by(s.pA[i], wei[i]));
+			pB = float3_add(pB, scale_float3_by(s.pB[i], wei[i]));
+		}
+	}
 }
 
 inline __device__ void compareAndSwap(float * key, float3 * v1, float3* v2, float3 * v3, int a, int b)
@@ -446,7 +451,8 @@ inline __device__ void computeSeparateDistance(Simplex & s, float3 Pref,
                                                ClosestPointTestContext & ctc,
                                                float4 & separateAxis,
                                                float3 & pointA,
-                                               float3 & pointB)
+                                               float3 & pointB,
+                                               BarycentricCoordinate & coord)
 {
 	float3 v = initialPoint(prxA, Pref);
 	
@@ -455,8 +461,6 @@ inline __device__ void computeSeparateDistance(Simplex & s, float3 Pref,
 	float v2;
 	int i = 0;
 	
-	BarycentricCoordinate coord;
-
 	while(i<99) {
 	    supportA = supportPoint(prxA, float3_reverse(v), margin, localA);
 	    supportB = supportPoint(prxB, v, margin, localB);

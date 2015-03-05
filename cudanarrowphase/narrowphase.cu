@@ -85,7 +85,8 @@ __global__ void computeSeparateAxis_kernel(float4 * dstSA,
 	float3 Pref = make_float3(0.0f, 0.0f, 0.0f);
 
 	ClosestPointTestContext ctc;
-	computeSeparateDistance(s, Pref, prxA, prxB, ctc, dstSA[ind], dstPA[ind], dstPB[ind]);
+	BarycentricCoordinate coord;
+	computeSeparateDistance(s, Pref, prxA, prxB, ctc, dstSA[ind], dstPA[ind], dstPB[ind], coord);
 }
 
 extern "C" {
@@ -119,7 +120,7 @@ void narrowphaseComputeSeparateAxis(float4 * dstSA,
 		uint * pointStart, uint * indexStart,
 		uint numOverlappingPairs)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(60, 48);
+    int tpb = 64;//CudaBase::LimitNThreadPerBlock(60, 48);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numOverlappingPairs, 512);
     dim3 grid(nblk, 1, 1);

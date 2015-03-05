@@ -79,10 +79,14 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
 	glColor3f(0.2f, 0.01f, 0.f);
 	Vector3F dst, cenA, cenB;
 	for(i=0; i < phase->numContacts(); i++) {
+	    if(sa[i*4+3] < .1f) continue; 
 	    cenA = tetrahedronCenter(ptet, tetInd, pairInd[i * 2]);
 	    cenB = tetrahedronCenter(ptet, tetInd, pairInd[i * 2 + 1]);
 		dst.set(sa[i*4], sa[i*4+1], sa[i*4+2]);
 		m_drawer->arrow(cenB, cenB + dst);
+		
+		m_drawer->arrow(cenA, cenA + pa[i]);
+		m_drawer->arrow(cenB, cenB + pb[i]);
 	}
 	
 }
