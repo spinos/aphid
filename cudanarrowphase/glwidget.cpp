@@ -20,7 +20,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	float vy = 1.f;
 	for(j=0; j < 2; j++) {
 		for(i=0; i<grdx; i++) {
-			Vector3F base(2.3f * i - 60.f, 2.f * j + 1.f, 0.5f * i);
+			Vector3F base(2.3f * i - 60.f, 3.f * j + 1.f, 0.5f * i);
 			Vector3F right = base + Vector3F(1.75f, 0.f, 0.f);
 			Vector3F front = base + Vector3F(0.f, 0.f, 1.75f);
 			Vector3F top = base + Vector3F(0.f, 1.75f, 0.f);
@@ -110,7 +110,7 @@ void GLWidget::clientDraw()
 {
 	m_dbgDraw->drawTetra(m_tetra);
 	m_dbgDraw->drawTetraAtFrameEnd(m_tetra);
-	m_dbgDraw->drawSeparateAxis(m_narrowphase);
+	m_dbgDraw->drawSeparateAxis(m_narrowphase, m_hostPairs, m_tetra);
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

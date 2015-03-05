@@ -22,8 +22,8 @@ CudaNarrowphase::CudaNarrowphase()
 	m_pointCacheLoc = new CUDABuffer;
 	m_indexCacheLoc = new CUDABuffer;
 	m_separateAxis = new CUDABuffer;
-	m_pointA = new CUDABuffer;
-	m_pointB = new CUDABuffer;
+	m_localA = new CUDABuffer;
+	m_localB = new CUDABuffer;
 }
 
 CudaNarrowphase::~CudaNarrowphase() {}
@@ -31,11 +31,11 @@ CudaNarrowphase::~CudaNarrowphase() {}
 void CudaNarrowphase::getSeparateAxis(BaseBuffer * dst)
 { m_separateAxis->deviceToHost(dst->data(), dst->bufferSize()); }
 
-void CudaNarrowphase::getPointA(BaseBuffer * dst)
-{ m_pointA->deviceToHost(dst->data(), dst->bufferSize()); }
+void CudaNarrowphase::getLocalA(BaseBuffer * dst)
+{ m_localA->deviceToHost(dst->data(), dst->bufferSize()); }
 
-void CudaNarrowphase::getPointB(BaseBuffer * dst)
-{ m_pointB->deviceToHost(dst->data(), dst->bufferSize()); }
+void CudaNarrowphase::getLocalB(BaseBuffer * dst)
+{ m_localB->deviceToHost(dst->data(), dst->bufferSize()); }
 
 const unsigned CudaNarrowphase::numContacts() const
 { return m_numContacts; }
@@ -86,8 +86,8 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	}
 	
 	m_separateAxis->create(numOverlappingPairs * 16);
-	m_pointA->create(numOverlappingPairs * 12);
-	m_pointB->create(numOverlappingPairs * 12);
+	m_localA->create(numOverlappingPairs * 12);
+	m_localB->create(numOverlappingPairs * 12);
 	m_numContacts = numOverlappingPairs;
 	computeSeparateAxis(overlappingPairBuf, numOverlappingPairs);
 }
@@ -115,8 +115,8 @@ void CudaNarrowphase::writeObjectCache(CudaTetrahedronSystem * tetra,
 void CudaNarrowphase::computeSeparateAxis(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)
 {
 	void * dstSA = m_separateAxis->bufferOnDevice();
-	void * dstPA = m_pointA->bufferOnDevice();
-	void * dstPB = m_pointB->bufferOnDevice();
+	void * dstPA = m_localA->bufferOnDevice();
+	void * dstPB = m_localB->bufferOnDevice();
 	void * pairs = overlappingPairBuf->bufferOnDevice();
 	void * pos = m_pos->bufferOnDevice();
 	void * vel = m_vel->bufferOnDevice();

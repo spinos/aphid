@@ -18,9 +18,13 @@ struct Simplex {
 	int dimension;
 };
 
-struct TetrahedronProxy {
+struct MovingTetrahedron {
     float3 p[4];
     float3 v[4];
+};
+
+struct TetrahedronProxy {
+    float3 p[4];
 };
 
 inline __device__ float3 triangleNormal(const float3 * v)
@@ -447,7 +451,7 @@ inline __device__ void computeSeparateDistance(Simplex & s, float3 Pref,
 	float3 v = initialPoint(prxA, Pref);
 	
 	float3 w, supportA, supportB, localA, localB;
-	float margin = 0.05f;
+	float margin = 0.02f;
 	float v2;
 	int i = 0;
 	
@@ -498,7 +502,7 @@ inline __device__ void checkClosestDistance(Simplex & s,
 	addToSimplex(s, prxB.p[1], la, lb);
 	addToSimplex(s, prxB.p[2], la, lb);
 	addToSimplex(s, prxB.p[3], la, lb);
-	computeClosestPointOnSimplex(s, float3_add(prxA.p[2], scale_float3_by(prxA.v[2], 0.01667f)), result);
+	// computeClosestPointOnSimplex(s, float3_add(prxA.p[2], scale_float3_by(prxA.v[2], 0.01667f)), result);
 }
 
 #endif        //  #ifndef _GJK_MATH_H_
