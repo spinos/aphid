@@ -117,9 +117,9 @@ inline __device__ float3 supportPoint(TetrahedronProxy tet, float3 ref, float ma
     
     int i;
     
-    float3 center = make_float3(0.f, 0.f, 0.f);
-    for(i=0; i<4; i++) {
-        center = float3_add(tet.p[i], center);
+    float3 center = tet.p[0];
+    for(i=1; i<4; i++) {
+        center = float3_add(center, tet.p[i]);
     }
     center = scale_float3_by(center,0.25f);
     
