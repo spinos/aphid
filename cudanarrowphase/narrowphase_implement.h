@@ -14,7 +14,8 @@ void narrowphaseWriteObjectToCache(float3 * dstPos,
         uint numPoints,
 		uint numTetradedrons);
 
-void narrowphaseComputeSeparateAxis(float3 * dst,
+void narrowphaseComputeSeparateAxis(float4 * dstSA,
+        float3 * dstPA, float3 * dstPB,
 		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,

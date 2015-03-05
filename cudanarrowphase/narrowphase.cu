@@ -42,7 +42,8 @@ __global__ void writeObjectIndexToCache_kernel(uint4 * dstInd,
 	dstInd[ind] = srcInd[ind];
 }
 
-__global__ void computeSeparateAxis_kernel(float3 * dst, 
+__global__ void computeSeparateAxis_kernel(float4 * dstSA,
+        float3 * dstPA, float3 * dstPB, 
     uint2 * pairs,
     float3 * pos, float3 * vel, 
     uint4* tetrahedron, 
@@ -69,17 +70,20 @@ __global__ void computeSeparateAxis_kernel(float3 * dst,
 	
 	float3 Pref = make_float3(0.0f, 0.0f, 0.0f);
 
-	computeSeparateDistance(s, Pref, prxA, prxB);
+	ClosestPointTestContext ctc;
+	//ContactTestResult result;
+	computeSeparateDistance(s, Pref, prxA, prxB, ctc, dstSA[ind], dstPA[ind], dstPB[ind]);
 	
-	float3 pa = float3_add(prxA.p[0], scale_float3_by(prxA.v[0], 0.01667f));
-	float3 pb = float3_add(prxB.p[0], scale_float3_by(prxB.v[0], 0.01667f));
+	//dstSA[ind] = result.separateAxis;
+	
+	// float3 pa = float3_add(prxA.p[0], scale_float3_by(prxA.v[0], 0.01667f));
+	// float3 pb = float3_add(prxB.p[0], scale_float3_by(prxB.v[0], 0.01667f));
 	
 	// dst[ind] = scale_float3_by(float3_add(pa, pb), 0.5);
 	
-	ClosestTestContext ctc;
-	checkClosestDistance(s, prxA, prxB, ctc);
+	// checkClosestDistance(s, prxA, prxB, ctc);
 	
-	dst[ind] = ctc.closestPoint;
+	// dst[ind] = ctc.closestPoint;
 }
 
 extern "C" {
@@ -104,7 +108,8 @@ void narrowphaseWriteObjectToCache(float3 * dstPos,
     writeObjectIndexToCache_kernel<<< grid, block >>>(dstInd, srcInd, numTetradedrons);
 }
 
-void narrowphaseComputeSeparateAxis(float3 * dst,
+void narrowphaseComputeSeparateAxis(float4 * dstSA,
+        float3 * dstPA, float3 * dstPB,
 		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,
@@ -117,7 +122,7 @@ void narrowphaseComputeSeparateAxis(float3 * dst,
     unsigned nblk = iDivUp(numOverlappingPairs, 512);
     dim3 grid(nblk, 1, 1);
     
-    computeSeparateAxis_kernel<<< grid, block >>>(dst, pairs, pos, vel, ind, pointStart, indexStart, numOverlappingPairs);
+    computeSeparateAxis_kernel<<< grid, block >>>(dstSA, dstPA, dstPB, pairs, pos, vel, ind, pointStart, indexStart, numOverlappingPairs);
 }
 
 }

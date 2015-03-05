@@ -22,12 +22,20 @@ CudaNarrowphase::CudaNarrowphase()
 	m_pointCacheLoc = new CUDABuffer;
 	m_indexCacheLoc = new CUDABuffer;
 	m_separateAxis = new CUDABuffer;
+	m_pointA = new CUDABuffer;
+	m_pointB = new CUDABuffer;
 }
 
 CudaNarrowphase::~CudaNarrowphase() {}
 
 void CudaNarrowphase::getSeparateAxis(BaseBuffer * dst)
 { m_separateAxis->deviceToHost(dst->data(), dst->bufferSize()); }
+
+void CudaNarrowphase::getPointA(BaseBuffer * dst)
+{ m_pointA->deviceToHost(dst->data(), dst->bufferSize()); }
+
+void CudaNarrowphase::getPointB(BaseBuffer * dst)
+{ m_pointB->deviceToHost(dst->data(), dst->bufferSize()); }
 
 const unsigned CudaNarrowphase::numContacts() const
 { return m_numContacts; }
@@ -77,7 +85,9 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	        m_objectPointStart[i], m_objectIndexStart[i]);
 	}
 	
-	m_separateAxis->create(numOverlappingPairs * 12);
+	m_separateAxis->create(numOverlappingPairs * 16);
+	m_pointA->create(numOverlappingPairs * 12);
+	m_pointB->create(numOverlappingPairs * 12);
 	m_numContacts = numOverlappingPairs;
 	computeSeparateAxis(overlappingPairBuf, numOverlappingPairs);
 }
@@ -104,12 +114,16 @@ void CudaNarrowphase::writeObjectCache(CudaTetrahedronSystem * tetra,
 
 void CudaNarrowphase::computeSeparateAxis(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)
 {
-	void * dst = m_separateAxis->bufferOnDevice();
+	void * dstSA = m_separateAxis->bufferOnDevice();
+	void * dstPA = m_pointA->bufferOnDevice();
+	void * dstPB = m_pointB->bufferOnDevice();
 	void * pairs = overlappingPairBuf->bufferOnDevice();
 	void * pos = m_pos->bufferOnDevice();
 	void * vel = m_vel->bufferOnDevice();
 	void * ind = m_ind->bufferOnDevice();
-	narrowphaseComputeSeparateAxis((float3 *)dst,
+	narrowphaseComputeSeparateAxis((float4 *)dstSA,
+	    (float3 *)dstPA,
+	    (float3 *)dstPB,
 		(uint2 *)pairs,
 		(float3 *)pos,
 		(float3 *)vel,

@@ -31,40 +31,40 @@ inline __device__ int getIndexWithInternalNodeMarkerSet(int isLeaf, int index)
 inline __device__ int getIndexWithInternalNodeMarkerRemoved(int index) 
 { return index & (~0x80000000); }
 
-inline __device__ float float3_length(float3 v) 
+inline __device__ float float3_length(const float3 & v) 
 { return sqrtf(v.x*v.x + v.y*v.y + v.z*v.z); }
 
-inline __device__ float float3_length2(float3 v) 
+inline __device__ float float3_length2(const float3 & v) 
 { return (v.x*v.x + v.y*v.y + v.z*v.z); }
 
-inline __device__ float3 float3_normalize(float3 v)
+inline __device__ float3 float3_normalize(const float3 & v)
 {
 	float l = float3_length(v);
 	l = 1.0 / l;
 	return make_float3(v.x * l, v.y * l, v.z * l);
 }
 
-inline __device__ float3 float3_reverse(float3 v)
+inline __device__ float3 float3_reverse(const float3 & v)
 { return make_float3(-v.x, -v.y, -v.z); }
 
-inline __device__ float3 float3_difference(float3 v1, float3 v0)
-{ return make_float3(v1.x - v0.x, v1.y - v0.y, v1.z - v0.z); }
+inline __device__ float3 float3_difference(const float3 & v1, const float3 & v2)
+{ return make_float3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z); }
 
-inline __device__ float3 float3_add(float3 v1, float3 v0)
-{ return make_float3(v1.x + v0.x, v1.y + v0.y, v1.z + v0.z); }
+inline __device__ float3 float3_add(const float3 & v1, const float3 & v2)
+{ return make_float3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z); }
 
-inline __device__ float3 float3_progress(float3 p0, float3 v0, float h)
+inline __device__ float3 float3_progress(const float3 & p0, const float3 & v0, float h)
 { return make_float3(p0.x + v0.x * h, p0.y + v0.y * h, p0.z + v0.z * h); }
 
-inline __device__ float3 scale_float3_by(float3 v, float s)
+inline __device__ float3 scale_float3_by(const float3 & v, float s)
 { return make_float3(v.x * s, v.y * s, v.z * s); }
 
-inline __device__ float distance_between(float3 v1, float3 v0)
+inline __device__ float distance_between(const float3 & v1, const float3 & v0)
 {
     return float3_length(float3_difference(v1, v0)); 
 }
 
-inline __device__ float distance2_between(float3 v1, float3 v0)
+inline __device__ float distance2_between(const float3 & v1, const float3 & v0)
 {
     return float3_length2(float3_difference(v1, v0)); 
 }
