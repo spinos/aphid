@@ -6,10 +6,12 @@
 #include "barycentric.cu"
 
 #define GJK_MAX_NUM_ITERATIONS 32
+#define GJK_THIN_MARGIN 0.05f
+
 struct ClosestPointTestContext {
     float3 referencePoint;
-    float3 closestPoint;
     float closestDistance;
+    float3 closestPoint;
 };
 
 struct Simplex {
@@ -292,6 +294,7 @@ inline __device__ void smallestSimplex(Simplex & s, BarycentricCoordinate & cont
 inline __device__ void computeSeparateDistance(Simplex & s, 
                                                const TetrahedronProxy & prxA,
                                                const TetrahedronProxy & prxB,
+                                               float margin,
                                                ClosestPointTestContext & ctc,
                                                float4 & separateAxis,
                                                BarycentricCoordinate & coord)
@@ -300,16 +303,13 @@ inline __device__ void computeSeparateDistance(Simplex & s,
 
 	float3 v = initialPoint(prxA, ctc.referencePoint);
 	
-	float3 w, supportA, supportB, localA, localB;
-	float margin = 0.02f;
+	float3 w, localA, localB;
 	float v2;
 	int i = 0;
 	
 	while(i<GJK_MAX_NUM_ITERATIONS) {
-	    supportA = supportPoint(prxA, float3_reverse(v), margin, localA);
-	    supportB = supportPoint(prxB, v, margin, localB);
-	    
-	    w = float3_difference(supportA, supportB);
+	    w = float3_difference(supportPoint(prxA, float3_reverse(v), margin, localA), 
+	                            supportPoint(prxB, v, margin, localB));
 	    
 	    v2 = float3_length2(v);
 	    if((v2 - float3_dot(w, v)) < 0.0001f * v2) {

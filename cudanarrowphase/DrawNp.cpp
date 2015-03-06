@@ -12,14 +12,13 @@
 #include <TetrahedronSystem.h>
 #include <BaseBuffer.h>
 #include <CudaNarrowphase.h>
+#include "narrowphase_implement.h"
 
 DrawNp::DrawNp() 
 {
 	m_x1 = new BaseBuffer;
-	m_separateAxis = new BaseBuffer;
-	m_localA = new BaseBuffer;
-	m_localB = new BaseBuffer;
 	m_coord = new BaseBuffer;
+	m_contact = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -63,43 +62,41 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
     Vector3F * ptet = (Vector3F *)m_x1->data();
     
     const unsigned nc = phase->numContacts();
-	m_separateAxis->create(nc * 16);
-	m_localA->create(nc * 12);
-	m_localB->create(nc * 12);
 	m_coord->create(nc * 16);
+	m_contact->create(nc * 48);
+	// std::cout<<" cd size "<<sizeof(ContactData)<<" ";
 	
-	phase->getSeparateAxis(m_separateAxis);
-	phase->getLocalA(m_localA);
-	phase->getLocalB(m_localB);
 	phase->getCoord(m_coord);
+	phase->getContact(m_contact);
 	
 	unsigned * pairInd = (unsigned *)pairs->data();
 	unsigned * tetInd = (unsigned *)tetra->hostTretradhedronIndices();
 	
-	float * sa = (float *)m_separateAxis->data();
-	Vector3F * pa = (Vector3F *)m_localA->data();
-	Vector3F * pb = (Vector3F *)m_localB->data();
 	float * coord = (float *)m_coord->data();
+	ContactData * contact = (ContactData *)m_contact->data();
+	
 	unsigned i;
 	glColor3f(0.2f, 0.01f, 0.f);
 	Vector3F dst, cenA, cenB;
 	for(i=0; i < nc; i++) {
-	    if(sa[i*4+3] < .1f) continue; 
+		ContactData & cf = contact[i];
+		
+	    // if(sa[i*4+3] < .1f) continue; 
+		if(cf.separateAxis.w < .1f) continue;
 	    cenA = tetrahedronCenter(ptet, tetInd, pairInd[i * 2]);
 	    cenB = tetrahedronCenter(ptet, tetInd, pairInd[i * 2 + 1]);
-		dst.set(sa[i*4], sa[i*4+1], sa[i*4+2]);
 		
 		m_drawer->setColor(.5f, 0.f, 0.f);
-		m_drawer->arrow(cenB + pb[i], cenB + pb[i] + dst);
+		
+		m_drawer->arrow(cenB + Vector3F(cf.localB.x, cf.localB.y, cf.localB.z), 
+		cenB + Vector3F(cf.localB.x + cf.separateAxis.x, cf.localB.y + cf.separateAxis.y, cf.localB.z + cf.separateAxis.z));
 		
 		m_drawer->setColor(0.f, .5f, 0.f);
-		m_drawer->arrow(cenA, cenA + pa[i]);
-		m_drawer->arrow(cenB, cenB + pb[i]);
+		m_drawer->arrow(cenA, cenA + Vector3F(cf.localA.x, cf.localA.y, cf.localA.z));
+		m_drawer->arrow(cenB, cenB + Vector3F(cf.localB.x, cf.localB.y, cf.localB.z));
 		
 		// dst = interpolatePointTetrahedron(ptet, tetInd, pairInd[i * 2], &coord[i*4]);
-		
 		// m_drawer->arrow(cenA, dst);
-		
 	}
 }
 

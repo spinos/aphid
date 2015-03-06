@@ -21,25 +21,17 @@ CudaNarrowphase::CudaNarrowphase()
     m_ind = new CUDABuffer;
 	m_pointCacheLoc = new CUDABuffer;
 	m_indexCacheLoc = new CUDABuffer;
-	m_separateAxis = new CUDABuffer;
-	m_localA = new CUDABuffer;
-	m_localB = new CUDABuffer;
 	m_coord = new CUDABuffer;
+	m_contact = new CUDABuffer;
 }
 
 CudaNarrowphase::~CudaNarrowphase() {}
 
-void CudaNarrowphase::getSeparateAxis(BaseBuffer * dst)
-{ m_separateAxis->deviceToHost(dst->data(), dst->bufferSize()); }
-
-void CudaNarrowphase::getLocalA(BaseBuffer * dst)
-{ m_localA->deviceToHost(dst->data(), dst->bufferSize()); }
-
-void CudaNarrowphase::getLocalB(BaseBuffer * dst)
-{ m_localB->deviceToHost(dst->data(), dst->bufferSize()); }
-
 void CudaNarrowphase::getCoord(BaseBuffer * dst)
 { m_coord->deviceToHost(dst->data(), dst->bufferSize()); }
+
+void CudaNarrowphase::getContact(BaseBuffer * dst)
+{ m_contact->deviceToHost(dst->data(), dst->bufferSize()); }
 
 const unsigned CudaNarrowphase::numContacts() const
 { return m_numContacts; }
@@ -105,28 +97,21 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 {
     if(numOverlappingPairs < 1) return;
 	
-	m_separateAxis->create(numOverlappingPairs * 16);
-	m_localA->create(numOverlappingPairs * 12);
-	m_localB->create(numOverlappingPairs * 12);
 	m_coord->create(numOverlappingPairs * 16);
+	m_contact->create(numOverlappingPairs * 48);
 	m_numContacts = numOverlappingPairs;
 	computeSeparateAxis(overlappingPairBuf, numOverlappingPairs);
 }
 
 void CudaNarrowphase::computeSeparateAxis(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)
 {
-	void * dstSA = m_separateAxis->bufferOnDevice();
-	void * dstPA = m_localA->bufferOnDevice();
-	void * dstPB = m_localB->bufferOnDevice();
 	void * dstCoord = m_coord->bufferOnDevice();
+	void * dstContact = m_contact->bufferOnDevice();
 	void * pairs = overlappingPairBuf->bufferOnDevice();
 	void * pos = m_pos->bufferOnDevice();
 	void * vel = m_vel->bufferOnDevice();
 	void * ind = m_ind->bufferOnDevice();
-	narrowphaseComputeSeparateAxis((float4 *)dstSA,
-	    (float3 *)dstPA,
-	    (float3 *)dstPB,
-	    (BarycentricCoordinate *)dstCoord,
+	narrowphaseComputeSeparateAxis((ContactData *)dstContact,
 		(uint2 *)pairs,
 		(float3 *)pos,
 		(float3 *)vel,

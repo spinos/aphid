@@ -17,6 +17,12 @@ typedef unsigned long long uint64;
 
 typedef float4 BarycentricCoordinate;
 
+struct ContactData {
+    float4 separateAxis;
+    float3 localA;
+    float3 localB;
+};
+
 struct mat33 {
     float3 v[3];
 };

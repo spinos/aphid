@@ -29,22 +29,7 @@ inline __device__ void progressTetrahedron(TetrahedronProxy & prx, const MovingT
     prx.p[3] = float3_add(tet.p[3], scale_float3_by(tet.v[3], h));
 }
 
-__global__ void writeObjectPointToCache_kernel(float3 * dstPos,
-        float3 * dstVel,
-        float3 * srcPos,
-        float3 * srcVel,
-        uint maxInd)
-{
-    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-
-	if(ind >= maxInd) return;
-	dstPos[ind] = srcPos[ind];
-	dstVel[ind] = srcVel[ind];
-}
-
-__global__ void computeSeparateAxis_kernel(float4 * dstSA,
-        float3 * dstPA, float3 * dstPB, 
-        BarycentricCoordinate * dstCoord,                                
+__global__ void computeSeparateAxis_kernel(ContactData * dstContact,
     uint2 * pairs,
     float3 * pos, float3 * vel, 
     uint4* tetrahedron, 
@@ -74,16 +59,16 @@ __global__ void computeSeparateAxis_kernel(float4 * dstSA,
 
 	ClosestPointTestContext ctc;
 	ctc.referencePoint = make_float3(0.0f, 0.0f, 0.0f);
-	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], ctc, dstSA[ind], dstCoord[ind]);
 	
-	interpolatePointAB(sS[threadIdx.x], dstCoord[ind], dstPA[ind], dstPB[ind]);
+	BarycentricCoordinate coord;
+	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.05f, ctc, dstContact[ind].separateAxis, coord);
+	
+	interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
 }
 
 extern "C" {
 
-void narrowphaseComputeSeparateAxis(float4 * dstSA,
-        float3 * dstPA, float3 * dstPB,
-        BarycentricCoordinate * dstCoord,
+void narrowphaseComputeSeparateAxis(ContactData * dstContact,
 		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,
@@ -91,12 +76,11 @@ void narrowphaseComputeSeparateAxis(float4 * dstSA,
 		uint * pointStart, uint * indexStart,
 		uint numOverlappingPairs)
 {
-    int tpb = GJK_BLOCK_SIZE;//CudaBase::LimitNThreadPerBlock(60, 48);
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numOverlappingPairs, tpb);
+    dim3 block(GJK_BLOCK_SIZE, 1, 1);
+    unsigned nblk = iDivUp(numOverlappingPairs, GJK_BLOCK_SIZE);
     dim3 grid(nblk, 1, 1);
     
-    computeSeparateAxis_kernel<<< grid, block >>>(dstSA, dstPA, dstPB, dstCoord, pairs, pos, vel, ind, pointStart, indexStart, numOverlappingPairs);
+    computeSeparateAxis_kernel<<< grid, block >>>(dstContact, pairs, pos, vel, ind, pointStart, indexStart, numOverlappingPairs);
 }
 
 }

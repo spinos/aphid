@@ -20,10 +20,8 @@ public:
 	void addTetrahedronSystem(CudaTetrahedronSystem * tetra);
 	void computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs);
 	
-	void getSeparateAxis(BaseBuffer * dst);
-	void getLocalA(BaseBuffer * dst);
-	void getLocalB(BaseBuffer * dst);
 	void getCoord(BaseBuffer * dst);
+	void getContact(BaseBuffer * dst);
 	const unsigned numContacts() const;
 protected:
 
@@ -35,10 +33,8 @@ private:
     CUDABuffer * m_ind;
 	CUDABuffer * m_pointCacheLoc;
 	CUDABuffer * m_indexCacheLoc;
-	CUDABuffer * m_separateAxis;
-	CUDABuffer * m_localA;
-	CUDABuffer * m_localB;
 	CUDABuffer * m_coord;
+	CUDABuffer * m_contact;
     CudaTetrahedronSystem * m_objects[CUDANARROWPHASE_MAX_NUMOBJECTS];
     unsigned m_objectPointStart[CUDANARROWPHASE_MAX_NUMOBJECTS];
 	unsigned m_objectIndexStart[CUDANARROWPHASE_MAX_NUMOBJECTS];

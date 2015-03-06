@@ -29,8 +29,6 @@ private:
 private:
 	GeoDrawer * m_drawer;
 	BaseBuffer * m_x1;
-	BaseBuffer * m_separateAxis;
-	BaseBuffer * m_localA;
-	BaseBuffer * m_localB;
 	BaseBuffer * m_coord;
+	BaseBuffer * m_contact;
 };

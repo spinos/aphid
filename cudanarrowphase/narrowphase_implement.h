@@ -4,9 +4,7 @@
 #include "bvh_common.h"
 
 extern "C" {
-void narrowphaseComputeSeparateAxis(float4 * dstSA,
-        float3 * dstPA, float3 * dstPB,
-        BarycentricCoordinate * dstCoord,
+void narrowphaseComputeSeparateAxis(ContactData * dstContact,
 		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,
