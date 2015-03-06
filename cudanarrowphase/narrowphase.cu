@@ -3,6 +3,8 @@
 #include <gjk_math.cu>
 #include <CudaBase.h>
 
+#define GJK_BLOCK_SIZE 64
+
 inline __device__ void extractTetrahedron(MovingTetrahedron & tet, uint start, uint4 vertices, float3 * pos, float3 * vel)
 {
     uint ind = start + vertices.x;
@@ -59,6 +61,9 @@ __global__ void computeSeparateAxis_kernel(float4 * dstSA,
     uint * pointStart, uint * indexStart,
     uint maxInd)
 {
+    __shared__ Simplex sS[GJK_BLOCK_SIZE];
+    __shared__ TetrahedronProxy sPrxA[GJK_BLOCK_SIZE];
+	__shared__ TetrahedronProxy sPrxB[GJK_BLOCK_SIZE];
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 
 	if(ind >= maxInd) return;
@@ -74,21 +79,15 @@ __global__ void computeSeparateAxis_kernel(float4 * dstSA,
 	extractTetrahedron(tA, pointStart[objA], tetrahedron[indexStart[objA] + elmA], pos, vel);
 	extractTetrahedron(tB, pointStart[objB], tetrahedron[indexStart[objB] + elmB], pos, vel);
 	
-	TetrahedronProxy prxA;
-	TetrahedronProxy prxB;
-	
-	progressTetrahedron(prxA, tA, 0.01667f);
-	progressTetrahedron(prxB, tB, 0.01667f);
+	progressTetrahedron(sPrxA[threadIdx.x], tA, 0.01667f);
+	progressTetrahedron(sPrxB[threadIdx.x], tB, 0.01667f);
 
-	Simplex s;
-	resetSimplex(s);
+	resetSimplex(sS[threadIdx.x]);
 	
 	float3 Pref = make_float3(0.0f, 0.0f, 0.0f);
 
 	ClosestPointTestContext ctc;
-	// BarycentricCoordinate coord;
-	computeSeparateDistance(s, Pref, prxA, prxB, ctc, dstSA[ind], dstPA[ind], dstPB[ind], dstCoord[ind]);
-	// checkClosestDistance(s, prxA, prxB, ctc, dstSA[ind], dstPA[ind], dstPB[ind], dstCoord[ind]);
+	computeSeparateDistance(sS[threadIdx.x], Pref, sPrxA[threadIdx.x], sPrxB[threadIdx.x], ctc, dstSA[ind], dstPA[ind], dstPB[ind], dstCoord[ind]);
 }
 
 extern "C" {
@@ -123,7 +122,7 @@ void narrowphaseComputeSeparateAxis(float4 * dstSA,
 		uint * pointStart, uint * indexStart,
 		uint numOverlappingPairs)
 {
-    int tpb = 64;//CudaBase::LimitNThreadPerBlock(60, 48);
+    int tpb = GJK_BLOCK_SIZE;//CudaBase::LimitNThreadPerBlock(60, 48);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numOverlappingPairs, tpb);
     dim3 grid(nblk, 1, 1);

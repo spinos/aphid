@@ -59,6 +59,7 @@ CUSOURCES = ../cudabvh/bvh_math.cu \
             ../cudabvh/reduceRange.cu \
             ../radixsort/radixsort.cu \
             matrix_math.cu \
+            barycentric.cu \
             gjk_math.cu \
             narrowphase.cu
             
