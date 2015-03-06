@@ -5,8 +5,9 @@
 #include "bvh_math.cu"
 #include "barycentric.cu"
 
-#define GJK_MAX_NUM_ITERATIONS 64
+#define GJK_MAX_NUM_ITERATIONS 32
 struct ClosestPointTestContext {
+    float3 referencePoint;
     float3 closestPoint;
     float closestDistance;
 };
@@ -189,7 +190,6 @@ inline __device__ void computeClosestPointOnTetrahedron(float3 p, float3 * v, Cl
 	pr[1] = v[2];
 	pr[2] = v[3];
 	computeClosestPointOnTriangle(p, pr, result);
-	
 }
 
 inline __device__ void computeClosestPointOnSimplex(Simplex & s, float3 p, ClosestPointTestContext & ctc)
@@ -209,6 +209,11 @@ inline __device__ void computeClosestPointOnSimplex(Simplex & s, float3 p, Close
     else {
         computeClosestPointOnTetrahedron(p, s.p, ctc);
     }
+}
+
+inline __device__ void computeClosestPointOnSimplex(Simplex & s, ClosestPointTestContext & ctc)
+{
+    computeClosestPointOnSimplex(s, ctc.referencePoint, ctc);
 }
 
 inline __device__ void computeContributionSimplex(BarycentricCoordinate & dst, const Simplex & s, const float3 & q)
@@ -233,27 +238,6 @@ inline __device__ void interpolatePointAB(Simplex & s,
 {
 	pA = make_float3(0.f, 0.f, 0.f);
 	pB = make_float3(0.f, 0.f, 0.f);
-	/*
-	if(contributes.x > 0.f) {
-	    pA = float3_add(pA, scale_float3_by(s.pA[0], contributes.x));
-	    pB = float3_add(pB, scale_float3_by(s.pB[0], contributes.x));
-	}
-	
-	if(contributes.y > 0.f) {
-	    pA = float3_add(pA, scale_float3_by(s.pA[1], contributes.y));
-	    pB = float3_add(pB, scale_float3_by(s.pB[1], contributes.y));
-	}
-	
-	if(contributes.z > 0.f) {
-	    pA = float3_add(pA, scale_float3_by(s.pA[2], contributes.z));
-	    pB = float3_add(pB, scale_float3_by(s.pB[2], contributes.z));
-	}
-	
-	if(contributes.w > 0.f) {
-	    pA = float3_add(pA, scale_float3_by(s.pA[3], contributes.w));
-	    pB = float3_add(pB, scale_float3_by(s.pB[3], contributes.w));
-	}
-	*/
 	const float * wei = &contributes.x;
 	int i;
 	for(i =0; i < s.dimension; i++) {
@@ -305,7 +289,7 @@ inline __device__ void smallestSimplex(Simplex & s, BarycentricCoordinate & cont
 	if(bar[3] > 1e-5) s.dimension++;
 }
 
-inline __device__ void computeSeparateDistance(Simplex & s, float3 Pref, 
+inline __device__ void computeSeparateDistance(Simplex & s, 
                                                const TetrahedronProxy & prxA,
                                                const TetrahedronProxy & prxB,
                                                ClosestPointTestContext & ctc,
@@ -314,7 +298,7 @@ inline __device__ void computeSeparateDistance(Simplex & s, float3 Pref,
                                                float3 & pointB,
                                                BarycentricCoordinate & coord)
 {
-	float3 v = initialPoint(prxA, Pref);
+	float3 v = initialPoint(prxA, ctc.referencePoint);
 	
 	float3 w, supportA, supportB, localA, localB;
 	float margin = 0.02f;
@@ -334,14 +318,14 @@ inline __device__ void computeSeparateDistance(Simplex & s, float3 Pref,
 	    
 	    addToSimplex(s, w, localA, localB);
 	    
-	    if(isPointInsideSimplex(s, Pref)) {
+	    if(isPointInsideSimplex(s, ctc.referencePoint)) {
 	        separateAxis.w = 0.f;
 	        return;
 	    }
 	    
-	    computeClosestPointOnSimplex(s, Pref, ctc);
+	    computeClosestPointOnSimplex(s, ctc);
 	    
-	    v = float3_difference(ctc.closestPoint, Pref);
+	    v = float3_difference(ctc.closestPoint, ctc.referencePoint);
 	    separateAxis = make_float4(v.x, v.y, v.z, 1.f);
 	    
 	    computeContributionSimplex(coord, s, ctc.closestPoint);

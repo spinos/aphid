@@ -83,11 +83,10 @@ __global__ void computeSeparateAxis_kernel(float4 * dstSA,
 	progressTetrahedron(sPrxB[threadIdx.x], tB, 0.01667f);
 
 	resetSimplex(sS[threadIdx.x]);
-	
-	float3 Pref = make_float3(0.0f, 0.0f, 0.0f);
 
 	ClosestPointTestContext ctc;
-	computeSeparateDistance(sS[threadIdx.x], Pref, sPrxA[threadIdx.x], sPrxB[threadIdx.x], ctc, dstSA[ind], dstPA[ind], dstPB[ind], dstCoord[ind]);
+	ctc.referencePoint = make_float3(0.0f, 0.0f, 0.0f);
+	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], ctc, dstSA[ind], dstPA[ind], dstPB[ind], dstCoord[ind]);
 }
 
 extern "C" {
