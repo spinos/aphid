@@ -23,6 +23,7 @@ public:
 	void getSeparateAxis(BaseBuffer * dst);
 	void getLocalA(BaseBuffer * dst);
 	void getLocalB(BaseBuffer * dst);
+	void getCoord(BaseBuffer * dst);
 	const unsigned numContacts() const;
 protected:
 
@@ -39,6 +40,7 @@ private:
 	CUDABuffer * m_separateAxis;
 	CUDABuffer * m_localA;
 	CUDABuffer * m_localB;
+	CUDABuffer * m_coord;
     CudaTetrahedronSystem * m_objects[CUDANARROWPHASE_MAX_NUMOBJECTS];
     unsigned m_objectPointStart[CUDANARROWPHASE_MAX_NUMOBJECTS];
 	unsigned m_objectIndexStart[CUDANARROWPHASE_MAX_NUMOBJECTS];

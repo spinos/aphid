@@ -100,7 +100,7 @@ void GLWidget::clientInit()
 	m_devicePairs->hostToDevice(m_hostPairs->data(), 99 *8);
 	
 	m_narrowphase->computeContacts(m_devicePairs, 99);
-	
+	m_dbgDraw->printCoord(m_narrowphase, m_hostPairs);
 	// connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	// connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));

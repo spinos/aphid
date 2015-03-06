@@ -16,6 +16,7 @@ void narrowphaseWriteObjectToCache(float3 * dstPos,
 
 void narrowphaseComputeSeparateAxis(float4 * dstSA,
         float3 * dstPA, float3 * dstPB,
+        BarycentricCoordinate * dstCoord,
 		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,

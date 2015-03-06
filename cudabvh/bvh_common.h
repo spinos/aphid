@@ -15,6 +15,8 @@
 typedef unsigned int uint;
 typedef unsigned long long uint64;
 
+typedef float4 BarycentricCoordinate;
+
 struct mat33 {
     float3 v[3];
 };

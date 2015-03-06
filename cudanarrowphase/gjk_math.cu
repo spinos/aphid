@@ -1,10 +1,9 @@
 #ifndef _GJK_MATH_H_
 #define _GJK_MATH_H_
 
+#include "bvh_common.h"
 #include "bvh_math.cu"
 #include "matrix_math.cu"
-
-typedef float4 BarycentricCoordinate;
 
 struct ClosestPointTestContext {
     float3 closestPoint;
@@ -160,7 +159,7 @@ inline __device__ BarycentricCoordinate getBarycentricCoordinate3(const float3 &
     
     float3 n = triangleNormal2(v);
 	
-    float D0 = float3_length(n);
+    float D0 = float3_length2(n);
     if(D0 < 1e-6) {
         coord.x = coord.y = coord.z = coord.w = -1.f;
         return coord;
@@ -497,16 +496,48 @@ inline __device__ void computeSeparateDistance(Simplex & s, float3 Pref,
 inline __device__ void checkClosestDistance(Simplex & s, 
                                         const TetrahedronProxy & prxA,
                                         const TetrahedronProxy & prxB,
-                                        ClosestPointTestContext & result)
+                                        ClosestPointTestContext & result,
+                                        float4 & dstSA,
+                                        float3 & dstPA,
+                                        float3 & dstPB,
+                                        BarycentricCoordinate & coord)
 {
+    float3 cenA = prxA.p[0];
+	cenA = float3_add(cenA, prxA.p[1]);
+	cenA = float3_add(cenA, prxA.p[2]);
+	cenA = float3_add(cenA, prxA.p[3]);
+	cenA = scale_float3_by(cenA, 0.25f);
+	
+	float3 cenB = prxB.p[0];
+	cenB = float3_add(cenB, prxB.p[1]);
+	cenB = float3_add(cenB, prxB.p[2]);
+	cenB = float3_add(cenB, prxB.p[3]);
+	cenB = scale_float3_by(cenB, 0.25f);
+	
     resetSimplex(s);
 	
 	float3 la, lb;
-	addToSimplex(s, prxB.p[0], la, lb);
-	addToSimplex(s, prxB.p[1], la, lb);
-	addToSimplex(s, prxB.p[2], la, lb);
-	addToSimplex(s, prxB.p[3], la, lb);
-	// computeClosestPointOnSimplex(s, float3_add(prxA.p[2], scale_float3_by(prxA.v[2], 0.01667f)), result);
+	la = float3_difference(prxA.p[0], cenA);
+	lb = float3_difference(prxB.p[0], cenB);
+	addToSimplex(s, prxA.p[0], la, lb);
+	la = float3_difference(prxA.p[1], cenA);
+	lb = float3_difference(prxB.p[1], cenB);
+	addToSimplex(s, prxA.p[1], la, lb);
+	la = float3_difference(prxA.p[2], cenA);
+	lb = float3_difference(prxB.p[2], cenB);
+	// addToSimplex(s, prxA.p[2], la, lb);
+	la = float3_difference(prxA.p[3], cenA);
+	lb = float3_difference(prxB.p[3], cenB);
+	addToSimplex(s, prxA.p[3], la, lb);
+
+	computeClosestPointOnSimplex(s, cenB, result);
+	
+	float3 d = float3_difference(result.closestPoint, cenB);
+	dstSA = make_float4(d.x, d.y, d.z, 1.f);
+	
+	computeContributionSimplex(coord, s, result.closestPoint);
+	
+	interpolatePointAB(s, coord, dstPA, dstPB);
 }
 
 #endif        //  #ifndef _GJK_MATH_H_

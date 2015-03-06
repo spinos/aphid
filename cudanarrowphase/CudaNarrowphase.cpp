@@ -24,6 +24,7 @@ CudaNarrowphase::CudaNarrowphase()
 	m_separateAxis = new CUDABuffer;
 	m_localA = new CUDABuffer;
 	m_localB = new CUDABuffer;
+	m_coord = new CUDABuffer;
 }
 
 CudaNarrowphase::~CudaNarrowphase() {}
@@ -36,6 +37,9 @@ void CudaNarrowphase::getLocalA(BaseBuffer * dst)
 
 void CudaNarrowphase::getLocalB(BaseBuffer * dst)
 { m_localB->deviceToHost(dst->data(), dst->bufferSize()); }
+
+void CudaNarrowphase::getCoord(BaseBuffer * dst)
+{ m_coord->deviceToHost(dst->data(), dst->bufferSize()); }
 
 const unsigned CudaNarrowphase::numContacts() const
 { return m_numContacts; }
@@ -88,6 +92,7 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	m_separateAxis->create(numOverlappingPairs * 16);
 	m_localA->create(numOverlappingPairs * 12);
 	m_localB->create(numOverlappingPairs * 12);
+	m_coord->create(numOverlappingPairs * 16);
 	m_numContacts = numOverlappingPairs;
 	computeSeparateAxis(overlappingPairBuf, numOverlappingPairs);
 }
@@ -117,6 +122,7 @@ void CudaNarrowphase::computeSeparateAxis(CUDABuffer * overlappingPairBuf, unsig
 	void * dstSA = m_separateAxis->bufferOnDevice();
 	void * dstPA = m_localA->bufferOnDevice();
 	void * dstPB = m_localB->bufferOnDevice();
+	void * dstCoord = m_coord->bufferOnDevice();
 	void * pairs = overlappingPairBuf->bufferOnDevice();
 	void * pos = m_pos->bufferOnDevice();
 	void * vel = m_vel->bufferOnDevice();
@@ -124,6 +130,7 @@ void CudaNarrowphase::computeSeparateAxis(CUDABuffer * overlappingPairBuf, unsig
 	narrowphaseComputeSeparateAxis((float4 *)dstSA,
 	    (float3 *)dstPA,
 	    (float3 *)dstPB,
+	    (BarycentricCoordinate *)dstCoord,
 		(uint2 *)pairs,
 		(float3 *)pos,
 		(float3 *)vel,

@@ -52,6 +52,7 @@ __global__ void writeObjectIndexToCache_kernel(uint4 * dstInd,
 
 __global__ void computeSeparateAxis_kernel(float4 * dstSA,
         float3 * dstPA, float3 * dstPB, 
+        BarycentricCoordinate * dstCoord,                                
     uint2 * pairs,
     float3 * pos, float3 * vel, 
     uint4* tetrahedron, 
@@ -85,8 +86,9 @@ __global__ void computeSeparateAxis_kernel(float4 * dstSA,
 	float3 Pref = make_float3(0.0f, 0.0f, 0.0f);
 
 	ClosestPointTestContext ctc;
-	BarycentricCoordinate coord;
-	computeSeparateDistance(s, Pref, prxA, prxB, ctc, dstSA[ind], dstPA[ind], dstPB[ind], coord);
+	// BarycentricCoordinate coord;
+	computeSeparateDistance(s, Pref, prxA, prxB, ctc, dstSA[ind], dstPA[ind], dstPB[ind], dstCoord[ind]);
+	// checkClosestDistance(s, prxA, prxB, ctc, dstSA[ind], dstPA[ind], dstPB[ind], dstCoord[ind]);
 }
 
 extern "C" {
@@ -113,6 +115,7 @@ void narrowphaseWriteObjectToCache(float3 * dstPos,
 
 void narrowphaseComputeSeparateAxis(float4 * dstSA,
         float3 * dstPA, float3 * dstPB,
+        BarycentricCoordinate * dstCoord,
 		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,
@@ -122,10 +125,10 @@ void narrowphaseComputeSeparateAxis(float4 * dstSA,
 {
     int tpb = 64;//CudaBase::LimitNThreadPerBlock(60, 48);
     dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numOverlappingPairs, 512);
+    unsigned nblk = iDivUp(numOverlappingPairs, tpb);
     dim3 grid(nblk, 1, 1);
     
-    computeSeparateAxis_kernel<<< grid, block >>>(dstSA, dstPA, dstPB, pairs, pos, vel, ind, pointStart, indexStart, numOverlappingPairs);
+    computeSeparateAxis_kernel<<< grid, block >>>(dstSA, dstPA, dstPB, dstCoord, pairs, pos, vel, ind, pointStart, indexStart, numOverlappingPairs);
 }
 
 }
