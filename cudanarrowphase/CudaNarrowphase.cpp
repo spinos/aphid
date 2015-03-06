@@ -70,24 +70,40 @@ void CudaNarrowphase::initOnDevice()
 	
 	m_pos->create(m_numPoints * 12);
 	m_vel->create(m_numPoints * 12);
-	m_ind->create(m_numElements * 4 * 4);
+	m_ind->create(m_numElements * 16); // 4 ints
 	
 	m_pointCacheLoc->create(CUDANARROWPHASE_MAX_NUMOBJECTS * 4);
 	m_indexCacheLoc->create(CUDANARROWPHASE_MAX_NUMOBJECTS * 4);
 	
 	m_pointCacheLoc->hostToDevice(&m_objectPointStart[0]);
 	m_indexCacheLoc->hostToDevice(&m_objectIndexStart[0]);
+	
+	char * pos = (char *)m_pos->bufferOnDevice();
+	char * vel = (char *)m_vel->bufferOnDevice();
+	char * ind = (char *)m_ind->bufferOnDevice();
+	
+	for(i = 0; i<m_numObjects; i++) {
+		CudaTetrahedronSystem * curObj = m_objects[i];
+		
+		curObj->setDeviceXPtr(pos);
+		curObj->setDeviceXPtr(vel);
+		curObj->setDeviceTretradhedronIndicesPtr(ind);
+		
+		m_pos->hostToDevice(curObj->hostX(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
+		m_vel->hostToDevice(curObj->hostV(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
+		m_ind->hostToDevice(curObj->hostTretradhedronIndices(), m_objectIndexStart[i] * 16, curObj->numTetradedrons() * 16);
+		
+		curObj->initOnDevice();
+		
+		pos += m_objectPointStart[i] * 12;
+		vel += m_objectPointStart[i] * 12;
+		ind += m_objectIndexStart[i] * 16;
+	}
 }
 
 void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)
 {
     if(numOverlappingPairs < 1) return;
-    
-    unsigned i;
-    for(i = 0; i<m_numObjects; i++) {
-	    writeObjectCache(m_objects[i], 
-	        m_objectPointStart[i], m_objectIndexStart[i]);
-	}
 	
 	m_separateAxis->create(numOverlappingPairs * 16);
 	m_localA->create(numOverlappingPairs * 12);
@@ -95,26 +111,6 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	m_coord->create(numOverlappingPairs * 16);
 	m_numContacts = numOverlappingPairs;
 	computeSeparateAxis(overlappingPairBuf, numOverlappingPairs);
-}
-
-void CudaNarrowphase::writeObjectCache(CudaTetrahedronSystem * tetra, 
-	        unsigned pointAt, unsigned indexAt)
-{
-    char * dstPos = (char *)m_pos->bufferOnDevice();
-    char * dstVel = (char *)m_vel->bufferOnDevice();
-    char * dstInd = (char *)m_ind->bufferOnDevice();
-    dstPos += pointAt * 12;
-    dstVel += pointAt * 12;
-    dstInd += indexAt * 16;
-
-    narrowphaseWriteObjectToCache((float3 *)dstPos,
-        (float3 *)dstVel,
-        (uint4 *)dstInd,
-        (float3 *)tetra->deviceX(),
-        (float3 *)tetra->deviceV(),
-        (uint4 *)tetra->deviceTretradhedronIndices(),
-        tetra->numPoints(),
-		tetra->numTetradedrons());
 }
 
 void CudaNarrowphase::computeSeparateAxis(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)

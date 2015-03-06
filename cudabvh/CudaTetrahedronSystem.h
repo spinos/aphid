@@ -18,6 +18,10 @@ public:
 	virtual ~CudaTetrahedronSystem();
 	virtual void initOnDevice();
 	virtual void update();
+	
+	void setDeviceXPtr(void * ptr);
+	void setDeviceVPtr(void * ptr);
+	void setDeviceTretradhedronIndicesPtr(void * ptr);
 
 	void * deviceX();
 	void * deviceV();
@@ -28,8 +32,8 @@ protected:
 private:
 	void formTetrahedronAabbs();
 private:
-	CUDABuffer * m_deviceX;
-	CUDABuffer * m_deviceV;
-	CUDABuffer * m_deviceTretradhedronIndices;
+	void * m_deviceX;
+	void * m_deviceV;
+	void * m_deviceTretradhedronIndices;
 };
 #endif        //  #ifndef CUDATETRAHEDRONSYSTEM_H

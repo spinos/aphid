@@ -42,16 +42,6 @@ __global__ void writeObjectPointToCache_kernel(float3 * dstPos,
 	dstVel[ind] = srcVel[ind];
 }
 
-__global__ void writeObjectIndexToCache_kernel(uint4 * dstInd,
-    uint4 * srcInd,
-    uint maxInd)
-{
-    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-
-	if(ind >= maxInd) return;
-	dstInd[ind] = srcInd[ind];
-}
-
 __global__ void computeSeparateAxis_kernel(float4 * dstSA,
         float3 * dstPA, float3 * dstPB, 
         BarycentricCoordinate * dstCoord,                                
@@ -82,34 +72,14 @@ __global__ void computeSeparateAxis_kernel(float4 * dstSA,
 	progressTetrahedron(sPrxA[threadIdx.x], tA, 0.01667f);
 	progressTetrahedron(sPrxB[threadIdx.x], tB, 0.01667f);
 
-	resetSimplex(sS[threadIdx.x]);
-
 	ClosestPointTestContext ctc;
 	ctc.referencePoint = make_float3(0.0f, 0.0f, 0.0f);
-	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], ctc, dstSA[ind], dstPA[ind], dstPB[ind], dstCoord[ind]);
+	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], ctc, dstSA[ind], dstCoord[ind]);
+	
+	interpolatePointAB(sS[threadIdx.x], dstCoord[ind], dstPA[ind], dstPB[ind]);
 }
 
 extern "C" {
-void narrowphaseWriteObjectToCache(float3 * dstPos,
-        float3 * dstVel,
-        uint4 * dstInd,
-        float3 * srcPos,
-        float3 * srcVel,
-        uint4 * srcInd,
-        uint numPoints,
-		uint numTetradedrons)
-{
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(numPoints, 512);
-    dim3 grid(nblk, 1, 1);
-    
-    writeObjectPointToCache_kernel<<< grid, block >>>(dstPos, dstVel, srcPos, srcVel, numPoints);
-    
-    nblk = iDivUp(numTetradedrons, 512);
-    grid.x = nblk;
-    
-    writeObjectIndexToCache_kernel<<< grid, block >>>(dstInd, srcInd, numTetradedrons);
-}
 
 void narrowphaseComputeSeparateAxis(float4 * dstSA,
         float3 * dstPA, float3 * dstPB,

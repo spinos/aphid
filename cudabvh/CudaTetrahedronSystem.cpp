@@ -12,28 +12,21 @@
 #include "createBvh_implement.h"
 #include "reduceBox_implement.h"
 
-CudaTetrahedronSystem::CudaTetrahedronSystem() 
-{
-	m_deviceX = new CUDABuffer;
-	m_deviceV = new CUDABuffer;
-    m_deviceTretradhedronIndices = new CUDABuffer;
-}
+CudaTetrahedronSystem::CudaTetrahedronSystem() {}
 
-CudaTetrahedronSystem::~CudaTetrahedronSystem() 
-{
-	delete m_deviceX;
-	delete m_deviceV;
-	delete m_deviceTretradhedronIndices;
-}
+CudaTetrahedronSystem::~CudaTetrahedronSystem() {}
+
+void CudaTetrahedronSystem::setDeviceXPtr(void * ptr)
+{ m_deviceX = ptr; }
+
+void CudaTetrahedronSystem::setDeviceVPtr(void * ptr)
+{ m_deviceV = ptr; }
+
+void CudaTetrahedronSystem::setDeviceTretradhedronIndicesPtr(void * ptr)
+{ m_deviceTretradhedronIndices = ptr; }
 
 void CudaTetrahedronSystem::initOnDevice() 
 {
-	m_deviceX->create(maxNumPoints() * 12);
-	m_deviceX->hostToDevice(hostX(), numPoints() * 12);
-	m_deviceV->create(maxNumPoints() * 12);
-	m_deviceV->hostToDevice(hostV(), numPoints() * 12);
-	m_deviceTretradhedronIndices->create(maxNumTetradedrons() * 16);
-	m_deviceTretradhedronIndices->hostToDevice(hostTretradhedronIndices(), numTetradedrons() * 16);
 	setNumLeafNodes(numTetradedrons());
 	CudaLinearBvh::initOnDevice();
 }
@@ -54,10 +47,10 @@ void CudaTetrahedronSystem::formTetrahedronAabbs()
 }
 
 void * CudaTetrahedronSystem::deviceX()
-{  return m_deviceX->bufferOnDevice(); }
+{  return m_deviceX; }
 
 void * CudaTetrahedronSystem::deviceV()
-{  return m_deviceV->bufferOnDevice(); }
+{  return m_deviceV; }
 
 void * CudaTetrahedronSystem::deviceTretradhedronIndices()
-{ return m_deviceTretradhedronIndices->bufferOnDevice(); }
+{ return m_deviceTretradhedronIndices; }

@@ -95,7 +95,6 @@ void GLWidget::clientInit()
 {
 	CudaBase::SetDevice();
 	
-	m_tetra->initOnDevice();
 	m_narrowphase->initOnDevice();
 	
 	m_devicePairs->create(GRDX * 8);

@@ -28,8 +28,6 @@ public:
 protected:
 
 private:
-    void writeObjectCache(CudaTetrahedronSystem * tetra, 
-	        unsigned pointAt, unsigned indexAt);
 	void computeSeparateAxis(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs);
 private:
     CUDABuffer * m_pos;

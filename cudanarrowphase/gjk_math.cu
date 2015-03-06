@@ -294,10 +294,10 @@ inline __device__ void computeSeparateDistance(Simplex & s,
                                                const TetrahedronProxy & prxB,
                                                ClosestPointTestContext & ctc,
                                                float4 & separateAxis,
-                                               float3 & pointA,
-                                               float3 & pointB,
                                                BarycentricCoordinate & coord)
 {
+    resetSimplex(s);
+
 	float3 v = initialPoint(prxA, ctc.referencePoint);
 	
 	float3 w, supportA, supportB, localA, localB;
@@ -330,8 +330,6 @@ inline __device__ void computeSeparateDistance(Simplex & s,
 	    
 	    computeContributionSimplex(coord, s, ctc.closestPoint);
 	    
-	    interpolatePointAB(s, coord, pointA, pointB);
-		
 	    smallestSimplex(s, coord);
 	    
 	    i++;
