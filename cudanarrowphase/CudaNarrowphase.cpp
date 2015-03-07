@@ -12,6 +12,19 @@
 #include <CUDABuffer.h>
 #include "narrowphase_implement.h"
 
+struct SSimplex {
+    float3 p[4];
+	float3 pA[4];
+	float3 pB[4];
+	int dimension;
+};
+
+struct ClosestPointTestContext {
+    // float3 referencePoint;
+    float3 closestPoint;
+    float closestDistance;
+};
+
 CudaNarrowphase::CudaNarrowphase() 
 {
     m_numObjects = 0;
@@ -23,6 +36,10 @@ CudaNarrowphase::CudaNarrowphase()
 	m_indexCacheLoc = new CUDABuffer;
 	m_coord = new CUDABuffer;
 	m_contact = new CUDABuffer;
+	
+	std::cout<<" size of simplex "<<sizeof(SSimplex)<<" \n";
+	std::cout<<" size of ctc "<<sizeof(ClosestPointTestContext)<<" \n";
+
 }
 
 CudaNarrowphase::~CudaNarrowphase() {}

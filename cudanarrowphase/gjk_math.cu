@@ -6,12 +6,13 @@
 #include "barycentric.cu"
 
 #define GJK_MAX_NUM_ITERATIONS 32
-#define GJK_THIN_MARGIN 0.05f
+#define GJK_THIN_MARGIN 0.02f
+
+#define FLOAT3_ORIGIN make_float3(0.f, 0.f, 0.f)
 
 struct ClosestPointTestContext {
-    float3 referencePoint;
-    float closestDistance;
     float3 closestPoint;
+    float closestDistance;
 };
 
 struct Simplex {
@@ -33,7 +34,41 @@ struct TetrahedronProxy {
 inline __device__ void resetSimplex(Simplex & s)
 { s.dimension = 0; }
 
-inline __device__ void addToSimplex(Simplex & s, float3 p, float3 localA, float3 localB)
+inline __device__ void addToSimplex(Simplex & s, const float3 & p)
+{
+    if(s.dimension == 0) {
+        s.p[0] = p;
+        s.pA[0] = s.pA[3];
+        s.pB[0] = s.pB[3];
+        s.dimension = 1;
+    }
+    else if(s.dimension == 1) {
+		if(distance2_between(p, s.p[0]) > 1e-6) {
+		    s.p[1] = p;
+		    s.pA[1] = s.pA[3];
+		    s.pB[1] = s.pB[3];
+		    s.dimension = 2;
+		}
+    }
+    else if(s.dimension == 2) {
+		if(!isTriangleDegenerate(s.p[0], s.p[1], p)) {
+		    s.p[2] = p;
+		    s.pA[2] = s.pA[3];
+		    s.pB[2] = s.pB[3];
+		    s.dimension = 3;
+		}
+    }
+    else {
+        if(!isTetrahedronDegenerate(s.p[0], s.p[1], s.p[2], p)) {
+		    s.p[3] = p;
+		    // s.pA[3] = localA;
+		    // s.pB[3] = localB;
+		    s.dimension = 4;
+		}
+    }
+}
+
+inline __device__ void addToSimplex(Simplex & s, const float3 & p, const float3 & localA, const float3 & localB)
 {
     if(s.dimension < 1) {
         s.p[0] = p;
@@ -67,7 +102,15 @@ inline __device__ void addToSimplex(Simplex & s, float3 p, float3 localA, float3
     }
 }
 
-inline __device__ float3 initialPoint(const TetrahedronProxy & tet, const float3 & ref)
+inline __device__ float3 initialPoint(const TetrahedronProxy & tet)
+{
+    if(float3_length2(tet.p[0]) > 1e-6)
+        return tet.p[0];
+    
+    return tet.p[1];
+}
+
+inline __device__ float3 initialPoint2(const TetrahedronProxy & tet, const float3 & ref)
 {
     float3 r = float3_difference(tet.p[0], ref);
     
@@ -106,7 +149,15 @@ inline __device__ float3 supportPoint(TetrahedronProxy tet, float3 ref, float ma
     return res;
 }
 
-inline __device__ int isPointInsideSimplex(Simplex & s, float3 p)
+inline __device__ int isOriginInsideSimplex(const Simplex & s)
+{
+    if(s.dimension > 3) {
+        return pointInsideTetrahedronTest(FLOAT3_ORIGIN, s.p);
+    }
+    return 0;
+}
+
+inline __device__ int isPointInsideSimplex(const Simplex & s, const float3 & p)
 {
     if(s.dimension > 3) {
         return pointInsideTetrahedronTest(p, s.p);
@@ -114,7 +165,7 @@ inline __device__ int isPointInsideSimplex(Simplex & s, float3 p)
     return 0;
 }
 
-inline __device__ void computeClosestPointOnLine(float3 p, float3 * v, ClosestPointTestContext & result)
+inline __device__ void computeClosestPointOnLine(const float3 & p, const float3 * v, ClosestPointTestContext & result)
 {
     float3 vr = float3_difference(p, v[0]);
     float3 v1 = float3_difference(v[1], v[0]);
@@ -149,7 +200,7 @@ inline __device__ float3 projectPointOnPlane(float3 p, float3 v, float3 nor)
     return float3_add(p, scale_float3_by(nor, t));
 }
 
-inline __device__ void computeClosestPointOnTriangle(float3 p, float3 * v, ClosestPointTestContext & result)
+inline __device__ void computeClosestPointOnTriangle(const float3 & p, const float3 * v, ClosestPointTestContext & result)
 {
     float3 nor = triangleNormal(v);
     float3 onplane = projectPointOnPlane(p, v[0], nor);
@@ -173,7 +224,7 @@ inline __device__ void computeClosestPointOnTriangle(float3 p, float3 * v, Close
     computeClosestPointOnLine(p, line, result);
 }
 
-inline __device__ void computeClosestPointOnTetrahedron(float3 p, float3 * v, ClosestPointTestContext & result)
+inline __device__ void computeClosestPointOnTetrahedron(const float3 & p, const float3 * v, ClosestPointTestContext & result)
 {
 	computeClosestPointOnTriangle(p, v, result);
 	
@@ -194,7 +245,7 @@ inline __device__ void computeClosestPointOnTetrahedron(float3 p, float3 * v, Cl
 	computeClosestPointOnTriangle(p, pr, result);
 }
 
-inline __device__ void computeClosestPointOnSimplex(Simplex & s, float3 p, ClosestPointTestContext & ctc)
+inline __device__ void computeClosestPointOnSimplex(Simplex & s, const float3 & p, ClosestPointTestContext & ctc)
 {
     ctc.closestDistance = 1e10;
 
@@ -215,7 +266,7 @@ inline __device__ void computeClosestPointOnSimplex(Simplex & s, float3 p, Close
 
 inline __device__ void computeClosestPointOnSimplex(Simplex & s, ClosestPointTestContext & ctc)
 {
-    computeClosestPointOnSimplex(s, ctc.referencePoint, ctc);
+    computeClosestPointOnSimplex(s, FLOAT3_ORIGIN, ctc);
 }
 
 inline __device__ void computeContributionSimplex(BarycentricCoordinate & dst, const Simplex & s, const float3 & q)
@@ -294,38 +345,38 @@ inline __device__ void smallestSimplex(Simplex & s, BarycentricCoordinate & cont
 inline __device__ void computeSeparateDistance(Simplex & s, 
                                                const TetrahedronProxy & prxA,
                                                const TetrahedronProxy & prxB,
-                                               float margin,
+                                               const float & margin,
                                                ClosestPointTestContext & ctc,
                                                float4 & separateAxis,
                                                BarycentricCoordinate & coord)
 {
     resetSimplex(s);
 
-	float3 v = initialPoint(prxA, ctc.referencePoint);
+	float3 v = initialPoint(prxA);
 	
-	float3 w, localA, localB;
+	float3 w;
 	float v2;
 	int i = 0;
 	
 	while(i<GJK_MAX_NUM_ITERATIONS) {
-	    w = float3_difference(supportPoint(prxA, float3_reverse(v), margin, localA), 
-	                            supportPoint(prxB, v, margin, localB));
+	    w = float3_difference(supportPoint(prxA, float3_reverse(v), margin, s.pA[3]), 
+	                            supportPoint(prxB, v, margin, s.pB[3]));
 	    
 	    v2 = float3_length2(v);
 	    if((v2 - float3_dot(w, v)) < 0.0001f * v2) {
 	        return;
 	    }
 	    
-	    addToSimplex(s, w, localA, localB);
+	    addToSimplex(s, w);
 	    
-	    if(isPointInsideSimplex(s, ctc.referencePoint)) {
+	    if(isOriginInsideSimplex(s)) {
 	        separateAxis.w = 0.f;
 	        return;
 	    }
 	    
 	    computeClosestPointOnSimplex(s, ctc);
 	    
-	    v = float3_difference(ctc.closestPoint, ctc.referencePoint);
+	    v = ctc.closestPoint;
 	    separateAxis = make_float4(v.x, v.y, v.z, 1.f);
 	    
 	    computeContributionSimplex(coord, s, ctc.closestPoint);

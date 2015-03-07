@@ -31,6 +31,9 @@ inline __device__ int getIndexWithInternalNodeMarkerSet(int isLeaf, int index)
 inline __device__ int getIndexWithInternalNodeMarkerRemoved(int index) 
 { return index & (~0x80000000); }
 
+inline __device__ void float3_set_zero(float3 & v)
+{ v.x = v.y = v.z = 0.f; }
+
 inline __device__ float float3_length(const float3 & v) 
 { return sqrtf(v.x*v.x + v.y*v.y + v.z*v.z); }
 

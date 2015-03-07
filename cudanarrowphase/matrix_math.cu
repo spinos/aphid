@@ -3,7 +3,7 @@
 
 #include "bvh_common.h"
 
-inline __device__ void fill_mat44(mat44 & m, float3 a, float3 b, float3 c, float3 d)
+inline __device__ void fill_mat44(mat44 & m, const float3 & a, const float3 & b, const float3 & c, const float3 & d)
 {
     m.v[0] = make_float4(a.x, a.y, a.z, 1.0f);
     m.v[1] = make_float4(b.x, b.y, b.z, 1.0f);

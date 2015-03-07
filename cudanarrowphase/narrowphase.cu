@@ -5,7 +5,7 @@
 
 #define GJK_BLOCK_SIZE 64
 
-inline __device__ void extractTetrahedron(MovingTetrahedron & tet, uint start, uint4 vertices, float3 * pos, float3 * vel)
+inline __device__ void extractTetrahedron(MovingTetrahedron & tet, uint start, const uint4 & vertices, float3 * pos, float3 * vel)
 {
     uint ind = start + vertices.x;
     tet.p[0] = pos[ind];
@@ -58,11 +58,63 @@ __global__ void computeSeparateAxis_kernel(ContactData * dstContact,
 	progressTetrahedron(sPrxB[threadIdx.x], tB, 0.01667f);
 
 	ClosestPointTestContext ctc;
-	ctc.referencePoint = make_float3(0.0f, 0.0f, 0.0f);
-	
 	BarycentricCoordinate coord;
-	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.05f, ctc, dstContact[ind].separateAxis, coord);
 	
+	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, dstContact[ind].separateAxis, 
+	    coord);
+	
+	interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+}
+
+__global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
+    uint2 * pairs,
+    float3 * pos, float3 * vel, 
+    uint4* tetrahedron, 
+    uint * pointStart, uint * indexStart,
+    uint maxInd)
+{
+    __shared__ Simplex sS[GJK_BLOCK_SIZE];
+    __shared__ TetrahedronProxy sPrxA[GJK_BLOCK_SIZE];
+	__shared__ TetrahedronProxy sPrxB[GJK_BLOCK_SIZE];
+	unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(ind >= maxInd) return;
+	
+	uint objA = extractObjectInd(pairs[ind].x);
+	uint objB = extractObjectInd(pairs[ind].y);
+	uint elmA = extractElementInd(pairs[ind].x);
+	uint elmB = extractElementInd(pairs[ind].y);
+	
+	MovingTetrahedron tA;
+	MovingTetrahedron tB;
+	
+	extractTetrahedron(tA, pointStart[objA], tetrahedron[indexStart[objA] + elmA], pos, vel);
+	extractTetrahedron(tB, pointStart[objB], tetrahedron[indexStart[objB] + elmB], pos, vel);
+	
+	progressTetrahedron(sPrxA[threadIdx.x], tA, 0.01667f);
+	progressTetrahedron(sPrxB[threadIdx.x], tB, 0.01667f);
+
+	ClosestPointTestContext ctc;
+	BarycentricCoordinate coord;
+
+	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, dstContact[ind].separateAxis, 
+	    coord);
+	
+	if(dstContact[ind].separateAxis.w < 1.f) {
+	    return;
+	}
+	
+	int i = 0;
+	while (i<GJK_MAX_NUM_ITERATIONS) {
+	    computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, dstContact[ind].separateAxis, 
+	        coord); 
+	    
+	    if(dstContact[ind].separateAxis.w < 1.f) {
+	        break;
+	    }
+	    
+	    i++;   
+	}
 	interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
 }
 
@@ -81,6 +133,21 @@ void narrowphaseComputeSeparateAxis(ContactData * dstContact,
     dim3 grid(nblk, 1, 1);
     
     computeSeparateAxis_kernel<<< grid, block >>>(dstContact, pairs, pos, vel, ind, pointStart, indexStart, numOverlappingPairs);
+}
+
+void narrowphaseComputeTimeOfImpact(ContactData * dstContact,
+		uint2 * pairs,
+		float3 * pos,
+		float3 * vel,
+		uint4 * ind,
+		uint * pointStart, uint * indexStart, 
+		uint numOverlappingPairs)
+{   
+    dim3 block(GJK_BLOCK_SIZE, 1, 1);
+    unsigned nblk = iDivUp(numOverlappingPairs, GJK_BLOCK_SIZE);
+    dim3 grid(nblk, 1, 1);
+    
+    computeTimeOfImpact_kernel<<< grid, block >>>(dstContact, pairs, pos, vel, ind, pointStart, indexStart, numOverlappingPairs);
 }
 
 }
