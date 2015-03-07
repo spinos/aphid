@@ -24,7 +24,7 @@ public:
 	void printCoord(CudaNarrowphase * phase, BaseBuffer * pairs);
 	void printTOI(CudaNarrowphase * phase, BaseBuffer * pairs);
 private:
-    void computeX1(TetrahedronSystem * tetra);
+    void computeX1(TetrahedronSystem * tetra, float h = 0.0166667f);
     Vector3F tetrahedronCenter(Vector3F * p, unsigned * v, unsigned i);
     Vector3F interpolatePointTetrahedron(Vector3F * p, unsigned * v, unsigned i, float * wei);
 private:

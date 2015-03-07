@@ -58,7 +58,7 @@ void DrawNp::drawTetraAtFrameEnd(TetrahedronSystem * tetra)
 
 void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, TetrahedronSystem * tetra)
 {
-    computeX1(tetra);
+    computeX1(tetra, 0.f);
     Vector3F * ptet = (Vector3F *)m_x1->data();
     
     const unsigned nc = phase->numContacts();
@@ -125,7 +125,7 @@ void DrawNp::printTOI(CudaNarrowphase * phase, BaseBuffer * pairs)
     }
 }
 
-void DrawNp::computeX1(TetrahedronSystem * tetra)
+void DrawNp::computeX1(TetrahedronSystem * tetra, float h)
 {
     m_x1->create(tetra->numPoints() * 12);
 	float * x1 = (float *)m_x1->data();
@@ -136,7 +136,7 @@ void DrawNp::computeX1(TetrahedronSystem * tetra)
 	const float nf = tetra->numPoints() * 3;
 	unsigned i;
 	for(i=0; i < nf; i++)
-		x1[i] = x0[i] + vel[i] * 0.01667f;
+		x1[i] = x0[i] + vel[i] * h;
 }
 
 Vector3F DrawNp::tetrahedronCenter(Vector3F * p, unsigned * v, unsigned i)

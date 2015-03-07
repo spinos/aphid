@@ -111,7 +111,7 @@ void GLWidget::clientDraw()
 {
     m_narrowphase->computeContacts(m_devicePairs, GRDX);
 	m_dbgDraw->drawTetra(m_tetra);
-	m_dbgDraw->drawTetraAtFrameEnd(m_tetra);
+	// m_dbgDraw->drawTetraAtFrameEnd(m_tetra);
 	m_dbgDraw->drawSeparateAxis(m_narrowphase, m_hostPairs, m_tetra);
 }
 

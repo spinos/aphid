@@ -117,6 +117,10 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	    return;
 	}
 	
+	dstContact[ind].separateAxis = sas;
+    interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+        
+	
 	float separateDistance = float4_length(sas);
 // within thin shell margin
 	if(separateDistance < GJK_THIN_MARGIN2) {
@@ -134,7 +138,7 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
         closeInSpeed = maxProjectSpeedAlong(tB.v, float3_from_float4(sas))
                         - maxProjectSpeedAlong(tA.v, float3_from_float4(sas));
 // going apart       
-        if(closeInSpeed < 0.f) { 
+        if(closeInSpeed < 1e-8) { 
             dstContact[ind].timeOfImpact = 1e8;
             break;
         }
