@@ -22,6 +22,7 @@ public:
 	void drawTetraAtFrameEnd(TetrahedronSystem * tetra);
 	void drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, TetrahedronSystem * tetra);
 	void printCoord(CudaNarrowphase * phase, BaseBuffer * pairs);
+	void printTOI(CudaNarrowphase * phase, BaseBuffer * pairs);
 private:
     void computeX1(TetrahedronSystem * tetra);
     Vector3F tetrahedronCenter(Vector3F * p, unsigned * v, unsigned i);

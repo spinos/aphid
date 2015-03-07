@@ -6,8 +6,9 @@
 #include "barycentric.cu"
 
 #define GJK_MAX_NUM_ITERATIONS 32
-#define GJK_THIN_MARGIN 0.02f
-
+#define GJK_THIN_MARGIN 0.01f
+#define GJK_THIN_MARGIN2 0.02f
+#define GJK_STEPSIZE 0.01666667f
 #define FLOAT3_ORIGIN make_float3(0.f, 0.f, 0.f)
 
 struct ClosestPointTestContext {

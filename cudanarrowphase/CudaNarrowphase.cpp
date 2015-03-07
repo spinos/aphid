@@ -20,9 +20,15 @@ struct SSimplex {
 };
 
 struct ClosestPointTestContext {
-    // float3 referencePoint;
     float3 closestPoint;
     float closestDistance;
+};
+
+struct SContactData {
+    float4 separateAxis;
+    float3 localA;
+    float3 localB;
+    float toi;
 };
 
 CudaNarrowphase::CudaNarrowphase() 
@@ -39,6 +45,7 @@ CudaNarrowphase::CudaNarrowphase()
 	
 	std::cout<<" size of simplex "<<sizeof(SSimplex)<<" \n";
 	std::cout<<" size of ctc "<<sizeof(ClosestPointTestContext)<<" \n";
+	std::cout<<" size of contact "<<sizeof(SContactData)<<" \n";
 
 }
 
@@ -117,10 +124,10 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	m_coord->create(numOverlappingPairs * 16);
 	m_contact->create(numOverlappingPairs * 48);
 	m_numContacts = numOverlappingPairs;
-	computeSeparateAxis(overlappingPairBuf, numOverlappingPairs);
+	computeTimeOfImpact(overlappingPairBuf, numOverlappingPairs);
 }
 
-void CudaNarrowphase::computeSeparateAxis(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)
+void CudaNarrowphase::computeTimeOfImpact(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)
 {
 	void * dstCoord = m_coord->bufferOnDevice();
 	void * dstContact = m_contact->bufferOnDevice();
@@ -128,7 +135,7 @@ void CudaNarrowphase::computeSeparateAxis(CUDABuffer * overlappingPairBuf, unsig
 	void * pos = m_pos->bufferOnDevice();
 	void * vel = m_vel->bufferOnDevice();
 	void * ind = m_ind->bufferOnDevice();
-	narrowphaseComputeSeparateAxis((ContactData *)dstContact,
+	narrowphaseComputeTimeOfImpact((ContactData *)dstContact,
 		(uint2 *)pairs,
 		(float3 *)pos,
 		(float3 *)vel,

@@ -29,6 +29,18 @@ inline __device__ void progressTetrahedron(TetrahedronProxy & prx, const MovingT
     prx.p[3] = float3_add(tet.p[3], scale_float3_by(tet.v[3], h));
 }
 
+inline __device__ float maxProjectSpeedAlong(const float3 * v, const float3 & d)
+{
+    float r = float3_dot(d, v[0]);
+    float r1 = float3_dot(d, v[1]);
+    if(r1 > r) r = r1;
+    r1 = float3_dot(d, v[2]);
+    if(r1 > r) r = r1;
+    r1 = float3_dot(d, v[3]);
+    if(r1 > r) r = r1;
+    return r;
+}
+
 __global__ void computeSeparateAxis_kernel(ContactData * dstContact,
     uint2 * pairs,
     float3 * pos, float3 * vel, 
@@ -91,31 +103,71 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	extractTetrahedron(tA, pointStart[objA], tetrahedron[indexStart[objA] + elmA], pos, vel);
 	extractTetrahedron(tB, pointStart[objB], tetrahedron[indexStart[objB] + elmB], pos, vel);
 	
-	progressTetrahedron(sPrxA[threadIdx.x], tA, 0.01667f);
-	progressTetrahedron(sPrxB[threadIdx.x], tB, 0.01667f);
+	progressTetrahedron(sPrxA[threadIdx.x], tA, 0.f);
+	progressTetrahedron(sPrxB[threadIdx.x], tB, 0.f);
 
 	ClosestPointTestContext ctc;
 	BarycentricCoordinate coord;
-
-	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, dstContact[ind].separateAxis, 
+	float4 sas;
+	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, sas, 
 	    coord);
-	
-	if(dstContact[ind].separateAxis.w < 1.f) {
+// intersected	
+	if(sas.w < 1.f) {
+	    dstContact[ind].timeOfImpact = 1e8;
 	    return;
 	}
 	
-	int i = 0;
-	while (i<GJK_MAX_NUM_ITERATIONS) {
-	    computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, dstContact[ind].separateAxis, 
-	        coord); 
-	    
-	    if(dstContact[ind].separateAxis.w < 1.f) {
-	        break;
-	    }
-	    
-	    i++;   
+	float separateDistance = float4_length(sas);
+// within thin shell margin
+	if(separateDistance < GJK_THIN_MARGIN2) {
+	    dstContact[ind].timeOfImpact = 0.f;
+	    dstContact[ind].separateAxis = sas;
+        interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+        return;  
 	}
-	interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+	
+	float closeInSpeed;
+	float toi = 0.f;
+	int i = 0;
+    while (i<GJK_MAX_NUM_ITERATIONS) {
+        
+        closeInSpeed = maxProjectSpeedAlong(tB.v, float3_from_float4(sas))
+                        - maxProjectSpeedAlong(tA.v, float3_from_float4(sas));
+// going apart       
+        if(closeInSpeed < 0.f) { 
+            dstContact[ind].timeOfImpact = 1e8;
+            break;
+        }
+        
+        toi += separateDistance / closeInSpeed;
+// too far away       
+        if(toi > GJK_STEPSIZE) { 
+            dstContact[ind].timeOfImpact = toi;
+            break;   
+        }
+        
+        progressTetrahedron(sPrxA[threadIdx.x], tA, toi);
+        progressTetrahedron(sPrxB[threadIdx.x], tB, toi);
+        
+        computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, sas, 
+            coord); 
+// use last step       
+        if(sas.w < 1.f) { 
+            break;
+        }
+// output
+        dstContact[ind].timeOfImpact = toi;
+        dstContact[ind].separateAxis = sas;
+        interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+        
+        separateDistance = float4_length(sas);
+// close enough
+        if(separateDistance < .001f) { 
+            break;
+        }
+        
+        i++;
+    }
 }
 
 extern "C" {

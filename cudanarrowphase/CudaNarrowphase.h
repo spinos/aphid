@@ -26,7 +26,7 @@ public:
 protected:
 
 private:
-	void computeSeparateAxis(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs);
+	void computeTimeOfImpact(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs);
 private:
     CUDABuffer * m_pos;
     CUDABuffer * m_vel;

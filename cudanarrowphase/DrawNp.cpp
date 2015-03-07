@@ -112,6 +112,19 @@ void DrawNp::printCoord(CudaNarrowphase * phase, BaseBuffer * pairs)
     }
 }
 
+void DrawNp::printTOI(CudaNarrowphase * phase, BaseBuffer * pairs)
+{
+    const unsigned nc = phase->numContacts();
+    m_contact->create(nc * 48);
+    phase->getContact(m_contact);
+    ContactData * contact = (ContactData *)m_contact->data();
+	
+    unsigned i;
+    for(i=0; i < nc; i++) {
+        std::cout<<" "<<i<<" "<<contact[i].timeOfImpact<<" ";
+    }
+}
+
 void DrawNp::computeX1(TetrahedronSystem * tetra)
 {
     m_x1->create(tetra->numPoints() * 12);
