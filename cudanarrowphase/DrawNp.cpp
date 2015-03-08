@@ -19,6 +19,9 @@ DrawNp::DrawNp()
 	m_x1 = new BaseBuffer;
 	m_coord = new BaseBuffer;
 	m_contact = new BaseBuffer;
+	m_counts = new BaseBuffer;
+	m_contactPairs = new BaseBuffer;
+	m_scanResult = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -61,13 +64,12 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
     computeX1(tetra, 0.f);
     Vector3F * ptet = (Vector3F *)m_x1->data();
     
-    const unsigned nc = phase->numContacts();
-	m_coord->create(nc * 16);
-	m_contact->create(nc * 48);
-	// std::cout<<" cd size "<<sizeof(ContactData)<<" ";
+    const unsigned np = phase->numPairs();
+	m_coord->create(np * 16);
+	m_contact->create(np * 48);
 	
 	phase->getCoord(m_coord);
-	phase->getContact(m_contact);
+	phase->getContact0(m_contact);
 	
 	unsigned * pairInd = (unsigned *)pairs->data();
 	unsigned * tetInd = (unsigned *)tetra->hostTretradhedronIndices();
@@ -78,8 +80,10 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
 	unsigned i;
 	glColor3f(0.2f, 0.01f, 0.f);
 	Vector3F dst, cenA, cenB;
-	for(i=0; i < nc; i++) {
+	for(i=0; i < np; i++) {
 		ContactData & cf = contact[i];
+		
+		// if(i==0) std::cout<<"distance "<<Vector3F(cf.separateAxis.x, cf.separateAxis.y, cf.separateAxis.z).length()<<"\n";
 		
 	    // if(sa[i*4+3] < .1f) continue; 
 		if(cf.separateAxis.w < .1f) continue;
@@ -114,15 +118,42 @@ void DrawNp::printCoord(CudaNarrowphase * phase, BaseBuffer * pairs)
 
 void DrawNp::printTOI(CudaNarrowphase * phase, BaseBuffer * pairs)
 {
-    const unsigned nc = phase->numContacts();
-    m_contact->create(nc * 48);
-    phase->getContact(m_contact);
+    const unsigned np = phase->numPairs();
+    m_contact->create(np * 48);
+	m_counts->create(np * 4);
+    phase->getContact0(m_contact);
+	phase->getContactCounts(m_counts);
     ContactData * contact = (ContactData *)m_contact->data();
-	
+	unsigned * counts = (unsigned *)m_counts->data();
     unsigned i;
-    for(i=0; i < nc; i++) {
-        std::cout<<" "<<i<<" "<<contact[i].timeOfImpact<<" ";
+    for(i=0; i < np; i++) {
+        // if(counts[i])
+		if(contact[i].timeOfImpact < .016667f) 
+		std::cout<<" "<<i<<" "<<contact[i].timeOfImpact<<" ";
     }
+	
+	return;
+	
+	m_contactPairs->create(np * 8);
+	m_scanResult->create(np * 4);
+	
+	if(phase->numContacts() < 1) return;
+	
+	phase->getContactPairs(m_contactPairs);
+	phase->getScanResult(m_scanResult);
+	
+	unsigned * scans = (unsigned *)m_scanResult->data();
+	
+	for(i=0; i < np; i++) if(counts[i]) std::cout<<" i "<<i<<" to "<<scans[i]<<"\n";
+	
+	unsigned * squeezedPairs = (unsigned *)m_contactPairs->data();
+	
+	CudaNarrowphase::CombinedObjectBuffer * objectBuf = phase->objectBuffer();
+	std::cout<<" n points "<<phase->numPoints();
+	
+	for(i=0; i < phase->numContacts(); i++) {
+		std::cout<<" "<<i<<" ("<<squeezedPairs[i*2]<<", "<<squeezedPairs[i*2 + 1]<<")\n";
+	}
 }
 
 void DrawNp::computeX1(TetrahedronSystem * tetra, float h)

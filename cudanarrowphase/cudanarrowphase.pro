@@ -7,6 +7,7 @@ HEADERS       = ../shared/Base3DView.h \
                 ../shared/CudaBase.h \
                 ../shared/BaseBuffer.h \
                 ../shared/CUDABuffer.h \
+                ../shared/ScanUtil.h \
                 ../cudabvh/CudaLinearBvh.h \
                 ../cudabvh/TetrahedronSystem.h \
                 ../cudabvh/CudaTetrahedronSystem.h \
@@ -16,16 +17,20 @@ HEADERS       = ../shared/Base3DView.h \
                 ../cudabvh/reduceRange_implement.h \
                 ../cudabvh/createBvh_implement.h \
                 ../cudabvh/tetrahedronSystem_implement.h \
+                ../cudabvh/scan_implement.h \
                 ../radixsort/radixsort_implement.h \
                 glWidget.h \
                 window.h \
                 DrawNp.h \
                 CudaNarrowphase.h \
-                narrowphase_implement.h
+                narrowphase_implement.h \
+                simpleContactSolver_implement.h \
+                SimpleContactSolver.h
 SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/CudaBase.cpp \
                 ../shared/BaseBuffer.cpp \
                 ../shared/CUDABuffer.cpp \
+                ../shared/ScanUtil.cpp \
                 ../cudabvh/CudaLinearBvh.cpp \
                 ../cudabvh/TetrahedronSystem.cpp \
                 ../cudabvh/CudaTetrahedronSystem.cpp \
@@ -33,7 +38,8 @@ SOURCES       = ../shared/Base3DView.cpp \
                 glWidget.cpp \
                 window.cpp \
                 DrawNp.cpp \
-                CudaNarrowphase.cpp
+                CudaNarrowphase.cpp \
+                SimpleContactSolver.cpp
 
 win32 {
     HEADERS += ../shared/gExtension.h
@@ -55,6 +61,7 @@ RCC_DIR = release/rcc
 UI_DIR = release/ui
 
 CUSOURCES = ../cudabvh/bvh_math.cu \
+            ../cudabvh/scan.cu \
             ../cudabvh/createBvh.cu \
             ../cudabvh/reduceBox.cu \
             ../cudabvh/reduceRange.cu \
@@ -63,6 +70,7 @@ CUSOURCES = ../cudabvh/bvh_math.cu \
             matrix_math.cu \
             barycentric.cu \
             gjk_math.cu \
+            simpleContactSolver.cu \
             narrowphase.cu
             
 macx {

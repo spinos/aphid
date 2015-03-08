@@ -7,6 +7,7 @@ class DrawNp;
 class BaseBuffer;
 class CUDABuffer;
 class CudaNarrowphase;
+class SimpleContactSolver;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -35,6 +36,7 @@ private:
 	BaseBuffer * m_hostPairs;
 	CUDABuffer * m_devicePairs;
 	CudaNarrowphase * m_narrowphase;
+	SimpleContactSolver * m_contactSolver;
 private slots:
     
 };

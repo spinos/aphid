@@ -5,6 +5,14 @@
 
 #define GJK_BLOCK_SIZE 64
 
+inline __device__ float totalSpeed(float3 * vA, float3 * vB)
+{
+    return (float3_length2(vA[0]) + float3_length2(vA[1]) +
+            float3_length2(vA[2]) + float3_length2(vA[2]) +
+            float3_length2(vB[0]) + float3_length2(vB[1]) +
+            float3_length2(vB[2]) + float3_length2(vB[2]));
+}
+
 inline __device__ void extractTetrahedron(MovingTetrahedron & tet, uint start, const uint4 & vertices, float3 * pos, float3 * vel)
 {
     uint ind = start + vertices.x;
@@ -103,6 +111,11 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	extractTetrahedron(tA, pointStart[objA], tetrahedron[indexStart[objA] + elmA], pos, vel);
 	extractTetrahedron(tB, pointStart[objB], tetrahedron[indexStart[objB] + elmB], pos, vel);
 	
+	if(totalSpeed(tA.v, tB.v) < 1e-8) {
+	    dstContact[ind].timeOfImpact = 1e8;
+	    return;
+	}
+	
 	progressTetrahedron(sPrxA[threadIdx.x], tA, 0.f);
 	progressTetrahedron(sPrxB[threadIdx.x], tB, 0.f);
 
@@ -126,26 +139,37 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	    dstContact[ind].timeOfImpact = 0.f;
 	    dstContact[ind].separateAxis = sas;
         interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
-        return;  
+        return;
 	}
 	
+	float3 nor;
 	float closeInSpeed;
 	float toi = 0.f;
 	int i = 0;
     while (i<GJK_MAX_NUM_ITERATIONS) {
-        
-        closeInSpeed = maxProjectSpeedAlong(tB.v, float3_from_float4(sas))
-                        - maxProjectSpeedAlong(tA.v, float3_from_float4(sas));
+        nor = float3_normalize(float3_from_float4(sas));
+        closeInSpeed = maxProjectSpeedAlong(tB.v, nor)
+                        - maxProjectSpeedAlong(tA.v, nor);
 // going apart       
         if(closeInSpeed < 1e-8) { 
             dstContact[ind].timeOfImpact = 1e8;
+            
+// for debug purpose
+            dstContact[ind].separateAxis = sas;
+            interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+        
             break;
         }
         
-        toi += separateDistance / closeInSpeed;
+        toi += (separateDistance - GJK_THIN_MARGIN2) / closeInSpeed * .73f;
 // too far away       
         if(toi > GJK_STEPSIZE) { 
             dstContact[ind].timeOfImpact = toi;
+            
+// for debug purpose
+            dstContact[ind].separateAxis = sas;
+            interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+        
             break;   
         }
         
@@ -169,8 +193,42 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
             break;
         }
         
+        separateDistance += GJK_THIN_MARGIN2;
+        
         i++;
     }
+}
+
+__global__ void computeValidPairs_kernel(uint* dstCounts, 
+                    ContactData * srcContact, 
+                    uint numContacts, 
+                    uint scanBufferLength)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(ind >= scanBufferLength) return;
+	
+	dstCounts[ind] = 0;
+	if(ind >= numContacts) {
+	    return;
+	}
+
+	dstCounts[ind] = (srcContact[ind].timeOfImpact < GJK_STEPSIZE);	
+}
+
+__global__ void squeezeContactPairs_kernel(uint2 * dstPairs, uint2 * srcPairs,
+                                    ContactData * dstContact, ContactData *srcContact,
+									uint * counts, uint * packLocs, 
+									uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	if(!counts[ind]) return;
+	
+	const uint toLoc = packLocs[ind];
+	dstPairs[toLoc] = srcPairs[ind];
+	dstContact[toLoc] = srcContact[ind];
 }
 
 extern "C" {
@@ -203,6 +261,33 @@ void narrowphaseComputeTimeOfImpact(ContactData * dstContact,
     dim3 grid(nblk, 1, 1);
     
     computeTimeOfImpact_kernel<<< grid, block >>>(dstContact, pairs, pos, vel, ind, pointStart, indexStart, numOverlappingPairs);
+}
+
+void narrowphaseComputeValidPairs(uint * dstCounts, 
+        ContactData * srcContact,
+        uint numContacts, 
+        uint scanBufferLength)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(scanBufferLength, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    computeValidPairs_kernel<<< grid, block >>>(dstCounts, srcContact, numContacts, scanBufferLength);
+}
+
+void narrowphaseSqueezeContactPairs(uint2 * dstPairs, uint2 * srcPairs,
+                                    ContactData * dstContact, ContactData *srcContact,
+									uint * counts, uint * packLocs, 
+									uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    squeezeContactPairs_kernel<<< grid, block >>>(dstPairs, srcPairs,
+                                    dstContact, srcContact,
+									counts, packLocs, 
+									maxInd);
 }
 
 }

@@ -32,4 +32,7 @@ private:
 	BaseBuffer * m_x1;
 	BaseBuffer * m_coord;
 	BaseBuffer * m_contact;
+	BaseBuffer * m_counts;
+	BaseBuffer * m_contactPairs;
+	BaseBuffer * m_scanResult;
 };

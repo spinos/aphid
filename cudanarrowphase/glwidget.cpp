@@ -8,9 +8,10 @@
 #include "DrawNp.h"
 #include <CUDABuffer.h>
 #include <CudaNarrowphase.h>
+#include "SimpleContactSolver.h"
 
-#define GRDX 1125
-#define NTET 2400
+#define GRDX 1225
+#define NTET 2500
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -20,33 +21,39 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	unsigned i, j;
 	float vy = 1.f;
+	float vrx, vry, vrz, vr;
 	for(j=0; j < 2; j++) {
 		for(i=0; i<GRDX; i++) {
-			Vector3F base(2.3f * i - 60.f, 3.f * j + 1.f, 0.5f * i);
-			Vector3F right = base + Vector3F(1.75f, 0.f, 0.f);
+			Vector3F base(2.3f * i, 3.f * j + 1.f, 0.5f * i);
+			Vector3F right = base + Vector3F(1.75f, 0.f, 0.7f);
 			Vector3F front = base + Vector3F(0.f, 0.f, 1.75f);
-			Vector3F top = base + Vector3F(0.f, 1.75f, 0.f);
+			Vector3F top = base + Vector3F(0.f, 1.75f, 0.7f);
 			if(j%2==0) top.x += 1.75f;
 			
+			vrx = .5f * (((float)(rand() % 199))/199.f - .5f);
+			vry = .5f * (((float)(rand() % 199))/199.f + .5f) * vy;
+			vrz = .05f * (((float)(rand() % 199))/199.f - .5f);
+			vr = .5f * (((float)(rand() % 199))/199.f);
+			
 			m_tetra->addPoint(&base.x);
-			hv[0] = 10.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 10.f * (((float)(rand() % 199))/199.f) * vy;
-			hv[2] = 13.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = vrx + vr;
+			hv[1] = vry;
+			hv[2] = vrz - vr;
 			hv+=3;
 			m_tetra->addPoint(&right.x);
-			hv[0] = 10.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 18.f * (((float)(rand() % 199))/199.f) * vy;
-			hv[2] = 15.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = vrx - vr;
+			hv[1] = vry;
+			hv[2] = vrz + vr;
 			hv+=3;
 			m_tetra->addPoint(&top.x);
-			hv[0] = 10.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 18.f * (((float)(rand() % 199))/199.f) * vy;
-			hv[2] = 15.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = vrx + vr;
+			hv[1] = vry;
+			hv[2] = vrz + vr;
 			hv+=3;
 			m_tetra->addPoint(&front.x);
-			hv[0] = 10.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 18.f * (((float)(rand() % 199))/199.f) * vy;
-			hv[2] = 15.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = vrx - vr;
+			hv[1] = vry;
+			hv[2] = vrz - vr;
 			hv+=3;
 
 			unsigned b = (j * GRDX + i) * 4;
@@ -85,6 +92,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_narrowphase = new CudaNarrowphase;
 	m_narrowphase->addTetrahedronSystem(m_tetra);
+	
+	m_contactSolver = new SimpleContactSolver;
 }
 
 GLWidget::~GLWidget()
@@ -101,7 +110,6 @@ void GLWidget::clientInit()
 	m_devicePairs->hostToDevice(m_hostPairs->data(), GRDX *8);
 	
 	m_narrowphase->computeContacts(m_devicePairs, GRDX);
-	m_dbgDraw->printTOI(m_narrowphase, m_hostPairs);
 	// connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	// connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
@@ -110,11 +118,17 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw()
 {
     m_narrowphase->computeContacts(m_devicePairs, GRDX);
+	// m_dbgDraw->printTOI(m_narrowphase, m_hostPairs);
+	
+	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
+									m_narrowphase->contacts(),
+									m_narrowphase->contactPairsBuffer(),
+									m_narrowphase->objectBuffer());
 	m_tetra->integrate(0.016667f);
 	m_tetra->sendXToHost();
 	m_dbgDraw->drawTetra(m_tetra);
-	m_dbgDraw->drawTetraAtFrameEnd(m_tetra);
-	// m_dbgDraw->drawSeparateAxis(m_narrowphase, m_hostPairs, m_tetra);
+	//m_dbgDraw->drawTetraAtFrameEnd(m_tetra);
+	m_dbgDraw->drawSeparateAxis(m_narrowphase, m_hostPairs, m_tetra);
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)
