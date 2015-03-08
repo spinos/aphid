@@ -11,19 +11,20 @@
 #include <CUDABuffer.h>
 #include "createBvh_implement.h"
 #include "reduceBox_implement.h"
+#include "tetrahedronSystem_implement.h"
 
 CudaTetrahedronSystem::CudaTetrahedronSystem() {}
 
 CudaTetrahedronSystem::~CudaTetrahedronSystem() {}
 
-void CudaTetrahedronSystem::setDeviceXPtr(void * ptr)
-{ m_deviceX = ptr; }
+void CudaTetrahedronSystem::setDeviceXPtr(CUDABuffer * ptr, unsigned loc)
+{ m_deviceX = ptr; m_xLoc = loc; }
 
-void CudaTetrahedronSystem::setDeviceVPtr(void * ptr)
-{ m_deviceV = ptr; }
+void CudaTetrahedronSystem::setDeviceVPtr(CUDABuffer * ptr, unsigned loc)
+{ m_deviceV = ptr; m_vLoc = loc; }
 
-void CudaTetrahedronSystem::setDeviceTretradhedronIndicesPtr(void * ptr)
-{ m_deviceTretradhedronIndices = ptr; }
+void CudaTetrahedronSystem::setDeviceTretradhedronIndicesPtr(CUDABuffer * ptr, unsigned loc)
+{ m_deviceTretradhedronIndices = ptr; m_iLoc = loc; }
 
 void CudaTetrahedronSystem::initOnDevice() 
 {
@@ -47,10 +48,16 @@ void CudaTetrahedronSystem::formTetrahedronAabbs()
 }
 
 void * CudaTetrahedronSystem::deviceX()
-{  return m_deviceX; }
+{  return m_deviceX->bufferOnDeviceAt(m_xLoc); }
 
 void * CudaTetrahedronSystem::deviceV()
-{  return m_deviceV; }
+{  return m_deviceV->bufferOnDeviceAt(m_vLoc); }
 
 void * CudaTetrahedronSystem::deviceTretradhedronIndices()
-{ return m_deviceTretradhedronIndices; }
+{ return m_deviceTretradhedronIndices->bufferOnDeviceAt(m_iLoc); }
+
+void CudaTetrahedronSystem::integrate(float timeStep)
+{ tetrahedronSystemIntegrate((float3 *)deviceX(), (float3 *)deviceV(), timeStep, numPoints()); }
+
+void CudaTetrahedronSystem::sendXToHost()
+{ m_deviceX->deviceToHost(hostX(), m_xLoc, numPoints() * 12); }

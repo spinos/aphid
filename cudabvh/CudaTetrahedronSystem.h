@@ -19,21 +19,25 @@ public:
 	virtual void initOnDevice();
 	virtual void update();
 	
-	void setDeviceXPtr(void * ptr);
-	void setDeviceVPtr(void * ptr);
-	void setDeviceTretradhedronIndicesPtr(void * ptr);
+	void setDeviceXPtr(CUDABuffer * ptr, unsigned loc);
+	void setDeviceVPtr(CUDABuffer * ptr, unsigned loc);
+	void setDeviceTretradhedronIndicesPtr(CUDABuffer * ptr, unsigned loc);
 
 	void * deviceX();
 	void * deviceV();
 	void * deviceTretradhedronIndices();
+	
+	void integrate(float timeStep);
+	void sendXToHost();
 	
 protected:
     
 private:
 	void formTetrahedronAabbs();
 private:
-	void * m_deviceX;
-	void * m_deviceV;
-	void * m_deviceTretradhedronIndices;
+	CUDABuffer * m_deviceX;
+	CUDABuffer * m_deviceV;
+	CUDABuffer * m_deviceTretradhedronIndices;
+	unsigned m_xLoc, m_vLoc, m_iLoc;
 };
 #endif        //  #ifndef CUDATETRAHEDRONSYSTEM_H

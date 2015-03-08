@@ -19,6 +19,7 @@ public:
 	
 	struct cudaGraphicsResource ** resource();
 	void * bufferOnDevice();
+	void * bufferOnDeviceAt(unsigned loc);
 	void hostToDevice(void * src, unsigned size);
 	void deviceToHost(void * dst, unsigned size);
 	void hostToDevice(void * src);

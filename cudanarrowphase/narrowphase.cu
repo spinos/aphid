@@ -117,9 +117,8 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	    return;
 	}
 	
-	dstContact[ind].separateAxis = sas;
-    interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
-        
+	// dstContact[ind].separateAxis = sas;
+    // interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);    
 	
 	float separateDistance = float4_length(sas);
 // within thin shell margin

@@ -94,26 +94,18 @@ void CudaNarrowphase::initOnDevice()
 	m_pointCacheLoc->hostToDevice(&m_objectPointStart[0]);
 	m_indexCacheLoc->hostToDevice(&m_objectIndexStart[0]);
 	
-	char * pos = (char *)m_pos->bufferOnDevice();
-	char * vel = (char *)m_vel->bufferOnDevice();
-	char * ind = (char *)m_ind->bufferOnDevice();
-	
 	for(i = 0; i<m_numObjects; i++) {
 		CudaTetrahedronSystem * curObj = m_objects[i];
 		
-		curObj->setDeviceXPtr(pos);
-		curObj->setDeviceXPtr(vel);
-		curObj->setDeviceTretradhedronIndicesPtr(ind);
+		curObj->setDeviceXPtr(m_pos, m_objectPointStart[i] * 12);
+		curObj->setDeviceVPtr(m_vel, m_objectPointStart[i] * 12);
+		curObj->setDeviceTretradhedronIndicesPtr(m_ind, m_objectIndexStart[i] * 16);
 		
 		m_pos->hostToDevice(curObj->hostX(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_vel->hostToDevice(curObj->hostV(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_ind->hostToDevice(curObj->hostTretradhedronIndices(), m_objectIndexStart[i] * 16, curObj->numTetradedrons() * 16);
 		
 		curObj->initOnDevice();
-		
-		pos += m_objectPointStart[i] * 12;
-		vel += m_objectPointStart[i] * 12;
-		ind += m_objectIndexStart[i] * 16;
 	}
 }
 

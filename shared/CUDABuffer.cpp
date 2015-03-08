@@ -49,6 +49,13 @@ struct cudaGraphicsResource ** CUDABuffer::resource()
 
 void * CUDABuffer::bufferOnDevice() { return _device_vbo_buffer; }
 
+void * CUDABuffer::bufferOnDeviceAt(unsigned loc)
+{
+	char * p = (char *)bufferOnDevice();
+    p += loc;
+	return p;
+}
+
 void CUDABuffer::hostToDevice(void * src, unsigned size)
 {
 	cutilSafeCall( cudaMemcpy(_device_vbo_buffer, src, size, cudaMemcpyHostToDevice) );   

@@ -15,6 +15,7 @@ HEADERS       = ../shared/Base3DView.h \
                 ../cudabvh/reduceBox_implement.h \
                 ../cudabvh/reduceRange_implement.h \
                 ../cudabvh/createBvh_implement.h \
+                ../cudabvh/tetrahedronSystem_implement.h \
                 ../radixsort/radixsort_implement.h \
                 glWidget.h \
                 window.h \
@@ -57,6 +58,7 @@ CUSOURCES = ../cudabvh/bvh_math.cu \
             ../cudabvh/createBvh.cu \
             ../cudabvh/reduceBox.cu \
             ../cudabvh/reduceRange.cu \
+            ../cudabvh/tetrahedronSystem.cu \
             ../radixsort/radixsort.cu \
             matrix_math.cu \
             barycentric.cu \

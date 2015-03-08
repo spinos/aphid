@@ -29,24 +29,24 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 			if(j%2==0) top.x += 1.75f;
 			
 			m_tetra->addPoint(&base.x);
-			hv[0] = 30.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 30.f * (((float)(rand() % 199))/199.f) * vy;
-			hv[2] = 33.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = 10.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 10.f * (((float)(rand() % 199))/199.f) * vy;
+			hv[2] = 13.f * (((float)(rand() % 199))/199.f - .5f);
 			hv+=3;
 			m_tetra->addPoint(&right.x);
-			hv[0] = 30.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 38.f * (((float)(rand() % 199))/199.f) * vy;
-			hv[2] = 35.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = 10.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 18.f * (((float)(rand() % 199))/199.f) * vy;
+			hv[2] = 15.f * (((float)(rand() % 199))/199.f - .5f);
 			hv+=3;
 			m_tetra->addPoint(&top.x);
-			hv[0] = 30.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 38.f * (((float)(rand() % 199))/199.f) * vy;
-			hv[2] = 35.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = 10.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 18.f * (((float)(rand() % 199))/199.f) * vy;
+			hv[2] = 15.f * (((float)(rand() % 199))/199.f - .5f);
 			hv+=3;
 			m_tetra->addPoint(&front.x);
-			hv[0] = 30.f * (((float)(rand() % 199))/199.f - .5f);
-			hv[1] = 38.f * (((float)(rand() % 199))/199.f) * vy;
-			hv[2] = 35.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[0] = 10.f * (((float)(rand() % 199))/199.f - .5f);
+			hv[1] = 18.f * (((float)(rand() % 199))/199.f) * vy;
+			hv[2] = 15.f * (((float)(rand() % 199))/199.f - .5f);
 			hv+=3;
 
 			unsigned b = (j * GRDX + i) * 4;
@@ -110,9 +110,11 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw()
 {
     m_narrowphase->computeContacts(m_devicePairs, GRDX);
+	m_tetra->integrate(0.016667f);
+	m_tetra->sendXToHost();
 	m_dbgDraw->drawTetra(m_tetra);
-	// m_dbgDraw->drawTetraAtFrameEnd(m_tetra);
-	m_dbgDraw->drawSeparateAxis(m_narrowphase, m_hostPairs, m_tetra);
+	m_dbgDraw->drawTetraAtFrameEnd(m_tetra);
+	// m_dbgDraw->drawSeparateAxis(m_narrowphase, m_hostPairs, m_tetra);
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)
