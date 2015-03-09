@@ -141,6 +141,9 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
         interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
         return;
 	}
+
+// use thin shell margin
+	separateDistance -= GJK_THIN_MARGIN2;
 	
 	float3 nor;
 	float closeInSpeed;
@@ -161,7 +164,7 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
             break;
         }
         
-        toi += (separateDistance - GJK_THIN_MARGIN2) / closeInSpeed * .73f;
+        toi += separateDistance / closeInSpeed * .732f;
 // too far away       
         if(toi > GJK_STEPSIZE) { 
             dstContact[ind].timeOfImpact = toi;
@@ -192,8 +195,6 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
         if(separateDistance < .001f) { 
             break;
         }
-        
-        separateDistance += GJK_THIN_MARGIN2;
         
         i++;
     }

@@ -24,15 +24,15 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	float vrx, vry, vrz, vr;
 	for(j=0; j < 2; j++) {
 		for(i=0; i<GRDX; i++) {
-			Vector3F base(2.3f * i, 3.f * j + 1.f, 0.5f * i);
+			Vector3F base(2.3f * i, 5.f * j + 1.f, 0.5f * i);
 			Vector3F right = base + Vector3F(1.75f, 0.f, 0.7f);
 			Vector3F front = base + Vector3F(0.f, 0.f, 1.75f);
 			Vector3F top = base + Vector3F(0.f, 1.75f, 0.7f);
 			if(j%2==0) top.x += 1.75f;
 			
 			vrx = .5f * (((float)(rand() % 199))/199.f - .5f);
-			vry = .5f * (((float)(rand() % 199))/199.f + .5f) * vy;
-			vrz = .05f * (((float)(rand() % 199))/199.f - .5f);
+			vry = 1.5f * (((float)(rand() % 199))/199.f + .5f) * vy;
+			vrz = .5f * (((float)(rand() % 199))/199.f - .5f);
 			vr = .5f * (((float)(rand() % 199))/199.f);
 			
 			m_tetra->addPoint(&base.x);
