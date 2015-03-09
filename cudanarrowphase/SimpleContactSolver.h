@@ -18,6 +18,12 @@ public:
 						void * contacts,
 						CUDABuffer * pairBuf,
 						void * objectData);
+						
+						
+	CUDABuffer * contactPairHashBuf();
+	CUDABuffer * bodySplitLocBuf();
 private:
+	CUDABuffer * m_sortedInd[2];
+	CUDABuffer * m_splitPair;
 };
 #endif        //  #ifndef SIMPLECONTACTSOLVER_H

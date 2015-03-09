@@ -11,6 +11,7 @@ class GeoDrawer;
 class TetrahedronSystem;
 class BaseBuffer;
 class CudaNarrowphase;
+class SimpleContactSolver;
 class DrawNp {
 public:
 	DrawNp();
@@ -23,6 +24,7 @@ public:
 	void drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, TetrahedronSystem * tetra);
 	void printCoord(CudaNarrowphase * phase, BaseBuffer * pairs);
 	void printTOI(CudaNarrowphase * phase, BaseBuffer * pairs);
+	void printContactPairHash(SimpleContactSolver * solver, unsigned numContacts);
 private:
     void computeX1(TetrahedronSystem * tetra, float h = 0.0166667f);
     Vector3F tetrahedronCenter(Vector3F * p, unsigned * v, unsigned i);
@@ -35,4 +37,5 @@ private:
 	BaseBuffer * m_counts;
 	BaseBuffer * m_contactPairs;
 	BaseBuffer * m_scanResult;
+	BaseBuffer * m_pairsHash;
 };

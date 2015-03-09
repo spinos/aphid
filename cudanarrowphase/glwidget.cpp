@@ -10,7 +10,7 @@
 #include <CudaNarrowphase.h>
 #include "SimpleContactSolver.h"
 
-#define GRDX 1225
+#define GRDX 1226
 #define NTET 2500
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -124,6 +124,9 @@ void GLWidget::clientDraw()
 									m_narrowphase->contacts(),
 									m_narrowphase->contactPairsBuffer(),
 									m_narrowphase->objectBuffer());
+									
+	m_dbgDraw->printContactPairHash(m_contactSolver, m_narrowphase->numContacts());
+	
 	m_tetra->integrate(0.016667f);
 	m_tetra->sendXToHost();
 	m_dbgDraw->drawTetra(m_tetra);
