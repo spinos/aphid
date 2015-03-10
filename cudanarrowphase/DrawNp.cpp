@@ -12,7 +12,9 @@
 #include <TetrahedronSystem.h>
 #include <BaseBuffer.h>
 #include <CudaNarrowphase.h>
+#include <SimpleContactSolver.h>
 #include "narrowphase_implement.h"
+#include <CUDABuffer.h>
 
 DrawNp::DrawNp() 
 {
@@ -22,6 +24,7 @@ DrawNp::DrawNp()
 	m_counts = new BaseBuffer;
 	m_contactPairs = new BaseBuffer;
 	m_scanResult = new BaseBuffer;
+	m_pairsHash = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -182,3 +185,30 @@ Vector3F DrawNp::interpolatePointTetrahedron(Vector3F * p, unsigned * v, unsigne
     return r;
 }
 
+void DrawNp::printContactPairHash(SimpleContactSolver * solver, unsigned numContacts)
+{
+	if(numContacts < 1) return;
+	CUDABuffer * hashp = solver->contactPairHashBuf();
+	
+	std::cout<<" nc "<<numContacts<<"\n";
+	
+	m_pairsHash->create(hashp->bufferSize());
+	hashp->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());
+	
+	unsigned * v = (unsigned *)m_pairsHash->data();
+	
+	unsigned i;
+	std::cout<<" body-contact hash ";
+	for(i=0; i < numContacts * 2; i++) {
+		std::cout<<" "<<i<<" ("<<v[i*2]<<","<<v[i*2+1]<<")\n";
+	}
+	
+	hashp = solver->bodySplitLocBuf();
+	m_pairsHash->create(hashp->bufferSize());
+	hashp->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());
+	
+	std::cout<<" body-split pairs ";
+	for(i=0; i < numContacts; i++) {
+		std::cout<<" "<<i<<" ("<<v[i*2]<<","<<v[i*2+1]<<")\n";
+	}
+}

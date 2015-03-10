@@ -52,6 +52,11 @@ static bool isPow2(unsigned int x)
     return ((x&(x-1))==0);
 }
 
+static uint iRound1024(uint n)
+{
+	return iDivUp(n, 1024) * 1024;
+}
+
 struct Aabb {
     float3 low;
     float3 high;
