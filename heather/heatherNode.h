@@ -35,10 +35,10 @@
 #include <maya/MDagPathArray.h>
 #include <Plane.h>
 #include <GlFramebuffer.h>
-#include "zEXRImage.h"
+#include "ExrImgData.h"
 #include "ClampShader.h"
 #include "DepthShader.h"
-
+#include <CUDABuffer.h>
 class heatherNode : public MPxLocatorNode
 {
 public:
@@ -56,10 +56,7 @@ public:
 	static  void *          creator();
 	static  MStatus         initialize();
 
-	static MObject adepthImageName;
-	static MObject aframeNumber;
-	static MObject aframePadding;
-	static MObject aenableMultiFrames;
+	static MObject ainimages;
 	static MObject ablockSetName;
 	static MObject acameraName;
 	static MObject outValue;
@@ -68,8 +65,9 @@ public:
 	static	MTypeId		id;
 	
 private:
-    void preLoadImage(const char * name, int frame, int padding, bool useImageSequence);
-	void cacheBlocks(const MString & setname);
+    void addImage(ExrImgData::DataDesc * desc);
+    void computeCombinedBufs();
+    void cacheBlocks(const MString & setname);
 	void cacheMeshFromNode(const MString & name);
 	void cacheMeshFromNode(const MObject & node);
 	void drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvinv, const float & aspectRatio, 
@@ -81,13 +79,18 @@ private:
 private:
 	MDagPathArray m_meshes;
 	MString m_carmeraName;
-	//Vector3F * m_blockVs;
-	//unsigned * m_blockTriIndices;
-    ZEXRImage * m_exr;
 	GlFramebuffer * m_framebuffer;
 	ClampShader m_clamp;
 	DepthShader m_depth;
     GLuint m_bgdCImg, m_depthImg, m_colorImg;
 	int m_portWidth, m_portHeight;
     bool m_needLoadImage;
+    ZEXRImage * m_images[32];
+    CUDABuffer * m_colorBuf[32];
+    CUDABuffer * m_depthBuf[32];
+    CUDABuffer * m_combinedColorBuf;
+    CUDABuffer * m_combinedDepthBuf;
+    BaseBuffer * m_hostCombinedColorBuf;
+    BaseBuffer * m_hostCombinedDepthBuf;
+    unsigned m_numImages;
 };

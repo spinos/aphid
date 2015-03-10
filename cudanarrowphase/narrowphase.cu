@@ -89,7 +89,7 @@ __global__ void computeSeparateAxis_kernel(ContactData * dstContact,
 __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
     uint2 * pairs,
     float3 * pos, float3 * vel, 
-    uint4* tetrahedron, 
+    uint4 * tetrahedron, 
     uint * pointStart, uint * indexStart,
     uint maxInd)
 {
@@ -129,9 +129,6 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	    dstContact[ind].timeOfImpact = 1e8;
 	    return;
 	}
-	
-	// dstContact[ind].separateAxis = sas;
-    // interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);    
 	
 	float separateDistance = float4_length(sas);
 // within thin shell margin

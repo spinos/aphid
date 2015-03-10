@@ -65,16 +65,13 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
     Vector3F * ptet = (Vector3F *)m_x1->data();
     
     const unsigned np = phase->numPairs();
-	m_coord->create(np * 16);
 	m_contact->create(np * 48);
 	
-	phase->getCoord(m_coord);
 	phase->getContact0(m_contact);
 	
 	unsigned * pairInd = (unsigned *)pairs->data();
 	unsigned * tetInd = (unsigned *)tetra->hostTretradhedronIndices();
 	
-	float * coord = (float *)m_coord->data();
 	ContactData * contact = (ContactData *)m_contact->data();
 	
 	unsigned i;
@@ -83,9 +80,6 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
 	for(i=0; i < np; i++) {
 		ContactData & cf = contact[i];
 		
-		// if(i==0) std::cout<<"distance "<<Vector3F(cf.separateAxis.x, cf.separateAxis.y, cf.separateAxis.z).length()<<"\n";
-		
-	    // if(sa[i*4+3] < .1f) continue; 
 		if(cf.separateAxis.w < .1f) continue;
 	    cenA = tetrahedronCenter(ptet, tetInd, pairInd[i * 2]);
 	    cenB = tetrahedronCenter(ptet, tetInd, pairInd[i * 2 + 1]);
@@ -98,9 +92,6 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
 		m_drawer->setColor(0.f, .5f, 0.f);
 		m_drawer->arrow(cenA, cenA + Vector3F(cf.localA.x, cf.localA.y, cf.localA.z));
 		m_drawer->arrow(cenB, cenB + Vector3F(cf.localB.x, cf.localB.y, cf.localB.z));
-		
-		// dst = interpolatePointTetrahedron(ptet, tetInd, pairInd[i * 2], &coord[i*4]);
-		// m_drawer->arrow(cenA, dst);
 	}
 }
 

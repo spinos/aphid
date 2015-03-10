@@ -10,32 +10,39 @@
 #include <maya/MFnMesh.h>
 #include <maya/MItMeshPolygon.h>
 #include <maya/MPointArray.h>
+#include <maya/MFnPluginData.h>
 #include <SHelper.h>
+#include "heather_implement.h"
 MTypeId heatherNode::id( 0x7065d6 );
 
-MObject heatherNode::adepthImageName;
-MObject heatherNode::aenableMultiFrames;
-MObject heatherNode::aframeNumber;
-MObject heatherNode::aframePadding;
+MObject heatherNode::ainimages;
 MObject heatherNode::ablockSetName;
 MObject heatherNode::acameraName;
 MObject heatherNode::outValue;
 
 heatherNode::heatherNode() 
 {
+    m_numImages = 0;
     m_needLoadImage = 0;
-    m_exr = 0;
+    // m_exr = 0;
 	m_framebuffer = 0;
 	m_portWidth = 0;
 	m_portHeight = 0;
 	m_carmeraName = "";
 	// m_blockVs = 0;
 	// m_blockTriIndices = 0;
+	m_combinedColorBuf = new CUDABuffer;
+    m_combinedDepthBuf = new CUDABuffer;
+    m_hostCombinedColorBuf = new BaseBuffer;
+    m_hostCombinedDepthBuf = new BaseBuffer;
 }
 heatherNode::~heatherNode() 
 {
-    if(m_exr) delete m_exr;
-	if(m_framebuffer) delete m_framebuffer;
+    if(m_framebuffer) delete m_framebuffer;
+    delete m_combinedColorBuf;
+    delete m_combinedDepthBuf;
+    delete m_hostCombinedColorBuf;
+    delete m_hostCombinedDepthBuf;
 	// if(m_blockVs) delete[] m_blockVs;
 	// if(m_blockTriIndices) delete[] m_blockTriIndices;
 }
@@ -43,52 +50,89 @@ heatherNode::~heatherNode()
 MStatus heatherNode::compute( const MPlug& plug, MDataBlock& block )
 {
     if( plug == outValue ) {
-        MString filename = block.inputValue(adepthImageName).asString();
-        int frame = block.inputValue(aframeNumber).asInt();
-		int padding = block.inputValue(aframePadding).asInt();
-		bool enableSequence = block.inputValue(aenableMultiFrames).asBool();
-        preLoadImage(filename.asChar(), frame, padding, enableSequence);
+        m_numImages = 0;
+       
+        MArrayDataHandle hArray = block.inputArrayValue(ainimages);
+        
+        MGlobal::displayInfo("heather compute");
+        int numSlots = hArray.elementCount();
+        int i;
+        for(i=0; i < numSlots; i++) {
+            MObject oslot = hArray.inputValue().data();
+            MFnPluginData fslot(oslot);
+            ExrImgData * dslot = (ExrImgData *)fslot.data();
+            if(dslot) {
+                ExrImgData::DataDesc * desc = dslot->getDesc();
+                addImage(desc);
+            }
+            hArray.next();
+        }
+        
+        computeCombinedBufs();
+        
 		MString setname = block.inputValue(ablockSetName).asString();
 		m_carmeraName = block.inputValue(acameraName).asString();
 		cacheBlocks(setname);
         MDataHandle outputHandle = block.outputValue( outValue );
 		outputHandle.set(0.0);
+		
+		block.setClean(plug);
+		return MS::kSuccess;
     }
-	return MS::kSuccess;
+	return MS::kUnknownParameter;
 }
 
-void heatherNode::preLoadImage(const char * name, int frame, int padding, bool useImageSequence)
+void heatherNode::addImage(ExrImgData::DataDesc * desc)
 {
-    std::string fileName(name);
-    if(fileName.size() < 3) return;
-	
-	if(useImageSequence)
-		SHelper::changeFrameNumber(fileName, frame, padding);
-		
-	if(!m_exr) m_exr = new ZEXRImage(fileName.c_str(), false);
-	else m_exr->open(fileName.c_str());
-    if(!m_exr->isOpened()) {
-		MGlobal::displayInfo(MString("cannot open image ") + fileName.c_str());
-		return;
-	}
-	
-	if(m_exr->fileName() != fileName) {
-		MGlobal::displayInfo(MString("cannot open image ") + fileName.c_str());
-		return;
-	}
-
-	// std::vector<std::string> names;
-    // ZEXRImage::listExrChannelNames(fileName, names);
-    
-    // std::vector<std::string>::const_iterator it = names.begin();
-    // for(;it != names.end();++it) MGlobal::displayWarning((*it).c_str());
-
-    if(!m_exr->isRGBAZ()) {
-        MGlobal::displayWarning(MString("image is not RGBAZ format.") + fileName.c_str());
+    if(m_numImages == 32) {
+        MGlobal::displayWarning("heather reaches maximum 32 images.");
         return;
     }
-    
+    if(!desc->_isValid) return;
+    m_images[m_numImages] = desc->_img;
+    m_colorBuf[m_numImages] = desc->_colorBuf;
+    m_depthBuf[m_numImages] = desc->_depthBuf;
+    m_numImages++;
     m_needLoadImage = 1;
+}
+
+void heatherNode::computeCombinedBufs()
+{
+    const unsigned numPix =  m_images[0]->getWidth() * m_images[0]->getHeight();
+    m_combinedColorBuf->create(numPix * 4 * 2);
+    m_combinedDepthBuf->create(numPix * 4);
+    
+    void * dstCol = m_combinedColorBuf->bufferOnDevice();
+    void * dstDep = m_combinedDepthBuf->bufferOnDevice();
+    void * srcCol = m_colorBuf[0]->bufferOnDevice();
+    void * srcDep = m_depthBuf[0]->bufferOnDevice();
+    
+    MGlobal::displayInfo(MString("combine pix ")+numPix);
+    CUU::heatherFillImage((CUU::ushort4 *)dstCol, (float *)dstDep, (CUU::ushort4 *)srcCol, (float *)srcDep, numPix);
+    
+    const unsigned depBufSize = m_depthBuf[0]->bufferSize();
+    const unsigned colBufSize = m_colorBuf[0]->bufferSize();
+    
+    unsigned i = 1;
+    for(;i < m_numImages; i++) {
+        if(m_depthBuf[i]->bufferSize() != depBufSize) continue;
+        if(m_colorBuf[i]->bufferSize() != colBufSize) continue;
+        
+        MGlobal::displayInfo(MString("combine img ")+i+" "+m_images[i]->getWidth() *  m_images[i]->getHeight());
+        
+        CUU::heatherMixImage((CUU::ushort4 *)dstCol, 
+                             (float *)dstDep, 
+                             (CUU::ushort4 *)m_colorBuf[i]->bufferOnDevice(), 
+                             (float *)m_depthBuf[i]->bufferOnDevice(), 
+                             numPix);
+    }
+    
+    
+    m_hostCombinedColorBuf->create(numPix * 4 * 2);
+    m_hostCombinedDepthBuf->create(numPix * 4);
+    
+    m_combinedColorBuf->deviceToHost(m_hostCombinedColorBuf->data(), m_hostCombinedColorBuf->bufferSize());
+    m_combinedDepthBuf->deviceToHost(m_hostCombinedDepthBuf->data(), m_hostCombinedDepthBuf->bufferSize());
 }
 
 void heatherNode::cacheBlocks(const MString & setname)
@@ -262,10 +306,11 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
 		m_depth.diagnose(log);
 	}	
-
-    if(!m_exr) return;
 	
-    const float imageAspectRatio = m_exr->aspectRation();
+	// MGlobal::displayInfo(MString(" n img ")+m_numImages);
+	if(m_numImages < 1) return;
+	
+    const float imageAspectRatio = m_images[0]->aspectRation();
 	
 	GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
@@ -330,19 +375,18 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	delete[] pixels;
 	
 	if(m_needLoadImage) {
-	    // MGlobal::displayInfo(MString("heather to load image ")+m_exr->fileName().c_str());
     
 	    glBindTexture(GL_TEXTURE_2D, m_colorImg);
 //#ifdef WIN32
 //	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RGBA, GL_HALF_FLOAT, m_exr->_pixels);
 //#else
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RGBA, GL_HALF_FLOAT_ARB, m_exr->_pixels);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, m_images[0]->getWidth(), m_images[0]->getHeight(), 0, GL_RGBA, GL_HALF_FLOAT_ARB, m_hostCombinedColorBuf->data());
 //#endif	
 	    glBindTexture(GL_TEXTURE_2D, m_depthImg);
 	    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
         // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RED, GL_FLOAT, m_exr->m_zData);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, m_images[0]->getWidth(), m_images[0]->getHeight(), 0, GL_RED, GL_FLOAT, m_hostCombinedDepthBuf->data());
 	    
 		// for(int i=0; i < m_exr->getWidth() * m_exr->getHeight(); i+=999) MGlobal::displayInfo(MString("z ")+m_exr->m_zData[i]);
 		m_clamp.setTextures(m_framebuffer->colorTexture(), m_bgdCImg,
@@ -530,24 +574,11 @@ MStatus heatherNode::initialize()
 	MFnNumericAttribute numAttr;
 	MStatus			 stat;
 	
-	adepthImageName = matAttr.create( "depthImage", "dmg", MFnData::kString );
- 	matAttr.setStorable(true);
-	// stringAttr.setArray(true);
-	addAttribute(adepthImageName);
-	
-	aenableMultiFrames = numAttr.create( "useImageSequence", "uis", MFnNumericData::kBoolean );
-	numAttr.setStorable(true);
-	addAttribute(aenableMultiFrames);
-	
-	aframeNumber = numAttr.create( "frameNumber", "fnb", MFnNumericData::kInt );
-	numAttr.setStorable(true);
-	numAttr.setKeyable(true);
-	addAttribute(aframeNumber);
-	
-	aframePadding = numAttr.create( "framePadding", "fpd", MFnNumericData::kInt );
-	numAttr.setDefault(0);
-	numAttr.setStorable(true);
-	addAttribute(aframePadding);
+	ainimages = matAttr.create("inImage", "iim", MFnData::kPlugin);
+	matAttr.setStorable(false);
+	matAttr.setConnectable(true);
+	matAttr.setArray(true);
+	addAttribute(ainimages);
 	
 	acameraName = matAttr.create( "lookCameraName", "lcm", MFnData::kString );
  	matAttr.setStorable(true);
@@ -562,9 +593,7 @@ MStatus heatherNode::initialize()
 	numAttr.setWritable(false);
 	addAttribute(outValue);
 	
-	attributeAffects(adepthImageName, outValue);
-	attributeAffects(aenableMultiFrames, outValue);
-	attributeAffects(aframeNumber, outValue);
+	attributeAffects(ainimages, outValue);
 	attributeAffects(ablockSetName, outValue);
 	attributeAffects(acameraName, outValue);
 	
