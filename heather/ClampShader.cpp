@@ -57,11 +57,12 @@ const char* ClampShader::fragmentProgramSource() const
 "}"
 "vec4 composed = fogC * alpha + bgdC * (1.0 - alpha);"
 "float bgdZ = texture2D(bgdZ_texture, gl_TexCoord[1].xy).r;"
-"if(fogZ < bgdZ) gl_FragColor = composed;"
+"if(fogZ < bgdZ || bgdZ < 0.1) gl_FragColor = composed;"
 "else gl_FragColor = bgdC;"
+
 //"gl_FragColor = texture2D(color_texture, gl_TexCoord[2].xy);"
 //"gl_FragColor = vec4(gl_TexCoord[2].xy, 0, 1);"
-//"gl_FragColor = vec4(bgdZ, bgdZ, bgdZ, 1);"
+//"gl_FragColor = vec4(bgdZ/1000, bgdZ/1000, bgdZ/1000, 1);"
 //"gl_FragColor = bgdC;"
 // "if(bgdZ<1000) gl_FragColor = vec4(gl_TexCoord[1].x, gl_TexCoord[1].y, 0.0, 1.0);"
 // http://tulrich.com/geekstuff/log_depth_buffer.txt

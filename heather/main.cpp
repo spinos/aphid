@@ -15,7 +15,7 @@
 MStatus initializePlugin( MObject obj )
 { 
 	MStatus   stat;
-	MFnPlugin plugin( obj, "ZHANG JIAN | OF3D", "2.0 Tue Mar 10 20:54:47", "Any");
+	MFnPlugin plugin( obj, "ZHANG JIAN | OF3D", "2.1 Wed Mar 11 18:43:16 CST 2015", "Any");
 
 	stat = plugin.registerData("heatherData", ExrImgData::id,
 								 &ExrImgData::creator);

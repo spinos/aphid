@@ -266,6 +266,8 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
         if(camName != m_carmeraName) return;
     }
     
+    const double nearPlane = fCam.nearClippingPlane() + .1f;
+    
     const double overscan = fCam.overscan();
 
 	view.beginGL();
@@ -307,7 +309,6 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 		m_depth.diagnose(log);
 	}	
 	
-	// MGlobal::displayInfo(MString(" n img ")+m_numImages);
 	if(m_numImages < 1) return;
 	
     const float imageAspectRatio = m_images[0]->aspectRation();
@@ -319,7 +320,6 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
     glGetIntegerv (GL_VIEWPORT, viewport);
 	Matrix44F mmv(mvmatrix);
     Matrix44F mmvinv(mvmatrix); mmvinv.inverse();
-    Matrix44F mproj(projmatrix);
     
     const GLint portWidth = viewport[2];
     const GLint portHeight = viewport[3];
@@ -388,7 +388,6 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
         // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, m_images[0]->getWidth(), m_images[0]->getHeight(), 0, GL_RED, GL_FLOAT, m_hostCombinedDepthBuf->data());
 	    
-		// for(int i=0; i < m_exr->getWidth() * m_exr->getHeight(); i+=999) MGlobal::displayInfo(MString("z ")+m_exr->m_zData[i]);
 		m_clamp.setTextures(m_framebuffer->colorTexture(), m_bgdCImg,
 				m_depthImg, 
 				m_colorImg);
@@ -402,32 +401,19 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	
 	const float gatePortRatioW = (float)gateWidth/(float)portWidth;
 	const float gatePortRatioH = (float)gateHeight/(float)portHeight;
-	drawBackPlane(mproj, mmvinv, realRatio, overscan, 1.0, 1.0, fit==MFnCamera::kHorizontalFilmFit);
 	drawBlocks();
 	
 	m_depth.programEnd();
 	m_framebuffer->end();
 	
-	float tt;
-    Vector3F leftP;
-    
-    Plane pfar(mproj.M(0,3) - mproj.M(0,2), 
-               mproj.M(1,3) - mproj.M(1,2),
-               mproj.M(2,3) - mproj.M(2,2), 
-               mproj.M(3,3) - mproj.M(3,2));
-    // MGlobal::displayInfo(MString("proj")+mproj.str().c_str());
-    Ray toFar(Vector3F(0,0,0), Vector3F(0,0,-1), 0.f, 1e8);
-    
-    pfar.rayIntersect(toFar, leftP, tt);
-    // MGlobal::displayInfo(MString("far")+leftP.str().c_str());
-	m_clamp.setClippings(0.1f, -leftP.z);
+	glDisable(GL_DEPTH_TEST);
 	
+	m_clamp.setClippings(0.1, fCam.farClippingPlane());
+
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
     m_clamp.programBegin();
-
-    glDisable(GL_DEPTH_TEST);
     
-	drawBackPlane(mproj, mmvinv, realRatio, overscan, gatePortRatioW, gatePortRatioH, fit==MFnCamera::kHorizontalFilmFit, gateSqueezeX, gateSqueezeY);
+	drawBackPlane(nearPlane, projmatrix, mmvinv, realRatio, overscan, gatePortRatioW, gatePortRatioH, fit==MFnCamera::kHorizontalFilmFit, gateSqueezeX, gateSqueezeY);
     
 	m_clamp.programEnd();
 	
@@ -445,49 +431,43 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	
 }
 
-void heatherNode::drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvinv, const float & aspectRatio, const double & overscan,
+void heatherNode::drawBackPlane(double farPlane, const GLdouble * mproj, const Matrix44F & mmvinv, const float & aspectRatio, const double & overscan,
 	                   const float & gatePortRatioW, const float & gatePortRatioH, char isHorizontalFit,
 	                   float gateSqueezeX, float gateSqueezeY)
 {
 	float tt;
     Vector3F leftP;
     
-    Plane pfar(mproj.M(0,3) - mproj.M(0,2), 
-               mproj.M(1,3) - mproj.M(1,2),
-               mproj.M(2,3) - mproj.M(2,2), 
-               mproj.M(3,3) - mproj.M(3,2));
-    // MGlobal::displayInfo(MString("proj")+mproj.str().c_str());
-    Ray toFar(Vector3F(0,0,0), Vector3F(0,0,-1), 0.f, 1e8);
-    
-    pfar.rayIntersect(toFar, leftP, tt);
-    const float zPlane = leftP.z * .991f;
-    
-    float leftMost, bottomMost;
+    double dt = -farPlane;
+
+    double leftMost, bottomMost;
     
     if(isHorizontalFit) {
-        Plane pleft(mproj.M(0,3) + mproj.M(0,0), 
-               mproj.M(1,3) + mproj.M(1,0),
-               mproj.M(2,3) + mproj.M(2,0), 
-               mproj.M(3,3) + mproj.M(3,0));
+        Plane pleft(mproj[3] + mproj[0], 
+               mproj[7] + mproj[4],
+               mproj[11] + mproj[8], 
+               mproj[15] + mproj[12]);
     
-        Ray toleft(Vector3F(0.f, 0.f, zPlane), Vector3F(-1,0,0), 0.f, 1e8);
+        Ray toleft(Vector3F(0.f, 0.f, dt), Vector3F(-1,0,0), 0.f, 1e32);
         pleft.rayIntersect(toleft, leftP, tt);
         
         leftMost = leftP.x / overscan;
         bottomMost = leftMost * aspectRatio;
     }
     else {
-        Plane pbottom(mproj.M(0,3) + mproj.M(0,1), 
-               mproj.M(1,3) + mproj.M(1,1),
-               mproj.M(2,3) + mproj.M(2,1), 
-               mproj.M(3,3) + mproj.M(3,1));
+        Plane pbottom(mproj[3] + mproj[1], 
+               mproj[7] + mproj[5],
+               mproj[11] + mproj[9], 
+               mproj[15] + mproj[13]);
     
-        Ray tobottom(Vector3F(0.f, 0.f, zPlane), Vector3F(0,-1,0), 0.f, 1e8);
+        Ray tobottom(Vector3F(0.f, 0.f, dt), Vector3F(0,-1,0), 0.f, 1e32);
         pbottom.rayIntersect(tobottom, leftP, tt);
         
         bottomMost = leftP.y / overscan;
         leftMost = bottomMost / aspectRatio;
     }
+    
+    // MGlobal::displayInfo(MString("corners ")+leftMost+" "+bottomMost+" "+dt);
     
 	glPushMatrix();
 	float tmat[16];
@@ -509,32 +489,32 @@ void heatherNode::drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvin
     glMultiTexCoord2f(GL_TEXTURE0, gateL, gateB); 
     glMultiTexCoord2f(GL_TEXTURE1, portL, portB); 
     glMultiTexCoord2f(GL_TEXTURE2, gateL, gateT); 
-    glVertex3f(leftMost,bottomMost, zPlane);
+    glVertex3d(leftMost,bottomMost, dt);
     
     glMultiTexCoord2f(GL_TEXTURE0, gateR, gateB);
     glMultiTexCoord2f(GL_TEXTURE1, portR, portB); 
     glMultiTexCoord2f(GL_TEXTURE2, gateR, gateT); 
-    glVertex3f(-leftMost,bottomMost, zPlane);
+    glVertex3d(-leftMost,bottomMost, dt);
     
     glMultiTexCoord2f(GL_TEXTURE0, gateR, gateT);
     glMultiTexCoord2f(GL_TEXTURE1, portR, portT); 
     glMultiTexCoord2f(GL_TEXTURE2, gateR, gateB); 
-    glVertex3f(-leftMost,-bottomMost, zPlane);
+    glVertex3d(-leftMost,-bottomMost, dt);
     
     glMultiTexCoord2f(GL_TEXTURE0, gateL, gateB); 
     glMultiTexCoord2f(GL_TEXTURE1, portL, portB); 
     glMultiTexCoord2f(GL_TEXTURE2, gateL, gateT); 
-    glVertex3f(leftMost,bottomMost, zPlane);
+    glVertex3d(leftMost,bottomMost, dt);
     
     glMultiTexCoord2f(GL_TEXTURE0, gateR, gateT); 
     glMultiTexCoord2f(GL_TEXTURE1, portR, portT); 
     glMultiTexCoord2f(GL_TEXTURE2, gateR, gateB); 
-    glVertex3f(-leftMost,-bottomMost, zPlane);
+    glVertex3f(-leftMost,-bottomMost, dt);
     
     glMultiTexCoord2f(GL_TEXTURE0, gateL, gateT); 
     glMultiTexCoord2f(GL_TEXTURE1, portL, portT); 
     glMultiTexCoord2f(GL_TEXTURE2, gateL, gateB); 
-    glVertex3f(leftMost,-bottomMost, zPlane);
+    glVertex3d(leftMost,-bottomMost, dt);
     glEnd();
     
     glPopMatrix();

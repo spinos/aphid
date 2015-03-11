@@ -70,7 +70,7 @@ private:
     void cacheBlocks(const MString & setname);
 	void cacheMeshFromNode(const MString & name);
 	void cacheMeshFromNode(const MObject & node);
-	void drawBackPlane(const Matrix44F & mproj, const Matrix44F & mmvinv, const float & aspectRatio, 
+	void drawBackPlane(double farPlane, const GLdouble * mproj, const Matrix44F & mmvinv, const float & aspectRatio, 
 	                   const double & overscan,
 	                   const float & gatePortRatioW, const float & gatePortRatioH, char isHorizontalFit = true,
 	                   float gateSqueezeX = 1.f, float gateSqueezeY = 1.f);
