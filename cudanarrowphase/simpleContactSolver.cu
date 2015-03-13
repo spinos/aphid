@@ -1,5 +1,6 @@
 #include "simpleContactSolver_implement.h"
 #include <bvh_math.cu>
+#include <CudaBase.h>
 
 inline __device__ uint4 computePointIndex(uint * pointStarts,
                                             uint * indexStarts,
@@ -29,10 +30,10 @@ inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
 	float3 omega[4];
 // omega = r cross v
 // v = omega cross r
-    float3_cross1(omega[0], float3_difference(position[ind.x], center), float3_difference(velocity[ind.x], averageLinearVel));
-    float3_cross1(omega[1], float3_difference(position[ind.y], center), float3_difference(velocity[ind.y], averageLinearVel));
-    float3_cross1(omega[2], float3_difference(position[ind.z], center), float3_difference(velocity[ind.z], averageLinearVel));
-    float3_cross1(omega[3], float3_difference(position[ind.w], center), float3_difference(velocity[ind.w], averageLinearVel));
+    omega[0] = float3_cross(float3_difference(position[ind.x], center), float3_difference(velocity[ind.x], averageLinearVel));
+    omega[1] = float3_cross(float3_difference(position[ind.y], center), float3_difference(velocity[ind.y], averageLinearVel));
+    omega[2] = float3_cross(float3_difference(position[ind.z], center), float3_difference(velocity[ind.z], averageLinearVel));
+    omega[3] = float3_cross(float3_difference(position[ind.w], center), float3_difference(velocity[ind.w], averageLinearVel));
     
 	float3_average4_direct(angularVel, omega);
 }
@@ -43,14 +44,14 @@ inline __device__ void computeBodyVelocities1(uint * pointStarts,
                                                 uint ind,
                                                 float3 * position,
                                                 float3 * velocity, 
-                                                float3 & linearVelocityA, 
-                                                float3 & angularVelocityA)
+                                                float3 & linearVelocity, 
+                                                float3 & angularVelocity)
 {
     const uint4 ia = computePointIndex(pointStarts, indexStarts, indices, ind);
 	
-	float3_average4(linearVelocityA, velocity, ia);
+	float3_average4(linearVelocity, velocity, ia);
 
-	computeBodyAngularVelocity(angularVelocityA, linearVelocityA, position, velocity, ia);
+	computeBodyAngularVelocity(angularVelocity, linearVelocity, position, velocity, ia);
 }
 
 inline __device__ void computeBodyVelocities(uint * pointStarts, 
@@ -201,18 +202,11 @@ __global__ void setContactConstraint_kernel(float3 * linVelA,
 	invMass[ind] = 1.f / (invMassA + invMassB);
 	lambda[ind] = 0.f;
 	
-	float3 llinVelA, langVelA;
 	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].x, srcPos, srcVel, 
-	    llinVelA, langVelA);
+	    linVelA[ind], angVelA[ind]);
 	
-	float3 llinVelB, langVelB;
 	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].y, srcPos, srcVel, 
-	    llinVelB, langVelB);
-	
-	angVelA[ind] = langVelA;
-	angVelB[ind] = langVelB;
-	linVelA[ind] = llinVelA;
-	linVelB[ind] = llinVelB;
+	    linVelB[ind], angVelB[ind]);
 }
 
 __global__ void clearDeltaVelocity_kernel(float3 * deltaLinVel, 
@@ -351,8 +345,10 @@ void simpleContactSolverSetContactConstraint(float3 * linVelA,
                                         uint * perObjectIndexStart,
                                         uint numContacts)
 {
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(numContacts, 512);
+    uint tpb = CudaBase::LimitNThreadPerBlock(30, 60);
+    
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numContacts, tpb);
     dim3 grid(nblk, 1, 1);
     
     setContactConstraint_kernel<<< grid, block >>>(linVelA,
