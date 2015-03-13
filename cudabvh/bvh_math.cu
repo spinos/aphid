@@ -78,6 +78,24 @@ inline __device__ float distance2_between(const float3 & v1, const float3 & v0)
     return float3_length2(float3_difference(v1, v0)); 
 }
 
+inline __device__ void float3_average4(float3 & dst, float3 * v, uint4 i)
+{
+    dst = v[i.x];
+	dst = float3_add(dst, v[i.y]);
+	dst = float3_add(dst, v[i.z]);
+	dst = float3_add(dst, v[i.w]);
+	dst = scale_float3_by(dst, 0.25f);
+}
+
+inline __device__ void float3_average4_direct(float3 & dst, float3 * v)
+{
+    dst = v[0];
+	dst = float3_add(dst, v[1]);
+	dst = float3_add(dst, v[2]);
+	dst = float3_add(dst, v[3]);
+	dst = scale_float3_by(dst, 0.25f);
+}
+
 inline __device__ int3 isless(float3 v, float3 threshold)
 { return make_int3(v.x < threshold.x, v.y < threshold.y, v.z < threshold.z); }
 
@@ -95,6 +113,12 @@ inline __device__ float float3_dot(float3 v1, float3 v0)
 inline __device__ float3 float3_cross(float3 v1, float3 v2)
 { return make_float3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x); }
 
+inline __device__ void float3_cross1(float3 & result, float3 & v1, float3 & v2)
+{ 
+    result.x = (v1.y * v2.z - v1.z * v2.y);
+    result.y = (v1.z * v2.x - v1.x * v2.z);
+    result.z = (v1.x * v2.y - v1.y * v2.x); 
+}
 
 inline __device__ void resetAabb(Aabb & dst)
 {

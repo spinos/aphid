@@ -14,6 +14,7 @@
 #include <maya/MDagPath.h>
 #include "ExrImgData.h"
 #include <CUDABuffer.h>
+#include <map>
 class ExrImgLoader : public MPxNode
 {
 public:
@@ -38,8 +39,6 @@ public:
 private:
 	void preLoadImage(ExrImgData::DataDesc * dst, const char * name, int frame, int padding, bool useImageSequence);
 private:
-    ZEXRImage * m_exr;
-    CUDABuffer * m_colBuf;
-    CUDABuffer * m_depBuf;
+    std::map<std::string, ZEXRImage *> m_files;
     ExrImgData::DataDesc *_pDesc;
 };

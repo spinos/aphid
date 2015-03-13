@@ -11,6 +11,7 @@ int CudaBase::MaxRegisterPerBlock = 8192;
 int CudaBase::MaxSharedMemoryPerBlock = 16384;
 int CudaBase::WarpSize = 32;
 int CudaBase::RuntimeVersion = 4000;
+bool CudaBase::HasDevice = 0;
 
 CudaBase::CudaBase()
 {
@@ -67,8 +68,10 @@ char CudaBase::CheckCUDevice()
 
 void CudaBase::SetDevice()
 {
+    if(HasDevice) return;
     CheckCUDevice();
 	cudaGLSetGLDevice(cutGetMaxGflopsDeviceId());
+	HasDevice = 1;
 }
 
 int CudaBase::LimitNThreadPerBlock(int regPT, int memPT)

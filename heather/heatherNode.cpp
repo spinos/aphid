@@ -13,6 +13,7 @@
 #include <maya/MFnPluginData.h>
 #include <SHelper.h>
 #include "heather_implement.h"
+#include <CudaBase.h>
 MTypeId heatherNode::id( 0x7065d6 );
 
 MObject heatherNode::ainimages;
@@ -35,6 +36,10 @@ heatherNode::heatherNode()
     m_combinedDepthBuf = new CUDABuffer;
     m_hostCombinedColorBuf = new BaseBuffer;
     m_hostCombinedDepthBuf = new BaseBuffer;
+    m_colorBuf[0] = new CUDABuffer;
+    m_colorBuf[1] = new CUDABuffer;
+    m_depthBuf[0] = new CUDABuffer;
+    m_depthBuf[1] = new CUDABuffer;
 }
 heatherNode::~heatherNode() 
 {
@@ -43,6 +48,10 @@ heatherNode::~heatherNode()
     delete m_combinedDepthBuf;
     delete m_hostCombinedColorBuf;
     delete m_hostCombinedDepthBuf;
+    delete m_colorBuf[0];
+    delete m_colorBuf[1];
+    delete m_depthBuf[0];
+    delete m_depthBuf[1];
 	// if(m_blockVs) delete[] m_blockVs;
 	// if(m_blockTriIndices) delete[] m_blockTriIndices;
 }
@@ -68,8 +77,6 @@ MStatus heatherNode::compute( const MPlug& plug, MDataBlock& block )
             hArray.next();
         }
         
-        computeCombinedBufs();
-        
 		MString setname = block.inputValue(ablockSetName).asString();
 		m_carmeraName = block.inputValue(acameraName).asString();
 		cacheBlocks(setname);
@@ -90,18 +97,29 @@ void heatherNode::addImage(ExrImgData::DataDesc * desc)
     }
     if(!desc->_isValid) return;
     m_images[m_numImages] = desc->_img;
-    m_colorBuf[m_numImages] = desc->_colorBuf;
-    m_depthBuf[m_numImages] = desc->_depthBuf;
     m_numImages++;
     m_needLoadImage = 1;
 }
 
 void heatherNode::computeCombinedBufs()
 {
+    if(m_numImages < 1) return;
+    if(!CudaBase::HasDevice) return;
+
     const unsigned numPix =  m_images[0]->getWidth() * m_images[0]->getHeight();
+    if(numPix < 4) return;
+    
+    m_colorBuf[0]->create(numPix * 4 * 2);
+    m_depthBuf[0]->create(numPix * 4);
+    
+    m_colorBuf[0]->hostToDevice(m_images[0]->_pixels);
+    m_depthBuf[0]->hostToDevice(m_images[0]->m_zData);
+    
     m_combinedColorBuf->create(numPix * 4 * 2);
     m_combinedDepthBuf->create(numPix * 4);
-    
+
+    MGlobal::displayInfo(MString("n pix") + numPix);
+
     void * dstCol = m_combinedColorBuf->bufferOnDevice();
     void * dstDep = m_combinedDepthBuf->bufferOnDevice();
     void * srcCol = m_colorBuf[0]->bufferOnDevice();
@@ -109,30 +127,28 @@ void heatherNode::computeCombinedBufs()
     
     MGlobal::displayInfo(MString("combine pix ")+numPix);
     CUU::heatherFillImage((CUU::ushort4 *)dstCol, (float *)dstDep, (CUU::ushort4 *)srcCol, (float *)srcDep, numPix);
-    
-    const unsigned depBufSize = m_depthBuf[0]->bufferSize();
-    const unsigned colBufSize = m_colorBuf[0]->bufferSize();
-    
+
     unsigned i = 1;
     for(;i < m_numImages; i++) {
-        if(m_depthBuf[i]->bufferSize() != depBufSize) continue;
-        if(m_colorBuf[i]->bufferSize() != colBufSize) continue;
+        if((m_images[i]->getWidth() * m_images[i]->getHeight()) != numPix) continue;
         
         MGlobal::displayInfo(MString("combine img ")+i+" "+m_images[i]->getWidth() *  m_images[i]->getHeight());
         
+        m_colorBuf[0]->hostToDevice(m_images[i]->_pixels);
+        m_depthBuf[0]->hostToDevice(m_images[i]->m_zData);
+        
         CUU::heatherMixImage((CUU::ushort4 *)dstCol, 
                              (float *)dstDep, 
-                             (CUU::ushort4 *)m_colorBuf[i]->bufferOnDevice(), 
-                             (float *)m_depthBuf[i]->bufferOnDevice(), 
+                             (CUU::ushort4 *)m_colorBuf[0]->bufferOnDevice(), 
+                             (float *)m_depthBuf[0]->bufferOnDevice(), 
                              numPix);
     }
+
+     m_hostCombinedColorBuf->create(numPix * 4 * 2);
+     m_hostCombinedDepthBuf->create(numPix * 4);
     
-    
-    m_hostCombinedColorBuf->create(numPix * 4 * 2);
-    m_hostCombinedDepthBuf->create(numPix * 4);
-    
-    m_combinedColorBuf->deviceToHost(m_hostCombinedColorBuf->data(), m_hostCombinedColorBuf->bufferSize());
-    m_combinedDepthBuf->deviceToHost(m_hostCombinedDepthBuf->data(), m_hostCombinedDepthBuf->bufferSize());
+     m_combinedColorBuf->deviceToHost(m_hostCombinedColorBuf->data(), m_hostCombinedColorBuf->bufferSize());
+     m_combinedDepthBuf->deviceToHost(m_hostCombinedDepthBuf->data(), m_hostCombinedDepthBuf->bufferSize());
 }
 
 void heatherNode::cacheBlocks(const MString & setname)
@@ -307,8 +323,11 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
 		m_depth.diagnose(log);
-	}	
-	
+		
+		CudaBase::SetDevice();
+	}
+	computeCombinedBufs();
+
 	if(m_numImages < 1) return;
 	
     const float imageAspectRatio = m_images[0]->aspectRation();

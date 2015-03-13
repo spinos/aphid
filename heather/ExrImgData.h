@@ -4,15 +4,12 @@
 #include <maya/MTypeId.h>
 #include <maya/MString.h>
 #include "zEXRImage.h"
-#include "CUDABuffer.h"
 class ExrImgData : public MPxData
 {
 public:
 	struct DataDesc
 	{
 	    ZEXRImage * _img;
-	    CUDABuffer * _colorBuf;
-	    CUDABuffer * _depthBuf;
 		bool _isValid;
 	};
 						ExrImgData() {}

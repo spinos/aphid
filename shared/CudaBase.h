@@ -15,6 +15,7 @@ public:
     static int MaxSharedMemoryPerBlock;
 	static int WarpSize;
 	static int RuntimeVersion;
+	static bool HasDevice;
     static int LimitNThreadPerBlock(int regPT, int memPT);
 private:
     

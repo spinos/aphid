@@ -1,8 +1,8 @@
 polySphere -r 1;
 sets -name "set1";
-loadPlugin heather;
+loadPlugin heather2012x64;
 string $loader = `createNode heatherImage`;
-setAttr -type "string" ($loader + ".depthImage") "E:/public/snotlout_ya_defaultHighRigRN.0109.exr";
+setAttr -type "string" ($loader + ".depthImage") "I:/projectFiles/barajoun_bilal_cg/files/review/sequences/Scn67/Seq37_Scn67_sh008/AniCache/review/V014/abuAlhakamArmor_HighRig_hiResRN/outImage/abuAlhakamArmor_HighRig_hiResRN.1001.exr";
 
 string $loader1 = `createNode heatherImage`;
 setAttr -type "string" ($loader1 + ".depthImage") "E:/public/hiccup_ya_defaultHighRigRN.0109.exr";

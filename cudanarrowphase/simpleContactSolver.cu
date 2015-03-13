@@ -17,28 +17,66 @@ inline __device__ uint4 computePointIndex(uint * pointStarts,
     return r;
 }
 
-inline __device__ void computeBodyLinearVelocity(uint * pointStarts, 
+inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
+                                                  float3 averageLinearVel,
+                                                  float3 * position,
+                                                  float3 * velocity,
+                                                  uint4 ind)
+{
+    float3 center;
+	float3_average4(center, position, ind);
+	
+	float3 omega[4];
+// omega = r cross v
+// v = omega cross r
+    float3_cross1(omega[0], float3_difference(position[ind.x], center), float3_difference(velocity[ind.x], averageLinearVel));
+    float3_cross1(omega[1], float3_difference(position[ind.y], center), float3_difference(velocity[ind.y], averageLinearVel));
+    float3_cross1(omega[2], float3_difference(position[ind.z], center), float3_difference(velocity[ind.z], averageLinearVel));
+    float3_cross1(omega[3], float3_difference(position[ind.w], center), float3_difference(velocity[ind.w], averageLinearVel));
+    
+	float3_average4_direct(angularVel, omega);
+}
+
+inline __device__ void computeBodyVelocities1(uint * pointStarts, 
                                                 uint * indexStarts, 
                                                 uint4 * indices, 
-                                                uint2 pair, 
+                                                uint ind,
+                                                float3 * position,
                                                 float3 * velocity, 
                                                 float3 & linearVelocityA, 
-                                                float3 & linearVelocityB)
+                                                float3 & angularVelocityA)
+{
+    const uint4 ia = computePointIndex(pointStarts, indexStarts, indices, ind);
+	
+	float3_average4(linearVelocityA, velocity, ia);
+
+	computeBodyAngularVelocity(angularVelocityA, linearVelocityA, position, velocity, ia);
+}
+
+inline __device__ void computeBodyVelocities(uint * pointStarts, 
+                                                uint * indexStarts, 
+                                                uint4 * indices, 
+                                                uint2 pair,
+                                                float3 * position,
+                                                float3 * velocity, 
+                                                float3 & linearVelocityA, 
+                                                float3 & linearVelocityB,
+                                                float3 & angularVelocityA, 
+                                                float3 & angularVelocityB)
 {
     const uint4 ia = computePointIndex(pointStarts, indexStarts, indices, pair.x);
 	const uint4 ib = computePointIndex(pointStarts, indexStarts, indices, pair.y);
 	
-	linearVelocityA = velocity[ia.x];
-	linearVelocityA = float3_add(linearVelocityA, velocity[ia.y]);
-	linearVelocityA = float3_add(linearVelocityA, velocity[ia.z]);
-	linearVelocityA = float3_add(linearVelocityA, velocity[ia.w]);
-	linearVelocityA = scale_float3_by(linearVelocityA, 0.25f);
+	float3_average4(linearVelocityA, velocity, ia);
+	float3_average4(linearVelocityB, velocity, ib);
 	
-	linearVelocityB = velocity[ib.x];
-	linearVelocityB = float3_add(linearVelocityA, velocity[ib.y]);
-	linearVelocityB = float3_add(linearVelocityA, velocity[ib.z]);
-	linearVelocityB = float3_add(linearVelocityA, velocity[ib.w]);
-	linearVelocityB = scale_float3_by(linearVelocityB, 0.25f);
+	float3 centerA;
+	float3_average4(centerA, position, ia);
+	
+	float3 centerB;
+	float3_average4(centerB, position, ib);
+	
+	
 }
 
 inline __device__ uint getBodyCountAt(uint ind, uint * count)
@@ -136,7 +174,8 @@ __global__ void computeSplitInvMass_kernel(float * invMass,
 	invMass[ind] = 1.f * (float)n;
 }
 
-__global__ void setContactConstraint_kernel(float3 * relLinVel,
+__global__ void setContactConstraint_kernel(float3 * linVelA,
+                                             float3 * linVelB,
                                         float3 * angVelA,
                                         float3 * angVelB,
                                         float * lambda,
@@ -162,15 +201,18 @@ __global__ void setContactConstraint_kernel(float3 * relLinVel,
 	invMass[ind] = 1.f / (invMassA + invMassB);
 	lambda[ind] = 0.f;
 	
-	float3 linearVelocityA, linearVelocityB;
-	computeBodyLinearVelocity(pointStarts, indexStarts, indices, pairs[ind], srcVel, 
-	    linearVelocityA, linearVelocityB);
-		
-	relLinVel[ind] = float3_difference(linearVelocityB, linearVelocityA);
-// omega = r cross v
-// v = omega cross r
-	angVelA[ind] = make_float3(0.f, 0.f, 0.f);
-	angVelB[ind] = make_float3(0.f, 0.f, 0.f);
+	float3 llinVelA, langVelA;
+	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].x, srcPos, srcVel, 
+	    llinVelA, langVelA);
+	
+	float3 llinVelB, langVelB;
+	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].y, srcPos, srcVel, 
+	    llinVelB, langVelB);
+	
+	angVelA[ind] = langVelA;
+	angVelB[ind] = langVelB;
+	linVelA[ind] = llinVelA;
+	linVelB[ind] = llinVelB;
 }
 
 __global__ void clearDeltaVelocity_kernel(float3 * deltaLinVel, 
@@ -222,9 +264,9 @@ __global__ void solveContact_kernel(float3 * deltaLinVel,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	float3 linearVelocityA, linearVelocityB;
-	computeBodyLinearVelocity(pointStarts, indexStarts, indices, pairs[ind], srcVelocity, 
-	    linearVelocityA, linearVelocityB);
+	float3 linearVelocityA, linearVelocityB, angularVelocityA, angularVelocityB;
+	computeBodyVelocities(pointStarts, indexStarts, indices, pairs[ind], srcVelocity, srcVelocity,
+	    linearVelocityA, linearVelocityB, angularVelocityA, angularVelocityB);
 	
 	const uint2 dstInd = splits[ind];
 	float massA = splitMass[dstInd.x];
@@ -293,7 +335,8 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
                                        bufLength);
 }
 
-void simpleContactSolverSetContactConstraint(float3 * relLinVel,
+void simpleContactSolverSetContactConstraint(float3 * linVelA,
+                                             float3 * linVelB,
                                         float3 * angVelA,
                                         float3 * angVelB,
                                         float * lambda,
@@ -312,7 +355,8 @@ void simpleContactSolverSetContactConstraint(float3 * relLinVel,
     unsigned nblk = iDivUp(numContacts, 512);
     dim3 grid(nblk, 1, 1);
     
-    setContactConstraint_kernel<<< grid, block >>>(relLinVel,
+    setContactConstraint_kernel<<< grid, block >>>(linVelA,
+                                        linVelB,
                                         angVelA,
                                         angVelB,
                                         lambda,

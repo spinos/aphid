@@ -28,7 +28,8 @@ private:
 	CUDABuffer * m_bodyCount;
 	CUDABuffer * m_splitInverseMass;
 	CUDABuffer * m_contactInverseMass;
-	CUDABuffer * m_relativeLinearVelocity;
+	CUDABuffer * m_linearVelocityA;
+	CUDABuffer * m_linearVelocityB;
 	CUDABuffer * m_angularVelocityA;
 	CUDABuffer * m_angularVelocityB;
 	CUDABuffer * m_lambda;

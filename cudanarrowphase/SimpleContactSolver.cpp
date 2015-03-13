@@ -22,7 +22,8 @@ SimpleContactSolver::SimpleContactSolver()
 	m_splitInverseMass = new CUDABuffer;
 	m_contactInverseMass = new CUDABuffer;
 	m_lambda = new CUDABuffer;
-	m_relativeLinearVelocity = new CUDABuffer;
+	m_linearVelocityA = new CUDABuffer;
+	m_linearVelocityB = new CUDABuffer;
 	m_angularVelocityA = new CUDABuffer; 
 	m_angularVelocityB = new CUDABuffer;
 	m_deltaLinearVelocity = new CUDABuffer;
@@ -77,8 +78,10 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	m_lambda->create(numContacts * 4);
 	void * lambda = m_lambda->bufferOnDevice();
 	
-	m_relativeLinearVelocity->create(numContacts * 12);
-	void * relLinVel = m_relativeLinearVelocity->bufferOnDevice();
+	m_linearVelocityA->create(numContacts * 12);
+	void * linVelA = m_linearVelocityA->bufferOnDevice();
+	m_linearVelocityB->create(numContacts * 12);
+	void * linVelB = m_linearVelocityB->bufferOnDevice();
 	
 	m_angularVelocityA->create(numContacts * 12);
 	void * angVelA = m_angularVelocityA->bufferOnDevice();
@@ -92,7 +95,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * perObjPointStart = objectBuf->m_pointCacheLoc->bufferOnDevice();
 	void * perObjectIndexStart = objectBuf->m_indexCacheLoc->bufferOnDevice();
 	
-	simpleContactSolverSetContactConstraint((float3 *)relLinVel,
+	simpleContactSolverSetContactConstraint((float3 *)linVelA,
+	                                        (float3 *)linVelB,
 	    (float3 *)angVelA,
 	    (float3 *)angVelB,
 	    (float *)lambda, (float *)contactMass, (float *)splitMass, 

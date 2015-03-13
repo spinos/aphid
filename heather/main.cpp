@@ -38,8 +38,6 @@ MStatus initializePlugin( MObject obj )
 		stat.perror("registerNode");
 		return stat;
 	}
-	
-	CudaBase::SetDevice();
 
 	// MGlobal::executeCommand ( "source cameraFrustumMenus.mel;cameraFrustumCreateMenus" );
 

@@ -86,8 +86,8 @@ private:
 	int m_portWidth, m_portHeight;
     bool m_needLoadImage;
     ZEXRImage * m_images[32];
-    CUDABuffer * m_colorBuf[32];
-    CUDABuffer * m_depthBuf[32];
+    CUDABuffer * m_colorBuf[2];
+    CUDABuffer * m_depthBuf[2];
     CUDABuffer * m_combinedColorBuf;
     CUDABuffer * m_combinedDepthBuf;
     BaseBuffer * m_hostCombinedColorBuf;
