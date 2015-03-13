@@ -25,5 +25,14 @@ public:
 private:
 	CUDABuffer * m_sortedInd[2];
 	CUDABuffer * m_splitPair;
+	CUDABuffer * m_bodyCount;
+	CUDABuffer * m_splitInverseMass;
+	CUDABuffer * m_contactInverseMass;
+	CUDABuffer * m_relativeLinearVelocity;
+	CUDABuffer * m_angularVelocityA;
+	CUDABuffer * m_angularVelocityB;
+	CUDABuffer * m_lambda;
+	CUDABuffer * m_deltaLinearVelocity;
+	CUDABuffer * m_deltaAngularVelocity;
 };
 #endif        //  #ifndef SIMPLECONTACTSOLVER_H
