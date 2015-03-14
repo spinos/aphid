@@ -8,6 +8,7 @@
  */
 
 #include <iostream>
+#include <map>
 #include <boost/format.hpp>
 #ifdef __APPLE__
 typedef unsigned long long uint64;
@@ -87,6 +88,11 @@ int clz(uint64 x)
 	return nzero;
 }
 
+struct Stripe {
+    char rgba[2048]; // 256 * 4 * 2
+    float z[256];
+};
+
 
 int main(int argc, char * const argv[])
 {
@@ -124,6 +130,32 @@ int main(int argc, char * const argv[])
 	std::cout<<boost::format("id masked: %1%\n") % byte_to_binary(~0x800000);
 	std::cout<<boost::format("1923: %1%\n") % byte_to_binary(1923);
 	std::cout<<boost::format("<<7 >>7: %1%\n") % byte_to_binary((((12<<24 | 1923) | 0x80000000)<<7)>>7);
+	
+	std::cout<<boost::format("sizeof Stripe: %1%\n") % sizeof(std::map<int, Stripe *>);
+	
+	int a[8] = {99, 83, -73, -32, 48, 1, 53, -192};
+	int b[4];
+	memcpy(b, &a[4], 4 * 4);
+
+	int i;
+	for(i=0; i<4; i++) {
+	    std::cout<<boost::format("b[%1%] %2%\n") % i % b[i]; 
+	}
+	
+	float c[4];
+	for(i=0; i<4; i++) {
+	    std::cout<<boost::format("c[%1%] %2%\n") % i % c[i]; 
+	}
+// If n is a power of 2, 
+// (i/n) is equivalent to (i>>log2(n)) 
+// and (i%n) is equivalent to (i&(n-1)); 	
+	std::cout<<boost::format("1023 & 255 %1%\n") % (1023 & 255);
+	std::cout<<boost::format("1024 & 255 %1%\n") % (1024 & 255);
+	std::cout<<boost::format("1023>>10 %1%\n") % (1023>>10);
+	std::cout<<boost::format("3<<2 %1%\n") % (3<<2);
+	std::cout<<boost::format("5>>2 %1%\n") % (5>>2);
+	std::cout<<boost::format("513 / 256 %1%\n") % ((513>>8) + ((513 & 255) != 0));
+	
 	std::cout<<"end of test\n";
 	return 0;
 }
