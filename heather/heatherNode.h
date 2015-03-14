@@ -38,7 +38,9 @@
 #include "ExrImgData.h"
 #include "ClampShader.h"
 #include "DepthShader.h"
-#include <CUDABuffer.h>
+class BaseBuffer;
+class CUDABuffer;
+class CudaTexture;
 class heatherNode : public MPxLocatorNode
 {
 public:
@@ -82,15 +84,15 @@ private:
 	GlFramebuffer * m_framebuffer;
 	ClampShader m_clamp;
 	DepthShader m_depth;
-    GLuint m_bgdCImg, m_depthImg, m_colorImg;
+    GLuint m_bgdCImg;
 	int m_portWidth, m_portHeight;
     bool m_needLoadImage;
     ZEXRImage * m_images[32];
-    CUDABuffer * m_colorBuf[2];
-    CUDABuffer * m_depthBuf[2];
+    CUDABuffer * m_colorBuf;
+    CUDABuffer * m_depthBuf;
     CUDABuffer * m_combinedColorBuf;
     CUDABuffer * m_combinedDepthBuf;
-    BaseBuffer * m_hostCombinedColorBuf;
-    BaseBuffer * m_hostCombinedDepthBuf;
+    CudaTexture * m_combinedColorTex;
+    CudaTexture * m_combinedDepthTex;
     unsigned m_numImages;
 };

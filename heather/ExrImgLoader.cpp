@@ -31,6 +31,11 @@ ExrImgLoader::ExrImgLoader()
 ExrImgLoader::~ExrImgLoader() 
 {
 	if(_pDesc) delete _pDesc;
+	std::map<std::string, ZEXRImage *>::iterator it = m_files.begin();
+	for(;it != m_files.end(); ++it) {
+	    delete it->second;
+	}
+	m_files.clear();
 }
 
 MStatus ExrImgLoader::compute( const MPlug& plug, MDataBlock& block )
@@ -58,7 +63,7 @@ MStatus ExrImgLoader::compute( const MPlug& plug, MDataBlock& block )
 		MDataHandle outDescHandle = block.outputValue(aoutval);
 		status = outDescHandle.set(pData);
 
-		block.setClean(plug);
+		// block.setClean(plug);
 		
 		return MS::kSuccess;
 	}
@@ -144,7 +149,7 @@ void ExrImgLoader::preLoadImage(ExrImgData::DataDesc * dst, const char * name, i
         
         m_files[exr->fileName()] = exr;
         dst->_img = exr;
-        std::cout<<" "<<dst->_img->getWidth()<<","<<dst->_img->getHeight()<<"\n";
+        // std::cout<<" "<<dst->_img->getWidth()<<","<<dst->_img->getHeight()<<"\n";
     }
     dst->_isValid = 1;
 }

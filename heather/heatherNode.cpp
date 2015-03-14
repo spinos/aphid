@@ -12,8 +12,11 @@
 #include <maya/MPointArray.h>
 #include <maya/MFnPluginData.h>
 #include <SHelper.h>
-#include "heather_implement.h"
 #include <CudaBase.h>
+#include <CUDABuffer.h>
+#include "heather_implement.h"
+#include <CudaTexture.h>
+
 MTypeId heatherNode::id( 0x7065d6 );
 
 MObject heatherNode::ainimages;
@@ -25,7 +28,6 @@ heatherNode::heatherNode()
 {
     m_numImages = 0;
     m_needLoadImage = 0;
-    // m_exr = 0;
 	m_framebuffer = 0;
 	m_portWidth = 0;
 	m_portHeight = 0;
@@ -34,24 +36,20 @@ heatherNode::heatherNode()
 	// m_blockTriIndices = 0;
 	m_combinedColorBuf = new CUDABuffer;
     m_combinedDepthBuf = new CUDABuffer;
-    m_hostCombinedColorBuf = new BaseBuffer;
-    m_hostCombinedDepthBuf = new BaseBuffer;
-    m_colorBuf[0] = new CUDABuffer;
-    m_colorBuf[1] = new CUDABuffer;
-    m_depthBuf[0] = new CUDABuffer;
-    m_depthBuf[1] = new CUDABuffer;
+    m_colorBuf = new CUDABuffer;
+    m_depthBuf = new CUDABuffer;
+    m_combinedColorTex = new CudaTexture;
+    m_combinedDepthTex = new CudaTexture;
 }
 heatherNode::~heatherNode() 
 {
     if(m_framebuffer) delete m_framebuffer;
     delete m_combinedColorBuf;
     delete m_combinedDepthBuf;
-    delete m_hostCombinedColorBuf;
-    delete m_hostCombinedDepthBuf;
-    delete m_colorBuf[0];
-    delete m_colorBuf[1];
-    delete m_depthBuf[0];
-    delete m_depthBuf[1];
+    delete m_combinedColorTex;
+    delete m_combinedDepthTex;
+    delete m_colorBuf;
+    delete m_depthBuf;
 	// if(m_blockVs) delete[] m_blockVs;
 	// if(m_blockTriIndices) delete[] m_blockTriIndices;
 }
@@ -63,7 +61,6 @@ MStatus heatherNode::compute( const MPlug& plug, MDataBlock& block )
        
         MArrayDataHandle hArray = block.inputArrayValue(ainimages);
         
-        MGlobal::displayInfo("heather compute");
         int numSlots = hArray.elementCount();
         int i;
         for(i=0; i < numSlots; i++) {
@@ -109,24 +106,35 @@ void heatherNode::computeCombinedBufs()
     const unsigned numPix =  m_images[0]->getWidth() * m_images[0]->getHeight();
     if(numPix < 4) return;
     
-    m_colorBuf[0]->create(numPix * 4 * 2);
-    m_depthBuf[0]->create(numPix * 4);
+    unsigned reduceRatio = 2;
     
-    m_colorBuf[0]->hostToDevice(m_images[0]->_pixels);
-    m_depthBuf[0]->hostToDevice(m_images[0]->m_zData);
+    const unsigned numReducedPix = (m_images[0]->getWidth() / reduceRatio) * (m_images[0]->getHeight() / reduceRatio);
     
-    m_combinedColorBuf->create(numPix * 4 * 2);
-    m_combinedDepthBuf->create(numPix * 4);
+    m_colorBuf->create(numPix * 4 * 2);
+    m_depthBuf->create(numPix * 4);
+    
+    m_colorBuf->hostToDevice(m_images[0]->_pixels);
+    m_depthBuf->hostToDevice(m_images[0]->m_zData);
+    
+    m_combinedColorBuf->create(numReducedPix * 4 * 2);
+    m_combinedDepthBuf->create(numReducedPix * 4);
 
     MGlobal::displayInfo(MString("n pix") + numPix);
 
     void * dstCol = m_combinedColorBuf->bufferOnDevice();
     void * dstDep = m_combinedDepthBuf->bufferOnDevice();
-    void * srcCol = m_colorBuf[0]->bufferOnDevice();
-    void * srcDep = m_depthBuf[0]->bufferOnDevice();
+    void * srcCol = m_colorBuf->bufferOnDevice();
+    void * srcDep = m_depthBuf->bufferOnDevice();
     
     MGlobal::displayInfo(MString("combine pix ")+numPix);
-    CUU::heatherFillImage((CUU::ushort4 *)dstCol, (float *)dstDep, (CUU::ushort4 *)srcCol, (float *)srcDep, numPix);
+
+    CUU::heatherFillImage((CUU::ushort4 *)dstCol, 
+                          (float *)dstDep, 
+                          (CUU::ushort4 *)srcCol, 
+                          (float *)srcDep, 
+                          m_images[0]->getWidth(),
+                          m_images[0]->getHeight(),
+                          reduceRatio);
 
     unsigned i = 1;
     for(;i < m_numImages; i++) {
@@ -134,21 +142,23 @@ void heatherNode::computeCombinedBufs()
         
         MGlobal::displayInfo(MString("combine img ")+i+" "+m_images[i]->getWidth() *  m_images[i]->getHeight());
         
-        m_colorBuf[0]->hostToDevice(m_images[i]->_pixels);
-        m_depthBuf[0]->hostToDevice(m_images[i]->m_zData);
+        m_colorBuf->hostToDevice(m_images[i]->_pixels);
+        m_depthBuf->hostToDevice(m_images[i]->m_zData);
         
         CUU::heatherMixImage((CUU::ushort4 *)dstCol, 
                              (float *)dstDep, 
-                             (CUU::ushort4 *)m_colorBuf[0]->bufferOnDevice(), 
-                             (float *)m_depthBuf[0]->bufferOnDevice(), 
-                             numPix);
+                             (CUU::ushort4 *)m_colorBuf->bufferOnDevice(), 
+                             (float *)m_depthBuf->bufferOnDevice(), 
+                             m_images[0]->getWidth(),
+                             m_images[0]->getHeight(),
+                             reduceRatio);
     }
 
-     m_hostCombinedColorBuf->create(numPix * 4 * 2);
-     m_hostCombinedDepthBuf->create(numPix * 4);
-    
-     m_combinedColorBuf->deviceToHost(m_hostCombinedColorBuf->data(), m_hostCombinedColorBuf->bufferSize());
-     m_combinedDepthBuf->deviceToHost(m_hostCombinedDepthBuf->data(), m_hostCombinedDepthBuf->bufferSize());
+     m_combinedColorTex->create(m_images[0]->getWidth() / reduceRatio, m_images[0]->getHeight() / reduceRatio, 4, true);
+     m_combinedColorTex->copyFrom(m_combinedColorBuf->bufferOnDevice(), numReducedPix * 4 * 2);
+   
+     m_combinedDepthTex->create(m_images[0]->getWidth() / reduceRatio, m_images[0]->getHeight() / reduceRatio, 1, false); 
+     m_combinedDepthTex->copyFrom(m_combinedDepthBuf->bufferOnDevice(), numReducedPix * 4);
 }
 
 void heatherNode::cacheBlocks(const MString & setname)
@@ -297,22 +307,24 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 		m_clamp.diagnose(log);
 		MGlobal::displayInfo(MString("glsl diagnose log: ") + log.c_str());
 		glGenTextures(1, &m_bgdCImg);
-		glGenTextures(1, &m_depthImg);
-		glGenTextures(1, &m_colorImg);
+		// glGenTextures(1, &m_depthImg);
+		// glGenTextures(1, &m_colorImg);
 		
 		glBindTexture(GL_TEXTURE_2D, m_bgdCImg);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+        // glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 						
+		/*
 		glBindTexture(GL_TEXTURE_2D, m_colorImg);
 	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	    
 	    glBindTexture(GL_TEXTURE_2D, m_depthImg);
 	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -322,12 +334,13 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
+	    */
+	    
 		m_depth.diagnose(log);
-		
+		MGlobal::displayInfo(MString("max tex size") + GL_MAX_TEXTURE_SIZE);
+     
 		CudaBase::SetDevice();
 	}
-	computeCombinedBufs();
-
 	if(m_numImages < 1) return;
 	
     const float imageAspectRatio = m_images[0]->aspectRation();
@@ -350,9 +363,9 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 		if(m_framebuffer) delete m_framebuffer;
 		m_framebuffer = new GlFramebuffer(portWidth, portHeight);
 		// if(m_framebuffer->hasFbo()) MGlobal::displayInfo("fbo created");
-		m_clamp.setTextures(m_framebuffer->colorTexture(), m_bgdCImg,
+		/*m_clamp.setTextures(m_framebuffer->colorTexture(), m_bgdCImg,
 				m_depthImg, 
-				m_colorImg);
+				*m_combinedColorTex->texture());*/
 	}
 	
 	MFnCamera::FilmFit 	fit = fCam.filmFit();
@@ -394,22 +407,25 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	delete[] pixels;
 	
 	if(m_needLoadImage) {
-    
+	    computeCombinedBufs();
+
+/*    
 	    glBindTexture(GL_TEXTURE_2D, m_colorImg);
 //#ifdef WIN32
 //	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, m_exr->getWidth(), m_exr->getHeight(), 0, GL_RGBA, GL_HALF_FLOAT, m_exr->_pixels);
 //#else
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, m_images[0]->getWidth(), m_images[0]->getHeight(), 0, GL_RGBA, GL_HALF_FLOAT_ARB, m_hostCombinedColorBuf->data());
-//#endif	
+//#endif
+
 	    glBindTexture(GL_TEXTURE_2D, m_depthImg);
 	    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB );
         // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, m_images[0]->getWidth(), m_images[0]->getHeight(), 0, GL_RED, GL_FLOAT, m_hostCombinedDepthBuf->data());
-	    
+*/	    
 		m_clamp.setTextures(m_framebuffer->colorTexture(), m_bgdCImg,
-				m_depthImg, 
-				m_colorImg);
+				*m_combinedDepthTex->texture(), 
+				*m_combinedColorTex->texture());
 				
 		m_needLoadImage = 0;
 	}

@@ -8,8 +8,12 @@ static uint iDivUp(uint dividend, uint divisor)
     return ( (dividend % divisor) == 0 ) ? (dividend / divisor) : (dividend / divisor + 1);
 }
 extern "C" {
-void heatherFillImage( ushort4 * dstCol,  float * dstDep,  ushort4 * srcCol,  float * srcDep, uint numPix);
-void heatherMixImage( ushort4 * dstCol,  float * dstDep,  ushort4 * srcCol,  float * srcDep, uint numPix);
+void heatherFillImage( ushort4 * dstCol, float * dstDep,  ushort4 * srcCol,  float * srcDep, 
+                      uint imageWidth, uint imageHeight,
+                      uint reduceRatio);
+void heatherMixImage( ushort4 * dstCol, float * dstDep,  ushort4 * srcCol,  float * srcDep, 
+                     uint imageWidth, uint imageHeight,
+                      uint reduceRatio);
 }
 }
 #endif        //  #ifndef HEATHER_IMPLEMENT_H

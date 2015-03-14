@@ -8,7 +8,7 @@
 #include <CUDABuffer.h>
 #include "simple_implement.h"
 
-#define TEX_SIZE 512
+#define TEX_SIZE 1024
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -23,7 +23,7 @@ GLWidget::~GLWidget()
 void GLWidget::clientInit()
 {
 	CudaBase::SetDevice();
-	m_tex->create(TEX_SIZE, TEX_SIZE, 4);
+	m_tex->create(TEX_SIZE, TEX_SIZE, 4, false);
 	m_buf->create(TEX_SIZE * TEX_SIZE * 16);
 	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 }
@@ -35,7 +35,8 @@ void GLWidget::clientDraw()
     
     m_tex->copyFrom(m_buf->bufferOnDevice(), TEX_SIZE * TEX_SIZE * 16);
     
-    m_tex->bind();
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, *m_tex->texture());
     
     glColor3f(1.f, 1.f, 1.f);
     glBegin(GL_TRIANGLES);
