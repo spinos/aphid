@@ -116,7 +116,6 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * deltaAngVel = m_deltaAngularVelocity->bufferOnDevice();
 	simpleContactSolverClearDeltaVelocity((float3 *)deltaLinVel, (float3 *)deltaAngVel, splitBufLength);
 	
-	
 	/*
 	const unsigned scanBufLength = iRound1024(numContacts * 2);
 	m_bodyCount->create(scanBufLength * 4);

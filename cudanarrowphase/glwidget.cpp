@@ -24,14 +24,15 @@ void GLWidget::clientInit()
 	CudaBase::SetDevice();
 	
 	m_solver->initOnDevice();
-	// connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 	
+	// connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 	connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 }
 
 void GLWidget::clientDraw()
-{ 								
+{ 	
+    // m_dbgDraw->printTOI(m_solver->narrowphase(), m_solver->hostPairs());
 	// m_dbgDraw->printContactPairHash(m_contactSolver, m_narrowphase->numContacts());
 	m_solver->tetra()->sendXToHost();
 	m_dbgDraw->drawTetra((TetrahedronSystem *)m_solver->tetra());
@@ -68,10 +69,12 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 		case Qt::Key_D:
 			break;
 		case Qt::Key_W:
-			internalTimer()->stop();
+			disconnect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
+			connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 			break;
 		case Qt::Key_S:
-			internalTimer()->start();
+			disconnect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+			connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 			break;
 		default:
 			break;

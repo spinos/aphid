@@ -6,7 +6,7 @@
 #include "SimpleContactSolver.h"
 #include <CUDABuffer.h>
 
-#define GRDX 1226
+#define GRDX 1234
 #define NTET 2500
 
 ContactThread::ContactThread(QObject *parent)
@@ -106,7 +106,6 @@ void ContactThread::initOnDevice()
 void ContactThread::stepPhysics(float dt)
 {
 	m_narrowphase->computeContacts(m_devicePairs, GRDX);
-	// m_dbgDraw->printTOI(m_narrowphase, m_hostPairs);
 	
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contacts(),
