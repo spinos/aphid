@@ -66,11 +66,17 @@ char CudaBase::CheckCUDevice()
     return 0;
 }
 
+void CudaBase::SetGLDevice()
+{
+    if(!CheckCUDevice()) return;
+	cudaGLSetGLDevice(cutGetMaxGflopsDeviceId());
+	HasDevice = 1;
+}
+
 void CudaBase::SetDevice()
 {
-    //if(HasDevice) return;
-    //CheckCUDevice();
-	cudaGLSetGLDevice(cutGetMaxGflopsDeviceId());
+    if(!CheckCUDevice()) return;
+	cudaSetDevice(cutGetMaxGflopsDeviceId());
 	HasDevice = 1;
 }
 

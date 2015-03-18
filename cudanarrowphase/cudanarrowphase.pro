@@ -4,6 +4,7 @@ CONFIG += release
 message(QMAKE with CUDA)
 INCLUDEPATH += ./ ../shared ../cudabvh ../radixsort
 HEADERS       = ../shared/Base3DView.h \
+                ../shared/BaseSolverThread.h \
                 ../shared/CudaBase.h \
                 ../shared/BaseBuffer.h \
                 ../shared/CUDABuffer.h \
@@ -22,11 +23,13 @@ HEADERS       = ../shared/Base3DView.h \
                 glWidget.h \
                 window.h \
                 DrawNp.h \
+                ContactThread.h \
                 CudaNarrowphase.h \
                 narrowphase_implement.h \
                 simpleContactSolver_implement.h \
                 SimpleContactSolver.h
 SOURCES       = ../shared/Base3DView.cpp \
+                ../shared/BaseSolverThread.cpp \
                 ../shared/CudaBase.cpp \
                 ../shared/BaseBuffer.cpp \
                 ../shared/CUDABuffer.cpp \
@@ -38,6 +41,7 @@ SOURCES       = ../shared/Base3DView.cpp \
                 glWidget.cpp \
                 window.cpp \
                 DrawNp.cpp \
+                ContactThread.cpp \
                 CudaNarrowphase.cpp \
                 SimpleContactSolver.cpp
 

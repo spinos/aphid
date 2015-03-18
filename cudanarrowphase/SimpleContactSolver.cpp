@@ -131,7 +131,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	const unsigned numSplitBodies = ScanUtil::getScanResult(m_bodyCount, m_scanBodyCount[0], scanBufLength);
 	*/
 	
-	
+	/*
 	int i;
 	for(i=0; i<7; i++) {
 	    simpleContactSolverSolveContact((float3 *)deltaLinVel,
@@ -145,5 +145,11 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                         (uint * )perObjectIndexStart,
                         numContacts);
 	}
-	
+	*/
+	simpleContactSolverStopAtContact((float3 *)vel,
+                    (uint2 *)pairs,
+                    (uint4 *)ind,
+                    (uint * )perObjPointStart,
+                    (uint * )perObjectIndexStart,
+                    numContacts);
 }

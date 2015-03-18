@@ -404,7 +404,7 @@ void Base3DView::keyReleaseEvent(QKeyEvent *event)
 void Base3DView::focusInEvent(QFocusEvent * event)
 {
 	m_isFocused = 1;
-	m_timer->start(30);
+	m_timer->start(33);
 	QGLWidget::focusInEvent(event);
 }
 

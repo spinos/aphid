@@ -9,6 +9,7 @@ public:
     
     static char CheckCUDevice();
     static void SetDevice();
+    static void SetGLDevice();
     
     static int MaxThreadPerBlock;
     static int MaxRegisterPerBlock;
