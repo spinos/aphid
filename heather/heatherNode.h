@@ -41,6 +41,7 @@
 class BaseBuffer;
 class CUDABuffer;
 class CudaTexture;
+class StripeCompressedRGBAZImage;
 class heatherNode : public MPxLocatorNode
 {
 public:
@@ -87,12 +88,14 @@ private:
     GLuint m_bgdCImg;
 	int m_portWidth, m_portHeight;
     bool m_needLoadImage;
-    ZEXRImage * m_images[32];
+    static StripeCompressedRGBAZImage * m_compressedImages[32];
     CUDABuffer * m_colorBuf;
     CUDABuffer * m_depthBuf;
     CUDABuffer * m_combinedColorBuf;
     CUDABuffer * m_combinedDepthBuf;
-    CudaTexture * m_combinedColorTex;
-    CudaTexture * m_combinedDepthTex;
+    static CudaTexture * m_combinedColorTex;
+    static CudaTexture * m_combinedDepthTex;
+    BaseBuffer * m_decompressedColor;
+    BaseBuffer * m_decompressedDepth;
     unsigned m_numImages;
 };

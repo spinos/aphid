@@ -57,6 +57,7 @@ void heatherFillImage( ushort4 * dstCol, float * dstDep,  ushort4 * srcCol,  flo
     dim3 grid(iDivUp(pixWidth, 16), iDivUp(pixHeight, 16), 1);
     uint numPix = pixWidth * pixHeight;
     fillImage_kernel<<< grid, block >>>(dstCol, dstDep, srcCol, srcDep, numPix, pixWidth, imageWidth, reduceRatio);
+    cudaDeviceSynchronize();
 }
 
 void heatherMixImage( ushort4 * dstCol, float * dstDep,  ushort4 * srcCol,  float * srcDep, 
@@ -69,6 +70,7 @@ void heatherMixImage( ushort4 * dstCol, float * dstDep,  ushort4 * srcCol,  floa
     dim3 grid(iDivUp(pixWidth, 16), iDivUp(pixHeight, 16), 1);
     uint numPix = pixWidth * pixHeight;
     mixImage_kernel<<< grid, block >>>(dstCol, dstDep, srcCol, srcDep, numPix, pixWidth, imageWidth, reduceRatio);
+    cudaDeviceSynchronize();
 }
 }
 }

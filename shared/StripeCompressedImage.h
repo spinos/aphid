@@ -21,11 +21,15 @@ public:
     
     void compress(ZEXRImage * img);
     void decompress(char * rgbaBuf, char * zBuf, unsigned numPix) const;
+    const unsigned numPixels() const;
+    const unsigned width() const;
+    const unsigned height() const;
 private:
-    bool isStripeOccupied(float * depth);
+    bool isStripeOccupied(float * depth, unsigned n);
     unsigned getStripeCount(unsigned numPix) const;
     int getNumPixInStripe(unsigned i, unsigned count, unsigned numPix) const;
 private:
     std::map<unsigned, StripeRGBAZ * > m_stripes;
+    unsigned m_width, m_height;
 };
 #endif        //  #ifndef STRIPECOMPRESSEDIMAGE_H

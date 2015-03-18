@@ -14,6 +14,8 @@
 #include <maya/MFnVectorArrayData.h>
 #include <SHelper.h>
 #include <CudaBase.h>
+#include <StripeCompressedImage.h>
+#include <zEXRImage.h>
 MTypeId     ExrImgLoader::id(0x22c78c48);
 MObject     ExrImgLoader::adepthImageName;
 MObject     ExrImgLoader::aframeNumber;
@@ -21,21 +23,24 @@ MObject     ExrImgLoader::aframePadding;
 MObject     ExrImgLoader::aenableMultiFrames;
 MObject     ExrImgLoader::aoutval;
 
+std::map<std::string, StripeCompressedRGBAZImage *> ExrImgLoader::CachedCompressedFiles;
+
 ExrImgLoader::ExrImgLoader()
 {
 	_pDesc = new ExrImgData::DataDesc;
-	_pDesc->_img = 0;
+	_pDesc->_compressedImg = 0;
 	_pDesc->_isValid = 0;
 }
 
 ExrImgLoader::~ExrImgLoader() 
 {
 	if(_pDesc) delete _pDesc;
-	std::map<std::string, ZEXRImage *>::iterator it = m_files.begin();
-	for(;it != m_files.end(); ++it) {
+	std::map<std::string, StripeCompressedRGBAZImage *>::iterator it = CachedCompressedFiles.begin();
+	for(;it != CachedCompressedFiles.end(); ++it) {
+	    std::cout<<" destroy "<<it->first<<"\n";
 	    delete it->second;
 	}
-	m_files.clear();
+	CachedCompressedFiles.clear();
 }
 
 MStatus ExrImgLoader::compute( const MPlug& plug, MDataBlock& block )
@@ -47,7 +52,7 @@ MStatus ExrImgLoader::compute( const MPlug& plug, MDataBlock& block )
 		bool enableSequence = block.inputValue(aenableMultiFrames).asBool();
 
 		MStatus status;
-		MGlobal::displayInfo("heather loader compute");
+		// MGlobal::displayInfo("heather loader compute");
 		
 		preLoadImage(_pDesc, filename.asChar(), frame, padding, enableSequence);
 		
@@ -58,7 +63,7 @@ MStatus ExrImgLoader::compute( const MPlug& plug, MDataBlock& block )
 		
 		if(pData) pData->setDesc(_pDesc);
 	
-		MGlobal::displayInfo("update exr image data desc");
+		// MGlobal::displayInfo("update exr image data desc");
 		
 		MDataHandle outDescHandle = block.outputValue(aoutval);
 		status = outDescHandle.set(pData);
@@ -115,42 +120,52 @@ MStatus ExrImgLoader::initialize()
 void ExrImgLoader::preLoadImage(ExrImgData::DataDesc * dst, const char * name, int frame, int padding, bool useImageSequence)
 {
     if(!CudaBase::HasDevice) return;
+    
+    dst->_isValid = 0;
+    dst->_compressedImg = 0;
+        
     std::string fileName(name);
-    if(fileName.size() < 3) {
-        dst->_img = 0;
-        dst->_isValid = 0;
-        return;
-    }
+    if(fileName.size() < 3) return;
 	
 	if(useImageSequence)
 		SHelper::changeFrameNumber(fileName, frame, padding);
 	
-	if(m_files.find(fileName) != m_files.end()) {
-	    MGlobal::displayInfo(MString("heather loader reuses image ")+fileName.c_str());
-	    dst->_img = m_files[fileName];
+	// std::cout<<" begin load "<<fileName<<"\n";
+	
+	if(CachedCompressedFiles.find(fileName) != CachedCompressedFiles.end()) {
+	    //MGlobal::displayInfo(MString("heather loader reuses image ")+fileName.c_str());
+	    dst->_compressedImg = CachedCompressedFiles[fileName];
 	}
 	else {	
-        MGlobal::displayInfo(MString("heather loader loads image ")+fileName.c_str());
+        //MGlobal::displayInfo(MString("heather loader loads image ")+fileName.c_str());
         ZEXRImage * exr = new ZEXRImage(fileName.c_str(), false);
         
         if(!exr->isOpened()) {
-            //delete exr;
+            delete exr;
             MGlobal::displayInfo(MString("cannot open image ") + fileName.c_str());
             dst->_isValid = 0;
             return;
         }
     
         if(!exr->isRGBAZ()) {
-            //delete exr;
+            delete exr;
             MGlobal::displayWarning(MString("image is not RGBAZ format.") + fileName.c_str());
             dst->_isValid = 0;
             return;
         }
         
-        m_files[exr->fileName()] = exr;
-        dst->_img = exr;
+        // CachedFiles[exr->fileName()] = exr;
         // std::cout<<" "<<dst->_img->getWidth()<<","<<dst->_img->getHeight()<<"\n";
+        
+        StripeCompressedRGBAZImage * compressed = new StripeCompressedRGBAZImage;
+        compressed->compress(exr);
+        
+        CachedCompressedFiles[exr->fileName()] = compressed;
+        dst->_compressedImg = compressed;
+        
+        delete exr;
     }
     dst->_isValid = 1;
+    // std::cout<<" end load "<<fileName<<"\n";
 }
 //~:

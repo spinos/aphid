@@ -15,6 +15,7 @@
 #include "ExrImgData.h"
 #include <CUDABuffer.h>
 #include <map>
+class StripeCompressedRGBAZImage;
 class ExrImgLoader : public MPxNode
 {
 public:
@@ -39,6 +40,6 @@ public:
 private:
 	void preLoadImage(ExrImgData::DataDesc * dst, const char * name, int frame, int padding, bool useImageSequence);
 private:
-    std::map<std::string, ZEXRImage *> m_files;
+    static std::map<std::string, StripeCompressedRGBAZImage *> CachedCompressedFiles;
     ExrImgData::DataDesc *_pDesc;
 };

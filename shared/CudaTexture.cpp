@@ -58,7 +58,7 @@ void CudaTexture::create(unsigned width, unsigned height, int pixelDepth, bool i
         else
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, m_width, m_height, 0, GL_RGBA, GL_FLOAT, NULL);
 	}
-
+	
 	cutilSafeCall(cudaGraphicsGLRegisterImage(&_cuda_tex_resource, m_texture, GL_TEXTURE_2D, cudaGraphicsMapFlagsNone));
 }
 
@@ -73,6 +73,7 @@ void CudaTexture::destroy()
 
 void CudaTexture::copyFrom(void * src, unsigned size)
 {
+    std::cout<<" cu tex cpy "<<size<<"\n";
 	cudaArray * arr;
 	cutilSafeCall(cudaGraphicsMapResources(1, &_cuda_tex_resource, 0));
     cutilSafeCall(cudaGraphicsSubResourceGetMappedArray(&arr, _cuda_tex_resource, 0, 0));

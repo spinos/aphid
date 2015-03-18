@@ -3,13 +3,13 @@
 #include <maya/MPxData.h>
 #include <maya/MTypeId.h>
 #include <maya/MString.h>
-#include "zEXRImage.h"
+#include <StripeCompressedImage.h>
 class ExrImgData : public MPxData
 {
 public:
 	struct DataDesc
 	{
-	    ZEXRImage * _img;
+	    StripeCompressedRGBAZImage * _compressedImg;
 		bool _isValid;
 	};
 						ExrImgData() {}

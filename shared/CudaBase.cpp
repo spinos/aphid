@@ -68,8 +68,8 @@ char CudaBase::CheckCUDevice()
 
 void CudaBase::SetDevice()
 {
-    if(HasDevice) return;
-    CheckCUDevice();
+    //if(HasDevice) return;
+    //CheckCUDevice();
 	cudaGLSetGLDevice(cutGetMaxGflopsDeviceId());
 	HasDevice = 1;
 }

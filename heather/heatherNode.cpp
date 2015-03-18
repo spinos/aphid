@@ -24,6 +24,10 @@ MObject heatherNode::ablockSetName;
 MObject heatherNode::acameraName;
 MObject heatherNode::outValue;
 
+CudaTexture * heatherNode::m_combinedColorTex = new CudaTexture;
+CudaTexture * heatherNode::m_combinedDepthTex = new CudaTexture;
+StripeCompressedRGBAZImage * heatherNode::m_compressedImages[32];
+
 heatherNode::heatherNode() 
 {
     m_numImages = 0;
@@ -38,16 +42,14 @@ heatherNode::heatherNode()
     m_combinedDepthBuf = new CUDABuffer;
     m_colorBuf = new CUDABuffer;
     m_depthBuf = new CUDABuffer;
-    m_combinedColorTex = new CudaTexture;
-    m_combinedDepthTex = new CudaTexture;
+    m_decompressedColor = new BaseBuffer;
+    m_decompressedDepth = new BaseBuffer;
 }
 heatherNode::~heatherNode() 
 {
     if(m_framebuffer) delete m_framebuffer;
     delete m_combinedColorBuf;
     delete m_combinedDepthBuf;
-    delete m_combinedColorTex;
-    delete m_combinedDepthTex;
     delete m_colorBuf;
     delete m_depthBuf;
 	// if(m_blockVs) delete[] m_blockVs;
@@ -93,7 +95,7 @@ void heatherNode::addImage(ExrImgData::DataDesc * desc)
         return;
     }
     if(!desc->_isValid) return;
-    m_images[m_numImages] = desc->_img;
+    m_compressedImages[m_numImages] = desc->_compressedImg;
     m_numImages++;
     m_needLoadImage = 1;
 }
@@ -101,64 +103,82 @@ void heatherNode::addImage(ExrImgData::DataDesc * desc)
 void heatherNode::computeCombinedBufs()
 {
     if(m_numImages < 1) return;
-    if(!CudaBase::HasDevice) return;
-
-    const unsigned numPix =  m_images[0]->getWidth() * m_images[0]->getHeight();
+    
+    const unsigned numPix =  m_compressedImages[0]->numPixels();
     if(numPix < 4) return;
+    
+    std::cout<<"n pix"<<numPix<<"\n";
+    
+    const unsigned width = m_compressedImages[0]->width();
+    const unsigned height = m_compressedImages[0]->height();
     
     unsigned reduceRatio = 2;
     
-    const unsigned numReducedPix = (m_images[0]->getWidth() / reduceRatio) * (m_images[0]->getHeight() / reduceRatio);
+    const unsigned numReducedPix = (width / reduceRatio) * (height / reduceRatio);
+    
+    std::cout<<"reduced to "<<numReducedPix<<"\n";
+    
+    m_decompressedColor->create(numPix * 4 * 2);
+    m_decompressedDepth->create(numPix * 4);
+    
+    m_compressedImages[0]->decompress(m_decompressedColor->data(), m_decompressedDepth->data(), numPix);
+    
+    m_combinedColorBuf->create(numReducedPix * 4 * 2);
+    m_combinedDepthBuf->create(numReducedPix * 4);
     
     m_colorBuf->create(numPix * 4 * 2);
     m_depthBuf->create(numPix * 4);
     
-    m_colorBuf->hostToDevice(m_images[0]->_pixels);
-    m_depthBuf->hostToDevice(m_images[0]->m_zData);
-    
-    m_combinedColorBuf->create(numReducedPix * 4 * 2);
-    m_combinedDepthBuf->create(numReducedPix * 4);
-
-    MGlobal::displayInfo(MString("n pix") + numPix);
+    std::cout<<"host to device cpy \n";
+        
+    m_colorBuf->hostToDevice(m_decompressedColor->data(), m_decompressedColor->bufferSize());
+    m_depthBuf->hostToDevice(m_decompressedDepth->data(), m_decompressedDepth->bufferSize());
 
     void * dstCol = m_combinedColorBuf->bufferOnDevice();
     void * dstDep = m_combinedDepthBuf->bufferOnDevice();
     void * srcCol = m_colorBuf->bufferOnDevice();
     void * srcDep = m_depthBuf->bufferOnDevice();
     
-    MGlobal::displayInfo(MString("combine pix ")+numPix);
-
     CUU::heatherFillImage((CUU::ushort4 *)dstCol, 
                           (float *)dstDep, 
                           (CUU::ushort4 *)srcCol, 
                           (float *)srcDep, 
-                          m_images[0]->getWidth(),
-                          m_images[0]->getHeight(),
+                          width,
+                          height,
                           reduceRatio);
-
+    
     unsigned i = 1;
     for(;i < m_numImages; i++) {
-        if((m_images[i]->getWidth() * m_images[i]->getHeight()) != numPix) continue;
+        if(m_compressedImages[i]->numPixels() != numPix) continue;
         
-        MGlobal::displayInfo(MString("combine img ")+i+" "+m_images[i]->getWidth() *  m_images[i]->getHeight());
+        std::cout<<"img "<<i<<" ";
         
-        m_colorBuf->hostToDevice(m_images[i]->_pixels);
-        m_depthBuf->hostToDevice(m_images[i]->m_zData);
+        m_compressedImages[i]->decompress(m_decompressedColor->data(), m_decompressedDepth->data(), numPix);
+        
+        m_colorBuf->create(numPix * 4 * 2);
+        m_depthBuf->create(numPix * 4);
+        std::cout<<"host to device cpy \n";
+        m_colorBuf->hostToDevice(m_decompressedColor->data(), m_decompressedColor->bufferSize());
+        m_depthBuf->hostToDevice(m_decompressedDepth->data(), m_decompressedDepth->bufferSize());
         
         CUU::heatherMixImage((CUU::ushort4 *)dstCol, 
                              (float *)dstDep, 
                              (CUU::ushort4 *)m_colorBuf->bufferOnDevice(), 
                              (float *)m_depthBuf->bufferOnDevice(), 
-                             m_images[0]->getWidth(),
-                             m_images[0]->getHeight(),
+                             width,
+                             height,
                              reduceRatio);
+        
+        std::cout<<"combined\n";
     }
 
-     m_combinedColorTex->create(m_images[0]->getWidth() / reduceRatio, m_images[0]->getHeight() / reduceRatio, 4, true);
+     m_combinedColorTex->create(width / reduceRatio, height / reduceRatio, 4, true);
      m_combinedColorTex->copyFrom(m_combinedColorBuf->bufferOnDevice(), numReducedPix * 4 * 2);
    
-     m_combinedDepthTex->create(m_images[0]->getWidth() / reduceRatio, m_images[0]->getHeight() / reduceRatio, 1, false); 
+     m_combinedDepthTex->create(width / reduceRatio,height / reduceRatio, 1, false); 
      m_combinedDepthTex->copyFrom(m_combinedDepthBuf->bufferOnDevice(), numReducedPix * 4);
+     
+     std::cout<<"done\n";
 }
 
 void heatherNode::cacheBlocks(const MString & setname)
@@ -343,7 +363,7 @@ void heatherNode::draw( M3dView & view, const MDagPath & /*path*/,
 	}
 	if(m_numImages < 1) return;
 	
-    const float imageAspectRatio = m_images[0]->aspectRation();
+    const float imageAspectRatio = (float)m_compressedImages[0]->height() / (float)m_compressedImages[0]->width();
 	
 	GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];

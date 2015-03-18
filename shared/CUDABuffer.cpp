@@ -10,9 +10,9 @@
 #include "CUDABuffer.h"
 #include <cutil_inline.h>
 #include <cutil_gl_inline.h>
-
+#include <iostream>
 CUDABuffer::CUDABuffer() : _device_vbo_buffer(0) {} 
-CUDABuffer::~CUDABuffer() {}
+CUDABuffer::~CUDABuffer() { destroy(); }
 
 void CUDABuffer::create(float * data, unsigned size)
 {
@@ -24,6 +24,7 @@ void CUDABuffer::create(unsigned size)
 {
 	if(canResize(size)) return;
 	destroy();
+	// std::cout<<"cu create buf "<<size<<" \n";
 	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, size));
 	setBufferType(kOnDevice);
 	setBufferSize(size);
@@ -58,7 +59,7 @@ void * CUDABuffer::bufferOnDeviceAt(unsigned loc)
 
 void CUDABuffer::hostToDevice(void * src, unsigned size)
 {
-	cutilSafeCall( cudaMemcpy(_device_vbo_buffer, src, size, cudaMemcpyHostToDevice) );   
+    cudaMemcpy(_device_vbo_buffer, src, size, cudaMemcpyHostToDevice);   
 }
 
 void CUDABuffer::deviceToHost(void * dst, unsigned size)
