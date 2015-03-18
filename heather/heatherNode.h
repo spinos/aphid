@@ -62,6 +62,7 @@ public:
 	static MObject ainimages;
 	static MObject ablockSetName;
 	static MObject acameraName;
+	static MObject acompressRatio;
 	static MObject outValue;
 	
 public: 
@@ -87,15 +88,16 @@ private:
 	DepthShader m_depth;
     GLuint m_bgdCImg;
 	int m_portWidth, m_portHeight;
+	int m_compressRatio;
     bool m_needLoadImage;
     static StripeCompressedRGBAZImage * m_compressedImages[32];
-    CUDABuffer * m_colorBuf;
-    CUDABuffer * m_depthBuf;
-    CUDABuffer * m_combinedColorBuf;
-    CUDABuffer * m_combinedDepthBuf;
+    static CUDABuffer * m_colorBuf;
+    static CUDABuffer * m_depthBuf;
+    static CUDABuffer * m_combinedColorBuf;
+    static CUDABuffer * m_combinedDepthBuf;
     static CudaTexture * m_combinedColorTex;
     static CudaTexture * m_combinedDepthTex;
-    BaseBuffer * m_decompressedColor;
-    BaseBuffer * m_decompressedDepth;
+    static BaseBuffer * m_decompressedColor;
+    static BaseBuffer * m_decompressedDepth;
     unsigned m_numImages;
 };

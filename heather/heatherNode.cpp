@@ -22,11 +22,18 @@ MTypeId heatherNode::id( 0x7065d6 );
 MObject heatherNode::ainimages;
 MObject heatherNode::ablockSetName;
 MObject heatherNode::acameraName;
+MObject heatherNode::acompressRatio;
 MObject heatherNode::outValue;
 
 CudaTexture * heatherNode::m_combinedColorTex = new CudaTexture;
 CudaTexture * heatherNode::m_combinedDepthTex = new CudaTexture;
 StripeCompressedRGBAZImage * heatherNode::m_compressedImages[32];
+CUDABuffer * heatherNode::m_colorBuf = new CUDABuffer;
+CUDABuffer * heatherNode::m_depthBuf = new CUDABuffer;
+CUDABuffer * heatherNode::m_combinedColorBuf = new CUDABuffer;
+CUDABuffer * heatherNode::m_combinedDepthBuf = new CUDABuffer;
+BaseBuffer * heatherNode::m_decompressedColor = new BaseBuffer;
+BaseBuffer * heatherNode::m_decompressedDepth = new BaseBuffer;
 
 heatherNode::heatherNode() 
 {
@@ -36,22 +43,13 @@ heatherNode::heatherNode()
 	m_portWidth = 0;
 	m_portHeight = 0;
 	m_carmeraName = "";
+	m_compressRatio = 2;
 	// m_blockVs = 0;
 	// m_blockTriIndices = 0;
-	m_combinedColorBuf = new CUDABuffer;
-    m_combinedDepthBuf = new CUDABuffer;
-    m_colorBuf = new CUDABuffer;
-    m_depthBuf = new CUDABuffer;
-    m_decompressedColor = new BaseBuffer;
-    m_decompressedDepth = new BaseBuffer;
 }
 heatherNode::~heatherNode() 
 {
     if(m_framebuffer) delete m_framebuffer;
-    delete m_combinedColorBuf;
-    delete m_combinedDepthBuf;
-    delete m_colorBuf;
-    delete m_depthBuf;
 	// if(m_blockVs) delete[] m_blockVs;
 	// if(m_blockTriIndices) delete[] m_blockTriIndices;
 }
@@ -60,6 +58,8 @@ MStatus heatherNode::compute( const MPlug& plug, MDataBlock& block )
 {
     if( plug == outValue ) {
         m_numImages = 0;
+        
+        m_compressRatio = block.inputValue(acompressRatio).asInt();
        
         MArrayDataHandle hArray = block.inputArrayValue(ainimages);
         
@@ -112,8 +112,8 @@ void heatherNode::computeCombinedBufs()
     const unsigned width = m_compressedImages[0]->width();
     const unsigned height = m_compressedImages[0]->height();
     
-    unsigned reduceRatio = 2;
-    
+    const unsigned reduceRatio = m_compressRatio;
+
     const unsigned numReducedPix = (width / reduceRatio) * (height / reduceRatio);
     
     std::cout<<"reduced to "<<numReducedPix<<"\n";
@@ -128,8 +128,6 @@ void heatherNode::computeCombinedBufs()
     
     m_colorBuf->create(numPix * 4 * 2);
     m_depthBuf->create(numPix * 4);
-    
-    std::cout<<"host to device cpy \n";
         
     m_colorBuf->hostToDevice(m_decompressedColor->data(), m_decompressedColor->bufferSize());
     m_depthBuf->hostToDevice(m_decompressedDepth->data(), m_decompressedDepth->bufferSize());
@@ -151,13 +149,11 @@ void heatherNode::computeCombinedBufs()
     for(;i < m_numImages; i++) {
         if(m_compressedImages[i]->numPixels() != numPix) continue;
         
-        std::cout<<"img "<<i<<" ";
-        
         m_compressedImages[i]->decompress(m_decompressedColor->data(), m_decompressedDepth->data(), numPix);
         
         m_colorBuf->create(numPix * 4 * 2);
         m_depthBuf->create(numPix * 4);
-        std::cout<<"host to device cpy \n";
+        
         m_colorBuf->hostToDevice(m_decompressedColor->data(), m_decompressedColor->bufferSize());
         m_depthBuf->hostToDevice(m_decompressedDepth->data(), m_decompressedDepth->bufferSize());
         
@@ -168,8 +164,6 @@ void heatherNode::computeCombinedBufs()
                              width,
                              height,
                              reduceRatio);
-        
-        std::cout<<"combined\n";
     }
 
      m_combinedColorTex->create(width / reduceRatio, height / reduceRatio, 4, true);
@@ -177,8 +171,6 @@ void heatherNode::computeCombinedBufs()
    
      m_combinedDepthTex->create(width / reduceRatio,height / reduceRatio, 1, false); 
      m_combinedDepthTex->copyFrom(m_combinedDepthBuf->bufferOnDevice(), numReducedPix * 4);
-     
-     std::cout<<"done\n";
 }
 
 void heatherNode::cacheBlocks(const MString & setname)
@@ -623,6 +615,12 @@ MStatus heatherNode::initialize()
  	matAttr.setStorable(true);
 	addAttribute(ablockSetName);
 	
+	acompressRatio = numAttr.create( "compressRatio", "cmpr", MFnNumericData::kInt, 2.f );
+ 	numAttr.setStorable(true);
+ 	numAttr.setMin(1.f);
+ 	numAttr.setMax(8.f);
+	addAttribute(acompressRatio);
+	
 	outValue = numAttr.create( "outValue", "ov", MFnNumericData::kFloat );
 	numAttr.setStorable(false);
 	numAttr.setWritable(false);
@@ -631,6 +629,7 @@ MStatus heatherNode::initialize()
 	attributeAffects(ainimages, outValue);
 	attributeAffects(ablockSetName, outValue);
 	attributeAffects(acameraName, outValue);
+	attributeAffects(acompressRatio, outValue);
 	
 	return MS::kSuccess;
 }
