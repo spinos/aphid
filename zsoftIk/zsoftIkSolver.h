@@ -7,8 +7,6 @@
 // https://www.toolchefs.com/?portfolio=soft-ik-solver
 // http://www.softimageblog.com/archives/108
 //
-// softDistance float
-// activeStretch float 0 - 1
 // midJointSlide float -1 - 1
 // midJointLockWeight float 0 - 1
 // midJointLockPosition point
@@ -37,10 +35,8 @@
 #include <maya/MFnIkJoint.h>
 
 #include <maya/MArgList.h>
-#include <maya/MPxCommand.h>
+
 #include <maya/MGlobal.h>
-#include <maya/MSceneMessage.h>
-#include <maya/MSelectionList.h>
 
 
 #define kSolverType "ik2Bsolver"
@@ -48,12 +44,6 @@
 #define kEpsilon 1.0e-5
 #define absoluteValue(x) ((x) < 0 ? (-(x)) : (x))
 
-
-//////////////////////////////////////////////////////////////////
-//
-// IK 2 Bone Solver Node
-//
-//////////////////////////////////////////////////////////////////
 class ik2Bsolver : public MPxIkSolverNode {
 
 public:
@@ -67,6 +57,9 @@ public:
         static  void*   creator();
         static  MStatus initialize();
         static MObject asoftDistance;
+		static MObject arestLength1;
+		static MObject arestLength2;
+		static MObject amaxStretching;
 
         static  MTypeId id;
 
@@ -83,21 +76,8 @@ private:
                          MQuaternion &qStart,
                          MQuaternion &qMid,
                          const double & softDistance,
+						 const double & restLength1,
+						 const double & restLength2,
                          double & stretching);
 private:
-    double m_restLength[2];
-    bool m_isFirst, m_isExtending;
-    double m_lastLe;
 };
-
-class addIK2BsolverCallbacks : public MPxCommand {
-public:                                                                                                                 
-                                        addIK2BsolverCallbacks() {};
-        virtual MStatus doIt (const MArgList &);
-        static void*    creator();
-        
-        // callback IDs for the solver callbacks
-        static MCallbackId afterNewId;
-        static MCallbackId afterOpenId;
-};
-

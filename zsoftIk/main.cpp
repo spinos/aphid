@@ -1,11 +1,8 @@
 #include <maya/MFnPlugin.h>
 #include <maya/MGlobal.h>
 #include "zsoftIkSolver.h"
-/////////////////////////////////////////////////////////
-//
-// Register the IK 2 Bone Solver and Callback Command
-//
-/////////////////////////////////////////////////////////
+#include "zsoftIkCallback.h"
+
 MStatus initializePlugin(MObject obj)
 {
         MStatus         status;
