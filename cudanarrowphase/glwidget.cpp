@@ -8,6 +8,8 @@
 #include <CUDABuffer.h>
 #include "ContactThread.h"
 #include <CudaTetrahedronSystem.h>
+#include "SimpleContactSolver.h"
+
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
     m_dbgDraw = new DrawNp;
@@ -38,6 +40,7 @@ void GLWidget::clientDraw()
 	m_dbgDraw->drawTetra((TetrahedronSystem *)m_solver->tetra());
 	//m_dbgDraw->drawTetraAtFrameEnd(m_tetra);
 	m_dbgDraw->drawSeparateAxis(m_solver->narrowphase(), m_solver->hostPairs(), (TetrahedronSystem *)m_solver->tetra());
+	m_dbgDraw->drawConstraint(m_solver->contactSolver(), m_solver->narrowphase(), (TetrahedronSystem *)m_solver->tetra());
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

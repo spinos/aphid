@@ -38,6 +38,18 @@ CUDABuffer * SimpleContactSolver::contactPairHashBuf()
 CUDABuffer * SimpleContactSolver::bodySplitLocBuf()
 { return m_splitPair; }
 
+CUDABuffer * SimpleContactSolver::linearVelocityABuf()
+{ return m_linearVelocityA; }
+
+CUDABuffer * SimpleContactSolver::linearVelocityBBuf()
+{ return m_linearVelocityB; }
+
+CUDABuffer * SimpleContactSolver::angularVelocityABuf()
+{ return m_angularVelocityA; }
+
+CUDABuffer * SimpleContactSolver::angularVelocityBBuf()
+{ return m_angularVelocityB; }
+
 void SimpleContactSolver::solveContacts(unsigned numContacts,
 										void * contacts,
 										CUDABuffer * pairBuf,

@@ -22,6 +22,7 @@ public:
 	void drawTetra(TetrahedronSystem * tetra);
 	void drawTetraAtFrameEnd(TetrahedronSystem * tetra);
 	void drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, TetrahedronSystem * tetra);
+	void drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phase, TetrahedronSystem * tetra);
 	void printCoord(CudaNarrowphase * phase, BaseBuffer * pairs);
 	void printTOI(CudaNarrowphase * phase, BaseBuffer * pairs);
 	void printContactPairHash(SimpleContactSolver * solver, unsigned numContacts);
@@ -38,4 +39,8 @@ private:
 	BaseBuffer * m_contactPairs;
 	BaseBuffer * m_scanResult;
 	BaseBuffer * m_pairsHash;
+	BaseBuffer * m_linearVelocityA;
+	BaseBuffer * m_linearVelocityB;
+	BaseBuffer * m_angularVelocityA;
+	BaseBuffer * m_angularVelocityB;
 };

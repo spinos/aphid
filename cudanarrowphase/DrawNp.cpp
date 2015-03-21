@@ -25,6 +25,10 @@ DrawNp::DrawNp()
 	m_contactPairs = new BaseBuffer;
 	m_scanResult = new BaseBuffer;
 	m_pairsHash = new BaseBuffer;
+	m_linearVelocityA = new BaseBuffer;
+	m_linearVelocityB = new BaseBuffer;
+	m_angularVelocityA = new BaseBuffer;
+	m_angularVelocityB = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -78,7 +82,7 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
 	ContactData * contact = (ContactData *)m_contact->data();
 	
 	unsigned i;
-	glColor3f(0.2f, 0.01f, 0.f);
+	
 	Vector3F dst, cenA, cenB;
 	for(i=0; i < np; i++) {
 		ContactData & cf = contact[i];
@@ -95,6 +99,81 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
 		m_drawer->setColor(0.f, .5f, 0.f);
 		m_drawer->arrow(cenA, cenA + Vector3F(cf.localA.x, cf.localA.y, cf.localA.z));
 		m_drawer->arrow(cenB, cenB + Vector3F(cf.localB.x, cf.localB.y, cf.localB.z));
+	}
+}
+
+void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phase, TetrahedronSystem * tetra)
+{
+    const unsigned nc = phase->numContacts();
+    if(nc < 1) return;
+    
+    computeX1(tetra, 0.f);
+    Vector3F * ptet = (Vector3F *)m_x1->data();
+    unsigned * tetInd = (unsigned *)tetra->hostTretradhedronIndices();
+    
+    m_contactPairs->create(nc * 8);
+    phase->getContactPairs(m_contactPairs);
+    
+    unsigned * c = (unsigned *)m_contactPairs->data();
+    unsigned i;
+    glColor3f(0.4f, 0.9f, 0.6f);
+	Vector3F dst, cenA, cenB;
+	for(i=0; i < nc; i++) {
+	    cenA = tetrahedronCenter(ptet, tetInd, c[i*2]);
+	    cenB = tetrahedronCenter(ptet, tetInd, c[i*2+1]);
+		m_drawer->arrow(cenB, cenA);
+	}
+    
+	CUDABuffer * bodyPair = solver->contactPairHashBuf();
+	m_pairsHash->create(bodyPair->bufferSize());
+	bodyPair->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());
+	
+	m_linearVelocityA->create(nc * 12);
+	m_linearVelocityB->create(nc * 12);
+	
+	CUDABuffer * dContactLinVel = solver->linearVelocityABuf();
+	dContactLinVel->deviceToHost(m_linearVelocityA->data(), m_linearVelocityA->bufferSize());
+	
+	dContactLinVel = solver->linearVelocityBBuf();
+	dContactLinVel->deviceToHost(m_linearVelocityB->data(), m_linearVelocityB->bufferSize());
+	
+	Vector3F * linVelA = (Vector3F *)m_linearVelocityA->data();
+	Vector3F * linVelB = (Vector3F *)m_linearVelocityB->data();
+	
+	m_angularVelocityA->create(nc * 12);
+	m_angularVelocityB->create(nc * 12);
+	
+	CUDABuffer * dContactAngVel = solver->angularVelocityABuf();
+	dContactAngVel->deviceToHost(m_angularVelocityA->data(), m_angularVelocityA->bufferSize());
+	
+	dContactAngVel = solver->angularVelocityBBuf();
+	dContactAngVel->deviceToHost(m_angularVelocityB->data(), m_angularVelocityB->bufferSize());
+	
+	Vector3F * angVelA = (Vector3F *)m_angularVelocityA->data();
+	Vector3F * angVelB = (Vector3F *)m_angularVelocityB->data();
+	
+	Vector3F linVel, angVel;
+	unsigned * v = (unsigned *)m_pairsHash->data();
+	for(i=0; i < nc * 2; i++) {
+	    if(c[(v[i*2+1]) * 2] == v[i*2]) {
+	        linVel = linVelA[i/2];
+	        angVel = angVelA[i/2];
+	    }
+	    else {
+	        linVel = linVelB[i/2];
+	        angVel = angVelB[i/2];
+	    }
+	    
+	    cenA = tetrahedronCenter(ptet, tetInd, v[i*2]);
+	    cenB = cenA + linVel;
+	    
+	    glColor3f(0.7f, 0.3f, 0.6f);
+	    m_drawer->arrow(cenA, cenB);
+	    
+	    cenB = cenA + angVel;
+	    
+	    glColor3f(0.2f, 0.7f, 0.5f);
+	    m_drawer->arrow(cenA, cenB);
 	}
 }
 

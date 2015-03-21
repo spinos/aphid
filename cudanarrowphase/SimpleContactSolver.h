@@ -22,6 +22,11 @@ public:
 						
 	CUDABuffer * contactPairHashBuf();
 	CUDABuffer * bodySplitLocBuf();
+	CUDABuffer * linearVelocityABuf();
+	CUDABuffer * linearVelocityBBuf();
+	CUDABuffer * angularVelocityABuf();
+	CUDABuffer * angularVelocityBBuf();
+	
 private:
 	CUDABuffer * m_sortedInd[2];
 	CUDABuffer * m_splitPair;

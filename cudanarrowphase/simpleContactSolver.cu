@@ -50,7 +50,7 @@ inline __device__ void computeBodyVelocities1(uint * pointStarts,
     const uint4 ia = computePointIndex(pointStarts, indexStarts, indices, ind);
 	
 	float3_average4(linearVelocity, velocity, ia);
-
+	
 	computeBodyAngularVelocity(angularVelocity, linearVelocity, position, velocity, ia);
 }
 
@@ -346,7 +346,7 @@ void simpleContactSolverSetContactConstraint(float3 * linVelA,
                                         uint numContacts)
 {
     uint tpb = CudaBase::LimitNThreadPerBlock(30, 60);
-    
+
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numContacts, tpb);
     dim3 grid(nblk, 1, 1);

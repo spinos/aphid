@@ -120,6 +120,9 @@ CudaTetrahedronSystem * ContactThread::tetra()
 CudaNarrowphase * ContactThread::narrowphase()
 { return m_narrowphase; }
 
+SimpleContactSolver * ContactThread::contactSolver()
+{ return m_contactSolver; }
+
 BaseBuffer * ContactThread::hostPairs()
 { return m_hostPairs; }
 //:~

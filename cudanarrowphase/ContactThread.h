@@ -17,6 +17,7 @@ public:
     
     CudaTetrahedronSystem * tetra();
     CudaNarrowphase * narrowphase();
+    SimpleContactSolver * contactSolver();
     BaseBuffer * hostPairs();
     
 protected:
