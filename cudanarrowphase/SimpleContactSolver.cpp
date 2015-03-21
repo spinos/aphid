@@ -22,10 +22,8 @@ SimpleContactSolver::SimpleContactSolver()
 	m_splitInverseMass = new CUDABuffer;
 	m_contactInverseMass = new CUDABuffer;
 	m_lambda = new CUDABuffer;
-	m_linearVelocityA = new CUDABuffer;
-	m_linearVelocityB = new CUDABuffer;
-	m_angularVelocityA = new CUDABuffer; 
-	m_angularVelocityB = new CUDABuffer;
+	m_contactLinearVelocity = new CUDABuffer;
+	m_contactAngularVelocity = new CUDABuffer; 
 	m_deltaLinearVelocity = new CUDABuffer;
 	m_deltaAngularVelocity = new CUDABuffer;
 }
@@ -38,17 +36,11 @@ CUDABuffer * SimpleContactSolver::contactPairHashBuf()
 CUDABuffer * SimpleContactSolver::bodySplitLocBuf()
 { return m_splitPair; }
 
-CUDABuffer * SimpleContactSolver::linearVelocityABuf()
-{ return m_linearVelocityA; }
+CUDABuffer * SimpleContactSolver::contactLinearVelocityBuf()
+{ return m_contactLinearVelocity; }
 
-CUDABuffer * SimpleContactSolver::linearVelocityBBuf()
-{ return m_linearVelocityB; }
-
-CUDABuffer * SimpleContactSolver::angularVelocityABuf()
-{ return m_angularVelocityA; }
-
-CUDABuffer * SimpleContactSolver::angularVelocityBBuf()
-{ return m_angularVelocityB; }
+CUDABuffer * SimpleContactSolver::contactAngularVelocityBuf()
+{ return m_contactAngularVelocity; }
 
 void SimpleContactSolver::solveContacts(unsigned numContacts,
 										void * contacts,
@@ -90,15 +82,11 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	m_lambda->create(numContacts * 4);
 	void * lambda = m_lambda->bufferOnDevice();
 	
-	m_linearVelocityA->create(numContacts * 12);
-	void * linVelA = m_linearVelocityA->bufferOnDevice();
-	m_linearVelocityB->create(numContacts * 12);
-	void * linVelB = m_linearVelocityB->bufferOnDevice();
+	m_contactLinearVelocity->create(numContacts * 2 * 12);
+	void * linVel = m_contactLinearVelocity->bufferOnDevice();
 	
-	m_angularVelocityA->create(numContacts * 12);
-	void * angVelA = m_angularVelocityA->bufferOnDevice();
-	m_angularVelocityB->create(numContacts * 12);
-	void * angVelB = m_angularVelocityB->bufferOnDevice();
+	m_contactAngularVelocity->create(numContacts * 2 * 12);
+	void * angVel = m_contactAngularVelocity->bufferOnDevice();
 	
 	CudaNarrowphase::CombinedObjectBuffer * objectBuf = (CudaNarrowphase::CombinedObjectBuffer *)objectData;
 	void * pos = objectBuf->m_pos->bufferOnDevice();
@@ -107,10 +95,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * perObjPointStart = objectBuf->m_pointCacheLoc->bufferOnDevice();
 	void * perObjectIndexStart = objectBuf->m_indexCacheLoc->bufferOnDevice();
 	
-	simpleContactSolverSetContactConstraint((float3 *)linVelA,
-	                                        (float3 *)linVelB,
-	    (float3 *)angVelA,
-	    (float3 *)angVelB,
+	simpleContactSolverSetContactConstraint((float3 *)linVel,
+	                                        (float3 *)angVel,
 	    (float *)lambda, (float *)contactMass, (float *)splitMass, 
 	    (uint2 *)splits, 
 	    (uint2 *)pairs,

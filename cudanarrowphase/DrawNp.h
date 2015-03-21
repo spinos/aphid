@@ -39,8 +39,6 @@ private:
 	BaseBuffer * m_contactPairs;
 	BaseBuffer * m_scanResult;
 	BaseBuffer * m_pairsHash;
-	BaseBuffer * m_linearVelocityA;
-	BaseBuffer * m_linearVelocityB;
-	BaseBuffer * m_angularVelocityA;
-	BaseBuffer * m_angularVelocityB;
+	BaseBuffer * m_linearVelocity;
+	BaseBuffer * m_angularVelocity;
 };

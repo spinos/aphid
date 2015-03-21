@@ -19,13 +19,14 @@ public:
     
     static float TimeStep;
     
+    virtual void stepPhysics(float dt);
+    
 signals:
     void doneStep();
 
 protected:
     void run();
-    virtual void stepPhysics(float dt);
-
+    
 private:
     QMutex mutex;
     QWaitCondition condition;

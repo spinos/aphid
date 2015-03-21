@@ -22,10 +22,8 @@ public:
 						
 	CUDABuffer * contactPairHashBuf();
 	CUDABuffer * bodySplitLocBuf();
-	CUDABuffer * linearVelocityABuf();
-	CUDABuffer * linearVelocityBBuf();
-	CUDABuffer * angularVelocityABuf();
-	CUDABuffer * angularVelocityBBuf();
+	CUDABuffer * contactLinearVelocityBuf();
+	CUDABuffer * contactAngularVelocityBuf();
 	
 private:
 	CUDABuffer * m_sortedInd[2];
@@ -33,10 +31,8 @@ private:
 	CUDABuffer * m_bodyCount;
 	CUDABuffer * m_splitInverseMass;
 	CUDABuffer * m_contactInverseMass;
-	CUDABuffer * m_linearVelocityA;
-	CUDABuffer * m_linearVelocityB;
-	CUDABuffer * m_angularVelocityA;
-	CUDABuffer * m_angularVelocityB;
+	CUDABuffer * m_contactLinearVelocity;
+	CUDABuffer * m_contactAngularVelocity;
 	CUDABuffer * m_lambda;
 	CUDABuffer * m_deltaLinearVelocity;
 	CUDABuffer * m_deltaAngularVelocity;

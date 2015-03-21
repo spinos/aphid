@@ -25,10 +25,8 @@ DrawNp::DrawNp()
 	m_contactPairs = new BaseBuffer;
 	m_scanResult = new BaseBuffer;
 	m_pairsHash = new BaseBuffer;
-	m_linearVelocityA = new BaseBuffer;
-	m_linearVelocityB = new BaseBuffer;
-	m_angularVelocityA = new BaseBuffer;
-	m_angularVelocityB = new BaseBuffer;
+	m_linearVelocity = new BaseBuffer;
+	m_angularVelocity = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -128,49 +126,42 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	m_pairsHash->create(bodyPair->bufferSize());
 	bodyPair->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());
 	
-	m_linearVelocityA->create(nc * 12);
-	m_linearVelocityB->create(nc * 12);
+	m_linearVelocity->create(nc * 2 * 12);
 	
-	CUDABuffer * dContactLinVel = solver->linearVelocityABuf();
-	dContactLinVel->deviceToHost(m_linearVelocityA->data(), m_linearVelocityA->bufferSize());
+	CUDABuffer * dContactLinVel = solver->contactLinearVelocityBuf();
+	dContactLinVel->deviceToHost(m_linearVelocity->data(), m_linearVelocity->bufferSize());
 	
-	dContactLinVel = solver->linearVelocityBBuf();
-	dContactLinVel->deviceToHost(m_linearVelocityB->data(), m_linearVelocityB->bufferSize());
+	Vector3F * linVel = (Vector3F *)m_linearVelocity->data();
 	
-	Vector3F * linVelA = (Vector3F *)m_linearVelocityA->data();
-	Vector3F * linVelB = (Vector3F *)m_linearVelocityB->data();
+	m_angularVelocity->create(nc * 2 * 12);
 	
-	m_angularVelocityA->create(nc * 12);
-	m_angularVelocityB->create(nc * 12);
+	CUDABuffer * dContactAngVel = solver->contactAngularVelocityBuf();
+	dContactAngVel->deviceToHost(m_angularVelocity->data(), m_angularVelocity->bufferSize());
 	
-	CUDABuffer * dContactAngVel = solver->angularVelocityABuf();
-	dContactAngVel->deviceToHost(m_angularVelocityA->data(), m_angularVelocityA->bufferSize());
+	Vector3F * angVel = (Vector3F *)m_angularVelocity->data();
 	
-	dContactAngVel = solver->angularVelocityBBuf();
-	dContactAngVel->deviceToHost(m_angularVelocityB->data(), m_angularVelocityB->bufferSize());
-	
-	Vector3F * angVelA = (Vector3F *)m_angularVelocityA->data();
-	Vector3F * angVelB = (Vector3F *)m_angularVelocityB->data();
-	
-	Vector3F linVel, angVel;
+	Vector3F linV, angV;
+	unsigned ilft;
 	unsigned * v = (unsigned *)m_pairsHash->data();
 	for(i=0; i < nc * 2; i++) {
+	    ilft = (i >> 1) << 1;
+// left or right
 	    if(c[(v[i*2+1]) * 2] == v[i*2]) {
-	        linVel = linVelA[i/2];
-	        angVel = angVelA[i/2];
+	        linV = linVel[ilft];
+	        angV = angVel[ilft];
 	    }
 	    else {
-	        linVel = linVelB[i/2];
-	        angVel = angVelB[i/2];
+	        linV = linVel[ilft + 1];
+	        angV = angVel[ilft + 1];
 	    }
 	    
 	    cenA = tetrahedronCenter(ptet, tetInd, v[i*2]);
-	    cenB = cenA + linVel;
+	    cenB = cenA + linV;
 	    
 	    glColor3f(0.7f, 0.3f, 0.6f);
 	    m_drawer->arrow(cenA, cenB);
 	    
-	    cenB = cenA + angVel;
+	    cenB = cenA + angV;
 	    
 	    glColor3f(0.2f, 0.7f, 0.5f);
 	    m_drawer->arrow(cenA, cenB);

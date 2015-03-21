@@ -175,10 +175,8 @@ __global__ void computeSplitInvMass_kernel(float * invMass,
 	invMass[ind] = 1.f * (float)n;
 }
 
-__global__ void setContactConstraint_kernel(float3 * linVelA,
-                                             float3 * linVelB,
-                                        float3 * angVelA,
-                                        float3 * angVelB,
+__global__ void setContactConstraint_kernel(float3 * contactLinVel,
+                                        float3 * contactAngVel,
                                         float * lambda,
                                         float * invMass, 
                                         float * splitInvMass, 
@@ -202,11 +200,13 @@ __global__ void setContactConstraint_kernel(float3 * linVelA,
 	invMass[ind] = 1.f / (invMassA + invMassB);
 	lambda[ind] = 0.f;
 	
+	const int ilft = ind * 2;
+	
 	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].x, srcPos, srcVel, 
-	    linVelA[ind], angVelA[ind]);
+	    contactLinVel[ilft], contactAngVel[ilft]);
 	
 	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].y, srcPos, srcVel, 
-	    linVelB[ind], angVelB[ind]);
+	    contactLinVel[ilft+1], contactAngVel[ilft+1]);
 }
 
 __global__ void clearDeltaVelocity_kernel(float3 * deltaLinVel, 
@@ -329,10 +329,8 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
                                        bufLength);
 }
 
-void simpleContactSolverSetContactConstraint(float3 * linVelA,
-                                             float3 * linVelB,
-                                        float3 * angVelA,
-                                        float3 * angVelB,
+void simpleContactSolverSetContactConstraint(float3 * contactLinVel,
+                                        float3 * contactAngVel,
                                         float * lambda,
                                         float * invMass, 
                                         float * splitInvMass, 
@@ -351,10 +349,8 @@ void simpleContactSolverSetContactConstraint(float3 * linVelA,
     unsigned nblk = iDivUp(numContacts, tpb);
     dim3 grid(nblk, 1, 1);
     
-    setContactConstraint_kernel<<< grid, block >>>(linVelA,
-                                        linVelB,
-                                        angVelA,
-                                        angVelB,
+    setContactConstraint_kernel<<< grid, block >>>(contactLinVel,
+                                        contactAngVel,
                                         lambda,
                                         invMass, 
                                         splitInvMass, 

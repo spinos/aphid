@@ -10,6 +10,8 @@
 #include <CudaTetrahedronSystem.h>
 #include "SimpleContactSolver.h"
 
+#define SIMULATE_INLINE 1
+
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
     m_dbgDraw = new DrawNp;
@@ -26,19 +28,26 @@ void GLWidget::clientInit()
 	CudaBase::SetDevice();
 	
 	m_solver->initOnDevice();
-	
-	// connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+
+#if SIMULATE_INLINE	
+	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+#else
 	connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
+	disconnect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+#endif
 }
 
 void GLWidget::clientDraw()
-{ 	
+{ 
+#if SIMULATE_INLINE
+    m_solver->stepPhysics(1.f / 60.f);
+#endif
     // m_dbgDraw->printTOI(m_solver->narrowphase(), m_solver->hostPairs());
 	// m_dbgDraw->printContactPairHash(m_contactSolver, m_narrowphase->numContacts());
 	m_solver->tetra()->sendXToHost();
 	m_dbgDraw->drawTetra((TetrahedronSystem *)m_solver->tetra());
-	//m_dbgDraw->drawTetraAtFrameEnd(m_tetra);
+	// m_dbgDraw->drawTetraAtFrameEnd((TetrahedronSystem *)m_solver->tetra());
 	m_dbgDraw->drawSeparateAxis(m_solver->narrowphase(), m_solver->hostPairs(), (TetrahedronSystem *)m_solver->tetra());
 	m_dbgDraw->drawConstraint(m_solver->contactSolver(), m_solver->narrowphase(), (TetrahedronSystem *)m_solver->tetra());
 }
@@ -72,12 +81,20 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 		case Qt::Key_D:
 			break;
 		case Qt::Key_W:
+#if SIMULATE_INLINE
+            internalTimer()->stop();
+#else
 			disconnect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 			connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+#endif
 			break;
 		case Qt::Key_S:
+#if SIMULATE_INLINE
+            internalTimer()->start();
+#else
 			disconnect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 			connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
+#endif
 			break;
 		default:
 			break;

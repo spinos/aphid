@@ -20,9 +20,10 @@ public:
     SimpleContactSolver * contactSolver();
     BaseBuffer * hostPairs();
     
-protected:
     virtual void stepPhysics(float dt);
-
+    
+protected:
+    
 private:
     BaseBuffer * m_hostPairs;
 	CUDABuffer * m_devicePairs;
