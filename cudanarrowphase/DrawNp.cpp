@@ -14,6 +14,7 @@
 #include <CudaNarrowphase.h>
 #include <SimpleContactSolver.h>
 #include "narrowphase_implement.h"
+#include "simpleContactSolver_implement.h"
 #include <CUDABuffer.h>
 
 DrawNp::DrawNp() 
@@ -28,6 +29,8 @@ DrawNp::DrawNp()
 	m_linearVelocity = new BaseBuffer;
 	m_angularVelocity = new BaseBuffer;
 	m_impulse = new BaseBuffer;
+	m_relLinearVelocity = new BaseBuffer;
+	m_deltaJ = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -89,6 +92,10 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
 		if(cf.separateAxis.w < .1f) continue;
 	    cenA = tetrahedronCenter(ptet, tetInd, pairInd[i * 2]);
 	    cenB = tetrahedronCenter(ptet, tetInd, pairInd[i * 2 + 1]);
+	    
+	    glColor3f(0.1f, 0.2f, 0.06f);
+	    m_drawer->arrow(cenA, cenA + tetrahedronVelocity(tetra, tetInd, pairInd[i * 2]));
+	    m_drawer->arrow(cenB, cenB + tetrahedronVelocity(tetra, tetInd, pairInd[i * 2 + 1]));
 		
 		m_drawer->setColor(.5f, 0.f, 0.f);
 		
@@ -114,13 +121,13 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
     phase->getContactPairs(m_contactPairs);
     
     unsigned * c = (unsigned *)m_contactPairs->data();
-    unsigned i;
+    unsigned i, j;
     glColor3f(0.4f, 0.9f, 0.6f);
 	Vector3F dst, cenA, cenB;
 	for(i=0; i < nc; i++) {
-	    cenA = tetrahedronCenter(ptet, tetInd, c[i*2]);
-	    cenB = tetrahedronCenter(ptet, tetInd, c[i*2+1]);
-		m_drawer->arrow(cenB, cenA);
+	    // cenA = tetrahedronCenter(ptet, tetInd, c[i*2]);
+	    // cenB = tetrahedronCenter(ptet, tetInd, c[i*2+1]);
+		// m_drawer->arrow(cenB, cenA);
 	}
     
 	CUDABuffer * bodyPair = solver->contactPairHashBuf();
@@ -129,16 +136,14 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	
 	m_linearVelocity->create(nc * 2 * 12);
 	
-	CUDABuffer * dContactLinVel = solver->contactLinearVelocityBuf();
-	dContactLinVel->deviceToHost(m_linearVelocity->data(), m_linearVelocity->bufferSize());
-	
+	solver->projectedLinearVelocityBuf()->deviceToHost(m_linearVelocity->data(), 
+	    m_linearVelocity->bufferSize());
 	Vector3F * linVel = (Vector3F *)m_linearVelocity->data();
 	
 	m_angularVelocity->create(nc * 2 * 12);
 	
-	CUDABuffer * dContactAngVel = solver->contactAngularVelocityBuf();
-	dContactAngVel->deviceToHost(m_angularVelocity->data(), m_angularVelocity->bufferSize());
-	
+	solver->projectedAngularVelocityBuf()->deviceToHost(m_angularVelocity->data(), 
+	    m_angularVelocity->bufferSize());
 	Vector3F * angVel = (Vector3F *)m_angularVelocity->data();
 	
 	m_impulse->create(nc * 8);
@@ -149,47 +154,73 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	phase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
 	ContactData * contact = (ContactData *)m_contact->data();
 	
-	Vector3F linV, angV, N;
-	float Jab;
-	unsigned ilft, irgt, iBody, iPair;
+	m_relLinearVelocity->create(nc * JACOBI_NUM_ITERATIONS * 12);
+	solver->relVBuf()->deviceToHost(m_relLinearVelocity->data(), m_relLinearVelocity->bufferSize());
+	Vector3F * relLinVel = (Vector3F *)m_relLinearVelocity->data();
+	
+	m_deltaJ->create(nc * 8);
+	solver->deltaJBuf()->deviceToHost(m_deltaJ->data(), m_deltaJ->bufferSize());
+	float * dJ = (float *)m_deltaJ->data();
+	
+	Vector3F N;
+	bool isA;
+	unsigned iPairA, iBody, iPair;
 	unsigned * bodyAndPair = (unsigned *)m_pairsHash->data();
 	for(i=0; i < nc * 2; i++) {
-	    ilft = (i >> 1) << 1;
-	    irgt = ilft+1;
-	    
+
 	    iBody = bodyAndPair[i*2];
 	    iPair = bodyAndPair[i*2+1];
+	    
+	    iPairA = iPair * 2;
 // left or right
-	    if(iBody == c[iPair * 2]) {
-	        linV = linVel[ilft];
-	        angV = angVel[ilft];
-	        Jab = J[ilft];
-	    }
-	    else {
-	        linV = linVel[irgt];
-	        angV = angVel[irgt];
-	        Jab = J[irgt];
-	    }
+        isA = (iBody == c[iPairA]);
+	    
+	    if(isA) std::cout<<"J["<<i<<"] "<<-J[i];
+	    else std::cout<<"J["<<i<<"] "<<J[i];
+	    
+	    std::cout<<" dJ "<<dJ[i]<<" ";
+	    
+	    std::cout<<" ("<<iPair<<","<<iBody<<")\n";
 	    
 	    cenA = tetrahedronCenter(ptet, tetInd, iBody);
-	    cenB = cenA + linV;
+
 	    
-	    glColor3f(0.7f, 0.3f, 0.6f);
-	    m_drawer->arrow(cenA, cenB);
+	    //cenB = cenA + angVel[i];
 	    
-	    cenB = cenA + angV;
+	    //glColor3f(0.1f, 0.7f, 0.3f);
+	    //m_drawer->arrow(cenA, cenB);
 	    
-	    glColor3f(0.2f, 0.7f, 0.5f);
-	    m_drawer->arrow(cenA, cenB);
-	    
-	    float4 sa = contact[iPair].separateAxis;
+	    ContactData & cd = contact[iPair];
+	    float4 sa = cd.separateAxis;
 	    N.set(sa.x, sa.y, sa.z);
 	    N.reverse();
 	    N.normalize();
 	    
-	    cenB = cenA + N * Jab;
-	    glColor3f(0.7f, 0.8f, 0.f);
-	    m_drawer->arrow(cenA, cenB);
+	    if(isA) {
+// show contact normal for A
+		    cenB = cenA + Vector3F(cd.localA.x, cd.localA.y, cd.localA.z);
+		    m_drawer->setColor(0.f, .3f, .9f);
+		    m_drawer->arrow(cenB, cenB + N);
+// reverse N for A
+            N.reverse();
+		}
+	    // cenB = cenA + linVel[i];
+	    
+	    // std::cout<<" "<<deltaLinVel[i]<<"\n";
+	    // std::cout<<" NJ - dV "<<Vector3F(N * J[i], deltaLinVel[i]).length();
+	    glColor3f(0.9f, 0.8f, 0.1f);
+	    m_drawer->arrow(cenA, cenA + N * dJ[i]);
+	    
+		glColor3f(0.1f, 0.78f, 0.2f);
+		m_drawer->arrow(cenA, cenA + linVel[i]);
+		
+		if(isA) {
+            for(j=0; j< JACOBI_NUM_ITERATIONS; j++) {
+                glColor3f(0.1f, 0.18f, 0.99f * j / (float)JACOBI_NUM_ITERATIONS);
+                m_drawer->arrow(cenA, cenA + relLinVel[iPair * JACOBI_NUM_ITERATIONS + j]);
+                std::cout<<"relv["<<j<<"] "<<relLinVel[iPair * JACOBI_NUM_ITERATIONS + j]<<"\n";
+            }
+        }
 	}
 }
 
@@ -257,6 +288,17 @@ void DrawNp::computeX1(TetrahedronSystem * tetra, float h)
 	unsigned i;
 	for(i=0; i < nf; i++)
 		x1[i] = x0[i] + vel[i] * h;
+}
+
+Vector3F DrawNp::tetrahedronVelocity(TetrahedronSystem * tetra, unsigned * v, unsigned i)
+{
+    Vector3F * vel = (Vector3F *)tetra->hostV();
+    Vector3F r = vel[v[i*4]];
+    r += vel[v[i * 4 + 1]];
+    r += vel[v[i * 4 + 2]];
+    r += vel[v[i * 4 + 3]];
+    r *= .25f;
+    return r;
 }
 
 Vector3F DrawNp::tetrahedronCenter(Vector3F * p, unsigned * v, unsigned i)

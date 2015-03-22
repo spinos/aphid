@@ -22,19 +22,24 @@ public:
 						
 	CUDABuffer * contactPairHashBuf();
 	CUDABuffer * bodySplitLocBuf();
-	CUDABuffer * contactLinearVelocityBuf();
-	CUDABuffer * contactAngularVelocityBuf();
+	CUDABuffer * projectedLinearVelocityBuf();
+	CUDABuffer * projectedAngularVelocityBuf();
 	CUDABuffer * impulseBuf();
+	CUDABuffer * deltaLinearVelocityBuf();
+	CUDABuffer * deltaJBuf();
+	CUDABuffer * relVBuf();
 	
 private:
 	CUDABuffer * m_sortedInd[2];
 	CUDABuffer * m_splitPair;
 	CUDABuffer * m_bodyCount;
 	CUDABuffer * m_splitInverseMass;
-	CUDABuffer * m_contactLinearVelocity;
-	CUDABuffer * m_contactAngularVelocity;
+	CUDABuffer * m_projectedLinearVelocity;
+	CUDABuffer * m_projectedAngularVelocity;
 	CUDABuffer * m_lambda;
 	CUDABuffer * m_deltaLinearVelocity;
 	CUDABuffer * m_deltaAngularVelocity;
+	CUDABuffer * m_deltaJ;
+	CUDABuffer * m_relV;
 };
 #endif        //  #ifndef SIMPLECONTACTSOLVER_H

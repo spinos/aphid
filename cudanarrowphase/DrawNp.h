@@ -29,6 +29,7 @@ public:
 private:
     void computeX1(TetrahedronSystem * tetra, float h = 0.0166667f);
     Vector3F tetrahedronCenter(Vector3F * p, unsigned * v, unsigned i);
+    Vector3F tetrahedronVelocity(TetrahedronSystem * tetra, unsigned * v, unsigned i);
     Vector3F interpolatePointTetrahedron(Vector3F * p, unsigned * v, unsigned i, float * wei);
 private:
 	GeoDrawer * m_drawer;
@@ -42,4 +43,6 @@ private:
 	BaseBuffer * m_linearVelocity;
 	BaseBuffer * m_angularVelocity;
 	BaseBuffer * m_impulse;
+	BaseBuffer * m_relLinearVelocity;
+	BaseBuffer * m_deltaJ;
 };

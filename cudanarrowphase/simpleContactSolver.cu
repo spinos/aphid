@@ -76,8 +76,6 @@ inline __device__ void computeBodyVelocities(uint * pointStarts,
 	
 	float3 centerB;
 	float3_average4(centerB, position, ib);
-	
-	
 }
 
 inline __device__ uint getBodyCountAt(uint ind, uint * count)
@@ -107,8 +105,21 @@ inline __device__ void computeImpulse(float & MinvJa,
     
     const float MinvJ = float3_dot(relativeLinVel, contactNormal) / (invMassA + invMassB);
     
-    MinvJa = -(1.f + 1.f) * invMassA * MinvJ;
-    MinvJb =  (1.f + 1.f) * invMassB * MinvJ;
+    MinvJa = (1.f + 1.f) * invMassA * MinvJ;
+    MinvJb = (1.f + 1.f) * invMassB * MinvJ;
+}
+
+inline __device__ float computeDeltaLambda(float & accumulated, float lambda)
+{
+    const float last = accumulated;
+    accumulated += lambda;
+    if(accumulated < 0.f) accumulated = 0.f;
+	return accumulated - last;
+}
+
+inline __device__ float3 computeDeltaVelocity(float3 dst, float J, float3 N)
+{
+    return float3_add(dst, scale_float3_by(N, J));
 }
 
 __global__ void writeContactIndex_kernel(KeyValuePair * dstInd, 
@@ -187,9 +198,10 @@ __global__ void computeSplitInvMass_kernel(float * invMass,
 	invMass[ind] = 1.f * (float)n;
 }
 
-__global__ void setContactConstraint_kernel(float3 * contactLinVel,
-                                        float3 * contactAngVel,
+__global__ void setContactConstraint_kernel(float3 * projLinVel,
+                                        float3 * projAngVel,
                                         float * lambda,
+                                        uint2 * splits,
                                         uint2 * pairs,
                                         float3 * srcPos,
                                         float3 * srcVel,
@@ -201,16 +213,16 @@ __global__ void setContactConstraint_kernel(float3 * contactLinVel,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	const int ilft = ind * 2;
+	const uint2 dstInd = splits[ind];
 	
-	lambda[ilft] = 0.f;
-	lambda[ilft + 1] = 0.f;
+	lambda[dstInd.x] = 0.f;
+	lambda[dstInd.y] = 0.f;
 	
 	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].x, srcPos, srcVel, 
-	    contactLinVel[ilft], contactAngVel[ilft]);
+	    projLinVel[dstInd.x], projAngVel[dstInd.x]);
 	
 	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].y, srcPos, srcVel, 
-	    contactLinVel[ilft+1], contactAngVel[ilft+1]);
+	    projLinVel[dstInd.y], projAngVel[dstInd.y]);
 }
 
 __global__ void clearDeltaVelocity_kernel(float3 * deltaLinVel, 
@@ -249,35 +261,39 @@ __global__ void stopAtContact_kernel(float3 * dstVelocity,
 }
 
 __global__ void solveContact_kernel(float * lambda,
-                        float3 * deltaLinVel,
-	                    float3 * deltaAngVel,
-	                    uint2 * splits,
-	                    float3 * linearVelocity,
+                        float3 * linearVelocity,
 	                    float3 * angularVelocity,
+	                    uint2 * splits,
 	                    float * splitMass,
                         ContactData * contacts,
-                        uint maxInd)
+                        float * deltaJ,
+                        uint maxInd,
+                        float3 * relV,
+                        int it)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
 	const uint2 dstInd = splits[ind];
 	
-	const uint ilft = ind * 2;
-	const float3 linVelA = float3_add(linearVelocity[ilft], deltaLinVel[dstInd.x]);
-	const float3 linVelB = float3_add(linearVelocity[ilft+1], deltaLinVel[dstInd.y]);
-	const float3 angVelA = float3_add(angularVelocity[ilft], deltaAngVel[dstInd.x]);
-	const float3 angVelB = float3_add(angularVelocity[ilft+1], deltaAngVel[dstInd.y]);
+	relV[ind * JACOBI_NUM_ITERATIONS + it] = float3_difference(linearVelocity[dstInd.x], linearVelocity[dstInd.y]);
 	
 	float Ja, Jb;
 	float3 N;
 	computeImpulse(Ja, Jb, N,
 	                    contacts[ind], 
-	                        linVelA, linVelB,
-	                        angVelA, angVelB,
+	                        linearVelocity[dstInd.x], linearVelocity[dstInd.y],
+	                        angularVelocity[dstInd.x], angularVelocity[dstInd.y],
 	                        splitMass[dstInd.x], splitMass[dstInd.y]);
-	lambda[dstInd.x] = Ja;
-	lambda[dstInd.y] = Jb;
+	
+	float dJa = computeDeltaLambda(lambda[dstInd.x], Ja);
+	float dJb = computeDeltaLambda(lambda[dstInd.y], Jb);
+	
+	linearVelocity[dstInd.x] = computeDeltaVelocity(linearVelocity[dstInd.x], -dJa, N);
+	linearVelocity[dstInd.y] = computeDeltaVelocity(linearVelocity[dstInd.y], dJb, N);
+	
+	deltaJ[dstInd.x] = dJa;
+	deltaJ[dstInd.y] = dJb;
 }
 
 extern "C" {
@@ -336,9 +352,10 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
                                        bufLength);
 }
 
-void simpleContactSolverSetContactConstraint(float3 * contactLinVel,
-                                        float3 * contactAngVel,
+void simpleContactSolverSetContactConstraint(float3 * projLinVel,
+                                        float3 * projAngVel,
                                         float * lambda,
+                                        uint2 * splits,
                                         uint2 * pairs,
                                         float3 * pos,
                                         float3 * vel,
@@ -353,9 +370,10 @@ void simpleContactSolverSetContactConstraint(float3 * contactLinVel,
     unsigned nblk = iDivUp(numContacts, tpb);
     dim3 grid(nblk, 1, 1);
     
-    setContactConstraint_kernel<<< grid, block >>>(contactLinVel,
-                                        contactAngVel,
+    setContactConstraint_kernel<<< grid, block >>>(projLinVel,
+                                        projAngVel,
                                         lambda,
+                                        splits,
                                         pairs,
                                         pos,
                                         vel,
@@ -398,28 +416,30 @@ void simpleContactSolverStopAtContact(float3 * dstVelocity,
 }
 
 void simpleContactSolverSolveContact(float * lambda,
-                        float3 * deltaLinVel,
-	                    float3 * deltaAngVel,
-	                    uint2 * splits,
-	                    float3 * linearVelocity,
+                        float3 * linearVelocity,
 	                    float3 * angularVelocity,
+	                    uint2 * splits,
 	                    float * splitMass,
                         ContactData * contacts,
-                        uint numContacts)
+                        float * deltaJ,
+                        uint numContacts,
+                        float3 * relV,
+                        int it)
 {
     dim3 block(512, 1, 1);
     unsigned nblk = iDivUp(numContacts, 512);
     dim3 grid(nblk, 1, 1);
     
     solveContact_kernel<<< grid, block >>>(lambda,
-                        deltaLinVel,
-	                    deltaAngVel,
-	                    splits,
-	                    linearVelocity,
+                        linearVelocity,
 	                    angularVelocity,
+	                    splits,
 	                    splitMass,
                         contacts,
-                        numContacts);
+                        deltaJ,
+                        numContacts,
+                        relV,
+                        it);
 }
 
 }

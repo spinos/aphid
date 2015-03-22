@@ -4,6 +4,8 @@
 #include "bvh_common.h"
 #include "radixsort_implement.h"
 
+#define JACOBI_NUM_ITERATIONS 7
+
 extern "C" {
 void simpleContactSolverWriteContactIndex(KeyValuePair * dstInd, 
                                     uint * srcInd, 
@@ -22,9 +24,10 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
                                         uint * bodyCount, 
                                         uint bufLength);
 
-void simpleContactSolverSetContactConstraint(float3 * contactLinVel,
-                                        float3 * contactAngVel,
+void simpleContactSolverSetContactConstraint(float3 * projLinVel,
+                                        float3 * projAngVel,
                                         float * lambda,
+                                        uint2 * splits,
                                         uint2 * pairs,
                                         float3 * pos,
                                         float3 * vel,
@@ -46,14 +49,15 @@ void simpleContactSolverStopAtContact(float3 * dstVelocity,
                     uint numContacts);
 
 void simpleContactSolverSolveContact(float * lambda,
-                        float3 * deltaLinVel,
-	                    float3 * deltaAngVel,
-	                    uint2 * splits,
-	                    float3 * linearVelocity,
+                        float3 * linearVelocity,
 	                    float3 * angularVelocity,
+	                    uint2 * splits,
 	                    float * splitMass,
                         ContactData * contacts,
-                        uint numContacts);
+                        float * deltaJ,
+                        uint numContacts,
+                        float3 * relV,
+                        int it);
 }
 #endif        //  #ifndef SIMPLECONTACTSOLVER_IMPLEMENT_H
 
