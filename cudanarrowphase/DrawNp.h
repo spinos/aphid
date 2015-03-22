@@ -41,4 +41,5 @@ private:
 	BaseBuffer * m_pairsHash;
 	BaseBuffer * m_linearVelocity;
 	BaseBuffer * m_angularVelocity;
+	BaseBuffer * m_impulse;
 };

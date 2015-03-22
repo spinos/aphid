@@ -41,7 +41,7 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw()
 { 
 #if SIMULATE_INLINE
-    m_solver->stepPhysics(1.f / 60.f);
+    if(internalTimer()->isActive()) m_solver->stepPhysics(1.f / 60.f);
 #endif
     // m_dbgDraw->printTOI(m_solver->narrowphase(), m_solver->hostPairs());
 	// m_dbgDraw->printContactPairHash(m_contactSolver, m_narrowphase->numContacts());

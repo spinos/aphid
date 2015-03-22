@@ -108,7 +108,7 @@ void ContactThread::stepPhysics(float dt)
 	m_narrowphase->computeContacts(m_devicePairs, GRDX);
 	
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
-									m_narrowphase->contacts(),
+									m_narrowphase->contactBuffer(),
 									m_narrowphase->contactPairsBuffer(),
 									m_narrowphase->objectBuffer());
 	m_tetra->integrate(0.016667f);

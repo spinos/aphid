@@ -20,7 +20,6 @@ SimpleContactSolver::SimpleContactSolver()
 	m_splitPair = new CUDABuffer;
 	m_bodyCount = new CUDABuffer;
 	m_splitInverseMass = new CUDABuffer;
-	m_contactInverseMass = new CUDABuffer;
 	m_lambda = new CUDABuffer;
 	m_contactLinearVelocity = new CUDABuffer;
 	m_contactAngularVelocity = new CUDABuffer; 
@@ -42,8 +41,11 @@ CUDABuffer * SimpleContactSolver::contactLinearVelocityBuf()
 CUDABuffer * SimpleContactSolver::contactAngularVelocityBuf()
 { return m_contactAngularVelocity; }
 
+CUDABuffer * SimpleContactSolver::impulseBuf()
+{ return m_lambda; }
+
 void SimpleContactSolver::solveContacts(unsigned numContacts,
-										void * contacts,
+										CUDABuffer * contactBuf,
 										CUDABuffer * pairBuf,
 										void * objectData)
 {
@@ -76,10 +78,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	
 	simpleContactSolverComputeSplitInverseMass((float *)splitMass, (uint *)dstCount, splitBufLength);
 	
-	m_contactInverseMass->create(numContacts * 4);
-	void * contactMass = m_contactInverseMass->bufferOnDevice();
-	
-	m_lambda->create(numContacts * 4);
+// A and B per contact	
+	m_lambda->create(numContacts * 8);
 	void * lambda = m_lambda->bufferOnDevice();
 	
 	m_contactLinearVelocity->create(numContacts * 2 * 12);
@@ -94,11 +94,12 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * ind = objectBuf->m_ind->bufferOnDevice();
 	void * perObjPointStart = objectBuf->m_pointCacheLoc->bufferOnDevice();
 	void * perObjectIndexStart = objectBuf->m_indexCacheLoc->bufferOnDevice();
-	
+
+// compute contact linear and angular velocity of body A and B per contact	
+// set inital impulse to zero
 	simpleContactSolverSetContactConstraint((float3 *)linVel,
 	                                        (float3 *)angVel,
-	    (float *)lambda, (float *)contactMass, (float *)splitMass, 
-	    (uint2 *)splits, 
+	    (float *)lambda, 
 	    (uint2 *)pairs,
 	    (float3 *)pos,
 	    (float3 *)vel,
@@ -128,21 +129,21 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	const unsigned numSplitBodies = ScanUtil::getScanResult(m_bodyCount, m_scanBodyCount[0], scanBufLength);
 	*/
 	
-	/*
+	void * contacts = contactBuf->bufferOnDevice();
 	int i;
-	for(i=0; i<7; i++) {
-	    simpleContactSolverSolveContact((float3 *)deltaLinVel,
+	for(i=0; i<1; i++) {
+// compute impulse and velocity changes per contact
+	    simpleContactSolverSolveContact((float *)lambda,
+	                    (float3 *)deltaLinVel,
 	                    (float3 *)deltaAngVel,
 	                    (uint2 *)splits,
+	                    (float3 *)linVel,
+	                    (float3 *)angVel,
 	                    (float *)splitMass,
-	                    (float3 *)vel,
-                        (uint2 *)pairs,
-						(uint4 *)ind,
-						(uint * )perObjPointStart,
-                        (uint * )perObjectIndexStart,
-                        numContacts);
+	                    (ContactData *)contacts,
+	                    numContacts);
 	}
-	*/
+	
 	simpleContactSolverStopAtContact((float3 *)vel,
                     (uint2 *)pairs,
                     (uint4 *)ind,

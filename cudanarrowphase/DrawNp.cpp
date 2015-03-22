@@ -27,6 +27,7 @@ DrawNp::DrawNp()
 	m_pairsHash = new BaseBuffer;
 	m_linearVelocity = new BaseBuffer;
 	m_angularVelocity = new BaseBuffer;
+	m_impulse = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -140,22 +141,37 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	
 	Vector3F * angVel = (Vector3F *)m_angularVelocity->data();
 	
-	Vector3F linV, angV;
-	unsigned ilft;
-	unsigned * v = (unsigned *)m_pairsHash->data();
+	m_impulse->create(nc * 8);
+	solver->impulseBuf()->deviceToHost(m_impulse->data(), m_impulse->bufferSize());
+	float * J = (float *)m_impulse->data();
+	
+	m_contact->create(nc * 48);
+	phase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
+	ContactData * contact = (ContactData *)m_contact->data();
+	
+	Vector3F linV, angV, N;
+	float Jab;
+	unsigned ilft, irgt, iBody, iPair;
+	unsigned * bodyAndPair = (unsigned *)m_pairsHash->data();
 	for(i=0; i < nc * 2; i++) {
 	    ilft = (i >> 1) << 1;
+	    irgt = ilft+1;
+	    
+	    iBody = bodyAndPair[i*2];
+	    iPair = bodyAndPair[i*2+1];
 // left or right
-	    if(c[(v[i*2+1]) * 2] == v[i*2]) {
+	    if(iBody == c[iPair * 2]) {
 	        linV = linVel[ilft];
 	        angV = angVel[ilft];
+	        Jab = J[ilft];
 	    }
 	    else {
-	        linV = linVel[ilft + 1];
-	        angV = angVel[ilft + 1];
+	        linV = linVel[irgt];
+	        angV = angVel[irgt];
+	        Jab = J[irgt];
 	    }
 	    
-	    cenA = tetrahedronCenter(ptet, tetInd, v[i*2]);
+	    cenA = tetrahedronCenter(ptet, tetInd, iBody);
 	    cenB = cenA + linV;
 	    
 	    glColor3f(0.7f, 0.3f, 0.6f);
@@ -164,6 +180,15 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	    cenB = cenA + angV;
 	    
 	    glColor3f(0.2f, 0.7f, 0.5f);
+	    m_drawer->arrow(cenA, cenB);
+	    
+	    float4 sa = contact[iPair].separateAxis;
+	    N.set(sa.x, sa.y, sa.z);
+	    N.reverse();
+	    N.normalize();
+	    
+	    cenB = cenA + N * Jab;
+	    glColor3f(0.7f, 0.8f, 0.f);
 	    m_drawer->arrow(cenA, cenB);
 	}
 }

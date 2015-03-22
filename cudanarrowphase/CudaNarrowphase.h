@@ -48,6 +48,7 @@ public:
 	
 	CombinedObjectBuffer * objectBuffer();
 	CUDABuffer * contactPairsBuffer();
+	CUDABuffer * contactBuffer();
 protected:
 
 private:

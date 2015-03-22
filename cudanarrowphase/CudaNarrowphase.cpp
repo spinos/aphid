@@ -103,6 +103,9 @@ CudaNarrowphase::CombinedObjectBuffer * CudaNarrowphase::objectBuffer()
 CUDABuffer * CudaNarrowphase::contactPairsBuffer()
 { return m_contactPairs; }
 
+CUDABuffer * CudaNarrowphase::contactBuffer()
+{ return m_contact[1]; }
+
 void CudaNarrowphase::addTetrahedronSystem(CudaTetrahedronSystem * tetra)
 {
     if(m_numObjects==CUDANARROWPHASE_MAX_NUMOBJECTS) return;

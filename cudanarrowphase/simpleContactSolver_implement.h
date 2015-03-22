@@ -25,9 +25,6 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
 void simpleContactSolverSetContactConstraint(float3 * contactLinVel,
                                         float3 * contactAngVel,
                                         float * lambda,
-                                        float * invMass, 
-                                        float * splitInvMass, 
-                                        uint2 * splits,
                                         uint2 * pairs,
                                         float3 * pos,
                                         float3 * vel,
@@ -48,16 +45,15 @@ void simpleContactSolverStopAtContact(float3 * dstVelocity,
                     uint * objectIndexStarts,
                     uint numContacts);
 
-void simpleContactSolverSolveContact(float3 * deltaLinVel,
+void simpleContactSolverSolveContact(float * lambda,
+                        float3 * deltaLinVel,
 	                    float3 * deltaAngVel,
 	                    uint2 * splits,
+	                    float3 * linearVelocity,
+	                    float3 * angularVelocity,
 	                    float * splitMass,
-	                    float3 * srcVelocity,
-                    uint2 * pairs,
-                    uint4 * indices,
-                    uint * objectPointStarts,
-                    uint * objectIndexStarts,
-                    uint numContacts);
+                        ContactData * contacts,
+                        uint numContacts);
 }
 #endif        //  #ifndef SIMPLECONTACTSOLVER_IMPLEMENT_H
 
