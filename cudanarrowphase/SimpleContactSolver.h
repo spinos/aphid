@@ -29,6 +29,7 @@ public:
 	CUDABuffer * deltaJBuf();
 	CUDABuffer * relVBuf();
 	
+	const unsigned numIterations() const;
 private:
 	CUDABuffer * m_sortedInd[2];
 	CUDABuffer * m_splitPair;

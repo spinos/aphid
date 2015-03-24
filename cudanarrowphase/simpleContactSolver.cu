@@ -87,26 +87,19 @@ inline __device__ uint getBodyCountAt(uint ind, uint * count)
     }
 }
 
-inline __device__ void computeImpulse(float & MinvJa,
-                                        float & MinvJb,
-                                        float3 & contactNormal,
+inline __device__ float computeImpulse(float3 & contactNormal,
                             const ContactData & contact,
                             float3 linearVelocityA, 
                             float3 linearVelocityB,
                             float3 angularVelocityA, 
-                            float3 angularVelocityB,
-                            float invMassA, 
-                            float invMassB)
+                            float3 angularVelocityB)
 {
 // VA - VB
     const float3 relativeLinVel = float3_difference(linearVelocityA, linearVelocityB);
 // from A to B
     contactNormal = float3_normalize(float3_reverse(float3_from_float4(contact.separateAxis)));
     
-    const float MinvJ = float3_dot(relativeLinVel, contactNormal) / (invMassA + invMassB);
-    
-    MinvJa = (1.f + 1.f) * invMassA * MinvJ;
-    MinvJb = (1.f + 1.f) * invMassB * MinvJ;
+    return  (1.f + 1.f) * float3_dot(relativeLinVel, contactNormal);
 }
 
 inline __device__ float computeDeltaLambda(float & accumulated, float lambda)
@@ -213,10 +206,9 @@ __global__ void setContactConstraint_kernel(float3 * projLinVel,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	const uint2 dstInd = splits[ind];
+	lambda[ind] = 0.f;
 	
-	lambda[dstInd.x] = 0.f;
-	lambda[dstInd.y] = 0.f;
+	const uint2 dstInd = splits[ind];
 	
 	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].x, srcPos, srcVel, 
 	    projLinVel[dstInd.x], projAngVel[dstInd.x]);
@@ -266,8 +258,8 @@ __global__ void solveContact_kernel(float * lambda,
 	                    uint2 * splits,
 	                    float * splitMass,
                         ContactData * contacts,
-                        float * deltaJ,
                         uint maxInd,
+                        float * deltaJ,
                         float3 * relV,
                         int it)
 {
@@ -278,22 +270,22 @@ __global__ void solveContact_kernel(float * lambda,
 	
 	relV[ind * JACOBI_NUM_ITERATIONS + it] = float3_difference(linearVelocity[dstInd.x], linearVelocity[dstInd.y]);
 	
-	float Ja, Jb;
 	float3 N;
-	computeImpulse(Ja, Jb, N,
+	float J = computeImpulse(N,
 	                    contacts[ind], 
 	                        linearVelocity[dstInd.x], linearVelocity[dstInd.y],
-	                        angularVelocity[dstInd.x], angularVelocity[dstInd.y],
-	                        splitMass[dstInd.x], splitMass[dstInd.y]);
+	                        angularVelocity[dstInd.x], angularVelocity[dstInd.y]);
 	
-	float dJa = computeDeltaLambda(lambda[dstInd.x], Ja);
-	float dJb = computeDeltaLambda(lambda[dstInd.y], Jb);
+	float dJ = computeDeltaLambda(lambda[ind], J);
 	
-	linearVelocity[dstInd.x] = computeDeltaVelocity(linearVelocity[dstInd.x], -dJa, N);
-	linearVelocity[dstInd.y] = computeDeltaVelocity(linearVelocity[dstInd.y], dJb, N);
+	float invMassA = splitMass[dstInd.x];
+	float invMassB = splitMass[dstInd.y];
+	float Minv = 1.0 / (invMassA + invMassB);
 	
-	deltaJ[dstInd.x] = dJa;
-	deltaJ[dstInd.y] = dJb;
+	linearVelocity[dstInd.x] = computeDeltaVelocity(linearVelocity[dstInd.x], -dJ * invMassA * Minv, N);
+	linearVelocity[dstInd.y] = computeDeltaVelocity(linearVelocity[dstInd.y], dJ * invMassB * Minv, N);
+	
+	deltaJ[ind * JACOBI_NUM_ITERATIONS + it] = dJ;
 }
 
 extern "C" {
@@ -421,8 +413,8 @@ void simpleContactSolverSolveContact(float * lambda,
 	                    uint2 * splits,
 	                    float * splitMass,
                         ContactData * contacts,
-                        float * deltaJ,
                         uint numContacts,
+                        float * deltaJ,
                         float3 * relV,
                         int it)
 {
@@ -436,8 +428,8 @@ void simpleContactSolverSolveContact(float * lambda,
 	                    splits,
 	                    splitMass,
                         contacts,
-                        deltaJ,
                         numContacts,
+                        deltaJ,
                         relV,
                         it);
 }

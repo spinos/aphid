@@ -54,8 +54,8 @@ void simpleContactSolverSolveContact(float * lambda,
 	                    uint2 * splits,
 	                    float * splitMass,
                         ContactData * contacts,
-                        float * deltaJ,
                         uint numContacts,
+                        float * deltaJ,
                         float3 * relV,
                         int it);
 }

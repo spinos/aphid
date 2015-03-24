@@ -14,7 +14,6 @@
 #include <CudaNarrowphase.h>
 #include <SimpleContactSolver.h>
 #include "narrowphase_implement.h"
-#include "simpleContactSolver_implement.h"
 #include <CUDABuffer.h>
 
 DrawNp::DrawNp() 
@@ -146,7 +145,7 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	    m_angularVelocity->bufferSize());
 	Vector3F * angVel = (Vector3F *)m_angularVelocity->data();
 	
-	m_impulse->create(nc * 8);
+	m_impulse->create(nc * 4);
 	solver->impulseBuf()->deviceToHost(m_impulse->data(), m_impulse->bufferSize());
 	float * J = (float *)m_impulse->data();
 	
@@ -154,11 +153,12 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	phase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
 	ContactData * contact = (ContactData *)m_contact->data();
 	
-	m_relLinearVelocity->create(nc * JACOBI_NUM_ITERATIONS * 12);
+	const unsigned njacobi = solver->numIterations();
+	m_relLinearVelocity->create(nc * njacobi * 12);
 	solver->relVBuf()->deviceToHost(m_relLinearVelocity->data(), m_relLinearVelocity->bufferSize());
 	Vector3F * relLinVel = (Vector3F *)m_relLinearVelocity->data();
 	
-	m_deltaJ->create(nc * 8);
+	m_deltaJ->create(nc * njacobi * 4);
 	solver->deltaJBuf()->deviceToHost(m_deltaJ->data(), m_deltaJ->bufferSize());
 	float * dJ = (float *)m_deltaJ->data();
 	
@@ -174,17 +174,9 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	    iPairA = iPair * 2;
 // left or right
         isA = (iBody == c[iPairA]);
-	    
-	    if(isA) std::cout<<"J["<<i<<"] "<<-J[i];
-	    else std::cout<<"J["<<i<<"] "<<J[i];
-	    
-	    std::cout<<" dJ "<<dJ[i]<<" ";
-	    
-	    std::cout<<" ("<<iPair<<","<<iBody<<")\n";
-	    
-	    cenA = tetrahedronCenter(ptet, tetInd, iBody);
 
-	    
+	    cenA = tetrahedronCenter(ptet, tetInd, iBody);
+ 
 	    //cenB = cenA + angVel[i];
 	    
 	    //glColor3f(0.1f, 0.7f, 0.3f);
@@ -209,16 +201,18 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	    // std::cout<<" "<<deltaLinVel[i]<<"\n";
 	    // std::cout<<" NJ - dV "<<Vector3F(N * J[i], deltaLinVel[i]).length();
 	    glColor3f(0.9f, 0.8f, 0.1f);
-	    m_drawer->arrow(cenA, cenA + N * dJ[i]);
+	    m_drawer->arrow(cenA, cenA + N * J[iPair]);
 	    
 		glColor3f(0.1f, 0.78f, 0.2f);
 		m_drawer->arrow(cenA, cenA + linVel[i]);
 		
 		if(isA) {
-            for(j=0; j< JACOBI_NUM_ITERATIONS; j++) {
-                glColor3f(0.1f, 0.18f, 0.99f * j / (float)JACOBI_NUM_ITERATIONS);
-                m_drawer->arrow(cenA, cenA + relLinVel[iPair * JACOBI_NUM_ITERATIONS + j]);
-                std::cout<<"relv["<<j<<"] "<<relLinVel[iPair * JACOBI_NUM_ITERATIONS + j]<<"\n";
+		    std::cout<<"pair["<<iPair<<"] J "<<J[iPair]<<"\n";
+            for(j=0; j< njacobi; j++) {
+                // glColor3f(0.1f, 0.18f, 0.99f * j / (float)njacobi);
+                // m_drawer->arrow(cenA, cenA + relLinVel[iPair * njacobi + j]);
+                // std::cout<<"relv["<<j<<"] "<<relLinVel[iPair * njacobi + j]<<"\n";
+                std::cout<<" dJ["<<j<<"] "<<dJ[iPair * njacobi + j]<<")\n";
             }
         }
 	}

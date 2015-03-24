@@ -55,6 +55,9 @@ CUDABuffer * SimpleContactSolver::deltaJBuf()
 CUDABuffer * SimpleContactSolver::relVBuf()
 { return m_relV; }
 
+const unsigned SimpleContactSolver::numIterations() const
+{ return JACOBI_NUM_ITERATIONS; }
+
 void SimpleContactSolver::solveContacts(unsigned numContacts,
 										CUDABuffer * contactBuf,
 										CUDABuffer * pairBuf,
@@ -91,8 +94,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	
 	simpleContactSolverComputeSplitInverseMass((float *)splitMass, (uint *)dstCount, splitBufLength);
 	
-// A and B per contact	
-	m_lambda->create(numContacts * 8);
+// one per contact	
+	m_lambda->create(numContacts * 4);
 	void * lambda = m_lambda->bufferOnDevice();
 	
 	m_projectedLinearVelocity->create(numContacts * 2 * 12);
@@ -143,7 +146,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	const unsigned numSplitBodies = ScanUtil::getScanResult(m_bodyCount, m_scanBodyCount[0], scanBufLength);
 	*/
 	
-	m_deltaJ->create(numContacts * 8);
+	m_deltaJ->create(numContacts * JACOBI_NUM_ITERATIONS * 4);
 	void * dJ = m_deltaJ->bufferOnDevice();
 	
 	m_relV->create(numContacts * JACOBI_NUM_ITERATIONS * 12);
@@ -159,8 +162,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                    (uint2 *)splits,
 	                    (float *)splitMass,
 	                    (ContactData *)contacts,
-	                    (float *)dJ,
 	                    numContacts,
+	                    (float *)dJ,
 	                    (float3 *)relV,
 	                    i);
 	}
