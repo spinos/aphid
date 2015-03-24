@@ -11,6 +11,10 @@ MObject ik2Bsolver::amaxStretching;
 ik2Bsolver::ik2Bsolver()
         : MPxIkSolverNode()
 {
+    m_herm._P[0].set(0.f, 0.f, 0.f);
+    m_herm._P[1].set(1.f, 1.f, 0.f);
+    m_herm._T[0].set(1.414f, 0.f, 0.f);
+    m_herm._T[1].set(1.f, 1.f, 0.f);
 }
 
 ik2Bsolver::~ik2Bsolver() {}
@@ -239,47 +243,23 @@ void ik2Bsolver::solveIK(const MPoint &startJointPos,
 		double weight = 0.0;
 		double slowLH = lengthH;// / (1.0 + (6.8 - softDistance) / (restLength1 + restLength2));
 		const double da = restLength1 + restLength2 - softDistance;
-		double shrinking = 1.0;
-		double addAng = 0.0;
-		double shortened = 0.0;
+
 		if(slowLH > da) {
+		    float s = (slowLH - da) / softDistance;
+		    if(s> 1.f) s= 1.f;
+		    Vector3F pt = m_herm.interpolate(s);
+		    MGlobal::displayInfo(MString("herm ")+ pt.y);
 			
 // approading l1+l2 slower 
 //
 			weight = 1.0 - exp(-(slowLH - da) / softDistance * 6.98);
 			
-			shortened = weight * softDistance;
-			
+			weight = pt.y * weight + (1.f - pt.y) * s;
 			slowLH = da + softDistance * weight;
-			
-			double tent = (lengthH - da)/(6.48 + softDistance);
-			if(tent > 0.5) tent = 1.0 - tent;
-			if(tent < 0.0) tent = 0.0;
-			tent*=2.0;
-			if(tent > 1.0) tent = 1.0;
-			
-			// slowLH = tent * slowLH + (1.0 - tent) * lengthH;
-			// slowLH = slowLH * 0.5 + lengthH * 0.5;
-			
-			//shrinking = slowLH / lengthH;
-			//shrinking *= shrinking;
-			//shrinking = 1.0 + (slowLH - lengthH)/lengthH;
-			//if(shrinking < 1.0) shrinking = 1.0;
-			//shrinking *= shrinking;
+
 			MGlobal::displayInfo(MString("wei ")+weight);
-			
-			
-			// shrinking += (1.0 - shrinking) * weight;
-			
-			//shrinking = lengthH / slowLH;
-			// shrinking *= shrinking;
 		}
-		
-		
-		if(weight > 0.0) {
-			// 
-		}
-        
+
 //
 //           1
 //        /    \
@@ -287,19 +267,10 @@ void ik2Bsolver::solveIK(const MPoint &startJointPos,
 //    /            \	     ---l1---1 ---l2---
 //  0 ------ l ------ 2     0 ------ l ------- 2
 //
-		//weight = 1.0 - exp(-(softDistance) / 1.0);
-		//MGlobal::displayInfo(MString(" wei ")+weight);
-			
+	
 // angle for arm extension		
         
 		double cos_theta = (slowLH * slowLH - length1*length1 - length2*length2) / (2*length1*length2);
-        
-		// double dT = (da * da - length1*length1 - length2*length2) / (2*length1*length2);
-		if(cos_theta > 0.99) {
-			//cos_theta = 0.99;
-			//cos_theta = 0.99 + 0.01 * weight;
-			// MGlobal::displayInfo(MString("wei ")+weight+" ang "+cos_theta);
-		}
 		
 		if (cos_theta > 1) 
                 cos_theta = 1;

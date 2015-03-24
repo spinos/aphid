@@ -37,7 +37,7 @@
 #include <maya/MArgList.h>
 
 #include <maya/MGlobal.h>
-
+#include <HermiteCurve.h>
 
 #define kSolverType "ik2Bsolver"
 #define kPi 3.14159265358979323846264338327950
@@ -80,4 +80,5 @@ private:
 						 const double & restLength2,
                          double & stretching);
 private:
+    HermiteCurve m_herm;
 };
