@@ -26,9 +26,10 @@ public:
 	CUDABuffer * projectedAngularVelocityBuf();
 	CUDABuffer * impulseBuf();
 	CUDABuffer * deltaLinearVelocityBuf();
+	CUDABuffer * deltaAngularVelocityBuf();
 	CUDABuffer * deltaJBuf();
-	CUDABuffer * relVBuf();
 	CUDABuffer * MinvBuf();
+	CUDABuffer * pntTetHashBuf();
 	
 	const unsigned numIterations() const;
 private:
@@ -43,6 +44,6 @@ private:
 	CUDABuffer * m_deltaLinearVelocity;
 	CUDABuffer * m_deltaAngularVelocity;
 	CUDABuffer * m_deltaJ;
-	CUDABuffer * m_relV;
+	CUDABuffer * m_pntTetHash[2];
 };
 #endif        //  #ifndef SIMPLECONTACTSOLVER_H

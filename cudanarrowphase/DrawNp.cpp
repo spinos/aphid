@@ -15,6 +15,7 @@
 #include <SimpleContactSolver.h>
 #include "narrowphase_implement.h"
 #include <CUDABuffer.h>
+#include "radixsort_implement.h"
 
 DrawNp::DrawNp() 
 {
@@ -28,9 +29,9 @@ DrawNp::DrawNp()
 	m_linearVelocity = new BaseBuffer;
 	m_angularVelocity = new BaseBuffer;
 	m_impulse = new BaseBuffer;
-	m_relLinearVelocity = new BaseBuffer;
 	m_deltaJ = new BaseBuffer;
 	m_massTensor = new BaseBuffer;
+	m_pntTetHash = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -135,14 +136,12 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	bodyPair->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());
 	
 	m_linearVelocity->create(nc * 2 * 12);
-	
-	solver->projectedLinearVelocityBuf()->deviceToHost(m_linearVelocity->data(), 
+	solver->deltaLinearVelocityBuf()->deviceToHost(m_linearVelocity->data(), 
 	    m_linearVelocity->bufferSize());
 	Vector3F * linVel = (Vector3F *)m_linearVelocity->data();
 	
 	m_angularVelocity->create(nc * 2 * 12);
-	
-	solver->projectedAngularVelocityBuf()->deviceToHost(m_angularVelocity->data(), 
+	solver->deltaAngularVelocityBuf()->deviceToHost(m_angularVelocity->data(), 
 	    m_angularVelocity->bufferSize());
 	Vector3F * angVel = (Vector3F *)m_angularVelocity->data();
 	
@@ -155,9 +154,6 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	ContactData * contact = (ContactData *)m_contact->data();
 	
 	const unsigned njacobi = solver->numIterations();
-	m_relLinearVelocity->create(nc * njacobi * 12);
-	solver->relVBuf()->deviceToHost(m_relLinearVelocity->data(), m_relLinearVelocity->bufferSize());
-	Vector3F * relLinVel = (Vector3F *)m_relLinearVelocity->data();
 	
 	m_deltaJ->create(nc * njacobi * 4);
 	solver->deltaJBuf()->deviceToHost(m_deltaJ->data(), m_deltaJ->bufferSize());
@@ -205,23 +201,31 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	    
 	    // std::cout<<" "<<deltaLinVel[i]<<"\n";
 	    // std::cout<<" NJ - dV "<<Vector3F(N * J[i], deltaLinVel[i]).length();
-	    glColor3f(0.9f, 0.8f, 0.1f);
-	    m_drawer->arrow(cenA, cenA + N * J[iPair]);
+	    // glColor3f(0.9f, 0.8f, 0.1f);
+	    // m_drawer->arrow(cenA, cenA + N * J[iPair]);
 	    
-		glColor3f(0.1f, 0.68f, 0.2f);
+		glColor3f(0.73f, 0.68f, 0.1f);
 		m_drawer->arrow(cenA, cenA + linVel[i]);
+		
+		glColor3f(0.1f, 0.68f, 0.72f);
+		m_drawer->arrow(cenA, cenA + angVel[i]);
+		
 		
 		if(isA) {
 		    std::cout<<"\npair["<<iPair<<"] \n Minv "<<Minv[iPair]<<"\n J "<<J[iPair]<<"\n";
             for(j=0; j< njacobi; j++) {
-                std::cout<<" dJ["<<j<<"] "<<dJ[iPair * njacobi + j]<<")\n";
-            }
-            for(j=0; j< njacobi; j++) {
-                // glColor3f(0.1f, 0.18f, 0.99f * j / (float)njacobi);
-                // m_drawer->arrow(cenA, cenA + relLinVel[iPair * njacobi + j]);
-                // std::cout<<"angv["<<j<<"] "<<relLinVel[iPair * njacobi + j]<<"\n";
+                std::cout<<" dJ["<<j<<"] "<<dJ[iPair * njacobi + j]<<"\n";
             }
         }
+	}
+	
+	m_pntTetHash->create(nc * 2 * 4 * 8);
+	solver->pntTetHashBuf()->deviceToHost(m_pntTetHash->data(), m_pntTetHash->bufferSize());
+	KeyValuePair * pntHash = (KeyValuePair *)m_pntTetHash->data();
+	
+	std::cout<<"pnt-tet hash\n";
+	for(i=0; i < nc * 8; i++) {
+	    std::cout<<" pnt["<<i<<"] ("<<pntHash[i].key<<", "<<pntHash[i].value<<")\n";
 	}
 }
 

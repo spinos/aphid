@@ -27,7 +27,8 @@ SimpleContactSolver::SimpleContactSolver()
 	m_deltaLinearVelocity = new CUDABuffer;
 	m_deltaAngularVelocity = new CUDABuffer;
 	m_deltaJ = new CUDABuffer;
-	m_relV = new CUDABuffer;
+	m_pntTetHash[0] = new CUDABuffer;
+	m_pntTetHash[1] = new CUDABuffer;
 }
 
 SimpleContactSolver::~SimpleContactSolver() {}
@@ -50,14 +51,17 @@ CUDABuffer * SimpleContactSolver::impulseBuf()
 CUDABuffer * SimpleContactSolver::deltaLinearVelocityBuf()
 { return m_deltaLinearVelocity; }
 
+CUDABuffer * SimpleContactSolver::deltaAngularVelocityBuf()
+{ return m_deltaAngularVelocity; }
+
 CUDABuffer * SimpleContactSolver::deltaJBuf()
 { return m_deltaJ; }
 
-CUDABuffer * SimpleContactSolver::relVBuf()
-{ return m_relV; }
-
 CUDABuffer * SimpleContactSolver::MinvBuf()
 { return m_massTensor; }
+
+CUDABuffer * SimpleContactSolver::pntTetHashBuf()
+{ return m_pntTetHash[0]; }
 
 const unsigned SimpleContactSolver::numIterations() const
 { return JACOBI_NUM_ITERATIONS; }
@@ -71,8 +75,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	
 	const unsigned indBufLength = nextPow2(numContacts * 2);
 	
-	m_sortedInd[0]->create(indBufLength * 8);
-	
+	m_sortedInd[0]->create(indBufLength * 8);	
 	m_sortedInd[1]->create(indBufLength * 8);
 	
 	void * bodyContactHash = m_sortedInd[0]->bufferOnDevice();
@@ -162,13 +165,12 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	m_deltaJ->create(numContacts * JACOBI_NUM_ITERATIONS * 4);
 	void * dJ = m_deltaJ->bufferOnDevice();
 	
-	m_relV->create(numContacts * JACOBI_NUM_ITERATIONS * 12);
-	void * relV = m_relV->bufferOnDevice();
-	
 	int i;
 	for(i=0; i<JACOBI_NUM_ITERATIONS; i++) {
 // compute impulse and velocity changes per contact
 	    simpleContactSolverSolveContact((float *)lambda,
+	                    (float3 *)deltaLinVel,
+	                    (float3 *)deltaAngVel,
 	                    (float3 *)projLinVel,
 	                    (float3 *)projAngVel,
 	                    (uint2 *)splits,
@@ -177,15 +179,34 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                    (ContactData *)contacts,
 	                    numContacts,
 	                    (float *)dJ,
-	                    (float3 *)relV,
 	                    i);
 	    
-	    simpleContactSolverAverageVelocities((float3 *)projLinVel,
-                        (float3 *)projAngVel,
+	    simpleContactSolverAverageVelocities((float3 *)deltaLinVel,
+                        (float3 *)deltaAngVel,
                         (uint *)bodyCount,
                         (KeyValuePair *)bodyContactHash, 
                         splitBufLength);
 	}
+	
+// 2 tet per contact, 4 pnt per tet, key is pnt index, value is tet index in split
+	const unsigned pntHashBufLength = nextPow2(numContacts * 2 * 4);
+	m_pntTetHash[0]->create(pntHashBufLength * 8);
+	m_pntTetHash[1]->create(pntHashBufLength * 8);
+	
+	void * pntTetHash = m_pntTetHash[0]->bufferOnDevice();
+	
+	simpleContactSolverWritePointTetHash((KeyValuePair *)pntTetHash,
+	                (uint2 *)pairs,
+	                (uint2 *)splits,
+	                (uint *)bodyCount,
+	                (uint4 *)ind,
+	                (uint * )perObjPointStart,
+	                (uint * )perObjectIndexStart,
+	                numContacts);
+	
+	void * intermediate = m_pntTetHash[1]->bufferOnDevice();
+	RadixSort((KeyValuePair *)pntTetHash, (KeyValuePair *)intermediate, pntHashBufLength, 32);
+    
 	
 	simpleContactSolverStopAtContact((float3 *)vel,
                     (uint2 *)pairs,
