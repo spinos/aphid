@@ -20,6 +20,7 @@ SimpleContactSolver::SimpleContactSolver()
 	m_splitPair = new CUDABuffer;
 	m_bodyCount = new CUDABuffer;
 	m_splitInverseMass = new CUDABuffer;
+	m_massTensor = new CUDABuffer;
 	m_lambda = new CUDABuffer;
 	m_projectedLinearVelocity = new CUDABuffer;
 	m_projectedAngularVelocity = new CUDABuffer; 
@@ -54,6 +55,9 @@ CUDABuffer * SimpleContactSolver::deltaJBuf()
 
 CUDABuffer * SimpleContactSolver::relVBuf()
 { return m_relV; }
+
+CUDABuffer * SimpleContactSolver::MinvBuf()
+{ return m_massTensor; }
 
 const unsigned SimpleContactSolver::numIterations() const
 { return JACOBI_NUM_ITERATIONS; }
@@ -111,11 +115,18 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * perObjPointStart = objectBuf->m_pointCacheLoc->bufferOnDevice();
 	void * perObjectIndexStart = objectBuf->m_indexCacheLoc->bufferOnDevice();
 
+	m_massTensor->create(numContacts * 4);
+	void * Minv = m_massTensor->bufferOnDevice();
+	
+	void * contacts = contactBuf->bufferOnDevice();
+	
 // compute projected linear and angular velocity	
 // set inital impulse to zero
+// calculate Minv
 	simpleContactSolverSetContactConstraint((float3 *)projLinVel,
 	                                        (float3 *)projAngVel,
 	    (float *)lambda, 
+	    (float *)Minv,
 	    (uint2 *)splits,
 	    (uint2 *)pairs,
 	    (float3 *)pos,
@@ -123,6 +134,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
         (uint4 *)ind,
         (uint * )perObjPointStart,
         (uint * )perObjectIndexStart,
+        (float *)splitMass,
+	    (ContactData *)contacts,
         numContacts);
 	
 	m_deltaLinearVelocity->create(splitBufLength * 12);
@@ -152,7 +165,6 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	m_relV->create(numContacts * JACOBI_NUM_ITERATIONS * 12);
 	void * relV = m_relV->bufferOnDevice();
 	
-	void * contacts = contactBuf->bufferOnDevice();
 	int i;
 	for(i=0; i<JACOBI_NUM_ITERATIONS; i++) {
 // compute impulse and velocity changes per contact
@@ -161,6 +173,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                    (float3 *)projAngVel,
 	                    (uint2 *)splits,
 	                    (float *)splitMass,
+	                    (float *)Minv,
 	                    (ContactData *)contacts,
 	                    numContacts,
 	                    (float *)dJ,

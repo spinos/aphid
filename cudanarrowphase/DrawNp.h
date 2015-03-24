@@ -45,4 +45,5 @@ private:
 	BaseBuffer * m_impulse;
 	BaseBuffer * m_relLinearVelocity;
 	BaseBuffer * m_deltaJ;
+	BaseBuffer * m_massTensor;
 };

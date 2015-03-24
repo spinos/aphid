@@ -28,6 +28,7 @@ public:
 	CUDABuffer * deltaLinearVelocityBuf();
 	CUDABuffer * deltaJBuf();
 	CUDABuffer * relVBuf();
+	CUDABuffer * MinvBuf();
 	
 	const unsigned numIterations() const;
 private:
@@ -35,6 +36,7 @@ private:
 	CUDABuffer * m_splitPair;
 	CUDABuffer * m_bodyCount;
 	CUDABuffer * m_splitInverseMass;
+	CUDABuffer * m_massTensor;
 	CUDABuffer * m_projectedLinearVelocity;
 	CUDABuffer * m_projectedAngularVelocity;
 	CUDABuffer * m_lambda;

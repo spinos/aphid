@@ -30,6 +30,7 @@ DrawNp::DrawNp()
 	m_impulse = new BaseBuffer;
 	m_relLinearVelocity = new BaseBuffer;
 	m_deltaJ = new BaseBuffer;
+	m_massTensor = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -162,6 +163,10 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	solver->deltaJBuf()->deviceToHost(m_deltaJ->data(), m_deltaJ->bufferSize());
 	float * dJ = (float *)m_deltaJ->data();
 	
+	m_massTensor->create(nc * 4);
+	solver->MinvBuf()->deviceToHost(m_massTensor->data(), m_massTensor->bufferSize());
+	float * Minv = (float *)m_massTensor->data();
+	
 	Vector3F N;
 	bool isA;
 	unsigned iPairA, iBody, iPair;
@@ -207,12 +212,14 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 		m_drawer->arrow(cenA, cenA + linVel[i]);
 		
 		if(isA) {
-		    std::cout<<"pair["<<iPair<<"] J "<<J[iPair]<<"\n";
+		    std::cout<<"\npair["<<iPair<<"] \n Minv "<<Minv[iPair]<<"\n J "<<J[iPair]<<"\n";
+            for(j=0; j< njacobi; j++) {
+                std::cout<<" dJ["<<j<<"] "<<dJ[iPair * njacobi + j]<<")\n";
+            }
             for(j=0; j< njacobi; j++) {
                 // glColor3f(0.1f, 0.18f, 0.99f * j / (float)njacobi);
                 // m_drawer->arrow(cenA, cenA + relLinVel[iPair * njacobi + j]);
-                // std::cout<<"relv["<<j<<"] "<<relLinVel[iPair * njacobi + j]<<"\n";
-                std::cout<<" dJ["<<j<<"] "<<dJ[iPair * njacobi + j]<<")\n";
+                // std::cout<<"angv["<<j<<"] "<<relLinVel[iPair * njacobi + j]<<"\n";
             }
         }
 	}
