@@ -331,6 +331,54 @@ __global__ void solveContact_kernel(float * lambda,
 	deltaJ[ind * JACOBI_NUM_ITERATIONS + it] = dJ;
 }
 
+__global__ void averageVelocities_kernel(float3 * linearVelocity,
+                        float3 * angularVelocity,
+                        uint * bodyCount, 
+                        KeyValuePair * srcInd,
+                        uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	uint c = bodyCount[ind];
+	if(c < 1) return;
+	
+	uint a = srcInd[ind].key;
+	
+	float3 linSum = linearVelocity[ind];
+	float3 angSum = angularVelocity[ind];
+
+	unsigned cur = ind;
+// add up backward
+	for(;;) {
+	    if(cur == maxInd - 1) break;
+	    cur++;
+	    if(srcInd[cur].key != a) break;
+	    
+	    linSum = float3_add(linSum, linearVelocity[cur]);
+	    angSum = float3_add(angSum, angularVelocity[cur]);
+	}
+
+	if(c > 1) {
+	    linSum = scale_float3_by(linSum, 1.f / (float)c);
+	    angSum = scale_float3_by(angSum, 1.f / (float)c);
+	}
+	
+	linearVelocity[ind] = linSum;
+	angularVelocity[ind] = angSum;
+	
+	cur = ind;
+// write backward
+	for(;;) {
+	    if(cur == maxInd - 1) break;
+	    cur++;
+	    if(srcInd[cur].key != a) break;
+	    
+	    linearVelocity[cur] = linSum;
+	    angularVelocity[cur] = angSum;
+	}
+}
+
 extern "C" {
     
 void simpleContactSolverWriteContactIndex(KeyValuePair * dstInd, 
@@ -485,6 +533,23 @@ void simpleContactSolverSolveContact(float * lambda,
                         deltaJ,
                         relV,
                         it);
+}
+
+void simpleContactSolverAverageVelocities(float3 * linearVelocity,
+                        float3 * angularVelocity,
+                        uint * bodyCount, 
+                        KeyValuePair * srcInd,
+                        uint numBodies)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numBodies, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    averageVelocities_kernel<<< grid, block >>>(linearVelocity,
+                        angularVelocity,
+                        bodyCount, 
+                        srcInd,
+                        numBodies);
 }
 
 }

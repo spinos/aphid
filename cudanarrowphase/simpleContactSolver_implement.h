@@ -61,6 +61,12 @@ void simpleContactSolverSolveContact(float * lambda,
                         float * deltaJ,
                         float3 * relV,
                         int it);
+
+void simpleContactSolverAverageVelocities(float3 * linearVelocity,
+                        float3 * angularVelocity,
+                        uint * bodyCount, 
+                        KeyValuePair * srcInd,
+                        uint numBodies);
 }
 #endif        //  #ifndef SIMPLECONTACTSOLVER_IMPLEMENT_H
 

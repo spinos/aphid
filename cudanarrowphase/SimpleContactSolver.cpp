@@ -75,28 +75,28 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	
 	m_sortedInd[1]->create(indBufLength * 8);
 	
-	void * dstInd = m_sortedInd[0]->bufferOnDevice();
+	void * bodyContactHash = m_sortedInd[0]->bufferOnDevice();
 	void * pairs = pairBuf->bufferOnDevice();
 	
-	simpleContactSolverWriteContactIndex((KeyValuePair *)dstInd, (uint *)pairs, numContacts * 2, indBufLength);
+	simpleContactSolverWriteContactIndex((KeyValuePair *)bodyContactHash, (uint *)pairs, numContacts * 2, indBufLength);
 	
 	void * tmp = m_sortedInd[1]->bufferOnDevice();
-	RadixSort((KeyValuePair *)dstInd, (KeyValuePair *)tmp, indBufLength, 32);
+	RadixSort((KeyValuePair *)bodyContactHash, (KeyValuePair *)tmp, indBufLength, 32);
 	
 	m_splitPair->create(numContacts * 8);
 	void * splits = m_splitPair->bufferOnDevice();
 	
 	const unsigned splitBufLength = numContacts * 2;
-	simpleContactSolverComputeSplitBufLoc((uint2 *)splits, (uint2 *)pairs, (KeyValuePair *)dstInd, splitBufLength);
+	simpleContactSolverComputeSplitBufLoc((uint2 *)splits, (uint2 *)pairs, (KeyValuePair *)bodyContactHash, splitBufLength);
 	
 	m_bodyCount->create(splitBufLength * 4);
-	void * dstCount = m_bodyCount->bufferOnDevice();
-	simpleContactSolverCountBody((uint *)dstCount, (KeyValuePair *)dstInd, splitBufLength);
+	void * bodyCount = m_bodyCount->bufferOnDevice();
+	simpleContactSolverCountBody((uint *)bodyCount, (KeyValuePair *)bodyContactHash, splitBufLength);
 	
 	m_splitInverseMass->create(splitBufLength * 4);
 	void * splitMass = m_splitInverseMass->bufferOnDevice();
 	
-	simpleContactSolverComputeSplitInverseMass((float *)splitMass, (uint *)dstCount, splitBufLength);
+	simpleContactSolverComputeSplitInverseMass((float *)splitMass, (uint *)bodyCount, splitBufLength);
 	
 // one per contact	
 	m_lambda->create(numContacts * 4);
@@ -154,7 +154,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	
 	void * scanResult = m_scanBodyCount[0]->bufferOnDevice();
 	void * scanIntermediate = m_scanBodyCount[1]->bufferOnDevice();
-	scanExclusive((uint *)scanResult, (uint *)dstCount, (uint *)scanIntermediate, scanBufLength / 1024, 1024);
+	scanExclusive((uint *)scanResult, (uint *)bodyCount, (uint *)scanIntermediate, scanBufLength / 1024, 1024);
 	
 	const unsigned numSplitBodies = ScanUtil::getScanResult(m_bodyCount, m_scanBodyCount[0], scanBufLength);
 	*/
@@ -179,6 +179,12 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                    (float *)dJ,
 	                    (float3 *)relV,
 	                    i);
+	    
+	    simpleContactSolverAverageVelocities((float3 *)projLinVel,
+                        (float3 *)projAngVel,
+                        (uint *)bodyCount,
+                        (KeyValuePair *)bodyContactHash, 
+                        splitBufLength);
 	}
 	
 	simpleContactSolverStopAtContact((float3 *)vel,

@@ -208,7 +208,7 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	    glColor3f(0.9f, 0.8f, 0.1f);
 	    m_drawer->arrow(cenA, cenA + N * J[iPair]);
 	    
-		glColor3f(0.1f, 0.78f, 0.2f);
+		glColor3f(0.1f, 0.68f, 0.2f);
 		m_drawer->arrow(cenA, cenA + linVel[i]);
 		
 		if(isA) {
