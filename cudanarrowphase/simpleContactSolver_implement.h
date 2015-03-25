@@ -4,7 +4,7 @@
 #include "bvh_common.h"
 #include "radixsort_implement.h"
 
-#define JACOBI_NUM_ITERATIONS 7
+#define JACOBI_NUM_ITERATIONS 8
 
 extern "C" {
 void simpleContactSolverWriteContactIndex(KeyValuePair * dstInd, 

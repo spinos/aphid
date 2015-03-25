@@ -33,6 +33,10 @@ SimpleContactSolver::SimpleContactSolver()
 
 SimpleContactSolver::~SimpleContactSolver() {}
 
+void SimpleContactSolver::initOnDevice()
+{
+}
+
 CUDABuffer * SimpleContactSolver::contactPairHashBuf()
 { return m_sortedInd[0]; }
 
@@ -86,7 +90,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * tmp = m_sortedInd[1]->bufferOnDevice();
 	RadixSort((KeyValuePair *)bodyContactHash, (KeyValuePair *)tmp, indBufLength, 32);
 	
-	m_splitPair->create(numContacts * 8);
+	m_splitPair->create(nextPow2(numContacts * 8));
 	void * splits = m_splitPair->bufferOnDevice();
 	
 	const unsigned splitBufLength = numContacts * 2;
@@ -95,13 +99,13 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                        (KeyValuePair *)bodyContactHash, 
 	                        splitBufLength);
 	
-	m_bodyCount->create(splitBufLength * 4);
+	m_bodyCount->create(nextPow2(splitBufLength * 4));
 	void * bodyCount = m_bodyCount->bufferOnDevice();
 	simpleContactSolverCountBody((uint *)bodyCount, 
 	                        (KeyValuePair *)bodyContactHash, 
 	                        splitBufLength);
 	
-	m_splitInverseMass->create(splitBufLength * 4);
+	m_splitInverseMass->create(nextPow2(splitBufLength * 4));
 	void * splitMass = m_splitInverseMass->bufferOnDevice();
 	
 	simpleContactSolverComputeSplitInverseMass((float *)splitMass, 
@@ -109,13 +113,13 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                             splitBufLength);
 	
 // one per contact	
-	m_lambda->create(numContacts * 4);
+	m_lambda->create(nextPow2(numContacts * 4));
 	void * lambda = m_lambda->bufferOnDevice();
 	
-	m_projectedLinearVelocity->create(numContacts * 2 * 12);
+	m_projectedLinearVelocity->create(nextPow2(numContacts * 2 * 12));
 	void * projLinVel = m_projectedLinearVelocity->bufferOnDevice();
 	
-	m_projectedAngularVelocity->create(numContacts * 2 * 12);
+	m_projectedAngularVelocity->create(nextPow2(numContacts * 2 * 12));
 	void * projAngVel = m_projectedAngularVelocity->bufferOnDevice();
 	
 	CudaNarrowphase::CombinedObjectBuffer * objectBuf = (CudaNarrowphase::CombinedObjectBuffer *)objectData;
@@ -125,7 +129,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * perObjPointStart = objectBuf->m_pointCacheLoc->bufferOnDevice();
 	void * perObjectIndexStart = objectBuf->m_indexCacheLoc->bufferOnDevice();
 
-	m_massTensor->create(numContacts * 4);
+	m_massTensor->create(nextPow2(numContacts * 4));
 	void * Minv = m_massTensor->bufferOnDevice();
 	
 	void * contacts = contactBuf->bufferOnDevice();
@@ -148,8 +152,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	    (ContactData *)contacts,
         numContacts);
 	
-	m_deltaLinearVelocity->create(splitBufLength * 12);
-	m_deltaAngularVelocity->create(splitBufLength * 12);
+	m_deltaLinearVelocity->create(nextPow2(splitBufLength * 12));
+	m_deltaAngularVelocity->create(nextPow2(splitBufLength * 12));
 	
 	void * deltaLinVel = m_deltaLinearVelocity->bufferOnDevice();
 	void * deltaAngVel = m_deltaAngularVelocity->bufferOnDevice();
@@ -171,11 +175,11 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	const unsigned numSplitBodies = ScanUtil::getScanResult(m_bodyCount, m_scanBodyCount[0], scanBufLength);
 	*/
 	
-	m_deltaJ->create(numContacts * JACOBI_NUM_ITERATIONS * 4);
+	m_deltaJ->create(nextPow2(numContacts * JACOBI_NUM_ITERATIONS * 4));
 	void * dJ = m_deltaJ->bufferOnDevice();
 	
 	int i;
-	for(i=0; i<JACOBI_NUM_ITERATIONS; i++) {
+	for(i=0; i< 7; i++) {
 // compute impulse and velocity changes per contact
 	    simpleContactSolverSolveContact((float *)lambda,
 	                    (float3 *)deltaLinVel,

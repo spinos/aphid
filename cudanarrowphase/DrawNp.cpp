@@ -16,6 +16,7 @@
 #include "narrowphase_implement.h"
 #include <CUDABuffer.h>
 #include "radixsort_implement.h"
+#include <CudaBase.h>
 
 DrawNp::DrawNp() 
 {
@@ -41,9 +42,20 @@ void DrawNp::setDrawer(GeoDrawer * drawer)
 
 void DrawNp::drawTetra(TetrahedronSystem * tetra)
 {
-	glColor3f(0.1f, 0.4f, 0.3f);
+	glColor3f(0.3f, 0.4f, 0.3f);
     
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)tetra->hostX());
+	glDrawElements(GL_TRIANGLES, tetra->numTriangleFaceVertices(), GL_UNSIGNED_INT, tetra->hostTriangleIndices());
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
+	glColor3f(0.1f, 0.4f, 0.f);
 	
     glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -83,16 +95,23 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
 	unsigned * tetInd = (unsigned *)tetra->hostTretradhedronIndices();
 	
 	ContactData * contact = (ContactData *)m_contact->data();
-	
+	glDisable(GL_DEPTH_TEST);
 	unsigned i;
 	
 	Vector3F dst, cenA, cenB;
 	for(i=0; i < np; i++) {
 		ContactData & cf = contact[i];
 		
-		if(cf.separateAxis.w < .1f) continue;
 	    cenA = tetrahedronCenter(ptet, tetInd, pairInd[i * 2]);
 	    cenB = tetrahedronCenter(ptet, tetInd, pairInd[i * 2 + 1]);
+	    
+	    if(cf.separateAxis.w < 1.f) {
+		    // std::cout<<"\n  penetrated!\n";
+		    glColor3f(0.9f, 0.5f, 0.9f);
+		    m_drawer->arrow(cenA, cenB);
+	    
+		    continue;
+		}
 	    
 	    glColor3f(0.1f, 0.2f, 0.06f);
 	    m_drawer->arrow(cenA, cenA + tetrahedronVelocity(tetra, tetInd, pairInd[i * 2]));
@@ -113,6 +132,14 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 {
     const unsigned nc = phase->numContacts();
     if(nc < 1) return 1;
+    
+    glDisable(GL_DEPTH_TEST);
+    
+    const unsigned njacobi = 8;//solver->numIterations();
+	
+	m_deltaJ->create(nc * njacobi * 4);
+	solver->deltaJBuf()->deviceToHost(m_deltaJ->data(), m_deltaJ->bufferSize());
+	float * dJ = (float *)m_deltaJ->data();
     
     computeX1(tetra, 0.f);
     Vector3F * ptet = (Vector3F *)m_x1->data();
@@ -153,20 +180,29 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 	phase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
 	ContactData * contact = (ContactData *)m_contact->data();
 	
-	const unsigned njacobi = solver->numIterations();
-	
-	m_deltaJ->create(nc * njacobi * 4);
-	solver->deltaJBuf()->deviceToHost(m_deltaJ->data(), m_deltaJ->bufferSize());
-	float * dJ = (float *)m_deltaJ->data();
+	float maxSAL = -1.f;
+	float minSAL = 1e8;
+	float SAL;
+	Vector3F N;
+	for(i=0; i<nc; i++) {
+	    ContactData & cd = contact[i];
+	    if(cd.separateAxis.w < .1f) continue;
+	    float4 sa = cd.separateAxis;
+	    N.set(sa.x, sa.y, sa.z);
+	    SAL = N.length();
+	    if(SAL > maxSAL) maxSAL = SAL;
+	    if(SAL < minSAL) minSAL = SAL;
+	}
+	std::cout<<"\n min max SA length "<<minSAL<<" "<<maxSAL<<"\n";
 	
 	m_massTensor->create(nc * 4);
 	solver->MinvBuf()->deviceToHost(m_massTensor->data(), m_massTensor->bufferSize());
 	float * Minv = (float *)m_massTensor->data();
 	
-	Vector3F N;
 	bool isA;
 	unsigned iPairA, iBody, iPair;
 	unsigned * bodyAndPair = (unsigned *)m_pairsHash->data();
+	bool converged;
 	for(i=0; i < nc * 2; i++) {
 
 	    iBody = bodyAndPair[i*2];
@@ -194,44 +230,49 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 		    cenB = cenA + Vector3F(cd.localA.x, cd.localA.y, cd.localA.z);
 		    m_drawer->setColor(0.f, .3f, .9f);
 		    m_drawer->arrow(cenB, cenB + N);
-// reverse N for A
-            N.reverse();
 		}
-	    // cenB = cenA + linVel[i];
-	    
-	    // std::cout<<" "<<deltaLinVel[i]<<"\n";
-	    // std::cout<<" NJ - dV "<<Vector3F(N * J[i], deltaLinVel[i]).length();
-	    // glColor3f(0.9f, 0.8f, 0.1f);
-	    // m_drawer->arrow(cenA, cenA + N * J[iPair]);
-	    
+
 		glColor3f(0.73f, 0.68f, 0.1f);
 		m_drawer->arrow(cenA, cenA + linVel[i]);
 		
 		glColor3f(0.1f, 0.68f, 0.72f);
 		m_drawer->arrow(cenA, cenA + angVel[i]);
 		
-		
 		if(isA) {
-		    std::cout<<"\npair["<<iPair<<"] \n Minv "<<Minv[iPair]<<"\n J "<<J[iPair]<<"\n";
-            for(j=0; j< njacobi; j++) {
+		    std::cout<<"\n contact["<<iPair<<"]\n";
+		    std::cout<<" SA ("<<sa.x<<", "<<sa.y<<", "<<sa.z<<")\n";
+		    std::cout<<" length "<<sqrt( sa.x * sa.x + sa.y * sa.y + sa.z * sa.z )<<"\n";
+		    std::cout<<" body["<<iBody<<"]\n";
+		    std::cout<<" Minv "<<Minv[iPair]<<"\n J "<<J[iPair]<<"\n";
+		    std::cout<<" toi "<<cd.timeOfImpact<<"\n";
+            for(j=0; j< 7; j++) {
                 std::cout<<" dJ["<<j<<"] "<<dJ[iPair * njacobi + j]<<"\n";
             }
-            
+		    converged = 1;
             float lastJ = dJ[iPair * njacobi];
-            for(j=1; j< njacobi; j++) {
+            for(j=1; j< 7; j++) {
                 
                 float curJ = dJ[iPair * njacobi + j];
                 if(curJ < 0.f) curJ = -curJ;
                 
                 if(curJ > lastJ && curJ > 1e-3) {
-                    std::cout<<" no converging!\n";
-                    return 0;
+                    converged = 0;
+                    break;
                 }
                 
                 lastJ = curJ;
             }
+            
+            if(!converged) {
+                std::cout<<" no converging!\n";
+                
+                glColor3f(1.f, 0.f, 0.f);
+                m_drawer->arrow(cenA + Vector3F(0.f, -8.f, 0.f), cenA);
+            }
         }
 	}
+	
+	if(!converged) return 0;
 	
 	m_pntTetHash->create(nc * 2 * 4 * 8);
 	solver->pntTetHashBuf()->deviceToHost(m_pntTetHash->data(), m_pntTetHash->bufferSize());
@@ -242,6 +283,7 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 	    // std::cout<<" pnt["<<i<<"] ("<<pntHash[i].key<<", "<<pntHash[i].value<<")\n";
 	}
 	
+	std::cout<<" cu mem consume "<<CudaBase::MemoryUsed<<"\n";
 	return 1;
 }
 

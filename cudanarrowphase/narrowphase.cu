@@ -100,6 +100,8 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 
 	if(ind >= maxInd) return;
 	
+	dstContact[ind].separateAxis.w = 0.f;
+	
 	uint objA = extractObjectInd(pairs[ind].x);
 	uint objB = extractObjectInd(pairs[ind].y);
 	uint elmA = extractElementInd(pairs[ind].x);
@@ -178,20 +180,24 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
         
         computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, sas, 
             coord); 
-// use last step       
+// penetrated use result of last step       
         if(sas.w < 1.f) { 
             break;
         }
-// output
-        dstContact[ind].timeOfImpact = toi;
-        dstContact[ind].separateAxis = sas;
-        interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
         
+// output toi and r
+        dstContact[ind].timeOfImpact = toi;
+        interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+
         separateDistance = float4_length(sas);
-// close enough
-        if(separateDistance < .001f) { 
+// close enough use result of last step
+        if(separateDistance < 0.001f) { 
+            if(i<1) dstContact[ind].separateAxis = sas;           
             break;
         }
+        
+// output sa
+        dstContact[ind].separateAxis = sas;
         
         i++;
     }

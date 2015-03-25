@@ -18,6 +18,8 @@ public:
 	static int RuntimeVersion;
 	static bool HasDevice;
     static int LimitNThreadPerBlock(int regPT, int memPT);
+    
+    static int MemoryUsed;
 private:
     
 };

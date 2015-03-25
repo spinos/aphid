@@ -12,6 +12,7 @@ int CudaBase::MaxSharedMemoryPerBlock = 16384;
 int CudaBase::WarpSize = 32;
 int CudaBase::RuntimeVersion = 4000;
 bool CudaBase::HasDevice = 0;
+int CudaBase::MemoryUsed = 0;
 
 CudaBase::CudaBase()
 {

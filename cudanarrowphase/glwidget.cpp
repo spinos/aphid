@@ -53,7 +53,7 @@ void GLWidget::clientDraw()
 	bool chk = m_dbgDraw->checkConstraint(m_solver->contactSolver(), m_solver->narrowphase(), (TetrahedronSystem *)m_solver->tetra());
 	
 	if(!chk) internalTimer()->stop();
-    else internalTimer()->start(200);
+    //else internalTimer()->start(100);
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

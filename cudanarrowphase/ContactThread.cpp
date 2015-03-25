@@ -6,7 +6,7 @@
 #include "SimpleContactSolver.h"
 #include <CUDABuffer.h>
 
-#define GRDX 1023
+#define GRDX 100
 #define NTET 2500
 
 ContactThread::ContactThread(QObject *parent)
@@ -17,20 +17,20 @@ ContactThread::ContactThread(QObject *parent)
 	float * hv = &m_tetra->hostV()[0];
 	
 	unsigned i, j;
-	float vy = 1.f;
+	float vy = 6.75f;
 	float vrx, vry, vrz, vr;
 	for(j=0; j < 2; j++) {
 		for(i=0; i<GRDX; i++) {
-			Vector3F base(2.3f * i, 5.f * j + 1.f, 0.5f * i);
+			Vector3F base(12.3f * i, 6.f * j + 1.f, 0.5f * i);
 			Vector3F right = base + Vector3F(1.75f, 0.f, 0.7f);
 			Vector3F front = base + Vector3F(0.f, 0.f, 1.75f);
 			Vector3F top = base + Vector3F(0.f, 1.75f, 0.7f);
-			if(j%2==0) top.x += 1.75f;
+			// if(j%2==0) top.x += 1.75f;
 			
-			vrx = .5f * (((float)(rand() % 199))/199.f - .5f);
-			vry = 1.5f * (((float)(rand() % 199))/199.f + .5f) * vy;
-			vrz = .5f * (((float)(rand() % 199))/199.f - .5f);
-			vr = .5f * (((float)(rand() % 199))/199.f);
+			vrx = 0.f * (((float)(rand() % 199))/199.f - .5f);
+			vry = 1.f /* * (((float)(rand() % 199))/199.f + .5f) */ * vy;
+			vrz = 0.f * (((float)(rand() % 199))/199.f - .5f);
+			vr = 0.f * (((float)(rand() % 199))/199.f);
 			
 			m_tetra->addPoint(&base.x);
 			hv[0] = vrx + vr;
@@ -99,8 +99,8 @@ void ContactThread::initOnDevice()
 	m_devicePairs->create(GRDX * 8);
 	m_devicePairs->hostToDevice(m_hostPairs->data(), GRDX *8);
 	
-	m_narrowphase->computeContacts(m_devicePairs, GRDX);
-	
+	// m_narrowphase->computeContacts(m_devicePairs, GRDX);
+	m_contactSolver->initOnDevice();
 }
 
 void ContactThread::stepPhysics(float dt)

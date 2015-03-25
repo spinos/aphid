@@ -160,9 +160,9 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
     if(numOverlappingPairs < 1) return;
 	m_numPairs = numOverlappingPairs;
 	
-	m_coord->create(numOverlappingPairs * 16);
-	m_contact[0]->create(numOverlappingPairs * 48);
-	m_contact[1]->create(numOverlappingPairs * 48);
+	m_coord->create(nextPow2(numOverlappingPairs * 16));
+	m_contact[0]->create(nextPow2(numOverlappingPairs * 48));
+	m_contact[1]->create(nextPow2(numOverlappingPairs * 48));
 	
 	void * overlappingPairs = overlappingPairBuf->bufferOnDevice();
 	computeTimeOfImpact(overlappingPairs, numOverlappingPairs);

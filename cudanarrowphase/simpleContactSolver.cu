@@ -95,14 +95,6 @@ inline __device__ float computeRelativeVelocity(float3 nA,
             float3_dot(torqueB, angularVelocityB);
 }
 
-inline __device__ float computeDeltaLambda(float & accumulated, float lambda)
-{
-    const float last = accumulated;
-    accumulated += lambda;
-    if(accumulated < 0.f) accumulated = 0.f;
-	return accumulated - last;
-}
-
 inline __device__ void applyImpulse(float3 & dst, float J, float3 N)
 {
     dst = float3_add(dst, scale_float3_by(N, J));
@@ -117,9 +109,9 @@ inline __device__ float computeMassTensor(float3 nA, float3 nB,
     float3 jmjA = float3_cross( scale_float3_by(torqueA, invMassA), rA );
     float3 jmjB = float3_cross( scale_float3_by(torqueB, invMassB), rB );
     
-    return -1.f/(invMassA + invMassB + 
-        float3_dot(jmjA, nA) + 
-        float3_dot(jmjB, nB));
+    return -1.f/(invMassA + invMassB);// + 
+        //float3_dot(jmjA, nA) + 
+        //float3_dot(jmjB, nB));
 }
 
 __global__ void writeContactIndex_kernel(KeyValuePair * dstInd, 
@@ -228,7 +220,7 @@ __global__ void setContactConstraint_kernel(float3 * projLinVel,
 	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].y, srcPos, srcVel, 
 	    projLinVel[ilft+1], projAngVel[ilft+1]);
 	
-	ContactData contact = contacts[ind];
+	ContactData & contact = contacts[ind];
 	float3 nA = normalOnA(contact);
 	float3 nB = float3_reverse(nA);
 	
@@ -284,6 +276,7 @@ __global__ void solveContact_kernel(float * lambda,
                         float * deltaJ,
                         int it)
 {
+    __shared__ float J[128];
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
@@ -306,25 +299,32 @@ __global__ void solveContact_kernel(float * lambda,
 	float3 torqueA = float3_cross(contact.localA, nA);
 	float3 torqueB = float3_cross(contact.localB, nB);
 	
-	float J = computeRelativeVelocity(nA, nB,
+	J[threadIdx.x] = computeRelativeVelocity(nA, nB,
 	                        linA, linB,
 	                        torqueA, torqueB,
 	                        angA, angB);
-	
-	J *= Minv[ind];
+// condition?
+	J[threadIdx.x] -= 7.5f;
+	J[threadIdx.x] *= Minv[ind];
 	
 	const float invMassA = splitMass[dstInd.x];
 	const float invMassB = splitMass[dstInd.y];
 	
-	float dJ = computeDeltaLambda(lambda[ind], J);
+	float prevSum = lambda[ind];
+	float updated = prevSum;
+	updated += J[threadIdx.x];
+	if(updated < 0.f) updated = 0.f;
+	lambda[ind] = updated;
 	
-	applyImpulse(deltaLinearVelocity[dstInd.x], dJ * invMassA, nA);
-	applyImpulse(deltaLinearVelocity[dstInd.y], dJ * invMassB, nB);
+	J[threadIdx.x] = updated - prevSum;
 	
-	applyImpulse(deltaAngularVelocity[dstInd.x], dJ * invMassA, torqueA);
-	applyImpulse(deltaAngularVelocity[dstInd.y], dJ * invMassB, torqueB);
+	deltaJ[ind * JACOBI_NUM_ITERATIONS + it] = J[threadIdx.x];
 	
-	deltaJ[ind * JACOBI_NUM_ITERATIONS + it] = dJ;
+	applyImpulse(deltaLinearVelocity[dstInd.x], J[threadIdx.x] * invMassA, nA);
+	applyImpulse(deltaLinearVelocity[dstInd.y], J[threadIdx.x] * invMassB, nB);
+	
+	applyImpulse(deltaAngularVelocity[dstInd.x], J[threadIdx.x] * invMassA, torqueA);
+	applyImpulse(deltaAngularVelocity[dstInd.y], J[threadIdx.x] * invMassB, torqueB);
 }
 
 __global__ void averageVelocities_kernel(float3 * linearVelocity,
@@ -478,12 +478,12 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
                                 indices,
                                 objectPointStarts,
                                 objectIndexStarts);
-        
+
 // v = omega X r
         sumLinVel = float3_add(sumLinVel, 
             float3_cross( deltaAngularVelocity[splitInd], 
                          float3_difference(position[iPnt], center) ) );
-        
+      
         count += 1.f;
         
         if(cur == maxInd - 1) break;
@@ -569,7 +569,7 @@ void simpleContactSolverSetContactConstraint(float3 * projLinVel,
                                         ContactData * contacts,
                                         uint numContacts)
 {
-    uint tpb = CudaBase::LimitNThreadPerBlock(36, 56);
+    uint tpb = CudaBase::LimitNThreadPerBlock(32, 56);
 
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numContacts, tpb);
@@ -617,7 +617,7 @@ void simpleContactSolverSolveContact(float * lambda,
                         float * deltaJ,
                         int it)
 {
-    uint tpb = CudaBase::LimitNThreadPerBlock(24, 40);
+    uint tpb = 128;//CudaBase::LimitNThreadPerBlock(32, 40);
 
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numContacts, tpb);
@@ -691,7 +691,7 @@ void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
                     uint * objectIndexStarts,
                     uint numPoints)
 {
-    uint tpb = CudaBase::LimitNThreadPerBlock(24, 40);
+    uint tpb = CudaBase::LimitNThreadPerBlock(22, 40);
 
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numPoints, tpb);

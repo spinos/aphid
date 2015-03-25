@@ -11,6 +11,7 @@
 #include <cutil_inline.h>
 #include <cutil_gl_inline.h>
 #include <iostream>
+#include "CudaBase.h"
 CUDABuffer::CUDABuffer() : _device_vbo_buffer(0) {} 
 CUDABuffer::~CUDABuffer() { destroy(); }
 
@@ -25,6 +26,7 @@ void CUDABuffer::create(unsigned size)
 	if(canResize(size)) return;
 	destroy();
 	// std::cout<<"cu create buf "<<size<<" \n";
+	CudaBase::MemoryUsed += size;
 	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, size));
 	setBufferType(kOnDevice);
 	setBufferSize(size);
@@ -39,6 +41,8 @@ void CUDABuffer::destroy()
 	else if(bufferType() == kOnDevice) {
 		if(_device_vbo_buffer == 0) return;
 		cudaFree(_device_vbo_buffer);
+		CudaBase::MemoryUsed -= bufferSize();
+		setBufferSize(0);
 		_device_vbo_buffer = 0;
 	}
 }

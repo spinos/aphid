@@ -14,6 +14,7 @@ class SimpleContactSolver {
 public:
 	SimpleContactSolver();
 	virtual ~SimpleContactSolver();
+	void initOnDevice();
 	void solveContacts(unsigned numContacts,
 						CUDABuffer * contactBuf,
 						CUDABuffer * pairBuf,
