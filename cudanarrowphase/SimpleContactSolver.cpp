@@ -90,16 +90,23 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * splits = m_splitPair->bufferOnDevice();
 	
 	const unsigned splitBufLength = numContacts * 2;
-	simpleContactSolverComputeSplitBufLoc((uint2 *)splits, (uint2 *)pairs, (KeyValuePair *)bodyContactHash, splitBufLength);
+	simpleContactSolverComputeSplitBufLoc((uint2 *)splits, 
+	                        (uint2 *)pairs, 
+	                        (KeyValuePair *)bodyContactHash, 
+	                        splitBufLength);
 	
 	m_bodyCount->create(splitBufLength * 4);
 	void * bodyCount = m_bodyCount->bufferOnDevice();
-	simpleContactSolverCountBody((uint *)bodyCount, (KeyValuePair *)bodyContactHash, splitBufLength);
+	simpleContactSolverCountBody((uint *)bodyCount, 
+	                        (KeyValuePair *)bodyContactHash, 
+	                        splitBufLength);
 	
 	m_splitInverseMass->create(splitBufLength * 4);
 	void * splitMass = m_splitInverseMass->bufferOnDevice();
 	
-	simpleContactSolverComputeSplitInverseMass((float *)splitMass, (uint *)bodyCount, splitBufLength);
+	simpleContactSolverComputeSplitInverseMass((float *)splitMass, 
+                            (uint *)bodyCount, 
+                            splitBufLength);
 	
 // one per contact	
 	m_lambda->create(numContacts * 4);
@@ -146,7 +153,9 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	
 	void * deltaLinVel = m_deltaLinearVelocity->bufferOnDevice();
 	void * deltaAngVel = m_deltaAngularVelocity->bufferOnDevice();
-	simpleContactSolverClearDeltaVelocity((float3 *)deltaLinVel, (float3 *)deltaAngVel, splitBufLength);
+	simpleContactSolverClearDeltaVelocity((float3 *)deltaLinVel, 
+	                            (float3 *)deltaAngVel, 
+	                            splitBufLength);
 	
 	/*
 	const unsigned scanBufLength = iRound1024(numContacts * 2);
@@ -202,7 +211,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                (uint4 *)ind,
 	                (uint * )perObjPointStart,
 	                (uint * )perObjectIndexStart,
-	                numContacts);
+	                numContacts * 2,
+	                pntHashBufLength);
 	
 	void * intermediate = m_pntTetHash[1]->bufferOnDevice();
 	RadixSort((KeyValuePair *)pntTetHash, (KeyValuePair *)intermediate, pntHashBufLength, 32);

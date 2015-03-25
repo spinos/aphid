@@ -395,43 +395,59 @@ __global__ void writePointTetHash_kernel(KeyValuePair * pntTetHash,
 	                uint4 * indices,
 	                uint * pointStart,
                     uint * indexStart,
+                    uint numBodies,
 	                uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	uint istart = ind * 2 * 4;
-	uint c = bodyCount[ind];
+	uint istart = ind * 4;
+	
+	if(ind >= numBodies) {
+	    pntTetHash[istart].key = 1<<30;
+        pntTetHash[istart].value = 1<<30;
+	    pntTetHash[istart + 1].key = 1<<30;
+        pntTetHash[istart + 1].value = 1<<30;
+        pntTetHash[istart + 2].key = 1<<30;
+        pntTetHash[istart + 2].value = 1<<30;
+        pntTetHash[istart + 3].key = 1<<30;
+        pntTetHash[istart + 3].value = 1<<30;
+        return;
+	}
+	   
+	const unsigned iContact = ind>>1;
+	
+	uint splitInd = splits[iContact].x;
+	uint iBody = pairs[iContact].x;
+	
+	if(ind & 1) {
+	    splitInd = splits[iContact].y;
+	    iBody = pairs[iContact].y;
+	}
+	    
+	uint c = bodyCount[splitInd];
 	if(c < 1) {
 // redundant
-        int i;
-        for(i=0; i < 8; i++) {
-            pntTetHash[istart + i].key = 1<<30;
-            pntTetHash[istart + i].value = 1<<30;
-	    }
+        pntTetHash[istart].key = 1<<30;
+        pntTetHash[istart].value = 1<<30;
+	    pntTetHash[istart + 1].key = 1<<30;
+        pntTetHash[istart + 1].value = 1<<30;
+        pntTetHash[istart + 2].key = 1<<30;
+        pntTetHash[istart + 2].value = 1<<30;
+        pntTetHash[istart + 3].key = 1<<30;
+        pntTetHash[istart + 3].value = 1<<30;
 	}
 	else {
-	    const uint2 dstInd = splits[ind];
-	    const uint4 ia = computePointIndex(pointStart, indexStart, indices, pairs[ind].x);
-	    const uint4 ib = computePointIndex(pointStart, indexStart, indices, pairs[ind].y);
+	    const uint4 ia = computePointIndex(pointStart, indexStart, indices, iBody);
 	    
 	    pntTetHash[istart  ].key = ia.x;
-	    pntTetHash[istart  ].value = dstInd.x;
+	    pntTetHash[istart  ].value = splitInd;
 	    pntTetHash[istart+1].key = ia.y;
-	    pntTetHash[istart+1].value = dstInd.x;
+	    pntTetHash[istart+1].value = splitInd;
 	    pntTetHash[istart+2].key = ia.z;
-	    pntTetHash[istart+2].value = dstInd.x;
+	    pntTetHash[istart+2].value = splitInd;
 	    pntTetHash[istart+3].key = ia.w;
-	    pntTetHash[istart+3].value = dstInd.x;
-	    
-	    pntTetHash[istart+4].key = ib.x;
-	    pntTetHash[istart+4].value = dstInd.y;
-	    pntTetHash[istart+5].key = ib.y;
-	    pntTetHash[istart+5].value = dstInd.y;
-	    pntTetHash[istart+6].key = ib.z;
-	    pntTetHash[istart+6].value = dstInd.y;
-	    pntTetHash[istart+7].key = ib.w;
-	    pntTetHash[istart+7].value = dstInd.y;
+	    pntTetHash[istart+3].value = splitInd;
 	}
 }
 
@@ -617,10 +633,11 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                uint4 * ind,
 	                uint * perObjPointStart,
                     uint * perObjectIndexStart,
-	                uint numContacts)
+	                uint numBodies,
+	                uint bufLength)
 {
     dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(numContacts, 512);
+    unsigned nblk = iDivUp(numBodies, 512);
     dim3 grid(nblk, 1, 1);
     
     writePointTetHash_kernel<<< grid, block >>>(pntTetHash,
@@ -630,7 +647,8 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                ind,
 	                perObjPointStart,
 	                perObjectIndexStart,
-	                numContacts);
+	                numBodies,
+	                bufLength);
 }
 
 }

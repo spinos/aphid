@@ -76,7 +76,8 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                uint4 * ind,
 	                uint * perObjPointStart,
                     uint * perObjectIndexStart,
-	                uint numContacts);
+	                uint numBodies,
+	                uint bufLength);
 }
 #endif        //  #ifndef SIMPLECONTACTSOLVER_IMPLEMENT_H
 
