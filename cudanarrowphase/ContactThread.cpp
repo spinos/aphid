@@ -6,7 +6,7 @@
 #include "SimpleContactSolver.h"
 #include <CUDABuffer.h>
 
-#define GRDX 1234
+#define GRDX 1023
 #define NTET 2500
 
 ContactThread::ContactThread(QObject *parent)

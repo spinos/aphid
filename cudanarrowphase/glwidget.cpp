@@ -46,10 +46,14 @@ void GLWidget::clientDraw()
     // m_dbgDraw->printTOI(m_solver->narrowphase(), m_solver->hostPairs());
 	// m_dbgDraw->printContactPairHash(m_contactSolver, m_narrowphase->numContacts());
 	m_solver->tetra()->sendXToHost();
+	m_solver->tetra()->sendVToHost();
 	m_dbgDraw->drawTetra((TetrahedronSystem *)m_solver->tetra());
 	// m_dbgDraw->drawTetraAtFrameEnd((TetrahedronSystem *)m_solver->tetra());
 	m_dbgDraw->drawSeparateAxis(m_solver->narrowphase(), m_solver->hostPairs(), (TetrahedronSystem *)m_solver->tetra());
-	m_dbgDraw->drawConstraint(m_solver->contactSolver(), m_solver->narrowphase(), (TetrahedronSystem *)m_solver->tetra());
+	bool chk = m_dbgDraw->checkConstraint(m_solver->contactSolver(), m_solver->narrowphase(), (TetrahedronSystem *)m_solver->tetra());
+	
+	if(!chk) internalTimer()->stop();
+    else internalTimer()->start(200);
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

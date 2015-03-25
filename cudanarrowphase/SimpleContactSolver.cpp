@@ -216,12 +216,16 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	
 	void * intermediate = m_pntTetHash[1]->bufferOnDevice();
 	RadixSort((KeyValuePair *)pntTetHash, (KeyValuePair *)intermediate, pntHashBufLength, 32);
-    
-	
-	simpleContactSolverStopAtContact((float3 *)vel,
+    	
+	simpleContactSolverUpdateVelocity((float3 *)vel,
+	                (float3 *)deltaLinVel,
+	                (float3 *)deltaAngVel,
+	                (KeyValuePair *)pntTetHash,
                     (uint2 *)pairs,
+                    (uint2 *)splits,
+                    (float3 *)pos,
                     (uint4 *)ind,
                     (uint * )perObjPointStart,
                     (uint * )perObjectIndexStart,
-                    numContacts);
+                    numContacts * 2 * 4);
 }

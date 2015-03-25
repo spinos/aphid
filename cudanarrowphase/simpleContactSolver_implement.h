@@ -43,13 +43,6 @@ void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel,
                                         float3 * deltaAngVel, 
                                         uint bufLength);
 
-void simpleContactSolverStopAtContact(float3 * dstVelocity,
-                    uint2 * pairs,
-                    uint4 * indices,
-                    uint * objectPointStarts,
-                    uint * objectIndexStarts,
-                    uint numContacts);
-
 void simpleContactSolverSolveContact(float * lambda,
                         float3 * deltaLinearVelocity,
 	                    float3 * deltaAngularVelocity,
@@ -78,6 +71,19 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
                     uint * perObjectIndexStart,
 	                uint numBodies,
 	                uint bufLength);
+
+void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
+                    float3 * deltaLinearVelocity,
+	                float3 * deltaAngularVelocity,
+	                KeyValuePair * pntTetHash,
+                    uint2 * pairs,
+                    uint2 * splits,
+                    float3 * position,
+                    uint4 * indices,
+                    uint * objectPointStarts,
+                    uint * objectIndexStarts,
+                    uint numPoints);
+
 }
 #endif        //  #ifndef SIMPLECONTACTSOLVER_IMPLEMENT_H
 

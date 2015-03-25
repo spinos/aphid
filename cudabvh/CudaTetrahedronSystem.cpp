@@ -61,3 +61,6 @@ void CudaTetrahedronSystem::integrate(float timeStep)
 
 void CudaTetrahedronSystem::sendXToHost()
 { m_deviceX->deviceToHost(hostX(), m_xLoc, numPoints() * 12); }
+
+void CudaTetrahedronSystem::sendVToHost()
+{ m_deviceV->deviceToHost(hostV(), m_vLoc, numPoints() * 12); }

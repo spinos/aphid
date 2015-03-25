@@ -29,6 +29,7 @@ public:
 	
 	void integrate(float timeStep);
 	void sendXToHost();
+	void sendVToHost();
 	
 protected:
     

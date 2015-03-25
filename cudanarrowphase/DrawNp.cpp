@@ -109,10 +109,10 @@ void DrawNp::drawSeparateAxis(CudaNarrowphase * phase, BaseBuffer * pairs, Tetra
 	}
 }
 
-void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phase, TetrahedronSystem * tetra)
+bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * phase, TetrahedronSystem * tetra)
 {
     const unsigned nc = phase->numContacts();
-    if(nc < 1) return;
+    if(nc < 1) return 1;
     
     computeX1(tetra, 0.f);
     Vector3F * ptet = (Vector3F *)m_x1->data();
@@ -216,6 +216,20 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
             for(j=0; j< njacobi; j++) {
                 std::cout<<" dJ["<<j<<"] "<<dJ[iPair * njacobi + j]<<"\n";
             }
+            
+            float lastJ = dJ[iPair * njacobi];
+            for(j=1; j< njacobi; j++) {
+                
+                float curJ = dJ[iPair * njacobi + j];
+                if(curJ < 0.f) curJ = -curJ;
+                
+                if(curJ > lastJ && curJ > 1e-3) {
+                    std::cout<<" no converging!\n";
+                    return 0;
+                }
+                
+                lastJ = curJ;
+            }
         }
 	}
 	
@@ -225,8 +239,10 @@ void DrawNp::drawConstraint(SimpleContactSolver * solver, CudaNarrowphase * phas
 	
 	std::cout<<"pnt-tet hash\n";
 	for(i=0; i < nc * 8; i++) {
-	    std::cout<<" pnt["<<i<<"] ("<<pntHash[i].key<<", "<<pntHash[i].value<<")\n";
+	    // std::cout<<" pnt["<<i<<"] ("<<pntHash[i].key<<", "<<pntHash[i].value<<")\n";
 	}
+	
+	return 1;
 }
 
 void DrawNp::printCoord(CudaNarrowphase * phase, BaseBuffer * pairs)

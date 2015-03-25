@@ -54,28 +54,15 @@ inline __device__ void computeBodyVelocities1(uint * pointStarts,
 	computeBodyAngularVelocity(angularVelocity, linearVelocity, position, velocity, ia);
 }
 
-inline __device__ void computeBodyVelocities(uint * pointStarts, 
-                                                uint * indexStarts, 
-                                                uint4 * indices, 
-                                                uint2 pair,
-                                                float3 * position,
-                                                float3 * velocity, 
-                                                float3 & linearVelocityA, 
-                                                float3 & linearVelocityB,
-                                                float3 & angularVelocityA, 
-                                                float3 & angularVelocityB)
+inline __device__ void computeBodyCenter(float3 & center, 
+                                uint iBody,
+                                float3 * position,
+                                uint4 * indices,
+                                uint * pointStarts,
+                                uint * indexStarts)
 {
-    const uint4 ia = computePointIndex(pointStarts, indexStarts, indices, pair.x);
-	const uint4 ib = computePointIndex(pointStarts, indexStarts, indices, pair.y);
-	
-	float3_average4(linearVelocityA, velocity, ia);
-	float3_average4(linearVelocityB, velocity, ib);
-	
-	float3 centerA;
-	float3_average4(centerA, position, ia);
-	
-	float3 centerB;
-	float3_average4(centerB, position, ib);
+    const uint4 iVert = computePointIndex(pointStarts, indexStarts, indices, iBody);
+	float3_average4(center, position, iVert);
 }
 
 inline __device__ uint getBodyCountAt(uint ind, uint * count)
@@ -405,13 +392,9 @@ __global__ void writePointTetHash_kernel(KeyValuePair * pntTetHash,
 	
 	if(ind >= numBodies) {
 	    pntTetHash[istart].key = 1<<30;
-        pntTetHash[istart].value = 1<<30;
-	    pntTetHash[istart + 1].key = 1<<30;
-        pntTetHash[istart + 1].value = 1<<30;
+        pntTetHash[istart + 1].key = 1<<30;
         pntTetHash[istart + 2].key = 1<<30;
-        pntTetHash[istart + 2].value = 1<<30;
         pntTetHash[istart + 3].key = 1<<30;
-        pntTetHash[istart + 3].value = 1<<30;
         return;
 	}
 	   
@@ -420,35 +403,99 @@ __global__ void writePointTetHash_kernel(KeyValuePair * pntTetHash,
 	uint splitInd = splits[iContact].x;
 	uint iBody = pairs[iContact].x;
 	
-	if(ind & 1) {
+	if((ind & 1)>0) {
 	    splitInd = splits[iContact].y;
 	    iBody = pairs[iContact].y;
 	}
 	    
-	uint c = bodyCount[splitInd];
-	if(c < 1) {
+	if(bodyCount[splitInd] < 1) {
 // redundant
         pntTetHash[istart].key = 1<<30;
-        pntTetHash[istart].value = 1<<30;
-	    pntTetHash[istart + 1].key = 1<<30;
-        pntTetHash[istart + 1].value = 1<<30;
+        pntTetHash[istart + 1].key = 1<<30;
         pntTetHash[istart + 2].key = 1<<30;
-        pntTetHash[istart + 2].value = 1<<30;
         pntTetHash[istart + 3].key = 1<<30;
-        pntTetHash[istart + 3].value = 1<<30;
 	}
 	else {
 	    const uint4 ia = computePointIndex(pointStart, indexStart, indices, iBody);
 	    
 	    pntTetHash[istart  ].key = ia.x;
-	    pntTetHash[istart  ].value = splitInd;
+	    pntTetHash[istart  ].value = ind;
 	    pntTetHash[istart+1].key = ia.y;
-	    pntTetHash[istart+1].value = splitInd;
+	    pntTetHash[istart+1].value = ind;
 	    pntTetHash[istart+2].key = ia.z;
-	    pntTetHash[istart+2].value = splitInd;
+	    pntTetHash[istart+2].value = ind;
 	    pntTetHash[istart+3].key = ia.w;
-	    pntTetHash[istart+3].value = splitInd;
+	    pntTetHash[istart+3].value = ind;
 	}
+}
+
+__global__ void updateVelocity_kernel(float3 * dstVelocity,
+                    float3 * deltaLinearVelocity,
+	                float3 * deltaAngularVelocity,
+	                KeyValuePair * pntTetHash,
+                    uint2 * pairs,
+                    uint2 * splits,
+                    float3 * position,
+                    uint4 * indices,
+                    uint * objectPointStarts,
+                    uint * objectIndexStarts,
+                    uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	const uint iPnt = pntTetHash[ind].key;
+	
+	if(iPnt > (1<<24)) return;
+	
+	int isFirst = 0;
+	
+	if(ind < 1) isFirst = 1;
+	else if(pntTetHash[ind - 1].key != iPnt) isFirst = 1;
+	
+	if(!isFirst) return;
+	
+	float3 sumLinVel = make_float3(0.f, 0.f, 0.f);
+	float3 center;
+	float count = 0.f;
+	uint cur = ind;
+	uint iContact, splitInd, iBody;
+	for(;;) {
+	    iContact = pntTetHash[cur].value>>1;
+	
+	    splitInd = splits[iContact].x;
+	    iBody = pairs[iContact].x;
+	
+        if((pntTetHash[cur].value & 1)>0) {
+            splitInd = splits[iContact].y;
+            iBody = pairs[iContact].y;
+        }
+        
+        sumLinVel = float3_add(sumLinVel, deltaLinearVelocity[splitInd]);
+        
+        computeBodyCenter(center, iBody,
+                                position,
+                                indices,
+                                objectPointStarts,
+                                objectIndexStarts);
+        
+// v = omega X r
+        sumLinVel = float3_add(sumLinVel, 
+            float3_cross( deltaAngularVelocity[splitInd], 
+                         float3_difference(position[iPnt], center) ) );
+        
+        count += 1.f;
+        
+        if(cur == maxInd - 1) break;
+	    cur++;
+	    if(pntTetHash[cur].key != iPnt) break;
+	}
+	
+	sumLinVel = scale_float3_by(sumLinVel, 1.f / count);
+	
+	dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], sumLinVel);
+	// dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], deltaLinearVelocity[splitInd]);
+	// dstVelocity[iPnt] = make_float3(0.f, 0.f, 0.f);
 }
 
 extern "C" {
@@ -522,7 +569,7 @@ void simpleContactSolverSetContactConstraint(float3 * projLinVel,
                                         ContactData * contacts,
                                         uint numContacts)
 {
-    uint tpb = CudaBase::LimitNThreadPerBlock(32, 56);
+    uint tpb = CudaBase::LimitNThreadPerBlock(36, 56);
 
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numContacts, tpb);
@@ -555,25 +602,6 @@ void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel,
     clearDeltaVelocity_kernel<<< grid, block >>>(deltaLinVel,
                                      deltaAngVel, 
                                        bufLength);
-}
-
-void simpleContactSolverStopAtContact(float3 * dstVelocity,
-                        uint2 * pairs,
-                        uint4 * indices,
-                        uint * objectPointStarts,
-                        uint * objectIndexStarts,
-                        uint numContacts)
-{
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(numContacts, 512);
-    dim3 grid(nblk, 1, 1);
-    
-    stopAtContact_kernel<<< grid, block >>>(dstVelocity, 
-                        pairs,
-                        indices,
-                        objectPointStarts,
-                        objectIndexStarts,
-                        numContacts);
 }
 
 void simpleContactSolverSolveContact(float * lambda,
@@ -649,6 +677,37 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                perObjectIndexStart,
 	                numBodies,
 	                bufLength);
+}
+
+void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
+                    float3 * deltaLinearVelocity,
+	                float3 * deltaAngularVelocity,
+	                KeyValuePair * pntTetHash,
+                    uint2 * pairs,
+                    uint2 * splits,
+                    float3 * position,
+                    uint4 * indices,
+                    uint * objectPointStarts,
+                    uint * objectIndexStarts,
+                    uint numPoints)
+{
+    uint tpb = CudaBase::LimitNThreadPerBlock(24, 40);
+
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numPoints, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    updateVelocity_kernel<<< grid, block >>>(dstVelocity,
+                    deltaLinearVelocity,
+	                deltaAngularVelocity,
+	                pntTetHash,
+                    pairs,
+                    splits,
+                    position,
+                    indices,
+                    objectPointStarts,
+                    objectIndexStarts,
+                    numPoints);
 }
 
 }
