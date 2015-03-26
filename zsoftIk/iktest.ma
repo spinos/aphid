@@ -1,6 +1,6 @@
 //Maya ASCII 2012 scene
 //Name: iktest.ma
-//Last modified: Tue, Mar 24, 2015 05:54:43 PM
+//Last modified: Tue, Mar 24, 2015 06:43:48 PM
 //Codeset: 936
 requires maya "2012";
 requires "zsoftIk2012x64" "2.5";
