@@ -6,7 +6,7 @@
 MStatus initializePlugin(MObject obj)
 {
         MStatus         status;
-        MFnPlugin       plugin(obj, "Autodesk", "2.5", "Any");
+        MFnPlugin       plugin(obj, "Zhang Jian", "1.0 Thu Mar 26 18:25:29 CST 2015 scaling factor", "Any");
 
         status = plugin.registerNode("zik2Bsolver", 
                                                                  ik2Bsolver::id,

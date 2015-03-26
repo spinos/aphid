@@ -78,7 +78,7 @@ private:
                          const double & softDistance,
 						 const double & restLength1,
 						 const double & restLength2,
-                         double & stretching);
+						 double & stretching);
 private:
     HermiteCurve m_herm;
 };

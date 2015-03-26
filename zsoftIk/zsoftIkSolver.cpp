@@ -151,6 +151,13 @@ MStatus ik2Bsolver::doSolve()
         
 		MObject thisNode = thisMObject();
         
+		MVector localEndJointT = endJointFn.getTranslation(MSpace::kTransform);
+		MVector worldEndJointT = endJointFn.rotatePivot(MSpace::kWorld) - midJointPos;
+		
+		double scaling =  worldEndJointT.length() / ( localEndJointT.length() + 1e-6);
+		
+		// MGlobal::displayInfo(MString(" scaling ")+scaling);
+		
         // get rest length
         //
         double restL1, restL2;
@@ -161,6 +168,10 @@ MStatus ik2Bsolver::doSolve()
         MPlug plug( thisNode, asoftDistance );
         double softD = 0.0;
         plug.getValue(softD);
+        
+        restL1 *= scaling;
+        restL2 *= scaling;
+        softD *= scaling;
 		
 		// get max stretching
 		double maxStretching = 0.0;
@@ -178,14 +189,13 @@ MStatus ik2Bsolver::doSolve()
                         qMid,
                         softD,
 						restL1, restL2,
-                        stretching);
+						stretching);
 
         midJointFn.rotateBy(qMid, MSpace::kWorld);
         startJointFn.rotateBy(qStart, MSpace::kWorld);
-        
-        
-		midJointFn.setTranslation(MVector(restL1, 0.0, 0.0), MSpace::kTransform);
-		endJointFn.setTranslation(MVector(restL2, 0.0, 0.0), MSpace::kTransform);
+
+		midJointFn.setTranslation(MVector(restL1 / scaling, 0.0, 0.0), MSpace::kTransform);
+		endJointFn.setTranslation(MVector(restL2 / scaling, 0.0, 0.0), MSpace::kTransform);
 			
 		// if(stretching > maxStretching) stretching = maxStretching;
 		if(maxStretching > 0.0) {
@@ -208,7 +218,7 @@ void ik2Bsolver::solveIK(const MPoint &startJointPos,
                          const double & softDistance,
 						 const double & restLength1,
 						 const double & restLength2,
-                         double & stretching)
+						 double & stretching)
 //
 // This is method that actually computes the IK solution.
 //
@@ -248,7 +258,7 @@ void ik2Bsolver::solveIK(const MPoint &startJointPos,
 		    float s = (slowLH - da) / softDistance;
 		    if(s> 1.f) s= 1.f;
 		    Vector3F pt = m_herm.interpolate(s);
-		    MGlobal::displayInfo(MString("herm ")+ pt.y);
+		    // MGlobal::displayInfo(MString("herm ")+ pt.y);
 			
 // approading l1+l2 slower 
 //
@@ -257,7 +267,7 @@ void ik2Bsolver::solveIK(const MPoint &startJointPos,
 			weight = pt.y * weight + (1.f - pt.y) * s;
 			slowLH = da + softDistance * weight;
 
-			MGlobal::displayInfo(MString("wei ")+weight);
+			// MGlobal::displayInfo(MString("wei ")+weight);
 		}
 
 //
