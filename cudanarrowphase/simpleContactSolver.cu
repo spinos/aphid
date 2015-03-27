@@ -1,5 +1,6 @@
 #include "simpleContactSolver_implement.h"
 #include <bvh_math.cu>
+#include "barycentric.cu"
 #include <CudaBase.h>
 
 inline __device__ uint4 computePointIndex(uint * pointStarts,
@@ -36,6 +37,30 @@ inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
     omega[3] = float3_cross(float3_difference(position[ind.w], center), float3_difference(velocity[ind.w], averageLinearVel));
     
 	float3_average4_direct(angularVel, omega);
+}
+
+inline __device__ BarycentricCoordinate localCoordinate(uint4 ia,
+                                    float3 * position,
+                                    float3 localP)
+{
+    float3 q;
+	float3_average4(q, position, ia);
+	q = float3_add(q, localP);
+	
+	return getBarycentricCoordinate4i(q, position, ia);
+}
+
+inline __device__ void projectMotion(float3 & linearVelocity, 
+                                    uint4 ia,
+                                    float3 * velocity,
+                                    BarycentricCoordinate * coord)
+{
+    float3_set_zero(linearVelocity);
+	
+	linearVelocity = float3_add(linearVelocity, scale_float3_by(velocity[ia.x], coord->x));
+	linearVelocity = float3_add(linearVelocity, scale_float3_by(velocity[ia.y], coord->y));
+	linearVelocity = float3_add(linearVelocity, scale_float3_by(velocity[ia.z], coord->z));
+	linearVelocity = float3_add(linearVelocity, scale_float3_by(velocity[ia.w], coord->w));
 }
 
 inline __device__ void computeBodyVelocities1(uint * pointStarts, 
@@ -78,6 +103,15 @@ inline __device__ uint getBodyCountAt(uint ind, uint * count)
 inline __device__ float3 normalOnA(const ContactData & contact)
 {
     return float3_normalize(float3_from_float4(contact.separateAxis));
+}
+
+inline __device__ float computeRelativeVelocity1(float3 nA,
+                            float3 nB,
+                            float3 linearVelocityA, 
+                            float3 linearVelocityB)
+{
+    return float3_dot(linearVelocityA, nA) +
+            float3_dot(linearVelocityB, nB);
 }
 
 inline __device__ float computeRelativeVelocity(float3 nA,
@@ -189,8 +223,7 @@ __global__ void computeSplitInvMass_kernel(float * invMass,
 	invMass[ind] = 1.f * (float)n;
 }
 
-__global__ void setContactConstraint_kernel(float3 * projLinVel,
-                                        float3 * projAngVel,
+__global__ void setContactConstraint_kernel(ContactConstraint* constraints,
                                         float * lambda,
                                         float * Minv,
                                         uint2 * splits,
@@ -207,35 +240,49 @@ __global__ void setContactConstraint_kernel(float3 * projLinVel,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	const uint ilft = ind * 2;
+	uint iContact = ind>>1;
 	
-	lambda[ind] = 0.f;
+	ContactData & contact = contacts[iContact];
+	
+	int isRgt = (ind & 1) > 0;
+	
+	float3 localP = contact.localA;
+	BarycentricCoordinate * coord = &constraints[ind].coordA;
+	uint iBody = pairs[ind].x;
+	
+	if(isRgt) {
+	    localP = contact.localB;
+	    coord = &constraints[ind].coordB;
+	    iBody = pairs[ind].y;
+	}
+	
+	uint4 ia = computePointIndex(pointStarts, indexStarts, indices, iBody);
+	
+	*coord = localCoordinate(ia, srcPos, localP);
+	
+	// float3 motionA;
+	// projectMotion(motionA, ia, srcVel, coord);
+	
+	if(isRgt) return;
+	
+	lambda[iContact] = 0.f;
 	
 	const uint2 dstInd = splits[ind];
 	
-	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].x, srcPos, srcVel, 
-	    projLinVel[ilft], projAngVel[ilft]);
-	
-	computeBodyVelocities1(pointStarts, indexStarts, indices, pairs[ind].y, srcPos, srcVel, 
-	    projLinVel[ilft+1], projAngVel[ilft+1]);
-	
-	ContactData contact = contacts[ind];
 	float3 nA = normalOnA(contact);
 	float3 nB = float3_reverse(nA);
 	float3 torqueA = float3_cross(contact.localA, nA);
 	float3 torqueB = float3_cross(contact.localB, nB);
 	
-	Minv[ind] = computeMassTensor(nA, nB, contact.localA, contact.localB,
+	Minv[iContact] = computeMassTensor(nA, nB, contact.localA, contact.localB,
 	                            torqueA, torqueB,
 	                            splitMass[dstInd.x], splitMass[dstInd.y]);
 	
-	float rel = computeRelativeVelocity(nA, nB,
-	                        projLinVel[ilft], projLinVel[ilft+1],
-	                        torqueA, torqueB,
-	                        projAngVel[ilft], projAngVel[ilft+1]);
-	if(rel * rel < 0.01f) rel = 0.f;
-	contacts[ind].separateAxis.w = rel;
+	/*float rel = computeRelativeVelocity1(nA, nB,
+	                        motionA, motionB);
 	
+	if(rel * rel < 0.01f) rel = 0.f;
+	contact.separateAxis.w = rel;*/
 }
 
 __global__ void clearDeltaVelocity_kernel(float3 * deltaLinVel, 
@@ -564,8 +611,7 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
                                        bufLength);
 }
 
-void simpleContactSolverSetContactConstraint(float3 * projLinVel,
-                                        float3 * projAngVel,
+void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
                                         float * lambda,
                                         float * Minv,
                                         uint2 * splits,
@@ -585,8 +631,7 @@ void simpleContactSolverSetContactConstraint(float3 * projLinVel,
     unsigned nblk = iDivUp(numContacts, tpb);
     dim3 grid(nblk, 1, 1);
     
-    setContactConstraint_kernel<<< grid, block >>>(projLinVel,
-                                        projAngVel,
+    setContactConstraint_kernel<<< grid, block >>>(constraints,
                                         lambda,
                                         Minv,
                                         splits,

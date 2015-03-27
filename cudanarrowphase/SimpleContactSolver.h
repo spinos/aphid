@@ -23,8 +23,8 @@ public:
 						
 	CUDABuffer * contactPairHashBuf();
 	CUDABuffer * bodySplitLocBuf();
-	CUDABuffer * projectedLinearVelocityBuf();
-	CUDABuffer * projectedAngularVelocityBuf();
+	// CUDABuffer * projectedLinearVelocityBuf();
+	// CUDABuffer * projectedAngularVelocityBuf();
 	CUDABuffer * impulseBuf();
 	CUDABuffer * deltaLinearVelocityBuf();
 	CUDABuffer * deltaAngularVelocityBuf();
@@ -39,8 +39,9 @@ private:
 	CUDABuffer * m_bodyCount;
 	CUDABuffer * m_splitInverseMass;
 	CUDABuffer * m_massTensor;
-	CUDABuffer * m_projectedLinearVelocity;
-	CUDABuffer * m_projectedAngularVelocity;
+	CUDABuffer * m_contraint;
+	// CUDABuffer * m_projectedLinearVelocity;
+	// CUDABuffer * m_projectedAngularVelocity;
 	CUDABuffer * m_lambda;
 	CUDABuffer * m_deltaLinearVelocity;
 	CUDABuffer * m_deltaAngularVelocity;

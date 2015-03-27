@@ -89,6 +89,21 @@ ContactThread::ContactThread(QObject *parent)
 		pab[i*2 + 1] = i + GRDX;
 	}
 	
+	Vector3F r0(-1.3f, 1.f, -0.f);
+	Vector3F n0(0.f, 1.f, 0.1f);
+	n0.normalize();
+	Vector3F omega0(0.0f, 0.f, 0.24f);
+	
+	std::cout<<"\n omega cross r dot n "<<omega0.cross(r0).dot(n0)<<"\n";
+	std::cout<<"\n r cross n dot omega "<<r0.cross(n0).dot(omega0)<<"\n";
+	
+	r0.normalize();
+	std::cout<<" omega cross r "<<omega0.cross(r0)<<"\n";
+	r0.set(-1.3f, .5f, -0.f);
+	r0.normalize();
+	std::cout<<" omega cross r "<<omega0.cross(r0)<<"\n";
+	
+	
 }
 
 ContactThread::~ContactThread() {}

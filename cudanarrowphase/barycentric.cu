@@ -78,6 +78,31 @@ inline __device__ BarycentricCoordinate getBarycentricCoordinate3(const float3 &
     return coord;
 }
 
+inline __device__ BarycentricCoordinate getBarycentricCoordinate4i(const float3 & p, const float3 * v, uint4 ind)
+{
+    BarycentricCoordinate coord;
+    
+    mat44 m;
+    fill_mat44(m, v[ind.x], v[ind.y], v[ind.z], v[ind.w]);
+    
+    float D0 = determinant44(m);
+    if(D0 == 0.f) {
+        coord.x = coord.y = coord.z = coord.w = -1.f;
+        return coord;
+    }  
+    
+    fill_mat44(m, p, v[ind.y], v[ind.z], v[ind.w]);
+    coord.x = determinant44(m) / D0;
+    fill_mat44(m, v[ind.x], p, v[ind.z], v[ind.w]);
+    coord.y = determinant44(m) / D0;
+    fill_mat44(m, v[ind.x], v[ind.y], p, v[ind.w]);
+    coord.z = determinant44(m) / D0;
+    fill_mat44(m, v[ind.x], v[ind.y], v[ind.z], p);
+    coord.w = determinant44(m) / D0;
+    
+    return coord;
+}
+
 inline __device__ BarycentricCoordinate getBarycentricCoordinate4(const float3 & p, const float3 * v)
 {
     BarycentricCoordinate coord;

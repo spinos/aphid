@@ -6,6 +6,11 @@
 
 #define JACOBI_NUM_ITERATIONS 8
 
+struct ContactConstraint {
+    BarycentricCoordinate coordA;
+    BarycentricCoordinate coordB;
+};
+
 extern "C" {
 void simpleContactSolverWriteContactIndex(KeyValuePair * dstInd, 
                                     uint * srcInd, 
@@ -24,8 +29,7 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
                                         uint * bodyCount, 
                                         uint bufLength);
 
-void simpleContactSolverSetContactConstraint(float3 * projLinVel,
-                                        float3 * projAngVel,
+void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
                                         float * lambda,
                                         float * Minv,
                                         uint2 * splits,
