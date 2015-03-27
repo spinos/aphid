@@ -100,6 +100,9 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 
 	if(ind >= maxInd) return;
 	
+	dstContact[ind].separateAxis=make_float4(0.f, 0.f, 0.f, 0.f);
+	dstContact[ind].timeOfImpact = 1e8;
+	
 	uint objA = extractObjectInd(pairs[ind].x);
 	uint objB = extractObjectInd(pairs[ind].y);
 	uint elmA = extractElementInd(pairs[ind].x);
@@ -111,10 +114,7 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	extractTetrahedron(tA, pointStart[objA], tetrahedron[indexStart[objA] + elmA], pos, vel);
 	extractTetrahedron(tB, pointStart[objB], tetrahedron[indexStart[objB] + elmB], pos, vel);
 	
-	if(totalSpeed(tA.v, tB.v) < 1e-8) {
-	    dstContact[ind].timeOfImpact = 1e8;
-	    return;
-	}
+	if(totalSpeed(tA.v, tB.v) < 1e-8) return;
 	
 	progressTetrahedron(sPrxA[threadIdx.x], tA, 0.f);
 	progressTetrahedron(sPrxB[threadIdx.x], tB, 0.f);
@@ -125,10 +125,7 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, sas, 
 	    coord);
 // intersected	
-	if(sas.w < 1.f) {
-	    dstContact[ind].timeOfImpact = 1e8;
-	    return;
-	}
+	if(sas.w < 1.f) return;
 	
 	float separateDistance = float4_length(sas);
 // within thin shell margin

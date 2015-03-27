@@ -42,9 +42,7 @@ private:
 	BaseBuffer * m_pairsHash;
 	BaseBuffer * m_linearVelocity;
 	BaseBuffer * m_angularVelocity;
-	BaseBuffer * m_impulse;
 	BaseBuffer * m_deltaJ;
-	BaseBuffer * m_massTensor;
 	BaseBuffer * m_pntTetHash;
 	BaseBuffer * m_constraint;
 };

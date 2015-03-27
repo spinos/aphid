@@ -30,9 +30,7 @@ DrawNp::DrawNp()
 	m_pairsHash = new BaseBuffer;
 	m_linearVelocity = new BaseBuffer;
 	m_angularVelocity = new BaseBuffer;
-	m_impulse = new BaseBuffer;
 	m_deltaJ = new BaseBuffer;
-	m_massTensor = new BaseBuffer;
 	m_pntTetHash = new BaseBuffer;
 	m_constraint = new BaseBuffer;
 }
@@ -135,6 +133,8 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
     const unsigned nc = phase->numContacts();
     if(nc < 1) return 1;
     
+    std::cout<<" num contact "<<nc<<"\n";
+    
     glDisable(GL_DEPTH_TEST);
     
     m_constraint->create(nc * 64);
@@ -178,10 +178,6 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 	    m_angularVelocity->bufferSize());
 	Vector3F * angVel = (Vector3F *)m_angularVelocity->data();
 	
-	m_impulse->create(nc * 4);
-	solver->impulseBuf()->deviceToHost(m_impulse->data(), m_impulse->bufferSize());
-	float * J = (float *)m_impulse->data();
-	
 	m_contact->create(nc * 48);
 	phase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
 	ContactData * contact = (ContactData *)m_contact->data();
@@ -200,10 +196,6 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 	    if(SAL < minSAL) minSAL = SAL;
 	}
 	std::cout<<"\n min max SA length "<<minSAL<<" "<<maxSAL<<"\n";
-	
-	m_massTensor->create(nc * 4);
-	solver->MinvBuf()->deviceToHost(m_massTensor->data(), m_massTensor->bufferSize());
-	float * Minv = (float *)m_massTensor->data();
 	
 	bool isA;
 	unsigned iPairA, iBody, iPair;
@@ -260,12 +252,12 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 		    
 		    if(constraint[iPair].relVel >0) converged = 0;
 		    if(constraint[iPair].Minv >0) converged = 0;
-		    /*std::cout<<" SA ("<<sa.x<<", "<<sa.y<<", "<<sa.z<<")\n";
+		    std::cout<<" SA ("<<sa.x<<", "<<sa.y<<", "<<sa.z<<")\n";
 		    std::cout<<" length "<<sqrt( sa.x * sa.x + sa.y * sa.y + sa.z * sa.z )<<"\n";
 		    std::cout<<" body["<<iBody<<"]\n";
-		    std::cout<<" Minv "<<Minv[iPair]<<"\n J "<<J[iPair]<<"\n";
 		    std::cout<<" toi "<<cd.timeOfImpact<<"\n";
-            for(j=0; j< 7; j++) {
+            /*
+		    for(j=0; j< 7; j++) {
                 std::cout<<" dJ["<<j<<"] "<<dJ[iPair * njacobi + j]<<"\n";
             }
 		    converged = 1;

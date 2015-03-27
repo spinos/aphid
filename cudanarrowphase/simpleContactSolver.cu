@@ -211,8 +211,6 @@ __global__ void computeSplitInvMass_kernel(float * invMass,
 }
 
 __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
-                                        float * lambda,
-                                        float * Minv,
                                         uint2 * splits,
                                         uint2 * pairs,
                                         float3 * srcPos,
@@ -251,9 +249,7 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	if(isRgt) return;
 	
 	constraints[iContact].lambda = 0.f;
-	
-	//lambda[iContact] = 0.f;
-	
+
 	const uint2 dstInd = splits[iContact];
 	
 	float3 nA = normalOnA(contact);
@@ -600,8 +596,6 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
 }
 
 void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
-                                        float * lambda,
-                                        float * Minv,
                                         uint2 * splits,
                                         uint2 * pairs,
                                         float3 * pos,
@@ -618,8 +612,6 @@ void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
     dim3 grid(nblk, 1, 1);
     
     setContactConstraint_kernel<<< grid, block >>>(constraints,
-                                        lambda,
-                                        Minv,
                                         splits,
                                         pairs,
                                         pos,
@@ -630,7 +622,7 @@ void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
                                         splitMass,
                                         contacts,
                                         numContacts);
-    cudaDeviceSynchronize();
+// cudaDeviceSynchronize();
 }
 
 void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel, 

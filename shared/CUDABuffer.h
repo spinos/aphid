@@ -30,6 +30,9 @@ public:
 	void unmap();
 	
 private:
+    const unsigned minimalMemSize(unsigned size) const;
+	
+private:
 	struct cudaGraphicsResource *_cuda_vbo_resource;
 	void *_device_vbo_buffer;
 };

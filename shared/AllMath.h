@@ -36,11 +36,16 @@ inline float log2f( float n )
 #define GoldenRatio 1.618
 #define ReGoldenRatio 0.382
 
+float RandomF01()
+{ return ((float)(rand() % 499))/499.f; }
+
+float RandomFn11()
+{ return (RandomF01() - 0.5f) * 2.f; }
+
 template<typename T>
 inline T Absolute(T const& a)
 {
-	if(a >= 0.0) return a;
-	return -a;
+	return (a >= 0.0) ? a : -a;
 }
 
 template<typename T>

@@ -24,9 +24,12 @@ void CUDABuffer::create(float * data, unsigned size)
 void CUDABuffer::create(unsigned size)
 {
 	if(canResize(size)) return;
+	unsigned rs = minimalMemSize(size);
+	if(bufferSize() > 0 && size <= rs) {
+        setBufferSize(size);
+        return;
+	}
 	destroy();
-// must no less than 1K
-	unsigned rs = (size < 1024) ? 1024 : size;
 	CudaBase::MemoryUsed += rs;
 	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, rs));
 	setBufferType(kOnDevice);
@@ -42,7 +45,7 @@ void CUDABuffer::destroy()
 	else if(bufferType() == kOnDevice) {
 		if(_device_vbo_buffer == 0) return;
 		cudaFree(_device_vbo_buffer);
-		CudaBase::MemoryUsed -= bufferSize();
+		CudaBase::MemoryUsed -= minimalMemSize(bufferSize());
 		setBufferSize(0);
 		_device_vbo_buffer = 0;
 	}
@@ -105,3 +108,10 @@ void CUDABuffer::unmap()
 {
 	cutilSafeCall(cudaGraphicsUnmapResources(1, resource(), 0));
 }
+
+const unsigned CUDABuffer::minimalMemSize(unsigned size) const
+{ 
+// must no less than 2K ?
+	return (size < 2048) ? 2048 : size;
+}
+

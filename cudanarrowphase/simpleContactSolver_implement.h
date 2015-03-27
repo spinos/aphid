@@ -34,8 +34,6 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
                                         uint bufLength);
 
 void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
-                                        float * lambda,
-                                        float * Minv,
                                         uint2 * splits,
                                         uint2 * pairs,
                                         float3 * pos,

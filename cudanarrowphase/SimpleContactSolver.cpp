@@ -20,11 +20,7 @@ SimpleContactSolver::SimpleContactSolver()
 	m_splitPair = new CUDABuffer;
 	m_bodyCount = new CUDABuffer;
 	m_splitInverseMass = new CUDABuffer;
-	m_massTensor = new CUDABuffer;
-	m_lambda = new CUDABuffer;
 	m_constraint = new CUDABuffer;
-	// m_projectedLinearVelocity = new CUDABuffer;
-	// m_projectedAngularVelocity = new CUDABuffer; 
 	m_deltaLinearVelocity = new CUDABuffer;
 	m_deltaAngularVelocity = new CUDABuffer;
 	m_deltaJ = new CUDABuffer;
@@ -49,15 +45,6 @@ CUDABuffer * SimpleContactSolver::bodySplitLocBuf()
 CUDABuffer * SimpleContactSolver::constraintBuf()
 { return m_constraint; }
 
-// CUDABuffer * SimpleContactSolver::projectedLinearVelocityBuf()
-// { return m_projectedLinearVelocity; }
-// 
-// CUDABuffer * SimpleContactSolver::projectedAngularVelocityBuf()
-// { return m_projectedAngularVelocity; }
-
-CUDABuffer * SimpleContactSolver::impulseBuf()
-{ return m_lambda; }
-
 CUDABuffer * SimpleContactSolver::deltaLinearVelocityBuf()
 { return m_deltaLinearVelocity; }
 
@@ -66,9 +53,6 @@ CUDABuffer * SimpleContactSolver::deltaAngularVelocityBuf()
 
 CUDABuffer * SimpleContactSolver::deltaJBuf()
 { return m_deltaJ; }
-
-CUDABuffer * SimpleContactSolver::MinvBuf()
-{ return m_massTensor; }
 
 CUDABuffer * SimpleContactSolver::pntTetHashBuf()
 { return m_pntTetHash[0]; }
@@ -118,16 +102,6 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                             (uint *)bodyCount, 
                             splitBufLength);
 	
-// one per contact	
-	m_lambda->create(numContacts * 4);
-	void * lambda = m_lambda->bufferOnDevice();
-	
-	// m_projectedLinearVelocity->create(nextPow2(numContacts * 2 * 12));
-	// void * projLinVel = m_projectedLinearVelocity->bufferOnDevice();
-	// 
-	// m_projectedAngularVelocity->create(nextPow2(numContacts * 2 * 12));
-	// void * projAngVel = m_projectedAngularVelocity->bufferOnDevice();
-	
 	CudaNarrowphase::CombinedObjectBuffer * objectBuf = (CudaNarrowphase::CombinedObjectBuffer *)objectData;
 	void * pos = objectBuf->m_pos->bufferOnDevice();
 	void * vel = objectBuf->m_vel->bufferOnDevice();
@@ -135,20 +109,12 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * perObjPointStart = objectBuf->m_pointCacheLoc->bufferOnDevice();
 	void * perObjectIndexStart = objectBuf->m_indexCacheLoc->bufferOnDevice();
 
-	m_massTensor->create(numContacts * 4);
-	void * Minv = m_massTensor->bufferOnDevice();
-	
 	m_constraint->create(numContacts * 64);
 	void * constraint = m_constraint->bufferOnDevice();
 	
 	void * contacts = contactBuf->bufferOnDevice();
 	
-// compute projected linear and angular velocity	
-// set inital impulse to zero
-// calculate Minv
 	simpleContactSolverSetContactConstraint((ContactConstraint *)constraint,
-	    (float *)lambda, 
-	    (float *)Minv,
 	    (uint2 *)splits,
 	    (uint2 *)pairs,
 	    (float3 *)pos,
@@ -159,16 +125,6 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
         (float *)splitMass,
 	    (ContactData *)contacts,
         numContacts * 2);
-    cudaDeviceSynchronize();
-    cudaError_t cudaResult;
-    cudaResult = cudaGetLastError();
-    if (cudaResult != cudaSuccess)
-    {
-        std::cout<<"cu error "<<cudaGetErrorString(cudaResult);
-        // Do whatever you want here
-        // I normally create a std::string msg with a description of where I am
-        // and append cudaGetErrorString(cudaResult)
-    }
 	
 	m_deltaLinearVelocity->create(nextPow2(splitBufLength * 12));
 	m_deltaAngularVelocity->create(nextPow2(splitBufLength * 12));

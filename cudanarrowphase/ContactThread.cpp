@@ -6,7 +6,8 @@
 #include "SimpleContactSolver.h"
 #include <CUDABuffer.h>
 
-#define GRDX 1199
+#define GRDW 40
+#define GRDH 40
 #define NTET 2500
 
 ContactThread::ContactThread(QObject *parent)
@@ -17,21 +18,21 @@ ContactThread::ContactThread(QObject *parent)
 	float * hv = &m_tetra->hostV()[0];
 	
 	unsigned i, j;
-	float vy = .75f;
+	float vy = 1.25f;
 	float vrx, vry, vrz, vr, vs;
-	for(j=0; j < 2; j++) {
-		for(i=0; i<GRDX; i++) {
-		    vs = 1.5f + (((float)(rand() % 199))/199.f) * 1.5f;
-			Vector3F base(12.3f * i, 6.f * j + 1.f, 0.5f * i);
+	for(j=0; j < GRDH; j++) {
+		for(i=0; i<GRDW; i++) {
+		    vs = 1.75f + RandomF01() * 1.5f;
+			Vector3F base(12.3f * i, 12.3f * j, 0.5f);
 			Vector3F right = base + Vector3F(1.75f, 0.f, 0.7f) * vs;
 			Vector3F front = base + Vector3F(0.f, 0.f, 1.75f) * vs;
 			Vector3F top = base + Vector3F(0.f, 1.75f, 0.7f) * vs;
-			if(j%2==0) top.x += 1.75f;
+			if(j&1) top.x += 1.75f * vs;
 			
-			vrx = 0.725f * (((float)(rand() % 199))/199.f - .5f);
-			vry = 1.f  * (((float)(rand() % 199))/199.f + 1.f)  * vy;
-			vrz = 0.822f * (((float)(rand() % 199))/199.f - .5f);
-			vr = 0.f * (((float)(rand() % 199))/199.f);
+			vrx = 0.725f * (RandomF01() - .5f);
+			vry = 1.f  * (RandomF01() + 1.f)  * vy;
+			vrz = 0.322f * (RandomF01() - .5f);
+			vr = 0.f * RandomF01();
 			
 			m_tetra->addPoint(&base.x);
 			hv[0] = vrx + vr;
@@ -54,7 +55,7 @@ ContactThread::ContactThread(QObject *parent)
 			hv[2] = vrz - vr;
 			hv+=3;
 
-			unsigned b = (j * GRDX + i) * 4;
+			unsigned b = (j * GRDW + i) * 4;
 			m_tetra->addTetrahedron(b, b+1, b+2, b+3);
 			
 			m_tetra->addTriangle(b, b+2, b+1);
@@ -82,11 +83,15 @@ ContactThread::ContactThread(QObject *parent)
 	m_hostPairs = new BaseBuffer;
 	m_devicePairs = new CUDABuffer;
 	
-	m_hostPairs->create(GRDX * 8);
+	m_hostPairs->create(GRDW * GRDH / 2 * 8);
 	unsigned * pab = (unsigned *)m_hostPairs->data();
-	for(i=0; i<GRDX; i++) {
-		pab[i*2] = i;
-		pab[i*2 + 1] = i + GRDX;
+	int k = 0;
+	for(j=0; j < GRDH; j+=2) {
+		for(i=0; i<GRDW; i++) {
+		    pab[k*2] = j * GRDW + i;
+		    pab[k*2 + 1] = (j+1) * GRDW + i;
+		    k++;
+		}
 	}
 	
 	Vector3F r0(-1.3f, 1.f, -0.f);
@@ -110,22 +115,23 @@ void ContactThread::initOnDevice()
 {
     m_narrowphase->initOnDevice();
 	
-	m_devicePairs->create(GRDX * 8);
-	m_devicePairs->hostToDevice(m_hostPairs->data(), GRDX *8);
+	m_devicePairs->create(GRDW * GRDH / 2 * 8);
+	m_devicePairs->hostToDevice(m_hostPairs->data(), m_hostPairs->bufferSize());
 	
-	m_narrowphase->computeContacts(m_devicePairs, GRDX);
+	m_narrowphase->computeContacts(m_devicePairs, GRDW * GRDH / 2);
 	m_contactSolver->initOnDevice();
 }
 
 void ContactThread::stepPhysics(float dt)
 {
-	m_narrowphase->computeContacts(m_devicePairs, GRDX);
+	m_narrowphase->computeContacts(m_devicePairs, GRDW * GRDH / 2);
 	
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),
 									m_narrowphase->contactPairsBuffer(),
 									m_narrowphase->objectBuffer());
 	m_tetra->integrate(0.016667f);
+	BaseSolverThread::stepPhysics(dt);
 }
 
 CudaTetrahedronSystem * ContactThread::tetra()

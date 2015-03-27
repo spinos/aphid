@@ -18,7 +18,7 @@ public:
     virtual ~BaseSolverThread();
     
     static float TimeStep;
-    
+    const unsigned numLoops() const;
     virtual void stepPhysics(float dt);
     
 signals:
@@ -33,6 +33,7 @@ private:
     
     bool abort;
 	bool restart;
+	unsigned m_numLoops;
 
 public slots:
     void simulate();

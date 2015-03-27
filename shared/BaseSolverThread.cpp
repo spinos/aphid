@@ -8,6 +8,7 @@ BaseSolverThread::BaseSolverThread(QObject *parent)
 {
     abort = false;
 	restart = false;
+	m_numLoops = 0;
 }
 
 BaseSolverThread::~BaseSolverThread()
@@ -42,7 +43,7 @@ void BaseSolverThread::run()
         }
         
 		stepPhysics(TimeStep);
-
+		
 		emit doneStep();
 
 		mutex.lock();
@@ -56,5 +57,8 @@ void BaseSolverThread::run()
 }
 
 void BaseSolverThread::stepPhysics(float dt)
-{
-}
+{ m_numLoops++; }
+
+const unsigned BaseSolverThread::numLoops() const
+{ return m_numLoops; }
+

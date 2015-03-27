@@ -24,13 +24,9 @@ public:
 	CUDABuffer * contactPairHashBuf();
 	CUDABuffer * bodySplitLocBuf();
 	CUDABuffer * constraintBuf();
-	// CUDABuffer * projectedLinearVelocityBuf();
-	// CUDABuffer * projectedAngularVelocityBuf();
-	CUDABuffer * impulseBuf();
 	CUDABuffer * deltaLinearVelocityBuf();
 	CUDABuffer * deltaAngularVelocityBuf();
 	CUDABuffer * deltaJBuf();
-	CUDABuffer * MinvBuf();
 	CUDABuffer * pntTetHashBuf();
 	
 	const unsigned numIterations() const;
@@ -39,11 +35,7 @@ private:
 	CUDABuffer * m_splitPair;
 	CUDABuffer * m_bodyCount;
 	CUDABuffer * m_splitInverseMass;
-	CUDABuffer * m_massTensor;
 	CUDABuffer * m_constraint;
-	// CUDABuffer * m_projectedLinearVelocity;
-	// CUDABuffer * m_projectedAngularVelocity;
-	CUDABuffer * m_lambda;
 	CUDABuffer * m_deltaLinearVelocity;
 	CUDABuffer * m_deltaAngularVelocity;
 	CUDABuffer * m_deltaJ;

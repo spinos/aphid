@@ -8,6 +8,7 @@
 #include <CUDABuffer.h>
 #include "ContactThread.h"
 #include <CudaTetrahedronSystem.h>
+#include <CudaNarrowphase.h>
 #include "SimpleContactSolver.h"
 
 #define SIMULATE_INLINE 1
@@ -42,7 +43,7 @@ void GLWidget::clientDraw()
 { 
 #if SIMULATE_INLINE
     if(internalTimer()->isActive()) m_solver->stepPhysics(1.f / 60.f);
-#endif
+#endif    
     // m_dbgDraw->printTOI(m_solver->narrowphase(), m_solver->hostPairs());
 	// m_dbgDraw->printContactPairHash(m_contactSolver, m_narrowphase->numContacts());
 	m_solver->tetra()->sendXToHost();

@@ -92,3 +92,15 @@ int CudaBase::LimitNThreadPerBlock(int regPT, int memPT)
 	if(nwarp < 1) nwarp = 1;
     return nwarp*WarpSize;
 }
+
+/*
+    cudaError_t cudaResult;
+    cudaResult = cudaGetLastError();
+    if (cudaResult != cudaSuccess)
+    {
+        std::cout<<"cu error "<<cudaGetErrorString(cudaResult);
+        // Do whatever you want here
+        // I normally create a std::string msg with a description of where I am
+        // and append cudaGetErrorString(cudaResult)
+    }
+*/
