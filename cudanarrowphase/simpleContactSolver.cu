@@ -244,7 +244,7 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	
 	ContactData & contact = contacts[iContact];
 	
-	int isRgt = (ind & 1) > 0;
+	int isRgt = ind & 1;
 	
 	float3 localP = contact.localA;
 	BarycentricCoordinate * coord = &constraints[ind].coordA;
