@@ -6,7 +6,7 @@
 #include "SimpleContactSolver.h"
 #include <CUDABuffer.h>
 
-#define GRDX 99
+#define GRDX 1199
 #define NTET 2500
 
 ContactThread::ContactThread(QObject *parent)
@@ -102,8 +102,6 @@ ContactThread::ContactThread(QObject *parent)
 	r0.set(-1.3f, .5f, -0.f);
 	r0.normalize();
 	std::cout<<" omega cross r "<<omega0.cross(r0)<<"\n";
-	
-	
 }
 
 ContactThread::~ContactThread() {}
@@ -115,7 +113,7 @@ void ContactThread::initOnDevice()
 	m_devicePairs->create(GRDX * 8);
 	m_devicePairs->hostToDevice(m_hostPairs->data(), GRDX *8);
 	
-	// m_narrowphase->computeContacts(m_devicePairs, GRDX);
+	m_narrowphase->computeContacts(m_devicePairs, GRDX);
 	m_contactSolver->initOnDevice();
 }
 

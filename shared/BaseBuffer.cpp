@@ -29,7 +29,7 @@ void BaseBuffer::create(float * data, unsigned size)
 
 void BaseBuffer::create(unsigned size)
 {
-	if(canResize(size)) return;
+	// if(canResize(size)) return;
 	destroy();
     m_native = new char[size];
     setBufferType(kOnHost);

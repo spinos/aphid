@@ -2,7 +2,7 @@
 #include <bvh_math.cu>
 #include "barycentric.cu"
 #include <CudaBase.h>
-
+#define SETCONSTRAINT_TPB 128
 inline __device__ uint4 computePointIndex(uint * pointStarts,
                                             uint * indexStarts,
                                             uint4 * indices,
@@ -224,6 +224,7 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
                                         ContactData * contacts,
                                         uint maxInd)
 {
+    __shared__ float3 sVel[SETCONSTRAINT_TPB];
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
@@ -231,30 +232,25 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	
 	ContactData contact = contacts[iContact];
 	
-	int isRgt = ind & 1;
+	int isRgt = (ind & 1);
 	
-	ContactConstraint & cst = constraints[iContact];
-	
-	float3 localP = contact.localA;
-	BarycentricCoordinate * coord = &cst.coordA;
-	uint iBody = pairs[iContact].x;
-	
-	if(isRgt) {
-	    localP = contact.localB;
-	    coord = &cst.coordB;
-	    iBody = pairs[iContact].y;
+	uint4 ia;
+	if(isRgt>0) {
+	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].y);
+	    constraints[iContact].coordB = localCoordinate(ia, srcPos, contact.localB);
+	    interpolate_float3i(sVel[threadIdx.x], ia, srcVel, &constraints[iContact].coordB);
 	}
-	
-	uint4 ia = computePointIndex(pointStarts, indexStarts, indices, iBody);
-	
-	*coord = localCoordinate(ia, srcPos, localP);
-	
-	float3 motionA;
-	interpolate_float3i(motionA, ia, srcVel, coord);
+	else {
+	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].x);
+	    constraints[iContact].coordA = localCoordinate(ia, srcPos, contact.localA);
+	    interpolate_float3i(sVel[threadIdx.x], ia, srcVel, &constraints[iContact].coordA);
+	}
+
+	__syncthreads();
 	
 	if(isRgt) return;
 	
-	cst.lambda = 0.f;
+	constraints[iContact].lambda = 0.f;
 	
 	//lambda[iContact] = 0.f;
 	
@@ -265,15 +261,16 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	float3 torqueA = float3_cross(contact.localA, nA);
 	float3 torqueB = float3_cross(contact.localB, nB);
 	
+	constraints[iContact].normal = nA;// float3_from_float4(contact.separateAxis);
 	constraints[iContact].Minv = computeMassTensor(nA, nB, contact.localA, contact.localB,
 	                            torqueA, torqueB,
 	                            splitMass[dstInd.x], splitMass[dstInd.y]);
-	/*
+	
 	float rel = computeRelativeVelocity1(nA, nB,
-	                        motionA, motionB);
+	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
 	
 	if(rel * rel < 0.01f) rel = 0.f;
-	contact.separateAxis.w = rel;*/
+	constraints[iContact].relVel = rel;
 }
 
 __global__ void clearDeltaVelocity_kernel(float3 * deltaLinVel, 
@@ -616,10 +613,8 @@ void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
                                         ContactData * contacts,
                                         uint numContacts)
 {
-    uint tpb = CudaBase::LimitNThreadPerBlock(32, 56);
-
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numContacts, tpb);
+    dim3 block(SETCONSTRAINT_TPB, 1, 1);
+    unsigned nblk = iDivUp(numContacts, SETCONSTRAINT_TPB);
     dim3 grid(nblk, 1, 1);
     
     setContactConstraint_kernel<<< grid, block >>>(constraints,
@@ -635,6 +630,7 @@ void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
                                         splitMass,
                                         contacts,
                                         numContacts);
+    cudaDeviceSynchronize();
 }
 
 void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel, 
@@ -663,7 +659,7 @@ void simpleContactSolverSolveContact(float * lambda,
                         float * deltaJ,
                         int it)
 {
-    uint tpb = 128;//CudaBase::LimitNThreadPerBlock(32, 40);
+    uint tpb = CudaBase::LimitNThreadPerBlock(32, 40);
 
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numContacts, tpb);

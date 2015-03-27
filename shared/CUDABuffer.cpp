@@ -25,9 +25,10 @@ void CUDABuffer::create(unsigned size)
 {
 	if(canResize(size)) return;
 	destroy();
-	// std::cout<<"cu create buf "<<size<<" \n";
-	CudaBase::MemoryUsed += size;
-	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, size));
+// must no less than 1K
+	unsigned rs = (size < 1024) ? 1024 : size;
+	CudaBase::MemoryUsed += rs;
+	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, rs));
 	setBufferType(kOnDevice);
 	setBufferSize(size);
 }
@@ -63,12 +64,13 @@ void * CUDABuffer::bufferOnDeviceAt(unsigned loc)
 
 void CUDABuffer::hostToDevice(void * src, unsigned size)
 {
-    cudaMemcpy(_device_vbo_buffer, src, size, cudaMemcpyHostToDevice);   
+    cutilSafeCall( cudaMemcpy(_device_vbo_buffer, src, size, cudaMemcpyHostToDevice) );   
 }
 
 void CUDABuffer::deviceToHost(void * dst, unsigned size)
 {
-	cutilSafeCall( cudaMemcpy(dst, _device_vbo_buffer, size, cudaMemcpyDeviceToHost) );   
+	cudaError_t err = cudaMemcpy(dst, _device_vbo_buffer, size, cudaMemcpyDeviceToHost); 
+	if(err) std::cout<<"Cudamemcpy threw error\n"; 
 }
 
 void CUDABuffer::hostToDevice(void * src)

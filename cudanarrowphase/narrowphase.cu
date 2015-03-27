@@ -100,8 +100,6 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 
 	if(ind >= maxInd) return;
 	
-	dstContact[ind].separateAxis.w = 0.f;
-	
 	uint objA = extractObjectInd(pairs[ind].x);
 	uint objB = extractObjectInd(pairs[ind].y);
 	uint elmA = extractElementInd(pairs[ind].x);

@@ -9,6 +9,7 @@
 struct ContactConstraint {
     BarycentricCoordinate coordA;
     BarycentricCoordinate coordB;
+    float3 normal;
     float lambda;
     float Minv;
     float relVel;

@@ -137,7 +137,7 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
     
     glDisable(GL_DEPTH_TEST);
     
-    m_constraint->create(nc * 48);
+    m_constraint->create(nc * 64);
     solver->constraintBuf()->deviceToHost(m_constraint->data(), m_constraint->bufferSize());
 	ContactConstraint * constraint = (ContactConstraint *)m_constraint->data();
     
@@ -245,12 +245,22 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 		m_drawer->arrow(cenA, cenA + angVel[i]);
 		
 		if(isA) {
+		    converged = 1;
 		    std::cout<<"\n contact["<<iPair<<"]\n";
 		    BarycentricCoordinate coord = constraint[iPair].coordA;
+		    if(coord.x + coord.y + coord.z + coord.w > 1.1f) converged = 0;
 		    std::cout<<" coordA ("<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.w<<")\n";
 		    coord = constraint[iPair].coordB;
+		    if(coord.x + coord.y + coord.z + coord.w > 1.1f) converged = 0;
 		    std::cout<<" coordB ("<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.w<<")\n";
-		    std::cout<<" SA ("<<sa.x<<", "<<sa.y<<", "<<sa.z<<")\n";
+		    std::cout<<" relVel "<<constraint[iPair].relVel<<"\n";
+		    std::cout<<" Minv "<<constraint[iPair].Minv<<"\n";
+		    Vector3F nn(constraint[iPair].normal.x, constraint[iPair].normal.y, constraint[iPair].normal.z);
+		    std::cout<<" normal "<<nn<<"\n";
+		    
+		    if(constraint[iPair].relVel >0) converged = 0;
+		    if(constraint[iPair].Minv >0) converged = 0;
+		    /*std::cout<<" SA ("<<sa.x<<", "<<sa.y<<", "<<sa.z<<")\n";
 		    std::cout<<" length "<<sqrt( sa.x * sa.x + sa.y * sa.y + sa.z * sa.z )<<"\n";
 		    std::cout<<" body["<<iBody<<"]\n";
 		    std::cout<<" Minv "<<Minv[iPair]<<"\n J "<<J[iPair]<<"\n";
@@ -271,7 +281,7 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
                 }
                 
                 lastJ = curJ;
-            }
+            }*/
             
             if(!converged) {
                 std::cout<<" no converging!\n";
