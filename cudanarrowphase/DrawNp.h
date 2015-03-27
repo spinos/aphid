@@ -46,4 +46,5 @@ private:
 	BaseBuffer * m_deltaJ;
 	BaseBuffer * m_massTensor;
 	BaseBuffer * m_pntTetHash;
+	BaseBuffer * m_constraint;
 };

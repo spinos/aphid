@@ -22,7 +22,7 @@ SimpleContactSolver::SimpleContactSolver()
 	m_splitInverseMass = new CUDABuffer;
 	m_massTensor = new CUDABuffer;
 	m_lambda = new CUDABuffer;
-	m_contraint = new CUDABuffer;
+	m_constraint = new CUDABuffer;
 	// m_projectedLinearVelocity = new CUDABuffer;
 	// m_projectedAngularVelocity = new CUDABuffer; 
 	m_deltaLinearVelocity = new CUDABuffer;
@@ -30,6 +30,8 @@ SimpleContactSolver::SimpleContactSolver()
 	m_deltaJ = new CUDABuffer;
 	m_pntTetHash[0] = new CUDABuffer;
 	m_pntTetHash[1] = new CUDABuffer;
+	
+	std::cout<<" sizeof struct ContactConstraint "<<sizeof(ContactConstraint)<<"\n";
 }
 
 SimpleContactSolver::~SimpleContactSolver() {}
@@ -43,6 +45,9 @@ CUDABuffer * SimpleContactSolver::contactPairHashBuf()
 
 CUDABuffer * SimpleContactSolver::bodySplitLocBuf()
 { return m_splitPair; }
+
+CUDABuffer * SimpleContactSolver::constraintBuf()
+{ return m_constraint; }
 
 // CUDABuffer * SimpleContactSolver::projectedLinearVelocityBuf()
 // { return m_projectedLinearVelocity; }
@@ -133,8 +138,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	m_massTensor->create(nextPow2(numContacts * 4));
 	void * Minv = m_massTensor->bufferOnDevice();
 	
-	m_contraint->create(numContacts * 32);
-	void * constraint = m_contraint->bufferOnDevice();
+	m_constraint->create(numContacts * 48);
+	void * constraint = m_constraint->bufferOnDevice();
 	
 	void * contacts = contactBuf->bufferOnDevice();
 	
@@ -188,12 +193,16 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	    simpleContactSolverSolveContact((float *)lambda,
 	                    (float3 *)deltaLinVel,
 	                    (float3 *)deltaAngVel,
-	                    (float3 *)projLinVel,
-	                    (float3 *)projAngVel,
+	                    (ContactConstraint *)constraint,
 	                    (uint2 *)splits,
 	                    (float *)splitMass,
 	                    (float *)Minv,
 	                    (ContactData *)contacts,
+	                    (float3 *)pos,
+	                    (float3 *)vel,
+	                    (uint4 *)ind,
+	                    (uint * )perObjPointStart,
+	                    (uint * )perObjectIndexStart,
 	                    numContacts,
 	                    (float *)dJ,
 	                    i);

@@ -153,5 +153,18 @@ inline __device__ int pointInsideTetrahedronTest(const float3 & p, const float3 
         coord.z >=0 && coord.z <=1 &&
         coord.w >=0 && coord.w <=1);
 }
+
+inline __device__ void interpolate_float3i(float3 & dst, 
+                                    uint4 ia,
+                                    float3 * velocity,
+                                    BarycentricCoordinate * coord)
+{
+    float3_set_zero(dst);
+	
+	dst = float3_add(dst, scale_float3_by(velocity[ia.x], coord->x));
+	dst = float3_add(dst, scale_float3_by(velocity[ia.y], coord->y));
+	dst = float3_add(dst, scale_float3_by(velocity[ia.z], coord->z));
+	dst = float3_add(dst, scale_float3_by(velocity[ia.w], coord->w));
+}
 #endif        //  #ifndef BARYCENTRIC_CU
 

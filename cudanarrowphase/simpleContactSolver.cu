@@ -50,19 +50,6 @@ inline __device__ BarycentricCoordinate localCoordinate(uint4 ia,
 	return getBarycentricCoordinate4i(q, position, ia);
 }
 
-inline __device__ void projectMotion(float3 & linearVelocity, 
-                                    uint4 ia,
-                                    float3 * velocity,
-                                    BarycentricCoordinate * coord)
-{
-    float3_set_zero(linearVelocity);
-	
-	linearVelocity = float3_add(linearVelocity, scale_float3_by(velocity[ia.x], coord->x));
-	linearVelocity = float3_add(linearVelocity, scale_float3_by(velocity[ia.y], coord->y));
-	linearVelocity = float3_add(linearVelocity, scale_float3_by(velocity[ia.z], coord->z));
-	linearVelocity = float3_add(linearVelocity, scale_float3_by(velocity[ia.w], coord->w));
-}
-
 inline __device__ void computeBodyVelocities1(uint * pointStarts, 
                                                 uint * indexStarts, 
                                                 uint4 * indices, 
@@ -242,43 +229,47 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	
 	uint iContact = ind>>1;
 	
-	ContactData & contact = contacts[iContact];
+	ContactData contact = contacts[iContact];
 	
 	int isRgt = ind & 1;
 	
+	ContactConstraint & cst = constraints[iContact];
+	
 	float3 localP = contact.localA;
-	BarycentricCoordinate * coord = &constraints[ind].coordA;
-	uint iBody = pairs[ind].x;
+	BarycentricCoordinate * coord = &cst.coordA;
+	uint iBody = pairs[iContact].x;
 	
 	if(isRgt) {
 	    localP = contact.localB;
-	    coord = &constraints[ind].coordB;
-	    iBody = pairs[ind].y;
+	    coord = &cst.coordB;
+	    iBody = pairs[iContact].y;
 	}
 	
 	uint4 ia = computePointIndex(pointStarts, indexStarts, indices, iBody);
 	
 	*coord = localCoordinate(ia, srcPos, localP);
 	
-	// float3 motionA;
-	// projectMotion(motionA, ia, srcVel, coord);
+	float3 motionA;
+	interpolate_float3i(motionA, ia, srcVel, coord);
 	
 	if(isRgt) return;
 	
-	lambda[iContact] = 0.f;
+	cst.lambda = 0.f;
 	
-	const uint2 dstInd = splits[ind];
+	//lambda[iContact] = 0.f;
+	
+	const uint2 dstInd = splits[iContact];
 	
 	float3 nA = normalOnA(contact);
 	float3 nB = float3_reverse(nA);
 	float3 torqueA = float3_cross(contact.localA, nA);
 	float3 torqueB = float3_cross(contact.localB, nB);
 	
-	Minv[iContact] = computeMassTensor(nA, nB, contact.localA, contact.localB,
+	constraints[iContact].Minv = computeMassTensor(nA, nB, contact.localA, contact.localB,
 	                            torqueA, torqueB,
 	                            splitMass[dstInd.x], splitMass[dstInd.y]);
-	
-	/*float rel = computeRelativeVelocity1(nA, nB,
+	/*
+	float rel = computeRelativeVelocity1(nA, nB,
 	                        motionA, motionB);
 	
 	if(rel * rel < 0.01f) rel = 0.f;
@@ -551,8 +542,8 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	sumLinVel = scale_float3_by(sumLinVel, 1.f / count);
 	
 	// dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], sumLinVel);
-	dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], deltaLinearVelocity[splitInd]);
-	// dstVelocity[iPnt] = make_float3(0.f, 0.f, 0.f);
+	// dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], deltaLinearVelocity[splitInd]);
+	float3_set_zero(dstVelocity[iPnt]);
 }
 
 extern "C" {
@@ -625,7 +616,7 @@ void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
                                         ContactData * contacts,
                                         uint numContacts)
 {
-    uint tpb = CudaBase::LimitNThreadPerBlock(40, 56);
+    uint tpb = CudaBase::LimitNThreadPerBlock(32, 56);
 
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numContacts, tpb);

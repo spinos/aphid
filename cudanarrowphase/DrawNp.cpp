@@ -16,6 +16,7 @@
 #include "narrowphase_implement.h"
 #include <CUDABuffer.h>
 #include "radixsort_implement.h"
+#include "simpleContactSolver_implement.h"
 #include <CudaBase.h>
 
 DrawNp::DrawNp() 
@@ -33,6 +34,7 @@ DrawNp::DrawNp()
 	m_deltaJ = new BaseBuffer;
 	m_massTensor = new BaseBuffer;
 	m_pntTetHash = new BaseBuffer;
+	m_constraint = new BaseBuffer;
 }
 
 DrawNp::~DrawNp() {}
@@ -134,6 +136,10 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
     if(nc < 1) return 1;
     
     glDisable(GL_DEPTH_TEST);
+    
+    m_constraint->create(nc * 48);
+    solver->constraintBuf()->deviceToHost(m_constraint->data(), m_constraint->bufferSize());
+	ContactConstraint * constraint = (ContactConstraint *)m_constraint->data();
     
     const unsigned njacobi = 8;//solver->numIterations();
 	
@@ -240,6 +246,10 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 		
 		if(isA) {
 		    std::cout<<"\n contact["<<iPair<<"]\n";
+		    BarycentricCoordinate coord = constraint[iPair].coordA;
+		    std::cout<<" coordA ("<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.w<<")\n";
+		    coord = constraint[iPair].coordB;
+		    std::cout<<" coordB ("<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.w<<")\n";
 		    std::cout<<" SA ("<<sa.x<<", "<<sa.y<<", "<<sa.z<<")\n";
 		    std::cout<<" length "<<sqrt( sa.x * sa.x + sa.y * sa.y + sa.z * sa.z )<<"\n";
 		    std::cout<<" body["<<iBody<<"]\n";
