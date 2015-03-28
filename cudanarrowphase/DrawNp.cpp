@@ -141,7 +141,7 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
     solver->constraintBuf()->deviceToHost(m_constraint->data(), m_constraint->bufferSize());
 	ContactConstraint * constraint = (ContactConstraint *)m_constraint->data();
     
-    const unsigned njacobi = 8;//solver->numIterations();
+    const unsigned njacobi = solver->numIterations();
 	
 	m_deltaJ->create(nc * njacobi * 4);
 	solver->deltaJBuf()->deviceToHost(m_deltaJ->data(), m_deltaJ->bufferSize());
@@ -241,9 +241,11 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 		    std::cout<<"\n contact["<<iPair<<"]\n";
 		    BarycentricCoordinate coord = constraint[iPair].coordA;
 		    if(coord.x + coord.y + coord.z + coord.w > 1.1f) converged = 0;
+		    if(coord.x + coord.y + coord.z + coord.w < .9f) converged = 0;
 		    std::cout<<" coordA ("<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.w<<")\n";
 		    coord = constraint[iPair].coordB;
 		    if(coord.x + coord.y + coord.z + coord.w > 1.1f) converged = 0;
+		    if(coord.x + coord.y + coord.z + coord.w < .9f) converged = 0;
 		    std::cout<<" coordB ("<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.w<<")\n";
 		    std::cout<<" relVel "<<constraint[iPair].relVel<<"\n";
 		    std::cout<<" Minv "<<constraint[iPair].Minv<<"\n";
@@ -256,13 +258,14 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 		    std::cout<<" length "<<sqrt( sa.x * sa.x + sa.y * sa.y + sa.z * sa.z )<<"\n";
 		    std::cout<<" body["<<iBody<<"]\n";
 		    std::cout<<" toi "<<cd.timeOfImpact<<"\n";
-            /*
-		    for(j=0; j< 7; j++) {
+            
+		    for(j=0; j< njacobi; j++) {
                 std::cout<<" dJ["<<j<<"] "<<dJ[iPair * njacobi + j]<<"\n";
             }
+            
 		    converged = 1;
             float lastJ = dJ[iPair * njacobi];
-            for(j=1; j< 7; j++) {
+            for(j=1; j< njacobi; j++) {
                 
                 float curJ = dJ[iPair * njacobi + j];
                 if(curJ < 0.f) curJ = -curJ;
@@ -273,11 +276,11 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
                 }
                 
                 lastJ = curJ;
-            }*/
+            }
             
             if(!converged) {
                 std::cout<<" no converging!\n";
-                
+                std::cout<<" num contacts "<<nc<<"\n";
                 glColor3f(1.f, 0.f, 0.f);
                 m_drawer->arrow(cenA + Vector3F(0.f, -8.f, 0.f), cenA);
             }

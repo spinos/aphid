@@ -6,8 +6,8 @@
 #include "SimpleContactSolver.h"
 #include <CUDABuffer.h>
 
-#define GRDW 40
-#define GRDH 40
+#define GRDW 44
+#define GRDH 44
 #define NTET 2500
 
 ContactThread::ContactThread(QObject *parent)
@@ -18,12 +18,12 @@ ContactThread::ContactThread(QObject *parent)
 	float * hv = &m_tetra->hostV()[0];
 	
 	unsigned i, j;
-	float vy = 1.25f;
+	float vy = 2.75f;
 	float vrx, vry, vrz, vr, vs;
 	for(j=0; j < GRDH; j++) {
 		for(i=0; i<GRDW; i++) {
 		    vs = 1.75f + RandomF01() * 1.5f;
-			Vector3F base(12.3f * i, 12.3f * j, 0.5f);
+			Vector3F base(12.3f * i, 12.3f * j, 0.2f * j);
 			Vector3F right = base + Vector3F(1.75f, 0.f, 0.7f) * vs;
 			Vector3F front = base + Vector3F(0.f, 0.f, 1.75f) * vs;
 			Vector3F top = base + Vector3F(0.f, 1.75f, 0.7f) * vs;

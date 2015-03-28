@@ -3,6 +3,7 @@
 #include "barycentric.cu"
 #include <CudaBase.h>
 #define SETCONSTRAINT_TPB 128
+#define DEFORMABILITY 0.05f
 inline __device__ uint4 computePointIndex(uint * pointStarts,
                                             uint * indexStarts,
                                             uint4 * indices,
@@ -132,6 +133,46 @@ inline __device__ float computeMassTensor(float3 nA, float3 nB,
     return -1.f/(invMassA + invMassB + 
         float3_dot(jmjA, nA) + 
         float3_dot(jmjB, nB));
+}
+
+inline __device__ void addDeltaVelocity(float3 & dst, 
+        float3 deltaLinearVelocity,
+        float3 deltaAngularVelocity,
+        float3 normal, 
+        float3 r,
+        BarycentricCoordinate * coord)
+{
+    dst = float3_add(dst, deltaLinearVelocity);
+    
+    float3 vRot = float3_cross(deltaAngularVelocity, r);
+    vRot = scale_float3_by(vRot, DEFORMABILITY);
+    
+// distribure by weight to vex, then sum by weight from vex
+    float wei = coord->x * coord->x;
+    wei = wei > 1.f ? 1.f : wei;
+    dst = float3_add(dst, scale_float3_by(vRot, wei));
+    
+    wei = coord->y * coord->y;
+    wei = wei > 1.f ? 1.f : wei;
+    dst = float3_add(dst, scale_float3_by(vRot, wei));
+    
+    wei = coord->z * coord->z;
+    wei = wei > 1.f ? 1.f : wei;
+    dst = float3_add(dst, scale_float3_by(vRot, wei));
+    
+    wei = coord->w * coord->w;
+    wei = wei > 1.f ? 1.f : wei;
+    dst = float3_add(dst, scale_float3_by(vRot, wei));
+}
+
+inline __device__ float getPntTetWeight(uint pnt, 
+                            uint4 tet, 
+                            BarycentricCoordinate coord)
+{
+    if(pnt == tet.x) return coord.x;
+    if(pnt == tet.y) return coord.y;
+    if(pnt == tet.z) return coord.z;
+    return coord.w;
 }
 
 __global__ void writeContactIndex_kernel(KeyValuePair * dstInd, 
@@ -304,68 +345,81 @@ __global__ void stopAtContact_kernel(float3 * dstVelocity,
 	dstVelocity[ib.w] = make_float3(0.f, 0.f, 0.f);
 }
 
-__global__ void solveContact_kernel(float * lambda,
+__global__ void solveContact_kernel(ContactConstraint* constraints,
                         float3 * deltaLinearVelocity,
 	                    float3 * deltaAngularVelocity,
-                        float3 * linearVelocity,
-	                    float3 * angularVelocity,
-	                    uint2 * splits,
+	                    uint2 * pairs,
+                        uint2 * splits,
 	                    float * splitMass,
-	                    float * Minv,
-                        ContactData * contacts,
+	                    ContactData * contacts,
+	                    float3 * positions,
+                        float3 * velocities,
+                        uint4 * indices,
+                        uint * pointStarts,
+                        uint * indexStarts,
                         uint maxInd,
                         float * deltaJ,
                         int it)
 {
-    __shared__ float J[128];
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
 	const uint2 dstInd = splits[ind];
 	
-	const uint ilft = ind * 2;
-	
-	float3 linA = float3_add(linearVelocity[ilft], deltaLinearVelocity[dstInd.x]);
-	float3 linB = float3_add(linearVelocity[ilft+1], deltaLinearVelocity[dstInd.y]);
-	
-	float3 angA = float3_add(angularVelocity[ilft], deltaAngularVelocity[dstInd.x]);
-	float3 angB = float3_add(angularVelocity[ilft+1], deltaAngularVelocity[dstInd.y]);
-	
+// initial velocities
+    uint4 ia = computePointIndex(pointStarts, indexStarts, indices, pairs[ind].x);
+    uint4 ib = computePointIndex(pointStarts, indexStarts, indices, pairs[ind].y);
+    
+    float3 velA;
+    interpolate_float3i(velA, ia, velocities, &constraints[ind].coordA);
+    float3 velB;
+    interpolate_float3i(velB, ib, velocities, &constraints[ind].coordB);
+    
 	ContactData contact = contacts[ind];
 
-	float3 nA = normalOnA(contact);
+	float3 nA = constraints[ind].normal;
 	float3 nB = float3_reverse(nA);
 // N pointing inside object
 // T = r X N	
 	float3 torqueA = float3_cross(contact.localA, nA);
 	float3 torqueB = float3_cross(contact.localB, nB);
 	
-	J[threadIdx.x] = computeRelativeVelocity(nA, nB,
-	                        linA, linB,
-	                        torqueA, torqueB,
-	                        angA, angB);
-// condition?
-	J[threadIdx.x] += contact.separateAxis.w;
-	J[threadIdx.x] *= Minv[ind];
+	addDeltaVelocity(velA, 
+        deltaLinearVelocity[dstInd.x],
+        deltaAngularVelocity[dstInd.x],
+        nA, contact.localA,
+        &constraints[ind].coordA);
+    
+    addDeltaVelocity(velB, 
+        deltaLinearVelocity[dstInd.y],
+        deltaAngularVelocity[dstInd.y],
+        nB, contact.localB,
+        &constraints[ind].coordB);
+	
+	float J = computeRelativeVelocity1(nA, nB,
+	                        velA, velB);
+
+	J += constraints[ind].relVel;
+	J *= constraints[ind].Minv;
 	
 	const float invMassA = splitMass[dstInd.x];
 	const float invMassB = splitMass[dstInd.y];
 	
-	float prevSum = lambda[ind];
+	float prevSum = constraints[ind].lambda;
 	float updated = prevSum;
-	updated += J[threadIdx.x];
+	updated += J;
 	if(updated < 0.f) updated = 0.f;
-	lambda[ind] = updated;
+	constraints[ind].lambda = updated;
 	
-	J[threadIdx.x] = updated - prevSum;
+	J = updated - prevSum;
 	
-	deltaJ[ind * JACOBI_NUM_ITERATIONS + it] = J[threadIdx.x];
+	deltaJ[ind * JACOBI_NUM_ITERATIONS + it] = J;
 	
-	applyImpulse(deltaLinearVelocity[dstInd.x], J[threadIdx.x] * invMassA, nA);
-	applyImpulse(deltaLinearVelocity[dstInd.y], J[threadIdx.x] * invMassB, nB);
+	applyImpulse(deltaLinearVelocity[dstInd.x], J * invMassA, nA);
+	applyImpulse(deltaLinearVelocity[dstInd.y], J * invMassB, nB);
 	
-	applyImpulse(deltaAngularVelocity[dstInd.x], J[threadIdx.x] * invMassA, torqueA);
-	applyImpulse(deltaAngularVelocity[dstInd.y], J[threadIdx.x] * invMassB, torqueB);
+	applyImpulse(deltaAngularVelocity[dstInd.x], J * invMassA, torqueA);
+	applyImpulse(deltaAngularVelocity[dstInd.y], J * invMassB, torqueB);
 }
 
 __global__ void averageVelocities_kernel(float3 * linearVelocity,
@@ -476,6 +530,8 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	                KeyValuePair * pntTetHash,
                     uint2 * pairs,
                     uint2 * splits,
+                    ContactConstraint * constraints,
+                    ContactData * contacts,
                     float3 * position,
                     uint4 * indices,
                     uint * objectPointStarts,
@@ -497,33 +553,40 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	if(!isFirst) return;
 	
 	float3 sumLinVel = make_float3(0.f, 0.f, 0.f);
-	float3 center;
 	float count = 0.f;
 	uint cur = ind;
 	uint iContact, splitInd, iBody;
+	uint4 iTet;
+	float weight;
+	BarycentricCoordinate coord;
+	float3 r, vRot;
 	for(;;) {
 	    iContact = pntTetHash[cur].value>>1;
 	
 	    splitInd = splits[iContact].x;
 	    iBody = pairs[iContact].x;
+	    coord = constraints[iContact].coordA;
+	    r = contacts[iContact].localA;
 	
         if((pntTetHash[cur].value & 1)>0) {
             splitInd = splits[iContact].y;
             iBody = pairs[iContact].y;
+            coord = constraints[iContact].coordB;
+            r = contacts[iContact].localB;
         }
         
         sumLinVel = float3_add(sumLinVel, deltaLinearVelocity[splitInd]);
         
-        computeBodyCenter(center, iBody,
-                                position,
-                                indices,
-                                objectPointStarts,
-                                objectIndexStarts);
+        iTet = computePointIndex(objectPointStarts, objectIndexStarts, indices, iBody);
+        weight = getPntTetWeight(iPnt, iTet, coord);
 
-// v = omega X r
-        sumLinVel = float3_add(sumLinVel, 
-            float3_cross( deltaAngularVelocity[splitInd], 
-                         float3_difference(position[iPnt], center) ) );
+// v = omega X r        
+        vRot = float3_cross(deltaAngularVelocity[splitInd], r);
+        
+// weighted by vex coord        
+        vRot = scale_float3_by(vRot, weight * DEFORMABILITY);
+
+        sumLinVel = float3_add(sumLinVel, vRot);
       
         count += 1.f;
         
@@ -532,11 +595,11 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	    if(pntTetHash[cur].key != iPnt) break;
 	}
 	
-	sumLinVel = scale_float3_by(sumLinVel, 1.f / count);
+	if(count > 1.f) sumLinVel = scale_float3_by(sumLinVel, 1.f / count);
 	
-	// dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], sumLinVel);
+	dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], sumLinVel);
 	// dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], deltaLinearVelocity[splitInd]);
-	float3_set_zero(dstVelocity[iPnt]);
+	// float3_set_zero(dstVelocity[iPnt]);
 }
 
 extern "C" {
@@ -622,7 +685,7 @@ void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
                                         splitMass,
                                         contacts,
                                         numContacts);
-// cudaDeviceSynchronize();
+    // cudaDeviceSynchronize();
 }
 
 void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel, 
@@ -638,34 +701,40 @@ void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel,
                                        bufLength);
 }
 
-void simpleContactSolverSolveContact(float * lambda,
+void simpleContactSolverSolveContact(ContactConstraint* constraints,
                         float3 * deltaLinearVelocity,
 	                    float3 * deltaAngularVelocity,
-                        float3 * linearVelocity,
-	                    float3 * angularVelocity,
-	                    uint2 * splits,
+                        uint2 * pairs,
+                        uint2 * splits,
 	                    float * splitMass,
-	                    float * Minv,
-                        ContactData * contacts,
+	                    ContactData * contacts,
+	                    float3 * positions,
+                        float3 * velocities,
+                        uint4 * indices,
+                        uint * perObjPointStart,
+                        uint * perObjectIndexStart,
                         uint numContacts,
                         float * deltaJ,
                         int it)
 {
-    uint tpb = CudaBase::LimitNThreadPerBlock(32, 40);
+    uint tpb = CudaBase::LimitNThreadPerBlock(42, 40);
 
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numContacts, tpb);
     dim3 grid(nblk, 1, 1);
     
-    solveContact_kernel<<< grid, block >>>(lambda,
+    solveContact_kernel<<< grid, block >>>(constraints,
                         deltaLinearVelocity,
-                        deltaAngularVelocity,
-                        linearVelocity,
-	                    angularVelocity,
-	                    splits,
+	                    deltaAngularVelocity,
+	                    pairs,
+                        splits,
 	                    splitMass,
-	                    Minv,
-                        contacts,
+	                    contacts,
+	                    positions,
+                        velocities,
+                        indices,
+                        perObjPointStart,
+                        perObjectIndexStart,
                         numContacts,
                         deltaJ,
                         it);
@@ -719,13 +788,15 @@ void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
 	                KeyValuePair * pntTetHash,
                     uint2 * pairs,
                     uint2 * splits,
+                    ContactConstraint * constraints,
+                    ContactData * contacts,
                     float3 * position,
                     uint4 * indices,
                     uint * objectPointStarts,
                     uint * objectIndexStarts,
                     uint numPoints)
 {
-    uint tpb = CudaBase::LimitNThreadPerBlock(22, 40);
+    uint tpb = CudaBase::LimitNThreadPerBlock(24, 40);
 
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numPoints, tpb);
@@ -737,6 +808,8 @@ void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
 	                pntTetHash,
                     pairs,
                     splits,
+                    constraints,
+                    contacts,
                     position,
                     indices,
                     objectPointStarts,

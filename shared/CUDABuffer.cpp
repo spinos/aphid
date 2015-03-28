@@ -111,7 +111,7 @@ void CUDABuffer::unmap()
 
 const unsigned CUDABuffer::minimalMemSize(unsigned size) const
 { 
-// must no less than 2K ?
-	return (size < 2048) ? 2048 : size;
+// must no less than 4K ?
+	return (size < 4096) ? 4096 : size;
 }
 

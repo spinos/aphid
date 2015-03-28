@@ -153,16 +153,14 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * dJ = m_deltaJ->bufferOnDevice();
 	
 	int i;
-	for(i=0; i< 7; i++) {
+	for(i=0; i< JACOBI_NUM_ITERATIONS; i++) {
 // compute impulse and velocity changes per contact
-/*
-	    simpleContactSolverSolveContact((float *)lambda,
+	    simpleContactSolverSolveContact((ContactConstraint *)constraint,
 	                    (float3 *)deltaLinVel,
 	                    (float3 *)deltaAngVel,
-	                    (ContactConstraint *)constraint,
+	                    (uint2 *)pairs,
 	                    (uint2 *)splits,
 	                    (float *)splitMass,
-	                    (float *)Minv,
 	                    (ContactData *)contacts,
 	                    (float3 *)pos,
 	                    (float3 *)vel,
@@ -172,7 +170,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                    numContacts,
 	                    (float *)dJ,
 	                    i);
-*/	    
+    
 	    simpleContactSolverAverageVelocities((float3 *)deltaLinVel,
                         (float3 *)deltaAngVel,
                         (uint *)bodyCount,
@@ -206,6 +204,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                (KeyValuePair *)pntTetHash,
                     (uint2 *)pairs,
                     (uint2 *)splits,
+                    (ContactConstraint *)constraint,
+                    (ContactData *)contacts,
                     (float3 *)pos,
                     (uint4 *)ind,
                     (uint * )perObjPointStart,
