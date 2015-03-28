@@ -18,16 +18,17 @@ ContactThread::ContactThread(QObject *parent)
 	float * hv = &m_tetra->hostV()[0];
 	
 	unsigned i, j;
-	float vy = 2.75f;
+	float vy = 1.95f;
 	float vrx, vry, vrz, vr, vs;
 	for(j=0; j < GRDH; j++) {
 		for(i=0; i<GRDW; i++) {
 		    vs = 1.75f + RandomF01() * 1.5f;
-			Vector3F base(12.3f * i, 12.3f * j, 0.2f * j);
+			Vector3F base(9.3f * i, 9.3f * j, 0.5f * j);
 			Vector3F right = base + Vector3F(1.75f, 0.f, 0.7f) * vs;
 			Vector3F front = base + Vector3F(0.f, 0.f, 1.75f) * vs;
 			Vector3F top = base + Vector3F(0.f, 1.75f, 0.7f) * vs;
-			if(j&1) top.x += 1.75f * vs;
+			if((j&1)==0) top.x += .75f;
+			else front.y += .75f;
 			
 			vrx = 0.725f * (RandomF01() - .5f);
 			vry = 1.f  * (RandomF01() + 1.f)  * vy;

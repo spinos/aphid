@@ -4,7 +4,7 @@
 #include <CudaBase.h>
 #define SETCONSTRAINT_TPB 128
 #define SOLVECONTACT_TPB 256
-#define DEFORMABILITY 0.07f
+#define DEFORMABILITY 0.17f
 inline __device__ uint4 computePointIndex(uint * pointStarts,
                                             uint * indexStarts,
                                             uint4 * indices,
@@ -131,9 +131,10 @@ inline __device__ float computeMassTensor(float3 nA, float3 nB,
     float3 jmjA = float3_cross( scale_float3_by(torqueA, invMassA), rA );
     float3 jmjB = float3_cross( scale_float3_by(torqueB, invMassB), rB );
     
-    return -1.f/(invMassA + invMassB + invMassA + invMassB);//
-        // float3_dot(jmjA, nA) + 
-        // float3_dot(jmjB, nB));
+    return -1.f/(invMassA + invMassB +  
+         invMassA + invMassB);    
+         // invMassA * float3_dot(jmjA, nA) + 
+         // invMassB * float3_dot(jmjB, nB));
 }
 
 inline __device__ void addDeltaVelocity(float3 & dst, 
@@ -144,7 +145,7 @@ inline __device__ void addDeltaVelocity(float3 & dst,
         BarycentricCoordinate * coord)
 {
     dst = float3_add(dst, deltaLinearVelocity);
-    
+
     float3 vRot = float3_cross(deltaAngularVelocity, r);
     vRot = scale_float3_by(vRot, DEFORMABILITY);
     

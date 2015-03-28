@@ -271,6 +271,7 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
             
 		    converged = 1;
             float lastJ = dJ[iPair * njacobi];
+			float sumJ = lastJ;
             for(j=1; j< njacobi; j++) {
                 
                 float curJ = dJ[iPair * njacobi + j];
@@ -282,7 +283,10 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
                 }
                 
                 lastJ = curJ;
+				sumJ+=curJ;
             }
+			
+			m_log->write(boost::str(boost::format("remain %1%\n") % (sumJ + constraint[iPair].relVel)));
             
             if(!converged) {
                 std::cout<<" no converging!\n";
