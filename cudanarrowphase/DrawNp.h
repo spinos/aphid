@@ -12,6 +12,7 @@ class TetrahedronSystem;
 class BaseBuffer;
 class CudaNarrowphase;
 class SimpleContactSolver;
+class BaseLog;
 class DrawNp {
 public:
 	DrawNp();
@@ -45,4 +46,5 @@ private:
 	BaseBuffer * m_deltaJ;
 	BaseBuffer * m_pntTetHash;
 	BaseBuffer * m_constraint;
+	BaseLog * m_log;
 };

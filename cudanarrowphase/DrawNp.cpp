@@ -18,6 +18,8 @@
 #include "radixsort_implement.h"
 #include "simpleContactSolver_implement.h"
 #include <CudaBase.h>
+#include <BaseLog.h>
+#include <boost/format.hpp>
 
 DrawNp::DrawNp() 
 {
@@ -33,6 +35,7 @@ DrawNp::DrawNp()
 	m_deltaJ = new BaseBuffer;
 	m_pntTetHash = new BaseBuffer;
 	m_constraint = new BaseBuffer;
+	m_log = new BaseLog("narrowphase.txt");
 }
 
 DrawNp::~DrawNp() {}
@@ -133,7 +136,7 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
     const unsigned nc = phase->numContacts();
     if(nc < 1) return 1;
     
-    std::cout<<" num contact "<<nc<<"\n";
+    m_log->write(boost::str(boost::format("\ncheck begin num contact %1% \n") % nc ));
     
     glDisable(GL_DEPTH_TEST);
     
@@ -195,7 +198,7 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 	    if(SAL > maxSAL) maxSAL = SAL;
 	    if(SAL < minSAL) minSAL = SAL;
 	}
-	std::cout<<"\n min max SA length "<<minSAL<<" "<<maxSAL<<"\n";
+	// std::cout<<"\n min max SA length "<<minSAL<<" "<<maxSAL<<"\n";
 	
 	bool isA;
 	unsigned iPairA, iBody, iPair;
@@ -238,29 +241,32 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 		
 		if(isA) {
 		    converged = 1;
-		    std::cout<<"\n contact["<<iPair<<"]\n";
+		    m_log->write(boost::str(boost::format("\n contact[%1%]\n") % iPair));
+			m_log->write(boost::str(boost::format(" toi %1%\n") % cd.timeOfImpact));
+            
 		    BarycentricCoordinate coord = constraint[iPair].coordA;
-		    if(coord.x + coord.y + coord.z + coord.w > 1.1f) converged = 0;
-		    if(coord.x + coord.y + coord.z + coord.w < .9f) converged = 0;
-		    std::cout<<" coordA ("<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.w<<")\n";
+			float csum = coord.x + coord.y + coord.z + coord.w;
+		    if(csum > 1.1f) converged = 0;
+		    if(csum < .9f) converged = 0;
+			
+		    m_log->write(boost::str(boost::format(" coordA (%1%, %2%, %3%, %4%) sum %5%\n") % coord.x % coord.y % coord.z % coord.w % csum ));
 		    coord = constraint[iPair].coordB;
-		    if(coord.x + coord.y + coord.z + coord.w > 1.1f) converged = 0;
-		    if(coord.x + coord.y + coord.z + coord.w < .9f) converged = 0;
-		    std::cout<<" coordB ("<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.w<<")\n";
-		    std::cout<<" relVel "<<constraint[iPair].relVel<<"\n";
-		    std::cout<<" Minv "<<constraint[iPair].Minv<<"\n";
-		    Vector3F nn(constraint[iPair].normal.x, constraint[iPair].normal.y, constraint[iPair].normal.z);
-		    std::cout<<" normal "<<nn<<"\n";
-		    
+		    csum = coord.x + coord.y + coord.z + coord.w;
+		    if(csum > 1.1f) converged = 0;
+		    if(csum < .9f) converged = 0;
+
+		    m_log->write(boost::str(boost::format(" coordB (%1%, %2%, %3%, %4%) sum %5%\n") % coord.x % coord.y % coord.z % coord.w % csum ));
+		    m_log->write(boost::str(boost::format(" relVel %1%\n") % constraint[iPair].relVel));
+		    m_log->write(boost::str(boost::format(" Minv %1%\n") % constraint[iPair].Minv));
+
 		    if(constraint[iPair].relVel >0) converged = 0;
 		    if(constraint[iPair].Minv >0) converged = 0;
-		    std::cout<<" SA ("<<sa.x<<", "<<sa.y<<", "<<sa.z<<")\n";
-		    std::cout<<" length "<<sqrt( sa.x * sa.x + sa.y * sa.y + sa.z * sa.z )<<"\n";
-		    std::cout<<" body["<<iBody<<"]\n";
-		    std::cout<<" toi "<<cd.timeOfImpact<<"\n";
-            
+			
+		    m_log->write(boost::str(boost::format(" SA (%1%, %2%, %3%) length %4%\n") % sa.x % sa.y % sa.z % sqrt(sa.x * sa.x + sa.y * sa.y + sa.z * sa.z ) ));
+		    m_log->write(boost::str(boost::format(" body[%1%]\n") % iBody));
+		    
 		    for(j=0; j< njacobi; j++) {
-                std::cout<<" dJ["<<j<<"] "<<dJ[iPair * njacobi + j]<<"\n";
+               m_log->write(boost::str(boost::format("dJ[%1%] %2%\n") % j % dJ[iPair * njacobi + j]));
             }
             
 		    converged = 1;
@@ -293,12 +299,12 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 	solver->pntTetHashBuf()->deviceToHost(m_pntTetHash->data(), m_pntTetHash->bufferSize());
 	KeyValuePair * pntHash = (KeyValuePair *)m_pntTetHash->data();
 	
-	std::cout<<"pnt-tet hash\n";
+	// std::cout<<"pnt-tet hash\n";
 	for(i=0; i < nc * 8; i++) {
 	    // std::cout<<" pnt["<<i<<"] ("<<pntHash[i].key<<", "<<pntHash[i].value<<")\n";
 	}
 	
-	std::cout<<" cu mem consume "<<CudaBase::MemoryUsed<<"\n";
+	m_log->write(boost::str(boost::format("device mem used %1% check end\n") % CudaBase::MemoryUsed ));
 	return 1;
 }
 
