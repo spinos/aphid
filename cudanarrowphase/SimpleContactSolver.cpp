@@ -167,7 +167,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                    (uint4 *)ind,
 	                    (uint * )perObjPointStart,
 	                    (uint * )perObjectIndexStart,
-	                    numContacts,
+	                    numContacts * 2,
 	                    (float *)dJ,
 	                    i);
     

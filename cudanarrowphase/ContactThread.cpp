@@ -6,8 +6,8 @@
 #include "SimpleContactSolver.h"
 #include <CUDABuffer.h>
 
-#define GRDW 44
-#define GRDH 44
+#define GRDW 32
+#define GRDH 32
 #define NTET 2500
 
 ContactThread::ContactThread(QObject *parent)
@@ -31,8 +31,8 @@ ContactThread::ContactThread(QObject *parent)
 			
 			vrx = 0.725f * (RandomF01() - .5f);
 			vry = 1.f  * (RandomF01() + 1.f)  * vy;
-			vrz = 0.322f * (RandomF01() - .5f);
-			vr = 0.f * RandomF01();
+			vrz = 0.732f * (RandomF01() - .5f);
+			vr = 0.13f * RandomF01();
 			
 			m_tetra->addPoint(&base.x);
 			hv[0] = vrx + vr;
