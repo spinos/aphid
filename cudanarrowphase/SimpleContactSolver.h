@@ -39,6 +39,7 @@ private:
 	CUDABuffer * m_deltaLinearVelocity;
 	CUDABuffer * m_deltaAngularVelocity;
 	CUDABuffer * m_deltaJ;
+	CUDABuffer * m_relVel;
 	CUDABuffer * m_pntTetHash[2];
 };
 #endif        //  #ifndef SIMPLECONTACTSOLVER_H

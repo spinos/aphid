@@ -258,7 +258,11 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 		    m_log->write(boost::str(boost::format(" coordB (%1%, %2%, %3%, %4%) sum %5%\n") % coord.x % coord.y % coord.z % coord.w % csum ));
 		    m_log->write(boost::str(boost::format(" relVel %1%\n") % constraint[iPair].relVel));
 		    m_log->write(boost::str(boost::format(" Minv %1%\n") % constraint[iPair].Minv));
+		    
+		    m_log->write(boost::str(boost::format(" ra (%1%, %2%, %3%)\n") % cd.localA.x % cd.localA.y % cd.localA.z ));
+		    m_log->write(boost::str(boost::format(" rb (%1%, %2%, %3%)\n") % cd.localB.x % cd.localB.y % cd.localB.z));
 
+		    
 		    if(constraint[iPair].relVel >0) converged = 0;
 		    if(constraint[iPair].Minv >0) converged = 0;
 			
@@ -291,6 +295,7 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
             
             if(!converged) {
                 std::cout<<" no converging!\n";
+                m_log->write(" no converging!\n");
                 std::cout<<" num contacts "<<nc<<"\n";
                 glColor3f(1.f, 0.f, 0.f);
                 m_drawer->arrow(cenA + Vector3F(0.f, -8.f, 0.f), cenA);

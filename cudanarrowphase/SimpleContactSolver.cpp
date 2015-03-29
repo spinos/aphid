@@ -24,6 +24,7 @@ SimpleContactSolver::SimpleContactSolver()
 	m_deltaLinearVelocity = new CUDABuffer;
 	m_deltaAngularVelocity = new CUDABuffer;
 	m_deltaJ = new CUDABuffer;
+	m_relVel = new CUDABuffer;
 	m_pntTetHash[0] = new CUDABuffer;
 	m_pntTetHash[1] = new CUDABuffer;
 	
@@ -149,7 +150,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	const unsigned numSplitBodies = ScanUtil::getScanResult(m_bodyCount, m_scanBodyCount[0], scanBufLength);
 	*/
 	
-	m_deltaJ->create(nextPow2(numContacts * JACOBI_NUM_ITERATIONS * 4));
+	m_deltaJ->create(numContacts * JACOBI_NUM_ITERATIONS * 4);
 	void * dJ = m_deltaJ->bufferOnDevice();
 	
 	int i;

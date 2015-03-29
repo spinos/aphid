@@ -3,7 +3,7 @@
 #include "barycentric.cu"
 #include <CudaBase.h>
 #define SETCONSTRAINT_TPB 128
-#define SOLVECONTACT_TPB 256
+#define SOLVECONTACT_TPB 128
 #define DEFORMABILITY 0.33f
 inline __device__ uint4 computePointIndex(uint * pointStarts,
                                             uint * indexStarts,
@@ -148,7 +148,7 @@ inline __device__ void deformMotion(float3 & dst,
     float lr = float3_length(r);
 // limit size of rotation
     if(l> lr * .59f) l = lr * .59f;
-    if(l>1e-5) dst = float3_normalize(dst);
+    if(l>1e-2) dst = float3_normalize(dst);
     dst = scale_float3_by(dst, l);
     dst = float3_add(dst, scale_float3_by(n, lr));
     dst = scale_float3_by(dst, DEFORMABILITY);
@@ -392,7 +392,7 @@ __global__ void solveContact_kernel(ContactConstraint* constraints,
 	uint iBody = pairs[iContact].x;
 	BarycentricCoordinate coord = constraints[iContact].coordA;
 	
-	if((ind & 1)>0) {
+	if((threadIdx.x & 1)>0) {
 	    splitInd = splits[iContact].y;
 	    iBody = pairs[iContact].y;
 	    coord = constraints[iContact].coordB;
@@ -440,11 +440,11 @@ __global__ void solveContact_kernel(ContactConstraint* constraints,
 	updated += J;
 	if(updated < 0.f) updated = 0.f;
 	
-	if((ind & 1)>0) constraints[iContact].lambda = updated;
+	if((threadIdx.x & 1)==0) constraints[iContact].lambda = updated;
 	
 	J = updated - prevSum;
 	
-	if((ind & 1)>0) deltaJ[iContact * JACOBI_NUM_ITERATIONS + it] = J;
+	if((threadIdx.x & 1)==0) deltaJ[iContact * JACOBI_NUM_ITERATIONS + it] = J;
 	
 	const float invMassA = splitMass[splitInd];
 	
@@ -698,10 +698,10 @@ void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
                                         uint * perObjectIndexStart,
                                         float * splitMass,
                                         ContactData * contacts,
-                                        uint numContacts)
+                                        uint numContacts2)
 {
     dim3 block(SETCONSTRAINT_TPB, 1, 1);
-    unsigned nblk = iDivUp(numContacts, SETCONSTRAINT_TPB);
+    unsigned nblk = iDivUp(numContacts2, SETCONSTRAINT_TPB);
     dim3 grid(nblk, 1, 1);
     
     setContactConstraint_kernel<<< grid, block >>>(constraints,
@@ -714,7 +714,7 @@ void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
                                         perObjectIndexStart,
                                         splitMass,
                                         contacts,
-                                        numContacts);
+                                        numContacts2);
     // cudaDeviceSynchronize();
 }
 
@@ -743,14 +743,12 @@ void simpleContactSolverSolveContact(ContactConstraint* constraints,
                         uint4 * indices,
                         uint * perObjPointStart,
                         uint * perObjectIndexStart,
-                        uint numContacts,
+                        uint numContacts2,
                         float * deltaJ,
                         int it)
 {
-    uint tpb = CudaBase::LimitNThreadPerBlock(44, 40);
-
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numContacts, tpb);
+    dim3 block(SOLVECONTACT_TPB, 1, 1);
+    unsigned nblk = iDivUp(numContacts2, SOLVECONTACT_TPB);
     dim3 grid(nblk, 1, 1);
     
     solveContact_kernel<<< grid, block >>>(constraints,
@@ -765,7 +763,7 @@ void simpleContactSolverSolveContact(ContactConstraint* constraints,
                         indices,
                         perObjPointStart,
                         perObjectIndexStart,
-                        numContacts,
+                        numContacts2,
                         deltaJ,
                         it);
 }
