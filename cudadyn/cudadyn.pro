@@ -20,6 +20,7 @@ HEADERS       = ../shared/Base3DView.h \
                 ../cudabvh/tetrahedronSystem_implement.h \
                 ../cudabvh/scan_implement.h \
                 ../radixsort/radixsort_implement.h \
+                ../cudabvh/CudaBroadphase.h \
                 glWidget.h \
                 window.h \
                 ../cudanarrowphase/DrawNp.h \
@@ -27,7 +28,8 @@ HEADERS       = ../shared/Base3DView.h \
                 ../cudanarrowphase/CudaNarrowphase.h \
                 ../cudanarrowphase/narrowphase_implement.h \
                 ../cudanarrowphase/simpleContactSolver_implement.h \
-                ../cudanarrowphase/SimpleContactSolver.h
+                ../cudanarrowphase/SimpleContactSolver.h \
+                CudaDynamicWorld.h
 SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/BaseSolverThread.cpp \
                 ../shared/CudaBase.cpp \
@@ -37,13 +39,15 @@ SOURCES       = ../shared/Base3DView.cpp \
                 ../cudabvh/CudaLinearBvh.cpp \
                 ../cudabvh/TetrahedronSystem.cpp \
                 ../cudabvh/CudaTetrahedronSystem.cpp \
+                ../cudabvh/CudaBroadphase.cpp \
                 main.cpp \
                 glWidget.cpp \
                 window.cpp \
                 ../cudanarrowphase/DrawNp.cpp \
                 ../cudanarrowphase/ContactThread.cpp \
                 ../cudanarrowphase/CudaNarrowphase.cpp \
-                ../cudanarrowphase/SimpleContactSolver.cpp
+                ../cudanarrowphase/SimpleContactSolver.cpp \
+                CudaDynamicWorld.cpp
 
 win32 {
     HEADERS += ../shared/gExtension.h
@@ -71,6 +75,7 @@ CUSOURCES = ../cudabvh/bvh_math.cu \
             ../cudabvh/reduceRange.cu \
             ../cudabvh/tetrahedronSystem.cu \
             ../radixsort/radixsort.cu \
+            ../cudabvh/broadphase.cu \
             ../cudanarrowphase/matrix_math.cu \
             ../cudanarrowphase/barycentric.cu \
             ../cudanarrowphase/gjk_math.cu \
