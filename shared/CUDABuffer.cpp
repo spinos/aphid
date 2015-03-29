@@ -24,13 +24,14 @@ void CUDABuffer::create(float * data, unsigned size)
 void CUDABuffer::create(unsigned size)
 {
 	if(canResize(size)) return;
-	unsigned rs = minimalMemSize(size);
-	if(bufferSize() > 0 && size <= rs) {
+	if(bufferSize() > 0 && size <= minimalMemSize(bufferSize())) {
         setBufferSize(size);
         return;
 	}
 	destroy();
+	unsigned rs = minimalMemSize(size);
 	CudaBase::MemoryUsed += rs;
+	// std::cout<<" alloc "<<rs<<"\n";
 	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, rs));
 	setBufferType(kOnDevice);
 	setBufferSize(size);
@@ -73,7 +74,9 @@ void CUDABuffer::hostToDevice(void * src, unsigned size)
 void CUDABuffer::deviceToHost(void * dst, unsigned size)
 {
 	cudaError_t err = cudaMemcpy(dst, _device_vbo_buffer, size, cudaMemcpyDeviceToHost); 
-	if(err) std::cout<<"Cudamemcpy threw error\n"; 
+	if(err) {
+	    std::cout<<"Cudamemcpy threw error\n";
+	}
 }
 
 void CUDABuffer::hostToDevice(void * src)
@@ -111,7 +114,10 @@ void CUDABuffer::unmap()
 
 const unsigned CUDABuffer::minimalMemSize(unsigned size) const
 { 
-// must no less than 4K ?
-	return (size < 4096) ? 4096 : size;
+// round to 1K
+// no less than 4K
+    unsigned rds = size;
+    rds = ((rds & 1023) == 0) ? rds : ((rds>>10) + 1)<<10;
+	return (rds < 4096) ? 4096 : rds;
 }
 

@@ -4,7 +4,7 @@
 #include <CudaBase.h>
 #define SETCONSTRAINT_TPB 128
 #define SOLVECONTACT_TPB 128
-#define DEFORMABILITY 0.33f
+#define DEFORMABILITY 0.34f
 inline __device__ uint4 computePointIndex(uint * pointStarts,
                                             uint * indexStarts,
                                             uint4 * indices,
@@ -290,22 +290,22 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	
 	ContactData contact = contacts[iContact];
 	
-	int isRgt = (ind & 1);
+	int isRgt = (threadIdx.x & 1);
 	
 	uint4 ia;
 	if(isRgt>0) {
 	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].y);
 	    constraints[iContact].coordB = localCoordinate(ia, srcPos, contact.localB);
 	    interpolate_float3i(sVel[threadIdx.x], ia, srcVel, &constraints[iContact].coordB);
+	    __syncthreads();
 	}
 	else {
 	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].x);
 	    constraints[iContact].coordA = localCoordinate(ia, srcPos, contact.localA);
 	    interpolate_float3i(sVel[threadIdx.x], ia, srcVel, &constraints[iContact].coordA);
+	    __syncthreads();
 	}
 
-	__syncthreads();
-	
 	if(isRgt) return;
 	
 	constraints[iContact].lambda = 0.f;

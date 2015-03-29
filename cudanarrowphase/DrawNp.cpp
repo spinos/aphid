@@ -141,7 +141,7 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
     glDisable(GL_DEPTH_TEST);
     
     m_constraint->create(nc * 64);
-    solver->constraintBuf()->deviceToHost(m_constraint->data(), m_constraint->bufferSize());
+    solver->constraintBuf()->deviceToHost(m_constraint->data(), nc * 64);
 	ContactConstraint * constraint = (ContactConstraint *)m_constraint->data();
     
     const unsigned njacobi = solver->numIterations();
