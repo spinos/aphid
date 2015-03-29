@@ -271,13 +271,14 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
             
 		    converged = 1;
             float lastJ = dJ[iPair * njacobi];
+            if(lastJ < 1e-3) converged = 0;
 			float sumJ = lastJ;
             for(j=1; j< njacobi; j++) {
                 
                 float curJ = dJ[iPair * njacobi + j];
                 if(curJ < 0.f) curJ = -curJ;
                 
-                if(curJ > lastJ && curJ > 1e-3) {
+                if(curJ >= lastJ && curJ > 1e-3) {
                     converged = 0;
                     break;
                 }

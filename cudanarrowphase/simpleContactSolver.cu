@@ -4,7 +4,7 @@
 #include <CudaBase.h>
 #define SETCONSTRAINT_TPB 128
 #define SOLVECONTACT_TPB 256
-#define DEFORMABILITY 0.17f
+#define DEFORMABILITY 0.33f
 inline __device__ uint4 computePointIndex(uint * pointStarts,
                                             uint * indexStarts,
                                             uint4 * indices,
@@ -137,6 +137,23 @@ inline __device__ float computeMassTensor(float3 nA, float3 nB,
          // invMassB * float3_dot(jmjB, nB));
 }
 
+inline __device__ void deformMotion(float3 & dst,
+                                    float3 r, 
+                                    float3 n,
+                                    float3 omega)
+{
+// v = omega X r 
+    dst = float3_cross(omega, r);
+    float l = float3_length2(dst);
+    float lr = float3_length(r);
+// limit size of rotation
+    if(l> lr * .59f) l = lr * .59f;
+    if(l>1e-5) dst = float3_normalize(dst);
+    dst = scale_float3_by(dst, l);
+    dst = float3_add(dst, scale_float3_by(n, lr));
+    dst = scale_float3_by(dst, DEFORMABILITY);
+}
+
 inline __device__ void addDeltaVelocity(float3 & dst, 
         float3 deltaLinearVelocity,
         float3 deltaAngularVelocity,
@@ -146,8 +163,8 @@ inline __device__ void addDeltaVelocity(float3 & dst,
 {
     dst = float3_add(dst, deltaLinearVelocity);
 
-    float3 vRot = float3_cross(deltaAngularVelocity, r);
-    vRot = scale_float3_by(vRot, DEFORMABILITY);
+    float3 vRot;
+    deformMotion(vRot, r, normal, deltaAngularVelocity);
     
 // distribure by weight to vex, then sum by weight from vex
     float wei = coord->x * coord->x;
@@ -572,7 +589,7 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	uint4 iTet;
 	float weight;
 	BarycentricCoordinate coord;
-	float3 r, vRot;
+	float3 r, vRot, normal;
 	for(;;) {
 	    iContact = pntTetHash[cur].value>>1;
 	
@@ -580,12 +597,14 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	    iBody = pairs[iContact].x;
 	    coord = constraints[iContact].coordA;
 	    r = contacts[iContact].localA;
+	    normal = constraints[iContact].normal;
 	
         if((pntTetHash[cur].value & 1)>0) {
             splitInd = splits[iContact].y;
             iBody = pairs[iContact].y;
             coord = constraints[iContact].coordB;
             r = contacts[iContact].localB;
+            normal = float3_reverse(normal);
         }
         
         sumLinVel = float3_add(sumLinVel, deltaLinearVelocity[splitInd]);
@@ -593,11 +612,9 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
         iTet = computePointIndex(objectPointStarts, objectIndexStarts, indices, iBody);
         weight = getPntTetWeight(iPnt, iTet, coord);
 
-// v = omega X r        
-        vRot = float3_cross(deltaAngularVelocity[splitInd], r);
-        
+        deformMotion(vRot, r, normal, deltaAngularVelocity[splitInd]);
 // weighted by vex coord        
-        vRot = scale_float3_by(vRot, weight * DEFORMABILITY);
+        vRot = scale_float3_by(vRot, weight);
 
         sumLinVel = float3_add(sumLinVel, vRot);
       

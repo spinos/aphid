@@ -9,7 +9,6 @@ HEADERS       = ../shared/Base3DView.h \
                 ../shared/BaseBuffer.h \
                 ../shared/CUDABuffer.h \
                 ../shared/ScanUtil.h \
-                ../shared/BaseLog.h \
                 ../cudabvh/CudaLinearBvh.h \
                 ../cudabvh/TetrahedronSystem.h \
                 ../cudabvh/CudaTetrahedronSystem.h \
@@ -35,7 +34,6 @@ SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/BaseBuffer.cpp \
                 ../shared/CUDABuffer.cpp \
                 ../shared/ScanUtil.cpp \
-                ../shared/BaseLog.cpp \
                 ../cudabvh/CudaLinearBvh.cpp \
                 ../cudabvh/TetrahedronSystem.cpp \
                 ../cudabvh/CudaTetrahedronSystem.cpp \
