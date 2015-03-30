@@ -58,6 +58,9 @@ void CudaBroadphase::getUniquePairs(BaseBuffer * dst)
 void CudaBroadphase::getScanUniquePairs(BaseBuffer * dst)
 { m_scanUniquePair->deviceToHost(dst->data(), dst->bufferSize()); }
 
+CUDABuffer * CudaBroadphase::overlappingPairBuf()
+{ return m_pairCache[1]; }
+
 void CudaBroadphase::addBvh(CudaLinearBvh * bvh)
 {
 	if(m_numObjects==CUDABROADPHASE_MAX_NUMOBJECTS) return;

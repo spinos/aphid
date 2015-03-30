@@ -30,6 +30,8 @@ public:
 	void addBvh(CudaLinearBvh * bvh);
 	void initOnDevice();
 	void computeOverlappingPairs();
+	
+	CUDABuffer * overlappingPairBuf();
 protected:
 
 private:

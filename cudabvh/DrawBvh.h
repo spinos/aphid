@@ -17,7 +17,6 @@ public:
 	
 	void setDrawer(GeoDrawer * drawer);
 	void setBvh(CudaLinearBvh * bvh);
-	void setBroadphase(CudaBroadphase * broadphase);
 	void addDispalyLevel();
 	void minusDispalyLevel();
 	
@@ -25,14 +24,15 @@ public:
 	void leaf();
 	void hash();
 	void hierarch();
-	void pairs();
 	
 	void printHash();
-	void printPairCounts();
+	
+	void printPairCounts(CudaBroadphase * broadphase);
+	void showOverlappingPairs(CudaBroadphase * broadphase);
+	
 private:
 	GeoDrawer * m_drawer;
 	CudaLinearBvh * m_bvh;
-	CudaBroadphase * m_broadphase;
 	BaseBuffer * m_displayLeafAabbs;
 	BaseBuffer * m_displayInternalAabbs;
 	BaseBuffer * m_displayInternalDistance;

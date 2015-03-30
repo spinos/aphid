@@ -20,6 +20,7 @@ HEADERS       = ../shared/Base3DView.h \
                 ../cudabvh/tetrahedronSystem_implement.h \
                 ../cudabvh/scan_implement.h \
                 ../radixsort/radixsort_implement.h \
+                ../cudabvh/DrawBvh.h \
                 ../cudabvh/CudaBroadphase.h \
                 glWidget.h \
                 window.h \
@@ -39,6 +40,7 @@ SOURCES       = ../shared/Base3DView.cpp \
                 ../cudabvh/CudaLinearBvh.cpp \
                 ../cudabvh/TetrahedronSystem.cpp \
                 ../cudabvh/CudaTetrahedronSystem.cpp \
+                ../cudabvh/DrawBvh.cpp \
                 ../cudabvh/CudaBroadphase.cpp \
                 main.cpp \
                 glWidget.cpp \
