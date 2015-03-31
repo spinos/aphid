@@ -1,3 +1,6 @@
+#ifndef DRAWBVH_H
+#define DRAWBVH_H
+
 /*
  *  DrawBvh.h
  *  cudabvh
@@ -48,3 +51,4 @@ private:
 	int m_hostRootNodeInd;
 	int m_displayLevel;
 };
+#endif        //  #ifndef DRAWBVH_H

@@ -1,3 +1,6 @@
+#ifndef CUDABROADPHASE_H
+#define CUDABROADPHASE_H
+
 /*
  *  CudaBroadphase.h
  *  cudabvh
@@ -52,3 +55,4 @@ private:
 	unsigned m_numObjects, m_numBoxes, m_scanBufferLength, m_pairCacheLength,
 	        m_numUniquePairs;
 };
+#endif        //  #ifndef CUDABROADPHASE_H

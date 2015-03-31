@@ -1,3 +1,6 @@
+#ifndef CUDABUFFER_H
+#define CUDABUFFER_H
+
 /*
  *  CUDABuffer.h
  *  brdf
@@ -6,7 +9,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#pragma once
+
 #include <BaseBuffer.h>
 class CUDABuffer : public BaseBuffer {
 public:
@@ -36,4 +39,6 @@ private:
 	struct cudaGraphicsResource *_cuda_vbo_resource;
 	void *_device_vbo_buffer;
 };
+
+#endif        //  #ifndef CUDABUFFER_H
 

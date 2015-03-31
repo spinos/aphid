@@ -2,6 +2,7 @@ TARGET = testdynamics
 macx:CONFIG -= app_bundle
 CONFIG += release
 message(QMAKE with CUDA)
+DEFINES += BOOST_NOINLINE='"__attribute__ ((noinline))"'
 INCLUDEPATH += ./ ../shared ../cudabvh ../radixsort ../cudanarrowphase
 HEADERS       = ../shared/Base3DView.h \
                 ../shared/BaseSolverThread.h \
@@ -47,10 +48,10 @@ SOURCES       = ../shared/Base3DView.cpp \
                 worldUtils.cpp \
                 glWidget.cpp \
                 window.cpp \
-                ../cudanarrowphase/DrawNp.cpp \
                 ../cudanarrowphase/ContactThread.cpp \
                 ../cudanarrowphase/CudaNarrowphase.cpp \
                 ../cudanarrowphase/SimpleContactSolver.cpp \
+                ../cudanarrowphase/DrawNp.cpp \
                 CudaDynamicWorld.cpp
 
 win32 {
@@ -145,4 +146,3 @@ cuda.commands = $$CUDA_CC \
     ${QMAKE_FILE_OUT} # Note the -O0
 QMAKE_EXTRA_COMPILERS += cuda
 ## DEFINES += CUDA_V3
-

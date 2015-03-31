@@ -19,6 +19,7 @@
 #include "simpleContactSolver_implement.h"
 #include <CudaBase.h>
 #include <BaseLog.h>
+#include <stripedModel.h>
 #include <boost/format.hpp>
 
 DrawNp::DrawNp() 
@@ -35,6 +36,11 @@ DrawNp::DrawNp()
 	m_deltaJ = new BaseBuffer;
 	m_pntTetHash = new BaseBuffer;
 	m_constraint = new BaseBuffer;
+	m_tetPnt = new BaseBuffer;
+	m_tetInd = new BaseBuffer;
+	m_pointStarts = new BaseBuffer;
+	m_indexStarts = new BaseBuffer;
+
 	m_log = new BaseLog("narrowphase.txt");
 }
 
@@ -318,6 +324,112 @@ bool DrawNp::checkConstraint(SimpleContactSolver * solver, CudaNarrowphase * pha
 	return 1;
 }
 
+void DrawNp::showConstraint(SimpleContactSolver * solver, CudaNarrowphase * phase)
+{
+	const unsigned nc = phase->numContacts();
+    if(nc < 1) return;
+    
+	CUDABuffer * pnts = phase->objectBuffer()->m_pos;
+	CUDABuffer * inds = phase->objectBuffer()->m_ind;
+	CUDABuffer * pointStarts = phase->objectBuffer()->m_pointCacheLoc;
+	CUDABuffer * indexStarts = phase->objectBuffer()->m_indexCacheLoc;
+	
+	m_tetPnt->create(pnts->bufferSize());
+	m_tetInd->create(inds->bufferSize());
+	m_pointStarts->create(pointStarts->bufferSize());
+	m_indexStarts->create(indexStarts->bufferSize());
+	
+	pnts->deviceToHost(m_tetPnt->data(), m_tetPnt->bufferSize());
+	inds->deviceToHost(m_tetInd->data(), m_tetInd->bufferSize());
+	pointStarts->deviceToHost(m_pointStarts->data(), m_pointStarts->bufferSize());
+	indexStarts->deviceToHost(m_indexStarts->data(), m_indexStarts->bufferSize());
+	
+	Vector3F * tetPnt = (Vector3F *)m_tetPnt->data();
+	unsigned * tetInd = (unsigned *)m_tetInd->data();
+	unsigned * pntOffset = (unsigned *)m_pointStarts->data();
+	unsigned * indOffset = (unsigned *)m_indexStarts->data();
+	
+    glDisable(GL_DEPTH_TEST);
+    
+    m_constraint->create(nc * 64);
+    solver->constraintBuf()->deviceToHost(m_constraint->data(), nc * 64);
+	ContactConstraint * constraint = (ContactConstraint *)m_constraint->data();
+    
+    m_contactPairs->create(nc * 8);
+    phase->getContactPairs(m_contactPairs);
+    
+    unsigned * c = (unsigned *)m_contactPairs->data();
+    unsigned i, j;
+    glColor3f(0.4f, 0.9f, 0.6f);
+	Vector3F dst, cenA, cenB;
+    
+	CUDABuffer * bodyPair = solver->contactPairHashBuf();
+	m_pairsHash->create(bodyPair->bufferSize());
+	bodyPair->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());
+	
+	m_linearVelocity->create(nc * 2 * 12);
+	solver->deltaLinearVelocityBuf()->deviceToHost(m_linearVelocity->data(), 
+	    m_linearVelocity->bufferSize());
+	Vector3F * linVel = (Vector3F *)m_linearVelocity->data();
+	
+	m_angularVelocity->create(nc * 2 * 12);
+	solver->deltaAngularVelocityBuf()->deviceToHost(m_angularVelocity->data(), 
+	    m_angularVelocity->bufferSize());
+	Vector3F * angVel = (Vector3F *)m_angularVelocity->data();
+	
+	m_contact->create(nc * 48);
+	phase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
+	ContactData * contact = (ContactData *)m_contact->data();
+
+	Vector3F N;
+
+	bool isA;
+	unsigned iPairA, iBody, iPair;
+	unsigned * bodyAndPair = (unsigned *)m_pairsHash->data();
+	bool converged;
+	for(i=0; i < nc * 2; i++) {
+
+	    iBody = bodyAndPair[i*2];
+	    iPair = bodyAndPair[i*2+1];
+	    
+	    // std::cout<<"body "<<iBody<<" pair "<<iPair<<"\n";
+	    
+	    iPairA = iPair * 2;
+// left or right
+        isA = (iBody == c[iPairA]);
+
+	    cenA = tetrahedronCenter(tetPnt, tetInd, pntOffset, indOffset, iBody);
+ 
+	    //cenB = cenA + angVel[i];
+	    
+	    //glColor3f(0.1f, 0.7f, 0.3f);
+	    //m_drawer->arrow(cenA, cenB);
+	    
+	    ContactData & cd = contact[iPair];
+	    float4 sa = cd.separateAxis;
+	    N.set(sa.x, sa.y, sa.z);
+	    N.reverse();
+	    N.normalize();
+
+	    if(isA) {
+// show contact normal for A
+		    cenB = cenA + Vector3F(cd.localA.x, cd.localA.y, cd.localA.z);
+		    m_drawer->setColor(0.f, .3f, .9f);
+		    m_drawer->arrow(cenB, cenB + N);
+		}
+
+		glColor3f(0.73f, 0.68f, 0.1f);
+		m_drawer->arrow(cenA, cenA + linVel[i]);
+		
+		glColor3f(0.1f, 0.68f, 0.72f);
+		m_drawer->arrow(cenA, cenA + angVel[i]);
+		
+		
+	}
+	
+	glEnable(GL_DEPTH_TEST);
+}
+
 void DrawNp::printCoord(CudaNarrowphase * phase, BaseBuffer * pairs)
 {
     const unsigned nc = phase->numContacts();
@@ -393,6 +505,23 @@ Vector3F DrawNp::tetrahedronVelocity(TetrahedronSystem * tetra, unsigned * v, un
     r += vel[v[i * 4 + 3]];
     r *= .25f;
     return r;
+}
+
+Vector3F DrawNp::tetrahedronCenter(Vector3F * p, unsigned * v, unsigned * pntOffset, unsigned * indOffset, unsigned i)
+{
+	unsigned objectI = extractObjectInd(i);
+	unsigned elementI = extractElementInd(i);
+	
+	unsigned pStart = pntOffset[objectI];
+	unsigned iStart = indOffset[objectI];
+	
+	Vector3F r = p[pStart + v[iStart + elementI * 4]];
+    r += p[pStart + v[iStart + elementI * 4 + 1]];
+    r += p[pStart + v[iStart + elementI * 4 + 2]];
+    r += p[pStart + v[iStart + elementI * 4 + 3]];
+    r *= .25f;
+    
+	return r;
 }
 
 Vector3F DrawNp::tetrahedronCenter(Vector3F * p, unsigned * v, unsigned i)

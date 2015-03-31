@@ -5,6 +5,7 @@
 #include <CudaTetrahedronSystem.h>
 #include <CudaBase.h>
 #include <DrawBvh.h>
+#include <DrawNp.h>
 
 CudaDynamicWorld::CudaDynamicWorld() 
 {
@@ -14,6 +15,7 @@ CudaDynamicWorld::CudaDynamicWorld()
 	m_numObjects = 0;
 	
 	m_dbgBvh = new DrawBvh;
+	m_dbgNp = new DrawNp;
 }
 
 CudaDynamicWorld::~CudaDynamicWorld()
@@ -27,7 +29,10 @@ const unsigned CudaDynamicWorld::numObjects() const
 { return m_numObjects; }
 
 void CudaDynamicWorld::setDrawer(GeoDrawer * drawer)
-{ m_dbgBvh->setDrawer(drawer); }
+{ 
+	m_dbgBvh->setDrawer(drawer); 
+	m_dbgNp->setDrawer(drawer);
+}
 
 CudaTetrahedronSystem * CudaDynamicWorld::tetradedron(unsigned ind)
 { return m_objects[ind]; }
@@ -63,7 +68,7 @@ void CudaDynamicWorld::stepPhysics(float dt)
 	for(i=0; i < m_numObjects; i++) m_objects[i]->update();
 	m_broadphase->computeOverlappingPairs();
 	
-	m_dbgBvh->showOverlappingPairs(m_broadphase);
+	// m_dbgBvh->showOverlappingPairs(m_broadphase);
 	for(i=0; i < m_numObjects; i++) {
 	    // m_dbgBvh->showHash(m_objects[i]);
 	}
@@ -75,6 +80,8 @@ void CudaDynamicWorld::stepPhysics(float dt)
 									m_narrowphase->contactBuffer(),
 									m_narrowphase->contactPairsBuffer(),
 									m_narrowphase->objectBuffer());
+									
+	// m_dbgNp->showConstraint(m_contactSolver, m_narrowphase);
 	
 	for(i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
 }

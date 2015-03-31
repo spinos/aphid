@@ -1,3 +1,6 @@
+#ifndef BASEBUFFER_H
+#define BASEBUFFER_H
+
 /*
  *  BaseBuffer.h
  *  brdf
@@ -6,8 +9,6 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-
-#pragma once
 
 class BaseBuffer {
 public:
@@ -44,3 +45,4 @@ private:
 	unsigned m_bufferSize;
 	BufferType m_bufferType;
 };
+#endif        //  #ifndef BASEBUFFER_H

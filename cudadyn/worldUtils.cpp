@@ -15,7 +15,7 @@ void createWorld(CudaDynamicWorld * world)
 	float * hv = &tetra->hostV()[0];
 	
 	unsigned i, j;
-	float vy = 2.95f;
+	float vy = 3.35f;
 	float vrx, vry, vrz, vr, vs;
 	for(j=0; j < GRDH; j++) {
 		for(i=0; i<GRDW; i++) {
@@ -28,7 +28,7 @@ void createWorld(CudaDynamicWorld * world)
 			    right.y = top.y-.1f;
 			}
 			else {
-			    base.y -= .085f * vs;
+			    base.x -= .085f * vs;
 			}
 			
 			vrx = 0.725f * (RandomF01() - .5f);

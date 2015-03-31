@@ -15,6 +15,7 @@
 #include <CUDABuffer.h>
 #include "bvh_common.h"
 #include <radixsort_implement.h>
+#include <stripedModel.h>
 
 DrawBvh::DrawBvh() 
 {
@@ -232,16 +233,12 @@ void DrawBvh::printPairCounts(CudaBroadphase * broadphase)
 	    std::cout<<" "<<i<<": "<<pc[i * 2]<<" "<<pc[i * 2 + 1]<<" is "<<u[i]<<" "<<s[i]<<" \n";
 }
 
-unsigned extractElementInd(unsigned combined)
-{ return ((combined<<7)>>7); }
-
-unsigned extractObjectInd(unsigned combined)
-{ return (combined>>24); }
-
 void DrawBvh::showOverlappingPairs(CudaBroadphase * broadphase)
 {
     const unsigned cacheLength = broadphase->pairCacheLength();
 	if(cacheLength < 1) return;
+	
+	glDisable(GL_DEPTH_TEST);
 	
 	// std::cout<<" num overlapping pairs "<<cacheLength<<" squeezed to "<<broadphase->numUniquePairs()<<"\n";
 	
@@ -276,5 +273,6 @@ void DrawBvh::showOverlappingPairs(CudaBroadphase * broadphase)
 	    
 	    m_drawer->arrow(a, b);
 	}
+	glEnable(GL_DEPTH_TEST);
 }
 

@@ -4,11 +4,12 @@
 #define CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS 32
 
 class GeoDrawer;
-class DrawBvh;
 class CudaBroadphase;
 class CudaNarrowphase;
 class SimpleContactSolver;
 class CudaTetrahedronSystem;
+class DrawBvh;
+class DrawNp;
 
 class CudaDynamicWorld
 {
@@ -36,6 +37,7 @@ private:
     CudaTetrahedronSystem * m_objects[CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS];
     unsigned m_numObjects;
     DrawBvh * m_dbgBvh;
+	DrawNp * m_dbgNp;
 };
 #endif        //  #ifndef CUDADYNAMICWORLD_H
 

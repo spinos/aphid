@@ -1,3 +1,6 @@
+#ifndef GEODRAWER_H
+#define GEODRAWER_H
+
 /*
  *  GeoDrawer.h
  *  aphid
@@ -7,7 +10,6 @@
  *
  */
 
-#pragma once
 #include "MeshDrawer.h"
 class BaseTransform;
 class TransformManipulator;
@@ -69,3 +71,4 @@ private:
 	CircleCurve * m_circle;
 	DiscMesh * m_disc;
 };
+#endif        //  #ifndef GEODRAWER_H

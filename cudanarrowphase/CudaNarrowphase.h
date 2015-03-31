@@ -1,3 +1,6 @@
+#ifndef CUDANARROWPHASE_H
+#define CUDANARROWPHASE_H
+
 /*
  *  CudaNarrowphase.h
  *  testnarrowpahse
@@ -66,3 +69,5 @@ private:
 	unsigned m_objectIndexStart[CUDANARROWPHASE_MAX_NUMOBJECTS];
 	unsigned m_numObjects, m_numPoints, m_numElements, m_numContacts, m_numPairs;
 };
+#endif        //  #ifndef CUDANARROWPHASE_H
+
