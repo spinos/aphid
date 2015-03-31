@@ -4,9 +4,9 @@
 #include <CudaTetrahedronSystem.h>
 #include <GeoDrawer.h>
 
-#define GRDW 48
-#define GRDH 48
-#define NTET 2500
+#define GRDW 55
+#define GRDH 55
+#define NTET 3600
 
 void createWorld(CudaDynamicWorld * world)
 {
@@ -15,7 +15,7 @@ void createWorld(CudaDynamicWorld * world)
 	float * hv = &tetra->hostV()[0];
 	
 	unsigned i, j;
-	float vy = 3.35f;
+	float vy = 3.95f;
 	float vrx, vry, vrz, vr, vs;
 	for(j=0; j < GRDH; j++) {
 		for(i=0; i<GRDW; i++) {
@@ -113,4 +113,6 @@ void drawWorld(CudaDynamicWorld * world)
         tetra->sendXToHost();
         drawTetra(tetra);
     }
+	
+	world->dbgDraw();
 }

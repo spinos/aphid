@@ -30,7 +30,7 @@ DrawBvh::DrawBvh()
 	m_boxes = new BaseBuffer;
 	m_uniquePairs = new BaseBuffer;
 	m_scanUniquePairs = new BaseBuffer;
-	m_displayLevel = 8;
+	m_displayLevel = 12;
 }
 
 DrawBvh::~DrawBvh() {}
@@ -249,7 +249,7 @@ void DrawBvh::showOverlappingPairs(CudaBroadphase * broadphase)
 
 	Aabb * boxes = (Aabb *)m_boxes->data();
 	Aabb abox;
-	BoundingBox bb;
+	BoundingBox ab, bb;
 	unsigned i;
 	m_drawer->setColor(0.f, 0.1f, 0.3f);
 
@@ -258,20 +258,25 @@ void DrawBvh::showOverlappingPairs(CudaBroadphase * broadphase)
 	uniquePairs->deviceToHost(m_pairCache->data(), m_pairCache->bufferSize());
 	unsigned * pc = (unsigned *)m_pairCache->data();
 	
-	Vector3F a, b;
 	unsigned objectI;
 	for(i=0; i < broadphase->numUniquePairs(); i++) {
 	    objectI = extractObjectInd(pc[i * 2]);
 	    abox = boxes[broadphase->objectStart(objectI) + extractElementInd(pc[i * 2])];
-	    a.set(abox.low.x +abox.high.x, abox.low.y +abox.high.y, abox.low.z +abox.high.z);
-	    a *= 0.5f;
+	    
+		bb.setMin(abox.low.x, abox.low.y, abox.low.z);
+		bb.setMax(abox.high.x, abox.high.y, abox.high.z);
 	    
 	    objectI = extractObjectInd(pc[i * 2 + 1]);
 	    abox = boxes[broadphase->objectStart(objectI) + extractElementInd(pc[i * 2 + 1])];
-	    b.set(abox.low.x +abox.high.x, abox.low.y +abox.high.y, abox.low.z +abox.high.z);
-	    b *= 0.5f;
 	    
-	    m_drawer->arrow(a, b);
+	    ab.setMin(abox.low.x, abox.low.y, abox.low.z);
+		ab.setMax(abox.high.x, abox.high.y, abox.high.z);
+		
+		m_drawer->arrow(bb.center(), ab.center());
+		
+		bb.expandBy(ab);
+		
+		// m_drawer->boundingBox(bb);
 	}
 	glEnable(GL_DEPTH_TEST);
 }

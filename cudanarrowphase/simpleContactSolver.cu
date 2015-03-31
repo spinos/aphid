@@ -4,7 +4,7 @@
 #include <CudaBase.h>
 #define SETCONSTRAINT_TPB 128
 #define SOLVECONTACT_TPB 128
-#define DEFORMABILITY 0.34f
+#define DEFORMABILITY 0.134f
 inline __device__ uint4 computePointIndex(uint * pointStarts,
                                             uint * indexStarts,
                                             uint4 * indices,

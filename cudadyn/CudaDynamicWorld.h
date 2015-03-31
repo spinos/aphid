@@ -28,6 +28,8 @@ public:
     void setDrawer(GeoDrawer * drawer);
     
     CudaTetrahedronSystem * tetradedron(unsigned ind);
+	
+	void dbgDraw();
 protected:
 
 private:

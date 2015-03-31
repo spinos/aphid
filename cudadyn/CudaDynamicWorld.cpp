@@ -68,11 +68,6 @@ void CudaDynamicWorld::stepPhysics(float dt)
 	for(i=0; i < m_numObjects; i++) m_objects[i]->update();
 	m_broadphase->computeOverlappingPairs();
 	
-	// m_dbgBvh->showOverlappingPairs(m_broadphase);
-	for(i=0; i < m_numObjects; i++) {
-	    // m_dbgBvh->showHash(m_objects[i]);
-	}
-	
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
 	                                m_broadphase->numUniquePairs());
 	
@@ -81,8 +76,20 @@ void CudaDynamicWorld::stepPhysics(float dt)
 									m_narrowphase->contactPairsBuffer(),
 									m_narrowphase->objectBuffer());
 									
-	// m_dbgNp->showConstraint(m_contactSolver, m_narrowphase);
-	
 	for(i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
 }
 
+void CudaDynamicWorld::dbgDraw()
+{
+	std::cout<<" num overlapping pairs "<<m_broadphase->numUniquePairs();
+	m_dbgBvh->showOverlappingPairs(m_broadphase);
+	
+	unsigned i;
+	for(i=0; i < m_numObjects; i++) {
+	    // m_dbgBvh->showHash(m_objects[i]);
+	}
+	std::cout<<" num contact pairs "<<m_narrowphase->numContacts();
+	
+	m_dbgNp->showConstraint(m_contactSolver, m_narrowphase);
+	std::cout<<" mem "<<CudaBase::MemoryUsed<<"\n";
+}

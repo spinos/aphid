@@ -13,6 +13,7 @@
 #include "broadphase_implement.h"
 #include "scan_implement.h"
 #include <CudaBase.h>
+#include <ScanUtil.h>
 CudaBroadphase::CudaBroadphase() 
 {
 	m_numObjects = 0;
@@ -96,7 +97,8 @@ void CudaBroadphase::computeOverlappingPairs()
 	
 	prefixSumPairCounts();
 	
-	m_pairCacheLength = getScanResult(m_pairCounts, m_pairStart, m_scanBufferLength - 1);
+	m_pairCacheLength = // getScanResult(m_pairCounts, m_pairStart, m_scanBufferLength - 1);
+	ScanUtil::getScanResult(m_pairCounts, m_pairStart, m_scanBufferLength);
 	if(m_pairCacheLength < 1) return;
 	
 	m_pairCache[0]->create(nextPow2(m_pairCacheLength) * 8);
@@ -217,7 +219,8 @@ void CudaBroadphase::squeezeOverlappingPairs()
 // squeeze to [1]
 	broadphaseCompactUniquePairs((uint2 *)tmp, (uint2 *)dst, (uint *)unique, (uint *)scanResult, m_pairCacheLength);
 	
-	m_numUniquePairs = getScanResult(m_uniquePair, m_scanUniquePair, m_pairCacheLength - 1);
+	m_numUniquePairs = // getScanResult(m_uniquePair, m_scanUniquePair, m_pairCacheLength - 1);
+	ScanUtil::getScanResult(m_uniquePair, m_scanUniquePair, m_pairCacheLength);
 }
 
 unsigned CudaBroadphase::getScanResult(CUDABuffer * counts, CUDABuffer * sums, unsigned n)
@@ -227,4 +230,3 @@ unsigned CudaBroadphase::getScanResult(CUDABuffer * counts, CUDABuffer * sums, u
     sums->deviceToHost(&b, 4*n, 4);
     return a + b;
 }
-

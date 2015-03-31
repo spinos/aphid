@@ -175,9 +175,9 @@ __global__ void calculateLeafHash_kernel(KeyValuePair *dst, Aabb * leafBoxes, ui
 	
 	float side = longestSideOfAabb(boundary);
 	float3 d = float3_difference(boundary.high, boundary.low);
-	if(d.x < side * 0.4) d.x = side;
-	if(d.y < side * 0.4) d.y = side;
-	if(d.z < side * 0.4) d.z = side;
+	if(d.x < side) d.x = side;
+	if(d.y < side) d.y = side;
+	if(d.z < side) d.z = side;
 	normalizeByBoundary(c.x, boundary.low.x, d.x);
 	normalizeByBoundary(c.y, boundary.low.y, d.y);
 	normalizeByBoundary(c.z, boundary.low.z, d.z);
