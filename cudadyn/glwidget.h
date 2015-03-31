@@ -3,8 +3,7 @@
 
 #include <Base3DView.h>
 
-class DrawNp;
-class ContactThread;
+class CudaDynamicWorld;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -28,9 +27,7 @@ private:
     void drawTetra();
     
 private:
-    ContactThread * m_solver;
-	
-    DrawNp * m_dbgDraw;
+    CudaDynamicWorld * m_world;
 	
 private slots:
     

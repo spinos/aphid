@@ -29,6 +29,9 @@ const unsigned CudaDynamicWorld::numObjects() const
 void CudaDynamicWorld::setDrawer(GeoDrawer * drawer)
 { m_dbgBvh->setDrawer(drawer); }
 
+CudaTetrahedronSystem * CudaDynamicWorld::tetradedron(unsigned ind)
+{ return m_objects[ind]; }
+
 void CudaDynamicWorld::addTetrahedronSystem(CudaTetrahedronSystem * tetra)
 {
     if(m_numObjects == CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS) return;
@@ -61,6 +64,17 @@ void CudaDynamicWorld::stepPhysics(float dt)
 	m_broadphase->computeOverlappingPairs();
 	
 	m_dbgBvh->showOverlappingPairs(m_broadphase);
+	for(i=0; i < m_numObjects; i++) {
+	    // m_dbgBvh->showHash(m_objects[i]);
+	}
+	
+	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
+	                                m_broadphase->numUniquePairs());
+	
+	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
+									m_narrowphase->contactBuffer(),
+									m_narrowphase->contactPairsBuffer(),
+									m_narrowphase->objectBuffer());
 	
 	for(i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
 }

@@ -12,6 +12,7 @@
 #include "CudaLinearBvh.h"
 #include "CudaBroadphase.h"
 #include <BaseBuffer.h>
+#include <CUDABuffer.h>
 #include "bvh_common.h"
 #include <radixsort_implement.h>
 
@@ -28,7 +29,7 @@ DrawBvh::DrawBvh()
 	m_boxes = new BaseBuffer;
 	m_uniquePairs = new BaseBuffer;
 	m_scanUniquePairs = new BaseBuffer;
-	m_displayLevel = 3;
+	m_displayLevel = 8;
 }
 
 DrawBvh::~DrawBvh() {}
@@ -45,9 +46,9 @@ void DrawBvh::addDispalyLevel()
 void DrawBvh::minusDispalyLevel()
 { m_displayLevel--; }
 
-void DrawBvh::bound()
+void DrawBvh::showBound(CudaLinearBvh * bvh)
 {
-	Aabb ab = m_bvh->bound();
+	Aabb ab = bvh->bound();
 	BoundingBox bb;
 	bb.setMin(ab.low.x, ab.low.y, ab.low.z);
 	bb.setMax(ab.high.x, ab.high.y, ab.high.z);
@@ -70,19 +71,19 @@ void DrawBvh::leaf()
 	}
 }
 
-void DrawBvh::hash()
+void DrawBvh::showHash(CudaLinearBvh * bvh)
 {
-	const unsigned n = m_bvh->numLeafNodes();
+	const unsigned n = bvh->numLeafNodes();
 	
 	m_displayLeafAabbs->create(n * sizeof(Aabb));
-	m_bvh->getLeafAabbs(m_displayLeafAabbs);
+	bvh->getLeafAabbs(m_displayLeafAabbs);
 	Aabb * boxes = (Aabb *)m_displayLeafAabbs->data();
 	
 	m_displayLeafHash->create(n * sizeof(KeyValuePair));
-	m_bvh->getLeafHash(m_displayLeafHash);
+	bvh->getLeafHash(m_displayLeafHash);
 	KeyValuePair * leafHash = (KeyValuePair *)m_displayLeafHash->data();
 	
-	const unsigned numInternal = m_bvh->numInternalNodes();
+	const unsigned numInternal = bvh->numInternalNodes();
 	glBegin(GL_LINES);
 	for(unsigned i=0; i < numInternal; i++) {
 		float red = (float)i/(float)numInternal;
@@ -104,30 +105,30 @@ inline int isLeafNode(int index)
 inline int getIndexWithInternalNodeMarkerRemoved(int index) 
 { return index & (~0x80000000); }
 
-void DrawBvh::hierarch()
+void DrawBvh::showHierarch(CudaLinearBvh * bvh)
 {
-	m_bvh->getRootNodeIndex(&m_hostRootNodeInd);
+	bvh->getRootNodeIndex(&m_hostRootNodeInd);
 	
-	const unsigned numInternal = m_bvh->numInternalNodes();
+	const unsigned numInternal = bvh->numInternalNodes();
 	
 	m_displayInternalAabbs->create(numInternal * sizeof(Aabb));
-	m_bvh->getInternalAabbs(m_displayInternalAabbs);
+	bvh->getInternalAabbs(m_displayInternalAabbs);
 	Aabb * internalBoxes = (Aabb *)m_displayInternalAabbs->data();
 	
-	m_displayLeafHash->create(m_bvh->numLeafNodes() * sizeof(KeyValuePair));
-	m_bvh->getLeafHash(m_displayLeafHash);
+	m_displayLeafHash->create(bvh->numLeafNodes() * sizeof(KeyValuePair));
+	bvh->getLeafHash(m_displayLeafHash);
 	KeyValuePair * leafHash = (KeyValuePair *)m_displayLeafHash->data();
 	
-	m_displayLeafAabbs->create(m_bvh->numLeafNodes() * sizeof(Aabb));
-	m_bvh->getLeafAabbs(m_displayLeafAabbs);
+	m_displayLeafAabbs->create(bvh->numLeafNodes() * sizeof(Aabb));
+	bvh->getLeafAabbs(m_displayLeafAabbs);
 	Aabb * leafBoxes = (Aabb *)m_displayLeafAabbs->data();
 	
-	m_internalChildIndices->create(m_bvh->numInternalNodes() * sizeof(int2));
-	m_bvh->getInternalChildIndex(m_internalChildIndices);
+	m_internalChildIndices->create(bvh->numInternalNodes() * sizeof(int2));
+	bvh->getInternalChildIndex(m_internalChildIndices);
 	int2 * internalNodeChildIndices = (int2 *)m_internalChildIndices->data();
 	
-	m_displayInternalDistance->create(m_bvh->numInternalNodes() * sizeof(int));
-	m_bvh->getInternalDistances(m_displayInternalDistance);
+	m_displayInternalDistance->create(bvh->numInternalNodes() * sizeof(int));
+	bvh->getInternalDistances(m_displayInternalDistance);
 	int * levels = (int *)m_displayInternalDistance->data();
 	
 	BoundingBox bb;
@@ -253,16 +254,16 @@ void DrawBvh::showOverlappingPairs(CudaBroadphase * broadphase)
 	Aabb abox;
 	BoundingBox bb;
 	unsigned i;
-	m_drawer->setColor(0.f, 0.1f, 0.4f);
+	m_drawer->setColor(0.f, 0.1f, 0.3f);
 
 	m_pairCache->create(broadphase->numUniquePairs() * 8);
-	broadphase->getOverlappingPairs(m_pairCache);
-	
+	CUDABuffer * uniquePairs = broadphase->overlappingPairBuf();
+	uniquePairs->deviceToHost(m_pairCache->data(), m_pairCache->bufferSize());
 	unsigned * pc = (unsigned *)m_pairCache->data();
 	
 	Vector3F a, b;
 	unsigned objectI;
-	for(i=0; i < cacheLength; i++) {
+	for(i=0; i < broadphase->numUniquePairs(); i++) {
 	    objectI = extractObjectInd(pc[i * 2]);
 	    abox = boxes[broadphase->objectStart(objectI) + extractElementInd(pc[i * 2])];
 	    a.set(abox.low.x +abox.high.x, abox.low.y +abox.high.y, abox.low.z +abox.high.z);

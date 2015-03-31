@@ -25,6 +25,8 @@ public:
     const unsigned numObjects() const;
     
     void setDrawer(GeoDrawer * drawer);
+    
+    CudaTetrahedronSystem * tetradedron(unsigned ind);
 protected:
 
 private:

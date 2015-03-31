@@ -22,6 +22,7 @@ HEADERS       = ../shared/Base3DView.h \
                 ../radixsort/radixsort_implement.h \
                 ../cudabvh/DrawBvh.h \
                 ../cudabvh/CudaBroadphase.h \
+                worldUtils.h \
                 glWidget.h \
                 window.h \
                 ../cudanarrowphase/DrawNp.h \
@@ -43,6 +44,7 @@ SOURCES       = ../shared/Base3DView.cpp \
                 ../cudabvh/DrawBvh.cpp \
                 ../cudabvh/CudaBroadphase.cpp \
                 main.cpp \
+                worldUtils.cpp \
                 glWidget.cpp \
                 window.cpp \
                 ../cudanarrowphase/DrawNp.cpp \

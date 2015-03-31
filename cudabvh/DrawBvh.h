@@ -20,15 +20,16 @@ public:
 	void addDispalyLevel();
 	void minusDispalyLevel();
 	
-	void bound();
 	void leaf();
-	void hash();
-	void hierarch();
 	
 	void printHash();
 	
 	void printPairCounts(CudaBroadphase * broadphase);
+	
 	void showOverlappingPairs(CudaBroadphase * broadphase);
+	void showBound(CudaLinearBvh * bvh);
+	void showHash(CudaLinearBvh * bvh);
+	void showHierarch(CudaLinearBvh * bvh);
 	
 private:
 	GeoDrawer * m_drawer;

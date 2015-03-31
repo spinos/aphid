@@ -46,9 +46,6 @@ void CudaBroadphase::getOverlappingPairCounts(BaseBuffer * dst)
 void CudaBroadphase::getOverlappingPairCache(BaseBuffer * dst)
 { m_pairCache[0]->deviceToHost(dst->data(), dst->bufferSize()); }
 
-void CudaBroadphase::getOverlappingPairs(BaseBuffer * dst)
-{ m_pairCache[1]->deviceToHost(dst->data(), dst->bufferSize()); }
-
 void CudaBroadphase::getScanCounts(BaseBuffer * dst)
 { m_pairStart->deviceToHost(dst->data(), dst->bufferSize()); }
 

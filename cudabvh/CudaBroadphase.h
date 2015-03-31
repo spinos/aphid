@@ -25,8 +25,7 @@ public:
 	void getBoxes(BaseBuffer * dst);
 	void getUniquePairs(BaseBuffer * dst);
 	void getScanUniquePairs(BaseBuffer * dst);
-	void getOverlappingPairs(BaseBuffer * dst);
-	
+
 	void addBvh(CudaLinearBvh * bvh);
 	void initOnDevice();
 	void computeOverlappingPairs();
