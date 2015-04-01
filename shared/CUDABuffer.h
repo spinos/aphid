@@ -38,6 +38,7 @@ private:
 private:
 	struct cudaGraphicsResource *_cuda_vbo_resource;
 	void *_device_vbo_buffer;
+	unsigned m_realSize;
 };
 
 #endif        //  #ifndef CUDABUFFER_H

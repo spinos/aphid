@@ -12,7 +12,7 @@
 #include <cutil_gl_inline.h>
 #include <iostream>
 #include "CudaBase.h"
-CUDABuffer::CUDABuffer() : _device_vbo_buffer(0) {} 
+CUDABuffer::CUDABuffer() : _device_vbo_buffer(0), m_realSize(0) {} 
 CUDABuffer::~CUDABuffer() { destroy(); }
 
 void CUDABuffer::create(float * data, unsigned size)
@@ -24,15 +24,14 @@ void CUDABuffer::create(float * data, unsigned size)
 void CUDABuffer::create(unsigned size)
 {
 	if(canResize(size)) return;
-	if(bufferSize() > 0 && size <= minimalMemSize(bufferSize())) {
+	if(size <= m_realSize) {
         setBufferSize(size);
         return;
 	}
 	destroy();
-	unsigned rs = minimalMemSize(size);
-	CudaBase::MemoryUsed += rs;
-	// std::cout<<" alloc "<<rs<<"\n";
-	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, rs));
+	m_realSize = minimalMemSize(size);
+	CudaBase::MemoryUsed += m_realSize;
+	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, m_realSize));
 	setBufferType(kOnDevice);
 	setBufferSize(size);
 }
@@ -46,7 +45,8 @@ void CUDABuffer::destroy()
 	else if(bufferType() == kOnDevice) {
 		if(_device_vbo_buffer == 0) return;
 		cudaFree(_device_vbo_buffer);
-		CudaBase::MemoryUsed -= minimalMemSize(bufferSize());
+		CudaBase::MemoryUsed -= m_realSize;
+		m_realSize = 0;
 		setBufferSize(0);
 		_device_vbo_buffer = 0;
 	}
