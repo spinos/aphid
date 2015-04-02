@@ -55,7 +55,7 @@ Vector3F BezierCurve::calculateBezierPoint(float t, Vector3F * data) const
 	return p;
 }
 
-void BezierCurve::getSegmentCurves(BezierCurve * dst) const
+void BezierCurve::getAccSegmentCurves(BezierCurve * dst) const
 {
     unsigned i, j;
     unsigned v[4];
@@ -67,10 +67,13 @@ void BezierCurve::getSegmentCurves(BezierCurve * dst) const
         if(j==0) v[0] = 0;
         if(j==numSegments()-1) v[3] = j+1;
         
-        dst[j].m_cvs[0] = m_cvs[v[0]] * .25f + m_cvs[v[1]] * .5f + m_cvs[v[2]] * .25f ;
-        dst[j].m_cvs[1] = dst[j].m_cvs[0] * .33f + m_cvs[v[1]] * .33f + m_cvs[v[2]] * .33f;
-        dst[j].m_cvs[3] = m_cvs[v[1]] * .25f + m_cvs[v[2]] * .5f + m_cvs[v[3]] * .25f ;
-        dst[j].m_cvs[2] = dst[j].m_cvs[3] * .33f + m_cvs[v[1]] * .33f + m_cvs[v[2]] * .33f;
+        if(j==0) dst[j].m_cvs[0] = m_cvs[v[0]];
+        else dst[j].m_cvs[0] = m_cvs[v[0]] * .25f + m_cvs[v[1]] * .5f + m_cvs[v[2]] * .25f ;
+        dst[j].m_cvs[1] = (dst[j].m_cvs[0] * 5.f + m_cvs[v[1]] * 2.f + m_cvs[v[2]] * 2.f) * (1.f / 9.f);
+        
+        if(j==numSegments()-1) dst[j].m_cvs[3] = m_cvs[v[3]];
+        else dst[j].m_cvs[3] = m_cvs[v[1]] * .25f + m_cvs[v[2]] * .5f + m_cvs[v[3]] * .25f ;
+        dst[j].m_cvs[2] = (dst[j].m_cvs[3] * 5.f + m_cvs[v[1]] * 2.f + m_cvs[v[2]] * 2.f) * (1.f / 9.f);
     }
 }
 

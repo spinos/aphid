@@ -17,7 +17,7 @@ public:
 	
 	virtual Vector3F interpolate(float param) const;
 
-	void getSegmentCurves(BezierCurve * dst) const;
+	void getAccSegmentCurves(BezierCurve * dst) const;
 private:
 	void calculateCage(unsigned seg, Vector3F *p) const;
 	Vector3F calculateBezierPoint(float t, Vector3F * data) const;

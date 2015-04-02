@@ -138,7 +138,7 @@ void LineDrawer::smoothCurve(BaseCurve & curve, short deg) const
 	for(unsigned i = 0; i <= nseg; i++) {
 		t = delta * i;
 		p = curve.interpolate(t);
-		setColor(1.f - t, 0.f, t);
+		// setColor(1.f - t, 0.f, t);
 		glVertex3f(p.x, p.y, p.z);
 	}
 	glEnd();
