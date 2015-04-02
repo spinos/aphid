@@ -6,7 +6,7 @@
 MStatus initializePlugin(MObject obj)
 {
         MStatus         status;
-        MFnPlugin       plugin(obj, "Zhang Jian", "1.0 Thu Mar 26 18:25:29 CST 2015 scaling factor", "Any");
+        MFnPlugin       plugin(obj, "Zhang Jian", "1.1 Thu Apr 02 19:56:54 scaling factor", "Any");
 
         status = plugin.registerNode("zik2Bsolver", 
                                                                  ik2Bsolver::id,

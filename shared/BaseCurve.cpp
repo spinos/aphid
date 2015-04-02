@@ -8,6 +8,7 @@
  */
 
 #include "BaseCurve.h"
+#include "BoundingBox.h"
 std::vector<Vector3F> BaseCurve::BuilderVertices;
 BaseCurve::BaseCurve() 
 {
@@ -141,3 +142,10 @@ float BaseCurve::length() const
 {
 	return m_hullLength;
 }
+
+void BaseCurve::getAabb(BoundingBox * box) const
+{
+    for(unsigned i = 0; i < numVertices(); i++)
+        box->expandBy(m_cvs[i]);
+}
+

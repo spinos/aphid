@@ -54,3 +54,23 @@ Vector3F BezierCurve::calculateBezierPoint(float t, Vector3F * data) const
 	p += p3 * ttt; //fourth term
 	return p;
 }
+
+void BezierCurve::getSegmentCurves(BezierCurve * dst) const
+{
+    unsigned i, j;
+    unsigned v[4];
+    for(j = 0; j < numSegments(); j++) {
+        v[0] = j-1;
+        v[1] = j;
+        v[2] = j+1;
+        v[3] = j+2;
+        if(j==0) v[0] = 0;
+        if(j==numSegments()-1) v[3] = j+1;
+        
+        dst[j].m_cvs[0] = m_cvs[v[0]] * .25f + m_cvs[v[1]] * .5f + m_cvs[v[2]] * .25f ;
+        dst[j].m_cvs[1] = dst[j].m_cvs[0] * .33f + m_cvs[v[1]] * .33f + m_cvs[v[2]] * .33f;
+        dst[j].m_cvs[3] = m_cvs[v[1]] * .25f + m_cvs[v[2]] * .5f + m_cvs[v[3]] * .25f ;
+        dst[j].m_cvs[2] = dst[j].m_cvs[3] * .33f + m_cvs[v[1]] * .33f + m_cvs[v[2]] * .33f;
+    }
+}
+

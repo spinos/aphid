@@ -199,7 +199,7 @@ MStatus ik2Bsolver::doSolve()
 			
 		// if(stretching > maxStretching) stretching = maxStretching;
 		if(maxStretching > 0.0) {
-			MVector vstretch(stretching* 0.5, 0.0, 0.0);
+			MVector vstretch(stretching* 0.5 / scaling, 0.0, 0.0);
 			midJointFn.translateBy(vstretch, MSpace::kTransform);
 			endJointFn.translateBy(vstretch, MSpace::kTransform);
 		}

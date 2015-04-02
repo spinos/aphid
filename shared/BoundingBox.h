@@ -45,6 +45,8 @@ public:
 	const Vector3F corner(const int & i) const;
 	char touch(const BoundingBox & b) const;
 	
+	float distanceTo(const Vector3F & pnt) const;
+	
 	char intersect(const BoundingBox & another) const;
 	char intersect(const Ray &ray, float *hitt0, float *hitt1) const;
 	bool intersect(const Plane & p, float & tmin, float & tmax) const;

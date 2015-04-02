@@ -11,7 +11,7 @@
 
 #include <AllMath.h>
 #include <vector>
-
+class BoundingBox;
 class BaseCurve {
 public:
 	BaseCurve();
@@ -42,6 +42,8 @@ public:
 	void findNeighborKnots(float param, unsigned & nei0, unsigned & nei1) const;
 	
 	float length() const;
+	
+	void getAabb(BoundingBox * box) const;
 	
 	static std::vector<Vector3F> BuilderVertices;
 	Vector3F * m_cvs;

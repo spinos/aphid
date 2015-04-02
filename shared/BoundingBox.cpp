@@ -203,6 +203,28 @@ char BoundingBox::touch(const BoundingBox & b) const
 	return 1;
 }
 
+float BoundingBox::distanceTo(const Vector3F & pnt) const
+{
+    if(isPointInside(pnt)) return -1.f;
+    
+    float dx = getMin(0) - pnt.x;
+    dx = dx > 0.f ? dx : 0.f;
+    const float dx1 = pnt.x - getMax(0);
+    dx = dx > dx1 ? dx : dx1;
+    
+    float dy = getMin(1) - pnt.y;
+    dy = dy > 0.f ? dy : 0.f;
+    const float dy1 = pnt.y - getMax(1);
+    dy = dy > dy1 ? dy : dy1;
+    
+    float dz = getMin(2) - pnt.z;
+    dz = dz > 0.f ? dz : 0.f;
+    const float dz1 = pnt.z - getMax(2);
+    dz = dz > dz1 ? dz : dz1;
+    
+    return sqrt(dx * dx + dy * dy + dz * dz);
+}
+
 char BoundingBox::intersect(const BoundingBox & another) const
 {
     for(int i=0; i < 3; i++) {
