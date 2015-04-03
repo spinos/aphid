@@ -93,6 +93,33 @@ struct Stripe {
     float z[256];
 };
 
+// decoding morton code to cartesian coordinate
+// https://fgiesen.wordpress.com/2009/12/13/decoding-morton-codes/
+
+uint Compact1By2(uint x)
+{
+  x &= 0x09249249;                  // x = ---- 9--8 --7- -6-- 5--4 --3- -2-- 1--0
+  x = (x ^ (x >>  2)) & 0x030c30c3; // x = ---- --98 ---- 76-- --54 ---- 32-- --10
+  x = (x ^ (x >>  4)) & 0x0300f00f; // x = ---- --98 ---- ---- 7654 ---- ---- 3210
+  x = (x ^ (x >>  8)) & 0xff0000ff; // x = ---- --98 ---- ---- ---- ---- 7654 3210
+  x = (x ^ (x >> 16)) & 0x000003ff; // x = ---- ---- ---- ---- ---- --98 7654 3210
+  return x;
+}
+
+uint DecodeMorton3Z(uint code)
+{
+  return Compact1By2(code >> 0);
+}
+
+uint DecodeMorton3Y(uint code)
+{
+  return Compact1By2(code >> 1);
+}
+
+uint DecodeMorton3X(uint code)
+{
+  return Compact1By2(code >> 2);
+}
 
 int main(int argc, char * const argv[])
 {
@@ -156,6 +183,12 @@ int main(int argc, char * const argv[])
 	std::cout<<boost::format("5>>2 %1%\n") % (5>>2);
 	std::cout<<boost::format("513 / 256 %1%\n") % ((513>>8) + ((513 & 255) != 0));
 	
+	x1 = 99, y1 = 736, z1 = 121;
+	m1 = morton3D(x1, y1, z1);
+	
+	std::cout<<boost::format("morton code of (%1%, %2%, %3%): %4%\n") % x1 % y1 % z1 % byte_to_binary(m1);	
+	std::cout<<boost::format("decode morton code to xyz: (%1%, %2%, %3%)\n") % DecodeMorton3X(m1) % DecodeMorton3Y(m1) % DecodeMorton3Z(m1);
+		
 	std::cout<<"end of test\n";
 	return 0;
 }

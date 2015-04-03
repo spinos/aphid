@@ -27,6 +27,7 @@ public:
 	void updateMax(const Vector3F & p);
 	
 	const int getLongestAxis() const;
+	const float getLongestDistance() const;
 	const float getMin(int axis) const;
 	const float getMax(int axis) const;
 	const Vector3F getMin() const;

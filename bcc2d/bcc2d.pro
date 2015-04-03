@@ -12,6 +12,8 @@ HEADERS       = ../shared/Base3DView.h \
                 ../shared/ScanUtil.h \
                 glWidget.h \
                 window.h \
+                CartesianGrid.h \
+                BccGrid.h \
                 BccWorld.h
 SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/BaseSolverThread.cpp \
@@ -22,6 +24,8 @@ SOURCES       = ../shared/Base3DView.cpp \
                 main.cpp \
                 glWidget.cpp \
                 window.cpp \
+                CartesianGrid.cpp \
+                BccGrid.cpp \
                 BccWorld.cpp
 
 win32 {
