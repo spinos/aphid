@@ -77,3 +77,81 @@ void BezierCurve::getAccSegmentCurves(BezierCurve * dst) const
     }
 }
 
+void BezierCurve::getAccSegmentSpline(unsigned i, SimpleBezierSpline & sp) const
+{
+    unsigned v[4];
+    v[0] = i-1;
+    v[1] = i;
+    v[2] = i+1;
+    v[3] = i+2;
+    if(i<1) v[0] = 0;
+    if(i==numSegments()-1) v[3] = i+1;
+    
+    if(i==0) sp.cv[0] = m_cvs[v[0]];
+    else sp.cv[0] = m_cvs[v[0]] * .25f + m_cvs[v[1]] * .5f + m_cvs[v[2]] * .25f ;
+    sp.cv[1] = (sp.cv[0] * 5.f + m_cvs[v[1]] * 2.f + m_cvs[v[2]] * 2.f) * (1.f / 9.f);
+    
+    if(i==numSegments()-1) sp.cv[3] = m_cvs[v[3]];
+    else sp.cv[3] = m_cvs[v[1]] * .25f + m_cvs[v[2]] * .5f + m_cvs[v[3]] * .25f ;
+    sp.cv[2] = (sp.cv[3] * 5.f + m_cvs[v[1]] * 2.f + m_cvs[v[2]] * 2.f) * (1.f / 9.f);
+}
+
+float BezierCurve::distanceToPoint(const Vector3F & toP, Vector3F & closestP) const
+{
+    float minD = 1e8;
+    const unsigned ns = numSegments();
+    for(unsigned i=0; i < ns; i++) {
+        SimpleBezierSpline sp;
+        getAccSegmentSpline(i, sp);   
+        distanceToPoint(sp, toP, minD, closestP);
+    }
+    return minD;
+}
+
+void BezierCurve::distanceToPoint(SimpleBezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP) const
+{
+    float paramMin = 0.f;
+    float paramMax = 1.f;
+    Vector3F line[2];
+    
+    line[0] = spline.calculateBezierPoint(paramMin);
+    line[1] = spline.calculateBezierPoint(paramMax);
+    
+    Vector3F pol;
+    float t;
+    for(;;) {
+        float d = closestDistanceToLine(line, pnt, pol, t);
+        
+        const float tt = paramMin * (1.f - t) + paramMax * t;
+        
+// end of line
+        if((tt <= 0.f || tt >= 1.f) && paramMax - paramMin < 0.1f) {
+            if(d < minDistance) {
+                minDistance = d;
+                closestP = pol;
+            }
+            break;
+        }
+        
+        const float h = .5f * (paramMax - paramMin);
+
+// small enought        
+        if(h < 1e-3) {
+            if(d < minDistance) {
+                minDistance = d;
+                closestP = pol;
+            }
+            break;
+        }
+        
+        if(t > .5f)
+            paramMin = tt - h * .5f;
+            
+        else
+            paramMax = tt + h * .5f;
+            
+        line[0] = spline.calculateBezierPoint(paramMin);
+        line[1] = spline.calculateBezierPoint(paramMax);
+    }
+}
+

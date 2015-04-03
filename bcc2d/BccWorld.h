@@ -1,15 +1,23 @@
 #ifndef BCCWORLD_H
 #define BCCWORLD_H
+#include <ALLMath.h>
 class BezierCurve;
-class LineDrawer;
+class GeoDrawer;
+struct SimpleBezierSpline;
 class BccWorld {
 public:
-    BccWorld(LineDrawer * drawer);
+    BccWorld(GeoDrawer * drawer);
     virtual ~BccWorld();
     
     void draw();
+    
+    void moveTestP(float x, float y, float z);
+    
 private:
-    LineDrawer * m_drawer;
+    void testDistanceToPoint(SimpleBezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP);
+private:
+    Vector3F m_testP;
+    GeoDrawer * m_drawer;
     BezierCurve * m_curve;
     BezierCurve * m_segmentCurve;
 };

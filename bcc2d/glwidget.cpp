@@ -53,20 +53,16 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 {
 	switch (event->key()) {
 		case Qt::Key_A:
+		    m_world->moveTestP(-.11f, 0.f, 0.f);
 			break;
 		case Qt::Key_D:
+		    m_world->moveTestP(.07f, 0.f, 0.f);
 			break;
 		case Qt::Key_W:
-#if SIMULATE_INLINE
-            internalTimer()->stop();
-#else
-#endif
+		    m_world->moveTestP(0.f, .11f, 0.f);
 			break;
 		case Qt::Key_S:
-#if SIMULATE_INLINE
-            internalTimer()->start();
-#else
-#endif
+		    m_world->moveTestP(0.f, -.07f, 0.f);
 			break;
 		default:
 			break;

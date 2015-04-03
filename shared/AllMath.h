@@ -42,6 +42,32 @@ inline float RandomF01()
 inline float RandomFn11()
 { return (RandomF01() - 0.5f) * 2.f; }
 
+inline float closestDistanceToLine(const Vector3F * p, const Vector3F & toP, Vector3F & closestP, float & coord)
+{
+    Vector3F vr = toP - p[0];
+    Vector3F v1 = p[1] - p[0];
+	const float dr = vr.length();
+	if(dr < 1e-5) {
+        closestP = p[0];
+        coord = 0.f;
+		return 0.f;
+    }
+	
+	const float d1 = v1.length();
+	vr.normalize();
+	v1.normalize();
+	float vrdv1 = vr.dot(v1) * dr;
+	if(vrdv1 < 0.f) vrdv1 = 0.f;
+	if(vrdv1 > d1) vrdv1 = d1;
+	
+	v1 = p[0] + v1 * vrdv1;
+	const float dc = v1.distanceTo(toP);
+	
+	closestP = v1;
+	coord = vrdv1 / d1;
+	return dc;
+}
+
 template<typename T>
 inline T Absolute(T const& a)
 {
