@@ -16,7 +16,10 @@ public:
 protected:
 
 private:
+    void subdivide(BezierCurve * curve, int level);
 
+private:
+    float m_tolerance;
 };
 #endif        //  #ifndef BCCGRID_H
 

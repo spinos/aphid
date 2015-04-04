@@ -6,7 +6,7 @@ CartesianGrid::CartesianGrid(const BoundingBox & bound, int maxLevel)
     m_origin = bound.getMin();
     m_span = bound.getLongestDistance();
     
-    const float margin = m_span / 64.f;
+    const float margin = m_span / 41.f;
     m_origin.x -= margin;
     m_origin.y -= margin;
     m_origin.z -= margin;
@@ -44,15 +44,27 @@ CartesianGrid::CellIndex * CartesianGrid::cells()
 const float CartesianGrid::cellSizeAtLevel(int level) const
 { return m_span / (float)(1<<level); }
 
-void CartesianGrid::addCell(int i, int j, int k, int level)
-{ 
+void CartesianGrid::setCell(unsigned i, const Vector3F & p, int level)
+{
+    const float h = m_span / 1024.f;
+    int x = (p.x - m_origin.x) / h;
+    int y = (p.y - m_origin.y) / h;
+    int z = (p.z - m_origin.z) / h;
+    unsigned code = encodeMorton3D(x, y, z);
+    
+    m_cells[i].key = code;
+    m_cells[i].index = m_numCells;
+    m_levels[i] = level;
+}
+
+void CartesianGrid::addCell(const Vector3F & p, int level)
+{
     if(m_numCells >= m_maxNumCells) return;
     
-    const int scale = 1<<(10-level);
-    
-    unsigned x = i * scale;
-    unsigned y = j * scale;
-    unsigned z = k * scale;
+    const float h = m_span / 1024.f;
+    int x = (p.x - m_origin.x) / h;
+    int y = (p.y - m_origin.y) / h;
+    int z = (p.z - m_origin.z) / h;
     unsigned code = encodeMorton3D(x, y, z);
     
     m_cells[m_numCells].key = code;
@@ -61,12 +73,12 @@ void CartesianGrid::addCell(int i, int j, int k, int level)
     m_numCells++;
 }
 
-const Vector3F CartesianGrid::cellOrigin(unsigned i) const
+const Vector3F CartesianGrid::cellCenter(unsigned i) const
 {
     unsigned code = m_cells[i].key;
     unsigned x, y, z;
     decodeMorton3D(code, x, y, z);
     float h = m_span / 1024.f;
-    return m_origin + Vector3F(x * h, y * h, z * h);
+    return m_origin + Vector3F((x + .5f) * h, (y + .5f) * h, (z + .5f) * h);
 }
 

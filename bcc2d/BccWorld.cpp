@@ -39,7 +39,7 @@ BccWorld::~BccWorld() {}
 void BccWorld::draw()
 {
     glColor3f(.1f, .1f, .1f); 
-    m_drawer->linearCurve(*m_curve);
+    // m_drawer->linearCurve(*m_curve);
     glColor3f(.0f, .3f, .5f);
     m_drawer->smoothCurve(*m_curve, 32);
     

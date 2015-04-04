@@ -21,8 +21,9 @@ public:
 protected:
     CellIndex * cells();
     const float cellSizeAtLevel(int level) const;
-    void addCell(int i, int j, int k, int level);
-    const Vector3F cellOrigin(unsigned i) const;
+    void addCell(const Vector3F & p, int level);
+    void setCell(unsigned i, const Vector3F & p, int level);
+    const Vector3F cellCenter(unsigned i) const;
 private:
     Vector3F m_origin;
     float m_span; // same for each dimensions
