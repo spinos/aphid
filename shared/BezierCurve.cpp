@@ -8,6 +8,7 @@
  */
 
 #include "BezierCurve.h"
+#include <BoundingBox.h>
 
 BezierCurve::BezierCurve() {}
 BezierCurve::~BezierCurve() {}
@@ -54,7 +55,7 @@ Vector3F BezierCurve::calculateBezierPoint(float t, Vector3F * data) const
 	p += p3 * ttt; //fourth term
 	return p;
 }
-
+/*
 void BezierCurve::getAccSegmentCurves(BezierCurve * dst) const
 {
     unsigned i, j;
@@ -76,24 +77,26 @@ void BezierCurve::getAccSegmentCurves(BezierCurve * dst) const
         dst[j].m_cvs[2] = (dst[j].m_cvs[3] * 5.f + m_cvs[v[1]] * 2.f + m_cvs[v[2]] * 2.f) * (1.f / 9.f);
     }
 }
-
-void BezierCurve::getAccSegmentSpline(unsigned i, SimpleBezierSpline & sp) const
+*/
+void BezierCurve::getSegmentSpline(unsigned i, BezierSpline & spline) const
 {
-    unsigned v[4];
-    v[0] = i-1;
-    v[1] = i;
-    v[2] = i+1;
-    v[3] = i+2;
-    if(i<1) v[0] = 0;
-    if(i==numSegments()-1) v[3] = i+1;
-    
-    if(i==0) sp.cv[0] = m_cvs[v[0]];
-    else sp.cv[0] = m_cvs[v[0]] * .25f + m_cvs[v[1]] * .5f + m_cvs[v[2]] * .25f ;
-    sp.cv[1] = (sp.cv[0] * 5.f + m_cvs[v[1]] * 2.f + m_cvs[v[2]] * 2.f) * (1.f / 9.f);
-    
-    if(i==numSegments()-1) sp.cv[3] = m_cvs[v[3]];
-    else sp.cv[3] = m_cvs[v[1]] * .25f + m_cvs[v[2]] * .5f + m_cvs[v[3]] * .25f ;
-    sp.cv[2] = (sp.cv[3] * 5.f + m_cvs[v[1]] * 2.f + m_cvs[v[2]] * 2.f) * (1.f / 9.f);
+	unsigned v[4];
+	v[0] = i-1;
+	v[1] = i;
+	v[2] = i+1;
+	v[3] = i+2;
+	if(i==0) v[0] = 0;
+	if(i==numSegments()-1) v[3] = i+1;
+	
+	if(i==0) spline.cv[0] = m_cvs[v[0]];
+	else spline.cv[0] = m_cvs[v[0]] * .25f + m_cvs[v[1]] * .5f + m_cvs[v[2]] * .25f ;
+	
+	spline.cv[1] = spline.cv[0] * .5f + m_cvs[v[1]] * .25f + m_cvs[v[2]] * .25f;
+	
+	if(i==numSegments()-1) spline.cv[3] = m_cvs[v[3]];
+	else spline.cv[3] = m_cvs[v[1]] * .25f + m_cvs[v[2]] * .5f + m_cvs[v[3]] * .25f ;
+	
+	spline.cv[2] = spline.cv[3] * .5f + m_cvs[v[1]] * .25f + m_cvs[v[2]] * .25f;
 }
 
 float BezierCurve::distanceToPoint(const Vector3F & toP, Vector3F & closestP) const
@@ -101,15 +104,23 @@ float BezierCurve::distanceToPoint(const Vector3F & toP, Vector3F & closestP) co
     float minD = 1e8;
     const unsigned ns = numSegments();
     for(unsigned i=0; i < ns; i++) {
-        SimpleBezierSpline sp;
-        getAccSegmentSpline(i, sp);   
+        BezierSpline sp;
+        getSegmentSpline(i, sp);   
         distanceToPoint(sp, toP, minD, closestP);
     }
     return minD;
 }
 
-void BezierCurve::distanceToPoint(SimpleBezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP) const
+void BezierCurve::distanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP) const
 {
+	BoundingBox box;
+	box.expandBy(spline.cv[0]);
+	box.expandBy(spline.cv[1]);
+	box.expandBy(spline.cv[2]);
+	box.expandBy(spline.cv[3]);
+	
+	if(box.distanceTo(pnt) > minDistance) return;
+	
     float paramMin = 0.f;
     float paramMax = 1.f;
     Vector3F line[2];
@@ -145,13 +156,67 @@ void BezierCurve::distanceToPoint(SimpleBezierSpline & spline, const Vector3F & 
         }
         
         if(t > .5f)
-            paramMin = tt - h * .5f;
-            
+            paramMin = tt - h * ((t - .5f)/.5f * .5f + .5f);
         else
-            paramMax = tt + h * .5f;
+            paramMax = tt + h * ((.5f - t)/.5f * .5f + .5f);
             
         line[0] = spline.calculateBezierPoint(paramMin);
         line[1] = spline.calculateBezierPoint(paramMax);
     }
 }
 
+bool BezierCurve::intersectBox(const BoundingBox & box) const
+{
+	const unsigned ns = numSegments();
+    for(unsigned i=0; i < ns; i++) {
+        BezierSpline sp;
+        getSegmentSpline(i, sp);   
+        if(intersectBox(sp, box)) return true;
+    }
+	
+	return false;
+}
+
+bool BezierCurve::intersectBox(BezierSpline & spline, const BoundingBox & box) const
+{
+	BoundingBox abox;
+	abox.expandBy(spline.cv[0]);
+	abox.expandBy(spline.cv[1]);
+	abox.expandBy(spline.cv[2]);
+	abox.expandBy(spline.cv[3]);
+	
+	if(!abox.intersect(box)) return false;
+	
+	if(abox.inside(box)) return true;
+	
+	BezierSpline stack[64];
+	int stackSize = 2;
+	spline.deCasteljauSplit(stack[0], stack[1]);
+	
+	while(stackSize > 0) {
+		BezierSpline c = stack[stackSize - 1];
+		stackSize--;
+		
+		abox.reset();
+		abox.expandBy(c.cv[0]);
+		abox.expandBy(c.cv[1]);
+		abox.expandBy(c.cv[2]);
+		abox.expandBy(c.cv[3]);
+		
+		if(abox.inside(box)) return true;
+		
+		if(abox.intersect(box)) {
+			if(abox.area() < 0.007f) return true;
+			
+			BezierSpline a, b;
+			c.deCasteljauSplit(a, b);
+			
+			stack[ stackSize ] = a;
+			stackSize++;
+			stack[ stackSize ] = b;
+			stackSize++;
+		}
+	}
+	
+	return false;
+}

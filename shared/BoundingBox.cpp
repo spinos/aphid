@@ -303,6 +303,16 @@ char BoundingBox::isBoxAround(const BoundingBox & b, float threshold) const
     return 1;
 }
 
+char BoundingBox::inside(const BoundingBox & b) const
+{
+	return (getMin(0) >= b.getMin(0) &&
+			getMin(1) >= b.getMin(1) &&
+			getMin(2) >= b.getMin(2) &&
+			getMax(0) <= b.getMax(0) &&
+			getMax(1) <= b.getMax(1) &&
+			getMax(2) <= b.getMax(2));
+}
+
 char BoundingBox::isValid() const
 {
 	return (getMin(0) < getMax(0) && getMin(1) < getMax(1) && getMin(2) < getMax(2));
