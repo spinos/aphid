@@ -10,15 +10,15 @@ BccWorld::BccWorld(GeoDrawer * drawer)
     m_drawer = drawer;  
     m_curve = new BezierCurve;
     m_curve->createVertices(9);
-    m_curve->m_cvs[0].set(4.f + RandomFn11(), 1.f + RandomFn11(), 0.f);
-    m_curve->m_cvs[1].set(2.f + RandomFn11(), 9.4f + RandomFn11(), 0.f);
-    m_curve->m_cvs[2].set(12.f + RandomFn11(), 8.4f + RandomFn11(), 0.f);
-    m_curve->m_cvs[3].set(6.f + RandomFn11(), .4f + RandomFn11(), 0.f);
-    m_curve->m_cvs[4].set(19.f + RandomFn11(), 2.4f + RandomFn11(), 0.f);
-    m_curve->m_cvs[5].set(21.f + RandomFn11(), 6.4f + RandomFn11(), 0.f);
-    m_curve->m_cvs[6].set(18.f + RandomFn11(), 12.2f + RandomFn11(), 0.f);
-    m_curve->m_cvs[7].set(12.f + RandomFn11(), 12.2f + RandomFn11(), 0.f);
-    m_curve->m_cvs[8].set(13.f + RandomFn11(), 8.2f + RandomFn11(), 0.f);
+    m_curve->m_cvs[0].set(8.f + RandomFn11(), 1.f + RandomFn11(), 4.1f);
+    m_curve->m_cvs[1].set(2.f + RandomFn11(), 9.4f + RandomFn11(), 1.11f);
+    m_curve->m_cvs[2].set(11.f + RandomFn11(), 8.4f + RandomFn11(), 1.13f);
+    m_curve->m_cvs[3].set(12.f + RandomFn11(), 1.4f + RandomFn11(), 1.14f);
+    m_curve->m_cvs[4].set(19.f + RandomFn11(), 2.4f + RandomFn11(), 2.16f);
+    m_curve->m_cvs[5].set(21.f + RandomFn11(), 3.4f + RandomFn11(), 1.17f);
+    m_curve->m_cvs[6].set(18.f + RandomFn11(), 12.2f + RandomFn11(), 3.18f);
+    m_curve->m_cvs[7].set(12.f + RandomFn11(), 12.2f + RandomFn11(), 4.19f);
+    m_curve->m_cvs[8].set(13.f + RandomFn11(), 8.2f + RandomFn11(), 0.18f);
     m_curve->computeKnots(); 
     
     const unsigned ns = m_curve->numSegments();

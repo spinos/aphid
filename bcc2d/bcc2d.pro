@@ -3,7 +3,7 @@ macx:CONFIG -= app_bundle
 CONFIG += release
 message(QMAKE with CUDA)
 DEFINES += BOOST_NOINLINE='"__attribute__ ((noinline))"'
-INCLUDEPATH += ./ ../shared ../cudabvh ../radixsort ../cudanarrowphase
+INCLUDEPATH += ./ ../shared ../cudabvh ../radixsort ../cudanarrowphase ../btree
 HEADERS       = ../shared/Base3DView.h \
                 ../shared/BaseSolverThread.h \
                 ../shared/CudaBase.h \
@@ -13,6 +13,7 @@ HEADERS       = ../shared/Base3DView.h \
                 glWidget.h \
                 window.h \
                 CartesianGrid.h \
+                MortonHash.h \
                 BccGrid.h \
                 BccWorld.h
 SOURCES       = ../shared/Base3DView.cpp \
@@ -21,10 +22,16 @@ SOURCES       = ../shared/Base3DView.cpp \
                 ../shared/BaseBuffer.cpp \
                 ../shared/CUDABuffer.cpp \
                 ../shared/ScanUtil.cpp \
+                ../btree/Types.cpp \
+                ../btree/Entity.cpp \
+                ../btree/BNode.cpp \
+                ../btree/BTree.cpp \
+                ../btree/Array.cpp \
                 main.cpp \
                 glWidget.cpp \
                 window.cpp \
                 CartesianGrid.cpp \
+                MortonHash.cpp \
                 BccGrid.cpp \
                 BccWorld.cpp
 

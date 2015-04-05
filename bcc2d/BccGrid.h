@@ -5,6 +5,7 @@
 
 class BezierCurve;
 class GeoDrawer;
+
 class BccGrid : public CartesianGrid
 {
 public:
@@ -13,6 +14,7 @@ public:
     
     void create(BezierCurve * curve);
     void draw(GeoDrawer * drawer);
+	void drawHash();
 protected:
 
 private:

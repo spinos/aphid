@@ -17,9 +17,9 @@ unsigned expandBits(unsigned v)
 // given 3D point located within the unit cube [0,1].
 unsigned encodeMorton3D(unsigned x, unsigned y, unsigned z) 
 { 
-    x = min(max(x, 0.0f), 1023); 
-    y = min(max(y, 0.0f), 1023); 
-    z = min(max(z, 0.0f), 1023); 
+    x = min(max(x, 0), 1023); 
+    y = min(max(y, 0), 1023); 
+    z = min(max(z, 0), 1023); 
     unsigned xx = expandBits((unsigned)x); 
     unsigned yy = expandBits((unsigned)y); 
     unsigned zz = expandBits((unsigned)z); 

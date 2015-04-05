@@ -103,6 +103,7 @@ private:
 	
 	void insertKey(KeyType x);
 	bool removeKey(const KeyType & x);
+	bool removeKeyAndData(const KeyType & x);
 
 	void partRoot(Pair<KeyType, Entity> x);
 	Pair<KeyType, Entity> partData(Pair<KeyType, Entity> x, Pair<KeyType, Entity> old[], BNode * lft, BNode * rgt, bool doSplitLeaf = false);
@@ -251,14 +252,17 @@ Pair<KeyType, Entity> * BNode<KeyType>::insert(const KeyType & x)
 template <typename KeyType> 
 void BNode<KeyType>::remove(const KeyType & x)
 {
-	if(isRoot()) {
+    if(isRoot()) {
+    
 		SeparatedNodes.reset();
 		removeRoot(x);
 	}
 	else if(isLeaf()) {
+    
 		removeLeaf(x);
 	}
 	else {
+    
 		BNode * n = nextIndex(x);
 		n->remove(x);
 	}
@@ -272,7 +276,7 @@ void BNode<KeyType>::removeRoot(const KeyType & x)
 		n->remove(x);
 	}
 	else {
-		removeKey(x);
+		removeKeyAndData(x);
 		
 		setFirstIndex(NULL);
 	}
@@ -805,14 +809,14 @@ bool BNode<KeyType>::removeDataLeaf(const KeyType & x)
 {
 	SearchResult s = findKey(x);
 	if(s.found < 0) {
-		//std::cout<<"cannot find key "<<x;
+		// std::cout<<"cannot find key "<<x;
 		return false;
 	}
 	
 	int found = s.found;
 	
 	if(m_data[found].index) {
-		delete m_data[found].index;
+	    delete m_data[found].index;
 		m_data[found].index = NULL;
 	}
 	
@@ -839,14 +843,46 @@ bool BNode<KeyType>::removeKey(const KeyType & x)
 {
 	SearchResult s = findKey(x);
 	
-	if(s.found < 0) return false;
+	if(s.found < 0) { std::cout<<" cannot find key ";
+	    return false;
+	}
 	
 	int found = s.found;
 	
-	if(found == 0) 
-		setFirstIndex(m_data[found].index);
-	else
+	if(found == 0) {
+	    setFirstIndex(m_data[found].index);
+	}
+	else {
 		m_data[found - 1].index = m_data[found].index;
+	}
+
+	if(found == numKeys() - 1) {
+		reduceNumKeys();
+		return true;
+	}
+	
+	for(int i= found; i < numKeys() - 1; i++)
+		m_data[i] = m_data[i+1];
+		
+    reduceNumKeys();
+	return true;
+}
+
+template <typename KeyType> 
+bool BNode<KeyType>::removeKeyAndData(const KeyType & x)
+{
+	SearchResult s = findKey(x);
+	
+	if(s.found < 0) { std::cout<<" cannot find key ";
+	    return false;
+	}
+	
+	int found = s.found;
+	
+	if(m_data[found].index) {
+	     delete m_data[found].index;
+	     m_data[found].index = 0;
+	}
 
 	if(found == numKeys() - 1) {
 		reduceNumKeys();

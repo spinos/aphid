@@ -2,7 +2,7 @@
 #define CARTESIANGRID_H
 
 #include <BoundingBox.h>
-
+#include <MortonHash.h>
 class CartesianGrid 
 {
 public:
@@ -19,17 +19,17 @@ public:
     const Vector3F origin() const;
     
 protected:
-    CellIndex * cells();
+	sdb::MortonHash * cells();
     const float cellSizeAtLevel(int level) const;
     void addCell(const Vector3F & p, int level);
-    void setCell(unsigned i, const Vector3F & p, int level);
-    const Vector3F cellCenter(unsigned i) const;
+	void removeCell(unsigned code);
+    const Vector3F cellCenter(unsigned code) const;
+	void printHash();
 private:
     Vector3F m_origin;
     float m_span; // same for each dimensions
-    CellIndex * m_cells;
-    unsigned * m_levels;
-    unsigned m_numCells, m_maxNumCells;
+    sdb::MortonHash * m_cellHash;
+    unsigned m_numCells;
 };
 
 #endif        //  #ifndef CARTESIANGRID_H
