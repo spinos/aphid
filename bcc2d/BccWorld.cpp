@@ -27,7 +27,7 @@ BccWorld::BccWorld(GeoDrawer * drawer)
     m_curve->getAabb(&box);
     
     m_grid = new BccGrid(box);
-    m_grid->create(m_curve);
+    m_grid->create(m_curve, 4);
 	
 	m_splines = new BaseBuffer;
 	m_splines->create(ns * sizeof(BezierSpline));
@@ -41,7 +41,7 @@ BccWorld::~BccWorld() {}
 void BccWorld::draw()
 {
     glColor3f(.99f, .03f, .05f);
-    m_drawer->smoothCurve(*m_curve, 32);
+    m_drawer->smoothCurve(*m_curve, 8);
     
     BoundingBox box;
     m_grid->getBounding(box);

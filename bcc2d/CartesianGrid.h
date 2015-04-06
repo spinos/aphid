@@ -22,11 +22,13 @@ protected:
 	sdb::MortonHash * cells();
     const float cellSizeAtLevel(int level) const;
 	const float gridSize() const;
+	void addGrid(const Vector3F & p);
     void addCell(const Vector3F & p, int level);
 	const Vector3F gridOrigin(unsigned code) const;
 	const Vector3F cellOrigin(unsigned code, int level) const;
 	void removeCell(unsigned code);
     const Vector3F cellCenter(unsigned code) const;
+    const Vector3F putIntoBound(const Vector3F & p) const;
 	void printHash();
 private:
     Vector3F m_origin;

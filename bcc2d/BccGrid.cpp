@@ -1,78 +1,49 @@
 #include "BccGrid.h"
 #include <BezierCurve.h>
 #include <GeoDrawer.h>
-
-static const float OctChildOffset[8][3] = {{-1.f, -1.f, -1.f},
-{-1.f, -1.f, 1.f},
-{-1.f, 1.f, -1.f},
-{-1.f, 1.f, 1.f},
-{1.f, -1.f, -1.f},
-{1.f, -1.f, 1.f},
-{1.f, 1.f, -1.f},
-{1.f, 1.f, 1.f}};
-
-/*
-*  6 + 8 connections
-*  x-y plane
-*                     3
-*                 9   |   13
-*                   \ | /
-*                    \|/
-*              4------1------5
-*                    /|\
-*                   / | \
-*                 7   |   11
-*                     2
-*  z-y plane
-*                     3
-*                 8   |   9
-*                   \ | /
-*                    \|/
-*              0------4------1
-*                    /|\
-*                   / | \
-*                 6   |   7
-*                     2
-*/
+#include <BccLattice.h>
+#include "bcc_common.h"
 
 BccGrid::BccGrid(const BoundingBox & bound) :
     CartesianGrid(bound)
 {
-
+    m_lattice = new BccLattice(bound);
 }
 
-BccGrid::~BccGrid() {}
-
-void BccGrid::create(BezierCurve * curve)
+BccGrid::~BccGrid() 
 {
+    delete m_lattice;
+}
+
+void BccGrid::create(BezierCurve * curve, int maxLevel)
+{
+// start at 8 cells per axis
     int level = 3;
-    int dim = 1<<level;
+    const int dim = 1<<level;
     int i, j, k;
 
     const float h = cellSizeAtLevel(level);
-    m_tolerance = 0.33f;
-    const Vector3F ori = origin() + Vector3F(h*.5f, h*.5f, h*.5f);
+    const float hh = h * .5f;
+    m_tolerance = 0.1f;
+    const Vector3F ori = origin() + Vector3F(hh, hh, hh);
     Vector3F sample, closestP;
     BoundingBox box;
     for(k=0; k < dim; k++) {
         for(j=0; j < dim; j++) {
             for(i=0; i < dim; i++) {
                 sample = ori + Vector3F(h* i, h* j, h* k);
-                box.setMin(sample.x - h*.5f, sample.y - h*.5f, sample.z - h*.5f);
-                box.setMax(sample.x + h*.5f, sample.y + h*.5f, sample.z + h*.5f);
+                box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
+                box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
                 if(curve->intersectBox(box))
                     addCell(sample, level);
             }
         }
     }
     std::cout<<" n level 3 cell "<<numCells()<<"\n";
-	subdivide(curve, 4);
-	
-	// subdivide(curve, 5);
-	// subdivide(curve, 6);
-	// subdivide(curve, 7);
-	// subdivide(curve, 8);
+    for(level=4; level<= maxLevel; level++)
+        subdivide(curve, level);
 	// printHash();
+	createLatticeNode();
 }
 
 void BccGrid::subdivide(BezierCurve * curve, int level)
@@ -95,7 +66,6 @@ void BccGrid::subdivide(BezierCurve * curve, int level)
     BoundingBox box;
     const float h = cellSizeAtLevel(level);
     const float hh = h * .5f;
-    int isFirst;
     for(i=0; i< n; i++) {
         sample = cellCenter(parentKey[i]);
 		removeCell(parentKey[i]);
@@ -115,6 +85,20 @@ void BccGrid::subdivide(BezierCurve * curve, int level)
 	std::cout<<" n level "<<level<<" cell "<<numCells()<<"\n";
 }
 
+void BccGrid::createLatticeNode()
+{
+    Vector3F cen;
+    float h;
+    sdb::MortonHash * c = cells();
+	c->begin();
+	while(!c->end()) {
+		cen = cellCenter(c->key());
+		h = cellSizeAtLevel(c->value()->level);
+		m_lattice->addOctahedron(cen, h);
+	    c->next();   
+	}	
+}
+
 void BccGrid::draw(GeoDrawer * drawer)
 {
 	sdb::MortonHash * c = cells();
@@ -127,13 +111,15 @@ void BccGrid::draw(GeoDrawer * drawer)
 	c->begin();
 	while(!c->end()) {
 		l = cellCenter(c->key());
-		h = cellSizeAtLevel(c->value()->level) * .48f;
+		h = cellSizeAtLevel(c->value()->level) * .5f;
         box.setMin(l.x - h, l.y - h, l.z - h);
         box.setMax(l.x + h, l.y + h, l.z + h);
         drawer->boundingBox(box);
 		
 	    c->next();   
-	}	
+	}
+
+	m_lattice->draw(drawer);
 }
 
 void BccGrid::drawHash()

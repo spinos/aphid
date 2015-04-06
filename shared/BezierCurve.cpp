@@ -167,6 +167,10 @@ void BezierCurve::distanceToPoint(BezierSpline & spline, const Vector3F & pnt, f
 
 bool BezierCurve::intersectBox(const BoundingBox & box) const
 {
+    BoundingBox ab;
+    getAabb(&ab);
+    if(!ab.intersect(box)) return false;
+    
 	const unsigned ns = numSegments();
     for(unsigned i=0; i < ns; i++) {
         BezierSpline sp;

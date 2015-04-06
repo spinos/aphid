@@ -95,7 +95,7 @@ void GeoDrawer::cube(const Vector3F & p, const float & size) const
 {
 	glPushMatrix();
 
-	glTranslatef(p.x, p.y, p.z);
+	glTranslatef(p.x-size*.5f, p.y-size*.5f, p.z-size*.5f);
 	glScalef(size, size, size);
 	
 	drawMesh(m_cube);
@@ -107,7 +107,7 @@ void GeoDrawer::solidCube(float x, float y, float z, float size)
 	setWired(0);
 	glPushMatrix();
 
-	glTranslatef(x, y, z);
+	glTranslatef(x-size*.5f, y-size*.5f, z-size*.5f);
 	glScalef(size, size, size);
 	
 	drawMesh(m_cube);

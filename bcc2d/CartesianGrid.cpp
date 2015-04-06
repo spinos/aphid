@@ -48,14 +48,38 @@ const float CartesianGrid::cellSizeAtLevel(int level) const
 const float CartesianGrid::gridSize() const
 { return m_gridH; }
 
-void CartesianGrid::addCell(const Vector3F & p, int level)
+void CartesianGrid::addGrid(const Vector3F & p)
 {
-    const float h = gridSize();
-    int x = (p.x - m_origin.x) / h;
-    int y = (p.y - m_origin.y) / h;
-    int z = (p.z - m_origin.z) / h;
+    const Vector3F q = putIntoBound(p);
+    const float ih = 1.f / gridSize();
+// numerical inaccuracy
+    unsigned x = (q.x - m_origin.x + 1e-6) * ih;
+    unsigned y = (q.y - m_origin.y + 1e-6) * ih;
+    unsigned z = (q.z - m_origin.z + 1e-6) * ih;
     unsigned code = encodeMorton3D(x, y, z);
     
+	sdb::CellValue * ind = new sdb::CellValue;
+	ind->level = 10;
+	m_cellHash->insert(code, ind);
+	
+    m_numCells++;
+}
+
+void CartesianGrid::addCell(const Vector3F & p, int level)
+{
+    const Vector3F q = putIntoBound(p);
+    const float ih = 1.f / gridSize();
+// numerical inaccuracy
+    unsigned x = (q.x - m_origin.x + 1e-6) * ih;
+    unsigned y = (q.y - m_origin.y + 1e-6) * ih;
+    unsigned z = (q.z - m_origin.z + 1e-6) * ih;
+    unsigned code = encodeMorton3D(x, y, z);
+    
+    // std::cout<<" encode x y z "<<x<<" "<<y<<" "<<z<<"\n";
+    //unsigned dx, dy, dz;
+    //decodeMorton3D(code, dx, dy, dz);
+    // std::cout<<" decode x y z "<<dx<<" "<<dy<<" "<<dz<<"\n";
+
 	sdb::CellValue * ind = new sdb::CellValue;
 	ind->level = level;
 	m_cellHash->insert(code, ind);
@@ -81,13 +105,25 @@ const Vector3F CartesianGrid::gridOrigin(unsigned code) const
     unsigned x, y, z;
     decodeMorton3D(code, x, y, z);
     float h = gridSize();
-    return m_origin + Vector3F(x * h, y * h, z * h);
+    return Vector3F(m_origin.x + h * x, m_origin.y + h * y, m_origin.z + h * z);
 }
 
 const Vector3F CartesianGrid::cellOrigin(unsigned code, int level) const
 {
     float h = cellSizeAtLevel(level) * 0.5f;
     return cellCenter(code) - Vector3F(h, h, h);
+}
+
+const Vector3F CartesianGrid::putIntoBound(const Vector3F & p) const
+{
+    Vector3F r = p;
+    if(r.x < m_origin.x) r.x = m_origin.x;
+    if(r.x > m_origin.x + m_span) r.x = m_origin.x + m_span;
+    if(r.y < m_origin.y) r.x = m_origin.y;
+    if(r.y > m_origin.y + m_span) r.y = m_origin.y + m_span;
+    if(r.z < m_origin.z) r.z = m_origin.z;
+    if(r.z > m_origin.z + m_span) r.z = m_origin.z + m_span;
+    return r;
 }
 
 void CartesianGrid::printHash()

@@ -11,6 +11,7 @@
 #include <LineBuffer.h>
 #include <AdaptableStripeBuffer.h>
 #include <BaseCurve.h>
+#include <BezierCurve.h>
 LineDrawer::LineDrawer() {}
 LineDrawer::~LineDrawer() {}
 
@@ -127,19 +128,25 @@ void LineDrawer::linearCurve(const BaseCurve & curve) const
 	glEnable(GL_DEPTH_TEST);
 }
 
-void LineDrawer::smoothCurve(BaseCurve & curve, short deg) const
+void LineDrawer::smoothCurve(const BezierCurve & curve, short deg) const
 {
 	glDisable(GL_DEPTH_TEST);
-	float t;
-	const unsigned nseg = (curve.numVertices() - 1) * deg;
-	const float delta = 1.f / nseg;
-	Vector3F p;
-	glBegin(GL_LINE_STRIP);
-	for(unsigned i = 0; i <= nseg; i++) {
-		t = delta * i;
-		p = curve.interpolate(t);
-		// setColor(1.f - t, 0.f, t);
-		glVertex3f(p.x, p.y, p.z);
+	const unsigned ns = curve.numSegments();
+	const float delta = 1.f / (float)deg;
+	Vector3F p0, p;
+	glBegin(GL_LINES);
+	unsigned i;
+	short j;
+	for(i = 0; i < ns; i++) {
+	    BezierSpline sp;
+	    curve.getSegmentSpline(i, sp);
+	    p0 = sp.calculateBezierPoint(0.f);
+	    for(j=1; j <= deg; j++) {
+	        glVertex3fv((GLfloat *)&p0);
+	        p = sp.calculateBezierPoint(delta * j);
+		    glVertex3fv((GLfloat *)&p);
+		    p0 = p;
+		}
 	}
 	glEnd();
 	glEnable(GL_DEPTH_TEST);

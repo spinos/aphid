@@ -12,6 +12,7 @@
 class LineBuffer;
 class AdaptableStripeBuffer;
 class BaseCurve;
+class BezierCurve;
 class LineDrawer : public BaseDrawer {
 public:
 	LineDrawer();
@@ -22,5 +23,5 @@ public:
 	void lineStripes(const unsigned & num, unsigned * nv, Vector3F * vs, Vector3F * cs) const;
 	void stripes(AdaptableStripeBuffer * data, const Vector3F & eyeDirection) const;
 	void linearCurve(const BaseCurve & curve) const;
-	void smoothCurve(BaseCurve & curve, short deg) const;
+	void smoothCurve(const BezierCurve & curve, short deg) const;
 };

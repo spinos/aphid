@@ -14,6 +14,8 @@ HEADERS       = ../shared/Base3DView.h \
                 window.h \
                 CartesianGrid.h \
                 MortonHash.h \
+                bcc_common.h \
+                BccLattice.h \
                 BccGrid.h \
                 BccWorld.h
 SOURCES       = ../shared/Base3DView.cpp \
@@ -32,6 +34,7 @@ SOURCES       = ../shared/Base3DView.cpp \
                 window.cpp \
                 CartesianGrid.cpp \
                 MortonHash.cpp \
+                BccLattice.cpp \
                 BccGrid.cpp \
                 BccWorld.cpp
 
