@@ -2,16 +2,17 @@
 #include <iostream>
 #include <Morton3D.h>
 #include <BNode.h>
-CartesianGrid::CartesianGrid(const BoundingBox & bound, int maxLevel) 
+CartesianGrid::CartesianGrid(const BoundingBox & bound) 
 {
     m_origin = bound.getMin();
     m_span = bound.getLongestDistance();
     
-    const float margin = m_span / 41.f;
+    const float margin = m_span / 43.f;
     m_origin.x -= margin;
     m_origin.y -= margin;
     m_origin.z -= margin;
     m_span += margin * 2.f;
+	m_gridH = m_span / 1024.f;
     
     m_numCells = 0;
 	
@@ -44,9 +45,12 @@ sdb::MortonHash * CartesianGrid::cells()
 const float CartesianGrid::cellSizeAtLevel(int level) const
 { return m_span / (float)(1<<level); }
 
+const float CartesianGrid::gridSize() const
+{ return m_gridH; }
+
 void CartesianGrid::addCell(const Vector3F & p, int level)
 {
-    const float h = m_span / 1024.f;
+    const float h = gridSize();
     int x = (p.x - m_origin.x) / h;
     int y = (p.y - m_origin.y) / h;
     int z = (p.z - m_origin.z) / h;
@@ -68,10 +72,22 @@ void CartesianGrid::removeCell(unsigned code)
 
 const Vector3F CartesianGrid::cellCenter(unsigned code) const
 {
+    float h = gridSize();
+    return gridOrigin(code) + Vector3F(.5f * h, .5f * h, .5f * h);
+}
+
+const Vector3F CartesianGrid::gridOrigin(unsigned code) const
+{
     unsigned x, y, z;
     decodeMorton3D(code, x, y, z);
-    float h = m_span / 1024.f;
-    return m_origin + Vector3F((x + .5f) * h, (y + .5f) * h, (z + .5f) * h);
+    float h = gridSize();
+    return m_origin + Vector3F(x * h, y * h, z * h);
+}
+
+const Vector3F CartesianGrid::cellOrigin(unsigned code, int level) const
+{
+    float h = cellSizeAtLevel(level) * 0.5f;
+    return cellCenter(code) - Vector3F(h, h, h);
 }
 
 void CartesianGrid::printHash()

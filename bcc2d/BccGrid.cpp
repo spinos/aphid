@@ -1,8 +1,42 @@
 #include "BccGrid.h"
 #include <BezierCurve.h>
 #include <GeoDrawer.h>
+
+static const float OctChildOffset[8][3] = {{-1.f, -1.f, -1.f},
+{-1.f, -1.f, 1.f},
+{-1.f, 1.f, -1.f},
+{-1.f, 1.f, 1.f},
+{1.f, -1.f, -1.f},
+{1.f, -1.f, 1.f},
+{1.f, 1.f, -1.f},
+{1.f, 1.f, 1.f}};
+
+/*
+*  6 + 8 connections
+*  x-y plane
+*                     3
+*                 9   |   13
+*                   \ | /
+*                    \|/
+*              4------1------5
+*                    /|\
+*                   / | \
+*                 7   |   11
+*                     2
+*  z-y plane
+*                     3
+*                 8   |   9
+*                   \ | /
+*                    \|/
+*              0------4------1
+*                    /|\
+*                   / | \
+*                 6   |   7
+*                     2
+*/
+
 BccGrid::BccGrid(const BoundingBox & bound) :
-    CartesianGrid(bound, 8)
+    CartesianGrid(bound)
 {
 
 }
@@ -56,7 +90,7 @@ void BccGrid::subdivide(BezierCurve * curve, int level)
 		c->next();
 	}
 	
-    int u, v, w;
+    int u;
     Vector3F sample, subs, closestP;
     BoundingBox box;
     const float h = cellSizeAtLevel(level);
@@ -65,20 +99,17 @@ void BccGrid::subdivide(BezierCurve * curve, int level)
     for(i=0; i< n; i++) {
         sample = cellCenter(parentKey[i]);
 		removeCell(parentKey[i]);
-		for(u = -1; u <= 1; u+=2) {
-           for(v = -1; v <= 1; v+=2) {
-               for(w = -1; w <= 1; w+=2) {
-                   subs = sample + Vector3F(hh * u, hh * v, hh * w);
-                   
-				   box.setMin(subs.x - hh, subs.y - hh, subs.z - hh);
-                   box.setMax(subs.x + hh, subs.y + hh, subs.z + hh);
-                
-                  if(curve->intersectBox(box))
-                       addCell(subs, level);
-               }
-           } 
-        }
-		
+		for(u = 0; u < 8; u++) {
+			subs = sample + Vector3F(hh * OctChildOffset[u][0], 
+			hh * OctChildOffset[u][1], 
+			hh * OctChildOffset[u][2]);
+
+			box.setMin(subs.x - hh, subs.y - hh, subs.z - hh);
+			box.setMax(subs.x + hh, subs.y + hh, subs.z + hh);
+
+			if(curve->intersectBox(box))
+			   addCell(subs, level);
+		}
     }
     delete[] parentKey;
 	std::cout<<" n level "<<level<<" cell "<<numCells()<<"\n";
@@ -95,7 +126,6 @@ void BccGrid::draw(GeoDrawer * drawer)
     
 	c->begin();
 	while(!c->end()) {
-		unsigned k = c->key();
 		l = cellCenter(c->key());
 		h = cellSizeAtLevel(c->value()->level) * .48f;
         box.setMin(l.x - h, l.y - h, l.z - h);
@@ -115,10 +145,10 @@ void BccGrid::drawHash()
 	glBegin(GL_LINE_STRIP);
 	c->begin();
 	while(!c->end()) {
-		unsigned k = c->key();
 		l = cellCenter(c->key());
 		glVertex3fv((GLfloat *)&l);
 	    c->next();   
 	}
 	glEnd();
 }
+
