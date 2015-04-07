@@ -10,6 +10,7 @@ HEADERS       = ../shared/Base3DView.h \
                 ../shared/BaseBuffer.h \
                 ../shared/CUDABuffer.h \
                 ../shared/ScanUtil.h \
+                ../shared/Morton3D.h \
                 glWidget.h \
                 window.h \
                 CartesianGrid.h \

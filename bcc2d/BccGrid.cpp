@@ -42,13 +42,16 @@ void BccGrid::create(BezierCurve * curve, int maxLevel)
     std::cout<<" n level 3 cell "<<numCells()<<"\n";
     for(level=4; level<= maxLevel; level++)
         subdivide(curve, level);
+    
 	// printHash();
 	createLatticeNode();
+	
+	std::cout<<" n green edges "<<m_lattice->numGreenEdges()<<"\n";
 }
 
 void BccGrid::subdivide(BezierCurve * curve, int level)
 {
-	sdb::MortonHash * c = cells();
+	sdb::CellHash * c = cells();
 	
     const unsigned n = c->size();
 	
@@ -89,7 +92,7 @@ void BccGrid::createLatticeNode()
 {
     Vector3F cen;
     float h;
-    sdb::MortonHash * c = cells();
+    sdb::CellHash * c = cells();
 	c->begin();
 	while(!c->end()) {
 		cen = cellCenter(c->key());
@@ -101,7 +104,7 @@ void BccGrid::createLatticeNode()
 
 void BccGrid::draw(GeoDrawer * drawer)
 {
-	sdb::MortonHash * c = cells();
+	sdb::CellHash * c = cells();
 	Vector3F l;
     BoundingBox box;
     float h;
@@ -124,7 +127,7 @@ void BccGrid::draw(GeoDrawer * drawer)
 
 void BccGrid::drawHash()
 {
-	sdb::MortonHash * c = cells();
+	sdb::CellHash * c = cells();
 	Vector3F l;
 	glColor3f(0.f, .1f, .4f);
     

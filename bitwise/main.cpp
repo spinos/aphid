@@ -24,6 +24,12 @@ typedef unsigned int uint;
 uint64 upsample(uint a, uint b) 
 { return ((uint64)a << 32) | (uint64)b; }
 
+void downsample(uint64 combined, uint & a, uint & b)
+{
+    a = combined >> 32;
+    b = combined & ~0x80000000;
+}
+
 uint expandBits(uint v) 
 { 
     v = (v * 0x00010001u) & 0xFF0000FFu; 
@@ -189,6 +195,16 @@ int main(int argc, char * const argv[])
 	std::cout<<boost::format("morton code of (%1%, %2%, %3%): %4%\n") % x1 % y1 % z1 % byte_to_binary(m1);	
 	std::cout<<boost::format("decode morton code to xyz: (%1%, %2%, %3%)\n") % DecodeMorton3X(m1) % DecodeMorton3Y(m1) % DecodeMorton3Z(m1);
 		
+	std::cout<<boost::format("mask of last32 bit: %1%\n") % byte_to_binary64(~0x80000000);
+	
+	uint upa = 892500748;
+	uint upb = 1219402334;
+	uint64 upc = upsample(upa, upb);
+	std::cout<<boost::format("upsample( %1%, %2% ): %3%\n") % upa % upb % upc;
+	downsample(upc, upa, upb);
+	std::cout<<boost::format("downsample( %1% ): %2% %3%\n") % upc % upa % upb;
+	
+	
 	std::cout<<"end of test\n";
 	return 0;
 }

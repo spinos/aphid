@@ -19,7 +19,7 @@ CartesianGrid::CartesianGrid(const BoundingBox & bound)
 	sdb::TreeNode::MaxNumKeysPerNode = 256;
 	sdb::TreeNode::MinNumKeysPerNode = 32;
 
-	m_cellHash = new sdb::MortonHash;
+	m_cellHash = new sdb::CellHash;
 }
 
 CartesianGrid::~CartesianGrid() 
@@ -39,7 +39,7 @@ void CartesianGrid::getBounding(BoundingBox & bound) const
 const Vector3F CartesianGrid::origin() const
 { return m_origin; }
 
-sdb::MortonHash * CartesianGrid::cells()
+sdb::CellHash * CartesianGrid::cells()
 { return m_cellHash; }
 
 const float CartesianGrid::cellSizeAtLevel(int level) const
@@ -48,32 +48,32 @@ const float CartesianGrid::cellSizeAtLevel(int level) const
 const float CartesianGrid::gridSize() const
 { return m_gridH; }
 
-void CartesianGrid::addGrid(const Vector3F & p)
+const unsigned CartesianGrid::mortonEncode(const Vector3F & p) const
 {
-    const Vector3F q = putIntoBound(p);
+	const Vector3F q = putIntoBound(p);
     const float ih = 1.f / gridSize();
 // numerical inaccuracy
     unsigned x = (q.x - m_origin.x + 1e-6) * ih;
     unsigned y = (q.y - m_origin.y + 1e-6) * ih;
     unsigned z = (q.z - m_origin.z + 1e-6) * ih;
-    unsigned code = encodeMorton3D(x, y, z);
+	return encodeMorton3D(x, y, z);
+}
+
+unsigned CartesianGrid::addGrid(const Vector3F & p)
+{
+    unsigned code = mortonEncode(p);
     
 	sdb::CellValue * ind = new sdb::CellValue;
 	ind->level = 10;
 	m_cellHash->insert(code, ind);
 	
     m_numCells++;
+	return code;
 }
 
-void CartesianGrid::addCell(const Vector3F & p, int level)
+unsigned CartesianGrid::addCell(const Vector3F & p, int level)
 {
-    const Vector3F q = putIntoBound(p);
-    const float ih = 1.f / gridSize();
-// numerical inaccuracy
-    unsigned x = (q.x - m_origin.x + 1e-6) * ih;
-    unsigned y = (q.y - m_origin.y + 1e-6) * ih;
-    unsigned z = (q.z - m_origin.z + 1e-6) * ih;
-    unsigned code = encodeMorton3D(x, y, z);
+    unsigned code = mortonEncode(p);
     
     // std::cout<<" encode x y z "<<x<<" "<<y<<" "<<z<<"\n";
     //unsigned dx, dy, dz;
@@ -85,6 +85,7 @@ void CartesianGrid::addCell(const Vector3F & p, int level)
 	m_cellHash->insert(code, ind);
 	
     m_numCells++;
+	return code;
 }
 
 void CartesianGrid::removeCell(unsigned code)

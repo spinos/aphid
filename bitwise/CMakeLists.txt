@@ -1,10 +1,12 @@
 cmake_minimum_required (VERSION 2.8)
-project (bitwise)
+project (testbit)
 # The version number.
 set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
 
-add_executable(bitwise main.cpp)
+set (HEADER_FILES "../shared/Morton3D.h")
+
+add_executable (testbit ${HEADER_FILES} main.cpp)
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -39,9 +41,9 @@ message ("boost date_time is" ${Boost_DATE_TIME_LIBRARY})
 message ("boost regex is" ${Boost_REGEX_LIBRARY})
 message ("boost filesystem is" ${Boost_FILESYSTEM_LIBRARY})
 
-target_link_libraries (bitwise ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (bitwise ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (bitwise ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (bitwise ${Boost_REGEX_LIBRARY})
+target_link_libraries (testbit ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (testbit ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (testbit ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (testbit ${Boost_REGEX_LIBRARY})
 
 

@@ -4,23 +4,45 @@
 #include <Array.h>
 
 namespace sdb {
+    
+typedef unsigned uint;
+typedef unsigned long long uint64;
 
 struct CellValue {
 	int level;
 	float a;
 };
 
-class MortonHash : public Array<unsigned, CellValue>
+class CellHash : public Array<unsigned, CellValue>
 {
 public:
-    MortonHash() {}
-    virtual ~MortonHash() {}
+    CellHash();
+    virtual ~CellHash();
     
 protected:
 
 private:
 
 };
+
+struct EdgeValue {
+    int level;
+    float a;
+};
+
+class EdgeHash : public Array<uint64, EdgeValue>
+{
+public:
+    EdgeHash();
+    virtual ~EdgeHash();
+    void addEdge(unsigned a, unsigned b);
+    void connectedTo(unsigned & a, unsigned & b);
+protected:
+
+private:
+
+};
+
 } // end namespace sdb
 #endif        //  #ifndef MORTONHASH_H
 
