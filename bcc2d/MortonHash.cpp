@@ -25,12 +25,19 @@ void downsample(uint64 combined, uint & a, uint & b)
     b = combined & ~0x80000000;
 }
 
+EdgeValue * EdgeHash::findEdge(unsigned a, unsigned b)
+{
+    swap(a, b);
+    uint64 c = upsample(a, b);
+    return find(c);
+}
+
 void EdgeHash::addEdge(unsigned a, unsigned b)
 {
     swap(a, b);
     uint64 c = upsample(a, b);
     EdgeValue * v = new EdgeValue;
-    v->level = 10;
+    v->visited = 0;
     insert(c, v);
 }
 

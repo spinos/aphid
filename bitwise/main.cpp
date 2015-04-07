@@ -127,6 +127,22 @@ uint DecodeMorton3X(uint code)
   return Compact1By2(code >> 2);
 }
 
+void testArray()
+{
+    const int a[3][3][3] = {{{0,1,2},{3,4,5},{6,7,8}},
+        {{9,10,11},{12,13,14},{15,16,17}},
+        {{18,19,20},{21,22,23},{24,25,26}}};
+    
+    int i, j, k;
+    for(k=0;k<3;k++) {
+        for(j=0;j<3;j++) {
+            for(i=0;i<3;i++) {
+                std::cout<<"a["<<k<<"]["<<j<<"]["<<i<<"] "<<a[k][j][i]<<"\n";
+            }
+        }
+    }
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
@@ -204,7 +220,7 @@ int main(int argc, char * const argv[])
 	downsample(upc, upa, upb);
 	std::cout<<boost::format("downsample( %1% ): %2% %3%\n") % upc % upa % upb;
 	
-	
+	testArray();
 	std::cout<<"end of test\n";
 	return 0;
 }

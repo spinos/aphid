@@ -7,11 +7,15 @@ class GeoDrawer;
 class BccLattice : public CartesianGrid
 {
 public:
+    struct Tetrahedron {
+        unsigned v[4];
+    };
+    
     BccLattice(const BoundingBox & bound);
     virtual ~BccLattice();
     
-    void addOctahedron(const Vector3F & center, float h);
-    
+    void add14Node(const Vector3F & center, float h);
+    void connect24Tetrahedron(const Vector3F & center, float h);
     void draw(GeoDrawer * drawer);
 	
 	const unsigned numGreenEdges() const;

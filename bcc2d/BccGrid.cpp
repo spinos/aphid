@@ -45,6 +45,7 @@ void BccGrid::create(BezierCurve * curve, int maxLevel)
     
 	// printHash();
 	createLatticeNode();
+	createLatticeTetrahedron();
 	
 	std::cout<<" n green edges "<<m_lattice->numGreenEdges()<<"\n";
 }
@@ -97,9 +98,23 @@ void BccGrid::createLatticeNode()
 	while(!c->end()) {
 		cen = cellCenter(c->key());
 		h = cellSizeAtLevel(c->value()->level);
-		m_lattice->addOctahedron(cen, h);
+		m_lattice->add14Node(cen, h);
 	    c->next();   
 	}	
+}
+
+void BccGrid::createLatticeTetrahedron()
+{
+    Vector3F cen;
+    float h;
+    sdb::CellHash * c = cells();
+	c->begin();
+	while(!c->end()) {
+		cen = cellCenter(c->key());
+		h = cellSizeAtLevel(c->value()->level);
+		m_lattice->connect24Tetrahedron(cen, h);
+	    c->next();   
+	}
 }
 
 void BccGrid::draw(GeoDrawer * drawer)

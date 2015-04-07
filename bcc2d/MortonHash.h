@@ -26,7 +26,7 @@ private:
 };
 
 struct EdgeValue {
-    int level;
+    int visited;
     float a;
 };
 
@@ -35,6 +35,7 @@ class EdgeHash : public Array<uint64, EdgeValue>
 public:
     EdgeHash();
     virtual ~EdgeHash();
+    EdgeValue * findEdge(unsigned a, unsigned b);
     void addEdge(unsigned a, unsigned b);
     void connectedTo(unsigned & a, unsigned & b);
 protected:

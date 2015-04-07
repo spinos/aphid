@@ -9,11 +9,11 @@ BccLattice::BccLattice(const BoundingBox & bound) :
 
 BccLattice::~BccLattice() {}
 
-void BccLattice::addOctahedron(const Vector3F & center, float h)
+void BccLattice::add14Node(const Vector3F & center, float h)
 {
 	const unsigned ccenter = mortonEncode(center);
 	unsigned cgreen;
-    Vector3F corner;
+	Vector3F corner;
     int i;
     float hh = h * .5f;
 	for(i=0; i < 8; i++) {
@@ -29,10 +29,34 @@ void BccLattice::addOctahedron(const Vector3F & center, float h)
         h * HexHeighborOffset[i][2]);
         
         cgreen = addGrid(corner);
-		
-		m_greenEdges->addEdge(ccenter, cgreen);
+        m_greenEdges->addEdge(ccenter, cgreen);
     }
     addGrid(center);
+}
+
+void BccLattice::connect24Tetrahedron(const Vector3F & center, float h)
+{
+    const unsigned ccenter = mortonEncode(center);
+    unsigned cgreen;
+	Vector3F corner;
+	int i;
+	for(i=0; i < 6; i++) {
+        corner = center + Vector3F(h * HexHeighborOffset[i][0], 
+        h * HexHeighborOffset[i][1], 
+        h * HexHeighborOffset[i][2]);
+        
+        cgreen = mortonEncode(corner);
+        
+		sdb::EdgeValue * edge = m_greenEdges->findEdge(ccenter, cgreen);
+		if(!edge) {
+		    std::cout<<" edge "<<i<<" connected to "<<center<<" doesn't exist!\n";
+		    continue;
+		}
+		if(edge->visited == 0) {
+		      
+		    edge->visited = 1;
+		}
+    }
 }
 
 const unsigned BccLattice::numGreenEdges() const
