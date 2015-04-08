@@ -28,6 +28,7 @@ private:
 	void drawTetrahedrons();
 	void encodeOctahedronVertices(const Vector3F & q, float h, int offset, unsigned * v) const;
 	void add4Tetrahedrons(unsigned * vOctahedron, BezierCurve * curve);
+	bool isCurveClosetToTetrahedron(const Vector3F * p, BezierCurve * curve) const;
 private:
     sdb::EdgeHash * m_greenEdges;
     Tetrahedron * m_tetrahedrons;

@@ -89,7 +89,7 @@ void BccLattice::draw(GeoDrawer * drawer)
 	    drawer->cube(l, h);
 	    latticeNode->next();
 	}
-	// drawGreenEdges();
+	drawGreenEdges();
 	drawer->setWired(1);
 	drawer->setColor(0.f, 0.f, 0.3f);
 	drawTetrahedrons();
@@ -142,6 +142,16 @@ void BccLattice::encodeOctahedronVertices(const Vector3F & q, float h, int offse
         v[i] = mortonEncode(corner);
         // if(!findGrid(v[i])) std::cout<<" cannot find grid "<<corner<<" ";
     }
+}
+
+bool BccLattice::isCurveClosetToTetrahedron(const Vector3F * p, BezierCurve * curve) const
+{
+    int i;
+    Vector3F q;
+    for(i=0; i<4; i++) {
+        if(curve->distanceToPoint(p[i], q) < 0.2f) return true;
+    }
+    return curve->intersectTetrahedron(p);
 }
 
 void BccLattice::add4Tetrahedrons(unsigned * vOctahedron, BezierCurve * curve)

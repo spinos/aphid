@@ -235,7 +235,7 @@ bool BezierCurve::intersectTetrahedron(BezierSpline & spline, const Vector3F * t
 	
 	if(!abox.intersect(box)) return false;
 	
-	BezierSpline stack[64];
+	BezierSpline stack[96];
 	int stackSize = 2;
 	spline.deCasteljauSplit(stack[0], stack[1]);
 	Vector3F q;
