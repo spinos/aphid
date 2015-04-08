@@ -55,29 +55,7 @@ Vector3F BezierCurve::calculateBezierPoint(float t, Vector3F * data) const
 	p += p3 * ttt; //fourth term
 	return p;
 }
-/*
-void BezierCurve::getAccSegmentCurves(BezierCurve * dst) const
-{
-    unsigned i, j;
-    unsigned v[4];
-    for(j = 0; j < numSegments(); j++) {
-        v[0] = j-1;
-        v[1] = j;
-        v[2] = j+1;
-        v[3] = j+2;
-        if(j==0) v[0] = 0;
-        if(j==numSegments()-1) v[3] = j+1;
-        
-        if(j==0) dst[j].m_cvs[0] = m_cvs[v[0]];
-        else dst[j].m_cvs[0] = m_cvs[v[0]] * .25f + m_cvs[v[1]] * .5f + m_cvs[v[2]] * .25f ;
-        dst[j].m_cvs[1] = (dst[j].m_cvs[0] * 5.f + m_cvs[v[1]] * 2.f + m_cvs[v[2]] * 2.f) * (1.f / 9.f);
-        
-        if(j==numSegments()-1) dst[j].m_cvs[3] = m_cvs[v[3]];
-        else dst[j].m_cvs[3] = m_cvs[v[1]] * .25f + m_cvs[v[2]] * .5f + m_cvs[v[3]] * .25f ;
-        dst[j].m_cvs[2] = (dst[j].m_cvs[3] * 5.f + m_cvs[v[1]] * 2.f + m_cvs[v[2]] * 2.f) * (1.f / 9.f);
-    }
-}
-*/
+
 void BezierCurve::getSegmentSpline(unsigned i, BezierSpline & spline) const
 {
 	unsigned v[4];
@@ -224,3 +202,70 @@ bool BezierCurve::intersectBox(BezierSpline & spline, const BoundingBox & box) c
 	
 	return false;
 }
+
+bool BezierCurve::intersectTetrahedron(const Vector3F * tet) const
+{
+    BoundingBox tbox;
+    tbox.expandBy(tet[0]);
+	tbox.expandBy(tet[1]);
+	tbox.expandBy(tet[2]);
+	tbox.expandBy(tet[3]);
+	
+    BoundingBox ab;
+    getAabb(&ab);
+    if(!ab.intersect(tbox)) return false;
+    
+	const unsigned ns = numSegments();
+    for(unsigned i=0; i < ns; i++) {
+        BezierSpline sp;
+        getSegmentSpline(i, sp);   
+        if(intersectTetrahedron(sp, tet, tbox)) return true;
+    }
+	
+	return false;
+}
+
+bool BezierCurve::intersectTetrahedron(BezierSpline & spline, const Vector3F * tet, const BoundingBox & box) const
+{
+    BoundingBox abox;
+	abox.expandBy(spline.cv[0]);
+	abox.expandBy(spline.cv[1]);
+	abox.expandBy(spline.cv[2]);
+	abox.expandBy(spline.cv[3]);
+	
+	if(!abox.intersect(box)) return false;
+	
+	BezierSpline stack[64];
+	int stackSize = 2;
+	spline.deCasteljauSplit(stack[0], stack[1]);
+	Vector3F q;
+	while(stackSize > 0) {
+		BezierSpline c = stack[stackSize - 1];
+		stackSize--;
+		
+		abox.reset();
+		abox.expandBy(c.cv[0]);
+		abox.expandBy(c.cv[1]);
+		abox.expandBy(c.cv[2]);
+		abox.expandBy(c.cv[3]);
+		
+		if(abox.intersect(box)) {
+			if(c.straightEnough()) {
+			    if(tetrahedronLineIntersection(tet, c.cv[0], c.cv[3], q))
+			        return true;
+			}
+			else {
+                BezierSpline a, b;
+                c.deCasteljauSplit(a, b);
+                
+                stack[ stackSize ] = a;
+                stackSize++;
+                stack[ stackSize ] = b;
+                stackSize++;
+			}
+		}
+	}
+	
+	return false;
+}
+

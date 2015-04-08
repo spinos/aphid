@@ -36,6 +36,12 @@ inline float log2f( float n )
 #define GoldenRatio 1.618
 #define ReGoldenRatio 0.382
 
+inline int GetSign(float d) {
+    if(d> 0.f) return 1;
+    if(d< 0.f) return -1;
+    return 0;
+}
+
 inline float RandomF01()
 { return ((float)(rand() % 499))/499.f; }
 

@@ -44,21 +44,6 @@ static const int OctahedronToTetrahedronVetex[4][4] = {
 {0, 3, 2, 1},
 {0, 4, 5, 1}
 };
-/* 
-*   3
-*  /|\
-* / | \
-*2-----1
-* \ | /
-*  \|/
-*   0 
-*/
-static const int TetrahedronToTriangleVertex[12] = {
-0, 1, 2, 
-1, 0, 3,
-2, 3, 0,
-3, 2, 1
-};
 
 #include <tetrahedron_math.h>
 

@@ -257,10 +257,10 @@ bool BccWorld::testIntersection(BezierSpline & spline, const BoundingBox & box)
 void BccWorld::testTetrahedronBoxIntersection()
 {
     Vector3F p[4];
-    p[0] = m_testP + Vector3F(0.f, -1.f, 0.f);
-    p[1] = m_testP + Vector3F(.75f, 0.f, .75f);
-    p[2] = m_testP + Vector3F(-.75f, 0.f, .75f);
-    p[3] = m_testP + Vector3F(0.f, 1.f, 0.f);
+    p[0] = m_testP + Vector3F(0.f, -2.f, 0.f);
+    p[1] = m_testP + Vector3F(1.75f, 0.f, 1.75f);
+    p[2] = m_testP + Vector3F(-1.75f, 0.f, 1.75f);
+    p[3] = m_testP + Vector3F(0.f, 2.f, 0.f);
     
     BoundingBox tetbox;
     tetbox.expandBy(p[0]);
@@ -268,6 +268,24 @@ void BccWorld::testTetrahedronBoxIntersection()
     tetbox.expandBy(p[2]);
     tetbox.expandBy(p[3]);
     
+    Vector3F line0(1.f, 1.f, 1.f);
+    Vector3F line1(10.f, 10.f, 4.f);
+    
+    
+    PluckerCoordinate pier, pies;
+    pier.set(line0, line1);
+    
+    pies.set(p[0], p[1]);
+    // std::cout<<" r dot s01 "<<pier.dot(pies)<<" ";
+    
+    pies.set(p[1], p[2]);
+    // std::cout<<" r dot s12 "<<pier.dot(pies)<<" ";
+    
+    pies.set(p[2], p[0]);
+    // std::cout<<" r dot s20 "<<pier.dot(pies)<<"\n";
+    
+    Vector3F q;
+    // if(tetrahedronLineIntersection(p, line0, line1, q))
     if(intersectTetrahedron(p))
         glColor3f(1.f, 0.f, 0.f);
     else 
@@ -279,6 +297,11 @@ void BccWorld::testTetrahedronBoxIntersection()
         glVertex3fv((GLfloat *)&p[TetrahedronToTriangleVertex[i]]);
     }
     glEnd();
+    
+    return;
+    
+    m_drawer->arrow(line0, line1);
+    m_drawer->arrow(line0, q);
 }
 
 bool BccWorld::intersectTetrahedron(Vector3F * p)
@@ -311,7 +334,7 @@ bool BccWorld::intersectTetrahedron(BezierSpline & spline, Vector3F * p)
 	BezierSpline stack[64];
 	int stackSize = 2;
 	spline.deCasteljauSplit(stack[0], stack[1]);
-	
+	Vector3F q;
 	while(stackSize > 0) {
 		BezierSpline c = stack[stackSize - 1];
 		stackSize--;
@@ -332,7 +355,7 @@ bool BccWorld::intersectTetrahedron(BezierSpline & spline, Vector3F * p)
 			    glVertex3fv((GLfloat *)&c.cv[3]);
 			    glEnd();
 			    
-			    if(tetrahedronLineIntersection(p, c.cv[0], c.cv[3]))
+			    if(tetrahedronLineIntersection(p, c.cv[0], c.cv[3], q))
 			        return true;
 			}
 			else {
