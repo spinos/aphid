@@ -40,7 +40,7 @@ struct PluckerCoordinate {
     Vector3F U, V;
 };
 
-inline bool tetrahedronLineIntersection(Vector3F * tet, const Vector3F & lineBegin, const Vector3F & lineEnd,
+inline bool tetrahedronLineIntersection(const Vector3F * tet, const Vector3F & lineBegin, const Vector3F & lineEnd,
     Vector3F & enterP)
 {
     PluckerCoordinate pieR, pieIj;

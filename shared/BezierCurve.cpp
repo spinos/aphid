@@ -9,7 +9,7 @@
 
 #include "BezierCurve.h"
 #include <BoundingBox.h>
-
+#include <tetrahedron_math.h>
 BezierCurve::BezierCurve() {}
 BezierCurve::~BezierCurve() {}
 

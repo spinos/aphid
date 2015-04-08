@@ -286,7 +286,8 @@ void BccWorld::testTetrahedronBoxIntersection()
     
     Vector3F q;
     // if(tetrahedronLineIntersection(p, line0, line1, q))
-    if(intersectTetrahedron(p))
+    // if(intersectTetrahedron(p))
+    if(m_curve->intersectTetrahedron(p))
         glColor3f(1.f, 0.f, 0.f);
     else 
         glColor3f(0.f, .3f, .1f);

@@ -15,7 +15,6 @@ HEADERS       = ../shared/Base3DView.h \
                 window.h \
                 CartesianGrid.h \
                 MortonHash.h \
-                tetrahedron_math.h \
                 bcc_common.h \
                 BccLattice.h \
                 BccGrid.h \
