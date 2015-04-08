@@ -55,10 +55,12 @@ static const int OctahedronToTetrahedronVetex[4][4] = {
 */
 static const int TetrahedronToTriangleVertex[12] = {
 0, 1, 2, 
-1, 3, 2,
-0, 3, 1,
-0, 2, 3
+1, 0, 3,
+2, 3, 0,
+3, 2, 1
 };
+
+#include <tetrahedron_math.h>
 
 /*
 *  6 + 8 connections

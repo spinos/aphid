@@ -3,7 +3,7 @@
 #include <GeoDrawer.h>
 #include "BccGrid.h"
 #include <BaseBuffer.h>
-
+#include "bcc_common.h"
 BccWorld::BccWorld(GeoDrawer * drawer) 
 {
     m_testP.set(10.f, 12.f, 0.f);
@@ -49,7 +49,9 @@ void BccWorld::draw()
     glColor3f(.21f, .21f, .21f);
     m_drawer->boundingBox(box);
     
-    m_grid->draw(m_drawer);
+    // m_grid->draw(m_drawer);
+    m_drawer->setWired(1);
+    testTetrahedronBoxIntersection();
 }
 
 void BccWorld::testDistanctToCurve()
@@ -128,7 +130,6 @@ void BccWorld::testDistanceToPoint(BezierSpline & spline, const Vector3F & pnt, 
             
         line[0] = spline.calculateBezierPoint(paramMin);
         line[1] = spline.calculateBezierPoint(paramMax);
-    
     }
 }
 
@@ -199,7 +200,7 @@ void BccWorld::testIntersection()
 		if(intersected) break;
     }
 	
-	intersected = m_curve->intersectBox(box);
+    intersected = m_curve->intersectBox(box);
 	
 	if(intersected) glColor3f(1.f, 0.f, 0.f);
 	else glColor3f(0.f, 1.f, 0.f);
@@ -252,3 +253,100 @@ bool BccWorld::testIntersection(BezierSpline & spline, const BoundingBox & box)
 	
 	return false;
 }
+
+void BccWorld::testTetrahedronBoxIntersection()
+{
+    Vector3F p[4];
+    p[0] = m_testP + Vector3F(0.f, -1.f, 0.f);
+    p[1] = m_testP + Vector3F(.75f, 0.f, .75f);
+    p[2] = m_testP + Vector3F(-.75f, 0.f, .75f);
+    p[3] = m_testP + Vector3F(0.f, 1.f, 0.f);
+    
+    BoundingBox tetbox;
+    tetbox.expandBy(p[0]);
+    tetbox.expandBy(p[1]);
+    tetbox.expandBy(p[2]);
+    tetbox.expandBy(p[3]);
+    
+    if(intersectTetrahedron(p))
+        glColor3f(1.f, 0.f, 0.f);
+    else 
+        glColor3f(0.f, .3f, .1f);
+    
+    glBegin(GL_TRIANGLES);
+    int i;
+    for(i=0; i< 12; i++) {
+        glVertex3fv((GLfloat *)&p[TetrahedronToTriangleVertex[i]]);
+    }
+    glEnd();
+}
+
+bool BccWorld::intersectTetrahedron(Vector3F * p)
+{
+    BezierSpline * spline = (BezierSpline *)m_splines->data();
+    const unsigned ns = m_curve->numSegments();
+    unsigned i;
+    for(i=0; i < ns; i++) {
+        if(intersectTetrahedron(spline[i], p)) return 1;
+    }
+    return 0;
+}
+
+bool BccWorld::intersectTetrahedron(BezierSpline & spline, Vector3F * p)
+{
+    BoundingBox tbox;
+    tbox.expandBy(p[0]);
+	tbox.expandBy(p[1]);
+	tbox.expandBy(p[2]);
+	tbox.expandBy(p[3]);
+    
+    BoundingBox abox;
+	abox.expandBy(spline.cv[0]);
+	abox.expandBy(spline.cv[1]);
+	abox.expandBy(spline.cv[2]);
+	abox.expandBy(spline.cv[3]);
+	
+	if(!abox.intersect(tbox)) return false;
+	
+	BezierSpline stack[64];
+	int stackSize = 2;
+	spline.deCasteljauSplit(stack[0], stack[1]);
+	
+	while(stackSize > 0) {
+		BezierSpline c = stack[stackSize - 1];
+		stackSize--;
+		
+		abox.reset();
+		abox.expandBy(c.cv[0]);
+		abox.expandBy(c.cv[1]);
+		abox.expandBy(c.cv[2]);
+		abox.expandBy(c.cv[3]);
+		
+		if(abox.intersect(tbox)) {
+			if(c.straightEnough()) {
+			    m_drawer->boundingBox(abox);
+			    glBegin(GL_LINE_STRIP);
+			    glVertex3fv((GLfloat *)&c.cv[0]);
+			    glVertex3fv((GLfloat *)&c.cv[1]);
+			    glVertex3fv((GLfloat *)&c.cv[2]);
+			    glVertex3fv((GLfloat *)&c.cv[3]);
+			    glEnd();
+			    
+			    if(tetrahedronLineIntersection(p, c.cv[0], c.cv[3]))
+			        return true;
+			}
+			else {
+                BezierSpline a, b;
+                c.deCasteljauSplit(a, b);
+                
+                stack[ stackSize ] = a;
+                stackSize++;
+                stack[ stackSize ] = b;
+                stackSize++;
+			}
+		}
+	}
+	
+	return false;
+}
+

@@ -64,6 +64,12 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 		case Qt::Key_S:
 		    m_world->moveTestP(0.f, -.07f, 0.f);
 			break;
+		case Qt::Key_F:
+		    m_world->moveTestP(0.f, 0.f, .11f);
+			break;
+		case Qt::Key_B:
+		    m_world->moveTestP(0.f, 0.f, -.07f);
+			break;
 		default:
 			break;
 	}
