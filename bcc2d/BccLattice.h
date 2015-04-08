@@ -15,17 +15,23 @@ public:
     virtual ~BccLattice();
     
     void add14Node(const Vector3F & center, float h);
+    void prepareTetrahedron();
     void connect24Tetrahedron(const Vector3F & center, float h);
     void draw(GeoDrawer * drawer);
 	
 	const unsigned numGreenEdges() const;
+	const unsigned numTetrahedrons() const;
 protected:
 
 private:
 	void drawGreenEdges();
-
+	void drawTetrahedrons();
+	void encodeOctahedronVertices(const Vector3F & q, float h, int offset, unsigned * v) const;
+	void add4Tetrahedrons(unsigned * vOctahedron);
 private:
     sdb::EdgeHash * m_greenEdges;
+    Tetrahedron * m_tetrahedrons;
+    unsigned m_numTetrahedrons;
 };
 #endif        //  #ifndef BCCLATTICE_H
 

@@ -59,6 +59,11 @@ const unsigned CartesianGrid::mortonEncode(const Vector3F & p) const
 	return encodeMorton3D(x, y, z);
 }
 
+sdb::CellValue * CartesianGrid::findGrid(unsigned code) const
+{
+    return m_cellHash->find(code);
+}
+
 unsigned CartesianGrid::addGrid(const Vector3F & p)
 {
     unsigned code = mortonEncode(p);
@@ -118,12 +123,12 @@ const Vector3F CartesianGrid::cellOrigin(unsigned code, int level) const
 const Vector3F CartesianGrid::putIntoBound(const Vector3F & p) const
 {
     Vector3F r = p;
-    if(r.x < m_origin.x) r.x = m_origin.x;
-    if(r.x > m_origin.x + m_span) r.x = m_origin.x + m_span;
-    if(r.y < m_origin.y) r.x = m_origin.y;
-    if(r.y > m_origin.y + m_span) r.y = m_origin.y + m_span;
-    if(r.z < m_origin.z) r.z = m_origin.z;
-    if(r.z > m_origin.z + m_span) r.z = m_origin.z + m_span;
+    if(r.x <= m_origin.x) r.x = m_origin.x + 1e-7;
+    if(r.x >= m_origin.x + m_span) r.x = m_origin.x + m_span - 1e-7;
+    if(r.y <= m_origin.y) r.y = m_origin.y + 1e-7;
+    if(r.y >= m_origin.y + m_span) r.y = m_origin.y + m_span - 1e-7;
+    if(r.z <= m_origin.z) r.z = m_origin.z + 1e-7;
+    if(r.z >= m_origin.z + m_span) r.z = m_origin.z + m_span - 1e-7;
     return r;
 }
 

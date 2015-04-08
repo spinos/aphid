@@ -6,11 +6,6 @@
 class CartesianGrid 
 {
 public:
-    struct CellIndex {
-        unsigned key;
-        unsigned index;
-    };
-    
     CartesianGrid(const BoundingBox & bound);
     virtual ~CartesianGrid();
     
@@ -23,6 +18,7 @@ protected:
     const float cellSizeAtLevel(int level) const;
 	const float gridSize() const;
 	const unsigned mortonEncode(const Vector3F & p) const;
+	sdb::CellValue * findGrid(unsigned code) const;
 	unsigned addGrid(const Vector3F & p);
     unsigned addCell(const Vector3F & p, int level);
 	const Vector3F gridOrigin(unsigned code) const;

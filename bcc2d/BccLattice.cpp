@@ -5,6 +5,8 @@ BccLattice::BccLattice(const BoundingBox & bound) :
     CartesianGrid(bound)
 {   
     m_greenEdges = new sdb::EdgeHash;
+    m_tetrahedrons = 0;
+    m_numTetrahedrons = 0;
 }
 
 BccLattice::~BccLattice() {}
@@ -34,11 +36,19 @@ void BccLattice::add14Node(const Vector3F & center, float h)
     addGrid(center);
 }
 
+void BccLattice::prepareTetrahedron()
+{
+    const unsigned noctahedron = m_greenEdges->size();
+    m_tetrahedrons = new Tetrahedron[noctahedron * 4];
+    m_numTetrahedrons = 0;
+}
+
 void BccLattice::connect24Tetrahedron(const Vector3F & center, float h)
 {
     const unsigned ccenter = mortonEncode(center);
     unsigned cgreen;
 	Vector3F corner;
+	unsigned vOctahedron[6];
 	int i;
 	for(i=0; i < 6; i++) {
         corner = center + Vector3F(h * HexHeighborOffset[i][0], 
@@ -53,16 +63,18 @@ void BccLattice::connect24Tetrahedron(const Vector3F & center, float h)
 		    continue;
 		}
 		if(edge->visited == 0) {
-		      
+		    encodeOctahedronVertices(center, h, i, vOctahedron);
+		    add4Tetrahedrons(vOctahedron);
 		    edge->visited = 1;
 		}
     }
 }
 
 const unsigned BccLattice::numGreenEdges() const
-{
-	return m_greenEdges->size();
-}
+{ return m_greenEdges->size(); }
+
+const unsigned BccLattice::numTetrahedrons() const
+{ return m_numTetrahedrons; }
 
 void BccLattice::draw(GeoDrawer * drawer)
 {
@@ -76,7 +88,9 @@ void BccLattice::draw(GeoDrawer * drawer)
 	    drawer->cube(l, h);
 	    latticeNode->next();
 	}
-	drawGreenEdges();
+	// drawGreenEdges();
+	drawer->setWired(1);
+	drawTetrahedrons();
 }
 
 void BccLattice::drawGreenEdges()
@@ -97,3 +111,47 @@ void BccLattice::drawGreenEdges()
 	}
 	glEnd();
 }
+
+void BccLattice::drawTetrahedrons()
+{
+    glColor3f(0.f, 0.1f, 0.2f);
+    glBegin(GL_TRIANGLES);
+    unsigned i, j;
+    Vector3F q;
+    for(i=0; i< m_numTetrahedrons; i++) {
+        Tetrahedron * tet = &m_tetrahedrons[i];
+        for(j=0; j< 12; j++) {
+            q = gridOrigin(tet->v[TetrahedronToTriangleVertex[j]]);
+            glVertex3fv((GLfloat *)&q);
+        }
+    }
+    glEnd();
+}
+
+void BccLattice::encodeOctahedronVertices(const Vector3F & q, float h, int offset, unsigned * v) const
+{
+    Vector3F corner;
+    int i;
+    for(i=0; i<6; i++) {
+        corner = q + Vector3F(h * HexOctahedronOffset[offset][i][0],
+                              h * HexOctahedronOffset[offset][i][1],
+                              h * HexOctahedronOffset[offset][i][2]);
+        
+        v[i] = mortonEncode(corner);
+        // if(!findGrid(v[i])) std::cout<<" cannot find grid "<<corner<<" ";
+    }
+}
+
+void BccLattice::add4Tetrahedrons(unsigned * vOctahedron)
+{
+    int i;
+    for(i=0; i<4; i++) {
+        Tetrahedron * tet = &m_tetrahedrons[m_numTetrahedrons];
+        tet->v[0] = vOctahedron[OctahedronToTetrahedronVetex[i][0]];
+        tet->v[1] = vOctahedron[OctahedronToTetrahedronVetex[i][1]];
+        tet->v[2] = vOctahedron[OctahedronToTetrahedronVetex[i][2]];
+        tet->v[3] = vOctahedron[OctahedronToTetrahedronVetex[i][3]];
+        m_numTetrahedrons++;
+    }
+}
+
