@@ -1,5 +1,6 @@
 #include "BccLattice.h"
 #include <GeoDrawer.h>
+#include <BezierCurve.h>
 #include "bcc_common.h"
 BccLattice::BccLattice(const BoundingBox & bound) :
     CartesianGrid(bound)
@@ -43,7 +44,7 @@ void BccLattice::prepareTetrahedron()
     m_numTetrahedrons = 0;
 }
 
-void BccLattice::connect24Tetrahedron(const Vector3F & center, float h)
+void BccLattice::connect24Tetrahedron(const Vector3F & center, float h, BezierCurve * curve)
 {
     const unsigned ccenter = mortonEncode(center);
     unsigned cgreen;
@@ -64,7 +65,7 @@ void BccLattice::connect24Tetrahedron(const Vector3F & center, float h)
 		}
 		if(edge->visited == 0) {
 		    encodeOctahedronVertices(center, h, i, vOctahedron);
-		    add4Tetrahedrons(vOctahedron);
+		    add4Tetrahedrons(vOctahedron, curve);
 		    edge->visited = 1;
 		}
     }
@@ -79,7 +80,7 @@ const unsigned BccLattice::numTetrahedrons() const
 void BccLattice::draw(GeoDrawer * drawer)
 {
     sdb::CellHash * latticeNode = cells();
-	drawer->setColor(0.f, 0.f, 0.3f);
+	drawer->setColor(0.3f, 0.3f, 0.3f);
 	float h = cellSizeAtLevel(8);
 	Vector3F l;
 	latticeNode->begin();
@@ -90,6 +91,7 @@ void BccLattice::draw(GeoDrawer * drawer)
 	}
 	// drawGreenEdges();
 	drawer->setWired(1);
+	drawer->setColor(0.f, 0.f, 0.3f);
 	drawTetrahedrons();
 }
 
@@ -142,16 +144,29 @@ void BccLattice::encodeOctahedronVertices(const Vector3F & q, float h, int offse
     }
 }
 
-void BccLattice::add4Tetrahedrons(unsigned * vOctahedron)
+void BccLattice::add4Tetrahedrons(unsigned * vOctahedron, BezierCurve * curve)
 {
+    unsigned code[4];
+    Vector3F tet[4];
     int i;
     for(i=0; i<4; i++) {
-        Tetrahedron * tet = &m_tetrahedrons[m_numTetrahedrons];
-        tet->v[0] = vOctahedron[OctahedronToTetrahedronVetex[i][0]];
-        tet->v[1] = vOctahedron[OctahedronToTetrahedronVetex[i][1]];
-        tet->v[2] = vOctahedron[OctahedronToTetrahedronVetex[i][2]];
-        tet->v[3] = vOctahedron[OctahedronToTetrahedronVetex[i][3]];
-        m_numTetrahedrons++;
+        code[0] = vOctahedron[OctahedronToTetrahedronVetex[i][0]];
+        code[1] = vOctahedron[OctahedronToTetrahedronVetex[i][1]];
+        code[2] = vOctahedron[OctahedronToTetrahedronVetex[i][2]];
+        code[3] = vOctahedron[OctahedronToTetrahedronVetex[i][3]];
+        tet[0] = gridOrigin(code[0]);
+        tet[1] = gridOrigin(code[1]);
+        tet[2] = gridOrigin(code[2]);
+        tet[3] = gridOrigin(code[3]);
+        
+        if(curve->intersectTetrahedron(tet)) {
+            Tetrahedron * tet = &m_tetrahedrons[m_numTetrahedrons];
+            tet->v[0] = code[0];
+            tet->v[1] = code[1];
+            tet->v[2] = code[2];
+            tet->v[3] = code[3];
+            m_numTetrahedrons++;
+        }
     }
 }
 

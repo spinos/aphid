@@ -49,7 +49,7 @@ void BccWorld::draw()
     glColor3f(.21f, .21f, .21f);
     m_drawer->boundingBox(box);
     
-    // m_grid->draw(m_drawer);
+    m_grid->draw(m_drawer);
     m_drawer->setWired(1);
     testTetrahedronBoxIntersection();
 }

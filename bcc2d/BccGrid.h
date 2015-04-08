@@ -20,7 +20,7 @@ protected:
 private:
     void subdivide(BezierCurve * curve, int level);
     void createLatticeNode();
-    void createLatticeTetrahedron();
+    void createLatticeTetrahedron(BezierCurve * curve);
 private:
     BccLattice * m_lattice;
     float m_tolerance;

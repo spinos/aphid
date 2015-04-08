@@ -43,7 +43,7 @@ struct BezierSpline {
     bool straightEnough() const
     {
         const float d = cv[0].distanceTo(cv[3]);
-        return ( ( cv[0].distanceTo(cv[1]) + cv[1].distanceTo(cv[2]) + cv[2].distanceTo(cv[3]) - d ) / d ) < .009f;
+        return ( ( cv[0].distanceTo(cv[1]) + cv[1].distanceTo(cv[2]) + cv[2].distanceTo(cv[3]) - d ) / d ) < .005f;
     }
     
     Vector3F cv[4];
