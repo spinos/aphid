@@ -14,9 +14,12 @@ public:
     BccLattice(const BoundingBox & bound);
     virtual ~BccLattice();
     
-    void add14Node(const Vector3F & center, float h);
+    void add38Node(const Vector3F & center, float h);
     void prepareTetrahedron();
-    void connect24Tetrahedron(const Vector3F & center, float h, BezierCurve * curve);
+    void touchIntersectedTetrahedron(const Vector3F & center, float h, BezierCurve * curve);
+    void untouchGreenEdges();
+    void add24Tetrahedron(const Vector3F & center, float h);
+    void addNeighborTetrahedron(const Vector3F & center, float h);
     void draw(GeoDrawer * drawer);
 	
 	const unsigned numGreenEdges() const;
@@ -27,7 +30,8 @@ private:
 	void drawGreenEdges();
 	void drawTetrahedrons();
 	void encodeOctahedronVertices(const Vector3F & q, float h, int offset, unsigned * v) const;
-	void add4Tetrahedrons(unsigned * vOctahedron, BezierCurve * curve);
+	void touch4Tetrahedrons(unsigned * vOctahedron, BezierCurve * curve);
+	void addTetrahedronsAllNodeVisited(unsigned * vOctahedron);
 	bool isCurveClosetToTetrahedron(const Vector3F * p, BezierCurve * curve) const;
 private:
     sdb::EdgeHash * m_greenEdges;

@@ -36,6 +36,10 @@ inline float log2f( float n )
 #define GoldenRatio 1.618
 #define ReGoldenRatio 0.382
 
+inline bool CloseToZero(float a) {
+    return (a < 1e-4 && a > -1e-4);
+}
+
 inline int GetSign(float d) {
     if(d> 0.f) return 1;
     if(d< 0.f) return -1;

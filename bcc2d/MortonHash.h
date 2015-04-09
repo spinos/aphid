@@ -10,7 +10,7 @@ typedef unsigned long long uint64;
 
 struct CellValue {
 	int level;
-	float a;
+	int visited;
 };
 
 class CellHash : public Array<unsigned, CellValue>

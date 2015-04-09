@@ -26,6 +26,8 @@ private:
 	void testTetrahedronBoxIntersection();
 	bool intersectTetrahedron(Vector3F * p);
 	bool intersectTetrahedron(BezierSpline & spline, Vector3F * p);
+	void testLineLine();
+	void testVicinity();
 private:
     Vector3F m_testP;
     GeoDrawer * m_drawer;

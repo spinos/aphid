@@ -4,6 +4,7 @@
 #include "BccGrid.h"
 #include <BaseBuffer.h>
 #include "bcc_common.h"
+#include <line_math.h>
 BccWorld::BccWorld(GeoDrawer * drawer) 
 {
     m_testP.set(10.f, 12.f, 0.f);
@@ -17,8 +18,8 @@ BccWorld::BccWorld(GeoDrawer * drawer)
     m_curve->m_cvs[4].set(19.f + RandomFn11(), 2.4f + RandomFn11(), 2.16f);
     m_curve->m_cvs[5].set(21.f + RandomFn11(), 3.4f + RandomFn11(), 1.17f);
     m_curve->m_cvs[6].set(18.f + RandomFn11(), 12.2f + RandomFn11(), 3.18f);
-    m_curve->m_cvs[7].set(12.f + RandomFn11(), 12.2f + RandomFn11(), 4.19f);
-    m_curve->m_cvs[8].set(13.f + RandomFn11(), 8.2f + RandomFn11(), 0.18f);
+    m_curve->m_cvs[7].set(12.f + RandomFn11(), 12.2f + RandomFn11(), 2.19f);
+    m_curve->m_cvs[8].set(13.f + RandomFn11(), 8.2f + RandomFn11(), 1.18f);
     m_curve->computeKnots(); 
     
     const unsigned ns = m_curve->numSegments();
@@ -40,9 +41,6 @@ BccWorld::~BccWorld() {}
  
 void BccWorld::draw()
 {
-    glColor3f(.99f, .03f, .05f);
-    m_drawer->smoothCurve(*m_curve, 8);
-    
     BoundingBox box;
     m_grid->getBounding(box);
     
@@ -51,7 +49,11 @@ void BccWorld::draw()
     
     m_grid->draw(m_drawer);
     m_drawer->setWired(1);
-    testTetrahedronBoxIntersection();
+
+    testLineLine();
+    
+    glColor3f(.99f, .03f, .05f);
+    m_drawer->smoothCurve(*m_curve, 16);
 }
 
 void BccWorld::testDistanctToCurve()
@@ -299,8 +301,6 @@ void BccWorld::testTetrahedronBoxIntersection()
     }
     glEnd();
     
-    return;
-    
     m_drawer->arrow(line0, line1);
     m_drawer->arrow(line0, q);
 }
@@ -372,5 +372,27 @@ bool BccWorld::intersectTetrahedron(BezierSpline & spline, Vector3F * p)
 	}
 	
 	return false;
+}
+
+void BccWorld::testLineLine()
+{
+    Vector3F line0(1.f, 11.f, 0.f);
+    Vector3F line1(10.f, 11.f, 0.f);
+    
+    Vector3F line2(-4.f, 10.f, 1.f);
+    Vector3F line3 = m_testP;//(10.f, 10.f, 1.f);
+    
+    if(areIntersectedOrParallelLines(line0, line1, line2, line3)) {
+        if(areParallelLines(line0, line1, line2, line3))
+            glColor3f(0.f, 1.f, 0.f);
+        else 
+            glColor3f(1.f, 0.f, 0.f);
+    }
+    else
+        glColor3f(0.f, 0.f, 0.3f);
+    
+    m_drawer->arrow(line0, line1);
+    m_drawer->arrow(line2, line3);
+    // std::cout<<" d "<<distanceBetweenLines(line0, line1, line2, line3)<<" ";
 }
 

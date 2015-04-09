@@ -8,7 +8,8 @@ ADD_DEFINITIONS(-DOPENEXR_DLL -DNDEBUG -D_WIN32_WINDOWS)
 ELSE ()
 include_directories(../../Library/boost_1_55_0 ../../Library/hdf5/include /usr/local/include/OpenEXR)
 ENDIF()
-add_library(aphid STATIC ../shared/tetrahedron_math.h
+add_library(aphid STATIC ../shared/line_math.h
+		../shared/tetrahedron_math.h
                 ../shared/Vector3F.cpp 
                 ../shared/Vector2F.cpp 
                 ../shared/Matrix44F.cpp 

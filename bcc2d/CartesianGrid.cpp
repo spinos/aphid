@@ -70,6 +70,7 @@ unsigned CartesianGrid::addGrid(const Vector3F & p)
     
 	sdb::CellValue * ind = new sdb::CellValue;
 	ind->level = 10;
+	ind->visited = 0;
 	m_cellHash->insert(code, ind);
 	
     m_numCells++;
@@ -87,6 +88,7 @@ unsigned CartesianGrid::addCell(const Vector3F & p, int level)
 
 	sdb::CellValue * ind = new sdb::CellValue;
 	ind->level = level;
+	ind->visited = 0;
 	m_cellHash->insert(code, ind);
 	
     m_numCells++;

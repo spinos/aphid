@@ -99,7 +99,7 @@ void BccGrid::createLatticeNode()
 	while(!c->end()) {
 		cen = cellCenter(c->key());
 		h = cellSizeAtLevel(c->value()->level);
-		m_lattice->add14Node(cen, h);
+		m_lattice->add38Node(cen, h);
 	    c->next();   
 	}
 	m_lattice->prepareTetrahedron();
@@ -114,7 +114,22 @@ void BccGrid::createLatticeTetrahedron(BezierCurve * curve)
 	while(!c->end()) {
 		cen = cellCenter(c->key());
 		h = cellSizeAtLevel(c->value()->level);
-		m_lattice->connect24Tetrahedron(cen, h, curve);
+		m_lattice->touchIntersectedTetrahedron(cen, h, curve);
+	    c->next();   
+	}
+	m_lattice->untouchGreenEdges();
+	c->begin();
+	while(!c->end()) {
+		cen = cellCenter(c->key());
+		h = cellSizeAtLevel(c->value()->level);
+		m_lattice->add24Tetrahedron(cen, h);
+	    c->next();   
+	}
+	c->begin();
+	while(!c->end()) {
+		cen = cellCenter(c->key());
+		h = cellSizeAtLevel(c->value()->level);
+		m_lattice->addNeighborTetrahedron(cen, h);
 	    c->next();   
 	}
 }
@@ -126,7 +141,7 @@ void BccGrid::draw(GeoDrawer * drawer)
     BoundingBox box;
     float h;
     
-    drawer->setColor(0.f, .3f, 0.2f);
+    drawer->setColor(0.3f, .2f, 0.1f);
     
 	c->begin();
 	while(!c->end()) {

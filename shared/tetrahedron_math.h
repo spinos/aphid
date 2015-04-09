@@ -77,6 +77,7 @@ inline bool tetrahedronLineIntersection(const Vector3F * tet, const Vector3F & l
             enterP = tet[ TetrahedronToTriangleVertexByFace[i][2] ] * w[0] / sumW 
                 + tet[ TetrahedronToTriangleVertexByFace[i][0] ] * w[1] / sumW
                 + tet[ TetrahedronToTriangleVertexByFace[i][1] ] * w[2] / sumW;
+            if((enterP-lineBegin).dot(lineEnd - lineBegin) < 0.f) return false;
             if(enterP.distanceTo(lineBegin) < lineEnd.distanceTo(lineBegin)) return true; 
         }
         
@@ -85,7 +86,7 @@ inline bool tetrahedronLineIntersection(const Vector3F * tet, const Vector3F & l
             enterP = tet[ TetrahedronToTriangleVertexByFace[i][2] ] * w[0] / sumW 
                 + tet[ TetrahedronToTriangleVertexByFace[i][0] ] * w[1] / sumW
                 + tet[ TetrahedronToTriangleVertexByFace[i][1] ] * w[2] / sumW;
-                
+            if((enterP-lineBegin).dot(lineEnd - lineBegin) < 0.f) return false;   
             if(enterP.distanceTo(lineBegin) > lineEnd.distanceTo(lineBegin)) return false;
             
             return true;
