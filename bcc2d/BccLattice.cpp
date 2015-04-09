@@ -1,6 +1,8 @@
 #include "BccLattice.h"
 #include <GeoDrawer.h>
 #include <BezierCurve.h>
+#include <BaseLog.h>
+#include <boost/format.hpp>
 #include "bcc_common.h"
 BccLattice::BccLattice(const BoundingBox & bound) :
     CartesianGrid(bound)
@@ -89,8 +91,8 @@ void BccLattice::touchIntersectedTetrahedron(const Vector3F & center, float h, B
 void BccLattice::add24Tetrahedron(const Vector3F & center, float h)
 {
     const unsigned ccenter = mortonEncode(center);
-    unsigned cgreen, cgreen1;
-	Vector3F corner, corner1;
+    unsigned cgreen;
+	Vector3F corner;
 	unsigned vOctahedron[6];
 	int i;
 	for(i=0; i < 6; i++) {
@@ -131,6 +133,9 @@ const unsigned BccLattice::numGreenEdges() const
 
 const unsigned BccLattice::numTetrahedrons() const
 { return m_numTetrahedrons; }
+
+const unsigned BccLattice::numVertices() const
+{ return m_visitedNodes; }
 
 void BccLattice::draw(GeoDrawer * drawer)
 {
@@ -282,5 +287,58 @@ void BccLattice::untouchGreenEdges()
 		m_greenEdges->next();
 	}
 	glEnd();
+}
+
+void BccLattice::countVisitedNodes()
+{
+    m_visitedNodes = 0;
+    sdb::CellHash * latticeNode = cells();
+    latticeNode->begin();
+	while(!latticeNode->end()) {
+	    if(latticeNode->value()->visited) {
+	        latticeNode->value()->index = m_visitedNodes;
+	        m_visitedNodes++;
+	    }
+	    latticeNode->next();
+	}
+}
+
+void BccLattice::logTetrahedronMesh()
+{
+    Vector3F p;
+    BaseLog log("./tetmesh.txt");
+    
+    log.write(boost::str(boost::format("static const unsigned TetraNumVertices = %1%;\n") % numVertices()));
+	log.write(boost::str(boost::format("static const float TetraP[%1%][3] = {\n") % numVertices()));
+	sdb::CellHash * latticeNode = cells();
+    
+	latticeNode->begin();
+	while(!latticeNode->end()) {
+	    if(latticeNode->value()->visited) {
+	        p = gridOrigin(latticeNode->key());
+	        log.write(boost::str(boost::format("{%1%,%2%,%3%}") % p.x % p.y % p.z));
+	        if(latticeNode->value()->index < numVertices()-1) log.write(",\n");
+	        else log.write("\n");
+	    }
+	    latticeNode->next();
+	}
+	log.write("};\n");
+	log.write(boost::str(boost::format("static const unsigned TetraNumTetrahedrons = %1%;\n") % numTetrahedrons()));
+	log.write(boost::str(boost::format("static const unsigned TetraIndices[%1%][4] = {\n") % numTetrahedrons()));
+	
+	unsigned i, j;
+	unsigned v[4];
+	for(i=0; i< numTetrahedrons(); i++) {
+        Tetrahedron * tet = &m_tetrahedrons[i];
+        for(j=0; j< 4; j++) {
+            sdb::CellValue * found = findGrid(tet->v[j]);
+            v[j] = found->index;
+        }
+        log.write(boost::str(boost::format("{%1%,%2%,%3%,%4%}") % v[0] % v[1] % v[2] % v[3]));
+	    if(i < numTetrahedrons()-1) log.write(",\n");
+	    else log.write("\n");
+    }
+    
+	log.write("};\n");
 }
 

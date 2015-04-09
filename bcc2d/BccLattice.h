@@ -20,10 +20,14 @@ public:
     void untouchGreenEdges();
     void add24Tetrahedron(const Vector3F & center, float h);
     void addNeighborTetrahedron(const Vector3F & center, float h);
+    void countVisitedNodes();
     void draw(GeoDrawer * drawer);
 	
 	const unsigned numGreenEdges() const;
 	const unsigned numTetrahedrons() const;
+	const unsigned numVertices() const;
+	
+	void logTetrahedronMesh();
 protected:
 
 private:
@@ -37,6 +41,7 @@ private:
     sdb::EdgeHash * m_greenEdges;
     Tetrahedron * m_tetrahedrons;
     unsigned m_numTetrahedrons;
+    unsigned m_visitedNodes;
 };
 #endif        //  #ifndef BCCLATTICE_H
 

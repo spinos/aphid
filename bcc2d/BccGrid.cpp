@@ -46,9 +46,12 @@ void BccGrid::create(BezierCurve * curve, int maxLevel)
 	// printHash();
 	createLatticeNode();
 	createLatticeTetrahedron(curve);
+	m_lattice->countVisitedNodes();
 	
+	m_lattice->logTetrahedronMesh();
 	std::cout<<" n green edges "<<m_lattice->numGreenEdges()<<"\n";
 	std::cout<<" n tetrahedrons "<<m_lattice->numTetrahedrons()<<"\n";
+	std::cout<<" n vertices "<<m_lattice->numVertices()<<"\n";
 }
 
 void BccGrid::subdivide(BezierCurve * curve, int level)

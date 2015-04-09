@@ -11,6 +11,7 @@ typedef unsigned long long uint64;
 struct CellValue {
 	int level;
 	int visited;
+	unsigned index;
 };
 
 class CellHash : public Array<unsigned, CellValue>
