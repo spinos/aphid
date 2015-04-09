@@ -100,7 +100,7 @@ void BccGrid::createLatticeNode()
 		cen = cellCenter(c->key());
 		h = cellSizeAtLevel(c->value()->level);
 		m_lattice->add38Node(cen, h);
-	    c->next();   
+	    c->next();
 	}
 	m_lattice->prepareTetrahedron();
 }

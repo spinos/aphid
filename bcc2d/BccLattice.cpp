@@ -148,13 +148,13 @@ void BccLattice::draw(GeoDrawer * drawer)
 	Vector3F l;
 	latticeNode->begin();
 	while(!latticeNode->end()) {
-	    if(latticeNode->value()->visited) {
+	    if(latticeNode->value()->visited)
 	        glColor3f(0.1f, 0.2f, 0.5f);
-	    //else glColor3f(0.3f, 0.3f, 0.3f);
+	    else glColor3f(0.3f, 0.3f, 0.3f);
 	    
-	        l = gridOrigin(latticeNode->key());
-	        drawer->cube(l, h);
-	    }
+	    l = gridOrigin(latticeNode->key());
+	    drawer->cube(l, h);
+	    
 	    latticeNode->next();
 	}
 	// drawGreenEdges();
