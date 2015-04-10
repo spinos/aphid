@@ -18,6 +18,7 @@ public:
     virtual ~BaseSolverThread();
     
     static float TimeStep;
+    static int NumSubsteps;
     const unsigned numLoops() const;
     virtual void stepPhysics(float dt);
     

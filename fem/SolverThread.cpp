@@ -22,8 +22,9 @@ SolverThread::SolverThread(QObject *parent)
     : BaseSolverThread(parent)
 {
     m_mesh = new FEMTetrahedronMesh;
-    m_mesh->generateBlocks(64,1,1, .125f,.125f,.125f);
-    m_mesh->setDensity(100.f);
+    // m_mesh->generateBlocks(64,1,1, .25f,.25f,.25f);
+    m_mesh->generateFromFile();
+    m_mesh->setDensity(2.f);
     
     unsigned totalPoints = m_mesh->numPoints();
 	
@@ -40,7 +41,8 @@ SolverThread::SolverThread(QObject *parent)
 	
 	Vector3F * Xi = m_mesh->Xi();
 	for(i=0; i < totalPoints; i++) {
-	    if(Xi[i].x<.1f)
+	    if(i==1 || i==44 || i==2)
+	    //if(Xi[i].x<.1f)
             fixed[i]=true;
         else
             fixed[i]=false;   
@@ -82,7 +84,7 @@ void SolverThread::stepPhysics(float dt)
 	updatePosition(dt);
 
 	// groundCollision();
-	// qDebug()<<"total volume "<<m_mesh->volume();
+	qDebug()<<"total volume "<<m_mesh->volume();
 }
 
 FEMTetrahedronMesh * SolverThread::mesh() { return m_mesh; }
@@ -116,7 +118,7 @@ void SolverThread::calculateK()
 		Matrix33F E; 
 		E.fill(e10, e20, e30);
 		
-		float detE = E.determinant();
+		float detE = E.determinant(); if(detE ==0.f) std::cout<<" zero det "<<E.str()<<"\n";
 		float invDetE = 1.0f/detE;	
 		
 		//Eq. 10.40 (a) & Eq. 10.42 (a)
@@ -299,12 +301,12 @@ void SolverThread::stiffnessAssembly()
 				f += prod;				   
 				if (j >= i) {
 					//Based on pseudocode given in Fig. 10.12 on page 361
-					Matrix33F tmp = (Re*tmpKe)*ReT;
+					Matrix33F tmp = (Re*tmpKe)*ReT; 
 					Matrix33F tmpT = tmp; tmpT.transpose();
 					int index = tetrahedra[k].indices[i]; 		
 					 
 					m_K_row[index][tetrahedra[k].indices[j]]+=(tmp);
-					 
+					
 					if (j > i) {
 						index = tetrahedra[k].indices[j];
 						m_K_row[index][tetrahedra[k].indices[i]]+= tmpT;
@@ -440,15 +442,15 @@ void SolverThread::dynamicsAssembly(float dt)
 		for (MatrixMap::iterator K = Kbegin; K != Kend;++K)
 		{
             unsigned j  = K->first;
-			Matrix33F K_ij  = K->second;
+			Matrix33F K_ij  = K->second; 
 			Vector3F x_j   = X[j];	
 			Matrix33F * A_ij = A(k,j);
  
 			*A_ij = K_ij * dt2; 
-			Vector3F prod = K_ij * x_j;
+			Vector3F prod = K_ij * x_j; 
 			//Vector3F(	K_ij[0][0]*x_j.x + K_ij[0][1]*x_j.y + K_ij[0][2]*x_j.z, 
-								//		K_ij[1][0]*x_j.x + K_ij[1][1]*x_j.y + K_ij[1][2]*x_j.z,
-									//	K_ij[2][0]*x_j.x + K_ij[2][1]*x_j.y + K_ij[2][2]*x_j.z);
+			//							K_ij[1][0]*x_j.x + K_ij[1][1]*x_j.y + K_ij[1][2]*x_j.z,
+			//							K_ij[2][0]*x_j.x + K_ij[2][1]*x_j.y + K_ij[2][2]*x_j.z);
 
             b[k] -= prod;//K_ij * x_j;
 			 

@@ -2,7 +2,7 @@
 #include "BaseSolverThread.h"
 
 float BaseSolverThread::TimeStep = 1.f / 60.f;
-
+int BaseSolverThread::NumSubsteps = 2;
 BaseSolverThread::BaseSolverThread(QObject *parent)
     : QThread(parent)
 {
@@ -42,7 +42,8 @@ void BaseSolverThread::run()
             return;
         }
         
-		stepPhysics(TimeStep);
+        for(int i=0; i < NumSubsteps; i++)
+            stepPhysics(TimeStep);
 		
 		emit doneStep();
 

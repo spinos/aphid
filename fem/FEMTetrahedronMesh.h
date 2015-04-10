@@ -21,6 +21,7 @@ public:
     virtual ~FEMTetrahedronMesh();
     
     void setDensity(float x);
+    void generateFromFile();
     void generateBlocks(unsigned xdim, unsigned ydim, unsigned zdim, float width, float height, float depth);
     void recalcMassMatrix(bool * isFixed);
     unsigned numTetrahedra() const;

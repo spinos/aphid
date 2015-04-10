@@ -1,9 +1,32 @@
 #include "FEMTetrahedronMesh.h"
-
+#include "tetmesh.h"
 FEMTetrahedronMesh::FEMTetrahedronMesh() : m_density(1000.f) {}
 FEMTetrahedronMesh::~FEMTetrahedronMesh() {}
 
 void FEMTetrahedronMesh::setDensity(float x) { m_density = x; }
+
+void FEMTetrahedronMesh::generateFromFile()
+{
+    m_totalPoints = TetraNumVertices;
+    m_X = new Vector3F[m_totalPoints];
+	m_Xi= new Vector3F[m_totalPoints];
+	m_mass = new float[m_totalPoints];
+	
+	unsigned i;
+	for(i=0; i<TetraNumVertices; i++) {
+	    m_X[i].set(TetraP[i][0], TetraP[i][1], TetraP[i][2]);
+	    m_Xi[i] = m_X[i];
+	}
+	
+	m_totalTetrahedrons = TetraNumTetrahedrons;
+	m_tetrahedron = new Tetrahedron[m_totalTetrahedrons];
+	Tetrahedron * t = &m_tetrahedron[0];
+	
+	for(i=0; i<m_totalTetrahedrons; i++) {
+	    addTetrahedron(t++, TetraIndices[i][0], TetraIndices[i][1], TetraIndices[i][2], TetraIndices[i][3]);
+	}
+}
+
 void FEMTetrahedronMesh::generateBlocks(unsigned xdim, unsigned ydim, unsigned zdim, float width, float height, float depth)
 {
     m_totalPoints = (xdim+1)*(ydim+1)*(zdim+1);

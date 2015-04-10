@@ -232,22 +232,28 @@ void Matrix33F::inverse()
 	*m(2, 2) = m22 / det;
 }
 
-/*
- *  | + - + |
+/*   
+ *  | a b c |
+ *  | d e f |
+ *  | g h i |
+ *
+ *  det33 = a*( e*i - h*f ) - b*( d*i - g*f ) + c*( d*h - g*e )
  */
 
 float Matrix33F::determinant() const
 {
-    return M(0, 0) * determinant22(M(2, 2), M(1, 1), M(2, 1), M(1, 2)) - M(0, 1) * determinant22(M(2, 2), M(1, 0), M(2, 0), M(1, 2)) + M(0, 1) * determinant22(M(2, 1), M(0, 1), M(2, 0), M(1, 1));
+    return M(0, 0) * determinant22(M(1, 1), M(1, 2), M(2, 1), M(2, 2)) 
+            - M(0, 1) * determinant22(M(1, 0), M(1, 2), M(2, 0), M(2, 2)) 
+            + M(0, 2) * determinant22(M(1, 0), M(1, 1), M(2, 0), M(2, 1));
 }
 
 /*  |a b|
  *  |c d|
  *  
- *  det = ad - bc
+ *  det22 = ad - bc
  */
  
-float Matrix33F::determinant22(float a, float d, float b, float c) const
+float Matrix33F::determinant22(float a, float b, float c, float d) const
 {
     return a * d - b * c;
 }

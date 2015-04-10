@@ -316,7 +316,7 @@ void BccLattice::logTetrahedronMesh()
 	while(!latticeNode->end()) {
 	    if(latticeNode->value()->visited) {
 	        p = gridOrigin(latticeNode->key());
-	        log.write(boost::str(boost::format("{%1%,%2%,%3%}") % p.x % p.y % p.z));
+	        log.write(boost::str(boost::format("{%1%f,%2%f,%3%f}") % p.x % p.y % p.z));
 	        if(latticeNode->value()->index < numVertices()-1) log.write(",\n");
 	        else log.write("\n");
 	    }
