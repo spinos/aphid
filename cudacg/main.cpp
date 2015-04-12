@@ -18,6 +18,63 @@
 #include <cutil_inline.h>
 #include <cusparse.h>
 #include <cublas.h>
+#include <radixsort_implement.h>
+
+void makeRandomUintVector(KeyValuePair *a, unsigned int numElements, unsigned int keybits)
+{
+    // Fill up with some random data
+    int keyshiftmask = 0;
+    if (keybits > 16) keyshiftmask = (1 << (keybits - 16)) - 1;
+    int keymask = 0xffff;
+    if (keybits < 16) keymask = (1 << keybits) - 1;
+
+    srand(95123);
+    for(unsigned int i=0; i < numElements; ++i)   
+    { 
+        a[i].key = ((rand() & keyshiftmask)<<16) | (rand() & keymask); 
+		a[i].value = i;
+    }
+}
+
+void testRadixSort()
+{
+    unsigned int numElements = 1048576;
+    unsigned int numIterations = (numElements >= 16777216) ? 10 : 100;
+    
+    KeyValuePair *h_data = (KeyValuePair *)malloc(numElements*sizeof(KeyValuePair));
+    
+    makeRandomUintVector(h_data, numElements, 30);
+	
+    KeyValuePair *d_data;
+    cudaMalloc((void **)&d_data, numElements*sizeof(KeyValuePair));
+	
+	cudaMemcpy(d_data, h_data, numElements * sizeof(KeyValuePair), cudaMemcpyHostToDevice);
+    
+	KeyValuePair *d_data1;
+    cudaMalloc((void **)&d_data1, numElements*sizeof(KeyValuePair));
+	
+    RadixSort(d_data, d_data1, numElements, 32);
+    
+    cudaMemcpy(h_data, d_data, numElements * sizeof(KeyValuePair), cudaMemcpyDeviceToHost);
+    
+    	char passed = 1;
+    for(unsigned int i=0; i<numElements-1; ++i)
+    {
+		// printf("%4d : %4d\n", h_data[i].key, h_data[i].value);
+        if( (h_data[i].key)>(h_data[i+1].key) )
+        {
+            printf("Unordered key[%d]: %d > key[%d]: %d\n", i, h_data[i].key, i+1, h_data[i+1].key);
+            passed = 0;
+			break;
+	    }
+    }
+	
+	if(passed) printf("passed!\n");
+
+    cutilSafeCall( cudaFree(d_data) );
+    cutilSafeCall( cudaFree(d_data1) );
+    free(h_data);
+}
 
 /* genTridiag: generate a random tridiagonal symmetric matrix */
 void genTridiag(int *I, int *J, float *val, int M, int N, int nz)
@@ -64,6 +121,9 @@ int main(int argc, char **argv)
         cudaThreadExit();
         exit(1);
     }
+    
+    printf("test radix sort\n");
+    testRadixSort();
 
     int M = 0, N = 0, nz = 0, *I = NULL, *J = NULL;
     float *val = NULL;
@@ -185,6 +245,7 @@ int main(int argc, char **argv)
     cudaFree(d_Ax);
 
     cudaThreadExit();
+    
     printf("done.\n");
     exit(0);
 }

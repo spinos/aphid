@@ -1,4 +1,4 @@
-## http://www.cmake.org/cmake/help/v3.0/module/FindCUDA.html
+## http://www.cmake.org/cmake/help/v2.8.12/cmake.html#module:FindCUDA
 
 cmake_minimum_required (VERSION 2.8)
 project (testcudacg)
@@ -12,13 +12,19 @@ message ("cuda found ? " ${CUDA_FOUND})
 message ("cuda version " ${CUDA_VERSION})
 message ("cuda sdk root dir " ${CUDA_SDK_ROOT_DIR})
 
-include_directories (${CUDA_TOOLKIT_INCLUDE} ${CUDA_SDK_ROOT_DIR}/common/inc)
+include_directories (${CUDA_TOOLKIT_INCLUDE} ${CUDA_SDK_ROOT_DIR}/common/inc
+"../radixsort")
 
 set (HEADER_FILES "../shared/Morton3D.h")
 
-add_executable (testcudacg ${HEADER_FILES} main.cpp)
+set (CUSOURCES "../radixsort/radixsort.cu")
 
-target_link_libraries(testcudacg ${CUDA_CUDA_LIBRARY})
+## add_executable (testcudacg ${HEADER_FILES} main.cpp)
+set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
+
+CUDA_ADD_EXECUTABLE (testcudacg ${HEADER_FILES} main.cpp ${CUSOURCES})
+
+
 target_link_libraries(testcudacg ${CUDA_CUDART_LIBRARY})
 target_link_libraries(testcudacg ${CUDA_cublas_LIBRARY})
 target_link_libraries(testcudacg ${CUDA_cusparse_LIBRARY})
