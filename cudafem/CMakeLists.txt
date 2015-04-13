@@ -1,0 +1,158 @@
+## http://www.cmake.org/cmake/help/v2.8.12/cmake.html#module:FindQt4
+## http://www.cmake.org/cmake/help/v3.0/manual/cmake-qt.7.html#introduction
+
+cmake_minimum_required (VERSION 2.8)
+project (testcudafem)
+set (CMAKE_AUTOMOC ON)
+set (CMAKE_INCLUDE_CURRENT_DIR ON)
+
+include_directories ("../shared" 
+"../cudabvh" 
+"../radixsort" 
+"../cudanarrowphase"
+"../cudadyn")
+
+set (HEADER_FILES "../shared/Base3DView.h" 
+"../shared/Morton3D.h"
+"../shared/BaseSolverThread.h"
+"../shared/CudaBase.h"
+"../shared/BaseBuffer.h"
+"../shared/CUDABuffer.h"
+"../shared/ScanUtil.h"
+"../cudabvh/CudaLinearBvh.h"
+"../cudabvh/TetrahedronSystem.h"
+"../cudabvh/CudaTetrahedronSystem.h"
+"../cudabvh/createBvh_implement.h"
+"../cudabvh/reduce_common.h"
+"../cudabvh/reduceBox_implement.h"
+"../cudabvh/reduceRange_implement.h"
+"../cudabvh/createBvh_implement.h"
+"../cudabvh/tetrahedronSystem_implement.h"
+"../cudabvh/scan_implement.h"
+"../radixsort/radixsort_implement.h"
+"../cudabvh/CudaBroadphase.h"
+"../cudanarrowphase/DrawNp.h"
+"../cudanarrowphase/ContactThread.h"
+"../cudanarrowphase/CudaNarrowphase.h"
+"../cudanarrowphase/narrowphase_implement.h"
+"../cudanarrowphase/simpleContactSolver_implement.h"
+"../cudanarrowphase/SimpleContactSolver.h"
+"../cudadyn/CudaDynamicWorld.h"
+"../cudadyn/worldUtils.h"
+"window.h"
+"glwidget.h")
+
+set (SOURCE_FILES "../shared/Base3DView.cpp"
+"../shared/BaseSolverThread.cpp"
+"../shared/CudaBase.cpp"
+"../shared/BaseBuffer.cpp"
+"../shared/CUDABuffer.cpp"
+"../shared/ScanUtil.cpp"
+"../cudabvh/CudaLinearBvh.cpp"
+"../cudabvh/TetrahedronSystem.cpp"
+"../cudabvh/CudaTetrahedronSystem.cpp"
+"../cudabvh/DrawBvh.cpp"
+"../cudabvh/CudaBroadphase.cpp"
+"../cudanarrowphase/ContactThread.cpp"
+"../cudanarrowphase/CudaNarrowphase.cpp"
+"../cudanarrowphase/SimpleContactSolver.cpp"
+"../cudanarrowphase/DrawNp.cpp"
+"../cudadyn/CudaDynamicWorld.cpp"
+"../cudadyn/worldUtils.cpp"
+"glwidget.cpp"
+"window.cpp"
+"main.cpp")
+
+## add_executable (testcudafem ${HEADER_FILES} ${SOURCE_FILES})
+
+find_package (CUDA QUIET REQUIRED)
+
+message ("cuda found ? " ${CUDA_FOUND})
+message ("cuda version " ${CUDA_VERSION})
+message ("cuda sdk root dir " ${CUDA_SDK_ROOT_DIR})
+
+set (CUSOURCES "../cudabvh/bvh_math.cu"
+"../cudabvh/scan.cu"
+"../cudabvh/createBvh.cu"
+"../cudabvh/reduceBox.cu"
+"../cudabvh/reduceRange.cu"
+"../cudabvh/tetrahedronSystem.cu"
+"../radixsort/radixsort.cu"
+"../cudabvh/broadphase.cu"
+"../cudanarrowphase/matrix_math.cu"
+"../cudanarrowphase/barycentric.cu"
+"../cudanarrowphase/gjk_math.cu"
+"../cudanarrowphase/simpleContactSolver.cu"
+"../cudanarrowphase/narrowphase.cu")
+
+set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
+
+CUDA_ADD_EXECUTABLE (testcudafem ${HEADER_FILES} ${SOURCE_FILES} ${CUSOURCES})
+
+include_directories (${CUDA_TOOLKIT_INCLUDE} ${CUDA_SDK_ROOT_DIR}/common/inc)
+## target_link_libraries(testcudafem ${CUDA_CUDA_LIBRARY})
+## target_link_libraries(testcudafem ${CUDA_CUDART_LIBRARY})
+## target_link_libraries(testcudafem ${CUDA_cublas_LIBRARY})
+## target_link_libraries(testcudafem ${CUDA_cusparse_LIBRARY})
+
+find_package (OpenGL REQUIRED)
+target_link_libraries (testcudafem ${OPENGL_LIBRARIES})
+
+set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
+target_link_libraries (testcudafem ${Aphid_Library})
+
+set (OpenEXR_Library "/usr/local/lib/libHalf.a"
+"/usr/local/lib/libIex.a"
+"/usr/local/lib/libIlmImf.a"
+"/usr/local/lib/libIlmThread.a")
+target_link_libraries (testcudafem ${OpenEXR_Library})
+
+find_package (zlib REQUIRED)
+target_link_libraries (testcudafem ${ZLIB_LIBRARIES})
+
+find_package (Qt4 REQUIRED)
+message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
+set (QT_USE_QTOPENGL ON)
+target_link_libraries (testcudafem Qt4::QtGui Qt4::QtOpenGL)
+
+if(WIN32)
+	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
+	set (Boost_LIBRARY_DIR "D:/usr/boost_1_51_0/stage/lib")
+	set (Boost_USE_STATIC_LIBS ON)
+	set (Boost_USE_MULTITHREADED ON)
+	include_directories ("D:/usr/boost_1_51_0")
+	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread)
+else()
+
+if(APPLE)
+	set (Boost_INCLUDE_DIR "/users/jianzhang/Library/boost_1_55_0")
+	set (Boost_LIBRARY_DIR "/users/jianzhang/Library/boost_1_55_0/stage/lib")
+	include_directories ("/users/jianzhang/Library/boost_1_55_0")
+	find_package(Boost 1.55 COMPONENTS system filesystem date_time regex thread)
+	include_directories ("/usr/local/include")
+
+else()
+	set (Boost_INCLUDE_DIR "/home/OF3D/zhangjian/Documents/boost_1_51_0")
+	set (Boost_USE_STATIC_LIBS ON)
+	set (Boost_USE_MULTITHREADED ON)
+	include_directories ("/home/OF3D/zhangjian/Documents/boost_1_51_0")
+	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread)	
+endif()
+	
+endif()
+
+message ("boost system is" ${Boost_SYSTEM_LIBRARY})
+message ("boost date_time is" ${Boost_DATE_TIME_LIBRARY})
+message ("boost regex is" ${Boost_REGEX_LIBRARY})
+message ("boost filesystem is" ${Boost_FILESYSTEM_LIBRARY})
+message ("boost thread is" ${Boost_THREAD_LIBRARY})
+
+target_link_libraries (testcudafem ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (testcudafem ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (testcudafem ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (testcudafem ${Boost_REGEX_LIBRARY})
+target_link_libraries (testcudafem ${Boost_THREAD_LIBRARY})
+
+set (AttributeNoninline "__attribute__ ((noinline))")
+add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
+
