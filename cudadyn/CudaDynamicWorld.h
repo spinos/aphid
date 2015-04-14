@@ -3,13 +3,10 @@
 
 #define CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS 32
 
-class GeoDrawer;
 class CudaBroadphase;
 class CudaNarrowphase;
 class SimpleContactSolver;
 class CudaTetrahedronSystem;
-class DrawBvh;
-class DrawNp;
 
 class CudaDynamicWorld
 {
@@ -25,11 +22,8 @@ public:
     
     const unsigned numObjects() const;
     
-    void setDrawer(GeoDrawer * drawer);
-    
     CudaTetrahedronSystem * tetradedron(unsigned ind);
 	
-	void dbgDraw();
 protected:
 
 private:
@@ -38,8 +32,6 @@ private:
     SimpleContactSolver * m_contactSolver;
     CudaTetrahedronSystem * m_objects[CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS];
     unsigned m_numObjects;
-    DrawBvh * m_dbgBvh;
-	DrawNp * m_dbgNp;
 };
 #endif        //  #ifndef CUDADYNAMICWORLD_H
 

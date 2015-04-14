@@ -4,8 +4,6 @@
 #include <SimpleContactSolver.h>
 #include <CudaTetrahedronSystem.h>
 #include <CudaBase.h>
-#include <DrawBvh.h>
-#include <DrawNp.h>
 
 CudaDynamicWorld::CudaDynamicWorld() 
 {
@@ -13,9 +11,6 @@ CudaDynamicWorld::CudaDynamicWorld()
     m_narrowphase = new CudaNarrowphase;
 	m_contactSolver = new SimpleContactSolver;
 	m_numObjects = 0;
-	
-	m_dbgBvh = new DrawBvh;
-	m_dbgNp = new DrawNp;
 }
 
 CudaDynamicWorld::~CudaDynamicWorld()
@@ -27,12 +22,6 @@ CudaDynamicWorld::~CudaDynamicWorld()
 
 const unsigned CudaDynamicWorld::numObjects() const
 { return m_numObjects; }
-
-void CudaDynamicWorld::setDrawer(GeoDrawer * drawer)
-{ 
-	m_dbgBvh->setDrawer(drawer); 
-	m_dbgNp->setDrawer(drawer);
-}
 
 CudaTetrahedronSystem * CudaDynamicWorld::tetradedron(unsigned ind)
 { return m_objects[ind]; }
@@ -78,7 +67,7 @@ void CudaDynamicWorld::stepPhysics(float dt)
 									
 	for(i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
 }
-
+/*
 void CudaDynamicWorld::dbgDraw()
 {
 	std::cout<<" num overlapping pairs "<<m_broadphase->numUniquePairs();
@@ -93,3 +82,4 @@ void CudaDynamicWorld::dbgDraw()
 	// m_dbgNp->showConstraint(m_contactSolver, m_narrowphase);
 	std::cout<<" mem "<<CudaBase::MemoryUsed<<"\n";
 }
+*/

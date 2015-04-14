@@ -2,6 +2,7 @@
 #define GLWIDGET_H
 
 #include <Base3DView.h>
+class DynamicWorldInterface;
 class CudaDynamicWorld;
 class GLWidget : public Base3DView
 {
@@ -24,7 +25,7 @@ protected:
 //! [3]
 private:
     CudaDynamicWorld * m_world;
-
+    DynamicWorldInterface * m_interface;
 private slots:
     void simulate();
 

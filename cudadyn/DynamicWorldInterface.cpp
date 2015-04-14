@@ -1,17 +1,34 @@
-#include "worldUtils.h"
-#include <AllMath.h>
+#include "DynamicWorldInterface.h"
 #include "CudaDynamicWorld.h"
 #include <CudaTetrahedronSystem.h>
+#include <AllMath.h>
 #include <GeoDrawer.h>
 
-#define GRDW 55
-#define GRDH 55
+#define GRDW 57
+#define GRDH 57
 #define NTET 3600
+#define NPNT 14400
 
-void createWorld(CudaDynamicWorld * world)
+struct A {
+    mat33 Ke[4][4];
+    mat33 Re;
+    //float3 B[4]; 
+    //float3 e1, e2, e3;
+    //float volume;
+    //float plastic[6];
+};
+
+DynamicWorldInterface::DynamicWorldInterface() 
+{
+    std::cout<<" size of A "<<sizeof(A)<<"\n";
+}
+
+DynamicWorldInterface::~DynamicWorldInterface() {}
+
+void DynamicWorldInterface::create(CudaDynamicWorld * world)
 {
     CudaTetrahedronSystem * tetra = new CudaTetrahedronSystem;
-	tetra->create(NTET, 1.f, 1.f);
+	tetra->create(NTET, NPNT);
 	float * hv = &tetra->hostV()[0];
 	
 	unsigned i, j;
@@ -58,18 +75,7 @@ void createWorld(CudaDynamicWorld * world)
 			hv+=3;
 
 			unsigned b = (j * GRDW + i) * 4;
-			tetra->addTetrahedron(b, b+1, b+2, b+3);
-			
-			tetra->addTriangle(b, b+2, b+1);
-			tetra->addTriangle(b, b+1, b+3);
-			tetra->addTriangle(b, b+3, b+2);
-			tetra->addTriangle(b+1, b+2, b+3);
-//	 2
-//	 | \ 
-//	 |  \
-//	 0 - 1
-//  /
-// 3 		
+			tetra->addTetrahedron(b, b+1, b+2, b+3);		
 		}
 		vy = -vy;
 	}
@@ -77,7 +83,7 @@ void createWorld(CudaDynamicWorld * world)
 	world->addTetrahedronSystem(tetra);
 }
 
-void drawTetra(TetrahedronSystem * tetra)
+void DynamicWorldInterface::draw(TetrahedronSystem * tetra)
 {
 	glColor3f(0.3f, 0.4f, 0.3f);
     
@@ -102,7 +108,7 @@ void drawTetra(TetrahedronSystem * tetra)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void drawWorld(CudaDynamicWorld * world)
+void DynamicWorldInterface::draw(CudaDynamicWorld * world)
 {
     const unsigned nobj = world->numObjects();
     if(nobj<1) return;
@@ -111,8 +117,7 @@ void drawWorld(CudaDynamicWorld * world)
     for(i=0; i< nobj; i++) {
         CudaTetrahedronSystem * tetra = world->tetradedron(i);
         tetra->sendXToHost();
-        drawTetra(tetra);
+        draw(tetra);
     }
-	
-	// world->dbgDraw();
 }
+

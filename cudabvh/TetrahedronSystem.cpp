@@ -9,6 +9,7 @@
 
 #include "TetrahedronSystem.h"
 #include <BaseBuffer.h>
+#include <tetrahedron_math.h>
 TetrahedronSystem::TetrahedronSystem() :
 m_numTetradedrons(0), m_numPoints(0), m_numTriangles(0)
 {
@@ -26,11 +27,11 @@ TetrahedronSystem::~TetrahedronSystem()
 	delete m_hostTriangleIndices;
 }
 
-void TetrahedronSystem::create(unsigned maxNumTetrahedrons, float pointTetrahedronRatio, float triangleTetrahedronRatio)
+void TetrahedronSystem::create(const unsigned & maxNumTetrahedrons, const unsigned & maxNumPoints)
 {
 	m_maxNumTetrahedrons = maxNumTetrahedrons;
-	m_maxNumPoints = maxNumTetrahedrons * 4 * pointTetrahedronRatio;
-	m_maxNumTriangles = maxNumTetrahedrons * 4 * triangleTetrahedronRatio;
+	m_maxNumPoints = maxNumPoints;
+	m_maxNumTriangles = maxNumTetrahedrons * 4;
 	m_hostX->create(m_maxNumPoints * 12);
 	m_hostV->create(m_maxNumPoints * 12);
 	m_hostTretradhedronIndices->create(m_maxNumTetrahedrons * 16);
@@ -56,6 +57,22 @@ void TetrahedronSystem::addTetrahedron(unsigned a, unsigned b, unsigned c, unsig
 	idx[2] = c;
 	idx[3] = d;
 	m_numTetradedrons++;
+	
+	addTriangle(idx[TetrahedronToTriangleVertexByFace[0][0]], 
+	            idx[TetrahedronToTriangleVertexByFace[0][1]],
+	            idx[TetrahedronToTriangleVertexByFace[0][2]]);
+	
+	addTriangle(idx[TetrahedronToTriangleVertexByFace[1][0]], 
+	            idx[TetrahedronToTriangleVertexByFace[1][1]],
+	            idx[TetrahedronToTriangleVertexByFace[1][2]]);
+	
+	addTriangle(idx[TetrahedronToTriangleVertexByFace[2][0]], 
+	            idx[TetrahedronToTriangleVertexByFace[2][1]],
+	            idx[TetrahedronToTriangleVertexByFace[2][2]]);
+	
+	addTriangle(idx[TetrahedronToTriangleVertexByFace[3][0]], 
+	            idx[TetrahedronToTriangleVertexByFace[3][1]],
+	            idx[TetrahedronToTriangleVertexByFace[3][2]]);
 }
 
 void TetrahedronSystem::addTriangle(unsigned a, unsigned b, unsigned c)

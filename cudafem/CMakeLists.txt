@@ -31,14 +31,12 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../cudabvh/scan_implement.h"
 "../radixsort/radixsort_implement.h"
 "../cudabvh/CudaBroadphase.h"
-"../cudanarrowphase/DrawNp.h"
-"../cudanarrowphase/ContactThread.h"
 "../cudanarrowphase/CudaNarrowphase.h"
 "../cudanarrowphase/narrowphase_implement.h"
 "../cudanarrowphase/simpleContactSolver_implement.h"
 "../cudanarrowphase/SimpleContactSolver.h"
 "../cudadyn/CudaDynamicWorld.h"
-"../cudadyn/worldUtils.h"
+"../cudadyn/DynamicWorldInterface.h"
 "window.h"
 "glwidget.h")
 
@@ -51,14 +49,11 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../cudabvh/CudaLinearBvh.cpp"
 "../cudabvh/TetrahedronSystem.cpp"
 "../cudabvh/CudaTetrahedronSystem.cpp"
-"../cudabvh/DrawBvh.cpp"
 "../cudabvh/CudaBroadphase.cpp"
-"../cudanarrowphase/ContactThread.cpp"
 "../cudanarrowphase/CudaNarrowphase.cpp"
 "../cudanarrowphase/SimpleContactSolver.cpp"
-"../cudanarrowphase/DrawNp.cpp"
 "../cudadyn/CudaDynamicWorld.cpp"
-"../cudadyn/worldUtils.cpp"
+"../cudadyn/DynamicWorldInterface.cpp"
 "glwidget.cpp"
 "window.cpp"
 "main.cpp")
@@ -140,10 +135,8 @@ message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
 set (QT_MT_REQUIRED ON)
 set (QT_USE_QTOPENGL ON)
 
-if(WIN32)
 include_directories (${QT_INCLUDE_DIR})
 include (${QT_USE_FILE})
-endif()
 
 ## target_link_libraries (testcudafem Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries(testcudafem ${QT_LIBRARIES})
@@ -162,7 +155,7 @@ if(APPLE)
 	set (Boost_LIBRARY_DIR "/users/jianzhang/Library/boost_1_55_0/stage/lib")
 	include_directories ("/users/jianzhang/Library/boost_1_55_0")
 	find_package(Boost 1.55 COMPONENTS system filesystem date_time regex thread)
-	include_directories ("/usr/local/include")
+	include_directories ("/users/jianzhang/Library/boost_1_55_0")
 
 else()
 	set (Boost_INCLUDE_DIR "/home/OF3D/zhangjian/Documents/boost_1_51_0")
@@ -179,12 +172,6 @@ message ("boost date_time is" ${Boost_DATE_TIME_LIBRARY})
 message ("boost regex is" ${Boost_REGEX_LIBRARY})
 message ("boost filesystem is" ${Boost_FILESYSTEM_LIBRARY})
 message ("boost thread is" ${Boost_THREAD_LIBRARY})
-
-## target_link_libraries (testcudafem ${Boost_SYSTEM_LIBRARY})
-## target_link_libraries (testcudafem ${Boost_FILESYSTEM_LIBRARY})
-## target_link_libraries (testcudafem ${Boost_DATE_TIME_LIBRARY})
-## target_link_libraries (testcudafem ${Boost_REGEX_LIBRARY})
-## target_link_libraries (testcudafem ${Boost_THREAD_LIBRARY})
 
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})

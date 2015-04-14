@@ -14,10 +14,9 @@ class TetrahedronSystem {
 public:
 	TetrahedronSystem();
 	virtual ~TetrahedronSystem();
-	void create(unsigned maxNumTetrahedrons, float pointTetrahedronRatio, float triangleTetrahedronRatio);
+	void create(const unsigned & maxNumTetrahedrons, const unsigned & maxNumPoints);
 	void addPoint(float * src);
 	void addTetrahedron(unsigned a, unsigned b, unsigned c, unsigned d);
-	void addTriangle(unsigned a, unsigned b, unsigned c);
 	const unsigned numTetradedrons() const;
 	const unsigned numPoints() const;
 	const unsigned numTriangles() const;
@@ -27,8 +26,10 @@ public:
 	unsigned * hostTretradhedronIndices();
 	unsigned * hostTriangleIndices();
 protected:
-	const unsigned maxNumPoints() const;
+    const unsigned maxNumPoints() const;
 	const unsigned maxNumTetradedrons() const;
+private:
+    void addTriangle(unsigned a, unsigned b, unsigned c);
 private:
 	BaseBuffer * m_hostX;
 	BaseBuffer * m_hostV;

@@ -4,7 +4,7 @@
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
 #include "CudaDynamicWorld.h"
-#include "worldUtils.h"
+#include "DynamicWorldInterface.h"
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	perspCamera()->setFarClipPlane(20000.f);
@@ -13,13 +13,15 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
 	
 	m_world = new CudaDynamicWorld;
-	createWorld(m_world);
+	m_interface = new DynamicWorldInterface;
+	m_interface->create(m_world);
 }
 //! [0]
 
 //! [1]
 GLWidget::~GLWidget()
 {
+    delete m_interface;
     delete m_world;
 }
 
@@ -33,7 +35,7 @@ void GLWidget::clientDraw()
 {
     if(internalTimer()->isActive())
         m_world->stepPhysics(1.f / 60.f);
-    drawWorld(m_world);
+    m_interface->draw(m_world);
 }
 //! [7]
 
