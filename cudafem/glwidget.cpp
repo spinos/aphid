@@ -36,6 +36,8 @@ void GLWidget::clientDraw()
     if(internalTimer()->isActive())
         m_world->stepPhysics(1.f / 60.f);
     m_interface->draw(m_world, getDrawer());
+    if(m_world->numContacts() > 0) 
+        internalTimer()->stop();
 }
 //! [7]
 
@@ -59,9 +61,19 @@ void GLWidget::simulate()
 {
 }
 
-void GLWidget::keyPressEvent(QKeyEvent *e)
+void GLWidget::keyPressEvent(QKeyEvent *event)
 {
-	Base3DView::keyPressEvent(e);
+    switch (event->key()) {
+        case Qt::Key_S:
+            if(internalTimer()->isActive()) 
+                internalTimer()->stop();
+            else
+                internalTimer()->start();
+            break;
+        default:
+			break;
+    }
+	Base3DView::keyPressEvent(event);
 }
 
 void GLWidget::keyReleaseEvent(QKeyEvent *event)

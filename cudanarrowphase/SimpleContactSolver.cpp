@@ -27,7 +27,7 @@ SimpleContactSolver::SimpleContactSolver()
 	m_relVel = new CUDABuffer;
 	m_pntTetHash[0] = new CUDABuffer;
 	m_pntTetHash[1] = new CUDABuffer;
-	
+	m_numContacts = 0;
 	std::cout<<" sizeof struct ContactConstraint "<<sizeof(ContactConstraint)<<"\n";
 }
 
@@ -61,13 +61,16 @@ CUDABuffer * SimpleContactSolver::pntTetHashBuf()
 const unsigned SimpleContactSolver::numIterations() const
 { return JACOBI_NUM_ITERATIONS; }
 
+const unsigned SimpleContactSolver::numContacts() const
+{ return m_numContacts; }
+
 void SimpleContactSolver::solveContacts(unsigned numContacts,
 										CUDABuffer * contactBuf,
 										CUDABuffer * pairBuf,
 										void * objectData)
 {
 	if(numContacts < 1) return; 
-	
+	m_numContacts = numContacts;
 	const unsigned indBufLength = nextPow2(numContacts * 2);
 	
 	m_sortedInd[0]->create(indBufLength * 8);	

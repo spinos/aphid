@@ -2,11 +2,15 @@
 #include "CudaDynamicWorld.h"
 #include <CudaTetrahedronSystem.h>
 #include <CudaBroadphase.h>
+#include <CudaNarrowphase.h>
+#include <SimpleContactSolver.h>
 #include <BaseBuffer.h>
 #include <CUDABuffer.h>
-#include <AllMath.h>
 #include <GeoDrawer.h>
 #include <stripedModel.h>
+#include <CudaLinearBvh.h>
+#include <radixsort_implement.h>
+#include <simpleContactSolver_implement.h>
 
 #define GRDW 57
 #define GRDH 57
@@ -26,7 +30,18 @@ DynamicWorldInterface::DynamicWorldInterface()
 {
     std::cout<<" size of A "<<sizeof(A)<<"\n";
     m_boxes = new BaseBuffer;
+    m_bvhHash = new BaseBuffer;
     m_pairCache = new BaseBuffer;
+    m_tetPnt = new BaseBuffer;
+	m_tetInd = new BaseBuffer;
+	m_pointStarts = new BaseBuffer;
+	m_indexStarts = new BaseBuffer;
+	m_constraint = new BaseBuffer;
+	m_contactPairs = new BaseBuffer;
+	m_contact = new BaseBuffer;
+	m_pairsHash = new BaseBuffer;
+	m_linearVelocity = new BaseBuffer;
+	m_angularVelocity = new BaseBuffer;
 }
 
 DynamicWorldInterface::~DynamicWorldInterface() {}
@@ -132,11 +147,15 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
     glDisable(GL_DEPTH_TEST);
     draw(world);
     showOverlappingPairs(world, drawer);
+    showBvhHash(world, drawer);
+    showContacts(world, drawer);
 }
 
 void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     CudaBroadphase * broadphase = world->broadphase();
+    std::cout<<" num overlapping pairs "<<broadphase->numUniquePairs()<<" ";
+	
     const unsigned cacheLength = broadphase->pairCacheLength();
 	if(cacheLength < 1) return;
 	
@@ -174,7 +193,169 @@ void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDr
 		
 		bb.expandBy(ab);
 		
-		// m_drawer->boundingBox(bb);
+		drawer->boundingBox(bb);
 	}
 }
 
+void DynamicWorldInterface::showBvhHash(CudaDynamicWorld * world, GeoDrawer * drawer)
+{
+    CudaBroadphase * broadphase = world->broadphase();
+    const unsigned n = broadphase->numObjects();
+    unsigned i;
+    for(i=0; i< n; i++)
+        showBvhHash(broadphase->object(i), drawer);
+}
+
+void DynamicWorldInterface::showBvhHash(CudaLinearBvh * bvh, GeoDrawer * drawer)
+{
+    const unsigned n = bvh->numLeafNodes();
+	
+	m_boxes->create(n * sizeof(Aabb));
+	bvh->getLeafAabbs(m_boxes);
+	Aabb * boxes = (Aabb *)m_boxes->data();
+	
+	m_bvhHash->create(n * sizeof(KeyValuePair));
+	bvh->getLeafHash(m_bvhHash);
+	KeyValuePair * bvhHash = (KeyValuePair *)m_bvhHash->data();
+	
+	float red;
+	Vector3F p, q;
+	for(unsigned i=1; i < n; i++) {
+		red = (float)i/(float)n;
+		
+		glColor3f(red, 1.f - red, 0.f);
+		Aabb & a0 = boxes[bvhHash[i-1].value];
+		p.set(a0.low.x * 0.5f + a0.high.x * 0.5f, a0.low.y * 0.5f + a0.high.y * 0.5f + 0.2f, a0.low.z * 0.5f + a0.high.z * 0.5f);
+        
+		Aabb & a1 = boxes[bvhHash[i].value];
+		q.set(a1.low.x * 0.5f + a1.high.x * 0.5f, a1.low.y * 0.5f + a1.high.y * 0.5f + 0.2f, a1.low.z * 0.5f + a1.high.z * 0.5f);
+        
+		drawer->arrow(p, q);
+	}
+}
+
+void DynamicWorldInterface::showContacts(CudaDynamicWorld * world, GeoDrawer * drawer)
+{
+    CudaNarrowphase * narrowphase = world->narrowphase();
+    const unsigned n = narrowphase->numContacts();
+    std::cout<<" num contact pairs "<<n<<"\n";
+	if(n<1) return;
+	
+	SimpleContactSolver * solver = world->contactSolver();
+	if(solver->numContacts() != n) return;
+	
+	CUDABuffer * pnts = narrowphase->objectBuffer()->m_pos;
+	CUDABuffer * inds = narrowphase->objectBuffer()->m_ind;
+	CUDABuffer * pointStarts = narrowphase->objectBuffer()->m_pointCacheLoc;
+	CUDABuffer * indexStarts = narrowphase->objectBuffer()->m_indexCacheLoc;
+	
+	m_tetPnt->create(pnts->bufferSize());
+	m_tetInd->create(inds->bufferSize());
+	m_pointStarts->create(pointStarts->bufferSize());
+	m_indexStarts->create(indexStarts->bufferSize());
+	
+	pnts->deviceToHost(m_tetPnt->data(), m_tetPnt->bufferSize());
+	inds->deviceToHost(m_tetInd->data(), m_tetInd->bufferSize());
+	pointStarts->deviceToHost(m_pointStarts->data(), m_pointStarts->bufferSize());
+	indexStarts->deviceToHost(m_indexStarts->data(), m_indexStarts->bufferSize());
+	
+	Vector3F * tetPnt = (Vector3F *)m_tetPnt->data();
+	unsigned * tetInd = (unsigned *)m_tetInd->data();
+	unsigned * pntOffset = (unsigned *)m_pointStarts->data();
+	unsigned * indOffset = (unsigned *)m_indexStarts->data();
+	
+    m_constraint->create(n * 64);
+    solver->constraintBuf()->deviceToHost(m_constraint->data(), n * 64);
+	ContactConstraint * constraint = (ContactConstraint *)m_constraint->data();
+    
+    m_contactPairs->create(n * 8);
+    narrowphase->getContactPairs(m_contactPairs);
+    
+    unsigned * c = (unsigned *)m_contactPairs->data();
+    unsigned i, j;
+    glColor3f(0.4f, 0.9f, 0.6f);
+	Vector3F dst, cenA, cenB;
+    
+	CUDABuffer * bodyPair = solver->contactPairHashBuf();
+	m_pairsHash->create(bodyPair->bufferSize());
+	bodyPair->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());
+	
+	m_linearVelocity->create(n * 2 * 12);
+	solver->deltaLinearVelocityBuf()->deviceToHost(m_linearVelocity->data(), 
+	    m_linearVelocity->bufferSize());
+	Vector3F * linVel = (Vector3F *)m_linearVelocity->data();
+	
+	m_angularVelocity->create(n * 2 * 12);
+	solver->deltaAngularVelocityBuf()->deviceToHost(m_angularVelocity->data(), 
+	    m_angularVelocity->bufferSize());
+	Vector3F * angVel = (Vector3F *)m_angularVelocity->data();
+	
+	m_contact->create(n * 48);
+	narrowphase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
+	ContactData * contact = (ContactData *)m_contact->data();
+
+	Vector3F N;
+
+	bool isA;
+	unsigned iPairA, iBody, iPair;
+	unsigned * bodyAndPair = (unsigned *)m_pairsHash->data();
+	bool converged;
+	for(i=0; i < n * 2; i++) {
+
+	    iBody = bodyAndPair[i*2];
+	    iPair = bodyAndPair[i*2+1];
+	    
+	    // std::cout<<"body "<<iBody<<" pair "<<iPair<<"\n";
+	    
+	    iPairA = iPair * 2;
+// left or right
+        isA = (iBody == c[iPairA]);
+
+	    cenA = tetrahedronCenter(tetPnt, tetInd, pntOffset, indOffset, iBody);
+ 
+	    //cenB = cenA + angVel[i];
+	    
+	    //glColor3f(0.1f, 0.7f, 0.3f);
+	    //m_drawer->arrow(cenA, cenB);
+	    
+	    ContactData & cd = contact[iPair];
+	    float4 sa = cd.separateAxis;
+	    N.set(sa.x, sa.y, sa.z);
+	    N.reverse();
+	    N.normalize();
+
+	    if(isA) {
+// show contact normal for A
+		    cenB = cenA + Vector3F(cd.localA.x, cd.localA.y, cd.localA.z);
+		    drawer->setColor(0.f, .3f, .9f);
+		    drawer->arrow(cenB, cenB + N);
+		}
+
+		glColor3f(0.73f, 0.68f, 0.1f);
+		drawer->arrow(cenA, cenA + linVel[i]);
+		
+		std::cout<<" delta lin vel"<<linVel[i]<<" ";
+		std::cout<<" delta ang vel"<<angVel[i]<<"\n";
+		
+		glColor3f(0.1f, 0.68f, 0.72f);
+		drawer->arrow(cenA, cenA + angVel[i]);
+		
+	}
+}
+
+Vector3F DynamicWorldInterface::tetrahedronCenter(Vector3F * p, unsigned * v, unsigned * pntOffset, unsigned * indOffset, unsigned i)
+{
+	unsigned objectI = extractObjectInd(i);
+	unsigned elementI = extractElementInd(i);
+	
+	unsigned pStart = pntOffset[objectI];
+	unsigned iStart = indOffset[objectI];
+	
+	Vector3F r = p[pStart + v[iStart + elementI * 4]];
+    r += p[pStart + v[iStart + elementI * 4 + 1]];
+    r += p[pStart + v[iStart + elementI * 4 + 2]];
+    r += p[pStart + v[iStart + elementI * 4 + 3]];
+    r *= .25f;
+    
+	return r;
+}

@@ -34,6 +34,9 @@ public:
 	void computeOverlappingPairs();
 	
 	CUDABuffer * overlappingPairBuf();
+	
+	const unsigned numObjects() const;
+	CudaLinearBvh * object(unsigned i) const;
 protected:
 
 private:

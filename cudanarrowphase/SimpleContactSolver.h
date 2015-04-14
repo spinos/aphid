@@ -30,6 +30,7 @@ public:
 	CUDABuffer * pntTetHashBuf();
 	
 	const unsigned numIterations() const;
+	const unsigned numContacts() const;
 private:
 	CUDABuffer * m_sortedInd[2];
 	CUDABuffer * m_splitPair;
@@ -41,5 +42,6 @@ private:
 	CUDABuffer * m_deltaJ;
 	CUDABuffer * m_relVel;
 	CUDABuffer * m_pntTetHash[2];
+	unsigned m_numContacts;
 };
 #endif        //  #ifndef SIMPLECONTACTSOLVER_H

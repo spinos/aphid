@@ -24,6 +24,9 @@ public:
     
     CudaTetrahedronSystem * tetradedron(unsigned ind) const;
 	CudaBroadphase * broadphase() const;
+	CudaNarrowphase * narrowphase() const;
+	SimpleContactSolver * contactSolver() const;
+	const unsigned numContacts() const;
 protected:
 
 private:

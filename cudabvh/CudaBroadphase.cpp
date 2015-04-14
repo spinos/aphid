@@ -67,6 +67,12 @@ void CudaBroadphase::addBvh(CudaLinearBvh * bvh)
 	m_numObjects++;
 }
 
+const unsigned CudaBroadphase::numObjects() const
+{ return m_numObjects; }
+
+CudaLinearBvh * CudaBroadphase::object(unsigned i) const
+{ return m_objects[i]; }
+
 void CudaBroadphase::initOnDevice()
 {
 	if(m_numObjects < 1) return;

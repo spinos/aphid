@@ -29,6 +29,12 @@ CudaTetrahedronSystem * CudaDynamicWorld::tetradedron(unsigned ind) const
 CudaBroadphase * CudaDynamicWorld::broadphase() const
 { return m_broadphase; }
 
+CudaNarrowphase * CudaDynamicWorld::narrowphase() const
+{ return m_narrowphase; }
+
+SimpleContactSolver * CudaDynamicWorld::contactSolver() const
+{ return m_contactSolver; }
+
 void CudaDynamicWorld::addTetrahedronSystem(CudaTetrahedronSystem * tetra)
 {
     if(m_numObjects == CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS) return;
@@ -60,12 +66,8 @@ void CudaDynamicWorld::stepPhysics(float dt)
 	for(i=0; i < m_numObjects; i++) m_objects[i]->update();
 	m_broadphase->computeOverlappingPairs();
 	
-	// std::cout<<" num overlapping pairs "<<m_broadphase->numUniquePairs();
-	
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
 	                                m_broadphase->numUniquePairs());
-	
-	// std::cout<<" num contact pairs "<<m_narrowphase->numContacts()<<"\n";
 	
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),
@@ -74,6 +76,9 @@ void CudaDynamicWorld::stepPhysics(float dt)
 									
 	for(i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
 }
+
+const unsigned CudaDynamicWorld::numContacts() const
+{ return m_narrowphase->numContacts(); }
 /*
 void CudaDynamicWorld::dbgDraw()
 {
