@@ -20,8 +20,15 @@ void broadphaseComputePairCounts(uint * dst, Aabb * boxes, uint numBoxes,
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices);
+
+void broadphaseComputePairCountsSelfCollide(uint * dst, Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
-								int isSelfCollision);
+								uint4 * tetrahedronIndices);
 
 void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
                               Aabb * boxes, uint numBoxes,
@@ -31,6 +38,16 @@ void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx, unsigned treeIdx);
+
+void broadphaseWritePairCacheSelfCollide(uint2 * dst, uint * starts, uint * counts,
+                              Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								uint4 * tetrahedronIndices,
+								unsigned queryIdx);
 
 void broadphaseUniquePair(uint * dst, uint2 * pairs, uint pairLength, uint bufLength);
 void broadphaseCompactUniquePairs(uint2 * dst, uint2 * pairs, uint * unique, uint * loc, uint pairLength);

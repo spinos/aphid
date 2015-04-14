@@ -8,6 +8,7 @@ FEMWorldInterface::~FEMWorldInterface() {}
 
 void FEMWorldInterface::create(CudaDynamicWorld * world)
 {
+    // return DynamicWorldInterface::create(world);
     std::cout<<"num points "<<TetraNumVertices<<"\n";
 	std::cout<<"num tetrahedrons "<<TetraNumTetrahedrons<<"\n";
 	
@@ -15,9 +16,9 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 	tetra->create(TetraNumTetrahedrons+100, TetraNumVertices+400);
 	float * hv = &tetra->hostV()[0];
 	float vrx, vry, vrz, vr;
-	float vy = 3.95f;
+	float vy = .295f;
 	unsigned i;
-	Vector3F p;
+	Vector3F p, q;
 	for(i=0; i<TetraNumVertices; i++) {
 	    p.set(TetraP[i][0], TetraP[i][1], TetraP[i][2]);
 	    tetra->addPoint(&p.x);
@@ -37,6 +38,10 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 	
 	for(i=0; i<TetraNumTetrahedrons; i++) {
 	    tetra->addTetrahedron(TetraIndices[i][0], TetraIndices[i][1], TetraIndices[i][2], TetraIndices[i][3]);
+	    
+	    // p.set(TetraP[TetraIndices[i][0]][0], TetraP[TetraIndices[i][0]][1], TetraP[TetraIndices[i][0]][2]);
+	    // q.set(TetraP[TetraIndices[i][1]][0], TetraP[TetraIndices[i][1]][1], TetraP[TetraIndices[i][1]][2]);
+	    // std::cout<<"el "<<(p - q).length()<<" ";
 	}
 	
 	world->addTetrahedronSystem(tetra);

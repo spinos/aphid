@@ -197,11 +197,41 @@ int main(int argc, char **argv)
     while (r1 > tol*tol && k <= max_iter) {
         if (k > 1) {
             b = r1 / r0;
+            
+// http://docs.nvidia.com/cuda/cublas/index.html#cublas-level-1-function-reference
+//  cublasSscal(cublasHandle_t handle, int n,
+//              const float           *alpha,
+//              float           *x, int incx)
+//  x [ j ] = alpha * x [ j ] for i = 1 , ... , n and j = 1 + ( i - 1 ) *  incx
+
             cublasSscal(N, b, d_p, 1);
+            
+// cublasSaxpy(cublasHandle_t handle, int n,
+//                           const float           *alpha,
+//                         const float           *x, int incx,
+//                         float                 *y, int incy)
+//  y [ j ] = alpha * x [ k ] + y [ j ] for i = 1 , ... , n , k = 1 + ( i - 1 ) *  incx and j = 1 + ( i - 1 ) *  incy
+
             cublasSaxpy(N, 1.0, d_r, 1, d_p, 1);
         } else {
+
+// cublasScopy(cublasHandle_t handle, int n,
+//                         const float           *x, int incx,
+//                         float                 *y, int incy)
+//  y [ j ] = x [ k ] for i = 1 , ... , n , k = 1 + ( i - 1 ) *  incx and j = 1 + ( i - 1 ) *  incy
+
             cublasScopy(N, d_r, 1, d_p, 1);
         }
+        
+// http://docs.nvidia.com/cuda/cusparse/index.html#cusparse-lt-t-gt-csrmv
+// cusparseScsrmv(cusparseHandle_t handle, cusparseOperation_t transA, 
+               // int m, int n, int nnz, const float           *alpha, 
+               // const cusparseMatDescr_t descrA, 
+               // const float           *csrValA, 
+               // const int *csrRowPtrA, const int *csrColIndA,
+               // const float           *x, const float           *beta, 
+               // float           *y)
+//  y = alpha * op ( A ) * x + beta * y
 
         cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, N, 1.0, descr, d_val, d_row, d_col, d_p, 0.0, d_Ax);
         a = r1 / cublasSdot(N, d_p, 1, d_Ax, 1);

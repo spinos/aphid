@@ -22,8 +22,8 @@ public:
     
     const unsigned numObjects() const;
     
-    CudaTetrahedronSystem * tetradedron(unsigned ind);
-	
+    CudaTetrahedronSystem * tetradedron(unsigned ind) const;
+	CudaBroadphase * broadphase() const;
 protected:
 
 private:

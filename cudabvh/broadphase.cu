@@ -4,6 +4,21 @@
 
 #define B3_BROADPHASE_MAX_STACK_SIZE 128
 
+__device__ int isTetrahedronConnected(uint a, uint b, const uint4 * v)
+{
+    if(a == b) return 1;
+    
+    const uint4 ta = v[a];
+    const uint4 tb = v[b];
+    
+    if(ta.x == tb.x || ta.x == tb.y || ta.x == tb.z || ta.x == tb.w) return 1;
+    if(ta.y == tb.x || ta.y == tb.y || ta.y == tb.z || ta.y == tb.w) return 1;
+    if(ta.z == tb.x || ta.z == tb.y || ta.z == tb.z || ta.z == tb.w) return 1;
+    if(ta.w == tb.x || ta.w == tb.y || ta.w == tb.z || ta.w == tb.w) return 1;
+    
+    return 0;
+}
+
 __global__ void resetPairCounts_kernel(uint * dst, uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
@@ -28,8 +43,7 @@ __global__ void computePairCounts_kernel(uint * overlappingCounts, Aabb * boxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, Aabb * leafAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices,
-								int isSelfCollision)
+								KeyValuePair * mortonCodesAndAabbIndices)
 {
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	if(boxIndex >= maxBoxInd) return;
@@ -60,13 +74,58 @@ __global__ void computePairCounts_kernel(uint * overlappingCounts, Aabb * boxes,
 		{    		    
 			if(isLeaf)
 			{
-			    if(isSelfCollision) { // todo: connected elements shared same vertices
-			        if(bvhRigidIndex != boxIndex) {
-			            overlappingCounts[boxIndex] += 1;
-			        }
-			    } else {
+			    overlappingCounts[boxIndex] += 1;
+			}
+			else {
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+                stackSize++;
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+                stackSize++;
+			}
+		}
+		
+	}
+}
+
+__global__ void computePairCountsSelfCollide_kernel(uint * overlappingCounts, Aabb * boxes,
+                                uint maxBoxInd,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndices, 
+								Aabb * internalNodeAabbs, Aabb * leafAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								uint4 * tetrahedronIndices)
+{
+	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if(boxIndex >= maxBoxInd) return;
+	
+	Aabb box = boxes[boxIndex];
+	
+	uint stack[B3_BROADPHASE_MAX_STACK_SIZE];
+	
+	int stackSize = 1;
+	stack[0] = *rootNodeIndex;
+		
+	int isLeaf;
+	
+	while(stackSize > 0)
+	{
+		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
+		stackSize--;
+		
+		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
+		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
+
+		//bvhRigidIndex is not used if internal node
+		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
+		
+		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
+
+		if(isAabbOverlapping(box, bvhNodeAabb))
+		{    		    
+			if(isLeaf)
+			{
+			    if(!isTetrahedronConnected(bvhRigidIndex, boxIndex, tetrahedronIndices)) 
 			        overlappingCounts[boxIndex] += 1;
-			    }
 			}
 			else {
                 stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
@@ -85,7 +144,6 @@ __global__ void writePairCache_kernel(uint2 * dst, uint * cacheStarts, uint * ov
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, Aabb * leafAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
-								int isSelfCollision,
 								unsigned queryIdx, unsigned treeIdx)
 {
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
@@ -123,21 +181,78 @@ __global__ void writePairCache_kernel(uint2 * dst, uint * cacheStarts, uint * ov
 		{
 			if(isLeaf)
 			{
-			    if(isSelfCollision) { // todo: connected elements shared same vertices
-			        if(bvhRigidIndex != boxIndex) {
-			            pair.x = combineObjectElementInd(queryIdx, boxIndex);
-			            pair.y = combineObjectElementInd(treeIdx, bvhRigidIndex);
-			            ascentOrder<uint2>(pair);
-			            dst[writeLoc] = pair;
-			            writeLoc++;
-			        }
-			    } else {
+			    pair.x = combineObjectElementInd(queryIdx, boxIndex);
+                pair.y = combineObjectElementInd(treeIdx, bvhRigidIndex);
+                ascentOrder<uint2>(pair);
+                dst[writeLoc] = pair;
+                writeLoc++;
+			    // }
+			    //if((writeLoc - startLoc)==cacheSize) { // cache if full
+			    //    return;
+			    //}
+			}
+			else {
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+                stackSize++;
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+                stackSize++;
+			}
+		}
+	}
+}
+
+__global__ void writePairCacheSelfCollide_kernel(uint2 * dst, uint * cacheStarts, uint * overlappingCounts, Aabb * boxes,
+                                uint maxBoxInd,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndices, 
+								Aabb * internalNodeAabbs, Aabb * leafAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								uint4 * tetrahedronIndices,
+								unsigned queryIdx)
+{
+	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if(boxIndex >= maxBoxInd) return;
+	
+	//uint cacheSize = overlappingCounts[boxIndex];
+	//if(cacheSize < 1) return;
+	
+	uint startLoc = cacheStarts[boxIndex];
+	uint writeLoc = startLoc;
+	
+	Aabb box = boxes[boxIndex];
+	
+	uint stack[B3_BROADPHASE_MAX_STACK_SIZE];
+	
+	int stackSize = 1;
+	stack[0] = *rootNodeIndex;
+		
+	int isLeaf;
+	
+	while(stackSize > 0)
+	{
+		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
+		stackSize--;
+		
+		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
+		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
+
+		//bvhRigidIndex is not used if internal node
+		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
+		
+		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
+		uint2 pair;
+		if(isAabbOverlapping(box, bvhNodeAabb))
+		{
+			if(isLeaf)
+			{
+			    if(!isTetrahedronConnected(bvhRigidIndex, boxIndex, tetrahedronIndices)) {
 			        pair.x = combineObjectElementInd(queryIdx, boxIndex);
-			        pair.y = combineObjectElementInd(treeIdx, bvhRigidIndex);
-                    ascentOrder<uint2>(pair);
-                    dst[writeLoc] = pair;
-                    writeLoc++;
+			        pair.y = combineObjectElementInd(queryIdx, bvhRigidIndex);
+			        ascentOrder<uint2>(pair);
+			        dst[writeLoc] = pair;
+			        writeLoc++;
 			    }
+			    // }
 			    //if((writeLoc - startLoc)==cacheSize) { // cache if full
 			    //    return;
 			    //}
@@ -218,8 +333,7 @@ void broadphaseComputePairCounts(uint * dst,
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices,
-								int isSelfCollision)
+								KeyValuePair * mortonCodesAndAabbIndices)
 { 
     dim3 block(512, 1, 1);
     unsigned nblk = iDivUp(numBoxes, 512);
@@ -233,8 +347,31 @@ void broadphaseComputePairCounts(uint * dst,
 								internalNodeChildIndex, 
 								internalNodeAabbs, 
 								leafNodeAabbs,
+								mortonCodesAndAabbIndices);
+}
+
+void broadphaseComputePairCountsSelfCollide(uint * dst, Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								uint4 * tetrahedronIndices)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numBoxes, 512);
+    
+    dim3 grid(nblk, 1, 1);
+    
+    computePairCountsSelfCollide_kernel<<< grid, block >>>(dst,
+                                boxes,
+                                numBoxes,
+								rootNodeIndex, 
+								internalNodeChildIndex, 
+								internalNodeAabbs, 
+								leafNodeAabbs,
 								mortonCodesAndAabbIndices,
-								isSelfCollision);
+								tetrahedronIndices);
 }
 
 void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
@@ -252,7 +389,6 @@ void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
     
     dim3 grid(nblk, 1, 1);
     
-    int isSelfCollision = (queryIdx == treeIdx);
     writePairCache_kernel<<< grid, block >>>(dst, starts, counts,
                                 boxes,
                                 numBoxes,
@@ -261,7 +397,35 @@ void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
 								internalNodeAabbs, 
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,
-								isSelfCollision, queryIdx, treeIdx);
+								queryIdx, treeIdx);
+}
+
+void broadphaseWritePairCacheSelfCollide(uint2 * dst, uint * starts, uint * counts,
+                              Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								uint4 * tetrahedronIndices,
+								unsigned queryIdx)
+{
+    int tpb = CudaBase::LimitNThreadPerBlock(18, 50);
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numBoxes, tpb);
+    
+    dim3 grid(nblk, 1, 1);
+    
+    writePairCacheSelfCollide_kernel<<< grid, block >>>(dst, starts, counts,
+                                boxes,
+                                numBoxes,
+								rootNodeIndex, 
+								internalNodeChildIndex, 
+								internalNodeAabbs, 
+								leafNodeAabbs,
+								mortonCodesAndAabbIndices,
+								tetrahedronIndices,
+								queryIdx);
 }
 
 void broadphaseUniquePair(uint * dst, uint2 * pairs, uint pairLength, uint bufLength)

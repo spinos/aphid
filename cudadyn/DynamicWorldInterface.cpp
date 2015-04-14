@@ -1,8 +1,12 @@
 #include "DynamicWorldInterface.h"
 #include "CudaDynamicWorld.h"
 #include <CudaTetrahedronSystem.h>
+#include <CudaBroadphase.h>
+#include <BaseBuffer.h>
+#include <CUDABuffer.h>
 #include <AllMath.h>
 #include <GeoDrawer.h>
+#include <stripedModel.h>
 
 #define GRDW 57
 #define GRDH 57
@@ -10,7 +14,7 @@
 #define NPNT 14400
 
 struct A {
-    mat33 Ke[4][4];
+    // mat33 Ke[4][4];
     mat33 Re;
     //float3 B[4]; 
     //float3 e1, e2, e3;
@@ -21,6 +25,8 @@ struct A {
 DynamicWorldInterface::DynamicWorldInterface() 
 {
     std::cout<<" size of A "<<sizeof(A)<<"\n";
+    m_boxes = new BaseBuffer;
+    m_pairCache = new BaseBuffer;
 }
 
 DynamicWorldInterface::~DynamicWorldInterface() {}
@@ -119,5 +125,56 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world)
         tetra->sendXToHost();
         draw(tetra);
     }
+}
+
+void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
+{
+    glDisable(GL_DEPTH_TEST);
+    draw(world);
+    showOverlappingPairs(world, drawer);
+}
+
+void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDrawer * drawer)
+{
+    CudaBroadphase * broadphase = world->broadphase();
+    const unsigned cacheLength = broadphase->pairCacheLength();
+	if(cacheLength < 1) return;
+	
+	const unsigned nb = broadphase->numBoxes();
+	m_boxes->create(nb * 24);
+	
+	broadphase->getBoxes(m_boxes);
+	
+	Aabb * boxes = (Aabb *)m_boxes->data();
+	Aabb abox;
+	BoundingBox ab, bb;
+	unsigned i;
+	drawer->setColor(0.f, 0.1f, 0.3f);
+	
+	m_pairCache->create(broadphase->numUniquePairs() * 8);
+	CUDABuffer * uniquePairs = broadphase->overlappingPairBuf();
+	uniquePairs->deviceToHost(m_pairCache->data(), m_pairCache->bufferSize());
+	unsigned * pc = (unsigned *)m_pairCache->data();
+	
+	unsigned objectI;
+	for(i=0; i < broadphase->numUniquePairs(); i++) {
+	    objectI = extractObjectInd(pc[i * 2]);
+	    abox = boxes[broadphase->objectStart(objectI) + extractElementInd(pc[i * 2])];
+	    
+		bb.setMin(abox.low.x, abox.low.y, abox.low.z);
+		bb.setMax(abox.high.x, abox.high.y, abox.high.z);
+	    
+	    objectI = extractObjectInd(pc[i * 2 + 1]);
+	    abox = boxes[broadphase->objectStart(objectI) + extractElementInd(pc[i * 2 + 1])];
+	    
+	    ab.setMin(abox.low.x, abox.low.y, abox.low.z);
+		ab.setMax(abox.high.x, abox.high.y, abox.high.z);
+		
+		drawer->arrow(bb.center(), ab.center());
+		
+		bb.expandBy(ab);
+		
+		// m_drawer->boundingBox(bb);
+	}
 }
 

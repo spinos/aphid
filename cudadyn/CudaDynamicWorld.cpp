@@ -23,8 +23,11 @@ CudaDynamicWorld::~CudaDynamicWorld()
 const unsigned CudaDynamicWorld::numObjects() const
 { return m_numObjects; }
 
-CudaTetrahedronSystem * CudaDynamicWorld::tetradedron(unsigned ind)
+CudaTetrahedronSystem * CudaDynamicWorld::tetradedron(unsigned ind) const
 { return m_objects[ind]; }
+
+CudaBroadphase * CudaDynamicWorld::broadphase() const
+{ return m_broadphase; }
 
 void CudaDynamicWorld::addTetrahedronSystem(CudaTetrahedronSystem * tetra)
 {
@@ -57,8 +60,12 @@ void CudaDynamicWorld::stepPhysics(float dt)
 	for(i=0; i < m_numObjects; i++) m_objects[i]->update();
 	m_broadphase->computeOverlappingPairs();
 	
+	// std::cout<<" num overlapping pairs "<<m_broadphase->numUniquePairs();
+	
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
 	                                m_broadphase->numUniquePairs());
+	
+	// std::cout<<" num contact pairs "<<m_narrowphase->numContacts()<<"\n";
 	
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),

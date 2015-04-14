@@ -14,6 +14,7 @@
 #include "scan_implement.h"
 #include <CudaBase.h>
 #include <ScanUtil.h>
+#include <CudaTetrahedronSystem.h>
 CudaBroadphase::CudaBroadphase() 
 {
 	m_numObjects = 0;
@@ -104,6 +105,9 @@ void CudaBroadphase::computeOverlappingPairs()
 	m_pairCache[0]->create(nextPow2(m_pairCacheLength) * 8);
 	m_pairCache[1]->create(nextPow2(m_pairCacheLength) * 8);
 	
+	void * cache = m_pairCache[0]->bufferOnDevice();
+	broadphaseResetPairCache((uint2 *)cache, nextPow2(m_pairCacheLength));
+	
 	for(j = 0; j<m_numObjects; j++) {
 		for(i = 0; i<m_numObjects; i++) {
 			writeOverlappingPairs(j, i);
@@ -119,6 +123,40 @@ void CudaBroadphase::resetPairCounts()
 }
 
 void CudaBroadphase::countOverlappingPairs(unsigned a, unsigned b)
+{
+    if(a == b) countOverlappingPairsSelf(a);
+    else countOverlappingPairsOther(a, b);
+}
+
+void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
+{
+    uint * counts = (uint *)m_pairCounts->bufferOnDevice();
+	counts += m_objectStart[a];
+
+// only for tetrahedron system
+	CudaTetrahedronSystem * query = static_cast<CudaTetrahedronSystem *>(m_objects[a]);
+	CudaLinearBvh * tree = m_objects[a];
+	
+	void * boxes = (Aabb *)query->leafAabbs();
+	const unsigned numBoxes = query->numLeafNodes();
+	void * tetrahedronIndices = query->deviceTretradhedronIndices();
+	
+	void * rootNodeIndex = tree->rootNodeIndex();
+	void * internalNodeChildIndex = tree->internalNodeChildIndices();
+	void * internalNodeAabbs = tree->internalNodeAabbs();
+	void * leafNodeAabbs = tree->leafAabbs();
+	void * mortonCodesAndAabbIndices = tree->leafHash();
+	
+	broadphaseComputePairCountsSelfCollide(counts, (Aabb *)boxes, numBoxes,
+							(int *)rootNodeIndex, 
+							(int2 *)internalNodeChildIndex, 
+							(Aabb *)internalNodeAabbs, 
+							(Aabb *)leafNodeAabbs,
+							(KeyValuePair *)mortonCodesAndAabbIndices,
+							(uint4 *)tetrahedronIndices);
+}
+
+void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 {
 	uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
@@ -140,8 +178,7 @@ void CudaBroadphase::countOverlappingPairs(unsigned a, unsigned b)
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
-							(KeyValuePair *)mortonCodesAndAabbIndices,
-							(a == b));							
+							(KeyValuePair *)mortonCodesAndAabbIndices);							
 }
 
 void CudaBroadphase::prefixSumPairCounts()
@@ -153,6 +190,47 @@ void CudaBroadphase::prefixSumPairCounts()
 }
 
 void CudaBroadphase::writeOverlappingPairs(unsigned a, unsigned b)
+{
+    if(a==b) writeOverlappingPairsSelf(a);
+    else writeOverlappingPairsOther(a, b);
+}
+
+void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
+{
+    uint * counts = (uint *)m_pairCounts->bufferOnDevice();
+	counts += m_objectStart[a];
+	
+	uint * starts = (uint *)m_pairStart->bufferOnDevice();
+	starts += m_objectStart[a];
+
+// only for tetrahedron system	
+	CudaTetrahedronSystem * query = static_cast<CudaTetrahedronSystem *>(m_objects[a]);
+	CudaLinearBvh * tree = m_objects[a];
+	
+	void * boxes = (Aabb *)query->leafAabbs();
+	const unsigned numBoxes = query->numLeafNodes();
+	void * tetrahedronIndices = query->deviceTretradhedronIndices();
+	
+	void * rootNodeIndex = tree->rootNodeIndex();
+	void * internalNodeChildIndex = tree->internalNodeChildIndices();
+	void * internalNodeAabbs = tree->internalNodeAabbs();
+	void * leafNodeAabbs = tree->leafAabbs();
+	void * mortonCodesAndAabbIndices = tree->leafHash();
+	
+	void * cache = m_pairCache[0]->bufferOnDevice();
+	
+	broadphaseWritePairCacheSelfCollide((uint2 *)cache, starts, counts, 
+	                         (Aabb *)boxes, numBoxes,
+							(int *)rootNodeIndex, 
+							(int2 *)internalNodeChildIndex, 
+							(Aabb *)internalNodeAabbs, 
+							(Aabb *)leafNodeAabbs,
+							(KeyValuePair *)mortonCodesAndAabbIndices,
+							(uint4 *)tetrahedronIndices,
+							a);
+}
+
+void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 {
     uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
@@ -173,8 +251,6 @@ void CudaBroadphase::writeOverlappingPairs(unsigned a, unsigned b)
 	void * mortonCodesAndAabbIndices = tree->leafHash();
 	
 	void * cache = m_pairCache[0]->bufferOnDevice();
-	
-	broadphaseResetPairCache((uint2 *)cache, nextPow2(m_pairCacheLength));
 	
 	broadphaseWritePairCache((uint2 *)cache, starts, counts, 
 	                         (Aabb *)boxes, numBoxes,

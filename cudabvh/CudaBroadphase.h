@@ -39,9 +39,13 @@ protected:
 private:
 	void resetPairCounts();
 	void countOverlappingPairs(unsigned a, unsigned b);
+	void countOverlappingPairsSelf(unsigned a);
+	void countOverlappingPairsOther(unsigned a, unsigned b);
 	void prefixSumPairCounts();
 	unsigned getScanResult(CUDABuffer * counts, CUDABuffer * sums, unsigned n);
 	void writeOverlappingPairs(unsigned a, unsigned b);
+	void writeOverlappingPairsSelf(unsigned a);
+	void writeOverlappingPairsOther(unsigned a, unsigned b);
 	void squeezeOverlappingPairs();
 private:
 	CUDABuffer * m_pairCounts;
