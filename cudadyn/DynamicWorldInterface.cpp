@@ -266,10 +266,6 @@ void DynamicWorldInterface::showContacts(CudaDynamicWorld * world, GeoDrawer * d
 	unsigned * pntOffset = (unsigned *)m_pointStarts->data();
 	unsigned * indOffset = (unsigned *)m_indexStarts->data();
 	
-    m_constraint->create(n * 64);
-    solver->constraintBuf()->deviceToHost(m_constraint->data(), n * 64);
-	ContactConstraint * constraint = (ContactConstraint *)m_constraint->data();
-    
     m_contactPairs->create(n * 8);
     narrowphase->getContactPairs(m_contactPairs);
     
@@ -353,6 +349,11 @@ bool DynamicWorldInterface::checkConstraint(SimpleContactSolver * solver, unsign
 	BarycentricCoordinate coord;
 	float sum;
 	for(i=0; i < n; i++) {
+	    if(IsNan(constraint[i].normal.x) || IsNan(constraint[i].normal.y) || IsNan(constraint[i].normal.z)) {
+	        std::cout<<"invalide normal["<<i<<"]\n";
+	        return false;
+	    }
+	    
 	    coord = constraint[i].coordA;
 	    sum = coord.x + coord.y + coord.z + coord.w;
 	    if(sum > 1.1f || sum < .9f) {
@@ -369,6 +370,11 @@ bool DynamicWorldInterface::checkConstraint(SimpleContactSolver * solver, unsign
 	    if(IsNan(constraint[i].Minv) || IsInf(constraint[i].Minv)) {
 	        std::cout<<"pair["<<i<<"] ("<<pairs[i*2]<<","<<pairs[i*2+1]<<")\n";
 	        std::cout<<"invalid minv["<<i<<"] "<<constraint[i].Minv<<"\n";
+	        return false;
+	    }
+	    
+	    if(IsNan(constraint[i].relVel) || IsInf(constraint[i].relVel)) {
+	        std::cout<<"invalid relvel"<<"["<<i<<"] "<<constraint[i].relVel<<"\n";
 	        return false;
 	    }
 	}

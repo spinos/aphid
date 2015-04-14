@@ -16,17 +16,17 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 	tetra->create(TetraNumTetrahedrons+100, TetraNumVertices+400);
 	float * hv = &tetra->hostV()[0];
 	float vrx, vry, vrz, vr;
-	float vy = .095f;
+	float vy = .895f;
 	unsigned i;
 	Vector3F p, q;
 	for(i=0; i<TetraNumVertices; i++) {
 	    p.set(TetraP[i][0], TetraP[i][1], TetraP[i][2]);
 	    tetra->addPoint(&p.x);
 	    
-	    vrx = 0.725f * (RandomF01() - .5f);
-		vry = 1.f  * (RandomF01() + 1.f)  * vy;
-		vrz = 0.732f * (RandomF01() - .5f);
-		vr = 0.13f * RandomF01();
+	    vrx = 0.0932f * (RandomF01() - .5f);
+		vry = 1.f * (RandomF01() + 1.f)  * vy;
+		vrz = 0.0932f * (RandomF01() - .5f);
+		vr = 0.013f * RandomF01();
 		
 		vy = -vy;
 			
