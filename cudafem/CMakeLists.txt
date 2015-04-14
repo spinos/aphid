@@ -10,7 +10,8 @@ include_directories ("../shared"
 "../cudabvh" 
 "../radixsort" 
 "../cudanarrowphase"
-"../cudadyn")
+"../cudadyn"
+"../fem")
 
 set (HEADER_FILES "../shared/Base3DView.h" 
 "../shared/Morton3D.h"
@@ -37,6 +38,9 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../cudanarrowphase/SimpleContactSolver.h"
 "../cudadyn/CudaDynamicWorld.h"
 "../cudadyn/DynamicWorldInterface.h"
+"../fem/tetmesh.h"
+"FEMTetrahedronSystem.h"
+"FEMWorldInterface.h"
 "window.h"
 "glwidget.h")
 
@@ -54,6 +58,8 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../cudanarrowphase/SimpleContactSolver.cpp"
 "../cudadyn/CudaDynamicWorld.cpp"
 "../cudadyn/DynamicWorldInterface.cpp"
+"FEMTetrahedronSystem.cpp"
+"FEMWorldInterface.cpp"
 "glwidget.cpp"
 "window.cpp"
 "main.cpp")

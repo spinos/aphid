@@ -4,7 +4,7 @@
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
 #include "CudaDynamicWorld.h"
-#include "DynamicWorldInterface.h"
+#include "FEMWorldInterface.h"
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	perspCamera()->setFarClipPlane(20000.f);
@@ -13,7 +13,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
 	
 	m_world = new CudaDynamicWorld;
-	m_interface = new DynamicWorldInterface;
+	m_interface = new FEMWorldInterface;
 	m_interface->create(m_world);
 }
 //! [0]
