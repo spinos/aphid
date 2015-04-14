@@ -108,9 +108,9 @@ void SolverThread::calculateK()
 		Vector3F e20 = x2-x0;
 		Vector3F e30 = x3-x0;
 
-		tetrahedra[k].e1 = e10;
-		tetrahedra[k].e2 = e20;
-		tetrahedra[k].e3 = e30;
+		// tetrahedra[k].e1 = e10;
+		// tetrahedra[k].e2 = e20;
+		// tetrahedra[k].e3 = e30;
 
 		tetrahedra[k].volume= FEMTetrahedronMesh::getTetraVolume(e10,e20,e30);
 		
@@ -143,7 +143,6 @@ void SolverThread::calculateK()
 		float invE32 = (e10.y*e20.x - e10.x*e20.y)*invDetE;
 		float invE02 = -invE12-invE22-invE32;
 
-		Vector3F B[4];
 		//Eq. 10.43 
 		//Bn ~ [bn cn dn]^T
 		// bn = d/dx N0 = [ invE00 invE10 invE20 invE30 ]
@@ -152,7 +151,12 @@ void SolverThread::calculateK()
 		tetrahedra[k].B[0] = Vector3F(invE00, invE01, invE02);		
 		tetrahedra[k].B[1] = Vector3F(invE10, invE11, invE12);		
 		tetrahedra[k].B[2] = Vector3F(invE20, invE21, invE22);		
-		tetrahedra[k].B[3] = Vector3F(invE30, invE31, invE32);	 
+		tetrahedra[k].B[3] = Vector3F(invE30, invE31, invE32);
+		
+		// std::cout<<"B[0] "<<tetrahedra[k].B[0]<<"\n";
+		// std::cout<<"B[1] "<<tetrahedra[k].B[1]<<"\n";
+		// std::cout<<"B[2] "<<tetrahedra[k].B[2]<<"\n";
+		// std::cout<<"B[3] "<<tetrahedra[k].B[3]<<"\n";
  
 		for(unsigned i=0;i<4;i++) {
 			for(unsigned j=0;j<4;j++) {
@@ -222,6 +226,7 @@ void SolverThread::updateOrientation()
     FEMTetrahedronMesh::Tetrahedron * tetrahedra = m_mesh->tetrahedra();
 	unsigned totalTetrahedra = m_mesh->numTetrahedra();
 	Vector3F * X = m_mesh->X();
+	Vector3F * Xi = m_mesh->Xi();
 	for(unsigned k=0;k<totalTetrahedra;k++) {
 		//Based on description on page 362-364 
 		float div6V = 1.0f / tetrahedra[k].volume*6.0f;
@@ -248,9 +253,17 @@ void SolverThread::updateOrientation()
 		
 		//Now get the rotation matrix from the initial undeformed (model/material coordinates)
 		//We get the precomputed edge values
-		e1 = tetrahedra[k].e1;
-		e2 = tetrahedra[k].e2;
-		e3 = tetrahedra[k].e3;
+		// e1 = tetrahedra[k].e1;
+		// e2 = tetrahedra[k].e2;
+		// e3 = tetrahedra[k].e3;
+		p0 = Xi[i0];
+		p1 = Xi[i1];
+		p2 = Xi[i2];
+		p3 = Xi[i3];
+
+		e1 = p1-p0;
+		e2 = p2-p0;
+		e3 = p3-p0;
 
 		//Based on Eq. 10.133		
 		Matrix33F &Re = tetrahedra[k].Re;

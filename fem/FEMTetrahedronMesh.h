@@ -9,7 +9,7 @@ public:
         float plastic[6];		//plasticity values
         Matrix33F Re;			//Rotational warp of tetrahedron.
         Matrix33F Ke[4][4];		//Stiffness element matrix
-        Vector3F e1, e2, e3;	//edges
+       // Vector3F e1, e2, e3;	//edges
         Vector3F B[4];			//Jacobian of shapefunctions; B=SN =[d/dx  0     0 ][wn 0  0]
                                 //                                  [0    d/dy   0 ][0 wn  0]
                                 //									[0     0   d/dz][0  0 wn]
