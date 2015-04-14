@@ -28,6 +28,7 @@ public:
 	CUDABuffer * deltaAngularVelocityBuf();
 	CUDABuffer * deltaJBuf();
 	CUDABuffer * pntTetHashBuf();
+	CUDABuffer * splitInverseMassBuf();
 	
 	const unsigned numIterations() const;
 	const unsigned numContacts() const;

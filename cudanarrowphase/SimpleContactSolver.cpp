@@ -58,6 +58,9 @@ CUDABuffer * SimpleContactSolver::deltaJBuf()
 CUDABuffer * SimpleContactSolver::pntTetHashBuf()
 { return m_pntTetHash[0]; }
 
+CUDABuffer * SimpleContactSolver::splitInverseMassBuf()
+{ return m_splitInverseMass; }
+
 const unsigned SimpleContactSolver::numIterations() const
 { return JACOBI_NUM_ITERATIONS; }
 

@@ -19,6 +19,11 @@
 #include <Matrix44F.h>
 #include <Vector2F.h>
 #include <boost/scoped_array.hpp>
+
+inline bool IsNan(float a) { return a != a; }
+
+inline bool IsInf(float a) { return (a > 1e38 || a < -1e38); }
+
 inline void Clamp01(float &v) {
 	if(v < 0.f) v = 0.f;
 	if(v > 1.f) v = 1.f;

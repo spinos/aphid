@@ -143,6 +143,23 @@ void testArray()
     }
 }
 
+void testNan()
+{
+    float a = 0.f/0.f;
+    std::cout<<boost::format("zero divided by zero: %1%\n") % a;
+	std::cout<<boost::format("is nan: %1%\n") % (a == a);
+}
+
+void testInf()
+{
+    float a = 1.f/0.f;
+    std::cout<<boost::format("one divided by zero: %1%\n") % a;
+	std::cout<<boost::format("is nan: %1%\n") % (a > 1e38);
+	a = -1.f/0.f;
+    std::cout<<boost::format("negative one divided by zero: %1%\n") % a;
+	std::cout<<boost::format("is nan: %1%\n") % (a < -1e38);
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
@@ -221,6 +238,8 @@ int main(int argc, char * const argv[])
 	std::cout<<boost::format("downsample( %1% ): %2% %3%\n") % upc % upa % upb;
 	
 	testArray();
+	testNan();
+	testInf();
 	std::cout<<"end of test\n";
 	return 0;
 }

@@ -42,6 +42,8 @@ DynamicWorldInterface::DynamicWorldInterface()
 	m_pairsHash = new BaseBuffer;
 	m_linearVelocity = new BaseBuffer;
 	m_angularVelocity = new BaseBuffer;
+	m_mass = new BaseBuffer;
+	m_split = new BaseBuffer;
 }
 
 DynamicWorldInterface::~DynamicWorldInterface() {}
@@ -334,28 +336,150 @@ void DynamicWorldInterface::showContacts(CudaDynamicWorld * world, GeoDrawer * d
 		glColor3f(0.73f, 0.68f, 0.1f);
 		drawer->arrow(cenA, cenA + linVel[i]);
 		
-		std::cout<<" delta lin vel"<<linVel[i]<<" ";
-		std::cout<<" delta ang vel"<<angVel[i]<<"\n";
-		
 		glColor3f(0.1f, 0.68f, 0.72f);
 		drawer->arrow(cenA, cenA + angVel[i]);
-		
 	}
 }
 
-Vector3F DynamicWorldInterface::tetrahedronCenter(Vector3F * p, unsigned * v, unsigned * pntOffset, unsigned * indOffset, unsigned i)
+bool DynamicWorldInterface::checkConstraint(SimpleContactSolver * solver, unsigned n)
 {
-	unsigned objectI = extractObjectInd(i);
-	unsigned elementI = extractElementInd(i);
+    unsigned * pairs = (unsigned *)m_pairCache->data();
 	
-	unsigned pStart = pntOffset[objectI];
-	unsigned iStart = indOffset[objectI];
-	
-	Vector3F r = p[pStart + v[iStart + elementI * 4]];
-    r += p[pStart + v[iStart + elementI * 4 + 1]];
-    r += p[pStart + v[iStart + elementI * 4 + 2]];
-    r += p[pStart + v[iStart + elementI * 4 + 3]];
-    r *= .25f;
+	m_constraint->create(n * 64);
+    solver->constraintBuf()->deviceToHost(m_constraint->data(), n * 64);
+	ContactConstraint * constraint = (ContactConstraint *)m_constraint->data();
     
-	return r;
+	unsigned i;
+	BarycentricCoordinate coord;
+	float sum;
+	for(i=0; i < n; i++) {
+	    coord = constraint[i].coordA;
+	    sum = coord.x + coord.y + coord.z + coord.w;
+	    if(sum > 1.1f || sum < .9f) {
+	        std::cout<<"invalid coord A["<<i<<"] "<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.z<<"\n";
+	        return false;
+	    }
+	    coord = constraint[i].coordB;
+	    sum = coord.x + coord.y + coord.z + coord.w;
+	    if(sum > 1.1f || sum < .9f) {
+	        std::cout<<"invalide coord B["<<i<<"] "<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.z<<"\n";
+	        return false;
+	    }
+	    
+	    if(IsNan(constraint[i].Minv) || IsInf(constraint[i].Minv)) {
+	        std::cout<<"pair["<<i<<"] ("<<pairs[i*2]<<","<<pairs[i*2+1]<<")\n";
+	        std::cout<<"invalid minv["<<i<<"] "<<constraint[i].Minv<<"\n";
+	        return false;
+	    }
+	}
+	
+	return true;
+}
+
+bool DynamicWorldInterface::verifyContact(CudaDynamicWorld * world)
+{
+    CudaNarrowphase * narrowphase = world->narrowphase();
+    const unsigned n = narrowphase->numContacts();
+    if(n<1) return true;
+    
+    SimpleContactSolver * solver = world->contactSolver();
+	if(solver->numContacts() != n) return true;
+	
+	m_pairCache->create(n * 8);
+	CUDABuffer * pairbuf = narrowphase->contactPairsBuffer();
+	pairbuf->deviceToHost(m_pairCache->data(), m_pairCache->bufferSize());
+	
+	if(!checkConstraint(solver, n)) {
+	    std::cout<<"invalid constraint\n";
+	    printContactPairHash(solver, n);
+	    return false;
+	}
+	
+	CUDABuffer * bodyPair = solver->contactPairHashBuf();
+	m_pairsHash->create(bodyPair->bufferSize());
+	bodyPair->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());
+	unsigned * bodyAndPair = (unsigned *)m_pairsHash->data();
+    
+    m_linearVelocity->create(n * 2 * 12);
+	solver->deltaLinearVelocityBuf()->deviceToHost(m_linearVelocity->data(), 
+	    m_linearVelocity->bufferSize());
+	Vector3F * linVel = (Vector3F *)m_linearVelocity->data();
+	
+	m_angularVelocity->create(n * 2 * 12);
+	solver->deltaAngularVelocityBuf()->deviceToHost(m_angularVelocity->data(), 
+	    m_angularVelocity->bufferSize());
+	Vector3F * angVel = (Vector3F *)m_angularVelocity->data();
+	
+	m_contact->create(n * 48);
+	narrowphase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
+	ContactData * contact = (ContactData *)m_contact->data();
+
+	Vector3F N;
+	unsigned iPairA, iBody, iPair;
+	unsigned i;
+	for(i=0; i < n * 2; i++) {
+	    iBody = bodyAndPair[i*2];
+	    iPair = bodyAndPair[i*2+1];
+	
+	    ContactData & cd = contact[iPair];
+	    N.set(cd.separateAxis.x, cd.separateAxis.y, cd.separateAxis.z);
+	    if(IsNan(N.x) || IsNan(N.y) || IsNan(N.z)) {
+	        std::cout<<"contact normal is Nan\n";
+	        return false;
+	    }
+	    
+	    if(IsNan(linVel[i].x) || IsNan(linVel[i].y) || IsNan(linVel[i].z)) {
+	        std::cout<<"delta linear velocity is Nan\n";
+	        return false;
+	    }
+	    
+	    if(IsNan(angVel[i].x) || IsNan(angVel[i].y) || IsNan(angVel[i].z)) {
+	        std::cout<<"delta angular velocity is Nan\n";
+	        return false;
+	    }
+	}
+    
+    return true;
+}
+
+void DynamicWorldInterface::printContactPairHash(SimpleContactSolver * solver, unsigned numContacts)
+{
+    unsigned i;
+	
+    m_mass->create(numContacts * 2 * 4);
+    CUDABuffer * splitMassBuf = solver->splitInverseMassBuf();
+    splitMassBuf->deviceToHost(m_mass->data(), m_mass->bufferSize());
+	float * mass = (float *)m_mass->data();
+	
+	std::cout<<" mass:\n";
+	for(i=0; i < numContacts * 2; i++) {
+		std::cout<<" "<<i<<" ("<<mass[i]<<")\n";
+	}
+	
+	CUDABuffer * splitbuf = solver->bodySplitLocBuf();
+	m_split->create(splitbuf->bufferSize());
+	splitbuf->deviceToHost(m_split->data(), m_split->bufferSize());
+	
+	unsigned * split = (unsigned *)m_split->data();
+	std::cout<<" split pairs:\n";
+	for(i=0; i < numContacts; i++) {
+		std::cout<<" "<<i<<" ("<<split[i*2]<<","<<split[i*2+1]<<")\n";
+	}
+    
+    unsigned * pairs = (unsigned *)m_pairCache->data();
+	std::cout<<" body(loc)(mass)-body(loc)(mass) pair:\n";
+	for(i=0; i < numContacts; i++) {
+		std::cout<<" "<<i<<" ("<<pairs[i*2]<<"("<<split[i*2]<<")("<<mass[split[i*2]]<<"),"<<pairs[i*2+1]<<"("<<split[i*2+1]<<")("<<mass[split[i*2+1]]<<"))\n";
+	}
+	
+	CUDABuffer * pairbuf = solver->contactPairHashBuf();
+	m_pairsHash->create(pairbuf->bufferSize());
+	pairbuf->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());
+	
+	unsigned * bodyPair = (unsigned *)m_pairsHash->data();
+	
+	std::cout<<" body-contact hash:\n";
+	for(i=0; i < numContacts * 2; i++) {
+		std::cout<<" "<<i<<" ("<<bodyPair[i*2]<<","<<bodyPair[i*2+1]<<")\n";
+	}
 }

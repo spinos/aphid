@@ -36,7 +36,7 @@ void GLWidget::clientDraw()
     if(internalTimer()->isActive())
         m_world->stepPhysics(1.f / 60.f);
     m_interface->draw(m_world, getDrawer());
-    if(m_world->numContacts() > 0) 
+    if(!m_interface->verifyContact(m_world)) 
         internalTimer()->stop();
 }
 //! [7]

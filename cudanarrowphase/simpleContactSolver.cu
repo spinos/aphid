@@ -83,7 +83,7 @@ inline __device__ uint getBodyCountAt(uint ind, uint * count)
 {
     uint cur = ind;
     for(;;) {
-        if(count[ind] > 0) return count[ind];
+        if(count[cur] > 0) return count[cur];
         cur--;
     }
 }

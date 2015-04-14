@@ -6,6 +6,7 @@ class GeoDrawer;
 class CudaDynamicWorld;
 class TetrahedronSystem;
 class CudaLinearBvh;
+class SimpleContactSolver;
 class DynamicWorldInterface {
 public:
     DynamicWorldInterface();
@@ -15,6 +16,7 @@ public:
     
     void draw(CudaDynamicWorld * world);
     void draw(CudaDynamicWorld * world, GeoDrawer * drawer);
+    bool verifyContact(CudaDynamicWorld * world);
 protected:
 
 private:
@@ -23,9 +25,8 @@ private:
     void showBvhHash(CudaDynamicWorld * world, GeoDrawer * drawer);
     void showBvhHash(CudaLinearBvh * bvh, GeoDrawer * drawer);
     void showContacts(CudaDynamicWorld * world, GeoDrawer * drawer);
-    Vector3F tetrahedronCenter(Vector3F * p, unsigned * v, 
-        unsigned * pntOffset, unsigned * indOffset, 
-        unsigned i);
+    bool checkConstraint(SimpleContactSolver * solver, unsigned n);
+    void printContactPairHash(SimpleContactSolver * solver, unsigned numContacts);
 private:
     BaseBuffer * m_boxes;
     BaseBuffer * m_bvhHash;
@@ -40,6 +41,8 @@ private:
 	BaseBuffer * m_pairsHash;
 	BaseBuffer * m_linearVelocity;
 	BaseBuffer * m_angularVelocity;
+	BaseBuffer * m_mass;
+	BaseBuffer * m_split;
 };
 #endif        //  #ifndef DYNAMICWORLDINTERFACE_H
 
