@@ -168,7 +168,7 @@ inline bool isTetrahedronDegenerated(const Vector3F * p)
     Matrix44F mat;
     float D0 = determinantTetrahedron(mat, p[0], p[1], p[2], p[3]);
 	if(D0 < 0.f) D0 = -D0;
-    return (D0 < 1.f);
+    return (D0 < 1e-5);
 }
 
 inline float tetrahedronVolume(const Vector3F * p) 

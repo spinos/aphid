@@ -31,6 +31,8 @@ private:
     bool checkDegenerated(unsigned n);
     void printContact(unsigned n);
     bool checkConstraint(SimpleContactSolver * solver, unsigned n);
+    void printConstraint(SimpleContactSolver * solver, unsigned n);
+    bool checkConvergent(SimpleContactSolver * solver, unsigned n);
     void printContactPairHash(SimpleContactSolver * solver, unsigned numContacts);
     void printFaultPair(CudaDynamicWorld * world);
     void storeModels(CudaNarrowphase * narrowphase);
@@ -52,6 +54,7 @@ private:
 	BaseBuffer * m_angularVelocity;
 	BaseBuffer * m_mass;
 	BaseBuffer * m_split;
+	BaseBuffer * m_deltaJ;
 };
 #endif        //  #ifndef DYNAMICWORLDINTERFACE_H
 

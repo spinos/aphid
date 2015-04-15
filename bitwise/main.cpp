@@ -168,10 +168,17 @@ void testInf()
 void testTetrahedronDegenerate()
 {
     Vector3F p[4];
-    p[0].set(-12.f, 0.f, 0.f);
-    p[1].set(12.f, 0.f, 0.f);
-    p[2].set(12.f, 0.f, 12.f);
-    p[3].set(0.f, .01f, 0.f);
+    p[0].set(0.f, 1.f, 0.f);
+    p[1].set(.1f, 1.f, 0.f);
+    p[2].set(.1f, 1.f, .1f);
+    p[3].set(0.f, 1.1f, 0.f);
+    
+    Vector3F e1 = p[1]-p[0];
+	Vector3F e2 = p[2]-p[0];
+	Vector3F e3 = p[3]-p[0];
+	const float sc = e1.length() * e2.length() * e3.length() / 6.f;
+	std::cout<<"sc "<<sc<<"\n";
+	
     Matrix44F mat;
     std::cout<<"det tet "<<determinantTetrahedron(mat, p[0], p[1], p[2], p[3])<<"\n";
     std::cout<<" volume "<<tetrahedronVolume(p)<<"\n";

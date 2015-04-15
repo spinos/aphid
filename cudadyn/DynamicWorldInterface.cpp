@@ -12,6 +12,7 @@
 #include <radixsort_implement.h>
 #include <simpleContactSolver_implement.h>
 #include <tetrahedron_math.h>
+#include <boost/format.hpp>
 
 #define GRDW 57
 #define GRDH 57
@@ -45,6 +46,7 @@ DynamicWorldInterface::DynamicWorldInterface()
 	m_angularVelocity = new BaseBuffer;
 	m_mass = new BaseBuffer;
 	m_split = new BaseBuffer;
+	m_deltaJ = new BaseBuffer;
 }
 
 DynamicWorldInterface::~DynamicWorldInterface() {}
@@ -332,6 +334,29 @@ void DynamicWorldInterface::showContacts(CudaDynamicWorld * world, GeoDrawer * d
 	}
 }
 
+void DynamicWorldInterface::printConstraint(SimpleContactSolver * solver, unsigned n)
+{
+    unsigned * pairs = (unsigned *)m_pairCache->data();
+	
+	m_constraint->create(n * 64);
+    solver->constraintBuf()->deviceToHost(m_constraint->data(), n * 64);
+	ContactConstraint * constraint = (ContactConstraint *)m_constraint->data();
+    
+	unsigned i;
+	BarycentricCoordinate coord;
+	float sum;
+	for(i=0; i < n; i++) {
+	    std::cout<<(boost::str(boost::format("contact[%1%] (%2%,%3%)\n") % i % pairs[i*2] % pairs[i*2+1]));
+        std::cout<<(boost::str(boost::format("n (%1%,%2%,%3%) ") % constraint[i].normal.x % constraint[i].normal.y % constraint[i].normal.z));
+        coord = constraint[i].coordA;
+	    std::cout<<(boost::str(boost::format("ca (%1%,%2%,%3%,%4%) ") % coord.x % coord.y % coord.z % coord.w));
+	    coord = constraint[i].coordB;
+	    std::cout<<(boost::str(boost::format("cb (%1%,%2%,%3%,%4%) ") % coord.x % coord.y % coord.z % coord.w));
+	    std::cout<<(boost::str(boost::format("minv %1% ") % constraint[i].Minv));
+	    std::cout<<(boost::str(boost::format("relvel %1%\n") % constraint[i].relVel));
+	}
+}
+
 bool DynamicWorldInterface::checkConstraint(SimpleContactSolver * solver, unsigned n)
 {
     unsigned * pairs = (unsigned *)m_pairCache->data();
@@ -459,6 +484,45 @@ void DynamicWorldInterface::printContact(unsigned n)
 	}
 }
 
+bool DynamicWorldInterface::checkConvergent(SimpleContactSolver * solver, unsigned n)
+{
+    const unsigned njacobi = solver->numIterations();
+	m_deltaJ->create(n * njacobi * 4);
+	solver->deltaJBuf()->deviceToHost(m_deltaJ->data(), m_deltaJ->bufferSize());
+	float * dJ = (float *)m_deltaJ->data();
+	
+	unsigned * pairs = (unsigned *)m_pairCache->data();
+    
+	unsigned i, j;
+	int converged;
+	float lastJ, curJ;
+	for(i=0; i<n; i++) {
+	    converged = 1;
+	    lastJ = dJ[i * njacobi];
+	    if(lastJ < 1e-3) converged = 0;
+	    for(j=1; j< njacobi; j++) {
+	        curJ = dJ[i * njacobi + j];
+	        if(curJ < 0.f) curJ = -curJ;
+	        if(curJ >= lastJ && curJ > 1e-3) {
+                converged = 0;
+                break;
+            }
+            lastJ = curJ;
+        }
+        if(!converged) {
+            std::cout<<(boost::str(boost::format("contact(%1%,%2%) not convergent\n") % pairs[i*2] % pairs[i*2+1]));
+            m_faultyPair[0] = pairs[i*2];
+	        m_faultyPair[1] = pairs[i*2+1];
+	        
+	        for(j=0; j< njacobi; j++)
+	            std::cout<<(boost::str(boost::format("dJ[%1%] %2%\n") % j % dJ[i * njacobi + j]));
+	        return false;
+        }
+	}
+   
+    return true;
+}
+
 bool DynamicWorldInterface::verifyData(CudaDynamicWorld * world)
 {
     CudaNarrowphase * narrowphase = world->narrowphase();
@@ -486,13 +550,19 @@ bool DynamicWorldInterface::verifyData(CudaDynamicWorld * world)
 	if(!checkContact(n)) {
 	    std::cout<<"invalid contact\n";
 	    printContact(n);
-	    printFaultPair(world);
 	    return false;
 	}
 	
 	if(!checkConstraint(solver, n)) {
 	    std::cout<<"invalid constraint\n";
 	    printContactPairHash(solver, n);
+	    return false;
+	}
+	
+	if(!checkConvergent(solver, n)) {
+	    std::cout<<"not convergent\n";
+	    printContact(n);
+	    printConstraint(solver, n);
 	    return false;
 	}
 	

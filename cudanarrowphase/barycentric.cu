@@ -34,7 +34,7 @@ inline __device__ int isTetrahedronDegenerate(const float3 & a, const float3 & b
     
     float D0 = determinant44(m) ;
     if(D0 < 0.f) D0 = -D0;
-    return (D0 < 0.01f);
+    return (D0 < 1e-5);
 }
 
 inline __device__ BarycentricCoordinate getBarycentricCoordinate2(const float3 & p, const float3 * v)
@@ -53,7 +53,6 @@ inline __device__ BarycentricCoordinate getBarycentricCoordinate2(const float3 &
 	}
 	return coord;
 }
-
 
 inline __device__ BarycentricCoordinate getBarycentricCoordinate3(const float3 & p, const float3 * v)
 {
@@ -126,6 +125,18 @@ inline __device__ BarycentricCoordinate getBarycentricCoordinate4(const float3 &
     coord.w = determinant44(m) / D0;
     
     return coord;
+}
+
+inline __device__ BarycentricCoordinate getBarycentricCoordinate4Relative(const float3 & p, const float3 * v)
+{
+    float3 q = v[0];
+    q = float3_add(q, v[1]);
+    q = float3_add(q, v[2]);
+    q = float3_add(q, v[3]);
+    q = scale_float3_by(q, .25f);
+    q = float3_add(q, p);
+    
+    return getBarycentricCoordinate4(q, v);
 }
 
 inline __device__ int pointInsideTriangleTest(const float3 & p, const float3 & nor, const float3 * tri)

@@ -37,6 +37,21 @@ inline __device__ void progressTetrahedron(TetrahedronProxy & prx, const MovingT
     prx.p[3] = float3_add(tet.p[3], scale_float3_by(tet.v[3], h));
 }
 
+inline __device__ float velocityOnTetrahedronAlong(const float3 * v, const BarycentricCoordinate & coord, const float3 & d)
+{
+    float3 vot = make_float3(0.f, 0.f, 0.f);
+    if(coord.x > 1e-5)
+        vot = float3_add(vot, scale_float3_by(v[0], coord.x));
+    if(coord.y > 1e-5)
+        vot = float3_add(vot, scale_float3_by(v[1], coord.y));
+    if(coord.z > 1e-5)
+        vot = float3_add(vot, scale_float3_by(v[2], coord.z));
+    if(coord.w > 1e-5)
+        vot = float3_add(vot, scale_float3_by(v[3], coord.w));
+    
+    return float3_dot(vot, d);
+}
+
 inline __device__ float maxProjectSpeedAlong(const float3 * v, const float3 & d)
 {
     float r = float3_dot(d, v[0]);
@@ -132,27 +147,39 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 // still intersected no solution
 	if(sas.w < 1.f) return;
 	
+	interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+	
+	float3 nor = float3_normalize(float3_from_float4(sas));
+	
+	float closeInSpeed = velocityOnTetrahedronAlong(tB.v, getBarycentricCoordinate4Relative(dstContact[ind].localB, tB.p), 
+	                                                nor)
+	                    - velocityOnTetrahedronAlong(tA.v, getBarycentricCoordinate4Relative(dstContact[ind].localA, tA.p), 
+	                                                nor);
+	                    // maxProjectSpeedAlong(tB.v, nor)
+                        // - maxProjectSpeedAlong(tA.v, nor);
+// going apart no contact     
+    if(closeInSpeed < 1e-8) { 
+        dstContact[ind].timeOfImpact = 1e8;	
+        return;
+    }
+	
 	float separateDistance = float4_length(sas);
 // within thin shell margin
 	if(separateDistance < GJK_THIN_MARGIN2) {
 	    dstContact[ind].timeOfImpact = 1e-9;
 	    dstContact[ind].separateAxis = sas;
-        interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
         return;
 	}
 
 // use thin shell margin
 	separateDistance -= GJK_THIN_MARGIN2;
 	
+	dstContact[ind].separateAxis = sas;
+	
 	float lastDistance = separateDistance;
-	float3 nor;
-	float closeInSpeed;
 	float toi = 0.f;
 	int i = 0;
     while (i<GJK_MAX_NUM_ITERATIONS) {
-        nor = float3_normalize(float3_from_float4(sas));
-        closeInSpeed = maxProjectSpeedAlong(tB.v, nor)
-                        - maxProjectSpeedAlong(tA.v, nor);
 // going apart       
         if(closeInSpeed < 1e-8) { 
             dstContact[ind].timeOfImpact = 1e8;
@@ -193,15 +220,12 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
         separateDistance = float4_length(sas);
 // close enough use result of last step
         if(separateDistance < 0.001f) { 
-            if(i<1)
-                dstContact[ind].separateAxis = sas;
             break;
         }
         
-// going apart
+// going apart, no contact
         if(separateDistance >= lastDistance) {
-            if(i<1)
-                dstContact[ind].separateAxis = sas;
+            dstContact[ind].timeOfImpact = 1e8;
             break;
         }
         
@@ -209,6 +233,12 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
         
 // output sa
         dstContact[ind].separateAxis = sas;
+        
+        nor = float3_normalize(float3_from_float4(sas));
+        closeInSpeed = velocityOnTetrahedronAlong(tB.v, getBarycentricCoordinate4Relative(dstContact[ind].localB, tB.p), 
+	                                                nor)
+	                    - velocityOnTetrahedronAlong(tA.v, getBarycentricCoordinate4Relative(dstContact[ind].localA, tA.p), 
+	                                                nor);
         
         i++;
     }
