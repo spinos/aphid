@@ -13,6 +13,9 @@ inline __device__ void ascentOrder(T & in)
     }
 }
 
+inline __device__ float absoluteValueF(float a)
+{ return (a > 0.f) ? a : -a; }
+
 inline __device__ uint combineObjectElementInd(uint objectIdx, uint elementIdx)
 { return (objectIdx<<24 | elementIdx); }
 

@@ -44,5 +44,8 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 	    // std::cout<<"el "<<(p - q).length()<<" ";
 	}
 	
+	tetra->setDensity(2.f);
+	tetra->calculateMass();
+	
 	world->addTetrahedronSystem(tetra);
 }

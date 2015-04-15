@@ -30,6 +30,12 @@ void simpleContactSolverComputeSplitBufLoc(uint2 * splits,
                                     uint bufLength);
 
 void simpleContactSolverComputeSplitInverseMass(float * invMass, 
+                                        uint2 * splits,
+                                        uint2 * pairs,
+                                        float * mass,
+	                                    uint4 * ind,
+	                                    uint * perObjPointStart,
+	                                    uint * perObjectIndexStart,
                                         uint * bodyCount, 
                                         uint bufLength);
 

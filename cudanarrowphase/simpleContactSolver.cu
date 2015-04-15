@@ -219,12 +219,12 @@ __global__ void computeSplitBufLoc_kernel(uint2 * splits,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= bufLength) return;
 	
-	const uint dstLoc = bodyPairHash[ind].value;
-	if(srcPairs[dstLoc].x == bodyPairHash[ind].key) {
-	    splits[dstLoc].x = ind;
+	const uint iPair = bodyPairHash[ind].value;
+	if(srcPairs[iPair].x == bodyPairHash[ind].key) {
+	    splits[iPair].x = ind;
 	}
 	else {
-	    splits[dstLoc].y = ind;
+	    splits[iPair].y = ind;
 	}
 }
 
@@ -258,16 +258,36 @@ __global__ void countBody_kernel(uint * dstCount,
 	}	
 }
 
-__global__ void computeSplitInvMass_kernel(float * invMass, 
-                                        uint * bodyCount, 
+__global__ void computeSplitInvMass_kernel(float * invMass,
+                                        uint2 * splits,
+                                        uint2 * pairs,
+                                        float * mass,
+	                                    uint4 * indices,
+	                                    uint * pointStart,
+	                                    uint * indexStart,
+	                                    uint * bodyCount, 
                                         uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	uint n = getBodyCountAt(ind, bodyCount);
+	const uint iPair = ind>>1;
+	const int isRgt = (ind & 1);
 	
-	invMass[ind] = 1.f * (float)n;
+	uint4 ia;
+	uint dstInd;
+	if(isRgt) {
+	    dstInd = splits[iPair].y;
+	    ia = computePointIndex(pointStart, indexStart, indices, pairs[iPair].y);
+	}
+	else {
+	    dstInd = splits[iPair].x;
+	    ia = computePointIndex(pointStart, indexStart, indices, pairs[iPair].x);
+	}
+	
+	uint n = getBodyCountAt(dstInd, bodyCount);
+	
+	invMass[dstInd] = (float)n / (absoluteValueF(mass[ia.x]) + absoluteValueF(mass[ia.y]) + absoluteValueF(mass[ia.z]) + absoluteValueF(mass[ia.w]));
 }
 
 __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
@@ -675,7 +695,13 @@ void simpleContactSolverCountBody(uint * dstCount,
                                        num);
 }
 
-void simpleContactSolverComputeSplitInverseMass(float * invMass, 
+void simpleContactSolverComputeSplitInverseMass(float * invMass,
+                                        uint2 * splits,
+                                        uint2 * pairs,
+                                        float * mass,
+	                                    uint4 * ind,
+	                                    uint * perObjPointStart,
+	                                    uint * perObjectIndexStart,
                                         uint * bodyCount, 
                                         uint bufLength)
 {
@@ -684,8 +710,14 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
     dim3 grid(nblk, 1, 1);
     
     computeSplitInvMass_kernel<<< grid, block >>>(invMass,
-                                     bodyCount, 
-                                       bufLength);
+                                        splits,
+                                        pairs,
+                                        mass,
+	                                    ind,
+	                                    perObjPointStart,
+	                                    perObjectIndexStart,
+	                                    bodyCount, 
+	                                    bufLength);
 }
 
 void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,

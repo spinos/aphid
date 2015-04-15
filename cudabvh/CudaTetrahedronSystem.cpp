@@ -23,6 +23,9 @@ void CudaTetrahedronSystem::setDeviceXPtr(CUDABuffer * ptr, unsigned loc)
 void CudaTetrahedronSystem::setDeviceVPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceV = ptr; m_vLoc = loc; }
 
+void CudaTetrahedronSystem::setDeviceMassPtr(CUDABuffer * ptr, unsigned loc)
+{ m_deviceMass = ptr; m_massLoc = loc; }
+
 void CudaTetrahedronSystem::setDeviceTretradhedronIndicesPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceTretradhedronIndices = ptr; m_iLoc = loc; }
 

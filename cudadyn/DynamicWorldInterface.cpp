@@ -106,6 +106,9 @@ void DynamicWorldInterface::create(CudaDynamicWorld * world)
 		vy = -vy;
 	}
 	
+	tetra->setDensity(.1f);
+	tetra->calculateMass();
+	
 	world->addTetrahedronSystem(tetra);
 }
 
@@ -346,13 +349,13 @@ void DynamicWorldInterface::printConstraint(SimpleContactSolver * solver, unsign
 	BarycentricCoordinate coord;
 	float sum;
 	for(i=0; i < n; i++) {
-	    std::cout<<(boost::str(boost::format("contact[%1%] (%2%,%3%)\n") % i % pairs[i*2] % pairs[i*2+1]));
-        std::cout<<(boost::str(boost::format("n (%1%,%2%,%3%) ") % constraint[i].normal.x % constraint[i].normal.y % constraint[i].normal.z));
+	    std::cout<<(boost::str(boost::format("constraint[%1%] (%2%,%3%)\n") % i % pairs[i*2] % pairs[i*2+1]));
+        std::cout<<(boost::str(boost::format("n (%1%,%2%,%3%)\n") % constraint[i].normal.x % constraint[i].normal.y % constraint[i].normal.z));
         coord = constraint[i].coordA;
 	    std::cout<<(boost::str(boost::format("ca (%1%,%2%,%3%,%4%) ") % coord.x % coord.y % coord.z % coord.w));
 	    coord = constraint[i].coordB;
-	    std::cout<<(boost::str(boost::format("cb (%1%,%2%,%3%,%4%) ") % coord.x % coord.y % coord.z % coord.w));
-	    std::cout<<(boost::str(boost::format("minv %1% ") % constraint[i].Minv));
+	    std::cout<<(boost::str(boost::format("cb (%1%,%2%,%3%,%4%)\n") % coord.x % coord.y % coord.z % coord.w));
+	    std::cout<<(boost::str(boost::format("minv %1%\n") % constraint[i].Minv));
 	    std::cout<<(boost::str(boost::format("relvel %1%\n") % constraint[i].relVel));
 	}
 }
@@ -475,11 +478,11 @@ void DynamicWorldInterface::printContact(unsigned n)
 	unsigned i;
 	for(i=0; i<n; i++) {
 	    sa.set(contact[i].separateAxis.x, contact[i].separateAxis.y, contact[i].separateAxis.z);
-	    std::cout<<"contact["<<i<<"] ("<<pairs[i*2]<<","<<pairs[i*2+1]<<")\n sa"<<sa<<" ";
+	    std::cout<<"contact["<<i<<"] ("<<pairs[i*2]<<","<<pairs[i*2+1]<<")\n sa"<<sa<<"\n";
 	    sa.set(contact[i].localA.x, contact[i].localA.y, contact[i].localA.z);
 	    std::cout<<"la "<<sa<<" ";
 	    sa.set(contact[i].localB.x, contact[i].localB.y, contact[i].localB.z);
-	    std::cout<<"lb "<<sa<<" ";
+	    std::cout<<"lb "<<sa<<"\n";
 	    std::cout<<"toi "<<contact[i].timeOfImpact<<"\n";
 	}
 }
@@ -530,7 +533,6 @@ bool DynamicWorldInterface::verifyData(CudaDynamicWorld * world)
     if(n<1) return true;
     
     SimpleContactSolver * solver = world->contactSolver();
-	// if(solver->numContacts() != n) return true;
 	
 	storeModels(narrowphase);
 	
@@ -563,6 +565,7 @@ bool DynamicWorldInterface::verifyData(CudaDynamicWorld * world)
 	    std::cout<<"not convergent\n";
 	    printContact(n);
 	    printConstraint(solver, n);
+	    printContactPairHash(solver, n);
 	    return false;
 	}
 	

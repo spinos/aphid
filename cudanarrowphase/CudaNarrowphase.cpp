@@ -40,6 +40,7 @@ CudaNarrowphase::CudaNarrowphase()
 	m_numContacts = 0;
     m_objectBuf.m_pos = new CUDABuffer;
     m_objectBuf.m_vel = new CUDABuffer;
+    m_objectBuf.m_mass = new CUDABuffer;
     m_objectBuf.m_ind = new CUDABuffer;
 	m_objectBuf.m_pointCacheLoc = new CUDABuffer;
 	m_objectBuf.m_indexCacheLoc = new CUDABuffer;
@@ -132,6 +133,7 @@ void CudaNarrowphase::initOnDevice()
 	
 	m_objectBuf.m_pos->create(m_numPoints * 12);
 	m_objectBuf.m_vel->create(m_numPoints * 12);
+	m_objectBuf.m_mass->create(m_numPoints * 4);
 	m_objectBuf.m_ind->create(m_numElements * 16); // 4 ints
 	
 	m_objectBuf.m_pointCacheLoc->create(CUDANARROWPHASE_MAX_NUMOBJECTS * 4);
@@ -145,10 +147,12 @@ void CudaNarrowphase::initOnDevice()
 		
 		curObj->setDeviceXPtr(m_objectBuf.m_pos, m_objectPointStart[i] * 12);
 		curObj->setDeviceVPtr(m_objectBuf.m_vel, m_objectPointStart[i] * 12);
+		curObj->setDeviceMassPtr(m_objectBuf.m_mass, m_objectPointStart[i] * 4);
 		curObj->setDeviceTretradhedronIndicesPtr(m_objectBuf.m_ind, m_objectIndexStart[i] * 16);
 		
 		m_objectBuf.m_pos->hostToDevice(curObj->hostX(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_vel->hostToDevice(curObj->hostV(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
+		m_objectBuf.m_mass->hostToDevice(curObj->hostMass(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
 		m_objectBuf.m_ind->hostToDevice(curObj->hostTretradhedronIndices(), m_objectIndexStart[i] * 16, curObj->numTetradedrons() * 16);
 		
 		curObj->initOnDevice();

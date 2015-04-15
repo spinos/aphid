@@ -18,6 +18,7 @@ public:
 	struct CombinedObjectBuffer {
 		CUDABuffer * m_pos;
 		CUDABuffer * m_vel;
+		CUDABuffer * m_mass;
 		CUDABuffer * m_ind;
 		CUDABuffer * m_pointCacheLoc;
 		CUDABuffer * m_indexCacheLoc;

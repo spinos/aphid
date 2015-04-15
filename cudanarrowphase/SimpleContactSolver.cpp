@@ -105,17 +105,24 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	m_splitInverseMass->create(splitBufLength * 4);
 	void * splitMass = m_splitInverseMass->bufferOnDevice();
 	
-	simpleContactSolverComputeSplitInverseMass((float *)splitMass, 
-                            (uint *)bodyCount, 
-                            splitBufLength);
-	
 	CudaNarrowphase::CombinedObjectBuffer * objectBuf = (CudaNarrowphase::CombinedObjectBuffer *)objectData;
 	void * pos = objectBuf->m_pos->bufferOnDevice();
 	void * vel = objectBuf->m_vel->bufferOnDevice();
+	void * mass = objectBuf->m_mass->bufferOnDevice();
 	void * ind = objectBuf->m_ind->bufferOnDevice();
 	void * perObjPointStart = objectBuf->m_pointCacheLoc->bufferOnDevice();
 	void * perObjectIndexStart = objectBuf->m_indexCacheLoc->bufferOnDevice();
-
+	
+	simpleContactSolverComputeSplitInverseMass((float *)splitMass,
+	                        (uint2 *)splits,
+	                        (uint2 *)pairs,
+	                        (float *)mass,
+	                        (uint4 *)ind,
+	                        (uint * )perObjPointStart,
+	                        (uint * )perObjectIndexStart,
+                            (uint *)bodyCount,
+                            splitBufLength);
+	
 	m_constraint->create(numContacts * 64);
 	void * constraint = m_constraint->bufferOnDevice();
 	
@@ -126,7 +133,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	    (uint2 *)pairs,
 	    (float3 *)pos,
 	    (float3 *)vel,
-        (uint4 *)ind,
+	    (uint4 *)ind,
         (uint * )perObjPointStart,
         (uint * )perObjectIndexStart,
         (float *)splitMass,
