@@ -23,5 +23,19 @@ inline Vector3F tetrahedronCenter(Vector3F * p, unsigned * v, unsigned * pntOffs
     
 	return r;
 }
+
+inline void tetrahedronPoints(Vector3F * dst, Vector3F * p, unsigned * v, unsigned * pntOffset, unsigned * indOffset, unsigned i)
+{
+	unsigned objectI = extractObjectInd(i);
+	unsigned elementI = extractElementInd(i);
+	
+	unsigned pStart = pntOffset[objectI];
+	unsigned iStart = indOffset[objectI];
+	
+	dst[0] = p[pStart + v[iStart + elementI * 4]];
+    dst[1] = p[pStart + v[iStart + elementI * 4 + 1]];
+    dst[2] = p[pStart + v[iStart + elementI * 4 + 2]];
+    dst[3] = p[pStart + v[iStart + elementI * 4 + 3]];
+}
 #endif        //  #ifndef STRIPEDMODEL_H
 

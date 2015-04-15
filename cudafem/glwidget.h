@@ -22,10 +22,13 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
     
-//! [3]
+private:
+    void stopPhysics();
+    void startPhysics();
 private:
     CudaDynamicWorld * m_world;
     FEMWorldInterface * m_interface;
+    bool m_isPhysicsRunning;
 private slots:
     void simulate();
 

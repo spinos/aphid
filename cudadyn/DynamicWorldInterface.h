@@ -4,6 +4,7 @@
 class BaseBuffer;
 class GeoDrawer;
 class CudaDynamicWorld;
+class CudaNarrowphase;
 class TetrahedronSystem;
 class CudaLinearBvh;
 class SimpleContactSolver;
@@ -16,7 +17,8 @@ public:
     
     void draw(CudaDynamicWorld * world);
     void draw(CudaDynamicWorld * world, GeoDrawer * drawer);
-    bool verifyContact(CudaDynamicWorld * world);
+    void drawFaulty(CudaDynamicWorld * world, GeoDrawer * drawer);
+    bool verifyData(CudaDynamicWorld * world);
 protected:
 
 private:
@@ -25,9 +27,16 @@ private:
     void showBvhHash(CudaDynamicWorld * world, GeoDrawer * drawer);
     void showBvhHash(CudaLinearBvh * bvh, GeoDrawer * drawer);
     void showContacts(CudaDynamicWorld * world, GeoDrawer * drawer);
+    bool checkContact(unsigned n);
+    bool checkDegenerated(unsigned n);
+    void printContact(unsigned n);
     bool checkConstraint(SimpleContactSolver * solver, unsigned n);
     void printContactPairHash(SimpleContactSolver * solver, unsigned numContacts);
+    void printFaultPair(CudaDynamicWorld * world);
+    void storeModels(CudaNarrowphase * narrowphase);
+    void showFaultyPair(CudaDynamicWorld * world, GeoDrawer * drawer);
 private:
+    unsigned m_faultyPair[2];
     BaseBuffer * m_boxes;
     BaseBuffer * m_bvhHash;
     BaseBuffer * m_pairCache;

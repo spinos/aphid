@@ -10,6 +10,7 @@
 #include <iostream>
 #include <map>
 #include <boost/format.hpp>
+#include <tetrahedron_math.h>
 #ifdef __APPLE__
 typedef unsigned long long uint64;
 #else
@@ -145,19 +146,35 @@ void testArray()
 
 void testNan()
 {
+#ifdef TEST_NAN
     float a = 0.f/0.f;
     std::cout<<boost::format("zero divided by zero: %1%\n") % a;
 	std::cout<<boost::format("is nan: %1%\n") % (a == a);
+#endif
 }
 
 void testInf()
 {
+#ifdef TEST_NAN
     float a = 1.f/0.f;
     std::cout<<boost::format("one divided by zero: %1%\n") % a;
 	std::cout<<boost::format("is nan: %1%\n") % (a > 1e38);
 	a = -1.f/0.f;
     std::cout<<boost::format("negative one divided by zero: %1%\n") % a;
 	std::cout<<boost::format("is nan: %1%\n") % (a < -1e38);
+#endif
+}
+
+void testTetrahedronDegenerate()
+{
+    Vector3F p[4];
+    p[0].set(-12.f, 0.f, 0.f);
+    p[1].set(12.f, 0.f, 0.f);
+    p[2].set(12.f, 0.f, 12.f);
+    p[3].set(0.f, .01f, 0.f);
+    Matrix44F mat;
+    std::cout<<"det tet "<<determinantTetrahedron(mat, p[0], p[1], p[2], p[3])<<"\n";
+    std::cout<<" volume "<<tetrahedronVolume(p)<<"\n";
 }
 
 int main(int argc, char * const argv[])
@@ -240,6 +257,7 @@ int main(int argc, char * const argv[])
 	testArray();
 	testNan();
 	testInf();
+	testTetrahedronDegenerate();
 	std::cout<<"end of test\n";
 	return 0;
 }

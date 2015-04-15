@@ -5,7 +5,7 @@ set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
 
 set (HEADER_FILES "../shared/Morton3D.h")
-
+include_directories ("../shared")
 add_executable (testbit ${HEADER_FILES} main.cpp)
 
 if(WIN32)
@@ -46,4 +46,10 @@ target_link_libraries (testbit ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (testbit ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (testbit ${Boost_REGEX_LIBRARY})
 
+if (WIN32)
+set (Aphid_Library "D:/aphid/lib/aphid.lib")
+else ()
+set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
+endif ()
 
+target_link_libraries (testbit ${Aphid_Library})

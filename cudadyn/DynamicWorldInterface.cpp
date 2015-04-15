@@ -11,6 +11,7 @@
 #include <CudaLinearBvh.h>
 #include <radixsort_implement.h>
 #include <simpleContactSolver_implement.h>
+#include <tetrahedron_math.h>
 
 #define GRDW 57
 #define GRDH 57
@@ -149,14 +150,21 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
     glDisable(GL_DEPTH_TEST);
     draw(world);
     showOverlappingPairs(world, drawer);
-    showBvhHash(world, drawer);
+    // showBvhHash(world, drawer);
     showContacts(world, drawer);
+}
+
+void DynamicWorldInterface::drawFaulty(CudaDynamicWorld * world, GeoDrawer * drawer)
+{
+    glDisable(GL_DEPTH_TEST);
+    draw(world);
+    showFaultyPair(world, drawer);
 }
 
 void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     CudaBroadphase * broadphase = world->broadphase();
-    std::cout<<" num overlapping pairs "<<broadphase->numUniquePairs()<<" ";
+    // std::cout<<" num overlapping pairs "<<broadphase->numUniquePairs()<<" ";
 	
     const unsigned cacheLength = broadphase->pairCacheLength();
 	if(cacheLength < 1) return;
@@ -195,7 +203,7 @@ void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDr
 		
 		bb.expandBy(ab);
 		
-		drawer->boundingBox(bb);
+		// drawer->boundingBox(bb);
 	}
 }
 
@@ -240,26 +248,13 @@ void DynamicWorldInterface::showContacts(CudaDynamicWorld * world, GeoDrawer * d
 {
     CudaNarrowphase * narrowphase = world->narrowphase();
     const unsigned n = narrowphase->numContacts();
-    std::cout<<" num contact pairs "<<n<<"\n";
+    // std::cout<<" num contact pairs "<<n<<"\n";
 	if(n<1) return;
 	
 	SimpleContactSolver * solver = world->contactSolver();
-	if(solver->numContacts() != n) return;
+	// if(solver->numContacts() != n) return;
 	
-	CUDABuffer * pnts = narrowphase->objectBuffer()->m_pos;
-	CUDABuffer * inds = narrowphase->objectBuffer()->m_ind;
-	CUDABuffer * pointStarts = narrowphase->objectBuffer()->m_pointCacheLoc;
-	CUDABuffer * indexStarts = narrowphase->objectBuffer()->m_indexCacheLoc;
-	
-	m_tetPnt->create(pnts->bufferSize());
-	m_tetInd->create(inds->bufferSize());
-	m_pointStarts->create(pointStarts->bufferSize());
-	m_indexStarts->create(indexStarts->bufferSize());
-	
-	pnts->deviceToHost(m_tetPnt->data(), m_tetPnt->bufferSize());
-	inds->deviceToHost(m_tetInd->data(), m_tetInd->bufferSize());
-	pointStarts->deviceToHost(m_pointStarts->data(), m_pointStarts->bufferSize());
-	indexStarts->deviceToHost(m_indexStarts->data(), m_indexStarts->bufferSize());
+	storeModels(narrowphase);
 	
 	Vector3F * tetPnt = (Vector3F *)m_tetPnt->data();
 	unsigned * tetInd = (unsigned *)m_tetInd->data();
@@ -351,6 +346,8 @@ bool DynamicWorldInterface::checkConstraint(SimpleContactSolver * solver, unsign
 	for(i=0; i < n; i++) {
 	    if(IsNan(constraint[i].normal.x) || IsNan(constraint[i].normal.y) || IsNan(constraint[i].normal.z)) {
 	        std::cout<<"invalide normal["<<i<<"]\n";
+	        m_faultyPair[0] = pairs[i*2];
+	        m_faultyPair[1] = pairs[i*2+1];
 	        return false;
 	    }
 	    
@@ -358,23 +355,31 @@ bool DynamicWorldInterface::checkConstraint(SimpleContactSolver * solver, unsign
 	    sum = coord.x + coord.y + coord.z + coord.w;
 	    if(sum > 1.1f || sum < .9f) {
 	        std::cout<<"invalid coord A["<<i<<"] "<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.z<<"\n";
+	        m_faultyPair[0] = pairs[i*2];
+	        m_faultyPair[1] = pairs[i*2+1];
 	        return false;
 	    }
 	    coord = constraint[i].coordB;
 	    sum = coord.x + coord.y + coord.z + coord.w;
 	    if(sum > 1.1f || sum < .9f) {
 	        std::cout<<"invalide coord B["<<i<<"] "<<coord.x<<","<<coord.y<<","<<coord.z<<","<<coord.z<<"\n";
+	        m_faultyPair[0] = pairs[i*2];
+	        m_faultyPair[1] = pairs[i*2+1]; 
 	        return false;
 	    }
 	    
 	    if(IsNan(constraint[i].Minv) || IsInf(constraint[i].Minv)) {
 	        std::cout<<"pair["<<i<<"] ("<<pairs[i*2]<<","<<pairs[i*2+1]<<")\n";
 	        std::cout<<"invalid minv["<<i<<"] "<<constraint[i].Minv<<"\n";
+	        m_faultyPair[0] = pairs[i*2];
+	        m_faultyPair[1] = pairs[i*2+1];
 	        return false;
 	    }
 	    
 	    if(IsNan(constraint[i].relVel) || IsInf(constraint[i].relVel)) {
 	        std::cout<<"invalid relvel"<<"["<<i<<"] "<<constraint[i].relVel<<"\n";
+	        m_faultyPair[0] = pairs[i*2];
+	        m_faultyPair[1] = pairs[i*2+1];
 	        return false;
 	    }
 	}
@@ -382,18 +387,108 @@ bool DynamicWorldInterface::checkConstraint(SimpleContactSolver * solver, unsign
 	return true;
 }
 
-bool DynamicWorldInterface::verifyContact(CudaDynamicWorld * world)
+bool DynamicWorldInterface::checkContact(unsigned n)
+{
+    ContactData * contact = (ContactData *)m_contact->data();
+    unsigned * pairs = (unsigned *)m_pairCache->data();
+    Vector3F sa;
+	unsigned i;
+	for(i=0; i<n; i++) {
+	    sa.set(contact[i].separateAxis.x, contact[i].separateAxis.y, contact[i].separateAxis.z);
+	    if(IsNan(sa.x) || IsNan(sa.y) || IsNan(sa.z)) {
+	        std::cout<<"("<<pairs[i*2]<<","<<pairs[i*2+1]<<")separate axis is Nan\n";
+	        m_faultyPair[0] = pairs[i*2];
+	        m_faultyPair[1] = pairs[i*2+1];
+	        return false;
+	    }
+	    if(sa.length() < 1e-6) {
+	        std::cout<<"("<<pairs[i*2]<<","<<pairs[i*2+1]<<")separate axis is zero\n";
+	        m_faultyPair[0] = pairs[i*2];
+	        m_faultyPair[1] = pairs[i*2+1];
+	        return false;
+	    }
+	}
+	return true;
+}
+
+bool DynamicWorldInterface::checkDegenerated(unsigned n)
+{
+    Vector3F * tetPnt = (Vector3F *)m_tetPnt->data();
+	unsigned * tetInd = (unsigned *)m_tetInd->data();
+	unsigned * pntOffset = (unsigned *)m_pointStarts->data();
+	unsigned * indOffset = (unsigned *)m_indexStarts->data();
+	unsigned * pairs = (unsigned *)m_pairCache->data();
+	Vector3F p[4];
+	Matrix44F mat;
+	unsigned i;
+	for(i=0; i < n; i++) {
+	    tetrahedronPoints(p, tetPnt, tetInd, pntOffset, indOffset, pairs[i*2]);
+	    if(isTetrahedronDegenerated(p)) {
+	        std::cout<<"degenerated tetrahedron ("<<pairs[i*2]<<"),"<<pairs[i*2+1]<<" ";
+	        std::cout<<"det "<<determinantTetrahedron(mat, p[0], p[1], p[2], p[3])<<"\n";
+	        m_faultyPair[0] = pairs[i*2];
+	        m_faultyPair[1] = pairs[i*2+1];
+	        return false;
+	    }
+	    tetrahedronPoints(p, tetPnt, tetInd, pntOffset, indOffset, pairs[i*2+1]);
+	    if(isTetrahedronDegenerated(p)) {
+	        std::cout<<"degenerated tetrahedron "<<pairs[i*2]<<",("<<pairs[i*2+1]<<") ";
+	        std::cout<<"det "<<determinantTetrahedron(mat, p[0], p[1], p[2], p[3])<<"\n";
+	        m_faultyPair[0] = pairs[i*2];
+	        m_faultyPair[1] = pairs[i*2+1];
+	        return false;
+	    }
+	}
+    return true;
+}
+
+void DynamicWorldInterface::printContact(unsigned n)
+{
+    ContactData * contact = (ContactData *)m_contact->data();
+    unsigned * pairs = (unsigned *)m_pairCache->data();
+    Vector3F sa;
+	unsigned i;
+	for(i=0; i<n; i++) {
+	    sa.set(contact[i].separateAxis.x, contact[i].separateAxis.y, contact[i].separateAxis.z);
+	    std::cout<<"contact["<<i<<"] ("<<pairs[i*2]<<","<<pairs[i*2+1]<<")\n sa"<<sa<<" ";
+	    sa.set(contact[i].localA.x, contact[i].localA.y, contact[i].localA.z);
+	    std::cout<<"la "<<sa<<" ";
+	    sa.set(contact[i].localB.x, contact[i].localB.y, contact[i].localB.z);
+	    std::cout<<"lb "<<sa<<" ";
+	    std::cout<<"toi "<<contact[i].timeOfImpact<<"\n";
+	}
+}
+
+bool DynamicWorldInterface::verifyData(CudaDynamicWorld * world)
 {
     CudaNarrowphase * narrowphase = world->narrowphase();
     const unsigned n = narrowphase->numContacts();
     if(n<1) return true;
     
     SimpleContactSolver * solver = world->contactSolver();
-	if(solver->numContacts() != n) return true;
+	// if(solver->numContacts() != n) return true;
+	
+	storeModels(narrowphase);
 	
 	m_pairCache->create(n * 8);
 	CUDABuffer * pairbuf = narrowphase->contactPairsBuffer();
 	pairbuf->deviceToHost(m_pairCache->data(), m_pairCache->bufferSize());
+	
+	if(!checkDegenerated(n)) {
+	    std::cout<<"degenerated tetrahedron\n";
+	    printFaultPair(world);
+	    return false;
+	}
+	
+	m_contact->create(n * 48);
+	narrowphase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
+	
+	if(!checkContact(n)) {
+	    std::cout<<"invalid contact\n";
+	    printContact(n);
+	    printFaultPair(world);
+	    return false;
+	}
 	
 	if(!checkConstraint(solver, n)) {
 	    std::cout<<"invalid constraint\n";
@@ -416,24 +511,13 @@ bool DynamicWorldInterface::verifyContact(CudaDynamicWorld * world)
 	    m_angularVelocity->bufferSize());
 	Vector3F * angVel = (Vector3F *)m_angularVelocity->data();
 	
-	m_contact->create(n * 48);
-	narrowphase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
-	ContactData * contact = (ContactData *)m_contact->data();
-
 	Vector3F N;
 	unsigned iPairA, iBody, iPair;
 	unsigned i;
 	for(i=0; i < n * 2; i++) {
 	    iBody = bodyAndPair[i*2];
 	    iPair = bodyAndPair[i*2+1];
-	
-	    ContactData & cd = contact[iPair];
-	    N.set(cd.separateAxis.x, cd.separateAxis.y, cd.separateAxis.z);
-	    if(IsNan(N.x) || IsNan(N.y) || IsNan(N.z)) {
-	        std::cout<<"contact normal is Nan\n";
-	        return false;
-	    }
-	    
+
 	    if(IsNan(linVel[i].x) || IsNan(linVel[i].y) || IsNan(linVel[i].z)) {
 	        std::cout<<"delta linear velocity is Nan\n";
 	        return false;
@@ -458,9 +542,8 @@ void DynamicWorldInterface::printContactPairHash(SimpleContactSolver * solver, u
 	float * mass = (float *)m_mass->data();
 	
 	std::cout<<" mass:\n";
-	for(i=0; i < numContacts * 2; i++) {
+	for(i=0; i < numContacts * 2; i++)
 		std::cout<<" "<<i<<" ("<<mass[i]<<")\n";
-	}
 	
 	CUDABuffer * splitbuf = solver->bodySplitLocBuf();
 	m_split->create(splitbuf->bufferSize());
@@ -489,3 +572,79 @@ void DynamicWorldInterface::printContactPairHash(SimpleContactSolver * solver, u
 		std::cout<<" "<<i<<" ("<<bodyPair[i*2]<<","<<bodyPair[i*2+1]<<")\n";
 	}
 }
+
+void DynamicWorldInterface::storeModels(CudaNarrowphase * narrowphase)
+{
+    CUDABuffer * pnts = narrowphase->objectBuffer()->m_pos;
+	CUDABuffer * inds = narrowphase->objectBuffer()->m_ind;
+	CUDABuffer * pointStarts = narrowphase->objectBuffer()->m_pointCacheLoc;
+	CUDABuffer * indexStarts = narrowphase->objectBuffer()->m_indexCacheLoc;
+	
+	m_tetPnt->create(pnts->bufferSize());
+	m_tetInd->create(inds->bufferSize());
+	m_pointStarts->create(pointStarts->bufferSize());
+	m_indexStarts->create(indexStarts->bufferSize());
+	
+	pnts->deviceToHost(m_tetPnt->data(), m_tetPnt->bufferSize());
+	inds->deviceToHost(m_tetInd->data(), m_tetInd->bufferSize());
+	pointStarts->deviceToHost(m_pointStarts->data(), m_pointStarts->bufferSize());
+	indexStarts->deviceToHost(m_indexStarts->data(), m_indexStarts->bufferSize());
+}
+
+void DynamicWorldInterface::printFaultPair(CudaDynamicWorld * world)
+{
+    CudaNarrowphase * narrowphase = world->narrowphase();
+    const unsigned n = narrowphase->numContacts();
+    if(n<1) return; 
+    
+    storeModels(narrowphase);
+    
+    Vector3F * tetPnt = (Vector3F *)m_tetPnt->data();
+	unsigned * tetInd = (unsigned *)m_tetInd->data();
+	unsigned * pntOffset = (unsigned *)m_pointStarts->data();
+	unsigned * indOffset = (unsigned *)m_indexStarts->data();
+	
+	Vector3F p[4];
+	tetrahedronPoints(p, tetPnt, tetInd, pntOffset, indOffset, m_faultyPair[0]);
+
+	int i;
+	for(i=0; i<4; i++) std::cout<<"pa"<<p[i]<<" ";
+	
+	tetrahedronPoints(p, tetPnt, tetInd, pntOffset, indOffset, m_faultyPair[1]);
+	
+	for(i=0; i<4; i++) std::cout<<"pb"<<p[i]<<" ";
+}
+
+void DynamicWorldInterface::showFaultyPair(CudaDynamicWorld * world, GeoDrawer * drawer)
+{
+    CudaNarrowphase * narrowphase = world->narrowphase();
+    const unsigned n = narrowphase->numContacts();
+    if(n<1) return; 
+    
+    storeModels(narrowphase);
+    
+    Vector3F * tetPnt = (Vector3F *)m_tetPnt->data();
+	unsigned * tetInd = (unsigned *)m_tetInd->data();
+	unsigned * pntOffset = (unsigned *)m_pointStarts->data();
+	unsigned * indOffset = (unsigned *)m_indexStarts->data();
+	
+	Vector3F p[4];
+	tetrahedronPoints(p, tetPnt, tetInd, pntOffset, indOffset, m_faultyPair[0]);
+	glColor3f(1.f, 0.f, 0.f);
+	drawer->arrow(p[0], p[1]);
+	drawer->arrow(p[0], p[2]);
+	drawer->arrow(p[0], p[3]);
+	drawer->arrow(p[1], p[2]);
+	drawer->arrow(p[2], p[3]);
+	drawer->arrow(p[3], p[1]);
+	tetrahedronPoints(p, tetPnt, tetInd, pntOffset, indOffset, m_faultyPair[1]);
+	drawer->arrow(p[0], p[1]);
+	drawer->arrow(p[0], p[2]);
+	drawer->arrow(p[0], p[3]);
+	drawer->arrow(p[1], p[2]);
+	drawer->arrow(p[2], p[3]);
+	drawer->arrow(p[3], p[1]);
+	drawer->arrow(tetrahedronCenter(tetPnt, tetInd, pntOffset, indOffset, m_faultyPair[0]),
+	             tetrahedronCenter(tetPnt, tetInd, pntOffset, indOffset, m_faultyPair[1]));
+}
+

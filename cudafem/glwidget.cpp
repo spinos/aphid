@@ -28,16 +28,13 @@ GLWidget::~GLWidget()
 void GLWidget::clientInit()
 {	
     m_world->initOnDevice();
-	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+    startPhysics();
 }
 
 void GLWidget::clientDraw()
 {
-    if(internalTimer()->isActive())
-        m_world->stepPhysics(1.f / 60.f);
-    m_interface->draw(m_world, getDrawer());
-    if(!m_interface->verifyContact(m_world)) 
-        internalTimer()->stop();
+    if(m_isPhysicsRunning) m_interface->draw(m_world, getDrawer());
+    else m_interface->drawFaulty(m_world, getDrawer());
 }
 //! [7]
 
@@ -59,16 +56,37 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::simulate()
 {
+    m_world->collide();
+    if(!m_interface->verifyData(m_world)) 
+        stopPhysics();
+    else {
+        m_world->integrate(1.f / 60.f);
+        update();
+    }
+}
+
+void GLWidget::stopPhysics()
+{
+    disconnect(internalTimer(), SIGNAL(timeout()), this, SLOT(simulate()));
+    connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+    m_isPhysicsRunning = false;
+}
+
+void GLWidget::startPhysics()
+{
+    disconnect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+    connect(internalTimer(), SIGNAL(timeout()), this, SLOT(simulate()));
+    m_isPhysicsRunning = true;
 }
 
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
         case Qt::Key_S:
-            if(internalTimer()->isActive()) 
-                internalTimer()->stop();
+            if(m_isPhysicsRunning) 
+                stopPhysics();
             else
-                internalTimer()->start();
+                startPhysics();
             break;
         default:
 			break;

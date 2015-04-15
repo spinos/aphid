@@ -61,6 +61,12 @@ void CudaDynamicWorld::initOnDevice()
 
 void CudaDynamicWorld::stepPhysics(float dt)
 {
+    collide();
+	integrate(dt);
+}
+
+void CudaDynamicWorld::collide()
+{
     if(m_numObjects < 1) return;
 	unsigned i;
 	for(i=0; i < m_numObjects; i++) m_objects[i]->update();
@@ -73,8 +79,13 @@ void CudaDynamicWorld::stepPhysics(float dt)
 									m_narrowphase->contactBuffer(),
 									m_narrowphase->contactPairsBuffer(),
 									m_narrowphase->objectBuffer());
-									
-	for(i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
+}
+
+void CudaDynamicWorld::integrate(float dt)
+{
+    if(m_numObjects < 1) return;
+    unsigned i;
+    for(i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
 }
 
 const unsigned CudaDynamicWorld::numContacts() const

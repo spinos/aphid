@@ -122,15 +122,20 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	ClosestPointTestContext ctc;
 	BarycentricCoordinate coord;
 	float4 sas;
-	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, sas, 
+	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, sas, 
 	    coord);
-// intersected	
+// intersected try zero margin	
+	if(sas.w < 1.f) {
+	    computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, sas, 
+	    coord);
+	}
+// still intersected no solution
 	if(sas.w < 1.f) return;
 	
 	float separateDistance = float4_length(sas);
 // within thin shell margin
 	if(separateDistance < GJK_THIN_MARGIN2) {
-	    dstContact[ind].timeOfImpact = 0.f;
+	    dstContact[ind].timeOfImpact = 1e-9;
 	    dstContact[ind].separateAxis = sas;
         interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
         return;
@@ -153,8 +158,8 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
             dstContact[ind].timeOfImpact = 1e8;
             
 // for debug purpose
-            dstContact[ind].separateAxis = sas;
-            interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+            // dstContact[ind].separateAxis = sas;
+            // interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
         
             break;
         }
@@ -165,8 +170,8 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
             dstContact[ind].timeOfImpact = toi;
             
 // for debug purpose
-            dstContact[ind].separateAxis = sas;
-            interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+            // dstContact[ind].separateAxis = sas;
+            // interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
         
             break;   
         }
@@ -188,14 +193,16 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
         separateDistance = float4_length(sas);
 // close enough use result of last step
         if(separateDistance < 0.001f) { 
-            if(i<1) dstContact[ind].separateAxis = sas;           
+            if(i<1)
+                dstContact[ind].separateAxis = sas;
             break;
         }
         
 // going apart
         if(separateDistance >= lastDistance) {
-            if(i<1) dstContact[ind].separateAxis = sas;           
-                break;
+            if(i<1)
+                dstContact[ind].separateAxis = sas;
+            break;
         }
         
         lastDistance = separateDistance;

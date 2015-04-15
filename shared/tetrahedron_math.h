@@ -162,5 +162,21 @@ inline bool tetrahedronLineIntersection(const Vector3F * tet, const Vector3F & l
 // no enter point    
     return false;
 }
+
+inline bool isTetrahedronDegenerated(const Vector3F * p)
+{
+    Matrix44F mat;
+    float D0 = determinantTetrahedron(mat, p[0], p[1], p[2], p[3]);
+	if(D0 < 0.f) D0 = -D0;
+    return (D0 < 1.f);
+}
+
+inline float tetrahedronVolume(const Vector3F * p) 
+{
+    Vector3F e1 = p[1]-p[0];
+	Vector3F e2 = p[2]-p[0];
+	Vector3F e3 = p[3]-p[0];
+	return  e1.dot( e2.cross( e3 ) ) / 6.0f;
+}
 #endif        //  #ifndef TETRAHEDRON_MATH_H
 

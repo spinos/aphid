@@ -20,6 +20,9 @@ public:
     
     void stepPhysics(float dt);
     
+    void collide();
+    void integrate(float dt);
+    
     const unsigned numObjects() const;
     
     CudaTetrahedronSystem * tetradedron(unsigned ind) const;

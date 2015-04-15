@@ -358,8 +358,9 @@ void broadphaseComputePairCountsSelfCollide(uint * dst, Aabb * boxes, uint numBo
 								KeyValuePair * mortonCodesAndAabbIndices,
 								uint4 * tetrahedronIndices)
 {
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(numBoxes, 512);
+    int tpb = CudaBase::LimitNThreadPerBlock(16, 50);
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numBoxes, tpb);
     
     dim3 grid(nblk, 1, 1);
     
@@ -383,7 +384,7 @@ void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx, unsigned treeIdx)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(17, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(18, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numBoxes, tpb);
     
@@ -410,7 +411,7 @@ void broadphaseWritePairCacheSelfCollide(uint2 * dst, uint * starts, uint * coun
 								uint4 * tetrahedronIndices,
 								unsigned queryIdx)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(18, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(20, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numBoxes, tpb);
     
