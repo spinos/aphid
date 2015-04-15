@@ -30,6 +30,8 @@ void narrowphaseSqueezeContactPairs(uint2 * dstPairs, uint2 * srcPairs,
                                     ContactData * dstContact, ContactData *srcContact,
 									uint * counts, uint * packLoc, 
 									uint maxInd);
+
+void narrowphaseResetX(float3 * dst, float3 *src, uint maxInd);
 }
 #endif        //  #ifndef NARROWPHASE_IMPLEMENT_H
 

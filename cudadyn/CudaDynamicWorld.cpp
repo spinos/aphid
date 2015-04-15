@@ -90,19 +90,10 @@ void CudaDynamicWorld::integrate(float dt)
 
 const unsigned CudaDynamicWorld::numContacts() const
 { return m_narrowphase->numContacts(); }
-/*
-void CudaDynamicWorld::dbgDraw()
+
+void CudaDynamicWorld::reset()
 {
-	std::cout<<" num overlapping pairs "<<m_broadphase->numUniquePairs();
-	// m_dbgBvh->showOverlappingPairs(m_broadphase);
-	
-	unsigned i;
-	for(i=0; i < m_numObjects; i++) {
-	    // m_dbgBvh->showHash(m_objects[i]);
-	}
-	std::cout<<" num contact pairs "<<m_narrowphase->numContacts();
-	
-	// m_dbgNp->showConstraint(m_contactSolver, m_narrowphase);
-	std::cout<<" mem "<<CudaBase::MemoryUsed<<"\n";
+    if(m_numObjects < 1) return;
+    m_narrowphase->resetToInitial();
 }
-*/
+

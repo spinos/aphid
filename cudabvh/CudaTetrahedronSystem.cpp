@@ -20,6 +20,9 @@ CudaTetrahedronSystem::~CudaTetrahedronSystem() {}
 void CudaTetrahedronSystem::setDeviceXPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceX = ptr; m_xLoc = loc; }
 
+void CudaTetrahedronSystem::setDeviceXiPtr(CUDABuffer * ptr, unsigned loc)
+{ m_deviceXi = ptr; m_xiLoc = loc; }
+
 void CudaTetrahedronSystem::setDeviceVPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceV = ptr; m_vLoc = loc; }
 
@@ -51,7 +54,10 @@ void CudaTetrahedronSystem::formTetrahedronAabbs()
 }
 
 void * CudaTetrahedronSystem::deviceX()
-{  return m_deviceX->bufferOnDeviceAt(m_xLoc); }
+{ return m_deviceX->bufferOnDeviceAt(m_xLoc); }
+
+void * CudaTetrahedronSystem::deviceXi()
+{ return m_deviceXi->bufferOnDeviceAt(m_xiLoc); }
 
 void * CudaTetrahedronSystem::deviceV()
 {  return m_deviceV->bufferOnDeviceAt(m_vLoc); }

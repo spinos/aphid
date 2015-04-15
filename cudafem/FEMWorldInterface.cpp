@@ -1,7 +1,7 @@
 #include "FEMWorldInterface.h"
 #include <AllMath.h>
 #include <CudaDynamicWorld.h>
-#include <CudaTetrahedronSystem.h>
+#include <FEMTetrahedronSystem.h>
 #include <tetmesh.h>
 FEMWorldInterface::FEMWorldInterface() {}
 FEMWorldInterface::~FEMWorldInterface() {}
@@ -12,7 +12,7 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
     std::cout<<"num points "<<TetraNumVertices<<"\n";
 	std::cout<<"num tetrahedrons "<<TetraNumTetrahedrons<<"\n";
 	
-    CudaTetrahedronSystem * tetra = new CudaTetrahedronSystem;
+    FEMTetrahedronSystem * tetra = new FEMTetrahedronSystem;
 	tetra->create(TetraNumTetrahedrons+100, TetraNumVertices+400);
 	float * hv = &tetra->hostV()[0];
 	float vrx, vry, vrz, vr;

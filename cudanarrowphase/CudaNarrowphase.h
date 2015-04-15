@@ -17,6 +17,7 @@ class CudaNarrowphase {
 public:
 	struct CombinedObjectBuffer {
 		CUDABuffer * m_pos;
+		CUDABuffer * m_pos0;
 		CUDABuffer * m_vel;
 		CUDABuffer * m_mass;
 		CUDABuffer * m_ind;
@@ -31,6 +32,7 @@ public:
 	const unsigned numElements() const;
 	
 	void initOnDevice();
+	void resetToInitial();
 	
 	void addTetrahedronSystem(CudaTetrahedronSystem * tetra);
 	void computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs);

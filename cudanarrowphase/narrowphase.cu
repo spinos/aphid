@@ -276,6 +276,19 @@ __global__ void squeezeContactPairs_kernel(uint2 * dstPairs, uint2 * srcPairs,
 	dstContact[toLoc] = srcContact[ind];
 }
 
+__global__ void resetX_kernel(float3 * dst, float3 * src, uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+    ind <<= 3;
+    int i;
+    for(i=0; i < 8; i++) {
+        if(ind>= maxInd) return;
+        
+        dst[ind] = src[ind];
+        ind++;
+    }
+}
+
 extern "C" {
 
 void narrowphaseComputeSeparateAxis(ContactData * dstContact,
@@ -333,6 +346,15 @@ void narrowphaseSqueezeContactPairs(uint2 * dstPairs, uint2 * srcPairs,
                                     dstContact, srcContact,
 									counts, packLocs, 
 									maxInd);
+}
+
+void narrowphaseResetX(float3 * dst, float3 *src, uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd>>3, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    resetX_kernel<<< grid, block >>>(dst, src, maxInd);
 }
 
 }

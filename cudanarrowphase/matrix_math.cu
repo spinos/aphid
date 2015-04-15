@@ -3,6 +3,13 @@
 
 #include "bvh_common.h"
 
+inline __device__ void set_mat33_identity(mat33 & m)
+{
+    m.v[0] = make_float3(1.f, 0.f, 0.f);
+    m.v[1] = make_float3(0.f, 1.f, 0.f);
+    m.v[2] = make_float3(0.f, 0.f, 1.f);
+}
+
 inline __device__ void fill_mat44(mat44 & m, const float3 & a, const float3 & b, const float3 & c, const float3 & d)
 {
     m.v[0] = make_float4(a.x, a.y, a.z, 1.0f);

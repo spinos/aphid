@@ -39,6 +39,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../cudadyn/CudaDynamicWorld.h"
 "../cudadyn/DynamicWorldInterface.h"
 "../fem/tetmesh.h"
+"cuFemTetrahedron_implement.h"
 "FEMTetrahedronSystem.h"
 "FEMWorldInterface.h"
 "window.h"
@@ -88,7 +89,8 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudanarrowphase/barycentric.cu"
 "../cudanarrowphase/gjk_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
-"../cudanarrowphase/narrowphase.cu")
+"../cudanarrowphase/narrowphase.cu"
+"cuFemTetrahedron.cu")
 
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
 

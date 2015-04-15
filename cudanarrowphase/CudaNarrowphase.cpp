@@ -39,6 +39,7 @@ CudaNarrowphase::CudaNarrowphase()
 	m_numPairs = 0;
 	m_numContacts = 0;
     m_objectBuf.m_pos = new CUDABuffer;
+    m_objectBuf.m_pos0 = new CUDABuffer;
     m_objectBuf.m_vel = new CUDABuffer;
     m_objectBuf.m_mass = new CUDABuffer;
     m_objectBuf.m_ind = new CUDABuffer;
@@ -132,6 +133,7 @@ void CudaNarrowphase::initOnDevice()
 	}
 	
 	m_objectBuf.m_pos->create(m_numPoints * 12);
+	m_objectBuf.m_pos0->create(m_numPoints * 12);
 	m_objectBuf.m_vel->create(m_numPoints * 12);
 	m_objectBuf.m_mass->create(m_numPoints * 4);
 	m_objectBuf.m_ind->create(m_numElements * 16); // 4 ints
@@ -146,11 +148,13 @@ void CudaNarrowphase::initOnDevice()
 		CudaTetrahedronSystem * curObj = m_objects[i];
 		
 		curObj->setDeviceXPtr(m_objectBuf.m_pos, m_objectPointStart[i] * 12);
+		curObj->setDeviceXiPtr(m_objectBuf.m_pos0, m_objectPointStart[i] * 12);
 		curObj->setDeviceVPtr(m_objectBuf.m_vel, m_objectPointStart[i] * 12);
 		curObj->setDeviceMassPtr(m_objectBuf.m_mass, m_objectPointStart[i] * 4);
 		curObj->setDeviceTretradhedronIndicesPtr(m_objectBuf.m_ind, m_objectIndexStart[i] * 16);
 		
 		m_objectBuf.m_pos->hostToDevice(curObj->hostX(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
+		m_objectBuf.m_pos0->hostToDevice(curObj->hostXi(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_vel->hostToDevice(curObj->hostV(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_mass->hostToDevice(curObj->hostMass(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
 		m_objectBuf.m_ind->hostToDevice(curObj->hostTretradhedronIndices(), m_objectIndexStart[i] * 16, curObj->numTetradedrons() * 16);
@@ -223,3 +227,13 @@ void CudaNarrowphase::squeezeContacts(void * overlappingPairs, unsigned numOverl
 									(uint *)counts, (uint *)scanResult, 
 									numOverlappingPairs);
 }
+
+void CudaNarrowphase::resetToInitial()
+{
+    if(m_numPoints < 1) return;
+    
+    void * dst = m_objectBuf.m_pos->bufferOnDevice();
+	void * src = m_objectBuf.m_pos0->bufferOnDevice();
+	narrowphaseResetX((float3 *)dst, (float3 *)src, m_numPoints);
+}
+

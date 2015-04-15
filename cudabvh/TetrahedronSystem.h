@@ -24,6 +24,7 @@ public:
 	const unsigned numTriangles() const;
 	const unsigned numTriangleFaceVertices() const;
 	float * hostX();
+	float * hostXi();
 	float * hostV();
 	float * hostMass();
 	unsigned * hostTretradhedronIndices();
@@ -35,6 +36,7 @@ private:
     void addTriangle(unsigned a, unsigned b, unsigned c);
 private:
 	BaseBuffer * m_hostX;
+	BaseBuffer * m_hostXi;
 	BaseBuffer * m_hostV;
 	BaseBuffer * m_hostMass;
 	BaseBuffer * m_hostTretradhedronIndices;

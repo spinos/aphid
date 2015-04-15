@@ -23,6 +23,8 @@ public:
     void collide();
     void integrate(float dt);
     
+    void reset();
+    
     const unsigned numObjects() const;
     
     CudaTetrahedronSystem * tetradedron(unsigned ind) const;

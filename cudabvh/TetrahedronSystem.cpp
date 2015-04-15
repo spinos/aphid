@@ -14,6 +14,7 @@ TetrahedronSystem::TetrahedronSystem() :
 m_numTetradedrons(0), m_numPoints(0), m_numTriangles(0)
 {
 	m_hostX = new BaseBuffer;
+	m_hostXi = new BaseBuffer;
 	m_hostV = new BaseBuffer;
 	m_hostTretradhedronIndices = new BaseBuffer;
 	m_hostTriangleIndices = new BaseBuffer;
@@ -24,6 +25,7 @@ m_numTetradedrons(0), m_numPoints(0), m_numTriangles(0)
 TetrahedronSystem::~TetrahedronSystem() 
 {
 	delete m_hostX;
+	delete m_hostXi;
 	delete m_hostV;
 	delete m_hostTretradhedronIndices;
 	delete m_hostTriangleIndices;
@@ -35,6 +37,7 @@ void TetrahedronSystem::create(const unsigned & maxNumTetrahedrons, const unsign
 	m_maxNumPoints = maxNumPoints;
 	m_maxNumTriangles = maxNumTetrahedrons * 4;
 	m_hostX->create(m_maxNumPoints * 12);
+	m_hostXi->create(m_maxNumPoints * 12);
 	m_hostV->create(m_maxNumPoints * 12);
 	m_hostMass->create(m_maxNumPoints * 4);
 	m_hostTretradhedronIndices->create(m_maxNumTetrahedrons * 16);
@@ -48,9 +51,13 @@ void TetrahedronSystem::addPoint(float * src)
 {
 	if(m_numPoints == m_maxNumPoints) return;
 	float * p = &hostX()[m_numPoints * 3];
+	float * p0 = &hostXi()[m_numPoints * 3];
 	p[0] = src[0];
 	p[1] = src[1];
 	p[2] = src[2];
+	p0[0] = p[0];
+	p0[1] = p[1];
+	p0[2] = p[2];
 	m_numPoints++;
 }
 
@@ -112,6 +119,9 @@ const unsigned TetrahedronSystem::numTriangleFaceVertices() const
 float * TetrahedronSystem::hostX()
 { return (float *)m_hostX->data(); }
 
+float * TetrahedronSystem::hostXi()
+{ return (float *)m_hostXi->data(); }
+
 float * TetrahedronSystem::hostV()
 { return (float *)m_hostV->data(); }
 
@@ -133,7 +143,7 @@ void TetrahedronSystem::calculateMass()
         mass[i] = base;
     }
     
-    Vector3F * p = (Vector3F *)hostX();
+    Vector3F * p = (Vector3F *)hostXi();
     
     Vector3F v[4];
     unsigned a, b, c, d;

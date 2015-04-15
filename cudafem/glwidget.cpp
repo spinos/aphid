@@ -82,6 +82,9 @@ void GLWidget::startPhysics()
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
+        case Qt::Key_R:
+            m_world->reset();
+            break;
         case Qt::Key_S:
             if(m_isPhysicsRunning) 
                 stopPhysics();
