@@ -3,6 +3,13 @@
 
 #include "bvh_math.cu"
 
+inline __device__ void set_mat33_zero(mat33 & m)
+{
+    m.v[0] = make_float3(0.f, 0.f, 0.f);
+    m.v[1] = make_float3(0.f, 0.f, 0.f);
+    m.v[2] = make_float3(0.f, 0.f, 0.f);
+}
+
 inline __device__ void set_mat33_identity(mat33 & m)
 {
     m.v[0] = make_float3(1.f, 0.f, 0.f);

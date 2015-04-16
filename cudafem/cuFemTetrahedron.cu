@@ -3,6 +3,13 @@
 #include "matrix_math.cu"
 #include <CudaBase.h>
 
+inline __device__ void extractTetij(uint c, uint & tet, uint & i, uint & j)
+{
+    tet = c>>5;
+    i = (c & 31)>>3;
+    j = c&3;
+}
+
 inline __device__ void tetrahedronP(float3 * pnt,
                                     float3 * src,
                                         uint4 & t) 
@@ -35,6 +42,41 @@ inline __device__ float tetrahedronVolume(const float3 * p)
     float3 e1, e2, e3;
 	tetrahedronEdge(e1, e2, e3, p); 
 	return tetrahedronVolume(e1, e2, e3);
+}
+
+__global__ void resetStiffnessMatrix_kernel(mat33* dst, 
+                    uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	set_mat33_zero(dst[ind]);
+}
+
+__global__ void stiffnessAssembly_kernel(mat33 * dst,
+                                        mat33 * orientation,
+                                        KeyValuePair * tetraInd,
+                                        uint * bufferIndices,
+                                        uint maxBufferInd,
+                                        uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	mat33 Re, ReT;
+	uint iTet, i, j;
+	uint cur = bufferIndices[ind];
+	for(;;) {
+	    if(tetraInd[cur].key != ind) break;
+	    
+	    extractTetij(tetraInd[cur].value, iTet, i, j);
+	    
+	    Re = orientation[iTet];
+	    dst[ind] = Re;
+	    
+	    cur++;
+	    if(cur >= maxBufferInd) break;
+	}
 }
 
 __global__ void resetRe_kernel(mat33* dst, 
@@ -113,6 +155,36 @@ void cuFemTetrahedron_calculateRe(mat33 * dst,
                                        pos0,
                                        indices,
                                        maxInd);
+}
+
+void cuFemTetrahedron_resetStiffnessMatrix(mat33 * dst,
+                                    uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    resetStiffnessMatrix_kernel<<< grid, block >>>(dst, 
+                                        maxInd);
+}
+
+void cuFemTetrahedron_stiffnessAssembly(mat33 * dst,
+                                        mat33 * orientation,
+                                        KeyValuePair * tetraInd,
+                                        uint * bufferIndices,
+                                        uint maxBufferInd,
+                                        uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    stiffnessAssembly_kernel<<< grid, block >>>(dst,
+                                            orientation,
+                                            tetraInd,
+                                            bufferIndices,
+                                            maxBufferInd,
+                                            maxInd);
 }
 
 }

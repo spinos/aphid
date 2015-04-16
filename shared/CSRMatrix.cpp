@@ -43,7 +43,7 @@ void CSRMatrix::create(CSRMatrix::ValueType type, unsigned m, const CSRMap & elm
             lastRow = row;
         }
         
-        J[ielm] = col;
+        J[it->second] = col;
         
         ielm++;
     }

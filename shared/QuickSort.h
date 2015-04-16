@@ -12,6 +12,7 @@ public:
 	QuickSort() {}
 	~QuickSort() {}
 	
+	static void Sort(unsigned * kv, int first, int last);
 	static void Sort(BaseArray &array,int first,int last);
 	static void Sort(vector<unsigned> &array,int first,int last);
 	static void Sort(deque<unsigned> &array,int first,int last);

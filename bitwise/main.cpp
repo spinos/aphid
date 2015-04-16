@@ -184,6 +184,23 @@ void testTetrahedronDegenerate()
     std::cout<<" volume "<<tetrahedronVolume(p)<<"\n";
 }
 
+void testKij()
+{
+    int k = 199;
+    int i = 2;
+    int j = 3;
+    int c = (k<<5 | ( i<<3 | j));
+    std::cout<<boost::format("kij    %1%\n") % byte_to_binary(c);	
+    std::cout<<boost::format("k %1%\n") % (c>>5);
+    std::cout<<boost::format("mask   %1%\n") % byte_to_binary(31);
+    std::cout<<boost::format("masked %1%\n") % byte_to_binary(c&31);
+    std::cout<<boost::format("masked>>3 %1%\n") % byte_to_binary((c&31)>>3);
+    std::cout<<boost::format("i         %1%\n") % ((c&31)>>3);
+    std::cout<<boost::format("mask   %1%\n") % byte_to_binary(3);
+    std::cout<<boost::format("masked  %1%\n") % byte_to_binary(c&3);
+    std::cout<<boost::format("j         %1%\n") % (c&3);	
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
@@ -265,6 +282,7 @@ int main(int argc, char * const argv[])
 	testNan();
 	testInf();
 	testTetrahedronDegenerate();
+	testKij();
 	std::cout<<"end of test\n";
 	return 0;
 }
