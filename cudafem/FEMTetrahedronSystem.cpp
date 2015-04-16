@@ -1,12 +1,12 @@
 #include "FEMTetrahedronSystem.h"
 #include <CUDABuffer.h>
-#include <CSRMatrix.h>
+#include <CudaCSRMatrix.h>
 #include <cuFemTetrahedron_implement.h>
 
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
     m_Re = new CUDABuffer;
-    m_stiffnessMatrix = new CSRMatrix;
+    m_stiffnessMatrix = new CudaCSRMatrix;
 }
 
 FEMTetrahedronSystem::~FEMTetrahedronSystem() 
@@ -19,6 +19,7 @@ void FEMTetrahedronSystem::initOnDevice()
 {
     m_Re->create(numTetrahedrons() * 36);
     createStiffnessMatrix();
+    m_stiffnessMatrix->initOnDevice();
     CudaTetrahedronSystem::initOnDevice();
 }
 

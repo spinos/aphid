@@ -23,6 +23,10 @@ public:
     unsigned * rowPtr();
     unsigned * colInd();
     
+    const unsigned dimension() const;
+    const unsigned numNonZero() const;
+    const ValueType valueType() const;
+    
     void verbose();
 protected:
 

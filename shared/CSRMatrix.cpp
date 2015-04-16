@@ -48,7 +48,6 @@ void CSRMatrix::create(CSRMatrix::ValueType type, unsigned m, const CSRMap & elm
         ielm++;
     }
     I[m] = ielm;
-    verbose();
 }
 
 void * CSRMatrix::value()
@@ -57,7 +56,6 @@ void * CSRMatrix::value()
 void * CSRMatrix::rowValue(unsigned i)
 {
     char * d = (char *)m_value->data();
-    
     return &d[rowPtr()[i] * m_valType];
 }
 
@@ -66,6 +64,15 @@ unsigned * CSRMatrix::rowPtr()
 
 unsigned * CSRMatrix::colInd()
 { return (unsigned *)m_colInd->data(); }
+
+const unsigned CSRMatrix::dimension() const
+{ return m_dimension; }
+
+const unsigned CSRMatrix::numNonZero() const
+{ return m_numNonZero; }
+
+const CSRMatrix::ValueType CSRMatrix::valueType() const
+{ return m_valType; }
 
 void CSRMatrix::verbose()
 {

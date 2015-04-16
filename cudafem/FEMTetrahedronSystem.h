@@ -3,7 +3,7 @@
 
 #include <CudaTetrahedronSystem.h>
 class CUDABuffer;
-class CSRMatrix;
+class CudaCSRMatrix;
 class FEMTetrahedronSystem : public CudaTetrahedronSystem {
 public:
     FEMTetrahedronSystem();
@@ -17,7 +17,7 @@ protected:
     
 private:
     CUDABuffer * m_Re;
-    CSRMatrix * m_stiffnessMatrix;
+    CudaCSRMatrix * m_stiffnessMatrix;
 };
 
 #endif        //  #ifndef FEMTETRAHEDRONSYSTEM_H
