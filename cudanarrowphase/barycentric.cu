@@ -127,16 +127,16 @@ inline __device__ BarycentricCoordinate getBarycentricCoordinate4(const float3 &
     return coord;
 }
 
-inline __device__ BarycentricCoordinate getBarycentricCoordinate4Relative(const float3 & p, const float3 * v)
+inline __device__ BarycentricCoordinate getBarycentricCoordinate4Relativei(const float3 & p, float3 * v, const uint4 & t)
 {
-    float3 q = v[0];
-    q = float3_add(q, v[1]);
-    q = float3_add(q, v[2]);
-    q = float3_add(q, v[3]);
+    float3 q = v[t.x];
+    q = float3_add(q, v[t.y]);
+    q = float3_add(q, v[t.z]);
+    q = float3_add(q, v[t.w]);
     q = scale_float3_by(q, .25f);
     q = float3_add(q, p);
     
-    return getBarycentricCoordinate4(q, v);
+    return getBarycentricCoordinate4i(q, v, t);
 }
 
 inline __device__ int pointInsideTriangleTest(const float3 & p, const float3 & nor, const float3 * tri)

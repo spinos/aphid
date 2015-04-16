@@ -184,7 +184,7 @@ void CudaNarrowphase::computeTimeOfImpact(void * overlappingPairs, unsigned numO
 	void * pos = m_objectBuf.m_pos->bufferOnDevice();
 	void * vel = m_objectBuf.m_vel->bufferOnDevice();
 	void * ind = m_objectBuf.m_ind->bufferOnDevice();
-	narrowphaseComputeTimeOfImpact((ContactData *)dstContact,
+	narrowphase_computeInitialSeparation((ContactData *)dstContact,
 		(uint2 *)overlappingPairs,
 		(float3 *)pos,
 		(float3 *)vel,
@@ -192,6 +192,18 @@ void CudaNarrowphase::computeTimeOfImpact(void * overlappingPairs, unsigned numO
 		(uint *)m_objectBuf.m_pointCacheLoc->bufferOnDevice(),
 		(uint *)m_objectBuf.m_indexCacheLoc->bufferOnDevice(),
 		numOverlappingPairs);
+	
+	int i;
+	for(i=0; i<7; i++) {
+	    narrowphase_advanceTimeOfImpactIterative((ContactData *)dstContact,
+		(uint2 *)overlappingPairs,
+		(float3 *)pos,
+		(float3 *)vel,
+		(uint4 *)ind,
+		(uint *)m_objectBuf.m_pointCacheLoc->bufferOnDevice(),
+		(uint *)m_objectBuf.m_indexCacheLoc->bufferOnDevice(),
+		numOverlappingPairs);
+	}
 }
 
 void CudaNarrowphase::squeezeContacts(void * overlappingPairs, unsigned numOverlappingPairs)

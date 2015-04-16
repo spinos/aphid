@@ -1,25 +1,11 @@
 #include "simpleContactSolver_implement.h"
 #include <bvh_math.cu>
 #include "barycentric.cu"
+#include "stripedModel.cu"
 #include <CudaBase.h>
 #define SETCONSTRAINT_TPB 128
 #define SOLVECONTACT_TPB 128
 #define DEFORMABILITY 0.134f
-inline __device__ uint4 computePointIndex(uint * pointStarts,
-                                            uint * indexStarts,
-                                            uint4 * indices,
-                                            uint combined)
-{
-    const uint objI = extractObjectInd(combined);
-    const uint elmI = extractElementInd(combined);
-    
-    uint4 r;
-    r.x = pointStarts[objI] + indices[indexStarts[objI] + elmI].x;
-    r.y = pointStarts[objI] + indices[indexStarts[objI] + elmI].y;
-    r.z = pointStarts[objI] + indices[indexStarts[objI] + elmI].z;
-    r.w = pointStarts[objI] + indices[indexStarts[objI] + elmI].w;
-    return r;
-}
 
 inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
                                                   float3 averageLinearVel,

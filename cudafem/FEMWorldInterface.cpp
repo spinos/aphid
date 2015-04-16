@@ -8,7 +8,7 @@ FEMWorldInterface::~FEMWorldInterface() {}
 
 void FEMWorldInterface::create(CudaDynamicWorld * world)
 {
-    // return DynamicWorldInterface::create(world);
+    return DynamicWorldInterface::create(world);
     std::cout<<"num points "<<TetraNumVertices<<"\n";
 	std::cout<<"num tetrahedrons "<<TetraNumTetrahedrons<<"\n";
 	

@@ -23,11 +23,6 @@ struct Simplex {
 	int dimension;
 };
 
-struct MovingTetrahedron {
-    float3 p[4];
-    float3 v[4];
-};
-
 struct TetrahedronProxy {
     float3 p[4];
 };
@@ -290,8 +285,8 @@ inline __device__ void interpolatePointAB(Simplex & s,
                                             const BarycentricCoordinate & contributes, 
                                             float3 & pA, float3 & pB)
 {
-	pA = make_float3(0.f, 0.f, 0.f);
-	pB = make_float3(0.f, 0.f, 0.f);
+	pA.x = pA.y = pA.z = 0.f;
+	pB.x = pB.y = pB.z = 0.f;
 	const float * wei = &contributes.x;
 	int i;
 	for(i =0; i < s.dimension; i++) {

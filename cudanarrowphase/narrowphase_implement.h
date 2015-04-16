@@ -21,6 +21,22 @@ void narrowphaseComputeTimeOfImpact(ContactData * dstContact,
 		uint * pointStart, uint * indexStart, 
 		uint numOverlappingPairs);
 
+void narrowphase_computeInitialSeparation(ContactData * dstContact,
+		uint2 * pairs,
+		float3 * pos,
+		float3 * vel,
+		uint4 * ind,
+		uint * pointStart, uint * indexStart, 
+		uint numOverlappingPairs);
+
+void narrowphase_advanceTimeOfImpactIterative(ContactData * dstContact,
+		uint2 * pairs,
+		float3 * pos,
+		float3 * vel,
+		uint4 * ind,
+		uint * pointStart, uint * indexStart, 
+		uint numOverlappingPairs);
+
 void narrowphaseComputeValidPairs(uint * dstCounts, 
         ContactData * srcContact, 
         uint numContacts, 
