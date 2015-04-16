@@ -124,7 +124,7 @@ void CudaNarrowphase::initOnDevice()
 	m_numPoints = 0;
 	unsigned i;
 	for(i = 0; i<m_numObjects; i++) {
-		m_numElements += m_objects[i]->numTetradedrons();
+		m_numElements += m_objects[i]->numTetrahedrons();
 		m_numPoints += m_objects[i]->numPoints();
 		if(i<m_numObjects-1) {
 		    m_objectPointStart[i+1] = m_numPoints;
@@ -157,9 +157,7 @@ void CudaNarrowphase::initOnDevice()
 		m_objectBuf.m_pos0->hostToDevice(curObj->hostXi(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_vel->hostToDevice(curObj->hostV(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_mass->hostToDevice(curObj->hostMass(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
-		m_objectBuf.m_ind->hostToDevice(curObj->hostTretradhedronIndices(), m_objectIndexStart[i] * 16, curObj->numTetradedrons() * 16);
-		
-		curObj->initOnDevice();
+		m_objectBuf.m_ind->hostToDevice(curObj->hostTretradhedronIndices(), m_objectIndexStart[i] * 16, curObj->numTetrahedrons() * 16);
 	}
 }
 

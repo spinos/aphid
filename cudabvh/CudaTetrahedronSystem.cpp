@@ -34,7 +34,8 @@ void CudaTetrahedronSystem::setDeviceTretradhedronIndicesPtr(CUDABuffer * ptr, u
 
 void CudaTetrahedronSystem::initOnDevice() 
 {
-	setNumLeafNodes(numTetradedrons());
+    calculateMass();
+	setNumLeafNodes(numTetrahedrons());
 	CudaLinearBvh::initOnDevice();
 }
 
@@ -50,7 +51,7 @@ void CudaTetrahedronSystem::formTetrahedronAabbs()
 	void * vsrc = deviceV();
     void * idx = deviceTretradhedronIndices();
     void * dst = leafAabbs();
-    bvhCalculateLeafAabbsTetrahedron2((Aabb *)dst, (float3 *)cvs, (float3 *)vsrc, 1.f/60.f, (uint4 *)idx, numTetradedrons());
+    bvhCalculateLeafAabbsTetrahedron2((Aabb *)dst, (float3 *)cvs, (float3 *)vsrc, 1.f/60.f, (uint4 *)idx, numTetrahedrons());
 }
 
 void * CudaTetrahedronSystem::deviceX()

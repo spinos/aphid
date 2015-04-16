@@ -1,7 +1,7 @@
 #ifndef _MATRIX_MATH_H_
 #define _MATRIX_MATH_H_
 
-#include "bvh_common.h"
+#include "bvh_math.cu"
 
 inline __device__ void set_mat33_identity(mat33 & m)
 {
@@ -30,6 +30,27 @@ inline __device__ float determinant44(const mat44 & M)
 			+ M.v[2].x * determinant33( M.v[0].y, M.v[1].y, M.v[3].y, M.v[0].z, M.v[1].z, M.v[3].z, M.v[0].w, M.v[1].w, M.v[3].w )
 			- M.v[3].x * determinant33( M.v[0].y, M.v[1].y, M.v[2].y, M.v[0].z, M.v[1].z, M.v[2].z, M.v[0].w, M.v[1].w, M.v[2].w ) );
 
+}
+
+inline __device__ void mat33_orthoNormalize(mat33 & dst)
+{
+    float3 r0 = dst.v[0];
+    float3 r1 = dst.v[1];
+    float3 r2 = dst.v[2];
+    
+    float l0 = float3_length(r0);
+    if(l0 > 0.f) scale_float3_by(r0, 1.f/l0);
+    
+    r1 = float3_difference(r1, scale_float3_by(r0, float3_dot(r0, r1)));
+    
+    float l1 = float3_length(r1);
+    if(l1 > 0.f) scale_float3_by(r1, 1.f/l1);
+    
+    r2 = float3_cross(r0, r1);
+    
+    dst.v[0] = r0;
+    dst.v[1] = r1;
+    dst.v[2] = r2;
 }
 
 #endif

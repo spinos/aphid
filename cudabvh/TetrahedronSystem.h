@@ -18,8 +18,7 @@ public:
 	void addPoint(float * src);
 	void addTetrahedron(unsigned a, unsigned b, unsigned c, unsigned d);
 	void setDensity(float x);
-	void calculateMass();
-	const unsigned numTetradedrons() const;
+	const unsigned numTetrahedrons() const;
 	const unsigned numPoints() const;
 	const unsigned numTriangles() const;
 	const unsigned numTriangleFaceVertices() const;
@@ -30,6 +29,7 @@ public:
 	unsigned * hostTretradhedronIndices();
 	unsigned * hostTriangleIndices();
 protected:
+    void calculateMass();
     const unsigned maxNumPoints() const;
 	const unsigned maxNumTetradedrons() const;
 private:
@@ -41,7 +41,7 @@ private:
 	BaseBuffer * m_hostMass;
 	BaseBuffer * m_hostTretradhedronIndices;
 	BaseBuffer * m_hostTriangleIndices;
-	unsigned m_numTetradedrons, m_numPoints, m_numTriangles;
+	unsigned m_numTetrahedrons, m_numPoints, m_numTriangles;
 	unsigned m_maxNumTetrahedrons, m_maxNumPoints, m_maxNumTriangles;
 	float m_density;
 };

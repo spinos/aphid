@@ -39,6 +39,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../cudadyn/CudaDynamicWorld.h"
 "../cudadyn/DynamicWorldInterface.h"
 "../fem/tetmesh.h"
+"../shared/CSRMatrix.h"
 "cuFemTetrahedron_implement.h"
 "FEMTetrahedronSystem.h"
 "FEMWorldInterface.h"
@@ -59,6 +60,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../cudanarrowphase/SimpleContactSolver.cpp"
 "../cudadyn/CudaDynamicWorld.cpp"
 "../cudadyn/DynamicWorldInterface.cpp"
+"../shared/CSRMatrix.cpp"
 "FEMTetrahedronSystem.cpp"
 "FEMWorldInterface.cpp"
 "glwidget.cpp"
@@ -76,6 +78,10 @@ find_package (CUDA QUIET REQUIRED)
 message ("cuda found ? " ${CUDA_FOUND})
 message ("cuda version " ${CUDA_VERSION})
 message ("cuda sdk root dir " ${CUDA_SDK_ROOT_DIR})
+message ("cuda librarie " ${CUDA_CUDA_LIBRARY})
+message ("cuda art librarie " ${CUDA_CUDART_LIBRARY})
+message ("cuda blas librarie " ${CUDA_cublas_LIBRARY})
+message ("cuda sparse librarie " ${CUDA_cusparse_LIBRARY})
 
 set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudabvh/scan.cu"

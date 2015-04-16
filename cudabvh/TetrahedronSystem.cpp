@@ -11,7 +11,7 @@
 #include <BaseBuffer.h>
 #include <tetrahedron_math.h>
 TetrahedronSystem::TetrahedronSystem() :
-m_numTetradedrons(0), m_numPoints(0), m_numTriangles(0)
+m_numTetrahedrons(0), m_numPoints(0), m_numTriangles(0)
 {
 	m_hostX = new BaseBuffer;
 	m_hostXi = new BaseBuffer;
@@ -63,13 +63,13 @@ void TetrahedronSystem::addPoint(float * src)
 
 void TetrahedronSystem::addTetrahedron(unsigned a, unsigned b, unsigned c, unsigned d)
 {
-	if(m_numTetradedrons == m_maxNumTetrahedrons) return;
-	unsigned *idx = &hostTretradhedronIndices()[m_numTetradedrons * 4];
+	if(m_numTetrahedrons == m_maxNumTetrahedrons) return;
+	unsigned *idx = &hostTretradhedronIndices()[m_numTetrahedrons * 4];
 	idx[0] = a;
 	idx[1] = b;
 	idx[2] = c;
 	idx[3] = d;
-	m_numTetradedrons++;
+	m_numTetrahedrons++;
 	
 	addTriangle(idx[TetrahedronToTriangleVertexByFace[0][0]], 
 	            idx[TetrahedronToTriangleVertexByFace[0][1]],
@@ -98,8 +98,8 @@ void TetrahedronSystem::addTriangle(unsigned a, unsigned b, unsigned c)
 	m_numTriangles++;
 }
 
-const unsigned TetrahedronSystem::numTetradedrons() const
-{ return m_numTetradedrons; }
+const unsigned TetrahedronSystem::numTetrahedrons() const
+{ return m_numTetrahedrons; }
 
 const unsigned TetrahedronSystem::numPoints() const
 { return m_numPoints; }
@@ -149,7 +149,7 @@ void TetrahedronSystem::calculateMass()
     unsigned a, b, c, d;
     unsigned *ind = hostTretradhedronIndices();
     float m;
-    for(i=0; i<m_numTetradedrons; i++) {
+    for(i=0; i<m_numTetrahedrons; i++) {
 		a = ind[0];
 		b = ind[1];
 		c = ind[2];

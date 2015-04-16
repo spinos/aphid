@@ -16,15 +16,6 @@ inline __device__ void ascentOrder(T & in)
 inline __device__ float absoluteValueF(float a)
 { return (a > 0.f) ? a : -a; }
 
-inline __device__ uint combineObjectElementInd(uint objectIdx, uint elementIdx)
-{ return (objectIdx<<24 | elementIdx); }
-
-inline __device__ uint extractObjectInd(uint combined)
-{ return (combined>>24);}
-
-inline __device__ uint extractElementInd(uint combined)
-{ return ((combined<<7)>>7);}
-
 inline __device__ int isLeafNode(int index) 
 { return (index >> 31 == 0); }
 

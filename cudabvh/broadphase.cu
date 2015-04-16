@@ -1,6 +1,7 @@
 #include "broadphase_implement.h"
 #include <bvh_math.cu>
 #include <CudaBase.h>
+#include <stripedModel.cu>
 
 #define B3_BROADPHASE_MAX_STACK_SIZE 128
 

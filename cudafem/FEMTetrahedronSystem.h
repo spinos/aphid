@@ -3,6 +3,7 @@
 
 #include <CudaTetrahedronSystem.h>
 class CUDABuffer;
+class CSRMatrix;
 class FEMTetrahedronSystem : public CudaTetrahedronSystem {
 public:
     FEMTetrahedronSystem();
@@ -12,9 +13,11 @@ public:
     void resetOrientation();
     void updateOrientation();
 protected:
-
+    void createStiffnessMatrix();
+    
 private:
     CUDABuffer * m_Re;
+    CSRMatrix * m_stiffnessMatrix;
 };
 
 #endif        //  #ifndef FEMTETRAHEDRONSYSTEM_H
