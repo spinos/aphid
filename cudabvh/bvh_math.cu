@@ -70,6 +70,13 @@ inline __device__ void float3_minus_inplace(float3 & v1, const float3 & v2)
     v1.z -= v2.z; 
 }
 
+inline __device__ void float3_scale_inplace(float3 & v1, float s)
+{ 
+    v1.x *= s;
+    v1.y *= s;
+    v1.z *= s; 
+}
+
 inline __device__ float3 float3_progress(const float3 & p0, const float3 & v0, float h)
 { return make_float3(p0.x + v0.x * h, p0.y + v0.y * h, p0.z + v0.z * h); }
 

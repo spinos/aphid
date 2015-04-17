@@ -24,6 +24,15 @@ CUDABuffer * CudaCSRMatrix::rowPtrBuf()
 CUDABuffer * CudaCSRMatrix::colIndBuf()
 { return m_deviceColInd; }
 
+void * CudaCSRMatrix::deviceValue()
+{ return m_deviceValue->bufferOnDevice(); }
+
+void * CudaCSRMatrix::deviceRowPtr()
+{ return m_deviceRowPtr->bufferOnDevice(); }
+
+void * CudaCSRMatrix::deviceColInd()
+{ return m_deviceColInd->bufferOnDevice(); }
+
 void CudaCSRMatrix::initOnDevice()
 {
     m_deviceValue->create(numNonZero() * valueType());

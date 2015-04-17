@@ -22,6 +22,7 @@ private:
     void updateStiffnessMatrix();
     void resetForce();
     void updateForce();
+    void dynamicsAssembly(float dt);
 private:
     CUDABuffer * m_Re;
     CudaCSRMatrix * m_stiffnessMatrix;
@@ -34,6 +35,7 @@ private:
     CUDABuffer * m_deviceVertexTetraHash;
     CUDABuffer * m_deviceVertexInd;
     CUDABuffer * m_F0;
+    CUDABuffer * m_rhs;
 };
 
 #endif        //  #ifndef FEMTETRAHEDRONSYSTEM_H

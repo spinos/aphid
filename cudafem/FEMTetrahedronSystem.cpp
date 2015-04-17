@@ -17,6 +17,7 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
     m_deviceVertexTetraHash = new CUDABuffer;
     m_deviceVertexInd = new CUDABuffer;
     m_F0 = new CUDABuffer;
+    m_rhs = new CUDABuffer;
 }
 
 FEMTetrahedronSystem::~FEMTetrahedronSystem() 
@@ -32,6 +33,7 @@ FEMTetrahedronSystem::~FEMTetrahedronSystem()
     delete m_deviceVertexTetraHash;
     delete m_deviceVertexInd;
     delete m_F0;
+    delete m_rhs;
 }
 
 void FEMTetrahedronSystem::initOnDevice()
@@ -45,6 +47,7 @@ void FEMTetrahedronSystem::initOnDevice()
     m_deviceVertexTetraHash->create(numTetrahedrons() * 16 * 8);
     m_deviceVertexInd->create(numPoints() * 4);
     m_F0->create(numPoints() * 12);
+    m_rhs->create(numPoints() * 12);
     
     m_deviceStiffnessTetraHash->hostToDevice(m_stiffnessTetraHash->data());
     m_deviceStiffnessInd->hostToDevice(m_stiffnessInd->data());
@@ -240,7 +243,7 @@ void FEMTetrahedronSystem::updateOrientation()
 
 void FEMTetrahedronSystem::resetStiffnessMatrix()
 {
-    void * dst = m_stiffnessMatrix->valueBuf()->bufferOnDevice();
+    void * dst = m_stiffnessMatrix->deviceValue();
     cuFemTetrahedron_resetStiffnessMatrix((mat33 *)dst, 
                                         m_stiffnessMatrix->numNonZero());
 }
@@ -285,5 +288,28 @@ void FEMTetrahedronSystem::updateForce()
                                         (unsigned *)ind,
                                         numTetrahedrons() * 16,
                                         numPoints());
+}
+
+void FEMTetrahedronSystem::dynamicsAssembly(float dt)
+{
+    float dt2 = dt*dt;
+	void * X = deviceX();
+	void * V = deviceV();
+	void * mass = deviceMass();
+	void * rhs = m_rhs->bufferOnDevice();
+	void * stiffness = m_stiffnessMatrix->deviceValue();
+	void * rowPtr = m_stiffnessMatrix->deviceRowPtr();
+	void * colInd = m_stiffnessMatrix->deviceColInd();
+	void * f0 = m_F0->bufferOnDevice();
+	cuFemTetrahedron_computeRhs((float3 *)rhs,
+                                (float3 *)X,
+                                (float3 *)V,
+                                (float *)mass,
+                                (mat33 *)stiffness,
+                                (uint *)rowPtr,
+                                (uint *)colInd,
+                                (float3 *)f0,
+                                dt2,
+                                numPoints());
 }
 

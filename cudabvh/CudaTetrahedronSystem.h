@@ -28,6 +28,7 @@ public:
 	void * deviceX();
 	void * deviceXi();
 	void * deviceV();
+	void * deviceMass();
 	void * deviceTretradhedronIndices();
 	
 	void integrate(float timeStep);

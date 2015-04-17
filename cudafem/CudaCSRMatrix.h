@@ -15,6 +15,9 @@ public:
     CUDABuffer * valueBuf();
     CUDABuffer * rowPtrBuf();
     CUDABuffer * colIndBuf();
+    void * deviceValue();
+    void * deviceRowPtr();
+    void * deviceColInd();
 protected:
 
 private:

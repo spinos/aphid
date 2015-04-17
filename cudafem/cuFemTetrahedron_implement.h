@@ -36,6 +36,17 @@ void cuFemTetrahedron_internalForce(float3 * dst,
                                     uint * bufferIndices,
                                     uint maxBufferInd,
                                     uint maxInd);
+
+void cuFemTetrahedron_computeRhs(float3 * rhs,
+                                float3 * pos,
+                                float3 * vel,
+                                float * mass,
+                                mat33 * stiffness,
+                                uint * rowPtr,
+                                uint * colInd,
+                                float3 * f0,
+                                float dt2,
+                                uint maxInd);
 }
 #endif        //  #ifndef CUFEMTETRAHEDRON_IMPLEMENT_H
 

@@ -63,6 +63,9 @@ void * CudaTetrahedronSystem::deviceXi()
 void * CudaTetrahedronSystem::deviceV()
 {  return m_deviceV->bufferOnDeviceAt(m_vLoc); }
 
+void * CudaTetrahedronSystem::deviceMass()
+{  return m_deviceMass->bufferOnDeviceAt(m_massLoc); }
+
 void * CudaTetrahedronSystem::deviceTretradhedronIndices()
 { return m_deviceTretradhedronIndices->bufferOnDeviceAt(m_iLoc); }
 

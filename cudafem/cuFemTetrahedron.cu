@@ -1,6 +1,39 @@
 #include "cuFemTetrahedron_implement.h"
 #include "cuFemMath.cu"
 
+__global__ void computeRhs_kernel(float3 * rhs,
+                                float3 * pos,
+                                float3 * vel,
+                                float * mass,
+                                mat33 * stiffness,
+                                uint * rowPtr,
+                                uint * colInd,
+                                float3 * f0,
+                                float dt2,
+                                uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	float3_set_zero(rhs[ind]);
+	const int nextRow = rowPtr[ind+1];
+	int cur = rowPtr[ind];
+	mat33 K;
+	uint j;
+	float3 tmp;
+	for(;cur<nextRow; cur++) {
+	    K = stiffness[cur];
+	    j = colInd[cur];
+	    mat33_float3_prod(tmp, K, pos[j]);
+	    float3_minus_inplace(rhs[ind], tmp);
+	}
+	
+	float3_minus_inplace(rhs[ind], f0[ind]);
+	float3_scale_inplace(rhs[ind], dt2);
+	tmp = vel[ind];
+	float3_scale_inplace(tmp, mass[ind]);
+	float3_add_inplace(rhs[ind], tmp);
+}
+
 __global__ void internalForce_kernel(float3 * dst,
     float d16, float d17, float d18,
                                     float3 * pos,
@@ -262,6 +295,33 @@ void cuFemTetrahedron_internalForce(float3 * dst,
                                             bufferIndices,
                                             maxBufferInd,
                                             maxInd);
+}
+
+void cuFemTetrahedron_computeRhs(float3 * rhs,
+                                float3 * pos,
+                                float3 * vel,
+                                float * mass,
+                                mat33 * stiffness,
+                                uint * rowPtr,
+                                uint * colInd,
+                                float3 * f0,
+                                float dt2,
+                                uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    computeRhs_kernel<<< grid, block >>>(rhs, 
+        pos,
+        vel,
+        mass, 
+        stiffness, 
+        rowPtr, 
+        colInd,
+        f0,
+        dt2, 
+        maxInd);
 }
 
 }
