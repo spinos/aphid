@@ -9,7 +9,7 @@ __global__ void computeRhs_kernel(float3 * rhs,
                                 uint * rowPtr,
                                 uint * colInd,
                                 float3 * f0,
-                                float dt2,
+                                float dt,
                                 uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
@@ -28,7 +28,7 @@ __global__ void computeRhs_kernel(float3 * rhs,
 	}
 	
 	float3_minus_inplace(rhs[ind], f0[ind]);
-	float3_scale_inplace(rhs[ind], dt2);
+	float3_scale_inplace(rhs[ind], dt);
 	tmp = vel[ind];
 	float3_scale_inplace(tmp, mass[ind]);
 	float3_add_inplace(rhs[ind], tmp);
@@ -305,7 +305,7 @@ void cuFemTetrahedron_computeRhs(float3 * rhs,
                                 uint * rowPtr,
                                 uint * colInd,
                                 float3 * f0,
-                                float dt2,
+                                float dt,
                                 uint maxInd)
 {
     dim3 block(512, 1, 1);
@@ -320,7 +320,7 @@ void cuFemTetrahedron_computeRhs(float3 * rhs,
         rowPtr, 
         colInd,
         f0,
-        dt2, 
+        dt, 
         maxInd);
 }
 

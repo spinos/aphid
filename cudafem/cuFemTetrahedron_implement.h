@@ -45,7 +45,7 @@ void cuFemTetrahedron_computeRhs(float3 * rhs,
                                 uint * rowPtr,
                                 uint * colInd,
                                 float3 * f0,
-                                float dt2,
+                                float dt,
                                 uint maxInd);
 }
 #endif        //  #ifndef CUFEMTETRAHEDRON_IMPLEMENT_H

@@ -292,8 +292,7 @@ void FEMTetrahedronSystem::updateForce()
 
 void FEMTetrahedronSystem::dynamicsAssembly(float dt)
 {
-    float dt2 = dt*dt;
-	void * X = deviceX();
+    void * X = deviceX();
 	void * V = deviceV();
 	void * mass = deviceMass();
 	void * rhs = m_rhs->bufferOnDevice();
@@ -309,7 +308,7 @@ void FEMTetrahedronSystem::dynamicsAssembly(float dt)
                                 (uint *)rowPtr,
                                 (uint *)colInd,
                                 (float3 *)f0,
-                                dt2,
+                                dt,
                                 numPoints());
 }
 
