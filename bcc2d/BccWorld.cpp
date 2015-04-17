@@ -20,6 +20,12 @@ BccWorld::BccWorld(GeoDrawer * drawer)
     m_curve->m_cvs[6].set(18.f + RandomFn11(), 12.2f + RandomFn11(), 3.18f);
     m_curve->m_cvs[7].set(12.f + RandomFn11(), 12.2f + RandomFn11(), 2.19f);
     m_curve->m_cvs[8].set(13.f + RandomFn11(), 8.2f + RandomFn11(), -2.18f);
+    
+    for(unsigned i=0; i<9;i++) {
+        m_curve->m_cvs[i] -= Vector3F(12.f, 0.f, 0.f);
+        m_curve->m_cvs[i] *= 3.f;
+    }
+    
     m_curve->computeKnots();
     
     const unsigned ns = m_curve->numSegments();

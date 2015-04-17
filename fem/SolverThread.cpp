@@ -24,7 +24,7 @@ SolverThread::SolverThread(QObject *parent)
     m_mesh = new FEMTetrahedronMesh;
     // m_mesh->generateBlocks(64,1,1, .25f,.25f,.25f);
     m_mesh->generateFromFile();
-    m_mesh->setDensity(2.f);
+    m_mesh->setDensity(1.f);
     
     unsigned totalPoints = m_mesh->numPoints();
 	

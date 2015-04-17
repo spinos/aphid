@@ -7,7 +7,7 @@ CartesianGrid::CartesianGrid(const BoundingBox & bound)
     m_origin = bound.getMin();
     m_span = bound.getLongestDistance();
     
-    const float margin = m_span / 43.f;
+    const float margin = m_span / 256.f;
     m_origin.x -= margin;
     m_origin.y -= margin;
     m_origin.z -= margin;
@@ -53,9 +53,9 @@ const unsigned CartesianGrid::mortonEncode(const Vector3F & p) const
 	const Vector3F q = putIntoBound(p);
     const float ih = 1.f / gridSize();
 // numerical inaccuracy
-    unsigned x = (q.x - m_origin.x + 1e-6) * ih;
-    unsigned y = (q.y - m_origin.y + 1e-6) * ih;
-    unsigned z = (q.z - m_origin.z + 1e-6) * ih;
+    unsigned x = (q.x - m_origin.x) * ih;
+    unsigned y = (q.y - m_origin.y) * ih;
+    unsigned z = (q.z - m_origin.z) * ih;
 	return encodeMorton3D(x, y, z);
 }
 
@@ -80,11 +80,6 @@ unsigned CartesianGrid::addGrid(const Vector3F & p)
 unsigned CartesianGrid::addCell(const Vector3F & p, int level)
 {
     unsigned code = mortonEncode(p);
-    
-    // std::cout<<" encode x y z "<<x<<" "<<y<<" "<<z<<"\n";
-    //unsigned dx, dy, dz;
-    //decodeMorton3D(code, dx, dy, dz);
-    // std::cout<<" decode x y z "<<dx<<" "<<dy<<" "<<dz<<"\n";
 
 	sdb::CellValue * ind = new sdb::CellValue;
 	ind->level = level;
