@@ -73,6 +73,15 @@ inline __device__ void mat33_mult_f(mat33 & m, float a)
     m.v[2].z *= a;
 }
 
+inline __device__ void mat33_float3_prod(float3 & dst, 
+                                        const mat33 & m, 
+                                        const float3 & a)
+{
+    dst.x = float3_dot(m.v[0], a);
+    dst.y = float3_dot(m.v[1], a);
+    dst.z = float3_dot(m.v[2], a);
+}
+
 inline __device__ void mat33_cpy(mat33 & a, const mat33 & b)
 {
     a.v[0] = b.v[0];

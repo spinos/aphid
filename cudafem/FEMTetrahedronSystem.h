@@ -19,7 +19,9 @@ private:
     void resetOrientation();
     void updateOrientation();
     void resetStiffnessMatrix();
-    void stiffnessAssembly();
+    void updateStiffnessMatrix();
+    void resetForce();
+    void updateForce();
 private:
     CUDABuffer * m_Re;
     CudaCSRMatrix * m_stiffnessMatrix;
@@ -31,6 +33,7 @@ private:
     CUDABuffer * m_deviceStiffnessInd;
     CUDABuffer * m_deviceVertexTetraHash;
     CUDABuffer * m_deviceVertexInd;
+    CUDABuffer * m_F0;
 };
 
 #endif        //  #ifndef FEMTETRAHEDRONSYSTEM_H

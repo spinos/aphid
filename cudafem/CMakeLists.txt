@@ -99,6 +99,7 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudanarrowphase/gjk_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
 "../cudanarrowphase/narrowphase.cu"
+"cuFemMath.cu"
 "cuFemTetrahedron.cu")
 
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")

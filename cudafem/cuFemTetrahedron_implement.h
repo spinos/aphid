@@ -24,6 +24,18 @@ void cuFemTetrahedron_stiffnessAssembly(mat33 * dst,
                                         uint * bufferIndices,
                                         uint maxBufferInd,
                                         uint maxInd);
+
+void cuFemTetrahedron_resetForce(float3 * dst,
+                                    uint maxInd);
+
+void cuFemTetrahedron_internalForce(float3 * dst,
+                                    float3 * pos,
+                                    uint4 * tetvert,
+                                    mat33 * orientation,
+                                    KeyValuePair * tetraInd,
+                                    uint * bufferIndices,
+                                    uint maxBufferInd,
+                                    uint maxInd);
 }
 #endif        //  #ifndef CUFEMTETRAHEDRON_IMPLEMENT_H
 

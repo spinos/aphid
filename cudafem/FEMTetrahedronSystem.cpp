@@ -16,6 +16,7 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
     m_deviceStiffnessInd = new CUDABuffer;
     m_deviceVertexTetraHash = new CUDABuffer;
     m_deviceVertexInd = new CUDABuffer;
+    m_F0 = new CUDABuffer;
 }
 
 FEMTetrahedronSystem::~FEMTetrahedronSystem() 
@@ -30,6 +31,7 @@ FEMTetrahedronSystem::~FEMTetrahedronSystem()
     delete m_deviceStiffnessInd;
     delete m_deviceVertexTetraHash;
     delete m_deviceVertexInd;
+    delete m_F0;
 }
 
 void FEMTetrahedronSystem::initOnDevice()
@@ -42,6 +44,7 @@ void FEMTetrahedronSystem::initOnDevice()
     m_deviceStiffnessInd->create(m_stiffnessMatrix->numNonZero() * 4);
     m_deviceVertexTetraHash->create(numTetrahedrons() * 16 * 8);
     m_deviceVertexInd->create(numPoints() * 4);
+    m_F0->create(numPoints() * 12);
     
     m_deviceStiffnessTetraHash->hostToDevice(m_stiffnessTetraHash->data());
     m_deviceStiffnessInd->hostToDevice(m_stiffnessInd->data());
@@ -61,6 +64,9 @@ unsigned combineKij(unsigned k, unsigned i, unsigned j)
 {
     return (k<<5 | ( i<<3 | j));
 }
+
+uint64 upsample(uint a, uint b) 
+{ return ((uint64)a << 32) | (uint64)b; }
 
 void extractKij(unsigned c, unsigned & k, unsigned & i, unsigned & j)
 {
@@ -85,7 +91,7 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
             h = ind[k*4+i];
             for(j=0; j<4; j++) {
                 
-                vtkv->key= ((uint64)h << 32) | (uint64)k;
+                vtkv->key= upsample(h, k);
                 vtkv->value=combineKij(k,i,j);
                 vtkv++;
                 
@@ -99,7 +105,7 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
         }
     }
     
-    vtkv -= n * 16;
+    vtkv -= hashSize;
     QuickSort1<uint64, uint>::Sort(vtkv, 0, hashSize -1);
     
     m_vertexTetraHash->create(hashSize * 8);
@@ -109,8 +115,6 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
         vertexTetraHash[i].key = vtkv[i].key >> 32;
         vertexTetraHash[i].value = vtkv[i].value;
     }
-    
-    delete[] vtkv;
 
     CSRMap::iterator it = vertexConnection.begin();
     i = 0;
@@ -120,40 +124,46 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
     }
     
     m_stiffnessMatrix->create(CSRMatrix::tMat33, w, vertexConnection);
-    
-    m_stiffnessTetraHash->create(hashSize * 8);
-    KeyValuePair * sth = (KeyValuePair *)m_stiffnessTetraHash->data();
-    
+
     for(k=0; k < n; k++) {
         for(i=0; i< 4; i++) {
             for(j=0; j<4; j++) {
                 if(j >= i) {
-                    sth->key = vertexConnection[matrixCoord(ind, k, w, i, j)];
-                    sth->value = combineKij(k,i,j);
-                    sth++;
+                    vtkv->key = upsample(vertexConnection[matrixCoord(ind, k, w, i, j)], k);
+                    vtkv->value = combineKij(k,i,j);
+                    vtkv++;
                     
                     if(j > i) {
-                        sth->key = vertexConnection[matrixCoord(ind, k, w, j, i)];
-                        sth->value = combineKij(k,i,j);
-                        sth++;
+                        vtkv->key = upsample(vertexConnection[matrixCoord(ind, k, w, j, i)], k);
+                        vtkv->value = combineKij(k,i,j);
+                        vtkv++;
                     } 
                 }
             }
         }
     }
     
-    sth -= hashSize;
-   
-    QuickSort::Sort((unsigned *)sth, 0, hashSize -1);
+    vtkv -= hashSize;
+    QuickSort1<uint64, uint>::Sort(vtkv, 0, hashSize -1);
     
+    m_stiffnessTetraHash->create(hashSize * 8);
+    KeyValuePair * stiffnessTetraHash = (KeyValuePair *)m_stiffnessTetraHash->data();
+   
+    for(i=0; i< hashSize; i++) {
+        stiffnessTetraHash[i].key = vtkv[i].key >> 32;
+        stiffnessTetraHash[i].value = vtkv[i].value;
+    }
+    
+    delete[] vtkv;
+
     m_stiffnessInd->create(m_stiffnessMatrix->numNonZero() * 4);
     unsigned * scanned = (unsigned *)m_stiffnessInd->data();
 
 // prefix sum to get element start
     unsigned lastK = n + 2;
     for(i=0; i< hashSize; i++) {
-        if(sth[i].key!= lastK) {
-            lastK = sth[i].key;
+        if(stiffnessTetraHash[i].key!= lastK) {
+            lastK = stiffnessTetraHash[i].key;
             *scanned = i;
             scanned++;
         }
@@ -235,7 +245,7 @@ void FEMTetrahedronSystem::resetStiffnessMatrix()
                                         m_stiffnessMatrix->numNonZero());
 }
 
-void FEMTetrahedronSystem::stiffnessAssembly() 
+void FEMTetrahedronSystem::updateStiffnessMatrix() 
 {
     void * dst = m_stiffnessMatrix->valueBuf()->bufferOnDevice();
     void * re = m_Re->bufferOnDevice();
@@ -251,5 +261,29 @@ void FEMTetrahedronSystem::stiffnessAssembly()
                                         (unsigned *)ind,
                                         numTetrahedrons() * 16,
                                         m_stiffnessMatrix->numNonZero());
+}
+
+void FEMTetrahedronSystem::resetForce()
+{
+    void * d = m_F0->bufferOnDevice();
+    cuFemTetrahedron_resetForce((float3 *)d, numPoints());
+}
+
+void FEMTetrahedronSystem::updateForce()
+{
+    void * d = m_F0->bufferOnDevice();
+    void * re = m_Re->bufferOnDevice();
+    void * vth = m_deviceVertexTetraHash->bufferOnDevice();
+    void * ind = m_deviceVertexInd->bufferOnDevice();
+    void * xi = deviceXi();
+    void * tetv = deviceTretradhedronIndices();
+    cuFemTetrahedron_internalForce((float3 *)d,
+                                        (float3 *)xi,
+                                        (uint4 *)tetv,
+                                        (mat33 *)re,
+                                        (KeyValuePair *)vth,
+                                        (unsigned *)ind,
+                                        numTetrahedrons() * 16,
+                                        numPoints());
 }
 
