@@ -17,6 +17,8 @@ void cuFemTetrahedron_resetStiffnessMatrix(mat33 * dst,
                                     uint maxInd);
 
 void cuFemTetrahedron_stiffnessAssembly(mat33 * dst,
+                                        float3 * pos,
+                                        uint4 * vert,
                                         mat33 * orientation,
                                         KeyValuePair * tetraInd,
                                         uint * bufferIndices,

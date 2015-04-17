@@ -178,7 +178,11 @@ void FEMTetrahedronSystem::stiffnessAssembly()
     void * re = m_Re->bufferOnDevice();
     void * sth = m_deviceStiffnessTetraHash->bufferOnDevice();
     void * ind = m_deviceStiffnessInd->bufferOnDevice();
+    void * xi = deviceXi();
+    void * tetv = deviceTretradhedronIndices();
     cuFemTetrahedron_stiffnessAssembly((mat33 *)dst,
+                                        (float3 *)xi,
+                                        (uint4 *)tetv,
                                         (mat33 *)re,
                                         (KeyValuePair *)sth,
                                         (unsigned *)ind,
