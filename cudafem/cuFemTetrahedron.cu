@@ -65,6 +65,7 @@ __global__ void resetStiffnessMatrix_kernel(mat33* dst,
 }
 
 __global__ void stiffnessAssembly_kernel(mat33 * dst,
+                                        float d16, float d17, float d18,
                                         float3 * pos,
                                         uint4 * tetv,
                                         mat33 * orientation,
@@ -79,7 +80,7 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 	float3 e10, e20, e30;
 	float3 B[4];
 	float invDetE;
-	mat33 Ke, Re, ReT;
+	mat33 Ke, Re, ReT, tmp, tmpT;
 	uint iTet, i, j;
 	uint cur = bufferIndices[ind];
 	for(;;) {
@@ -106,9 +107,34 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 		B[2].z = (e10.x*e30.y - e10.y*e30.x)*invDetE;
 		B[3].z = (e10.y*e20.x - e10.x*e20.y)*invDetE;
 		B[0].z = -B[1].z-B[2].z-B[3].z;
+		
+		Ke.v[0].x = d16 * B[i].x * B[j].x + d18 * (B[i].y * B[j].y + B[i].z * B[j].z);
+		Ke.v[0].y = d17 * B[i].x * B[j].y + d18 * (B[i].y * B[j].x);
+		Ke.v[0].z = d17 * B[i].x * B[j].z + d18 * (B[i].z * B[j].x);
+
+		Ke.v[1].x = d17 * B[i].y * B[j].x + d18 * (B[i].x * B[j].y);
+		Ke.v[1].y = d16 * B[i].y * B[j].y + d18 * (B[i].x * B[j].x + B[i].z * B[j].z);
+		Ke.v[1].z = d17 * B[i].y * B[j].z + d18 * (B[i].z * B[j].y);
+
+		Ke.v[2].x = d17 * B[i].z * B[j].x + d18 * (B[i].x * B[j].z);
+		Ke.v[2].y = d17 * B[i].z * B[j].y + d18 * (B[i].y * B[j].z);
+		Ke.v[2].z = d16 * B[i].z * B[j].z + d18 * (B[i].y * B[j].y + B[i].x * B[i].x);
 	    
+		mat33_mult_f(Ke, tetrahedronVolume(e10, e20, e30));
+
 	    Re = orientation[iTet];
-	    dst[ind] = Re;
+	    mat33_transpose(ReT, Re);
+	    
+	    mat33_cpy(tmp, Re);
+	    mat33_mult(tmp, Ke);
+	    mat33_mult(tmp, ReT);
+	    
+	    mat33_add(dst[ind], tmp);
+	    
+	    if(j>i) {
+	        mat33_transpose(tmpT, tmp);
+	        mat33_add(dst[ind], tmpT);
+	    }
 	    
 	    cur++;
 	    if(cur >= maxBufferInd) break;
@@ -218,6 +244,7 @@ void cuFemTetrahedron_stiffnessAssembly(mat33 * dst,
     dim3 grid(nblk, 1, 1);
     
     stiffnessAssembly_kernel<<< grid, block >>>(dst,
+        1.f, 2.f, 3.f,
                                             pos,
                                             vert,
                                             orientation,

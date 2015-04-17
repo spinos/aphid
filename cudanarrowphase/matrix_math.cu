@@ -60,4 +60,66 @@ inline __device__ void mat33_orthoNormalize(mat33 & dst)
     dst.v[2] = r2;
 }
 
+inline __device__ void mat33_mult_f(mat33 & m, float a)
+{
+    m.v[0].x *= a;
+    m.v[0].y *= a;
+    m.v[0].z *= a;
+    m.v[1].x *= a;
+    m.v[1].y *= a;
+    m.v[1].z *= a;
+    m.v[2].x *= a;
+    m.v[2].y *= a;
+    m.v[2].z *= a;
+}
+
+inline __device__ void mat33_cpy(mat33 & a, const mat33 & b)
+{
+    a.v[0] = b.v[0];
+    a.v[1] = b.v[1];
+    a.v[2] = b.v[2];
+}
+
+inline __device__ void mat33_transpose(mat33 & a, const mat33 & b)
+{
+    a.v[0].y = b.v[1].x;
+    a.v[0].z = b.v[2].x;
+    a.v[1].x = b.v[0].y;
+    a.v[1].z = b.v[2].y;
+    a.v[2].x = b.v[0].z;
+    a.v[2].y = b.v[1].z;
+}
+
+inline __device__ void mat33_add(mat33 & a, const mat33 & b)
+{
+    a.v[0].x += b.v[0].x;
+	a.v[0].y += b.v[0].y;
+	a.v[0].z += b.v[0].z;
+	a.v[1].x += b.v[1].x;
+	a.v[1].y += b.v[1].y;
+	a.v[1].z += b.v[1].z;
+	a.v[2].x += b.v[2].x;
+	a.v[2].y += b.v[2].y;
+	a.v[2].z += b.v[2].z;
+}
+
+inline __device__ void mat33_mult(mat33 & a, const mat33 & b)
+{
+    mat33 tb;
+    mat33_transpose(tb, b);
+    mat33 ma;
+    ma.v[0] = a.v[0];
+    ma.v[1] = a.v[1];
+    ma.v[2] = a.v[2];
+	a.v[0].x = float3_dot(ma.v[0], tb.v[0]);
+	a.v[0].y = float3_dot(ma.v[0], tb.v[1]);
+	a.v[0].z = float3_dot(ma.v[0], tb.v[2]);
+	a.v[1].x = float3_dot(ma.v[1], tb.v[0]);
+	a.v[1].y = float3_dot(ma.v[1], tb.v[1]);
+	a.v[1].z = float3_dot(ma.v[1], tb.v[2]);
+	a.v[2].x = float3_dot(ma.v[2], tb.v[0]);
+	a.v[2].y = float3_dot(ma.v[2], tb.v[1]);
+	a.v[2].z = float3_dot(ma.v[2], tb.v[2]);
+}
+
 #endif
