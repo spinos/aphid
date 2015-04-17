@@ -25,6 +25,7 @@ private:
     CudaCSRMatrix * m_stiffnessMatrix;
     BaseBuffer * m_stiffnessTetraHash;
     BaseBuffer * m_stiffnessInd;
+    BaseBuffer * m_vertexInd;
     CUDABuffer * m_deviceStiffnessTetraHash;
     CUDABuffer * m_deviceStiffnessInd;
 };

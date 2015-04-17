@@ -10,6 +10,7 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
     m_stiffnessMatrix = new CudaCSRMatrix;
     m_stiffnessTetraHash = new BaseBuffer;
     m_stiffnessInd = new BaseBuffer;
+    m_vertexInd = new BaseBuffer;
     m_deviceStiffnessTetraHash = new CUDABuffer;
     m_deviceStiffnessInd = new CUDABuffer;
 }
@@ -24,7 +25,7 @@ FEMTetrahedronSystem::~FEMTetrahedronSystem()
 void FEMTetrahedronSystem::initOnDevice()
 {
     m_Re->create(numTetrahedrons() * 36);
-    createStiffnessMatrix();
+    createStiffnessMatrix();verbose();
     m_stiffnessMatrix->initOnDevice();
     
     m_deviceStiffnessTetraHash->create(numTetrahedrons() * 16 * 8);
@@ -58,22 +59,36 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
 {
     CSRMap vertexConnection;
     unsigned *ind = hostTretradhedronIndices();
-    unsigned i, j, k;
+    unsigned i, j, k, h;
     const unsigned n = numTetrahedrons();
     const unsigned w = numPoints();
+
+    m_vertexInd->create(n * 16 * 8);
+    KeyValuePair * vertexInd = (KeyValuePair *)m_vertexInd->data();
+
+// 16 per tet
     for(k=0; k < n; k++) {
         for(i=0; i< 4; i++) {
+            h = ind[k*4+i];
             for(j=0; j<4; j++) {
+                
+                vertexInd->key=h;
+                vertexInd->value=combineKij(k,i,j);
+                vertexInd++;
+                
                 if(j >= i) {
                     vertexConnection[matrixCoord(ind, k, w, i, j)] = 1;
-                    
-                    if(j > i)
-                        vertexConnection[matrixCoord(ind, k, w, j, i)] = 1; 
+                    if(j > i) {
+                        vertexConnection[matrixCoord(ind, k, w, j, i)] = 1;
+                    }
                 }
             }
         }
     }
     
+    vertexInd -= n * 16;
+    QuickSort::Sort((unsigned *)vertexInd, 0, n * 16 -1);
+
     CSRMap::iterator it = vertexConnection.begin();
     i = 0;
     for(;it!=vertexConnection.end();++it) {
@@ -144,6 +159,13 @@ void FEMTetrahedronSystem::verbose()
     unsigned * ind = (unsigned *)m_stiffnessInd->data();
     for(i=0; i<nnz; i++)
         std::cout<<" "<<ind[i];
+    
+    KeyValuePair * vertexInd = (KeyValuePair *)m_vertexInd->data();
+    std::cout<<"\n vertex indirection["<<n * 16<<"]: ";
+    for(h=0; h<n*16; h++) {
+        extractKij(vertexInd[h].value, k, i, j);
+        std::cout<<" v"<<vertexInd[h].key<<":"<<k<<","<<i<<","<<j<<" ";
+    }
 }
 
 void FEMTetrahedronSystem::resetOrientation()
