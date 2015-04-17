@@ -35,6 +35,8 @@ private:
 	void dynamicsAssembly(float dt);
 	void updatePosition(float dt);
 	void groundCollision();
+	void updateF0();
+	void updateB(float dt);
 };
 
 #endif        //  #ifndef SOLVERTHREAD_H

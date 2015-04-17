@@ -2,7 +2,7 @@
 #include "BaseSolverThread.h"
 
 float BaseSolverThread::TimeStep = 1.f / 60.f;
-int BaseSolverThread::NumSubsteps = 2;
+int BaseSolverThread::NumSubsteps = 3;
 BaseSolverThread::BaseSolverThread(QObject *parent)
     : QThread(parent)
 {

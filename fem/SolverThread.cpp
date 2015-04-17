@@ -12,7 +12,7 @@ Vector3F D(d16, d17, d18); //Isotropic elasticity matrix D
 
 float creep = 0.20f;
 float yield = 0.04f;
-float mass_damping=1.f;
+float mass_damping=0.8f;
 float m_max = 0.2f;
 Vector3F gravity(0.0f,-9.81f,0.0f); 
 
@@ -22,9 +22,9 @@ SolverThread::SolverThread(QObject *parent)
     : BaseSolverThread(parent)
 {
     m_mesh = new FEMTetrahedronMesh;
-    // m_mesh->generateBlocks(64,1,1, .25f,.25f,.25f);
+    // m_mesh->generateBlocks(64,2,2, .5f, .5f, .5f);
     m_mesh->generateFromFile();
-    m_mesh->setDensity(1.f);
+    m_mesh->setDensity(2.f);
     
     unsigned totalPoints = m_mesh->numPoints();
 	
@@ -41,7 +41,7 @@ SolverThread::SolverThread(QObject *parent)
 	
 	Vector3F * Xi = m_mesh->Xi();
 	for(i=0; i < totalPoints; i++) {
-	    if(i==1 || i==44 || i==2)
+	    if(i==7 || i==5 || i==8 || i==18)
 	    //if(Xi[i].x<.1f)
             fixed[i]=true;
         else
@@ -84,7 +84,7 @@ void SolverThread::stepPhysics(float dt)
 	updatePosition(dt);
 
 	// groundCollision();
-	qDebug()<<"total volume "<<m_mesh->volume();
+	// qDebug()<<"total volume "<<m_mesh->volume();
 }
 
 FEMTetrahedronMesh * SolverThread::mesh() { return m_mesh; }
@@ -292,8 +292,8 @@ void SolverThread::resetOrientation() {
 	}
 }
 
-void SolverThread::stiffnessAssembly() 
-{ 
+void SolverThread::updateF0()
+{
     Vector3F * Xi = m_mesh->Xi();
 	FEMTetrahedronMesh::Tetrahedron * tetrahedra = m_mesh->tetrahedra();
 	unsigned totalTetrahedra = m_mesh->numTetrahedra();
@@ -308,10 +308,27 @@ void SolverThread::stiffnessAssembly()
 				Matrix33F tmpKe = tetrahedra[k].Ke[i][j];
 				Vector3F x0 = Xi[tetrahedra[k].indices[j]];
 				Vector3F prod = tmpKe * x0;
-				// Vector3F(tmpKe.M(0, 0)*x0.x+ tmpKe.M(0, 1)*x0.y+tmpKe.M(0, 2)*x0.z, //tmpKe*x0;
-					//					   tmpKe.M(1, 0)*x0.x+ tmpKe.M(1, 1)*x0.y+tmpKe.M(1, 2)*x0.z,
-						//				   tmpKe.M(2, 0)*x0.x+ tmpKe.M(2, 1)*x0.y+tmpKe.M(2, 2)*x0.z);
 				f += prod;				   
+			}
+			unsigned idx = tetrahedra[k].indices[i];
+			m_F0[idx] -= Re*f;		
+		}  	
+	} 
+}
+
+void SolverThread::stiffnessAssembly() 
+{ 
+    updateF0();
+    
+    FEMTetrahedronMesh::Tetrahedron * tetrahedra = m_mesh->tetrahedra();
+	unsigned totalTetrahedra = m_mesh->numTetrahedra();
+	for(unsigned k=0;k<totalTetrahedra;k++) {
+		Matrix33F Re = tetrahedra[k].Re;
+		Matrix33F ReT = Re; ReT.transpose();
+
+		for (unsigned i = 0; i < 4; ++i) {
+			for (unsigned j = 0; j < 4; ++j) {
+				Matrix33F tmpKe = tetrahedra[k].Ke[i][j];
 				if (j >= i) {
 					//Based on pseudocode given in Fig. 10.12 on page 361
 					Matrix33F tmp = (Re*tmpKe)*ReT; 
@@ -326,9 +343,7 @@ void SolverThread::stiffnessAssembly()
 					}
 				}
 
-			}
-			unsigned idx = tetrahedra[k].indices[i];
-			m_F0[idx] -= Re*f;		
+			}		
 		}  	
 	} 
 }
@@ -437,10 +452,9 @@ void SolverThread::addPlasticityForce(float dt)
 	}
 }
 
-void SolverThread::dynamicsAssembly(float dt) 
+void SolverThread::updateB(float dt)
 {
-	float dt2 = dt*dt;
-	unsigned totalPoints = m_mesh->numPoints();
+    unsigned totalPoints = m_mesh->numPoints();
 	Vector3F * X = m_mesh->X();
     float * mass = m_mesh->M();
 	Vector3F * b = rightHandSide();
@@ -457,15 +471,37 @@ void SolverThread::dynamicsAssembly(float dt)
             unsigned j  = K->first;
 			Matrix33F K_ij  = K->second; 
 			Vector3F x_j   = X[j];	
+			Vector3F prod = K_ij * x_j; 
+			b[k] -= prod;
+		}
+	  
+		b[k] -= m_F0[k];
+		b[k] += m_F[k];
+		b[k] *= dt;
+		b[k] += m_V[k]*m_i;
+	} 
+}
+
+void SolverThread::dynamicsAssembly(float dt) 
+{
+    updateB(dt);
+	float dt2 = dt*dt;
+	unsigned totalPoints = m_mesh->numPoints();
+	float * mass = m_mesh->M();
+	for(unsigned k=0;k<totalPoints;k++) {
+
+		float m_i = mass[k];
+		
+		MatrixMap tmp = m_K_row[k];
+		MatrixMap::iterator Kbegin = tmp.begin();
+        MatrixMap::iterator Kend   = tmp.end();
+		for (MatrixMap::iterator K = Kbegin; K != Kend;++K)
+		{
+            unsigned j  = K->first;
+			Matrix33F K_ij  = K->second; 
 			Matrix33F * A_ij = A(k,j);
  
 			*A_ij = K_ij * dt2; 
-			Vector3F prod = K_ij * x_j; 
-			//Vector3F(	K_ij[0][0]*x_j.x + K_ij[0][1]*x_j.y + K_ij[0][2]*x_j.z, 
-			//							K_ij[1][0]*x_j.x + K_ij[1][1]*x_j.y + K_ij[1][2]*x_j.z,
-			//							K_ij[2][0]*x_j.x + K_ij[2][1]*x_j.y + K_ij[2][2]*x_j.z);
-
-            b[k] -= prod;//K_ij * x_j;
 			 
             if (k == j)
             {
@@ -476,11 +512,6 @@ void SolverThread::dynamicsAssembly(float dt)
 			  *(*A_ij).m(2, 2) += tmp;
 			}
 		}
-	  
-		b[k] -= m_F0[k];
-		b[k] += m_F[k];
-		b[k] *= dt;
-		b[k] += m_V[k]*m_i;
 	} 
 }
 
