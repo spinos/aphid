@@ -19,6 +19,7 @@ public:
 	virtual ~BaseLog();
 	
 	void write(const std::string & os);
+	void write(unsigned & i);
 	void writeTime();
 protected:
 

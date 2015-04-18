@@ -23,6 +23,9 @@ BaseLog::~BaseLog()
 		m_file.close();
 }
 
+void BaseLog::write(unsigned & i)
+{ m_file<<" "<<i<<" "; }
+
 void BaseLog::write(const std::string & os )
 { m_file<<os; }
 

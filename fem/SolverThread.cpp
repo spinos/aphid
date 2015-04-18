@@ -5,7 +5,7 @@
 #include <CUDABuffer.h>
 #include <CudaBase.h>
 #include <cuConjugateGradient_implement.h>
-#include <BaseLog.h>
+#include <CudaDbgLog.h>
 // Poisson ratio: transverse contraction strain to longitudinal extension 
 // strain in the direction of stretching force. Tensile deformation is 
 // considered positive and compressive deformation is considered negative. 
@@ -24,9 +24,11 @@ float creep = 0.20f;
 float yield = 0.04f;
 float mass_damping=0.4f;
 float m_max = 0.2f;
-Vector3F gravity(0.0f,-9.81f,0.0f); 
+Vector3F gravity(0.0f,-9.81f,0.0f);
 
-bool bUseStiffnessWarping = false;
+CudaDbgLog dbglg("stiffness.txt");
+
+bool bUseStiffnessWarping = true;
 #define TESTBLOCK 0
 #define SOLVEONGPU 1
 SolverThread::SolverThread(QObject *parent)
@@ -98,7 +100,7 @@ void SolverThread::stepPhysics(float dt)
 		resetOrientation();
 
 	stiffnessAssembly();
- 
+	
 	// addPlasticityForce(dt);
  
 	dynamicsAssembly(dt);
@@ -110,6 +112,18 @@ void SolverThread::stepPhysics(float dt)
 #endif
  
 	updatePosition(dt);
+	
+	dbglg.write("Re");
+	unsigned totalTetrahedra = m_mesh->numTetrahedra();
+	FEMTetrahedronMesh::Tetrahedron * tetrahedra = m_mesh->tetrahedra();
+	for(unsigned k=0;k<totalTetrahedra;k++) {
+	    dbglg.write(k);
+		dbglg.write(tetrahedra[k].Re.str());
+	}
+ 
+	dbglg.writeMat33(m_stiffnessMatrix->valueBuf(), 
+	    m_stiffnessMatrix->numNonZero(),
+	    "K ");
 
 	// groundCollision();
 	// qDebug()<<"total volume "<<m_mesh->volume();
@@ -539,7 +553,7 @@ void SolverThread::updateB(float dt)
 		b[k] += m_V[k]*m_i;
 	} 
 }
-int Fstr = 1;
+
 void SolverThread::dynamicsAssembly(float dt) 
 {
     updateB(dt);
@@ -578,12 +592,6 @@ void SolverThread::dynamicsAssembly(float dt)
 	}
 	
 	m_stiffnessMatrix->valueBuf()->hostToDevice(m_hostK->data());
-	
-	if(Fstr) {
-	    BaseLog lg("stiffness.txt");
-	    m_stiffnessMatrix->print(&lg);
-	    Fstr = 0;
-	}
 }
 
 void SolverThread::updatePosition(float dt) 
