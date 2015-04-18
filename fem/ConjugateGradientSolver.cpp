@@ -11,10 +11,28 @@
 #include <CudaCSRMatrix.h>
 #include <CUDABuffer.h>
 #include <cuConjugateGradient_implement.h>
-
+#include <CudaReduction.h>
 int i_max = 32;
 ConjugateGradientSolver::ConjugateGradientSolver() {}
-ConjugateGradientSolver::~ConjugateGradientSolver() {}
+ConjugateGradientSolver::~ConjugateGradientSolver() 
+{
+    cudaThreadExit();
+    delete[] m_b;
+    delete[] m_residual;
+    delete[] m_update;
+    delete m_prev;
+	delete[] m_A_row;
+	delete[] m_IsFixed;
+	delete m_deviceIsFixed;
+	delete m_deviceResidual;
+	delete m_deviceUpdate;
+	delete m_devicePrev;
+	delete m_deviceD;
+	delete m_deviceD2;
+	delete m_deviceX;
+	delete m_deviceRhs;
+	delete m_reduce;
+}
 	
 void ConjugateGradientSolver::init(unsigned n)
 {
@@ -31,14 +49,10 @@ void ConjugateGradientSolver::init(unsigned n)
 	m_devicePrev = new CUDABuffer;
 	m_deviceD = new CUDABuffer;
 	m_deviceD2 = new CUDABuffer;
-	m_hostD = new BaseBuffer;
-	m_hostD2 = new BaseBuffer;
 	m_deviceX = new CUDABuffer;
 	m_deviceRhs = new CUDABuffer;
-	
-	m_hostD->create(m_numRows * 4);
-    m_hostD2->create(m_numRows * 4);
-    m_prev->create(m_numRows * 12);
+	m_reduce = new CudaReduction;
+	m_prev->create(m_numRows * 12);
 }
 
 void ConjugateGradientSolver::initOnDevice()
@@ -53,6 +67,7 @@ void ConjugateGradientSolver::initOnDevice()
     m_deviceD2->create(m_numRows * 4);
     m_deviceX->create(m_numRows * 12);
     m_deviceRhs->create(m_numRows * 12);
+    m_reduce->initOnDevice();
 }
 
 void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMatrix) 
@@ -64,7 +79,7 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
     m_deviceRhs->hostToDevice(m_b);
     void * dRhs = m_deviceRhs->bufferOnDevice();
     
-    m_devicePrev->hostToDevice(m_prev->data());
+    // m_devicePrev->hostToDevice(m_prev->data());
     
 	cuConjugateGradient_prevresidual((float3 *)m_devicePrev->bufferOnDevice(),
                             (float3 *)m_deviceResidual->bufferOnDevice(),
@@ -76,12 +91,12 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
                             (float3 *)dRhs,
                             m_numRows);
     
-    m_devicePrev->deviceToHost(m_prev->data());
+    // m_devicePrev->deviceToHost(m_prev->data());
 
     Vector3F * prev = (Vector3F *)m_prev->data();
 	
 	for(unsigned k=0; k< 1; k++) {
-        std::cout<<" prev["<<k<<"] h "<<prev[k];
+        // std::cout<<" prev["<<k<<"] h "<<prev[k];
     }
     
 	for(int i=0;i<i_max;i++) {
@@ -95,23 +110,12 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
                             (uint *)stiffnessMatrix->deviceColInd(),
                             (uint *)dFixed,
                             m_numRows);
-        cudaThreadSynchronize();
-        
-       
-// todo reduction sum     
-        m_deviceD->deviceToHost(m_hostD->data());
-        m_deviceD2->deviceToHost(m_hostD2->data());
-        
-        float * hd = (float *)m_hostD->data();
-        float * hd2 = (float *)m_hostD2->data();
         
         float d =0;
 		float d2=0;
-
-        for(unsigned k=0; k< m_numRows; k++) {
-            d += hd[k];
-            d2 += hd2[k];
-        }
+		
+		m_reduce->sumF(d, (float *)m_deviceD->bufferOnDevice(), m_numRows);
+        m_reduce->sumF(d2, (float *)m_deviceD2->bufferOnDevice(), m_numRows);
         
 		if(fabs(d2)< 1e-10f)
 			d2 = 1e-10f;
@@ -125,16 +129,12 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
                             d3,
                             (uint *)dFixed,
                             m_numRows);
-        cudaThreadSynchronize();
- // todo reduction sum        
-        m_deviceD->deviceToHost(m_hostD->data());
         
         float d1 = 0.f;
-        for(unsigned k=0; k< m_numRows; k++) {
-            d1 += hd[k];
-        }
+
+        m_reduce->sumF(d1, (float *)m_deviceD->bufferOnDevice(), m_numRows);
         
-        // std::cout<<" d1["<<i<<"] "<<d1<<" ";
+        if(i>29) std::cout<<" d1["<<i<<"] "<<d1<<" ";
         
 		if(i >= i_max && d1 < 0.001f)
 			break;

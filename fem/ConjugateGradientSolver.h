@@ -13,6 +13,7 @@
 class BaseBuffer;
 class CUDABuffer;
 class CudaCSRMatrix;
+class CudaReduction;
 typedef std::map<int, Matrix33F> MatrixMap;
 
 class ConjugateGradientSolver {
@@ -44,7 +45,6 @@ private:
 	CUDABuffer * m_deviceD2;
 	CUDABuffer * m_deviceX;
 	CUDABuffer * m_deviceRhs;
-	BaseBuffer * m_hostD;
-	BaseBuffer * m_hostD2;
+	CudaReduction * m_reduce;
 	unsigned m_numRows;
 };

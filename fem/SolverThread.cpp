@@ -21,7 +21,7 @@ float m_max = 0.2f;
 Vector3F gravity(0.0f,-9.81f,0.0f); 
 
 bool bUseStiffnessWarping = true;
-#define TESTBLOCK 1
+#define TESTBLOCK 0
 #define SOLVEONGPU 1
 SolverThread::SolverThread(QObject *parent)
     : BaseSolverThread(parent)
@@ -29,7 +29,7 @@ SolverThread::SolverThread(QObject *parent)
     m_mesh = new FEMTetrahedronMesh;
 #if TESTBLOCK
     m_mesh->generateBlocks(64,2,2, .5f, .5f, .5f);
-    m_mesh->setDensity(20.f);
+    m_mesh->setDensity(30.f);
 #else
     m_mesh->generateFromFile();
     m_mesh->setDensity(10.f);
@@ -71,7 +71,12 @@ SolverThread::SolverThread(QObject *parent)
 	m_hostK = new BaseBuffer;
 }
 
-SolverThread::~SolverThread() {}
+SolverThread::~SolverThread() 
+{
+    std::cout<<" solver exit\n";
+    delete m_hostK;
+    delete m_stiffnessMatrix;
+}
 
 void SolverThread::stepPhysics(float dt)
 {

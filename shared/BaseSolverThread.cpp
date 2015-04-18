@@ -18,7 +18,6 @@ BaseSolverThread::~BaseSolverThread()
     condition.wakeOne();
     mutex.unlock();
     wait();
-    
 }
 
 void BaseSolverThread::simulate()

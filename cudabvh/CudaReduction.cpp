@@ -22,7 +22,7 @@ void CudaReduction::sumF(float & result, float * idata, unsigned m)
     uint n = m;
 	getReduceBlockThread(blocks, threads, n);
 	
-	std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(float)<<"\n";
+	// std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(float)<<"\n";
 	
 	void * d_odata = m_obuf->bufferOnDevice();
 	cuReduce_F_Sum((float *)d_odata, idata, m, blocks, threads);
@@ -32,7 +32,7 @@ void CudaReduction::sumF(float & result, float * idata, unsigned m)
 	    blocks = threads = 0;
 		getReduceBlockThread(blocks, threads, n);
 		
-		std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(float)<<"\n";
+		// std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(float)<<"\n";
 	
 		cuReduce_F_Sum((float *)d_odata, (float *)d_odata, n, blocks, threads);
 		

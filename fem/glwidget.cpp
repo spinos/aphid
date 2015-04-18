@@ -13,7 +13,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setFarClipPlane(2000.f);
 	orthoCamera()->setNearClipPlane(1.f);
 	
-	m_solver = new SolverThread;
+	m_solver = new SolverThread(this);
 }
 //! [0]
 
