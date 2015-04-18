@@ -19,6 +19,87 @@
 #include <cusparse.h>
 #include <cublas.h>
 #include <radixsort_implement.h>
+#include <cuReduceSum_implement.h>
+#include <CudaReduction.h>
+// #define FULLREDUCTION
+#define USEREDFN
+void testReduceSum()
+{
+// float sum is not exactly precise, more numbers, larger the sum
+// less accurate it gets
+//
+// n 524285 blocks x threads : 128 x 512 sharedmem size 2048
+// sum: 6.28856e+06  proof: 6.28854e+06.
+// n 4093 blocks x threads : 4 x 512 sharedmem size 2048
+// sum: 4087.44  proof: 4087.44.
+
+    const uint m = (1<<17)-3;
+    float * h_data = new float[m];
+    
+    uint roundedSize = (m * 4);
+    
+    float * d_idata;
+    cudaMalloc((void**)&d_idata, roundedSize);
+    
+    uint i;
+    std::cout<<" generating "<<m<<" random numbers...\n";
+    float proof = 0.f;
+    for(i=0; i< m; i++) {
+        h_data[i] = (((float)rand()/RAND_MAX) + .5f) * 1.0005f;
+        proof += h_data[i];
+    }
+    
+    std::cout<<" transfer idata to device\n";
+    
+    cutilSafeCallNoSync(cudaMemcpy(d_idata, h_data, m * 4, cudaMemcpyHostToDevice));
+    
+    std::cout<<" reduce sum on gpu\n";
+#ifdef USEREDFN    
+    std::cout<<" use red\n";
+    CudaReduction red;
+    red.initOnDevice();
+    
+    float redsum;
+    red.sumF(redsum, d_idata, m);
+    std::cout<<" sum: "<<redsum<<" ";
+#else   
+    uint threads, blocks;
+    uint n = m;
+	getReduceBlockThread(blocks, threads, n);
+	
+	std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(float)<<"\n";
+	
+	float * d_odata;
+    cudaMalloc((void**)&d_odata, blocks * 4);
+    
+	cuReduce_F_Sum(d_odata, d_idata, m, blocks, threads);
+	
+#ifdef FULLREDUCTION
+    n = blocks;	
+	while(n > 1) {
+	    blocks = threads = 0;
+		getReduceBlockThread(blocks, threads, n);
+		
+		std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(float)<<"\n";
+	
+		cuReduce_F_Sum(d_odata, d_odata, n, blocks, threads);
+		
+		n = (n + (threads*2-1)) / (threads*2);
+	}
+	float sum;
+	cudaMemcpy(&sum, d_odata, 4, cudaMemcpyDeviceToHost);
+	
+#else
+	float h_odata[ReduceMaxBlocks];
+	cudaMemcpy(h_odata, d_odata, blocks * 4, cudaMemcpyDeviceToHost);
+	float sum = 0.f;
+	for(i=0; i< blocks;i++)
+	    sum += h_odata[i];
+#endif
+	std::cout<<" sum: "<<sum<<" ";
+#endif
+	std::cout<<" proof: "<<proof<<" ";
+}
 
 void makeRandomUintVector(KeyValuePair *a, unsigned int numElements, unsigned int keybits)
 {
@@ -101,31 +182,9 @@ void genTridiag(int *I, int *J, float *val, int M, int N, int nz)
     I[N] = nz;
 }
 
-int main(int argc, char **argv)
+void testCg()
 {
-    // This will pick the best possible CUDA capable device
-    cudaDeviceProp deviceProp;
-    int devID = 0;
-    
-    cutilSafeCall( cudaGetDeviceProperties(&deviceProp, devID) );
-
-    // Statistics about the GPU device
-    printf("> GPU device has %d Multi-Processors, SM %d.%d compute capabilities\n\n", 
-		deviceProp.multiProcessorCount, deviceProp.major, deviceProp.minor);
-
-    int version = (deviceProp.major * 0x10 + deviceProp.minor);
-    if(version < 0x11) 
-    {
-        printf("cudacg: requires a minimum CUDA compute 1.1 capability\n");
-        printf("PASSED");
-        cudaThreadExit();
-        exit(1);
-    }
-    
-    printf("test radix sort\n");
-    testRadixSort();
-
-    int M = 0, N = 0, nz = 0, *I = NULL, *J = NULL;
+        int M = 0, N = 0, nz = 0, *I = NULL, *J = NULL;
     float *val = NULL;
     const float tol = 1e-5f;   
     const int max_iter = 10000;
@@ -275,6 +334,37 @@ int main(int argc, char **argv)
     cudaFree(d_Ax);
 
     cudaThreadExit();
+}
+
+int main(int argc, char **argv)
+{
+    // This will pick the best possible CUDA capable device
+    cudaDeviceProp deviceProp;
+    int devID = 0;
+    
+    cutilSafeCall( cudaGetDeviceProperties(&deviceProp, devID) );
+
+    // Statistics about the GPU device
+    printf("> GPU device has %d Multi-Processors, SM %d.%d compute capabilities\n\n", 
+		deviceProp.multiProcessorCount, deviceProp.major, deviceProp.minor);
+
+    int version = (deviceProp.major * 0x10 + deviceProp.minor);
+    if(version < 0x11) 
+    {
+        printf("cudacg: requires a minimum CUDA compute 1.1 capability\n");
+        printf("PASSED");
+        cudaThreadExit();
+        exit(1);
+    }
+    
+    // printf("test radix sort\n");
+    // testRadixSort();
+    
+    // printf("test conjugate gradient\n");
+    // testCg();
+    
+    std::cout<<"\n test reduce sum:\n";
+    testReduceSum();
     
     printf("done.\n");
     exit(0);

@@ -30,7 +30,6 @@ else()
 	set (Boost_USE_MULTITHREADED ON)
 	include_directories ("/home/OF3D/zhangjian/Documents/boost_1_51_0")
 	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex)
-
 	
 endif()
 	
