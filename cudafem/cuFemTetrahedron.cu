@@ -1,6 +1,36 @@
 #include "cuFemTetrahedron_implement.h"
 #include "cuFemMath.cu"
 
+__global__ void integrate_kernel(float3 * pos, 
+								float3 * vel, 
+								uint * anchor,
+								float dt, 
+								uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	if(anchor[ind] > (1<<28)) return;
+	float3_add_inplace(pos[ind], scale_float3_by(vel[ind], dt));
+}
+
+__global__ void externalForce_kernel(float3 * dst,
+                                float * mass,
+                                uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	float m = mass[ind];
+	if(m > 1e28f) {
+	    float3_set_zero(dst[ind]);
+	    return;
+	}
+	
+	float3 gravity = make_float3(0.f, -9.81f, 0.f);
+	dst[ind] = scale_float3_by(gravity, mass[ind]);
+}
+
 __global__ void computeRhs_kernel(float3 * rhs,
                                 float3 * pos,
                                 float3 * vel,
@@ -9,6 +39,7 @@ __global__ void computeRhs_kernel(float3 * rhs,
                                 uint * rowPtr,
                                 uint * colInd,
                                 float3 * f0,
+                                float3 * externalForce,
                                 float dt,
                                 uint maxInd)
 {
@@ -28,6 +59,7 @@ __global__ void computeRhs_kernel(float3 * rhs,
 	}
 	
 	float3_minus_inplace(rhs[ind], f0[ind]);
+	float3_minus_inplace(rhs[ind], externalForce[ind]);
 	float3_scale_inplace(rhs[ind], dt);
 	tmp = vel[ind];
 	float3_scale_inplace(tmp, mass[ind]);
@@ -305,6 +337,7 @@ void cuFemTetrahedron_computeRhs(float3 * rhs,
                                 uint * rowPtr,
                                 uint * colInd,
                                 float3 * f0,
+                                float3 * externalForce,
                                 float dt,
                                 uint maxInd)
 {
@@ -320,7 +353,38 @@ void cuFemTetrahedron_computeRhs(float3 * rhs,
         rowPtr, 
         colInd,
         f0,
+        externalForce,
         dt, 
+        maxInd);
+}
+
+void cuFemTetrahedron_externalForce(float3 * dst,
+                                float * mass,
+                                uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    externalForce_kernel<<< grid, block >>>(dst,
+        mass,
+        maxInd);
+}
+
+void cuFemTetrahedron_integrate(float3 * pos, 
+								float3 * vel, 
+								uint * anchor,
+								float dt, 
+								uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    integrate_kernel<<< grid, block >>>(pos,
+        vel,
+        anchor,
+        dt,
         maxInd);
 }
 

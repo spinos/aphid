@@ -16,7 +16,6 @@ int i_max = 32;
 ConjugateGradientSolver::ConjugateGradientSolver() {}
 ConjugateGradientSolver::~ConjugateGradientSolver() 
 {
-    cudaThreadExit();
     delete[] m_b;
     delete[] m_residual;
     delete[] m_update;
@@ -79,7 +78,7 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
     m_deviceRhs->hostToDevice(m_b);
     void * dRhs = m_deviceRhs->bufferOnDevice();
     
-    // m_devicePrev->hostToDevice(m_prev->data());
+    m_devicePrev->hostToDevice(m_prev->data());
     
 	cuConjugateGradient_prevresidual((float3 *)m_devicePrev->bufferOnDevice(),
                             (float3 *)m_deviceResidual->bufferOnDevice(),

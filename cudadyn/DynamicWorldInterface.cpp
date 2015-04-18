@@ -106,7 +106,7 @@ void DynamicWorldInterface::create(CudaDynamicWorld * world)
 		vy = -vy;
 	}
 	
-	tetra->setDensity(.1f);
+	tetra->setTotalMass(100.f);
 	world->addTetrahedronSystem(tetra);
 }
 

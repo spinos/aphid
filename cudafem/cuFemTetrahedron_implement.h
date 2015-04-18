@@ -45,8 +45,19 @@ void cuFemTetrahedron_computeRhs(float3 * rhs,
                                 uint * rowPtr,
                                 uint * colInd,
                                 float3 * f0,
+                                float3 * externalForce,
                                 float dt,
                                 uint maxInd);
+
+void cuFemTetrahedron_externalForce(float3 * dst,
+                                float * mass,
+                                uint maxInd);
+								
+void cuFemTetrahedron_integrate(float3 * pos, 
+								float3 * vel, 
+								uint * anchor,
+								float dt, 
+								uint maxInd);
 }
 #endif        //  #ifndef CUFEMTETRAHEDRON_IMPLEMENT_H
 

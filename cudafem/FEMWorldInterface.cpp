@@ -8,7 +8,7 @@ FEMWorldInterface::~FEMWorldInterface() {}
 
 void FEMWorldInterface::create(CudaDynamicWorld * world)
 {
-    return DynamicWorldInterface::create(world);
+    // return DynamicWorldInterface::create(world);
     std::cout<<"num points "<<TetraNumVertices<<"\n";
 	std::cout<<"num tetrahedrons "<<TetraNumTetrahedrons<<"\n";
 	
@@ -43,7 +43,10 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 	    // q.set(TetraP[TetraIndices[i][1]][0], TetraP[TetraIndices[i][1]][1], TetraP[TetraIndices[i][1]][2]);
 	    // std::cout<<"el "<<(p - q).length()<<" ";
 	}
-	
-	tetra->setDensity(2.f);
+	tetra->setAnchoredPoint(7, 0);
+	tetra->setAnchoredPoint(5, 20);
+	tetra->setAnchoredPoint(8, 9);
+	tetra->setAnchoredPoint(18, 78);
+	tetra->setTotalMass(200.f);
 	world->addTetrahedronSystem(tetra);
 }

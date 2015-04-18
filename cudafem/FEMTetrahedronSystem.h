@@ -10,7 +10,9 @@ public:
     FEMTetrahedronSystem();
     virtual ~FEMTetrahedronSystem();
     virtual void initOnDevice();
-    
+	virtual void update();
+    virtual void integrate(float dt);
+	
     void verbose();
 protected:
     
@@ -23,6 +25,8 @@ private:
     void resetForce();
     void updateForce();
     void dynamicsAssembly(float dt);
+    void updateExternalForce();
+	void solveConjugateGradient();
 private:
     CUDABuffer * m_Re;
     CudaCSRMatrix * m_stiffnessMatrix;
@@ -35,6 +39,7 @@ private:
     CUDABuffer * m_deviceVertexTetraHash;
     CUDABuffer * m_deviceVertexInd;
     CUDABuffer * m_F0;
+    CUDABuffer * m_Fe;
     CUDABuffer * m_rhs;
 };
 

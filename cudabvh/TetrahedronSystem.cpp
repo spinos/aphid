@@ -19,7 +19,8 @@ m_numTetrahedrons(0), m_numPoints(0), m_numTriangles(0)
 	m_hostTretradhedronIndices = new BaseBuffer;
 	m_hostTriangleIndices = new BaseBuffer;
 	m_hostMass = new BaseBuffer;
-	m_density = 1.f;
+	m_hostAnchor = new BaseBuffer;
+	m_totalMass = 10.f;
 }
 
 TetrahedronSystem::~TetrahedronSystem() 
@@ -29,6 +30,7 @@ TetrahedronSystem::~TetrahedronSystem()
 	delete m_hostV;
 	delete m_hostTretradhedronIndices;
 	delete m_hostTriangleIndices;
+	delete m_hostAnchor;
 }
 
 void TetrahedronSystem::create(const unsigned & maxNumTetrahedrons, const unsigned & maxNumPoints)
@@ -40,24 +42,27 @@ void TetrahedronSystem::create(const unsigned & maxNumTetrahedrons, const unsign
 	m_hostXi->create(m_maxNumPoints * 12);
 	m_hostV->create(m_maxNumPoints * 12);
 	m_hostMass->create(m_maxNumPoints * 4);
+	m_hostAnchor->create(m_maxNumPoints * 4);
 	m_hostTretradhedronIndices->create(m_maxNumTetrahedrons * 16);
 	m_hostTriangleIndices->create(m_maxNumTriangles * 12);
 }
 
-void TetrahedronSystem::setDensity(float x)
-{ m_density = x; }
+void TetrahedronSystem::setTotalMass(float x)
+{ m_totalMass = x; }
 
 void TetrahedronSystem::addPoint(float * src)
 {
 	if(m_numPoints == m_maxNumPoints) return;
 	float * p = &hostX()[m_numPoints * 3];
 	float * p0 = &hostXi()[m_numPoints * 3];
+	unsigned * anchor = &hostAnchor()[m_numPoints];
 	p[0] = src[0];
 	p[1] = src[1];
 	p[2] = src[2];
 	p0[0] = p[0];
 	p0[1] = p[1];
 	p0[2] = p[2];
+	*anchor = 0;
 	m_numPoints++;
 }
 
@@ -128,19 +133,48 @@ float * TetrahedronSystem::hostV()
 float * TetrahedronSystem::hostMass()
 { return (float *)m_hostMass->data(); }
 
+unsigned * TetrahedronSystem::hostAnchor()
+{ return (unsigned *)m_hostAnchor->data(); }
+
 unsigned * TetrahedronSystem::hostTretradhedronIndices()
 { return (unsigned *)m_hostTretradhedronIndices->data(); }
 
 unsigned * TetrahedronSystem::hostTriangleIndices()
 { return (unsigned *)m_hostTriangleIndices->data(); }
 
+float TetrahedronSystem::totalInitialVolume()
+{
+	Vector3F * p = (Vector3F *)hostXi();
+    unsigned * v = hostTretradhedronIndices();
+    unsigned i;
+	Vector3F t[4];
+	unsigned a, b, c, d;
+	float sum = 0.f;
+	for(i=0; i<m_numTetrahedrons; i++) {
+		a = v[0];
+		b = v[1];
+		c = v[2];
+		d = v[3];
+		t[0] = p[a];
+		t[1] = p[b];
+		t[2] = p[c];
+		t[3] = p[d];
+		sum += tetrahedronVolume(t);
+	}
+	return sum;
+}
+
 void TetrahedronSystem::calculateMass()
 {
+	const float density = m_totalMass / totalInitialVolume();
     const float base = 1.f/(float)m_numPoints;
     unsigned i;
     float * mass = hostMass();
     for(i=0; i< m_numPoints; i++) {
-        mass[i] = base;
+		if(isAnchoredPoint(i))
+			mass[i] = 1e30f;
+        else
+			mass[i] = base;
     }
     
     Vector3F * p = (Vector3F *)hostXi();
@@ -160,7 +194,7 @@ void TetrahedronSystem::calculateMass()
 		v[2] = p[c];
 		v[3] = p[d];
 		
-		m = (m_density * tetrahedronVolume(v)) * .25f;
+		m = density * tetrahedronVolume(v) * .25f;
 		
 		mass[a] += m;
 		mass[b] += m;
@@ -176,3 +210,11 @@ void TetrahedronSystem::calculateMass()
     */
 }
 
+void TetrahedronSystem::setAnchoredPoint(unsigned i, unsigned anchorInd)
+{
+	unsigned * anchor = &hostAnchor()[i];
+	*anchor = ((1<<30) | anchorInd);
+}
+
+bool TetrahedronSystem::isAnchoredPoint(unsigned i)
+{ return (hostAnchor()[i] > (1<<29)); }

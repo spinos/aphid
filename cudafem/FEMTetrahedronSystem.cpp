@@ -17,6 +17,7 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
     m_deviceVertexTetraHash = new CUDABuffer;
     m_deviceVertexInd = new CUDABuffer;
     m_F0 = new CUDABuffer;
+    m_Fe = new CUDABuffer;
     m_rhs = new CUDABuffer;
 }
 
@@ -33,13 +34,14 @@ FEMTetrahedronSystem::~FEMTetrahedronSystem()
     delete m_deviceVertexTetraHash;
     delete m_deviceVertexInd;
     delete m_F0;
+    delete m_Fe;
     delete m_rhs;
 }
 
 void FEMTetrahedronSystem::initOnDevice()
 {
     m_Re->create(numTetrahedrons() * 36);
-    createStiffnessMatrix();verbose();
+    createStiffnessMatrix();
     m_stiffnessMatrix->initOnDevice();
     
     m_deviceStiffnessTetraHash->create(numTetrahedrons() * 16 * 8);
@@ -47,6 +49,7 @@ void FEMTetrahedronSystem::initOnDevice()
     m_deviceVertexTetraHash->create(numTetrahedrons() * 16 * 8);
     m_deviceVertexInd->create(numPoints() * 4);
     m_F0->create(numPoints() * 12);
+    m_Fe->create(numPoints() * 12);
     m_rhs->create(numPoints() * 12);
     
     m_deviceStiffnessTetraHash->hostToDevice(m_stiffnessTetraHash->data());
@@ -300,6 +303,7 @@ void FEMTetrahedronSystem::dynamicsAssembly(float dt)
 	void * rowPtr = m_stiffnessMatrix->deviceRowPtr();
 	void * colInd = m_stiffnessMatrix->deviceColInd();
 	void * f0 = m_F0->bufferOnDevice();
+	void * fe = m_Fe->bufferOnDevice();
 	cuFemTetrahedron_computeRhs((float3 *)rhs,
                                 (float3 *)X,
                                 (float3 *)V,
@@ -308,7 +312,40 @@ void FEMTetrahedronSystem::dynamicsAssembly(float dt)
                                 (uint *)rowPtr,
                                 (uint *)colInd,
                                 (float3 *)f0,
+								(float3 *)fe,
                                 dt,
                                 numPoints());
 }
 
+void FEMTetrahedronSystem::updateExternalForce()
+{
+    void * force = m_Fe->bufferOnDevice();
+    void * mass = deviceMass();
+    cuFemTetrahedron_externalForce((float3 *)force,
+                                (float *)mass,
+                                numPoints());
+}
+
+void FEMTetrahedronSystem::solveConjugateGradient()
+{
+	
+}
+
+void FEMTetrahedronSystem::integrate(float dt)
+{
+    cuFemTetrahedron_integrate((float3 *)deviceX(), 
+								(float3 *)deviceV(), 
+								(uint *)deviceAnchor(),
+								dt, 
+								numPoints());
+}
+
+void FEMTetrahedronSystem::update()
+{
+	updateExternalForce();
+	resetStiffnessMatrix();
+	// resetOrientation();
+	dynamicsAssembly(1.f/60.f);
+	solveConjugateGradient();
+	CudaTetrahedronSystem::update();
+}

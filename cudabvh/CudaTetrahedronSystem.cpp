@@ -13,9 +13,15 @@
 #include "reduceBox_implement.h"
 #include "tetrahedronSystem_implement.h"
 
-CudaTetrahedronSystem::CudaTetrahedronSystem() {}
+CudaTetrahedronSystem::CudaTetrahedronSystem() 
+{
+	m_deviceAnchor = new CUDABuffer;
+}
 
-CudaTetrahedronSystem::~CudaTetrahedronSystem() {}
+CudaTetrahedronSystem::~CudaTetrahedronSystem() 
+{
+	delete m_deviceAnchor;
+}
 
 void CudaTetrahedronSystem::setDeviceXPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceX = ptr; m_xLoc = loc; }
@@ -34,6 +40,8 @@ void CudaTetrahedronSystem::setDeviceTretradhedronIndicesPtr(CUDABuffer * ptr, u
 
 void CudaTetrahedronSystem::initOnDevice() 
 {
+	m_deviceAnchor->create(numPoints() * 4);
+	m_deviceAnchor->hostToDevice(hostAnchor());
     calculateMass();
 	setNumLeafNodes(numTetrahedrons());
 	CudaLinearBvh::initOnDevice();
@@ -65,6 +73,9 @@ void * CudaTetrahedronSystem::deviceV()
 
 void * CudaTetrahedronSystem::deviceMass()
 {  return m_deviceMass->bufferOnDeviceAt(m_massLoc); }
+
+void * CudaTetrahedronSystem::deviceAnchor()
+{ return m_deviceAnchor->bufferOnDevice(); }
 
 void * CudaTetrahedronSystem::deviceTretradhedronIndices()
 { return m_deviceTretradhedronIndices->bufferOnDeviceAt(m_iLoc); }

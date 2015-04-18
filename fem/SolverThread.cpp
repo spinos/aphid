@@ -4,9 +4,14 @@
 #include <BaseBuffer.h>
 #include <CUDABuffer.h>
 #include <CudaBase.h>
-
-float nu = 0.33f;			//Poisson ratio
-float Y = 500000.0f;		//Young modulus
+#include <cuConjugateGradient_implement.h>
+// Poisson ratio: transverse contraction strain to longitudinal extension 
+// strain in the direction of stretching force. Tensile deformation is 
+// considered positive and compressive deformation is considered negative. 
+float nu = 0.33f; 
+// Young modulus: also known as the tensile modulus or elastic modulus, 
+// is a measure of the stiffness of an elastic material
+float Y = 500000.0f;
 
 float d15 = Y / (1.0f + nu) / (1.0f - 2 * nu);
 float d16 = (1.0f - nu) * d15;
@@ -32,7 +37,7 @@ SolverThread::SolverThread(QObject *parent)
     m_mesh->setDensity(30.f);
 #else
     m_mesh->generateFromFile();
-    m_mesh->setDensity(10.f);
+    m_mesh->setDensity(4.f);
 #endif
     
     unsigned totalPoints = m_mesh->numPoints();
@@ -74,6 +79,8 @@ SolverThread::SolverThread(QObject *parent)
 SolverThread::~SolverThread() 
 {
     std::cout<<" solver exit\n";
+    cudaThreadExit();
+    
     delete m_hostK;
     delete m_stiffnessMatrix;
 }
@@ -91,7 +98,7 @@ void SolverThread::stepPhysics(float dt)
 
 	stiffnessAssembly();
  
-	addPlasticityForce(dt);
+	// addPlasticityForce(dt);
  
 	dynamicsAssembly(dt);
  
@@ -258,14 +265,15 @@ void SolverThread::initializePlastic()
 
 void SolverThread::computeForces() 
 {
+    int * fixed = isFixed();
 	unsigned i=0; 
 	unsigned totalPoints = m_mesh->numPoints();
 	float * mass = m_mesh->M();
 	for(i=0;i<totalPoints;i++) {
 		m_F[i].setZero();
-
+		if(fixed[i] < 1)
 		//add gravity force only for non-fixed points
-		m_F[i] += gravity * mass[i];
+		    m_F[i] += gravity * mass[i];
 	}
 }
 

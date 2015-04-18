@@ -29,9 +29,10 @@ public:
 	void * deviceXi();
 	void * deviceV();
 	void * deviceMass();
+	void * deviceAnchor();
 	void * deviceTretradhedronIndices();
 	
-	void integrate(float timeStep);
+	virtual void integrate(float dt);
 	void sendXToHost();
 	void sendVToHost();
 	
@@ -44,6 +45,7 @@ private:
 	CUDABuffer * m_deviceXi;
 	CUDABuffer * m_deviceV;
 	CUDABuffer * m_deviceMass;
+	CUDABuffer * m_deviceAnchor;
 	CUDABuffer * m_deviceTretradhedronIndices;
 	unsigned m_xLoc, m_xiLoc, m_vLoc, m_massLoc, m_iLoc;
 };

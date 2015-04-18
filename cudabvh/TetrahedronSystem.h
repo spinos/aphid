@@ -17,7 +17,8 @@ public:
 	void create(const unsigned & maxNumTetrahedrons, const unsigned & maxNumPoints);
 	void addPoint(float * src);
 	void addTetrahedron(unsigned a, unsigned b, unsigned c, unsigned d);
-	void setDensity(float x);
+	void setTotalMass(float x);
+	void setAnchoredPoint(unsigned i, unsigned anchorInd);
 	const unsigned numTetrahedrons() const;
 	const unsigned numPoints() const;
 	const unsigned numTriangles() const;
@@ -26,12 +27,15 @@ public:
 	float * hostXi();
 	float * hostV();
 	float * hostMass();
+	unsigned * hostAnchor();
 	unsigned * hostTretradhedronIndices();
 	unsigned * hostTriangleIndices();
 protected:
+	float totalInitialVolume();
     void calculateMass();
     const unsigned maxNumPoints() const;
 	const unsigned maxNumTetradedrons() const;
+	bool isAnchoredPoint(unsigned i);
 private:
     void addTriangle(unsigned a, unsigned b, unsigned c);
 private:
@@ -41,8 +45,9 @@ private:
 	BaseBuffer * m_hostMass;
 	BaseBuffer * m_hostTretradhedronIndices;
 	BaseBuffer * m_hostTriangleIndices;
+	BaseBuffer * m_hostAnchor;
 	unsigned m_numTetrahedrons, m_numPoints, m_numTriangles;
 	unsigned m_maxNumTetrahedrons, m_maxNumPoints, m_maxNumTriangles;
-	float m_density;
+	float m_totalMass;
 };
 #endif        //  #ifndef TETRAHEDRONSYSTEM_H
