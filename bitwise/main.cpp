@@ -283,6 +283,9 @@ int main(int argc, char * const argv[])
 	testInf();
 	testTetrahedronDegenerate();
 	testKij();
+	
+	std::cout<<boost::format("39 mod 16: %1%\n") % (39 & 15);
+	
 	std::cout<<"end of test\n";
 	return 0;
 }

@@ -37,7 +37,7 @@ void cuFemTetrahedron_internalForce(float3 * dst,
                                     uint maxBufferInd,
                                     uint maxInd);
 
-void cuFemTetrahedron_computeRhs(float3 * rhs,
+void cuFemTetrahedron_computeRhsA(float3 * rhs,
                                 float3 * pos,
                                 float3 * vel,
                                 float * mass,

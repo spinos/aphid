@@ -5,6 +5,7 @@
 #include <CUDABuffer.h>
 #include <CudaBase.h>
 #include <cuConjugateGradient_implement.h>
+#include <BaseLog.h>
 // Poisson ratio: transverse contraction strain to longitudinal extension 
 // strain in the direction of stretching force. Tensile deformation is 
 // considered positive and compressive deformation is considered negative. 
@@ -25,7 +26,7 @@ float mass_damping=0.4f;
 float m_max = 0.2f;
 Vector3F gravity(0.0f,-9.81f,0.0f); 
 
-bool bUseStiffnessWarping = true;
+bool bUseStiffnessWarping = false;
 #define TESTBLOCK 0
 #define SOLVEONGPU 1
 SolverThread::SolverThread(QObject *parent)
@@ -136,7 +137,8 @@ void SolverThread::initOnDevice()
 	}
 	
 	m_stiffnessMatrix->create(CSRMatrix::tMat33, totalPoints, vertexConnection);
-	m_stiffnessMatrix->verbose();
+	// m_stiffnessMatrix->verbose();
+	std::cout<<"max nnz per row "<<m_stiffnessMatrix->maxNNZRow();
 	m_stiffnessMatrix->initOnDevice();
 	
 	m_hostK->create(m_stiffnessMatrix->numNonZero() * 36);
@@ -537,7 +539,7 @@ void SolverThread::updateB(float dt)
 		b[k] += m_V[k]*m_i;
 	} 
 }
-
+int Fstr = 1;
 void SolverThread::dynamicsAssembly(float dt) 
 {
     updateB(dt);
@@ -576,6 +578,12 @@ void SolverThread::dynamicsAssembly(float dt)
 	}
 	
 	m_stiffnessMatrix->valueBuf()->hostToDevice(m_hostK->data());
+	
+	if(Fstr) {
+	    BaseLog lg("stiffness.txt");
+	    m_stiffnessMatrix->print(&lg);
+	    Fstr = 0;
+	}
 }
 
 void SolverThread::updatePosition(float dt) 

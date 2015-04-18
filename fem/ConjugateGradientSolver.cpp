@@ -133,7 +133,7 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
 
         m_reduce->sumF(d1, (float *)m_deviceD->bufferOnDevice(), m_numRows);
         
-        if(i>29) std::cout<<" d1["<<i<<"] "<<d1<<" ";
+        // if(i>29) std::cout<<" d1["<<i<<"] "<<d1<<" ";
         
 		if(i >= i_max && d1 < 0.001f)
 			break;

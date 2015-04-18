@@ -3,6 +3,7 @@
 #include <CudaCSRMatrix.h>
 #include <cuFemTetrahedron_implement.h>
 #include <QuickSort.h>
+#include <BaseLog.h>
 
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
@@ -18,7 +19,6 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
     m_deviceVertexInd = new CUDABuffer;
     m_F0 = new CUDABuffer;
     m_Fe = new CUDABuffer;
-    m_rhs = new CUDABuffer;
 }
 
 FEMTetrahedronSystem::~FEMTetrahedronSystem() 
@@ -35,7 +35,6 @@ FEMTetrahedronSystem::~FEMTetrahedronSystem()
     delete m_deviceVertexInd;
     delete m_F0;
     delete m_Fe;
-    delete m_rhs;
 }
 
 void FEMTetrahedronSystem::initOnDevice()
@@ -50,13 +49,14 @@ void FEMTetrahedronSystem::initOnDevice()
     m_deviceVertexInd->create(numPoints() * 4);
     m_F0->create(numPoints() * 12);
     m_Fe->create(numPoints() * 12);
-    m_rhs->create(numPoints() * 12);
     
     m_deviceStiffnessTetraHash->hostToDevice(m_stiffnessTetraHash->data());
     m_deviceStiffnessInd->hostToDevice(m_stiffnessInd->data());
     m_deviceVertexTetraHash->hostToDevice(m_vertexTetraHash->data());
     m_deviceVertexInd->hostToDevice(m_vertexInd->data());
     
+    setDimension(numPoints());
+    CudaConjugateGradientSolver::initOnDevice();
     CudaTetrahedronSystem::initOnDevice();
 }
 
@@ -298,13 +298,12 @@ void FEMTetrahedronSystem::dynamicsAssembly(float dt)
     void * X = deviceX();
 	void * V = deviceV();
 	void * mass = deviceMass();
-	void * rhs = m_rhs->bufferOnDevice();
 	void * stiffness = m_stiffnessMatrix->deviceValue();
 	void * rowPtr = m_stiffnessMatrix->deviceRowPtr();
 	void * colInd = m_stiffnessMatrix->deviceColInd();
 	void * f0 = m_F0->bufferOnDevice();
 	void * fe = m_Fe->bufferOnDevice();
-	cuFemTetrahedron_computeRhs((float3 *)rhs,
+	cuFemTetrahedron_computeRhsA((float3 *)rightHandSide(),
                                 (float3 *)X,
                                 (float3 *)V,
                                 (float *)mass,
@@ -325,10 +324,18 @@ void FEMTetrahedronSystem::updateExternalForce()
                                 (float *)mass,
                                 numPoints());
 }
-
+int Fst = 1;
 void FEMTetrahedronSystem::solveConjugateGradient()
 {
-	
+	if(Fst) {
+		BaseLog lg("stiffness.txt");
+	    m_stiffnessMatrix->print(&lg);
+		Fst = 0;
+	}
+    return;
+    float error;
+	solve(deviceV(), m_stiffnessMatrix,
+                deviceAnchor(), &error);
 }
 
 void FEMTetrahedronSystem::integrate(float dt)
@@ -344,7 +351,8 @@ void FEMTetrahedronSystem::update()
 {
 	updateExternalForce();
 	resetStiffnessMatrix();
-	// resetOrientation();
+	resetOrientation();
+	updateStiffnessMatrix();
 	dynamicsAssembly(1.f/60.f);
 	solveConjugateGradient();
 	CudaTetrahedronSystem::update();

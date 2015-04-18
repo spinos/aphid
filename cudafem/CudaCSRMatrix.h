@@ -4,7 +4,7 @@
 #include "CSRMatrix.h"
 
 class CUDABuffer;
-
+class BaseLog;
 class CudaCSRMatrix : public CSRMatrix
 {
 public:
@@ -18,6 +18,7 @@ public:
     void * deviceValue();
     void * deviceRowPtr();
     void * deviceColInd();
+    void print(BaseLog * lg);
 protected:
 
 private:

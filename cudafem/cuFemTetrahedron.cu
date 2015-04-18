@@ -31,7 +31,7 @@ __global__ void externalForce_kernel(float3 * dst,
 	dst[ind] = scale_float3_by(gravity, mass[ind]);
 }
 
-__global__ void computeRhs_kernel(float3 * rhs,
+__global__ void computeRhsA_kernel(float3 * rhs,
                                 float3 * pos,
                                 float3 * vel,
                                 float * mass,
@@ -41,6 +41,7 @@ __global__ void computeRhs_kernel(float3 * rhs,
                                 float3 * f0,
                                 float3 * externalForce,
                                 float dt,
+                                float dt2,
                                 uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
@@ -51,18 +52,29 @@ __global__ void computeRhs_kernel(float3 * rhs,
 	mat33 K;
 	uint j;
 	float3 tmp;
+	float damping;
+	const float mi = mass[ind];
 	for(;cur<nextRow; cur++) {
 	    K = stiffness[cur];
 	    j = colInd[cur];
 	    mat33_float3_prod(tmp, K, pos[j]);
 	    float3_minus_inplace(rhs[ind], tmp);
+	    
+	    mat33_mult_f(stiffness[cur], dt2);
+	    if(ind == j) {
+	        damping = .4f * mi * dt + mi;
+	        K.v[0].x += damping;
+	        K.v[1].y += damping;
+	        K.v[2].z += damping;
+	        stiffness[cur] = K;
+	    }
 	}
 	
 	float3_minus_inplace(rhs[ind], f0[ind]);
-	float3_minus_inplace(rhs[ind], externalForce[ind]);
+	float3_add_inplace(rhs[ind], externalForce[ind]);
 	float3_scale_inplace(rhs[ind], dt);
 	tmp = vel[ind];
-	float3_scale_inplace(tmp, mass[ind]);
+	float3_scale_inplace(tmp, mi);
 	float3_add_inplace(rhs[ind], tmp);
 }
 
@@ -283,8 +295,11 @@ void cuFemTetrahedron_stiffnessAssembly(mat33 * dst,
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);
     
+    float d16, d17, d18;
+    calculateIsotropicElasticity(d16, d17, d18);
+    
     stiffnessAssembly_kernel<<< grid, block >>>(dst,
-        1.f, 2.f, 3.f,
+                                            d16, d17, d18,
                                             pos,
                                             vert,
                                             orientation,
@@ -318,8 +333,11 @@ void cuFemTetrahedron_internalForce(float3 * dst,
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);
     
+    float d16, d17, d18;
+    calculateIsotropicElasticity(d16, d17, d18);
+    
     internalForce_kernel<<< grid, block >>>(dst,
-        1.f, 2.f, 3.f,
+                                            d16, d17, d18,
                                             pos,
                                             tetvert,
                                             orientation,
@@ -329,7 +347,7 @@ void cuFemTetrahedron_internalForce(float3 * dst,
                                             maxInd);
 }
 
-void cuFemTetrahedron_computeRhs(float3 * rhs,
+void cuFemTetrahedron_computeRhsA(float3 * rhs,
                                 float3 * pos,
                                 float3 * vel,
                                 float * mass,
@@ -341,11 +359,12 @@ void cuFemTetrahedron_computeRhs(float3 * rhs,
                                 float dt,
                                 uint maxInd)
 {
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(maxInd, 512);
+    int tpb = CudaBase::LimitNThreadPerBlock(32, 50);
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);
     
-    computeRhs_kernel<<< grid, block >>>(rhs, 
+    computeRhsA_kernel<<< grid, block >>>(rhs, 
         pos,
         vel,
         mass, 
@@ -355,6 +374,7 @@ void cuFemTetrahedron_computeRhs(float3 * rhs,
         f0,
         externalForce,
         dt, 
+        dt * dt,
         maxInd);
 }
 

@@ -27,7 +27,10 @@ public:
     const unsigned numNonZero() const;
     const ValueType valueType() const;
     
+    unsigned maxNNZRow();
+    
     void verbose();
+    
 protected:
 
 private:

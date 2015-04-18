@@ -74,6 +74,18 @@ const unsigned CSRMatrix::numNonZero() const
 const CSRMatrix::ValueType CSRMatrix::valueType() const
 { return m_valType; }
 
+unsigned CSRMatrix::maxNNZRow()
+{
+    unsigned i;
+    unsigned * row = rowPtr();
+    unsigned mnnzpr = 0;
+    for(i = 1; i<=m_dimension; i++) {
+        if(row[i]-row[i-1] > mnnzpr)
+            mnnzpr = row[i]-row[i-1];
+    }
+    return mnnzpr;
+}
+
 void CSRMatrix::verbose()
 {
     unsigned lastRow = m_dimension + 2;

@@ -2,10 +2,13 @@
 #define FEMTETRAHEDRONSYSTEM_H
 
 #include <CudaTetrahedronSystem.h>
+#include <CudaConjugateGradientSolver.h>
 class BaseBuffer;
 class CUDABuffer;
 class CudaCSRMatrix;
-class FEMTetrahedronSystem : public CudaTetrahedronSystem {
+class FEMTetrahedronSystem : public CudaTetrahedronSystem, 
+                                public CudaConjugateGradientSolver
+{
 public:
     FEMTetrahedronSystem();
     virtual ~FEMTetrahedronSystem();
@@ -40,7 +43,6 @@ private:
     CUDABuffer * m_deviceVertexInd;
     CUDABuffer * m_F0;
     CUDABuffer * m_Fe;
-    CUDABuffer * m_rhs;
 };
 
 #endif        //  #ifndef FEMTETRAHEDRONSYSTEM_H

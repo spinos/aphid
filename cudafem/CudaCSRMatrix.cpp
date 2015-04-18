@@ -1,6 +1,8 @@
 #include "CudaCSRMatrix.h"
 #include <CUDABuffer.h>
-
+#include <BaseLog.h>
+#include <boost/format.hpp>
+#include <Matrix33F.h>
 CudaCSRMatrix::CudaCSRMatrix() 
 {
     m_deviceValue = new CUDABuffer;
@@ -43,3 +45,12 @@ void CudaCSRMatrix::initOnDevice()
     m_deviceColInd->hostToDevice(colInd());
 }
 
+void CudaCSRMatrix::print(BaseLog * lg)
+{
+    valueBuf()->deviceToHost(value());
+    Matrix33F * hostK = (Matrix33F *)value();
+    unsigned i;
+    for(i=0; i<numNonZero(); i++) {
+        lg->write(boost::str(boost::format("K[%1%] %2%\n") % i % hostK[i].str()));
+    }
+}
