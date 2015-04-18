@@ -1,5 +1,9 @@
 #include <QtCore>
 #include "SolverThread.h"
+#include <CudaCSRMatrix.h>
+#include <BaseBuffer.h>
+#include <CUDABuffer.h>
+#include <CudaBase.h>
 
 float nu = 0.33f;			//Poisson ratio
 float Y = 500000.0f;		//Young modulus
@@ -12,19 +16,24 @@ Vector3F D(d16, d17, d18); //Isotropic elasticity matrix D
 
 float creep = 0.20f;
 float yield = 0.04f;
-float mass_damping=0.8f;
+float mass_damping=0.4f;
 float m_max = 0.2f;
 Vector3F gravity(0.0f,-9.81f,0.0f); 
 
 bool bUseStiffnessWarping = true;
-
+#define TESTBLOCK 1
+#define SOLVEONGPU 1
 SolverThread::SolverThread(QObject *parent)
     : BaseSolverThread(parent)
 {
     m_mesh = new FEMTetrahedronMesh;
-    // m_mesh->generateBlocks(64,2,2, .5f, .5f, .5f);
+#if TESTBLOCK
+    m_mesh->generateBlocks(64,2,2, .5f, .5f, .5f);
+    m_mesh->setDensity(20.f);
+#else
     m_mesh->generateFromFile();
-    m_mesh->setDensity(2.f);
+    m_mesh->setDensity(10.f);
+#endif
     
     unsigned totalPoints = m_mesh->numPoints();
 	
@@ -35,7 +44,7 @@ SolverThread::SolverThread(QObject *parent)
 	m_F = new Vector3F[totalPoints]; 
 	m_F0 = new Vector3F[totalPoints]; 
 	
-	bool * fixed = isFixed();
+	int * fixed = isFixed();
 	unsigned i;
 	for(i=0; i < totalPoints; i++) m_V[i].setZero();
 	
@@ -43,9 +52,9 @@ SolverThread::SolverThread(QObject *parent)
 	for(i=0; i < totalPoints; i++) {
 	    if(i==7 || i==5 || i==8 || i==18)
 	    //if(Xi[i].x<.1f)
-            fixed[i]=true;
+            fixed[i]=1;
         else
-            fixed[i]=false;   
+            fixed[i]=0;   
 	}
 	
 	calculateK();
@@ -58,6 +67,8 @@ SolverThread::SolverThread(QObject *parent)
 	qDebug()<<"num tetrahedrons "<<m_mesh->numTetrahedra();
 	qDebug()<<"total volume "<<m_mesh->volume0();
 	
+	m_stiffnessMatrix = new CudaCSRMatrix;
+	m_hostK = new BaseBuffer;
 }
 
 SolverThread::~SolverThread() {}
@@ -79,7 +90,11 @@ void SolverThread::stepPhysics(float dt)
  
 	dynamicsAssembly(dt);
  
-	solve(m_V);
+#if SOLVEONGPU
+	solveGpu(m_V, m_stiffnessMatrix);
+#else
+    solve(m_V);
+#endif
  
 	updatePosition(dt);
 
@@ -88,6 +103,34 @@ void SolverThread::stepPhysics(float dt)
 }
 
 FEMTetrahedronMesh * SolverThread::mesh() { return m_mesh; }
+
+void SolverThread::initOnDevice()
+{
+    CudaBase::SetDevice();
+    stiffnessAssembly();
+    unsigned totalPoints = m_mesh->numPoints();
+    CSRMap vertexConnection;
+    unsigned i=0;
+    for(unsigned k=0;k<totalPoints;k++) {
+		MatrixMap tmp = m_K_row[k];
+		MatrixMap::iterator Kbegin = tmp.begin();
+        MatrixMap::iterator Kend   = tmp.end();
+		for (MatrixMap::iterator K = Kbegin; K != Kend;++K)
+		{
+            unsigned j  = K->first;
+			vertexConnection[k*totalPoints + j]=i;
+			i++;
+		}
+	}
+	
+	m_stiffnessMatrix->create(CSRMatrix::tMat33, totalPoints, vertexConnection);
+	m_stiffnessMatrix->verbose();
+	m_stiffnessMatrix->initOnDevice();
+	
+	m_hostK->create(m_stiffnessMatrix->numNonZero() * 36);
+	
+	ConjugateGradientSolver::initOnDevice();
+}
 
 void SolverThread::calculateK()
 {
@@ -488,6 +531,8 @@ void SolverThread::dynamicsAssembly(float dt)
 	float dt2 = dt*dt;
 	unsigned totalPoints = m_mesh->numPoints();
 	float * mass = m_mesh->M();
+	Matrix33F * hostK = (Matrix33F *)m_hostK->data();
+	int i = 0;
 	for(unsigned k=0;k<totalPoints;k++) {
 
 		float m_i = mass[k];
@@ -511,15 +556,20 @@ void SolverThread::dynamicsAssembly(float dt)
 			  *(*A_ij).m(1, 1) += tmp;  
 			  *(*A_ij).m(2, 2) += tmp;
 			}
+			
+			hostK[i] = *A_ij;
+			i++;
 		}
-	} 
+	}
+	
+	m_stiffnessMatrix->valueBuf()->hostToDevice(m_hostK->data());
 }
 
 void SolverThread::updatePosition(float dt) 
 {
     unsigned totalPoints = m_mesh->numPoints();
     Vector3F * X = m_mesh->X();
-    bool * fixed = isFixed();
+    int * fixed = isFixed();
 	for(unsigned k=0;k<totalPoints;k++) {
 		if(fixed[k])
 			continue;

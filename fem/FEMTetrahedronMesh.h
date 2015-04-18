@@ -23,7 +23,7 @@ public:
     void setDensity(float x);
     void generateFromFile();
     void generateBlocks(unsigned xdim, unsigned ydim, unsigned zdim, float width, float height, float depth);
-    void recalcMassMatrix(bool * isFixed);
+    void recalcMassMatrix(int * isFixed);
     unsigned numTetrahedra() const;
     unsigned numPoints() const;
     Tetrahedron * tetrahedra();

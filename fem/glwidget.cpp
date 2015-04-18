@@ -24,8 +24,10 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientInit()
 {
+    m_solver->initOnDevice();
     connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
+	disconnect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 }
 
 void GLWidget::clientDraw()
@@ -90,4 +92,10 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 void GLWidget::keyReleaseEvent(QKeyEvent *event)
 {
 	Base3DView::keyReleaseEvent(event);
+}
+
+void GLWidget::simulate()
+{
+    m_solver->stepPhysics(1.f/60.f);
+    update();
 }

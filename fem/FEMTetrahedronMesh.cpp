@@ -133,7 +133,7 @@ float FEMTetrahedronMesh::volume0() const
     return r;
 }
 
-void FEMTetrahedronMesh::recalcMassMatrix(bool * isFixed) 
+void FEMTetrahedronMesh::recalcMassMatrix(int * isFixed) 
 {
 	//This is a lumped mass matrix
 	//Based on Eq. 10.106 and pseudocode in Fig. 10.9 on page 358

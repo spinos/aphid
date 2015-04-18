@@ -28,7 +28,7 @@ private:
     SolverThread * m_solver;
 	
 private slots:
-
+    void simulate();
 };
 //! [3]
 

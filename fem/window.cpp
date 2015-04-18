@@ -9,7 +9,7 @@ Window::Window()
     glWidget = new GLWidget;
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Untitled"));
+    setWindowTitle(tr("FEM"));
 }
 //! [1]
 

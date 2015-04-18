@@ -3,7 +3,8 @@
 #include <BaseSolverThread.h>
 #include <ConjugateGradientSolver.h>
 #include <FEMTetrahedronMesh.h>
-
+class BaseBuffer;
+class CudaCSRMatrix;
 class SolverThread : public BaseSolverThread, ConjugateGradientSolver
 {
 public:
@@ -11,10 +12,13 @@ public:
     virtual ~SolverThread();
     
     FEMTetrahedronMesh * mesh();
-
-protected:
+    
+    virtual void initOnDevice();
+    
     virtual void stepPhysics(float dt);
 
+protected:
+    
 private:
     FEMTetrahedronMesh * m_mesh;
 	Vector3F * m_F;
@@ -22,6 +26,8 @@ private:
 	Vector3F * m_V;
 
 	MatrixMap * m_K_row;
+	CudaCSRMatrix * m_stiffnessMatrix;
+	BaseBuffer * m_hostK;
 	
     void calculateK();
     void clearStiffnessAssembly();
