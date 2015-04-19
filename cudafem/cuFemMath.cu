@@ -111,7 +111,7 @@ inline __device__ void calculateKe(mat33 & Ke,
 
     Ke.v[2].x = d17 * B[i].z * B[j].x + d18 * (B[i].x * B[j].z);
     Ke.v[2].y = d17 * B[i].z * B[j].y + d18 * (B[i].y * B[j].z);
-    Ke.v[2].z = d16 * B[i].z * B[j].z + d18 * (B[i].y * B[j].y + B[i].x * B[i].x);
+    Ke.v[2].z = d16 * B[i].z * B[j].z + d18 * (B[i].y * B[j].y + B[i].x * B[j].x);
     
     mat33_mult_f(Ke, volume);
 }

@@ -169,6 +169,8 @@ void SolverThread::initOnDevice()
 
 void SolverThread::calculateK()
 {
+    dbglg.write("Ke");
+	   
     unsigned totalTetrahedra = m_mesh->numTetrahedra();
     Vector3F * Xi = m_mesh->Xi();
     FEMTetrahedronMesh::Tetrahedron * tetrahedra = m_mesh->tetrahedra();
@@ -259,6 +261,12 @@ void SolverThread::calculateK()
 
 				Ke *= tetrahedra[k].volume;
 				
+				dbglg.write("kij");
+				dbglg.write(k);
+				dbglg.write(i);
+				dbglg.write(j);
+				dbglg.write(Ke.str());
+	
 				// qDebug()<<Ke.str().c_str();
 			}
 		}

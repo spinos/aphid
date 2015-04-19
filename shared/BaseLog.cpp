@@ -12,7 +12,7 @@
 using namespace boost::posix_time;
 BaseLog::BaseLog(const std::string & fileName)
 {
-	m_file.open(fileName.c_str(), std::ios::app);
+	m_file.open(fileName.c_str(), std::ios::trunc);
 	m_file<<"start logging ";
 	writeTime();
 }
@@ -24,7 +24,7 @@ BaseLog::~BaseLog()
 }
 
 void BaseLog::write(unsigned & i)
-{ write<unsigned>(i); }
+{ _write<unsigned>(i); }
 
 void BaseLog::write(const std::string & os )
 { m_file<<os; }

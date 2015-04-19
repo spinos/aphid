@@ -59,7 +59,7 @@ __global__ void computeRhsA_kernel(float3 * rhs,
 	    j = colInd[cur];
 	    mat33_float3_prod(tmp, K, pos[j]);
 	    float3_minus_inplace(rhs[ind], tmp);
-	    
+		
 	    mat33_mult_f(stiffness[cur], dt2);
 	    if(ind == j) {
 	        damping = .4f * mi * dt + mi;
@@ -175,19 +175,22 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 	    calculateKe(Ke, B, d16, d17, d18, volume, i, j);
 
 	    Re = orientation[iTet];
-	    mat33_transpose(ReT, Re);
-	    
+		
+		mat33_transpose(ReT, Re);
 	    mat33_cpy(tmp, Re);
 	    mat33_mult(tmp, Ke);
 	    mat33_mult(tmp, ReT);
-	        
+		mat33_transpose(tmpT, tmp);
+	    
 	    mat33_add(dst[ind], tmp);
-	    
-	    if(j>i) {
-	        mat33_transpose(tmpT, tmp);
+	        
+	    if(j>i)
 	        mat33_add(dst[ind], tmpT);
-	    }
-	    
+			
+// test
+//	    dst[ind] = Ke;
+//		mat33_mult(dst[ind], Re);
+		
 	    cur++;
 	    if(cur >= maxBufferInd) break;
 	}
@@ -291,7 +294,7 @@ void cuFemTetrahedron_stiffnessAssembly(mat33 * dst,
                                         uint maxBufferInd,
                                         uint maxInd)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(24, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(32, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);
@@ -329,7 +332,7 @@ void cuFemTetrahedron_internalForce(float3 * dst,
                                     uint maxBufferInd,
                                     uint maxInd)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(28, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(36, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);

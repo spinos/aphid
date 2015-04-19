@@ -6,12 +6,14 @@
 #include <CudaDbgLog.h>
 
 CudaDbgLog bglg("stiffness.txt");
-#define PRINT_RE 0
-#define PRINT_K 0
+#define PRINT_RE 1
+#define PRINT_K 1
 #define PRINT_F0 1
 #define PRINT_FE 0
-#define PRINT_VETKIJIND 0
-#define PRINT_VETKIJHSH 0
+#define PRINT_VETKIJIND 1
+#define PRINT_VETKIJHSH 1
+#define PRINT_STIFKIJIND 1
+#define PRINT_STIFKIJHSH 1
 
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
@@ -272,7 +274,7 @@ void FEMTetrahedronSystem::updateStiffnessMatrix()
                                         (uint4 *)tetv,
                                         (mat33 *)re,
                                         (KeyValuePair *)sth,
-                                        (unsigned *)ind,
+                                        (uint *)ind,
                                         numTetrahedrons() * 16,
                                         m_stiffnessMatrix->numNonZero());
 }
@@ -360,6 +362,27 @@ void FEMTetrahedronSystem::update()
 	dynamicsAssembly(1.f/60.f);
 	solveConjugateGradient();
 
+#if PRINT_VETKIJHSH
+	bglg.writeHash(m_deviceVertexTetraHash, 
+					numTetrahedrons() * 16, 
+					" VkijHash ", CudaDbgLog::FOnce);
+#endif	
+#if PRINT_VETKIJIND
+	bglg.writeUInt(m_deviceVertexInd, 
+					numPoints(), 
+					" VkijInd ", CudaDbgLog::FOnce);
+#endif			
+#if PRINT_STIFKIJHSH
+	bglg.writeHash(m_deviceStiffnessTetraHash, 
+					numTetrahedrons() * 16, 
+					" SkijHash ", CudaDbgLog::FOnce);
+#endif
+#if PRINT_STIFKIJHSH
+	bglg.writeUInt(m_deviceStiffnessInd, 
+					m_stiffnessMatrix->numNonZero(), 
+					" SkijInd ", CudaDbgLog::FOnce);
+#endif
+
 #if PRINT_RE	
 	bglg.writeMat33(m_Re, 
 					numTetrahedrons(), 
@@ -380,16 +403,5 @@ void FEMTetrahedronSystem::update()
 					numPoints(), 
 					" Fe ", CudaDbgLog::FAlways);
 #endif
-#if PRINT_VETKIJHSH
-	bglg.writeHash(m_deviceVertexTetraHash, 
-					numTetrahedrons() * 16, 
-					" VkijHash ", CudaDbgLog::FOnce);
-#endif	
-#if PRINT_VETKIJIND
-	bglg.writeUInt(m_deviceVertexInd, 
-					numPoints(), 
-					" VkijInd ", CudaDbgLog::FOnce);
-#endif			
-	bglg.write("foo");
 	CudaTetrahedronSystem::update();
 }

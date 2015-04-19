@@ -91,12 +91,15 @@ inline __device__ void mat33_cpy(mat33 & a, const mat33 & b)
 
 inline __device__ void mat33_transpose(mat33 & a, const mat33 & b)
 {
+	a.v[0].x = b.v[0].x;
     a.v[0].y = b.v[1].x;
     a.v[0].z = b.v[2].x;
-    a.v[1].x = b.v[0].y;
+	a.v[1].x = b.v[0].y;
+	a.v[1].y = b.v[1].y;
     a.v[1].z = b.v[2].y;
     a.v[2].x = b.v[0].z;
     a.v[2].y = b.v[1].z;
+	a.v[2].z = b.v[2].z;
 }
 
 inline __device__ void mat33_add(mat33 & a, const mat33 & b)
