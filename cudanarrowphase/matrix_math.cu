@@ -46,12 +46,12 @@ inline __device__ void mat33_orthoNormalize(mat33 & dst)
     float3 r2 = dst.v[2];
     
     float l0 = float3_length(r0);
-    if(l0 > 0.f) scale_float3_by(r0, 1.f/l0);
+    if(l0 > 0.f) float3_divide_inplace(r0, l0);
     
-    r1 = float3_difference(r1, scale_float3_by(r0, float3_dot(r0, r1)));
+    float3_minus_inplace(r1, scale_float3_by(r0, float3_dot(r0, r1)));
     
     float l1 = float3_length(r1);
-    if(l1 > 0.f) scale_float3_by(r1, 1.f/l1);
+    if(l1 > 0.f) float3_divide_inplace(r1, l1);
     
     r2 = float3_cross(r0, r1);
     

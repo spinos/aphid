@@ -352,14 +352,14 @@ void FEMTetrahedronSystem::update()
 	updateStiffnessMatrix();
 	dynamicsAssembly(1.f/60.f);
 	solveConjugateGradient();
-	
+/*	
 	bglg.writeMat33(m_Re, 
 					numTetrahedrons(), 
 					" Re ", CudaDbgLog::FAlways);
-/*
+*/
 	bglg.writeMat33(m_stiffnessMatrix->valueBuf(), 
 					m_stiffnessMatrix->numNonZero(), 
 					" K ", CudaDbgLog::FAlways);
-*/					
+					
 	CudaTetrahedronSystem::update();
 }
