@@ -26,21 +26,25 @@ float mass_damping=0.4f;
 float m_max = 0.2f;
 Vector3F gravity(0.0f,-9.81f,0.0f);
 
+#define ENABLE_DBG 0
+
 CudaDbgLog dbglg("stiffness.txt");
 
 bool bUseStiffnessWarping = true;
 #define TESTBLOCK 0
 #define SOLVEONGPU 1
+
 SolverThread::SolverThread(QObject *parent)
     : BaseSolverThread(parent)
 {
     m_mesh = new FEMTetrahedronMesh;
+    
 #if TESTBLOCK
     m_mesh->generateBlocks(64,2,2, .5f, .5f, .5f);
     m_mesh->setDensity(30.f);
 #else
     m_mesh->generateFromFile();
-    m_mesh->setDensity(4.f);
+    m_mesh->setDensity(1.4f);
 #endif
     
     unsigned totalPoints = m_mesh->numPoints();
@@ -113,6 +117,7 @@ void SolverThread::stepPhysics(float dt)
  
 	updatePosition(dt);
 	
+#if ENABLE_DBG	
 	dbglg.write("Re");
 	unsigned totalTetrahedra = m_mesh->numTetrahedra();
 	FEMTetrahedronMesh::Tetrahedron * tetrahedra = m_mesh->tetrahedra();
@@ -120,20 +125,25 @@ void SolverThread::stepPhysics(float dt)
 	    dbglg.write(k);
 		dbglg.write(tetrahedra[k].Re.str());
 	}
-	
-	dbglg.write("F0");
-	unsigned totalPoints = m_mesh->numPoints();
-	for(unsigned k=0;k<totalPoints;k++) {
-	    dbglg.write(k);
-		dbglg.write(m_F0[k].str());
-	}
- 
+
 	dbglg.writeMat33(m_stiffnessMatrix->valueBuf(), 
 	    m_stiffnessMatrix->numNonZero(),
 	    "K ");
 
-	// groundCollision();
-	// qDebug()<<"total volume "<<m_mesh->volume();
+	dbglg.write("Rhs");
+	unsigned totalPoints = m_mesh->numPoints();
+	for(unsigned k=0;k<totalPoints;k++) {
+	    dbglg.write(k);
+		dbglg.write(rightHandSide()[k].str());
+		dbglg.newLine();
+	}
+	dbglg.write("F0");
+	for(unsigned k=0;k<totalPoints;k++) {
+	    dbglg.write(k);
+		dbglg.write(m_F0[k].str());
+		dbglg.newLine();
+	}
+#endif
 }
 
 FEMTetrahedronMesh * SolverThread::mesh() { return m_mesh; }
@@ -169,8 +179,9 @@ void SolverThread::initOnDevice()
 
 void SolverThread::calculateK()
 {
+#if ENABLE_DBG
     dbglg.write("Ke");
-	   
+#endif
     unsigned totalTetrahedra = m_mesh->numTetrahedra();
     Vector3F * Xi = m_mesh->Xi();
     FEMTetrahedronMesh::Tetrahedron * tetrahedra = m_mesh->tetrahedra();
@@ -260,14 +271,13 @@ void SolverThread::calculateK()
 				*Ke.m(2, 2)= d16 * d21 * d24 + d18 * (d20 * d23 + d19 * d22);
 
 				Ke *= tetrahedra[k].volume;
-				
+#if ENABLE_DBG				
 				dbglg.write("kij");
 				dbglg.write(k);
 				dbglg.write(i);
 				dbglg.write(j);
 				dbglg.write(Ke.str());
-	
-				// qDebug()<<Ke.str().c_str();
+#endif
 			}
 		}
  	}
@@ -386,8 +396,7 @@ void SolverThread::updateF0()
 	unsigned totalTetrahedra = m_mesh->numTetrahedra();
 	for(unsigned k=0;k<totalTetrahedra;k++) {
 		Matrix33F Re = tetrahedra[k].Re;
-		Matrix33F ReT = Re; ReT.transpose();
-
+		
 		for (unsigned i = 0; i < 4; ++i) {
 			//Based on pseudocode given in Fig. 10.11 on page 361
 			Vector3F f(0.0f,0.0f,0.0f);
@@ -397,8 +406,7 @@ void SolverThread::updateF0()
 				Vector3F prod = tmpKe * x0;
 				f += prod;				   
 			}
-			unsigned idx = tetrahedra[k].indices[i];
-			m_F0[idx] -= Re*f;		
+			m_F0[ tetrahedra[k].indices[i] ] -= Re*f;		
 		}  	
 	} 
 }
@@ -420,19 +428,17 @@ void SolverThread::stiffnessAssembly()
 					//Based on pseudocode given in Fig. 10.12 on page 361
 					Matrix33F tmp = (Re*tmpKe)*ReT; 
 					Matrix33F tmpT = tmp; tmpT.transpose();
-					int index = tetrahedra[k].indices[i]; 		
-					 
-					m_K_row[index][tetrahedra[k].indices[j]]+=(tmp);
+					
+					m_K_row[ tetrahedra[k].indices[i] ][tetrahedra[k].indices[j]]+=(tmp);
 					
 					if (j > i) {
-						index = tetrahedra[k].indices[j];
-						m_K_row[index][tetrahedra[k].indices[i]]+= tmpT;
+						m_K_row[ tetrahedra[k].indices[j] ][tetrahedra[k].indices[i]]+= tmpT;
 					}
 				}
 
 			}		
 		}  	
-	} 
+	}
 }
 
 void SolverThread::addPlasticityForce(float dt) 

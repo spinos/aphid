@@ -22,6 +22,7 @@ public:
 	void write(unsigned & i);
 	void writeTime();
 	void newLine();
+	void writeArraySize(const unsigned & n);
 protected:
 	template <typename T>
 	void _write(const T & a) {

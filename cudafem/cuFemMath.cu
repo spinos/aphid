@@ -16,6 +16,14 @@ inline __device__ void extractTetij(uint c, uint & tet, uint & i, uint & j)
     j = c&3;
 }
 
+inline __device__ void extractTetijt(uint c, uint & tet, uint & i, uint & j, uint & t)
+{
+    tet = c>>5;
+    i = (c & 31)>>3;
+    j = (c & 7)>>1;
+	t = c & 1;
+}
+
 inline __device__ void tetrahedronP(float3 * pnt,
                                     float3 * src,
                                         const uint4 & t) 

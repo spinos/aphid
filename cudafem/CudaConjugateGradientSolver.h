@@ -15,6 +15,7 @@ public:
     static int MaxNIterations;
 protected:
     void * rightHandSide();
+	CUDABuffer * rightHandSideBuf();
     void solve(void * X, CudaCSRMatrix * A,
                 void * fixed, float * error = 0);
 private:

@@ -4,16 +4,9 @@
 #include <cuFemTetrahedron_implement.h>
 #include <QuickSort.h>
 #include <CudaDbgLog.h>
+#include <boost/format.hpp>
 
 CudaDbgLog bglg("stiffness.txt");
-#define PRINT_RE 1
-#define PRINT_K 1
-#define PRINT_F0 1
-#define PRINT_FE 0
-#define PRINT_VETKIJIND 1
-#define PRINT_VETKIJHSH 1
-#define PRINT_STIFKIJIND 1
-#define PRINT_STIFKIJHSH 1
 
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
@@ -51,6 +44,7 @@ void FEMTetrahedronSystem::initOnDevice()
 {
     m_Re->create(numTetrahedrons() * 36);
     createStiffnessMatrix();
+	createVertexTetraHash();
     m_stiffnessMatrix->initOnDevice();
     
     m_deviceStiffnessTetraHash->create(numTetrahedrons() * 16 * 8);
@@ -81,6 +75,11 @@ unsigned combineKij(unsigned k, unsigned i, unsigned j)
     return (k<<5 | ( i<<3 | j));
 }
 
+unsigned combineKijt(unsigned k, unsigned i, unsigned j, unsigned t)
+{
+    return ( k<<5 | ( i<<3 | (j<<1 | t) ) );
+}
+
 uint64 upsample(uint a, uint b) 
 { return ((uint64)a << 32) | (uint64)b; }
 
@@ -91,6 +90,15 @@ void extractKij(unsigned c, unsigned & k, unsigned & i, unsigned & j)
     j = c&3;
 }
 
+void extractKijt(unsigned c, unsigned & k, unsigned & i, unsigned & j, unsigned & t)
+{
+    k = c>>5;
+    i = (c & 31)>>3;
+    j = (c & 7)>>1;
+	t = c & 1;
+}
+
+
 void FEMTetrahedronSystem::createStiffnessMatrix()
 {
     CSRMap vertexConnection;
@@ -99,9 +107,9 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
     const unsigned n = numTetrahedrons();
     const unsigned w = numPoints();
     const unsigned hashSize = n * 16;
-    
+	    
     QuickSortPair<uint64, uint> * vtkv = new QuickSortPair<uint64, uint>[hashSize];
-
+	
     for(k=0; k < n; k++) {
         for(i=0; i< 4; i++) {
             h = ind[k*4+i];
@@ -112,8 +120,10 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
                 vtkv++;
                 
                 if(j >= i) {
+// i row j col
                     vertexConnection[matrixCoord(ind, k, w, i, j)] = 1;
                     if(j > i) {
+// j row i col
                         vertexConnection[matrixCoord(ind, k, w, j, i)] = 1;
                     }
                 }
@@ -121,17 +131,6 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
         }
     }
     
-    vtkv -= hashSize;
-    QuickSort1<uint64, uint>::Sort(vtkv, 0, hashSize -1);
-    
-    m_vertexTetraHash->create(hashSize * 8);
-    KeyValuePair * vertexTetraHash = (KeyValuePair *)m_vertexTetraHash->data();
-
-    for(i=0; i< hashSize; i++) {
-        vertexTetraHash[i].key = vtkv[i].key >> 32;
-        vertexTetraHash[i].value = vtkv[i].value;
-    }
-
     CSRMap::iterator it = vertexConnection.begin();
     i = 0;
     for(;it!=vertexConnection.end();++it) {
@@ -140,52 +139,89 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
     }
     
     m_stiffnessMatrix->create(CSRMatrix::tMat33, w, vertexConnection);
+	
+	QuickSortPair<uint64, uint> * kkij = new QuickSortPair<uint64, uint>[hashSize];
 
     for(k=0; k < n; k++) {
         for(i=0; i< 4; i++) {
             for(j=0; j<4; j++) {
                 if(j >= i) {
-                    vtkv->key = upsample(vertexConnection[matrixCoord(ind, k, w, i, j)], k);
-                    vtkv->value = combineKij(k,i,j);
-                    vtkv++;
+                    kkij->key = upsample(vertexConnection[matrixCoord(ind, k, w, i, j)], k);
+                    kkij->value = combineKijt(k,i,j, 0);
+                    kkij++;
                     
                     if(j > i) {
-                        vtkv->key = upsample(vertexConnection[matrixCoord(ind, k, w, j, i)], k);
-                        vtkv->value = combineKij(k,i,j);
-                        vtkv++;
+                        kkij->key = upsample(vertexConnection[matrixCoord(ind, k, w, j, i)], k);
+                        kkij->value = combineKijt(k,i,j, 1);
+                        kkij++;
                     } 
                 }
             }
         }
     }
     
-    vtkv -= hashSize;
-    QuickSort1<uint64, uint>::Sort(vtkv, 0, hashSize -1);
+    kkij -= hashSize;
+    QuickSort1<uint64, uint>::Sort(kkij, 0, hashSize -1);
     
     m_stiffnessTetraHash->create(hashSize * 8);
     KeyValuePair * stiffnessTetraHash = (KeyValuePair *)m_stiffnessTetraHash->data();
    
     for(i=0; i< hashSize; i++) {
-        stiffnessTetraHash[i].key = vtkv[i].key >> 32;
-        stiffnessTetraHash[i].value = vtkv[i].value;
+        stiffnessTetraHash[i].key = kkij[i].key >> 32;
+        stiffnessTetraHash[i].value = kkij[i].value;
     }
     
-    delete[] vtkv;
+    delete[] kkij;
 
     m_stiffnessInd->create(m_stiffnessMatrix->numNonZero() * 4);
-    unsigned * scanned = (unsigned *)m_stiffnessInd->data();
+    unsigned * stiffnessInd = (unsigned *)m_stiffnessInd->data();
 
-// prefix sum to get element start
     unsigned lastK = n + 2;
     for(i=0; i< hashSize; i++) {
         if(stiffnessTetraHash[i].key!= lastK) {
             lastK = stiffnessTetraHash[i].key;
-            *scanned = i;
-            scanned++;
+            *stiffnessInd = i;
+            stiffnessInd++;
         }
     }
+}
+
+void FEMTetrahedronSystem::createVertexTetraHash()
+{
+	unsigned *ind = hostTretradhedronIndices();
+    unsigned i, j, k;
+    const unsigned n = numTetrahedrons();
+    const unsigned w = numPoints();
+    const unsigned hashSize = n * 16;
+	
+	QuickSortPair<uint64, uint> * vkij = new QuickSortPair<uint64, uint>[hashSize];
+	for(k=0; k < n; k++) {
+        for(i=0; i< 4; i++) {
+            for(j=0; j<4; j++) {
+                
+                vkij->key= upsample(ind[k*4+i], k);
+                vkij->value=combineKij(k,i,j);
+                vkij++;
+                
+            }
+        }
+    }
+	
+	vkij -= hashSize;
+	
+	QuickSort1<uint64, uint>::Sort(vkij, 0, hashSize -1);
     
-    m_vertexInd->create(w * 4);
+	m_vertexTetraHash->create(hashSize * 8);
+    KeyValuePair * vertexTetraHash = (KeyValuePair *)m_vertexTetraHash->data();
+
+    for(i=0; i< hashSize; i++) {
+        vertexTetraHash[i].key = vkij[i].key >> 32;
+        vertexTetraHash[i].value = vkij[i].value;
+    }
+	
+	delete[] vkij;
+	
+	m_vertexInd->create(w * 4);
     unsigned * vertexInd = (unsigned *)m_vertexInd->data();
     
     unsigned lastV = w + 2;
@@ -198,41 +234,82 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
     }
 }
 
+#define PRINT_RE 0
+#define PRINT_K 0
+#define PRINT_F0 0
+#define PRINT_FE 0
+#define PRINT_VETKIJIND 0
+#define PRINT_VETKIJHSH 0
+#define PRINT_STIFKIJIND 0
+#define PRINT_STIFKIJHSH 0
+#define PRINT_RHS 0
+#define PRINT_SOLVERR 1
+#define PRINT_ANCHOR 0
+
 void FEMTetrahedronSystem::verbose()
-{
-    std::cout<<"\n stiffness matrix:\n";
-    m_stiffnessMatrix->verbose();
-    
-    const unsigned n = numTetrahedrons();
-    
-    std::cout<<"\n stiffness-to-tetra hash["<<n * 16<<"]: ";
+{    
+#if PRINT_VETKIJHSH
+	bglg.writeHash(m_deviceVertexTetraHash, 
+					numTetrahedrons() * 16, 
+					" VkijHash ", CudaDbgLog::FOnce);
+#endif	
+#if PRINT_VETKIJIND
+	bglg.writeUInt(m_deviceVertexInd, 
+					numPoints(), 
+					" VkijInd ", CudaDbgLog::FOnce);
+#endif			
+#if PRINT_STIFKIJHSH
+	// bglg.writeHash(m_deviceStiffnessTetraHash, 
+	//					numTetrahedrons() * 16, 
+	//				" SkijHash ", CudaDbgLog::FOnce);
+					
+	const unsigned n = numTetrahedrons();
+    bglg.write(boost::str(boost::format("\n stiffness-to-kij hash[%1%]\n") % (n * 16)));
+	
     KeyValuePair * sth = (KeyValuePair *)m_stiffnessTetraHash->data();
     
-    unsigned i, j, k, h;
+    unsigned i, j, k, h, t;
     for(h=0; h< n * 16; h++) {
-        extractKij(sth[h].value, k, i, j);
-        std::cout<<" "<<sth[h].key<<":"<<k<<","<<i<<","<<j<<" ";
+        extractKijt(sth[h].value, k, i, j, t);
+		bglg.write(h);
+		bglg.write(boost::str(boost::format("%1%:(%2%,%3%,%4%,%5%)\n") % sth[h].key %  k % i % j % t));
     }
-    
-    const unsigned nnz = m_stiffnessMatrix->numNonZero();
-    
-    unsigned * ind = (unsigned *)m_stiffnessInd->data();
-    std::cout<<"\n stiffness indirection["<<nnz<<"]:\n";
-    for(i=0; i<nnz; i++)
-        std::cout<<" "<<ind[i];
-    
-    KeyValuePair * vertexTetraHash = (KeyValuePair *)m_vertexTetraHash->data();
-    std::cout<<"\n vertex-to_tetra hash["<<n * 16<<"]:\n";
-    for(h=0; h<n*16; h++) {
-        extractKij(vertexTetraHash[h].value, k, i, j);
-        std::cout<<" v"<<vertexTetraHash[h].key<<":"<<k<<","<<i<<","<<j<<" ";
-    }
-    
-    unsigned * vertexInd = (unsigned *)m_vertexInd->data();
-    std::cout<<"\n vertex indirection["<<numPoints()<<"]\n";
-    for(h=0; h<numPoints(); h++) {
-        std::cout<<" "<<vertexInd[h]<<" ";
-    }
+#endif
+#if PRINT_STIFKIJHSH
+	bglg.writeUInt(m_deviceStiffnessInd, 
+					m_stiffnessMatrix->numNonZero(), 
+					" SkijInd ", CudaDbgLog::FOnce);
+#endif
+#if PRINT_RE	
+	bglg.writeMat33(m_Re, 
+					numTetrahedrons(), 
+					" Re ", CudaDbgLog::FAlways);
+#endif
+#if PRINT_K
+	bglg.writeMat33(m_stiffnessMatrix->valueBuf(), 
+					m_stiffnessMatrix->numNonZero(), 
+					" K ", CudaDbgLog::FAlways);
+#endif
+#if PRINT_F0
+	bglg.writeVec3(m_F0, 
+					numPoints(), 
+					" F0 ", CudaDbgLog::FAlways);
+#endif
+#if PRINT_FE
+	bglg.writeVec3(m_Fe, 
+					numPoints(), 
+					" Fe ", CudaDbgLog::FAlways);
+#endif
+#if PRINT_RHS
+	bglg.writeVec3(rightHandSideBuf(), 
+					numPoints(), 
+					" Rhs ", CudaDbgLog::FAlways);
+#endif
+#if PRINT_ANCHOR
+	bglg.writeUInt(anchorBuf(), 
+					numPoints(), 
+					" Anchor ", CudaDbgLog::FOnce);
+#endif
 }
 
 void FEMTetrahedronSystem::resetOrientation()
@@ -313,7 +390,7 @@ void FEMTetrahedronSystem::dynamicsAssembly(float dt)
 	void * colInd = m_stiffnessMatrix->deviceColInd();
 	void * f0 = m_F0->bufferOnDevice();
 	void * fe = m_Fe->bufferOnDevice();
-	cuFemTetrahedron_computeRhsA((float3 *)rightHandSide(),
+	cuFemTetrahedron_computeRhs((float3 *)rightHandSide(),
                                 (float3 *)X,
                                 (float3 *)V,
                                 (float *)mass,
@@ -322,6 +399,13 @@ void FEMTetrahedronSystem::dynamicsAssembly(float dt)
                                 (uint *)colInd,
                                 (float3 *)f0,
 								(float3 *)fe,
+                                dt,
+                                numPoints());
+								
+	cuFemTetrahedron_dampK((mat33 *)stiffness,
+                                (float *)mass,
+                                (uint *)rowPtr,
+                                (uint *)colInd,
                                 dt,
                                 numPoints());
 }
@@ -337,10 +421,12 @@ void FEMTetrahedronSystem::updateExternalForce()
 
 void FEMTetrahedronSystem::solveConjugateGradient()
 {
-    return;
-    float error;
+    float ferr;
 	solve(deviceV(), m_stiffnessMatrix,
-                deviceAnchor(), &error);
+                deviceAnchor(), &ferr);
+#if PRINT_SOLVERR
+	bglg.write(boost::str(boost::format("cg solve error: %1%\n") % ferr));
+#endif
 }
 
 void FEMTetrahedronSystem::integrate(float dt)
@@ -355,53 +441,11 @@ void FEMTetrahedronSystem::integrate(float dt)
 void FEMTetrahedronSystem::update()
 {
 	updateExternalForce();
-	resetStiffnessMatrix();
 	updateOrientation();
 	updateForce();
 	updateStiffnessMatrix();
 	dynamicsAssembly(1.f/60.f);
 	solveConjugateGradient();
-
-#if PRINT_VETKIJHSH
-	bglg.writeHash(m_deviceVertexTetraHash, 
-					numTetrahedrons() * 16, 
-					" VkijHash ", CudaDbgLog::FOnce);
-#endif	
-#if PRINT_VETKIJIND
-	bglg.writeUInt(m_deviceVertexInd, 
-					numPoints(), 
-					" VkijInd ", CudaDbgLog::FOnce);
-#endif			
-#if PRINT_STIFKIJHSH
-	bglg.writeHash(m_deviceStiffnessTetraHash, 
-					numTetrahedrons() * 16, 
-					" SkijHash ", CudaDbgLog::FOnce);
-#endif
-#if PRINT_STIFKIJHSH
-	bglg.writeUInt(m_deviceStiffnessInd, 
-					m_stiffnessMatrix->numNonZero(), 
-					" SkijInd ", CudaDbgLog::FOnce);
-#endif
-
-#if PRINT_RE	
-	bglg.writeMat33(m_Re, 
-					numTetrahedrons(), 
-					" Re ", CudaDbgLog::FAlways);
-#endif
-#if PRINT_K
-	bglg.writeMat33(m_stiffnessMatrix->valueBuf(), 
-					m_stiffnessMatrix->numNonZero(), 
-					" K ", CudaDbgLog::FAlways);
-#endif
-#if PRINT_F0
-	bglg.writeVec3(m_F0, 
-					numPoints(), 
-					" F0 ", CudaDbgLog::FAlways);
-#endif
-#if PRINT_FE
-	bglg.writeVec3(m_Fe, 
-					numPoints(), 
-					" Fe ", CudaDbgLog::FAlways);
-#endif
+	verbose();
 	CudaTetrahedronSystem::update();
 }

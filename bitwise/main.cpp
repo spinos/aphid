@@ -201,6 +201,22 @@ void testKij()
     std::cout<<boost::format("j         %1%\n") % (c&3);	
 }
 
+void testKijt()
+{
+    int k = 11110;
+    int i = 3;
+    int j = 3;
+    int t = 0;
+    int c = ( k<<5 | ( i<<3 | (j<<1 | t) ) );
+    std::cout<<boost::format("kijt    %1%\n") % byte_to_binary(c);	
+    std::cout<<boost::format("k %1%\n") % (c>>5);
+    std::cout<<boost::format("masked>>3 %1%\n") % byte_to_binary((c&31)>>3);
+    std::cout<<boost::format("i         %1%\n") % ((c&31)>>3);
+    std::cout<<boost::format("j         %1%\n") % ((c&7)>>1);
+    std::cout<<boost::format("t         %1%\n") % (c&1);
+    	
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
@@ -282,7 +298,7 @@ int main(int argc, char * const argv[])
 	testNan();
 	testInf();
 	testTetrahedronDegenerate();
-	testKij();
+	testKijt();
 	
 	std::cout<<boost::format("39 mod 16: %1%\n") % (39 & 15);
 	

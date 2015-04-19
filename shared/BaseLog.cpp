@@ -9,6 +9,8 @@
 
 #include "BaseLog.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/format.hpp>
+
 using namespace boost::posix_time;
 BaseLog::BaseLog(const std::string & fileName)
 {
@@ -36,6 +38,7 @@ void BaseLog::writeTime()
 }
 
 void BaseLog::newLine()
-{
-	m_file<<"\n";
-}
+{ m_file<<"\n"; }
+
+void BaseLog::writeArraySize(const unsigned & n)
+{ write(boost::str(boost::format(" [%1%] \n") % n)); }

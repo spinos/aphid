@@ -31,7 +31,7 @@ __global__ void externalForce_kernel(float3 * dst,
 	dst[ind] = scale_float3_by(gravity, mass[ind]);
 }
 
-__global__ void computeRhsA_kernel(float3 * rhs,
+__global__ void computeRhs_kernel(float3 * rhs,
                                 float3 * pos,
                                 float3 * vel,
                                 float * mass,
@@ -46,36 +46,57 @@ __global__ void computeRhsA_kernel(float3 * rhs,
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
+	
 	float3_set_zero(rhs[ind]);
-	const int nextRow = rowPtr[ind+1];
-	int cur = rowPtr[ind];
+	
+	const uint nextRow = rowPtr[ind+1];
+	uint cur = rowPtr[ind];
+	const float mi = mass[ind];
 	mat33 K;
 	uint j;
 	float3 tmp;
-	float damping;
-	const float mi = mass[ind];
 	for(;cur<nextRow; cur++) {
 	    K = stiffness[cur];
 	    j = colInd[cur];
 	    mat33_float3_prod(tmp, K, pos[j]);
 	    float3_minus_inplace(rhs[ind], tmp);
-		
-	    mat33_mult_f(stiffness[cur], dt2);
-	    if(ind == j) {
-	        damping = .4f * mi * dt + mi;
-	        K.v[0].x += damping;
-	        K.v[1].y += damping;
-	        K.v[2].z += damping;
-	        stiffness[cur] = K;
-	    }
 	}
 	
 	float3_minus_inplace(rhs[ind], f0[ind]);
 	float3_add_inplace(rhs[ind], externalForce[ind]);
 	float3_scale_inplace(rhs[ind], dt);
+
 	tmp = vel[ind];
 	float3_scale_inplace(tmp, mi);
 	float3_add_inplace(rhs[ind], tmp);
+}
+
+__global__ void dampK_kernel(mat33 * stiffness,
+                                float * mass,
+                                uint * rowPtr,
+                                uint * colInd,
+                                float dt,
+								float dt2,
+                                uint maxInd)
+{
+	unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	const uint nextRow = rowPtr[ind+1];
+	uint cur = rowPtr[ind];
+	const float mi = mass[ind];
+	float damping;
+	for(;cur<nextRow; cur++) {
+
+	    mat33_mult_f(stiffness[cur], dt2);
+		
+	    if(ind == colInd[cur]) {
+	        damping = .2f * mi * dt + mi;
+	        stiffness[cur].v[0].x += damping;
+	        stiffness[cur].v[1].y += damping;
+	        stiffness[cur].v[2].z += damping;
+	    }
+	}
 }
 
 __global__ void internalForce_kernel(float3 * dst,
@@ -90,10 +111,12 @@ __global__ void internalForce_kernel(float3 * dst,
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
+	
+	float3_set_zero(dst[ind]);
+	
 	float volume;
 	float3 B[4];
 	float3 pj, force, sum;
-	float3_set_zero(sum);
 	mat33 Ke, Re;
 	uint iTet, i, j;
 	uint cur = bufferIndices[ind];
@@ -105,23 +128,24 @@ __global__ void internalForce_kernel(float3 * dst,
 	    
 	    if(lastTet != iTet) {
 	        if(lastTet != 9496729) {
-	            mat33_float3_prod(force, Re, sum);
+				mat33_float3_prod(force, Re, sum);
 	            float3_minus_inplace(dst[ind], force);
 	        }
+			
 	        float3_set_zero(sum);
 	        lastTet = iTet;
 	    }
 		
 		Re = orientation[iTet];
 		calculateBandVolume(B, volume, pos, tetvert[iTet]);
-	    calculateKe(Ke, B, d16, d17, d18, volume, i, j);	    
-	    
+		calculateKe(Ke, B, d16, d17, d18, volume, i, j);	    
+		
 	    uint * tetv = &(tetvert[iTet].x);
 	    pj = pos[tetv[j]];
 		
 	    mat33_float3_prod(force, Ke, pj);	    
 	    float3_add_inplace(sum, force);
-
+		
 	    cur++;
 	    if(cur >= maxBufferInd) break;
 	}
@@ -160,15 +184,17 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
+	set_mat33_zero(dst[ind]);
+	
 	float volume;
 	float3 B[4];
 	mat33 Ke, Re, ReT, tmp, tmpT;
-	uint iTet, i, j;
+	uint iTet, i, j, needT;
 	uint cur = bufferIndices[ind];
 	for(;;) {
 	    if(tetraInd[cur].key != ind) break;
 	    
-	    extractTetij(tetraInd[cur].value, iTet, i, j);
+	    extractTetijt(tetraInd[cur].value, iTet, i, j, needT);
 	    
 	    calculateBandVolume(B, volume, pos, tetv[iTet]);
 		
@@ -181,16 +207,12 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 	    mat33_mult(tmp, Ke);
 	    mat33_mult(tmp, ReT);
 		mat33_transpose(tmpT, tmp);
-	    
-	    mat33_add(dst[ind], tmp);
-	        
-	    if(j>i)
+    
+	    if(needT)
 	        mat33_add(dst[ind], tmpT);
-			
-// test
-//	    dst[ind] = Ke;
-//		mat33_mult(dst[ind], Re);
-		
+		else
+			mat33_add(dst[ind], tmp);
+					
 	    cur++;
 	    if(cur >= maxBufferInd) break;
 	}
@@ -332,7 +354,7 @@ void cuFemTetrahedron_internalForce(float3 * dst,
                                     uint maxBufferInd,
                                     uint maxInd)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(36, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(40, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);
@@ -351,7 +373,7 @@ void cuFemTetrahedron_internalForce(float3 * dst,
                                             maxInd);
 }
 
-void cuFemTetrahedron_computeRhsA(float3 * rhs,
+void cuFemTetrahedron_computeRhs(float3 * rhs,
                                 float3 * pos,
                                 float3 * vel,
                                 float * mass,
@@ -363,12 +385,12 @@ void cuFemTetrahedron_computeRhsA(float3 * rhs,
                                 float dt,
                                 uint maxInd)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(32, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(16, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);
     
-    computeRhsA_kernel<<< grid, block >>>(rhs, 
+    computeRhs_kernel<<< grid, block >>>(rhs, 
         pos,
         vel,
         mass, 
@@ -378,6 +400,27 @@ void cuFemTetrahedron_computeRhsA(float3 * rhs,
         f0,
         externalForce,
         dt, 
+        dt * dt,
+        maxInd);
+}
+
+void cuFemTetrahedron_dampK(mat33 * stiffness,
+                                float * mass,
+                                uint * rowPtr,
+                                uint * colInd,
+                                float dt,
+                                uint maxInd)
+{
+	int tpb = CudaBase::LimitNThreadPerBlock(16, 50);
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(maxInd, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    dampK_kernel<<< grid, block >>>(stiffness, 
+        mass, 
+        rowPtr, 
+        colInd,
+		dt,
         dt * dt,
         maxInd);
 }

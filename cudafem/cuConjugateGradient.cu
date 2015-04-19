@@ -15,14 +15,14 @@ __global__ void addX_kernel(float3 * X,
 	
 	d[ind] = 0.f;
 	
-	if(fixed[ind]==1) return;
+	if(fixed[ind] > 0) return;
 	
 	float3_add_inplace(X[ind], scale_float3_by(prev[ind], d3));
 	float3_minus_inplace(residual[ind], scale_float3_by(update[ind], d3));
 	d[ind] = float3_dot(residual[ind], residual[ind]);
 }
 
-__global__ void prevresidual_kernel(float3 * a,
+__global__ void prevresidual_kernel(float3 * prev,
                             float3 * residual,
                             mat33 * A,
                             uint * rowPtr,
@@ -35,7 +35,9 @@ __global__ void prevresidual_kernel(float3 * a,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	if(fixed[ind]==1) return;
+	float3_set_zero(prev[ind]);
+	
+	if(fixed[ind] > 0) return;
 	
 	residual[ind] = rhs[ind];
 	
@@ -49,7 +51,7 @@ __global__ void prevresidual_kernel(float3 * a,
 	    float3_minus_inplace(residual[ind], tmp);
 	}
 	
-	a[ind] = residual[ind];
+	prev[ind] = residual[ind];
 }
 
 __global__ void addResidual_kernel(float3 * prev,
@@ -61,7 +63,7 @@ __global__ void addResidual_kernel(float3 * prev,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	if(fixed[ind]==1) return;
+	if(fixed[ind] > 0) return;
 	
 	float3_scale_inplace(prev[ind], d4);
 	float3_add_inplace(prev[ind], residual[ind]);
@@ -85,7 +87,7 @@ __global__ void Ax_kernel(float3 * prev,
 	d[ind] = 0.f;
 	d2[ind] = 0.f;
 	
-	if(fixed[ind]==1) return;
+	if(fixed[ind] > 0) return;
 	
 	uint j;
 	float3 tmp;

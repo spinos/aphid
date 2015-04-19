@@ -37,7 +37,7 @@ public:
 	void sendVToHost();
 	
 protected:
-    
+    CUDABuffer * anchorBuf();
 private:
 	void formTetrahedronAabbs();
 private:

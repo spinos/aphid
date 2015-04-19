@@ -24,6 +24,7 @@ void CudaDbgLog::writeFlt(BaseBuffer * buf, unsigned n,
 	float * m = (float *)buf->data();
 	newLine();
     write(notation);
+	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
         write(i);
@@ -52,6 +53,7 @@ void CudaDbgLog::writeUInt(BaseBuffer * buf, unsigned n,
 	unsigned * m = (unsigned *)buf->data();
 	newLine();
     write(notation);
+	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
         write(i);
@@ -80,6 +82,7 @@ void CudaDbgLog::writeVec3(BaseBuffer * buf, unsigned n,
 	Vector3F * m = (Vector3F *)buf->data();
 	newLine();
     write(notation);
+	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
         write(i);
@@ -109,6 +112,7 @@ void CudaDbgLog::writeMat33(BaseBuffer * buf, unsigned n,
     Matrix33F * m = (Matrix33F *)buf->data();
 	newLine();
     write(notation);
+	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
         write(i);
@@ -137,6 +141,7 @@ void CudaDbgLog::writeHash(BaseBuffer * buf, unsigned n,
     unsigned * m = (unsigned *)buf->data();
 	newLine();
     write(notation);
+	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
         write(i);

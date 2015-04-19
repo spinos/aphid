@@ -166,7 +166,9 @@ float TetrahedronSystem::totalInitialVolume()
 
 void TetrahedronSystem::calculateMass()
 {
-	const float density = m_totalMass / totalInitialVolume();
+	float density = m_totalMass / totalInitialVolume();
+	if(density < 0.f) density = -density;
+	std::cout<<" density "<<density;
     const float base = 1.f/(float)m_numPoints;
     unsigned i;
     float * mass = hostMass();

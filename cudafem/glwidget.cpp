@@ -56,13 +56,14 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::simulate()
 {
+	for(int i=0; i < 2; i++) {
     m_world->collide();
     if(!m_interface->verifyData(m_world)) 
         stopPhysics();
-    else {
+    else
         m_world->integrate(1.f / 60.f);
-        update();
-    }
+	}
+	update();
 }
 
 void GLWidget::stopPhysics()

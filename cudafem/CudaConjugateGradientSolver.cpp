@@ -4,6 +4,10 @@
 #include <CudaCSRMatrix.h>
 #include <cuConjugateGradient_implement.h>
 #include <AllMath.h>
+#include <CudaDbgLog.h>
+#include <boost/format.hpp>
+
+CudaDbgLog cglg("cgsolver.txt");
 
 int CudaConjugateGradientSolver::MaxNIterations = 30;
 
@@ -61,11 +65,19 @@ void CudaConjugateGradientSolver::initOnDevice()
 void * CudaConjugateGradientSolver::rightHandSide()
 { return m_rhs->bufferOnDevice(); }
 
+CUDABuffer * CudaConjugateGradientSolver::rightHandSideBuf()
+{ return m_rhs; }
+
 void CudaConjugateGradientSolver::solve(void * X, 
                 CudaCSRMatrix * A,
                 void * fixed,
                 float * error)
 {
+	// cglg.writeVec3(m_rhs, m_dimension, "cg b", CudaDbgLog::FAlways);
+	//cglg.writeMat33(A->valueBuf(), 
+	//				A->numNonZero(), 
+	//				" cg A ", CudaDbgLog::FAlways);
+					
     cuConjugateGradient_prevresidual((float3 *)previous(),
                             (float3 *)residual(),
                             (mat33 *)A->deviceValue(),

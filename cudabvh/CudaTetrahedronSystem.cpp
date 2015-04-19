@@ -77,6 +77,9 @@ void * CudaTetrahedronSystem::deviceMass()
 void * CudaTetrahedronSystem::deviceAnchor()
 { return m_deviceAnchor->bufferOnDevice(); }
 
+CUDABuffer * CudaTetrahedronSystem::anchorBuf()
+{ return m_deviceAnchor; }
+
 void * CudaTetrahedronSystem::deviceTretradhedronIndices()
 { return m_deviceTretradhedronIndices->bufferOnDeviceAt(m_iLoc); }
 

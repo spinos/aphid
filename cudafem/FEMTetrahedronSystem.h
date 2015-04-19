@@ -21,6 +21,7 @@ protected:
     
 private:
     void createStiffnessMatrix();
+	void createVertexTetraHash();
     void resetOrientation();
     void updateOrientation();
     void resetStiffnessMatrix();

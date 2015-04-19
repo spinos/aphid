@@ -37,7 +37,7 @@ void cuFemTetrahedron_internalForce(float3 * dst,
                                     uint maxBufferInd,
                                     uint maxInd);
 
-void cuFemTetrahedron_computeRhsA(float3 * rhs,
+void cuFemTetrahedron_computeRhs(float3 * rhs,
                                 float3 * pos,
                                 float3 * vel,
                                 float * mass,
@@ -46,6 +46,13 @@ void cuFemTetrahedron_computeRhsA(float3 * rhs,
                                 uint * colInd,
                                 float3 * f0,
                                 float3 * externalForce,
+                                float dt,
+                                uint maxInd);
+								
+void cuFemTetrahedron_dampK(mat33 * stiffness,
+                                float * mass,
+                                uint * rowPtr,
+                                uint * colInd,
                                 float dt,
                                 uint maxInd);
 

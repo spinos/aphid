@@ -12,6 +12,11 @@
 #include <CUDABuffer.h>
 #include <cuConjugateGradient_implement.h>
 #include <CudaReduction.h>
+#include <CudaDbgLog.h>
+#include <boost/format.hpp>
+
+CudaDbgLog ceglg("cgsolver.txt");
+
 int i_max = 32;
 ConjugateGradientSolver::ConjugateGradientSolver() {}
 ConjugateGradientSolver::~ConjugateGradientSolver() 
@@ -78,8 +83,6 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
     m_deviceRhs->hostToDevice(m_b);
     void * dRhs = m_deviceRhs->bufferOnDevice();
     
-    m_devicePrev->hostToDevice(m_prev->data());
-    
 	cuConjugateGradient_prevresidual((float3 *)m_devicePrev->bufferOnDevice(),
                             (float3 *)m_deviceResidual->bufferOnDevice(),
                             (mat33 *)stiffnessMatrix->deviceValue(),
@@ -90,6 +93,10 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
                             (float3 *)dRhs,
                             m_numRows);
     
+    // ceglg.write("cg init");
+    // ceglg.writeVec3(m_deviceResidual, m_numRows, "cg residual", CudaDbgLog::FAlways);
+    // ceglg.writeVec3(m_devicePrev, m_numRows, "cg prev", CudaDbgLog::FAlways);
+    
     // m_devicePrev->deviceToHost(m_prev->data());
 
     Vector3F * prev = (Vector3F *)m_prev->data();
@@ -98,7 +105,7 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
         // std::cout<<" prev["<<k<<"] h "<<prev[k];
     }
     
-	for(int i=0;i<i_max;i++) {
+	for(unsigned i=0;i<i_max;i++) {
 	    cuConjugateGradient_Ax((float3 *)m_devicePrev->bufferOnDevice(),
                             (float3 *)m_deviceUpdate->bufferOnDevice(),
                             (float3 *)m_deviceResidual->bufferOnDevice(),
@@ -110,6 +117,13 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
                             (uint *)dFixed,
                             m_numRows);
         
+        // ceglg.write("cg step ");
+        // ceglg.write(i);
+    
+        // ceglg.writeVec3(m_deviceUpdate, m_numRows, "cg update", CudaDbgLog::FAlways);
+        // ceglg.writeVec3(m_deviceResidual, m_numRows, "cg residual", CudaDbgLog::FAlways);
+        // ceglg.writeVec3(m_devicePrev, m_numRows, "cg prev", CudaDbgLog::FAlways);
+    
         float d =0;
 		float d2=0;
 		
@@ -128,7 +142,11 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
                             d3,
                             (uint *)dFixed,
                             m_numRows);
-        
+        // ceglg.write("addX");
+        // ceglg.writeVec3(m_deviceUpdate, m_numRows, "cg update", CudaDbgLog::FAlways);
+        // ceglg.writeVec3(m_deviceResidual, m_numRows, "cg residual", CudaDbgLog::FAlways);
+        // ceglg.writeVec3(m_devicePrev, m_numRows, "cg prev", CudaDbgLog::FAlways);
+        // 
         float d1 = 0.f;
 
         m_reduce->sumF(d1, (float *)m_deviceD->bufferOnDevice(), m_numRows);
@@ -146,7 +164,13 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
                             (float3 *)m_deviceResidual->bufferOnDevice(),
                             d4,
                             (uint *)dFixed,
-                            m_numRows);             
+                            m_numRows);
+        
+        // ceglg.write("add residual");
+        // ceglg.writeVec3(m_deviceUpdate, m_numRows, "cg update", CudaDbgLog::FAlways);
+        // ceglg.writeVec3(m_deviceResidual, m_numRows, "cg residual", CudaDbgLog::FAlways);
+        // ceglg.writeVec3(m_devicePrev, m_numRows, "cg prev", CudaDbgLog::FAlways);
+        // 
 	}	 
 	cudaThreadSynchronize();
 	m_deviceX->deviceToHost(X);

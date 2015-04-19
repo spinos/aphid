@@ -36,7 +36,7 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 		vy = -vy;
 			
 	    hv[0] = 0.f;//vrx + vr;
-		hv[1] = vry;
+		hv[1] = 0.f;//vry;
 		hv[2] = 0.f;//vrz - vr;
 		hv+=3;
 	}
@@ -48,10 +48,10 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 	    // q.set(TetraP[TetraIndices[i][1]][0], TetraP[TetraIndices[i][1]][1], TetraP[TetraIndices[i][1]][2]);
 	    // std::cout<<"el "<<(p - q).length()<<" ";
 	}
-	tetra->setAnchoredPoint(7, 0);
-	tetra->setAnchoredPoint(5, 20);
-	tetra->setAnchoredPoint(8, 9);
-	tetra->setAnchoredPoint(18, 78);
-	tetra->setTotalMass(50.f);
+	tetra->setAnchoredPoint(122, 0);
+	tetra->setAnchoredPoint(123, 20);
+	tetra->setAnchoredPoint(116, 9);
+	tetra->setAnchoredPoint(124, 78);
+	tetra->setTotalMass(5000.f);
 	world->addTetrahedronSystem(tetra);
 }
