@@ -21,7 +21,12 @@ public:
 	void write(const std::string & os);
 	void write(unsigned & i);
 	void writeTime();
+	void newLine();
 protected:
+	template <typename T>
+	void _write(const T & a) {
+		m_file<<" "<<a<<" ";
+	}
 
 private:
 	std::ofstream m_file;

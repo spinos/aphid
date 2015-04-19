@@ -93,29 +93,30 @@ __global__ void internalForce_kernel(float3 * dst,
 	float volume;
 	float3 B[4];
 	float3 pj, force, sum;
+	float3_set_zero(sum);
 	mat33 Ke, Re;
 	uint iTet, i, j;
 	uint cur = bufferIndices[ind];
-	uint lastTet = 94967295;
+	uint lastTet = 9496729;
 	for(;;) {
 	    if(tetraInd[cur].key != ind) break;
 	    
 	    extractTetij(tetraInd[cur].value, iTet, i, j);
 	    
 	    if(lastTet != iTet) {
-	        if(lastTet != 94967295) {
+	        if(lastTet != 9496729) {
 	            mat33_float3_prod(force, Re, sum);
 	            float3_minus_inplace(dst[ind], force);
 	        }
-	        Re = orientation[iTet];
-	        calculateBandVolume(B, volume, pos, tetvert[iTet]);
 	        float3_set_zero(sum);
 	        lastTet = iTet;
 	    }
-
+		
+		Re = orientation[iTet];
+		calculateBandVolume(B, volume, pos, tetvert[iTet]);
 	    calculateKe(Ke, B, d16, d17, d18, volume, i, j);	    
 	    
-	    uint * tetv = &tetvert[iTet].x;
+	    uint * tetv = &(tetvert[iTet].x);
 	    pj = pos[tetv[j]];
 		
 	    mat33_float3_prod(force, Ke, pj);	    
@@ -226,19 +227,20 @@ __global__ void calculateRe_kernel(mat33 * dst,
 	float3 n2 = scale_float3_by(float3_cross(e3, e1), div6V);
 	float3 n3 = scale_float3_by(float3_cross(e1, e2), div6V);
 	
-	dst[ind].v[0].x = e01.x * n1.x + e02.x * n2.x + e03.x * n3.x;  
-	dst[ind].v[1].x = e01.x * n1.y + e02.x * n2.y + e03.x * n3.y;   
-	dst[ind].v[2].x = e01.x * n1.z + e02.x * n2.z + e03.x * n3.z;
+	mat33 * Ke = &dst[ind];
+	Ke->v[0].x = e01.x * n1.x + e02.x * n2.x + e03.x * n3.x;  
+	Ke->v[1].x = e01.x * n1.y + e02.x * n2.y + e03.x * n3.y;   
+	Ke->v[2].x = e01.x * n1.z + e02.x * n2.z + e03.x * n3.z;
 
-    dst[ind].v[0].y = e01.y * n1.x + e02.y * n2.x + e03.y * n3.x;  
-	dst[ind].v[1].y = e01.y * n1.y + e02.y * n2.y + e03.y * n3.y;   
-	dst[ind].v[2].y = e01.y * n1.z + e02.y * n2.z + e03.y * n3.z;
+    Ke->v[0].y = e01.y * n1.x + e02.y * n2.x + e03.y * n3.x;  
+	Ke->v[1].y = e01.y * n1.y + e02.y * n2.y + e03.y * n3.y;   
+	Ke->v[2].y = e01.y * n1.z + e02.y * n2.z + e03.y * n3.z;
 
-    dst[ind].v[0].z = e01.z * n1.x + e02.z * n2.x + e03.z * n3.x;  
-	dst[ind].v[1].z = e01.z * n1.y + e02.z * n2.y + e03.z * n3.y;  
-	dst[ind].v[2].z = e01.z * n1.z + e02.z * n2.z + e03.z * n3.z;
+    Ke->v[0].z = e01.z * n1.x + e02.z * n2.x + e03.z * n3.x;  
+	Ke->v[1].z = e01.z * n1.y + e02.z * n2.y + e03.z * n3.y;  
+	Ke->v[2].z = e01.z * n1.z + e02.z * n2.z + e03.z * n3.z;
 	
-	mat33_orthoNormalize(dst[ind]);
+	mat33_orthoNormalize(*Ke);
 }
 
 extern "C" {
@@ -327,7 +329,7 @@ void cuFemTetrahedron_internalForce(float3 * dst,
                                     uint maxBufferInd,
                                     uint maxInd)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(34, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(28, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);

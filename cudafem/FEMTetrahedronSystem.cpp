@@ -6,6 +6,12 @@
 #include <CudaDbgLog.h>
 
 CudaDbgLog bglg("stiffness.txt");
+#define PRINT_RE 0
+#define PRINT_K 0
+#define PRINT_F0 1
+#define PRINT_FE 0
+#define PRINT_VETKIJIND 0
+#define PRINT_VETKIJHSH 0
 
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
@@ -182,7 +188,7 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
     
     unsigned lastV = w + 2;
     for(i=0; i< hashSize; i++) {
-        if(vertexTetraHash[i].key!= lastV) {
+        if(vertexTetraHash[i].key != lastV) {
             lastV = vertexTetraHash[i].key;
             *vertexInd = i;
             vertexInd++;
@@ -349,17 +355,41 @@ void FEMTetrahedronSystem::update()
 	updateExternalForce();
 	resetStiffnessMatrix();
 	updateOrientation();
+	updateForce();
 	updateStiffnessMatrix();
 	dynamicsAssembly(1.f/60.f);
 	solveConjugateGradient();
-/*	
+
+#if PRINT_RE	
 	bglg.writeMat33(m_Re, 
 					numTetrahedrons(), 
 					" Re ", CudaDbgLog::FAlways);
-*/
+#endif
+#if PRINT_K
 	bglg.writeMat33(m_stiffnessMatrix->valueBuf(), 
 					m_stiffnessMatrix->numNonZero(), 
 					" K ", CudaDbgLog::FAlways);
-					
+#endif
+#if PRINT_F0
+	bglg.writeVec3(m_F0, 
+					numPoints(), 
+					" F0 ", CudaDbgLog::FAlways);
+#endif
+#if PRINT_FE
+	bglg.writeVec3(m_Fe, 
+					numPoints(), 
+					" Fe ", CudaDbgLog::FAlways);
+#endif
+#if PRINT_VETKIJHSH
+	bglg.writeHash(m_deviceVertexTetraHash, 
+					numTetrahedrons() * 16, 
+					" VkijHash ", CudaDbgLog::FOnce);
+#endif	
+#if PRINT_VETKIJIND
+	bglg.writeUInt(m_deviceVertexInd, 
+					numPoints(), 
+					" VkijInd ", CudaDbgLog::FOnce);
+#endif			
+	bglg.write("foo");
 	CudaTetrahedronSystem::update();
 }

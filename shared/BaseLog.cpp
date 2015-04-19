@@ -24,7 +24,7 @@ BaseLog::~BaseLog()
 }
 
 void BaseLog::write(unsigned & i)
-{ m_file<<" "<<i<<" "; }
+{ write<unsigned>(i); }
 
 void BaseLog::write(const std::string & os )
 { m_file<<os; }
@@ -33,4 +33,9 @@ void BaseLog::writeTime()
 { 
 	const ptime now = second_clock::local_time();
 	m_file<<" at "<<to_iso_extended_string(now)<<"\n";
+}
+
+void BaseLog::newLine()
+{
+	m_file<<"\n";
 }

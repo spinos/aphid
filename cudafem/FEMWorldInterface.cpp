@@ -3,12 +3,17 @@
 #include <CudaDynamicWorld.h>
 #include <FEMTetrahedronSystem.h>
 #include <tetmesh.h>
+
+#define COLLIDEJUST 0
+
 FEMWorldInterface::FEMWorldInterface() {}
 FEMWorldInterface::~FEMWorldInterface() {}
 
 void FEMWorldInterface::create(CudaDynamicWorld * world)
 {
-    // return DynamicWorldInterface::create(world);
+#if COLLIDEJUST
+    return DynamicWorldInterface::create(world);
+#endif
     std::cout<<"num points "<<TetraNumVertices<<"\n";
 	std::cout<<"num tetrahedrons "<<TetraNumTetrahedrons<<"\n";
 	
@@ -16,7 +21,7 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 	tetra->create(TetraNumTetrahedrons+100, TetraNumVertices+400);
 	float * hv = &tetra->hostV()[0];
 	float vrx, vry, vrz, vr;
-	float vy = .695f;
+	float vy = 1.695f;
 	unsigned i;
 	Vector3F p, q;
 	for(i=0; i<TetraNumVertices; i++) {
@@ -47,6 +52,6 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 	tetra->setAnchoredPoint(5, 20);
 	tetra->setAnchoredPoint(8, 9);
 	tetra->setAnchoredPoint(18, 78);
-	tetra->setTotalMass(200.f);
+	tetra->setTotalMass(50.f);
 	world->addTetrahedronSystem(tetra);
 }

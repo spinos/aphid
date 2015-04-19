@@ -120,6 +120,13 @@ void SolverThread::stepPhysics(float dt)
 	    dbglg.write(k);
 		dbglg.write(tetrahedra[k].Re.str());
 	}
+	
+	dbglg.write("F0");
+	unsigned totalPoints = m_mesh->numPoints();
+	for(unsigned k=0;k<totalPoints;k++) {
+	    dbglg.write(k);
+		dbglg.write(m_F0[k].str());
+	}
  
 	dbglg.writeMat33(m_stiffnessMatrix->valueBuf(), 
 	    m_stiffnessMatrix->numNonZero(),
