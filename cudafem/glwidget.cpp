@@ -5,6 +5,7 @@
 #include <KdTreeDrawer.h>
 #include "CudaDynamicWorld.h"
 #include "FEMWorldInterface.h"
+#define DRGDRW 1
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	perspCamera()->setFarClipPlane(20000.f);
@@ -33,7 +34,11 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+#if DRGDRW
     if(m_isPhysicsRunning) m_interface->draw(m_world, getDrawer());
+#else
+	if(m_isPhysicsRunning) m_interface->draw(m_world);
+#endif
     else m_interface->drawFaulty(m_world, getDrawer());
 }
 //! [7]

@@ -55,11 +55,21 @@ __global__ void computeRhs_kernel(float3 * rhs,
 	mat33 K;
 	uint j;
 	float3 tmp;
+	float damping;
 	for(;cur<nextRow; cur++) {
 	    K = stiffness[cur];
 	    j = colInd[cur];
 	    mat33_float3_prod(tmp, K, pos[j]);
 	    float3_minus_inplace(rhs[ind], tmp);
+		
+		mat33_mult_f(stiffness[cur], dt2);
+		
+	    if(ind == colInd[cur]) {
+	        damping = .2f * mi * dt + mi;
+	        stiffness[cur].v[0].x += damping;
+	        stiffness[cur].v[1].y += damping;
+	        stiffness[cur].v[2].z += damping;
+	    }
 	}
 	
 	float3_minus_inplace(rhs[ind], f0[ind]);
@@ -385,7 +395,7 @@ void cuFemTetrahedron_computeRhs(float3 * rhs,
                                 float dt,
                                 uint maxInd)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(16, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(24, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);

@@ -243,8 +243,8 @@ void FEMTetrahedronSystem::createVertexTetraHash()
 #define PRINT_STIFKIJIND 0
 #define PRINT_STIFKIJHSH 0
 #define PRINT_RHS 0
-#define PRINT_SOLVERR 1
 #define PRINT_ANCHOR 0
+#define PRINT_SOLVERR 0
 
 void FEMTetrahedronSystem::verbose()
 {    
@@ -401,13 +401,13 @@ void FEMTetrahedronSystem::dynamicsAssembly(float dt)
 								(float3 *)fe,
                                 dt,
                                 numPoints());
-								
+/*								
 	cuFemTetrahedron_dampK((mat33 *)stiffness,
                                 (float *)mass,
                                 (uint *)rowPtr,
                                 (uint *)colInd,
                                 dt,
-                                numPoints());
+                                numPoints());*/
 }
 
 void FEMTetrahedronSystem::updateExternalForce()
