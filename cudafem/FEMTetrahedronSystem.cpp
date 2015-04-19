@@ -3,7 +3,9 @@
 #include <CudaCSRMatrix.h>
 #include <cuFemTetrahedron_implement.h>
 #include <QuickSort.h>
-#include <BaseLog.h>
+#include <CudaDbgLog.h>
+
+CudaDbgLog bglg("stiffness.txt");
 
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
@@ -324,14 +326,9 @@ void FEMTetrahedronSystem::updateExternalForce()
                                 (float *)mass,
                                 numPoints());
 }
-int Fst = 1;
+
 void FEMTetrahedronSystem::solveConjugateGradient()
 {
-	if(Fst) {
-		BaseLog lg("stiffness.txt");
-	    m_stiffnessMatrix->print(&lg);
-		Fst = 0;
-	}
     return;
     float error;
 	solve(deviceV(), m_stiffnessMatrix,
@@ -351,9 +348,18 @@ void FEMTetrahedronSystem::update()
 {
 	updateExternalForce();
 	resetStiffnessMatrix();
-	resetOrientation();
+	updateOrientation();
 	updateStiffnessMatrix();
 	dynamicsAssembly(1.f/60.f);
 	solveConjugateGradient();
+	
+	bglg.writeMat33(m_Re, 
+					numTetrahedrons(), 
+					" Re ", CudaDbgLog::FAlways);
+/*
+	bglg.writeMat33(m_stiffnessMatrix->valueBuf(), 
+					m_stiffnessMatrix->numNonZero(), 
+					" K ", CudaDbgLog::FAlways);
+*/					
 	CudaTetrahedronSystem::update();
 }
