@@ -5,6 +5,19 @@
 
 #define B3_BROADPHASE_MAX_STACK_SIZE 128
 
+__device__ int isElementExcluded(uint b, uint a, 
+									uint * exclusionInd,
+									uint * exclusionStart)
+{
+	if(a >= b) return 1;
+	uint cur = exclusionStart[a];
+	uint maxInd = exclusionStart[a+1];
+	for(; cur < maxInd; cur++) {
+		if(exclusionInd[cur] == b) return 1;
+	}
+	return 0;
+}
+
 __device__ int isTetrahedronConnected(uint a, uint b, const uint4 * v)
 {
     if(a == b) return 1;
@@ -18,6 +31,129 @@ __device__ int isTetrahedronConnected(uint a, uint b, const uint4 * v)
     if(ta.w == tb.x || ta.w == tb.y || ta.w == tb.z || ta.w == tb.w) return 1;
     
     return 0;
+}
+
+__global__ void writePairCacheSelfCollideExclusion_kernel(uint2 * dst, 
+								uint * cacheStarts, 
+								uint * overlappingCounts,
+								Aabb * boxes, 
+								uint maxBoxInd,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndices, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								unsigned queryIdx,
+								uint * exclusionIndices,
+								uint * exclusionStarts)
+{
+	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if(boxIndex >= maxBoxInd) return;
+	
+	//uint cacheSize = overlappingCounts[boxIndex];
+	//if(cacheSize < 1) return;
+	
+	uint startLoc = cacheStarts[boxIndex];
+	uint writeLoc = startLoc;
+	
+	Aabb box = boxes[boxIndex];
+	
+	uint stack[B3_BROADPHASE_MAX_STACK_SIZE];
+	
+	int stackSize = 1;
+	stack[0] = *rootNodeIndex;
+		
+	int isLeaf;
+	
+	while(stackSize > 0)
+	{
+		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
+		stackSize--;
+		
+		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
+		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
+
+		//bvhRigidIndex is not used if internal node
+		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
+		
+		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
+		uint2 pair;
+		if(isAabbOverlapping(box, bvhNodeAabb))
+		{
+			if(isLeaf)
+			{
+			    if(!isElementExcluded(bvhRigidIndex, boxIndex, exclusionIndices, exclusionStarts)) {
+			        pair.x = combineObjectElementInd(queryIdx, boxIndex);
+			        pair.y = combineObjectElementInd(queryIdx, bvhRigidIndex);
+			        dst[writeLoc] = pair;
+			        writeLoc++;
+			    }
+			    // }
+			    //if((writeLoc - startLoc)==cacheSize) { // cache if full
+			    //    return;
+			    //}
+			}
+			else {
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+                stackSize++;
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+                stackSize++;
+			}
+		}
+	}
+}
+
+__global__ void computePairCountsSelfCollideExclusion_kernel(uint * overlappingCounts, 
+								Aabb * boxes, 
+								uint maxBoxInd,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndices, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								uint * exclusionIndices,
+								uint * exclusionStarts)
+{
+	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if(boxIndex >= maxBoxInd) return;
+	
+	Aabb box = boxes[boxIndex];
+	
+	uint stack[B3_BROADPHASE_MAX_STACK_SIZE];
+	
+	int stackSize = 1;
+	stack[0] = *rootNodeIndex;
+		
+	int isLeaf;
+	
+	while(stackSize > 0)
+	{
+		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
+		stackSize--;
+		
+		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
+		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
+
+		//bvhRigidIndex is not used if internal node
+		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
+		
+		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
+
+		if(isAabbOverlapping(box, bvhNodeAabb))
+		{    		    
+			if(isLeaf)
+			{
+			    if(!isElementExcluded(bvhRigidIndex, boxIndex, exclusionIndices, exclusionStarts)) 
+			        overlappingCounts[boxIndex] += 1;
+			}
+			else {
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+                stackSize++;
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+                stackSize++;
+			}
+		}
+	}
 }
 
 __global__ void resetPairCounts_kernel(uint * dst, uint maxInd)
@@ -445,6 +581,63 @@ void broadphaseCompactUniquePairs(uint2 * dst, uint2 * pairs, uint * unique, uin
     dim3 grid(nblk, 1, 1);
     
     compactUniquePairs_kernel<<< grid, block >>>(dst, pairs, unique, loc, pairLength);
+}
+
+void broadphaseComputePairCountsSelfCollideExclusion(uint * dst, Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								uint * exclusionIndices,
+								uint * exclusionStarts)
+{
+	int tpb = CudaBase::LimitNThreadPerBlock(18, 50);
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numBoxes, tpb);
+    
+    dim3 grid(nblk, 1, 1);
+    
+    computePairCountsSelfCollideExclusion_kernel<<< grid, block >>>(dst,
+                                boxes,
+                                numBoxes,
+								rootNodeIndex, 
+								internalNodeChildIndex, 
+								internalNodeAabbs, 
+								leafNodeAabbs,
+								mortonCodesAndAabbIndices,
+								exclusionIndices,
+								exclusionStarts);
+}
+								
+void broadphaseWritePairCacheSelfCollideExclusion(uint2 * dst, uint * starts, uint * counts,
+                              Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								unsigned queryIdx,
+								uint * exclusionIndices,
+								uint * exclusionStarts)
+{
+	int tpb = CudaBase::LimitNThreadPerBlock(20, 50);
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numBoxes, tpb);
+    
+    dim3 grid(nblk, 1, 1);
+    
+    writePairCacheSelfCollideExclusion_kernel<<< grid, block >>>(dst, starts, counts,
+                                boxes,
+                                numBoxes,
+								rootNodeIndex, 
+								internalNodeChildIndex, 
+								internalNodeAabbs, 
+								leafNodeAabbs,
+								mortonCodesAndAabbIndices,
+								queryIdx,
+								exclusionIndices,
+								exclusionStarts);
 }
 
 }

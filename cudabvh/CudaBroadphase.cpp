@@ -145,7 +145,8 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	
 	void * boxes = (Aabb *)query->leafAabbs();
 	const unsigned numBoxes = query->numLeafNodes();
-	void * tetrahedronIndices = query->deviceTretradhedronIndices();
+	void * exclusionInd = query->deviceVicinityInd();
+	void * exclusionStart = query->deviceVicinityStart();
 	
 	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
@@ -153,13 +154,14 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	void * leafNodeAabbs = tree->leafAabbs();
 	void * mortonCodesAndAabbIndices = tree->leafHash();
 	
-	broadphaseComputePairCountsSelfCollide(counts, (Aabb *)boxes, numBoxes,
+	broadphaseComputePairCountsSelfCollideExclusion(counts, (Aabb *)boxes, numBoxes,
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
-							(uint4 *)tetrahedronIndices);
+							(uint *)exclusionInd,
+							(uint *)exclusionStart);
 }
 
 void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
@@ -215,7 +217,8 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	
 	void * boxes = (Aabb *)query->leafAabbs();
 	const unsigned numBoxes = query->numLeafNodes();
-	void * tetrahedronIndices = query->deviceTretradhedronIndices();
+	void * exclusionInd = query->deviceVicinityInd();
+	void * exclusionStart = query->deviceVicinityStart();
 	
 	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
@@ -225,15 +228,16 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	
 	void * cache = m_pairCache[0]->bufferOnDevice();
 	
-	broadphaseWritePairCacheSelfCollide((uint2 *)cache, starts, counts, 
+	broadphaseWritePairCacheSelfCollideExclusion((uint2 *)cache, starts, counts, 
 	                         (Aabb *)boxes, numBoxes,
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
-							(uint4 *)tetrahedronIndices,
-							a);
+							a,
+							(uint *)exclusionInd,
+							(uint *)exclusionStart);
 }
 
 void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)

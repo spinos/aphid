@@ -31,6 +31,8 @@ public:
 	void * deviceMass();
 	void * deviceAnchor();
 	void * deviceTretradhedronIndices();
+	void * deviceVicinityInd();
+	void * deviceVicinityStart();
 	
 	virtual void integrate(float dt);
 	void sendXToHost();

@@ -102,3 +102,10 @@ void CudaTetrahedronSystem::sendXToHost()
 
 void CudaTetrahedronSystem::sendVToHost()
 { m_deviceV->deviceToHost(hostV(), m_vLoc, numPoints() * 12); }
+
+void * CudaTetrahedronSystem::deviceVicinityInd()
+{ return m_deviceTetrahedronVicinityInd->bufferOnDevice(); }
+
+void * CudaTetrahedronSystem::deviceVicinityStart()
+{ return m_deviceTetrahedronVicinityStart->bufferOnDevice(); }
+//:~
