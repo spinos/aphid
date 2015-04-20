@@ -16,11 +16,15 @@
 CudaTetrahedronSystem::CudaTetrahedronSystem() 
 {
 	m_deviceAnchor = new CUDABuffer;
+	m_deviceTetrahedronVicinityInd = new CUDABuffer;
+	m_deviceTetrahedronVicinityStart = new CUDABuffer;
 }
 
 CudaTetrahedronSystem::~CudaTetrahedronSystem() 
 {
 	delete m_deviceAnchor;
+	delete m_deviceTetrahedronVicinityInd;
+	delete m_deviceTetrahedronVicinityStart;
 }
 
 void CudaTetrahedronSystem::setDeviceXPtr(CUDABuffer * ptr, unsigned loc)
@@ -36,10 +40,16 @@ void CudaTetrahedronSystem::setDeviceMassPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceMass = ptr; m_massLoc = loc; }
 
 void CudaTetrahedronSystem::setDeviceTretradhedronIndicesPtr(CUDABuffer * ptr, unsigned loc)
-{ m_deviceTretradhedronIndices = ptr; m_iLoc = loc; }
+{ m_deviceTetrahedronIndices = ptr; m_iLoc = loc; }
 
 void CudaTetrahedronSystem::initOnDevice() 
 {
+	createL2Vicinity();
+	m_deviceTetrahedronVicinityInd->create(numTetrahedronVicinityInd() * 4);
+	m_deviceTetrahedronVicinityStart->create((numTetrahedrons() + 1) * 4);
+	m_deviceTetrahedronVicinityInd->hostToDevice(hostTetrahedronVicinityInd());
+	m_deviceTetrahedronVicinityStart->hostToDevice(hostTetrahedronVicinityStart());
+	
 	m_deviceAnchor->create(numPoints() * 4);
 	m_deviceAnchor->hostToDevice(hostAnchor());
     calculateMass();
@@ -81,7 +91,7 @@ CUDABuffer * CudaTetrahedronSystem::anchorBuf()
 { return m_deviceAnchor; }
 
 void * CudaTetrahedronSystem::deviceTretradhedronIndices()
-{ return m_deviceTretradhedronIndices->bufferOnDeviceAt(m_iLoc); }
+{ return m_deviceTetrahedronIndices->bufferOnDeviceAt(m_iLoc); }
 
 void CudaTetrahedronSystem::integrate(float timeStep)
 { tetrahedronSystemIntegrate((float3 *)deviceX(), (float3 *)deviceV(), timeStep, numPoints()); }

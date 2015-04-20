@@ -46,7 +46,9 @@ private:
 	CUDABuffer * m_deviceV;
 	CUDABuffer * m_deviceMass;
 	CUDABuffer * m_deviceAnchor;
-	CUDABuffer * m_deviceTretradhedronIndices;
+	CUDABuffer * m_deviceTetrahedronIndices;
+	CUDABuffer * m_deviceTetrahedronVicinityInd;
+	CUDABuffer * m_deviceTetrahedronVicinityStart;
 	unsigned m_xLoc, m_xiLoc, m_vLoc, m_massLoc, m_iLoc;
 };
 #endif        //  #ifndef CUDATETRAHEDRONSYSTEM_H

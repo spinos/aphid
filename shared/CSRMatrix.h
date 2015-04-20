@@ -7,6 +7,7 @@ class CSRMatrix
 {
 public:
     enum ValueType{
+		tIndexOnly = 0,
         tFloat = 4,
         tVec3 = 12,
         tMat33 = 36,

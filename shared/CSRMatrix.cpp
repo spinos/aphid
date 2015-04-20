@@ -23,7 +23,7 @@ void CSRMatrix::create(CSRMatrix::ValueType type, unsigned m, const CSRMap & elm
     m_dimension = m;
     unsigned nnz = elms.size();
     m_numNonZero = nnz;
-    m_value->create(nnz * type);
+    if(type > tIndexOnly) m_value->create(nnz * type);
     m_rowPtr->create((m+1) * 4);
     m_colInd->create(nnz * 4);
     

@@ -10,16 +10,19 @@
 #include "TetrahedronSystem.h"
 #include <BaseBuffer.h>
 #include <tetrahedron_math.h>
+#define PRINT_VICINITY 0
 TetrahedronSystem::TetrahedronSystem() :
 m_numTetrahedrons(0), m_numPoints(0), m_numTriangles(0)
 {
 	m_hostX = new BaseBuffer;
 	m_hostXi = new BaseBuffer;
 	m_hostV = new BaseBuffer;
-	m_hostTretradhedronIndices = new BaseBuffer;
+	m_hostTetrahedronIndices = new BaseBuffer;
 	m_hostTriangleIndices = new BaseBuffer;
 	m_hostMass = new BaseBuffer;
 	m_hostAnchor = new BaseBuffer;
+	m_hostTetrahedronVicinityInd = new BaseBuffer;
+	m_hostTetrahedronVicinityStart = new BaseBuffer;
 	m_totalMass = 10.f;
 }
 
@@ -28,9 +31,11 @@ TetrahedronSystem::~TetrahedronSystem()
 	delete m_hostX;
 	delete m_hostXi;
 	delete m_hostV;
-	delete m_hostTretradhedronIndices;
+	delete m_hostTetrahedronIndices;
 	delete m_hostTriangleIndices;
 	delete m_hostAnchor;
+	delete m_hostTetrahedronVicinityInd;
+	delete m_hostTetrahedronVicinityStart;
 }
 
 void TetrahedronSystem::create(const unsigned & maxNumTetrahedrons, const unsigned & maxNumPoints)
@@ -43,7 +48,7 @@ void TetrahedronSystem::create(const unsigned & maxNumTetrahedrons, const unsign
 	m_hostV->create(m_maxNumPoints * 12);
 	m_hostMass->create(m_maxNumPoints * 4);
 	m_hostAnchor->create(m_maxNumPoints * 4);
-	m_hostTretradhedronIndices->create(m_maxNumTetrahedrons * 16);
+	m_hostTetrahedronIndices->create(m_maxNumTetrahedrons * 16);
 	m_hostTriangleIndices->create(m_maxNumTriangles * 12);
 }
 
@@ -137,7 +142,7 @@ unsigned * TetrahedronSystem::hostAnchor()
 { return (unsigned *)m_hostAnchor->data(); }
 
 unsigned * TetrahedronSystem::hostTretradhedronIndices()
-{ return (unsigned *)m_hostTretradhedronIndices->data(); }
+{ return (unsigned *)m_hostTetrahedronIndices->data(); }
 
 unsigned * TetrahedronSystem::hostTriangleIndices()
 { return (unsigned *)m_hostTriangleIndices->data(); }
@@ -220,3 +225,145 @@ void TetrahedronSystem::setAnchoredPoint(unsigned i, unsigned anchorInd)
 
 bool TetrahedronSystem::isAnchoredPoint(unsigned i)
 { return (hostAnchor()[i] > (1<<29)); }
+
+void TetrahedronSystem::getPointTetrahedronConnection(VicinityMap * vertTetConn)
+{
+	unsigned i;
+	unsigned *ind = hostTretradhedronIndices();
+	for(i=0; i<m_numTetrahedrons; i++) {
+		vertTetConn[ind[0]][i] = 1;
+		vertTetConn[ind[1]][i] = 1;
+		vertTetConn[ind[2]][i] = 1;
+		vertTetConn[ind[3]][i] = 1;
+		ind += 4;
+	}
+}
+
+void TetrahedronSystem::getTehrahedronTehrahedronConnectionL1(VicinityMap * tetTetConn, 
+															VicinityMap * vertTetConn)
+{
+	unsigned i, j;
+	unsigned *ind = hostTretradhedronIndices();
+	for(i=0; i<m_numTetrahedrons; i++) {
+		for(j=0; j<4; j++) {
+			VicinityMapIter itvert = vertTetConn[ind[j]].begin();
+			for(; itvert != vertTetConn[ind[j]].end(); ++itvert) {
+				tetTetConn[itvert->first][i] = 1;
+			}
+		}
+		ind += 4;
+	}
+}
+
+void TetrahedronSystem::getTehrahedronTehrahedronConnectionL2(VicinityMap * dstConn, 
+											VicinityMap * srcConn)
+{
+	unsigned i, j;
+	for(i=0; i<m_numTetrahedrons; i++) {
+		VicinityMapIter iti = srcConn[i].begin();
+		for(; iti != srcConn[i].end(); ++iti) {
+			j = iti->first;
+			if(j == i) continue;
+			VicinityMapIter itj = srcConn[j].begin();
+			for(; itj != srcConn[j].end(); ++itj) {
+				dstConn[itj->first][i] = 1;
+			}
+		}
+	}
+}
+
+void TetrahedronSystem::buildVicinityIndStart(VicinityMap * tetTetConn)
+{
+	m_hostTetrahedronVicinityStart->create(m_numTetrahedrons+1);
+	unsigned * tvstart = (unsigned *)m_hostTetrahedronVicinityStart->data();
+	
+	unsigned count = 0;
+	unsigned i;
+	for(i=0; i<m_numTetrahedrons; i++) {
+		tvstart[i] = count;
+		count += tetTetConn[i].size();
+	}
+	tvstart[m_numTetrahedrons] = count;
+
+#if PRINT_VICINITY
+	std::cout<<" vicinity size "<<count;
+#endif
+	
+	m_tetrahedronVicinitySize = count;
+	
+	m_hostTetrahedronVicinityInd->create(count * 4);
+	unsigned * tvind = (unsigned *)m_hostTetrahedronVicinityInd->data();
+	
+	count = 0;
+	for(i=0; i<m_numTetrahedrons; i++) {
+	
+#if PRINT_VICINITY
+		std::cout<<"\n t"<<i<<" ["<<tvstart[i]<<":"<<(tvstart[i+1]-1)<<"] ";
+#endif
+
+		VicinityMapIter ittet = tetTetConn[i].begin();
+		for(; ittet != tetTetConn[i].end(); ++ittet) {
+			tvind[count] = ittet->first;
+			
+#if PRINT_VICINITY
+			std::cout<<" "<<ittet->first;
+#endif
+
+			count++;
+		}
+	}
+}
+
+void TetrahedronSystem::createL1Vicinity()
+{
+	std::cout<<" create L1 vicinity\n";
+	VicinityMap * vertTetConn = new VicinityMap[m_numPoints];
+	getPointTetrahedronConnection(vertTetConn);	
+	
+	VicinityMap * tetTetConn = new VicinityMap[m_numTetrahedrons];
+	getTehrahedronTehrahedronConnectionL1(tetTetConn, vertTetConn);
+	
+	buildVicinityIndStart(tetTetConn);
+	
+	unsigned i;
+	for(i=0; i<m_numPoints; i++) vertTetConn[i].clear();
+	delete[] vertTetConn;
+	
+	for(i=0; i<m_numTetrahedrons; i++) tetTetConn[i].clear();
+	delete[] tetTetConn;
+}
+
+void TetrahedronSystem::createL2Vicinity()
+{
+	std::cout<<" create L2 vicinity\n";
+	VicinityMap * vertTetConn = new VicinityMap[m_numPoints];
+	getPointTetrahedronConnection(vertTetConn);	
+	
+	VicinityMap * tetTetConn1 = new VicinityMap[m_numTetrahedrons];
+	getTehrahedronTehrahedronConnectionL1(tetTetConn1, vertTetConn);
+	
+	VicinityMap * tetTetConn2 = new VicinityMap[m_numTetrahedrons];
+	getTehrahedronTehrahedronConnectionL2(tetTetConn2, tetTetConn1);
+	
+	buildVicinityIndStart(tetTetConn2);
+	
+	unsigned i;
+	for(i=0; i<m_numPoints; i++) vertTetConn[i].clear();
+	delete[] vertTetConn;
+	
+	for(i=0; i<m_numPoints; i++) tetTetConn1[i].clear();
+	delete[] tetTetConn1;
+	
+	for(i=0; i<m_numTetrahedrons; i++) tetTetConn2[i].clear();
+	delete[] tetTetConn2;
+}
+
+const unsigned TetrahedronSystem::numTetrahedronVicinityInd() const
+{ return m_tetrahedronVicinitySize; }
+
+unsigned * TetrahedronSystem::hostTetrahedronVicinityInd()
+{ (unsigned *)m_hostTetrahedronVicinityInd->data(); }
+
+unsigned * TetrahedronSystem::hostTetrahedronVicinityStart()
+{ (unsigned *)m_hostTetrahedronVicinityStart->data(); }
+//~:
