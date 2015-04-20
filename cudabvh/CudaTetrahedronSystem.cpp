@@ -45,6 +45,7 @@ void CudaTetrahedronSystem::setDeviceTretradhedronIndicesPtr(CUDABuffer * ptr, u
 void CudaTetrahedronSystem::initOnDevice() 
 {
 	createL2Vicinity();
+	
 	m_deviceTetrahedronVicinityInd->create(numTetrahedronVicinityInd() * 4);
 	m_deviceTetrahedronVicinityStart->create((numTetrahedrons() + 1) * 4);
 	m_deviceTetrahedronVicinityInd->hostToDevice(hostTetrahedronVicinityInd());
