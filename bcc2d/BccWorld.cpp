@@ -12,7 +12,6 @@ BccWorld::BccWorld(GeoDrawer * drawer)
 {
 	m_drawer = drawer;
 	m_curves = new CurveGroup;
-	
 	if(!readCurvesFromFile(BccGlobal::FileName))
 		createTestCurves();
 		
@@ -27,6 +26,9 @@ BccWorld::BccWorld(GeoDrawer * drawer)
 	std::cout<<" n spines "<<m_numSplines;
 		
 	m_splineBuf = new BaseBuffer;
+	m_curveStartBuf = new BaseBuffer;
+	m_curveStartBuf->create(m_curves->numCurves() * 12);
+	Vector3F * curveStart = (Vector3F *)m_curveStartBuf->data();
 	
 	m_splineBuf->create(m_numSplines * sizeof(BezierSpline));
 	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
@@ -34,14 +36,15 @@ BccWorld::BccWorld(GeoDrawer * drawer)
 	
 	unsigned nsp;
 	unsigned ispline = 0;
-	unsigned curveStart = 0;
+	unsigned cvDrift = 0;
 	for(i=0; i < m_curves->numCurves(); i++) {
 		nsp = cc[i] - 1;
-		for(j=0; j < nsp; j++) {
-			BezierCurve::extractSpline(spline[ispline], j, &cvs[curveStart], nsp - 1);
+		curveStart[i] = cvs[cvDrift];
+		for(j=0; j < nsp; j++) {			
+			BezierCurve::extractSpline(spline[ispline], j, &cvs[cvDrift], nsp - 1);
 			ispline++;
 		}
-		curveStart += nsp + 1;
+		cvDrift += nsp + 1;
 	}
 	
     BoundingBox box;
@@ -51,7 +54,13 @@ BccWorld::BccWorld(GeoDrawer * drawer)
 	std::cout<<" bbox "<<box.str();
     
     m_grid = new BccGrid(box);
-    m_grid->create(spline, m_numSplines, 5);
+    m_grid->create(spline, m_numSplines, 6);
+	
+	m_anchorBuf = new BaseBuffer;
+	m_anchorBuf->create(m_grid->numTetrahedronVertices() * 4);
+	
+	resetAnchors(m_grid->numTetrahedronVertices());
+	m_grid->addAnchors((unsigned *)m_anchorBuf->data(), curveStart, m_curves->numCurves());
 }
 
 BccWorld::~BccWorld() 
@@ -90,11 +99,12 @@ void BccWorld::draw()
     glColor3f(.21f, .21f, .21f);
     m_drawer->boundingBox(box);
     
-    m_grid->draw(m_drawer);
+    m_grid->draw(m_drawer, (unsigned *)m_anchorBuf->data());
     m_drawer->setWired(1);
 
     glColor3f(.99f, .03f, .05f);
     drawCurves();
+	drawCurveStars();
 }
 
 void BccWorld::testDistanctToCurve()
@@ -429,6 +439,16 @@ void BccWorld::drawCurves()
 		m_drawer->smoothCurve(spline[i], 16);
 }
 
+void BccWorld::drawCurveStars()
+{
+	const float csz = m_grid->span() / 1024.f;
+	m_drawer->setWired(0);
+	Vector3F * curveStart = (Vector3F *)m_curveStartBuf->data();
+	unsigned i=0;
+	for(; i < m_curves->numCurves(); i++)
+		m_drawer->cube(curveStart[i], csz);
+}
+
 bool BccWorld::readCurvesFromFile(const std::string & fileName)
 {
 	if(fileName.size() < 4 || fileName == "unknown") return false;
@@ -443,5 +463,13 @@ bool BccWorld::readCurvesFromFile(const std::string & fileName)
 	hes.close();
 	
 	return true;
+}
+
+void BccWorld::resetAnchors(unsigned n)
+{
+	unsigned * anchor = (unsigned *)m_anchorBuf->data();
+	unsigned i=0;
+	for(; i < n; i++)
+		anchor[i] = 0;
 }
 //:~

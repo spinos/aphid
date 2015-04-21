@@ -202,7 +202,7 @@ bool BezierCurve::intersectBox(BezierSpline & spline, const BoundingBox & box)
 		if(abox.inside(box)) return true;
 		
 		if(abox.intersect(box)) {
-			if(abox.area() < 0.007f) return true;
+			if(abox.area() < 0.001f) return true;
 			
 			BezierSpline a, b;
 			c.deCasteljauSplit(a, b);

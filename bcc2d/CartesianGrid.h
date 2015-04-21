@@ -12,6 +12,7 @@ public:
     const unsigned numCells() const;
     void getBounding(BoundingBox & bound) const;
     const Vector3F origin() const;
+	const float span() const;
     
 protected:
 	sdb::CellHash * cells();

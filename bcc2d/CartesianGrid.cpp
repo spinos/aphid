@@ -7,7 +7,7 @@ CartesianGrid::CartesianGrid(const BoundingBox & bound)
     m_origin = bound.getMin();
     m_span = bound.getLongestDistance();
     
-    const float margin = m_span / 179.f;
+    const float margin = m_span / 63.f;
     m_origin.x -= margin;
     m_origin.y -= margin;
     m_origin.z -= margin;
@@ -38,6 +38,9 @@ void CartesianGrid::getBounding(BoundingBox & bound) const
 
 const Vector3F CartesianGrid::origin() const
 { return m_origin; }
+
+const float CartesianGrid::span() const
+{ return m_span; }
 
 sdb::CellHash * CartesianGrid::cells()
 { return m_cellHash; }

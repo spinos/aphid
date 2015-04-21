@@ -133,7 +133,7 @@ inline bool tetrahedronLineIntersection(const Vector3F * tet, const Vector3F & l
         thetaI[2] = GetSign(w[2]);
         
         if(thetaI[0] !=0 || thetaI[1] !=0 || thetaI[2] !=0) {
-            if(faceEnter < 0 && thetaI[0]>0 && thetaI[1]>0 && thetaI[2]>0)
+            if(faceEnter < 0 && thetaI[0]>=0 && thetaI[1]>=0 && thetaI[2]>=0)
                 faceEnter = i;
             //else if(faceLeave < 0 && thetaI[0]<=0 && thetaI[1]<=0 && thetaI[2]<=0)
               //  faceLeave = i;

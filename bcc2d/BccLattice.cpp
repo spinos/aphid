@@ -138,32 +138,54 @@ const unsigned BccLattice::numTetrahedrons() const
 const unsigned BccLattice::numVertices() const
 { return m_visitedNodes; }
 
-void BccLattice::draw(GeoDrawer * drawer)
+void BccLattice::draw(GeoDrawer * drawer, unsigned * anchored)
 {
     drawer->setWired(0);
 	glColor3f(0.3f, 0.4f, 0.33f);
 	drawTetrahedrons();
 	glDisable(GL_DEPTH_TEST);
 	drawer->setWired(1);
-	glColor3f(0.03f, 0.14f, 0.5f);
-	drawTetrahedrons();
-	
+	glColor3f(.03f, .14f, .44f);
+	drawTetrahedrons(anchored);
+	drawVisitedNodes(drawer);
+	// drawGreenEdges();
+}
+
+void BccLattice::drawAllNodes(GeoDrawer * drawer)
+{
 	drawer->setWired(0);
     sdb::CellHash * latticeNode = cells();
-	float h = cellSizeAtLevel(8);
+	float h = cellSizeAtLevel(11);
 	Vector3F l;
 	latticeNode->begin();
 	while(!latticeNode->end()) {
 	    if(latticeNode->value()->visited)
 	        glColor3f(0.1f, 0.2f, 0.5f);
-	    else glColor3f(0.3f, 0.3f, 0.3f);
+	    else 
+			glColor3f(0.3f, 0.3f, 0.3f);
 	    
 	    l = gridOrigin(latticeNode->key());
 	    drawer->cube(l, h);
 	    
 	    latticeNode->next();
 	}
-	// drawGreenEdges();
+}
+
+void BccLattice::drawVisitedNodes(GeoDrawer * drawer)
+{
+	drawer->setWired(0);
+	glColor3f(0.1f, 0.2f, 0.5f);
+    sdb::CellHash * latticeNode = cells();
+	float h = cellSizeAtLevel(11);
+	Vector3F l;
+	latticeNode->begin();
+	while(!latticeNode->end()) {
+	    if(latticeNode->value()->visited) {
+			l = gridOrigin(latticeNode->key());
+			drawer->cube(l, h);
+	    }
+	    latticeNode->next();
+	}
 }
 
 void BccLattice::drawGreenEdges()
@@ -196,6 +218,32 @@ void BccLattice::drawTetrahedrons()
         Tetrahedron * tet = &m_tetrahedrons[i];
         for(j=0; j< 12; j++) {
             q = gridOrigin(tet->v[TetrahedronToTriangleVertex[j]]);
+            glVertex3fv((GLfloat *)&q);
+        }
+    }
+    glEnd();
+}	
+
+void BccLattice::drawTetrahedrons(unsigned * anchored)
+{
+    glBegin(GL_TRIANGLES);
+    unsigned i, j;
+    Vector3F q;
+	unsigned a[4];
+    for(i=0; i< m_numTetrahedrons; i++) {
+        Tetrahedron * tet = &m_tetrahedrons[i];
+		for(j=0; j<4; j++) {
+			sdb::CellValue * found = findGrid(tet->v[j]);
+			a[j] = anchored[found->index];
+		}
+		
+        for(j=0; j< 12; j++) {
+            q = gridOrigin(tet->v[TetrahedronToTriangleVertex[j]]);
+			
+			if(a[TetrahedronToTriangleVertex[j]])
+				glColor3f(.993f, .14f, .04f);
+			else
+				glColor3f(.03f, .14f, .44f);
             glVertex3fv((GLfloat *)&q);
         }
     }
@@ -357,5 +405,29 @@ bool BccLattice::intersectTetrahedron(const Vector3F * tet, BezierSpline * splin
 			return true;
 	}
 	return false;
+}
+
+void BccLattice::addAnchors(unsigned * anchored, Vector3F * pos, unsigned n)
+{
+	unsigned i=0;
+	for(; i< n; i++) addAnchor(anchored, pos[i]);
+}
+
+void BccLattice::addAnchor(unsigned * anchored, const Vector3F & pnt)
+{
+	Vector3F q[4];
+	unsigned j, i=0;
+	for(; i< numTetrahedrons(); i++) {
+        Tetrahedron * tet = &m_tetrahedrons[i];
+        for(j=0; j< 4; j++)
+            q[j] = gridOrigin(tet->v[j]); 
+        
+		if(!pointInsideTetrahedronTest(pnt, q)) continue;
+		
+		for(j=0; j< 4; j++) {
+			sdb::CellValue * found = findGrid(tet->v[j]);
+			anchored[found->index] = 1;
+		}
+    }
 }
 //:~

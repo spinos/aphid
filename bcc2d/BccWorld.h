@@ -31,11 +31,15 @@ private:
 	void testVicinity();
 	void drawCurves();
 	bool readCurvesFromFile(const std::string & fileName);
+	void drawCurveStars();
+	void resetAnchors(unsigned n);
 private:
     Vector3F m_testP;
     GeoDrawer * m_drawer;
     BccGrid * m_grid;
 	BaseBuffer * m_splineBuf;
+	BaseBuffer * m_curveStartBuf;
+	BaseBuffer * m_anchorBuf;
 	CurveGroup * m_curves;
 	unsigned m_numSplines;
 };

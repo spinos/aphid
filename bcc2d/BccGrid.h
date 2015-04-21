@@ -14,8 +14,11 @@ public:
     virtual ~BccGrid();
     
     void create(BezierSpline * splines, unsigned n, int maxLevel);
-    void draw(GeoDrawer * drawer);
+	void addAnchors(unsigned * anchors, Vector3F * pos, unsigned n);
+    void draw(GeoDrawer * drawer, unsigned * anchored);
 	void drawHash();
+	
+	const unsigned numTetrahedronVertices() const;
 protected:
 
 private:

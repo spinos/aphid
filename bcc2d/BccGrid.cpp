@@ -43,6 +43,12 @@ void BccGrid::create(BezierSpline * splines, unsigned n, int maxLevel)
         }
     }
     std::cout<<" n level 3 cell "<<numCells()<<"\n";
+	
+	if(maxLevel >= 9) {
+		maxLevel = 9;
+		std::cout<<" max level cannot be over 9\n";
+	}
+	
     for(level=4; level<= maxLevel; level++)
         subdivide(level);
     
@@ -140,7 +146,7 @@ void BccGrid::createLatticeTetrahedron()
 	}
 }
 
-void BccGrid::draw(GeoDrawer * drawer)
+void BccGrid::draw(GeoDrawer * drawer, unsigned * anchored)
 {
 	sdb::CellHash * c = cells();
 	Vector3F l;
@@ -160,7 +166,7 @@ void BccGrid::draw(GeoDrawer * drawer)
 	    c->next();   
 	}
 
-	m_lattice->draw(drawer);
+	m_lattice->draw(drawer, anchored);
 }
 
 void BccGrid::drawHash()
@@ -187,5 +193,15 @@ bool BccGrid::intersectBox(const BoundingBox & box) const
 			return true;
 	}
 	return false;
+}
+
+void BccGrid::addAnchors(unsigned * anchors, Vector3F * pos, unsigned n)
+{
+	m_lattice->addAnchors(anchors, pos, n);
+}
+
+const unsigned BccGrid::numTetrahedronVertices() const
+{
+	return m_lattice->numVertices();
 }
 //:!

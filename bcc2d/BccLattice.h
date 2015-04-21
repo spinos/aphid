@@ -23,7 +23,8 @@ public:
     void add24Tetrahedron(const Vector3F & center, float h);
     void addNeighborTetrahedron(const Vector3F & center, float h);
     void countVisitedNodes();
-    void draw(GeoDrawer * drawer);
+	void addAnchors(unsigned * anchored, Vector3F * pos, unsigned n);
+    void draw(GeoDrawer * drawer, unsigned * anchored);
 	
 	const unsigned numGreenEdges() const;
 	const unsigned numTetrahedrons() const;
@@ -35,12 +36,16 @@ protected:
 private:
 	void drawGreenEdges();
 	void drawTetrahedrons();
+	void drawTetrahedrons(unsigned * anchored);
+	void drawAllNodes(GeoDrawer * drawer);
+	void drawVisitedNodes(GeoDrawer * drawer);
 	void encodeOctahedronVertices(const Vector3F & q, float h, int offset, unsigned * v) const;
 	void touch4Tetrahedrons(unsigned * vOctahedron,
 							BezierSpline * splines, unsigned numSplines);
 	void addTetrahedronsAllNodeVisited(unsigned * vOctahedron);
 	bool isCurveClosetToTetrahedron(const Vector3F * p, BezierCurve * curve) const;
 	bool intersectTetrahedron(const Vector3F * tet, BezierSpline * splines, unsigned numSplines) const;
+	void addAnchor(unsigned * anchored, const Vector3F & pnt);
 private:
     sdb::EdgeHash * m_greenEdges;
     Tetrahedron * m_tetrahedrons;
