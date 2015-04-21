@@ -42,4 +42,10 @@ const unsigned CurveGroup::numPoints() const
 
 const unsigned CurveGroup::numCurves() const
 { return m_numCurves; }
+
+void CurveGroup::verbose() const
+{
+	std::cout<<" curve group n curves: "<<m_numCurves;
+	std::cout<<" n cvs: "<<m_numPoints<<"\n";
+}
 //:~

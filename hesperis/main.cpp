@@ -5,7 +5,7 @@
 MStatus initializePlugin(MObject obj)
 {
         MStatus         status;
-        MFnPlugin       plugin(obj, "Zhang Jian", "1.1 Thu Apr 21 19:56:54 2015", "Any");
+        MFnPlugin       plugin(obj, "Zhang Jian", "1.1 Tue Apr 21 17:55:27 CST 2015", "Any");
 
         status = plugin.registerCommand("hesperis",
                                         HesperisCmd::creator, HesperisCmd::newSyntax);

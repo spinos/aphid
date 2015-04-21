@@ -80,9 +80,14 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, const std::string & fileName
 		}
 	}
 	
-	HesperisFile hesf(fileName.c_str());
-	
-	bool saved = hesf.save();
-	if(!saved) MGlobal::displayInfo(MString(" cannot save file ")+ fileName.c_str());
+	HesperisFile hesf;
+	bool fstat = hesf.create(fileName.c_str());
+	if(!fstat) MGlobal::displayWarning(MString(" cannot create file ")+ fileName.c_str());
+	hesf.addCurve("curves", &gcurve);
+	hesf.setDirty();
+	fstat = hesf.save();
+	if(!fstat) MGlobal::displayWarning(MString(" cannot save file ")+ fileName.c_str());
+	hesf.close();
+	MGlobal::displayInfo(" done.");
 	return true;
 }

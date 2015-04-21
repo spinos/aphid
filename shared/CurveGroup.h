@@ -18,6 +18,8 @@ public:
 	
 	const unsigned numPoints() const;
 	const unsigned numCurves() const;
+	
+	void verbose() const;
 protected:
 
 private:
