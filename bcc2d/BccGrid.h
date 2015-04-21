@@ -2,6 +2,7 @@
 #define BCCGRID_H
 
 #include <CartesianGrid.h>
+struct BezierSpline;
 class BccLattice;
 class BezierCurve;
 class GeoDrawer;
@@ -12,17 +13,20 @@ public:
     BccGrid(const BoundingBox & bound);
     virtual ~BccGrid();
     
-    void create(BezierCurve * curve, int maxLevel);
+    void create(BezierSpline * splines, unsigned n, int maxLevel);
     void draw(GeoDrawer * drawer);
 	void drawHash();
 protected:
 
 private:
-    void subdivide(BezierCurve * curve, int level);
+    void subdivide(int level);
     void createLatticeNode();
-    void createLatticeTetrahedron(BezierCurve * curve);
+    void createLatticeTetrahedron();
+	bool intersectBox(const BoundingBox & box) const;
 private:
+	BezierSpline * m_splines;
     BccLattice * m_lattice;
+	unsigned m_numSplines;
     float m_tolerance;
 };
 #endif        //  #ifndef BCCGRID_H

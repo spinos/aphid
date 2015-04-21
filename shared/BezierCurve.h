@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-
+#include <BoundingBox.h>
 #include <BaseCurve.h>
 
 struct BezierSpline {
@@ -45,6 +45,14 @@ struct BezierSpline {
         const float d = cv[0].distanceTo(cv[3]);
         return ( ( cv[0].distanceTo(cv[1]) + cv[1].distanceTo(cv[2]) + cv[2].distanceTo(cv[3]) - d ) / d ) < .002f;
     }
+	
+	void getAabb(BoundingBox * box) const
+	{
+		box->expandBy(cv[0]);
+		box->expandBy(cv[1]);
+		box->expandBy(cv[2]);
+		box->expandBy(cv[3]);
+	}
     
     Vector3F cv[4];
 };
@@ -60,10 +68,12 @@ public:
 	float distanceToPoint(const Vector3F & toP, Vector3F & closestP) const;
 	bool intersectBox(const BoundingBox & box) const;
 	bool intersectTetrahedron(const Vector3F * tet) const;
+	
+	static void extractSpline(BezierSpline & spline, unsigned i, Vector3F * cvs, unsigned maxInd);
+	static bool intersectBox(BezierSpline & spline, const BoundingBox & box);
+	static bool intersectTetrahedron(BezierSpline & spline, const Vector3F * tet, const BoundingBox & box);
+	static void distanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP);
 private:
 	void calculateCage(unsigned seg, Vector3F *p) const;
 	Vector3F calculateBezierPoint(float t, Vector3F * data) const;
-	void distanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP) const;
-	bool intersectBox(BezierSpline & spline, const BoundingBox & box) const;
-	bool intersectTetrahedron(BezierSpline & spline, const Vector3F * tet, const BoundingBox & box) const;
 };

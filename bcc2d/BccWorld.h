@@ -2,7 +2,7 @@
 #define BCCWORLD_H
 #include <ALLMath.h>
 #include <BoundingBox.h>
-class BezierCurve;
+class CurveGroup;
 class GeoDrawer;
 class BccGrid;
 class BaseBuffer;
@@ -10,7 +10,7 @@ struct BezierSpline;
 
 class BccWorld {
 public:
-    BccWorld(GeoDrawer * drawer);
+	BccWorld(GeoDrawer * drawer);
     virtual ~BccWorld();
     
     void draw();
@@ -18,6 +18,7 @@ public:
     void moveTestP(float x, float y, float z);
     
 private:
+	void createTestCurves();
     void testDistanctToCurve();
     void testDistanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP);
 	void testSpline();
@@ -28,12 +29,15 @@ private:
 	bool intersectTetrahedron(BezierSpline & spline, Vector3F * p);
 	void testLineLine();
 	void testVicinity();
+	void drawCurves();
+	bool readCurvesFromFile(const std::string & fileName);
 private:
     Vector3F m_testP;
     GeoDrawer * m_drawer;
-    BezierCurve * m_curve;
     BccGrid * m_grid;
-	BaseBuffer * m_splines;
+	BaseBuffer * m_splineBuf;
+	CurveGroup * m_curves;
+	unsigned m_numSplines;
 };
 
 #endif        //  #ifndef BCCWORLD_H

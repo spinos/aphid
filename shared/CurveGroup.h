@@ -12,6 +12,7 @@ public:
 	CurveGroup();
 	virtual ~CurveGroup();
 	void create(unsigned n, unsigned ncvs);
+	void clear();
 	
 	Vector3F * points();
 	unsigned * counts();

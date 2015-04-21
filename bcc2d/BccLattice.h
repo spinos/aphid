@@ -3,6 +3,7 @@
 
 #include <CartesianGrid.h>
 class GeoDrawer;
+struct BezierSpline;
 class BezierCurve;
 class BccLattice : public CartesianGrid
 {
@@ -16,7 +17,8 @@ public:
     
     void add38Node(const Vector3F & center, float h);
     void prepareTetrahedron();
-    void touchIntersectedTetrahedron(const Vector3F & center, float h, BezierCurve * curve);
+    void touchIntersectedTetrahedron(const Vector3F & center, float h, 
+										BezierSpline * splines, unsigned numSplines);
     void untouchGreenEdges();
     void add24Tetrahedron(const Vector3F & center, float h);
     void addNeighborTetrahedron(const Vector3F & center, float h);
@@ -34,9 +36,11 @@ private:
 	void drawGreenEdges();
 	void drawTetrahedrons();
 	void encodeOctahedronVertices(const Vector3F & q, float h, int offset, unsigned * v) const;
-	void touch4Tetrahedrons(unsigned * vOctahedron, BezierCurve * curve);
+	void touch4Tetrahedrons(unsigned * vOctahedron,
+							BezierSpline * splines, unsigned numSplines);
 	void addTetrahedronsAllNodeVisited(unsigned * vOctahedron);
 	bool isCurveClosetToTetrahedron(const Vector3F * p, BezierCurve * curve) const;
+	bool intersectTetrahedron(const Vector3F * tet, BezierSpline * splines, unsigned numSplines) const;
 private:
     sdb::EdgeHash * m_greenEdges;
     Tetrahedron * m_tetrahedrons;

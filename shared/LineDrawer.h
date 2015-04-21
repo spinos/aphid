@@ -12,6 +12,7 @@
 class LineBuffer;
 class AdaptableStripeBuffer;
 class BaseCurve;
+struct BezierSpline;
 class BezierCurve;
 class LineDrawer : public BaseDrawer {
 public:
@@ -24,4 +25,5 @@ public:
 	void stripes(AdaptableStripeBuffer * data, const Vector3F & eyeDirection) const;
 	void linearCurve(const BaseCurve & curve) const;
 	void smoothCurve(const BezierCurve & curve, short deg) const;
+	void smoothCurve(const BezierSpline & sp, short deg) const;
 };

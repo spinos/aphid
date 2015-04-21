@@ -3,47 +3,84 @@
 #include <GeoDrawer.h>
 #include "BccGrid.h"
 #include <BaseBuffer.h>
+#include <CurveGroup.h>
 #include "bcc_common.h"
 #include <line_math.h>
-BccWorld::BccWorld(GeoDrawer * drawer) 
+#include <HesperisFile.h>
+#include "BccGlobal.h"
+BccWorld::BccWorld(GeoDrawer * drawer)
 {
-    m_testP.set(10.f, 12.f, 0.f);
-    m_drawer = drawer;  
-    m_curve = new BezierCurve;
-    m_curve->createVertices(9);
-    m_curve->m_cvs[0].set(8.f + RandomFn11(), 1.f + RandomFn11(), 4.1f);
-    m_curve->m_cvs[1].set(2.f + RandomFn11(), 9.4f + RandomFn11(), 1.11f);
-    m_curve->m_cvs[2].set(14.f + RandomFn11(), 8.4f + RandomFn11(), -3.13f);
-    m_curve->m_cvs[3].set(12.f + RandomFn11(), 1.4f + RandomFn11(), 1.14f);
-    m_curve->m_cvs[4].set(19.f + RandomFn11(), 2.4f + RandomFn11(), 2.16f);
-    m_curve->m_cvs[5].set(20.f + RandomFn11(), 3.4f + RandomFn11(), 5.17f);
-    m_curve->m_cvs[6].set(18.f + RandomFn11(), 12.2f + RandomFn11(), 3.18f);
-    m_curve->m_cvs[7].set(12.f + RandomFn11(), 12.2f + RandomFn11(), 2.19f);
-    m_curve->m_cvs[8].set(13.f + RandomFn11(), 8.2f + RandomFn11(), -2.18f);
-    
-    for(unsigned i=0; i<9;i++) {
-        m_curve->m_cvs[i] -= Vector3F(12.f, 0.f, 0.f);
-        m_curve->m_cvs[i] *= 3.f;
-    }
-    
-    m_curve->computeKnots();
-    
-    const unsigned ns = m_curve->numSegments();
-    
-    BoundingBox box; 
-    m_curve->getAabb(&box);
+	m_drawer = drawer;
+	m_curves = new CurveGroup;
+	
+	if(!readCurvesFromFile(BccGlobal::FileName))
+		createTestCurves();
+		
+	qDebug()<<" n curves "<<m_curves->numCurves();
+		
+	m_numSplines = 0;
+	unsigned * cc = m_curves->counts();
+	unsigned j, i=0;
+	for(; i < m_curves->numCurves(); i++)
+		m_numSplines += cc[i] - 1;
+		
+	std::cout<<" n spines "<<m_numSplines;
+		
+	m_splineBuf = new BaseBuffer;
+	
+	m_splineBuf->create(m_numSplines * sizeof(BezierSpline));
+	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
+	Vector3F * cvs = m_curves->points();
+	
+	unsigned nsp;
+	unsigned ispline = 0;
+	unsigned curveStart = 0;
+	for(i=0; i < m_curves->numCurves(); i++) {
+		nsp = cc[i] - 1;
+		for(j=0; j < nsp; j++) {
+			BezierCurve::extractSpline(spline[ispline], j, &cvs[curveStart], nsp - 1);
+			ispline++;
+		}
+		curveStart += nsp + 1;
+	}
+	
+    BoundingBox box;
+    for(i=0; i < m_numSplines; i++)
+		spline[i].getAabb(&box);
+		
+	std::cout<<" bbox "<<box.str();
     
     m_grid = new BccGrid(box);
-    m_grid->create(m_curve, 4);
-	
-	m_splines = new BaseBuffer;
-	m_splines->create(ns * sizeof(BezierSpline));
-	BezierSpline * spline = (BezierSpline *)m_splines->data();
-	for(unsigned i=0; i < ns; i++)
-		m_curve->getSegmentSpline(i, spline[i]);
+    m_grid->create(spline, m_numSplines, 5);
 }
 
-BccWorld::~BccWorld() {}
+BccWorld::~BccWorld() 
+{
+	delete m_splineBuf;
+}
+
+void BccWorld::createTestCurves()
+{
+	qDebug()<<" gen test curve";
+	m_curves->create(1, 9);
+	m_curves->counts()[0] = 9;
+	
+	Vector3F * cvs = m_curves->points();
+	cvs[0].set(8.f + RandomFn11(), 1.f + RandomFn11(), 4.1f);
+    cvs[1].set(2.f + RandomFn11(), 9.4f + RandomFn11(), 1.11f);
+    cvs[2].set(14.f + RandomFn11(), 8.4f + RandomFn11(), -3.13f);
+    cvs[3].set(12.f + RandomFn11(), 1.4f + RandomFn11(), 1.14f);
+    cvs[4].set(19.f + RandomFn11(), 2.4f + RandomFn11(), 2.16f);
+    cvs[5].set(20.f + RandomFn11(), 3.4f + RandomFn11(), 5.17f);
+    cvs[6].set(18.f + RandomFn11(), 12.2f + RandomFn11(), 3.18f);
+    cvs[7].set(12.f + RandomFn11(), 12.2f + RandomFn11(), 2.19f);
+    cvs[8].set(13.f + RandomFn11(), 8.2f + RandomFn11(), -2.18f);
+    
+    for(unsigned i=0; i<9;i++) {
+        cvs[i] -= Vector3F(12.f, 0.f, 0.f);
+        cvs[i] *= 3.f;
+    }
+}
  
 void BccWorld::draw()
 {
@@ -56,30 +93,21 @@ void BccWorld::draw()
     m_grid->draw(m_drawer);
     m_drawer->setWired(1);
 
-    testLineLine();
-    
     glColor3f(.99f, .03f, .05f);
-    m_drawer->smoothCurve(*m_curve, 16);
-    
-    testTetrahedronBoxIntersection();
+    drawCurves();
 }
 
 void BccWorld::testDistanctToCurve()
 {
     Vector3F cls;
     float minD = 1e8;
-	BezierSpline * spline = (BezierSpline *)m_splines->data();
-    const unsigned ns = m_curve->numSegments();
+	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
     unsigned i;
-    for(i=0; i < ns; i++) {
+    for(i=0; i < m_numSplines; i++) {
         testDistanceToPoint(spline[i], m_testP, minD, cls);
     }
     
     m_drawer->setColor(.1f, .9f, 0.f);
-    m_drawer->arrow(m_testP, cls);
-    
-	m_drawer->setColor(.9f, .1f, 0.f);
-    m_curve->distanceToPoint(m_testP, cls);
     m_drawer->arrow(m_testP, cls);
 }
 
@@ -148,16 +176,12 @@ void BccWorld::moveTestP(float x, float y, float z)
 
 void BccWorld::testSpline()
 {
-	glColor3f(.1f, .1f, .1f); 
-    m_drawer->linearCurve(*m_curve);
-    
-	BezierSpline * spline = (BezierSpline *)m_splines->data();
+	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
 	BezierSpline a, b;
-	const unsigned ns = m_curve->numSegments();
 	unsigned i, j;
 	Vector3F p;
 
-	for(i=0; i< ns; i++) {
+	for(i=0; i< m_numSplines; i++) {
 		glColor3f(.1f, .1f, .1f);
 		glBegin(GL_LINE_STRIP);
 		glVertex3fv((GLfloat *)&spline[i].cv[0]);
@@ -202,18 +226,12 @@ void BccWorld::testIntersection()
 	
 	bool intersected = 0;
 	
-	BezierSpline * spline = (BezierSpline *)m_splines->data();
-    const unsigned ns = m_curve->numSegments();
+	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
     unsigned i;
-    for(i=0; i < ns; i++) {
+    for(i=0; i < m_numSplines; i++) {
         intersected = testIntersection(spline[i], box);
 		if(intersected) break;
     }
-	
-    intersected = m_curve->intersectBox(box);
-	
-	if(intersected) glColor3f(1.f, 0.f, 0.f);
-	else glColor3f(0.f, 1.f, 0.f);
 	
 	m_drawer->boundingBox(box);
 }
@@ -315,10 +333,9 @@ void BccWorld::testTetrahedronBoxIntersection()
 
 bool BccWorld::intersectTetrahedron(Vector3F * p)
 {
-    BezierSpline * spline = (BezierSpline *)m_splines->data();
-    const unsigned ns = m_curve->numSegments();
+    BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
     unsigned i;
-    for(i=0; i < ns; i++) {
+    for(i=0; i < m_numSplines; i++) {
         if(intersectTetrahedron(spline[i], p)) return 1;
     }
     return 0;
@@ -404,3 +421,27 @@ void BccWorld::testLineLine()
     // std::cout<<" d "<<distanceBetweenLines(line0, line1, line2, line3)<<" ";
 }
 
+void BccWorld::drawCurves()
+{
+	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
+	unsigned i=0;
+	for(;i<m_numSplines;i++)
+		m_drawer->smoothCurve(spline[i], 16);
+}
+
+bool BccWorld::readCurvesFromFile(const std::string & fileName)
+{
+	if(fileName.size() < 4 || fileName == "unknown") return false;
+	
+	if(!BaseFile::FileExists(fileName)) {
+		qDebug()<<" file not exist";
+		return false;
+	}
+	HesperisFile hes;
+	hes.addCurve("curves", m_curves);
+	if(!hes.open(fileName)) return false;
+	hes.close();
+	
+	return true;
+}
+//:~

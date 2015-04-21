@@ -8,7 +8,6 @@
  */
 
 #include "BezierCurve.h"
-#include <BoundingBox.h>
 #include <tetrahedron_math.h>
 BezierCurve::BezierCurve() {}
 BezierCurve::~BezierCurve() {}
@@ -56,6 +55,27 @@ Vector3F BezierCurve::calculateBezierPoint(float t, Vector3F * data) const
 	return p;
 }
 
+void BezierCurve::extractSpline(BezierSpline & spline, unsigned i, Vector3F * cvs, unsigned maxInd)
+{
+	unsigned v[4];
+	v[0] = i-1;
+	v[1] = i;
+	v[2] = i+1;
+	v[3] = i+2;
+	if(i==0) v[0] = 0;
+	if(i==maxInd) v[3] = i+1;
+	
+	if(i==0) spline.cv[0] = cvs[v[0]];
+	else spline.cv[0] = cvs[v[0]] * .25f + cvs[v[1]] * .5f + cvs[v[2]] * .25f ;
+	
+	spline.cv[1] = spline.cv[0] * .5f + cvs[v[1]] * .25f + cvs[v[2]] * .25f;
+	
+	if(i==maxInd) spline.cv[3] = cvs[v[3]];
+	else spline.cv[3] = cvs[v[1]] * .25f + cvs[v[2]] * .5f + cvs[v[3]] * .25f ;
+	
+	spline.cv[2] = spline.cv[3] * .5f + cvs[v[1]] * .25f + cvs[v[2]] * .25f;
+}
+
 void BezierCurve::getSegmentSpline(unsigned i, BezierSpline & spline) const
 {
 	unsigned v[4];
@@ -89,13 +109,10 @@ float BezierCurve::distanceToPoint(const Vector3F & toP, Vector3F & closestP) co
     return minD;
 }
 
-void BezierCurve::distanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP) const
+void BezierCurve::distanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP)
 {
 	BoundingBox box;
-	box.expandBy(spline.cv[0]);
-	box.expandBy(spline.cv[1]);
-	box.expandBy(spline.cv[2]);
-	box.expandBy(spline.cv[3]);
+	spline.getAabb(&box);
 	
 	if(box.distanceTo(pnt) > minDistance) return;
 	
@@ -159,13 +176,10 @@ bool BezierCurve::intersectBox(const BoundingBox & box) const
 	return false;
 }
 
-bool BezierCurve::intersectBox(BezierSpline & spline, const BoundingBox & box) const
+bool BezierCurve::intersectBox(BezierSpline & spline, const BoundingBox & box)
 {
 	BoundingBox abox;
-	abox.expandBy(spline.cv[0]);
-	abox.expandBy(spline.cv[1]);
-	abox.expandBy(spline.cv[2]);
-	abox.expandBy(spline.cv[3]);
+	spline.getAabb(&abox);
 	
 	if(!abox.intersect(box)) return false;
 	
@@ -225,13 +239,10 @@ bool BezierCurve::intersectTetrahedron(const Vector3F * tet) const
 	return false;
 }
 
-bool BezierCurve::intersectTetrahedron(BezierSpline & spline, const Vector3F * tet, const BoundingBox & box) const
+bool BezierCurve::intersectTetrahedron(BezierSpline & spline, const Vector3F * tet, const BoundingBox & box)
 {
     BoundingBox abox;
-	abox.expandBy(spline.cv[0]);
-	abox.expandBy(spline.cv[1]);
-	abox.expandBy(spline.cv[2]);
-	abox.expandBy(spline.cv[3]);
+	spline.getAabb(&abox);
 	
 	if(!abox.intersect(box)) return false;
 	

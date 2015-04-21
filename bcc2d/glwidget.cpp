@@ -1,5 +1,5 @@
 #include <QtGui>
-
+#include "BccGlobal.h"
 #include <gl_heads.h>
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
@@ -11,7 +11,7 @@
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-    m_world = new BccWorld(getDrawer());
+	m_world = new BccWorld(getDrawer());
 }
 
 GLWidget::~GLWidget()

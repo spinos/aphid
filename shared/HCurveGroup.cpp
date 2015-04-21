@@ -27,9 +27,6 @@ char HCurveGroup::verifyType()
 	if(!hasNamedAttr(".nc"))
 		return 0;
 	
-	if(!hasNamedAttr(".p"))
-		return 0;
-	
 	return 1;
 }
 
@@ -64,6 +61,7 @@ char HCurveGroup::save(CurveGroup * curve)
 
 char HCurveGroup::load(CurveGroup * curve)
 {
+	if(!verifyType()) return false;
 	int numPoints = 4;
 	
 	readIntAttr(".nv", &numPoints);

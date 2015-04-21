@@ -18,17 +18,25 @@ CurveGroup::CurveGroup()
 
 CurveGroup::~CurveGroup() 
 {
-	if(m_points) delete[] m_points;
-	if(m_counts) delete[] m_counts;
+	clear();
 }
 
 void CurveGroup::create(unsigned n, unsigned ncvs)
 {
+	clear();
 	m_numCurves = n;
 	m_numPoints = ncvs;
 	
 	m_counts = new unsigned[m_numCurves];
 	m_points = new Vector3F[m_numPoints];
+}
+
+void CurveGroup::clear()
+{
+	m_numCurves = 0;
+	m_numPoints = 0;
+	if(m_points) delete[] m_points;
+	if(m_counts) delete[] m_counts;
 }
 
 Vector3F * CurveGroup::points()

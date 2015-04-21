@@ -61,7 +61,8 @@ void BccLattice::prepareTetrahedron()
     m_numTetrahedrons = 0;
 }
 
-void BccLattice::touchIntersectedTetrahedron(const Vector3F & center, float h, BezierCurve * curve)
+void BccLattice::touchIntersectedTetrahedron(const Vector3F & center, float h,
+												BezierSpline * splines, unsigned numSplines)
 {
     const unsigned ccenter = mortonEncode(center);
     unsigned cgreen;
@@ -82,7 +83,7 @@ void BccLattice::touchIntersectedTetrahedron(const Vector3F & center, float h, B
 		}
 		if(edge->visited == 0) {
 		    encodeOctahedronVertices(center, h, i, vOctahedron);
-		    touch4Tetrahedrons(vOctahedron, curve);
+		    touch4Tetrahedrons(vOctahedron, splines, numSplines);
 		    edge->visited = 1;
 		}
     }
@@ -225,7 +226,8 @@ bool BccLattice::isCurveClosetToTetrahedron(const Vector3F * p, BezierCurve * cu
     return curve->intersectTetrahedron(p);
 }
 
-void BccLattice::touch4Tetrahedrons(unsigned * vOctahedron, BezierCurve * curve)
+void BccLattice::touch4Tetrahedrons(unsigned * vOctahedron,
+									BezierSpline * splines, unsigned numSplines)
 {
     unsigned code[4];
     Vector3F tet[4];
@@ -235,7 +237,7 @@ void BccLattice::touch4Tetrahedrons(unsigned * vOctahedron, BezierCurve * curve)
             code[j] = vOctahedron[OctahedronToTetrahedronVetex[i][j]];
             tet[j] = gridOrigin(code[j]);
         }
-        if(curve->intersectTetrahedron(tet)) {
+        if(intersectTetrahedron(tet, splines, numSplines)) {
             for(j=0; j<4; j++) {
                 code[j] = vOctahedron[OctahedronToTetrahedronVetex[i][j]];
                 sdb::CellValue * found = findGrid(code[j]);
@@ -342,3 +344,18 @@ void BccLattice::logTetrahedronMesh()
 	log.write("};\n");
 }
 
+bool BccLattice::intersectTetrahedron(const Vector3F * tet, BezierSpline * splines, unsigned numSplines) const
+{
+	unsigned i = 0;
+	for(; i<numSplines; i++) {
+		BoundingBox tbox;
+		tbox.expandBy(tet[0]);
+		tbox.expandBy(tet[1]);
+		tbox.expandBy(tet[2]);
+		tbox.expandBy(tet[3]);
+		if(BezierCurve::intersectTetrahedron(splines[i], tet, tbox))
+			return true;
+	}
+	return false;
+}
+//:~

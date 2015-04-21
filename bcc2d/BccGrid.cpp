@@ -15,8 +15,11 @@ BccGrid::~BccGrid()
     delete m_lattice;
 }
 
-void BccGrid::create(BezierCurve * curve, int maxLevel)
+void BccGrid::create(BezierSpline * splines, unsigned n, int maxLevel)
 {
+	m_splines = splines;
+	m_numSplines = n;
+	
 // start at 8 cells per axis
     int level = 3;
     const int dim = 1<<level;
@@ -34,18 +37,18 @@ void BccGrid::create(BezierCurve * curve, int maxLevel)
                 sample = ori + Vector3F(h* (float)i, h* (float)j, h* (float)k);
                 box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
                 box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
-                if(curve->intersectBox(box))
+                if(intersectBox(box))
                     addCell(sample, level);
             }
         }
     }
     std::cout<<" n level 3 cell "<<numCells()<<"\n";
     for(level=4; level<= maxLevel; level++)
-        subdivide(curve, level);
+        subdivide(level);
     
 	// printHash();
 	createLatticeNode();
-	createLatticeTetrahedron(curve);
+	createLatticeTetrahedron();
 	m_lattice->countVisitedNodes();
 	
 	m_lattice->logTetrahedronMesh();
@@ -54,7 +57,7 @@ void BccGrid::create(BezierCurve * curve, int maxLevel)
 	std::cout<<" n vertices "<<m_lattice->numVertices()<<"\n";
 }
 
-void BccGrid::subdivide(BezierCurve * curve, int level)
+void BccGrid::subdivide(int level)
 {
 	sdb::CellHash * c = cells();
 	
@@ -85,7 +88,7 @@ void BccGrid::subdivide(BezierCurve * curve, int level)
 			box.setMin(subs.x - hh, subs.y - hh, subs.z - hh);
 			box.setMax(subs.x + hh, subs.y + hh, subs.z + hh);
 
-			if(curve->intersectBox(box))
+			if(intersectBox(box))
 			   addCell(subs, level);
 		}
     }
@@ -108,7 +111,7 @@ void BccGrid::createLatticeNode()
 	m_lattice->prepareTetrahedron();
 }
 
-void BccGrid::createLatticeTetrahedron(BezierCurve * curve)
+void BccGrid::createLatticeTetrahedron()
 {
     Vector3F cen;
     float h;
@@ -117,7 +120,7 @@ void BccGrid::createLatticeTetrahedron(BezierCurve * curve)
 	while(!c->end()) {
 		cen = cellCenter(c->key());
 		h = cellSizeAtLevel(c->value()->level);
-		m_lattice->touchIntersectedTetrahedron(cen, h, curve);
+		m_lattice->touchIntersectedTetrahedron(cen, h, m_splines, m_numSplines);
 	    c->next();   
 	}
 	m_lattice->untouchGreenEdges();
@@ -176,3 +179,13 @@ void BccGrid::drawHash()
 	glEnd();
 }
 
+bool BccGrid::intersectBox(const BoundingBox & box) const
+{
+	unsigned i = 0;
+	for(; i<m_numSplines; i++) {
+		if(BezierCurve::intersectBox(m_splines[i], box))
+			return true;
+	}
+	return false;
+}
+//:!

@@ -18,6 +18,7 @@ public:
 	
 	void addCurve(const std::string & name, CurveGroup * data);
 	virtual bool doWrite(const std::string & fileName);
+	virtual bool doRead(const std::string & fileName);
 protected:
 
 private:
