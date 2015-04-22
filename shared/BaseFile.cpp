@@ -204,6 +204,11 @@ bool BaseFile::FileExists(const std::string & name)
 	return true;
 }
 
+bool BaseFile::InvalidFilename(const std::string & name)
+{
+	return (name.size() < 3 || name == "unknown");
+}
+
 void BaseFile::setLatestError(BaseFile::ErrorMsg err)
 {
 	m_error = err;

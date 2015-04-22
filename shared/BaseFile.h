@@ -63,7 +63,7 @@ public:
 	bool isReverting() const;
 	bool isClosing() const;
 	static bool FileExists(const std::string & name);
-	
+	static bool InvalidFilename(const std::string & name);
 private:
 	enum ClearMode {
 		Normal = 0,

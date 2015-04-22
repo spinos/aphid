@@ -6,13 +6,13 @@
 #include <CurveGroup.h>
 #include "bcc_common.h"
 #include <line_math.h>
-#include <HesperisFile.h>
 #include "BccGlobal.h"
+#include <HesperisFile.h>
 BccWorld::BccWorld(GeoDrawer * drawer)
 {
 	m_drawer = drawer;
 	m_curves = new CurveGroup;
-	if(!readCurvesFromFile(BccGlobal::FileName))
+	if(!readCurvesFromFile())
 		createTestCurves();
 		
 	qDebug()<<" n curves "<<m_curves->numCurves();
@@ -109,7 +109,7 @@ void BccWorld::draw()
 	drawAnchor();
     
 	glDisable(GL_DEPTH_TEST);
-    glColor3f(.59f, .21f, 0.f);
+    glColor3f(.59f, .02f, 0.f);
     drawCurves();
 	drawCurveStars();
 }
@@ -456,17 +456,19 @@ void BccWorld::drawCurveStars()
 		m_drawer->cube(curveStart[i], csz);
 }
 
-bool BccWorld::readCurvesFromFile(const std::string & fileName)
+bool BccWorld::readCurvesFromFile()
 {
-	if(fileName.size() < 4 || fileName == "unknown") return false;
+	if(BaseFile::InvalidFilename(BccGlobal::FileName)) return false;
 	
-	if(!BaseFile::FileExists(fileName)) {
+	if(!BaseFile::FileExists(BccGlobal::FileName)) {
 		qDebug()<<" file not exist";
+		BccGlobal::FileName = "unknown";
 		return false;
 	}
 	HesperisFile hes;
+	hes.setReadComponent(HesperisFile::RCurve);
 	hes.addCurve("curves", m_curves);
-	if(!hes.open(fileName)) return false;
+	if(!hes.open(BccGlobal::FileName)) return false;
 	hes.close();
 	
 	return true;
@@ -553,5 +555,22 @@ void BccWorld::drawAnchor()
         }
     }
     glEnd();
+}
+
+bool BccWorld::save()
+{
+	if(BaseFile::InvalidFilename(BccGlobal::FileName)) {
+		std::cout<<" no specifc file to save\n";
+		return false;
+	}
+	
+	HesperisFile hes;
+	hes.setWriteComponent(HesperisFile::WTetra);
+	hes.addTetrahedron("tetra", &m_mesh);
+	if(!hes.open(BccGlobal::FileName)) return false;
+	hes.setDirty();
+	hes.save();
+	hes.close();
+	return true;
 }
 //:~

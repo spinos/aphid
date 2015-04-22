@@ -51,6 +51,12 @@ void GLWidget::clientMouseInput(QMouseEvent */*event*/)
 
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
+	if(event->modifiers() == Qt::ControlModifier | Qt::MetaModifier) {
+		if(event->key() == Qt::Key_S) {
+			m_world->save();
+		}
+	}
+		
 	switch (event->key()) {
 		case Qt::Key_A:
 		    m_world->moveTestP(-.1f, 0.f, 0.f);

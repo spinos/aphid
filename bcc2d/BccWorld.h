@@ -2,19 +2,12 @@
 #define BCCWORLD_H
 #include <ALLMath.h>
 #include <BoundingBox.h>
+#include <HTetrahedronMesh.h>
 class CurveGroup;
 class GeoDrawer;
 class BccGrid;
 class BaseBuffer;
 struct BezierSpline;
-
-struct TetrahedronMeshData {
-    unsigned m_numTetrahedrons;
-    unsigned m_numPoints;
-    BaseBuffer * m_anchorBuf;
-    BaseBuffer * m_pointBuf;
-    BaseBuffer * m_indexBuf;
-};
 
 class BccWorld {
 public:
@@ -22,7 +15,7 @@ public:
     virtual ~BccWorld();
     
     void draw();
-    
+    bool save();
     void moveTestP(float x, float y, float z);
     
 private:
@@ -38,7 +31,7 @@ private:
 	void testLineLine();
 	void testVicinity();
 	void drawCurves();
-	bool readCurvesFromFile(const std::string & fileName);
+	bool readCurvesFromFile();
 	void drawCurveStars();
 	void resetAnchors(unsigned n);
 	void createMeshData(unsigned nt, unsigned nv);

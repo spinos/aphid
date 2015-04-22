@@ -11,10 +11,23 @@
 #include <AllHdf.h>
 #include <HWorld.h>
 #include <HCurveGroup.h>
+#include <BaseBuffer.h>
+#include <HTetrahedronMesh.h>
 #include <sstream>
 HesperisFile::HesperisFile() {}
-HesperisFile::HesperisFile(const char * name) : HFile(name) {}
+HesperisFile::HesperisFile(const char * name) : HFile(name) 
+{
+	m_readComp = RNone;
+	m_writeComp = WCurve;
+}
+
 HesperisFile::~HesperisFile() {}
+
+void HesperisFile::setReadComponent(ReadComponent comp)
+{ m_readComp = comp; }
+
+void HesperisFile::setWriteComponent(WriteComponent comp)
+{ m_writeComp = comp; }
 
 bool HesperisFile::doWrite(const std::string & fileName)
 {
@@ -25,24 +38,53 @@ bool HesperisFile::doWrite(const std::string & fileName)
 	
 	HWorld grpWorld;
 	grpWorld.save();
+	
+	if(m_writeComp == WCurve) writeCurve();
+	else if(m_writeComp == WTetra) writeTetrahedron();
+	
+	grpWorld.close();
+	HObject::FileIO.close();
+	
+	std::cout<<" finished writing hesperis file at "<<grpWorld.modifiedTimeStr()<<"\n";
+	
+	return true;
+}
+
+bool HesperisFile::writeCurve()
+{
 	std::stringstream sst;
 	std::map<std::string, CurveGroup *>::iterator itcurve = m_curves.begin();
 	for(; itcurve != m_curves.end(); ++itcurve) {
 		sst.str("");
 		sst<<"/world/"<<itcurve->first;
+		std::cout<<" write curve "<<sst.str()<<"\n";
 		HCurveGroup grpCurve(sst.str());
 		grpCurve.save(itcurve->second);
 		grpCurve.close();
 	}
-	
-	grpWorld.close();
-	HObject::FileIO.close();
-	
+	return true;
+}
+
+bool HesperisFile::writeTetrahedron()
+{
+	std::stringstream sst;
+	std::map<std::string, TetrahedronMeshData *>::iterator it = m_terahedrons.begin();
+	for(; it != m_terahedrons.end(); ++it) {
+		sst.str("");
+		sst<<"/world/"<<it->first;
+		std::cout<<" write tetrahedron mesh "<<sst.str()<<"\n";
+		HTetrahedronMesh grp(sst.str());
+		grp.save(it->second);
+		grp.close();
+	}
 	return true;
 }
 
 void HesperisFile::addCurve(const std::string & name, CurveGroup * data)
 { m_curves[name] = data; }
+
+void HesperisFile::addTetrahedron(const std::string & name, TetrahedronMeshData * data)
+{ m_terahedrons[name] = data; }
 
 bool HesperisFile::doRead(const std::string & fileName)
 {
@@ -52,12 +94,25 @@ bool HesperisFile::doRead(const std::string & fileName)
 	HWorld grpWorld;
 	grpWorld.load();
 	
+	if(m_readComp == RCurve) readCurve();
+	else if(m_readComp == RTetra) readTetrahedron();
+	
+	grpWorld.close();
+	
+	std::cout<<" finished reading hesperis file modified at "<<grpWorld.modifiedTimeStr()<<"\n";
+	
+	return true;
+}
+
+bool HesperisFile::readCurve()
+{
 	bool allValid = true;
 	std::stringstream sst;
 	std::map<std::string, CurveGroup *>::iterator itcurve = m_curves.begin();
 	for(; itcurve != m_curves.end(); ++itcurve) {
 		sst.str("");
 		sst<<"/world/"<<itcurve->first;
+		std::cout<<" read curve "<<sst.str()<<"\n";
 		HCurveGroup grpCurve(sst.str());
 		if(!grpCurve.load(itcurve->second)) {
 			std::cout<<" cannot load "<<sst.str();
@@ -67,16 +122,33 @@ bool HesperisFile::doRead(const std::string & fileName)
 		grpCurve.close();
 	}
 	
-	grpWorld.close();
-	
-	if(!allValid) {
-		std::cout<<" encounter problem(s) reading the file.\n";
-		return false;
-	}
-	
-	std::cout<<" done reading curve file modified at "<<grpWorld.modifiedTimeStr()<<"\n";
-	
-	return true;
+	if(!allValid)
+		std::cout<<" encounter problem(s) reading curves.\n";
+
+	return allValid;
 }
 
+bool HesperisFile::readTetrahedron()
+{
+	bool allValid = true;
+	std::stringstream sst;
+	std::map<std::string, TetrahedronMeshData *>::iterator it = m_terahedrons.begin();
+	for(; it != m_terahedrons.end(); ++it) {
+		sst.str("");
+		sst<<"/world/"<<it->first;
+		std::cout<<" read tetrahedron mesh "<<sst.str()<<"\n";
+		HTetrahedronMesh grp(sst.str());
+		if(!grp.load(it->second)) {
+			std::cout<<" cannot load "<<sst.str();
+			allValid = false;
+		}
+		
+		grp.close();
+	}
+	
+	if(!allValid)
+		std::cout<<" encounter problem(s) reading tetrahedrons.\n";
+
+	return allValid;
+}
 //:~
