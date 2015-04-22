@@ -14,10 +14,9 @@
 #include <CudaReduction.h>
 #include <CudaDbgLog.h>
 #include <boost/format.hpp>
-
+#include <FemGlobal.h>
 CudaDbgLog ceglg("cgsolver.txt");
 
-int i_max = 32;
 ConjugateGradientSolver::ConjugateGradientSolver() {}
 ConjugateGradientSolver::~ConjugateGradientSolver() 
 {
@@ -105,7 +104,7 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
         // std::cout<<" prev["<<k<<"] h "<<prev[k];
     }
     
-	for(unsigned i=0;i<i_max;i++) {
+	for(unsigned i=0;i<FemGlobal::CGSolverMaxNumIterations;i++) {
 	    cuConjugateGradient_Ax((float3 *)m_devicePrev->bufferOnDevice(),
                             (float3 *)m_deviceUpdate->bufferOnDevice(),
                             (float3 *)m_deviceResidual->bufferOnDevice(),
@@ -153,7 +152,7 @@ void ConjugateGradientSolver::solveGpu(Vector3F * X, CudaCSRMatrix * stiffnessMa
         
         // if(i>29) std::cout<<" d1["<<i<<"] "<<d1<<" ";
         
-		if(i >= i_max && d1 < 0.001f)
+		if(d1 < 0.001f)
 			break;
 
 		if(fabs(d)<1e-10f)
@@ -204,7 +203,7 @@ void ConjugateGradientSolver::solve(Vector3F * X)
 		prev[k]= m_residual[k];
 	}
 	
-	for(int i=0;i<i_max;i++) {
+	for(int i=0;i<FemGlobal::CGSolverMaxNumIterations;i++) {
 		float d =0;
 		float d2=0;
 		
@@ -250,7 +249,7 @@ void ConjugateGradientSolver::solve(Vector3F * X)
 			d1 += m_residual[k].dot(m_residual[k]);
 		}
 		
-		if(i >= i_max && d1 < 0.001f)
+		if(d1 < 0.001f)
 			break;
 
 		if(fabs(d)<1e-10f)

@@ -12,7 +12,6 @@ public:
     void setDimension(unsigned n);
     void initOnDevice();
     
-    static int MaxNIterations;
 protected:
     void * rightHandSide();
 	CUDABuffer * rightHandSideBuf();

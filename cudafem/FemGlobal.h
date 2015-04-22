@@ -14,4 +14,5 @@
 class FemGlobal {
 public:
 	static std::string FileName;
+	static int CGSolverMaxNumIterations;
 };

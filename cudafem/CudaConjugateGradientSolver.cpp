@@ -6,10 +6,8 @@
 #include <AllMath.h>
 #include <CudaDbgLog.h>
 #include <boost/format.hpp>
-
+#include <FemGlobal.h>
 CudaDbgLog cglg("cgsolver.txt");
-
-int CudaConjugateGradientSolver::MaxNIterations = 30;
 
 CudaConjugateGradientSolver::CudaConjugateGradientSolver()
 {
@@ -88,7 +86,7 @@ void CudaConjugateGradientSolver::solve(void * X,
                             (float3 *)rightHandSide(),
                             m_dimension);
     
-    for(int i=0;i<MaxNIterations;i++) {
+    for(int i=0;i<FemGlobal::CGSolverMaxNumIterations;i++) {
 	    cuConjugateGradient_Ax((float3 *)previous(),
                             (float3 *)updated(),
                             (float3 *)residual(),

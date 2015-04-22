@@ -11,6 +11,7 @@ include_directories ("../shared"
 "../radixsort" 
 "../cudanarrowphase"
 "../cudadyn"
+"../hesperis"
 "../fem")
 
 set (HEADER_FILES "../shared/Base3DView.h" 
@@ -42,6 +43,8 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../cudadyn/DynamicWorldInterface.h"
 "../fem/tetmesh.h"
 "../shared/CSRMatrix.h"
+"../hesperis/HesperisFile.h"
+"FemGlobal.h"
 "CudaCSRMatrix.h"
 "cuFemTetrahedron_implement.h"
 "CudaConjugateGradientSolver.h"
@@ -67,6 +70,8 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../cudadyn/CudaDynamicWorld.cpp"
 "../cudadyn/DynamicWorldInterface.cpp"
 "../shared/CSRMatrix.cpp"
+"../hesperis/HesperisFile.cpp"
+"FemGlobal.cpp"
 "CudaCSRMatrix.cpp"
 "CudaConjugateGradientSolver.cpp"
 "FEMTetrahedronSystem.cpp"
@@ -113,6 +118,25 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
 
 CUDA_ADD_EXECUTABLE (testcudafem ${HEADER_FILES} ${SOURCE_FILES} ${CUSOURCES})
+
+## find_package(HDF5 REQUIRED)
+if (WIN32)
+set (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
+set (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
+else ()
+set (HDF5_INCLUDE_DIR "/users/jianzhang/Library/hdf5/include")
+set (HDF5_LIBRARIES "/users/jianzhang/Library/hdf5/lib/libhdf5.dylib")
+endif ()
+
+if (WIN32)
+set (SZIP_INCLUDE_DIR "D:/usr/szip-2.1/src")
+set (SZIP_LIBRARIES "D:/usr/szip-2.1/szip.lib")
+include_directories (${SZIP_INCLUDE_DIR})
+target_link_libraries (testcudafem ${SZIP_LIBRARIES})
+endif ()
+
+include_directories (${HDF5_INCLUDE_DIR})
+target_link_libraries (testcudafem ${HDF5_LIBRARIES})
 
 include_directories (${CUDA_TOOLKIT_INCLUDE} ${CUDA_SDK_ROOT_DIR}/common/inc)
 ## target_link_libraries(testcudafem ${CUDA_CUDA_LIBRARY})

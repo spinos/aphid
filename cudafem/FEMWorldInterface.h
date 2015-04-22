@@ -2,7 +2,7 @@
 #define FEMWORLDINTERFACE_H
 
 #include <DynamicWorldInterface.h>
-
+class FEMTetrahedronSystem;
 class FEMWorldInterface : public DynamicWorldInterface {
 public:
     FEMWorldInterface();
@@ -13,7 +13,7 @@ public:
 protected:
 
 private:
-
+	void createTestMesh(FEMTetrahedronSystem * mesh);
 };
 
 #endif        //  #ifndef FEMWORLDINTERFACE_H
