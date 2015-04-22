@@ -7,7 +7,7 @@ CartesianGrid::CartesianGrid(const BoundingBox & bound)
     m_origin = bound.getMin();
     m_span = bound.getLongestDistance();
     
-    const float margin = m_span / 63.f;
+    const float margin = m_span / 99.f;
     m_origin.x -= margin;
     m_origin.y -= margin;
     m_origin.z -= margin;

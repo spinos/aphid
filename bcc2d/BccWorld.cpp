@@ -53,7 +53,7 @@ BccWorld::BccWorld(GeoDrawer * drawer)
 		
 	std::cout<<" bbox "<<box.str();
 	
-    m_grid = new BccGrid(box); std::cout<<" finest grid size "<<(m_grid->span() / (float)(1<<5));
+    m_grid = new BccGrid(box); std::cout<<" finest grid size "<<(m_grid->span() / (float)(1<<6));
     m_grid->create(spline, m_numSplines, 6);
 	
     std::cout<<" n tetrahedrons "<<m_grid->numTetrahedrons()<<"\n";
@@ -104,11 +104,11 @@ void BccWorld::draw()
     m_drawer->boundingBox(box);
     
     m_grid->draw(m_drawer, (unsigned *)m_mesh.m_anchorBuf->data());
-    m_drawer->setWired(1);
 
 	drawMesh();
-    drawAnchor();
+	drawAnchor();
     
+	glDisable(GL_DEPTH_TEST);
     glColor3f(.59f, .21f, 0.f);
     drawCurves();
 	drawCurveStars();
@@ -496,12 +496,12 @@ void BccWorld::resetAnchors(unsigned n)
 
 void BccWorld::drawMesh()
 {
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glColor3f(0.3f, 0.4f, 0.33f);
 	drawMesh(m_mesh.m_numTetrahedrons, (Vector3F *)m_mesh.m_pointBuf->data(),
 	         (unsigned *)m_mesh.m_indexBuf->data());
-    
+
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glColor3f(.03f, .14f, .44f);
     drawMesh(m_mesh.m_numTetrahedrons, (Vector3F *)m_mesh.m_pointBuf->data(),

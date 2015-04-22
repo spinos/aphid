@@ -28,6 +28,7 @@ private:
     void createLatticeNode();
     void createLatticeTetrahedron();
 	bool intersectBox(const BoundingBox & box) const;
+	void drawCells(GeoDrawer * drawer);
 private:
 	BezierSpline * m_splines;
     BccLattice * m_lattice;

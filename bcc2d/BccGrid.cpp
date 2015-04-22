@@ -151,7 +151,12 @@ void BccGrid::createLatticeTetrahedron()
 
 void BccGrid::draw(GeoDrawer * drawer, unsigned * anchored)
 {
-	sdb::CellHash * c = cells();
+	m_lattice->draw(drawer, anchored);
+}
+
+void BccGrid::drawCells(GeoDrawer * drawer)
+{
+    sdb::CellHash * c = cells();
 	Vector3F l;
     BoundingBox box;
     float h;
@@ -168,8 +173,6 @@ void BccGrid::draw(GeoDrawer * drawer, unsigned * anchored)
 		
 	    c->next();   
 	}
-
-	m_lattice->draw(drawer, anchored);
 }
 
 void BccGrid::drawHash()

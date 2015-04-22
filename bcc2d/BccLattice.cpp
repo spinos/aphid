@@ -147,11 +147,13 @@ const unsigned BccLattice::numVertices() const
 { return m_visitedNodes; }
 
 void BccLattice::draw(GeoDrawer * drawer, unsigned * anchored)
-{
+{/*
     drawer->setWired(0);
 	glColor3f(0.3f, 0.4f, 0.33f);
-	glDisable(GL_DEPTH_TEST);
+	drawTetrahedrons();
 	drawer->setWired(1);
+	glColor3f(.03f, .14f, .44f);
+	drawTetrahedrons();*/
 	glColor3f(.03f, .14f, .44f);
 	drawVisitedNodes(drawer);
 }
