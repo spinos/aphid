@@ -2,7 +2,8 @@
 #define SOLVERTHREAD_H
 #include <BaseSolverThread.h>
 #include <ConjugateGradientSolver.h>
-#include <FEMTetrahedronMesh.h>
+#include <FemGlobal.h>
+class FEMTetrahedronMesh;
 class BaseBuffer;
 class CudaCSRMatrix;
 class SolverThread : public BaseSolverThread, ConjugateGradientSolver
@@ -20,6 +21,7 @@ public:
 protected:
     
 private:
+	TetrahedronMeshData m_meshData;
     FEMTetrahedronMesh * m_mesh;
 	Vector3F * m_F;
 	Vector3F * m_F0;
@@ -43,6 +45,7 @@ private:
 	void groundCollision();
 	void updateF0();
 	void updateB(float dt);
+	bool readMeshFromFile();
 };
 
 #endif        //  #ifndef SOLVERTHREAD_H

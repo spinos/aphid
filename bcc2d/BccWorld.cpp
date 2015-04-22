@@ -458,10 +458,10 @@ void BccWorld::drawCurveStars()
 
 bool BccWorld::readCurvesFromFile()
 {
-	if(BaseFile::InvalidFilename(BccGlobal::FileName)) return false;
+	if(BaseFile::InvalidFilename(BccGlobal::FileName)) 
+		return false;
 	
 	if(!BaseFile::FileExists(BccGlobal::FileName)) {
-		qDebug()<<" file not exist";
 		BccGlobal::FileName = "unknown";
 		return false;
 	}

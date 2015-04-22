@@ -3,7 +3,7 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
-
+class FEMTetrahedronMesh;
 class SolverThread;
 class GLWidget : public Base3DView
 {
@@ -23,7 +23,8 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
     
-//! [3]
+private:
+	void drawMesh(FEMTetrahedronMesh * mesh);
 private:
     SolverThread * m_solver;
 	

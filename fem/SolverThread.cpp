@@ -6,6 +6,7 @@
 #include <CudaBase.h>
 #include <cuConjugateGradient_implement.h>
 #include <CudaDbgLog.h>
+#include <FEMTetrahedronMesh.h>
 // Poisson ratio: transverse contraction strain to longitudinal extension 
 // strain in the direction of stretching force. Tensile deformation is 
 // considered positive and compressive deformation is considered negative. 
@@ -22,7 +23,7 @@ Vector3F D(d16, d17, d18); //Isotropic elasticity matrix D
 
 float creep = 0.20f;
 float yield = 0.04f;
-float mass_damping=0.4f;
+float mass_damping=0.9f;
 float m_max = 0.2f;
 Vector3F gravity(0.0f,-9.81f,0.0f);
 
@@ -38,13 +39,16 @@ SolverThread::SolverThread(QObject *parent)
     : BaseSolverThread(parent)
 {
     m_mesh = new FEMTetrahedronMesh;
-    
+	
+    bool hasData = 0;
 #if TESTBLOCK
     m_mesh->generateBlocks(64,2,2, .5f, .5f, .5f);
     m_mesh->setDensity(30.f);
 #else
-    m_mesh->generateFromFile();
-    m_mesh->setDensity(1.4f);
+	hasData = readMeshFromFile();
+	if(!hasData)
+		m_mesh->generateTest();
+    m_mesh->setDensity(10.4f);
 #endif
     
     unsigned totalPoints = m_mesh->numPoints();
@@ -60,13 +64,21 @@ SolverThread::SolverThread(QObject *parent)
 	unsigned i;
 	for(i=0; i < totalPoints; i++) m_V[i].setZero();
 	
-	Vector3F * Xi = m_mesh->Xi();
-	for(i=0; i < totalPoints; i++) {
-	    if(i==7 || i==5 || i==8 || i==18)
-	    //if(Xi[i].x<.1f)
-            fixed[i]=1;
-        else
-            fixed[i]=0;   
+	if(hasData) {
+		unsigned * anchor = (unsigned *)m_meshData.m_anchorBuf->data();
+		for(i=0; i < totalPoints; i++) {
+			fixed[i] = anchor[i];
+		}
+	}
+	else {
+		Vector3F * Xi = m_mesh->Xi();
+		for(i=0; i < totalPoints; i++) {
+			if(i==7 || i==5 || i==8 || i==18)
+			//if(Xi[i].x<.1f)
+				fixed[i]=1;
+			else
+				fixed[i]=0;   
+		}
 	}
 	
 	calculateK();
@@ -636,5 +648,28 @@ void SolverThread::groundCollision()
 		if(X[i].y<0) //collision with ground
 			X[i].y=0;
 	}
+}
+
+bool SolverThread::readMeshFromFile()
+{
+	if(BaseFile::InvalidFilename(FemGlobal::FileName)) 
+		return false;
+		
+	if(!BaseFile::FileExists(FemGlobal::FileName)) {
+		FemGlobal::FileName = "unknown";
+		return false;
+	}
+	
+	HesperisFile hes;
+	hes.setReadComponent(HesperisFile::RTetra);
+	hes.addTetrahedron("tetra", &m_meshData);
+	if(!hes.open(FemGlobal::FileName)) return false;
+	hes.close();
+	
+	qDebug()<<" nt "<<m_meshData.m_numTetrahedrons;
+	qDebug()<<" nv "<<m_meshData.m_numPoints;
+	
+	m_mesh->generateFromData(&m_meshData);
+	return true;
 }
 //:~

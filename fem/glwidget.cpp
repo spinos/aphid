@@ -4,7 +4,7 @@
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
 #include <SolverThread.h>
-
+#include <FEMTetrahedronMesh.h>
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
     qDebug()<<"glview";
@@ -32,43 +32,37 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+	FEMTetrahedronMesh * mesh = m_solver->mesh();
+    glColor3f(0.5f, 0.6f, .44f);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+	drawMesh(mesh);
+	
+	glColor3f(0.1f, 0.14f, .5f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    FEMTetrahedronMesh * mesh = m_solver->mesh();
-    unsigned nt = mesh->numTetrahedra();
+	
+	drawMesh(mesh);
+}
+
+void GLWidget::drawMesh(FEMTetrahedronMesh * mesh)
+{
+	unsigned nt = mesh->numTetrahedra();
     FEMTetrahedronMesh::Tetrahedron * t = mesh->tetrahedra();
 	Vector3F * p = mesh->X();
-	Vector3F a, b, c, d;
-	glBegin(GL_LINES);
-	for(unsigned i = 0; i < nt; i++) {
-	    FEMTetrahedronMesh::Tetrahedron tet = t[i];
-	    a = p[tet.indices[0]];
-	    b = p[tet.indices[1]];
-	    c = p[tet.indices[2]];
-	    d = p[tet.indices[3]];
-	    glVertex3f(a.x, a.y, a.z);
-	    glVertex3f(b.x, b.y, b.z);
-	    
-	    glVertex3f(a.x, a.y, a.z);
-	    glVertex3f(c.x, c.y, c.z);
-	    
-	    glVertex3f(a.x, a.y, a.z);
-	    glVertex3f(d.x, d.y, d.z);
-	    
-	    glVertex3f(b.x, b.y, b.z);
-	    glVertex3f(c.x, c.y, c.z);
-	    
-	    glVertex3f(c.x, c.y, c.z);
-	    glVertex3f(d.x, d.y, d.z);
-	    
-	    glVertex3f(d.x, d.y, d.z);
-	    glVertex3f(b.x, b.y, b.z);
-	    
+	Vector3F q;
+	glBegin(GL_TRIANGLES);
+	unsigned i, j;
+	for(i = 0; i < nt; i++) {
+	    FEMTetrahedronMesh::Tetrahedron & tet = t[i];
+		
+		for(j=0; j< 12; j++) {
+            q = p[ tet.indices[ TetrahedronToTriangleVertex[j] ] ];
+            glVertex3fv((GLfloat *)&q);
+        }
 	}
 	glEnd();
 }
-//! [7]
 
-//! [9]
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
 {
 }

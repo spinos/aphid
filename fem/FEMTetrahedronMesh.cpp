@@ -1,11 +1,37 @@
 #include "FEMTetrahedronMesh.h"
 #include "tetmesh.h"
+#include <FemGlobal.h>
 FEMTetrahedronMesh::FEMTetrahedronMesh() : m_density(1000.f) {}
 FEMTetrahedronMesh::~FEMTetrahedronMesh() {}
 
 void FEMTetrahedronMesh::setDensity(float x) { m_density = x; }
 
-void FEMTetrahedronMesh::generateFromFile()
+void FEMTetrahedronMesh::generateFromData(TetrahedronMeshData * tetm)
+{
+	m_totalPoints = tetm->m_numPoints;
+	m_X = new Vector3F[m_totalPoints];
+	m_Xi= new Vector3F[m_totalPoints];
+	m_mass = new float[m_totalPoints];
+	
+	Vector3F * p = (Vector3F *)tetm->m_pointBuf->data();
+	
+	unsigned i;
+	for(i=0; i<m_totalPoints; i++) {
+	    m_X[i] = p[i];
+	    m_Xi[i] = m_X[i];
+	}
+	
+	m_totalTetrahedrons = tetm->m_numTetrahedrons;
+	m_tetrahedron = new Tetrahedron[m_totalTetrahedrons];
+	
+	unsigned * ind = (unsigned *)tetm->m_indexBuf->data();
+	Tetrahedron * t = &m_tetrahedron[0];
+	for(i=0; i<m_totalTetrahedrons; i++) {
+	    addTetrahedron(t++, ind[i*4], ind[i*4+1], ind[i*4+2], ind[i*4+3]);
+	}
+}
+
+void FEMTetrahedronMesh::generateTest()
 {
     m_totalPoints = TetraNumVertices;
     m_X = new Vector3F[m_totalPoints];

@@ -1,5 +1,5 @@
 #include <AllMath.h>
-
+class TetrahedronMeshData;
 class FEMTetrahedronMesh
 {
 public:
@@ -21,7 +21,8 @@ public:
     virtual ~FEMTetrahedronMesh();
     
     void setDensity(float x);
-    void generateFromFile();
+	void generateFromData(TetrahedronMeshData * tetm);
+    void generateTest();
     void generateBlocks(unsigned xdim, unsigned ydim, unsigned zdim, float width, float height, float depth);
     void recalcMassMatrix(int * isFixed);
     unsigned numTetrahedra() const;
