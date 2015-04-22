@@ -44,16 +44,22 @@ void BccGrid::create(BezierSpline * splines, unsigned n, int maxLevel)
     }
     std::cout<<" n level 3 cell "<<numCells()<<"\n";
 	
+    if(maxLevel <=5 ) {
+		maxLevel = 5;
+		std::cout<<" max level cannot < 5\n";
+	}
 	if(maxLevel >= 9) {
 		maxLevel = 9;
-		std::cout<<" max level cannot be over 9\n";
+		std::cout<<" max level cannot > 9\n";
 	}
 	
     for(level=4; level<= maxLevel; level++)
         subdivide(level);
     
 	// printHash();
+	std::cout<<" creating bcc lattice\n";
 	createLatticeNode();
+	std::cout<<" creating bcc tetrahedrons\n";
 	createLatticeTetrahedron();
 	m_lattice->countVisitedNodes();
 	

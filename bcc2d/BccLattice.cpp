@@ -4,6 +4,9 @@
 #include <BaseLog.h>
 #include <boost/format.hpp>
 #include "bcc_common.h"
+
+Vector3F BccLattice::NodeCenterOffset;
+
 BccLattice::BccLattice(const BoundingBox & bound) :
     CartesianGrid(bound)
 {   
@@ -13,6 +16,9 @@ BccLattice::BccLattice(const BoundingBox & bound) :
 }
 
 BccLattice::~BccLattice() {}
+
+const Vector3F BccLattice::nodeCenter(unsigned code) const
+{ return gridOrigin(code) + NodeCenterOffset; }
 
 void BccLattice::add38Node(const Vector3F & center, float h)
 {
@@ -56,6 +62,8 @@ void BccLattice::add38Node(const Vector3F & center, float h)
 
 void BccLattice::prepareTetrahedron()
 {
+    const float hh = cellSizeAtLevel(11);
+    NodeCenterOffset.set(hh, hh, hh);
     const unsigned noctahedron = m_greenEdges->size();
     m_tetrahedrons = new Tetrahedron[noctahedron * 4];
     m_numTetrahedrons = 0;
@@ -153,7 +161,7 @@ void BccLattice::draw(GeoDrawer * drawer, unsigned * anchored)
 
 void BccLattice::drawAllNodes(GeoDrawer * drawer)
 {
-	drawer->setWired(0);
+    drawer->setWired(0);
     sdb::CellHash * latticeNode = cells();
 	float h = cellSizeAtLevel(11);
 	Vector3F l;
@@ -164,7 +172,7 @@ void BccLattice::drawAllNodes(GeoDrawer * drawer)
 	    else 
 			glColor3f(0.3f, 0.3f, 0.3f);
 	    
-	    l = gridOrigin(latticeNode->key());
+	    l = nodeCenter(latticeNode->key());
 	    drawer->cube(l, h);
 	    
 	    latticeNode->next();
@@ -173,7 +181,7 @@ void BccLattice::drawAllNodes(GeoDrawer * drawer)
 
 void BccLattice::drawVisitedNodes(GeoDrawer * drawer)
 {
-	drawer->setWired(0);
+    drawer->setWired(0);
 	glColor3f(0.1f, 0.2f, 0.5f);
     sdb::CellHash * latticeNode = cells();
 	float h = cellSizeAtLevel(11);
@@ -181,7 +189,7 @@ void BccLattice::drawVisitedNodes(GeoDrawer * drawer)
 	latticeNode->begin();
 	while(!latticeNode->end()) {
 	    if(latticeNode->value()->visited) {
-			l = gridOrigin(latticeNode->key());
+			l = nodeCenter(latticeNode->key());
 			drawer->cube(l, h);
 	    }
 	    latticeNode->next();
@@ -199,8 +207,8 @@ void BccLattice::drawGreenEdges()
 	    else glColor3f(0.f, .5f, 0.f);
 	    
 		m_greenEdges->connectedTo(a, b);
-		pa = gridOrigin(a);
-		pb = gridOrigin(b);
+		pa = nodeCenter(a);
+		pb = nodeCenter(b);
 		
 		glVertex3fv((GLfloat *)&pa);
 		glVertex3fv((GLfloat *)&pb);
@@ -217,7 +225,7 @@ void BccLattice::drawTetrahedrons()
     for(i=0; i< m_numTetrahedrons; i++) {
         Tetrahedron * tet = &m_tetrahedrons[i];
         for(j=0; j< 12; j++) {
-            q = gridOrigin(tet->v[TetrahedronToTriangleVertex[j]]);
+            q = nodeCenter(tet->v[TetrahedronToTriangleVertex[j]]);
             glVertex3fv((GLfloat *)&q);
         }
     }
@@ -238,7 +246,7 @@ void BccLattice::drawTetrahedrons(unsigned * anchored)
 		}
 		
         for(j=0; j< 12; j++) {
-            q = gridOrigin(tet->v[TetrahedronToTriangleVertex[j]]);
+            q = nodeCenter(tet->v[TetrahedronToTriangleVertex[j]]);
 			
 			if(a[TetrahedronToTriangleVertex[j]])
 				glColor3f(.993f, .14f, .04f);
@@ -283,14 +291,14 @@ void BccLattice::touch4Tetrahedrons(unsigned * vOctahedron,
     for(i=0; i<4; i++) {
         for(j=0; j<4; j++) {
             code[j] = vOctahedron[OctahedronToTetrahedronVetex[i][j]];
-            tet[j] = gridOrigin(code[j]);
+            tet[j] = nodeCenter(code[j]);
         }
         if(intersectTetrahedron(tet, splines, numSplines)) {
             for(j=0; j<4; j++) {
                 code[j] = vOctahedron[OctahedronToTetrahedronVetex[i][j]];
                 sdb::CellValue * found = findGrid(code[j]);
                 if(!found) {
-                    std::cout<<" cannot find grid "<<gridOrigin(code[j])<<" ";
+                    std::cout<<" cannot find grid "<<nodeCenter(code[j])<<" ";
                     break;
                 }
                 found->visited = 1;
@@ -310,7 +318,7 @@ void BccLattice::addTetrahedronsAllNodeVisited(unsigned * vOctahedron)
             code = vOctahedron[OctahedronToTetrahedronVetex[i][j]];
             sdb::CellValue * found = findGrid(code);
             if(!found) {
-                // std::cout<<" cannot find grid "<<gridOrigin(code)<<" ";
+                // std::cout<<" cannot find grid "<<nodeCenter(code)<<" ";
                 allVisited = 0;
                 continue;
             }
@@ -365,7 +373,7 @@ void BccLattice::logTetrahedronMesh()
 	latticeNode->begin();
 	while(!latticeNode->end()) {
 	    if(latticeNode->value()->visited) {
-	        p = gridOrigin(latticeNode->key());
+	        p = nodeCenter(latticeNode->key());
 	        log.write(boost::str(boost::format("{%1%f,%2%f,%3%f}") % p.x % p.y % p.z));
 	        if(latticeNode->value()->index < numVertices()-1) log.write(",\n");
 	        else log.write("\n");
@@ -420,7 +428,7 @@ void BccLattice::addAnchor(unsigned * anchored, const Vector3F & pnt)
 	for(; i< numTetrahedrons(); i++) {
         Tetrahedron * tet = &m_tetrahedrons[i];
         for(j=0; j< 4; j++)
-            q[j] = gridOrigin(tet->v[j]); 
+            q[j] = nodeCenter(tet->v[j]); 
         
 		if(!pointInsideTetrahedronTest(pnt, q)) continue;
 		

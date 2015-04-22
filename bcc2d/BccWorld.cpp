@@ -52,15 +52,19 @@ BccWorld::BccWorld(GeoDrawer * drawer)
 		spline[i].getAabb(&box);
 		
 	std::cout<<" bbox "<<box.str();
-    
-    m_grid = new BccGrid(box);
-    m_grid->create(spline, m_numSplines, 6);
 	
+    m_grid = new BccGrid(box); std::cout<<" finest grid size "<<(m_grid->span() / (float)(1<<5));
+    m_grid->create(spline, m_numSplines, 5);
+	
+    
 	m_anchorBuf = new BaseBuffer;
 	m_anchorBuf->create(m_grid->numTetrahedronVertices() * 4);
 	
 	resetAnchors(m_grid->numTetrahedronVertices());
+	
+	std::cout<<" add anchor points\n";
 	m_grid->addAnchors((unsigned *)m_anchorBuf->data(), curveStart, m_curves->numCurves());
+	std::cout<<" done\n";
 }
 
 BccWorld::~BccWorld() 

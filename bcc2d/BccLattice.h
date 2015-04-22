@@ -34,6 +34,7 @@ public:
 protected:
 
 private:
+    const Vector3F nodeCenter(unsigned code) const;
 	void drawGreenEdges();
 	void drawTetrahedrons();
 	void drawTetrahedrons(unsigned * anchored);
@@ -51,6 +52,7 @@ private:
     Tetrahedron * m_tetrahedrons;
     unsigned m_numTetrahedrons;
     unsigned m_visitedNodes;
+    static Vector3F NodeCenterOffset;
 };
 #endif        //  #ifndef BCCLATTICE_H
 
