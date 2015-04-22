@@ -54,16 +54,16 @@ BccWorld::BccWorld(GeoDrawer * drawer)
 	std::cout<<" bbox "<<box.str();
 	
     m_grid = new BccGrid(box); std::cout<<" finest grid size "<<(m_grid->span() / (float)(1<<5));
-    m_grid->create(spline, m_numSplines, 5);
+    m_grid->create(spline, m_numSplines, 6);
 	
-    
-	m_anchorBuf = new BaseBuffer;
-	m_anchorBuf->create(m_grid->numTetrahedronVertices() * 4);
+    std::cout<<" n tetrahedrons "<<m_grid->numTetrahedrons()<<"\n";
+	std::cout<<" n vertices "<<m_grid->numTetrahedronVertices()<<"\n";
 	
-	resetAnchors(m_grid->numTetrahedronVertices());
-	
+    createMeshData(m_grid->numTetrahedrons(), m_grid->numTetrahedronVertices());
+
 	std::cout<<" add anchor points\n";
-	m_grid->addAnchors((unsigned *)m_anchorBuf->data(), curveStart, m_curves->numCurves());
+	m_grid->addAnchors((unsigned *)m_mesh.m_anchorBuf->data(), curveStart, m_curves->numCurves());
+	m_grid->extractTetrahedronMeshData((Vector3F *)m_mesh.m_pointBuf->data(), (unsigned *)m_mesh.m_indexBuf->data());
 	std::cout<<" done\n";
 }
 
@@ -103,10 +103,13 @@ void BccWorld::draw()
     glColor3f(.21f, .21f, .21f);
     m_drawer->boundingBox(box);
     
-    m_grid->draw(m_drawer, (unsigned *)m_anchorBuf->data());
+    m_grid->draw(m_drawer, (unsigned *)m_mesh.m_anchorBuf->data());
     m_drawer->setWired(1);
 
-    glColor3f(.99f, .03f, .05f);
+	drawMesh();
+    drawAnchor();
+    
+    glColor3f(.59f, .21f, 0.f);
     drawCurves();
 	drawCurveStars();
 }
@@ -469,11 +472,86 @@ bool BccWorld::readCurvesFromFile(const std::string & fileName)
 	return true;
 }
 
+void BccWorld::createMeshData(unsigned nt, unsigned nv)
+{
+    m_mesh.m_numTetrahedrons = nt;
+    m_mesh.m_numPoints = nv;
+	m_mesh.m_anchorBuf = new BaseBuffer;
+	m_mesh.m_anchorBuf->create(nv * 4);
+	m_mesh.m_pointBuf = new BaseBuffer;
+	m_mesh.m_pointBuf->create(nv * 12);
+	m_mesh.m_indexBuf = new BaseBuffer;
+	m_mesh.m_indexBuf->create(nt * 4 * 4);
+	
+	resetAnchors(nv);
+}
+
 void BccWorld::resetAnchors(unsigned n)
 {
-	unsigned * anchor = (unsigned *)m_anchorBuf->data();
+	unsigned * anchor = (unsigned *)m_mesh.m_anchorBuf->data();
 	unsigned i=0;
 	for(; i < n; i++)
 		anchor[i] = 0;
+}
+
+void BccWorld::drawMesh()
+{
+    glDisable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glColor3f(0.3f, 0.4f, 0.33f);
+	drawMesh(m_mesh.m_numTetrahedrons, (Vector3F *)m_mesh.m_pointBuf->data(),
+	         (unsigned *)m_mesh.m_indexBuf->data());
+    
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glColor3f(.03f, .14f, .44f);
+    drawMesh(m_mesh.m_numTetrahedrons, (Vector3F *)m_mesh.m_pointBuf->data(),
+	         (unsigned *)m_mesh.m_indexBuf->data());
+}
+
+void BccWorld::drawMesh(unsigned nt, Vector3F * points, unsigned * indices)
+{
+    glBegin(GL_TRIANGLES);
+    unsigned i, j;
+    Vector3F q;
+    unsigned * tet;
+    for(i=0; i< nt; i++) {
+        tet = &indices[i*4];
+        for(j=0; j< 12; j++) {
+            q = points[ tet[ TetrahedronToTriangleVertex[j] ] ];
+            glVertex3fv((GLfloat *)&q);
+        }
+    }
+    glEnd();
+}
+
+void BccWorld::drawAnchor()
+{
+    const float csz = m_grid->span() / 1024.f;
+	m_drawer->setWired(0);
+	unsigned nt = m_mesh.m_numTetrahedrons;
+    Vector3F * p = (Vector3F *)m_mesh.m_pointBuf->data();
+    unsigned * a = (unsigned *)m_mesh.m_anchorBuf->data();
+    unsigned * t = (unsigned *)m_mesh.m_indexBuf->data();
+    unsigned i, j;
+    Vector3F q;
+    glColor3f(.59f, .21f, 0.f);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glBegin(GL_TRIANGLES);
+    for(i=0; i< nt; i++) {
+        bool anchored = 1;
+        unsigned * tet = &t[i*4];
+        for(j=0; j<4; j++) {
+            if(a[tet[j]] < 1) {
+                anchored = 0;
+                break;
+            }
+        }
+        if(!anchored) continue;
+        for(j=0; j< 12; j++) {
+            q = p[ tet[ TetrahedronToTriangleVertex[j] ] ];
+            glVertex3fv((GLfloat *)&q);
+        }
+    }
+    glEnd();
 }
 //:~

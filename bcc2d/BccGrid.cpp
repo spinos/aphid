@@ -59,14 +59,11 @@ void BccGrid::create(BezierSpline * splines, unsigned n, int maxLevel)
 	// printHash();
 	std::cout<<" creating bcc lattice\n";
 	createLatticeNode();
+	std::cout<<" n green edges "<<m_lattice->numGreenEdges()<<"\n";
 	std::cout<<" creating bcc tetrahedrons\n";
 	createLatticeTetrahedron();
 	m_lattice->countVisitedNodes();
-	
 	m_lattice->logTetrahedronMesh();
-	std::cout<<" n green edges "<<m_lattice->numGreenEdges()<<"\n";
-	std::cout<<" n tetrahedrons "<<m_lattice->numTetrahedrons()<<"\n";
-	std::cout<<" n vertices "<<m_lattice->numVertices()<<"\n";
 }
 
 void BccGrid::subdivide(int level)
@@ -207,7 +204,11 @@ void BccGrid::addAnchors(unsigned * anchors, Vector3F * pos, unsigned n)
 }
 
 const unsigned BccGrid::numTetrahedronVertices() const
-{
-	return m_lattice->numVertices();
-}
-//:!
+{ return m_lattice->numVertices(); }
+
+const unsigned BccGrid::numTetrahedrons() const
+{ return m_lattice->numTetrahedrons(); }
+
+void BccGrid::extractTetrahedronMeshData(Vector3F * points, unsigned * indices)
+{ return m_lattice->extractTetrahedronMeshData(points, indices); }
+//:~

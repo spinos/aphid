@@ -8,6 +8,14 @@ class BccGrid;
 class BaseBuffer;
 struct BezierSpline;
 
+struct TetrahedronMeshData {
+    unsigned m_numTetrahedrons;
+    unsigned m_numPoints;
+    BaseBuffer * m_anchorBuf;
+    BaseBuffer * m_pointBuf;
+    BaseBuffer * m_indexBuf;
+};
+
 class BccWorld {
 public:
 	BccWorld(GeoDrawer * drawer);
@@ -33,15 +41,19 @@ private:
 	bool readCurvesFromFile(const std::string & fileName);
 	void drawCurveStars();
 	void resetAnchors(unsigned n);
+	void createMeshData(unsigned nt, unsigned nv);
+	void drawMesh();
+	void drawMesh(unsigned nt, Vector3F * points, unsigned * indices);
+	void drawAnchor();
 private:
     Vector3F m_testP;
     GeoDrawer * m_drawer;
     BccGrid * m_grid;
 	BaseBuffer * m_splineBuf;
 	BaseBuffer * m_curveStartBuf;
-	BaseBuffer * m_anchorBuf;
 	CurveGroup * m_curves;
 	unsigned m_numSplines;
+	TetrahedronMeshData m_mesh;
 };
 
 #endif        //  #ifndef BCCWORLD_H

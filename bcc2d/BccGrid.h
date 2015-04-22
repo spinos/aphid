@@ -19,6 +19,8 @@ public:
 	void drawHash();
 	
 	const unsigned numTetrahedronVertices() const;
+	const unsigned numTetrahedrons() const;
+	void extractTetrahedronMeshData(Vector3F * points, unsigned * indices);
 protected:
 
 private:

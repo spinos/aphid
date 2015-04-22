@@ -30,6 +30,7 @@ public:
 	const unsigned numTetrahedrons() const;
 	const unsigned numVertices() const;
 	
+	void extractTetrahedronMeshData(Vector3F * points, unsigned * indices);
 	void logTetrahedronMesh();
 protected:
 
@@ -47,6 +48,8 @@ private:
 	bool isCurveClosetToTetrahedron(const Vector3F * p, BezierCurve * curve) const;
 	bool intersectTetrahedron(const Vector3F * tet, BezierSpline * splines, unsigned numSplines) const;
 	void addAnchor(unsigned * anchored, const Vector3F & pnt);
+	void extractPoints(Vector3F * dst);
+	void extractIndices(unsigned * dst);
 private:
     sdb::EdgeHash * m_greenEdges;
     Tetrahedron * m_tetrahedrons;

@@ -150,13 +150,10 @@ void BccLattice::draw(GeoDrawer * drawer, unsigned * anchored)
 {
     drawer->setWired(0);
 	glColor3f(0.3f, 0.4f, 0.33f);
-	drawTetrahedrons();
 	glDisable(GL_DEPTH_TEST);
 	drawer->setWired(1);
 	glColor3f(.03f, .14f, .44f);
-	drawTetrahedrons(anchored);
 	drawVisitedNodes(drawer);
-	// drawGreenEdges();
 }
 
 void BccLattice::drawAllNodes(GeoDrawer * drawer)
@@ -436,6 +433,39 @@ void BccLattice::addAnchor(unsigned * anchored, const Vector3F & pnt)
 			sdb::CellValue * found = findGrid(tet->v[j]);
 			anchored[found->index] = 1;
 		}
+    }
+}
+
+void BccLattice::extractTetrahedronMeshData(Vector3F * points, unsigned * indices)
+{
+    extractPoints(points);
+    extractIndices(indices);
+}
+
+void BccLattice::extractPoints(Vector3F * dst)
+{
+    unsigned i = 0;
+    sdb::CellHash * latticeNode = cells();
+    latticeNode->begin();
+	while(!latticeNode->end()) {
+	    if(latticeNode->value()->visited) {
+	        dst[i] = nodeCenter(latticeNode->key());
+	        i++;
+	    }
+	    latticeNode->next();
+	}
+}
+
+void BccLattice::extractIndices(unsigned * dst)
+{
+    unsigned i, j, k = 0;
+	for(i=0; i< numTetrahedrons(); i++) {
+        Tetrahedron * tet = &m_tetrahedrons[i];
+        for(j=0; j< 4; j++) {
+            sdb::CellValue * found = findGrid(tet->v[j]);
+            dst[k] = found->index;
+            k++;
+        }
     }
 }
 //:~
