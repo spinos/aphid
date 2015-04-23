@@ -363,8 +363,8 @@ int main(int argc, char **argv)
     // printf("test conjugate gradient\n");
     // testCg();
     
-    std::cout<<"\n test reduce sum:\n";
-    testReduceSum();
+    // std::cout<<"\n test reduce sum:\n";
+    // testReduceSum();
     
     printf("done.\n");
     exit(0);

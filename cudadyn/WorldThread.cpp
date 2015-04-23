@@ -37,8 +37,7 @@ void WorldThread::run()
 {	 
 	forever {
 	    if (abort) {
-            // destroySolverData();
-            qDebug()<<"abort";
+            qDebug()<<"abort b4";
             return;
         }
         
@@ -46,6 +45,13 @@ void WorldThread::run()
             m_world->stepPhysics(TimeStep);
             m_numLoops++; 
         }
+        
+        if (abort) {
+            qDebug()<<"abort aft";
+            return;
+        }
+        
+        m_world->sendXToHost();
 		
 		emit doneStep();
 
@@ -55,8 +61,8 @@ void WorldThread::run()
 			condition.wait(&mutex);
 			
 		restart = false;
-        mutex.unlock();
-   }
+        mutex.unlock(); 
+    }
 }
 
 const unsigned WorldThread::numLoops() const

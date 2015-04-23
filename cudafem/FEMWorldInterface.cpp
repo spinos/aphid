@@ -62,10 +62,10 @@ void FEMWorldInterface::createTestMesh(FEMTetrahedronSystem * mesh)
 	for(i=0; i<TetraNumTetrahedrons; i++)
 	    mesh->addTetrahedron(TetraIndices[i][0], TetraIndices[i][1], TetraIndices[i][2], TetraIndices[i][3]);
 	
-	mesh->setAnchoredPoint(122, 0);
-	mesh->setAnchoredPoint(123, 20);
-	mesh->setAnchoredPoint(116, 9);
-	mesh->setAnchoredPoint(124, 78);
+	mesh->setAnchoredPoint(89, 0);
+	mesh->setAnchoredPoint(63, 20);
+	mesh->setAnchoredPoint(71, 9);
+	mesh->setAnchoredPoint(95, 78);
 }
 
 void FEMWorldInterface::resetVelocity(FEMTetrahedronSystem * mesh)

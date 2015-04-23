@@ -146,8 +146,7 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world)
     unsigned i;
     for(i=0; i< nobj; i++) {
         CudaTetrahedronSystem * tetra = world->tetradedron(i);
-        tetra->sendXToHost();
-        draw(tetra);
+        if(tetra) draw(tetra);
     }
 }
 
@@ -186,13 +185,13 @@ void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDr
 	unsigned i;
 	drawer->setColor(0.f, 0.1f, 0.3f);
 	
-	m_pairCache->create(broadphase->numUniquePairs() * 8);
+	m_pairCache->create(broadphase->numOverlappingPairs() * 8);
 	CUDABuffer * uniquePairs = broadphase->overlappingPairBuf();
 	uniquePairs->deviceToHost(m_pairCache->data(), m_pairCache->bufferSize());
 	unsigned * pc = (unsigned *)m_pairCache->data();
 	
 	unsigned objectI;
-	for(i=0; i < broadphase->numUniquePairs(); i++) {
+	for(i=0; i < broadphase->numOverlappingPairs(); i++) {
 	    objectI = extractObjectInd(pc[i * 2]);
 	    abox = boxes[broadphase->objectStart(objectI) + extractElementInd(pc[i * 2])];
 	    

@@ -31,12 +31,11 @@ void CUDABuffer::create(unsigned size)
 	destroy();
 	m_realSize = minimalMemSize(size);
 	CudaBase::MemoryUsed += m_realSize;
-	std::cout<<" cu malloc "<<m_realSize;
-	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, m_realSize));
-	//if ( cudaSuccess != err ) {
-    //    printf( "Cuda error in file '%s' in line %i : %s.\n",
-    //             __FILE__, __LINE__, cudaGetErrorString( err) );
-    //}
+	cudaError_t err = cudaMalloc((void **)&_device_vbo_buffer, m_realSize);
+	if ( cudaSuccess != err ) {
+        printf( "Cuda error in file '%s' in line %i : %s.\n",
+                 __FILE__, __LINE__, cudaGetErrorString( err) );
+    }
 	setBufferType(kOnDevice);
 	setBufferSize(size);
 }
@@ -49,8 +48,11 @@ void CUDABuffer::destroy()
 	}
 	else if(bufferType() == kOnDevice) {
 		if(_device_vbo_buffer == 0) return;
-		std::cout<<" cu free ";
-		cudaFree(_device_vbo_buffer);
+		cudaError_t err = cudaFree(_device_vbo_buffer);
+		if ( cudaSuccess != err ) {
+		    printf( "Cuda error in file '%s' in line %i : %s.\n",
+                 __FILE__, __LINE__, cudaGetErrorString( err) );
+        }
 		CudaBase::MemoryUsed -= m_realSize;
 		m_realSize = 0;
 		setBufferSize(0);

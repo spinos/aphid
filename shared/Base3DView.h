@@ -92,7 +92,7 @@ protected:
 	const Vector3F strokeVector(const float & depth) const;
 	
 	void hudText(const std::string & t, const int & row) const;
-	
+	float frameRate();
 private:
 	void computeIncidentRay(int x, int y);
 	

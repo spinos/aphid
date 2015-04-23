@@ -3,17 +3,17 @@
 #include <CudaBase.h>
 #include <stripedModel.cu>
 
-#define B3_BROADPHASE_MAX_STACK_SIZE 64
+#define B3_BROADPHASE_MAX_STACK_SIZE 96
 
 __device__ int isElementExcluded(uint b, uint a, 
 									uint * exclusionInd,
 									uint * exclusionStart)
 {
 	if(a >= b) return 1;
-	uint cur = exclusionStart[a];
-	uint maxInd = exclusionStart[a+1];
-	for(; cur < maxInd; cur++) {
-		if(exclusionInd[cur] == b) return 1;
+	uint cur = exclusionStart[a+1]-1;
+	uint minInd = exclusionStart[a];
+	for(; cur >= minInd; cur--) {
+		if(b <= exclusionInd[cur]) return 1;
 	}
 	return 0;
 }
@@ -74,7 +74,7 @@ __global__ void writePairCacheSelfCollideExclusion_kernel(uint2 * dst,
 		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
 
 		//bvhRigidIndex is not used if internal node
-		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
+		int bvhRigidIndex = (isLeaf) ? (int)mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
 		
 		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
 		uint2 pair;
@@ -320,7 +320,7 @@ __global__ void writePairCache_kernel(uint2 * dst, uint * cacheStarts, uint * ov
 			{
 			    pair.x = combineObjectElementInd(queryIdx, boxIndex);
                 pair.y = combineObjectElementInd(treeIdx, bvhRigidIndex);
-                ascentOrder<uint2>(pair);
+                // ascentOrder<uint2>(pair);
                 dst[writeLoc] = pair;
                 writeLoc++;
 			    // }
@@ -385,7 +385,7 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst, uint * cacheStarts
 			    if(!isTetrahedronConnected(bvhRigidIndex, boxIndex, tetrahedronIndices)) {
 			        pair.x = combineObjectElementInd(queryIdx, boxIndex);
 			        pair.y = combineObjectElementInd(queryIdx, bvhRigidIndex);
-			        ascentOrder<uint2>(pair);
+			        // ascentOrder<uint2>(pair);
 			        dst[writeLoc] = pair;
 			        writeLoc++;
 			    }

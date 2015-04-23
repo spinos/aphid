@@ -439,7 +439,7 @@ void FEMTetrahedronSystem::integrate(float dt)
 }
 
 void FEMTetrahedronSystem::update()
-{
+{ // return CudaTetrahedronSystem::update();
 	updateExternalForce();
 	updateOrientation();
 	updateForce();

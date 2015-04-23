@@ -65,8 +65,8 @@ const unsigned CudaLinearBvh::numLeafNodes() const
 const unsigned CudaLinearBvh::numInternalNodes() const 
 { return numLeafNodes() - 1; }
 
-const Aabb CudaLinearBvh::bound() const
-{ return m_bound; }
+void CudaLinearBvh::getBound(Aabb * dst)
+{ cudaMemcpy(dst, combineAabbsBuffer(), 24, cudaMemcpyDeviceToHost); }
 
 void CudaLinearBvh::getRootNodeIndex(int * dst)
 { m_rootNodeIndexOnDevice->deviceToHost((void *)dst, m_rootNodeIndexOnDevice->bufferSize()); }
@@ -135,15 +135,18 @@ void CudaLinearBvh::combineAabb()
 		
 		n = (n + (threads*2-1)) / (threads*2);
 	}
-	
-	cudaMemcpy(&m_bound, pdst, sizeof(Aabb), cudaMemcpyDeviceToHost);
 }
 
 void CudaLinearBvh::computeAndSortLeafHash()
 {
+    Aabb bound;
+    getBound(&bound);
+    std::cout<<" bound (("<<bound.low.x<<" "<<bound.low.y<<" "<<bound.low.z;
+    std::cout<<"),("<<bound.high.x<<" "<<bound.high.y<<" "<<bound.high.z<<"))";
 	void * dst = m_leafHash[0]->bufferOnDevice();
 	void * src = leafAabbs();
-	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, numLeafNodes(), nextPow2(numLeafNodes()), m_bound);
+	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, numLeafNodes(), nextPow2(numLeafNodes()),
+	    bound);
 	void * tmp = m_leafHash[1]->bufferOnDevice();
 	RadixSort((KeyValuePair *)dst, (KeyValuePair *)tmp, nextPow2(numLeafNodes()), 32);
 }
@@ -208,8 +211,8 @@ void CudaLinearBvh::findMaxDistanceFromRoot()
 void CudaLinearBvh::formInternalTreeAabbsIterative()
 {
 	int maxDistance = -1;
-	m_reducedMaxDistance->deviceToHost(&maxDistance, sizeof(int));
-	// qDebug()<<"max level "<<maxDistance;
+	m_reducedMaxDistance->deviceToHost(&maxDistance, 4);
+	// std::cout<<" lin bvh max level "<<maxDistance;
 	if(maxDistance < 0) 
 		return;
 	

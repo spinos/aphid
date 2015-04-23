@@ -19,12 +19,14 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_interface->create(m_world);
 	
 	m_thread = new WorldThread(m_world, this);
+	m_isPhysicsRunning = 0;
 }
 //! [0]
 
 //! [1]
 GLWidget::~GLWidget()
 {
+    delete m_thread;
     delete m_interface;
     delete m_world;
 }
@@ -37,10 +39,17 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+    std::stringstream sst;
+	sst.str("");
+	sst<<"fps: "<<frameRate();
+    hudText(sst.str(), 1);
 #if DRGDRW
     if(m_isPhysicsRunning) m_interface->draw(m_world, getDrawer());
 #else
-	if(m_isPhysicsRunning) m_interface->draw(m_world);
+    if(m_isPhysicsRunning) {
+        emit updatePhysics();
+        m_interface->draw(m_world);
+    }
 #endif
     else m_interface->drawFaulty(m_world, getDrawer());
 }
@@ -66,12 +75,13 @@ void GLWidget::simulate()
 {
 #if DRGDRW
 	for(int i=0; i < 2; i++) {
-    m_world->collide();
-    if(!m_interface->verifyData(m_world)) 
-        stopPhysics();
-    else
-        m_world->integrate(1.f / 60.f);
-	}
+	    m_world->collide();
+	    if(!m_interface->verifyData(m_world)) 
+	        stopPhysics();
+	    else 
+	        m_world->integrate(1.f / 60.f);
+    }
+    m_world->sendXToHost();
 #else
     m_world->stepPhysics(1.f / 60.f);
     m_world->stepPhysics(1.f / 60.f);
@@ -97,8 +107,9 @@ void GLWidget::startPhysics()
 #if DRGDRW
     connect(internalTimer(), SIGNAL(timeout()), this, SLOT(simulate()));
 #else
-    connect(internalTimer(), SIGNAL(timeout()), m_thread, SLOT(simulate()));
+    connect(this, SIGNAL(updatePhysics()), m_thread, SLOT(simulate()));
     connect(m_thread, SIGNAL(doneStep()), this, SLOT(update()));
+    emit updatePhysics();
 #endif
     m_isPhysicsRunning = true;
 }

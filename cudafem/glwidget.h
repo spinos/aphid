@@ -33,6 +33,8 @@ private:
     bool m_isPhysicsRunning;
 private slots:
     void simulate();
+signals:
+    void updatePhysics();
 
 };
 //! [3]

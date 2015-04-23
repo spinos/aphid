@@ -73,7 +73,7 @@ void CudaDynamicWorld::collide()
 	m_broadphase->computeOverlappingPairs();
 	
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
-	                                m_broadphase->numUniquePairs());
+	                                m_broadphase->numOverlappingPairs());
 	
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),
@@ -95,5 +95,14 @@ void CudaDynamicWorld::reset()
 {
     if(m_numObjects < 1) return;
     m_narrowphase->resetToInitial();
+}
+
+void CudaDynamicWorld::sendXToHost()
+{
+    const unsigned nobj = numObjects();
+    if(nobj<1) return;
+    unsigned i;
+    for(i=0; i< nobj; i++)
+        tetradedron(i)->sendXToHost();
 }
 

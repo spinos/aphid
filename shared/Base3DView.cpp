@@ -522,4 +522,7 @@ float Base3DView::elapsedTime() const
 	long tnow = (boost::posix_time::ptime(boost::posix_time::microsec_clock::local_time()) - time_t_epoch).total_milliseconds();
 	return ((float) ( tnow - m_startTime ) ); 
 }
+
+float Base3DView::frameRate()
+{ return 1000.f/deltaTime(); }
 //:~
