@@ -10,6 +10,8 @@
 #include "TetrahedronSystem.h"
 #include <BaseBuffer.h>
 #include <tetrahedron_math.h>
+#include <HTetrahedronMesh.h>
+
 #define PRINT_VICINITY 0
 TetrahedronSystem::TetrahedronSystem() :
 m_numTetrahedrons(0), m_numPoints(0), m_numTriangles(0)
@@ -36,6 +38,25 @@ TetrahedronSystem::~TetrahedronSystem()
 	delete m_hostAnchor;
 	delete m_hostTetrahedronVicinityInd;
 	delete m_hostTetrahedronVicinityStart;
+}
+
+void TetrahedronSystem::generateFromData(TetrahedronMeshData * md)
+{
+	create(md->m_numTetrahedrons + 100, md->m_numPoints + 400);
+	Vector3F * p = (Vector3F *)md->m_pointBuf->data();
+	unsigned i;
+	for(i=0; i< md->m_numPoints; i++)
+	    addPoint((float *)&p[i]);
+	
+	unsigned * ind = (unsigned *)md->m_indexBuf->data();
+	for(i=0; i< md->m_numTetrahedrons; i++)
+		addTetrahedron(ind[i*4], ind[i*4+1], ind[i*4+2], ind[i*4+3]);
+		
+	unsigned * anchor = (unsigned *)md->m_anchorBuf->data();
+	for(i=0; i< md->m_numPoints; i++) {
+// 0 or 1 for now
+		if(anchor[i] > 0) setAnchoredPoint(i, anchor[i]);
+	}
 }
 
 void TetrahedronSystem::create(const unsigned & maxNumTetrahedrons, const unsigned & maxNumPoints)

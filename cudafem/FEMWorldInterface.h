@@ -13,7 +13,9 @@ public:
 protected:
 
 private:
+	bool readMeshFromFile(FEMTetrahedronSystem * mesh);
 	void createTestMesh(FEMTetrahedronSystem * mesh);
+	void resetVelocity(FEMTetrahedronSystem * mesh);
 };
 
 #endif        //  #ifndef FEMWORLDINTERFACE_H

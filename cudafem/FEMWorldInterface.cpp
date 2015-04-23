@@ -16,7 +16,33 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 #endif
     FEMTetrahedronSystem * tetra = new FEMTetrahedronSystem;
 	createTestMesh(tetra);
+	resetVelocity(tetra);
+	tetra->setTotalMass(1000.f);
 	world->addTetrahedronSystem(tetra);
+}
+
+bool FEMWorldInterface::readMeshFromFile(FEMTetrahedronSystem * mesh)
+{
+	if(BaseFile::InvalidFilename(FemGlobal::FileName)) 
+		return false;
+		
+	if(!BaseFile::FileExists(FemGlobal::FileName)) {
+		FemGlobal::FileName = "unknown";
+		return false;
+	}
+	
+	TetrahedronMeshData meshData;
+	HesperisFile hes;
+	hes.setReadComponent(HesperisFile::RTetra);
+	hes.addTetrahedron("tetra", &meshData);
+	if(!hes.open(FemGlobal::FileName)) return false;
+	hes.close();
+	
+	std::cout<<" nt "<<meshData.m_numTetrahedrons;
+	std::cout<<" nv "<<meshData.m_numPoints;
+	
+	mesh->generateFromData(&meshData);
+	return true;
 }
 
 void FEMWorldInterface::createTestMesh(FEMTetrahedronSystem * mesh)
@@ -25,26 +51,12 @@ void FEMWorldInterface::createTestMesh(FEMTetrahedronSystem * mesh)
 	std::cout<<"num tetrahedrons "<<TetraNumTetrahedrons<<"\n";
 	
 	mesh->create(TetraNumTetrahedrons+100, TetraNumVertices+400);
-	float * hv = &mesh->hostV()[0];
-	float vrx, vry, vrz, vr;
-	float vy = 1.695f;
+	
 	unsigned i;
-	Vector3F p, q;
+	Vector3F p;
 	for(i=0; i<TetraNumVertices; i++) {
 	    p.set(TetraP[i][0], TetraP[i][1], TetraP[i][2]);
 	    mesh->addPoint(&p.x);
-	    
-	    vrx = 0.0932f * (RandomF01() - .5f);
-		vry = .5f * (RandomF01() + 1.f)  * vy;
-		vrz = 0.0932f * (RandomF01() - .5f);
-		vr = 0.013f * RandomF01();
-		
-		vy = -vy;
-			
-	    hv[0] = 0.f;//vrx + vr;
-		hv[1] = 0.f;
-		hv[2] = 0.f;//vrz - vr;
-		hv+=3;
 	}
 	
 	for(i=0; i<TetraNumTetrahedrons; i++)
@@ -54,6 +66,13 @@ void FEMWorldInterface::createTestMesh(FEMTetrahedronSystem * mesh)
 	mesh->setAnchoredPoint(123, 20);
 	mesh->setAnchoredPoint(116, 9);
 	mesh->setAnchoredPoint(124, 78);
-	mesh->setTotalMass(1000.f);
+}
+
+void FEMWorldInterface::resetVelocity(FEMTetrahedronSystem * mesh)
+{
+	Vector3F * hv = (Vector3F *)mesh->hostV();
+	unsigned i;
+	const unsigned n = mesh->numPoints();
+	for(i=0; i< n; i++) hv[i].setZero();
 }
 //:~

@@ -12,7 +12,7 @@ class FEMTetrahedronSystem : public CudaTetrahedronSystem,
 public:
     FEMTetrahedronSystem();
     virtual ~FEMTetrahedronSystem();
-    virtual void initOnDevice();
+	virtual void initOnDevice();
 	virtual void update();
     virtual void integrate(float dt);
 	
