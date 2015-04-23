@@ -13,6 +13,7 @@
 #include "simpleContactSolver_implement.h"
 #include "scan_implement.h"
 #include <ScanUtil.h>
+#include <DynGlobal.h>
 SimpleContactSolver::SimpleContactSolver() 
 {
 	m_sortedInd[0] = new CUDABuffer;
@@ -62,7 +63,7 @@ CUDABuffer * SimpleContactSolver::splitInverseMassBuf()
 { return m_splitInverseMass; }
 
 const unsigned SimpleContactSolver::numIterations() const
-{ return JACOBI_NUM_ITERATIONS; }
+{ return DynGlobal::MaxContactNumIterations; }
 
 const unsigned SimpleContactSolver::numContacts() const
 { return m_numContacts; }
@@ -163,13 +164,14 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	const unsigned numSplitBodies = ScanUtil::getScanResult(m_bodyCount, m_scanBodyCount[0], scanBufLength);
 	*/
 	
-	m_deltaJ->create(numContacts * JACOBI_NUM_ITERATIONS * 4);
+	if(DynGlobal::CheckConvergence) m_deltaJ->create(numContacts * DynGlobal::MaxContactNumIterations * 4);
 	void * dJ = m_deltaJ->bufferOnDevice();
 	
 	int i;
-	for(i=0; i< JACOBI_NUM_ITERATIONS; i++) {
+	for(i=0; i< DynGlobal::MaxContactNumIterations; i++) {
 // compute impulse and velocity changes per contact
-	    simpleContactSolverSolveContact((ContactConstraint *)constraint,
+        if(DynGlobal::CheckConvergence)
+	        simpleContactSolverSolveContact((ContactConstraint *)constraint,
 	                    (float3 *)deltaLinVel,
 	                    (float3 *)deltaAngVel,
 	                    (uint2 *)pairs,
@@ -183,7 +185,22 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                    (uint * )perObjectIndexStart,
 	                    numContacts * 2,
 	                    (float *)dJ,
+	                    DynGlobal::MaxContactNumIterations,
 	                    i);
+	    else
+	        simpleContactSolverSolveContactWoJ((ContactConstraint *)constraint,
+	                    (float3 *)deltaLinVel,
+	                    (float3 *)deltaAngVel,
+	                    (uint2 *)pairs,
+	                    (uint2 *)splits,
+	                    (float *)splitMass,
+	                    (ContactData *)contacts,
+	                    (float3 *)pos,
+	                    (float3 *)vel,
+	                    (uint4 *)ind,
+	                    (uint * )perObjPointStart,
+	                    (uint * )perObjectIndexStart,
+	                    numContacts * 2);
     
 	    simpleContactSolverAverageVelocities((float3 *)deltaLinVel,
                         (float3 *)deltaAngVel,

@@ -399,8 +399,8 @@ const unsigned TetrahedronSystem::numTetrahedronVicinityInd() const
 { return m_tetrahedronVicinitySize; }
 
 unsigned * TetrahedronSystem::hostTetrahedronVicinityInd()
-{ (unsigned *)m_hostTetrahedronVicinityInd->data(); }
+{ return (unsigned *)m_hostTetrahedronVicinityInd->data(); }
 
 unsigned * TetrahedronSystem::hostTetrahedronVicinityStart()
-{ (unsigned *)m_hostTetrahedronVicinityStart->data(); }
+{ return (unsigned *)m_hostTetrahedronVicinityStart->data(); }
 //~:

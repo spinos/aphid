@@ -13,6 +13,7 @@
 #include <simpleContactSolver_implement.h>
 #include <tetrahedron_math.h>
 #include <boost/format.hpp>
+#include <DynGlobal.h>
 
 #define GRDW 57
 #define GRDH 57
@@ -30,6 +31,7 @@ struct A {
 
 DynamicWorldInterface::DynamicWorldInterface() 
 {
+    m_faultyPair[0] = 0; m_faultyPair[1] = 1;
     std::cout<<" size of A "<<sizeof(A)<<"\n";
     m_boxes = new BaseBuffer;
     m_bvhHash = new BaseBuffer;
@@ -112,7 +114,8 @@ void DynamicWorldInterface::create(CudaDynamicWorld * world)
 
 void DynamicWorldInterface::draw(TetrahedronSystem * tetra)
 {
-	glColor3f(0.3f, 0.4f, 0.3f);
+    glEnable(GL_DEPTH_TEST);
+	glColor3f(0.6f, 0.62f, 0.6f);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
@@ -125,7 +128,7 @@ void DynamicWorldInterface::draw(TetrahedronSystem * tetra)
 	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
-	glColor3f(0.1f, 0.4f, 0.f);
+	glColor3f(0.31f, 0.32f, 0.4f);
 	
     glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -150,8 +153,8 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world)
 
 void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
-    glDisable(GL_DEPTH_TEST);
     draw(world);
+    glDisable(GL_DEPTH_TEST);
     showOverlappingPairs(world, drawer);
     // showBvhHash(world, drawer);
     showContacts(world, drawer);
@@ -559,14 +562,16 @@ bool DynamicWorldInterface::verifyData(CudaDynamicWorld * world)
 	    return false;
 	}
 	
-	if(!checkConvergent(solver, n)) {
-	    std::cout<<"not convergent\n";
-	    printContact(n);
-	    printConstraint(solver, n);
-	    printContactPairHash(solver, n);
-	    return false;
-	}
-	
+    if(DynGlobal::CheckConvergence) {
+        if(!checkConvergent(solver, n)) {
+            std::cout<<"not convergent\n";
+            printContact(n);
+            printConstraint(solver, n);
+            printContactPairHash(solver, n);
+            return false;
+        }
+    }
+    
 	CUDABuffer * bodyPair = solver->contactPairHashBuf();
 	m_pairsHash->create(bodyPair->bufferSize());
 	bodyPair->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());

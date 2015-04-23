@@ -305,8 +305,7 @@ void CudaBroadphase::squeezeOverlappingPairs()
 // squeeze to [1]
 	broadphaseCompactUniquePairs((uint2 *)tmp, (uint2 *)dst, (uint *)unique, (uint *)scanResult, m_pairCacheLength);
 	
-	m_numUniquePairs = // getScanResult(m_uniquePair, m_scanUniquePair, m_pairCacheLength - 1);
-	ScanUtil::getScanResult(m_uniquePair, m_scanUniquePair, m_pairCacheLength);
+	m_numUniquePairs = ScanUtil::getScanResult(m_uniquePair, m_scanUniquePair, m_pairCacheLength);
 }
 
 unsigned CudaBroadphase::getScanResult(CUDABuffer * counts, CUDABuffer * sums, unsigned n)

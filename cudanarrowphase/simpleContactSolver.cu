@@ -4,7 +4,7 @@
 #include "stripedModel.cu"
 #include <CudaBase.h>
 #define SETCONSTRAINT_TPB 128
-#define SOLVECONTACT_TPB 128
+#define SOLVECONTACT_TPB 256
 #define DEFORMABILITY 0.134f
 
 inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
@@ -370,6 +370,90 @@ __global__ void stopAtContact_kernel(float3 * dstVelocity,
 	dstVelocity[ib.w] = make_float3(0.f, 0.f, 0.f);
 }
 
+__global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
+                        float3 * deltaLinearVelocity,
+	                    float3 * deltaAngularVelocity,
+	                    uint2 * pairs,
+                        uint2 * splits,
+	                    float * splitMass,
+	                    ContactData * contacts,
+	                    float3 * positions,
+                        float3 * velocities,
+                        uint4 * indices,
+                        uint * pointStarts,
+                        uint * indexStarts,
+                        uint maxInd)
+{
+    __shared__ float3 sVel[SOLVECONTACT_TPB];
+    __shared__ float3 sN[SOLVECONTACT_TPB];
+    
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	const uint iContact = ind>>1;
+	
+	uint splitInd = splits[iContact].x;
+	uint iBody = pairs[iContact].x;
+	BarycentricCoordinate coord = constraints[iContact].coordA;
+	
+	if((threadIdx.x & 1)>0) {
+	    splitInd = splits[iContact].y;
+	    iBody = pairs[iContact].y;
+	    coord = constraints[iContact].coordB;
+	}
+
+// initial velocities
+    uint4 ia = computePointIndex(pointStarts, indexStarts, indices, iBody);
+    
+    float3 velA;
+    interpolate_float3i(velA, ia, velocities, &coord);
+    
+	float3 nA = constraints[iContact].normal;
+	float3 rA = contacts[iContact].localA;
+	
+	if((ind & 1)>0) {
+	    nA = float3_reverse(nA);
+	    rA = contacts[iContact].localB;
+	}
+	
+// N pointing inside object
+// T = r X N	
+	float3 torqueA = float3_cross(rA, nA);
+	
+	addDeltaVelocity(velA, 
+        deltaLinearVelocity[splitInd],
+        deltaAngularVelocity[splitInd],
+        nA, rA,
+        &coord);
+    
+    sN[threadIdx.x] = nA;
+    sVel[threadIdx.x] = velA;
+    __syncthreads();
+    
+    uint iLeft = (threadIdx.x>>1)<<1;
+    uint iRight = iLeft + 1;
+	
+	float J = computeRelativeVelocity1(sN[iLeft], sN[iRight],
+	                        sVel[iLeft], sVel[iRight]);
+
+	J += constraints[iContact].relVel;
+	J *= constraints[iContact].Minv;
+	
+	float prevSum = constraints[iContact].lambda;
+	float updated = prevSum;
+	updated += J;
+	if(updated < 0.f) updated = 0.f;
+	
+	if((threadIdx.x & 1)==0) constraints[iContact].lambda = updated;
+	
+	J = updated - prevSum;
+	
+	const float invMassA = splitMass[splitInd];
+	
+	applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
+	applyImpulse(deltaAngularVelocity[splitInd], J * invMassA, torqueA);
+}
+
 __global__ void solveContact_kernel(ContactConstraint* constraints,
                         float3 * deltaLinearVelocity,
 	                    float3 * deltaAngularVelocity,
@@ -384,6 +468,7 @@ __global__ void solveContact_kernel(ContactConstraint* constraints,
                         uint * indexStarts,
                         uint maxInd,
                         float * deltaJ,
+                        int maxNIt,
                         int it)
 {
     __shared__ float3 sVel[SOLVECONTACT_TPB];
@@ -450,7 +535,7 @@ __global__ void solveContact_kernel(ContactConstraint* constraints,
 	
 	J = updated - prevSum;
 	
-	if((threadIdx.x & 1)==0) deltaJ[iContact * JACOBI_NUM_ITERATIONS + it] = J;
+	if((threadIdx.x & 1)==0) deltaJ[iContact * maxNIt + it] = J;
 	
 	const float invMassA = splitMass[splitInd];
 	
@@ -749,6 +834,39 @@ void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel,
                                        bufLength);
 }
 
+void simpleContactSolverSolveContactWoJ(ContactConstraint* constraints,
+                        float3 * deltaLinearVelocity,
+	                    float3 * deltaAngularVelocity,
+	                    uint2 * pairs,
+                        uint2 * splits,
+	                    float * splitMass,
+	                    ContactData * contacts,
+	                    float3 * positions,
+                        float3 * velocities,
+                        uint4 * indices,
+                        uint * perObjPointStart,
+                        uint * perObjectIndexStart,
+                        uint numContacts2)
+{
+    dim3 block(SOLVECONTACT_TPB, 1, 1);
+    unsigned nblk = iDivUp(numContacts2, SOLVECONTACT_TPB);
+    dim3 grid(nblk, 1, 1);
+    
+    solveContactWoJ_kernel<<< grid, block >>>(constraints,
+                        deltaLinearVelocity,
+	                    deltaAngularVelocity,
+	                    pairs,
+                        splits,
+	                    splitMass,
+	                    contacts,
+	                    positions,
+                        velocities,
+                        indices,
+                        perObjPointStart,
+                        perObjectIndexStart,
+                        numContacts2);
+}
+
 void simpleContactSolverSolveContact(ContactConstraint* constraints,
                         float3 * deltaLinearVelocity,
 	                    float3 * deltaAngularVelocity,
@@ -763,6 +881,7 @@ void simpleContactSolverSolveContact(ContactConstraint* constraints,
                         uint * perObjectIndexStart,
                         uint numContacts2,
                         float * deltaJ,
+                        int maxNIt,
                         int it)
 {
     dim3 block(SOLVECONTACT_TPB, 1, 1);
@@ -783,6 +902,7 @@ void simpleContactSolverSolveContact(ContactConstraint* constraints,
                         perObjectIndexStart,
                         numContacts2,
                         deltaJ,
+                        maxNIt,
                         it);
 }
 

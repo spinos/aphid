@@ -33,7 +33,7 @@ CudaDbgLog dbglg("stiffness.txt");
 
 bool bUseStiffnessWarping = true;
 #define TESTBLOCK 0
-#define SOLVEONGPU 1
+#define SOLVEONGPU 0
 
 SolverThread::SolverThread(QObject *parent)
     : BaseSolverThread(parent)

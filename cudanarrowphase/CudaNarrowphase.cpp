@@ -13,7 +13,7 @@
 #include "narrowphase_implement.h"
 #include "scan_implement.h"
 #include <ScanUtil.h>
-
+#include <DynGlobal.h>
 struct SSimplex {
     float3 p[4];
 	float3 pA[4];
@@ -192,7 +192,7 @@ void CudaNarrowphase::computeTimeOfImpact(void * overlappingPairs, unsigned numO
 		numOverlappingPairs);
 	
 	int i;
-	for(i=0; i<7; i++) {
+	for(i=0; i<DynGlobal::MaxTOINumIterations; i++) {
 	    narrowphase_advanceTimeOfImpactIterative((ContactData *)dstContact,
 		(uint2 *)overlappingPairs,
 		(float3 *)pos,

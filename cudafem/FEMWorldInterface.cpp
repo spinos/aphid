@@ -15,9 +15,9 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
     return DynamicWorldInterface::create(world);
 #endif
     FEMTetrahedronSystem * tetra = new FEMTetrahedronSystem;
-	createTestMesh(tetra);
+	if(!readMeshFromFile(tetra)) createTestMesh(tetra);
 	resetVelocity(tetra);
-	tetra->setTotalMass(1000.f);
+	tetra->setTotalMass(4000.f);
 	world->addTetrahedronSystem(tetra);
 }
 

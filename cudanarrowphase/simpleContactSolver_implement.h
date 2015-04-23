@@ -4,8 +4,6 @@
 #include "bvh_common.h"
 #include "radixsort_implement.h"
 
-#define JACOBI_NUM_ITERATIONS 7
-
 struct ContactConstraint {
     BarycentricCoordinate coordA;
     BarycentricCoordinate coordB;
@@ -69,7 +67,22 @@ void simpleContactSolverSolveContact(ContactConstraint* constraints,
                         uint * perObjectIndexStart,
                         uint numContacts,
                         float * deltaJ,
+                        int maxNIt,
                         int it);
+
+void simpleContactSolverSolveContactWoJ(ContactConstraint* constraints,
+                        float3 * deltaLinearVelocity,
+	                    float3 * deltaAngularVelocity,
+	                    uint2 * pairs,
+                        uint2 * splits,
+	                    float * splitMass,
+	                    ContactData * contacts,
+	                    float3 * positions,
+                        float3 * velocities,
+                        uint4 * indices,
+                        uint * perObjPointStart,
+                        uint * perObjectIndexStart,
+                        uint numContacts);
 
 void simpleContactSolverAverageVelocities(float3 * linearVelocity,
                         float3 * angularVelocity,
