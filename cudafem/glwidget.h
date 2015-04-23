@@ -4,6 +4,7 @@
 #include <Base3DView.h>
 class FEMWorldInterface;
 class CudaDynamicWorld;
+class WorldThread;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -28,6 +29,7 @@ private:
 private:
     CudaDynamicWorld * m_world;
     FEMWorldInterface * m_interface;
+    WorldThread * m_thread;
     bool m_isPhysicsRunning;
 private slots:
     void simulate();

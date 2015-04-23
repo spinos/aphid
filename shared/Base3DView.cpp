@@ -35,7 +35,7 @@ Base3DView::Base3DView(QWidget *parent)
 	
 	m_timer = new QTimer(this);
 	//connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
-	m_timer->start(33);
+	m_timer->start(34);
 	setFocusPolicy(Qt::ClickFocus);
 	m_isFocused = 0;
 	m_interactContext = 0;
@@ -404,7 +404,7 @@ void Base3DView::keyReleaseEvent(QKeyEvent *event)
 void Base3DView::focusInEvent(QFocusEvent * event)
 {
 	m_isFocused = 1;
-	m_timer->start(33);
+	m_timer->start(34);
 	QGLWidget::focusInEvent(event);
 }
 

@@ -5,7 +5,8 @@
 #include <KdTreeDrawer.h>
 #include "CudaDynamicWorld.h"
 #include "FEMWorldInterface.h"
-#define DRGDRW 1
+#include <WorldThread.h>
+#define DRGDRW 0
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	perspCamera()->setFarClipPlane(20000.f);
@@ -16,6 +17,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_world = new CudaDynamicWorld;
 	m_interface = new FEMWorldInterface;
 	m_interface->create(m_world);
+	
+	m_thread = new WorldThread(m_world, this);
 }
 //! [0]
 
@@ -61,6 +64,7 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::simulate()
 {
+#if DRGDRW
 	for(int i=0; i < 2; i++) {
     m_world->collide();
     if(!m_interface->verifyData(m_world)) 
@@ -68,12 +72,21 @@ void GLWidget::simulate()
     else
         m_world->integrate(1.f / 60.f);
 	}
+#else
+    m_world->stepPhysics(1.f / 60.f);
+    m_world->stepPhysics(1.f / 60.f);
+#endif
 	update();
 }
 
 void GLWidget::stopPhysics()
 {
+#if DRGDRW
     disconnect(internalTimer(), SIGNAL(timeout()), this, SLOT(simulate()));
+#else
+    disconnect(internalTimer(), SIGNAL(timeout()), m_thread, SLOT(simulate()));
+    disconnect(m_thread, SIGNAL(doneStep()), this, SLOT(update()));
+#endif
     connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
     m_isPhysicsRunning = false;
 }
@@ -81,7 +94,12 @@ void GLWidget::stopPhysics()
 void GLWidget::startPhysics()
 {
     disconnect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+#if DRGDRW
     connect(internalTimer(), SIGNAL(timeout()), this, SLOT(simulate()));
+#else
+    connect(internalTimer(), SIGNAL(timeout()), m_thread, SLOT(simulate()));
+    connect(m_thread, SIGNAL(doneStep()), this, SLOT(update()));
+#endif
     m_isPhysicsRunning = true;
 }
 

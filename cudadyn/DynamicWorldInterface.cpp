@@ -156,7 +156,7 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
     draw(world);
     glDisable(GL_DEPTH_TEST);
     showOverlappingPairs(world, drawer);
-    // showBvhHash(world, drawer);
+    showBvhHash(world, drawer);
     showContacts(world, drawer);
 }
 
@@ -430,8 +430,8 @@ bool DynamicWorldInterface::checkContact(unsigned n)
 	        m_faultyPair[1] = pairs[i*2+1];
 	        return false;
 	    }
-	    if(sa.length() < 1e-6) {
-	        std::cout<<"("<<pairs[i*2]<<","<<pairs[i*2+1]<<")separate axis is zero\n";
+	    if(sa.length() < 1e-9) {
+	        std::cout<<"("<<pairs[i*2]<<","<<pairs[i*2+1]<<")separate axis is close to zero\n";
 	        m_faultyPair[0] = pairs[i*2];
 	        m_faultyPair[1] = pairs[i*2+1];
 	        return false;

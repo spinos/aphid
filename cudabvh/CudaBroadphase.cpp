@@ -17,6 +17,7 @@
 #include <CudaTetrahedronSystem.h>
 CudaBroadphase::CudaBroadphase() 
 {
+    m_numUniquePairs = 0;
 	m_numObjects = 0;
 	m_pairCacheLength = 0;
 	m_pairCounts = new CUDABuffer;
@@ -84,7 +85,10 @@ void CudaBroadphase::initOnDevice()
 			m_objectStart[i+1] = m_numBoxes;
 		}
 	}
+	std::cout<<" broadphase n box "<<m_numBoxes<<" ";
+	std::cout<<" broadphase set scan buf";
 	m_scanBufferLength = iDivUp(m_numBoxes, 1024) * 1024;
+	std::cout<<" broadphase scan buf l "<<m_scanBufferLength<<" ";
 	m_pairCounts->create(m_scanBufferLength * 4);
 	m_pairStart->create(m_scanBufferLength * 4);
 	m_scanIntermediate->create(m_scanBufferLength * 4);
@@ -104,9 +108,12 @@ void CudaBroadphase::computeOverlappingPairs()
 	
 	prefixSumPairCounts();
 	
+	std::cout<<" scan buf l "<<m_scanBufferLength;
 	m_pairCacheLength = // getScanResult(m_pairCounts, m_pairStart, m_scanBufferLength - 1);
 	ScanUtil::getScanResult(m_pairCounts, m_pairStart, m_scanBufferLength);
 	if(m_pairCacheLength < 1) return;
+	
+	std::cout<<" overlapping pair cache l: "<<m_pairCacheLength;
 	
 	m_pairCache[0]->create(nextPow2(m_pairCacheLength) * 8);
 	m_pairCache[1]->create(nextPow2(m_pairCacheLength) * 8);
@@ -285,6 +292,7 @@ void CudaBroadphase::getBoxes(BaseBuffer * dst)
 
 void CudaBroadphase::squeezeOverlappingPairs()
 {
+    m_numUniquePairs = 0;
     void * dst = m_pairCache[0]->bufferOnDevice();
     void * tmp = m_pairCache[1]->bufferOnDevice();
     RadixSort((KeyValuePair *)dst, (KeyValuePair *)tmp, nextPow2(m_pairCacheLength), 32);
@@ -306,6 +314,7 @@ void CudaBroadphase::squeezeOverlappingPairs()
 	broadphaseCompactUniquePairs((uint2 *)tmp, (uint2 *)dst, (uint *)unique, (uint *)scanResult, m_pairCacheLength);
 	
 	m_numUniquePairs = ScanUtil::getScanResult(m_uniquePair, m_scanUniquePair, m_pairCacheLength);
+	std::cout<<" n unique overlapping pairs: "<<m_pairCacheLength;
 }
 
 unsigned CudaBroadphase::getScanResult(CUDABuffer * counts, CUDABuffer * sums, unsigned n)

@@ -446,6 +446,6 @@ void FEMTetrahedronSystem::update()
 	updateStiffnessMatrix();
 	dynamicsAssembly(1.f/60.f);
 	solveConjugateGradient();
-	verbose();
+	// verbose();
 	CudaTetrahedronSystem::update();
 }

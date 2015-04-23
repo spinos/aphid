@@ -3,7 +3,7 @@
 #include <CudaBase.h>
 #include <stripedModel.cu>
 
-#define B3_BROADPHASE_MAX_STACK_SIZE 128
+#define B3_BROADPHASE_MAX_STACK_SIZE 64
 
 __device__ int isElementExcluded(uint b, uint a, 
 									uint * exclusionInd,
@@ -449,8 +449,8 @@ extern "C" {
 
 void broadphaseResetPairCounts(uint * dst, uint num)
 {
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(num, 512);
+    dim3 block(256, 1, 1);
+    unsigned nblk = iDivUp(num, 256);
     dim3 grid(nblk, 1, 1);
     resetPairCounts_kernel<<< grid, block >>>(dst, num);
 }
@@ -472,8 +472,9 @@ void broadphaseComputePairCounts(uint * dst,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices)
 { 
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(numBoxes, 512);
+    int tpb = CudaBase::LimitNThreadPerBlock(20, 50);
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numBoxes, tpb);
     
     dim3 grid(nblk, 1, 1);
     
@@ -495,7 +496,7 @@ void broadphaseComputePairCountsSelfCollide(uint * dst, Aabb * boxes, uint numBo
 								KeyValuePair * mortonCodesAndAabbIndices,
 								uint4 * tetrahedronIndices)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(16, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(20, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numBoxes, tpb);
     
@@ -521,7 +522,7 @@ void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx, unsigned treeIdx)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(18, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(20, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numBoxes, tpb);
     
@@ -548,7 +549,7 @@ void broadphaseWritePairCacheSelfCollide(uint2 * dst, uint * starts, uint * coun
 								uint4 * tetrahedronIndices,
 								unsigned queryIdx)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(20, 50);
+    int tpb = CudaBase::LimitNThreadPerBlock(22, 50);
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numBoxes, tpb);
     

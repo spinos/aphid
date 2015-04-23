@@ -31,7 +31,12 @@ void CUDABuffer::create(unsigned size)
 	destroy();
 	m_realSize = minimalMemSize(size);
 	CudaBase::MemoryUsed += m_realSize;
+	std::cout<<" cu malloc "<<m_realSize;
 	cutilSafeCall(cudaMalloc((void **)&_device_vbo_buffer, m_realSize));
+	//if ( cudaSuccess != err ) {
+    //    printf( "Cuda error in file '%s' in line %i : %s.\n",
+    //             __FILE__, __LINE__, cudaGetErrorString( err) );
+    //}
 	setBufferType(kOnDevice);
 	setBufferSize(size);
 }
@@ -44,6 +49,7 @@ void CUDABuffer::destroy()
 	}
 	else if(bufferType() == kOnDevice) {
 		if(_device_vbo_buffer == 0) return;
+		std::cout<<" cu free ";
 		cudaFree(_device_vbo_buffer);
 		CudaBase::MemoryUsed -= m_realSize;
 		m_realSize = 0;
@@ -80,23 +86,40 @@ void CUDABuffer::deviceToHost(void * dst, unsigned size)
 }
 
 void CUDABuffer::hostToDevice(void * src)
-{ cutilSafeCall( cudaMemcpy(_device_vbo_buffer, src, bufferSize(), cudaMemcpyHostToDevice) ); }
+{ 
+    cudaError_t err = cudaMemcpy(_device_vbo_buffer, src, bufferSize(), cudaMemcpyHostToDevice); 
+    if(err) {
+	    std::cout<<"Cudamemcpy threw error\n";
+	}
+}
 
 void CUDABuffer::deviceToHost(void * dst)
-{ cutilSafeCall( cudaMemcpy(dst, _device_vbo_buffer, bufferSize(), cudaMemcpyDeviceToHost) ); }
+{ 
+    cudaError_t err = cudaMemcpy(dst, _device_vbo_buffer, bufferSize(), cudaMemcpyDeviceToHost); 
+    if(err) {
+	    std::cout<<"Cudamemcpy threw error\n";
+	}
+}
 
 void CUDABuffer::hostToDevice(void * src, unsigned loc, unsigned size)
 {
 	char * p = (char *)bufferOnDevice();
     p += loc;
-	cudaMemcpy(p, src, size, cudaMemcpyHostToDevice);
+	cudaError_t err = cudaMemcpy(p, src, size, cudaMemcpyHostToDevice);
+	if(err) {
+	    std::cout<<"Cudamemcpy threw error\n";
+	}
 }
 
 void CUDABuffer::deviceToHost(void * dst, unsigned loc, unsigned size)
 {
     char * p = (char *)bufferOnDevice();
     p += loc;
-    cudaMemcpy(dst, p, size, cudaMemcpyDeviceToHost);
+    cudaError_t err = cudaMemcpy(dst, p, size, cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+    if(err) {
+	    std::cout<<"Cudamemcpy threw error\n";
+	}
 }
 
 void CUDABuffer::map(void ** p)
@@ -117,7 +140,7 @@ const unsigned CUDABuffer::minimalMemSize(unsigned size) const
 // round to 1K
 // no less than 4K
     unsigned rds = size;
-    rds = ((rds & 1023) == 0) ? rds : ((rds>>10) + 1)<<10;
+    rds = ((rds & 1023) == 0) ? rds : ((rds/1024) + 1) * 1024;
 	return (rds < 4096) ? 4096 : rds;
 }
 
