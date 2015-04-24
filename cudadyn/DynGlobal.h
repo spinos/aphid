@@ -7,6 +7,7 @@
 #define DRAW_NPH_CONTACT 0
 #define COLLIDEJUST 0
 #define PRINT_BOUND 0
+#define PRINT_BVH_MAXLEVEL 1
 class DynGlobal
 {
 public:

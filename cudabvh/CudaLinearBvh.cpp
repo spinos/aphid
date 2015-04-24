@@ -218,7 +218,9 @@ void CudaLinearBvh::formInternalTreeAabbsIterative()
 {
 	int maxDistance = -1;
 	m_reducedMaxDistance->deviceToHost(&maxDistance, 4);
-	// std::cout<<" lin bvh max level "<<maxDistance;
+#if PRINT_BVH_MAXLEVEL
+	std::cout<<" bvh max level "<<maxDistance<<"\n";
+#endif
 	if(maxDistance < 0) 
 		return;
 	
