@@ -463,22 +463,26 @@ void testReduceMinMaxBox()
 	
 	cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
     cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
-	cudaEventRecord(start_event, 0);
-	float res[3];
-	reducer.minPnt(res, (float3 *)db.bufferOnDevice(), m*2);
-	
-	std::cout<<" min box "<<res[0]<<","<<res[1]<<","<<res[2]<<"\n";
-	
-	reducer.maxPnt(res, (float3 *)db.bufferOnDevice(), m*2);
-	
-	std::cout<<" max box "<<res[0]<<","<<res[1]<<","<<res[2]<<"\n";
-	
-	cudaEventRecord(stop_event, 0);
-	cudaEventSynchronize(stop_event);
-	float met;
-	cudaEventElapsedTime(&met, start_event, stop_event);
-	std::cout<<" reduction took "<<met<<" milliseconds\n";
-	
+    
+    float res[3];
+
+    for(i=10; i<= 20; i++) {
+        cudaEventRecord(start_event, 0);
+        
+        reducer.minBox(res, (Aabb *)db.bufferOnDevice(), 1<<i);
+        
+        std::cout<<" min box "<<res[0]<<","<<res[1]<<","<<res[2]<<"\n";
+        
+        reducer.maxBox(res, (Aabb *)db.bufferOnDevice(), 1<<i);
+        
+        std::cout<<" max box "<<res[0]<<","<<res[1]<<","<<res[2]<<"\n";
+        
+        cudaEventRecord(stop_event, 0);
+        cudaEventSynchronize(stop_event);
+        float met;
+        cudaEventElapsedTime(&met, start_event, stop_event);
+        std::cout<<" reduction "<<(1<<i)<<" boxes took "<<met<<" milliseconds\n";
+	}
 	cudaEventDestroy(start_event);
     cudaEventDestroy(stop_event);
 }
