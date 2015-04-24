@@ -7,7 +7,7 @@
  *
  */
 #include "BaseBuffer.h"
-
+#include <iostream>
 BaseBuffer::BaseBuffer() : m_bufferSize(0), m_native(0)
 {}
 

@@ -5,8 +5,8 @@
 #define DRAW_BPH_PAIRS 0
 #define DRAW_BVH_HASH 1
 #define DRAW_NPH_CONTACT 0
-#define COLLIDEJUST 0
-#define PRINT_BOUND 1
+#define COLLIDEJUST 1
+#define PRINT_BOUND 0
 #define PRINT_BVH_MAXLEVEL 0
 #define DRAW_BVH_HIERARCHY 0
 class DynGlobal

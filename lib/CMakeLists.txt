@@ -162,6 +162,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/BaseLog.cpp
 ../shared/CurveGroup.cpp 
 ../shared/HCurveGroup.cpp
+../shared/BaseBuffer.cpp
 ../shared/HTetrahedronMesh.cpp
                                 ../lapl/VertexAdjacency.cpp 
                 ../lapl/Anchor.cpp 

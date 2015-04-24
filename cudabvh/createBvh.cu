@@ -7,6 +7,7 @@
 //Since 32 bit ints are used to index leaf nodes, the max prefix is 64(32 + 32 bit z-curve) or 96(32 + 64 bit z-curve).
 #define B3_PLBVH_INVALID_COMMON_PREFIX 128
 #define B3_PLBVH_ROOT_NODE_MARKER -1
+#define CALC_TETRA_AABB_NUM_THREADS 512
 
 inline __device__ int computeCommonPrefixLength(uint64 i, uint64 j) 
 { return (int)__clzll(i ^ j); }
@@ -69,27 +70,42 @@ inline __device__ void normalizeByBoundary(float & x, float low, float width)
 	}
 }
 
-__global__ void calculateAabbsTetrahedron2_kernel(Aabb *dst, float3 * pos, float3 * vel, float h, uint4 * tets, unsigned maxTetInd)
+__global__ void calculateAabbsTetrahedron2_kernel(Aabb *dst, float3 * pos, float3 * vel, float h, 
+                                                            uint4 * tetrahedronVertices, 
+                                                            unsigned maxNumPerTetVs)
 {
-    unsigned idx = blockIdx.x*blockDim.x + threadIdx.x;
+    __shared__ float3 sP0[CALC_TETRA_AABB_NUM_THREADS];
+    __shared__ float3 sP1[CALC_TETRA_AABB_NUM_THREADS];
+    
+    uint idx = blockIdx.x*blockDim.x + threadIdx.x;
 
-	if(idx >= maxTetInd) return;
+	if(idx >= maxNumPerTetVs) return;
 	
-	uint4 t = tets[idx];
-
+	uint itet = idx>>2;
+	uint ivert = idx & 3;
+	uint * vtet = & tetrahedronVertices[itet].x;
+	
+	uint iv = vtet[ivert];
+	
+	sP0[threadIdx.x] = pos[iv];
+	sP1[threadIdx.x] = float3_progress(pos[iv], vel[iv], h);
+	__syncthreads();
+	
+	if(ivert > 0) return;
+	
 	Aabb res;
 	resetAabb(res);
-	expandAabb(res, pos[t.x]);
-	expandAabb(res, pos[t.y]);
-	expandAabb(res, pos[t.z]);
-	expandAabb(res, pos[t.w]);
 	
-	expandAabb(res, float3_progress(pos[t.x], vel[t.x], h));
-	expandAabb(res, float3_progress(pos[t.y], vel[t.y], h));
-	expandAabb(res, float3_progress(pos[t.z], vel[t.z], h));
-	expandAabb(res, float3_progress(pos[t.w], vel[t.w], h));
+	expandAabb(res, sP0[threadIdx.x]);
+	expandAabb(res, sP1[threadIdx.x]);
+	expandAabb(res, sP0[threadIdx.x + 1]);
+	expandAabb(res, sP1[threadIdx.x + 1]);
+	expandAabb(res, sP0[threadIdx.x + 2]);
+	expandAabb(res, sP1[threadIdx.x + 2]);
+	expandAabb(res, sP0[threadIdx.x + 3]);
+	expandAabb(res, sP1[threadIdx.x + 3]);
 	
-	dst[idx] = res;
+	dst[itet] = res;
 }
 
 __global__ void calculateAabbsTetrahedron_kernel(Aabb *dst, float3 * cvs, uint4 * tets, unsigned maxTetInd)
@@ -475,13 +491,13 @@ __global__ void formInternalNodeAabbsAtDistance_kernel(int * distanceFromRoot, K
 
 extern "C" void bvhCalculateLeafAabbsTetrahedron2(Aabb *dst, float3 * pos, float3 * vel, float timeStep, uint4 * tets, unsigned numTetrahedrons)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(24, 40);
+    int tpb = CALC_TETRA_AABB_NUM_THREADS;
 
     dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numTetrahedrons, tpb);
+    unsigned nblk = iDivUp(numTetrahedrons<<2, tpb);
     
     dim3 grid(nblk, 1, 1);
-    calculateAabbsTetrahedron2_kernel<<< grid, block >>>(dst, pos, vel, timeStep, tets, numTetrahedrons);
+    calculateAabbsTetrahedron2_kernel<<< grid, block >>>(dst, pos, vel, timeStep, tets, numTetrahedrons<<2);
 }
 
 extern "C" void bvhCalculateLeafAabbsTetrahedron(Aabb *dst, float3 * cvs, uint4 * tets, unsigned numTetrahedrons)

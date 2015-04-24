@@ -130,7 +130,7 @@ bool HesperisFile::readCurve()
 
 bool HesperisFile::readTetrahedron()
 {
-	bool allValid = true;
+    bool allValid = true;
 	std::stringstream sst;
 	std::map<std::string, TetrahedronMeshData *>::iterator it = m_terahedrons.begin();
 	for(; it != m_terahedrons.end(); ++it) {
