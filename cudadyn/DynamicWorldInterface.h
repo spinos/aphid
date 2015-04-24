@@ -24,12 +24,18 @@ protected:
 
 private:
     void draw(TetrahedronSystem * tetra);
+#if DRAW_BPH_PAIRS
     void showOverlappingPairs(CudaDynamicWorld * world, GeoDrawer * drawer);
+#endif
 #if DRAW_BVH_HASH
     void showBvhHash(CudaDynamicWorld * world, GeoDrawer * drawer);
     void showBvhHash(CudaLinearBvh * bvh, GeoDrawer * drawer);
 #endif
+
+#if DRAW_NPH_CONTACT
     void showContacts(CudaDynamicWorld * world, GeoDrawer * drawer);
+#endif
+
     bool checkContact(unsigned n);
     bool checkDegenerated(unsigned n);
     void printContact(unsigned n);
@@ -42,8 +48,6 @@ private:
     void showFaultyPair(CudaDynamicWorld * world, GeoDrawer * drawer);
 private:
     unsigned m_faultyPair[2];
-    BaseBuffer * m_boxes;
-    BaseBuffer * m_bvhHash;
     BaseBuffer * m_pairCache;
     BaseBuffer * m_tetPnt;
 	BaseBuffer * m_tetInd;

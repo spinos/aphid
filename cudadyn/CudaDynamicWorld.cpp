@@ -97,11 +97,33 @@ void CudaDynamicWorld::reset()
 
 void CudaDynamicWorld::sendXToHost()
 {
-    const unsigned nobj = numObjects();
+	const unsigned nobj = numObjects();
     if(nobj<1) return;
+    
+	cudaEvent_t start_event, stop_event;
+        
+	cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
+    cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
+
+	cudaEventRecord(start_event, 0);
+    
+	sendDbgToHost();
+	
     unsigned i;
     for(i=0; i< nobj; i++)
         tetradedron(i)->sendXToHost();
+		
+	m_broadphase->sendDbgToHost();
+		
+	cudaEventRecord(stop_event, 0);
+    cudaEventSynchronize(stop_event);
+	
+	float elapsed_time;
+    cudaEventElapsedTime(&elapsed_time, start_event, stop_event);
+	
+	std::cout<<" device-host transaction time: "<<elapsed_time<<" milliseconds\n";
+	cudaEventDestroy( start_event ); 
+	cudaEventDestroy( stop_event );
 }
 
 void CudaDynamicWorld::sendDbgToHost()

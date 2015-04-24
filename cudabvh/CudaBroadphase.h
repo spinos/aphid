@@ -9,7 +9,8 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-#define CUDABROADPHASE_MAX_NUMOBJECTS 32
+#include <DynGlobal.h>
+
 class BaseBuffer;
 class CUDABuffer;
 class CudaLinearBvh;
@@ -22,13 +23,7 @@ public:
 	const unsigned pairCacheLength() const;
 	const unsigned objectStart(unsigned ind) const;
 	const unsigned numOverlappingPairs() const;
-	void getOverlappingPairCounts(BaseBuffer * dst);
-	void getOverlappingPairCache(BaseBuffer * dst);
-	void getScanCounts(BaseBuffer * dst);
-	void getBoxes(BaseBuffer * dst);
-	void getUniquePairs(BaseBuffer * dst);
-	void getScanUniquePairs(BaseBuffer * dst);
-
+	
 	void addBvh(CudaLinearBvh * bvh);
 	void initOnDevice();
 	void computeOverlappingPairs();
@@ -37,6 +32,13 @@ public:
 	
 	const unsigned numObjects() const;
 	CudaLinearBvh * object(unsigned i) const;
+	
+	void sendDbgToHost();
+	
+#if DRAW_BPH_PAIRS
+	void * hostPairCache();
+	void * hostAabb();
+#endif
 protected:
 
 private:
@@ -45,7 +47,6 @@ private:
 	void countOverlappingPairsSelf(unsigned a);
 	void countOverlappingPairsOther(unsigned a, unsigned b);
 	void prefixSumPairCounts();
-	unsigned getScanResult(CUDABuffer * counts, CUDABuffer * sums, unsigned n);
 	void writeOverlappingPairs(unsigned a, unsigned b);
 	void writeOverlappingPairsSelf(unsigned a);
 	void writeOverlappingPairsOther(unsigned a, unsigned b);
@@ -54,6 +55,10 @@ private:
 	CUDABuffer * m_pairStart;
 	CUDABuffer * m_scanIntermediate;
 	CUDABuffer * m_pairCache;
+#if DRAW_BPH_PAIRS
+	BaseBuffer * m_hostPairCache;
+	BaseBuffer * m_hostAabb;
+#endif
 	CudaLinearBvh * m_objects[CUDABROADPHASE_MAX_NUMOBJECTS];
 	unsigned m_objectStart[CUDABROADPHASE_MAX_NUMOBJECTS];
 	unsigned m_numObjects, m_numBoxes, m_scanBufferLength, m_pairCacheLength;

@@ -23,8 +23,7 @@ public:
     void collide();
     void integrate(float dt);
     void sendXToHost();
-	void sendDbgToHost();
-    void reset();
+	void reset();
     
     const unsigned numObjects() const;
     
@@ -34,7 +33,7 @@ public:
 	SimpleContactSolver * contactSolver() const;
 	const unsigned numContacts() const;
 protected:
-
+	void sendDbgToHost();
 private:
     CudaBroadphase * m_broadphase;
     CudaNarrowphase * m_narrowphase;

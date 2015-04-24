@@ -32,8 +32,6 @@ DynamicWorldInterface::DynamicWorldInterface()
 {
     m_faultyPair[0] = 0; m_faultyPair[1] = 1;
     std::cout<<" size of A "<<sizeof(A)<<"\n";
-    m_boxes = new BaseBuffer;
-    m_bvhHash = new BaseBuffer;
     m_pairCache = new BaseBuffer;
     m_tetPnt = new BaseBuffer;
 	m_tetInd = new BaseBuffer;
@@ -153,11 +151,18 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     draw(world);
     glDisable(GL_DEPTH_TEST);
-    // showOverlappingPairs(world, drawer);
+	
+#if DRAW_BPH_PAIRS
+    showOverlappingPairs(world, drawer);
+#endif
+
 #if DRAW_BVH_HASH
 	showBvhHash(world, drawer);
 #endif
-	// showContacts(world, drawer);
+
+#if DRAW_NPH_CONTACT
+	showContacts(world, drawer);
+#endif
 }
 
 void DynamicWorldInterface::drawFaulty(CudaDynamicWorld * world, GeoDrawer * drawer)
@@ -167,6 +172,7 @@ void DynamicWorldInterface::drawFaulty(CudaDynamicWorld * world, GeoDrawer * dra
     showFaultyPair(world, drawer);
 }
 
+#if DRAW_BPH_PAIRS
 void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     CudaBroadphase * broadphase = world->broadphase();
@@ -175,21 +181,13 @@ void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDr
     const unsigned cacheLength = broadphase->pairCacheLength();
 	if(cacheLength < 1) return;
 	
-	const unsigned nb = broadphase->numBoxes();
-	m_boxes->create(nb * 24);
-	
-	broadphase->getBoxes(m_boxes);
-	
-	Aabb * boxes = (Aabb *)m_boxes->data();
+	Aabb * boxes = (Aabb *)broadphase->hostAabb();
 	Aabb abox;
 	BoundingBox ab, bb;
 	unsigned i;
 	drawer->setColor(0.f, 0.1f, 0.3f);
 	
-	m_pairCache->create(broadphase->numOverlappingPairs() * 8);
-	CUDABuffer * uniquePairs = broadphase->overlappingPairBuf();
-	uniquePairs->deviceToHost(m_pairCache->data(), m_pairCache->bufferSize());
-	unsigned * pc = (unsigned *)m_pairCache->data();
+	unsigned * pc = (unsigned *)broadphase->hostPairCache();
 	
 	unsigned objectI;
 	for(i=0; i < broadphase->numOverlappingPairs(); i++) {
@@ -212,6 +210,7 @@ void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDr
 		// drawer->boundingBox(bb);
 	}
 }
+#endif
 
 #if DRAW_BVH_HASH
 void DynamicWorldInterface::showBvhHash(CudaDynamicWorld * world, GeoDrawer * drawer)
@@ -246,6 +245,7 @@ void DynamicWorldInterface::showBvhHash(CudaLinearBvh * bvh, GeoDrawer * drawer)
 }
 #endif
 
+#if DRAW_NPH_CONTACT
 void DynamicWorldInterface::showContacts(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     CudaNarrowphase * narrowphase = world->narrowphase();
@@ -333,6 +333,7 @@ void DynamicWorldInterface::showContacts(CudaDynamicWorld * world, GeoDrawer * d
 		drawer->arrow(cenA, cenA + angVel[i]);
 	}
 }
+#endif
 
 void DynamicWorldInterface::printConstraint(SimpleContactSolver * solver, unsigned n)
 {

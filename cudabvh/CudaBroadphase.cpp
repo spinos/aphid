@@ -23,6 +23,10 @@ CudaBroadphase::CudaBroadphase()
 	m_pairStart = new CUDABuffer;
 	m_scanIntermediate = new CUDABuffer;
 	m_pairCache = new CUDABuffer;
+#if DRAW_BPH_PAIRS	
+	m_hostPairCache = new BaseBuffer;
+	m_hostAabb = new BaseBuffer;
+#endif
 }
 
 CudaBroadphase::~CudaBroadphase() {}
@@ -38,15 +42,6 @@ const unsigned CudaBroadphase::numOverlappingPairs() const
 
 const unsigned CudaBroadphase::objectStart(unsigned ind) const
 { return m_objectStart[ind]; }
-
-void CudaBroadphase::getOverlappingPairCounts(BaseBuffer * dst)
-{ m_pairCounts->deviceToHost(dst->data(), dst->bufferSize()); }
-
-void CudaBroadphase::getOverlappingPairCache(BaseBuffer * dst)
-{ m_pairCache->deviceToHost(dst->data(), dst->bufferSize()); }
-
-void CudaBroadphase::getScanCounts(BaseBuffer * dst)
-{ m_pairStart->deviceToHost(dst->data(), dst->bufferSize()); }
 
 CUDABuffer * CudaBroadphase::overlappingPairBuf()
 { return m_pairCache; }
@@ -110,6 +105,10 @@ void CudaBroadphase::computeOverlappingPairs()
 			writeOverlappingPairs(j, i);
 		}
 	}
+#if DRAW_BPH_PAIRS
+	m_hostPairCache->create(nextPow2(m_pairCacheLength) * 8);
+	m_hostAabb->create(m_numBoxes * sizeof(Aabb));
+#endif
 }
 
 void CudaBroadphase::resetPairCounts()
@@ -261,21 +260,24 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 							a, b);
 }
 
-void CudaBroadphase::getBoxes(BaseBuffer * dst)
+void CudaBroadphase::sendDbgToHost()
 {
-    char * hbox = (char *)dst->data();
-    unsigned i;
-    for(i = 0; i<m_numObjects; i++) {
-        const unsigned numBoxes = m_objects[i]->numLeafNodes();
+#if DRAW_BPH_PAIRS
+	m_pairCache->deviceToHost(m_hostPairCache->data());
+	char * hbox = (char *)hostAabb();
+	unsigned i=0;
+    for(; i<m_numObjects; i++) {
+        const unsigned nb = m_objects[i]->numLeafNodes();
         m_objects[i]->getLeafAabbsAt(hbox);
-		hbox += numBoxes * 24;
+		hbox += nb * 24;
 	}
+#endif
 }
 
-unsigned CudaBroadphase::getScanResult(CUDABuffer * counts, CUDABuffer * sums, unsigned n)
-{
-    unsigned a, b;
-    counts->deviceToHost(&a, 4*n, 4);
-    sums->deviceToHost(&b, 4*n, 4);
-    return a + b;
-}
+#if DRAW_BPH_PAIRS
+void * CudaBroadphase::hostPairCache()
+{ return m_hostPairCache->data(); }
+
+void * CudaBroadphase::hostAabb()
+{ return m_hostAabb->data(); }
+#endif
