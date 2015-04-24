@@ -23,6 +23,7 @@ public:
     void collide();
     void integrate(float dt);
     void sendXToHost();
+	void sendDbgToHost();
     void reset();
     
     const unsigned numObjects() const;

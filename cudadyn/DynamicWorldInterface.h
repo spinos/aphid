@@ -1,6 +1,7 @@
 #ifndef DYNAMICWORLDINTERFACE_H
 #define DYNAMICWORLDINTERFACE_H
 #include <AllMath.h>
+#include <DynGlobal.h>
 class BaseBuffer;
 class GeoDrawer;
 class CudaDynamicWorld;
@@ -24,8 +25,10 @@ protected:
 private:
     void draw(TetrahedronSystem * tetra);
     void showOverlappingPairs(CudaDynamicWorld * world, GeoDrawer * drawer);
+#if DRAW_BVH_HASH
     void showBvhHash(CudaDynamicWorld * world, GeoDrawer * drawer);
     void showBvhHash(CudaLinearBvh * bvh, GeoDrawer * drawer);
+#endif
     void showContacts(CudaDynamicWorld * world, GeoDrawer * drawer);
     bool checkContact(unsigned n);
     bool checkDegenerated(unsigned n);

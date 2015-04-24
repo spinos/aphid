@@ -48,10 +48,10 @@ void GLWidget::clientDraw()
 #else
     if(m_isPhysicsRunning) {
         emit updatePhysics();
-        m_interface->draw(m_world);
+        m_interface->draw(m_world, getDrawer());
     }
 #endif
-    else m_interface->drawFaulty(m_world, getDrawer());
+    //else m_interface->drawFaulty(m_world, getDrawer());
 }
 //! [7]
 
@@ -82,9 +82,7 @@ void GLWidget::simulate()
 	        m_world->integrate(1.f / 60.f);
     }
     m_world->sendXToHost();
-#else
-    m_world->stepPhysics(1.f / 60.f);
-    m_world->stepPhysics(1.f / 60.f);
+	m_world->sendDbgToHost();
 #endif
 	update();
 }

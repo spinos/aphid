@@ -51,7 +51,8 @@ void WorldThread::run()
             return;
         }
         
-        m_world->sendXToHost();
+        m_world->sendDbgToHost();
+		m_world->sendXToHost();
 		
 		emit doneStep();
 

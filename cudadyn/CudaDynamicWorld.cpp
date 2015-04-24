@@ -83,9 +83,7 @@ void CudaDynamicWorld::collide()
 
 void CudaDynamicWorld::integrate(float dt)
 {
-    if(m_numObjects < 1) return;
-    unsigned i;
-    for(i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
+    for(unsigned i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
 }
 
 const unsigned CudaDynamicWorld::numContacts() const
@@ -106,3 +104,7 @@ void CudaDynamicWorld::sendXToHost()
         tetradedron(i)->sendXToHost();
 }
 
+void CudaDynamicWorld::sendDbgToHost()
+{
+	for(unsigned i=0; i < m_numObjects; i++) m_objects[i]->sendDbgToHost();
+}

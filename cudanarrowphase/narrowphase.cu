@@ -336,7 +336,7 @@ __global__ void computeValidPairs_kernel(uint* dstCounts,
 	    return;
 	}
 
-	dstCounts[ind] = (srcContact[ind].timeOfImpact < GJK_STEPSIZE);	
+	dstCounts[ind] = (srcContact[ind].timeOfImpact < GJK_STEPSIZE && float4_length(srcContact[ind].separateAxis) > 1e-8f);	
 }
 
 __global__ void squeezeContactPairs_kernel(uint2 * dstPairs, uint2 * srcPairs,

@@ -4,8 +4,7 @@
 #include <FEMTetrahedronSystem.h>
 #include <tetmesh.h>
 #include "FemGlobal.h"
-#define COLLIDEJUST 0
-
+#include <DynGlobal.h>
 FEMWorldInterface::FEMWorldInterface() {}
 FEMWorldInterface::~FEMWorldInterface() {}
 

@@ -13,7 +13,6 @@
 #include <simpleContactSolver_implement.h>
 #include <tetrahedron_math.h>
 #include <boost/format.hpp>
-#include <DynGlobal.h>
 
 #define GRDW 57
 #define GRDH 57
@@ -154,9 +153,11 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     draw(world);
     glDisable(GL_DEPTH_TEST);
-    showOverlappingPairs(world, drawer);
-    showBvhHash(world, drawer);
-    showContacts(world, drawer);
+    // showOverlappingPairs(world, drawer);
+#if DRAW_BVH_HASH
+	showBvhHash(world, drawer);
+#endif
+	// showContacts(world, drawer);
 }
 
 void DynamicWorldInterface::drawFaulty(CudaDynamicWorld * world, GeoDrawer * drawer)
@@ -212,6 +213,7 @@ void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDr
 	}
 }
 
+#if DRAW_BVH_HASH
 void DynamicWorldInterface::showBvhHash(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     CudaBroadphase * broadphase = world->broadphase();
@@ -224,14 +226,9 @@ void DynamicWorldInterface::showBvhHash(CudaDynamicWorld * world, GeoDrawer * dr
 void DynamicWorldInterface::showBvhHash(CudaLinearBvh * bvh, GeoDrawer * drawer)
 {
     const unsigned n = bvh->numLeafNodes();
+	Aabb * boxes = (Aabb *)bvh->hostLeafBox();
 	
-	m_boxes->create(n * sizeof(Aabb));
-	bvh->getLeafAabbs(m_boxes);
-	Aabb * boxes = (Aabb *)m_boxes->data();
-	
-	m_bvhHash->create(n * sizeof(KeyValuePair));
-	bvh->getLeafHash(m_bvhHash);
-	KeyValuePair * bvhHash = (KeyValuePair *)m_bvhHash->data();
+	KeyValuePair * bvhHash = (KeyValuePair *)bvh->hostLeafHash();
 	
 	float red;
 	Vector3F p, q;
@@ -239,15 +236,15 @@ void DynamicWorldInterface::showBvhHash(CudaLinearBvh * bvh, GeoDrawer * drawer)
 		red = (float)i/(float)n;
 		
 		glColor3f(red, 1.f - red, 0.f);
-		Aabb & a0 = boxes[bvhHash[i-1].value];
+		Aabb a0 = boxes[bvhHash[i-1].value];
 		p.set(a0.low.x * 0.5f + a0.high.x * 0.5f, a0.low.y * 0.5f + a0.high.y * 0.5f + 0.2f, a0.low.z * 0.5f + a0.high.z * 0.5f);
-        
-		Aabb & a1 = boxes[bvhHash[i].value];
+		Aabb a1 = boxes[bvhHash[i].value];
 		q.set(a1.low.x * 0.5f + a1.high.x * 0.5f, a1.low.y * 0.5f + a1.high.y * 0.5f + 0.2f, a1.low.z * 0.5f + a1.high.z * 0.5f);
         
 		drawer->arrow(p, q);
 	}
 }
+#endif
 
 void DynamicWorldInterface::showContacts(CudaDynamicWorld * world, GeoDrawer * drawer)
 {

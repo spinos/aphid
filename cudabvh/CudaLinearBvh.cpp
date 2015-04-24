@@ -30,7 +30,11 @@ CudaLinearBvh::CudaLinearBvh()
 	m_internalNodeParentIndices = new CUDABuffer;
 	m_rootNodeIndexOnDevice = new CUDABuffer;
 	m_distanceInternalNodeFromRoot = new CUDABuffer;
-	m_reducedMaxDistance = new CUDABuffer;	
+	m_reducedMaxDistance = new CUDABuffer;
+#if DRAW_BVH_HASH
+	m_hostLeafHash = new BaseBuffer;
+	m_hostLeafBox = new BaseBuffer;
+#endif
 }
 
 CudaLinearBvh::~CudaLinearBvh() {}
@@ -57,6 +61,12 @@ void CudaLinearBvh::initOnDevice()
 	m_distanceInternalNodeFromRoot->create(numInternalNodes() * sizeof(int));
 	
 	m_reducedMaxDistance->create(ReduceMaxBlocks * sizeof(int));
+
+#if DRAW_BVH_HASH
+	m_hostLeafBox->create(numLeafNodes() * sizeof(Aabb));
+	m_hostLeafHash->create(nextPow2(numLeafNodes()) * sizeof(KeyValuePair));
+#endif
+
 }
 
 const unsigned CudaLinearBvh::numLeafNodes() const 
@@ -71,14 +81,14 @@ void CudaLinearBvh::getBound(Aabb * dst)
 void CudaLinearBvh::getRootNodeIndex(int * dst)
 { m_rootNodeIndexOnDevice->deviceToHost((void *)dst, m_rootNodeIndexOnDevice->bufferSize()); }
 
-void CudaLinearBvh::getLeafAabbs(BaseBuffer * dst)
-{ m_leafAabbs->deviceToHost(dst->data(), m_leafAabbs->bufferSize()); }
+// void CudaLinearBvh::getLeafAabbs(BaseBuffer * dst)
+// { m_leafAabbs->deviceToHost(dst->data(), m_leafAabbs->bufferSize()); }
 
 void CudaLinearBvh::getInternalAabbs(BaseBuffer * dst)
 { m_internalNodeAabbs->deviceToHost(dst->data(), m_internalNodeAabbs->bufferSize()); }
 
-void CudaLinearBvh::getLeafHash(BaseBuffer * dst)
-{ m_leafHash[0]->deviceToHost(dst->data(), numLeafNodes() * sizeof(KeyValuePair)); }
+// void CudaLinearBvh::getLeafHash(BaseBuffer * dst)
+// { m_leafHash[0]->deviceToHost(dst->data(), numLeafNodes() * sizeof(KeyValuePair)); }
 
 void CudaLinearBvh::getInternalDistances(BaseBuffer * dst)
 { m_distanceInternalNodeFromRoot->deviceToHost(dst->data(), m_distanceInternalNodeFromRoot->bufferSize()); }
@@ -141,8 +151,10 @@ void CudaLinearBvh::computeAndSortLeafHash()
 {
     Aabb bound;
     getBound(&bound);
+#if PRINT_BOUND
     std::cout<<" bound (("<<bound.low.x<<" "<<bound.low.y<<" "<<bound.low.z;
     std::cout<<"),("<<bound.high.x<<" "<<bound.high.y<<" "<<bound.high.z<<"))";
+#endif
 	void * dst = m_leafHash[0]->bufferOnDevice();
 	void * src = leafAabbs();
 	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, numLeafNodes(), nextPow2(numLeafNodes()),
@@ -244,4 +256,21 @@ const unsigned CudaLinearBvh::usedMemory() const
     n += m_distanceInternalNodeFromRoot->bufferSize();
 	n += m_reducedMaxDistance->bufferSize();
 	return n;
+}
+
+#if DRAW_BVH_HASH
+void * CudaLinearBvh::hostLeafHash()
+{ return m_hostLeafHash->data(); }
+
+void * CudaLinearBvh::hostLeafBox()
+{ return m_hostLeafBox->data(); }
+#endif
+
+void CudaLinearBvh::sendDbgToHost()
+{
+#if DRAW_BVH_HASH
+	std::cout<<"\nhost hahs";
+	m_leafAabbs->deviceToHost(m_hostLeafBox->data(), m_leafAabbs->bufferSize());
+	m_leafHash[0]->deviceToHost(m_hostLeafHash->data(), m_leafHash[0]->bufferSize());
+#endif
 }
