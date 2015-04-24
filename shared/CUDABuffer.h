@@ -10,35 +10,31 @@
  *
  */
 
-#include <BaseBuffer.h>
-class CUDABuffer : public BaseBuffer {
+class CUDABuffer {
 public:
 	CUDABuffer();
 	virtual ~CUDABuffer();
 	
-	virtual void create(float * data, unsigned size);
-	virtual void destroy();
+	void destroy();
 	void create(unsigned size);
 	
-	struct cudaGraphicsResource ** resource();
 	void * bufferOnDevice();
 	void * bufferOnDeviceAt(unsigned loc);
+	
 	void hostToDevice(void * src, unsigned size);
 	void deviceToHost(void * dst, unsigned size);
 	void hostToDevice(void * src);
 	void deviceToHost(void * dst);
 	void hostToDevice(void * src, unsigned loc, unsigned size);
 	void deviceToHost(void * dst, unsigned loc, unsigned size);
-	void map(void ** p);
-	void unmap();
 	
+	const unsigned bufferSize() const;
 private:
     const unsigned minimalMemSize(unsigned size) const;
 	
 private:
-	struct cudaGraphicsResource *_cuda_vbo_resource;
 	void *_device_vbo_buffer;
-	unsigned m_realSize;
+	unsigned m_bufferSize, m_reseveSize;
 };
 
 #endif        //  #ifndef CUDABUFFER_H

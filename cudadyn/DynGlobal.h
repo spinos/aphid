@@ -8,6 +8,7 @@
 #define COLLIDEJUST 0
 #define PRINT_BOUND 0
 #define PRINT_BVH_MAXLEVEL 1
+#define DRAW_BVH_HIERARCHY 0
 class DynGlobal
 {
 public:

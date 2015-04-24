@@ -36,6 +36,10 @@ private:
     void showContacts(CudaDynamicWorld * world, GeoDrawer * drawer);
 #endif
 
+#if DRAW_BVH_HIERARCHY
+	void showBvhHierarchy(CudaLinearBvh * bvh);
+#endif
+
     bool checkContact(unsigned n);
     bool checkDegenerated(unsigned n);
     void printContact(unsigned n);

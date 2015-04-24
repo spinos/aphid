@@ -1,4 +1,5 @@
 #include "FEMTetrahedronSystem.h"
+#include <BaseBuffer.h>
 #include <CUDABuffer.h>
 #include <CudaCSRMatrix.h>
 #include <cuFemTetrahedron_implement.h>

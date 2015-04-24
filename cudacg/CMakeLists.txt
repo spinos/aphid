@@ -20,11 +20,15 @@ include_directories (${CUDA_TOOLKIT_INCLUDE} ${CUDA_SDK_ROOT_DIR}/common/inc
 set (HEADER_FILES "../shared/Morton3D.h"
 "../cudabvh/CudaReduction.h")
 set (SOURC_FILES "main.cpp"
-"../shared/BaseBuffer.cpp"
 "../shared/CudaBase.cpp"
 "../shared/CUDABuffer.cpp"
+"../shared/BaseBuffer.cpp"
 "../cudabvh/CudaReduction.cpp")
 set (CUSOURCES "../radixsort/radixsort.cu"
+"../cudabvh/reduceRange.cu"
+"../cudabvh/cuReduceFlt2.cu"
+"../cudabvh/cuReduceFlt3.cu"
+"../cudabvh/cuReduceFlt4.cu"
 "../cudabvh/cuReduceSum.cu")
 
 ## add_executable (testcudacg ${HEADER_FILES} main.cpp)
@@ -36,10 +40,6 @@ CUDA_ADD_EXECUTABLE (testcudacg ${HEADER_FILES} ${SOURC_FILES} ${CUSOURCES})
 target_link_libraries(testcudacg ${CUDA_CUDART_LIBRARY})
 target_link_libraries(testcudacg ${CUDA_cublas_LIBRARY})
 target_link_libraries(testcudacg ${CUDA_cusparse_LIBRARY})
-
-find_package (OpenGL REQUIRED)
-target_link_libraries (testcudacg ${OPENGL_LIBRARIES})
-
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")

@@ -62,6 +62,11 @@ struct Aabb {
     float3 high;
 };
 
+struct Aabb4 {
+    float4 low;
+    float4 high;
+};
+
 struct EdgeContact {
     uint v[4];   
 };

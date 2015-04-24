@@ -2,7 +2,6 @@
 #include <sstream>
 #include <gl_heads.h>
 #include "CudaBase.h"
-#include <cuda_runtime_api.h>
 #include <cutil_inline.h>
 #include <cutil_gl_inline.h>
 
@@ -93,14 +92,18 @@ int CudaBase::LimitNThreadPerBlock(int regPT, int memPT)
     return nwarp*WarpSize;
 }
 
-/*
-    cudaError_t cudaResult;
-    cudaResult = cudaGetLastError();
-    if (cudaResult != cudaSuccess)
-    {
-        std::cout<<"cu error "<<cudaGetErrorString(cudaResult);
+void CudaBase::CheckCudaError(cudaError_t err, const char * info)
+{
+    // cudaError_t cudaResult;
+    // cudaResult = cudaGetLastError();
+    if (err != cudaSuccess) {
+        std::cout<<"cu error "<<cudaGetErrorString(err)<<" when "<<info<<"\n";
+		exit(1);
         // Do whatever you want here
         // I normally create a std::string msg with a description of where I am
         // and append cudaGetErrorString(cudaResult)
     }
-*/
+}
+
+void CudaBase::CheckCudaError(const char * info)
+{ CheckCudaError(cudaGetLastError(), info); }

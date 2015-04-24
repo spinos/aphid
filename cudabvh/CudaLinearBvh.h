@@ -12,6 +12,7 @@
  
 #include "bvh_common.h"
 #include <DynGlobal.h>
+class CudaReduction;
 class BaseBuffer;
 class CUDABuffer;
 class BvhTriangleMesh;
@@ -50,13 +51,16 @@ public:
 	void * hostLeafHash();
 	void * hostLeafBox();
 #endif
+
+#if DRAW_BVH_HIERARCHY
+	void * hostInternalAabb();
+#endif
 	
 private:
     void combineAabb();
 	void computeAndSortLeafHash();
 	void buildInternalTree();
-	void findMaxDistanceFromRoot();
-	void formInternalTreeAabbsIterative();
+	void formInternalTreeAabbsIterative(int maxDistance);
 	
 private:
     CUDABuffer * m_leafAabbs;
@@ -69,11 +73,17 @@ private:
 	CUDABuffer * m_internalNodeParentIndices;
 	CUDABuffer * m_rootNodeIndexOnDevice;
     CUDABuffer * m_distanceInternalNodeFromRoot;
-	CUDABuffer * m_reducedMaxDistance;
+	CudaReduction * m_findMaxDistance;
 	unsigned m_numLeafNodes;
 #if DRAW_BVH_HASH
 	BaseBuffer * m_hostLeafHash;
 	BaseBuffer * m_hostLeafBox;
+#endif
+
+#if DRAW_BVH_HIERARCHY
+	BaseBuffer * m_hostInternalAabb;
+	
+	
 #endif
 };
 #endif        //  #ifndef CUDALINEARBVH_H

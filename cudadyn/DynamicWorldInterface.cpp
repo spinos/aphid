@@ -721,3 +721,81 @@ void DynamicWorldInterface::showFaultyPair(CudaDynamicWorld * world, GeoDrawer *
 	             tetrahedronCenter(tetPnt, tetInd, pntOffset, indOffset, m_faultyPair[1]));
 }
 
+#if DRAW_BVH_HIERARCHY
+void DynamicWorldInterface::showBvhHierarchy(CudaLinearBvh * bvh)
+{
+	bvh->getRootNodeIndex(&m_hostRootNodeInd);
+	
+	const unsigned numInternal = bvh->numInternalNodes();
+	
+	Aabb * internalBoxes = (Aabb *)bvh->hostInternalAabb();
+	
+	KeyValuePair * leafHash = (KeyValuePair *)bvh->hostLeafHash();
+	
+	m_displayLeafAabbs->create(bvh->numLeafNodes() * sizeof(Aabb));
+	bvh->getLeafAabbs(m_displayLeafAabbs);
+	Aabb * leafBoxes = (Aabb *)m_displayLeafAabbs->data();
+	
+	m_internalChildIndices->create(bvh->numInternalNodes() * sizeof(int2));
+	bvh->getInternalChildIndex(m_internalChildIndices);
+	int2 * internalNodeChildIndices = (int2 *)m_internalChildIndices->data();
+	
+	m_displayInternalDistance->create(bvh->numInternalNodes() * sizeof(int));
+	bvh->getInternalDistances(m_displayInternalDistance);
+	int * levels = (int *)m_displayInternalDistance->data();
+	
+	BoundingBox bb;
+	
+	int stack[128];
+	stack[0] = m_hostRootNodeInd;
+	int stackSize = 1;
+	int maxStack = 1;
+	int touchedLeaf = 0;
+	int touchedInternal = 0;
+	while(stackSize > 0) {
+		int internalOrLeafNodeIndex = stack[ stackSize - 1 ];
+		stackSize--;
+		
+		int isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
+		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
+		
+		int bvhRigidIndex = (isLeaf) ? leafHash[bvhNodeIndex].value : -1;
+		
+		Aabb bvhNodeAabb = (isLeaf) ? leafBoxes[bvhRigidIndex] : internalBoxes[bvhNodeIndex];
+
+		{
+			if(isLeaf) {
+				glColor3f(.5, 0., 0.);
+				bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
+				bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);
+				m_drawer->boundingBox(bb);
+
+				touchedLeaf++;
+			}
+			else {
+				glColor3f(.5, .65, 0.);
+				
+				if(levels[bvhNodeIndex] > m_displayLevel) continue;
+				bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
+				bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);
+				m_drawer->boundingBox(bb);
+
+				touchedInternal++;
+				if(stackSize + 2 > 128)
+				{
+					//Error
+				}
+				else
+				{
+				    stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+					stackSize++;
+					stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+					stackSize++;
+					
+					if(stackSize > maxStack) maxStack = stackSize;
+				}
+			}
+		}
+	}	
+}
+#endif

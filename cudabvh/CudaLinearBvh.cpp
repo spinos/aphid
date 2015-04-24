@@ -7,13 +7,14 @@
  *
  */
 #include <CudaBase.h>
+#include <BaseBuffer.h>
 #include <CUDABuffer.h>
 #include "BvhTriangleMesh.h"
 #include "CudaLinearBvh.h"
 #include <radixsort_implement.h>
 #include "createBvh_implement.h"
 #include "reduceBox_implement.h"
-#include "reduceRange_implement.h"
+#include "CudaReduction.h"
 #include "bvh_dbg.h"
 
 CudaLinearBvh::CudaLinearBvh() 
@@ -30,10 +31,13 @@ CudaLinearBvh::CudaLinearBvh()
 	m_internalNodeParentIndices = new CUDABuffer;
 	m_rootNodeIndexOnDevice = new CUDABuffer;
 	m_distanceInternalNodeFromRoot = new CUDABuffer;
-	m_reducedMaxDistance = new CUDABuffer;
+	m_findMaxDistance = new CudaReduction;
 #if DRAW_BVH_HASH
 	m_hostLeafHash = new BaseBuffer;
 	m_hostLeafBox = new BaseBuffer;
+#endif
+#if DRAW_BVH_HIERARCHY
+	m_hostInternalAabb = new BaseBuffer;
 #endif
 }
 
@@ -60,7 +64,7 @@ void CudaLinearBvh::initOnDevice()
 	m_rootNodeIndexOnDevice->create(sizeof(int));
 	m_distanceInternalNodeFromRoot->create(numInternalNodes() * sizeof(int));
 	
-	m_reducedMaxDistance->create(ReduceMaxBlocks * sizeof(int));
+	m_findMaxDistance->initOnDevice();
 
 #if DRAW_BVH_HASH
 	m_hostLeafBox->create(numLeafNodes() * sizeof(Aabb));
@@ -188,42 +192,20 @@ void CudaLinearBvh::buildInternalTree()
 	bvhFindDistanceFromRoot((int *)rootInd, (int *)internalNodeParentIndex,
 							(int *)distanceFromRoot, 
 							numInternalNodes());
-							
-	findMaxDistanceFromRoot();						
-	formInternalTreeAabbsIterative();
-}
-
-void CudaLinearBvh::findMaxDistanceFromRoot()
-{
-	void * psrc = m_distanceInternalNodeFromRoot->bufferOnDevice();
-    void * pdst = m_reducedMaxDistance->bufferOnDevice();
-	
-	unsigned n = numInternalNodes();
-	unsigned threads, blocks;
-	getReduceBlockThread(blocks, threads, n);
-	
-	bvhReduceFindMax((int *)pdst, (int *)psrc, n, blocks, threads);
-	
-	n = blocks;
-	while(n > 1) {
-		getReduceBlockThread(blocks, threads, n);
-		
-		bvhReduceFindMax((int *)pdst, (int *)pdst, n, blocks, threads);
-		
-		n = (n + (threads*2-1)) / (threads*2);
-	}
-}
-
-void CudaLinearBvh::formInternalTreeAabbsIterative()
-{
+				
 	int maxDistance = -1;
-	m_reducedMaxDistance->deviceToHost(&maxDistance, 4);
+	m_findMaxDistance->maxI(maxDistance, (int *)m_distanceInternalNodeFromRoot->bufferOnDevice(), numInternalNodes());
 #if PRINT_BVH_MAXLEVEL
 	std::cout<<" bvh max level "<<maxDistance<<"\n";
 #endif
-	if(maxDistance < 0) 
-		return;
+	if(maxDistance < 0)
+		CudaBase::CheckCudaError("finding bvh max level");
 	
+	formInternalTreeAabbsIterative(maxDistance);
+}
+
+void CudaLinearBvh::formInternalTreeAabbsIterative(int maxDistance)
+{
 	void * distances = m_distanceInternalNodeFromRoot->bufferOnDevice();
 	void * boxes = m_leafHash[0]->bufferOnDevice();
 	void * internalNodeChildIndex = m_internalNodeChildIndices->bufferOnDevice();
@@ -250,7 +232,6 @@ const unsigned CudaLinearBvh::usedMemory() const
 	n += m_internalNodeParentIndices->bufferSize();
 	n += m_rootNodeIndexOnDevice->bufferSize();
     n += m_distanceInternalNodeFromRoot->bufferSize();
-	n += m_reducedMaxDistance->bufferSize();
 	return n;
 }
 
@@ -269,3 +250,8 @@ void CudaLinearBvh::sendDbgToHost()
 	m_leafHash[0]->deviceToHost(m_hostLeafHash->data(), m_leafHash[0]->bufferSize());
 #endif
 }
+
+#if DRAW_BVH_HIERARCHY
+void * CudaLinearBvh::hostInternalAabb()
+{ return m_hostInternalAabb->data(); }
+#endif

@@ -9,6 +9,7 @@
 
 #include "CudaNarrowphase.h"
 #include <CudaTetrahedronSystem.h>
+#include <BaseBuffer.h>
 #include <CUDABuffer.h>
 #include "narrowphase_implement.h"
 #include "scan_implement.h"

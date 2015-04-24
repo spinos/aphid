@@ -1,5 +1,6 @@
 #ifndef CUDABASE_H
 #define CUDABASE_H
+#include <cuda_runtime_api.h>
 
 class CudaBase
 {
@@ -18,6 +19,8 @@ public:
 	static int RuntimeVersion;
 	static bool HasDevice;
     static int LimitNThreadPerBlock(int regPT, int memPT);
+	static void CheckCudaError(cudaError_t err, const char * info);
+    static void CheckCudaError(const char * info);
     
     static int MemoryUsed;
 private:

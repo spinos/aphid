@@ -1,4 +1,5 @@
 #include "CudaDbgLog.h"
+#include "BaseBuffer.h"
 #include "CUDABuffer.h"
 #include "AllMath.h"
 #include <boost/format.hpp>

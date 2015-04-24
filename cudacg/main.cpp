@@ -21,6 +21,11 @@
 #include <radixsort_implement.h>
 #include <cuReduceSum_implement.h>
 #include <CudaReduction.h>
+#include <CUDABuffer.h>
+#include <BaseBuffer.h>
+
+cudaEvent_t start_event, stop_event;
+    
 // #define FULLREDUCTION
 #define USEREDFN
 void testReduceSum()
@@ -32,7 +37,7 @@ void testReduceSum()
 // sum: 6.28856e+06  proof: 6.28854e+06.
 // n 4093 blocks x threads : 4 x 512 sharedmem size 2048
 // sum: 4087.44  proof: 4087.44.
-
+	std::cout<<"\n test reduce sum:\n";
     const uint m = (1<<17)-3;
     float * h_data = new float[m];
     
@@ -336,6 +341,148 @@ void testCg()
     cudaThreadExit();
 }
 
+void testBuffer()
+{
+	std::cout<<" test cu buffer\n";
+	CUDABuffer db;
+	db.create(1024*1024*4);
+	
+	BaseBuffer hb;
+	hb.create(1024*1024*4);
+	
+	unsigned * h = (unsigned *)hb.data();
+	unsigned i;
+	for(i=0; i< 1024*1024; i++) h[i] = i+1;
+	
+	db.hostToDevice(hb.data());
+	
+	db.deviceToHost(hb.data());
+	
+	std::cout<<" h[17] "<<h[17];
+}
+
+void testReduceMax()
+{
+	std::cout<<" test find max\n";
+	CUDABuffer db;
+	db.create(1024*1024*4);
+	
+	BaseBuffer hb;
+	hb.create(1024*1024*4);
+	
+	unsigned * h = (unsigned *)hb.data();
+	unsigned i;
+	for(i=0; i< 1024*1024; i++) h[i] = i+1;
+	
+	db.hostToDevice(hb.data());
+	
+	CudaReduction reducer;
+	reducer.initOnDevice();
+	
+	cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
+    cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
+	cudaEventRecord(start_event, 0);
+	int res = 0;
+	reducer.maxI(res, (int *)db.bufferOnDevice(), 1024 * 1024);
+	cudaEventRecord(stop_event, 0);
+	cudaEventSynchronize(stop_event);
+	float met;
+	cudaEventElapsedTime(&met, start_event, stop_event);
+	std::cout<<" reduction took "<<met<<" milliseconds\n";
+	std::cout<<" max "<<res<<"\n";
+	cudaEventDestroy(start_event);
+    cudaEventDestroy(stop_event);
+}
+
+void testReduceMinMaxF()
+{
+	std::cout<<" test find min max f\n";
+	unsigned m = 1024*1024;
+	CUDABuffer db;
+	db.create(m*4);
+	
+	BaseBuffer hb;
+	hb.create(m*4);
+	
+	float * h = (float *)hb.data();
+	unsigned i;
+	for(i=0; i< m; i++) h[i] = -59999.f + 99999.f * ((float)(random() & 255))/127.f;
+	
+	db.hostToDevice(hb.data());
+	
+	CudaReduction reducer;
+	reducer.initOnDevice();
+	
+	cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
+    cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
+	cudaEventRecord(start_event, 0);
+	float res[2];
+	reducer.minMaxF(res, (float *)db.bufferOnDevice(), m);
+	
+	std::cout<<" minmax f "<<res[0]<<","<<res[1]<<"\n";
+	
+	cudaEventRecord(stop_event, 0);
+	cudaEventSynchronize(stop_event);
+	float met;
+	cudaEventElapsedTime(&met, start_event, stop_event);
+	std::cout<<" reduction took "<<met<<" milliseconds\n";
+	
+	cudaEventDestroy(start_event);
+    cudaEventDestroy(stop_event);
+}
+
+void testReduceMinMaxBox()
+{
+	std::cout<<" test find min max f\n";
+	unsigned m = 1024*1024;
+	CUDABuffer db;
+	db.create(m*32);
+	
+	BaseBuffer hb;
+	hb.create(m*32);
+	
+	Aabb * h = (Aabb *)hb.data();
+	float x, y, z;
+	unsigned i;
+	for(i=0; i< m; i++) {
+	    x = 44.f * ((float)(random() & 255))/256.f - 22.f;
+	    y = 440.f * ((float)(random() & 255))/256.f - 220.f;
+	    z = 4400.f * ((float)(random() & 255))/256.f - 2200.f;
+	    h[i].low.x = x - 1.f;
+	    h[i].low.y = y - 1.f;
+	    h[i].low.z = z - 1.f;
+	    h[i].high.x = x + 1.f;
+	    h[i].high.y = y + 1.f;
+	    h[i].high.z = z + 1.f;
+	}
+	
+	db.hostToDevice(hb.data());
+	
+	CudaReduction reducer;
+	reducer.initOnDevice();
+	
+	cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
+    cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
+	cudaEventRecord(start_event, 0);
+	float res[3];
+	reducer.minPnt(res, (float3 *)db.bufferOnDevice(), m*2);
+	
+	std::cout<<" min box "<<res[0]<<","<<res[1]<<","<<res[2]<<"\n";
+	
+	reducer.maxPnt(res, (float3 *)db.bufferOnDevice(), m*2);
+	
+	std::cout<<" max box "<<res[0]<<","<<res[1]<<","<<res[2]<<"\n";
+	
+	cudaEventRecord(stop_event, 0);
+	cudaEventSynchronize(stop_event);
+	float met;
+	cudaEventElapsedTime(&met, start_event, stop_event);
+	std::cout<<" reduction took "<<met<<" milliseconds\n";
+	
+	cudaEventDestroy(start_event);
+    cudaEventDestroy(stop_event);
+}
+
 int main(int argc, char **argv)
 {
     // This will pick the best possible CUDA capable device
@@ -362,9 +509,9 @@ int main(int argc, char **argv)
     
     // printf("test conjugate gradient\n");
     // testCg();
-    
-    // std::cout<<"\n test reduce sum:\n";
-    // testReduceSum();
+    testReduceMax();
+    testReduceMinMaxF();
+	testReduceMinMaxBox();
     
     printf("done.\n");
     exit(0);

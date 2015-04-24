@@ -3,7 +3,7 @@
 
 #include "bvh_common.h"
 
-#define ReduceMaxBlocks 128
+#define ReduceMaxBlocks 64
 #ifdef CUDA_V3
 #define ReduceMaxThreads 256
 #else
