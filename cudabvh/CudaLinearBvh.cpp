@@ -13,7 +13,6 @@
 #include "CudaLinearBvh.h"
 #include <radixsort_implement.h>
 #include "createBvh_implement.h"
-#include "reduceBox_implement.h"
 #include "CudaReduction.h"
 #include "bvh_dbg.h"
 
@@ -79,9 +78,6 @@ const unsigned CudaLinearBvh::numLeafNodes() const
 const unsigned CudaLinearBvh::numInternalNodes() const 
 { return numLeafNodes() - 1; }
 
-void CudaLinearBvh::getBound(Aabb * dst)
-{ cudaMemcpy(dst, combineAabbsBuffer(), 24, cudaMemcpyDeviceToHost); }
-
 void CudaLinearBvh::getRootNodeIndex(int * dst)
 { m_rootNodeIndexOnDevice->deviceToHost((void *)dst, m_rootNodeIndexOnDevice->bufferSize()); }
 
@@ -111,52 +107,30 @@ void CudaLinearBvh::getLeafAabbsAt(char * dst)
 
 void * CudaLinearBvh::leafHash()
 { return m_leafHash[0]->bufferOnDevice(); }
-
-void * CudaLinearBvh::combineAabbsBuffer()
-{ return m_internalNodeAabbs->bufferOnDevice(); }
  
 void CudaLinearBvh::update()
 {
-	combineAabb();
+	computeAabb();
 	computeAndSortLeafHash();
 	buildInternalTree();
 }
 
-void CudaLinearBvh::combineAabb()
+void CudaLinearBvh::computeAabb()
 {
-    void * pdst = combineAabbsBuffer();
-    unsigned threads, blocks;
-    unsigned n = numLeafNodes();
-	getReduceBlockThread(blocks, threads, n);
-	
-	// std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(Aabb)<<"\n";
-	
-	bvhReduceAabbByAabb((Aabb *)pdst, (Aabb *)leafAabbs(), numLeafNodes(), blocks, threads);
-	
-	n = blocks;
-	while(n > 1) {
-		getReduceBlockThread(blocks, threads, n);
-		
-		// std::cout<<"n "<<n<<" blocks x threads : "<<blocks<<" x "<<threads<<" sharedmem size "<<threads * sizeof(Aabb)<<"\n";
-	
-		bvhReduceAabbByAabb((Aabb *)pdst, (Aabb *)pdst, n, blocks, threads);
-		
-		n = (n + (threads*2-1)) / (threads*2);
-	}
+	reducer()->minBox(aabbPtr(), (Aabb *)leafAabbs(), numLeafNodes());
+	reducer()->maxBox(&aabbPtr()[3], (Aabb *)leafAabbs(), numLeafNodes());
+#if PRINT_BOUND
+    std::cout<<" bound (("<<m_bounding.low.x<<" "<<m_bounding.low.y<<" "<<m_bounding.low.z;
+    std::cout<<"),("<<m_bounding.high.x<<" "<<m_bounding.high.y<<" "<<m_bounding.high.z<<"))";
+#endif
 }
 
 void CudaLinearBvh::computeAndSortLeafHash()
 {
-    Aabb bound;
-    getBound(&bound);
-#if PRINT_BOUND
-    std::cout<<" bound (("<<bound.low.x<<" "<<bound.low.y<<" "<<bound.low.z;
-    std::cout<<"),("<<bound.high.x<<" "<<bound.high.y<<" "<<bound.high.z<<"))";
-#endif
 	void * dst = m_leafHash[0]->bufferOnDevice();
 	void * src = leafAabbs();
 	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, numLeafNodes(), nextPow2(numLeafNodes()),
-	    bound);
+	    m_bounding);
 	void * tmp = m_leafHash[1]->bufferOnDevice();
 	RadixSort((KeyValuePair *)dst, (KeyValuePair *)tmp, nextPow2(numLeafNodes()), 32);
 }
@@ -255,3 +229,13 @@ void CudaLinearBvh::sendDbgToHost()
 void * CudaLinearBvh::hostInternalAabb()
 { return m_hostInternalAabb->data(); }
 #endif
+
+CudaReduction * CudaLinearBvh::reducer()
+{ return m_findMaxDistance; }
+
+float * CudaLinearBvh::aabbPtr()
+{ return &m_bounding.low.x; }
+
+const Aabb CudaLinearBvh::getAabb() const
+{ return m_bounding; }
+//:~

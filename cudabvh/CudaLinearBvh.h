@@ -28,8 +28,8 @@ public:
 	
 	const unsigned numLeafNodes() const;
 	const unsigned numInternalNodes() const;
-	void getBound(Aabb * dst);
 	
+	const Aabb getAabb() const;
 	void getRootNodeIndex(int * dst);
 	void getLeafAabbsAt(char * dst);
 	void getInternalAabbs(BaseBuffer * dst);
@@ -41,7 +41,6 @@ public:
 	void * internalNodeAabbs();
 	void * leafAabbs();
 	void * leafHash();
-	void * combineAabbsBuffer();
 	
 	void sendDbgToHost();
 	
@@ -55,14 +54,17 @@ public:
 #if DRAW_BVH_HIERARCHY
 	void * hostInternalAabb();
 #endif
-	
+
+protected:
+	CudaReduction * reducer();
+	float * aabbPtr();
 private:
-    void combineAabb();
 	void computeAndSortLeafHash();
 	void buildInternalTree();
 	void formInternalTreeAabbsIterative(int maxDistance);
-	
+	void computeAabb();
 private:
+	Aabb m_bounding;
     CUDABuffer * m_leafAabbs;
 	CUDABuffer * m_internalNodeAabbs;
 	CUDABuffer * m_leafHash[2];
