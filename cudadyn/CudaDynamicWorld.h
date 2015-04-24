@@ -1,7 +1,7 @@
 #ifndef CUDADYNAMICWORLD_H
 #define CUDADYNAMICWORLD_H
 
-#define CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS 32
+#include "DynGLobal.h"
 
 class CudaBroadphase;
 class CudaNarrowphase;
@@ -33,7 +33,7 @@ public:
 	SimpleContactSolver * contactSolver() const;
 	const unsigned numContacts() const;
 protected:
-	void sendDbgToHost();
+	
 private:
     CudaBroadphase * m_broadphase;
     CudaNarrowphase * m_narrowphase;

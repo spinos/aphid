@@ -82,7 +82,6 @@ void GLWidget::simulate()
 	        m_world->integrate(1.f / 60.f);
     }
     m_world->sendXToHost();
-	m_world->sendDbgToHost();
 #endif
 	update();
 }

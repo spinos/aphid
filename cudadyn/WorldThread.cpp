@@ -37,7 +37,7 @@ void WorldThread::run()
 {	 
 	forever {
 	    if (abort) {
-            qDebug()<<"abort b4";
+            qDebug()<<"abort physics b4";
             return;
         }
         
@@ -47,7 +47,7 @@ void WorldThread::run()
         }
         
         if (abort) {
-            qDebug()<<"abort aft";
+            qDebug()<<"abort physics aft";
             return;
         }
         
