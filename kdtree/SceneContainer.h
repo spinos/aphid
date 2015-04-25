@@ -10,7 +10,7 @@
 class RandomMesh;
 class KdTreeDrawer;
 class BezierCurve;
-class KdTree;
+class KdCluster;
 class GeometryArray;
 class SceneContainer {
 public:
@@ -30,6 +30,6 @@ private:
 	KdTreeDrawer * m_drawer;
 	RandomMesh * m_mesh[4];
 	GeometryArray * m_curves;
-	KdTree * m_tree;
+	KdCluster * m_cluster;
 	int m_level;
 };

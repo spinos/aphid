@@ -20,6 +20,8 @@ unsigned KdTree::NumPrimitivesInLeafThreashold = 8;
 KdTree::KdTree() 
 {
 	m_root = 0;
+	m_maxLeafLevel = 0;
+	m_numNoEmptyLeaf = 0;
 }
 
 KdTree::~KdTree() 
@@ -423,5 +425,14 @@ char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 	return 1;
 }
 
+const unsigned KdTree::numNoEmptyLeaves() const
+{ return m_numNoEmptyLeaf; }
+
 const TypedEntity::Type KdTree::type() const
 { return TypedEntity::TKdTree; }
+
+IndexArray & KdTree::indirection()
+{ return m_stream.indirection(); }
+
+PrimitiveArray & KdTree::primitives()
+{ return m_stream.primitives(); }

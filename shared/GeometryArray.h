@@ -16,8 +16,11 @@ public:
 	
 	void create(unsigned n);
 	void setGeometry(Geometry * geo, unsigned i);
+	void setNumGeometries(unsigned n);
 	const unsigned numGeometies() const;
 	Geometry * geometry(unsigned icomponent) const;
+	void destroyGeometries();
+	
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;

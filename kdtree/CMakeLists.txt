@@ -12,6 +12,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "window.h"
 "glwidget.h"
 "SceneContainer.h"
+"KdCluster.h"
 "RandomMesh.h")
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
@@ -19,6 +20,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "glWidget.cpp"
 "window.cpp"
 "SceneContainer.cpp"
+"KdCluster.cpp"
 "RandomMesh.cpp")
 
 if (WIN32)

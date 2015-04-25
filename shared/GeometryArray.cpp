@@ -17,10 +17,6 @@ GeometryArray::GeometryArray()
 
 GeometryArray::~GeometryArray()
 {
-	unsigned i=0;
-	for(; i < m_numGeometies; i++)
-		delete m_geos[i];
-		
 	delete m_geos;
 }
 
@@ -36,8 +32,18 @@ void GeometryArray::create(unsigned n)
 void GeometryArray::setGeometry(Geometry * geo, unsigned i)
 { m_geos[i] = geo; }
 
+void GeometryArray::setNumGeometries(unsigned n)
+{ m_numGeometies = n; }
+
 const unsigned GeometryArray::numComponents() const
 { return m_numGeometies; }
+
+void GeometryArray::destroyGeometries()
+{
+	unsigned i=0;
+	for(; i < m_numGeometies; i++)
+		delete m_geos[i];
+}
 
 const BoundingBox GeometryArray::calculateBBox() const
 {

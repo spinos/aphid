@@ -18,13 +18,14 @@ class KdTree : public Geometry
 {
 public:
 	KdTree();
-	~KdTree();
+	virtual ~KdTree();
 	
 	bool isEmpty() const;
 	KdTreeNode* getRoot() const;
 	void addGeometry(Geometry * geo);
-	void create();
-	void rebuild();
+	
+	virtual void create();
+	virtual void rebuild();
 	
 	char intersect(IntersectionContext * ctx);
 	char closestPoint(const Vector3F & origin, IntersectionContext * ctx);
@@ -34,8 +35,13 @@ public:
 	virtual const Type type() const;
 	static int MaxBuildLevel;
 	static unsigned NumPrimitivesInLeafThreashold;
+	
+protected:
+	virtual void clear();
+	const unsigned numNoEmptyLeaves() const;
+	IndexArray & indirection();
+	PrimitiveArray & primitives();
 private:
-	void clear();
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
 	void createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx);
 	char recusiveIntersect(KdTreeNode *node, IntersectionContext * ctx);

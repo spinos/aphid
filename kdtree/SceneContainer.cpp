@@ -10,7 +10,7 @@
 #include "SceneContainer.h"
 #include <AllMath.h>
 #include <RandomMesh.h>
-#include <KdTree.h>
+#include <KdCluster.h>
 #include <KdTreeDrawer.h>
 #include <BezierCurve.h>
 #include <CurveBuilder.h>
@@ -22,7 +22,7 @@ SceneContainer::SceneContainer(KdTreeDrawer * drawer)
 {
 	m_level = 6;
 	m_drawer = drawer;
-	m_tree = new KdTree;
+	m_cluster = new KdCluster;
 	
 #if TEST_MESH
 	testMesh();
@@ -33,9 +33,9 @@ SceneContainer::SceneContainer(KdTreeDrawer * drawer)
 #endif
 	
 	KdTree::MaxBuildLevel = m_level;
-	KdTree::NumPrimitivesInLeafThreashold = 8;
+	KdTree::NumPrimitivesInLeafThreashold = 13;
 	
-	m_tree->create();
+	m_cluster->create();
 }
 
 SceneContainer::~SceneContainer() {}
@@ -48,7 +48,7 @@ void SceneContainer::testMesh()
 					1.f + 32.f * RandomF01(), 
 					-12.f + 32.f * RandomF01());
 		m_mesh[i] = new RandomMesh(25000 + 5000 * RandomF01(), c, 4.f + 2.f * RandomF01(), i&1);
-		m_tree->addGeometry(m_mesh[i]);
+		m_cluster->addGeometry(m_mesh[i]);
 	}
 }
 
@@ -78,9 +78,9 @@ void SceneContainer::testCurve()
 			cb.addVertex(p);
 		}
 		cb.finishBuild(c);
-		m_curves->setGeometry(c, i); 
+		m_curves->setGeometry(c, i);
 	}
-	m_tree->addGeometry(m_curves);
+	m_cluster->addGeometry(m_curves);
 }
 
 void SceneContainer::renderWorld()
@@ -102,7 +102,7 @@ void SceneContainer::renderWorld()
 		
 	m_drawer->setWired(1);
 	m_drawer->setColor(0.15f, 1.f, 0.5f);
-	m_drawer->drawKdTree(m_tree);
+	m_drawer->drawKdTree(m_cluster);
 }
 
 void SceneContainer::upLevel()
@@ -110,7 +110,7 @@ void SceneContainer::upLevel()
 	m_level++;
 	if(m_level > 24) m_level = 24;
 	KdTree::MaxBuildLevel = m_level;
-	m_tree->rebuild();
+	m_cluster->rebuild();
 }
 
 void SceneContainer::downLevel()
@@ -118,5 +118,5 @@ void SceneContainer::downLevel()
 	m_level--;
 	if(m_level<2) m_level = 2;
 	KdTree::MaxBuildLevel = m_level;
-	m_tree->rebuild();
+	m_cluster->rebuild();
 }

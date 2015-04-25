@@ -9,6 +9,7 @@
 
 #include "Geometry.h"
 Geometry::Geometry() {}
+Geometry::~Geometry() {}
 
 void Geometry::setBBox(const BoundingBox &bbox)
 { m_bbox = bbox; }

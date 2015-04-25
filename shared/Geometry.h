@@ -13,6 +13,7 @@
 class Geometry : public TypedEntity {
 public:
 	Geometry();
+	virtual ~Geometry();
 	
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox() const;
