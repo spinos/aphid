@@ -15,6 +15,8 @@ public:
 	void setShaderType(ShaderType t);
 	ShaderType shaderType() const;
 	
+	virtual const Type type() const;
+	
 protected:
 	
 private:

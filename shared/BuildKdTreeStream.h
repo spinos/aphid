@@ -19,7 +19,7 @@ public:
 	BuildKdTreeStream();
 	~BuildKdTreeStream();
 	void cleanup();
-	void appendMesh(BaseMesh* mesh);
+	void appendGeometry(Geometry * geo);
 	
 	const unsigned getNumPrimitives() const;
 	const PrimitiveArray &getPrimitives() const;

@@ -16,6 +16,8 @@ public:
 	SkeletonJoint(BaseTransform * parent = 0);
 	virtual ~SkeletonJoint();
 	
+	virtual const Type type() const;
+	
 	void setJointOrient(const Vector3F & v);
 	Vector3F jointOrient() const;
 	

@@ -3,9 +3,7 @@
 #include <gl_heads.h>
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
-#include <CudaBase.h>
 #include "DrawNp.h"
-#include <CUDABuffer.h>
 #include "BccWorld.h"
 #define SIMULATE_INLINE 1
 

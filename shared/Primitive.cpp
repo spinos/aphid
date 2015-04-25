@@ -8,15 +8,15 @@
  */
 #include <TypedEntity.h>
 #include "Primitive.h"
-
+#include "Geometry.h"
 Primitive::Primitive() {}
 
-void Primitive::setGeometry(char * data)
+void Primitive::setGeometry(Geometry * data)
 {
 	m_geometry = data;
 }
 
-char *Primitive::getGeometry() const
+Geometry *Primitive::getGeometry() const
 {
 	return m_geometry;
 }
@@ -29,9 +29,4 @@ void Primitive::setComponentIndex(const unsigned &idx)
 const unsigned Primitive::getComponentIndex() const
 {
 	return m_componentIndex;
-}
-
-bool Primitive::isMeshGeometry() const
-{
-	return ((TypedEntity *)m_geometry)->isTriangleMesh();
 }

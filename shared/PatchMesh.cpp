@@ -15,7 +15,6 @@
 
 PatchMesh::PatchMesh() 
 {
-    setEntityType(TypedEntity::TPatchMesh);
 	m_numQuads = 0;
 }
 
@@ -24,6 +23,9 @@ PatchMesh::~PatchMesh()
 	m_quadIndices.reset();
 	m_quadUVIds.reset();
 }
+
+const TypedEntity::Type PatchMesh::type() const
+{ return TPatchMesh; }
 
 unsigned PatchMesh::getNumFaces() const
 {

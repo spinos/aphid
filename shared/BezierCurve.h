@@ -9,7 +9,7 @@
 #pragma once
 #include <BoundingBox.h>
 #include <BaseCurve.h>
-
+#include <Primitive.h>
 struct BezierSpline {
     void deCasteljauSplit(BezierSpline & a, BezierSpline & b)
     {
@@ -61,6 +61,8 @@ class BezierCurve : public BaseCurve {
 public:
 	BezierCurve();
 	virtual ~BezierCurve();
+
+	const Type type() const;
 	
 	virtual Vector3F interpolate(float param) const;
 
@@ -73,6 +75,11 @@ public:
 	static bool intersectBox(BezierSpline & spline, const BoundingBox & box);
 	static bool intersectTetrahedron(BezierSpline & spline, const Vector3F * tet, const BoundingBox & box);
 	static void distanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP);
+	
+// overrid base curve
+	virtual const BoundingBox calculateBBox() const;
+	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
+	
 private:
 	void calculateCage(unsigned seg, Vector3F *p) const;
 	Vector3F calculateBezierPoint(float t, Vector3F * data) const;

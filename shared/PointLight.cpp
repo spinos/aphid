@@ -9,5 +9,8 @@
 
 #include "PointLight.h"
 
-PointLight::PointLight() {setEntityType(TPointLight);}
+PointLight::PointLight() {}
 PointLight::~PointLight() {}
+
+const TypedEntity::Type PointLight::type() const
+{ return TPointLight; }

@@ -164,6 +164,8 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/HCurveGroup.cpp
 ../shared/BaseBuffer.cpp
 ../shared/HTetrahedronMesh.cpp
+../shared/AGenericMesh.cpp
+../shared/CurveBuilder.cpp
                                 ../lapl/VertexAdjacency.cpp 
                 ../lapl/Anchor.cpp 
                 ../catmullclark/BaseQuad.cpp 

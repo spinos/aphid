@@ -1,16 +1,17 @@
 #ifndef TRIANGLEMESH_H
 #define TRIANGLEMESH_H
 
-#include "BaseMesh.h"
-class EasyModel;
-class TriangleMesh : public BaseMesh {
+#include "AGenericMesh.h"
+
+class TriangleMesh : public AGenericMesh {
 public:
     TriangleMesh();
     virtual ~TriangleMesh();
-    
-    void copyOf(EasyModel * esm);
-	virtual Matrix33F getTangentFrame(const unsigned& idx) const;
-	
+    virtual const Type type() const;
+	virtual const unsigned numComponents() const;
+	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
+	const unsigned numTriangles() const;
+	const unsigned numTriangleFaceVertices() const;
 private:
 
 };

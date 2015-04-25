@@ -9,7 +9,7 @@
 
 #include "BaseTexture.h"
 
-BaseTexture::BaseTexture() { setEntityType(TTexture); setAllWhite(true); }
+BaseTexture::BaseTexture() { setAllWhite(true); }
 
 BaseTexture::~BaseTexture() {}
 
@@ -34,3 +34,6 @@ void BaseTexture::setAllWhite(bool x) { m_allWhite = x; }
 bool BaseTexture::allWhite() const { return m_allWhite; }
 
 unsigned BaseTexture::dataSize() const { return numTexels() * m_format * m_depth; }
+
+const TypedEntity::Type BaseTexture::type() const
+{ return TTexture; }

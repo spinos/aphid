@@ -39,6 +39,8 @@ public:
 	void setAllWhite(bool x);
 	bool allWhite() const;
 	unsigned dataSize() const;
+	
+	virtual const Type type() const;
 protected:
 
 private:

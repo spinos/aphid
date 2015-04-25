@@ -32,8 +32,11 @@ public:
 	
 	unsigned processTriangleFromPolygon();
 	
+// override geometry
+	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox() const;
-	virtual const BoundingBox calculateBBox(const unsigned &idx) const;
+	virtual const BoundingBox calculateBBox(unsigned icompenent) const;
+	
 	const int faceOnSideOf(const unsigned &idx, const int &axis, const float &pos) const;
 	
 	Vector3F * vertices();
@@ -93,6 +96,8 @@ public:
 	virtual unsigned * quadIndices();
 	virtual unsigned * getQuadIndices() const;
 	virtual unsigned numQuads() const;
+	
+	virtual const Type type() const;
 	
 	void verbose() const;
 private:

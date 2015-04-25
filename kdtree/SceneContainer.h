@@ -7,21 +7,26 @@
  *
  */
 
-#include "shapeDrawer.h"
-#include <Vector3F.h>
-#include <RandomMesh.h>
-#include <KdTree.h>
+class RandomMesh;
+class KdTreeDrawer;
+class BezierCurve;
+class KdTree;
 class SceneContainer {
 public:
-	SceneContainer();
+	SceneContainer(KdTreeDrawer * drawer);
 	virtual ~SceneContainer();
 	
 	void renderWorld();
 	
 protected:
-	ShapeDrawer* fDrawer;
-	RandomMesh * m_cube;
-	RandomMesh * m_ball;
-	RandomMesh * m_bb;
+
+private:
+	void testMesh();
+	void testCurve();
+
+private:
+	KdTreeDrawer * m_drawer;
+	RandomMesh * m_mesh[4];
+	BezierCurve * m_curve[399];
 	KdTree * m_tree;
 };

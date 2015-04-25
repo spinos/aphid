@@ -23,7 +23,6 @@ BaseMesh::BaseMesh()
 	m_v = 0;
 	m_uvIds = 0;
 	m_numUVs = m_numUVIds = 0;
-	setEntityType(TypedEntity::TTriangleMesh);
 }
 
 BaseMesh::~BaseMesh()
@@ -112,6 +111,9 @@ unsigned BaseMesh::processTriangleFromPolygon()
 	return m_numTriangles;
 }
 
+const unsigned BaseMesh::numComponents() const
+{ return m_numTriangles; }
+
 const BoundingBox BaseMesh::calculateBBox() const
 {
 	BoundingBox box;
@@ -123,7 +125,7 @@ const BoundingBox BaseMesh::calculateBBox() const
 	return box;
 }
 
-const BoundingBox BaseMesh::calculateBBox(const unsigned &idx) const
+const BoundingBox BaseMesh::calculateBBox(unsigned idx) const
 {
 	BoundingBox box;
 	unsigned *trii = &_indices[idx * 3];
@@ -597,4 +599,7 @@ void BaseMesh::verbose() const
 	std::cout<<" num uvs "<<getNumUVs()<<"\n";
 	std::cout<<" num uvs indices "<<getNumUVIds()<<"\n";
 }
+
+const TypedEntity::Type BaseMesh::type() const
+{ return TTriangleMesh;}
 //:~

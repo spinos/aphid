@@ -23,7 +23,7 @@ void LightDrawer::drawLight(BaseLight * l) const
 {
 	useSolid();
 	useColor(l->lightColor());
-	switch (l->entityType()) {
+	switch (l->type()) {
 		case TypedEntity::TDistantLight:
 			drawDistantLight(static_cast<DistantLight *>(l));
 			break;

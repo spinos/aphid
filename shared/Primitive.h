@@ -8,19 +8,18 @@
  */
 
 #pragma once
-
+class Geometry;
 class Primitive {
 public:
 	Primitive();
 
-	void setGeometry(char * data);
-	char *getGeometry() const;
+	void setGeometry(Geometry * data);
+	Geometry *getGeometry() const;
 	
 	void setComponentIndex(const unsigned &idx);
 	const unsigned getComponentIndex() const;
 	
-	bool isMeshGeometry() const;
 private:
-	char *m_geometry;
+	Geometry *m_geometry;
 	unsigned m_componentIndex;
 };

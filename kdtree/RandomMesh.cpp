@@ -12,11 +12,9 @@
 #include <cmath>
 RandomMesh::RandomMesh(unsigned numFaces, const Vector3F & center, const float & size, int type) 
 {
-	createVertices(numFaces * 3);
-	createIndices(numFaces * 3);
+	createBuffer(numFaces * 4, numFaces * 4);
 	
-	Vector3F * p = vertices();
-	
+	Vector3F * p = points();
 	unsigned * idx = indices();
 	
 	float rx, ry, rz, r, phi, theta;
@@ -52,6 +50,9 @@ RandomMesh::RandomMesh(unsigned numFaces, const Vector3F & center, const float &
 		
 		p[i * 3 + 2] = p[i * 3] + Vector3F(rx, ry, rz);
 	}
+	
+	setNumPoints(numFaces * 3);
+	setNumIndices(numFaces * 3);
 }
 
 RandomMesh::~RandomMesh() {}

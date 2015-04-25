@@ -12,7 +12,6 @@
 #include <PrimitiveArray.h>
 #include <IndexArray.h>
 #include <KdTreeNodeArray.h>
-#include <BaseMesh.h>
 #include <ClassificationStorage.h>
 #include <BoundingBoxList.h>
 #include <IndexList.h>

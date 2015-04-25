@@ -12,7 +12,6 @@
 BaseTransform::BaseTransform(BaseTransform * parent)
 {
 	m_parent = parent;
-	setEntityType(TTransform);
 	m_rotateDOF.x = m_rotateDOF.y = m_rotateDOF.z = 1.f;
 }
 
@@ -174,3 +173,5 @@ Float3 BaseTransform::rotateDOF() const
     return m_rotateDOF;
 }
 
+const TypedEntity::Type BaseTransform::type() const
+{ return TTransform; }

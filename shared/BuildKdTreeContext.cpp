@@ -8,6 +8,7 @@
  */
 
 #include "BuildKdTreeContext.h"
+#include "Geometry.h"
 BuildKdTreeContext::BuildKdTreeContext() {}
 
 BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
@@ -24,11 +25,11 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
 		
 		Primitive *p = primitives.asPrimitive();
 
-		BaseMesh *mesh = (BaseMesh *)(p->getGeometry());
+		Geometry *geo = p->getGeometry();
 		
 		unsigned compIdx = p->getComponentIndex();
 		
-		primBoxes[i] = mesh->calculateBBox(compIdx);
+		primBoxes[i] = geo->calculateBBox(compIdx);
 		primBoxes[i].expand(10e-6);
 		primitives.next();
 	}

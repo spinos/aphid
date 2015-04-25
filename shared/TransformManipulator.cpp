@@ -15,12 +15,14 @@ TransformManipulator::TransformManipulator()
 	m_rotateAxis = AY;
 	m_mode = ToolContext::MoveTransform;
 	m_started = 0;
-	setEntityType(TTransformManipulator);
 }
 
 TransformManipulator::~TransformManipulator() 
 {
 }
+
+const TypedEntity::Type TransformManipulator::type() const
+{ return TTransformManipulator; }
 
 void TransformManipulator::attachTo(BaseTransform * subject)
 {

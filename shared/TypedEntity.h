@@ -11,28 +11,27 @@
 
 class TypedEntity {
 public:
-    enum TypeEntries {
+    enum Type {
 		TUnknown = 0,
-        TTriangleMesh = 1,
-        TPatchMesh = 2,
-		TKdTree = 3,
-        TTransform = 4,
-		TJoint = 5,
-		TTransformManipulator = 6,
-		TDistantLight = 7,
-		TPointLight = 8,
-		TSquareLight = 9,
-		TTexture = 10,
-		TShader= 11
+		TGenericMesh = 1,
+        TTriangleMesh = 2,
+		TPatchMesh = 3,
+		TPolygonMesh = 4,
+		TTetrahedronMesh = 5,
+        TKdTree = 6,
+        TTransform = 7,
+		TJoint = 8,
+		TTransformManipulator = 9,
+		TDistantLight = 10,
+		TPointLight = 11,
+		TSquareLight = 12,
+		TTexture = 13,
+		TShader= 14,
+		TCurve = 15,
+		TBezierCurve = 16
     };
-    
-	TypedEntity();
-	void setEntityType(TypeEntries val);
-	int entityType() const;
+    	
+	virtual const Type type() const;
 	
-	bool isMesh() const;
-	bool isTriangleMesh() const;
-	bool isPatchMesh() const;
-private:	
-	int m_type;
+private:
 };

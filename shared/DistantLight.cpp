@@ -9,5 +9,8 @@
 
 #include "DistantLight.h"
 
-DistantLight::DistantLight() {setEntityType(TDistantLight);}
+DistantLight::DistantLight() {}
 DistantLight::~DistantLight() {}
+
+const TypedEntity::Type DistantLight::type() const
+{ return TDistantLight; }

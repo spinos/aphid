@@ -18,6 +18,7 @@
 #include <CubeMesh.h>
 #include <CircleCurve.h>
 #include <DiscMesh.h>
+#include <CurveBuilder.h>
 
 GeoDrawer::GeoDrawer() 
 {
@@ -271,10 +272,12 @@ void GeoDrawer::anchor(Anchor *a, char active)
 	
 	if(a->numPoints() > 1) {
 		BaseCurve curve;
+		CurveBuilder builder;
+		
 		for(unsigned i = 0; i < a->numPoints(); i++)
-			curve.addVertex(a->getPoint(i)->p);
-		curve.finishAddVertex();
-		curve.computeKnots();
+			builder.addVertex(a->getPoint(i)->p);
+		builder.finishBuild(&curve);
+
 		linearCurve(curve);
 	}
 	glPopMatrix();
@@ -444,17 +447,17 @@ void GeoDrawer::components(SelectionArray * arr)
         const unsigned numVert = arr->numVertices();
 		if(numVert < 1) return;
 		BaseCurve curve;
+		CurveBuilder builder;
 		glDisable(GL_DEPTH_TEST);
 		for(unsigned i = 0; i < numVert; i++) {
 			Vector3F p = arr->getVertexP(i);
 			solidCube(p.x, p.y, p.z, 0.2f);
-			curve.addVertex(p);
+			builder.addVertex(p);
 		}
 		glEnable(GL_DEPTH_TEST);
 		
 		if(arr->hasVertexPath()) {
-		    curve.finishAddVertex();
-			curve.computeKnots();
+		    builder.finishBuild(&curve);
 			glLineWidth(2.f);
 			linearCurve(curve);
 			glLineWidth(1.f);
@@ -464,6 +467,7 @@ void GeoDrawer::components(SelectionArray * arr)
 
 void GeoDrawer::primitive(Primitive * prim)
 {
+/*
 	BaseMesh *geo = (BaseMesh *)prim->getGeometry();//printf("prim %i ", geo->entityType());
 	const unsigned iface = prim->getComponentIndex();
 	if(geo->isTriangleMesh())
@@ -471,6 +475,7 @@ void GeoDrawer::primitive(Primitive * prim)
 	else {
 		patch((const BaseMesh *)geo, iface);
 		}
+*/
 }
 
 void GeoDrawer::drawDisc(float scale) const

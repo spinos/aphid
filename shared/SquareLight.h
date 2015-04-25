@@ -16,6 +16,8 @@ public:
 	SquareLight();
 	virtual ~SquareLight();
 	
+	virtual const Type type() const;
+	
 	void setSquare(const BoundingRectangle & square);
 	BoundingRectangle square() const;
 protected:

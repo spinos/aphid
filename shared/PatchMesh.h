@@ -16,7 +16,7 @@ class PatchMesh : public BaseMesh {
 public:
 	PatchMesh();
 	virtual ~PatchMesh();
-	
+	virtual const Type type() const;
 	virtual unsigned getNumFaces() const;
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(const unsigned &idx) const;

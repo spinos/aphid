@@ -7,6 +7,7 @@ class CurveGroup;
 class GeoDrawer;
 class BccGrid;
 class BaseBuffer;
+class KdTree;
 struct BezierSpline;
 
 class BccWorld {
@@ -45,6 +46,7 @@ private:
 	BaseBuffer * m_splineBuf;
 	BaseBuffer * m_curveStartBuf;
 	CurveGroup * m_curves;
+	KdTree * m_tree;
 	unsigned m_numSplines;
 	TetrahedronMeshData m_mesh;
 };

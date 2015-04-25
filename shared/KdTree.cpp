@@ -16,7 +16,6 @@
 
 KdTree::KdTree() 
 {
-	setEntityType(TypedEntity::TKdTree);
 	m_root = 0;
 }
 
@@ -35,13 +34,10 @@ KdTreeNode* KdTree::getRoot() const
 	return m_root; 
 }
 
-void KdTree::addMesh(BaseMesh* mesh)
+void KdTree::addGeometry(Geometry * geo)
 {
-	m_stream.appendMesh(mesh);
-
-	BoundingBox b = getBBox();
-	b.expandBy(mesh->calculateBBox());
-	setBBox(b);
+	m_stream.appendGeometry(geo);
+	updateBBox(geo->calculateBBox());
 }
 
 void KdTree::create()
@@ -413,3 +409,6 @@ char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 	}
 	return 1;
 }
+
+const TypedEntity::Type KdTree::type() const
+{ return TypedEntity::TKdTree; }

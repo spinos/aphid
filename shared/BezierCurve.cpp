@@ -12,6 +12,9 @@
 BezierCurve::BezierCurve() {}
 BezierCurve::~BezierCurve() {}
 
+const TypedEntity::Type BezierCurve::type() const
+{ return TBezierCurve; }
+
 Vector3F BezierCurve::interpolate(float param) const
 {	
 	unsigned seg = segmentByParameter(param);
@@ -162,8 +165,8 @@ void BezierCurve::distanceToPoint(BezierSpline & spline, const Vector3F & pnt, f
 
 bool BezierCurve::intersectBox(const BoundingBox & box) const
 {
-    BoundingBox ab;
-    getAabb(&ab);
+    BoundingBox ab = getBBox();
+
     if(!ab.intersect(box)) return false;
     
 	const unsigned ns = numSegments();
@@ -225,8 +228,8 @@ bool BezierCurve::intersectTetrahedron(const Vector3F * tet) const
 	tbox.expandBy(tet[2]);
 	tbox.expandBy(tet[3]);
 	
-    BoundingBox ab;
-    getAabb(&ab);
+    BoundingBox ab = getBBox();
+
     if(!ab.intersect(tbox)) return false;
     
 	const unsigned ns = numSegments();
@@ -280,3 +283,23 @@ bool BezierCurve::intersectTetrahedron(BezierSpline & spline, const Vector3F * t
 	return false;
 }
 
+const BoundingBox BezierCurve::calculateBBox() const
+{
+	BoundingBox b;
+	BezierSpline sp;
+	const unsigned ns = numSegments();
+    for(unsigned i=0; i < ns; i++) {
+        getSegmentSpline(i, sp);   
+        sp.getAabb(&b);
+    }
+	return b;
+}
+
+const BoundingBox BezierCurve::calculateBBox(unsigned icomponent) const
+{
+	BoundingBox b;
+	BezierSpline sp;
+	getSegmentSpline(icomponent, sp);
+	sp.getAabb(&b);
+	return b;
+}

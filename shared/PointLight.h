@@ -15,6 +15,8 @@ class PointLight : public BaseLight {
 public:
 	PointLight();
 	virtual ~PointLight();
+	
+	virtual const Type type() const;
 protected:
 
 private:

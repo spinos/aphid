@@ -18,6 +18,8 @@ public:
 	TransformManipulator();
 	virtual ~TransformManipulator();
 	
+	virtual const Type type() const;
+	
 	void attachTo(BaseTransform * subject);
 	void reattach();
 	void detach();

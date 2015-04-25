@@ -55,6 +55,8 @@ public:
 	
 	void setRotateDOF(const Float3 & dof);
 	Float3 rotateDOF() const;
+	
+	virtual const Type type() const;
 protected:
 	
 	

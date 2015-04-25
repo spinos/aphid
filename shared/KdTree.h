@@ -23,7 +23,7 @@ public:
 	bool isEmpty() const;
 	KdTreeNode* getRoot() const;
 	void cleanup();
-	void addMesh(BaseMesh* mesh);
+	void addGeometry(Geometry * geo);
 	void create();
 	
 	char intersect(IntersectionContext * ctx);
@@ -31,7 +31,7 @@ public:
 	void select(SelectionContext * ctx);
 
 	Primitive * getPrim(unsigned idx);
-	
+	virtual const Type type() const;
 private:
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
 	void createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx);

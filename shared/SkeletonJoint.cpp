@@ -10,11 +10,12 @@
 #include "SkeletonJoint.h"
 
 SkeletonJoint::SkeletonJoint(BaseTransform * parent) : BaseTransform(parent) 
-{
-	setEntityType(TJoint);
-}
+{}
 
 SkeletonJoint::~SkeletonJoint() {}
+
+const TypedEntity::Type SkeletonJoint::type() const
+{ return TJoint; }
 
 void SkeletonJoint::setJointOrient(const Vector3F & v)
 {

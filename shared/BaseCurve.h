@@ -11,19 +11,22 @@
 
 #include <AllMath.h>
 #include <vector>
+#include <Geometry.h>
 class BoundingBox;
-class BaseCurve {
+class BaseCurve : public Geometry {
 public:
 	BaseCurve();
 	virtual ~BaseCurve();
 	
+// overrid typed
+	virtual const Type type() const;
+	
 	void cleanup();
 	
 	void createVertices(unsigned num);
-	void addVertex(const Vector3F & vert);
-	void finishAddVertex();
-	unsigned numVertices() const;
-	unsigned numSegments() const;
+	
+	const unsigned numVertices() const;
+	const unsigned numSegments() const;
 	void computeKnots();
 	
 	unsigned segmentByParameter(float param) const;
@@ -43,12 +46,15 @@ public:
 	
 	float length() const;
 	
-	void getAabb(BoundingBox * box) const;
-	
-	static std::vector<Vector3F> BuilderVertices;
 	Vector3F * m_cvs;
 	float * m_knots;
 	unsigned m_numVertices;
 	float m_hullLength;
+
+// override geometry
+	virtual const unsigned numComponents() const;
+	virtual const BoundingBox calculateBBox() const;
+	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
+	
 private:
 };

@@ -8,11 +8,26 @@
  */
 
 #include "MeshDrawer.h"
+#include <TriangleMesh.h>
 #include <BaseMesh.h>
 #include <BaseDeformer.h>
 #include <BaseField.h>
 MeshDrawer::MeshDrawer() {}
 MeshDrawer::~MeshDrawer() {}
+
+void MeshDrawer::triangleMesh(const TriangleMesh * mesh, const BaseDeformer * deformer) const
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	if(!deformer)
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->points());
+	else
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedP());
+
+	glDrawElements(GL_TRIANGLES, mesh->numTriangleFaceVertices(), GL_UNSIGNED_INT, mesh->indices());
+
+// deactivate vertex arrays after drawing
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
 
 void MeshDrawer::quadMesh(const BaseMesh * mesh) const
 {

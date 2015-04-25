@@ -15,6 +15,8 @@ class DistantLight : public BaseLight {
 public:
 	DistantLight();
 	virtual ~DistantLight();
+	
+	virtual const Type type() const;
 protected:
 
 private:

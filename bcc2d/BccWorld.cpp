@@ -8,6 +8,7 @@
 #include <line_math.h>
 #include "BccGlobal.h"
 #include <HesperisFile.h>
+#include <KdTree.h>
 BccWorld::BccWorld(GeoDrawer * drawer)
 {
 	m_drawer = drawer;
@@ -53,6 +54,10 @@ BccWorld::BccWorld(GeoDrawer * drawer)
 		
 	std::cout<<" bbox "<<box.str();
 	
+	std::cout<<" creating kd tree\n";
+	m_tree = new KdTree;
+	m_tree->addPrimitives(spline, m_numSplines, box);
+	
     m_grid = new BccGrid(box); std::cout<<" finest grid size "<<(m_grid->span() / (float)(1<<6));
     m_grid->create(spline, m_numSplines, 6);
 	
@@ -64,6 +69,8 @@ BccWorld::BccWorld(GeoDrawer * drawer)
 	std::cout<<" add anchor points\n";
 	m_grid->addAnchors((unsigned *)m_mesh.m_anchorBuf->data(), curveStart, m_curves->numCurves());
 	m_grid->extractTetrahedronMeshData((Vector3F *)m_mesh.m_pointBuf->data(), (unsigned *)m_mesh.m_indexBuf->data());
+	
+	
 	std::cout<<" done\n";
 }
 

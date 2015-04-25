@@ -16,9 +16,8 @@ CircleCurve::CircleCurve() : m_radius(1.f), m_eccentricity(0.f)
 
 void CircleCurve::create()
 {
-    m_numVertices = 37;
-    m_cvs = new Vector3F[numVertices()];
-	setRadius(1.f);
+	createVertices(37);
+    setRadius(1.f);
 }
 
 CircleCurve::~CircleCurve() {}

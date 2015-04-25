@@ -9,9 +9,10 @@
 
 #include "BaseCurve.h"
 #include "BoundingBox.h"
-std::vector<Vector3F> BaseCurve::BuilderVertices;
+
 BaseCurve::BaseCurve() 
 {
+	m_numVertices = 0;
 	m_cvs = 0;
 	m_knots = 0;
 }
@@ -21,6 +22,9 @@ BaseCurve::~BaseCurve()
 	cleanup();
 }
 
+const TypedEntity::Type BaseCurve::type() const
+{ return TCurve; }
+
 void BaseCurve::cleanup()
 {
 	if(m_knots) delete[] m_knots;
@@ -29,31 +33,18 @@ void BaseCurve::cleanup()
 
 void BaseCurve::createVertices(unsigned num)
 {
+	cleanup();
 	m_numVertices = num;
 	m_cvs = new Vector3F[m_numVertices];
+	m_knots = new float[m_numVertices];
 }
 
-void BaseCurve::addVertex(const Vector3F & vert)
-{
-	BuilderVertices.push_back(vert);
-}
-
-void BaseCurve::finishAddVertex()
-{
-    m_numVertices = (unsigned)BuilderVertices.size();
-	
-	m_cvs = new Vector3F[numVertices()];
-	for(unsigned i = 0; i < numVertices(); i++) m_cvs[i] = BuilderVertices[i];
-	
-	BuilderVertices.clear();
-}
-
-unsigned BaseCurve::numVertices() const
+const unsigned BaseCurve::numVertices() const
 {
 	return m_numVertices;
 }
 
-unsigned BaseCurve::numSegments() const
+const unsigned BaseCurve::numSegments() const
 {
     return m_numVertices - 1;
 }
@@ -79,7 +70,6 @@ void BaseCurve::computeKnots()
 		m_hullLength += m_cvs[i].distanceTo(m_cvs[i-1]);
 	}
 	
-	m_knots = new float[numVertices()];
 	m_knots[0] = 0.f;
 	
 	float knotL = 0.f;
@@ -143,9 +133,21 @@ float BaseCurve::length() const
 	return m_hullLength;
 }
 
-void BaseCurve::getAabb(BoundingBox * box) const
-{
-    for(unsigned i = 0; i < numVertices(); i++)
-        box->expandBy(m_cvs[i]);
+const unsigned BaseCurve::numComponents() const 
+{ return numSegments(); }
+
+const BoundingBox BaseCurve::calculateBBox() const
+{ 
+	BoundingBox b;
+	for(unsigned i = 0; i < numVertices(); i++)
+        b.expandBy(m_cvs[i]);
+	return b;
 }
 
+const BoundingBox BaseCurve::calculateBBox(unsigned icomponent) const
+{
+	BoundingBox b;
+	b.expandBy(m_cvs[icomponent]);
+	b.expandBy(m_cvs[icomponent+1]);
+	return b;
+}
