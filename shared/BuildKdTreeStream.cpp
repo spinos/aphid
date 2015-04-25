@@ -24,6 +24,7 @@ void BuildKdTreeStream::cleanup()
 
 void BuildKdTreeStream::appendGeometry(Geometry * geo)
 {
+// std::cout<<" geo type "<<geo->type()<<" ";
 	const unsigned n = geo->numComponents();
 	m_primitives.expandBy(n);
 	m_indices.expandBy(n);

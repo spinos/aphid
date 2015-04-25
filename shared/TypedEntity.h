@@ -28,7 +28,8 @@ public:
 		TTexture = 13,
 		TShader= 14,
 		TCurve = 15,
-		TBezierCurve = 16
+		TBezierCurve = 16,
+		TGeometryArray = 17
     };
     	
 	virtual const Type type() const;

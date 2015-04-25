@@ -45,7 +45,7 @@ void KdTree::create()
 	m_root = new KdTreeNode;
 	
 	BoundingBox b = getBBox();
-    b.verbose();
+    std::cout<<" kdtree level 0 box "<<b.str();
 	boost::timer bTimer;
 	bTimer.restart();
 	

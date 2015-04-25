@@ -286,12 +286,9 @@ bool BezierCurve::intersectTetrahedron(BezierSpline & spline, const Vector3F * t
 const BoundingBox BezierCurve::calculateBBox() const
 {
 	BoundingBox b;
-	BezierSpline sp;
 	const unsigned ns = numSegments();
-    for(unsigned i=0; i < ns; i++) {
-        getSegmentSpline(i, sp);   
-        sp.getAabb(&b);
-    }
+    for(unsigned i=0; i < ns; i++)
+		b.expandBy(calculateBBox(i));
 	return b;
 }
 

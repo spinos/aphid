@@ -33,7 +33,7 @@ void KdTreeDrawer::drawKdTree(KdTree * tree)
 
 void KdTreeDrawer::drawKdTreeNode(KdTreeNode * tree, const BoundingBox & bbox, int level)
 {
-	if(level == 22) return;
+	if(level == 32) return;
 	if(tree->isLeaf()) return;
 	
 	Vector3F corner0(bbox.getMin(0), bbox.getMin(1), bbox.getMin(2));

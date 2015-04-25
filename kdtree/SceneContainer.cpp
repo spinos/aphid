@@ -14,6 +14,7 @@
 #include <KdTreeDrawer.h>
 #include <BezierCurve.h>
 #include <CurveBuilder.h>
+#include <GeometryArray.h>
 #define TEST_CURVE 1
 #define TEST_MESH 0
 SceneContainer::SceneContainer(KdTreeDrawer * drawer) 
@@ -48,29 +49,34 @@ void SceneContainer::testMesh()
 
 void SceneContainer::testCurve()
 {
+	m_curves = new GeometryArray;
+	m_curves->create(599);
+	m_curves->setComponentType(TypedEntity::TBezierCurve);
+	
+	float xoff = 0.f;
 	unsigned nv;
 	Vector3F p, dp;
 	CurveBuilder cb;
 	unsigned i, j;
-	for(i=0; i<399; i++) {
-		m_curve[i] = new BezierCurve;
-		nv = 10 + 5 * RandomF01();
-		p.set(60.f + 60.f * RandomFn11(),
-					14.f * RandomF01(),
-					50.f + 60.f * RandomFn11());
+	for(i=0; i<599; i++) { xoff = (float)i/3.f;
+		BezierCurve * c = new BezierCurve;
+		nv = 10 + 15 * RandomF01();
+		p.set(-150.f + 80.f * RandomFn11() + xoff,
+					-1.f + .4f * RandomF01(),
+					-150.f + 60.f * RandomFn11() + xoff*.4f);
 		cb.addVertex(p);
 		for(j=1; j< nv; j++) {
-			dp.set(.32f * RandomFn11(),
-					.3f + RandomF01() * 2.f,
+			dp.set(.99f * RandomFn11(),
+					.3f + RandomF01() * 3.f,
 					.92f * RandomFn11());
 					
 			p += dp;
 			cb.addVertex(p);
 		}
-		cb.finishBuild(m_curve[i]);
-		
-		m_tree->addGeometry(m_curve[i]);
+		cb.finishBuild(c);
+		m_curves->setGeometry(c, i); 
 	}
+	m_tree->addGeometry(m_curves);
 }
 
 void SceneContainer::renderWorld()
@@ -86,8 +92,8 @@ void SceneContainer::renderWorld()
 	glColor3f(0.1f, .2f, .3f);
 	
 #if TEST_CURVE
-	for(i=0; i<399; i++)
-		m_drawer->smoothCurve(*m_curve[i], 4);
+	for(i=0; i<599; i++)
+		m_drawer->smoothCurve(*(BezierCurve *)m_curves->geometry(i), 4);
 #endif
 		
 	m_drawer->setWired(1);

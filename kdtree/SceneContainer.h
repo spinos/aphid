@@ -11,6 +11,7 @@ class RandomMesh;
 class KdTreeDrawer;
 class BezierCurve;
 class KdTree;
+class GeometryArray;
 class SceneContainer {
 public:
 	SceneContainer(KdTreeDrawer * drawer);
@@ -27,6 +28,6 @@ private:
 private:
 	KdTreeDrawer * m_drawer;
 	RandomMesh * m_mesh[4];
-	BezierCurve * m_curve[399];
+	GeometryArray * m_curves;
 	KdTree * m_tree;
 };
