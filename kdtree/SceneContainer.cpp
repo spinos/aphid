@@ -17,8 +17,10 @@
 #include <GeometryArray.h>
 #define TEST_CURVE 1
 #define TEST_MESH 0
+#define NUM_CURVES 899
 SceneContainer::SceneContainer(KdTreeDrawer * drawer) 
 {
+	m_level = 6;
 	m_drawer = drawer;
 	m_tree = new KdTree;
 	
@@ -29,6 +31,9 @@ SceneContainer::SceneContainer(KdTreeDrawer * drawer)
 #if TEST_CURVE
 	testCurve();
 #endif
+	
+	KdTree::MaxBuildLevel = m_level;
+	KdTree::NumPrimitivesInLeafThreashold = 8;
 	
 	m_tree->create();
 }
@@ -50,20 +55,19 @@ void SceneContainer::testMesh()
 void SceneContainer::testCurve()
 {
 	m_curves = new GeometryArray;
-	m_curves->create(599);
-	m_curves->setComponentType(TypedEntity::TBezierCurve);
+	m_curves->create(NUM_CURVES);
 	
 	float xoff = 0.f;
 	unsigned nv;
 	Vector3F p, dp;
 	CurveBuilder cb;
 	unsigned i, j;
-	for(i=0; i<599; i++) { xoff = (float)i/3.f;
+	for(i=0; i<NUM_CURVES; i++) { xoff = (float)i/3.f;
 		BezierCurve * c = new BezierCurve;
 		nv = 10 + 15 * RandomF01();
-		p.set(-150.f + 80.f * RandomFn11() + xoff,
-					-1.f + .4f * RandomF01(),
-					-150.f + 60.f * RandomFn11() + xoff*.4f);
+		p.set(-150.f + 120.f * RandomFn11() + xoff,
+					-1.f + 7.9f * RandomF01(),
+					-250.f + 100.f * RandomFn11() + xoff*.34f);
 		cb.addVertex(p);
 		for(j=1; j< nv; j++) {
 			dp.set(.99f * RandomFn11(),
@@ -92,11 +96,27 @@ void SceneContainer::renderWorld()
 	glColor3f(0.1f, .2f, .3f);
 	
 #if TEST_CURVE
-	for(i=0; i<599; i++)
+	for(i=0; i<NUM_CURVES; i++)
 		m_drawer->smoothCurve(*(BezierCurve *)m_curves->geometry(i), 4);
 #endif
 		
 	m_drawer->setWired(1);
 	m_drawer->setColor(0.15f, 1.f, 0.5f);
 	m_drawer->drawKdTree(m_tree);
+}
+
+void SceneContainer::upLevel()
+{
+	m_level++;
+	if(m_level > 24) m_level = 24;
+	KdTree::MaxBuildLevel = m_level;
+	m_tree->rebuild();
+}
+
+void SceneContainer::downLevel()
+{
+	m_level--;
+	if(m_level<2) m_level = 2;
+	KdTree::MaxBuildLevel = m_level;
+	m_tree->rebuild();
 }

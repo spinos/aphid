@@ -22,9 +22,9 @@ public:
 	
 	bool isEmpty() const;
 	KdTreeNode* getRoot() const;
-	void cleanup();
 	void addGeometry(Geometry * geo);
 	void create();
+	void rebuild();
 	
 	char intersect(IntersectionContext * ctx);
 	char closestPoint(const Vector3F & origin, IntersectionContext * ctx);
@@ -32,7 +32,10 @@ public:
 
 	Primitive * getPrim(unsigned idx);
 	virtual const Type type() const;
+	static int MaxBuildLevel;
+	static unsigned NumPrimitivesInLeafThreashold;
 private:
+	void clear();
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
 	void createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx);
 	char recusiveIntersect(KdTreeNode *node, IntersectionContext * ctx);
@@ -44,4 +47,5 @@ private:
 	BuildKdTreeStream m_stream;
 	KdTreeNode *m_root;
 	int m_maxLeafLevel;
+	unsigned m_numNoEmptyLeaf;
 };

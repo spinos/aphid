@@ -41,7 +41,6 @@ const unsigned GeometryArray::numComponents() const
 
 const BoundingBox GeometryArray::calculateBBox() const
 {
-	if(m_componentType == TUnknown) return Geometry::calculateBBox();
 	BoundingBox b;
 	unsigned i=0;
 	for(; i < m_numGeometies; i++) {
@@ -52,10 +51,7 @@ const BoundingBox GeometryArray::calculateBBox() const
 
 const BoundingBox GeometryArray::calculateBBox(unsigned icomponent) const
 {
-	if(m_componentType == TBezierCurve) 
-		return ((BezierCurve *)m_geos[icomponent])->calculateBBox();
-	
-	return BoundingBox();
+	return m_geos[icomponent]->calculateBBox();
 }
 	
 Geometry * GeometryArray::geometry(unsigned icomponent) const
@@ -63,9 +59,3 @@ Geometry * GeometryArray::geometry(unsigned icomponent) const
 
 const unsigned GeometryArray::numGeometies() const
 { return m_numGeometies; }
-
-void GeometryArray::setComponentType(Type t)
-{ m_componentType = t; }
-
-TypedEntity::Type GeometryArray::componentType() const
-{ return m_componentType; }

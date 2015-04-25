@@ -18,7 +18,8 @@ public:
 	virtual ~SceneContainer();
 	
 	void renderWorld();
-	
+	void upLevel();
+	void downLevel();
 protected:
 
 private:
@@ -30,4 +31,5 @@ private:
 	RandomMesh * m_mesh[4];
 	GeometryArray * m_curves;
 	KdTree * m_tree;
+	int m_level;
 };

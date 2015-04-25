@@ -15,6 +15,13 @@ BuildKdTreeStream::~BuildKdTreeStream()
 	cleanup();
 }
 
+void BuildKdTreeStream::initialize()
+{
+	m_indices.initialize();
+	m_nodes.initialize();
+	m_indirection.initialize();
+}
+
 void BuildKdTreeStream::cleanup()
 {
 	m_indices.clear();

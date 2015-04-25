@@ -14,6 +14,9 @@
 #include "SelectionContext.h"
 #include <boost/timer.hpp>
 
+int KdTree::MaxBuildLevel = 32;
+unsigned KdTree::NumPrimitivesInLeafThreashold = 8;
+
 KdTree::KdTree() 
 {
 	m_root = 0;
@@ -21,7 +24,7 @@ KdTree::KdTree()
 
 KdTree::~KdTree() 
 {
-	cleanup();
+	clear();
 }
 
 bool KdTree::isEmpty() const
@@ -53,17 +56,26 @@ void KdTree::create()
 	ctx->setBBox(b);
 	
 	m_maxLeafLevel = 0;
+	m_numNoEmptyLeaf = 0;
 	
 	subdivide(m_root, *ctx, 0);
 	ctx->verbose();
 	delete ctx;
 	
 	m_stream.verbose();
-	std::cout << "Kd tree constructed in " << bTimer.elapsed() << " secs";
-	std::cout<<"\n max leaf level: "<<m_maxLeafLevel<<"\n";
+	std::cout << "Kd tree constructed in " << bTimer.elapsed() 
+	<< " secs\n max leaf level: "<<m_maxLeafLevel<<"\n"
+	<< " num no-empty leaves "<<m_numNoEmptyLeaf<<"\n";
 }
 
-void KdTree::cleanup()
+void KdTree::rebuild()
+{
+	clear();
+	m_stream.initialize();
+	create();
+}
+
+void KdTree::clear()
 {
 	if(m_root) delete m_root;
 	m_root = 0;
@@ -72,7 +84,7 @@ void KdTree::cleanup()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < 8 || level == 32) {
+	if(ctx.getNumPrimitives() < NumPrimitivesInLeafThreashold || level == KdTree::MaxBuildLevel) {
 		if(level > m_maxLeafLevel) m_maxLeafLevel = level;
 		createLeaf(node, ctx);
 		return;
@@ -136,6 +148,7 @@ void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 			*idx = src[i];
 			indir.next();
 		}
+		m_numNoEmptyLeaf++;
 	}
 	
 	node->setLeaf(true);

@@ -23,12 +23,9 @@ public:
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
 	virtual const Type type() const;
 	
-	void setComponentType(Type t);
-	Type componentType() const;
 protected:
 
 private:
 	Geometry ** m_geos;
 	unsigned m_numGeometies;
-	Type m_componentType;
 };

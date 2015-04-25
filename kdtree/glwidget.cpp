@@ -54,7 +54,13 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 	}
 		
 	switch (event->key()) {
-		case Qt::Key_A:
+		case Qt::Key_I:
+			qDebug()<<"up level";
+			m_scene->upLevel();
+		    break;
+		case Qt::Key_M:
+			qDebug()<<"down level";
+			m_scene->downLevel();
 		    break;
 		default:
 			break;

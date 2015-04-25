@@ -18,6 +18,7 @@ class BuildKdTreeStream {
 public:
 	BuildKdTreeStream();
 	~BuildKdTreeStream();
+	void initialize();
 	void cleanup();
 	void appendGeometry(Geometry * geo);
 	
