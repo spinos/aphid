@@ -18,14 +18,11 @@ public:
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
-	
-	void setBBox(const BoundingBox &bbox);
-	const BoundingBox & getBBox() const;
-	
+	virtual bool intersectBox(const BoundingBox & box);
+	virtual bool intersectTetrahedron(const Vector3F * tet);
+	virtual bool intersectBox(unsigned icomponent, const BoundingBox & box);
+	virtual bool intersectTetrahedron(unsigned icomponent, const Vector3F * tet);
 protected:
-	BoundingBox * bbox();
-	void updateBBox(const BoundingBox & box);
 	
 private:
-	BoundingBox m_bbox;
 };

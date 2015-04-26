@@ -10,13 +10,14 @@
 #pragma once
 #include <AllMath.h>
 #include <Geometry.h>
+#include <Boundary.h>
 #include <IntersectionContext.h>
 #include <Ray.h>
 #include <VertexDataGroup.h>
 
 class SelectionContext;
 
-class BaseMesh : public Geometry {
+class BaseMesh : public Geometry, public Boundary {
 public:
 	BaseMesh();
 	virtual ~BaseMesh();

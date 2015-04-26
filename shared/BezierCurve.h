@@ -68,8 +68,6 @@ public:
 
 	void getSegmentSpline(unsigned i, BezierSpline & sp) const;
 	float distanceToPoint(const Vector3F & toP, Vector3F & closestP) const;
-	bool intersectBox(const BoundingBox & box) const;
-	bool intersectTetrahedron(const Vector3F * tet) const;
 	
 	static void extractSpline(BezierSpline & spline, unsigned i, Vector3F * cvs, unsigned maxInd);
 	static bool intersectBox(BezierSpline & spline, const BoundingBox & box);
@@ -79,6 +77,9 @@ public:
 // overrid base curve
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
+// overrid geometry
+	virtual bool intersectBox(const BoundingBox & box);
+	virtual bool intersectTetrahedron(const Vector3F * tet);
 	
 private:
 	void calculateCage(unsigned seg, Vector3F *p) const;

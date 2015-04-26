@@ -13,6 +13,8 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "glwidget.h"
 "SceneContainer.h"
 "KdCluster.h"
+"KdIntersection.h"
+"RandomCurve.h"
 "RandomMesh.h")
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
@@ -21,6 +23,8 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "window.cpp"
 "SceneContainer.cpp"
 "KdCluster.cpp"
+"KdIntersection.cpp"
+"RandomCurve.cpp"
 "RandomMesh.cpp")
 
 if (WIN32)

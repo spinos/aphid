@@ -15,6 +15,7 @@
 #include <BezierCurve.h>
 #include <CurveBuilder.h>
 #include <GeometryArray.h>
+#include <RandomCurve.h>
 #define TEST_CURVE 1
 #define TEST_MESH 0
 #define NUM_CURVES 899
@@ -57,29 +58,12 @@ void SceneContainer::testCurve()
 	m_curves = new GeometryArray;
 	m_curves->create(NUM_CURVES);
 	
-	float xoff = 0.f;
-	unsigned nv;
-	Vector3F p, dp;
-	CurveBuilder cb;
-	unsigned i, j;
-	for(i=0; i<NUM_CURVES; i++) { xoff = (float)i/3.f;
-		BezierCurve * c = new BezierCurve;
-		nv = 10 + 15 * RandomF01();
-		p.set(-150.f + 120.f * RandomFn11() + xoff,
-					-1.f + 7.9f * RandomF01(),
-					-250.f + 100.f * RandomFn11() + xoff*.34f);
-		cb.addVertex(p);
-		for(j=1; j< nv; j++) {
-			dp.set(.99f * RandomFn11(),
-					.3f + RandomF01() * 3.f,
-					.92f * RandomFn11());
-					
-			p += dp;
-			cb.addVertex(p);
-		}
-		cb.finishBuild(c);
-		m_curves->setGeometry(c, i);
-	}
+	RandomCurve rc;
+	rc.create(m_curves, NUM_CURVES,
+				Vector3F(-150.f, 10.f, -200.f), Vector3F(300.f, -80.f, 150.f),
+				Vector3F(.15f, 1.f, 0.13f), 
+				50.f);
+
 	m_cluster->addGeometry(m_curves);
 }
 

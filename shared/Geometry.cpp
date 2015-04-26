@@ -11,23 +11,23 @@
 Geometry::Geometry() {}
 Geometry::~Geometry() {}
 
-void Geometry::setBBox(const BoundingBox &bbox)
-{ m_bbox = bbox; }
-
-const BoundingBox & Geometry::getBBox() const
-{ return m_bbox; }
-
-BoundingBox * Geometry::bbox()
-{ return &m_bbox; }
-
-void Geometry::updateBBox(const BoundingBox & box)
-{ m_bbox.expandBy(box); }
-
 const unsigned Geometry::numComponents() const 
 { return 0; }
 
 BoundingBox const Geometry::calculateBBox() const 
-{ BoundingBox b; return b; }
+{ return BoundingBox(); }
 
 const BoundingBox Geometry::calculateBBox(unsigned icomponent) const
-{ BoundingBox b; return b; }
+{ return BoundingBox(); }
+
+bool Geometry::intersectBox(const BoundingBox & box)
+{ return false; }
+
+bool Geometry::intersectTetrahedron(const Vector3F * tet)
+{ return false; }
+
+bool Geometry::intersectBox(unsigned icomponent, const BoundingBox & box)
+{ return false; }
+
+bool Geometry::intersectTetrahedron(unsigned icomponent, const Vector3F * tet)
+{ return false; }

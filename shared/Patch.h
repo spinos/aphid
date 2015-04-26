@@ -13,8 +13,9 @@
 #include <Segment.h>
 #include <BoundingBox.h>
 #include <Geometry.h>
+#include <Boundary.h>
 
-class Patch : public Plane, public Geometry {
+class Patch : public Plane, public Boundary, public Geometry {
 public:
 	struct PushPlaneContext {
 		void reset(const Vector3F & n, const Vector3F & p, const Vector3F & f, const float & r) {

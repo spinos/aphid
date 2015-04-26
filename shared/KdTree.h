@@ -8,13 +8,14 @@
  */
 #pragma once
 #include <Geometry.h>
+#include <Boundary.h>
 #include <KdTreeNode.h>
 #include <BuildKdTreeStream.h>
 #include <KdTreeBuilder.h>
 
 class IntersectionContext;
 class SelectionContext;
-class KdTree : public Geometry
+class KdTree : public Geometry, public Boundary
 {
 public:
 	KdTree();

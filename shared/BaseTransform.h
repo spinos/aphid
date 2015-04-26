@@ -10,10 +10,11 @@
 #pragma once
 #include <AllMath.h>
 #include <Geometry.h>
+#include <Boundary.h>
 #include <NamedEntity.h>
 #include <Ray.h>
 
-class BaseTransform : public Geometry, public NamedEntity {
+class BaseTransform : public Geometry, public Boundary, public NamedEntity {
 public:
 	enum RotateAxis {
 		AX,
