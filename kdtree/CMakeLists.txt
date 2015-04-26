@@ -6,7 +6,7 @@ project (testkdtree)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
-include_directories ("../shared")
+include_directories ("../shared" "../catmullclark")
 
 set (HEADER_FILES "../shared/Base3DView.h" 
 "window.h"

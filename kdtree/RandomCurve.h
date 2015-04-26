@@ -8,12 +8,14 @@
  */
 #include <AllMath.h>
 class GeometryArray;
+class BezierPatch;
 class RandomCurve {
 public:
 	RandomCurve();
-	void create(GeometryArray * result, unsigned n, 
-				const Vector3F & base,
-				const Vector3F & translation,
+	void create(GeometryArray * result, 
+				unsigned nu, unsigned nv, 
+				BezierPatch * base,
 				const Vector3F & generalDir,
-				float radius);
+				int sn, int sm,
+				float fr);
 };

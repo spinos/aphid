@@ -11,45 +11,52 @@
 #include <BezierCurve.h>
 #include <CurveBuilder.h>
 #include <GeometryArray.h>
-
+#include <BezierPatch.h>
 RandomCurve::RandomCurve() {}
 
-void RandomCurve::create(GeometryArray * result, unsigned n, 
-				const Vector3F & base,
-				const Vector3F & translation,
+void RandomCurve::create(GeometryArray * result, 
+				unsigned nu, unsigned nv,
+				BezierPatch * base,
 				const Vector3F & generalDir,
-				float radius)
+				int sn, int sm,
+				float fr)
 {
-	unsigned i, j, nv;
-	const Vector3F deltaTranslation = translation * (1.f/(float)n);
+	unsigned i, j, k, s;
 	const float dirl = generalDir.length();
 	CurveBuilder cb;
-	Vector3F curBase = base;
+	float du = 1.f/(float)nu;
+	float dv = 1.f/(float)nv;
+	float u, v;
 	Vector3F p, vel, gra;
-	for(i = 0; i < n; i++) {
+	for(j = 0; j < nv; j++) {
+	for(i = 0; i < nu; i++) {
 		BezierCurve * c = new BezierCurve;
 		
-		p = curBase + Vector3F( RandomFn11() * radius, RandomFn11() * radius * .02f,  RandomFn11() * radius);
+		u = du * (.5f + i + RandomFn11() * .4f);
+		v = dv * (.5f + j + RandomFn11() * .4f);
+		
+		base->evaluateSurfacePosition(u, v, &p);
+		
 		cb.addVertex(p);
 		
-		nv = 10 + 3 * RandomF01();
-		vel = generalDir + Vector3F(RandomFn11(), RandomFn11(), RandomFn11()) * dirl * .22f;
+		s = sn + (sm - sn) * RandomF01();
+		vel = generalDir + Vector3F(RandomFn11(), RandomFn11(), RandomFn11()) * dirl * fr * .5f;
 		vel.normalize();
 		vel *= dirl;
 		
-		for(j=1; j< nv; j++) {
+		for(k=1; k< s; k++) {
 			p += vel;
 			cb.addVertex(p);
 			
 			gra = Vector3F(RandomFn11(), RandomFn11(), RandomFn11());
 			gra.normalize();
-			gra *= dirl * .12f;
+			gra *= dirl * fr * .1f;
 		
 			vel += gra;
 		}
 		
 		cb.finishBuild(c);
-		result->setGeometry(c, i);
-		curBase += deltaTranslation;
+		result->setGeometry(c, j * nu + i);
+	}
 	}
 }
