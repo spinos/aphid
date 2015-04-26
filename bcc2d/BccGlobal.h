@@ -8,6 +8,9 @@
  */
 #include <string>
 #include <qDebug>
+#include <BaseBuffer.h>
+#include <GeometryArray.h>
+#include <KdIntersection.h>
 class BccGlobal {
 public:
 	static std::string FileName;

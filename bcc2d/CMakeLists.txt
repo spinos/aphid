@@ -29,6 +29,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "bcc_common.h"
 "BccLattice.h"
 "BccGrid.h"
+"BccMesh.h"
 "BccWorld.h")
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
@@ -48,6 +49,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "MortonHash.cpp"
 "BccLattice.cpp"
 "BccGrid.cpp"
+"BccMesh.cpp"
 "BccWorld.cpp")
 
 if (WIN32)

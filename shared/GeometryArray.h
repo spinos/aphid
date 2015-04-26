@@ -1,3 +1,6 @@
+#ifndef GEOMETRYARRAY_H
+#define GEOMETRYARRAY_H
+
 /*
  *  GeometryArray.h
  *  
@@ -32,3 +35,4 @@ private:
 	Geometry ** m_geos;
 	unsigned m_numGeometies;
 };
+#endif        //  #ifndef GEOMETRYARRAY_H

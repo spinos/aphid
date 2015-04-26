@@ -184,5 +184,6 @@ add_library(aphid STATIC ../shared/line_math.h
 				../powell/BaseFunction.cpp
 ../kdtree/KdCluster.cpp
 ../kdtree/KdIntersection.cpp
-../shared/APointCloud.cpp)
+../shared/APointCloud.cpp
+../shared/ATetrahedronMesh.cpp)
 

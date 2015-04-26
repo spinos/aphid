@@ -1,3 +1,6 @@
+#ifndef KDCLUSTER_H
+#define KDCLUSTER_H
+
 /*
  *  KdCluster.h
  *  testkdtree
@@ -28,3 +31,4 @@ private:
 	GeometryArray ** m_groupGeometries;
 	unsigned m_currentGroup;
 };
+#endif        //  #ifndef KDCLUSTER_H

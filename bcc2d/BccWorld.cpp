@@ -2,7 +2,6 @@
 #include <BezierCurve.h>
 #include <KdTreeDrawer.h>
 #include "BccGrid.h"
-#include <BaseBuffer.h>
 #include <CurveGroup.h>
 #include "bcc_common.h"
 #include <line_math.h>
@@ -16,6 +15,7 @@
 #include <RandomCurve.h>
 #include <bezierPatch.h>
 #include <APointCloud.h>
+#include <BccMesh.h>
 
 BccWorld::BccWorld(KdTreeDrawer * drawer)
 {
@@ -75,22 +75,7 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	
 	m_cluster->create();
 	
-	createGroupIntersection();
-	
-	box = m_intersect->getBBox();
-	
-    m_grid = new BccGrid(box); std::cout<<" finest grid size "<<(m_grid->span() / (float)(1<<6));
-    // m_grid->create(spline, m_numSplines, 6);
-	m_grid->create(m_intersect, 5);
-	
-    std::cout<<" n tetrahedrons "<<m_grid->numTetrahedrons()<<"\n";
-	std::cout<<" n vertices "<<m_grid->numTetrahedronVertices()<<"\n";
-	
-    createMeshData(m_grid->numTetrahedrons(), m_grid->numTetrahedronVertices());
-
-	std::cout<<" add anchor points\n";
-	m_grid->addAnchors((unsigned *)m_mesh.m_anchorBuf->data(), m_anchorIntersect);
-	m_grid->extractTetrahedronMeshData((Vector3F *)m_mesh.m_pointBuf->data(), (unsigned *)m_mesh.m_indexBuf->data());
+	createMeshes();
 	
 	std::cout<<" done\n";
 }
@@ -216,45 +201,48 @@ void BccWorld::createCurveGeometry()
 	}
 }
 
-void BccWorld::createGroupIntersection()
+void BccWorld::createMeshes()
 {
-	m_intersect = new KdIntersection;
+	unsigned n = m_cluster->numGroups();
+	m_meshes = new BccMesh[n];
 	
-	GeometryArray * arr = m_cluster->group(0);
-	const unsigned n = arr->numGeometies();
+	unsigned ntet = 0;
+	unsigned nvert = 0;
 	unsigned i=0;
-	for(;i<n;i++) m_intersect->addGeometry(arr->geometry(i));
+	for(;i<n;i++) {
+		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, 5);
+		ntet += m_meshes[i].numTetrahedrons();
+		nvert += m_meshes[i].numPoints();
+	}
 	
-	KdTree::MaxBuildLevel = 32;
-	KdTree::NumPrimitivesInLeafThreashold = 9;
-	
-	m_intersect->create();
+	std::cout<<" n meshes "<<n<<"\n"
+	<<" total n tetrahedrons "<<ntet<<"\n"
+	<<" total n points "<<nvert<<"\n";
+	m_numMeshes = n;
 }
  
 void BccWorld::draw()
 {
-    BoundingBox box;
-    m_grid->getBounding(box);
+    // BoundingBox box;
+    // m_grid->getBounding(box);
     
-    glColor3f(.21f, .21f, .21f);
-    m_drawer->boundingBox(box);
+    // glColor3f(.21f, .21f, .21f);
+    // m_drawer->boundingBox(box);
     
-    m_grid->draw(m_drawer, (unsigned *)m_mesh.m_anchorBuf->data());
+    // m_grid->draw(m_drawer, (unsigned *)m_mesh.m_anchorBuf->data());
 
 	drawMesh();
-	drawAnchor();
+	// drawAnchor();
     
 	glDisable(GL_DEPTH_TEST);
-    glColor3f(.59f, .02f, 0.f);
-    drawCurves();
-	drawCurveStars();
+    // glColor3f(.59f, .02f, 0.f);
+    // drawCurves();
+	// drawCurveStars();
 	
 	for(unsigned i=0; i<m_cluster->numGroups(); i++) {
 		m_drawer->setGroupColorLight(i);
 		m_drawer->geometry(m_cluster->group(i));
 	}
-	
-	// m_drawer->drawKdTree(m_intersect);
 }
 
 void BccWorld::testDistanctToCurve()
@@ -591,12 +579,14 @@ void BccWorld::drawCurves()
 
 void BccWorld::drawCurveStars()
 {
+/*
 	const float csz = m_grid->span() / 1024.f;
 	m_drawer->setWired(0);
 	Vector3F * curveStart = (Vector3F *)m_curveStartBuf->data();
 	unsigned i=0;
 	for(; i < m_curves->numCurves(); i++)
 		m_drawer->cube(curveStart[i], csz);
+*/
 }
 
 bool BccWorld::readCurveDataFromFile()
@@ -641,16 +631,19 @@ void BccWorld::resetAnchors(unsigned n)
 
 void BccWorld::drawMesh()
 {
+	unsigned i=0;
+	for(;i<m_numMeshes; i++) {
     glEnable(GL_DEPTH_TEST);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glColor3f(0.3f, 0.4f, 0.33f);
-	drawMesh(m_mesh.m_numTetrahedrons, (Vector3F *)m_mesh.m_pointBuf->data(),
-	         (unsigned *)m_mesh.m_indexBuf->data());
+	drawMesh(m_meshes[i].numTetrahedrons(), m_meshes[i].points(),
+	         m_meshes[i].indices());
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glColor3f(.03f, .14f, .44f);
-    drawMesh(m_mesh.m_numTetrahedrons, (Vector3F *)m_mesh.m_pointBuf->data(),
-	         (unsigned *)m_mesh.m_indexBuf->data());
+    drawMesh(m_meshes[i].numTetrahedrons(), m_meshes[i].points(),
+	         m_meshes[i].indices());
+	}
 }
 
 void BccWorld::drawMesh(unsigned nt, Vector3F * points, unsigned * indices)
@@ -671,6 +664,7 @@ void BccWorld::drawMesh(unsigned nt, Vector3F * points, unsigned * indices)
 
 void BccWorld::drawAnchor()
 {
+/*
     const float csz = m_grid->span() / 1024.f;
 	m_drawer->setWired(0);
 	unsigned nt = m_mesh.m_numTetrahedrons;
@@ -698,6 +692,7 @@ void BccWorld::drawAnchor()
         }
     }
     glEnd();
+*/
 }
 
 bool BccWorld::save()

@@ -1,3 +1,6 @@
+#ifndef RANDOMCURVE_H
+#define RANDOMCURVE_H
+
 /*
  *  RandomCurve.h
  *  testkdtree
@@ -19,3 +22,4 @@ public:
 				int sn, int sm,
 				float fr);
 };
+#endif        //  #ifndef RANDOMCURVE_H

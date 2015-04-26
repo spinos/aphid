@@ -6,6 +6,7 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+
 #include "Geometry.h"
 class BaseBuffer;
 class AGenericMesh : public Geometry {
