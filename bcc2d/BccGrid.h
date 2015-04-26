@@ -6,6 +6,7 @@ struct BezierSpline;
 class BccLattice;
 class BezierCurve;
 class GeoDrawer;
+class KdIntersection;
 
 class BccGrid : public CartesianGrid
 {
@@ -13,7 +14,7 @@ public:
     BccGrid(const BoundingBox & bound);
     virtual ~BccGrid();
     
-    void create(BezierSpline * splines, unsigned n, int maxLevel);
+    void create(KdIntersection * tree, int maxLevel);
 	void addAnchors(unsigned * anchors, Vector3F * pos, unsigned n);
     void draw(GeoDrawer * drawer, unsigned * anchored);
 	void drawHash();
@@ -27,13 +28,11 @@ private:
     void subdivide(int level);
     void createLatticeNode();
     void createLatticeTetrahedron();
-	bool intersectBox(const BoundingBox & box) const;
 	void drawCells(GeoDrawer * drawer);
 private:
-	BezierSpline * m_splines;
+	KdIntersection * m_tree;
     BccLattice * m_lattice;
-	unsigned m_numSplines;
-    float m_tolerance;
+	float m_tolerance;
 };
 #endif        //  #ifndef BCCGRID_H
 

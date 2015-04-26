@@ -4,7 +4,7 @@
 #include <BaseLog.h>
 #include <boost/format.hpp>
 #include "bcc_common.h"
-
+#include <KdIntersection.h>
 Vector3F BccLattice::NodeCenterOffset;
 
 BccLattice::BccLattice(const BoundingBox & bound) :
@@ -70,7 +70,7 @@ void BccLattice::prepareTetrahedron()
 }
 
 void BccLattice::touchIntersectedTetrahedron(const Vector3F & center, float h,
-												BezierSpline * splines, unsigned numSplines)
+												KdIntersection * tree)
 {
     const unsigned ccenter = mortonEncode(center);
     unsigned cgreen;
@@ -91,7 +91,7 @@ void BccLattice::touchIntersectedTetrahedron(const Vector3F & center, float h,
 		}
 		if(edge->visited == 0) {
 		    encodeOctahedronVertices(center, h, i, vOctahedron);
-		    touch4Tetrahedrons(vOctahedron, splines, numSplines);
+		    touch4Tetrahedrons(vOctahedron, tree);
 		    edge->visited = 1;
 		}
     }
@@ -281,8 +281,7 @@ bool BccLattice::isCurveClosetToTetrahedron(const Vector3F * p, BezierCurve * cu
     return curve->intersectTetrahedron(p);
 }
 
-void BccLattice::touch4Tetrahedrons(unsigned * vOctahedron,
-									BezierSpline * splines, unsigned numSplines)
+void BccLattice::touch4Tetrahedrons(unsigned * vOctahedron, KdIntersection * tree)
 {
     unsigned code[4];
     Vector3F tet[4];
@@ -292,7 +291,7 @@ void BccLattice::touch4Tetrahedrons(unsigned * vOctahedron,
             code[j] = vOctahedron[OctahedronToTetrahedronVetex[i][j]];
             tet[j] = nodeCenter(code[j]);
         }
-        if(intersectTetrahedron(tet, splines, numSplines)) {
+        if(tree->intersectTetrahedron(tet)) {
             for(j=0; j<4; j++) {
                 code[j] = vOctahedron[OctahedronToTetrahedronVetex[i][j]];
                 sdb::CellValue * found = findGrid(code[j]);

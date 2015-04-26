@@ -3,6 +3,7 @@
 #include <GeoDrawer.h>
 #include <BccLattice.h>
 #include "bcc_common.h"
+#include <KdIntersection.h>
 
 BccGrid::BccGrid(const BoundingBox & bound) :
     CartesianGrid(bound)
@@ -15,10 +16,9 @@ BccGrid::~BccGrid()
     delete m_lattice;
 }
 
-void BccGrid::create(BezierSpline * splines, unsigned n, int maxLevel)
+void BccGrid::create(KdIntersection * tree, int maxLevel)
 {
-	m_splines = splines;
-	m_numSplines = n;
+	m_tree = tree;
 	
 // start at 8 cells per axis
     int level = 3;
@@ -37,18 +37,18 @@ void BccGrid::create(BezierSpline * splines, unsigned n, int maxLevel)
                 sample = ori + Vector3F(h* (float)i, h* (float)j, h* (float)k);
                 box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
                 box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
-                if(intersectBox(box))
+                if(tree->intersectBox(box))
                     addCell(sample, level);
             }
         }
     }
     std::cout<<" n level 3 cell "<<numCells()<<"\n";
 	
-    if(maxLevel <=5 ) {
-		maxLevel = 5;
+    if(maxLevel < 4 ) {
+		maxLevel = 4;
 		std::cout<<" max level cannot < 5\n";
 	}
-	if(maxLevel >= 9) {
+	if(maxLevel > 9) {
 		maxLevel = 9;
 		std::cout<<" max level cannot > 9\n";
 	}
@@ -97,7 +97,7 @@ void BccGrid::subdivide(int level)
 			box.setMin(subs.x - hh, subs.y - hh, subs.z - hh);
 			box.setMax(subs.x + hh, subs.y + hh, subs.z + hh);
 
-			if(intersectBox(box))
+			if(m_tree->intersectBox(box))
 			   addCell(subs, level);
 		}
     }
@@ -129,8 +129,8 @@ void BccGrid::createLatticeTetrahedron()
 	while(!c->end()) {
 		cen = cellCenter(c->key());
 		h = cellSizeAtLevel(c->value()->level);
-		m_lattice->touchIntersectedTetrahedron(cen, h, m_splines, m_numSplines);
-	    c->next();   
+		m_lattice->touchIntersectedTetrahedron(cen, h, m_tree);
+	    c->next();
 	}
 	m_lattice->untouchGreenEdges();
 	c->begin();
@@ -189,16 +189,6 @@ void BccGrid::drawHash()
 	    c->next();   
 	}
 	glEnd();
-}
-
-bool BccGrid::intersectBox(const BoundingBox & box) const
-{
-	unsigned i = 0;
-	for(; i<m_numSplines; i++) {
-		if(BezierCurve::intersectBox(m_splines[i], box))
-			return true;
-	}
-	return false;
 }
 
 void BccGrid::addAnchors(unsigned * anchors, Vector3F * pos, unsigned n)

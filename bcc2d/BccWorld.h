@@ -4,15 +4,17 @@
 #include <BoundingBox.h>
 #include <HTetrahedronMesh.h>
 class CurveGroup;
-class GeoDrawer;
+class KdTreeDrawer;
 class BccGrid;
 class BaseBuffer;
-class KdTree;
+class KdCluster;
+class KdIntersection;
+class GeometryArray;
 struct BezierSpline;
 
 class BccWorld {
 public:
-	BccWorld(GeoDrawer * drawer);
+	BccWorld(KdTreeDrawer * drawer);
     virtual ~BccWorld();
     
     void draw();
@@ -20,7 +22,10 @@ public:
     void moveTestP(float x, float y, float z);
     
 private:
-	void createTestCurves();
+	void createTestCurveData();
+	void createRandomCurveGeometrt();
+	void createCurveGeometry();
+	void createGroupIntersection();
     void testDistanctToCurve();
     void testDistanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP);
 	void testSpline();
@@ -32,7 +37,7 @@ private:
 	void testLineLine();
 	void testVicinity();
 	void drawCurves();
-	bool readCurvesFromFile();
+	bool readCurveDataFromFile();
 	void drawCurveStars();
 	void resetAnchors(unsigned n);
 	void createMeshData(unsigned nt, unsigned nv);
@@ -41,12 +46,14 @@ private:
 	void drawAnchor();
 private:
     Vector3F m_testP;
-    GeoDrawer * m_drawer;
+    KdTreeDrawer * m_drawer;
     BccGrid * m_grid;
 	BaseBuffer * m_splineBuf;
 	BaseBuffer * m_curveStartBuf;
 	CurveGroup * m_curves;
-	KdTree * m_tree;
+	KdCluster * m_cluster;
+	KdIntersection * m_intersect;
+	GeometryArray * m_allGeo;
 	unsigned m_numSplines;
 	TetrahedronMeshData m_mesh;
 };

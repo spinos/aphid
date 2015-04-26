@@ -1,6 +1,6 @@
 #include "BccWorld.h"
 #include <BezierCurve.h>
-#include <GeoDrawer.h>
+#include <KdTreeDrawer.h>
 #include "BccGrid.h"
 #include <BaseBuffer.h>
 #include <CurveGroup.h>
@@ -8,16 +8,24 @@
 #include <line_math.h>
 #include "BccGlobal.h"
 #include <HesperisFile.h>
-#include <KdTree.h>
-BccWorld::BccWorld(GeoDrawer * drawer)
+#include <KdCluster.h>
+#include <KdIntersection.h>
+#include <GeometryArray.h>
+#include <CurveBuilder.h>
+#include <BezierCurve.h>
+#include <RandomCurve.h>
+#include <bezierPatch.h>
+BccWorld::BccWorld(KdTreeDrawer * drawer)
 {
 	m_drawer = drawer;
 	m_curves = new CurveGroup;
-	if(!readCurvesFromFile())
-		createTestCurves();
+	if(!readCurveDataFromFile())
+		createTestCurveData();
 		
 	qDebug()<<" n curves "<<m_curves->numCurves();
-		
+	
+	createRandomCurveGeometrt();
+			
 	m_numSplines = 0;
 	unsigned * cc = m_curves->counts();
 	unsigned j, i=0;
@@ -55,21 +63,30 @@ BccWorld::BccWorld(GeoDrawer * drawer)
 	std::cout<<" bbox "<<box.str();
 	
 	std::cout<<" creating kd tree\n";
-	m_tree = new KdTree;
-	m_tree->addPrimitives(spline, m_numSplines, box);
+	m_cluster = new KdCluster;
+	m_cluster->addGeometry(m_allGeo);
+	
+	KdTree::MaxBuildLevel = 6;
+	KdTree::NumPrimitivesInLeafThreashold = 13;
+	
+	m_cluster->create();
+	
+	createGroupIntersection();
+	
+	box = m_intersect->getBBox();
 	
     m_grid = new BccGrid(box); std::cout<<" finest grid size "<<(m_grid->span() / (float)(1<<6));
-    m_grid->create(spline, m_numSplines, 6);
+    // m_grid->create(spline, m_numSplines, 6);
+	m_grid->create(m_intersect, 5);
 	
     std::cout<<" n tetrahedrons "<<m_grid->numTetrahedrons()<<"\n";
 	std::cout<<" n vertices "<<m_grid->numTetrahedronVertices()<<"\n";
 	
     createMeshData(m_grid->numTetrahedrons(), m_grid->numTetrahedronVertices());
 
-	std::cout<<" add anchor points\n";
-	m_grid->addAnchors((unsigned *)m_mesh.m_anchorBuf->data(), curveStart, m_curves->numCurves());
+	// std::cout<<" add anchor points\n";
+	// m_grid->addAnchors((unsigned *)m_mesh.m_anchorBuf->data(), curveStart, m_curves->numCurves());
 	m_grid->extractTetrahedronMeshData((Vector3F *)m_mesh.m_pointBuf->data(), (unsigned *)m_mesh.m_indexBuf->data());
-	
 	
 	std::cout<<" done\n";
 }
@@ -79,9 +96,9 @@ BccWorld::~BccWorld()
 	delete m_splineBuf;
 }
 
-void BccWorld::createTestCurves()
+void BccWorld::createTestCurveData()
 {
-	qDebug()<<" gen test curve";
+	qDebug()<<" gen 1 test curve";
 	m_curves->create(1, 9);
 	m_curves->counts()[0] = 9;
 	
@@ -101,6 +118,94 @@ void BccWorld::createTestCurves()
         cvs[i] *= 3.f;
     }
 }
+
+void BccWorld::createRandomCurveGeometrt()
+{
+	const unsigned n = 25 * 25;
+	m_allGeo = new GeometryArray;
+	m_allGeo->create(n);
+	
+	BezierPatch bp;
+	bp.resetCvs();
+	
+	int i=0;
+	bp._contorlPoints[0].y += -.2f;
+	bp._contorlPoints[1].y += -.4f;
+	bp._contorlPoints[2].y += -.4f;
+	bp._contorlPoints[3].y += -.5f;
+	
+	bp._contorlPoints[4].y += -.5f;
+	bp._contorlPoints[5].y += .1f;
+	bp._contorlPoints[6].y += .5f;
+	bp._contorlPoints[7].y += .1f;
+	
+	bp._contorlPoints[9].y += .5f;
+	bp._contorlPoints[10].y += .5f;
+	
+	bp._contorlPoints[13].y += -.4f;
+	bp._contorlPoints[14].y += -.85f;
+	bp._contorlPoints[15].y += -.21f;
+	
+	i=0;
+	for(;i<16;i++) {
+		bp._contorlPoints[i] *= 80.f;
+		bp._contorlPoints[i].y += 10.f;
+		bp._contorlPoints[i].z -= 10.f;
+	}
+	
+	RandomCurve rc;
+	rc.create(m_allGeo, 25, 25,
+				&bp,
+				Vector3F(-.15f, 1.f, 0.33f), 
+				11, 21,
+				.9f);
+}
+
+void BccWorld::createCurveGeometry()
+{
+	const unsigned n = m_curves->numCurves();
+	m_allGeo = new GeometryArray;
+	m_allGeo->create(n);
+	
+	unsigned * cc = m_curves->counts();
+	Vector3F * cvs = m_curves->points();
+	
+	CurveBuilder cb;
+	
+	unsigned ncv;
+	unsigned cvDrift = 0;
+	
+	unsigned i, j;
+	for(i=0; i< n; i++) {
+		
+		ncv = cc[i];
+		
+		for(j=0; j < ncv; j++)			
+			cb.addVertex(cvs[j + cvDrift]);
+		
+		BezierCurve * c = new BezierCurve;
+		cb.finishBuild(c);
+		
+		m_allGeo->setGeometry(c, i);
+		
+		cvDrift += ncv;
+	}
+}
+
+void BccWorld::createGroupIntersection()
+{
+	m_intersect = new KdIntersection;
+	
+	GeometryArray * arr = m_cluster->group(0);
+	const unsigned n = arr->numGeometies();
+	unsigned i=0;
+	for(;i<n;i++) m_intersect->addGeometry(arr->geometry(i));
+	
+	KdTree::MaxBuildLevel = 32;
+	KdTree::NumPrimitivesInLeafThreashold = 9;
+	
+	m_intersect->create();
+}
  
 void BccWorld::draw()
 {
@@ -119,6 +224,13 @@ void BccWorld::draw()
     glColor3f(.59f, .02f, 0.f);
     drawCurves();
 	drawCurveStars();
+	
+	for(unsigned i=0; i<m_cluster->numGroups(); i++) {
+		m_drawer->setGroupColorLight(i);
+		m_drawer->geometry(m_cluster->group(i));
+	}
+	
+	// m_drawer->drawKdTree(m_intersect);
 }
 
 void BccWorld::testDistanctToCurve()
@@ -463,7 +575,7 @@ void BccWorld::drawCurveStars()
 		m_drawer->cube(curveStart[i], csz);
 }
 
-bool BccWorld::readCurvesFromFile()
+bool BccWorld::readCurveDataFromFile()
 {
 	if(BaseFile::InvalidFilename(BccGlobal::FileName)) 
 		return false;

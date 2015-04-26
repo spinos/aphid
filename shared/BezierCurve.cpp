@@ -242,6 +242,26 @@ bool BezierCurve::intersectTetrahedron(const Vector3F * tet)
 	return false;
 }
 
+bool BezierCurve::intersectBox(unsigned icomponent, const BoundingBox & box)
+{
+	BezierSpline sp;
+	getSegmentSpline(icomponent, sp);   
+    return intersectBox(sp, box);
+}
+
+bool BezierCurve::intersectTetrahedron(unsigned icomponent, const Vector3F * tet)
+{
+	BoundingBox tbox;
+    tbox.expandBy(tet[0]);
+	tbox.expandBy(tet[1]);
+	tbox.expandBy(tet[2]);
+	tbox.expandBy(tet[3]);
+	
+	BezierSpline sp;
+	getSegmentSpline(icomponent, sp);   
+	return intersectTetrahedron(sp, tet, tbox);
+}
+
 bool BezierCurve::intersectTetrahedron(BezierSpline & spline, const Vector3F * tet, const BoundingBox & box)
 {
     BoundingBox abox;

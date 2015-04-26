@@ -5,6 +5,7 @@
 class GeoDrawer;
 struct BezierSpline;
 class BezierCurve;
+class KdIntersection;
 class BccLattice : public CartesianGrid
 {
 public:
@@ -18,7 +19,7 @@ public:
     void add38Node(const Vector3F & center, float h);
     void prepareTetrahedron();
     void touchIntersectedTetrahedron(const Vector3F & center, float h, 
-										BezierSpline * splines, unsigned numSplines);
+										KdIntersection * tree);
     void untouchGreenEdges();
     void add24Tetrahedron(const Vector3F & center, float h);
     void addNeighborTetrahedron(const Vector3F & center, float h);
@@ -42,8 +43,7 @@ private:
 	void drawAllNodes(GeoDrawer * drawer);
 	void drawVisitedNodes(GeoDrawer * drawer);
 	void encodeOctahedronVertices(const Vector3F & q, float h, int offset, unsigned * v) const;
-	void touch4Tetrahedrons(unsigned * vOctahedron,
-							BezierSpline * splines, unsigned numSplines);
+	void touch4Tetrahedrons(unsigned * vOctahedron, KdIntersection * tree);
 	void addTetrahedronsAllNodeVisited(unsigned * vOctahedron);
 	bool isCurveClosetToTetrahedron(const Vector3F * p, BezierCurve * curve) const;
 	bool intersectTetrahedron(const Vector3F * tet, BezierSpline * splines, unsigned numSplines) const;

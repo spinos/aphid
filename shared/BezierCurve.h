@@ -80,7 +80,8 @@ public:
 // overrid geometry
 	virtual bool intersectBox(const BoundingBox & box);
 	virtual bool intersectTetrahedron(const Vector3F * tet);
-	
+	virtual bool intersectBox(unsigned icomponent, const BoundingBox & box);
+	virtual bool intersectTetrahedron(unsigned icomponent, const Vector3F * tet);
 private:
 	void calculateCage(unsigned seg, Vector3F *p) const;
 	Vector3F calculateBezierPoint(float t, Vector3F * data) const;
