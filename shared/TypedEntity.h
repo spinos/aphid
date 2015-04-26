@@ -29,7 +29,8 @@ public:
 		TShader= 14,
 		TCurve = 15,
 		TBezierCurve = 16,
-		TGeometryArray = 17
+		TGeometryArray = 17,
+		TPointCloud = 18
     };
     	
 	virtual const Type type() const;

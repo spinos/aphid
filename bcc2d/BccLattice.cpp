@@ -413,13 +413,7 @@ bool BccLattice::intersectTetrahedron(const Vector3F * tet, BezierSpline * splin
 	return false;
 }
 
-void BccLattice::addAnchors(unsigned * anchored, Vector3F * pos, unsigned n)
-{
-	unsigned i=0;
-	for(; i< n; i++) addAnchor(anchored, pos[i]);
-}
-
-void BccLattice::addAnchor(unsigned * anchored, const Vector3F & pnt)
+void BccLattice::addAnchors(unsigned * anchored, KdIntersection * tree)
 {
 	Vector3F q[4];
 	unsigned j, i=0;
@@ -428,7 +422,7 @@ void BccLattice::addAnchor(unsigned * anchored, const Vector3F & pnt)
         for(j=0; j< 4; j++)
             q[j] = nodeCenter(tet->v[j]); 
         
-		if(!pointInsideTetrahedronTest(pnt, q)) continue;
+		if(!tree->intersectTetrahedron(q)) continue;
 		
 		for(j=0; j< 4; j++) {
 			sdb::CellValue * found = findGrid(tet->v[j]);

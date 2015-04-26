@@ -24,7 +24,7 @@ public:
     void add24Tetrahedron(const Vector3F & center, float h);
     void addNeighborTetrahedron(const Vector3F & center, float h);
     void countVisitedNodes();
-	void addAnchors(unsigned * anchored, Vector3F * pos, unsigned n);
+	void addAnchors(unsigned * anchored, KdIntersection * tree);
     void draw(GeoDrawer * drawer, unsigned * anchored);
 	
 	const unsigned numGreenEdges() const;
@@ -47,7 +47,6 @@ private:
 	void addTetrahedronsAllNodeVisited(unsigned * vOctahedron);
 	bool isCurveClosetToTetrahedron(const Vector3F * p, BezierCurve * curve) const;
 	bool intersectTetrahedron(const Vector3F * tet, BezierSpline * splines, unsigned numSplines) const;
-	void addAnchor(unsigned * anchored, const Vector3F & pnt);
 	void extractPoints(Vector3F * dst);
 	void extractIndices(unsigned * dst);
 private:

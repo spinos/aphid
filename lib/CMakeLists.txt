@@ -181,5 +181,8 @@ add_library(aphid STATIC ../shared/line_math.h
                 ../catmullclark/AccInterior.cpp 
                 ../catmullclark/BezierDrawer.cpp 
 				../powell/PowellMethod.cpp 
-				../powell/BaseFunction.cpp)
+				../powell/BaseFunction.cpp
+../kdtree/KdCluster.cpp
+../kdtree/KdIntersection.cpp
+../shared/APointCloud.cpp)
 

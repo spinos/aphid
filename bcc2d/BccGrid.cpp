@@ -191,9 +191,9 @@ void BccGrid::drawHash()
 	glEnd();
 }
 
-void BccGrid::addAnchors(unsigned * anchors, Vector3F * pos, unsigned n)
+void BccGrid::addAnchors(unsigned * anchors, KdIntersection * tree)
 {
-	m_lattice->addAnchors(anchors, pos, n);
+	m_lattice->addAnchors(anchors, tree);
 }
 
 const unsigned BccGrid::numTetrahedronVertices() const

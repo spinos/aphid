@@ -15,6 +15,8 @@
 #include <BezierCurve.h>
 #include <RandomCurve.h>
 #include <bezierPatch.h>
+#include <APointCloud.h>
+
 BccWorld::BccWorld(KdTreeDrawer * drawer)
 {
 	m_drawer = drawer;
@@ -24,7 +26,9 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 		
 	qDebug()<<" n curves "<<m_curves->numCurves();
 	
-	createRandomCurveGeometrt();
+	createRandomCurveGeometry();
+	createCurveStartP();
+	createAnchorIntersect();
 			
 	m_numSplines = 0;
 	unsigned * cc = m_curves->counts();
@@ -84,8 +88,8 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	
     createMeshData(m_grid->numTetrahedrons(), m_grid->numTetrahedronVertices());
 
-	// std::cout<<" add anchor points\n";
-	// m_grid->addAnchors((unsigned *)m_mesh.m_anchorBuf->data(), curveStart, m_curves->numCurves());
+	std::cout<<" add anchor points\n";
+	m_grid->addAnchors((unsigned *)m_mesh.m_anchorBuf->data(), m_anchorIntersect);
 	m_grid->extractTetrahedronMeshData((Vector3F *)m_mesh.m_pointBuf->data(), (unsigned *)m_mesh.m_indexBuf->data());
 	
 	std::cout<<" done\n";
@@ -119,7 +123,7 @@ void BccWorld::createTestCurveData()
     }
 }
 
-void BccWorld::createRandomCurveGeometrt()
+void BccWorld::createRandomCurveGeometry()
 {
 	const unsigned n = 25 * 25;
 	m_allGeo = new GeometryArray;
@@ -159,6 +163,26 @@ void BccWorld::createRandomCurveGeometrt()
 				Vector3F(-.15f, 1.f, 0.33f), 
 				11, 21,
 				.9f);
+}
+
+void BccWorld::createCurveStartP()
+{
+	const unsigned n = m_allGeo->numGeometies();
+	m_curveStartP = new APointCloud;
+	m_curveStartP->create(n);
+	Vector3F * p = m_curveStartP->points();
+	
+	unsigned i=0;
+	for(;i<n;i++) p[i] = ((BezierCurve *)m_allGeo->geometry(i))->m_cvs[0];	
+}
+
+void BccWorld::createAnchorIntersect()
+{
+	m_anchorIntersect = new KdIntersection;
+	m_anchorIntersect->addGeometry(m_curveStartP);
+	KdTree::MaxBuildLevel = 32;
+	KdTree::NumPrimitivesInLeafThreashold = 9;
+	m_anchorIntersect->create();
 }
 
 void BccWorld::createCurveGeometry()

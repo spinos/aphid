@@ -15,7 +15,7 @@ public:
     virtual ~BccGrid();
     
     void create(KdIntersection * tree, int maxLevel);
-	void addAnchors(unsigned * anchors, Vector3F * pos, unsigned n);
+	void addAnchors(unsigned * anchors, KdIntersection * tree);
     void draw(GeoDrawer * drawer, unsigned * anchored);
 	void drawHash();
 	
