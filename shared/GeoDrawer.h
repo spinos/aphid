@@ -23,6 +23,8 @@ class CircleCurve;
 class SelectionArray;
 class Primitive;
 class DiscMesh;
+class Geometry;
+class GeometryArray;
 class GeoDrawer : public MeshDrawer {
 public:
 	GeoDrawer();
@@ -63,6 +65,9 @@ public:
 	void drawSquare(const BoundingRectangle & b) const;
 	void aabb(const Vector3F & low, const Vector3F & high) const;
 	void tetrahedron(const Vector3F * p) const;
+	
+	void geometry(Geometry * geo) const;
+	void geometryArray(GeometryArray * arr) const;
 	
 private:
 	GeodesicSphereMesh * m_sphere;

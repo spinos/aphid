@@ -56,6 +56,12 @@ public:
 	void unbindTexture();
 	
 	void quad(Vector3F & a, Vector3F & b, Vector3F & c, Vector3F & d, char filled = 0) const;
+	
+	void setGroupColorLight(int i) const;
+	
+protected:
+	const float * lightColor(int i) const;
+	
 public:
 	GProfile m_markerProfile;
 	GProfile m_surfaceProfile;
@@ -65,6 +71,8 @@ public:
 	GMaterial *paintMat;
 	GLight majorLit;
 	GLight fillLit;
+	
+protected:
 	
 private:
 	int addTexture();

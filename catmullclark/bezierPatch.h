@@ -25,6 +25,7 @@ class BezierPatch : public Geometry
 public:
 	BezierPatch();
 	virtual ~BezierPatch();
+	void resetCvs();
 	void resetTexcoord();
 	virtual void setTexcoord(float* u, float* v, unsigned* idx);
 	virtual void evaluateContolPoints();

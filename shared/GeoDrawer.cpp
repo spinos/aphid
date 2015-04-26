@@ -19,7 +19,8 @@
 #include <CircleCurve.h>
 #include <DiscMesh.h>
 #include <CurveBuilder.h>
-
+#include <Geometry.h>
+#include <GeometryArray.h>
 GeoDrawer::GeoDrawer() 
 {
 	m_sphere = new GeodesicSphereMesh(8);
@@ -559,4 +560,24 @@ void GeoDrawer::tetrahedron(const Vector3F * p) const
 	vertex(p[2]);
 	vertex(p[3]);
     glEnd();
+}
+
+void GeoDrawer::geometry(Geometry * geo) const
+{
+	if(geo->type() == TypedEntity::TGeometryArray) return geometryArray((GeometryArray *)geo);
+	
+	switch (geo->type()) {
+		case TypedEntity::TBezierCurve:
+			smoothCurve(*(BezierCurve *)geo, 4);
+			break;
+		default:
+			break;
+	}
+}
+
+void GeoDrawer::geometryArray(GeometryArray * arr) const
+{
+	unsigned i = 0;
+	for(;i<arr->numGeometies(); i++)
+		geometry(arr->geometry(i));
 }

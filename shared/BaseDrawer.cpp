@@ -17,6 +17,26 @@
 #include <cmath>
 #include <zEXRImage.h>
 
+static const int sModLightColors = 15;
+static const float sLightColors[16][3] = {
+{.52941f, .807843f, .9215687f},
+{.941176f, .5f, .5f},
+{.56471f, .933333f, .56471f},
+{.933333f, .847058f, .682353f},
+{.69804f, .8745098f, .933333f},
+{.933333f, .9098049f, .666667f},
+{.603921f, 1.f, .603921f},
+{.933333f, .933333f, .87843f},
+{.12549f, .6980392f, .666667f},
+{.933333f, .862745f, .509803f},
+{.603921f, .752194f, .803921f},
+{1.f, .843137f, 0.f},
+{.517647f, .4392157f, 1.f},
+{.878431f, .933333f, .933333f},
+{1.f, .960784f, .933333f},
+{.462745f, .933333f, .77647f}
+};
+
 BaseDrawer::BaseDrawer () : m_wired(0) 
 {
 	m_activeColor.set(0.f, .8f, .2f);
@@ -295,4 +315,10 @@ void BaseDrawer::quad(Vector3F & a, Vector3F & b, Vector3F & c, Vector3F & d, ch
 	vertex(a); vertex(b); vertex(c); vertex(d);
 	glEnd();
 }
+
+const float * BaseDrawer::lightColor(int i) const
+{ return sLightColors[i&sModLightColors]; }
+
+void BaseDrawer::setGroupColorLight(int i) const
+{ glColor3fv(lightColor(i)); }
 //:~

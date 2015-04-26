@@ -36,6 +36,29 @@ BezierPatch::BezierPatch() {}
 
 BezierPatch::~BezierPatch() {}
 
+void BezierPatch::resetCvs()
+{
+	_contorlPoints[0].set(-1.f, 0.f, 1.f);
+	_contorlPoints[1].set(-.5f, 0.f, 1.f);
+	_contorlPoints[2].set(.5f, 0.f, 1.f);
+	_contorlPoints[3].set(1.f, 0.f, 1.f);
+	
+	_contorlPoints[4].set(-1.f, 0.f, .5f);
+	_contorlPoints[5].set(-.5f, 0.f, .5f);
+	_contorlPoints[6].set(.5f, 0.f, .5f);
+	_contorlPoints[7].set(1.f, 0.f, .5f);
+	
+	_contorlPoints[8].set(-1.f, 0.f, -.5f);
+	_contorlPoints[9].set(-.5f, 0.f, -.5f);
+	_contorlPoints[10].set(.5f, 0.f, -.5f);
+	_contorlPoints[11].set(1.f, 0.f, -.5f);
+	
+	_contorlPoints[12].set(-1.f, 0.f, -1.f);
+	_contorlPoints[13].set(-.5f, 0.f, -1.f);
+	_contorlPoints[14].set(.5f, 0.f, -1.f);
+	_contorlPoints[15].set(1.f, 0.f, -1.f);
+}
+
 void BezierPatch::resetTexcoord()
 {
     _texcoords[0].set(0.f, 0.f);

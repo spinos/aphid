@@ -62,37 +62,37 @@ void SceneContainer::testCurve()
 	m_curves->create(NUM_CURVES);
 	
 	BezierPatch bp;
-	bp._contorlPoints[0].set(-15.f, -8.f, 0.f);
-	bp._contorlPoints[1].set(-5.f, 4.f, 0.f);
-	bp._contorlPoints[2].set(5.f, -1.f, 0.f);
-	bp._contorlPoints[3].set(15.f, 1.f, 0.f);
-	
-	bp._contorlPoints[4].set(-15.f, 2.f, -10.f);
-	bp._contorlPoints[5].set(-5.f, 13.f, -10.f);
-	bp._contorlPoints[6].set(5.f, 15.f, -10.f);
-	bp._contorlPoints[7].set(15.f, 7.f, -10.f);
-	
-	bp._contorlPoints[8].set(-15.f, 4.f, -20.f);
-	bp._contorlPoints[9].set(-5.f, 16.f, -20.f);
-	bp._contorlPoints[10].set(5.f, 19.f, -20.f);
-	bp._contorlPoints[11].set(15.f, 11.f, -20.f);
-	
-	bp._contorlPoints[12].set(-15.f, 6.f, -30.f);
-	bp._contorlPoints[13].set(-5.f, 6.f, -30.f);
-	bp._contorlPoints[14].set(5.f, 12.f, -30.f);
-	bp._contorlPoints[15].set(15.f, 15.f, -30.f);
+	bp.resetCvs();
 	
 	int i=0;
+	bp._contorlPoints[0].y += -.2f;
+	bp._contorlPoints[1].y += -.4f;
+	bp._contorlPoints[2].y += -.4f;
+	bp._contorlPoints[3].y += -.5f;
+	
+	bp._contorlPoints[4].y += -.5f;
+	
+	bp._contorlPoints[7].y += .1f;
+	
+	bp._contorlPoints[9].y += .5f;
+	bp._contorlPoints[10].y += .5f;
+	
+	bp._contorlPoints[13].y += -.4f;
+	bp._contorlPoints[14].y += -.85f;
+	bp._contorlPoints[15].y += -.21f;
+	
+	i=0;
 	for(;i<16;i++) {
-		bp._contorlPoints[i] *= 4.f;
-		bp._contorlPoints[i].y -= 14.f;
+		bp._contorlPoints[i] *= 60.f;
+		bp._contorlPoints[i].y -= 10.f;
+		bp._contorlPoints[i].z -= 10.f;
 	}
 	
 	RandomCurve rc;
 	rc.create(m_curves, NUM_CURVESU, NUM_CURVESV,
 				&bp,
 				Vector3F(-.15f, 1.f, 0.33f), 
-				11, 19,
+				11, 21,
 				.9f);
 
 	m_cluster->addGeometry(m_curves);
@@ -111,8 +111,13 @@ void SceneContainer::renderWorld()
 	glColor3f(0.1f, .2f, .3f);
 	
 #if TEST_CURVE
-	for(i=0; i<NUM_CURVES; i++)
-		m_drawer->smoothCurve(*(BezierCurve *)m_curves->geometry(i), 4);
+	// for(i=0; i<NUM_CURVES; i++)
+		// m_drawer->smoothCurve(*(BezierCurve *)m_curves->geometry(i), 4);
+	// glColor3f(.354f,.8333f,.12f);
+	for(i=0; i<m_cluster->numGroups(); i++) {
+		m_drawer->setGroupColorLight(i);
+		m_drawer->geometry(m_cluster->group(i));
+	}
 #endif
 		
 	m_drawer->setWired(1);
