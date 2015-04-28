@@ -18,15 +18,21 @@
 #include <RandomCurve.h>
 #include <bezierPatch.h>
 
+#define DGB_DRAW 0
+#define SINGLE_TEST 1
+
 FitTest::FitTest(KdTreeDrawer * drawer) 
 { 
 	m_drawer = drawer;
 	m_allGeo = new GeometryArray;
 	
-	// createSingleCurve();
+#if SINGLE_TEST
+	createSingleCurve();
+#else
 	createRandomCurves();
+#endif
 
-	build(m_allGeo, m_tetrahedronP, m_tetrahedronInd, .87f, 4, 39);
+	build(m_allGeo, m_tetrahedronP, m_tetrahedronInd, 1.19f, 12, 39);
 	
 	std::cout<<" tetrahedron n p "<<m_tetrahedronP.size()<<"\n"
 		<<" n tetrahedron "<<m_tetrahedronInd.size()/4<<"\n done\n";
@@ -41,6 +47,12 @@ void FitTest::createSingleCurve()
     BezierCurve * curve = new BezierCurve;
 	
 	CurveBuilder cb;
+	cb.addVertex(Vector3F(-7.5f, 4.f, 5.f));
+	cb.addVertex(Vector3F(-7.5f, 6.f, 5.f));
+	cb.addVertex(Vector3F(-7.5f, 6.f, 1.f));
+	cb.addVertex(Vector3F(-7.5f, 2.f, 1.f));
+	cb.addVertex(Vector3F(-7.5f, 1.f, 1.f));
+	cb.addVertex(Vector3F(-2.5f, 1.f, 1.f));
 	cb.addVertex(Vector3F(.5f, 1.f, 1.f));
 	cb.addVertex(Vector3F(-2.f, 10.f, 6.01f));
 	cb.addVertex(Vector3F(5.f, 10.f, 5.99f));
@@ -48,6 +60,7 @@ void FitTest::createSingleCurve()
 	cb.addVertex(Vector3F(4.f, 8.f, 2.03f));
 	cb.addVertex(Vector3F(4.f, 8.5f, 1.01f));
 	cb.addVertex(Vector3F(3.1f, 8.95f, 0.f));
+	cb.addVertex(Vector3F(3.1f, 8.95f, -3.f));
 	
 	cb.finishBuild(curve);
 	m_allGeo->setGeometry(curve, 0);
@@ -89,9 +102,9 @@ void FitTest::createRandomCurves()
 	RandomCurve rc;
 	rc.create(m_allGeo, 15, 15,
 				&bp,
-				Vector3F(-.15f, 4.f, 0.33f), 
+				Vector3F(.035f, 1.84f, 0.03f), 
 				11, 17,
-				.79f);
+				.89f);
 }
 
 void FitTest::draw() 
@@ -138,33 +151,18 @@ void FitTest::draw()
 	
 	glColor3f(.8f, .8f, .8f);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+#if DGB_DRAW
+	
+#else
 	drawTetrahedron();
+#endif
 	glColor3f(.128f, .28f, .128f);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	drawTetrahedron();
-}
-
-void FitTest::drawOctahedron(BccOctahedron & octa)
-{
-	Vector3F a, b;
-	glColor3f(0.f, 0.8f, 0.f);
-
-	m_drawer->arrow(octa.p()[0], octa.p()[1]);
 	
-	glColor3f(0.8f, 0.f, 0.f);
-	
-	int i;
-	for(i=0;i<8;i++) {
-		octa.getEdge(a, b, i);
-		m_drawer->arrow(a, b);
-	}
-	
-	glColor3f(0.f, 0.f, 0.8f);
-	
-	for(i=8;i<12;i++) {
-		octa.getEdge(a, b, i);
-		m_drawer->arrow(a, b);
-	}
+#if DGB_DRAW
+	drawOctahedron(m_drawer);
+#endif
 }
 
 void FitTest::drawTetrahedron()

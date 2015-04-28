@@ -24,7 +24,6 @@ protected:
 private:
     void createSingleCurve();
     void createRandomCurves();
-	void drawOctahedron(BccOctahedron & octa);
 	void drawTetrahedron();
 private:
 	KdTreeDrawer * m_drawer;

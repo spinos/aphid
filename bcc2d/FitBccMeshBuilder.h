@@ -13,6 +13,7 @@ class BezierCurve;
 struct BezierSpline;
 class BccOctahedron;
 class GeometryArray;
+class KdTreeDrawer;
 
 class FitBccMeshBuilder {
 public:
@@ -33,16 +34,17 @@ public:
 	           unsigned minNumGroups,
 	           unsigned maxNumGroups);
 protected:
+	void drawOctahedron(KdTreeDrawer * drawer);
 private:
     void cleanup();
 	float splineLength(BezierSpline & spline);
 	float splineParameterByLength(BezierSpline & spline, float expectedLength);
+	void drawOctahedron(KdTreeDrawer * drawer, BccOctahedron & octa);
 	
 private:
 	Vector3F * m_samples;
 	unsigned m_numSamples;
 	Vector3F * m_reducedP;
 	unsigned m_numGroups;
-	float * m_octahedronSize;
 	BccOctahedron * m_octa;
 };

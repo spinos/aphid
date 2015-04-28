@@ -12,12 +12,12 @@
 #include <BezierCurve.h>
 #include "BccOctahedron.h"
 #include "bcc_common.h"
+#include <KdTreeDrawer.h>
 
 FitBccMeshBuilder::FitBccMeshBuilder() 
 {
     m_samples = 0;
     m_reducedP = 0;
-    m_octahedronSize = 0;
     m_octa = 0;
 }
 
@@ -28,7 +28,6 @@ void FitBccMeshBuilder::cleanup()
 {
     if(m_samples) delete[] m_samples;
     if(m_reducedP) delete[] m_reducedP;
-    if(m_octahedronSize) delete[] m_octahedronSize;
     if(m_octa) delete[] m_octa;
 }
     
@@ -82,7 +81,7 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	// std::cout<<" shortest seg length "<<shortestl<<"\n";
 	
 	if(groupNCvRatio < .01f) groupNCvRatio = .01f;
-	m_numGroups = ns * groupNCvRatio;
+	m_numGroups = (ns+1) * groupNCvRatio;
 	
 	if(m_numGroups < minNumGroups) m_numGroups = minNumGroups;
 	if(m_numGroups > maxNumGroups) m_numGroups = maxNumGroups;
@@ -162,36 +161,26 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	delete[] counts;
 	delete[] sl;
 	
-	m_octahedronSize = new float[m_numGroups];
-	
-	for(i=0; i<m_numGroups; i++) {
-		if(i<1) {
-			m_octahedronSize[i] = m_reducedP[0].distanceTo(m_reducedP[1]) * .5f;
-		}
-		else if(i==m_numGroups-1) {
-			m_octahedronSize[i] = m_reducedP[m_numGroups-1].distanceTo(m_reducedP[m_numGroups-2]) * .5f;
-		}
-		else {
-			m_octahedronSize[i] = m_reducedP[i].distanceTo(m_reducedP[i-1]) * .25f 
-									+ m_reducedP[i].distanceTo(m_reducedP[i+1]) * .25f;
-
-		}
-		// std::cout<<" group size"<<i<<" "<<m_octahedronSize[i];
-	}
-	
-	float averageSize = 0.f;
-	for(i=0; i<m_numGroups; i++) averageSize += m_octahedronSize[i];
-	averageSize /= (float)m_numGroups;
-	// std::cout<<" average group size "<<averageSize<<"\n";
-	
 	int vv[2];
 	int ee[2];
 	float dV, dE;
-	Vector3F a, b, c, d;
+	Vector3F octDir, a, b, c, d;
 	
 	m_octa = new BccOctahedron[m_numGroups];
 	for(i=0; i<m_numGroups;i++) {
-		m_octa[i].create(m_reducedP[i], m_octahedronSize[i]);
+		if(i<1) {
+			octDir = (m_reducedP[1] - m_reducedP[0]) * .5f;
+		}
+		else if(i==m_numGroups-1) {
+			octDir = (m_reducedP[m_numGroups-1] - m_reducedP[m_numGroups-2]) * .5f;
+		}
+		else {
+			octDir = (m_reducedP[i] - m_reducedP[i-1]) * .25f 
+					+ (m_reducedP[i+1] - m_reducedP[i]) * .25f;
+
+		}
+		
+		m_octa[i].create(m_reducedP[i], octDir);
 		
 		if(i>0) {
 			dV = m_octa[i].movePoleCost(vv, m_octa[i-1]);
@@ -199,19 +188,22 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 			dE = m_octa[i].moveEdgeCost(ee, m_octa[i-1]);
 			
 			if(dV <= dE) {
-				BccOctahedron::movePoles(m_octa[i], vv[0], m_octa[i-1], vv[1], tetrahedronP);
+				// BccOctahedron::movePoles(m_octa[i], vv[0], m_octa[i-1], vv[1], tetrahedronP);
 			}
 			else {
 				BccOctahedron::moveEdges(m_octa[i], ee[0], m_octa[i-1], ee[1], tetrahedronP);
 			}
+			
+			BccOctahedron::connectDifferentAxis(m_octa[i], 
+												m_octa[i-1], tetrahedronP);
 		}
 		
 		m_octa[i].createTetrahedron(tetrahedronP, tetrahedronInd);
 		
 		if(i>0) {
 		    if(dV <= dE) {
-				BccOctahedron::add8GapTetrahedron(m_octa[i], vv[0], m_octa[i-1], vv[1], 
-													tetrahedronInd);
+				//BccOctahedron::add8GapTetrahedron(m_octa[i], vv[0], m_octa[i-1], vv[1], 
+				//									tetrahedronInd);
 			}
 			else {
 				BccOctahedron::add2GapTetrahedron(m_octa[i], ee[0], m_octa[i-1], ee[1],
@@ -300,3 +292,31 @@ float FitBccMeshBuilder::splineParameterByLength(BezierSpline & spline, float ex
 	return result;
 }
 
+void FitBccMeshBuilder::drawOctahedron(KdTreeDrawer * drawer)
+{
+	for(unsigned i=0; i<m_numGroups; i++)
+		drawOctahedron(drawer, m_octa[i]);
+}
+
+void FitBccMeshBuilder::drawOctahedron(KdTreeDrawer * drawer, BccOctahedron & octa)
+{
+	Vector3F a, b;
+	glColor3f(0.f, 0.8f, 0.f);
+
+	drawer->arrow(octa.p()[0], octa.p()[1]);
+	
+	glColor3f(0.8f, 0.f, 0.f);
+	
+	int i;
+	for(i=0;i<8;i++) {
+		octa.getEdge(a, b, i);
+		drawer->arrow(a, b);
+	}
+	
+	glColor3f(0.f, 0.f, 0.8f);
+	
+	for(i=8;i<12;i++) {
+		octa.getEdge(a, b, i);
+		drawer->arrow(a, b);
+	}
+}
