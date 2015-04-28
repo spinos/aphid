@@ -5,11 +5,14 @@
 #include <KdTreeDrawer.h>
 #include "DrawNp.h"
 #include "BccWorld.h"
+#include "FitTest.h"
+
 #define SIMULATE_INLINE 1
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-	m_world = new BccWorld(getDrawer());
+	// m_world = new BccWorld(getDrawer());
+	m_fit = new FitTest(getDrawer());
 }
 
 GLWidget::~GLWidget()
@@ -23,7 +26,8 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-    m_world->draw();
+    // m_world->draw();
+	m_fit->draw();
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)
@@ -51,10 +55,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 {
 	if(event->modifiers() == Qt::ControlModifier | Qt::MetaModifier) {
 		if(event->key() == Qt::Key_S) {
-			m_world->save();
+			// m_world->save();
 		}
 	}
-		
+	/*
 	switch (event->key()) {
 		case Qt::Key_A:
 		    m_world->moveTestP(-.1f, 0.f, 0.f);
@@ -77,6 +81,6 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 		default:
 			break;
 	}
-	
+	*/
 	Base3DView::keyPressEvent(event);
 }

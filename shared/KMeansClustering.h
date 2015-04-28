@@ -26,6 +26,7 @@ public:
 	char isValid() const;
 	unsigned group(unsigned idx) const;
 	unsigned countPerGroup(unsigned idx) const;
+	const Vector3F centeroid(unsigned igroup) const;
 protected:
     virtual void setK(const unsigned & k);
 	virtual void setN(unsigned n);

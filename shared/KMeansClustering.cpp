@@ -145,3 +145,6 @@ void KMeansClustering::setValid(char val)
 {
 	m_valid = val;
 }
+
+const Vector3F KMeansClustering::centeroid(unsigned igroup) const
+{ return m_centroid[igroup]; }

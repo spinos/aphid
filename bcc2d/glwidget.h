@@ -3,6 +3,7 @@
 
 #include <Base3DView.h>
 class BccWorld;
+class FitTest;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -26,6 +27,7 @@ private:
 
 private:
 	BccWorld * m_world;
+	FitTest * m_fit;
 private slots:
     
 };

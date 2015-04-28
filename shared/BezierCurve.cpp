@@ -319,4 +319,4 @@ const BoundingBox BezierCurve::calculateBBox(unsigned icomponent) const
 	getSegmentSpline(icomponent, sp);
 	sp.getAabb(&b);
 	return b;
-}
+}	

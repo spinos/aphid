@@ -30,7 +30,9 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "BccLattice.h"
 "BccGrid.h"
 "BccMesh.h"
-"BccWorld.h")
+"BccWorld.h"
+"FitTest.h"
+"BccOctahedron.h")
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../shared/BaseBuffer.cpp"
@@ -50,7 +52,9 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "BccLattice.cpp"
 "BccGrid.cpp"
 "BccMesh.cpp"
-"BccWorld.cpp")
+"BccWorld.cpp"
+"FitTest.cpp"
+"BccOctahedron.cpp")
 
 if (WIN32)
 set (SOURCE_FILES ${SOURCE_FILES} "../shared/gExtension.cpp")
