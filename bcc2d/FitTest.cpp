@@ -14,11 +14,31 @@
 #include <CurveBuilder.h>
 #include "BccOctahedron.h"
 #include "bcc_common.h"
+#include "GeometryArray.h"
+#include <RandomCurve.h>
+#include <bezierPatch.h>
 
 FitTest::FitTest(KdTreeDrawer * drawer) 
 { 
-	m_drawer = drawer; 
-	m_curve = new BezierCurve;
+	m_drawer = drawer;
+	m_allGeo = new GeometryArray;
+	
+	// createSingleCurve();
+	createRandomCurves();
+
+	build(m_allGeo, m_tetrahedronP, m_tetrahedronInd, .87f, 4, 39);
+	
+	std::cout<<" tetrahedron n p "<<m_tetrahedronP.size()<<"\n"
+		<<" n tetrahedron "<<m_tetrahedronInd.size()/4<<"\n done\n";
+}
+
+FitTest::~FitTest() {}
+
+void FitTest::createSingleCurve()
+{
+    m_allGeo->create(1);
+    
+    BezierCurve * curve = new BezierCurve;
 	
 	CurveBuilder cb;
 	cb.addVertex(Vector3F(.5f, 1.f, 1.f));
@@ -29,183 +49,63 @@ FitTest::FitTest(KdTreeDrawer * drawer)
 	cb.addVertex(Vector3F(4.f, 8.5f, 1.01f));
 	cb.addVertex(Vector3F(3.1f, 8.95f, 0.f));
 	
-	cb.finishBuild(m_curve);
-	
-	unsigned ns = m_curve->numSegments();
-	
-	float * sl = new float[ns];
-	float suml = 0.f;
-	BezierSpline spl;
-	
-	unsigned i=0;
-	for(;i<ns;i++) {
-		m_curve->getSegmentSpline(i, spl);
-		sl[i] = splineLength(spl);
-		suml += sl[i];
-	}
-	
-	std::cout<<" total length "<<suml<<"\n";
-	
-	const float threashold = suml / (float)ns * 0.01f; 
-	float shortestl = 1e8f;
-	for(i=0;i<ns;i++) {
-		if(sl[i]<shortestl && sl[i] > threashold) shortestl = sl[i];
-	}
-	
-	std::cout<<" shortest seg length "<<shortestl<<"\n";
-	
-	m_numGroups = 7;
-	std::cout<<" split to "<<m_numGroups<<" groups\n";
-	
-	float splitL = suml / (float)ns /(float)m_numGroups * .249f;
-	std::cout<<" split length "<<splitL<<"\n";
-	// if(splitL < suml / (float)ns * .06249f) splitL = suml / (float)ns * .06249f;
-	
-	unsigned nsplit = 0;
-	for(i=0;i<ns;i++) {
-		nsplit += sl[i] / splitL;
-	}
-	
-	std::cout<<" n split "<<nsplit<<"\n";
-	
-	m_samples = new Vector3F[nsplit + 2];
-	
-	unsigned isample = 0;
-	float delta, param, curL;
-	unsigned j;
-	for(i=0;i<ns;i++) {
-		m_curve->getSegmentSpline(i, spl);
-		
-		nsplit = sl[i] / splitL;
-		delta = sl[i] / (float)nsplit;
-		
-		m_samples[isample] = spl.cv[0];
-		isample++;
-		
-		curL = delta;
-		
-		param = splineParameterByLength(spl, curL);
-		
-		while(param < .99f) {
-			m_samples[isample] = spl.calculateBezierPoint(param);
-			isample++;
-			
-			curL += delta;
-			param = splineParameterByLength(spl, curL);
-		}
-	}
-	
-	m_samples[isample] = m_curve->m_cvs[ns];
-	
-	m_numSamples = isample + 1;
-	
-	std::cout<<" n sample "<<m_numSamples<<"\n";
-	
-	m_reducedP = new Vector3F[m_numGroups];
-	unsigned * counts = new unsigned[m_numGroups];
-	
-	for(i=0; i<m_numGroups; i++) {
-		m_reducedP[i].setZero();
-		counts[i] = 0;
-	}
-	
-	float fcpg = (float)m_numSamples / (float)m_numGroups;
-	unsigned cpg = fcpg;
-	if(fcpg - cpg > .5f) cpg++;
-	
-	std::cout<<" n groups "<<m_numGroups<<" sample per group "<<cpg<<"\n";
-	
-	unsigned igrp;
-	for(i=0; i<m_numSamples; i++) {
-		igrp = i / cpg;
-		if(igrp > m_numGroups-1) igrp = m_numGroups -1;
-		m_reducedP[igrp] += m_samples[i];
-		counts[igrp]++;
-	}
-	
-	for(i=0; i<m_numGroups; i++) {
-		m_reducedP[i] *= 1.f/(float)counts[i];
-		if(i==m_numGroups-1) std::cout<<" count in group"<<i<<" "<<counts[i]<<"\n";
-	}
-	
-	delete[] counts;
-	delete[] sl;
-	
-	m_octahedronSize = new float[m_numGroups];
-	
-	for(i=0; i<m_numGroups; i++) {
-		if(i<1) {
-			m_octahedronSize[i] = m_reducedP[0].distanceTo(m_reducedP[1]) * .5f;
-		}
-		else if(i==m_numGroups-1) {
-			m_octahedronSize[i] = m_reducedP[m_numGroups-1].distanceTo(m_reducedP[m_numGroups-2]) * .5f;
-		}
-		else {
-			m_octahedronSize[i] = m_reducedP[i].distanceTo(m_reducedP[i-1]) * .25f 
-									+ m_reducedP[i].distanceTo(m_reducedP[i+1]) * .25f;
-
-		}
-		std::cout<<" group size"<<i<<" "<<m_octahedronSize[i];
-	}
-	
-	float averageSize = 0.f;
-	for(i=0; i<m_numGroups; i++) averageSize += m_octahedronSize[i];
-	averageSize /= (float)m_numGroups;
-	std::cout<<" average group size "<<averageSize<<"\n";
-	
-	int vv[2];
-	int ee[2];
-	float dV, dE;
-	Vector3F a, b, c, d;
-	
-	m_octa = new BccOctahedron[m_numGroups];
-	for(i=0; i<m_numGroups;i++) {
-		m_octa[i].create(m_reducedP[i], m_octahedronSize[i]);
-		
-		if(i>0) {
-			dV = m_octa[i].movePoleCost(vv, m_octa[i-1]);
-			
-			dE = m_octa[i].moveEdgeCost(ee, m_octa[i-1]);
-			
-			if(dV <= dE) {
-				BccOctahedron::movePoles(m_octa[i], vv[0], m_octa[i-1], vv[1], m_tetrahedronP);
-			}
-			else {
-				BccOctahedron::moveEdges(m_octa[i], ee[0], m_octa[i-1], ee[1], m_tetrahedronP);
-			}
-		}
-		
-		m_octa[i].createTetrahedron(m_tetrahedronP, m_tetrahedronInd);
-		
-		if(i>0) {
-		    if(dV <= dE) {
-				BccOctahedron::add8GapTetrahedron(m_octa[i], vv[0], m_octa[i-1], vv[1], 
-													m_tetrahedronInd);
-			}
-			else {
-				BccOctahedron::add2GapTetrahedron(m_octa[i], ee[0], m_octa[i-1], ee[1],
-													m_tetrahedronInd);
-			}
-		}
-	}
-		
-	std::cout<<" tetrahedron n p "<<m_tetrahedronP.size()<<"\n"
-		<<" n tetrahedron "<<m_tetrahedronInd.size()/4<<"\n";
+	cb.finishBuild(curve);
+	m_allGeo->setGeometry(curve, 0);
 }
 
-FitTest::~FitTest() {}
+void FitTest::createRandomCurves()
+{
+    const unsigned n = 15 * 15;
+	m_allGeo->create(n);
+	
+	BezierPatch bp;
+	bp.resetCvs();
+	
+	int i=0;
+	bp._contorlPoints[0].y += -.2f;
+	bp._contorlPoints[1].y += -.4f;
+	bp._contorlPoints[2].y += -.4f;
+	bp._contorlPoints[3].y += -.5f;
+	
+	bp._contorlPoints[4].y += -.5f;
+	bp._contorlPoints[5].y += .1f;
+	bp._contorlPoints[6].y += .5f;
+	bp._contorlPoints[7].y += .1f;
+	
+	bp._contorlPoints[9].y += .5f;
+	bp._contorlPoints[10].y += .5f;
+	
+	bp._contorlPoints[13].y += -.4f;
+	bp._contorlPoints[14].y += -.85f;
+	bp._contorlPoints[15].y += -.21f;
+	
+	i=0;
+	for(;i<16;i++) {
+		bp._contorlPoints[i] *= 80.f;
+		bp._contorlPoints[i].y += 10.f;
+		bp._contorlPoints[i].z -= 10.f;
+	}
+	
+	RandomCurve rc;
+	rc.create(m_allGeo, 15, 15,
+				&bp,
+				Vector3F(-.15f, 4.f, 0.33f), 
+				11, 17,
+				.79f);
+}
 
 void FitTest::draw() 
 {
+    m_drawer->geometry(m_allGeo);
 	// m_drawer->linearCurve(*m_curve);
-	// m_drawer->smoothCurve(*m_curve, 8);
-	glBegin(GL_POINTS);
-	unsigned i=0;
+	//m_drawer->smoothCurve(*m_curve, 8);
+	//glBegin(GL_POINTS);
+	//unsigned i=0;
 	
-	glColor3f(0.f, 0.f, .5f);
-	for(;i<m_numSamples;i++)
-		glVertex3fv((GLfloat *)&m_samples[i]);
-	glEnd();
+	//glColor3f(0.f, 0.f, .5f);
+	//for(;i<m_numSamples;i++)
+	//	glVertex3fv((GLfloat *)&m_samples[i]);
+	//glEnd();
 	//glColor3f(0.8f, 0.f, 0.f);
 	//for(i=1; i<m_numReducedP+1; i++)
 		//m_drawer->arrow(m_reducedP[i-1], m_reducedP[i]);
@@ -214,8 +114,8 @@ void FitTest::draw()
 	// int ee[2];
 	// float dV, dE;
 	// Vector3F a, b, c, d;
-	for(i=0; i<m_numGroups; i++) {
-		drawOctahedron(m_octa[i]);
+	//for(i=0; i<m_numGroups; i++) {
+		//drawOctahedron(m_octa[i]);
 		/*if(i>0) {
 			dV = m_octa[i].movePoleCost(vv, m_octa[i-1]);
 			
@@ -234,8 +134,13 @@ void FitTest::draw()
 				m_drawer->arrow(b, d);
 			}
 		}*/
-	}
+	//}
 	
+	glColor3f(.8f, .8f, .8f);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	drawTetrahedron();
+	glColor3f(.128f, .28f, .128f);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	drawTetrahedron();
 }
 
@@ -262,90 +167,8 @@ void FitTest::drawOctahedron(BccOctahedron & octa)
 	}
 }
 
-
-float FitTest::splineLength(BezierSpline & spline)
-{
-	float res = 0.f;
-	
-	BezierSpline stack[64];
-	int stackSize = 2;
-	spline.deCasteljauSplit(stack[0], stack[1]);
-	
-	while(stackSize > 0) {
-		BezierSpline c = stack[stackSize - 1];
-		stackSize--;
-		
-		float l = c.cv[0].distanceTo(c.cv[3]);
-		
-		if(l < 1e-6f) {
-			res += l;
-			continue;
-		}
-		
-		if(c.straightEnough()) {
-			res += l;
-			continue;
-		}
-			
-		if(stackSize == 61) {
-			std::cout<<" warning: fitTest::splineLength stack overflown\n";
-			continue;
-		}
-		
-		BezierSpline a, b;
-		c.deCasteljauSplit(a, b);
-		
-		stack[ stackSize ] = a;
-		stackSize++;
-		stack[ stackSize ] = b;
-		stackSize++;
-	}
-	
-	return res;
-}
-
-float FitTest::splineParameterByLength(BezierSpline & spline, float expectedLength)
-{
-	float pmin = 0.f;
-	float pmax = 1.f;
-	float result = (pmin + pmax) * .5f;
-	float lastResult = result;
-	BezierSpline a, b, c;
-	spline.deCasteljauSplit(a, b);
-	
-	float l = splineLength(a);
-	while(Absolute(l - expectedLength) > 1e-4) {
-		
-		if(l > expectedLength) {
-			c = a;
-			c.deCasteljauSplit(a, b);
-			
-			pmax = result;
-			
-			l -= splineLength(b);
-		}
-		else {
-			c = b;
-			c.deCasteljauSplit(a, b);
-			
-			l += splineLength(a);
-			
-			pmin = result;
-		}
-		
-		result = (pmin + pmax) * .5f;
-		
-		if(Absolute(result - lastResult) < 1e-4) break;
-		
-		lastResult = result;
-	}
-	return result;
-}
-
 void FitTest::drawTetrahedron()
 {
-	glColor3f(.8f, .8f, .8f);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_TRIANGLES);
     unsigned i, j;
     Vector3F q;

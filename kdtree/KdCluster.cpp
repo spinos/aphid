@@ -36,7 +36,7 @@ void KdCluster::create()
 	unsigned n;
 	unsigned i=0;
 	for(; i < m_currentGroup; i++) {
-		n = m_groupGeometries[i]->numGeometies();
+		n = m_groupGeometries[i]->numGeometries();
 		totalNGeo += n;
 		if(n < minN) minN = n;
 		if(n > maxN) maxN = n;

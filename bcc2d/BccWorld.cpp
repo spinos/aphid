@@ -152,7 +152,7 @@ void BccWorld::createRandomCurveGeometry()
 
 void BccWorld::createCurveStartP()
 {
-	const unsigned n = m_allGeo->numGeometies();
+	const unsigned n = m_allGeo->numGeometries();
 	m_curveStartP = new APointCloud;
 	m_curveStartP->create(n);
 	Vector3F * p = m_curveStartP->points();

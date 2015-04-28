@@ -20,7 +20,7 @@ public:
 	void create(unsigned n);
 	void setGeometry(Geometry * geo, unsigned i);
 	void setNumGeometries(unsigned n);
-	const unsigned numGeometies() const;
+	const unsigned numGeometries() const;
 	Geometry * geometry(unsigned icomponent) const;
 	void destroyGeometries();
 	

@@ -578,6 +578,6 @@ void GeoDrawer::geometry(Geometry * geo) const
 void GeoDrawer::geometryArray(GeometryArray * arr) const
 {
 	unsigned i = 0;
-	for(;i<arr->numGeometies(); i++)
+	for(;i<arr->numGeometries(); i++)
 		geometry(arr->geometry(i));
 }

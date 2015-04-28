@@ -63,5 +63,5 @@ const BoundingBox GeometryArray::calculateBBox(unsigned icomponent) const
 Geometry * GeometryArray::geometry(unsigned icomponent) const
 { return m_geos[icomponent]; }
 
-const unsigned GeometryArray::numGeometies() const
+const unsigned GeometryArray::numGeometries() const
 { return m_numGeometies; }

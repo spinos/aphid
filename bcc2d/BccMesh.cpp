@@ -26,7 +26,7 @@ BccMesh::~BccMesh()
 void BccMesh::create(GeometryArray * geoa, KdIntersection * anchorIntersect, int level)
 {
 	m_intersect = new KdIntersection;
-	const unsigned n = geoa->numGeometies();
+	const unsigned n = geoa->numGeometries();
 	unsigned i=0;
 	for(;i<n;i++) m_intersect->addGeometry(geoa->geometry(i));
 	m_intersect->create();
