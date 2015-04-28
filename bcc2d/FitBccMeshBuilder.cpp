@@ -161,6 +161,16 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	delete[] counts;
 	delete[] sl;
 	
+	float * groupSize = new float[m_numGroups];
+	for(i=0; i<m_numGroups;i++) groupSize[i] = -1e8f;
+	
+	for(i=0; i<m_numSamples; i++) {
+		igrp = i / cpg;
+		if(igrp > m_numGroups-1) igrp = m_numGroups -1;
+		float s = m_reducedP[igrp].distanceTo(m_samples[i]);
+		if(s>groupSize[igrp]) groupSize[igrp] = s;
+	}
+	
 	int vv[2];
 	int ee[2];
 	float dV, dE;
@@ -180,7 +190,7 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 
 		}
 		
-		m_octa[i].create(m_reducedP[i], octDir);
+		m_octa[i].create(m_reducedP[i], octDir, groupSize[i]);
 		
 		if(i>0) {
 			dV = m_octa[i].movePoleCost(vv, m_octa[i-1]);
@@ -211,6 +221,8 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 			}
 		}
 	}
+	
+	delete[] groupSize;
 }
 
 float FitBccMeshBuilder::splineLength(BezierSpline & spline)

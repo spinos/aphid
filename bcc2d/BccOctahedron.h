@@ -11,7 +11,7 @@ class BccOctahedron {
 public:
 	BccOctahedron();
 	virtual ~BccOctahedron();
-	void create(const Vector3F & center, const Vector3F & dir);
+	void create(const Vector3F & center, const Vector3F & dir, float size);
 	float movePoleCost(int * v, BccOctahedron & another);
 	float moveEdgeCost(int * v, BccOctahedron & another);
 	void closestPoleTo(int & va, int & vb,  BccOctahedron & another);

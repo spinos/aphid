@@ -58,9 +58,8 @@ const int BccOctahedron::axis() const
 const float BccOctahedron::size() const
 { return m_size; }
 
-void BccOctahedron::create(const Vector3F & center, const Vector3F & dir)
+void BccOctahedron::create(const Vector3F & center, const Vector3F & dir, float size)
 {
-	float size = dir.length();
 	m_axis = dir.longestAxis();
 	if(m_axis!=1) m_axis= 0;
 	if(m_axis == 0) {
