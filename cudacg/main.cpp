@@ -406,7 +406,7 @@ void testReduceMinMaxF()
 	
 	float * h = (float *)hb.data();
 	unsigned i;
-	for(i=0; i< m; i++) h[i] = -59999.f + 99999.f * ((float)(random() & 255))/127.f;
+	for(i=0; i< m; i++) h[i] = -59999.f + 99999.f * ((float)(rand() & 255))/127.f;
 	
 	db.hostToDevice(hb.data());
 	
@@ -445,9 +445,9 @@ void testReduceMinMaxBox()
 	float x, y, z;
 	unsigned i;
 	for(i=0; i< m; i++) {
-	    x = 44.f * ((float)(random() & 255))/256.f - 22.f;
-	    y = 440.f * ((float)(random() & 255))/256.f - 220.f;
-	    z = 4400.f * ((float)(random() & 255))/256.f - 2200.f;
+	    x = 44.f * ((float)(rand() & 255))/256.f - 22.f;
+	    y = 440.f * ((float)(rand() & 255))/256.f - 220.f;
+	    z = 4400.f * ((float)(rand() & 255))/256.f - 2200.f;
 	    h[i].low.x = x - 1.f;
 	    h[i].low.y = y - 1.f;
 	    h[i].low.z = z - 1.f;
