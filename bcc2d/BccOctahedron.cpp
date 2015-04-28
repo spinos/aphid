@@ -26,6 +26,16 @@ static const int OctahedronEdgePair[12][2] = {
 {8,9},{9,8},
 {10,11},{11,10}};
 
+static const int OctahedronEdgeValenceVertices[8][2] = {
+{3,4},
+{5,2},
+{2,5},
+{4,3},
+{4,3},
+{2,5},
+{5,2},
+{3,4}};
+
 BccOctahedron::BccOctahedron() {}
 BccOctahedron::~BccOctahedron() {}
 	
@@ -141,6 +151,88 @@ void BccOctahedron::moveEdges(BccOctahedron & octa1, int ea, BccOctahedron & oct
 	
 	points[octa2.vertexIndex()[vc]] = octa2.p()[vc];
 	points[octa2.vertexIndex()[vd]] = octa2.p()[vd];
+}
+
+void BccOctahedron::add8GapTetrahedron(BccOctahedron & octa1, int va, 
+	                               BccOctahedron & octa2, int vb,
+	                               std::vector<unsigned > & indices)
+{
+    indices.push_back(octa1.vertexIndex()[2]);
+    indices.push_back(octa1.vertexIndex()[3]);
+    indices.push_back(octa2.vertexIndex()[2]);
+    indices.push_back(octa1.vertexIndex()[va]);
+    
+    indices.push_back(octa2.vertexIndex()[2]);
+    indices.push_back(octa1.vertexIndex()[3]);
+    indices.push_back(octa2.vertexIndex()[3]);
+    indices.push_back(octa1.vertexIndex()[va]);
+    
+    indices.push_back(octa1.vertexIndex()[2]);
+    indices.push_back(octa2.vertexIndex()[2]);
+    indices.push_back(octa1.vertexIndex()[4]);
+    indices.push_back(octa1.vertexIndex()[va]);
+    
+    indices.push_back(octa1.vertexIndex()[4]);
+    indices.push_back(octa2.vertexIndex()[2]);
+    indices.push_back(octa2.vertexIndex()[4]);
+    indices.push_back(octa1.vertexIndex()[va]);
+    
+    indices.push_back(octa1.vertexIndex()[4]);
+    indices.push_back(octa2.vertexIndex()[4]);
+    indices.push_back(octa1.vertexIndex()[5]);
+    indices.push_back(octa1.vertexIndex()[va]);
+    
+    indices.push_back(octa1.vertexIndex()[5]);
+    indices.push_back(octa2.vertexIndex()[4]);
+    indices.push_back(octa2.vertexIndex()[5]);
+    indices.push_back(octa1.vertexIndex()[va]);
+    
+    indices.push_back(octa1.vertexIndex()[5]);
+    indices.push_back(octa2.vertexIndex()[3]);
+    indices.push_back(octa1.vertexIndex()[3]);
+    indices.push_back(octa1.vertexIndex()[va]);
+    
+    indices.push_back(octa1.vertexIndex()[5]);
+    indices.push_back(octa2.vertexIndex()[5]);
+    indices.push_back(octa2.vertexIndex()[3]);
+    indices.push_back(octa1.vertexIndex()[va]);
+}
+
+void BccOctahedron::add2GapTetrahedron(BccOctahedron & octa1, int ea, 
+	                               BccOctahedron & octa2, int eb,
+	                               std::vector<unsigned > & indices)
+{
+    int va, vb, vc, vd;
+    if(ea>7) {
+        octa1.getEdgeVertices(va, vb, ea);
+        indices.push_back(octa1.vertexIndex()[va]);
+        indices.push_back(octa1.vertexIndex()[vb]);
+        indices.push_back(octa1.vertexIndex()[0]);
+        indices.push_back(octa2.vertexIndex()[0]);
+        
+        indices.push_back(octa1.vertexIndex()[vb]);
+        indices.push_back(octa1.vertexIndex()[va]);
+        indices.push_back(octa1.vertexIndex()[1]);
+        indices.push_back(octa2.vertexIndex()[1]);
+    }
+    else {
+        octa1.getEdgeVertices(va, vb, ea);
+        vc = OctahedronEdgeValenceVertices[ea][0];
+        vd = OctahedronEdgeValenceVertices[eb][0];
+        
+        indices.push_back(octa1.vertexIndex()[va]);
+        indices.push_back(octa1.vertexIndex()[vb]);
+        indices.push_back(octa1.vertexIndex()[vc]);
+        indices.push_back(octa2.vertexIndex()[vd]);
+        
+        vc = OctahedronEdgeValenceVertices[ea][1];
+        vd = OctahedronEdgeValenceVertices[eb][1];
+        
+        indices.push_back(octa1.vertexIndex()[vb]);
+        indices.push_back(octa1.vertexIndex()[va]);
+        indices.push_back(octa1.vertexIndex()[vc]);
+        indices.push_back(octa2.vertexIndex()[vd]);
+    }
 }
 
 void BccOctahedron::createTetrahedron(std::vector<Vector3F > & points, std::vector<unsigned > & indices)

@@ -22,12 +22,12 @@ FitTest::FitTest(KdTreeDrawer * drawer)
 	
 	CurveBuilder cb;
 	cb.addVertex(Vector3F(.5f, 1.f, 1.f));
-	cb.addVertex(Vector3F(0.f, 10.f, 6.01f));
+	cb.addVertex(Vector3F(-2.f, 10.f, 6.01f));
 	cb.addVertex(Vector3F(5.f, 10.f, 5.99f));
 	cb.addVertex(Vector3F(5.f, 8.f, 4.01f));
 	cb.addVertex(Vector3F(4.f, 8.f, 2.03f));
 	cb.addVertex(Vector3F(4.f, 8.5f, 1.01f));
-	cb.addVertex(Vector3F(4.1f, 8.5f, 1.f));
+	cb.addVertex(Vector3F(3.1f, 8.95f, 0.f));
 	
 	cb.finishBuild(m_curve);
 	
@@ -54,8 +54,12 @@ FitTest::FitTest(KdTreeDrawer * drawer)
 	
 	std::cout<<" shortest seg length "<<shortestl<<"\n";
 	
-	float splitL = shortestl * .49f;
-	if(splitL < suml / (float)ns * .06249f) splitL = suml / (float)ns * .06249f;
+	m_numGroups = 7;
+	std::cout<<" split to "<<m_numGroups<<" groups\n";
+	
+	float splitL = suml / (float)ns /(float)m_numGroups * .249f;
+	std::cout<<" split length "<<splitL<<"\n";
+	// if(splitL < suml / (float)ns * .06249f) splitL = suml / (float)ns * .06249f;
 	
 	unsigned nsplit = 0;
 	for(i=0;i<ns;i++) {
@@ -97,7 +101,6 @@ FitTest::FitTest(KdTreeDrawer * drawer)
 	
 	std::cout<<" n sample "<<m_numSamples<<"\n";
 	
-	m_numGroups = 10;
 	m_reducedP = new Vector3F[m_numGroups];
 	unsigned * counts = new unsigned[m_numGroups];
 	
@@ -106,19 +109,23 @@ FitTest::FitTest(KdTreeDrawer * drawer)
 		counts[i] = 0;
 	}
 	
-	unsigned cpg = m_numSamples / m_numGroups + 1;
+	float fcpg = (float)m_numSamples / (float)m_numGroups;
+	unsigned cpg = fcpg;
+	if(fcpg - cpg > .5f) cpg++;
+	
 	std::cout<<" n groups "<<m_numGroups<<" sample per group "<<cpg<<"\n";
 	
 	unsigned igrp;
 	for(i=0; i<m_numSamples; i++) {
 		igrp = i / cpg;
+		if(igrp > m_numGroups-1) igrp = m_numGroups -1;
 		m_reducedP[igrp] += m_samples[i];
 		counts[igrp]++;
 	}
 	
 	for(i=0; i<m_numGroups; i++) {
 		m_reducedP[i] *= 1.f/(float)counts[i];
-		std::cout<<" count in group"<<i<<" "<<counts[i];
+		if(i==m_numGroups-1) std::cout<<" count in group"<<i<<" "<<counts[i]<<"\n";
 	}
 	
 	delete[] counts;
@@ -141,9 +148,10 @@ FitTest::FitTest(KdTreeDrawer * drawer)
 		std::cout<<" group size"<<i<<" "<<m_octahedronSize[i];
 	}
 	
-	// float averageSize = 0.f;
-	// for(i=0; i<m_numGroups; i++) averageSize += m_octahedronSize[i];
-	// averageSize /= (float)m_numGroups;
+	float averageSize = 0.f;
+	for(i=0; i<m_numGroups; i++) averageSize += m_octahedronSize[i];
+	averageSize /= (float)m_numGroups;
+	std::cout<<" average group size "<<averageSize<<"\n";
 	
 	int vv[2];
 	int ee[2];
@@ -161,21 +169,28 @@ FitTest::FitTest(KdTreeDrawer * drawer)
 			
 			if(dV <= dE) {
 				BccOctahedron::movePoles(m_octa[i], vv[0], m_octa[i-1], vv[1], m_tetrahedronP);
-				// BccOctahedron::add4GapTetrahedron(m_octa[i], vv[0], m_octa[i-1], vv[1], 
-					//								m_tetrahedronP, m_tetrahedronInd);
 			}
 			else {
 				BccOctahedron::moveEdges(m_octa[i], ee[0], m_octa[i-1], ee[1], m_tetrahedronP);
-				// BccOctahedron::add2GapTetrahedron(m_octa[i], ee[0], m_octa[i-1], ee[1],
-					//								m_tetrahedronP, m_tetrahedronInd);
 			}
 		}
 		
 		m_octa[i].createTetrahedron(m_tetrahedronP, m_tetrahedronInd);
+		
+		if(i>0) {
+		    if(dV <= dE) {
+				BccOctahedron::add8GapTetrahedron(m_octa[i], vv[0], m_octa[i-1], vv[1], 
+													m_tetrahedronInd);
+			}
+			else {
+				BccOctahedron::add2GapTetrahedron(m_octa[i], ee[0], m_octa[i-1], ee[1],
+													m_tetrahedronInd);
+			}
+		}
 	}
 		
 	std::cout<<" tetrahedron n p "<<m_tetrahedronP.size()<<"\n"
-		<<" tetrahedron n v "<<m_tetrahedronInd.size()<<"\n";
+		<<" n tetrahedron "<<m_tetrahedronInd.size()/4<<"\n";
 }
 
 FitTest::~FitTest() {}

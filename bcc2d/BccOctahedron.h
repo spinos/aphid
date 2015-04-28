@@ -26,6 +26,12 @@ public:
 	
 	static void movePoles(BccOctahedron & octa1, int va, BccOctahedron & octa2, int vb, std::vector<Vector3F > & points);
 	static void moveEdges(BccOctahedron & octa1, int ea, BccOctahedron & octa2, int eb, std::vector<Vector3F > & points);
+	static void add8GapTetrahedron(BccOctahedron & octa1, int va, 
+	                               BccOctahedron & octa2, int vb,
+	                               std::vector<unsigned > & indices);
+	static void add2GapTetrahedron(BccOctahedron & octa1, int ea, 
+	                               BccOctahedron & octa2, int eb,
+	                               std::vector<unsigned > & indices);
 private:
 	
 private:
