@@ -30,7 +30,8 @@ void broadphaseComputePairCountsSelfCollide(uint * dst, Aabb * boxes, uint numBo
 								KeyValuePair * mortonCodesAndAabbIndices,
 								uint4 * tetrahedronIndices);
 
-void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
+void cuBroadphase_writePairCache(uint2 * dst, uint * locations, 
+								uint * starts, uint * counts,
                               Aabb * boxes, uint numBoxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndex, 
@@ -61,7 +62,8 @@ void broadphaseComputePairCountsSelfCollideExclusion(uint * dst, Aabb * boxes, u
 								uint * exclusionIndices,
 								uint * exclusionStarts);
 								
-void broadphaseWritePairCacheSelfCollideExclusion(uint2 * dst, uint * starts, uint * counts,
+void cuBroadphase_writePairCacheSelfCollideExclusion(uint2 * dst, uint * locations, 
+								uint * starts, uint * counts,
                               Aabb * boxes, uint numBoxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndex, 
@@ -71,4 +73,6 @@ void broadphaseWritePairCacheSelfCollideExclusion(uint2 * dst, uint * starts, ui
 								unsigned queryIdx,
 								uint * exclusionIndices,
 								uint * exclusionStarts);
+								
+void cuBroadphase_writeLocation(uint * dst, uint * src, uint n);
 }

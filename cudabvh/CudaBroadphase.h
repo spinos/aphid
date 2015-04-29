@@ -47,12 +47,14 @@ private:
 	void countOverlappingPairsSelf(unsigned a);
 	void countOverlappingPairsOther(unsigned a, unsigned b);
 	void prefixSumPairCounts();
+	void setWriteLocation();
 	void writeOverlappingPairs(unsigned a, unsigned b);
 	void writeOverlappingPairsSelf(unsigned a);
 	void writeOverlappingPairsOther(unsigned a, unsigned b);
 private:
 	CUDABuffer * m_pairCounts;
 	CUDABuffer * m_pairStart;
+	CUDABuffer * m_pairWriteLocation;
 	CUDABuffer * m_scanIntermediate;
 	CUDABuffer * m_pairCache;
 #if DRAW_BPH_PAIRS

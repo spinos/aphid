@@ -21,6 +21,7 @@ CudaBroadphase::CudaBroadphase()
 	m_pairCacheLength = 0;
 	m_pairCounts = new CUDABuffer;
 	m_pairStart = new CUDABuffer;
+	m_pairWriteLocation = new CUDABuffer;
 	m_scanIntermediate = new CUDABuffer;
 	m_pairCache = new CUDABuffer;
 #if DRAW_BPH_PAIRS	
@@ -29,7 +30,19 @@ CudaBroadphase::CudaBroadphase()
 #endif
 }
 
-CudaBroadphase::~CudaBroadphase() {}
+CudaBroadphase::~CudaBroadphase() 
+{
+    delete m_pairCounts;
+    delete m_pairStart;
+    delete m_pairWriteLocation;
+    delete m_scanIntermediate;
+    delete m_pairCache;
+    
+#if DRAW_BPH_PAIRS
+	delete m_hostPairCache;
+	delete m_hostAabb;
+#endif
+}
 
 const unsigned CudaBroadphase::numBoxes() const
 { return m_numBoxes; }
@@ -74,6 +87,7 @@ void CudaBroadphase::initOnDevice()
 	m_scanBufferLength = iDivUp(m_numBoxes, 1024) * 1024;
 	m_pairCounts->create(m_scanBufferLength * 4);
 	m_pairStart->create(m_scanBufferLength * 4);
+	m_pairWriteLocation->create(m_scanBufferLength * 4);
 	m_scanIntermediate->create(m_scanBufferLength * 4);
 }
 
@@ -97,6 +111,8 @@ void CudaBroadphase::computeOverlappingPairs()
 	m_pairCacheLength = // getScanResult(m_pairCounts, m_pairStart, m_scanBufferLength - 1);
 	ScanUtil::getScanResult(m_pairCounts, m_pairStart, m_scanBufferLength);
 	if(m_pairCacheLength < 1) return;
+	
+	setWriteLocation();
 	
 	m_pairCache->create(nextPow2(m_pairCacheLength) * 8);
 	
@@ -188,6 +204,13 @@ void CudaBroadphase::prefixSumPairCounts()
     scanExclusive((uint *)scanResult, (uint *)scanInput, (uint *)scanIntermediate, m_scanBufferLength / 1024, 1024);
 }
 
+void CudaBroadphase::setWriteLocation()
+{
+    void * dst = m_pairWriteLocation->bufferOnDevice();
+    void * src = m_pairStart->bufferOnDevice();
+	cuBroadphase_writeLocation((uint *)dst, (uint *)src, m_scanBufferLength);
+}
+
 void CudaBroadphase::writeOverlappingPairs(unsigned a, unsigned b)
 {
     if(a==b) writeOverlappingPairsSelf(a);
@@ -201,6 +224,9 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	
 	uint * starts = (uint *)m_pairStart->bufferOnDevice();
 	starts += m_objectStart[a];
+	
+	uint * location = (uint *)m_pairWriteLocation->bufferOnDevice();
+	location += m_objectStart[a];
 
 // only for tetrahedron system	
 	CudaTetrahedronSystem * query = static_cast<CudaTetrahedronSystem *>(m_objects[a]);
@@ -219,7 +245,7 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	
 	void * cache = m_pairCache->bufferOnDevice();
 	
-	broadphaseWritePairCacheSelfCollideExclusion((uint2 *)cache, starts, counts, 
+	cuBroadphase_writePairCacheSelfCollideExclusion((uint2 *)cache, location, starts, counts, 
 	                         (Aabb *)boxes, numBoxes,
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
@@ -239,6 +265,9 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 	uint * starts = (uint *)m_pairStart->bufferOnDevice();
 	starts += m_objectStart[a];
 	
+	uint * location = (uint *)m_pairWriteLocation->bufferOnDevice();
+	location += m_objectStart[a];
+	
 	CudaLinearBvh * query = m_objects[a];
 	CudaLinearBvh * tree = m_objects[b];
 	
@@ -253,7 +282,7 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 	
 	void * cache = m_pairCache->bufferOnDevice();
 	
-	broadphaseWritePairCache((uint2 *)cache, starts, counts, 
+	cuBroadphase_writePairCache((uint2 *)cache, location, starts, counts, 
 	                         (Aabb *)boxes, numBoxes,
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 

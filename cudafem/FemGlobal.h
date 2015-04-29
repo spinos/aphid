@@ -12,6 +12,7 @@
 #include <HTetrahedronMesh.h>
 #include <BaseBuffer.h>
 #include <tetrahedron_math.h>
+#define DISABLE_FEM 0
 class FemGlobal {
 public:
 	static std::string FileName;

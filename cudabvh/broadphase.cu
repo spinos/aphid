@@ -3,7 +3,7 @@
 #include <CudaBase.h>
 #include <stripedModel.cu>
 
-#define B3_BROADPHASE_MAX_STACK_SIZE 96
+#define B3_BROADPHASE_MAX_STACK_SIZE 128
 
 __device__ int isElementExcluded(uint b, uint a, 
 									uint * exclusionInd,
@@ -34,6 +34,7 @@ __device__ int isTetrahedronConnected(uint a, uint b, const uint4 * v)
 }
 
 __global__ void writePairCacheSelfCollideExclusion_kernel(uint2 * dst, 
+                                uint * cacheWriteLocation,
 								uint * cacheStarts, 
 								uint * overlappingCounts,
 								Aabb * boxes, 
@@ -50,11 +51,13 @@ __global__ void writePairCacheSelfCollideExclusion_kernel(uint2 * dst,
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	if(boxIndex >= maxBoxInd) return;
 	
-	//uint cacheSize = overlappingCounts[boxIndex];
-	//if(cacheSize < 1) return;
+	uint cacheSize = overlappingCounts[boxIndex];
+	if(cacheSize < 1) return;
 	
 	uint startLoc = cacheStarts[boxIndex];
-	uint writeLoc = startLoc;
+	uint writeLoc = cacheWriteLocation[boxIndex];
+	
+	if((writeLoc - startLoc) >= cacheSize) return;
 	
 	Aabb box = boxes[boxIndex];
 	
@@ -88,12 +91,15 @@ __global__ void writePairCacheSelfCollideExclusion_kernel(uint2 * dst,
 			        dst[writeLoc] = pair;
 			        writeLoc++;
 			    }
-			    // }
-			    //if((writeLoc - startLoc)==cacheSize) { // cache if full
-			    //    return;
-			    //}
+			    
+			    if((writeLoc - startLoc)==cacheSize) { // cache if full
+			        break;
+			    }
 			}
 			else {
+			    if(stackSize == B3_BROADPHASE_MAX_STACK_SIZE)
+			        continue;
+			    
                 stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
                 stackSize++;
                 stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
@@ -101,6 +107,7 @@ __global__ void writePairCacheSelfCollideExclusion_kernel(uint2 * dst,
 			}
 		}
 	}
+	cacheWriteLocation[boxIndex] = writeLoc;
 }
 
 __global__ void computePairCountsSelfCollideExclusion_kernel(uint * overlappingCounts, 
@@ -275,7 +282,11 @@ __global__ void computePairCountsSelfCollide_kernel(uint * overlappingCounts, Aa
 	}
 }
 
-__global__ void writePairCache_kernel(uint2 * dst, uint * cacheStarts, uint * overlappingCounts, Aabb * boxes,
+__global__ void writePairCache_kernel(uint2 * dst, 
+                                uint * cacheWriteLocation,
+                                uint * cacheStarts, 
+                                uint * overlappingCounts, 
+                                Aabb * boxes,
                                 uint maxBoxInd,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndices, 
@@ -286,11 +297,13 @@ __global__ void writePairCache_kernel(uint2 * dst, uint * cacheStarts, uint * ov
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	if(boxIndex >= maxBoxInd) return;
 	
-	//uint cacheSize = overlappingCounts[boxIndex];
-	//if(cacheSize < 1) return;
+	uint cacheSize = overlappingCounts[boxIndex];
+	if(cacheSize < 1) return;
 	
 	uint startLoc = cacheStarts[boxIndex];
-	uint writeLoc = startLoc;
+	uint writeLoc = cacheWriteLocation[boxIndex];
+	
+	if((writeLoc - startLoc) >= cacheSize) return;
 	
 	Aabb box = boxes[boxIndex];
 	
@@ -323,12 +336,15 @@ __global__ void writePairCache_kernel(uint2 * dst, uint * cacheStarts, uint * ov
                 // ascentOrder<uint2>(pair);
                 dst[writeLoc] = pair;
                 writeLoc++;
-			    // }
-			    //if((writeLoc - startLoc)==cacheSize) { // cache if full
-			    //    return;
-			    //}
+			    
+			    if((writeLoc - startLoc)==cacheSize) { // cache if full
+			        break;
+			    }
 			}
 			else {
+			    if(stackSize == B3_BROADPHASE_MAX_STACK_SIZE)
+			        continue;
+			    
                 stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
                 stackSize++;
                 stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
@@ -336,6 +352,7 @@ __global__ void writePairCache_kernel(uint2 * dst, uint * cacheStarts, uint * ov
 			}
 		}
 	}
+	cacheWriteLocation[boxIndex] = writeLoc;
 }
 
 __global__ void writePairCacheSelfCollide_kernel(uint2 * dst, uint * cacheStarts, uint * overlappingCounts, Aabb * boxes,
@@ -445,6 +462,14 @@ __global__ void compactUniquePairs_kernel(uint2 * dst, uint2 * pairs, uint * uni
 	}
 }
 
+__global__ void startAsWriteLocation(uint * dst, uint * src, uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(ind >= maxInd) return;
+	dst[ind] = src[ind];
+}
+
 extern "C" {
 
 void broadphaseResetPairCounts(uint * dst, uint num)
@@ -513,7 +538,8 @@ void broadphaseComputePairCountsSelfCollide(uint * dst, Aabb * boxes, uint numBo
 								tetrahedronIndices);
 }
 
-void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
+void cuBroadphase_writePairCache(uint2 * dst, uint * locations, 
+                                uint * starts, uint * counts,
                               Aabb * boxes, uint numBoxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndex, 
@@ -528,7 +554,9 @@ void broadphaseWritePairCache(uint2 * dst, uint * starts, uint * counts,
     
     dim3 grid(nblk, 1, 1);
     
-    writePairCache_kernel<<< grid, block >>>(dst, starts, counts,
+    writePairCache_kernel<<< grid, block >>>(dst, 
+                                locations,
+                                starts, counts,
                                 boxes,
                                 numBoxes,
 								rootNodeIndex, 
@@ -611,7 +639,8 @@ void broadphaseComputePairCountsSelfCollideExclusion(uint * dst, Aabb * boxes, u
 								exclusionStarts);
 }
 								
-void broadphaseWritePairCacheSelfCollideExclusion(uint2 * dst, uint * starts, uint * counts,
+void cuBroadphase_writePairCacheSelfCollideExclusion(uint2 * dst, uint * locations, 
+                                uint * starts, uint * counts,
                               Aabb * boxes, uint numBoxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndex, 
@@ -628,7 +657,9 @@ void broadphaseWritePairCacheSelfCollideExclusion(uint2 * dst, uint * starts, ui
     
     dim3 grid(nblk, 1, 1);
     
-    writePairCacheSelfCollideExclusion_kernel<<< grid, block >>>(dst, starts, counts,
+    writePairCacheSelfCollideExclusion_kernel<<< grid, block >>>(dst, 
+                                locations,
+                                starts, counts,
                                 boxes,
                                 numBoxes,
 								rootNodeIndex, 
@@ -639,6 +670,17 @@ void broadphaseWritePairCacheSelfCollideExclusion(uint2 * dst, uint * starts, ui
 								queryIdx,
 								exclusionIndices,
 								exclusionStarts);
+}
+
+void cuBroadphase_writeLocation(uint * dst, uint * src, uint n)
+{
+    int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(n, tpb);
+    
+    dim3 grid(nblk, 1, 1);
+    
+    startAsWriteLocation<<< grid, block >>>(dst, src, n);
 }
 
 }

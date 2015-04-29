@@ -6,6 +6,7 @@
 #include <QuickSort.h>
 #include <CudaDbgLog.h>
 #include <boost/format.hpp>
+#include <FemGlobal.h>
 
 CudaDbgLog bglg("stiffness.txt");
 
@@ -440,7 +441,10 @@ void FEMTetrahedronSystem::integrate(float dt)
 }
 
 void FEMTetrahedronSystem::update()
-{ // return CudaTetrahedronSystem::update();
+{ 
+#if DISABLE_FEM
+	return CudaTetrahedronSystem::update();
+#endif
 	updateExternalForce();
 	updateOrientation();
 	updateForce();
