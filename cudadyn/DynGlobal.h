@@ -9,6 +9,8 @@
 #define PRINT_BOUND 1
 #define PRINT_BVH_MAXLEVEL 1
 #define DRAW_BVH_HIERARCHY 0
+#define DISABLE_COLLISION_DETECTION 0
+#define DISABLE_COLLISION 0
 class DynGlobal
 {
 public:

@@ -13,12 +13,10 @@
 
 BccMesh::BccMesh() 
 {
-	m_anchors = new BaseBuffer;
 }
 
 BccMesh::~BccMesh() 
 {
-	delete m_anchors;
 	delete m_grid;
 	delete m_intersect;
 }
@@ -45,18 +43,9 @@ void BccMesh::create(GeometryArray * geoa, KdIntersection * anchorIntersect, int
 	setNumPoints(np);
 	setNumIndices(nt * 4);
 	createBuffer(np, nt * 4);
-	m_anchors->create(np * 4);
 	
 	resetAnchors(np);
 	
-	m_grid->addAnchors((unsigned *)m_anchors->data(), anchorIntersect);
+	m_grid->addAnchors(anchors(), anchorIntersect);
 	m_grid->extractTetrahedronMeshData(points(), indices());
-}
-
-void BccMesh::resetAnchors(unsigned n)
-{
-	unsigned * anchor = (unsigned *)m_anchors->data();
-	unsigned i=0;
-	for(; i < n; i++)
-		anchor[i] = 0;
 }

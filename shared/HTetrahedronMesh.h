@@ -9,21 +9,16 @@
 
 #include <HBase.h>
 class BaseBuffer;
-struct TetrahedronMeshData {
-    unsigned m_numTetrahedrons;
-    unsigned m_numPoints;
-    BaseBuffer * m_anchorBuf;
-    BaseBuffer * m_pointBuf;
-    BaseBuffer * m_indexBuf;
-};
+class ATetrahedronMesh;
+
 class HTetrahedronMesh : public HBase {
 public:
 	HTetrahedronMesh(const std::string & path);
 	virtual ~HTetrahedronMesh();
 	
 	char verifyType();
-	virtual char save(TetrahedronMeshData * tetra);
-	virtual char load(TetrahedronMeshData * tetra);
+	virtual char save(ATetrahedronMesh * tetra);
+	virtual char load(ATetrahedronMesh * tetra);
 	
 private:
 	

@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QDebug>
 #include "BccGlobal.h"
 #include "window.h"
 

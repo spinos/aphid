@@ -2,6 +2,7 @@
 #define GLWIDGET_H
 
 #include <Base3DView.h>
+#include <BccGlobal.h>
 class BccWorld;
 class FitTest;
 class GLWidget : public Base3DView
@@ -26,8 +27,13 @@ protected:
 private:
 
 private:
-	BccWorld * m_world;
+	
+#if TEST_FIT
 	FitTest * m_fit;
+#else
+	BccWorld * m_world;
+#endif
+
 private slots:
     
 };

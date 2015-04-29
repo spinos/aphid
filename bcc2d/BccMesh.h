@@ -21,9 +21,8 @@ public:
 protected:
 
 private:
-	void resetAnchors(unsigned n);
+	
 private:
-	BaseBuffer * m_anchors;
 	KdIntersection * m_intersect;
 	BccGrid * m_grid;
 };

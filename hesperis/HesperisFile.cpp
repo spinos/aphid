@@ -12,6 +12,7 @@
 #include <HWorld.h>
 #include <HCurveGroup.h>
 #include <BaseBuffer.h>
+#include <ATetrahedronMesh.h>
 #include <HTetrahedronMesh.h>
 #include <sstream>
 HesperisFile::HesperisFile() {}
@@ -68,7 +69,7 @@ bool HesperisFile::writeCurve()
 bool HesperisFile::writeTetrahedron()
 {
 	std::stringstream sst;
-	std::map<std::string, TetrahedronMeshData *>::iterator it = m_terahedrons.begin();
+	std::map<std::string, ATetrahedronMesh *>::iterator it = m_terahedrons.begin();
 	for(; it != m_terahedrons.end(); ++it) {
 		sst.str("");
 		sst<<"/world/"<<it->first;
@@ -83,7 +84,7 @@ bool HesperisFile::writeTetrahedron()
 void HesperisFile::addCurve(const std::string & name, CurveGroup * data)
 { m_curves[name] = data; }
 
-void HesperisFile::addTetrahedron(const std::string & name, TetrahedronMeshData * data)
+void HesperisFile::addTetrahedron(const std::string & name, ATetrahedronMesh * data)
 { m_terahedrons[name] = data; }
 
 bool HesperisFile::doRead(const std::string & fileName)
@@ -132,7 +133,7 @@ bool HesperisFile::readTetrahedron()
 {
     bool allValid = true;
 	std::stringstream sst;
-	std::map<std::string, TetrahedronMeshData *>::iterator it = m_terahedrons.begin();
+	std::map<std::string, ATetrahedronMesh *>::iterator it = m_terahedrons.begin();
 	for(; it != m_terahedrons.end(); ++it) {
 		sst.str("");
 		sst<<"/world/"<<it->first;

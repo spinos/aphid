@@ -11,12 +11,12 @@
  */
 #include <map>
 class BaseBuffer;
-struct TetrahedronMeshData;
+class ATetrahedronMesh;
 class TetrahedronSystem {
 public:
 	TetrahedronSystem();
 	virtual ~TetrahedronSystem();
-	void generateFromData(TetrahedronMeshData * md);
+	void generateFromData(ATetrahedronMesh * md);
 	void create(const unsigned & maxNumTetrahedrons, const unsigned & maxNumPoints);
 	void addPoint(float * src);
 	void addTetrahedron(unsigned a, unsigned b, unsigned c, unsigned d);

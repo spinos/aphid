@@ -12,15 +12,13 @@
 #include "FitBccMeshBuilder.h"
 FitBccMesh::FitBccMesh() 
 {
-	m_anchors = new BaseBuffer;
 }
 
 FitBccMesh::~FitBccMesh() 
 {
-	delete m_anchors;
 }
 
-void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorIntersect,
+void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorPoints,
 						float groupNCvRatio,
 	           unsigned minNumGroups,
 	           unsigned maxNumGroups)
@@ -34,13 +32,15 @@ void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorIntersect,
 	unsigned nt = tetrahedronInd.size()/4;
 	unsigned np = tetrahedronP.size();
 	
+	// nt = 16;
+	// np = 18;
+	
 	std::cout<<" n tetrahedrons "<<nt<<"\n";
 	std::cout<<" n vertices "<<np<<"\n";
 	
 	setNumPoints(np);
 	setNumIndices(nt * 4);
 	createBuffer(np, nt * 4);
-	m_anchors->create(np * 4);
 	
 	unsigned i;
 	for(i=0;i<np;i++) points()[i] = tetrahedronP[i];
@@ -48,32 +48,26 @@ void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorIntersect,
 	for(i=0;i<nt*4;i++) indices()[i] = tetrahedronInd[i];
 	
 	resetAnchors(np);
-	addAnchors(anchorIntersect);
-}
-
-void FitBccMesh::resetAnchors(unsigned n)
-{
-	unsigned * anchor = (unsigned *)m_anchors->data();
-	unsigned i=0;
-	for(; i < n; i++)
-		anchor[i] = 0;
+	
+	// for(i=0;i<6;i++) anchors()[i] = 1;
+	addAnchors(anchorPoints);
 }
 
 void FitBccMesh::addAnchors(KdIntersection * anchorIntersect)
 {
-	unsigned * anchor = (unsigned *)m_anchors->data();
-	
-	Vector3F q[4];
+	BoundingBox box;
 	unsigned j, i=0;
 	for(; i< numTetrahedrons(); i++) {
-        unsigned * tet = &indices()[i*4];
+        unsigned * tet = tetrahedronIndices(i);
+		
+		box.reset();
         for(j=0; j< 4; j++)
-            q[j] = points()[tet[j]]; 
+            box.expandBy(points()[tet[j]], 0.001f); 
         
-		if(!anchorIntersect->intersectTetrahedron(q)) continue;
+		if(!anchorIntersect->intersectBox(box)) continue;
 		
 		for(j=0; j< 4; j++) {
-			anchor[tet[j]] = 1;
+			anchors()[tet[j]] = 1;
 		}
     }
 }

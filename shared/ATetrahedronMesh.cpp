@@ -42,3 +42,15 @@ const BoundingBox ATetrahedronMesh::calculateBBox(unsigned icomponent) const
 	box.updateMax(p[v[3]]);
 	return box;
 }
+
+void ATetrahedronMesh::create(unsigned np, unsigned nt)
+{
+	createBuffer(np, nt * 4);
+	setNumPoints(np);
+	setNumIndices(nt * 4);
+}
+
+unsigned * ATetrahedronMesh::tetrahedronIndices(unsigned idx) const
+{
+	return &indices()[idx*4];
+}

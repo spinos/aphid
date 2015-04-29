@@ -14,6 +14,7 @@ AGenericMesh::AGenericMesh()
 {
 	m_points = new BaseBuffer;
 	m_indices = new BaseBuffer;
+	m_anchors = new BaseBuffer;
 	m_numPoints = m_numIndices = 0;
 }
 
@@ -21,6 +22,7 @@ AGenericMesh::~AGenericMesh()
 {
 	delete m_points;
 	delete m_indices;
+	delete m_anchors;
 }
 
 const TypedEntity::Type AGenericMesh::type() const
@@ -42,6 +44,7 @@ void AGenericMesh::createBuffer(unsigned np, unsigned ni)
 {
 	m_points->create(np * 12);
 	m_indices->create(ni * 4);
+	m_anchors->create(np * 4);
 }
 
 Vector3F * AGenericMesh::points() const
@@ -49,6 +52,9 @@ Vector3F * AGenericMesh::points() const
 	
 unsigned * AGenericMesh::indices() const
 { return (unsigned *)m_indices->data(); }
+
+unsigned * AGenericMesh::anchors() const
+{ return (unsigned *)m_anchors->data(); }
 
 void AGenericMesh::setNumPoints(unsigned n)
 { m_numPoints = n; }
@@ -61,3 +67,11 @@ const unsigned AGenericMesh::numPoints() const
 
 const unsigned AGenericMesh::numIndices() const
 { return m_numIndices; }
+
+void AGenericMesh::resetAnchors(unsigned n)
+{
+	unsigned * anchor = (unsigned *)m_anchors->data();
+	unsigned i=0;
+	for(; i < n; i++)
+		anchor[i] = 0;
+}

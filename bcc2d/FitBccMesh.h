@@ -16,15 +16,14 @@ public:
 	FitBccMesh();
 	virtual ~FitBccMesh();
 	
-	void create(GeometryArray * geoa, KdIntersection * anchorIntersect,
+	void create(GeometryArray * geoa, KdIntersection * anchorPoints,
 					float groupNCvRatio,
 	           unsigned minNumGroups,
 	           unsigned maxNumGroups);
 protected:
 
 private:
-	void resetAnchors(unsigned n);
 	void addAnchors(KdIntersection * anchorIntersect);
 private:
-	BaseBuffer * m_anchors;
+	
 };

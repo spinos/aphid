@@ -11,7 +11,7 @@
 #include <map>
 class CurveGroup;
 class BaseBuffer;
-struct TetrahedronMeshData;
+struct ATetrahedronMesh;
 
 class HesperisFile : public HFile {
 public:
@@ -33,7 +33,7 @@ public:
 	void setReadComponent(ReadComponent comp);
 	void setWriteComponent(WriteComponent comp);
 	void addCurve(const std::string & name, CurveGroup * data);
-	void addTetrahedron(const std::string & name, TetrahedronMeshData * data);
+	void addTetrahedron(const std::string & name, ATetrahedronMesh * data);
 	virtual bool doWrite(const std::string & fileName);
 	virtual bool doRead(const std::string & fileName);
 protected:
@@ -45,7 +45,7 @@ private:
 	bool readTetrahedron();
 private:
 	std::map<std::string, CurveGroup * > m_curves;
-	std::map<std::string, TetrahedronMeshData * > m_terahedrons;
+	std::map<std::string, ATetrahedronMesh * > m_terahedrons;
 	ReadComponent m_readComp;
 	WriteComponent m_writeComp;
 };

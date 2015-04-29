@@ -30,15 +30,15 @@ bool FEMWorldInterface::readMeshFromFile(FEMTetrahedronSystem * mesh)
 		return false;
 	}
 	
-	TetrahedronMeshData meshData;
+	ATetrahedronMesh meshData;
 	HesperisFile hes;
 	hes.setReadComponent(HesperisFile::RTetra);
-	hes.addTetrahedron("tetra", &meshData);
+	hes.addTetrahedron("tetra_0", &meshData);
 	if(!hes.open(FemGlobal::FileName)) return false;
 	hes.close();
 	
-	std::cout<<" nt "<<meshData.m_numTetrahedrons;
-	std::cout<<" nv "<<meshData.m_numPoints;
+	std::cout<<" nt "<<meshData.numTetrahedrons();
+	std::cout<<" nv "<<meshData.numPoints();
 	
 	mesh->generateFromData(&meshData);
 	return true;

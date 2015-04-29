@@ -79,6 +79,9 @@ void CudaBroadphase::initOnDevice()
 
 void CudaBroadphase::computeOverlappingPairs()
 {
+#if DISABLE_COLLISION_DETECTION
+	return;
+#endif
 	if(m_numObjects < 1) return;
 	unsigned i, j;
 	

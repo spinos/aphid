@@ -5,7 +5,6 @@
 #include <CurveGroup.h>
 #include "bcc_common.h"
 #include <line_math.h>
-#include "BccGlobal.h"
 #include <HesperisFile.h>
 #include <KdCluster.h>
 #include <KdIntersection.h>
@@ -16,55 +15,23 @@
 #include <bezierPatch.h>
 #include <APointCloud.h>
 #include <BccMesh.h>
+#include <FitBccMesh.h>
 
 BccWorld::BccWorld(KdTreeDrawer * drawer)
 {
 	m_drawer = drawer;
 	m_curves = new CurveGroup;
-	if(!readCurveDataFromFile())
-		createTestCurveData();
+	if(!createCurveGeometryFromFile())
+#if WORLD_TEST_SINGLE
+		createTestCurveGeometry();
+#else
+		createRandomCurveGeometry();
+#endif
 		
-	qDebug()<<" n curves "<<m_curves->numCurves();
+	std::cout<<" n curves "<<m_curves->numCurves();
 	
-	createRandomCurveGeometry();
 	createCurveStartP();
 	createAnchorIntersect();
-			
-	m_numSplines = 0;
-	unsigned * cc = m_curves->counts();
-	unsigned j, i=0;
-	for(; i < m_curves->numCurves(); i++)
-		m_numSplines += cc[i] - 1;
-		
-	std::cout<<" n spines "<<m_numSplines;
-		
-	m_splineBuf = new BaseBuffer;
-	m_curveStartBuf = new BaseBuffer;
-	m_curveStartBuf->create(m_curves->numCurves() * 12);
-	Vector3F * curveStart = (Vector3F *)m_curveStartBuf->data();
-	
-	m_splineBuf->create(m_numSplines * sizeof(BezierSpline));
-	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
-	Vector3F * cvs = m_curves->points();
-	
-	unsigned nsp;
-	unsigned ispline = 0;
-	unsigned cvDrift = 0;
-	for(i=0; i < m_curves->numCurves(); i++) {
-		nsp = cc[i] - 1;
-		curveStart[i] = cvs[cvDrift];
-		for(j=0; j < nsp; j++) {			
-			BezierCurve::extractSpline(spline[ispline], j, &cvs[cvDrift], nsp - 1);
-			ispline++;
-		}
-		cvDrift += nsp + 1;
-	}
-	
-    BoundingBox box;
-    for(i=0; i < m_numSplines; i++)
-		spline[i].getAabb(&box);
-		
-	std::cout<<" bbox "<<box.str();
 	
 	std::cout<<" creating kd tree\n";
 	m_cluster = new KdCluster;
@@ -82,12 +49,55 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 
 BccWorld::~BccWorld() 
 {
-	delete m_splineBuf;
+	delete m_curves;
+	delete m_cluster;
+	delete m_anchorIntersect;
+	delete m_allGeo;
+	delete m_curveStartP;
+	delete[] m_meshes;
 }
 
-void BccWorld::createTestCurveData()
+bool BccWorld::createCurveGeometryFromFile()
 {
-	qDebug()<<" gen 1 test curve";
+	if(!readCurveDataFromFile()) return false;
+	
+	m_allGeo = new GeometryArray;
+	m_allGeo->create(m_curves->numCurves());
+	
+	const unsigned n = m_curves->numCurves();
+	m_allGeo = new GeometryArray;
+	m_allGeo->create(n);
+	
+	unsigned * cc = m_curves->counts();
+	Vector3F * cvs = m_curves->points();
+	
+	CurveBuilder cb;
+	
+	unsigned ncv;
+	unsigned cvDrift = 0;
+	
+	unsigned i, j;
+	for(i=0; i< n; i++) {
+		
+		ncv = cc[i];
+		
+		for(j=0; j < ncv; j++)			
+			cb.addVertex(cvs[j + cvDrift]);
+		
+		BezierCurve * c = new BezierCurve;
+		cb.finishBuild(c);
+		
+		m_allGeo->setGeometry(c, i);
+		
+		cvDrift += ncv;
+	}
+	
+	return true;
+}
+
+void BccWorld::createTestCurveGeometry()
+{
+	std::cout<<" gen 1 test curve";
 	m_curves->create(1, 9);
 	m_curves->counts()[0] = 9;
 	
@@ -106,11 +116,24 @@ void BccWorld::createTestCurveData()
         cvs[i] -= Vector3F(12.f, 0.f, 0.f);
         cvs[i] *= 3.f;
     }
+	
+	m_allGeo = new GeometryArray;
+	m_allGeo->create(1);
+	
+	CurveBuilder cb;
+	
+	unsigned i;
+	for(i=0; i< 9; i++)
+		cb.addVertex(cvs[i]);
+	
+	BezierCurve * c = new BezierCurve;
+	cb.finishBuild(c);
+	m_allGeo->setGeometry(c, 0);
 }
 
 void BccWorld::createRandomCurveGeometry()
 {
-	const unsigned n = 25 * 25;
+	const unsigned n = 15 * 15;
 	m_allGeo = new GeometryArray;
 	m_allGeo->create(n);
 	
@@ -143,7 +166,7 @@ void BccWorld::createRandomCurveGeometry()
 	}
 	
 	RandomCurve rc;
-	rc.create(m_allGeo, 25, 25,
+	rc.create(m_allGeo, 15, 15,
 				&bp,
 				Vector3F(-.15f, 1.f, 0.33f), 
 				11, 21,
@@ -170,47 +193,24 @@ void BccWorld::createAnchorIntersect()
 	m_anchorIntersect->create();
 }
 
-void BccWorld::createCurveGeometry()
-{
-	const unsigned n = m_curves->numCurves();
-	m_allGeo = new GeometryArray;
-	m_allGeo->create(n);
-	
-	unsigned * cc = m_curves->counts();
-	Vector3F * cvs = m_curves->points();
-	
-	CurveBuilder cb;
-	
-	unsigned ncv;
-	unsigned cvDrift = 0;
-	
-	unsigned i, j;
-	for(i=0; i< n; i++) {
-		
-		ncv = cc[i];
-		
-		for(j=0; j < ncv; j++)			
-			cb.addVertex(cvs[j + cvDrift]);
-		
-		BezierCurve * c = new BezierCurve;
-		cb.finishBuild(c);
-		
-		m_allGeo->setGeometry(c, i);
-		
-		cvDrift += ncv;
-	}
-}
-
 void BccWorld::createMeshes()
 {
 	unsigned n = m_cluster->numGroups();
+#if WORLD_USE_FIT
+	m_meshes = new FitBccMesh[n];
+#else
 	m_meshes = new BccMesh[n];
+#endif
 	
 	unsigned ntet = 0;
 	unsigned nvert = 0;
 	unsigned i=0;
 	for(;i<n;i++) {
+#if WORLD_USE_FIT
+		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, 1.0f, 5, 48);
+#else
 		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, 5);
+#endif
 		ntet += m_meshes[i].numTetrahedrons();
 		nvert += m_meshes[i].numPoints();
 	}
@@ -245,350 +245,6 @@ void BccWorld::draw()
 	}
 }
 
-void BccWorld::testDistanctToCurve()
-{
-    Vector3F cls;
-    float minD = 1e8;
-	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
-    unsigned i;
-    for(i=0; i < m_numSplines; i++) {
-        testDistanceToPoint(spline[i], m_testP, minD, cls);
-    }
-    
-    m_drawer->setColor(.1f, .9f, 0.f);
-    m_drawer->arrow(m_testP, cls);
-}
-
-void BccWorld::testDistanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP)
-{
-	BoundingBox box;
-	box.expandBy(spline.cv[0]);
-	box.expandBy(spline.cv[1]);
-	box.expandBy(spline.cv[2]);
-	box.expandBy(spline.cv[3]);
-	
-	if(box.distanceTo(pnt) > minDistance) return;
-	
-    float paramMin = 0.f;
-    float paramMax = 1.f;
-    Vector3F line[2];
-    
-    line[0] = spline.calculateBezierPoint(paramMin);
-    line[1] = spline.calculateBezierPoint(paramMax);
-    
-    Vector3F pol;
-    float t;
-    for(;;) {
-        glColor3f(1.f, .9f, .0f);
-        glBegin(GL_LINES);
-        glVertex3fv((GLfloat *)&line[0]);
-        glVertex3fv((GLfloat *)&line[1]);
-        glEnd();
-        
-        float d = closestDistanceToLine(line, pnt, pol, t);
-        
-        const float tt = paramMin * (1.f - t) + paramMax * t;
-        
-// end of line
-        if((tt <= 0.f || tt >= 1.f) && paramMax - paramMin < 0.1f) {
-            if(d < minDistance) {
-                minDistance = d;
-                closestP = pol;
-            }
-            break;
-        }
-        
-        const float h = .5f * (paramMax - paramMin);
-
-// small enough       
-        if(h < 1e-3) {
-            if(d < minDistance) {
-                minDistance = d;
-                closestP = pol;
-            }
-            break;
-        }
-        
-        if(t > .5f)
-            paramMin = tt - h * ((t - .5f)/.5f * .5f + .5f);
-        else
-            paramMax = tt + h * ((.5f - t)/.5f * .5f + .5f);
-            
-        line[0] = spline.calculateBezierPoint(paramMin);
-        line[1] = spline.calculateBezierPoint(paramMax);
-    }
-}
-
-void BccWorld::moveTestP(float x, float y, float z)
-{ m_testP += Vector3F(x, y, z);}
-
-void BccWorld::testSpline()
-{
-	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
-	BezierSpline a, b;
-	unsigned i, j;
-	Vector3F p;
-
-	for(i=0; i< m_numSplines; i++) {
-		glColor3f(.1f, .1f, .1f);
-		glBegin(GL_LINE_STRIP);
-		glVertex3fv((GLfloat *)&spline[i].cv[0]);
-		glVertex3fv((GLfloat *)&spline[i].cv[1]);
-		glVertex3fv((GLfloat *)&spline[i].cv[2]);
-		glVertex3fv((GLfloat *)&spline[i].cv[3]);
-		glEnd();
-		
-		glColor3f(.6f, .1f, .51f);
-		glBegin(GL_LINE_STRIP);
-		for(j=0; j<11; j++) {
-			p = spline[i].calculateBezierPoint(0.1f * j);
-			glVertex3fv((GLfloat *)&p);
-		}
-		glEnd();
-		
-		spline[i].deCasteljauSplit(a, b);
-		
-		glColor3f(.6f, .71f, .1f);
-		glBegin(GL_LINE_STRIP);
-		for(j=0; j<11; j++) {
-			p = a.calculateBezierPoint(0.1f * j);
-			glVertex3fv((GLfloat *)&p);
-		}
-		glEnd();
-		
-		glColor3f(.1f, .71f, .1f);
-		glBegin(GL_LINE_STRIP);
-		for(j=0; j<11; j++) {
-			p = b.calculateBezierPoint(0.1f * j);
-			glVertex3fv((GLfloat *)&p);
-		}
-		glEnd();
-	}
-}
-
-void BccWorld::testIntersection()
-{
-	BoundingBox box;
-    box.setMin(m_testP.x - 1.f, m_testP.y - 1.f, m_testP.z - 1.f);
-	box.setMax(m_testP.x + 1.f, m_testP.y + 1.f, m_testP.z + 1.f);
-	
-	bool intersected = 0;
-	
-	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
-    unsigned i;
-    for(i=0; i < m_numSplines; i++) {
-        intersected = testIntersection(spline[i], box);
-		if(intersected) break;
-    }
-	
-	m_drawer->boundingBox(box);
-}
-
-bool BccWorld::testIntersection(BezierSpline & spline, const BoundingBox & box)
-{
-	BoundingBox abox;
-	abox.expandBy(spline.cv[0]);
-	abox.expandBy(spline.cv[1]);
-	abox.expandBy(spline.cv[2]);
-	abox.expandBy(spline.cv[3]);
-	
-	if(!abox.intersect(box)) return false;
-	
-	if(abox.inside(box)) return true;
-	
-	BezierSpline stack[64];
-	int stackSize = 2;
-	spline.deCasteljauSplit(stack[0], stack[1]);
-	
-	while(stackSize > 0) {
-		BezierSpline c = stack[stackSize - 1];
-		stackSize--;
-		
-		abox.reset();
-		abox.expandBy(c.cv[0]);
-		abox.expandBy(c.cv[1]);
-		abox.expandBy(c.cv[2]);
-		abox.expandBy(c.cv[3]);
-		
-		m_drawer->boundingBox(abox);
-		
-		if(abox.inside(box)) return true;
-		
-		if(abox.intersect(box)) {
-			if(abox.area() < 0.007f) return true;
-			
-			BezierSpline a, b;
-			c.deCasteljauSplit(a, b);
-			
-			stack[ stackSize ] = a;
-			stackSize++;
-			stack[ stackSize ] = b;
-			stackSize++;
-		}
-	}
-	
-	return false;
-}
-
-void BccWorld::testTetrahedronBoxIntersection()
-{
-    Vector3F p[4];
-    p[0] = m_testP + Vector3F(0.f, -1.f, 0.f);
-    p[1] = m_testP + Vector3F(.5f, 0.f, -.5f);
-    p[2] = m_testP + Vector3F(-.5f, 0.f, -.5f);
-    p[3] = m_testP + Vector3F(0.f, 1.f, 0.f);
-    
-    BoundingBox tetbox;
-    tetbox.expandBy(p[0]);
-    tetbox.expandBy(p[1]);
-    tetbox.expandBy(p[2]);
-    tetbox.expandBy(p[3]);
-    
-    Vector3F line0(1.f, 1.f, 1.f);
-    Vector3F line1(10.f, 10.f, 4.f);
-    
-    
-    PluckerCoordinate pier, pies;
-    pier.set(line0, line1);
-    
-    pies.set(p[0], p[1]);
-    // std::cout<<" r dot s01 "<<pier.dot(pies)<<" ";
-    
-    pies.set(p[1], p[2]);
-    // std::cout<<" r dot s12 "<<pier.dot(pies)<<" ";
-    
-    pies.set(p[2], p[0]);
-    // std::cout<<" r dot s20 "<<pier.dot(pies)<<"\n";
-    
-    Vector3F q;
-    // if(tetrahedronLineIntersection(p, line0, line1, q))
-    if(intersectTetrahedron(p))
-    // if(m_curve->intersectTetrahedron(p))
-        glColor3f(1.f, 0.f, 0.f);
-    else 
-        glColor3f(0.f, .3f, .1f);
-    
-    glBegin(GL_TRIANGLES);
-    int i;
-    for(i=0; i< 12; i++) {
-        glVertex3fv((GLfloat *)&p[TetrahedronToTriangleVertex[i]]);
-    }
-    glEnd();
-    
-    m_drawer->arrow(line0, line1);
-    m_drawer->arrow(line0, q);
-}
-
-bool BccWorld::intersectTetrahedron(Vector3F * p)
-{
-    BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
-    unsigned i;
-    for(i=0; i < m_numSplines; i++) {
-        if(intersectTetrahedron(spline[i], p)) return 1;
-    }
-    return 0;
-}
-
-bool BccWorld::intersectTetrahedron(BezierSpline & spline, Vector3F * p)
-{
-    BoundingBox tbox;
-    tbox.expandBy(p[0]);
-	tbox.expandBy(p[1]);
-	tbox.expandBy(p[2]);
-	tbox.expandBy(p[3]);
-    
-    BoundingBox abox;
-	abox.expandBy(spline.cv[0]);
-	abox.expandBy(spline.cv[1]);
-	abox.expandBy(spline.cv[2]);
-	abox.expandBy(spline.cv[3]);
-	
-	if(!abox.intersect(tbox)) return false;
-	
-	BezierSpline stack[64];
-	int stackSize = 2;
-	spline.deCasteljauSplit(stack[0], stack[1]);
-	Vector3F q;
-	while(stackSize > 0) {
-		BezierSpline c = stack[stackSize - 1];
-		stackSize--;
-		
-		abox.reset();
-		abox.expandBy(c.cv[0]);
-		abox.expandBy(c.cv[1]);
-		abox.expandBy(c.cv[2]);
-		abox.expandBy(c.cv[3]);
-		
-		if(abox.intersect(tbox)) {
-			if(c.straightEnough()) {
-			    m_drawer->boundingBox(abox);
-			    glBegin(GL_LINE_STRIP);
-			    glVertex3fv((GLfloat *)&c.cv[0]);
-			    glVertex3fv((GLfloat *)&c.cv[1]);
-			    glVertex3fv((GLfloat *)&c.cv[2]);
-			    glVertex3fv((GLfloat *)&c.cv[3]);
-			    glEnd();
-			    
-			    if(tetrahedronLineIntersection(p, c.cv[0], c.cv[3], q))
-			        return true;
-			}
-			else {
-                BezierSpline a, b;
-                c.deCasteljauSplit(a, b);
-                
-                stack[ stackSize ] = a;
-                stackSize++;
-                stack[ stackSize ] = b;
-                stackSize++;
-			}
-		}
-	}
-	
-	return false;
-}
-
-void BccWorld::testLineLine()
-{
-    Vector3F line0(1.f, 11.f, 0.f);
-    Vector3F line1(10.f, 11.f, 0.f);
-    
-    Vector3F line2(-4.f, 10.f, 1.f);
-    Vector3F line3 = m_testP;//(10.f, 10.f, 1.f);
-    
-    if(areIntersectedOrParallelLines(line0, line1, line2, line3)) {
-        if(areParallelLines(line0, line1, line2, line3))
-            glColor3f(0.f, 1.f, 0.f);
-        else 
-            glColor3f(1.f, 0.f, 0.f);
-    }
-    else
-        glColor3f(0.f, 0.f, 0.3f);
-    
-    m_drawer->arrow(line0, line1);
-    m_drawer->arrow(line2, line3);
-    // std::cout<<" d "<<distanceBetweenLines(line0, line1, line2, line3)<<" ";
-}
-
-void BccWorld::drawCurves()
-{
-	BezierSpline * spline = (BezierSpline *)m_splineBuf->data();
-	unsigned i=0;
-	for(;i<m_numSplines;i++)
-		m_drawer->smoothCurve(spline[i], 16);
-}
-
-void BccWorld::drawCurveStars()
-{
-/*
-	const float csz = m_grid->span() / 1024.f;
-	m_drawer->setWired(0);
-	Vector3F * curveStart = (Vector3F *)m_curveStartBuf->data();
-	unsigned i=0;
-	for(; i < m_curves->numCurves(); i++)
-		m_drawer->cube(curveStart[i], csz);
-*/
-}
-
 bool BccWorld::readCurveDataFromFile()
 {
 	if(BaseFile::InvalidFilename(BccGlobal::FileName)) 
@@ -605,28 +261,6 @@ bool BccWorld::readCurveDataFromFile()
 	hes.close();
 	
 	return true;
-}
-
-void BccWorld::createMeshData(unsigned nt, unsigned nv)
-{
-    m_mesh.m_numTetrahedrons = nt;
-    m_mesh.m_numPoints = nv;
-	m_mesh.m_anchorBuf = new BaseBuffer;
-	m_mesh.m_anchorBuf->create(nv * 4);
-	m_mesh.m_pointBuf = new BaseBuffer;
-	m_mesh.m_pointBuf->create(nv * 12);
-	m_mesh.m_indexBuf = new BaseBuffer;
-	m_mesh.m_indexBuf->create(nt * 4 * 4);
-	
-	resetAnchors(nv);
-}
-
-void BccWorld::resetAnchors(unsigned n)
-{
-	unsigned * anchor = (unsigned *)m_mesh.m_anchorBuf->data();
-	unsigned i=0;
-	for(; i < n; i++)
-		anchor[i] = 0;
 }
 
 void BccWorld::drawMesh()
@@ -704,7 +338,14 @@ bool BccWorld::save()
 	
 	HesperisFile hes;
 	hes.setWriteComponent(HesperisFile::WTetra);
-	hes.addTetrahedron("tetra", &m_mesh);
+	
+	unsigned i = 0;
+	for(; i < m_numMeshes; i++) {
+		std::stringstream sst;
+		sst<<"tetra_"<<i;
+		hes.addTetrahedron(sst.str(), &m_meshes[i]);
+	}
+	
 	if(!hes.open(BccGlobal::FileName)) return false;
 	hes.setDirty();
 	hes.save();

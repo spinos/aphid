@@ -3,6 +3,7 @@
 #include <ALLMath.h>
 #include <BoundingBox.h>
 #include <HTetrahedronMesh.h>
+#include "BccGlobal.h"
 
 class CurveGroup;
 class KdTreeDrawer;
@@ -13,6 +14,7 @@ class GeometryArray;
 class APointCloud;
 struct BezierSpline;
 class BccMesh;
+class FitBccMesh;
 
 class BccWorld {
 public:
@@ -21,46 +23,32 @@ public:
     
     void draw();
     bool save();
-    void moveTestP(float x, float y, float z);
     
 private:
-	void createTestCurveData();
+	bool createCurveGeometryFromFile();
+	void createTestCurveGeometry();
 	void createRandomCurveGeometry();
-	void createCurveGeometry();
 	void createCurveStartP();
 	void createAnchorIntersect();
 	void createMeshes();
-    void testDistanctToCurve();
-    void testDistanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP);
-	void testSpline();
-	void testIntersection();
-	bool testIntersection(BezierSpline & spline, const BoundingBox & box);
-	void testTetrahedronBoxIntersection();
-	bool intersectTetrahedron(Vector3F * p);
-	bool intersectTetrahedron(BezierSpline & spline, Vector3F * p);
-	void testLineLine();
-	void testVicinity();
-	void drawCurves();
-	bool readCurveDataFromFile();
+    bool readCurveDataFromFile();
 	void drawCurveStars();
-	void resetAnchors(unsigned n);
-	void createMeshData(unsigned nt, unsigned nv);
+
 	void drawMesh();
 	void drawMesh(unsigned nt, Vector3F * points, unsigned * indices);
 	void drawAnchor();
 private:
-    Vector3F m_testP;
     KdTreeDrawer * m_drawer;
-    BaseBuffer * m_splineBuf;
-	BaseBuffer * m_curveStartBuf;
-	CurveGroup * m_curves;
+    CurveGroup * m_curves;
 	KdCluster * m_cluster;
 	KdIntersection * m_anchorIntersect;
 	GeometryArray * m_allGeo;
 	APointCloud * m_curveStartP;
-	unsigned m_numSplines;
-	TetrahedronMeshData m_mesh;
+#if WORLD_USE_FIT
+	FitBccMesh * m_meshes;
+#else
 	BccMesh * m_meshes;
+#endif
 	unsigned m_numMeshes;
 };
 

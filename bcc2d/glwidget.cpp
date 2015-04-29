@@ -7,12 +7,13 @@
 #include "BccWorld.h"
 #include "FitTest.h"
 
-#define SIMULATE_INLINE 1
-
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-	// m_world = new BccWorld(getDrawer());
+#if TEST_FIT
 	m_fit = new FitTest(getDrawer());
+#else
+	m_world = new BccWorld(getDrawer());
+#endif
 }
 
 GLWidget::~GLWidget()
@@ -26,8 +27,11 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-    // m_world->draw();
+#if TEST_FIT
 	m_fit->draw();
+#else
+	m_world->draw();
+#endif
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)
@@ -55,7 +59,11 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 {
 	if(event->modifiers() == Qt::ControlModifier | Qt::MetaModifier) {
 		if(event->key() == Qt::Key_S) {
-			// m_world->save();
+#if TEST_FIT
+
+#else
+			m_world->save();
+#endif
 		}
 	}
 	/*

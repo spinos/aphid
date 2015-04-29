@@ -21,14 +21,16 @@ public:
 	const unsigned numIndices() const;
 	Vector3F * points() const;
 	unsigned * indices() const;
+	unsigned * anchors() const;
 	
 protected:
 	void createBuffer(unsigned np, unsigned ni);
 	void setNumPoints(unsigned n);
 	void setNumIndices(unsigned n);
-	
+	void resetAnchors(unsigned n);
 private:
 	BaseBuffer * m_points;
 	BaseBuffer * m_indices;
+	BaseBuffer * m_anchors;
 	unsigned m_numPoints, m_numIndices;
 };

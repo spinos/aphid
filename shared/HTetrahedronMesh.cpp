@@ -14,6 +14,7 @@
 #include <iostream>
 #include <CurveGroup.h>
 #include <BaseBuffer.h>
+#include <ATetrahedronMesh.h>
 
 HTetrahedronMesh::HTetrahedronMesh(const std::string & path) : HBase(path) 
 {
@@ -32,15 +33,15 @@ char HTetrahedronMesh::verifyType()
 	return 1;
 }
 
-char HTetrahedronMesh::save(TetrahedronMeshData * tetra)
+char HTetrahedronMesh::save(ATetrahedronMesh * tetra)
 {
-	int nv = tetra->m_numPoints;
+	int nv = tetra->numPoints();
 	if(!hasNamedAttr(".nv"))
 		addIntAttr(".nv");
 	
 	writeIntAttr(".nv", &nv);
 	
-	int nt = tetra->m_numTetrahedrons;
+	int nt = tetra->numTetrahedrons();
 	if(!hasNamedAttr(".nt"))
 		addIntAttr(".nt");
 	
@@ -49,22 +50,22 @@ char HTetrahedronMesh::save(TetrahedronMeshData * tetra)
 	if(!hasNamedData(".p"))
 	    addVector3Data(".p", nv);
 	
-	writeVector3Data(".p", nv, (Vector3F *)tetra->m_pointBuf->data());
+	writeVector3Data(".p", nv, (Vector3F *)tetra->points());
 	
 	if(!hasNamedData(".a"))
 	    addIntData(".a", nv);
 	
-	writeIntData(".a", nv, (int *)tetra->m_anchorBuf->data());
+	writeIntData(".a", nv, (int *)tetra->anchors());
 		
 	if(!hasNamedData(".v"))
 	    addIntData(".v", nt * 4);
 	
-	writeIntData(".v", nt * 4, (int *)tetra->m_indexBuf->data());
+	writeIntData(".v", nt * 4, (int *)tetra->indices());
 
 	return 1;
 }
 
-char HTetrahedronMesh::load(TetrahedronMeshData * tetra)
+char HTetrahedronMesh::load(ATetrahedronMesh * tetra)
 {
 	if(!verifyType()) return false;
 	int nv = 4;
@@ -75,18 +76,11 @@ char HTetrahedronMesh::load(TetrahedronMeshData * tetra)
 	
 	readIntAttr(".nt", &nt);
 	
-	tetra->m_numTetrahedrons = nt;
-    tetra->m_numPoints = nv;
-	tetra->m_anchorBuf = new BaseBuffer;
-	tetra->m_anchorBuf->create(nv * 4);
-	tetra->m_pointBuf = new BaseBuffer;
-	tetra->m_pointBuf->create(nv * 12);
-	tetra->m_indexBuf = new BaseBuffer;
-	tetra->m_indexBuf->create(nt * 4 * 4);
+	tetra->create(nv, nt);
 	
-	readVector3Data(".p", nv, (Vector3F *)tetra->m_pointBuf->data());
-	readIntData(".a", nv, (unsigned *)tetra->m_anchorBuf->data());
-	readIntData(".v", nt * 4, (unsigned *)tetra->m_indexBuf->data());
+	readVector3Data(".p", nv, (Vector3F *)tetra->points());
+	readIntData(".a", nv, (unsigned *)tetra->anchors());
+	readIntData(".v", nt * 4, (unsigned *)tetra->indices());
 	
 	return 1;
 }

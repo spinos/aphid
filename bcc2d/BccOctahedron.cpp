@@ -65,10 +65,10 @@ void BccOctahedron::create(const Vector3F & center, const Vector3F & dir, float 
 	if(m_axis == 0) {
 		m_p[0] = center - Vector3F::YAxis * size;
 		m_p[1] = center + Vector3F::YAxis * size;
-		m_p[2] = center - Vector3F::XAxis * size  - Vector3F::ZAxis * size;
-		m_p[3] = center - Vector3F::XAxis * size  + Vector3F::ZAxis * size;
-		m_p[4] = center + Vector3F::XAxis * size  - Vector3F::ZAxis * size;
-		m_p[5] = center + Vector3F::XAxis * size  + Vector3F::ZAxis * size;
+		m_p[2] = center + Vector3F::XAxis * size  - Vector3F::ZAxis * size;
+		m_p[3] = center + Vector3F::XAxis * size  + Vector3F::ZAxis * size;
+		m_p[4] = center - Vector3F::XAxis * size  - Vector3F::ZAxis * size;
+		m_p[5] = center - Vector3F::XAxis * size  + Vector3F::ZAxis * size;
 	}
 	else {
 		m_p[0] = center - Vector3F::XAxis * size;
@@ -281,15 +281,15 @@ void BccOctahedron::add2GapTetrahedron(BccOctahedron & octa1, int ea,
     int va, vb, vc, vd;
     if(ea>7) {
         octa1.getEdgeVertices(va, vb, ea);
-        indices.push_back(octa1.vertexIndex()[va]);
-        indices.push_back(octa1.vertexIndex()[vb]);
-        indices.push_back(octa1.vertexIndex()[0]);
-        indices.push_back(octa2.vertexIndex()[0]);
-        
         indices.push_back(octa1.vertexIndex()[vb]);
         indices.push_back(octa1.vertexIndex()[va]);
         indices.push_back(octa1.vertexIndex()[1]);
         indices.push_back(octa2.vertexIndex()[1]);
+        
+        indices.push_back(octa1.vertexIndex()[va]);
+        indices.push_back(octa1.vertexIndex()[vb]);
+        indices.push_back(octa1.vertexIndex()[0]);
+        indices.push_back(octa2.vertexIndex()[0]);
     }
     else {
         octa1.getEdgeVertices(va, vb, ea);
@@ -321,7 +321,8 @@ void BccOctahedron::createTetrahedron(std::vector<Vector3F > & points, std::vect
 		}
 	}
 	
-	// for(i=0;i<6;i++) std::cout<<" v octa "<<i<<" "<<m_meshVerticesInd[i]<<" ";
+	//for(i=0;i<6;i++) std::cout<<" v octa "<<i<<" "<<m_meshVerticesInd[i]<<" ";
+	//std::cout<<"\n";
 	
 	for(i=0;i<4;i++) {
 		for(j=0;j<4;j++) {

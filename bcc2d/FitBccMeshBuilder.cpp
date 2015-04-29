@@ -56,6 +56,7 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	           unsigned minNumGroups,
 	           unsigned maxNumGroups)
 {
+	const unsigned lastNumTet = tetrahedronInd.size();
     cleanup();
 	const unsigned ns = curve->numSegments();
 	
@@ -197,12 +198,7 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 			
 			dE = m_octa[i].moveEdgeCost(ee, m_octa[i-1]);
 			
-			if(dV <= dE) {
-				// BccOctahedron::movePoles(m_octa[i], vv[0], m_octa[i-1], vv[1], tetrahedronP);
-			}
-			else {
-				BccOctahedron::moveEdges(m_octa[i], ee[0], m_octa[i-1], ee[1], tetrahedronP);
-			}
+			BccOctahedron::moveEdges(m_octa[i], ee[0], m_octa[i-1], ee[1], tetrahedronP);
 			
 			BccOctahedron::connectDifferentAxis(m_octa[i], 
 												m_octa[i-1], tetrahedronP);
@@ -211,18 +207,14 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 		m_octa[i].createTetrahedron(tetrahedronP, tetrahedronInd);
 		
 		if(i>0) {
-		    if(dV <= dE) {
-				//BccOctahedron::add8GapTetrahedron(m_octa[i], vv[0], m_octa[i-1], vv[1], 
-				//									tetrahedronInd);
-			}
-			else {
-				BccOctahedron::add2GapTetrahedron(m_octa[i], ee[0], m_octa[i-1], ee[1],
+			BccOctahedron::add2GapTetrahedron(m_octa[i], ee[0], m_octa[i-1], ee[1],
 													tetrahedronInd);
-			}
 		}
 	}
 	
 	delete[] groupSize;
+	
+	checkTetrahedronVolume(tetrahedronP, tetrahedronInd, lastNumTet);
 }
 
 float FitBccMeshBuilder::splineLength(BezierSpline & spline)
@@ -330,5 +322,33 @@ void FitBccMeshBuilder::drawOctahedron(KdTreeDrawer * drawer, BccOctahedron & oc
 	for(i=8;i<12;i++) {
 		octa.getEdge(a, b, i);
 		drawer->arrow(a, b);
+	}
+}
+
+void FitBccMeshBuilder::checkTetrahedronVolume(std::vector<Vector3F > & tetrahedronP, 
+	           std::vector<unsigned > & tetrahedronInd, unsigned start)
+{
+	Vector3F p[4];
+	unsigned i = start;
+	unsigned tmp;
+	unsigned tend = tetrahedronInd.size();
+	for(;i<tend;i+=4) {
+		p[0] = tetrahedronP[tetrahedronInd[i]];
+		p[1] = tetrahedronP[tetrahedronInd[i+1]];
+		p[2] = tetrahedronP[tetrahedronInd[i+2]];
+		p[3] = tetrahedronP[tetrahedronInd[i+3]];
+		// std::cout<<" tet vol "<<tetrahedronVolume(p)<<"\n";
+		if(tetrahedronVolume(p)<0.f) {
+			tmp = tetrahedronInd[i+1];
+			tetrahedronInd[i+1] = tetrahedronInd[i+2];
+			tetrahedronInd[i+2] = tmp;
+			
+			p[0] = tetrahedronP[tetrahedronInd[i]];
+			p[1] = tetrahedronP[tetrahedronInd[i+1]];
+			p[2] = tetrahedronP[tetrahedronInd[i+2]];
+			p[3] = tetrahedronP[tetrahedronInd[i+3]];
+			
+			// std::cout<<" tet vol after swap 1 2 "<<tetrahedronVolume(p)<<"\n";
+		}
 	}
 }

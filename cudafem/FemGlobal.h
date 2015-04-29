@@ -7,6 +7,7 @@
  *
  */
 #include <string>
+#include <ATetrahedronMesh.h>
 #include <HesperisFile.h>
 #include <HTetrahedronMesh.h>
 #include <BaseBuffer.h>

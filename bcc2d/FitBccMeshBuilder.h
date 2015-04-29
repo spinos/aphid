@@ -40,7 +40,8 @@ private:
 	float splineLength(BezierSpline & spline);
 	float splineParameterByLength(BezierSpline & spline, float expectedLength);
 	void drawOctahedron(KdTreeDrawer * drawer, BccOctahedron & octa);
-	
+	void checkTetrahedronVolume(std::vector<Vector3F > & tetrahedronP, 
+	           std::vector<unsigned > & tetrahedronInd, unsigned start);
 private:
 	Vector3F * m_samples;
 	unsigned m_numSamples;

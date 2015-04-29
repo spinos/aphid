@@ -1,3 +1,6 @@
+#ifndef ATETRAHEDRONMESH_H
+#define ATETRAHEDRONMESH_H
+
 /*
  *  ATetrahedronMesh.h
  *  aphid
@@ -17,8 +20,12 @@ public:
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
 	const unsigned numTetrahedrons() const;
+	
+	void create(unsigned np, unsigned nt);
+	unsigned * tetrahedronIndices(unsigned idx) const;
 protected:
 	
 private:
 	
 };
+#endif        //  #ifndef ATETRAHEDRONMESH_H
