@@ -101,8 +101,8 @@ void CudaConjugateGradientSolver::solve(void * X,
         float d =0;
 		float d2=0;
 		
-		m_reduce->sumF(d, (float *)diff(), m_dimension);
-        m_reduce->sumF(d2, (float *)diff2(), m_dimension);
+		m_reduce->sum<float>(d, (float *)diff(), m_dimension);
+        m_reduce->sum<float>(d2, (float *)diff2(), m_dimension);
         
 		if(fabs(d2)< 1e-10f)
 			d2 = 1e-10f;
@@ -119,7 +119,7 @@ void CudaConjugateGradientSolver::solve(void * X,
         
         float d1 = 0.f;
 
-        m_reduce->sumF(d1, (float *)diff(), m_dimension);
+        m_reduce->sum<float>(d1, (float *)diff(), m_dimension);
         
         // if(i>28) std::cout<<" d1["<<i<<"] "<<d1<<" ";
         if(error) *error = d1;

@@ -519,10 +519,10 @@ void testReduceMinMaxBox()
     for(i=10; i<= 20; i++) {
         cudaEventRecord(start_event, 0);
         
-        reducer.minMaxBox<Aabb, float3>((float3 *)&res, (float3 *)db.bufferOnDevice(), 1<<i);
+        reducer.minMaxBox<Aabb, float3>((Aabb *)&res, (float3 *)db.bufferOnDevice(), 2<<i);
         
-        std::cout<<" min box "<<res[0]<<","<<res[1]<<","<<res[2]<<"\n";
-        std::cout<<" max box "<<res[3]<<","<<res[4]<<","<<res[5]<<"\n";
+        std::cout<<" min max box ("<<res[0]<<","<<res[1]<<","<<res[2]<<"),("
+                <<res[3]<<","<<res[4]<<","<<res[5]<<")\n";
         
         cudaEventRecord(stop_event, 0);
         cudaEventSynchronize(stop_event);

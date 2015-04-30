@@ -111,9 +111,32 @@ template<class T, class T1>
     
         cudaMemcpy(result, d_odata, sizeof(T1) * 2, cudaMemcpyDeviceToHost);
     }
+	
+template<class T>
+    void minMaxBox(T * result, T * idata, unsigned m)
+    {
+        uint threads, blocks;
+        uint n = m;
+        getReduceBlockThread(blocks, threads, n);
+        
+        void * d_odata = m_obuf->bufferOnDevice();
+        cuReduceFindMinMaxBox<T>((T *)d_odata, idata, m, blocks, threads);
+        
+        n = blocks;	
+        while(n > 1) {
+            blocks = threads = 0;
+            getReduceBlockThread(blocks, threads, n);
+            
+            cuReduceFindMinMaxBox<T>((T *)d_odata, (T *)d_odata, n, blocks, threads);
+            
+            n = (n + (threads*2-1)) / (threads*2);
+        }
+    
+        cudaMemcpy(result, d_odata, sizeof(T), cudaMemcpyDeviceToHost);
+    }
     
 template<class T, class T1>
-    void minMaxBox(T1 * result, T1 * idata, unsigned m)
+    void minMaxBox(T * result, T1 * idata, unsigned m)
     {
         uint threads, blocks;
         uint n = m;
@@ -132,7 +155,7 @@ template<class T, class T1>
             n = (n + (threads*2-1)) / (threads*2);
         }
     
-        cudaMemcpy(result, d_odata, sizeof(T1) * 2, cudaMemcpyDeviceToHost);
+        cudaMemcpy(result, d_odata, sizeof(T), cudaMemcpyDeviceToHost);
     }
 	
 protected:

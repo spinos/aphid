@@ -117,8 +117,7 @@ void CudaLinearBvh::update()
 
 void CudaLinearBvh::computeAabb()
 {
-	reducer()->minBox(aabbPtr(), (Aabb *)leafAabbs(), numLeafNodes());
-	reducer()->maxBox(&aabbPtr()[3], (Aabb *)leafAabbs(), numLeafNodes());
+	reducer()->minMaxBox<Aabb, float3>(&m_bounding, (float3 *)leafAabbs(), numLeafNodes() * 2);
 #if PRINT_BOUND
     std::cout<<" bound (("<<m_bounding.low.x<<" "<<m_bounding.low.y<<" "<<m_bounding.low.z;
     std::cout<<"),("<<m_bounding.high.x<<" "<<m_bounding.high.y<<" "<<m_bounding.high.z<<"))";
@@ -168,7 +167,7 @@ void CudaLinearBvh::buildInternalTree()
 							numInternalNodes());
 				
 	int maxDistance = -1;
-	m_findMaxDistance->maxI(maxDistance, (int *)m_distanceInternalNodeFromRoot->bufferOnDevice(), numInternalNodes());
+	m_findMaxDistance->max<int>(maxDistance, (int *)m_distanceInternalNodeFromRoot->bufferOnDevice(), numInternalNodes());
 #if PRINT_BVH_MAXLEVEL
 	std::cout<<" bvh max level "<<maxDistance<<"\n";
 #endif
