@@ -17,6 +17,11 @@ typedef unsigned long long uint64;
 
 typedef float4 BarycentricCoordinate;
 
+struct ClosestPointTestContext {
+    float3 closestPoint;
+    float closestDistance;
+};
+
 struct ContactData {
     float4 separateAxis;
     float3 localA;

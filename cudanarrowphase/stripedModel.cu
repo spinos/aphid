@@ -19,12 +19,13 @@ inline __device__ uint4 computePointIndex(uint * pointStarts,
 {
     const uint objI = extractObjectInd(combined);
     const uint elmI = extractElementInd(combined);
-    
+    const uint & objectDrift = pointStarts[objI];
+    const uint4 & elementInd = indices[indexStarts[objI] + elmI];
     uint4 r;
-    r.x = pointStarts[objI] + indices[indexStarts[objI] + elmI].x;
-    r.y = pointStarts[objI] + indices[indexStarts[objI] + elmI].y;
-    r.z = pointStarts[objI] + indices[indexStarts[objI] + elmI].z;
-    r.w = pointStarts[objI] + indices[indexStarts[objI] + elmI].w;
+    r.x = objectDrift + elementInd.x;
+    r.y = objectDrift + elementInd.y;
+    r.z = objectDrift + elementInd.z;
+    r.w = objectDrift + elementInd.w;
     return r;
 }
 #endif        //  #ifndef STRIPEDMODEL_CU

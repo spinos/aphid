@@ -1,20 +1,17 @@
-#ifndef _GJK_MATH_H_
-#define _GJK_MATH_H_
+#ifndef _GJK_MATH_CU_
+#define _GJK_MATH_CU_
 
 #include "bvh_common.h"
 #include "bvh_math.cu"
 #include "barycentric.cu"
+#include "line_math.cu"
+#include "triangle_math.cu"
 
-#define GJK_MAX_NUM_ITERATIONS 32
+#define GJK_MAX_NUM_ITERATIONS 20
 #define GJK_THIN_MARGIN 0.005f
 #define GJK_THIN_MARGIN2 0.01f
 #define GJK_STEPSIZE 0.01666667f
 #define FLOAT3_ORIGIN make_float3(0.f, 0.f, 0.f)
-
-struct ClosestPointTestContext {
-    float3 closestPoint;
-    float closestDistance;
-};
 
 struct Simplex {
     float3 p[4];
@@ -39,7 +36,7 @@ inline __device__ void addToSimplex(Simplex & s, const float3 & p)
         s.dimension = 1;
     }
     else if(s.dimension == 1) {
-		if(distance2_between(p, s.p[0]) > 1e-6) {
+		if(distance2_between(p, s.p[0]) > 1e-6f) {
 		    s.p[1] = p;
 		    s.pA[1] = s.pA[3];
 		    s.pB[1] = s.pB[3];
@@ -161,89 +158,9 @@ inline __device__ int isPointInsideSimplex(const Simplex & s, const float3 & p)
     return 0;
 }
 
-inline __device__ void computeClosestPointOnLine(const float3 & p, const float3 * v, ClosestPointTestContext & result)
-{
-    float3 vr = float3_difference(p, v[0]);
-    float3 v1 = float3_difference(v[1], v[0]);
-	float dr = float3_length(vr);
-	if(dr < 1e-6) {
-        result.closestPoint = v[0];
-		result.closestDistance = 0.f;
-        return;
-    }
-	
-	float d1 = float3_length(v1);
-	vr = float3_normalize(vr);
-	v1 = float3_normalize(v1);
-	float vrdv1 = float3_dot(vr, v1) * dr;
-	if(vrdv1 < 0.f) vrdv1 = 0.f;
-	if(vrdv1 > d1) vrdv1 = d1;
-	
-	v1 = float3_add(v[0], scale_float3_by(v1, vrdv1));
-	float dc = distance_between(v1, p);
-	
-	if(dc < result.closestDistance) {
-	    result.closestPoint = v1;
-	    result.closestDistance = dc;
-	}
-}
-
-// http://mathworld.wolfram.com/Point-PlaneDistance.html
-
-inline __device__ float3 projectPointOnPlane(float3 p, float3 v, float3 nor)
-{
-    float t = float3_dot(nor, v) - float3_dot(nor, p);
-    return float3_add(p, scale_float3_by(nor, t));
-}
-
-inline __device__ void computeClosestPointOnTriangle(const float3 & p, const float3 * v, ClosestPointTestContext & result)
-{
-    float3 nor = triangleNormal(v);
-    float3 onplane = projectPointOnPlane(p, v[0], nor);
-    
-    if(pointInsideTriangleTest(onplane, nor, v)) {
-        float d = distance_between(p, onplane);
-        if(d < result.closestDistance) {
-            result.closestPoint = onplane;
-            result.closestDistance = d;
-        }
-        return;
-    }
-    
-    computeClosestPointOnLine(p, v, result);
-    float3 line[2];
-    line[0] = v[1];
-    line[1] = v[2];
-    computeClosestPointOnLine(p, line, result);
-    line[0] = v[2];
-    line[1] = v[0];
-    computeClosestPointOnLine(p, line, result);
-}
-
-inline __device__ void computeClosestPointOnTetrahedron(const float3 & p, const float3 * v, ClosestPointTestContext & result)
-{
-	computeClosestPointOnTriangle(p, v, result);
-	
-	float3 pr[3];
-	pr[0] = v[0];
-	pr[1] = v[1];
-	pr[2] = v[3];
-	computeClosestPointOnTriangle(p, pr, result);
-	
-	pr[0] = v[0];
-	pr[1] = v[2];
-	pr[2] = v[3];
-	computeClosestPointOnTriangle(p, pr, result);
-	
-	pr[0] = v[1];
-	pr[1] = v[2];
-	pr[2] = v[3];
-	computeClosestPointOnTriangle(p, pr, result);
-}
-
 inline __device__ void computeClosestPointOnSimplex(Simplex & s, const float3 & p, ClosestPointTestContext & ctc)
 {
-    ctc.closestDistance = 1e10;
+    ctc.closestDistance = 1e10f;
 
     if(s.dimension < 2) {
         ctc.closestPoint = s.p[0];
@@ -332,10 +249,10 @@ inline __device__ void smallestSimplex(Simplex & s, BarycentricCoordinate & cont
 
 	s.dimension = 0;
 	
-	if(bar[0] > 1e-5) s.dimension++;
-	if(bar[1] > 1e-5) s.dimension++;
-	if(bar[2] > 1e-5) s.dimension++;
-	if(bar[3] > 1e-5) s.dimension++;
+	if(bar[0] > 1e-5f) s.dimension++;
+	if(bar[1] > 1e-5f) s.dimension++;
+	if(bar[2] > 1e-5f) s.dimension++;
+	if(bar[3] > 1e-5f) s.dimension++;
 }
 
 inline __device__ void computeSeparateDistance(Simplex & s, 
@@ -430,5 +347,5 @@ inline __device__ void checkClosestDistance(Simplex & s,
 	interpolatePointAB(s, coord, dstPA, dstPB);
 }
 
-#endif        //  #ifndef _GJK_MATH_H_
+#endif        //  #ifndef _GJK_MATH_CU_
 

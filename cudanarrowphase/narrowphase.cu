@@ -39,13 +39,13 @@ inline __device__ void progressTetrahedron(TetrahedronProxy & prx,
 inline __device__ float velocityOnTetrahedronAlong(float3 * v, const uint4 & t, const BarycentricCoordinate & coord, const float3 & d)
 {
     float3 vot = make_float3(0.f, 0.f, 0.f);
-    if(coord.x > 1e-5)
+    if(coord.x > 1e-5f)
         vot = float3_add(vot, scale_float3_by(v[t.x], coord.x));
-    if(coord.y > 1e-5)
+    if(coord.y > 1e-5f)
         vot = float3_add(vot, scale_float3_by(v[t.y], coord.y));
-    if(coord.z > 1e-5)
+    if(coord.z > 1e-5f)
         vot = float3_add(vot, scale_float3_by(v[t.z], coord.z));
-    if(coord.w > 1e-5)
+    if(coord.w > 1e-5f)
         vot = float3_add(vot, scale_float3_by(v[t.w], coord.w));
     
     return float3_dot(vot, d);
@@ -242,8 +242,8 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
 	                    - velocityOnTetrahedronAlong(vel, ita, getBarycentricCoordinate4Relativei(dstContact[ind].localA, pos, ita), 
 	                                                nor);
 // going apart     
-    if(closeInSpeed < 1e-8) { 
-        dstContact[ind].timeOfImpact = 1e8;
+    if(closeInSpeed < 1e-8f) { 
+        dstContact[ind].timeOfImpact = 1e8f;
         return;
     }
     
@@ -260,7 +260,7 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
 
 // too far away	
 	if(toi > GJK_STEPSIZE) { 
-        dstContact[ind].timeOfImpact = 1e8;
+        dstContact[ind].timeOfImpact = 1e8f;
         return;
     }
 	
@@ -295,7 +295,7 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 	if(ind >= maxInd) return;
 	
 	dstContact[ind].separateAxis=make_float4(0.f, 0.f, 0.f, 0.f);
-	dstContact[ind].timeOfImpact = 1e8;
+	dstContact[ind].timeOfImpact = 1e8f;
 	
 	const uint4 ita = computePointIndex(pointStart, indexStart, indices, pairs[ind].x);
 	const uint4 itb = computePointIndex(pointStart, indexStart, indices, pairs[ind].y);
@@ -306,20 +306,20 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 	ClosestPointTestContext ctc;
 	BarycentricCoordinate coord;
 	float4 sas;
-	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, sas, 
-	    coord);
+//	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, sas, 
+//	    coord);
 // intersected try zero margin	
-	if(sas.w < 1.f) {
+//	if(sas.w < 1.f) {
 	    computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, sas, 
 	    coord);
-	}
+//	}
 // still intersected no solution
 	if(sas.w < 1.f) return;
 
 // output	
 	interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
 	dstContact[ind].separateAxis = sas;
-	dstContact[ind].timeOfImpact = 1e-9;
+	dstContact[ind].timeOfImpact = 1e-9f;
 }
 
 __global__ void computeValidPairs_kernel(uint* dstCounts, 

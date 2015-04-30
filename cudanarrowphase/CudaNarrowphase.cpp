@@ -22,11 +22,6 @@ struct SSimplex {
 	int dimension;
 };
 
-struct ClosestPointTestContext {
-    float3 closestPoint;
-    float closestDistance;
-};
-
 struct SContactData {
     float4 separateAxis;
     float3 localA;

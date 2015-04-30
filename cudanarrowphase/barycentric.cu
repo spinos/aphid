@@ -4,6 +4,16 @@
 #include "bvh_math.cu"
 #include "matrix_math.cu"
 
+inline __device__ float3 triangleNormal2(const float3 & v0,
+                                        const float3 & v1,
+                                        const float3 & v2)
+{
+    float3 ab = float3_difference(v1, v0);
+    float3 ac = float3_difference(v2, v0);
+    float3 nor = float3_cross(ab, ac);
+    return float3_normalize(nor);
+}
+
 inline __device__ float3 triangleNormal(const float3 * v)
 {
     float3 ab = float3_difference(v[1], v[0]);
@@ -24,7 +34,7 @@ inline __device__ int isTriangleDegenerate(const float3 & a, const float3 & b, c
     float3 ab = float3_difference(b, a);
     float3 ac = float3_difference(c, a);
     float3 nor = float3_cross(ab, ac);
-    return (float3_length2(nor) < 1e-6);
+    return (float3_length2(nor) < 1e-6f);
 }
 
 inline __device__ int isTetrahedronDegenerate(const float3 & a, const float3 & b, const float3 & c, const float3 & d)
@@ -34,7 +44,7 @@ inline __device__ int isTetrahedronDegenerate(const float3 & a, const float3 & b
     
     float D0 = determinant44(m) ;
     if(D0 < 0.f) D0 = -D0;
-    return (D0 < 1e-5);
+    return (D0 < 1e-5f);
 }
 
 inline __device__ BarycentricCoordinate getBarycentricCoordinate2(const float3 & p, const float3 * v)
@@ -137,6 +147,26 @@ inline __device__ BarycentricCoordinate getBarycentricCoordinate4Relativei(const
     q = float3_add(q, p);
     
     return getBarycentricCoordinate4i(q, v, t);
+}
+
+inline __device__ int pointInsideTriangleTest2(const float3 & p, const float3 & nor, 
+                                                const float3 & v0,
+                                        const float3 & v1,
+                                        const float3 & v2)
+{
+    float3 e01 = float3_difference(v1, v0);
+	float3 x0 = float3_difference(p, v0);
+	if(float3_dot( float3_cross(e01, x0), nor ) < 0.f) return 0;
+	
+	float3 e12 = float3_difference(v2, v1);
+	float3 x1 = float3_difference(p, v1);
+	if(float3_dot( float3_cross(e12, x1), nor ) < 0.f) return 0;
+	
+	float3 e20 = float3_difference(v0, v2);
+	float3 x2 = float3_difference(p, v2);
+	if(float3_dot( float3_cross(e20, x2), nor ) < 0.f) return 0;
+	
+	return 1;
 }
 
 inline __device__ int pointInsideTriangleTest(const float3 & p, const float3 & nor, const float3 * tri)
