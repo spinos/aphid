@@ -32,7 +32,7 @@ set (CUSOURCES "../radixsort/radixsort.cu"
 "../cudabvh/cuReduceSum.cu")
 
 ## add_executable (testcudacg ${HEADER_FILES} main.cpp)
-set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
+set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_20")
 
 CUDA_ADD_EXECUTABLE (testcudacg ${HEADER_FILES} ${SOURC_FILES} ${CUSOURCES})
 

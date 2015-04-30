@@ -2,8 +2,8 @@
 #include <sstream>
 #include <gl_heads.h>
 #include "CudaBase.h"
-#include <cutil_inline.h>
-#include <cutil_gl_inline.h>
+#include <cuda_runtime.h>
+#include <cuda_gl_interop.h>
 
 int CudaBase::MaxThreadPerBlock = 512;
 int CudaBase::MaxRegisterPerBlock = 8192;
@@ -69,14 +69,14 @@ char CudaBase::CheckCUDevice()
 void CudaBase::SetGLDevice()
 {
     if(!CheckCUDevice()) return;
-	cudaGLSetGLDevice(cutGetMaxGflopsDeviceId());
+	cudaGLSetGLDevice(0);
 	HasDevice = 1;
 }
 
 void CudaBase::SetDevice()
 {
     if(!CheckCUDevice()) return;
-	cudaSetDevice(cutGetMaxGflopsDeviceId());
+	cudaSetDevice(0);
 	HasDevice = 1;
 }
 

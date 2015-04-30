@@ -85,7 +85,7 @@ find_package (zlib REQUIRED)
 target_link_libraries (testkdtree ${ZLIB_LIBRARIES})
 
 if(WIN32)
-set (QT_QMAKE_EXECUTABLE "D:/usr/Qtx64/4.7.1/bin/qmake.exe")
+set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
 endif()
 
 find_package (Qt4 REQUIRED)

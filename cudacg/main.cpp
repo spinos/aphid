@@ -15,7 +15,7 @@
  * 
  */
 
-#include <cutil_inline.h>
+// #include <cutil_inline.h>
 #include <cusparse.h>
 #include <cublas.h>
 #include <radixsort_implement.h>
@@ -56,7 +56,7 @@ void testReduceSum()
     
     std::cout<<" transfer idata to device\n";
     
-    cutilSafeCallNoSync(cudaMemcpy(d_idata, h_data, m * 4, cudaMemcpyHostToDevice));
+    cudaMemcpy(d_idata, h_data, m * 4, cudaMemcpyHostToDevice);
     
     std::cout<<" reduce sum on gpu\n";
 #ifdef USEREDFN    
@@ -157,8 +157,8 @@ void testRadixSort()
 	
 	if(passed) printf("passed!\n");
 
-    cutilSafeCall( cudaFree(d_data) );
-    cutilSafeCall( cudaFree(d_data1) );
+    cudaFree(d_data);
+    cudaFree(d_data1);
     free(h_data);
 }
 
@@ -238,13 +238,13 @@ void testCg()
     
     printf("sending data to device\n");
     
-    cutilSafeCall( cudaMalloc((void**)&d_col, nz*sizeof(int)) );
-    cutilSafeCall( cudaMalloc((void**)&d_row, (N+1)*sizeof(int)) );
-    cutilSafeCall( cudaMalloc((void**)&d_val, nz*sizeof(float)) );
-    cutilSafeCall( cudaMalloc((void**)&d_x, N*sizeof(float)) );  
-    cutilSafeCall( cudaMalloc((void**)&d_r, N*sizeof(float)) );
-    cutilSafeCall( cudaMalloc((void**)&d_p, N*sizeof(float)) );
-    cutilSafeCall( cudaMalloc((void**)&d_Ax, N*sizeof(float)) );
+    cudaMalloc((void**)&d_col, nz*sizeof(int));
+    cudaMalloc((void**)&d_row, (N+1)*sizeof(int));
+    cudaMalloc((void**)&d_val, nz*sizeof(float));
+    cudaMalloc((void**)&d_x, N*sizeof(float));  
+    cudaMalloc((void**)&d_r, N*sizeof(float));
+    cudaMalloc((void**)&d_p, N*sizeof(float));
+    cudaMalloc((void**)&d_Ax, N*sizeof(float));
 
     cudaMemcpy(d_col, J, nz*sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_row, I, (N+1)*sizeof(int), cudaMemcpyHostToDevice);
@@ -252,7 +252,7 @@ void testCg()
     cudaMemcpy(d_x, x, N*sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_r, rhs, N*sizeof(float), cudaMemcpyHostToDevice);
 
-    cusparseScsrmv(handle,CUSPARSE_OPERATION_NON_TRANSPOSE, N, N, 1.0, descr, d_val, d_row, d_col, d_x, 0.0, d_Ax);
+    // cusparseScsrmv(handle,CUSPARSE_OPERATION_NON_TRANSPOSE, N, N, 1.0, descr, d_val, d_row, d_col, d_x, 0.0, d_Ax);
     cublasSaxpy(N, -1.0, d_Ax, 1, d_r, 1);
     r1 = cublasSdot(N, d_r, 1, d_r, 1);
     
@@ -297,7 +297,7 @@ void testCg()
                // float           *y)
 //  y = alpha * op ( A ) * x + beta * y
 
-        cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, N, 1.0, descr, d_val, d_row, d_col, d_p, 0.0, d_Ax);
+        // cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, N, 1.0, descr, d_val, d_row, d_col, d_p, 0.0, d_Ax);
         a = r1 / cublasSdot(N, d_p, 1, d_Ax, 1);
         cublasSaxpy(N, a, d_p, 1, d_x, 1);
         cublasSaxpy(N, -a, d_Ax, 1, d_r, 1);
@@ -493,7 +493,7 @@ int main(int argc, char **argv)
     cudaDeviceProp deviceProp;
     int devID = 0;
     
-    cutilSafeCall( cudaGetDeviceProperties(&deviceProp, devID) );
+    cudaGetDeviceProperties(&deviceProp, devID);
 
     // Statistics about the GPU device
     printf("> GPU device has %d Multi-Processors, SM %d.%d compute capabilities\n\n", 
@@ -508,14 +508,14 @@ int main(int argc, char **argv)
         exit(1);
     }
     
-    // printf("test radix sort\n");
-    // testRadixSort();
+    printf("test radix sort\n");
+    testRadixSort();
     
     // printf("test conjugate gradient\n");
     // testCg();
     testReduceMax();
-    testReduceMinMaxF();
-	testReduceMinMaxBox();
+	testReduceMinMaxF();
+//	testReduceMinMaxBox();
     
     printf("done.\n");
     exit(0);

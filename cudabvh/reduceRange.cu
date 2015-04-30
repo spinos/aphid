@@ -3,8 +3,7 @@
 template <unsigned int blockSize, bool nIsPow2>
 __global__ void reduceFindMax_kernel(int *g_idata, int *g_odata, unsigned int n)
 {
-    extern __shared__ int sdata[];
-
+	extern __shared__ int sdata[];
     // perform first level of reduction,
     // reading from global memory, writing to shared memory
     unsigned int tid = threadIdx.x;
@@ -31,64 +30,76 @@ __global__ void reduceFindMax_kernel(int *g_idata, int *g_odata, unsigned int n)
 
 
     // do reduction in shared mem
-    if (blockSize >= 512) { 
-        if (tid < 256) { 
+    if (blockSize >= 512 && tid < 256) { 
             mySum = max(mySum, sdata[tid + 256]);
             sdata[tid] = mySum; 
         } 
+
         __syncthreads(); 
-    }
-    if (blockSize >= 256) { 
-        if (tid < 128) { 
+    
+    if (blockSize >= 256 && tid < 128) { 
             mySum = max(mySum, sdata[tid + 128]); 
             sdata[tid] = mySum; 
         } 
+
         __syncthreads(); 
-    }
-    if (blockSize >= 128) { 
-        if (tid <  64) { 
+   
+    if (blockSize >= 128 && tid <  64) { 
             mySum = max(mySum, sdata[tid +  64]); 
             sdata[tid] = mySum; 
         } 
+
         __syncthreads(); 
-    }
-    
+
+ #if (__CUDA_ARCH__ >= 300 )
+    if ( tid < 32 )
     {
-        // now that we are using warp-synchronous programming (below)
-        // we need to declare our shared memory volatile so that the compiler
-        // doesn't reorder stores to it and induce incorrect behavior.
-        volatile int * smem = sdata;
-        if (blockSize >=  64) {
-            mySum = max(mySum, smem[tid + 32]);
-            smem[tid] = mySum;
-            __syncthreads(); 
-        }
-        if (blockSize >=  32) { 
-            mySum = max(mySum, smem[tid + 16]);
-            smem[tid] = mySum;
-            __syncthreads(); 
-        }
-        if (blockSize >=  16) { 
-            mySum = max(mySum, smem[tid +  8]);
-            smem[tid] = mySum;
-            __syncthreads(); 
-        }
-        if (blockSize >=   8) { 
-            mySum = max(mySum, smem[tid +  4]);
-            smem[tid] = mySum;
-            __syncthreads(); 
-        }
-        if (blockSize >=   4) { 
-            mySum = max(mySum, smem[tid +  2]);
-            smem[tid] = mySum;
-            __syncthreads(); 
-        }
-        if (blockSize >=   2) { 
-            mySum = max(mySum, smem[tid +  1]);
-            smem[tid] = mySum;
-            __syncthreads(); 
+        // Fetch final intermediate sum from 2nd warp
+        if (blockSize >=  64) mySum += sdata[tid + 32];
+        // Reduce final warp using shuffle
+        for (int offset = warpSize/2; offset > 0; offset /= 2) 
+        {
+            mySum += __shfl_down(mySum, offset);
         }
     }
+#else 
+        // fully unroll reduction within a single warp
+        if ((blockSize >=  64) && (tid < 32)) {
+            mySum = max(mySum, sdata[tid + 32]);
+            sdata[tid] = mySum;
+        }
+	 __syncthreads(); 
+	
+        if ((blockSize >=  32) && (tid < 16)) { 
+            mySum = max(mySum, sdata[tid + 16]);
+            sdata[tid] = mySum;
+        }
+	__syncthreads(); 
+	
+        if ((blockSize >=  16) && (tid <  8)) { 
+            mySum = max(mySum, sdata[tid +  8]);
+            sdata[tid] = mySum;
+        }
+	__syncthreads(); 
+	
+        if ((blockSize >=   8) && (tid <  4)) { 
+            mySum = max(mySum, sdata[tid +  4]);
+            sdata[tid] = mySum;
+        }
+	 __syncthreads(); 
+	
+       if ((blockSize >=   4) && (tid <  2)) { 
+            mySum = max(mySum, sdata[tid +  2]);
+            sdata[tid] = mySum;
+        }
+	__syncthreads(); 
+	
+        if ((blockSize >=   2) && ( tid <  1)) { 
+            mySum = max(mySum, sdata[tid +  1]);
+            sdata[tid] = mySum;
+        }
+	__syncthreads(); 
+#endif
     
     // write result for this block to global mem 
     if (tid == 0) 
