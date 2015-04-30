@@ -1,16 +1,26 @@
-#include "reduceRange_implement.h"
+#include "cuReduceMax_implement.h"
 
-template <unsigned int blockSize, bool nIsPow2>
-__global__ void reduceFindMax_kernel(int *g_idata, int *g_odata, unsigned int n)
+template<class T>
+struct SharedMemory
 {
-	extern __shared__ int sdata[];
+    __device__ inline operator       T*()
+    {
+        extern __shared__ int __smem[];
+        return (T*)__smem;
+    }
+};
+
+template <class T, unsigned int blockSize, bool nIsPow2>
+__global__ void reduceFindMax_kernel(T *g_idata, T *g_odata, unsigned int n)
+{
+	T *sdata = SharedMemory<T>();
     // perform first level of reduction,
     // reading from global memory, writing to shared memory
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x*blockSize*2 + threadIdx.x;
     unsigned int gridSize = blockSize*2*gridDim.x;
     
-    int mySum = -9999999;
+    T mySum = -999999999;
 
     // we reduce multiple elements per thread.  The number is determined by the 
     // number of active thread blocks (via gridDim).  More blocks will result
@@ -106,60 +116,70 @@ __global__ void reduceFindMax_kernel(int *g_idata, int *g_odata, unsigned int n)
         g_odata[blockIdx.x] = sdata[0];
 }
 
-extern "C" void bvhReduceFindMax(int *dst, int *src, unsigned numElements, unsigned numBlocks, unsigned numThreads)
+template <class T>
+void cuReduceFindMax(T *dst, T *src, unsigned numElements, unsigned numBlocks, unsigned numThreads)
 {
     dim3 dimBlock(numThreads, 1, 1);
     dim3 dimGrid(numBlocks, 1, 1);
-	int smemSize = (numThreads <= 32) ? 2 * numThreads * sizeof(int) : numThreads * sizeof(int);
+	int smemSize = (numThreads <= 32) ? 2 * numThreads * sizeof(T) : numThreads * sizeof(T);
 	
 	if (isPow2(numElements)) {
 		switch (numThreads)
 		{
 		case 512:
-			reduceFindMax_kernel<512, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,512, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case 256:
-			reduceFindMax_kernel<256, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,256, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case 128:
-			reduceFindMax_kernel<128, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,128, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case 64:
-			reduceFindMax_kernel<64, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,64, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case 32:
-			reduceFindMax_kernel<32, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,32, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case 16:
-			reduceFindMax_kernel<16, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,16, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case  8:
-			reduceFindMax_kernel< 8, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T, 8, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case  4:
-			reduceFindMax_kernel< 4, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T, 4, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case  2:
-			reduceFindMax_kernel< 2, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T, 2, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case  1:
-			reduceFindMax_kernel< 1, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T, 1, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		}
 	}
 	else {
 		switch (numThreads)
 		{
 		case 512:
-			reduceFindMax_kernel<512, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,512, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case 256:
-			reduceFindMax_kernel<256, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,256, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case 128:
-			reduceFindMax_kernel<128, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,128, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case 64:
-			reduceFindMax_kernel<64, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,64, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case 32:
-			reduceFindMax_kernel<32, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,32, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case 16:
-			reduceFindMax_kernel<16, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T,16, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case  8:
-			reduceFindMax_kernel< 8, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T, 8, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case  4:
-			reduceFindMax_kernel< 4, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T, 4, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case  2:
-			reduceFindMax_kernel< 2, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T, 2, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		case  1:
-			reduceFindMax_kernel< 1, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
+			reduceFindMax_kernel<T, 1, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, numElements); break;
 		}
 	}
 }
+
+template void 
+cuReduceFindMax<int>(int *d_idata, int *d_odata, 
+    unsigned numElements, unsigned numBlocks, unsigned numThreads);
+
+template void 
+cuReduceFindMax<float>(float *d_idata, float *d_odata,
+    unsigned numElements, unsigned numBlocks, unsigned numThreads);
+

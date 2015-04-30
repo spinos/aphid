@@ -1,5 +1,15 @@
 #include "cuReduceSum_implement.h"
 
+template<class T>
+struct SharedMemory
+{
+    __device__ inline operator       T*()
+    {
+        extern __shared__ int __smem[];
+        return (T*)__smem;
+    }
+};
+
 template <unsigned int blockSize, bool nIsPow2>
 __global__ void reducePntMinX_kernel(float3 *g_idata, float *g_odata, uint n)
 {
@@ -386,10 +396,10 @@ __global__ void reduceFMax_kernel(float *g_idata, float *g_odata, uint n)
         g_odata[blockIdx.x] = sdata[0];
 }
 
-template <unsigned int blockSize, bool nIsPow2>
-__global__ void reduceFSum_kernel(float *g_idata, float *g_odata, uint n)
+template <class T, unsigned int blockSize, bool nIsPow2>
+__global__ void reduceFindSum_kernel(T *g_idata, T *g_odata, uint n)
 {
-    extern __shared__ float sdata[];
+    T *sdata = SharedMemory<T>();
 
     // perform first level of reduction,
     // reading from global memory, writing to shared memory
@@ -397,7 +407,7 @@ __global__ void reduceFSum_kernel(float *g_idata, float *g_odata, uint n)
     unsigned int i = blockIdx.x*blockSize*2 + threadIdx.x;
     unsigned int gridSize = blockSize*2*gridDim.x;
     
-    float mySum = 0.f;
+    T mySum = 0.f;
 
     // we reduce multiple elements per thread.  The number is determined by the 
     // number of active thread blocks (via gridDim).  More blocks will result
@@ -417,132 +427,145 @@ __global__ void reduceFSum_kernel(float *g_idata, float *g_odata, uint n)
 
 
     // do reduction in shared mem
-    if (blockSize >= 512) { 
-        if (tid < 256) { 
-            mySum += sdata[tid + 256];
-            sdata[tid] = mySum; 
-        } 
-        __syncthreads(); 
-    }
-    if (blockSize >= 256) { 
-        if (tid < 128) { 
-            mySum += sdata[tid + 128]; 
-            sdata[tid] = mySum; 
-        } 
-        __syncthreads(); 
-    }
-    if (blockSize >= 128) { 
-        if (tid <  64) { 
-            mySum += sdata[tid +  64]; 
-            sdata[tid] = mySum; 
-        } 
-        __syncthreads(); 
-    }
+    if (blockSize >= 512 && tid < 256) { 
+        mySum += sdata[tid + 256];
+		sdata[tid] = mySum; 
+	}
+	__syncthreads(); 
     
-
+    if (blockSize >= 256 && tid < 128) { 
+		mySum += sdata[tid + 128]; 
+		sdata[tid] = mySum; 
+	} 
+	__syncthreads(); 
+		
+    if (blockSize >= 128 && tid <  64) { 
+		mySum += sdata[tid +  64]; 
+		sdata[tid] = mySum; 
+	}
+	__syncthreads(); 
+    
+ #if (__CUDA_ARCH__ >= 300 )
+    if ( tid < 32 )
     {
-        // now that we are using warp-synchronous programming (below)
-        // we need to declare our shared memory volatile so that the compiler
-        // doesn't reorder stores to it and induce incorrect behavior.
-        volatile float * smem = sdata;
-        if (blockSize >=  64) {
-            mySum += smem[tid + 32];
-            smem[tid] = mySum;
-            __syncthreads(); 
-        }
-        if (blockSize >=  32) { 
-           mySum += smem[tid + 16];
-            smem[tid] = mySum;
-            __syncthreads(); 
-        }
-        if (blockSize >=  16) { 
-            mySum += smem[tid +  8];
-            smem[tid] = mySum;
-            __syncthreads(); 
-        }
-        if (blockSize >=   8) { 
-            mySum += smem[tid +  4];
-            smem[tid] = mySum;
-            __syncthreads(); 
-        }
-        if (blockSize >=   4) { 
-            mySum += smem[tid +  2];
-            smem[tid] = mySum;
-            __syncthreads(); 
-        }
-        
-        if (blockSize >=   2) { 
-            mySum += smem[tid +  1];
-            smem[tid] = mySum;
-            __syncthreads(); 
+        // Fetch final intermediate sum from 2nd warp
+        if (blockSize >=  64) mySum += sdata[tid + 32];
+        // Reduce final warp using shuffle
+        for (int offset = warpSize/2; offset > 0; offset /= 2) 
+        {
+            mySum += __shfl_down(mySum, offset);
         }
     }
-    
+#else     
+        // fully unroll reduction within a single warp
+	if ((blockSize >=  64) && (tid < 32)) {
+		mySum += sdata[tid + 32];
+		sdata[tid] = mySum;
+	}
+	__syncthreads(); 
+        
+	if ((blockSize >=  32) && (tid < 16)) { 
+	   mySum += sdata[tid + 16];
+		sdata[tid] = mySum;
+	}
+	__syncthreads(); 
+	
+	if ((blockSize >=  16) && (tid <  8)) {
+		mySum += sdata[tid +  8];
+		sdata[tid] = mySum;
+	}
+	__syncthreads(); 
+        
+	if ((blockSize >=   8) && (tid <  4)) { 
+		mySum += sdata[tid +  4];
+		sdata[tid] = mySum;
+	}
+	__syncthreads(); 
+        
+	if ((blockSize >=   4) && (tid <  2)) { 
+		mySum += sdata[tid +  2];
+		sdata[tid] = mySum;
+	}
+	__syncthreads(); 
+	
+	if ((blockSize >=   2) && ( tid <  1)) {
+		mySum += sdata[tid +  1];
+		sdata[tid] = mySum;
+	}
+	__syncthreads();         
+#endif    
     // write result for this block to global mem 
     if (tid == 0) 
         g_odata[blockIdx.x] = sdata[0];
 }
-
-extern "C" {
     
-void cuReduce_F_Sum(float *dst, float *src, 
+template <class T>
+void cuReduceFindSum(T *dst, T *src, 
     uint n, uint nBlocks, uint nThreads)
 {
 	dim3 dimBlock(nThreads, 1, 1);
     dim3 dimGrid(nBlocks, 1, 1);
-	uint smemSize = (nThreads <= 32) ? 64 * 4 : nThreads * 4;
+	int smemSize = (nThreads <= 32) ? 2 * nThreads * sizeof(T) : nThreads * sizeof(T);
 	
 	if (isPow2(n)) {
 		switch (nThreads)
 		{
 		case 512:
-			reduceFSum_kernel<512, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 512, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case 256:
-			reduceFSum_kernel<256, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 256, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case 128:
-			reduceFSum_kernel<128, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 128, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case 64:
-			reduceFSum_kernel<64, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 64, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case 32:
-			reduceFSum_kernel<32, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 32, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case 16:
-			reduceFSum_kernel<16, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 16, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case  8:
-			reduceFSum_kernel< 8, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T,  8, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case  4:
-			reduceFSum_kernel< 4, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T,  4, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case  2:
-			reduceFSum_kernel< 2, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T,  2, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case  1:
-			reduceFSum_kernel< 1, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T,  1, true><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		}
 	}
 	else {
 		switch (nThreads)
 		{
 		case 512:
-			reduceFSum_kernel<512, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 512, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case 256:
-			reduceFSum_kernel<256, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 256, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case 128:
-			reduceFSum_kernel<128, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 128, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case 64:
-			reduceFSum_kernel<64, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 64, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case 32:
-			reduceFSum_kernel<32, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 32, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case 16:
-			reduceFSum_kernel<16, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T, 16, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case  8:
-			reduceFSum_kernel< 8, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T,  8, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case  4:
-			reduceFSum_kernel< 4, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T,  4, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case  2:
-			reduceFSum_kernel< 2, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T,  2, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		case  1:
-			reduceFSum_kernel< 1, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
+			reduceFindSum_kernel<T,  1, false><<< dimGrid, dimBlock, smemSize >>>(src, dst, n); break;
 		}
 	}
 }
+
+template
+void cuReduceFindSum<int>(int *dst, int *src, 
+    uint n, uint nBlocks, uint nThreads);
+	
+template
+void cuReduceFindSum<float>(float *dst, float *src, 
+    uint n, uint nBlocks, uint nThreads);
 
 void cuReduce_F_Max(float * dst, float * src,
                     uint n, uint nBlocks, uint nThreads)
@@ -782,4 +805,3 @@ void cuReduce_Pnt_MinX(float * dst, float3 * src,
 	}
 }
 
-}

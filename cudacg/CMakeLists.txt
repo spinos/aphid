@@ -14,25 +14,30 @@ message ("cuda sdk root dir " ${CUDA_SDK_ROOT_DIR})
 
 include_directories (${CUDA_TOOLKIT_INCLUDE} ${CUDA_SDK_ROOT_DIR}/common/inc
 "../radixsort"
+"../reduction"
 "../cudabvh"
 "../shared")
 
 set (HEADER_FILES "../shared/Morton3D.h"
-"../cudabvh/CudaReduction.h")
+"../reduction/CudaReduction.h")
 set (SOURC_FILES "main.cpp"
 "../shared/CudaBase.cpp"
 "../shared/CUDABuffer.cpp"
 "../shared/BaseBuffer.cpp"
-"../cudabvh/CudaReduction.cpp")
+"../reduction/CudaReduction.cpp")
 set (CUSOURCES "../radixsort/radixsort.cu"
-"../cudabvh/reduceRange.cu"
-"../cudabvh/cuReduceFlt2.cu"
-"../cudabvh/cuReduceFlt3.cu"
-"../cudabvh/cuReduceFlt4.cu"
-"../cudabvh/cuReduceSum.cu")
+"../reduction/cuReduceMax.cu"
+"../reduction/cuReduceMin.cu"
+"../reduction/cuReduceMinMax.cu"
+"../reduction/cuReduceMinMaxBox.cu"
+"../reduction/cuReduceSum.cu")
 
 ## add_executable (testcudacg ${HEADER_FILES} main.cpp)
+if(WIN32)
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_20")
+else()
+set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
+endif()
 
 CUDA_ADD_EXECUTABLE (testcudacg ${HEADER_FILES} ${SOURC_FILES} ${CUSOURCES})
 
