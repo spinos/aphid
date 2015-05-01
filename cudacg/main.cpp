@@ -23,6 +23,7 @@
 #include <CudaReduction.h>
 #include <CUDABuffer.h>
 #include <BaseBuffer.h>
+#include <CudaScan.h>
 
 cudaEvent_t start_event, stop_event;
     
@@ -101,9 +102,9 @@ void testReduceSum()
 	for(i=0; i< blocks;i++)
 	    sum += h_odata[i];
 #endif
-	std::cout<<" sum: "<<sum<<" ";
+	std::cout<<" sum: "<<sum<<"\n";
 #endif
-	std::cout<<" proof: "<<proof<<" ";
+	std::cout<<" proof: "<<proof<<"\n";
 }
 
 void makeRandomUintVector(KeyValuePair *a, unsigned int numElements, unsigned int keybits)
@@ -534,6 +535,50 @@ void testReduceMinMaxBox()
     cudaEventDestroy(stop_event);
 }
 
+void testScan()
+{
+	std::cout<<" test scan\n";
+	unsigned m = 1024*1024;
+		
+	CUDABuffer dcount;
+	dcount.create(m*4);
+	
+	CUDABuffer dsum;
+	dsum.create(m*4);
+	
+	BaseBuffer hb;
+	hb.create(m*4);
+	
+	unsigned * h = (unsigned *)hb.data();
+	unsigned i;
+	for(i=0; i< m; i++) {
+	    h[i] = !(rand() & 3);
+	}
+	
+	dcount.hostToDevice(hb.data());
+	
+	CudaScan csn;
+	csn.create(m);
+	
+	cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
+    cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
+	
+	cudaEventRecord(start_event, 0);
+	
+	unsigned result = csn.prefixSum(&dsum, &dcount, m);
+	std::cout<<" result is "<<result<<"\n";
+	
+	cudaEventRecord(stop_event, 0);
+	cudaEventSynchronize(stop_event);
+	float met;
+	cudaEventElapsedTime(&met, start_event, stop_event);
+	
+	cudaEventDestroy(start_event);
+    cudaEventDestroy(stop_event);
+	
+	std::cout<<" scan "<<m<<" ints took "<<met<<" milliseconds\n";
+}
+
 int main(int argc, char **argv)
 {
     // This will pick the best possible CUDA capable device
@@ -563,6 +608,7 @@ int main(int argc, char **argv)
 	testReduceMinMax();
 	testReduceMinMaxBox();
 	testReduceSum();
+	testScan();
     
     printf("done.\n");
     exit(0);

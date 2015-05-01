@@ -16,6 +16,7 @@ include_directories (${CUDA_TOOLKIT_INCLUDE} ${CUDA_SDK_ROOT_DIR}/common/inc
 "../radixsort"
 "../reduction"
 "../cudabvh"
+"../scan"
 "../shared")
 
 set (HEADER_FILES "../shared/Morton3D.h"
@@ -24,8 +25,10 @@ set (SOURC_FILES "main.cpp"
 "../shared/CudaBase.cpp"
 "../shared/CUDABuffer.cpp"
 "../shared/BaseBuffer.cpp"
+"../scan/CudaScan.cpp"
 "../reduction/CudaReduction.cpp")
 set (CUSOURCES "../radixsort/radixsort.cu"
+"../scan/scan.cu"
 "../reduction/cuReduceMax.cu"
 "../reduction/cuReduceMin.cu"
 "../reduction/cuReduceMinMax.cu"
