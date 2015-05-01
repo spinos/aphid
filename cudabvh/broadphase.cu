@@ -4,10 +4,23 @@
 #include <stripedModel.cu>
 
 #define B3_BROADPHASE_MAX_STACK_SIZE 128
-#define B3_BROADPHASE_MAX_STACK_SIZE_M_3 125
+#define B3_BROADPHASE_MAX_STACK_SIZE_M_2 126
+
+template<class T>
+struct SharedMemory
+{
+    __device__ inline operator       T*()
+    {
+        extern __shared__ int __smem[];
+        return (T*)__smem;
+    }
+};
 
 inline __device__ int isStackFull(int stackSize)
-{return stackSize > B3_BROADPHASE_MAX_STACK_SIZE_M_3; }
+{return stackSize > B3_BROADPHASE_MAX_STACK_SIZE_M_2; }
+
+inline __device__ int outOfStack(int stackSize)
+{return (stackSize < 1 || stackSize > B3_BROADPHASE_MAX_STACK_SIZE); }
 
 __device__ int isElementExcluded(uint b, uint a, 
 									uint * exclusionInd,
@@ -35,6 +48,143 @@ __device__ int isTetrahedronConnected(uint a, uint b, const uint4 * v)
     if(ta.w == tb.x || ta.w == tb.y || ta.w == tb.z || ta.w == tb.w) return 1;
     
     return 0;
+}
+
+__global__ void writePairCacheSExclS_kernel(uint2 * dst, 
+                                uint * cacheWriteLocation,
+								uint * cacheStarts, 
+								uint * overlappingCounts,
+								Aabb * boxes, 
+								uint maxBoxInd,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndices, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								unsigned queryIdx,
+								uint * exclusionIndices,
+								uint * exclusionStarts)
+{
+	int * sStack = SharedMemory<int>();
+	
+	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if(boxIndex >= maxBoxInd) return;
+	
+	uint cacheSize = overlappingCounts[boxIndex];
+	if(cacheSize < 1) return;
+	
+	uint startLoc = cacheStarts[boxIndex];
+	uint writeLoc = cacheWriteLocation[boxIndex];
+	
+	if((writeLoc - startLoc) >= cacheSize) return;
+	
+	Aabb box = boxes[boxIndex];
+	
+	int * stack = &sStack[threadIdx.x << 7];
+	
+	int stackSize = 1;
+	stack[0] = *rootNodeIndex;
+		
+	int isLeaf;
+	
+	for(;;) {
+		if(outOfStack(stackSize)) break;
+	
+		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
+		stackSize--;
+		
+		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
+		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
+
+		//bvhRigidIndex is not used if internal node
+		int bvhRigidIndex = (isLeaf) ? (int)mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
+		
+		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
+		uint2 pair;
+		if(isAabbOverlapping(box, bvhNodeAabb))
+		{
+			if(isLeaf)
+			{
+			    if(!isElementExcluded(bvhRigidIndex, boxIndex, exclusionIndices, exclusionStarts)) {
+			        pair.x = combineObjectElementInd(queryIdx, boxIndex);
+			        pair.y = combineObjectElementInd(queryIdx, bvhRigidIndex);
+			        dst[writeLoc] = pair;
+			        writeLoc++;
+			    }
+			    
+			    if((writeLoc - startLoc)==cacheSize) { // cache if full
+			        break;
+			    }
+			}
+			else {
+			    if(isStackFull(stackSize)) continue;
+			    
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+                stackSize++;
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+                stackSize++;
+			}
+		}
+	}
+	cacheWriteLocation[boxIndex] = writeLoc;
+}
+
+__global__ void countPairsSExclS_kernel(uint * overlappingCounts, 
+								Aabb * boxes, 
+								uint maxBoxInd,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndices, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								uint * exclusionIndices,
+								uint * exclusionStarts)
+{
+	int * sStack = SharedMemory<int>();
+	
+	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	if(boxIndex >= maxBoxInd) return;
+	
+	Aabb box = boxes[boxIndex];
+	
+	int * stack = &sStack[threadIdx.x << 7];
+	int stackSize = 1;
+	stack[0] = *rootNodeIndex;
+		
+	int isLeaf;
+	
+	for(;;) {
+		if(outOfStack(stackSize)) break;
+		
+		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
+		stackSize--;
+		
+		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
+		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
+
+		//bvhRigidIndex is not used if internal node
+		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
+		
+		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
+
+		if(isAabbOverlapping(box, bvhNodeAabb))
+		{    		    
+			if(isLeaf)
+			{
+			    if(!isElementExcluded(bvhRigidIndex, boxIndex, exclusionIndices, exclusionStarts)) 
+			        overlappingCounts[boxIndex] += 1;
+			}
+			else {
+			    if(isStackFull(stackSize)) continue;
+			    
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+                stackSize++;
+                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+                stackSize++;
+				
+			}
+		}
+	}
 }
 
 __global__ void writePairCacheSelfCollideExclusion_kernel(uint2 * dst, 
@@ -72,8 +222,9 @@ __global__ void writePairCacheSelfCollideExclusion_kernel(uint2 * dst,
 		
 	int isLeaf;
 	
-	while(stackSize > 0)
-	{
+	for(;;) {
+		if(outOfStack(stackSize)) break;
+	
 		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
 		stackSize--;
 		
@@ -136,8 +287,9 @@ __global__ void computePairCountsSelfCollideExclusion_kernel(uint * overlappingC
 		
 	int isLeaf;
 	
-	while(stackSize > 0)
-	{
+	for(;;) {
+		if(outOfStack(stackSize)) break;
+	
 		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
 		stackSize--;
 		
@@ -206,8 +358,9 @@ __global__ void computePairCounts_kernel(uint * overlappingCounts, Aabb * boxes,
 		
 	int isLeaf;
 	
-	while(stackSize > 0)
-	{
+	for(;;) {
+		if(outOfStack(stackSize)) break;
+			
 		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
 		stackSize--;
 		
@@ -258,8 +411,9 @@ __global__ void computePairCountsSelfCollide_kernel(uint * overlappingCounts, Aa
 		
 	int isLeaf;
 	
-	while(stackSize > 0)
-	{
+	for(;;) {
+		if(outOfStack(stackSize)) break;
+	
 		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
 		stackSize--;
 		
@@ -323,8 +477,9 @@ __global__ void writePairCache_kernel(uint2 * dst,
 		
 	int isLeaf;
 	
-	while(stackSize > 0)
-	{
+	for(;;) {
+		if(outOfStack(stackSize)) break;
+	
 		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
 		stackSize--;
 		
@@ -390,8 +545,9 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst, uint * cacheStarts
 		
 	int isLeaf;
 	
-	while(stackSize > 0)
-	{
+	for(;;) {
+		if(outOfStack(stackSize)) break;
+	
 		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
 		stackSize--;
 		
@@ -691,6 +847,69 @@ void cuBroadphase_writeLocation(uint * dst, uint * src, uint n)
     dim3 grid(nblk, 1, 1);
     
     startAsWriteLocation_kernel<<< grid, block >>>(dst, src, n);
+}
+
+void cuBroadphase_countPairsSelfCollideExclS(uint * dst, Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								uint * exclusionIndices,
+								uint * exclusionStarts,
+								int nThreads)
+{
+	dim3 block(nThreads, 1, 1);
+    unsigned nblk = iDivUp(numBoxes, nThreads);
+    dim3 grid(nblk, 1, 1);
+	
+	int smemSize = nThreads * 512;
+	
+	countPairsSExclS_kernel<<< grid, block, smemSize>>>(dst,
+                                boxes,
+                                numBoxes,
+								rootNodeIndex, 
+								internalNodeChildIndex, 
+								internalNodeAabbs, 
+								leafNodeAabbs,
+								mortonCodesAndAabbIndices,
+								exclusionIndices,
+								exclusionStarts);
+}
+
+void cuBroadphase_writePairCacheSelfCollideExclS(uint2 * dst, uint * locations, 
+                                uint * starts, uint * counts,
+                              Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								unsigned queryIdx,
+								uint * exclusionIndices,
+								uint * exclusionStarts,
+								int nThreads)
+{
+	dim3 block(nThreads, 1, 1);
+    unsigned nblk = iDivUp(numBoxes, nThreads);
+    
+    dim3 grid(nblk, 1, 1);
+	
+	int smemSize = nThreads * 512;
+    
+    writePairCacheSExclS_kernel<<< grid, block, smemSize>>>(dst, 
+                                locations,
+                                starts, counts,
+                                boxes,
+                                numBoxes,
+								rootNodeIndex, 
+								internalNodeChildIndex, 
+								internalNodeAabbs, 
+								leafNodeAabbs,
+								mortonCodesAndAabbIndices,
+								queryIdx,
+								exclusionIndices,
+								exclusionStarts);
 }
 
 }

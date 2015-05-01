@@ -74,5 +74,28 @@ void cuBroadphase_writePairCacheSelfCollideExclusion(uint2 * dst, uint * locatio
 								uint * exclusionIndices,
 								uint * exclusionStarts);
 								
+void cuBroadphase_countPairsSelfCollideExclS(uint * dst, Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								uint * exclusionIndices,
+								uint * exclusionStarts,
+								int nThreads);
+								
+void cuBroadphase_writePairCacheSelfCollideExclS(uint2 * dst, uint * locations, 
+								uint * starts, uint * counts,
+                              Aabb * boxes, uint numBoxes,
+								int * rootNodeIndex, 
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								unsigned queryIdx,
+								uint * exclusionIndices,
+								uint * exclusionStarts,
+								int nThreads);
+								
 void cuBroadphase_writeLocation(uint * dst, uint * src, uint n);
 }

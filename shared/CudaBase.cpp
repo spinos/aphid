@@ -88,7 +88,7 @@ int CudaBase::LimitNThreadPerBlock(int regPT, int memPT)
     if(byReg < tpb) tpb = byReg;
     if(byMem < tpb) tpb = byMem;
 	int nwarp = tpb / WarpSize;
-	if(nwarp < 1) nwarp = 1;
+	if(nwarp < 1) return WarpSize>>1;
     return nwarp*WarpSize;
 }
 

@@ -6,8 +6,8 @@
 #define DRAW_BVH_HASH 0
 #define DRAW_NPH_CONTACT 0
 #define COLLIDEJUST 0
-#define PRINT_BOUND 1
-#define PRINT_BVH_MAXLEVEL 1
+#define PRINT_BOUND 0
+#define PRINT_BVH_MAXLEVEL 0
 #define DRAW_BVH_HIERARCHY 0
 #define DISABLE_COLLISION_DETECTION 0
 #define DISABLE_COLLISION 0
@@ -17,6 +17,7 @@ public:
     static bool CheckConvergence;
     static int MaxTOINumIterations;
     static int MaxContactNumIterations;
+	static int BvhStackedNumThreads;
 };
 #endif        //  #ifndef BVHGLOBAL_H
 

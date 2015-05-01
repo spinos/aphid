@@ -89,6 +89,9 @@ void CudaBroadphase::initOnDevice()
 	m_pairStart->create(m_scanBufferLength * 4);
 	m_pairWriteLocation->create(m_scanBufferLength * 4);
 	m_scanIntermediate->create(m_scanBufferLength * 4);
+	
+	DynGlobal::BvhStackedNumThreads = CudaBase::LimitNThreadPerBlock(22, 512+64+16);
+	std::cout<<" bvh stack tpb "<<DynGlobal::BvhStackedNumThreads<<"\n";
 }
 
 void CudaBroadphase::computeOverlappingPairs()
@@ -161,14 +164,16 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	void * leafNodeAabbs = tree->leafAabbs();
 	void * mortonCodesAndAabbIndices = tree->leafHash();
 	
-	broadphaseComputePairCountsSelfCollideExclusion(counts, (Aabb *)boxes, numBoxes,
+	cuBroadphase_countPairsSelfCollideExclS(counts, (Aabb *)boxes, numBoxes,
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							(uint *)exclusionInd,
-							(uint *)exclusionStart);
+							(uint *)exclusionStart,
+							DynGlobal::BvhStackedNumThreads);
+	CudaBase::CheckCudaError("broadphase count pairs smem");
 }
 
 void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
@@ -245,7 +250,7 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	
 	void * cache = m_pairCache->bufferOnDevice();
 	
-	cuBroadphase_writePairCacheSelfCollideExclusion((uint2 *)cache, location, starts, counts, 
+	cuBroadphase_writePairCacheSelfCollideExclS((uint2 *)cache, location, starts, counts, 
 	                         (Aabb *)boxes, numBoxes,
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
@@ -254,7 +259,9 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							a,
 							(uint *)exclusionInd,
-							(uint *)exclusionStart);
+							(uint *)exclusionStart,
+							DynGlobal::BvhStackedNumThreads);
+	CudaBase::CheckCudaError("broadphase write pairs smem");
 }
 
 void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)

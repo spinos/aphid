@@ -62,6 +62,15 @@ static uint iRound1024(uint n)
 	return iDivUp(n, 1024) * 1024;
 }
 
+static int iLog2(int n)
+{
+	int i=0;
+	while(n > (1<<i)) {
+		i++;
+	}
+	return i;
+}
+
 struct Aabb {
     float3 low;
     float3 high;
