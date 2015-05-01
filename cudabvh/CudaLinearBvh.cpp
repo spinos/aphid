@@ -30,6 +30,7 @@ CudaLinearBvh::CudaLinearBvh()
 	m_internalNodeParentIndices = new CUDABuffer;
 	m_rootNodeIndexOnDevice = new CUDABuffer;
 	m_distanceInternalNodeFromRoot = new CUDABuffer;
+	m_maxChildElementIndices = new CUDABuffer;
 	m_findMaxDistance = new CudaReduction;
 #if DRAW_BVH_HASH
 	m_hostLeafHash = new BaseBuffer;
@@ -40,7 +41,22 @@ CudaLinearBvh::CudaLinearBvh()
 #endif
 }
 
-CudaLinearBvh::~CudaLinearBvh() {}
+CudaLinearBvh::~CudaLinearBvh() 
+{
+	delete m_leafAabbs;
+	delete m_internalNodeAabbs;
+	delete m_leafHash[0];
+	delete m_leafHash[1];
+	delete m_internalNodeCommonPrefixValues;
+	delete m_internalNodeCommonPrefixLengths;
+	delete m_leafNodeParentIndices;
+	delete m_internalNodeChildIndices;
+	delete m_internalNodeParentIndices;
+	delete m_rootNodeIndexOnDevice;
+	delete m_distanceInternalNodeFromRoot;
+	delete m_maxChildElementIndices;
+	delete m_findMaxDistance;
+}
 
 void CudaLinearBvh::setNumLeafNodes(unsigned n)
 { m_numLeafNodes = n; }
@@ -62,6 +78,7 @@ void CudaLinearBvh::initOnDevice()
 	m_internalNodeParentIndices->create(numInternalNodes() * sizeof(int));
 	m_rootNodeIndexOnDevice->create(sizeof(int));
 	m_distanceInternalNodeFromRoot->create(numInternalNodes() * sizeof(int));
+	m_maxChildElementIndices->create(numInternalNodes() * sizeof(int));
 	
 	m_findMaxDistance->initOnDevice();
 
@@ -98,6 +115,9 @@ void * CudaLinearBvh::internalNodeChildIndices()
 
 void * CudaLinearBvh::internalNodeAabbs()
 { return m_internalNodeAabbs->bufferOnDevice(); }
+
+void * CudaLinearBvh::internalNodeChildLimit()
+{ return m_maxChildElementIndices->bufferOnDevice(); }
 
 void * CudaLinearBvh::leafAabbs()
 { return m_leafAabbs->bufferOnDevice(); }
@@ -184,12 +204,18 @@ void CudaLinearBvh::formInternalTreeAabbsIterative(int maxDistance)
 	void * internalNodeChildIndex = m_internalNodeChildIndices->bufferOnDevice();
 	void * leafNodeAabbs = m_leafAabbs->bufferOnDevice();
 	void * internalNodeAabbs = m_internalNodeAabbs->bufferOnDevice();
+	void * maxChildElement = m_maxChildElementIndices->bufferOnDevice();
+	
 	for(int distanceFromRoot = maxDistance; distanceFromRoot >= 0; --distanceFromRoot) {		
 		bvhFormInternalNodeAabbsAtDistance((int *)distances, (KeyValuePair *)boxes,
 											(int2 *)internalNodeChildIndex,
-											(Aabb *)leafNodeAabbs, (Aabb *)internalNodeAabbs,
+											(Aabb *)leafNodeAabbs, 
+											(Aabb *)internalNodeAabbs,
+											(int *)maxChildElement,
 											maxDistance, distanceFromRoot, 
 											numInternalNodes());
+											
+		CudaBase::CheckCudaError("bvh form internal aabb iterative");
 	}
 }
 

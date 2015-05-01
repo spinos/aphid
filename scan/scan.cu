@@ -193,7 +193,7 @@ extern "C" void scanExclusive(
     uint log2L;
     uint factorizationRemainder = factorRadix2(log2L, arrayLength);
     // assert( factorizationRemainder == 1 );
-
+	
     //Check supported size range
     // assert( (arrayLength >= MIN_SHORT_ARRAY_SIZE) && (arrayLength <= MAX_SHORT_ARRAY_SIZE) );
 

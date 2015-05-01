@@ -14,6 +14,7 @@
 class BaseBuffer;
 class CUDABuffer;
 class CudaLinearBvh;
+class CudaScan;
 class CudaBroadphase {
 public:
 	CudaBroadphase();
@@ -46,7 +47,6 @@ private:
 	void countOverlappingPairs(unsigned a, unsigned b);
 	void countOverlappingPairsSelf(unsigned a);
 	void countOverlappingPairsOther(unsigned a, unsigned b);
-	void prefixSumPairCounts();
 	void setWriteLocation();
 	void writeOverlappingPairs(unsigned a, unsigned b);
 	void writeOverlappingPairsSelf(unsigned a);
@@ -55,7 +55,7 @@ private:
 	CUDABuffer * m_pairCounts;
 	CUDABuffer * m_pairStart;
 	CUDABuffer * m_pairWriteLocation;
-	CUDABuffer * m_scanIntermediate;
+	CudaScan * m_scanIntermediate;
 	CUDABuffer * m_pairCache;
 #if DRAW_BPH_PAIRS
 	BaseBuffer * m_hostPairCache;

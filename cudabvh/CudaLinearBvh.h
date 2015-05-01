@@ -39,6 +39,7 @@ public:
 	void * rootNodeIndex();
 	void * internalNodeChildIndices();
 	void * internalNodeAabbs();
+	void * internalNodeChildLimit();
 	void * leafAabbs();
 	void * leafHash();
 	
@@ -75,6 +76,7 @@ private:
 	CUDABuffer * m_internalNodeParentIndices;
 	CUDABuffer * m_rootNodeIndexOnDevice;
     CUDABuffer * m_distanceInternalNodeFromRoot;
+	CUDABuffer * m_maxChildElementIndices;
 	CudaReduction * m_findMaxDistance;
 	unsigned m_numLeafNodes;
 #if DRAW_BVH_HASH

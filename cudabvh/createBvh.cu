@@ -457,6 +457,7 @@ __global__ void findDistanceFromRoot_kernel(int* rootNodeIndex, int* internalNod
 __global__ void formInternalNodeAabbsAtDistance_kernel(int * distanceFromRoot, KeyValuePair * mortonCodesAndAabbIndices,
 												int2 * childNodes,
 												Aabb * leafNodeAabbs, Aabb * internalNodeAabbs,
+												int * maxChildInd,
 												int maxDistanceFromRoot, int processedDistance, 
 												uint numInternalNodes)
 {
@@ -482,6 +483,15 @@ __global__ void formInternalNodeAabbsAtDistance_kernel(int * distanceFromRoot, K
 		
 		Aabb leftChildAabb = (isLeftChildLeaf) ? leafNodeAabbs[leftRigidIndex] : internalNodeAabbs[leftChildIndex];
 		Aabb rightChildAabb = (isRightChildLeaf) ? leafNodeAabbs[rightRigidIndex] : internalNodeAabbs[rightChildIndex];
+		
+		int elmLimit = -1;
+		if(isLeftChildLeaf) elmLimit = max(elmLimit, leftRigidIndex);
+		else elmLimit = max(elmLimit, maxChildInd[leftChildIndex]);
+		
+		if(isRightChildLeaf) elmLimit = max(elmLimit, rightRigidIndex);
+		else elmLimit = max(elmLimit, maxChildInd[rightChildIndex]);
+		
+		maxChildInd[internalNodeIndex] = elmLimit;
 		
 		Aabb mergedAabb = leftChildAabb;
 		expandAabb(mergedAabb, rightChildAabb);
@@ -597,16 +607,20 @@ extern "C" void bvhFindDistanceFromRoot(int* rootNodeIndex, int* internalNodePar
 extern "C" void bvhFormInternalNodeAabbsAtDistance(int * distanceFromRoot, KeyValuePair * mortonCodesAndAabbIndices,
 												int2 * childNodes,
 												Aabb * leafNodeAabbs, Aabb * internalNodeAabbs,
+												int * maxChildInd,
 												int maxDistanceFromRoot, int processedDistance, 
 												uint numInternalNodes)
 {
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(numInternalNodes, 512);
+	int tpb = CudaBase::LimitNThreadPerBlock(18, 52);
+
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numInternalNodes, tpb);
     
     dim3 grid(nblk, 1, 1);
     formInternalNodeAabbsAtDistance_kernel<<< grid, block >>>(distanceFromRoot, mortonCodesAndAabbIndices,
 										childNodes,
 										leafNodeAabbs, internalNodeAabbs,
+										maxChildInd,
 										maxDistanceFromRoot, processedDistance, 
 										numInternalNodes);
 }

@@ -37,7 +37,9 @@ extern "C" void bvhFindDistanceFromRoot(int* rootNodeIndex, int* internalNodePar
 
 extern "C" void bvhFormInternalNodeAabbsAtDistance(int * distanceFromRoot, KeyValuePair * mortonCodesAndAabbIndices,
 												int2 * childNodes,
-												Aabb * leafNodeAabbs, Aabb * internalNodeAabbs,
+												Aabb * leafNodeAabbs, 
+												Aabb * internalNodeAabbs,
+												int * maxChildInd,
 												int maxDistanceFromRoot, int processedDistance, 
 												uint numInternalNodes);
 									

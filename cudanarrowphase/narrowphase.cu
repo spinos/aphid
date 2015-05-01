@@ -65,8 +65,8 @@ __global__ void computeSeparateAxis_kernel(ContactData * dstContact,
 
 	if(ind >= maxInd) return;
 	
-	uint4 ita = computePointIndex(pointStart, indexStart, indices, pairs[ind].x);
-	uint4 itb = computePointIndex(pointStart, indexStart, indices, pairs[ind].y);
+	const uint4 ita = computePointIndex(pointStart, indexStart, indices, pairs[ind].x);
+	const uint4 itb = computePointIndex(pointStart, indexStart, indices, pairs[ind].y);
 	
 	progressTetrahedron(sPrxA[threadIdx.x], ita, pos, vel, 0.01667f);
 	progressTetrahedron(sPrxB[threadIdx.x], itb, pos, vel, 0.01667f);

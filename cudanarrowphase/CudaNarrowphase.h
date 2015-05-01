@@ -13,6 +13,7 @@
 class CudaTetrahedronSystem;
 class CUDABuffer;
 class BaseBuffer;
+class CudaScan;
 class CudaNarrowphase {
 public:
 	struct CombinedObjectBuffer {
@@ -66,7 +67,8 @@ private:
 	CUDABuffer * m_contact[2];
 	CUDABuffer * m_contactPairs;
 	CUDABuffer * m_validCounts;
-	CUDABuffer * m_scanValidContacts[2];
+	CUDABuffer * m_scanValidContacts;
+	CudaScan * m_scanIntermediate;
     CudaTetrahedronSystem * m_objects[CUDANARROWPHASE_MAX_NUMOBJECTS];
     unsigned m_objectPointStart[CUDANARROWPHASE_MAX_NUMOBJECTS];
 	unsigned m_objectIndexStart[CUDANARROWPHASE_MAX_NUMOBJECTS];

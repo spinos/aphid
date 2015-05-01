@@ -12,8 +12,7 @@
 #include <BaseBuffer.h>
 #include <CUDABuffer.h>
 #include "narrowphase_implement.h"
-#include "scan_implement.h"
-#include <ScanUtil.h>
+#include <CudaScan.h>
 #include <DynGlobal.h>
 struct SSimplex {
     float3 p[4];
@@ -46,8 +45,8 @@ CudaNarrowphase::CudaNarrowphase()
 	m_contact[1] = new CUDABuffer;
 	m_contactPairs = new CUDABuffer;
 	m_validCounts = new CUDABuffer;
-	m_scanValidContacts[0] = new CUDABuffer;
-	m_scanValidContacts[1] = new CUDABuffer;
+	m_scanValidContacts = new CUDABuffer;
+	m_scanIntermediate = new CudaScan;
 	std::cout<<" size of simplex "<<sizeof(SSimplex)<<" \n";
 	std::cout<<" size of ctc "<<sizeof(ClosestPointTestContext)<<" \n";
 	std::cout<<" size of contact "<<sizeof(SContactData)<<" \n";
@@ -93,7 +92,7 @@ void CudaNarrowphase::getContactPairs(BaseBuffer * dst)
 { m_contactPairs->deviceToHost(dst->data(), dst->bufferSize());}
 
 void CudaNarrowphase::getScanResult(BaseBuffer * dst)
-{ m_scanValidContacts[0]->deviceToHost(dst->data(), dst->bufferSize());}
+{ m_scanValidContacts->deviceToHost(dst->data(), dst->bufferSize());}
 
 CudaNarrowphase::CombinedObjectBuffer * CudaNarrowphase::objectBuffer()
 { return &m_objectBuf; }
@@ -207,7 +206,8 @@ void CudaNarrowphase::squeezeContacts(void * overlappingPairs, unsigned numOverl
 {
 	void * srcContact = m_contact[0]->bufferOnDevice();
 	
-	const unsigned scanValidPairLength = iDivUp(numOverlappingPairs, 1024) * 1024;
+	const unsigned scanValidPairLength = CudaScan::getScanBufferLength(numOverlappingPairs);
+	m_scanIntermediate->create(scanValidPairLength);
 	
 	m_validCounts->create(scanValidPairLength * 4);
 	
@@ -215,21 +215,19 @@ void CudaNarrowphase::squeezeContacts(void * overlappingPairs, unsigned numOverl
 	
 	narrowphaseComputeValidPairs((uint *)counts, (ContactData *)srcContact, numOverlappingPairs, scanValidPairLength);
 	
-	m_scanValidContacts[0]->create(scanValidPairLength * 4);
-	m_scanValidContacts[1]->create(scanValidPairLength * 4);
+	m_scanValidContacts->create(scanValidPairLength * 4);
 	
-	void * scanResult = m_scanValidContacts[0]->bufferOnDevice();
-	void * scanIntermediate = m_scanValidContacts[1]->bufferOnDevice();
-	scanExclusive((uint *)scanResult, (uint *)counts, (uint *)scanIntermediate, scanValidPairLength / 1024, 1024);
-
-	m_numContacts = ScanUtil::getScanResult(m_validCounts, m_scanValidContacts[0], scanValidPairLength);
+	m_numContacts = m_scanIntermediate->prefixSum(m_scanValidContacts, 
+												m_validCounts, scanValidPairLength);
 	
 	if(m_numContacts < 1) return;
 	
+	std::cout<<" n contact pairs "<<m_numContacts<<"\n";
+	
 	m_contactPairs->create(numOverlappingPairs * 8);
 	void * dstPairs = m_contactPairs->bufferOnDevice();
-	
 	void * dstContact = m_contact[1]->bufferOnDevice();
+	void * scanResult = m_scanValidContacts->bufferOnDevice();
 	
 	narrowphaseSqueezeContactPairs((uint2 *)dstPairs, (uint2 *)overlappingPairs, 
 									(ContactData *)dstContact, (ContactData *)srcContact,

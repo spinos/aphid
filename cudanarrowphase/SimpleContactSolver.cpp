@@ -11,8 +11,6 @@
 #include "CudaNarrowphase.h"
 #include <CUDABuffer.h>
 #include "simpleContactSolver_implement.h"
-#include "scan_implement.h"
-#include <ScanUtil.h>
 #include <DynGlobal.h>
 SimpleContactSolver::SimpleContactSolver() 
 {

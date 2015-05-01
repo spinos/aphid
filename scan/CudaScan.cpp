@@ -20,7 +20,7 @@ unsigned CudaScan::prefixSum(CUDABuffer * obuf, CUDABuffer * ibuf, unsigned n)
 { 
 	scanExclusive((uint *)obuf->bufferOnDevice(), (uint *)ibuf->bufferOnDevice(), 
 					(uint *)m_intermediate->bufferOnDevice(), 
-					n >> 10, 1024);
+					n >> 10, 1<< 10);
 					
 	unsigned a=0, b=0;
     ibuf->deviceToHost(&a, 4*(n - 1), 4);

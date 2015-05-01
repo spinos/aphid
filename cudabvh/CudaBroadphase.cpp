@@ -13,7 +13,7 @@
 #include "broadphase_implement.h"
 #include "scan_implement.h"
 #include <CudaBase.h>
-#include <ScanUtil.h>
+#include <CudaScan.h>
 #include <CudaTetrahedronSystem.h>
 CudaBroadphase::CudaBroadphase() 
 {
@@ -22,7 +22,7 @@ CudaBroadphase::CudaBroadphase()
 	m_pairCounts = new CUDABuffer;
 	m_pairStart = new CUDABuffer;
 	m_pairWriteLocation = new CUDABuffer;
-	m_scanIntermediate = new CUDABuffer;
+	m_scanIntermediate = new CudaScan;
 	m_pairCache = new CUDABuffer;
 #if DRAW_BPH_PAIRS	
 	m_hostPairCache = new BaseBuffer;
@@ -84,11 +84,11 @@ void CudaBroadphase::initOnDevice()
 		}
 	}
 	
-	m_scanBufferLength = iDivUp(m_numBoxes, 1024) * 1024;
+	m_scanBufferLength = CudaScan::getScanBufferLength(m_numBoxes);//iDivUp(m_numBoxes, 1024) * 1024;
 	m_pairCounts->create(m_scanBufferLength * 4);
 	m_pairStart->create(m_scanBufferLength * 4);
 	m_pairWriteLocation->create(m_scanBufferLength * 4);
-	m_scanIntermediate->create(m_scanBufferLength * 4);
+	m_scanIntermediate->create(m_scanBufferLength);
 	
 	DynGlobal::BvhStackedNumThreads = CudaBase::LimitNThreadPerBlock(22, 512+64+16);
 	std::cout<<" bvh stack tpb "<<DynGlobal::BvhStackedNumThreads<<"\n";
@@ -98,22 +98,23 @@ void CudaBroadphase::computeOverlappingPairs()
 {
 #if DISABLE_COLLISION_DETECTION
 	return;
-#endif
+#endif	
 	if(m_numObjects < 1) return;
 	unsigned i, j;
 	
 	resetPairCounts();
+	
 	for(j = 0; j<m_numObjects; j++) {
 		for(i = j; i<m_numObjects; i++) {
 			countOverlappingPairs(j, i);
 		}
 	}
 	
-	prefixSumPairCounts();
+	m_pairCacheLength = m_scanIntermediate->prefixSum(m_pairStart, m_pairCounts, m_scanBufferLength);
 	
-	m_pairCacheLength = // getScanResult(m_pairCounts, m_pairStart, m_scanBufferLength - 1);
-	ScanUtil::getScanResult(m_pairCounts, m_pairStart, m_scanBufferLength);
 	if(m_pairCacheLength < 1) return;
+	
+	std::cout<<" overlapping pair cache length "<<m_pairCacheLength<<"\n";
 	
 	setWriteLocation();
 	
@@ -161,6 +162,7 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
+	void * internalChildLimit = tree->internalNodeChildLimit();
 	void * leafNodeAabbs = tree->leafAabbs();
 	void * mortonCodesAndAabbIndices = tree->leafHash();
 	
@@ -168,6 +170,7 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
+							(int *)internalChildLimit,
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							(uint *)exclusionInd,
@@ -199,14 +202,6 @@ void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices);							
-}
-
-void CudaBroadphase::prefixSumPairCounts()
-{
-    void * scanInput = m_pairCounts->bufferOnDevice();
-    void * scanResult = m_pairStart->bufferOnDevice();
-    void * scanIntermediate = m_scanIntermediate->bufferOnDevice();
-    scanExclusive((uint *)scanResult, (uint *)scanInput, (uint *)scanIntermediate, m_scanBufferLength / 1024, 1024);
 }
 
 void CudaBroadphase::setWriteLocation()
@@ -245,6 +240,7 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
+	void * internalChildLimit = tree->internalNodeChildLimit();
 	void * leafNodeAabbs = tree->leafAabbs();
 	void * mortonCodesAndAabbIndices = tree->leafHash();
 	
@@ -255,6 +251,7 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
+							(int *)internalChildLimit,
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							a,

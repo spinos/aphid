@@ -300,13 +300,21 @@ void TetrahedronSystem::buildVicinityIndStart(VicinityMap * tetTetConn)
 	
 	std::cout<<" n tet "<<m_numTetrahedrons;
 	
+	unsigned maxConn = 0;
+	unsigned minConn = 1000;
+	
 	unsigned count = 0;
 	unsigned i;
 	for(i=0; i<m_numTetrahedrons; i++) {
 		tvstart[i] = count;
 		count += tetTetConn[i].size();
+		
+		if(maxConn < tetTetConn[i].size()) maxConn = tetTetConn[i].size();
+		if(minConn > tetTetConn[i].size()) minConn = tetTetConn[i].size();
 	}
 	tvstart[m_numTetrahedrons] = count;
+	
+	std::cout<<" min/max n connections "<<minConn<<"/"<<maxConn<<"\n";
 
 #if PRINT_VICINITY
 	std::cout<<" vicinity size "<<tvstart[m_numTetrahedrons];
