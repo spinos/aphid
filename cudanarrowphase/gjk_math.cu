@@ -167,10 +167,10 @@ inline __device__ void computeClosestPointOnSimplex(Simplex & s, const float3 & 
         ctc.closestDistance = distance_between(p, s.p[0]);
     }
     else if(s.dimension < 3) {
-        computeClosestPointOnLine(p, s.p, ctc);
+        computeClosestPointOnLine1(p, s.p[0], s.p[1], ctc);
     }
     else if(s.dimension < 4) {
-        computeClosestPointOnTriangle(p, s.p, ctc);
+        computeClosestPointOnTriangle2(p, s.p[0], s.p[1], s.p[2], ctc);
     }
     else {
         computeClosestPointOnTetrahedron(p, s.p, ctc);

@@ -225,21 +225,23 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
 	unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 
 	if(ind >= maxInd) return;
-
+	
+	const ContactData ct = dstContact[ind];
+	
 // already determined no contact
-	if(dstContact[ind].separateAxis.w < 1.f || dstContact[ind].timeOfImpact > GJK_STEPSIZE)
+	if(ct.separateAxis.w < 1.f || ct.timeOfImpact > GJK_STEPSIZE)
 	    return;
 	
 	const uint4 ita = computePointIndex(pointStart, indexStart, indices, pairs[ind].x);
 	const uint4 itb = computePointIndex(pointStart, indexStart, indices, pairs[ind].y);
 	
-	float4 sas = dstContact[ind].separateAxis;
+	float4 sas = ct.separateAxis;
 	
-	float3 nor = float3_normalize(float3_from_float4(sas));
+	const float3 nor = float3_normalize(float3_from_float4(sas));
 	
-	float closeInSpeed = velocityOnTetrahedronAlong(vel, itb, getBarycentricCoordinate4Relativei(dstContact[ind].localB, pos, itb), 
+	float closeInSpeed = velocityOnTetrahedronAlong(vel, itb, getBarycentricCoordinate4Relativei(ct.localB, pos, itb), 
 	                                                nor)
-	                    - velocityOnTetrahedronAlong(vel, ita, getBarycentricCoordinate4Relativei(dstContact[ind].localA, pos, ita), 
+	                    - velocityOnTetrahedronAlong(vel, ita, getBarycentricCoordinate4Relativei(ct.localA, pos, ita), 
 	                                                nor);
 // going apart     
     if(closeInSpeed < 1e-8f) { 
@@ -247,16 +249,16 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
         return;
     }
     
-	float separateDistance = float4_length(dstContact[ind].separateAxis);
+	float separateDistance = float4_length(ct.separateAxis);
 	
 // within thin shell margin
-	if(separateDistance < GJK_THIN_MARGIN2)
+	if(separateDistance <= GJK_THIN_MARGIN2)
 	    return;
 	
 // use thin shell margin
 	separateDistance -= GJK_THIN_MARGIN2;
 
-	float toi = dstContact[ind].timeOfImpact + separateDistance / closeInSpeed * .732f;
+	const float toi = ct.timeOfImpact + separateDistance / closeInSpeed * .732f;
 
 // too far away	
 	if(toi > GJK_STEPSIZE) { 
@@ -310,7 +312,8 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 //	    coord);
 // intersected try zero margin	
 //	if(sas.w < 1.f) {
-	    computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, sas, 
+	    computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, 
+		sas, 
 	    coord);
 //	}
 // still intersected no solution

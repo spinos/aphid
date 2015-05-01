@@ -22,6 +22,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../shared/CUDABuffer.h"
 "../shared/ScanUtil.h"
 "../shared/CudaDbgLog.h"
+"../cudabvh/bvh_common.h"
 "../cudabvh/CudaLinearBvh.h"
 "../cudabvh/TetrahedronSystem.h"
 "../cudabvh/CudaTetrahedronSystem.h"
@@ -110,6 +111,8 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudabvh/broadphase.cu"
 "../cudanarrowphase/stripedModel.cu"
 "../cudanarrowphase/matrix_math.cu"
+"../cudanarrowphase/line_math.cu"
+"../cudanarrowphase/triangle_math.cu"
 "../cudanarrowphase/barycentric.cu"
 "../cudanarrowphase/gjk_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
@@ -118,7 +121,11 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "cuFemTetrahedron.cu"
 "cuConjugateGradient.cu")
 
+if (WIN32)
+set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_20")
+else ()
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
+endif()
 
 CUDA_ADD_EXECUTABLE (testcudafem ${HEADER_FILES} ${SOURCE_FILES} ${CUSOURCES})
 

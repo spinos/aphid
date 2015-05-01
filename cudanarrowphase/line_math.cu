@@ -27,64 +27,37 @@ inline __device__ void computeClosestPointOnLine1(const float3 & p0,
                                                     const float3 & p2,
                                                     ClosestPointTestContext & result)
 {
-    float3 vr = float3_difference(p0, p1);
-    float dr = float3_length(vr);
+	float3 vr, v1;
+	if(distancePointLine(p0, p1, p2, vr, v1) > result.closestDistance) return;
+	
+    const float dr = float3_length(vr);
 	if(dr < 1e-6f) {
         result.closestPoint = p1;
 		result.closestDistance = 0.f;
         return;
     }
 	
-    float3 v1 = float3_difference(p2, p1);
-	float d1 = float3_length(v1);
-	// vr = float3_normalize(vr);
-	float3_scale_inplace(vr, 1.f/dr);
-	// v1 = float3_normalize(v1);
+	const float d1 = float3_length(v1);
+	
 	float3_scale_inplace(v1, 1.f/d1);
-	float vrdv1 = float3_dot(vr, v1) * dr;
+	float vrdv1 = float3_dot(vr, v1);
 	if(vrdv1 < 0.f) vrdv1 = 0.f;
 	if(vrdv1 > d1) vrdv1 = d1;
 	
-	v1 = float3_add(p1, scale_float3_by(v1, vrdv1));
-	float dc = distance_between(v1, p0);
+	float3_scale_inplace(v1, vrdv1);
+	v1 = float3_add(p1, v1);
+	const float dc = distance_between(v1, p0);
 	
 	if(dc < result.closestDistance) {
 	    result.closestPoint = v1;
 	    result.closestDistance = dc;
 	}
 }
-
+/*
 inline __device__ void computeClosestPointOnLine(const float3 & p, const float3 * v, ClosestPointTestContext & result)
 {
     computeClosestPointOnLine1(p, v[0], v[1], result);
-   /*
-    float3 vr = float3_difference(p, v[0]);
-    float dr = float3_length(vr);
-	if(dr < 1e-6f) {
-        result.closestPoint = v[0];
-		result.closestDistance = 0.f;
-        return;
-    }
-	
-    float3 v1 = float3_difference(v[1], v[0]);
-	float d1 = float3_length(v1);
-	// vr = float3_normalize(vr);
-	float3_scale_inplace(vr, 1.f/dr);
-	// v1 = float3_normalize(v1);
-	float3_scale_inplace(v1, 1.f/d1);
-	float vrdv1 = float3_dot(vr, v1) * dr;
-	if(vrdv1 < 0.f) vrdv1 = 0.f;
-	if(vrdv1 > d1) vrdv1 = d1;
-	
-	v1 = float3_add(v[0], scale_float3_by(v1, vrdv1));
-	float dc = distance_between(v1, p);
-	
-	if(dc < result.closestDistance) {
-	    result.closestPoint = v1;
-	    result.closestDistance = dc;
-	}
-	*/
 }
-
+*/
 #endif        //  #ifndef LINE_MATH_CU
 

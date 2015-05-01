@@ -2,6 +2,7 @@
 #define TRIANGLE_MATH_CU
 
 #include "barycentric.cu"
+#include "line_math.cu"
 
 inline __device__ void computeClosestPointOnTriangleInside2(const float3 & p, 
                                         const float3 & v0,
@@ -49,19 +50,17 @@ inline __device__ void computeClosestPointOnTriangle2(const float3 & p,
     computeClosestPointOnLine1(p, v2, v0, result);
 }
 
+/*
 inline __device__ void computeClosestPointOnTriangle(const float3 & p, const float3 * v, ClosestPointTestContext & result)
 {
     computeClosestPointOnTriangle2(p, v[0], v[1], v[2], result);
 }
+*/
 
 inline __device__ void computeClosestPointOnTetrahedron(const float3 & p, const float3 * v, ClosestPointTestContext & result)
 {
 	computeClosestPointOnTriangleInside(p, v, result);
-/*
-	computeClosestPointOnTriangle2(p, v[0], v[1], v[3], result);
-	computeClosestPointOnTriangle2(p, v[0], v[2], v[3], result);
-	computeClosestPointOnTriangle2(p, v[1], v[2], v[3], result);
-*/
+
 	float3 pr[3];
 	pr[0] = v[0];
 	pr[1] = v[1];
