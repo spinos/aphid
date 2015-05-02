@@ -71,6 +71,10 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 										CUDABuffer * pairBuf,
 										void * objectData)
 {
+#if DISABLE_COLLISION_RESOLUTION
+	return;
+#endif
+
 	if(numContacts < 1) return; 
 	m_numContacts = numContacts;
 	const unsigned indBufLength = nextPow2(numContacts * 2);

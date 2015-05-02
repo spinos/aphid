@@ -563,20 +563,20 @@ void testScan()
 	cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
     cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
 	
-	cudaEventRecord(start_event, 0);
+	for(i=10; i< 20; i++) {
+		cudaEventRecord(start_event, 0);
 	
-	unsigned result = csn.prefixSum(&dsum, &dcount, m);
-	std::cout<<" result is "<<result<<"\n";
-	
-	cudaEventRecord(stop_event, 0);
-	cudaEventSynchronize(stop_event);
-	float met;
-	cudaEventElapsedTime(&met, start_event, stop_event);
-	
+		unsigned result = csn.prefixSum(&dsum, &dcount, 2<<i);
+		
+		cudaEventRecord(stop_event, 0);
+		cudaEventSynchronize(stop_event);
+		float met;
+		cudaEventElapsedTime(&met, start_event, stop_event);
+		std::cout<<" scan "<<(2<<i)<<" ints took "<<met<<" milliseconds\n";
+		std::cout<<" result is "<<result<<"\n";
+	}
 	cudaEventDestroy(start_event);
     cudaEventDestroy(stop_event);
-	
-	std::cout<<" scan "<<m<<" ints took "<<met<<" milliseconds\n";
 }
 
 int main(int argc, char **argv)

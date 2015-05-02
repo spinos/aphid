@@ -137,6 +137,31 @@ inline __device__ BarycentricCoordinate getBarycentricCoordinate4(const float3 &
     return coord;
 }
 
+inline __device__ BarycentricCoordinate getBarycentricCoordinate42(const float3 & p, const float3 * v)
+{
+    BarycentricCoordinate coord;
+    
+    mat44 m;
+    fill_mat44(m, v[0], v[2], v[4], v[6]);
+    
+    float D0 = determinant44(m);
+    if(D0 == 0.f) {
+        coord.x = coord.y = coord.z = coord.w = -1.f;
+        return coord;
+    }  
+    
+    fill_mat44(m, p, v[2], v[4], v[6]);
+    coord.x = determinant44(m) / D0;
+    fill_mat44(m, v[0], p, v[4], v[6]);
+    coord.y = determinant44(m) / D0;
+    fill_mat44(m, v[0], v[2], p, v[6]);
+    coord.z = determinant44(m) / D0;
+    fill_mat44(m, v[0], v[2], v[4], p);
+    coord.w = determinant44(m) / D0;
+    
+    return coord;
+}
+
 inline __device__ BarycentricCoordinate getBarycentricCoordinate4Relativei(const float3 & p, float3 * v, const uint4 & t)
 {
     float3 q = v[t.x];
@@ -147,6 +172,18 @@ inline __device__ BarycentricCoordinate getBarycentricCoordinate4Relativei(const
     q = float3_add(q, p);
     
     return getBarycentricCoordinate4i(q, v, t);
+}
+
+inline __device__ BarycentricCoordinate getBarycentricCoordinate4Relative2(const float3 & p, float3 * v)
+{
+    float3 q = v[0];
+    q = float3_add(q, v[2]);
+    q = float3_add(q, v[4]);
+    q = float3_add(q, v[6]);
+    q = scale_float3_by(q, .25f);
+    q = float3_add(q, p);
+    
+    return getBarycentricCoordinate42(q, v);
 }
 
 inline __device__ int pointInsideTriangleTest2(const float3 & p, const float3 & nor, 

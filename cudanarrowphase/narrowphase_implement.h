@@ -22,19 +22,12 @@ void narrowphaseComputeTimeOfImpact(ContactData * dstContact,
 		uint numOverlappingPairs);
 
 void narrowphase_computeInitialSeparation(ContactData * dstContact,
-		uint2 * pairs,
 		float3 * pos,
-		float3 * vel,
-		uint4 * ind,
-		uint * pointStart, uint * indexStart, 
 		uint numOverlappingPairs);
 
 void narrowphase_advanceTimeOfImpactIterative(ContactData * dstContact,
-		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,
-		uint4 * ind,
-		uint * pointStart, uint * indexStart, 
 		uint numOverlappingPairs);
 
 void narrowphaseComputeValidPairs(uint * dstCounts, 
@@ -48,6 +41,26 @@ void narrowphaseSqueezeContactPairs(uint2 * dstPairs, uint2 * srcPairs,
 									uint maxInd);
 
 void narrowphaseResetX(float3 * dst, float3 *src, uint maxInd);
+
+void narrowphase_writePairPosAndVel(float3 * dstPos,
+		float3 * dstVel,
+		uint2 * pairs,
+		float3 * pos,
+		float3 * vel,
+		uint4 * ind,
+		uint * pointStart, uint * indexStart, 
+		uint numOverlappingPairs);
+		
+void narrowphase_writePairs(uint2 * dstPair,
+		uint2 * srcPair,
+		uint numOverlappingPairs);
+		
+void narrowphase_squeezeContactPosAndVel(float3 * dstPos, float3 * srcPos, 
+									float3 * dstVel, float3 * srcVel,
+									uint2 * dstPairs, uint2 * srcPairs,
+                                    ContactData * dstContact, ContactData *srcContact,
+									uint *counts, uint * scanResult, 
+									uint numPairs);
 }
 #endif        //  #ifndef NARROWPHASE_IMPLEMENT_H
 

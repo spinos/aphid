@@ -32,8 +32,12 @@ __device__ void writeElementExclusion(int * dst,
 	
 	uint cur = exclusionStart[a+1]-1;
 	uint minInd = exclusionStart[a];
-	for(i=0; cur >= minInd && i<32; cur--, i++)
-		 dst[i] = exclusionInd[cur];
+// for isolate element
+	if(minInd == cur) { dst[0] = exclusionInd[cur]; return; }
+	for(i=0;i<32; i++) {
+		dst[i] = exclusionInd[cur--];
+		if(cur < minInd) return; 
+	}
 }
 
 __device__ int isElementExcludedS(uint b, int * exclusionInd)
@@ -90,9 +94,10 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 								uint * exclusionIndices,
 								uint * exclusionStarts)
 {
-	int * sStack = SharedMemory<int>();
+	// int * sStack = SharedMemory<int>();
 	
 	__shared__ int sExclElm[32*16];
+	__shared__ int sStack[128*16];
 	
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	if(boxIndex >= maxBoxInd) return;
@@ -126,10 +131,9 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 		
 		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
 		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
-		
 		if(internalChildLimit[bvhNodeIndex] <= boxIndex) continue;
-
-		//bvhRigidIndex is not used if internal node
+			    
+//bvhRigidIndex is not used if internal node
 		int bvhRigidIndex = (isLeaf) ? (int)mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
 		
 		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
@@ -151,7 +155,7 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 			    }
 			}
 			else {
-			    if(isStackFull(stackSize)) continue;
+				if(isStackFull(stackSize)) continue;
 			    
                 stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
                 stackSize++;
@@ -175,9 +179,10 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 								uint * exclusionIndices,
 								uint * exclusionStarts)
 {
-	int * sStack = SharedMemory<int>();
+	// int * sStack = SharedMemory<int>();
 	
 	__shared__ int sExclElm[32*16];
+	__shared__ int sStack[128*16];
 	
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	if(boxIndex >= maxBoxInd) return;
@@ -202,10 +207,9 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 		
 		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
 		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
-		
 		if(internalChildLimit[bvhNodeIndex] <= boxIndex) continue;
-
-		//bvhRigidIndex is not used if internal node
+				
+//bvhRigidIndex is not used if internal node
 		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
 		
 		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
@@ -908,9 +912,9 @@ void cuBroadphase_countPairsSelfCollideExclS(uint * dst, Aabb * boxes, uint numB
     unsigned nblk = iDivUp(numBoxes, nThreads);
     dim3 grid(nblk, 1, 1);
 	
-	int smemSize = nThreads * 512;
+	// int smemSize = nThreads * 512;
 	
-	countPairsSExclS_kernel<<< grid, block, smemSize>>>(dst,
+	countPairsSExclS_kernel<<< grid, block>>>(dst,
                                 boxes,
                                 numBoxes,
 								rootNodeIndex, 
@@ -942,9 +946,9 @@ void cuBroadphase_writePairCacheSelfCollideExclS(uint2 * dst, uint * locations,
     
     dim3 grid(nblk, 1, 1);
 	
-	int smemSize = nThreads * 512;
+	// int smemSize = nThreads * 512;
     
-    writePairCacheSExclS_kernel<<< grid, block, smemSize>>>(dst, 
+    writePairCacheSExclS_kernel<<< grid, block>>>(dst, 
                                 locations,
                                 starts, counts,
                                 boxes,

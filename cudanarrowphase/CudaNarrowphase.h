@@ -38,7 +38,6 @@ public:
 	void addTetrahedronSystem(CudaTetrahedronSystem * tetra);
 	void computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs);
 	
-	void getCoord(BaseBuffer * dst);
 	void getContact(BaseBuffer * dst);
 	const unsigned numPairs() const;
 	const unsigned numContacts() const;
@@ -59,20 +58,28 @@ public:
 protected:
 
 private:
-	void computeTimeOfImpact(void * overlappingPairs, unsigned numOverlappingPairs);
-	void squeezeContacts(void * overlappingPairs, unsigned numOverlappingPairs);
+	void resetContacts(void * overlappingPairs, unsigned numOverlappingPairs);
+	void computeInitialSeparation();
+	unsigned countValidContacts(CUDABuffer * contactBuf, unsigned n);
+	void computeTimeOfImpact();
+	void squeezeContacts(unsigned numPairs);
+	void swapBuffer();
+	const unsigned bufferId() const;
+	const unsigned otherBufferId() const;
 private:
 	CombinedObjectBuffer m_objectBuf;
-	CUDABuffer * m_coord;
 	CUDABuffer * m_contact[2];
-	CUDABuffer * m_contactPairs;
+	CUDABuffer * m_contactPairs[2];
 	CUDABuffer * m_validCounts;
 	CUDABuffer * m_scanValidContacts;
 	CudaScan * m_scanIntermediate;
+	CUDABuffer * m_tetVertPos[2];
+	CUDABuffer * m_tetVertVel[2];
     CudaTetrahedronSystem * m_objects[CUDANARROWPHASE_MAX_NUMOBJECTS];
     unsigned m_objectPointStart[CUDANARROWPHASE_MAX_NUMOBJECTS];
 	unsigned m_objectIndexStart[CUDANARROWPHASE_MAX_NUMOBJECTS];
 	unsigned m_numObjects, m_numPoints, m_numElements, m_numContacts, m_numPairs;
+	unsigned m_bufferId;
 };
 #endif        //  #ifndef CUDANARROWPHASE_H
 

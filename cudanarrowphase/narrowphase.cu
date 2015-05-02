@@ -51,6 +51,65 @@ inline __device__ float velocityOnTetrahedronAlong(float3 * v, const uint4 & t, 
     return float3_dot(vot, d);
 }
 
+inline __device__ float velocityOnTetrahedronAlong2(float3 * v, const BarycentricCoordinate & coord, const float3 & d)
+{
+    float3 vot = make_float3(0.f, 0.f, 0.f);
+    if(coord.x > 1e-5f)
+        vot = float3_add(vot, scale_float3_by(v[0], coord.x));
+    if(coord.y > 1e-5f)
+        vot = float3_add(vot, scale_float3_by(v[2], coord.y));
+    if(coord.z > 1e-5f)
+        vot = float3_add(vot, scale_float3_by(v[4], coord.z));
+    if(coord.w > 1e-5f)
+        vot = float3_add(vot, scale_float3_by(v[6], coord.w));
+    
+    return float3_dot(vot, d);
+}
+
+__global__ void writePairInd_kernel(uint2 * dstPair,
+		uint2 * srcPair,
+		uint maxInd)
+{
+	unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(ind >= maxInd) return;
+	
+	dstPair[ind] = srcPair[ind];
+}
+
+__global__ void writePairPosAndVel_kernel(float3 * dstPos,
+		float3 * dstVel,
+		uint2 * pairs,
+		float3 * srcPos,
+		float3 * srcVel,
+		uint4 * indices,
+		uint * pointStart, uint * indexStart, 
+		uint maxInd)
+{
+	unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(ind >= maxInd) return;
+
+// a00 b00 a01 b01 a02 b02 a03 b03 a10 b10 a11 b11 ...
+// 8 pos/vel per pair 4 for a 4 for b	
+	const uint iPair = ind>>3;
+	
+// 512 threads 256 va 256 vb	
+	const int isB = threadIdx.x & 1;
+	
+	uint4 ia;
+	if(isB) ia = computePointIndex(pointStart, indexStart, indices, pairs[iPair].y);
+	else ia = computePointIndex(pointStart, indexStart, indices, pairs[iPair].x);
+	
+	uint * tetVertices = &ia.x;
+	
+// 512 threads 64 ta 64 tb
+	const int iVert = (threadIdx.x >> 1) & 3;
+	
+	dstPos[ind] = srcPos[tetVertices[iVert]];
+	dstVel[ind] = srcVel[tetVertices[iVert]];
+}
+
 __global__ void computeSeparateAxis_kernel(ContactData * dstContact,
     uint2 * pairs,
     float3 * pos, float3 * vel, 
@@ -213,10 +272,7 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 }
 
 __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
-    uint2 * pairs,
     float3 * pos, float3 * vel, 
-    uint4 * indices, 
-    uint * pointStart, uint * indexStart,
     uint maxInd)
 {
     __shared__ Simplex sS[GJK_BLOCK_SIZE];
@@ -232,16 +288,16 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
 	if(ct.separateAxis.w < 1.f || ct.timeOfImpact > GJK_STEPSIZE)
 	    return;
 	
-	const uint4 ita = computePointIndex(pointStart, indexStart, indices, pairs[ind].x);
-	const uint4 itb = computePointIndex(pointStart, indexStart, indices, pairs[ind].y);
+	float3 * ppos = & pos[ind<<3];
+	float3 * pvel = & vel[ind<<3];
 	
 	float4 sas = ct.separateAxis;
 	
 	const float3 nor = float3_normalize(float3_from_float4(sas));
 	
-	float closeInSpeed = velocityOnTetrahedronAlong(vel, itb, getBarycentricCoordinate4Relativei(ct.localB, pos, itb), 
+	float closeInSpeed = velocityOnTetrahedronAlong2(&pvel[1], getBarycentricCoordinate4Relative2(ct.localB, &ppos[1]), 
 	                                                nor)
-	                    - velocityOnTetrahedronAlong(vel, ita, getBarycentricCoordinate4Relativei(ct.localA, pos, ita), 
+	                    - velocityOnTetrahedronAlong2(pvel, getBarycentricCoordinate4Relative2(ct.localA, ppos), 
 	                                                nor);
 // going apart     
     if(closeInSpeed < 1e-8f) { 
@@ -258,7 +314,7 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
 // use thin shell margin
 	separateDistance -= GJK_THIN_MARGIN2;
 
-	const float toi = ct.timeOfImpact + separateDistance / closeInSpeed * .732f;
+	const float toi = ct.timeOfImpact + separateDistance / closeInSpeed * .571f;
 
 // too far away	
 	if(toi > GJK_STEPSIZE) { 
@@ -266,8 +322,14 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
         return;
     }
 	
-	progressTetrahedron(sPrxA[threadIdx.x], ita, pos, vel, toi);
-	progressTetrahedron(sPrxB[threadIdx.x], itb, pos, vel, toi);
+	sPrxA[threadIdx.x].p[0] = float3_add( ppos[0], scale_float3_by(pvel[0], toi) );
+	sPrxB[threadIdx.x].p[0] = float3_add( ppos[1], scale_float3_by(pvel[1], toi) );
+	sPrxA[threadIdx.x].p[1] = float3_add( ppos[2], scale_float3_by(pvel[2], toi) );
+	sPrxB[threadIdx.x].p[1] = float3_add( ppos[3], scale_float3_by(pvel[3], toi) );
+	sPrxA[threadIdx.x].p[2] = float3_add( ppos[4], scale_float3_by(pvel[4], toi) );
+	sPrxB[threadIdx.x].p[2] = float3_add( ppos[5], scale_float3_by(pvel[5], toi) );
+	sPrxA[threadIdx.x].p[3] = float3_add( ppos[6], scale_float3_by(pvel[6], toi) );
+	sPrxB[threadIdx.x].p[3] = float3_add( ppos[7], scale_float3_by(pvel[7], toi) );
 	
 	ClosestPointTestContext ctc;
 	BarycentricCoordinate coord;
@@ -283,10 +345,7 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
 }
 
 __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
-    uint2 * pairs,
-    float3 * pos, float3 * vel, 
-    uint4 * indices, 
-    uint * pointStart, uint * indexStart,
+    float3 * pos,
     uint maxInd)
 {
     __shared__ Simplex sS[GJK_BLOCK_SIZE];
@@ -299,12 +358,17 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 	dstContact[ind].separateAxis=make_float4(0.f, 0.f, 0.f, 0.f);
 	dstContact[ind].timeOfImpact = 1e8f;
 	
-	const uint4 ita = computePointIndex(pointStart, indexStart, indices, pairs[ind].x);
-	const uint4 itb = computePointIndex(pointStart, indexStart, indices, pairs[ind].y);
+	float3 * ppos = & pos[ind<<3];
 	
-	t0Tetrahedron(sPrxA[threadIdx.x], ita, pos);
-	t0Tetrahedron(sPrxB[threadIdx.x], itb, pos);
-
+	sPrxA[threadIdx.x].p[0] = ppos[0];
+	sPrxB[threadIdx.x].p[0] = ppos[1];
+	sPrxA[threadIdx.x].p[1] = ppos[2];
+	sPrxB[threadIdx.x].p[1] = ppos[3];
+	sPrxA[threadIdx.x].p[2] = ppos[4];
+	sPrxB[threadIdx.x].p[2] = ppos[5];
+	sPrxA[threadIdx.x].p[3] = ppos[6];
+	sPrxB[threadIdx.x].p[3] = ppos[7];
+	
 	ClosestPointTestContext ctc;
 	BarycentricCoordinate coord;
 	float4 sas;
@@ -357,6 +421,36 @@ __global__ void squeezeContactPairs_kernel(uint2 * dstPairs, uint2 * srcPairs,
 	dstContact[toLoc] = srcContact[ind];
 }
 
+__global__ void squeezeContactPosAndVel_kernel(float3 * dstPos, 
+									float3 * srcPos, 
+									float3 * dstVel, 
+									float3 * srcVel,
+									uint2 * dstPairs, 
+									uint2 * srcPairs,
+                                    ContactData * dstContact, 
+									ContactData *srcContact,
+									uint *counts, uint * packLocs, 
+									uint maxInd)
+{
+	unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	const uint iPair = ind>>3;
+	if(!counts[iPair]) return;
+	
+	uint toLoc = (packLocs[iPair]<<3) + (ind & 7);
+	
+	dstPos[toLoc] = srcPos[ind];
+	dstVel[toLoc] = srcVel[ind];
+	
+	if(ind & 7) return;
+	
+	toLoc = packLocs[iPair];
+	
+	dstPairs[toLoc] = srcPairs[iPair];
+	dstContact[toLoc] = srcContact[iPair];
+}
+
 __global__ void resetX_kernel(float3 * dst, float3 * src, uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
@@ -403,11 +497,7 @@ void narrowphaseComputeTimeOfImpact(ContactData * dstContact,
 }
 
 void narrowphase_computeInitialSeparation(ContactData * dstContact,
-		uint2 * pairs,
 		float3 * pos,
-		float3 * vel,
-		uint4 * ind,
-		uint * pointStart, uint * indexStart, 
 		uint numOverlappingPairs)
 {   
     dim3 block(GJK_BLOCK_SIZE, 1, 1);
@@ -415,21 +505,13 @@ void narrowphase_computeInitialSeparation(ContactData * dstContact,
     dim3 grid(nblk, 1, 1);
     
     computeInitialSeparation_kernel<<< grid, block >>>(dstContact, 
-                                                        pairs, 
-                                                        pos, 
-                                                        vel, 
-                                                        ind, 
-                                                        pointStart, 
-                                                        indexStart, 
+                                                        pos,
                                                         numOverlappingPairs);
 }
 
 void narrowphase_advanceTimeOfImpactIterative(ContactData * dstContact,
-		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,
-		uint4 * ind,
-		uint * pointStart, uint * indexStart, 
 		uint numOverlappingPairs)
 {   
     dim3 block(GJK_BLOCK_SIZE, 1, 1);
@@ -437,12 +519,8 @@ void narrowphase_advanceTimeOfImpactIterative(ContactData * dstContact,
     dim3 grid(nblk, 1, 1);
     
     advanceTimeOfImpactIterative_kernel<<< grid, block >>>(dstContact, 
-                                                        pairs, 
                                                         pos, 
                                                         vel, 
-                                                        ind, 
-                                                        pointStart, 
-                                                        indexStart, 
                                                         numOverlappingPairs);
 }
 
@@ -480,6 +558,69 @@ void narrowphaseResetX(float3 * dst, float3 *src, uint maxInd)
     dim3 grid(nblk, 1, 1);
     
     resetX_kernel<<< grid, block >>>(dst, src, maxInd);
+}
+
+void narrowphase_writePairPosAndVel(float3 * dstPos,
+		float3 * dstVel,
+		uint2 * pairs,
+		float3 * pos,
+		float3 * vel,
+		uint4 * ind,
+		uint * pointStart, uint * indexStart, 
+		uint numOverlappingPairs)
+{
+	dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numOverlappingPairs<<3, 512);
+    dim3 grid(nblk, 1, 1);
+	
+	writePairPosAndVel_kernel<<< grid, block >>>(dstPos,
+		dstVel,
+		pairs,
+		pos,
+		vel,
+		ind,
+		pointStart, indexStart, 
+		numOverlappingPairs<<3);
+}
+
+void narrowphase_writePairs(uint2 * dstPair,
+		uint2 * srcPair,
+		uint numOverlappingPairs)
+{
+	dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numOverlappingPairs, 512);
+    dim3 grid(nblk, 1, 1);
+	
+	writePairInd_kernel<<< grid, block >>>(dstPair,
+		srcPair,
+		numOverlappingPairs);
+}
+
+void narrowphase_squeezeContactPosAndVel(float3 * dstPos, 
+									float3 * srcPos, 
+									float3 * dstVel, 
+									float3 * srcVel,
+									uint2 * dstPairs, 
+									uint2 * srcPairs,
+                                    ContactData * dstContact, 
+									ContactData *srcContact,
+									uint *counts, uint * scanResult, 
+									uint numPairs)
+{
+	dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(numPairs<<3, 512);
+    dim3 grid(nblk, 1, 1);
+	
+	squeezeContactPosAndVel_kernel<<< grid, block >>>(dstPos, 
+									srcPos, 
+									dstVel, 
+									srcVel,
+									dstPairs, 
+									srcPairs,
+                                    dstContact, 
+									srcContact,
+									counts, scanResult, 
+									numPairs<<3);
 }
 
 }
