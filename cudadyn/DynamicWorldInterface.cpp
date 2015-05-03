@@ -9,6 +9,7 @@
 #include <GeoDrawer.h>
 #include <stripedModel.h>
 #include <CudaLinearBvh.h>
+#include <LBvhBuilder.h>
 #include <radixsort_implement.h>
 #include <simpleContactSolver_implement.h>
 #include <tetrahedron_math.h>
@@ -43,6 +44,8 @@ DynamicWorldInterface::~DynamicWorldInterface() {}
 
 void DynamicWorldInterface::create(CudaDynamicWorld * world)
 {
+	world->setBvhBuilder(new LBvhBuilder);
+	
     CudaTetrahedronSystem * tetra = new CudaTetrahedronSystem;
 	tetra->create(NTET, NPNT);
 	float * hv = &tetra->hostV()[0];

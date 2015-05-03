@@ -12,10 +12,11 @@
  
 #include "bvh_common.h"
 #include <DynGlobal.h>
-class CudaReduction;
+// class CudaReduction;
 class BaseBuffer;
 class CUDABuffer;
 class BvhTriangleMesh;
+class BvhBuilder;
 
 class CudaLinearBvh {
 public:
@@ -29,7 +30,6 @@ public:
 	const unsigned numLeafNodes() const;
 	const unsigned numInternalNodes() const;
 	
-	const Aabb getAabb() const;
 	void getRootNodeIndex(int * dst);
 	void getLeafAabbsAt(char * dst);
 	void getInternalAabbs(BaseBuffer * dst);
@@ -38,10 +38,16 @@ public:
 	
 	void * rootNodeIndex();
 	void * internalNodeChildIndices();
+	void * internalNodeParentIndices();
 	void * internalNodeAabbs();
 	void * internalNodeChildLimit();
 	void * leafAabbs();
 	void * leafHash();
+	void * leafHash0();
+	void * leafHash1();
+	void * leafNodeParentIndices();
+	void * distanceInternalNodeFromRoot();
+	void * maxChildElementIndices();
 	
 	void sendDbgToHost();
 	
@@ -59,28 +65,22 @@ public:
 	const int hostRootInd() const;
 #endif
 
+	static BvhBuilder * Builder;
+
 protected:
-	CudaReduction * reducer();
-	float * aabbPtr();
+	
 private:
-	void computeAndSortLeafHash();
-	void buildInternalTree();
-	void formInternalTreeAabbsIterative(int maxDistance);
-	void computeAabb();
+	
 private:
-	Aabb m_bounding;
-    CUDABuffer * m_leafAabbs;
+	CUDABuffer * m_leafAabbs;
 	CUDABuffer * m_internalNodeAabbs;
 	CUDABuffer * m_leafHash[2];
-	CUDABuffer * m_internalNodeCommonPrefixValues;
-	CUDABuffer * m_internalNodeCommonPrefixLengths;
 	CUDABuffer * m_leafNodeParentIndices;
 	CUDABuffer * m_internalNodeChildIndices;
 	CUDABuffer * m_internalNodeParentIndices;
 	CUDABuffer * m_rootNodeIndexOnDevice;
     CUDABuffer * m_distanceInternalNodeFromRoot;
 	CUDABuffer * m_maxChildElementIndices;
-	CudaReduction * m_findMaxDistance;
 	unsigned m_numLeafNodes;
 #if DRAW_BVH_HASH
 	BaseBuffer * m_hostLeafHash;

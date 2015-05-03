@@ -15,6 +15,8 @@ public:
     virtual ~CudaReduction();
     
     void initOnDevice();
+	
+	void * resultOnDevice();
     
 template <class T>  
     void min(T & result, T * idata, unsigned m)

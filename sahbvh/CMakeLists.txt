@@ -49,6 +49,8 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "SahWorldInterface.h"
 "SahGlobal.h"
 "SahTetrahedronSystem.h"
+"BvhBuilder.h"
+"LBvhBuilder.h"
 "window.h"
 "glwidget.h")
 
@@ -74,6 +76,8 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "SahWorldInterface.cpp"
 "SahGlobal.cpp"
 "SahTetrahedronSystem.cpp"
+"BvhBuilder.cpp"
+"LBvhBuilder.cpp"
 "glwidget.cpp"
 "window.cpp"
 "main.cpp")

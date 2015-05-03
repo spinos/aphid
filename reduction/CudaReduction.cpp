@@ -15,3 +15,6 @@ void CudaReduction::initOnDevice()
     m_obuf->create(ReduceMaxBlocks * 32);
 }
 
+void * CudaReduction::resultOnDevice()
+{ return m_obuf->bufferOnDevice(); }
+

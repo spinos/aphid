@@ -13,7 +13,7 @@ extern "C" void bvhCalculateLeafAabbsTriangle(Aabb *dst, float3 * cvs, uint3 * t
 extern "C" void bvhCalculateLeafAabbs(Aabb *dst, float3 * cvs, EdgeContact * edges, unsigned numEdges, unsigned numVertices);
 
 extern "C" void bvhResetLeafHash(KeyValuePair * dst, uint buffSize);
-extern "C" void bvhCalculateLeafHash(KeyValuePair * dst, Aabb * leafBoxes, uint numLeaves, uint buffSize, Aabb bigBox);
+extern "C" void bvhCalculateLeafHash(KeyValuePair * dst, Aabb * leafBoxes, uint numLeaves, uint buffSize, Aabb * bigBox);
 
 extern "C" void bvhComputeAdjacentPairCommonPrefix(KeyValuePair * mortonCode,
 													uint64 * o_commonPrefix,

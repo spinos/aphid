@@ -7,6 +7,7 @@ class CudaBroadphase;
 class CudaNarrowphase;
 class SimpleContactSolver;
 class CudaTetrahedronSystem;
+class BvhBuilder;
 
 class CudaDynamicWorld
 {
@@ -16,6 +17,7 @@ public:
     
     virtual void initOnDevice();
     
+	void setBvhBuilder(BvhBuilder * builder);
     void addTetrahedronSystem(CudaTetrahedronSystem * tetra);
     
     void stepPhysics(float dt);

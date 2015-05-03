@@ -175,7 +175,8 @@ __global__ void resetLeafHash_kernel(KeyValuePair *dst, uint bufSize)
 	dst[idx].value = idx;
 }
 
-__global__ void calculateLeafHash_kernel(KeyValuePair *dst, Aabb * leafBoxes, uint maxInd, uint bufSize, Aabb boundary)
+__global__ void calculateLeafHash_kernel(KeyValuePair *dst, Aabb * leafBoxes, uint maxInd, uint bufSize, 
+		Aabb * boundary)
 {
 	uint idx = blockIdx.x*blockDim.x + threadIdx.x;
 	
@@ -183,20 +184,20 @@ __global__ void calculateLeafHash_kernel(KeyValuePair *dst, Aabb * leafBoxes, ui
 	
 	dst[idx].value = idx;
 	if(idx >= maxInd) {
-		dst[idx].key = 1073741825; // 2^30 + 1
+		dst[idx].key = 1073741823; // 2^30 - 1
 		return;
 	}
 	
 	float3 c = centroidOfAabb(leafBoxes[idx]);
 	
-	float side = longestSideOfAabb(boundary);
-	float3 d = float3_difference(boundary.high, boundary.low);
+	float side = longestSideOfAabb(*boundary);
+	float3 d = float3_difference(boundary->high, boundary->low);
 	if(d.x < side) d.x = side;
 	if(d.y < side) d.y = side;
 	if(d.z < side) d.z = side;
-	normalizeByBoundary(c.x, boundary.low.x, d.x);
-	normalizeByBoundary(c.y, boundary.low.y, d.y);
-	normalizeByBoundary(c.z, boundary.low.z, d.z);
+	normalizeByBoundary(c.x, boundary->low.x, d.x);
+	normalizeByBoundary(c.y, boundary->low.y, d.y);
+	normalizeByBoundary(c.z, boundary->low.z, d.z);
 	
 	dst[idx].key = morton3D(c.x, c.y, c.z);
 }
@@ -545,7 +546,8 @@ extern "C" void bvhResetLeafHash(KeyValuePair * dst, uint buffSize)
 	resetLeafHash_kernel<<< grid, block >>>(dst, buffSize);
 }
 
-extern "C" void bvhCalculateLeafHash(KeyValuePair * dst, Aabb * leafBoxes, uint numLeaves, uint buffSize, Aabb bigBox)
+extern "C" void bvhCalculateLeafHash(KeyValuePair * dst, Aabb * leafBoxes, uint numLeaves, uint buffSize, 
+			Aabb * bigBox)
 {
 	dim3 block(512, 1, 1);
     unsigned nblk = iDivUp(buffSize, 512);

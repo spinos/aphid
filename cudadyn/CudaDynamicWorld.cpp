@@ -4,6 +4,7 @@
 #include <SimpleContactSolver.h>
 #include <CudaTetrahedronSystem.h>
 #include <CudaBase.h>
+#include <BvhBuilder.h>
 
 CudaDynamicWorld::CudaDynamicWorld() 
 {
@@ -35,6 +36,9 @@ CudaNarrowphase * CudaDynamicWorld::narrowphase() const
 SimpleContactSolver * CudaDynamicWorld::contactSolver() const
 { return m_contactSolver; }
 
+void CudaDynamicWorld::setBvhBuilder(BvhBuilder * builder)
+{ CudaLinearBvh::Builder = builder; }
+
 void CudaDynamicWorld::addTetrahedronSystem(CudaTetrahedronSystem * tetra)
 {
     if(m_numObjects == CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS) return;
@@ -50,6 +54,8 @@ void CudaDynamicWorld::initOnDevice()
 {
     if(m_numObjects < 1) return;
     CudaBase::SetDevice();
+	
+	CudaLinearBvh::Builder->initOnDevice();
     
     unsigned i;
 	for(i=0; i < m_numObjects; i++) m_objects[i]->initOnDevice();

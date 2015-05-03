@@ -12,6 +12,7 @@
 #include <SahTetrahedronSystem.h>
 #include <tetmesh.h>
 #include <SahGlobal.h>
+#include <LBvhBuilder.h>
 
 SahWorldInterface::SahWorldInterface() {}
 SahWorldInterface::~SahWorldInterface() {}
@@ -21,9 +22,12 @@ void SahWorldInterface::create(CudaDynamicWorld * world)
 #if COLLIDEJUST
     return DynamicWorldInterface::create(world);
 #endif
+	world->setBvhBuilder(new LBvhBuilder);
+	
     SahTetrahedronSystem * tetra = new SahTetrahedronSystem;
 	if(!readMeshFromFile(tetra)) createTestMesh(tetra);
-	// resetVelocity(tetra);
+	
+	resetVelocity(tetra);
 	tetra->setTotalMass(4000.f);
 	world->addTetrahedronSystem(tetra);
 }
@@ -73,4 +77,12 @@ void SahWorldInterface::createTestMesh(SahTetrahedronSystem * mesh)
 	mesh->setAnchoredPoint(63, 20);
 	mesh->setAnchoredPoint(71, 9);
 	mesh->setAnchoredPoint(95, 78);
+}
+
+void SahWorldInterface::resetVelocity(SahTetrahedronSystem * mesh)
+{
+	Vector3F * hv = (Vector3F *)mesh->hostV();
+	unsigned i;
+	const unsigned n = mesh->numPoints();
+	for(i=0; i< n; i++) hv[i].setZero();
 }

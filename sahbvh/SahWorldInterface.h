@@ -20,5 +20,5 @@ protected:
 private:
 	bool readMeshFromFile(SahTetrahedronSystem * mesh);
 	void createTestMesh(SahTetrahedronSystem * mesh);
-	
+	void resetVelocity(SahTetrahedronSystem * mesh);
 };
