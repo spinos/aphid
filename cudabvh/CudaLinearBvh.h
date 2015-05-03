@@ -54,6 +54,9 @@ public:
 
 #if DRAW_BVH_HIERARCHY
 	void * hostInternalAabb();
+	void * hostInternalChildIndices();
+	void * hostInternalDistanceFromRoot();
+	const int hostRootInd() const;
 #endif
 
 protected:
@@ -85,9 +88,10 @@ private:
 #endif
 
 #if DRAW_BVH_HIERARCHY
+	int m_hostRootInd;
 	BaseBuffer * m_hostInternalAabb;
-	
-	
+	BaseBuffer * m_hostInternalChildIndices;
+	BaseBuffer * m_hostInternalDistanceFromRoot;
 #endif
 };
 #endif        //  #ifndef CUDALINEARBVH_H

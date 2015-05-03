@@ -299,6 +299,7 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 void CudaBroadphase::sendDbgToHost()
 {
 #if DRAW_BPH_PAIRS
+	if(m_pairCacheLength<1) return;
 	m_pairCache->deviceToHost(m_hostPairCache->data());
 	char * hbox = (char *)hostAabb();
 	unsigned i=0;

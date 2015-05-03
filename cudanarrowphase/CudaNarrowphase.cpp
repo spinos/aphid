@@ -179,6 +179,16 @@ void CudaNarrowphase::initOnDevice()
 		m_objectBuf.m_mass->hostToDevice(curObj->hostMass(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
 		m_objectBuf.m_ind->hostToDevice(curObj->hostTretradhedronIndices(), m_objectIndexStart[i] * 16, curObj->numTetrahedrons() * 16);
 	}
+	
+	const unsigned estimatedN = m_numElements * 2;
+	m_contact[0]->create(estimatedN * 48);
+	m_contact[1]->create(estimatedN * 48);
+	m_contactPairs[0]->create(estimatedN * 8);
+	m_contactPairs[1]->create(estimatedN * 8);
+	m_tetVertPos[0]->create(estimatedN * 2 * 4 * 12);
+	m_tetVertPos[1]->create(estimatedN * 2 * 4 * 12);
+	m_tetVertVel[0]->create(estimatedN * 2 * 4 * 12);
+	m_tetVertVel[1]->create(estimatedN * 2 * 4 * 12);
 }
 
 void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)

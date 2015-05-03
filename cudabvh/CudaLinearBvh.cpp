@@ -38,6 +38,8 @@ CudaLinearBvh::CudaLinearBvh()
 #endif
 #if DRAW_BVH_HIERARCHY
 	m_hostInternalAabb = new BaseBuffer;
+	m_hostInternalChildIndices = new BaseBuffer;
+	m_hostInternalDistanceFromRoot = new BaseBuffer;
 #endif
 }
 
@@ -87,6 +89,11 @@ void CudaLinearBvh::initOnDevice()
 	m_hostLeafHash->create(nextPow2(numLeafNodes()) * sizeof(KeyValuePair));
 #endif
 
+#if DRAW_BVH_HIERARCHY
+	m_hostInternalAabb->create(numInternalNodes() * sizeof(Aabb));
+	m_hostInternalChildIndices->create(numInternalNodes() * sizeof(int2));
+	m_hostInternalDistanceFromRoot->create(numInternalNodes() * sizeof(int));
+#endif
 }
 
 const unsigned CudaLinearBvh::numLeafNodes() const 
@@ -96,7 +103,7 @@ const unsigned CudaLinearBvh::numInternalNodes() const
 { return numLeafNodes() - 1; }
 
 void CudaLinearBvh::getRootNodeIndex(int * dst)
-{ m_rootNodeIndexOnDevice->deviceToHost((void *)dst, m_rootNodeIndexOnDevice->bufferSize()); }
+{ m_rootNodeIndexOnDevice->deviceToHost((void *)dst, 4); }
 
 void CudaLinearBvh::getInternalAabbs(BaseBuffer * dst)
 { m_internalNodeAabbs->deviceToHost(dst->data(), m_internalNodeAabbs->bufferSize()); }
@@ -180,7 +187,7 @@ void CudaLinearBvh::buildInternalTree()
 								(int *)internalNodeParentIndex,
 								(int *)rootInd,
 								numInternalNodes());
-	
+								
 	void * distanceFromRoot = m_distanceInternalNodeFromRoot->bufferOnDevice();
 	bvhFindDistanceFromRoot((int *)rootInd, (int *)internalNodeParentIndex,
 							(int *)distanceFromRoot, 
@@ -248,11 +255,27 @@ void CudaLinearBvh::sendDbgToHost()
 	m_leafAabbs->deviceToHost(m_hostLeafBox->data(), m_leafAabbs->bufferSize());
 	m_leafHash[0]->deviceToHost(m_hostLeafHash->data(), m_leafHash[0]->bufferSize());
 #endif
+
+#if DRAW_BVH_HIERARCHY
+	getRootNodeIndex(&m_hostRootInd);
+	m_internalNodeAabbs->deviceToHost(m_hostInternalAabb->data(), m_internalNodeAabbs->bufferSize());
+	m_internalNodeChildIndices->deviceToHost(m_hostInternalChildIndices->data(), m_internalNodeChildIndices->bufferSize());
+	m_distanceInternalNodeFromRoot->deviceToHost(m_hostInternalDistanceFromRoot->data(), m_distanceInternalNodeFromRoot->bufferSize());
+#endif
 }
 
 #if DRAW_BVH_HIERARCHY
 void * CudaLinearBvh::hostInternalAabb()
 { return m_hostInternalAabb->data(); }
+
+void * CudaLinearBvh::hostInternalChildIndices()
+{ return m_hostInternalChildIndices->data(); }
+
+void * CudaLinearBvh::hostInternalDistanceFromRoot()
+{ return m_hostInternalDistanceFromRoot->data(); }
+
+const int CudaLinearBvh::hostRootInd() const
+{ return m_hostRootInd; }
 #endif
 
 CudaReduction * CudaLinearBvh::reducer()

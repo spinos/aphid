@@ -19,19 +19,9 @@
 #define NTET 3600
 #define NPNT 14400
 
-struct A {
-    // mat33 Ke[4][4];
-    mat33 Re;
-    //float3 B[4]; 
-    //float3 e1, e2, e3;
-    //float volume;
-    //float plastic[6];
-};
-
 DynamicWorldInterface::DynamicWorldInterface() 
 {
     m_faultyPair[0] = 0; m_faultyPair[1] = 1;
-    std::cout<<" size of A "<<sizeof(A)<<"\n";
     m_pairCache = new BaseBuffer;
     m_tetPnt = new BaseBuffer;
 	m_tetInd = new BaseBuffer;
@@ -46,6 +36,7 @@ DynamicWorldInterface::DynamicWorldInterface()
 	m_mass = new BaseBuffer;
 	m_split = new BaseBuffer;
 	m_deltaJ = new BaseBuffer;
+	m_maxDisplayLevel = 5;
 }
 
 DynamicWorldInterface::~DynamicWorldInterface() {}
@@ -109,6 +100,13 @@ void DynamicWorldInterface::create(CudaDynamicWorld * world)
 	world->addTetrahedronSystem(tetra);
 }
 
+void DynamicWorldInterface::changeMaxDisplayLevel(int d)
+{
+	m_maxDisplayLevel += d;
+	if(m_maxDisplayLevel<1) m_maxDisplayLevel = 1;
+	if(m_maxDisplayLevel>30) m_maxDisplayLevel = 30;
+}
+
 void DynamicWorldInterface::draw(TetrahedronSystem * tetra)
 {
     glEnable(GL_DEPTH_TEST);
@@ -152,12 +150,17 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
     draw(world);
     glDisable(GL_DEPTH_TEST);
 	
+	
 #if DRAW_BPH_PAIRS
     showOverlappingPairs(world, drawer);
 #endif
 
 #if DRAW_BVH_HASH
 	showBvhHash(world, drawer);
+#endif
+
+#if DRAW_BVH_HIERARCHY
+	showBvhHierarchy(world, drawer);
 #endif
 
 #if DRAW_NPH_CONTACT
@@ -176,7 +179,7 @@ void DynamicWorldInterface::drawFaulty(CudaDynamicWorld * world, GeoDrawer * dra
 void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     CudaBroadphase * broadphase = world->broadphase();
-    // std::cout<<" num overlapping pairs "<<broadphase->numUniquePairs()<<" ";
+    std::cout<<" num overlapping pairs "<<broadphase->numOverlappingPairs()<<" ";
 	
     const unsigned cacheLength = broadphase->pairCacheLength();
 	if(cacheLength < 1) return;
@@ -722,80 +725,82 @@ void DynamicWorldInterface::showFaultyPair(CudaDynamicWorld * world, GeoDrawer *
 }
 
 #if DRAW_BVH_HIERARCHY
-void DynamicWorldInterface::showBvhHierarchy(CudaLinearBvh * bvh)
+
+void DynamicWorldInterface::showBvhHierarchy(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
-	bvh->getRootNodeIndex(&m_hostRootNodeInd);
-	
+	CudaBroadphase * broadphase = world->broadphase();
+    const unsigned n = broadphase->numObjects();
+    unsigned i;
+    for(i=0; i< n; i++)
+        showBvhHierarchy(broadphase->object(i), drawer);
+}
+
+inline int isLeafNode(int index) 
+{ return (index >> 31 == 0); }
+
+inline int getIndexWithInternalNodeMarkerRemoved(int index) 
+{ return index & (~0x80000000); }
+
+void DynamicWorldInterface::showBvhHierarchy(CudaLinearBvh * bvh, GeoDrawer * drawer)
+{
+	const int rootNodeInd = bvh->hostRootInd();
 	const unsigned numInternal = bvh->numInternalNodes();
 	
 	Aabb * internalBoxes = (Aabb *)bvh->hostInternalAabb();
-	
-	KeyValuePair * leafHash = (KeyValuePair *)bvh->hostLeafHash();
-	
-	m_displayLeafAabbs->create(bvh->numLeafNodes() * sizeof(Aabb));
-	bvh->getLeafAabbs(m_displayLeafAabbs);
-	Aabb * leafBoxes = (Aabb *)m_displayLeafAabbs->data();
-	
-	m_internalChildIndices->create(bvh->numInternalNodes() * sizeof(int2));
-	bvh->getInternalChildIndex(m_internalChildIndices);
-	int2 * internalNodeChildIndices = (int2 *)m_internalChildIndices->data();
-	
-	m_displayInternalDistance->create(bvh->numInternalNodes() * sizeof(int));
-	bvh->getInternalDistances(m_displayInternalDistance);
-	int * levels = (int *)m_displayInternalDistance->data();
+	int2 * internalNodeChildIndices = (int2 *)bvh->hostInternalChildIndices();
+	int * distanceFromRoot = (int *)bvh->hostInternalDistanceFromRoot();
 	
 	BoundingBox bb;
-	
+	Aabb bvhNodeAabb;
 	int stack[128];
-	stack[0] = m_hostRootNodeInd;
+	stack[0] = rootNodeInd;
 	int stackSize = 1;
 	int maxStack = 1;
-	int touchedLeaf = 0;
 	int touchedInternal = 0;
+	int maxLevel = 0;
+	int level;
 	while(stackSize > 0) {
 		int internalOrLeafNodeIndex = stack[ stackSize - 1 ];
 		stackSize--;
 		
-		int isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
+		if(isLeafNode(internalOrLeafNodeIndex)) continue;
+		
 		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
 		
-		int bvhRigidIndex = (isLeaf) ? leafHash[bvhNodeIndex].value : -1;
+		level = distanceFromRoot[bvhNodeIndex];
+		if(level > m_maxDisplayLevel) continue;
+		if(maxLevel < level)
+			maxLevel = level;
+			
+		bvhNodeAabb = internalBoxes[bvhNodeIndex];
+
+		bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
+		bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);
 		
-		Aabb bvhNodeAabb = (isLeaf) ? leafBoxes[bvhRigidIndex] : internalBoxes[bvhNodeIndex];
-
-		{
-			if(isLeaf) {
-				glColor3f(.5, 0., 0.);
-				bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
-				bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);
-				m_drawer->boundingBox(bb);
-
-				touchedLeaf++;
-			}
-			else {
-				glColor3f(.5, .65, 0.);
-				
-				if(levels[bvhNodeIndex] > m_displayLevel) continue;
-				bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
-				bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);
-				m_drawer->boundingBox(bb);
-
-				touchedInternal++;
-				if(stackSize + 2 > 128)
-				{
-					//Error
-				}
-				else
-				{
-				    stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
-					stackSize++;
-					stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
-					stackSize++;
-					
-					if(stackSize > maxStack) maxStack = stackSize;
-				}
-			}
+		if(m_maxDisplayLevel - level < 2) {
+			drawer->setGroupColorLight(level);
+			drawer->boundingBox(bb);
 		}
-	}	
+
+		touchedInternal++;
+		if(stackSize + 2 > 128)
+		{
+			//Error
+		}
+		else
+		{
+			stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+			stackSize++;
+			stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+			stackSize++;
+			
+			if(stackSize > maxStack) maxStack = stackSize;
+		}
+			
+	}
+	std::cout<<" total n internal node "<<numInternal<<"\n"
+		<<" n internal node reached "<<touchedInternal<<"\n"
+		<<" max draw bvh hierarchy stack size "<<maxStack<<"\n"
+		<<" max level reached "<<maxLevel<<"\n";	
 }
 #endif

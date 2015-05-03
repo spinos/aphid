@@ -16,6 +16,7 @@ public:
     
     virtual void create(CudaDynamicWorld * world);
     
+	void changeMaxDisplayLevel(int d);
     void draw(CudaDynamicWorld * world);
     void draw(CudaDynamicWorld * world, GeoDrawer * drawer);
     void drawFaulty(CudaDynamicWorld * world, GeoDrawer * drawer);
@@ -37,7 +38,8 @@ private:
 #endif
 
 #if DRAW_BVH_HIERARCHY
-	void showBvhHierarchy(CudaLinearBvh * bvh);
+	void showBvhHierarchy(CudaDynamicWorld * world, GeoDrawer * drawer);
+	void showBvhHierarchy(CudaLinearBvh * bvh, GeoDrawer * drawer);
 #endif
 
     bool checkContact(unsigned n);
@@ -51,6 +53,7 @@ private:
     void storeModels(CudaNarrowphase * narrowphase);
     void showFaultyPair(CudaDynamicWorld * world, GeoDrawer * drawer);
 private:
+	int m_maxDisplayLevel;
     unsigned m_faultyPair[2];
     BaseBuffer * m_pairCache;
     BaseBuffer * m_tetPnt;
