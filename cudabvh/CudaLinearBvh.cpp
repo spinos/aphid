@@ -19,11 +19,10 @@ BvhBuilder * CudaLinearBvh::Builder = 0;
 
 CudaLinearBvh::CudaLinearBvh() 
 { 
-	m_numLeafNodes = 0; 
+	m_numPrimitives = 0; 
 	m_leafAabbs = new CUDABuffer;
 	m_internalNodeAabbs = new CUDABuffer;
-	m_leafHash[0] = new CUDABuffer;
-	m_leafHash[1] = new CUDABuffer;
+	m_leafHash = new CUDABuffer;
 	m_leafNodeParentIndices = new CUDABuffer;
 	m_internalNodeChildIndices = new CUDABuffer;
 	m_internalNodeParentIndices = new CUDABuffer;
@@ -46,8 +45,7 @@ CudaLinearBvh::~CudaLinearBvh()
 {
 	delete m_leafAabbs;
 	delete m_internalNodeAabbs;
-	delete m_leafHash[0];
-	delete m_leafHash[1];
+	delete m_leafHash;
 	delete m_leafNodeParentIndices;
 	delete m_internalNodeChildIndices;
 	delete m_internalNodeParentIndices;
@@ -56,8 +54,8 @@ CudaLinearBvh::~CudaLinearBvh()
 	delete m_maxChildElementIndices;
 }
 
-void CudaLinearBvh::setNumLeafNodes(unsigned n)
-{ m_numLeafNodes = n; }
+const void CudaLinearBvh::setNumPrimitives(unsigned n)
+{ m_numPrimitives = n; }
 
 void CudaLinearBvh::initOnDevice()
 {
@@ -65,8 +63,7 @@ void CudaLinearBvh::initOnDevice()
 // assume numInternalNodes() >> ReduceMaxBlocks
 	m_internalNodeAabbs->create(numInternalNodes() * sizeof(Aabb));
 	
-	m_leafHash[0]->create(nextPow2(numLeafNodes()) * sizeof(KeyValuePair));
-	m_leafHash[1]->create(nextPow2(numLeafNodes()) * sizeof(KeyValuePair));
+	m_leafHash->create(nextPow2(numLeafNodes()) * sizeof(KeyValuePair));
 	
 	m_leafNodeParentIndices->create(numLeafNodes() * sizeof(int));
 	m_internalNodeChildIndices->create(numInternalNodes() * sizeof(int2));
@@ -87,8 +84,11 @@ void CudaLinearBvh::initOnDevice()
 #endif
 }
 
+const unsigned CudaLinearBvh::numPrimitives() const
+{ return m_numPrimitives; }
+	
 const unsigned CudaLinearBvh::numLeafNodes() const 
-{ return m_numLeafNodes; }
+{ return m_numPrimitives; }
 
 const unsigned CudaLinearBvh::numInternalNodes() const 
 { return numLeafNodes() - 1; }
@@ -127,13 +127,7 @@ void CudaLinearBvh::getLeafAabbsAt(char * dst)
 { m_leafAabbs->deviceToHost(dst, 0, m_leafAabbs->bufferSize()); }
 
 void * CudaLinearBvh::leafHash()
-{ return m_leafHash[0]->bufferOnDevice(); }
-
-void * CudaLinearBvh::leafHash0()
-{ return m_leafHash[0]->bufferOnDevice(); }
-
-void * CudaLinearBvh::leafHash1()
-{ return m_leafHash[1]->bufferOnDevice(); }
+{ return m_leafHash->bufferOnDevice(); }
 
 void * CudaLinearBvh::leafNodeParentIndices()
 { return m_leafNodeParentIndices->bufferOnDevice(); }
@@ -153,7 +147,7 @@ const unsigned CudaLinearBvh::usedMemory() const
 {
 	unsigned n = m_leafAabbs->bufferSize();
 	n += m_internalNodeAabbs->bufferSize();
-	n += m_leafHash[0]->bufferSize() * 2;
+	n += m_leafHash->bufferSize();
 	n += m_leafNodeParentIndices->bufferSize();
 	n += m_internalNodeChildIndices->bufferSize();
 	n += m_internalNodeParentIndices->bufferSize();
@@ -174,7 +168,7 @@ void CudaLinearBvh::sendDbgToHost()
 {
 #if DRAW_BVH_HASH
 	m_leafAabbs->deviceToHost(m_hostLeafBox->data(), m_leafAabbs->bufferSize());
-	m_leafHash[0]->deviceToHost(m_hostLeafHash->data(), m_leafHash[0]->bufferSize());
+	m_leafHash->deviceToHost(m_hostLeafHash->data(), m_leafHash->bufferSize());
 #endif
 
 #if DRAW_BVH_HIERARCHY

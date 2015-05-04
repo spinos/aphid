@@ -54,7 +54,7 @@ void CudaTetrahedronSystem::initOnDevice()
 	m_deviceAnchor->create(numPoints() * 4);
 	m_deviceAnchor->hostToDevice(hostAnchor());
     calculateMass();
-	setNumLeafNodes(numTetrahedrons());
+	setNumPrimitives(numTetrahedrons());
 	CudaLinearBvh::initOnDevice();
 }
 

@@ -118,6 +118,9 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
 "../cudanarrowphase/narrowphase.cu")
 
+## disable warnings
+## http://www.ssl.berkeley.edu/~jimm/grizzly_docs/SSL/opt/intel/cc/9.0/lib/locale/en_US/mcpcom.msg
+
 if (WIN32)
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_20")
 else ()
@@ -183,7 +186,8 @@ find_package (zlib REQUIRED)
 target_link_libraries (testsah ${ZLIB_LIBRARIES})
 
 if(WIN32)
-set (QT_QMAKE_EXECUTABLE "D:/usr/Qtx64/4.7.1/bin/qmake.exe")
+## set (QT_QMAKE_EXECUTABLE "D:/usr/Qtx64/4.7.1/bin/qmake.exe")
+set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
 endif()
 
 find_package (Qt4 REQUIRED)

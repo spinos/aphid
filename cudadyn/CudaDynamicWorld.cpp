@@ -126,8 +126,9 @@ void CudaDynamicWorld::sendXToHost()
 	
 	float elapsed_time;
     cudaEventElapsedTime(&elapsed_time, start_event, stop_event);
-	
+#if PRINT_TRANSACTION_TIME	
 	std::cout<<" device-host transaction time: "<<elapsed_time<<" milliseconds\n";
+#endif
 	cudaEventDestroy( start_event ); 
 	cudaEventDestroy( stop_event );
 }

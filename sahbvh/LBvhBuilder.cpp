@@ -34,13 +34,14 @@ void LBvhBuilder::initOnDevice()
 void LBvhBuilder::build(CudaLinearBvh * bvh)
 {
 // create data
+	const unsigned nl = bvh->numLeafNodes();
+	createSortBuf(nl);
+	
 	const unsigned nin = bvh->numInternalNodes();
 	m_internalNodeCommonPrefixValues->create(nin * sizeof(uint64));
 	m_internalNodeCommonPrefixLengths->create(nin * sizeof(int));
 	
 // find bounding box of all leaf aabb
-	const unsigned nl = bvh->numLeafNodes();
-	
 	Aabb bounding;
 	reducer()->minMaxBox<Aabb, float3>(&bounding, (float3 *)bvh->leafAabbs(), nl * 2);
 #if PRINT_BOUND	
@@ -52,16 +53,16 @@ void LBvhBuilder::build(CudaLinearBvh * bvh)
 // morton curve ordering 
 	const unsigned sortLength = nextPow2(nl);
 	
-	void * dst = bvh->leafHash0();
+	void * dst = bvh->leafHash();
 	void * src = bvh->leafAabbs();
 	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, nl, sortLength,
 	    (Aabb *)reducer()->resultOnDevice());
 		
 	CudaBase::CheckCudaError("calc morton key");
 	
-	RadixSort((KeyValuePair *)dst, (KeyValuePair *)bvh->leafHash1(), sortLength, 32);
+	RadixSort((KeyValuePair *)dst, (KeyValuePair *)sortIntermediateBuf(), sortLength, 32);
 	
-	void * morton = bvh->leafHash0();
+	void * morton = bvh->leafHash();
 	void * commonPrefix = m_internalNodeCommonPrefixValues->bufferOnDevice();
 	void * commonPrefixLengths = m_internalNodeCommonPrefixLengths->bufferOnDevice();
 	
@@ -102,12 +103,12 @@ void LBvhBuilder::build(CudaLinearBvh * bvh)
 	if(maxDistance < 0)
 		CudaBase::CheckCudaError("finding bvh max level");
 		
-	void * boxes =  bvh->leafHash0();
+	void * boxes =  bvh->leafHash();
 	void * leafNodeAabbs = bvh->leafAabbs();
 	void * internalNodeAabbs = bvh->internalNodeAabbs();
 	void * maxChildElement = bvh->maxChildElementIndices();
 	
-	for(int distance = maxDistance; distance >= 0; --distance) {		
+	for(int distance = maxDistance; distance >= 0; --distance) {	
 		bvhFormInternalNodeAabbsAtDistance((int *)distanceFromRoot, (KeyValuePair *)boxes,
 											(int2 *)internalNodeChildIndex,
 											(Aabb *)leafNodeAabbs, 

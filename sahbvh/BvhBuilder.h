@@ -8,6 +8,8 @@
  */
 class CudaReduction;
 class CudaLinearBvh;
+class CUDABuffer;
+
 class BvhBuilder {
 public:
 	BvhBuilder();
@@ -18,8 +20,11 @@ public:
 	virtual void build(CudaLinearBvh * bvh);
 protected:
 	CudaReduction * reducer();
+	void createSortBuf(unsigned n);
+	void * sortIntermediateBuf();
 private:
 	
 private:
 	CudaReduction * m_findMaxDistance;
+	CUDABuffer * m_sortIntermediate;
 };

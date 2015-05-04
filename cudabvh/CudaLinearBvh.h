@@ -23,10 +23,10 @@ public:
 	CudaLinearBvh();
 	virtual ~CudaLinearBvh();
 	
-	void setNumLeafNodes(unsigned n);
 	virtual void initOnDevice();
 	virtual void update();
 	
+	const unsigned numPrimitives() const;
 	const unsigned numLeafNodes() const;
 	const unsigned numInternalNodes() const;
 	
@@ -43,8 +43,6 @@ public:
 	void * internalNodeChildLimit();
 	void * leafAabbs();
 	void * leafHash();
-	void * leafHash0();
-	void * leafHash1();
 	void * leafNodeParentIndices();
 	void * distanceInternalNodeFromRoot();
 	void * maxChildElementIndices();
@@ -68,20 +66,21 @@ public:
 	static BvhBuilder * Builder;
 
 protected:
+	const void setNumPrimitives(unsigned n);
 	
 private:
 	
 private:
 	CUDABuffer * m_leafAabbs;
 	CUDABuffer * m_internalNodeAabbs;
-	CUDABuffer * m_leafHash[2];
+	CUDABuffer * m_leafHash;
 	CUDABuffer * m_leafNodeParentIndices;
 	CUDABuffer * m_internalNodeChildIndices;
 	CUDABuffer * m_internalNodeParentIndices;
 	CUDABuffer * m_rootNodeIndexOnDevice;
-    CUDABuffer * m_distanceInternalNodeFromRoot;
+	CUDABuffer * m_distanceInternalNodeFromRoot;
 	CUDABuffer * m_maxChildElementIndices;
-	unsigned m_numLeafNodes;
+	unsigned m_numPrimitives;
 #if DRAW_BVH_HASH
 	BaseBuffer * m_hostLeafHash;
 	BaseBuffer * m_hostLeafBox;

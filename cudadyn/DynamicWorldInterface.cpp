@@ -150,6 +150,7 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world)
 
 void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
+	if(world->numObjects() < 1) return;
     draw(world);
     glDisable(GL_DEPTH_TEST);
 	
@@ -746,7 +747,7 @@ inline int getIndexWithInternalNodeMarkerRemoved(int index)
 
 void DynamicWorldInterface::showBvhHierarchy(CudaLinearBvh * bvh, GeoDrawer * drawer)
 {
-	const int rootNodeInd = bvh->hostRootInd();
+	const int rootNodeInd = bvh->hostRootInd(); // std::cout<<" root "<< rootNodeInd;
 	const unsigned numInternal = bvh->numInternalNodes();
 	
 	Aabb * internalBoxes = (Aabb *)bvh->hostInternalAabb();
@@ -801,9 +802,11 @@ void DynamicWorldInterface::showBvhHierarchy(CudaLinearBvh * bvh, GeoDrawer * dr
 		}
 			
 	}
+#if 0
 	std::cout<<" total n internal node "<<numInternal<<"\n"
 		<<" n internal node reached "<<touchedInternal<<"\n"
 		<<" max draw bvh hierarchy stack size "<<maxStack<<"\n"
-		<<" max level reached "<<maxLevel<<"\n";	
+		<<" max level reached "<<maxLevel<<"\n";
+#endif
 }
 #endif
