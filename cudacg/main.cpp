@@ -132,7 +132,7 @@ void testRadixSort()
     
     KeyValuePair *h_data = (KeyValuePair *)malloc(numElements*sizeof(KeyValuePair));
     
-    makeRandomUintVector(h_data, numElements, 30);
+    makeRandomUintVector(h_data, numElements, 12);
 	
     KeyValuePair *d_data;
     cudaMalloc((void **)&d_data, numElements*sizeof(KeyValuePair));
@@ -142,11 +142,11 @@ void testRadixSort()
 	KeyValuePair *d_data1;
     cudaMalloc((void **)&d_data1, numElements*sizeof(KeyValuePair));
 	
-    RadixSort(d_data, d_data1, numElements, 32);
+    RadixSort(d_data, d_data1, numElements, 18);
     
     cudaMemcpy(h_data, d_data, numElements * sizeof(KeyValuePair), cudaMemcpyDeviceToHost);
     
-    	char passed = 1;
+	char passed = 1;
     for(unsigned int i=0; i<numElements-1; ++i)
     {
 		// printf("%4d : %4d\n", h_data[i].key, h_data[i].value);
@@ -599,9 +599,7 @@ int main(int argc, char **argv)
         cudaThreadExit();
         exit(1);
     }
-    
-    // testRadixSort();
-    
+        
     // printf("test conjugate gradient\n");
     // testCg();
     testReduceMin();
@@ -609,7 +607,7 @@ int main(int argc, char **argv)
 	testReduceMinMaxBox();
 	testReduceSum();
 	testScan();
-    
+    testRadixSort();
     printf("done.\n");
     exit(0);
 }

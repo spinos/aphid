@@ -9,6 +9,7 @@
 class CudaReduction;
 class CudaLinearBvh;
 class CUDABuffer;
+class CudaScan;
 
 class BvhBuilder {
 public:
@@ -20,11 +21,16 @@ public:
 	virtual void build(CudaLinearBvh * bvh);
 protected:
 	CudaReduction * reducer();
-	void createSortBuf(unsigned n);
-	void * sortIntermediateBuf();
+	CudaScan * scanner();
+	void createSortAndScanBuf(unsigned n);
+	void computeMortionHash(void * mortonCode,
+							void * primitiveAabbs, unsigned numPrimitives);
+	void sort(void * odata, unsigned nelem, unsigned nbits);
+	void * sortIntermediate();
 private:
 	
 private:
 	CudaReduction * m_findMaxDistance;
+	CudaScan * m_findPrefixSum;
 	CUDABuffer * m_sortIntermediate;
 };

@@ -12,7 +12,7 @@
 #include <SahTetrahedronSystem.h>
 #include <tetmesh.h>
 #include <SahGlobal.h>
-#include <LBvhBuilder.h>
+#include <SahBuilder.h>
 
 SahWorldInterface::SahWorldInterface() {}
 SahWorldInterface::~SahWorldInterface() {}
@@ -22,7 +22,7 @@ void SahWorldInterface::create(CudaDynamicWorld * world)
 #if COLLIDEJUST
     return DynamicWorldInterface::create(world);
 #endif
-	world->setBvhBuilder(new LBvhBuilder);
+	world->setBvhBuilder(new SahBuilder);
 	
     SahTetrahedronSystem * tetra = new SahTetrahedronSystem;
 	if(!readMeshFromFile(tetra)) createTestMesh(tetra);

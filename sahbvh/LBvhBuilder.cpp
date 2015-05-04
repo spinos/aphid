@@ -10,7 +10,6 @@
 #include "LBvhBuilder.h"
 #include <CudaReduction.h>
 #include <CudaLinearBvh.h>
-#include <radixsort_implement.h>
 #include <createBvh_implement.h>
 #include <CudaBase.h>
 
@@ -34,33 +33,16 @@ void LBvhBuilder::initOnDevice()
 void LBvhBuilder::build(CudaLinearBvh * bvh)
 {
 // create data
-	const unsigned nl = bvh->numLeafNodes();
-	createSortBuf(nl);
+	const unsigned nl = bvh->numPrimitives();
+	createSortAndScanBuf(nl);
 	
 	const unsigned nin = bvh->numInternalNodes();
 	m_internalNodeCommonPrefixValues->create(nin * sizeof(uint64));
 	m_internalNodeCommonPrefixLengths->create(nin * sizeof(int));
 	
-// find bounding box of all leaf aabb
-	Aabb bounding;
-	reducer()->minMaxBox<Aabb, float3>(&bounding, (float3 *)bvh->leafAabbs(), nl * 2);
-#if PRINT_BOUND	
-    std::cout<<" bvh builder bound (("<<bounding.low.x<<" "<<bounding.low.y<<" "<<bounding.low.z;
-    std::cout<<"),("<<bounding.high.x<<" "<<bounding.high.y<<" "<<bounding.high.z<<"))";
-#endif
-	CudaBase::CheckCudaError("finding bvh bounding");
-
-// morton curve ordering 
-	const unsigned sortLength = nextPow2(nl);
+	computeMortionHash(bvh->leafHash(), bvh->leafAabbs(), nl);
 	
-	void * dst = bvh->leafHash();
-	void * src = bvh->leafAabbs();
-	bvhCalculateLeafHash((KeyValuePair *)dst, (Aabb *)src, nl, sortLength,
-	    (Aabb *)reducer()->resultOnDevice());
-		
-	CudaBase::CheckCudaError("calc morton key");
-	
-	RadixSort((KeyValuePair *)dst, (KeyValuePair *)sortIntermediateBuf(), sortLength, 32);
+	sort(bvh->leafHash(), nl, 32);
 	
 	void * morton = bvh->leafHash();
 	void * commonPrefix = m_internalNodeCommonPrefixValues->bufferOnDevice();

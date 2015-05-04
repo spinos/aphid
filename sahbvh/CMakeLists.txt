@@ -51,6 +51,8 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "SahTetrahedronSystem.h"
 "BvhBuilder.h"
 "LBvhBuilder.h"
+"SahBuilder.h"
+"sahbvh_implement.h"
 "window.h"
 "glwidget.h")
 
@@ -78,6 +80,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "SahTetrahedronSystem.cpp"
 "BvhBuilder.cpp"
 "LBvhBuilder.cpp"
+"SahBuilder.cpp"
 "glwidget.cpp"
 "window.cpp"
 "main.cpp")
@@ -116,7 +119,8 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudanarrowphase/barycentric.cu"
 "../cudanarrowphase/gjk_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
-"../cudanarrowphase/narrowphase.cu")
+"../cudanarrowphase/narrowphase.cu"
+"sahbvh.cu")
 
 ## disable warnings
 ## http://www.ssl.berkeley.edu/~jimm/grizzly_docs/SSL/opt/intel/cc/9.0/lib/locale/en_US/mcpcom.msg

@@ -5,8 +5,6 @@
 #include <CudaDbgLog.h>
 #include <boost/format.hpp>
 
-CudaDbgLog bglg("sah.txt");
-
 SahTetrahedronSystem::SahTetrahedronSystem() 
 {
 }
