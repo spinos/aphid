@@ -209,11 +209,11 @@ void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDr
 	    
 	    ab.setMin(abox.low.x, abox.low.y, abox.low.z);
 		ab.setMax(abox.high.x, abox.high.y, abox.high.z);
+
 		
 		drawer->arrow(bb.center(), ab.center());
 		
-		bb.expandBy(ab);
-		
+		// bb.expandBy(ab);
 		// drawer->boundingBox(bb);
 	}
 }
@@ -233,7 +233,7 @@ void DynamicWorldInterface::showBvhHash(CudaLinearBvh * bvh, GeoDrawer * drawer)
 {
     const unsigned n = bvh->numLeafNodes();
 	Aabb * boxes = (Aabb *)bvh->hostLeafBox();
-	
+	BoundingBox bb;
 	KeyValuePair * bvhHash = (KeyValuePair *)bvh->hostLeafHash();
 	
 	float red;
@@ -246,8 +246,13 @@ void DynamicWorldInterface::showBvhHash(CudaLinearBvh * bvh, GeoDrawer * drawer)
 		p.set(a0.low.x * 0.5f + a0.high.x * 0.5f, a0.low.y * 0.5f + a0.high.y * 0.5f + 0.2f, a0.low.z * 0.5f + a0.high.z * 0.5f);
 		Aabb a1 = boxes[bvhHash[i].value];
 		q.set(a1.low.x * 0.5f + a1.high.x * 0.5f, a1.low.y * 0.5f + a1.high.y * 0.5f + 0.2f, a1.low.z * 0.5f + a1.high.z * 0.5f);
-        
+#if DRAW_BVH_HASH_SFC       
 		drawer->arrow(p, q);
+#else
+        bb.setMin(a0.low.x, a0.low.y, a0.low.z);
+        bb.setMax(a0.high.x, a0.high.y, a0.high.z);
+        drawer->boundingBox(bb);
+#endif
 	}
 }
 #endif
