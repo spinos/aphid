@@ -27,4 +27,5 @@ private:
 	CUDABuffer * m_compressedRunHeads;
 	CUDABuffer * m_runHash;
 	CUDABuffer * m_runLength;
+	CUDABuffer * m_emissions[2];
 };

@@ -111,6 +111,9 @@ void * CudaLinearBvh::rootNodeIndex()
 void * CudaLinearBvh::internalNodeChildIndices()
 { return m_internalNodeChildIndices->bufferOnDevice(); }
 
+CUDABuffer * CudaLinearBvh::internalNodeChildIndicesBuf()
+{ return m_internalNodeChildIndices; }
+
 void * CudaLinearBvh::internalNodeParentIndices()
 { return m_internalNodeParentIndices->bufferOnDevice(); }
 
@@ -122,6 +125,12 @@ void * CudaLinearBvh::internalNodeChildLimit()
 
 void * CudaLinearBvh::leafAabbs()
 { return m_leafAabbs->bufferOnDevice(); }
+
+void * CudaLinearBvh::primitiveAabb()
+{ return m_leafAabbs->bufferOnDevice(); }
+
+void * CudaLinearBvh::primitiveHash()
+{ return m_leafHash->bufferOnDevice(); }
 
 void CudaLinearBvh::getLeafAabbsAt(char * dst)
 { m_leafAabbs->deviceToHost(dst, 0, m_leafAabbs->bufferSize()); }

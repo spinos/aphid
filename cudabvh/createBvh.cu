@@ -57,15 +57,15 @@ inline __device__ uint morton3D(float x, float y, float z)
     uint xx = expandBits((uint)x); 
     uint yy = expandBits((uint)y); 
     uint zz = expandBits((uint)z); 
-    return xx * 4 + yy * 2 + zz; 
+    return (xx <<2) + (yy <<1) + zz; 
 } 
 
 inline __device__ void normalizeByBoundary(float & x, float low, float width)
 {
-	if(x < low) x = 0.0;
-	else if(x > low + width) x = 1.0;
+	if(x < low) x = 0.0f;
+	else if(x > low + width) x = 1.0f;
 	else {
-		if(width < TINY_VALUE2) x = 0.0;
+		if(width < TINY_VALUE2) x = 0.0f;
 		else x = (x - low) / width;
 	}
 }

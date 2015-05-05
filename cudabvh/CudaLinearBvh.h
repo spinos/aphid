@@ -43,6 +43,8 @@ public:
 	void * internalNodeChildLimit();
 	void * leafAabbs();
 	void * leafHash();
+	void * primitiveAabb();
+	void * primitiveHash();
 	void * leafNodeParentIndices();
 	void * distanceInternalNodeFromRoot();
 	void * maxChildElementIndices();
@@ -50,6 +52,8 @@ public:
 	void sendDbgToHost();
 	
 	const unsigned usedMemory() const;
+	
+	CUDABuffer * internalNodeChildIndicesBuf();
 	
 #if DRAW_BVH_HASH
 	void * hostLeafHash();

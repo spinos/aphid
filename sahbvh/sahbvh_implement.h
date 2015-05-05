@@ -3,6 +3,13 @@
 
 #include <radixsort_implement.h>
 
+#define SAH_MAX_N_BLOCKS 4096
+
+struct EmissionBlock {
+    uint root_id;
+    uint block_offset;
+};
+
 extern "C" {
 void sahbvh_computeRunHead(uint * blockHeads, 
 							KeyValuePair * mortonCode,

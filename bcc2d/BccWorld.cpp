@@ -37,7 +37,7 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	m_cluster = new KdCluster;
 	m_cluster->addGeometry(m_allGeo);
 	
-	KdTree::MaxBuildLevel = 6;
+	KdTree::MaxBuildLevel = 2;
 	KdTree::NumPrimitivesInLeafThreashold = 13;
 	
 	m_cluster->create();
