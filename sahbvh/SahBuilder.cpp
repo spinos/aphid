@@ -176,12 +176,14 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	
 	computeMortionHash(primitiveHash, primitiveAabb, n);
     
-    int nbits = countTreeBits(primitiveHash, n);
+	if(n<=2048) 
+        sort(primitiveHash, n, 32);
+	else 
+        sortPrimitives(primitiveHash, primitiveAabb,
+            n, 10, 5);
+      
+    // sahlg.writeMortonHash(bvh->primitiveHashBuf(), n, "sorted_primitive_hash", CudaDbgLog::FOnce);
 
-	//if(n<=2048) sort(primitiveHash, n, 32);
-	//else 
-    sortPrimitives(primitiveHash, primitiveAabb,
-        n, nbits, getM(nbits, 5));
 /*
 // set root node range
     unsigned rr[2];
@@ -206,9 +208,9 @@ int SahBuilder::countTreeBits(void * morton, unsigned numPrimitives)
     sahbvh_countTreeBits((uint *)m_mortonBits->bufferOnDevice(), 
                             (KeyValuePair *)morton,
                             numPrimitives);
-    int maxNBits = -1;
-    reducer()->max<int>(maxNBits, (int *)m_mortonBits->bufferOnDevice(), numPrimitives);
-    return maxNBits;
+    int nBits[2];
+    reducer()->minMax<int2, int>((int *)nBits, (int *)m_mortonBits->bufferOnDevice(), numPrimitives);
+    return nBits[1] - nBits[0];
 }
 
 int SahBuilder::getM(int n, int m)
@@ -224,12 +226,11 @@ int SahBuilder::getM(int n, int m)
 void SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs, 
                                 unsigned numPrimitives, int n, int m)
 {
-    std::cout<<" sort by first 3*m bits "<<m<<" ";
-        
+    // std::cout<<" sort by first 3*m bits "<<m<<" ";
 	const unsigned scanLength = CudaScan::getScanBufferLength(numPrimitives);
 	
-	const unsigned d = n - 3*m;
-    std::cout<<" d "<<d<<"\n";
+	const unsigned d = 3*(n - m);
+
 	sahbvh_computeRunHead((uint *)m_runHeads->bufferOnDevice(), 
 							(KeyValuePair *)morton,
 							d,
@@ -261,7 +262,7 @@ void SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 	
 	sahbvh_computeRunHash((KeyValuePair *)m_runHash->bufferOnDevice(), 
 						(KeyValuePair *)morton,
-						(uint *)m_runIndices->bufferOnDevice(),
+						(uint *)m_compressedRunHeads->bufferOnDevice(),
                         m,
 						d,
 						numRuns,
@@ -271,7 +272,7 @@ void SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 						
 	sort(m_runHash->bufferOnDevice(), numRuns, 30);
 	
-	sahlg.writeHash(m_runHash, numRuns, "sorted_run_heads", CudaDbgLog::FOnce);
+	sahlg.writeMortonHash(m_runHash, numRuns, "sorted_run_heads", CudaDbgLog::FOnce);
 
 	m_runLength->create(scanLength * 4);
 	
@@ -300,7 +301,7 @@ void SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 					numRuns);
 					
 	sahlg.writeUInt(m_runHeads, numPrimitives, "decompressed_ind", CudaDbgLog::FOnce);
-    
+   
     sahbvh_computeClusterAabbs((Aabb *)m_clusterAabb->bufferOnDevice(),
             (Aabb *)primitiveAabbs,
             (uint *)m_compressedRunHeads->bufferOnDevice(),

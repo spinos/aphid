@@ -162,6 +162,47 @@ void CudaDbgLog::writeHash(CUDABuffer * buf, unsigned n,
 	writeHash(m_hostBuf, n, notation, FIgnore);
 }
 
+const char *byte_to_binary(unsigned x)
+{
+    static char b[33];
+    b[32] = '\0';
+
+    for (int z = 0; z < 32; z++) {
+        b[31-z] = ((x>>z) & 0x1) ? '1' : '0';
+    }
+
+    return b;
+}
+
+void CudaDbgLog::writeMortonHash(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    unsigned * m = (unsigned *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        write(i);
+        write(boost::str(boost::format("(%1%,%2%)\n") % byte_to_binary(m[i*2]) %  m[i*2+1]));
+    }
+}
+	
+void CudaDbgLog::writeMortonHash(CUDABuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    m_hostBuf->create(buf->bufferSize());
+    buf->deviceToHost(m_hostBuf->data());
+	
+	writeMortonHash(m_hostBuf, n, notation, FIgnore);
+}
+
 bool CudaDbgLog::checkFrequency(Frequency freq, const std::string & notation)
 {
 	if(freq == FIgnore) return true;

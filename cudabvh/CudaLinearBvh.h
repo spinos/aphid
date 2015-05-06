@@ -53,6 +53,7 @@ public:
 	
 	const unsigned usedMemory() const;
 	
+	CUDABuffer * primitiveHashBuf();
 	CUDABuffer * internalNodeChildIndicesBuf();
 	
 #if DRAW_BVH_HASH

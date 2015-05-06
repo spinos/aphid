@@ -300,6 +300,14 @@ int main(int argc, char * const argv[])
 	testTetrahedronDegenerate();
 	testKijt();
 	
+	m1 = 22860495;
+	std::cout<<boost::format("22860495: %1%\n") % byte_to_binary(m1);
+	std::cout<<boost::format("decode morton code to xyz: (%1%, %2%, %3%)\n") % DecodeMorton3X(m1) % DecodeMorton3Y(m1) % DecodeMorton3Z(m1);
+	
+	m1 = 802499201;
+	std::cout<<boost::format("802499201: %1%\n") % byte_to_binary(m1);
+	std::cout<<boost::format("decode morton code to xyz: (%1%, %2%, %3%)\n") % DecodeMorton3X(m1) % DecodeMorton3Y(m1) % DecodeMorton3Z(m1);
+	
 	std::cout<<boost::format("39 mod 16: %1%\n") % (39 & 15);
 	
 	std::cout<<"end of test\n";

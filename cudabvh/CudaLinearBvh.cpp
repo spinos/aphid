@@ -114,6 +114,9 @@ void * CudaLinearBvh::internalNodeChildIndices()
 CUDABuffer * CudaLinearBvh::internalNodeChildIndicesBuf()
 { return m_internalNodeChildIndices; }
 
+CUDABuffer * CudaLinearBvh::primitiveHashBuf()
+{ return m_leafHash; }
+
 void * CudaLinearBvh::internalNodeParentIndices()
 { return m_internalNodeParentIndices->bufferOnDevice(); }
 
