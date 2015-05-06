@@ -1,16 +1,50 @@
 #include "sahbvh_implement.h"
 #include <bvh_math.cu>
 
+__global__ void countTreeBits_kernel(uint * nbits, 
+                            KeyValuePair * morton,
+                            uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+    
+    nbits[ind] = 32 - __clz(morton[ind].key);
+}
+
 __global__ void writeSortedHash_kernel(KeyValuePair * dst,
 							KeyValuePair * src,
 							uint * indices,
 							uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-
 	if(ind >= maxInd) return;
 	
 	dst[ind] = src[indices[ind]];
+}
+
+__global__ void computeClusterAabbs_kernel(Aabb * clusterAabbs,
+            Aabb * primitiveAabbs,
+            uint * compressedIndices,
+            KeyValuePair * sorted,
+            uint * offset,
+            uint * runLength,
+            uint nRuns)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= nRuns) return;
+    
+    const uint sortedInd = sorted[ind].value;
+	const uint start = offset[ind];
+	const uint first = compressedIndices[sortedInd];
+	const uint l = runLength[ind];
+    
+    Aabb box;
+    resetAabb(box);
+    uint i = 0;
+	for(;i<l;i++) 
+        expandAabb(box, primitiveAabbs[first + i]);
+	
+    clusterAabbs[ind] = box;
 }
 
 __global__ void decompressIndices_kernel(uint * decompressedIndices,
@@ -21,7 +55,6 @@ __global__ void decompressIndices_kernel(uint * decompressedIndices,
 					uint nRuns)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-
 	if(ind >= nRuns) return;
 	
 	const uint sortedInd = sorted[ind].value;
@@ -39,7 +72,6 @@ __global__ void copyHash_kernel(KeyValuePair * dst,
 					uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-
 	if(ind >= maxInd) return;
 	
 	dst[ind] = src[ind];
@@ -51,7 +83,6 @@ __global__ void compressRunHead_kernel(uint * compressed,
 							uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-
 	if(ind >= maxInd) return;
 	
 	if(runHeads[ind]) compressed[indices[ind]] = ind;
@@ -65,8 +96,8 @@ __global__ void computeRunLength_kernel(uint * runLength,
 							uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-
 	if(ind >= maxInd) return;
+    
 	if(ind >= nRuns) {
 	    runLength[ind] = 0;
 	    return;
@@ -85,18 +116,18 @@ __global__ void computeRunLength_kernel(uint * runLength,
 __global__ void computeRunHash_kernel(KeyValuePair * compressed, 
 						KeyValuePair * morton,
 						uint * indices,
+                        uint m,
 						uint d,
 						uint maxElem,
 						uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-
 	if(ind >= maxInd) return;
 	
 	compressed[ind].value = ind;
 	
 	if(ind >= maxElem)
-	    compressed[ind].key = 1<<(30-d);
+	    compressed[ind].key = 1<<(m*3);
 	else 
 	    compressed[ind].key = (morton[indices[ind]].key) >> d;
 }
@@ -108,7 +139,6 @@ __global__ void computeRunHead_kernel(uint * blockHeads,
 							uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-
 	if(ind >= maxInd) return;
 	
 	if(ind >= maxElem) {
@@ -150,6 +180,7 @@ void sahbvh_computeRunHead(uint * blockHeads,
 void sahbvh_computeRunHash(KeyValuePair * compressed, 
 						KeyValuePair * morton,
 						uint * indices,
+                        uint m,
 						uint d,
 						uint n,
 						uint bufLength)
@@ -162,6 +193,7 @@ void sahbvh_computeRunHash(KeyValuePair * compressed,
     computeRunHash_kernel<<< grid, block>>>(compressed,
         morton,
         indices,
+        m,
         d,
         n,
         bufLength);
@@ -252,6 +284,42 @@ void sahbvh_writeSortedHash(KeyValuePair * dst,
 							src,
 							indices,
 							n);
+}
+
+void sahbvh_countTreeBits(uint * nbits, 
+                            KeyValuePair * morton,
+                            uint n)
+{
+    const int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(n, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    countTreeBits_kernel<<< grid, block>>>(nbits, 
+                            morton,
+                            n);
+}
+
+void sahbvh_computeClusterAabbs(Aabb * clusterAabbs,
+            Aabb * primitiveAabbs,
+            uint * compressedIndices,
+            KeyValuePair * sorted,
+            uint * offset,
+            uint * runLength,
+            uint n)
+{
+    const int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(n, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    computeClusterAabbs_kernel<<< grid, block>>>(clusterAabbs, 
+                            primitiveAabbs,
+                            compressedIndices,
+                            sorted,
+                            offset,
+                            runLength,
+                            n);
 }
 
 }

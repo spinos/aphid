@@ -22,7 +22,7 @@ protected:
     virtual void clientMouseInput(Vector3F & stir);
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
-    
+
 private:
     void stopPhysics();
     void startPhysics();

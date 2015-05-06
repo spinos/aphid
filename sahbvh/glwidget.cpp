@@ -6,6 +6,8 @@
 #include "CudaDynamicWorld.h"
 #include "SahWorldInterface.h"
 #include <WorldThread.h>
+#include <WorldDbgDraw.h>
+
 #define DRGDRW 0
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -13,8 +15,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
 	orthoCamera()->setNearClipPlane(1.f);
-	
-	m_world = new CudaDynamicWorld;
+ 
+    m_world = new CudaDynamicWorld;
+    
 	m_interface = new SahWorldInterface;
 	m_interface->create(m_world);
 	
@@ -32,23 +35,33 @@ GLWidget::~GLWidget()
 }
 
 void GLWidget::clientInit()
-{	
+{
+    qDebug()<<"init";
+    CudaDynamicWorld::DbgDrawer = new WorldDbgDraw(getDrawer());
     m_world->initOnDevice();
+    qDebug()<<"initd";
     startPhysics();
 }
 
 void GLWidget::clientDraw()
 {
+    if(m_thread->numLoops() < WorldThread::NumSubsteps) {
+        emit updatePhysics();
+        return;
+    }
+    
     std::stringstream sst;
 	sst.str("");
 	sst<<"fps: "<<frameRate();
     hudText(sst.str(), 1);
+    
 #if DRGDRW
     if(m_isPhysicsRunning) m_interface->draw(m_world, getDrawer());
 #else
     if(m_isPhysicsRunning) {
         emit updatePhysics();
-        m_interface->draw(m_world, getDrawer());
+        m_interface->draw(m_world);
+        m_world->dbgDraw();
     }
 #endif
     //else m_interface->drawFaulty(m_world, getDrawer());
@@ -100,13 +113,12 @@ void GLWidget::stopPhysics()
 
 void GLWidget::startPhysics()
 {
-    disconnect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+    // disconnect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 #if DRGDRW
     connect(internalTimer(), SIGNAL(timeout()), this, SLOT(simulate()));
 #else
     connect(this, SIGNAL(updatePhysics()), m_thread, SLOT(simulate()));
     connect(m_thread, SIGNAL(doneStep()), this, SLOT(update()));
-    emit updatePhysics();
 #endif
     m_isPhysicsRunning = true;
 }

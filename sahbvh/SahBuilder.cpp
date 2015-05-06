@@ -129,6 +129,8 @@ CudaDbgLog sahlg("sah.txt");
 
 SahBuilder::SahBuilder() 
 {
+    m_mortonBits = new CUDABuffer;
+    m_clusterAabb = new CUDABuffer;
 	m_runHeads = new CUDABuffer;
 	m_runIndices = new CUDABuffer;
 	m_runHash = new CUDABuffer;
@@ -140,6 +142,8 @@ SahBuilder::SahBuilder()
 
 SahBuilder::~SahBuilder() 
 {
+    delete m_mortonBits;
+    delete m_clusterAabb;
 	delete m_runHeads;
 	delete m_runIndices;
 	delete m_runHash;
@@ -153,6 +157,7 @@ void SahBuilder::initOnDevice()
 {
     m_emissions[0]->create(SAH_MAX_N_BLOCKS * 8);
     m_emissions[1]->create(SAH_MAX_N_BLOCKS * 8);
+    m_clusterAabb->create(SAH_MAX_N_BLOCKS * 24);
 	BvhBuilder::initOnDevice();
 }
 
@@ -162,6 +167,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	const unsigned n = bvh->numPrimitives();
 	createSortAndScanBuf(n);
 	
+    m_mortonBits->create(n * 4);
 	m_runHeads->create(CudaScan::getScanBufferLength(n) * 4);
 	m_runIndices->create(CudaScan::getScanBufferLength(n) * 4);
 	
@@ -169,10 +175,14 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	void * primitiveAabb = bvh->primitiveAabb();
 	
 	computeMortionHash(primitiveHash, primitiveAabb, n);
-	
-	if(n<=2048) sort(primitiveHash, n, 32);
-	else sortPrimitives(primitiveHash, n, 6);
-	
+    
+    int nbits = countTreeBits(primitiveHash, n);
+
+	//if(n<=2048) sort(primitiveHash, n, 32);
+	//else 
+    sortPrimitives(primitiveHash, primitiveAabb,
+        n, nbits, getM(nbits, 5));
+/*
 // set root node range
     unsigned rr[2];
     rr[0] = 0;
@@ -188,15 +198,38 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	
 	m_emissions[0]->hostToDevice(&eb, 8);
 	unsigned nEmissions = 1;
-	
-	
+*/
 }
 
-void SahBuilder::sortPrimitives(void * morton, unsigned numPrimitives, unsigned m)
+int SahBuilder::countTreeBits(void * morton, unsigned numPrimitives)
 {
+    sahbvh_countTreeBits((uint *)m_mortonBits->bufferOnDevice(), 
+                            (KeyValuePair *)morton,
+                            numPrimitives);
+    int maxNBits = -1;
+    reducer()->max<int>(maxNBits, (int *)m_mortonBits->bufferOnDevice(), numPrimitives);
+    return maxNBits;
+}
+
+int SahBuilder::getM(int n, int m)
+{
+    int r = n - 3 * m;
+    while(r<=0) {
+        m--;
+        r = n - 3 * m;
+    }
+    return m;
+}
+
+void SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs, 
+                                unsigned numPrimitives, int n, int m)
+{
+    std::cout<<" sort by first 3*m bits "<<m<<" ";
+        
 	const unsigned scanLength = CudaScan::getScanBufferLength(numPrimitives);
 	
-	const unsigned d = 30 - 3*m;
+	const unsigned d = n - 3*m;
+    std::cout<<" d "<<d<<"\n";
 	sahbvh_computeRunHead((uint *)m_runHeads->bufferOnDevice(), 
 							(KeyValuePair *)morton,
 							d,
@@ -214,12 +247,6 @@ void SahBuilder::sortPrimitives(void * morton, unsigned numPrimitives, unsigned 
 	
 	sahlg.writeUInt(m_runIndices, numPrimitives, "scanned_run_heads", CudaDbgLog::FOnce);
 	
-// no need to compress												
-	if(numRuns == numPrimitives - 1) {
-		sort(morton, numPrimitives, 32);
-		return;
-	}
-	
 	m_compressedRunHeads->create(numRuns * 4);
 	
 	sahbvh_compressRunHead((uint *)m_compressedRunHeads->bufferOnDevice(), 
@@ -235,13 +262,14 @@ void SahBuilder::sortPrimitives(void * morton, unsigned numPrimitives, unsigned 
 	sahbvh_computeRunHash((KeyValuePair *)m_runHash->bufferOnDevice(), 
 						(KeyValuePair *)morton,
 						(uint *)m_runIndices->bufferOnDevice(),
+                        m,
 						d,
 						numRuns,
 						sortRunLength);
 	
 	CudaBase::CheckCudaError("write run hash");
 						
-	sort(m_runHash->bufferOnDevice(), numRuns, 25);
+	sort(m_runHash->bufferOnDevice(), numRuns, 30);
 	
 	sahlg.writeHash(m_runHash, numRuns, "sorted_run_heads", CudaDbgLog::FOnce);
 
@@ -272,6 +300,14 @@ void SahBuilder::sortPrimitives(void * morton, unsigned numPrimitives, unsigned 
 					numRuns);
 					
 	sahlg.writeUInt(m_runHeads, numPrimitives, "decompressed_ind", CudaDbgLog::FOnce);
+    
+    sahbvh_computeClusterAabbs((Aabb *)m_clusterAabb->bufferOnDevice(),
+            (Aabb *)primitiveAabbs,
+            (uint *)m_compressedRunHeads->bufferOnDevice(),
+            (KeyValuePair *)m_runHash->bufferOnDevice(),
+            (uint *)m_runIndices->bufferOnDevice(),
+            (uint *)m_runLength->bufferOnDevice(),
+            numRuns);
 	
 	sahbvh_writeSortedHash((KeyValuePair *)morton,
 							(KeyValuePair *)sortIntermediate(),

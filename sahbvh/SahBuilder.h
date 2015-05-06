@@ -20,8 +20,13 @@ public:
 protected:
 	
 private:
-	void sortPrimitives(void * morton, unsigned numPrimitives, unsigned m);
+    int countTreeBits(void * morton, unsigned numPrimitives);
+	int getM(int n, int m);
+    void sortPrimitives(void * morton, void * primitiveAabbs, 
+                        unsigned numPrimitives, int n, int m);
 private:
+    CUDABuffer * m_mortonBits;
+    CUDABuffer * m_clusterAabb;
 	CUDABuffer * m_runHeads;
 	CUDABuffer * m_runIndices;
 	CUDABuffer * m_compressedRunHeads;

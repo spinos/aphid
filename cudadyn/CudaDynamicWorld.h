@@ -8,7 +8,7 @@ class CudaNarrowphase;
 class SimpleContactSolver;
 class CudaTetrahedronSystem;
 class BvhBuilder;
-
+class WorldDbgDraw;
 class CudaDynamicWorld
 {
 public:
@@ -34,6 +34,10 @@ public:
 	CudaNarrowphase * narrowphase() const;
 	SimpleContactSolver * contactSolver() const;
 	const unsigned numContacts() const;
+    
+    void dbgDraw();
+    
+    static WorldDbgDraw * DbgDrawer;
 protected:
 	
 private:

@@ -35,15 +35,15 @@ void WorldThread::simulate()
 
 void WorldThread::run()
 {	 
-	forever {
+    forever 
+    {
 	    if (abort) {
             qDebug()<<"abort physics b4";
             return;
         }
         
         for(int i=0; i < NumSubsteps; i++) {
-            m_world->stepPhysics(TimeStep);
-            m_numLoops++; 
+           m_world->stepPhysics(TimeStep);
         }
         
         if (abort) {
@@ -52,15 +52,17 @@ void WorldThread::run()
         }
         
         m_world->sendXToHost();
-		
+        m_numLoops+=NumSubsteps; 
+
 		emit doneStep();
 
 		mutex.lock();
-		
+        
         if (!restart)
 			condition.wait(&mutex);
 			
 		restart = false;
+
         mutex.unlock(); 
     }
 }

@@ -59,11 +59,12 @@ void * CUDABuffer::bufferOnDeviceAt(unsigned loc)
 void CUDABuffer::hostToDevice(void * src, unsigned size)
 {
     cudaError_t err = cudaMemcpy(_device_vbo_buffer, src, size, cudaMemcpyHostToDevice);
-	CudaBase::CheckCudaError(err, " cu buffer host to device with size");
+    CudaBase::CheckCudaError(err, " cu buffer host to device with size");
 }
 
 void CUDABuffer::deviceToHost(void * dst, unsigned size)
 {
+	//cudaDeviceSynchronize();
 	cudaError_t err = cudaMemcpy(dst, _device_vbo_buffer, size, cudaMemcpyDeviceToHost); 
 	CudaBase::CheckCudaError(err, " cu buffer device to host with size");
 }
@@ -76,7 +77,8 @@ void CUDABuffer::hostToDevice(void * src)
 
 void CUDABuffer::deviceToHost(void * dst)
 { 
-    cudaError_t err = cudaMemcpy(dst, _device_vbo_buffer, m_bufferSize, cudaMemcpyDeviceToHost); 
+    //cudaDeviceSynchronize();
+	cudaError_t err = cudaMemcpy(dst, _device_vbo_buffer, m_bufferSize, cudaMemcpyDeviceToHost); 
     CudaBase::CheckCudaError(err, " cu buffer device to host");
 }
 
@@ -90,10 +92,10 @@ void CUDABuffer::hostToDevice(void * src, unsigned loc, unsigned size)
 
 void CUDABuffer::deviceToHost(void * dst, unsigned loc, unsigned size)
 {
+    //cudaDeviceSynchronize();
     char * p = (char *)bufferOnDevice();
     p += loc;
     cudaError_t err = cudaMemcpy(dst, p, size, cudaMemcpyDeviceToHost);
-    //cudaDeviceSynchronize();
     CudaBase::CheckCudaError(err, " cu buffer device to host with location and size");
 }
 

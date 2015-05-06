@@ -36,6 +36,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../radixsort/radixsort_implement.h"
 "../cudabvh/CudaBroadphase.h"
 "../cudadyn/DynGlobal.h"
+"../cudadyn/WorldDbgDraw.h"
 "../cudanarrowphase/CudaNarrowphase.h"
 "../cudanarrowphase/narrowphase_implement.h"
 "../cudanarrowphase/simpleContactSolver_implement.h"
@@ -68,6 +69,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../reduction/CudaReduction.cpp"
 "../scan/CudaScan.cpp"
 "../cudadyn/DynGlobal.cpp"
+"../cudadyn/WorldDbgDraw.cpp"
 "../cudadyn/WorldThread.cpp"
 "../cudanarrowphase/CudaNarrowphase.cpp"
 "../cudanarrowphase/SimpleContactSolver.cpp"
@@ -124,9 +126,10 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 
 ## disable warnings
 ## http://www.ssl.berkeley.edu/~jimm/grizzly_docs/SSL/opt/intel/cc/9.0/lib/locale/en_US/mcpcom.msg
+## http://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#axzz3ZLADmK6E
 
 if (WIN32)
-set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_20")
+set (CUDA_NVCC_FLAGS "--disable-warnings --ptxas-options=-v -arch sm_20")
 else ()
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
 endif()

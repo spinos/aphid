@@ -5,6 +5,9 @@
 #include <CudaTetrahedronSystem.h>
 #include <CudaBase.h>
 #include <BvhBuilder.h>
+#include <WorldDbgDraw.h>
+
+WorldDbgDraw * CudaDynamicWorld::DbgDrawer = 0;
 
 CudaDynamicWorld::CudaDynamicWorld() 
 {
@@ -76,15 +79,28 @@ void CudaDynamicWorld::collide()
     if(m_numObjects < 1) return;
 	unsigned i;
 	for(i=0; i < m_numObjects; i++) m_objects[i]->update();
+    
+    //std::cout<<"aft bvh ";
+   // CudaBase::CheckCudaError("bvh update");
+        
 	m_broadphase->computeOverlappingPairs();
+    
+    //std::cout<<"aft bph ";
+    //CudaBase::CheckCudaError("bph update");
 	
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
 	                                m_broadphase->numOverlappingPairs());
+	
+   // std::cout<<"aft contact ";
+    //CudaBase::CheckCudaError("contact");
 	
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),
 									m_narrowphase->contactPairsBuffer(),
 									m_narrowphase->objectBuffer());
+    
+    //std::cout<<"aft contact solve ";
+    //CudaBase::CheckCudaError("contact solve");
 }
 
 void CudaDynamicWorld::integrate(float dt)
@@ -103,9 +119,11 @@ void CudaDynamicWorld::reset()
 
 void CudaDynamicWorld::sendXToHost()
 {
-	const unsigned nobj = numObjects();
+    const unsigned nobj = numObjects();
     if(nobj<1) return;
     
+    // cudaDeviceSynchronize();
+
 	cudaEvent_t start_event, stop_event;
         
 	cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
@@ -114,10 +132,10 @@ void CudaDynamicWorld::sendXToHost()
 	cudaEventRecord(start_event, 0);
     
 	 unsigned i;
-    for(i=0; i< nobj; i++) {
+     for(i=0; i< nobj; i++) {
         tetradedron(i)->sendXToHost();
-		m_objects[i]->sendDbgToHost();
-	}
+        m_objects[i]->sendDbgToHost();
+     }
 	
 	m_broadphase->sendDbgToHost();
 		
@@ -132,3 +150,17 @@ void CudaDynamicWorld::sendXToHost()
 	cudaEventDestroy( start_event ); 
 	cudaEventDestroy( stop_event );
 }
+
+void CudaDynamicWorld::dbgDraw()
+{
+    if(!CudaDynamicWorld::DbgDrawer) return;
+    const unsigned nobj = numObjects();
+    if(nobj<1) return;
+
+#if DRAW_BVH_HASH
+    for(unsigned i=0; i< nobj; i++) {
+        DbgDrawer->showBvhHash(m_objects[i]);
+	}
+#endif
+}
+

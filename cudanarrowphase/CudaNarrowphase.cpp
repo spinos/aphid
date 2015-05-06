@@ -37,7 +37,7 @@ CudaNarrowphase::CudaNarrowphase()
 	// std::cout<<" size of simplex "<<sizeof(SSimplex)<<" \n";
 	// std::cout<<" size of ctc "<<sizeof(ClosestPointTestContext)<<" \n";
 	// std::cout<<" size of contact "<<sizeof(SContactData)<<" \n";
-
+    m_bufferId = 0;
     m_numObjects = 0;
 	m_numPairs = 0;
 	m_numContacts = 0;
