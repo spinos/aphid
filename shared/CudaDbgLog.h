@@ -62,6 +62,14 @@ public:
 	void writeMortonHash(CUDABuffer * buf, unsigned n, 
 	                const std::string & notation,
 	                Frequency freq = FOnce);
+    
+    void writeInt2(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+	void writeInt2(CUDABuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
 protected:
     static std::map<std::string, bool> VisitedPtr;
 	bool checkFrequency(Frequency freq, const std::string & notation);

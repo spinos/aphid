@@ -122,6 +122,7 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudanarrowphase/gjk_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
 "../cudanarrowphase/narrowphase.cu"
+"sah_math.cu"
 "sahbvh.cu")
 
 ## disable warnings

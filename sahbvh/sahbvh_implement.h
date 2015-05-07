@@ -4,7 +4,9 @@
 #include <bvh_common.h>
 #include <radixsort_implement.h>
 
-#define SAH_MAX_N_BLOCKS 4096
+#define SAH_MAX_N_BLOCKS 2048
+#define SIZE_OF_SPLITBIN 64
+#define SIZE_OF_SPLITID 8
 
 struct EmissionBlock {
     uint root_id;
@@ -17,13 +19,13 @@ struct SplitBin {
     Aabb rightBox;
     uint rightCount;
     float cost;
-    int id;
+    float plane;
 };
 
 struct SplitId {
-    uint blockId;
+    uint emissionId;
     uint side;
-};
+};
 
 extern "C" {
 void sahbvh_computeRunHead(uint * blockHeads, 
@@ -85,7 +87,11 @@ void sahbvh_emitSahSplit(EmissionBlock * outEmissions,
 	    int2 * rootNodes,
 	    Aabb * rootAabbs,
 	    KeyValuePair * clusterMorton,
+        Aabb * clusterAabbs,
+        SplitBin * splitBins,
+        SplitId * splitIds,
 	    uint numClusters,
+        uint numBins,
 	    uint numEmissions);
 
 }

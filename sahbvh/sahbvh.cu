@@ -1,5 +1,107 @@
 #include "sahbvh_implement.h"
 #include <bvh_math.cu>
+#include "sah_math.cu"
+
+#define ASSIGNE_EMISSIONID_NTHREAD 512
+#define ASSIGNE_EMISSIONID_NTHREAD_M1 511
+#define ASSIGNE_EMISSIONID_NTHREAD_LOG2 9
+
+__global__ void computeBins_kernel(SplitBin * splitBins,
+                        Aabb * rootAabbs,
+                        SplitId * splitIds,
+                        Aabb * clusterAabbs,
+                        uint numBins,
+                        uint numClusters)
+{      
+    uint ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= numClusters) return;
+    
+    const uint iEmission = splitIds[ind].emissionId;
+    const uint firstBin = iEmission * numBins * 3;
+    
+    const Aabb rootBox = rootAabbs[iEmission];
+    const Aabb clusterBox = clusterAabbs[ind];
+    float3 center = centroidOfAabb(clusterBox);
+    uint dimension = 0;
+    float * p = &center.x;
+    uint i, j;
+    for(;dimension<3; dimension++) {
+        for(i=0;i<numBins;i++) {
+            j = dimension * numBins + i;
+            
+            SplitBin & obin = splitBins[firstBin + j];
+            
+            if(p[dimension] <= obin.plane) {
+                atomicAdd(&obin.leftCount, 1);
+                /*atomicMin(&obin.leftBox.low.x, clusterBox.low.x);
+                atomicMin(&obin.leftBox.low.y, clusterBox.low.y);
+                atomicMin(&obin.leftBox.low.z, clusterBox.low.z);
+                atomicMax(&obin.leftBox.high.x, clusterBox.high.x);
+                atomicMax(&obin.leftBox.high.y, clusterBox.high.y);
+                atomicMax(&obin.leftBox.high.z, clusterBox.high.z);*/
+            }
+            else {
+                atomicAdd(&obin.rightCount, 1);
+                /*atomicMin(&obin.rightBox.low.x, clusterBox.low.x);
+                atomicMin(&obin.rightBox.low.y, clusterBox.low.y);
+                atomicMin(&obin.rightBox.low.z, clusterBox.low.z);
+                atomicMax(&obin.rightBox.high.x, clusterBox.high.x);
+                atomicMax(&obin.rightBox.high.y, clusterBox.high.y);
+                atomicMax(&obin.rightBox.high.z, clusterBox.high.z);*/
+            }
+        }
+    }
+}
+
+__global__ void resetBins_kernel(SplitBin * splitBins, 
+                        EmissionBlock * inEmissions,
+                        Aabb * rootAabbs,
+                        uint numBins)
+{
+    if(threadIdx.x >= numBins * 3) return;
+    
+    uint iEmission = blockIdx.x;
+    const uint firstBin = iEmission * numBins * 3;
+    
+    SplitBin obin;
+    resetAabb(obin.leftBox);
+    resetAabb(obin.rightBox);
+    obin.leftCount = 0;
+    obin.rightCount = 0;
+    obin.cost = 0.f;
+    
+    Aabb box = rootAabbs[inEmissions[iEmission].root_id];
+    
+    uint dimension = threadIdx.x / numBins;
+    uint binId = threadIdx.x - numBins * dimension;
+    obin.plane = splitPlaneOfBin(&box, dimension, numBins, binId);
+    splitBins[firstBin + threadIdx.x] = obin;
+}
+
+__global__ void assignEmissionId_kernel(SplitId * splitIds,
+        EmissionBlock * inEmissions,
+        int2 * rootRanges,
+        uint nEmissions)
+{
+    uint iEmission = blockIdx.x;
+    if(iEmission >= nEmissions) return;
+    
+    uint iRoot = inEmissions[iEmission].root_id;
+    const int primitiveRangeBegin = rootRanges[iRoot].x;
+    const int primitiveRangeEnd = rootRanges[iRoot].y;
+    int numPrimitivesInRange = primitiveRangeEnd - primitiveRangeBegin + 1;
+    if(numPrimitivesInRange < 0) return; // invalid range
+
+    int npt = numPrimitivesInRange>>ASSIGNE_EMISSIONID_NTHREAD_LOG2;
+    if(numPrimitivesInRange & ASSIGNE_EMISSIONID_NTHREAD_M1) npt++;
+    
+    int i, j;
+    for(i=0; i<npt; i++) {
+        j = threadIdx.x * npt + i;
+        if(j < numPrimitivesInRange)
+            splitIds[primitiveRangeBegin + j].emissionId = iEmission;
+    }
+}
 
 __global__ void countTreeBits_kernel(uint * nbits, 
                             KeyValuePair * morton,
@@ -322,15 +424,93 @@ void sahbvh_computeClusterAabbs(Aabb * clusterAabbs,
                             n);
 }
 
+void sahbvh_assignEmissionId(SplitId * splitIds,
+        EmissionBlock * inEmissions,
+        int2 * rootRanges,
+        uint numEmissions)
+{
+    const int tpb = ASSIGNE_EMISSIONID_NTHREAD;
+    dim3 block(tpb, 1, 1);
+    const int nblk = numEmissions;
+    dim3 grid(nblk, 1, 1);
+// one block for each emission
+// assign emissionIds to each primitive in range
+    assignEmissionId_kernel<<< grid, block>>>(splitIds,
+        inEmissions,
+        rootRanges,
+        numEmissions);
+}
+
+void sahbvh_resetBins(SplitBin * splitBins, 
+                        EmissionBlock * inEmissions,
+                        Aabb * rootAabbs,
+                        uint numBins,
+                        uint numEmissions)
+{
+    const int tpb = 128;
+    dim3 block(tpb, 1, 1);
+    const int nblk = numEmissions;
+    dim3 grid(nblk, 1, 1);
+// one block for each emission
+// reset 3 * n bins
+    resetBins_kernel<<< grid, block>>>(splitBins, 
+        inEmissions,
+        rootAabbs,
+        numBins);
+}
+
+void sahbvh_computeBins(SplitBin * splitBins,
+                        Aabb * rootAabbs,
+                        SplitId * splitIds,
+                        Aabb * clusterAabbs,
+                        uint numBins,
+                        uint numClusters)
+{
+    const int tpb = 128;
+    dim3 block(tpb, 1, 1);
+    const int nblk = iDivUp(numClusters, tpb);
+    dim3 grid(nblk, 1, 1);
+// one thread for each cluster/primitive
+// find bins according to splitId
+// atomic update bin contents
+
+    computeBins_kernel<<< grid, block>>>(splitBins,
+                        rootAabbs,
+                        splitIds,
+                        clusterAabbs,
+                        numBins,
+                        numClusters);
+}
+
 void sahbvh_emitSahSplit(EmissionBlock * outEmissions,
 	    EmissionBlock * inEmissions,
-	    int2 * rootNodes,
+	    int2 * rootRanges,
 	    Aabb * rootAabbs,
 	    KeyValuePair * clusterMorton,
+        Aabb * clusterAabbs,
+        SplitBin * splitBins,
+        SplitId * splitIds,
 	    uint numClusters,
+        uint numBins,
 	    uint numEmissions)
 {
-
+    sahbvh_assignEmissionId(splitIds,
+                            inEmissions,
+                            rootRanges,
+                            numEmissions);
+    
+    sahbvh_resetBins(splitBins, 
+                        inEmissions,
+                        rootAabbs,
+                        numBins, 
+                        numEmissions);
+    
+    sahbvh_computeBins(splitBins, 
+                        rootAabbs,
+                        splitIds,
+                        clusterAabbs, 
+                        numBins,
+                        numClusters);
 }
 
 }

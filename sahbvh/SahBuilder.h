@@ -18,7 +18,9 @@ public:
 	
 	virtual void build(CudaLinearBvh * bvh);
 protected:
-	
+	void * splitBins();
+    void * splitIds();
+    void * clusterAabbs();
 private:
     int countTreeBits(void * morton, unsigned numPrimitives);
 	int getM(int n, int m);
@@ -33,4 +35,6 @@ private:
 	CUDABuffer * m_runHash;
 	CUDABuffer * m_runLength;
 	CUDABuffer * m_emissions[2];
+    CUDABuffer * m_splitBins;
+    CUDABuffer * m_splitIds;
 };
