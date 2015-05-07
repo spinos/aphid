@@ -123,6 +123,9 @@ void * CudaLinearBvh::internalNodeParentIndices()
 void * CudaLinearBvh::internalNodeAabbs()
 { return m_internalNodeAabbs->bufferOnDevice(); }
 
+CUDABuffer * CudaLinearBvh::internalNodeAabbsBuf()
+{ return m_internalNodeAabbs; }
+
 void * CudaLinearBvh::internalNodeChildLimit()
 { return m_maxChildElementIndices->bufferOnDevice(); }
 

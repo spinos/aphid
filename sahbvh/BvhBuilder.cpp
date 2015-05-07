@@ -54,15 +54,16 @@ void BvhBuilder::sort(void * odata, unsigned nelem, unsigned nbits)
 }
 
 void BvhBuilder::computeMortionHash(void * mortonCode,
-									void * primitiveAabbs, unsigned numPrimitives)
+									void * primitiveAabbs, 
+									unsigned numPrimitives,
+									float * bounding)
 {
 // find bounding box of all leaf aabb
-	Aabb bounding;
-	reducer()->minMaxBox<Aabb, float3>(&bounding, (float3 *)primitiveAabbs, numPrimitives * 2);
+	reducer()->minMaxBox<Aabb, float3>((Aabb *)bounding, (float3 *)primitiveAabbs, numPrimitives * 2);
 	
 #if PRINT_BOUND	
-    std::cout<<" bvh builder bound (("<<bounding.low.x<<" "<<bounding.low.y<<" "<<bounding.low.z;
-    std::cout<<"),("<<bounding.high.x<<" "<<bounding.high.y<<" "<<bounding.high.z<<"))";
+    std::cout<<" bvh builder bound (("<<bounding[0]<<" "<<bounding[1]<<" "<<bounding[2];
+    std::cout<<"),("<<bounding[3]<<" "<<bounding[4]<<" "<<bounding[5]<<"))";
 #endif
 
 	CudaBase::CheckCudaError("finding bvh bounding");

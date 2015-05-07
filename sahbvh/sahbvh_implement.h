@@ -11,6 +11,20 @@ struct EmissionBlock {
     uint block_offset;
 };
 
+struct SplitBin {
+    Aabb leftBox;
+    uint leftCount;
+    Aabb rightBox;
+    uint rightCount;
+    float cost;
+    int id;
+};
+
+struct SplitId {
+    uint blockId;
+    uint side;
+};
+
 extern "C" {
 void sahbvh_computeRunHead(uint * blockHeads, 
 							KeyValuePair * mortonCode,
@@ -65,6 +79,14 @@ void sahbvh_writeSortedHash(KeyValuePair * dst,
 void sahbvh_countTreeBits(uint * nbits, 
                             KeyValuePair * morton,
                             uint n);
+
+void sahbvh_emitSahSplit(EmissionBlock * outEmissions,
+	    EmissionBlock * inEmissions,
+	    int2 * rootNodes,
+	    Aabb * rootAabbs,
+	    KeyValuePair * clusterMorton,
+	    uint numClusters,
+	    uint numEmissions);
 
 }
 #endif        //  #ifndef SAH_IMPLEMENT_H

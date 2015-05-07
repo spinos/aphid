@@ -322,4 +322,15 @@ void sahbvh_computeClusterAabbs(Aabb * clusterAabbs,
                             n);
 }
 
+void sahbvh_emitSahSplit(EmissionBlock * outEmissions,
+	    EmissionBlock * inEmissions,
+	    int2 * rootNodes,
+	    Aabb * rootAabbs,
+	    KeyValuePair * clusterMorton,
+	    uint numClusters,
+	    uint numEmissions)
+{
+
+}
+
 }

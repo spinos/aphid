@@ -24,6 +24,7 @@
 #include <CUDABuffer.h>
 #include <BaseBuffer.h>
 #include <CudaScan.h>
+#include <cu_testAtomic_impl.h>
 
 cudaEvent_t start_event, stop_event;
     
@@ -579,6 +580,54 @@ void testScan()
     cudaEventDestroy(stop_event);
 }
 
+void testAtomic()
+{
+    std::cout<<" test atomic\n";
+    const unsigned n = 1<<24;
+    BaseBuffer hin;
+    hin.create(n*4);
+    
+    std::cout<<" generating "<<n<<" ints betwenn (0, 127)\n";
+    int * iin = (int *)hin.data();
+    unsigned i=0;
+    for(;i<n;i++) iin[i] = rand() & 127;
+    
+    int proof[32];
+    for(i=0;i<32;i++) proof[i]=0;
+    for(i=0;i<n;i++) proof[iin[i]/4]++;
+    
+    CUDABuffer din;
+    din.create(n*4);
+    din.hostToDevice(hin.data());
+    
+	BaseBuffer hout;
+	hout.create(32*4);
+	int * iout = (int *)hout.data();
+	for(i=0;i<32;i++) iout[i] = 0;
+	
+	CUDABuffer dout;
+    dout.create(32*4);
+    dout.hostToDevice(hout.data());
+    
+    cu_testAtomic((int *)dout.bufferOnDevice(),
+                    (int *)din.bufferOnDevice(),
+                    4,
+                    n);
+    
+    dout.deviceToHost(hout.data());
+    
+    std::cout<<" check 32 bins\n";
+    int passed = 1;
+    for(i=0;i<32;i++) { 
+        if(iout[i] != proof[i]) {
+            passed = 0;
+            std::cout<<" gpu result != cup result, failed";
+            break;
+        }
+    }
+    if(passed) std::cout<<"passed!\n";
+}
+
 int main(int argc, char **argv)
 {
     // This will pick the best possible CUDA capable device
@@ -608,6 +657,7 @@ int main(int argc, char **argv)
 	testReduceSum();
 	testScan();
     testRadixSort();
+    testAtomic();
     printf("done.\n");
     exit(0);
 }

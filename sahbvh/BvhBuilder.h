@@ -24,7 +24,9 @@ protected:
 	CudaScan * scanner();
 	void createSortAndScanBuf(unsigned n);
 	void computeMortionHash(void * mortonCode,
-							void * primitiveAabbs, unsigned numPrimitives);
+							void * primitiveAabbs, 
+							unsigned numPrimitives,
+							float * bounding);
 	void sort(void * odata, unsigned nelem, unsigned nbits);
 	void * sortIntermediate();
 private:

@@ -55,6 +55,7 @@ public:
 	
 	CUDABuffer * primitiveHashBuf();
 	CUDABuffer * internalNodeChildIndicesBuf();
+	CUDABuffer * internalNodeAabbsBuf();
 	
 #if DRAW_BVH_HASH
 	void * hostLeafHash();

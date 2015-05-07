@@ -40,7 +40,8 @@ void LBvhBuilder::build(CudaLinearBvh * bvh)
 	m_internalNodeCommonPrefixValues->create(nin * sizeof(uint64));
 	m_internalNodeCommonPrefixLengths->create(nin * sizeof(int));
 	
-	computeMortionHash(bvh->leafHash(), bvh->leafAabbs(), nl);
+	float bounding[6];
+	computeMortionHash(bvh->leafHash(), bvh->leafAabbs(), nl, bounding);
 	
 	sort(bvh->leafHash(), nl, 32);
 	

@@ -5,7 +5,7 @@ project (testcudacg)
 # The version number.
 set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
-
+set (CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package (CUDA QUIET REQUIRED)
 
 message ("cuda found ? " ${CUDA_FOUND})
@@ -28,6 +28,7 @@ set (SOURC_FILES "main.cpp"
 "../scan/CudaScan.cpp"
 "../reduction/CudaReduction.cpp")
 set (CUSOURCES "../radixsort/radixsort.cu"
+    "cu_testAtomic.cu"
 "../scan/scan.cu"
 "../reduction/cuReduceMax.cu"
 "../reduction/cuReduceMin.cu"

@@ -22,7 +22,7 @@ protected:
 private:
     int countTreeBits(void * morton, unsigned numPrimitives);
 	int getM(int n, int m);
-    void sortPrimitives(void * morton, void * primitiveAabbs, 
+    unsigned sortPrimitives(void * morton, void * primitiveAabbs, 
                         unsigned numPrimitives, int n, int m);
 private:
     CUDABuffer * m_mortonBits;
