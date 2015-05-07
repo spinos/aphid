@@ -207,8 +207,9 @@ inline __device__ int isAabbOverlapping(const Aabb & a, const Aabb & b)
 
 inline __device__ float spanOfAabb(Aabb * box, uint dimension)
 {
-    float * fmn = &box->low.x;
-    float * fmx = &box->high.x;
+    float * fmn = &(box->low.x);
+    float * fmx = &(box->high.x);
     return fmx[dimension] - fmn[dimension];
 }
+
 #endif

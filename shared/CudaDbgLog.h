@@ -70,6 +70,18 @@ public:
 	void writeInt2(CUDABuffer * buf, unsigned n, 
 	                const std::string & notation,
 	                Frequency freq = FOnce);
+	
+	void writeStruct(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                const std::vector<std::pair<int, int> > & desc,
+	                unsigned size,
+	                Frequency freq = FOnce);
+	
+	void writeStruct(CUDABuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                const std::vector<std::pair<int, int> > & desc,
+	                unsigned size,
+	                Frequency freq = FOnce);
 protected:
     static std::map<std::string, bool> VisitedPtr;
 	bool checkFrequency(Frequency freq, const std::string & notation);

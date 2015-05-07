@@ -5,6 +5,7 @@
 #define ASSIGNE_EMISSIONID_NTHREAD 512
 #define ASSIGNE_EMISSIONID_NTHREAD_M1 511
 #define ASSIGNE_EMISSIONID_NTHREAD_LOG2 9
+#define COMPUTE_BINS_NTHREAD 128
 
 __global__ void computeBins_kernel(SplitBin * splitBins,
                         Aabb * rootAabbs,
@@ -13,49 +14,91 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
                         uint numBins,
                         uint numClusters)
 {      
+    __shared__ int sSide[SAH_MAX_NUM_BINS * COMPUTE_BINS_NTHREAD];
+    
     uint ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= numClusters) return;
+	
+	int * sideVertical = &sSide[SAH_MAX_NUM_BINS * threadIdx.x];
+	int * sideHorizontal = &sSide[threadIdx.x];
     
-    const uint iEmission = splitIds[ind].emissionId;
-    const uint firstBin = iEmission * numBins * 3;
+	uint iEmission = splitIds[ind].emissionId;
     
-    const Aabb rootBox = rootAabbs[iEmission];
-    const Aabb clusterBox = clusterAabbs[ind];
+    Aabb rootBox = rootAabbs[iEmission];
+    float * boxLow = &rootBox.low.x;
+    Aabb clusterBox = clusterAabbs[ind];
     float3 center = centroidOfAabb(clusterBox);
-    uint dimension = 0;
     float * p = &center.x;
-    uint i, j;
-    for(;dimension<3; dimension++) {
-        for(i=0;i<numBins;i++) {
-            j = dimension * numBins + i;
-            
-            SplitBin & obin = splitBins[firstBin + j];
-            
-            if(p[dimension] <= obin.plane) {
-                atomicAdd(&obin.leftCount, 1);
-                /*atomicMin(&obin.leftBox.low.x, clusterBox.low.x);
-                atomicMin(&obin.leftBox.low.y, clusterBox.low.y);
-                atomicMin(&obin.leftBox.low.z, clusterBox.low.z);
-                atomicMax(&obin.leftBox.high.x, clusterBox.high.x);
-                atomicMax(&obin.leftBox.high.y, clusterBox.high.y);
-                atomicMax(&obin.leftBox.high.z, clusterBox.high.z);*/
-            }
-            else {
-                atomicAdd(&obin.rightCount, 1);
-                /*atomicMin(&obin.rightBox.low.x, clusterBox.low.x);
-                atomicMin(&obin.rightBox.low.y, clusterBox.low.y);
-                atomicMin(&obin.rightBox.low.z, clusterBox.low.z);
-                atomicMax(&obin.rightBox.high.x, clusterBox.high.x);
-                atomicMax(&obin.rightBox.high.y, clusterBox.high.y);
-                atomicMax(&obin.rightBox.high.z, clusterBox.high.z);*/
-            }
-        }
-    }
+    
+    const float g = longestSideOfAabb(rootBox) * .003f;
+    
+    computeSplitSide(sideVertical,
+                        0,
+                        &rootBox,
+                        numBins,
+                        p,
+                        boxLow);
+      
+    __syncthreads();
+    
+    if(threadIdx.x < numBins)
+    updateBins(splitBins,
+               splitIds,
+               clusterAabbs,
+               sideHorizontal,
+               rootBox.low,
+               g,
+               0,
+               COMPUTE_BINS_NTHREAD,
+               numBins,
+               numClusters);
+    
+    computeSplitSide(sideVertical,
+                        1,
+                        &rootBox,
+                        numBins,
+                        p,
+                        boxLow);
+    
+    __syncthreads();
+    
+     if(threadIdx.x < numBins)
+     updateBins(splitBins,
+               splitIds,
+               clusterAabbs,
+               sideHorizontal,
+               rootBox.low,
+               g,
+               1,
+               COMPUTE_BINS_NTHREAD,
+               numBins,
+               numClusters);
+
+    computeSplitSide(sideVertical,
+                        2,
+                        &rootBox,
+                        numBins,
+                        p,
+                        boxLow);
+    
+    __syncthreads();
+    
+     if(threadIdx.x < numBins)
+     updateBins(splitBins,
+               splitIds,
+               clusterAabbs,
+               sideHorizontal,
+               rootBox.low,
+               g,
+               2,
+               COMPUTE_BINS_NTHREAD,
+               numBins,
+               numClusters);
+
 }
 
 __global__ void resetBins_kernel(SplitBin * splitBins, 
                         EmissionBlock * inEmissions,
-                        Aabb * rootAabbs,
                         uint numBins)
 {
     if(threadIdx.x >= numBins * 3) return;
@@ -63,19 +106,7 @@ __global__ void resetBins_kernel(SplitBin * splitBins,
     uint iEmission = blockIdx.x;
     const uint firstBin = iEmission * numBins * 3;
     
-    SplitBin obin;
-    resetAabb(obin.leftBox);
-    resetAabb(obin.rightBox);
-    obin.leftCount = 0;
-    obin.rightCount = 0;
-    obin.cost = 0.f;
-    
-    Aabb box = rootAabbs[inEmissions[iEmission].root_id];
-    
-    uint dimension = threadIdx.x / numBins;
-    uint binId = threadIdx.x - numBins * dimension;
-    obin.plane = splitPlaneOfBin(&box, dimension, numBins, binId);
-    splitBins[firstBin + threadIdx.x] = obin;
+    resetSplitBin(splitBins[firstBin + threadIdx.x]);
 }
 
 __global__ void assignEmissionId_kernel(SplitId * splitIds,
@@ -455,7 +486,6 @@ void sahbvh_resetBins(SplitBin * splitBins,
 // reset 3 * n bins
     resetBins_kernel<<< grid, block>>>(splitBins, 
         inEmissions,
-        rootAabbs,
         numBins);
 }
 
@@ -466,7 +496,7 @@ void sahbvh_computeBins(SplitBin * splitBins,
                         uint numBins,
                         uint numClusters)
 {
-    const int tpb = 128;
+    const int tpb = COMPUTE_BINS_NTHREAD;
     dim3 block(tpb, 1, 1);
     const int nblk = iDivUp(numClusters, tpb);
     dim3 grid(nblk, 1, 1);

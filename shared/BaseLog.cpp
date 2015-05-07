@@ -42,3 +42,26 @@ void BaseLog::newLine()
 
 void BaseLog::writeArraySize(const unsigned & n)
 { write(boost::str(boost::format(" [%1%] \n") % n)); }
+
+void BaseLog::writeStruct1(char * data, const std::vector<std::pair<int, int> > & desc)
+{
+    std::vector<std::pair<int, int> >::const_iterator it = desc.begin();
+    for(;it!=desc.end();++it)
+        writeByTypeAndLoc(it->first, it->second, data);
+    newLine();
+}
+
+void BaseLog::writeByTypeAndLoc(int type, int loc, char * data)
+{
+    switch(type) {
+    case 0:
+        _write<int>(*(int *)&data[loc]);
+        break;
+    case 1:
+        _write<float>(*(float *)&data[loc]);
+        break;
+    default:
+        ;
+    }
+}
+

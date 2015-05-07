@@ -4,6 +4,7 @@
 #include <bvh_common.h>
 #include <radixsort_implement.h>
 
+#define SAH_MAX_NUM_BINS 16
 #define SAH_MAX_N_BLOCKS 2048
 #define SIZE_OF_SPLITBIN 64
 #define SIZE_OF_SPLITID 8
@@ -13,13 +14,18 @@ struct EmissionBlock {
     uint block_offset;
 };
 
+struct BinAabb {
+    int3 low;
+    int3 high;
+};
+
 struct SplitBin {
-    Aabb leftBox;
+    BinAabb leftBox;
     uint leftCount;
-    Aabb rightBox;
+    BinAabb rightBox;
     uint rightCount;
     float cost;
-    float plane;
+    float padding;
 };
 
 struct SplitId {

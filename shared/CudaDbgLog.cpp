@@ -232,6 +232,39 @@ void CudaDbgLog::writeInt2(CUDABuffer * buf, unsigned n,
 	writeInt2(m_hostBuf, n, notation, FIgnore);
 }
 
+void CudaDbgLog::writeStruct(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                const std::vector<std::pair<int, int> > & desc,
+	                unsigned size,
+	                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    char * m = (char *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        write(i);
+        writeStruct1(&m[i*size], desc);
+    }
+}
+	
+void CudaDbgLog::writeStruct(CUDABuffer * buf, unsigned n, 
+                const std::string & notation,
+                const std::vector<std::pair<int, int> > & desc,
+                unsigned size,
+                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    m_hostBuf->create(buf->bufferSize());
+    buf->deviceToHost(m_hostBuf->data());
+	
+	writeStruct(m_hostBuf, n, notation, desc, size, FIgnore);
+}
+
 bool CudaDbgLog::checkFrequency(Frequency freq, const std::string & notation)
 {
 	if(freq == FIgnore) return true;
@@ -243,3 +276,4 @@ bool CudaDbgLog::checkFrequency(Frequency freq, const std::string & notation)
     }
 	return true;
 }
+//:~

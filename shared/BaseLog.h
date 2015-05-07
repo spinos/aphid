@@ -13,6 +13,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <utility>
+#include <vector>
 class BaseLog {
 public:
 	BaseLog(const std::string & fileName);
@@ -23,11 +25,14 @@ public:
 	void writeTime();
 	void newLine();
 	void writeArraySize(const unsigned & n);
+	void writeStruct1(char * data, const std::vector<std::pair<int, int> > & desc);
 protected:
 	template <typename T>
 	void _write(const T & a) {
 		m_file<<" "<<a<<" ";
 	}
+private:
+    void writeByTypeAndLoc(int type, int loc, char * data);
 
 private:
 	std::ofstream m_file;
