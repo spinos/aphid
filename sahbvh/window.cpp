@@ -9,7 +9,7 @@ Window::Window()
     glWidget = new GLWidget;
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Cuda FEM"));
+    setWindowTitle(tr("Cuda SAH BVH"));
 }
 //! [1]
 

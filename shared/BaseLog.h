@@ -25,6 +25,7 @@ public:
 	void writeTime();
 	void newLine();
 	void writeArraySize(const unsigned & n);
+	void writeArrayIndex(const unsigned & n);
 	void writeStruct1(char * data, const std::vector<std::pair<int, int> > & desc);
 protected:
 	template <typename T>

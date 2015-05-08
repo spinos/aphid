@@ -36,10 +36,8 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientInit()
 {
-    qDebug()<<"init";
     CudaDynamicWorld::DbgDrawer = new WorldDbgDraw(getDrawer());
     m_world->initOnDevice();
-    qDebug()<<"initd";
     startPhysics();
 }
 

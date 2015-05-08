@@ -47,9 +47,10 @@ __global__ void spawnNode_kernel(int2 * internalNodeChildIndices,
         rootBox.low, g);
     binAabbToAabb(internalNodeAabbs[rightChild], split.rightBox, 
         rootBox.low, g);
-    
-    rootInd.x = leftChild;
-    rootInd.y = rightChild;
+  
+// mark as internal
+    rootInd.x = (leftChild | 0x80000000);
+    rootInd.y = (rightChild| 0x80000000);
     
     EmissionEvent * spawn = &outEmissions[e.node_offset];
     spawn->root_id = leftChild;

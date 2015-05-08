@@ -10,6 +10,10 @@ public:
     void showBvhHash(CudaLinearBvh * bvh);
 #endif
 
+#if DRAW_BVH_HIERARCHY
+    void showBvhHierarchy(CudaLinearBvh * bvh);
+#endif
+
 protected:
 
 private:

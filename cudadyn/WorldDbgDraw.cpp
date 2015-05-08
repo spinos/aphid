@@ -38,3 +38,79 @@ void WorldDbgDraw::showBvhHash(CudaLinearBvh * bvh)
 	}
 }
 #endif
+
+#if DRAW_BVH_HIERARCHY
+
+inline int isLeafNode(int index) 
+{ return (index >> 31 == 0); }
+
+inline int getIndexWithInternalNodeMarkerRemoved(int index) 
+{ return index & (~0x80000000); }
+
+void WorldDbgDraw::showBvhHierarchy(CudaLinearBvh * bvh)
+{
+    const int rootNodeInd = 0x80000000;//bvh->hostRootInd(); // std::cout<<" root "<< rootNodeInd;
+	
+    // const unsigned numInternal = bvh->numInternalNodes();
+	
+	Aabb * internalBoxes = (Aabb *)bvh->hostInternalAabb();
+	int2 * internalNodeChildIndices = (int2 *)bvh->hostInternalChildIndices();
+	// int * distanceFromRoot = (int *)bvh->hostInternalDistanceFromRoot();
+	
+	BoundingBox bb;
+	Aabb bvhNodeAabb;
+	int stack[128];
+	stack[0] = rootNodeInd;
+	int stackSize = 1;
+	int maxStack = 1;
+	int touchedInternal = 0;
+	//int maxLevel = 0;
+	//int level;
+	while(stackSize > 0) {
+		int internalOrLeafNodeIndex = stack[ stackSize - 1 ];
+		stackSize--;
+		
+		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
+		
+		//level = distanceFromRoot[bvhNodeIndex];
+		//if(level > m_maxDisplayLevel) continue;
+		//if(maxLevel < level)
+			//maxLevel = level;
+			
+		bvhNodeAabb = internalBoxes[bvhNodeIndex];
+
+		bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
+		bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);
+		
+		//if(m_maxDisplayLevel - level < 2) {
+			m_drawer->setGroupColorLight(7);
+			m_drawer->boundingBox(bb);
+		//}
+
+		touchedInternal++;
+		
+		if(isLeafNode(internalOrLeafNodeIndex)) continue;
+		
+		if(stackSize + 2 > 128)
+		{
+			//Error
+		}
+		else
+		{
+			stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+			stackSize++;
+			stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+			stackSize++;
+			
+			if(stackSize > maxStack) maxStack = stackSize;
+		}
+			
+	}
+#if 0
+	std::cout//<<" total n internal node "<<numInternal<<"\n"
+		<<" n internal node reached "<<touchedInternal<<"\n"
+		<<" max draw bvh hierarchy stack size "<<maxStack<<"\n"
+		<<" max level reached "<<maxLevel<<"\n";
+#endif
+}
+#endif

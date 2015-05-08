@@ -43,6 +43,9 @@ void BaseLog::newLine()
 void BaseLog::writeArraySize(const unsigned & n)
 { write(boost::str(boost::format(" [%1%] \n") % n)); }
 
+void BaseLog::writeArrayIndex(const unsigned & n)
+{ write(boost::str(boost::format(" %1%: ") % n)); }
+
 void BaseLog::writeStruct1(char * data, const std::vector<std::pair<int, int> > & desc)
 {
     std::vector<std::pair<int, int> >::const_iterator it = desc.begin();

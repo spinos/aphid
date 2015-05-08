@@ -28,7 +28,7 @@ void CudaDbgLog::writeFlt(BaseBuffer * buf, unsigned n,
 	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
-        write(i);
+        writeArrayIndex(i);
         _write<float>(m[i]);
 		newLine();
     }
@@ -57,7 +57,7 @@ void CudaDbgLog::writeUInt(BaseBuffer * buf, unsigned n,
 	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
-        write(i);
+        writeArrayIndex(i);
         _write<unsigned>(m[i]);
 		newLine();
     }
@@ -86,7 +86,7 @@ void CudaDbgLog::writeVec3(BaseBuffer * buf, unsigned n,
 	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
-        write(i);
+        writeArrayIndex(i);
         write(m[i].str());
 		newLine();
     }
@@ -116,7 +116,7 @@ void CudaDbgLog::writeMat33(BaseBuffer * buf, unsigned n,
 	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
-        write(i);
+        writeArrayIndex(i);
         write(m[i].str());
     }
 }
@@ -145,7 +145,7 @@ void CudaDbgLog::writeHash(BaseBuffer * buf, unsigned n,
 	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
-        write(i);
+        writeArrayIndex(i);
         write(boost::str(boost::format("(%1%,%2%)\n") % m[i*2] %  m[i*2+1]));
     }
 }
@@ -186,7 +186,7 @@ void CudaDbgLog::writeMortonHash(BaseBuffer * buf, unsigned n,
 	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
-        write(i);
+        writeArrayIndex(i);
         write(boost::str(boost::format("(%1%,%2%)\n") % byte_to_binary(m[i*2]) %  m[i*2+1]));
     }
 }
@@ -215,7 +215,7 @@ void CudaDbgLog::writeInt2(BaseBuffer * buf, unsigned n,
 	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
-        write(i);
+        writeArrayIndex(i);
         write(boost::str(boost::format("(%1%,%2%)\n") % m[i*2] % m[i*2+1]));
     }
 }
@@ -244,7 +244,7 @@ void CudaDbgLog::writeAabb(BaseBuffer * buf, unsigned n,
 	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
-        write(i);
+        writeArrayIndex(i);
         write(boost::str(boost::format("((%1%,%2%,%3%),(%4%,%5%,%6%))\n") % m[i*6] % m[i*6+1] % m[i*6+2] 
             % m[i*6+3] % m[i*6+4] % m[i*6+5]));
     }
@@ -276,7 +276,7 @@ void CudaDbgLog::writeStruct(BaseBuffer * buf, unsigned n,
 	writeArraySize(n);
     unsigned i = 0;
     for(; i < n; i++) {
-        write(i);
+        writeArrayIndex(i);
         writeStruct1(&m[i*size], desc);
     }
 }
