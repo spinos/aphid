@@ -138,7 +138,8 @@ inline __device__ void computeSplitSide(int * side,
 }
 
 inline __device__ void updateBins(SplitBin * splitBins,
-                                SplitId * splitIds,
+                                uint iEmission,
+                                uint primitiveBegin,
                                 Aabb * clusterAabbs,
                                 int * sideHorizontal,
                                 float3 rootBoxLow,
@@ -148,38 +149,19 @@ inline __device__ void updateBins(SplitBin * splitBins,
                                 uint numBins,
                                 uint numClusters)
 {
-    uint ind = blockIdx.x*blockDim.x;
-    uint lastEmission = splitIds[ind].emissionId;
-        
-    SplitBin & obin = splitBins[lastEmission * numBins * 3 
+    SplitBin & obin = splitBins[iEmission * numBins * 3 
                                 + numBins * dimension 
                                 + threadIdx.x];
     SplitBin aBin;
     resetSplitBin(aBin);
     
-    Aabb fBox = clusterAabbs[ind];
-    
-    updateSplitBinSide(aBin, fBox, rootBoxLow, g, 
-        sideHorizontal[0]);
-    
-    for(int i=1; i<nThreads; i++) {
-        ind++;
+    Aabb fBox;
+    uint ind;
+    for(int i=0; i<nThreads; i++) {
+        ind = primitiveBegin + i;
         if(ind == numClusters) {
             updateSplitBin(obin, aBin);
             break;
-        }
-        
-        uint iEmission = splitIds[ind].emissionId;
-        if(iEmission != lastEmission) {
-            
-            updateSplitBin(obin, aBin);
-            
-            lastEmission = iEmission;
-            obin = splitBins[iEmission * numBins * 3 
-                            + numBins * dimension 
-                            + threadIdx.x];
-            
-            resetSplitBin(aBin);
         }
         
         fBox = clusterAabbs[ind];

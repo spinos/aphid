@@ -127,8 +127,27 @@ give 14 nodes to each block
 
 CudaDbgLog sahlg("sah.txt");
 
+static std::vector<std::pair<int, int> > binDesc;
+
 SahBuilder::SahBuilder() 
 {
+    binDesc.push_back(std::pair<int, int>(0, 0));
+	binDesc.push_back(std::pair<int, int>(0, 4));
+	binDesc.push_back(std::pair<int, int>(0, 8));
+	binDesc.push_back(std::pair<int, int>(0, 12));
+	binDesc.push_back(std::pair<int, int>(0, 16));
+	binDesc.push_back(std::pair<int, int>(0, 20));
+	binDesc.push_back(std::pair<int, int>(0, 24));
+	binDesc.push_back(std::pair<int, int>(0, 28));
+	binDesc.push_back(std::pair<int, int>(0, 32));
+	binDesc.push_back(std::pair<int, int>(0, 36));
+	binDesc.push_back(std::pair<int, int>(0, 40));
+	binDesc.push_back(std::pair<int, int>(0, 44));
+	binDesc.push_back(std::pair<int, int>(0, 48));
+	binDesc.push_back(std::pair<int, int>(0, 52));
+	binDesc.push_back(std::pair<int, int>(1, 56));
+	binDesc.push_back(std::pair<int, int>(1, 60));
+	
     std::cout<<"size of bin "<<sizeof(SplitBin)<<"\n";
     m_mortonBits = new CUDABuffer;
     m_clusterAabb = new CUDABuffer;
@@ -141,6 +160,8 @@ SahBuilder::SahBuilder()
 	m_emissions[1] = new CUDABuffer;
     m_splitBins = new CUDABuffer;
     m_splitIds = new CUDABuffer;
+    m_emissionBlocks = new CUDABuffer;
+    m_numBinningBlocks = new CUDABuffer;
 }
 
 SahBuilder::~SahBuilder() 
@@ -156,6 +177,8 @@ SahBuilder::~SahBuilder()
 	delete m_emissions[1];
     delete m_splitBins;
     delete m_splitIds;
+    delete m_emissionBlocks;
+    delete m_numBinningBlocks;
 }
 
 void SahBuilder::initOnDevice()
@@ -164,6 +187,7 @@ void SahBuilder::initOnDevice()
     m_emissions[1]->create(SAH_MAX_N_BLOCKS * 8);
     m_clusterAabb->create(SAH_MAX_N_BLOCKS * 24);
     m_splitBins->create(256 * SIZE_OF_SPLITBIN * SAH_MAX_NUM_BINS * 3);
+    m_numBinningBlocks->create(4);
     BvhBuilder::initOnDevice();
 }
 
@@ -179,7 +203,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
     
 // one splitId for each cluster or primitive
     m_splitIds->create(n * SIZE_OF_SPLITID);
-	
+    
 	void * primitiveHash = bvh->primitiveHash();
 	void * primitiveAabb = bvh->primitiveAabb();
 	
@@ -210,48 +234,39 @@ void SahBuilder::build(CudaLinearBvh * bvh)
     internalAabbBuf->hostToDevice(bounding, 24);
     
 // emit from root node
-	EmissionBlock eb;
+	EmissionEvent eb;
 	eb.root_id = 0;
-	eb.block_offset = 0;
+	eb.node_offset = 0;
 	
 	m_emissions[0]->hostToDevice(&eb, 8);
 	unsigned numEmissions = 1;
+
+// emission-block relationship	
+	m_emissionBlocks->create((n * SIZE_OF_EMISSIONBLOCK)>>2);
  
 // 16 bins for each dimension for first split
     m_splitBins->create(numEmissions * SIZE_OF_SPLITBIN * SAH_MAX_NUM_BINS * 3);
 
-	sahbvh_emitSahSplit((EmissionBlock *)m_emissions[1]->bufferOnDevice(),
-	    (EmissionBlock *)m_emissions[0]->bufferOnDevice(),
+	sahbvh_emitSahSplit((EmissionEvent *)m_emissions[1]->bufferOnDevice(),
+	    (EmissionEvent *)m_emissions[0]->bufferOnDevice(),
 	    (int2 *)internalChildBuf->bufferOnDevice(),
 	    (Aabb *)internalAabbBuf->bufferOnDevice(),
 	    (KeyValuePair *)m_runHash->bufferOnDevice(),
         (Aabb *)clusterAabbs(),
         (SplitBin *)splitBins(),
+        (EmissionBlock *)emissionBlocks(),
         (SplitId *)splitIds(),
+        (uint *)m_numBinningBlocks->bufferOnDevice(),
 	    numClusters,
         SAH_MAX_NUM_BINS,
 	    numEmissions);
 	
-	std::vector<std::pair<int, int> > binDesc;
-	binDesc.push_back(std::pair<int, int>(0, 0));
-	binDesc.push_back(std::pair<int, int>(0, 4));
-	binDesc.push_back(std::pair<int, int>(0, 8));
-	binDesc.push_back(std::pair<int, int>(0, 12));
-	binDesc.push_back(std::pair<int, int>(0, 16));
-	binDesc.push_back(std::pair<int, int>(0, 20));
-	binDesc.push_back(std::pair<int, int>(0, 24));
-	binDesc.push_back(std::pair<int, int>(0, 28));
-	binDesc.push_back(std::pair<int, int>(0, 32));
-	binDesc.push_back(std::pair<int, int>(0, 36));
-	binDesc.push_back(std::pair<int, int>(0, 40));
-	binDesc.push_back(std::pair<int, int>(0, 44));
-	binDesc.push_back(std::pair<int, int>(0, 48));
-	binDesc.push_back(std::pair<int, int>(0, 52));
-	binDesc.push_back(std::pair<int, int>(1, 56));
-	binDesc.push_back(std::pair<int, int>(1, 60));
+	unsigned nbb = 0;
+	m_numBinningBlocks->deviceToHost(&nbb, 4);
+	sahlg.writeInt2(m_emissionBlocks, nbb, "emission_block", CudaDbgLog::FOnce);
 	
     CudaBase::CheckCudaError("sah split");
-	sahlg.writeInt2(m_splitIds, numClusters, "emission_id", CudaDbgLog::FOnce);
+	// sahlg.writeInt2(m_splitIds, numClusters, "emission_id", CudaDbgLog::FOnce);
     sahlg.writeStruct(m_splitBins, numEmissions * SAH_MAX_NUM_BINS * 3, 
             "bins", 
             binDesc,
@@ -384,3 +399,6 @@ void * SahBuilder::splitIds()
 void * SahBuilder::clusterAabbs()
 { return m_clusterAabb->bufferOnDevice(); }
 
+void * SahBuilder::emissionBlocks()
+{ return m_emissionBlocks->bufferOnDevice(); }
+//:~

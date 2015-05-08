@@ -8,10 +8,12 @@
 #define SAH_MAX_N_BLOCKS 2048
 #define SIZE_OF_SPLITBIN 64
 #define SIZE_OF_SPLITID 8
+#define SIZE_OF_EMISSIONBLOCK 8
+#define SIZE_OF_EMISSIONEVENT 8
 
-struct EmissionBlock {
+struct EmissionEvent {
     uint root_id;
-    uint block_offset;
+    uint node_offset;
 };
 
 struct BinAabb {
@@ -26,6 +28,11 @@ struct SplitBin {
     uint rightCount;
     float cost;
     float padding;
+};
+
+struct EmissionBlock {
+    uint emission_id;
+    uint primitive_offset;
 };
 
 struct SplitId {
@@ -88,14 +95,16 @@ void sahbvh_countTreeBits(uint * nbits,
                             KeyValuePair * morton,
                             uint n);
 
-void sahbvh_emitSahSplit(EmissionBlock * outEmissions,
-	    EmissionBlock * inEmissions,
+void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
+	    EmissionEvent * inEmissions,
 	    int2 * rootNodes,
 	    Aabb * rootAabbs,
 	    KeyValuePair * clusterMorton,
         Aabb * clusterAabbs,
         SplitBin * splitBins,
+        EmissionBlock * emissionIds,
         SplitId * splitIds,
+        uint * totalBinningBlocks,
 	    uint numClusters,
         uint numBins,
 	    uint numEmissions);

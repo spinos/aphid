@@ -1,28 +1,61 @@
 #include "sahbvh_implement.h"
 #include <bvh_math.cu>
 #include "sah_math.cu"
+#include <CudaBase.h>
 
 #define ASSIGNE_EMISSIONID_NTHREAD 512
 #define ASSIGNE_EMISSIONID_NTHREAD_M1 511
 #define ASSIGNE_EMISSIONID_NTHREAD_LOG2 9
 #define COMPUTE_BINS_NTHREAD 128
+#define COMPUTE_BINS_NTHREAD_M1 127
+#define COMPUTE_BINS_NTHREAD_LOG2 7
+
+__global__ void numEmissionBlocks_kernel(uint * totalBlocks,
+        EmissionBlock * emissionIds,
+        EmissionEvent * inEmissions,
+        int2 * rootRanges,
+        uint numEmissions)
+{
+    uint iRoot;
+    int primitiveRangeBegin, primitiveRangeEnd;
+    int numPrimitivesInRange, nb;
+    uint nBlocks = 0;
+    uint i, j;
+    for(i=0;i<numEmissions;i++) {
+        iRoot = inEmissions[i].root_id;
+        primitiveRangeBegin = rootRanges[iRoot].x;
+        primitiveRangeEnd = rootRanges[iRoot].y;
+        numPrimitivesInRange = primitiveRangeEnd - primitiveRangeBegin + 1;
+        
+        nb = numPrimitivesInRange>>COMPUTE_BINS_NTHREAD_LOG2;
+        if(numPrimitivesInRange & COMPUTE_BINS_NTHREAD_M1) nb++;
+        
+        for(j=0; j<nb; j++) {
+            emissionIds[nBlocks].emission_id = i;
+            emissionIds[nBlocks].primitive_offset = primitiveRangeBegin + j * COMPUTE_BINS_NTHREAD;
+            nBlocks++;
+        }
+    }
+    totalBlocks[0] = nBlocks;
+}
 
 __global__ void computeBins_kernel(SplitBin * splitBins,
                         Aabb * rootAabbs,
-                        SplitId * splitIds,
+                        EmissionBlock * emissionIds,
                         Aabb * clusterAabbs,
                         uint numBins,
                         uint numClusters)
 {      
     __shared__ int sSide[SAH_MAX_NUM_BINS * COMPUTE_BINS_NTHREAD];
     
-    uint ind = blockIdx.x*blockDim.x + threadIdx.x;
+    const uint iEmission = emissionIds[blockIdx.x].emission_id;
+    const uint primitiveBegin = emissionIds[blockIdx.x].primitive_offset;
+    
+    uint ind = primitiveBegin + threadIdx.x;
 	if(ind >= numClusters) return;
 	
 	int * sideVertical = &sSide[SAH_MAX_NUM_BINS * threadIdx.x];
 	int * sideHorizontal = &sSide[threadIdx.x];
-    
-	uint iEmission = splitIds[ind].emissionId;
     
     Aabb rootBox = rootAabbs[iEmission];
     float * boxLow = &rootBox.low.x;
@@ -43,7 +76,8 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     
     if(threadIdx.x < numBins)
     updateBins(splitBins,
-               splitIds,
+                iEmission,
+                primitiveBegin,
                clusterAabbs,
                sideHorizontal,
                rootBox.low,
@@ -64,7 +98,8 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     
      if(threadIdx.x < numBins)
      updateBins(splitBins,
-               splitIds,
+                iEmission,
+                primitiveBegin,
                clusterAabbs,
                sideHorizontal,
                rootBox.low,
@@ -85,7 +120,8 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     
      if(threadIdx.x < numBins)
      updateBins(splitBins,
-               splitIds,
+                iEmission,
+                primitiveBegin,
                clusterAabbs,
                sideHorizontal,
                rootBox.low,
@@ -98,7 +134,7 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
 }
 
 __global__ void resetBins_kernel(SplitBin * splitBins, 
-                        EmissionBlock * inEmissions,
+                        EmissionEvent * inEmissions,
                         uint numBins)
 {
     if(threadIdx.x >= numBins * 3) return;
@@ -110,7 +146,7 @@ __global__ void resetBins_kernel(SplitBin * splitBins,
 }
 
 __global__ void assignEmissionId_kernel(SplitId * splitIds,
-        EmissionBlock * inEmissions,
+        EmissionEvent * inEmissions,
         int2 * rootRanges,
         uint nEmissions)
 {
@@ -159,7 +195,7 @@ __global__ void computeClusterAabbs_kernel(Aabb * clusterAabbs,
             Aabb * primitiveAabbs,
             uint * compressedIndices,
             KeyValuePair * sorted,
-            uint * offset,
+            // uint * offset,
             uint * runLength,
             uint nRuns)
 {
@@ -167,7 +203,7 @@ __global__ void computeClusterAabbs_kernel(Aabb * clusterAabbs,
 	if(ind >= nRuns) return;
     
     const uint sortedInd = sorted[ind].value;
-	const uint start = offset[ind];
+	// const uint start = offset[ind];
 	const uint first = compressedIndices[sortedInd];
 	const uint l = runLength[ind];
     
@@ -450,13 +486,35 @@ void sahbvh_computeClusterAabbs(Aabb * clusterAabbs,
                             primitiveAabbs,
                             compressedIndices,
                             sorted,
-                            offset,
+                            // offset,
                             runLength,
                             n);
 }
 
+void sahbvh_numEmissionBlocks(uint * totalBinningBlocks,
+        EmissionBlock * emissionIds,
+        EmissionEvent * inEmissions,
+        int2 * rootRanges,
+        uint numEmissions)
+{
+    const int tpb = 1;
+    dim3 block(tpb, 1, 1);
+    const int nblk = 1;
+    dim3 grid(nblk, 1, 1);
+// one thread for all emissions
+// split emission primitive into blocks
+// assign emission id and block offset 
+// sum up number of blocks needed
+    numEmissionBlocks_kernel<<< grid, block>>>(totalBinningBlocks,
+        emissionIds,
+        inEmissions,
+        rootRanges,
+        numEmissions);
+
+}
+
 void sahbvh_assignEmissionId(SplitId * splitIds,
-        EmissionBlock * inEmissions,
+        EmissionEvent * inEmissions,
         int2 * rootRanges,
         uint numEmissions)
 {
@@ -473,7 +531,7 @@ void sahbvh_assignEmissionId(SplitId * splitIds,
 }
 
 void sahbvh_resetBins(SplitBin * splitBins, 
-                        EmissionBlock * inEmissions,
+                        EmissionEvent * inEmissions,
                         Aabb * rootAabbs,
                         uint numBins,
                         uint numEmissions)
@@ -491,14 +549,15 @@ void sahbvh_resetBins(SplitBin * splitBins,
 
 void sahbvh_computeBins(SplitBin * splitBins,
                         Aabb * rootAabbs,
-                        SplitId * splitIds,
+                        EmissionBlock * emissionIds,
                         Aabb * clusterAabbs,
                         uint numBins,
-                        uint numClusters)
+                        uint numClusters,
+                        uint numBinningBlocks)
 {
     const int tpb = COMPUTE_BINS_NTHREAD;
     dim3 block(tpb, 1, 1);
-    const int nblk = iDivUp(numClusters, tpb);
+    const int nblk = numBinningBlocks;
     dim3 grid(nblk, 1, 1);
 // one thread for each cluster/primitive
 // find bins according to splitId
@@ -506,20 +565,22 @@ void sahbvh_computeBins(SplitBin * splitBins,
 
     computeBins_kernel<<< grid, block>>>(splitBins,
                         rootAabbs,
-                        splitIds,
+                        emissionIds,
                         clusterAabbs,
                         numBins,
                         numClusters);
 }
 
-void sahbvh_emitSahSplit(EmissionBlock * outEmissions,
-	    EmissionBlock * inEmissions,
+void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
+	    EmissionEvent * inEmissions,
 	    int2 * rootRanges,
 	    Aabb * rootAabbs,
 	    KeyValuePair * clusterMorton,
         Aabb * clusterAabbs,
         SplitBin * splitBins,
+        EmissionBlock * emissionIds,
         SplitId * splitIds,
+        uint * totalBinningBlocks,
 	    uint numClusters,
         uint numBins,
 	    uint numEmissions)
@@ -529,6 +590,17 @@ void sahbvh_emitSahSplit(EmissionBlock * outEmissions,
                             rootRanges,
                             numEmissions);
     
+    sahbvh_numEmissionBlocks(totalBinningBlocks,
+                        emissionIds,
+                        inEmissions,
+                        rootRanges,
+                        numEmissions);
+    
+    uint numBinningBlocks = 0;
+    cudaMemcpy(&numBinningBlocks, totalBinningBlocks, 4, cudaMemcpyDeviceToHost); 
+    if(numBinningBlocks < 1)
+        CudaBase::CheckCudaError("sah calc n binning blks");
+    
     sahbvh_resetBins(splitBins, 
                         inEmissions,
                         rootAabbs,
@@ -537,10 +609,11 @@ void sahbvh_emitSahSplit(EmissionBlock * outEmissions,
     
     sahbvh_computeBins(splitBins, 
                         rootAabbs,
-                        splitIds,
+                        emissionIds,
                         clusterAabbs, 
                         numBins,
-                        numClusters);
+                        numClusters,
+                        numBinningBlocks);
 }
 
 }

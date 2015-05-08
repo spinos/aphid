@@ -21,6 +21,7 @@ protected:
 	void * splitBins();
     void * splitIds();
     void * clusterAabbs();
+    void * emissionBlocks();
 private:
     int countTreeBits(void * morton, unsigned numPrimitives);
 	int getM(int n, int m);
@@ -37,4 +38,6 @@ private:
 	CUDABuffer * m_emissions[2];
     CUDABuffer * m_splitBins;
     CUDABuffer * m_splitIds;
+    CUDABuffer * m_emissionBlocks;
+    CUDABuffer * m_numBinningBlocks;
 };
