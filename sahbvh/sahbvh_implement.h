@@ -14,8 +14,8 @@
 struct EmissionEvent {
     uint root_id;
     uint node_offset;
-    int split_dimension;
-    float split_plane;
+    int bin_id;
+    int n_split;
 };
 
 struct BinAabb {
@@ -29,7 +29,7 @@ struct SplitBin {
     BinAabb rightBox;
     uint rightCount;
     float cost;
-    float padding;
+    float plane;
 };
 
 struct EmissionBlock {
@@ -101,15 +101,17 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
 	    EmissionEvent * inEmissions,
 	    int2 * rootNodes,
 	    Aabb * rootAabbs,
-	    KeyValuePair * clusterMorton,
+	    KeyValuePair * clusterIndirection,
         Aabb * clusterAabbs,
         SplitBin * splitBins,
         EmissionBlock * emissionIds,
         SplitId * splitIds,
         uint * totalBinningBlocks,
+        uint * totalNodeCount,
 	    uint numClusters,
         uint numBins,
-	    uint numEmissions);
+	    uint numEmissions,
+	    uint currentNumNodes);
 
 }
 #endif        //  #ifndef SAH_IMPLEMENT_H

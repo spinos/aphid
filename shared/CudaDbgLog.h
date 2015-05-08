@@ -71,6 +71,14 @@ public:
 	                const std::string & notation,
 	                Frequency freq = FOnce);
 	
+	void writeAabb(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+	void writeAabb(CUDABuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
 	void writeStruct(BaseBuffer * buf, unsigned n, 
 	                const std::string & notation,
 	                const std::vector<std::pair<int, int> > & desc,

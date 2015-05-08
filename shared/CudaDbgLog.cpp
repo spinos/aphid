@@ -232,6 +232,36 @@ void CudaDbgLog::writeInt2(CUDABuffer * buf, unsigned n,
 	writeInt2(m_hostBuf, n, notation, FIgnore);
 }
 
+void CudaDbgLog::writeAabb(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    float * m = (float *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        write(i);
+        write(boost::str(boost::format("((%1%,%2%,%3%),(%4%,%5%,%6%))\n") % m[i*6] % m[i*6+1] % m[i*6+2] 
+            % m[i*6+3] % m[i*6+4] % m[i*6+5]));
+    }
+}
+	
+void CudaDbgLog::writeAabb(CUDABuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    m_hostBuf->create(buf->bufferSize());
+    buf->deviceToHost(m_hostBuf->data());
+	
+	writeAabb(m_hostBuf, n, notation, FIgnore);
+}
+
 void CudaDbgLog::writeStruct(BaseBuffer * buf, unsigned n, 
 	                const std::string & notation,
 	                const std::vector<std::pair<int, int> > & desc,

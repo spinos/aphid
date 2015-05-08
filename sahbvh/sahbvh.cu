@@ -10,20 +10,112 @@
 #define COMPUTE_BINS_NTHREAD_M1 127
 #define COMPUTE_BINS_NTHREAD_LOG2 7
 
+__global__ void spawnNode_kernel(int2 * internalNodeChildIndices,
+                    Aabb * internalNodeAabbs,
+                    EmissionEvent * outEmissions,
+                    EmissionEvent * inEmissions,
+                    SplitBin * splitBins,
+                    uint numBins,
+                    uint currentNumNodes,
+                    uint * totalNodeCountAft)
+{
+    const uint iEmission = blockIdx.x;
+    EmissionEvent & e = inEmissions[iEmission];
+    const uint iRoot = e.root_id;
+    const int iBin = e.bin_id;
+    SplitBin & split = splitBins[iBin + iEmission * numBins * 3];
+    const uint leftCount = split.leftCount;
+    
+    Aabb rootBox = internalNodeAabbs[iRoot];
+    const float g = longestSideOfAabb(rootBox) * .003f;
+    
+    int2 & rootInd = internalNodeChildIndices[iRoot];
+    
+    const int primitiveBegin = rootInd.x;
+    const int primitiveEnd = rootInd.y;
+    
+    int leftChild = currentNumNodes + e.node_offset;
+    int rightChild = leftChild + 1;
+    
+    internalNodeChildIndices[leftChild].x = primitiveBegin;
+    internalNodeChildIndices[leftChild].y = primitiveBegin + leftCount - 1;
+    
+    internalNodeChildIndices[rightChild].x = primitiveBegin + leftCount;
+    internalNodeChildIndices[rightChild].y = primitiveEnd;
+    
+    binAabbToAabb(internalNodeAabbs[leftChild], split.leftBox, 
+        rootBox.low, g);
+    binAabbToAabb(internalNodeAabbs[rightChild], split.rightBox, 
+        rootBox.low, g);
+    
+    rootInd.x = leftChild;
+    rootInd.y = rightChild;
+    
+    EmissionEvent * spawn = &outEmissions[e.node_offset];
+    spawn->root_id = leftChild;
+    spawn->node_offset = 0;
+    
+    spawn++;
+    spawn->root_id = rightChild;
+    spawn->node_offset = 0;
+}
+
+__global__ void scanNodeOffset_kernel(uint * nodeCount,
+                            EmissionEvent * inEmissions,
+                            uint numEmissions)
+{
+    uint i=1;
+    EmissionEvent & last = inEmissions[0];
+    for(;i<numEmissions;i++) {
+        EmissionEvent & current = inEmissions[i];
+        current.node_offset = last.node_offset
+                                    + last.n_split * 2;
+        last = current;
+    }
+    nodeCount[0] += last.node_offset + last.n_split * 2;
+}
+
+__global__ void splitIndirection_kernel(KeyValuePair * primitiveInd,
+                            SplitId * splitIds,
+                            EmissionEvent * inEmissions,
+                            int2 * rootRanges)
+{
+    const uint iEmission = blockIdx.x;
+    const uint iRoot = inEmissions[iEmission].root_id;
+    const int rootEnd = rootRanges[iRoot].y;
+    int rangeBegin = rootRanges[iRoot].x;
+    int rangeEnd = rootEnd;
+    KeyValuePair intermediate;
+    for(;;) {
+        while(splitIds[rangeBegin].split_side<1) rangeBegin++;
+        while(splitIds[rangeEnd].split_side>0) rangeEnd--;
+            
+        if(rangeBegin >= rangeEnd) break;
+        
+        intermediate = primitiveInd[rangeBegin];
+        primitiveInd[rangeBegin++] = primitiveInd[rangeEnd];
+        primitiveInd[rangeEnd--] = intermediate;
+    }
+    if(rangeBegin < rootEnd) inEmissions[iEmission].n_split = 1;
+    else inEmissions[iEmission].n_split = 0;
+}
 
 __global__ void computeSplitSide_kernel(SplitId * splitIds,
                             EmissionEvent * inEmissions,
+                            KeyValuePair * clusterInd,
                             Aabb * clusterAabbs,
+                            SplitBin * splitBins,
+                            uint numBins,
                             uint numClusters)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= numClusters) return;
 	
 	const uint iEmission = splitIds[ind].emission_id;
-	
-	int dimension = inEmissions[iEmission].split_dimension;
-	float plane = inEmissions[iEmission].split_plane;
-    Aabb clusterBox = clusterAabbs[ind];
+	const int iBin = inEmissions[iEmission].bin_id;
+	int dimension = iBin / numBins;
+	float plane = splitBins[iBin + iEmission * numBins * 3].plane;
+    Aabb clusterBox = clusterAabbs[clusterInd[ind].value];
     
     float3 center = centroidOfAabb(clusterBox);
     if(float3_component(center, dimension) <= plane) splitIds[ind].split_side = 0;
@@ -65,10 +157,12 @@ __global__ void bestSplit_kernel(SplitBin * splitBins,
             }
         }
         
-        inEmissions[iEmission].split_dimension = splitI / numBins;
-        inEmissions[iEmission].split_plane = splitPlaneOfBin(&rootBox,
-            numBins,
-            splitI);
+        inEmissions[iEmission].bin_id = splitI;
+        splitBins[splitI
+                  + iEmission * numBins * 3].plane = splitPlaneOfBin(&rootBox,
+                                                numBins,
+                                                splitI);
+        
     }
 }
 
@@ -105,6 +199,7 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
                         EmissionEvent * inEmissions,
                         Aabb * rootAabbs,
                         EmissionBlock * emissionIds,
+                        KeyValuePair * clusterIndirection,
                         Aabb * clusterAabbs,
                         uint numBins,
                         uint numClusters)
@@ -123,7 +218,7 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     
     Aabb rootBox = rootAabbs[iRoot];
     float * boxLow = &rootBox.low.x;
-    Aabb clusterBox = clusterAabbs[ind];
+    Aabb clusterBox = clusterAabbs[clusterIndirection[ind].value];
     float3 center = centroidOfAabb(clusterBox);
     float * p = &center.x;
     
@@ -142,6 +237,7 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     updateBins(splitBins,
                 iEmission,
                 primitiveBegin,
+                clusterIndirection,
                clusterAabbs,
                sideHorizontal,
                rootBox.low,
@@ -164,6 +260,7 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
      updateBins(splitBins,
                 iEmission,
                 primitiveBegin,
+                clusterIndirection,
                clusterAabbs,
                sideHorizontal,
                rootBox.low,
@@ -186,6 +283,7 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
      updateBins(splitBins,
                 iEmission,
                 primitiveBegin,
+                clusterIndirection,
                clusterAabbs,
                sideHorizontal,
                rootBox.low,
@@ -277,7 +375,7 @@ __global__ void computeClusterAabbs_kernel(Aabb * clusterAabbs,
 	for(;i<l;i++) 
         expandAabb(box, primitiveAabbs[first + i]);
 	
-    clusterAabbs[ind] = box;
+    clusterAabbs[sortedInd] = box;
 }
 
 __global__ void decompressIndices_kernel(uint * decompressedIndices,
@@ -615,6 +713,7 @@ void sahbvh_computeBins(SplitBin * splitBins,
                         EmissionEvent * inEmissions,
                         Aabb * rootAabbs,
                         EmissionBlock * emissionIds,
+                        KeyValuePair * clusterIndirection,
                         Aabb * clusterAabbs,
                         uint numBins,
                         uint numClusters,
@@ -632,6 +731,7 @@ void sahbvh_computeBins(SplitBin * splitBins,
                         inEmissions,
                         rootAabbs,
                         emissionIds,
+                        clusterIndirection,
                         clusterAabbs,
                         numBins,
                         numClusters);
@@ -657,7 +757,10 @@ void sahbvh_bestSplit(SplitBin * splitBins,
 
 void sahbvh_computeSplitSide(SplitId * splitIds,
                             EmissionEvent * inEmissions,
+                            KeyValuePair * clusterIndirection,
                             Aabb * clusterAabbs,
+                            SplitBin * splitBins,
+                            uint numBins,
                             uint numClusters)
 {
     const int tpb = 512;
@@ -668,23 +771,90 @@ void sahbvh_computeSplitSide(SplitId * splitIds,
 // decide left or right it reside to the split plane
     computeSplitSide_kernel<<< grid, block>>>(splitIds,
                                     inEmissions,
+                                    clusterIndirection,
                                     clusterAabbs,
+                                    splitBins,
+                                    numBins,
                                     numClusters);
+}
+
+void sahbvh_splitIndirection(KeyValuePair * primitiveInd,
+                            SplitId * splitIds,
+                            EmissionEvent * inEmissions,
+                            int2 * rootRanges,
+                            uint numEmissions)
+{
+    const int tpb = 1;
+    dim3 block(tpb, 1, 1);
+    const int nblk = numEmissions;
+    dim3 grid(nblk, 1, 1);
+// one block per emission
+// within range of root node
+// swap any ind that split side 1 before side 0
+    splitIndirection_kernel<<< grid, block>>>(primitiveInd,
+                                            splitIds,
+                                            inEmissions,
+                                            rootRanges);
+}
+
+void sahbvh_scanNodeOffset(uint * nodeCount,
+                            EmissionEvent * inEmissions,
+                            uint numEmissions)
+{
+    const int tpb = 1;
+    dim3 block(tpb, 1, 1);
+    const int nblk = 1;
+    dim3 grid(nblk, 1, 1);
+// one thread prefix sum node offset
+// add to nodeCount
+    scanNodeOffset_kernel<<< grid, block>>>(nodeCount,
+                                            inEmissions,
+                                            numEmissions);
+}
+
+void sahbvh_spawnNode(int2 * internalNodeChildIndices,
+                    Aabb * internalNodeAabbs,
+                    EmissionEvent * outEmissions,
+                    EmissionEvent * inEmissions,
+                    SplitBin * splitBins,
+                    uint numBins,
+                    uint numEmissions,
+                    uint currentNumNodes,
+                    uint * totalNodeCount)
+{
+    const int tpb = 1;
+    dim3 block(tpb, 1, 1);
+    const int nblk = numEmissions;
+    dim3 grid(nblk, 1, 1);
+// one thread per emission
+// set child node range
+// connect to root
+// create next level emissions
+    spawnNode_kernel<<< grid, block>>>(internalNodeChildIndices,
+                                    internalNodeAabbs,
+                                    outEmissions,
+                                    inEmissions,
+                                    splitBins,
+                                    numBins,
+                                    currentNumNodes,
+                                    totalNodeCount);
 }
 
 void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
 	    EmissionEvent * inEmissions,
 	    int2 * rootRanges,
 	    Aabb * rootAabbs,
-	    KeyValuePair * clusterMorton,
+	    KeyValuePair * clusterIndirection,
         Aabb * clusterAabbs,
         SplitBin * splitBins,
         EmissionBlock * emissionIds,
         SplitId * splitIds,
         uint * totalBinningBlocks,
+        uint * totalNodeCount,
 	    uint numClusters,
         uint numBins,
-	    uint numEmissions)
+	    uint numEmissions,
+	    uint currentNumNodes)
 {
     sahbvh_assignEmissionId(splitIds,
                             inEmissions,
@@ -712,6 +882,7 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
                         inEmissions,
                         rootAabbs,
                         emissionIds,
+                        clusterIndirection,
                         clusterAabbs, 
                         numBins,
                         numClusters,
@@ -725,8 +896,31 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
     
     sahbvh_computeSplitSide(splitIds,
                             inEmissions,
+                            clusterIndirection,
                             clusterAabbs,
+                            splitBins,
+                            numBins,
                             numClusters);
+    
+    sahbvh_splitIndirection(clusterIndirection,
+                            splitIds,
+                            inEmissions,
+                            rootRanges,
+                            numEmissions);
+    
+    sahbvh_scanNodeOffset(totalNodeCount,
+                            inEmissions,
+                            numEmissions);
+    
+    sahbvh_spawnNode(rootRanges,
+                    rootAabbs,
+                    outEmissions,
+                    inEmissions,
+                    splitBins,
+                    numBins,
+                    numEmissions,
+                    currentNumNodes,
+                    totalNodeCount);
 }
 
 }

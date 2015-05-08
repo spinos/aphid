@@ -4,6 +4,19 @@
 #include "sahbvh_implement.h"
 #include <bvh_math.cu>
 
+inline __device__ void binAabbToAabb(Aabb & dst,
+                                BinAabb & src,
+                                float3 p,
+                                float h)
+{
+    dst.low.x = p.x + (float)src.low.x * h;
+    dst.low.y = p.y + (float)src.low.y * h;
+    dst.low.z = p.z + (float)src.low.z * h;
+    dst.high.x = p.x + (float)src.high.x * h;
+    dst.high.y = p.y + (float)src.high.y * h;
+    dst.high.z = p.z + (float)src.high.z * h;
+}
+
 inline __device__ void expandBinBox(BinAabb & dst,
                                     Aabb & src,
                                     float3 p,
@@ -138,7 +151,8 @@ inline __device__ void computeSplitSide(int * side,
 inline __device__ void updateBins(SplitBin * splitBins,
                                 uint iEmission,
                                 uint primitiveBegin,
-                                Aabb * clusterAabbs,
+                                KeyValuePair * primitiveInd,
+                                Aabb * primitiveAabb,
                                 int * sideHorizontal,
                                 float3 rootBoxLow,
                                 float g,
@@ -162,7 +176,7 @@ inline __device__ void updateBins(SplitBin * splitBins,
             break;
         }
         
-        fBox = clusterAabbs[ind];
+        fBox = primitiveAabb[primitiveInd[ind].value];
         
         updateSplitBinSide(aBin, fBox, rootBoxLow, g, 
             sideHorizontal[i*SAH_MAX_NUM_BINS]);
