@@ -9,11 +9,13 @@
 #define SIZE_OF_SPLITBIN 64
 #define SIZE_OF_SPLITID 8
 #define SIZE_OF_EMISSIONBLOCK 8
-#define SIZE_OF_EMISSIONEVENT 8
+#define SIZE_OF_EMISSIONEVENT 16
 
 struct EmissionEvent {
     uint root_id;
     uint node_offset;
+    int split_dimension;
+    float split_plane;
 };
 
 struct BinAabb {
@@ -36,8 +38,8 @@ struct EmissionBlock {
 };
 
 struct SplitId {
-    uint emissionId;
-    uint side;
+    uint emission_id;
+    uint split_side;
 };
 
 extern "C" {

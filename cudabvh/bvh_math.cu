@@ -31,6 +31,12 @@ inline __device__ float3 float3_from_float4(const float4 & a)
 inline __device__ void float3_set_zero(float3 & v)
 { v.x = v.y = v.z = 0.f; }
 
+inline __device__ float float3_component(float3 & v, int d)
+{ if(d < 1) return v.x;
+    if(d<2) return v.y;
+    return v.z;    
+}
+
 inline __device__ float float3_length(const float3 & v) 
 { return sqrtf(v.x*v.x + v.y*v.y + v.z*v.z); }
 
@@ -207,9 +213,17 @@ inline __device__ int isAabbOverlapping(const Aabb & a, const Aabb & b)
 
 inline __device__ float spanOfAabb(Aabb * box, uint dimension)
 {
-    float * fmn = &(box->low.x);
-    float * fmx = &(box->high.x);
-    return fmx[dimension] - fmn[dimension];
+    return (float3_component(box->high, dimension) 
+            - float3_component(box->low, dimension));
+}
+
+inline __device__ float areaOfAabb(Aabb * box)
+{
+    float dx = box->high.x - box->low.x;
+    float dy = box->high.y - box->low.y;
+    float dz = box->high.z - box->low.z;
+    if(dx <= 0.f || dy <= 0.f || dz <= 0.f) return 0.f;
+    return (dx * dy + dy * dz + dz * dx) * 2.f;
 }
 
 #endif

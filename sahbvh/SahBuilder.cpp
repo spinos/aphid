@@ -266,12 +266,13 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	sahlg.writeInt2(m_emissionBlocks, nbb, "emission_block", CudaDbgLog::FOnce);
 	
     CudaBase::CheckCudaError("sah split");
-	// sahlg.writeInt2(m_splitIds, numClusters, "emission_id", CudaDbgLog::FOnce);
-    sahlg.writeStruct(m_splitBins, numEmissions * SAH_MAX_NUM_BINS * 3, 
+	sahlg.writeStruct(m_splitBins, numEmissions * SAH_MAX_NUM_BINS * 3, 
             "bins", 
             binDesc,
             SIZE_OF_SPLITBIN,
             CudaDbgLog::FOnce);
+    
+    sahlg.writeInt2(m_splitIds, numClusters, "emission_id", CudaDbgLog::FOnce);
 }
 
 int SahBuilder::countTreeBits(void * morton, unsigned numPrimitives)

@@ -92,15 +92,13 @@ inline __device__ void updateSplitBin(SplitBin & dst,
 }
 
 inline __device__ float splitPlaneOfBin(Aabb * rootBox,
-                        uint dimension,
                         uint n,
                         uint ind)
 {
+    int dimension = ind / n;
     float d = spanOfAabb(rootBox, dimension);
-    float * ll = &(rootBox->low.x);
-    float fmn = ll[dimension];
-    float h = d / (float)n; 
-    return fmn + h * (float)ind + h * .5f;
+    return (float3_component(rootBox->low, dimension) 
+        + (d / (float)n) * ((float)(ind - dimension*n) + .5f));
 }
 
 inline __device__ void setSplitSide(int * side,
@@ -172,8 +170,32 @@ inline __device__ void updateBins(SplitBin * splitBins,
         if(i == nThreads-1) {
             updateSplitBin(obin, aBin);
         }
-    }
+    }  
+}
+
+inline __device__ float areaOfBinBox(BinAabb * box,
+                                    float h)
+{
+    float dx = box->high.x - box->low.x;
+    float dy = box->high.y - box->low.y;
+    float dz = box->high.z - box->low.z;
+    if(dx <= 0.f || dy <= 0.f || dz <= 0.f) return 0.f;
     
+    dx *= h;
+    dy *= h;
+    dz *= h;
+    
+    return (dx * dy + dy * dz + dz * dx) * 2.f;
+}
+
+inline __device__ float costOfSplit(SplitBin * bin,
+                        float rootBoxArea,
+                        float h)
+{
+    float leftArea = areaOfBinBox(&bin->leftBox, h);
+    float rightArea = areaOfBinBox(&bin->rightBox, h);
+    return (leftArea / rootBoxArea * (float)bin->leftCount 
+            + rightArea / rootBoxArea * (float)bin->rightCount);   
 }
 
 #endif        //  #ifndef SAH_MATH_CU

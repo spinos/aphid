@@ -10,6 +10,68 @@
 #define COMPUTE_BINS_NTHREAD_M1 127
 #define COMPUTE_BINS_NTHREAD_LOG2 7
 
+
+__global__ void computeSplitSide_kernel(SplitId * splitIds,
+                            EmissionEvent * inEmissions,
+                            Aabb * clusterAabbs,
+                            uint numClusters)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= numClusters) return;
+	
+	const uint iEmission = splitIds[ind].emission_id;
+	
+	int dimension = inEmissions[iEmission].split_dimension;
+	float plane = inEmissions[iEmission].split_plane;
+    Aabb clusterBox = clusterAabbs[ind];
+    
+    float3 center = centroidOfAabb(clusterBox);
+    if(float3_component(center, dimension) <= plane) splitIds[ind].split_side = 0;
+    else splitIds[ind].split_side = 1;
+}
+
+__global__ void bestSplit_kernel(SplitBin * splitBins, 
+                        EmissionEvent * inEmissions,
+                        Aabb * rootAabbs,
+                        uint numBins)
+{
+    __shared__ float sCost[SAH_MAX_NUM_BINS * 16];
+    
+    const uint iEmission = blockIdx.x;
+    const uint iRoot = inEmissions[iEmission].root_id;
+    Aabb rootBox = rootAabbs[iRoot];
+    const float rootArea = areaOfAabb(&rootAabbs[iRoot]);
+    const float g = longestSideOfAabb(rootBox) * .003f;
+    
+    if(threadIdx.x < numBins * 3)
+        sCost[threadIdx.x] = costOfSplit(&splitBins[iEmission * numBins * 3 
+                                                    + threadIdx.x],
+                                        rootArea,
+                                        g);
+    // splitBins[iEmission * numBins * 3 
+    //        + threadIdx.x].cost = sCost[threadIdx.x];
+    __syncthreads();
+    
+    int i;
+    int splitI;
+    float minCost;
+    if(threadIdx.x < 1) {
+        minCost = sCost[0];
+        splitI = 0;
+        for(i=1; i < numBins * 3; i++) {
+            if(minCost > sCost[i]) {
+                minCost = sCost[i];
+                splitI = i;
+            }
+        }
+        
+        inEmissions[iEmission].split_dimension = splitI / numBins;
+        inEmissions[iEmission].split_plane = splitPlaneOfBin(&rootBox,
+            numBins,
+            splitI);
+    }
+}
+
 __global__ void numEmissionBlocks_kernel(uint * totalBlocks,
         EmissionBlock * emissionIds,
         EmissionEvent * inEmissions,
@@ -40,6 +102,7 @@ __global__ void numEmissionBlocks_kernel(uint * totalBlocks,
 }
 
 __global__ void computeBins_kernel(SplitBin * splitBins,
+                        EmissionEvent * inEmissions,
                         Aabb * rootAabbs,
                         EmissionBlock * emissionIds,
                         Aabb * clusterAabbs,
@@ -50,6 +113,7 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     
     const uint iEmission = emissionIds[blockIdx.x].emission_id;
     const uint primitiveBegin = emissionIds[blockIdx.x].primitive_offset;
+    const uint iRoot = inEmissions[iEmission].root_id;
     
     uint ind = primitiveBegin + threadIdx.x;
 	if(ind >= numClusters) return;
@@ -57,7 +121,7 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
 	int * sideVertical = &sSide[SAH_MAX_NUM_BINS * threadIdx.x];
 	int * sideHorizontal = &sSide[threadIdx.x];
     
-    Aabb rootBox = rootAabbs[iEmission];
+    Aabb rootBox = rootAabbs[iRoot];
     float * boxLow = &rootBox.low.x;
     Aabb clusterBox = clusterAabbs[ind];
     float3 center = centroidOfAabb(clusterBox);
@@ -166,7 +230,7 @@ __global__ void assignEmissionId_kernel(SplitId * splitIds,
     for(i=0; i<npt; i++) {
         j = threadIdx.x * npt + i;
         if(j < numPrimitivesInRange)
-            splitIds[primitiveRangeBegin + j].emissionId = iEmission;
+            splitIds[primitiveRangeBegin + j].emission_id = iEmission;
     }
 }
 
@@ -548,6 +612,7 @@ void sahbvh_resetBins(SplitBin * splitBins,
 }
 
 void sahbvh_computeBins(SplitBin * splitBins,
+                        EmissionEvent * inEmissions,
                         Aabb * rootAabbs,
                         EmissionBlock * emissionIds,
                         Aabb * clusterAabbs,
@@ -564,11 +629,47 @@ void sahbvh_computeBins(SplitBin * splitBins,
 // atomic update bin contents
 
     computeBins_kernel<<< grid, block>>>(splitBins,
+                        inEmissions,
                         rootAabbs,
                         emissionIds,
                         clusterAabbs,
                         numBins,
                         numClusters);
+}
+
+void sahbvh_bestSplit(SplitBin * splitBins, 
+                        EmissionEvent * inEmissions,
+                        Aabb * rootAabbs,
+                        uint numBins,
+                        uint numEmissions)
+{
+    const int tpb = 128;
+    dim3 block(tpb, 1, 1);
+    const int nblk = numEmissions;
+    dim3 grid(nblk, 1, 1);
+// one block per emission
+// find the lowest split cost
+    bestSplit_kernel<<< grid, block>>>(splitBins,
+                                    inEmissions,
+                                    rootAabbs,
+                                    numBins);
+}
+
+void sahbvh_computeSplitSide(SplitId * splitIds,
+                            EmissionEvent * inEmissions,
+                            Aabb * clusterAabbs,
+                            uint numClusters)
+{
+    const int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    const int nblk = iDivUp(numClusters, tpb);
+    dim3 grid(nblk, 1, 1);
+// one thread per primitive
+// decide left or right it reside to the split plane
+    computeSplitSide_kernel<<< grid, block>>>(splitIds,
+                                    inEmissions,
+                                    clusterAabbs,
+                                    numClusters);
 }
 
 void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
@@ -608,12 +709,24 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
                         numEmissions);
     
     sahbvh_computeBins(splitBins, 
+                        inEmissions,
                         rootAabbs,
                         emissionIds,
                         clusterAabbs, 
                         numBins,
                         numClusters,
                         numBinningBlocks);
+    
+    sahbvh_bestSplit(splitBins,
+                    inEmissions,
+                    rootAabbs,
+                    numBins,
+                    numEmissions);
+    
+    sahbvh_computeSplitSide(splitIds,
+                            inEmissions,
+                            clusterAabbs,
+                            numClusters);
 }
 
 }
