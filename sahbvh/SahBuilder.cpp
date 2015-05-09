@@ -294,7 +294,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 			
 	int nbinblks = 0;
 	m_totalNodeCount->deviceToHost(&nbinblks, 4, 4);
-	sahlg.writeInt2(m_emissionBlocks, nbinblks, "emission_bin_blk", CudaDbgLog::FOnce);
+	sahlg.writeInt2(m_emissionBlocks, nbinblks + 1, "emission_bin_blk", CudaDbgLog::FOnce);
 	
 	sahlg.writeStruct(m_splitBins, numEmissions * numBins * 3, 
             "bins", 

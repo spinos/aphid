@@ -195,9 +195,9 @@ __global__ void numEmissionBlocks_kernel(uint * totalBlocks,
             nBlocks++;
         }
     }
-    emissionIds[nBlocks].emission_id = numEmissions;
+    emissionIds[nBlocks].emission_id = numEmissions - 1;
     emissionIds[nBlocks].primitive_offset = numClusters;
-    totalBlocks[0] = nBlocks+1;
+    totalBlocks[0] = nBlocks;
 }
 
 __global__ void computeBins_kernel(SplitBin * splitBins,
