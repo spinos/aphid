@@ -168,6 +168,7 @@ SahBuilder::SahBuilder()
     m_splitIds = new CUDABuffer;
     m_emissionBlocks = new CUDABuffer;
     m_totalNodeCount = new CUDABuffer;
+	m_bufferId = 0;
 }
 
 SahBuilder::~SahBuilder() 
@@ -191,7 +192,6 @@ void SahBuilder::initOnDevice()
 {
     m_emissions[0]->create(SAH_MAX_N_BLOCKS * SIZE_OF_EMISSIONEVENT);
     m_emissions[1]->create(SAH_MAX_N_BLOCKS * SIZE_OF_EMISSIONEVENT);
-    m_clusterAabb->create(SAH_MAX_N_BLOCKS * 24);
     m_splitBins->create(256 * SIZE_OF_SPLITBIN * SAH_MAX_NUM_BINS * 3);
     m_totalNodeCount->create(4);
     BvhBuilder::initOnDevice();
@@ -206,6 +206,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
     m_mortonBits->create(n * 4);
 	m_runHeads->create(CudaScan::getScanBufferLength(n) * 4);
 	m_runIndices->create(CudaScan::getScanBufferLength(n) * 4);
+	m_clusterAabb->create(n * 24);
     
 // one splitId for each cluster or primitive
     m_splitIds->create(n * SIZE_OF_SPLITID);
@@ -235,26 +236,41 @@ void SahBuilder::build(CudaLinearBvh * bvh)
     
 	bvh->setRootChildAndAabb(rr, bounding);
     
-    unsigned one = 1;
-    m_totalNodeCount->hostToDevice(&one, 4);
-    
+    unsigned numNodes = 1;
+    m_totalNodeCount->hostToDevice(&numNodes, 4);
+	
+	resetBuffer();
 // emit from root node
 	EmissionEvent eb;
 	eb.root_id = 0;
 	eb.node_offset = 0;
+	inEmissionBuf()->hostToDevice(&eb, SIZE_OF_EMISSIONEVENT);
 	
-	m_emissions[0]->hostToDevice(&eb, SIZE_OF_EMISSIONEVENT);
 	unsigned numEmissions = 1;
-	unsigned numNodes = 1;
-
+	
 // emission-block relationship	
 	m_emissionBlocks->create((n * SIZE_OF_EMISSIONBLOCK)>>2);
+	
+	int maxLevel = 2;
+	
+	int i = 0;
+	for(; i < maxLevel; i++) {
+		const std::string levelx = BaseLog::addSuffix<int>("level", i);
+		sahlg.braceBegin(levelx);
+	
+	// std::cout<<"    level"<<i<<" in"<<m_bufferId; 
  
 // 16 bins for each dimension for first split
     m_splitBins->create(numEmissions * SIZE_OF_SPLITBIN * SAH_MAX_NUM_BINS * 3);
+	
+	sahlg.writeStruct(inEmissionBuf(), numEmissions, 
+            "in_emissionsb4", 
+            emissionDesc,
+            SIZE_OF_EMISSIONEVENT,
+            CudaDbgLog::FOnce);
 
-	sahbvh_emitSahSplit((EmissionEvent *)m_emissions[1]->bufferOnDevice(),
-	    (EmissionEvent *)m_emissions[0]->bufferOnDevice(),
+	sahbvh_emitSahSplit((EmissionEvent *)outEmissionBuf()->bufferOnDevice(),
+	    (EmissionEvent *)inEmissionBuf()->bufferOnDevice(),
 	    (int2 *)bvh->internalNodeChildIndices(),
 	    (Aabb *)bvh->internalNodeAabbs(),
 	    (KeyValuePair *)m_runHash->bufferOnDevice(),
@@ -270,6 +286,13 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	    numNodes);
 
     CudaBase::CheckCudaError("sah split");
+	
+	sahlg.writeStruct(inEmissionBuf(), numEmissions, 
+            "in_emissionsaft", 
+            emissionDesc,
+            SIZE_OF_EMISSIONEVENT,
+            CudaDbgLog::FOnce);
+	
 	sahlg.writeStruct(m_splitBins, numEmissions * SAH_MAX_NUM_BINS * 3, 
             "bins", 
             binDesc,
@@ -277,13 +300,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
             CudaDbgLog::FOnce);
     
     sahlg.writeInt2(m_splitIds, numClusters, "emission_id", CudaDbgLog::FOnce);
-    
-    sahlg.writeStruct(m_emissions[0], numEmissions, 
-            "in_emissions", 
-            emissionDesc,
-            SIZE_OF_EMISSIONEVENT,
-            CudaDbgLog::FOnce);
-    
+	
     const unsigned numNodeb4 = numNodes;
     m_totalNodeCount->deviceToHost(&numNodes, 4);
 	
@@ -291,11 +308,15 @@ void SahBuilder::build(CudaLinearBvh * bvh)
     sahlg.writeAabb(bvh->internalAabbBuf(), numNodes, "internal_box", CudaDbgLog::FOnce);
     
 	numEmissions = numNodes - numNodeb4;
-    sahlg.writeStruct(m_emissions[1], numEmissions, 
+    sahlg.writeStruct(outEmissionBuf(), numEmissions, 
             "out_emissions", 
             emissionDesc,
             SIZE_OF_EMISSIONEVENT,
             CudaDbgLog::FOnce);
+		
+		sahlg.braceEnd(levelx);		
+		swapBuffer();
+	}
 }
 
 int SahBuilder::countTreeBits(void * morton, unsigned numPrimitives)
@@ -405,8 +426,6 @@ unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
             (uint *)m_runLength->bufferOnDevice(),
             numRuns);
     
-    // sahlg.writeFlt(m_clusterAabb, numRuns * 6, "cluster_box", CudaDbgLog::FOnce);
-	
 	sahbvh_writeSortedHash((KeyValuePair *)morton,
 							(KeyValuePair *)sortIntermediate(),
 							(uint *)m_runHeads->bufferOnDevice(),
@@ -425,4 +444,19 @@ void * SahBuilder::clusterAabbs()
 
 void * SahBuilder::emissionBlocks()
 { return m_emissionBlocks->bufferOnDevice(); }
+
+void SahBuilder::resetBuffer()
+{ m_bufferId = 0; }
+
+void SahBuilder::swapBuffer()
+{ 
+	m_bufferId++; 
+	m_bufferId = m_bufferId & 1;
+}
+
+CUDABuffer * SahBuilder::inEmissionBuf()
+{ return m_emissions[m_bufferId]; }
+
+CUDABuffer * SahBuilder::outEmissionBuf()
+{ return m_emissions[(m_bufferId+1)&1]; }
 //:~

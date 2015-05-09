@@ -55,25 +55,25 @@ __global__ void spawnNode_kernel(int2 * internalNodeChildIndices,
     EmissionEvent * spawn = &outEmissions[e.node_offset];
     spawn->root_id = leftChild;
     spawn->node_offset = 0;
+    spawn->n_split = 0;
     
     spawn++;
     spawn->root_id = rightChild;
     spawn->node_offset = 0;
+    spawn->n_split = 0;
 }
 
 __global__ void scanNodeOffset_kernel(uint * nodeCount,
                             EmissionEvent * inEmissions,
                             uint numEmissions)
 {
-    uint i=1;
-    EmissionEvent & last = inEmissions[0];
-    for(;i<numEmissions;i++) {
-        EmissionEvent & current = inEmissions[i];
-        current.node_offset = last.node_offset
-                                    + last.n_split * 2;
-        last = current;
+    uint i;
+    for(i=1;i<numEmissions;i++) {
+        inEmissions[i].node_offset = inEmissions[i-1].node_offset
+                                    + inEmissions[i-1].n_split * 2;
     }
-    nodeCount[0] += last.node_offset + last.n_split * 2;
+    nodeCount[0] += inEmissions[numEmissions-1].node_offset 
+                    + inEmissions[numEmissions-1].n_split * 2;
 }
 
 __global__ void splitIndirection_kernel(KeyValuePair * primitiveInd,
@@ -867,7 +867,7 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
                         inEmissions,
                         rootRanges,
                         numEmissions);
-    
+                        
     uint numBinningBlocks = 0;
     cudaMemcpy(&numBinningBlocks, totalBinningBlocks, 4, cudaMemcpyDeviceToHost); 
     if(numBinningBlocks < 1)
@@ -888,13 +888,13 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
                         numBins,
                         numClusters,
                         numBinningBlocks);
-    
+         
     sahbvh_bestSplit(splitBins,
                     inEmissions,
                     rootAabbs,
                     numBins,
                     numEmissions);
-    
+                    
     sahbvh_computeSplitSide(splitIds,
                             inEmissions,
                             clusterIndirection,
@@ -912,7 +912,7 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
     sahbvh_scanNodeOffset(totalNodeCount,
                             inEmissions,
                             numEmissions);
-    
+                            
     sahbvh_spawnNode(rootRanges,
                     rootAabbs,
                     outEmissions,
@@ -922,6 +922,7 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
                     numEmissions,
                     currentNumNodes,
                     totalNodeCount);
+                       
 }
 
 }

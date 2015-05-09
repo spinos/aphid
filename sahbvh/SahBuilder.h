@@ -27,6 +27,10 @@ private:
 	int getM(int n, int m);
     unsigned sortPrimitives(void * morton, void * primitiveAabbs, 
                         unsigned numPrimitives, int n, int m);
+	void resetBuffer();
+	void swapBuffer();
+	CUDABuffer * inEmissionBuf();
+	CUDABuffer * outEmissionBuf();
 private:
     CUDABuffer * m_mortonBits;
     CUDABuffer * m_clusterAabb;
@@ -40,4 +44,5 @@ private:
     CUDABuffer * m_splitIds;
     CUDABuffer * m_emissionBlocks;
     CUDABuffer * m_totalNodeCount;
+	int m_bufferId;
 };

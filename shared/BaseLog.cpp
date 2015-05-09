@@ -9,9 +9,11 @@
 
 #include "BaseLog.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include <boost/format.hpp>
 
 using namespace boost::posix_time;
+
+std::map<std::string, bool> BaseLog::VisitedPtr;
+
 BaseLog::BaseLog(const std::string & fileName)
 {
 	m_file.open(fileName.c_str(), std::ios::trunc);
@@ -68,3 +70,53 @@ void BaseLog::writeByTypeAndLoc(int type, int loc, char * data)
     }
 }
 
+void BaseLog::braceBegin(const std::string & notation, Frequency freq)
+{ 
+	if(!checkFrequency(freq, notation, 1)) return;
+	
+	m_file<<notation<<" {\n";
+	m_pathToName.push_back(notation);
+	//std::cout<<" last path { "<<m_pathToName.back();
+}
+
+void BaseLog::braceEnd(const std::string & notation, Frequency freq)
+{ 
+	if(m_pathToName.size() < 1) return;
+	
+	//std::cout<<" last path } "<<m_pathToName.back();
+	
+	if(notation!=m_pathToName.back()) return;
+	
+	m_file<<" } // end of "<<m_pathToName.back()<<"\n"; 
+	m_pathToName.pop_back(); 
+}
+
+bool BaseLog::checkFrequency(Frequency freq, const std::string & notation,
+							char ignorePath)
+{
+	if(freq == FIgnore) return true;
+	std::string fpn = notation;
+	if(!ignorePath) fpn = fullPathName(notation);
+	if(freq == FOnce) {
+        if(VisitedPtr.find(fpn) != VisitedPtr.end()) {
+			return false;
+		}
+		else
+			VisitedPtr[fpn] = true;
+    }
+	return true;
+}
+
+std::string BaseLog::fullPathName(const std::string & name)
+{
+	if(m_pathToName.size() < 1) return name;
+	
+	std::stringstream sst;
+	sst.str("/");
+	std::vector<std::string >::const_iterator it = m_pathToName.begin();
+	for(; it != m_pathToName.end(); ++it) {
+		sst<<*it<<"/";
+	}
+	sst<<name;
+	return sst.str();
+}

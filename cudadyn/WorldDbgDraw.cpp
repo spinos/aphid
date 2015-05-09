@@ -79,13 +79,16 @@ void WorldDbgDraw::showBvhHierarchy(CudaLinearBvh * bvh)
 			
 		bvhNodeAabb = internalBoxes[bvhNodeIndex];
 
-		bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
-		bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);
 		
-		//if(m_maxDisplayLevel - level < 2) {
+		//if(m_maxDisplayLevel - level < 2) 
+		if(isLeafNode(internalOrLeafNodeIndex)==0)
+		 {
+			bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
+			bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);
+		
 			m_drawer->setGroupColorLight(7);
 			m_drawer->boundingBox(bb);
-		//}
+		}
 
 		touchedInternal++;
 		

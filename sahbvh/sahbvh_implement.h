@@ -5,7 +5,7 @@
 #include <radixsort_implement.h>
 
 #define SAH_MAX_NUM_BINS 16
-#define SAH_MAX_N_BLOCKS 2048
+#define SAH_MAX_N_BLOCKS 1024
 #define SIZE_OF_SPLITBIN 64
 #define SIZE_OF_SPLITID 8
 #define SIZE_OF_EMISSIONBLOCK 8

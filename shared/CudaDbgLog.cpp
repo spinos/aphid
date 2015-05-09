@@ -4,8 +4,6 @@
 #include "AllMath.h"
 #include <boost/format.hpp>
 
-std::map<std::string, bool> CudaDbgLog::VisitedPtr;
-
 CudaDbgLog::CudaDbgLog(const std::string & fileName) :
 BaseLog(fileName)
 {
@@ -293,17 +291,5 @@ void CudaDbgLog::writeStruct(CUDABuffer * buf, unsigned n,
     buf->deviceToHost(m_hostBuf->data());
 	
 	writeStruct(m_hostBuf, n, notation, desc, size, FIgnore);
-}
-
-bool CudaDbgLog::checkFrequency(Frequency freq, const std::string & notation)
-{
-	if(freq == FIgnore) return true;
-	if(freq == FOnce) {
-        if(VisitedPtr.find(notation) != VisitedPtr.end())
-            return false;
-		else
-			VisitedPtr[notation] = true;
-    }
-	return true;
 }
 //:~
