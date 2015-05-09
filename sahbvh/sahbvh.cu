@@ -136,13 +136,14 @@ __global__ void bestSplit_kernel(SplitBin * splitBins,
     const float rootArea = areaOfAabb(&rootAabbs[iRoot]);
     const float g = longestSideOfAabb(rootBox) * .003f;
     
-    if(threadIdx.x < numBins * 3)
+    if(threadIdx.x < numBins * 3) {
         sCost[threadIdx.x] = costOfSplit(&splitBins[iEmission * numBins * 3 
                                                     + threadIdx.x],
                                         rootArea,
                                         g);
-    // splitBins[iEmission * numBins * 3 
-    //        + threadIdx.x].cost = sCost[threadIdx.x];
+        splitBins[iEmission * numBins * 3 
+              + threadIdx.x].cost = sCost[threadIdx.x];
+    }
     __syncthreads();
     
     int i;
@@ -251,6 +252,8 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
                numBins,
                maxNumInBlock);
     
+    __syncthreads();
+    
     if(ind < maxNumInBlock)
         computeSplitSide(sideVertical,
                         1,
@@ -274,6 +277,8 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
                COMPUTE_BINS_NTHREAD,
                numBins,
                maxNumInBlock);
+     
+     __syncthreads();
 
      if(ind < maxNumInBlock)
         computeSplitSide(sideVertical,
@@ -298,7 +303,7 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
                COMPUTE_BINS_NTHREAD,
                numBins,
                maxNumInBlock);
-
+     __syncthreads();
 }
 
 __global__ void resetBins_kernel(SplitBin * splitBins, 

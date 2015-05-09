@@ -252,7 +252,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 // emission-block relationship	
 	m_emissionBlocks->create((n * SIZE_OF_EMISSIONBLOCK)>>2);
 	
-	int maxLevel = 5;
+	int maxLevel = 4;
 	
 	int i = 0;
 	for(; i < maxLevel; i++) {
@@ -320,7 +320,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 		sahlg.braceEnd(levelx);		
 		swapBuffer();
 		
-		if(i<1) numBins = numBins>>1;
+		// if(i<1) numBins = numBins>>1;
 	}
 }
 
