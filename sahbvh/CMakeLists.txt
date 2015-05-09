@@ -53,6 +53,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "BvhBuilder.h"
 "LBvhBuilder.h"
 "SahBuilder.h"
+"binning_implement.h"
 "sahbvh_implement.h"
 "window.h"
 "glwidget.h")
@@ -123,6 +124,7 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
 "../cudanarrowphase/narrowphase.cu"
 "sah_math.cu"
+"binning.cu"
 "sahbvh.cu")
 
 ## disable warnings

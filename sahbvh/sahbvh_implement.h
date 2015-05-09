@@ -8,8 +8,11 @@
 #define SAH_MAX_N_BLOCKS 1024
 #define SIZE_OF_SPLITBIN 64
 #define SIZE_OF_SPLITID 8
-#define SIZE_OF_EMISSIONBLOCK 8
+#define SIZE_OF_EMISSIONBLOCK 16
 #define SIZE_OF_EMISSIONEVENT 16
+#define COMPUTE_BINS_NTHREAD 128
+#define COMPUTE_BINS_NTHREAD_M1 127
+#define COMPUTE_BINS_NTHREAD_LOG2 7
 
 struct EmissionEvent {
     uint root_id;
@@ -35,6 +38,8 @@ struct SplitBin {
 struct EmissionBlock {
     uint emission_id;
     uint primitive_offset;
+    int is_spilled;
+    int bin_offset;
 };
 
 struct SplitId {
@@ -106,7 +111,8 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
         SplitBin * splitBins,
         EmissionBlock * emissionIds,
         SplitId * splitIds,
-        uint * totalBinningBlocks,
+        SplitBin * spilledBins,
+        uint numBinningBlocks,
         uint * totalNodeCount,
 	    uint numClusters,
         uint numBins,

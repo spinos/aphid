@@ -44,5 +44,6 @@ private:
     CUDABuffer * m_splitIds;
     CUDABuffer * m_emissionBlocks;
     CUDABuffer * m_totalNodeCount;
+    CUDABuffer * m_spilledBins;
 	int m_bufferId;
 };

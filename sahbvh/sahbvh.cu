@@ -3,13 +3,6 @@
 #include "sah_math.cu"
 #include <CudaBase.h>
 
-#define ASSIGNE_EMISSIONID_NTHREAD 512
-#define ASSIGNE_EMISSIONID_NTHREAD_M1 511
-#define ASSIGNE_EMISSIONID_NTHREAD_LOG2 9
-#define COMPUTE_BINS_NTHREAD 128
-#define COMPUTE_BINS_NTHREAD_M1 127
-#define COMPUTE_BINS_NTHREAD_LOG2 7
-
 __global__ void spawnNode_kernel(int2 * internalNodeChildIndices,
                     Aabb * internalNodeAabbs,
                     EmissionEvent * outEmissions,
@@ -168,38 +161,6 @@ __global__ void bestSplit_kernel(SplitBin * splitBins,
     }
 }
 
-__global__ void numEmissionBlocks_kernel(uint * totalBlocks,
-        EmissionBlock * emissionIds,
-        EmissionEvent * inEmissions,
-        int2 * rootRanges,
-        uint numClusters,
-        uint numEmissions)
-{
-    uint iRoot;
-    int primitiveRangeBegin, primitiveRangeEnd;
-    int numPrimitivesInRange, nb;
-    uint nBlocks = 0;
-    uint i, j;
-    for(i=0;i<numEmissions;i++) {
-        iRoot = inEmissions[i].root_id;
-        primitiveRangeBegin = rootRanges[iRoot].x;
-        primitiveRangeEnd = rootRanges[iRoot].y;
-        numPrimitivesInRange = primitiveRangeEnd - primitiveRangeBegin + 1;
-        
-        nb = numPrimitivesInRange>>COMPUTE_BINS_NTHREAD_LOG2;
-        if(numPrimitivesInRange & COMPUTE_BINS_NTHREAD_M1) nb++;
-        
-        for(j=0; j<nb; j++) {
-            emissionIds[nBlocks].emission_id = i;
-            emissionIds[nBlocks].primitive_offset = primitiveRangeBegin + j * COMPUTE_BINS_NTHREAD;
-            nBlocks++;
-        }
-    }
-    emissionIds[nBlocks].emission_id = numEmissions - 1;
-    emissionIds[nBlocks].primitive_offset = numClusters;
-    totalBlocks[0] = nBlocks;
-}
-
 __global__ void computeBins_kernel(SplitBin * splitBins,
                         EmissionEvent * inEmissions,
                         Aabb * rootAabbs,
@@ -316,31 +277,6 @@ __global__ void resetBins_kernel(SplitBin * splitBins,
     const uint firstBin = iEmission * numBins * 3;
     
     resetSplitBin(splitBins[firstBin + threadIdx.x]);
-}
-
-__global__ void assignEmissionId_kernel(SplitId * splitIds,
-        EmissionEvent * inEmissions,
-        int2 * rootRanges,
-        uint nEmissions)
-{
-    uint iEmission = blockIdx.x;
-    if(iEmission >= nEmissions) return;
-    
-    uint iRoot = inEmissions[iEmission].root_id;
-    const int primitiveRangeBegin = rootRanges[iRoot].x;
-    const int primitiveRangeEnd = rootRanges[iRoot].y;
-    int numPrimitivesInRange = primitiveRangeEnd - primitiveRangeBegin + 1;
-    if(numPrimitivesInRange < 0) return; // invalid range
-
-    int npt = numPrimitivesInRange>>ASSIGNE_EMISSIONID_NTHREAD_LOG2;
-    if(numPrimitivesInRange & ASSIGNE_EMISSIONID_NTHREAD_M1) npt++;
-    
-    int i, j;
-    for(i=0; i<npt; i++) {
-        j = threadIdx.x * npt + i;
-        if(j < numPrimitivesInRange)
-            splitIds[primitiveRangeBegin + j].emission_id = iEmission;
-    }
 }
 
 __global__ void countTreeBits_kernel(uint * nbits, 
@@ -664,47 +600,6 @@ void sahbvh_computeClusterAabbs(Aabb * clusterAabbs,
                             n);
 }
 
-void sahbvh_numEmissionBlocks(uint * totalBinningBlocks,
-        EmissionBlock * emissionIds,
-        EmissionEvent * inEmissions,
-        int2 * rootRanges,
-        uint numClusters,
-        uint numEmissions)
-{
-    const int tpb = 1;
-    dim3 block(tpb, 1, 1);
-    const int nblk = 1;
-    dim3 grid(nblk, 1, 1);
-// one thread for all emissions
-// split emission primitive into blocks
-// assign emission id and block offset 
-// sum up number of blocks needed, last will be total num primitives
-    numEmissionBlocks_kernel<<< grid, block>>>(totalBinningBlocks,
-        emissionIds,
-        inEmissions,
-        rootRanges,
-        numClusters,
-        numEmissions);
-
-}
-
-void sahbvh_assignEmissionId(SplitId * splitIds,
-        EmissionEvent * inEmissions,
-        int2 * rootRanges,
-        uint numEmissions)
-{
-    const int tpb = ASSIGNE_EMISSIONID_NTHREAD;
-    dim3 block(tpb, 1, 1);
-    const int nblk = numEmissions;
-    dim3 grid(nblk, 1, 1);
-// one block for each emission
-// assign emissionIds to each primitive in range
-    assignEmissionId_kernel<<< grid, block>>>(splitIds,
-        inEmissions,
-        rootRanges,
-        numEmissions);
-}
-
 void sahbvh_resetBins(SplitBin * splitBins, 
                         EmissionEvent * inEmissions,
                         Aabb * rootAabbs,
@@ -860,30 +755,14 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
         SplitBin * splitBins,
         EmissionBlock * emissionIds,
         SplitId * splitIds,
-        uint * totalBinningBlocks,
+        SplitBin * spilledBins,
+        uint numBinningBlocks,
         uint * totalNodeCount,
 	    uint numClusters,
         uint numBins,
 	    uint numEmissions,
 	    uint currentNumNodes)
 {
-    sahbvh_assignEmissionId(splitIds,
-                            inEmissions,
-                            rootRanges,
-                            numEmissions);
-    
-    sahbvh_numEmissionBlocks(totalBinningBlocks,
-                        emissionIds,
-                        inEmissions,
-                        rootRanges,
-                        numClusters,
-                        numEmissions);
-                        
-    uint numBinningBlocks = 0;
-    cudaMemcpy(&numBinningBlocks, totalBinningBlocks, 4, cudaMemcpyDeviceToHost); 
-    if(numBinningBlocks < 1)
-        CudaBase::CheckCudaError("sah calc n binning blks");
-    
     sahbvh_resetBins(splitBins, 
                         inEmissions,
                         rootAabbs,
@@ -931,8 +810,7 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
                     numBins,
                     numEmissions,
                     currentNumNodes,
-                    totalNodeCount);
-                       
+                    totalNodeCount);                    
 }
 
 }

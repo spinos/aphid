@@ -121,6 +121,7 @@ give 14 nodes to each block
 #include <CudaDbgLog.h>
 #include <CudaReduction.h>
 #include <CudaLinearBvh.h>
+#include <binning_implement.h>
 #include <sahbvh_implement.h>
 #include <CudaBase.h>
 #include <CudaScan.h>
@@ -129,6 +130,7 @@ CudaDbgLog sahlg("sah.txt");
 
 static std::vector<std::pair<int, int> > binDesc;
 static std::vector<std::pair<int, int> > emissionDesc;
+static std::vector<std::pair<int, int> > emissionBlockDesc;
 
 SahBuilder::SahBuilder() 
 {
@@ -153,6 +155,11 @@ SahBuilder::SahBuilder()
 	emissionDesc.push_back(std::pair<int, int>(0, 4));
 	emissionDesc.push_back(std::pair<int, int>(0, 8));
     emissionDesc.push_back(std::pair<int, int>(0, 12));
+    
+    emissionBlockDesc.push_back(std::pair<int, int>(0, 0));
+	emissionBlockDesc.push_back(std::pair<int, int>(0, 4));
+	emissionBlockDesc.push_back(std::pair<int, int>(0, 8));
+    emissionBlockDesc.push_back(std::pair<int, int>(0, 12));
 	
     std::cout<<"size of bin "<<sizeof(SplitBin)<<"\n";
     m_mortonBits = new CUDABuffer;
@@ -168,6 +175,7 @@ SahBuilder::SahBuilder()
     m_splitIds = new CUDABuffer;
     m_emissionBlocks = new CUDABuffer;
     m_totalNodeCount = new CUDABuffer;
+    m_spilledBins = new CUDABuffer;
 	m_bufferId = 0;
 }
 
@@ -186,14 +194,17 @@ SahBuilder::~SahBuilder()
     delete m_splitIds;
     delete m_emissionBlocks;
 	delete m_totalNodeCount;
+	delete m_spilledBins;
 }
 
 void SahBuilder::initOnDevice()
 {
     m_emissions[0]->create(SAH_MAX_N_BLOCKS * SIZE_OF_EMISSIONEVENT);
     m_emissions[1]->create(SAH_MAX_N_BLOCKS * SIZE_OF_EMISSIONEVENT);
-    m_splitBins->create(256 * SIZE_OF_SPLITBIN * SAH_MAX_NUM_BINS * 3);
-    m_totalNodeCount->create(4);
+    m_emissionBlocks->create(SAH_MAX_N_BLOCKS * SIZE_OF_EMISSIONBLOCK);
+	m_splitBins->create(SAH_MAX_N_BLOCKS * SIZE_OF_SPLITBIN * (SAH_MAX_NUM_BINS>>1) * 3);
+	m_spilledBins->create(32 * SIZE_OF_SPLITBIN * SAH_MAX_NUM_BINS * 3);
+    m_totalNodeCount->create(16);
     BvhBuilder::initOnDevice();
 }
 
@@ -248,11 +259,10 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	
 	unsigned numEmissions = 1;
 	unsigned numBins = SAH_MAX_NUM_BINS;
+	unsigned numBinBlocks = 0;
+	unsigned numSpilledBinBlocks = 0;
 	
-// emission-block relationship	
-	m_emissionBlocks->create((n * SIZE_OF_EMISSIONBLOCK)>>2);
-	
-	int maxLevel = 4;
+	int maxLevel = 5;
 	
 	int i = 0;
 	for(; i < maxLevel; i++) {
@@ -267,7 +277,25 @@ void SahBuilder::build(CudaLinearBvh * bvh)
             emissionDesc,
             SIZE_OF_EMISSIONEVENT,
             CudaDbgLog::FOnce);
-
+    
+    sahbvh_getNumBinningBlocks(&numBinBlocks,
+        &numSpilledBinBlocks,
+        (uint *)(&((char *)m_totalNodeCount->bufferOnDevice())[4]),
+        (uint *)(&((char *)m_totalNodeCount->bufferOnDevice())[8]),
+        (SplitId *)splitIds(),
+        (EmissionBlock *)emissionBlocks(),
+        (EmissionEvent *)inEmissionBuf()->bufferOnDevice(),
+        (int2 *)bvh->internalNodeChildIndices(),
+        numClusters,
+        numEmissions);
+    
+    if(numSpilledBinBlocks > 0)
+        m_spilledBins->create(numSpilledBinBlocks * SIZE_OF_SPLITBIN * SAH_MAX_NUM_BINS * 3);
+    
+    sahlg.writeStruct(m_emissionBlocks, numBinBlocks + 1, 
+        "emission_bin_blk", emissionBlockDesc, SIZE_OF_EMISSIONBLOCK,
+        CudaDbgLog::FOnce);
+    
 	sahbvh_emitSahSplit((EmissionEvent *)outEmissionBuf()->bufferOnDevice(),
 	    (EmissionEvent *)inEmissionBuf()->bufferOnDevice(),
 	    (int2 *)bvh->internalNodeChildIndices(),
@@ -277,7 +305,8 @@ void SahBuilder::build(CudaLinearBvh * bvh)
         (SplitBin *)splitBins(),
         (EmissionBlock *)emissionBlocks(),
         (SplitId *)splitIds(),
-        (uint *)(&((char *)m_totalNodeCount->bufferOnDevice())[4]),
+        (SplitBin *)m_spilledBins->bufferOnDevice(),
+        numBinBlocks,
         (uint *)m_totalNodeCount->bufferOnDevice(),
 	    numClusters,
         numBins,
@@ -292,10 +321,6 @@ void SahBuilder::build(CudaLinearBvh * bvh)
             SIZE_OF_EMISSIONEVENT,
             CudaDbgLog::FOnce);
 			
-	int nbinblks = 0;
-	m_totalNodeCount->deviceToHost(&nbinblks, 4, 4);
-	sahlg.writeInt2(m_emissionBlocks, nbinblks + 1, "emission_bin_blk", CudaDbgLog::FOnce);
-	
 	sahlg.writeStruct(m_splitBins, numEmissions * numBins * 3, 
             "bins", 
             binDesc,
@@ -320,7 +345,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 		sahlg.braceEnd(levelx);		
 		swapBuffer();
 		
-		// if(i<1) numBins = numBins>>1;
+		if(i==2) numBins = numBins>>1;
 	}
 }
 
