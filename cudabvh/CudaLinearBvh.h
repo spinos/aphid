@@ -54,9 +54,9 @@ public:
 	const unsigned usedMemory() const;
 	
 	CUDABuffer * primitiveHashBuf();
-	CUDABuffer * internalNodeChildIndicesBuf();
-	CUDABuffer * internalNodeAabbsBuf();
-	
+	CUDABuffer * internalChildBuf();
+	CUDABuffer * internalAabbBuf();
+	void setRootChildAndAabb(int * child, float * box);
 #if DRAW_BVH_HASH
 	void * hostLeafHash();
 	void * hostLeafBox();
