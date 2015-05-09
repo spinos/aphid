@@ -27,9 +27,9 @@ struct BinAabb {
 };
 
 struct SplitBin {
-    BinAabb leftBox;
+    Aabb leftBox;
     uint leftCount;
-    BinAabb rightBox;
+    Aabb rightBox;
     uint rightCount;
     float cost;
     float plane;
@@ -111,6 +111,7 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
         SplitBin * splitBins,
         EmissionBlock * emissionIds,
         SplitId * splitIds,
+        uint numSpilledBinBlocks,
         SplitBin * spilledBins,
         uint numBinningBlocks,
         uint * totalNodeCount,

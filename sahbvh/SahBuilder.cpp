@@ -134,19 +134,19 @@ static std::vector<std::pair<int, int> > emissionBlockDesc;
 
 SahBuilder::SahBuilder() 
 {
-    binDesc.push_back(std::pair<int, int>(0, 0));
-	binDesc.push_back(std::pair<int, int>(0, 4));
-	binDesc.push_back(std::pair<int, int>(0, 8));
-	binDesc.push_back(std::pair<int, int>(0, 12));
-	binDesc.push_back(std::pair<int, int>(0, 16));
-	binDesc.push_back(std::pair<int, int>(0, 20));
+    binDesc.push_back(std::pair<int, int>(1, 0));
+	binDesc.push_back(std::pair<int, int>(1, 4));
+	binDesc.push_back(std::pair<int, int>(1, 8));
+	binDesc.push_back(std::pair<int, int>(1, 12));
+	binDesc.push_back(std::pair<int, int>(1, 16));
+	binDesc.push_back(std::pair<int, int>(1, 20));
 	binDesc.push_back(std::pair<int, int>(0, 24));
-	binDesc.push_back(std::pair<int, int>(0, 28));
-	binDesc.push_back(std::pair<int, int>(0, 32));
-	binDesc.push_back(std::pair<int, int>(0, 36));
-	binDesc.push_back(std::pair<int, int>(0, 40));
-	binDesc.push_back(std::pair<int, int>(0, 44));
-	binDesc.push_back(std::pair<int, int>(0, 48));
+	binDesc.push_back(std::pair<int, int>(1, 28));
+	binDesc.push_back(std::pair<int, int>(1, 32));
+	binDesc.push_back(std::pair<int, int>(1, 36));
+	binDesc.push_back(std::pair<int, int>(1, 40));
+	binDesc.push_back(std::pair<int, int>(1, 44));
+	binDesc.push_back(std::pair<int, int>(1, 48));
 	binDesc.push_back(std::pair<int, int>(0, 52));
 	binDesc.push_back(std::pair<int, int>(1, 56));
 	binDesc.push_back(std::pair<int, int>(1, 60));
@@ -262,7 +262,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	unsigned numBinBlocks = 0;
 	unsigned numSpilledBinBlocks = 0;
 	
-	int maxLevel = 5;
+	int maxLevel = 3;
 	
 	int i = 0;
 	for(; i < maxLevel; i++) {
@@ -305,6 +305,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
         (SplitBin *)splitBins(),
         (EmissionBlock *)emissionBlocks(),
         (SplitId *)splitIds(),
+        numSpilledBinBlocks,
         (SplitBin *)m_spilledBins->bufferOnDevice(),
         numBinBlocks,
         (uint *)m_totalNodeCount->bufferOnDevice(),
@@ -314,6 +315,12 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	    numNodes);
 
     CudaBase::CheckCudaError("sah split");
+    
+    sahlg.writeStruct(m_spilledBins, numSpilledBinBlocks * numBins * 3, 
+            "spilled_bins", 
+            binDesc,
+            SIZE_OF_SPLITBIN,
+            CudaDbgLog::FOnce);
 	
 	sahlg.writeStruct(inEmissionBuf(), numEmissions, 
             "in_emissionsaft", 

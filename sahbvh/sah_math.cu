@@ -52,34 +52,22 @@ inline __device__ void expandBinBox(BinAabb & dst,
 
 inline __device__ void updateSplitBinSide(SplitBin & dst,
                                         Aabb & fBox,
-                                        float3 p,
-                                        float h,
                                         int side)
 {
     if(side) {
         dst.rightCount++;
-        expandBinBox(dst.rightBox, fBox, p, h);
+        expandAabb(dst.rightBox, fBox);
     }
     else {
         dst.leftCount++;
-        expandBinBox(dst.leftBox, fBox, p, h);
+        expandAabb(dst.leftBox, fBox);
     }
 }
 
 inline __device__ void resetSplitBin(SplitBin & b)
 {
-    b.leftBox.low.x = 2000;
-    b.leftBox.low.y = 2000;
-    b.leftBox.low.z = 2000;
-    b.leftBox.high.x = -2000;
-    b.leftBox.high.y = -2000;
-    b.leftBox.high.z = -2000;
-    b.rightBox.low.x = 2000;
-    b.rightBox.low.y = 2000;
-    b.rightBox.low.z = 2000;
-    b.rightBox.high.x = -2000;
-    b.rightBox.high.y = -2000;
-    b.rightBox.high.z = -2000;
+    resetAabb(b.leftBox);
+    resetAabb(b.rightBox);
     b.leftCount = 0;
     b.rightCount = 0;
     b.cost = 0.f;
@@ -88,20 +76,10 @@ inline __device__ void resetSplitBin(SplitBin & b)
 inline __device__ void updateSplitBin(SplitBin & dst,
                                         SplitBin & src)
 {
-    atomicAdd(&dst.leftCount, src.leftCount);
-    atomicAdd(&dst.rightCount, src.rightCount);
-    atomicMin(&dst.leftBox.low.x, src.leftBox.low.x);
-    atomicMin(&dst.leftBox.low.y, src.leftBox.low.y);
-    atomicMin(&dst.leftBox.low.z, src.leftBox.low.z);
-    atomicMax(&dst.leftBox.high.x, src.leftBox.high.x);
-    atomicMax(&dst.leftBox.high.y, src.leftBox.high.y);
-    atomicMax(&dst.leftBox.high.z, src.leftBox.high.z);
-    atomicMin(&dst.rightBox.low.x, src.rightBox.low.x);
-    atomicMin(&dst.rightBox.low.y, src.rightBox.low.y);
-    atomicMin(&dst.rightBox.low.z, src.rightBox.low.z);
-    atomicMax(&dst.rightBox.high.x, src.rightBox.high.x);
-    atomicMax(&dst.rightBox.high.y, src.rightBox.high.y);
-    atomicMax(&dst.rightBox.high.z, src.rightBox.high.z);
+    dst.leftCount += src.leftCount;
+    dst.rightCount += src.rightCount;
+    expandAabb(dst.leftBox, src.leftBox);
+    expandAabb(dst.rightBox, src.rightBox);
 }
 
 inline __device__ float splitPlaneOfBin(Aabb * rootBox,
@@ -149,21 +127,15 @@ inline __device__ void computeSplitSide(int * side,
 }
 
 inline __device__ void updateBins(SplitBin * splitBins,
-                                uint iEmission,
                                 uint primitiveBegin,
                                 KeyValuePair * primitiveInd,
                                 Aabb * primitiveAabb,
                                 int * sideHorizontal,
-                                float3 rootBoxLow,
-                                float g,
                                 uint dimension,
                                 uint nThreads,
                                 uint numBins,
                                 uint numClusters)
 {
-    SplitBin & obin = splitBins[iEmission * numBins * 3 
-                                + numBins * dimension 
-                                + threadIdx.x];
     SplitBin aBin;
     resetSplitBin(aBin);
     
@@ -172,17 +144,19 @@ inline __device__ void updateBins(SplitBin * splitBins,
     for(int i=0; i<nThreads; i++) {
         ind = primitiveBegin + i;
         if(ind == numClusters) {
-            updateSplitBin(obin, aBin);
+            updateSplitBin(splitBins[numBins * dimension 
+                                + threadIdx.x], aBin);
             break;
         }
         
         fBox = primitiveAabb[primitiveInd[ind].value];
         
-        updateSplitBinSide(aBin, fBox, rootBoxLow, g, 
+        updateSplitBinSide(aBin, fBox, 
             sideHorizontal[i*SAH_MAX_NUM_BINS]);
         
         if(i == nThreads-1) {
-            updateSplitBin(obin, aBin);
+            updateSplitBin(splitBins[numBins * dimension 
+                                + threadIdx.x], aBin);
         }
     }  
 }
@@ -209,8 +183,8 @@ inline __device__ float costOfSplit(SplitBin * bin,
 // empty side is invalid
     if(bin->leftCount < 1 || bin->rightCount < 1) return 1e10f;
     
-    float leftArea = areaOfBinBox(&bin->leftBox, h);
-    float rightArea = areaOfBinBox(&bin->rightBox, h);
+    float leftArea = areaOfAabb(&bin->leftBox);
+    float rightArea = areaOfAabb(&bin->rightBox);
 
     return (leftArea / rootBoxArea * (float)bin->leftCount 
             + rightArea / rootBoxArea * (float)bin->rightCount);   

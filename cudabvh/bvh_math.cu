@@ -176,8 +176,12 @@ inline __device__ void expandAabb(Aabb & dst, float4 p)
 
 inline __device__ void expandAabb(Aabb & dst, const Aabb & b)
 {
-	expandAabb(dst, b.low);
-	expandAabb(dst, b.high);
+	if(b.low.x < dst.low.x) dst.low.x = b.low.x;
+    if(b.low.y < dst.low.y) dst.low.y = b.low.y;
+    if(b.low.z < dst.low.z) dst.low.z = b.low.z;
+    if(b.high.x > dst.high.x) dst.high.x = b.high.x;
+    if(b.high.y > dst.high.y) dst.high.y = b.high.y;
+    if(b.high.z > dst.high.z) dst.high.z = b.high.z;
 }
 
 inline __device__ void expandAabb(Aabb & dst, volatile Aabb * src)

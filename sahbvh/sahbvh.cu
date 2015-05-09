@@ -36,10 +36,13 @@ __global__ void spawnNode_kernel(int2 * internalNodeChildIndices,
     internalNodeChildIndices[rightChild].x = primitiveBegin + leftCount;
     internalNodeChildIndices[rightChild].y = primitiveEnd;
     
-    binAabbToAabb(internalNodeAabbs[leftChild], split.leftBox, 
-        rootBox.low, g);
-    binAabbToAabb(internalNodeAabbs[rightChild], split.rightBox, 
-        rootBox.low, g);
+    internalNodeAabbs[leftChild] = split.leftBox;
+    internalNodeAabbs[rightChild] = split.rightBox;
+    
+    //binAabbToAabb(internalNodeAabbs[leftChild], split.leftBox, 
+      //  rootBox.low, g);
+    //binAabbToAabb(internalNodeAabbs[rightChild], split.rightBox, 
+      //  rootBox.low, g);
   
 // mark as internal
     rootInd.x = (leftChild | 0x80000000);
@@ -161,7 +164,35 @@ __global__ void bestSplit_kernel(SplitBin * splitBins,
     }
 }
 
+__global__ void gatherSpillBins_kernel(SplitBin * splitBins,
+                        SplitBin * spilledBins,
+                        EmissionBlock * emissionIds,
+                        uint numBins,
+                        uint numBinningBlocks)
+{
+    if(emissionIds[blockIdx.x].is_spilled < 1) return;
+	if(threadIdx.x >= numBins * 3) return;
+	
+	const uint iEmission = emissionIds[blockIdx.x].emission_id;
+    
+	int isHead = 0;
+	if(blockIdx.x < 1) isHead = 1;
+	else if(emissionIds[blockIdx.x - 1].emission_id != iEmission) isHead = 1;
+	
+	if(isHead < 1) return;
+	
+	int i = blockIdx.x;
+	for(;i<numBinningBlocks; i++) {
+	    if(emissionIds[i].emission_id != iEmission) break;
+	    
+	    updateSplitBin(splitBins[iEmission * numBins * 3 + threadIdx.x],
+	        spilledBins[emissionIds[i].bin_offset * numBins * 3 + threadIdx.x]);
+	}
+	
+}
+
 __global__ void computeBins_kernel(SplitBin * splitBins,
+                        SplitBin * spilledBins,
                         EmissionEvent * inEmissions,
                         Aabb * rootAabbs,
                         EmissionBlock * emissionIds,
@@ -172,9 +203,15 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     __shared__ int sSide[SAH_MAX_NUM_BINS * COMPUTE_BINS_NTHREAD];
     
     const uint iEmission = emissionIds[blockIdx.x].emission_id;
+    const int iSpill = emissionIds[blockIdx.x].bin_offset;
     const uint primitiveBegin = emissionIds[blockIdx.x].primitive_offset;
     const uint iRoot = inEmissions[iEmission].root_id;
     const uint maxNumInBlock = emissionIds[blockIdx.x+1].primitive_offset;
+    
+    SplitBin * target = &splitBins[iEmission * numBins * 3];
+    
+    if(emissionIds[blockIdx.x].is_spilled) 
+        target = &spilledBins[iSpill * numBins * 3];
     
     uint ind = primitiveBegin + threadIdx.x;
 	
@@ -186,9 +223,7 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     Aabb clusterBox = clusterAabbs[clusterIndirection[ind].value];
     float3 center = centroidOfAabb(clusterBox);
     float * p = &center.x;
-    
-    const float g = longestSideOfAabb(rootBox) * .003f;
-    
+
     if(ind < maxNumInBlock)
 	    computeSplitSide(sideVertical,
                         0,
@@ -200,21 +235,18 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     __syncthreads();
     
     if(threadIdx.x < numBins)
-    updateBins(splitBins,
-                iEmission,
+    updateBins(target,
                 primitiveBegin,
                 clusterIndirection,
                clusterAabbs,
                sideHorizontal,
-               rootBox.low,
-               g,
                0,
                COMPUTE_BINS_NTHREAD,
                numBins,
                maxNumInBlock);
     
     __syncthreads();
-    
+
     if(ind < maxNumInBlock)
         computeSplitSide(sideVertical,
                         1,
@@ -226,14 +258,11 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     __syncthreads();
     
      if(threadIdx.x < numBins)
-     updateBins(splitBins,
-                iEmission,
+     updateBins(target,
                 primitiveBegin,
                 clusterIndirection,
                clusterAabbs,
                sideHorizontal,
-               rootBox.low,
-               g,
                1,
                COMPUTE_BINS_NTHREAD,
                numBins,
@@ -252,14 +281,11 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
     __syncthreads();
     
      if(threadIdx.x < numBins)
-     updateBins(splitBins,
-                iEmission,
+     updateBins(target,
                 primitiveBegin,
                 clusterIndirection,
                clusterAabbs,
                sideHorizontal,
-               rootBox.low,
-               g,
                2,
                COMPUTE_BINS_NTHREAD,
                numBins,
@@ -268,15 +294,12 @@ __global__ void computeBins_kernel(SplitBin * splitBins,
 }
 
 __global__ void resetBins_kernel(SplitBin * splitBins, 
-                        EmissionEvent * inEmissions,
-                        uint numBins)
+                        uint n)
 {
-    if(threadIdx.x >= numBins * 3) return;
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= n) return;
     
-    uint iEmission = blockIdx.x;
-    const uint firstBin = iEmission * numBins * 3;
-    
-    resetSplitBin(splitBins[firstBin + threadIdx.x]);
+    resetSplitBin(splitBins[ind]);
 }
 
 __global__ void countTreeBits_kernel(uint * nbits, 
@@ -601,30 +624,47 @@ void sahbvh_computeClusterAabbs(Aabb * clusterAabbs,
 }
 
 void sahbvh_resetBins(SplitBin * splitBins, 
-                        EmissionEvent * inEmissions,
-                        Aabb * rootAabbs,
+                        uint n)
+{
+    const int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    const int nblk = iDivUp(n, tpb);
+    dim3 grid(nblk, 1, 1);
+
+    resetBins_kernel<<< grid, block>>>(splitBins, 
+        n);
+}
+
+void sahbvh_gatherSpillBins(SplitBin * splitBins,
+                        SplitBin * spilledBins,
+                        EmissionBlock * emissionIds,
                         uint numBins,
-                        uint numEmissions)
+                        uint numBinningBlocks)
 {
     const int tpb = 128;
     dim3 block(tpb, 1, 1);
-    const int nblk = numEmissions;
+    const int nblk = numBinningBlocks;
     dim3 grid(nblk, 1, 1);
-// one block for each emission
-// reset 3 * n bins
-    resetBins_kernel<<< grid, block>>>(splitBins, 
-        inEmissions,
-        numBins);
+// one block per binning block
+// if it is spilled and head to event
+// go forward to add up all spilled bins and set to event bin
+    gatherSpillBins_kernel<<< grid, block>>>(splitBins,
+                        spilledBins,
+                        emissionIds,
+                        numBins,
+                        numBinningBlocks);
 }
 
 void sahbvh_computeBins(SplitBin * splitBins,
+                        SplitBin * spilledBins,
                         EmissionEvent * inEmissions,
                         Aabb * rootAabbs,
                         EmissionBlock * emissionIds,
                         KeyValuePair * clusterIndirection,
                         Aabb * clusterAabbs,
                         uint numBins,
-                        uint numBinningBlocks)
+                        uint numBinningBlocks,
+                        uint numSpilledBinBlocks)
 {
     const int tpb = COMPUTE_BINS_NTHREAD;
     dim3 block(tpb, 1, 1);
@@ -635,12 +675,21 @@ void sahbvh_computeBins(SplitBin * splitBins,
 // atomic update bin contents
 
     computeBins_kernel<<< grid, block>>>(splitBins,
+                        spilledBins,
                         inEmissions,
                         rootAabbs,
                         emissionIds,
                         clusterIndirection,
                         clusterAabbs,
                         numBins);
+
+    if(numSpilledBinBlocks > 0) {
+        sahbvh_gatherSpillBins(splitBins,
+                        spilledBins,
+                        emissionIds,
+                        numBins,
+                        numBinningBlocks);
+    }
 }
 
 void sahbvh_bestSplit(SplitBin * splitBins, 
@@ -755,6 +804,7 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
         SplitBin * splitBins,
         EmissionBlock * emissionIds,
         SplitId * splitIds,
+        uint numSpilledBinBlocks,
         SplitBin * spilledBins,
         uint numBinningBlocks,
         uint * totalNodeCount,
@@ -763,20 +813,23 @@ void sahbvh_emitSahSplit(EmissionEvent * outEmissions,
 	    uint numEmissions,
 	    uint currentNumNodes)
 {
-    sahbvh_resetBins(splitBins, 
-                        inEmissions,
-                        rootAabbs,
-                        numBins, 
-                        numEmissions);
+    sahbvh_resetBins(splitBins,
+                        numEmissions * numBins * 3);
     
-    sahbvh_computeBins(splitBins, 
+    if(numSpilledBinBlocks > 0)
+        sahbvh_resetBins(spilledBins,
+                        numSpilledBinBlocks * numBins * 3);
+    
+    sahbvh_computeBins(splitBins,
+                        spilledBins,
                         inEmissions,
                         rootAabbs,
                         emissionIds,
                         clusterIndirection,
                         clusterAabbs, 
                         numBins,
-                        numBinningBlocks);
+                        numBinningBlocks,
+                        numSpilledBinBlocks);
          
     sahbvh_bestSplit(splitBins,
                     inEmissions,
