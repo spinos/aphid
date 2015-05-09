@@ -86,7 +86,7 @@ void WorldDbgDraw::showBvhHierarchy(CudaLinearBvh * bvh)
 			bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
 			bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);
 		
-			m_drawer->setGroupColorLight(7);
+			m_drawer->setGroupColorLight(touchedInternal);
 			m_drawer->boundingBox(bb);
 		}
 

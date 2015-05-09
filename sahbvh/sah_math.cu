@@ -206,8 +206,12 @@ inline __device__ float costOfSplit(SplitBin * bin,
                         float rootBoxArea,
                         float h)
 {
+// empty side is invalid
+    if(bin->leftCount < 1 || bin->rightCount < 1) return 1e10f;
+    
     float leftArea = areaOfBinBox(&bin->leftBox, h);
     float rightArea = areaOfBinBox(&bin->rightBox, h);
+
     return (leftArea / rootBoxArea * (float)bin->leftCount 
             + rightArea / rootBoxArea * (float)bin->rightCount);   
 }

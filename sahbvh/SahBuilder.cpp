@@ -247,21 +247,20 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	inEmissionBuf()->hostToDevice(&eb, SIZE_OF_EMISSIONEVENT);
 	
 	unsigned numEmissions = 1;
+	unsigned numBins = SAH_MAX_NUM_BINS;
 	
 // emission-block relationship	
 	m_emissionBlocks->create((n * SIZE_OF_EMISSIONBLOCK)>>2);
 	
-	int maxLevel = 2;
+	int maxLevel = 5;
 	
 	int i = 0;
 	for(; i < maxLevel; i++) {
 		const std::string levelx = BaseLog::addSuffix<int>("level", i);
 		sahlg.braceBegin(levelx);
 	
-	// std::cout<<"    level"<<i<<" in"<<m_bufferId; 
- 
 // 16 bins for each dimension for first split
-    m_splitBins->create(numEmissions * SIZE_OF_SPLITBIN * SAH_MAX_NUM_BINS * 3);
+    m_splitBins->create(numEmissions * SIZE_OF_SPLITBIN * numBins * 3);
 	
 	sahlg.writeStruct(inEmissionBuf(), numEmissions, 
             "in_emissionsb4", 
@@ -281,7 +280,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
         (uint *)(&((char *)m_totalNodeCount->bufferOnDevice())[4]),
         (uint *)m_totalNodeCount->bufferOnDevice(),
 	    numClusters,
-        SAH_MAX_NUM_BINS,
+        numBins,
 	    numEmissions,
 	    numNodes);
 
@@ -292,14 +291,18 @@ void SahBuilder::build(CudaLinearBvh * bvh)
             emissionDesc,
             SIZE_OF_EMISSIONEVENT,
             CudaDbgLog::FOnce);
+			
+	int nbinblks = 0;
+	m_totalNodeCount->deviceToHost(&nbinblks, 4, 4);
+	sahlg.writeInt2(m_emissionBlocks, nbinblks, "emission_bin_blk", CudaDbgLog::FOnce);
 	
-	sahlg.writeStruct(m_splitBins, numEmissions * SAH_MAX_NUM_BINS * 3, 
+	sahlg.writeStruct(m_splitBins, numEmissions * numBins * 3, 
             "bins", 
             binDesc,
             SIZE_OF_SPLITBIN,
             CudaDbgLog::FOnce);
     
-    sahlg.writeInt2(m_splitIds, numClusters, "emission_id", CudaDbgLog::FOnce);
+    // sahlg.writeInt2(m_splitIds, numClusters, "emission_id", CudaDbgLog::FOnce);
 	
     const unsigned numNodeb4 = numNodes;
     m_totalNodeCount->deviceToHost(&numNodes, 4);
@@ -316,6 +319,8 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 		
 		sahlg.braceEnd(levelx);		
 		swapBuffer();
+		
+		if(i<1) numBins = numBins>>1;
 	}
 }
 
