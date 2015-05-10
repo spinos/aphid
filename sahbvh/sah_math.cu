@@ -136,6 +136,7 @@ inline __device__ void updateBins(SplitBin * splitBins,
                                 uint numBins,
                                 uint numClusters)
 {
+    resetSplitBin(splitBins[threadIdx.x]);
     SplitBin aBin;
     resetSplitBin(aBin);
     
@@ -144,8 +145,7 @@ inline __device__ void updateBins(SplitBin * splitBins,
     for(int i=0; i<nThreads; i++) {
         ind = primitiveBegin + i;
         if(ind == numClusters) {
-            updateSplitBin(splitBins[numBins * dimension 
-                                + threadIdx.x], aBin);
+            updateSplitBin(splitBins[threadIdx.x], aBin);
             break;
         }
         
@@ -155,8 +155,7 @@ inline __device__ void updateBins(SplitBin * splitBins,
             sideHorizontal[i*SAH_MAX_NUM_BINS]);
         
         if(i == nThreads-1) {
-            updateSplitBin(splitBins[numBins * dimension 
-                                + threadIdx.x], aBin);
+            updateSplitBin(splitBins[threadIdx.x], aBin);
         }
     }  
 }
@@ -177,8 +176,7 @@ inline __device__ float areaOfBinBox(BinAabb * box,
 }
 
 inline __device__ float costOfSplit(SplitBin * bin,
-                        float rootBoxArea,
-                        float h)
+                        float rootBoxArea)
 {
 // empty side is invalid
     if(bin->leftCount < 1 || bin->rightCount < 1) return 1e10f;
