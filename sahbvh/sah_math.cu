@@ -70,7 +70,6 @@ inline __device__ void resetSplitBin(SplitBin & b)
     resetAabb(b.rightBox);
     b.leftCount = 0;
     b.rightCount = 0;
-    b.cost = 0.f;
 }
 
 inline __device__ void updateSplitBin(SplitBin & dst,
@@ -112,18 +111,36 @@ inline __device__ void computeSplitSide(int * side,
                                         uint dimension,
                                         Aabb * rootBox,
                                         uint numBins,
-                                        float * p,
-                                        float * boxLow)
+                                        float p,
+                                        float boxLow)
 {
     float h = spanOfAabb(rootBox, dimension) / (float)numBins;
     
     setSplitSide(side, 0, numBins - 1);
     
-    int lastRight = lastBinSplitToRight(p[dimension],
-                        boxLow[dimension],
+    int lastRight = lastBinSplitToRight(p,
+                        boxLow,
                         h);
     
     setSplitSide(side, 1, lastRight);
+}
+
+inline __device__ void collectBins(SplitBin & dst,
+                                KeyValuePair * primitiveInd,
+                                Aabb * primitiveAabb,
+                                int * sideHorizontal,
+                                int begin,
+                                int end)
+{
+    int tid = 0;
+    for(int i=begin; i<end; i++) {
+        Aabb fBox = primitiveAabb[primitiveInd[i].value];
+        
+        updateSplitBinSide(dst, fBox, 
+            sideHorizontal[tid*SAH_MAX_NUM_BINS]);
+        
+        tid++;
+    }
 }
 
 inline __device__ void updateBins(SplitBin * splitBins,
@@ -136,7 +153,6 @@ inline __device__ void updateBins(SplitBin * splitBins,
                                 uint numBins,
                                 uint numClusters)
 {
-    resetSplitBin(splitBins[threadIdx.x]);
     SplitBin aBin;
     resetSplitBin(aBin);
     

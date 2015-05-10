@@ -31,7 +31,7 @@ struct SplitBin {
     uint leftCount;
     Aabb rightBox;
     uint rightCount;
-    float cost;
+    int id;
     float plane;
 };
 
