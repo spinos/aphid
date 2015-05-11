@@ -12,10 +12,36 @@ struct QuickSortPair {
    ValueType value;
 };
 
-template <typename KeyType, typename ValueType>
 class QuickSort1
 {
 public:
+    template <typename ValueType>
+    static void Sort(ValueType * kv, int first, int last)
+    {
+        if(last < first) return;
+        int low, high;
+        ValueType temp;
+        low = first;
+        high = last;
+        ValueType list_separator = kv[(first+last)/2];
+        do
+        {
+            while(kv[low] < list_separator) low++;
+            while(kv[high] > list_separator) high--;
+    
+            if(low<=high)
+            {
+                temp = kv[low];
+                kv[low++] = kv[high];
+                kv[high--]=temp;
+            }
+        } while(low<=high);
+        
+        if(first<high) Sort(kv,first,high);
+        if(low<last) Sort(kv,low,last);
+    }
+    
+    template <typename KeyType, typename ValueType>
     static void Sort(QuickSortPair<KeyType, ValueType > * kv, int first, int last)
     {
         if(last < first) return;

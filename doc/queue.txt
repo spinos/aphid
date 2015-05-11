@@ -1,1 +1,138 @@
 http://www.icg.tugraz.at/project/parallel/downloads
+
+Whippletree: Task-basedSchedulingofDynamicWorkloadsontheGPU
+
+Dynamic Task Parallelism with a GPU Work-Stealing Runtime System 
+
+L16: Dynamic Task Queues and Synchronization
+
+Dynamic Load Balancing on Single- and Multi-GPU Systems 
+
+Understanding the Efﬁciency of Ray Traversal on GPUs 
+
+http://nvlabs.github.io/nvbio/work__queue__ordered__inl_8h_source.html
+ 
+template<template <class> class QUEUE, class PROCINFO, class ApplicationContext = void, int maxShared = 16336, bool LoadToShared = true, bool MultiElement = true, bool StaticTimelimit  = false, bool DynamicTimelimit = false>
+class TechniqueCore
+  ^
+  |
+template<template <class> class QUEUE, class PROCINFO, class ApplicationContext, int maxShared, bool LoadToShared, bool MultiElement>
+class Technique<QUEUE,PROCINFO,ApplicationContext,maxShared,LoadToShared,MultiElement,false,false> : public TechniqueCore<QUEUE,PROCINFO,ApplicationContext,maxShared,LoadToShared,MultiElement,false,false>
+  ^
+  |
+class DynamicPointed : public Technique<Q, PROCINFO, CUSTOM, maxShared, false, true>
+  ^
+  |
+class DynamicPointed16336 : public DynamicPointed<Q, PROCINFO, CUSTOM, 16336>
+  ^
+  |
+Megakernel::DynamicPointed16336
+
+so 16336 is max shared mem
+
+#include "techniqueDynamicParallelism.cuh"
+
+Technique::insertIntoQueue(int num) 
+
+launch kernel initData with num as nblocks
+calls Queue::init(), which calls InitProc::init(), where
+
+q-> template enqueueInitial<Proc0>(d); d is expected data
+
+put Proc0 into queue
+
+#include "queueInterface.cuh"
+class Queue
+    ^
+    |
+template<class ProcedureInfo, template<uint TElementSize, uint TQueueSize, class TAdditionalData> class InternalPackageQueue, uint PackageQueueSize, template<uint TElementSize, uint TQueueSize, class TAdditionalData> class InternalItemQueue, uint ItemQueueSize, bool RandomSelect = false>
+class PerProcedureVersatileQueue : public ::Queue<> 
+    ^
+    |
+template<class ProcedureInfo, template<uint TElementSize, uint TQueueSize, class TAdditionalData> class InternalQueue, uint QueueSize, bool RandomSelect = false>
+class PerProcedureQueue : public PerProcedureVersatileQueue<ProcedureInfo, InternalQueue, QueueSize, InternalQueue, QueueSize, RandomSelect>
+{
+};
+    ^
+    |
+template<template<uint TElementSize, uint TQueueSize, class TAdditionalData> class InternalQueue, uint QueueSize, bool RandomSelect = false>
+struct PerProcedureQueueTyping 
+{
+  template<class ProcedureInfo>
+  class Type : public PerProcedureVersatileQueue<ProcedureInfo, InternalQueue, QueueSize, InternalQueue, QueueSize, RandomSelect> {}; 
+};
+  ^
+  |
+template<class ProcInfo>
+class MyQueue : public PerProcedureQueueTyping<QueueDistLocksOpt_t, 12*1024, false>::Type<ProcInfo> {};
+
+TechniqueCore::init() 
+
+q = std::unique_ptr<Q, cuda_deleter>(cudaAlloc<Q>());
+
+initQueue<Q> <<<512, 512>>>(q.get());
+
+#include "procedureInterface.cuh"
+
+Derived MyProc from class Procedure and override execute(int threadId, int numThreads, Q* queue,  ExpectedData* data, uint* shared)
+
+transferring the necessary queue, data, shared mem, etc
+
+in Proc0::execute()
+
+queue-> template enqueue< Proc1 >(*data, 0);
+
+in Proc1::execute()
+
+if(myLocalThreadId == 0)
+    queue-> template enqueue< Proc2 >(*data, 1);
+
+in Proc2::execute()
+
+really do something
+
+after queue is prepared
+
+Technique::execute()
+launch kernel
+
+__global__ void megakernel(Q* q, uint4 sharedMemDist, int t) where
+
+q is started, maintained, or ended
+
+
+snapped from https://devtalk.nvidia.com/default/topic/460974/cuda-programming-and-performance/shared-queue/
+
+#define MaxSize 10
+typedef struct Queue
+{
+    int *QItems;
+    int *index;
+} PriQueue q;
+
+__shared__ int localQ[MaxSize];
+__shared__ int localQ_index;
+__shared__ int globalQ_index;
+
+__global__ void makequeue(){}
+
+__global__ void dequeue (){}
+
+__global__ void enqueue (int newnode){
+//insert new node in the local queue
+    int index=atomicAdd(&localQ_index,1);
+    localQ[index]=newnode;
+
+//thread 0 obtain the index of the global queue
+    if (threadIdx.x==0)
+        globalQ_index=atomicAdd(q.index,localQ_index);
+
+    __synchthreads();
+
+//copy the local queue inot the global queue (other kernels can see)
+
+    if (threadIdx.x<localQ_index)
+        q.QItems[globalQ_index+threadIdx.x]=localQ[threadIdx.x];
+} 
+
+
