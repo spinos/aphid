@@ -4,6 +4,7 @@
 #include <BaseBuffer.h>
 #include <QuickSort.h>
 #include <iostream>
+#include <SimpleQueueInterface.h>
 
 cudaEvent_t start_event, stop_event;
 
@@ -40,8 +41,7 @@ extern "C" {
 void cu_testQuickSort(void * q,
                     unsigned * idata,
                     unsigned * nodes, 
-                    unsigned numNodes,
-                    unsigned maxNumNodes,
+                    SimpleQueueInterface * qi,
                     unsigned maxNumParallelNodes,
                     unsigned * checkMaxN);
 }
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
         
     printf("start task queue.\n");
     
-    unsigned n = 1<<22;
+    unsigned n = 1<<16;
     BaseBuffer hdata;
     hdata.create(n*4);
     
@@ -96,6 +96,17 @@ int main(int argc, char **argv)
     rootRange[1] = n - 1;
     nodesBuf.hostToDevice(&rootRange, 8);
     
+    SimpleQueueInterface qi;
+    qi.tbid = 0;
+    qi.numNodes = 1;
+    qi.maxNumWorks = maxNumNodes;
+    qi.lock = 0;
+    qi.workDone = 0;
+    
+    CUDABuffer dqi;
+    dqi.create(SIZE_OF_SIMPLEQUEUEINTERFACE);
+    dqi.hostToDevice(&qi, SIZE_OF_SIMPLEQUEUEINTERFACE);
+    
     CUDABuffer qbuf;
     qbuf.create(8);
 
@@ -110,19 +121,19 @@ int main(int argc, char **argv)
     cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
 	cudaEventRecord(start_event, 0);
     
+	std::cout<<" launch cu kernel\n";
     cu_testQuickSort(qbuf.bufferOnDevice(),
                                 deviceData, 
                                 nodes, 
-                                nodeCount,  
-                                maxNumNodes,
-                                2048,
+                                (SimpleQueueInterface *)dqi.bufferOnDevice(),
+                                1024,
                                 (unsigned *)maxnbuf.bufferOnDevice());
     
     cudaEventRecord(stop_event, 0);
     cudaEventSynchronize(stop_event);
     float met;
 	cudaEventElapsedTime(&met, start_event, stop_event);
-	std::cout<<" quicksort "<<n<<" ints took "<<met<<" milliseconds\n";
+	std::cout<<" test "<<n<<" took "<<met<<" milliseconds\n";
 		
     cudaEventDestroy(start_event);
     cudaEventDestroy(stop_event);
@@ -130,6 +141,10 @@ int main(int argc, char **argv)
     unsigned mnw = 0;
     maxnbuf.deviceToHost(&mnw, 4);
     std::cout<<" check q max n works "<<mnw<<"\n";
+    
+    dqi.deviceToHost(&qi, SIZE_OF_SIMPLEQUEUEINTERFACE);
+    std::cout<<" last work done by block "<<qi.workBlock<<"\n";
+    std::cout<<" n work done "<<qi.workDone<<"\n";
     
     // if(checkSortResult(hostData, n)) std::cout<<" cpu sorted passed.\n";
     printf("done.\n");
