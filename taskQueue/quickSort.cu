@@ -47,21 +47,30 @@
 #include "bvh_common.h"
 
 extern "C" {
-void cu_testQuickSort(uint * idata,
-                    uint * numNodes, uint * nodeRanges,
-                    uint maxNumNodes)
+void cu_testQuickSort(void * q,
+                    uint * idata,
+                    uint * nodes, 
+                    uint numNodes,
+                    uint maxNumNodes,
+                    uint maxNumParallelNodes,
+                    uint * checkMaxN)
 {
     printf("cu test quicksort\n");
-
-    const int tpb = 512;
+    printf("init q max n works %i\n", maxNumNodes);
+    simpleQueue::initSimpleQueue_kernel<<<512, 512>>>((simpleQueue::SimpleQueue *)q,
+        numNodes -1,
+        maxNumNodes);
+    
+    cudaDeviceSynchronize();
+    
+    // SimpleQueue q(lock, tail, nodeRanges);
+    const int tpb = 256;
     dim3 block(tpb, 1, 1);
-    const unsigned nblk = iDivUp(maxNumNodes, tpb);
+// one warp per parallel node
+    const unsigned nblk = maxNumParallelNodes>>5;
     dim3 grid(nblk, 1, 1);
-    /*
-    quickSort_kernel<<< grid, block>>>(obin,
-        idata,
-        h,
-        n);*/
+    
+    quickSort_checkQ_kernel<<<grid, block>>>(checkMaxN, (simpleQueue::SimpleQueue *)q);
 }
 
 }

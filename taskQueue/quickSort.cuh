@@ -1,4 +1,15 @@
+#ifndef QUICKSORT_CUH
+#define QUICKSORT_CUH
+
 #include <cuda_runtime_api.h>
+#include "SimpleQueue.cuh"
+
+__global__ void quickSort_checkQ_kernel(uint * maxN,
+                        simpleQueue::SimpleQueue * q)
+{
+   if(blockIdx.x < 1 && threadIdx.x < 1)
+        maxN[0] = q->maxNumWorks();
+}
 
 __global__ void quickSort_kernel(int * obin,
                     int * idata,
@@ -12,4 +23,6 @@ __global__ void quickSort_kernel(int * obin,
 	
     atomicAdd(&obin[d/h], 1);
 }
+
+#endif        //  #ifndef QUICKSORT_CUH
 

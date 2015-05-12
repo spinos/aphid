@@ -37,9 +37,13 @@ bool checkSortResult(unsigned * a,
 }
 
 extern "C" {
-void cu_testQuickSort(unsigned * idata,
-                    unsigned * nNodes, unsigned * nodeRanges,
-                    unsigned maxNumNodes);
+void cu_testQuickSort(void * q,
+                    unsigned * idata,
+                    unsigned * nodes, 
+                    unsigned numNodes,
+                    unsigned maxNumNodes,
+                    unsigned maxNumParallelNodes,
+                    unsigned * checkMaxN);
 }
 
 int main(int argc, char **argv)
@@ -77,38 +81,55 @@ int main(int argc, char **argv)
     ddata.hostToDevice(hostData);
     unsigned * deviceData = (unsigned *)ddata.bufferOnDevice();
     
-// max 2^16 nodes first int is n nodes
+// max 2^16 nodes first int is n levels
     unsigned maxNumNodes = 1<<16;
     std::cout<<" max n sorting nodes "<<maxNumNodes<<"\n";
     
     CUDABuffer nodesBuf;
-    nodesBuf.create((maxNumNodes + 1)*4);
+    nodesBuf.create((maxNumNodes * 2)*4);
     unsigned * nodes = (unsigned *)nodesBuf.bufferOnDevice();
     
 // create first node
     unsigned nodeCount = 1;
-    nodesBuf.hostToDevice(&nodeCount, 4);
     unsigned rootRange[2];
     rootRange[0] = 0;
     rootRange[1] = n - 1;
-    nodesBuf.hostToDevice(&rootRange, 4, 8);
+    nodesBuf.hostToDevice(&rootRange, 8);
     
-    cu_testQuickSort(deviceData, nodes, &nodes[1], maxNumNodes);
+    CUDABuffer qbuf;
+    qbuf.create(8);
+
+    CUDABuffer maxnbuf;
+    maxnbuf.create(4);
     
+    unsigned nine = 999;
+    maxnbuf.hostToDevice(&nine, 4);
     //QuickSort1::Sort<unsigned>(hostD, 0, n-1);
     
-    /*cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
+    cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
     cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
 	cudaEventRecord(start_event, 0);
+    
+    cu_testQuickSort(qbuf.bufferOnDevice(),
+                                deviceData, 
+                                nodes, 
+                                nodeCount,  
+                                maxNumNodes,
+                                2048,
+                                (unsigned *)maxnbuf.bufferOnDevice());
     
     cudaEventRecord(stop_event, 0);
     cudaEventSynchronize(stop_event);
     float met;
 	cudaEventElapsedTime(&met, start_event, stop_event);
-	// std::cout<<" quicksort "<<n<<" ints took "<<met<<" milliseconds\n";
+	std::cout<<" quicksort "<<n<<" ints took "<<met<<" milliseconds\n";
 		
     cudaEventDestroy(start_event);
-    cudaEventDestroy(stop_event);*/
+    cudaEventDestroy(stop_event);
+    
+    unsigned mnw = 0;
+    maxnbuf.deviceToHost(&mnw, 4);
+    std::cout<<" check q max n works "<<mnw<<"\n";
     
     // if(checkSortResult(hostData, n)) std::cout<<" cpu sorted passed.\n";
     printf("done.\n");

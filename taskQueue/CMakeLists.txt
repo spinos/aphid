@@ -25,10 +25,11 @@ set (SOURC_FILES "main.cpp"
 "../shared/CudaBase.cpp"
 "../shared/CUDABuffer.cpp"
 "../shared/BaseBuffer.cpp")
-set (CUSOURCES "quickSort.cu")
+set (CUSOURCES "quickSort.cu"
+"SimpleQueue.cu")
 
 if(WIN32)
-set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_20")
+set (CUDA_NVCC_FLAGS "--disable-warnings --ptxas-options=-v -arch sm_20")
 else()
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
 endif()
