@@ -37,7 +37,7 @@ struct SimpleQueue {
         _workDoneCounter = &interface->workDone;
         _qhead = interface->qhead;
         _qtail = interface->qtail;
-        _maxNumWorks = interface->maxNumWorks;   
+        _maxNumWorks = interface->maxNumWorks;
     }
     
     __device__ void lock()
@@ -95,20 +95,21 @@ struct SimpleQueue {
  *               -2 if no unfinished pregress out of work
  */    
     __device__ int dequeue()
-    {
-        if(isQueueFinished()) return -1;
-        if( atomicCAS( &_elements[_qhead], 0, 1 ) != 0 ) return -1;
+    {        
+        //if(isQueueFinished()) return -1;
+        int oldTail = _qtail;
+        int i = _qhead;
+        for(;i<oldTail;i++) {
+            if(atomicCAS( &_elements[i], 0, 1 ) == 0) {
+                _qhead = i;
+                return i;
+            }
+        }
+        return -1;
+        /*if( atomicCAS( &_elements[_qhead], 0, 1 ) != 0 ) return -1;
         int oldHead = _qhead;
         _qhead++;
-        return oldHead;
-    }
- 
-    __device__ int isQueueFinished()
-    {
-        //lock();
-        int status = (_qhead == _qtail);
-        //unlock();
-        return status;
+        return oldHead;*/
     }
     
     __device__ uint maxNumWorks()

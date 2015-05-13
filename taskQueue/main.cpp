@@ -74,7 +74,7 @@ int main(int argc, char **argv)
         
     printf("start task queue.\n");
     
-    unsigned n = 1<<16;
+    unsigned n = 1<<15;
     BaseBuffer hdata;
     hdata.create(n*4);
     
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
     CUDABuffer maxnbuf;
     maxnbuf.create(4);
     
-    unsigned numParallel = 1024;
+    unsigned numParallel = 4000;
     
     CUDABuffer blkbuf;
     blkbuf.create(maxNumNodes * 4);
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
     std::cout<<" q tail "<<qi.qtail<<"\n";
     
     qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
-    qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);
+    // qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);
     qslog.writeUInt(&blkbuf, qi.workDone, "work_blocks", CudaDbgLog::FOnce);
     qslog.writeUInt(&loopbuf, numParallel, "loop_blocks", CudaDbgLog::FOnce);
     
