@@ -46,7 +46,7 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
     int2 root;
     int headToSecond, spawn;
     
-    for(i=0;i<299;i++) {
+    for(i=0;i<149;i++) {
         if(blockIdx.x < 1 && threadIdx.x < 1) {
             if(i<1) {
                 q->init(qi);
@@ -88,29 +88,22 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                       }
                     }
                     
-                    q->setWorkDone();
+                    // q->setWorkDone();
                     qi->workBlock = blockIdx.x;
-                    
+                    //__threadfence_block();
             }
-            else {
-                __threadfence_block();
-                __threadfence_block();
-                __threadfence_block();
-                __threadfence_block();
-        __threadfence_block();
-        __threadfence_block();
-            }
+            
         }
-        __syncthreads();
+        //__syncthreads();
         
-        if(sWorkPerBlock[0] < -1) break;
+        //if(sWorkPerBlock[0] < 0) break;
     }
     
     if(threadIdx.x < 1)
         loopbuf[blockIdx.x] = loaded;
     
     if(blockIdx.x < 1 && threadIdx.x < 1) {
-        qi->tail = i;
+        qi->qtail = i;
         maxN[0] = q->workDoneCount();
     }
 }

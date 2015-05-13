@@ -101,8 +101,13 @@ int main(int argc, char **argv)
     rootRange[1] = n - 1;
     nodesBuf.hostToDevice(&rootRange, 8);
     
+    CUDABuffer elementsbuf;
+    elementsbuf.create(maxNumNodes * 4);
+    
     SimpleQueueInterface qi;
-    qi.tbid = 0;
+    qi.elements = (int *)elementsbuf.bufferOnDevice();
+    qi.qhead = 0;
+    qi.qtail = 0;
     qi.numNodes = 1;
     qi.maxNumWorks = maxNumNodes;
     qi.lock = 0;
@@ -159,7 +164,7 @@ int main(int argc, char **argv)
     dqi.deviceToHost(&qi, SIZE_OF_SIMPLEQUEUEINTERFACE);
     std::cout<<" last work done by block "<<qi.workBlock<<"\n";
     std::cout<<" n work done "<<qi.workDone<<"\n";
-    std::cout<<" q tail "<<qi.tail<<"\n";
+    std::cout<<" q tail "<<qi.qtail<<"\n";
     
     qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
     qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);
