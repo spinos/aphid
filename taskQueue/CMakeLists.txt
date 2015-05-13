@@ -24,6 +24,7 @@ set (HEADER_FILES "../shared/Morton3D.h"
 set (SOURC_FILES "main.cpp"
 "../shared/CudaBase.cpp"
 "../shared/CUDABuffer.cpp"
+"../shared/CudaDbgLog.cpp"
 "../shared/BaseBuffer.cpp")
 set (CUSOURCES "quickSort.cu"
 "SimpleQueue.cu")
@@ -85,4 +86,5 @@ target_link_libraries (testqueue ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (testqueue ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (testqueue ${Boost_REGEX_LIBRARY})
 
-
+set (AttributeNoninline "__attribute__ ((noinline))")
+add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})

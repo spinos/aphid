@@ -51,6 +51,7 @@ void cu_testQuickSort(void * q,
     quickSort_checkQ_kernel<<<grid, block>>>(checkMaxN, 
                                 (simpleQueue::SimpleQueue *)q,
                                 qi,
+                                idata,
                                 (int2 *)nodes);
 }
 

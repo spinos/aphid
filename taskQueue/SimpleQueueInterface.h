@@ -10,7 +10,8 @@ struct SimpleQueueInterface {
     uint lock;
     uint workDone;
     uint workBlock;
-    uint padding[2];
+    uint tail;
+    uint padding;
 };
 #endif        //  #ifndef SIMPLEQUEUEINTERFACE_H
 

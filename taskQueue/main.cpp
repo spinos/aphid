@@ -3,8 +3,11 @@
 #include <CUDABuffer.h>
 #include <BaseBuffer.h>
 #include <QuickSort.h>
+#include <CudaDbgLog.h>
 #include <iostream>
 #include <SimpleQueueInterface.h>
+
+CudaDbgLog qslog("qsort.txt");
 
 cudaEvent_t start_event, stop_event;
 
@@ -74,7 +77,7 @@ int main(int argc, char **argv)
     hdata.create(n*4);
     
     unsigned * hostData = (unsigned *)hdata.data();
-    makeRadomUints(hostData, n, 16);
+    makeRadomUints(hostData, n, 30);
     
     CUDABuffer ddata;
     ddata.create(n*4);
@@ -126,7 +129,7 @@ int main(int argc, char **argv)
                                 deviceData, 
                                 nodes, 
                                 (SimpleQueueInterface *)dqi.bufferOnDevice(),
-                                1024,
+                                4096,
                                 (unsigned *)maxnbuf.bufferOnDevice());
     
     cudaEventRecord(stop_event, 0);
@@ -145,8 +148,13 @@ int main(int argc, char **argv)
     dqi.deviceToHost(&qi, SIZE_OF_SIMPLEQUEUEINTERFACE);
     std::cout<<" last work done by block "<<qi.workBlock<<"\n";
     std::cout<<" n work done "<<qi.workDone<<"\n";
+    std::cout<<" q tail "<<qi.tail<<"\n";
     
-    // if(checkSortResult(hostData, n)) std::cout<<" cpu sorted passed.\n";
+    qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
+    qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);
+    
+    ddata.deviceToHost(hostData);
+    if(checkSortResult(hostData, n)) std::cout<<" gpu sorted passed.\n";
     printf("done.\n");
     exit(0);
 }
