@@ -46,7 +46,9 @@ void cu_testQuickSort(void * q,
                     unsigned * nodes, 
                     SimpleQueueInterface * qi,
                     unsigned maxNumParallelNodes,
-                    unsigned * checkMaxN);
+                    unsigned * checkMaxN,
+                    unsigned * workBlocks,
+                    unsigned * loopbuf);
 }
 
 int main(int argc, char **argv)
@@ -116,6 +118,13 @@ int main(int argc, char **argv)
     CUDABuffer maxnbuf;
     maxnbuf.create(4);
     
+    unsigned numParallel = 1024;
+    
+    CUDABuffer blkbuf;
+    blkbuf.create(maxNumNodes * 4);
+    CUDABuffer loopbuf;
+    loopbuf.create(numParallel * 4);
+    
     unsigned nine = 999;
     maxnbuf.hostToDevice(&nine, 4);
     //QuickSort1::Sort<unsigned>(hostD, 0, n-1);
@@ -129,8 +138,10 @@ int main(int argc, char **argv)
                                 deviceData, 
                                 nodes, 
                                 (SimpleQueueInterface *)dqi.bufferOnDevice(),
-                                4096,
-                                (unsigned *)maxnbuf.bufferOnDevice());
+                                numParallel,
+                                (unsigned *)maxnbuf.bufferOnDevice(),
+                                (unsigned *)blkbuf.bufferOnDevice(),
+                                (unsigned *)loopbuf.bufferOnDevice());
     
     cudaEventRecord(stop_event, 0);
     cudaEventSynchronize(stop_event);
@@ -152,6 +163,8 @@ int main(int argc, char **argv)
     
     qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
     qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);
+    qslog.writeUInt(&blkbuf, qi.workDone, "work_blocks", CudaDbgLog::FOnce);
+    qslog.writeUInt(&loopbuf, numParallel, "loop_blocks", CudaDbgLog::FOnce);
     
     ddata.deviceToHost(hostData);
     if(checkSortResult(hostData, n)) std::cout<<" gpu sorted passed.\n";

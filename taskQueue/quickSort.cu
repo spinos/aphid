@@ -39,7 +39,9 @@ void cu_testQuickSort(void * q,
                     uint * nodes, 
                     SimpleQueueInterface * qi,
                     uint maxNumParallelNodes,
-                    uint * checkMaxN)
+                    uint * checkMaxN,
+                    uint * workBlocks,
+                    uint * loopbuf)
 {
     //cudaDeviceSynchronize();
     const int tpb = 256;
@@ -52,7 +54,9 @@ void cu_testQuickSort(void * q,
                                 (simpleQueue::SimpleQueue *)q,
                                 qi,
                                 idata,
-                                (int2 *)nodes);
+                                (int2 *)nodes,
+                                workBlocks,
+                                loopbuf);
 }
 
 }

@@ -31,7 +31,7 @@ struct SimpleQueue {
     {
         _mutex = &interface->lock;
         _workDoneCounter = &interface->workDone;
-        _tbid = 0;//interface->tbid;
+        _tbid = interface->tbid;
         _qinTail = _qoutTail = 0;
         _maxNumWorks = interface->maxNumWorks;   
     }
@@ -164,7 +164,7 @@ struct SimpleQueue {
     
     __device__ int isAllWorkDone()
     {
-        return *_workDoneCounter >= _tbid-1;
+        return (*_workDoneCounter >= _tbid && _tbid > 1);
     }
     
     __device__ uint outTail()

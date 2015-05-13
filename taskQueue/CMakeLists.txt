@@ -6,6 +6,7 @@ project (testqueue)
 set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
+set (CMAKE_BUILD_TYPE RELEASE)
 find_package (CUDA QUIET REQUIRED)
 
 message ("cuda found ? " ${CUDA_FOUND})
@@ -40,15 +41,6 @@ CUDA_ADD_EXECUTABLE (testqueue ${HEADER_FILES} ${SOURC_FILES} ${CUSOURCES})
 target_link_libraries(testqueue ${CUDA_CUDART_LIBRARY})
 target_link_libraries(testqueue ${CUDA_cublas_LIBRARY})
 target_link_libraries(testqueue ${CUDA_cusparse_LIBRARY})
-
-if (WIN32)
-set (Aphid_Library "D:/aphid/lib/aphid.lib")
-else ()
-set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
-endif ()
-
-target_link_libraries (testqueue ${Aphid_Library})
-
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -88,3 +80,12 @@ target_link_libraries (testqueue ${Boost_REGEX_LIBRARY})
 
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
+
+if (WIN32)
+set (Aphid_Library "D:/aphid/lib/aphid.lib")
+else ()
+set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
+endif ()
+
+target_link_libraries (testqueue ${Aphid_Library})
+

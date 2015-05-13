@@ -36,18 +36,21 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                         simpleQueue::SimpleQueue * q,
                         SimpleQueueInterface * qi,
                         uint * idata,
-                        int2 * nodes)
+                        int2 * nodes,
+                        uint * workBlocks,
+                        uint * loopbuf)
 {
     __shared__ int sWorkPerBlock[128];
+    int i=0;
+    int loaded = 0;
     int2 root;
     int headToSecond, spawn;
-    int i=0;
-    for(;i<19;i++) {
+    
+    for(i=0;i<299;i++) {
         if(blockIdx.x < 1 && threadIdx.x < 1) {
             if(i<1) {
                 q->init(qi);
                 q->enqueue();
-                i++;
             }
         }
         
@@ -63,8 +66,9 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
         if(threadIdx.x < 1) {
             sWorkPerBlock[0] = q->dequeue();
             
-            if(sWorkPerBlock[0] > -1) {
+            if(sWorkPerBlock[0] > -1) { loaded++;
                 root = nodes[sWorkPerBlock[0]];
+                workBlocks[sWorkPerBlock[0]] = blockIdx.x;
                 quickSort_redistribute(idata,
                             root,
                             headToSecond);
@@ -76,7 +80,7 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                         nodes[spawn].x = root.x;
                         nodes[spawn].y = headToSecond - 1;
                       }
-                        
+                      
                       if(headToSecond < root.y) {
                         spawn = q->enqueue();
                         nodes[spawn].x = headToSecond;
@@ -85,15 +89,25 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                     }
                     
                     q->setWorkDone();
-                    qi->workBlock = i;
+                    qi->workBlock = blockIdx.x;
+                    
+            }
+            else {
+                __threadfence_block();
+                __threadfence_block();
+                __threadfence_block();
+                __threadfence_block();
+        __threadfence_block();
+        __threadfence_block();
             }
         }
         __syncthreads();
         
         if(sWorkPerBlock[0] < -1) break;
-        
-        // if(q->workDoneCount() > 2086) break;
     }
+    
+    if(threadIdx.x < 1)
+        loopbuf[blockIdx.x] = loaded;
     
     if(blockIdx.x < 1 && threadIdx.x < 1) {
         qi->tail = i;
