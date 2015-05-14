@@ -38,39 +38,41 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                         uint * idata,
                         int2 * nodes,
                         uint * workBlocks,
-                        uint * loopbuf)
+                        uint * loopbuf,
+                        int4 * headtailperloop)
 {
-    __shared__ int sWorkPerBlock[128];
-    int i=0;
+    __shared__ int sWorkPerBlock[512];
+    // __shared__ simpleQueue::TimeLimiter<1000> timelimiter;
+
+    int i=0, j;
     int loaded = 0;
     int2 root;
     int headToSecond, spawn, offset;
     
-    // for(i=0;i<2;i++) 
+    for(i=0;i<9;i++) 
     {
-        if(blockIdx.x < 1 && threadIdx.x < 1) {
-            if(i<1) {
-                q->init(qi);
-                q->enqueue();
-                i++;
-            }
+        if(i<1) {
+            q->init(qi);
+            continue;
         }
         
-        if(threadIdx.x < 1) {
-            sWorkPerBlock[0] = 1;
-            if(q->maxNumWorks() < 1)
-                sWorkPerBlock[0] = 0;
+        if(q->isEmpty()) {
+            continue;
         }
-        __syncthreads();
         
-        //if(sWorkPerBlock[0] < 1) continue;
+       // if(threadIdx.x < 1)
+         //   for(j=0;j<(blockDim.x>>5);j++) sWorkPerBlock[j] = 1;
 
-        if((threadIdx.x&31)== 0) {
-            sWorkPerBlock[0] = q->dequeue();
+        __syncthreads();
+
+        if((threadIdx.x&31) == 0) {
+            sWorkPerBlock[threadIdx.x>>5] = q->dequeue();
             
-            if(sWorkPerBlock[0] > -1) { loaded++;
-                root = nodes[sWorkPerBlock[0]];
-                workBlocks[sWorkPerBlock[0]] = blockIdx.x;//offset;//q->tail() - q->head();//
+            if(sWorkPerBlock[threadIdx.x>>5] > -1) { loaded++;
+                root = nodes[sWorkPerBlock[threadIdx.x>>5]];
+                
+                workBlocks[sWorkPerBlock[threadIdx.x>>5]] = blockIdx.x;//q->workDoneCount();//offset;//q->tail() - q->head();//
+                
                 quickSort_redistribute(idata,
                             root,
                             headToSecond);
@@ -83,31 +85,54 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                         nodes[spawn].y = headToSecond - 1;
                       }
                       
+                      
+                      
                       if(headToSecond < root.y) {
                         spawn = q->enqueue();
                         nodes[spawn].x = headToSecond;
                         nodes[spawn].y = root.y;
                       }
+                      
+                      
                     }
                     
                     q->setWorkDone();
-                    qi->workBlock = blockIdx.x;
-                    
-            }            
-            //__threadfence_block();            
-        }
-        //__syncthreads();
+                    qi->workBlock = spawn;
         
-        //if(sWorkPerBlock[0] < 0) break;
+                    __threadfence_block();
+                    
+                    q->swapTails();
+            }           
+                     
+        }
+        
+        //if(q->workDoneCount() == q->tail() && q->tail() > 1) {
+          // qi->qtail = q->tail();
+          // timelimiter.start();
+        //}
+        __syncthreads();
+        
+        //if(timelimiter.stop()) break;
+        
+        if(threadIdx.x < 1) {
+        loopbuf[blockIdx.x] = loaded; 
+        
+        }
+        
+        //
+          //  
+                  
+        if(threadIdx.x <1) {
+            headtailperloop[i].x = q->head();
+            headtailperloop[i].y= q->intail();
+            headtailperloop[i].z= q->outtail();
+            headtailperloop[i].w= q->workDoneCount();
+        }
     }
     
-    if(threadIdx.x < 1)
-        loopbuf[blockIdx.x] = loaded;
-    
-    if(threadIdx.x < 1) {
-        qi->qtail = i;
-        atomicAdd(maxN, 1);
-    }
+    if(blockIdx.x < 1 && threadIdx.x <1) {
+             *maxN = i;//q->workDoneCount();
+        }
 }
 /*
 __global__ void quickSort_kernel(int * obin,

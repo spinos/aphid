@@ -42,10 +42,11 @@ void cu_testQuickSort(void * q,
                     uint maxNumParallelNodes,
                     uint * checkMaxN,
                     uint * workBlocks,
-                    uint * loopbuf)
+                    uint * loopbuf,
+                    int * headtailperloop)
 {
     //cudaDeviceSynchronize();
-    const int tpb = 512;
+    const int tpb = 256;
     dim3 block(tpb, 1, 1);
 // one warp per parallel node
     const unsigned nblk = maxNumParallelNodes;
@@ -57,7 +58,8 @@ void cu_testQuickSort(void * q,
                                 idata,
                                 (int2 *)nodes,
                                 workBlocks,
-                                loopbuf);
+                                loopbuf,
+                                (int4 *)headtailperloop);
     
     CudaBase::CheckCudaError("q sort");
 }

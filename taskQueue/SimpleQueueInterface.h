@@ -2,16 +2,18 @@
 #define SIMPLEQUEUEINTERFACE_H
 
 #include "bvh_common.h"
-#define SIZE_OF_SIMPLEQUEUEINTERFACE 32
+#define SIZE_OF_SIMPLEQUEUEINTERFACE 64
 struct SimpleQueueInterface {
     int * elements;
     int lock;
-    uint qhead;
-    uint qtail;
+    int qhead;
+    int qouttail;
+    int qintail;
     uint numNodes;
     uint maxNumWorks;
-    uint workDone;
+    int workDone;
     uint workBlock;
+    int padding[7];
 };
 #endif        //  #ifndef SIMPLEQUEUEINTERFACE_H
 

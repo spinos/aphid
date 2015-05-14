@@ -6,8 +6,10 @@
 #include <CudaDbgLog.h>
 #include <iostream>
 #include <SimpleQueueInterface.h>
-
+#include <vector>
 CudaDbgLog qslog("qsort.txt");
+
+static std::vector<std::pair<int, int> > headtailDesc;
 
 cudaEvent_t start_event, stop_event;
 
@@ -48,7 +50,8 @@ void cu_testQuickSort(void * q,
                     unsigned maxNumParallelNodes,
                     unsigned * checkMaxN,
                     unsigned * workBlocks,
-                    unsigned * loopbuf);
+                    unsigned * loopbuf,
+                    int * headtailperloop);
 }
 
 int main(int argc, char **argv)
@@ -73,6 +76,14 @@ int main(int argc, char **argv)
     }
         
     printf("start task queue.\n");
+    
+    headtailDesc.push_back(std::pair<int, int>(0, 0));
+headtailDesc.push_back(std::pair<int, int>(0, 4));
+headtailDesc.push_back(std::pair<int, int>(0, 8));
+headtailDesc.push_back(std::pair<int, int>(0, 12));
+
+    
+    std::cout<<"size of qi "<<sizeof(SimpleQueueInterface);
     
     unsigned n = 1<<15;
     BaseBuffer hdata;
@@ -107,7 +118,8 @@ int main(int argc, char **argv)
     SimpleQueueInterface qi;
     qi.elements = (int *)elementsbuf.bufferOnDevice();
     qi.qhead = 0;
-    qi.qtail = 0;
+    qi.qintail = 1;
+    qi.qouttail = 1;
     qi.numNodes = 1;
     qi.maxNumWorks = maxNumNodes;
     qi.lock = 0;
@@ -123,7 +135,10 @@ int main(int argc, char **argv)
     CUDABuffer maxnbuf;
     maxnbuf.create(4);
     
-    unsigned numParallel = 4000;
+    CUDABuffer headtailperloop;
+    headtailperloop.create(16 * 25);
+    
+    unsigned numParallel = 500;
     
     CUDABuffer blkbuf;
     blkbuf.create(maxNumNodes * 4);
@@ -146,7 +161,8 @@ int main(int argc, char **argv)
                                 numParallel,
                                 (unsigned *)maxnbuf.bufferOnDevice(),
                                 (unsigned *)blkbuf.bufferOnDevice(),
-                                (unsigned *)loopbuf.bufferOnDevice());
+                                (unsigned *)loopbuf.bufferOnDevice(),
+                                (int *)headtailperloop.bufferOnDevice());
     
     cudaEventRecord(stop_event, 0);
     cudaEventSynchronize(stop_event);
@@ -159,17 +175,20 @@ int main(int argc, char **argv)
     
     unsigned mnw = 0;
     maxnbuf.deviceToHost(&mnw, 4);
-    std::cout<<" check q max n works "<<mnw<<"\n";
+    std::cout<<" check last qtail "<<mnw<<"\n";
     
     dqi.deviceToHost(&qi, SIZE_OF_SIMPLEQUEUEINTERFACE);
     std::cout<<" last work done by block "<<qi.workBlock<<"\n";
     std::cout<<" n work done "<<qi.workDone<<"\n";
-    std::cout<<" q tail "<<qi.qtail<<"\n";
+    std::cout<<" q head "<<qi.qhead<<"\n";
+    std::cout<<" q in tail "<<qi.qintail<<"\n";
+    std::cout<<" q out tail "<<qi.qouttail<<"\n";
     
-    qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
+    //if(qi.workDone>0) qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
     // qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);
-    qslog.writeUInt(&blkbuf, qi.workDone, "work_blocks", CudaDbgLog::FOnce);
-    qslog.writeUInt(&loopbuf, numParallel, "loop_blocks", CudaDbgLog::FOnce);
+    //if(qi.workDone>0) qslog.writeUInt(&blkbuf, qi.workDone, "work_blocks", CudaDbgLog::FOnce);
+    //qslog.writeUInt(&loopbuf, numParallel, "loop_blocks", CudaDbgLog::FOnce);
+    qslog.writeStruct(&headtailperloop, 25, "head_tail", headtailDesc,16, CudaDbgLog::FOnce);
     
     ddata.deviceToHost(hostData);
     if(checkSortResult(hostData, n)) std::cout<<" gpu sorted passed.\n";
