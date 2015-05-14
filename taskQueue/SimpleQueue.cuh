@@ -32,20 +32,18 @@ struct SimpleQueue {
  */
     __device__ void init(SimpleQueueInterface * interface) 
     {
-        if(blockIdx.x < 1 && threadIdx.x < 1) {
-            _mutex = &interface->lock;
-            _elements = interface->elements;
-            _workDoneCounter = &interface->workDone;
-            _qhead = &interface->qhead;
-            _qintail = &interface->qintail;
-            _qouttail = &interface->qouttail;
-            _maxNumWorks = interface->maxNumWorks;
-            
-            *_qhead = 0;
-            *_qintail = 1;
-            *_qouttail = 1;
-            _elements[0] = 0;
-        }
+        _mutex = &interface->lock;
+        _elements = interface->elements;
+        _workDoneCounter = &interface->workDone;
+        _qhead = &interface->qhead;
+        _qintail = &interface->qintail;
+        _qouttail = &interface->qouttail;
+        _maxNumWorks = interface->maxNumWorks;
+        
+        *_qhead = 0;
+        *_qintail = 1;
+        *_qouttail = 1;
+        _elements[0] = 0;
     }
     
     __device__ void lock()
@@ -75,11 +73,11 @@ struct SimpleQueue {
     __device__ int enqueue()
     {
         int oldTail = atomicAdd(_qouttail, 1);
-        /*lock();
-        int oldTail = _qouttail;
-        _qouttail++;
+        //lock();
+        //int oldTail = *_qouttail;
+        //*_qouttail += 1;
         
-        unlock();*/
+        //unlock();
         _elements[oldTail] = 0;
         return oldTail;
         // return atomicAdd(&_qtail, 1);
@@ -121,6 +119,21 @@ struct SimpleQueue {
         return oldHead;*/
     }
     
+    __device__ int dequeue(int offset, int stride)
+    {       
+        int k = *_qhead + offset;
+        
+        while(k< *_qintail) {
+            if( atomicCAS( &_elements[k], 0, 1 ) == 0 ) {
+            //if(_elements[k]==0) {
+              //  _elements[k] = 1;
+                return k;
+            }
+            k+= stride;
+        }
+        return -1;
+    }
+    
     __device__ uint maxNumWorks()
     {
         return _maxNumWorks;
@@ -133,6 +146,9 @@ struct SimpleQueue {
     
     __device__ void setWorkDone()
     {
+        //lock();
+        //*_workDoneCounter += 1;
+        //unlock();
         atomicAdd(_workDoneCounter, 1);
     }
     
@@ -158,14 +174,29 @@ struct SimpleQueue {
     
     __device__ void swapTails()
     {
-        lock();
-        if(*_qintail== *_workDoneCounter) {
+        if(threadIdx.x <1) {
+            //lock();
+        
+            if(*_qouttail > *_qintail 
+                && *_workDoneCounter >= *_qintail) {
             
                 *_qhead = *_qintail;
                 *_qintail = *_qouttail;
-            
+            }
+            //unlock();
         }
-        unlock();
+    }
+    
+    __device__ void extendTail()
+    {
+        //if(threadIdx.x <1) {
+            //lock();
+        
+            *_qintail = *_qouttail;
+            
+            //unlock();
+        //}
+        
     }
 };
 

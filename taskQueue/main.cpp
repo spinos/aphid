@@ -85,7 +85,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     
     std::cout<<"size of qi "<<sizeof(SimpleQueueInterface);
     
-    unsigned n = 1<<15;
+    unsigned n = (1<<15)-1;
     BaseBuffer hdata;
     hdata.create(n*4);
     
@@ -138,7 +138,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     CUDABuffer headtailperloop;
     headtailperloop.create(16 * 25);
     
-    unsigned numParallel = 500;
+    unsigned numParallel = 2000;
     
     CUDABuffer blkbuf;
     blkbuf.create(maxNumNodes * 4);
@@ -175,7 +175,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     
     unsigned mnw = 0;
     maxnbuf.deviceToHost(&mnw, 4);
-    std::cout<<" check last qtail "<<mnw<<"\n";
+    std::cout<<" last block quit after loop "<<mnw<<"\n";
     
     dqi.deviceToHost(&qi, SIZE_OF_SIMPLEQUEUEINTERFACE);
     std::cout<<" last work done by block "<<qi.workBlock<<"\n";
@@ -184,11 +184,11 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     std::cout<<" q in tail "<<qi.qintail<<"\n";
     std::cout<<" q out tail "<<qi.qouttail<<"\n";
     
-    //if(qi.workDone>0) qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
+    if(qi.workDone>0) qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
     // qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);
-    //if(qi.workDone>0) qslog.writeUInt(&blkbuf, qi.workDone, "work_blocks", CudaDbgLog::FOnce);
-    //qslog.writeUInt(&loopbuf, numParallel, "loop_blocks", CudaDbgLog::FOnce);
-    qslog.writeStruct(&headtailperloop, 25, "head_tail", headtailDesc,16, CudaDbgLog::FOnce);
+    if(qi.workDone>0) qslog.writeUInt(&blkbuf, qi.workDone, "work_blocks", CudaDbgLog::FOnce);
+    qslog.writeUInt(&loopbuf, numParallel, "loop_blocks", CudaDbgLog::FOnce);
+    qslog.writeStruct(&headtailperloop, 15, "head_tail", headtailDesc,16, CudaDbgLog::FOnce);
     
     ddata.deviceToHost(hostData);
     if(checkSortResult(hostData, n)) std::cout<<" gpu sorted passed.\n";

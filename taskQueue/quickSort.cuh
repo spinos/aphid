@@ -49,24 +49,27 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
     int2 root;
     int headToSecond, spawn, offset;
     
+    if(threadIdx.x <1) {
+        if(q->isEmpty()) q->init(qi);
+    }
+    
+    __syncthreads();
+    
     for(i=0;i<9;i++) 
     {
-        if(i<1) {
-            q->init(qi);
-            continue;
+        if(q->workDoneCount()>= 32766) break;
+       
+        if(threadIdx.x <1) {
+            headtailperloop[i].x = 0;
+            headtailperloop[i].y= 0;
+            headtailperloop[i].z = 0;
+            headtailperloop[i].w= 0;
         }
         
-        if(q->isEmpty()) {
-            continue;
-        }
-        
-       // if(threadIdx.x < 1)
-         //   for(j=0;j<(blockDim.x>>5);j++) sWorkPerBlock[j] = 1;
-
-        __syncthreads();
+        //__syncthreads();
 
         if((threadIdx.x&31) == 0) {
-            sWorkPerBlock[threadIdx.x>>5] = q->dequeue();
+            sWorkPerBlock[threadIdx.x>>5] = q->dequeue((threadIdx.x)>>5, blockDim.x>>5);
             
             if(sWorkPerBlock[threadIdx.x>>5] > -1) { loaded++;
                 root = nodes[sWorkPerBlock[threadIdx.x>>5]];
@@ -76,7 +79,8 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                 quickSort_redistribute(idata,
                             root,
                             headToSecond);
-                    
+                //__syncthreads();
+            
                     if(root.x +1 < root.y) 
                     {
                       if(root.x < headToSecond - 1) {
@@ -84,9 +88,7 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                         nodes[spawn].x = root.x;
                         nodes[spawn].y = headToSecond - 1;
                       }
-                      
-                      
-                      
+
                       if(headToSecond < root.y) {
                         spawn = q->enqueue();
                         nodes[spawn].x = headToSecond;
@@ -97,42 +99,41 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                     }
                     
                     q->setWorkDone();
-                    qi->workBlock = spawn;
+                    qi->workBlock = blockIdx.x;
         
-                    __threadfence_block();
-                    
-                    q->swapTails();
+                    //__threadfence_block();
+
+                   if(threadIdx.x <1) {
+           // && sWorkPerBlock[0] > -1) {
+                        //q->extendTail();
+                    }
+                    //atomicMin(&headtailperloop[i].z, blockIdx.x);
+                    //atomicMax(&headtailperloop[i].w, blockIdx.x);
             }           
                      
         }
         
-        //if(q->workDoneCount() == q->tail() && q->tail() > 1) {
-          // qi->qtail = q->tail();
-          // timelimiter.start();
-        //}
         __syncthreads();
         
-        //if(timelimiter.stop()) break;
-        
         if(threadIdx.x < 1) {
-        loopbuf[blockIdx.x] = loaded; 
+            loopbuf[blockIdx.x] = loaded; 
         
         }
-        
-        //
-          //  
                   
+        q->swapTails();
+        
         if(threadIdx.x <1) {
-            headtailperloop[i].x = q->head();
+            headtailperloop[i].x= q->head();
             headtailperloop[i].y= q->intail();
             headtailperloop[i].z= q->outtail();
-            headtailperloop[i].w= q->workDoneCount();
+            headtailperloop[i].w= blockIdx.x;
         }
+        
     }
     
-    if(blockIdx.x < 1 && threadIdx.x <1) {
+    if(threadIdx.x <1)
              *maxN = i;//q->workDoneCount();
-        }
+      //  }
 }
 /*
 __global__ void quickSort_kernel(int * obin,
