@@ -39,6 +39,7 @@ void cu_testQuickSort(void * q,
                     uint * idata,
                     uint * nodes, 
                     SimpleQueueInterface * qi,
+                    uint numElements,
                     uint maxNumBlocks,
                     uint * checkMaxN,
                     uint * workBlocks,
@@ -52,7 +53,7 @@ void cu_testQuickSort(void * q,
     const unsigned nblk = maxNumBlocks;
     dim3 grid(nblk, 1, 1);
     
-    quickSort_checkQ_kernel<29, 32766><<<grid, block>>>(checkMaxN, 
+    quickSort_checkQ_kernel<29, 7><<<grid, block>>>(checkMaxN, 
                                 (simpleQueue::SimpleQueue *)q,
                                 qi,
                                 idata,

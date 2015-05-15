@@ -47,6 +47,7 @@ void cu_testQuickSort(void * q,
                     unsigned * idata,
                     unsigned * nodes, 
                     SimpleQueueInterface * qi,
+                    unsigned numElements,
                     unsigned maxNumParallelNodes,
                     unsigned * checkMaxN,
                     unsigned * workBlocks,
@@ -85,16 +86,19 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     
     std::cout<<"size of qi "<<sizeof(SimpleQueueInterface);
     
-    unsigned n = (1<<15)-1;
+    unsigned n = (1<<12);
     BaseBuffer hdata;
     hdata.create(n*4);
     
     unsigned * hostData = (unsigned *)hdata.data();
-    makeRadomUints(hostData, n, 30);
+    makeRadomUints(hostData, n, 16);
     
     CUDABuffer ddata;
     ddata.create(n*4);
     ddata.hostToDevice(hostData);
+    
+    qslog.writeUInt(&ddata, n, "result_unsorted", CudaDbgLog::FOnce);
+    
     unsigned * deviceData = (unsigned *)ddata.bufferOnDevice();
     
 // max 2^16 nodes first int is n levels
@@ -158,6 +162,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
                                 deviceData, 
                                 nodes, 
                                 (SimpleQueueInterface *)dqi.bufferOnDevice(),
+                                n,
                                 numParallel,
                                 (unsigned *)maxnbuf.bufferOnDevice(),
                                 (unsigned *)blkbuf.bufferOnDevice(),
@@ -185,7 +190,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     std::cout<<" q out tail "<<qi.qouttail<<"\n";
     
     if(qi.workDone>0) qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
-    // qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);
+    qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);
     if(qi.workDone>0) qslog.writeUInt(&blkbuf, qi.workDone, "work_blocks", CudaDbgLog::FOnce);
     qslog.writeUInt(&loopbuf, numParallel, "loop_blocks", CudaDbgLog::FOnce);
     qslog.writeStruct(&headtailperloop, 15, "head_tail", headtailDesc,16, CudaDbgLog::FOnce);
