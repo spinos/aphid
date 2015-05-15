@@ -10,7 +10,7 @@ __device__ int * _elements;
 __device__ int * _qintail;
 __device__ int * _qouttail;
 __device__ int * _qhead;
-__device__ uint _maxNumWorks = 0;
+__device__ int _maxNumWorks = 0;
 __device__ int *_workDoneCounter;
 
 struct SimpleQueue {
@@ -30,6 +30,7 @@ struct SimpleQueue {
  *  n finished works
  *
  */
+    template<int WorkLimit>
     __device__ void init(SimpleQueueInterface * interface) 
     {
         _mutex = &interface->lock;
@@ -38,7 +39,7 @@ struct SimpleQueue {
         _qhead = &interface->qhead;
         _qintail = &interface->qintail;
         _qouttail = &interface->qouttail;
-        _maxNumWorks = interface->maxNumWorks;
+        _maxNumWorks = WorkLimit;
         
         *_qhead = 0;
         *_qintail = 1;
@@ -134,11 +135,6 @@ struct SimpleQueue {
         return -1;
     }
     
-    __device__ uint maxNumWorks()
-    {
-        return _maxNumWorks;
-    }
-    
     __device__ int isEmpty()
     {
         return _maxNumWorks < 1;
@@ -197,6 +193,12 @@ struct SimpleQueue {
             //unlock();
         //}
         
+    }
+    
+    template<int WorkLimit>
+    __device__ int isDone()
+    {
+        return *_workDoneCounter >= WorkLimit;
     }
 };
 

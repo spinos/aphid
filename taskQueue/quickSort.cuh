@@ -32,6 +32,7 @@ __device__ void quickSort_redistribute(uint * data,
     headToSecond = low;
 }
 
+template <int LoopLimit, int WorkLimit>
 __global__ void quickSort_checkQ_kernel(uint * maxN,
                         simpleQueue::SimpleQueue * q,
                         SimpleQueueInterface * qi,
@@ -50,14 +51,14 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
     int headToSecond, spawn, offset;
     
     if(threadIdx.x <1) {
-        if(q->isEmpty()) q->init(qi);
+        if(q->isEmpty()) q->init<WorkLimit>(qi);
     }
     
     __syncthreads();
     
-    for(i=0;i<9;i++) 
+    for(i=0;i<LoopLimit;i++) 
     {
-        if(q->workDoneCount()>= 32766) break;
+        if(q->isDone<WorkLimit>()) break;
        
         if(threadIdx.x <1) {
             headtailperloop[i].x = 0;

@@ -39,7 +39,7 @@ void cu_testQuickSort(void * q,
                     uint * idata,
                     uint * nodes, 
                     SimpleQueueInterface * qi,
-                    uint maxNumParallelNodes,
+                    uint maxNumBlocks,
                     uint * checkMaxN,
                     uint * workBlocks,
                     uint * loopbuf,
@@ -49,10 +49,10 @@ void cu_testQuickSort(void * q,
     const int tpb = 512;
     dim3 block(tpb, 1, 1);
 // one warp per parallel node
-    const unsigned nblk = maxNumParallelNodes;
+    const unsigned nblk = maxNumBlocks;
     dim3 grid(nblk, 1, 1);
     
-    quickSort_checkQ_kernel<<<grid, block>>>(checkMaxN, 
+    quickSort_checkQ_kernel<4, 32766><<<grid, block>>>(checkMaxN, 
                                 (simpleQueue::SimpleQueue *)q,
                                 qi,
                                 idata,
