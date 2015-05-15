@@ -171,7 +171,7 @@ struct SimpleQueue {
     __device__ void swapTails()
     {
         if(threadIdx.x <1) {
-            //lock();
+            lock();
         
             if(*_qouttail > *_qintail 
                 && *_workDoneCounter >= *_qintail) {
@@ -179,7 +179,7 @@ struct SimpleQueue {
                 *_qhead = *_qintail;
                 *_qintail = *_qouttail;
             }
-            //unlock();
+            unlock();
         }
     }
     

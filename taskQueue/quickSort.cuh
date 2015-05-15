@@ -11,12 +11,12 @@ __device__ void quickSort_redistribute(uint * data,
     int low = range.x;
     int high = range.y;
     headToSecond = (low + high)/2;
-    
+    return;
     if(low > high) return;
     
     uint intermediate;
     uint separator = data[(low + high)/2];
-    for(;;) {
+   // for(;;) {
         while(data[low]<separator) low++;
         while(data[high]>separator) high--;
             
@@ -26,8 +26,8 @@ __device__ void quickSort_redistribute(uint * data,
             data[high--] = intermediate;
         }
         
-        if(low > high) break;
-    }
+   //     if(low > high) break;
+   // }
     
     headToSecond = low;
 }
@@ -67,23 +67,31 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
             headtailperloop[i].w= 0;
         }
         
-        //__syncthreads();
+        if((threadIdx.x) == 0) {
+            sWorkPerBlock[0] = q->dequeue();
+        }
+        
+        __syncthreads();
+        
+        if(sWorkPerBlock[0] > -1) {
+            root = nodes[sWorkPerBlock[0]];
+            headToSecond = (root.x + root.y)/2+1;
+            
+            //quickSort_redistribute(idata,
+                //            root,
+                //            headToSecond);
+        }
+         
+        __syncthreads();
+        
+        if((threadIdx.x) == 0) {
+            if(sWorkPerBlock[0] > -1) { loaded++;
+                root = nodes[sWorkPerBlock[0]];
+                
+                workBlocks[sWorkPerBlock[0]] = blockIdx.x;//q->workDoneCount();//offset;//q->tail() - q->head();//
 
-        if((threadIdx.x&31) == 0) {
-            sWorkPerBlock[threadIdx.x>>5] = q->dequeue((threadIdx.x)>>5, blockDim.x>>5);
-            
-            if(sWorkPerBlock[threadIdx.x>>5] > -1) { loaded++;
-                root = nodes[sWorkPerBlock[threadIdx.x>>5]];
-                
-                workBlocks[sWorkPerBlock[threadIdx.x>>5]] = blockIdx.x;//q->workDoneCount();//offset;//q->tail() - q->head();//
-                
-                quickSort_redistribute(idata,
-                            root,
-                            headToSecond);
-                //__syncthreads();
-            
-                    if(root.x +1 < root.y) 
-                    {
+                headToSecond = (root.x + root.y)/2+1;
+
                       if(root.x < headToSecond - 1) {
                         spawn = q->enqueue();
                         nodes[spawn].x = root.x;
@@ -95,9 +103,6 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                         nodes[spawn].x = headToSecond;
                         nodes[spawn].y = root.y;
                       }
-                      
-                      
-                    }
                     
                     q->setWorkDone();
                     qi->workBlock = blockIdx.x;
@@ -121,13 +126,13 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
         
         }
                   
-        q->swapTails();
+        if(threadIdx.x < 1) q->swapTails();
         
         if(threadIdx.x <1) {
             headtailperloop[i].x= q->head();
             headtailperloop[i].y= q->intail();
             headtailperloop[i].z= q->outtail();
-            headtailperloop[i].w= blockIdx.x;
+            headtailperloop[i].w= q->workDoneCount();
         }
         
     }
