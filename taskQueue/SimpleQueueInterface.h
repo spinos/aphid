@@ -10,7 +10,8 @@ struct SimpleQueueInterface {
     int qintail;
     int workDone;
     int workBlock;
-    int padding[3];
+    int lastBlock;
+    int padding[2];
 };
 #endif        //  #ifndef SIMPLEQUEUEINTERFACE_H
 

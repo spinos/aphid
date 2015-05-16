@@ -86,7 +86,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     
     std::cout<<"size of qi "<<sizeof(SimpleQueueInterface);
     
-    unsigned n = (1<<13)-173;
+    unsigned n = (1<<13)-97;
     BaseBuffer hdata;
     hdata.create(n*4);
     
@@ -170,11 +170,12 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     cudaEventDestroy(stop_event);
     
     dqi.deviceToHost(&qi, SIZE_OF_SIMPLEQUEUEINTERFACE);
-    std::cout<<" last work done by block "<<qi.workBlock<<"\n";
     std::cout<<" n work done "<<qi.workDone<<"\n";
     std::cout<<" q head "<<qi.qhead<<"\n";
     std::cout<<" q in tail "<<qi.qintail<<"\n";
     std::cout<<" q out tail "<<qi.qouttail<<"\n";
+    std::cout<<" last work block "<<qi.workBlock<<"\n";
+    std::cout<<" last block "<<qi.lastBlock<<"\n";
     
     if(qi.workDone>0) qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
     qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);

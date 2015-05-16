@@ -13,7 +13,8 @@ struct SimpleQueue {
     int _qouttail;
     int _qhead;
     int _workDoneCounter;
-    int padding[2];
+    int _stopClock;
+    int padding;
 /*
  *  n nodes                                max n nodes
  *
@@ -38,6 +39,7 @@ struct SimpleQueue {
         _qintail = 1;
         _qouttail = 1;
         _elements = 0;
+        _stopClock = 0;
     }
     
     __device__ void setElements(int * elms)
@@ -73,14 +75,8 @@ struct SimpleQueue {
     __device__ int enqueue()
     {
         int oldTail = atomicAdd(&_qouttail, 1);
-        //lock();
-        //int oldTail = *_qouttail;
-        //*_qouttail += 1;
-        
-        //unlock();
         _elements[oldTail] = 0;
         return oldTail;
-        // return atomicAdd(&_qtail, 1);
     }
     
 /*
@@ -113,10 +109,6 @@ struct SimpleQueue {
             }
         }
         return -1;
-        /*if( atomicCAS( &_elements[_qhead], 0, 1 ) != 0 ) return -1;
-        int oldHead = _qhead;
-        _qhead++;
-        return oldHead;*/
     }
     
     __device__ int dequeue(int offset, int stride)
@@ -166,21 +158,25 @@ struct SimpleQueue {
     {
         if(threadIdx.x <1) {
             lock();
-        
             if(_qouttail > _qintail 
                 && _workDoneCounter >= _qintail) {
             
                 _qhead = _qintail;
                 _qintail = _qouttail;
+                _stopClock = 0;
+            }
+            else {
+                _stopClock++;   
             }
             unlock();
         }
     }
     
-    template<int WorkLimit>
+    template<int WorkLimit, int IdelLimit>
     __device__ int isDone()
     {
-        return _workDoneCounter >= WorkLimit;
+        return (_stopClock > IdelLimit
+            || _workDoneCounter >= WorkLimit);
     }
 };
 

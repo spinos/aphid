@@ -31,6 +31,7 @@
  */
  
 #include "quickSort.cuh"
+#include "OddEvenSort.cuh"
 #include "bvh_common.h"
 #include "CudaBase.h"
 
@@ -56,7 +57,10 @@ void cu_testQuickSort(void * q,
     const unsigned nblk = maxNumBlocks;
     dim3 grid(nblk, 1, 1);
     
-    quickSort_checkQ_kernel<3, 127><<<grid, block, 16320>>>(queue,
+    OddEvenSortTask oes;
+    
+    quickSort_checkQ_kernel<simpleQueue::SimpleQueue, OddEvenSortTask, 2, 127, 24><<<grid, block, 16320>>>(queue,
+                                oes,
                                 qi,
                                 idata,
                                 (int2 *)nodes,
