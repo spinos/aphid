@@ -17,12 +17,9 @@ __global__ void quickSort_checkQ_kernel(QueueType * q,
     extern __shared__ int smem[]; 
     
     int & sWorkPerBlock = smem[0];
-    int & sSorted = smem[1];
-
+    
     int i;
     int loaded = 0;
-    int2 root;
-    int headToSecond, spawn;
     
     for(i=0;i<LoopLimit;i++) {
         if(q->template isDone<WorkLimit, IdelLimit>()) break;
@@ -30,7 +27,8 @@ __global__ void quickSort_checkQ_kernel(QueueType * q,
         if(task.execute(q, smem, idata, nodes)) {
 // for debug purpose only
             qi->workBlock = blockIdx.x;
-            workBlocks[sWorkPerBlock] = blockIdx.x;//q->workDoneCount();//offset;//q->tail() - q->head();//
+            workBlocks[sWorkPerBlock] = blockIdx.x;
+            loaded++;
         }
 
         __syncthreads();
