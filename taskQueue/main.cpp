@@ -86,12 +86,12 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     
     std::cout<<"size of qi "<<sizeof(SimpleQueueInterface);
     
-    unsigned n = (1<<12);
+    unsigned n = (1<<13)-131;
     BaseBuffer hdata;
     hdata.create(n*4);
     
     unsigned * hostData = (unsigned *)hdata.data();
-    makeRadomUints(hostData, n, 16);
+    makeRadomUints(hostData, n, 17);
     
     CUDABuffer ddata;
     ddata.create(n*4);

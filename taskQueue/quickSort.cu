@@ -47,13 +47,13 @@ void cu_testQuickSort(void * q,
                     int * headtailperloop)
 {
     //cudaDeviceSynchronize();
-    const int tpb = 512;
+    const int tpb = 256;
     dim3 block(tpb, 1, 1);
 // one warp per parallel node
     const unsigned nblk = maxNumBlocks;
     dim3 grid(nblk, 1, 1);
     
-    quickSort_checkQ_kernel<29, 7><<<grid, block>>>(checkMaxN, 
+    quickSort_checkQ_kernel<3, 127><<<grid, block>>>(checkMaxN, 
                                 (simpleQueue::SimpleQueue *)q,
                                 qi,
                                 idata,
