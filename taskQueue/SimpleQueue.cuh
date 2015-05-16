@@ -5,15 +5,15 @@
 #include "SimpleQueueInterface.h"
 
 namespace simpleQueue {
-__device__ int * _mutex;
-__device__ int * _elements;
-__device__ int * _qintail;
-__device__ int * _qouttail;
-__device__ int * _qhead;
-__device__ int _maxNumWorks = 0;
-__device__ int *_workDoneCounter;
 
 struct SimpleQueue {
+    int * _elements;
+    int _mutex;
+    int _qintail;
+    int _qouttail;
+    int _qhead;
+    int _workDoneCounter;
+    int padding[2];
 /*
  *  n nodes                                max n nodes
  *
@@ -30,31 +30,30 @@ struct SimpleQueue {
  *  n finished works
  *
  */
-    template<int WorkLimit>
-    __device__ void init(SimpleQueueInterface * interface) 
+    __device__ void init() 
     {
-        _mutex = &interface->lock;
-        _elements = interface->elements;
-        _workDoneCounter = &interface->workDone;
-        _qhead = &interface->qhead;
-        _qintail = &interface->qintail;
-        _qouttail = &interface->qouttail;
-        _maxNumWorks = WorkLimit;
-        
-        *_qhead = 0;
-        *_qintail = 1;
-        *_qouttail = 1;
+        _mutex = 0;
+        _workDoneCounter = 0;
+        _qhead = 0;
+        _qintail = 1;
+        _qouttail = 1;
+        _elements = 0;
+    }
+    
+    __device__ void setElements(int * elms)
+    {
+        _elements = elms;
         _elements[0] = 0;
     }
     
     __device__ void lock()
     {
-        while( atomicCAS( _mutex, 0, 1 ) != 0 );
+        while( atomicCAS( &_mutex, 0, 1 ) != 0 );
     }
     
     __device__ void unlock() 
     {
-        atomicExch( _mutex, 0 );
+        atomicExch( &_mutex, 0 );
     }
     
 /*
@@ -73,7 +72,7 @@ struct SimpleQueue {
  */     
     __device__ int enqueue()
     {
-        int oldTail = atomicAdd(_qouttail, 1);
+        int oldTail = atomicAdd(&_qouttail, 1);
         //lock();
         //int oldTail = *_qouttail;
         //*_qouttail += 1;
@@ -105,11 +104,11 @@ struct SimpleQueue {
  */    
     __device__ int dequeue()
     {        
-        int oldTail = *_qintail;
-        int i = *_qhead;
+        int oldTail = _qintail;
+        int i = _qhead;
         for(;i<oldTail;i++) {
             if(atomicCAS( &_elements[i], 0, 1 ) == 0) {
-                *_qhead=i;
+                _qhead=i;
                 return i;
             }
         }
@@ -122,14 +121,12 @@ struct SimpleQueue {
     
     __device__ int dequeue(int offset, int stride)
     {       
-        int k = *_qhead + offset;
+        int k = _qhead + offset;
         
-        while(k< *_qintail) {
-            if( atomicCAS( &_elements[k], 0, 1 ) == 0 ) {
-            //if(_elements[k]==0) {
-              //  _elements[k] = 1;
+        while(k< _qintail) {
+            if( atomicCAS( &_elements[k], 0, 1 ) == 0 )
                 return k;
-            }
+            
             k+= stride;
         }
         return -1;
@@ -137,35 +134,32 @@ struct SimpleQueue {
     
     __device__ int isEmpty()
     {
-        return _maxNumWorks < 1;
+        return _elements == 0;
     }
     
     __device__ void setWorkDone()
     {
-        //lock();
-        //*_workDoneCounter += 1;
-        //unlock();
-        atomicAdd(_workDoneCounter, 1);
+        atomicAdd(&_workDoneCounter, 1);
     }
     
-    __device__ uint head()
+    __device__ int head()
     {
-        return *_qhead;
+        return _qhead;
     }
     
-    __device__ uint intail()
+    __device__ int intail()
     {
-        return *_qintail;
+        return _qintail;
     }
     
     __device__ int outtail()
     {
-        return *_qouttail;
+        return _qouttail;
     }
     
-    __device__ uint workDoneCount()
+    __device__ int workDoneCount()
     {
-        return *_workDoneCounter;   
+        return _workDoneCounter;   
     }
     
     __device__ void swapTails()
@@ -173,34 +167,25 @@ struct SimpleQueue {
         if(threadIdx.x <1) {
             lock();
         
-            if(*_qouttail > *_qintail 
-                && *_workDoneCounter >= *_qintail) {
+            if(_qouttail > _qintail 
+                && _workDoneCounter >= _qintail) {
             
-                *_qhead = *_qintail;
-                *_qintail = *_qouttail;
+                _qhead = _qintail;
+                _qintail = _qouttail;
             }
             unlock();
         }
     }
     
-    __device__ void extendTail()
-    {
-        //if(threadIdx.x <1) {
-            //lock();
-        
-            *_qintail = *_qouttail;
-            
-            //unlock();
-        //}
-        
-    }
-    
     template<int WorkLimit>
     __device__ int isDone()
     {
-        return *_workDoneCounter >= WorkLimit;
+        return _workDoneCounter >= WorkLimit;
     }
 };
+
+__global__ void init_kernel(SimpleQueue * queue,
+                            int * elements);
 
 template<unsigned long StaticLimit>
 struct TimeLimiter

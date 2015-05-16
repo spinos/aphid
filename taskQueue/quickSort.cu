@@ -38,23 +38,25 @@ extern "C" {
 void cu_testQuickSort(void * q,
                     uint * idata,
                     uint * nodes, 
+                    int * elements,
                     SimpleQueueInterface * qi,
                     uint numElements,
                     uint maxNumBlocks,
-                    uint * checkMaxN,
                     uint * workBlocks,
                     uint * loopbuf,
                     int * headtailperloop)
 {
     //cudaDeviceSynchronize();
+    
+    simpleQueue::SimpleQueue * queue = (simpleQueue::SimpleQueue *)q;
+    simpleQueue::init_kernel<<< 1,32 >>>(queue, elements);
+    
     const int tpb = 256;
     dim3 block(tpb, 1, 1);
-// one warp per parallel node
     const unsigned nblk = maxNumBlocks;
     dim3 grid(nblk, 1, 1);
     
-    quickSort_checkQ_kernel<3, 127><<<grid, block>>>(checkMaxN, 
-                                (simpleQueue::SimpleQueue *)q,
+    quickSort_checkQ_kernel<3, 127><<<grid, block, 16320>>>(queue,
                                 qi,
                                 idata,
                                 (int2 *)nodes,

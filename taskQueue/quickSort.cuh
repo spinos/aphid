@@ -96,8 +96,7 @@ __device__ void quickSort_batch(uint * data,
 
 __device__ void quickSort_oddEven(uint * data,
                             int low, int high, 
-                            int & sorted,
-                            uint & nloop)
+                            int & sorted)
 {
     if(threadIdx.x < 1) {
         sorted = 0;
@@ -121,8 +120,6 @@ __device__ void quickSort_oddEven(uint * data,
                 quickSort_swap(data[left], data[right]);
                 sorted = 0;
             }
-            
-            
         }
         
         __syncthreads();
@@ -140,83 +137,8 @@ __device__ void quickSort_oddEven(uint * data,
     }
 }
 
-__device__ void quickSort_swapHead(uint * data,
-                            int low, int high)
-{
-    int headToSecond = (low + high)/2+1;
-    if(headToSecond > high) return;
-    
-    uint intermediate;
-    int i, j;
-    
-    for(j=0;j<headToSecond-2;j++){
-// highest in left
-        i=low;
-        for(;i<headToSecond-1;i++) {
-            if(data[headToSecond-1] < data[i]) {
-                intermediate = data[i];
-                data[i] = data[headToSecond-1];
-                data[headToSecond-1] = intermediate;
-            }
-        }
-
-// lowest in right
-        i=headToSecond+1;
-        for(;i<=high;i++) {
-            if(data[headToSecond] > data[i]) {
-                intermediate = data[i];
-                data[i] = data[headToSecond];
-                data[headToSecond] = intermediate;
-            }
-        }
-
-// swap at split 
-        if(data[headToSecond-1] > data[headToSecond]) {
-            intermediate = data[headToSecond-1];
-            data[headToSecond-1] = data[headToSecond];
-            data[headToSecond] = intermediate;
-        }
-        else break;
-    }
-}
-
-__device__ void quickSort_redistribute(uint * data,
-                            int low, int high)
-{
-    int headToSecond = (low + high)/2+1;
-    
-    if(headToSecond > high) return;
-    
-    uint intermediate;
-    
-    if(headToSecond == high) {
-        if(threadIdx.x > 0) return;
-        if(data[high] < data[low]) {
-                intermediate = data[low];
-                data[low] = data[high];
-                data[high] = intermediate;
-        }
-        return;
-    }
-    
-    int i = threadIdx.x;
-    
-    while((low + i)<headToSecond) {
-        if((headToSecond + i) <= high) {
-            if(data[headToSecond + i] < data[low+i]) {
-                intermediate = data[low+i];
-                data[low+i] = data[headToSecond + i];
-                data[headToSecond + i] = intermediate;
-            }
-        }
-        
-        i += blockDim.x;
-    }
-}
-
 template <int LoopLimit, int WorkLimit>
-__global__ void quickSort_checkQ_kernel(uint * maxN,
-                        simpleQueue::SimpleQueue * q,
+__global__ void quickSort_checkQ_kernel(simpleQueue::SimpleQueue * q,
                         SimpleQueueInterface * qi,
                         uint * idata,
                         int2 * nodes,
@@ -224,41 +146,28 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                         uint * loopbuf,
                         int4 * headtailperloop)
 {
-    __shared__ int sWorkPerBlock[512];
-    __shared__ int sSorted;
-    // __shared__ simpleQueue::TimeLimiter<1000> timelimiter;
+    extern __shared__ int smem[]; 
+    
+    int & sWorkPerBlock = smem[0];
+    int & sSorted = smem[1];
 
-    int i=0, j;
+    int i;
     int loaded = 0;
     int2 root;
-    int headToSecond, spawn, offset;
+    int headToSecond, spawn;
     
-    if(threadIdx.x <1) {
-        if(q->isEmpty()) q->init<WorkLimit>(qi);
-    }
-    
-    __syncthreads();
-    
-    for(i=0;i<LoopLimit;i++) 
-    {
+    for(i=0;i<LoopLimit;i++) {
         if(q->isDone<WorkLimit>()) break;
-       
-        if(threadIdx.x <1) {
-            headtailperloop[i].x = 0;
-            headtailperloop[i].y= 0;
-            headtailperloop[i].z = 0;
-            headtailperloop[i].w= 0;
-        }
         
         if((threadIdx.x) == 0) {
-            sWorkPerBlock[0] = q->dequeue();
+            sWorkPerBlock = q->dequeue();
         }
         
         __syncthreads();
         
         if(threadIdx.x ==0) {
-            if(sWorkPerBlock[0] > -1) {
-                root = nodes[sWorkPerBlock[0]];
+            if(sWorkPerBlock > -1) {
+                root = nodes[sWorkPerBlock];
                 headToSecond = (root.x + root.y)/2+1;
             }   
             qi->workBlock = 0;
@@ -266,16 +175,15 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
         
         __syncthreads();
         
-        if(sWorkPerBlock[0] > -1) {
-              root = nodes[sWorkPerBlock[0]];
+        if(sWorkPerBlock > -1) {
+              root = nodes[sWorkPerBlock];
               if((root.y - root.x + 1) <= 256*2) {
                     quickSort_oddEven(idata,
                                root.x,
                                root.y,
-                               sSorted,
-                               qi->workBlock);
+                               sSorted);
                     
-                    qi->workBlock = blockIdx.x;////blockIdx.x;
+                    qi->workBlock = blockIdx.x;
               }
               else { 
                     quickSort_batch(idata,
@@ -288,7 +196,7 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
         __syncthreads();
         
         if((threadIdx.x) == 0) {
-            if(sWorkPerBlock[0] > -1) { 
+            if(sWorkPerBlock > -1) { 
                 loaded++;
                 
                 int sbatch = quickSort_batchSize(root.y - root.x + 1);
@@ -296,29 +204,22 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
                 if(nbatch&1) nbatch++;
                 headToSecond = root.x + sbatch * nbatch / 2;
                 
-                if((root.y - root.x + 1) > 256*2) {
-                //if(root.x < headToSecond - 1) {
+                if((root.y - root.x + 1) > 256*2) {               
                         spawn = q->enqueue();
                         nodes[spawn].x = root.x;
                         nodes[spawn].y = headToSecond - 1;
-                  //    }
 
-                    //  if(headToSecond < root.y) {
                         spawn = q->enqueue();
                         nodes[spawn].x = headToSecond;
                         nodes[spawn].y = root.y;
-                      //}
                 }
                     
                 q->setWorkDone();
                     
                     //__threadfence_block();
 
-                   if(threadIdx.x <1) {
-           // && sWorkPerBlock[0] > -1) {
-                        //q->extendTail();
-                    }
-                    workBlocks[sWorkPerBlock[0]] = blockIdx.x;//q->workDoneCount();//offset;//q->tail() - q->head();//
+// for debug purpose only
+                    workBlocks[sWorkPerBlock] = blockIdx.x;//q->workDoneCount();//offset;//q->tail() - q->head();//
                       
                     //atomicMin(&headtailperloop[i].z, blockIdx.x);
                     //atomicMax(&headtailperloop[i].w, blockIdx.x);
@@ -327,41 +228,22 @@ __global__ void quickSort_checkQ_kernel(uint * maxN,
         }
         
         __syncthreads();
-        
-        if(threadIdx.x < 1) {
-            loopbuf[blockIdx.x] = loaded; 
-        
-        }
                   
         if(threadIdx.x < 1) q->swapTails();
-        
+
+// for debug purpose only
         if(threadIdx.x <1) {
+            loopbuf[blockIdx.x] = loaded; 
             headtailperloop[i].x= q->head();
             headtailperloop[i].y= q->intail();
             headtailperloop[i].z= q->outtail();
             headtailperloop[i].w= q->workDoneCount();
-        }
-        
+            qi->qhead= q->head();
+            qi->qintail= q->intail();
+            qi->qouttail= q->outtail();
+            qi->workDone= q->workDoneCount();
+        } 
     }
-    
-    if(threadIdx.x <1)
-             *maxN = i;//q->workDoneCount();
-      //  }
 }
-/*
-__global__ void quickSort_kernel(int * obin,
-                    int * idata,
-                    int h,
-                    int n)
-{
-    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-	if(ind >= n) return;
-	
-	int d = idata[ind];
-	
-    atomicAdd(&obin[d/h], 1);
-}
-*/
-
 #endif        //  #ifndef QUICKSORT_CUH
 

@@ -46,10 +46,10 @@ extern "C" {
 void cu_testQuickSort(void * q,
                     unsigned * idata,
                     unsigned * nodes, 
+                    int * elements,
                     SimpleQueueInterface * qi,
                     unsigned numElements,
                     unsigned maxNumParallelNodes,
-                    unsigned * checkMaxN,
                     unsigned * workBlocks,
                     unsigned * loopbuf,
                     int * headtailperloop);
@@ -86,12 +86,12 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     
     std::cout<<"size of qi "<<sizeof(SimpleQueueInterface);
     
-    unsigned n = (1<<13)-131;
+    unsigned n = (1<<13)-173;
     BaseBuffer hdata;
     hdata.create(n*4);
     
     unsigned * hostData = (unsigned *)hdata.data();
-    makeRadomUints(hostData, n, 17);
+    makeRadomUints(hostData, n, 16);
     
     CUDABuffer ddata;
     ddata.create(n*4);
@@ -120,13 +120,9 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     elementsbuf.create(maxNumNodes * 4);
     
     SimpleQueueInterface qi;
-    qi.elements = (int *)elementsbuf.bufferOnDevice();
     qi.qhead = 0;
     qi.qintail = 1;
     qi.qouttail = 1;
-    qi.numNodes = 1;
-    qi.maxNumWorks = maxNumNodes;
-    qi.lock = 0;
     qi.workDone = 0;
     
     CUDABuffer dqi;
@@ -134,10 +130,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     dqi.hostToDevice(&qi, SIZE_OF_SIMPLEQUEUEINTERFACE);
     
     CUDABuffer qbuf;
-    qbuf.create(8);
-
-    CUDABuffer maxnbuf;
-    maxnbuf.create(4);
+    qbuf.create(SIZE_OF_SIMPLEQUEUE);
     
     CUDABuffer headtailperloop;
     headtailperloop.create(16 * 25);
@@ -149,8 +142,6 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     CUDABuffer loopbuf;
     loopbuf.create(numParallel * 4);
     
-    unsigned nine = 999;
-    maxnbuf.hostToDevice(&nine, 4);
     //QuickSort1::Sort<unsigned>(hostD, 0, n-1);
     
     cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
@@ -161,10 +152,10 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     cu_testQuickSort(qbuf.bufferOnDevice(),
                                 deviceData, 
                                 nodes, 
+                                (int *)elementsbuf.bufferOnDevice(),
                                 (SimpleQueueInterface *)dqi.bufferOnDevice(),
                                 n,
                                 numParallel,
-                                (unsigned *)maxnbuf.bufferOnDevice(),
                                 (unsigned *)blkbuf.bufferOnDevice(),
                                 (unsigned *)loopbuf.bufferOnDevice(),
                                 (int *)headtailperloop.bufferOnDevice());
@@ -177,10 +168,6 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
 		
     cudaEventDestroy(start_event);
     cudaEventDestroy(stop_event);
-    
-    unsigned mnw = 0;
-    maxnbuf.deviceToHost(&mnw, 4);
-    std::cout<<" last block quit after loop "<<mnw<<"\n";
     
     dqi.deviceToHost(&qi, SIZE_OF_SIMPLEQUEUEINTERFACE);
     std::cout<<" last work done by block "<<qi.workBlock<<"\n";
