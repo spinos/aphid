@@ -31,10 +31,6 @@ __global__ void quickSort_checkQ_kernel(QueueType * q,
             loaded++;
         }
 
-        __syncthreads();
-                  
-        if(threadIdx.x < 1) q->swapTails();
-
 // for debug purpose only
         if(threadIdx.x <1) {
             loopbuf[blockIdx.x] = loaded; 

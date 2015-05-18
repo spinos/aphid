@@ -61,8 +61,7 @@ struct OddEvenSortTask {
          
         __syncthreads();
         
-        if(threadIdx.x == 0) {
-            if(sWorkPerBlock > -1) { 
+        if(threadIdx.x == 0) {             
                 
                 int sbatch = quickSort_batchSize(root.y - root.x + 1);
                 int nbatch = (root.y - root.x + 1) / sbatch;
@@ -81,11 +80,13 @@ struct OddEvenSortTask {
                     
                 q->setWorkDone();
                     
-                    //__threadfence_block();
-            }
-    }
-    
-    return 1;
+                    //
+                q->swapTails();
+        }
+        
+        __syncthreads();
+        
+        return 1;
   } 
   
   
@@ -115,12 +116,7 @@ __device__ void sort_batch(uint * data,
 
     int i;
     
-    if(threadIdx.x ==0)
-        sorted = 0;
-        
-    __syncthreads();
-    
-    while(sorted<1) {
+    for(;;) {
                
 // begin as lowest in batch     
         i= batchBegin + 1;
@@ -128,7 +124,7 @@ __device__ void sort_batch(uint * data,
             if(data[batchBegin] > data[i])
                 sort_swap(data[batchBegin], data[i]);
         }
-    
+        
 // end as highest in batch    
         i= batchBegin;
         for(;i< batchEnd;i++) {
@@ -136,12 +132,11 @@ __device__ void sort_batch(uint * data,
                 sort_swap(data[batchEnd], data[i]);
         }
         
-        __syncthreads();
-        
         if(threadIdx.x < 1) {
             sorted = 1;
         }
         
+        __threadfence_block();
         __syncthreads();
 
 // swap at batch begin        
@@ -152,27 +147,25 @@ __device__ void sort_batch(uint * data,
             }
         }
         
+        __threadfence_block();
         __syncthreads();
+        
+        if(sorted) break;
     }
 }
 
 __device__ void sort_oddEven(uint * data,
                             int low, int high, 
                             int & sorted)
-{
-    if(threadIdx.x < 1) {
-        sorted = 0;
-    }
-    
-    __syncthreads();
-    
+{    
     int left, right;
-    while(sorted<1) {
+    for(;;) {
         
         if(threadIdx.x < 1) {
             sorted = 1;
         }
         
+        __threadfence_block();
         __syncthreads();
         
         left = low + threadIdx.x * 2;
@@ -196,6 +189,8 @@ __device__ void sort_oddEven(uint * data,
         }
         
         __syncthreads();
+        
+        if(sorted) break;
     }
 }
 };
