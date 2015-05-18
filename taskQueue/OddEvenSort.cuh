@@ -26,26 +26,33 @@ step      0         1         2         3         4
 
 #include <cuda_runtime_api.h>
 
+namespace oddEvenSort {
+    
+struct DataInterface {
+    uint * idata;
+    int2 * nodes;
+};
+
 struct OddEvenSortTask {
     template <typename QueueType>
-    __device__ int execute(QueueType * q, int * smem,
-                            uint * idata,
-                            int2 * nodes)
+    __device__ int execute(QueueType * q, 
+                            DataInterface data,
+                            int * smem)
     {
         int & sWorkPerBlock = smem[0];
         int & sSorted = smem[1];
         int2 root;
         int headToSecond, spawn;
         
-        root = nodes[sWorkPerBlock];
+        root = data.nodes[sWorkPerBlock];
         if((root.y - root.x + 1) <= 256*2) {
-            sort_oddEven(idata,
+            sort_oddEven(data.idata,
                        root.x,
                       root.y,
                       sSorted);
         }
         else { 
-             sort_batch(idata,
+             sort_batch(data.idata,
                        root.x,
                           root.y,
                            sSorted);
@@ -62,12 +69,12 @@ struct OddEvenSortTask {
                 
                 if((root.y - root.x + 1) > 256*2) {               
                         spawn = q->enqueue();
-                        nodes[spawn].x = root.x;
-                        nodes[spawn].y = headToSecond - 1;
+                        data.nodes[spawn].x = root.x;
+                        data.nodes[spawn].y = headToSecond - 1;
 
                         spawn = q->enqueue();
-                        nodes[spawn].x = headToSecond;
-                        nodes[spawn].y = root.y;
+                        data.nodes[spawn].x = headToSecond;
+                        data.nodes[spawn].y = root.y;
                 }
                     
                 q->setWorkDone();
@@ -190,5 +197,7 @@ __device__ void sort_oddEven(uint * data,
     }
 }
 };
+
+}
 #endif        //  #ifndef ODDEVENSORT_CUH
 

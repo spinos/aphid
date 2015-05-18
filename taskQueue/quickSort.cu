@@ -57,13 +57,15 @@ void cu_testQuickSort(void * q,
     const unsigned nblk = maxNumBlocks;
     dim3 grid(nblk, 1, 1);
     
-    OddEvenSortTask oes;
+    oddEvenSort::OddEvenSortTask oes;
+    oddEvenSort::DataInterface oesd;
+    oesd.idata = idata;
+    oesd.nodes = (int2 *)nodes;
     
-    quickSort_checkQ_kernel<simpleQueue::SimpleQueue, OddEvenSortTask, 5, 31, 24><<<grid, block, 16320>>>(queue,
+    quickSort_test_kernel<simpleQueue::SimpleQueue, oddEvenSort::OddEvenSortTask, oddEvenSort::DataInterface, 5, 63, 24><<<grid, block, 16320>>>(queue,
                                 oes,
+                                oesd,
                                 qi,
-                                idata,
-                                (int2 *)nodes,
                                 workBlocks,
                                 loopbuf,
                                 (int4 *)headtailperloop);

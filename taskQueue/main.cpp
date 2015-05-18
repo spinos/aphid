@@ -86,7 +86,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     
     std::cout<<"size of qi "<<sizeof(SimpleQueueInterface);
     
-    unsigned n = (1<<13)-97;
+    unsigned n = (1<<13)-297;
     BaseBuffer hdata;
     hdata.create(n*4);
     
@@ -124,6 +124,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     qi.qintail = 1;
     qi.qouttail = 1;
     qi.workDone = 0;
+    qi.workBlock = 0;
     
     CUDABuffer dqi;
     dqi.create(SIZE_OF_SIMPLEQUEUEINTERFACE);
@@ -180,8 +181,8 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     if(qi.workDone>0) qslog.writeInt2(&nodesBuf, qi.workDone, "sort_node", CudaDbgLog::FOnce);
     qslog.writeUInt(&ddata, n, "result", CudaDbgLog::FOnce);
     if(qi.workDone>0) qslog.writeUInt(&blkbuf, qi.workDone, "work_blocks", CudaDbgLog::FOnce);
-    qslog.writeUInt(&loopbuf, numParallel, "loop_blocks", CudaDbgLog::FOnce);
-    qslog.writeStruct(&headtailperloop, 15, "head_tail", headtailDesc,16, CudaDbgLog::FOnce);
+    qslog.writeUInt(&loopbuf, qi.workBlock+1, "loop_blocks", CudaDbgLog::FOnce);
+    qslog.writeStruct(&headtailperloop, 4, "head_tail", headtailDesc,16, CudaDbgLog::FOnce);
     
     ddata.deviceToHost(hostData);
     if(checkSortResult(hostData, n)) std::cout<<" gpu sorted passed.\n";

@@ -165,9 +165,16 @@ struct SimpleQueue {
                 _qintail = _qouttail;
                 _stopClock = 0;
             }
-            else {
-                _stopClock++;   
-            }
+            unlock();
+        }
+    }
+    
+    __device__ void advanceStopClock()
+    {
+        if(threadIdx.x <1) {
+            lock();
+            if(_qouttail == _qintail 
+                && _workDoneCounter >= _qintail) _stopClock++;
             unlock();
         }
     }

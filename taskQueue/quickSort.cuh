@@ -4,12 +4,11 @@
 #include <cuda_runtime_api.h>
 #include "SimpleQueue.cuh"
 
-template <typename QueueType, typename TaskType, int LoopLimit, int WorkLimit, int IdelLimit>
-__global__ void quickSort_checkQ_kernel(QueueType * q,
+template <typename QueueType, typename TaskType, typename TaskData, int LoopLimit, int WorkLimit, int IdelLimit>
+__global__ void quickSort_test_kernel(QueueType * q,
                         TaskType task,
+                        TaskData data,
                         SimpleQueueInterface * qi,
-                        uint * idata,
-                        int2 * nodes,
                         uint * workBlocks,
                         uint * loopbuf,
                         int4 * headtailperloop)
@@ -26,17 +25,19 @@ __global__ void quickSort_checkQ_kernel(QueueType * q,
         
         if(threadIdx.x == 0) {
             sWorkPerBlock = q->dequeue();
-        }
-                
+        }     
         __syncthreads();
         
         if(sWorkPerBlock>-1) {
-            task.execute(q, smem, idata, nodes);
+            task.execute(q, data, smem);
 // for debug purpose only
-            qi->workBlock = blockIdx.x;
+            atomicMax(&qi->workBlock, blockIdx.x);
             workBlocks[sWorkPerBlock] = blockIdx.x;
             loaded++;
-        } else i--;
+        } else {
+            q->advanceStopClock();
+            i--;
+        }
 
 // for debug purpose only
         if(threadIdx.x <1) {
