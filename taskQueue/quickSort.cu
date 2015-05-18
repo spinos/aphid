@@ -59,7 +59,7 @@ void cu_testQuickSort(void * q,
     
     OddEvenSortTask oes;
     
-    quickSort_checkQ_kernel<simpleQueue::SimpleQueue, OddEvenSortTask, 2, 127, 24><<<grid, block, 16320>>>(queue,
+    quickSort_checkQ_kernel<simpleQueue::SimpleQueue, OddEvenSortTask, 5, 31, 24><<<grid, block, 16320>>>(queue,
                                 oes,
                                 qi,
                                 idata,

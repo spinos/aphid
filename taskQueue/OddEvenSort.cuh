@@ -36,27 +36,19 @@ struct OddEvenSortTask {
         int & sSorted = smem[1];
         int2 root;
         int headToSecond, spawn;
-    
-        if(threadIdx.x == 0) {
-            sWorkPerBlock = q->dequeue();
-        }
-                
-        __syncthreads();
-        
-        if(sWorkPerBlock < 0) return 0;
         
         root = nodes[sWorkPerBlock];
         if((root.y - root.x + 1) <= 256*2) {
             sort_oddEven(idata,
                        root.x,
-                       root.y,
-                       sSorted);
+                      root.y,
+                      sSorted);
         }
         else { 
-            sort_batch(idata,
-                    root.x,
-                       root.y,
-                        sSorted);
+             sort_batch(idata,
+                       root.x,
+                          root.y,
+                           sSorted);
         }
          
         __syncthreads();
@@ -79,12 +71,11 @@ struct OddEvenSortTask {
                 }
                     
                 q->setWorkDone();
-                    
-                    //
-                q->swapTails();
+                q->swapTails();    
+
         }
-        
-        __syncthreads();
+       // __threadfence();
+       // __syncthreads();
         
         return 1;
   } 
@@ -116,27 +107,33 @@ __device__ void sort_batch(uint * data,
 
     int i;
     
-    for(;;) {
+    for(;;) 
+    {
                
 // begin as lowest in batch     
-        i= batchBegin + 1;
-        for(;i<= batchEnd;i++) {
-            if(data[batchBegin] > data[i])
-                sort_swap(data[batchBegin], data[i]);
+        for(i = 0;i< batchSize;i++) {
+            if(batchBegin + i <= batchEnd) {
+                if(data[batchBegin + i] < data[batchBegin])
+                    sort_swap(data[batchBegin + i], data[batchBegin]);
+            }
         }
         
-// end as highest in batch    
-        i= batchBegin;
-        for(;i< batchEnd;i++) {
-            if(data[batchEnd] < data[i])
-                sort_swap(data[batchEnd], data[i]);
+        __syncthreads();
+        
+// end as highest in batch
+        for(i = 0;i< batchSize;i++) {
+            if(batchBegin + i <= batchEnd) {
+                if(data[batchBegin + i] > data[batchEnd])
+                    sort_swap(data[batchBegin + i], data[batchEnd]);
+            }
         }
+        
+        __syncthreads();
         
         if(threadIdx.x < 1) {
             sorted = 1;
         }
         
-        __threadfence_block();
         __syncthreads();
 
 // swap at batch begin        
@@ -147,7 +144,6 @@ __device__ void sort_batch(uint * data,
             }
         }
         
-        __threadfence_block();
         __syncthreads();
         
         if(sorted) break;
@@ -165,7 +161,7 @@ __device__ void sort_oddEven(uint * data,
             sorted = 1;
         }
         
-        __threadfence_block();
+        //__threadfence_block();
         __syncthreads();
         
         left = low + threadIdx.x * 2;

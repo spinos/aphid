@@ -24,12 +24,19 @@ __global__ void quickSort_checkQ_kernel(QueueType * q,
     for(i=0;i<LoopLimit;i++) {
         if(q->template isDone<WorkLimit, IdelLimit>()) break;
         
-        if(task.execute(q, smem, idata, nodes)) {
+        if(threadIdx.x == 0) {
+            sWorkPerBlock = q->dequeue();
+        }
+                
+        __syncthreads();
+        
+        if(sWorkPerBlock>-1) {
+            task.execute(q, smem, idata, nodes);
 // for debug purpose only
             qi->workBlock = blockIdx.x;
             workBlocks[sWorkPerBlock] = blockIdx.x;
             loaded++;
-        }
+        } else i--;
 
 // for debug purpose only
         if(threadIdx.x <1) {
