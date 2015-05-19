@@ -4,14 +4,16 @@
 #include <cuda_runtime_api.h>
 #include "SimpleQueue.cuh"
 
-template <typename QueueType, typename TaskType, typename TaskData, int LoopLimit, int WorkLimit, int IdelLimit>
+template <typename QueueType, typename TaskType, typename TaskData, int IdelLimit>
 __global__ void quickSort_test_kernel(QueueType * q,
                         TaskType task,
                         TaskData data,
                         SimpleQueueInterface * qi,
                         uint * workBlocks,
                         uint * loopbuf,
-                        int4 * headtailperloop)
+                        int4 * headtailperloop,
+                        int loopLimit,
+                        int workLimit)
 {
     extern __shared__ int smem[]; 
     
@@ -20,8 +22,8 @@ __global__ void quickSort_test_kernel(QueueType * q,
     int i;
     int loaded = 0;
     
-    for(i=0;i<LoopLimit;i++) {
-        if(q->template isDone<WorkLimit, IdelLimit>()) break;
+    for(i=0;i<loopLimit;i++) {
+        if(q->template isDone<IdelLimit>(workLimit)) break;
         
         if(threadIdx.x == 0) {
             sWorkPerBlock = q->dequeue();

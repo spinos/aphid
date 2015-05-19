@@ -14,7 +14,8 @@ include_directories ("../shared"
 "../cudadyn"
 "../reduction"
 "../hesperis"
-"../fem")
+"../fem"
+"../taskQueue")
 
 set (HEADER_FILES "../shared/Base3DView.h" 
 "../shared/Morton3D.h"
@@ -55,6 +56,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "SahBuilder.h"
 "binning_implement.h"
 "sahbvh_implement.h"
+"SahInterface.h"
 "window.h"
 "glwidget.h")
 
@@ -123,9 +125,11 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudanarrowphase/gjk_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
 "../cudanarrowphase/narrowphase.cu"
+"../taskQueue/SimpleQueue.cu"
 "sah_math.cu"
 "binning.cu"
-"sahbvh.cu")
+"sahbvh.cu"
+"SahSplit.cu")
 
 ## disable warnings
 ## http://www.ssl.berkeley.edu/~jimm/grizzly_docs/SSL/opt/intel/cc/9.0/lib/locale/en_US/mcpcom.msg

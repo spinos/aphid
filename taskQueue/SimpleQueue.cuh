@@ -179,11 +179,11 @@ struct SimpleQueue {
         }
     }
     
-    template<int WorkLimit, int IdelLimit>
-    __device__ int isDone()
+    template<int IdelLimit>
+    __device__ int isDone(int workLimit)
     {
         return (_stopClock > IdelLimit
-            || _workDoneCounter >= WorkLimit);
+            || _workDoneCounter >= workLimit);
     }
 };
 

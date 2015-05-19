@@ -49,7 +49,6 @@ void cu_testQuickSort(void * q,
                     int * elements,
                     SimpleQueueInterface * qi,
                     unsigned numElements,
-                    unsigned maxNumParallelNodes,
                     unsigned * workBlocks,
                     unsigned * loopbuf,
                     int * headtailperloop);
@@ -86,7 +85,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     
     std::cout<<"size of qi "<<sizeof(SimpleQueueInterface);
     
-    unsigned n = (1<<13)-297;
+    unsigned n = (1<<13) - 97;
     BaseBuffer hdata;
     hdata.create(n*4);
     
@@ -136,12 +135,10 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     CUDABuffer headtailperloop;
     headtailperloop.create(16 * 25);
     
-    unsigned numParallel = 2000;
-    
     CUDABuffer blkbuf;
     blkbuf.create(maxNumNodes * 4);
     CUDABuffer loopbuf;
-    loopbuf.create(numParallel * 4);
+    loopbuf.create(1024 * 4);
     
     //QuickSort1::Sort<unsigned>(hostD, 0, n-1);
     
@@ -156,7 +153,6 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
                                 (int *)elementsbuf.bufferOnDevice(),
                                 (SimpleQueueInterface *)dqi.bufferOnDevice(),
                                 n,
-                                numParallel,
                                 (unsigned *)blkbuf.bufferOnDevice(),
                                 (unsigned *)loopbuf.bufferOnDevice(),
                                 (int *)headtailperloop.bufferOnDevice());

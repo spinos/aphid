@@ -31,6 +31,9 @@ private:
 	void swapBuffer();
 	CUDABuffer * inEmissionBuf();
 	CUDABuffer * outEmissionBuf();
+	
+	void splitClusters(CudaLinearBvh * bvh,
+	                    unsigned numClusters);
 private:
     CUDABuffer * m_mortonBits;
     CUDABuffer * m_clusterAabb;
@@ -44,5 +47,6 @@ private:
     CUDABuffer * m_splitIds;
     CUDABuffer * m_emissionBlocks;
     CUDABuffer * m_totalNodeCount;
+    CUDABuffer * m_queueAndElement;
     int m_bufferId;
 };

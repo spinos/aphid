@@ -42,7 +42,6 @@ void cu_testQuickSort(void * q,
                     int * elements,
                     SimpleQueueInterface * qi,
                     uint numElements,
-                    uint maxNumBlocks,
                     uint * workBlocks,
                     uint * loopbuf,
                     int * headtailperloop)
@@ -54,7 +53,7 @@ void cu_testQuickSort(void * q,
     
     const int tpb = 256;
     dim3 block(tpb, 1, 1);
-    const unsigned nblk = maxNumBlocks;
+    const unsigned nblk = 1024;
     dim3 grid(nblk, 1, 1);
     
     oddEvenSort::OddEvenSortTask oes;
@@ -62,13 +61,17 @@ void cu_testQuickSort(void * q,
     oesd.idata = idata;
     oesd.nodes = (int2 *)nodes;
     
-    quickSort_test_kernel<simpleQueue::SimpleQueue, oddEvenSort::OddEvenSortTask, oddEvenSort::DataInterface, 5, 63, 24><<<grid, block, 16320>>>(queue,
+    int lpb = 1 + numElements>>10;
+    
+    quickSort_test_kernel<simpleQueue::SimpleQueue, oddEvenSort::OddEvenSortTask, oddEvenSort::DataInterface, 24><<<grid, block, 16320>>>(queue,
                                 oes,
                                 oesd,
                                 qi,
                                 workBlocks,
                                 loopbuf,
-                                (int4 *)headtailperloop);
+                                (int4 *)headtailperloop,
+                                lpb,
+                                32);
     
     CudaBase::CheckCudaError("q sort");
 }
