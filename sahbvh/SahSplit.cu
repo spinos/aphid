@@ -28,7 +28,7 @@ void doSplitWorks(void * q, int * qelements,
     
     int lpb = 1 + numPrimitives>>10;
     
-    work_kernel<simpleQueue::SimpleQueue, SplitTask, DataInterface, 24><<<grid, block, 16320>>>(queue,
+    work_kernel<simpleQueue::SimpleQueue, SplitTask, DataInterface, 24, 8, 256><<<grid, block, 16320>>>(queue,
                                 task,
                                 data,
                                 lpb,

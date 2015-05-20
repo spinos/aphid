@@ -1,8 +1,7 @@
 #ifndef SAH_IMPLEMENT_H
 #define SAH_IMPLEMENT_H
 
-#include <bvh_common.h>
-#include <radixsort_implement.h>
+#include "sah_common.h"
 
 #define SAH_MAX_NUM_BINS 16
 #define SAH_MAX_N_BLOCKS 1024
@@ -24,15 +23,6 @@ struct EmissionEvent {
 struct BinAabb {
     int3 low;
     int3 high;
-};
-
-struct SplitBin {
-    Aabb leftBox;
-    uint leftCount;
-    Aabb rightBox;
-    uint rightCount;
-    int id;
-    float plane;
 };
 
 struct EmissionBlock {

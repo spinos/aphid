@@ -354,12 +354,6 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 
 void SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
 {
-// create first node
-    int rootRange[2];
-    rootRange[0] = 0;
-    rootRange[1] = numClusters - 1;
-    bvh->internalChildBuf()->hostToDevice(&rootRange, 8);
-    
     m_queueAndElement->create(SIZE_OF_SIMPLEQUEUE + numClusters * 4);
     
     sahsplit::doSplitWorks(m_queueAndElement->bufferOnDevice(),
