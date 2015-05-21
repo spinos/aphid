@@ -1,6 +1,7 @@
 #include <cuda_runtime_api.h>
 #include "SimpleQueue.cuh"
 #include "sah_math.cuh"
+#include "onebitsort.cuh"
 
 namespace sahsplit {
 
@@ -9,6 +10,7 @@ struct DataInterface {
     Aabb * nodeAabbs;
     KeyValuePair * primitiveIndirections;
     Aabb * primitiveAabbs;
+    KeyValuePair * intermediateIndirections;
 };
 
 struct SplitTask {
@@ -22,7 +24,7 @@ template <typename QueueType, int NumBins, int NumThreads>
         computeBestBin<NumBins, NumThreads>(sWorkPerBlock, data, smem);
         
         if(validateSplit(&smem[1]))
-            rearrange(data, smem);
+            rearrange<NumBins, NumThreads>(data, smem);
 
         if(threadIdx.x == 0) {  
             if(validateSplit(&smem[1]))
@@ -147,8 +149,7 @@ template<int NumBins, int NumThreads, int Dimension>
         
         __syncthreads();
         
-        int nbatch = (root.y - root.x + 1)/NumThreads;
-        if(( root.y - root.x + 1) & (NumThreads-1)) nbatch++;
+        int nbatch = numBatches<NumThreads>(root);
 
         int i=0;
         for(;i<nbatch;i++) {
@@ -201,8 +202,111 @@ template<int NumBins, int NumThreads, int Dimension>
         __syncthreads();
     }
     
+    template<int NumBins, int NumThreads>
     __device__ void rearrange(DataInterface data, int * smem)
     {
+        int & iRoot = smem[0];
+        int2 root = data.nodes[iRoot];
+        Aabb rootBox = data.nodeAabbs[iRoot];
+        int nbatch = numBatches<NumThreads>(root);
+
+        KeyValuePair * major = data.primitiveIndirections;
+        KeyValuePair * backup = data.intermediateIndirections;
+        Aabb * boxes = data.primitiveAabbs;
+        
+        int i=0;
+        for(;i<nbatch;i++)
+            writeIndirection(backup, major, root.x + i*NumThreads, root.y);
+        
+        __syncthreads();
+        
+/*
+ *    layout of memory in int
+ *    t  as num threads
+ *    16 as size of bin
+ *
+ *    0                                      workId
+ *    1             -> 1+1*16-1              split bin
+ *    1+1*16        -> 1+1*16+t*2-1          sides
+ *    1+1*16+t*2    -> 1+1*16+t*2+2-1        group begin
+ *    1+1*16+t*2+2  -> 1+1*16+t*2+2+t*2-1    offsets
+ *
+ *    layout of sides
+ *
+ *    0      1      2        n-1     thread 
+ * 
+ *    2*0    2*1    2*2      2*(n-1)
+ *    2*1-1  2*2-1  2*3-1    2*n-1
+ */        
+ 
+        SplitBin * sSplit = (SplitBin *)&smem[1];
+        float splitPlane = sSplit->plane;
+        int splitDimension = sSplit->id/NumBins;
+        
+        int * groupBegin = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                    + NumThreads * 2];
+                                    
+        if(threadIdx.x == 0)
+            groupBegin[threadIdx.x] = root.x;
+        
+        __syncthreads();
+            
+        if(threadIdx.x == 1)
+            groupBegin[threadIdx.x] = root.x + sSplit->leftCount;
+        
+        __syncthreads();
+        
+        int * sSide = &smem[1 + SIZE_OF_SPLITBIN_IN_INT];
+        int * sOffset = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                        + NumThreads * 2
+                                        + 2];
+            
+        int * sideVertical = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                        + threadIdx.x * 2];
+                                        
+        int * offsetVertical = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                        + NumThreads * 2
+                                        + 2
+                                        + threadIdx.x * 2];
+                                        
+        int * sideHorizontal = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                        + threadIdx.x];
+                                        
+        int * offsetHorizontal = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                        + NumThreads * 2
+                                        + 2
+                                        + threadIdx.x];
+        int j, splitSide, ind;
+        for(i=0;i<nbatch;i++) {
+            sideVertical[0] = 0;
+            sideVertical[1] = 0;
+            offsetVertical[0] = 0;
+            offsetVertical[1] = 1;
+            
+            __syncthreads();
+            
+            j = root.x + i*NumThreads + threadIdx.x;
+            if(j<= root.y) {
+                splitSide = computeSplitSide(boxes[j], splitPlane, splitDimension);
+                sideVertical[splitSide]++;
+            }
+            
+            __syncthreads();
+            
+            onebitsort::scanInBlock(sOffset, sSide);
+            
+            if(j<= root.y) {
+                ind = groupBegin[splitSide] + offsetVertical[splitSide];
+                major[ind] = backup[j];
+            }
+            __syncthreads();
+            
+            if(threadIdx.x < 2) {
+                groupBegin[threadIdx.x] += sideHorizontal[2*(NumThreads-1)]
+                                        + offsetHorizontal[2*(NumThreads-1)];
+            }
+            __syncthreads();
+        }
         
     }
     
@@ -230,6 +334,14 @@ template<int NumBins, int NumThreads, int Dimension>
         SplitBin * sBestBin = (SplitBin *)smem;
 // for a valid split
         return (sBestBin[0].leftCount > 0 && sBestBin[0].rightCount > 0);
+    }
+    
+    template<int NumThreads>
+    __device__ int numBatches(int2 range)
+    {
+        int nbatch = (range.y - range.x + 1)/NumThreads;
+        if(( range.y - range.x + 1) & (NumThreads-1)) nbatch++;
+        return nbatch;
     }
 };
 

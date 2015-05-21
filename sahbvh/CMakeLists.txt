@@ -15,6 +15,7 @@ include_directories ("../shared"
 "../reduction"
 "../hesperis"
 "../fem"
+"../onebitsort"
 "../taskQueue")
 
 set (HEADER_FILES "../shared/Base3DView.h" 

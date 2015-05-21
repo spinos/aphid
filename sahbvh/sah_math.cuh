@@ -122,3 +122,19 @@ inline __device__ float splitPlaneOfBin(Aabb * rootBox,
         + (d / (float)n) * ((float)(ind - dimension*n) + .5f));
 }
 
+inline __device__ void writeIndirection(KeyValuePair * dst,
+                            KeyValuePair * src,
+                            int begin, int end)
+{
+    int j = begin + threadIdx.x;
+    if(j<= end)
+        dst[j] = src[j];
+}
+
+inline __device__ int computeSplitSide(Aabb box,
+                         float plane,
+                         int dimension)
+{
+    float3 center = centroidOfAabb(box);
+    return (float3_component(center, dimension) > plane);
+}

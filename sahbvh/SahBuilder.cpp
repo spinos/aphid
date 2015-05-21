@@ -128,7 +128,6 @@ give 14 nodes to each block
 #include "SahInterface.h"
 
 #define PRINT_PRIMITIVE_SORT_RESULT 0
-#define SPLIT_BY_LEVEL 0
 
 CudaDbgLog sahlg("sah.txt");
 
@@ -250,7 +249,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
     
 	bvh->setRootChildAndAabb(rr, bounding);
     
-#if SPLIT_BY_LEVEL
+#if 0
     unsigned numNodes = 1;
     m_totalNodeCount->hostToDevice(&numNodes, 4);
 	
@@ -362,7 +361,11 @@ void SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
 	    (Aabb *)bvh->internalNodeAabbs(),
 	    (KeyValuePair *)m_runHash->bufferOnDevice(),
         (Aabb *)clusterAabbs(),
+        (KeyValuePair *)m_runHash->bufferOnDeviceAt(numClusters * 8),
         numClusters);
+    
+    sahlg.writeInt2(bvh->internalChildBuf(), 3, "internal_node", CudaDbgLog::FOnce);
+    sahlg.writeAabb(bvh->internalAabbBuf(), 3, "internal_box", CudaDbgLog::FOnce);
 }
 
 int SahBuilder::countTreeBits(void * morton, unsigned numPrimitives)
@@ -425,16 +428,14 @@ unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 	sahlg.writeUInt(m_compressedRunHeads, numRuns, "compressed_run_heads", CudaDbgLog::FOnce);
 #endif
 
-	const unsigned sortRunLength = nextPow2(numRuns);
-	m_runHash->create((sortRunLength * sizeof(KeyValuePair)));
+	m_runHash->create((numRuns * 2 * 8));
 	
 	sahbvh_computeRunHash((KeyValuePair *)m_runHash->bufferOnDevice(), 
 						(KeyValuePair *)morton,
 						(uint *)m_compressedRunHeads->bufferOnDevice(),
                         m,
 						d,
-						numRuns,
-						sortRunLength);
+						numRuns);
 	
 	CudaBase::CheckCudaError("write run hash");
 						

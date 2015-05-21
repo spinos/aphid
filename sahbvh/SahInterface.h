@@ -12,6 +12,7 @@ void doSplitWorks(void * q, int * qelements,
                     Aabb * nodeAabbs,
                     KeyValuePair * primitiveIndirections,
                     Aabb * primitiveAabbs,
+                    KeyValuePair * intermediateIndirections,
                     uint numPrimitives);
 }
 #endif        //  #ifndef SAHINTERFACE_H

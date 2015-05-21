@@ -8,6 +8,7 @@ void doSplitWorks(void * q, int * qelements,
                     Aabb * nodeAabbs,
                     KeyValuePair * primitiveIndirections,
                     Aabb * primitiveAabbs,
+                    KeyValuePair * intermediateIndirections,
                     uint numPrimitives)
 {
     simpleQueue::SimpleQueue * queue = (simpleQueue::SimpleQueue *)q;
@@ -18,6 +19,7 @@ void doSplitWorks(void * q, int * qelements,
     data.nodeAabbs = nodeAabbs;
     data.primitiveIndirections = primitiveIndirections;
     data.primitiveAabbs = primitiveAabbs;
+    data.intermediateIndirections = intermediateIndirections;
     
     SplitTask task;
     

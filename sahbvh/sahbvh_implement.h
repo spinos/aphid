@@ -49,8 +49,7 @@ void sahbvh_computeRunHash(KeyValuePair * compressed,
 						uint * indices,
                         uint m,
 						uint d,
-						uint n,
-						uint bufLength);
+						uint n);
 
 void sahbvh_computeRunLength(uint * runLength,
 							uint * runHeads,
