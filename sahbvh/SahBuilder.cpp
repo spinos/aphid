@@ -364,8 +364,9 @@ void SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
         (KeyValuePair *)m_runHash->bufferOnDeviceAt(numClusters * 8),
         numClusters);
     
-    sahlg.writeInt2(bvh->internalChildBuf(), 3, "internal_node", CudaDbgLog::FOnce);
-    sahlg.writeAabb(bvh->internalAabbBuf(), 3, "internal_box", CudaDbgLog::FOnce);
+    sahlg.writeHash(m_runHash, numClusters, "split_indirections", CudaDbgLog::FOnce);
+    sahlg.writeInt2(bvh->internalChildBuf(), 63, "internal_node", CudaDbgLog::FOnce);
+    sahlg.writeAabb(bvh->internalAabbBuf(), 63, "internal_box", CudaDbgLog::FOnce);
 }
 
 int SahBuilder::countTreeBits(void * morton, unsigned numPrimitives)
@@ -427,8 +428,7 @@ unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 #if PRINT_PRIMITIVE_SORT_RESULT
 	sahlg.writeUInt(m_compressedRunHeads, numRuns, "compressed_run_heads", CudaDbgLog::FOnce);
 #endif
-
-	m_runHash->create((numRuns * 2 * 8));
+    m_runHash->create((nextPow2(numRuns) * 2 * 8));
 	
 	sahbvh_computeRunHash((KeyValuePair *)m_runHash->bufferOnDevice(), 
 						(KeyValuePair *)morton,

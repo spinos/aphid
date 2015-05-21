@@ -127,8 +127,10 @@ inline __device__ void writeIndirection(KeyValuePair * dst,
                             int begin, int end)
 {
     int j = begin + threadIdx.x;
-    if(j<= end)
+    if(j<= end) {
         dst[j] = src[j];
+        // src[j].key = 9999997;
+    }
 }
 
 inline __device__ int computeSplitSide(Aabb box,

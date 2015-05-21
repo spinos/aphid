@@ -34,6 +34,6 @@ void doSplitWorks(void * q, int * qelements,
                                 task,
                                 data,
                                 lpb,
-                                1);
+                                31);
 }
 }

@@ -205,9 +205,8 @@ template<int NumBins, int NumThreads, int Dimension>
     template<int NumBins, int NumThreads>
     __device__ void rearrange(DataInterface data, int * smem)
     {
-        int & iRoot = smem[0];
+        int iRoot = smem[0];
         int2 root = data.nodes[iRoot];
-        Aabb rootBox = data.nodeAabbs[iRoot];
         int nbatch = numBatches<NumThreads>(root);
 
         KeyValuePair * major = data.primitiveIndirections;
@@ -248,8 +247,6 @@ template<int NumBins, int NumThreads, int Dimension>
                                     
         if(threadIdx.x == 0)
             groupBegin[threadIdx.x] = root.x;
-        
-        __syncthreads();
             
         if(threadIdx.x == 1)
             groupBegin[threadIdx.x] = root.x + sSplit->leftCount;
@@ -280,24 +277,24 @@ template<int NumBins, int NumThreads, int Dimension>
         for(i=0;i<nbatch;i++) {
             sideVertical[0] = 0;
             sideVertical[1] = 0;
-            offsetVertical[0] = 0;
-            offsetVertical[1] = 1;
             
             __syncthreads();
             
             j = root.x + i*NumThreads + threadIdx.x;
             if(j<= root.y) {
-                splitSide = computeSplitSide(boxes[j], splitPlane, splitDimension);
+                splitSide = computeSplitSide(boxes[backup[j].value], splitPlane, splitDimension);
                 sideVertical[splitSide]++;
             }
             
             __syncthreads();
             
-            onebitsort::scanInBlock(sOffset, sSide);
+            onebitsort::scanInBlock<int>(sOffset, sSide);
             
             if(j<= root.y) {
                 ind = groupBegin[splitSide] + offsetVertical[splitSide];
                 major[ind] = backup[j];
+// for debug purpose only
+                major[ind].key = splitSide;
             }
             __syncthreads();
             
@@ -318,15 +315,14 @@ template<int NumBins, int NumThreads, int Dimension>
         
         SplitBin * sBestBin = (SplitBin *)&smem[1];
         int headToSecond = root.x + sBestBin->leftCount;
-        int child = q->enqueue();
+        int child = q->enqueue2();
         data.nodes[child].x = root.x;
         data.nodes[child].y = headToSecond - 1;
         data.nodeAabbs[child] = sBestBin->leftBox;
 
-        child = q->enqueue();
-        data.nodes[child].x = headToSecond;
-        data.nodes[child].y = root.y;
-        data.nodeAabbs[child] = sBestBin->rightBox;
+        data.nodes[child+1].x = headToSecond;
+        data.nodes[child+1].y = root.y;
+        data.nodeAabbs[child+1] = sBestBin->rightBox;
     }
     
     __device__ int validateSplit(void * smem)
@@ -340,7 +336,7 @@ template<int NumBins, int NumThreads, int Dimension>
     __device__ int numBatches(int2 range)
     {
         int nbatch = (range.y - range.x + 1)/NumThreads;
-        if(( range.y - range.x + 1) & (NumThreads-1)) nbatch++;
+        if((( range.y - range.x + 1) & (NumThreads-1)) > 0) nbatch++;
         return nbatch;
     }
 };

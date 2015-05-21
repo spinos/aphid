@@ -79,6 +79,14 @@ struct SimpleQueue {
         return oldTail;
     }
     
+    __device__ int enqueue2()
+    {
+        int oldTail = atomicAdd(&_qouttail, 2);
+        _elements[oldTail] = 0;
+        _elements[oldTail+1] = 0;
+        return oldTail;
+    }
+    
 /*
  *  0  1  2  3 ... n-1  n
  *

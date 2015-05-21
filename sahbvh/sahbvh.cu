@@ -632,14 +632,18 @@ __global__ void computeRunHash_kernel(KeyValuePair * compressed,
 						uint * indices,
                         uint m,
 						uint d,
-						uint maxElem)
+						uint maxElem,
+						uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-	if(ind >= maxElem) return;
+	if(ind >= maxInd) return;
 	
 	compressed[ind].value = ind;
 	
-	compressed[ind].key = (morton[indices[ind]].key) >> d;
+	if(ind>=maxElem)
+	    compressed[ind].key = 1<<(m*3);
+	else
+	    compressed[ind].key = (morton[indices[ind]].key) >> d;
 }
 
 __global__ void computeRunHead_kernel(uint * blockHeads, 
@@ -694,9 +698,10 @@ void sahbvh_computeRunHash(KeyValuePair * compressed,
 						uint d,
 						uint n)
 {
+    uint bufL = nextPow2(n);
     const int tpb = 512;
     dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(n, tpb);
+    unsigned nblk = iDivUp(bufL, tpb);
     dim3 grid(nblk, 1, 1);
     
     computeRunHash_kernel<<< grid, block>>>(compressed,
@@ -704,7 +709,8 @@ void sahbvh_computeRunHash(KeyValuePair * compressed,
         indices,
         m,
         d,
-        n);
+        n,
+        bufL);
 }
 
 void sahbvh_computeRunLength(uint * runLength,

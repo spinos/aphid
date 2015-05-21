@@ -76,10 +76,8 @@ __global__ void RadixSum(KeyValuePair *oData, KeyValuePair *pData,
     
     uint j, pos, p, ind;
     for(i=0;i<numBatches;i++) {
-        for(j=0;j<2;j++) {
-            binVertical[j] = 0;
-            binOffsetVertical[j] = 0;
-        }
+        binVertical[0] = 0;
+        binVertical[1] = 0;
         
         __syncthreads();
     
