@@ -25,6 +25,57 @@ extern __shared__ uint sRadixSum[];
  *  prefix sum: http://http.developer.nvidia.com/GPUGems3/gpugems3_ch39.html
  */
  
+__device__ void reduceInBlock(uint * binVertical)
+{
+        if(threadIdx.x < 128) {
+        binVertical[0] += binVertical[0 + 128 *2];
+        binVertical[1] += binVertical[1 + 128 *2];
+    }
+    __syncthreads();
+    
+    if(threadIdx.x < 64) {
+        binVertical[0] += binVertical[0 + 64 *2];
+        binVertical[1] += binVertical[1 + 64 *2];
+    }
+    __syncthreads();
+    
+    if(threadIdx.x < 32) {
+        binVertical[0] += binVertical[0 + 32 *2];
+        binVertical[1] += binVertical[1 + 32 *2];
+    }
+    __syncthreads();
+    
+    if(threadIdx.x < 16) {
+        binVertical[0] += binVertical[0 + 16 *2];
+        binVertical[1] += binVertical[1 + 16 *2];
+    }
+    __syncthreads();
+    
+    if(threadIdx.x < 8) {
+        binVertical[0] += binVertical[0 + 8 *2];
+        binVertical[1] += binVertical[1 + 8 *2];
+    }
+    __syncthreads();
+    
+    if(threadIdx.x < 4) {
+        binVertical[0] += binVertical[0 + 4 *2];
+        binVertical[1] += binVertical[1 + 4 *2];
+    }
+    __syncthreads();
+    
+    if(threadIdx.x < 2) {
+        binVertical[0] += binVertical[0 + 2 *2];
+        binVertical[1] += binVertical[1 + 2 *2];
+    }
+    __syncthreads();
+    
+    if(threadIdx.x < 1) {
+        binVertical[0] += binVertical[0 + 1 *2];
+        binVertical[1] += binVertical[1 + 1 *2];
+    }
+    __syncthreads();
+}
+ 
 __device__ void scanInBlock(uint * sum, uint* idata)
 {
     int i = threadIdx.x;
@@ -202,53 +253,7 @@ __global__ void RadixSum(KeyValuePair *oData, KeyValuePair *pData,
     
     __syncthreads();
     
-    if(threadIdx.x < 128) {
-        binVertical[0] += binVertical[0 + 128 *2];
-        binVertical[1] += binVertical[1 + 128 *2];
-    }
-    __syncthreads();
-    
-    if(threadIdx.x < 64) {
-        binVertical[0] += binVertical[0 + 64 *2];
-        binVertical[1] += binVertical[1 + 64 *2];
-    }
-    __syncthreads();
-    
-    if(threadIdx.x < 32) {
-        binVertical[0] += binVertical[0 + 32 *2];
-        binVertical[1] += binVertical[1 + 32 *2];
-    }
-    __syncthreads();
-    
-    if(threadIdx.x < 16) {
-        binVertical[0] += binVertical[0 + 16 *2];
-        binVertical[1] += binVertical[1 + 16 *2];
-    }
-    __syncthreads();
-    
-    if(threadIdx.x < 8) {
-        binVertical[0] += binVertical[0 + 8 *2];
-        binVertical[1] += binVertical[1 + 8 *2];
-    }
-    __syncthreads();
-    
-    if(threadIdx.x < 4) {
-        binVertical[0] += binVertical[0 + 4 *2];
-        binVertical[1] += binVertical[1 + 4 *2];
-    }
-    __syncthreads();
-    
-    if(threadIdx.x < 2) {
-        binVertical[0] += binVertical[0 + 2 *2];
-        binVertical[1] += binVertical[1 + 2 *2];
-    }
-    __syncthreads();
-    
-    if(threadIdx.x < 1) {
-        binVertical[0] += binVertical[0 + 1 *2];
-        binVertical[1] += binVertical[1 + 1 *2];
-    }
-    __syncthreads();
+    reduceInBlock(binVertical);
     
     if(threadIdx.x < 4)
         sRadixSum[threadIdx.x] = 0;

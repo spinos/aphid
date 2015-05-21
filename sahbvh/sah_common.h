@@ -14,6 +14,7 @@ struct SplitBin {
 };
 
 #define SIZE_OF_SPLITBIN 64
+#define SIZE_OF_SPLITBIN_IN_INT 16
 
 #endif        //  #ifndef SAH_COMMON_H
 

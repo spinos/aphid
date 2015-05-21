@@ -18,26 +18,18 @@ template <typename QueueType, int NumBins, int NumThreads>
                             int * smem)
     {
         int & sWorkPerBlock = smem[0];
-        int headToSecond, spawn;
-
+        
         computeBestBin<NumBins, NumThreads>(sWorkPerBlock, data, smem);
+        
+        if(validateSplit(&smem[1]))
+            rearrange(data, smem);
 
-        if(threadIdx.x == 0) {             
-                /*
-                headToSecond = (root.y - root.x + 1) / 2;
+        if(threadIdx.x == 0) {  
+            if(validateSplit(&smem[1]))
+                spawn(q, data, smem);
                 
-                if((root.y - root.x + 1) > 256*2) {               
-                        spawn = q->enqueue();
-                        data.nodes[spawn].x = root.x;
-                        data.nodes[spawn].y = headToSecond - 1;
-
-                        spawn = q->enqueue();
-                        data.nodes[spawn].x = headToSecond;
-                        data.nodes[spawn].y = root.y;
-                }*/
-                    
-                q->setWorkDone();
-                q->swapTails();
+            q->setWorkDone();
+            q->swapTails();
 
         }
        // __threadfence();
@@ -53,12 +45,29 @@ template<int NumBins, int NumThreads>
     {
         int2 root = data.nodes[iRoot];
         Aabb rootBox = data.nodeAabbs[iRoot];
-        
-        int * sSide = &smem[1];
-        float * sCost = (float *)&smem[1 + NumBins * NumThreads];
-        SplitBin * sBin = (SplitBin *)&smem[1 + NumBins * NumThreads + NumBins];
-        SplitBin * sBestBin = (SplitBin *)&smem[1 + NumBins * NumThreads + NumBins
-                                                    + NumBins * SIZE_OF_SPLITBIN];
+/*
+ *    layout of memory in int
+ *    n  as num bins
+ *    t  as num threads
+ *    16 as size of bin
+ *
+ *    0                                      workId
+ *    1             -> 1+3*16-1              best bin per dimension
+ *    1+3*16        -> 1+3*16+n*16-1         bins
+ *    1+3*16+n*16   -> 1+3*16+n*16+n-1       costs
+ *    1+3*16+n*16+n -> 1+3*16+n*16+n+n*t-1   sides
+ *
+ *    when n = 8, t = 256
+ *    total shared memory 8932 bytes
+ *
+ */      
+        SplitBin * sBestBin = (SplitBin *)&smem[1];
+        SplitBin * sBin = (SplitBin *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
+        float * sCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT
+                                        + NumBins * SIZE_OF_SPLITBIN_IN_INT];
+        int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT
+                              + NumBins * SIZE_OF_SPLITBIN_IN_INT
+                              + NumBins];
         
 /*
  *    layout of sides
@@ -190,6 +199,37 @@ template<int NumBins, int NumThreads, int Dimension>
         }
         
         __syncthreads();
+    }
+    
+    __device__ void rearrange(DataInterface data, int * smem)
+    {
+        
+    }
+    
+    template <typename QueueType>
+    __device__ void spawn(QueueType * q, DataInterface data, int * smem)
+    {
+        int & iRoot = smem[0];
+        int2 root = data.nodes[iRoot];
+        
+        SplitBin * sBestBin = (SplitBin *)&smem[1];
+        int headToSecond = root.x + sBestBin->leftCount;
+        int child = q->enqueue();
+        data.nodes[child].x = root.x;
+        data.nodes[child].y = headToSecond - 1;
+        data.nodeAabbs[child] = sBestBin->leftBox;
+
+        child = q->enqueue();
+        data.nodes[child].x = headToSecond;
+        data.nodes[child].y = root.y;
+        data.nodeAabbs[child] = sBestBin->rightBox;
+    }
+    
+    __device__ int validateSplit(void * smem)
+    {
+        SplitBin * sBestBin = (SplitBin *)smem;
+// for a valid split
+        return (sBestBin[0].leftCount > 0 && sBestBin[0].rightCount > 0);
     }
 };
 
