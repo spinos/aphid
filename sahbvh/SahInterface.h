@@ -16,6 +16,10 @@ void doSplitWorks(void * q, int * qelements,
                     Aabb * primitiveAabbs,
                     KeyValuePair * intermediateIndirections,
                     uint numPrimitives);
+
+void initHash(KeyValuePair * primitiveIndirections,
+                    uint numPrimitives);
+
 }
 #endif        //  #ifndef SAHINTERFACE_H
 

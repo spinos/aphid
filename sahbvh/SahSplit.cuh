@@ -476,4 +476,13 @@ __global__ void work_kernel(QueueType * q,
     }
 }
 
+__global__ void initHash_kernel(KeyValuePair * primitiveIndirections,
+                    uint n)
+{
+    uint ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= n) return;
+	
+	primitiveIndirections[ind].value = ind;
+}
+
 }

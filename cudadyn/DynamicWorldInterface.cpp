@@ -38,7 +38,7 @@ DynamicWorldInterface::DynamicWorldInterface()
 	m_mass = new BaseBuffer;
 	m_split = new BaseBuffer;
 	m_deltaJ = new BaseBuffer;
-	m_maxDisplayLevel = 1;
+	m_maxDisplayLevel = 2;
 }
 
 DynamicWorldInterface::~DynamicWorldInterface() {}
