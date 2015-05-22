@@ -3,6 +3,8 @@
 #include <CudaLinearBvh.h>
 #include <radixsort_implement.h>
 
+int WorldDbgDraw::MaxDrawBvhHierarchyLevel = 2;
+
 WorldDbgDraw::WorldDbgDraw(GeoDrawer * drawer) 
 { m_drawer = drawer; }
 
@@ -55,7 +57,7 @@ void WorldDbgDraw::showBvhHierarchy(CudaLinearBvh * bvh)
 	
 	Aabb * internalBoxes = (Aabb *)bvh->hostInternalAabb();
 	int2 * internalNodeChildIndices = (int2 *)bvh->hostInternalChildIndices();
-	// int * distanceFromRoot = (int *)bvh->hostInternalDistanceFromRoot();
+	int * distanceFromRoot = (int *)bvh->hostInternalDistanceFromRoot();
 	
 	BoundingBox bb;
 	Aabb bvhNodeAabb;
@@ -65,15 +67,15 @@ void WorldDbgDraw::showBvhHierarchy(CudaLinearBvh * bvh)
 	int maxStack = 1;
 	int touchedInternal = 0;
 	//int maxLevel = 0;
-	//int level;
+	int level;
 	while(stackSize > 0) {
 		int internalOrLeafNodeIndex = stack[ stackSize - 1 ];
 		stackSize--;
 		
 		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
 		
-		//level = distanceFromRoot[bvhNodeIndex];
-		//if(level > m_maxDisplayLevel) continue;
+		level = distanceFromRoot[bvhNodeIndex];
+		if(level > MaxDrawBvhHierarchyLevel) continue;
 		//if(maxLevel < level)
 			//maxLevel = level;
 			
@@ -81,7 +83,7 @@ void WorldDbgDraw::showBvhHierarchy(CudaLinearBvh * bvh)
 
 		
 		//if(m_maxDisplayLevel - level < 2) 
-		if(isLeafNode(internalOrLeafNodeIndex)==0)
+		if(isLeafNode(internalOrLeafNodeIndex)==0 && level >= MaxDrawBvhHierarchyLevel-1)
 		 {
 			bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
 			bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);

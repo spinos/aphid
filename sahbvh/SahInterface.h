@@ -10,6 +10,8 @@ namespace sahsplit {
 void doSplitWorks(void * q, int * qelements,
                     int2 * nodes,
                     Aabb * nodeAabbs,
+                    int * nodeParents,
+                    int * nodeLevels,
                     KeyValuePair * primitiveIndirections,
                     Aabb * primitiveAabbs,
                     KeyValuePair * intermediateIndirections,

@@ -10,6 +10,7 @@
 #include <stripedModel.h>
 #include <CudaLinearBvh.h>
 #include <LBvhBuilder.h>
+#include <WorldDbgDraw.h>
 #include <radixsort_implement.h>
 #include <simpleContactSolver_implement.h>
 #include <tetrahedron_math.h>
@@ -37,7 +38,7 @@ DynamicWorldInterface::DynamicWorldInterface()
 	m_mass = new BaseBuffer;
 	m_split = new BaseBuffer;
 	m_deltaJ = new BaseBuffer;
-	m_maxDisplayLevel = 5;
+	m_maxDisplayLevel = 1;
 }
 
 DynamicWorldInterface::~DynamicWorldInterface() {}
@@ -108,6 +109,7 @@ void DynamicWorldInterface::changeMaxDisplayLevel(int d)
 	m_maxDisplayLevel += d;
 	if(m_maxDisplayLevel<1) m_maxDisplayLevel = 1;
 	if(m_maxDisplayLevel>30) m_maxDisplayLevel = 30;
+    WorldDbgDraw::MaxDrawBvhHierarchyLevel = m_maxDisplayLevel;
 }
 
 void DynamicWorldInterface::draw(TetrahedronSystem * tetra)

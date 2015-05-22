@@ -14,6 +14,7 @@ public:
     void showBvhHierarchy(CudaLinearBvh * bvh);
 #endif
 
+    static int MaxDrawBvhHierarchyLevel;
 protected:
 
 private:

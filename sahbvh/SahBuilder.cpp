@@ -242,12 +242,10 @@ void SahBuilder::build(CudaLinearBvh * bvh)
       
     // sahlg.writeMortonHash(bvh->primitiveHashBuf(), n, "sorted_primitive_hash", CudaDbgLog::FOnce);
 
-// set root node range
     int rr[2];
     rr[0] = 0;
     rr[1] = numClusters - 1;
-    
-	bvh->setRootChildAndAabb(rr, bounding);
+	bvh->initRootNode(rr, bounding);
     
 #if 0
     unsigned numNodes = 1;
@@ -359,14 +357,18 @@ void SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
         (int *)m_queueAndElement->bufferOnDeviceAt(SIZE_OF_SIMPLEQUEUE),
         (int2 *)bvh->internalNodeChildIndices(),
 	    (Aabb *)bvh->internalNodeAabbs(),
+        (int *)bvh->internalNodeParentIndices(),
+        (int *)bvh->distanceInternalNodeFromRoot(),
 	    (KeyValuePair *)m_runHash->bufferOnDevice(),
         (Aabb *)clusterAabbs(),
         (KeyValuePair *)m_runHash->bufferOnDeviceAt(numClusters * 8),
         numClusters);
     
-    sahlg.writeHash(m_runHash, numClusters, "split_indirections", CudaDbgLog::FOnce);
-    sahlg.writeInt2(bvh->internalChildBuf(), 63, "internal_node", CudaDbgLog::FOnce);
-    sahlg.writeAabb(bvh->internalAabbBuf(), 63, "internal_box", CudaDbgLog::FOnce);
+    // sahlg.writeHash(m_runHash, numClusters, "split_indirections", CudaDbgLog::FOnce);
+    sahlg.writeInt2(bvh->internalChildBuf(), 127, "internal_node", CudaDbgLog::FOnce);
+    // sahlg.writeAabb(bvh->internalAabbBuf(), 127, "internal_box", CudaDbgLog::FOnce);
+    // sahlg.writeUInt(bvh->internalParentBuf(), 127, "parent_node", CudaDbgLog::FOnce);
+    // sahlg.writeUInt(bvh->distanceInternalNodeFromRootBuf(), 127, "node_level", CudaDbgLog::FOnce);
 }
 
 int SahBuilder::countTreeBits(void * morton, unsigned numPrimitives)

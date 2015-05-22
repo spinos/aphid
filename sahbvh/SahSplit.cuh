@@ -8,6 +8,8 @@ namespace sahsplit {
 struct DataInterface {
     int2 * nodes;
     Aabb * nodeAabbs;
+    int * nodeParents;
+    int * nodeLevels;
     KeyValuePair * primitiveIndirections;
     Aabb * primitiveAabbs;
     KeyValuePair * intermediateIndirections;
@@ -315,14 +317,26 @@ template<int NumBins, int NumThreads, int Dimension>
         
         SplitBin * sBestBin = (SplitBin *)&smem[1];
         int headToSecond = root.x + sBestBin->leftCount;
-        int child = q->enqueue2();
+        const int child = q->enqueue2();
         data.nodes[child].x = root.x;
         data.nodes[child].y = headToSecond - 1;
         data.nodeAabbs[child] = sBestBin->leftBox;
-
+        
         data.nodes[child+1].x = headToSecond;
         data.nodes[child+1].y = root.y;
         data.nodeAabbs[child+1] = sBestBin->rightBox;
+        
+        int2 childInd;
+        childInd.x = (child | 0x80000000);
+        childInd.y = ((child+1) | 0x80000000);
+        data.nodes[iRoot] = childInd;
+        
+        data.nodeParents[child] = iRoot;
+        data.nodeParents[child+1] = iRoot;
+        
+        const int level = data.nodeLevels[iRoot] + 1; 
+        data.nodeLevels[child] = level;
+        data.nodeLevels[child+1] = level;
     }
     
     __device__ int validateSplit(void * smem)

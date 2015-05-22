@@ -202,10 +202,13 @@ const int CudaLinearBvh::hostRootInd() const
 { return m_hostRootInd; }
 #endif
 
-void CudaLinearBvh::setRootChildAndAabb(int * child, float * box)
+void CudaLinearBvh::initRootNode(int * child, float * box)
 {
 	m_internalNodeChildIndices->hostToDevice(child, 8);
 	m_internalNodeAabbs->hostToDevice(box, 24);
+    int zero = 0;
+    m_internalNodeParentIndices->hostToDevice(&zero, 4);
+    m_distanceInternalNodeFromRoot->hostToDevice(&zero, 4);
 }
 
 CUDABuffer * CudaLinearBvh::internalChildBuf()
@@ -213,4 +216,10 @@ CUDABuffer * CudaLinearBvh::internalChildBuf()
 
 CUDABuffer * CudaLinearBvh::internalAabbBuf()
 { return m_internalNodeAabbs; }
+
+CUDABuffer * CudaLinearBvh::internalParentBuf()
+{ return m_internalNodeParentIndices; }
+
+CUDABuffer * CudaLinearBvh::distanceInternalNodeFromRootBuf()
+{ return m_distanceInternalNodeFromRoot; }
 //:~

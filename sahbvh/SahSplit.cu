@@ -6,6 +6,8 @@ namespace sahsplit {
 void doSplitWorks(void * q, int * qelements,
                     int2 * nodes,
                     Aabb * nodeAabbs,
+                    int * nodeParents,
+                    int * nodeLevels,
                     KeyValuePair * primitiveIndirections,
                     Aabb * primitiveAabbs,
                     KeyValuePair * intermediateIndirections,
@@ -17,6 +19,8 @@ void doSplitWorks(void * q, int * qelements,
     DataInterface data;
     data.nodes = nodes;
     data.nodeAabbs = nodeAabbs;
+    data.nodeParents = nodeParents;
+    data.nodeLevels = nodeLevels;
     data.primitiveIndirections = primitiveIndirections;
     data.primitiveAabbs = primitiveAabbs;
     data.intermediateIndirections = intermediateIndirections;
@@ -34,6 +38,6 @@ void doSplitWorks(void * q, int * qelements,
                                 task,
                                 data,
                                 lpb,
-                                31);
+                                63);
 }
 }
