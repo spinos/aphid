@@ -210,6 +210,97 @@ template<int NumBins, int NumThreads, int Dimension>
         int iRoot = smem[0];
         int2 root = data.nodes[iRoot];
         int nbatch = numBatches<NumThreads>(root);
+        if(nbatch>1) 
+            rearrangeBatched<NumBins, NumThreads>(root, nbatch, data, smem);
+        else 
+            rearrangeInBlock<NumBins, NumThreads>(root, data, smem);
+    }
+    
+    template<int NumBins, int NumThreads>
+    __device__ void rearrangeInBlock(int2 root, DataInterface data, int * smem)   
+    {
+/*
+ *    layout of memory in int
+ *    t  as num threads
+ *    16 as size of bin
+ *
+ *    0                                          workId
+ *    1                -> 1+1*16-1               split bin
+ *    1+1*16           -> 1+1*16+t*2-1           sides
+ *    1+1*16+t*2       -> 1+1*16+t*2+2-1         group begin
+ *    1+1*16+t*2+2     -> 1+1*16+t*2+2+t*2-1     offsets
+ *    1+1*16+t*2+2+t*2 -> 1+1*16+t*2+2+t*2+t*2-1 backup indirection
+ *    
+ */         
+        KeyValuePair * major = data.primitiveIndirections;
+        KeyValuePair * backup = (KeyValuePair *)&smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                        + NumThreads * 2
+                                        + 2
+                                        + NumThreads * 2];
+        Aabb * boxes = data.primitiveAabbs;
+        
+        const int j = root.x + threadIdx.x;
+            
+        if(j <= root.y) 
+            backup[threadIdx.x] = major[j];
+        
+        __syncthreads();
+        
+        SplitBin * sSplit = (SplitBin *)&smem[1];
+        float splitPlane = sSplit->plane;
+        int splitDimension = sSplit->id/NumBins;
+        
+        int * groupBegin = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                    + NumThreads * 2];
+                                    
+        if(threadIdx.x == 0)
+            groupBegin[threadIdx.x] = root.x;
+            
+        if(threadIdx.x == 1)
+            groupBegin[threadIdx.x] = root.x + sSplit->leftCount;
+        
+        __syncthreads();
+        
+        int * sSide = &smem[1 + SIZE_OF_SPLITBIN_IN_INT];
+        int * sOffset = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                        + NumThreads * 2
+                                        + 2];
+            
+        int * sideVertical = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                        + threadIdx.x * 2];
+                                        
+        int * offsetVertical = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+                                        + NumThreads * 2
+                                        + 2
+                                        + threadIdx.x * 2];
+                                        
+        int splitSide, ind;
+
+        sideVertical[0] = 0;
+        sideVertical[1] = 0;
+        
+        __syncthreads();
+        
+        if(j<= root.y) {
+            splitSide = computeSplitSide(boxes[backup[threadIdx.x].value], splitPlane, splitDimension);
+            sideVertical[splitSide]++;
+        }
+            
+        __syncthreads();
+            
+        onebitsort::scanInBlock<int>(sOffset, sSide);
+            
+        if(j<= root.y) {
+            ind = groupBegin[splitSide] + offsetVertical[splitSide];
+            major[ind] = backup[threadIdx.x];
+// for debug purpose only
+            // major[ind].key = splitSide;
+        }
+    }
+
+    template<int NumBins, int NumThreads>
+    __device__ void rearrangeBatched(int2 root, int nbatch, DataInterface data, int * smem)   
+    {
 
         KeyValuePair * major = data.primitiveIndirections;
         KeyValuePair * backup = data.intermediateIndirections;
@@ -296,7 +387,7 @@ template<int NumBins, int NumThreads, int Dimension>
                 ind = groupBegin[splitSide] + offsetVertical[splitSide];
                 major[ind] = backup[j];
 // for debug purpose only
-                major[ind].key = splitSide;
+                // major[ind].key = splitSide;
             }
             __syncthreads();
             
