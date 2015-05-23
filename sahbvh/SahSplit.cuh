@@ -16,21 +16,39 @@ struct DataInterface {
 };
 
 struct SplitTask {
-template <typename QueueType, int NumBins, int NumThreads>
+    __device__ int shouldSplit(DataInterface data, int iRoot)
+    {
+        int2 root = data.nodes[iRoot];
+        
+        return (root.y - root.x) > 6;
+    }
+    
+    __device__ int validateSplit(void * smem)
+    {
+        SplitBin * sBestBin = (SplitBin *)smem;
+// for a valid split
+        return (sBestBin[0].leftCount > 0 && sBestBin[0].rightCount > 0);
+    }
+    
+    template <typename QueueType, int NumBins, int NumThreads>
     __device__ int execute(QueueType * q,
                             DataInterface data,
                             int * smem)
     {
-        int & sWorkPerBlock = smem[0];
+        int sWorkPerBlock = smem[0];
+        int doSplit = shouldSplit(data, sWorkPerBlock);
+        if(doSplit) {
+            computeBestBin<NumBins, NumThreads>(sWorkPerBlock, data, smem);
         
-        computeBestBin<NumBins, NumThreads>(sWorkPerBlock, data, smem);
-        
-        if(validateSplit(&smem[1]))
-            rearrange<NumBins, NumThreads>(data, smem);
+            if(validateSplit(&smem[1]))
+                rearrange<NumBins, NumThreads>(data, smem);
+        }
 
         if(threadIdx.x == 0) {  
-            if(validateSplit(&smem[1]))
-                spawn(q, data, smem);
+            if(doSplit) {
+                if(validateSplit(&smem[1]))
+                    spawn(q, data, smem);
+            }
                 
             q->setWorkDone();
             q->swapTails();
@@ -95,7 +113,7 @@ template<int NumBins, int NumThreads, int Dimension>
                                     Aabb rootBox)
     {
         if((root.y - root.x) < 16)
-            computeBinsPerDimensionPrimitiveCenter<Dimension>(root.y - root.x+1,
+            computeBinsPerDimensionPrimitiveCenter<Dimension>(root.y - root.x + 1,
                                     data,
                                     smem,
                                     root,
@@ -108,7 +126,7 @@ template<int NumBins, int NumThreads, int Dimension>
     }
  
 template<int Dimension>  
-    __device__ void computeBinsPerDimensionPrimitiveCenter(int NumBins,
+    __device__ void computeBinsPerDimensionPrimitiveCenter(int numBins,
                                     DataInterface data,
                                     int * smem,
                                     int2 root,
@@ -134,10 +152,10 @@ template<int Dimension>
         float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
         SplitBin * sBin = (SplitBin *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3];
         float * sCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
-                                        + NumBins * SIZE_OF_SPLITBIN_IN_INT];
+                                        + numBins * SIZE_OF_SPLITBIN_IN_INT];
         int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
-                                        + NumBins * SIZE_OF_SPLITBIN_IN_INT
-                                        + NumBins];
+                                        + numBins * SIZE_OF_SPLITBIN_IN_INT
+                                        + numBins];
 /*
  *    layout of sides
  *    0    n     2n    3n
@@ -148,19 +166,18 @@ template<int Dimension>
  *    vertical computeSides
  *    horizonal collectBins
  */
-        int * sideVertical = &sSide[NumBins * threadIdx.x];
         int * sideHorizontal = &sSide[threadIdx.x];                      
         
         KeyValuePair * primitiveIndirections = data.primitiveIndirections;
         Aabb * primitiveAabbs = data.primitiveAabbs;
         Aabb clusterBox;
         float3 center;
-        if(threadIdx.x < NumBins) {
+        if(threadIdx.x < numBins) {
             resetSplitBin(sBin[threadIdx.x]);
 // primitive center as split plane             
             clusterBox = primitiveAabbs[primitiveIndirections[root.x + threadIdx.x].value];
             center = centroidOfAabb(clusterBox);
-            sBin[threadIdx.x].plane = float3_component(center, Dimension);
+            sBin[threadIdx.x].plane = float3_component(center, Dimension) + 1e-7f;
         }
         
         __syncthreads();
@@ -181,30 +198,30 @@ template<int Dimension>
  *   vertical   j as bins
  */             
         int i, j;
-        if(threadIdx.x < NumBins*NumBins) {
-            i = threadIdx.x / NumBins;
-            j = threadIdx.x - i * NumBins;
+        if(threadIdx.x < numBins*numBins) {
+            i = threadIdx.x / numBins;
+            j = threadIdx.x - i * numBins;
             
             clusterBox = primitiveAabbs[primitiveIndirections[root.x + i].value];
             center = centroidOfAabb(clusterBox);
             
-            sideVertical[j] = (float3_component(center, Dimension) > sBin[j].plane);
+            sSide[threadIdx.x] = (float3_component(center, Dimension) > sBin[j].plane);
         }
     
         __syncthreads();
     
-        if(threadIdx.x < NumBins) {
-            for(i=0; i<NumBins; i++) {
+        if(threadIdx.x < numBins) {
+            for(i=0; i<numBins; i++) {
                 clusterBox = primitiveAabbs[primitiveIndirections[root.x + i].value];
                 updateSplitBinSide(sBin[threadIdx.x], clusterBox, 
-                                    sideHorizontal[i * NumBins]);
+                                    sideHorizontal[i * numBins]);
             }
         }
 
         __syncthreads();
         
         
-        if(threadIdx.x < NumBins) {
+        if(threadIdx.x < numBins) {
             float rootArea = areaOfAabb(&rootBox);
             sCost[threadIdx.x] = costOfSplit(&sBin[threadIdx.x],
                                         rootArea);
@@ -215,7 +232,7 @@ template<int Dimension>
         if(threadIdx.x < 1) {
             int bestI = 0;
             float lowestCost = sCost[0];
-            for(i=1; i< NumBins; i++) {
+            for(i=1; i< numBins; i++) {
                 if(lowestCost > sCost[i]) {
                     lowestCost = sCost[i];
                     bestI = i;
@@ -603,13 +620,6 @@ template<int NumBins, int NumThreads, int Dimension>
         const int level = data.nodeLevels[iRoot] + 1; 
         data.nodeLevels[child] = level;
         data.nodeLevels[child+1] = level;
-    }
-    
-    __device__ int validateSplit(void * smem)
-    {
-        SplitBin * sBestBin = (SplitBin *)smem;
-// for a valid split
-        return (sBestBin[0].leftCount > 0 && sBestBin[0].rightCount > 0);
     }
     
     template<int NumThreads>

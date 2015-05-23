@@ -38,7 +38,7 @@ void doSplitWorks(void * q, int * qelements,
                                 task,
                                 data,
                                 lpb,
-                                63);
+                                numPrimitives-1);
 }
 
 void initHash(KeyValuePair * primitiveIndirections,
