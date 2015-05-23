@@ -19,7 +19,8 @@ BvhBuilder * CudaLinearBvh::Builder = 0;
 
 CudaLinearBvh::CudaLinearBvh() 
 { 
-	m_numPrimitives = 0; 
+	m_numPrimitives = 0;
+	m_numActiveInternalNodes = 0;
 	m_leafAabbs = new CUDABuffer;
 	m_internalNodeAabbs = new CUDABuffer;
 	m_leafHash = new CUDABuffer;
@@ -54,7 +55,7 @@ CudaLinearBvh::~CudaLinearBvh()
 	delete m_maxChildElementIndices;
 }
 
-const void CudaLinearBvh::setNumPrimitives(unsigned n)
+void CudaLinearBvh::setNumPrimitives(unsigned n)
 { m_numPrimitives = n; }
 
 void CudaLinearBvh::initOnDevice()
@@ -91,7 +92,7 @@ const unsigned CudaLinearBvh::numLeafNodes() const
 { return m_numPrimitives; }
 
 const unsigned CudaLinearBvh::numInternalNodes() const 
-{ return numLeafNodes() - 1; }
+{ return m_numPrimitives - 1; }
 
 void CudaLinearBvh::getRootNodeIndex(int * dst)
 { m_rootNodeIndexOnDevice->deviceToHost((void *)dst, 4); }
@@ -182,9 +183,9 @@ void CudaLinearBvh::sendDbgToHost()
 
 #if DRAW_BVH_HIERARCHY
 	getRootNodeIndex(&m_hostRootInd);
-	m_internalNodeAabbs->deviceToHost(m_hostInternalAabb->data(), m_internalNodeAabbs->bufferSize());
-	m_internalNodeChildIndices->deviceToHost(m_hostInternalChildIndices->data(), m_internalNodeChildIndices->bufferSize());
-	m_distanceInternalNodeFromRoot->deviceToHost(m_hostInternalDistanceFromRoot->data(), m_distanceInternalNodeFromRoot->bufferSize());
+	m_internalNodeAabbs->deviceToHost(m_hostInternalAabb->data(), m_numActiveInternalNodes * 24);
+	m_internalNodeChildIndices->deviceToHost(m_hostInternalChildIndices->data(), m_numActiveInternalNodes * 8);
+	m_distanceInternalNodeFromRoot->deviceToHost(m_hostInternalDistanceFromRoot->data(), m_numActiveInternalNodes * 4);
 #endif
 }
 
@@ -222,4 +223,7 @@ CUDABuffer * CudaLinearBvh::internalParentBuf()
 
 CUDABuffer * CudaLinearBvh::distanceInternalNodeFromRootBuf()
 { return m_distanceInternalNodeFromRoot; }
+
+void CudaLinearBvh::setNumActiveInternalNodes(unsigned n)
+{ m_numActiveInternalNodes = n; }
 //:~

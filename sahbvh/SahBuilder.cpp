@@ -354,7 +354,7 @@ void SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
 {
     m_queueAndElement->create(SIZE_OF_SIMPLEQUEUE + numClusters * 4);
     
-    sahsplit::doSplitWorks(m_queueAndElement->bufferOnDevice(),
+    int n = sahsplit::doSplitWorks(m_queueAndElement->bufferOnDevice(),
         (int *)m_queueAndElement->bufferOnDeviceAt(SIZE_OF_SIMPLEQUEUE),
         (int2 *)bvh->internalNodeChildIndices(),
 	    (Aabb *)bvh->internalNodeAabbs(),
@@ -366,10 +366,11 @@ void SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
         numClusters);
     
     // sahlg.writeHash(m_runHash, numClusters, "split_indirections", CudaDbgLog::FOnce);
-    sahlg.writeInt2(bvh->internalChildBuf(), 1024, "internal_node", CudaDbgLog::FOnce);
-    // sahlg.writeAabb(bvh->internalAabbBuf(), 127, "internal_box", CudaDbgLog::FOnce);
-    // sahlg.writeUInt(bvh->internalParentBuf(), 127, "parent_node", CudaDbgLog::FOnce);
-    // sahlg.writeUInt(bvh->distanceInternalNodeFromRootBuf(), 127, "node_level", CudaDbgLog::FOnce);
+    sahlg.writeInt2(bvh->internalChildBuf(), n, "internal_node", CudaDbgLog::FOnce);
+    // sahlg.writeAabb(bvh->internalAabbBuf(), n, "internal_box", CudaDbgLog::FOnce);
+    // sahlg.writeUInt(bvh->internalParentBuf(), n, "parent_node", CudaDbgLog::FOnce);
+    // sahlg.writeUInt(bvh->distanceInternalNodeFromRootBuf(), n, "node_level", CudaDbgLog::FOnce);
+    bvh->setNumActiveInternalNodes(n);
 }
 
 int SahBuilder::countTreeBits(void * morton, unsigned numPrimitives)

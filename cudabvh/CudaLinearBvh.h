@@ -72,9 +72,11 @@ public:
 #endif
 
 	static BvhBuilder * Builder;
+	
+	void setNumActiveInternalNodes(unsigned n);
 
 protected:
-	const void setNumPrimitives(unsigned n);
+	void setNumPrimitives(unsigned n);
 	
 private:
 	
@@ -88,7 +90,7 @@ private:
 	CUDABuffer * m_rootNodeIndexOnDevice;
 	CUDABuffer * m_distanceInternalNodeFromRoot;
 	CUDABuffer * m_maxChildElementIndices;
-	unsigned m_numPrimitives;
+	unsigned m_numPrimitives, m_numActiveInternalNodes;
 #if DRAW_BVH_HASH
 	BaseBuffer * m_hostLeafHash;
 	BaseBuffer * m_hostLeafBox;

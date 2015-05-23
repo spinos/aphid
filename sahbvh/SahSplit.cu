@@ -3,7 +3,7 @@
 #include "SahSplit.cuh"
 
 namespace sahsplit {
-void doSplitWorks(void * q, int * qelements,
+int doSplitWorks(void * q, int * qelements,
                     int2 * nodes,
                     Aabb * nodeAabbs,
                     int * nodeParents,
@@ -39,6 +39,15 @@ void doSplitWorks(void * q, int * qelements,
                                 data,
                                 lpb,
                                 numPrimitives-1);
+                                
+    simpleQueue::SimpleQueue result;
+    cudaError_t err = cudaMemcpy(&result, queue, SIZE_OF_SIMPLEQUEUE, cudaMemcpyDeviceToHost); 
+    if (err != cudaSuccess) {
+        printf(" cu error %s when retrieving task queue result\n", cudaGetErrorString(err));
+    }
+    
+    //printf("q out tail %i\n", result._qouttail);
+    return result._qouttail;
 }
 
 void initHash(KeyValuePair * primitiveIndirections,

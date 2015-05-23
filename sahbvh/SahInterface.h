@@ -7,7 +7,7 @@
 
 namespace sahsplit {
     
-void doSplitWorks(void * q, int * qelements,
+int doSplitWorks(void * q, int * qelements,
                     int2 * nodes,
                     Aabb * nodeAabbs,
                     int * nodeParents,
