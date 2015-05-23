@@ -396,7 +396,7 @@ __global__ void computeBinsInBlock_kernel(SplitBin * outBins,
             bestBin.plane = splitPlaneOfBin(&rootBox,
                                                 numBins,
                                                 bestI);
-            bestBin.id = bestI;
+            bestBin.dimension = bestI;
         }
     }
     
@@ -446,7 +446,7 @@ __global__ void computeBinsInBlock_kernel(SplitBin * outBins,
             bestBin.plane = splitPlaneOfBin(&rootBox,
                                                 numBins,
                                                 numBins + bestI);
-            bestBin.id = numBins + bestI;
+            bestBin.dimension = numBins + bestI;
         }
     }
     
@@ -496,13 +496,13 @@ __global__ void computeBinsInBlock_kernel(SplitBin * outBins,
             bestBin.plane = splitPlaneOfBin(&rootBox,
                                                 numBins,
                                                 numBins * 2 + bestI);
-            bestBin.id = numBins*2 + bestI;
+            bestBin.dimension = numBins*2 + bestI;
         }
     }
     
     if(threadIdx.x < 1) {
         outBins[iEmission] = bestBin;
-        inEmissions[iEmission].bin_id = bestBin.id;
+        inEmissions[iEmission].bin_id = bestBin.dimension;
     }
 }
 

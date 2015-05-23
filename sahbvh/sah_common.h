@@ -9,7 +9,7 @@ struct SplitBin {
     uint leftCount;
     Aabb rightBox;
     uint rightCount;
-    int id;
+    int dimension;
     float plane;
 };
 

@@ -57,22 +57,87 @@ template<int NumBins, int NumThreads>
  *
  *    0                                      workId
  *    1             -> 1+3*16-1              best bin per dimension
- *    1+3*16        -> 1+3*16+n*16-1         bins
- *    1+3*16+n*16   -> 1+3*16+n*16+n-1       costs
- *    1+3*16+n*16+n -> 1+3*16+n*16+n+n*t-1   sides
+ *    1+3*16        -> 1+3*16+3-1            cost of best bin per dimension
  *
- *    when n = 8, t = 256
- *    total shared memory 8932 bytes
- *
- */      
-        SplitBin * sBestBin = (SplitBin *)&smem[1];
-        SplitBin * sBin = (SplitBin *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
-        float * sCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT
-                                        + NumBins * SIZE_OF_SPLITBIN_IN_INT];
-        int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT
-                              + NumBins * SIZE_OF_SPLITBIN_IN_INT
-                              + NumBins];
+ */             
+        computeBestBinPerDimension<NumBins, NumThreads, 0>(data,
+                                    smem,
+                                    root,
+                                    rootBox);
         
+        computeBestBinPerDimension<NumBins, NumThreads, 1>(data,
+                                    smem,
+                                    root,
+                                    rootBox);
+        
+        computeBestBinPerDimension<NumBins, NumThreads, 2>(data,
+                                    smem,
+                                    root,
+                                    rootBox);
+        
+        SplitBin * sBestBin = (SplitBin *)&smem[1];
+        float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
+        
+        if(threadIdx.x < 1) {
+// first is the best
+            if(sBestCost[1] < sBestCost[0])
+                sBestBin[0] = sBestBin[1];
+            
+            if(sBestCost[2] < sBestCost[0])
+                sBestBin[0] = sBestBin[2];
+        }
+    }
+    
+template<int NumBins, int NumThreads, int Dimension>
+    __device__ void computeBestBinPerDimension(DataInterface data,
+                                    int * smem,
+                                    int2 root,
+                                    Aabb rootBox)
+    {
+        if((root.y - root.x) < 16)
+            computeBinsPerDimensionPrimitiveCenter<Dimension>(root.y - root.x+1,
+                                    data,
+                                    smem,
+                                    root,
+                                    rootBox);
+        else
+            computeBinsPerDimensionBatched<NumBins, NumThreads, Dimension>(data,
+                                    smem,
+                                    root,
+                                    rootBox);
+    }
+ 
+template<int Dimension>  
+    __device__ void computeBinsPerDimensionPrimitiveCenter(int NumBins,
+                                    DataInterface data,
+                                    int * smem,
+                                    int2 root,
+                                    Aabb rootBox)
+    {
+/*
+ *    layout of memory in int
+ *    n  as num bins and num primitives
+ *    16 as size of bin
+ *
+ *    0                                          workId
+ *    1               -> 1+3*16-1                best bin per dimension
+ *    1+3*16          -> 1+3*16+3-1              cost of best bin per dimension
+ *    1+3*16+3        -> 1+3*16+3+n*16-1         bins
+ *    1+3*16+3+n*16   -> 1+3*16+3+n*16+n-1       costs
+ *    1+3*16+3+n*16+n -> 1+3*16+3+n*16+n+n*n-1   sides
+ *
+ *    when n = 16
+ *    total shared memory 2320 bytes
+ *
+ */ 
+        SplitBin * sBestBin = (SplitBin *)&smem[1];
+        float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
+        SplitBin * sBin = (SplitBin *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3];
+        float * sCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
+                                        + NumBins * SIZE_OF_SPLITBIN_IN_INT];
+        int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
+                                        + NumBins * SIZE_OF_SPLITBIN_IN_INT
+                                        + NumBins];
 /*
  *    layout of sides
  *    0    n     2n    3n
@@ -84,77 +149,152 @@ template<int NumBins, int NumThreads>
  *    horizonal collectBins
  */
         int * sideVertical = &sSide[NumBins * threadIdx.x];
-        int * sideHorizontal = &sSide[threadIdx.x];
+        int * sideHorizontal = &sSide[threadIdx.x];                      
         
-        computeBestBinPerDimension<NumBins, NumThreads, 0>(sBestBin,
-                                    sideVertical,
-                                    sideHorizontal,
-                                    sCost,
-                                    data.primitiveIndirections,
-                                    data.primitiveAabbs,
-                                    sBin,
-                                    root,
-                                    rootBox);
-        
-        computeBestBinPerDimension<NumBins, NumThreads, 1>(sBestBin,
-                                    sideVertical,
-                                    sideHorizontal,
-                                    sCost,
-                                    data.primitiveIndirections,
-                                    data.primitiveAabbs,
-                                    sBin,
-                                    root,
-                                    rootBox);
-        
-        computeBestBinPerDimension<NumBins, NumThreads, 2>(sBestBin,
-                                    sideVertical,
-                                    sideHorizontal,
-                                    sCost,
-                                    data.primitiveIndirections,
-                                    data.primitiveAabbs,
-                                    sBin,
-                                    root,
-                                    rootBox);
-        
-        if(threadIdx.x < 1) {
-            int bestI = sBestBin[0].id;
-            if(sBestBin[1].plane < sBestBin[0].plane) {
-                sBestBin[0] = sBestBin[1];
-                bestI = sBestBin[1].id;
-            }
-            
-            if(sBestBin[2].plane < sBestBin[0].plane) {
-                sBestBin[0] = sBestBin[2];
-                bestI = sBestBin[2].id;
-            }
-// first is the best
-            sBestBin[0].plane = splitPlaneOfBin(&rootBox,
-                                                NumBins,
-                                                bestI);
-        }
-    }
-    
-template<int NumBins, int NumThreads, int Dimension>
-    __device__ void computeBestBinPerDimension(SplitBin * sBestBin,
-                                    int * sideVertical,
-                                    int * sideHorizontal,
-                                    float * sCost,
-                                    KeyValuePair * primitiveIndirections,
-                                    Aabb * primitiveAabbs,
-                                    SplitBin * sBin,
-                                    int2 root,
-                                    Aabb rootBox)
-    {
+        KeyValuePair * primitiveIndirections = data.primitiveIndirections;
+        Aabb * primitiveAabbs = data.primitiveAabbs;
+        Aabb clusterBox;
+        float3 center;
         if(threadIdx.x < NumBins) {
             resetSplitBin(sBin[threadIdx.x]);
+// primitive center as split plane             
+            clusterBox = primitiveAabbs[primitiveIndirections[root.x + threadIdx.x].value];
+            center = centroidOfAabb(clusterBox);
+            sBin[threadIdx.x].plane = float3_component(center, Dimension);
         }
         
         __syncthreads();
         
+/*
+ *   n as num bins and num primitives
+ *
+ *   0   1     2     ..     n-1
+ *
+ *   0   n     2n          (n-1)n
+ *   1   n+1   2n+1        (n-1)n+1
+ *   2   n+2   2n+2        (n-1)n+2
+ *   .
+ *   .
+ *   n-1 2n-1  3n-1           nn-1
+ *
+ *   horizontal i as primitives
+ *   vertical   j as bins
+ */             
+        int i, j;
+        if(threadIdx.x < NumBins*NumBins) {
+            i = threadIdx.x / NumBins;
+            j = threadIdx.x - i * NumBins;
+            
+            clusterBox = primitiveAabbs[primitiveIndirections[root.x + i].value];
+            center = centroidOfAabb(clusterBox);
+            
+            sideVertical[j] = (float3_component(center, Dimension) > sBin[j].plane);
+        }
+    
+        __syncthreads();
+    
+        if(threadIdx.x < NumBins) {
+            for(i=0; i<NumBins; i++) {
+                clusterBox = primitiveAabbs[primitiveIndirections[root.x + i].value];
+                updateSplitBinSide(sBin[threadIdx.x], clusterBox, 
+                                    sideHorizontal[i * NumBins]);
+            }
+        }
+
+        __syncthreads();
+        
+        
+        if(threadIdx.x < NumBins) {
+            float rootArea = areaOfAabb(&rootBox);
+            sCost[threadIdx.x] = costOfSplit(&sBin[threadIdx.x],
+                                        rootArea);
+        }
+        
+        __syncthreads();
+           
+        if(threadIdx.x < 1) {
+            int bestI = 0;
+            float lowestCost = sCost[0];
+            for(i=1; i< NumBins; i++) {
+                if(lowestCost > sCost[i]) {
+                    lowestCost = sCost[i];
+                    bestI = i;
+                }
+            }
+            sBestBin[Dimension] = sBin[bestI];
+            sBestBin[Dimension].dimension = Dimension;
+// store cost here
+            sBestCost[Dimension] = sCost[bestI];
+        }
+        
+        __syncthreads();
+    }
+    
+template<int NumBins, int NumThreads, int Dimension>  
+    __device__ void computeBinsPerDimensionBatched(DataInterface data,
+                                    int * smem,
+                                    int2 root,
+                                    Aabb rootBox)
+    {
+/*
+ *    layout of memory in int
+ *    n  as num bins
+ *    t  as num threads
+ *    16 as size of bin
+ *    32 as warp size
+ *
+ *    0                                          workId
+ *    1                   -> 1+3*16-1                best bin per dimension
+ *    1+3*16              -> 1+3*16+3-1                 cost of best bin per dimension
+ *    1+3*16+3            -> 1+3*16+3+n*(t/32)*16-1               bins
+ *    1+3*16+3+n*(t/32)*16       -> 1+3*16+3+n*(t/32)*16+n-1               costs
+ *    1+3*16+3+n*(t/32)*16+n     -> 1+3*16+3+n*(t/32)*16+n+n*t-1             sides
+ *
+ *    when n = 8, t = 256
+ *    total shared memory 12528 bytes
+ */         
+        SplitBin * sBestBin = (SplitBin *)&smem[1];
+        float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
+        SplitBin * sBin = (SplitBin *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3];
+        const int numWarps = NumThreads>>5;
+        float * sCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
+                                        + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT];
+        int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
+                                        + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT
+                                        + NumBins];
+/*
+ *    layout of sides
+ *    0    n     2n    3n
+ *    1    n+1   2n+1  3n+1
+ *   
+ *    n-1  2n-1  3n-1  4n-1
+ *
+ *    vertical computeSides
+ *    horizonal collectBins
+ *
+ */
+        int * sideVertical = &sSide[NumBins * threadIdx.x];
+        int * sideHorizontal = &sSide[threadIdx.x];
+        
+        const int numWarpBins = numWarps * NumBins;
+        
+        if(threadIdx.x < numWarpBins)
+            resetSplitBin(sBin[threadIdx.x]);
+        
+        if(threadIdx.x < NumBins)
+            sBin[threadIdx.x].plane = binSplitPlane<Dimension>(&rootBox,
+                                         NumBins,
+                                         threadIdx.x);
+        
+        __syncthreads();
+        
+        KeyValuePair * primitiveIndirections = data.primitiveIndirections;
+        Aabb * primitiveAabbs = data.primitiveAabbs;
+                                    
         int nbatch = numBatches<NumThreads>(root);
 
-        int i=0;
-        for(;i<nbatch;i++) {
+        int i,j;
+        for(i=0;i<nbatch;i++) {
             computeSides<NumBins, Dimension>(sideVertical,
                        rootBox,
                        primitiveIndirections,
@@ -163,8 +303,45 @@ template<int NumBins, int NumThreads, int Dimension>
                        root.y);
         
             __syncthreads();
-        
+/*
+ *    layout of warp bins
+ *    n as num bins
+ *    w as num warps (256/32)
+ *
+ *    0     1        2          w-1         w  warps
+ *
+ *    0     32n      64n       (w-1)32n
+ *    1     32n+1    64n+1     (w-1)32n+1
+ *    
+ *    n-1   64n-1    96n-1      w32n
+ *
+ */
+            /*
+            if(threadIdx.x < numWarpBins) {
+                  int w = threadIdx.x / NumBins;
+                  int b = threadIdx.x - w * NumBins;
+                  
+                collectBinsInWarp<NumBins>(sBin[threadIdx.x], 
+                    primitiveIndirections,
+                    primitiveAabbs,
+                    &sSide[b + w * 32 * NumBins],
+                    root.x + w * 32 + i * NumThreads,
+                    root.y);
+            }
+            
+            __syncthreads();
+            
             if(threadIdx.x < NumBins) {
+                for(j=1; j<numWarps; j++)
+                    combineSplitBin(sBin[threadIdx.x],
+                                    sBin[threadIdx.x + j * NumBins]);
+                  
+            }
+            
+            __syncthreads();
+            */
+        
+            if(threadIdx.x < NumBins) {   
                 collectBins<NumBins, NumThreads>(sBin[threadIdx.x],
                     primitiveIndirections,
                     primitiveAabbs,
@@ -183,22 +360,20 @@ template<int NumBins, int NumThreads, int Dimension>
         }
         
          __syncthreads();
-        
+            
         if(threadIdx.x < 1) {
             int bestI = 0;
             float lowestCost = sCost[0];
-            for(i=0; i< NumBins; i++) {
+            for(i=1; i< NumBins; i++) {
                 if(lowestCost > sCost[i]) {
                     lowestCost = sCost[i];
                     bestI = i;
                 }
             }
             sBestBin[Dimension] = sBin[bestI];
+            sBestBin[Dimension].dimension = Dimension;
 // store cost here
-            sBestBin[Dimension].plane = sCost[bestI];//splitPlaneOfBin(&rootBox,
-                                         //       NumBins,
-                                         //       bestI);
-            sBestBin[Dimension].id = Dimension * NumBins + bestI;
+            sBestCost[Dimension] = sCost[bestI];
         }
         
         __syncthreads();
@@ -248,7 +423,7 @@ template<int NumBins, int NumThreads, int Dimension>
         
         SplitBin * sSplit = (SplitBin *)&smem[1];
         float splitPlane = sSplit->plane;
-        int splitDimension = sSplit->id/NumBins;
+        int splitDimension = sSplit->dimension;
         
         int * groupBegin = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
                                     + NumThreads * 2];
@@ -333,7 +508,7 @@ template<int NumBins, int NumThreads, int Dimension>
  
         SplitBin * sSplit = (SplitBin *)&smem[1];
         float splitPlane = sSplit->plane;
-        int splitDimension = sSplit->id/NumBins;
+        int splitDimension = sSplit->dimension;
         
         int * groupBegin = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
                                     + NumThreads * 2];

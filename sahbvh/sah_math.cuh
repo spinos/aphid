@@ -112,6 +112,16 @@ inline __device__ float costOfSplit(SplitBin * bin,
             + rightArea / rootBoxArea * (float)bin->rightCount);   
 }
 
+template<int Dimension>
+inline __device__ float binSplitPlane(Aabb * rootBox,
+                        uint n,
+                        uint ind)
+{
+    float d = spanOfAabb(rootBox, Dimension);
+    return (float3_component(rootBox->low, Dimension) 
+                 + (d / (float)n) * ((float)ind + .5f));
+}
+
 inline __device__ float splitPlaneOfBin(Aabb * rootBox,
                         uint n,
                         uint ind)
@@ -139,4 +149,31 @@ inline __device__ int computeSplitSide(Aabb box,
 {
     float3 center = centroidOfAabb(box);
     return (float3_component(center, dimension) > plane);
+}
+
+template <int NumBins>
+inline __device__ void collectBinsInWarp(SplitBin & dst,
+                                    KeyValuePair * primitiveIndirections,
+                                    Aabb * primitiveAabbs,
+                                    int * side,
+                                    int begin,
+                                    int end)
+    {
+        for(int i=0; i<32; i++) {
+            int j = begin + i;
+            if(j<=end) {
+                Aabb fBox = primitiveAabbs[primitiveIndirections[j].value];
+                
+                updateSplitBinSide(dst, fBox, 
+                  side[i*NumBins]);
+            }
+        }
+    }
+    
+inline __device__ void combineSplitBin(SplitBin & a, const SplitBin & b)
+{
+    a.leftCount += b.leftCount;
+    a.rightCount += b.leftCount;
+    expandAabb(a.leftBox, b.leftBox);
+    expandAabb(a.rightBox, b.rightBox);
 }
