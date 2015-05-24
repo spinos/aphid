@@ -367,9 +367,9 @@ void SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
     
     sahlg.writeHash(m_runHash, numClusters, "split_indirections", CudaDbgLog::FOnce);
     sahlg.writeInt2(bvh->internalChildBuf(), n, "internal_node", CudaDbgLog::FOnce);
-    // sahlg.writeAabb(bvh->internalAabbBuf(), n, "internal_box", CudaDbgLog::FOnce);
-    // sahlg.writeUInt(bvh->internalParentBuf(), n, "parent_node", CudaDbgLog::FOnce);
-    // sahlg.writeUInt(bvh->distanceInternalNodeFromRootBuf(), n, "node_level", CudaDbgLog::FOnce);
+    sahlg.writeAabb(bvh->internalAabbBuf(), n, "internal_box", CudaDbgLog::FOnce);
+    sahlg.writeUInt(bvh->internalParentBuf(), n, "parent_node", CudaDbgLog::FOnce);
+    sahlg.writeUInt(bvh->distanceInternalNodeFromRootBuf(), n, "node_level", CudaDbgLog::FOnce);
     bvh->setNumActiveInternalNodes(n);
 }
 

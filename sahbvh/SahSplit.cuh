@@ -20,14 +20,14 @@ struct SplitTask {
     {
         int2 root = data.nodes[iRoot];
         
-        return (root.y - root.x) > 6;
+        return (root.y - root.x) > 7;
     }
     
     __device__ int validateSplit(DataInterface data, int * smem)
     {
         int2 root = data.nodes[smem[0]];
         float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
-        return (sBestCost[0] < (root.y - root.x + 3));
+        return (sBestCost[0] < (root.y - root.x));
     }
     
     template <typename QueueType, int NumBins, int NumThreads>
@@ -171,49 +171,47 @@ template<int NumBins, int Dimension>
         
         KeyValuePair * primitiveIndirections = data.primitiveIndirections;
         Aabb * primitiveAabbs = data.primitiveAabbs;
-        Aabb clusterBox;
-        if(threadIdx.x < NumBins) {
+        Aabb box;
+        if(threadIdx.x < NumBins)
             resetSplitBin(sBin[threadIdx.x]);
-        }
         
         if(threadIdx.x < numPrimitives) {
 // primitive high as split plane             
-            clusterBox = primitiveAabbs[primitiveIndirections[root.x + threadIdx.x].value];
-            sBin[threadIdx.x].plane = float3_component(clusterBox.high, Dimension);
+            box = primitiveAabbs[primitiveIndirections[root.x + threadIdx.x].value];
+            sBin[threadIdx.x].plane = float3_component(box.high, Dimension);
         }
         
         __syncthreads();
         
 /*
- *   n as num bins and num primitives
+ *   layout of binning threads
+ *   n as num bins 
+ *   m as max num primitives, where m equels n
  *
- *   0   1     2     ..     n-1
+ *   0      1        2               m-1
+ *   m      m+1      m+2             2m-1
+ *   2m     2m+1     2m+2            3m-1
  *
- *   0   n     2n          (n-1)n
- *   1   n+1   2n+1        (n-1)n+1
- *   2   n+2   2n+2        (n-1)n+2
- *   .
- *   .
- *   n-1 2n-1  3n-1           nn-1
+ *   (n-1)m (n-1)m+1 (n-1)m+2        nm-1
  *
  *   horizontal i as primitives
  *   vertical   j as bins
  */             
-        int i = threadIdx.x / NumBins;
-        int j = threadIdx.x - i * NumBins;
+        int j = threadIdx.x / NumBins;
+        int i = threadIdx.x - j * NumBins;
         
         if(i < numPrimitives && j < numPrimitives) {
-            clusterBox = primitiveAabbs[primitiveIndirections[root.x + i].value];
+            box = primitiveAabbs[primitiveIndirections[root.x + i].value];
             
-            sSide[threadIdx.x] = (float3_component(clusterBox.low, Dimension) > sBin[j].plane);
+            sSide[i*NumBins + j] = (float3_component(box.low, Dimension) > sBin[j].plane);
         }
     
         __syncthreads();
     
-        if(threadIdx.x < NumBins) {
+        if(threadIdx.x < numPrimitives) {
             for(i=0; i<numPrimitives; i++) {
-                clusterBox = primitiveAabbs[primitiveIndirections[root.x + i].value];
-                updateSplitBinSide(sBin[threadIdx.x], clusterBox, 
+                box = primitiveAabbs[primitiveIndirections[root.x + i].value];
+                updateSplitBinSide(sBin[threadIdx.x], box, 
                                     sideHorizontal[i * NumBins]);
             }
         }
@@ -247,7 +245,34 @@ template<int NumBins, int Dimension>
         __syncthreads();
     }
     
-template<int NumBins, int NumThreads, int Dimension>  
+    __device__ int numBinningBatches(int2 range, int batchSize)
+    {
+        int nbatch = (range.y - range.x + 1)/batchSize;
+        if((( range.y - range.x + 1) & (batchSize-1)) > 0) nbatch++;
+        return nbatch;
+    }
+    
+    template <int NumBins>
+    __device__ void collectBinsBatched(SplitBin & dst,
+                                    KeyValuePair * primitiveIndirections,
+                                    Aabb * primitiveAabbs,
+                                    int * sideHorizontal,
+                                    int batchSize,
+                                    int begin,
+                                    int end)
+    {
+        for(int i=0; i<batchSize; i++) {
+            int j = begin + i;
+            if(j<=end) {
+                Aabb fBox = primitiveAabbs[primitiveIndirections[j].value];
+            
+                updateSplitBinSide(dst, fBox, 
+                    sideHorizontal[i * NumBins]);
+            }
+        }
+    }
+    
+    template<int NumBins, int NumThreads, int Dimension>  
     __device__ void computeBinsPerDimensionBatched(DataInterface data,
                                     int * smem,
                                     int2 root,
@@ -293,31 +318,53 @@ template<int NumBins, int NumThreads, int Dimension>
         int * sideVertical = &sSide[NumBins * threadIdx.x];
         int * sideHorizontal = &sSide[threadIdx.x];
         
-        const int numWarpBins = numWarps * NumBins;
+       // const int numWarpBins = numWarps * NumBins;
         
-        if(threadIdx.x < numWarpBins)
+        if(threadIdx.x < NumBins) {
             resetSplitBin(sBin[threadIdx.x]);
-        
-        if(threadIdx.x < NumBins)
             sBin[threadIdx.x].plane = binSplitPlane<Dimension>(&rootBox,
                                          NumBins,
                                          threadIdx.x);
-        
+        }
         __syncthreads();
         
         KeyValuePair * primitiveIndirections = data.primitiveIndirections;
         Aabb * primitiveAabbs = data.primitiveAabbs;
-                                    
-        int nbatch = numBatches<NumThreads>(root);
-
-        int i,j;
-        for(i=0;i<nbatch;i++) {
+                    
+        const int batchSize = NumThreads / NumBins;
+        const int nbatch = numBinningBatches(root, batchSize);
+/*
+ *    layout of binning threads
+ *    n as num bins
+ *    m as num threads/n
+ *
+ *    0      1        2               m-1
+ *    m      m+1      m+2             2m-1
+ *    2m     2m+1     2m+2            3m-1
+ *
+ *    (n-1)m (n-1)m+1 (n-1)m+2        nm-1
+ *   
+ *    horizontal i as primitives
+ *    vertical   j as bins
+ */
+        int j = threadIdx.x / batchSize;
+        int i = threadIdx.x - j * batchSize;
+        int k, ind;
+        Aabb box;
+        for(k=0;k<nbatch;k++) {
+            ind = root.x + k * batchSize + i;
+            if(ind <= root.y) {
+                box = primitiveAabbs[primitiveIndirections[ind].value];
+                sSide[i*NumBins + j] = (float3_component(box.low, Dimension) > sBin[j].plane);
+            }
+            /*
             computeSides<NumBins, Dimension>(sideVertical,
                        rootBox,
                        primitiveIndirections,
                        primitiveAabbs,
-                       root.x + i * NumThreads,
+                       root.x + k * NumThreads,
                        root.y);
+                       */
         
             __syncthreads();
 /*
@@ -358,13 +405,21 @@ template<int NumBins, int NumThreads, int Dimension>
             __syncthreads();
             */
         
-            if(threadIdx.x < NumBins) {   
-                collectBins<NumBins, NumThreads>(sBin[threadIdx.x],
+            if(threadIdx.x < NumBins) {  
+                collectBinsBatched<NumBins>(sBin[threadIdx.x],
+                    primitiveIndirections,
+                    primitiveAabbs,
+                    sideHorizontal,
+                    batchSize,
+                    root.x + k * batchSize,
+                    root.y);
+                
+                /*collectBins<NumBins, NumThreads>(sBin[threadIdx.x],
                     primitiveIndirections,
                     primitiveAabbs,
                     sideHorizontal,
                     root.x + i * NumThreads,
-                    root.y);
+                    root.y);*/
             }
     
             __syncthreads();
