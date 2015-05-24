@@ -67,8 +67,8 @@ inline __device__ void computeSides(int * sideVertical,
     int j = begin + threadIdx.x;
     if(j<= end) {
         Aabb clusterBox = primitiveAabbs[primitiveIndirections[j].value];
-        float3 center = centroidOfAabb(clusterBox);
-        float p = float3_component(center, Dimension);
+        //float3 center = centroidOfAabb(clusterBox);
+        float p = float3_component(clusterBox.low, Dimension);
         float boxLow = float3_component(rootBox.low, Dimension);    
         
         computeSplitSide(sideVertical,
@@ -139,16 +139,8 @@ inline __device__ void writeIndirection(KeyValuePair * dst,
     int j = begin + threadIdx.x;
     if(j<= end) {
         dst[j] = src[j];
-        // src[j].key = 9999997;
+        src[j].key = 9999997;
     }
-}
-
-inline __device__ int computeSplitSide(Aabb box,
-                         float plane,
-                         int dimension)
-{
-    float3 center = centroidOfAabb(box);
-    return (float3_component(center, dimension) > plane);
 }
 
 template <int NumBins>
