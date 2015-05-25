@@ -59,6 +59,7 @@ public:
     CUDABuffer * internalParentBuf();
     CUDABuffer * distanceInternalNodeFromRootBuf();
 	void initRootNode(int * child, float * box);
+	
 #if DRAW_BVH_HASH
 	void * hostLeafHash();
 	void * hostLeafBox();
@@ -68,7 +69,8 @@ public:
 	void * hostInternalAabb();
 	void * hostInternalChildIndices();
 	void * hostInternalDistanceFromRoot();
-	const int hostRootInd() const;
+	void * hostPrimitiveHash();
+	void * hostPrimitiveAabb();
 #endif
 
 	static BvhBuilder * Builder;
@@ -91,16 +93,18 @@ private:
 	CUDABuffer * m_distanceInternalNodeFromRoot;
 	CUDABuffer * m_maxChildElementIndices;
 	unsigned m_numPrimitives, m_numActiveInternalNodes;
+	
 #if DRAW_BVH_HASH
 	BaseBuffer * m_hostLeafHash;
 	BaseBuffer * m_hostLeafBox;
 #endif
 
 #if DRAW_BVH_HIERARCHY
-	int m_hostRootInd;
 	BaseBuffer * m_hostInternalAabb;
 	BaseBuffer * m_hostInternalChildIndices;
 	BaseBuffer * m_hostInternalDistanceFromRoot;
+	BaseBuffer * m_hostLeafHash;
+	BaseBuffer * m_hostLeafBox;
 #endif
 };
 #endif        //  #ifndef CUDALINEARBVH_H

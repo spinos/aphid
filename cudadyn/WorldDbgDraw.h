@@ -16,6 +16,8 @@ public:
 
     static int MaxDrawBvhHierarchyLevel;
 protected:
+    void drawPrimitiveBoxes(void * boxes, void * indirections, 
+        int begin, int end);
 
 private:
     GeoDrawer * m_drawer;

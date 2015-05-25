@@ -581,16 +581,6 @@ __global__ void decompressIndices_kernel(uint * decompressedIndices,
 	    decompressedIndices[start + i] = first + i;
 }
 
-__global__ void copyHash_kernel(KeyValuePair * dst,
-					KeyValuePair * src,
-					uint maxInd)
-{
-    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-	if(ind >= maxInd) return;
-	
-	dst[ind] = src[ind];
-}
-
 __global__ void compressRunHead_kernel(uint * compressed, 
 							uint * runHeads,
 							uint * indices,
@@ -747,20 +737,6 @@ void sahbvh_compressRunHead(uint * compressed,
     compressRunHead_kernel<<< grid, block>>>(compressed,
         runHeads,
         indices,
-        n);
-}
-
-void sahbvh_copyHash(KeyValuePair * dst,
-					KeyValuePair * src,
-					uint n)
-{
-    const int tpb = 512;
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(n, tpb);
-    dim3 grid(nblk, 1, 1);
-    
-    copyHash_kernel<<< grid, block>>>(dst,
-        src,
         n);
 }
 

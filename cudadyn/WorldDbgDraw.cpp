@@ -51,23 +51,22 @@ inline int getIndexWithInternalNodeMarkerRemoved(int index)
 
 void WorldDbgDraw::showBvhHierarchy(CudaLinearBvh * bvh)
 {
-    const int rootNodeInd = 0x80000000;//bvh->hostRootInd(); // std::cout<<" root "<< rootNodeInd;
-	
-    // const unsigned numInternal = bvh->numInternalNodes();
+    const int rootNodeInd = 0x80000000;
 	
 	Aabb * internalBoxes = (Aabb *)bvh->hostInternalAabb();
 	int2 * internalNodeChildIndices = (int2 *)bvh->hostInternalChildIndices();
 	int * distanceFromRoot = (int *)bvh->hostInternalDistanceFromRoot();
+	Aabb * primitiveBoxes = (Aabb *)bvh->hostPrimitiveAabb();
+	KeyValuePair * primitiveHash = (KeyValuePair *)bvh->hostPrimitiveHash();
 	
 	BoundingBox bb;
 	Aabb bvhNodeAabb;
 	int stack[128];
 	stack[0] = rootNodeInd;
 	int stackSize = 1;
-	int maxStack = 1;
 	int touchedInternal = 0;
-	//int maxLevel = 0;
 	int level;
+	int2 child;
 	while(stackSize > 0) {
 		int internalOrLeafNodeIndex = stack[ stackSize - 1 ];
 		stackSize--;
@@ -76,14 +75,11 @@ void WorldDbgDraw::showBvhHierarchy(CudaLinearBvh * bvh)
 		
 		level = distanceFromRoot[bvhNodeIndex];
 		if(level > MaxDrawBvhHierarchyLevel) continue;
-		//if(maxLevel < level)
-			//maxLevel = level;
-			
+		
+		child = internalNodeChildIndices[bvhNodeIndex];
 		bvhNodeAabb = internalBoxes[bvhNodeIndex];
 
-		
-		//if(m_maxDisplayLevel - level < 2) 
-		if(isLeafNode(internalOrLeafNodeIndex)==0 && level >= MaxDrawBvhHierarchyLevel-1)
+		if(isLeafNode(child.x) || level >= MaxDrawBvhHierarchyLevel-1)
 		 {
 			bb.setMin(bvhNodeAabb.low.x, bvhNodeAabb.low.y, bvhNodeAabb.low.z);
 			bb.setMax(bvhNodeAabb.high.x, bvhNodeAabb.high.y, bvhNodeAabb.high.z);
@@ -94,7 +90,12 @@ void WorldDbgDraw::showBvhHierarchy(CudaLinearBvh * bvh)
 
 		touchedInternal++;
 		
-		if(isLeafNode(internalOrLeafNodeIndex)) continue;
+		if(isLeafNode(child.x)) {
+		    drawPrimitiveBoxes(primitiveBoxes, primitiveHash, 
+		        child.x,
+		        child.y);
+		    continue;
+		}
 		
 		if(stackSize + 2 > 128)
 		{
@@ -102,20 +103,30 @@ void WorldDbgDraw::showBvhHierarchy(CudaLinearBvh * bvh)
 		}
 		else
 		{
-			stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
+			stack[ stackSize ] = child.x;
 			stackSize++;
-			stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
+			stack[ stackSize ] = child.y;
 			stackSize++;
-			
-			if(stackSize > maxStack) maxStack = stackSize;
 		}
 			
 	}
-#if 0
-	std::cout//<<" total n internal node "<<numInternal<<"\n"
-		<<" n internal node reached "<<touchedInternal<<"\n"
-		<<" max draw bvh hierarchy stack size "<<maxStack<<"\n"
-		<<" max level reached "<<maxLevel<<"\n";
-#endif
 }
 #endif
+
+void WorldDbgDraw::drawPrimitiveBoxes(void * boxes, void * indirections, 
+        int begin, int end)
+{
+    Aabb * primitiveBox = (Aabb *)boxes; 
+    KeyValuePair * primitiveHash = (KeyValuePair *)indirections;
+    Aabb ab;
+    BoundingBox bb;
+	int i = begin;
+    for(;i<=end;i++) {
+        ab = primitiveBox[primitiveHash[i].value];
+        bb.setMin(ab.low.x, ab.low.y, ab.low.z);
+		bb.setMax(ab.high.x, ab.high.y, ab.high.z);
+		
+		m_drawer->boundingBox(bb);
+    }
+}
+

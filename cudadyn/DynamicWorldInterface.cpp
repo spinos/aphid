@@ -754,6 +754,7 @@ inline int getIndexWithInternalNodeMarkerRemoved(int index)
 
 void DynamicWorldInterface::showBvhHierarchy(CudaLinearBvh * bvh, GeoDrawer * drawer)
 {
+#if 0
 	const int rootNodeInd = bvh->hostRootInd(); // std::cout<<" root "<< rootNodeInd;
 	const unsigned numInternal = bvh->numInternalNodes();
 	
@@ -809,7 +810,7 @@ void DynamicWorldInterface::showBvhHierarchy(CudaLinearBvh * bvh, GeoDrawer * dr
 		}
 			
 	}
-#if 0
+
 	std::cout<<" total n internal node "<<numInternal<<"\n"
 		<<" n internal node reached "<<touchedInternal<<"\n"
 		<<" max draw bvh hierarchy stack size "<<maxStack<<"\n"
