@@ -230,14 +230,7 @@ void SahBuilder::build(CudaLinearBvh * bvh)
 	computeMortionHash(primitiveHash, primitiveAabb, n, bounding);
 	
 	unsigned numClusters = 0;
-	if(n<=2048) {
-        sort(primitiveHash, n, 32);
-        numClusters = n;
-    }
-	else {
-        numClusters = sortPrimitives(primitiveHash, primitiveAabb,
-            n, 10, 5);
-    }
+	numClusters = sortPrimitives(bvh, n, 10, 5);
     
 #if 0 
 	sahlg.writeMortonHash(bvh->primitiveHashBuf(), n, "primitive_hash", CudaDbgLog::FOnce);
@@ -428,15 +421,18 @@ int SahBuilder::getM(int n, int m)
     return m;
 }
 
-unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs, 
+unsigned SahBuilder::sortPrimitives(CudaLinearBvh * bvh, 
                                 unsigned numPrimitives, int n, int m)
 {
+    void * primitiveHash = bvh->primitiveHash();
+	void * primitiveAabb = bvh->primitiveAabb();
+	
     const unsigned scanLength = CudaScan::getScanBufferLength(numPrimitives);
 	
 	const unsigned d = 3*(n - m);
 
 	sahcompress::computeRunHead((uint *)m_runHeads->bufferOnDevice(), 
-							(KeyValuePair *)morton,
+							(KeyValuePair *)primitiveHash,
 							d,
 							numPrimitives,
 							scanLength);
@@ -476,14 +472,14 @@ unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 	sahlg.writeUInt(m_runLength, numRuns, "run_length", CudaDbgLog::FOnce);
 
     sahcompress::computeClusterAabbs((Aabb *)clusterAabbs(),
-            (Aabb *)primitiveAabbs,
+            (Aabb *)primitiveAabb,
             (uint *)m_runOffsets->bufferOnDevice(),
             (uint *)m_runLength->bufferOnDevice(),
             numRuns);
     
 #else
     sahcompress::computeRunHash((KeyValuePair *)m_runHash->bufferOnDevice(), 
-						(KeyValuePair *)morton,
+						(KeyValuePair *)primitiveHash,
 						(uint *)m_runOffsets->bufferOnDevice(),
                         m,
 						d,
@@ -518,16 +514,16 @@ unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 	sahlg.writeUInt(m_runHeads, numPrimitives, "decompressed_ind", CudaDbgLog::FOnce);
 
     sahdecompress::copyHash((KeyValuePair *)sortIntermediate(),
-					(KeyValuePair *)morton,
+					(KeyValuePair *)primitiveHash,
 					numPrimitives);
 	
-	sahdecompress::writeSortedHash((KeyValuePair *)morton,
+	sahdecompress::writeSortedHash((KeyValuePair *)primitiveHash,
 							(KeyValuePair *)sortIntermediate(),
 							(uint *)m_runHeads->bufferOnDevice(),
 							numPrimitives);
 	
 	sahcompress::computeRunHead((uint *)m_runHeads->bufferOnDevice(), 
-							(KeyValuePair *)morton,
+							(KeyValuePair *)primitiveHash,
 							d,
 							numPrimitives,
 							scanLength);
@@ -554,7 +550,7 @@ unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 	
 	sahcompress::computeSortedClusterAabbs((Aabb *)clusterAabbs(),
             (Aabb *)primitiveAabbs,
-            (KeyValuePair *)morton,
+            (KeyValuePair *)primitiveHash,
             (uint *)m_runOffsets->bufferOnDevice(),
             (uint *)m_runLength->bufferOnDevice(),
             numCompressedRuns);

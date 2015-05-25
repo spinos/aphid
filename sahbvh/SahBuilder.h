@@ -25,7 +25,7 @@ protected:
 private:
     int countTreeBits(void * morton, unsigned numPrimitives);
 	int getM(int n, int m);
-    unsigned sortPrimitives(void * morton, void * primitiveAabbs, 
+    unsigned sortPrimitives(CudaLinearBvh * bvh, 
                         unsigned numPrimitives, int n, int m);
 	void resetBuffer();
 	void swapBuffer();
