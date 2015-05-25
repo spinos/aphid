@@ -367,10 +367,45 @@ void SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
     
     sahlg.writeHash(m_runHash, numClusters, "split_indirections", CudaDbgLog::FOnce);
     sahlg.writeInt2(bvh->internalChildBuf(), n, "internal_node", CudaDbgLog::FOnce);
-    sahlg.writeAabb(bvh->internalAabbBuf(), n, "internal_box", CudaDbgLog::FOnce);
-    sahlg.writeUInt(bvh->internalParentBuf(), n, "parent_node", CudaDbgLog::FOnce);
-    sahlg.writeUInt(bvh->distanceInternalNodeFromRootBuf(), n, "node_level", CudaDbgLog::FOnce);
+    // sahlg.writeAabb(bvh->internalAabbBuf(), n, "internal_box", CudaDbgLog::FOnce);
+    // sahlg.writeUInt(bvh->internalParentBuf(), n, "parent_node", CudaDbgLog::FOnce);
+    // sahlg.writeUInt(bvh->distanceInternalNodeFromRootBuf(), n, "node_level", CudaDbgLog::FOnce);
     bvh->setNumActiveInternalNodes(n);
+    
+    sahdecompress::countLeaves((uint *)m_runLength->bufferOnDevice(),
+                                (int *)m_queueAndElement->bufferOnDeviceAt(SIZE_OF_SIMPLEQUEUE),
+                                (int2 *)bvh->internalNodeChildIndices(),
+                                (KeyValuePair *)m_runHash->bufferOnDevice(),
+                                (uint *)m_compressedRunHeads->bufferOnDevice(),
+                                numClusters,
+                                bvh->numPrimitives(),
+                                n,
+                                CudaScan::getScanBufferLength(n));
+#if PRINT_PRIMITIVE_SORT_RESULT							
+	sahlg.writeUInt(m_runLength, n, "leaf_length", CudaDbgLog::FOnce);
+#endif
+
+    scanner()->prefixSum(m_runIndices, m_runLength, CudaScan::getScanBufferLength(n));
+
+#if PRINT_PRIMITIVE_SORT_RESULT	
+	sahlg.writeUInt(m_runIndices, n, "leaf_offset", CudaDbgLog::FOnce);
+#endif
+
+    sahdecompress::copyHash((KeyValuePair *)sortIntermediate(),
+					(KeyValuePair *)bvh->primitiveHash(),
+					bvh->numPrimitives());
+	
+	sahdecompress::decompressPrimitives((KeyValuePair *)bvh->primitiveHash(),
+                            (KeyValuePair *)sortIntermediate(),
+                            (int2 *)bvh->internalNodeChildIndices(),
+                            (KeyValuePair *)m_runHash->bufferOnDevice(),
+                            (uint *)m_runIndices->bufferOnDevice(),
+                            (uint *)m_compressedRunHeads->bufferOnDevice(),
+                            numClusters,
+                            bvh->numPrimitives(),
+                            n);
+    sahlg.writeInt2(bvh->internalChildBuf(), n, "decompressed_node", CudaDbgLog::FOnce);
+    
 }
 
 int SahBuilder::countTreeBits(void * morton, unsigned numPrimitives)

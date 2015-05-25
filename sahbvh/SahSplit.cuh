@@ -20,7 +20,7 @@ struct SplitTask {
     {
         int2 root = data.nodes[iRoot];
         
-        return (root.y - root.x) > 5;
+        return (root.y - root.x) > 6;
     }
     
     __device__ int validateSplit(DataInterface data, int * smem)

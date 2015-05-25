@@ -32,13 +32,22 @@ void initHash(KeyValuePair * primitiveIndirections,
  *   cluster length is runHead[i+1]-runHead[i]
  *   internal nodes has zero count
  */
+
 void countLeaves(uint * leafLengths,
                     int * qelements,
                     int2 * nodes,
+                    KeyValuePair * indirections,
                     uint * runHeads,
+                    uint numHeads,
                     uint numPrimitives,
                     uint numNodes,
                     uint scanLength);
+
+/*
+ *  simple copy
+ */
+void copyHash(KeyValuePair * dst, KeyValuePair * src,
+                uint n);
 /*
  *   for each leaf node 
  *   replace cluster range with primitive range
@@ -46,9 +55,11 @@ void countLeaves(uint * leafLengths,
  */
 void decompressPrimitives(KeyValuePair * dst,
                             KeyValuePair * src,
-                            uint* offset,
                             int2 * nodes,
+                            KeyValuePair * indirections,
+                            uint* leafOffset,
                             uint * runHeads,
+                            uint numHeads,
                             uint numPrimitives,
                             uint numNodes);
 }

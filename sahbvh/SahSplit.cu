@@ -1,5 +1,3 @@
-#include "SahInterface.h"
-
 #include "SahSplit.cuh"
 
 namespace sahsplit {
