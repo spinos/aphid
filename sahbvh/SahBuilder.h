@@ -39,7 +39,7 @@ private:
     CUDABuffer * m_clusterAabb;
 	CUDABuffer * m_runHeads;
 	CUDABuffer * m_runIndices;
-	CUDABuffer * m_compressedRunHeads;
+	CUDABuffer * m_runOffsets;
 	CUDABuffer * m_runHash;
 	CUDABuffer * m_runLength;
 	CUDABuffer * m_emissions[2];

@@ -130,6 +130,7 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "sah_math.cu"
 "binning.cu"
 "sahbvh.cu"
+"SahCompress.cu"
 "SahDecompress.cu"
 "SahSplit.cu")
 

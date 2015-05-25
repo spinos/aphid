@@ -18,6 +18,39 @@ int doSplitWorks(void * q, int * qelements,
                     uint numPrimitives);
 }
 
+namespace sahcompress {
+    
+void computeRunHead(uint * runHeads,
+                    KeyValuePair * morton,
+                    uint d,
+                    uint n,
+                    uint scanLength);
+
+void compressRunHead(uint * compressed, 
+							uint * runHeads,
+							uint * indices,
+							uint n);
+
+void computeRunHash(KeyValuePair * compressed, 
+						KeyValuePair * morton,
+						uint * indices,
+                        uint m,
+						uint d,
+						uint n);
+
+void computeRunLength(uint * runLength,
+							uint * runHeads,
+							uint nRuns,
+							uint nPrimitives,
+							uint bufLength);
+
+void computeClusterAabbs(Aabb * clusterAabbs,
+            Aabb * primitiveAabbs,
+            uint * runHeads,
+            uint * runLength,
+            uint numRuns);
+}
+
 namespace sahdecompress {
 
 /*
