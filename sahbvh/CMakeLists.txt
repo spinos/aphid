@@ -130,6 +130,7 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "sah_math.cu"
 "binning.cu"
 "sahbvh.cu"
+"SahDecompress.cu"
 "SahSplit.cu")
 
 ## disable warnings

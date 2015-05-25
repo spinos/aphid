@@ -20,7 +20,7 @@ struct SplitTask {
     {
         int2 root = data.nodes[iRoot];
         
-        return (root.y - root.x) > 7;
+        return (root.y - root.x) > 5;
     }
     
     __device__ int validateSplit(DataInterface data, int * smem)
@@ -291,6 +291,7 @@ template<int NumBins, int Dimension>
  *    1+3*16+3            -> 1+3*16+3+n*(t/32)*16-1               bins
  *    1+3*16+3+n*(t/32)*16       -> 1+3*16+3+n*(t/32)*16+n-1               costs
  *    1+3*16+3+n*(t/32)*16+n     -> 1+3*16+3+n*(t/32)*16+n+n*t-1             sides
+ *    1+3*16+3+n*(t/32)*16+n+n*t     -> 1+3*16+3+n*(t/32)*16+n+n*t+nb*6-1    boxes
  *
  *    when n = 8, t = 256
  *    total shared memory 12528 bytes
@@ -304,6 +305,10 @@ template<int NumBins, int Dimension>
         int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
                                         + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT
                                         + NumBins];
+        Aabb * sBox = (Aabb *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
+                                        + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT
+                                        + NumBins
+                                        + NumBins * NumThreads];
 /*
  *    layout of sides
  *    0    n     2n    3n
@@ -350,13 +355,20 @@ template<int NumBins, int Dimension>
         int j = threadIdx.x / batchSize;
         int i = threadIdx.x - j * batchSize;
         int k, ind;
-        Aabb box;
+        
         for(k=0;k<nbatch;k++) {
             ind = root.x + k * batchSize + i;
-            if(ind <= root.y) {
-                box = primitiveAabbs[primitiveIndirections[ind].value];
-                sSide[i*NumBins + j] = (float3_component(box.low, Dimension) > sBin[j].plane);
+               
+            if(threadIdx.x < batchSize) {
+               if(ind <= root.y) {
+                   sBox[threadIdx.x] = primitiveAabbs[primitiveIndirections[ind].value];
+               }
             }
+            __syncthreads();
+            
+            if(ind <= root.y)
+                sSide[i*NumBins + j] = (float3_component(sBox[i].low, Dimension) > sBin[j].plane);
+            
             /*
             computeSides<NumBins, Dimension>(sideVertical,
                        rootBox,
@@ -714,15 +726,6 @@ __global__ void work_kernel(QueueType * q,
             i--;
         } 
     }
-}
-
-__global__ void initHash_kernel(KeyValuePair * primitiveIndirections,
-                    uint n)
-{
-    uint ind = blockIdx.x*blockDim.x + threadIdx.x;
-	if(ind >= n) return;
-	
-	primitiveIndirections[ind].value = ind;
 }
 
 }

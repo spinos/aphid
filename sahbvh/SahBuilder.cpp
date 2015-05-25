@@ -450,7 +450,7 @@ unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 #endif
 
 #else
-    sahsplit::initHash((KeyValuePair *)m_runHash->bufferOnDevice(),
+    sahdecompress::initHash((KeyValuePair *)m_runHash->bufferOnDevice(),
                             numRuns);
 #endif
 
