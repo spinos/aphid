@@ -76,6 +76,26 @@ void computeRunLength(uint * runLength,
         bufLength);
 }
 
+void computeSortedRunLength(uint * runLength,
+							uint * runHeads,
+							KeyValuePair * indirections,
+							uint nRuns,
+							uint nPrimitives,
+							uint bufLength)
+{
+    const int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(bufLength, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    computeSortedRunLength_kernel<<< grid, block>>>(runLength,
+        runHeads,
+        indirections,
+        nRuns,
+        nPrimitives,
+        bufLength);
+}
+
 void computeClusterAabbs(Aabb * clusterAabbs,
             Aabb * primitiveAabbs,
             uint * runHeads,
@@ -88,6 +108,26 @@ void computeClusterAabbs(Aabb * clusterAabbs,
     dim3 grid(nblk, 1, 1);
     computeClusterAabbs_kernel<<< grid, block>>>(clusterAabbs,
                 primitiveAabbs,
+                runHeads,
+                runLength,
+                numRuns);
+}
+
+void computeSortedClusterAabbs(Aabb * clusterAabbs,
+            Aabb * primitiveAabbs,
+            KeyValuePair * indirections,
+            uint * runHeads,
+            uint * runLength,
+            uint numRuns)
+{
+    const int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numRuns, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    computeSortedClusterAabbs_kernel<<< grid, block>>>(clusterAabbs,
+                primitiveAabbs,
+                indirections,
                 runHeads,
                 runLength,
                 numRuns);

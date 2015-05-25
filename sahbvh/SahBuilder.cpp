@@ -127,8 +127,7 @@ give 14 nodes to each block
 #include <CudaScan.h>
 #include "SahInterface.h"
 
-#define PRINT_PRIMITIVE_SORT_RESULT 1
-#define COMPRESS_RUNS 0
+#define COMPRESS_ONCE 1
 
 CudaDbgLog sahlg("sah.txt");
 
@@ -443,19 +442,13 @@ unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 							scanLength);
 	
 	// CudaBase::CheckCudaError("finding bvh run heads");
-
-#if PRINT_PRIMITIVE_SORT_RESULT	
+	
 	sahlg.writeUInt(m_runHeads, numPrimitives, "run_heads", CudaDbgLog::FOnce);
-#endif
 
 	const unsigned numRuns = scanner()->prefixSum(m_runIndices, 
 												m_runHeads, scanLength);
 												
 	// CudaBase::CheckCudaError("scan bvh run heads");
-
-#if PRINT_PRIMITIVE_SORT_RESULT	
-	sahlg.writeUInt(m_runIndices, numPrimitives, "scanned_run_heads", CudaDbgLog::FOnce);
-#endif
 
 	m_runOffsets->create(numRuns * 4);
 	
@@ -464,74 +457,11 @@ unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 							(uint *)m_runIndices->bufferOnDevice(),
 							numPrimitives);
 
-#if PRINT_PRIMITIVE_SORT_RESULT
 	sahlg.writeUInt(m_runOffsets, numRuns, "run_offsets", CudaDbgLog::FOnce);
-#endif
 
     m_runHash->create((nextPow2(numRuns) * 2 * 8));
 
-#if COMPRESS_RUNS	
-	sahcompress::computeRunHash((KeyValuePair *)m_runHash->bufferOnDevice(), 
-						(KeyValuePair *)morton,
-						(uint *)m_compressedRunHeads->bufferOnDevice(),
-                        m,
-						d,
-						numRuns);
-	
-	CudaBase::CheckCudaError("write run hash");
-						
-	sort(m_runHash->bufferOnDevice(), numRuns, 3*m);
-	
-#if PRINT_PRIMITIVE_SORT_RESULT	
-	sahlg.writeMortonHash(m_runHash, numRuns, "sorted_run_heads", CudaDbgLog::FOnce);
-#endif
-
-/*
-	sahbvh_computeRunLength((uint *)m_runLength->bufferOnDevice(),
-							(uint *)m_compressedRunHeads->bufferOnDevice(),
-							(KeyValuePair *)m_runHash->bufferOnDevice(),
-							numRuns,
-							numPrimitives,
-							scanLength);*/
-
-
-/*
-	scanner()->prefixSum(m_runIndices, m_runLength, scanLength);
-
-#if PRINT_PRIMITIVE_SORT_RESULT	
-	sahlg.writeUInt(m_runIndices, numRuns, "offset", CudaDbgLog::FOnce);
-#endif
-
-	sahbvh_copyHash((KeyValuePair *)sortIntermediate(),
-					(KeyValuePair *)morton,
-					numPrimitives);
-					
-	sahbvh_decompressIndices((uint *)m_runHeads->bufferOnDevice(),
-					(uint *)m_compressedRunHeads->bufferOnDevice(),
-					(KeyValuePair *)m_runHash->bufferOnDevice(),
-					(uint *)m_runIndices->bufferOnDevice(),
-					(uint *)m_runLength->bufferOnDevice(),
-					numRuns);
-
-#if PRINT_PRIMITIVE_SORT_RESULT 
-	sahlg.writeUInt(m_runHeads, numPrimitives, "decompressed_ind", CudaDbgLog::FOnce);
-#endif
-
-    sahbvh_computeClusterAabbs((Aabb *)clusterAabbs(),
-            (Aabb *)primitiveAabbs,
-            (uint *)m_compressedRunHeads->bufferOnDevice(),
-            (KeyValuePair *)m_runHash->bufferOnDevice(),
-            (uint *)m_runIndices->bufferOnDevice(),
-            (uint *)m_runLength->bufferOnDevice(),
-            numRuns);*/
-/*     
-	sahbvh_writeSortedHash((KeyValuePair *)morton,
-							(KeyValuePair *)sortIntermediate(),
-							(uint *)m_runHeads->bufferOnDevice(),
-							numPrimitives);
-*/ 
-
-#else
+#if COMPRESS_ONCE
     sahdecompress::initHash((KeyValuePair *)m_runHash->bufferOnDevice(),
                             numRuns);
     
@@ -542,21 +472,97 @@ unsigned SahBuilder::sortPrimitives(void * morton, void * primitiveAabbs,
 							numRuns,
 							numPrimitives,
 							scanLength);
-	
-#if PRINT_PRIMITIVE_SORT_RESULT							
+							
 	sahlg.writeUInt(m_runLength, numRuns, "run_length", CudaDbgLog::FOnce);
-#endif
 
     sahcompress::computeClusterAabbs((Aabb *)clusterAabbs(),
             (Aabb *)primitiveAabbs,
             (uint *)m_runOffsets->bufferOnDevice(),
             (uint *)m_runLength->bufferOnDevice(),
             numRuns);
+    
+#else
+    sahcompress::computeRunHash((KeyValuePair *)m_runHash->bufferOnDevice(), 
+						(KeyValuePair *)morton,
+						(uint *)m_runOffsets->bufferOnDevice(),
+                        m,
+						d,
+						numRuns);
+	
+	// CudaBase::CheckCudaError("write run hash");
+						
+	sort(m_runHash->bufferOnDevice(), numRuns, 3*m);
+	
+	sahlg.writeMortonHash(m_runHash, numRuns, "sorted_run_hash", CudaDbgLog::FOnce);
+    
+    m_runLength->create(scanLength * 4);
+	    
+	sahcompress::computeSortedRunLength((uint *)m_runLength->bufferOnDevice(),
+							(uint *)m_runOffsets->bufferOnDevice(),
+							(KeyValuePair *)m_runHash->bufferOnDevice(),
+							numRuns,
+							numPrimitives,
+							scanLength);
+
+	scanner()->prefixSum(m_runIndices, m_runLength, scanLength);
+
+	sahlg.writeUInt(m_runIndices, numRuns, "offset", CudaDbgLog::FOnce);
+
+    sahdecompress::decompressIndices((uint *)m_runHeads->bufferOnDevice(),
+					(uint *)m_runOffsets->bufferOnDevice(),
+					(KeyValuePair *)m_runHash->bufferOnDevice(),
+					(uint *)m_runIndices->bufferOnDevice(),
+					(uint *)m_runLength->bufferOnDevice(),
+					numRuns);
+ 
+	sahlg.writeUInt(m_runHeads, numPrimitives, "decompressed_ind", CudaDbgLog::FOnce);
+
+    sahdecompress::copyHash((KeyValuePair *)sortIntermediate(),
+					(KeyValuePair *)morton,
+					numPrimitives);
+	
+	sahdecompress::writeSortedHash((KeyValuePair *)morton,
+							(KeyValuePair *)sortIntermediate(),
+							(uint *)m_runHeads->bufferOnDevice(),
+							numPrimitives);
+	
+	sahcompress::computeRunHead((uint *)m_runHeads->bufferOnDevice(), 
+							(KeyValuePair *)morton,
+							d,
+							numPrimitives,
+							scanLength);
+		
+	sahlg.writeUInt(m_runHeads, numPrimitives, "run_heads2", CudaDbgLog::FOnce);
+	
+	unsigned numCompressedRuns = scanner()->prefixSum(m_runIndices, 
+												m_runHeads, scanLength);
+												
+	sahcompress::compressRunHead((uint *)m_runOffsets->bufferOnDevice(), 
+							(uint *)m_runHeads->bufferOnDevice(),
+							(uint *)m_runIndices->bufferOnDevice(),
+							numPrimitives);
+	
+	sahlg.writeUInt(m_runOffsets, numRuns, "run_offsets2", CudaDbgLog::FOnce);
+
+	sahcompress::computeRunLength((uint *)m_runLength->bufferOnDevice(),
+							(uint *)m_runOffsets->bufferOnDevice(),
+							numCompressedRuns,
+							numPrimitives,
+							scanLength);
+	
+	sahlg.writeUInt(m_runLength, numRuns, "run_length2", CudaDbgLog::FOnce);
+	
+	sahcompress::computeSortedClusterAabbs((Aabb *)clusterAabbs(),
+            (Aabb *)primitiveAabbs,
+            (KeyValuePair *)morton,
+            (uint *)m_runOffsets->bufferOnDevice(),
+            (uint *)m_runLength->bufferOnDevice(),
+            numCompressedRuns);
+    
+    return numCompressedRuns;
 
 #endif
-	    
-	return numRuns;
-
+    return numRuns;
 }
 
 void * SahBuilder::splitBins()

@@ -62,6 +62,26 @@ __global__ void copyHash_kernel(KeyValuePair * dst,
 	dst[ind] = src[ind];
 }
 
+__global__ void decompressIndices_kernel(uint * decompressedIndices,
+                    uint * compressedIndices,
+					KeyValuePair * sorted,
+					uint * offset,
+					uint * runLength,
+					uint nRuns)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= nRuns) return;
+	
+	const uint sortedInd = sorted[ind].value;
+	const uint start = offset[ind];
+	const uint first = compressedIndices[sortedInd];
+	const uint l = runLength[ind];
+	
+	uint i = 0;
+	for(;i<l;i++)
+	    decompressedIndices[start + i] = first + i;
+}
+
 __global__ void decompressPrimitives_kernel(KeyValuePair * dst,
                             KeyValuePair * src,
                             int2 * nodes,
@@ -101,6 +121,17 @@ __global__ void decompressPrimitives_kernel(KeyValuePair * dst,
 	range.x = leafOffset[ind];
 	range.y = writeInd-1;
 	nodes[ind] = range;
+}
+
+__global__ void writeSortedHash_kernel(KeyValuePair * dst,
+							KeyValuePair * src,
+							uint * indices,
+							uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	dst[ind] = src[indices[ind]];
 }
 
 }

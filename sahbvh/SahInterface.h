@@ -44,8 +44,22 @@ void computeRunLength(uint * runLength,
 							uint nPrimitives,
 							uint bufLength);
 
+void computeSortedRunLength(uint * runLength,
+							uint * runHeads,
+							KeyValuePair * indirections,
+							uint nRuns,
+							uint nPrimitives,
+							uint bufLength);
+
 void computeClusterAabbs(Aabb * clusterAabbs,
             Aabb * primitiveAabbs,
+            uint * runHeads,
+            uint * runLength,
+            uint numRuns);
+
+void computeSortedClusterAabbs(Aabb * clusterAabbs,
+            Aabb * primitiveAabbs,
+            KeyValuePair * indirections,
             uint * runHeads,
             uint * runLength,
             uint numRuns);
@@ -95,6 +109,18 @@ void decompressPrimitives(KeyValuePair * dst,
                             uint numHeads,
                             uint numPrimitives,
                             uint numNodes);
+
+void decompressIndices(uint * decompressedIndices,
+                    uint * compressedIndices,
+					KeyValuePair * sorted,
+					uint * offset,
+					uint * runLength,
+					uint n);
+
+void writeSortedHash(KeyValuePair * dst,
+							KeyValuePair * src,
+							uint * indices,
+							uint n);
 }
 #endif        //  #ifndef SAHINTERFACE_H
 

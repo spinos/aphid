@@ -53,6 +53,26 @@ void copyHash(KeyValuePair * dst, KeyValuePair * src,
         n);
 }
 
+void decompressIndices(uint * decompressedIndices,
+                    uint * compressedIndices,
+					KeyValuePair * sorted,
+					uint * offset,
+					uint * runLength,
+					uint n)
+{
+    const int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(n, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    decompressIndices_kernel<<< grid, block>>>(decompressedIndices,
+                                            compressedIndices,
+                                            sorted,
+                                          offset,
+                                          runLength,
+                                          n);
+}
+
 void decompressPrimitives(KeyValuePair * dst,
                             KeyValuePair * src,
                             int2 * nodes,
@@ -77,6 +97,22 @@ void decompressPrimitives(KeyValuePair * dst,
                 numHeads,
                 numPrimitives,
                 numNodes);
+}
+
+void writeSortedHash(KeyValuePair * dst,
+							KeyValuePair * src,
+							uint * indices,
+							uint n)
+{
+    const int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(n, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    writeSortedHash_kernel<<< grid, block>>>(dst,
+							src,
+							indices,
+							n);
 }
 
 }

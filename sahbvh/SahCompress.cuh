@@ -81,6 +81,31 @@ __global__ void computeRunLength_kernel(uint * runLength,
 	    runLength[ind] = runHeads[ind+1] 
 	                    - runHeads[ind];
 }
+
+__global__ void computeSortedRunLength_kernel(uint * runLength,
+							uint * runHeads,
+							KeyValuePair * indirections,
+							uint nRuns,
+							uint nPrimitives,
+							uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+    
+	if(ind >= nRuns) {
+	    runLength[ind] = 0;
+	    return;
+	}
+	
+	uint sortedInd = indirections[ind].value;
+
+	if(sortedInd >= nRuns-1) 
+	    runLength[ind] = nPrimitives 
+	                    - runHeads[sortedInd];
+	else
+	    runLength[ind] = runHeads[sortedInd+1] 
+	                    - runHeads[sortedInd];
+}
     
 __global__ void computeClusterAabbs_kernel(Aabb * clusterAabbs,
             Aabb * primitiveAabbs,
@@ -101,4 +126,26 @@ __global__ void computeClusterAabbs_kernel(Aabb * clusterAabbs,
 	
     clusterAabbs[ind] = box;
 }
+
+__global__ void computeSortedClusterAabbs_kernel(Aabb * clusterAabbs,
+            Aabb * primitiveAabbs,
+            KeyValuePair * indirections,
+            uint * runHeads,
+            uint * runLength,
+            uint numRuns)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= numRuns) return;
+	
+	const uint first = runHeads[ind];
+	const uint l = runLength[ind];
+	Aabb box;
+    resetAabb(box);
+    uint i = 0;
+	for(;i<l;i++) 
+        expandAabb(box, primitiveAabbs[indirections[first + i].value]);
+	
+    clusterAabbs[ind] = box;
+}
+
 }
