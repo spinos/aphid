@@ -18,35 +18,24 @@ public:
 	
 	virtual void build(CudaLinearBvh * bvh);
 protected:
-	void * splitBins();
-    void * splitIds();
     void * clusterAabbs();
-    void * emissionBlocks();
 private:
-    int countTreeBits(void * morton, unsigned numPrimitives);
-	int getM(int n, int m);
+    int getM(int n, int m);
     unsigned sortPrimitives(CudaLinearBvh * bvh, 
                         unsigned numPrimitives, int n, int m);
-	void resetBuffer();
-	void swapBuffer();
-	CUDABuffer * inEmissionBuf();
-	CUDABuffer * outEmissionBuf();
-	
-	void splitClusters(CudaLinearBvh * bvh,
+
+	int splitClusters(CudaLinearBvh * bvh,
 	                    unsigned numClusters);
+	
+	void decompressCluster(CudaLinearBvh * bvh, int numClusters, int numNodes);
+	int splitPrimitives(CudaLinearBvh * bvh, int numInternal);
+
 private:
-    CUDABuffer * m_mortonBits;
     CUDABuffer * m_clusterAabb;
 	CUDABuffer * m_runHeads;
 	CUDABuffer * m_runIndices;
 	CUDABuffer * m_runOffsets;
 	CUDABuffer * m_runHash;
 	CUDABuffer * m_runLength;
-	CUDABuffer * m_emissions[2];
-    CUDABuffer * m_splitBins;
-    CUDABuffer * m_splitIds;
-    CUDABuffer * m_emissionBlocks;
-    CUDABuffer * m_totalNodeCount;
     CUDABuffer * m_queueAndElement;
-    int m_bufferId;
 };
