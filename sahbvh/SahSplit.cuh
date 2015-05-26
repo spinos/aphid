@@ -99,11 +99,16 @@ template<int NumBins, int NumThreads>
         float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
         
         if(threadIdx.x < 1) {
+            float d = spanOfAabb(&rootBox, 0);
 // first is the best
-            if(sBestCost[1] < sBestCost[0])
+            if(sBestCost[1] < sBestCost[0] 
+                && spanOfAabb(&rootBox, 1) > d * .25f) {
                 sBestBin[0] = sBestBin[1];
+                d = spanOfAabb(&rootBox, 1);
+            }
             
-            if(sBestCost[2] < sBestCost[0])
+            if(sBestCost[2] < sBestCost[0]
+                && spanOfAabb(&rootBox, 2) > d * .25f)
                 sBestBin[0] = sBestBin[2];
         }
     }
@@ -162,6 +167,7 @@ template<int NumBins, int Dimension>
                                         + NumBins * SIZE_OF_SPLITBIN_IN_INT
                                         + NumBins
                                         + NumBins * NumBins];
+                                        
 /*
  *    layout of sides
  *    0    n     2n    3n
@@ -310,6 +316,7 @@ template<int NumBins, int Dimension>
                                         + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT
                                         + NumBins
                                         + NumBins * NumThreads];
+                                        
 /*
  *    layout of sides
  *    0    n     2n    3n
