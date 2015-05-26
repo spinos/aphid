@@ -15,7 +15,8 @@ int doSplitWorks(void * q, int * qelements,
                     KeyValuePair * primitiveIndirections,
                     Aabb * primitiveAabbs,
                     KeyValuePair * intermediateIndirections,
-                    uint numPrimitives);
+                    uint numPrimitives,
+                    int initialNumNodes);
 }
 
 namespace sahcompress {
@@ -44,6 +45,12 @@ void computeRunLength(uint * runLength,
 							uint nPrimitives,
 							uint bufLength);
 
+void computeClusterAabbs(Aabb * clusterAabbs,
+            Aabb * primitiveAabbs,
+            uint * runHeads,
+            uint * runLength,
+            uint numRuns);
+
 void computeSortedRunLength(uint * runLength,
 							uint * runHeads,
 							KeyValuePair * indirections,
@@ -51,18 +58,15 @@ void computeSortedRunLength(uint * runLength,
 							uint nPrimitives,
 							uint bufLength);
 
-void computeClusterAabbs(Aabb * clusterAabbs,
-            Aabb * primitiveAabbs,
-            uint * runHeads,
-            uint * runLength,
-            uint numRuns);
-
 void computeSortedClusterAabbs(Aabb * clusterAabbs,
+            KeyValuePair * primitiveIndirections,
             Aabb * primitiveAabbs,
             KeyValuePair * indirections,
             uint * runHeads,
             uint * runLength,
             uint numRuns);
+
+void copyAabb(Aabb * dst, Aabb * src, uint n);
 }
 
 namespace sahdecompress {
@@ -117,10 +121,13 @@ void decompressIndices(uint * decompressedIndices,
 					uint * runLength,
 					uint n);
 
-void writeSortedHash(KeyValuePair * dst,
-							KeyValuePair * src,
-							uint * indices,
-							uint n);
+void rearrangeIndices(KeyValuePair * dst,
+                        KeyValuePair * src,
+                        uint * compressedIndices,
+					KeyValuePair * sorted,
+					uint * offset,
+					uint * runLength,
+					uint nunRuns);
 }
 #endif        //  #ifndef SAHINTERFACE_H
 

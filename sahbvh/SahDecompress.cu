@@ -115,4 +115,26 @@ void writeSortedHash(KeyValuePair * dst,
 							n);
 }
 
+void rearrangeIndices(KeyValuePair * dst,
+                        KeyValuePair * src,
+                        uint * compressedIndices,
+					KeyValuePair * sorted,
+					uint * offset,
+					uint * runLength,
+					uint nunRuns)
+{
+    const int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(nunRuns, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    rearrangeIndices_kernel<<< grid, block>>>(dst,
+                            src,
+                            compressedIndices,
+                            sorted,
+                            offset,
+                            runLength,
+                            nunRuns);
+}
+
 }

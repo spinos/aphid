@@ -9,10 +9,11 @@ int doSplitWorks(void * q, int * qelements,
                     KeyValuePair * primitiveIndirections,
                     Aabb * primitiveAabbs,
                     KeyValuePair * intermediateIndirections,
-                    uint numPrimitives)
+                    uint numPrimitives,
+                    int initialNumNodes)
 {
     simpleQueue::SimpleQueue * queue = (simpleQueue::SimpleQueue *)q;
-    simpleQueue::init_kernel<<< 1,32 >>>(queue, qelements);
+    simpleQueue::init_kernel<<< 1,32 >>>(queue, initialNumNodes, qelements);
     
     DataInterface data;
     data.nodes = nodes;
@@ -27,10 +28,10 @@ int doSplitWorks(void * q, int * qelements,
     
     const int tpb = 256;
     dim3 block(tpb, 1, 1);
-    const unsigned nblk = 1024;
+    const unsigned nblk = iRound1024(numPrimitives);
     dim3 grid(nblk, 1, 1);
     
-    int lpb = 1 + numPrimitives>>10;
+    int lpb = 1 + nblk>>10;
     
     work_kernel<simpleQueue::SimpleQueue, SplitTask, DataInterface, 24, 8, 256><<<grid, block, 16320>>>(queue,
                                 task,

@@ -73,8 +73,8 @@ __global__ void decompressIndices_kernel(uint * decompressedIndices,
 	if(ind >= nRuns) return;
 	
 	const uint sortedInd = sorted[ind].value;
-	const uint start = offset[ind];
 	const uint first = compressedIndices[sortedInd];
+	const uint start = offset[ind];
 	const uint l = runLength[ind];
 	
 	uint i = 0;
@@ -132,6 +132,27 @@ __global__ void writeSortedHash_kernel(KeyValuePair * dst,
 	if(ind >= maxInd) return;
 	
 	dst[ind] = src[indices[ind]];
+}
+
+__global__ void rearrangeIndices_kernel(KeyValuePair * dst,
+                        KeyValuePair * src,
+                        uint * compressedIndices,
+					KeyValuePair * sorted,
+					uint * offset,
+					uint * runLength,
+					uint nunRuns)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= nunRuns) return;
+	
+	const uint sortedInd = sorted[ind].value;
+	const uint first = compressedIndices[sortedInd];
+	const uint start = offset[ind];
+	const uint l = runLength[ind];
+	
+	uint i = 0;
+	for(;i<l;i++)
+	    dst[start + i] = src[first + i];
 }
 
 }

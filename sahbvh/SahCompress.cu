@@ -114,6 +114,7 @@ void computeClusterAabbs(Aabb * clusterAabbs,
 }
 
 void computeSortedClusterAabbs(Aabb * clusterAabbs,
+            KeyValuePair * primitiveIndirections,
             Aabb * primitiveAabbs,
             KeyValuePair * indirections,
             uint * runHeads,
@@ -126,11 +127,22 @@ void computeSortedClusterAabbs(Aabb * clusterAabbs,
     dim3 grid(nblk, 1, 1);
     
     computeSortedClusterAabbs_kernel<<< grid, block>>>(clusterAabbs,
+                primitiveIndirections,
                 primitiveAabbs,
                 indirections,
                 runHeads,
                 runLength,
                 numRuns);
+}
+
+void copyAabb(Aabb * dst, Aabb * src, uint n)
+{
+    const int tpb = 512;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(n, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    copyAabb_kernel<<< grid, block>>>(dst, src ,n);
 }
 
 }

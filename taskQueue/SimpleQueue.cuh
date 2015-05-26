@@ -31,13 +31,13 @@ struct SimpleQueue {
  *  n finished works
  *
  */
-    __device__ void init() 
+    __device__ void init(int tail) 
     {
         _mutex = 0;
         _workDoneCounter = 0;
         _qhead = 0;
-        _qintail = 1;
-        _qouttail = 1;
+        _qintail = tail;
+        _qouttail = tail;
         _elements = 0;
         _stopClock = 0;
     }
@@ -196,6 +196,7 @@ struct SimpleQueue {
 };
 
 __global__ void init_kernel(SimpleQueue * queue,
+                            int tail,
                             int * elements);
 
 template<unsigned long StaticLimit>

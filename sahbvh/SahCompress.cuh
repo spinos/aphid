@@ -81,6 +81,26 @@ __global__ void computeRunLength_kernel(uint * runLength,
 	    runLength[ind] = runHeads[ind+1] 
 	                    - runHeads[ind];
 }
+    
+__global__ void computeClusterAabbs_kernel(Aabb * clusterAabbs,
+            Aabb * primitiveAabbs,
+            uint * runHeads,
+            uint * runLength,
+            uint numRuns)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= numRuns) return;
+	
+	const uint first = runHeads[ind];
+	const uint l = runLength[ind];
+	Aabb box;
+    resetAabb(box);
+    uint i = 0;
+	for(;i<l;i++) 
+        expandAabb(box, primitiveAabbs[first + i]);
+	
+    clusterAabbs[ind] = box;
+}
 
 __global__ void computeSortedRunLength_kernel(uint * runLength,
 							uint * runHeads,
@@ -106,28 +126,9 @@ __global__ void computeSortedRunLength_kernel(uint * runLength,
 	    runLength[ind] = runHeads[sortedInd+1] 
 	                    - runHeads[sortedInd];
 }
-    
-__global__ void computeClusterAabbs_kernel(Aabb * clusterAabbs,
-            Aabb * primitiveAabbs,
-            uint * runHeads,
-            uint * runLength,
-            uint numRuns)
-{
-    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-	if(ind >= numRuns) return;
-	
-	const uint first = runHeads[ind];
-	const uint l = runLength[ind];
-	Aabb box;
-    resetAabb(box);
-    uint i = 0;
-	for(;i<l;i++) 
-        expandAabb(box, primitiveAabbs[first + i]);
-	
-    clusterAabbs[ind] = box;
-}
 
 __global__ void computeSortedClusterAabbs_kernel(Aabb * clusterAabbs,
+            KeyValuePair * primitiveIndirections,
             Aabb * primitiveAabbs,
             KeyValuePair * indirections,
             uint * runHeads,
@@ -137,15 +138,23 @@ __global__ void computeSortedClusterAabbs_kernel(Aabb * clusterAabbs,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= numRuns) return;
 	
-	const uint first = runHeads[ind];
+	uint sortedInd = indirections[ind].value;
+	const uint first = runHeads[sortedInd];
 	const uint l = runLength[ind];
 	Aabb box;
     resetAabb(box);
     uint i = 0;
 	for(;i<l;i++) 
-        expandAabb(box, primitiveAabbs[indirections[first + i].value]);
+        expandAabb(box, primitiveAabbs[primitiveIndirections[first + i].value]);
 	
-    clusterAabbs[ind] = box;
+    clusterAabbs[sortedInd] = box;
+}
+
+__global__ void copyAabb_kernel(Aabb * dst, Aabb * src, uint n)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= n) return;
+	dst[ind] = src[ind];
 }
 
 }
