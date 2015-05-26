@@ -211,8 +211,8 @@ void SahBuilder::build(CudaLinearBvh * bvh)
     m_queueAndElement->create(SIZE_OF_SIMPLEQUEUE + n * 4);
     int numInternal = splitClusters(bvh, numClusters);
     decompressCluster(bvh, numClusters, numInternal);
-    int nn = splitPrimitives(bvh, numInternal);
-    bvh->setNumActiveInternalNodes(nn);
+    numInternal = splitPrimitives(bvh, numInternal);
+    bvh->setNumActiveInternalNodes(numInternal);
 }
 
 int SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)

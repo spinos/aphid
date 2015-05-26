@@ -123,8 +123,8 @@ void WorldDbgDraw::drawPrimitiveBoxes(void * boxes, void * indirections,
 	int i = begin;
     for(;i<=end;i++) {
         ab = primitiveBox[primitiveHash[i].value];
-        bb.setMin(ab.low.x, ab.low.y, ab.low.z);
-		bb.setMax(ab.high.x, ab.high.y, ab.high.z);
+        bb.setMin(ab.low.x- 1e-3, ab.low.y- 1e-3, ab.low.z- 1e-3);
+		bb.setMax(ab.high.x+ 1e-3, ab.high.y+ 1e-3, ab.high.z+ 1e-3);
 		
 		m_drawer->boundingBox(bb);
     }
