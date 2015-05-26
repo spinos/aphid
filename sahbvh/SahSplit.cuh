@@ -19,15 +19,16 @@ struct SplitTask {
     __device__ int shouldSplit(DataInterface data, int iRoot)
     {
         int2 root = data.nodes[iRoot];
+        if(root.x>>31) return 0;
         
-        return (root.y - root.x) > 3;
+        return (root.y - root.x) > 6;
     }
     
     __device__ int validateSplit(DataInterface data, int * smem)
     {
         int2 root = data.nodes[smem[0]];
         float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
-        return (sBestCost[0] < (root.y - root.x));
+        return (sBestCost[0] < (root.y - root.x + .5f));
     }
     
     template <typename QueueType, int NumBins, int NumThreads>

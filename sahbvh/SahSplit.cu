@@ -33,7 +33,7 @@ int doSplitWorks(void * q, int * qelements,
     
     int lpb = 1 + nblk>>10;
     
-    work_kernel<simpleQueue::SimpleQueue, SplitTask, DataInterface, 24, 8, 256><<<grid, block, 16320>>>(queue,
+    work_kernel<simpleQueue::SimpleQueue, SplitTask, DataInterface, 23, 8, 256><<<grid, block, 16320>>>(queue,
                                 task,
                                 data,
                                 lpb,
@@ -44,8 +44,13 @@ int doSplitWorks(void * q, int * qelements,
     if (err != cudaSuccess) {
         printf(" cu error %s when retrieving task queue result\n", cudaGetErrorString(err));
     }
-    
-    //printf("q out tail %i\n", result._qouttail);
+    /*
+    printf("\nstart tail %i\n", initialNumNodes);
+    printf("q head %i\n", result._qhead);
+    printf("q in tail %i\n", result._qintail);
+    printf("q out tail %i\n", result._qouttail);
+    printf("q work done %i\n", result._workDoneCounter);
+    */
     return result._qouttail;
 }
 }

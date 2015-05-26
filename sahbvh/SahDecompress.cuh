@@ -31,8 +31,10 @@ __global__ void countLeaves_kernel(uint * leafLengths,
 	    return;
 	}
 	
+	qelements[ind] = 0;
+	
 	int2 range = nodes[ind];
-	if((range.x >> 31)) {
+	if(range.x >> 31) {
 	    leafLengths[ind] = 0;
 	    return;
 	}

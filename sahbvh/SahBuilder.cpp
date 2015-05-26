@@ -230,7 +230,7 @@ int SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
         1);
     
     // sahlg.writeHash(m_runHash, numClusters, "split_indirections", CudaDbgLog::FOnce);
-    // sahlg.writeInt2(bvh->internalChildBuf(), n, "internal_node", CudaDbgLog::FOnce);
+    sahlg.writeInt2(bvh->internalChildBuf(), n, "internal_node", CudaDbgLog::FOnce);
     // sahlg.writeAabb(bvh->internalAabbBuf(), n, "internal_box", CudaDbgLog::FOnce);
     // sahlg.writeUInt(bvh->internalParentBuf(), n, "parent_node", CudaDbgLog::FOnce);
     // sahlg.writeUInt(bvh->distanceInternalNodeFromRootBuf(), n, "node_level", CudaDbgLog::FOnce);
@@ -249,11 +249,11 @@ void SahBuilder::decompressCluster(CudaLinearBvh * bvh, int numClusters, int num
                                 numNodes,
                                 CudaScan::getScanBufferLength(numNodes));
 							
-	sahlg.writeUInt(m_runLength, numNodes, "leaf_length", CudaDbgLog::FOnce);
+	// sahlg.writeUInt(m_runLength, numNodes, "leaf_length", CudaDbgLog::FOnce);
 
     scanner()->prefixSum(m_runIndices, m_runLength, CudaScan::getScanBufferLength(numNodes));
 	
-	// sahlg.writeUInt(m_runIndices, numNodes, "leaf_offset", CudaDbgLog::FOnce);
+	// sahlg.writeUInt(m_queueAndElement, bvh->numPrimitives(), "queue_lock", CudaDbgLog::FOnce);
 
     sahdecompress::copyHash((KeyValuePair *)sortIntermediate(),
 					(KeyValuePair *)bvh->primitiveHash(),
@@ -273,8 +273,20 @@ void SahBuilder::decompressCluster(CudaLinearBvh * bvh, int numClusters, int num
 
 int SahBuilder::splitPrimitives(CudaLinearBvh * bvh, int numInternal)
 {
-    
-    return numInternal;   
+    int nn = sahsplit::doSplitWorks(m_queueAndElement->bufferOnDevice(),
+        (int *)m_queueAndElement->bufferOnDeviceAt(SIZE_OF_SIMPLEQUEUE),
+        (int2 *)bvh->internalNodeChildIndices(),
+	    (Aabb *)bvh->internalNodeAabbs(),
+        (int *)bvh->internalNodeParentIndices(),
+        (int *)bvh->distanceInternalNodeFromRoot(),
+	    (KeyValuePair *)bvh->primitiveHash(),
+        (Aabb *)bvh->primitiveAabb(),
+        (KeyValuePair *)sortIntermediate(),
+        bvh->numPrimitives(),
+        numInternal); 
+    sahlg.writeInt2(bvh->internalChildBuf(), nn, "internal_node1", CudaDbgLog::FOnce);
+    // sahlg.writeUInt(bvh->internalParentBuf(), x, "parent_node1", CudaDbgLog::FOnce);
+    return nn;
 }
 
 int SahBuilder::getM(int n, int m)
