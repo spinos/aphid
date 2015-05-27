@@ -71,11 +71,6 @@ static int iLog2(int n)
 	return i;
 }
 
-struct Aabb {
-    float3 low;
-    float3 high;
-};
-
 struct Aabb4 {
     float4 low;
     float4 high;
@@ -94,6 +89,11 @@ struct RayInfo {
 #define TINY_VALUE 1e-10
 #define TINY_VALUE2 1e-8
 #define HUGE_VALUE 1e12
+
+struct Aabb {
+    float3 low;
+    float3 high;
+};
 
 #endif        //  #ifndef BVH_COMMON_H
 

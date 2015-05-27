@@ -477,10 +477,10 @@ template<int NumBins, int Dimension>
         int iRoot = smem[0];
         int2 root = data.nodes[iRoot];
         int nbatch = numBatches<NumThreads>(root);
-        //if(nbatch>1) 
+        if(nbatch>1) 
             rearrangeBatched<NumBins, NumThreads>(root, nbatch, data, smem);
-       // else 
-        //    rearrangeInBlock<NumBins, NumThreads>(root, data, smem);
+        else 
+            rearrangeInBlock<NumBins, NumThreads>(root, data, smem);
     }
     
     template<int NumBins, int NumThreads>

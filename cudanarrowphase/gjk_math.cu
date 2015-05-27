@@ -2,7 +2,7 @@
 #define _GJK_MATH_CU_
 
 #include "bvh_common.h"
-#include "bvh_math.cu"
+#include "bvh_math.cuh"
 #include "barycentric.cu"
 #include "line_math.cu"
 #include "triangle_math.cu"

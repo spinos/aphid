@@ -2,7 +2,7 @@
 #define LINE_MATH_CU
 
 #include "bvh_common.h"
-#include "bvh_math.cu"
+#include "bvh_math.cuh"
 
 inline __device__ float distancePointLine(const float3 & P0, 
                         const float3 & P1, const float3 & P2,

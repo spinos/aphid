@@ -1,5 +1,5 @@
 #include "createBvh_implement.h"
-#include <bvh_math.cu>
+#include "bvh_math.cuh"
 #include <CudaBase.h>
 //Set so that it is always greater than the actual common prefixes, and never selected as a parent node.
 //If there are no duplicates, then the highest common prefix is 32 or 64, depending on the number of bits used for the z-curve.

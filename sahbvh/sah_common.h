@@ -4,7 +4,7 @@
 #include "radixsort_implement.h"
 #include "bvh_common.h"
 
-struct __align__(64) SplitBin {
+struct SplitBin {
     Aabb leftBox;
     uint leftCount;
     Aabb rightBox;

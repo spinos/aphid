@@ -1,7 +1,7 @@
 #ifndef BARYCENTRIC_CU
 #define BARYCENTRIC_CU
 
-#include "bvh_math.cu"
+#include "bvh_math.cuh"
 #include "matrix_math.cu"
 
 inline __device__ float3 triangleNormal2(const float3 & v0,

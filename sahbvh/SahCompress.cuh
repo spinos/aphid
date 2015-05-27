@@ -1,5 +1,5 @@
 #include <cuda_runtime_api.h>
-#include "bvh_math.cu"
+#include "bvh_math.cuh"
 #include "radixsort_implement.h"
 
 namespace sahcompress {

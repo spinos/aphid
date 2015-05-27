@@ -108,8 +108,7 @@ message ("cuda art librarie " ${CUDA_CUDART_LIBRARY})
 message ("cuda blas librarie " ${CUDA_cublas_LIBRARY})
 message ("cuda sparse librarie " ${CUDA_cusparse_LIBRARY})
 
-set (CUSOURCES "../cudabvh/bvh_math.cu"
-"../scan/scan.cu"
+set (CUSOURCES "../scan/scan.cu"
 "../cudabvh/createBvh.cu"
 "../cudabvh/tetrahedronSystem.cu"
 "../reduction/cuReduceSum.cu"
@@ -128,9 +127,6 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
 "../cudanarrowphase/narrowphase.cu"
 "../taskQueue/SimpleQueue.cu"
-"sah_math.cu"
-"binning.cu"
-"sahbvh.cu"
 "SahCompress.cu"
 "SahDecompress.cu"
 "SahSplit.cu")

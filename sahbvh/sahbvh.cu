@@ -1,5 +1,5 @@
 #include "sahbvh_implement.h"
-#include <bvh_math.cu>
+#include "bvh_math.cuh"
 #include "sah_math.cu"
 #include <CudaBase.h>
 

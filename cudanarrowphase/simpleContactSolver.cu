@@ -1,5 +1,5 @@
 #include "simpleContactSolver_implement.h"
-#include <bvh_math.cu>
+#include "bvh_math.cuh"
 #include "barycentric.cu"
 #include "stripedModel.cu"
 #include <CudaBase.h>

@@ -1,7 +1,7 @@
 #ifndef _MATRIX_MATH_H_
 #define _MATRIX_MATH_H_
 
-#include "bvh_math.cu"
+#include "bvh_math.cuh"
 
 inline __device__ void set_mat33_zero(mat33 & m)
 {

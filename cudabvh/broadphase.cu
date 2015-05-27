@@ -1,5 +1,5 @@
 #include "broadphase_implement.h"
-#include <bvh_math.cu>
+#include "bvh_math.cuh"
 #include <CudaBase.h>
 #include <stripedModel.cu>
 

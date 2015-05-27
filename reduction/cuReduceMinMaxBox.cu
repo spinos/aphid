@@ -1,5 +1,5 @@
 #include "cuReduceMinMaxBox_implement.h"
-
+#include "bvh_math.cuh"
 template<class T>
 struct SharedMemory
 {
@@ -13,23 +13,13 @@ struct SharedMemory
 template<class T>
 __device__ void getMinMaxBox(T & a, T & b)
 {
-	a.low.x = min(a.low.x, b.low.x);
-	a.low.y = min(a.low.y, b.low.y);
-	a.low.z = min(a.low.z, b.low.z);
-	a.high.x = max(a.high.x, b.high.x);
-	a.high.y = max(a.high.y, b.high.y);
-	a.high.z = max(a.high.z, b.high.z);
+    expandAabb(a, b);
 }
 
 template<class T, class T1>
 __device__ void getMinMaxBox(T & a, T1 & b)
 {
-	a.low.x = min(a.low.x, b.x);
-	a.low.y = min(a.low.y, b.y);
-	a.low.z = min(a.low.z, b.z);
-	a.high.x = max(a.high.x, b.x);
-	a.high.y = max(a.high.y, b.y);
-	a.high.z = max(a.high.z, b.z);
+    expandAabb(a, b);
 }
 
 template <class T, unsigned int blockSize, bool nIsPow2>
@@ -43,12 +33,7 @@ __global__ void reduceFindMinMaxBox_kernel(T *g_idata, T *g_odata, unsigned int 
     unsigned int gridSize = blockSize*2*gridDim.x;
     
     T mySum;
-    mySum.low.x = 999999999;
-	mySum.low.y = 999999999;
-	mySum.low.z = 999999999;
-    mySum.high.x = -999999999;
-	mySum.high.y = -999999999;
-	mySum.high.z = -999999999;
+    resetAabb(mySum);
 
     // we reduce multiple elements per thread.  The number is determined by the 
     // number of active thread blocks (via gridDim).  More blocks will result
@@ -143,12 +128,7 @@ __global__ void reduceFindMinMaxBox_kernel1(T1 *g_idata, T *g_odata, unsigned in
     unsigned int gridSize = blockSize*2*gridDim.x;
     
     T mySum;
-    mySum.low.x = 999999999;
-	mySum.low.y = 999999999;
-	mySum.low.z = 999999999;
-    mySum.high.x = -999999999;
-	mySum.high.y = -999999999;
-	mySum.high.z = -999999999;
+    resetAabb(mySum);
 
     // we reduce multiple elements per thread.  The number is determined by the 
     // number of active thread blocks (via gridDim).  More blocks will result

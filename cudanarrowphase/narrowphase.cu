@@ -1,5 +1,5 @@
 #include "narrowphase_implement.h"
-#include <bvh_math.cu>
+#include "bvh_math.cuh"
 #include <gjk_math.cu>
 #include <stripedModel.cu>
 #include <CudaBase.h>

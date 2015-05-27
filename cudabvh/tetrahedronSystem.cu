@@ -1,5 +1,5 @@
 #include "tetrahedronSystem_implement.h"
-#include "bvh_math.cu"
+#include "bvh_math.cuh"
 
 __global__ void tetrahedronSystemIntegrate_kernel(float3 * o_position, float3 * i_velocity, 
                                     float dt, uint maxInd)

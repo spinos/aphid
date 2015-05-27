@@ -1,5 +1,5 @@
 #include "sah_common.h"
-#include "bvh_math.cu"
+#include "bvh_math.cuh"
 inline __device__ void resetSplitBin(SplitBin & b)
 {
     resetAabb(b.leftBox);

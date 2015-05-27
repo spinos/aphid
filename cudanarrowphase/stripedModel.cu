@@ -1,7 +1,7 @@
 #ifndef STRIPEDMODEL_CU
 #define STRIPEDMODEL_CU
 
-#include <bvh_math.cu>
+#include <bvh_math.cuh>
 
 inline __device__ uint combineObjectElementInd(uint objectIdx, uint elementIdx)
 { return (objectIdx<<24 | elementIdx); }

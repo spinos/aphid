@@ -1,5 +1,6 @@
-#ifndef _BVH_MATH_H_
-#define _BVH_MATH_H_
+#ifndef BVH_MATH_CUH
+#define BVH_MATH_CUH
+
 #include "bvh_common.h"
 
 template<typename T>
@@ -184,16 +185,6 @@ inline __device__ void expandAabb(Aabb & dst, const Aabb & b)
     if(b.high.z > dst.high.z) dst.high.z = b.high.z;
 }
 
-inline __device__ void expandAabb(Aabb & dst, volatile Aabb * src)
-{
-    if(src->low.x < dst.low.x) dst.low.x = src->low.x;
-    if(src->low.y < dst.low.y) dst.low.y = src->low.y;
-    if(src->low.z < dst.low.z) dst.low.z = src->low.z;
-    if(src->high.x > dst.high.x) dst.high.x = src->high.x;
-    if(src->high.y > dst.high.y) dst.high.y = src->high.y;
-    if(src->high.z > dst.high.z) dst.high.z = src->high.z;
-}
-
 inline __device__ float3 centroidOfAabb(const Aabb & box)
 {
 	return make_float3(box.low.x * 0.5 + box.high.x * 0.5, box.low.y * 0.5 + box.high.y * 0.5, box.low.z * 0.5 + box.high.z * 0.5);
@@ -230,4 +221,5 @@ inline __device__ float areaOfAabb(Aabb * box)
     return (dx * dy + dy * dz + dz * dx) * 2.f;
 }
 
-#endif
+#endif        //  #ifndef BVH_MATH_CUH
+
