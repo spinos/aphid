@@ -6,7 +6,7 @@
 
 namespace simpleQueue {
 
-struct SimpleQueue {
+struct __align__(8) SimpleQueue {
     int * _elements;
     int _mutex;
     int _qintail;
@@ -14,7 +14,7 @@ struct SimpleQueue {
     int _qhead;
     int _workDoneCounter;
     int _stopClock;
-    int padding;
+    // int padding;
 /*
  *  n nodes                                max n nodes
  *
@@ -57,7 +57,6 @@ struct SimpleQueue {
     {
         atomicExch( &_mutex, 0 );
     }
-    
 /*
  *  0  1  2  3 ... n-1   n    n+1
  *
@@ -75,18 +74,22 @@ struct SimpleQueue {
     __device__ int enqueue()
     {
         int oldTail = atomicAdd(&_qouttail, 1);
-        _elements[oldTail] = 0;
+        // _elements[oldTail] = 0;
         return oldTail;
     }
     
     __device__ int enqueue2()
     {
         int oldTail = atomicAdd(&_qouttail, 2);
-        _elements[oldTail] = 0;
-        _elements[oldTail+1] = 0;
+        // _elements[oldTail] = 0;
+        // _elements[oldTail+1] = 0;
         return oldTail;
     }
     
+    __device__ void releaseTask(int idx)
+    {
+        _elements[idx] = 0;
+    }
 /*
  *  0  1  2  3 ... n-1  n
  *
@@ -107,16 +110,18 @@ struct SimpleQueue {
  *               -2 if no unfinished pregress out of work
  */    
     __device__ int dequeue()
-    {        
+    {     
+        int result = -1;
         int oldTail = _qintail;
         int i = _qhead;
         for(;i<oldTail;i++) {
             if(atomicCAS( &_elements[i], 0, 1 ) == 0) {
                 _qhead=i;
-                return i;
+                result = i;
+                break;
             }
         }
-        return -1;
+        return result;
     }
     
     __device__ int dequeue(int offset, int stride)

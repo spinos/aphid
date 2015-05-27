@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     CudaBase::SetDevice();
     if(!CudaBase::HasDevice) return 1;
     
-    unsigned n = (1<<12) - 171;
+    unsigned n = (1<<16) - 171;
     BaseBuffer hdata;
     hdata.create(n*8);
     

@@ -85,7 +85,7 @@ headtailDesc.push_back(std::pair<int, int>(0, 12));
     
     std::cout<<"size of qi "<<sizeof(SimpleQueueInterface);
     
-    unsigned n = (1<<13) - 97;
+    unsigned n = (1<<15) - 97;
     BaseBuffer hdata;
     hdata.create(n*4);
     

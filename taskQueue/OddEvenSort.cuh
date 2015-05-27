@@ -71,10 +71,11 @@ struct OddEvenSortTask {
                         spawn = q->enqueue();
                         data.nodes[spawn].x = root.x;
                         data.nodes[spawn].y = headToSecond - 1;
-
+                        q->releaseTask(spawn);
                         spawn = q->enqueue();
                         data.nodes[spawn].x = headToSecond;
                         data.nodes[spawn].y = root.y;
+                        q->releaseTask(spawn);
                 }
                     
                 q->setWorkDone();

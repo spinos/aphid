@@ -1,5 +1,5 @@
 #include "SahSplit.cuh"
-
+#include "CudaBase.h"
 namespace sahsplit {
 int doSplitWorks(void * q, int * qelements,
                     int2 * nodes,
@@ -37,8 +37,9 @@ int doSplitWorks(void * q, int * qelements,
                                 task,
                                 data,
                                 lpb,
+                               // 2);
                                 numPrimitives-1);
-                                
+    CudaBase::CheckCudaError("split work");                            
     simpleQueue::SimpleQueue result;
     cudaError_t err = cudaMemcpy(&result, queue, SIZE_OF_SIMPLEQUEUE, cudaMemcpyDeviceToHost); 
     if (err != cudaSuccess) {

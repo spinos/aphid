@@ -90,18 +90,6 @@ __global__ void reduceFindMinMaxBox_kernel(T *g_idata, T *g_odata, unsigned int 
 
         __syncthreads(); 
 
- #if (__CUDA_ARCH__ >= 300 )
-    if ( tid < 32 )
-    {
-        // Fetch final intermediate sum from 2nd warp
-        if (blockSize >=  64) mySum += sdata[tid + 32];
-        // Reduce final warp using shuffle
-        for (int offset = warpSize/2; offset > 0; offset /= 2) 
-        {
-            mySum += __shfl_down(mySum, offset);
-        }
-    }
-#else 
         // fully unroll reduction within a single warp
         if ((blockSize >=  64) && (tid < 32)) {
 			getMinMaxBox<T>(mySum, sdata[tid + 32]);
@@ -138,7 +126,6 @@ __global__ void reduceFindMinMaxBox_kernel(T *g_idata, T *g_odata, unsigned int 
             sdata[tid] = mySum;
         }
 	__syncthreads(); 
-#endif
     
     // write result for this block to global mem 
     if (tid == 0) 
@@ -203,18 +190,6 @@ __global__ void reduceFindMinMaxBox_kernel1(T1 *g_idata, T *g_odata, unsigned in
 
         __syncthreads(); 
 
- #if (__CUDA_ARCH__ >= 300 )
-    if ( tid < 32 )
-    {
-        // Fetch final intermediate sum from 2nd warp
-        if (blockSize >=  64) mySum += sdata[tid + 32];
-        // Reduce final warp using shuffle
-        for (int offset = warpSize/2; offset > 0; offset /= 2) 
-        {
-            mySum += __shfl_down(mySum, offset);
-        }
-    }
-#else 
         // fully unroll reduction within a single warp
         if ((blockSize >=  64) && (tid < 32)) {
 			getMinMaxBox<T>(mySum, sdata[tid + 32]);
@@ -251,7 +226,6 @@ __global__ void reduceFindMinMaxBox_kernel1(T1 *g_idata, T *g_odata, unsigned in
             sdata[tid] = mySum;
         }
 	__syncthreads(); 
-#endif
     
     // write result for this block to global mem 
     if (tid == 0) 

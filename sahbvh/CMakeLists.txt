@@ -6,6 +6,7 @@ project (testsah)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
+## set (CMAKE_BUILD_TYPE DEBUG)
 include_directories ("../shared" 
 "../cudabvh" 
 "../radixsort"
@@ -139,7 +140,7 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 ## http://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#axzz3ZLADmK6E
 
 if (WIN32)
-set (CUDA_NVCC_FLAGS "--disable-warnings --ptxas-options=-v -arch sm_20")
+set (CUDA_NVCC_FLAGS "--disable-warnings --ptxas-options=-v -arch sm_30")
 else ()
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
 endif()

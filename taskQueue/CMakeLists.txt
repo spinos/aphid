@@ -6,7 +6,7 @@ project (testqueue)
 set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (CMAKE_BUILD_TYPE RELEASE)
+set (CMAKE_BUILD_TYPE Debug)
 find_package (CUDA QUIET REQUIRED)
 
 message ("cuda found ? " ${CUDA_FOUND})

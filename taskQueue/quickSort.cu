@@ -49,7 +49,7 @@ void cu_testQuickSort(void * q,
     //cudaDeviceSynchronize();
     
     simpleQueue::SimpleQueue * queue = (simpleQueue::SimpleQueue *)q;
-    simpleQueue::init_kernel<<< 1,32 >>>(queue, elements);
+    simpleQueue::init_kernel<<< 1,32 >>>(queue, 1, elements);
     
     const int tpb = 256;
     dim3 block(tpb, 1, 1);
@@ -71,7 +71,7 @@ void cu_testQuickSort(void * q,
                                 loopbuf,
                                 (int4 *)headtailperloop,
                                 lpb,
-                                32);
+                                255);
     
     CudaBase::CheckCudaError("q sort");
 }
