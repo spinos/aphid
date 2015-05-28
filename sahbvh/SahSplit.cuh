@@ -76,8 +76,8 @@ template<int NumBins, int NumThreads>
  *    16 as size of bin
  *
  *    0                                      workId
- *    1             -> 1+4*16-1              best bin per dimension
- *    1+4*16        -> 1+4*16+4-1            cost of best bin per dimension
+ *    1             -> 1+3*16-1              best bin per dimension
+ *    1+3*16        -> 1+3*16+3-1            cost of best bin per dimension
  *
  */             
         computeBestBinPerDimension<NumBins, NumThreads, 0>(data,
@@ -96,7 +96,7 @@ template<int NumBins, int NumThreads>
                                     rootBox);
         
         SplitBin * sBestBin = (SplitBin *)&smem[1];
-        float * sBestCost = (float *)&smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT];
+        float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
         
         if(threadIdx.x < 1) {
             float d = spanOfAabb(&rootBox, 0);
@@ -119,13 +119,13 @@ template<int NumBins, int NumThreads, int Dimension>
                                     int2 root,
                                     Aabb rootBox)
     {
-        /*if((root.y - root.x) < 16)
+        if((root.y - root.x) < 16)
             computeBinsPerDimensionPrimitive<16, Dimension>(root.y - root.x + 1,
                                     data,
                                     smem,
                                     root,
                                     rootBox);
-        else*/
+        else
             computeBinsPerDimensionBatched<NumBins, NumThreads, Dimension>(data,
                                     smem,
                                     root,
@@ -145,25 +145,25 @@ template<int NumBins, int Dimension>
  *    16 as size of bin
  *
  *    0                                          workId
- *    1               -> 1+4*16-1                best bin per dimension
- *    1+4*16          -> 1+4*16+4-1              cost of best bin per dimension
- *    1+4*16+4        -> 1+4*16+4+n*16-1         bins
- *    1+4*16+4+n*16   -> 1+4*16+4+n*16+n-1       costs
- *    1+4*16+4+n*16+n -> 1+4*16+4+n*16+n+n*n-1   sides
+ *    1               -> 1+3*16-1                best bin per dimension
+ *    1+3*16          -> 1+3*16+3-1              cost of best bin per dimension
+ *    1+3*16+3        -> 1+3*16+3+n*16-1         bins
+ *    1+3*16+3+n*16   -> 1+3*16+3+n*16+n-1       costs
+ *    1+3*16+3+n*16+n -> 1+3*16+3+n*16+n+n*n-1   sides
  *
  *    when n = 16
  *    total shared memory 2320 bytes
  *
  */ 
         SplitBin * sBestBin = (SplitBin *)&smem[1];
-        float * sBestCost = (float *)&smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT];
-        SplitBin * sBin = (SplitBin *)&smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT + 4];
-        float * sCost = (float *)&smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT + 4
+        float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
+        SplitBin * sBin = (SplitBin *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3];
+        float * sCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
                                         + NumBins * SIZE_OF_SPLITBIN_IN_INT];
-        int * sSide = &smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT + 4
+        int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
                                         + NumBins * SIZE_OF_SPLITBIN_IN_INT
                                         + NumBins];
-        Aabb * sBox = (Aabb *)&smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT + 4
+        Aabb * sBox = (Aabb *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
                                         + NumBins * SIZE_OF_SPLITBIN_IN_INT
                                         + NumBins
                                         + NumBins * NumBins];
@@ -293,26 +293,26 @@ template<int NumBins, int Dimension>
  *    32 as warp size
  *
  *    0                                          workId
- *    1                   -> 1+4*16-1                best bin per dimension
- *    1+4*16              -> 1+4*16+4-1                 cost of best bin per dimension
- *    1+4*16+4            -> 1+4*16+4+n*(t/32)*16-1               bins
- *    1+4*16+4+n*(t/32)*16       -> 1+4*16+4+n*(t/32)*16+n-1               costs
- *    1+4*16+4+n*(t/32)*16+n     -> 1+4*16+4+n*(t/32)*16+n+n*t-1             sides
- *    1+4*16+4+n*(t/32)*16+n+n*t -> 1+4*16+4+n*(t/32)*16+n+n*t+nb*6-1    boxes
+ *    1                   -> 1+3*16-1                best bin per dimension
+ *    1+3*16              -> 1+3*16+3-1                 cost of best bin per dimension
+ *    1+3*16+3            -> 1+3*16+3+n*(t/32)*16-1               bins
+ *    1+3*16+3+n*(t/32)*16       -> 1+3*16+3+n*(t/32)*16+n-1               costs
+ *    1+3*16+3+n*(t/32)*16+n     -> 1+3*16+3+n*(t/32)*16+n+n*t-1             sides
+ *    1+3*16+3+n*(t/32)*16+n+n*t -> 1+3*16+3+n*(t/32)*16+n+n*t+nb*6-1    boxes
  *
  *    when n = 8, t = 256
  *    total shared memory 12528 bytes
  */         
         SplitBin * sBestBin = (SplitBin *)&smem[1];
-        float * sBestCost = (float *)&smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT];
-        SplitBin * sBin = (SplitBin *)&smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT + 4];
+        float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
+        SplitBin * sBin = (SplitBin *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3];
         const int numWarps = NumThreads>>5;
-        float * sCost = (float *)&smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT + 4
+        float * sCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
                                         + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT];
-        int * sSide = &smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT + 4
+        int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
                                         + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT
                                         + NumBins];
-        Aabb * sBox = (Aabb *)&smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT + 4
+        Aabb * sBox = (Aabb *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
                                         + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT
                                         + NumBins
                                         + NumBins * NumThreads];
@@ -492,17 +492,17 @@ template<int NumBins, int Dimension>
  *    16 as size of bin
  *
  *    0                                          workId
- *    1                -> 1+4*16-1               split bin
- *    1+4*16           -> 1+4*16+t*2-1           sides
- *    1+4*16+t*2       -> 1+4*16+t*2+2-1         group begin
- *    1+4*16+t*2+4     -> 1+4*16+t*2+2+t*4-1     offsets
- *    1+4*16+t*2+4+t*2 -> 1+4*16+t*2+2+t*4+t*2-1 backup indirection
+ *    1                -> 1+3*16-1               split bin
+ *    1+3*16           -> 1+3*16+t*3-1           sides
+ *    1+3*16+t*2       -> 1+3*16+t*3+2-1         group begin
+ *    1+3*16+t*2+3     -> 1+3*16+t*3+2+t*4-1     offsets
+ *    1+3*16+t*2+3+t*2 -> 1+3*16+t*3+2+t*4+t*2-1 backup indirection
  *    
  */         
         KeyValuePair * major = data.primitiveIndirections;
-        KeyValuePair * backup = (KeyValuePair *)&smem[1 + 4 * SIZE_OF_SPLITBIN_IN_INT
+        KeyValuePair * backup = (KeyValuePair *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT
                                         + NumThreads * 2
-                                        + 4
+                                        + 3
                                         + NumThreads * 2];
         Aabb * boxes = data.primitiveAabbs;
         
@@ -517,7 +517,7 @@ template<int NumBins, int Dimension>
         float splitPlane = sSplit->plane;
         int splitDimension = sSplit->dimension;
         
-        int * groupBegin = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+        int * groupBegin = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT
                                     + NumThreads * 2];
                                     
         if(threadIdx.x == 0)
@@ -528,17 +528,17 @@ template<int NumBins, int Dimension>
         
         __syncthreads();
         
-        int * sSide = &smem[1 + SIZE_OF_SPLITBIN_IN_INT];
-        int * sOffset = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+        int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
+        int * sOffset = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT
                                         + NumThreads * 2
-                                        + 2];
+                                        + 3];
             
-        int * sideVertical = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+        int * sideVertical = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT
                                         + threadIdx.x * 2];
                                         
-        int * offsetVertical = &smem[1 + SIZE_OF_SPLITBIN_IN_INT
+        int * offsetVertical = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT
                                         + NumThreads * 2
-                                        + 2
+                                        + 3
                                         + threadIdx.x * 2];
                                         
         int splitSide, ind;

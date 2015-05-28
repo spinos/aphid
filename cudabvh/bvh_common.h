@@ -90,7 +90,7 @@ struct RayInfo {
 #define TINY_VALUE2 1e-8
 #define HUGE_VALUE 1e12
 
-struct Aabb {
+struct __align__(4) Aabb {
     float3 low;
     float3 high;
 };
