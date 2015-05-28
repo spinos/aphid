@@ -28,10 +28,11 @@ int doSplitWorks(void * q, int * qelements,
     
     const int tpb = 256;
     dim3 block(tpb, 1, 1);
-    const unsigned nblk = iRound1024(numPrimitives);
+    unsigned nblk = iRound1024(numPrimitives);
+    if(nblk>1024) nblk = 1024;
     dim3 grid(nblk, 1, 1);
     
-    int lpb = 1 + nblk>>10;
+    int lpb = iRound1024(numPrimitives) / nblk;
     
     work_kernel<simpleQueue::SimpleQueue, SplitTask, DataInterface, 23, 8, 256><<<grid, block, 16320>>>(queue,
                                 task,
