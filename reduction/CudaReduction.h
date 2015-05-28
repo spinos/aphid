@@ -2,6 +2,7 @@
 #define CUDAREDUCTION_H
 #include "bvh_common.h"
 #include <CUDABuffer.h>
+#include <CudaBase.h>
 #include "reduce_common.h"
 #include <cuReduceMin_implement.h>
 #include <cuReduceMax_implement.h>
@@ -123,14 +124,14 @@ template<class T>
         
         void * d_odata = m_obuf->bufferOnDevice();
         cuReduceFindMinMaxBox<T>((T *)d_odata, idata, m, blocks, threads);
-        
+        // CudaBase::CheckCudaError("reduce box");
         n = blocks;	
         while(n > 1) {
             blocks = threads = 0;
             getReduceBlockThread(blocks, threads, n);
             
             cuReduceFindMinMaxBox<T>((T *)d_odata, (T *)d_odata, n, blocks, threads);
-            
+            // CudaBase::CheckCudaError("reduce box");
             n = (n + (threads*2-1)) / (threads*2);
         }
     

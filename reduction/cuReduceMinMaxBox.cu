@@ -1,5 +1,5 @@
-#include "cuReduceMinMaxBox_implement.h"
 #include "bvh_math.cuh"
+#include "Aabb.cuh"
 template<class T>
 struct SharedMemory
 {
@@ -271,10 +271,12 @@ void cuReduceFindMinMaxBox(T *dst, T *src, unsigned numElements, unsigned numBlo
 	}
 }
 
-template void 
-cuReduceFindMinMaxBox<Aabb>(Aabb *d_odata, Aabb *d_idata, 
+template void cuReduceFindMinMaxBox<Aabb>(Aabb *d_odata, Aabb *d_idata, 
     unsigned numElements, unsigned numBlocks, unsigned numThreads);
 
+template void cuReduceFindMinMaxBox<Aabb4>(Aabb4 *d_odata, Aabb4 *d_idata, 
+    unsigned numElements, unsigned numBlocks, unsigned numThreads);
+    
 template <class T, class T1>
 void cuReduceFindMinMaxBox(T *dst, T1 *src, unsigned numElements, unsigned numBlocks, unsigned numThreads)
 {
@@ -334,6 +336,9 @@ void cuReduceFindMinMaxBox(T *dst, T1 *src, unsigned numElements, unsigned numBl
 	}
 }
 
-template void 
-cuReduceFindMinMaxBox<Aabb, float3>(Aabb *d_odata, float3 *d_idata, 
+template void cuReduceFindMinMaxBox<Aabb, float3>(Aabb *d_odata, float3 *d_idata, 
     unsigned numElements, unsigned numBlocks, unsigned numThreads);
+    
+template void cuReduceFindMinMaxBox<Aabb4, float4>(Aabb4 *d_odata, float4 *d_idata, 
+    unsigned numElements, unsigned numBlocks, unsigned numThreads);
+

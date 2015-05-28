@@ -1,6 +1,8 @@
 #include <cuda_runtime_api.h>
 #include "SimpleQueue.cuh"
-#include "sah_math.cuh"
+#include "sah_common.h"
+#include "bvh_math.cuh"
+#include "Aabb.cuh"
 #include "onebitsort.cuh"
 
 namespace sahsplit {
@@ -188,7 +190,7 @@ template<int NumBins, int Dimension>
         if(threadIdx.x < numPrimitives) {
 // primitive high as split plane             
             sBox[threadIdx.x] = primitiveAabbs[primitiveIndirections[root.x + threadIdx.x].value];
-            sBin[threadIdx.x].plane = float3_component(sBox[threadIdx.x].high, Dimension);
+            sBin[threadIdx.x].plane = highPlaneOfAabb(&sBox[threadIdx.x], Dimension);
         }
         
         __syncthreads();
@@ -211,7 +213,7 @@ template<int NumBins, int Dimension>
         int i = threadIdx.x - j * NumBins;
         
         if(i < numPrimitives && j < numPrimitives) {
-            sSide[i*NumBins + j] = (float3_component(sBox[i].low, Dimension) > sBin[j].plane);
+            sSide[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], Dimension) > sBin[j].plane);
         }
     
         __syncthreads();
@@ -328,7 +330,7 @@ template<int NumBins, int Dimension>
  *    horizonal collectBins
  *
  */
-        int * sideVertical = &sSide[NumBins * threadIdx.x];
+        // int * sideVertical = &sSide[NumBins * threadIdx.x];
         int * sideHorizontal = &sSide[threadIdx.x];
         
        // const int numWarpBins = numWarps * NumBins;
@@ -375,7 +377,7 @@ template<int NumBins, int Dimension>
             __syncthreads();
             
             if(ind <= root.y)
-                sSide[i*NumBins + j] = (float3_component(sBox[i].low, Dimension) > sBin[j].plane);
+                sSide[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], Dimension) > sBin[j].plane);
             
             /*
             computeSides<NumBins, Dimension>(sideVertical,
@@ -549,7 +551,7 @@ template<int NumBins, int Dimension>
         __syncthreads();
         
         if(j<= root.y) {
-            splitSide = (float3_component(boxes[backup[threadIdx.x].value].low, splitDimension) > splitPlane);
+            splitSide = (lowPlaneOfAabb(&boxes[backup[threadIdx.x].value], splitDimension) > splitPlane);
             sideVertical[splitSide]++;
         }
             
@@ -642,7 +644,7 @@ template<int NumBins, int Dimension>
             
             j = root.x + i*NumThreads + threadIdx.x;
             if(j<= root.y) {
-                splitSide = (float3_component(boxes[backup[j].value].low, splitDimension) > splitPlane);
+                splitSide = (lowPlaneOfAabb(&boxes[backup[j].value], splitDimension) > splitPlane);
                 sideVertical[splitSide]++;
             }
             
@@ -709,6 +711,62 @@ template<int NumBins, int Dimension>
         int nbatch = (range.y - range.x + 1)/NumThreads;
         if((( range.y - range.x + 1) & (NumThreads-1)) > 0) nbatch++;
         return nbatch;
+    }
+    
+    __device__ void writeIndirection(KeyValuePair * dst,
+                            KeyValuePair * src,
+                            int begin, int end)
+    {
+        int j = begin + threadIdx.x;
+        if(j<= end) {
+            dst[j] = src[j];
+            src[j].key = 9999997;
+        }
+    }
+    
+    __device__ void updateSplitBinSide(SplitBin & dst,
+                                        Aabb & fBox,
+                                        int side)
+    {
+        if(side) {
+            dst.rightCount++;
+            expandAabb(dst.rightBox, fBox);
+        }
+        else {
+            dst.leftCount++;
+            expandAabb(dst.leftBox, fBox);
+        }
+    }
+    
+    template<int Dimension>
+    __device__ float binSplitPlane(Aabb * rootBox,
+                        uint n,
+                        uint ind)
+    {
+        float d = spanOfAabb(rootBox, Dimension);
+        return (lowPlaneOfAabb(rootBox, Dimension) 
+                     + (d / (float)n) * ((float)ind + .5f));
+    }
+    
+    __device__ float costOfSplit(SplitBin * bin,
+                        float rootBoxArea)
+    {
+// empty side is invalid
+        if(bin->leftCount < 1 || bin->rightCount < 1) return 1e10f;
+        
+        float leftArea = areaOfAabb(&bin->leftBox);
+        float rightArea = areaOfAabb(&bin->rightBox);
+    
+        return (leftArea / rootBoxArea * (float)bin->leftCount 
+                + rightArea / rootBoxArea * (float)bin->rightCount);   
+    }
+    
+    __device__ void resetSplitBin(SplitBin & b)
+    {
+        resetAabb(b.leftBox);
+        resetAabb(b.rightBox);
+        b.leftCount = 0;
+        b.rightCount = 0;
     }
 };
 

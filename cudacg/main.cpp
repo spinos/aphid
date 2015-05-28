@@ -485,7 +485,7 @@ void testReduceMinMax()
 
 void testReduceMinMaxBox()
 {
-	std::cout<<" test find min max f\n";
+	std::cout<<"\n\n test find min max box\n\n";
 	unsigned m = 1024*1024;
 	CUDABuffer db;
 	db.create(m*32);
@@ -525,6 +525,59 @@ void testReduceMinMaxBox()
         
         std::cout<<" min max box ("<<res[0]<<","<<res[1]<<","<<res[2]<<"),("
                 <<res[3]<<","<<res[4]<<","<<res[5]<<")\n";
+        
+        cudaEventRecord(stop_event, 0);
+        cudaEventSynchronize(stop_event);
+        float met;
+        cudaEventElapsedTime(&met, start_event, stop_event);
+        std::cout<<" reduction "<<(1<<i)<<" boxes took "<<met<<" milliseconds\n";
+	}
+	cudaEventDestroy(start_event);
+    cudaEventDestroy(stop_event);
+}
+
+void testReduceMinMaxBox4()
+{
+	std::cout<<"\n\n test find min max box4\n\n";
+	unsigned m = 1024*1024;
+	CUDABuffer db;
+	db.create(m*32);
+	
+	BaseBuffer hb;
+	hb.create(m*32);
+	
+	Aabb4 * h = (Aabb4 *)hb.data();
+	float x, y, z;
+	unsigned i;
+	for(i=0; i< m; i++) {
+	    x = 440.f * ((float)(rand() & 255))/256.f - 22.f;
+	    y = 44.f * ((float)(rand() & 255))/256.f - 220.f;
+	    z = 440.f * ((float)(rand() & 255))/256.f - 2200.f;
+	    h[i].low.x = x - 1.f;
+	    h[i].low.y = y - 1.f;
+	    h[i].low.z = z - 1.f;
+	    h[i].high.x = x + 1.f;
+	    h[i].high.y = y + 1.f;
+	    h[i].high.z = z + 1.f;
+	}
+	
+	db.hostToDevice(hb.data());
+	
+	CudaReduction reducer;
+	reducer.initOnDevice();
+	
+	cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
+    cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
+    
+    float res[8];
+
+    for(i=10; i<= 20; i++) {
+        cudaEventRecord(start_event, 0);
+        
+        reducer.minMaxBox<Aabb4, float4>((Aabb4 *)&res, (float4 *)db.bufferOnDevice(), 2<<i);
+        
+        std::cout<<" min max box ("<<res[0]<<","<<res[1]<<","<<res[2]<<"),("
+                <<res[4]<<","<<res[5]<<","<<res[6]<<")\n";
         
         cudaEventRecord(stop_event, 0);
         cudaEventSynchronize(stop_event);
@@ -651,13 +704,14 @@ int main(int argc, char **argv)
         
     // printf("test conjugate gradient\n");
     // testCg();
-    testReduceMin();
-	testReduceMinMax();
+    // testReduceMin();
+	// testReduceMinMax();
+	testReduceMinMaxBox4();
 	testReduceMinMaxBox();
-	testReduceSum();
-	testScan();
-    testRadixSort();
-    testAtomic();
+	// testReduceSum();
+	// testScan();
+    // testRadixSort();
+    // testAtomic();
     printf("done.\n");
     exit(0);
 }

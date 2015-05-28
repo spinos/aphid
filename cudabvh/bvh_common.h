@@ -71,11 +71,6 @@ static int iLog2(int n)
 	return i;
 }
 
-struct Aabb4 {
-    float4 low;
-    float4 high;
-};
-
 struct EdgeContact {
     uint v[4];   
 };
@@ -93,6 +88,11 @@ struct RayInfo {
 struct __align__(4) Aabb {
     float3 low;
     float3 high;
+};
+
+struct __align__(16) Aabb4 {
+    float4 low;
+    float4 high;
 };
 
 #endif        //  #ifndef BVH_COMMON_H
