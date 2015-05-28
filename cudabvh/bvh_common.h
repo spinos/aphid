@@ -71,7 +71,7 @@ static int iLog2(int n)
 	return i;
 }
 
-struct Aabb {
+struct __align__(4) Aabb {
     float3 low;
     float3 high;
 };
