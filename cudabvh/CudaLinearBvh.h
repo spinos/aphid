@@ -40,14 +40,12 @@ public:
 	void * internalNodeChildIndices();
 	void * internalNodeParentIndices();
 	void * internalNodeAabbs();
-	// void * internalNodeChildLimit();
 	void * leafAabbs();
 	void * leafHash();
 	void * primitiveAabb();
 	void * primitiveHash();
 	void * leafNodeParentIndices();
 	void * distanceInternalNodeFromRoot();
-	// void * maxChildElementIndices();
 	
 	void sendDbgToHost();
 	

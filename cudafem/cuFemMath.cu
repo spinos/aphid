@@ -1,11 +1,7 @@
 #ifndef CUFEMMATH_CU
 #define CUFEMMATH_CU
 
-#include "bvh_math.cu"
-#include "matrix_math.cu"
-#include <CudaBase.h>
-
-#include "bvh_math.cu"
+#include "bvh_math.cuh"
 #include "matrix_math.cu"
 #include <CudaBase.h>
 

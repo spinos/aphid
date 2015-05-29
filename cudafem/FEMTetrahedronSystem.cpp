@@ -163,7 +163,7 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
     }
     
     kkij -= hashSize;
-    QuickSort1<uint64, uint>::Sort(kkij, 0, hashSize -1);
+    QuickSort1::Sort<uint64, uint>(kkij, 0, hashSize -1);
     
     m_stiffnessTetraHash->create(hashSize * 8);
     KeyValuePair * stiffnessTetraHash = (KeyValuePair *)m_stiffnessTetraHash->data();
@@ -211,7 +211,7 @@ void FEMTetrahedronSystem::createVertexTetraHash()
 	
 	vkij -= hashSize;
 	
-	QuickSort1<uint64, uint>::Sort(vkij, 0, hashSize -1);
+	QuickSort1::Sort<uint64, uint>(vkij, 0, hashSize -1);
     
 	m_vertexTetraHash->create(hashSize * 8);
     KeyValuePair * vertexTetraHash = (KeyValuePair *)m_vertexTetraHash->data();

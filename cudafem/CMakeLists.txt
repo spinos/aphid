@@ -14,7 +14,10 @@ include_directories ("../shared"
 "../cudadyn"
 "../reduction"
 "../hesperis"
-"../fem")
+"../fem"
+"../onebitsort"
+"../sahbvh"
+"../taskQueue")
 
 set (HEADER_FILES "../shared/Base3DView.h" 
 "../shared/Morton3D.h"
@@ -72,8 +75,11 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../cudanarrowphase/SimpleContactSolver.cpp"
 "../cudadyn/CudaDynamicWorld.cpp"
 "../cudadyn/DynamicWorldInterface.cpp"
+"../cudadyn/WorldDbgDraw.cpp"
 "../shared/CSRMatrix.cpp"
 "../hesperis/HesperisFile.cpp"
+"../sahbvh/BvhBuilder.cpp"
+"../sahbvh/SahBuilder.cpp"
 "FemGlobal.cpp"
 "CudaCSRMatrix.cpp"
 "CudaConjugateGradientSolver.cpp"
@@ -99,8 +105,7 @@ message ("cuda art librarie " ${CUDA_CUDART_LIBRARY})
 message ("cuda blas librarie " ${CUDA_cublas_LIBRARY})
 message ("cuda sparse librarie " ${CUDA_cusparse_LIBRARY})
 
-set (CUSOURCES "../cudabvh/bvh_math.cu"
-"../scan/scan.cu"
+set (CUSOURCES "../scan/scan.cu"
 "../cudabvh/createBvh.cu"
 "../cudabvh/tetrahedronSystem.cu"
 "../reduction/cuReduceSum.cu"
@@ -118,12 +123,16 @@ set (CUSOURCES "../cudabvh/bvh_math.cu"
 "../cudanarrowphase/gjk_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
 "../cudanarrowphase/narrowphase.cu"
+"../taskQueue/SimpleQueue.cu"
+"../sahbvh/SahCompress.cu"
+"../sahbvh/SahDecompress.cu"
+"../sahbvh/SahSplit.cu"
 "cuFemMath.cu"
 "cuFemTetrahedron.cu"
 "cuConjugateGradient.cu")
 
 if (WIN32)
-set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_20")
+set (CUDA_NVCC_FLAGS "--disable-warnings --ptxas-options=-v -arch sm_30")
 else ()
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
 endif()
@@ -187,7 +196,7 @@ find_package (zlib REQUIRED)
 target_link_libraries (testcudafem ${ZLIB_LIBRARIES})
 
 if(WIN32)
-set (QT_QMAKE_EXECUTABLE "D:/usr/Qtx64/4.7.1/bin/qmake.exe")
+set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
 endif()
 
 find_package (Qt4 REQUIRED)

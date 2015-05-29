@@ -90,8 +90,9 @@ void CudaBroadphase::initOnDevice()
 	m_pairWriteLocation->create(m_scanBufferLength * 4);
 	m_scanIntermediate->create(m_scanBufferLength);
 	
-	DynGlobal::BvhStackedNumThreads = CudaBase::LimitNThreadPerBlock(22, 512+64+16);
-	std::cout<<" bvh stack tpb "<<DynGlobal::BvhStackedNumThreads<<"\n";
+	// DynGlobal::BvhStackedNumThreads = CudaBase::LimitNThreadPerBlock(22, 512+64+16);
+	DynGlobal::BvhStackedNumThreads = 32;
+    std::cout<<" bvh stack tpb "<<DynGlobal::BvhStackedNumThreads<<"\n";
 }
 
 void CudaBroadphase::computeOverlappingPairs()
@@ -159,18 +160,14 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	void * exclusionInd = query->deviceVicinityInd();
 	void * exclusionStart = query->deviceVicinityStart();
 	
-	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
-	// void * internalChildLimit = tree->internalNodeChildLimit();
-	void * leafNodeAabbs = tree->leafAabbs();
-	void * mortonCodesAndAabbIndices = tree->leafHash();
-	
+	void * leafNodeAabbs = tree->primitiveAabb();
+	void * mortonCodesAndAabbIndices = tree->primitiveHash();
+    
 	cubroadphase::countPairsSelfCollideExclS(counts, (Aabb *)boxes, numBoxes,
-							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
-							// (int *)internalChildLimit,
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							(uint *)exclusionInd,
@@ -193,8 +190,8 @@ void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
-	void * leafNodeAabbs = tree->leafAabbs();
-	void * mortonCodesAndAabbIndices = tree->leafHash();
+	void * leafNodeAabbs = tree->primitiveAabb();
+	void * mortonCodesAndAabbIndices = tree->primitiveHash();
 	
 	broadphaseComputePairCounts(counts, (Aabb *)boxes, numBoxes,
 							(int *)rootNodeIndex, 
@@ -240,7 +237,6 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
-	// void * internalChildLimit = tree->internalNodeChildLimit();
 	void * leafNodeAabbs = tree->leafAabbs();
 	void * mortonCodesAndAabbIndices = tree->leafHash();
 	
