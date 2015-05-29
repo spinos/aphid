@@ -15,6 +15,9 @@
 #include <CudaBase.h>
 #include <CudaScan.h>
 #include <CudaTetrahedronSystem.h>
+#include <CudaDbgLog.h>
+
+CudaDbgLog bphlg("broadphase.txt");
 
 CudaBroadphase::CudaBroadphase() 
 {
@@ -85,7 +88,7 @@ void CudaBroadphase::initOnDevice()
 		}
 	}
 	
-	m_scanBufferLength = CudaScan::getScanBufferLength(m_numBoxes);//iDivUp(m_numBoxes, 1024) * 1024;
+	m_scanBufferLength = CudaScan::getScanBufferLength(m_numBoxes);
 	m_pairCounts->create(m_scanBufferLength * 4);
 	m_pairStart->create(m_scanBufferLength * 4);
 	m_pairWriteLocation->create(m_scanBufferLength * 4);
@@ -115,23 +118,46 @@ void CudaBroadphase::computeOverlappingPairs()
 	m_pairCacheLength = m_scanIntermediate->prefixSum(m_pairStart, m_pairCounts, m_scanBufferLength);
 	
 	if(m_pairCacheLength < 1) return;
+
+	/*
+	bphlg.writeUInt(m_pairCounts,
+         m_numBoxes,
+                "overlapping_counts", CudaDbgLog::FAlways);
+
+    bphlg.writeUInt(m_pairStart,
+         m_numBoxes,
+                "overlapping_offsets", CudaDbgLog::FAlways);
+
 	
 	std::cout<<" overlapping pair cache length "<<m_pairCacheLength<<"\n";
-	
+	*/
 	setWriteLocation();
-	
-	m_pairCache->create(nextPow2(m_pairCacheLength) * 8);
+	/*
+	bphlg.writeUInt(m_pairWriteLocation,
+         m_numBoxes,
+                "overlapping_write_location0", CudaDbgLog::FAlways);
+	*/
+	m_pairCache->create(m_pairCacheLength * 8);
 	
 	void * cache = m_pairCache->bufferOnDevice();
-	broadphaseResetPairCache((uint2 *)cache, nextPow2(m_pairCacheLength));
+	broadphaseResetPairCache((uint2 *)cache, m_pairCacheLength);
 	
 	for(j = 0; j<m_numObjects; j++) {
 		for(i = j; i<m_numObjects; i++) {
 			writeOverlappingPairs(j, i);
 		}
 	}
+	/*
+	bphlg.writeUInt(m_pairWriteLocation,
+         m_numBoxes,
+                "overlapping_write_location1", CudaDbgLog::FAlways);
+    
+    bphlg.writeHash(m_pairCache,
+         m_pairCacheLength,
+                "overlapping_pairs", CudaDbgLog::FAlways);
+	*/	
 #if DRAW_BPH_PAIRS
-	m_hostPairCache->create(nextPow2(m_pairCacheLength) * 8);
+	m_hostPairCache->create(m_pairCacheLength * 8);
 	m_hostAabb->create(m_numBoxes * sizeof(Aabb));
 #endif
 }
@@ -248,7 +274,6 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
-							// (int *)internalChildLimit,
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							a,

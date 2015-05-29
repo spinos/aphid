@@ -6,8 +6,8 @@
 #include "radixsort_implement.h"
 #include "Aabb.cuh"
 
-#define B3_BROADPHASE_MAX_STACK_SIZE 128
-#define B3_BROADPHASE_MAX_STACK_SIZE_M_2 126
+#define B3_BROADPHASE_MAX_STACK_SIZE 64
+#define B3_BROADPHASE_MAX_STACK_SIZE_M_2 62
 
 inline __device__ int isStackFull(int stackSize)
 {return stackSize > B3_BROADPHASE_MAX_STACK_SIZE_M_2; }
@@ -60,9 +60,9 @@ inline __device__ void countOverlappings(uint & count,
 }
 
 inline __device__ void writeOverlappings(uint2 * overlappings,
+                                uint & writeLoc,
                                 uint iQuery,
                                 uint iBox,
-                                uint writeLoc,
                                 uint startLoc,
                                 uint cacheSize,
                                 KeyValuePair * indirections,
@@ -103,7 +103,7 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 	// int * sStack = SharedMemory<int>();
 	
 	__shared__ int sExclElm[32*32];
-	__shared__ int sStack[128*32];
+	__shared__ int sStack[64*32];
 	
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	if(boxIndex >= maxBoxInd) return;
@@ -114,7 +114,7 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 	writeElementExclusion(exclElm, boxIndex, exclusionIndices,
 									exclusionStarts);
 	
-	int * stack = &sStack[threadIdx.x << 7];
+	int * stack = &sStack[threadIdx.x << 6];
 	int stackSize = 1;
 	stack[0] = 0x80000000;
 		
@@ -188,7 +188,7 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 								uint * exclusionStarts)
 {
 	__shared__ int sExclElm[32*32];
-	__shared__ int sStack[128*32];
+	__shared__ int sStack[64*32];
 	
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	if(boxIndex >= maxBoxInd) return;
@@ -207,7 +207,7 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 	writeElementExclusion(exclElm, boxIndex, exclusionIndices,
 									exclusionStarts);
 	
-	int * stack = &sStack[threadIdx.x << 7];
+	int * stack = &sStack[threadIdx.x << 6];
 	int stackSize = 1;
 	stack[0] = 0x80000000;
 		
@@ -228,9 +228,9 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 			    
         if(!isInternal) {
            writeOverlappings(dst,
+                                writeLoc,
                                 queryIdx,
                                 boxIndex,
-                                writeLoc,
                                 startLoc,
                                 cacheSize,
                                 mortonCodesAndAabbIndices,

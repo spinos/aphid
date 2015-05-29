@@ -45,7 +45,7 @@ set (CUSOURCES "../radixsort/radixsort.cu"
 if(WIN32)
 set (CUDA_NVCC_FLAGS "-g -G --ptxas-options=-v -arch sm_30")
 else()
-set (CUDA_NVCC_FLAGS "-g -G --ptxas-options=-v -arch sm_11")
+set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
 endif()
 
 CUDA_ADD_EXECUTABLE (testsplit ${HEADER_FILES} ${SOURC_FILES} ${CUSOURCES})
