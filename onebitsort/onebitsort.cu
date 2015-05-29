@@ -74,7 +74,7 @@ __global__ void RadixSum(KeyValuePair *oData, KeyValuePair *pData,
 
     __syncthreads();
     
-    uint j, pos, p, ind;
+    uint pos, p, ind;
     for(i=0;i<numBatches;i++) {
         binVertical[0] = 0;
         binVertical[1] = 0;
@@ -90,17 +90,7 @@ __global__ void RadixSum(KeyValuePair *oData, KeyValuePair *pData,
         
         __syncthreads();
         
-#if 0
-        if(threadIdx.x < 2) {
-            for(j=1;j<256;j++) {
-                binOffsetHorizontal[2 * j] = binOffsetHorizontal[2 * (j-1)] 
-                                                + binHorizontal[2 * (j-1)];
-            }
-        }
-        __syncthreads();
-#else
         onebitsort::scanInBlock(&sRadixSum[4 + 256 * 2], &sRadixSum[4]);
-#endif
         
         if(pos<elements) {
             ind = sRadixSum[p] + binOffsetVertical[p];

@@ -21,15 +21,24 @@ inline __device__ void writeElementExclusion(int * dst,
 									uint * exclusionStart)
 {
 	uint i;
-	for(i=0;i<32;i++) dst[i] = -1;
-	
+
 	uint cur = exclusionStart[a+1]-1;
 	uint minInd = exclusionStart[a];
 // for isolate element
-	if(minInd == cur) { dst[0] = exclusionInd[cur]; return; }
+	if(minInd == cur) { 
+	    dst[0] = exclusionInd[cur]; 
+	    dst[1] = -1; 
+	    return; 
+	}
+	
 	for(i=0;i<32; i++) {
 		dst[i] = exclusionInd[cur--];
-		if(cur < minInd) return; 
+		if(cur < minInd) {
+		    if(i<31) {
+		        dst[i+1] = -1;
+		    }
+		    return; 
+		}
 	}
 }
 
@@ -55,7 +64,8 @@ inline __device__ void countOverlappings(uint & count,
     for(;i<=range.y;i++) {
         iElement = indirections[i].value;
         if(isElementExcludedS(iElement, exclElm)) continue;
-        if(isAabbOverlapping(box, elementBoxes[iElement])) count++;
+        if(isAabbOverlapping(box, elementBoxes[iElement])) 
+            count++;
     }
 }
 
@@ -77,7 +87,8 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
     for(;i<=range.y;i++) {
         iElement = indirections[i].value;
         if(isElementExcludedS(iElement, exclElm)) continue;
-        if(isAabbOverlapping(box, elementBoxes[iElement])) {
+        if(isAabbOverlapping(box, elementBoxes[iElement])) 
+        {
             pair.x = combineObjectElementInd(iQuery, iBox);
 			pair.y = combineObjectElementInd(iQuery, iElement);
 			overlappings[writeLoc] = pair;

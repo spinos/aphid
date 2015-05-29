@@ -119,11 +119,11 @@ __device__ void scanInBlock(T * sum, T * idata)
         sum[i*2+1] = 0;
         
         tmp = sum[(i-128)*2];
-        sum[(i-128)*2] = 0;
+        sum[(i-128)*2] = sum[i*2];
         sum[i*2] = tmp;
         
         tmp = sum[(i-128)*2+1];
-        sum[(i-128)*2+1] = 0;
+        sum[(i-128)*2+1] = sum[i*2+1];
         sum[i*2+1] = tmp;
     }
     __syncthreads();

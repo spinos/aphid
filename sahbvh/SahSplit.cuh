@@ -30,7 +30,7 @@ struct SplitTask {
     {
         int2 root = data.nodes[smem[0]];
         float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
-        return (sBestCost[0] < (root.y - root.x));
+        return (sBestCost[0] < (root.y - root.x-.5f));
     }
     
     template <typename QueueType, int NumBins, int NumThreads>
@@ -39,9 +39,8 @@ struct SplitTask {
                             int * smem)
     {
         int sWorkPerBlock = smem[0];
-        int doSplit = shouldSplit(data, sWorkPerBlock);
         int doSpawn = 0;
-        if(doSplit) {
+        if(shouldSplit(data, sWorkPerBlock)) {
             computeBestBin<NumBins, NumThreads>(sWorkPerBlock, data, smem);
         
             doSpawn = validateSplit(data, smem);
@@ -120,7 +119,7 @@ template<int NumBins, int NumThreads, int Dimension>
                                     int * smem,
                                     int2 root,
                                     Aabb rootBox)
-    {
+    {        
         if((root.y - root.x) < 16)
             computeBinsPerDimensionPrimitive<16, Dimension>(root.y - root.x + 1,
                                     data,
@@ -378,15 +377,6 @@ template<int NumBins, int Dimension>
             
             if(ind <= root.y)
                 sSide[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], Dimension) > sBin[j].plane);
-            
-            /*
-            computeSides<NumBins, Dimension>(sideVertical,
-                       rootBox,
-                       primitiveIndirections,
-                       primitiveAabbs,
-                       root.x + k * NumThreads,
-                       root.y);
-                       */
         
             __syncthreads();
 /*
@@ -435,13 +425,6 @@ template<int NumBins, int Dimension>
                     batchSize,
                     root.x + k * batchSize,
                     root.y);
-                
-                /*collectBins<NumBins, NumThreads>(sBin[threadIdx.x],
-                    primitiveIndirections,
-                    primitiveAabbs,
-                    sideHorizontal,
-                    root.x + i * NumThreads,
-                    root.y);*/
             }
     
             __syncthreads();
@@ -563,7 +546,7 @@ template<int NumBins, int Dimension>
             ind = groupBegin[splitSide] + offsetVertical[splitSide];
             major[ind] = backup[threadIdx.x];
 // for debug purpose only
-            major[ind].key = splitSide;
+            // major[ind].key = splitSide;
         }
     }
 
@@ -656,7 +639,7 @@ template<int NumBins, int Dimension>
                 ind = groupBegin[splitSide] + offsetVertical[splitSide];
                 major[ind] = backup[j];
 // for debug purpose only
-                major[ind].key = splitSide;
+                // major[ind].key = splitSide;
             }
             __syncthreads();
             
