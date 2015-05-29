@@ -6,6 +6,9 @@
 #include <CudaBase.h>
 #include <BvhBuilder.h>
 #include <WorldDbgDraw.h>
+#include <CudaDbgLog.h>
+
+CudaDbgLog bphlg("broadphase.txt");
 
 WorldDbgDraw * CudaDynamicWorld::DbgDrawer = 0;
 
@@ -85,6 +88,11 @@ void CudaDynamicWorld::collide()
         
 	m_broadphase->computeOverlappingPairs();
     
+    if(m_broadphase->numOverlappingPairs())
+        bphlg.writeHash(m_broadphase->overlappingPairBuf(),
+                m_broadphase->numOverlappingPairs(),
+                "overlapping_pairs", CudaDbgLog::FAlways);
+
     //std::cout<<"aft bph ";
     //CudaBase::CheckCudaError("bph update");
 	

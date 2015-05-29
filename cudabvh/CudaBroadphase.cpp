@@ -15,6 +15,7 @@
 #include <CudaBase.h>
 #include <CudaScan.h>
 #include <CudaTetrahedronSystem.h>
+
 CudaBroadphase::CudaBroadphase() 
 {
     m_numObjects = 0;

@@ -75,7 +75,6 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
     uint iElement;
     int i=range.x;
     for(;i<=range.y;i++) {
-        if((writeLoc - startLoc)>=cacheSize) return;
         iElement = indirections[i].value;
         if(isElementExcludedS(iElement, exclElm)) continue;
         if(isAabbOverlapping(box, elementBoxes[iElement])) {
@@ -84,6 +83,7 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
 			overlappings[writeLoc] = pair;
             writeLoc++;
         }
+        if((writeLoc - startLoc)==cacheSize) return;
     }
 }
 
