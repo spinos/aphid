@@ -162,15 +162,15 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
-	void * internalChildLimit = tree->internalNodeChildLimit();
+	// void * internalChildLimit = tree->internalNodeChildLimit();
 	void * leafNodeAabbs = tree->leafAabbs();
 	void * mortonCodesAndAabbIndices = tree->leafHash();
 	
-	cuBroadphase_countPairsSelfCollideExclS(counts, (Aabb *)boxes, numBoxes,
+	cubroadphase::countPairsSelfCollideExclS(counts, (Aabb *)boxes, numBoxes,
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
-							(int *)internalChildLimit,
+							// (int *)internalChildLimit,
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							(uint *)exclusionInd,
@@ -208,7 +208,7 @@ void CudaBroadphase::setWriteLocation()
 {
     void * dst = m_pairWriteLocation->bufferOnDevice();
     void * src = m_pairStart->bufferOnDevice();
-	cuBroadphase_writeLocation((uint *)dst, (uint *)src, m_scanBufferLength);
+    cubroadphase::writeLocation((uint *)dst, (uint *)src, m_scanBufferLength);
 }
 
 void CudaBroadphase::writeOverlappingPairs(unsigned a, unsigned b)
@@ -240,18 +240,18 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
-	void * internalChildLimit = tree->internalNodeChildLimit();
+	// void * internalChildLimit = tree->internalNodeChildLimit();
 	void * leafNodeAabbs = tree->leafAabbs();
 	void * mortonCodesAndAabbIndices = tree->leafHash();
 	
 	void * cache = m_pairCache->bufferOnDevice();
 	
-	cuBroadphase_writePairCacheSelfCollideExclS((uint2 *)cache, location, starts, counts, 
+	cubroadphase::writePairCacheSelfCollideExclS((uint2 *)cache, location, starts, counts, 
 	                         (Aabb *)boxes, numBoxes,
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
-							(int *)internalChildLimit,
+							// (int *)internalChildLimit,
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							a,

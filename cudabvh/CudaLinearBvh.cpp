@@ -29,7 +29,7 @@ CudaLinearBvh::CudaLinearBvh()
 	m_internalNodeParentIndices = new CUDABuffer;
 	m_rootNodeIndexOnDevice = new CUDABuffer;
 	m_distanceInternalNodeFromRoot = new CUDABuffer;
-	m_maxChildElementIndices = new CUDABuffer;
+	// m_maxChildElementIndices = new CUDABuffer;
 
 #if DRAW_BVH_HASH
 	m_hostLeafHash = new BaseBuffer;
@@ -54,7 +54,7 @@ CudaLinearBvh::~CudaLinearBvh()
 	delete m_internalNodeParentIndices;
 	delete m_rootNodeIndexOnDevice;
 	delete m_distanceInternalNodeFromRoot;
-	delete m_maxChildElementIndices;
+	// delete m_maxChildElementIndices;
 }
 
 void CudaLinearBvh::setNumPrimitives(unsigned n)
@@ -73,7 +73,7 @@ void CudaLinearBvh::initOnDevice()
 	m_internalNodeParentIndices->create(numInternalNodes() * sizeof(int));
 	m_rootNodeIndexOnDevice->create(sizeof(int));
 	m_distanceInternalNodeFromRoot->create(numInternalNodes() * sizeof(int));
-	m_maxChildElementIndices->create(numInternalNodes() * sizeof(int));
+	// m_maxChildElementIndices->create(numInternalNodes() * sizeof(int));
 	
 #if DRAW_BVH_HASH
 	m_hostLeafBox->create(numLeafNodes() * sizeof(Aabb));
@@ -125,8 +125,8 @@ void * CudaLinearBvh::internalNodeParentIndices()
 void * CudaLinearBvh::internalNodeAabbs()
 { return m_internalNodeAabbs->bufferOnDevice(); }
 
-void * CudaLinearBvh::internalNodeChildLimit()
-{ return m_maxChildElementIndices->bufferOnDevice(); }
+// void * CudaLinearBvh::internalNodeChildLimit()
+// { return m_maxChildElementIndices->bufferOnDevice(); }
 
 void * CudaLinearBvh::leafAabbs()
 { return m_leafAabbs->bufferOnDevice(); }
@@ -149,8 +149,8 @@ void * CudaLinearBvh::leafNodeParentIndices()
 void * CudaLinearBvh::distanceInternalNodeFromRoot()
 { return m_distanceInternalNodeFromRoot->bufferOnDevice(); }
 
-void * CudaLinearBvh::maxChildElementIndices()
-{ return m_maxChildElementIndices->bufferOnDevice(); }
+// void * CudaLinearBvh::maxChildElementIndices()
+// { return m_maxChildElementIndices->bufferOnDevice(); }
  
 void CudaLinearBvh::update()
 {

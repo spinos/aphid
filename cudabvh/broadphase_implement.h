@@ -8,7 +8,7 @@
  */
 
 #include "bvh_common.h"
-#include <radixsort_implement.h>
+#include "radixsort_implement.h"
 
 extern "C" {
 
@@ -73,25 +73,27 @@ void cuBroadphase_writePairCacheSelfCollideExclusion(uint2 * dst, uint * locatio
 								unsigned queryIdx,
 								uint * exclusionIndices,
 								uint * exclusionStarts);
-								
-void cuBroadphase_countPairsSelfCollideExclS(uint * dst, Aabb * boxes, uint numBoxes,
+}
+
+namespace cubroadphase {
+void countPairsSelfCollideExclS(uint * dst, Aabb * boxes, uint numBoxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
-								int * internalChildLimit,
+								// int * internalChildLimit,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								uint * exclusionIndices,
 								uint * exclusionStarts,
 								int nThreads);
 								
-void cuBroadphase_writePairCacheSelfCollideExclS(uint2 * dst, uint * locations, 
+void writePairCacheSelfCollideExclS(uint2 * dst, uint * locations, 
 								uint * starts, uint * counts,
                               Aabb * boxes, uint numBoxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
-								int * internalChildLimit,
+								// int * internalChildLimit,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx,
@@ -99,5 +101,5 @@ void cuBroadphase_writePairCacheSelfCollideExclS(uint2 * dst, uint * locations,
 								uint * exclusionStarts,
 								int nThreads);
 								
-void cuBroadphase_writeLocation(uint * dst, uint * src, uint n);
+void writeLocation(uint * dst, uint * src, uint n);
 }

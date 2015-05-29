@@ -40,14 +40,14 @@ public:
 	void * internalNodeChildIndices();
 	void * internalNodeParentIndices();
 	void * internalNodeAabbs();
-	void * internalNodeChildLimit();
+	// void * internalNodeChildLimit();
 	void * leafAabbs();
 	void * leafHash();
 	void * primitiveAabb();
 	void * primitiveHash();
 	void * leafNodeParentIndices();
 	void * distanceInternalNodeFromRoot();
-	void * maxChildElementIndices();
+	// void * maxChildElementIndices();
 	
 	void sendDbgToHost();
 	
@@ -91,7 +91,7 @@ private:
 	CUDABuffer * m_internalNodeParentIndices;
 	CUDABuffer * m_rootNodeIndexOnDevice;
 	CUDABuffer * m_distanceInternalNodeFromRoot;
-	CUDABuffer * m_maxChildElementIndices;
+	// CUDABuffer * m_maxChildElementIndices;
 	unsigned m_numPrimitives, m_numActiveInternalNodes;
 	
 #if DRAW_BVH_HASH

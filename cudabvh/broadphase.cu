@@ -88,7 +88,7 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, 
-								int * internalChildLimit,
+								// int * internalChildLimit,
 								Aabb * leafAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx,
@@ -132,7 +132,7 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 		
 		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
 		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
-		if(internalChildLimit[bvhNodeIndex] <= boxIndex) continue;
+		// if(internalChildLimit[bvhNodeIndex] <= boxIndex) continue;
 			    
 //bvhRigidIndex is not used if internal node
 		int bvhRigidIndex = (isLeaf) ? (int)mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
@@ -174,7 +174,7 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, 
-								int * internalChildLimit,
+								// int * internalChildLimit,
 								Aabb * leafAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								uint * exclusionIndices,
@@ -208,7 +208,7 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 		
 		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
 		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
-		if(internalChildLimit[bvhNodeIndex] <= boxIndex) continue;
+		// if(internalChildLimit[bvhNodeIndex] <= boxIndex) continue;
 				
 //bvhRigidIndex is not used if internal node
 		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
@@ -887,7 +887,11 @@ void cuBroadphase_writePairCacheSelfCollideExclusion(uint2 * dst, uint * locatio
 								exclusionStarts);
 }
 
-void cuBroadphase_writeLocation(uint * dst, uint * src, uint n)
+}
+
+namespace cubroadphase {
+
+void writeLocation(uint * dst, uint * src, uint n)
 {
     int tpb = 512;
     dim3 block(tpb, 1, 1);
@@ -898,11 +902,11 @@ void cuBroadphase_writeLocation(uint * dst, uint * src, uint n)
     startAsWriteLocation_kernel<<< grid, block >>>(dst, src, n);
 }
 
-void cuBroadphase_countPairsSelfCollideExclS(uint * dst, Aabb * boxes, uint numBoxes,
+void countPairsSelfCollideExclS(uint * dst, Aabb * boxes, uint numBoxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
-								int * internalChildLimit,
+								// int * internalChildLimit,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								uint * exclusionIndices,
@@ -921,20 +925,20 @@ void cuBroadphase_countPairsSelfCollideExclS(uint * dst, Aabb * boxes, uint numB
 								rootNodeIndex, 
 								internalNodeChildIndex, 
 								internalNodeAabbs, 
-								internalChildLimit,
+								// internalChildLimit,
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,
 								exclusionIndices,
 								exclusionStarts);
 }
 
-void cuBroadphase_writePairCacheSelfCollideExclS(uint2 * dst, uint * locations, 
+void writePairCacheSelfCollideExclS(uint2 * dst, uint * locations, 
                                 uint * starts, uint * counts,
                               Aabb * boxes, uint numBoxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
-								int * internalChildLimit,
+								// int * internalChildLimit,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx,
@@ -957,7 +961,7 @@ void cuBroadphase_writePairCacheSelfCollideExclS(uint2 * dst, uint * locations,
 								rootNodeIndex, 
 								internalNodeChildIndex, 
 								internalNodeAabbs, 
-								internalChildLimit,
+								// internalChildLimit,
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,
 								queryIdx,
