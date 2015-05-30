@@ -15,18 +15,21 @@
 #include <CUDABuffer.h>
 #include <CudaBase.h>
 #include <CudaScan.h>
+#include "BvhInterface.h"
 
 BvhBuilder::BvhBuilder() 
 {
 	m_findMaxDistance = new CudaReduction;
 	m_sortIntermediate = new CUDABuffer;
 	m_findPrefixSum = new CudaScan;
+	m_traverseCosts = new CUDABuffer;
 }
 
 BvhBuilder::~BvhBuilder() 
 {
 	delete m_findMaxDistance;
 	delete m_sortIntermediate;
+	delete m_traverseCosts;
 }
 
 void BvhBuilder::initOnDevice()
@@ -79,3 +82,34 @@ void BvhBuilder::computeMortionHash(void * mortonCode,
 
 void * BvhBuilder::sortIntermediate()
 { return m_sortIntermediate->bufferOnDevice(); }
+
+float BvhBuilder::computeCostOfTraverse(CudaLinearBvh * bvh)
+{
+    const unsigned n = bvh->numActiveInternalNodes();
+    m_traverseCosts->create(n * 4);
+    bvhcost::computeTraverseCost((float *)m_traverseCosts->bufferOnDevice(),
+        (int2 *)bvh->internalNodeChildIndices(),
+	    (Aabb *)bvh->internalNodeAabbs(),
+        n);
+    
+    float redsum;
+    reducer()->sum<float>(redsum, (float *)m_traverseCosts->bufferOnDevice(), n);
+    return redsum;
+}
+
+void BvhBuilder::update(CudaLinearBvh * bvh)
+{
+    const int maxDistance = bvh->maxInternalNodeLevel();
+    for(int distance = maxDistance; distance >= 0; --distance) {	
+        bvhlazy::updateNodeAabbAtLevel((Aabb *)bvh->internalNodeAabbs(), 
+                                (int *)bvh->distanceInternalNodeFromRoot(),	
+                                (int2 *)bvh->internalNodeChildIndices(),
+                                (KeyValuePair *)bvh->primitiveHash(),
+                                (Aabb *)bvh->primitiveAabb(), 
+                                distance, 
+                                bvh->numActiveInternalNodes());
+                                
+		CudaBase::CheckCudaError("bvh builder form internal aabb iterative");
+	}
+}
+

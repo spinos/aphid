@@ -17,6 +17,7 @@ public:
 	virtual void initOnDevice();
 	
 	virtual void build(CudaLinearBvh * bvh);
+	
 protected:
     void * clusterAabbs();
 private:

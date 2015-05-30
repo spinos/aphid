@@ -74,6 +74,13 @@ public:
 	static BvhBuilder * Builder;
 	
 	void setNumActiveInternalNodes(unsigned n);
+	const unsigned numActiveInternalNodes() const;
+	
+	void setMaxInternalNodeLevel(int n);
+	const int maxInternalNodeLevel() const;
+	
+	void setCostOfTraverse(float x);
+	const float costOfTraverse() const;
 
 protected:
 	void setNumPrimitives(unsigned n);
@@ -89,8 +96,9 @@ private:
 	CUDABuffer * m_internalNodeParentIndices;
 	CUDABuffer * m_rootNodeIndexOnDevice;
 	CUDABuffer * m_distanceInternalNodeFromRoot;
-	// CUDABuffer * m_maxChildElementIndices;
 	unsigned m_numPrimitives, m_numActiveInternalNodes;
+	int m_maxInternalNodeLevel;
+	float m_costOfTraverse;
 	
 #if DRAW_BVH_HASH
 	BaseBuffer * m_hostLeafHash;

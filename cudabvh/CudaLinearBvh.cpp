@@ -29,7 +29,7 @@ CudaLinearBvh::CudaLinearBvh()
 	m_internalNodeParentIndices = new CUDABuffer;
 	m_rootNodeIndexOnDevice = new CUDABuffer;
 	m_distanceInternalNodeFromRoot = new CUDABuffer;
-	// m_maxChildElementIndices = new CUDABuffer;
+	m_maxInternalNodeLevel = 0;
 
 #if DRAW_BVH_HASH
 	m_hostLeafHash = new BaseBuffer;
@@ -124,9 +124,6 @@ void * CudaLinearBvh::internalNodeParentIndices()
 
 void * CudaLinearBvh::internalNodeAabbs()
 { return m_internalNodeAabbs->bufferOnDevice(); }
-
-// void * CudaLinearBvh::internalNodeChildLimit()
-// { return m_maxChildElementIndices->bufferOnDevice(); }
 
 void * CudaLinearBvh::leafAabbs()
 { return m_leafAabbs->bufferOnDevice(); }
@@ -234,4 +231,19 @@ CUDABuffer * CudaLinearBvh::distanceInternalNodeFromRootBuf()
 
 void CudaLinearBvh::setNumActiveInternalNodes(unsigned n)
 { m_numActiveInternalNodes = n; }
+
+const unsigned CudaLinearBvh::numActiveInternalNodes() const
+{ return m_numActiveInternalNodes; }
+
+void CudaLinearBvh::setMaxInternalNodeLevel(int n)
+{ m_maxInternalNodeLevel = n; }
+
+const int CudaLinearBvh::maxInternalNodeLevel() const
+{ return m_maxInternalNodeLevel; }
+
+void CudaLinearBvh::setCostOfTraverse(float x)
+{ m_costOfTraverse = x; }
+
+const float CudaLinearBvh::costOfTraverse() const
+{ return m_costOfTraverse; }
 //:~

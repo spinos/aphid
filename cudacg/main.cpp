@@ -52,7 +52,7 @@ void testReduceSum()
     std::cout<<" generating "<<m<<" random numbers...\n";
     float proof = 0.f;
     for(i=0; i< m; i++) {
-        h_data[i] = (((float)rand()/RAND_MAX) + .5f) * 1.0005f;
+        h_data[i] = (((float)rand()/RAND_MAX) + .5f) * .4915f;
         proof += h_data[i];
     }
     
@@ -708,7 +708,7 @@ int main(int argc, char **argv)
 	// testReduceMinMax();
 	testReduceMinMaxBox4();
 	testReduceMinMaxBox();
-	// testReduceSum();
+	testReduceSum();
 	// testScan();
     // testRadixSort();
     // testAtomic();

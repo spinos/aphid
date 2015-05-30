@@ -20,6 +20,8 @@ public:
 	
 	virtual void build(CudaLinearBvh * bvh);
 protected:
+    float computeCostOfTraverse(CudaLinearBvh * bvh);
+    void update(CudaLinearBvh * bvh);
 	CudaReduction * reducer();
 	CudaScan * scanner();
 	void createSortAndScanBuf(unsigned n);
@@ -35,4 +37,5 @@ private:
 	CudaReduction * m_findMaxDistance;
 	CudaScan * m_findPrefixSum;
 	CUDABuffer * m_sortIntermediate;
+	CUDABuffer * m_traverseCosts;
 };

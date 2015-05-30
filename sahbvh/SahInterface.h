@@ -129,5 +129,6 @@ void rearrangeIndices(KeyValuePair * dst,
 					uint * runLength,
 					uint nunRuns);
 }
+
 #endif        //  #ifndef SAHINTERFACE_H
 

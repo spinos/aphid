@@ -128,6 +128,8 @@ set (CUSOURCES "../scan/scan.cu"
 "../taskQueue/SimpleQueue.cu"
 "SahCompress.cu"
 "SahDecompress.cu"
+"BvhCost.cu"
+"BvhLazy.cu"
 "SahSplit.cu")
 
 ## disable warnings
