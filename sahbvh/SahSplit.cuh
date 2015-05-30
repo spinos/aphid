@@ -30,7 +30,7 @@ struct SplitTask {
     {
         int2 root = data.nodes[smem[0]];
         float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
-        return (sBestCost[0] < (root.y - root.x-.5f));
+        return (sBestCost[0] < (root.y - root.x -.6f));
     }
     
     template <typename QueueType, int NumBins, int NumThreads>
@@ -43,11 +43,14 @@ struct SplitTask {
         if(shouldSplit(data, sWorkPerBlock)) {
             computeBestBin<NumBins, NumThreads>(sWorkPerBlock, data, smem);
         
+            __threadfence_block();
+            __syncthreads();
+
             doSpawn = validateSplit(data, smem);
             if(doSpawn)
                 rearrange<NumBins, NumThreads>(data, smem);
         }
-
+        
         if(threadIdx.x == 0) {  
             if(doSpawn) {
                 spawn(q, data, smem);
@@ -57,8 +60,6 @@ struct SplitTask {
             q->swapTails();
 
         }
-       // __threadfence();
-       // __syncthreads();
         
         return 1;   
     }
@@ -81,17 +82,7 @@ template<int NumBins, int NumThreads>
  *    1+3*16        -> 1+3*16+3-1            cost of best bin per dimension
  *
  */             
-        computeBestBinPerDimension<NumBins, NumThreads, 0>(data,
-                                    smem,
-                                    root,
-                                    rootBox);
-        
-        computeBestBinPerDimension<NumBins, NumThreads, 1>(data,
-                                    smem,
-                                    root,
-                                    rootBox);
-        
-        computeBestBinPerDimension<NumBins, NumThreads, 2>(data,
+        computeBestBin3Dimensions<NumBins, NumThreads>(data,
                                     smem,
                                     root,
                                     rootBox);
@@ -102,7 +93,7 @@ template<int NumBins, int NumThreads>
         if(threadIdx.x < 1) {
             float d = spanOfAabb(&rootBox, 0);
 // first is the best
-            if(sBestCost[1] < sBestCost[0] 
+            if(sBestCost[1] < sBestCost[0]
                 && spanOfAabb(&rootBox, 1) > d * .25f) {
                 sBestBin[0] = sBestBin[1];
                 d = spanOfAabb(&rootBox, 1);
@@ -114,27 +105,104 @@ template<int NumBins, int NumThreads>
         }
     }
     
-template<int NumBins, int NumThreads, int Dimension>
-    __device__ void computeBestBinPerDimension(DataInterface data,
+    template<int NumBins, int NumThreads>
+    __device__ void computeBestBin3Dimensions(DataInterface data,
                                     int * smem,
                                     int2 root,
                                     Aabb rootBox)
-    {        
-        if((root.y - root.x) < 16)
-            computeBinsPerDimensionPrimitive<16, Dimension>(root.y - root.x + 1,
+    {      
+        float rootArea = areaOfAabb(&rootBox);
+        if((root.y - root.x) < 16) {
+            computeBinsPrimitive<16>(root.y - root.x + 1,
                                     data,
                                     smem,
                                     root,
                                     rootBox);
-        else
-            computeBinsPerDimensionBatched<NumBins, NumThreads, Dimension>(data,
+            findBestBin3Dimensions<16>(smem, rootArea);
+        }
+        else {
+            computeBinsBatched<NumBins, NumThreads>(data,
                                     smem,
                                     root,
                                     rootBox);
+            findBestBin3Dimensions<NumBins>(smem, rootArea);
+        }
+    }
+    
+    template<int NumBins>
+    __device__ void findBestBin3Dimensions(int * smem, float rootArea)
+    {
+        SplitBin * sBestBin = (SplitBin *)&smem[1];
+        float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
+           
+        SplitBin * sBin = (SplitBin *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3];
+        
+        SplitBin * sBinX = sBin;
+        SplitBin * sBinY = &sBin[    NumBins];
+        SplitBin * sBinZ = &sBin[2 * NumBins];
+        
+        float * sCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
+                                               + 4 * NumBins * SIZE_OF_SPLITBIN_IN_INT];
+        
+        float * sCostX = sCost;
+        float * sCostY = &sCost[    NumBins];
+        float * sCostZ = &sCost[2 * NumBins];
+        
+        if(threadIdx.x < NumBins * 3) {
+            sCost[threadIdx.x] = costOfSplit(&sBin[threadIdx.x],
+                                        rootArea);
+        }
+         __syncthreads();
+        
+        int i, bestI;
+        float lowestCost;
+        if(threadIdx.x == 0) {
+            bestI = 0;
+            lowestCost = sCostX[0];
+            for(i=1; i< NumBins; i++) {
+                if(lowestCost > sCostX[i]) {
+                    lowestCost = sCostX[i];
+                    bestI = i;
+                }
+            }
+            sBestBin[0] = sBinX[bestI];
+            sBestBin[0].dimension = 0;
+            sBestCost[0] = lowestCost;
+        }
+        
+        if(threadIdx.x == 1) {
+            bestI = 0;
+            lowestCost = sCostY[0];
+            for(i=1; i< NumBins; i++) {
+                if(lowestCost > sCostY[i]) {
+                    lowestCost = sCostY[i];
+                    bestI = i;
+                }
+            }
+            sBestBin[1] = sBinY[bestI];
+            sBestBin[1].dimension = 1;
+            sBestCost[1] = lowestCost;
+        }
+        
+        if(threadIdx.x == 2) {
+            bestI = 0;
+            lowestCost = sCostZ[0];
+            for(i=1; i< NumBins; i++) {
+                if(lowestCost > sCostZ[i]) {
+                    lowestCost = sCostZ[i];
+                    bestI = i;
+                }
+            }
+            sBestBin[2] = sBinZ[bestI];
+            sBestBin[2].dimension = 2;
+            sBestCost[2] = lowestCost;
+        }
+        
+        __syncthreads();
     }
  
-template<int NumBins, int Dimension>  
-    __device__ void computeBinsPerDimensionPrimitive(int numPrimitives,
+template<int NumBins>  
+    __device__ void computeBinsPrimitive(int numPrimitives,
                                     DataInterface data,
                                     int * smem,
                                     int2 root,
@@ -142,32 +210,37 @@ template<int NumBins, int Dimension>
     {
 /*
  *    layout of memory in int
- *    n  as num bins and num primitives
+ *    n  as num bins and n >= num primitives
  *    16 as size of bin
  *
  *    0                                          workId
  *    1               -> 1+3*16-1                best bin per dimension
  *    1+3*16          -> 1+3*16+3-1              cost of best bin per dimension
- *    1+3*16+3        -> 1+3*16+3+n*16-1         bins
- *    1+3*16+3+n*16   -> 1+3*16+3+n*16+n-1       costs
- *    1+3*16+3+n*16+n -> 1+3*16+3+n*16+n+n*n-1   sides
- *
+ *    1+3*16+3        -> 1+3*16+3+n*4*16-1       bins for 3 dimensions
+ *    1+3*16+3+n*4*16 -> 1+3*16+3+n*4*16+n*4-1   costs for 3 dimensions
+ *    1+3*16+3+n*4*16+n*4 -> 1+3*16+3+n*4*16+n*4+n*n*4-1 sides for 3 dimensions
+ *    1+3*16+3+n*4*16+n*4+n*n*4 -> 1+3*16+3+n*4*16+n*4+n*n*4+n*6-1    boxes
  *    when n = 16
- *    total shared memory 2320 bytes
+ *    total shared memory 52+1024+64+1024+96 = 9040 bytes
  *
  */ 
-        SplitBin * sBestBin = (SplitBin *)&smem[1];
-        float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
         SplitBin * sBin = (SplitBin *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3];
-        float * sCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
-                                        + NumBins * SIZE_OF_SPLITBIN_IN_INT];
+        
+        SplitBin *sBinX = sBin;
+        SplitBin *sBinY = &sBin[    NumBins];
+        SplitBin *sBinZ = &sBin[2 * NumBins];
+                                        
         int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
-                                        + NumBins * SIZE_OF_SPLITBIN_IN_INT
-                                        + NumBins];
+                                        + 4 * NumBins * SIZE_OF_SPLITBIN_IN_INT
+                                        + 4 * NumBins];          
+        int * sSideX = sSide;
+        int * sSideY = &sSide[    NumBins * NumBins];
+        int * sSideZ = &sSide[2 * NumBins * NumBins];
+                                        
         Aabb * sBox = (Aabb *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
-                                        + NumBins * SIZE_OF_SPLITBIN_IN_INT
-                                        + NumBins
-                                        + NumBins * NumBins];
+                                        + 4 * NumBins * SIZE_OF_SPLITBIN_IN_INT
+                                        + 4 * NumBins
+                                        + 4 * NumBins * NumBins];   
                                         
 /*
  *    layout of sides
@@ -179,18 +252,24 @@ template<int NumBins, int Dimension>
  *    vertical computeSides
  *    horizonal collectBins
  */
-        int * sideHorizontal = &sSide[threadIdx.x];                      
         
         KeyValuePair * primitiveIndirections = data.primitiveIndirections;
         Aabb * primitiveAabbs = data.primitiveAabbs;
-        if(threadIdx.x < NumBins)
+        if(threadIdx.x < 3 * NumBins)
             resetSplitBin(sBin[threadIdx.x]);
         
         if(threadIdx.x < numPrimitives) {
 // primitive high as split plane             
             sBox[threadIdx.x] = primitiveAabbs[primitiveIndirections[root.x + threadIdx.x].value];
-            sBin[threadIdx.x].plane = highPlaneOfAabb(&sBox[threadIdx.x], Dimension);
+            sBinX[threadIdx.x].plane = highPlaneOfAabb(&sBox[threadIdx.x], 0);
         }
+        __syncthreads();
+        
+        if(threadIdx.x > 31 && threadIdx.x < 32 + numPrimitives)
+            sBinY[threadIdx.x - 32].plane = highPlaneOfAabb(&sBox[threadIdx.x - 32], 1);
+        
+        if(threadIdx.x > 63 && threadIdx.x < 64 + numPrimitives)
+            sBinZ[threadIdx.x - 64].plane = highPlaneOfAabb(&sBox[threadIdx.x - 64], 2);
         
         __syncthreads();
         
@@ -212,45 +291,36 @@ template<int NumBins, int Dimension>
         int i = threadIdx.x - j * NumBins;
         
         if(i < numPrimitives && j < numPrimitives) {
-            sSide[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], Dimension) > sBin[j].plane);
+            sSideX[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], 0) > sBinX[j].plane);
+            sSideY[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], 1) > sBinY[j].plane);
+            sSideZ[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], 2) > sBinZ[j].plane);
         }
     
         __syncthreads();
     
         if(threadIdx.x < numPrimitives) {
             for(i=0; i<numPrimitives; i++) {
-                updateSplitBinSide(sBin[threadIdx.x], sBox[i], 
-                                    sideHorizontal[i * NumBins]);
+                updateSplitBinSide(sBinX[threadIdx.x], sBox[i], 
+                                    sSideX[threadIdx.x + i * NumBins]);
+            }
+        }
+        
+        if(threadIdx.x > 31 && threadIdx.x < 32+numPrimitives) {
+            for(i=0; i<numPrimitives; i++) {
+                updateSplitBinSide(sBinY[threadIdx.x-32], sBox[i], 
+                                    sSideY[threadIdx.x-32 + i * NumBins]);
+            }
+        }
+        
+        if(threadIdx.x > 63 && threadIdx.x < 64+numPrimitives) {
+            for(i=0; i<numPrimitives; i++) {
+                updateSplitBinSide(sBinZ[threadIdx.x-64], sBox[i], 
+                                    sSideZ[threadIdx.x-64 + i * NumBins]);
             }
         }
 
         __syncthreads();
-        
-        
-        if(threadIdx.x < numPrimitives) {
-            float rootArea = areaOfAabb(&rootBox);
-            sCost[threadIdx.x] = costOfSplit(&sBin[threadIdx.x],
-                                        rootArea);
-        }
-        
-        __syncthreads();
-           
-        if(threadIdx.x < 1) {
-            int bestI = 0;
-            float lowestCost = sCost[0];
-            for(i=1; i< numPrimitives; i++) {
-                if(lowestCost > sCost[i]) {
-                    lowestCost = sCost[i];
-                    bestI = i;
-                }
-            }
-            sBestBin[Dimension] = sBin[bestI];
-            sBestBin[Dimension].dimension = Dimension;
-// store cost here
-            sBestCost[Dimension] = sCost[bestI];
-        }
-        
-        __syncthreads();
+          
     }
     
     __device__ int numBinningBatches(int2 range, int batchSize)
@@ -260,28 +330,24 @@ template<int NumBins, int Dimension>
         return nbatch;
     }
     
-    template <int NumBins>
-    __device__ void collectBinsBatched(SplitBin & dst,
-                                    KeyValuePair * primitiveIndirections,
-                                    Aabb * primitiveAabbs,
-                                    int * sideHorizontal,
+    template <int NumBins, int ThreadOffset>
+    __device__ void collectBinsBatched(SplitBin * bins,
+                                    Aabb * boxes,
+                                    int * sides,
                                     int batchSize,
                                     int begin,
                                     int end)
     {
         for(int i=0; i<batchSize; i++) {
-            int j = begin + i;
-            if(j<=end) {
-                Aabb fBox = primitiveAabbs[primitiveIndirections[j].value];
-            
-                updateSplitBinSide(dst, fBox, 
-                    sideHorizontal[i * NumBins]);
+            if((begin + i)<=end) {
+                updateSplitBinSide(bins[threadIdx.x - ThreadOffset], boxes[i], 
+                    sides[threadIdx.x - ThreadOffset + i * NumBins]);
             }
         }
     }
     
-    template<int NumBins, int NumThreads, int Dimension>  
-    __device__ void computeBinsPerDimensionBatched(DataInterface data,
+    template<int NumBins, int NumThreads>  
+    __device__ void computeBinsBatched(DataInterface data,
                                     int * smem,
                                     int2 root,
                                     Aabb rootBox)
@@ -291,61 +357,65 @@ template<int NumBins, int Dimension>
  *    n  as num bins
  *    t  as num threads
  *    16 as size of bin
- *    32 as warp size
+ *    nb is batch size nt/n = 32
  *
  *    0                                          workId
  *    1                   -> 1+3*16-1                best bin per dimension
  *    1+3*16              -> 1+3*16+3-1                 cost of best bin per dimension
- *    1+3*16+3            -> 1+3*16+3+n*(t/32)*16-1               bins
- *    1+3*16+3+n*(t/32)*16       -> 1+3*16+3+n*(t/32)*16+n-1               costs
- *    1+3*16+3+n*(t/32)*16+n     -> 1+3*16+3+n*(t/32)*16+n+n*t-1             sides
- *    1+3*16+3+n*(t/32)*16+n+n*t -> 1+3*16+3+n*(t/32)*16+n+n*t+nb*6-1    boxes
+ *    1+3*16+3            -> 1+3*16+3+n*4*16-1               bins for 3 dimensions
+ *    1+3*16+3+n*4*16       -> 1+3*16+3+n*4*16+n*4-1               costs for 3 dimensions
+ *    1+3*16+3+n*4*16+n*4        -> 1+3*16+3+n*4*16+n*4+n*nb*4-1         sides for 3 dimensions
+ *    1+3*16+3+n*4*16+n*4+n*nb*4 -> 1+3*16+3+n*4*16+n*4+n*nb*4+nb*6-1    boxes
  *
  *    when n = 8, t = 256
- *    total shared memory 12528 bytes
- */         
-        SplitBin * sBestBin = (SplitBin *)&smem[1];
-        float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
+ *    total shared memory 52+512+32+1024+192 = 7248 bytes
+ */       
+        const int batchSize = NumThreads / NumBins;
+        
         SplitBin * sBin = (SplitBin *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3];
-        const int numWarps = NumThreads>>5;
-        float * sCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
-                                        + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT];
+        SplitBin *sBinX = sBin;
+        SplitBin *sBinY = &sBin[    NumBins];
+        SplitBin *sBinZ = &sBin[2 * NumBins];
         int * sSide = &smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
-                                        + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT
-                                        + NumBins];
+                                        + 4 * NumBins * SIZE_OF_SPLITBIN_IN_INT
+                                        + 4 * NumBins];
+        int * sSideX = sSide;
+        int * sSideY = &sSide[    NumBins * batchSize];
+        int * sSideZ = &sSide[2 * NumBins * batchSize];
         Aabb * sBox = (Aabb *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT + 3
-                                        + NumBins * numWarps * SIZE_OF_SPLITBIN_IN_INT
-                                        + NumBins
-                                        + NumBins * NumThreads];
-                                        
+                                        + 4 * NumBins * SIZE_OF_SPLITBIN_IN_INT
+                                        + 4 * NumBins
+                                        + 4 * NumBins * batchSize];                                       
 /*
  *    layout of sides
- *    0    n     2n    3n
- *    1    n+1   2n+1  3n+1
- *   
- *    n-1  2n-1  3n-1  4n-1
+ *    0    n    2n    .  31n
+ *    1    n+1  2n+1  .  31n+1
+ *    .
+ *    n-1 2n-1  3n-1  .  32n-1
  *
  *    vertical computeSides
  *    horizonal collectBins
  *
- */
-        // int * sideVertical = &sSide[NumBins * threadIdx.x];
-        int * sideHorizontal = &sSide[threadIdx.x];
-        
-       // const int numWarpBins = numWarps * NumBins;
-        
+ */ 
         if(threadIdx.x < NumBins) {
-            resetSplitBin(sBin[threadIdx.x]);
-            sBin[threadIdx.x].plane = binSplitPlane<Dimension>(&rootBox,
-                                         NumBins,
-                                         threadIdx.x);
+            resetSplitBin(sBinX[threadIdx.x]);
+            sBinX[threadIdx.x     ].plane = binSplitPlane<NumBins, 0, 0>(&rootBox);
+        }
+        
+        if(threadIdx.x > 31 && threadIdx.x < 32 + NumBins) {
+            resetSplitBin(sBinY[threadIdx.x - 32]);
+            sBinY[threadIdx.x - 32].plane = binSplitPlane<NumBins, 1, 32>(&rootBox);
+        }
+        
+        if(threadIdx.x > 63 && threadIdx.x < 64 + NumBins) {
+            resetSplitBin(sBinZ[threadIdx.x - 64]);
+            sBinZ[threadIdx.x - 64].plane = binSplitPlane<NumBins, 2, 64>(&rootBox);
         }
         __syncthreads();
         
         KeyValuePair * primitiveIndirections = data.primitiveIndirections;
         Aabb * primitiveAabbs = data.primitiveAabbs;
                     
-        const int batchSize = NumThreads / NumBins;
         const int nbatch = numBinningBatches(root, batchSize);
 /*
  *    layout of binning threads
@@ -375,85 +445,43 @@ template<int NumBins, int Dimension>
             }
             __syncthreads();
             
-            if(ind <= root.y)
-                sSide[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], Dimension) > sBin[j].plane);
+            if(ind <= root.y) {
+                sSideX[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], 0) > sBinX[j].plane);
+                sSideY[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], 1) > sBinY[j].plane);
+                sSideZ[i*NumBins + j] = (lowPlaneOfAabb(&sBox[i], 2) > sBinZ[j].plane);
+            }
         
             __syncthreads();
-/*
- *    layout of warp bins
- *    n as num bins
- *    w as num warps (256/32)
- *
- *    0     1        2          w-1         w  warps
- *
- *    0     32n      64n       (w-1)32n
- *    1     32n+1    64n+1     (w-1)32n+1
- *    
- *    n-1   64n-1    96n-1      w32n
- *
- */
-            /*
-            if(threadIdx.x < numWarpBins) {
-                  int w = threadIdx.x / NumBins;
-                  int b = threadIdx.x - w * NumBins;
-                  
-                collectBinsInWarp<NumBins>(sBin[threadIdx.x], 
-                    primitiveIndirections,
-                    primitiveAabbs,
-                    &sSide[b + w * 32 * NumBins],
-                    root.x + w * 32 + i * NumThreads,
+        
+            if(threadIdx.x < NumBins) {  
+                collectBinsBatched<NumBins, 0>(sBinX,
+                    sBox,
+                    sSideX,
+                    batchSize,
+                    root.x + k * batchSize,
                     root.y);
             }
             
-            __syncthreads();
-            
-            if(threadIdx.x < NumBins) {
-                for(j=1; j<numWarps; j++)
-                    combineSplitBin(sBin[threadIdx.x],
-                                    sBin[threadIdx.x + j * NumBins]);
-                  
+            if(threadIdx.x >31 && threadIdx.x < 32+NumBins) {  
+                collectBinsBatched<NumBins, 32>(sBinY,
+                    sBox,
+                    sSideY,
+                    batchSize,
+                    root.x + k * batchSize,
+                    root.y);
             }
             
-            __syncthreads();
-            */
-        
-            if(threadIdx.x < NumBins) {  
-                collectBinsBatched<NumBins>(sBin[threadIdx.x],
-                    primitiveIndirections,
-                    primitiveAabbs,
-                    sideHorizontal,
+            if(threadIdx.x >63 && threadIdx.x < 64+NumBins) {  
+                collectBinsBatched<NumBins, 64>(sBinZ,
+                    sBox,
+                    sSideZ,
                     batchSize,
                     root.x + k * batchSize,
                     root.y);
             }
     
             __syncthreads();
-        }
-        
-        if(threadIdx.x < NumBins) {
-            float rootArea = areaOfAabb(&rootBox);
-            sCost[threadIdx.x] = costOfSplit(&sBin[threadIdx.x],
-                                        rootArea);
-        }
-        
-         __syncthreads();
-            
-        if(threadIdx.x < 1) {
-            int bestI = 0;
-            float lowestCost = sCost[0];
-            for(i=1; i< NumBins; i++) {
-                if(lowestCost > sCost[i]) {
-                    lowestCost = sCost[i];
-                    bestI = i;
-                }
-            }
-            sBestBin[Dimension] = sBin[bestI];
-            sBestBin[Dimension].dimension = Dimension;
-// store cost here
-            sBestCost[Dimension] = sCost[bestI];
-        }
-        
-        __syncthreads();
+        } 
     }
     
     template<int NumBins, int NumThreads>
@@ -721,14 +749,13 @@ template<int NumBins, int Dimension>
         }
     }
     
-    template<int Dimension>
-    __device__ float binSplitPlane(Aabb * rootBox,
-                        uint n,
-                        uint ind)
+    template<int NumBins, int Dimension, int ThreadOffset>
+    __device__ float binSplitPlane(Aabb * rootBox)
     {
+        int ind = threadIdx.x - ThreadOffset;
         float d = spanOfAabb(rootBox, Dimension);
         return (lowPlaneOfAabb(rootBox, Dimension) 
-                     + (d / (float)n) * ((float)ind + .5f));
+                     + (d / (float)NumBins) * ((float)ind + .5f));
     }
     
     __device__ float costOfSplit(SplitBin * bin,
