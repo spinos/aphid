@@ -12,12 +12,17 @@
 #include "createBvh_implement.h"
 #include "reduceBox_implement.h"
 #include "tetrahedronSystem_implement.h"
+#include "TetrahedronSystemInterface.h"
+#include <CudaDbgLog.h>
+
+// CudaDbgLog tetsyslg("tetsys.txt");
 
 CudaTetrahedronSystem::CudaTetrahedronSystem() 
 {
 	m_deviceAnchor = new CUDABuffer;
 	m_deviceTetrahedronVicinityInd = new CUDABuffer;
 	m_deviceTetrahedronVicinityStart = new CUDABuffer;
+	m_vicinity = new CUDABuffer;
 }
 
 CudaTetrahedronSystem::~CudaTetrahedronSystem() 
@@ -25,6 +30,7 @@ CudaTetrahedronSystem::~CudaTetrahedronSystem()
 	delete m_deviceAnchor;
 	delete m_deviceTetrahedronVicinityInd;
 	delete m_deviceTetrahedronVicinityStart;
+	delete m_vicinity;
 }
 
 void CudaTetrahedronSystem::setDeviceXPtr(CUDABuffer * ptr, unsigned loc)
@@ -50,6 +56,15 @@ void CudaTetrahedronSystem::initOnDevice()
 	m_deviceTetrahedronVicinityStart->create((numTetrahedrons() + 1) * 4);
 	m_deviceTetrahedronVicinityInd->hostToDevice(hostTetrahedronVicinityInd());
 	m_deviceTetrahedronVicinityStart->hostToDevice(hostTetrahedronVicinityStart());
+	m_vicinity->create(numTetrahedrons()*TETRAHEDRONSYSTEM_VICINITY_LENGTH*4);
+	
+	tetrasys::writeVicinity((int *)vicinity(), 
+	         (int *)m_deviceTetrahedronVicinityInd->bufferOnDevice(), 
+	         (int *)m_deviceTetrahedronVicinityStart->bufferOnDevice(), 
+	         numTetrahedrons());
+	
+	// tetsyslg.writeInt(m_vicinity, numTetrahedrons()*TETRAHEDRONSYSTEM_VICINITY_LENGTH, 
+	   //             "tetsys_vicinity", CudaDbgLog::FOnce);
 	
 	m_deviceAnchor->create(numPoints() * 4);
 	m_deviceAnchor->hostToDevice(hostAnchor());
@@ -103,9 +118,6 @@ void CudaTetrahedronSystem::sendXToHost()
 void CudaTetrahedronSystem::sendVToHost()
 { m_deviceV->deviceToHost(hostV(), m_vLoc, numPoints() * 12); }
 
-void * CudaTetrahedronSystem::deviceVicinityInd()
-{ return m_deviceTetrahedronVicinityInd->bufferOnDevice(); }
-
-void * CudaTetrahedronSystem::deviceVicinityStart()
-{ return m_deviceTetrahedronVicinityStart->bufferOnDevice(); }
+void * CudaTetrahedronSystem::vicinity()
+{ return m_vicinity->bufferOnDevice(); }
 //:~

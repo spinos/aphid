@@ -731,7 +731,7 @@ template<int NumBins>
         int j = begin + threadIdx.x;
         if(j<= end) {
             dst[j] = src[j];
-            src[j].key = 9999997;
+            // src[j].key = 9999997;
         }
     }
     

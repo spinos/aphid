@@ -1,8 +1,8 @@
 #ifndef CUDADBGLOG_H
 #define CUDADBGLOG_H
 #include "BaseLog.h"
-class BaseBuffer;
-class CUDABuffer;
+#include "BaseBuffer.h"
+#include "CUDABuffer.h"
 class CudaDbgLog : public BaseLog {
 public:    
 	CudaDbgLog(const std::string & fileName);
@@ -21,6 +21,14 @@ public:
 	                Frequency freq = FOnce);
 	
 	void writeUInt(CUDABuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+	void writeInt(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+	void writeInt(CUDABuffer * buf, unsigned n, 
 	                const std::string & notation,
 	                Frequency freq = FOnce);
 	
@@ -84,6 +92,36 @@ public:
 	                unsigned size,
 	                Frequency freq = FOnce);
 protected:
+    template<typename T>
+    void writeSingle(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce)
+	{
+	    if(!checkFrequency(freq, notation)) return;
+        T * m = (T *)buf->data();
+        newLine();
+        write(notation);
+        writeArraySize(n);
+        unsigned i = 0;
+        for(; i < n; i++) {
+            writeArrayIndex(i);
+            _write<T>(m[i]);
+            newLine();
+        }
+	}
+	
+	template<typename T>
+	void writeSingle(CUDABuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce)
+    {
+        if(!checkFrequency(freq, notation)) return;
+        
+        m_hostBuf->create(buf->bufferSize());
+        buf->deviceToHost(m_hostBuf->data());
+        
+        writeSingle<T>(m_hostBuf, n, notation, FIgnore);
+    }
     
 private:
 	BaseBuffer * m_hostBuf;

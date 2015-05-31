@@ -15,43 +15,29 @@ inline __device__ int isStackFull(int stackSize)
 inline __device__ int outOfStack(int stackSize)
 {return (stackSize < 1 || stackSize > B3_BROADPHASE_MAX_STACK_SIZE); }
 
+template<int NumExcls>
 inline __device__ void writeElementExclusion(int * dst,
 									uint a,
-									uint * exclusionInd,
-									uint * exclusionStart)
+									int * exclusionInd)
 {
-	uint i;
-
-	uint cur = exclusionStart[a+1]-1;
-	uint minInd = exclusionStart[a];
-// for isolate element
-	if(minInd == cur) { 
-	    dst[0] = exclusionInd[cur]; 
-	    dst[1] = -1; 
-	    return; 
-	}
-	
-	for(i=0;i<32; i++) {
-		dst[i] = exclusionInd[cur--];
-		if(cur < minInd) {
-		    if(i<31) {
-		        dst[i+1] = -1;
-		    }
-		    return; 
-		}
-	}
+    int start = NumExcls * a;
+	int i=0;
+	for(;i<NumExcls; i++)
+	    dst[i] = exclusionInd[start + i];
 }
 
+template<int NumExcls>
 inline __device__ int isElementExcludedS(uint b, int * exclusionInd)
 {
 	uint i;
-	for(i=0; i<32; i++) {
+	for(i=0; i<NumExcls; i++) {
 		if(exclusionInd[i] < 0) break;
 		if(b <= exclusionInd[i]) return 1;
 	}
 	return 0;
 }
 
+template<int NumExcls>
 inline __device__ void countOverlappings(uint & count,
                                          KeyValuePair * indirections,
                                          Aabb box,
@@ -63,12 +49,13 @@ inline __device__ void countOverlappings(uint & count,
     int i=range.x;
     for(;i<=range.y;i++) {
         iElement = indirections[i].value;
-        if(isElementExcludedS(iElement, exclElm)) continue;
+        if(isElementExcludedS<NumExcls>(iElement, exclElm)) continue;
         if(isAabbOverlapping(box, elementBoxes[iElement])) 
             count++;
     }
 }
 
+template<int NumExcls>
 inline __device__ void writeOverlappings(uint2 * overlappings,
                                 uint & writeLoc,
                                 uint iQuery,
@@ -86,7 +73,7 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
     int i=range.x;
     for(;i<=range.y;i++) {
         iElement = indirections[i].value;
-        if(isElementExcludedS(iElement, exclElm)) continue;
+        if(isElementExcludedS<NumExcls>(iElement, exclElm)) continue;
         if(isAabbOverlapping(box, elementBoxes[iElement])) 
         {
             pair.x = combineObjectElementInd(iQuery, iBox);
@@ -101,6 +88,7 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
 inline __device__ int isInternalNode(int2 child)
 { return (child.x>>31) != 0; }
 
+template<int NumExcls>
 __global__ void countPairsSExclS_kernel(uint * overlappingCounts, 
 								Aabb * boxes, 
 								uint maxBoxInd,
@@ -108,8 +96,7 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 								Aabb * internalNodeAabbs, 
 								Aabb * leafAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
-								uint * exclusionIndices,
-								uint * exclusionStarts)
+								int * exclusionIndices)
 {
 	// int * sStack = SharedMemory<int>();
 	
@@ -122,8 +109,7 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 	const Aabb box = boxes[boxIndex];
 	
 	int * exclElm = & sExclElm[threadIdx.x << 5];
-	writeElementExclusion(exclElm, boxIndex, exclusionIndices,
-									exclusionStarts);
+	writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
 	
 	int * stack = &sStack[threadIdx.x << 6];
 	int stackSize = 1;
@@ -141,49 +127,36 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 		iNode = stack[ stackSize - 1 ];
 		stackSize--;
 		
-		// isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
         child = internalNodeChildIndices[iNode];
         isInternal = isInternalNode(child);
-        
-        if(!isInternal) {
-            countOverlappings(iCount,
+		
+        internalBox = internalNodeAabbs[iNode];
+
+		if(isAabbOverlapping(box, internalBox))
+		{    
+		    if(!isInternal) {
+		        countOverlappings<NumExcls>(iCount,
                                 mortonCodesAndAabbIndices,
                                 box,
                                 leafAabbs,
                                 exclElm,
                                 child);
-            continue;
-        }
-				
-        internalBox = internalNodeAabbs[iNode];
-        
-//bvhRigidIndex is not used if internal node
-		//int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
-		
-		//Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
-
-		if(isAabbOverlapping(box, internalBox))
-		{    
-/*		    
-			if(isLeaf)
-			{
-			    // if(!isElementExcluded(bvhRigidIndex, boxIndex, exclusionIndices, exclusionStarts)) 
-				if(!isElementExcludedS(bvhRigidIndex, exclElm))
-			        overlappingCounts[boxIndex] += 1;
-			}
-			else*/ 
+            }
+            else {
 				if(isStackFull(stackSize)) continue;
 			    
                 stack[ stackSize ] = child.x;
                 stackSize++;
                 stack[ stackSize ] = child.y;
                 stackSize++;
+            }
 		}
 	}
     overlappingCounts[boxIndex] = iCount;
 }
 
+template<int NumExcls>
 __global__ void writePairCacheSExclS_kernel(uint2 * dst, 
                                 uint * cacheWriteLocation,
 								uint * cacheStarts, 
@@ -195,8 +168,7 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 								Aabb * leafAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx,
-								uint * exclusionIndices,
-								uint * exclusionStarts)
+								int * exclusionIndices)
 {
 	__shared__ int sExclElm[32*32];
 	__shared__ int sStack[64*32];
@@ -215,8 +187,7 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 	const Aabb box = boxes[boxIndex];
 	
 	int * exclElm = & sExclElm[threadIdx.x << 5];
-	writeElementExclusion(exclElm, boxIndex, exclusionIndices,
-									exclusionStarts);
+	writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
 	
 	int * stack = &sStack[threadIdx.x << 6];
 	int stackSize = 1;
@@ -236,9 +207,13 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
 		child = internalNodeChildIndices[iNode];
         isInternal = isInternalNode(child);
-			    
-        if(!isInternal) {
-           writeOverlappings(dst,
+        
+		internalBox = internalNodeAabbs[iNode];
+        
+		if(isAabbOverlapping(box, internalBox))
+		{
+			if(!isInternal) {
+			    writeOverlappings<NumExcls>(dst,
                                 writeLoc,
                                 queryIdx,
                                 boxIndex,
@@ -249,34 +224,15 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
                                 leafAabbs,
                                 exclElm,
                                 child);
-           continue;
-        }
-        
-		internalBox = internalNodeAabbs[iNode];
-        
-		if(isAabbOverlapping(box, internalBox))
-		{
-			/*if(isLeaf)
-			{
-			    // if(!isElementExcluded(bvhRigidIndex, boxIndex, exclusionIndices, exclusionStarts)) {
-				if(!isElementExcludedS(bvhRigidIndex, exclElm)) {
-			        pair.x = combineObjectElementInd(queryIdx, boxIndex);
-			        pair.y = combineObjectElementInd(queryIdx, bvhRigidIndex);
-			        dst[writeLoc] = pair;
-			        writeLoc++;
-			    }
-			    
-			    if((writeLoc - startLoc)==cacheSize) { // cache if full
-			        break;
-			    }
-			}
-			else */
+            }
+			else {
 				if(isStackFull(stackSize)) continue;
 			    
                 stack[ stackSize ] = child.x;
                 stackSize++;
                 stack[ stackSize ] = child.y;
                 stackSize++;
+            }
 		}
 	}
 	cacheWriteLocation[boxIndex] = writeLoc;

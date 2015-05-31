@@ -1,6 +1,4 @@
 #include "CudaDbgLog.h"
-#include "BaseBuffer.h"
-#include "CUDABuffer.h"
 #include "AllMath.h"
 #include <boost/format.hpp>
 
@@ -48,29 +46,28 @@ void CudaDbgLog::writeUInt(BaseBuffer * buf, unsigned n,
 	                const std::string & notation,
 	                Frequency freq)
 {
-	if(!checkFrequency(freq, notation)) return;
-	unsigned * m = (unsigned *)buf->data();
-	newLine();
-    write(notation);
-	writeArraySize(n);
-    unsigned i = 0;
-    for(; i < n; i++) {
-        writeArrayIndex(i);
-        _write<unsigned>(m[i]);
-		newLine();
-    }
+	writeSingle<unsigned int>(buf, n, notation, freq);
 }
 	
 void CudaDbgLog::writeUInt(CUDABuffer * buf, unsigned n, 
 	                const std::string & notation,
 	                Frequency freq)
 {
-	if(!checkFrequency(freq, notation)) return;
+	writeSingle<unsigned int>(buf, n, notation, freq);
+}
+
+void CudaDbgLog::writeInt(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+    writeSingle<int>(buf, n, notation, freq);
+}
 	
-    m_hostBuf->create(buf->bufferSize());
-    buf->deviceToHost(m_hostBuf->data());
-	
-	writeUInt(m_hostBuf, n, notation, FIgnore);
+void CudaDbgLog::writeInt(CUDABuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+	writeSingle<int>(buf, n, notation, freq);
 }
 
 void CudaDbgLog::writeVec3(BaseBuffer * buf, unsigned n, 

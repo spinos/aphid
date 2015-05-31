@@ -54,7 +54,6 @@ CudaLinearBvh::~CudaLinearBvh()
 	delete m_internalNodeParentIndices;
 	delete m_rootNodeIndexOnDevice;
 	delete m_distanceInternalNodeFromRoot;
-	// delete m_maxChildElementIndices;
 }
 
 void CudaLinearBvh::setNumPrimitives(unsigned n)
@@ -73,8 +72,7 @@ void CudaLinearBvh::initOnDevice()
 	m_internalNodeParentIndices->create(numInternalNodes() * sizeof(int));
 	m_rootNodeIndexOnDevice->create(sizeof(int));
 	m_distanceInternalNodeFromRoot->create(numInternalNodes() * sizeof(int));
-	// m_maxChildElementIndices->create(numInternalNodes() * sizeof(int));
-	
+
 #if DRAW_BVH_HASH
 	m_hostLeafBox->create(numLeafNodes() * sizeof(Aabb));
 	m_hostLeafHash->create(nextPow2(numLeafNodes()) * sizeof(KeyValuePair));
@@ -146,9 +144,6 @@ void * CudaLinearBvh::leafNodeParentIndices()
 void * CudaLinearBvh::distanceInternalNodeFromRoot()
 { return m_distanceInternalNodeFromRoot->bufferOnDevice(); }
 
-// void * CudaLinearBvh::maxChildElementIndices()
-// { return m_maxChildElementIndices->bufferOnDevice(); }
- 
 void CudaLinearBvh::update()
 {
 	Builder->build(this);

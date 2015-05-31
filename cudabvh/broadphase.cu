@@ -1,4 +1,5 @@
 #include "Overlapping.cuh"
+#include "TetrahedronSystemInterface.h"
 #include <CudaBase.h>
 
 template<class T>
@@ -704,8 +705,8 @@ void countPairsSelfCollideExclS(uint * dst,
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
-								uint * exclusionIndices,
-								uint * exclusionStarts,
+								int * exclusionIndices,
+								// uint * exclusionStarts,
 								int nThreads)
 {
 	dim3 block(nThreads, 1, 1);
@@ -714,7 +715,7 @@ void countPairsSelfCollideExclS(uint * dst,
 	
 	// int smemSize = nThreads * 512;
 	
-	countPairsSExclS_kernel<<< grid, block>>>(dst,
+	countPairsSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH> <<< grid, block>>>(dst,
                                 boxes,
                                 numBoxes,
 								// rootNodeIndex, 
@@ -723,8 +724,7 @@ void countPairsSelfCollideExclS(uint * dst,
 								// internalChildLimit,
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,
-								exclusionIndices,
-								exclusionStarts);
+								exclusionIndices);
 }
 
 void writePairCacheSelfCollideExclS(uint2 * dst, uint * locations, 
@@ -737,8 +737,8 @@ void writePairCacheSelfCollideExclS(uint2 * dst, uint * locations,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx,
-								uint * exclusionIndices,
-								uint * exclusionStarts,
+								int * exclusionIndices,
+								// uint * exclusionStarts,
 								int nThreads)
 {
 	dim3 block(nThreads, 1, 1);
@@ -748,7 +748,7 @@ void writePairCacheSelfCollideExclS(uint2 * dst, uint * locations,
 	
 	// int smemSize = nThreads * 512;
     
-    writePairCacheSExclS_kernel<<< grid, block>>>(dst, 
+    writePairCacheSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH> <<< grid, block>>>(dst, 
                                 locations,
                                 starts, counts,
                                 boxes,
@@ -758,8 +758,7 @@ void writePairCacheSelfCollideExclS(uint2 * dst, uint * locations,
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,
 								queryIdx,
-								exclusionIndices,
-								exclusionStarts);
+								exclusionIndices);
 }
 
 }

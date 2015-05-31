@@ -75,9 +75,16 @@ inline __device__ float longestSideOfAabb(const Aabb & box)
 
 inline __device__ int isAabbOverlapping(const Aabb & a, const Aabb & b)
 {
-    return	(a.low.x < b.high.x) && (b.low.x < a.high.x) && 
+    if(a.low.x >= b.high.x) return 0;
+    if(a.low.y >= b.high.y) return 0;
+    if(a.low.z >= b.high.z) return 0;
+    if(b.low.x >= a.high.x) return 0;
+    if(b.low.y >= a.high.y) return 0;
+    if(b.low.z >= a.high.z) return 0;
+    return 1;
+    /*return	(a.low.x < b.high.x) && (b.low.x < a.high.x) && 
             (a.low.y < b.high.y) && (b.low.y < a.high.y) && 
-            (a.low.z < b.high.z) && (b.low.z < a.high.z);
+            (a.low.z < b.high.z) && (b.low.z < a.high.z);*/
 }
 
 inline __device__ float spanOfAabb(Aabb * box, uint dimension)

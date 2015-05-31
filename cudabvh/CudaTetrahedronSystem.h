@@ -31,8 +31,7 @@ public:
 	void * deviceMass();
 	void * deviceAnchor();
 	void * deviceTretradhedronIndices();
-	void * deviceVicinityInd();
-	void * deviceVicinityStart();
+	void * vicinity();
 	
 	virtual void integrate(float dt);
 	void sendXToHost();
@@ -51,6 +50,7 @@ private:
 	CUDABuffer * m_deviceTetrahedronIndices;
 	CUDABuffer * m_deviceTetrahedronVicinityInd;
 	CUDABuffer * m_deviceTetrahedronVicinityStart;
+	CUDABuffer * m_vicinity;
 	unsigned m_xLoc, m_xiLoc, m_vLoc, m_massLoc, m_iLoc;
 };
 #endif        //  #ifndef CUDATETRAHEDRONSYSTEM_H

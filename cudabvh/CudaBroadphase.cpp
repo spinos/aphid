@@ -15,6 +15,7 @@
 #include <CudaBase.h>
 #include <CudaScan.h>
 #include <CudaTetrahedronSystem.h>
+#include "TetrahedronSystemInterface.h"
 #include <CudaDbgLog.h>
 
 CudaDbgLog bphlg("broadphase.txt");
@@ -184,8 +185,7 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	
 	void * boxes = (Aabb *)query->leafAabbs();
 	const unsigned numBoxes = query->numLeafNodes();
-	void * exclusionInd = query->deviceVicinityInd();
-	void * exclusionStart = query->deviceVicinityStart();
+	void * exclusionInd = query->vicinity();
 	
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
@@ -197,8 +197,7 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
-							(uint *)exclusionInd,
-							(uint *)exclusionStart,
+							(int *)exclusionInd,
 							DynGlobal::BvhStackedNumThreads);
 	CudaBase::CheckCudaError("broadphase count pairs smem");
 }
@@ -258,8 +257,7 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	
 	void * boxes = (Aabb *)query->leafAabbs();
 	const unsigned numBoxes = query->numLeafNodes();
-	void * exclusionInd = query->deviceVicinityInd();
-	void * exclusionStart = query->deviceVicinityStart();
+	void * exclusionInd = query->vicinity();
 	
 	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
@@ -277,8 +275,7 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							a,
-							(uint *)exclusionInd,
-							(uint *)exclusionStart,
+							(int *)exclusionInd,
 							DynGlobal::BvhStackedNumThreads);
 	CudaBase::CheckCudaError("broadphase write pairs smem");
 }
