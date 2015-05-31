@@ -18,8 +18,9 @@ public:
 	
 	virtual void initOnDevice();
 	
-	virtual void build(CudaLinearBvh * bvh);
+	void build(CudaLinearBvh * bvh);
 protected:
+	virtual void rebuild(CudaLinearBvh * bvh);
     float computeCostOfTraverse(CudaLinearBvh * bvh);
     void update(CudaLinearBvh * bvh);
 	CudaReduction * reducer();

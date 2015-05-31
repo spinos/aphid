@@ -19,7 +19,21 @@ __global__ void updateNodeAabbAtLevel_kernel(Aabb * nodeAabbs,
 	
 	if(nodeLevels[ind] != level) return;
 	
+	int2 child = nodes[ind];
 	
+	int i;
+	Aabb box;
+	resetAabb(box);
+	if(child.x>>31) {
+	    expandAabb(box, nodeAabbs[child.x]);
+	    expandAabb(box, nodeAabbs[child.y]);
+	}
+	else {
+	    i=child.x;
+	    for(;i<=child.y;i++)
+	        expandAabb(box, primitiveAabbs[primitiveIndirections[i].value]);
+	}
+	nodeAabbs[ind] = box;
 }
 
 #endif        //  #ifndef BVHLAZY_CUH

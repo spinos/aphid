@@ -49,7 +49,20 @@ void BvhBuilder::createSortAndScanBuf(unsigned n)
 	m_findPrefixSum->create(CudaScan::getScanBufferLength(n));
 }
 
-void BvhBuilder::build(CudaLinearBvh * bvh) {}
+void BvhBuilder::build(CudaLinearBvh * bvh) 
+{
+	if(bvh->maxInternalNodeLevel() < 1) {
+		rebuild(bvh);
+	}
+	else {
+		update(bvh);
+		float cost = computeCostOfTraverse(bvh);
+		if(cost > bvh->costOfTraverse() * 1.1f)
+			rebuild(bvh);
+	}
+}
+
+void BvhBuilder::rebuild(CudaLinearBvh * bvh) {}
 
 void BvhBuilder::sort(void * odata, unsigned nelem, unsigned nbits)
 {
@@ -108,7 +121,6 @@ void BvhBuilder::update(CudaLinearBvh * bvh)
                                 (Aabb *)bvh->primitiveAabb(), 
                                 distance, 
                                 bvh->numActiveInternalNodes());
-                                
 		CudaBase::CheckCudaError("bvh builder form internal aabb iterative");
 	}
 }
