@@ -2,6 +2,8 @@
 #include "TetrahedronSystemInterface.h"
 #include <CudaBase.h>
 
+#define BVH_TRAVERSE_NTHREADS 256
+
 template<class T>
 struct SharedMemory
 {
@@ -705,23 +707,18 @@ void countPairsSelfCollideExclS(uint * dst,
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
-								int * exclusionIndices,
-								// uint * exclusionStarts,
-								int nThreads)
+								int * exclusionIndices)
 {
+    int nThreads = BVH_TRAVERSE_NTHREADS;
 	dim3 block(nThreads, 1, 1);
-    unsigned nblk = iDivUp(numBoxes, nThreads);
+    int nblk = iDivUp(numBoxes, nThreads);
     dim3 grid(nblk, 1, 1);
-	
-	// int smemSize = nThreads * 512;
-	
+
 	countPairsSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH> <<< grid, block>>>(dst,
                                 boxes,
                                 numBoxes,
-								// rootNodeIndex, 
 								internalNodeChildIndex, 
 								internalNodeAabbs, 
-								// internalChildLimit,
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,
 								exclusionIndices);
@@ -729,25 +726,20 @@ void countPairsSelfCollideExclS(uint * dst,
 
 void writePairCacheSelfCollideExclS(uint2 * dst, uint * locations, 
                                 uint * starts, uint * counts,
-                              Aabb * boxes, uint numBoxes,
+                                Aabb * boxes, uint numBoxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
-								// int * internalChildLimit,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx,
-								int * exclusionIndices,
-								// uint * exclusionStarts,
-								int nThreads)
+								int * exclusionIndices)
 {
+    int nThreads = BVH_TRAVERSE_NTHREADS;
 	dim3 block(nThreads, 1, 1);
-    unsigned nblk = iDivUp(numBoxes, nThreads);
-    
+    int nblk = iDivUp(numBoxes, nThreads);
     dim3 grid(nblk, 1, 1);
 	
-	// int smemSize = nThreads * 512;
-    
     writePairCacheSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH> <<< grid, block>>>(dst, 
                                 locations,
                                 starts, counts,

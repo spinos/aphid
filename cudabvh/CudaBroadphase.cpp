@@ -197,8 +197,8 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
-							(int *)exclusionInd,
-							DynGlobal::BvhStackedNumThreads);
+							(int *)exclusionInd);
+	                        //DynGlobal::BvhStackedNumThreads);
 	CudaBase::CheckCudaError("broadphase count pairs smem");
 }
 
@@ -275,8 +275,8 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							a,
-							(int *)exclusionInd,
-							DynGlobal::BvhStackedNumThreads);
+							(int *)exclusionInd);
+	                        //DynGlobal::BvhStackedNumThreads);
 	CudaBase::CheckCudaError("broadphase write pairs smem");
 }
 

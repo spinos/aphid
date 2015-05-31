@@ -83,8 +83,7 @@ void countPairsSelfCollideExclS(uint * dst,
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
-								int * exclusionIndices,
-								int nThreads);
+								int * exclusionIndices);
 								
 void writePairCacheSelfCollideExclS(uint2 * dst, 
                                 uint * locations, 
@@ -97,8 +96,7 @@ void writePairCacheSelfCollideExclS(uint2 * dst,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx,
-								int * exclusionIndices,
-								int nThreads);
+								int * exclusionIndices);
 								
 void writeLocation(uint * dst, uint * src, uint n);
 }

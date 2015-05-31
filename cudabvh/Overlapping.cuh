@@ -100,18 +100,20 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 {
 	// int * sStack = SharedMemory<int>();
 	
-	__shared__ int sExclElm[32*32];
-	__shared__ int sStack[64*32];
+	// __shared__ int sExclElm[32*32];
+	// __shared__ int sStack[64*32];
 	
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	if(boxIndex >= maxBoxInd) return;
 	
 	const Aabb box = boxes[boxIndex];
 	
-	int * exclElm = & sExclElm[threadIdx.x << 5];
-	writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
+	int * exclElm = &exclusionIndices[boxIndex*NumExcls];//& sExclElm[threadIdx.x << 5];
+	//int exclElm[NumExcls];
+	//writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
 	
-	int * stack = &sStack[threadIdx.x << 6];
+	// int * stack = &sStack[threadIdx.x << 6];
+	int stack[B3_BROADPHASE_MAX_STACK_SIZE];
 	int stackSize = 1;
 	stack[0] = 0x80000000;
 		
@@ -170,8 +172,8 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 								unsigned queryIdx,
 								int * exclusionIndices)
 {
-	__shared__ int sExclElm[32*32];
-	__shared__ int sStack[64*32];
+	//__shared__ int sExclElm[32*32];
+	//__shared__ int sStack[64*32];
 	
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	if(boxIndex >= maxBoxInd) return;
@@ -186,10 +188,12 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 	
 	const Aabb box = boxes[boxIndex];
 	
-	int * exclElm = & sExclElm[threadIdx.x << 5];
-	writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
+	int * exclElm = &exclusionIndices[boxIndex*NumExcls];//& sExclElm[threadIdx.x << 5];
+	//int exclElm[NumExcls];
+	//writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
 	
-	int * stack = &sStack[threadIdx.x << 6];
+	// int * stack = &sStack[threadIdx.x << 6];
+	int stack[B3_BROADPHASE_MAX_STACK_SIZE];
 	int stackSize = 1;
 	stack[0] = 0x80000000;
 		
