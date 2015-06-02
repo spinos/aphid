@@ -46,6 +46,7 @@ public:
 	void * primitiveHash();
 	void * leafNodeParentIndices();
 	void * distanceInternalNodeFromRoot();
+	void * internalNodeNumPrimitives();
 	
 	void sendDbgToHost();
 	
@@ -96,6 +97,7 @@ private:
 	CUDABuffer * m_internalNodeParentIndices;
 	CUDABuffer * m_rootNodeIndexOnDevice;
 	CUDABuffer * m_distanceInternalNodeFromRoot;
+	CUDABuffer * m_internalNodeNumPrimitives;
 	unsigned m_numPrimitives, m_numActiveInternalNodes;
 	int m_maxInternalNodeLevel;
 	float m_costOfTraverse;

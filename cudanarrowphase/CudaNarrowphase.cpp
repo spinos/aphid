@@ -203,7 +203,8 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	
 	computeInitialSeparation();
 	
-	std::cout<<" n contact after initial separation "<<countValidContacts(m_contact[bufferId()], numOverlappingPairs)<<"\n";
+	// std::cout<<" n contact after initial separation "<<
+	countValidContacts(m_contact[bufferId()], numOverlappingPairs);
 	
 	computeTimeOfImpact();
 	
@@ -214,12 +215,12 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	
 	m_numContacts = countValidContacts(m_contact[bufferId()], m_numPairs);
 	
-	std::cout<<" n contacts "<<m_numContacts<<"\n";
+	// std::cout<<" n contacts "<<m_numContacts<<"\n";
 	
 	if(m_numContacts < 1) return;
 		
 	if(m_numContacts < m_numPairs) {
-		std::cout<<" final squeez contact pairs to "<<m_numContacts<<"\n";
+		// std::cout<<" final squeez contact pairs to "<<m_numContacts<<"\n";
 
 		squeezeContacts(m_numPairs);
 		swapBuffer();
@@ -302,7 +303,7 @@ void CudaNarrowphase::computeTimeOfImpact()
 		if(m_numPairs<1) return;
 		
 		if(m_numPairs < lastNumPairs>>2) {
-			std::cout<<" squeez contact pairs "<<lastNumPairs<<" to "<<m_numPairs<<"\n";
+			// std::cout<<" squeez contact pairs "<<lastNumPairs<<" to "<<m_numPairs<<"\n";
 
 			//nplg.writeVec3(m_tetVertPos[bufferId()], lastNumPairs<<3, "posb4", CudaDbgLog::FAlways);
 			//nplg.writeVec3(m_tetVertVel[bufferId()], lastNumPairs<<3, "velb4", CudaDbgLog::FAlways);

@@ -57,7 +57,7 @@ void BvhBuilder::build(CudaLinearBvh * bvh)
 	else {
 		update(bvh);
 		float cost = computeCostOfTraverse(bvh);
-		if(cost > bvh->costOfTraverse() * 1.1f)
+		if(cost > bvh->costOfTraverse() * 1.06f)
 			rebuild(bvh);
 	}
 }
@@ -102,6 +102,7 @@ float BvhBuilder::computeCostOfTraverse(CudaLinearBvh * bvh)
     m_traverseCosts->create(n * 4);
     bvhcost::computeTraverseCost((float *)m_traverseCosts->bufferOnDevice(),
         (int2 *)bvh->internalNodeChildIndices(),
+        (int *)bvh->internalNodeNumPrimitives(),
 	    (Aabb *)bvh->internalNodeAabbs(),
         n);
     
@@ -122,6 +123,19 @@ void BvhBuilder::update(CudaLinearBvh * bvh)
                                 distance, 
                                 bvh->numActiveInternalNodes());
 		CudaBase::CheckCudaError("bvh builder form internal aabb iterative");
+	}
+}
+
+void BvhBuilder::countPrimitivesInNode(CudaLinearBvh * bvh)
+{
+    const int maxDistance = bvh->maxInternalNodeLevel();
+    for(int distance = maxDistance; distance >= 0; --distance) {	
+        bvhcost::countPrimitviesInNodeAtLevel((int *)bvh->internalNodeNumPrimitives(), 
+                                (int *)bvh->distanceInternalNodeFromRoot(),	
+                                (int2 *)bvh->internalNodeChildIndices(),
+                                distance, 
+                                bvh->numActiveInternalNodes());
+		CudaBase::CheckCudaError("bvh builder count primitives in node iterative");
 	}
 }
 

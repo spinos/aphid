@@ -7,6 +7,7 @@
 
 __global__ void computeTraverseCost_kernel(float * costs,
         int2 * nodes,
+        int * nodeNumPrimitives,
 	    Aabb * nodeAabbs,
         uint n)
 {
@@ -22,8 +23,30 @@ __global__ void computeTraverseCost_kernel(float * costs,
 	Aabb rightBox = nodeAabbs[child.y];
 	Aabb rootBox = nodeAabbs[ind];
 	
-	costs[ind] = (areaOfAabb(&leftBox) + areaOfAabb(&rightBox))
+	costs[ind] = 2.5f + (areaOfAabb(&leftBox) * nodeNumPrimitives[child.x] 
+	                + areaOfAabb(&rightBox) * nodeNumPrimitives[child.y])
 	                / areaOfAabb(&rootBox);
+}
+
+__global__ void countPrimitviesInNodeAtLevel_kernel(int * nodeNumPrimitives,
+        int * nodeLevels,
+        int2 * nodes,
+        int level,
+	    uint n)
+{
+    uint ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= n) return;
+	
+	if(nodeLevels[ind] != level) return;
+	
+	int2 child = nodes[ind];
+	
+	if(child.x>>31) {
+	    nodeNumPrimitives[ind] = nodeNumPrimitives[child.x] + nodeNumPrimitives[child.y];
+	}
+	else {
+	    nodeNumPrimitives[ind] = child.y - child.x + 1;
+	}
 }
 
 #endif        //  #ifndef BVHCOST_CUH

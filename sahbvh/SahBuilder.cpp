@@ -214,14 +214,16 @@ void SahBuilder::rebuild(CudaLinearBvh * bvh)
     numInternal = splitPrimitives(bvh, numInternal);
     bvh->setNumActiveInternalNodes(numInternal);
     
-    float cost = computeCostOfTraverse(bvh);
-    std::cout<<" cost of traverse: "<<cost<<"\n";
-    bvh->setCostOfTraverse(cost);
-    
 	int maxDistanceToRoot = 0;
 	reducer()->max<int>(maxDistanceToRoot, (int *)bvh->distanceInternalNodeFromRoot(), numInternal);
 	std::cout<<" max level "<<maxDistanceToRoot<<"\n";
 	bvh->setMaxInternalNodeLevel(maxDistanceToRoot);
+	
+	countPrimitivesInNode(bvh);
+	
+	float cost = computeCostOfTraverse(bvh);
+    std::cout<<" cost of traverse: "<<cost<<"\n";
+    bvh->setCostOfTraverse(cost);
 }
 
 int SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)

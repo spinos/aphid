@@ -5,8 +5,15 @@
 namespace bvhcost {
 void computeTraverseCost(float * costs,
         int2 * nodes,
+        int * nodeNumPrimitives,
 	    Aabb * nodeAabbs,
         uint n);
+
+void countPrimitviesInNodeAtLevel(int * nodeNumPrimitives,
+        int * nodeLevels,
+        int2 * nodes,
+        int level,
+	    uint n);
 }
 
 namespace bvhlazy {

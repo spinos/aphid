@@ -23,6 +23,7 @@ protected:
 	virtual void rebuild(CudaLinearBvh * bvh);
     float computeCostOfTraverse(CudaLinearBvh * bvh);
     void update(CudaLinearBvh * bvh);
+    void countPrimitivesInNode(CudaLinearBvh * bvh);
 	CudaReduction * reducer();
 	CudaScan * scanner();
 	void createSortAndScanBuf(unsigned n);

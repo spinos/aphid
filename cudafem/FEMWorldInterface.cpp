@@ -5,6 +5,8 @@
 #include <tetmesh.h>
 #include "FemGlobal.h"
 #include <DynGlobal.h>
+#include <SahBuilder.h>
+
 FEMWorldInterface::FEMWorldInterface() {}
 FEMWorldInterface::~FEMWorldInterface() {}
 
@@ -13,6 +15,8 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
 #if COLLIDEJUST
     return DynamicWorldInterface::create(world);
 #endif
+    world->setBvhBuilder(new SahBuilder);
+	
     FEMTetrahedronSystem * tetra = new FEMTetrahedronSystem;
 	if(!readMeshFromFile(tetra)) createTestMesh(tetra);
 	resetVelocity(tetra);

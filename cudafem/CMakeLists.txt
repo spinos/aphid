@@ -127,6 +127,8 @@ set (CUSOURCES "../scan/scan.cu"
 "../sahbvh/SahCompress.cu"
 "../sahbvh/SahDecompress.cu"
 "../sahbvh/SahSplit.cu"
+"../sahbvh/BvhCost.cu"
+"../sahbvh/BvhLazy.cu"
 "cuFemMath.cu"
 "cuFemTetrahedron.cu"
 "cuConjugateGradient.cu")
