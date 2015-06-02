@@ -214,12 +214,16 @@ void SahBuilder::rebuild(CudaLinearBvh * bvh)
     numInternal = splitPrimitives(bvh, numInternal);
     bvh->setNumActiveInternalNodes(numInternal);
     
-	int maxDistanceToRoot = 0;
+    sahlg.writeInt(bvh->distanceInternalNodeFromRootBuf(), numInternal, "node_level", CudaDbgLog::FOnce);
+    
+    int maxDistanceToRoot = 0;
 	reducer()->max<int>(maxDistanceToRoot, (int *)bvh->distanceInternalNodeFromRoot(), numInternal);
-	std::cout<<" max level "<<maxDistanceToRoot<<"\n";
+	std::cout<<" bvh max level "<<maxDistanceToRoot<<"\n";
 	bvh->setMaxInternalNodeLevel(maxDistanceToRoot);
 	
 	countPrimitivesInNode(bvh);
+    
+    sahlg.writeInt(bvh->internalNodeNumPrimitiveBuf(), numInternal, "primitive_count", CudaDbgLog::FOnce);
 	
 	float cost = computeCostOfTraverse(bvh);
     std::cout<<" cost of traverse: "<<cost<<"\n";
@@ -244,7 +248,6 @@ int SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
     sahlg.writeInt2(bvh->internalChildBuf(), n, "internal_node", CudaDbgLog::FOnce);
     // sahlg.writeAabb(bvh->internalAabbBuf(), n, "internal_box", CudaDbgLog::FOnce);
     // sahlg.writeUInt(bvh->internalParentBuf(), n, "parent_node", CudaDbgLog::FOnce);
-    // sahlg.writeUInt(bvh->distanceInternalNodeFromRootBuf(), n, "node_level", CudaDbgLog::FOnce);
     return n;
 }
  

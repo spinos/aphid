@@ -18,6 +18,9 @@ __global__ void computeTraverseCost_kernel(float * costs,
 	
 	int2 child = nodes[ind];
 	if((child.x>>31) == 0) return;
+    
+    child.x = getIndexWithInternalNodeMarkerRemoved(child.x);
+    child.y = getIndexWithInternalNodeMarkerRemoved(child.y);
 	    
 	Aabb leftBox = nodeAabbs[child.x];
 	Aabb rightBox = nodeAabbs[child.y];
@@ -38,14 +41,16 @@ __global__ void countPrimitviesInNodeAtLevel_kernel(int * nodeNumPrimitives,
 	if(ind >= n) return;
 	
 	if(nodeLevels[ind] != level) return;
-	
+    
 	int2 child = nodes[ind];
 	
-	if(child.x>>31) {
-	    nodeNumPrimitives[ind] = nodeNumPrimitives[child.x] + nodeNumPrimitives[child.y];
+	if((child.x>>31)==0) {
+        nodeNumPrimitives[ind] = child.y - child.x + 1;
 	}
 	else {
-	    nodeNumPrimitives[ind] = child.y - child.x + 1;
+        child.x = getIndexWithInternalNodeMarkerRemoved(child.x);
+        child.y = getIndexWithInternalNodeMarkerRemoved(child.y);
+	    nodeNumPrimitives[ind] = nodeNumPrimitives[child.x] + nodeNumPrimitives[child.y];
 	}
 }
 

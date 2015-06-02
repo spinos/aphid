@@ -57,6 +57,7 @@ public:
 	CUDABuffer * internalAabbBuf();
     CUDABuffer * internalParentBuf();
     CUDABuffer * distanceInternalNodeFromRootBuf();
+    CUDABuffer * internalNodeNumPrimitiveBuf();
 	void initRootNode(int * child, float * box);
 	
 #if DRAW_BVH_HASH

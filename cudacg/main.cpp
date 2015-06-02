@@ -376,7 +376,7 @@ void testReduceMax()
 	
 	unsigned * h = (unsigned *)hb.data();
 	unsigned i;
-	for(i=0; i< 1024*1024; i++) h[i] = i+1;
+	for(i=0; i< 1024*1024; i++) h[i] = rand() % 14;
 	
 	db.hostToDevice(hb.data());
 	
@@ -387,7 +387,7 @@ void testReduceMax()
     cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
 	cudaEventRecord(start_event, 0);
 	int res = 0;
-	reducer.max<int>(res, (int *)db.bufferOnDevice(), 1024 * 1024);
+	reducer.max<int>(res, (int *)db.bufferOnDevice(), 1928);
 	cudaEventRecord(stop_event, 0);
 	cudaEventSynchronize(stop_event);
 	float met;
@@ -420,7 +420,7 @@ void testReduceMin()
     cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
 	cudaEventRecord(start_event, 0);
 	int res = 0;
-	reducer.min<int>(res, (int *)db.bufferOnDevice(), 1024 * 1024);
+	reducer.max<int>(res, (int *)db.bufferOnDevice(), 1024 * 1024);
 	cudaEventRecord(stop_event, 0);
 	cudaEventSynchronize(stop_event);
 	float met;
@@ -704,11 +704,11 @@ int main(int argc, char **argv)
         
     // printf("test conjugate gradient\n");
     // testCg();
-    // testReduceMin();
+    testReduceMax();
 	// testReduceMinMax();
-	testReduceMinMaxBox4();
+	//testReduceMinMaxBox4();
 	testReduceMinMaxBox();
-	testReduceSum();
+	//testReduceSum();
 	// testScan();
     // testRadixSort();
     // testAtomic();

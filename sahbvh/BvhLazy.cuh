@@ -24,14 +24,16 @@ __global__ void updateNodeAabbAtLevel_kernel(Aabb * nodeAabbs,
 	int i;
 	Aabb box;
 	resetAabb(box);
-	if(child.x>>31) {
-	    expandAabb(box, nodeAabbs[child.x]);
-	    expandAabb(box, nodeAabbs[child.y]);
-	}
-	else {
-	    i=child.x;
+	if((child.x>>31)==0) {
+        i=child.x;
 	    for(;i<=child.y;i++)
 	        expandAabb(box, primitiveAabbs[primitiveIndirections[i].value]);
+	}
+	else {
+        child.x = getIndexWithInternalNodeMarkerRemoved(child.x);
+        child.y = getIndexWithInternalNodeMarkerRemoved(child.y);
+	    expandAabb(box, nodeAabbs[child.x]);
+	    expandAabb(box, nodeAabbs[child.y]);
 	}
 	nodeAabbs[ind] = box;
 }

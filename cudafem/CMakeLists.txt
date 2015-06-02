@@ -134,7 +134,7 @@ set (CUSOURCES "../scan/scan.cu"
 "cuConjugateGradient.cu")
 
 if (WIN32)
-set (CUDA_NVCC_FLAGS "--disable-warnings --ptxas-options=-v -arch sm_30")
+set (CUDA_NVCC_FLAGS "--disable-warnings --ptxas-options=-v -arch sm_21")
 else ()
 set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
 endif()

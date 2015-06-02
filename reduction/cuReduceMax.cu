@@ -60,19 +60,7 @@ __global__ void reduceFindMax_kernel(T *g_idata, T *g_odata, unsigned int n)
         } 
 
         __syncthreads(); 
-
- #if (__CUDA_ARCH__ >= 300 )
-    if ( tid < 32 )
-    {
-        // Fetch final intermediate sum from 2nd warp
-        if (blockSize >=  64) mySum += sdata[tid + 32];
-        // Reduce final warp using shuffle
-        for (int offset = warpSize/2; offset > 0; offset /= 2) 
-        {
-            mySum += __shfl_down(mySum, offset);
-        }
-    }
-#else 
+ 
         // fully unroll reduction within a single warp
         if ((blockSize >=  64) && (tid < 32)) {
             mySum = max(mySum, sdata[tid + 32]);
@@ -109,7 +97,6 @@ __global__ void reduceFindMax_kernel(T *g_idata, T *g_odata, unsigned int n)
             sdata[tid] = mySum;
         }
 	__syncthreads(); 
-#endif
     
     // write result for this block to global mem 
     if (tid == 0) 

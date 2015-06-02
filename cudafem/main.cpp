@@ -7,6 +7,7 @@ int main(int argc, char *argv[])
 {
 	qDebug()<<" strating cuda fem\n";
 	if(argc > 1) FemGlobal::FileName = argv[argc - 1];
+    else FemGlobal::FileName = "untitled.hes";
     QApplication app(argc, argv);
     Window window;
     //window.showMaximized();

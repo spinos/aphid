@@ -230,6 +230,9 @@ CUDABuffer * CudaLinearBvh::internalParentBuf()
 CUDABuffer * CudaLinearBvh::distanceInternalNodeFromRootBuf()
 { return m_distanceInternalNodeFromRoot; }
 
+CUDABuffer * CudaLinearBvh::internalNodeNumPrimitiveBuf()
+{ return m_internalNodeNumPrimitives; }
+
 void CudaLinearBvh::setNumActiveInternalNodes(unsigned n)
 { m_numActiveInternalNodes = n; }
 

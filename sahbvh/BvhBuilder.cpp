@@ -57,7 +57,7 @@ void BvhBuilder::build(CudaLinearBvh * bvh)
 	else {
 		update(bvh);
 		float cost = computeCostOfTraverse(bvh);
-		if(cost > bvh->costOfTraverse() * 1.06f)
+		if(cost > bvh->costOfTraverse() * 1.05f)
 			rebuild(bvh);
 	}
 }
@@ -105,8 +105,9 @@ float BvhBuilder::computeCostOfTraverse(CudaLinearBvh * bvh)
         (int *)bvh->internalNodeNumPrimitives(),
 	    (Aabb *)bvh->internalNodeAabbs(),
         n);
+    CudaBase::CheckCudaError("bvh builder cost of traverse");
     
-    float redsum;
+    float redsum = 0.f;
     reducer()->sum<float>(redsum, (float *)m_traverseCosts->bufferOnDevice(), n);
     return redsum;
 }
@@ -137,5 +138,9 @@ void BvhBuilder::countPrimitivesInNode(CudaLinearBvh * bvh)
                                 bvh->numActiveInternalNodes());
 		CudaBase::CheckCudaError("bvh builder count primitives in node iterative");
 	}
+    
+    int redsum = -1;
+    reducer()->max<int>(redsum, (int *)bvh->internalNodeNumPrimitives(), bvh->numActiveInternalNodes());
+    std::cout<<" max internal node primitives"<< redsum;
 }
 
