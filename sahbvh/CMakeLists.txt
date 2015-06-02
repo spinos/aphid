@@ -107,7 +107,6 @@ message ("cuda blas librarie " ${CUDA_cublas_LIBRARY})
 message ("cuda sparse librarie " ${CUDA_cusparse_LIBRARY})
 
 set (CUSOURCES "../scan/scan.cu"
-"../cudabvh/createBvh.cu"
 "../cudabvh/tetrahedronSystem.cu"
 "../reduction/cuReduceSum.cu"
 "../reduction/cuReduceMin.cu"
@@ -127,6 +126,7 @@ set (CUSOURCES "../scan/scan.cu"
 "../taskQueue/SimpleQueue.cu"
 "SahCompress.cu"
 "SahDecompress.cu"
+"BvhHash.cu"
 "BvhCost.cu"
 "BvhLazy.cu"
 "SahSplit.cu")

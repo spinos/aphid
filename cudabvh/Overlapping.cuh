@@ -8,6 +8,7 @@
 
 #define B3_BROADPHASE_MAX_STACK_SIZE 64
 #define B3_BROADPHASE_MAX_STACK_SIZE_M_2 62
+#define EXCLU_IN_SMEM 0
 
 inline __device__ int isStackFull(int stackSize)
 {return stackSize > B3_BROADPHASE_MAX_STACK_SIZE_M_2; }
@@ -88,7 +89,7 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
 inline __device__ int isInternalNode(int2 child)
 { return (child.x>>31) != 0; }
 
-template<int NumExcls>
+template<int NumExcls, int NumThreads>
 __global__ void countPairsSExclS_kernel(uint * overlappingCounts, 
 								Aabb * boxes, 
 								uint maxBoxInd,
@@ -98,19 +99,22 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								int * exclusionIndices)
 {
-	// int * sStack = SharedMemory<int>();
-	
-	// __shared__ int sExclElm[32*32];
+#if EXCLU_IN_SMEM
+    __shared__ int sExclElm[NumThreads*NumExcls];
+#endif 
 	// __shared__ int sStack[64*32];
 	
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
 	if(boxIndex >= maxBoxInd) return;
 	
 	const Aabb box = boxes[boxIndex];
-	
-	int * exclElm = &exclusionIndices[boxIndex*NumExcls];//& sExclElm[threadIdx.x << 5];
-	//int exclElm[NumExcls];
-	//writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
+
+#if EXCLU_IN_SMEM
+    int * exclElm = &sExclElm[threadIdx.x * NumExcls];
+    writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
+#else
+	int * exclElm = &exclusionIndices[boxIndex*NumExcls];
+#endif	
 	
 	// int * stack = &sStack[threadIdx.x << 6];
 	int stack[B3_BROADPHASE_MAX_STACK_SIZE];
@@ -158,7 +162,7 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
     overlappingCounts[boxIndex] = iCount;
 }
 
-template<int NumExcls>
+template<int NumExcls, int NumThreads>
 __global__ void writePairCacheSExclS_kernel(uint2 * dst, 
                                 uint * cacheWriteLocation,
 								uint * cacheStarts, 
@@ -172,7 +176,9 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 								unsigned queryIdx,
 								int * exclusionIndices)
 {
-	//__shared__ int sExclElm[32*32];
+#if EXCLU_IN_SMEM
+    __shared__ int sExclElm[NumThreads*NumExcls];
+#endif
 	//__shared__ int sStack[64*32];
 	
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
@@ -188,9 +194,12 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 	
 	const Aabb box = boxes[boxIndex];
 	
-	int * exclElm = &exclusionIndices[boxIndex*NumExcls];//& sExclElm[threadIdx.x << 5];
-	//int exclElm[NumExcls];
-	//writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
+#if EXCLU_IN_SMEM
+    int * exclElm = &sExclElm[threadIdx.x * NumExcls];
+    writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
+#else
+	int * exclElm = &exclusionIndices[boxIndex*NumExcls];
+#endif
 	
 	// int * stack = &sStack[threadIdx.x << 6];
 	int stack[B3_BROADPHASE_MAX_STACK_SIZE];
@@ -246,8 +255,7 @@ __global__ void startAsWriteLocation_kernel(uint * dst, uint * src, uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 
-	if(ind >= maxInd) return;
-	dst[ind] = src[ind];
+	if(ind < maxInd) dst[ind] = src[ind];
 }
 
 #endif        //  #ifndef BROADPHASE_CUH

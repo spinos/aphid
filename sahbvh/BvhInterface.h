@@ -2,6 +2,16 @@
 #define BVHINTERFACE_H
 
 #include "bvh_common.h"
+#include "radixsort_implement.h"
+
+namespace bvhhash {
+void computePrimitiveHash(KeyValuePair * dst, 
+            Aabb * leafBoxes, 
+            uint numLeaves, 
+            uint buffSize, 
+			Aabb * bigBox);
+}
+
 namespace bvhcost {
 void computeTraverseCost(float * costs,
         int2 * nodes,

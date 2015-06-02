@@ -30,5 +30,21 @@ void writeVicinity(int * vicinities,
                       n);
 }
 
+void formTetrahedronAabbs(Aabb *dst, 
+                        float3 * pos, 
+                        float3 * vel, 
+                        float timeStep, 
+                        uint4 * tets, 
+                        unsigned numTetrahedrons)
+{
+    int tpb = CALC_TETRA_AABB_NUM_THREADS;
+
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numTetrahedrons<<2, tpb);
+    
+    dim3 grid(nblk, 1, 1);
+    formTetrahedronAabbs_kernel<<< grid, block >>>(dst, pos, vel, timeStep, tets, numTetrahedrons<<2);
+}
+
 }
 

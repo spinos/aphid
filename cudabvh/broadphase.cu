@@ -2,8 +2,6 @@
 #include "TetrahedronSystemInterface.h"
 #include <CudaBase.h>
 
-#define BVH_TRAVERSE_NTHREADS 256
-
 template<class T>
 struct SharedMemory
 {
@@ -709,12 +707,12 @@ void countPairsSelfCollideExclS(uint * dst,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								int * exclusionIndices)
 {
-    int nThreads = BVH_TRAVERSE_NTHREADS;
+    int nThreads = 64;
 	dim3 block(nThreads, 1, 1);
     int nblk = iDivUp(numBoxes, nThreads);
     dim3 grid(nblk, 1, 1);
 
-	countPairsSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH> <<< grid, block>>>(dst,
+	countPairsSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block>>>(dst,
                                 boxes,
                                 numBoxes,
 								internalNodeChildIndex, 
@@ -735,12 +733,12 @@ void writePairCacheSelfCollideExclS(uint2 * dst, uint * locations,
 								unsigned queryIdx,
 								int * exclusionIndices)
 {
-    int nThreads = BVH_TRAVERSE_NTHREADS;
+    int nThreads = 64;
 	dim3 block(nThreads, 1, 1);
     int nblk = iDivUp(numBoxes, nThreads);
     dim3 grid(nblk, 1, 1);
 	
-    writePairCacheSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH> <<< grid, block>>>(dst, 
+    writePairCacheSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block>>>(dst, 
                                 locations,
                                 starts, counts,
                                 boxes,

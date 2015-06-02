@@ -10,6 +10,14 @@ void writeVicinity(int * vicinities,
                     int * indices,
                     int * offsets,
                     uint n);
+
+void formTetrahedronAabbs(Aabb *dst, 
+                        float3 * pos, 
+                        float3 * vel, 
+                        float timeStep, 
+                        uint4 * tets, 
+                        unsigned numTetrahedrons);
+
 }
 #endif        //  #ifndef TETRAHEDRONSYSTEMINTERFACE_H
 

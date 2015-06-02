@@ -57,7 +57,7 @@ void BvhBuilder::build(CudaLinearBvh * bvh)
 	else {
 		update(bvh);
 		float cost = computeCostOfTraverse(bvh);
-		if(cost > bvh->costOfTraverse() * 1.05f)
+		if(cost > bvh->costOfTraverse() * 1.04f)
 			rebuild(bvh);
 	}
 }
@@ -87,7 +87,7 @@ void BvhBuilder::computeMortionHash(void * mortonCode,
 // morton curve ordering 
 	const unsigned sortLength = nextPow2(numPrimitives);
 	
-	bvhCalculateLeafHash((KeyValuePair *)mortonCode, (Aabb *)primitiveAabbs, numPrimitives, sortLength,
+	bvhhash::computePrimitiveHash((KeyValuePair *)mortonCode, (Aabb *)primitiveAabbs, numPrimitives, sortLength,
 	    (Aabb *)reducer()->resultOnDevice());
 		
 	CudaBase::CheckCudaError("calc morton key");
@@ -139,8 +139,8 @@ void BvhBuilder::countPrimitivesInNode(CudaLinearBvh * bvh)
 		CudaBase::CheckCudaError("bvh builder count primitives in node iterative");
 	}
     
-    int redsum = -1;
-    reducer()->max<int>(redsum, (int *)bvh->internalNodeNumPrimitives(), bvh->numActiveInternalNodes());
-    std::cout<<" max internal node primitives"<< redsum;
+    // int redsum = -1;
+    // reducer()->max<int>(redsum, (int *)bvh->internalNodeNumPrimitives(), bvh->numActiveInternalNodes());
+    // std::cout<<" max internal node primitives"<< redsum;
 }
 

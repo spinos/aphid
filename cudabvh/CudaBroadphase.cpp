@@ -94,10 +94,6 @@ void CudaBroadphase::initOnDevice()
 	m_pairStart->create(m_scanBufferLength * 4);
 	m_pairWriteLocation->create(m_scanBufferLength * 4);
 	m_scanIntermediate->create(m_scanBufferLength);
-	
-	// DynGlobal::BvhStackedNumThreads = CudaBase::LimitNThreadPerBlock(22, 512+64+16);
-	DynGlobal::BvhStackedNumThreads = 32;
-    std::cout<<" bvh stack tpb "<<DynGlobal::BvhStackedNumThreads<<"\n";
 }
 
 void CudaBroadphase::computeOverlappingPairs()
@@ -198,7 +194,6 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							(int *)exclusionInd);
-	                        //DynGlobal::BvhStackedNumThreads);
 	CudaBase::CheckCudaError("broadphase count pairs smem");
 }
 
@@ -276,7 +271,6 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							a,
 							(int *)exclusionInd);
-	                        //DynGlobal::BvhStackedNumThreads);
 	CudaBase::CheckCudaError("broadphase write pairs smem");
 }
 

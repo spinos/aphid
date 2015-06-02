@@ -962,7 +962,7 @@ void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
                     uint * objectIndexStarts,
                     uint numPoints)
 {
-    uint tpb = CudaBase::LimitNThreadPerBlock(24, 40);
+    uint tpb = 256;
 
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numPoints, tpb);

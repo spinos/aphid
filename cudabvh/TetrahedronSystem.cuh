@@ -2,6 +2,8 @@
 #define TETRAHEDRONSYSTEM_CUH
 
 #include "bvh_math.cuh"
+#include "Aabb.cuh"
+#define CALC_TETRA_AABB_NUM_THREADS 512
 
 __global__ void tetrahedronSystemIntegrate_kernel(float3 * o_position, float3 * i_velocity, 
                                     float dt, uint maxInd)
@@ -33,5 +35,44 @@ __global__ void writeVicinity_kernel(int * vicinities,
 	        vicinities[start + i] = indices[curInd--];
 	}
 }
+
+__global__ void formTetrahedronAabbs_kernel(Aabb *dst, float3 * pos, float3 * vel, float h, 
+                                                            uint4 * tetrahedronVertices, 
+                                                            unsigned maxNumPerTetVs)
+{
+    __shared__ float3 sP0[CALC_TETRA_AABB_NUM_THREADS];
+    __shared__ float3 sP1[CALC_TETRA_AABB_NUM_THREADS];
+    
+    uint idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(idx >= maxNumPerTetVs) return;
+	
+	uint itet = idx>>2;
+	uint ivert = idx & 3;
+	uint * vtet = & tetrahedronVertices[itet].x;
+	
+	uint iv = vtet[ivert];
+	
+	sP0[threadIdx.x] = pos[iv];
+	sP1[threadIdx.x] = float3_progress(pos[iv], vel[iv], h);
+	__syncthreads();
+	
+	if(ivert > 0) return;
+	
+	Aabb res;
+	resetAabb(res);
+	
+	expandAabb(res, sP0[threadIdx.x]);
+	expandAabb(res, sP1[threadIdx.x]);
+	expandAabb(res, sP0[threadIdx.x + 1]);
+	expandAabb(res, sP1[threadIdx.x + 1]);
+	expandAabb(res, sP0[threadIdx.x + 2]);
+	expandAabb(res, sP1[threadIdx.x + 2]);
+	expandAabb(res, sP0[threadIdx.x + 3]);
+	expandAabb(res, sP1[threadIdx.x + 3]);
+	
+	dst[itet] = res;
+}
+
 #endif        //  #ifndef TETRAHEDRONSYSTEM_CUH
 
