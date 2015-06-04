@@ -12,4 +12,5 @@ class HesperisIO {
 public:
 	static bool WriteCurves(MDagPathArray & paths, const std::string & fileName);
 	static bool IsCurveValid(const MDagPath & path);
+	static bool WriteMeshes(MDagPathArray & paths, const std::string & fileName);
 };

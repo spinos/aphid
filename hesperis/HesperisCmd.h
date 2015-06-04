@@ -11,8 +11,10 @@ public:
 		static MSyntax newSyntax();
 private:
 	void getCurves(const MDagPath & root, MDagPathArray & dst);
+	void getMeshes(const MDagPath & root, MDagPathArray & dst);
 	void pushCurves(const MDagPathArray & curves);
 	MStatus parseArgs ( const MArgList& args );
+	void writeMesh();
 private:
 	enum IOMode {
 		IOUnknown = 0,
@@ -21,4 +23,5 @@ private:
 	};
 	IOMode m_ioMode;
 	MString m_fileName;
+	MString m_growMeshName;
 };

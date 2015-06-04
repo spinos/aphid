@@ -91,3 +91,8 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, const std::string & fileName
 	MGlobal::displayInfo(" done.");
 	return true;
 }
+
+bool HesperisIO::WriteMeshes(MDagPathArray & paths, const std::string & fileName)
+{
+	return true;
+}

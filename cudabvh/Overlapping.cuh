@@ -31,10 +31,24 @@ template<int NumExcls>
 inline __device__ int isElementExcludedS(uint b, int * exclusionInd)
 {
 	uint i;
-	for(i=0; i<NumExcls; i++) {
+#if 0
+    int4 * exclusionInd4 = (int4 *)exclusionInd;
+	for(i=0; i<(NumExcls>>2); i++) {
+		if(exclusionInd4[i].x < 0) break;
+		if(b <= exclusionInd4[i].x) return 1;
+		if(exclusionInd4[i].y < 0) break;
+		if(b <= exclusionInd4[i].y) return 1;
+		if(exclusionInd4[i].z < 0) break;
+		if(b <= exclusionInd4[i].z) return 1;
+		if(exclusionInd4[i].w < 0) break;
+		if(b <= exclusionInd4[i].w) return 1;
+	}
+#else
+    for(i=0; i<NumExcls; i++) {
 		if(exclusionInd[i] < 0) break;
 		if(b <= exclusionInd[i]) return 1;
 	}
+#endif
 	return 0;
 }
 
