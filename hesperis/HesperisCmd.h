@@ -15,11 +15,13 @@ private:
 	void pushCurves(const MDagPathArray & curves);
 	MStatus parseArgs ( const MArgList& args );
 	void writeMesh();
+	MStatus printHelp();
 private:
 	enum IOMode {
 		IOUnknown = 0,
 		IOWrite = 1,
-		IORead = 2
+		IORead = 2,
+		IOHelp = 3
 	};
 	IOMode m_ioMode;
 	MString m_fileName;

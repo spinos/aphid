@@ -83,6 +83,7 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file)
 		}
 	}
 	
+	file->setWriteComponent(HesperisFile::WCurve);
 	file->addCurve("curves", &gcurve);
 	file->setDirty();
 	bool fstat = file->save();

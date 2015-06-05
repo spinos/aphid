@@ -57,7 +57,7 @@ void BvhBuilder::build(CudaLinearBvh * bvh)
 	else {
 		update(bvh);
 		float cost = computeCostOfTraverse(bvh);
-		if(cost > bvh->costOfTraverse() * 1.04f)
+		if(cost > bvh->costOfTraverse() * 1.03f)
 			rebuild(bvh);
 	}
 }

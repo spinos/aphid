@@ -37,7 +37,7 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	m_cluster = new KdCluster;
 	m_cluster->addGeometry(m_allGeo);
 	
-	KdTree::MaxBuildLevel = 2;
+	KdTree::MaxBuildLevel = 3;
 	KdTree::NumPrimitivesInLeafThreashold = 13;
 	
 	m_cluster->create();
@@ -207,7 +207,7 @@ void BccWorld::createMeshes()
 	unsigned i=0;
 	for(;i<n;i++) {
 #if WORLD_USE_FIT
-		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, 1.0f, 5, 48);
+		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, .8f, 4, 32);
 #else
 		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, 5);
 #endif

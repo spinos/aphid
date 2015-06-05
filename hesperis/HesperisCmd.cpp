@@ -17,6 +17,7 @@ MSyntax HesperisCmd::newSyntax()
 
 	syntax.addFlag("-w", "-write", MSyntax::kString);
 	syntax.addFlag("-gm", "-growMesh", MSyntax::kString);
+	syntax.addFlag("-h", "-help", MSyntax::kNoArg);
 	syntax.enableQuery(false);
 	syntax.enableEdit(false);
 
@@ -78,8 +79,13 @@ MStatus HesperisCmd::parseArgs ( const MArgList& args )
 		MGlobal::displayInfo(MString(" hesperis will write grow mesh ") + m_growMeshName);
 	}
 	
+	if(argData.isFlagSet("-h")) 
+	{
+		m_ioMode = IOHelp;
+	}
+	
 	if(m_ioMode == IOUnknown) {
-		MGlobal::displayInfo(" no valid arguments are set, use -w filename");
+		MGlobal::displayInfo(" no valid arguments are set, use -h for help");
 		return MS::kFailure;
 	}
 	
@@ -91,6 +97,8 @@ MStatus HesperisCmd::doIt(const MArgList &args)
 	MStatus status = parseArgs( args );
 	
 	if( status != MS::kSuccess ) return status;
+	
+	if(m_ioMode == IOHelp) return printHelp();
 	
 	MSelectionList selList;
     MGlobal::getActiveSelectionList(selList);
@@ -144,5 +152,15 @@ void HesperisCmd::writeMesh()
 
 	HesperisFile file(m_fileName.asChar());
 	HesperisIO::WriteMeshes(meshes, &file);
+}
+
+MStatus HesperisCmd::printHelp()
+{
+	MGlobal::displayInfo(MString("To use hesperis cmd:")
+		+MString("\n select group of curves to export")
+		+MString("\n hesperis -w filename")
+		+MString("\n or")
+		+MString("\n hesperis -w filename -gm fullPathToMesh"));
+	return MS::kSuccess;
 }
 //:~
