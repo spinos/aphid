@@ -5,6 +5,7 @@
 #include <maya/MItDag.h>
 #include <maya/MArgDatabase.h>
 #include "HesperisIO.h"
+#include "HesperisFile.h"
 #include <ASearchHelper.h>
 
 void *HesperisCmd::creator()
@@ -114,9 +115,18 @@ MStatus HesperisCmd::doIt(const MArgList &args)
 		return MS::kSuccess;
 	}
 	
-	HesperisIO::WriteCurves(curves, m_fileName.asChar());
+	HesperisFile hesf;
+	bool fstat = hesf.create(m_fileName.asChar());
+	if(!fstat) {
+		MGlobal::displayWarning(MString(" cannot create file ")+ m_fileName);
+		return MS::kSuccess;
+	}
+	
+	HesperisIO::WriteCurves(curves, &hesf);
 	
 	writeMesh();
+	
+	MGlobal::displayInfo(" done.");
 	
 	return MS::kSuccess;
 }
@@ -132,6 +142,7 @@ void HesperisCmd::writeMesh()
 	if(meshes.length() < 1)
 		MGlobal::displayInfo(MString(" no mesh found by name ")+m_growMeshName);
 
-	HesperisIO::WriteMeshes(meshes, m_fileName.asChar());
+	HesperisFile file(m_fileName.asChar());
+	HesperisIO::WriteMeshes(meshes, &file);
 }
 //:~

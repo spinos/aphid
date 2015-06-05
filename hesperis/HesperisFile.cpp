@@ -12,8 +12,8 @@
 #include <HWorld.h>
 #include <HCurveGroup.h>
 #include <BaseBuffer.h>
-#include <ATetrahedronMesh.h>
 #include <HTetrahedronMesh.h>
+#include <HTriangleMesh.h>
 #include <sstream>
 HesperisFile::HesperisFile() {}
 HesperisFile::HesperisFile(const char * name) : HFile(name) 
@@ -40,8 +40,18 @@ bool HesperisFile::doWrite(const std::string & fileName)
 	HWorld grpWorld;
 	grpWorld.save();
 	
-	if(m_writeComp == WCurve) writeCurve();
-	else if(m_writeComp == WTetra) writeTetrahedron();
+	switch (m_writeComp) {
+		case WCurve:
+			writeCurve();
+			break;
+		case WTetra:
+			writeTetrahedron();
+			break;
+		case WTri:
+			
+		default:
+			break;
+	}
 	
 	grpWorld.close();
 	HObject::FileIO.close();
@@ -81,11 +91,29 @@ bool HesperisFile::writeTetrahedron()
 	return true;
 }
 
+bool HesperisFile::writeTriangle()
+{
+	std::stringstream sst;
+	std::map<std::string, ATriangleMesh *>::iterator it = m_triangleMeshes.begin();
+	for(; it != m_triangleMeshes.end(); ++it) {
+		sst.str("");
+		sst<<"/world/"<<it->first;
+		std::cout<<" write triangle mesh "<<sst.str()<<"\n";
+		HTriangleMesh grp(sst.str());
+		grp.save(it->second);
+		grp.close();
+	}
+	return true;
+}
+
 void HesperisFile::addCurve(const std::string & name, CurveGroup * data)
 { m_curves[name] = data; }
 
 void HesperisFile::addTetrahedron(const std::string & name, ATetrahedronMesh * data)
 { m_terahedrons[name] = data; }
+
+void HesperisFile::addTriangleMesh(const std::string & name, ATriangleMesh * data)
+{ m_triangleMeshes[name] = data; }
 
 bool HesperisFile::doRead(const std::string & fileName)
 {
@@ -143,7 +171,6 @@ bool HesperisFile::readTetrahedron()
 			std::cout<<" cannot load "<<sst.str();
 			allValid = false;
 		}
-		
 		grp.close();
 	}
 	

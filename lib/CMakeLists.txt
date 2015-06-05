@@ -170,6 +170,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/CurveGroup.cpp 
 ../shared/HCurveGroup.cpp
 ../shared/BaseBuffer.cpp
+../shared/HTriangleMesh.cpp
 ../shared/HTetrahedronMesh.cpp
 ../shared/AGenericMesh.cpp
 ../shared/CurveBuilder.cpp
@@ -192,5 +193,6 @@ add_library(aphid STATIC ../shared/line_math.h
 ../kdtree/KdCluster.cpp
 ../kdtree/KdIntersection.cpp
 ../shared/APointCloud.cpp
+../shared/ATriangleMesh.cpp
 ../shared/ATetrahedronMesh.cpp)
 

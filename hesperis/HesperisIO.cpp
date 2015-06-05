@@ -10,8 +10,11 @@
 #include "HesperisIO.h"
 #include <maya/MGlobal.h>
 #include <maya/MFnNurbsCurve.h>
+#include <maya/MFnMesh.h>
 #include <maya/MPointArray.h>
+#include <maya/MIntArray.h>
 #include <CurveGroup.h>
+#include <ATriangleMesh.h>
 #include "HesperisFile.h"
 
 bool HesperisIO::IsCurveValid(const MDagPath & path)
@@ -29,7 +32,7 @@ bool HesperisIO::IsCurveValid(const MDagPath & path)
 	return true;
 }
 
-bool HesperisIO::WriteCurves(MDagPathArray & paths, const std::string & fileName) 
+bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file) 
 {
 	MStatus stat;
 	const unsigned n = paths.length();
@@ -80,19 +83,69 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, const std::string & fileName
 		}
 	}
 	
-	HesperisFile hesf;
-	bool fstat = hesf.create(fileName.c_str());
-	if(!fstat) MGlobal::displayWarning(MString(" cannot create file ")+ fileName.c_str());
-	hesf.addCurve("curves", &gcurve);
-	hesf.setDirty();
-	fstat = hesf.save();
-	if(!fstat) MGlobal::displayWarning(MString(" cannot save file ")+ fileName.c_str());
-	hesf.close();
-	MGlobal::displayInfo(" done.");
+	file->addCurve("curves", &gcurve);
+	file->setDirty();
+	bool fstat = file->save();
+	if(!fstat) MGlobal::displayWarning(MString(" cannot save curves to file ")+ file->fileName().c_str());
+	file->close();
+	
 	return true;
 }
 
-bool HesperisIO::WriteMeshes(MDagPathArray & paths, const std::string & fileName)
+bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file)
 {
+	MStatus stat;
+	const unsigned n = paths.length();
+	unsigned i, j;
+	int numPnts = 0;
+	unsigned numNodes = 0;
+	unsigned numTris = 0;
+	
+	MGlobal::displayInfo(" hesperis check meshes");
+	
+	MIntArray triangleCounts, triangleVertices;
+	MPointArray ps;
+	
+	std::vector<ATriangleMesh * > meshes;
+	for(i=0; i< n; i++) {
+		MFnMesh fmesh(paths[i].node());
+		numPnts = fmesh.numVertices();
+		numNodes++;
+		
+		fmesh.getTriangles(triangleCounts, triangleVertices);
+		numTris = triangleVertices.length() / 3;
+		
+		MGlobal::displayInfo(paths[i].fullPathName());
+		MGlobal::displayInfo(MString(" vertex count: ") + numPnts);
+		MGlobal::displayInfo(MString(" triangle count: ") + numTris);
+	
+		ATriangleMesh * amesh = new ATriangleMesh;
+		meshes.push_back(amesh);
+		amesh->create(numPnts, numTris);
+		
+		Vector3F * pnts = amesh->points();
+		unsigned * inds = amesh->indices();
+	
+		fmesh.getPoints(ps, MSpace::kWorld);
+			
+		for(j=0; j<numPnts; j++)
+			pnts[j].set((float)ps[j].x, (float)ps[j].y, (float)ps[j].z);
+		
+		for(j=0; j<triangleVertices.length(); j++)
+			inds[j] = triangleVertices[j];
+			
+		std::string meshName(paths[i].fullPathName().asChar());
+		file->addTriangleMesh(meshName, amesh);
+	}
+	
+	file->setDirty();
+	file->setWriteComponent(HesperisFile::WTri);
+	bool fstat = file->save();
+	if(!fstat) MGlobal::displayWarning(MString(" cannot save mesh to file ")+ file->fileName().c_str());
+	file->close();
+	
+	std::vector<ATriangleMesh * >::iterator it = meshes.begin();
+	for(;it!=meshes.end();++it) delete *it;
+	meshes.clear();
 	return true;
 }

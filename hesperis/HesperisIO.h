@@ -8,9 +8,10 @@
  */
 #include <maya/MDagPath.h>
 #include <maya/MDagPathArray.h>
+class HesperisFile;
 class HesperisIO {
 public:
-	static bool WriteCurves(MDagPathArray & paths, const std::string & fileName);
+	static bool WriteCurves(MDagPathArray & paths, HesperisFile * file);
 	static bool IsCurveValid(const MDagPath & path);
-	static bool WriteMeshes(MDagPathArray & paths, const std::string & fileName);
+	static bool WriteMeshes(MDagPathArray & paths, HesperisFile * file);
 };
