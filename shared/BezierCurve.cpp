@@ -303,6 +303,47 @@ bool BezierCurve::intersectTetrahedron(BezierSpline & spline, const Vector3F * t
 	return false;
 }
 
+float BezierCurve::splineLength(BezierSpline & spline)
+{
+	float res = 0.f;
+	
+	BezierSpline stack[64];
+	int stackSize = 2;
+	spline.deCasteljauSplit(stack[0], stack[1]);
+	
+	while(stackSize > 0) {
+		BezierSpline c = stack[stackSize - 1];
+		stackSize--;
+		
+		float l = c.cv[0].distanceTo(c.cv[3]);
+		
+		if(l < 1e-6f) {
+			res += l;
+			continue;
+		}
+		
+		if(c.straightEnough()) {
+			res += l;
+			continue;
+		}
+			
+		if(stackSize == 61) {
+			std::cout<<" warning: FitBccMeshBuilder::splineLength stack overflown\n";
+			continue;
+		}
+		
+		BezierSpline a, b;
+		c.deCasteljauSplit(a, b);
+		
+		stack[ stackSize ] = a;
+		stackSize++;
+		stack[ stackSize ] = b;
+		stackSize++;
+	}
+	
+	return res;
+}
+
 const BoundingBox BezierCurve::calculateBBox() const
 {
 	BoundingBox b;
@@ -320,3 +361,16 @@ const BoundingBox BezierCurve::calculateBBox(unsigned icomponent) const
 	sp.getAabb(&b);
 	return b;
 }	
+
+float BezierCurve::length() const
+{
+	float sum = 0.f;
+	const unsigned ns = numSegments();
+	BezierSpline sp;
+    for(unsigned i=0; i < ns; i++) {
+		getSegmentSpline(i, sp);
+		sum += splineLength(sp);
+	}
+	return sum;
+}
+//:~

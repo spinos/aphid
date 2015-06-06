@@ -14,6 +14,7 @@
 #include <BaseBuffer.h>
 #include <HTetrahedronMesh.h>
 #include <HTriangleMesh.h>
+#include <ATriangleMesh.h>
 #include <sstream>
 HesperisFile::HesperisFile() {}
 HesperisFile::HesperisFile(const char * name) : HFile(name) 
@@ -48,7 +49,7 @@ bool HesperisFile::doWrite(const std::string & fileName)
 			writeTetrahedron();
 			break;
 		case WTri:
-			
+			writeTriangle();
 		default:
 			break;
 	}
@@ -123,8 +124,19 @@ bool HesperisFile::doRead(const std::string & fileName)
 	HWorld grpWorld;
 	grpWorld.load();
 	
-	if(m_readComp == RCurve) readCurve();
-	else if(m_readComp == RTetra) readTetrahedron();
+	switch (m_readComp) {
+		case RCurve:
+			readCurve();
+			break;
+		case RTetra:
+			readTetrahedron();
+			break;
+		case RTri:
+			listTriangle(&grpWorld);
+			readTriangle();
+		default:
+			break;
+	}
 	
 	grpWorld.close();
 	
@@ -169,6 +181,38 @@ bool HesperisFile::readTetrahedron()
 		HTetrahedronMesh grp(sst.str());
 		if(!grp.load(it->second)) {
 			std::cout<<" cannot load "<<sst.str();
+			allValid = false;
+		}
+		grp.close();
+	}
+	
+	if(!allValid)
+		std::cout<<" encounter problem(s) reading tetrahedrons.\n";
+
+	return allValid;
+}
+
+bool HesperisFile::listTriangle(HBase * grp)
+{
+	std::vector<std::string > triNames;
+	grp->lsTypedChild<HTriangleMesh>(triNames);
+	
+	std::vector<std::string>::const_iterator it = triNames.begin();
+	for(;it!=triNames.end();++it) {
+		addTriangleMesh(*it, new ATriangleMesh);
+	}
+	return true;
+}
+
+bool HesperisFile::readTriangle()
+{
+	bool allValid = true;
+	std::map<std::string, ATriangleMesh *>::iterator it = m_triangleMeshes.begin();
+	for(; it != m_triangleMeshes.end(); ++it) {
+		std::cout<<" read triangle mesh "<<it->first<<"\n";
+		HTriangleMesh grp(it->first);
+		if(!grp.load(it->second)) {
+			std::cout<<" cannot load "<<it->first;
 			allValid = false;
 		}
 		grp.close();

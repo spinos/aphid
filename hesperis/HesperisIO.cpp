@@ -109,7 +109,8 @@ bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file)
 	
 	std::vector<ATriangleMesh * > meshes;
 	for(i=0; i< n; i++) {
-		MFnMesh fmesh(paths[i].node());
+		MFnMesh fmesh(paths[i].node(), &stat);
+		if(!stat) continue;
 		numPnts = fmesh.numVertices();
 		numNodes++;
 		
@@ -135,7 +136,11 @@ bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file)
 		for(j=0; j<triangleVertices.length(); j++)
 			inds[j] = triangleVertices[j];
 			
-		std::string meshName(paths[i].fullPathName().asChar());
+		amesh->setDagName(std::string(paths[i].fullPathName().asChar()));
+		std::stringstream sst;
+		sst.str("");
+		sst<<"mesh"<<numNodes;
+		std::string meshName = sst.str();
 		file->addTriangleMesh(meshName, amesh);
 	}
 	

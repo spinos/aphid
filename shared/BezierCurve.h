@@ -73,10 +73,12 @@ public:
 	static bool intersectBox(BezierSpline & spline, const BoundingBox & box);
 	static bool intersectTetrahedron(BezierSpline & spline, const Vector3F * tet, const BoundingBox & box);
 	static void distanceToPoint(BezierSpline & spline, const Vector3F & pnt, float & minDistance, Vector3F & closestP);
+	static float splineLength(BezierSpline & spline);
 	
 // overrid base curve
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
+	virtual float length() const;
 // overrid geometry
 	virtual bool intersectBox(const BoundingBox & box);
 	virtual bool intersectTetrahedron(const Vector3F * tet);

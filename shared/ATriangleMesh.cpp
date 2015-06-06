@@ -52,3 +52,10 @@ unsigned * ATriangleMesh::triangleIndices(unsigned idx) const
 {
 	return &indices()[idx*3];
 }
+
+void ATriangleMesh::setDagName(const std::string & name)
+{ m_dagName = name; }
+
+const std::string ATriangleMesh::dagName() const
+{ return m_dagName; }
+//:~

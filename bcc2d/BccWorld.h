@@ -30,12 +30,14 @@ private:
 	void createRandomCurveGeometry();
 	void createCurveStartP();
 	void createAnchorIntersect();
-	void createMeshes();
+	void createTetrahedronMeshes();
+	void createTriangleMeshesFromFile();
     bool readCurveDataFromFile();
+	bool readTriangleDataFromFile();
 	void drawCurveStars();
 
-	void drawMesh();
-	void drawMesh(unsigned nt, Vector3F * points, unsigned * indices);
+	void drawTetrahedronMesh();
+	void drawTetrahedronMesh(unsigned nt, Vector3F * points, unsigned * indices);
 	void drawAnchor();
 private:
     KdTreeDrawer * m_drawer;

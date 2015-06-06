@@ -27,8 +27,6 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 #else
 		createRandomCurveGeometry();
 #endif
-		
-	std::cout<<" n curves "<<m_curves->numCurves();
 	
 	createCurveStartP();
 	createAnchorIntersect();
@@ -37,12 +35,14 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	m_cluster = new KdCluster;
 	m_cluster->addGeometry(m_allGeo);
 	
-	KdTree::MaxBuildLevel = 3;
-	KdTree::NumPrimitivesInLeafThreashold = 13;
+	KdTree::MaxBuildLevel = 8;
+	KdTree::NumPrimitivesInLeafThreashold = 15;
 	
 	m_cluster->create();
 	
-	createMeshes();
+	createTetrahedronMeshes();
+	
+	createTriangleMeshesFromFile();
 	
 	std::cout<<" done\n";
 }
@@ -71,6 +71,7 @@ bool BccWorld::createCurveGeometryFromFile()
 	unsigned * cc = m_curves->counts();
 	Vector3F * cvs = m_curves->points();
 	
+	float sumLength = 0.f;
 	CurveBuilder cb;
 	
 	unsigned ncv;
@@ -87,11 +88,13 @@ bool BccWorld::createCurveGeometryFromFile()
 		BezierCurve * c = new BezierCurve;
 		cb.finishBuild(c);
 		
+		sumLength += c->length();
+		
 		m_allGeo->setGeometry(c, i);
 		
 		cvDrift += ncv;
 	}
-	
+	std::cout<<" total curve length: "<<sumLength<<"\n";
 	return true;
 }
 
@@ -193,7 +196,7 @@ void BccWorld::createAnchorIntersect()
 	m_anchorIntersect->create();
 }
 
-void BccWorld::createMeshes()
+void BccWorld::createTetrahedronMeshes()
 {
 	unsigned n = m_cluster->numGroups();
 #if WORLD_USE_FIT
@@ -215,10 +218,17 @@ void BccWorld::createMeshes()
 		nvert += m_meshes[i].numPoints();
 	}
 	
-	std::cout<<" n meshes "<<n<<"\n"
-	<<" total n tetrahedrons "<<ntet<<"\n"
-	<<" total n points "<<nvert<<"\n";
+	std::cout<<"\n n tetrahedron meshes "<<n
+	<<"\n total n tetrahedrons "<<ntet
+	<<"\n total n points "<<nvert
+	<<"\n";
 	m_numMeshes = n;
+}
+
+void BccWorld::createTriangleMeshesFromFile()
+{
+	if(!readTriangleDataFromFile()) return;
+	
 }
  
 void BccWorld::draw()
@@ -231,7 +241,7 @@ void BccWorld::draw()
     
     // m_grid->draw(m_drawer, (unsigned *)m_mesh.m_anchorBuf->data());
 
-	drawMesh();
+	drawTetrahedronMesh();
 	// drawAnchor();
     
 	glDisable(GL_DEPTH_TEST);
@@ -254,6 +264,7 @@ bool BccWorld::readCurveDataFromFile()
 		BccGlobal::FileName = "unknown";
 		return false;
 	}
+	
 	HesperisFile hes;
 	hes.setReadComponent(HesperisFile::RCurve);
 	hes.addCurve("curves", m_curves);
@@ -263,24 +274,43 @@ bool BccWorld::readCurveDataFromFile()
 	return true;
 }
 
-void BccWorld::drawMesh()
+bool BccWorld::readTriangleDataFromFile()
+{
+	if(BaseFile::InvalidFilename(BccGlobal::FileName)) 
+		return false;
+	
+	if(!BaseFile::FileExists(BccGlobal::FileName)) {
+		BccGlobal::FileName = "unknown";
+		return false;
+	}
+	
+	HesperisFile hes;
+	hes.setReadComponent(HesperisFile::RTri);
+	// hes.addCurve("curves", m_curves);
+	if(!hes.open(BccGlobal::FileName)) return false;
+	hes.close();
+	
+	return true;
+}
+
+void BccWorld::drawTetrahedronMesh()
 {
 	unsigned i=0;
 	for(;i<m_numMeshes; i++) {
     glEnable(GL_DEPTH_TEST);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glColor3f(0.3f, 0.4f, 0.33f);
-	drawMesh(m_meshes[i].numTetrahedrons(), m_meshes[i].points(),
+	drawTetrahedronMesh(m_meshes[i].numTetrahedrons(), m_meshes[i].points(),
 	         m_meshes[i].indices());
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glColor3f(.03f, .14f, .44f);
-    drawMesh(m_meshes[i].numTetrahedrons(), m_meshes[i].points(),
+    drawTetrahedronMesh(m_meshes[i].numTetrahedrons(), m_meshes[i].points(),
 	         m_meshes[i].indices());
 	}
 }
 
-void BccWorld::drawMesh(unsigned nt, Vector3F * points, unsigned * indices)
+void BccWorld::drawTetrahedronMesh(unsigned nt, Vector3F * points, unsigned * indices)
 {
     glBegin(GL_TRIANGLES);
     unsigned i, j;

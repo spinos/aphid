@@ -37,7 +37,6 @@ protected:
 	void drawOctahedron(KdTreeDrawer * drawer);
 private:
     void cleanup();
-	float splineLength(BezierSpline & spline);
 	float splineParameterByLength(BezierSpline & spline, float expectedLength);
 	void drawOctahedron(KdTreeDrawer * drawer, BccOctahedron & octa);
 	void checkTetrahedronVolume(std::vector<Vector3F > & tetrahedronP, 

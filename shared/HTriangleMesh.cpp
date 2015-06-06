@@ -29,6 +29,9 @@ char HTriangleMesh::verifyType()
 
 	if(!hasNamedAttr(".nv"))
 		return 0;
+		
+	if(!hasNamedAttr(".dag"))
+		return 0;
 	
 	return 1;
 }
@@ -61,6 +64,12 @@ char HTriangleMesh::save(ATriangleMesh * tri)
 	    addIntData(".v", nt * 3);
 	
 	writeIntData(".v", nt * 3, (int *)tri->indices());
+	
+	if(!hasNamedAttr(".dag"))
+		addStringAttr(".dag", tri->dagName().size());
+		
+	std::cout<<" dag name is "<<tri->dagName();
+	writeStringAttr(".dag", tri->dagName());
 
 	return 1;
 }
@@ -75,6 +84,11 @@ char HTriangleMesh::load(ATriangleMesh * tri)
 	int nt = 1;
 	
 	readIntAttr(".ntri", &nt);
+	
+	std::string dagName;
+	readStringAttr(".dag", dagName);
+	tri->setDagName(dagName);
+	std::cout<<" dag name is "<<dagName;
 	
 	tri->create(nv, nt);
 	

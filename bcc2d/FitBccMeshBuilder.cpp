@@ -67,7 +67,7 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	unsigned i=0;
 	for(;i<ns;i++) {
 		curve->getSegmentSpline(i, spl);
-		sl[i] = splineLength(spl);
+		sl[i] = BezierCurve::splineLength(spl);
 		suml += sl[i];
 	}
 	
@@ -217,47 +217,6 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	checkTetrahedronVolume(tetrahedronP, tetrahedronInd, lastNumTet);
 }
 
-float FitBccMeshBuilder::splineLength(BezierSpline & spline)
-{
-	float res = 0.f;
-	
-	BezierSpline stack[64];
-	int stackSize = 2;
-	spline.deCasteljauSplit(stack[0], stack[1]);
-	
-	while(stackSize > 0) {
-		BezierSpline c = stack[stackSize - 1];
-		stackSize--;
-		
-		float l = c.cv[0].distanceTo(c.cv[3]);
-		
-		if(l < 1e-6f) {
-			res += l;
-			continue;
-		}
-		
-		if(c.straightEnough()) {
-			res += l;
-			continue;
-		}
-			
-		if(stackSize == 61) {
-			std::cout<<" warning: FitBccMeshBuilder::splineLength stack overflown\n";
-			continue;
-		}
-		
-		BezierSpline a, b;
-		c.deCasteljauSplit(a, b);
-		
-		stack[ stackSize ] = a;
-		stackSize++;
-		stack[ stackSize ] = b;
-		stackSize++;
-	}
-	
-	return res;
-}
-
 float FitBccMeshBuilder::splineParameterByLength(BezierSpline & spline, float expectedLength)
 {
 	float pmin = 0.f;
@@ -267,7 +226,7 @@ float FitBccMeshBuilder::splineParameterByLength(BezierSpline & spline, float ex
 	BezierSpline a, b, c;
 	spline.deCasteljauSplit(a, b);
 	
-	float l = splineLength(a);
+	float l = BezierCurve::splineLength(a);
 	while(Absolute(l - expectedLength) > 1e-4) {
 		
 		if(l > expectedLength) {
@@ -276,13 +235,13 @@ float FitBccMeshBuilder::splineParameterByLength(BezierSpline & spline, float ex
 			
 			pmax = result;
 			
-			l -= splineLength(b);
+			l -= BezierCurve::splineLength(b);
 		}
 		else {
 			c = b;
 			c.deCasteljauSplit(a, b);
 			
-			l += splineLength(a);
+			l += BezierCurve::splineLength(a);
 			
 			pmin = result;
 		}

@@ -123,7 +123,7 @@ void BvhBuilder::update(CudaLinearBvh * bvh)
                                 (Aabb *)bvh->primitiveAabb(), 
                                 distance, 
                                 bvh->numActiveInternalNodes());
-		CudaBase::CheckCudaError("bvh builder form internal aabb iterative");
+		// CudaBase::CheckCudaError("bvh builder form internal aabb iterative");
 	}
 }
 
@@ -136,7 +136,7 @@ void BvhBuilder::countPrimitivesInNode(CudaLinearBvh * bvh)
                                 (int2 *)bvh->internalNodeChildIndices(),
                                 distance, 
                                 bvh->numActiveInternalNodes());
-		CudaBase::CheckCudaError("bvh builder count primitives in node iterative");
+		// CudaBase::CheckCudaError("bvh builder count primitives in node iterative");
 	}
     
     // int redsum = -1;

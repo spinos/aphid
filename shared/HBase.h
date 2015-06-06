@@ -11,6 +11,7 @@
 #include <AllHdf.h>
 #include <string>
 #include <iostream>
+#include <vector>
 class Vector3F;
 class Matrix33F;
 
@@ -65,4 +66,16 @@ public:
 	
 	virtual char save();
 	virtual char load();
+	
+	template<typename T>
+	void lsTypedChild(std::vector<std::string> & names) {
+		int nc = numChildren();
+		int i = 0;
+		for(;i<nc;i++) {
+			if(isChildGroup(i)) {
+				T gc(childPath(i));
+				if(gc.verifyType()) names.push_back(childPath(i));
+			}
+		}
+	}
 };

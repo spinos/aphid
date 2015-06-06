@@ -39,12 +39,11 @@ public:
 	
 	virtual Vector3F interpolate(float param) const;
 	virtual Vector3F interpolate(float param, Vector3F * data) const;
+	virtual float length() const;
 	
 	Vector3F calculateStraightPoint(float t, unsigned k0, unsigned k1, Vector3F * data) const;
 	
 	void findNeighborKnots(float param, unsigned & nei0, unsigned & nei1) const;
-	
-	float length() const;
 	
 	Vector3F * m_cvs;
 	float * m_knots;

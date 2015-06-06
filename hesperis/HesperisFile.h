@@ -13,6 +13,7 @@ class CurveGroup;
 class BaseBuffer;
 class ATetrahedronMesh;
 class ATriangleMesh;
+class HBase;
 
 class HesperisFile : public HFile {
 public:
@@ -48,6 +49,8 @@ private:
 	bool writeTriangle();
 	bool readCurve();
 	bool readTetrahedron();
+	bool listTriangle(HBase * grp);
+	bool readTriangle();
 private:
 	std::map<std::string, CurveGroup * > m_curves;
 	std::map<std::string, ATetrahedronMesh * > m_terahedrons;

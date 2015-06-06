@@ -17,6 +17,7 @@ public:
 	virtual char load();
 	
 	std::string modifiedTimeStr() const;
+	
 private:
 	int m_modifiedTime;
 };
