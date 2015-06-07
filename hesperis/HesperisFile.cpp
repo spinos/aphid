@@ -15,6 +15,7 @@
 #include <HTetrahedronMesh.h>
 #include <HTriangleMesh.h>
 #include <ATriangleMesh.h>
+#include <GeometryArray.h>
 #include <sstream>
 HesperisFile::HesperisFile() {}
 HesperisFile::HesperisFile(const char * name) : HFile(name) 
@@ -222,5 +223,17 @@ bool HesperisFile::readTriangle()
 		std::cout<<" encounter problem(s) reading tetrahedrons.\n";
 
 	return allValid;
+}
+
+void HesperisFile::extractTriangleMeshes(GeometryArray * dst)
+{
+	dst->create(m_triangleMeshes.size());
+	unsigned i = 0;
+	std::map<std::string, ATriangleMesh *>::const_iterator it = m_triangleMeshes.begin();
+	for(; it != m_triangleMeshes.end(); ++it) {
+		dst->setGeometry(it->second, i);
+		i++;
+	}
+	dst->setNumGeometries(i);
 }
 //:~

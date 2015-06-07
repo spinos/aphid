@@ -1,3 +1,6 @@
+#ifndef AGENERICMESH_H
+#define AGENERICMESH_H
+
 /*
  *  AGenericMesh.h
  *  aphid
@@ -11,7 +14,7 @@
 class BaseBuffer;
 class AGenericMesh : public Geometry {
 public:
-	AGenericMesh();
+	AGenericMesh();                                      
 	virtual ~AGenericMesh();
 	
 	virtual const Type type() const;
@@ -34,3 +37,4 @@ private:
 	BaseBuffer * m_anchors;
 	unsigned m_numPoints, m_numIndices;
 };
+#endif        //  #ifndef AGENERICMESH_H

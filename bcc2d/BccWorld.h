@@ -15,6 +15,7 @@ class APointCloud;
 struct BezierSpline;
 class BccMesh;
 class FitBccMesh;
+class ATriangleMesh;
 
 class BccWorld {
 public:
@@ -39,6 +40,7 @@ private:
 	void drawTetrahedronMesh();
 	void drawTetrahedronMesh(unsigned nt, Vector3F * points, unsigned * indices);
 	void drawAnchor();
+	void drawTriangleMesh();
 private:
     KdTreeDrawer * m_drawer;
     CurveGroup * m_curves;
@@ -46,6 +48,7 @@ private:
 	KdIntersection * m_anchorIntersect;
 	GeometryArray * m_allGeo;
 	APointCloud * m_curveStartP;
+	GeometryArray * m_triangleMeshes;
 #if WORLD_USE_FIT
 	FitBccMesh * m_meshes;
 #else

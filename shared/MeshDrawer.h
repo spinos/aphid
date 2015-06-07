@@ -14,10 +14,12 @@ class TriangleMesh;
 class BaseMesh;
 class BaseDeformer;
 class BaseField;
+class ATriangleMesh;
 class MeshDrawer : public LineDrawer {
 public:
 	MeshDrawer();
 	virtual ~MeshDrawer();
+	void triangleMesh(ATriangleMesh * mesh) const;
 	void triangleMesh(const TriangleMesh * mesh, const BaseDeformer * deformer = 0) const;
 	void quadMesh(const BaseMesh * mesh) const;
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0) const;

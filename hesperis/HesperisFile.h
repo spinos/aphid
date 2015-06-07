@@ -9,11 +9,13 @@
 #include <HFile.h>
 #include <string>
 #include <map>
+#include <vector>
 class CurveGroup;
 class BaseBuffer;
 class ATetrahedronMesh;
 class ATriangleMesh;
 class HBase;
+class GeometryArray;
 
 class HesperisFile : public HFile {
 public:
@@ -41,6 +43,7 @@ public:
 	void addTriangleMesh(const std::string & name, ATriangleMesh * data);
 	virtual bool doWrite(const std::string & fileName);
 	virtual bool doRead(const std::string & fileName);
+	void extractTriangleMeshes(GeometryArray * dst);
 protected:
 
 private:

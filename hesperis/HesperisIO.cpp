@@ -111,9 +111,9 @@ bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file)
 	for(i=0; i< n; i++) {
 		MFnMesh fmesh(paths[i].node(), &stat);
 		if(!stat) continue;
-		numPnts = fmesh.numVertices();
 		numNodes++;
 		
+		numPnts = fmesh.numVertices();
 		fmesh.getTriangles(triangleCounts, triangleVertices);
 		numTris = triangleVertices.length() / 3;
 		
@@ -128,7 +128,7 @@ bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file)
 		Vector3F * pnts = amesh->points();
 		unsigned * inds = amesh->indices();
 	
-		fmesh.getPoints(ps, MSpace::kWorld);
+		fmesh.getPoints(ps, MSpace::kObject);
 			
 		for(j=0; j<numPnts; j++)
 			pnts[j].set((float)ps[j].x, (float)ps[j].y, (float)ps[j].z);

@@ -21,6 +21,7 @@
 #include <CurveBuilder.h>
 #include <Geometry.h>
 #include <GeometryArray.h>
+#include <ATriangleMesh.h>
 GeoDrawer::GeoDrawer() 
 {
 	m_sphere = new GeodesicSphereMesh(8);
@@ -569,6 +570,9 @@ void GeoDrawer::geometry(Geometry * geo) const
 	switch (geo->type()) {
 		case TypedEntity::TBezierCurve:
 			smoothCurve(*(BezierCurve *)geo, 4);
+			break;
+		case TypedEntity::TTriangleMesh:
+			triangleMesh((ATriangleMesh *)geo);
 			break;
 		default:
 			break;

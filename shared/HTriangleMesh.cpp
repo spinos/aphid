@@ -88,7 +88,6 @@ char HTriangleMesh::load(ATriangleMesh * tri)
 	std::string dagName;
 	readStringAttr(".dag", dagName);
 	tri->setDagName(dagName);
-	std::cout<<" dag name is "<<dagName;
 	
 	tri->create(nv, nt);
 	

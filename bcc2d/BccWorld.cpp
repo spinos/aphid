@@ -16,6 +16,7 @@
 #include <APointCloud.h>
 #include <BccMesh.h>
 #include <FitBccMesh.h>
+#include <ATriangleMesh.h>
 
 BccWorld::BccWorld(KdTreeDrawer * drawer)
 {
@@ -227,8 +228,25 @@ void BccWorld::createTetrahedronMeshes()
 
 void BccWorld::createTriangleMeshesFromFile()
 {
+	m_triangleMeshes = new GeometryArray;
 	if(!readTriangleDataFromFile()) return;
 	
+	std::cout<<"\n n triangle mesh: "<<m_triangleMeshes->numGeometries()
+	<<"\n";
+	for(unsigned i=0; i<m_triangleMeshes->numGeometries(); i++) {
+		ATriangleMesh * m = (ATriangleMesh *)m_triangleMeshes->geometry(0);
+		std::cout<<m->dagName()
+		<<"\n n triangle: "<<m->numTriangles()
+		<<"\n n points: "<<m->numPoints()
+		<<"\n";
+	}
+	/*
+	if(m_triangleMeshes->numGeometries()>0) {
+		ATriangleMesh * m = (ATriangleMesh *)m_triangleMeshes->geometry(0);		
+		unsigned i = 0;
+		for(;i<m->numIndices();i++) std::cout<<" "<<m->indices()[i];
+		for(i=0;i<m->numPoints();i++) std::cout<<" "<<m->points()[i];
+	}*/
 }
  
 void BccWorld::draw()
@@ -243,6 +261,7 @@ void BccWorld::draw()
 
 	drawTetrahedronMesh();
 	// drawAnchor();
+	drawTriangleMesh();
     
 	glDisable(GL_DEPTH_TEST);
     // glColor3f(.59f, .02f, 0.f);
@@ -286,9 +305,10 @@ bool BccWorld::readTriangleDataFromFile()
 	
 	HesperisFile hes;
 	hes.setReadComponent(HesperisFile::RTri);
-	// hes.addCurve("curves", m_curves);
 	if(!hes.open(BccGlobal::FileName)) return false;
 	hes.close();
+	
+	hes.extractTriangleMeshes(m_triangleMeshes);
 	
 	return true;
 }
@@ -357,6 +377,11 @@ void BccWorld::drawAnchor()
     }
     glEnd();
 */
+}
+
+void BccWorld::drawTriangleMesh()
+{
+	m_drawer->geometry(m_triangleMeshes);
 }
 
 bool BccWorld::save()
