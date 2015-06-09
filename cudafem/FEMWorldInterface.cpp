@@ -20,7 +20,7 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
     FEMTetrahedronSystem * tetra = new FEMTetrahedronSystem;
 	if(!readMeshFromFile(tetra)) createTestMesh(tetra);
 	resetVelocity(tetra);
-	tetra->setTotalMass(112000.f);
+	tetra->setTotalMass(3000.f);
 	world->addTetrahedronSystem(tetra);
 }
 
@@ -41,8 +41,9 @@ bool FEMWorldInterface::readMeshFromFile(FEMTetrahedronSystem * mesh)
 	if(!hes.open(FemGlobal::FileName)) return false;
 	hes.close();
 	
-	std::cout<<" nt "<<meshData.numTetrahedrons();
-	std::cout<<" nv "<<meshData.numPoints();
+	std::cout<<" n tetrahedron: "<<meshData.numTetrahedrons()
+	<<"\n n vertex: "<<meshData.numPoints()
+	<<"\n";
 	
 	mesh->generateFromData(&meshData);
 	return true;
