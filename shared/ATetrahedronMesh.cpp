@@ -9,6 +9,7 @@
 
 #include "ATetrahedronMesh.h"
 #include "BaseBuffer.h"
+#include "tetrahedron_math.h"
 
 ATetrahedronMesh::ATetrahedronMesh() 
 {
@@ -54,3 +55,31 @@ unsigned * ATetrahedronMesh::tetrahedronIndices(unsigned idx) const
 {
 	return &indices()[idx*4];
 }
+
+float ATetrahedronMesh::calculateVolume() const
+{
+    Vector3F * p = points();
+	unsigned * v = indices();
+    
+    const unsigned n = numTetrahedrons();
+    float sum = 0.f;
+    Vector3F q[4];
+    unsigned i = 0;
+    for(;i<n;i++) {
+        q[0] = p[v[0]];
+		q[1] = p[v[1]];
+		q[2] = p[v[2]];
+		q[3] = p[v[3]];
+        sum+=tetrahedronVolume(q);
+        v+=4;
+    }
+    
+    return sum;
+}
+
+const float ATetrahedronMesh::volume() const
+{ return m_volume; }
+
+void ATetrahedronMesh::setVolume(float x)
+{ m_volume = x;}
+//:~

@@ -9,6 +9,7 @@ class CudaNarrowphase;
 class TetrahedronSystem;
 class CudaLinearBvh;
 class SimpleContactSolver;
+class TriangleSystem;
 class DynamicWorldInterface {
 public:
     DynamicWorldInterface();
@@ -25,6 +26,7 @@ protected:
 
 private:
     void draw(TetrahedronSystem * tetra);
+    void drawTriangle(TriangleSystem * tri);
 #if DRAW_BPH_PAIRS
     void showOverlappingPairs(CudaDynamicWorld * world, GeoDrawer * drawer);
 #endif

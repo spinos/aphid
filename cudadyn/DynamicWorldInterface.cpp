@@ -15,6 +15,7 @@
 #include <simpleContactSolver_implement.h>
 #include <tetrahedron_math.h>
 #include <boost/format.hpp>
+#include <TriangleSystem.h>
 
 #define GRDW 57
 #define GRDH 57
@@ -148,6 +149,9 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world)
         CudaTetrahedronSystem * tetra = world->tetradedron(i);
         if(tetra) draw(tetra);
     }
+    
+    TriangleSystem * tri = world->firstTriangle();
+    if(tri) drawTriangle(tri);
 }
 
 void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
@@ -172,6 +176,32 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 #if DRAW_NPH_CONTACT
 	showContacts(world, drawer);
 #endif
+}
+
+void DynamicWorldInterface::drawTriangle(TriangleSystem * tri)
+{
+    glEnable(GL_DEPTH_TEST);
+	glColor3f(0.6f, 0.62f, 0.6f);
+    
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)tri->hostX());
+	glDrawElements(GL_TRIANGLES, tri->numTriangleFaceVertices(), GL_UNSIGNED_INT, tri->hostTriangleIndices());
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
+	glColor3f(0.28f, 0.29f, 0.4f);
+	
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)tri->hostX());
+	glDrawElements(GL_TRIANGLES, tri->numTriangleFaceVertices(), GL_UNSIGNED_INT, tri->hostTriangleIndices());
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void DynamicWorldInterface::drawFaulty(CudaDynamicWorld * world, GeoDrawer * drawer)

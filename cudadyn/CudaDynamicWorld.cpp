@@ -3,6 +3,7 @@
 #include <CudaNarrowphase.h>
 #include <SimpleContactSolver.h>
 #include <CudaTetrahedronSystem.h>
+#include <TriangleSystem.h>
 #include <CudaBase.h>
 #include <BvhBuilder.h>
 #include <WorldDbgDraw.h>
@@ -15,6 +16,7 @@ CudaDynamicWorld::CudaDynamicWorld()
     m_narrowphase = new CudaNarrowphase;
 	m_contactSolver = new SimpleContactSolver;
 	m_numObjects = 0;
+    m_triangleMesh[0] = 0;
 }
 
 CudaDynamicWorld::~CudaDynamicWorld()
@@ -51,6 +53,11 @@ void CudaDynamicWorld::addTetrahedronSystem(CudaTetrahedronSystem * tetra)
     
     m_broadphase->addBvh(tetra);
     m_narrowphase->addTetrahedronSystem(tetra);
+}
+
+void CudaDynamicWorld::addTriangleSystem(TriangleSystem * tri)
+{
+    m_triangleMesh[0] = tri;
 }
 
 void CudaDynamicWorld::initOnDevice()
@@ -170,3 +177,6 @@ void CudaDynamicWorld::dbgDraw()
 #endif
 }
 
+TriangleSystem * CudaDynamicWorld::firstTriangle() const
+{ return m_triangleMesh[0]; }
+//:~

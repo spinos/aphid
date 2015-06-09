@@ -29,6 +29,9 @@ char HTetrahedronMesh::verifyType()
 
 	if(!hasNamedAttr(".nv"))
 		return 0;
+    
+    if(!hasNamedAttr(".vlm"))
+		return 0;
 	
 	return 1;
 }
@@ -61,6 +64,12 @@ char HTetrahedronMesh::save(ATetrahedronMesh * tetra)
 	    addIntData(".v", nt * 4);
 	
 	writeIntData(".v", nt * 4, (int *)tetra->indices());
+    
+    if(!hasNamedAttr(".vlm"))
+	    addFloatAttr(".vlm");
+    
+    float vlm = tetra->volume();
+    writeFloatAttr(".vlm", &vlm);
 
 	return 1;
 }
@@ -82,6 +91,9 @@ char HTetrahedronMesh::load(ATetrahedronMesh * tetra)
 	readIntData(".a", nv, (unsigned *)tetra->anchors());
 	readIntData(".v", nt * 4, (unsigned *)tetra->indices());
 	
+    float vlm = 0.f;
+    readFloatAttr(".vlm", &vlm);
+    tetra->setVolume(vlm);
 	return 1;
 }
 //:~

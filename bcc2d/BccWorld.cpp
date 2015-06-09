@@ -36,7 +36,7 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	m_cluster = new KdCluster;
 	m_cluster->addGeometry(m_allGeo);
 	
-	KdTree::MaxBuildLevel = 8;
+	KdTree::MaxBuildLevel = 5;
 	KdTree::NumPrimitivesInLeafThreashold = 15;
 	
 	m_cluster->create();
@@ -208,6 +208,7 @@ void BccWorld::createTetrahedronMeshes()
 	
 	unsigned ntet = 0;
 	unsigned nvert = 0;
+    float vlm;
 	unsigned i=0;
 	for(;i<n;i++) {
 #if WORLD_USE_FIT
@@ -215,6 +216,8 @@ void BccWorld::createTetrahedronMeshes()
 #else
 		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, 5);
 #endif
+        vlm = m_meshes[i].calculateVolume();
+        m_meshes[i].setVolume(vlm);
 		ntet += m_meshes[i].numTetrahedrons();
 		nvert += m_meshes[i].numPoints();
 	}

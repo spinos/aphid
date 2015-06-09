@@ -23,9 +23,13 @@ public:
 	
 	void create(unsigned np, unsigned nt);
 	unsigned * tetrahedronIndices(unsigned idx) const;
+    float calculateVolume() const;
+    
+    const float volume() const;
+    void setVolume(float x);
 protected:
 	
 private:
-	
+	float m_volume;
 };
 #endif        //  #ifndef ATETRAHEDRONMESH_H

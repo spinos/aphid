@@ -110,7 +110,7 @@ void drawWorld(CudaDynamicWorld * world)
     unsigned i;
     for(i=0; i< nobj; i++) {
         CudaTetrahedronSystem * tetra = world->tetradedron(i);
-        tetra->sendXToHost();
+        // tetra->sendXToHost();
         drawTetra(tetra);
     }
 	

@@ -13,9 +13,10 @@ public:
 protected:
 
 private:
-	bool readMeshFromFile(FEMTetrahedronSystem * mesh);
+	bool readTetrahedronMeshFromFile(FEMTetrahedronSystem * mesh);
 	void createTestMesh(FEMTetrahedronSystem * mesh);
 	void resetVelocity(FEMTetrahedronSystem * mesh);
+    bool readTriangleMeshFromFile(CudaDynamicWorld * world);
 };
 
 #endif        //  #ifndef FEMWORLDINTERFACE_H
