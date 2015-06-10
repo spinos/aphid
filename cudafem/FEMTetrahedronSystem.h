@@ -11,6 +11,7 @@ class FEMTetrahedronSystem : public CudaTetrahedronSystem,
 {
 public:
     FEMTetrahedronSystem();
+    FEMTetrahedronSystem(ATetrahedronMesh * md);
     virtual ~FEMTetrahedronSystem();
 	virtual void initOnDevice();
 	virtual void update();

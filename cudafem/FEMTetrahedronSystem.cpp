@@ -26,6 +26,23 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
     m_Fe = new CUDABuffer;
 }
 
+FEMTetrahedronSystem::FEMTetrahedronSystem(ATetrahedronMesh * md) :
+CudaTetrahedronSystem(md)
+{
+    m_Re = new CUDABuffer;
+    m_stiffnessMatrix = new CudaCSRMatrix;
+    m_stiffnessTetraHash = new BaseBuffer;
+    m_stiffnessInd = new BaseBuffer;
+    m_vertexTetraHash = new BaseBuffer;
+    m_vertexInd = new BaseBuffer;
+    m_deviceStiffnessTetraHash = new CUDABuffer;
+    m_deviceStiffnessInd = new CUDABuffer;
+    m_deviceVertexTetraHash = new CUDABuffer;
+    m_deviceVertexInd = new CUDABuffer;
+    m_F0 = new CUDABuffer;
+    m_Fe = new CUDABuffer;
+}
+
 FEMTetrahedronSystem::~FEMTetrahedronSystem() 
 {
     delete m_Re;

@@ -18,7 +18,11 @@
 // CudaDbgLog tetsyslg("tetsys.txt");
 
 CudaTetrahedronSystem::CudaTetrahedronSystem()
-{}
+{
+    m_deviceTetrahedronVicinityInd = new CUDABuffer;
+	m_deviceTetrahedronVicinityStart = new CUDABuffer;
+	m_vicinity = new CUDABuffer;
+}
 
 CudaTetrahedronSystem::CudaTetrahedronSystem(ATetrahedronMesh * md) : TetrahedronSystem(md)
 {
@@ -36,8 +40,6 @@ CudaTetrahedronSystem::~CudaTetrahedronSystem()
 
 void CudaTetrahedronSystem::initOnDevice() 
 {
-	createL2Vicinity();
-	
 	m_deviceTetrahedronVicinityInd->create(numTetrahedronVicinityInd() * 4);
 	m_deviceTetrahedronVicinityStart->create((numTetrahedrons() + 1) * 4);
 	m_deviceTetrahedronVicinityInd->hostToDevice(hostTetrahedronVicinityInd());
@@ -48,8 +50,6 @@ void CudaTetrahedronSystem::initOnDevice()
 	         (int *)m_deviceTetrahedronVicinityInd->bufferOnDevice(), 
 	         (int *)m_deviceTetrahedronVicinityStart->bufferOnDevice(), 
 	         numTetrahedrons());
-	
-	calculateMass();
 	
 	CudaMassSystem::initOnDevice();
 	

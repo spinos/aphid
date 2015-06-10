@@ -32,6 +32,8 @@ public:
 	virtual const int elementRank() const;
 	virtual const unsigned numElements() const;
 
+    void resetVelocity();
+    const float totalMass() const;
 protected:
 	void setNumPoints(unsigned x);
 	void setNumTetrahedrons(unsigned x);
@@ -40,6 +42,10 @@ protected:
 	void addPoint(float * src);
 	void addTetrahedron(unsigned a, unsigned b, unsigned c, unsigned d);
 	void addTriangle(unsigned a, unsigned b, unsigned c);
+	void setTotalMass(float x);
+    
+    void setAnchoredPoint(unsigned i, unsigned anchorInd);
+	bool isAnchoredPoint(unsigned i);
 	
 private:
 	BaseBuffer * m_hostX;
@@ -51,5 +57,6 @@ private:
 	BaseBuffer * m_hostTriangleIndices;
     unsigned m_numPoints, m_numTetrahedrons, m_numTriangles;
 	unsigned m_maxNumPoints, m_maxNumTetrahedrons, m_maxNumTriangles;
+    float m_totalMass;
 };
 #endif        //  #ifndef MASSSYSTEM_H

@@ -18,16 +18,11 @@ void FEMWorldInterface::create(CudaDynamicWorld * world)
     return DynamicWorldInterface::create(world);
 #endif
     world->setBvhBuilder(new SahBuilder);
-	
-    FEMTetrahedronSystem * tetra = new FEMTetrahedronSystem;
-	if(!readTetrahedronMeshFromFile(tetra)) createTestMesh(tetra);
-	resetVelocity(tetra);
-	world->addTetrahedronSystem(tetra);
-    
+	readTetrahedronMeshFromFile(world);
     readTriangleMeshFromFile(world);
 }
 
-bool FEMWorldInterface::readTetrahedronMeshFromFile(FEMTetrahedronSystem * mesh)
+bool FEMWorldInterface::readTetrahedronMeshFromFile(CudaDynamicWorld * world)
 {
 	if(BaseFile::InvalidFilename(FemGlobal::FileName)) 
 		return false;
@@ -48,10 +43,13 @@ bool FEMWorldInterface::readTetrahedronMeshFromFile(FEMTetrahedronSystem * mesh)
 	<<"\n n vertex: "<<meshData.numPoints()
 	<<"\n";
 	
-	mesh->generateFromData(&meshData);
+    FEMTetrahedronSystem * mesh = new FEMTetrahedronSystem(&meshData);
+    mesh->resetVelocity();
+	world->addTetrahedronSystem(mesh);
+	
 	return true;
 }
-
+/*
 void FEMWorldInterface::createTestMesh(FEMTetrahedronSystem * mesh)
 {
 	std::cout<<"test mesh num points "<<TetraNumVertices<<"\n";
@@ -74,15 +72,7 @@ void FEMWorldInterface::createTestMesh(FEMTetrahedronSystem * mesh)
 	mesh->setAnchoredPoint(71, 9);
 	mesh->setAnchoredPoint(95, 78);
 }
-
-void FEMWorldInterface::resetVelocity(FEMTetrahedronSystem * mesh)
-{
-	Vector3F * hv = (Vector3F *)mesh->hostV();
-	unsigned i;
-	const unsigned n = mesh->numPoints();
-	for(i=0; i< n; i++) hv[i].setZero();
-}
-
+*/
 bool FEMWorldInterface::readTriangleMeshFromFile(CudaDynamicWorld * world)
 {
     if(BaseFile::InvalidFilename(FemGlobal::FileName)) 

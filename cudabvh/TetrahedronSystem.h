@@ -18,10 +18,7 @@ public:
 	TetrahedronSystem();
 	TetrahedronSystem(ATetrahedronMesh * md);
 	virtual ~TetrahedronSystem();
-	
-	void setTotalMass(float x);
-	void setAnchoredPoint(unsigned i, unsigned anchorInd);
-	
+
 	unsigned * hostTetrahedronVicinityInd();
 	unsigned * hostTetrahedronVicinityStart();
 	
@@ -31,9 +28,6 @@ public:
 protected:
 	float totalInitialVolume();
     void calculateMass();
-    const unsigned maxNumPoints() const;
-	const unsigned maxNumTetradedrons() const;
-	bool isAnchoredPoint(unsigned i);
 	void createL1Vicinity();
 	void createL2Vicinity();
 	const unsigned numTetrahedronVicinityInd() const;
@@ -51,6 +45,5 @@ private:
 	BaseBuffer * m_hostTetrahedronVicinityInd;
 	BaseBuffer * m_hostTetrahedronVicinityStart;
 	unsigned m_tetrahedronVicinitySize;
-	float m_totalMass;
 };
 #endif        //  #ifndef TETRAHEDRONSYSTEM_H

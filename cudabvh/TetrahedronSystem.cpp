@@ -23,7 +23,6 @@ TetrahedronSystem::TetrahedronSystem()
 {
 	m_hostTetrahedronVicinityInd = new BaseBuffer;
 	m_hostTetrahedronVicinityStart = new BaseBuffer;
-	m_totalMass = 0.f;
 	
 	create(NTET, NTET * 4, NPNT);
 	
@@ -79,13 +78,14 @@ TetrahedronSystem::TetrahedronSystem()
 	}
 	
 	setTotalMass(500.f);
+    calculateMass();
+    createL2Vicinity();
 }
 
 TetrahedronSystem::TetrahedronSystem(ATetrahedronMesh * md)
 {
 	m_hostTetrahedronVicinityInd = new BaseBuffer;
 	m_hostTetrahedronVicinityStart = new BaseBuffer;
-	m_totalMass = 0.f;
 	
 	create(md->numTetrahedrons() + 100, md->numTetrahedrons() * 4 + 400, md->numPoints() + 400);
 	Vector3F * p = md->points();
@@ -105,6 +105,8 @@ TetrahedronSystem::TetrahedronSystem(ATetrahedronMesh * md)
     
     std::cout<<"\n initial volume "<<md->volume()<<"\n";
     setTotalMass(100.f * md->volume());
+    calculateMass();
+    createL2Vicinity();
 }
 
 TetrahedronSystem::~TetrahedronSystem() 
@@ -112,9 +114,6 @@ TetrahedronSystem::~TetrahedronSystem()
 	delete m_hostTetrahedronVicinityInd;
 	delete m_hostTetrahedronVicinityStart;
 }
-
-void TetrahedronSystem::setTotalMass(float x)
-{ m_totalMass = x; }
 
 float TetrahedronSystem::totalInitialVolume()
 {
@@ -144,7 +143,7 @@ void TetrahedronSystem::calculateMass()
 {
 	const unsigned np = numPoints();
 	const unsigned nt = numTetrahedrons();
-	const float density = m_totalMass / totalInitialVolume();
+	const float density = totalMass() / totalInitialVolume();
     const float base = 1.f/(float)np;
     unsigned i;
     float * mass = hostMass();
@@ -187,15 +186,6 @@ void TetrahedronSystem::calculateMass()
     }
     */
 }
-
-void TetrahedronSystem::setAnchoredPoint(unsigned i, unsigned anchorInd)
-{
-	unsigned * anchor = &hostAnchor()[i];
-	*anchor = ((1<<30) | anchorInd);
-}
-
-bool TetrahedronSystem::isAnchoredPoint(unsigned i)
-{ return (hostAnchor()[i] > (1<<29)); }
 
 void TetrahedronSystem::getPointTetrahedronConnection(VicinityMap * vertTetConn)
 {

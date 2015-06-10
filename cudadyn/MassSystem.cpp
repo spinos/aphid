@@ -13,7 +13,8 @@
 MassSystem::MassSystem() : 
 m_numTetrahedrons(0), 
 m_numPoints(0), 
-m_numTriangles(0)
+m_numTriangles(0),
+m_totalMass(0.f)
 {
 	m_hostX = new BaseBuffer;
 	m_hostXi = new BaseBuffer;
@@ -149,4 +150,27 @@ void MassSystem::addTriangle(unsigned a, unsigned b, unsigned c)
 	idx[2] = c;
 	m_numTriangles++;
 }
+
+void MassSystem::resetVelocity()
+{
+	Vector3F * hv = (Vector3F *)hostV();
+	const unsigned n = numPoints();
+	unsigned i = 0;
+	for(; i< n; i++) hv[i].setZero();
+}
+
+void MassSystem::setTotalMass(float x)
+{ m_totalMass = x; }
+
+const float MassSystem::totalMass() const
+{ return m_totalMass; }
+
+void MassSystem::setAnchoredPoint(unsigned i, unsigned anchorInd)
+{
+	unsigned * anchor = &hostAnchor()[i];
+	*anchor = ((1<<30) | anchorInd);
+}
+
+bool MassSystem::isAnchoredPoint(unsigned i)
+{ return (hostAnchor()[i] > (1<<29)); }
 //:~
