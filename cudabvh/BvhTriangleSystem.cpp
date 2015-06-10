@@ -1,25 +1,25 @@
-#include "CudaTriangleSystem.h"
+#include "BvhTriangleSystem.h"
 #include <CUDABuffer.h>
 #include "TriangleSystemInterface.h"
-CudaTriangleSystem::CudaTriangleSystem(ATriangleMesh * md) : TriangleSystem(md)
+BvhTriangleSystem::BvhTriangleSystem(ATriangleMesh * md) : TriangleSystem(md)
 {
 }
 
-CudaTriangleSystem::~CudaTriangleSystem() {}
+BvhTriangleSystem::~BvhTriangleSystem() {}
 
-void CudaTriangleSystem::initOnDevice() 
+void BvhTriangleSystem::initOnDevice() 
 {
 	setNumPrimitives(numTriangles());
 	CudaLinearBvh::initOnDevice();
 }
 
-void CudaTriangleSystem::update()
+void BvhTriangleSystem::update()
 {
 	formTetrahedronAabbs();
     CudaLinearBvh::update();
 }
 
-void CudaTriangleSystem::formTetrahedronAabbs()
+void BvhTriangleSystem::formTetrahedronAabbs()
 {
     void * cvs = deviceX();
 	void * vsrc = deviceV();

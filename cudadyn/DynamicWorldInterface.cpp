@@ -1,6 +1,6 @@
 #include "DynamicWorldInterface.h"
 #include "CudaDynamicWorld.h"
-#include <CudaTetrahedronSystem.h>
+#include <BvhTetrahedronSystem.h>
 #include <CudaBroadphase.h>
 #include <CudaNarrowphase.h>
 #include <SimpleContactSolver.h>
@@ -43,7 +43,7 @@ void DynamicWorldInterface::create(CudaDynamicWorld * world)
 {
 	world->setBvhBuilder(new SahBuilder);
 	
-    world->addTetrahedronSystem(new CudaTetrahedronSystem);
+    world->addTetrahedronSystem(new BvhTetrahedronSystem);
 }
 
 void DynamicWorldInterface::changeMaxDisplayLevel(int d)
@@ -87,7 +87,7 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world)
     
     unsigned i;
     for(i=0; i< nobj; i++) {
-        CudaTetrahedronSystem * tetra = world->tetradedron(i);
+        BvhTetrahedronSystem * tetra = world->tetradedron(i);
         if(tetra) draw(tetra);
     }
     

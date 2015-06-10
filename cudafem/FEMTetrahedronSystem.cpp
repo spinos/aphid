@@ -27,7 +27,7 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
 }
 
 FEMTetrahedronSystem::FEMTetrahedronSystem(ATetrahedronMesh * md) :
-CudaTetrahedronSystem(md)
+BvhTetrahedronSystem(md)
 {
     m_Re = new CUDABuffer;
     m_stiffnessMatrix = new CudaCSRMatrix;
@@ -80,7 +80,7 @@ void FEMTetrahedronSystem::initOnDevice()
     
     setDimension(numPoints());
     CudaConjugateGradientSolver::initOnDevice();
-    CudaTetrahedronSystem::initOnDevice();
+    BvhTetrahedronSystem::initOnDevice();
 }
 
 unsigned matrixCoord(unsigned * indices, unsigned tet, 
@@ -469,5 +469,5 @@ void FEMTetrahedronSystem::update()
 	dynamicsAssembly(1.f/60.f);
 	solveConjugateGradient();
 	// verbose();
-	CudaTetrahedronSystem::update();
+	BvhTetrahedronSystem::update();
 }

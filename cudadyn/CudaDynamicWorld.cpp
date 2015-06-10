@@ -2,7 +2,7 @@
 #include <CudaBroadphase.h>
 #include <CudaNarrowphase.h>
 #include <SimpleContactSolver.h>
-#include <CudaTetrahedronSystem.h>
+#include <BvhTetrahedronSystem.h>
 #include <TriangleSystem.h>
 #include <CudaBase.h>
 #include <BvhBuilder.h>
@@ -29,7 +29,7 @@ CudaDynamicWorld::~CudaDynamicWorld()
 const unsigned CudaDynamicWorld::numObjects() const
 { return m_numObjects; }
 
-CudaTetrahedronSystem * CudaDynamicWorld::tetradedron(unsigned ind) const
+BvhTetrahedronSystem * CudaDynamicWorld::tetradedron(unsigned ind) const
 { return m_objects[ind]; }
 
 CudaBroadphase * CudaDynamicWorld::broadphase() const
@@ -44,7 +44,7 @@ SimpleContactSolver * CudaDynamicWorld::contactSolver() const
 void CudaDynamicWorld::setBvhBuilder(BvhBuilder * builder)
 { CudaLinearBvh::Builder = builder; }
 
-void CudaDynamicWorld::addTetrahedronSystem(CudaTetrahedronSystem * tetra)
+void CudaDynamicWorld::addTetrahedronSystem(BvhTetrahedronSystem * tetra)
 {
     if(m_numObjects == CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS) return;
     

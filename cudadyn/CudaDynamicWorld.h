@@ -6,7 +6,7 @@ class CudaBroadphase;
 class CudaNarrowphase;
 class SimpleContactSolver;
 class TriangleSystem;
-class CudaTetrahedronSystem;
+class BvhTetrahedronSystem;
 class BvhBuilder;
 class WorldDbgDraw;
 class TriangleSystem;
@@ -19,7 +19,7 @@ public:
     virtual void initOnDevice();
     
 	void setBvhBuilder(BvhBuilder * builder);
-    void addTetrahedronSystem(CudaTetrahedronSystem * tetra);
+    void addTetrahedronSystem(BvhTetrahedronSystem * tetra);
     void addTriangleSystem(TriangleSystem * tri);
     
     void stepPhysics(float dt);
@@ -31,7 +31,7 @@ public:
     
     const unsigned numObjects() const;
     
-    CudaTetrahedronSystem * tetradedron(unsigned ind) const;
+    BvhTetrahedronSystem * tetradedron(unsigned ind) const;
 	TriangleSystem * firstTriangle() const;
 	
     CudaBroadphase * broadphase() const;
@@ -48,7 +48,7 @@ private:
     CudaBroadphase * m_broadphase;
     CudaNarrowphase * m_narrowphase;
     SimpleContactSolver * m_contactSolver;
-    CudaTetrahedronSystem * m_objects[CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS];
+    BvhTetrahedronSystem * m_objects[CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS];
     TriangleSystem * m_triangleMesh[2];
     unsigned m_numObjects;
 };

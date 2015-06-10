@@ -14,7 +14,7 @@
 #include "scan_implement.h"
 #include <CudaBase.h>
 #include <CudaScan.h>
-#include <CudaTetrahedronSystem.h>
+#include <BvhTetrahedronSystem.h>
 #include "TetrahedronSystemInterface.h"
 #include <CudaDbgLog.h>
 
@@ -176,7 +176,7 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	counts += m_objectStart[a];
 
 // only for tetrahedron system
-	CudaTetrahedronSystem * query = static_cast<CudaTetrahedronSystem *>(m_objects[a]);
+	BvhTetrahedronSystem * query = static_cast<BvhTetrahedronSystem *>(m_objects[a]);
 	CudaLinearBvh * tree = m_objects[a];
 	
 	void * boxes = (Aabb *)query->leafAabbs();
@@ -247,7 +247,7 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	location += m_objectStart[a];
 
 // only for tetrahedron system	
-	CudaTetrahedronSystem * query = static_cast<CudaTetrahedronSystem *>(m_objects[a]);
+	BvhTetrahedronSystem * query = static_cast<BvhTetrahedronSystem *>(m_objects[a]);
 	CudaLinearBvh * tree = m_objects[a];
 	
 	void * boxes = (Aabb *)query->leafAabbs();

@@ -1,8 +1,8 @@
-#ifndef CUDATETRAHEDRONSYSTEM_H
-#define CUDATETRAHEDRONSYSTEM_H
+#ifndef BVHTETRAHEDRONSYSTEM_H
+#define BVHTETRAHEDRONSYSTEM_H
 
 /*
- *  CudaTetrahedronSystem.h
+ *  BvhTetrahedronSystem.h
  *  cudabvh
  *
  *  Created by jian zhang on 2/15/15.
@@ -12,11 +12,11 @@
 #include "CudaLinearBvh.h"
 #include <TetrahedronSystem.h>
 class CUDABuffer; 
-class CudaTetrahedronSystem : public TetrahedronSystem, public CudaLinearBvh {
+class BvhTetrahedronSystem : public TetrahedronSystem, public CudaLinearBvh {
 public:
-	CudaTetrahedronSystem();
-	CudaTetrahedronSystem(ATetrahedronMesh * md);
-	virtual ~CudaTetrahedronSystem();
+	BvhTetrahedronSystem();
+	BvhTetrahedronSystem(ATetrahedronMesh * md);
+	virtual ~BvhTetrahedronSystem();
 	virtual void initOnDevice();
 	virtual void update();
 	

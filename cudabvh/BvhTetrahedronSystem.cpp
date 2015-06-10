@@ -1,5 +1,5 @@
 /*
- *  CudaTetrahedronSystem.cpp
+ *  BvhTetrahedronSystem.cpp
  *  cudabvh
  *
  *  Created by jian zhang on 2/15/15.
@@ -7,7 +7,7 @@
  *
  */
 
-#include "CudaTetrahedronSystem.h"
+#include "BvhTetrahedronSystem.h"
 #include <CUDABuffer.h>
 #include "createBvh_implement.h"
 #include "reduceBox_implement.h"
@@ -17,28 +17,28 @@
 
 // CudaDbgLog tetsyslg("tetsys.txt");
 
-CudaTetrahedronSystem::CudaTetrahedronSystem()
+BvhTetrahedronSystem::BvhTetrahedronSystem()
 {
     m_deviceTetrahedronVicinityInd = new CUDABuffer;
 	m_deviceTetrahedronVicinityStart = new CUDABuffer;
 	m_vicinity = new CUDABuffer;
 }
 
-CudaTetrahedronSystem::CudaTetrahedronSystem(ATetrahedronMesh * md) : TetrahedronSystem(md)
+BvhTetrahedronSystem::BvhTetrahedronSystem(ATetrahedronMesh * md) : TetrahedronSystem(md)
 {
 	m_deviceTetrahedronVicinityInd = new CUDABuffer;
 	m_deviceTetrahedronVicinityStart = new CUDABuffer;
 	m_vicinity = new CUDABuffer;
 }
 
-CudaTetrahedronSystem::~CudaTetrahedronSystem() 
+BvhTetrahedronSystem::~BvhTetrahedronSystem() 
 {
 	delete m_deviceTetrahedronVicinityInd;
 	delete m_deviceTetrahedronVicinityStart;
 	delete m_vicinity;
 }
 
-void CudaTetrahedronSystem::initOnDevice() 
+void BvhTetrahedronSystem::initOnDevice() 
 {
 	m_deviceTetrahedronVicinityInd->create(numTetrahedronVicinityInd() * 4);
 	m_deviceTetrahedronVicinityStart->create((numTetrahedrons() + 1) * 4);
@@ -57,13 +57,13 @@ void CudaTetrahedronSystem::initOnDevice()
 	CudaLinearBvh::initOnDevice();
 }
 
-void CudaTetrahedronSystem::update()
+void BvhTetrahedronSystem::update()
 {
 	formTetrahedronAabbs();
     CudaLinearBvh::update();
 }
 
-void CudaTetrahedronSystem::formTetrahedronAabbs()
+void BvhTetrahedronSystem::formTetrahedronAabbs()
 {
 	void * cvs = deviceX();
 	void * vsrc = deviceV();
@@ -72,15 +72,15 @@ void CudaTetrahedronSystem::formTetrahedronAabbs()
     tetrasys::formTetrahedronAabbs((Aabb *)dst, (float3 *)cvs, (float3 *)vsrc, 1.f/60.f, (uint4 *)idx, numTetrahedrons());
 }
 
-void CudaTetrahedronSystem::integrate(float timeStep)
+void BvhTetrahedronSystem::integrate(float timeStep)
 { tetrahedronSystemIntegrate((float3 *)deviceX(), (float3 *)deviceV(), timeStep, numPoints()); }
 
-void CudaTetrahedronSystem::sendXToHost()
+void BvhTetrahedronSystem::sendXToHost()
 { deviceXBuf()->deviceToHost(hostX(), xLoc(), numPoints() * 12); }
 
-void CudaTetrahedronSystem::sendVToHost()
+void BvhTetrahedronSystem::sendVToHost()
 { deviceVBuf()->deviceToHost(hostV(), vLoc(), numPoints() * 12); }
 
-void * CudaTetrahedronSystem::vicinity()
+void * BvhTetrahedronSystem::vicinity()
 { return m_vicinity->bufferOnDevice(); }
 //:~
