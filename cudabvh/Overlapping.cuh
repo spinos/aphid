@@ -1,5 +1,5 @@
-#ifndef BROADPHASE_CUH
-#define BROADPHASE_CUH
+#ifndef OVERLAPPING_CUH
+#define OVERLAPPING_CUH
 
 #include "stripedModel.cu"
 #include "bvh_math.cuh"
@@ -272,5 +272,5 @@ __global__ void startAsWriteLocation_kernel(uint * dst, uint * src, uint maxInd)
 	if(ind < maxInd) dst[ind] = src[ind];
 }
 
-#endif        //  #ifndef BROADPHASE_CUH
+#endif        //  #ifndef OVERLAPPING_CUH
 
