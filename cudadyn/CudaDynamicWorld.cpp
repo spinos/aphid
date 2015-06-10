@@ -52,7 +52,7 @@ void CudaDynamicWorld::addTetrahedronSystem(CudaTetrahedronSystem * tetra)
     m_numObjects++;
     
     m_broadphase->addBvh(tetra);
-    m_narrowphase->addTetrahedronSystem(tetra);
+    m_narrowphase->addMassSystem(tetra);
 }
 
 void CudaDynamicWorld::addTriangleSystem(TriangleSystem * tri)

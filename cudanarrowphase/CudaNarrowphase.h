@@ -10,7 +10,7 @@
  *
  */
 #define CUDANARROWPHASE_MAX_NUMOBJECTS 32
-class CudaTetrahedronSystem;
+class CudaMassSystem;
 class CUDABuffer;
 class BaseBuffer;
 class CudaScan;
@@ -35,7 +35,7 @@ public:
 	void initOnDevice();
 	void resetToInitial();
 	
-	void addTetrahedronSystem(CudaTetrahedronSystem * tetra);
+	void addMassSystem(CudaMassSystem * tetra);
 	void computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs);
 	
 	void getContact(BaseBuffer * dst);
@@ -75,7 +75,7 @@ private:
 	CudaScan * m_scanIntermediate;
 	CUDABuffer * m_tetVertPos[2];
 	CUDABuffer * m_tetVertVel[2];
-    CudaTetrahedronSystem * m_objects[CUDANARROWPHASE_MAX_NUMOBJECTS];
+    CudaMassSystem * m_objects[CUDANARROWPHASE_MAX_NUMOBJECTS];
     unsigned m_objectPointStart[CUDANARROWPHASE_MAX_NUMOBJECTS];
 	unsigned m_objectIndexStart[CUDANARROWPHASE_MAX_NUMOBJECTS];
 	unsigned m_numObjects, m_numPoints, m_numElements, m_numContacts, m_numPairs;

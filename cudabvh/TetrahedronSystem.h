@@ -10,31 +10,24 @@
  *
  */
 #include <map>
+#include <CudaMassSystem.h>
 class BaseBuffer;
 class ATetrahedronMesh;
-class TetrahedronSystem {
+class TetrahedronSystem : public CudaMassSystem {
 public:
 	TetrahedronSystem();
+	TetrahedronSystem(ATetrahedronMesh * md);
 	virtual ~TetrahedronSystem();
-	void generateFromData(ATetrahedronMesh * md);
-	void create(const unsigned & maxNumTetrahedrons, const unsigned & maxNumPoints);
-	void addPoint(float * src);
-	void addTetrahedron(unsigned a, unsigned b, unsigned c, unsigned d);
+	
 	void setTotalMass(float x);
 	void setAnchoredPoint(unsigned i, unsigned anchorInd);
-	const unsigned numTetrahedrons() const;
-	const unsigned numPoints() const;
-	const unsigned numTriangles() const;
-	const unsigned numTriangleFaceVertices() const;
-	float * hostX();
-	float * hostXi();
-	float * hostV();
-	float * hostMass();
-	unsigned * hostAnchor();
-	unsigned * hostTretradhedronIndices();
-	unsigned * hostTriangleIndices();
+	
 	unsigned * hostTetrahedronVicinityInd();
 	unsigned * hostTetrahedronVicinityStart();
+	
+// override mass system
+	virtual const int elementRank() const;
+	virtual const unsigned numElements() const;
 protected:
 	float totalInitialVolume();
     void calculateMass();
@@ -45,7 +38,7 @@ protected:
 	void createL2Vicinity();
 	const unsigned numTetrahedronVicinityInd() const;
 private:
-    void addTriangle(unsigned a, unsigned b, unsigned c);
+    
 typedef std::map<unsigned, unsigned> VicinityMap;
 typedef std::map<unsigned, unsigned>::iterator VicinityMapIter;
 	void getPointTetrahedronConnection(VicinityMap * vertTetConn);
@@ -55,17 +48,9 @@ typedef std::map<unsigned, unsigned>::iterator VicinityMapIter;
 											VicinityMap * srcConn);
 	void buildVicinityIndStart(VicinityMap * tetTetConn);
 private:
-	BaseBuffer * m_hostX;
-	BaseBuffer * m_hostXi;
-	BaseBuffer * m_hostV;
-	BaseBuffer * m_hostMass;
-	BaseBuffer * m_hostTetrahedronIndices;
-	BaseBuffer * m_hostTriangleIndices;
-	BaseBuffer * m_hostAnchor;
 	BaseBuffer * m_hostTetrahedronVicinityInd;
 	BaseBuffer * m_hostTetrahedronVicinityStart;
-	unsigned m_numTetrahedrons, m_numPoints, m_numTriangles, m_tetrahedronVicinitySize;
-	unsigned m_maxNumTetrahedrons, m_maxNumPoints, m_maxNumTriangles;
+	unsigned m_tetrahedronVicinitySize;
 	float m_totalMass;
 };
 #endif        //  #ifndef TETRAHEDRONSYSTEM_H

@@ -8,7 +8,7 @@
  */
 
 #include "CudaNarrowphase.h"
-#include <CudaTetrahedronSystem.h>
+#include <CudaMassSystem.h>
 #include <BaseBuffer.h>
 #include <CUDABuffer.h>
 #include "narrowphase_implement.h"
@@ -128,7 +128,7 @@ CUDABuffer * CudaNarrowphase::contactPairsBuffer()
 CUDABuffer * CudaNarrowphase::contactBuffer()
 { return m_contact[bufferId()]; }
 
-void CudaNarrowphase::addTetrahedronSystem(CudaTetrahedronSystem * tetra)
+void CudaNarrowphase::addMassSystem(CudaMassSystem * tetra)
 {
     if(m_numObjects==CUDANARROWPHASE_MAX_NUMOBJECTS) return;
     m_objects[m_numObjects] = tetra;
@@ -144,7 +144,7 @@ void CudaNarrowphase::initOnDevice()
 	m_numPoints = 0;
 	unsigned i;
 	for(i = 0; i<m_numObjects; i++) {
-		m_numElements += m_objects[i]->numTetrahedrons();
+		m_numElements += m_objects[i]->numElements();
 		m_numPoints += m_objects[i]->numPoints();
 		if(i<m_numObjects-1) {
 		    m_objectPointStart[i+1] = m_numPoints;
@@ -165,7 +165,7 @@ void CudaNarrowphase::initOnDevice()
 	m_objectBuf.m_indexCacheLoc->hostToDevice(&m_objectIndexStart[0]);
 	
 	for(i = 0; i<m_numObjects; i++) {
-		CudaTetrahedronSystem * curObj = m_objects[i];
+		CudaMassSystem * curObj = m_objects[i];
 		
 		curObj->setDeviceXPtr(m_objectBuf.m_pos, m_objectPointStart[i] * 12);
 		curObj->setDeviceXiPtr(m_objectBuf.m_pos0, m_objectPointStart[i] * 12);
@@ -177,7 +177,7 @@ void CudaNarrowphase::initOnDevice()
 		m_objectBuf.m_pos0->hostToDevice(curObj->hostXi(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_vel->hostToDevice(curObj->hostV(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_mass->hostToDevice(curObj->hostMass(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
-		m_objectBuf.m_ind->hostToDevice(curObj->hostTretradhedronIndices(), m_objectIndexStart[i] * 16, curObj->numTetrahedrons() * 16);
+		m_objectBuf.m_ind->hostToDevice(curObj->hostTetrahedronIndices(), m_objectIndexStart[i] * 16, curObj->numElements() * 16);
 	}
 	
 	const unsigned estimatedN = m_numElements * 2;

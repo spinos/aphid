@@ -1,17 +1,10 @@
 #include "TriangleSystem.h"
 #include <BaseBuffer.h>
 TriangleSystem::TriangleSystem(ATriangleMesh * md) 
-{
-   m_hostX = new BaseBuffer;
-	m_hostXi = new BaseBuffer;
-	m_hostV = new BaseBuffer;
-	m_hostTriangleIndices = new BaseBuffer;
-    m_hostTetrahedronIndices = new BaseBuffer;
-	m_hostMass = new BaseBuffer;
-    
+{    
     const unsigned np = md->numPoints();
     
-    create(md->numTriangles(), np);
+    create(md->numTriangles(), md->numTriangles(), np);
     
     Vector3F * p = md->points();
     Vector3F * q = (Vector3F *)hostX();
@@ -39,52 +32,19 @@ TriangleSystem::TriangleSystem(ATriangleMesh * md)
     
     float * mass = hostMass();
     for(i=0;i<np;i++) mass[i] = 1e30f;
+	
+	setNumPoints(np);
+	setNumTetrahedrons(md->numTriangles());
+	setNumTriangles(md->numTriangles());
 }
 
 TriangleSystem::~TriangleSystem() 
 {
-    delete m_hostX;
-	delete m_hostXi;
-	delete m_hostV;
-    delete m_hostMass;
-	delete m_hostTriangleIndices;
 }
 
-void TriangleSystem::create(unsigned numTri, unsigned numPnt)
-{
-    m_numTriangles = numTri;
-    m_numPoints = numPnt;
-    m_hostX->create(m_numPoints * 12);
-	m_hostXi->create(m_numPoints * 12);
-	m_hostV->create(m_numPoints * 12);
-	m_hostMass->create(m_numPoints * 4);
-	m_hostTriangleIndices->create(m_numTriangles * 12);
-    m_hostTetrahedronIndices->create(m_numTriangles * 16);
-}
+const int TriangleSystem::elementRank() const
+{ return 3; }
 
-const unsigned TriangleSystem::numTriangles() const
-{ return m_numTriangles; }
-
-const unsigned TriangleSystem::numPoints() const
-{ return m_numPoints; }
-
-const unsigned TriangleSystem::numTriangleFaceVertices() const
-{ return m_numTriangles * 3; }
-
-float * TriangleSystem::hostX()
-{ return (float *)m_hostX->data(); }
-
-float * TriangleSystem::hostXi()
-{ return (float *)m_hostXi->data(); }
-
-float * TriangleSystem::hostV()
-{ return (float *)m_hostV->data(); }
-
-float * TriangleSystem::hostMass()
-{ return (float *)m_hostMass->data(); }
-
-unsigned * TriangleSystem::hostTriangleIndices()
-{ return (unsigned *)m_hostTriangleIndices->data(); }
-
-unsigned * TriangleSystem::hostTetrahedronIndices()
-{ return (unsigned *)m_hostTetrahedronIndices->data(); }
+const unsigned TriangleSystem::numElements() const
+{ return numTriangles(); }
+//:~

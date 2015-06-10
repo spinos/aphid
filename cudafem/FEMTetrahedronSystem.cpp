@@ -104,7 +104,7 @@ void extractKijt(unsigned c, unsigned & k, unsigned & i, unsigned & j, unsigned 
 void FEMTetrahedronSystem::createStiffnessMatrix()
 {
     CSRMap vertexConnection;
-    unsigned *ind = hostTretradhedronIndices();
+    unsigned *ind = hostTetrahedronIndices();
     unsigned i, j, k, h;
     const unsigned n = numTetrahedrons();
     const unsigned w = numPoints();
@@ -190,7 +190,7 @@ void FEMTetrahedronSystem::createStiffnessMatrix()
 
 void FEMTetrahedronSystem::createVertexTetraHash()
 {
-	unsigned *ind = hostTretradhedronIndices();
+	unsigned *ind = hostTetrahedronIndices();
     unsigned i, j, k;
     const unsigned n = numTetrahedrons();
     const unsigned w = numPoints();

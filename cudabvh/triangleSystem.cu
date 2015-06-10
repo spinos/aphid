@@ -1,6 +1,4 @@
-#include "bvh_common.h"
-#include "bvh_math.cuh"
-#include "Aabb.cuh"
+#include "TriangleSystem.cuh"
 
 namespace trianglesys {
 void formTetrahedronAabbs(Aabb * dst,
@@ -16,7 +14,7 @@ void formTetrahedronAabbs(Aabb * dst,
     unsigned nblk = iDivUp(numTriangles<<2, tpb);
     
     dim3 grid(nblk, 1, 1);
-    formTetrahedronAabbs_kernel<<< grid, block >>>(dst, pos, vel, timeStep, tets, numTriangles<<2);
+    formTriangleAabbs_kernel<<< grid, block >>>(dst, pos, vel, timeStep, tets, numTriangles<<2);
 }
 
 }
