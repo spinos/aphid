@@ -525,4 +525,38 @@ float Base3DView::elapsedTime() const
 
 float Base3DView::frameRate()
 { return 1000.f/deltaTime(); }
+
+void Base3DView::drawFrontImagePlane()
+{
+	glPushMatrix();
+	float m[16];
+	getCamera()->fSpace.glMatrix(m);
+	glMultMatrixf(m);
+	
+	float fw, fh, fz;
+	
+	fz = -.0001f - getCamera()->nearClipPlane();
+	
+	if(getCamera()->isOrthographic())
+        fw = getCamera()->fieldOfView();
+    else
+        fw = getCamera()->frameWidth();
+	
+	fh = fw / getCamera()->aspectRatio();
+	
+	glTranslatef(-fw*.5f, -fh*.5f, fz);
+	glScalef(fw, fh, 1.f);
+	
+	glColor3f(1.f, 1.f, 1.f);
+	glEnable(GL_TEXTURE_2D);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0); glVertex2f(0, 0);
+    glTexCoord2f(1, 0); glVertex2f(1, 0);
+    glTexCoord2f(1, 1); glVertex2f(1, 1);
+    glTexCoord2f(0, 1); glVertex2f(0, 1);
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+	glPopMatrix();
+}
 //:~

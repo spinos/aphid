@@ -93,6 +93,8 @@ protected:
 	
 	void hudText(const std::string & t, const int & row) const;
 	float frameRate();
+	
+	void drawFrontImagePlane();
 private:
 	void computeIncidentRay(int x, int y);
 	

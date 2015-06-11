@@ -12,4 +12,26 @@ void resetImage(float4 * pix,
         n);
 }
 
+void setModelViewMatrix(float * src, uint size) 
+{
+    cudaMemcpyToSymbol(c_modelViewMatrix, src, size);
+}
+
+void renderImageOrthographic(float4 * pix,
+                uint imageW,
+                uint imageH,
+                float fovWidth,
+                float aspectRatio)
+{
+    uint nthread = 8;
+    uint nblockX = iDivUp(imageW, nthread);
+    uint nblockY = iDivUp(imageH, nthread);
+    dim3 block(nthread, nthread, 1);
+    dim3 grid(nblockX, nblockY, 1);
+    renderImageOrthographic_kernel<<< grid, block >>>(pix,
+                        imageW, imageH,
+                        fovWidth,
+                        aspectRatio);
+}
+
 }

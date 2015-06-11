@@ -3,7 +3,11 @@
 #include <GeoDrawer.h>
 #include <CudaBase.h>
 #include <BvhBuilder.h>
+#include <PerspectiveCamera.h>
 #include "AdeniumRender.h"
+
+GLuint AdeniumWorld::m_texture = 0;
+
 AdeniumWorld::AdeniumWorld() :
 m_numObjects(0)
 {
@@ -25,7 +29,7 @@ void AdeniumWorld::addTriangleSystem(BvhTriangleSystem * tri)
 void AdeniumWorld::setBvhBuilder(BvhBuilder * builder)
 { CudaLinearBvh::Builder = builder; }
 
-void AdeniumWorld::draw()
+void AdeniumWorld::draw(BaseCamera * camera)
 {
     unsigned i = 0;
     for(;i<m_numObjects; i++)
@@ -69,5 +73,45 @@ void AdeniumWorld::initOnDevice()
 
 void AdeniumWorld::resizeRenderArea(int w, int h)
 {
-    m_image->resize(w, h);
+    if(!m_image->resize(w, h)) return;
+	
+	if(m_texture) glDeleteTextures(1, &m_texture);
+	glGenTextures(1, &m_texture);
+    glBindTexture(GL_TEXTURE_2D, m_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
 }
+
+void AdeniumWorld::render(BaseCamera * camera)
+{
+	if(!m_image->isInitd()) return;
+	m_image->reset();
+	Matrix44F mt = camera->fSpace;
+	mt.transpose();
+	m_image->setModelViewMatrix(mt.v);
+	if(camera->isOrthographic()) {
+		m_image->renderOrhographic(camera);
+	}
+	else {
+		//m_image->renderPerspective(camera);
+	}
+	m_image->sendToHost();
+	
+	if(!m_texture) {
+		glGenTextures(1, &m_texture);
+		glBindTexture(GL_TEXTURE_2D, m_texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, m_image->imageWidth(), m_image->imageHeight(), 0, GL_RGBA, GL_FLOAT, NULL);
+	}
+	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->imageWidth(), m_image->imageHeight(), GL_RGBA, GL_FLOAT, m_image->hostRgbz());
+}
+//:~

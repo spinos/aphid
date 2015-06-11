@@ -44,7 +44,7 @@ void CudaTexture::create(unsigned width, unsigned height, int pixelDepth, bool i
 	
     if(isHalf) {
         if(m_pixelDepth == 1)
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE16F_ARB, m_width, m_height, 0, GL_RED, GL_HALF_FLOAT_ARB, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE16F_ARB, m_width, m_height, 0, GL_RED, GL_HALF_FLOAT_ARB, NULL);
         else if(m_pixelDepth == 3)
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB, m_width, m_height, 0, GL_RGB, GL_HALF_FLOAT_ARB, NULL);
         else

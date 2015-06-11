@@ -29,7 +29,13 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-    m_world->draw();
+    if(getCamera()->isOrthographic()) {
+		m_world->render(getCamera());
+		glDisable(GL_BLEND);
+		drawFrontImagePlane();
+	}
+	else
+		m_world->draw(getCamera());
 }
 //! [7]
 

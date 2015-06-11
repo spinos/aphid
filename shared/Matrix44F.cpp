@@ -33,6 +33,22 @@ Matrix44F::Matrix44F(double * mat)
 
 Matrix44F::~Matrix44F() {}
 
+/*
+ *   layout
+ *
+ *   0  1  2  3
+ *   4  5  6  7
+ *   8  9  10 11
+ *   12 13 14 15
+ *
+ *   row    i
+ *   column j
+ *
+ *   00 01 02 03
+ *   10 11 12 13
+ *   20 21 22 23
+ *   30 31 32 33
+ */
 float Matrix44F::operator() (int i, int j)
 {
 	return v[i * 4 + j];
@@ -333,6 +349,40 @@ void Matrix44F::transposed(float * mat) const
 	mat[13] = M(3, 1);
 	mat[14] = M(3, 2);
 	mat[15] = M(3, 3);
+}
+
+/*
+ *  __ 01 02 03
+ *  __ __ 12 13
+ *  __ __ __ 23
+ *  __ __ __ __
+ */
+
+void Matrix44F::transpose()
+{
+	float tmp= M(0, 1);
+    *m(0, 1) = M(1, 0);
+    *m(1, 0) = tmp;
+
+    tmp =      M(0, 2);
+    *m(0, 2) = M(2, 0);
+    *m(2, 0) = tmp;
+	
+	tmp =      M(0, 3);
+    *m(0, 3) = M(3, 0);
+    *m(3, 0) = tmp;
+	
+    tmp =      M(1, 2);
+    *m(1, 2) = M(2, 1);
+    *m(2, 1) = tmp;
+	
+	tmp =      M(1, 3);
+    *m(1, 3) = M(3, 1);
+    *m(3, 1) = tmp;
+	
+	tmp =      M(2, 3);
+    *m(2, 3) = M(3, 2);
+    *m(3, 2) = tmp;
 }
 
 float Matrix44F::Determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i )

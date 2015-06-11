@@ -66,7 +66,7 @@ void BaseCamera::updateInverseSpace()
 
 void BaseCamera::getMatrix(float* m) const
 {
-	fInverseSpace.transposed(m);
+	fInverseSpace.glMatrix(m);
 }
 	
 void BaseCamera::tumble(int x, int y)

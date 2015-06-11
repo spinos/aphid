@@ -3,14 +3,25 @@
 
 class BaseBuffer;
 class CUDABuffer;
+class BaseCamera;
 class AdeniumRender {
 public:
     AdeniumRender();
     virtual ~AdeniumRender();
     
     void initOnDevice();
-    void resize(int w, int h);
+    bool resize(int w, int h);
     void reset();
+	void setModelViewMatrix(float * src);
+	void renderOrhographic(BaseCamera * camera);
+	void renderPerspective(BaseCamera * camera);
+	void sendToHost();
+	
+	const int imageWidth() const;
+	const int imageHeight() const;
+	void * hostRgbz();
+	
+	const bool isInitd() const;
 private:
     bool isSizeValid(int x, int y) const;
     int numPixels() const;

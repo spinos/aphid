@@ -4,6 +4,7 @@
 #include <CUDABuffer.h>
 #include <iostream>
 #include "AdeniumRenderInterface.h"
+#include <PerspectiveCamera.h>
 AdeniumRender::AdeniumRender() :
 m_imageWidth(0), m_imageHeight(0),
 m_initd(0)
@@ -14,14 +15,16 @@ m_initd(0)
 
 AdeniumRender::~AdeniumRender() {}
 
-void AdeniumRender::resize(int w, int h)
+bool AdeniumRender::resize(int w, int h)
 { 
-    if(!isSizeValid(w, h)) return;
+    if(!isSizeValid(w, h)) return false;
+	if(w==m_imageWidth && h == m_imageHeight) return false;
     m_imageWidth = w;
     m_imageHeight = h;
     m_hostRgbz->create(m_imageWidth * m_imageHeight * 4 * 4);
     if(m_initd) m_deviceRgbz->create(m_imageWidth * m_imageHeight * 4 * 4);
     std::cout<<" resize render area: "<<w<<" x "<<h<<"\n";
+	return true;
 }
 
 void AdeniumRender::initOnDevice()
@@ -39,9 +42,45 @@ int AdeniumRender::numPixels() const
 
 void AdeniumRender::reset()
 {
-    adetrace::resetImage((float4 *) rgbz(), (uint)numPixels());
+    adetrace::resetImage((float4 *)rgbz(), (uint)numPixels());
 }
 
 void * AdeniumRender::rgbz()
 { return m_deviceRgbz->bufferOnDevice(); }
+
+void AdeniumRender::setModelViewMatrix(float * src)
+{
+	adetrace::setModelViewMatrix(src, 64);
+}
+
+void AdeniumRender::renderOrhographic(BaseCamera * camera)
+{
+	adetrace::renderImageOrthographic((float4 *) rgbz(),
+                imageWidth(),
+                imageHeight(),
+                camera->fieldOfView(),
+                camera->aspectRatio());
+}
+
+void AdeniumRender::renderPerspective(BaseCamera * camera)
+{
+	
+}
+
+void AdeniumRender::sendToHost()
+{
+	m_deviceRgbz->deviceToHost(m_hostRgbz->data(), numPixels() * 16);
+}
+
+const int AdeniumRender::imageWidth() const
+{ return m_imageWidth; }
+
+const int AdeniumRender::imageHeight() const
+{ return m_imageHeight; }
+
+void * AdeniumRender::hostRgbz()
+{ return m_hostRgbz->data(); }
+
+const bool AdeniumRender::isInitd() const
+{ return m_initd==1; }
 //:~

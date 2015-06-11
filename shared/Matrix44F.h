@@ -53,6 +53,7 @@
 	Vector3F getUp() const;
 	Vector3F getFront() const;
 	void transposed(float * mat) const;
+	void transpose();
 	void glMatrix(float *m) const;
 	const float determinant() const;
 	
