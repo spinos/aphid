@@ -9,9 +9,9 @@
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-	perspCamera()->setFarClipPlane(20000.f);
+	perspCamera()->setFarClipPlane(10000.f);
 	perspCamera()->setNearClipPlane(1.f);
-	orthoCamera()->setFarClipPlane(20000.f);
+	orthoCamera()->setFarClipPlane(10000.f);
 	orthoCamera()->setNearClipPlane(1.f);
     connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
     m_world = new AdeniumWorld;
@@ -37,8 +37,14 @@ void GLWidget::clientDraw()
 		glDisable(GL_BLEND);
 		drawFrontImagePlane();
 	}
-	else
+	else {
 		m_world->draw(getCamera());
+	}
+		
+	std::stringstream sst;
+	sst.str("");
+	sst<<"fps: "<<frameRate();
+	hudText(sst.str(), 1);
 }
 //! [7]
 

@@ -56,11 +56,17 @@ void AdeniumRender::setModelViewMatrix(float * src)
 
 void AdeniumRender::renderOrhographic(BaseCamera * camera, BvhTriangleSystem * tri)
 {
+	void * internalNodeChildIndex = tri->internalNodeChildIndices();
+	void * internalNodeAabbs = tri->internalNodeAabbs();
+	void * indirection = tri->primitiveHash();
+    
 	adetrace::renderImageOrthographic((float4 *) rgbz(),
                 imageWidth(),
                 imageHeight(),
                 camera->fieldOfView(),
-                camera->aspectRatio());
+                camera->aspectRatio(),
+				(int2 *)internalNodeChildIndex,
+				(Aabb *)internalNodeAabbs);
 }
 
 void AdeniumRender::renderPerspective(BaseCamera * camera)

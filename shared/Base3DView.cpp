@@ -535,7 +535,7 @@ void Base3DView::drawFrontImagePlane()
 	
 	float fw, fh, fz;
 	
-	fz = -.0001f - getCamera()->nearClipPlane();
+	fz = -.1f - getCamera()->nearClipPlane();
 	
 	if(getCamera()->isOrthographic())
         fw = getCamera()->fieldOfView();

@@ -12,5 +12,7 @@ void renderImageOrthographic(float4 * pix,
                 uint imageW,
                 uint imageH,
                 float fovWidth,
-                float aspectRatio);
+                float aspectRatio,
+				int2 * nodes,
+				Aabb * nodeAabbs);
 }

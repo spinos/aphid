@@ -21,7 +21,9 @@ void renderImageOrthographic(float4 * pix,
                 uint imageW,
                 uint imageH,
                 float fovWidth,
-                float aspectRatio)
+                float aspectRatio,
+                int2 * nodes,
+				Aabb * nodeAabbs)
 {
     uint nthread = 8;
     uint nblockX = iDivUp(imageW, nthread);
@@ -31,7 +33,9 @@ void renderImageOrthographic(float4 * pix,
     renderImageOrthographic_kernel<<< grid, block >>>(pix,
                         imageW, imageH,
                         fovWidth,
-                        aspectRatio);
+                        aspectRatio,
+                        nodes,
+                        nodeAabbs);
 }
 
 }

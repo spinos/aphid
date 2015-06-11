@@ -815,6 +815,7 @@ void GLHUD::drawString(const std::string & str, const int & row) const
 	glScalef(gridScale, gridScale, 1.f);
 
     float cx, cy;
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 	glEnable(GL_BLEND);

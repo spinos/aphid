@@ -32,7 +32,7 @@ float PerspectiveCamera::fieldOfView() const
 float PerspectiveCamera::frameWidth() const
 {
 	double e = tan(m_fov/360.f*3.1415927);
-	return e * m_nearClipPlane * 2.f;
+	return e * (m_nearClipPlane + .1f) * 2.f;
 }
 
 float PerspectiveCamera::frameWidthRel() const

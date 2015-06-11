@@ -5,56 +5,6 @@
 
 #define B3_PLVBH_TRAVERSE_MAX_STACK_SIZE 128
 
-__device__ int rayIntersectsAabb(float3 rayOrigin, float rayLength, 
-                                float3 rayNormalizedDirection, 
-                                const Aabb & aabb,
-                                float & distanceMin, float & distanceMax)
-{
-	//AABB is considered as 3 pairs of 2 planes( {x_min, x_max}, {y_min, y_max}, {z_min, z_max} ).
-	//t_min is the point of intersection with the closer plane, t_max is the point of intersection with the farther plane.
-	//
-	//if (rayNormalizedDirection.x < 0.0f), then max.x will be the near plane 
-	//and min.x will be the far plane; otherwise, it is reversed.
-	//
-	//In order for there to be a collision, the t_min and t_max of each pair must overlap.
-	//This can be tested for by selecting the highest t_min and lowest t_max and comparing them.
-	
-	//int3 isNegative = isless( rayNormalizedDirection, make_float3(0.0f, 0.0f, 0.0f) );	//isless(x,y) returns (x < y)
-	int3 isNegative = make_int3(rayNormalizedDirection.x < 0.f, rayNormalizedDirection.y < 0.f, rayNormalizedDirection.z < 0.f);
-	//When using vector types, the select() function checks the most signficant bit, 
-	//but isless() sets the least significant bit.
-	//isNegative <<= 31;
-
-	//select(b, a, condition) == condition ? a : b
-	//When using select() with vector types, (condition[i]) is true if its most significant bit is 1
-	float3 t_min = float3_difference( select(aabb.high, aabb.low, isNegative), rayOrigin );
-	//divide_float3(t_min, rayNormalizedDirection);
-	float3 t_max = float3_difference( select(aabb.low, aabb.high, isNegative), rayOrigin );
-	//divide_float3(t_max, rayNormalizedDirection);
-	
-	t_min.x /= rayNormalizedDirection.x;
-	t_min.y /= rayNormalizedDirection.y;
-	t_min.z /= rayNormalizedDirection.z;
-	
-	t_max.x /= rayNormalizedDirection.x;
-	t_max.y /= rayNormalizedDirection.y;
-	t_max.z /= rayNormalizedDirection.z;
-	
-	//float t_min_final = 0.0f;
-	//float t_max_final = rayLength;
-	
-	distanceMin = 0.f; 
-	distanceMax = rayLength;
-
-	//Must use fmin()/fmax(); if one of the parameters is NaN, then the parameter that is not NaN is returned. 
-	//Behavior of min()/max() with NaNs is undefined. (See OpenCL Specification 1.2 [6.12.2] and [6.12.4])
-	//Since the innermost fmin()/fmax() is always not NaN, this should never return NaN.
-	distanceMin = fmax( t_min.z, fmax(t_min.y, fmax(t_min.x, distanceMin)) );
-	distanceMax = fmin( t_max.z, fmin(t_max.y, fmin(t_max.x, distanceMax)) );
-
-	return (distanceMin <= distanceMax);
-}
-
 __global__ void rayTraverseIterative_kernel(RayInfo * rays,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndices, 
