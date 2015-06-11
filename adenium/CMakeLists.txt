@@ -44,6 +44,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../cudabvh/BvhTriangleSystem.cpp"
 "../cudadyn/MassSystem.cpp"
 "../cudadyn/CudaMassSystem.cpp"
+"../cudadyn/WorldDbgDraw.cpp"
 "AdeniumWorld.cpp"
 "AdeniumRender.cpp"
 "AdeniumInterface.cpp")

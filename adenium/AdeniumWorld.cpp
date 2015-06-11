@@ -2,10 +2,13 @@
 #include <BvhTriangleSystem.h>
 #include <GeoDrawer.h>
 #include <CudaBase.h>
+#include <CUDABuffer.h>
 #include <BvhBuilder.h>
 #include <PerspectiveCamera.h>
 #include "AdeniumRender.h"
+#include <WorldDbgDraw.h>
 
+WorldDbgDraw * AdeniumWorld::DbgDrawer = 0;
 GLuint AdeniumWorld::m_texture = 0;
 
 AdeniumWorld::AdeniumWorld() :
@@ -34,6 +37,19 @@ void AdeniumWorld::draw(BaseCamera * camera)
     unsigned i = 0;
     for(;i<m_numObjects; i++)
         drawTriangle(m_objects[i]);
+		
+	dbgDraw();
+}
+
+void AdeniumWorld::dbgDraw()
+{
+	if(!DbgDrawer) return;
+    unsigned i;
+#if DRAW_BVH_HIERARCHY
+    for(i=0; i< m_numObjects; i++) {
+        DbgDrawer->showBvhHierarchy(m_objects[i]);
+	}
+#endif
 }
 
 void AdeniumWorld::drawTriangle(TriangleSystem * tri)
@@ -66,8 +82,38 @@ void AdeniumWorld::initOnDevice()
 {
     CudaBase::SetDevice();
     CudaLinearBvh::Builder->initOnDevice();
+	
+	unsigned ne, np;
     unsigned i=0;
-	for(;i < m_numObjects; i++) m_objects[i]->initOnDevice();
+	for(;i < m_numObjects; i++) {
+		CudaMassSystem * curObj = m_objects[i];
+		
+		ne = curObj->numElements();
+		np = curObj->numPoints();
+		
+		m_objectPos[i] = new CUDABuffer;
+		m_objectPos[i]->create(np*12);
+		
+		curObj->setDeviceXPtr(m_objectPos[i], 0);
+		m_objectPos[i]->hostToDevice(curObj->hostX(), np * 12);
+		
+		m_objectVel[i] = new CUDABuffer;
+		m_objectVel[i]->create(np*12);
+		
+		curObj->setDeviceVPtr(m_objectVel[i], 0);
+		m_objectVel[i]->hostToDevice(curObj->hostV(), np * 12);
+		
+		m_objectInd[i] = new CUDABuffer;
+		m_objectInd[i]->create(ne * 16);
+		
+		curObj->setDeviceTretradhedronIndicesPtr(m_objectInd[i], 0);
+		m_objectInd[i]->hostToDevice(curObj->hostTetrahedronIndices(), ne * 16);
+		
+		curObj->initOnDevice();
+		
+		m_objects[i]->update();
+		m_objects[i]->sendDbgToHost();
+	}
     m_image->initOnDevice();
 }
 
@@ -88,12 +134,13 @@ void AdeniumWorld::resizeRenderArea(int w, int h)
 void AdeniumWorld::render(BaseCamera * camera)
 {
 	if(!m_image->isInitd()) return;
+	if(m_numObjects<1) return;
 	m_image->reset();
 	Matrix44F mt = camera->fSpace;
 	mt.transpose();
 	m_image->setModelViewMatrix(mt.v);
 	if(camera->isOrthographic()) {
-		m_image->renderOrhographic(camera);
+		m_image->renderOrhographic(camera, m_objects[0]);
 	}
 	else {
 		//m_image->renderPerspective(camera);

@@ -5,6 +5,7 @@
 #include <iostream>
 #include "AdeniumRenderInterface.h"
 #include <PerspectiveCamera.h>
+#include <BvhTriangleSystem.h>
 AdeniumRender::AdeniumRender() :
 m_imageWidth(0), m_imageHeight(0),
 m_initd(0)
@@ -31,7 +32,7 @@ void AdeniumRender::initOnDevice()
 {
     if(!isSizeValid(m_imageWidth, m_imageHeight)) return;
     m_deviceRgbz->create(m_imageWidth * m_imageHeight * 4 * 4);
-    m_initd = 1;
+	m_initd = 1;
 }
 
 bool AdeniumRender::isSizeValid(int x, int y) const
@@ -53,7 +54,7 @@ void AdeniumRender::setModelViewMatrix(float * src)
 	adetrace::setModelViewMatrix(src, 64);
 }
 
-void AdeniumRender::renderOrhographic(BaseCamera * camera)
+void AdeniumRender::renderOrhographic(BaseCamera * camera, BvhTriangleSystem * tri)
 {
 	adetrace::renderImageOrthographic((float4 *) rgbz(),
                 imageWidth(),

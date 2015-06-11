@@ -7,6 +7,7 @@ public:
     AdeniumInterface();
     virtual ~AdeniumInterface();
     void create(AdeniumWorld * world);
+	void changeMaxDisplayLevel(AdeniumWorld * world, int x);
     static std::string FileName;
 protected:
     bool readTriangleMeshFromFile(AdeniumWorld * world);

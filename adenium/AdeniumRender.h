@@ -4,6 +4,7 @@
 class BaseBuffer;
 class CUDABuffer;
 class BaseCamera;
+class BvhTriangleSystem;
 class AdeniumRender {
 public:
     AdeniumRender();
@@ -13,7 +14,7 @@ public:
     bool resize(int w, int h);
     void reset();
 	void setModelViewMatrix(float * src);
-	void renderOrhographic(BaseCamera * camera);
+	void renderOrhographic(BaseCamera * camera, BvhTriangleSystem * tri);
 	void renderPerspective(BaseCamera * camera);
 	void sendToHost();
 	

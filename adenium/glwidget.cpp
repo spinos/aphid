@@ -5,6 +5,8 @@
 #include <KdTreeDrawer.h>
 #include "AdeniumInterface.h"
 #include "AdeniumWorld.h"
+#include <WorldDbgDraw.h>
+
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	perspCamera()->setFarClipPlane(20000.f);
@@ -24,6 +26,7 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientInit()
 {	
+	AdeniumWorld::DbgDrawer = new WorldDbgDraw(getDrawer());
     m_world->initOnDevice();
 }
 
@@ -61,6 +64,17 @@ void GLWidget::simulate()
 
 void GLWidget::keyPressEvent(QKeyEvent *e)
 {
+	AdeniumInterface adei;
+	switch (e->key()) {
+        case Qt::Key_A:
+			adei.changeMaxDisplayLevel(m_world, 1);
+			break;
+		case Qt::Key_D:
+			adei.changeMaxDisplayLevel(m_world, -1);
+			break;
+        default:
+			break;
+    }
 	Base3DView::keyPressEvent(e);
 }
 
