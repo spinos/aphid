@@ -30,7 +30,7 @@ void renderImageOrthographic(float4 * pix,
     uint nblockY = iDivUp(imageH, nthread);
     dim3 block(nthread, nthread, 1);
     dim3 grid(nblockX, nblockY, 1);
-    renderImageOrthographic_kernel<<< grid, block >>>(pix,
+    renderImageOrthographic_kernel<64> <<< grid, block, 16320 >>>(pix,
                         imageW, imageH,
                         fovWidth,
                         aspectRatio,

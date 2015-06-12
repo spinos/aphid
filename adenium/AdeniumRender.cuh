@@ -1,18 +1,93 @@
 #include "matrix_math.cuh"
 #include "ray_intersection.cuh"
+#include "cuSMem.cuh"
 #define ADE_RAYTRAVERSE_MAX_STACK_SIZE 64
-#define ADE_RAYTRAVERSE_MAX_STACK_SIZE_M_2 62
 
 __constant__ mat44 c_modelViewMatrix;  // inverse view matrix
-
-inline __device__ int isStackFull(int stackSize)
-{return stackSize > ADE_RAYTRAVERSE_MAX_STACK_SIZE_M_2; }
 
 inline __device__ int outOfStack(int stackSize)
 {return (stackSize < 1 || stackSize > ADE_RAYTRAVERSE_MAX_STACK_SIZE); }
 
 inline __device__ int isInternalNode(int2 child)
 { return (child.x>>31) != 0; }
+
+inline __device__ int iLeafNode(int2 child)
+{ return (child.x>>31) == 0; }
+
+__device__ uint tId()
+{ return blockDim.x * threadIdx.y + threadIdx.x; }
+
+template<int NumThreads, typename T>
+__device__ void reduceSumInBlock(uint tid, T * m)
+{
+    if(NumThreads >= 64) {
+        if(tid < 32) {
+            m[tid] += m[tid + 32];
+        }
+        //__syncthreads();
+    }
+    
+    if(tid < 16) {
+        m[tid] += m[tid + 16];
+    }
+    //__syncthreads();
+    
+    if(tid < 8) {
+        m[tid] += m[tid + 8];
+    }
+    //__syncthreads();
+    
+    if(tid < 4) {
+        m[tid] += m[tid + 4];
+    }
+    //__syncthreads();
+    
+    if(tid < 2) {
+        m[tid] += m[tid + 2];
+    }
+    //__syncthreads();
+    
+    if(tid < 1) {
+        m[tid] += m[tid + 1];
+    }
+    __syncthreads();
+}
+
+template<int NumThreads, typename T>
+__device__ void reduceMaxInBlock(uint tid, T * m)
+{
+    if(NumThreads >= 64) {
+        if(tid < 32) {
+            m[tid] = max(m[tid], m[tid + 32]);
+        }
+       // __syncthreads();
+    }
+    
+    if(tid < 16) {
+        m[tid] = max(m[tid], m[tid + 16]);
+    }
+   // __syncthreads();
+    
+    if(tid < 8) {
+        m[tid] = max(m[tid], m[tid + 8]);
+    }
+    //__syncthreads();
+    
+    if(tid < 4) {
+        m[tid] = max(m[tid], m[tid + 4]);
+    }
+    //__syncthreads();
+    
+    if(tid < 2) {
+        m[tid] = max(m[tid], m[tid + 2]);
+    }
+    //__syncthreads();
+    
+    if(tid < 1) {
+        m[tid] = max(m[tid], m[tid + 1]);
+    }
+    __syncthreads();
+}
 
 __global__ void resetImage_kernel(float4 * pix, 
 								uint maxInd)
@@ -22,6 +97,7 @@ __global__ void resetImage_kernel(float4 * pix,
 	pix[ind] = make_float4(0.f, 0.f, 0.f, 1e20f);
 }
 
+template<int NumThreads>
 __global__ void renderImageOrthographic_kernel(float4 * pix,
                 uint imageW,
                 uint imageH,
@@ -30,6 +106,8 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
                 int2 * internalNodeChildIndices,
 				Aabb * internalNodeAabbs)
 {
+    int *sdata = SharedMemory<int>();
+    
     uint x = blockIdx.x*blockDim.x + threadIdx.x;
     uint y = blockIdx.y*blockDim.y + threadIdx.y;
     if ((x >= imageW) || (y >= imageH)) return;
@@ -39,37 +117,83 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
     
     Ray eyeRay;
     eyeRay.o = make_float4(u * fovWidth, v * fovWidth/aspectRatio, 0.f, 1.f);
-    eyeRay.d = make_float4(0.f, 0.f, -1000.f, 0.f);
+    eyeRay.d = make_float4(0.f, 0.f, -1.f, 0.f);
     
     eyeRay.o = transform(c_modelViewMatrix, eyeRay.o);
     eyeRay.d = transform(c_modelViewMatrix, eyeRay.d);
     normalize(eyeRay.d);
-    
-    int stack[ADE_RAYTRAVERSE_MAX_STACK_SIZE];
-	int stackSize = 1;
-	stack[0] = 0x80000000;
-	
-    int isInternal;
+  
+    float4 outRgbz = pix[y * imageW + x];
+    float rayLength = outRgbz.w;
+/* 
+ *  smem layout in ints
+ *  n as num threads
+ *  m as max stack size
+ *
+ *  0   -> 1      stackSize
+ *  1   -> m      stack
+ *  m+1 -> m+1+n  branching
+ *  m+1+n+1 -> m+1+n+1+n  visiting
+ *
+ *  branching is first child to visit
+ *  -1 left 1 right 0 neither
+ *  if sum(branching) < 1 left first else right first
+ *  visiting is n child to visit
+ *  3 both 2 left 1 right 0 neither
+ *  if max(visiting) == 0 pop stack
+ *  if max(visiting) == 1 override top of stack by right
+ *  if max(visiting) >= 2 override top of stack by second, then push first to stack
+ */
+    int & sstackSize = sdata[0];
+    int * sstack = &sdata[1];
+    int * sbranch = &sdata[ADE_RAYTRAVERSE_MAX_STACK_SIZE+1];
+    int * svisit = &sdata[ADE_RAYTRAVERSE_MAX_STACK_SIZE+1+NumThreads+1];
+    const uint tid = tId();
+    if(tid<1) {
+        sstack[0] = 0x80000000;
+        sstackSize = 1;
+    }
+    __syncthreads();
+
+    int isLeaf;
     int iNode;
     int2 child;
+    int2 pushChild;
     Aabb leftBox, rightBox;
     float lambda1, lambda2;
     float mu1, mu2;
     int b1, b2;
-    float4 outRgbz = pix[y * imageW + x];
-    float rayLength = outRgbz.w;
     for(;;) {
-        if(outOfStack(stackSize)) break;
-        iNode = stack[ stackSize - 1 ];
-		stackSize--;
+        iNode = sstack[ sstackSize - 1 ];
 		
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
         child = internalNodeChildIndices[iNode];
-        isInternal = isInternalNode(child);
+        isLeaf = iLeafNode(child);
 		
-        if(isInternal) {
-            if(isStackFull(stackSize)) continue;
+        if(isLeaf) {
+// todo intersect triangles in leaf
+            leftBox = internalNodeAabbs[iNode];
+            b1 = ray_box(lambda1, lambda2,
+                    eyeRay,
+                    rayLength,
+                    leftBox);
+            if(b1) {
+                rayLength = lambda2;
+                outRgbz.x = rayLength/300.f;
+                outRgbz.y = rayLength/300.f;
+                outRgbz.z = rayLength/300.f;
+                outRgbz.w = rayLength;
+            }
             
+            if(tid<1) {
+// take out top of stack
+                sstackSize--;
+            }
+            __syncthreads();
+            
+            if(sstackSize<1) break;
+        }
+        else {
             leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
             b1 = ray_box(lambda1, lambda2,
                     eyeRay,
@@ -82,49 +206,65 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
                     rayLength,
                     rightBox);
             
-            if(b1 > 0 && b2 > 0) { 
+            svisit[tid] = 2 * b1 + b2;
+            if(svisit[tid]==3) { 
 // visit both children
                 if(mu1 < lambda1) {
 // vist right child first
-                    stack[ stackSize ] = child.x;
-                    stackSize++;
-                    stack[ stackSize ] = child.y;
-                    stackSize++;
+                    sbranch[tid] = 1;
                 }
                 else {
-// vist left child first 
-                    stack[ stackSize ] = child.y;
-                    stackSize++;
-                    stack[ stackSize ] = child.x;
-                    stackSize++;
+// vist left child first
+                    sbranch[tid] = -1;
                 }
             }
-            else if(b1 > 0) { 
+            else if(svisit[tid]==2) { 
 // visit left child
-                stack[ stackSize ] = child.x;
-                stackSize++;
+                sbranch[tid] = -1;
             }
-            else if(b2 > 0) { 
+            else if(svisit[tid]==1) { 
 // visit right child
-                stack[ stackSize ] = child.y;
-                stackSize++;
+                sbranch[tid] = 1;
             }
             else { 
 // visit no child
+                sbranch[tid] = 0;
             }
-        }
-        else {
-// todo intersect triangles in leaf
-            leftBox = internalNodeAabbs[iNode];
-            b1 = ray_box(lambda1, lambda2,
-                    eyeRay,
-                    rayLength,
-                    leftBox);
-            rayLength = lambda2;
-            outRgbz.x = rayLength/300.f;
-            outRgbz.y = rayLength/300.f;
-            outRgbz.z = rayLength/300.f;
-            outRgbz.w = rayLength;
+            __syncthreads();
+            
+// branching decision
+            reduceSumInBlock<NumThreads, int>(tid, sbranch);
+            reduceMaxInBlock<NumThreads, int>(tid, svisit);
+            if(tid<1) {
+                if(svisit[tid] == 0) {
+// visit no child, take out top of stack
+                    sstackSize--;
+                }
+                else if(svisit[tid] == 1) {
+// visit right child
+                    sstack[ sstackSize - 1 ] = child.y; 
+                }
+                else {
+// visit both children
+                    if(sbranch[tid]<1) {
+                        pushChild = child;
+                    }
+                    else {
+                        pushChild.x = child.y;
+                        pushChild.y = child.x;
+                    }
+                    
+                    sstack[ sstackSize - 1 ] = pushChild.y;
+                    if(sstackSize < ADE_RAYTRAVERSE_MAX_STACK_SIZE) { 
+                            sstack[ sstackSize ] = pushChild.x;
+                            sstackSize++;
+                    }
+                }
+            }
+            
+            __syncthreads();
+            
+            if(sstackSize<1) break;
         }
     }
     pix[y * imageW + x] = outRgbz;
