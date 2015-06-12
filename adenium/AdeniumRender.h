@@ -3,6 +3,7 @@
 
 class BaseBuffer;
 class CUDABuffer;
+class CudaPixelBuffer;
 class BaseCamera;
 class BvhTriangleSystem;
 class AdeniumRender {
@@ -28,6 +29,7 @@ private:
     int numPixels() const;
     void * rgbz();
 private:
+    CudaPixelBuffer * m_deviceRgbzPix;
     BaseBuffer * m_hostRgbz;
     CUDABuffer * m_deviceRgbz;
     int m_imageWidth, m_imageHeight;

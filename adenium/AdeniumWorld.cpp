@@ -80,7 +80,7 @@ void AdeniumWorld::drawTriangle(TriangleSystem * tri)
 
 void AdeniumWorld::initOnDevice()
 {
-    CudaBase::SetDevice();
+    CudaBase::SetGLDevice();
     CudaLinearBvh::Builder->initOnDevice();
 	
 	unsigned ne, np;

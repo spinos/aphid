@@ -2,6 +2,7 @@
 #include <CUDABuffer.h>
 #include <BaseBuffer.h>
 #include <CUDABuffer.h>
+#include <CudaPixelBuffer.h>
 #include <iostream>
 #include "AdeniumRenderInterface.h"
 #include <PerspectiveCamera.h>
@@ -12,9 +13,15 @@ m_initd(0)
 {
     m_hostRgbz = new BaseBuffer;
     m_deviceRgbz = new CUDABuffer;
+    m_deviceRgbzPix = new CudaPixelBuffer;
 }
 
-AdeniumRender::~AdeniumRender() {}
+AdeniumRender::~AdeniumRender() 
+{
+    delete m_hostRgbz;
+    delete m_deviceRgbz;
+    delete m_deviceRgbzPix;
+}
 
 bool AdeniumRender::resize(int w, int h)
 { 
@@ -43,6 +50,7 @@ int AdeniumRender::numPixels() const
 
 void AdeniumRender::reset()
 {
+    m_deviceRgbzPix->create(numPixels() * 16);
     adetrace::resetImage((float4 *)rgbz(), (uint)numPixels());
 }
 
