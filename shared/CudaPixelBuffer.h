@@ -6,7 +6,7 @@ public:
     virtual ~CudaPixelBuffer();
     
     void create(unsigned size);
-    void map(void * entry);
+    void * map();
     void unmap();
     void bind();
     void unbind();

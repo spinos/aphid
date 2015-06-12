@@ -114,7 +114,6 @@ void AdeniumWorld::initOnDevice()
 		m_objects[i]->update();
 		m_objects[i]->sendDbgToHost();
 	}
-    m_image->initOnDevice();
 }
 
 void AdeniumWorld::resizeRenderArea(int w, int h)
@@ -133,19 +132,18 @@ void AdeniumWorld::resizeRenderArea(int w, int h)
 
 void AdeniumWorld::render(BaseCamera * camera)
 {
-	if(!m_image->isInitd()) return;
 	if(m_numObjects<1) return;
-	m_image->reset();
 	Matrix44F mt = camera->fSpace;
 	mt.transpose();
 	m_image->setModelViewMatrix(mt.v);
+	m_image->reset();
 	if(camera->isOrthographic()) {
 		m_image->renderOrhographic(camera, m_objects[0]);
 	}
 	else {
 		//m_image->renderPerspective(camera);
 	}
-	m_image->sendToHost();
+	// m_image->sendToHost();
 	
 	if(!m_texture) {
 		glGenTextures(1, &m_texture);
@@ -158,7 +156,9 @@ void AdeniumWorld::render(BaseCamera * camera)
 	}
 	
 	glEnable(GL_TEXTURE_2D);
+	m_image->bindBuffer();
 	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->imageWidth(), m_image->imageHeight(), GL_RGBA, GL_FLOAT, m_image->hostRgbz());
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->imageWidth(), m_image->imageHeight(), GL_RGBA, GL_FLOAT,0);
+	m_image->unbindBuffer();
 }
 //:~

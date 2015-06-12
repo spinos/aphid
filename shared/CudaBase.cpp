@@ -69,6 +69,7 @@ char CudaBase::CheckCUDevice()
 void CudaBase::SetGLDevice()
 {
     if(!CheckCUDevice()) return;
+	std::cout<<" cuda set GL device\n";
 	cudaGLSetGLDevice(0);
 	HasDevice = 1;
 }

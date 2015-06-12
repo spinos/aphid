@@ -11,7 +11,6 @@ public:
     AdeniumRender();
     virtual ~AdeniumRender();
     
-    void initOnDevice();
     bool resize(int w, int h);
     void reset();
 	void setModelViewMatrix(float * src);
@@ -21,19 +20,15 @@ public:
 	
 	const int imageWidth() const;
 	const int imageHeight() const;
-	void * hostRgbz();
-	
-	const bool isInitd() const;
+	void bindBuffer();
+	void unbindBuffer();
+
 private:
     bool isSizeValid(int x, int y) const;
     int numPixels() const;
-    void * rgbz();
 private:
     CudaPixelBuffer * m_deviceRgbzPix;
-    BaseBuffer * m_hostRgbz;
-    CUDABuffer * m_deviceRgbz;
     int m_imageWidth, m_imageHeight;
-    int m_initd;
 };
 #endif        //  #ifndef ADENIUMRENDER_H
 
