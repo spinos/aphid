@@ -6,6 +6,7 @@
 #include <radixsort_implement.h>
 
 #define ADE_RAYTRAVERSE_MAX_STACK_SIZE 64
+#define ADE_RAYTRAVERSE_TRIANGLE_CACHE_SIZE 128
 
 __constant__ mat44 c_modelViewMatrix;  // inverse view matrix
 
@@ -21,7 +22,67 @@ inline __device__ int iLeafNode(int2 child)
 __device__ uint tId()
 { return blockDim.x * threadIdx.y + threadIdx.x; }
 
-__device__ int intersectLeafTriangles(float & rayLength,
+template<int NumThreads>
+__device__ void putLeafTrianglesInSmem(float3 * points,
+                                        uint tid,
+                                        int n,
+                                        int2 range,
+                                        KeyValuePair * elementHash,
+                                        int4 * elementVertices,
+                                        float3 * elementPoints)
+{
+    uint iElement; 
+    int4 triVert;
+    uint loc = tid;
+    
+    if(loc < n) {
+        iElement = elementHash[range.x + loc].value;
+        triVert= elementVertices[iElement];
+        points[loc*3] = elementPoints[triVert.x];
+        points[loc*3+1] = elementPoints[triVert.y];
+        points[loc*3+2] = elementPoints[triVert.z];
+    }
+    
+    if(n>NumThreads) {
+        loc += NumThreads;
+        if(loc < n) {
+            iElement = elementHash[range.x + loc].value;
+            triVert= elementVertices[iElement];
+            points[loc*3] = elementPoints[triVert.x];
+            points[loc*3+1] = elementPoints[triVert.y];
+            points[loc*3+2] = elementPoints[triVert.z];
+        }
+    }
+}
+
+__device__ int intersectLeafTrianglesS(float & rayLength,
+                                int & triId,
+                                const Ray & eyeRay,
+                                int cacheLength,
+                                float3 * trianglePoints)
+{
+    int stat = 0;
+    float u, v, t;
+    int frontFacing;
+    int i=0;
+    for(;i<cacheLength;i++) {
+        if(ray_triangle_MollerTrumbore(eyeRay,
+            trianglePoints[i*3],
+            trianglePoints[i*3+1],
+            trianglePoints[i*3+2],
+            u, v, t, frontFacing)) {
+            if(t<rayLength) {
+                rayLength = t;
+                triId = i;
+                stat = 1;
+            }
+        }
+    }
+    return stat;
+}
+
+__device__ int intersectLeafTrianglesG(float & rayLength,
+                        int & triId,
                        const Ray & eyeRay,
                        int2 range,
                        KeyValuePair * elementHash,
@@ -44,6 +105,7 @@ __device__ int intersectLeafTriangles(float & rayLength,
             u, v, t, frontFacing)) {
             if(t<rayLength) {
                 rayLength = t;
+                triId = iElement;
                 stat = 1;
             }
         }
@@ -92,13 +154,15 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
     float rayLength = outRgbz.w;
 /* 
  *  smem layout in ints
- *  n as num threads
- *  m as max stack size
+ *  n as num threads    64
+ *  m as max stack size 64
+ *  c as tri cache size 128
  *
  *  0   -> 1      stackSize
- *  1   -> m      stack
- *  m+1 -> m+1+n  branching
- *  m+1+n+1 -> m+1+n+1+n  visiting
+ *  4   -> 4+m-1       stack
+ *  4+m -> 4+m+n-1  branching
+ *  4+m+n -> 4+m+n+n-1  visiting
+ *  4+m+n+n -> 4+m+n+n+12*c-1 triangle points
  *
  *  branching is first child to visit
  *  -1 left 1 right 0 neither
@@ -110,9 +174,10 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
  *  if max(visiting) >= 2 override top of stack by second, then push first to stack
  */
     int & sstackSize = sdata[0];
-    int * sstack = &sdata[1];
-    int * sbranch = &sdata[ADE_RAYTRAVERSE_MAX_STACK_SIZE+1];
-    int * svisit = &sdata[ADE_RAYTRAVERSE_MAX_STACK_SIZE+1+NumThreads+1];
+    int * sstack =  &sdata[4];
+    int * sbranch = &sdata[4 + ADE_RAYTRAVERSE_MAX_STACK_SIZE];
+    int * svisit =  &sdata[4 + ADE_RAYTRAVERSE_MAX_STACK_SIZE + NumThreads];
+    float3 * strianglePCache = (float3 *)&sdata[4 + ADE_RAYTRAVERSE_MAX_STACK_SIZE + NumThreads + NumThreads];
     const uint tid = tId();
     if(tid<1) {
         sstack[0] = 0x80000000;
@@ -120,6 +185,11 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
     }
     __syncthreads();
 
+    float3 hitP, hitN;
+    int hitTriangle;
+    int4 triV;
+    int canLeafFitInSmem;
+    int numTriangles;
     int isLeaf;
     int iNode;
     int2 child;
@@ -136,6 +206,20 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
         isLeaf = iLeafNode(child);
 		
         if(isLeaf) {
+// load triangles into smem
+            numTriangles = child.y - child.x + 1;
+            canLeafFitInSmem = (numTriangles <= ADE_RAYTRAVERSE_TRIANGLE_CACHE_SIZE);
+            
+            if(canLeafFitInSmem) 
+                putLeafTrianglesInSmem<NumThreads>(strianglePCache,
+                                            tid,
+                                            numTriangles,
+                                            child,
+                                            elementHash,
+                                            elementVertices,
+                                            elementPoints);
+            __syncthreads();
+            
             leftBox = internalNodeAabbs[iNode];
             b1 = ray_box(lambda1, lambda2,
                     eyeRay,
@@ -143,15 +227,39 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
                     leftBox);
             if(b1) {
 // intersect triangles in leaf  
-                if(intersectLeafTriangles(rayLength,
+                if(canLeafFitInSmem) 
+                    b1 = intersectLeafTrianglesS(rayLength,
+                                hitTriangle,
+                                eyeRay, 
+                                numTriangles,
+                                strianglePCache);
+                else 
+                    b1 = intersectLeafTrianglesG(rayLength,
+                                hitTriangle,
                                 eyeRay, 
                                 child,
                                 elementHash,
                                 elementVertices,
-                                elementPoints)) {
-                    outRgbz.x = rayLength/300.f;
-                    outRgbz.y = rayLength/300.f;
-                    outRgbz.z = rayLength/300.f;
+                                elementPoints);
+                if(b1) {
+                    ray_progress(hitP, eyeRay, rayLength);
+                    
+                    if(canLeafFitInSmem) {
+                        triangle_normal(hitN, strianglePCache[hitTriangle * 3],
+                                    strianglePCache[hitTriangle * 3+1],
+                                    strianglePCache[hitTriangle * 3+2]);
+                    }
+                    else {
+                        triV = elementVertices[hitTriangle];
+                        triangle_normal(hitN, elementPoints[triV.x],
+                                    elementPoints[triV.y],
+                                    elementPoints[triV.z]);
+                    }
+                    
+                    hitN = float3_normalize(hitN);
+                    outRgbz.x = hitN.x;
+                    outRgbz.y = hitN.y;
+                    outRgbz.z = hitN.z;
                     outRgbz.w = rayLength;
                 }
             }

@@ -8,6 +8,13 @@ struct __align__(16) Ray {
 	float4 d;	// direction
 };
 
+__device__ void ray_progress(float3 & p, const Ray & r, float h)
+{ 
+  p.x = r.o.x + r.d.x * h;
+  p.y = r.o.y + r.d.y * h;
+  p.z = r.o.z + r.d.z * h; 
+}
+
 template<typename T1, typename T2>
 __device__ float3 float3_cross(const T1 & v1, const T2 & v2)
 { return make_float3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x); }
@@ -25,6 +32,19 @@ __device__ void float3_divide_inplace(float3 & v1, const float4 & v2)
     v1.x /= v2.x;
     v1.y /= v2.y;
     v1.z /= v2.z; 
+}
+
+__device__ void weightedSum(float3 & dst,
+                            float3 & v1,
+                            float3 & v2,
+                            float3 & v3,
+                            float w1,
+                            float w2,
+                            float w3)
+{
+    dst.x = v1.x * w1 + v2.x * w2 + v3.x * w3;
+    dst.y = v1.y * w1 + v2.y * w2 + v3.y * w3;
+    dst.z = v1.z * w1 + v2.z * w2 + v3.z * w3;
 }
 
 __device__ int ray_box(float & distanceMin, float & distanceMax,
