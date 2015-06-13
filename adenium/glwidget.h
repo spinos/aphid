@@ -24,6 +24,9 @@ protected:
     virtual void resizeEvent(QResizeEvent * event);
 
 private:
+	void toggleRayCast();
+private:
+	bool m_enableRayCast;
     AdeniumWorld * m_world;
 private slots:
     void simulate();

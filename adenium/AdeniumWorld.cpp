@@ -141,9 +141,8 @@ void AdeniumWorld::render(BaseCamera * camera)
 		m_image->renderOrhographic(camera, m_objects[0]);
 	}
 	else {
-		//m_image->renderPerspective(camera);
+		m_image->renderPerspective(camera, m_objects[0]);
 	}
-	// m_image->sendToHost();
 	
 	if(!m_texture) {
 		glGenTextures(1, &m_texture);

@@ -17,6 +17,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_world = new AdeniumWorld;
     AdeniumInterface adei;
     adei.create(m_world);
+	m_enableRayCast = true;
 }
 
 GLWidget::~GLWidget()
@@ -32,7 +33,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-    if(getCamera()->isOrthographic()) {
+	if(m_enableRayCast) {
 		m_world->render(getCamera());
 		glDisable(GL_BLEND);
 		drawFrontImagePlane();
@@ -72,6 +73,9 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 {
 	AdeniumInterface adei;
 	switch (e->key()) {
+		case Qt::Key_Q:
+			toggleRayCast();
+			break;
         case Qt::Key_A:
 			adei.changeMaxDisplayLevel(m_world, 1);
 			break;
@@ -96,3 +100,10 @@ void GLWidget::resizeEvent(QResizeEvent * event)
     m_world->resizeRenderArea(renderAreaSize.width(), renderAreaSize.height());
     Base3DView::resizeEvent(event);
 }
+
+void GLWidget::toggleRayCast()
+{
+	if(m_enableRayCast) m_enableRayCast = false;
+	else m_enableRayCast = true;
+}
+//:~

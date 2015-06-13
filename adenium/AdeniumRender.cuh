@@ -121,8 +121,30 @@ __global__ void resetImage_kernel(float4 * pix,
 	pix[ind] = make_float4(0.f, 0.f, 0.f, 1e20f);
 }
 
-template<int NumThreads>
-__global__ void renderImageOrthographic_kernel(float4 * pix,
+template<int IsOrthographic> 
+__device__ void computeEyeRay(Ray & eyeRay, 
+                            uint x, uint y,
+                            uint imageW, uint imageH,
+                            float fov, float aspectRatio)
+{
+    const float u = ((float)x / (float)imageW) - .5f;
+    const float v = ((float)y / (float)imageH) - .5f;
+    
+    if(IsOrthographic) {
+        eyeRay.o = make_float4(u * fov, v * fov/aspectRatio, 0.f, 1.f);
+        eyeRay.d = make_float4(0.f, 0.f, -1.f, 0.f);
+    }
+    else {
+        eyeRay.o = make_float4(0.f, 0.f, 0.f, 1.f);
+        eyeRay.d = make_float4(u * fov, v * fov/aspectRatio, -1.f, 0.f);
+    }
+    eyeRay.o = transform(c_modelViewMatrix, eyeRay.o);
+    eyeRay.d = transform(c_modelViewMatrix, eyeRay.d);
+    normalize(eyeRay.d);
+}
+
+template<int NumThreads, int IsOrthographic>
+__global__ void renderImage_kernel(float4 * pix,
                 uint imageW,
                 uint imageH,
                 float fovWidth,
@@ -139,16 +161,10 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
     uint y = blockIdx.y*blockDim.y + threadIdx.y;
     if ((x >= imageW) || (y >= imageH)) return;
     
-    float u = (x / (float) imageW) - .5f;
-    float v = (y / (float) imageH) - .5f;
-    
     Ray eyeRay;
-    eyeRay.o = make_float4(u * fovWidth, v * fovWidth/aspectRatio, 0.f, 1.f);
-    eyeRay.d = make_float4(0.f, 0.f, -1.f, 0.f);
-    
-    eyeRay.o = transform(c_modelViewMatrix, eyeRay.o);
-    eyeRay.d = transform(c_modelViewMatrix, eyeRay.d);
-    normalize(eyeRay.d);
+    computeEyeRay<IsOrthographic>(eyeRay, x, y,
+                        imageW, imageH,
+                        fovWidth, aspectRatio);
   
     float4 outRgbz = pix[y * imageW + x];
     float rayLength = outRgbz.w;

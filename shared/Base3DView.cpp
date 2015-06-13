@@ -540,7 +540,7 @@ void Base3DView::drawFrontImagePlane()
 	if(getCamera()->isOrthographic())
         fw = getCamera()->fieldOfView();
     else
-        fw = getCamera()->frameWidth();
+        fw = getCamera()->frameWidth() * (-fz);
 	
 	fh = fw / getCamera()->aspectRatio();
 	

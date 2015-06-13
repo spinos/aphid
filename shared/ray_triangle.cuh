@@ -2,6 +2,7 @@
 #define RAY_TRIANGLE_CUH
 /*
  * reference
+ * http://geomalgorithms.com/a06-_intersect-2.html
  * http://www.hugi.scene.org/online/hugi25/hugi%2025%20-%20coding%20corner%20graphics,%20sound%20&%20synchronization%20ken%20ray-triangle%20intersection%20tests%20for%20dummies.htm
  */
 #include "ray_intersection.cuh"

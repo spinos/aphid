@@ -15,7 +15,7 @@ public:
     void reset();
 	void setModelViewMatrix(float * src);
 	void renderOrhographic(BaseCamera * camera, BvhTriangleSystem * tri);
-	void renderPerspective(BaseCamera * camera);
+	void renderPerspective(BaseCamera * camera, BvhTriangleSystem * tri);
 	void sendToHost();
 	
 	const int imageWidth() const;

@@ -17,7 +17,7 @@ void setModelViewMatrix(float * src, uint size)
     cudaMemcpyToSymbol(c_modelViewMatrix, src, size);
 }
 
-void renderImageOrthographic(float4 * pix,
+void renderImage(float4 * pix,
                 uint imageW,
                 uint imageH,
                 float fovWidth,
@@ -26,14 +26,26 @@ void renderImageOrthographic(float4 * pix,
 				Aabb * nodeAabbs,
 				KeyValuePair * elementHash,
 				int4 * elementVertices,
-				float3 * elementPoints)
+				float3 * elementPoints,
+				int isOrthographic)
 {
     uint nthread = 8;
     uint nblockX = iDivUp(imageW, nthread);
     uint nblockY = iDivUp(imageH, nthread);
     dim3 block(nthread, nthread, 1);
     dim3 grid(nblockX, nblockY, 1);
-    renderImageOrthographic_kernel<64> <<< grid, block, 16320 >>>(pix,
+    if(isOrthographic)
+        renderImage_kernel<64, 1> <<< grid, block, 16320 >>>(pix,
+                        imageW, imageH,
+                        fovWidth,
+                        aspectRatio,
+                        nodes,
+                        nodeAabbs,
+				elementHash,
+				elementVertices,
+				elementPoints);
+	else
+	    renderImage_kernel<64, 0> <<< grid, block, 16320 >>>(pix,
                         imageW, imageH,
                         fovWidth,
                         aspectRatio,

@@ -8,7 +8,7 @@ void setModelViewMatrix(float * src,
 void resetImage(float4 * pix, 
             uint n);
 
-void renderImageOrthographic(float4 * pix,
+void renderImage(float4 * pix,
                 uint imageW,
                 uint imageH,
                 float fovWidth,
@@ -17,5 +17,6 @@ void renderImageOrthographic(float4 * pix,
 				Aabb * nodeAabbs,
 				KeyValuePair * elementHash,
 				int4 * elementVertices,
-				float3 * elementPoints);
+				float3 * elementPoints,
+				int isOrthographic);
 }
