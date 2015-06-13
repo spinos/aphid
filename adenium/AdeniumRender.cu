@@ -17,11 +17,19 @@ void setModelViewMatrix(float * src, uint size)
     cudaMemcpyToSymbol(c_modelViewMatrix, src, size);
 }
 
+void setImageSize(int * src) 
+{
+    cudaMemcpyToSymbol(c_imageSize, src, 8);
+}
+
+void setCameraProp(float * src) 
+{
+    cudaMemcpyToSymbol(c_cameraProp, src, 8);
+}
+
 void renderImage(float4 * pix,
                 uint imageW,
                 uint imageH,
-                float fovWidth,
-                float aspectRatio,
                 int2 * nodes,
 				Aabb * nodeAabbs,
 				KeyValuePair * elementHash,
@@ -36,9 +44,6 @@ void renderImage(float4 * pix,
     dim3 grid(nblockX, nblockY, 1);
     if(isOrthographic)
         renderImage_kernel<64, 1> <<< grid, block, 16320 >>>(pix,
-                        imageW, imageH,
-                        fovWidth,
-                        aspectRatio,
                         nodes,
                         nodeAabbs,
 				elementHash,
@@ -46,9 +51,6 @@ void renderImage(float4 * pix,
 				elementPoints);
 	else
 	    renderImage_kernel<64, 0> <<< grid, block, 16320 >>>(pix,
-                        imageW, imageH,
-                        fovWidth,
-                        aspectRatio,
                         nodes,
                         nodeAabbs,
 				elementHash,

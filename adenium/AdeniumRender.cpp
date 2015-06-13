@@ -38,7 +38,10 @@ int AdeniumRender::numPixels() const
 void AdeniumRender::reset()
 {
 	m_deviceRgbzPix->create(numPixels() * 16);
-	
+	int imgs[2];
+	imgs[0] = imageWidth();
+	imgs[1] = imageHeight();
+	adetrace::setImageSize(imgs);
 	void * pix = m_deviceRgbzPix->map();
 	adetrace::resetImage((float4 *)pix, (uint)numPixels());
 	CudaBase::CheckCudaError(" reset image");
@@ -52,6 +55,11 @@ void AdeniumRender::setModelViewMatrix(float * src)
 
 void AdeniumRender::renderOrhographic(BaseCamera * camera, BvhTriangleSystem * tri)
 {
+	float camp[2];
+	camp[0] = camera->fieldOfView();
+	camp[1] = camera->aspectRatio();
+	adetrace::setCameraProp(camp);
+	
 	void * internalNodeChildIndex = tri->internalNodeChildIndices();
 	void * internalNodeAabbs = tri->internalNodeAabbs();
 	void * indirection = tri->primitiveHash();
@@ -61,9 +69,7 @@ void AdeniumRender::renderOrhographic(BaseCamera * camera, BvhTriangleSystem * t
 	adetrace::renderImage((float4 *)pix,
                 imageWidth(),
                 imageHeight(),
-                camera->fieldOfView(),
-                camera->aspectRatio(),
-				(int2 *)internalNodeChildIndex,
+                (int2 *)internalNodeChildIndex,
 				(Aabb *)internalNodeAabbs,
 				(KeyValuePair *)indirection,
 				(int4 *)vertices,
@@ -75,6 +81,11 @@ void AdeniumRender::renderOrhographic(BaseCamera * camera, BvhTriangleSystem * t
 
 void AdeniumRender::renderPerspective(BaseCamera * camera, BvhTriangleSystem * tri)
 {
+	float camp[2];
+	camp[0] = camera->frameWidth();
+	camp[1] = camera->aspectRatio();
+	adetrace::setCameraProp(camp);
+	
 	void * internalNodeChildIndex = tri->internalNodeChildIndices();
 	void * internalNodeAabbs = tri->internalNodeAabbs();
 	void * indirection = tri->primitiveHash();
@@ -84,9 +95,7 @@ void AdeniumRender::renderPerspective(BaseCamera * camera, BvhTriangleSystem * t
 	adetrace::renderImage((float4 *)pix,
                 imageWidth(),
                 imageHeight(),
-                camera->frameWidth(),
-                camera->aspectRatio(),
-				(int2 *)internalNodeChildIndex,
+                (int2 *)internalNodeChildIndex,
 				(Aabb *)internalNodeAabbs,
 				(KeyValuePair *)indirection,
 				(int4 *)vertices,

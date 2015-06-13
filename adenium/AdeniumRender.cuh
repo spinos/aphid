@@ -9,6 +9,8 @@
 #define ADE_RAYTRAVERSE_TRIANGLE_CACHE_SIZE 128
 
 __constant__ mat44 c_modelViewMatrix;  // inverse view matrix
+__constant__ int2 c_imageSize;
+__constant__ float2 c_cameraProp; // (fieldOfView, aspectRatio)
 
 inline __device__ int outOfStack(int stackSize)
 {return (stackSize < 1 || stackSize > ADE_RAYTRAVERSE_MAX_STACK_SIZE); }
@@ -123,20 +125,18 @@ __global__ void resetImage_kernel(float4 * pix,
 
 template<int IsOrthographic> 
 __device__ void computeEyeRay(Ray & eyeRay, 
-                            uint x, uint y,
-                            uint imageW, uint imageH,
-                            float fov, float aspectRatio)
+                            uint x, uint y)
 {
-    const float u = ((float)x / (float)imageW) - .5f;
-    const float v = ((float)y / (float)imageH) - .5f;
+    const float u = ((float)x / (float)c_imageSize.x) - .5f;
+    const float v = ((float)y / (float)c_imageSize.y) - .5f;
     
     if(IsOrthographic) {
-        eyeRay.o = make_float4(u * fov, v * fov/aspectRatio, 0.f, 1.f);
+        eyeRay.o = make_float4(u * c_cameraProp.x, v * c_cameraProp.x/c_cameraProp.y, 0.f, 1.f);
         eyeRay.d = make_float4(0.f, 0.f, -1.f, 0.f);
     }
     else {
         eyeRay.o = make_float4(0.f, 0.f, 0.f, 1.f);
-        eyeRay.d = make_float4(u * fov, v * fov/aspectRatio, -1.f, 0.f);
+        eyeRay.d = make_float4(u * c_cameraProp.x, v * c_cameraProp.x/c_cameraProp.y, -1.f, 0.f);
     }
     eyeRay.o = transform(c_modelViewMatrix, eyeRay.o);
     eyeRay.d = transform(c_modelViewMatrix, eyeRay.d);
@@ -145,10 +145,6 @@ __device__ void computeEyeRay(Ray & eyeRay,
 
 template<int NumThreads, int IsOrthographic>
 __global__ void renderImage_kernel(float4 * pix,
-                uint imageW,
-                uint imageH,
-                float fovWidth,
-                float aspectRatio,
                 int2 * internalNodeChildIndices,
 				Aabb * internalNodeAabbs,
 				KeyValuePair * elementHash,
@@ -159,14 +155,12 @@ __global__ void renderImage_kernel(float4 * pix,
     
     uint x = blockIdx.x*blockDim.x + threadIdx.x;
     uint y = blockIdx.y*blockDim.y + threadIdx.y;
-    if ((x >= imageW) || (y >= imageH)) return;
+    if ((x >= c_imageSize.x) || (y >= c_imageSize.y)) return;
     
     Ray eyeRay;
-    computeEyeRay<IsOrthographic>(eyeRay, x, y,
-                        imageW, imageH,
-                        fovWidth, aspectRatio);
+    computeEyeRay<IsOrthographic>(eyeRay, x, y);
   
-    float4 outRgbz = pix[y * imageW + x];
+    float4 outRgbz = pix[y * c_imageSize.x + x];
     float rayLength = outRgbz.w;
 /* 
  *  smem layout in ints
@@ -362,6 +356,6 @@ __global__ void renderImage_kernel(float4 * pix,
             if(sstackSize<1) break;
         }
     }
-    pix[y * imageW + x] = outRgbz;
+    pix[y * c_imageSize.x + x] = outRgbz;
 }
 
