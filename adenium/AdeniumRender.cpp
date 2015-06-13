@@ -56,13 +56,18 @@ void AdeniumRender::renderOrhographic(BaseCamera * camera, BvhTriangleSystem * t
 	void * internalNodeAabbs = tri->internalNodeAabbs();
 	void * indirection = tri->primitiveHash();
     void * pix = m_deviceRgbzPix->map();
+    void * vertices = tri->deviceTretradhedronIndices(); 
+    void * points = tri->deviceX();
 	adetrace::renderImageOrthographic((float4 *)pix,
                 imageWidth(),
                 imageHeight(),
                 camera->fieldOfView(),
                 camera->aspectRatio(),
 				(int2 *)internalNodeChildIndex,
-				(Aabb *)internalNodeAabbs);
+				(Aabb *)internalNodeAabbs,
+				(KeyValuePair *)indirection,
+				(int4 *)vertices,
+				(float3 *)points);
 	CudaBase::CheckCudaError(" render ortho image");
 	m_deviceRgbzPix->unmap();
 }

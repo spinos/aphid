@@ -1,5 +1,5 @@
 #include <bvh_common.h>
-
+#include <radixsort_implement.h>
 namespace adetrace {
     
 void setModelViewMatrix(float * src, 
@@ -14,5 +14,8 @@ void renderImageOrthographic(float4 * pix,
                 float fovWidth,
                 float aspectRatio,
 				int2 * nodes,
-				Aabb * nodeAabbs);
+				Aabb * nodeAabbs,
+				KeyValuePair * elementHash,
+				int4 * elementVertices,
+				float3 * elementPoints);
 }

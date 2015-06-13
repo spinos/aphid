@@ -1,6 +1,10 @@
 #include "matrix_math.cuh"
 #include "ray_intersection.cuh"
 #include "cuSMem.cuh"
+#include "cuReduceInBlock.cuh"
+#include "ray_triangle.cuh"
+#include <radixsort_implement.h>
+
 #define ADE_RAYTRAVERSE_MAX_STACK_SIZE 64
 
 __constant__ mat44 c_modelViewMatrix;  // inverse view matrix
@@ -17,76 +21,34 @@ inline __device__ int iLeafNode(int2 child)
 __device__ uint tId()
 { return blockDim.x * threadIdx.y + threadIdx.x; }
 
-template<int NumThreads, typename T>
-__device__ void reduceSumInBlock(uint tid, T * m)
+__device__ int intersectLeafTriangles(float & rayLength,
+                       const Ray & eyeRay,
+                       int2 range,
+                       KeyValuePair * elementHash,
+                       int4 * elementVertices,
+                       float3 * elementPoints)
 {
-    if(NumThreads >= 64) {
-        if(tid < 32) {
-            m[tid] += m[tid + 32];
+    int stat = 0;
+    float u, v, t;
+    int frontFacing;
+    uint iElement;
+    int4 triVert;
+    int i=range.x;
+    for(;i<=range.y;i++) {
+        iElement = elementHash[i].value;
+        triVert = elementVertices[iElement];
+        if(ray_triangle_MollerTrumbore(eyeRay,
+            elementPoints[triVert.x],
+            elementPoints[triVert.y],
+            elementPoints[triVert.z],
+            u, v, t, frontFacing)) {
+            if(t<rayLength) {
+                rayLength = t;
+                stat = 1;
+            }
         }
-        //__syncthreads();
     }
-    
-    if(tid < 16) {
-        m[tid] += m[tid + 16];
-    }
-    //__syncthreads();
-    
-    if(tid < 8) {
-        m[tid] += m[tid + 8];
-    }
-    //__syncthreads();
-    
-    if(tid < 4) {
-        m[tid] += m[tid + 4];
-    }
-    //__syncthreads();
-    
-    if(tid < 2) {
-        m[tid] += m[tid + 2];
-    }
-    //__syncthreads();
-    
-    if(tid < 1) {
-        m[tid] += m[tid + 1];
-    }
-    __syncthreads();
-}
-
-template<int NumThreads, typename T>
-__device__ void reduceMaxInBlock(uint tid, T * m)
-{
-    if(NumThreads >= 64) {
-        if(tid < 32) {
-            m[tid] = max(m[tid], m[tid + 32]);
-        }
-       // __syncthreads();
-    }
-    
-    if(tid < 16) {
-        m[tid] = max(m[tid], m[tid + 16]);
-    }
-   // __syncthreads();
-    
-    if(tid < 8) {
-        m[tid] = max(m[tid], m[tid + 8]);
-    }
-    //__syncthreads();
-    
-    if(tid < 4) {
-        m[tid] = max(m[tid], m[tid + 4]);
-    }
-    //__syncthreads();
-    
-    if(tid < 2) {
-        m[tid] = max(m[tid], m[tid + 2]);
-    }
-    //__syncthreads();
-    
-    if(tid < 1) {
-        m[tid] = max(m[tid], m[tid + 1]);
-    }
-    __syncthreads();
+    return stat;   
 }
 
 __global__ void resetImage_kernel(float4 * pix, 
@@ -104,7 +66,10 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
                 float fovWidth,
                 float aspectRatio,
                 int2 * internalNodeChildIndices,
-				Aabb * internalNodeAabbs)
+				Aabb * internalNodeAabbs,
+				KeyValuePair * elementHash,
+				int4 * elementVertices,
+				float3 * elementPoints)
 {
     int *sdata = SharedMemory<int>();
     
@@ -171,18 +136,24 @@ __global__ void renderImageOrthographic_kernel(float4 * pix,
         isLeaf = iLeafNode(child);
 		
         if(isLeaf) {
-// todo intersect triangles in leaf
             leftBox = internalNodeAabbs[iNode];
             b1 = ray_box(lambda1, lambda2,
                     eyeRay,
                     rayLength,
                     leftBox);
             if(b1) {
-                rayLength = lambda2;
-                outRgbz.x = rayLength/300.f;
-                outRgbz.y = rayLength/300.f;
-                outRgbz.z = rayLength/300.f;
-                outRgbz.w = rayLength;
+// intersect triangles in leaf  
+                if(intersectLeafTriangles(rayLength,
+                                eyeRay, 
+                                child,
+                                elementHash,
+                                elementVertices,
+                                elementPoints)) {
+                    outRgbz.x = rayLength/300.f;
+                    outRgbz.y = rayLength/300.f;
+                    outRgbz.z = rayLength/300.f;
+                    outRgbz.w = rayLength;
+                }
             }
             
             if(tid<1) {

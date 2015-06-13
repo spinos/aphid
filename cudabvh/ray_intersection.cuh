@@ -8,8 +8,17 @@ struct __align__(16) Ray {
 	float4 d;	// direction
 };
 
-__device__ float3 float3_difference(const float3 & v1, const float4 & v2)
+template<typename T1, typename T2>
+__device__ float3 float3_cross(const T1 & v1, const T2 & v2)
+{ return make_float3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x); }
+
+template<typename T1, typename T2>
+__device__ float3 float3_difference(const T1 & v1, const T2 & v2)
 { return make_float3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z); }
+
+template<typename T1, typename T2>
+__device__ float float3_dot(const T1 & v1, const T2 & v2)
+{ return (v1.x * v2.x + v1.y * v2.y + v1.z * v2.z); }
 
 __device__ void float3_divide_inplace(float3 & v1, const float4 & v2)
 { 
