@@ -1,4 +1,4 @@
-#include "Overlapping.cuh"
+#include "stackUtil.cuh"
 #include "TetrahedronSystemInterface.h"
 #include <CudaBase.h>
 
@@ -192,58 +192,6 @@ __global__ void resetPairCache_kernel(uint2 * dst, uint maxInd)
 	dst[ind].y = 0x80000000;
 }
 
-__global__ void computePairCounts_kernel(uint * overlappingCounts, Aabb * boxes,
-                                uint maxBoxInd,
-								int * rootNodeIndex, 
-								int2 * internalNodeChildIndices, 
-								Aabb * internalNodeAabbs, Aabb * leafAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices)
-{
-	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
-	if(boxIndex >= maxBoxInd) return;
-	
-	Aabb box = boxes[boxIndex];
-	
-	uint stack[B3_BROADPHASE_MAX_STACK_SIZE];
-	
-	int stackSize = 1;
-	stack[0] = *rootNodeIndex;
-		
-	int isLeaf;
-	
-	for(;;) {
-		if(outOfStack(stackSize)) break;
-			
-		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
-		stackSize--;
-		
-		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
-		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
-
-		//bvhRigidIndex is not used if internal node
-		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
-		
-		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
-
-		if(isAabbOverlapping(box, bvhNodeAabb))
-		{    		    
-			if(isLeaf)
-			{
-			    overlappingCounts[boxIndex] += 1;
-			}
-			else {
-			    if(isStackFull(stackSize)) continue;
-			    
-                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
-                stackSize++;
-                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
-                stackSize++;
-			}
-		}
-		
-	}
-}
-
 __global__ void computePairCountsSelfCollide_kernel(uint * overlappingCounts, Aabb * boxes,
                                 uint maxBoxInd,
 								int * rootNodeIndex, 
@@ -296,79 +244,6 @@ __global__ void computePairCountsSelfCollide_kernel(uint * overlappingCounts, Aa
 		}
 		
 	}
-}
-
-__global__ void writePairCache_kernel(uint2 * dst, 
-                                uint * cacheWriteLocation,
-                                uint * cacheStarts, 
-                                uint * overlappingCounts, 
-                                Aabb * boxes,
-                                uint maxBoxInd,
-								int * rootNodeIndex, 
-								int2 * internalNodeChildIndices, 
-								Aabb * internalNodeAabbs, Aabb * leafAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices,
-								unsigned queryIdx, unsigned treeIdx)
-{
-	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
-	if(boxIndex >= maxBoxInd) return;
-	
-	uint cacheSize = overlappingCounts[boxIndex];
-	if(cacheSize < 1) return;
-	
-	uint startLoc = cacheStarts[boxIndex];
-	uint writeLoc = cacheWriteLocation[boxIndex];
-	
-	if((writeLoc - startLoc) >= cacheSize) return;
-	
-	Aabb box = boxes[boxIndex];
-	
-	uint stack[B3_BROADPHASE_MAX_STACK_SIZE];
-	
-	int stackSize = 1;
-	stack[0] = *rootNodeIndex;
-		
-	int isLeaf;
-	
-	for(;;) {
-		if(outOfStack(stackSize)) break;
-	
-		uint internalOrLeafNodeIndex = stack[ stackSize - 1 ];
-		stackSize--;
-		
-		isLeaf = isLeafNode(internalOrLeafNodeIndex);	//Internal node if false
-		uint bvhNodeIndex = getIndexWithInternalNodeMarkerRemoved(internalOrLeafNodeIndex);
-
-		//bvhRigidIndex is not used if internal node
-		int bvhRigidIndex = (isLeaf) ? mortonCodesAndAabbIndices[bvhNodeIndex].value : -1;
-		
-		Aabb bvhNodeAabb = (isLeaf) ? leafAabbs[bvhRigidIndex] : internalNodeAabbs[bvhNodeIndex];
-		uint2 pair;
-		if(isAabbOverlapping(box, bvhNodeAabb))
-		{
-			if(isLeaf)
-			{
-			    pair.x = combineObjectElementInd(queryIdx, boxIndex);
-                pair.y = combineObjectElementInd(treeIdx, bvhRigidIndex);
-                // ascentOrder<uint2>(pair);
-                dst[writeLoc] = pair;
-                writeLoc++;
-			    
-			    if((writeLoc - startLoc)==cacheSize) { // cache if full
-			        break;
-			    }
-			}
-			else {
-			    if(isStackFull(stackSize)) continue;
-			    
-                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].x;
-                stackSize++;
-                stack[ stackSize ] = internalNodeChildIndices[bvhNodeIndex].y;
-                stackSize++;
-			}
-		}
-	}
-	cacheWriteLocation[boxIndex] = writeLoc;
 }
 
 __global__ void writePairCacheSelfCollide_kernel(uint2 * dst, uint * cacheStarts, uint * overlappingCounts, Aabb * boxes,
@@ -499,31 +374,6 @@ void broadphaseResetPairCache(uint2 * dst, uint num)
     resetPairCache_kernel<<< grid, block >>>(dst, num);
 }
 
-void broadphaseComputePairCounts(uint * dst,
-                                Aabb * boxes,
-                                uint numBoxes,
-								int * rootNodeIndex, 
-								int2 * internalNodeChildIndex, 
-								Aabb * internalNodeAabbs, 
-								Aabb * leafNodeAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices)
-{ 
-    int tpb = CudaBase::LimitNThreadPerBlock(20, 50);
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numBoxes, tpb);
-    
-    dim3 grid(nblk, 1, 1);
-    
-    computePairCounts_kernel<<< grid, block >>>(dst,
-                                boxes,
-                                numBoxes,
-								rootNodeIndex, 
-								internalNodeChildIndex, 
-								internalNodeAabbs, 
-								leafNodeAabbs,
-								mortonCodesAndAabbIndices);
-}
-
 void broadphaseComputePairCountsSelfCollide(uint * dst, Aabb * boxes, uint numBoxes,
 								int * rootNodeIndex, 
 								int2 * internalNodeChildIndex, 
@@ -549,34 +399,6 @@ void broadphaseComputePairCountsSelfCollide(uint * dst, Aabb * boxes, uint numBo
 								tetrahedronIndices);
 }
 
-void cuBroadphase_writePairCache(uint2 * dst, uint * locations, 
-                                uint * starts, uint * counts,
-                              Aabb * boxes, uint numBoxes,
-								int * rootNodeIndex, 
-								int2 * internalNodeChildIndex, 
-								Aabb * internalNodeAabbs, 
-								Aabb * leafNodeAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices,
-								unsigned queryIdx, unsigned treeIdx)
-{
-    int tpb = CudaBase::LimitNThreadPerBlock(20, 50);
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numBoxes, tpb);
-    
-    dim3 grid(nblk, 1, 1);
-    
-    writePairCache_kernel<<< grid, block >>>(dst, 
-                                locations,
-                                starts, counts,
-                                boxes,
-                                numBoxes,
-								rootNodeIndex, 
-								internalNodeChildIndex, 
-								internalNodeAabbs, 
-								leafNodeAabbs,
-								mortonCodesAndAabbIndices,
-								queryIdx, treeIdx);
-}
 
 void broadphaseWritePairCacheSelfCollide(uint2 * dst, uint * starts, uint * counts,
                               Aabb * boxes, uint numBoxes,
@@ -681,74 +503,6 @@ void cuBroadphase_writePairCacheSelfCollideExclusion(uint2 * dst, uint * locatio
 								queryIdx,
 								exclusionIndices,
 								exclusionStarts);
-}
-
-}
-
-namespace cubroadphase {
-
-void writeLocation(uint * dst, uint * src, uint n)
-{
-    int tpb = 512;
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(n, tpb);
-    
-    dim3 grid(nblk, 1, 1);
-    
-    startAsWriteLocation_kernel<<< grid, block >>>(dst, src, n);
-}
-
-void countPairsSelfCollideExclS(uint * dst, 
-                                Aabb * boxes, 
-                                uint numBoxes,
-								int2 * internalNodeChildIndex, 
-								Aabb * internalNodeAabbs, 
-								Aabb * leafNodeAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices,
-								int * exclusionIndices)
-{
-    int nThreads = 64;
-	dim3 block(nThreads, 1, 1);
-    int nblk = iDivUp(numBoxes, nThreads);
-    dim3 grid(nblk, 1, 1);
-
-	countPairsSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block>>>(dst,
-                                boxes,
-                                numBoxes,
-								internalNodeChildIndex, 
-								internalNodeAabbs, 
-								leafNodeAabbs,
-								mortonCodesAndAabbIndices,
-								exclusionIndices);
-}
-
-void writePairCacheSelfCollideExclS(uint2 * dst, uint * locations, 
-                                uint * starts, uint * counts,
-                                Aabb * boxes, uint numBoxes,
-								int * rootNodeIndex, 
-								int2 * internalNodeChildIndex, 
-								Aabb * internalNodeAabbs, 
-								Aabb * leafNodeAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices,
-								unsigned queryIdx,
-								int * exclusionIndices)
-{
-    int nThreads = 64;
-	dim3 block(nThreads, 1, 1);
-    int nblk = iDivUp(numBoxes, nThreads);
-    dim3 grid(nblk, 1, 1);
-	
-    writePairCacheSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block>>>(dst, 
-                                locations,
-                                starts, counts,
-                                boxes,
-                                numBoxes,
-								internalNodeChildIndex, 
-								internalNodeAabbs, 
-								leafNodeAabbs,
-								mortonCodesAndAabbIndices,
-								queryIdx,
-								exclusionIndices);
 }
 
 }

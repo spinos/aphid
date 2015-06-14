@@ -16,6 +16,7 @@
 #include <CudaScan.h>
 #include <BvhTetrahedronSystem.h>
 #include "TetrahedronSystemInterface.h"
+#include "OverlappingInterface.h"
 #include <CudaDbgLog.h>
 
 CudaDbgLog bphlg("broadphase.txt");
@@ -188,7 +189,7 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	void * leafNodeAabbs = tree->primitiveAabb();
 	void * mortonCodesAndAabbIndices = tree->primitiveHash();
     
-	cubroadphase::countPairsSelfCollideExclS(counts, (Aabb *)boxes, numBoxes,
+	bvhoverlap::countPairsSelfCollideExclS(counts, (Aabb *)boxes, numBoxes,
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
@@ -208,14 +209,12 @@ void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 	void * boxes = (Aabb *)query->leafAabbs();
 	const unsigned numBoxes = query->numLeafNodes();
 	
-	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
 	void * leafNodeAabbs = tree->primitiveAabb();
 	void * mortonCodesAndAabbIndices = tree->primitiveHash();
 	
-	broadphaseComputePairCounts(counts, (Aabb *)boxes, numBoxes,
-							(int *)rootNodeIndex, 
+	bvhoverlap::countPairs(counts, (Aabb *)boxes, numBoxes,
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
@@ -226,7 +225,7 @@ void CudaBroadphase::setWriteLocation()
 {
     void * dst = m_pairWriteLocation->bufferOnDevice();
     void * src = m_pairStart->bufferOnDevice();
-    cubroadphase::writeLocation((uint *)dst, (uint *)src, m_scanBufferLength);
+    bvhoverlap::writeLocation((uint *)dst, (uint *)src, m_scanBufferLength);
 }
 
 void CudaBroadphase::writeOverlappingPairs(unsigned a, unsigned b)
@@ -262,7 +261,7 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	
 	void * cache = m_pairCache->bufferOnDevice();
 	
-	cubroadphase::writePairCacheSelfCollideExclS((uint2 *)cache, location, starts, counts, 
+	bvhoverlap::writePairCacheSelfCollideExclS((uint2 *)cache, location, starts, counts, 
 	                         (Aabb *)boxes, numBoxes,
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
@@ -291,7 +290,6 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 	void * boxes = (Aabb *)query->leafAabbs();
 	const unsigned numBoxes = query->numLeafNodes();
 	
-	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
 	void * leafNodeAabbs = tree->leafAabbs();
@@ -299,9 +297,8 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 	
 	void * cache = m_pairCache->bufferOnDevice();
 	
-	cuBroadphase_writePairCache((uint2 *)cache, location, starts, counts, 
+	bvhoverlap::writePairCache((uint2 *)cache, location, starts, counts, 
 	                         (Aabb *)boxes, numBoxes,
-							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,

@@ -74,29 +74,3 @@ void cuBroadphase_writePairCacheSelfCollideExclusion(uint2 * dst, uint * locatio
 								uint * exclusionIndices,
 								uint * exclusionStarts);
 }
-
-namespace cubroadphase {
-void countPairsSelfCollideExclS(uint * dst, 
-                                Aabb * boxes, 
-                                uint numBoxes,
-								int2 * internalNodeChildIndex, 
-								Aabb * internalNodeAabbs, 
-								Aabb * leafNodeAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices,
-								int * exclusionIndices);
-								
-void writePairCacheSelfCollideExclS(uint2 * dst, 
-                                uint * locations, 
-								uint * starts, 
-								uint * counts,
-								Aabb * boxes, uint numBoxes,
-								int * rootNodeIndex, 
-								int2 * internalNodeChildIndex, 
-								Aabb * internalNodeAabbs, 
-								Aabb * leafNodeAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices,
-								unsigned queryIdx,
-								int * exclusionIndices);
-								
-void writeLocation(uint * dst, uint * src, uint n);
-}
