@@ -29,7 +29,7 @@ void countPairsSelfCollideExclS(uint * dst,
     int nblk = iDivUp(numBoxes, nThreads);
     dim3 grid(nblk, 1, 1);
 
-	countPairsSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block>>>(dst,
+	countPairsSelfCollide_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block, 16320 >>>(dst,
                                 boxes,
                                 numBoxes,
 								internalNodeChildIndex, 
@@ -55,7 +55,7 @@ void writePairCacheSelfCollideExclS(uint2 * dst, uint * locations,
     int nblk = iDivUp(numBoxes, nThreads);
     dim3 grid(nblk, 1, 1);
 	
-    writePairCacheSExclS_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block>>>(dst, 
+    writePairCacheSelfCollide_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block, 16320 >>>(dst, 
                                 locations,
                                 starts, counts,
                                 boxes,

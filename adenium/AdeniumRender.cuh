@@ -344,7 +344,7 @@ __global__ void renderImage_kernel(float4 * pix,
             }
             else {
                 sbranch[tid] = 0;
-                svisit[tid]==0;
+                svisit[tid] =0;
             }
             __syncthreads();
             

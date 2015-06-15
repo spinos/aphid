@@ -1,12 +1,10 @@
 #ifndef OVERLAPPING_CUH
 #define OVERLAPPING_CUH
 
-#include "stackUtil.cuh"
-#define EXCLU_IN_SMEM 0
-
+#include "bvhUtil.h"
 
 template<int NumExcls>
-inline __device__ void writeElementExclusion(int * dst,
+__device__ void writeElementExclusion(int * dst,
 									uint a,
 									int * exclusionInd)
 {
@@ -17,7 +15,7 @@ inline __device__ void writeElementExclusion(int * dst,
 }
 
 template<int NumExcls>
-inline __device__ int isElementExcludedS(uint b, int * exclusionInd)
+__device__ int isElementExcludedS(uint b, int * exclusionInd)
 {
 	uint i;
 #if 0
@@ -42,17 +40,35 @@ inline __device__ int isElementExcludedS(uint b, int * exclusionInd)
 }
 
 template<int NumExcls>
-inline __device__ void countOverlappings(uint & count,
-                                         KeyValuePair * indirections,
+inline __device__ void countOveralppingsExclS(uint & count,
                                          Aabb box,
+                                         int n,
                                          Aabb * elementBoxes,
-                                         int * exclElm,
-                                         int2 range)
+                                         uint * elementInd,
+                                         int * exclElm)
+{
+    uint iElement;
+    int i=0;
+    for(;i<n;i++) {
+        iElement = elementInd[i];
+        if(isElementExcludedS<NumExcls>(iElement, exclElm)) continue;
+        if(isAabbOverlapping(box, elementBoxes[i])) 
+            count++;
+    }
+}
+
+template<int NumExcls>
+inline __device__ void countOveralppingsExclG(uint & count,
+                                         Aabb box,
+                                         int2 range,
+                                         KeyValuePair * elementHash,
+                                         Aabb * elementBoxes,
+                                         int * exclElm)
 {
     uint iElement;
     int i=range.x;
     for(;i<=range.y;i++) {
-        iElement = indirections[i].value;
+        iElement = elementHash[i].value;
         if(isElementExcludedS<NumExcls>(iElement, exclElm)) continue;
         if(isAabbOverlapping(box, elementBoxes[iElement])) 
             count++;
@@ -60,26 +76,25 @@ inline __device__ void countOverlappings(uint & count,
 }
 
 template<int NumExcls>
-inline __device__ void writeOverlappings(uint2 * overlappings,
+inline __device__ void writeOverlappingsExclS(uint2 * overlappings,
                                 uint & writeLoc,
                                 uint iQuery,
                                 uint iBox,
                                 uint startLoc,
                                 uint cacheSize,
-                                KeyValuePair * indirections,
                                 Aabb box,
-                                Aabb * elementBoxes,
-                                int * exclElm,
-                                int2 range)
+                                         int n,
+                                         Aabb * elementBoxes,
+                                         uint * elementInd,
+                                         int * exclElm)
 {
     uint2 pair;
     uint iElement;
-    int i=range.x;
-    for(;i<=range.y;i++) {
-        iElement = indirections[i].value;
+    int i=0;
+    for(;i<n;i++) {
+        iElement = elementInd[i];
         if(isElementExcludedS<NumExcls>(iElement, exclElm)) continue;
-        if(isAabbOverlapping(box, elementBoxes[iElement])) 
-        {
+        if(isAabbOverlapping(box, elementBoxes[i])) {
             pair.x = combineObjectElementInd(iQuery, iBox);
 			pair.y = combineObjectElementInd(iQuery, iElement);
 			overlappings[writeLoc] = pair;
@@ -89,11 +104,37 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
     }
 }
 
-inline __device__ int isInternalNode(int2 child)
-{ return (child.x>>31) != 0; }
+template<int NumExcls>
+inline __device__ void writeOverlappingsExclG(uint2 * overlappings,
+                                uint & writeLoc,
+                                uint iQuery,
+                                uint iBox,
+                                uint startLoc,
+                                uint cacheSize,
+                                Aabb box,
+                                int2 range,
+                                KeyValuePair * elementHash,
+                                Aabb * elementBoxes,
+                                int * exclElm)
+{
+    uint2 pair;
+    uint iElement;
+    int i=range.x;
+    for(;i<=range.y;i++) {
+        iElement = elementHash[i].value;
+        if(isElementExcludedS<NumExcls>(iElement, exclElm)) continue;
+        if(isAabbOverlapping(box, elementBoxes[iElement])) {
+            pair.x = combineObjectElementInd(iQuery, iBox);
+			pair.y = combineObjectElementInd(iQuery, iElement);
+			overlappings[writeLoc] = pair;
+            writeLoc++;
+        }
+        if((writeLoc - startLoc)==cacheSize) return;
+    }
+}
 
 template<int NumExcls, int NumThreads>
-__global__ void countPairsSExclS_kernel(uint * overlappingCounts, 
+__global__ void countPairsSelfCollide_kernel(uint * overlappingCounts, 
 								Aabb * boxes, 
 								uint maxBoxInd,
 								int2 * internalNodeChildIndices, 
@@ -102,71 +143,150 @@ __global__ void countPairsSExclS_kernel(uint * overlappingCounts,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								int * exclusionIndices)
 {
-#if EXCLU_IN_SMEM
-    __shared__ int sExclElm[NumThreads*NumExcls];
-#endif 
-	// __shared__ int sStack[64*32];
+    int *sdata = SharedMemory<int>();
 	
-	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
-	if(boxIndex >= maxBoxInd) return;
+	uint boxInd = blockIdx.x*blockDim.x + threadIdx.x;
+	const int isValidBox = (boxInd < maxBoxInd);
 	
-	const Aabb box = boxes[boxIndex];
-
-#if EXCLU_IN_SMEM
-    int * exclElm = &sExclElm[threadIdx.x * NumExcls];
-    writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
-#else
-	int * exclElm = &exclusionIndices[boxIndex*NumExcls];
-#endif	
-	
-	// int * stack = &sStack[threadIdx.x << 6];
-	int stack[B3_BROADPHASE_MAX_STACK_SIZE];
-	int stackSize = 1;
-	stack[0] = 0x80000000;
+	Aabb box;
+    if(isValidBox)
+        box = boxes[boxInd];
+/* 
+ *  smem layout in ints
+ *  n as num threads    64
+ *  m as max stack size 64
+ *  c as box cache size 64
+ *  e as exclusive size 32
+ *
+ *  0   -> 1      stackSize
+ *  4   -> 4+m-1       stack
+ *  4+m -> 4+m+n-1  visiting
+ *  4+m+n -> 4+m+n+6*c-1  leaf boxes cache
+ *  4+m+n+6*c -> 4+m+n+6*c+c-1  leaf ind cache
+ *  4+m+n+6*c+c -> 4+m+n+6*c+c+e*n-1  box exclusive ind cache
+ *
+ *  visiting is n child to visit
+ *  3 both 2 left 1 right 0 neither
+ *  if max(visiting) == 0 pop stack
+ *  if max(visiting) == 1 override top of stack by right
+ *  if max(visiting) >= 2 override top of stack by right, then push left to stack
+ */	
+    int & sstackSize = sdata[0];
+    int * sstack =  &sdata[4];
+    int * svisit = &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
+    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads];
+    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads + BVH_PACKET_TRAVERSE_CACHE_SIZE * 6];
+    int * sexclusCache = &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads + BVH_PACKET_TRAVERSE_CACHE_SIZE * 6 + BVH_PACKET_TRAVERSE_CACHE_SIZE];
+	if(isValidBox) 
+        writeElementExclusion<NumExcls>(sexclusCache, boxInd, exclusionIndices);
+    int * exclElm = &sexclusCache[boxInd*NumExcls];
+    
+    const uint tid = threadIdx.x;
+    if(tid<1) {
+        sstack[0] = 0x80000000;
+        sstackSize = 1;
+    }
+    __syncthreads();
 		
-	int isInternal;
+	int canLeafFitInSmem;
+    int numBoxesInLeaf;
+	int isLeaf;
     int iNode;
     int2 child;
-    Aabb internalBox;
+    Aabb leftBox, rightBox;
+    int b1, b2;
 	
-    uint iCount = 0;
+    uint outCount = 0;
 	for(;;) {
-		if(outOfStack(stackSize)) break;
-		
-		iNode = stack[ stackSize - 1 ];
-		stackSize--;
-		
+		iNode = sstack[ sstackSize - 1 ];
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
         child = internalNodeChildIndices[iNode];
-        isInternal = isInternalNode(child);
-		
-        internalBox = internalNodeAabbs[iNode];
+        isLeaf = iLeafNode(child);
 
-		if(isAabbOverlapping(box, internalBox))
-		{    
-		    if(!isInternal) {
-		        countOverlappings<NumExcls>(iCount,
-                                mortonCodesAndAabbIndices,
-                                box,
-                                leafAabbs,
-                                exclElm,
-                                child);
+        if(isLeaf) {
+// load leaf boxes into smem
+            numBoxesInLeaf = child.y - child.x + 1;
+            canLeafFitInSmem = (numBoxesInLeaf <= BVH_PACKET_TRAVERSE_CACHE_SIZE);
+            if(canLeafFitInSmem) 
+                putLeafBoxAndIndInSmem<NumThreads>(sboxCache,
+                                            sindCache,
+                                            tid,
+                                            numBoxesInLeaf,
+                                            child,
+                                            mortonCodesAndAabbIndices,
+                                            leafAabbs);
+            __syncthreads(); 
+            if(isValidBox) {
+// intersect boxes in leaf
+            if(canLeafFitInSmem)
+                countOveralppingsExclS<NumExcls>(outCount, 
+                                    box,
+                                    numBoxesInLeaf,
+                                    sboxCache,
+                                    sindCache,
+                                    exclElm);
+            else
+                countOveralppingsExclG<NumExcls>(outCount,
+                                    box,
+                                    child,
+                                    mortonCodesAndAabbIndices,
+                                    leafAabbs,
+                                    exclElm);
+            }
+            if(tid<1) {
+// take out top of stack
+                sstackSize--;
+            }
+            __syncthreads();
+            
+            if(sstackSize<1) break;
+        }
+        else {
+            if(isValidBox) {
+                leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
+                b1 = isAabbOverlapping(box, leftBox);
+            
+                rightBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.y)];
+                b2 = isAabbOverlapping(box, rightBox);
+            
+                svisit[tid] = 2 * b1 + b2;
             }
             else {
-				if(isStackFull(stackSize)) continue;
-			    
-                stack[ stackSize ] = child.x;
-                stackSize++;
-                stack[ stackSize ] = child.y;
-                stackSize++;
+                svisit[tid] = 0;
             }
-		}
+            __syncthreads();
+            
+            reduceMaxInBlock<NumThreads, int>(tid, svisit);
+		
+            if(tid<1) {
+                if(svisit[tid] == 0) {
+// visit no child, take out top of stack
+                    sstackSize--;
+                }
+                else if(svisit[tid] == 1) {
+// visit right child
+                    sstack[ sstackSize - 1 ] = child.y; 
+                }
+                else {
+// visit both children                    
+                    sstack[ sstackSize - 1 ] = child.y;
+                    if(sstackSize < BVH_TRAVERSE_MAX_STACK_SIZE) { 
+                            sstack[ sstackSize ] = child.x;
+                            sstackSize++;
+                    }
+                }
+            }
+            __syncthreads();
+            
+            if(sstackSize<1) break;
+        }
 	}
-    overlappingCounts[boxIndex] = iCount;
+	if(isValidBox)
+	    overlappingCounts[boxInd] = outCount;
 }
 
 template<int NumExcls, int NumThreads>
-__global__ void writePairCacheSExclS_kernel(uint2 * dst, 
+__global__ void writePairCacheSelfCollide_kernel(uint2 * dst, 
                                 uint * cacheWriteLocation,
 								uint * cacheStarts, 
 								uint * overlappingCounts,
@@ -179,53 +299,158 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
 								unsigned queryIdx,
 								int * exclusionIndices)
 {
-#if EXCLU_IN_SMEM
-    __shared__ int sExclElm[NumThreads*NumExcls];
-#endif
-	//__shared__ int sStack[64*32];
+    int *sdata = SharedMemory<int>();
 	
-	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
-	if(boxIndex >= maxBoxInd) return;
+	uint boxInd = blockIdx.x*blockDim.x + threadIdx.x;
+	const int isValidBox = (boxInd < maxBoxInd);
 	
-	uint cacheSize = overlappingCounts[boxIndex];
-	if(cacheSize < 1) return;
-	
-	uint startLoc = cacheStarts[boxIndex];
-	uint writeLoc = cacheWriteLocation[boxIndex];
-	
-	if((writeLoc - startLoc) >= cacheSize) return;
-	
-	const Aabb box = boxes[boxIndex];
-	
-#if EXCLU_IN_SMEM
-    int * exclElm = &sExclElm[threadIdx.x * NumExcls];
-    writeElementExclusion<NumExcls>(exclElm, boxIndex, exclusionIndices);
-#else
-	int * exclElm = &exclusionIndices[boxIndex*NumExcls];
-#endif
-	
-	// int * stack = &sStack[threadIdx.x << 6];
-	int stack[B3_BROADPHASE_MAX_STACK_SIZE];
-	int stackSize = 1;
-	stack[0] = 0x80000000;
+	uint cacheSize, startLoc, writeLoc;
+    Aabb box;
+    if(isValidBox) {
+	     cacheSize = overlappingCounts[boxInd];
+	     startLoc = cacheStarts[boxInd];
+	     writeLoc = cacheWriteLocation[boxInd];
+         box = boxes[boxInd];	
+	}
+/* 
+ *  smem layout in ints
+ *  n as num threads    64
+ *  m as max stack size 64
+ *  c as box cache size 64
+ *  e as exclusive size 32
+ *
+ *  0   -> 1      stackSize
+ *  4   -> 4+m-1       stack
+ *  4+m -> 4+m+n-1  visiting
+ *  4+m+n -> 4+m+n+6*c-1  leaf boxes cache
+ *  4+m+n+6*c -> 4+m+n+6*c+c-1  leaf ind cache
+ *  4+m+n+6*c+c -> 4+m+n+6*c+c+e*n-1  box exclusive ind cache
+ *
+ *  visiting is n child to visit
+ *  3 both 2 left 1 right 0 neither
+ *  if max(visiting) == 0 pop stack
+ *  if max(visiting) == 1 override top of stack by right
+ *  if max(visiting) >= 2 override top of stack by right, then push left to stack
+ */
+    int & sstackSize = sdata[0];
+    int * sstack =  &sdata[4];
+    int * svisit = &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
+    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads];
+    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads + BVH_PACKET_TRAVERSE_CACHE_SIZE * 6];
+    int * sexclusCache = &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads + BVH_PACKET_TRAVERSE_CACHE_SIZE * 6 + BVH_PACKET_TRAVERSE_CACHE_SIZE];
+	if(isValidBox) 
+        writeElementExclusion<NumExcls>(sexclusCache, boxInd, exclusionIndices);
+    int * exclElm = &sexclusCache[boxInd*NumExcls];
+    
+	const uint tid = threadIdx.x;
+    if(tid<1) {
+        sstack[0] = 0x80000000;
+        sstackSize = 1;
+    }
+    __syncthreads();
 		
-	int isInternal;
+	int canLeafFitInSmem;
+    int numBoxesInLeaf;
+	int isLeaf;
     int iNode;
     int2 child;
-    Aabb internalBox;
+    Aabb leftBox, rightBox;
+    int b1, b2;
 	
 	for(;;) {
-		if(outOfStack(stackSize)) break;
-        
-		iNode = stack[ stackSize - 1 ];
-		stackSize--;
-		
+		iNode = sstack[ sstackSize - 1 ];
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
-		child = internalNodeChildIndices[iNode];
-        isInternal = isInternalNode(child);
-        
-		internalBox = internalNodeAabbs[iNode];
-        
+        child = internalNodeChildIndices[iNode];
+        isLeaf = iLeafNode(child);
+		
+		if(isLeaf) {
+// load leaf boxes into smem
+            numBoxesInLeaf = child.y - child.x + 1;
+            canLeafFitInSmem = (numBoxesInLeaf <= BVH_PACKET_TRAVERSE_CACHE_SIZE);
+            if(canLeafFitInSmem) 
+                putLeafBoxAndIndInSmem<NumThreads>(sboxCache,
+                                            sindCache,
+                                            tid,
+                                            numBoxesInLeaf,
+                                            child,
+                                            mortonCodesAndAabbIndices,
+                                            leafAabbs);
+            __syncthreads();
+            if(isValidBox) {
+// intersect boxes in leaf
+            if(canLeafFitInSmem)
+                writeOverlappingsExclS<NumExcls>(dst,
+                                    writeLoc,
+                                    queryIdx,
+                                    boxInd,
+                                    startLoc,
+                                    cacheSize,
+                                    box,
+                                    numBoxesInLeaf,
+                                    sboxCache,
+                                    sindCache,
+                                    exclElm);
+            else
+                writeOverlappingsExclG<NumExcls>(dst,
+                                    writeLoc,
+                                    queryIdx,
+                                    boxInd,
+                                    startLoc,
+                                    cacheSize,
+                                    box,
+                                    child,
+                                    mortonCodesAndAabbIndices,
+                                    leafAabbs,
+                                    exclElm);
+            }
+            if(tid<1) {
+// take out top of stack
+                sstackSize--;
+            }
+            __syncthreads();
+            
+            if(sstackSize<1) break;
+		}
+		else {
+		    if(isValidBox) {
+                leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
+                b1 = isAabbOverlapping(box, leftBox);
+            
+                rightBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.y)];
+                b2 = isAabbOverlapping(box, rightBox);
+            
+                svisit[tid] = 2 * b1 + b2;
+            }
+            else {
+                svisit[tid] = 0;
+            }
+            __syncthreads();
+            
+            reduceMaxInBlock<NumThreads, int>(tid, svisit);
+		
+            if(tid<1) {
+                if(svisit[tid] == 0) {
+// visit no child, take out top of stack
+                    sstackSize--;
+                }
+                else if(svisit[tid] == 1) {
+// visit right child
+                    sstack[ sstackSize - 1 ] = child.y; 
+                }
+                else {
+// visit both children                    
+                    sstack[ sstackSize - 1 ] = child.y;
+                    if(sstackSize < BVH_TRAVERSE_MAX_STACK_SIZE) { 
+                            sstack[ sstackSize ] = child.x;
+                            sstackSize++;
+                    }
+                }
+            }
+            __syncthreads();
+            
+            if(sstackSize<1) break;
+		}
+/*		
 		if(isAabbOverlapping(box, internalBox))
 		{
 			if(!isInternal) {
@@ -249,9 +474,10 @@ __global__ void writePairCacheSExclS_kernel(uint2 * dst,
                 stack[ stackSize ] = child.y;
                 stackSize++;
             }
-		}
+		}*/
 	}
-	cacheWriteLocation[boxIndex] = writeLoc;
+	if(isValidBox)
+	    cacheWriteLocation[boxInd] = writeLoc;
 }
 
 __global__ void startAsWriteLocation_kernel(uint * dst, uint * src, uint maxInd)

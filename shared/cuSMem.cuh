@@ -1,3 +1,6 @@
+#ifndef CUSMEM_CUH
+#define CUSMEM_CUH
+
 #include <cuda_runtime_api.h>
 
 template<class T>
@@ -9,4 +12,6 @@ struct SharedMemory
         return (T*)__smem;
     }
 };
+
+#endif        //  #ifndef CUSMEM_CUH
 

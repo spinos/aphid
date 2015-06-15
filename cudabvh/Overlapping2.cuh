@@ -1,11 +1,7 @@
-#include "cuSMem.cuh"
-#include "cuReduceInBlock.cuh"
+#ifndef OVERLAPPING2_CUH
+#define OVERLAPPING2_CUH
 
-#define BVH_PACKET_TRAVERSE_CACHE_SIZE 128
-#define BVH_TRAVERSE_MAX_STACK_SIZE 64
-
-inline __device__ int iLeafNode(const int2 & child)
-{ return (child.x>>31) == 0; }
+#include "bvhUtil.h"
 
 template<int NumThreads>
 __device__ void putLeafBoxesInSmem(Aabb * dst,
@@ -27,33 +23,6 @@ __device__ void putLeafBoxesInSmem(Aabb * dst,
         if(loc < n) {
             iElement = elementHash[range.x + loc].value;
             dst[loc] = elementAabbs[iElement];
-        }
-    }
-}
-
-template<int NumThreads>
-__device__ void putLeafBoxAndIndInSmem(Aabb * dst,
-                                    uint * elementInd,
-                                   uint tid,
-                                   uint n,
-                                   int2 range,
-                                   KeyValuePair * elementHash,
-                                   Aabb * elementAabbs)
-{
-    uint iElement; 
-    uint loc = tid;
-    if(loc < n) {
-        iElement = elementHash[range.x + loc].value;
-        dst[loc] = elementAabbs[iElement];
-        elementInd[loc] = iElement;
-    }
-    
-    if(n>NumThreads) {
-        loc += NumThreads;
-        if(loc < n) {
-            iElement = elementHash[range.x + loc].value;
-            dst[loc] = elementAabbs[iElement];
-            elementInd[loc] = iElement;
         }
     }
 }
@@ -163,7 +132,7 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
  *  smem layout in ints
  *  n as num threads    64
  *  m as max stack size 64
- *  c as box cache size 128
+ *  c as box cache size 64
  *
  *  0   -> 1      stackSize
  *  4   -> 4+m-1       stack
@@ -309,13 +278,13 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
  *  smem layout in ints
  *  n as num threads    64
  *  m as max stack size 64
- *  c as box cache size 128
+ *  c as box cache size 64
  *
  *  0   -> 1      stackSize
  *  4   -> 4+m-1       stack
  *  4+m -> 4+m+n-1  visiting
  *  4+m+n -> 4+m+n+6*c-1  leaf boxes cache
- *  4+m+n+6*c -> 4+m+n+6*c+c leaf boxes ind
+ *  4+m+n+6*c -> 4+m+n+6*c+c-1 leaf boxes ind
  *
  *  visiting is n child to visit
  *  3 both 2 left 1 right 0 neither
@@ -439,3 +408,5 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
 	if(isValidBox)
         cacheWriteLocation[boxInd] = writeLoc;
 }
+#endif        //  #ifndef OVERLAPPING2_CUH
+
