@@ -8,11 +8,16 @@ __device__ void writeElementExclusion(int * dst,
 									uint a,
 									int * exclusionInd)
 {
+    int i=0;
+#if 1
     int4 * dstInd4 = (int4 *)dst;
 	int4 * srcInd4 = (int4 *)&exclusionInd[NumExcls * a];
-	int i=0;
 	for(;i<(NumExcls>>2); i++)
 	    dstInd4[i] = srcInd4[i];
+#else
+    for(;i<NumExcls; i++)
+	    dst[i] = exclusionInd[NumExcls * a + i];
+#endif
 }
 
 template<int NumExcls>

@@ -6,6 +6,13 @@
 template<int NumThreads, typename T>
 __device__ void reduceSumInBlock(uint tid, T * m)
 {
+    if(NumThreads >= 128) {
+        if(tid < 64) {
+            m[tid] += m[tid + 64];
+        }
+        __syncthreads();
+    }
+    
     if(NumThreads >= 64) {
         if(tid < 32) {
             m[tid] += m[tid + 32];
@@ -42,6 +49,13 @@ __device__ void reduceSumInBlock(uint tid, T * m)
 template<int NumThreads, typename T>
 __device__ void reduceMaxInBlock(uint tid, T * m)
 {
+    if(NumThreads >= 128) {
+        if(tid < 64) {
+            m[tid] = max(m[tid], m[tid + 64]);
+        }
+        __syncthreads();
+    }
+    
     if(NumThreads >= 64) {
         if(tid < 32) {
             m[tid] = max(m[tid], m[tid + 32]);
