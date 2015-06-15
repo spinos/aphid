@@ -18,14 +18,14 @@ public:
     virtual void create(CudaDynamicWorld * world);
     
 	void changeMaxDisplayLevel(int d);
-    void draw(CudaDynamicWorld * world);
     void draw(CudaDynamicWorld * world, GeoDrawer * drawer);
+    // void draw(CudaDynamicWorld * world, GeoDrawer * drawer);
     void drawFaulty(CudaDynamicWorld * world, GeoDrawer * drawer);
     bool verifyData(CudaDynamicWorld * world);
 protected:
 
 private:
-    void draw(TetrahedronSystem * tetra);
+    void drawTetrahedron(TetrahedronSystem * tetra, GeoDrawer * drawer, int ind);
     void drawTriangle(TriangleSystem * tri);
 #if DRAW_BPH_PAIRS
     void showOverlappingPairs(CudaDynamicWorld * world, GeoDrawer * drawer);

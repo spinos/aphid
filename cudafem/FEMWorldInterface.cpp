@@ -32,21 +32,28 @@ bool FEMWorldInterface::readTetrahedronMeshFromFile(CudaDynamicWorld * world)
 		return false;
 	}
 	
-	ATetrahedronMesh meshData;
 	HesperisFile hes;
 	hes.setReadComponent(HesperisFile::RTetra);
-	hes.addTetrahedron("tetra_0", &meshData);
+	// hes.addTetrahedron("tetra_0", &meshData);
 	if(!hes.open(FemGlobal::FileName)) return false;
 	hes.close();
 	
-	std::cout<<" n tetrahedron: "<<meshData.numTetrahedrons()
-	<<"\n n vertex: "<<meshData.numPoints()
-	<<"\n";
-	
-    FEMTetrahedronSystem * mesh = new FEMTetrahedronSystem(&meshData);
-    mesh->resetVelocity();
-	world->addTetrahedronSystem(mesh);
-	
+    GeometryArray tetrahedronGeos;
+	hes.extractTetrahedronMeshes(&tetrahedronGeos);
+    
+    unsigned n = tetrahedronGeos.numGeometries();
+    n =2;
+    unsigned i = 0;
+    for(;i<n;i++) {
+        ATetrahedronMesh * meshData = (ATetrahedronMesh *)tetrahedronGeos.geometry(i);
+        std::cout<<"\n tetrahedron mesh["<<i<<"]"
+	    <<"\n n tetrahedron: "<<meshData->numTetrahedrons()
+        <<"\n n vertex: "<<meshData->numPoints()
+        <<"\n";
+        FEMTetrahedronSystem * mesh = new FEMTetrahedronSystem(meshData);
+        mesh->resetVelocity();
+        world->addTetrahedronSystem(mesh);
+    }
 	return true;
 }
 /*

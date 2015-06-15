@@ -86,28 +86,20 @@ void CudaDynamicWorld::collide()
     if(m_numObjects < 1) return;
 	unsigned i;
 	for(i=0; i < m_numObjects; i++) m_objects[i]->update();
-    
-    //std::cout<<"aft bvh ";
-   // CudaBase::CheckCudaError("bvh update");
+    CudaBase::CheckCudaError("bvh update");
         
 	m_broadphase->computeOverlappingPairs();
-    
-    //std::cout<<"aft bph ";
-    //CudaBase::CheckCudaError("bph update");
+    CudaBase::CheckCudaError("broadphase update");
 	
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
 	                                m_broadphase->numOverlappingPairs());
-	
-   // std::cout<<"aft contact ";
-    //CudaBase::CheckCudaError("contact");
+    CudaBase::CheckCudaError("narrowphase update");
 	
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),
 									m_narrowphase->contactPairsBuffer(),
 									m_narrowphase->objectBuffer());
-    
-    //std::cout<<"aft contact solve ";
-    //CudaBase::CheckCudaError("contact solve");
+    CudaBase::CheckCudaError("contact solve");
 }
 
 void CudaDynamicWorld::integrate(float dt)

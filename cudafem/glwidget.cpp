@@ -57,7 +57,7 @@ void GLWidget::clientDraw()
 #else
     if(m_isPhysicsRunning) {
         emit updatePhysics();
-        m_interface->draw(m_world);
+        m_interface->draw(m_world, getDrawer());
         m_world->dbgDraw();
     }
 #endif

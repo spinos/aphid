@@ -151,9 +151,14 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
     int *sdata = SharedMemory<int>();
     
 	uint boxInd = blockIdx.x*blockDim.x + threadIdx.x;
-	if(boxInd >= maxBoxInd) return;
+    const int isValidBox = (boxInd < maxBoxInd);
 	
-	Aabb box = boxes[boxInd];
+	Aabb box;
+    uint outCount;
+    if(isValidBox) {
+        box = boxes[boxInd];
+        outCount = overlappingCounts[boxInd];
+    }
 /* 
  *  smem layout in ints
  *  n as num threads    64
@@ -189,7 +194,6 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
     int2 child;
     Aabb leftBox, rightBox;
     int b1, b2;
-    uint outCount = 0;
 	for(;;) {
 		iNode = sstack[ sstackSize - 1 ];
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
@@ -208,6 +212,8 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
                                             mortonCodesAndAabbIndices,
                                             leafAabbs);
             __syncthreads();
+            
+            if(isValidBox) {
 // intersect boxes in leaf
             if(canLeafFitInSmem)
                 countOveralppingsS(outCount, 
@@ -220,7 +226,7 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
                                     child,
                                     mortonCodesAndAabbIndices,
                                     leafAabbs);
-
+            }
             if(tid<1) {
 // take out top of stack
                 sstackSize--;
@@ -230,6 +236,7 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
             if(sstackSize<1) break;
 		}
 		else {
+            if(isValidBox) {
 		    leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
             b1 = isAabbOverlapping(box, leftBox);
             
@@ -237,6 +244,10 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
             b2 = isAabbOverlapping(box, rightBox);
             
             svisit[tid] = 2 * b1 + b2;
+            }
+            else {
+                svisit[tid] = 0;
+            }   
             __syncthreads();
             
             reduceMaxInBlock<NumThreads, int>(tid, svisit);
@@ -264,7 +275,8 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
             if(sstackSize<1) break;
 		}
 	}
-	overlappingCounts[boxInd] = outCount;
+	if(isValidBox) 
+        overlappingCounts[boxInd] = outCount;
 }
 
 template<int NumThreads>
@@ -283,13 +295,16 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
     int *sdata = SharedMemory<int>();
     
 	uint boxInd = blockIdx.x*blockDim.x + threadIdx.x;
-	if(boxInd >= maxBoxInd) return;
+	const int isValidBox = (boxInd < maxBoxInd);
 	
-	const uint cacheSize = overlappingCounts[boxInd];
-	const uint startLoc = cacheStarts[boxInd];
-	uint writeLoc = cacheWriteLocation[boxInd];
-	
-	Aabb box = boxes[boxInd];	
+    uint cacheSize, startLoc, writeLoc;
+    Aabb box;
+    if(isValidBox) {
+	     cacheSize = overlappingCounts[boxInd];
+	     startLoc = cacheStarts[boxInd];
+	     writeLoc = cacheWriteLocation[boxInd];
+         box = boxes[boxInd];	
+	}
 /* 
  *  smem layout in ints
  *  n as num threads    64
@@ -346,6 +361,7 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
                                             mortonCodesAndAabbIndices,
                                             leafAabbs);
             __syncthreads();
+            if(isValidBox) {
 // intersect boxes in leaf
             if(canLeafFitInSmem)
                 writeOveralppingsS(outPairs, 
@@ -371,7 +387,7 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
                                     leafAabbs,
                                     startLoc,
                                     cacheSize);
-
+            }
             if(tid<1) {
 // take out top of stack
                 sstackSize--;
@@ -381,6 +397,7 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
             if(sstackSize<1) break;		    
 		}
 		else {
+            if(isValidBox) {
 			leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
             b1 = isAabbOverlapping(box, leftBox);
             
@@ -388,6 +405,10 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
             b2 = isAabbOverlapping(box, rightBox);
             
             svisit[tid] = 2 * b1 + b2;
+            }
+            else {
+                svisit[tid] = 0;
+            }
             __syncthreads();
             
             reduceMaxInBlock<NumThreads, int>(tid, svisit);
@@ -415,5 +436,6 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
             if(sstackSize<1) break;
 		}
 	}
-	cacheWriteLocation[boxInd] = writeLoc;
+	if(isValidBox)
+        cacheWriteLocation[boxInd] = writeLoc;
 }

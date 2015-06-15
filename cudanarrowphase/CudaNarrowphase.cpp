@@ -15,7 +15,7 @@
 #include <CudaScan.h>
 #include <DynGlobal.h>
 #include <CudaDbgLog.h>
-
+#include <CudaBase.h>
 CudaDbgLog nplg("nph.txt");
 
 struct SSimplex {
@@ -262,11 +262,13 @@ void CudaNarrowphase::resetContacts(void * overlappingPairs, unsigned numOverlap
 		(uint *)m_objectBuf.m_pointCacheLoc->bufferOnDevice(),
 		(uint *)m_objectBuf.m_indexCacheLoc->bufferOnDevice(),
 		numOverlappingPairs);
+    CudaBase::CheckCudaError("narrowphase write pair p and v");
 		
 	void * dstPair = m_contactPairs[bufferId()]->bufferOnDevice();
 	narrowphase_writePairs((uint2 *)dstPair, 
 		(uint2 *)overlappingPairs,
 		numOverlappingPairs);
+    CudaBase::CheckCudaError("narrowphase write pair");
 }
 
 void CudaNarrowphase::computeInitialSeparation()
@@ -277,6 +279,7 @@ void CudaNarrowphase::computeInitialSeparation()
 	narrowphase_computeInitialSeparation((ContactData *)dstContact,
 		(float3 *)pairPos,
 		m_numPairs);
+    CudaBase::CheckCudaError("narrowphase initial sep");
 }
 
 void CudaNarrowphase::computeTimeOfImpact()
@@ -295,6 +298,7 @@ void CudaNarrowphase::computeTimeOfImpact()
 		(float3 *)pairPos,
 		(float3 *)pairVel,
 		lastNumPairs);
+        CudaBase::CheckCudaError("narrowphase time of impact");
 		
 		if(lastNumPairs < 256) continue;
 		
@@ -313,8 +317,7 @@ void CudaNarrowphase::computeTimeOfImpact()
 			
 			//nplg.writeVec3(m_tetVertPos[bufferId()], m_numPairs<<3, "posaft", CudaDbgLog::FAlways);
 			//nplg.writeVec3(m_tetVertVel[bufferId()], m_numPairs<<3, "velaft", CudaDbgLog::FAlways);
-	
-			
+
 			lastNumPairs = m_numPairs;
 		}
 	}
@@ -328,6 +331,7 @@ unsigned CudaNarrowphase::countValidContacts(CUDABuffer * contactBuf, unsigned n
 
 	narrowphaseComputeValidPairs((uint *)counts, (ContactData *)contactBuf->bufferOnDevice(), 
 										n, scanValidPairLength);
+    CudaBase::CheckCudaError("narrowphase count valid");
 	
 	return m_scanIntermediate->prefixSum(m_scanValidContacts, 
 												m_validCounts, scanValidPairLength);
@@ -352,11 +356,6 @@ void CudaNarrowphase::squeezeContacts(unsigned numPairs)
 	
 	void * counts = m_validCounts->bufferOnDevice();
 	void * scanResult = m_scanValidContacts->bufferOnDevice();
-	
-	//narrowphaseSqueezeContactPairs((uint2 *)dstPairs, (uint2 *)srcPairs, 
-	//								(ContactData *)dstContact, (ContactData *)srcContact,
-	//								(uint *)counts, (uint *)scanResult, 
-	//								numPairs);
 									
 	narrowphase_squeezeContactPosAndVel((float3 *)dstPos, (float3 *)srcPos, 
 									(float3 *)dstVel, (float3 *)srcVel,
@@ -364,6 +363,7 @@ void CudaNarrowphase::squeezeContacts(unsigned numPairs)
 									(ContactData *)dstContact, (ContactData *)srcContact,
 									(uint *)counts, (uint *)scanResult, 
 									numPairs);
+    CudaBase::CheckCudaError("narrowphase squeeze contact");
 }
 
 void CudaNarrowphase::resetToInitial()

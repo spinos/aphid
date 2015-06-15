@@ -19,6 +19,9 @@
 #include "OverlappingInterface.h"
 #include <CudaDbgLog.h>
 
+//#define DISABLE_INTER_OBJECT_COLLISION
+//#define DISABLE_SELF_COLLISION
+
 CudaDbgLog bphlg("broadphase.txt");
 
 CudaBroadphase::CudaBroadphase() 
@@ -91,6 +94,7 @@ void CudaBroadphase::initOnDevice()
 	}
 	
 	m_scanBufferLength = CudaScan::getScanBufferLength(m_numBoxes);
+    std::cout<<" broadphase scan buf length "<<m_scanBufferLength<<"\n";
 	m_pairCounts->create(m_scanBufferLength * 4);
 	m_pairStart->create(m_scanBufferLength * 4);
 	m_pairWriteLocation->create(m_scanBufferLength * 4);
@@ -116,8 +120,7 @@ void CudaBroadphase::computeOverlappingPairs()
 	m_pairCacheLength = m_scanIntermediate->prefixSum(m_pairStart, m_pairCounts, m_scanBufferLength);
 	
 	if(m_pairCacheLength < 1) return;
-
-	/*
+#if 0
 	bphlg.writeUInt(m_pairCounts,
          m_numBoxes,
                 "overlapping_counts", CudaDbgLog::FAlways);
@@ -125,16 +128,14 @@ void CudaBroadphase::computeOverlappingPairs()
     bphlg.writeUInt(m_pairStart,
          m_numBoxes,
                 "overlapping_offsets", CudaDbgLog::FAlways);
-
-	
 	std::cout<<" overlapping pair cache length "<<m_pairCacheLength<<"\n";
-	*/
+#endif	
 	setWriteLocation();
-	/*
+#if 0	
 	bphlg.writeUInt(m_pairWriteLocation,
          m_numBoxes,
                 "overlapping_write_location0", CudaDbgLog::FAlways);
-	*/
+#endif
 	m_pairCache->create(m_pairCacheLength * 8);
 	
 	void * cache = m_pairCache->bufferOnDevice();
@@ -145,15 +146,16 @@ void CudaBroadphase::computeOverlappingPairs()
 			writeOverlappingPairs(j, i);
 		}
 	}
-	/*
+#if 0
 	bphlg.writeUInt(m_pairWriteLocation,
          m_numBoxes,
                 "overlapping_write_location1", CudaDbgLog::FAlways);
-    
+#endif
+#if 0    
     bphlg.writeHash(m_pairCache,
          m_pairCacheLength,
                 "overlapping_pairs", CudaDbgLog::FAlways);
-	*/	
+#endif	
 #if DRAW_BPH_PAIRS
 	m_hostPairCache->create(m_pairCacheLength * 8);
 	m_hostAabb->create(m_numBoxes * sizeof(Aabb));
@@ -173,6 +175,9 @@ void CudaBroadphase::countOverlappingPairs(unsigned a, unsigned b)
 
 void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 {
+#ifdef DISABLE_SELF_COLLISION 
+    return;
+#endif
     uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
 
@@ -195,11 +200,14 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							(int *)exclusionInd);
-	CudaBase::CheckCudaError("broadphase count pairs smem");
+	CudaBase::CheckCudaError("broadphase count pairs self-collide");
 }
 
 void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 {
+#ifdef DISABLE_INTER_OBJECT_COLLISION
+    return;
+#endif
 	uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
 	
@@ -218,7 +226,8 @@ void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
-							(KeyValuePair *)mortonCodesAndAabbIndices);							
+							(KeyValuePair *)mortonCodesAndAabbIndices);	
+    CudaBase::CheckCudaError("broadphase count pairs");
 }
 
 void CudaBroadphase::setWriteLocation()
@@ -236,6 +245,9 @@ void CudaBroadphase::writeOverlappingPairs(unsigned a, unsigned b)
 
 void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 {
+#ifdef DISABLE_SELF_COLLISION 
+    return;
+#endif
     uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
 	
@@ -270,11 +282,14 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							a,
 							(int *)exclusionInd);
-	CudaBase::CheckCudaError("broadphase write pairs smem");
+	CudaBase::CheckCudaError("broadphase write pairs self-collide");
 }
 
 void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 {
+#ifdef DISABLE_INTER_OBJECT_COLLISION
+    return;
+#endif
     uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
 	
@@ -304,6 +319,7 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 							(Aabb *)leafNodeAabbs,
 							(KeyValuePair *)mortonCodesAndAabbIndices,
 							a, b);
+    CudaBase::CheckCudaError("broadphase write pairs");
 }
 
 void CudaBroadphase::sendDbgToHost()

@@ -43,6 +43,7 @@ public:
 	void addTriangleMesh(const std::string & name, ATriangleMesh * data);
 	virtual bool doWrite(const std::string & fileName);
 	virtual bool doRead(const std::string & fileName);
+    void extractTetrahedronMeshes(GeometryArray * dst);
 	void extractTriangleMeshes(GeometryArray * dst);
 protected:
 
@@ -51,6 +52,7 @@ private:
 	bool writeTetrahedron();
 	bool writeTriangle();
 	bool readCurve();
+    bool listTetrahedron(HBase * grp);
 	bool readTetrahedron();
 	bool listTriangle(HBase * grp);
 	bool readTriangle();

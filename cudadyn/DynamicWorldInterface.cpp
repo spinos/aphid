@@ -54,7 +54,7 @@ void DynamicWorldInterface::changeMaxDisplayLevel(int d)
     WorldDbgDraw::MaxDrawBvhHierarchyLevel = m_maxDisplayLevel;
 }
 
-void DynamicWorldInterface::draw(TetrahedronSystem * tetra)
+void DynamicWorldInterface::drawTetrahedron(TetrahedronSystem * tetra, GeoDrawer * drawer, int ind)
 {
     glEnable(GL_DEPTH_TEST);
 	glColor3f(0.6f, 0.62f, 0.6f);
@@ -70,8 +70,9 @@ void DynamicWorldInterface::draw(TetrahedronSystem * tetra)
 	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
-	glColor3f(0.31f, 0.32f, 0.4f);
-	
+	// glColor3f(0.31f, 0.32f, 0.4f);
+	drawer->setGroupColorLight(ind);
+    
     glEnableClientState(GL_VERTEX_ARRAY);
 
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)tetra->hostX());
@@ -80,7 +81,7 @@ void DynamicWorldInterface::draw(TetrahedronSystem * tetra)
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void DynamicWorldInterface::draw(CudaDynamicWorld * world)
+void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     const unsigned nobj = world->numObjects();
     if(nobj<1) return;
@@ -88,13 +89,13 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world)
     unsigned i;
     for(i=0; i< nobj; i++) {
         BvhTetrahedronSystem * tetra = world->tetradedron(i);
-        if(tetra) draw(tetra);
+        if(tetra) drawTetrahedron(tetra, drawer, i);
     }
     
     TriangleSystem * tri = world->firstTriangle();
-    if(tri) drawTriangle(tri);
+    // if(tri) drawTriangle(tri);
 }
-
+/*
 void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
 	if(world->numObjects() < 1) return;
@@ -118,7 +119,7 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 	showContacts(world, drawer);
 #endif
 }
-
+*/
 void DynamicWorldInterface::drawTriangle(TriangleSystem * tri)
 {
     glEnable(GL_DEPTH_TEST);
@@ -148,7 +149,7 @@ void DynamicWorldInterface::drawTriangle(TriangleSystem * tri)
 void DynamicWorldInterface::drawFaulty(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     glDisable(GL_DEPTH_TEST);
-    draw(world);
+    draw(world, drawer);
     showFaultyPair(world, drawer);
 }
 

@@ -15,6 +15,7 @@
 #include <HTetrahedronMesh.h>
 #include <HTriangleMesh.h>
 #include <ATriangleMesh.h>
+#include <ATetrahedronMesh.h>
 #include <GeometryArray.h>
 #include <sstream>
 HesperisFile::HesperisFile() {}
@@ -130,6 +131,7 @@ bool HesperisFile::doRead(const std::string & fileName)
 			readCurve();
 			break;
 		case RTetra:
+            listTetrahedron(&grpWorld);
 			readTetrahedron();
 			break;
 		case RTri:
@@ -170,18 +172,27 @@ bool HesperisFile::readCurve()
 	return allValid;
 }
 
+bool HesperisFile::listTetrahedron(HBase * grp)
+{
+    std::vector<std::string > tetraNames;
+	grp->lsTypedChild<HTetrahedronMesh>(tetraNames);
+	
+	std::vector<std::string>::const_iterator it = tetraNames.begin();
+	for(;it!=tetraNames.end();++it) {
+		addTetrahedron(*it, new ATetrahedronMesh);
+	}
+	return true;
+}
+
 bool HesperisFile::readTetrahedron()
 {
     bool allValid = true;
-	std::stringstream sst;
 	std::map<std::string, ATetrahedronMesh *>::iterator it = m_terahedrons.begin();
 	for(; it != m_terahedrons.end(); ++it) {
-		sst.str("");
-		sst<<"/world/"<<it->first;
-		std::cout<<" read tetrahedron mesh "<<sst.str()<<"\n";
-		HTetrahedronMesh grp(sst.str());
+		std::cout<<" read tetrahedron mesh "<<it->first<<"\n";
+		HTetrahedronMesh grp(it->first);
 		if(!grp.load(it->second)) {
-			std::cout<<" cannot load "<<sst.str();
+			std::cout<<" cannot load "<<it->first;
 			allValid = false;
 		}
 		grp.close();
@@ -220,9 +231,21 @@ bool HesperisFile::readTriangle()
 	}
 	
 	if(!allValid)
-		std::cout<<" encounter problem(s) reading tetrahedrons.\n";
+		std::cout<<" encounter problem(s) reading triangles.\n";
 
 	return allValid;
+}
+
+void HesperisFile::extractTetrahedronMeshes(GeometryArray * dst)
+{
+    dst->create(m_terahedrons.size());
+	unsigned i = 0;
+	std::map<std::string, ATetrahedronMesh *>::const_iterator it = m_terahedrons.begin();
+	for(; it != m_terahedrons.end(); ++it) {
+		dst->setGeometry(it->second, i);
+		i++;
+	}
+	dst->setNumGeometries(i);
 }
 
 void HesperisFile::extractTriangleMeshes(GeometryArray * dst)

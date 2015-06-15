@@ -10,7 +10,7 @@ inline __device__ uint extractObjectInd(uint combined)
 { return (combined>>24);}
 
 inline __device__ uint extractElementInd(uint combined)
-{ return ((combined<<7)>>7);}
+{ return ((combined<<8)>>8);}
 
 inline __device__ uint4 computePointIndex(uint * pointStarts,
                                             uint * indexStarts,
