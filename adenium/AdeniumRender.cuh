@@ -170,13 +170,17 @@ __global__ void renderImage_kernel(float4 * pix,
     
     uint x = blockIdx.x*blockDim.x + threadIdx.x;
     uint y = blockIdx.y*blockDim.y + threadIdx.y;
-    if ((x >= c_imageSize.x) || (y >= c_imageSize.y)) return;
-    
+    const int isInImage = (x < c_imageSize.x && y < c_imageSize.y);
+
     Ray eyeRay;
     eye.computeEyeRay(eyeRay, x, y);
   
-    float4 outRgbz = pix[y * c_imageSize.x + x];
-    float rayLength = outRgbz.w;
+    float4 outRgbz; 
+    float rayLength;
+    if(isInImage) {
+        outRgbz = pix[y * c_imageSize.x + x];
+        rayLength = outRgbz.w;
+    }
 /* 
  *  smem layout in ints
  *  n as num threads    64
@@ -245,6 +249,7 @@ __global__ void renderImage_kernel(float4 * pix,
                                             elementPoints);
             __syncthreads();
             
+            if(isInImage) {
             leftBox = internalNodeAabbs[iNode];
             b1 = ray_box(lambda1, lambda2,
                     eyeRay,
@@ -288,6 +293,7 @@ __global__ void renderImage_kernel(float4 * pix,
                     outRgbz.w = rayLength;
                 }
             }
+            }
             
             if(tid<1) {
 // take out top of stack
@@ -298,6 +304,7 @@ __global__ void renderImage_kernel(float4 * pix,
             if(sstackSize<1) break;
         }
         else {
+            if(isInImage) {
             leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
             b1 = ray_box(lambda1, lambda2,
                     eyeRay,
@@ -333,6 +340,11 @@ __global__ void renderImage_kernel(float4 * pix,
             else { 
 // visit no child
                 sbranch[tid] = 0;
+            }
+            }
+            else {
+                sbranch[tid] = 0;
+                svisit[tid]==0;
             }
             __syncthreads();
             
@@ -371,6 +383,7 @@ __global__ void renderImage_kernel(float4 * pix,
             if(sstackSize<1) break;
         }
     }
-    pix[y * c_imageSize.x + x] = outRgbz;
+    if(isInImage) 
+        pix[y * c_imageSize.x + x] = outRgbz;
 }
 
