@@ -24,6 +24,40 @@ inline __device__ int iLeafNode(int2 child)
 __device__ uint tId()
 { return blockDim.x * threadIdx.y + threadIdx.x; }
 
+struct OrthographicEye
+{
+    __device__
+    void computeEyeRay(Ray & eyeRay, 
+                            uint x, uint y)
+    {
+        const float u = ((float)x / (float)c_imageSize.x) - .5f;
+        const float v = ((float)y / (float)c_imageSize.y) - .5f;
+        eyeRay.o = make_float4(u * c_cameraProp.x, v * c_cameraProp.x/c_cameraProp.y, 0.f, 1.f);
+        eyeRay.d = make_float4(0.f, 0.f, -1.f, 0.f);
+        
+        eyeRay.o = transform(c_modelViewMatrix, eyeRay.o);
+        eyeRay.d = transform(c_modelViewMatrix, eyeRay.d);
+        normalize(eyeRay.d);
+    }
+};
+
+struct PerspectiveEye
+{
+    __device__
+    void computeEyeRay(Ray & eyeRay, 
+                            uint x, uint y)
+    {
+        const float u = ((float)x / (float)c_imageSize.x) - .5f;
+        const float v = ((float)y / (float)c_imageSize.y) - .5f;
+        eyeRay.o = make_float4(0.f, 0.f, 0.f, 1.f);
+        eyeRay.d = make_float4(u * c_cameraProp.x, v * c_cameraProp.x/c_cameraProp.y, -1.f, 0.f);
+
+        eyeRay.o = transform(c_modelViewMatrix, eyeRay.o);
+        eyeRay.d = transform(c_modelViewMatrix, eyeRay.d);
+        normalize(eyeRay.d);
+    }
+};
+
 template<int NumThreads>
 __device__ void putLeafTrianglesInSmem(float3 * points,
                                         uint tid,
@@ -123,33 +157,14 @@ __global__ void resetImage_kernel(float4 * pix,
 	pix[ind] = make_float4(0.f, 0.f, 0.f, 1e20f);
 }
 
-template<int IsOrthographic> 
-__device__ void computeEyeRay(Ray & eyeRay, 
-                            uint x, uint y)
-{
-    const float u = ((float)x / (float)c_imageSize.x) - .5f;
-    const float v = ((float)y / (float)c_imageSize.y) - .5f;
-    
-    if(IsOrthographic) {
-        eyeRay.o = make_float4(u * c_cameraProp.x, v * c_cameraProp.x/c_cameraProp.y, 0.f, 1.f);
-        eyeRay.d = make_float4(0.f, 0.f, -1.f, 0.f);
-    }
-    else {
-        eyeRay.o = make_float4(0.f, 0.f, 0.f, 1.f);
-        eyeRay.d = make_float4(u * c_cameraProp.x, v * c_cameraProp.x/c_cameraProp.y, -1.f, 0.f);
-    }
-    eyeRay.o = transform(c_modelViewMatrix, eyeRay.o);
-    eyeRay.d = transform(c_modelViewMatrix, eyeRay.d);
-    normalize(eyeRay.d);
-}
-
-template<int NumThreads, int IsOrthographic>
+template<int NumThreads, typename T>
 __global__ void renderImage_kernel(float4 * pix,
                 int2 * internalNodeChildIndices,
 				Aabb * internalNodeAabbs,
 				KeyValuePair * elementHash,
 				int4 * elementVertices,
-				float3 * elementPoints)
+				float3 * elementPoints,
+				T eye)
 {
     int *sdata = SharedMemory<int>();
     
@@ -158,7 +173,7 @@ __global__ void renderImage_kernel(float4 * pix,
     if ((x >= c_imageSize.x) || (y >= c_imageSize.y)) return;
     
     Ray eyeRay;
-    computeEyeRay<IsOrthographic>(eyeRay, x, y);
+    eye.computeEyeRay(eyeRay, x, y);
   
     float4 outRgbz = pix[y * c_imageSize.x + x];
     float rayLength = outRgbz.w;

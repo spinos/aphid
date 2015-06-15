@@ -42,20 +42,26 @@ void renderImage(float4 * pix,
     uint nblockY = iDivUp(imageH, nthread);
     dim3 block(nthread, nthread, 1);
     dim3 grid(nblockX, nblockY, 1);
-    if(isOrthographic)
-        renderImage_kernel<64, 1> <<< grid, block, 16320 >>>(pix,
+    if(isOrthographic) {
+        OrthographicEye eye;
+        renderImage_kernel<64, OrthographicEye> <<< grid, block, 16320 >>>(pix,
                         nodes,
                         nodeAabbs,
 				elementHash,
 				elementVertices,
-				elementPoints);
-	else
-	    renderImage_kernel<64, 0> <<< grid, block, 16320 >>>(pix,
+				elementPoints,
+				eye);
+	}
+	else {
+	    PerspectiveEye eye;
+	    renderImage_kernel<64, PerspectiveEye> <<< grid, block, 16320 >>>(pix,
                         nodes,
                         nodeAabbs,
 				elementHash,
 				elementVertices,
-				elementPoints);
+				elementPoints,
+				eye);
+	}
 }
 
 }
