@@ -8,17 +8,18 @@ __device__ void writeElementExclusion(int * dst,
 									uint a,
 									int * exclusionInd)
 {
-    int start = NumExcls * a;
+    int4 * dstInd4 = (int4 *)dst;
+	int4 * srcInd4 = (int4 *)&exclusionInd[NumExcls * a];
 	int i=0;
-	for(;i<NumExcls; i++)
-	    dst[i] = exclusionInd[start + i];
+	for(;i<(NumExcls>>2); i++)
+	    dstInd4[i] = srcInd4[i];
 }
 
 template<int NumExcls>
 __device__ int isElementExcludedS(uint b, int * exclusionInd)
 {
 	uint i;
-#if 0
+#if 1
     int4 * exclusionInd4 = (int4 *)exclusionInd;
 	for(i=0; i<(NumExcls>>2); i++) {
 		if(exclusionInd4[i].x < 0) break;
@@ -80,8 +81,6 @@ inline __device__ void writeOverlappingsExclS(uint2 * overlappings,
                                 uint & writeLoc,
                                 uint iQuery,
                                 uint iBox,
-                                uint startLoc,
-                                uint cacheSize,
                                 Aabb box,
                                          int n,
                                          Aabb * elementBoxes,
@@ -100,7 +99,6 @@ inline __device__ void writeOverlappingsExclS(uint2 * overlappings,
 			overlappings[writeLoc] = pair;
             writeLoc++;
         }
-        if((writeLoc - startLoc)==cacheSize) return;
     }
 }
 
@@ -109,8 +107,6 @@ inline __device__ void writeOverlappingsExclG(uint2 * overlappings,
                                 uint & writeLoc,
                                 uint iQuery,
                                 uint iBox,
-                                uint startLoc,
-                                uint cacheSize,
                                 Aabb box,
                                 int2 range,
                                 KeyValuePair * elementHash,
@@ -129,14 +125,14 @@ inline __device__ void writeOverlappingsExclG(uint2 * overlappings,
 			overlappings[writeLoc] = pair;
             writeLoc++;
         }
-        if((writeLoc - startLoc)==cacheSize) return;
     }
 }
 
 template<int NumExcls, int NumThreads>
 __global__ void countPairsSelfCollide_kernel(uint * overlappingCounts, 
 								Aabb * boxes, 
-								uint maxBoxInd,
+								KeyValuePair * queryIndirection,
+                                uint maxBoxInd,
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, 
 								Aabb * leafAabbs,
@@ -145,12 +141,15 @@ __global__ void countPairsSelfCollide_kernel(uint * overlappingCounts,
 {
     int *sdata = SharedMemory<int>();
 	
-	uint boxInd = blockIdx.x*blockDim.x + threadIdx.x;
-	const int isValidBox = (boxInd < maxBoxInd);
+	uint ind = blockIdx.x*blockDim.x + threadIdx.x;
+	const int isValidBox = (ind < maxBoxInd);
 	
+	uint boxInd;
 	Aabb box;
-    if(isValidBox)
+    if(isValidBox) {
+        boxInd = queryIndirection[ind].value;
         box = boxes[boxInd];
+    }
 /* 
  *  smem layout in ints
  *  n as num threads    64
@@ -177,11 +176,12 @@ __global__ void countPairsSelfCollide_kernel(uint * overlappingCounts,
     Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads];
     uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads + BVH_PACKET_TRAVERSE_CACHE_SIZE * 6];
     int * sexclusCache = &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads + BVH_PACKET_TRAVERSE_CACHE_SIZE * 6 + BVH_PACKET_TRAVERSE_CACHE_SIZE];
-	if(isValidBox) 
-        writeElementExclusion<NumExcls>(sexclusCache, boxInd, exclusionIndices);
-    int * exclElm = &sexclusCache[boxInd*NumExcls];
-    
+	
     const uint tid = threadIdx.x;
+    int * exclElm = &sexclusCache[tid*NumExcls];
+    if(isValidBox) 
+        writeElementExclusion<NumExcls>(exclElm, boxInd, exclusionIndices);
+    
     if(tid<1) {
         sstack[0] = 0x80000000;
         sstackSize = 1;
@@ -288,10 +288,9 @@ __global__ void countPairsSelfCollide_kernel(uint * overlappingCounts,
 template<int NumExcls, int NumThreads>
 __global__ void writePairCacheSelfCollide_kernel(uint2 * dst, 
                                 uint * cacheWriteLocation,
-								uint * cacheStarts, 
-								uint * overlappingCounts,
 								Aabb * boxes, 
-								uint maxBoxInd,
+								KeyValuePair * queryIndirection,
+                                uint maxBoxInd,
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, 
 								Aabb * leafAabbs,
@@ -301,14 +300,14 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst,
 {
     int *sdata = SharedMemory<int>();
 	
-	uint boxInd = blockIdx.x*blockDim.x + threadIdx.x;
-	const int isValidBox = (boxInd < maxBoxInd);
+	uint ind = blockIdx.x*blockDim.x + threadIdx.x;
+	const int isValidBox = (ind < maxBoxInd);
 	
-	uint cacheSize, startLoc, writeLoc;
+	uint boxInd;
+	uint writeLoc;
     Aabb box;
     if(isValidBox) {
-	     cacheSize = overlappingCounts[boxInd];
-	     startLoc = cacheStarts[boxInd];
+         boxInd = queryIndirection[ind].value;
 	     writeLoc = cacheWriteLocation[boxInd];
          box = boxes[boxInd];	
 	}
@@ -338,12 +337,12 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst,
     Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads];
     uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads + BVH_PACKET_TRAVERSE_CACHE_SIZE * 6];
     int * sexclusCache = &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads + BVH_PACKET_TRAVERSE_CACHE_SIZE * 6 + BVH_PACKET_TRAVERSE_CACHE_SIZE];
-	if(isValidBox) 
-        writeElementExclusion<NumExcls>(sexclusCache, boxInd, exclusionIndices);
-    int * exclElm = &sexclusCache[boxInd*NumExcls];
-    
 	const uint tid = threadIdx.x;
-    if(tid<1) {
+    int * exclElm = &sexclusCache[tid*NumExcls];
+    if(isValidBox) 
+        writeElementExclusion<NumExcls>(exclElm, boxInd, exclusionIndices);
+    
+	if(tid<1) {
         sstack[0] = 0x80000000;
         sstackSize = 1;
     }
@@ -383,8 +382,6 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst,
                                     writeLoc,
                                     queryIdx,
                                     boxInd,
-                                    startLoc,
-                                    cacheSize,
                                     box,
                                     numBoxesInLeaf,
                                     sboxCache,
@@ -395,8 +392,6 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst,
                                     writeLoc,
                                     queryIdx,
                                     boxInd,
-                                    startLoc,
-                                    cacheSize,
                                     box,
                                     child,
                                     mortonCodesAndAabbIndices,
@@ -450,31 +445,6 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst,
             
             if(sstackSize<1) break;
 		}
-/*		
-		if(isAabbOverlapping(box, internalBox))
-		{
-			if(!isInternal) {
-			    writeOverlappings<NumExcls>(dst,
-                                writeLoc,
-                                queryIdx,
-                                boxIndex,
-                                startLoc,
-                                cacheSize,
-                                mortonCodesAndAabbIndices,
-                                box,
-                                leafAabbs,
-                                exclElm,
-                                child);
-            }
-			else {
-				if(isStackFull(stackSize)) continue;
-			    
-                stack[ stackSize ] = child.x;
-                stackSize++;
-                stack[ stackSize ] = child.y;
-                stackSize++;
-            }
-		}*/
 	}
 	if(isValidBox)
 	    cacheWriteLocation[boxInd] = writeLoc;

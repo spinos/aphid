@@ -62,9 +62,7 @@ __device__ void writeOveralppingsS(uint2 * outPairs,
                                 uint iTree,
                                 int n,
                                 Aabb * elementBoxes,
-                                uint * elementInd,
-                                const uint & startLoc,
-                                const uint & cacheSize)
+                                uint * elementInd)
 {
     uint2 pair;
     int i=0;
@@ -76,7 +74,6 @@ __device__ void writeOveralppingsS(uint2 * outPairs,
 			outPairs[writeLoc] = pair;
             writeLoc++;
         }
-        if((writeLoc - startLoc)==cacheSize) return;
     }
 }
 
@@ -89,9 +86,7 @@ __device__ void writeOveralppingsG(uint2 * outPairs,
                                 uint iTree,
                                 int2 range,
                                 KeyValuePair * elementHash,
-                                Aabb * elementBoxes,
-                                const uint & startLoc,
-                                const uint & cacheSize)
+                                Aabb * elementBoxes)
 {
     uint2 pair;
     uint iElement;
@@ -105,12 +100,12 @@ __device__ void writeOveralppingsG(uint2 * outPairs,
 			outPairs[writeLoc] = pair;
             writeLoc++;
         }
-        if((writeLoc - startLoc)==cacheSize) return;
     }
 }
 
 template<int NumThreads>
 __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
+                                KeyValuePair * queryIndirection,
                                 uint maxBoxInd,
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, 
@@ -119,12 +114,14 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
 {
     int *sdata = SharedMemory<int>();
     
-	uint boxInd = blockIdx.x*blockDim.x + threadIdx.x;
-    const int isValidBox = (boxInd < maxBoxInd);
+	uint ind = blockIdx.x*blockDim.x + threadIdx.x;
+    const int isValidBox = (ind < maxBoxInd);
 	
+	uint boxInd;
 	Aabb box;
     uint outCount;
     if(isValidBox) {
+        boxInd = queryIndirection[ind].value;
         box = boxes[boxInd];
         outCount = overlappingCounts[boxInd];
     }
@@ -251,9 +248,8 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
 template<int NumThreads>
 __global__ void writePairCache_kernel(uint2 * outPairs, 
                                 uint * cacheWriteLocation,
-                                uint * cacheStarts, 
-                                uint * overlappingCounts, 
                                 Aabb * boxes,
+                                KeyValuePair * queryIndirection,
                                 uint maxBoxInd,
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, Aabb * leafAabbs,
@@ -263,14 +259,14 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
 {
     int *sdata = SharedMemory<int>();
     
-	uint boxInd = blockIdx.x*blockDim.x + threadIdx.x;
-	const int isValidBox = (boxInd < maxBoxInd);
+	uint ind = blockIdx.x*blockDim.x + threadIdx.x;
+	const int isValidBox = (ind < maxBoxInd);
 	
-    uint cacheSize, startLoc, writeLoc;
+	uint boxInd;
+    uint writeLoc;
     Aabb box;
     if(isValidBox) {
-	     cacheSize = overlappingCounts[boxInd];
-	     startLoc = cacheStarts[boxInd];
+	     boxInd = queryIndirection[ind].value;
 	     writeLoc = cacheWriteLocation[boxInd];
          box = boxes[boxInd];	
 	}
@@ -341,9 +337,7 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
                                     treeIdx,
                                     numBoxesInLeaf,
                                     sboxCache,
-                                    sindCache,
-                                    startLoc,
-                                    cacheSize);
+                                    sindCache);
             else
                 writeOveralppingsG(outPairs,
                                     writeLoc,
@@ -353,9 +347,7 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
                                     treeIdx,
                                     child,
                                     mortonCodesAndAabbIndices,
-                                    leafAabbs,
-                                    startLoc,
-                                    cacheSize);
+                                    leafAabbs);
             }
             if(tid<1) {
 // take out top of stack

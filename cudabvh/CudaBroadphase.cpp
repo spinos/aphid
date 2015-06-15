@@ -185,7 +185,8 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	BvhTetrahedronSystem * query = static_cast<BvhTetrahedronSystem *>(m_objects[a]);
 	CudaLinearBvh * tree = m_objects[a];
 	
-	void * boxes = (Aabb *)query->leafAabbs();
+	void * boxes = query->leafAabbs();
+	void * queryInd = query->primitiveHash();
 	const unsigned numBoxes = query->numLeafNodes();
 	void * exclusionInd = query->vicinity();
 	
@@ -194,7 +195,9 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	void * leafNodeAabbs = tree->primitiveAabb();
 	void * mortonCodesAndAabbIndices = tree->primitiveHash();
     
-	bvhoverlap::countPairsSelfCollideExclS(counts, (Aabb *)boxes, numBoxes,
+	bvhoverlap::countPairsSelfCollideExclS(counts, (Aabb *)boxes, 
+	                        (KeyValuePair *)queryInd,
+	                        numBoxes,
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
@@ -214,7 +217,8 @@ void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 	CudaLinearBvh * query = m_objects[a];
 	CudaLinearBvh * tree = m_objects[b];
 	
-	void * boxes = (Aabb *)query->leafAabbs();
+	void * boxes = query->leafAabbs();
+	void * queryInd = query->primitiveHash();
 	const unsigned numBoxes = query->numLeafNodes();
 	
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
@@ -222,7 +226,9 @@ void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 	void * leafNodeAabbs = tree->primitiveAabb();
 	void * mortonCodesAndAabbIndices = tree->primitiveHash();
 	
-	bvhoverlap::countPairs(counts, (Aabb *)boxes, numBoxes,
+	bvhoverlap::countPairs(counts, (Aabb *)boxes, 
+	                        (KeyValuePair *)queryInd,
+	                        numBoxes,
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
@@ -248,11 +254,11 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 #ifdef DISABLE_SELF_COLLISION 
     return;
 #endif
-    uint * counts = (uint *)m_pairCounts->bufferOnDevice();
-	counts += m_objectStart[a];
+    // uint * counts = (uint *)m_pairCounts->bufferOnDevice();
+	// counts += m_objectStart[a];
 	
-	uint * starts = (uint *)m_pairStart->bufferOnDevice();
-	starts += m_objectStart[a];
+	// uint * starts = (uint *)m_pairStart->bufferOnDevice();
+	// starts += m_objectStart[a];
 	
 	uint * location = (uint *)m_pairWriteLocation->bufferOnDevice();
 	location += m_objectStart[a];
@@ -261,7 +267,8 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	BvhTetrahedronSystem * query = static_cast<BvhTetrahedronSystem *>(m_objects[a]);
 	CudaLinearBvh * tree = m_objects[a];
 	
-	void * boxes = (Aabb *)query->leafAabbs();
+	void * boxes = query->leafAabbs();
+	void * queryInd = query->primitiveHash();
 	const unsigned numBoxes = query->numLeafNodes();
 	void * exclusionInd = query->vicinity();
 	
@@ -269,12 +276,15 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
 	void * leafNodeAabbs = tree->leafAabbs();
-	void * mortonCodesAndAabbIndices = tree->leafHash();
+	void * mortonCodesAndAabbIndices = tree->primitiveHash();
 	
 	void * cache = m_pairCache->bufferOnDevice();
 	
-	bvhoverlap::writePairCacheSelfCollideExclS((uint2 *)cache, location, starts, counts, 
-	                         (Aabb *)boxes, numBoxes,
+	bvhoverlap::writePairCacheSelfCollideExclS((uint2 *)cache, 
+	                            location,
+	                         (Aabb *)boxes, 
+	                         (KeyValuePair *)queryInd,
+	                        numBoxes,
 							(int *)rootNodeIndex, 
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
@@ -290,11 +300,11 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 #ifdef DISABLE_INTER_OBJECT_COLLISION
     return;
 #endif
-    uint * counts = (uint *)m_pairCounts->bufferOnDevice();
-	counts += m_objectStart[a];
+    // uint * counts = (uint *)m_pairCounts->bufferOnDevice();
+	// counts += m_objectStart[a];
 	
-	uint * starts = (uint *)m_pairStart->bufferOnDevice();
-	starts += m_objectStart[a];
+	// uint * starts = (uint *)m_pairStart->bufferOnDevice();
+	// starts += m_objectStart[a];
 	
 	uint * location = (uint *)m_pairWriteLocation->bufferOnDevice();
 	location += m_objectStart[a];
@@ -302,7 +312,8 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 	CudaLinearBvh * query = m_objects[a];
 	CudaLinearBvh * tree = m_objects[b];
 	
-	void * boxes = (Aabb *)query->leafAabbs();
+	void * boxes = query->leafAabbs();
+	void * queryInd = query->primitiveHash();
 	const unsigned numBoxes = query->numLeafNodes();
 	
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
@@ -312,8 +323,10 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 	
 	void * cache = m_pairCache->bufferOnDevice();
 	
-	bvhoverlap::writePairCache((uint2 *)cache, location, starts, counts, 
-	                         (Aabb *)boxes, numBoxes,
+	bvhoverlap::writePairCache((uint2 *)cache, location, 
+	                         (Aabb *)boxes, 
+	                         (KeyValuePair *)queryInd,
+	                         numBoxes,
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
