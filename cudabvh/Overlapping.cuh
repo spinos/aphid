@@ -5,26 +5,25 @@
 
 template<int NumExcls>
 __device__ void writeElementExclusion(int * dst,
-									uint a,
 									int * exclusionInd)
 {
     int i=0;
-#if 0
+#if 1
     int4 * dstInd4 = (int4 *)dst;
-	int4 * srcInd4 = (int4 *)&exclusionInd[NumExcls * a];
+	int4 * srcInd4 = (int4 *)exclusionInd;
 	for(;i<(NumExcls>>2); i++)
 	    dstInd4[i] = srcInd4[i];
 #else
     for(;i<NumExcls; i++)
-	    dst[i] = exclusionInd[NumExcls * a + i];
+	    dst[i] = exclusionInd[i];
 #endif
 }
 
 template<int NumExcls>
 __device__ int isElementExcludedS(int b, int * exclusionInd)
 {
-	uint i;
-#if 0
+	int i;
+#if 1
     int4 * exclusionInd4 = (int4 *)exclusionInd;
 	for(i=0; i<(NumExcls>>2); i++) {
 		if(exclusionInd4[i].x < 0) break;
@@ -227,7 +226,8 @@ __global__ void countPairsSelfCollide_kernel(uint * overlappingCounts,
     if(!isLeafNode(queryRange)) return;
     
 	const uint tid = tId2();
-	const int querySize = queryRange.y - queryRange.x + 1;
+	int querySize = queryRange.y - queryRange.x + 1;
+	//if(querySize > NumThreadsPerDim) querySize = NumThreadsPerDim;
 	const int isValidBox = (tid < querySize);
 /* 
  *  smem layout in ints
@@ -255,21 +255,20 @@ __global__ void countPairsSelfCollide_kernel(uint * overlappingCounts,
     int & sstackSize =          sdata[0];
     int * sstack =             &sdata[4];
     int * svisit =             &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
-    uint * squeryIdx = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim];
-    Aabb * squeryBox = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim];
-    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim + 6 * NumThreadsPerDim];
-    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim + 12 * NumThreadsPerDim];
-    int * sexclusCache =       &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim];
-	int * scounts =            &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim];
-	uint * selmIds =   (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim + NumThreadsPerDim * NumThreadsPerDim]; 
+    uint * squeryIdx = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim];
+    Aabb * squeryBox = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim];
+    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 6 * NumThreadsPerDim];
+    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim];
+    int * sexclusCache =       &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim];
+	int * scounts =            &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim];
+	//uint * selmIds =   (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim + NumThreadsPerDim * NumThreadsPerDim]; 
 	
-    int * exclElm = &sexclusCache[NumExcls * threadIdx.x];
     if(isValidBox) {
-       // writeElementExclusion<NumExcls>(exclElm, boxInd, exclusionIndices);
         squeryIdx[tid] = mortonCodesAndAabbIndices[queryRange.x + tid].value;
         squeryBox[tid] = boxes[squeryIdx[tid]];
+        writeElementExclusion<NumExcls>(&sexclusCache[NumExcls*threadIdx.x], &exclusionIndices[NumExcls*squeryIdx[tid]]);
     }
-    
+
     if(tid<1) {
         sstack[0] = 0x80000000;
         sstackSize = 1;
@@ -305,34 +304,22 @@ __global__ void countPairsSelfCollide_kernel(uint * overlappingCounts,
                                             leafAabbs);
             __syncthreads();
 // intersect boxes in leaf using all threads
-/*
             findOveralppings<NumExcls, NumThreadsPerDim>(scounts,
                                     box,
                                     querySize,
                                     numBoxesInLeaf,
                                     sboxCache,
                                     sindCache,
-                                    &exclusionIndices[boxInd*NumExcls],
+                                    //&exclusionIndices[NumExcls * squeryIdx[threadIdx.x]],
+                                    &sexclusCache[NumExcls*threadIdx.x],
                                     tid);
-*/                               
-                        findOveralppingsWElmId<NumExcls, NumThreadsPerDim>(scounts,
-                                    selmIds,
-                                    box,
-                                    querySize,
-                                    numBoxesInLeaf,
-                                    sboxCache,
-                                    sindCache,
-                                    //exclElm,
-                                    &exclusionIndices[boxInd*NumExcls],
-                                    tid,
-                                    0);
             __syncthreads();
             if(isValidBox)
                 sumOverlappingCounts<NumThreadsPerDim>(outCount, 
                                     scounts,
                                     numBoxesInLeaf,
                                     tid);
-            __syncthreads();
+            //__syncthreads();
             if(tid<1) {
 // take out top of stack
                 sstackSize--;
@@ -404,7 +391,8 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst,
     if(!isLeafNode(queryRange)) return;
     
 	const uint tid = tId2();
-    const int querySize = queryRange.y - queryRange.x + 1;
+	int querySize = queryRange.y - queryRange.x + 1;
+	//if(querySize > NumThreadsPerDim) querySize = NumThreadsPerDim;
 	const int isValidBox = (tid < querySize);
 /* 
  *  smem layout in ints
@@ -426,19 +414,18 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst,
     int & sstackSize =          sdata[0];
     int * sstack =             &sdata[4];
     int * svisit =             &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
-    uint * squeryIdx = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim];
-    Aabb * squeryBox = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim];
-    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim + 6 * NumThreadsPerDim];
-    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim + 12 * NumThreadsPerDim];
-    int * sexclusCache =       &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim];
-	int * scounts =            &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim];
-	uint * selmIds =   (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + 2 * NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim + NumThreadsPerDim * NumThreadsPerDim]; 
+    uint * squeryIdx = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim];
+    Aabb * squeryBox = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim];
+    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 6 * NumThreadsPerDim];
+    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim];
+    int * sexclusCache =       &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim];
+	int * scounts =            &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim];
+	uint * selmIds =   (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim + NumThreadsPerDim * NumThreadsPerDim]; 
 	
-    int * exclElm = &sexclusCache[NumExcls * threadIdx.x];
     if(isValidBox) {
-        // writeElementExclusion<NumExcls>(exclElm, boxInd, exclusionIndices);
         squeryIdx[tid] = mortonCodesAndAabbIndices[queryRange.x + tid].value;
         squeryBox[tid] = boxes[squeryIdx[tid]];
+        writeElementExclusion<NumExcls>(&sexclusCache[NumExcls*threadIdx.x], &exclusionIndices[NumExcls*squeryIdx[tid]]);
     }
     
 	if(tid<1) {
@@ -486,8 +473,8 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst,
                                     numBoxesInLeaf,
                                     sboxCache,
                                     sindCache,
-                                    //exclElm,
-                                    &exclusionIndices[boxInd*NumExcls],
+                                    //&exclusionIndices[boxInd*NumExcls],
+                                    &sexclusCache[NumExcls*threadIdx.x],
                                     tid,
                                     queryIdx);
             __syncthreads();
@@ -500,7 +487,7 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst,
                                     tid,
                                     queryIdx,
                                     boxInd);
-            __syncthreads();
+            //__syncthreads();
             if(tid<1) {
 // take out top of stack
                 sstackSize--;
