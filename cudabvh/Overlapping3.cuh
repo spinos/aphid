@@ -4,8 +4,6 @@
 #include "stackUtil.cuh"
 #include "bvhUtil.h"
 
-#define EXCLU_IN_SMEM 0
-
 template<int NumExcls>
 inline __device__ void countOverlappings(uint & count,
                                          KeyValuePair * indirections,

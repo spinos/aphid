@@ -194,16 +194,17 @@ __global__ void countPairsSelfCollidePacket_kernel(uint * overlappingCounts,
  *  m as max stack size 64
  *  e as exclusive size 32
  *
-  *  0   -> 1      stackSize
+ *  0   ->       stackSize
+ *  1   ->       visit left child
+ *  2   ->       visit right child
  *  4   -> 4+m-1       stack
- *  4+m -> 4+m+n-1  visiting
- *  4+m+n -> 4+m+2n-1  visiting
- *  4+m+2n -> 4+m+2n+6*n-1  query boxes
- *  4+m+2n+6*n -> 4+m+2n+6*n+6*n-1  leaf boxes cache
- *  4+m+2n+12*n -> 4+m+2n+12*n+n-1  leaf ind cache
- *  4+m+2n+12*n+n -> 4+m+2n+12*n+n+e*n-1  box exclusive ind cache
- *  4+m+2n+12*n+n+e*n -> 4+m+2n+12*n+n+e*n+n*n-1 overlapping counts
- *  4+m+2n+12*n+n+e*n+n*n -> 4+m+2n+12*n+n+e*n+n*n+n*n-1 overlapping ids
+ *  4+m -> 4+m+n-1  query index
+ *  4+m+n -> 4+m+n+6n-1  query boxes
+ *  4+m+n+6n -> 4+m+2n+6n+6n-1  leaf boxes cache
+ *  4+m+n+12n -> 4+m+2n+12n+n-1  leaf ind cache
+ *  4+m+n+12n+n -> 4+m+2n+12n+n+en-1  box exclusive ind cache
+ *  4+m+n+12n+n+en -> 4+m+2n+12n+n+en+nn-1 overlapping counts
+ *  4+m+n+12n+n+en+nn -> 4+m+2n+12*n+n+en+nn+nn-1 overlapping ids
  *
  *  visiting is n child to visit
  *  3 both 2 left 1 right 0 neither
@@ -212,15 +213,15 @@ __global__ void countPairsSelfCollidePacket_kernel(uint * overlappingCounts,
  *  if max(visiting) >= 2 override top of stack by right, then push left to stack
  */	
     int & sstackSize =          sdata[0];
+    int & b1 =                  sdata[1];
+    int & b2 =                  sdata[2];
     int * sstack =             &sdata[4];
-    int * svisit =             &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
-    uint * squeryIdx = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim];
-    Aabb * squeryBox = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim];
-    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 6 * NumThreadsPerDim];
-    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim];
-    int * sexclusCache =       &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim];
-	int * scounts =            &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim];
-	//uint * selmIds =   (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim + NumThreadsPerDim * NumThreadsPerDim]; 
+    uint * squeryIdx = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
+    Aabb * squeryBox = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim];
+    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 6 * NumThreadsPerDim];
+    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim];
+    int * sexclusCache =       &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim];
+	int * scounts =            &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim];
 	
     if(isValidBox) {
         squeryIdx[tid] = mortonCodesAndAabbIndices[queryRange.x + tid].value;
@@ -239,9 +240,9 @@ __global__ void countPairsSelfCollidePacket_kernel(uint * overlappingCounts,
     int iNode;
     int2 child;
     Aabb leftBox, rightBox;
-    int b1, b2;
-	const uint boxInd = squeryIdx[threadIdx.x];
+    const uint boxInd = squeryIdx[threadIdx.x];
     const Aabb box = squeryBox[threadIdx.x];
+    const Aabb groupBox = internalNodeAabbs[queryInd];
     uint outCount = 0;
     
 	for(;;) {
@@ -269,7 +270,6 @@ __global__ void countPairsSelfCollidePacket_kernel(uint * overlappingCounts,
                                     numBoxesInLeaf,
                                     sboxCache,
                                     sindCache,
-                                    //&exclusionIndices[NumExcls * squeryIdx[threadIdx.x]],
                                     &sexclusCache[NumExcls*threadIdx.x],
                                     tid);
             __syncthreads();
@@ -288,28 +288,26 @@ __global__ void countPairsSelfCollidePacket_kernel(uint * overlappingCounts,
             if(sstackSize<1) break;
         }
         else {
-            if(isValidBox) {
+            if(tid<1) {
                 leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
-                b1 = isAabbOverlapping(box, leftBox);
-            
-                rightBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.y)];
-                b2 = isAabbOverlapping(box, rightBox);
-
-                svisit[tid] = 2 * b1 + b2;
+                b1 = isAabbOverlapping(groupBox, leftBox);
             }
-            else {
-                svisit[tid] = 0;
+            else if(tid==1) {
+                rightBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.y)];
+                b2 = isAabbOverlapping(groupBox, rightBox);
             }
             __syncthreads();
             
-            reduceMaxInBlock<NumThreadsPerDim, int>(tid, svisit);
-		
             if(tid<1) {
-                if(svisit[tid] == 0) {
+                if(b1 == 0 && b2 == 0) {
 // visit no child, take out top of stack
                     sstackSize--;
                 }
-                else if(svisit[tid] == 1) {
+                else if(b1 > b2) {
+// visit right child
+                    sstack[ sstackSize - 1 ] = child.x; 
+                }
+                else if(b2 > b1) {
 // visit right child
                     sstack[ sstackSize - 1 ] = child.y; 
                 }
@@ -360,42 +358,48 @@ __global__ void writePairCacheSelfCollidePacket_kernel(uint2 * dst,
  *  m as max stack size 64
  *  e as exclusive size 32
  *
- *  0   -> 1      stackSize
+ *  0   ->        stackSize
+ *  1   ->       visit left child
+ *  2   ->       visit right child
  *  4   -> 4+m-1       stack
- *  4+m -> 4+m+n-1  visiting
- *  4+m+n -> 4+m+2n-1  visiting
- *  4+m+2n -> 4+m+2n+6*n-1  query boxes
- *  4+m+2n+6*n -> 4+m+2n+6*n+6*n-1  leaf boxes cache
- *  4+m+2n+12*n -> 4+m+2n+12*n+n-1  leaf ind cache
- *  4+m+2n+12*n+n -> 4+m+2n+12*n+n+e*n-1  box exclusive ind cache
- *  4+m+2n+12*n+n+e*n -> 4+m+2n+12*n+n+e*n+n*n-1 overlapping counts
- *  4+m+2n+12*n+n+e*n+n*n -> 4+m+2n+12*n+n+e*n+n*n+n*n-1 overlapping ids
+ *  4+m -> 4+m+n-1  query index
+ *  4+m+n+6n -> 4+m+n+6n+6n-1  leaf boxes cache
+ *  4+m+n+12n -> 4+m+n+12n+n-1  leaf ind cache
+ *  4+m+n+12n+n -> 4+m+n+12n+n+en-1  box exclusive ind cache
+ *  4+m+n+12n+n+en -> 4+m+n+12n+n+en+nn-1 overlapping counts
+ *  4+m+n+12n+n+en+nn -> 4+m+n+12n+n+en+nn+nn-1 overlapping ids
+ *  4+m+n+12n+n+en+nn+nn -> 4+m+n+12n+n+en+nn+nn+nn-1  cache size
  */
     int & sstackSize =          sdata[0];
+    int & b1 =                  sdata[1];
+    int & b2 =                  sdata[2];
     int * sstack =             &sdata[4];
-    int * svisit =             &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
-    uint * squeryIdx = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim];
-    Aabb * squeryBox = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim];
-    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 6 * NumThreadsPerDim];
-    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim];
-    int * sexclusCache =       &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim];
-	int * scounts =            &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim];
-	uint * selmIds =   (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim * NumThreadsPerDim + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim + NumThreadsPerDim * NumThreadsPerDim]; 
-	
+    uint * squeryIdx = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
+    Aabb * squeryBox = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim];
+    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 6 * NumThreadsPerDim];
+    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim];
+    int * sexclusCache =       &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim];
+	int * scounts =            &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim];
+	uint * selmIds =   (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim + NumThreadsPerDim * NumThreadsPerDim]; 
+	//int * svisit =             &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumExcls * NumThreadsPerDim + 2 * NumThreadsPerDim * NumThreadsPerDim];
+    
     if(isValidBox) {
         squeryIdx[tid] = mortonCodesAndAabbIndices[queryRange.x + tid].value;
         squeryBox[tid] = boxes[squeryIdx[tid]];
-        writeElementExclusion<NumExcls>(&sexclusCache[NumExcls*threadIdx.x], &exclusionIndices[NumExcls*squeryIdx[tid]]);
-        svisit[tid] = cacheSize[squeryIdx[tid]];
-    }
-    else 
-        svisit[tid] = 0;
+        //svisit[tid] = cacheSize[squeryIdx[tid]];
+    //}
+    //else 
+      //  svisit[tid] = 0;
     
-    __syncthreads();
-    reduceMaxInBlock<NumThreadsPerDim, int>(tid, svisit);
-	__syncthreads();
+    //__syncthreads();
+    //reduceMaxInBlock<NumThreadsPerDim, int>(tid, svisit);
+	//__syncthreads();
 	
-	if(svisit[0]<1) return;
+	//if(svisit[0]<1) return;
+	
+	//if(isValidBox) {
+        writeElementExclusion<NumExcls>(&sexclusCache[NumExcls*threadIdx.x], &exclusionIndices[NumExcls*squeryIdx[tid]]);
+    }
     
 	if(tid<1) {
         sstack[0] = 0x80000000;
@@ -408,10 +412,10 @@ __global__ void writePairCacheSelfCollidePacket_kernel(uint2 * dst,
     int iNode;
     int2 child;
     Aabb leftBox, rightBox;
-    int b1, b2;
     
     const uint boxInd = squeryIdx[threadIdx.x];
     const Aabb box = squeryBox[threadIdx.x];
+    const Aabb groupBox = internalNodeAabbs[queryInd];
     uint writeLoc;
     if(threadIdx.x < querySize) writeLoc = cacheWriteLocation[boxInd];
 	
@@ -434,7 +438,6 @@ __global__ void writePairCacheSelfCollidePacket_kernel(uint2 * dst,
                                             leafAabbs);
             __syncthreads();
 // intersect boxes in leaf using all threads
-
             findOveralppingsWElmId<NumExcls, NumThreadsPerDim>(scounts,
                                     selmIds,
                                     box,
@@ -442,7 +445,6 @@ __global__ void writePairCacheSelfCollidePacket_kernel(uint2 * dst,
                                     numBoxesInLeaf,
                                     sboxCache,
                                     sindCache,
-                                    //&exclusionIndices[boxInd*NumExcls],
                                     &sexclusCache[NumExcls*threadIdx.x],
                                     tid,
                                     queryIdx);
@@ -466,28 +468,26 @@ __global__ void writePairCacheSelfCollidePacket_kernel(uint2 * dst,
             if(sstackSize<1) break;
 		}
 		else {
-		    if(isValidBox) {
+		    if(tid<1) {
                 leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
-                b1 = isAabbOverlapping(box, leftBox);
-            
-                rightBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.y)];
-                b2 = isAabbOverlapping(box, rightBox);
-            
-                svisit[tid] = 2 * b1 + b2;
+                b1 = isAabbOverlapping(groupBox, leftBox);
             }
-            else {
-                svisit[tid] = 0;
+            else if(tid==1) {
+                rightBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.y)];
+                b2 = isAabbOverlapping(groupBox, rightBox);
             }
             __syncthreads();
             
-            reduceMaxInBlock<NumThreadsPerDim, int>(tid, svisit);
-		
             if(tid<1) {
-                if(svisit[tid] == 0) {
+                if(b1 == 0 && b2 == 0) {
 // visit no child, take out top of stack
                     sstackSize--;
                 }
-                else if(svisit[tid] == 1) {
+                else if(b1 > b2) {
+// visit right child
+                    sstack[ sstackSize - 1 ] = child.x; 
+                }
+                else if(b2 > b1) {
 // visit right child
                     sstack[ sstackSize - 1 ] = child.y; 
                 }

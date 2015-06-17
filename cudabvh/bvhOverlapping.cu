@@ -2,7 +2,7 @@
 #include "Overlapping2.cuh"
 #include "Overlapping3.cuh"
 #include "TetrahedronSystemInterface.h"
-#define USE_PACKET_TRAVERSE 0
+#define USE_PACKET_TRAVERSE 1
 
 namespace bvhoverlap {
 
