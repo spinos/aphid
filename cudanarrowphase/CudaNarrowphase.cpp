@@ -193,7 +193,7 @@ void CudaNarrowphase::initOnDevice()
 
 void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)
 {
-#if DISABLE_CONTACT
+#if DISABLE_COLLISION_RESOLUTION
 	return;
 #endif
     if(numOverlappingPairs < 1) return;

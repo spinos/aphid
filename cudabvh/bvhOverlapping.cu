@@ -24,12 +24,12 @@ void countPairsSelfCollideExclS(uint * dst,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								int * exclusionIndices)
 {
-    int nThreads = 8;
+    int nThreads = 16;
 	dim3 block(nThreads, nThreads, 1);
     int nblk = numQueryInternalNodes;
     dim3 grid(nblk, 1, 1);
 
-	countPairsSelfCollide_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 8> <<< grid, block, 16320 >>>(dst,
+	countPairsSelfCollide_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 16> <<< grid, block, 16320 >>>(dst,
                                 boxes,
                                 internalNodeChildIndex, 
 								internalNodeAabbs, 
@@ -49,12 +49,12 @@ void writePairCacheSelfCollideExclS(uint2 * dst,
 								unsigned queryIdx,
 								int * exclusionIndices)
 {
-    int nThreads = 8;
+    int nThreads = 16;
 	dim3 block(nThreads, nThreads, 1);
     int nblk = numQueryInternalNodes;
     dim3 grid(nblk, 1, 1);
 	
-    writePairCacheSelfCollide_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 8> <<< grid, block, 16320 >>>(dst, 
+    writePairCacheSelfCollide_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 16> <<< grid, block, 16320 >>>(dst, 
                                 locations,
                                 boxes,
                                 internalNodeChildIndex, 

@@ -124,7 +124,8 @@ void CudaBroadphase::computeOverlappingPairs()
 	bphlg.writeUInt(m_pairCounts,
          m_numBoxes,
                 "overlapping_counts", CudaDbgLog::FAlways);
-
+#endif
+#if 0
     bphlg.writeUInt(m_pairStart,
          m_numBoxes,
                 "overlapping_offsets", CudaDbgLog::FAlways);
@@ -186,7 +187,6 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	CudaLinearBvh * tree = m_objects[a];
 	
 	void * boxes = query->leafAabbs();
-	//const unsigned numBoxes = query->numLeafNodes();
 	void * exclusionInd = query->vicinity();
 	
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
@@ -266,7 +266,6 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	CudaLinearBvh * tree = m_objects[a];
 	
 	void * boxes = query->leafAabbs();
-	// const unsigned numBoxes = query->numLeafNodes();
 	void * exclusionInd = query->vicinity();
 	
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();

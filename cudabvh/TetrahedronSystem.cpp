@@ -104,7 +104,7 @@ TetrahedronSystem::TetrahedronSystem(ATetrahedronMesh * md)
 	}
     
     std::cout<<"\n initial volume "<<md->volume()<<"\n";
-    setTotalMass(100.f * md->volume());
+    setTotalMass(75.f * md->volume());
     calculateMass();
     createL2Vicinity();
 }
