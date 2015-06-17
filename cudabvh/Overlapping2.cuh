@@ -65,12 +65,12 @@ __device__ void writeOveralppingsS(uint2 * outPairs,
                                 uint * elementInd)
 {
     uint2 pair;
+    pair.x = combineObjectElementInd(iQuery, iBox);
     int i=0;
     for(;i<n;i++) {
         if(isAabbOverlapping(box, elementBoxes[i])) 
         {
-            pair.x = combineObjectElementInd(iQuery, iBox);
-			pair.y = combineObjectElementInd(iTree, elementInd[i]);
+            pair.y = combineObjectElementInd(iTree, elementInd[i]);
 			outPairs[writeLoc] = pair;
             writeLoc++;
         }
@@ -89,14 +89,14 @@ __device__ void writeOveralppingsG(uint2 * outPairs,
                                 Aabb * elementBoxes)
 {
     uint2 pair;
+    pair.x = combineObjectElementInd(iQuery, iBox);
     uint iElement;
     int i=range.x;
     for(;i<=range.y;i++) {
         iElement = elementHash[i].value;
         if(isAabbOverlapping(box, elementBoxes[iElement])) 
         {
-            pair.x = combineObjectElementInd(iQuery, iBox);
-			pair.y = combineObjectElementInd(iTree, iElement);
+            pair.y = combineObjectElementInd(iTree, iElement);
 			outPairs[writeLoc] = pair;
             writeLoc++;
         }
@@ -252,7 +252,8 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
                                 KeyValuePair * queryIndirection,
                                 uint maxBoxInd,
 								int2 * internalNodeChildIndices, 
-								Aabb * internalNodeAabbs, Aabb * leafAabbs,
+								Aabb * internalNodeAabbs, 
+								Aabb * leafAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								uint queryIdx, 
 								uint treeIdx)

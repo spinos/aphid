@@ -19,8 +19,8 @@
 #include "OverlappingInterface.h"
 #include <CudaDbgLog.h>
 
-#define DISABLE_INTER_OBJECT_COLLISION
-// #define DISABLE_SELF_COLLISION
+//#define DISABLE_INTER_OBJECT_COLLISION
+#define DISABLE_SELF_COLLISION
 
 CudaDbgLog bphlg("broadphase.txt");
 
@@ -297,11 +297,11 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 #ifdef DISABLE_INTER_OBJECT_COLLISION
     return;
 #endif
-    // uint * counts = (uint *)m_pairCounts->bufferOnDevice();
-	// counts += m_objectStart[a];
+    uint * counts = (uint *)m_pairCounts->bufferOnDevice();
+	counts += m_objectStart[a];
 	
-	// uint * starts = (uint *)m_pairStart->bufferOnDevice();
-	// starts += m_objectStart[a];
+	uint * starts = (uint *)m_pairStart->bufferOnDevice();
+	starts += m_objectStart[a];
 	
 	uint * location = (uint *)m_pairWriteLocation->bufferOnDevice();
 	location += m_objectStart[a];
@@ -320,7 +320,10 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 	
 	void * cache = m_pairCache->bufferOnDevice();
 	
-	bvhoverlap::writePairCache((uint2 *)cache, location, 
+	bvhoverlap::writePairCache((uint2 *)cache, 
+	                            location, 
+	                            starts,
+	                            counts,
 	                         (Aabb *)boxes, 
 	                         (KeyValuePair *)queryInd,
 	                         numBoxes,

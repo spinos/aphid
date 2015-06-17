@@ -1,4 +1,5 @@
 #include "Overlapping.cuh"
+#include "Overlapping1.cuh"
 #include "Overlapping2.cuh"
 #include "Overlapping3.cuh"
 #include "TetrahedronSystemInterface.h"
@@ -116,6 +117,7 @@ void countPairs(uint * dst,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices)
 { 
+#if USE_PACKET_TRAVERSE
     int tpb = 64;
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numBoxes, tpb);
@@ -130,18 +132,38 @@ void countPairs(uint * dst,
 								internalNodeAabbs, 
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices);
+#else
+        int tpb = 64;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numBoxes, tpb);
+    
+    dim3 grid(nblk, 1, 1);
+    
+    countPairsSingle_kernel<<< grid, block >>>(dst,
+                                boxes,
+                                numBoxes,
+								internalNodeChildIndex, 
+								internalNodeAabbs, 
+								leafNodeAabbs,
+								mortonCodesAndAabbIndices);
+#endif
 }
 
-void writePairCache(uint2 * dst, uint * locations, 
-                                Aabb * boxes, 
+void writePairCache(uint2 * dst, 
+                                uint * locations, 
+                                uint * cacheStarts, 
+								uint * overlappingCounts,
+								Aabb * boxes, 
                               KeyValuePair * queryIndirection,
                                 uint numBoxes,
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
-								unsigned queryIdx, unsigned treeIdx)
+								uint queryIdx, 
+								uint treeIdx)
 {
+#if USE_PACKET_TRAVERSE
     int tpb = 64;
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numBoxes, tpb);
@@ -157,6 +179,27 @@ void writePairCache(uint2 * dst, uint * locations,
 								internalNodeAabbs, 
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,
-								queryIdx, treeIdx);
+								queryIdx, 
+								treeIdx);
+#else
+    int tpb = 64;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numBoxes, tpb);
+    
+    dim3 grid(nblk, 1, 1);
+    
+    writePairCacheSingle_kernel<<< grid, block >>>(dst,
+                                locations,
+                                cacheStarts,
+                                overlappingCounts,
+                                boxes,
+                                numBoxes,
+								internalNodeChildIndex, 
+								internalNodeAabbs, 
+								leafNodeAabbs,
+								mortonCodesAndAabbIndices,
+								queryIdx, 
+								treeIdx);
+#endif
 }
 }
