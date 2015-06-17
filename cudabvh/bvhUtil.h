@@ -41,5 +41,45 @@ inline __device__ void putLeafBoxAndIndInSmem(Aabb * elementBox,
     }
 }
 
+template<int NumExcls>
+__device__ void writeElementExclusion(int * dst,
+									int * exclusionInd)
+{
+    int i=0;
+#if 1
+    int4 * dstInd4 = (int4 *)dst;
+	int4 * srcInd4 = (int4 *)exclusionInd;
+	for(;i<(NumExcls>>2); i++)
+	    dstInd4[i] = srcInd4[i];
+#else
+    for(;i<NumExcls; i++)
+	    dst[i] = exclusionInd[i];
+#endif
+}
+
+template<int NumExcls>
+__device__ int isElementExcludedS(int b, int * exclusionInd)
+{
+	int i;
+#if 1
+    int4 * exclusionInd4 = (int4 *)exclusionInd;
+	for(i=0; i<(NumExcls>>2); i++) {
+		if(exclusionInd4[i].x < 0) break;
+		if(b <= exclusionInd4[i].x) return 1;
+		if(exclusionInd4[i].y < 0) break;
+		if(b <= exclusionInd4[i].y) return 1;
+		if(exclusionInd4[i].z < 0) break;
+		if(b <= exclusionInd4[i].z) return 1;
+		if(exclusionInd4[i].w < 0) break;
+		if(b <= exclusionInd4[i].w) return 1;
+	}
+#else
+    for(i=0; i<NumExcls; i++) {
+		if(exclusionInd[i] < 0) break;
+		if(b <= exclusionInd[i]) return 1;
+	}
+#endif
+	return 0;
+}
 #endif        //  #ifndef BVH_UTIL_H
 

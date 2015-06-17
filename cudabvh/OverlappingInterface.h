@@ -11,15 +11,6 @@ void countPairs(uint * dst,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices);
 
-void countPairsSelfCollideExclS(uint * dst, 
-                                Aabb * boxes,
-                                uint numQueryInternalNodes,
-								int2 * internalNodeChildIndex, 
-								Aabb * internalNodeAabbs, 
-								Aabb * leafNodeAabbs,
-								KeyValuePair * mortonCodesAndAabbIndices,
-								int * exclusionIndices);
-
 void writePairCache(uint2 * dst, 
                                 uint * locations, 
                                Aabb * boxes, 
@@ -30,11 +21,24 @@ void writePairCache(uint2 * dst,
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								unsigned queryIdx, unsigned treeIdx);
-								
-void writePairCacheSelfCollideExclS(uint2 * dst, 
-                                uint * locations, 
+
+void countPairsSelfCollide(uint * dst, 
+                                Aabb * boxes,
+                                uint numQueryInternalNodes,
+								uint numQueryPrimitives,
+								int2 * internalNodeChildIndex, 
+								Aabb * internalNodeAabbs, 
+								Aabb * leafNodeAabbs,
+								KeyValuePair * mortonCodesAndAabbIndices,
+								int * exclusionIndices);
+
+void writePairCacheSelfCollide(uint2 * dst, 
+                                uint * locations,
+                                uint * cacheStarts, 
+								uint * overlappingCounts,
 								Aabb * boxes, 
 								uint numQueryInternalNodes,
+								uint numQueryPrimitives,
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,

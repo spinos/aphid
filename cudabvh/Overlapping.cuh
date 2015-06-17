@@ -3,47 +3,6 @@
 
 #include "bvhUtil.h"
 
-template<int NumExcls>
-__device__ void writeElementExclusion(int * dst,
-									int * exclusionInd)
-{
-    int i=0;
-#if 1
-    int4 * dstInd4 = (int4 *)dst;
-	int4 * srcInd4 = (int4 *)exclusionInd;
-	for(;i<(NumExcls>>2); i++)
-	    dstInd4[i] = srcInd4[i];
-#else
-    for(;i<NumExcls; i++)
-	    dst[i] = exclusionInd[i];
-#endif
-}
-
-template<int NumExcls>
-__device__ int isElementExcludedS(int b, int * exclusionInd)
-{
-	int i;
-#if 1
-    int4 * exclusionInd4 = (int4 *)exclusionInd;
-	for(i=0; i<(NumExcls>>2); i++) {
-		if(exclusionInd4[i].x < 0) break;
-		if(b <= exclusionInd4[i].x) return 1;
-		if(exclusionInd4[i].y < 0) break;
-		if(b <= exclusionInd4[i].y) return 1;
-		if(exclusionInd4[i].z < 0) break;
-		if(b <= exclusionInd4[i].z) return 1;
-		if(exclusionInd4[i].w < 0) break;
-		if(b <= exclusionInd4[i].w) return 1;
-	}
-#else
-    for(i=0; i<NumExcls; i++) {
-		if(exclusionInd[i] < 0) break;
-		if(b <= exclusionInd[i]) return 1;
-	}
-#endif
-	return 0;
-}
-
 template<int NumExcls, int NumThreadsPerDim>
 __device__ void findOveralppings(int * scounts,
                                          Aabb box,
@@ -211,7 +170,7 @@ inline __device__ void writeOverlappingsExclG(uint2 * overlappings,
 }
 
 template<int NumExcls, int NumThreadsPerDim>
-__global__ void countPairsSelfCollide_kernel(uint * overlappingCounts, 
+__global__ void countPairsSelfCollidePacket_kernel(uint * overlappingCounts, 
 								Aabb * boxes, 
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, 
@@ -374,8 +333,9 @@ __global__ void countPairsSelfCollide_kernel(uint * overlappingCounts,
 }
 
 template<int NumExcls, int NumThreadsPerDim>
-__global__ void writePairCacheSelfCollide_kernel(uint2 * dst, 
+__global__ void writePairCacheSelfCollidePacket_kernel(uint2 * dst, 
                                 uint * cacheWriteLocation,
+                                uint * cacheSize,
 								Aabb * boxes,
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, 
@@ -426,7 +386,16 @@ __global__ void writePairCacheSelfCollide_kernel(uint2 * dst,
         squeryIdx[tid] = mortonCodesAndAabbIndices[queryRange.x + tid].value;
         squeryBox[tid] = boxes[squeryIdx[tid]];
         writeElementExclusion<NumExcls>(&sexclusCache[NumExcls*threadIdx.x], &exclusionIndices[NumExcls*squeryIdx[tid]]);
+        svisit[tid] = cacheSize[squeryIdx[tid]];
     }
+    else 
+        svisit[tid] = 0;
+    
+    __syncthreads();
+    reduceMaxInBlock<NumThreadsPerDim, int>(tid, svisit);
+	__syncthreads();
+	
+	if(svisit[0]<1) return;
     
 	if(tid<1) {
         sstack[0] = 0x80000000;

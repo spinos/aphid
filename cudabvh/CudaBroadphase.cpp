@@ -194,8 +194,9 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	void * leafNodeAabbs = tree->primitiveAabb();
 	void * mortonCodesAndAabbIndices = tree->primitiveHash();
     
-	bvhoverlap::countPairsSelfCollideExclS(counts, (Aabb *)boxes,
+	bvhoverlap::countPairsSelfCollide(counts, (Aabb *)boxes,
 	                        query->numActiveInternalNodes(),
+							query->numPrimitives(),
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
@@ -252,11 +253,11 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 #ifdef DISABLE_SELF_COLLISION 
     return;
 #endif
-    // uint * counts = (uint *)m_pairCounts->bufferOnDevice();
-	// counts += m_objectStart[a];
+    uint * counts = (uint *)m_pairCounts->bufferOnDevice();
+	counts += m_objectStart[a];
 	
-	// uint * starts = (uint *)m_pairStart->bufferOnDevice();
-	// starts += m_objectStart[a];
+	uint * starts = (uint *)m_pairStart->bufferOnDevice();
+	starts += m_objectStart[a];
 	
 	uint * location = (uint *)m_pairWriteLocation->bufferOnDevice();
 	location += m_objectStart[a];
@@ -275,10 +276,13 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	
 	void * cache = m_pairCache->bufferOnDevice();
 	
-	bvhoverlap::writePairCacheSelfCollideExclS((uint2 *)cache, 
+	bvhoverlap::writePairCacheSelfCollide((uint2 *)cache, 
 	                            location,
+	                            starts,
+	                            counts,
 	                         (Aabb *)boxes, 
 	                         query->numActiveInternalNodes(),
+							query->numPrimitives(),
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
