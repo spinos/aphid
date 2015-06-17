@@ -164,7 +164,7 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
 		iNode = sstack[ sstackSize - 1 ];
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
         child = internalNodeChildIndices[iNode];
-        isLeaf = iLeafNode(child);
+        isLeaf = isLeafNode(child);
 			
 		if(isLeaf) {
 // load leaf boxes into smem
@@ -311,7 +311,7 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
 		iNode = sstack[ sstackSize - 1 ];
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
         child = internalNodeChildIndices[iNode];
-        isLeaf = iLeafNode(child);
+        isLeaf = isLeafNode(child);
         
 		if(isLeaf) {
 // load leaf boxes into smem

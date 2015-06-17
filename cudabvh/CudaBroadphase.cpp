@@ -186,8 +186,7 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	CudaLinearBvh * tree = m_objects[a];
 	
 	void * boxes = query->leafAabbs();
-	void * queryInd = query->primitiveHash();
-	const unsigned numBoxes = query->numLeafNodes();
+	//const unsigned numBoxes = query->numLeafNodes();
 	void * exclusionInd = query->vicinity();
 	
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
@@ -195,9 +194,8 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	void * leafNodeAabbs = tree->primitiveAabb();
 	void * mortonCodesAndAabbIndices = tree->primitiveHash();
     
-	bvhoverlap::countPairsSelfCollideExclS(counts, (Aabb *)boxes, 
-	                        (KeyValuePair *)queryInd,
-	                        numBoxes,
+	bvhoverlap::countPairsSelfCollideExclS(counts, (Aabb *)boxes,
+	                        query->numActiveInternalNodes(),
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
@@ -268,11 +266,9 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	CudaLinearBvh * tree = m_objects[a];
 	
 	void * boxes = query->leafAabbs();
-	void * queryInd = query->primitiveHash();
-	const unsigned numBoxes = query->numLeafNodes();
+	// const unsigned numBoxes = query->numLeafNodes();
 	void * exclusionInd = query->vicinity();
 	
-	void * rootNodeIndex = tree->rootNodeIndex();
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
 	void * leafNodeAabbs = tree->leafAabbs();
@@ -283,9 +279,7 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	bvhoverlap::writePairCacheSelfCollideExclS((uint2 *)cache, 
 	                            location,
 	                         (Aabb *)boxes, 
-	                         (KeyValuePair *)queryInd,
-	                        numBoxes,
-							(int *)rootNodeIndex, 
+	                         query->numActiveInternalNodes(),
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,

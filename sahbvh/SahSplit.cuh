@@ -30,7 +30,7 @@ struct SplitTask {
     {
         int2 root = data.nodes[smem[0]];
         float * sBestCost = (float *)&smem[1 + 3 * SIZE_OF_SPLITBIN_IN_INT];
-        return (sBestCost[0] < (root.y - root.x -.6f));
+        return (sBestCost[0] < (root.y - root.x - .5f));
     }
     
     template <typename QueueType, int NumBins, int NumThreads>

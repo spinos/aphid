@@ -17,24 +17,21 @@ void writeLocation(uint * dst, uint * src, uint n)
 
 void countPairsSelfCollideExclS(uint * dst, 
                                 Aabb * boxes, 
-                                KeyValuePair * queryIndirection,
-                                uint numBoxes,
+                                uint numQueryInternalNodes,
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices,
 								int * exclusionIndices)
 {
-    int nThreads = 64;
-	dim3 block(nThreads, 1, 1);
-    int nblk = iDivUp(numBoxes, nThreads);
+    int nThreads = 8;
+	dim3 block(nThreads, nThreads, 1);
+    int nblk = numQueryInternalNodes;
     dim3 grid(nblk, 1, 1);
 
-	countPairsSelfCollide_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block, 16320 >>>(dst,
+	countPairsSelfCollide_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 8> <<< grid, block, 16320 >>>(dst,
                                 boxes,
-                                queryIndirection,
-                                numBoxes,
-								internalNodeChildIndex, 
+                                internalNodeChildIndex, 
 								internalNodeAabbs, 
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,
@@ -44,9 +41,7 @@ void countPairsSelfCollideExclS(uint * dst,
 void writePairCacheSelfCollideExclS(uint2 * dst, 
                                 uint * locations, 
                                 Aabb * boxes, 
-                                KeyValuePair * queryIndirection,
-                                uint numBoxes,
-								int * rootNodeIndex, 
+                                uint numQueryInternalNodes,
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
 								Aabb * leafNodeAabbs,
@@ -54,17 +49,15 @@ void writePairCacheSelfCollideExclS(uint2 * dst,
 								unsigned queryIdx,
 								int * exclusionIndices)
 {
-    int nThreads = 64;
-	dim3 block(nThreads, 1, 1);
-    int nblk = iDivUp(numBoxes, nThreads);
+    int nThreads = 8;
+	dim3 block(nThreads, nThreads, 1);
+    int nblk = numQueryInternalNodes;
     dim3 grid(nblk, 1, 1);
 	
-    writePairCacheSelfCollide_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block, 16320 >>>(dst, 
+    writePairCacheSelfCollide_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 8> <<< grid, block, 16320 >>>(dst, 
                                 locations,
                                 boxes,
-                                queryIndirection,
-                                numBoxes,
-								internalNodeChildIndex, 
+                                internalNodeChildIndex, 
 								internalNodeAabbs, 
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices,

@@ -77,8 +77,8 @@ void CudaLinearBvh::initOnDevice()
 	m_internalNodeNumPrimitives->create(numInternalNodes() * sizeof(int));
 
 #if DRAW_BVH_HASH
-	m_hostLeafBox->create(numLeafNodes() * sizeof(Aabb));
-	m_hostLeafHash->create(nextPow2(numLeafNodes()) * sizeof(KeyValuePair));
+	m_hostLeafBox->create(numPrimitives() * sizeof(Aabb));
+	m_hostLeafHash->create(nextPow2(numPrimitives()) * sizeof(KeyValuePair));
 #endif
 
 #if DRAW_BVH_HIERARCHY
