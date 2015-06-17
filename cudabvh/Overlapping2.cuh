@@ -3,163 +3,126 @@
 
 #include "bvhUtil.h"
 
-template<int NumThreads>
-__device__ void putLeafBoxesInSmem(Aabb * dst,
-                                   uint tid,
-                                   uint n,
-                                   int2 range,
-                                   KeyValuePair * elementHash,
-                                   Aabb * elementAabbs)
+template<int NumThreadsPerDim>
+__device__ void findOveralppings(int * scounts,
+                                         Aabb box,
+                                         int m,
+                                         int n,
+                                         Aabb * elementBoxes,
+                                         uint * elementInd,
+                                         uint tid)
 {
-    uint iElement; 
-    uint loc = tid;
-    if(loc < n) {
-        iElement = elementHash[range.x + loc].value;
-        dst[loc] = elementAabbs[iElement];
-    }
-    
-    if(n>NumThreads) {
-        loc += NumThreads;
-        if(loc < n) {
-            iElement = elementHash[range.x + loc].value;
-            dst[loc] = elementAabbs[iElement];
+/*
+ *  layout of shared counts
+ *  n as num threads per dimension
+ *  nn threads
+ *  horizontal is idx of primitive to query
+ *  vertical is idx of primitive to test
+ *
+ *  0  1    2    3  ... n-1
+ *  n  n+1  n+2  n+3    2n-1
+ *  2n 2n+2 2n+2 2n+3   3n-1
+ *  ...
+ *  (n-1)n ...          nn-1
+ */
+    scounts[tid] = 0;
+    if(threadIdx.x < m && threadIdx.y < n) {
+        if(isAabbOverlapping(box, elementBoxes[threadIdx.y])) {
+                scounts[tid] = 1;
         }
     }
 }
 
-__device__ void countOveralppingsS(uint & count, 
-                                    Aabb box,
-                                    int n,
-                                    Aabb * elementBoxes)
+template<int NumThreadsPerDim>
+__device__ void findOveralppingsWId(int * scounts,
+                                        uint * selmIds,
+                                         Aabb box,
+                                         int m,
+                                         int n,
+                                         Aabb * elementBoxes,
+                                         uint * elementInd,
+                                         uint tid,
+                                         uint iQuery)
 {
-    int i=0;
-    for(;i<n;i++) {
-        if(isAabbOverlapping(box, elementBoxes[i])) 
-            count++;
-    }
-}
-
-__device__ void countOveralppingsG(uint & count,
-                                    Aabb box,
-                                    int2 range,
-                                    KeyValuePair * elementHash,
-                                    Aabb * elementBoxes)
-{
+    scounts[tid] = 0;
     uint iElement;
-    int i=range.x;
-    for(;i<=range.y;i++) {
-        iElement = elementHash[i].value;
-        if(isAabbOverlapping(box, elementBoxes[iElement])) 
-            count++;
-    }
-}
-
-__device__ void writeOveralppingsS(uint2 * outPairs,
-                                uint & writeLoc,
-                                uint iQuery,
-                                uint iBox,
-                                Aabb box,
-                                uint iTree,
-                                int n,
-                                Aabb * elementBoxes,
-                                uint * elementInd)
-{
-    uint2 pair;
-    pair.x = combineObjectElementInd(iQuery, iBox);
-    int i=0;
-    for(;i<n;i++) {
-        if(isAabbOverlapping(box, elementBoxes[i])) 
-        {
-            pair.y = combineObjectElementInd(iTree, elementInd[i]);
-			outPairs[writeLoc] = pair;
-            writeLoc++;
+    if(threadIdx.x < m && threadIdx.y < n) {
+        iElement = elementInd[threadIdx.y];
+        if(isAabbOverlapping(box, elementBoxes[threadIdx.y])) {
+            scounts[tid] = 1;
+            selmIds[tid] = combineObjectElementInd(iQuery, iElement);
         }
     }
 }
 
-
-__device__ void writeOveralppingsG(uint2 * outPairs,
-                                uint & writeLoc,
-                                uint iQuery,
-                                uint iBox,
-                                Aabb box,
-                                uint iTree,
-                                int2 range,
-                                KeyValuePair * elementHash,
-                                Aabb * elementBoxes)
-{
-    uint2 pair;
-    pair.x = combineObjectElementInd(iQuery, iBox);
-    uint iElement;
-    int i=range.x;
-    for(;i<=range.y;i++) {
-        iElement = elementHash[i].value;
-        if(isAabbOverlapping(box, elementBoxes[iElement])) 
-        {
-            pair.y = combineObjectElementInd(iTree, iElement);
-			outPairs[writeLoc] = pair;
-            writeLoc++;
-        }
-    }
-}
-
-template<int NumThreads>
-__global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
+template<int NumThreadsPerDim>
+__global__ void countPairsPacket_kernel(uint * overlappingCounts, 
+                                Aabb * boxes,
                                 KeyValuePair * queryIndirection,
-                                uint maxBoxInd,
-								int2 * internalNodeChildIndices, 
+                                int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, 
 								Aabb * leafAabbs,
 								KeyValuePair * mortonCodesAndAabbIndices)
 {
     int *sdata = SharedMemory<int>();
     
-	uint ind = blockIdx.x*blockDim.x + threadIdx.x;
-    const int isValidBox = (ind < maxBoxInd);
-	
-	uint boxInd;
-	Aabb box;
-    uint outCount;
-    if(isValidBox) {
-        boxInd = queryIndirection[ind].value;
-        box = boxes[boxInd];
-        outCount = overlappingCounts[boxInd];
-    }
+	uint queryInd = blockIdx.x;
+    int2 queryRange = internalNodeChildIndices[queryInd];
+    if(!isLeafNode(queryRange)) return;
+    
+	const uint tid = tId2();
+	int querySize = queryRange.y - queryRange.x + 1;
+	const int isValidBox = (tid < querySize);
 /* 
  *  smem layout in ints
- *  n as num threads    64
+ *  n as max num primitives in a leaf node 16
  *  m as max stack size 64
- *  c as box cache size 64
  *
  *  0   -> 1      stackSize
+ *  1   ->       visit left child
+ *  2   ->       visit right child
  *  4   -> 4+m-1       stack
- *  4+m -> 4+m+n-1  visiting
- *  4+m+n -> 4+m+n+6*c-1  leaf boxes cache
+ *  4+m -> 4+m+n-1  query index
+ *  4+m+n -> 4+m+n+6n-1  query boxes
+ *  4+m+n+6n -> 4+m+n+12n-1  leaf boxes cache
+ *  4+m+n+12n -> 4+m+n+12n+n-1 leaf boxes ind
+ *  4+m+n+12n+n -> 4+m+n+12n+n+nn-1 overlapping counts
  *
- *  visiting is n child to visit
- *  3 both 2 left 1 right 0 neither
- *  if max(visiting) == 0 pop stack
- *  if max(visiting) == 1 override top of stack by right
- *  if max(visiting) >= 2 override top of stack by right, then push left to stack
- */	
-    int & sstackSize = sdata[0];
-    int * sstack =  &sdata[4];
-    int * svisit = &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
-    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads];
-    const uint tid = threadIdx.x;
+ */		
+    int & sstackSize =          sdata[0];
+    int & b1 =                  sdata[1];
+    int & b2 =                  sdata[2];
+    int * sstack =             &sdata[4];
+    uint * squeryIdx = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
+    Aabb * squeryBox = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim];
+    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 6 * NumThreadsPerDim];
+    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim];
+    int * scounts =            &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim];
+	
+    if(isValidBox) {
+	    squeryIdx[tid] = mortonCodesAndAabbIndices[queryRange.x + tid].value;
+        squeryBox[tid] = boxes[squeryIdx[tid]];
+    }
+    
     if(tid<1) {
         sstack[0] = 0x80000000;
         sstackSize = 1;
     }
     __syncthreads();
     	
-    int canLeafFitInSmem;
     int numBoxesInLeaf;
 	int isLeaf;
     int iNode;
     int2 child;
     Aabb leftBox, rightBox;
-    int b1, b2;
+    
+    const uint boxInd = squeryIdx[threadIdx.x];
+    const Aabb box = squeryBox[threadIdx.x];
+    const Aabb groupBox = internalNodeAabbs[queryInd];
+    
+    uint outCount;
+    if(threadIdx.x < querySize) outCount = overlappingCounts[boxInd];
+	
 	for(;;) {
 		iNode = sstack[ sstackSize - 1 ];
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
@@ -169,30 +132,29 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
 		if(isLeaf) {
 // load leaf boxes into smem
             numBoxesInLeaf = child.y - child.x + 1;
-            canLeafFitInSmem = (numBoxesInLeaf <= BVH_PACKET_TRAVERSE_CACHE_SIZE);
-            if(canLeafFitInSmem) 
-                putLeafBoxesInSmem<NumThreads>(sboxCache,
+            if(numBoxesInLeaf > NumThreadsPerDim) numBoxesInLeaf = NumThreadsPerDim;
+            putLeafBoxInSmem<NumThreadsPerDim>(sboxCache,
                                             tid,
                                             numBoxesInLeaf,
                                             child,
                                             mortonCodesAndAabbIndices,
                                             leafAabbs);
             __syncthreads();
-            
-            if(isValidBox) {
-// intersect boxes in leaf
-            if(canLeafFitInSmem)
-                countOveralppingsS(outCount, 
+// intersect boxes in leaf using all threads
+            findOveralppings<NumThreadsPerDim>(scounts,
                                     box,
+                                    querySize,
                                     numBoxesInLeaf,
-                                    sboxCache);
-            else
-                countOveralppingsG(outCount,
-                                    box,
-                                    child,
-                                    mortonCodesAndAabbIndices,
-                                    leafAabbs);
-            }
+                                    sboxCache,
+                                    sindCache,
+                                    tid);
+            __syncthreads();
+            if(isValidBox)
+                sumOverlappingCounts<NumThreadsPerDim>(outCount,
+                                    scounts,
+                                    numBoxesInLeaf,
+                                    tid);
+            
             if(tid<1) {
 // take out top of stack
                 sstackSize--;
@@ -202,28 +164,26 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
             if(sstackSize<1) break;
 		}
 		else {
-            if(isValidBox) {
-		    leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
-            b1 = isAabbOverlapping(box, leftBox);
-            
-            rightBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.y)];
-            b2 = isAabbOverlapping(box, rightBox);
-            
-            svisit[tid] = 2 * b1 + b2;
+            if(tid<1) {
+                leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
+                b1 = isAabbOverlapping(groupBox, leftBox);
             }
-            else {
-                svisit[tid] = 0;
-            }   
+            else if(tid==1) {
+                rightBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.y)];
+                b2 = isAabbOverlapping(groupBox, rightBox);
+            }
             __syncthreads();
             
-            reduceMaxInBlock<NumThreads, int>(tid, svisit);
-		
             if(tid<1) {
-                if(svisit[tid] == 0) {
+                if(b1 == 0 && b2 == 0) {
 // visit no child, take out top of stack
                     sstackSize--;
                 }
-                else if(svisit[tid] == 1) {
+                else if(b1 > b2) {
+// visit right child
+                    sstack[ sstackSize - 1 ] = child.x; 
+                }
+                else if(b2 > b1) {
 // visit right child
                     sstack[ sstackSize - 1 ] = child.y; 
                 }
@@ -245,8 +205,8 @@ __global__ void countPairs_kernel(uint * overlappingCounts, Aabb * boxes,
         overlappingCounts[boxInd] = outCount;
 }
 
-template<int NumThreads>
-__global__ void writePairCache_kernel(uint2 * outPairs, 
+template<int NumThreadsPerDim>
+__global__ void writePairCachePacket_kernel(uint2 * outPairs, 
                                 uint * cacheWriteLocation,
                                 Aabb * boxes,
                                 KeyValuePair * queryIndirection,
@@ -260,54 +220,64 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
 {
     int *sdata = SharedMemory<int>();
     
-	uint ind = blockIdx.x*blockDim.x + threadIdx.x;
-	const int isValidBox = (ind < maxBoxInd);
-	
-	uint boxInd;
-    uint writeLoc;
-    Aabb box;
-    if(isValidBox) {
-	     boxInd = queryIndirection[ind].value;
-	     writeLoc = cacheWriteLocation[boxInd];
-         box = boxes[boxInd];	
-	}
+    uint queryInd = blockIdx.x;
+    int2 queryRange = internalNodeChildIndices[queryInd];
+    if(!isLeafNode(queryRange)) return;
+    
+	const uint tid = tId2();
+	int querySize = queryRange.y - queryRange.x + 1;
+	const int isValidBox = (tid < querySize);
 /* 
  *  smem layout in ints
- *  n as num threads    64
+ *  n as max num primitives in a leaf node 16
  *  m as max stack size 64
- *  c as box cache size 64
  *
  *  0   -> 1      stackSize
+ *  1   ->       visit left child
+ *  2   ->       visit right child
  *  4   -> 4+m-1       stack
- *  4+m -> 4+m+n-1  visiting
- *  4+m+n -> 4+m+n+6*c-1  leaf boxes cache
- *  4+m+n+6*c -> 4+m+n+6*c+c-1 leaf boxes ind
+ *  4+m -> 4+m+n-1  query index
+ *  4+m+n -> 4+m+n+6n-1  query boxes
+ *  4+m+n+6n -> 4+m+n+12n-1  leaf boxes cache
+ *  4+m+n+12n -> 4+m+n+12n+n-1 leaf boxes ind
+ *  4+m+n+12n+n -> 4+m+n+12n+n+nn-1 overlapping counts
+ *  4+m+n+12n+n+nn -> 4+m+n+12n+n+nn+nn-1 overlapping ids
  *
- *  visiting is n child to visit
- *  3 both 2 left 1 right 0 neither
- *  if max(visiting) == 0 pop stack
- *  if max(visiting) == 1 override top of stack by right
- *  if max(visiting) >= 2 override top of stack by right, then push left to stack
- */
-	int & sstackSize = sdata[0];
-    int * sstack =  &sdata[4];
-    int * svisit = &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
-    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads];
-    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreads + BVH_PACKET_TRAVERSE_CACHE_SIZE * 6];
-    const uint tid = threadIdx.x;
-    if(tid<1) {
+ */	
+    int & sstackSize =          sdata[0];
+    int & b1 =                  sdata[1];
+    int & b2 =                  sdata[2];
+    int * sstack =             &sdata[4];
+    uint * squeryIdx = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE];
+    Aabb * squeryBox = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim];
+    Aabb * sboxCache = (Aabb *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 6 * NumThreadsPerDim];
+    uint * sindCache = (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim];
+    int * scounts =            &sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim];
+	uint * selmIds =   (uint *)&sdata[4 + BVH_TRAVERSE_MAX_STACK_SIZE + NumThreadsPerDim + 12 * NumThreadsPerDim + NumThreadsPerDim + NumThreadsPerDim * NumThreadsPerDim]; 
+	
+	if(isValidBox) {
+	    squeryIdx[tid] = mortonCodesAndAabbIndices[queryRange.x + tid].value;
+        squeryBox[tid] = boxes[squeryIdx[tid]];
+    }
+
+	if(tid<1) {
         sstack[0] = 0x80000000;
         sstackSize = 1;
     }
     __syncthreads();
 	
-    int canLeafFitInSmem;
     int numBoxesInLeaf;
 	int isLeaf;
     int iNode;
     int2 child;
     Aabb leftBox, rightBox;
-    int b1, b2;
+    
+    const uint boxInd = squeryIdx[threadIdx.x];
+    const Aabb box = squeryBox[threadIdx.x];
+    const Aabb groupBox = internalNodeAabbs[queryInd];
+    uint writeLoc;
+    if(threadIdx.x < querySize) writeLoc = cacheWriteLocation[boxInd];
+	
 	for(;;) {
 		iNode = sstack[ sstackSize - 1 ];
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
@@ -317,9 +287,8 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
 		if(isLeaf) {
 // load leaf boxes into smem
             numBoxesInLeaf = child.y - child.x + 1;
-            canLeafFitInSmem = (numBoxesInLeaf <= BVH_PACKET_TRAVERSE_CACHE_SIZE);
-            if(canLeafFitInSmem) 
-                putLeafBoxAndIndInSmem<NumThreads>(sboxCache,
+            if(numBoxesInLeaf > NumThreadsPerDim) numBoxesInLeaf = NumThreadsPerDim;
+            putLeafBoxAndIndInSmem<NumThreadsPerDim>(sboxCache,
                                             sindCache,
                                             tid,
                                             numBoxesInLeaf,
@@ -327,29 +296,27 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
                                             mortonCodesAndAabbIndices,
                                             leafAabbs);
             __syncthreads();
-            if(isValidBox) {
-// intersect boxes in leaf
-            if(canLeafFitInSmem)
-                writeOveralppingsS(outPairs, 
-                                    writeLoc,
-                                    queryIdx,
-                                    boxInd,
+// intersect boxes in leaf using all threads
+            findOveralppingsWId<NumThreadsPerDim>(scounts,
+                                    selmIds,
                                     box,
-                                    treeIdx,
+                                    querySize,
                                     numBoxesInLeaf,
                                     sboxCache,
-                                    sindCache);
-            else
-                writeOveralppingsG(outPairs,
+                                    sindCache,
+                                    tid,
+                                    treeIdx);
+            __syncthreads();
+            if(isValidBox)
+                sumOverlappingPairs<NumThreadsPerDim>(outPairs,
                                     writeLoc,
+                                    scounts,
+                                    selmIds,
+                                    numBoxesInLeaf,
+                                    tid,
                                     queryIdx,
-                                    boxInd,
-                                    box,
-                                    treeIdx,
-                                    child,
-                                    mortonCodesAndAabbIndices,
-                                    leafAabbs);
-            }
+                                    boxInd);
+            
             if(tid<1) {
 // take out top of stack
                 sstackSize--;
@@ -359,28 +326,26 @@ __global__ void writePairCache_kernel(uint2 * outPairs,
             if(sstackSize<1) break;		    
 		}
 		else {
-            if(isValidBox) {
-			leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
-            b1 = isAabbOverlapping(box, leftBox);
-            
-            rightBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.y)];
-            b2 = isAabbOverlapping(box, rightBox);
-            
-            svisit[tid] = 2 * b1 + b2;
+            if(tid<1) {
+                leftBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.x)];
+                b1 = isAabbOverlapping(groupBox, leftBox);
             }
-            else {
-                svisit[tid] = 0;
+            else if(tid==1) {
+                rightBox = internalNodeAabbs[getIndexWithInternalNodeMarkerRemoved(child.y)];
+                b2 = isAabbOverlapping(groupBox, rightBox);
             }
             __syncthreads();
             
-            reduceMaxInBlock<NumThreads, int>(tid, svisit);
-		
             if(tid<1) {
-                if(svisit[tid] == 0) {
+                if(b1 == 0 && b2 == 0) {
 // visit no child, take out top of stack
                     sstackSize--;
                 }
-                else if(svisit[tid] == 1) {
+                else if(b1 > b2) {
+// visit right child
+                    sstack[ sstackSize - 1 ] = child.x; 
+                }
+                else if(b2 > b1) {
 // visit right child
                     sstack[ sstackSize - 1 ] = child.y; 
                 }

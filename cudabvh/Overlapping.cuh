@@ -206,11 +206,6 @@ __global__ void countPairsSelfCollidePacket_kernel(uint * overlappingCounts,
  *  4+m+n+12n+n+en -> 4+m+2n+12n+n+en+nn-1 overlapping counts
  *  4+m+n+12n+n+en+nn -> 4+m+2n+12*n+n+en+nn+nn-1 overlapping ids
  *
- *  visiting is n child to visit
- *  3 both 2 left 1 right 0 neither
- *  if max(visiting) == 0 pop stack
- *  if max(visiting) == 1 override top of stack by right
- *  if max(visiting) >= 2 override top of stack by right, then push left to stack
  */	
     int & sstackSize =          sdata[0];
     int & b1 =                  sdata[1];

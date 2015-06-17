@@ -20,7 +20,7 @@
 #include <CudaDbgLog.h>
 
 //#define DISABLE_INTER_OBJECT_COLLISION
-#define DISABLE_SELF_COLLISION
+//#define DISABLE_SELF_COLLISION
 
 CudaDbgLog bphlg("broadphase.txt");
 
@@ -227,7 +227,8 @@ void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 	
 	bvhoverlap::countPairs(counts, (Aabb *)boxes, 
 	                        (KeyValuePair *)queryInd,
-	                        numBoxes,
+	                         query->numActiveInternalNodes(),
+							numBoxes,
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,
@@ -311,7 +312,6 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 	
 	void * boxes = query->leafAabbs();
 	void * queryInd = query->primitiveHash();
-	const unsigned numBoxes = query->numLeafNodes();
 	
 	void * internalNodeChildIndex = tree->internalNodeChildIndices();
 	void * internalNodeAabbs = tree->internalNodeAabbs();
@@ -326,7 +326,8 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 	                            counts,
 	                         (Aabb *)boxes, 
 	                         (KeyValuePair *)queryInd,
-	                         numBoxes,
+	                            query->numActiveInternalNodes(),
+							query->numPrimitives(),
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 
 							(Aabb *)leafNodeAabbs,

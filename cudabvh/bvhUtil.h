@@ -24,6 +24,22 @@ inline __device__ int isLeafNode(const int2 & child)
 { return (child.x>>31) == 0; }
 
 template<int NumThreads>
+inline __device__ void putLeafBoxInSmem(Aabb * elementBox,
+                                    uint tid,
+                                   uint n,
+                                   int2 range,
+                                   KeyValuePair * elementHash,
+                                   Aabb * leafAabbs)
+{
+    uint iElement; 
+    uint loc = tid;
+    if(loc < n) {
+        iElement = elementHash[range.x + loc].value;
+        elementBox[loc] = leafAabbs[iElement];
+    }
+}
+
+template<int NumThreads>
 inline __device__ void putLeafBoxAndIndInSmem(Aabb * elementBox,
                                     uint * elementInd,
                                    uint tid,

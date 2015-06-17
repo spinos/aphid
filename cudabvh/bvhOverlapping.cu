@@ -3,7 +3,7 @@
 #include "Overlapping2.cuh"
 #include "Overlapping3.cuh"
 #include "TetrahedronSystemInterface.h"
-#define USE_PACKET_TRAVERSE 1
+#define USE_PACKET_TRAVERSE 0
 
 namespace bvhoverlap {
 
@@ -111,6 +111,7 @@ void writePairCacheSelfCollide(uint2 * dst,
 void countPairs(uint * dst,
                                 Aabb * boxes,
                                 KeyValuePair * queryIndirection,
+                                uint numQueryInternalNodes,
                                 uint numBoxes,
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
@@ -118,22 +119,20 @@ void countPairs(uint * dst,
 								KeyValuePair * mortonCodesAndAabbIndices)
 { 
 #if USE_PACKET_TRAVERSE
-    int tpb = 64;
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numBoxes, tpb);
-    
+    int nThreads = 16;
+	dim3 block(nThreads, nThreads, 1);
+    int nblk = numQueryInternalNodes;
     dim3 grid(nblk, 1, 1);
     
-    countPairs_kernel<64> <<< grid, block, 16320 >>>(dst,
+    countPairsPacket_kernel<16> <<< grid, block, 16320 >>>(dst,
                                 boxes,
                                 queryIndirection,
-                                numBoxes,
-								internalNodeChildIndex, 
+                                internalNodeChildIndex, 
 								internalNodeAabbs, 
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices);
 #else
-        int tpb = 64;
+    int tpb = 64;
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numBoxes, tpb);
     
@@ -155,6 +154,7 @@ void writePairCache(uint2 * dst,
 								uint * overlappingCounts,
 								Aabb * boxes, 
                               KeyValuePair * queryIndirection,
+                                uint numQueryInternalNodes,
                                 uint numBoxes,
 								int2 * internalNodeChildIndex, 
 								Aabb * internalNodeAabbs, 
@@ -164,13 +164,12 @@ void writePairCache(uint2 * dst,
 								uint treeIdx)
 {
 #if USE_PACKET_TRAVERSE
-    int tpb = 64;
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numBoxes, tpb);
-    
+    int nThreads = 16;
+	dim3 block(nThreads, nThreads, 1);
+    int nblk = numQueryInternalNodes;
     dim3 grid(nblk, 1, 1);
     
-    writePairCache_kernel<64> <<< grid, block, 16320 >>>(dst, 
+    writePairCachePacket_kernel<16> <<< grid, block, 16320 >>>(dst, 
                                 locations,
                                 boxes,
                                 queryIndirection,
