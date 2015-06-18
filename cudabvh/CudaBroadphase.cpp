@@ -19,7 +19,7 @@
 #include "OverlappingInterface.h"
 #include <CudaDbgLog.h>
 
-//#define DISABLE_INTER_OBJECT_COLLISION
+#define DISABLE_INTER_OBJECT_COLLISION
 //#define DISABLE_SELF_COLLISION
 
 CudaDbgLog bphlg("broadphase.txt");

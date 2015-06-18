@@ -11,6 +11,12 @@
 #define BVH_PACKET_TRAVERSE_CACHE_SIZE 64
 #define BVH_TRAVERSE_MAX_STACK_SIZE 64
 
+inline __device__ uint wId()
+{ return threadIdx.x>>5; }
+
+inline __device__ uint tIdW()
+{ return threadIdx.x & 31; }
+
 inline __device__ uint tId1()
 { return threadIdx.x; }
 
@@ -23,7 +29,6 @@ inline __device__ int isInternalNode(const int2 & child)
 inline __device__ int isLeafNode(const int2 & child)
 { return (child.x>>31) == 0; }
 
-template<int NumThreads>
 inline __device__ void putLeafBoxInSmem(Aabb * elementBox,
                                     uint tid,
                                    uint n,
@@ -39,7 +44,6 @@ inline __device__ void putLeafBoxInSmem(Aabb * elementBox,
     }
 }
 
-template<int NumThreads>
 inline __device__ void putLeafBoxAndIndInSmem(Aabb * elementBox,
                                     uint * elementInd,
                                    uint tid,

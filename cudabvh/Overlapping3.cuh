@@ -1,12 +1,17 @@
 #ifndef OVERLAPPING3_CUH
 #define OVERLAPPING3_CUH
 
+/*
+ *  self-collision single traverse
+ */
+
 #include "stackUtil.cuh"
 #include "bvhUtil.h"
 
 template<int NumExcls>
 inline __device__ void countOverlappings(uint & count,
                                          KeyValuePair * indirections,
+                                         uint iBox,
                                          Aabb box,
                                          Aabb * elementBoxes,
                                          int * exclElm,
@@ -16,9 +21,12 @@ inline __device__ void countOverlappings(uint & count,
     int i=range.x;
     for(;i<=range.y;i++) {
         iElement = indirections[i].value;
-        if(isElementExcludedS<NumExcls>(iElement, exclElm)) continue;
-        if(isAabbOverlapping(box, elementBoxes[iElement])) 
-            count++;
+        if(iElement > iBox) {
+            if(!isElementExcludedS<NumExcls>(iElement, exclElm)) {
+                if(isAabbOverlapping(box, elementBoxes[iElement])) 
+                    count++;
+            }
+        }
     }
 }
 
@@ -39,11 +47,13 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
     int i=range.x;
     for(;i<=range.y;i++) {
         iElement = indirections[i].value;
-        if(!isElementExcludedS<NumExcls>(iElement, exclElm)) {
-            if(isAabbOverlapping(box, elementBoxes[iElement])) {
-                pair.y = combineObjectElementInd(iQuery, iElement);
-                overlappings[writeLoc] = pair;
-                writeLoc++;
+        if(iElement > iBox) {
+            if(!isElementExcludedS<NumExcls>(iElement, exclElm)) {
+                if(isAabbOverlapping(box, elementBoxes[iElement])) {
+                    pair.y = combineObjectElementInd(iQuery, iElement);
+                    overlappings[writeLoc] = pair;
+                    writeLoc++;
+                }
             }
         }
     }
@@ -84,7 +94,7 @@ __global__ void countPairsSelfCollideSingle_kernel(uint * overlappingCounts,
 	
     uint iCount = 0;
 	for(;;) {
-		if(outOfStack(stackSize)) break;
+		if(stackSize < 1) break;
 		
 		iNode = stack[ stackSize - 1 ];
 		stackSize--;
@@ -95,11 +105,11 @@ __global__ void countPairsSelfCollideSingle_kernel(uint * overlappingCounts,
 		
         internalBox = internalNodeAabbs[iNode];
 
-		if(isAabbOverlapping(box, internalBox))
-		{    
+		if(isAabbOverlapping(box, internalBox)) {    
 		    if(!isInternal) {
 		        countOverlappings<NumExcls>(iCount,
                                 mortonCodesAndAabbIndices,
+                                boxIndex,
                                 box,
                                 leafAabbs,
                                 exclElm,
@@ -160,7 +170,7 @@ __global__ void writePairCacheSelfCollideSingle_kernel(uint2 * dst,
     Aabb internalBox;
 	
 	for(;;) {
-		if(outOfStack(stackSize)) break;
+		if(stackSize < 1) break;
         
 		iNode = stack[ stackSize - 1 ];
 		stackSize--;
@@ -171,8 +181,7 @@ __global__ void writePairCacheSelfCollideSingle_kernel(uint2 * dst,
         
 		internalBox = internalNodeAabbs[iNode];
         
-		if(isAabbOverlapping(box, internalBox))
-		{
+		if(isAabbOverlapping(box, internalBox)) {
 			if(!isInternal) {
 			    writeOverlappings<NumExcls>(dst,
                                 writeLoc,

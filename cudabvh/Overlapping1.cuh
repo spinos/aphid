@@ -1,6 +1,10 @@
 #ifndef OVERLAPPING1_CUH
 #define OVERLAPPING1_CUH
 
+/* 
+ *  collision single traverse
+ */
+
 #include "stackUtil.cuh"
 #include "bvhUtil.h"
 

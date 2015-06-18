@@ -29,13 +29,14 @@ void countPairsSelfCollide(uint * dst,
 								int * exclusionIndices)
 {
 #if USE_PACKET_TRAVERSE
-    int nThreads = 16;
-	dim3 block(nThreads, nThreads, 1);
-    int nblk = numQueryInternalNodes;
+    int nThreads = 256;
+	dim3 block(nThreads, 1, 1);
+    int nblk = iDivUp(numQueryInternalNodes, 8);
     dim3 grid(nblk, 1, 1);
 
-	countPairsSelfCollidePacket_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 16> <<< grid, block, 16320 >>>(dst,
+	countPairsSelfCollidePacket_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH> <<< grid, block, 16320 >>>(dst,
                                 boxes,
+                                numQueryInternalNodes,
                                 internalNodeChildIndex, 
 								internalNodeAabbs, 
 								leafNodeAabbs,
