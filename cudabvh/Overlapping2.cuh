@@ -1,6 +1,10 @@
 #ifndef OVERLAPPING2_CUH
 #define OVERLAPPING2_CUH
 
+/*
+ *  collision packet traverse
+ */
+
 #include "bvhUtil.h"
 
 template<int NumThreadsPerDim>

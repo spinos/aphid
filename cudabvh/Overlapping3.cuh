@@ -87,7 +87,7 @@ __global__ void countPairsSelfCollideSingle_kernel(uint * overlappingCounts,
 	int stackSize = 1;
 	stack[0] = 0x80000000;
 		
-	int isInternal;
+	int isLeaf;
     int iNode;
     int2 child;
     Aabb internalBox;
@@ -101,12 +101,12 @@ __global__ void countPairsSelfCollideSingle_kernel(uint * overlappingCounts,
 		
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
         child = internalNodeChildIndices[iNode];
-        isInternal = isInternalNode(child);
+        isLeaf = isLeafNode(child);
 		
         internalBox = internalNodeAabbs[iNode];
 
 		if(isAabbOverlapping(box, internalBox)) {    
-		    if(!isInternal) {
+		    if(isLeaf) {
 		        countOverlappings<NumExcls>(iCount,
                                 mortonCodesAndAabbIndices,
                                 boxIndex,
@@ -164,7 +164,7 @@ __global__ void writePairCacheSelfCollideSingle_kernel(uint2 * dst,
 	int stackSize = 1;
 	stack[0] = 0x80000000;
 		
-	int isInternal;
+	int isLeaf;
     int iNode;
     int2 child;
     Aabb internalBox;
@@ -177,12 +177,12 @@ __global__ void writePairCacheSelfCollideSingle_kernel(uint2 * dst,
 		
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
 		child = internalNodeChildIndices[iNode];
-        isInternal = isInternalNode(child);
+        isLeaf = isLeafNode(child);
         
 		internalBox = internalNodeAabbs[iNode];
         
 		if(isAabbOverlapping(box, internalBox)) {
-			if(!isInternal) {
+			if(isLeaf) {
 			    writeOverlappings<NumExcls>(dst,
                                 writeLoc,
                                 queryIdx,

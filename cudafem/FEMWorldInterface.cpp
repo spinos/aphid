@@ -42,7 +42,7 @@ bool FEMWorldInterface::readTetrahedronMeshFromFile(CudaDynamicWorld * world)
 	hes.extractTetrahedronMeshes(&tetrahedronGeos);
     
     unsigned n = tetrahedronGeos.numGeometries();
-    n = 1;
+    n = 2;
     unsigned i = 0;
     for(;i<n;i++) {
         ATetrahedronMesh * meshData = (ATetrahedronMesh *)tetrahedronGeos.geometry(i);

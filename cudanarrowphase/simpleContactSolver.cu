@@ -5,7 +5,7 @@
 #include <CudaBase.h>
 #define SETCONSTRAINT_TPB 128
 #define SOLVECONTACT_TPB 256
-#define DEFORMABILITY 0.134f
+#define DEFORMABILITY 0.0134f
 
 inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
                                                   float3 averageLinearVel,

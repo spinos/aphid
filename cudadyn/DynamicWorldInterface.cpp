@@ -71,7 +71,7 @@ void DynamicWorldInterface::drawTetrahedron(TetrahedronSystem * tetra, GeoDrawer
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
 	glColor3f(0.31f, 0.32f, 0.4f);
-	drawer->setGroupColorLight(ind);
+	// drawer->setGroupColorLight(ind);
     
     glEnableClientState(GL_VERTEX_ARRAY);
 

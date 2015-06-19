@@ -64,7 +64,7 @@ __global__ void countPairsSingle_kernel(uint * overlappingCounts,
 	int stackSize = 1;
 	stack[0] = 0x80000000;
 		
-	int isInternal;
+	int isLeaf;
     int iNode;
     int2 child;
     Aabb internalBox;
@@ -78,13 +78,13 @@ __global__ void countPairsSingle_kernel(uint * overlappingCounts,
 		
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
         child = internalNodeChildIndices[iNode];
-        isInternal = isInternalNode(child);
+        isLeaf = isLeafNode(child);
 		
         internalBox = internalNodeAabbs[iNode];
 
 		if(isAabbOverlapping(box, internalBox))
 		{    
-		    if(!isInternal) {
+		    if(isLeaf) {
 		        countOverlappings(outCount,
                                 mortonCodesAndAabbIndices,
                                 box,
@@ -132,7 +132,7 @@ __global__ void writePairCacheSingle_kernel(uint2 * outPairs,
 	int stackSize = 1;
 	stack[0] = 0x80000000;
 		
-	int isInternal;
+	int isLeaf;
     int iNode;
     int2 child;
     Aabb internalBox;
@@ -145,13 +145,13 @@ __global__ void writePairCacheSingle_kernel(uint2 * outPairs,
 		
 		iNode = getIndexWithInternalNodeMarkerRemoved(iNode);
 		child = internalNodeChildIndices[iNode];
-        isInternal = isInternalNode(child);
+        isLeaf = isLeafNode(child);
         
 		internalBox = internalNodeAabbs[iNode];
         
 		if(isAabbOverlapping(box, internalBox))
 		{
-			if(!isInternal) {
+			if(isLeaf) {
 			    writeOverlappings(outPairs,
                                 writeLoc,
                                 queryIdx,
