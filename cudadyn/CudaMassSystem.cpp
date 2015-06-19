@@ -71,4 +71,10 @@ void * CudaMassSystem::deviceAnchor()
 
 CUDABuffer * CudaMassSystem::anchorBuf()
 { return m_deviceAnchor; }
+
+void CudaMassSystem::sendXToHost()
+{ deviceXBuf()->deviceToHost(hostX(), xLoc(), numPoints() * 12); }
+
+void CudaMassSystem::sendVToHost()
+{ deviceVBuf()->deviceToHost(hostV(), vLoc(), numPoints() * 12); }
 //:~

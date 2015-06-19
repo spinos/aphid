@@ -54,33 +54,6 @@ void DynamicWorldInterface::changeMaxDisplayLevel(int d)
     WorldDbgDraw::MaxDrawBvhHierarchyLevel = m_maxDisplayLevel;
 }
 
-void DynamicWorldInterface::drawTetrahedron(TetrahedronSystem * tetra, GeoDrawer * drawer, int ind)
-{
-    glEnable(GL_DEPTH_TEST);
-	glColor3f(0.6f, 0.62f, 0.6f);
-    
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
-    glEnableClientState(GL_VERTEX_ARRAY);
-
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)tetra->hostX());
-	glDrawElements(GL_TRIANGLES, tetra->numTriangleFaceVertices(), GL_UNSIGNED_INT, tetra->hostTriangleIndices());
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	
-	glColor3f(0.31f, 0.32f, 0.4f);
-	// drawer->setGroupColorLight(ind);
-    
-    glEnableClientState(GL_VERTEX_ARRAY);
-
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)tetra->hostX());
-	glDrawElements(GL_TRIANGLES, tetra->numTriangleFaceVertices(), GL_UNSIGNED_INT, tetra->hostTriangleIndices());
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-}
-
 void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
     const unsigned nobj = world->numObjects();
@@ -88,12 +61,10 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
     
     unsigned i;
     for(i=0; i< nobj; i++) {
-        BvhTetrahedronSystem * tetra = world->tetradedron(i);
-        if(tetra) drawTetrahedron(tetra, drawer, i);
+		MassSystem * ms = world->object(i);
+		// drawer->setGroupColorLight(ind);
+        if(ms) drawSystem(ms);
     }
-    
-    TriangleSystem * tri = world->firstTriangle();
-    // if(tri) drawTriangle(tri);
 }
 /*
 void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
@@ -120,7 +91,7 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 #endif
 }
 */
-void DynamicWorldInterface::drawTriangle(TriangleSystem * tri)
+void DynamicWorldInterface::drawSystem(MassSystem * tri)
 {
     glEnable(GL_DEPTH_TEST);
 	glColor3f(0.6f, 0.62f, 0.6f);

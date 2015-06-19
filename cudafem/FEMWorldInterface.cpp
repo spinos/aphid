@@ -7,7 +7,7 @@
 #include <DynGlobal.h>
 #include <SahBuilder.h>
 #include <GeometryArray.h>
-#include <TriangleSystem.h>
+#include <BvhTriangleSystem.h>
 
 FEMWorldInterface::FEMWorldInterface() {}
 FEMWorldInterface::~FEMWorldInterface() {}
@@ -42,7 +42,7 @@ bool FEMWorldInterface::readTetrahedronMeshFromFile(CudaDynamicWorld * world)
 	hes.extractTetrahedronMeshes(&tetrahedronGeos);
     
     unsigned n = tetrahedronGeos.numGeometries();
-    n = 2;
+    n = 1;
     unsigned i = 0;
     for(;i<n;i++) {
         ATetrahedronMesh * meshData = (ATetrahedronMesh *)tetrahedronGeos.geometry(i);
@@ -101,7 +101,7 @@ bool FEMWorldInterface::readTriangleMeshFromFile(CudaDynamicWorld * world)
     if(triangleMeshes.numGeometries() < 1) return false;
     std::cout<<" n tri mesh "<<triangleMeshes.numGeometries();
 	
-    world->addTriangleSystem(new TriangleSystem((ATriangleMesh *)triangleMeshes.geometry(0)));
+    world->addTriangleSystem(new BvhTriangleSystem((ATriangleMesh *)triangleMeshes.geometry(0)));
 	return true;
 }
 //:~

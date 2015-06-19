@@ -75,12 +75,6 @@ void BvhTetrahedronSystem::formTetrahedronAabbs()
 void BvhTetrahedronSystem::integrate(float timeStep)
 { tetrahedronSystemIntegrate((float3 *)deviceX(), (float3 *)deviceV(), timeStep, numPoints()); }
 
-void BvhTetrahedronSystem::sendXToHost()
-{ deviceXBuf()->deviceToHost(hostX(), xLoc(), numPoints() * 12); }
-
-void BvhTetrahedronSystem::sendVToHost()
-{ deviceVBuf()->deviceToHost(hostV(), vLoc(), numPoints() * 12); }
-
 void * BvhTetrahedronSystem::vicinity()
 { return m_vicinity->bufferOnDevice(); }
 //:~

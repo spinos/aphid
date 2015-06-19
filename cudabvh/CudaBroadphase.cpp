@@ -18,6 +18,7 @@
 #include "TetrahedronSystemInterface.h"
 #include "OverlappingInterface.h"
 #include <CudaDbgLog.h>
+#include <MassSystem.h>
 
 //#define DISABLE_INTER_OBJECT_COLLISION
 //#define DISABLE_SELF_COLLISION
@@ -179,9 +180,11 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 #ifdef DISABLE_SELF_COLLISION 
     return;
 #endif
+	if(!checkSystemRank(a)) return;
+
     uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
-
+	
 // only for tetrahedron system
 	BvhTetrahedronSystem * query = static_cast<BvhTetrahedronSystem *>(m_objects[a]);
 	CudaLinearBvh * tree = m_objects[a];
@@ -210,6 +213,8 @@ void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 #ifdef DISABLE_INTER_OBJECT_COLLISION
     return;
 #endif
+	if(!checkSystemRank(a)) return;
+	
 	uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
 	
@@ -254,6 +259,8 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 #ifdef DISABLE_SELF_COLLISION 
     return;
 #endif
+	if(!checkSystemRank(a)) return;
+	
     uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
 	
@@ -298,6 +305,8 @@ void CudaBroadphase::writeOverlappingPairsOther(unsigned a, unsigned b)
 #ifdef DISABLE_INTER_OBJECT_COLLISION
     return;
 #endif
+	if(!checkSystemRank(a)) return;
+	
     uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
 	
@@ -358,3 +367,11 @@ void * CudaBroadphase::hostPairCache()
 void * CudaBroadphase::hostAabb()
 { return m_hostAabb->data(); }
 #endif
+
+bool CudaBroadphase::checkSystemRank(unsigned a)
+{
+	MassSystem * ms = dynamic_cast<MassSystem *>(m_objects[a]);
+	// std::cout<<" sys rank "<<ms->elementRank();
+	return (ms->elementRank() ==4);
+}
+//:~

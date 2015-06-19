@@ -21,10 +21,9 @@ public:
 	virtual void update();
 	
 	void * vicinity();
-	
+// override mass system
 	virtual void integrate(float dt);
-	void sendXToHost();
-	void sendVToHost();
+	
 protected:
     
 private:

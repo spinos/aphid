@@ -173,4 +173,6 @@ void MassSystem::setAnchoredPoint(unsigned i, unsigned anchorInd)
 
 bool MassSystem::isAnchoredPoint(unsigned i)
 { return (hostAnchor()[i] > (1<<29)); }
+
+void MassSystem::integrate(float dt) {}
 //:~

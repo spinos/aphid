@@ -3,7 +3,7 @@
 #include <CudaNarrowphase.h>
 #include <SimpleContactSolver.h>
 #include <BvhTetrahedronSystem.h>
-#include <TriangleSystem.h>
+#include <BvhTriangleSystem.h>
 #include <CudaBase.h>
 #include <BvhBuilder.h>
 #include <WorldDbgDraw.h>
@@ -16,7 +16,6 @@ CudaDynamicWorld::CudaDynamicWorld()
     m_narrowphase = new CudaNarrowphase;
 	m_contactSolver = new SimpleContactSolver;
 	m_numObjects = 0;
-    m_triangleMesh[0] = 0;
 }
 
 CudaDynamicWorld::~CudaDynamicWorld()
@@ -28,9 +27,6 @@ CudaDynamicWorld::~CudaDynamicWorld()
 
 const unsigned CudaDynamicWorld::numObjects() const
 { return m_numObjects; }
-
-BvhTetrahedronSystem * CudaDynamicWorld::tetradedron(unsigned ind) const
-{ return m_objects[ind]; }
 
 CudaBroadphase * CudaDynamicWorld::broadphase() const
 { return m_broadphase; }
@@ -55,9 +51,15 @@ void CudaDynamicWorld::addTetrahedronSystem(BvhTetrahedronSystem * tetra)
     m_narrowphase->addMassSystem(tetra);
 }
 
-void CudaDynamicWorld::addTriangleSystem(TriangleSystem * tri)
+void CudaDynamicWorld::addTriangleSystem(BvhTriangleSystem * tri)
 {
-    m_triangleMesh[0] = tri;
+    if(m_numObjects == CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS) return;
+    
+    m_objects[m_numObjects] = tri;
+    m_numObjects++;
+    
+    m_broadphase->addBvh(tri);
+    m_narrowphase->addMassSystem(tri);
 }
 
 void CudaDynamicWorld::initOnDevice()
@@ -85,7 +87,7 @@ void CudaDynamicWorld::collide()
 {
     if(m_numObjects < 1) return;
 	unsigned i;
-	for(i=0; i < m_numObjects; i++) m_objects[i]->update();
+	for(i=0; i < m_numObjects; i++) bvhObject(i)->update();
     CudaBase::CheckCudaError("bvh update");
         
 	m_broadphase->computeOverlappingPairs();
@@ -132,8 +134,9 @@ void CudaDynamicWorld::sendXToHost()
     
 	 unsigned i;
      for(i=0; i< nobj; i++) {
-        tetradedron(i)->sendXToHost();
-        m_objects[i]->sendDbgToHost();
+		m_objects[i]->sendXToHost();
+        CudaLinearBvh * bvh = bvhObject(i);
+        bvh->sendDbgToHost();
      }
 	
 	m_broadphase->sendDbgToHost();
@@ -169,6 +172,9 @@ void CudaDynamicWorld::dbgDraw()
 #endif
 }
 
-TriangleSystem * CudaDynamicWorld::firstTriangle() const
-{ return m_triangleMesh[0]; }
+CudaLinearBvh * CudaDynamicWorld::bvhObject(unsigned idx) const
+{ return dynamic_cast<CudaLinearBvh *>(m_objects[idx]); }
+
+CudaMassSystem * CudaDynamicWorld::object(unsigned idx) const
+{ return m_objects[idx]; }
 //:~

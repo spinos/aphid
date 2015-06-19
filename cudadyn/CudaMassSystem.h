@@ -32,6 +32,8 @@ public:
 	void * deviceAnchor();
 	void * deviceTretradhedronIndices();
 	
+	void sendXToHost();
+	void sendVToHost();
 protected:
 	CUDABuffer * deviceXBuf();
 	CUDABuffer * deviceVBuf();

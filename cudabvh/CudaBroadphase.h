@@ -51,6 +51,7 @@ private:
 	void writeOverlappingPairs(unsigned a, unsigned b);
 	void writeOverlappingPairsSelf(unsigned a);
 	void writeOverlappingPairsOther(unsigned a, unsigned b);
+	bool checkSystemRank(unsigned a);
 private:
 	CUDABuffer * m_pairCounts;
 	CUDABuffer * m_pairStart;
