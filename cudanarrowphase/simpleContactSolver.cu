@@ -6,7 +6,7 @@
 #define SETCONSTRAINT_TPB 128
 #define SOLVECONTACT_TPB 256
 #define DEFORMABILITY 0.0134f
-
+#define ENABLE_DEFORMABILITY 0
 inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
                                                   float3 averageLinearVel,
                                                   float3 * position,
@@ -148,7 +148,7 @@ inline __device__ void addDeltaVelocity(float3 & dst,
         BarycentricCoordinate * coord)
 {
     dst = float3_add(dst, deltaLinearVelocity);
-
+#if ENABLE_DEFORMABILITY
     float3 vRot;
     deformMotion(vRot, r, normal, deltaAngularVelocity);
     
@@ -168,6 +168,7 @@ inline __device__ void addDeltaVelocity(float3 & dst,
     wei = coord->w * coord->w;
     wei = wei > 1.f ? 1.f : wei;
     dst = float3_add(dst, scale_float3_by(vRot, wei));
+#endif
 }
 
 inline __device__ float getPntTetWeight(uint pnt, 
@@ -680,7 +681,10 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	uint4 iTet;
 	float weight;
 	BarycentricCoordinate coord;
-	float3 r, vRot, normal;
+	float3 r, normal;
+#if ENABLE_DEFORMABILITY
+    float3 vRot;
+#endif
 	for(;;) {
 	    iContact = pntTetHash[cur].value>>1;
 	
@@ -702,13 +706,13 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
         
         iTet = computePointIndex(objectPointStarts, objectIndexStarts, indices, iBody);
         weight = getPntTetWeight(iPnt, iTet, coord);
-
+#if ENABLE_DEFORMABILITY
         deformMotion(vRot, r, normal, deltaAngularVelocity[splitInd]);
 // weighted by vex coord        
         vRot = scale_float3_by(vRot, weight);
 
         sumLinVel = float3_add(sumLinVel, vRot);
-      
+#endif
         count += 1.f;
         
         if(cur == maxInd - 1) break;
