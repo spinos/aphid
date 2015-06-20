@@ -65,6 +65,11 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 		// drawer->setGroupColorLight(ind);
         if(ms) drawSystem(ms);
     }
+	
+	// glDisable(GL_DEPTH_TEST);
+#if DRAW_BPH_PAIRS
+    showOverlappingPairs(world, drawer);
+#endif
 }
 /*
 void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
@@ -72,11 +77,6 @@ void DynamicWorldInterface::draw(CudaDynamicWorld * world, GeoDrawer * drawer)
 	if(world->numObjects() < 1) return;
     draw(world);
     glDisable(GL_DEPTH_TEST);
-	
-	
-#if DRAW_BPH_PAIRS
-    showOverlappingPairs(world, drawer);
-#endif
 
 #if DRAW_BVH_HASH
 	showBvhHash(world, drawer);
@@ -127,11 +127,11 @@ void DynamicWorldInterface::drawFaulty(CudaDynamicWorld * world, GeoDrawer * dra
 #if DRAW_BPH_PAIRS
 void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDrawer * drawer)
 {
-    CudaBroadphase * broadphase = world->broadphase();
-    std::cout<<" num overlapping pairs "<<broadphase->numOverlappingPairs()<<" ";
-	
-    const unsigned cacheLength = broadphase->pairCacheLength();
+	CudaBroadphase * broadphase = world->broadphase();
+    const unsigned cacheLength = broadphase->hostNumPairs();
 	if(cacheLength < 1) return;
+	
+	std::cout<<" show broadphase num overlapping pairs "<<cacheLength<<" ";
 	
 	Aabb * boxes = (Aabb *)broadphase->hostAabb();
 	Aabb abox;
@@ -141,21 +141,22 @@ void DynamicWorldInterface::showOverlappingPairs(CudaDynamicWorld * world, GeoDr
 	
 	unsigned * pc = (unsigned *)broadphase->hostPairCache();
 	
-	unsigned objectI;
-	for(i=0; i < broadphase->numOverlappingPairs(); i++) {
+	unsigned objectI, objectJ;
+	for(i=0; i < cacheLength; i++) {
 	    objectI = extractObjectInd(pc[i * 2]);
+		objectJ = extractObjectInd(pc[i * 2 + 1]);
+		if(objectI == objectJ) continue;
+	    
 	    abox = boxes[broadphase->objectStart(objectI) + extractElementInd(pc[i * 2])];
 	    
 		bb.setMin(abox.low.x, abox.low.y, abox.low.z);
 		bb.setMax(abox.high.x, abox.high.y, abox.high.z);
 	    
-	    objectI = extractObjectInd(pc[i * 2 + 1]);
-	    abox = boxes[broadphase->objectStart(objectI) + extractElementInd(pc[i * 2 + 1])];
+	    abox = boxes[broadphase->objectStart(objectJ) + extractElementInd(pc[i * 2 + 1])];
 	    
 	    ab.setMin(abox.low.x, abox.low.y, abox.low.z);
 		ab.setMax(abox.high.x, abox.high.y, abox.high.z);
 
-		
 		drawer->arrow(bb.center(), ab.center());
 		
 		// bb.expandBy(ab);

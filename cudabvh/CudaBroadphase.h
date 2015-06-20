@@ -39,6 +39,7 @@ public:
 #if DRAW_BPH_PAIRS
 	void * hostPairCache();
 	void * hostAabb();
+	const unsigned hostNumPairs() const;
 #endif
 protected:
 
@@ -61,6 +62,7 @@ private:
 #if DRAW_BPH_PAIRS
 	BaseBuffer * m_hostPairCache;
 	BaseBuffer * m_hostAabb;
+	unsigned m_hostNumPairs;
 #endif
 	CudaLinearBvh * m_objects[CUDABROADPHASE_MAX_NUMOBJECTS];
 	unsigned m_objectStart[CUDABROADPHASE_MAX_NUMOBJECTS];

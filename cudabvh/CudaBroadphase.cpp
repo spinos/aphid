@@ -113,9 +113,13 @@ void CudaBroadphase::computeOverlappingPairs()
 	resetPairCounts();
 	
 	for(j = 0; j<m_numObjects; j++) {
-		for(i = j; i<m_numObjects; i++) {
+		for(i = j+1; i<m_numObjects; i++) {
 			countOverlappingPairs(j, i);
 		}
+	}
+	
+	for(j = 0; j<m_numObjects; j++) {
+		countOverlappingPairs(j, j);
 	}
 	
 	m_pairCacheLength = m_scanIntermediate->prefixSum(m_pairStart, m_pairCounts, m_scanBufferLength);
@@ -144,9 +148,13 @@ void CudaBroadphase::computeOverlappingPairs()
 	broadphaseResetPairCache((uint2 *)cache, m_pairCacheLength);
 	
 	for(j = 0; j<m_numObjects; j++) {
-		for(i = j; i<m_numObjects; i++) {
+		for(i = j+1; i<m_numObjects; i++) {
 			writeOverlappingPairs(j, i);
 		}
+	}
+	
+	for(j = 0; j<m_numObjects; j++) {
+		writeOverlappingPairs(j, j);
 	}
 #if 0
 	bphlg.writeUInt(m_pairWriteLocation,
@@ -157,10 +165,6 @@ void CudaBroadphase::computeOverlappingPairs()
     bphlg.writeHash(m_pairCache,
          m_pairCacheLength,
                 "overlapping_pairs", CudaDbgLog::FAlways);
-#endif	
-#if DRAW_BPH_PAIRS
-	m_hostPairCache->create(m_pairCacheLength * 8);
-	m_hostAabb->create(m_numBoxes * sizeof(Aabb));
 #endif
 }
 
@@ -349,6 +353,9 @@ void CudaBroadphase::sendDbgToHost()
 {
 #if DRAW_BPH_PAIRS
 	if(m_pairCacheLength<1) return;
+	m_hostNumPairs = m_pairCacheLength;
+	m_hostPairCache->create(m_pairCacheLength * 8);
+	m_hostAabb->create(m_numBoxes * sizeof(Aabb));
 	m_pairCache->deviceToHost(m_hostPairCache->data());
 	char * hbox = (char *)hostAabb();
 	unsigned i=0;
@@ -366,6 +373,9 @@ void * CudaBroadphase::hostPairCache()
 
 void * CudaBroadphase::hostAabb()
 { return m_hostAabb->data(); }
+
+const unsigned CudaBroadphase::hostNumPairs() const
+{ return m_hostNumPairs; }
 #endif
 
 bool CudaBroadphase::checkSystemRank(unsigned a)

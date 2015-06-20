@@ -92,7 +92,7 @@ __global__ void countPairsSelfCollideSingle_kernel(uint * overlappingCounts,
     int2 child;
     Aabb internalBox;
 	
-    uint iCount = 0;
+    uint iCount = overlappingCounts[boxIndex];
 	for(;;) {
 		if(outOfStack(stackSize)) break;
 		

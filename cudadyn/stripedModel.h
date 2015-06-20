@@ -2,7 +2,7 @@
 #define STRIPEDMODEL_H
 #include <AllMath.h>
 inline unsigned extractElementInd(unsigned combined)
-{ return ((combined<<7)>>7); }
+{ return ((combined<<8)>>8); }
 
 inline unsigned extractObjectInd(unsigned combined)
 { return (combined>>24); }
