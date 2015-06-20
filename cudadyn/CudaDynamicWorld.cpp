@@ -167,7 +167,7 @@ void CudaDynamicWorld::dbgDraw()
 
 #if DRAW_BVH_HIERARCHY
     for(unsigned i=0; i< nobj; i++) {
-        DbgDrawer->showBvhHierarchy(m_objects[i]);
+        DbgDrawer->showBvhHierarchy(bvhObject(i));
 	}
 #endif
 }

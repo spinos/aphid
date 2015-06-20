@@ -42,8 +42,8 @@ bool FEMWorldInterface::readTetrahedronMeshFromFile(CudaDynamicWorld * world)
 	hes.extractTetrahedronMeshes(&tetrahedronGeos);
     
     unsigned n = tetrahedronGeos.numGeometries();
-    n = 1;
-    unsigned i = 0;
+    n = 10;
+    unsigned i = 9;
     for(;i<n;i++) {
         ATetrahedronMesh * meshData = (ATetrahedronMesh *)tetrahedronGeos.geometry(i);
         std::cout<<"\n tetrahedron mesh["<<i<<"]"

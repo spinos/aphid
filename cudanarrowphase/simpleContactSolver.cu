@@ -50,7 +50,6 @@ inline __device__ void computeBodyVelocities1(uint * pointStarts,
     const uint4 ia = computePointIndex(pointStarts, indexStarts, indices, ind);
 	
 	float3_average4(linearVelocity, velocity, ia);
-	
 	computeBodyAngularVelocity(angularVelocity, linearVelocity, position, velocity, ia);
 }
 
@@ -331,7 +330,6 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	
 	float rel = computeRelativeVelocity1(nA, nB,
 	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
-	
 	if(rel * rel < 0.01f) rel = 0.f;
 	constraints[iContact].relVel = rel;
 }
@@ -451,8 +449,9 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
 	
 	const float invMassA = splitMass[splitInd];
 	
-	applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
-	applyImpulse(deltaAngularVelocity[splitInd], J * invMassA, torqueA);
+    if(invMassA > 1e-10f)
+        applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
+	//applyImpulse(deltaAngularVelocity[splitInd], J * invMassA, torqueA);
 }
 
 __global__ void solveContact_kernel(ContactConstraint* constraints,

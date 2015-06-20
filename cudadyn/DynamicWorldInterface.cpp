@@ -384,8 +384,8 @@ bool DynamicWorldInterface::checkContact(unsigned n)
 	        m_faultyPair[1] = pairs[i*2+1];
 	        return false;
 	    }
-	    if(sa.length() < 1e-9) {
-	        std::cout<<"("<<pairs[i*2]<<","<<pairs[i*2+1]<<")separate axis is close to zero\n";
+	    if(sa.length() < 1e-6) {
+	        std::cout<<"("<<pairs[i*2]<<","<<pairs[i*2+1]<<")separate axis is close to zero "<<sa.length()<<"\n";
 	        m_faultyPair[0] = pairs[i*2];
 	        m_faultyPair[1] = pairs[i*2+1];
 	        return false;
@@ -490,26 +490,27 @@ bool DynamicWorldInterface::verifyData(CudaDynamicWorld * world)
     SimpleContactSolver * solver = world->contactSolver();
 	
 	storeModels(narrowphase);
-	
+
 	m_pairCache->create(n * 8);
 	CUDABuffer * pairbuf = narrowphase->contactPairsBuffer();
 	pairbuf->deviceToHost(m_pairCache->data(), m_pairCache->bufferSize());
-	
+/*
 	if(!checkDegenerated(n)) {
 	    std::cout<<"degenerated tetrahedron\n";
 	    printFaultPair(world);
 	    return false;
 	}
-	
+*/
+    	
 	m_contact->create(n * 48);
 	narrowphase->contactBuffer()->deviceToHost(m_contact->data(), m_contact->bufferSize());
 	
 	if(!checkContact(n)) {
 	    std::cout<<"invalid contact\n";
-	    printContact(n);
+	    // printContact(n);
 	    return false;
 	}
-	
+    return true;
 	if(!checkConstraint(solver, n)) {
 	    std::cout<<"invalid constraint\n";
 	    printContactPairHash(solver, n);

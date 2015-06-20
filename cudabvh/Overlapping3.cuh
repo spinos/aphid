@@ -94,7 +94,7 @@ __global__ void countPairsSelfCollideSingle_kernel(uint * overlappingCounts,
 	
     uint iCount = 0;
 	for(;;) {
-		if(stackSize < 1) break;
+		if(outOfStack(stackSize)) break;
 		
 		iNode = stack[ stackSize - 1 ];
 		stackSize--;
@@ -170,7 +170,7 @@ __global__ void writePairCacheSelfCollideSingle_kernel(uint2 * dst,
     Aabb internalBox;
 	
 	for(;;) {
-		if(stackSize < 1) break;
+		if(outOfStack(stackSize)) break;
         
 		iNode = stack[ stackSize - 1 ];
 		stackSize--;

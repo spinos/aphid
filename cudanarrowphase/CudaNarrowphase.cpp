@@ -197,6 +197,8 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	return;
 #endif
     if(numOverlappingPairs < 1) return;
+    
+    std::cout<<" n overlappings "<<numOverlappingPairs<<"\n";
 	
 	void * overlappingPairs = overlappingPairBuf->bufferOnDevice();
 	resetContacts(overlappingPairs, numOverlappingPairs);
@@ -204,8 +206,13 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	computeInitialSeparation();
 	
 	// std::cout<<" n contact after initial separation "<<
-	countValidContacts(m_contact[bufferId()], numOverlappingPairs);
+	m_numContacts = countValidContacts(m_contact[bufferId()], numOverlappingPairs);
 	
+    if(m_numPairs < 1) {
+		m_numContacts = 0;
+		return;
+	}
+    
 	computeTimeOfImpact();
 	
 	if(m_numPairs < 1) {
@@ -220,7 +227,7 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	if(m_numContacts < 1) return;
 		
 	if(m_numContacts < m_numPairs) {
-		// std::cout<<" final squeez contact pairs to "<<m_numContacts<<"\n";
+		std::cout<<" final squeez contact pairs to "<<m_numContacts<<"\n";
 
 		squeezeContacts(m_numPairs);
 		swapBuffer();
@@ -300,7 +307,7 @@ void CudaNarrowphase::computeTimeOfImpact()
 		lastNumPairs);
         CudaBase::CheckCudaError("narrowphase time of impact");
 		
-		if(lastNumPairs < 256) continue;
+		if(lastNumPairs < 512) continue;
 		
 		m_numPairs = countValidContacts(m_contact[bufferId()], lastNumPairs);
 		//std::cout<<" n count i "<<m_numPairs<<"\n";

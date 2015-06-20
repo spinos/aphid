@@ -121,10 +121,10 @@ __global__ void writePairCacheSingle_kernel(uint2 * outPairs,
 	if(boxIndex >= maxBoxInd) return;
 	
 	uint cacheSize = overlappingCounts[boxIndex];
-	if(cacheSize < 1) return;
+	//if(cacheSize < 1) return;
 	
 	uint writeLoc = cacheWriteLocation[boxIndex];
-	if(writeLoc - writeStart[boxIndex] >= cacheSize) return;
+	//if(writeLoc - writeStart[boxIndex] >= cacheSize) return;
 	
 	const Aabb box = boxes[boxIndex];
 	

@@ -4,6 +4,10 @@
 #include "Overlapping3.cuh"
 #include "TetrahedronSystemInterface.h"
 #define USE_PACKET_TRAVERSE 0
+#define SINGL_TRAVERSE_NUM_THREAD 64
+#define SINGL_TRAVERSE_SIZE_SMEM 16320
+//#define SINGL_TRAVERSE_NUM_THREAD 128
+//#define SINGL_TRAVERSE_SIZE_SMEM 32640
 
 namespace bvhoverlap {
 
@@ -43,12 +47,12 @@ void countPairsSelfCollide(uint * dst,
 								mortonCodesAndAabbIndices,
 								exclusionIndices);
 #else
-    int nThreads = 64;
+    int nThreads = SINGL_TRAVERSE_NUM_THREAD;
 	dim3 block(nThreads, 1, 1);
     int nblk = iDivUp(numQueryPrimitives, nThreads);
     dim3 grid(nblk, 1, 1);
 
-	countPairsSelfCollideSingle_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block, 16320 >>>(dst,
+	countPairsSelfCollideSingle_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 64> <<< grid, block, SINGL_TRAVERSE_SIZE_SMEM >>>(dst,
                                 boxes,
                                 numQueryPrimitives,
                                 internalNodeChildIndex, 
@@ -90,12 +94,12 @@ void writePairCacheSelfCollide(uint2 * dst,
 								queryIdx,
 								exclusionIndices);
 #else
-    int nThreads = 64;
+    int nThreads = SINGL_TRAVERSE_NUM_THREAD;
 	dim3 block(nThreads, 1, 1);
     int nblk = iDivUp(numQueryPrimitives, nThreads);;
     dim3 grid(nblk, 1, 1);
 	
-    writePairCacheSelfCollideSingle_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 16> <<< grid, block, 16320 >>>(dst, 
+    writePairCacheSelfCollideSingle_kernel<TETRAHEDRONSYSTEM_VICINITY_LENGTH, 16> <<< grid, block, SINGL_TRAVERSE_SIZE_SMEM >>>(dst, 
                                 locations,
                                 overlappingCounts,
                                 boxes,
@@ -133,7 +137,7 @@ void countPairs(uint * dst,
 								leafNodeAabbs,
 								mortonCodesAndAabbIndices);
 #else
-    int tpb = 64;
+    int tpb = SINGL_TRAVERSE_NUM_THREAD;
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numBoxes, tpb);
     
@@ -182,7 +186,7 @@ void writePairCache(uint2 * dst,
 								queryIdx, 
 								treeIdx);
 #else
-    int tpb = 64;
+    int tpb = SINGL_TRAVERSE_NUM_THREAD;
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(numBoxes, tpb);
     

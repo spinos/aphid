@@ -31,7 +31,7 @@ TriangleSystem::TriangleSystem(ATriangleMesh * md)
     }
     
     float * mass = hostMass();
-    for(i=0;i<np;i++) mass[i] = 1e30f;
+    for(i=0;i<np;i++) mass[i] = 1e20f;
 	
 	setNumPoints(np);
 	setNumTetrahedrons(md->numTriangles());
