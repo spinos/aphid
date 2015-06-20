@@ -59,7 +59,7 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
     }
 }
 
-template<int NumExcls, int NumThreads>
+template<int NumExcls, int NumSkip>
 __global__ void countPairsSelfCollideSingle_kernel(uint * overlappingCounts, 
 								Aabb * boxes, 
 								uint maxBoxInd,
@@ -72,6 +72,7 @@ __global__ void countPairsSelfCollideSingle_kernel(uint * overlappingCounts,
     int *sdata = SharedMemory<int>();
 		
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	boxIndex = boxIndex<<NumSkip;
 	if(boxIndex >= maxBoxInd) return;
 	
 	const Aabb box = boxes[boxIndex];
@@ -128,7 +129,7 @@ __global__ void countPairsSelfCollideSingle_kernel(uint * overlappingCounts,
     overlappingCounts[boxIndex] = iCount;
 }
 
-template<int NumExcls, int NumThreads>
+template<int NumExcls, int NumSkip>
 __global__ void writePairCacheSelfCollideSingle_kernel(uint2 * dst, 
                                 uint * cacheWriteLocation,
 								uint * overlappingCounts,
@@ -144,6 +145,7 @@ __global__ void writePairCacheSelfCollideSingle_kernel(uint2 * dst,
     int *sdata = SharedMemory<int>();
 	
 	uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
+	boxIndex = boxIndex<<NumSkip;
 	if(boxIndex >= maxBoxInd) return;
 	
 	uint cacheSize = overlappingCounts[boxIndex];
