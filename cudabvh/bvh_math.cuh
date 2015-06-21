@@ -47,6 +47,9 @@ inline __device__ float float4_length(const float4 & v)
 inline __device__ float float3_length2(const float3 & v) 
 { return (v.x*v.x + v.y*v.y + v.z*v.z); }
 
+inline __device__ float float3_length2(const float4 & v) 
+{ return (v.x*v.x + v.y*v.y + v.z*v.z); }
+
 inline __device__ float3 float3_normalize(const float3 & v)
 {
 	float l = float3_length(v);
