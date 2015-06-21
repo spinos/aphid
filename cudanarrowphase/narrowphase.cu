@@ -389,6 +389,13 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 	dstContact[ind].timeOfImpact = 1e-9f;
 }
 
+__device__ int isValidPair(float toi, const float4 & sa)
+{
+    if(toi >= GJK_STEPSIZE) return 0;
+    if(float3_length2(sa) < 1e-10f) return 0;
+    return 1;
+}
+
 __global__ void computeValidPairs_kernel(uint* dstCounts, 
                     ContactData * srcContact, 
                     uint numContacts, 
@@ -402,8 +409,9 @@ __global__ void computeValidPairs_kernel(uint* dstCounts,
 	if(ind >= numContacts) {
 	    return;
 	}
-
-	dstCounts[ind] = (srcContact[ind].timeOfImpact < GJK_STEPSIZE && float3_length2(srcContact[ind].separateAxis) > 1e-10f);	
+	
+	const ContactData cd = srcContact[ind];
+	dstCounts[ind] = isValidPair(cd.timeOfImpact, cd.separateAxis);	
 }
 
 __global__ void squeezeContactPairs_kernel(uint2 * dstPairs, uint2 * srcPairs,
