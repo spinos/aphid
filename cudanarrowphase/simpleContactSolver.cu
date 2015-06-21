@@ -439,8 +439,17 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
 	
 	float J = computeRelativeVelocity1(sN[iLeft], sN[iRight],
 	                        sVel[iLeft], sVel[iRight]);
-
-	J += constraints[iContact].relVel;
+/*
+ *  reference
+ *  Game Physics 
+ *  Game and Media Technology 
+ *  Master Program - Utrecht University 
+ *  Dr. Nicolas Pronost 
+ *  Lecture 7 Collision Resolution Pg. 18
+ *  j = (1 + Cr)Vr.N*M^-1
+ */
+    J += constraints[iContact].relVel;
+    J *= 0.3f;
 	J *= constraints[iContact].Minv;
 	
 	float prevSum = constraints[iContact].lambda;
@@ -454,7 +463,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
 	
 	const float invMassA = splitMass[splitInd];
 	
-    if(invMassA > 1e-10f)
+    if(invMassA > 1e-9f)
         applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
 	//applyImpulse(deltaAngularVelocity[splitInd], J * invMassA, torqueA);
 }
@@ -681,36 +690,45 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	float3 sumLinVel = make_float3(0.f, 0.f, 0.f);
 	float count = 0.f;
 	uint cur = ind;
-	uint iContact, splitInd, iBody;
-	uint4 iTet;
-	float weight;
-	BarycentricCoordinate coord;
-	float3 r, normal;
+	uint iContact, splitInd;
+	
+	float3 normal;
 #if ENABLE_DEFORMABILITY
-    float3 vRot;
+    uint iBody;
+    float3 r, vRot;
+    float weight;
+    uint4 iTet;
+	BarycentricCoordinate coord;
 #endif
 	for(;;) {
 	    iContact = pntTetHash[cur].value>>1;
 	
 	    splitInd = splits[iContact].x;
-	    iBody = pairs[iContact].x;
+	    
+#if ENABLE_DEFORMABILITY
+        iBody = pairs[iContact].x;
 	    coord = constraints[iContact].coordA;
 	    r = contacts[iContact].localA;
+#endif
 	    normal = constraints[iContact].normal;
 	
         if((pntTetHash[cur].value & 1)>0) {
             splitInd = splits[iContact].y;
+            
+#if ENABLE_DEFORMABILITY
             iBody = pairs[iContact].y;
             coord = constraints[iContact].coordB;
             r = contacts[iContact].localB;
+#endif
             normal = float3_reverse(normal);
         }
         
         sumLinVel = float3_add(sumLinVel, deltaLinearVelocity[splitInd]);
-        
+             
+#if ENABLE_DEFORMABILITY
         iTet = computePointIndex(objectPointStarts, objectIndexStarts, indices, iBody);
         weight = getPntTetWeight(iPnt, iTet, coord);
-#if ENABLE_DEFORMABILITY
+
         deformMotion(vRot, r, normal, deltaAngularVelocity[splitInd]);
 // weighted by vex coord        
         vRot = scale_float3_by(vRot, weight);
@@ -724,11 +742,10 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	    if(pntTetHash[cur].key != iPnt) break;
 	}
 	
-	if(count > 1.f) sumLinVel = scale_float3_by(sumLinVel, 1.f / count);
-	
+	if(count > 1.f)
+	    sumLinVel = scale_float3_by(sumLinVel, 1.f / count);
+
 	dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], sumLinVel);
-	// dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], deltaLinearVelocity[splitInd]);
-	// float3_set_zero(dstVelocity[iPnt]);
 }
 
 extern "C" {

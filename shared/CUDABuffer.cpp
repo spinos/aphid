@@ -96,7 +96,12 @@ void CUDABuffer::deviceToHost(void * dst, unsigned loc, unsigned size)
     char * p = (char *)bufferOnDevice();
     p += loc;
     cudaError_t err = cudaMemcpy(dst, p, size, cudaMemcpyDeviceToHost);
-    CudaBase::CheckCudaError(err, " cu buffer device to host with location and size");
+	if (err != cudaSuccess) {
+		std::cout<<" cuda last check point "<<CudaBase::BreakInfo
+		<<" error occured when cu buffer device to host with location "
+		<<loc<<" and size "<<size;
+		CudaBase::CheckCudaError(err, " cu buffer device to host with location and size");
+	}
 }
 
 const unsigned CUDABuffer::bufferSize() const

@@ -1,7 +1,7 @@
 #ifndef CUDABASE_H
 #define CUDABASE_H
 #include <cuda_runtime_api.h>
-
+#include <string>
 class CudaBase
 {
 public:
@@ -23,8 +23,8 @@ public:
     static void CheckCudaError(const char * info);
     
     static int MemoryUsed;
+	static std::string BreakInfo;
 private:
-    
 };
 
 #endif        //  #ifndef CUDAWORKS_H

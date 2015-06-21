@@ -445,6 +445,7 @@ void DynamicWorldInterface::printContact(unsigned n)
 
 bool DynamicWorldInterface::checkConvergent(SimpleContactSolver * solver, unsigned n)
 {
+/*
     const unsigned njacobi = solver->numIterations();
 	m_deltaJ->create(n * njacobi * 4);
 	solver->deltaJBuf()->deviceToHost(m_deltaJ->data(), m_deltaJ->bufferSize());
@@ -478,7 +479,7 @@ bool DynamicWorldInterface::checkConvergent(SimpleContactSolver * solver, unsign
 	        return false;
         }
 	}
-   
+*/   
     return true;
 }
 
@@ -517,7 +518,7 @@ bool DynamicWorldInterface::verifyData(CudaDynamicWorld * world)
 	    printContactPairHash(solver, n);
 	    return false;
 	}
-	
+/*
     if(DynGlobal::CheckConvergence) {
         if(!checkConvergent(solver, n)) {
             std::cout<<"not convergent\n";
@@ -527,7 +528,7 @@ bool DynamicWorldInterface::verifyData(CudaDynamicWorld * world)
             return false;
         }
     }
-    
+*/    
 	CUDABuffer * bodyPair = solver->contactPairHashBuf();
 	m_pairsHash->create(bodyPair->bufferSize());
 	bodyPair->deviceToHost(m_pairsHash->data(), m_pairsHash->bufferSize());

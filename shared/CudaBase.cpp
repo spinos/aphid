@@ -12,6 +12,7 @@ int CudaBase::WarpSize = 32;
 int CudaBase::RuntimeVersion = 4000;
 bool CudaBase::HasDevice = 0;
 int CudaBase::MemoryUsed = 0;
+std::string CudaBase::BreakInfo("unknown");
 
 CudaBase::CudaBase()
 {
@@ -95,16 +96,19 @@ int CudaBase::LimitNThreadPerBlock(int regPT, int memPT)
 
 void CudaBase::CheckCudaError(cudaError_t err, const char * info)
 {
-    // cudaError_t cudaResult;
+	// cudaError_t cudaResult;
     // cudaResult = cudaGetLastError();
     if (err != cudaSuccess) {
-        std::cout<<"cu error "<<cudaGetErrorString(err)<<" when "<<info<<"\n";
+		std::cout<<"cuda last breaks "<<BreakInfo
+        <<" exit due to error '"<<cudaGetErrorString(err)<<"' when "<<info<<"\n";
 		exit(1);
         // Do whatever you want here
         // I normally create a std::string msg with a description of where I am
         // and append cudaGetErrorString(cudaResult)
     }
+	BreakInfo = std::string(info);
 }
 
 void CudaBase::CheckCudaError(const char * info)
 { CheckCudaError(cudaGetLastError(), info); }
+//:~

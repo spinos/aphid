@@ -17,7 +17,6 @@
 class DynGlobal
 {
 public:
-    static bool CheckConvergence;
     static int MaxTOINumIterations;
     static int MaxContactNumIterations;
 };

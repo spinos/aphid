@@ -91,17 +91,17 @@ void CudaDynamicWorld::collide()
     CudaBase::CheckCudaError("bvh update");
         
 	m_broadphase->computeOverlappingPairs();
-    CudaBase::CheckCudaError("broadphase update");
+    // CudaBase::CheckCudaError("broadphase update");
 	
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
 	                                m_broadphase->numOverlappingPairs());
-    CudaBase::CheckCudaError("narrowphase update");
+    // CudaBase::CheckCudaError("narrowphase update");
 	
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),
 									m_narrowphase->contactPairsBuffer(),
 									m_narrowphase->objectBuffer());
-    CudaBase::CheckCudaError("contact solve");
+    // CudaBase::CheckCudaError("solve contact");
 }
 
 void CudaDynamicWorld::integrate(float dt)

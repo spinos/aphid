@@ -14,10 +14,10 @@
 #include <HTetrahedronMesh.h>
 
 #define PRINT_VICINITY 0
-#define GRDW 57
-#define GRDH 57
-#define NTET 3600
-#define NPNT 14400
+#define GRDW 39
+#define GRDH 39
+#define NTET 1600
+#define NPNT 6400
 
 TetrahedronSystem::TetrahedronSystem() 
 {
@@ -149,7 +149,7 @@ void TetrahedronSystem::calculateMass()
     float * mass = hostMass();
     for(i=0; i< np; i++) {
 		if(isAnchoredPoint(i))
-			mass[i] = 1e30f;
+			mass[i] = 1e20f;
         else
 			mass[i] = base;
     }

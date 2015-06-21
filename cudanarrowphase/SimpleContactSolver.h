@@ -26,7 +26,7 @@ public:
 	CUDABuffer * constraintBuf();
 	CUDABuffer * deltaLinearVelocityBuf();
 	CUDABuffer * deltaAngularVelocityBuf();
-	CUDABuffer * deltaJBuf();
+	// CUDABuffer * deltaJBuf();
 	CUDABuffer * pntTetHashBuf();
 	CUDABuffer * splitInverseMassBuf();
 	
@@ -40,7 +40,7 @@ private:
 	CUDABuffer * m_constraint;
 	CUDABuffer * m_deltaLinearVelocity;
 	CUDABuffer * m_deltaAngularVelocity;
-	CUDABuffer * m_deltaJ;
+	// CUDABuffer * m_deltaJ;
 	CUDABuffer * m_relVel;
 	CUDABuffer * m_pntTetHash[2];
 	unsigned m_numContacts;
