@@ -334,7 +334,7 @@ unsigned CudaNarrowphase::countValidContacts(CUDABuffer * contactBuf, unsigned n
 
 	narrowphaseComputeValidPairs((uint *)counts, (ContactData *)contactBuf->bufferOnDevice(), 
 										n, scanValidPairLength);
-    CudaBase::CheckCudaError("narrowphase count valid");
+    CudaBase::CheckCudaError("narrowphase count valid pairs");
 	
 	return m_scanIntermediate->prefixSum(m_scanValidContacts, 
 												m_validCounts, scanValidPairLength);

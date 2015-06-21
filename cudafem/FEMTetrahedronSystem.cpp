@@ -25,7 +25,7 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
     m_F0 = new CUDABuffer;
     m_Fe = new CUDABuffer;
 	m_BVolume = new CUDABuffer;
-	m_hasBVolume = 0;
+	m_hasBVolume = false;
 }
 
 FEMTetrahedronSystem::FEMTetrahedronSystem(ATetrahedronMesh * md) :
@@ -86,6 +86,7 @@ void FEMTetrahedronSystem::initOnDevice()
     setDimension(numPoints());
     CudaConjugateGradientSolver::initOnDevice();
     BvhTetrahedronSystem::initOnDevice();
+    m_hasBVolume = false;
 }
 
 unsigned matrixCoord(unsigned * indices, unsigned tet, 
@@ -399,7 +400,7 @@ void FEMTetrahedronSystem::updateBVolume()
                     (float3 *)xi,
                     (uint4 * )tetv,
                     numTetrahedrons());
-	m_hasBVolume = 1;
+	m_hasBVolume = true;
 }
 
 void FEMTetrahedronSystem::updateForce()

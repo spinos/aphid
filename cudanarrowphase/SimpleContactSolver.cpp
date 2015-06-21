@@ -12,6 +12,7 @@
 #include <CUDABuffer.h>
 #include "simpleContactSolver_implement.h"
 #include <DynGlobal.h>
+#include <CudaBase.h>
 SimpleContactSolver::SimpleContactSolver() 
 {
 	m_sortedInd[0] = new CUDABuffer;
@@ -142,6 +143,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
         (float *)splitMass,
 	    (ContactData *)contacts,
         numContacts * 2);
+    CudaBase::CheckCudaError("jacobi solver set constraint");
 	
 	m_deltaLinearVelocity->create(nextPow2(splitBufLength * 12));
 	m_deltaAngularVelocity->create(nextPow2(splitBufLength * 12));
@@ -203,12 +205,15 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                    (uint * )perObjPointStart,
 	                    (uint * )perObjectIndexStart,
 	                    numContacts * 2);
+        CudaBase::CheckCudaError("jacobi solver solve impulse");
     
 	    simpleContactSolverAverageVelocities((float3 *)deltaLinVel,
                         (float3 *)deltaAngVel,
                         (uint *)bodyCount,
                         (KeyValuePair *)bodyContactHash, 
                         splitBufLength);
+        
+        CudaBase::CheckCudaError("jacobi solver average velocity");
 	}
 	
 // 2 tet per contact, 4 pnt per tet, key is pnt index, value is tet index in split
@@ -227,7 +232,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                (uint * )perObjectIndexStart,
 	                numContacts * 2,
 	                pntHashBufLength);
-	
+	CudaBase::CheckCudaError("jacobi solver point-tetra hash");
+    
 	void * intermediate = m_pntTetHash[1]->bufferOnDevice();
 	RadixSort((KeyValuePair *)pntTetHash, (KeyValuePair *)intermediate, pntHashBufLength, 32);
     	
@@ -244,4 +250,5 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                     (uint * )perObjPointStart,
                     (uint * )perObjectIndexStart,
                     numContacts * 2 * 4);
+    CudaBase::CheckCudaError("jacobi solver update velocity");
 }

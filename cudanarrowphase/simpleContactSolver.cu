@@ -1,3 +1,8 @@
+/*
+ * reference
+ * http://www.cs.cornell.edu/courses/cs5643/2013sp/a3Rigidbody/
+ */
+
 #include "simpleContactSolver_implement.h"
 #include "bvh_math.cuh"
 #include "barycentric.cu"
@@ -108,13 +113,13 @@ inline __device__ void applyImpulse(float3 & dst, float J, float3 N)
     dst = float3_add(dst, scale_float3_by(N, J));
 }
 
-inline __device__ float computeMassTensor(float3 nA, float3 nB, 
-                                        float3 rA, float3 rB,
-                                        float3 torqueA, float3 torqueB,
+inline __device__ float computeMassTensor(//float3 nA, float3 nB, 
+                                       // float3 rA, float3 rB,
+                                       // float3 torqueA, float3 torqueB,
                                         float invMassA, float invMassB)
 {
-    float3 jmjA = float3_cross( scale_float3_by(torqueA, invMassA), rA );
-    float3 jmjB = float3_cross( scale_float3_by(torqueB, invMassB), rB );
+    //float3 jmjA = float3_cross( scale_float3_by(torqueA, invMassA), rA );
+    //float3 jmjB = float3_cross( scale_float3_by(torqueB, invMassB), rB );
     
     return -1.f/(invMassA + invMassB +  
          invMassA + invMassB);    
@@ -320,17 +325,17 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	
 	float3 nA = normalOnA(contact);
 	float3 nB = float3_reverse(nA);
-	float3 torqueA = float3_cross(contact.localA, nA);
-	float3 torqueB = float3_cross(contact.localB, nB);
+	//float3 torqueA = float3_cross(contact.localA, nA);
+	//float3 torqueB = float3_cross(contact.localB, nB);
 	
 	constraints[iContact].normal = nA;// float3_from_float4(contact.separateAxis);
-	constraints[iContact].Minv = computeMassTensor(nA, nB, contact.localA, contact.localB,
-	                            torqueA, torqueB,
+	constraints[iContact].Minv = computeMassTensor(//nA, nB, contact.localA, contact.localB,
+	                            //torqueA, torqueB,
 	                            splitMass[dstInd.x], splitMass[dstInd.y]);
 	
 	float rel = computeRelativeVelocity1(nA, nB,
 	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
-	if(rel * rel < 0.01f) rel = 0.f;
+	//if(rel * rel < 0.001f) rel = 0.f;
 	constraints[iContact].relVel = rel;
 }
 
@@ -417,7 +422,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
 	
 // N pointing inside object
 // T = r X N	
-	float3 torqueA = float3_cross(rA, nA);
+	//float3 torqueA = float3_cross(rA, nA);
 	
 	addDeltaVelocity(velA, 
         deltaLinearVelocity[splitInd],
