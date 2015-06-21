@@ -24,6 +24,8 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
     m_deviceVertexInd = new CUDABuffer;
     m_F0 = new CUDABuffer;
     m_Fe = new CUDABuffer;
+	m_BVolume = new CUDABuffer;
+	m_hasBVolume = 0;
 }
 
 FEMTetrahedronSystem::FEMTetrahedronSystem(ATetrahedronMesh * md) :
@@ -41,6 +43,7 @@ BvhTetrahedronSystem(md)
     m_deviceVertexInd = new CUDABuffer;
     m_F0 = new CUDABuffer;
     m_Fe = new CUDABuffer;
+	m_BVolume = new CUDABuffer;
 }
 
 FEMTetrahedronSystem::~FEMTetrahedronSystem() 
@@ -57,6 +60,7 @@ FEMTetrahedronSystem::~FEMTetrahedronSystem()
     delete m_deviceVertexInd;
     delete m_F0;
     delete m_Fe;
+	delete m_BVolume;
 }
 
 void FEMTetrahedronSystem::initOnDevice()
@@ -72,6 +76,7 @@ void FEMTetrahedronSystem::initOnDevice()
     m_deviceVertexInd->create(numPoints() * 4);
     m_F0->create(numPoints() * 12);
     m_Fe->create(numPoints() * 12);
+	m_BVolume->create(numTetrahedrons() * 64);
     
     m_deviceStiffnessTetraHash->hostToDevice(m_stiffnessTetraHash->data());
     m_deviceStiffnessInd->hostToDevice(m_stiffnessInd->data());
@@ -343,10 +348,12 @@ void FEMTetrahedronSystem::updateOrientation()
     void * x = deviceX();
 	void * xi = deviceXi();
 	void * ind = deviceTretradhedronIndices();
-	cuFemTetrahedron_calculateRe((mat33 *)re, 
+	void * bv = m_BVolume->bufferOnDevice();
+	tetrahedronfem::calculateRe((mat33 *)re, 
 	                            (float3 *)x, 
 	                            (float3 *)xi,
 	                            (uint4 *)ind,
+								(float4 *)bv,
 	                            numTetrahedrons());
 }
 
@@ -365,9 +372,11 @@ void FEMTetrahedronSystem::updateStiffnessMatrix()
     void * ind = m_deviceStiffnessInd->bufferOnDevice();
     void * xi = deviceXi();
     void * tetv = deviceTretradhedronIndices();
-    cuFemTetrahedron_stiffnessAssembly((mat33 *)dst,
+    void * bv = m_BVolume->bufferOnDevice();
+    tetrahedronfem::stiffnessAssembly((mat33 *)dst,
                                         (float3 *)xi,
                                         (uint4 *)tetv,
+										(float4 *)bv,
                                         (mat33 *)re,
                                         (KeyValuePair *)sth,
                                         (uint *)ind,
@@ -381,6 +390,18 @@ void FEMTetrahedronSystem::resetForce()
     cuFemTetrahedron_resetForce((float3 *)d, numPoints());
 }
 
+void FEMTetrahedronSystem::updateBVolume()
+{
+	if(m_hasBVolume) return;
+	void * xi = deviceXi();
+	void * tetv = deviceTretradhedronIndices();
+	tetrahedronfem::computeBVolume((float4 * )m_BVolume->bufferOnDevice(), 
+                    (float3 *)xi,
+                    (uint4 * )tetv,
+                    numTetrahedrons());
+	m_hasBVolume = 1;
+}
+
 void FEMTetrahedronSystem::updateForce()
 {
     void * d = m_F0->bufferOnDevice();
@@ -389,9 +410,11 @@ void FEMTetrahedronSystem::updateForce()
     void * ind = m_deviceVertexInd->bufferOnDevice();
     void * xi = deviceXi();
     void * tetv = deviceTretradhedronIndices();
-    cuFemTetrahedron_internalForce((float3 *)d,
+	void * bv = m_BVolume->bufferOnDevice();
+    tetrahedronfem::internalForce((float3 *)d,
                                         (float3 *)xi,
                                         (uint4 *)tetv,
+										(float4 *)bv,
                                         (mat33 *)re,
                                         (KeyValuePair *)vth,
                                         (unsigned *)ind,
@@ -420,13 +443,6 @@ void FEMTetrahedronSystem::dynamicsAssembly(float dt)
 								(float3 *)fe,
                                 dt,
                                 numPoints());
-/*								
-	cuFemTetrahedron_dampK((mat33 *)stiffness,
-                                (float *)mass,
-                                (uint *)rowPtr,
-                                (uint *)colInd,
-                                dt,
-                                numPoints());*/
 }
 
 void FEMTetrahedronSystem::updateExternalForce()
@@ -463,6 +479,7 @@ void FEMTetrahedronSystem::update()
 	return CudaTetrahedronSystem::update();
 #endif
 	updateExternalForce();
+	updateBVolume();
 	updateOrientation();
 	updateForce();
 	updateStiffnessMatrix();

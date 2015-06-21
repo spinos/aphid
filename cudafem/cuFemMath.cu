@@ -65,6 +65,36 @@ inline __device__ float tetrahedronVolume(const float3 * p)
 	return tetrahedronVolume(e1, e2, e3);
 }
 
+inline __device__ void calculateBandVolume(float4 * B,
+                                    float3 * pos,
+                                    const uint4 & tetv)
+{
+    float3 e10, e20, e30;
+	
+    tetrahedronEdgei(e10, e20, e30, pos, tetv);
+    
+    float invDetE = 1.f / determinant33(e10.x, e10.y, e10.z,
+                                e20.x, e20.y, e20.z,
+                                e30.x, e30.y, e30.z);
+    
+    B[1].x = (e20.z*e30.y - e20.y*e30.z)*invDetE;
+    B[2].x = (e10.y*e30.z - e10.z*e30.y)*invDetE;
+    B[3].x = (e10.z*e20.y - e10.y*e20.z)*invDetE;
+    B[0].x = -B[1].x-B[2].x-B[3].x;
+
+    B[1].y = (e20.x*e30.z - e20.z*e30.x)*invDetE;
+    B[2].y = (e10.z*e30.x - e10.x*e30.z)*invDetE;
+    B[3].y = (e10.x*e20.z - e10.z*e20.x)*invDetE;
+    B[0].y = -B[1].y-B[2].y-B[3].y;
+
+    B[1].z = (e20.y*e30.x - e20.x*e30.y)*invDetE;
+    B[2].z = (e10.x*e30.y - e10.y*e30.x)*invDetE;
+    B[3].z = (e10.y*e20.x - e10.x*e20.y)*invDetE;
+    B[0].z = -B[1].z-B[2].z-B[3].z;
+    
+    B[0].w = tetrahedronVolume(e10, e20, e30);
+}
+
 inline __device__ void calculateBandVolume(float3 * B,
                                     float & volume,
                                     float3 * pos,
@@ -94,6 +124,29 @@ inline __device__ void calculateBandVolume(float3 * B,
     B[0].z = -B[1].z-B[2].z-B[3].z;
     
     volume = tetrahedronVolume(e10, e20, e30);
+}
+
+inline __device__ void calculateKe(mat33 & Ke,
+                                float4 * B,
+                                float d16,
+                                float d17,
+                                float d18,
+                                uint i,
+                                uint j)
+{
+    Ke.v[0].x = d16 * B[i].x * B[j].x + d18 * (B[i].y * B[j].y + B[i].z * B[j].z);
+    Ke.v[0].y = d17 * B[i].x * B[j].y + d18 * (B[i].y * B[j].x);
+    Ke.v[0].z = d17 * B[i].x * B[j].z + d18 * (B[i].z * B[j].x);
+
+    Ke.v[1].x = d17 * B[i].y * B[j].x + d18 * (B[i].x * B[j].y);
+    Ke.v[1].y = d16 * B[i].y * B[j].y + d18 * (B[i].x * B[j].x + B[i].z * B[j].z);
+    Ke.v[1].z = d17 * B[i].y * B[j].z + d18 * (B[i].z * B[j].y);
+
+    Ke.v[2].x = d17 * B[i].z * B[j].x + d18 * (B[i].x * B[j].z);
+    Ke.v[2].y = d17 * B[i].z * B[j].y + d18 * (B[i].y * B[j].z);
+    Ke.v[2].z = d16 * B[i].z * B[j].z + d18 * (B[i].y * B[j].y + B[i].x * B[j].x);
+    
+    mat33_mult_f(Ke, B[0].w);
 }
 
 inline __device__ void calculateKe(mat33 & Ke,
