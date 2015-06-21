@@ -1,6 +1,17 @@
 #include "cuFemTetrahedron_implement.h"
 #include "cuFemMath.cu"
 
+__global__ void computeBVolume_kernel(float4 * dst, 
+                    float3 * pos,
+                    uint4 * tetVertices,
+                    uint numTet)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= numTet) return;
+	
+	calculateBandVolume(&dst[ind<<2], pos, tetVertices[ind]);
+}
+
 __global__ void integrate_kernel(float3 * pos, 
 								float3 * vel, 
 								uint * anchor,
@@ -65,7 +76,7 @@ __global__ void computeRhs_kernel(float3 * rhs,
 		mat33_mult_f(stiffness[cur], dt2);
 		
 	    if(ind == colInd[cur]) {
-	        damping = .2f * mi * dt + mi;
+	        damping = .3f * mi * dt + mi;
 	        stiffness[cur].v[0].x += damping;
 	        stiffness[cur].v[1].y += damping;
 	        stiffness[cur].v[2].z += damping;
@@ -113,6 +124,7 @@ __global__ void internalForce_kernel(float3 * dst,
     float d16, float d17, float d18,
                                     float3 * pos,
                                     uint4 * tetvert,
+                                    float4 * BVol,
                                     mat33 * orientation,
                                     KeyValuePair * tetraInd,
                                     uint * bufferIndices,
@@ -124,8 +136,7 @@ __global__ void internalForce_kernel(float3 * dst,
 	
 	float3_set_zero(dst[ind]);
 	
-	float volume;
-	float3 B[4];
+	float4 * B;
 	float3 pj, force, sum;
 	mat33 Ke, Re;
 	uint iTet, i, j;
@@ -147,8 +158,8 @@ __global__ void internalForce_kernel(float3 * dst,
 	    }
 		
 		Re = orientation[iTet];
-		calculateBandVolume(B, volume, pos, tetvert[iTet]);
-		calculateKe(Ke, B, d16, d17, d18, volume, i, j);	    
+		B = &BVol[iTet<<2];
+		calculateKe(Ke, B, d16, d17, d18, i, j);	    
 		
 	    uint * tetv = &(tetvert[iTet].x);
 	    pj = pos[tetv[j]];
@@ -183,8 +194,7 @@ __global__ void resetStiffnessMatrix_kernel(mat33* dst,
 
 __global__ void stiffnessAssembly_kernel(mat33 * dst,
                                         float d16, float d17, float d18,
-                                        float3 * pos,
-                                        uint4 * tetv,
+                                        float4 * BVol,
                                         mat33 * orientation,
                                         KeyValuePair * tetraInd,
                                         uint * bufferIndices,
@@ -196,8 +206,7 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 	
 	set_mat33_zero(dst[ind]);
 	
-	float volume;
-	float3 B[4];
+	float4 * B;
 	mat33 Ke, Re, ReT, tmp, tmpT;
 	uint iTet, i, j, needT;
 	uint cur = bufferIndices[ind];
@@ -206,9 +215,9 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 	    
 	    extractTetijt(tetraInd[cur].value, iTet, i, j, needT);
 	    
-	    calculateBandVolume(B, volume, pos, tetv[iTet]);
-		
-	    calculateKe(Ke, B, d16, d17, d18, volume, i, j);
+	    B = &BVol[iTet<<2];
+	    
+	    calculateKe(Ke, B, d16, d17, d18, i, j);
 
 	    Re = orientation[iTet];
 		
@@ -240,6 +249,7 @@ __global__ void resetRe_kernel(mat33* dst,
 __global__ void calculateRe_kernel(mat33 * dst, 
                                     float3 * pos, 
                                     float3 * pos0,
+                                    float4 * BVol,
                                     uint4 * indices,
                                     uint maxInd)
 {
@@ -248,12 +258,14 @@ __global__ void calculateRe_kernel(mat33 * dst,
 	
 	uint4 t = indices[ind];
 	
+	float4 * B = &BVol[ind<<2];
+	
 	float3 pnt[4];
 	tetrahedronP(pnt, pos0, t);
 	float3 e01, e02, e03;
 	tetrahedronEdge(e01, e02, e03, pnt); 
 	
-	float div6V = 1.f / tetrahedronVolume(e01, e02, e03) * 6.f;
+	float div6V = 1.f / B[0].w * 6.f;
 
 	tetrahedronP(pnt, pos, t);
 	float3 e1, e2, e3;
@@ -288,24 +300,6 @@ void cuFemTetrahedron_resetRe(mat33 * d, uint maxInd)
     resetRe_kernel<<< grid, block >>>(d, maxInd);
 }
 
-void cuFemTetrahedron_calculateRe(mat33 * dst, 
-                                    float3 * pos, 
-                                    float3 * pos0,
-                                    uint4 * indices,
-                                    uint maxInd)
-{
-    int tpb = CudaBase::LimitNThreadPerBlock(32, 50);
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(maxInd, tpb);
-    dim3 grid(nblk, 1, 1);
-    
-    calculateRe_kernel<<< grid, block >>>(dst, 
-                                       pos, 
-                                       pos0,
-                                       indices,
-                                       maxInd);
-}
-
 void cuFemTetrahedron_resetStiffnessMatrix(mat33 * dst,
                                     uint maxInd)
 {
@@ -317,34 +311,6 @@ void cuFemTetrahedron_resetStiffnessMatrix(mat33 * dst,
                                         maxInd);
 }
 
-void cuFemTetrahedron_stiffnessAssembly(mat33 * dst,
-                                        float3 * pos,
-                                        uint4 * vert,
-                                        mat33 * orientation,
-                                        KeyValuePair * tetraInd,
-                                        uint * bufferIndices,
-                                        uint maxBufferInd,
-                                        uint maxInd)
-{
-    int tpb = CudaBase::LimitNThreadPerBlock(32, 50);
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(maxInd, tpb);
-    dim3 grid(nblk, 1, 1);
-    
-    float d16, d17, d18;
-    calculateIsotropicElasticity(d16, d17, d18);
-    
-    stiffnessAssembly_kernel<<< grid, block >>>(dst,
-                                            d16, d17, d18,
-                                            pos,
-                                            vert,
-                                            orientation,
-                                            tetraInd,
-                                            bufferIndices,
-                                            maxBufferInd,
-                                            maxInd);
-}
-
 void cuFemTetrahedron_resetForce(float3 * dst,
                                     uint maxInd)
 {
@@ -353,34 +319,6 @@ void cuFemTetrahedron_resetForce(float3 * dst,
     dim3 grid(nblk, 1, 1);
     
     resetForce_kernel<<< grid, block >>>(dst, maxInd);
-}
-
-void cuFemTetrahedron_internalForce(float3 * dst,
-                                    float3 * pos,
-                                    uint4 * tetvert,
-                                    mat33 * orientation,
-                                    KeyValuePair * tetraInd,
-                                    uint * bufferIndices,
-                                    uint maxBufferInd,
-                                    uint maxInd)
-{
-    int tpb = CudaBase::LimitNThreadPerBlock(40, 50);
-    dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(maxInd, tpb);
-    dim3 grid(nblk, 1, 1);
-    
-    float d16, d17, d18;
-    calculateIsotropicElasticity(d16, d17, d18);
-    
-    internalForce_kernel<<< grid, block >>>(dst,
-                                            d16, d17, d18,
-                                            pos,
-                                            tetvert,
-                                            orientation,
-                                            tetraInd,
-                                            bufferIndices,
-                                            maxBufferInd,
-                                            maxInd);
 }
 
 void cuFemTetrahedron_computeRhs(float3 * rhs,
@@ -395,7 +333,7 @@ void cuFemTetrahedron_computeRhs(float3 * rhs,
                                 float dt,
                                 uint maxInd)
 {
-    int tpb = CudaBase::LimitNThreadPerBlock(24, 50);
+    int tpb = 256;
     dim3 block(tpb, 1, 1);
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);
@@ -463,6 +401,102 @@ void cuFemTetrahedron_integrate(float3 * pos,
         anchor,
         dt,
         maxInd);
+}
+
+}
+
+namespace tetrahedronfem {
+void computeBVolume(float4 * dst, 
+                    float3 * pos,
+                    uint4 * tetVertices,
+                    uint numTet)
+{
+    dim3 block(256, 1, 1);
+    unsigned nblk = iDivUp(numTet, 256);
+    dim3 grid(nblk, 1, 1);
+    
+    computeBVolume_kernel<<< grid, block >>>(dst, 
+                       pos,
+                       tetVertices,
+                       numTet);
+}
+
+void calculateRe(mat33 * dst, 
+                                    float3 * pos, 
+                                    float3 * pos0,
+                                    uint4 * indices,
+                                    float4 * BVol,
+                                    uint maxInd)
+{
+    int tpb = 256;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(maxInd, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    calculateRe_kernel<<< grid, block >>>(dst, 
+                                       pos, 
+                                       pos0,
+                                       BVol,
+                                       indices,
+                                       maxInd);
+}
+
+void internalForce(float3 * dst,
+                                    float3 * pos,
+                                    uint4 * tetvert,
+                                    float4 * BVol,
+                                    mat33 * orientation,
+                                    KeyValuePair * tetraInd,
+                                    uint * bufferIndices,
+                                    uint maxBufferInd,
+                                    uint maxInd)
+{
+    int tpb = 256;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(maxInd, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    float d16, d17, d18;
+    calculateIsotropicElasticity(d16, d17, d18);
+    
+    internalForce_kernel<<< grid, block >>>(dst,
+                                            d16, d17, d18,
+                                            pos,
+                                            tetvert,
+                                            BVol,
+                                            orientation,
+                                            tetraInd,
+                                            bufferIndices,
+                                            maxBufferInd,
+                                            maxInd);
+}
+
+void stiffnessAssembly(mat33 * dst,
+                                        float3 * pos,
+                                        uint4 * vert,
+                                        float4 * BVol,
+                                        mat33 * orientation,
+                                        KeyValuePair * tetraInd,
+                                        uint * bufferIndices,
+                                        uint maxBufferInd,
+                                        uint maxInd)
+{
+    int tpb = 256;
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(maxInd, tpb);
+    dim3 grid(nblk, 1, 1);
+    
+    float d16, d17, d18;
+    calculateIsotropicElasticity(d16, d17, d18);
+    
+    stiffnessAssembly_kernel<<< grid, block >>>(dst,
+                                            d16, d17, d18,
+                                            BVol,
+                                            orientation,
+                                            tetraInd,
+                                            bufferIndices,
+                                            maxBufferInd,
+                                            maxInd);
 }
 
 }

@@ -32,6 +32,7 @@ private:
     void dynamicsAssembly(float dt);
     void updateExternalForce();
 	void solveConjugateGradient();
+	void updateBVolume();
 private:
     CUDABuffer * m_Re;
     CudaCSRMatrix * m_stiffnessMatrix;
@@ -45,6 +46,8 @@ private:
     CUDABuffer * m_deviceVertexInd;
     CUDABuffer * m_F0;
     CUDABuffer * m_Fe;
+	CUDABuffer * m_BVolume;
+	bool m_hasBVolume;
 };
 
 #endif        //  #ifndef FEMTETRAHEDRONSYSTEM_H
