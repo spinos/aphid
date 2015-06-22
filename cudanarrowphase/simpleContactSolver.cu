@@ -278,7 +278,7 @@ __global__ void computeSplitInvMass_kernel(float * invMass,
 	
 	uint n = getBodyCountAt(dstInd, bodyCount);
 	
-	invMass[dstInd] = (float)n / (absoluteValueF(mass[ia.x]) + absoluteValueF(mass[ia.y]) + absoluteValueF(mass[ia.z]) + absoluteValueF(mass[ia.w]));
+	invMass[dstInd] = (float)n / (mass[ia.x] + mass[ia.y] + mass[ia.z] + mass[ia.w]);
 }
 
 __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
@@ -335,7 +335,7 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	
 	float rel = computeRelativeVelocity1(nA, nB,
 	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
-	//if(rel * rel < 0.001f) rel = 0.f;
+	if(rel * rel < 0.01f) rel = 0.f;
 	constraints[iContact].relVel = rel;
 }
 
@@ -448,6 +448,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
  *  Lecture 7 Collision Resolution Pg. 18
  *  j = (1 + Cr)Vr.N*M^-1
  */
+    //if(J * J < 0.01f) J = 0.f;
     J += constraints[iContact].relVel;
     J *= 0.3f;
 	J *= constraints[iContact].Minv;
@@ -463,8 +464,8 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
 	
 	const float invMassA = splitMass[splitInd];
 	
-    if(invMassA > 1e-9f)
-        applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
+    //if(invMassA > 1e-9f)
+    applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
 	//applyImpulse(deltaAngularVelocity[splitInd], J * invMassA, torqueA);
 }
 
@@ -703,15 +704,6 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	for(;;) {
 	    iContact = pntTetHash[cur].value>>1;
 	
-	    splitInd = splits[iContact].x;
-	    
-#if ENABLE_DEFORMABILITY
-        iBody = pairs[iContact].x;
-	    coord = constraints[iContact].coordA;
-	    r = contacts[iContact].localA;
-#endif
-	    normal = constraints[iContact].normal;
-	
         if((pntTetHash[cur].value & 1)>0) {
             splitInd = splits[iContact].y;
             
@@ -719,8 +711,19 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
             iBody = pairs[iContact].y;
             coord = constraints[iContact].coordB;
             r = contacts[iContact].localB;
+            normal = float3_reverse(constraints[iContact].normal);
 #endif
-            normal = float3_reverse(normal);
+            
+        }
+        else {
+            splitInd = splits[iContact].x;
+	    
+#if ENABLE_DEFORMABILITY
+            iBody = pairs[iContact].x;
+            coord = constraints[iContact].coordA;
+            r = contacts[iContact].localA;
+            normal = constraints[iContact].normal;
+#endif
         }
         
         sumLinVel = float3_add(sumLinVel, deltaLinearVelocity[splitInd]);

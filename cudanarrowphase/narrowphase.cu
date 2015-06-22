@@ -392,7 +392,7 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 __device__ int isValidPair(float toi, const float4 & sa)
 {
     if(toi >= GJK_STEPSIZE) return 0;
-    if(float3_length2(sa) < 1e-10f) return 0;
+    if(float3_length2(sa) < 1e-12f) return 0;
     return 1;
 }
 
@@ -405,8 +405,8 @@ __global__ void computeValidPairs_kernel(uint* dstCounts,
 
 	if(ind >= scanBufferLength) return;
 	
-	dstCounts[ind] = 0;
 	if(ind >= numContacts) {
+	    dstCounts[ind] = 0;
 	    return;
 	}
 	
