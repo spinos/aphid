@@ -154,12 +154,12 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	if(ind >= maxInd) return;
 	
 	dstContact[ind].separateAxis=make_float4(0.f, 0.f, 0.f, 0.f);
-	dstContact[ind].timeOfImpact = 1e8;
+	dstContact[ind].timeOfImpact = 1e8f;
 	
 	const uint4 ita = computePointIndex(pointStart, indexStart, indices, pairs[ind].x);
 	const uint4 itb = computePointIndex(pointStart, indexStart, indices, pairs[ind].y);
 	
-	if(totalSpeed(vel, ita, itb) < 1e-8) return;
+	if(totalSpeed(vel, ita, itb) < 1e-8f) return;
 	
 	t0Tetrahedron(sPrxA[threadIdx.x], ita, pos);
 	t0Tetrahedron(sPrxB[threadIdx.x], itb, pos);
@@ -186,14 +186,14 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	                    - velocityOnTetrahedronAlong(vel, ita, getBarycentricCoordinate4Relativei(dstContact[ind].localA, pos, ita), 
 	                                                nor);
 // going apart no contact     
-    if(closeInSpeed < 1e-8) { 
+    if(closeInSpeed < 1e-8f) { 
         return;
     }
 	
 	float separateDistance = float4_length(sas);
 // within thin shell margin
 	if(separateDistance < GJK_THIN_MARGIN2) {
-	    dstContact[ind].timeOfImpact = 1e-9;
+	    dstContact[ind].timeOfImpact = 1e-9f;
 	    dstContact[ind].separateAxis = sas;
         return;
 	}
@@ -208,8 +208,8 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 	int i = 0;
     while (i<GJK_MAX_NUM_ITERATIONS) {
 // going apart       
-        if(closeInSpeed < 1e-8) { 
-            dstContact[ind].timeOfImpact = 1e8;
+        if(closeInSpeed < 1e-8f) { 
+            dstContact[ind].timeOfImpact = 1e8f;
             
 // for debug purpose
             // dstContact[ind].separateAxis = sas;
@@ -252,7 +252,7 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
         
 // going apart, no contact
         if(separateDistance >= lastDistance) {
-            dstContact[ind].timeOfImpact = 1e8;
+            dstContact[ind].timeOfImpact = 1e8f;
             break;
         }
         

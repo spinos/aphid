@@ -7,7 +7,7 @@
 #include "line_math.cu"
 #include "triangle_math.cu"
 
-#define GJK_MAX_NUM_ITERATIONS 20
+#define GJK_MAX_NUM_ITERATIONS 10
 #define GJK_THIN_MARGIN 0.005f
 #define GJK_THIN_MARGIN2 0.01f
 #define GJK_STEPSIZE 0.01666667f
@@ -70,7 +70,7 @@ inline __device__ void addToSimplex(Simplex & s, const float3 & p, const float3 
         s.dimension = 1;
     }
     else if(s.dimension < 2) {
-		if(distance2_between(p, s.p[0]) > 1e-6) {
+		if(distance2_between(p, s.p[0]) > 1e-6f) {
 		    s.p[1] = p;
 		    s.pA[1] = localA;
 		    s.pB[1] = localB;
@@ -97,7 +97,7 @@ inline __device__ void addToSimplex(Simplex & s, const float3 & p, const float3 
 
 inline __device__ float3 initialPoint(const TetrahedronProxy & tet)
 {
-    if(float3_length2(tet.p[0]) > 1e-6)
+    if(float3_length2(tet.p[0]) > 1e-6f)
         return tet.p[0];
     
     return tet.p[1];
@@ -107,7 +107,7 @@ inline __device__ float3 initialPoint2(const TetrahedronProxy & tet, const float
 {
     float3 r = float3_difference(tet.p[0], ref);
     
-    if(float3_length2(r) < 1e-6)
+    if(float3_length2(r) < 1e-6f)
         r = float3_difference(tet.p[1], ref);
     
     return r;
@@ -115,7 +115,7 @@ inline __device__ float3 initialPoint2(const TetrahedronProxy & tet, const float
 
 inline __device__ float3 supportPoint(TetrahedronProxy tet, float3 ref, float margin, float3 & localP)
 {
-    float maxDotv = -1e8;
+    float maxDotv = -1e8f;
     float dotv;
     
     float3 dMargin = scale_float3_by(float3_normalize(ref), margin);
@@ -207,7 +207,7 @@ inline __device__ void interpolatePointAB(Simplex & s,
 	const float * wei = &contributes.x;
 	int i;
 	for(i =0; i < s.dimension; i++) {
-		if(wei[i] > 1e-5) {
+		if(wei[i] > 1e-5f) {
 		    pA = float3_add(pA, scale_float3_by(s.pA[i], wei[i]));
 			pB = float3_add(pB, scale_float3_by(s.pB[i], wei[i]));
 		}
