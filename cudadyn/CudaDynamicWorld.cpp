@@ -124,14 +124,14 @@ void CudaDynamicWorld::sendXToHost()
     if(nobj<1) return;
     
     // cudaDeviceSynchronize();
-
+#if 0
 	cudaEvent_t start_event, stop_event;
-        
+    
 	cudaEventCreateWithFlags(&start_event, cudaEventBlockingSync);
     cudaEventCreateWithFlags(&stop_event, cudaEventBlockingSync);
 
 	cudaEventRecord(start_event, 0);
-    
+#endif   
 	 unsigned i;
      for(i=0; i< nobj; i++) {
 		m_objects[i]->sendXToHost();
@@ -140,7 +140,7 @@ void CudaDynamicWorld::sendXToHost()
      }
 	
 	m_broadphase->sendDbgToHost();
-		
+#if 0		
 	cudaEventRecord(stop_event, 0);
     cudaEventSynchronize(stop_event);
 	
@@ -151,6 +151,7 @@ void CudaDynamicWorld::sendXToHost()
 #endif
 	cudaEventDestroy( start_event ); 
 	cudaEventDestroy( stop_event );
+#endif
 }
 
 void CudaDynamicWorld::dbgDraw()

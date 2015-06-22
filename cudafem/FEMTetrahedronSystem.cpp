@@ -7,6 +7,7 @@
 #include <CudaDbgLog.h>
 #include <boost/format.hpp>
 #include <FemGlobal.h>
+#include <CudaBase.h>
 
 CudaDbgLog bglg("stiffness.txt");
 
@@ -472,6 +473,7 @@ void FEMTetrahedronSystem::integrate(float dt)
 								(uint *)deviceAnchor(),
 								dt, 
 								numPoints());
+    CudaBase::CheckCudaError("fem tetrahedron integrate");
 }
 
 void FEMTetrahedronSystem::update()

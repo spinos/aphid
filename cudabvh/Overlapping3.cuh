@@ -19,7 +19,7 @@ inline __device__ void countOverlappings(uint & count,
 {
     uint iElement;
     int i=range.x;
-    for(;i<=range.y;i++) {
+    for(;i<=range.y;i+=2) {
         iElement = indirections[i].value;
         if(iElement > iBox) {
             if(!isElementExcludedS<NumExcls>(iElement, exclElm)) {
@@ -45,7 +45,7 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
     pair.x = combineObjectElementInd(iQuery, iBox);
     uint iElement;
     int i=range.x;
-    for(;i<=range.y;i++) {
+    for(;i<=range.y;i+=2) {
         iElement = indirections[i].value;
         if(iElement > iBox) {
             if(!isElementExcludedS<NumExcls>(iElement, exclElm)) {
