@@ -18,7 +18,7 @@
 #include <RandomCurve.h>
 #include <bezierPatch.h>
 
-#define DGB_DRAW 1
+#define DGB_DRAW 0
 #define SINGLE_TEST 1
 
 FitTest::FitTest(KdTreeDrawer * drawer) 
@@ -32,7 +32,7 @@ FitTest::FitTest(KdTreeDrawer * drawer)
 	createRandomCurves();
 #endif
 
-	build(m_allGeo, m_tetrahedronP, m_tetrahedronInd, 1.39f, 12, 49);
+	build(m_allGeo, m_tetrahedronP, m_tetrahedronInd, 1.39f, 12, 69);
 	
 	std::cout<<" tetrahedron n p "<<m_tetrahedronP.size()<<"\n"
 		<<" n tetrahedron "<<m_tetrahedronInd.size()/4<<"\n done\n";

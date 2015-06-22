@@ -13,20 +13,26 @@
 #include "BccOctahedron.h"
 #include "bcc_common.h"
 #include <KdTreeDrawer.h>
+#include "CurveSampler.h"
+
+#define DBG_PRINT
+
+float FitBccMeshBuilder::EstimatedGroupSize = 1.f;
 
 FitBccMeshBuilder::FitBccMeshBuilder() 
 {
-    m_samples = 0;
     m_reducedP = 0;
     m_octa = 0;
+	m_sampler = new CurveSampler;
 }
 
 FitBccMeshBuilder::~FitBccMeshBuilder() 
-{ cleanup(); }
+{ cleanup(); 
+	delete m_sampler;
+}
 
 void FitBccMeshBuilder::cleanup()
 {
-    if(m_samples) delete[] m_samples;
     if(m_reducedP) delete[] m_reducedP;
     if(m_octa) delete[] m_octa;
 }
@@ -35,7 +41,7 @@ void FitBccMeshBuilder::build(GeometryArray * curves,
 	           std::vector<Vector3F > & tetrahedronP, 
 	           std::vector<unsigned > & tetrahedronInd,
 	           float groupNCvRatio,
-	           unsigned minNumGroups,
+			   unsigned minNumGroups,
 	           unsigned maxNumGroups)
 {
     const unsigned n = curves->numGeometries();
@@ -45,7 +51,7 @@ void FitBccMeshBuilder::build(GeometryArray * curves,
 	           tetrahedronP, 
 	           tetrahedronInd,
 	           groupNCvRatio,
-	           minNumGroups,
+			   minNumGroups,
 	           maxNumGroups);
 }
 
@@ -53,11 +59,16 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	           std::vector<Vector3F > & tetrahedronP, 
 	           std::vector<unsigned > & tetrahedronInd,
 	           float groupNCvRatio,
-	           unsigned minNumGroups,
+			   unsigned minNumGroups,
 	           unsigned maxNumGroups)
 {
 	const unsigned lastNumTet = tetrahedronInd.size();
     cleanup();
+	
+	m_sampler->begin();
+	m_sampler->process(curve, EstimatedGroupSize);
+	m_sampler->end();
+	
 	const unsigned ns = curve->numSegments();
 	
 	float * sl = new float[ns];
@@ -70,10 +81,13 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 		sl[i] = BezierCurve::splineLength(spl);
 		suml += sl[i];
 	}
-	
-	// std::cout<<" total length "<<suml<<"\n";
-	
-	const float threashold = suml / (float)ns * 0.01f; 
+
+#ifdef DBG_PRINT
+	std::cout<<" total length "<<suml<<"\n"
+	<<" estimate n groups "<<1+(int)(suml/EstimatedGroupSize);
+#endif
+
+	const float threashold = suml / (float)ns * 0.01f;
 	float shortestl = 1e8f;
 	for(i=0;i<ns;i++) {
 		if(sl[i]<shortestl && sl[i] > threashold) shortestl = sl[i];
@@ -96,42 +110,7 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	for(i=0;i<ns;i++) {
 		nsplit += sl[i] / splitL;
 	}
-	
-	// std::cout<<" n split "<<nsplit<<"\n";
-	
-	m_samples = new Vector3F[nsplit + 2];
-	
-	unsigned isample = 0;
-	float delta, param, curL;
-	unsigned j;
-	for(i=0;i<ns;i++) {
-		curve->getSegmentSpline(i, spl);
-		
-		nsplit = sl[i] / splitL;
-		delta = sl[i] / (float)nsplit;
-		
-		m_samples[isample] = spl.cv[0];
-		isample++;
-		
-		curL = delta;
-		
-		param = splineParameterByLength(spl, curL);
-		
-		while(param < .99f) {
-			m_samples[isample] = spl.calculateBezierPoint(param);
-			isample++;
-			
-			curL += delta;
-			param = splineParameterByLength(spl, curL);
-		}
-	}
-	
-	m_samples[isample] = curve->m_cvs[ns];
-	
-	m_numSamples = isample + 1;
-	
-	// std::cout<<" n sample "<<m_numSamples<<"\n";
-	
+
 	m_reducedP = new Vector3F[m_numGroups];
 	unsigned * counts = new unsigned[m_numGroups];
 	
@@ -140,17 +119,20 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 		counts[i] = 0;
 	}
 	
-	float fcpg = (float)m_numSamples / (float)m_numGroups;
+	const unsigned numSamples = m_sampler->numSamples();
+	const Vector3F * samples = m_sampler->samples();
+	
+	float fcpg = (float)numSamples / (float)m_numGroups;
 	unsigned cpg = fcpg;
 	if(fcpg - cpg > .5f) cpg++;
-	
-	// std::cout<<" n groups "<<m_numGroups<<" sample per group "<<cpg<<"\n";
-	
+#ifdef DBG_PRINT
+	std::cout<<" n groups "<<m_numGroups<<" sample per group "<<cpg<<"\n";
+#endif	
 	unsigned igrp;
-	for(i=0; i<m_numSamples; i++) {
+	for(i=0; i<numSamples; i++) {
 		igrp = i / cpg;
 		if(igrp > m_numGroups-1) igrp = m_numGroups -1;
-		m_reducedP[igrp] += m_samples[i];
+		m_reducedP[igrp] += samples[i];
 		counts[igrp]++;
 	}
 	
@@ -165,10 +147,10 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	float * groupSize = new float[m_numGroups];
 	for(i=0; i<m_numGroups;i++) groupSize[i] = -1e8f;
 	
-	for(i=0; i<m_numSamples; i++) {
+	for(i=0; i<numSamples; i++) {
 		igrp = i / cpg;
 		if(igrp > m_numGroups-1) igrp = m_numGroups -1;
-		float s = m_reducedP[igrp].distanceTo(m_samples[i]);
+		float s = m_reducedP[igrp].distanceTo(samples[i]);
 		if(s>groupSize[igrp]) groupSize[igrp] = s;
 	}
 	
@@ -215,44 +197,6 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	delete[] groupSize;
 	
 	checkTetrahedronVolume(tetrahedronP, tetrahedronInd, lastNumTet);
-}
-
-float FitBccMeshBuilder::splineParameterByLength(BezierSpline & spline, float expectedLength)
-{
-	float pmin = 0.f;
-	float pmax = 1.f;
-	float result = (pmin + pmax) * .5f;
-	float lastResult = result;
-	BezierSpline a, b, c;
-	spline.deCasteljauSplit(a, b);
-	
-	float l = BezierCurve::splineLength(a);
-	while(Absolute(l - expectedLength) > 1e-4) {
-		
-		if(l > expectedLength) {
-			c = a;
-			c.deCasteljauSplit(a, b);
-			
-			pmax = result;
-			
-			l -= BezierCurve::splineLength(b);
-		}
-		else {
-			c = b;
-			c.deCasteljauSplit(a, b);
-			
-			l += BezierCurve::splineLength(a);
-			
-			pmin = result;
-		}
-		
-		result = (pmin + pmax) * .5f;
-		
-		if(Absolute(result - lastResult) < 1e-4) break;
-		
-		lastResult = result;
-	}
-	return result;
 }
 
 void FitBccMeshBuilder::drawOctahedron(KdTreeDrawer * drawer)

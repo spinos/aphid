@@ -16,7 +16,7 @@
 #include <GeometryArray.h>
 #include <KdIntersection.h>
 
-#define TEST_FIT 0
+#define TEST_FIT 1
 #define WORLD_USE_FIT 1
 #define WORLD_TEST_SINGLE 0
 

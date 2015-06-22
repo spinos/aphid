@@ -14,6 +14,7 @@ struct BezierSpline;
 class BccOctahedron;
 class GeometryArray;
 class KdTreeDrawer;
+class CurveSampler;
 
 class FitBccMeshBuilder {
 public:
@@ -24,26 +25,26 @@ public:
 	           std::vector<Vector3F > & tetrahedronP, 
 	           std::vector<unsigned > & tetrahedronInd,
 	           float groupNCvRatio,
-	           unsigned minNumGroups,
+			   unsigned minNumGroups,
 	           unsigned maxNumGroups);
 	
 	void build(BezierCurve * curve, 
 	           std::vector<Vector3F > & tetrahedronP, 
 	           std::vector<unsigned > & tetrahedronInd,
 	           float groupNCvRatio,
-	           unsigned minNumGroups,
+			   unsigned minNumGroups,
 	           unsigned maxNumGroups);
+			   
+	static float EstimatedGroupSize;
 protected:
 	void drawOctahedron(KdTreeDrawer * drawer);
 private:
     void cleanup();
-	float splineParameterByLength(BezierSpline & spline, float expectedLength);
 	void drawOctahedron(KdTreeDrawer * drawer, BccOctahedron & octa);
 	void checkTetrahedronVolume(std::vector<Vector3F > & tetrahedronP, 
 	           std::vector<unsigned > & tetrahedronInd, unsigned start);
 private:
-	Vector3F * m_samples;
-	unsigned m_numSamples;
+	CurveSampler * m_sampler;
 	Vector3F * m_reducedP;
 	unsigned m_numGroups;
 	BccOctahedron * m_octa;

@@ -33,6 +33,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "BccWorld.h"
 "FitTest.h"
 "BccOctahedron.h"
+"CurveSampler.h"
 "FitBccMeshBuilder.h"
 "FitBccMesh.h")
 
@@ -57,6 +58,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "BccWorld.cpp"
 "FitTest.cpp"
 "BccOctahedron.cpp"
+"CurveSampler.cpp"
 "FitBccMeshBuilder.cpp"
 "FitBccMesh.cpp")
 
