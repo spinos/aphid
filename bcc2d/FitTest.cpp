@@ -18,7 +18,7 @@
 #include <RandomCurve.h>
 #include <bezierPatch.h>
 
-#define DGB_DRAW 0
+#define DGB_DRAW 1
 #define SINGLE_TEST 1
 
 FitTest::FitTest(KdTreeDrawer * drawer) 
@@ -162,6 +162,7 @@ void FitTest::draw()
 	
 #if DGB_DRAW
 	drawOctahedron(m_drawer);
+	drawSamples(m_drawer);
 #endif
 }
 

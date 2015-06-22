@@ -34,6 +34,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "FitTest.h"
 "BccOctahedron.h"
 "CurveSampler.h"
+"SampleGroup.h"
 "FitBccMeshBuilder.h"
 "FitBccMesh.h")
 
@@ -59,6 +60,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "FitTest.cpp"
 "BccOctahedron.cpp"
 "CurveSampler.cpp"
+"SampleGroup.cpp"
 "FitBccMeshBuilder.cpp"
 "FitBccMesh.cpp")
 

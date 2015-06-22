@@ -34,7 +34,7 @@ void CurveSampler::end()
 void CurveSampler::process(BezierCurve * curve, float groupSize)
 {
 	const unsigned ns = curve->numSegments();
-	const float estimateD = groupSize * .049f;
+	const float estimateD = groupSize * .08f;
 	
 	BezierSpline spl;
 	float sl;

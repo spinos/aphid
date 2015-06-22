@@ -14,7 +14,7 @@
 #include "bcc_common.h"
 #include <KdTreeDrawer.h>
 #include "CurveSampler.h"
-
+#include "SampleGroup.h"
 #define DBG_PRINT
 
 float FitBccMeshBuilder::EstimatedGroupSize = 1.f;
@@ -24,11 +24,14 @@ FitBccMeshBuilder::FitBccMeshBuilder()
     m_reducedP = 0;
     m_octa = 0;
 	m_sampler = new CurveSampler;
+	m_reducer = new SampleGroup;
 }
 
 FitBccMeshBuilder::~FitBccMeshBuilder() 
-{ cleanup(); 
+{ 
+	cleanup(); 
 	delete m_sampler;
+	delete m_reducer;
 }
 
 void FitBccMeshBuilder::cleanup()
@@ -101,15 +104,6 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	if(m_numGroups < minNumGroups) m_numGroups = minNumGroups;
 	if(m_numGroups > maxNumGroups) m_numGroups = maxNumGroups;
 	// std::cout<<" split to "<<m_numGroups<<" groups\n";
-	
-	float splitL = suml / (float)ns /(float)m_numGroups * .249f;
-	// std::cout<<" split length "<<splitL<<"\n";
-	// if(splitL < suml / (float)ns * .06249f) splitL = suml / (float)ns * .06249f;
-	
-	unsigned nsplit = 0;
-	for(i=0;i<ns;i++) {
-		nsplit += sl[i] / splitL;
-	}
 
 	m_reducedP = new Vector3F[m_numGroups];
 	unsigned * counts = new unsigned[m_numGroups];
@@ -120,7 +114,9 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	}
 	
 	const unsigned numSamples = m_sampler->numSamples();
-	const Vector3F * samples = m_sampler->samples();
+	Vector3F * samples = m_sampler->samples();
+	
+	m_reducer->compute(samples, numSamples, m_numGroups);
 	
 	float fcpg = (float)numSamples / (float)m_numGroups;
 	unsigned cpg = fcpg;
@@ -254,4 +250,21 @@ void FitBccMeshBuilder::checkTetrahedronVolume(std::vector<Vector3F > & tetrahed
 			// std::cout<<" tet vol after swap 1 2 "<<tetrahedronVolume(p)<<"\n";
 		}
 	}
+}
+
+void FitBccMeshBuilder::drawSamples(KdTreeDrawer * drawer)
+{
+	const unsigned numSamples = m_sampler->numSamples();
+	Vector3F * samples = m_sampler->samples();
+	
+	glDisable(GL_DEPTH_TEST);
+	glColor3f(1.f, 0.f, 0.f);
+	glBegin(GL_POINTS);
+	unsigned i = 0;
+	for(;i<numSamples;i++) glVertex3fv((float *)&samples[i]);
+	glEnd();
+	
+	glColor3f(0.f, 1.f, 1.f);
+	for(i=0;i<m_reducer->K()-1;i++) drawer->arrow(m_reducer->centeroid(i), m_reducer->centeroid(i+1));
+	
 }

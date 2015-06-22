@@ -15,7 +15,7 @@ class BccOctahedron;
 class GeometryArray;
 class KdTreeDrawer;
 class CurveSampler;
-
+class SampleGroup;
 class FitBccMeshBuilder {
 public:
 	FitBccMeshBuilder();
@@ -38,6 +38,7 @@ public:
 	static float EstimatedGroupSize;
 protected:
 	void drawOctahedron(KdTreeDrawer * drawer);
+	void drawSamples(KdTreeDrawer * drawer);
 private:
     void cleanup();
 	void drawOctahedron(KdTreeDrawer * drawer, BccOctahedron & octa);
@@ -45,6 +46,7 @@ private:
 	           std::vector<unsigned > & tetrahedronInd, unsigned start);
 private:
 	CurveSampler * m_sampler;
+	SampleGroup * m_reducer;
 	Vector3F * m_reducedP;
 	unsigned m_numGroups;
 	BccOctahedron * m_octa;
