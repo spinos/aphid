@@ -16,10 +16,7 @@ public:
 	FitBccMesh();
 	virtual ~FitBccMesh();
 	
-	void create(GeometryArray * geoa, KdIntersection * anchorPoints,
-					float groupNCvRatio,
-	           unsigned minNumGroups,
-	           unsigned maxNumGroups);
+	void create(GeometryArray * geoa, KdIntersection * anchorPoints);
 protected:
 
 private:

@@ -10,6 +10,7 @@
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 #if TEST_FIT
+    FitBccMeshBuilder::EstimatedGroupSize = 2.1f;
 	m_fit = new FitTest(getDrawer());
 #else
 	m_world = new BccWorld(getDrawer());

@@ -23,17 +23,11 @@ public:
 	
 	void build(GeometryArray * curves, 
 	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd,
-	           float groupNCvRatio,
-			   unsigned minNumGroups,
-	           unsigned maxNumGroups);
+	           std::vector<unsigned > & tetrahedronInd);
 	
 	void build(BezierCurve * curve, 
 	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd,
-	           float groupNCvRatio,
-			   unsigned minNumGroups,
-	           unsigned maxNumGroups);
+	           std::vector<unsigned > & tetrahedronInd);
 			   
 	static float EstimatedGroupSize;
 protected:
@@ -47,7 +41,5 @@ private:
 private:
 	CurveSampler * m_sampler;
 	SampleGroup * m_reducer;
-	Vector3F * m_reducedP;
-	unsigned m_numGroups;
 	BccOctahedron * m_octa;
 };

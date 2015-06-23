@@ -18,7 +18,7 @@
 #include <RandomCurve.h>
 #include <bezierPatch.h>
 
-#define DGB_DRAW 1
+#define DGB_DRAW 0
 #define SINGLE_TEST 1
 
 FitTest::FitTest(KdTreeDrawer * drawer) 
@@ -32,7 +32,7 @@ FitTest::FitTest(KdTreeDrawer * drawer)
 	createRandomCurves();
 #endif
 
-	build(m_allGeo, m_tetrahedronP, m_tetrahedronInd, 1.39f, 12, 69);
+	build(m_allGeo, m_tetrahedronP, m_tetrahedronInd);
 	
 	std::cout<<" tetrahedron n p "<<m_tetrahedronP.size()<<"\n"
 		<<" n tetrahedron "<<m_tetrahedronInd.size()/4<<"\n done\n";
@@ -53,13 +53,13 @@ void FitTest::createSingleCurve()
 	cb.addVertex(Vector3F(-7.5f, 2.f, 1.f));
 	cb.addVertex(Vector3F(-7.5f, 1.f, 1.f));
 	cb.addVertex(Vector3F(-2.5f, 1.f, 1.f));
-	cb.addVertex(Vector3F(.5f, 1.f, 1.f));
+	cb.addVertex(Vector3F(.5f, 4.f, 1.f));
 	cb.addVertex(Vector3F(-2.f, 10.f, 6.01f));
 	cb.addVertex(Vector3F(5.f, 10.f, 5.99f));
 	cb.addVertex(Vector3F(5.f, 8.f, 4.01f));
 	cb.addVertex(Vector3F(4.f, 8.f, 2.03f));
 	cb.addVertex(Vector3F(4.f, 8.5f, 1.01f));
-	cb.addVertex(Vector3F(3.1f, 8.95f, 0.f));
+	cb.addVertex(Vector3F(5.1f, 8.95f, 0.f));
 	cb.addVertex(Vector3F(3.1f, 8.95f, -3.f));
 	
 	cb.finishBuild(curve);

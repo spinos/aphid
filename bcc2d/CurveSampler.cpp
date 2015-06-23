@@ -34,22 +34,30 @@ void CurveSampler::end()
 void CurveSampler::process(BezierCurve * curve, float groupSize)
 {
 	const unsigned ns = curve->numSegments();
-	const float estimateD = groupSize * .08f;
+	const float estimateD = groupSize * .033f;
 	
 	BezierSpline spl;
 	float sl;
-	float delta;
-	unsigned i=0;
-	for(;i<ns;i++) {
-		curve->getSegmentSpline(i, spl);
+	float delta = 1e8f;
+	unsigned i;
+    for(i=0;i<ns;i++) {
+        curve->getSegmentSpline(i, spl);
 		sl = BezierCurve::splineLength(spl);
-		if(sl<estimateD*.02f) {
+        if(sl<estimateD*.01f) {
 			std::cout<<" curve sampler warning: segment is too short "<<sl<<"\n";
 			continue;
 		}
-// at least 4 split per segment
-		delta = sl * .25f;
-		if(delta > estimateD) delta = estimateD;
+// at least 5 seg per segment
+        sl *= .2f;
+        if(delta > sl) delta = sl;
+    }
+    
+    if(delta > estimateD) delta = estimateD;
+    
+    std::cout<<" delta "<<delta;
+    
+	for(i=0;i<ns;i++) {
+		curve->getSegmentSpline(i, spl);
 		sampleSeg(&spl, delta);
 	}
 	

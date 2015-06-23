@@ -18,16 +18,13 @@ FitBccMesh::~FitBccMesh()
 {
 }
 
-void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorPoints,
-						float groupNCvRatio,
-	           unsigned minNumGroups,
-	           unsigned maxNumGroups)
+void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorPoints)
 {
 	std::vector<Vector3F > tetrahedronP;
 	std::vector<unsigned > tetrahedronInd;
 	
 	FitBccMeshBuilder builder;
-	builder.build(geoa, tetrahedronP, tetrahedronInd, groupNCvRatio, minNumGroups, maxNumGroups);
+	builder.build(geoa, tetrahedronP, tetrahedronInd);
 	
 	unsigned nt = tetrahedronInd.size()/4;
 	unsigned np = tetrahedronP.size();

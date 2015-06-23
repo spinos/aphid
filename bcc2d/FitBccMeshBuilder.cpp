@@ -21,7 +21,6 @@ float FitBccMeshBuilder::EstimatedGroupSize = 1.f;
 
 FitBccMeshBuilder::FitBccMeshBuilder() 
 {
-    m_reducedP = 0;
     m_octa = 0;
 	m_sampler = new CurveSampler;
 	m_reducer = new SampleGroup;
@@ -36,34 +35,24 @@ FitBccMeshBuilder::~FitBccMeshBuilder()
 
 void FitBccMeshBuilder::cleanup()
 {
-    if(m_reducedP) delete[] m_reducedP;
     if(m_octa) delete[] m_octa;
 }
     
 void FitBccMeshBuilder::build(GeometryArray * curves, 
 	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd,
-	           float groupNCvRatio,
-			   unsigned minNumGroups,
-	           unsigned maxNumGroups)
+	           std::vector<unsigned > & tetrahedronInd)
 {
     const unsigned n = curves->numGeometries();
     unsigned i=0;
     for(;i<n;i++)
         build((BezierCurve *)curves->geometry(i), 
 	           tetrahedronP, 
-	           tetrahedronInd,
-	           groupNCvRatio,
-			   minNumGroups,
-	           maxNumGroups);
+	           tetrahedronInd);
 }
 
 void FitBccMeshBuilder::build(BezierCurve * curve, 
 	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd,
-	           float groupNCvRatio,
-			   unsigned minNumGroups,
-	           unsigned maxNumGroups)
+	           std::vector<unsigned > & tetrahedronInd)
 {
 	const unsigned lastNumTet = tetrahedronInd.size();
     cleanup();
@@ -74,102 +63,51 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	
 	const unsigned ns = curve->numSegments();
 	
-	float * sl = new float[ns];
 	float suml = 0.f;
 	BezierSpline spl;
 	
 	unsigned i=0;
 	for(;i<ns;i++) {
 		curve->getSegmentSpline(i, spl);
-		sl[i] = BezierCurve::splineLength(spl);
-		suml += sl[i];
+		suml += BezierCurve::splineLength(spl);
 	}
 
+	unsigned numGroups = (int)(suml/EstimatedGroupSize);
+    if(numGroups < 3) numGroups = 3;
+    
 #ifdef DBG_PRINT
 	std::cout<<" total length "<<suml<<"\n"
-	<<" estimate n groups "<<1+(int)(suml/EstimatedGroupSize);
+	<<" estimate n groups "<<numGroups;
 #endif
-
-	const float threashold = suml / (float)ns * 0.01f;
-	float shortestl = 1e8f;
-	for(i=0;i<ns;i++) {
-		if(sl[i]<shortestl && sl[i] > threashold) shortestl = sl[i];
-	}
-	
-	// std::cout<<" shortest seg length "<<shortestl<<"\n";
-	
-	if(groupNCvRatio < .01f) groupNCvRatio = .01f;
-	m_numGroups = (ns+1) * groupNCvRatio;
-	
-	if(m_numGroups < minNumGroups) m_numGroups = minNumGroups;
-	if(m_numGroups > maxNumGroups) m_numGroups = maxNumGroups;
-	// std::cout<<" split to "<<m_numGroups<<" groups\n";
-
-	m_reducedP = new Vector3F[m_numGroups];
-	unsigned * counts = new unsigned[m_numGroups];
-	
-	for(i=0; i<m_numGroups; i++) {
-		m_reducedP[i].setZero();
-		counts[i] = 0;
-	}
 	
 	const unsigned numSamples = m_sampler->numSamples();
 	Vector3F * samples = m_sampler->samples();
 	
-	m_reducer->compute(samples, numSamples, m_numGroups);
+	m_reducer->compute(samples, numSamples, numGroups);
 	
-	float fcpg = (float)numSamples / (float)m_numGroups;
-	unsigned cpg = fcpg;
-	if(fcpg - cpg > .5f) cpg++;
-#ifdef DBG_PRINT
-	std::cout<<" n groups "<<m_numGroups<<" sample per group "<<cpg<<"\n";
-#endif	
-	unsigned igrp;
-	for(i=0; i<numSamples; i++) {
-		igrp = i / cpg;
-		if(igrp > m_numGroups-1) igrp = m_numGroups -1;
-		m_reducedP[igrp] += samples[i];
-		counts[igrp]++;
-	}
-	
-	for(i=0; i<m_numGroups; i++) {
-		m_reducedP[i] *= 1.f/(float)counts[i];
-		// if(i==m_numGroups-1) std::cout<<" count in group"<<i<<" "<<counts[i]<<"\n";
-	}
-	
-	delete[] counts;
-	delete[] sl;
-	
-	float * groupSize = new float[m_numGroups];
-	for(i=0; i<m_numGroups;i++) groupSize[i] = -1e8f;
-	
-	for(i=0; i<numSamples; i++) {
-		igrp = i / cpg;
-		if(igrp > m_numGroups-1) igrp = m_numGroups -1;
-		float s = m_reducedP[igrp].distanceTo(samples[i]);
-		if(s>groupSize[igrp]) groupSize[igrp] = s;
-	}
-	
+	float * groupSize = m_reducer->groupSize();
+    Vector3F * groupCenter = m_reducer->groupCentroid();
+
 	int vv[2];
 	int ee[2];
 	float dV, dE;
 	Vector3F octDir, a, b, c, d;
 	
-	m_octa = new BccOctahedron[m_numGroups];
-	for(i=0; i<m_numGroups;i++) {
+	m_octa = new BccOctahedron[numGroups];
+	for(i=0; i<numGroups;i++) {
 		if(i<1) {
-			octDir = (m_reducedP[1] - m_reducedP[0]) * .5f;
+			octDir = (groupCenter[1] - groupCenter[0]) * .5f;
 		}
-		else if(i==m_numGroups-1) {
-			octDir = (m_reducedP[m_numGroups-1] - m_reducedP[m_numGroups-2]) * .5f;
+		else if(i==numGroups-1) {
+			octDir = (groupCenter[numGroups-1] - groupCenter[numGroups-2]) * .5f;
 		}
 		else {
-			octDir = (m_reducedP[i] - m_reducedP[i-1]) * .25f 
-					+ (m_reducedP[i+1] - m_reducedP[i]) * .25f;
+			octDir = (groupCenter[i] - groupCenter[i-1]) * .25f 
+					+ (groupCenter[i+1] - groupCenter[i]) * .25f;
 
 		}
 		
-		m_octa[i].create(m_reducedP[i], octDir, groupSize[i]);
+		m_octa[i].create(groupCenter[i], octDir, groupSize[i]);
 		
 		if(i>0) {
 			dV = m_octa[i].movePoleCost(vv, m_octa[i-1]);
@@ -189,15 +127,13 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 													tetrahedronInd);
 		}
 	}
-	
-	delete[] groupSize;
-	
+
 	checkTetrahedronVolume(tetrahedronP, tetrahedronInd, lastNumTet);
 }
 
 void FitBccMeshBuilder::drawOctahedron(KdTreeDrawer * drawer)
 {
-	for(unsigned i=0; i<m_numGroups; i++)
+	for(unsigned i=0; i<m_reducer->numGroups(); i++)
 		drawOctahedron(drawer, m_octa[i]);
 }
 
@@ -265,6 +201,6 @@ void FitBccMeshBuilder::drawSamples(KdTreeDrawer * drawer)
 	glEnd();
 	
 	glColor3f(0.f, 1.f, 1.f);
-	for(i=0;i<m_reducer->K()-1;i++) drawer->arrow(m_reducer->centeroid(i), m_reducer->centeroid(i+1));
+	for(i=0;i<m_reducer->numGroups()-1;i++) drawer->arrow(m_reducer->groupCentroid()[i], m_reducer->groupCentroid()[i+1]);
 	
 }

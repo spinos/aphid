@@ -212,7 +212,7 @@ void BccWorld::createTetrahedronMeshes()
 	unsigned i=0;
 	for(;i<n;i++) {
 #if WORLD_USE_FIT
-		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, .7f, 4, 32);
+		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect);
 #else
 		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, 5);
 #endif
