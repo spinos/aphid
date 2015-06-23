@@ -25,6 +25,9 @@ public:
     void draw();
     bool save();
     
+    void rebuildTetrahedronsMesh(float deltaNumGroups);
+    const float totalCurveLength() const;
+    const unsigned numCurves() const;
 private:
 	bool createCurveGeometryFromFile();
 	void createTestCurveGeometry();
@@ -41,6 +44,7 @@ private:
 	void drawTetrahedronMesh(unsigned nt, Vector3F * points, unsigned * indices);
 	void drawAnchor();
 	void drawTriangleMesh();
+    void clearTetrahedronMesh();
 private:
     KdTreeDrawer * m_drawer;
     CurveGroup * m_curves;
@@ -55,6 +59,9 @@ private:
 	BccMesh * m_meshes;
 #endif
 	unsigned m_numMeshes;
+    unsigned m_numCurves;
+    float m_totalCurveLength;
+    float m_estimatedNumGroups;
 };
 
 #endif        //  #ifndef BCCWORLD_H

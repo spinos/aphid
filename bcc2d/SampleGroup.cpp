@@ -50,7 +50,7 @@ void SampleGroup::compute(Vector3F * samples, unsigned numSamples, unsigned numG
     
     float * gs = groupSize();
     Vector3F * gc = groupCentroid();
-    unsigned i, j;
+    unsigned i;
     for(i=0; i < numGroups; i++) gs[i] = 0.f;
     for(i=0; i < numGroups; i++) gc[i].setZero();
     
@@ -71,7 +71,7 @@ void SampleGroup::compute(Vector3F * samples, unsigned numSamples, unsigned numG
     
     for(i=0; i<numGroups; i++) {
 		gc[i] *= 1.f/(float)counts[i];
-		std::cout<<" count in group"<<i<<" "<<counts[i]<<"\n";
+		// std::cout<<" count in group"<<i<<" "<<counts[i]<<"\n";
 	}
     
     float d;

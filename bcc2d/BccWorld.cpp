@@ -17,9 +17,13 @@
 #include <BccMesh.h>
 #include <FitBccMesh.h>
 #include <ATriangleMesh.h>
+#include "FitBccMeshBuilder.h"
 
 BccWorld::BccWorld(KdTreeDrawer * drawer)
 {
+    m_numCurves = 0;
+    m_totalCurveLength = 0.f;
+    m_estimatedNumGroups = 2500.f;
 	m_drawer = drawer;
 	m_curves = new CurveGroup;
 	if(!createCurveGeometryFromFile())
@@ -36,7 +40,7 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	m_cluster = new KdCluster;
 	m_cluster->addGeometry(m_allGeo);
 	
-	KdTree::MaxBuildLevel = 12;
+	KdTree::MaxBuildLevel = 16;
 	KdTree::NumPrimitivesInLeafThreashold = 7;
 	
 	m_cluster->create();
@@ -45,7 +49,7 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	
 	createTriangleMeshesFromFile();
 	
-	std::cout<<" done\n";
+	std::cout<<" done initialize.\n";
 }
 
 BccWorld::~BccWorld() 
@@ -72,7 +76,7 @@ bool BccWorld::createCurveGeometryFromFile()
 	unsigned * cc = m_curves->counts();
 	Vector3F * cvs = m_curves->points();
 	
-	float sumLength = 0.f;
+	m_totalCurveLength = 0.f;
 	CurveBuilder cb;
 	
 	unsigned ncv;
@@ -89,13 +93,15 @@ bool BccWorld::createCurveGeometryFromFile()
 		BezierCurve * c = new BezierCurve;
 		cb.finishBuild(c);
 		
-		sumLength += c->length();
+		m_totalCurveLength += c->length();
 		
 		m_allGeo->setGeometry(c, i);
 		
 		cvDrift += ncv;
 	}
-	std::cout<<" total curve length: "<<sumLength<<"\n";
+    std::cout<<" n curves "<<n
+	    <<" total curve length: "<<m_totalCurveLength<<"\n";
+    m_numCurves = n;
 	return true;
 }
 
@@ -199,6 +205,14 @@ void BccWorld::createAnchorIntersect()
 
 void BccWorld::createTetrahedronMeshes()
 {
+    if(totalCurveLength()<1.f) {
+        std::cout<<" invalid total curve length "<<totalCurveLength()<<" !\n";
+        return;
+    }
+#if WORLD_USE_FIT
+    FitBccMeshBuilder::EstimatedGroupSize = totalCurveLength() / m_estimatedNumGroups;
+    std::cout<<"\n group size is "<<FitBccMeshBuilder::EstimatedGroupSize;
+#endif	
 	unsigned n = m_cluster->numGroups();
 #if WORLD_USE_FIT
 	m_meshes = new FitBccMesh[n];
@@ -212,7 +226,7 @@ void BccWorld::createTetrahedronMeshes()
 	unsigned i=0;
 	for(;i<n;i++) {
 #if WORLD_USE_FIT
-		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect);
+        m_meshes[i].create(m_cluster->group(i), m_anchorIntersect);
 #else
 		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, 5);
 #endif
@@ -322,7 +336,7 @@ void BccWorld::drawTetrahedronMesh()
 	for(;i<m_numMeshes; i++) {
     glEnable(GL_DEPTH_TEST);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glColor3f(0.3f, 0.4f, 0.33f);
+	glColor3f(0.51f, 0.53f, 0.52f);
 	drawTetrahedronMesh(m_meshes[i].numTetrahedrons(), m_meshes[i].points(),
 	         m_meshes[i].indices());
 
@@ -384,7 +398,13 @@ void BccWorld::drawAnchor()
 
 void BccWorld::drawTriangleMesh()
 {
+    glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glColor3f(0.63f, 0.64f, 0.65f);
 	m_drawer->geometry(m_triangleMeshes);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glColor3f(.03f, .14f, .44f);
+    m_drawer->geometry(m_triangleMeshes);
 }
 
 bool BccWorld::save()
@@ -409,5 +429,26 @@ bool BccWorld::save()
 	hes.save();
 	hes.close();
 	return true;
+}
+
+const float BccWorld::totalCurveLength() const
+{ return m_totalCurveLength; }
+
+const unsigned BccWorld::numCurves() const
+{ return m_numCurves; }
+
+void BccWorld::clearTetrahedronMesh()
+{
+    if(m_meshes) delete[] m_meshes;
+}
+
+void BccWorld::rebuildTetrahedronsMesh(float deltaNumGroups)
+{
+    m_estimatedNumGroups += deltaNumGroups * numCurves();
+    if(m_estimatedNumGroups < 100.f) m_estimatedNumGroups = 100.f;
+    
+    clearTetrahedronMesh();
+    createTetrahedronMeshes();
+    std::cout<<" done rebuild. \n";
 }
 //:~

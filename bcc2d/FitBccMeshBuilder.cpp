@@ -15,7 +15,7 @@
 #include <KdTreeDrawer.h>
 #include "CurveSampler.h"
 #include "SampleGroup.h"
-#define DBG_PRINT
+//#define DBG_PRINT
 
 float FitBccMeshBuilder::EstimatedGroupSize = 1.f;
 

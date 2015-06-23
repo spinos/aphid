@@ -32,8 +32,8 @@ void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorPoints)
 	// nt = 16;
 	// np = 18;
 	
-	std::cout<<" n tetrahedrons "<<nt<<"\n";
-	std::cout<<" n vertices "<<np<<"\n";
+	//std::cout<<" n tetrahedrons "<<nt<<"\n";
+	//std::cout<<" n vertices "<<np<<"\n";
 	
 	setNumPoints(np);
 	setNumIndices(nt * 4);

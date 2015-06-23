@@ -53,16 +53,18 @@ void CurveSampler::process(BezierCurve * curve, float groupSize)
     }
     
     if(delta > estimateD) delta = estimateD;
-    
+#if 0
     std::cout<<" delta "<<delta;
-    
+#endif  
 	for(i=0;i<ns;i++) {
 		curve->getSegmentSpline(i, spl);
 		sampleSeg(&spl, delta);
 	}
 	
 	m_points.push_back(spl.cv[3]);
+#if 0
 	std::cout<<" curve sampler n samples "<<m_points.size();
+#endif
 }
 
 void CurveSampler::sampleSeg(BezierSpline * spl, float delta)
