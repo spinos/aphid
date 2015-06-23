@@ -24,6 +24,8 @@ public:
     
     void draw();
     bool save();
+	
+	void selectCluster(const Ray * r);
     
     void rebuildTetrahedronsMesh(float deltaNumGroups);
     const float totalCurveLength() const;

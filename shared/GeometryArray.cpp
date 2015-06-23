@@ -65,3 +65,16 @@ Geometry * GeometryArray::geometry(unsigned icomponent) const
 
 const unsigned GeometryArray::numGeometries() const
 { return m_numGeometies; }
+
+bool GeometryArray::intersectRay(const Ray * r)
+{
+	unsigned i=0;
+	for(; i < m_numGeometies; i++)
+		if(intersectRay(i, r)) return true;
+	return false;
+}
+
+bool GeometryArray::intersectRay(unsigned icomponent, const Ray * r)
+{
+	return geometry(icomponent)->intersectRay(r);
+}

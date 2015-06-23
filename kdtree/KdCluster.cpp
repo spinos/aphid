@@ -26,6 +26,7 @@ void KdCluster::create()
 	
 	m_groupGeometries = new GeometryArray *[numNoEmptyLeaves()];
 	
+	m_nodeGroupInd.clear();
 	m_currentGroup = 0;
 	const BoundingBox b = getBBox();
 	recursiveFindGroup(root, b);
@@ -79,7 +80,6 @@ void KdCluster::recursiveFindGroup(KdTreeNode *node, const BoundingBox & box)
 	box.split(axis, splitPos, leftBox, rightBox);
 	
 	recursiveFindGroup(node->getLeft(), leftBox);
-	
 	recursiveFindGroup(node->getRight(), rightBox);
 }
 
@@ -128,5 +128,68 @@ void KdCluster::leafWriteGroup(KdTreeNode *node, const BoundingBox & box)
 	}
 	
 	curGrp->setNumGeometries(igroup);
+	m_nodeGroupInd[node] = m_currentGroup;
 	m_currentGroup++;
 }
+
+bool KdCluster::intersectRay(const Ray * eyeRay)
+{ 
+	if(!getRoot()) return false;
+	float hitt0, hitt1;
+	BoundingBox b = getBBox();
+	if(!b.intersect(*eyeRay, &hitt0, &hitt1)) return false;
+	
+	return recursiveIntersectRay(getRoot(), eyeRay, b); 
+}
+
+bool KdCluster::recursiveIntersectRay(KdTreeNode *node, const Ray * eyeRay, const BoundingBox & box)
+{
+	if(node->isLeaf())
+		return leafIntersectRay(node, eyeRay);
+		
+	const int axis = node->getAxis();
+	const float splitPos = node->getSplitPos();
+	
+	BoundingBox leftBox, rightBox;
+	box.split(axis, splitPos, leftBox, rightBox);
+	
+	float lambda1, lambda2;
+    float mu1, mu2;
+	char b1 = leftBox.intersect(*eyeRay, &lambda1, &lambda2);
+	char b2 = rightBox.intersect(*eyeRay, &mu1, &mu2);
+	
+	if(b1 && b2) {
+		if(mu1 < lambda1) {
+// vist right child first
+			if(recursiveIntersectRay(node->getRight(), eyeRay, rightBox)) return true;
+			if(recursiveIntersectRay(node->getLeft(), eyeRay, leftBox)) return true;
+		}
+		else {
+// vist left child first
+			if(recursiveIntersectRay(node->getLeft(), eyeRay, leftBox)) return true;
+			if(recursiveIntersectRay(node->getRight(), eyeRay, rightBox)) return true;
+		}
+	}
+	else if(b1) {
+		if(recursiveIntersectRay(node->getLeft(), eyeRay, leftBox)) return true;
+	}
+	else if(b2) {
+		if(recursiveIntersectRay(node->getRight(), eyeRay, rightBox)) return true;
+	}
+	return false;
+}
+
+bool KdCluster::leafIntersectRay(KdTreeNode *node, const Ray * eyeRay)
+{
+	const unsigned num = node->getNumPrims();
+	if(num < 1) return false;
+	
+	GeometryArray * g = group(m_nodeGroupInd[node]);
+	if(!g->intersectRay(eyeRay)) return false;
+	m_currentGroup = m_nodeGroupInd[node];
+	return true;
+}
+
+const unsigned KdCluster::currentGroup() const
+{ return m_currentGroup; }
+//:~

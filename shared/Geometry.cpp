@@ -26,8 +26,14 @@ bool Geometry::intersectBox(const BoundingBox & box)
 bool Geometry::intersectTetrahedron(const Vector3F * tet)
 { return false; }
 
+bool Geometry::intersectRay(const Ray * r)
+{ return false; }
+
 bool Geometry::intersectBox(unsigned icomponent, const BoundingBox & box)
 { return false; }
 
 bool Geometry::intersectTetrahedron(unsigned icomponent, const Vector3F * tet)
+{ return false; }
+
+bool Geometry::intersectRay(unsigned icomponent, const Ray * r)
 { return false; }

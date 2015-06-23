@@ -9,6 +9,7 @@
 
 #include "BezierCurve.h"
 #include <tetrahedron_math.h>
+
 BezierCurve::BezierCurve() {}
 BezierCurve::~BezierCurve() {}
 
@@ -373,4 +374,5 @@ float BezierCurve::length() const
 	}
 	return sum;
 }
+
 //:~

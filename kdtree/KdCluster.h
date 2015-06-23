@@ -10,6 +10,7 @@
  *
  */
 #include <KdTree.h>
+#include <map>
 class GeometryArray;
 class KdCluster : public KdTree {
 public:
@@ -17,18 +18,26 @@ public:
 	virtual ~KdCluster();
 	
 	const unsigned numGroups() const;
+	const unsigned currentGroup() const;
 	GeometryArray * group(unsigned idx) const;
 	
 	virtual void create();
 	virtual void rebuild();
+	
+	virtual bool intersectRay(const Ray * eyeRay);
+	
 protected:
 	virtual void clear();
 private:
 	void recursiveFindGroup(KdTreeNode *node, const BoundingBox & box);
 	void leafWriteGroup(KdTreeNode *node, const BoundingBox & box);
 	void clearGroups();
+	
+	bool recursiveIntersectRay(KdTreeNode *node, const Ray * eyeRay, const BoundingBox & box);
+	bool leafIntersectRay(KdTreeNode *node, const Ray * eyeRay);
 private:
 	GeometryArray ** m_groupGeometries;
+	std::map<KdTreeNode *, unsigned > m_nodeGroupInd;
 	unsigned m_currentGroup;
 };
 #endif        //  #ifndef KDCLUSTER_H

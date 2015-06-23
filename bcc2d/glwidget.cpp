@@ -35,24 +35,32 @@ void GLWidget::clientDraw()
 #endif
 }
 
-void GLWidget::clientSelect(QMouseEvent */*event*/)
+void GLWidget::clientSelect(QMouseEvent * event)
+{
+	setUpdatesEnabled(false);
+#if TEST_FIT
+
+#else
+	m_world->selectCluster(getIncidentRay());
+#endif
+	setUpdatesEnabled(true);
+}
+
+void GLWidget::clientDeselect(QMouseEvent * event) 
 {
 	setUpdatesEnabled(false);
 	
 	setUpdatesEnabled(true);
 }
 
-void GLWidget::clientDeselect(QMouseEvent */*event*/) 
+void GLWidget::clientMouseInput(QMouseEvent * event)
 {
 	setUpdatesEnabled(false);
-	
-	setUpdatesEnabled(true);
-}
+#if TEST_FIT
 
-void GLWidget::clientMouseInput(QMouseEvent */*event*/)
-{
-	setUpdatesEnabled(false);
-	
+#else
+	m_world->selectCluster(getIncidentRay());
+#endif	
 	setUpdatesEnabled(true);
 }
 

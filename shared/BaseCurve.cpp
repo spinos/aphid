@@ -9,6 +9,10 @@
 
 #include "BaseCurve.h"
 #include "BoundingBox.h"
+#include <Ray.h>
+#include <line_math.h>
+
+float BaseCurve::RayIntersectionTolerance = 1.f;
 
 BaseCurve::BaseCurve() 
 {
@@ -150,4 +154,20 @@ const BoundingBox BaseCurve::calculateBBox(unsigned icomponent) const
 	b.expandBy(m_cvs[icomponent]);
 	b.expandBy(m_cvs[icomponent+1]);
 	return b;
+}
+
+bool BaseCurve::intersectRay(const Ray * r)
+{ 
+	const unsigned ns = numSegments();
+	unsigned i = 0;
+	for(;i<ns;i++)
+		if(intersectRay(i, r)) return true;
+	return false; 
+}
+
+bool BaseCurve::intersectRay(unsigned icomponent, const Ray * r)
+{ 
+	Vector3F P1 = r->m_origin + r->m_dir * r->m_tmin;
+	Vector3F P2 = r->m_origin + r->m_dir * r->m_tmax;
+	return (distanceBetweenLines(P1, P2, m_cvs[icomponent], m_cvs[icomponent + 1]) < RayIntersectionTolerance);
 }

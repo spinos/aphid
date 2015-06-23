@@ -54,6 +54,9 @@ public:
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
+	virtual bool intersectRay(const Ray * r);
+	virtual bool intersectRay(unsigned icomponent, const Ray * r);
 	
+	static float RayIntersectionTolerance;
 private:
 };

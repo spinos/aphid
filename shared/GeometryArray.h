@@ -28,7 +28,9 @@ public:
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
 	virtual const Type type() const;
-	
+// overrid geometry
+	virtual bool intersectRay(const Ray * r);
+	virtual bool intersectRay(unsigned icomponent, const Ray * r);
 protected:
 
 private:

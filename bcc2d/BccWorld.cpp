@@ -41,7 +41,7 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	m_cluster->addGeometry(m_allGeo);
 	
 	KdTree::MaxBuildLevel = 16;
-	KdTree::NumPrimitivesInLeafThreashold = 7;
+	KdTree::NumPrimitivesInLeafThreashold = 31;
 	
 	m_cluster->create();
 	
@@ -211,7 +211,7 @@ void BccWorld::createTetrahedronMeshes()
     }
 #if WORLD_USE_FIT
     FitBccMeshBuilder::EstimatedGroupSize = totalCurveLength() / m_estimatedNumGroups;
-    std::cout<<"\n group size is "<<FitBccMeshBuilder::EstimatedGroupSize;
+    std::cout<<"\n estimate group size "<<FitBccMeshBuilder::EstimatedGroupSize;
 #endif	
 	unsigned n = m_cluster->numGroups();
 #if WORLD_USE_FIT
@@ -285,9 +285,14 @@ void BccWorld::draw()
     // drawCurves();
 	// drawCurveStars();
 	
-	for(unsigned i=0; i<m_cluster->numGroups(); i++) {
-		m_drawer->setGroupColorLight(i);
-		m_drawer->geometry(m_cluster->group(i));
+	//for(unsigned i=0; i<m_cluster->numGroups(); i++) {
+	//	m_drawer->setGroupColorLight(i);
+	//	m_drawer->geometry(m_cluster->group(i));
+	//}
+	unsigned selectedCurveGrp = m_cluster->currentGroup();
+	if(selectedCurveGrp<m_cluster->numGroups()) {
+		m_drawer->setGroupColorLight(selectedCurveGrp);
+		m_drawer->geometry(m_cluster->group(selectedCurveGrp));
 	}
 }
 
@@ -450,5 +455,11 @@ void BccWorld::rebuildTetrahedronsMesh(float deltaNumGroups)
     clearTetrahedronMesh();
     createTetrahedronMeshes();
     std::cout<<" done rebuild. \n";
+}
+
+void BccWorld::selectCluster(const Ray * r)
+{
+	BaseCurve::RayIntersectionTolerance = totalCurveLength() / m_estimatedNumGroups * .47f;
+	m_cluster->intersectRay(r);
 }
 //:~
