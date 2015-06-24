@@ -5,36 +5,91 @@
 
 CurveReduction::CurveReduction() 
 {
+	m_gapHash = 0;
 }
 
 CurveReduction::~CurveReduction() 
 {
+	if(m_gapHash) delete[] m_gapHash;
 } 
 
-GeometryArray *  CurveReduction::compute(GeometryArray * curves, float alpha)
+GeometryArray *  CurveReduction::compute(GeometryArray * curves, float distanceThreshold)
 {
     const unsigned n = curves->numGeometries();
-    int m = n * alpha;
-    m = n - n/2;
-    if(m<1) m = 1;
-    if((int)n - m < 1) {
+    if(n < 2) {
         std::cout<<" curve reduction insufficient n curves "<<n<<".\n";
         return 0;
     }
-    std::cout<<" curve reduce curves from "<<n<<" to "<<n-m<<".\n";
-    Vector3F * samples = new Vector3F[n];
     
+	Vector3F * samples = new Vector3F[n];
+// sample curve starts
     unsigned i = 0;
     for(;i<n;i++) {
         BaseCurve * c = static_cast<BaseCurve *>(curves->geometry(i));
         samples[i] = c->m_cvs[0];
     }
-    
+	
+	computeSampleGaps(samples, n, curves);
+	
+	int m = computeM(n, distanceThreshold);
+	if(m<1) {
+		// std::cout<<" curve reduction finds no curves close enough, skipped.\n";
+		delete[] samples;
+		return 0;
+	}
+	
+	std::cout<<" reduce curves from "<<n<<" to "<<n-m<<".\n";
+	
     KMeanSampleGroup::compute(samples, n, n - m);
     delete[] samples;
     
     GeometryArray * merged = mergeCurves(curves);
     return merged;
+}
+
+void CurveReduction::computeSampleGaps(Vector3F * samples, unsigned n, GeometryArray * curves)
+{
+	if(m_gapHash) delete[] m_gapHash;
+	m_gapHash = new GapInd[n];
+	
+	Vector3F p;
+	float d;
+	unsigned i, j;
+	for(i=0; i<n; i++) {
+		m_gapHash[i].value = i;
+		m_gapHash[i].key = 1e8f;
+		p = samples[i];
+		for(j=0; j<n; j++) {
+			if(j==i) continue;
+			d = p.distanceTo(samples[j]);
+			if(m_gapHash[i].key > d) m_gapHash[i].key = d;
+		}
+	}
+	
+	QuickSort1::Sort<float, unsigned >(m_gapHash, 0, n-1);
+    
+}
+
+int CurveReduction::computeM(unsigned n, float distanceThreshold)
+{
+	int m = 0;
+	unsigned i;
+	for(i=0; i<n; i++) { 
+		if(m_gapHash[i].key <= distanceThreshold) m++;
+		// std::cout<<"\n gap "<<m_gapHash[i].key<<" s"<<m_gapHash[i].value; 
+	}
+
+	return m/2;
+}
+
+void CurveReduction::initialGuess(const Vector3F * pos)
+{
+// sample group center start from the one with largest gap
+	unsigned i, s;
+    for(i=0; i< K(); i++) {
+		s = m_gapHash[N() - 1 - i].value;
+		setCentroid(i, pos[s]);
+	}
 }
 
 GeometryArray * CurveReduction::mergeCurves(GeometryArray * curves)
@@ -114,4 +169,4 @@ Vector3F CurveReduction::samplePointsInGroup(float param, unsigned igroup, Geome
     sum *= 1.f / (float)countPerGroup(igroup);
     return sum;
 }
-
+//:~

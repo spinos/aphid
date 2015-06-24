@@ -15,7 +15,6 @@ public:
 	KMeansClustering();
 	virtual ~KMeansClustering();
 	
-	void setInitialGuess(unsigned idx, const Vector3F & pos);
 	void preAssign();
 	void assignToGroup(unsigned idx, const Vector3F & pos);
 	float moveCentroids();
@@ -26,11 +25,12 @@ public:
 	char isValid() const;
 	unsigned group(unsigned idx) const;
 	unsigned countPerGroup(unsigned idx) const;
-	const Vector3F centeroid(unsigned igroup) const;
-    const Vector3F centroid(unsigned igroup) const;
+	const Vector3F centroid(unsigned igroup) const;
 protected:
     virtual void setK(const unsigned & k);
 	virtual void setN(unsigned n);
+	virtual void initialGuess(const Vector3F * pos);
+	void setCentroid(unsigned idx, const Vector3F & pos);
 	void setValid(char val);
 	
 private:

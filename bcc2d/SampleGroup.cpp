@@ -99,13 +99,9 @@ void KMeanSampleGroup::compute(Vector3F * samples, unsigned numSamples, unsigned
 	setN(numSamples);
 	setK(numGroups);
 	
-	unsigned seg = numSamples / numGroups;
-    if(seg < 1) seg = 1;
+	initialGuess(samples);
 	float d;
 	unsigned i, j;
-	for(i = 0; i < numGroups; i++) {
-		setInitialGuess(i, samples[i*seg]);
-	}
 	
 	for(j = 0; j < numSamples*3; j++) {
 		preAssign();

@@ -65,9 +65,10 @@ void KMeansClustering::setN(unsigned n)
 	m_group = new unsigned[n];
 }
 
-void KMeansClustering::setInitialGuess(unsigned idx, const Vector3F & pos)
+void KMeansClustering::initialGuess(const Vector3F * pos)
 {
-	m_centroid[idx] = pos;
+	for(unsigned i=0; i<K(); i++)
+		m_centroid[i] = pos[i];
 }
 
 void KMeansClustering::preAssign()
@@ -153,9 +154,9 @@ void KMeansClustering::setValid(char val)
 	m_valid = val;
 }
 
-const Vector3F KMeansClustering::centeroid(unsigned igroup) const
-{ return m_centroid[igroup]; }
-
 const Vector3F KMeansClustering::centroid(unsigned igroup) const
 { return m_centroid[igroup]; }
 
+void KMeansClustering::setCentroid(unsigned idx, const Vector3F & pos)
+{ m_centroid[idx] = pos;}
+//:~

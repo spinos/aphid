@@ -49,6 +49,8 @@ private:
 	void drawAnchor();
 	void drawTriangleMesh();
     void clearTetrahedronMesh();
+	float groupCurveLength(GeometryArray * geos);
+	void rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos);
 private:
     KdTreeDrawer * m_drawer;
     CurveGroup * m_curves;
@@ -63,8 +65,7 @@ private:
 	BccMesh * m_meshes;
 #endif
     CurveReduction * m_reducer;
-	unsigned m_numMeshes;
-    unsigned m_numCurves;
+	unsigned m_numMeshes, m_numCurves, m_totalNumTetrahedrons, m_totalNumPoints;
     float m_totalCurveLength;
     float m_estimatedNumGroups;
 };

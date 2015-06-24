@@ -244,6 +244,8 @@ void BccWorld::createTetrahedronMeshes()
 	<<"\n total n points "<<nvert
 	<<"\n";
 	m_numMeshes = n;
+	m_totalNumTetrahedrons = ntet;
+	m_totalNumPoints = nvert;
 }
 
 void BccWorld::createTriangleMeshesFromFile()
@@ -466,6 +468,18 @@ void BccWorld::select(const Ray * r)
 void BccWorld::clearSelection()
 { m_cluster->setCurrentGroup(m_cluster->numGroups()); }
 
+float BccWorld::groupCurveLength(GeometryArray * geos)
+{
+	float sum = 0.f;
+	const unsigned n = geos->numGeometries();
+     unsigned i = 0;
+    for(;i<n;i++) {
+        BezierCurve * c = static_cast<BezierCurve *>(geos->geometry(i));
+        sum += c->length();
+    }
+	return sum;
+}
+
 void BccWorld::reduceSelected(float x)
 {
     const unsigned selectedCurveGrp = m_cluster->currentGroup();
@@ -473,9 +487,57 @@ void BccWorld::reduceSelected(float x)
         std::cout<<" bcc has no valid selection, cannot reduce.\n";
         return;
     }
-    GeometryArray * reduced = m_reducer->compute(m_cluster->group(selectedCurveGrp), x);
-    if(reduced) {
-        m_cluster->setGroupGeometry(selectedCurveGrp, reduced);
+	
+	const float oldCurveLength = groupCurveLength(m_cluster->group(selectedCurveGrp));
+	const unsigned oldNCurves = m_cluster->group(selectedCurveGrp)->numGeometries();
+    GeometryArray * reduced = 0;
+	
+	int i=0;
+	for(;i<20;i++) {
+		GeometryArray * ir = m_reducer->compute(m_cluster->group(selectedCurveGrp), FitBccMeshBuilder::EstimatedGroupSize * 1.33f);
+		if(ir) {
+			reduced = ir;
+			m_cluster->setGroupGeometry(selectedCurveGrp, reduced);
+		}
+		else break;
+	}
+	
+	if(!reduced) {
+        std::cout<<" bcc has insufficient for curve reduction, skipped.\n";
+        return;
     }
+	
+	m_totalCurveLength -= oldCurveLength;
+	m_totalCurveLength += groupCurveLength(reduced);
+	
+	m_numCurves -= oldNCurves;
+	m_numCurves += reduced->numGeometries();
+	
+	rebuildGroupTetrahedronMesh(selectedCurveGrp, reduced);
+}
+
+void BccWorld::rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos)
+{
+	const unsigned oldNVert = m_meshes[igroup].numPoints();
+	const unsigned oldNTet = m_meshes[igroup].numTetrahedrons();
+	const unsigned oldTotalNTet = m_totalNumTetrahedrons;
+	const unsigned oldTotalNVert = m_totalNumPoints;
+	float vlm;
+#if WORLD_USE_FIT
+	m_meshes[igroup].create(geos, m_anchorIntersect);
+#else
+	m_meshes[igroup].create(geos, m_anchorIntersect, 5);
+#endif	
+	vlm = m_meshes[igroup].calculateVolume();
+	m_meshes[igroup].setVolume(vlm);
+	
+	m_totalNumPoints -= oldNVert;
+	m_totalNumPoints += m_meshes[igroup].numPoints();
+	m_totalNumTetrahedrons -= oldNTet;
+	m_totalNumTetrahedrons += m_meshes[igroup].numTetrahedrons();
+	
+	std::cout<<" reduce n points from "<<oldTotalNTet<<" to "<<m_totalNumPoints
+	<<"\n n tetrahedrons form "<<oldTotalNTet<<" to "<<m_totalNumTetrahedrons
+	<<"\n";
 }
 //:~
