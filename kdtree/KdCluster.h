@@ -25,7 +25,7 @@ public:
 	virtual void rebuild();
 	
 	virtual bool intersectRay(const Ray * eyeRay);
-	
+	void setCurrentGroup(unsigned x);
 protected:
 	virtual void clear();
 private:

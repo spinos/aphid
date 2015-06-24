@@ -192,4 +192,7 @@ bool KdCluster::leafIntersectRay(KdTreeNode *node, const Ray * eyeRay)
 
 const unsigned KdCluster::currentGroup() const
 { return m_currentGroup; }
+
+void KdCluster::setCurrentGroup(unsigned x)
+{ m_currentGroup = x; }
 //:~

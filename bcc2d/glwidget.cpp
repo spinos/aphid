@@ -41,7 +41,7 @@ void GLWidget::clientSelect(QMouseEvent * event)
 #if TEST_FIT
 
 #else
-	m_world->selectCluster(getIncidentRay());
+	m_world->select(getIncidentRay());
 #endif
 	setUpdatesEnabled(true);
 }
@@ -59,7 +59,7 @@ void GLWidget::clientMouseInput(QMouseEvent * event)
 #if TEST_FIT
 
 #else
-	m_world->selectCluster(getIncidentRay());
+	m_world->select(getIncidentRay());
 #endif	
 	setUpdatesEnabled(true);
 }

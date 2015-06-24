@@ -285,11 +285,7 @@ void BccWorld::draw()
     // drawCurves();
 	// drawCurveStars();
 	
-	//for(unsigned i=0; i<m_cluster->numGroups(); i++) {
-	//	m_drawer->setGroupColorLight(i);
-	//	m_drawer->geometry(m_cluster->group(i));
-	//}
-	unsigned selectedCurveGrp = m_cluster->currentGroup();
+	const unsigned selectedCurveGrp = m_cluster->currentGroup();
 	if(selectedCurveGrp<m_cluster->numGroups()) {
 		m_drawer->setGroupColorLight(selectedCurveGrp);
 		m_drawer->geometry(m_cluster->group(selectedCurveGrp));
@@ -403,7 +399,7 @@ void BccWorld::drawAnchor()
 
 void BccWorld::drawTriangleMesh()
 {
-    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glColor3f(0.63f, 0.64f, 0.65f);
 	m_drawer->geometry(m_triangleMeshes);
@@ -457,9 +453,15 @@ void BccWorld::rebuildTetrahedronsMesh(float deltaNumGroups)
     std::cout<<" done rebuild. \n";
 }
 
-void BccWorld::selectCluster(const Ray * r)
+void BccWorld::select(const Ray * r)
 {
-	BaseCurve::RayIntersectionTolerance = totalCurveLength() / m_estimatedNumGroups * .47f;
-	m_cluster->intersectRay(r);
+	BaseCurve::RayIntersectionTolerance = totalCurveLength() / m_estimatedNumGroups * .37f;
+	if(!m_cluster->intersectRay(r))
+		clearSelection();
+}
+
+void BccWorld::clearSelection()
+{
+	m_cluster->setCurrentGroup(m_cluster->numGroups());
 }
 //:~
