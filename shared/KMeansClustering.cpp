@@ -73,34 +73,41 @@ void KMeansClustering::setInitialGuess(unsigned idx, const Vector3F & pos)
 void KMeansClustering::preAssign()
 {
 	for(unsigned i = 0; i < m_k; i++) m_sum[i].setZero();
+    for(unsigned i = 0; i < m_k; i++) m_countPerGroup[i] = 0;
 }
 
 void KMeansClustering::assignToGroup(unsigned idx, const Vector3F & pos)
 {
 	unsigned g = 0;
-	float minD = 10e8;
+	float minD = 1e8;
 	float d;
 	for(unsigned i = 0; i < m_k; i++) {
 		d = Vector3F(pos, m_centroid[i]).length();
-		if(d < minD) {
+		if(minD > d) {
 			g = i;
 			minD = d;
 		}
 	}
+   /*  std::cout<<" mind "<<minD
+    <<" assign "<<idx<<" to group"<<g
+    <<" p "<<pos<<" c"<<m_centroid[g]
+    <<"\n"; */
 	m_group[idx] = g;
 	m_sum[g] += pos;
+    m_countPerGroup[g] += 1;
 }
 
 float KMeansClustering::moveCentroids()
 {
 	float delta = 0.f;
-	for(unsigned i = 0; i < m_k; i++) m_countPerGroup[i] = 0;
-	for(unsigned i = 0; i < m_n; i++) {
-		m_countPerGroup[m_group[i]] += 1;
-	}
-	for(unsigned i = 0; i < m_k; i++) {
+	for(unsigned i = 0; i < K(); i++) {
 		m_sum[i] *= 1.f/(float)m_countPerGroup[i];
 		delta += Vector3F(m_centroid[i], m_sum[i]).length();
+        
+/*         std::cout<<" grp"<<i
+    <<" sum "<<m_sum[i]<<" c"<<m_centroid[i]
+    <<"\n";
+     */
 		m_centroid[i] = m_sum[i];
 	}
 	return delta;
@@ -148,3 +155,7 @@ void KMeansClustering::setValid(char val)
 
 const Vector3F KMeansClustering::centeroid(unsigned igroup) const
 { return m_centroid[igroup]; }
+
+const Vector3F KMeansClustering::centroid(unsigned igroup) const
+{ return m_centroid[igroup]; }
+

@@ -16,6 +16,7 @@ struct BezierSpline;
 class BccMesh;
 class FitBccMesh;
 class ATriangleMesh;
+class CurveReduction;
 
 class BccWorld {
 public:
@@ -27,7 +28,7 @@ public:
 	
 	void select(const Ray * r);
 	void clearSelection();
-    
+    void reduceSelected(float x);
     void rebuildTetrahedronsMesh(float deltaNumGroups);
     const float totalCurveLength() const;
     const unsigned numCurves() const;
@@ -61,6 +62,7 @@ private:
 #else
 	BccMesh * m_meshes;
 #endif
+    CurveReduction * m_reducer;
 	unsigned m_numMeshes;
     unsigned m_numCurves;
     float m_totalCurveLength;

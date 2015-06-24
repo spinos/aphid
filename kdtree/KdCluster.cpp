@@ -18,6 +18,9 @@ const unsigned KdCluster::numGroups() const
 GeometryArray * KdCluster::group(unsigned idx) const
 { return m_groupGeometries[idx]; }
 
+void KdCluster::setGroupGeometry(unsigned idx, GeometryArray * geos)
+{ m_groupGeometries[idx] = geos; }
+
 void KdCluster::create()
 {
 	KdTree::create();
@@ -195,4 +198,7 @@ const unsigned KdCluster::currentGroup() const
 
 void KdCluster::setCurrentGroup(unsigned x)
 { m_currentGroup = x; }
+
+bool KdCluster::isGroupIdValid(unsigned x) const
+{ return x < numGroups(); }
 //:~

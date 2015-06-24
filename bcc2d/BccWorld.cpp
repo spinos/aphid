@@ -18,6 +18,7 @@
 #include <FitBccMesh.h>
 #include <ATriangleMesh.h>
 #include "FitBccMeshBuilder.h"
+#include "CurveReduction.h"
 
 BccWorld::BccWorld(KdTreeDrawer * drawer)
 {
@@ -26,6 +27,7 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
     m_estimatedNumGroups = 2500.f;
 	m_drawer = drawer;
 	m_curves = new CurveGroup;
+    m_reducer = new CurveReduction;
 	if(!createCurveGeometryFromFile())
 #if WORLD_TEST_SINGLE
 		createTestCurveGeometry();
@@ -40,7 +42,7 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	m_cluster = new KdCluster;
 	m_cluster->addGeometry(m_allGeo);
 	
-	KdTree::MaxBuildLevel = 16;
+	KdTree::MaxBuildLevel = 6;
 	KdTree::NumPrimitivesInLeafThreashold = 31;
 	
 	m_cluster->create();
@@ -54,6 +56,7 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 
 BccWorld::~BccWorld() 
 {
+    delete m_reducer;
 	delete m_curves;
 	delete m_cluster;
 	delete m_anchorIntersect;
@@ -286,7 +289,7 @@ void BccWorld::draw()
 	// drawCurveStars();
 	
 	const unsigned selectedCurveGrp = m_cluster->currentGroup();
-	if(selectedCurveGrp<m_cluster->numGroups()) {
+	if(m_cluster->isGroupIdValid(selectedCurveGrp)) {
 		m_drawer->setGroupColorLight(selectedCurveGrp);
 		m_drawer->geometry(m_cluster->group(selectedCurveGrp));
 	}
@@ -461,7 +464,18 @@ void BccWorld::select(const Ray * r)
 }
 
 void BccWorld::clearSelection()
+{ m_cluster->setCurrentGroup(m_cluster->numGroups()); }
+
+void BccWorld::reduceSelected(float x)
 {
-	m_cluster->setCurrentGroup(m_cluster->numGroups());
+    const unsigned selectedCurveGrp = m_cluster->currentGroup();
+	if(!m_cluster->isGroupIdValid(selectedCurveGrp)) {
+        std::cout<<" bcc has no valid selection, cannot reduce.\n";
+        return;
+    }
+    GeometryArray * reduced = m_reducer->compute(m_cluster->group(selectedCurveGrp), x);
+    if(reduced) {
+        m_cluster->setGroupGeometry(selectedCurveGrp, reduced);
+    }
 }
 //:~

@@ -99,7 +99,8 @@ void KMeanSampleGroup::compute(Vector3F * samples, unsigned numSamples, unsigned
 	setN(numSamples);
 	setK(numGroups);
 	
-	const unsigned seg = numSamples / numGroups;
+	unsigned seg = numSamples / numGroups;
+    if(seg < 1) seg = 1;
 	float d;
 	unsigned i, j;
 	for(i = 0; i < numGroups; i++) {
@@ -112,7 +113,8 @@ void KMeanSampleGroup::compute(Vector3F * samples, unsigned numSamples, unsigned
 			assignToGroup(i, samples[i]);
 		}
 		d = moveCentroids();
-		if(d < 10e-3) break;
+// std::cout<<" d" <<d;
+		if(d < 1e-3) break;
 	}
 	
 	// std::cout<<" j end "<<j;

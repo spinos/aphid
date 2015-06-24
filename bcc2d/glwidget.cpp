@@ -75,7 +75,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 #endif
 		}
 	}
-	
+    setUpdatesEnabled(false);	
 	switch (event->key()) {
 		case Qt::Key_K:
 		    m_world->rebuildTetrahedronsMesh(-1.f);
@@ -83,10 +83,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 		case Qt::Key_L:
 		    m_world->rebuildTetrahedronsMesh(1.f);
 			break;
-		/*case Qt::Key_W:
-		    m_world->moveTestP(0.f, .1f, 0.f);
+		case Qt::Key_M:
+		    m_world->reduceSelected(.13f);
 			break;
-		case Qt::Key_S:
+		/*case Qt::Key_S:
 		    m_world->moveTestP(0.f, -.1f, 0.f);
 			break;
 		case Qt::Key_F:
@@ -98,6 +98,6 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 		default:
 			break;
 	}
-	
+	setUpdatesEnabled(true);
 	Base3DView::keyPressEvent(event);
 }

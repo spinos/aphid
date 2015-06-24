@@ -20,12 +20,15 @@ public:
 	const unsigned numGroups() const;
 	const unsigned currentGroup() const;
 	GeometryArray * group(unsigned idx) const;
+    void setGroupGeometry(unsigned idx, GeometryArray * geos);
 	
 	virtual void create();
 	virtual void rebuild();
 	
 	virtual bool intersectRay(const Ray * eyeRay);
 	void setCurrentGroup(unsigned x);
+    
+    bool isGroupIdValid(unsigned x) const;
 protected:
 	virtual void clear();
 private:

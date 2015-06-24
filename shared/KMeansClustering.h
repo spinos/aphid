@@ -27,6 +27,7 @@ public:
 	unsigned group(unsigned idx) const;
 	unsigned countPerGroup(unsigned idx) const;
 	const Vector3F centeroid(unsigned igroup) const;
+    const Vector3F centroid(unsigned igroup) const;
 protected:
     virtual void setK(const unsigned & k);
 	virtual void setN(unsigned n);
