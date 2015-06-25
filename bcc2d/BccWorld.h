@@ -51,6 +51,7 @@ private:
     void clearTetrahedronMesh();
 	float groupCurveLength(GeometryArray * geos);
 	void rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos);
+	ATetrahedronMesh * combinedTetrahedronMesh();
 private:
     KdTreeDrawer * m_drawer;
     CurveGroup * m_curves;

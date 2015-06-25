@@ -26,6 +26,7 @@ public:
 	unsigned * indices() const;
 	unsigned * anchors() const;
 	
+	void copyStripe(AGenericMesh * inmesh, unsigned driftP, unsigned driftI);
 protected:
 	void createBuffer(unsigned np, unsigned ni);
 	void setNumPoints(unsigned n);

@@ -75,3 +75,20 @@ void AGenericMesh::resetAnchors(unsigned n)
 	for(; i < n; i++)
 		anchor[i] = 0;
 }
+
+void AGenericMesh::copyStripe(AGenericMesh * inmesh, unsigned driftP, unsigned driftI)
+{
+	Vector3F * dstP = & ((Vector3F *)m_points->data())[driftP];
+	unsigned * dstA = & ((unsigned *)m_anchors->data())[driftP];
+	unsigned * dstI = & ((unsigned *)m_indices->data())[driftI];
+	const unsigned np = inmesh->numPoints();
+	const unsigned ni = inmesh->numIndices();
+	unsigned i=0;
+	Vector3F * srcP = inmesh->points();
+	unsigned * srcA = inmesh->anchors();
+	unsigned * srcI = inmesh->indices();
+	for(;i<np;i++) dstP[i] = srcP[i]; 
+	for(i=0;i<np;i++) dstA[i] = srcA[i]; 
+	for(i=0;i<ni;i++) dstI[i] = driftP + srcI[i]; 
+}
+//:~

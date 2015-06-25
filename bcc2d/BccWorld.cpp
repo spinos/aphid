@@ -423,17 +423,28 @@ bool BccWorld::save()
 	HesperisFile hes;
 	hes.setWriteComponent(HesperisFile::WTetra);
 	
+#if 0	
 	unsigned i = 0;
 	for(; i < m_numMeshes; i++) {
 		std::stringstream sst;
 		sst<<"tetra_"<<i;
 		hes.addTetrahedron(sst.str(), &m_meshes[i]);
 	}
-	
+#else
+	ATetrahedronMesh * cm = combinedTetrahedronMesh();
+	hes.addTetrahedron("tetra_c", cm);
+#endif	
+
 	if(!hes.open(BccGlobal::FileName)) return false;
 	hes.setDirty();
 	hes.save();
 	hes.close();
+	
+#if 0
+#else
+	delete cm;
+#endif
+
 	return true;
 }
 
@@ -494,7 +505,7 @@ void BccWorld::reduceSelected(float x)
 	
 	int i=0;
 	for(;i<20;i++) {
-		GeometryArray * ir = m_reducer->compute(m_cluster->group(selectedCurveGrp), FitBccMeshBuilder::EstimatedGroupSize * 1.33f);
+		GeometryArray * ir = m_reducer->compute(m_cluster->group(selectedCurveGrp), FitBccMeshBuilder::EstimatedGroupSize * 1.23f);
 		if(ir) {
 			reduced = ir;
 			m_cluster->setGroupGeometry(selectedCurveGrp, reduced);
@@ -539,5 +550,34 @@ void BccWorld::rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos
 	std::cout<<" reduce n points from "<<oldTotalNTet<<" to "<<m_totalNumPoints
 	<<"\n n tetrahedrons form "<<oldTotalNTet<<" to "<<m_totalNumTetrahedrons
 	<<"\n";
+}
+
+ATetrahedronMesh * BccWorld::combinedTetrahedronMesh()
+{
+	ATetrahedronMesh * omesh = new ATetrahedronMesh;
+	unsigned ntet = 0;
+	unsigned nvert = 0;
+	unsigned i = 0;
+	for(; i < m_numMeshes; i++) {
+		ntet += m_meshes[i].numTetrahedrons();
+		nvert += m_meshes[i].numPoints();
+	}
+	omesh->create(nvert, ntet);
+	
+	ntet = 0;
+	nvert = 0;
+	i = 0;
+	for(; i < m_numMeshes; i++) {
+		omesh->copyStripe(&m_meshes[i], nvert, ntet * 4);
+		ntet += m_meshes[i].numTetrahedrons();
+		nvert += m_meshes[i].numPoints();
+	}
+	float vlm = omesh->calculateVolume();
+	omesh->setVolume(vlm);
+	std::cout<<" combined all meshes:\n n tetrahedrons "<<ntet
+	<<"\n n points "<<nvert
+	<<"\n initial volume "<<vlm
+	<<"\n";
+	return omesh;
 }
 //:~
