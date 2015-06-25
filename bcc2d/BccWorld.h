@@ -32,6 +32,8 @@ public:
     void rebuildTetrahedronsMesh(float deltaNumGroups);
     const float totalCurveLength() const;
     const unsigned numCurves() const;
+	const unsigned numTetrahedrons() const;
+	const unsigned numPoints() const;
 private:
 	bool createCurveGeometryFromFile();
 	void createTestCurveGeometry();
@@ -49,6 +51,8 @@ private:
 	void drawAnchor();
 	void drawTriangleMesh();
     void clearTetrahedronMesh();
+	void reduceAllGroups();
+	void reduceGroup(unsigned igroup);
 	float groupCurveLength(GeometryArray * geos);
 	void rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos);
 	ATetrahedronMesh * combinedTetrahedronMesh();

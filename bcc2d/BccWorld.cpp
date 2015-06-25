@@ -454,6 +454,12 @@ const float BccWorld::totalCurveLength() const
 const unsigned BccWorld::numCurves() const
 { return m_numCurves; }
 
+const unsigned BccWorld::numTetrahedrons() const
+{ return m_totalNumTetrahedrons; }
+
+const unsigned BccWorld::numPoints() const
+{ return m_totalNumPoints; }
+
 void BccWorld::clearTetrahedronMesh()
 {
     if(m_meshes) delete[] m_meshes;
@@ -494,21 +500,30 @@ float BccWorld::groupCurveLength(GeometryArray * geos)
 void BccWorld::reduceSelected(float x)
 {
     const unsigned selectedCurveGrp = m_cluster->currentGroup();
-	if(!m_cluster->isGroupIdValid(selectedCurveGrp)) {
-        std::cout<<" bcc has no valid selection, cannot reduce.\n";
-        return;
-    }
-	
-	const float oldCurveLength = groupCurveLength(m_cluster->group(selectedCurveGrp));
-	const unsigned oldNCurves = m_cluster->group(selectedCurveGrp)->numGeometries();
+	if(m_cluster->isGroupIdValid(selectedCurveGrp))
+		reduceGroup(selectedCurveGrp);
+	else
+        reduceAllGroups();	
+}
+
+void BccWorld::reduceAllGroups()
+{
+	unsigned i = 0;
+	for(;i<m_cluster->numGroups();i++) reduceGroup(i);
+}
+
+void BccWorld::reduceGroup(unsigned igroup)
+{
+	const float oldCurveLength = groupCurveLength(m_cluster->group(igroup));
+	const unsigned oldNCurves = m_cluster->group(igroup)->numGeometries();
     GeometryArray * reduced = 0;
 	
 	int i=0;
 	for(;i<20;i++) {
-		GeometryArray * ir = m_reducer->compute(m_cluster->group(selectedCurveGrp), FitBccMeshBuilder::EstimatedGroupSize * 1.23f);
+		GeometryArray * ir = m_reducer->compute(m_cluster->group(igroup), FitBccMeshBuilder::EstimatedGroupSize * 1.23f);
 		if(ir) {
 			reduced = ir;
-			m_cluster->setGroupGeometry(selectedCurveGrp, reduced);
+			m_cluster->setGroupGeometry(igroup, reduced);
 		}
 		else break;
 	}
@@ -524,7 +539,7 @@ void BccWorld::reduceSelected(float x)
 	m_numCurves -= oldNCurves;
 	m_numCurves += reduced->numGeometries();
 	
-	rebuildGroupTetrahedronMesh(selectedCurveGrp, reduced);
+	rebuildGroupTetrahedronMesh(igroup, reduced);
 }
 
 void BccWorld::rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos)

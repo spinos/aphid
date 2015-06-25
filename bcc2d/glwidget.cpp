@@ -32,6 +32,16 @@ void GLWidget::clientDraw()
 	m_fit->draw();
 #else
 	m_world->draw();
+	std::stringstream sst;
+	sst.str("");
+	sst<<"n curves: "<<m_world->numCurves();
+	hudText(sst.str(), 1);
+	sst.str("");
+	sst<<"n tetrahedrons: "<<m_world->numTetrahedrons();
+    hudText(sst.str(), 2);
+	sst.str("");
+	sst<<"n points: "<<m_world->numPoints();
+    hudText(sst.str(), 3);
 #endif
 }
 
