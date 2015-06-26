@@ -6,7 +6,7 @@
  */
 
 #include "stackUtil.cuh"
-#include "bvhUtil.h"
+#include "bvhUtil.cuh"
 
 inline __device__ void countOverlappings(uint & count,
                                          KeyValuePair * indirections,

@@ -5,7 +5,7 @@
  *  self-collision packet traverse
  */
  
-#include "bvhUtil.h"
+#include "bvhUtil.cuh"
 
 template<int NumExcls>
 inline __device__ void countOverlappings1(uint & count,

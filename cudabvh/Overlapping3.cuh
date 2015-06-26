@@ -6,7 +6,7 @@
  */
 
 #include "stackUtil.cuh"
-#include "bvhUtil.h"
+#include "bvhUtil.cuh"
 
 template<int NumExcls>
 inline __device__ void countOverlappings(uint & count,

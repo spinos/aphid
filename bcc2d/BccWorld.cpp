@@ -282,7 +282,7 @@ void BccWorld::draw()
     // m_grid->draw(m_drawer, (unsigned *)m_mesh.m_anchorBuf->data());
 
 	drawTetrahedronMesh();
-	// drawAnchor();
+	drawAnchor();
 	drawTriangleMesh();
     
 	glDisable(GL_DEPTH_TEST);
@@ -371,35 +371,40 @@ void BccWorld::drawTetrahedronMesh(unsigned nt, Vector3F * points, unsigned * in
 
 void BccWorld::drawAnchor()
 {
-/*
-    const float csz = m_grid->span() / 1024.f;
-	m_drawer->setWired(0);
-	unsigned nt = m_mesh.m_numTetrahedrons;
-    Vector3F * p = (Vector3F *)m_mesh.m_pointBuf->data();
-    unsigned * a = (unsigned *)m_mesh.m_anchorBuf->data();
-    unsigned * t = (unsigned *)m_mesh.m_indexBuf->data();
     unsigned i, j;
-    Vector3F q;
-    glColor3f(.59f, .21f, 0.f);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glBegin(GL_TRIANGLES);
-    for(i=0; i< nt; i++) {
-        bool anchored = 1;
-        unsigned * tet = &t[i*4];
-        for(j=0; j<4; j++) {
-            if(a[tet[j]] < 1) {
-                anchored = 0;
-                break;
-            }
-        }
-        if(!anchored) continue;
-        for(j=0; j< 12; j++) {
-            q = p[ tet[ TetrahedronToTriangleVertex[j] ] ];
-            glVertex3fv((GLfloat *)&q);
-        }
+    const float csz = BaseCurve::RayIntersectionTolerance;//m_grid->span() / 1024.f;
+	// m_drawer->setWired(0);
+	// unsigned nt = m_mesh.m_numTetrahedrons;
+	glColor3f(.59f, .21f, 0.f);
+	for(i=0; i<m_numMeshes;i++) {
+	    Vector3F * p = (Vector3F *)m_meshes[i].points();
+	    unsigned * a = (unsigned *)m_meshes[i].anchors();
+	    for(j=0;j<m_meshes[i].numPoints();j++) {
+	        if(a[j]<1) continue;
+	        m_drawer->cube(p[j], csz);
+	    }
+    // unsigned * t = (unsigned *)m_mesh.m_indexBuf->data();
+    // Vector3F q;
+    
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //glBegin(GL_TRIANGLES);
+    // for(i=0; i< nt; i++) {
+        // bool anchored = 1;
+        // unsigned * tet = &t[i*4];
+        // for(j=0; j<4; j++) {
+            // if(a[tet[j]] < 1) {
+                // anchored = 0;
+                // break;
+            // }
+        // }
+        // if(!anchored) continue;
+        // for(j=0; j< 12; j++) {
+            // q = p[ tet[ TetrahedronToTriangleVertex[j] ] ];
+            // glVertex3fv((GLfloat *)&q);
+        // }
+    // }
+    //glEnd();
     }
-    glEnd();
-*/
 }
 
 void BccWorld::drawTriangleMesh()

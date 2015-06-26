@@ -1,5 +1,5 @@
-#ifndef BVH_UTIL_H
-#define BVH_UTIL_H
+#ifndef BVH_UTIL_CUH
+#define BVH_UTIL_CUH
 
 #include "radixsort_implement.h"
 #include "cuSMem.cuh"
@@ -83,15 +83,17 @@ __device__ int isElementExcludedS(int b, int * exclusionInd)
 	int i;
 #if 1
     int4 * exclusionInd4 = (int4 *)exclusionInd;
+    int4 ind;
 	for(i=0; i<(NumExcls>>2); i++) {
-		if(exclusionInd4[i].x < 0) break;
-		if(b <= exclusionInd4[i].x) return 1;
-		if(exclusionInd4[i].y < 0) break;
-		if(b <= exclusionInd4[i].y) return 1;
-		if(exclusionInd4[i].z < 0) break;
-		if(b <= exclusionInd4[i].z) return 1;
-		if(exclusionInd4[i].w < 0) break;
-		if(b <= exclusionInd4[i].w) return 1;
+	    ind = exclusionInd4[i];
+		if(ind.x < 0) break;
+		if(b <= ind.x) return 1;
+		if(ind.y < 0) break;
+		if(b <= ind.y) return 1;
+		if(ind.z < 0) break;
+		if(b <= ind.z) return 1;
+		if(ind.w < 0) break;
+		if(b <= ind.w) return 1;
 	}
 #else
     for(i=0; i<NumExcls; i++) {
@@ -101,5 +103,5 @@ __device__ int isElementExcludedS(int b, int * exclusionInd)
 #endif
 	return 0;
 }
-#endif        //  #ifndef BVH_UTIL_H
+#endif        //  #ifndef BVH_UTIL_CUH
 

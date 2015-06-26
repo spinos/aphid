@@ -5,7 +5,7 @@
  *  collision packet traverse
  */
 
-#include "bvhUtil.h"
+#include "bvhUtil.cuh"
 
 template<int NumThreadsPerDim>
 __device__ void findOveralppings(int * scounts,
