@@ -35,6 +35,7 @@ SimpleContactSolver::~SimpleContactSolver() {}
 
 void SimpleContactSolver::initOnDevice()
 {
+	CudaReduction::initOnDevice();
 }
 
 CUDABuffer * SimpleContactSolver::contactPairHashBuf()
@@ -52,17 +53,11 @@ CUDABuffer * SimpleContactSolver::deltaLinearVelocityBuf()
 CUDABuffer * SimpleContactSolver::deltaAngularVelocityBuf()
 { return m_deltaAngularVelocity; }
 
-//CUDABuffer * SimpleContactSolver::deltaJBuf()
-//{ return m_deltaJ; }
-
 CUDABuffer * SimpleContactSolver::pntTetHashBuf()
 { return m_pntTetHash[0]; }
 
 CUDABuffer * SimpleContactSolver::splitInverseMassBuf()
 { return m_splitInverseMass; }
-
-const unsigned SimpleContactSolver::numIterations() const
-{ return DynGlobal::MaxContactNumIterations; }
 
 const unsigned SimpleContactSolver::numContacts() const
 { return m_numContacts; }
@@ -105,6 +100,11 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	simpleContactSolverCountBody((uint *)bodyCount, 
 	                        (KeyValuePair *)bodyContactHash, 
 	                        splitBufLength);
+							
+	int mxcount = 0;
+	max<int>(mxcount, (int *)bodyCount, splitBufLength);
+    if(mxcount>9) std::cout<<" max count per contact "<<mxcount; 
+	int numiterations = mxcount + 2;
 	
 	m_splitInverseMass->create(splitBufLength * 4);
 	void * splitMass = m_splitInverseMass->bufferOnDevice();
@@ -169,7 +169,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	*/
 	
 	int i;
-	for(i=0; i< DynGlobal::MaxContactNumIterations; i++) {
+	for(i=0; i< numiterations; i++) {
 // compute impulse and velocity changes per contact
         simpleContactSolverSolveContactWoJ((ContactConstraint *)constraint,
 	                    (float3 *)deltaLinVel,

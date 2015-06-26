@@ -18,7 +18,6 @@ class DynGlobal
 {
 public:
     static int MaxTOINumIterations;
-    static int MaxContactNumIterations;
 };
 #endif        //  #ifndef BVHGLOBAL_H
 

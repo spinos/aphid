@@ -12,7 +12,6 @@
  
 #include "bvh_common.h"
 #include <DynGlobal.h>
-// class CudaReduction;
 class BaseBuffer;
 class CUDABuffer;
 class BvhTriangleMesh;

@@ -9,8 +9,9 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+#include <CudaReduction.h>
 class CUDABuffer;
-class SimpleContactSolver {
+class SimpleContactSolver : public CudaReduction {
 public:
 	SimpleContactSolver();
 	virtual ~SimpleContactSolver();
@@ -26,11 +27,9 @@ public:
 	CUDABuffer * constraintBuf();
 	CUDABuffer * deltaLinearVelocityBuf();
 	CUDABuffer * deltaAngularVelocityBuf();
-	// CUDABuffer * deltaJBuf();
 	CUDABuffer * pntTetHashBuf();
 	CUDABuffer * splitInverseMassBuf();
 	
-	const unsigned numIterations() const;
 	const unsigned numContacts() const;
 private:
 	CUDABuffer * m_sortedInd[2];
@@ -40,7 +39,6 @@ private:
 	CUDABuffer * m_constraint;
 	CUDABuffer * m_deltaLinearVelocity;
 	CUDABuffer * m_deltaAngularVelocity;
-	// CUDABuffer * m_deltaJ;
 	CUDABuffer * m_relVel;
 	CUDABuffer * m_pntTetHash[2];
 	unsigned m_numContacts;
