@@ -449,7 +449,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
  *  j = (1 + Cr)Vr.N*M^-1
  */
     J += constraints[iContact].relVel;
-    J *= 0.499f;
+    J *= 0.5f;
     J *= constraints[iContact].Minv;
 	
 	float prevSum = constraints[iContact].lambda;
@@ -463,7 +463,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
 	
 	const float invMassA = splitMass[splitInd];
 	
-    if(invMassA > 1e-6f)
+    //if(invMassA > 1e-6f)
         applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
 	//applyImpulse(deltaAngularVelocity[splitInd], J * invMassA, torqueA);
 }
@@ -747,7 +747,11 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	if(count > 1.f)
 	    sumLinVel = scale_float3_by(sumLinVel, 1.f / count);
 
-	dstVelocity[iPnt] = float3_add(dstVelocity[iPnt], sumLinVel);
+    float3 a = dstVelocity[iPnt];
+	float3_add_inplace(a, sumLinVel);
+    float speed = float3_length(a);
+    if(speed>10.f) float3_scale_inplace(a, 10.f/speed);
+    dstVelocity[iPnt] = a;
 }
 
 extern "C" {
