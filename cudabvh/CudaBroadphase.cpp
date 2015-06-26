@@ -191,6 +191,8 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	
 // only for tetrahedron system
 	BvhTetrahedronSystem * query = static_cast<BvhTetrahedronSystem *>(m_objects[a]);
+	void * anchors = query->deviceAnchor();
+	void * tets = query->deviceTretradhedronIndices();
 	CudaLinearBvh * tree = m_objects[a];
 	
 	void * boxes = query->leafAabbs();
@@ -202,6 +204,8 @@ void CudaBroadphase::countOverlappingPairsSelf(unsigned a)
 	void * mortonCodesAndAabbIndices = tree->primitiveHash();
     
 	bvhoverlap::countPairsSelfCollide(counts, (Aabb *)boxes,
+							(unsigned *)anchors,
+							(int4 *)tets,
 	                        query->numActiveInternalNodes(),
 							query->numPrimitives(),
 							(int2 *)internalNodeChildIndex, 
@@ -222,6 +226,11 @@ void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 	uint * counts = (uint *)m_pairCounts->bufferOnDevice();
 	counts += m_objectStart[a];
 	
+// only for tetrahedron system
+	BvhTetrahedronSystem * querysys = static_cast<BvhTetrahedronSystem *>(m_objects[a]);
+	void * anchors = querysys->deviceAnchor();
+	void * tets = querysys->deviceTretradhedronIndices();
+	
 	CudaLinearBvh * query = m_objects[a];
 	CudaLinearBvh * tree = m_objects[b];
 	
@@ -234,7 +243,9 @@ void CudaBroadphase::countOverlappingPairsOther(unsigned a, unsigned b)
 	void * leafNodeAabbs = tree->primitiveAabb();
 	void * mortonCodesAndAabbIndices = tree->primitiveHash();
 	
-	bvhoverlap::countPairs(counts, (Aabb *)boxes, 
+	bvhoverlap::countPairs(counts, (Aabb *)boxes,
+							(unsigned *)anchors,
+							(int4 *)tets,
 	                        (KeyValuePair *)queryInd,
 	                         query->numActiveInternalNodes(),
 							numBoxes,
@@ -293,7 +304,7 @@ void CudaBroadphase::writeOverlappingPairsSelf(unsigned a)
 	                            starts,
 	                            counts,
 	                         (Aabb *)boxes, 
-	                         query->numActiveInternalNodes(),
+							 query->numActiveInternalNodes(),
 							query->numPrimitives(),
 							(int2 *)internalNodeChildIndex, 
 							(Aabb *)internalNodeAabbs, 

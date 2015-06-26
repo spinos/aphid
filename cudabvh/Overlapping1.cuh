@@ -49,7 +49,9 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
 
 template<int NumSkip>
 __global__ void countPairsSingle_kernel(uint * overlappingCounts, 
-								Aabb * boxes, 
+								Aabb * boxes,
+								uint * anchors,
+                                int4 * tetrahedronVertices,
 								uint maxBoxInd,
 								int2 * internalNodeChildIndices, 
 								Aabb * internalNodeAabbs, 
@@ -59,6 +61,11 @@ __global__ void countPairsSingle_kernel(uint * overlappingCounts,
     uint boxInd = blockIdx.x*blockDim.x + threadIdx.x;
     boxInd = boxInd<<NumSkip;
 	if(boxInd >= maxBoxInd) return;
+	
+	if(anchors[tetrahedronVertices[boxInd].x] > 0) {
+	    overlappingCounts[boxInd] = 0;
+	    return;
+	}
 	
 	const Aabb box = boxes[boxInd];	
 	
