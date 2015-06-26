@@ -449,7 +449,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
  *  j = (1 + Cr)Vr.N*M^-1
  */
     J += constraints[iContact].relVel;
-    J *= 0.7f;
+    J *= 0.499f;
     J *= constraints[iContact].Minv;
 	
 	float prevSum = constraints[iContact].lambda;

@@ -6,7 +6,8 @@
 #define USE_PACKET_TRAVERSE 0
 #define SINGL_TRAVERSE_NUM_THREAD 64
 #define SINGL_TRAVERSE_SIZE_SMEM 16320
-#define SELF_COLLIDE_SKIP 1
+#define SELF_COLLIDE_SKIP 2
+#define SOLLIDE_SKIP 0
 //#define SINGL_TRAVERSE_NUM_THREAD 128
 //#define SINGL_TRAVERSE_SIZE_SMEM 32640
 
@@ -140,11 +141,11 @@ void countPairs(uint * dst,
 #else
     int tpb = SINGL_TRAVERSE_NUM_THREAD;
     dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numBoxes, tpb);
+    unsigned nblk = iDivUp(numBoxes>>SOLLIDE_SKIP, tpb);
     
     dim3 grid(nblk, 1, 1);
     
-    countPairsSingle_kernel<<< grid, block >>>(dst,
+    countPairsSingle_kernel<SOLLIDE_SKIP> <<< grid, block >>>(dst,
                                 boxes,
                                 numBoxes,
 								internalNodeChildIndex, 
@@ -189,11 +190,11 @@ void writePairCache(uint2 * dst,
 #else
     int tpb = SINGL_TRAVERSE_NUM_THREAD;
     dim3 block(tpb, 1, 1);
-    unsigned nblk = iDivUp(numBoxes, tpb);
+    unsigned nblk = iDivUp(numBoxes>>SOLLIDE_SKIP, tpb);
     
     dim3 grid(nblk, 1, 1);
     
-    writePairCacheSingle_kernel<<< grid, block >>>(dst,
+    writePairCacheSingle_kernel<SOLLIDE_SKIP> <<< grid, block >>>(dst,
                                 locations,
                                 cacheStarts,
                                 overlappingCounts,

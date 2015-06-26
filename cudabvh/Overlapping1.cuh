@@ -47,6 +47,7 @@ inline __device__ void writeOverlappings(uint2 * overlappings,
     }
 }
 
+template<int NumSkip>
 __global__ void countPairsSingle_kernel(uint * overlappingCounts, 
 								Aabb * boxes, 
 								uint maxBoxInd,
@@ -56,6 +57,7 @@ __global__ void countPairsSingle_kernel(uint * overlappingCounts,
 								KeyValuePair * mortonCodesAndAabbIndices)
 {
     uint boxInd = blockIdx.x*blockDim.x + threadIdx.x;
+    boxInd = boxInd<<NumSkip;
 	if(boxInd >= maxBoxInd) return;
 	
 	const Aabb box = boxes[boxInd];	
@@ -104,6 +106,7 @@ __global__ void countPairsSingle_kernel(uint * overlappingCounts,
     overlappingCounts[boxInd] = outCount;
 }
 
+template<int NumSkip>
 __global__ void writePairCacheSingle_kernel(uint2 * outPairs, 
                                 uint * cacheWriteLocation,
                                 uint * writeStart,
@@ -118,6 +121,7 @@ __global__ void writePairCacheSingle_kernel(uint2 * outPairs,
 								uint treeIdx)
 {
     uint boxIndex = blockIdx.x*blockDim.x + threadIdx.x;
+    boxIndex = boxIndex<<NumSkip;
 	if(boxIndex >= maxBoxInd) return;
 	
 	uint cacheSize = overlappingCounts[boxIndex];

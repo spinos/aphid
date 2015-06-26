@@ -121,10 +121,9 @@ void CudaConjugateGradientSolver::solve(void * X,
 
         m_reduce->sum<float>(d1, (float *)diff(), m_dimension);
         
-        // if(i>28) std::cout<<" d1["<<i<<"] "<<d1<<" ";
         if(error) *error = d1;
         
-		if(d1 < 0.001f)
+		if(d1 < 0.01f)
 			break;
 
 		if(fabs(d)<1e-10f)

@@ -10,4 +10,4 @@
 #include "FemGlobal.h"
 
 std::string FemGlobal::FileName = "unknown";
-int FemGlobal::CGSolverMaxNumIterations = 30;
+int FemGlobal::CGSolverMaxNumIterations = 20;

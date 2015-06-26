@@ -375,7 +375,8 @@ void CudaNarrowphase::resetToInitial()
     
     void * dst = m_objectBuf.m_pos->bufferOnDevice();
 	void * src = m_objectBuf.m_pos0->bufferOnDevice();
-	narrowphaseResetX((float3 *)dst, (float3 *)src, m_numPoints);
+    void * vel = m_objectBuf.m_vel->bufferOnDevice();
+	narrowphaseResetX((float3 *)dst, (float3 *)src, (float3 *)vel, m_numPoints);
 }
 
 void CudaNarrowphase::swapBuffer()
