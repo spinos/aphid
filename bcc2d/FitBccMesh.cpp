@@ -18,7 +18,7 @@ FitBccMesh::~FitBccMesh()
 {
 }
 
-void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorPoints)
+void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorIntersect)
 {
 	std::vector<Vector3F > tetrahedronP;
 	std::vector<unsigned > tetrahedronInd;
@@ -46,8 +46,7 @@ void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorPoints)
 	
 	resetAnchors(np);
 	
-	// for(i=0;i<6;i++) anchors()[i] = 1;
-	addAnchors(anchorPoints);
+	addAnchors(builder.startPoints(), geoa->numGeometries());
 }
 
 void FitBccMesh::addAnchors(KdIntersection * anchorIntersect)
@@ -68,3 +67,39 @@ void FitBccMesh::addAnchors(KdIntersection * anchorIntersect)
 		}
     }
 }
+
+void FitBccMesh::addAnchors(Vector3F * anchorPoints, unsigned n)
+{
+	unsigned i, j, k;
+	unsigned * anchorTri = new unsigned[n];
+	for(i=0; i< n; i++) {
+// todo: find closest tri id for each start point
+	}
+	
+	BoundingBox box;
+	int anchored;
+	for(i=0; i< numTetrahedrons(); i++) {
+        unsigned * tet = tetrahedronIndices(i);
+		
+		box.reset();
+        for(j=0; j< 4; j++)
+            box.expandBy(points()[tet[j]], 0.001f); 
+        
+		// if(!anchorIntersect->intersectBox(box)) continue;
+		anchored = 0;
+		for(k=0; k<n; k++) {
+			if(box.isPointInside(anchorPoints[k])) {
+				anchored = 1;
+				break;
+			}
+		}
+		
+		if(!anchored) continue;
+		
+		for(j=0; j< 4; j++) {
+			anchors()[tet[j]] = 1;
+		}
+    }
+	delete[] anchorTri;
+}
+//:~

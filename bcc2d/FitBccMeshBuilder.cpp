@@ -24,6 +24,7 @@ FitBccMeshBuilder::FitBccMeshBuilder()
     m_octa = 0;
 	m_sampler = new CurveSampler;
 	m_reducer = new SampleGroup;
+	m_startPoints = 0;
 }
 
 FitBccMeshBuilder::~FitBccMeshBuilder() 
@@ -31,6 +32,7 @@ FitBccMeshBuilder::~FitBccMeshBuilder()
 	cleanup(); 
 	delete m_sampler;
 	delete m_reducer;
+	if(m_startPoints) delete[] m_startPoints;
 }
 
 void FitBccMeshBuilder::cleanup()
@@ -43,16 +45,21 @@ void FitBccMeshBuilder::build(GeometryArray * curves,
 	           std::vector<unsigned > & tetrahedronInd)
 {
     const unsigned n = curves->numGeometries();
+	if(m_startPoints) delete[] m_startPoints;
+	m_startPoints = new Vector3F[n];
+	
     unsigned i=0;
     for(;i<n;i++)
         build((BezierCurve *)curves->geometry(i), 
 	           tetrahedronP, 
-	           tetrahedronInd);
+	           tetrahedronInd,
+			   i);
 }
 
 void FitBccMeshBuilder::build(BezierCurve * curve, 
 	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd)
+	           std::vector<unsigned > & tetrahedronInd,
+			   unsigned curveIdx)
 {
 	const unsigned lastNumTet = tetrahedronInd.size();
     cleanup();
@@ -87,6 +94,8 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	
 	float * groupSize = m_reducer->groupSize();
     Vector3F * groupCenter = m_reducer->groupCentroid();
+	
+	m_startPoints[curveIdx] = groupCenter[0];
 
 	int vv[2];
 	int ee[2];
@@ -204,3 +213,7 @@ void FitBccMeshBuilder::drawSamples(KdTreeDrawer * drawer)
 	for(i=0;i<m_reducer->numGroups()-1;i++) drawer->arrow(m_reducer->groupCentroid()[i], m_reducer->groupCentroid()[i+1]);
 	
 }
+
+Vector3F * FitBccMeshBuilder::startPoints()
+{ return m_startPoints; }
+//:~

@@ -46,11 +46,8 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 	KdTree::NumPrimitivesInLeafThreashold = 31;
 	
 	m_cluster->create();
-	
-	createTetrahedronMeshes();
-	
 	createTriangleMeshesFromFile();
-	
+	createTetrahedronMeshes();
 	std::cout<<" done initialize.\n";
 }
 
@@ -229,7 +226,7 @@ void BccWorld::createTetrahedronMeshes()
 	unsigned i=0;
 	for(;i<n;i++) {
 #if WORLD_USE_FIT
-        m_meshes[i].create(m_cluster->group(i), m_anchorIntersect);
+        m_meshes[i].create(m_cluster->group(i), m_triIntersect);
 #else
 		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, 5);
 #endif
@@ -255,20 +252,19 @@ void BccWorld::createTriangleMeshesFromFile()
 	
 	std::cout<<"\n n triangle mesh: "<<m_triangleMeshes->numGeometries()
 	<<"\n";
+	m_triIntersect = new KdIntersection;
 	for(unsigned i=0; i<m_triangleMeshes->numGeometries(); i++) {
-		ATriangleMesh * m = (ATriangleMesh *)m_triangleMeshes->geometry(0);
+		ATriangleMesh * m = (ATriangleMesh *)m_triangleMeshes->geometry(i);
 		std::cout<<m->dagName()
 		<<"\n n triangle: "<<m->numTriangles()
 		<<"\n n points: "<<m->numPoints()
 		<<"\n";
+		m_triIntersect->addGeometry(m);
 	}
-	/*
-	if(m_triangleMeshes->numGeometries()>0) {
-		ATriangleMesh * m = (ATriangleMesh *)m_triangleMeshes->geometry(0);		
-		unsigned i = 0;
-		for(;i<m->numIndices();i++) std::cout<<" "<<m->indices()[i];
-		for(i=0;i<m->numPoints();i++) std::cout<<" "<<m->points()[i];
-	}*/
+	
+	KdTree::MaxBuildLevel = 32;
+	KdTree::NumPrimitivesInLeafThreashold = 9;
+	m_triIntersect->create();
 }
  
 void BccWorld::draw()
@@ -295,6 +291,8 @@ void BccWorld::draw()
 		m_drawer->setGroupColorLight(selectedCurveGrp);
 		m_drawer->geometry(m_cluster->group(selectedCurveGrp));
 	}
+	
+	// m_drawer->drawKdTree(m_triIntersect);
 }
 
 bool BccWorld::readCurveDataFromFile()
@@ -525,7 +523,7 @@ void BccWorld::reduceGroup(unsigned igroup)
 	
 	int i=0;
 	for(;i<20;i++) {
-		GeometryArray * ir = m_reducer->compute(m_cluster->group(igroup), FitBccMeshBuilder::EstimatedGroupSize * 1.23f);
+		GeometryArray * ir = m_reducer->compute(m_cluster->group(igroup), FitBccMeshBuilder::EstimatedGroupSize);
 		if(ir) {
 			reduced = ir;
 			m_cluster->setGroupGeometry(igroup, reduced);
@@ -555,7 +553,7 @@ void BccWorld::rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos
 	const unsigned oldTotalNVert = m_totalNumPoints;
 	float vlm;
 #if WORLD_USE_FIT
-	m_meshes[igroup].create(geos, m_anchorIntersect);
+	m_meshes[igroup].create(geos, m_triIntersect);
 #else
 	m_meshes[igroup].create(geos, m_anchorIntersect, 5);
 #endif	

@@ -27,7 +27,10 @@ public:
 	
 	void build(BezierCurve * curve, 
 	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd);
+	           std::vector<unsigned > & tetrahedronInd,
+			   unsigned curveIdx);
+			   
+	Vector3F * startPoints();
 			   
 	static float EstimatedGroupSize;
 protected:
@@ -42,4 +45,5 @@ private:
 	CurveSampler * m_sampler;
 	SampleGroup * m_reducer;
 	BccOctahedron * m_octa;
+	Vector3F * m_startPoints;
 };

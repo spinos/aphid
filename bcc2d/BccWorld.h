@@ -61,6 +61,7 @@ private:
     CurveGroup * m_curves;
 	KdCluster * m_cluster;
 	KdIntersection * m_anchorIntersect;
+	KdIntersection * m_triIntersect;
 	GeometryArray * m_allGeo;
 	APointCloud * m_curveStartP;
 	GeometryArray * m_triangleMeshes;
