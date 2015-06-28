@@ -22,14 +22,13 @@ Matrix44F::Matrix44F(float x)
 }
 
 Matrix44F::Matrix44F(const Matrix44F & a)
-{
-	for(int i = 0; i < 16; i++) v[i] = a.v[i];
-}
+{ for(int i = 0; i < 16; i++) v[i] = a.v[i]; }
+
+Matrix44F::Matrix44F(float * mat)
+{ for(int i = 0; i < 16; i++) v[i] = mat[i]; }
 
 Matrix44F::Matrix44F(double * mat)
-{
-    for(int i = 0; i < 16; i++) v[i] = mat[i];
-}
+{ for(int i = 0; i < 16; i++) v[i] = mat[i]; }
 
 Matrix44F::~Matrix44F() {}
 

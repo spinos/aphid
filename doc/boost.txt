@@ -1,3 +1,7 @@
 build boost with 64-bit address model
 
 .\b2 -q toolset=msvc variant=release address-model=64 threading=multi --with-system --with-date_time --with-regex --with-filesystem --with-thread ...
+
+options for compression
+
+-sNO_COMPRESSION=0 -sNO_ZLIB=0 -sZLIB_SOURCE=D:/usr/zlib-1.2.5 -sZLIB_LIBPATH=D:/usr/zlib-1.2.5 -sNO_SZIP=0 -sSZIP_SOURCE=D:/usr/szip-2.1

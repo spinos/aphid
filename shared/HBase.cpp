@@ -143,6 +143,16 @@ void HBase::writeMatrix33Data(const char * dataName, unsigned count, Matrix33F *
 	cset.close();
 }
 
+void HBase::writeMatrix44Data(const char * dataName, unsigned count, Matrix44F *value, HDataset::SelectPart * part)
+{
+    FloatsHDataset cset(dataName);
+	cset.setNumFloats(count * 16);
+	cset.open(fObjectId);
+
+	if(!cset.write((char *)value, part)) std::cout<<"error: h5 base "<<fObjectId<<" cannot write mat44 data "<<dataName<<"!\n";
+	cset.close();
+}
+
 void HBase::writeCharData(const char * dataName, unsigned count, char *value, HDataset::SelectPart * part)
 {
 	HCharData pset(dataName);

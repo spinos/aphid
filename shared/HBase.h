@@ -14,6 +14,7 @@
 #include <vector>
 class Vector3F;
 class Matrix33F;
+class Matrix44F;
 
 class HBase : public HGroup {
 public:
@@ -35,6 +36,7 @@ public:
 	void writeFloatData(const char * dataName, unsigned count, float *value, HDataset::SelectPart * part = 0);
 	void writeVector3Data(const char * dataName, unsigned count, Vector3F *value, HDataset::SelectPart * part = 0);
 	void writeMatrix33Data(const char * dataName, unsigned count, Matrix33F *value, HDataset::SelectPart * part = 0);
+	void writeMatrix44Data(const char * dataName, unsigned count, Matrix44F *value, HDataset::SelectPart * part = 0);
 	void writeCharData(const char * dataName, unsigned count, char *value, HDataset::SelectPart * part = 0);
 	
 	char readIntAttr(const char * attrName, int *value);

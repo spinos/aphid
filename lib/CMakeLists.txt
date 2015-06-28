@@ -107,6 +107,7 @@ add_library(aphid STATIC ../shared/line_math.h
     ../shared/VerticesHDataset.cpp 
     ../shared/IndicesHDataset.cpp 
         ../shared/FloatsHDataset.cpp 
+../shared/XformHDataset.cpp 
     ../shared/HIntAttribute.cpp 
     ../shared/HFloatAttribute.cpp 
     ../shared/HStringAttribute.cpp 
