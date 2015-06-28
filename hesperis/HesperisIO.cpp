@@ -13,6 +13,7 @@
 #include <maya/MFnMesh.h>
 #include <maya/MPointArray.h>
 #include <maya/MIntArray.h>
+#include <maya/MFnTransform.h>
 #include <CurveGroup.h>
 #include <ATriangleMesh.h>
 #include "HesperisFile.h"
@@ -106,12 +107,15 @@ bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file)
 	
 	MIntArray triangleCounts, triangleVertices;
 	MPointArray ps;
-	
+    MPoint wp;
+	MMatrix worldTm;
 	std::vector<ATriangleMesh * > meshes;
 	for(i=0; i< n; i++) {
 		MFnMesh fmesh(paths[i].node(), &stat);
 		if(!stat) continue;
 		numNodes++;
+        
+        worldTm = GetWorldTransform(paths[i]);
 		
 		numPnts = fmesh.numVertices();
 		fmesh.getTriangles(triangleCounts, triangleVertices);
@@ -130,8 +134,10 @@ bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file)
 	
 		fmesh.getPoints(ps, MSpace::kObject);
 			
-		for(j=0; j<numPnts; j++)
-			pnts[j].set((float)ps[j].x, (float)ps[j].y, (float)ps[j].z);
+		for(j=0; j<numPnts; j++) {
+            wp = ps[j] * worldTm;
+			pnts[j].set((float)wp.x, (float)wp.y, (float)wp.z);
+        }
 		
 		for(j=0; j<triangleVertices.length(); j++)
 			inds[j] = triangleVertices[j];
@@ -155,3 +161,36 @@ bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file)
 	meshes.clear();
 	return true;
 }
+
+MMatrix HesperisIO::GetParentTransform(const MDagPath & path)
+{
+    MMatrix m;
+    MDagPath parentPath = path;
+    parentPath.pop();
+    MStatus stat;
+    MFnTransform ft(parentPath, &stat);
+    if(!stat) {
+        MGlobal::displayWarning(MString("hesperis io cannot create transform func by paht ")+path.fullPathName());
+        return m;   
+    }
+    m = ft.transformation().asMatrix();
+    return m;
+}
+
+MMatrix HesperisIO::GetWorldTransform(const MDagPath & path)
+{
+    MMatrix m;
+    MDagPath parentPath = path;
+    MStatus stat;
+    for(;;) {
+        stat = parentPath.pop();
+        if(!stat) break;
+        MFnTransform ft(parentPath, &stat);
+        if(!stat) {
+            return m;   
+        }
+        m *= ft.transformation().asMatrix();
+    }
+    return m;
+}
+

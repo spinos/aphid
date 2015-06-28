@@ -77,10 +77,10 @@ __global__ void countPairsSelfCollideSingle_kernel(uint * overlappingCounts,
 	boxIndex = boxIndex<<NumSkip;
 	if(boxIndex >= maxBoxInd) return;
 	
-	if(anchors[tetrahedronVertices[boxIndex].x] > 0) {
-	    overlappingCounts[boxIndex] = 0;
-	    return;
-	}
+	// if(anchors[tetrahedronVertices[boxIndex].x] > 0) {
+	    // overlappingCounts[boxIndex] = 0;
+	    // return;
+	// }
 	
 	const Aabb box = boxes[boxIndex];
 

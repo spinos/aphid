@@ -63,7 +63,7 @@ __global__ void countPairsSingle_kernel(uint * overlappingCounts,
 	if(boxInd >= maxBoxInd) return;
 	
 	if(anchors[tetrahedronVertices[boxInd].x] > 0) {
-	    overlappingCounts[boxInd] = 0;
+	    // overlappingCounts[boxInd] = 0;
 	    return;
 	}
 	

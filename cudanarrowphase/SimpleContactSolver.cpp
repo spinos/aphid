@@ -103,7 +103,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 							
 	int mxcount = 0;
 	max<int>(mxcount, (int *)bodyCount, splitBufLength);
-    if(mxcount>9) std::cout<<" max count per contact "<<mxcount; 
+// if(mxcount>9) std::cout<<" max count per contact "<<mxcount; 
 	int numiterations = mxcount + 2;
 	
 	m_splitInverseMass->create(splitBufLength * 4);
