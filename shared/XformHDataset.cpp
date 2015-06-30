@@ -18,3 +18,11 @@ XformHDataset::XformHDataset(const std::string & path) : HDataset(path)
 
 XformHDataset::~XformHDataset() {}
 
+char XformHDataset::read(float *data)
+{
+	herr_t status = H5Dread(fObjectId, dataType(), H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+	if(status < 0)
+		return 0;
+	return 1;
+}
+
