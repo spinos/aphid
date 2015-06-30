@@ -56,10 +56,14 @@ private:
 	bool readTetrahedron();
 	bool listTriangle(HBase * grp);
 	bool readTriangle();
+    void openParents(const std::string & name);
+    void closeParents();
+    std::string worldPath(const std::string & name);
 private:
 	std::map<std::string, CurveGroup * > m_curves;
 	std::map<std::string, ATetrahedronMesh * > m_terahedrons;
 	std::map<std::string, ATriangleMesh * > m_triangleMeshes;
+    std::map<std::string, HBase * > m_parentGroups;
 	ReadComponent m_readComp;
 	WriteComponent m_writeComp;
 };

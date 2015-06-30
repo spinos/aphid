@@ -414,7 +414,7 @@ char SHelper::hasParent(std::string& name)
 	return 1;
 }
 
-void SHelper::listParentNames(std::string& name, std::vector<std::string>& parents)
+void SHelper::listParentNames(const std::string& name, std::vector<std::string>& parents)
 {
 	parents.clear();
 	std::string r;

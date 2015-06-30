@@ -17,7 +17,9 @@
 #include <ATriangleMesh.h>
 #include <ATetrahedronMesh.h>
 #include <GeometryArray.h>
+#include <SHelper.h>
 #include <sstream>
+#include <boost/format.hpp>
 HesperisFile::HesperisFile() {}
 HesperisFile::HesperisFile(const char * name) : HFile(name) 
 {
@@ -66,15 +68,16 @@ bool HesperisFile::doWrite(const std::string & fileName)
 
 bool HesperisFile::writeCurve()
 {
-	std::stringstream sst;
 	std::map<std::string, CurveGroup *>::iterator itcurve = m_curves.begin();
 	for(; itcurve != m_curves.end(); ++itcurve) {
-		sst.str("");
-		sst<<"/world/"<<itcurve->first;
-		std::cout<<" write curve "<<sst.str()<<"\n";
-		HCurveGroup grpCurve(sst.str());
+		openParents(itcurve->first);
+        std::cout<<" write curve "<<worldPath(itcurve->first)
+        <<"\n";
+        
+		HCurveGroup grpCurve(worldPath(itcurve->first));
 		grpCurve.save(itcurve->second);
 		grpCurve.close();
+        closeParents();
 	}
 	return true;
 }
@@ -259,4 +262,36 @@ void HesperisFile::extractTriangleMeshes(GeometryArray * dst)
 	}
 	dst->setNumGeometries(i);
 }
+
+void HesperisFile::openParents(const std::string & name)
+{
+    std::vector<std::string>  parents;
+    SHelper::listParentNames(name, parents);
+    if(parents.size() < 1) return;
+    
+    m_parentGroups.clear();
+    
+    std::vector<std::string>::const_iterator it = parents.begin();
+    for(;it!=parents.end();++it) {
+        std::string wp = worldPath(*it);
+        std::cout<<"hes open "<<wp;
+        m_parentGroups[wp] = new HBase(wp);
+
+        
+    }
+}
+
+void HesperisFile::closeParents()
+{
+    if(m_parentGroups.size() < 1) return;
+    std::map<std::string, HBase * >::const_iterator it = m_parentGroups.begin();
+    for(;it!=m_parentGroups.end(); ++it) {
+        std::cout<<"hes close "<<it->first;
+        it->second->close();
+    }
+    m_parentGroups.clear();
+}
+
+std::string HesperisFile::worldPath(const std::string & name)
+{ return boost::str(boost::format("/world%1%") % name); }
 //:~

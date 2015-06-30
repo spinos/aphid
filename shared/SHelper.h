@@ -44,7 +44,7 @@ public:
 	static void getHierarchy(const char *name, std::vector<std::string> &res);
 	static void listAllNames(std::string& name, std::vector<std::string>& all);
 	static char hasParent(std::string& name);
-	static void listParentNames(std::string& name, std::vector<std::string>& parents);
+	static void listParentNames(const std::string& name, std::vector<std::string>& parents);
 	static void pathToFilename(std::string& name);
 	static void noColon(std::string& name);
 	static void pathDosToUnix(std::string& name);

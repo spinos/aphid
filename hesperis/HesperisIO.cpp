@@ -14,10 +14,11 @@
 #include <maya/MPointArray.h>
 #include <maya/MIntArray.h>
 #include <maya/MFnTransform.h>
+#include <maya/MItDag.h>
 #include <CurveGroup.h>
 #include <ATriangleMesh.h>
 #include "HesperisFile.h"
-
+#include <sstream>
 bool HesperisIO::IsCurveValid(const MDagPath & path)
 {
 	MStatus stat;
@@ -33,7 +34,7 @@ bool HesperisIO::IsCurveValid(const MDagPath & path)
 	return true;
 }
 
-bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file) 
+bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file, const std::string & parentName) 
 {
 	MStatus stat;
 	const unsigned n = paths.length();
@@ -85,7 +86,14 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file)
 	}
 	
 	file->setWriteComponent(HesperisFile::WCurve);
-	file->addCurve("curves", &gcurve);
+    if(parentName.size()>1) {
+        std::stringstream sst;
+        sst<<parentName<<"|curves";
+        MGlobal::displayInfo(MString("hes io write ")+sst.str().c_str());
+        file->addCurve(sst.str(), &gcurve);
+    }
+    else
+        file->addCurve("|curves", &gcurve);
 	file->setDirty();
 	bool fstat = file->save();
 	if(!fstat) MGlobal::displayWarning(MString(" cannot save curves to file ")+ file->fileName().c_str());
@@ -194,3 +202,21 @@ MMatrix HesperisIO::GetWorldTransform(const MDagPath & path)
     return m;
 }
 
+bool HesperisIO::GetCurves(const MDagPath &root, MDagPathArray & dst)
+{
+    MStatus stat;
+	MItDag iter;
+	iter.reset(root, MItDag::kDepthFirst, MFn::kNurbsCurve);
+	for(; !iter.isDone(); iter.next()) {								
+		MDagPath apath;		
+		iter.getPath( apath );
+		if(IsCurveValid(apath)) dst.append(apath);
+	}
+    return dst.length() > 0;
+}
+
+bool HesperisIO::ReadCurves(HesperisFile * file, MObject &target)
+{
+    return 1;
+}
+//:~
