@@ -1,0 +1,19 @@
+/*
+ *  AFrameRange.h
+ *  
+ *
+ *  Created by jian zhang on 7/2/15.
+ *  Copyright 2015 __MyCompanyName__. All rights reserved.
+ *
+ */
+
+class AFrameRange {
+public:
+	AFrameRange();
+	virtual ~AFrameRange();
+	void reset();
+	bool isValid();
+	static int FirstFrame;
+	static int LastFrame;
+	static int SamplesPerFrame;
+};

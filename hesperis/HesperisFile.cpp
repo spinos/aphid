@@ -12,6 +12,7 @@
 #include <HWorld.h>
 #include <HCurveGroup.h>
 #include <BaseBuffer.h>
+#include <HFrameRange.h>
 #include <HTransform.h>
 #include <HTetrahedronMesh.h>
 #include <HTriangleMesh.h>
@@ -22,6 +23,9 @@
 #include <SHelper.h>
 #include <sstream>
 #include <boost/format.hpp>
+
+AFrameRange HesperisFile::Frames;
+
 HesperisFile::HesperisFile() {}
 HesperisFile::HesperisFile(const char * name) : HFile(name) 
 {
@@ -64,6 +68,7 @@ bool HesperisFile::doWrite(const std::string & fileName)
 			break;
 	}
 	
+	writeFrames();
 	grpWorld.close();
 	HObject::FileIO.close();
 	
@@ -165,6 +170,7 @@ bool HesperisFile::doRead(const std::string & fileName)
 			break;
 	}
 	
+	readFrames(&grpWorld);
 	grpWorld.close();
 	
 	std::cout<<" finished reading hesperis file modified at "<<grpWorld.modifiedTimeStr()<<"\n";
@@ -286,4 +292,25 @@ void HesperisFile::extractTriangleMeshes(GeometryArray * dst)
 
 std::string HesperisFile::worldPath(const std::string & name)
 { return boost::str(boost::format("/world%1%") % name); }
+
+bool HesperisFile::writeFrames()
+{
+	if(!Frames.isValid()) return false;
+	HFrameRange g("/world/.frames");
+	g.save(&Frames);
+	g.close();
+	return true;
+}
+
+bool HesperisFile::readFrames(HBase * grp)
+{
+	Frames.reset();
+	if(!grp->hasNamedChild(".frames")) {
+		return false;
+	}
+	HFrameRange g("/world/.frames");
+	g.load(&Frames);
+	g.close();
+	return true;
+}
 //:~

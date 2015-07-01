@@ -10,6 +10,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <AFrameRange.h>
 class BaseTransform;
 class CurveGroup;
 class BaseBuffer;
@@ -48,13 +49,17 @@ public:
 	virtual bool doRead(const std::string & fileName);
     void extractTetrahedronMeshes(GeometryArray * dst);
 	void extractTriangleMeshes(GeometryArray * dst);
+	
+	static AFrameRange Frames;
 protected:
 
 private:
+	bool writeFrames();
 	bool writeTransform();
 	bool writeCurve();
 	bool writeTetrahedron();
 	bool writeTriangle();
+	bool readFrames(HBase * grp);
 	bool readCurve();
     bool listTetrahedron(HBase * grp);
 	bool readTetrahedron();
