@@ -171,6 +171,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/CurveGroup.cpp 
 ../shared/HCurveGroup.cpp
 ../shared/BaseBuffer.cpp
+../shared/HTransform.cpp
 ../shared/HTriangleMesh.cpp
 ../shared/HTetrahedronMesh.cpp
 ../shared/AGenericMesh.cpp

@@ -629,7 +629,7 @@ void SHelper::removeNodeName(std::string& name)
 	name = r;
 }
 
-void SHelper::behead(std::string& name, std::string& head)
+void SHelper::behead(std::string& name, const std::string& head)
 {
 	if(head.size() < 1)
 		return;

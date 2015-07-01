@@ -428,11 +428,10 @@ std::string HBase::childPath(int i)
 }
 
 char HBase::save()
-{
-	return 1;
-}
+{ return 1; }
 
 char HBase::load()
-{
-	return 1;
-}
+{ return 1; }
+
+char HBase::verifyType()
+{ return 1; }

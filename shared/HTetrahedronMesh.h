@@ -16,7 +16,7 @@ public:
 	HTetrahedronMesh(const std::string & path);
 	virtual ~HTetrahedronMesh();
 	
-	char verifyType();
+	virtual char verifyType();
 	virtual char save(ATetrahedronMesh * tetra);
 	virtual char load(ATetrahedronMesh * tetra);
 	

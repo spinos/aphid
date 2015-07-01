@@ -51,7 +51,7 @@ public:
 	static void pathUnixToDos(std::string& name);
 	static void removePrefix(std::string& name);
 	static void removeNodeName(std::string& name);
-	static void behead(std::string& name, std::string& head);
+	static void behead(std::string& name, const std::string& head);
 	static void stripAll(std::string& name);
 	static std::string afterLastUnderscore(const std::string &res);
 	static char fuzzyMatch(std::string &one,std::string &another);

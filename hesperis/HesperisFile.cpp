@@ -12,6 +12,7 @@
 #include <HWorld.h>
 #include <HCurveGroup.h>
 #include <BaseBuffer.h>
+#include <HTransform.h>
 #include <HTetrahedronMesh.h>
 #include <HTriangleMesh.h>
 #include <ATriangleMesh.h>
@@ -274,10 +275,7 @@ void HesperisFile::openParents(const std::string & name)
     std::vector<std::string>::const_iterator it = parents.begin();
     for(;it!=parents.end();++it) {
         std::string wp = worldPath(*it);
-        std::cout<<"hes open "<<wp;
-        m_parentGroups[wp] = new HBase(wp);
-
-        
+        m_parentGroups[wp] = new HTransform(wp);
     }
 }
 
@@ -286,7 +284,7 @@ void HesperisFile::closeParents()
     if(m_parentGroups.size() < 1) return;
     std::map<std::string, HBase * >::const_iterator it = m_parentGroups.begin();
     for(;it!=m_parentGroups.end(); ++it) {
-        std::cout<<"hes close "<<it->first;
+        it->second->save();
         it->second->close();
     }
     m_parentGroups.clear();
