@@ -17,6 +17,7 @@
 #include <HTriangleMesh.h>
 #include <ATriangleMesh.h>
 #include <ATetrahedronMesh.h>
+#include <BaseTransform.h>
 #include <GeometryArray.h>
 #include <SHelper.h>
 #include <sstream>
@@ -55,6 +56,10 @@ bool HesperisFile::doWrite(const std::string & fileName)
 			break;
 		case WTri:
 			writeTriangle();
+			break;
+		case WTransform:
+			writeTransform();
+			break;
 		default:
 			break;
 	}
@@ -67,18 +72,30 @@ bool HesperisFile::doWrite(const std::string & fileName)
 	return true;
 }
 
+bool HesperisFile::writeTransform()
+{
+	std::map<std::string, BaseTransform *>::iterator ittrans = m_transforms.begin();
+	for(; ittrans != m_transforms.end(); ++ittrans) {
+		std::cout<<" write transform "<<worldPath(ittrans->first)
+        <<"\n";
+        
+		HTransform grp(worldPath(ittrans->first));
+		grp.save(ittrans->second);
+		grp.close();
+	}
+	return true;
+}
+
 bool HesperisFile::writeCurve()
 {
 	std::map<std::string, CurveGroup *>::iterator itcurve = m_curves.begin();
 	for(; itcurve != m_curves.end(); ++itcurve) {
-		openParents(itcurve->first);
-        std::cout<<" write curve "<<worldPath(itcurve->first)
+		std::cout<<" write curve "<<worldPath(itcurve->first)
         <<"\n";
         
 		HCurveGroup grpCurve(worldPath(itcurve->first));
 		grpCurve.save(itcurve->second);
 		grpCurve.close();
-        closeParents();
 	}
 	return true;
 }
@@ -112,6 +129,9 @@ bool HesperisFile::writeTriangle()
 	}
 	return true;
 }
+
+void HesperisFile::addTransform(const std::string & name, BaseTransform * data)
+{ m_transforms[name] = data; }
 
 void HesperisFile::addCurve(const std::string & name, CurveGroup * data)
 { m_curves[name] = data; }
@@ -262,32 +282,6 @@ void HesperisFile::extractTriangleMeshes(GeometryArray * dst)
 		i++;
 	}
 	dst->setNumGeometries(i);
-}
-
-void HesperisFile::openParents(const std::string & name)
-{
-    std::vector<std::string>  parents;
-    SHelper::listParentNames(name, parents);
-    if(parents.size() < 1) return;
-    
-    m_parentGroups.clear();
-    
-    std::vector<std::string>::const_iterator it = parents.begin();
-    for(;it!=parents.end();++it) {
-        std::string wp = worldPath(*it);
-        m_parentGroups[wp] = new HTransform(wp);
-    }
-}
-
-void HesperisFile::closeParents()
-{
-    if(m_parentGroups.size() < 1) return;
-    std::map<std::string, HBase * >::const_iterator it = m_parentGroups.begin();
-    for(;it!=m_parentGroups.end(); ++it) {
-        it->second->save();
-        it->second->close();
-    }
-    m_parentGroups.clear();
 }
 
 std::string HesperisFile::worldPath(const std::string & name)

@@ -111,10 +111,12 @@ MStatus HesperisCmd::doIt(const MArgList &args)
 	MItSelectionList iter( selList );
 	
 	MDagPathArray curves;
+	MDagPathArray tms;
 	
 	for(; !iter.isDone(); iter.next()) {								
 		MDagPath apath;		
 		iter.getDagPath( apath );
+		tms.append(apath);
 		getCurves(apath, curves);	
 	}
 	
@@ -130,16 +132,17 @@ MStatus HesperisCmd::doIt(const MArgList &args)
 		return MS::kSuccess;
 	}
 	
+	HesperisIO::WriteTransforms(tms, &hesf);
 	HesperisIO::WriteCurves(curves, &hesf);
 	
-	writeMesh();
+	writeMesh(&hesf);
 	
 	MGlobal::displayInfo(" done.");
 	
 	return MS::kSuccess;
 }
 
-void HesperisCmd::writeMesh()
+void HesperisCmd::writeMesh(HesperisFile * file)
 {
 	if(m_growMeshName.length() < 3) return;
 	ASearchHelper searcher;
@@ -150,8 +153,7 @@ void HesperisCmd::writeMesh()
 	if(meshes.length() < 1)
 		MGlobal::displayInfo(MString(" no mesh found by name ")+m_growMeshName);
 
-	HesperisFile file(m_fileName.asChar());
-	HesperisIO::WriteMeshes(meshes, &file);
+	HesperisIO::WriteMeshes(meshes, file);
 }
 
 MStatus HesperisCmd::printHelp()

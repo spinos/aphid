@@ -16,6 +16,8 @@ class HesperisFile;
 class CurveGroup;
 class HesperisIO {
 public:
+	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName = "");
+    static bool AddTransform(const MDagPath & path, HesperisFile * file, const std::string & beheadName = "");
     static bool WriteCurves(MDagPathArray & paths, HesperisFile * file, const std::string & parentName = "");
 	static bool IsCurveValid(const MDagPath & path);
 	static bool WriteMeshes(MDagPathArray & paths, HesperisFile * file);

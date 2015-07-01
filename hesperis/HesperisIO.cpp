@@ -24,7 +24,41 @@
 #include <HCurveGroup.h>
 #include <SHelper.h>
 #include <CurveGroup.h>
+#include <BaseTransform.h>
 #include <sstream>
+
+bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName)
+{
+	file->setWriteComponent(HesperisFile::WTransform);
+    file->setDirty();
+	
+	unsigned i = 0;
+	for(;i<paths.length();i++) AddTransform(paths[i], file, beheadName);
+	
+	bool fstat = file->save();
+	if(!fstat) MGlobal::displayWarning(MString(" cannot save transform to file ")+ file->fileName().c_str());
+	file->close();
+	return true;
+}
+
+bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file, const std::string & beheadName)
+{
+	MFnDagNode fdg(path);
+	if(fdg.parentCount()>0) {
+		MObject oparent = fdg.parent(0);
+		MFnDagNode fp(oparent);
+		MDagPath pp;
+		fp.getPath(pp);
+		AddTransform(pp, file, beheadName);
+	}
+	
+	std::string nodeName = path.fullPathName().asChar();
+	if(beheadName.size() > 1) SHelper::behead(nodeName, beheadName);
+// todo extract tm    
+	file->addTransform(nodeName, new BaseTransform);
+	return true;
+}
+
 bool HesperisIO::IsCurveValid(const MDagPath & path)
 {
 	MStatus stat;

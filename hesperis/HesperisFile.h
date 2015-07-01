@@ -10,6 +10,7 @@
 #include <string>
 #include <map>
 #include <vector>
+class BaseTransform;
 class CurveGroup;
 class BaseBuffer;
 class ATetrahedronMesh;
@@ -29,7 +30,8 @@ public:
 	enum WriteComponent {
 		WCurve = 0,
 		WTetra = 1,
-		WTri = 2
+		WTri = 2,
+		WTransform = 3 
 	};
 	
 	HesperisFile();
@@ -38,6 +40,7 @@ public:
 	
 	void setReadComponent(ReadComponent comp);
 	void setWriteComponent(WriteComponent comp);
+	void addTransform(const std::string & name, BaseTransform * data);
 	void addCurve(const std::string & name, CurveGroup * data);
 	void addTetrahedron(const std::string & name, ATetrahedronMesh * data);
 	void addTriangleMesh(const std::string & name, ATriangleMesh * data);
@@ -48,6 +51,7 @@ public:
 protected:
 
 private:
+	bool writeTransform();
 	bool writeCurve();
 	bool writeTetrahedron();
 	bool writeTriangle();
@@ -56,10 +60,9 @@ private:
 	bool readTetrahedron();
 	bool listTriangle(HBase * grp);
 	bool readTriangle();
-    void openParents(const std::string & name);
-    void closeParents();
     std::string worldPath(const std::string & name);
 private:
+	std::map<std::string, BaseTransform * > m_transforms;
 	std::map<std::string, CurveGroup * > m_curves;
 	std::map<std::string, ATetrahedronMesh * > m_terahedrons;
 	std::map<std::string, ATriangleMesh * > m_triangleMeshes;

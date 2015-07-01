@@ -142,7 +142,7 @@ std::string BaseFile::chooseSaveFileName()
 void BaseFile::doClear()
 {
 	setClean();
-	setFileName("untitled");
+	// setFileName("untitled");
 }
 
 bool BaseFile::doCreate(const std::string & fileName)

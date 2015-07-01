@@ -3,6 +3,7 @@
 #include <maya/MSyntax.h>
 #include <maya/MArgList.h>
 #include <maya/MString.h>
+class HesperisFile;
 class HesperisCmd : public MPxCommand {
 public:                                                                                                                 
 		HesperisCmd() {};
@@ -14,7 +15,7 @@ private:
 	void getMeshes(const MDagPath & root, MDagPathArray & dst);
 	void pushCurves(const MDagPathArray & curves);
 	MStatus parseArgs ( const MArgList& args );
-	void writeMesh();
+	void writeMesh(HesperisFile * file);
 	MStatus printHelp();
 private:
 	enum IOMode {
