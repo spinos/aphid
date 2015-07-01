@@ -18,6 +18,12 @@
 #include <CurveGroup.h>
 #include <ATriangleMesh.h>
 #include "HesperisFile.h"
+#include <HBase.h>
+#include <HWorld.h>
+#include <HTransform.h>
+#include <HCurveGroup.h>
+#include <SHelper.h>
+#include <CurveGroup.h>
 #include <sstream>
 bool HesperisIO::IsCurveValid(const MDagPath & path)
 {
@@ -210,13 +216,154 @@ bool HesperisIO::GetCurves(const MDagPath &root, MDagPathArray & dst)
 	for(; !iter.isDone(); iter.next()) {								
 		MDagPath apath;		
 		iter.getPath( apath );
-		if(IsCurveValid(apath)) dst.append(apath);
+		if(IsCurveValid(apath)) {
+            MFnDagNode fdag(apath);
+            if(!fdag.isIntermediateObject())
+                dst.append(apath);
+        }
 	}
     return dst.length() > 0;
 }
 
 bool HesperisIO::ReadCurves(HesperisFile * file, MObject &target)
 {
-    return 1;
+    MGlobal::displayInfo("opium read curve bundle");
+    HWorld grpWorld;
+    ReadTransforms(&grpWorld, target);
+    ReadCurves(&grpWorld, target);
+    grpWorld.close();
+    return true;
+}
+
+bool HesperisIO::ReadTransforms(HBase * parent, MObject &target)
+{
+    std::vector<std::string > tmNames;
+    parent->lsTypedChild<HTransform>(tmNames);
+	std::vector<std::string>::const_iterator it = tmNames.begin();
+	
+    for(;it!=tmNames.end();++it) {
+        std::string nodeName = *it;
+        SHelper::behead(nodeName, parent->pathToObject());
+        SHelper::behead(nodeName, "/");
+        HBase child(*it);
+        MObject otm = MObject::kNullObj;
+        if(!FindNamedChild(otm, nodeName, target)) {
+            MFnTransform ftransform;
+            otm = ftransform.create(target);
+            SHelper::noColon(nodeName);
+            ftransform.setName(nodeName.c_str()); 
+        }
+        ReadTransforms(&child, otm);
+        ReadCurves(&child, otm);
+        child.close();
+	}
+    return true;
+}
+
+bool HesperisIO::ReadCurves(HBase * parent, MObject &target)
+{
+    std::vector<std::string > crvNames;
+    parent->lsTypedChild<HCurveGroup>(crvNames);
+	std::vector<std::string>::const_iterator it = crvNames.begin();
+	
+    for(;it!=crvNames.end();++it) {
+        std::string nodeName = *it;
+        SHelper::behead(nodeName, parent->pathToObject());
+        SHelper::behead(nodeName, "/");
+        HCurveGroup child(*it);
+        MGlobal::displayInfo(MString(" create ") + nodeName.c_str());
+        CurveGroup cg;
+        child.load(&cg);
+        CreateCurveGeos(&cg, target);
+        child.close();
+	}
+    return true;
+}
+
+bool HesperisIO::CreateCurveGeos(CurveGroup * geos, MObject &target)
+{
+    if(CheckExistingCurves(geos, target)) return true;
+    
+    MGlobal::displayInfo(MString("create ")+ geos->numCurves()
+    +MString(" curves"));
+    
+    Vector3F * pnts = geos->points();
+    unsigned * cnts = geos->counts();
+    unsigned i=0;
+    for(;i<geos->numCurves();i++) {
+        CreateACurve(pnts, cnts[i], target);
+        pnts+= cnts[i];
+    }
+    return true;
+}
+
+bool HesperisIO::CreateACurve(Vector3F * pos, unsigned nv, MObject &target)
+{
+    MPointArray vertexArray;
+    unsigned i=0;
+	for(; i<nv; i++)
+		vertexArray.append( MPoint( pos[i].x, pos[i].y, pos[i].z ) );
+	const int degree = 2;
+    const int spans = nv - degree;
+	const int nknots = spans + 2 * degree - 1;
+    MDoubleArray knotSequences;
+	knotSequences.append(0.0);
+	for(i = 0; i < nknots-2; i++)
+		knotSequences.append( (double)i );
+	knotSequences.append(nknots-3);
+    
+    MFnNurbsCurve curveFn;
+	MStatus stat;
+	curveFn.create(vertexArray,
+					knotSequences, degree, 
+					MFnNurbsCurve::kOpen, 
+					false, false, 
+					target, 
+					&stat );
+					
+	return stat == MS::kSuccess;
+}
+
+bool HesperisIO::CheckExistingCurves(CurveGroup * geos, MObject &target)
+{
+    MDagPathArray existing;
+    MDagPath root;
+    MDagPath::getAPathTo(target, root);
+    if(!GetCurves(root, existing)) return false;
+    
+    const unsigned ne = existing.length();
+    if(ne != geos->numCurves()) return false;
+    
+    unsigned n = 0;
+    unsigned i=0;
+    for(;i<ne;i++) {
+        MFnNurbsCurve fcurve(existing[i].node());
+		n += fcurve.numCVs();
+    }
+    if(n!=geos->numPoints()) return false;
+    
+    MGlobal::displayInfo(" existing curves matched");
+    
+    return true;
+}
+
+bool HesperisIO::FindNamedChild(MObject & dst, const std::string & name, MObject & oparent)
+{
+    if(oparent == MObject::kNullObj) {
+        MItDag itdag(MItDag::kBreadthFirst);
+        oparent = itdag.currentItem();
+        MGlobal::displayInfo(MFnDagNode(oparent).name() + " as default parent");
+    }
+    
+    MFnDagNode ppf(oparent);
+    for(unsigned i = 0; i <ppf.childCount(); i++) {
+        MFnDagNode pf(ppf.child(i));
+        std::string curname = pf.name().asChar();
+        if(SHelper::isMatched(curname, name)) {
+            dst = ppf.child(i);
+            return true;
+        }
+    }
+    return false;
 }
 //:~

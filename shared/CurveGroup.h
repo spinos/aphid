@@ -1,3 +1,6 @@
+#ifndef CURVEGROUP_H
+#define CURVEGROUP_H
+
 /*
  *  CurveGroup.h
  *  hesperis
@@ -28,3 +31,4 @@ private:
 	unsigned * m_counts;
 	unsigned m_numCurves, m_numPoints;
 };
+#endif        //  #ifndef CURVEGROUP_H

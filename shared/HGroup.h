@@ -20,6 +20,5 @@ public:
 	virtual char open();
 	virtual void close();
 	virtual int objectType() const;
-	
 };
 #endif        //  #ifndef HGROUP_H

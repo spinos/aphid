@@ -11,6 +11,8 @@
 #include <Plane.h>
 BaseTransform::BaseTransform(BaseTransform * parent)
 {
+    m_translation.setZero();
+    m_angles.setZero();
 	m_parent = parent;
 	m_rotateDOF.x = m_rotateDOF.y = m_rotateDOF.z = 1.f;
 }
