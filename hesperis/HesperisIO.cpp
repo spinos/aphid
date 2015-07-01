@@ -68,8 +68,12 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file, const s
 	unsigned inode = 0;
 	unsigned icv = 0;
 	unsigned nj;
+	MPoint wp;
+	MMatrix worldTm;
 	for(i=0; i< n; i++) {
 		if(!IsCurveValid(paths[i])) continue;
+		
+		worldTm = GetWorldTransform(paths[i]);
 		
 		MFnNurbsCurve fcurve(paths[i].node());
 		nj = fcurve.numCVs();
@@ -80,7 +84,8 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file, const s
 		inode++;
 		
 		for(j=0; j<nj; j++) {
-			pnts[icv].set((float)ps[j].x, (float)ps[j].y, (float)ps[j].z);
+			wp = ps[j] * worldTm;
+			pnts[icv].set((float)wp.x, (float)wp.y, (float)wp.z);
 			icv++;
 		}
 	}
