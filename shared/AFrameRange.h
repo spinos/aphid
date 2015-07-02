@@ -1,3 +1,6 @@
+#ifndef AFRAMERANGE_H
+#define AFRAMERANGE_H
+
 /*
  *  AFrameRange.h
  *  
@@ -17,3 +20,4 @@ public:
 	static int LastFrame;
 	static int SamplesPerFrame;
 };
+#endif        //  #ifndef AFRAMERANGE_H

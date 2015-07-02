@@ -31,4 +31,7 @@ public:
     static bool CreateACurve(Vector3F * pos, unsigned nv, MObject &target = MObject::kNullObj);
     static bool CheckExistingCurves(CurveGroup * geos, MObject &target = MObject::kNullObj);
     static bool FindNamedChild(MObject & dst, const std::string & name, MObject & oparent = MObject::kNullObj);
+    static bool CreateCurveGroup(MDagPathArray & paths, CurveGroup * dst);
+    static bool LsCurves(std::vector<std::string > & dst);
+    static bool LsCurves(std::vector<std::string > & dst, HBase * parent);
 };

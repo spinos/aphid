@@ -76,60 +76,12 @@ bool HesperisIO::IsCurveValid(const MDagPath & path)
 
 bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file, const std::string & parentName) 
 {
-	MStatus stat;
-	const unsigned n = paths.length();
-	unsigned i, j;
-	int numCvs = 0;
-	unsigned numNodes = 0;
-	
-	MGlobal::displayInfo(" hesperis check curves");
-	
-	for(i=0; i< n; i++) {
-		if(!IsCurveValid(paths[i])) continue;
-		MFnNurbsCurve fcurve(paths[i].node());
-		numCvs += fcurve.numCVs();
-		numNodes++;
-	}
-	
-	if(numCvs < 4) {
-		MGlobal::displayInfo(" too fews cvs!");
-		return false;
-	}
-	
-	MGlobal::displayInfo(MString(" curve count: ") + numNodes);
-	MGlobal::displayInfo(MString(" cv count: ") + numCvs);
-	
-	CurveGroup gcurve;
-	gcurve.create(numNodes, numCvs);
-	
-	Vector3F * pnts = gcurve.points();
-	unsigned * counts = gcurve.counts();
-	
-	unsigned inode = 0;
-	unsigned icv = 0;
-	unsigned nj;
-	MPoint wp;
-	MMatrix worldTm;
-	for(i=0; i< n; i++) {
-		if(!IsCurveValid(paths[i])) continue;
-		
-		worldTm = GetWorldTransform(paths[i]);
-		
-		MFnNurbsCurve fcurve(paths[i].node());
-		nj = fcurve.numCVs();
-		MPointArray ps;
-		fcurve.getCVs(ps, MSpace::kWorld);
-		
-		counts[inode] = nj;
-		inode++;
-		
-		for(j=0; j<nj; j++) {
-			wp = ps[j] * worldTm;
-			pnts[icv].set((float)wp.x, (float)wp.y, (float)wp.z);
-			icv++;
-		}
-	}
-	
+    CurveGroup gcurve;
+    if(!CreateCurveGroup(paths, &gcurve)) {
+        MGlobal::displayInfo(" hesperis check curves error");
+        return false;
+    }
+    
 	file->setWriteComponent(HesperisFile::WCurve);
     if(parentName.size()>1) {
         std::stringstream sst;
@@ -404,5 +356,86 @@ bool HesperisIO::FindNamedChild(MObject & dst, const std::string & name, MObject
         }
     }
     return false;
+}
+
+bool HesperisIO::CreateCurveGroup(MDagPathArray & paths, CurveGroup * dst)
+{
+    MStatus stat;
+	const unsigned n = paths.length();
+	unsigned i, j;
+	int numCvs = 0;
+	unsigned numNodes = 0;
+    
+    for(i=0; i< n; i++) {
+		if(!IsCurveValid(paths[i])) continue;
+		MFnNurbsCurve fcurve(paths[i].node());
+		numCvs += fcurve.numCVs();
+		numNodes++;
+	}
+    
+    if(numCvs < 4) {
+		MGlobal::displayInfo(" too fews cvs!");
+		return false;
+	}
+    
+    dst->create(numNodes, numCvs);
+    Vector3F * pnts = dst->points();
+	unsigned * counts = dst->counts();
+    
+    unsigned inode = 0;
+	unsigned icv = 0;
+	unsigned nj;
+	MPoint wp;
+	MMatrix worldTm;
+	for(i=0; i< n; i++) {
+		if(!IsCurveValid(paths[i])) continue;
+		
+		worldTm = GetWorldTransform(paths[i]);
+		
+		MFnNurbsCurve fcurve(paths[i].node());
+		nj = fcurve.numCVs();
+		MPointArray ps;
+		fcurve.getCVs(ps, MSpace::kWorld);
+		
+		counts[inode] = nj;
+		inode++;
+		
+		for(j=0; j<nj; j++) {
+			wp = ps[j] * worldTm;
+			pnts[icv].set((float)wp.x, (float)wp.y, (float)wp.z);
+			icv++;
+		}
+	}
+    return true;
+}
+
+bool HesperisIO::LsCurves(std::vector<std::string > & dst)
+{
+    HWorld grpWorld;
+    LsCurves(dst, &grpWorld);
+    grpWorld.close();
+    return true;   
+}
+
+bool HesperisIO::LsCurves(std::vector<std::string > & dst, HBase * parent)
+{
+    std::vector<std::string > tmNames;
+    parent->lsTypedChild<HTransform>(tmNames);
+	std::vector<std::string>::const_iterator ita = tmNames.begin();
+	
+    for(;ita!=tmNames.end();++ita) {
+        HBase child(*ita);
+        LsCurves(dst, &child);
+        child.close();
+	}
+    
+    std::vector<std::string > crvNames;
+    parent->lsTypedChild<HCurveGroup>(crvNames);
+	std::vector<std::string>::const_iterator itb = crvNames.begin();
+	
+    for(;itb!=crvNames.end();++itb) {
+        dst.push_back(*itb);
+	}
+    return true;
 }
 //:~
