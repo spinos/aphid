@@ -24,30 +24,6 @@ MSyntax HesperisCmd::newSyntax()
 	return syntax;
 }
 
-void HesperisCmd::getCurves(const MDagPath & root, MDagPathArray & dst)
-{
-	MStatus stat;
-	MItDag iter;
-	iter.reset(root, MItDag::kDepthFirst, MFn::kNurbsCurve);
-	for(; !iter.isDone(); iter.next()) {								
-		MDagPath apath;		
-		iter.getPath( apath );
-		dst.append(apath);
-	}
-}
-
-void HesperisCmd::getMeshes(const MDagPath & root, MDagPathArray & dst)
-{
-	MStatus stat;
-	MItDag iter;
-	iter.reset(root, MItDag::kDepthFirst, MFn::kMesh);
-	for(; !iter.isDone(); iter.next()) {								
-		MDagPath apath;		
-		iter.getPath( apath );
-		dst.append(apath);
-	}
-}
-
 MStatus HesperisCmd::parseArgs ( const MArgList& args )
 {
 	m_ioMode = IOUnknown;
@@ -117,7 +93,7 @@ MStatus HesperisCmd::doIt(const MArgList &args)
 		MDagPath apath;		
 		iter.getDagPath( apath );
 		tms.append(apath);
-		getCurves(apath, curves);	
+		ASearchHelper::AllTypedPaths(apath, curves, MFn::kNurbsCurve);
 	}
 	
 	if(curves.length() < 1) {
@@ -149,7 +125,7 @@ void HesperisCmd::writeMesh(HesperisFile * file)
 	MDagPath meshGrp;
 	if(!searcher.dagByFullName(m_growMeshName.asChar(), meshGrp)) return;
 	MDagPathArray meshes;
-	getMeshes(meshGrp, meshes);
+	ASearchHelper::AllTypedPaths(meshGrp, meshes, MFn::kMesh);
 	if(meshes.length() < 1)
 		MGlobal::displayInfo(MString(" no mesh found by name ")+m_growMeshName);
 

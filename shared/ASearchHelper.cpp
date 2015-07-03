@@ -627,31 +627,29 @@ char ASearchHelper::findNodeWithNamedPlugValue2(const MObject &root, MObject &re
 	return 0;
 }
 
-char ASearchHelper::findConnectedTypedDepNodeByTypename(MFn::Type type, MString& name, MObject& root, MObject& node)
+bool ASearchHelper::FirstConnectedTypedDepNodeByTypename(MFn::Type type, MString& name, MObject& root, MObject& node)
 {
 	node = MObject::kNullObj;
 	MStatus stat;
 	// up stream
 	MItDependencyGraph itdep(root, type, MItDependencyGraph::kUpstream, MItDependencyGraph::kDepthFirst, MItDependencyGraph::kNodeLevel, &stat );
-	for(; !itdep.isDone(); itdep.next())
-	{
+	for(; !itdep.isDone(); itdep.next()) {
 		MFnDependencyNode pf(itdep.currentItem());
 		if(pf.typeName()==name) {
 			node = itdep.currentItem();
-			return 1;
+			return true;
 		}
 	} 
 	// down stream
 	MItDependencyGraph itdepd(root, type, MItDependencyGraph::kDownstream, MItDependencyGraph::kDepthFirst, MItDependencyGraph::kNodeLevel, &stat );
-	for(; !itdepd.isDone(); itdepd.next())
-	{
+	for(; !itdepd.isDone(); itdepd.next()) {
 		MFnDependencyNode pf(itdepd.currentItem());
 		if(pf.typeName()==name) {
 			node = itdepd.currentItem();
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 char ASearchHelper::findShadingEnginesByName(std::string& name, MObjectArray& result)
@@ -820,5 +818,34 @@ char ASearchHelper::sameParent(MObject &one, MObject &another)
     nameOne = SHelper::getParentName(nameOne);
     nameTwo = SHelper::getParentName(nameTwo);
     return nameOne == nameTwo;
+}
+
+bool ASearchHelper::FirstTypedObj(const MObject &root, MObject & dst, MFn::Type typ)
+{
+    MStatus stat;
+	MItDag iter;
+	iter.reset(root, MItDag::kDepthFirst, typ);
+	for(; !iter.isDone(); iter.next()) {								
+		MDagPath apath;		
+		iter.getPath( apath );
+		MFnDagNode fdag(apath);
+		if(!fdag.isIntermediateObject()) {
+			dst = apath.node();
+			return true;
+		}
+	}
+    return false;
+}
+
+void ASearchHelper::AllTypedPaths(const MDagPath & root, MDagPathArray & dst, MFn::Type typ)
+{
+	MStatus stat;
+	MItDag iter;
+	iter.reset(root, MItDag::kDepthFirst, typ);
+	for(; !iter.isDone(); iter.next()) {								
+		MDagPath apath;		
+		iter.getPath( apath );
+		dst.append(apath);
+	}
 }
 //~:

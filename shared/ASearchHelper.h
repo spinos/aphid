@@ -53,7 +53,6 @@ public:
 	char findReferencedMeshInHistory(MObject &root, MObject &res);
 	char findTransformWithNamedPlugValue(const MObject &root, MObject &res, MString &name, MString &value);
 	char findNodeWithNamedPlugValue2(const MObject &root, MObject &res, MString &name1, MString &value1, MString &name2, MString &value2);
-	char findConnectedTypedDepNodeByTypename(MFn::Type type, MString& name, MObject& root, MObject& node);
 	char findShadingEnginesByName(std::string& name, MObjectArray& result);
 	char findSkinByMesh(MObject& mesh, MObject &skin);
 	char shadingEngines(MObject &mesh, MObjectArray & sgs);
@@ -62,5 +61,9 @@ public:
 	char dagByFullName(const char *name, MDagPath & res);
 	void lastMesh(MObject & result);
 	char sameParent(MObject &one, MObject &another);
+	
+	static void AllTypedPaths(const MDagPath & root, MDagPathArray & dst, MFn::Type typ);
+	static bool FirstTypedObj(const MObject &root, MObject & dst, MFn::Type typ);
+	static bool FirstConnectedTypedDepNodeByTypename(MFn::Type type, MString& name, MObject& root, MObject& node);
 };
 #endif

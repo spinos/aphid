@@ -11,8 +11,6 @@ public:
         static void*    creator();
 		static MSyntax newSyntax();
 private:
-	void getCurves(const MDagPath & root, MDagPathArray & dst);
-	void getMeshes(const MDagPath & root, MDagPathArray & dst);
 	void pushCurves(const MDagPathArray & curves);
 	MStatus parseArgs ( const MArgList& args );
 	void writeMesh(HesperisFile * file);
