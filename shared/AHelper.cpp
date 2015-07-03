@@ -934,4 +934,10 @@ char AHelper::containsGeom(const MDagPath & root)
 	}
 	return 0;
 }
+
+std::string AHelper::FullPathNameToObj(const MObject & node)
+{
+    MFnDagNode pf(node);
+    return std::string(pf.fullPathName().asChar());
+}
 //:~

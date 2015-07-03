@@ -20,8 +20,8 @@ class MDagPathArray;
 #include <string>
 #include <vector>
 #include <sstream>
-
-class ASearchHelper {
+#include <AHelper.h>
+class ASearchHelper : public AHelper {
 public:
 	ASearchHelper() {}
 	std::string getPullPathName(MObject &node);
@@ -62,8 +62,10 @@ public:
 	void lastMesh(MObject & result);
 	char sameParent(MObject &one, MObject &another);
 	
+    static bool FirstObjByAttrValInArray(MObjectArray &objarr, MString &attrname, MString &attrval, MObject &res);
 	static void AllTypedPaths(const MDagPath & root, MDagPathArray & dst, MFn::Type typ);
 	static bool FirstTypedObj(const MObject &root, MObject & dst, MFn::Type typ);
 	static bool FirstConnectedTypedDepNodeByTypename(MFn::Type type, MString& name, MObject& root, MObject& node);
+    static bool FristNamedPlugInHistory(MObject &root, MFn::Type type, MString &name1, MPlug &plug1);
 };
 #endif

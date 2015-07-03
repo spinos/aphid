@@ -21,6 +21,7 @@
 #include <maya/MGlobal.h>
 #include "ASearchHelper.h"
 #include <SHelper.h>
+
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -847,5 +848,44 @@ void ASearchHelper::AllTypedPaths(const MDagPath & root, MDagPathArray & dst, MF
 		iter.getPath( apath );
 		dst.append(apath);
 	}
+}
+
+bool ASearchHelper::FirstObjByAttrValInArray(MObjectArray &objarr, MString &attrname, MString &attrval, MObject &res)
+{
+	MString meshname;
+	for(unsigned i = 0; i <objarr.length(); i++) {
+		if(getStringAttributeByName(objarr[i], attrname.asChar(), meshname)) {
+			if(meshname == attrval) {
+				res = objarr[i];
+				return true;
+			}
+		}
+		else {
+			MPlug plg;
+			if(FristNamedPlugInHistory(objarr[i], MFn::kMesh, attrname, plg)) {
+				meshname = plg.asString();
+				if(meshname == attrval) {
+					res = objarr[i];
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool ASearchHelper::FristNamedPlugInHistory(MObject &root, MFn::Type type, MString &name1, MPlug &plug1)
+{
+	MStatus stat;
+	MItDependencyGraph itdep(root, type, MItDependencyGraph::kUpstream, MItDependencyGraph::kDepthFirst, MItDependencyGraph::kNodeLevel, &stat );
+	for(; !itdep.isDone(); itdep.next())
+	{
+	        MObject ocur = itdep.currentItem();
+	        MFnDependencyNode fdep(ocur);
+	        plug1 = fdep.findPlug( name1, false, &stat);
+	        if(stat)
+	                return true;
+	}
+	return false;
 }
 //~:

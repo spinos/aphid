@@ -123,5 +123,6 @@ public:
 	static void createMinimalMaterial(MString &name, MString &texture);
 	
 	static char containsGeom(const MDagPath & root);
+    static std::string FullPathNameToObj(const MObject & obj);
 };
 #endif
