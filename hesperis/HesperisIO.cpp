@@ -26,6 +26,7 @@
 #include <CurveGroup.h>
 #include <BaseTransform.h>
 #include <sstream>
+#include <boost/format.hpp>
 
 bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName)
 {
@@ -44,13 +45,15 @@ bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * fil
 bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file, const std::string & beheadName)
 {
 	MFnDagNode fdg(path);
-	if(fdg.parentCount()>0) {
-		MObject oparent = fdg.parent(0);
-		MFnDagNode fp(oparent);
-		MDagPath pp;
-		fp.getPath(pp);
-		AddTransform(pp, file, beheadName);
-	}
+	if(fdg.parentCount() < 1) return false;
+	
+	MGlobal::displayInfo(MString("add transform ")+path.fullPathName()+" parent c "+MFnDagNode(path).parentCount());
+
+	MObject oparent = fdg.parent(0);
+	MFnDagNode fp(oparent);
+	MDagPath pp;
+	fp.getPath(pp);
+	AddTransform(pp, file, beheadName);
 	
 	std::string nodeName = path.fullPathName().asChar();
 	if(beheadName.size() > 1) SHelper::behead(nodeName, beheadName);
@@ -83,14 +86,13 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file, const s
     }
     
 	file->setWriteComponent(HesperisFile::WCurve);
-    if(parentName.size()>1) {
-        std::stringstream sst;
-        sst<<parentName<<"|curves";
-        MGlobal::displayInfo(MString("hes io write ")+sst.str().c_str());
-        file->addCurve(sst.str(), &gcurve);
-    }
-    else
-        file->addCurve("|curves", &gcurve);
+	
+	std::string curveName = "|curves";
+    if(parentName.size()>1) curveName = boost::str(boost::format("%1%|curves") % parentName);
+	
+	MGlobal::displayInfo(MString("hes io write ")+curveName.c_str());
+    file->addCurve(curveName, &gcurve);
+	
 	file->setDirty();
 	bool fstat = file->save();
 	if(!fstat) MGlobal::displayWarning(MString(" cannot save curves to file ")+ file->fileName().c_str());
@@ -148,10 +150,8 @@ bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file)
 			inds[j] = triangleVertices[j];
 			
 		amesh->setDagName(std::string(paths[i].fullPathName().asChar()));
-		std::stringstream sst;
-		sst.str("");
-		sst<<"mesh"<<numNodes;
-		std::string meshName = sst.str();
+		
+		std::string meshName = boost::str(boost::format("|mesh%1%") % numNodes);
 		file->addTriangleMesh(meshName, amesh);
 	}
 	

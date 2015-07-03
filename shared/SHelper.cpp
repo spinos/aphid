@@ -875,4 +875,7 @@ char SHelper::isMatched(const std::string &one, const std::string &another)
     
     return 0;
 }
+
+bool SHelper::IsPullPath(const std::string & name)
+{ return (name[0] == '|' || name[0] == '/'); }
 //:~

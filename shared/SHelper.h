@@ -62,6 +62,7 @@ public:
 	static int countColons(const std::string &in);
 	static void validateUnixPath(std::string& name);
 	static char isMatched(const std::string &one, const std::string &another);
+	static bool IsPullPath(const std::string & name);
 };
 #endif
 //:~

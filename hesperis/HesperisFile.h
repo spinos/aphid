@@ -51,6 +51,7 @@ public:
 	void extractTriangleMeshes(GeometryArray * dst);
 	
 	static AFrameRange Frames;
+	static bool DoStripNamespace;
 protected:
 
 private:
@@ -65,13 +66,13 @@ private:
 	bool readTetrahedron();
 	bool listTriangle(HBase * grp);
 	bool readTriangle();
-    std::string worldPath(const std::string & name);
+    std::string worldPath(const std::string & name) const;
+	std::string checkPath(const std::string & name) const;
 private:
 	std::map<std::string, BaseTransform * > m_transforms;
 	std::map<std::string, CurveGroup * > m_curves;
 	std::map<std::string, ATetrahedronMesh * > m_terahedrons;
 	std::map<std::string, ATriangleMesh * > m_triangleMeshes;
-    std::map<std::string, HBase * > m_parentGroups;
-	ReadComponent m_readComp;
+    ReadComponent m_readComp;
 	WriteComponent m_writeComp;
 };

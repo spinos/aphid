@@ -25,6 +25,7 @@
 #include <boost/format.hpp>
 
 AFrameRange HesperisFile::Frames;
+bool HesperisFile::DoStripNamespace = true;
 
 HesperisFile::HesperisFile() {}
 HesperisFile::HesperisFile(const char * name) : HFile(name) 
@@ -83,7 +84,6 @@ bool HesperisFile::writeTransform()
 	for(; ittrans != m_transforms.end(); ++ittrans) {
 		std::cout<<" write transform "<<worldPath(ittrans->first)
         <<"\n";
-        
 		HTransform grp(worldPath(ittrans->first));
 		grp.save(ittrans->second);
 		grp.close();
@@ -97,7 +97,6 @@ bool HesperisFile::writeCurve()
 	for(; itcurve != m_curves.end(); ++itcurve) {
 		std::cout<<" write curve "<<worldPath(itcurve->first)
         <<"\n";
-        
 		HCurveGroup grpCurve(worldPath(itcurve->first));
 		grpCurve.save(itcurve->second);
 		grpCurve.close();
@@ -107,13 +106,11 @@ bool HesperisFile::writeCurve()
 
 bool HesperisFile::writeTetrahedron()
 {
-	std::stringstream sst;
 	std::map<std::string, ATetrahedronMesh *>::iterator it = m_terahedrons.begin();
 	for(; it != m_terahedrons.end(); ++it) {
-		sst.str("");
-		sst<<"/world/"<<it->first;
-		std::cout<<" write tetrahedron mesh "<<sst.str()<<"\n";
-		HTetrahedronMesh grp(sst.str());
+		std::cout<<" write tetrahedron mesh "<<worldPath(it->first)
+		<<"\n";
+		HTetrahedronMesh grp(worldPath(it->first));
 		grp.save(it->second);
 		grp.close();
 	}
@@ -122,13 +119,11 @@ bool HesperisFile::writeTetrahedron()
 
 bool HesperisFile::writeTriangle()
 {
-	std::stringstream sst;
 	std::map<std::string, ATriangleMesh *>::iterator it = m_triangleMeshes.begin();
 	for(; it != m_triangleMeshes.end(); ++it) {
-		sst.str("");
-		sst<<"/world/"<<it->first;
-		std::cout<<" write triangle mesh "<<sst.str()<<"\n";
-		HTriangleMesh grp(sst.str());
+		std::cout<<" write triangle mesh "<<worldPath(it->first)
+		<<"\n";
+		HTriangleMesh grp(worldPath(it->first));
 		grp.save(it->second);
 		grp.close();
 	}
@@ -136,16 +131,16 @@ bool HesperisFile::writeTriangle()
 }
 
 void HesperisFile::addTransform(const std::string & name, BaseTransform * data)
-{ m_transforms[name] = data; }
+{ m_transforms[checkPath(name)] = data; }
 
 void HesperisFile::addCurve(const std::string & name, CurveGroup * data)
-{ m_curves[name] = data; }
+{ m_curves[checkPath(name)] = data; }
 
 void HesperisFile::addTetrahedron(const std::string & name, ATetrahedronMesh * data)
-{ m_terahedrons[name] = data; }
+{ m_terahedrons[checkPath(name)] = data; }
 
 void HesperisFile::addTriangleMesh(const std::string & name, ATriangleMesh * data)
-{ m_triangleMeshes[name] = data; }
+{ m_triangleMeshes[checkPath(name)] = data; }
 
 bool HesperisFile::doRead(const std::string & fileName)
 {
@@ -181,15 +176,14 @@ bool HesperisFile::doRead(const std::string & fileName)
 bool HesperisFile::readCurve()
 {
 	bool allValid = true;
-	std::stringstream sst;
 	std::map<std::string, CurveGroup *>::iterator itcurve = m_curves.begin();
 	for(; itcurve != m_curves.end(); ++itcurve) {
-		sst.str("");
-		sst<<"/world/"<<itcurve->first;
-		std::cout<<" read curve "<<sst.str()<<"\n";
-		HCurveGroup grpCurve(sst.str());
+		std::cout<<" read curve "<<worldPath(itcurve->first)
+		<<"\n";
+		HCurveGroup grpCurve(worldPath(itcurve->first));
 		if(!grpCurve.load(itcurve->second)) {
-			std::cout<<" cannot load "<<sst.str();
+			std::cout<<" cannot load "<<worldPath(itcurve->first)
+			<<"\n";
 			allValid = false;
 		}
 		
@@ -290,8 +284,20 @@ void HesperisFile::extractTriangleMeshes(GeometryArray * dst)
 	dst->setNumGeometries(i);
 }
 
-std::string HesperisFile::worldPath(const std::string & name)
-{ return boost::str(boost::format("/world%1%") % name); }
+std::string HesperisFile::worldPath(const std::string & name) const
+{ 
+	if(SHelper::IsPullPath(name))
+		return boost::str(boost::format("/world%1%") % name); 
+	return boost::str(boost::format("/world/%1%") % name); 
+}
+
+std::string HesperisFile::checkPath(const std::string & name) const
+{
+	std::string r(name);
+	if(DoStripNamespace) SHelper::removeAnyNamespace(r);
+	
+	return HObject::ValidPathName(r);
+}
 
 bool HesperisFile::writeFrames()
 {

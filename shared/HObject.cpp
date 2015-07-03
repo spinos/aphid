@@ -41,6 +41,7 @@ std::string HObject::ValidPathName(const std::string & name)
 {
 	std::string r = name;
 	boost::algorithm::replace_all(r, "|", "/");
+	boost::algorithm::replace_all(r, "//", "/");
     boost::trim(r);
 	return r;
 }
