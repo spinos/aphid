@@ -63,6 +63,7 @@ public:
 	static void validateUnixPath(std::string& name);
 	static char isMatched(const std::string &one, const std::string &another);
 	static bool IsPullPath(const std::string & name);
+    static std::string ParentPath(const std::string & name, const std::string & separator);
 };
 #endif
 //:~

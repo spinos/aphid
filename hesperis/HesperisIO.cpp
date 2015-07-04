@@ -47,7 +47,7 @@ bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file, const 
 	MFnDagNode fdg(path);
 	if(fdg.parentCount() < 1) return false;
 	
-	MGlobal::displayInfo(MString("add transform ")+path.fullPathName()+" parent c "+MFnDagNode(path).parentCount());
+	MGlobal::displayInfo(MString("hes io add transform ")+path.fullPathName());
 
 	MObject oparent = fdg.parent(0);
 	MFnDagNode fp(oparent);
@@ -90,7 +90,7 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file, const s
 	std::string curveName = "|curves";
     if(parentName.size()>1) curveName = boost::str(boost::format("%1%|curves") % parentName);
 	
-	MGlobal::displayInfo(MString("hes io write ")+curveName.c_str());
+	MGlobal::displayInfo(MString("hes io write curves")+curveName.c_str());
     file->addCurve(curveName, &gcurve);
 	
 	file->setDirty();

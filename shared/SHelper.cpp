@@ -433,7 +433,6 @@ void SHelper::listParentNames(const std::string& name, std::vector<std::string>&
 				r = r + "|" +(*tok_iter);
 				parents.push_back(r);
 			}
-			
 		}
 }
 
@@ -878,4 +877,23 @@ char SHelper::isMatched(const std::string &one, const std::string &another)
 
 bool SHelper::IsPullPath(const std::string & name)
 { return (name[0] == '|' || name[0] == '/'); }
+
+std::string SHelper::ParentPath(const std::string & name, const std::string & separator)
+{
+    std::string r("");
+	std::string str = name;
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("|/");
+	tokenizer tokens(str, sep);
+	for (tokenizer::iterator tok_iter = tokens.begin();
+		tok_iter != tokens.end(); ++tok_iter)
+		{
+// mesh shape will be the last
+			tokenizer::iterator nextit = tok_iter;
+			++nextit;
+			if(nextit != tokens.end())
+				r = r + separator +(*tok_iter);
+		}
+	return r;
+}
 //:~
