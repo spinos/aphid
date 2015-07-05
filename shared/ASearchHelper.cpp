@@ -846,7 +846,9 @@ void ASearchHelper::AllTypedPaths(const MDagPath & root, MDagPathArray & dst, MF
 	for(; !iter.isDone(); iter.next()) {								
 		MDagPath apath;		
 		iter.getPath( apath );
-		dst.append(apath);
+		MFnDagNode fdag(apath);
+		if(!fdag.isIntermediateObject()) 
+            dst.append(apath);
 	}
 }
 

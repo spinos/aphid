@@ -85,15 +85,14 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file, const s
         return false;
     }
     
-	file->setWriteComponent(HesperisFile::WCurve);
-	
 	std::string curveName = "|curves";
     if(parentName.size()>1) curveName = boost::str(boost::format("%1%|curves") % parentName);
 	
-	MGlobal::displayInfo(MString("hes io write curves")+curveName.c_str());
+	MGlobal::displayInfo(MString("hes io write curve group ")+curveName.c_str());
     file->addCurve(curveName, &gcurve);
 	
 	file->setDirty();
+	file->setWriteComponent(HesperisFile::WCurve);
 	bool fstat = file->save();
 	if(!fstat) MGlobal::displayWarning(MString(" cannot save curves to file ")+ file->fileName().c_str());
 	file->close();
@@ -101,69 +100,27 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file, const s
 	return true;
 }
 
-bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file)
+bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file, const std::string & parentName)
 {
-	MStatus stat;
-	const unsigned n = paths.length();
-	unsigned i, j;
-	int numPnts = 0;
-	unsigned numNodes = 0;
-	unsigned numTris = 0;
+    ATriangleMesh combined;
+    if(!CreateMeshGroup(paths, &combined)) {
+        MGlobal::displayInfo(" hesperis check meshes error");
+        return false;
+    }
+    
+    combined.setDagName(parentName);
+    std::string meshName = "|meshes";
+    if(parentName.size()>1) meshName = boost::str(boost::format("%1%|meshes") % parentName);
 	
-	MGlobal::displayInfo(" hesperis check meshes");
-	
-	MIntArray triangleCounts, triangleVertices;
-	MPointArray ps;
-    MPoint wp;
-	MMatrix worldTm;
-	std::vector<ATriangleMesh * > meshes;
-	for(i=0; i< n; i++) {
-		MFnMesh fmesh(paths[i].node(), &stat);
-		if(!stat) continue;
-		numNodes++;
-        
-        worldTm = GetWorldTransform(paths[i]);
-		
-		numPnts = fmesh.numVertices();
-		fmesh.getTriangles(triangleCounts, triangleVertices);
-		numTris = triangleVertices.length() / 3;
-		
-		MGlobal::displayInfo(paths[i].fullPathName());
-		MGlobal::displayInfo(MString(" vertex count: ") + numPnts);
-		MGlobal::displayInfo(MString(" triangle count: ") + numTris);
-	
-		ATriangleMesh * amesh = new ATriangleMesh;
-		meshes.push_back(amesh);
-		amesh->create(numPnts, numTris);
-		
-		Vector3F * pnts = amesh->points();
-		unsigned * inds = amesh->indices();
-	
-		fmesh.getPoints(ps, MSpace::kObject);
-			
-		for(j=0; j<numPnts; j++) {
-            wp = ps[j] * worldTm;
-			pnts[j].set((float)wp.x, (float)wp.y, (float)wp.z);
-        }
-		
-		for(j=0; j<triangleVertices.length(); j++)
-			inds[j] = triangleVertices[j];
-			
-		amesh->setDagName(std::string(paths[i].fullPathName().asChar()));
-		
-		std::string meshName = boost::str(boost::format("|mesh%1%") % numNodes);
-		file->addTriangleMesh(meshName, amesh);
-	}
-	
+    MGlobal::displayInfo(MString("hes io write mesh group ")+meshName.c_str());
+    file->addTriangleMesh(meshName, &combined);
+
 	file->setDirty();
 	file->setWriteComponent(HesperisFile::WTri);
 	bool fstat = file->save();
 	if(!fstat) MGlobal::displayWarning(MString(" cannot save mesh to file ")+ file->fileName().c_str());
 	file->close();
 	
-	std::vector<ATriangleMesh * >::iterator it = meshes.begin();
-	for(;it!=meshes.end();++it) delete *it;
-	meshes.clear();
 	return true;
 }
 
@@ -406,6 +363,74 @@ bool HesperisIO::CreateCurveGroup(MDagPathArray & paths, CurveGroup * dst)
 			icv++;
 		}
 	}
+    return true;
+}
+
+bool HesperisIO::CreateMeshGroup(MDagPathArray & paths, ATriangleMesh * dst)
+{
+    MStatus stat;
+	const unsigned n = paths.length();
+	unsigned i, j;
+	int numPnts = 0;
+	unsigned numNodes = 0;
+	unsigned numTris = 0;
+	
+	MGlobal::displayInfo(" hesperis check meshes");
+	
+	MIntArray triangleCounts, triangleVertices;
+	MPointArray ps;
+    MPoint wp;
+	MMatrix worldTm;
+    
+    for(i=0; i< n; i++) {
+		MFnMesh fmesh(paths[i].node(), &stat);
+		if(!stat) continue;
+		numNodes++;
+        
+        numPnts += fmesh.numVertices();
+		fmesh.getTriangles(triangleCounts, triangleVertices);
+		numTris += triangleVertices.length() / 3;
+	}
+    
+    if(numNodes < 1 || numTris < 1) {
+        MGlobal::displayInfo(" insufficient mesh data");
+        return false;   
+    }
+    
+    MGlobal::displayInfo(MString(" mesh count: ") + numNodes +
+                         MString(" vertex count: ") + numPnts +
+	                    MString(" triangle count: ") + numTris);
+	
+    dst->create(numPnts, numTris);
+	Vector3F * pnts = dst->points();
+	unsigned * inds = dst->indices();
+    
+    unsigned pDrift = 0;
+    unsigned iDrift = 0;
+    for(i=0; i< n; i++) {
+		MFnMesh fmesh(paths[i].node(), &stat);
+		if(!stat) continue;
+        
+        //MGlobal::displayInfo(MString("p drift ")+pDrift+
+        //                     MString("i drift ")+iDrift);
+		
+        worldTm = GetWorldTransform(paths[i]);
+		
+		fmesh.getPoints(ps, MSpace::kObject);
+		fmesh.getTriangles(triangleCounts, triangleVertices);
+			
+		for(j=0; j<fmesh.numVertices(); j++) {
+            wp = ps[j] * worldTm;
+			pnts[pDrift + j].set((float)wp.x, (float)wp.y, (float)wp.z);
+        }
+		
+		for(j=0; j<triangleVertices.length(); j++)
+			inds[iDrift + j] = pDrift + triangleVertices[j];
+        
+        pDrift += fmesh.numVertices();
+        iDrift += triangleVertices.length();
+	}
+    
     return true;
 }
 
