@@ -19,6 +19,9 @@ public:
 	virtual char save(ATriangleMesh * tri);
 	virtual char load(ATriangleMesh * tri);
 	
+protected:
+	char readAftCreation(ATriangleMesh * tri);
+	
 private:
 	
 };

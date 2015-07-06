@@ -76,7 +76,6 @@ char HTriangleMesh::save(ATriangleMesh * tri)
 
 char HTriangleMesh::load(ATriangleMesh * tri)
 {
-	if(!verifyType()) return false;
 	int nv = 3;
 	
 	readIntAttr(".nv", &nv);
@@ -85,15 +84,20 @@ char HTriangleMesh::load(ATriangleMesh * tri)
 	
 	readIntAttr(".ntri", &nt);
 	
+	tri->create(nv, nt);
+	
+	return readAftCreation(tri);
+}
+
+char HTriangleMesh::readAftCreation(ATriangleMesh * tri)
+{
+	readVector3Data(".p", tri->numPoints(), (Vector3F *)tri->points());
+	readIntData(".a", tri->numPoints(), (unsigned *)tri->anchors());
+	readIntData(".v", tri->numTriangles() * 3, (unsigned *)tri->indices());
+	
 	std::string dagName;
 	readStringAttr(".dag", dagName);
 	tri->setDagName(dagName);
-	
-	tri->create(nv, nt);
-	
-	readVector3Data(".p", nv, (Vector3F *)tri->points());
-	readIntData(".a", nv, (unsigned *)tri->anchors());
-	readIntData(".v", nt * 3, (unsigned *)tri->indices());
 	
 	return 1;
 }
