@@ -16,6 +16,7 @@ class CurveGroup;
 class BaseBuffer;
 class ATetrahedronMesh;
 class ATriangleMesh;
+class ATriangleMeshGroup;
 class HBase;
 class GeometryArray;
 
@@ -44,7 +45,7 @@ public:
 	void addTransform(const std::string & name, BaseTransform * data);
 	void addCurve(const std::string & name, CurveGroup * data);
 	void addTetrahedron(const std::string & name, ATetrahedronMesh * data);
-	void addTriangleMesh(const std::string & name, ATriangleMesh * data);
+	void addTriangleMesh(const std::string & name, ATriangleMeshGroup * data);
 	virtual bool doWrite(const std::string & fileName);
 	virtual bool doRead(const std::string & fileName);
     void extractTetrahedronMeshes(GeometryArray * dst);
@@ -72,7 +73,7 @@ private:
 	std::map<std::string, BaseTransform * > m_transforms;
 	std::map<std::string, CurveGroup * > m_curves;
 	std::map<std::string, ATetrahedronMesh * > m_terahedrons;
-	std::map<std::string, ATriangleMesh * > m_triangleMeshes;
+	std::map<std::string, ATriangleMeshGroup * > m_triangleMeshes;
     ReadComponent m_readComp;
 	WriteComponent m_writeComp;
 };

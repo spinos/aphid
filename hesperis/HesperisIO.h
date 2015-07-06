@@ -14,7 +14,7 @@
 class HBase;
 class HesperisFile;
 class CurveGroup;
-class ATriangleMesh;
+class ATriangleMeshGroup;
 class HesperisIO {
 public:
 	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName = "");
@@ -26,6 +26,7 @@ public:
     static MMatrix GetWorldTransform(const MDagPath & path);
     static bool GetCurves(const MDagPath &root, MDagPathArray & dst);
     static bool ReadCurves(HesperisFile * file, MObject &target = MObject::kNullObj);
+    static bool ReadMeshes(HesperisFile * file, MObject &target = MObject::kNullObj);
     static bool ReadTransforms(HBase * parent, MObject &target = MObject::kNullObj);
     static bool ReadCurves(HBase * parent, MObject &target = MObject::kNullObj);
     static bool CreateCurveGeos(CurveGroup * geos, MObject &target = MObject::kNullObj);
@@ -33,7 +34,7 @@ public:
     static bool CheckExistingCurves(CurveGroup * geos, MObject &target = MObject::kNullObj);
     static bool FindNamedChild(MObject & dst, const std::string & name, MObject & oparent = MObject::kNullObj);
     static bool CreateCurveGroup(MDagPathArray & paths, CurveGroup * dst);
-    static bool CreateMeshGroup(MDagPathArray & paths, ATriangleMesh * dst);
+    static bool CreateMeshGroup(MDagPathArray & paths, ATriangleMeshGroup * dst);
     static bool LsCurves(std::vector<std::string > & dst);
     static bool LsCurves(std::vector<std::string > & dst, HBase * parent);
 };

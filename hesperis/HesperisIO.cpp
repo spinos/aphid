@@ -16,7 +16,7 @@
 #include <maya/MFnTransform.h>
 #include <maya/MItDag.h>
 #include <CurveGroup.h>
-#include <ATriangleMesh.h>
+#include <ATriangleMeshGroup.h>
 #include "HesperisFile.h"
 #include <HBase.h>
 #include <HWorld.h>
@@ -102,7 +102,7 @@ bool HesperisIO::WriteCurves(MDagPathArray & paths, HesperisFile * file, const s
 
 bool HesperisIO::WriteMeshes(MDagPathArray & paths, HesperisFile * file, const std::string & parentName)
 {
-    ATriangleMesh combined;
+    ATriangleMeshGroup combined;
     if(!CreateMeshGroup(paths, &combined)) {
         MGlobal::displayInfo(" hesperis check meshes error");
         return false;
@@ -179,6 +179,16 @@ bool HesperisIO::ReadCurves(HesperisFile * file, MObject &target)
     HWorld grpWorld;
     ReadTransforms(&grpWorld, target);
     ReadCurves(&grpWorld, target);
+    grpWorld.close();
+    return true;
+}
+
+bool HesperisIO::ReadMeshes(HesperisFile * file, MObject &target)
+{
+    MGlobal::displayInfo("opium read mesh");
+    HWorld grpWorld;
+    ReadTransforms(&grpWorld, target);
+    // ReadMeshes(&grpWorld, target);
     grpWorld.close();
     return true;
 }
@@ -366,7 +376,7 @@ bool HesperisIO::CreateCurveGroup(MDagPathArray & paths, CurveGroup * dst)
     return true;
 }
 
-bool HesperisIO::CreateMeshGroup(MDagPathArray & paths, ATriangleMesh * dst)
+bool HesperisIO::CreateMeshGroup(MDagPathArray & paths, ATriangleMeshGroup * dst)
 {
     MStatus stat;
 	const unsigned n = paths.length();
@@ -401,12 +411,15 @@ bool HesperisIO::CreateMeshGroup(MDagPathArray & paths, ATriangleMesh * dst)
                          MString(" vertex count: ") + numPnts +
 	                    MString(" triangle count: ") + numTris);
 	
-    dst->create(numPnts, numTris);
+    dst->create(numPnts, numTris, numNodes);
 	Vector3F * pnts = dst->points();
 	unsigned * inds = dst->indices();
+    unsigned * pntDrift = dst->pointDrifts();
+    unsigned * indDrift = dst->indexDrifts();
     
     unsigned pDrift = 0;
     unsigned iDrift = 0;
+    unsigned iNode = 0;
     for(i=0; i< n; i++) {
 		MFnMesh fmesh(paths[i].node(), &stat);
 		if(!stat) continue;
@@ -427,8 +440,12 @@ bool HesperisIO::CreateMeshGroup(MDagPathArray & paths, ATriangleMesh * dst)
 		for(j=0; j<triangleVertices.length(); j++)
 			inds[iDrift + j] = pDrift + triangleVertices[j];
         
+        pntDrift[iNode] = pDrift;
+        indDrift[iNode] = iDrift;
+        
         pDrift += fmesh.numVertices();
         iDrift += triangleVertices.length();
+        iNode++;
 	}
     
     return true;

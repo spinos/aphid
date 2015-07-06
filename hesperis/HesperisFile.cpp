@@ -15,8 +15,8 @@
 #include <HFrameRange.h>
 #include <HTransform.h>
 #include <HTetrahedronMesh.h>
-#include <HTriangleMesh.h>
-#include <ATriangleMesh.h>
+#include <HTriangleMeshGroup.h>
+#include <ATriangleMeshGroup.h>
 #include <ATetrahedronMesh.h>
 #include <BaseTransform.h>
 #include <GeometryArray.h>
@@ -119,11 +119,11 @@ bool HesperisFile::writeTetrahedron()
 
 bool HesperisFile::writeTriangle()
 {
-	std::map<std::string, ATriangleMesh *>::iterator it = m_triangleMeshes.begin();
+	std::map<std::string, ATriangleMeshGroup *>::iterator it = m_triangleMeshes.begin();
 	for(; it != m_triangleMeshes.end(); ++it) {
 		std::cout<<" write triangle mesh "<<worldPath(it->first)
 		<<"\n";
-		HTriangleMesh grp(worldPath(it->first));
+		HTriangleMeshGroup grp(worldPath(it->first));
 		grp.save(it->second);
 		grp.close();
 	}
@@ -139,7 +139,7 @@ void HesperisFile::addCurve(const std::string & name, CurveGroup * data)
 void HesperisFile::addTetrahedron(const std::string & name, ATetrahedronMesh * data)
 { m_terahedrons[checkPath(name)] = data; }
 
-void HesperisFile::addTriangleMesh(const std::string & name, ATriangleMesh * data)
+void HesperisFile::addTriangleMesh(const std::string & name, ATriangleMeshGroup * data)
 { m_triangleMeshes[checkPath(name)] = data; }
 
 bool HesperisFile::doRead(const std::string & fileName)
@@ -231,11 +231,11 @@ bool HesperisFile::readTetrahedron()
 bool HesperisFile::listTriangle(HBase * grp)
 {
 	std::vector<std::string > triNames;
-	grp->lsTypedChild<HTriangleMesh>(triNames);
+	grp->lsTypedChild<HTriangleMeshGroup>(triNames);
 	
 	std::vector<std::string>::const_iterator it = triNames.begin();
 	for(;it!=triNames.end();++it) {
-		addTriangleMesh(*it, new ATriangleMesh);
+		addTriangleMesh(*it, new ATriangleMeshGroup);
 	}
 	return true;
 }
@@ -243,10 +243,10 @@ bool HesperisFile::listTriangle(HBase * grp)
 bool HesperisFile::readTriangle()
 {
 	bool allValid = true;
-	std::map<std::string, ATriangleMesh *>::iterator it = m_triangleMeshes.begin();
+	std::map<std::string, ATriangleMeshGroup *>::iterator it = m_triangleMeshes.begin();
 	for(; it != m_triangleMeshes.end(); ++it) {
 		std::cout<<" read triangle mesh "<<it->first<<"\n";
-		HTriangleMesh grp(it->first);
+		HTriangleMeshGroup grp(it->first);
 		if(!grp.load(it->second)) {
 			std::cout<<" cannot load "<<it->first;
 			allValid = false;
@@ -276,7 +276,7 @@ void HesperisFile::extractTriangleMeshes(GeometryArray * dst)
 {
 	dst->create(m_triangleMeshes.size());
 	unsigned i = 0;
-	std::map<std::string, ATriangleMesh *>::const_iterator it = m_triangleMeshes.begin();
+	std::map<std::string, ATriangleMeshGroup *>::const_iterator it = m_triangleMeshes.begin();
 	for(; it != m_triangleMeshes.end(); ++it) {
 		dst->setGeometry(it->second, i);
 		i++;
