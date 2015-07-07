@@ -27,7 +27,7 @@ public:
 	virtual MStatus		appendSyntax();
 
 	virtual MTypeId constraintTypeId() const;
-	virtual MPxConstraintCommand::TargetType targetType() const;
+	// virtual MPxConstraintCommand::TargetType targetType() const;
 
 	virtual const MObject& constraintInstancedAttribute() const;
 	virtual const MObject& constraintOutputAttribute() const;
@@ -36,7 +36,8 @@ public:
 	virtual const MObject& constraintTargetWeightAttribute() const;
 	virtual const MObject& objectAttribute() const;
 
-	virtual MStatus connectTarget(void *opaqueTarget, int index);
+	// virtual MStatus connectTarget(void *opaqueTarget, int index);
+    virtual MStatus connectTarget(	MDagPath & 	targetPath, int index);
 	virtual MStatus connectObjectAndConstraint( MDGModifier& modifier );
 
 	virtual void createdConstraint(MPxConstraint *constraint);

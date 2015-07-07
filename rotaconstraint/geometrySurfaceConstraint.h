@@ -10,6 +10,26 @@
 #include <maya/MFnCompoundAttribute.h>
 #include <maya/MTypes.h>
 
+class MAccumulatedOffet {
+public:
+    MAccumulatedOffet() 
+    {
+        m_v= MVector::zero;
+    }
+    
+    void add(const MVector & a) 
+    {
+        m_v += a;
+    }
+    
+    MPoint asPoint() const
+    {
+        return MPoint(m_v.x, m_v.y, m_v.z);   
+    }
+    
+    MVector m_v;
+};
+
 class geometrySurfaceConstraint : public MPxConstraint
 {
 public:
@@ -28,15 +48,22 @@ public:
 
 public:
 	static MObject		compoundTarget;
+    static MObject		targetTransform;
 	static MObject		targetGeometry;
 	static MObject		targetWeight;
 
 	static MObject		constraintParentInverseMatrix;
 	static MObject		constraintGeometry;
-
+    static MObject		constraintTranslateX;
+    static MObject		constraintTranslateY;
+    static MObject		constraintTranslateZ;
 	static	MTypeId		id;
 
 	rotaBase::ConstraintType weightType;
+    
+private:
+    MPoint m_lastPos;
+    MAccumulatedOffet m_totalOffset;
 };
 
 // Useful inline method

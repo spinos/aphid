@@ -19,17 +19,13 @@ void* geometrySurfaceConstraintCommand::creator()
 
 void geometrySurfaceConstraintCommand::createdConstraint(MPxConstraint *constraint)
 {
-	if ( constraint )
-	{
+	if ( constraint ) {
 		geometrySurfaceConstraint *c = (geometrySurfaceConstraint*) constraint;
 		c->weightType = weightType;
 	}
 	else
-	{
 		MGlobal::displayError("Failed to get created constraint.");
-	}
 }
-
 
 MStatus geometrySurfaceConstraintCommand::parseArgs(const MArgList &argList)
 {
@@ -61,23 +57,37 @@ MStatus geometrySurfaceConstraintCommand::doIt(const MArgList &argList)
 
 	if ( MS::kFailure == parseArgs(argList) )
 		return MS::kFailure;
-
+    
 	return MS::kUnknownParameter;
 }
 
-MStatus geometrySurfaceConstraintCommand::connectTarget(void *opaqueTarget, int index)
+// MStatus geometrySurfaceConstraintCommand::connectTarget(void *opaqueTarget, int index)
+MStatus geometrySurfaceConstraintCommand::connectTarget( MDagPath & targetPath, int index)
 {
-	MStatus status = connectTargetAttribute( 
-			opaqueTarget, index, geometrySurfaceConstraint::targetGeometry );
-	if (!status) { status.perror("connectTargetGeometry"); return status;}
+	MStatus status;/* = connectTargetAttribute(targetPath, index, 
+                                            MPxTransform::geometry,
+                                            geometrySurfaceConstraint::targetGeometry );
+	if (!status) { 
+        MGlobal::displayInfo("failed to connectTargetGeometry"); 
+        return status;
+    }*/
+    
+    status = connectTargetAttribute(targetPath, index, 
+                                    MPxTransform::worldMatrix,
+                                    geometrySurfaceConstraint::targetTransform );
+	if (!status) {
+        MGlobal::displayInfo("failed to connectTargetTransform"); 
+        return status;
+    }
+    
 	return MS::kSuccess;
 }
 
 MStatus geometrySurfaceConstraintCommand::connectObjectAndConstraint( MDGModifier& modifier )
 {
+// object to be constrained
 	MObject transform = transformObject();
-	if ( transform.isNull() )
-	{
+	if ( transform.isNull() ) {
 		MGlobal::displayError("Failed to get transformObject()");
 		return MS::kFailure;
 	}
@@ -90,19 +100,31 @@ MStatus geometrySurfaceConstraintCommand::connectObjectAndConstraint( MDGModifie
 	MPlug translatePlug = transformFn.findPlug( "translate", &status );
 	if (!status) { status.perror(" transformFn.findPlug"); return status;}
 
-	if ( MPlug::kFreeToChange == translatePlug.isFreeToChange() )
-	{
+	if ( MPlug::kFreeToChange == translatePlug.isFreeToChange() ) {
 		MFnNumericData nd;
 		MObject translateData = nd.create( MFnNumericData::k3Double, &status );
 		status = nd.setData3Double( translate.x,translate.y,translate.z);
 		if (!status) { status.perror("nd.setData3Double"); return status;}
-		status = modifier.newPlugValue( translatePlug, translateData );
-		if (!status) { status.perror("modifier.newPlugValue"); return status;}
+        
+ // set translate value unchanged?
+		//status = modifier.newPlugValue( translatePlug, translateData );
+		//if (!status) { status.perror("modifier.newPlugValue"); return status;}
 
-		status = connectObjectAttribute( 
-			MPxTransform::geometry, 
-					geometrySurfaceConstraint::constraintGeometry, false );
-		if (!status) { status.perror("connectObjectAttribute"); return status;}
+		//status = connectObjectAttribute( MPxTransform::geometry, 
+		//			geometrySurfaceConstraint::constraintGeometry, false );
+		//if (!status) { status.perror("connectObjectAttribute"); return status;}
+        
+        status = connectObjectAttribute( MPxTransform::translateX, 
+		    geometrySurfaceConstraint::constraintTranslateX, false );
+		if (!status) { status.perror("connectObjectAttribute tx"); return status;}
+        
+        status = connectObjectAttribute( MPxTransform::translateY, 
+		    geometrySurfaceConstraint::constraintTranslateY, false );
+		if (!status) { status.perror("connectObjectAttribute ty"); return status;}
+        
+        status = connectObjectAttribute( MPxTransform::translateZ, 
+		    geometrySurfaceConstraint::constraintTranslateZ, false );
+		if (!status) { status.perror("connectObjectAttribute tz"); return status;}
 	}
 
 	status = connectObjectAttribute( 
@@ -139,19 +161,14 @@ const MObject& geometrySurfaceConstraintCommand::constraintTargetWeightAttribute
 }
 
 const MObject& geometrySurfaceConstraintCommand::objectAttribute() const
-{
-	return MPxTransform::geometry;
-}
+{ return MPxTransform::geometry; }
 
 MTypeId geometrySurfaceConstraintCommand::constraintTypeId() const
-{
-	return geometrySurfaceConstraint::id;
-}
+{ return geometrySurfaceConstraint::id; }
 
-MPxConstraintCommand::TargetType geometrySurfaceConstraintCommand::targetType() const
-{
-	return MPxConstraintCommand::kGeometryShape;
-}
+// MPxConstraintCommand::TargetType geometrySurfaceConstraintCommand::targetType() const
+// { return kGeometryShape; }
+// { return kTransform; }
 
 MStatus geometrySurfaceConstraintCommand::appendSyntax()
 {
