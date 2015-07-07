@@ -11,11 +11,18 @@ MObject     geometrySurfaceConstraint::constraintGeometry;
 MObject		geometrySurfaceConstraint::constraintTranslateX;
 MObject		geometrySurfaceConstraint::constraintTranslateY;
 MObject		geometrySurfaceConstraint::constraintTranslateZ;
+MObject		geometrySurfaceConstraint::constraintTargetX;
+MObject		geometrySurfaceConstraint::constraintTargetY;
+MObject		geometrySurfaceConstraint::constraintTargetZ;
+MObject		geometrySurfaceConstraint::constraintObjectX;
+MObject		geometrySurfaceConstraint::constraintObjectY;
+MObject		geometrySurfaceConstraint::constraintObjectZ;
 
 geometrySurfaceConstraint::geometrySurfaceConstraint() 
 {
 	weightType = rotaBase::kLargestWeight;
     m_lastPos = MPoint::origin;
+	m_isInitd = false;
 }
 
 geometrySurfaceConstraint::~geometrySurfaceConstraint() 
@@ -31,7 +38,32 @@ MStatus geometrySurfaceConstraint::compute( const MPlug& plug, MDataBlock& block
 	MStatus returnStatus;
  
     if(plug == constraintTranslateX || plug == constraintTranslateY || plug == constraintTranslateZ) {
-        MArrayDataHandle targetArray = block.inputArrayValue( compoundTarget );
+        if(!m_isInitd) {
+			MPlug pgTx(thisMObject(), constraintTargetX);
+			double lastTx = pgTx.asDouble();
+			MPlug pgTy(thisMObject(), constraintTargetY);
+			double lastTy = pgTy.asDouble();
+			MPlug pgTz(thisMObject(), constraintTargetZ);
+			double lastTz = pgTz.asDouble();
+			
+			MGlobal::displayInfo(MString("init target p ")+lastTx+" "+lastTy+" "+lastTz);
+		
+			MPlug pgOx(thisMObject(), constraintObjectX);
+			double lastOx = pgOx.asDouble();
+			MPlug pgOy(thisMObject(), constraintObjectY);
+			double lastOy = pgOy.asDouble();
+			MPlug pgOz(thisMObject(), constraintObjectZ);
+			double lastOz = pgOz.asDouble();
+			
+			MGlobal::displayInfo(MString("init object p ")+lastOx+" "+lastOy+" "+lastOz);
+		
+			m_lastPos = MPoint(lastTx, lastTy, lastTz);
+			m_totalOffset.m_v = MVector(lastOx, lastOy, lastOz);
+			
+			m_isInitd = true;
+		}
+		
+		MArrayDataHandle targetArray = block.inputArrayValue( compoundTarget );
 		const unsigned int targetArrayCount = targetArray.elementCount();
         MMatrix tm;
         tm.setToIdentity();
@@ -49,92 +81,49 @@ MStatus geometrySurfaceConstraint::compute( const MPlug& plug, MDataBlock& block
             tm = ftm.matrix();
             targetArray.next();
         }
-        /*MGlobal::displayInfo(MString("constraint compute p ")+
-                             tm(0,0)+" "+tm(0,1)+" "+tm(0,2)+"\n"+
-                             tm(1,0)+" "+tm(1,1)+" "+tm(1,2)+"\n"+
-                             tm(2,0)+" "+tm(2,1)+" "+tm(2,2)+"\n"+
-                             tm(3,0)+" "+tm(3,1)+" "+tm(3,2)+"\n"
-                             );*/
+
         MPoint curPos(tm(3,0), tm(3,1), tm(3,2));
+		
+// target translates in world space
         MVector dv = curPos - m_lastPos;
-        // MGlobal::displayInfo(MString("dv ")+dv.x+" "+dv.y+" "+dv.z);
-        // m_totalOffset.add(dv);
-        m_totalOffset.m_v = -dv;
-        // m_lastPos = curPos;
-        
-        MPoint pt = m_totalOffset.asPoint() * tm;
-        
+// into target object space
+		dv *= MTransformationMatrix(tm).asRotateMatrix().inverse();
+// cancel out
+        m_totalOffset.add(-dv);
+// object position in world space
+		MPoint wp = m_totalOffset.asPoint() * tm;
+		
+		m_lastPos = curPos;
+		
         MDataHandle hout;
         if(plug == constraintTranslateX) {
             hout = block.outputValue(constraintTranslateX);
-			hout.set(pt.x);
+			hout.set(wp.x);
         }
         else if(plug == constraintTranslateY) {
             hout = block.outputValue(constraintTranslateY);
-			hout.set(pt.y);
+			hout.set(wp.y);
         }
         else if(plug == constraintTranslateZ) {
             hout = block.outputValue(constraintTranslateZ);
-			hout.set(pt.z);
+			hout.set(wp.z);
         }
+		
+		MPlug pgTx(thisMObject(), constraintTargetX);
+		pgTx.setValue(m_lastPos.x);
+		MPlug pgTy(thisMObject(), constraintTargetY);
+		pgTy.setValue(m_lastPos.y);
+		MPlug pgTz(thisMObject(), constraintTargetZ);
+		pgTz.setValue(m_lastPos.z);
+		
+		MPlug pgOx(thisMObject(), constraintObjectX);
+		pgOx.setValue(m_totalOffset.m_v.x);
+		MPlug pgOy(thisMObject(), constraintObjectY);
+		pgOy.setValue(m_totalOffset.m_v.y);
+		MPlug pgOz(thisMObject(), constraintObjectZ);
+		pgOz.setValue(m_totalOffset.m_v.z);
     }
-	else if ( plug == geometrySurfaceConstraint::constraintGeometry ) {
-
-		block.inputValue(constraintParentInverseMatrix);
-
-		MArrayDataHandle targetArray = block.inputArrayValue( compoundTarget );
-		unsigned int targetArrayCount = targetArray.elementCount();
-		double weight, selectedWeight = 0;
-		if ( weightType == rotaBase::kSmallestWeight )
-			selectedWeight = FLT_MAX;
-		MObject selectedMesh;
-		unsigned int i;
-		for ( i = 0; i < targetArrayCount; i++ )
-		{
-			MDataHandle targetElement = targetArray.inputValue();
-			weight = targetElement.child(targetWeight).asDouble();
-			if ( !equivalent(weight,0.0))
-			{
-				if ( weightType == rotaBase::kLargestWeight )
-				{
-					if ( weight > selectedWeight )
-					{
-						MObject mesh = targetElement.child(targetGeometry).asMesh();
-						if ( !mesh.isNull() )
-						{
-							selectedMesh = mesh;
-							selectedWeight =  weight;
-						}
-					}
-				}
-				else
-				{
-					if  ( weight < selectedWeight )
-					{
-						MObject mesh = targetElement.child(targetGeometry).asMesh();
-						if ( !mesh.isNull() )
-						{
-							selectedMesh = mesh;
-							selectedWeight =  weight;
-						}
-					}
-				}
-			}
-			targetArray.next();
-		}
-		//
-		if ( selectedMesh.isNull() ) {
-			block.setClean(plug);
-		}
-		else {
-			// The transform node via the geometry attribute will take care of
-			// updating the location of the constrained geometry.
-			MDataHandle outputConstraintGeometryHandle = block.outputValue(constraintGeometry);
-			outputConstraintGeometryHandle.setMObject(selectedMesh);
-		}
-	} 
-	else 
-	{
+	else {
 		return MS::kUnknownParameter;
 	}
 
@@ -257,6 +246,66 @@ MStatus geometrySurfaceConstraint::initialize()
     numAttr.setReadable(true);
 	numAttr.setWritable(false);
     addAttribute(constraintTranslateZ);
+
+	constraintTargetX = numAttr.create( "constraintTargetX", "ttx", MFnNumericData::kDouble, 0.0, &status );
+    if(!status) {
+        MGlobal::displayInfo("failed to create attrib constraintTargetX");
+        return status;
+    }
+    numAttr.setReadable(true);
+	numAttr.setWritable(true);
+    numAttr.setStorable(true);
+    addAttribute(constraintTargetX);
+	
+	constraintTargetY = numAttr.create( "constraintTargetY", "tty", MFnNumericData::kDouble, 0.0, &status );
+    if(!status) {
+        MGlobal::displayInfo("failed to create attrib constraintTargetY");
+        return status;
+    }
+    numAttr.setReadable(true);
+	numAttr.setWritable(true);
+    numAttr.setStorable(true);
+    addAttribute(constraintTargetY);
+	
+	constraintTargetZ = numAttr.create( "constraintTargetZ", "ttz", MFnNumericData::kDouble, 0.0, &status );
+    if(!status) {
+        MGlobal::displayInfo("failed to create attrib constraintTargetZ");
+        return status;
+    }
+    numAttr.setReadable(true);
+	numAttr.setWritable(true);
+    numAttr.setStorable(true);
+    addAttribute(constraintTargetZ);
+	
+	constraintObjectX = numAttr.create( "constraintObjectX", "otx", MFnNumericData::kDouble, 0.0, &status );
+    if(!status) {
+        MGlobal::displayInfo("failed to create attrib constraintObjectX");
+        return status;
+    }
+    numAttr.setReadable(true);
+	numAttr.setWritable(true);
+    numAttr.setStorable(true);
+    addAttribute(constraintObjectX);
+	
+	constraintObjectY = numAttr.create( "constraintObjectY", "oty", MFnNumericData::kDouble, 0.0, &status );
+    if(!status) {
+        MGlobal::displayInfo("failed to create attrib constraintObjectY");
+        return status;
+    }
+    numAttr.setReadable(true);
+	numAttr.setWritable(true);
+    numAttr.setStorable(true);
+    addAttribute(constraintObjectY);
+	
+	constraintObjectZ = numAttr.create( "constraintObjectZ", "otz", MFnNumericData::kDouble, 0.0, &status );
+    if(!status) {
+        MGlobal::displayInfo("failed to create attrib constraintObjectZ");
+        return status;
+    }
+    numAttr.setReadable(true);
+	numAttr.setWritable(true);
+	numAttr.setStorable(true);
+    addAttribute(constraintObjectZ);
 
 	status = addAttribute( geometrySurfaceConstraint::constraintParentInverseMatrix );
 	if (!status) { status.perror("addAttribute"); return status;}

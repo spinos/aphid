@@ -61,7 +61,19 @@ MStatus geometrySurfaceConstraintCommand::doIt(const MArgList &argList)
 	return MS::kUnknownParameter;
 }
 
-// MStatus geometrySurfaceConstraintCommand::connectTarget(void *opaqueTarget, int index)
+#ifdef OLD_API
+MStatus geometrySurfaceConstraintCommand::connectTarget(void *opaqueTarget, int index)
+{
+	MStatus status = connectTargetAttribute(opaqueTarget, index, 
+                                            geometrySurfaceConstraint::targetTransform );
+	if (!status) { 
+        MGlobal::displayInfo("failed to connectTargetTransform"); 
+        return status;
+    }
+	
+	return MS::kSuccess;
+}
+#else
 MStatus geometrySurfaceConstraintCommand::connectTarget( MDagPath & targetPath, int index)
 {
 	MStatus status;/* = connectTargetAttribute(targetPath, index, 
@@ -82,6 +94,7 @@ MStatus geometrySurfaceConstraintCommand::connectTarget( MDagPath & targetPath, 
     
 	return MS::kSuccess;
 }
+#endif
 
 MStatus geometrySurfaceConstraintCommand::connectObjectAndConstraint( MDGModifier& modifier )
 {
@@ -147,7 +160,7 @@ const MObject& geometrySurfaceConstraintCommand::constraintOutputAttribute() con
 
 const MObject& geometrySurfaceConstraintCommand::constraintTargetInstancedAttribute() const
 {
-	return geometrySurfaceConstraint::targetGeometry;
+	return geometrySurfaceConstraint::targetTransform;
 }
 
 const MObject& geometrySurfaceConstraintCommand::constraintTargetAttribute() const

@@ -52,7 +52,7 @@ geometryConstraint -e -w 10.0 pPlane2 pCylinder1;
 MStatus initializePlugin( MObject obj )
 { 
 	MStatus   status;
-	MFnPlugin plugin( obj, "Zhang Jian", "9.0", "Any");
+	MFnPlugin plugin( obj, "Zhang Jian", "0.1.0", "Any");
 
 	status = plugin.registerNode( "geometrySurfaceConstraint", geometrySurfaceConstraint::id, geometrySurfaceConstraint::creator,
 		geometrySurfaceConstraint::initialize, MPxNode::kConstraintNode );

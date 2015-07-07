@@ -36,8 +36,11 @@ public:
 	virtual const MObject& constraintTargetWeightAttribute() const;
 	virtual const MObject& objectAttribute() const;
 
-	// virtual MStatus connectTarget(void *opaqueTarget, int index);
+#ifdef OLD_API
+	virtual MStatus connectTarget(void *opaqueTarget, int index);
+#else
     virtual MStatus connectTarget(	MDagPath & 	targetPath, int index);
+#endif
 	virtual MStatus connectObjectAndConstraint( MDGModifier& modifier );
 
 	virtual void createdConstraint(MPxConstraint *constraint);

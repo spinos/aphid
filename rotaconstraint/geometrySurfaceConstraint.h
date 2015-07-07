@@ -57,13 +57,22 @@ public:
     static MObject		constraintTranslateX;
     static MObject		constraintTranslateY;
     static MObject		constraintTranslateZ;
+	
+	static MObject		constraintTargetX;
+    static MObject		constraintTargetY;
+    static MObject		constraintTargetZ;
+	static MObject		constraintObjectX;
+    static MObject		constraintObjectY;
+    static MObject		constraintObjectZ;
+	
 	static	MTypeId		id;
 
 	rotaBase::ConstraintType weightType;
     
 private:
     MPoint m_lastPos;
-    MAccumulatedOffet m_totalOffset;
+	MAccumulatedOffet m_totalOffset;
+	bool m_isInitd;
 };
 
 // Useful inline method
