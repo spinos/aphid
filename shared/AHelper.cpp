@@ -940,4 +940,30 @@ std::string AHelper::FullPathNameToObj(const MObject & node)
     MFnDagNode pf(node);
     return std::string(pf.fullPathName().asChar());
 }
+
+MMatrix AHelper::GetWorldTransformMatrix(const MDagPath & path)
+{
+	MMatrix m = MMatrix::identity;
+	if(path.node().hasFn(MFn::kTransform))
+		m = MFnTransform(path).transformation().asMatrix();
+		
+	m *= GetWorldParentTransformMatrix(path);
+	return m;
+}
+
+MMatrix AHelper::GetWorldParentTransformMatrix(const MDagPath & path)
+{
+	MMatrix m;
+    MDagPath parentPath = path;
+    MStatus stat;
+    for(;;) {
+        stat = parentPath.pop();
+        if(!stat) break;
+        MFnTransform ft(parentPath, &stat);
+        if(!stat) break;   
+
+        m *= ft.transformation().asMatrix();
+    }
+    return m;
+}
 //:~

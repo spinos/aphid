@@ -124,5 +124,8 @@ public:
 	
 	static char containsGeom(const MDagPath & root);
     static std::string FullPathNameToObj(const MObject & obj);
+	
+	static MMatrix GetWorldTransformMatrix(const MDagPath & path);
+	static MMatrix GetWorldParentTransformMatrix(const MDagPath & path);
 };
 #endif

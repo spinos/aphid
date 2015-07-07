@@ -9,7 +9,7 @@
 
 #include "rotaCmd.h"
 #include "geometrySurfaceConstraint.h"
-#include <HesperisIO.h>
+#include <AHelper.h>
 geometrySurfaceConstraintCommand::geometrySurfaceConstraintCommand() {}
 geometrySurfaceConstraintCommand::~geometrySurfaceConstraintCommand() {}
 
@@ -84,6 +84,10 @@ MStatus geometrySurfaceConstraintCommand::connectTarget( MDagPath & targetPath, 
 {
 	MGlobal::displayInfo("todo move target to object rotate pivot");
 	
+	MMatrix ptm = AHelper::GetWorldParentTransformMatrix(targetPath);
+	MPoint plocal = m_objectRotatePvt;
+	plocal *= ptm.inverse();
+	
 	MStatus status;/* = connectTargetAttribute(targetPath, index, 
                                             MPxTransform::geometry,
                                             geometrySurfaceConstraint::targetGeometry );
@@ -126,9 +130,8 @@ MStatus geometrySurfaceConstraintCommand::connectObjectAndConstraint( MDGModifie
 	MDagPath::getAPathTo(transform, pobj);
 	// MGlobal::displayInfo(MString(" obj p ")+pobj.fullPathName());
 
-	MMatrix wtm = transformFn.transformation().asMatrix();
-	wtm *= HesperisIO::GetWorldTransform(pobj);
-	MPoint rotatePivot = transformFn.rotatePivot (MSpace::kTransform);
+	MMatrix wtm = AHelper::GetWorldTransformMatrix(pobj);
+	MPoint rotatePivot = transformFn.rotatePivot(MSpace::kTransform);
 	
 	rotatePivot *= wtm;
 	MGlobal::displayInfo(MString("object world rotate pivot ")+rotatePivot.x+" "+rotatePivot.y+" "+rotatePivot.z);
