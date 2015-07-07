@@ -9,6 +9,7 @@
 
 #include "rotaCmd.h"
 #include "geometrySurfaceConstraint.h"
+#include <HesperisIO.h>
 geometrySurfaceConstraintCommand::geometrySurfaceConstraintCommand() {}
 geometrySurfaceConstraintCommand::~geometrySurfaceConstraintCommand() {}
 
@@ -64,6 +65,11 @@ MStatus geometrySurfaceConstraintCommand::doIt(const MArgList &argList)
 #ifdef OLD_API
 MStatus geometrySurfaceConstraintCommand::connectTarget(void *opaqueTarget, int index)
 {
+	MGlobal::displayInfo(MString("todo move target to object rotate pivot ")+
+		m_objectRotatePvt.x+" "+
+		m_objectRotatePvt.y+" "+
+		m_objectRotatePvt.z);
+	
 	MStatus status = connectTargetAttribute(opaqueTarget, index, 
                                             geometrySurfaceConstraint::targetTransform );
 	if (!status) { 
@@ -76,6 +82,8 @@ MStatus geometrySurfaceConstraintCommand::connectTarget(void *opaqueTarget, int 
 #else
 MStatus geometrySurfaceConstraintCommand::connectTarget( MDagPath & targetPath, int index)
 {
+	MGlobal::displayInfo("todo move target to object rotate pivot");
+	
 	MStatus status;/* = connectTargetAttribute(targetPath, index, 
                                             MPxTransform::geometry,
                                             geometrySurfaceConstraint::targetGeometry );
@@ -112,7 +120,21 @@ MStatus geometrySurfaceConstraintCommand::connectObjectAndConstraint( MDGModifie
 
 	MPlug translatePlug = transformFn.findPlug( "translate", &status );
 	if (!status) { status.perror(" transformFn.findPlug"); return status;}
+	
+// world rotate pivot
+	MDagPath pobj;
+	MDagPath::getAPathTo(transform, pobj);
+	// MGlobal::displayInfo(MString(" obj p ")+pobj.fullPathName());
 
+	MMatrix wtm = transformFn.transformation().asMatrix();
+	wtm *= HesperisIO::GetWorldTransform(pobj);
+	MPoint rotatePivot = transformFn.rotatePivot (MSpace::kTransform);
+	
+	rotatePivot *= wtm;
+	MGlobal::displayInfo(MString("object world rotate pivot ")+rotatePivot.x+" "+rotatePivot.y+" "+rotatePivot.z);
+
+	m_objectRotatePvt = rotatePivot;
+	
 	if ( MPlug::kFreeToChange == translatePlug.isFreeToChange() ) {
 		MFnNumericData nd;
 		MObject translateData = nd.create( MFnNumericData::k3Double, &status );

@@ -48,7 +48,7 @@ public:
 	static  void* creator();
 
 protected:
-		virtual MStatus			parseArgs(const MArgList &argList);
-
+	virtual MStatus			parseArgs(const MArgList &argList);
+	MPoint m_objectRotatePvt;
 	rotaBase::ConstraintType weightType;
 };
