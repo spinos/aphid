@@ -69,7 +69,7 @@ MStatus geometrySurfaceConstraintCommand::connectTarget(void *opaqueTarget, int 
 		m_objectRotatePvt.x+" "+
 		m_objectRotatePvt.y+" "+
 		m_objectRotatePvt.z);
-	
+
 	MStatus status = connectTargetAttribute(opaqueTarget, index, 
                                             geometrySurfaceConstraint::targetTransform );
 	if (!status) { 
@@ -82,12 +82,19 @@ MStatus geometrySurfaceConstraintCommand::connectTarget(void *opaqueTarget, int 
 #else
 MStatus geometrySurfaceConstraintCommand::connectTarget( MDagPath & targetPath, int index)
 {
-	MGlobal::displayInfo("todo move target to object rotate pivot");
-	
 	MMatrix ptm = AHelper::GetWorldParentTransformMatrix(targetPath);
 	MPoint plocal = m_objectRotatePvt;
 	plocal *= ptm.inverse();
-	
+    
+    MGlobal::displayInfo(MString("move target to object rotate pivot")+
+		m_objectRotatePvt.x+" "+
+		m_objectRotatePvt.y+" "+
+		m_objectRotatePvt.z);
+    
+    MVector t(m_objectRotatePvt.x, m_objectRotatePvt.y, m_objectRotatePvt.z);
+    MFnTransform ftrans(targetPath);
+    ftrans.setTranslation(t, MSpace::kTransform);
+    
 	MStatus status;/* = connectTargetAttribute(targetPath, index, 
                                             MPxTransform::geometry,
                                             geometrySurfaceConstraint::targetGeometry );
@@ -103,6 +110,14 @@ MStatus geometrySurfaceConstraintCommand::connectTarget( MDagPath & targetPath, 
         MGlobal::displayInfo("failed to connectTargetTransform"); 
         return status;
     }
+    
+    MStatus hasAttr;
+    MFnNumericAttribute foffset(offsetAttribute(), &hasAttr);
+    if(!hasAttr) {
+        MGlobal::displayInfo("cannot get constraint target offset attrib");
+        return MS::kSuccess;
+    }
+    foffset.setDefault(m_objectRotatePvt.x, m_objectRotatePvt.y, m_objectRotatePvt.z);
     
 	return MS::kSuccess;
 }
@@ -134,7 +149,10 @@ MStatus geometrySurfaceConstraintCommand::connectObjectAndConstraint( MDGModifie
 	MPoint rotatePivot = transformFn.rotatePivot(MSpace::kTransform);
 	
 	rotatePivot *= wtm;
-	MGlobal::displayInfo(MString("object world rotate pivot ")+rotatePivot.x+" "+rotatePivot.y+" "+rotatePivot.z);
+	MGlobal::displayInfo(MString("object world rotate pivot ")
+                         +rotatePivot.x+" "
+                         +rotatePivot.y+" "
+                         +rotatePivot.z);
 
 	m_objectRotatePvt = rotatePivot;
 	
@@ -204,10 +222,6 @@ const MObject& geometrySurfaceConstraintCommand::objectAttribute() const
 MTypeId geometrySurfaceConstraintCommand::constraintTypeId() const
 { return geometrySurfaceConstraint::id; }
 
-// MPxConstraintCommand::TargetType geometrySurfaceConstraintCommand::targetType() const
-// { return kGeometryShape; }
-// { return kTransform; }
-
 MStatus geometrySurfaceConstraintCommand::appendSyntax()
 {
 	MStatus ReturnStatus;
@@ -224,3 +238,10 @@ MStatus geometrySurfaceConstraintCommand::appendSyntax()
 
 	return ReturnStatus;
 }
+
+bool geometrySurfaceConstraintCommand::supportsOffset () const
+{return true;}
+
+const MObject & geometrySurfaceConstraintCommand::offsetAttribute() const
+{ return geometrySurfaceConstraint::targetRestP; }
+

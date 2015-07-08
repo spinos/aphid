@@ -27,8 +27,8 @@ public:
 	virtual MStatus		appendSyntax();
 
 	virtual MTypeId constraintTypeId() const;
-	// virtual MPxConstraintCommand::TargetType targetType() const;
-
+    virtual bool 	supportsOffset () const;
+    virtual const MObject & 	offsetAttribute () const;
 	virtual const MObject& constraintInstancedAttribute() const;
 	virtual const MObject& constraintOutputAttribute() const;
 	virtual const MObject& constraintTargetInstancedAttribute() const;
