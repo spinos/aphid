@@ -36,6 +36,7 @@ public:
         
 	static MObject		constraintParentInverseMatrix;
 	static MObject		constraintGeometry;
+// output translation
     static MObject		constraintTranslateX;
     static MObject		constraintTranslateY;
     static MObject		constraintTranslateZ;

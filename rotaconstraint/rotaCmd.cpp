@@ -91,7 +91,7 @@ MStatus geometrySurfaceConstraintCommand::connectTarget( MDagPath & targetPath, 
 		m_objectRotatePvt.y+" "+
 		m_objectRotatePvt.z);
     
-    MVector t(m_objectRotatePvt.x, m_objectRotatePvt.y, m_objectRotatePvt.z);
+    MVector t(plocal.x, plocal.y, plocal.z);
     MFnTransform ftrans(targetPath);
     ftrans.setTranslation(t, MSpace::kTransform);
     

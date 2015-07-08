@@ -45,6 +45,7 @@ MStatus geometrySurfaceConstraint::compute( const MPlug& plug, MDataBlock& block
             double3 & tgo = htgo.asDouble3();
             MGlobal::displayInfo(MString("target rest p ")+tgo[0]+" "+tgo[1]+" "+tgo[2]);
             m_restPos = MPoint(tgo[0],tgo[1],tgo[2]);
+			m_isInitd = true;
 		}
 		
 		MArrayDataHandle targetArray = block.inputArrayValue( compoundTarget );
@@ -65,38 +66,31 @@ MStatus geometrySurfaceConstraint::compute( const MPlug& plug, MDataBlock& block
             tm = ftm.matrix();
             targetArray.next();
         }
+		
+		MDataHandle hparentInvMat = block.inputValue(constraintParentInverseMatrix);
+		MMatrix parentInvMat = hparentInvMat.asMatrix();
 
 // world position
         MPoint curPos(tm(3,0), tm(3,1), tm(3,2));
-        
-        if(!m_isInitd) {
-// reset offset
-            m_isInitd = true;
-        }
-// target translates in world space
-        //MVector dv = curPos - m_lastPos;
-// into target object space
-		//dv *= MTransformationMatrix(tm).asRotateMatrix().inverse();
-// cancel out
-        //m_totalOffset -= dv;
-        m_offsetToRest = m_restPos - curPos;
+// offset in local space
+		m_offsetToRest = m_restPos - curPos;
 // object position in world space
-		MPoint wp = m_offsetToRest * tm + curPos;
-		
-		//m_lastPos = curPos;
-		
+		MPoint localP = m_offsetToRest * tm + curPos;
+// in local space
+		localP *= parentInvMat;
+
         MDataHandle hout;
         if(plug == constraintTranslateX) {
             hout = block.outputValue(constraintTranslateX);
-			hout.set(wp.x);
+			hout.set(localP.x);
         }
         else if(plug == constraintTranslateY) {
             hout = block.outputValue(constraintTranslateY);
-			hout.set(wp.y);
+			hout.set(localP.y);
         }
         else if(plug == constraintTranslateZ) {
             hout = block.outputValue(constraintTranslateZ);
-			hout.set(wp.z);
+			hout.set(localP.z);
         }
 		
 		//MPlug pgTx(thisMObject(), constraintTargetX);
