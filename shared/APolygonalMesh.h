@@ -1,8 +1,8 @@
 #ifndef APOLYGONALMESH_H
 #define APOLYGONALMESH_H
-
+#include <map>
 #include "AGenericMesh.h"
-
+class APolygonalUV;
 class APolygonalMesh : public AGenericMesh {
 public:
 	APolygonalMesh();
@@ -19,9 +19,14 @@ public:
 	unsigned * faceCounts() const;
     unsigned * faceDrifts() const;
     
+	void addUV(const std::string & name, APolygonalUV * uv);
+	const unsigned numUVs() const;
+	const std::string uvName(unsigned idx) const;
+	APolygonalUV * uvData(const std::string & name) const;
 protected:
     unsigned * polygonIndices(unsigned idx) const;
 private:
+	std::map<std::string, APolygonalUV * > m_uvs;
     BaseBuffer * m_faceCounts;
     BaseBuffer * m_faceDrifts;
     unsigned m_numPolygons;

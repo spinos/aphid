@@ -5,6 +5,7 @@
 #include <maya/MIntArray.h>
 #include <maya/MItMeshPolygon.h>
 #include <APolygonalMesh.h>
+#include <APolygonalUV.h>
 bool HesperisPolygonalMeshIO::WritePolygonalMeshes(MDagPathArray & paths, HesperisFile * file)
 {
     std::vector<APolygonalMesh *> data;
@@ -25,7 +26,7 @@ bool HesperisPolygonalMeshIO::WritePolygonalMeshes(MDagPathArray & paths, Hesper
 
 bool HesperisPolygonalMeshIO::CreateMeshData(APolygonalMesh * data, const MDagPath & path)
 {
-    MGlobal::displayInfo(MString("todo poly mesh write ")+path.fullPathName());
+    MGlobal::displayInfo(MString(" poly mesh write ")+path.fullPathName());
     MStatus stat;
     MFnMesh fmesh(path.node(), &stat);
     if(!stat) {
@@ -69,5 +70,59 @@ bool HesperisPolygonalMeshIO::CreateMeshData(APolygonalMesh * data, const MDagPa
     }
     
     data->computeFaceDrift();
+	
+	if(fmesh.numUVSets() < 1) {
+		MGlobal::displayWarning(MString(" mesh has no uv ")+path.fullPathName());
+		return true;
+	}
+	
+	MStringArray setNames;
+	fmesh.getUVSetNames(setNames);
+	
+	for(i=0; i< setNames.length(); i++) {
+		APolygonalUV * auv = new APolygonalUV;
+		CreateMeshUV(auv, path, setNames[i]);
+		data->addUV(setNames[i].asChar(), auv);
+	}
+	
     return true;
 }
+
+bool HesperisPolygonalMeshIO::CreateMeshUV(APolygonalUV * data, const MDagPath & path, const MString & setName)
+{
+	MFloatArray uarray, varray;
+    MIntArray uvIds;
+	
+	MFnMesh fmesh(path.node());
+	fmesh.getUVs( uarray, varray, &setName );
+	
+	MItMeshPolygon faceIt(path);
+	for( ; !faceIter.isDone(); faceIter.next() ) {
+        for( int k=0; k < faceIter.polygonVertexCount(); k++ ) {
+            int aid;
+            faceIter.getUVIndex( k, aid, &setName );
+            uvIds.append(aid);
+        }
+    }
+	
+	unsigned ncorrds = uarray.length();
+	unsigned ninds = uvIds.length();
+	
+	data->create(ncorrds, ninds);
+	
+	float * u = data->ucoord();
+	float * v = data->vcoord();
+	unsigned * ind = data->indices();
+	
+	unsigned i;
+	for(i=0; i< ncoords; i++) {
+		u[i] = uarray[i];
+		v[i] = varray[i];
+	}
+	
+	for(i=0; i< ninds; i++) 
+		ind[i] = uvIds[i];
+
+	return true;
+}
+//:~
