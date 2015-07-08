@@ -1,7 +1,7 @@
 #include "APolygonalMesh.h"
 #include "BaseBuffer.h"
 #include "APolygonalUV.h"
-
+#include "SHelper.h"
 APolygonalMesh::APolygonalMesh() 
 {
     m_faceCounts = new BaseBuffer;
@@ -75,7 +75,7 @@ void APolygonalMesh::computeFaceDrift()
 }
 
 void APolygonalMesh::addUV(const std::string & name, APolygonalUV * uv)
-{ m_uvs[name] = uv; }
+{ m_uvs[SHelper::getLastName(name)] = uv; }
 
 const unsigned APolygonalMesh::numUVs() const
 { return m_uvs.size(); }
