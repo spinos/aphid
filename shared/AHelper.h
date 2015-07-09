@@ -37,7 +37,7 @@
 #include <maya/MItMeshPolygon.h>
 #include <maya/MPlugArray.h>
 #include <maya/MFnTransform.h>
-
+#include <sstream>
 class AHelper
 {
 public:
@@ -127,5 +127,12 @@ public:
 	
 	static MMatrix GetWorldTransformMatrix(const MDagPath & path);
 	static MMatrix GetWorldParentTransformMatrix(const MDagPath & path);
+	template<typename T>
+	static void Info(const std::string & note, const T & v)
+	{
+		std::stringstream sst;
+		sst<<note<<" "<<v;
+		MGlobal::displayInfo(sst.str().c_str());
+	}
 };
 #endif

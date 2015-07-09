@@ -22,6 +22,7 @@
 #include <HWorld.h>
 #include <HTransform.h>
 #include <HCurveGroup.h>
+#include <AHelper.h>
 #include <SHelper.h>
 #include <CurveGroup.h>
 #include <BaseTransform.h>
@@ -506,6 +507,7 @@ bool HesperisIO::GetTransform(BaseTransform * dst, const MDagPath & path)
     ftransform.getScale(mScales);
 	std::stringstream sst;
 	
+	/*
 	sst<<" translate "<<mTranslate;
 	MGlobal::displayInfo(sst.str().c_str());
 	sst.str("");
@@ -515,20 +517,22 @@ bool HesperisIO::GetTransform(BaseTransform * dst, const MDagPath & path)
 	sst<<" scale "<<mScales[0]<<" "<<mScales[1]<<" "<<mScales[2];
 	MGlobal::displayInfo(sst.str().c_str());
 	sst.str("");
-	sst<<" scale pivot "<<mScalePivot;
-	MGlobal::displayInfo(sst.str().c_str());
-	sst.str("");
 	sst<<" rotate pivot "<<mRotatePivot;
 	MGlobal::displayInfo(sst.str().c_str());
 	sst.str("");
-	sst<<" scale pivot translation "<<mScalePivotTranslate;
+	sst<<" scale pivot "<<mScalePivot;
 	MGlobal::displayInfo(sst.str().c_str());
 	sst.str("");
 	sst<<" rotate pivot translation "<<mRotatePivotTranslate;
 	MGlobal::displayInfo(sst.str().c_str());
 	sst.str("");
+	sst<<" scale pivot translation "<<mScalePivotTranslate;
+	MGlobal::displayInfo(sst.str().c_str());
+	sst.str("");
 	sst<<" rotate order "<<mRotationOrder;
 	MGlobal::displayInfo(sst.str().c_str());
+*/
+
 	sst.str("");
 	MMatrix mat = ftransform.transformation().asMatrix();
 	sst<<" matrix "<<"["<<mat[0][0]<<", "<<mat[0][1]<<", "<<mat[0][2]<<", "<<mat[0][3]<<"]\n";
@@ -541,11 +545,39 @@ bool HesperisIO::GetTransform(BaseTransform * dst, const MDagPath & path)
 	dst->setRotationAngles(Vector3F(mRotationInRadians[0], mRotationInRadians[1], mRotationInRadians[2]));
 	dst->setScale(Vector3F(mScales[0], mScales[1], mScales[2]));
 	dst->setRotationOrder(GetRotationOrder(mRotationOrder));
+	dst->setRotatePivot(Vector3F(mRotatePivot.x, mRotatePivot.y, mRotatePivot.z), Vector3F(mRotatePivotTranslate.x, mRotatePivotTranslate.y, mRotatePivotTranslate.z));
+	dst->setScalePivot(Vector3F(mScalePivot.x, mScalePivot.y, mScalePivot.z), Vector3F(mRotatePivotTranslate.x, mRotatePivotTranslate.y, mRotatePivotTranslate.z), Vector3F(mScalePivotTranslate.x, mScalePivotTranslate.y, mScalePivotTranslate.z));
 	
+	AHelper::Info<Vector3F>("rotate at", dst->rotatePivot());
+	AHelper::Info<Vector3F>("scale at", dst->scalePivot());
+	AHelper::Info<Matrix44F>("space", dst->space());
+	/*
 	Matrix44F space = dst->space();
+	
+	MVector pv = mTranslate + mRotatePivotTranslate + mScalePivotTranslate - mRotatePivot;
 	sst.str("");
-	sst<<" space "<<space;
+	sst<<" rpv "<<pv;
 	MGlobal::displayInfo(sst.str().c_str());
+	
+	Matrix33F rot = dst->orientation();
+	Vector3F pvr = rot.transform(Vector3F(pv.x, pv.y, pv.z));
+	sst.str("");
+	sst<<" rpv r "<<pvr;
+	MGlobal::displayInfo(sst.str().c_str());
+	
+	sst.str("");
+	sst<<" rot d "<<pvr - Vector3F(pv.x, pv.y, pv.z);
+	MGlobal::displayInfo(sst.str().c_str());
+	
+	sst.str("");
+	sst<<" t b4 "<< mTranslate + mRotatePivotTranslate + mScalePivotTranslate;
+	MGlobal::displayInfo(sst.str().c_str());
+	
+	MVector tor = mTranslate + mRotatePivotTranslate + mScalePivotTranslate;
+	sst.str("");
+	sst<<" t aft "<< dst->rotatePivot() + pvr;
+	MGlobal::displayInfo(sst.str().c_str());*/
+	
 	return true;
 }
 
