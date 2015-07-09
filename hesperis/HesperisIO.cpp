@@ -480,4 +480,100 @@ bool HesperisIO::LsCurves(std::vector<std::string > & dst, HBase * parent)
 	}
     return true;
 }
+
+bool HesperisIO::GetTransform(BaseTransform * dst, const MDagPath & path)
+{
+	MStatus stat;
+	MFnTransform ftransform(path, &stat);
+	if(!stat) {
+		MGlobal::displayInfo(MString("is not transform ")+path.fullPathName());
+		return false;
+	}
+	
+	MPoint mRotatePivot, mScalePivot;
+	MVector mTranslate, mRotatePivotTranslate, mScalePivotTranslate;
+    double mRotationInRadians[3];
+    double mScales[3];
+	MTransformationMatrix::RotationOrder mRotationOrder;
+    
+	mTranslate = ftransform.getTranslation(MSpace::kTransform);
+    mScalePivot = ftransform.scalePivot(MSpace::kTransform);
+    mRotatePivot = ftransform.rotatePivot(MSpace::kTransform);
+    mRotatePivotTranslate = ftransform.rotatePivotTranslation(MSpace::kTransform);
+    mScalePivotTranslate = ftransform.scalePivotTranslation(MSpace::kTransform);
+    mRotationOrder = ftransform.rotationOrder();
+    ftransform.getRotation(mRotationInRadians, mRotationOrder);
+    ftransform.getScale(mScales);
+	std::stringstream sst;
+	
+	sst<<" translate "<<mTranslate;
+	MGlobal::displayInfo(sst.str().c_str());
+	sst.str("");
+	sst<<" rotate "<<mRotationInRadians[0]<<" "<<mRotationInRadians[1]<<" "<<mRotationInRadians[2];
+	MGlobal::displayInfo(sst.str().c_str());
+	sst.str("");
+	sst<<" scale "<<mScales[0]<<" "<<mScales[1]<<" "<<mScales[2];
+	MGlobal::displayInfo(sst.str().c_str());
+	sst.str("");
+	sst<<" scale pivot "<<mScalePivot;
+	MGlobal::displayInfo(sst.str().c_str());
+	sst.str("");
+	sst<<" rotate pivot "<<mRotatePivot;
+	MGlobal::displayInfo(sst.str().c_str());
+	sst.str("");
+	sst<<" scale pivot translation "<<mScalePivotTranslate;
+	MGlobal::displayInfo(sst.str().c_str());
+	sst.str("");
+	sst<<" rotate pivot translation "<<mRotatePivotTranslate;
+	MGlobal::displayInfo(sst.str().c_str());
+	sst.str("");
+	sst<<" rotate order "<<mRotationOrder;
+	MGlobal::displayInfo(sst.str().c_str());
+	sst.str("");
+	MMatrix mat = ftransform.transformation().asMatrix();
+	sst<<" matrix "<<"["<<mat[0][0]<<", "<<mat[0][1]<<", "<<mat[0][2]<<", "<<mat[0][3]<<"]\n";
+    sst<<"["<<mat[1][0]<<", "<<mat[1][1]<<", "<<mat[1][2]<<", "<<mat[1][3]<<"]\n";
+    sst<<"["<<mat[2][0]<<", "<<mat[2][1]<<", "<<mat[2][2]<<", "<<mat[2][3]<<"]\n";
+    sst<<"["<<mat[3][0]<<", "<<mat[3][1]<<", "<<mat[3][2]<<", "<<mat[3][3]<<"]\n";
+	MGlobal::displayInfo(sst.str().c_str());
+
+	dst->setTranslation(Vector3F(mTranslate.x, mTranslate.y, mTranslate.z));
+	dst->setRotationAngles(Vector3F(mRotationInRadians[0], mRotationInRadians[1], mRotationInRadians[2]));
+	dst->setScale(Vector3F(mScales[0], mScales[1], mScales[2]));
+	dst->setRotationOrder(GetRotationOrder(mRotationOrder));
+	
+	Matrix44F space = dst->space();
+	sst.str("");
+	sst<<" space "<<space;
+	MGlobal::displayInfo(sst.str().c_str());
+	return true;
+}
+
+Matrix33F::RotateOrder HesperisIO::GetRotationOrder(MTransformationMatrix::RotationOrder x)
+{
+	Matrix33F::RotateOrder r = Matrix33F::Unknown;
+	switch (x) {
+		case MTransformationMatrix::kXYZ:
+			r = Matrix33F::XYZ;
+			break;
+		case MTransformationMatrix::kYZX:
+			r = Matrix33F::YZX;
+			break;
+		case MTransformationMatrix::kZXY:
+			r = Matrix33F::ZXY;
+			break;
+		case MTransformationMatrix::kXZY:
+			r = Matrix33F::XZY;
+			break;
+		case MTransformationMatrix::kYXZ:
+			r = Matrix33F::YXZ;
+			break;
+		case MTransformationMatrix::kZYX:
+			r = Matrix33F::ZYX;
+			break;
+		default:
+			break;
+	}
+	return r;
+}
 //:~

@@ -15,6 +15,7 @@ private:
 	MStatus parseArgs ( const MArgList& args );
 	void writeMesh(HesperisFile * file);
 	MStatus printHelp();
+	void testTransform();
 private:
 	enum IOMode {
 		IOUnknown = 0,

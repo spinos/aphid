@@ -9,12 +9,14 @@
 #include <maya/MDagPath.h>
 #include <maya/MDagPathArray.h>
 #include <maya/MMatrix.h>
+#include <maya/MTransformationMatrix.h>
 #include <maya/MObject.h>
 #include <AllMath.h>
 class HBase;
 class HesperisFile;
 class CurveGroup;
 class ATriangleMeshGroup;
+class BaseTransform;
 class HesperisIO {
 public:
 	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName = "");
@@ -37,4 +39,6 @@ public:
     static bool CreateMeshGroup(MDagPathArray & paths, ATriangleMeshGroup * dst);
     static bool LsCurves(std::vector<std::string > & dst);
     static bool LsCurves(std::vector<std::string > & dst, HBase * parent);
+	static bool GetTransform(BaseTransform * dst, const MDagPath & path);
+	static Matrix33F::RotateOrder GetRotationOrder(MTransformationMatrix::RotationOrder x);
 };

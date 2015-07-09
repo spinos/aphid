@@ -314,15 +314,39 @@ void Matrix33F::rotateEuler(float phi, float theta, float psi, RotateOrder order
 	*D.m(1, 0) = -sphi;
 	*D.m(1, 1) = cphi;
 	
-	if(order == XYZ) {
-		multiply(B);
-		multiply(C);
-		multiply(D);
-	}
-	else {
-		multiply(D);
-		multiply(C);
-		multiply(B);
+	switch(order) {
+	    case XYZ:
+	        multiply(B);
+	        multiply(C);
+	        multiply(D);
+	        break;
+		case YZX:
+		    multiply(C);
+		    multiply(D);
+		    multiply(B);
+		    break;
+		case ZXY:
+		    multiply(D);
+		    multiply(B);
+		    multiply(C);
+		    break;
+		case XZY:
+		    multiply(B);
+		    multiply(D);
+		    multiply(C);
+		    break;
+		case YXZ:
+		    multiply(C);
+		    multiply(B);
+		    multiply(D);
+		    break;
+		case ZYX:
+		    multiply(D);
+		    multiply(C);
+		    multiply(B);
+		    break;
+		default:
+		    break;
 	}
 }
 
@@ -332,6 +356,15 @@ Vector3F Matrix33F::scale() const
 	Vector3F vy(M(1, 0), M(1, 1), M(1, 2));
 	Vector3F vz(M(2, 0), M(2, 1), M(2, 2));
 	return Vector3F(vx.length(), vy.length(), vz.length());
+}
+
+void Matrix33F::scaleBy(const Vector3F & v)
+{
+    Matrix33F S;
+	*S.m(0, 0) = v.x;
+	*S.m(1, 1) = v.y;
+	*S.m(2, 2) = v.z;
+	multiply(S);
 }
 
 void Matrix33F::orthoNormalize()
@@ -388,9 +421,9 @@ const std::string Matrix33F::str() const
 {
 	std::stringstream sst;
 	sst.str("");
-    sst<<"["<<v[0]<<" "<<v[1]<<" "<<v[2]<<"]\n";
-    sst<<"["<<v[3]<<" "<<v[4]<<" "<<v[5]<<"]\n";
-	sst<<"["<<v[6]<<" "<<v[7]<<" "<<v[8]<<"]\n";
+    sst<<"["<<v[0]<<", "<<v[1]<<", "<<v[2]<<"]\n";
+    sst<<"["<<v[3]<<", "<<v[4]<<", "<<v[5]<<"]\n";
+	sst<<"["<<v[6]<<", "<<v[7]<<", "<<v[8]<<"]\n";
 	
 	return sst.str();
 }

@@ -7,6 +7,7 @@
 #include "HesperisIO.h"
 #include "HesperisFile.h"
 #include <ASearchHelper.h>
+#include <BaseTransform.h>
 
 void *HesperisCmd::creator()
 { return new HesperisCmd; }
@@ -136,8 +137,19 @@ MStatus HesperisCmd::printHelp()
 {
 	MGlobal::displayInfo(MString("To use hesperis cmd:")
 		+MString("\n select group of curves to export")
-		+MString("\n hesperis -w filename -gm fullPathToMesh")
+		+MString("\n hesperis -w filename -gm fullPathToTransformOfMesh")
         +MString("\n -gm or -growMesh is full path name to the transform of grow mesh"));
+	testTransform();
 	return MS::kSuccess;
+}
+
+void HesperisCmd::testTransform()
+{
+	ASearchHelper searcher;
+	MDagPath meshGrp;
+	if(!searcher.dagByFullName("|group1|pCube1", meshGrp)) return;
+	
+	BaseTransform data;
+	HesperisIO::GetTransform(&data, meshGrp);
 }
 //:~

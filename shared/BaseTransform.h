@@ -34,7 +34,7 @@ public:
 	void rotate(const Vector3F & v);
 	void setRotationAngles(const Vector3F & v);
 
-	Matrix33F rotation() const;
+	Matrix33F orientation() const;
 	Vector3F rotationAngles() const;
 	
 	void addChild(BaseTransform * child);
@@ -57,13 +57,20 @@ public:
 	void setRotateDOF(const Float3 & dof);
 	Float3 rotateDOF() const;
 	
+	void setRotationOrder(Matrix33F::RotateOrder x);
+	Matrix33F::RotateOrder rotationOrder() const;
+	
+	void setScale(const Vector3F & a);
+	Vector3F scale() const;
+	
 	virtual const Type type() const;
 protected:
 	
 	
 private:
-	Vector3F m_translation, m_angles;
+	Vector3F m_translation, m_angles, m_scale;
 	BaseTransform * m_parent;
 	std::vector<BaseTransform *> m_children;
 	Float3 m_rotateDOF;
+	Matrix33F::RotateOrder m_rotationOrder;
 };

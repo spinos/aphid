@@ -13,8 +13,10 @@ BaseTransform::BaseTransform(BaseTransform * parent)
 {
     m_translation.setZero();
     m_angles.setZero();
+    m_scale.set(1.f, 1.f, 1.f);
 	m_parent = parent;
 	m_rotateDOF.x = m_rotateDOF.y = m_rotateDOF.z = 1.f;
+	m_rotationOrder = Matrix33F::XYZ;
 }
 
 BaseTransform::~BaseTransform() {}
@@ -57,25 +59,23 @@ void BaseTransform::setRotationAngles(const Vector3F & v)
 
 Vector3F BaseTransform::rotationBaseAngles() const
 {
-	return Vector3F();
+	return Vector3F::Zero;
 }
 
-Matrix33F BaseTransform::rotation() const
+Matrix33F BaseTransform::orientation() const
 {
 	Matrix33F r;
 	Vector3F angs = rotationAngles();
-	r.rotateEuler(angs.x, angs.y, angs.z);
+	r.rotateEuler(angs.x, angs.y, angs.z, m_rotationOrder);
 	angs = rotationBaseAngles();
 	Matrix33F b;
-	b.rotateEuler(angs.x, angs.y, angs.z);
+	b.rotateEuler(angs.x, angs.y, angs.z, m_rotationOrder);
 	r.multiply(b);
 	return r;
 }
 
 Vector3F BaseTransform::rotationAngles() const
-{
-	return m_angles;
-}
+{ return m_angles; }
 
 void BaseTransform::addChild(BaseTransform * child)
 {
@@ -107,7 +107,9 @@ Matrix44F BaseTransform::space() const
 {
 	Matrix44F s;
 	s.setTranslation(m_translation);
-	s.setRotation(rotation());
+	Matrix33F r = orientation();
+	r.scaleBy(m_scale);
+	s.setRotation(r);
 	return s;
 }
 
@@ -152,7 +154,7 @@ Vector3F BaseTransform::rotatePlane(RotateAxis a) const
 		return r.transform(Vector3F::YAxis);
 	}
 	
-	r = rotation();
+	r = orientation();
 	return r.transform(Vector3F::XAxis);
 }
 
@@ -177,3 +179,16 @@ Float3 BaseTransform::rotateDOF() const
 
 const TypedEntity::Type BaseTransform::type() const
 { return TTransform; }
+
+void BaseTransform::setRotationOrder(Matrix33F::RotateOrder x)
+{ m_rotationOrder = x; }
+
+Matrix33F::RotateOrder BaseTransform::rotationOrder() const
+{ return m_rotationOrder; }
+
+void BaseTransform::setScale(const Vector3F & a)
+{ m_scale = a; }
+
+Vector3F BaseTransform::scale() const
+{ return m_scale; }
+//:~

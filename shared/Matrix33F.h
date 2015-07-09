@@ -13,8 +13,13 @@
  {
  public:
 	enum RotateOrder {
-		XYZ = 0,
-		ZYX = 1
+		Unknown = 0,
+	    XYZ = 1,
+		YZX = 2,
+		ZXY = 3,
+		XZY = 4,
+		YXZ = 5,
+		ZYX = 6
 	};
 	
 	Matrix33F();
@@ -50,6 +55,7 @@
 	void rotateEuler(float phi, float theta, float psi, RotateOrder order = XYZ);
 	
 	Vector3F scale() const;
+	void scaleBy(const Vector3F & v);
 	void orthoNormalize();
 	void set(const Quaternion & q);
 	
