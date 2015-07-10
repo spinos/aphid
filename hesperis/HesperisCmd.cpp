@@ -147,7 +147,7 @@ void HesperisCmd::testTransform()
 {
 	ASearchHelper searcher;
 	MDagPath meshGrp;
-	if(!searcher.dagByFullName("|group1|pCube1", meshGrp)) return;
+	if(!searcher.dagByFullName("|pCube1", meshGrp)) return;
 	
 	BaseTransform data;
 	HesperisIO::GetTransform(&data, meshGrp);

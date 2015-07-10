@@ -16,8 +16,8 @@ BaseTransform::BaseTransform(BaseTransform * parent)
     m_scale.set(1.f, 1.f, 1.f);
     m_rotatePivot.setZero();
     m_scalePivot.setZero();
-    //m_rotatePivotTranslate.setZero();
-    //m_scalePivotTranslate.setZero();
+    m_rotatePivotTranslate.setZero();
+    m_scalePivotTranslate.setZero();
 	m_parent = parent;
 	m_rotateDOF.x = m_rotateDOF.y = m_rotateDOF.z = 1.f;
 	m_rotationOrder = Matrix33F::XYZ;
@@ -110,14 +110,13 @@ void BaseTransform::parentSpace(Matrix44F & dst) const
 Matrix44F BaseTransform::space() const
 {
     Matrix44F s;
-	s.setTranslation(m_translation + m_rotatePivot);
+	s.setTranslation(m_translation);
 	Matrix33F r = orientation();
-	/*
-	Vector3F pivotV0 = (m_translation + m_rotatePivotTranslate + m_rotatePivotTranslate) - m_rotatePivot;
-	Vector3F pivotV1 = r.transform(pivotV0);
-	Vector3F displaceByRotation = pivotV1 - pivotV0;
-	s.translate(displaceByRotation);
-	*/
+	
+	s.translate(m_rotatePivotTranslate);
+	s.translate(m_rotatePivot);
+	s.translate(r.transform(m_rotatePivot.reversed()));
+	
 	r.scaleBy(m_scale);
 	s.setRotation(r);
 
@@ -205,25 +204,25 @@ Vector3F BaseTransform::scale() const
 
 void BaseTransform::setRotatePivot(const Vector3F & p, const Vector3F & t)
 { 
-    m_rotatePivot = p + t; 
-    // m_rotatePivotTranslate = t;
+    m_rotatePivot = p; 
+    m_rotatePivotTranslate = t;
 }
 
 Vector3F BaseTransform::rotatePivot() const
 { return m_rotatePivot; }
 
-// Vector3F BaseTransform::rotatePivotTranslate() const
-// { return m_rotatePivotTranslate; }
+Vector3F BaseTransform::rotatePivotTranslate() const
+{ return m_rotatePivotTranslate; }
 
-void BaseTransform::setScalePivot(const Vector3F & p, const Vector3F & t1, const Vector3F & t2)
+void BaseTransform::setScalePivot(const Vector3F & p, const Vector3F & t)
 { 
-    m_scalePivot = p + t1 + t2; 
-    // m_scalePivotTranslate = t;
+    m_scalePivot = p; 
+    m_scalePivotTranslate = t;
 }
 
 Vector3F BaseTransform::scalePivot() const
 { return m_scalePivot; }
 
-// Vector3F BaseTransform::scalePivotTranslate() const
-// { return m_scalePivotTranslate; }
+Vector3F BaseTransform::scalePivotTranslate() const
+{ return m_scalePivotTranslate; }
 //:~

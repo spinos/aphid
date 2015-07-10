@@ -65,18 +65,18 @@ public:
 	
 	void setRotatePivot(const Vector3F & p, const Vector3F & t);
 	Vector3F rotatePivot() const;
-	//Vector3F rotatePivotTranslate() const;
+	Vector3F rotatePivotTranslate() const;
 	
-	void setScalePivot(const Vector3F & p, const Vector3F & t1, const Vector3F & t2);
+	void setScalePivot(const Vector3F & p, const Vector3F & t);
 	Vector3F scalePivot() const;
-	//Vector3F scalePivotTranslate() const;
+	Vector3F scalePivotTranslate() const;
 	
 	virtual const Type type() const;
 protected:
 	
 	
 private:
-	Vector3F m_translation, m_angles, m_scale, m_rotatePivot, m_scalePivot;//, m_rotatePivotTranslate, m_scalePivotTranslate;
+	Vector3F m_translation, m_angles, m_scale, m_rotatePivot, m_scalePivot, m_rotatePivotTranslate, m_scalePivotTranslate;
 	BaseTransform * m_parent;
 	std::vector<BaseTransform *> m_children;
 	Float3 m_rotateDOF;
