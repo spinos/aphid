@@ -12,8 +12,11 @@
 #include <maya/MTransformationMatrix.h>
 #include <maya/MObject.h>
 #include <AllMath.h>
-#include<BaseTransform.h>
-class HBase;
+#include <HBase.h>
+#include <BaseTransform.h>
+#include <HTransform.h>
+#include <SHelper.h>
+
 class HesperisFile;
 class CurveGroup;
 class ATriangleMeshGroup;

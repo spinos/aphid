@@ -150,19 +150,20 @@ bool HesperisPolygonalMeshIO::ReadMeshes(HesperisFile * file, MObject &target)
 MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & parentObj,
                        const std::string & nodeName)
 {
-    // MGlobal::displayInfo(MString("todo poly mesh in ")+nodeName.c_str());         
-    // MGlobal::displayInfo(data->verbosestr().c_str());
-
+	const int numVertices = data->numPoints();
+    
     MObject otm = MObject::kNullObj;
     if(HesperisIO::FindNamedChild(otm, nodeName, parentObj)) {
-        MGlobal::displayInfo(MString(" node exists ")+nodeName.c_str());
-        return otm;
-    } 
+        if(!checkMeshNv(otm, numVertices))
+			MGlobal::displayWarning(MString(" existing node ")+ nodeName.c_str() + 
+				MString(" is not a mesh or it is a mesh has wrong number of cvs"));
+		
+		return otm;
+    }
     
     MPointArray vertexArray;
 	MIntArray polygonCounts, polygonConnects;
-	const int numVertices = data->numPoints();
-    const int numPolygons = data->numPolygons();
+	const int numPolygons = data->numPolygons();
     
     Vector3F * cvs = data->points();
     int i = 0;
@@ -179,9 +180,73 @@ MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & pa
         polygonConnects.append(conns[i]);
     
     MStatus stat;
-    MFnMesh meshFn;
-	otm = meshFn.create(numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, parentObj, &stat );
+    MFnMesh fmesh;
+	otm = fmesh.create(numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, parentObj, &stat );
 
+	if(!stat) {
+		MGlobal::displayWarning(MString(" hesperis failed to create poly mesh ")+nodeName.c_str());
+		return otm;
+	}
+	
+	std::string validName(nodeName);
+	SHelper::noColon(validName);
+	fmesh.setName(validName.c_str()); 
+	
+	if(data->numUVs() < 1) {
+		MGlobal::displayWarning(MString(" poly mesh has no uv ")+nodeName.c_str());
+		return otm;
+	}
+	
+	for(i=0;i<data->numUVs();i++) {
+		std::string setName = data->uvName(i);
+		addUV(data->uvData(setName), fmesh, setName, polygonCounts);
+	}
+		
     return otm;
+}
+
+void HesperisPolygonalMeshCreator::addUV(APolygonalUV * data, MFnMesh & fmesh,
+						const std::string & setName,
+						const MIntArray & uvCounts)
+{
+	MFloatArray uArray, vArray;
+	MIntArray uvIds;
+	const unsigned ncoord = data->numCoords();
+	const unsigned nind = data->numIndices();
+	
+	float * u = data->ucoord();
+	float * v = data->vcoord(); 
+	unsigned i = 0;
+	for(;i<ncoord;i++) {
+		uArray.append(u[i]);
+		vArray.append(v[i]);
+	}
+	
+	unsigned * ind = data->indices();
+	for(i=0; i<nind; i++)
+		uvIds.append(ind[i]);
+		
+	const MString uvSet(setName.c_str());
+	MStatus stat = fmesh.setUVs( uArray, vArray, &uvSet);
+	if(!stat) {
+		MGlobal::displayWarning(MString(" hesperis failed to create uv set coord ")+uvSet);
+		return;
+	}
+	
+	stat = fmesh.assignUVs( uvCounts, uvIds, &uvSet );
+	if(!stat)
+		MGlobal::displayWarning(MString(" hesperis failed to create uv set uvid ")+uvSet);
+		
+	return;
+}
+
+bool HesperisPolygonalMeshCreator::checkMeshNv(const MObject & node, unsigned nv)
+{
+	MStatus stat;
+	MFnMesh fmesh(node, &stat);
+	if(!stat)
+		return false;
+	
+	return (fmesh.numVertices() == nv);
 }
 //:~

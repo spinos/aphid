@@ -20,10 +20,8 @@
 #include "HesperisFile.h"
 #include <HBase.h>
 #include <HWorld.h>
-#include <HTransform.h>
 #include <HCurveGroup.h>
 #include <AHelper.h>
-#include <SHelper.h>
 #include <CurveGroup.h>
 #include <sstream>
 #include <boost/format.hpp>
