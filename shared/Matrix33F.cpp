@@ -358,15 +358,6 @@ Vector3F Matrix33F::scale() const
 	return Vector3F(vx.length(), vy.length(), vz.length());
 }
 
-void Matrix33F::scaleBy(const Vector3F & v)
-{
-    Matrix33F S;
-	*S.m(0, 0) = v.x;
-	*S.m(1, 1) = v.y;
-	*S.m(2, 2) = v.z;
-	multiply(S);
-}
-
 void Matrix33F::orthoNormalize()
 {
     Vector3F r0(M(0, 0), M(0, 1), M(0, 2));

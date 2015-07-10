@@ -55,7 +55,6 @@
 	void rotateEuler(float phi, float theta, float psi, RotateOrder order = XYZ);
 	
 	Vector3F scale() const;
-	void scaleBy(const Vector3F & v);
 	void orthoNormalize();
 	void set(const Quaternion & q);
 	

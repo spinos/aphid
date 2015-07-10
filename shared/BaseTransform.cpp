@@ -117,7 +117,19 @@ Matrix44F BaseTransform::space() const
 	s.translate(m_rotatePivot);
 	s.translate(r.transform(m_rotatePivot.reversed()));
 	
-	r.scaleBy(m_scale);
+	s.translate(r.transform(m_scalePivotTranslate));
+	s.translate(r.transform(m_scalePivot));
+	
+	Vector3F displaceByScaling = m_scalePivot.reversed();
+	displaceByScaling = displaceByScaling * m_scale;
+	s.translate(r.transform(displaceByScaling));
+	
+	Matrix33F scaleMatrix;
+	*scaleMatrix.m(0, 0) = m_scale.x;
+	*scaleMatrix.m(1, 1) = m_scale.y;
+	*scaleMatrix.m(2, 2) = m_scale.z;
+	
+	r = scaleMatrix * r;
 	s.setRotation(r);
 
 	return s;

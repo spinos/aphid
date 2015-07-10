@@ -546,7 +546,7 @@ bool HesperisIO::GetTransform(BaseTransform * dst, const MDagPath & path)
 	dst->setScale(Vector3F(mScales[0], mScales[1], mScales[2]));
 	dst->setRotationOrder(GetRotationOrder(mRotationOrder));
 	dst->setRotatePivot(Vector3F(mRotatePivot.x, mRotatePivot.y, mRotatePivot.z), Vector3F(mRotatePivotTranslate.x, mRotatePivotTranslate.y, mRotatePivotTranslate.z));
-	dst->setScalePivot(Vector3F(mScalePivot.x, mScalePivot.y, mScalePivot.z), Vector3F(mRotatePivotTranslate.x, mRotatePivotTranslate.y, mRotatePivotTranslate.z), Vector3F(mScalePivotTranslate.x, mScalePivotTranslate.y, mScalePivotTranslate.z));
+	dst->setScalePivot(Vector3F(mScalePivot.x, mScalePivot.y, mScalePivot.z), Vector3F(mScalePivotTranslate.x, mScalePivotTranslate.y, mScalePivotTranslate.z));
 	
 	AHelper::Info<Vector3F>("rotate at", dst->rotatePivot());
 	AHelper::Info<Vector3F>("scale at", dst->scalePivot());
