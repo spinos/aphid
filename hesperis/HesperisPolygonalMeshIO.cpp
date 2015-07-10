@@ -150,14 +150,38 @@ bool HesperisPolygonalMeshIO::ReadMeshes(HesperisFile * file, MObject &target)
 MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & parentObj,
                        const std::string & nodeName)
 {
-    MGlobal::displayInfo(MString("todo poly mesh in ")+nodeName.c_str());         
-    MGlobal::displayInfo(data->verbosestr().c_str());
+    // MGlobal::displayInfo(MString("todo poly mesh in ")+nodeName.c_str());         
+    // MGlobal::displayInfo(data->verbosestr().c_str());
 
     MObject otm = MObject::kNullObj;
-    if(!HesperisIO::FindNamedChild(otm, nodeName, parentObj)) {
-        MGlobal::displayInfo(MString(" node doesn't exist ")+nodeName.c_str());
-        
+    if(HesperisIO::FindNamedChild(otm, nodeName, parentObj)) {
+        MGlobal::displayInfo(MString(" node exists ")+nodeName.c_str());
+        return otm;
     } 
+    
+    MPointArray vertexArray;
+	MIntArray polygonCounts, polygonConnects;
+	const int numVertices = data->numPoints();
+    const int numPolygons = data->numPolygons();
+    
+    Vector3F * cvs = data->points();
+    int i = 0;
+    for(;i<numVertices;i++)
+        vertexArray.append( MPoint( cvs[i].x, cvs[i].y, cvs[i].z ) );
+    
+    unsigned * counts = data->faceCounts();
+    for(i=0;i<numPolygons;i++)
+        polygonCounts.append(counts[i]);
+    
+    const int numFaceVertices = data->numIndices();
+    unsigned * conns = data->indices();
+    for(i=0;i<numFaceVertices;i++)
+        polygonConnects.append(conns[i]);
+    
+    MStatus stat;
+    MFnMesh meshFn;
+	otm = meshFn.create(numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, parentObj, &stat );
+
     return otm;
 }
 //:~
