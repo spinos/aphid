@@ -101,4 +101,26 @@ APolygonalUV * APolygonalMesh::uvData(const std::string & name) const
 	}
 	return 0; 
 }
+
+std::string APolygonalMesh::verbosestr() const
+{
+    std::stringstream sst;
+    sst<<" polymesh nv "<<numPoints()
+    <<"\n npoly "<<numPolygons()
+    <<"\n nfacev "<<numIndices();
+    if(numUVs() < 1) {
+        sst<<"\n warning: mesh has no uv"
+        <<"\n";
+        return sst.str();
+    }
+    sst<<"\n nuvset "<<numUVs();
+    unsigned i = 0;
+    for(;i<numUVs();i++) {
+        sst<<"\n uvset["<<i<<"] name "<<uvName(i);
+        sst<<uvData(uvName(i))->verbosestr();
+    }
+    
+    sst<<"\n";
+    return sst.str();
+}
 //:~

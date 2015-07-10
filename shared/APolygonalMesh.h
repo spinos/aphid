@@ -23,6 +23,8 @@ public:
 	const unsigned numUVs() const;
 	const std::string uvName(unsigned idx) const;
 	APolygonalUV * uvData(const std::string & name) const;
+    
+    virtual std::string verbosestr() const;
 protected:
     unsigned * polygonIndices(unsigned idx) const;
 private:

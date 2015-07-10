@@ -966,4 +966,14 @@ MMatrix AHelper::GetWorldParentTransformMatrix(const MDagPath & path)
     }
     return m;
 }
+
+void AHelper::PrintMatrix(const std::string & note, const MMatrix & mat)
+{
+    std::stringstream sst;
+	sst<<note<<" ["<<mat[0][0]<<", "<<mat[0][1]<<", "<<mat[0][2]<<", "<<mat[0][3]<<"]\n"
+    <<"["<<mat[1][0]<<", "<<mat[1][1]<<", "<<mat[1][2]<<", "<<mat[1][3]<<"]\n"
+    <<"["<<mat[2][0]<<", "<<mat[2][1]<<", "<<mat[2][2]<<", "<<mat[2][3]<<"]\n"
+    <<"["<<mat[3][0]<<", "<<mat[3][1]<<", "<<mat[3][2]<<", "<<mat[3][3]<<"]\n";
+	MGlobal::displayInfo(sst.str().c_str());
+}
 //:~

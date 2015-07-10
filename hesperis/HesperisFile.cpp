@@ -16,6 +16,7 @@
 #include <HTransform.h>
 #include <HTetrahedronMesh.h>
 #include <HTriangleMeshGroup.h>
+#include <HPolygonalMesh.h>
 #include <ATriangleMeshGroup.h>
 #include <ATetrahedronMesh.h>
 #include <BaseTransform.h>
@@ -64,6 +65,9 @@ bool HesperisFile::doWrite(const std::string & fileName)
 			break;
 		case WTransform:
 			writeTransform();
+			break;
+        case WPoly:
+			writePolygon();
 			break;
 		default:
 			break;
@@ -130,6 +134,19 @@ bool HesperisFile::writeTriangle()
 	return true;
 }
 
+bool HesperisFile::writePolygon()
+{
+    std::map<std::string, APolygonalMesh *>::iterator it = m_polyMeshes.begin();
+	for(; it != m_polyMeshes.end(); ++it) {
+		std::cout<<" write poly mesh "<<worldPath(it->first)
+		<<"\n";
+		HPolygonalMesh grp(worldPath(it->first));
+		grp.save(it->second);
+		grp.close();
+	}
+	return true;
+}
+
 void HesperisFile::addTransform(const std::string & name, BaseTransform * data)
 { m_transforms[checkPath(name)] = data; }
 
@@ -141,6 +158,9 @@ void HesperisFile::addTetrahedron(const std::string & name, ATetrahedronMesh * d
 
 void HesperisFile::addTriangleMesh(const std::string & name, ATriangleMeshGroup * data)
 { m_triangleMeshes[checkPath(name)] = data; }
+
+void HesperisFile::addPolygonalMesh(const std::string & name, APolygonalMesh * data)
+{ m_polyMeshes[checkPath(name)] = data; }
 
 bool HesperisFile::doRead(const std::string & fileName)
 {

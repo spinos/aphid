@@ -134,5 +134,7 @@ public:
 		sst<<note<<" "<<v;
 		MGlobal::displayInfo(sst.str().c_str());
 	}
+    
+    static void PrintMatrix(const std::string & note, const MMatrix & mat);
 };
 #endif

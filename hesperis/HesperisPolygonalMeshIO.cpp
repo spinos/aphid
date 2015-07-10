@@ -6,6 +6,11 @@
 #include <maya/MItMeshPolygon.h>
 #include <APolygonalMesh.h>
 #include <APolygonalUV.h>
+#include "HesperisFile.h"
+#include <HWorld.h>
+#include <SHelper.h>
+#include <HTransform.h>
+#include <HPolygonalMesh.h>
 bool HesperisPolygonalMeshIO::WritePolygonalMeshes(MDagPathArray & paths, HesperisFile * file)
 {
     std::vector<APolygonalMesh *> data;
@@ -14,8 +19,16 @@ bool HesperisPolygonalMeshIO::WritePolygonalMeshes(MDagPathArray & paths, Hesper
     for(;i<paths.length();i++) {
         APolygonalMesh * mesh = new APolygonalMesh;
         CreateMeshData(mesh, paths[i]);
+        // MGlobal::displayInfo(mesh->verbosestr().c_str());
+        file->addPolygonalMesh(paths[i].fullPathName().asChar(), mesh);
         data.push_back(mesh);
     }
+    
+    file->setDirty();
+	file->setWriteComponent(HesperisFile::WPoly);
+	bool fstat = file->save();
+	if(!fstat) MGlobal::displayWarning(MString(" cannot save poly mesh to file ")+ file->fileName().c_str());
+	file->close();
     
     std::vector<APolygonalMesh *>::iterator it = data.begin();
     for(;it!=data.end(); ++it)
@@ -26,7 +39,6 @@ bool HesperisPolygonalMeshIO::WritePolygonalMeshes(MDagPathArray & paths, Hesper
 
 bool HesperisPolygonalMeshIO::CreateMeshData(APolygonalMesh * data, const MDagPath & path)
 {
-    MGlobal::displayInfo(MString(" poly mesh write ")+path.fullPathName());
     MStatus stat;
     MFnMesh fmesh(path.node(), &stat);
     if(!stat) {
@@ -97,18 +109,18 @@ bool HesperisPolygonalMeshIO::CreateMeshUV(APolygonalUV * data, const MDagPath &
 	fmesh.getUVs( uarray, varray, &setName );
 	
 	MItMeshPolygon faceIt(path);
-	for( ; !faceIter.isDone(); faceIter.next() ) {
-        for( int k=0; k < faceIter.polygonVertexCount(); k++ ) {
+	for( ; !faceIt.isDone(); faceIt.next() ) {
+        for( int k=0; k < faceIt.polygonVertexCount(); k++ ) {
             int aid;
-            faceIter.getUVIndex( k, aid, &setName );
+            faceIt.getUVIndex( k, aid, &setName );
             uvIds.append(aid);
         }
     }
 	
-	unsigned ncorrds = uarray.length();
+	unsigned ncoords = uarray.length();
 	unsigned ninds = uvIds.length();
 	
-	data->create(ncorrds, ninds);
+	data->create(ncoords, ninds);
 	
 	float * u = data->ucoord();
 	float * v = data->vcoord();
@@ -124,5 +136,28 @@ bool HesperisPolygonalMeshIO::CreateMeshUV(APolygonalUV * data, const MDagPath &
 		ind[i] = uvIds[i];
 
 	return true;
+}
+
+bool HesperisPolygonalMeshIO::ReadMeshes(HesperisFile * file, MObject &target)
+{
+    MGlobal::displayInfo("opium read poly mesh");
+    HWorld grpWorld;
+    ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisPolygonalMeshCreator>(&grpWorld, target);
+    grpWorld.close();
+    return true;
+}
+
+MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & parentObj,
+                       const std::string & nodeName)
+{
+    MGlobal::displayInfo(MString("todo poly mesh in ")+nodeName.c_str());         
+    MGlobal::displayInfo(data->verbosestr().c_str());
+
+    MObject otm = MObject::kNullObj;
+    if(!HesperisIO::FindNamedChild(otm, nodeName, parentObj)) {
+        MGlobal::displayInfo(MString(" node doesn't exist ")+nodeName.c_str());
+        
+    } 
+    return otm;
 }
 //:~

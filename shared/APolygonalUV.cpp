@@ -1,5 +1,6 @@
 #include "APolygonalUV.h"
 #include <BaseBuffer.h>
+#include <sstream>
 
 APolygonalUV::APolygonalUV()
 {
@@ -40,4 +41,13 @@ const unsigned APolygonalUV::numCoords() const
 
 const unsigned APolygonalUV::numIndices() const
 { return m_numIndices; }
+
+std::string APolygonalUV::verbosestr() const
+{
+    std::stringstream sst;
+    sst<<" poly uv ncoord "<<numCoords()
+    <<"\n nfacev "<<numIndices()
+    <<"\n";
+    return sst.str();
+}
 //:~

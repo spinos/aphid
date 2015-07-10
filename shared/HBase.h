@@ -70,7 +70,7 @@ public:
 	virtual char load();
     
     virtual char verifyType();
-	
+
 	template<typename T>
 	void lsTypedChild(std::vector<std::string> & names) {
 		int nc = numChildren();

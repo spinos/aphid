@@ -1,8 +1,8 @@
 #ifndef APOLYGONALUV_H
 #define APOLYGONALUV_H
-
+#include <AVerbose.h>
 class BaseBuffer;
-class APolygonalUV {
+class APolygonalUV : public AVerbose {
 public:
     APolygonalUV();
     virtual ~APolygonalUV();
@@ -14,6 +14,8 @@ public:
     unsigned * indices() const;
     const unsigned numCoords() const;
     const unsigned numIndices() const;
+    
+    virtual std::string verbosestr() const;
 protected:
 
 private:

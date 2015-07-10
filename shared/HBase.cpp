@@ -435,3 +435,4 @@ char HBase::load()
 
 char HBase::verifyType()
 { return 1; }
+//:~

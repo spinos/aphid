@@ -9,8 +9,9 @@
 
 #pragma once
 #include <TypedEntity.h>
+#include <AVerbose.h>
 #include <BoundingBox.h>
-class Geometry : public TypedEntity {
+class Geometry : public TypedEntity, public AVerbose {
 public:
 	Geometry();
 	virtual ~Geometry();

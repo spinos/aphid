@@ -25,7 +25,6 @@
 #include <AHelper.h>
 #include <SHelper.h>
 #include <CurveGroup.h>
-#include <BaseTransform.h>
 #include <sstream>
 #include <boost/format.hpp>
 
@@ -180,16 +179,6 @@ bool HesperisIO::ReadCurves(HesperisFile * file, MObject &target)
     HWorld grpWorld;
     ReadTransforms(&grpWorld, target);
     ReadCurves(&grpWorld, target);
-    grpWorld.close();
-    return true;
-}
-
-bool HesperisIO::ReadMeshes(HesperisFile * file, MObject &target)
-{
-    MGlobal::displayInfo("opium read mesh");
-    HWorld grpWorld;
-    ReadTransforms(&grpWorld, target);
-    // ReadMeshes(&grpWorld, target);
     grpWorld.close();
     return true;
 }
@@ -505,41 +494,8 @@ bool HesperisIO::GetTransform(BaseTransform * dst, const MDagPath & path)
     mRotationOrder = ftransform.rotationOrder();
     ftransform.getRotation(mRotationInRadians, mRotationOrder);
     ftransform.getScale(mScales);
-	std::stringstream sst;
 	
-	/*
-	sst<<" translate "<<mTranslate;
-	MGlobal::displayInfo(sst.str().c_str());
-	sst.str("");
-	sst<<" rotate "<<mRotationInRadians[0]<<" "<<mRotationInRadians[1]<<" "<<mRotationInRadians[2];
-	MGlobal::displayInfo(sst.str().c_str());
-	sst.str("");
-	sst<<" scale "<<mScales[0]<<" "<<mScales[1]<<" "<<mScales[2];
-	MGlobal::displayInfo(sst.str().c_str());
-	sst.str("");
-	sst<<" rotate pivot "<<mRotatePivot;
-	MGlobal::displayInfo(sst.str().c_str());
-	sst.str("");
-	sst<<" scale pivot "<<mScalePivot;
-	MGlobal::displayInfo(sst.str().c_str());
-	sst.str("");
-	sst<<" rotate pivot translation "<<mRotatePivotTranslate;
-	MGlobal::displayInfo(sst.str().c_str());
-	sst.str("");
-	sst<<" scale pivot translation "<<mScalePivotTranslate;
-	MGlobal::displayInfo(sst.str().c_str());
-	sst.str("");
-	sst<<" rotate order "<<mRotationOrder;
-	MGlobal::displayInfo(sst.str().c_str());
-*/
-
-	sst.str("");
-	MMatrix mat = ftransform.transformation().asMatrix();
-	sst<<" matrix "<<"["<<mat[0][0]<<", "<<mat[0][1]<<", "<<mat[0][2]<<", "<<mat[0][3]<<"]\n";
-    sst<<"["<<mat[1][0]<<", "<<mat[1][1]<<", "<<mat[1][2]<<", "<<mat[1][3]<<"]\n";
-    sst<<"["<<mat[2][0]<<", "<<mat[2][1]<<", "<<mat[2][2]<<", "<<mat[2][3]<<"]\n";
-    sst<<"["<<mat[3][0]<<", "<<mat[3][1]<<", "<<mat[3][2]<<", "<<mat[3][3]<<"]\n";
-	MGlobal::displayInfo(sst.str().c_str());
+    //AHelper::PrintMatrix("matrix", ftransform.transformation().asMatrix());
 
 	dst->setTranslation(Vector3F(mTranslate.x, mTranslate.y, mTranslate.z));
 	dst->setRotationAngles(Vector3F(mRotationInRadians[0], mRotationInRadians[1], mRotationInRadians[2]));
@@ -548,35 +504,7 @@ bool HesperisIO::GetTransform(BaseTransform * dst, const MDagPath & path)
 	dst->setRotatePivot(Vector3F(mRotatePivot.x, mRotatePivot.y, mRotatePivot.z), Vector3F(mRotatePivotTranslate.x, mRotatePivotTranslate.y, mRotatePivotTranslate.z));
 	dst->setScalePivot(Vector3F(mScalePivot.x, mScalePivot.y, mScalePivot.z), Vector3F(mScalePivotTranslate.x, mScalePivotTranslate.y, mScalePivotTranslate.z));
 	
-	AHelper::Info<Vector3F>("rotate at", dst->rotatePivot());
-	AHelper::Info<Vector3F>("scale at", dst->scalePivot());
-	AHelper::Info<Matrix44F>("space", dst->space());
-	/*
-	Matrix44F space = dst->space();
-	
-	MVector pv = mTranslate + mRotatePivotTranslate + mScalePivotTranslate - mRotatePivot;
-	sst.str("");
-	sst<<" rpv "<<pv;
-	MGlobal::displayInfo(sst.str().c_str());
-	
-	Matrix33F rot = dst->orientation();
-	Vector3F pvr = rot.transform(Vector3F(pv.x, pv.y, pv.z));
-	sst.str("");
-	sst<<" rpv r "<<pvr;
-	MGlobal::displayInfo(sst.str().c_str());
-	
-	sst.str("");
-	sst<<" rot d "<<pvr - Vector3F(pv.x, pv.y, pv.z);
-	MGlobal::displayInfo(sst.str().c_str());
-	
-	sst.str("");
-	sst<<" t b4 "<< mTranslate + mRotatePivotTranslate + mScalePivotTranslate;
-	MGlobal::displayInfo(sst.str().c_str());
-	
-	MVector tor = mTranslate + mRotatePivotTranslate + mScalePivotTranslate;
-	sst.str("");
-	sst<<" t aft "<< dst->rotatePivot() + pvr;
-	MGlobal::displayInfo(sst.str().c_str());*/
+	//AHelper::Info<Matrix44F>("space", dst->space());
 	
 	return true;
 }
@@ -607,5 +535,21 @@ Matrix33F::RotateOrder HesperisIO::GetRotationOrder(MTransformationMatrix::Rotat
 			break;
 	}
 	return r;
+}
+
+MObject HesperisTransformCreator::create(BaseTransform * data, MObject & parentObj,
+                       const std::string & nodeName)
+{
+    MObject otm = MObject::kNullObj;
+    if(!HesperisIO::FindNamedChild(otm, nodeName, parentObj)) {
+        MFnTransform ftransform;
+        otm = ftransform.create(parentObj);
+
+        std::string validName(nodeName);
+        SHelper::noColon(validName);
+        ftransform.setName(validName.c_str()); 
+    }
+    MGlobal::displayInfo(MString("todo transform in ")+nodeName.c_str()); 
+    return otm;
 }
 //:~

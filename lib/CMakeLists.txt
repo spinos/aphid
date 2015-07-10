@@ -188,6 +188,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/HPolygonalMesh.cpp
 ../shared/APolygonalUV.cpp
 ../shared/HPolygonalUV.cpp
+../shared/AVerbose.cpp
                                 ../lapl/VertexAdjacency.cpp 
                 ../lapl/Anchor.cpp 
                 ../catmullclark/BaseQuad.cpp 

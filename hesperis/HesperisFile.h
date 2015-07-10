@@ -19,6 +19,7 @@ class ATriangleMesh;
 class ATriangleMeshGroup;
 class HBase;
 class GeometryArray;
+class APolygonalMesh;
 
 class HesperisFile : public HFile {
 public:
@@ -26,14 +27,17 @@ public:
 		RNone = 0,
 		RCurve = 1,
 		RTetra = 2,
-		RTri = 3
+		RTri = 3,
+        RTransform = 4,
+        RPoly = 5
 	};
 
 	enum WriteComponent {
 		WCurve = 0,
 		WTetra = 1,
 		WTri = 2,
-		WTransform = 3 
+		WTransform = 3,
+        WPoly = 4
 	};
 	
 	HesperisFile();
@@ -42,11 +46,14 @@ public:
 	
 	void setReadComponent(ReadComponent comp);
 	void setWriteComponent(WriteComponent comp);
-	void addTransform(const std::string & name, BaseTransform * data);
+	
+    void addTransform(const std::string & name, BaseTransform * data);
 	void addCurve(const std::string & name, CurveGroup * data);
 	void addTetrahedron(const std::string & name, ATetrahedronMesh * data);
 	void addTriangleMesh(const std::string & name, ATriangleMeshGroup * data);
-	virtual bool doWrite(const std::string & fileName);
+	void addPolygonalMesh(const std::string & name, APolygonalMesh * data);
+    
+    virtual bool doWrite(const std::string & fileName);
 	virtual bool doRead(const std::string & fileName);
     void extractTetrahedronMeshes(GeometryArray * dst);
 	void extractTriangleMeshes(GeometryArray * dst);
@@ -61,6 +68,8 @@ private:
 	bool writeCurve();
 	bool writeTetrahedron();
 	bool writeTriangle();
+    bool writePolygon();
+    
 	bool readFrames(HBase * grp);
 	bool readCurve();
     bool listTetrahedron(HBase * grp);
@@ -74,6 +83,7 @@ private:
 	std::map<std::string, CurveGroup * > m_curves;
 	std::map<std::string, ATetrahedronMesh * > m_terahedrons;
 	std::map<std::string, ATriangleMeshGroup * > m_triangleMeshes;
+    std::map<std::string, APolygonalMesh * > m_polyMeshes;
     ReadComponent m_readComp;
 	WriteComponent m_writeComp;
 };

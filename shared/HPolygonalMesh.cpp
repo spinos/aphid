@@ -18,7 +18,7 @@ char HPolygonalMesh::verifyType()
 	if(!hasNamedAttr(".nv"))
 		return 0;
 		
-	if(!hasNamedAttr(".fcnt"))
+	if(!hasNamedData(".fcnt"))
 		return 0;
 		
 	return 1;
