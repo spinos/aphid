@@ -217,6 +217,22 @@ void testKijt()
     	
 }
 
+void testMap()
+{
+    std::cout<<" test str map\n";
+    std::map<std::string, int > pool;
+    pool["|group2|group1|pCube"] = 0;
+    pool["|group2"] = 1;
+    pool["|group2|pSphere"] = 2;
+    pool["|helix"] = 3;
+    pool["|group1|pCube"] = 4;
+    
+    std::map<std::string, int >::const_iterator it = pool.begin();
+    for(;it!=pool.end();++it)
+        std::cout<<"\n "<<it->second<<" "<<it->first;
+    std::cout<<" \n";
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
@@ -310,6 +326,7 @@ int main(int argc, char * const argv[])
 	
 	std::cout<<boost::format("39 mod 16: %1%\n") % (39 & 15);
 	
+	testMap();
 	std::cout<<"end of test\n";
 	return 0;
 }

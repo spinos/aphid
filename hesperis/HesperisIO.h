@@ -46,17 +46,9 @@ public:
 								ATriangleMeshGroup * dst);
     static MMatrix GetParentTransform(const MDagPath & path);
     static MMatrix GetWorldTransform(const MDagPath & path);
-    static bool GetCurves(const MDagPath &root, MDagPathArray & dst);
-    static bool ReadCurves(HesperisFile * file, MObject &target = MObject::kNullObj);
-    static bool ReadTransforms(HBase * parent, MObject &target = MObject::kNullObj);
-    static bool ReadCurves(HBase * parent, MObject &target = MObject::kNullObj);
-    static bool CreateCurveGeos(CurveGroup * geos, MObject &target = MObject::kNullObj);
-    static bool CreateACurve(Vector3F * pos, unsigned nv, MObject &target = MObject::kNullObj);
-    static bool CheckExistingCurves(CurveGroup * geos, MObject &target = MObject::kNullObj);
     static bool FindNamedChild(MObject & dst, const std::string & name, MObject & oparent = MObject::kNullObj);
+    static bool GetTransform(BaseTransform * dst, const MDagPath & path);
     static bool LsCurves(std::vector<std::string > & dst);
-    static bool LsCurves(std::vector<std::string > & dst, HBase * parent);
-	static bool GetTransform(BaseTransform * dst, const MDagPath & path);
     static bool LsMeshes(std::vector<std::string > & dst);
 	static Matrix33F::RotateOrder GetRotationOrder(MTransformationMatrix::RotationOrder x);
 
