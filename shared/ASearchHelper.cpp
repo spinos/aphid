@@ -838,7 +838,7 @@ bool ASearchHelper::FirstTypedObj(const MObject &root, MObject & dst, MFn::Type 
     return false;
 }
 
-void ASearchHelper::AllTypedPaths(const MDagPath & root, MDagPathArray & dst, MFn::Type typ)
+void ASearchHelper::AllTypedPaths(std::map<std::string, MDagPath > & dst, const MDagPath & root, MFn::Type typ)
 {
 	MStatus stat;
 	MItDag iter;
@@ -848,7 +848,7 @@ void ASearchHelper::AllTypedPaths(const MDagPath & root, MDagPathArray & dst, MF
 		iter.getPath( apath );
 		MFnDagNode fdag(apath);
 		if(!fdag.isIntermediateObject()) 
-            dst.append(apath);
+            dst[apath.fullPathName().asChar()] = apath;
 	}
 }
 

@@ -87,18 +87,18 @@ MStatus HesperisCmd::doIt(const MArgList &args)
 	
 	MItSelectionList iter( selList );
 	
-	MDagPathArray curves;
+	std::map<std::string, MDagPath > curves;
 	MDagPathArray tms;
 	
 	for(; !iter.isDone(); iter.next()) {								
 		MDagPath apath;		
 		iter.getDagPath( apath );
 		tms.append(apath);
-		ASearchHelper::AllTypedPaths(apath, curves, MFn::kNurbsCurve);
+		ASearchHelper::AllTypedPaths(curves, apath, MFn::kNurbsCurve);
 	}
 	
-	if(curves.length() < 1) {
-		MGlobal::displayInfo(" Zero curve selction!");
+	if(curves.size() < 1) {
+		MGlobal::displayInfo(" zero curve selction!");
 		return MS::kSuccess;
 	}
 	
@@ -125,9 +125,9 @@ void HesperisCmd::writeMesh(HesperisFile * file)
 	ASearchHelper searcher;
 	MDagPath meshGrp;
 	if(!searcher.dagByFullName(m_growMeshName.asChar(), meshGrp)) return;
-	MDagPathArray meshes;
-	ASearchHelper::AllTypedPaths(meshGrp, meshes, MFn::kMesh);
-	if(meshes.length() < 1)
+	std::map<std::string, MDagPath > meshes;
+	ASearchHelper::AllTypedPaths(meshes, meshGrp, MFn::kMesh);
+	if(meshes.size() < 1)
 		MGlobal::displayInfo(MString(" no mesh found by name ")+m_growMeshName);
 
 	HesperisIO::WriteMeshes(meshes, file);
