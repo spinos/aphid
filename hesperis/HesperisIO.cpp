@@ -21,6 +21,7 @@
 #include <HBase.h>
 #include <HWorld.h>
 #include <HCurveGroup.h>
+#include <HTriangleMeshGroup.h>
 #include <AHelper.h>
 #include <CurveGroup.h>
 #include <sstream>
@@ -466,6 +467,14 @@ bool HesperisIO::LsCurves(std::vector<std::string > & dst, HBase * parent)
     for(;itb!=crvNames.end();++itb) {
         dst.push_back(*itb);
 	}
+    return true;
+}
+
+bool HesperisIO::LsMeshes(std::vector<std::string > & dst)
+{
+    HWorld grpWorld;
+    LsNames<HTriangleMeshGroup>(dst, &grpWorld);
+    grpWorld.close();
     return true;
 }
 

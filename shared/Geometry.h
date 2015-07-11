@@ -26,6 +26,6 @@ public:
 	virtual bool intersectTetrahedron(unsigned icomponent, const Vector3F * tet);
 	virtual bool intersectRay(unsigned icomponent, const Ray * r);
 protected:
-	
+    
 private:
 };

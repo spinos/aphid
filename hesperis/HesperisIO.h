@@ -49,8 +49,10 @@ public:
     static bool LsCurves(std::vector<std::string > & dst);
     static bool LsCurves(std::vector<std::string > & dst, HBase * parent);
 	static bool GetTransform(BaseTransform * dst, const MDagPath & path);
+    static bool LsMeshes(std::vector<std::string > & dst);
 	static Matrix33F::RotateOrder GetRotationOrder(MTransformationMatrix::RotationOrder x);
-    
+
+protected:
     template<typename Th, typename Td, typename Tc>
     static bool ReadTransformAnd(HBase * parent, MObject &target)
     {
@@ -89,5 +91,28 @@ public:
             child.close();
         }
         return true;
+    }
+    
+    template<typename Th>
+    static bool LsNames(std::vector<std::string> & dst, HBase * parent)
+    {
+        std::vector<std::string > tmNames;
+        parent->lsTypedChild<HTransform>(tmNames);
+        std::vector<std::string>::const_iterator ita = tmNames.begin();
+        
+        for(;ita!=tmNames.end();++ita) {
+            HBase child(*ita);
+            LsNames<Th>(dst, &child);
+            child.close();
+        }
+        
+        std::vector<std::string > crvNames;
+        parent->lsTypedChild<Th>(crvNames);
+        std::vector<std::string>::const_iterator itb = crvNames.begin();
+        
+        for(;itb!=crvNames.end();++itb)
+            dst.push_back(*itb);
+        
+        return true;   
     }
 };
