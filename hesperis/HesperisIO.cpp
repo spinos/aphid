@@ -240,7 +240,7 @@ bool HesperisIO::CreateMeshGroup(const std::map<std::string, MDagPath > & paths,
 	unsigned numNodes = 0;
 	unsigned numTris = 0;
 	
-	MGlobal::displayInfo(" hesperis check meshes");
+	// MGlobal::displayInfo(" hesperis check meshes");
 	
 	MIntArray triangleCounts, triangleVertices;
 	MPointArray ps;
@@ -263,9 +263,9 @@ bool HesperisIO::CreateMeshGroup(const std::map<std::string, MDagPath > & paths,
         return false;   
     }
     
-    MGlobal::displayInfo(MString(" mesh count: ") + numNodes +
-                         MString(" vertex count: ") + numPnts +
-	                    MString(" triangle count: ") + numTris);
+    //MGlobal::displayInfo(MString(" mesh count: ") + numNodes +
+    //                     MString(" vertex count: ") + numPnts +
+	//                    MString(" triangle count: ") + numTris);
 	
     dst->create(numPnts, numTris, numNodes);
 	Vector3F * pnts = dst->points();
@@ -402,7 +402,7 @@ MObject HesperisTransformCreator::create(BaseTransform * data, MObject & parentO
         SHelper::noColon(validName);
         ftransform.setName(validName.c_str()); 
     }
-    MGlobal::displayInfo(MString("todo transform in ")+nodeName.c_str()); 
+    // MGlobal::displayInfo(MString("todo transform in ")+nodeName.c_str()); 
     return otm;
 }
 //:~

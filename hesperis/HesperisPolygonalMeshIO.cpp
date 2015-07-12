@@ -11,16 +11,16 @@
 #include <SHelper.h>
 #include <HTransform.h>
 #include <HPolygonalMesh.h>
-bool HesperisPolygonalMeshIO::WritePolygonalMeshes(MDagPathArray & paths, HesperisFile * file)
+bool HesperisPolygonalMeshIO::WritePolygonalMeshes(const std::map<std::string, MDagPath > & paths, HesperisFile * file)
 {
     std::vector<APolygonalMesh *> data;
     
-    unsigned i = 0;
-    for(;i<paths.length();i++) {
+    std::map<std::string, MDagPath >::const_iterator it = paths.begin();
+    for(;it!=paths.end();++it) {
         APolygonalMesh * mesh = new APolygonalMesh;
-        CreateMeshData(mesh, paths[i]);
+        CreateMeshData(mesh, it->second);
         // MGlobal::displayInfo(mesh->verbosestr().c_str());
-        file->addPolygonalMesh(paths[i].fullPathName().asChar(), mesh);
+        file->addPolygonalMesh(it->second.fullPathName().asChar(), mesh);
         data.push_back(mesh);
     }
     
@@ -30,9 +30,9 @@ bool HesperisPolygonalMeshIO::WritePolygonalMeshes(MDagPathArray & paths, Hesper
 	if(!fstat) MGlobal::displayWarning(MString(" cannot save poly mesh to file ")+ file->fileName().c_str());
 	file->close();
     
-    std::vector<APolygonalMesh *>::iterator it = data.begin();
-    for(;it!=data.end(); ++it)
-        delete *it;
+    std::vector<APolygonalMesh *>::iterator itd = data.begin();
+    for(;itd!=data.end(); ++itd)
+        delete *itd;
     data.clear();
     return true;
 }

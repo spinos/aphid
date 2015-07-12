@@ -1,4 +1,6 @@
 #include "HesperisIO.h"
+#include <map>
+#include <string>
 class MFnMesh;
 class MIntArray;
 class APolygonalMesh;
@@ -17,7 +19,7 @@ public:
 
 class HesperisPolygonalMeshIO : public HesperisIO {
 public:
-    static bool WritePolygonalMeshes(MDagPathArray & paths, HesperisFile * file);
+    static bool WritePolygonalMeshes(const std::map<std::string, MDagPath > & paths, HesperisFile * file);
     static bool CreateMeshData(APolygonalMesh * data, const MDagPath & path);
 	static bool CreateMeshUV(APolygonalUV * data, const MDagPath & path, const MString & setName);
     static bool ReadMeshes(HesperisFile * file, MObject &target = MObject::kNullObj);
