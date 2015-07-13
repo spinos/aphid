@@ -57,7 +57,12 @@ public:
 	virtual bool doRead(const std::string & fileName);
     void extractTetrahedronMeshes(GeometryArray * dst);
 	void extractTriangleMeshes(GeometryArray * dst);
-	
+    
+    void clearTransforms();
+    void clearCurves();
+    void clearTriangleMeshes();
+	void clearPolygonalMeshes();
+    
 	static AFrameRange Frames;
 	static bool DoStripNamespace;
 protected:

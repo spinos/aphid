@@ -13,15 +13,13 @@
 #include <HPolygonalMesh.h>
 bool HesperisPolygonalMeshIO::WritePolygonalMeshes(const std::map<std::string, MDagPath > & paths, HesperisFile * file)
 {
-    std::vector<APolygonalMesh *> data;
-    
+    file->clearPolygonalMeshes();
     std::map<std::string, MDagPath >::const_iterator it = paths.begin();
     for(;it!=paths.end();++it) {
         APolygonalMesh * mesh = new APolygonalMesh;
         CreateMeshData(mesh, it->second);
         // MGlobal::displayInfo(mesh->verbosestr().c_str());
         file->addPolygonalMesh(it->second.fullPathName().asChar(), mesh);
-        data.push_back(mesh);
     }
     
     file->setDirty();
@@ -30,10 +28,6 @@ bool HesperisPolygonalMeshIO::WritePolygonalMeshes(const std::map<std::string, M
 	if(!fstat) MGlobal::displayWarning(MString(" cannot save poly mesh to file ")+ file->fileName().c_str());
 	file->close();
     
-    std::vector<APolygonalMesh *>::iterator itd = data.begin();
-    for(;itd!=data.end(); ++itd)
-        delete *itd;
-    data.clear();
     return true;
 }
 

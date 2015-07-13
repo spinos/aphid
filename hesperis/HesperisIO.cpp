@@ -29,13 +29,14 @@
 
 bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName)
 {
-	file->setWriteComponent(HesperisFile::WTransform);
-    file->setDirty();
-	
+    file->clearTransforms();
+    
 	unsigned i = 0;
 	for(;i<paths.length();i++) AddTransform(paths[i], file, beheadName);
 	
-	bool fstat = file->save();
+	file->setDirty();
+	file->setWriteComponent(HesperisFile::WTransform);
+    bool fstat = file->save();
 	if(!fstat) MGlobal::displayWarning(MString(" cannot save transform to file ")+ file->fileName().c_str());
 	file->close();
 	return true;
@@ -46,7 +47,7 @@ bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file, const 
 	MFnDagNode fdg(path);
 	if(fdg.parentCount() < 1) return false;
 	
-	MGlobal::displayInfo(MString("hes io add transform ")+path.fullPathName());
+	AHelper::Info<MString>("hes io add transform ", path.fullPathName());
 
 	MObject oparent = fdg.parent(0);
 	MFnDagNode fp(oparent);
@@ -80,8 +81,8 @@ bool HesperisIO::WriteCurves(const std::map<std::string, MDagPath > & paths,
 							HesperisFile * file, 
 							const std::string & parentName) 
 {
-    CurveGroup gcurve;
-    if(!CreateCurveGroup(paths, &gcurve)) {
+    CurveGroup * gcurve = new CurveGroup;
+    if(!CreateCurveGroup(paths, gcurve)) {
         MGlobal::displayInfo(" hesperis check curves error");
         return false;
     }
@@ -90,7 +91,8 @@ bool HesperisIO::WriteCurves(const std::map<std::string, MDagPath > & paths,
     if(parentName.size()>1) curveName = boost::str(boost::format("%1%|curves") % parentName);
 	
 	MGlobal::displayInfo(MString("hes io write curve group ")+curveName.c_str());
-    file->addCurve(curveName, &gcurve);
+    file->clearCurves();
+    file->addCurve(curveName, gcurve);
 	
 	file->setDirty();
 	file->setWriteComponent(HesperisFile::WCurve);
@@ -105,18 +107,20 @@ bool HesperisIO::WriteMeshes(const std::map<std::string, MDagPath > & paths,
 							HesperisFile * file, 
 							const std::string & parentName)
 {
-    ATriangleMeshGroup combined;
-    if(!CreateMeshGroup(paths, &combined)) {
+    ATriangleMeshGroup * combined = new ATriangleMeshGroup;
+    if(!CreateMeshGroup(paths, combined)) {
         MGlobal::displayInfo(" hesperis check meshes error");
         return false;
     }
     
-    combined.setDagName(parentName);
+    combined->setDagName(parentName);
     std::string meshName = "|meshes";
     if(parentName.size()>1) meshName = boost::str(boost::format("%1%|meshes") % parentName);
 	
     MGlobal::displayInfo(MString("hes io write mesh group ")+meshName.c_str());
-    file->addTriangleMesh(meshName, &combined);
+    
+    file->clearTriangleMeshes();
+    file->addTriangleMesh(meshName, combined);
 
 	file->setDirty();
 	file->setWriteComponent(HesperisFile::WTri);

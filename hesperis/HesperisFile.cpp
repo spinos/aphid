@@ -11,12 +11,14 @@
 #include <AllHdf.h>
 #include <HWorld.h>
 #include <HCurveGroup.h>
+#include <CurveGroup.h>
 #include <BaseBuffer.h>
 #include <HFrameRange.h>
 #include <HTransform.h>
 #include <HTetrahedronMesh.h>
 #include <HTriangleMeshGroup.h>
 #include <HPolygonalMesh.h>
+#include <APolygonalMesh.h>
 #include <ATriangleMeshGroup.h>
 #include <ATetrahedronMesh.h>
 #include <BaseTransform.h>
@@ -338,5 +340,37 @@ bool HesperisFile::readFrames(HBase * grp)
 	g.load(&Frames);
 	g.close();
 	return true;
+}
+
+void HesperisFile::clearTransforms()
+{ 
+    std::map<std::string, BaseTransform *>::iterator ittrans = m_transforms.begin();
+	for(; ittrans != m_transforms.end(); ++ittrans) 
+        delete ittrans->second;
+    m_transforms.clear(); 
+}
+
+void HesperisFile::clearCurves()
+{
+    std::map<std::string, CurveGroup *>::iterator it = m_curves.begin();
+	for(; it != m_curves.end(); ++it) 
+        delete it->second;
+    m_curves.clear(); 
+}
+
+void HesperisFile::clearTriangleMeshes()
+{
+    std::map<std::string, ATriangleMeshGroup *>::iterator it = m_triangleMeshes.begin();
+	for(; it != m_triangleMeshes.end(); ++it) 
+        delete it->second;
+    m_triangleMeshes.clear(); 
+}
+
+void HesperisFile::clearPolygonalMeshes()
+{
+    std::map<std::string, APolygonalMesh *>::iterator it = m_polyMeshes.begin();
+	for(; it != m_polyMeshes.end(); ++it) 
+        delete it->second;
+    m_polyMeshes.clear(); 
 }
 //:~
