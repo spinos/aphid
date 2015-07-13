@@ -181,7 +181,7 @@ bool HesperisFile::doRead(const std::string & fileName)
 			readTetrahedron();
 			break;
 		case RTri:
-			listTriangle(&grpWorld);
+            listTriangle(&grpWorld);
 			readTriangle();
 		default:
 			break;
@@ -220,13 +220,14 @@ bool HesperisFile::readCurve()
 
 bool HesperisFile::listTetrahedron(HBase * grp)
 {
+    clearTetrahedronMeshes();
     std::vector<std::string > tetraNames;
-	grp->lsTypedChild<HTetrahedronMesh>(tetraNames);
+    LsNames<HTetrahedronMesh>(tetraNames, grp);
 	
 	std::vector<std::string>::const_iterator it = tetraNames.begin();
-	for(;it!=tetraNames.end();++it) {
+	for(;it!=tetraNames.end();++it)
 		addTetrahedron(*it, new ATetrahedronMesh);
-	}
+
 	return true;
 }
 
@@ -252,13 +253,14 @@ bool HesperisFile::readTetrahedron()
 
 bool HesperisFile::listTriangle(HBase * grp)
 {
-	std::vector<std::string > triNames;
-	grp->lsTypedChild<HTriangleMeshGroup>(triNames);
-	
+    clearTriangleMeshes();
+    std::vector<std::string > triNames;
+    LsNames<HTriangleMeshGroup>(triNames, grp);
+    
 	std::vector<std::string>::const_iterator it = triNames.begin();
-	for(;it!=triNames.end();++it) {
+	for(;it!=triNames.end();++it)
 		addTriangleMesh(*it, new ATriangleMeshGroup);
-	}
+
 	return true;
 }
 
@@ -372,5 +374,13 @@ void HesperisFile::clearPolygonalMeshes()
 	for(; it != m_polyMeshes.end(); ++it) 
         delete it->second;
     m_polyMeshes.clear(); 
+}
+
+void HesperisFile::clearTetrahedronMeshes()
+{
+    std::map<std::string, ATetrahedronMesh *>::iterator it = m_terahedrons.begin();
+	for(; it != m_terahedrons.end(); ++it) 
+        delete it->second;
+    m_terahedrons.clear(); 
 }
 //:~

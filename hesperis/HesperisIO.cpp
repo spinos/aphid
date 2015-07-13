@@ -315,7 +315,7 @@ bool HesperisIO::CreateMeshGroup(const std::map<std::string, MDagPath > & paths,
 bool HesperisIO::LsCurves(std::vector<std::string > & dst)
 {
     HWorld grpWorld;
-    LsNames<HCurveGroup>(dst, &grpWorld);
+    HesperisFile::LsNames<HCurveGroup>(dst, &grpWorld);
     grpWorld.close();
     return true;   
 }
@@ -323,7 +323,7 @@ bool HesperisIO::LsCurves(std::vector<std::string > & dst)
 bool HesperisIO::LsMeshes(std::vector<std::string > & dst)
 {
     HWorld grpWorld;
-    LsNames<HTriangleMeshGroup>(dst, &grpWorld);
+    HesperisFile::LsNames<HTriangleMeshGroup>(dst, &grpWorld);
     grpWorld.close();
     return true;
 }

@@ -57,17 +57,41 @@ public:
 	virtual bool doRead(const std::string & fileName);
     void extractTetrahedronMeshes(GeometryArray * dst);
 	void extractTriangleMeshes(GeometryArray * dst);
+
+	static AFrameRange Frames;
+	static bool DoStripNamespace;
     
     void clearTransforms();
     void clearCurves();
     void clearTriangleMeshes();
 	void clearPolygonalMeshes();
+    void clearTetrahedronMeshes();
     
-	static AFrameRange Frames;
-	static bool DoStripNamespace;
-protected:
+    template<typename Th>
+    static bool LsNames(std::vector<std::string> & dst, HBase * parent)
+    {
+        std::vector<std::string > tmNames;
+        parent->lsTypedChild<HTransform>(tmNames);
+        std::vector<std::string>::const_iterator ita = tmNames.begin();
+        
+        for(;ita!=tmNames.end();++ita) {
+            HBase child(*ita);
+            LsNames<Th>(dst, &child);
+            child.close();
+        }
+        
+        std::vector<std::string > crvNames;
+        parent->lsTypedChild<Th>(crvNames);
+        std::vector<std::string>::const_iterator itb = crvNames.begin();
+        
+        for(;itb!=crvNames.end();++itb)
+            dst.push_back(*itb);
+        
+        return true;   
+    }
+protected: 
 
-private:
+private: 
 	bool writeFrames();
 	bool writeTransform();
 	bool writeCurve();

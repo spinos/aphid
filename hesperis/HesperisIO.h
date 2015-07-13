@@ -92,27 +92,4 @@ protected:
         }
         return true;
     }
-    
-    template<typename Th>
-    static bool LsNames(std::vector<std::string> & dst, HBase * parent)
-    {
-        std::vector<std::string > tmNames;
-        parent->lsTypedChild<HTransform>(tmNames);
-        std::vector<std::string>::const_iterator ita = tmNames.begin();
-        
-        for(;ita!=tmNames.end();++ita) {
-            HBase child(*ita);
-            LsNames<Th>(dst, &child);
-            child.close();
-        }
-        
-        std::vector<std::string > crvNames;
-        parent->lsTypedChild<Th>(crvNames);
-        std::vector<std::string>::const_iterator itb = crvNames.begin();
-        
-        for(;itb!=crvNames.end();++itb)
-            dst.push_back(*itb);
-        
-        return true;   
-    }
 };

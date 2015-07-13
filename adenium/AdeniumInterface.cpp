@@ -34,7 +34,10 @@ bool AdeniumInterface::readTriangleMeshFromFile(AdeniumWorld * world)
     GeometryArray triangleMeshes;
 	hes.extractTriangleMeshes(&triangleMeshes);
     
-    if(triangleMeshes.numGeometries() < 1) return false;
+    if(triangleMeshes.numGeometries() < 1) {
+        std::cout<<" no triangle mesh discovered\n";
+        return false;
+    }
     std::cout<<" n tri mesh "<<triangleMeshes.numGeometries();
 	
     world->addTriangleSystem(new BvhTriangleSystem((ATriangleMesh *)triangleMeshes.geometry(0)));
