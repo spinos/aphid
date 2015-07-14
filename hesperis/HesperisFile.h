@@ -6,18 +6,26 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-#include <HFile.h>
+#include <AllHdf.h>
+#include <HBase.h>
+#include <HTransform.h>
+#include <HFrameRange.h>
+#include <HTriangleMeshGroup.h>
+#include <HTetrahedronMesh.h>
+#include <HCurveGroup.h>
+#include <HWorld.h>
+#include <HPolygonalMesh.h>
 #include <string>
 #include <map>
 #include <vector>
 #include <AFrameRange.h>
+
 class BaseTransform;
 class CurveGroup;
 class BaseBuffer;
 class ATetrahedronMesh;
 class ATriangleMesh;
 class ATriangleMeshGroup;
-class HBase;
 class GeometryArray;
 class APolygonalMesh;
 

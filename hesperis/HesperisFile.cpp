@@ -8,16 +8,8 @@
  */
 
 #include "HesperisFile.h"
-#include <AllHdf.h>
-#include <HWorld.h>
-#include <HCurveGroup.h>
 #include <CurveGroup.h>
 #include <BaseBuffer.h>
-#include <HFrameRange.h>
-#include <HTransform.h>
-#include <HTetrahedronMesh.h>
-#include <HTriangleMeshGroup.h>
-#include <HPolygonalMesh.h>
 #include <APolygonalMesh.h>
 #include <ATriangleMeshGroup.h>
 #include <ATetrahedronMesh.h>
