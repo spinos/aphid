@@ -61,3 +61,6 @@ void HFile::flush()
 	useDocument();
 	H5Fflush(HObject::FileIO.fFileId, H5F_SCOPE_LOCAL);
 }
+
+bool HFile::entityExists(const std::string & name)
+{ return m_doc.checkExist(name) == 1; }

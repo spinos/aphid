@@ -6,7 +6,7 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-
+#pragma once
 #include "HTriangleMesh.h"
 class ATriangleMeshGroup;
 class HTriangleMeshGroup : public HTriangleMesh {

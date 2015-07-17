@@ -8,6 +8,8 @@ class TriangleSystem;
 class AdeniumRender;
 class BaseCamera;
 class WorldDbgDraw;
+class ATriangleMesh;
+class TriangleDifference;
 class AdeniumWorld {
 public:
     AdeniumWorld();
@@ -23,9 +25,12 @@ public:
 	
 	static WorldDbgDraw * DbgDrawer;
     
+    void setRestMesh(ATriangleMesh * m);
+    bool matchRestMesh(ATriangleMesh * m);
 private:
     void drawTriangle(TriangleSystem * tri);
 private:
+    TriangleDifference * m_difference;
     BvhTriangleSystem * m_objects[32];
 	CUDABuffer * m_objectInd[32];
 	CUDABuffer * m_objectPos[32];

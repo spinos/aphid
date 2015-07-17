@@ -29,9 +29,6 @@ char HTriangleMesh::verifyType()
 
 	if(!hasNamedAttr(".nv"))
 		return 0;
-		
-	if(!hasNamedAttr(".dag"))
-		return 0;
 	
 	return 1;
 }
@@ -94,10 +91,6 @@ char HTriangleMesh::readAftCreation(ATriangleMesh * tri)
 	readVector3Data(".p", tri->numPoints(), (Vector3F *)tri->points());
 	readIntData(".a", tri->numPoints(), (unsigned *)tri->anchors());
 	readIntData(".v", tri->numTriangles() * 3, (unsigned *)tri->indices());
-	
-	std::string dagName;
-	readStringAttr(".dag", dagName);
-	tri->setDagName(dagName);
 	
 	return 1;
 }

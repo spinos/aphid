@@ -7,6 +7,7 @@
 #include <WorldDbgDraw.h>
 #include <iostream>
 std::string AdeniumInterface::FileName("");
+H5FileIn AdeniumInterface::BakeFile;
 AdeniumInterface::AdeniumInterface() {}
 AdeniumInterface::~AdeniumInterface() {}
 
@@ -40,8 +41,9 @@ bool AdeniumInterface::readTriangleMeshFromFile(AdeniumWorld * world)
     }
     std::cout<<" n tri mesh "<<triangleMeshes.numGeometries();
 	
+    world->setRestMesh((ATriangleMesh *)triangleMeshes.geometry(0));
     world->addTriangleSystem(new BvhTriangleSystem((ATriangleMesh *)triangleMeshes.geometry(0)));
-	return true;
+    return true;
 }
 
 void AdeniumInterface::changeMaxDisplayLevel(AdeniumWorld * world, int x)
@@ -50,4 +52,26 @@ void AdeniumInterface::changeMaxDisplayLevel(AdeniumWorld * world, int x)
 	if(level<1) level = 1;
 	if(level>30) level = 30;
 	WorldDbgDraw::MaxDrawBvhHierarchyLevel = level;
+}
+
+bool AdeniumInterface::LoadBake(AdeniumWorld * world, const std::string & name)
+{
+    if(BakeFile.isOpened()) BakeFile.close();
+    if(!BakeFile.open(name)) return false;
+    
+    std::string meshName;
+    ATriangleMesh * tri = BakeFile.findBakedMesh(meshName);
+    if(!tri) return false;
+    
+    std::cout<<"mesh name is "<<meshName;
+    
+    if(!world->matchRestMesh(tri)) {
+        std::cout<<" no match";
+        return false;
+    }
+    
+    std::cout<<" bake range ("<<BakeFile.FirstFrame
+    <<", "<<BakeFile.LastFrame
+    <<")\n";
+    return true;
 }

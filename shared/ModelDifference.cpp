@@ -42,7 +42,7 @@ bool ModelDifference::matchTarget(AGenericMesh * object) const
 	unsigned i=1;
 	for(;i<n;i++) {
 		dv = p1[i] - prest[i];
-		if((dv - dv0).length2() > 1e-6f) {
+        if((dv - dv0).length2() > 1e-6f) {
 			std::cout<<" shape not match\n";
 			return false;
 		}

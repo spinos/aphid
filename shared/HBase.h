@@ -82,4 +82,14 @@ public:
 			}
 		}
 	}
+    
+    void lsData(std::vector<std::string> & names) {
+        int nc = numChildren();
+		int i = 0;
+		for(;i<nc;i++) {
+			//if(isChildData(i)) {
+				names.push_back(childPath(i));
+			//}
+		}
+    }
 };

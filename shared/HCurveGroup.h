@@ -6,7 +6,7 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-
+#pragma once
 #include <HBase.h>
 class CurveGroup;
 class HCurveGroup : public HBase {

@@ -76,6 +76,9 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 		case Qt::Key_Q:
 			toggleRayCast();
 			break;
+        case Qt::Key_L:
+			loadBake();
+			break;
         case Qt::Key_A:
 			adei.changeMaxDisplayLevel(m_world, 1);
 			break;
@@ -105,5 +108,19 @@ void GLWidget::toggleRayCast()
 {
 	if(m_enableRayCast) m_enableRayCast = false;
 	else m_enableRayCast = true;
+}
+
+void GLWidget::loadBake()
+{
+    QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this,
+							tr("Open .h5 file as baked grow mesh"),
+							tr("info"),
+							tr("All Files (*);;H5 Files (*.h5)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName == "") return;
+    if(!AdeniumInterface::LoadBake(m_world, fileName.toUtf8().data()))
+        qDebug()<<" failed to load h5 bake file: "<<fileName;
 }
 //:~

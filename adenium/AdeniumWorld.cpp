@@ -5,6 +5,7 @@
 #include <CUDABuffer.h>
 #include <BvhBuilder.h>
 #include <PerspectiveCamera.h>
+#include <TriangleDifference.h>
 #include "AdeniumRender.h"
 #include <WorldDbgDraw.h>
 
@@ -12,7 +13,8 @@ WorldDbgDraw * AdeniumWorld::DbgDrawer = 0;
 GLuint AdeniumWorld::m_texture = 0;
 
 AdeniumWorld::AdeniumWorld() :
-m_numObjects(0)
+m_numObjects(0),
+m_difference(0)
 {
     m_image = new AdeniumRender;
 }
@@ -20,6 +22,18 @@ m_numObjects(0)
 AdeniumWorld::~AdeniumWorld() 
 {
     delete m_image;
+    if(m_difference) delete m_difference;
+}
+
+void AdeniumWorld::setRestMesh(ATriangleMesh * m)
+{
+    if(m_difference) delete m_difference;
+    m_difference = new TriangleDifference(m);
+}
+
+bool AdeniumWorld::matchRestMesh(ATriangleMesh * m)
+{
+    return m_difference->matchTarget(m);
 }
 
 void AdeniumWorld::addTriangleSystem(BvhTriangleSystem * tri)
