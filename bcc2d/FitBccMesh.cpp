@@ -52,6 +52,8 @@ void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorIntersect)
 void FitBccMesh::addAnchors(KdIntersection * anchorIntersect)
 {
 	BoundingBox box;
+    Vector3F toPos;
+    float maxD;
 	unsigned j, i=0;
 	for(; i< numTetrahedrons(); i++) {
         unsigned * tet = tetrahedronIndices(i);
@@ -59,6 +61,9 @@ void FitBccMesh::addAnchors(KdIntersection * anchorIntersect)
 		box.reset();
         for(j=0; j< 4; j++)
             box.expandBy(points()[tet[j]], 0.001f); 
+        
+        toPos = box.center();
+        maxD = box.radius();
         
 		if(!anchorIntersect->intersectBox(box)) continue;
 		

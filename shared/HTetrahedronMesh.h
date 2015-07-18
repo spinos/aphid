@@ -1,3 +1,6 @@
+#ifndef HTETRAHEDRONMESH_H
+#define HTETRAHEDRONMESH_H
+
 /*
  *  HTetrahedronMesh.h
  *  testbcc
@@ -23,3 +26,4 @@ public:
 private:
 	
 };
+#endif        //  #ifndef HTETRAHEDRONMESH_H

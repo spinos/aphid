@@ -47,6 +47,7 @@ public:
 	char touch(const BoundingBox & b) const;
 	
 	float distanceTo(const Vector3F & pnt) const;
+    float radius() const;
 	
 	char intersect(const BoundingBox & another) const;
 	char intersect(const Ray &ray, float *hitt0, float *hitt1) const;

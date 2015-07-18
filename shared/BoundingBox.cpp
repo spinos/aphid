@@ -360,6 +360,14 @@ const Vector3F BoundingBox::normal(const int & i) const
     return Vector3F::ZAxis;
 }
 
+float BoundingBox::radius() const
+{
+    float dx = distance(0) * .5f;
+    float dy = distance(1) * .5f;
+    float dz = distance(2) * .5f;
+    return sqrt(dx*dx + dy*dy + dz*dz);
+}
+
 void BoundingBox::verbose() const
 {
 	std::cout<<str()<<"\n";
