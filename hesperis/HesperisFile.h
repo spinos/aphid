@@ -1,3 +1,6 @@
+#ifndef HESPERISFILE_H
+#define HESPERISFILE_H
+
 /*
  *  HesperisFile.h
  *  hesperis
@@ -7,6 +10,7 @@
  *
  */
 #include <AllHdf.h>
+#include <HFile.h>
 #include <HBase.h>
 #include <HTransform.h>
 #include <HFrameRange.h>
@@ -124,3 +128,4 @@ private:
     ReadComponent m_readComp;
 	WriteComponent m_writeComp;
 };
+#endif        //  #ifndef HESPERISFILE_H

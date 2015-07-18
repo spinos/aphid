@@ -66,12 +66,15 @@ bool AdeniumInterface::LoadBake(AdeniumWorld * world, const std::string & name)
     std::cout<<"mesh name is "<<meshName;
     
     if(!world->matchRestMesh(tri)) {
-        std::cout<<" no match";
+        std::cout<<" bake failed to match rest mesh!\n";
         return false;
     }
     
     std::cout<<" bake range ("<<BakeFile.FirstFrame
     <<", "<<BakeFile.LastFrame
     <<")\n";
+    
+    BakeFile.frameBegin();
     return true;
 }
+//:~

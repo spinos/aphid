@@ -1,3 +1,6 @@
+#ifndef HBASE_H
+#define HBASE_H
+
 /*
  *  HBase.h
  *  masq
@@ -7,7 +10,6 @@
  *
  */
 
-#pragma once
 #include "AllHdf.h"
 #include <string>
 #include <iostream>
@@ -87,9 +89,10 @@ public:
         int nc = numChildren();
 		int i = 0;
 		for(;i<nc;i++) {
-			//if(isChildData(i)) {
+			if(isChildData(i)) {
 				names.push_back(childPath(i));
-			//}
+			}
 		}
     }
 };
+#endif        //  #ifndef HBASE_H

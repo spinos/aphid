@@ -13,7 +13,6 @@
 #include <HFloatAttribute.h>
 #include <HStringAttribute.h>
 #include <HCharData.h>
-#include <HFile.h>
 
 #endif        //  #ifndef ALLHDF_H
 

@@ -8,9 +8,9 @@
  */
 
 #pragma once
-#include <HDocument.h>
-#include <BaseFile.h>
-#include <vector>
+#include "HDocument.h"
+#include "BaseFile.h"
+#include "HBase.h"
 
 class HFile : public BaseFile {
 public:
@@ -29,14 +29,14 @@ protected:
     bool entityExists(const std::string & name);
     
     template<typename Tb, typename Th>
-    static bool LsNames2(std::vector<std::string> & dst, Tb * parent)
+    static bool LsNames2(std::vector<std::string> & dst, HBase * parent)
     {
-        std::vector<std::string > aNames;
+        std::vector<std::string> aNames;
         parent->lsTypedChild<Tb>(aNames);
         std::vector<std::string>::const_iterator ita = aNames.begin();
         
         for(;ita!=aNames.end();++ita) {
-            Tb child(*ita);
+            HBase child(*ita);
             LsNames2<Tb, Th>(dst, &child);
             child.close();
         }

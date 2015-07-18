@@ -3,6 +3,7 @@
 #include <HTriangleMeshGroup.h>
 #include <ATriangleMesh.h>
 #include <HFrameRange.h>
+#include <boost/format.hpp>
 
 H5FileIn::H5FileIn() : HFile() {}
 H5FileIn::H5FileIn(const char * name) : HFile(name) {}
@@ -44,10 +45,10 @@ ATriangleMesh * H5FileIn::findBakedMesh(std::string & name)
     
     std::cout<<""<<geoName;
     
-    const std::string bakName = geo.childPath(".bake");
-    HBase bak(bakName);
+    m_bakeName = geo.childPath(".bake");
+    HBase bak(m_bakeName);
     
-    std::cout<<""<<bakName;
+    std::cout<<""<<m_bakeName;
     std::cout<<" n samples "<<bak.numChildren();
     
     std::vector<std::string > dataNames;
@@ -67,3 +68,25 @@ ATriangleMesh * H5FileIn::findBakedMesh(std::string & name)
     return tri;
 }
 
+void H5FileIn::frameBegin()
+{ m_currentFrame = FirstFrame; }
+
+bool H5FileIn::frameEnd() const
+{ return m_currentFrame == LastFrame; }
+
+void H5FileIn::nextFrame()
+{ m_currentFrame++; }
+
+bool H5FileIn::readFrame(Vector3F * dst, unsigned nv)
+{
+    useDocument();
+    const std::string name = boost::str(boost::format("%1%/%2%") % m_bakeName % m_currentFrame);
+    if(!entityExists(name)) {
+        std::cout<<" cannot read frame "<<name<<"\n";
+        return false;
+    }
+    
+    
+    return true;
+}
+//:~
