@@ -34,3 +34,7 @@ const unsigned BaseBuffer::bufferSize() const
 
 char * BaseBuffer::data() const 
 {return m_native; }
+
+void BaseBuffer::copyFrom(const void * src, unsigned size)
+{ memcpy( data(), src, size ); }
+//:~

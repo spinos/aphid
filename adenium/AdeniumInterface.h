@@ -10,6 +10,7 @@ public:
     void create(AdeniumWorld * world);
 	void changeMaxDisplayLevel(AdeniumWorld * world, int x);
     static bool LoadBake(AdeniumWorld * world, const std::string & name);
+    static bool ReadBakeFrame(AdeniumWorld * world);
     static std::string FileName;
     static H5FileIn BakeFile;
 protected:

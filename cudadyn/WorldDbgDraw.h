@@ -5,6 +5,7 @@ class WorldDbgDraw {
 public:
     WorldDbgDraw(GeoDrawer * drawer);
     virtual ~WorldDbgDraw();
+    GeoDrawer * drawer();
     
 #if DRAW_BVH_HASH
     void showBvhHash(CudaLinearBvh * bvh);

@@ -175,4 +175,7 @@ bool MassSystem::isAnchoredPoint(unsigned i)
 { return (hostAnchor()[i] > (1<<29)); }
 
 void MassSystem::integrate(float dt) {}
+
+void MassSystem::setHostX(float * src)
+{ m_hostX->copyFrom(src, numPoints() * 12); }
 //:~

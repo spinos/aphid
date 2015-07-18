@@ -75,6 +75,18 @@ bool AdeniumInterface::LoadBake(AdeniumWorld * world, const std::string & name)
     <<")\n";
     
     BakeFile.frameBegin();
+    world->setDifferenceObject(tri);
+    return true;
+}
+
+bool AdeniumInterface::ReadBakeFrame(AdeniumWorld * world)
+{
+    ATriangleMesh * m = world->deformedMesh();
+    if(!BakeFile.readFrame(m->points(), m->numPoints()))
+        return false;
+    world->deform(BakeFile.isFrameBegin());
+    if(BakeFile.isFrameEnd()) BakeFile.frameBegin();
+    else BakeFile.nextFrame();
     return true;
 }
 //:~

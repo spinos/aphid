@@ -14,7 +14,9 @@ GLuint AdeniumWorld::m_texture = 0;
 
 AdeniumWorld::AdeniumWorld() :
 m_numObjects(0),
-m_difference(0)
+m_difference(0),
+m_deformedMesh(0),
+m_enableRayCast(true)
 {
     m_image = new AdeniumRender;
 }
@@ -51,15 +53,15 @@ void AdeniumWorld::draw(BaseCamera * camera)
     unsigned i = 0;
     for(;i<m_numObjects; i++)
         drawTriangle(m_objects[i]);
-		
+	drawOverallTranslation();
 	dbgDraw();
 }
 
 void AdeniumWorld::dbgDraw()
 {
 	if(!DbgDrawer) return;
-    unsigned i;
 #if DRAW_BVH_HIERARCHY
+    unsigned i;
     for(i=0; i< m_numObjects; i++) {
         DbgDrawer->showBvhHierarchy(m_objects[i]);
 	}
@@ -147,7 +149,7 @@ void AdeniumWorld::resizeRenderArea(int w, int h)
 void AdeniumWorld::render(BaseCamera * camera)
 {
 	if(m_numObjects<1) return;
-	Matrix44F mt = camera->fSpace;
+    Matrix44F mt = camera->fSpace;
 	mt.transpose();
 	m_image->setModelViewMatrix(mt.v);
 	m_image->reset();
@@ -174,4 +176,51 @@ void AdeniumWorld::render(BaseCamera * camera)
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->imageWidth(), m_image->imageHeight(), GL_RGBA, GL_FLOAT,0);
 	m_image->unbindBuffer();
 }
+
+void AdeniumWorld::setDifferenceObject(ATriangleMesh * m)
+{ 
+    m_deformedMesh = m;
+    std::cout<<"init translation "<<m_difference->resetTranslation(m);
+}
+
+ATriangleMesh * AdeniumWorld::deformedMesh()
+{ return m_deformedMesh; }
+
+void AdeniumWorld::deform(bool toReset)
+{
+    if(toReset) m_difference->resetTranslation(m_deformedMesh);
+    else m_difference->addTranslation(m_deformedMesh);
+    
+    m_difference->moveToObjectSpace(m_deformedMesh);
+    const unsigned nv = m_deformedMesh->numPoints();
+    if(isRayCast()) {
+        m_objectPos[0]->hostToDevice(m_deformedMesh->points(), nv * 12);
+        m_objects[0]->update();
+    }
+    else {
+        m_objects[0]->setHostX((float *)m_deformedMesh->points());
+    }
+}
+
+void AdeniumWorld::drawOverallTranslation()
+{
+    if(m_difference->numTranslations() < 2) return;
+    unsigned i = 1;
+    for(;i<m_difference->numTranslations();i++) {
+        DbgDrawer->drawer()->arrow(m_difference->getTranslation(i-1), 
+            m_difference->getTranslation(i));
+    }
+}
+
+bool AdeniumWorld::isRayCast() const
+{ return m_enableRayCast; }
+
+void AdeniumWorld::toggleRayCast()
+{
+	if(m_enableRayCast) m_enableRayCast = false;
+	else m_enableRayCast = true;
+}
+
+const Vector3F AdeniumWorld::currentTranslation() const
+{ return m_difference->lastTranslation(); }
 //:~

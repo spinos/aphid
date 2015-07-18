@@ -71,7 +71,7 @@ ATriangleMesh * H5FileIn::findBakedMesh(std::string & name)
 void H5FileIn::frameBegin()
 { m_currentFrame = FirstFrame; }
 
-bool H5FileIn::frameEnd() const
+bool H5FileIn::isFrameEnd() const
 { return m_currentFrame == LastFrame; }
 
 void H5FileIn::nextFrame()
@@ -80,13 +80,21 @@ void H5FileIn::nextFrame()
 bool H5FileIn::readFrame(Vector3F * dst, unsigned nv)
 {
     useDocument();
-    const std::string name = boost::str(boost::format("%1%/%2%") % m_bakeName % m_currentFrame);
-    if(!entityExists(name)) {
-        std::cout<<" cannot read frame "<<name<<"\n";
+    const std::string frame = boost::str(boost::format("%1%") % m_currentFrame);
+   
+    HBase bakeNode(m_bakeName.c_str());
+    if(!bakeNode.hasNamedData(frame.c_str())) {
+        std::cout<<" cannot read frame "<<frame<<"\n";
         return false;
     }
-    
-    
+    bakeNode.readVector3Data(frame.c_str(), nv, dst);
+    bakeNode.close();
     return true;
 }
+
+const int H5FileIn::currentFrame() const
+{ return m_currentFrame; }
+
+bool H5FileIn::isFrameBegin() const
+{ return m_currentFrame == FirstFrame; }
 //:~

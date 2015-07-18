@@ -36,6 +36,8 @@ public:
     const float totalMass() const;
 	
 	virtual void integrate(float dt);
+    
+    void setHostX(float * src);
 protected:
 	void setNumPoints(unsigned x);
 	void setNumTetrahedrons(unsigned x);

@@ -67,7 +67,7 @@ Vector3F ModelDifference::resetTranslation(const AGenericMesh * object)
 	m_centers.clear();
 	Vector3F p = computeCenterOf(object);
 	m_centers.push_back(p);
-	return p; 
+	return p;
 }
 
 Vector3F ModelDifference::addTranslation(const AGenericMesh * object)
@@ -103,8 +103,11 @@ void ModelDifference::computeVelocities(Vector3F * dst, AGenericMesh * object, f
 }
 
 const unsigned ModelDifference::numTranslations() const
-{ return m_centers.size() - 1; }
+{ return m_centers.size(); }
 
 const Vector3F ModelDifference::getTranslation(unsigned idx) const
-{ return m_centers[idx+1] - m_centers[idx]; }
+{ return m_centers[idx]; }
+
+const Vector3F ModelDifference::lastTranslation() const
+{ return m_centers.back(); }
 //:~

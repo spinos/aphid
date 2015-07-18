@@ -17,7 +17,6 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_world = new AdeniumWorld;
     AdeniumInterface adei;
     adei.create(m_world);
-	m_enableRayCast = true;
 }
 
 GLWidget::~GLWidget()
@@ -33,7 +32,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	if(m_enableRayCast) {
+	if(m_world->isRayCast()) {
 		m_world->render(getCamera());
 		glDisable(GL_BLEND);
 		drawFrontImagePlane();
@@ -41,9 +40,20 @@ void GLWidget::clientDraw()
 	else {
 		m_world->draw(getCamera());
 	}
-		
+	
 	std::stringstream sst;
-	sst.str("");
+	
+    if(AdeniumInterface::BakeFile.isOpened()) {
+        sst.str("");
+        sst<<"frame: "<<AdeniumInterface::BakeFile.currentFrame();
+        hudText(sst.str(), 2);
+        AdeniumInterface::ReadBakeFrame(m_world);
+        sst.str("");
+        sst<<"world p: "<<m_world->currentTranslation();
+        hudText(sst.str(), 3);
+    }
+    
+    sst.str("");
 	sst<<"fps: "<<frameRate();
 	hudText(sst.str(), 1);
 }
@@ -74,7 +84,7 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 	AdeniumInterface adei;
 	switch (e->key()) {
 		case Qt::Key_Q:
-			toggleRayCast();
+			m_world->toggleRayCast();
 			break;
         case Qt::Key_L:
 			loadBake();
@@ -102,12 +112,6 @@ void GLWidget::resizeEvent(QResizeEvent * event)
     //qDebug()<<"render size "<<renderAreaSize.width()<<" "<<renderAreaSize.height();
     m_world->resizeRenderArea(renderAreaSize.width(), renderAreaSize.height());
     Base3DView::resizeEvent(event);
-}
-
-void GLWidget::toggleRayCast()
-{
-	if(m_enableRayCast) m_enableRayCast = false;
-	else m_enableRayCast = true;
 }
 
 void GLWidget::loadBake()

@@ -135,3 +135,5 @@ void WorldDbgDraw::drawPrimitiveBoxes(void * boxes, void * indirections,
     }
 }
 
+GeoDrawer * WorldDbgDraw::drawer()
+{ return m_drawer; }

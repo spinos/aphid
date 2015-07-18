@@ -24,6 +24,7 @@ public:
 	
 	const unsigned numTranslations() const;
 	const Vector3F getTranslation(unsigned idx) const;
+    const Vector3F lastTranslation() const;
 protected:
 	Vector3F computeCenterOf(const AGenericMesh * object) const;
 	

@@ -9,11 +9,13 @@ public:
     
     ATriangleMesh * findBakedMesh(std::string & name);
     
+    bool isFrameBegin() const;
+    bool isFrameEnd() const;
     void frameBegin();
-    bool frameEnd() const;
     void nextFrame();
     
     bool readFrame(Vector3F * dst, unsigned nv);
+    const int currentFrame() const;
 protected:
 
 
