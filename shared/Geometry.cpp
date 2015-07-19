@@ -41,3 +41,10 @@ bool Geometry::intersectRay(unsigned icomponent, const Ray * r)
 void Geometry::closestToPoint(ClosestToPointTestResult * result) {}
 
 void Geometry::closestToPoint(unsigned icomponent, ClosestToPointTestResult * result) {}
+
+const Vector3F Geometry::boundingCenter() const
+{
+	BoundingBox box = calculateBBox();
+	return box.center();
+}
+//:~

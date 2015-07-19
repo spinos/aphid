@@ -54,14 +54,14 @@ bool ModelDifference::matchTarget(AGenericMesh * object) const
 Vector3F ModelDifference::resetTranslation(const AGenericMesh * object)
 { 
 	m_centers.clear();
-	Vector3F p = object->averageP();
+	Vector3F p = object->boundingCenter();
 	m_centers.push_back(p);
 	return p;
 }
 
 Vector3F ModelDifference::addTranslation(const AGenericMesh * object)
 {
-	Vector3F currentCenter = object->averageP();
+	Vector3F currentCenter = object->boundingCenter();
 	Vector3F dp = currentCenter - m_centers.back();
 	m_centers.push_back(currentCenter);
 	return dp;

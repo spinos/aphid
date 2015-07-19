@@ -34,6 +34,8 @@ public:
 	Geometry();
 	virtual ~Geometry();
 	
+	const Vector3F boundingCenter() const;
+	
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;

@@ -19,15 +19,12 @@ public:
 	void computeQ(ATriangleMesh * mesh);
 protected:
 	void computeV(Matrix33F * dst, ATriangleMesh * mesh) const;
-    void computeC(Vector3F * dst, ATriangleMesh * mesh) const;
-	Matrix33F * undeformedV();
+    Matrix33F * undeformedV();
     Matrix33F * Q();
     unsigned * binded();
-    Vector3F * undeformedC();
 	Vector3F getV4(const Vector3F & v1, const Vector3F & v2, const Vector3F & v3) const;
 private:
 	BaseBuffer * m_V;
     BaseBuffer * m_Q;
     BaseBuffer * m_binded;
-    BaseBuffer * m_C;
 };
