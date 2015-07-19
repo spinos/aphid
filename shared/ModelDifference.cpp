@@ -90,4 +90,7 @@ const Vector3F ModelDifference::getTranslation(unsigned idx) const
 
 const Vector3F ModelDifference::lastTranslation() const
 { return m_centers.back(); }
+
+AGenericMesh * ModelDifference::target() const
+{ return m_target; }
 //:~

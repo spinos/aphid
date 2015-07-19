@@ -17,10 +17,10 @@ public:
 	
     void requireQ(AGenericMesh * m);
 	void computeQ(ATriangleMesh * mesh);
+	Matrix33F * Q();
 protected:
 	void computeV(Matrix33F * dst, ATriangleMesh * mesh) const;
     Matrix33F * undeformedV();
-    Matrix33F * Q();
     unsigned * binded();
 	Vector3F getV4(const Vector3F & v1, const Vector3F & v2, const Vector3F & v3) const;
 private:

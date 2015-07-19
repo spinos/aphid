@@ -190,6 +190,8 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/AVerbose.cpp
 ../shared/ModelDifference.cpp
 ../shared/TriangleDifference.cpp
+../shared/ADeformer.cpp
+../shared/TriangleAnchorDeformer.cpp
                                 ../lapl/VertexAdjacency.cpp 
                 ../lapl/Anchor.cpp 
                 ../catmullclark/BaseQuad.cpp 

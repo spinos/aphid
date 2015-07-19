@@ -25,7 +25,7 @@ public:
 	const Vector3F getTranslation(unsigned idx) const;
     const Vector3F lastTranslation() const;
 protected:
-	
+	AGenericMesh * target() const;
 private:
 	std::vector<Vector3F> m_centers;
 	BaseBuffer * m_p0;
