@@ -33,7 +33,7 @@ AdeniumWorld::~AdeniumWorld()
 
 void AdeniumWorld::setRestMesh(ATriangleMesh * m)
 {
-    const Vector3F t = m->averageP();
+    const Vector3F t = m->boundingCenter();
     m_restSpaceInv.setIdentity();
     m_restSpaceInv.setTranslation(t);
     m_restSpaceInv.inverse();
