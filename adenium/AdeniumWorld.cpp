@@ -6,9 +6,10 @@
 #include <BvhBuilder.h>
 #include <PerspectiveCamera.h>
 #include <TriangleDifference.h>
+#include <ATetrahedronMesh.h>
 #include "AdeniumRender.h"
 #include <WorldDbgDraw.h>
-
+#include <tetrahedron_math.h>
 WorldDbgDraw * AdeniumWorld::DbgDrawer = 0;
 GLuint AdeniumWorld::m_texture = 0;
 
@@ -16,7 +17,8 @@ AdeniumWorld::AdeniumWorld() :
 m_numObjects(0),
 m_difference(0),
 m_deformedMesh(0),
-m_enableRayCast(true)
+m_enableRayCast(true),
+m_tetraMesh(0)
 {
     m_image = new AdeniumRender;
 }
@@ -25,10 +27,18 @@ AdeniumWorld::~AdeniumWorld()
 {
     delete m_image;
     if(m_difference) delete m_difference;
+    if(m_deformedMesh) delete m_deformedMesh;
+    if(m_tetraMesh) delete m_tetraMesh;
 }
 
 void AdeniumWorld::setRestMesh(ATriangleMesh * m)
 {
+    const Vector3F t = m->averageP();
+    m_restSpaceInv.setIdentity();
+    m_restSpaceInv.setTranslation(t);
+    m_restSpaceInv.inverse();
+    m->moveIntoSpace(m_restSpaceInv);
+
     if(m_difference) delete m_difference;
     m_difference = new TriangleDifference(m);
 }
@@ -45,6 +55,13 @@ void AdeniumWorld::addTriangleSystem(BvhTriangleSystem * tri)
     m_numObjects++;
 }
 
+void AdeniumWorld::addTetrahedronMesh(ATetrahedronMesh * tetra)
+{ 
+    m_tetraMesh = tetra;
+    m_tetraMesh->moveIntoSpace(m_restSpaceInv);
+    m_difference->requireQ(tetra);
+}
+
 void AdeniumWorld::setBvhBuilder(BvhBuilder * builder)
 { CudaLinearBvh::Builder = builder; }
 
@@ -53,6 +70,7 @@ void AdeniumWorld::draw(BaseCamera * camera)
     unsigned i = 0;
     for(;i<m_numObjects; i++)
         drawTriangle(m_objects[i]);
+    drawTetrahedron();
 	drawOverallTranslation();
 	dbgDraw();
 }
@@ -92,6 +110,26 @@ void AdeniumWorld::drawTriangle(TriangleSystem * tri)
 	glDrawElements(GL_TRIANGLES, tri->numTriangleFaceVertices(), GL_UNSIGNED_INT, tri->hostTriangleIndices());
 
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void AdeniumWorld::drawTetrahedron()
+{
+    if(!m_tetraMesh) return;
+    
+    glColor3f(0.13f, 0.29f, 0.24f);
+    const unsigned nt = m_tetraMesh->numTetrahedrons();
+    Vector3F * p = m_tetraMesh->points();
+    glBegin(GL_TRIANGLES);
+    unsigned i, j;
+    Vector3F q;
+    for(i=0; i< nt; i++) {
+        unsigned * tet = m_tetraMesh->tetrahedronIndices(i);
+        for(j=0; j< 12; j++) {
+            q = p[ tet[ TetrahedronToTriangleVertex[j] ] ];
+            glVertex3fv((GLfloat *)&q);
+        }
+    }
+    glEnd();
 }
 
 void AdeniumWorld::initOnDevice()
@@ -191,7 +229,13 @@ void AdeniumWorld::deform(bool toReset)
     if(toReset) m_difference->resetTranslation(m_deformedMesh);
     else m_difference->addTranslation(m_deformedMesh);
     
-    m_difference->moveToObjectSpace(m_deformedMesh);
+    const Vector3F t = m_difference->lastTranslation();
+    Matrix44F mat; mat.setTranslation(t);
+    mat.inverse();
+    m_deformedMesh->moveIntoSpace(mat);
+    
+    m_difference->computeQ(m_deformedMesh);
+    
     const unsigned nv = m_deformedMesh->numPoints();
     if(isRayCast()) {
         m_objectPos[0]->hostToDevice(m_deformedMesh->points(), nv * 12);

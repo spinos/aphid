@@ -51,40 +51,20 @@ bool ModelDifference::matchTarget(AGenericMesh * object) const
 	return true;
 }
 
-Vector3F ModelDifference::computeCenterOf(const AGenericMesh * object) const
-{
-	Vector3F * p1 = object->points();
-	const unsigned n = object->numPoints();
-	Vector3F center = Vector3F::Zero;
-	unsigned i=0;
-	for(;i<n;i++) center += p1[i];
-	center *= 1.f/(float)n;
-	return center;
-}
-
 Vector3F ModelDifference::resetTranslation(const AGenericMesh * object)
 { 
 	m_centers.clear();
-	Vector3F p = computeCenterOf(object);
+	Vector3F p = object->averageP();
 	m_centers.push_back(p);
 	return p;
 }
 
 Vector3F ModelDifference::addTranslation(const AGenericMesh * object)
 {
-	Vector3F currentCenter = computeCenterOf(object);
+	Vector3F currentCenter = object->averageP();
 	Vector3F dp = currentCenter - m_centers.back();
 	m_centers.push_back(currentCenter);
 	return dp;
-}
-
-void ModelDifference::moveToObjectSpace(AGenericMesh * object) const
-{
-	const Vector3F center = m_centers.back();
-	const unsigned n = object->numPoints();
-	Vector3F * p1 = object->points();
-	unsigned i=0;
-	for(;i<n;i++) p1[i] -= center;
 }
 
 void ModelDifference::computeVelocities(Vector3F * dst, AGenericMesh * object, float oneOverDt)

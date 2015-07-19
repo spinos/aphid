@@ -11,6 +11,7 @@
  */
 
 #include "Geometry.h"
+#include <Matrix44F.h>
 #include <map>
 class BaseBuffer;
 class AGenericMesh : public Geometry {
@@ -31,6 +32,8 @@ public:
 	
 	const unsigned numAnchoredPoints() const;
 	void getAnchorInd(std::map<unsigned, unsigned> & dst) const;
+    const Vector3F averageP() const;
+    void moveIntoSpace(const Matrix44F & m);
 protected:
 	void createBuffer(unsigned np, unsigned ni);
 	void setNumPoints(unsigned n);

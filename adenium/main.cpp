@@ -10,8 +10,9 @@ int main(int argc, char *argv[])
     else AdeniumInterface::FileName = "foo.hes";
     
     std::cout<<"Adenium start up"
-    <<"\n Q to switch between ray-casting and openGL "
-    <<"\n press L to load bake";
+    <<"\n press Q to switch between ray-casting and openGL "
+    <<"\n press L to load bake file"
+    <<"\n ";
     
     QApplication app(argc, argv);
     Window window;

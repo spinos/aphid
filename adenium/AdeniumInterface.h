@@ -15,6 +15,7 @@ public:
     static H5FileIn BakeFile;
 protected:
     bool readTriangleMeshFromFile(AdeniumWorld * world);
+    bool readTetrahedronMeshFromFile(AdeniumWorld * world);
 };
 #endif        //  #ifndef ADENIUMINTERFACE_H
 

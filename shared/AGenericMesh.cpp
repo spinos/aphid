@@ -113,4 +113,23 @@ void AGenericMesh::getAnchorInd(std::map<unsigned, unsigned> & dst) const
 		if(a>0) dst[(a[i]<<8)>>8] = 1;
 	}
 }
+
+const Vector3F AGenericMesh::averageP() const
+{
+    Vector3F center = Vector3F::Zero;
+    const unsigned n = numPoints();
+    Vector3F * p = points();
+	unsigned i=0;
+	for(;i<n;i++) center += p[i];
+    center *= 1.f/(float)n;
+	return center;
+}
+
+void AGenericMesh::moveIntoSpace(const Matrix44F & m)
+{
+    const unsigned n = numPoints();
+    Vector3F * p = points();
+    unsigned i=0;
+	for(;i<n;i++) p[i] = m.transform(p[i]);
+}
 //:~

@@ -15,11 +15,16 @@ public:
 	TriangleDifference(ATriangleMesh * target);
 	virtual ~TriangleDifference();
 	
-	void computeQ(Matrix33F * dst, unsigned n, unsigned * ind, ATriangleMesh * mesh);
+    void requireQ(AGenericMesh * m);
+	void computeQ(ATriangleMesh * mesh);
 protected:
 	void computeV(Matrix33F * dst, ATriangleMesh * mesh);
 	Matrix33F * undeformedV();
+    Matrix33F * Q();
+    unsigned * binded();
 	Vector3F getV4(const Vector3F & v1, const Vector3F & v2, const Vector3F & v3) const;
 private:
 	BaseBuffer * m_V;
+    BaseBuffer * m_Q;
+    BaseBuffer * m_binded;
 };

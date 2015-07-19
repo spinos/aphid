@@ -1,7 +1,7 @@
 #ifndef ADENIUMWORLD_H
 #define ADENIUMWORLD_H
 #include <gl_heads.h>
-#include <Vector3F.h>
+#include <Matrix44F.h>
 class BvhTriangleSystem;
 class CUDABuffer;
 class BvhBuilder;
@@ -11,6 +11,7 @@ class BaseCamera;
 class WorldDbgDraw;
 class ATriangleMesh;
 class TriangleDifference;
+class ATetrahedronMesh;
 class AdeniumWorld {
 public:
     AdeniumWorld();
@@ -18,6 +19,7 @@ public:
     
     void setBvhBuilder(BvhBuilder * builder);
     void addTriangleSystem(BvhTriangleSystem * tri); 
+    void addTetrahedronMesh(ATetrahedronMesh * tetra);
     void initOnDevice();
     void draw(BaseCamera * camera);
 	void dbgDraw();
@@ -37,8 +39,10 @@ public:
     const Vector3F currentTranslation() const;
 private:
     void drawTriangle(TriangleSystem * tri);
+    void drawTetrahedron();
     void drawOverallTranslation();
 private:
+    Matrix44F m_restSpaceInv;
     TriangleDifference * m_difference;
     BvhTriangleSystem * m_objects[32];
 	CUDABuffer * m_objectInd[32];
@@ -46,6 +50,7 @@ private:
 	CUDABuffer * m_objectVel[32];
 	AdeniumRender * m_image;
     ATriangleMesh * m_deformedMesh;
+    ATetrahedronMesh * m_tetraMesh;
 	unsigned m_numObjects;
 	static GLuint m_texture;
     bool m_enableRayCast;

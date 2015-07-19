@@ -19,14 +19,12 @@ public:
 	bool matchTarget(AGenericMesh * object) const;
 	Vector3F resetTranslation(const AGenericMesh * object);
 	Vector3F addTranslation(const AGenericMesh * object);
-	void moveToObjectSpace(AGenericMesh * object) const;
 	void computeVelocities(Vector3F * dst, AGenericMesh * object, float oneOverDt);
 	
 	const unsigned numTranslations() const;
 	const Vector3F getTranslation(unsigned idx) const;
     const Vector3F lastTranslation() const;
 protected:
-	Vector3F computeCenterOf(const AGenericMesh * object) const;
 	
 private:
 	std::vector<Vector3F> m_centers;

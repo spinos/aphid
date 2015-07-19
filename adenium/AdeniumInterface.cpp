@@ -15,6 +15,7 @@ void AdeniumInterface::create(AdeniumWorld * world)
 {
     world->setBvhBuilder(new SahBuilder);
     readTriangleMeshFromFile(world);
+    readTetrahedronMeshFromFile(world);
 }
 
 bool AdeniumInterface::readTriangleMeshFromFile(AdeniumWorld * world)
@@ -41,8 +42,37 @@ bool AdeniumInterface::readTriangleMeshFromFile(AdeniumWorld * world)
     }
     std::cout<<" n tri mesh "<<triangleMeshes.numGeometries();
 	
-    world->setRestMesh((ATriangleMesh *)triangleMeshes.geometry(0));
-    world->addTriangleSystem(new BvhTriangleSystem((ATriangleMesh *)triangleMeshes.geometry(0)));
+    ATriangleMesh * gm = (ATriangleMesh *)triangleMeshes.geometry(0);
+    world->setRestMesh(gm);
+    world->addTriangleSystem(new BvhTriangleSystem(gm));
+    return true;
+}
+
+bool AdeniumInterface::readTetrahedronMeshFromFile(AdeniumWorld * world)
+{
+    if(BaseFile::InvalidFilename(FileName)) 
+		return false;
+		
+	if(!BaseFile::FileExists(FileName)) {
+		FileName = "unknown";
+		return false;
+	}
+    
+    HesperisFile hes;
+	hes.setReadComponent(HesperisFile::RTetra);
+	if(!hes.open(FileName)) return false;
+	hes.close();
+    
+    GeometryArray tetraMeshes;
+	hes.extractTetrahedronMeshes(&tetraMeshes);
+    
+    if(tetraMeshes.numGeometries() < 1) {
+        std::cout<<" no tetrahedron mesh discovered\n";
+        return false;
+    }
+    std::cout<<" n tetra mesh "<<tetraMeshes.numGeometries();
+	
+    world->addTetrahedronMesh((ATetrahedronMesh *)tetraMeshes.geometry(0));
     return true;
 }
 
