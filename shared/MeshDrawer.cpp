@@ -8,7 +8,6 @@
  */
 
 #include "MeshDrawer.h"
-#include <TriangleMesh.h>
 #include <BaseMesh.h>
 #include <BaseDeformer.h>
 #include <BaseField.h>
@@ -16,15 +15,7 @@
 MeshDrawer::MeshDrawer() {}
 MeshDrawer::~MeshDrawer() {}
 
-void MeshDrawer::triangleMesh(ATriangleMesh * mesh) const
-{
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->points());
-	glDrawElements(GL_TRIANGLES, mesh->numIndices(), GL_UNSIGNED_INT, mesh->indices());
-	glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void MeshDrawer::triangleMesh(const TriangleMesh * mesh, const BaseDeformer * deformer) const
+void MeshDrawer::triangleMesh(const ATriangleMesh * mesh, const BaseDeformer * deformer) const
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	if(!deformer)
@@ -32,9 +23,8 @@ void MeshDrawer::triangleMesh(const TriangleMesh * mesh, const BaseDeformer * de
 	else
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedP());
 
-	glDrawElements(GL_TRIANGLES, mesh->numTriangleFaceVertices(), GL_UNSIGNED_INT, mesh->indices());
+	glDrawElements(GL_TRIANGLES, mesh->numIndices(), GL_UNSIGNED_INT, mesh->indices());
 
-// deactivate vertex arrays after drawing
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 

@@ -35,8 +35,7 @@ add_library(aphid STATIC ../shared/line_math.h
 				../shared/BaseTransform.cpp 
                 ../shared/Geometry.cpp 
                 ../shared/BaseMesh.cpp 
-				../shared/PlaneMesh.cpp 
-                ../shared/TriangleMesh.cpp 
+				../shared/PlaneMesh.cpp
                 ../shared/Triangle.cpp 
                 ../shared/GeoElement.cpp 
                 ../shared/Vertex.cpp 

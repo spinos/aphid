@@ -91,4 +91,26 @@ void AGenericMesh::copyStripe(AGenericMesh * inmesh, unsigned driftP, unsigned d
 	for(i=0;i<np;i++) dstA[i] = srcA[i]; 
 	for(i=0;i<ni;i++) dstI[i] = driftP + srcI[i]; 
 }
+
+const unsigned AGenericMesh::numAnchoredPoints() const
+{
+	unsigned count = 0;
+	unsigned * a = anchors();
+	const unsigned n = numPoints();
+	unsigned i=0;
+	for(;i<n;i++) {
+		if(a[i] > 0) count++;
+	}
+	return count;
+}
+
+void AGenericMesh::getAnchorInd(std::map<unsigned, unsigned> & dst) const
+{
+	unsigned * a = anchors();
+	const unsigned n = numPoints();
+	unsigned i=0;
+	for(;i<n;i++) {
+		if(a>0) dst[(a[i]<<8)>>8] = 1;
+	}
+}
 //:~

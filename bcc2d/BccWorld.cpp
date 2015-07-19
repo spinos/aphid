@@ -222,6 +222,7 @@ void BccWorld::createTetrahedronMeshes()
 	
 	unsigned ntet = 0;
 	unsigned nvert = 0;
+	unsigned nanchored = 0;
     float vlm;
 	unsigned i=0;
 	for(;i<n;i++) {
@@ -234,11 +235,13 @@ void BccWorld::createTetrahedronMeshes()
         m_meshes[i].setVolume(vlm);
 		ntet += m_meshes[i].numTetrahedrons();
 		nvert += m_meshes[i].numPoints();
+		nanchored += m_meshes[i].numAnchoredPoints();
 	}
 	
 	std::cout<<"\n n tetrahedron meshes "<<n
 	<<"\n total n tetrahedrons "<<ntet
 	<<"\n total n points "<<nvert
+	<<"\n total n anchored points "<<nanchored
 	<<"\n";
 	m_numMeshes = n;
 	m_totalNumTetrahedrons = ntet;

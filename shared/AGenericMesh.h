@@ -11,6 +11,7 @@
  */
 
 #include "Geometry.h"
+#include <map>
 class BaseBuffer;
 class AGenericMesh : public Geometry {
 public:
@@ -27,6 +28,9 @@ public:
 	unsigned * anchors() const;
 	
 	void copyStripe(AGenericMesh * inmesh, unsigned driftP, unsigned driftI);
+	
+	const unsigned numAnchoredPoints() const;
+	void getAnchorInd(std::map<unsigned, unsigned> & dst) const;
 protected:
 	void createBuffer(unsigned np, unsigned ni);
 	void setNumPoints(unsigned n);
