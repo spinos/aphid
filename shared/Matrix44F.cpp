@@ -440,6 +440,19 @@ void Matrix44F::setRotation(const Quaternion & q)
 	*m(2, 2) = 1.0f - qxqx2 - qyqy2;
 }
 
+void Matrix44F::scaleBy(float sc)
+{
+	*m(0, 0) *= sc;
+	*m(0, 1) *= sc;
+	*m(0, 2) *= sc;
+	*m(1, 0) *= sc;
+	*m(1, 1) *= sc;
+	*m(1, 2) *= sc;
+	*m(2, 0) *= sc;
+	*m(2, 1) *= sc;
+	*m(2, 2) *= sc;
+}
+
 const std::string Matrix44F::str() const
 {
 	std::stringstream sst;

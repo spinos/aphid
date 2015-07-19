@@ -29,6 +29,7 @@ GeoDrawer::GeoDrawer()
 	m_circle = new CircleCurve;
 	m_cube = new CubeMesh;
 	m_disc = new DiscMesh;
+	m_alignDir = Vector3F::ZAxis;
 }
 
 GeoDrawer::~GeoDrawer()
@@ -134,6 +135,30 @@ void GeoDrawer::circleAt(const Matrix44F & mat, float radius)
     useSpace(mat);
 	m_circle->setRadius(radius);
     linearCurve(*m_circle);
+    glPopMatrix();
+}
+
+void GeoDrawer::alignedCircle(const Vector3F & pos, float radius) const
+{
+	glPushMatrix();
+    Matrix44F mat;
+    mat.setTranslation(pos);
+    mat.setFrontOrientation(m_alignDir);
+	mat.scaleBy(radius);
+	useSpace(mat);
+	linearCurve(*m_circle);
+    glPopMatrix();
+}
+
+void GeoDrawer::alignedDisc(const Vector3F & pos, float radius) const
+{
+	glPushMatrix();
+    Matrix44F mat;
+    mat.setTranslation(pos);
+    mat.setFrontOrientation(m_alignDir);
+	mat.scaleBy(radius);
+	useSpace(mat);
+	drawMesh(m_disc);
     glPopMatrix();
 }
 
@@ -585,3 +610,7 @@ void GeoDrawer::geometryArray(GeometryArray * arr) const
 	for(;i<arr->numGeometries(); i++)
 		geometry(arr->geometry(i));
 }
+
+void GeoDrawer::setAlignDir(const Vector3F & v)
+{ m_alignDir = v; }
+//:~

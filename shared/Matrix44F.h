@@ -57,6 +57,7 @@
 	void transpose();
 	void glMatrix(float *m) const;
 	const float determinant() const;
+	void scaleBy(float sc);
 	
 	static float Determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i );
 	static Matrix44F Identitiy;
