@@ -61,12 +61,6 @@ char HTriangleMesh::save(ATriangleMesh * tri)
 	    addIntData(".v", nt * 3);
 	
 	writeIntData(".v", nt * 3, (int *)tri->indices());
-	
-	if(!hasNamedAttr(".dag"))
-		addStringAttr(".dag", tri->dagName().size());
-		
-	std::cout<<" dag name is "<<tri->dagName();
-	writeStringAttr(".dag", tri->dagName());
 
 	return 1;
 }

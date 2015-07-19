@@ -250,13 +250,11 @@ void BccWorld::createTriangleMeshesFromFile()
 	m_triangleMeshes = new GeometryArray;
 	if(!readTriangleDataFromFile()) return;
 	
-	std::cout<<"\n n triangle mesh: "<<m_triangleMeshes->numGeometries()
-	<<"\n";
+	std::cout<<"\n n trimesh: "<<m_triangleMeshes->numGeometries();
 	m_triIntersect = new KdIntersection;
 	for(unsigned i=0; i<m_triangleMeshes->numGeometries(); i++) {
 		ATriangleMesh * m = (ATriangleMesh *)m_triangleMeshes->geometry(i);
-		std::cout<<m->dagName()
-		<<"\n n triangle: "<<m->numTriangles()
+		std::cout<<"\n mesh["<<i<<"] n triangles: "<<m->numTriangles()
 		<<"\n n points: "<<m->numPoints()
 		<<"\n";
 		m_triIntersect->addGeometry(m);

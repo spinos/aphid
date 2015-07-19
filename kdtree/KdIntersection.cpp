@@ -26,11 +26,11 @@ bool KdIntersection::intersectBox(const BoundingBox & box)
 
 bool KdIntersection::recursiveIntersectBox(KdTreeNode *node, const BoundingBox & box)
 {
+	if(!box.intersect(m_testBox)) return false;
+	
 	if(node->isLeaf())
 		return leafIntersectBox(node, box);
 		
-	if(!box.intersect(m_testBox)) return false;
-	
 	const int axis = node->getAxis();
 	const float splitPos = node->getSplitPos();
 	

@@ -36,7 +36,8 @@ public:
 	virtual const Type type() const;
 	static int MaxBuildLevel;
 	static unsigned NumPrimitivesInLeafThreashold;
-	
+// override geomery
+	virtual void closestToPoint(ClosestToPointTestResult * result);
 protected:
 	virtual void clear();
 	const unsigned numNoEmptyLeaves() const;
@@ -51,6 +52,9 @@ private:
 	char leafClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx);
 	char recursiveSelect(KdTreeNode *node, SelectionContext * ctx);
 	char leafSelect(KdTreeNode *node, SelectionContext * ctx);
+	void recusiveClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result);
+	void leafClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result);
+	
 	BuildKdTreeStream m_stream;
 	KdTreeNode *m_root;
 	int m_maxLeafLevel;

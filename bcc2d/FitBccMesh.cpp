@@ -18,7 +18,7 @@ FitBccMesh::~FitBccMesh()
 {
 }
 
-void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorIntersect)
+void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorMesh)
 {
 	std::vector<Vector3F > tetrahedronP;
 	std::vector<unsigned > tetrahedronInd;
@@ -46,65 +46,38 @@ void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorIntersect)
 	
 	resetAnchors(np);
 	
-	addAnchors(builder.startPoints(), geoa->numGeometries());
+	addAnchors(builder.startPoints(), builder.tetrahedronDrifts(), geoa->numGeometries(), anchorMesh);
 }
 
-void FitBccMesh::addAnchors(KdIntersection * anchorIntersect)
-{
-	BoundingBox box;
-    Vector3F toPos;
-    float maxD;
-	unsigned j, i=0;
-	for(; i< numTetrahedrons(); i++) {
-        unsigned * tet = tetrahedronIndices(i);
-		
-		box.reset();
-        for(j=0; j< 4; j++)
-            box.expandBy(points()[tet[j]], 0.001f); 
-        
-        toPos = box.center();
-        maxD = box.radius();
-        
-		if(!anchorIntersect->intersectBox(box)) continue;
-		
-		for(j=0; j< 4; j++) {
-			anchors()[tet[j]] = 1;
-		}
-    }
-}
-
-void FitBccMesh::addAnchors(Vector3F * anchorPoints, unsigned n)
+void FitBccMesh::addAnchors(Vector3F * anchorPoints, unsigned * tetraDrifts, unsigned n,
+						KdIntersection * anchorMesh)
 {
 	unsigned i, j, k;
 	unsigned * anchorTri = new unsigned[n];
+	Geometry::ClosestToPointTestResult cls;
 	for(i=0; i< n; i++) {
-// todo: find closest tri id for each start point
+		cls.reset(anchorPoints[i], 1e8f);
+		anchorMesh->closestToPoint(&cls);
+		anchorTri[i] = cls._icomponent;
 	}
 	
 	BoundingBox box;
-	int anchored;
-	for(i=0; i< numTetrahedrons(); i++) {
-        unsigned * tet = tetrahedronIndices(i);
+	for(k = 0; k <n; k++) {
+	for(i=0; i< 6; i++) {
+        unsigned * tet = tetrahedronIndices(tetraDrifts[k] + i);
 		
 		box.reset();
         for(j=0; j< 4; j++)
-            box.expandBy(points()[tet[j]], 0.001f); 
+            box.expandBy(points()[tet[j]], 1e-3f); 
         
-		// if(!anchorIntersect->intersectBox(box)) continue;
-		anchored = 0;
-		for(k=0; k<n; k++) {
-			if(box.isPointInside(anchorPoints[k])) {
-				anchored = 1;
-				break;
-			}
-		}
-		
-		if(!anchored) continue;
+		if(box.center().distanceTo(anchorPoints[k]) > box.radius())
+			continue;
 		
 		for(j=0; j< 4; j++) {
-			anchors()[tet[j]] = 1;
+			anchors()[tet[j]] = (1<<24 | anchorTri[k]);
 		}
     }
+	}
 	delete[] anchorTri;
 }
 //:~

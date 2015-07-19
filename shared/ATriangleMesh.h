@@ -19,16 +19,15 @@ public:
 	virtual const Type type() const;
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
+	virtual void closestToPoint(unsigned icomponent, ClosestToPointTestResult * result);
 	const unsigned numTriangles() const;
 	
 	void create(unsigned np, unsigned nt);
 	unsigned * triangleIndices(unsigned idx) const;
 	
-	void setDagName(const std::string & name);
-	const std::string dagName() const;
 protected:
 	
 private:
-	std::string m_dagName;
+	
 };
 #endif        //  #ifndef ATRIANGLEMESH_H

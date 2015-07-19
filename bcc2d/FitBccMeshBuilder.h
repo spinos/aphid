@@ -31,6 +31,7 @@ public:
 			   unsigned curveIdx);
 			   
 	Vector3F * startPoints();
+	unsigned * tetrahedronDrifts();
 			   
 	static float EstimatedGroupSize;
 protected:
@@ -46,4 +47,5 @@ private:
 	SampleGroup * m_reducer;
 	BccOctahedron * m_octa;
 	Vector3F * m_startPoints;
+	unsigned * m_tetraDrift;
 };

@@ -37,3 +37,7 @@ bool Geometry::intersectTetrahedron(unsigned icomponent, const Vector3F * tet)
 
 bool Geometry::intersectRay(unsigned icomponent, const Ray * r)
 { return false; }
+
+void Geometry::closestToPoint(ClosestToPointTestResult * result) {}
+
+void Geometry::closestToPoint(unsigned icomponent, ClosestToPointTestResult * result) {}

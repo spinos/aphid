@@ -436,3 +436,44 @@ IndexArray & KdTree::indirection()
 
 PrimitiveArray & KdTree::primitives()
 { return m_stream.primitives(); }
+
+void KdTree::closestToPoint(ClosestToPointTestResult * result)
+{ recusiveClosestToPoint(getRoot(), getBBox(), result); }
+
+void KdTree::recusiveClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result)
+{
+	if(!result->closeTo(box)) return;
+	if(node->isLeaf())
+		return leafClosestToPoint(node, box, result);
+		
+	const int axis = node->getAxis();
+	const float splitPos = node->getSplitPos();
+	BoundingBox leftBox, rightBox;
+	box.split(axis, splitPos, leftBox, rightBox);
+	
+	recusiveClosestToPoint(node->getLeft(), leftBox, result);
+	recusiveClosestToPoint(node->getRight(), rightBox, result);
+}
+
+void KdTree::leafClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result)
+{
+	const unsigned num = node->getNumPrims();
+	if(num < 1) return;
+	
+	unsigned start = node->getPrimStart();
+	IndexArray &indir = indirection();
+	PrimitiveArray &prims = primitives();
+	indir.setIndex(start);
+
+	for(unsigned i = 0; i < num; i++) {
+		unsigned *iprim = indir.asIndex();
+
+		Primitive * prim = prims.asPrimitive(*iprim);
+		Geometry * geo = prim->getGeometry();
+		unsigned icomponent = prim->getComponentIndex();
+		
+		geo->closestToPoint(icomponent, result);
+		indir.next();
+	}
+}
+//:~

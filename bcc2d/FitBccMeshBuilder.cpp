@@ -25,6 +25,7 @@ FitBccMeshBuilder::FitBccMeshBuilder()
 	m_sampler = new CurveSampler;
 	m_reducer = new SampleGroup;
 	m_startPoints = 0;
+	m_tetraDrift = 0;
 }
 
 FitBccMeshBuilder::~FitBccMeshBuilder() 
@@ -33,6 +34,7 @@ FitBccMeshBuilder::~FitBccMeshBuilder()
 	delete m_sampler;
 	delete m_reducer;
 	if(m_startPoints) delete[] m_startPoints;
+	if(m_tetraDrift) delete[] m_tetraDrift;
 }
 
 void FitBccMeshBuilder::cleanup()
@@ -47,13 +49,17 @@ void FitBccMeshBuilder::build(GeometryArray * curves,
     const unsigned n = curves->numGeometries();
 	if(m_startPoints) delete[] m_startPoints;
 	m_startPoints = new Vector3F[n];
+	if(m_tetraDrift) delete[] m_tetraDrift;
+	m_tetraDrift = new unsigned[n];
 	
     unsigned i=0;
-    for(;i<n;i++)
+    for(;i<n;i++) {
+		m_tetraDrift[i] = tetrahedronInd.size() / 4;
         build((BezierCurve *)curves->geometry(i), 
 	           tetrahedronP, 
 	           tetrahedronInd,
 			   i);
+	}
 }
 
 void FitBccMeshBuilder::build(BezierCurve * curve, 
@@ -216,4 +222,7 @@ void FitBccMeshBuilder::drawSamples(KdTreeDrawer * drawer)
 
 Vector3F * FitBccMeshBuilder::startPoints()
 { return m_startPoints; }
+
+unsigned * FitBccMeshBuilder::tetrahedronDrifts()
+{ return m_tetraDrift; }
 //:~
