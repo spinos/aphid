@@ -12,6 +12,7 @@ class WorldDbgDraw;
 class ATriangleMesh;
 class TriangleDifference;
 class ATetrahedronMesh;
+class TriangleAnchorDeformer;
 class AdeniumWorld {
 public:
     AdeniumWorld();
@@ -40,6 +41,7 @@ public:
 private:
     void drawTriangle(TriangleSystem * tri);
     void drawTetrahedron();
+    void drawAnchors();
     void drawOverallTranslation();
 private:
     Matrix44F m_restSpaceInv;
@@ -51,6 +53,7 @@ private:
 	AdeniumRender * m_image;
     ATriangleMesh * m_deformedMesh;
     ATetrahedronMesh * m_tetraMesh;
+    TriangleAnchorDeformer * m_tetraDeformer;
 	unsigned m_numObjects;
 	static GLuint m_texture;
     bool m_enableRayCast;

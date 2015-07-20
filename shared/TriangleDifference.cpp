@@ -24,10 +24,8 @@ TriangleDifference::TriangleDifference(ATriangleMesh * target) : ModelDifference
     m_Q->create(n * 36);
     m_binded = new BaseBuffer;
     m_binded->create(n * 4);
-    Matrix33F * v = undeformedV();
-	computeV(v, target);
+    computeUndeformedV(target);
 	unsigned i=0;
-	for(;i<n;i++) v[i].inverse();
     unsigned * b = binded();
     for(i=0;i<n;i++) b[i] = 0;
 }
@@ -38,8 +36,9 @@ TriangleDifference::~TriangleDifference()
     delete m_Q;
 }
 
-void TriangleDifference::computeV(Matrix33F * dst, ATriangleMesh * mesh) const
+void TriangleDifference::computeUndeformedV(ATriangleMesh * mesh)
 {
+    Matrix33F * dst = undeformedV();
 	const unsigned n = mesh->numTriangles();
 	Vector3F * p = mesh->points();
 	Vector3F v1, v2, v3, v4;
@@ -50,15 +49,15 @@ void TriangleDifference::computeV(Matrix33F * dst, ATriangleMesh * mesh) const
 		v2 = p[vi[1]];
 		v3 = p[vi[2]];
 		v4 = getV4(v1, v2, v3);
-		
 		dst[i].fill(v2-v1, v3-v1, v4-v1);
+        dst[i].inverse();
 	}
 }
 
 Vector3F TriangleDifference::getV4(const Vector3F & v1, const Vector3F & v2, const Vector3F & v3) const
 {
 	Vector3F nor = (v2 - v1).cross(v3 - v1);
-	nor *= 1.f/sqrt(nor.length());
+    nor.normalize();
 	return v1 + nor;
 }
 
@@ -74,6 +73,7 @@ unsigned * TriangleDifference::binded()
 void TriangleDifference::computeQ(ATriangleMesh * mesh)
 {
     Matrix33F * dst = Q();
+    Matrix33F * vtau = undeformedV();
     unsigned * b = binded();
     const unsigned n = mesh->numTriangles();
 	Vector3F * p = mesh->points();
@@ -89,8 +89,7 @@ void TriangleDifference::computeQ(ATriangleMesh * mesh)
 		v3 = p[vi[2]];
 		v4 = getV4(v1, v2, v3);
 		deformedV.fill(v2-v1, v3-v1, v4-v1);
-		
-		dst[i] = deformedV * undeformedV()[i];
+        dst[i] = vtau[i] * deformedV;
 	}
 }
 

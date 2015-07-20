@@ -19,7 +19,7 @@ public:
 	void computeQ(ATriangleMesh * mesh);
 	Matrix33F * Q();
 protected:
-	void computeV(Matrix33F * dst, ATriangleMesh * mesh) const;
+	void computeUndeformedV(ATriangleMesh * mesh);
     Matrix33F * undeformedV();
     unsigned * binded();
 	Vector3F getV4(const Vector3F & v1, const Vector3F & v2, const Vector3F & v3) const;

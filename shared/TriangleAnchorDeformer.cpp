@@ -61,7 +61,8 @@ bool TriangleAnchorDeformer::solve(ATriangleMesh * m)
 	for(;i<n;i++) {
 		if(a[i]>0) {
 			const unsigned ia = (a[i]<<8)>>8;
-			const Matrix33F q = m_diff->Q()[ia];
+			Matrix33F q = m_diff->Q()[ia];
+            q.orthoNormalize();
 			const Vector3F t = m->triangleCenter(ia);
 			sp.setRotation(q);
 			sp.setTranslation(t);

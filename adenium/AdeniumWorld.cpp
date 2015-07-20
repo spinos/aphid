@@ -10,6 +10,8 @@
 #include "AdeniumRender.h"
 #include <WorldDbgDraw.h>
 #include <tetrahedron_math.h>
+#include <TriangleAnchorDeformer.h>
+
 WorldDbgDraw * AdeniumWorld::DbgDrawer = 0;
 GLuint AdeniumWorld::m_texture = 0;
 
@@ -21,11 +23,13 @@ m_enableRayCast(true),
 m_tetraMesh(0)
 {
     m_image = new AdeniumRender;
+    m_tetraDeformer = new TriangleAnchorDeformer;
 }
 
 AdeniumWorld::~AdeniumWorld() 
 {
     delete m_image;
+    delete m_tetraDeformer;
     if(m_difference) delete m_difference;
     if(m_deformedMesh) delete m_deformedMesh;
     if(m_tetraMesh) delete m_tetraMesh;
@@ -41,6 +45,7 @@ void AdeniumWorld::setRestMesh(ATriangleMesh * m)
 
     if(m_difference) delete m_difference;
     m_difference = new TriangleDifference(m);
+    m_tetraDeformer->setDifference(m_difference);
 }
 
 bool AdeniumWorld::matchRestMesh(ATriangleMesh * m)
@@ -60,6 +65,7 @@ void AdeniumWorld::addTetrahedronMesh(ATetrahedronMesh * tetra)
     m_tetraMesh = tetra;
     m_tetraMesh->moveIntoSpace(m_restSpaceInv);
     m_difference->requireQ(tetra);
+    m_tetraDeformer->setMesh(m_tetraMesh);
 }
 
 void AdeniumWorld::setBvhBuilder(BvhBuilder * builder)
@@ -71,6 +77,7 @@ void AdeniumWorld::draw(BaseCamera * camera)
     for(;i<m_numObjects; i++)
         drawTriangle(m_objects[i]);
     drawTetrahedron();
+    drawAnchors();
 	drawOverallTranslation();
 	dbgDraw();
 }
@@ -118,7 +125,7 @@ void AdeniumWorld::drawTetrahedron()
     
     glColor3f(0.13f, 0.29f, 0.24f);
     const unsigned nt = m_tetraMesh->numTetrahedrons();
-    Vector3F * p = m_tetraMesh->points();
+    Vector3F * p = m_tetraDeformer->deformedP();
     glBegin(GL_TRIANGLES);
     unsigned i, j;
     Vector3F q;
@@ -130,6 +137,20 @@ void AdeniumWorld::drawTetrahedron()
         }
     }
     glEnd();
+}
+
+void AdeniumWorld::drawAnchors()
+{
+    if(!m_tetraMesh) return;
+    glEnable(GL_DEPTH_TEST);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glColor3f(.59f, .21f, 0.f);
+    unsigned * a = m_tetraMesh->anchors();
+    Vector3F * p = m_tetraDeformer->deformedP();
+    unsigned i = 0;
+    for(;i<m_tetraMesh->numPoints();i++) {
+        if(a[i]>0) DbgDrawer->drawer()->alignedDisc(p[i], 0.08f);
+    }
 }
 
 void AdeniumWorld::initOnDevice()
@@ -235,6 +256,8 @@ void AdeniumWorld::deform(bool toReset)
     m_deformedMesh->moveIntoSpace(mat);
     
     m_difference->computeQ(m_deformedMesh);
+    if(toReset) m_tetraDeformer->reset(m_deformedMesh);
+    else m_tetraDeformer->solve(m_deformedMesh);
     
     const unsigned nv = m_deformedMesh->numPoints();
     if(isRayCast()) {

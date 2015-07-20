@@ -374,8 +374,7 @@ void BccWorld::drawAnchor()
 	    Vector3F * p = (Vector3F *)m_meshes[i].points();
 	    unsigned * a = (unsigned *)m_meshes[i].anchors();
 	    for(j=0;j<m_meshes[i].numPoints();j++) {
-	        if(a[j]<1) continue;
-	        m_drawer->alignedDisc(p[j], csz);
+	        if(a[j]>0) m_drawer->alignedDisc(p[j], csz);
 	    }
     }
 }

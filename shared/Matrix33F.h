@@ -60,6 +60,11 @@
 	
 	static Matrix33F IdentityMatrix;
 	
+    friend std::ostream& operator<<(std::ostream &output, const Matrix33F & p) {
+        output << p.str();
+        return output;
+    }
+    
 	const std::string Matrix33F::str() const;
 	
 	float v[9];

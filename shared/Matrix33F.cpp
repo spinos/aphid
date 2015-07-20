@@ -207,17 +207,17 @@ void Matrix33F::inverse()
 {
     const float det = determinant();
     
-    const float m00 =  determinant22(M(2, 2), M(1, 1), M(2, 1), M(1, 2));
-    const float m01 = -determinant22(M(2, 2), M(1, 0), M(2, 0), M(1, 2));
-    const float m02 =  determinant22(M(2, 1), M(1, 0), M(2, 0), M(1, 1));
+    const float m00 =  determinant22(M(1, 1), M(1, 2), M(2, 1), M(2, 2));
+    const float m01 = -determinant22(M(1, 0), M(1, 2), M(2, 0), M(2, 2));
+    const float m02 =  determinant22(M(1, 0), M(1, 1), M(2, 0), M(2, 1));
 	
-	const float m10 = -determinant22(M(2, 2), M(0, 1), M(2, 1), M(0, 2));
-	const float m11 =  determinant22(M(2, 2), M(0, 0), M(2, 0), M(0, 2));
-	const float m12 = -determinant22(M(2, 1), M(0, 0), M(2, 0), M(0, 1));
+	const float m10 = -determinant22(M(0, 1), M(0, 2), M(2, 1), M(2, 2));
+	const float m11 =  determinant22(M(0, 0), M(0, 2), M(2, 0), M(2, 2));
+	const float m12 = -determinant22(M(0, 0), M(0, 1), M(2, 0), M(2, 1));
 	
-	const float m20 =  determinant22(M(1, 2), M(0, 1), M(1, 1), M(0, 2));
-	const float m21 = -determinant22(M(1, 2), M(0, 0), M(1, 0), M(0, 2));
-	const float m22 =  determinant22(M(1, 1), M(0, 0), M(1, 0), M(0, 1));
+	const float m20 =  determinant22(M(0, 1), M(0, 2), M(1, 1), M(1, 2));
+	const float m21 = -determinant22(M(0, 0), M(0, 2), M(1, 0), M(1, 2));
+	const float m22 =  determinant22(M(0, 0), M(0, 1), M(1, 0), M(1, 1));
     
     *m(0, 0) = m00 / det;
     *m(0, 1) = m10 / det;
