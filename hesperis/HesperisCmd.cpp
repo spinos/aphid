@@ -139,7 +139,6 @@ MStatus HesperisCmd::printHelp()
 		+MString("\n select group of curves to export")
 		+MString("\n hesperis -w filename -gm fullPathToTransformOfMesh")
         +MString("\n -gm or -growMesh is full path name to the transform of grow mesh"));
-	testTransform();
 	return MS::kSuccess;
 }
 

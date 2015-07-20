@@ -83,4 +83,13 @@ const Vector3F ATriangleMesh::triangleCenter(unsigned idx) const
 	Vector3F * p = points();
 	return (p[v[0]] + p[v[1]] + p[v[2]]) / 3.f;
 }
+
+std::string ATriangleMesh::verbosestr() const
+{
+	std::stringstream sst;
+	sst<<" triangle mesh nv "<<numPoints()
+		<<"\n ntri "<<numTriangles()
+		<<"\n";
+	return sst.str();
+}
 //:~

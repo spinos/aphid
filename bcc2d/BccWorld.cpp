@@ -263,7 +263,7 @@ void BccWorld::createTriangleMeshesFromFile()
 		m_triIntersect->addGeometry(m);
 	}
 	
-	KdTree::MaxBuildLevel = 32;
+	KdTree::MaxBuildLevel = 20;
 	KdTree::NumPrimitivesInLeafThreashold = 9;
 	m_triIntersect->create();
 }
