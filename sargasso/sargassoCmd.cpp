@@ -12,6 +12,9 @@
 #include <ASearchHelper.h>
 #include <ATriangleMesh.h>
 #include <KdTree.h>
+#include <maya/MFnPointArrayData.h>
+#include <maya/MFnIntArrayData.h>
+#include <maya/MFnVectorArrayData.h>
 
 SargassoCmd::SargassoCmd() {}
 SargassoCmd::~SargassoCmd() {}
@@ -144,9 +147,11 @@ MStatus SargassoCmd::createNode(const MObjectArray & transforms,
 	tree.create();
 	
 	const unsigned nt = transforms.length();
-	AHelper::Info<int>(" to bind n transforms: ", nt);
+	AHelper::Info<int>(" n transforms: ", nt);
 	
+	std::map<unsigned, char> bindInds;
 	Vector3F * localPs = new Vector3F[nt];
+	MVectorArray localPArray;
 	Geometry::ClosestToPointTestResult cls;
 	for(i=0;i<nt;i++) {
 		MFnTransform ftrans(transforms[i]);
@@ -165,9 +170,59 @@ MStatus SargassoCmd::createNode(const MObjectArray & transforms,
 		tree.closestToPoint(&cls);
 		AHelper::Info<unsigned>(" tri ", cls._icomponent);
 		localPs[i] = wp - trimesh.triangleCenter(cls._icomponent);
+		localPArray.append(MVector(localPs[i].x, localPs[i].y, localPs[i].z));
 		AHelper::Info<Vector3F>(" localp ", cls._hitPoint);
+		bindInds[cls._icomponent] = 1;
 	}
-	
 	delete[] localPs;
+	
+	MDGModifier modif;
+	MObject osarg = modif.createNode("sargassoNode");
+	modif.doIt();
+	MFnDependencyNode fsarg(osarg);
+	MStatus stat;
+	MPlug prestP = fsarg.findPlug("targetRestP", false, &stat);
+	
+	MFnPointArrayData restPData;
+    MObject orestP = restPData.create(ps);
+    prestP.setMObject(orestP);
+    
+	MPlug ptri = fsarg.findPlug("targetTriangle", false, &stat);
+	
+	MFnIntArrayData triData;
+    MObject otri = triData.create(triangleVertices);
+    ptri.setMObject(otri);
+    
+    MPlug plocalP = fsarg.findPlug("objectLocalP", false, &stat);
+	
+	MFnVectorArrayData localPData;
+    MObject olocalP = localPData.create(localPArray);
+    plocalP.setMObject(olocalP);
+	
+	MPlug ptnv = fsarg.findPlug("targetNumV", false, &stat);
+	ptnv.setInt(nv);
+	
+	MPlug ptnt = fsarg.findPlug("targetNumTri", false, &stat);
+	ptnt.setInt(triangleVertices.length());
+	
+	MPlug pobjc = fsarg.findPlug("objectCount", false, &stat);
+	pobjc.setInt(nt);
+	
+	const unsigned nbind = bindInds.size();
+	AHelper::Info<unsigned>(" binded to n triangles: ", nbind);
+	MIntArray bindTris;
+	std::map<unsigned, char>::const_iterator it = bindInds.begin();
+	for(;it!=bindInds.end();++it)
+		bindTris.append(it->first);
+		
+	MPlug pbind = fsarg.findPlug("targetBindId", false, &stat);
+	
+	MFnIntArrayData bindData;
+    MObject obind = bindData.create(bindTris);
+    pbind.setMObject(obind);
+	
+	modif.connect(fmesh.findPlug("worldMesh"), fsarg.findPlug("targetMesh"));
+    modif.doIt();
+	
 	return MS::kSuccess;
 }

@@ -16,3 +16,6 @@
 #include <maya/MDGModifier.h>
 #include <maya/MPxTransform.h>
 #include <maya/MFnNumericAttribute.h>
+#include <maya/MPointArray.h>
+#include <maya/MVectorArray.h>
+#include <maya/MIntArray.h>

@@ -43,7 +43,14 @@ public:
 	static MObject		constraintObjectX;
     static MObject		constraintObjectY;
     static MObject		constraintObjectZ;
-
+	static MObject atargetRestP;
+	static MObject atargetTri;
+	static MObject atargetNv;
+	static MObject atargetNt;
+	static MObject aobjN;
+	static MObject aobjLocal;
+	static MObject atargetBind;
+	static MObject atargetMesh;
 	static	MTypeId		id;
     
 private:

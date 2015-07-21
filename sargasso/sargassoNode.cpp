@@ -1,5 +1,9 @@
 #include "sargassoNode.h"
 #include <maya/MFnMatrixData.h>
+#include <maya/MFnVectorArrayData.h>
+#include <maya/MFnIntArrayData.h>
+#include <maya/MFnPointArrayData.h>
+#include <maya/MFnMeshData.h>
 
 MTypeId     SargassoNode::id( 0x9b1798 );
 MObject     SargassoNode::compoundTarget;  
@@ -19,7 +23,15 @@ MObject		SargassoNode::constraintTargetZ;
 MObject		SargassoNode::constraintObjectX;
 MObject		SargassoNode::constraintObjectY;
 MObject		SargassoNode::constraintObjectZ;
-
+MObject SargassoNode::atargetRestP;
+MObject SargassoNode::atargetTri;
+MObject SargassoNode::atargetNv;
+MObject SargassoNode::atargetNt;
+MObject SargassoNode::aobjN;
+MObject SargassoNode::aobjLocal;
+MObject SargassoNode::atargetBind;
+MObject SargassoNode::atargetMesh;
+	
 SargassoNode::SargassoNode() 
 {
     m_isInitd = false;
@@ -287,6 +299,47 @@ MStatus SargassoNode::initialize()
 	status = attributeAffects( constraintParentInverseMatrix, constraintGeometry );
 	if (!status) { status.perror("attributeAffects"); return status;}
     
+	MPointArray defaultPntArray;
+	MFnPointArrayData pntArrayDataFn;
+	pntArrayDataFn.create( defaultPntArray );
+	
+	atargetRestP = typedAttr.create( "targetRestP", "tgrp", MFnData::kPointArray, pntArrayDataFn.object());
+ 	typedAttr.setStorable(true);
+ 	addAttribute(atargetRestP);
+	
+	MIntArray defaultIntArray;
+	MFnIntArrayData intArrayDataFn;
+	intArrayDataFn.create( defaultIntArray );
+	
+	atargetTri = typedAttr.create( "targetTriangle", "tgtri", MFnData::kIntArray, intArrayDataFn.object());
+ 	typedAttr.setStorable(true);
+ 	addAttribute(atargetTri);
+	
+	atargetBind = typedAttr.create( "targetBindId", "tgbdi", MFnData::kIntArray, intArrayDataFn.object());
+ 	typedAttr.setStorable(true);
+ 	addAttribute(atargetBind);
+	
+	atargetNv = numAttr.create( "targetNumV", "tgnv", MFnNumericData::kInt, 0, &status );
+    addAttribute(atargetNv);
+	
+	atargetNt = numAttr.create( "targetNumTri", "tgnt", MFnNumericData::kInt, 0, &status );
+    addAttribute(atargetNt);
+	
+	MVectorArray defaultVectArray;
+	MFnVectorArrayData vectArrayDataFn;
+	vectArrayDataFn.create( defaultVectArray );
+	
+	aobjLocal = typedAttr.create( "objectLocalP", "oblp", MFnData::kVectorArray, vectArrayDataFn.object());
+ 	typedAttr.setStorable(true);
+ 	addAttribute(aobjLocal);
+	
+	aobjN = numAttr.create( "objectCount", "obct", MFnNumericData::kInt, 0, &status );
+    addAttribute(aobjN);
+	
+	atargetMesh = typedAttr.create("targetMesh", "tgms", MFnMeshData::kMesh, &status);
+	typedAttr.setStorable(false);
+	addAttribute(atargetMesh);
+	
     attributeAffects(targetTransform, constraintTranslateX);
     attributeAffects(targetTransform, constraintTranslateY);
     attributeAffects(targetTransform, constraintTranslateZ);
