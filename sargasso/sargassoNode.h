@@ -9,7 +9,10 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnCompoundAttribute.h>
 #include <maya/MTypes.h>
-
+#include <Vector3F.h>
+class BaseBuffer;
+class ATriangleMesh;
+class TriangleDifference;
 class SargassoNode : public MPxNode
 {
 public:
@@ -22,27 +25,20 @@ public:
 	static  void*		creator();
 	static  MStatus		initialize();
 
+    virtual MStatus connectionMade(const MPlug &plug, const MPlug &otherPlug, bool asSrc);
 public:
-	static MObject		compoundTarget;
+	static MObject		compoundOutput;
     static MObject		targetTransform;
-	static MObject		targetGeometry;
 	static MObject		targetWeight;
     static MObject		targetOffset;
     static MObject		targetRestP;
         
-	static MObject		constraintParentInverseMatrix;
-	static MObject		constraintGeometry;
-// output translation
+	static MObject		aconstraintParentInverseMatrix;
+
     static MObject		constraintTranslateX;
     static MObject		constraintTranslateY;
     static MObject		constraintTranslateZ;
 	
-	static MObject		constraintTargetX;
-    static MObject		constraintTargetY;
-    static MObject		constraintTargetZ;
-	static MObject		constraintObjectX;
-    static MObject		constraintObjectY;
-    static MObject		constraintObjectZ;
 	static MObject atargetRestP;
 	static MObject atargetTri;
 	static MObject atargetNv;
@@ -52,9 +48,14 @@ public:
 	static MObject atargetBind;
 	static MObject atargetMesh;
 	static	MTypeId		id;
-    
 private:
+    bool creatRestShape(const MObject & m);
+    Vector3F * localP();
+private:
+    ATriangleMesh * m_mesh;
+    TriangleDifference * m_diff;
     MPoint m_restPos;
 	MVector m_offsetToRest;
+    BaseBuffer * m_localP;
 	bool m_isInitd;
 };

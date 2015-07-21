@@ -102,4 +102,11 @@ void TriangleDifference::requireQ(AGenericMesh * m)
     std::map<unsigned, unsigned>::const_iterator it = inds.begin();
     for(;it!=inds.end();++it) b[it->first] = 1;
 }
+
+void TriangleDifference::requireQ(const std::vector<unsigned> & v)
+{
+    unsigned * b = binded();
+    std::vector<unsigned>::const_iterator it = v.begin();
+    for(;it!=v.end();++it) b[*it] = 1;
+}
 //:~

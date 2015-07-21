@@ -14,7 +14,7 @@
 MStatus initializePlugin( MObject obj )
 { 
 	MStatus   status;
-	MFnPlugin plugin( obj, "Zhang Jian", "0.0.1", "Any");
+	MFnPlugin plugin( obj, "Zhang Jian", "0.0.1 Tue Jul 21 16:49:44 CST 2015 first", "Any");
 
 	status = plugin.registerNode( "sargassoNode", SargassoNode::id, SargassoNode::creator,
 		SargassoNode::initialize );
@@ -44,9 +44,9 @@ MStatus uninitializePlugin( MObject obj)
 		return status;
 	}
 
-	status = plugin.deregisterConstraintCommand( "sargasso" );
+	status = plugin.deregisterCommand( "sargasso" );
 	if (!status) {
-		status.perror("deregisterNode");
+		status.perror("deregisterCmd");
 		return status;
 	}
 

@@ -162,16 +162,16 @@ MStatus SargassoCmd::createNode(const MObjectArray & transforms,
 		t *= wtm;
 		
 		Vector3F wp(t.x, t.y, t.z);
-		AHelper::Info<unsigned>(" trans ", i);
-		AHelper::Info<Vector3F>(" worldp ", wp);
+		//AHelper::Info<unsigned>(" trans ", i);
+		//AHelper::Info<Vector3F>(" worldp ", wp);
 		
 		cls.reset(wp, 1e8f);
 		
 		tree.closestToPoint(&cls);
-		AHelper::Info<unsigned>(" tri ", cls._icomponent);
+		//AHelper::Info<unsigned>(" tri ", cls._icomponent);
 		localPs[i] = wp - trimesh.triangleCenter(cls._icomponent);
 		localPArray.append(MVector(localPs[i].x, localPs[i].y, localPs[i].z));
-		AHelper::Info<Vector3F>(" localp ", cls._hitPoint);
+		//AHelper::Info<Vector3F>(" localp ", cls._hitPoint);
 		bindInds[cls._icomponent] = 1;
 	}
 	delete[] localPs;
@@ -221,8 +221,41 @@ MStatus SargassoCmd::createNode(const MObjectArray & transforms,
     MObject obind = bindData.create(bindTris);
     pbind.setMObject(obind);
 	
-	modif.connect(fmesh.findPlug("worldMesh"), fsarg.findPlug("targetMesh"));
-    modif.doIt();
-	
+    MPlug pwm = fmesh.findPlug("worldMesh");
+    MPlug ptm = fsarg.findPlug("targetMesh");
+    MGlobal::executeCommand(MString("connectAttr -f ") +
+                            pwm.name() +
+                            MString("[0] ") +
+                            ptm.name());
+
+    for(i=0;i<nt;i++) {
+        MFnTransform ftrans(transforms[i]);
+        MGlobal::executeCommand(MString("connectAttr -f ") +
+                            ftrans.name() +
+                            MString(".parentInverseMatrix[0] ") +
+                            fsarg.name() +
+                            MString(".constraintParentInvMat[") +
+                            i +
+                            MString("]"));
+        MString ov = fsarg.name() +
+                            MString(".outValue[") +
+                            i +
+                            MString("]");
+        MGlobal::executeCommand(MString("connectAttr -f ") +
+                            ov +
+                            MString(".ctx ") +
+                            ftrans.name() +
+                            MString(".tx "));
+        MGlobal::executeCommand(MString("connectAttr -f ") +
+                            ov +
+                            MString(".cty ") +
+                            ftrans.name() +
+                            MString(".ty "));
+        MGlobal::executeCommand(MString("connectAttr -f ") +
+                            ov +
+                            MString(".ctz ") +
+                            ftrans.name() +
+                            MString(".tz "));
+    }
 	return MS::kSuccess;
 }

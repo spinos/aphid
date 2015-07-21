@@ -14,7 +14,7 @@ Geometry::~Geometry() {}
 const unsigned Geometry::numComponents() const 
 { return 0; }
 
-BoundingBox const Geometry::calculateBBox() const 
+const BoundingBox Geometry::calculateBBox() const 
 { return BoundingBox(); }
 
 const BoundingBox Geometry::calculateBBox(unsigned icomponent) const

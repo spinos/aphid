@@ -60,5 +60,9 @@ public:
 	void verbose() const;
 	void verbose(const char * pref) const;
 	const std::string str() const;
+    friend std::ostream& operator<<(std::ostream &output, const BoundingBox & p) {
+        output << p.str();
+        return output;
+    }
 	float m_data[8];
 };

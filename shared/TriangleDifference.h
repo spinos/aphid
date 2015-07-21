@@ -16,6 +16,7 @@ public:
 	virtual ~TriangleDifference();
 	
     void requireQ(AGenericMesh * m);
+    void requireQ(const std::vector<unsigned> & v);
 	void computeQ(ATriangleMesh * mesh);
 	Matrix33F * Q();
 protected:
