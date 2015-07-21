@@ -27,13 +27,16 @@ MObject SargassoNode::aobjN;
 MObject SargassoNode::aobjLocal;
 MObject SargassoNode::atargetBind;
 MObject SargassoNode::atargetMesh;
-	
+MObject SargassoNode::aobjTri;
+
 SargassoNode::SargassoNode() 
 {
     m_isInitd = false;
     m_mesh = new ATriangleMesh;
     m_diff = 0;
     m_localP = new BaseBuffer;
+    m_triId = new BaseBuffer;
+    m_numObjects = 0;
 }
 
 SargassoNode::~SargassoNode() 
@@ -41,6 +44,7 @@ SargassoNode::~SargassoNode()
     delete m_mesh;
     if(m_diff) delete m_diff;
     delete m_localP;
+    delete m_triId;
 }
 
 void SargassoNode::postConstructor()
@@ -49,9 +53,51 @@ void SargassoNode::postConstructor()
 
 MStatus SargassoNode::compute( const MPlug& plug, MDataBlock& block )
 {	
-	MStatus returnStatus;
-/* 
-    if(plug == constraintTranslateX || plug == constraintTranslateY || plug == constraintTranslateZ) {
+	MStatus stat;
+
+    if(plug == constraintTranslateX || 
+        plug == constraintTranslateY ||
+        plug == constraintTranslateZ) {
+         // AHelper::Info<MString>("compute plug", plug.parent().name());
+         // AHelper::Info<unsigned>("ov id", plug.parent().logicalIndex());
+         unsigned iobject = plug.parent().logicalIndex();
+         if(iobject > m_numObjects-1) {
+             MGlobal::displayInfo("n constraint is out of bound");
+             return MS::kSuccess;
+         }
+         
+         if(iobject == 0 && plug == constraintTranslateX) {
+             MDataHandle hm = block.inputValue(atargetMesh);
+             updateShape(hm.asMesh());
+         }
+         
+         unsigned itri = objectTriangleInd()[iobject];
+         
+         const Vector3F objectP = localP()[iobject];
+         
+         Matrix33F q = m_diff->Q()[itri];
+         q.orthoNormalize();
+         const Vector3F t = m_mesh->triangleCenter(itri);
+         Matrix44F sp;
+         sp.setRotation(q);
+		 sp.setTranslation(t);
+         Vector3F solvedT = sp.transform(objectP);
+         
+         MDataHandle hout = block.outputValue(plug, &stat);
+         if(!stat) AHelper::Info<MString>("cannot get output value", plug.parent().name());
+             
+         if(plug == constraintTranslateX) {
+             hout.set((double)solvedT.x);
+         }
+         else if(plug == constraintTranslateY) {
+             hout.set((double)solvedT.y);
+         }
+         else if(plug == constraintTranslateZ) {
+             hout.set((double)solvedT.z);
+         }
+         block.setClean( plug );
+    }
+/*
         if(!m_isInitd) {
 // read rest position
             MDataHandle htgo = block.inputValue(targetRestP);
@@ -124,11 +170,11 @@ MStatus SargassoNode::compute( const MPlug& plug, MDataBlock& block )
 		//MObject offsetData = nd.create( MFnNumericData::k3Double);
         //nd.setData3Double(m_lastPos.x, m_lastPos.y, m_lastPos.z);
         //MPlug pgTgo(thisMObject(), targetOffset);
-        //pgTgo.setValue(offsetData); 
-    }
+        //pgTgo.setValue(offsetData);
+*/
 	else
 		return MS::kUnknownParameter;
-*/
+
 	return MS::kSuccess;
 }
 
@@ -238,6 +284,10 @@ MStatus SargassoNode::initialize()
 	atargetBind = typedAttr.create( "targetBindId", "tgbdi", MFnData::kIntArray, intArrayDataFn.object());
  	typedAttr.setStorable(true);
  	addAttribute(atargetBind);
+    
+    aobjTri = typedAttr.create( "objectTriId", "obti", MFnData::kIntArray, intArrayDataFn.object());
+ 	typedAttr.setStorable(true);
+ 	addAttribute(aobjTri);
 	
 	atargetNv = numAttr.create( "targetNumV", "tgnv", MFnNumericData::kInt, 0, &status );
     addAttribute(atargetNv);
@@ -260,9 +310,8 @@ MStatus SargassoNode::initialize()
 	typedAttr.setStorable(false);
 	addAttribute(atargetMesh);
 	
-    //attributeAffects(targetTransform, constraintTranslateX);
-    //attributeAffects(targetTransform, constraintTranslateY);
-    //attributeAffects(targetTransform, constraintTranslateZ);
+    attributeAffects(atargetMesh, compoundOutput);
+    attributeAffects(aconstraintParentInverseMatrix, compoundOutput);
 
 	return MS::kSuccess;
 }
@@ -362,17 +411,54 @@ bool SargassoNode::creatRestShape(const MObject & m)
     pobjLocal.getValue(oobjLocal);
     MFnVectorArrayData fobjLocal(oobjLocal);
     MVectorArray localPArray = fobjLocal.array();
-    const unsigned nlocalP = localPArray.length();
-    AHelper::Info<unsigned>("n constrained objects", nlocalP);
+    m_numObjects = localPArray.length();
+    AHelper::Info<unsigned>("n constrained objects", m_numObjects);
     
-    m_localP->create(nlocalP * 12);
+    m_localP->create(m_numObjects * 12);
     
     Vector3F * lp = localP();
-    for(i=0;i<nlocalP;i++) lp[i].set(localPArray[i].x, localPArray[i].y, localPArray[i].z);
+    for(i=0;i<m_numObjects;i++) lp[i].set(localPArray[i].x, localPArray[i].y, localPArray[i].z);
     
+    m_triId->create(m_numObjects * 4);
+    
+    MPlug pobjtri(thisObj, aobjTri);
+    MObject oobjtri;
+    pobjtri.getValue(oobjtri);
+    MFnIntArrayData fobjtri(oobjtri);
+    MIntArray objtriArray = fobjtri.array();
+    
+    unsigned * tri = objectTriangleInd();
+    for(i=0;i<m_numObjects;i++) tri[i] = objtriArray[i];
+        
+    return true;
+}
+
+bool SargassoNode::updateShape(const MObject & m)
+{
+    MStatus stat;
+    MFnMesh fmesh(m, &stat);
+    if(!stat) {
+        MGlobal::displayInfo("val is not mesh");
+        return false;
+    }
+    
+    MPointArray ps;
+	fmesh.getPoints(ps, MSpace::kWorld);
+	
+    const unsigned n = m_mesh->numPoints();
+    Vector3F * p = m_mesh->points();
+    unsigned i=0;
+    for(;i<n;i++) p[i].set(ps[i].x, ps[i].y, ps[i].z);
+    
+    m_diff->computeQ(m_mesh);
+    
+   // MGlobal::displayInfo("update mesh");
     return true;
 }
 
 Vector3F * SargassoNode::localP()
 { return (Vector3F *)m_localP->data(); }
+
+unsigned * SargassoNode::objectTriangleInd()
+{ return (unsigned *)m_triId->data(); }
 //:~

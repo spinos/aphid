@@ -45,17 +45,22 @@ public:
 	static MObject atargetNt;
 	static MObject aobjN;
 	static MObject aobjLocal;
+    static MObject aobjTri;
 	static MObject atargetBind;
 	static MObject atargetMesh;
 	static	MTypeId		id;
 private:
     bool creatRestShape(const MObject & m);
+    bool updateShape(const MObject & m);
     Vector3F * localP();
+    unsigned * objectTriangleInd();
 private:
     ATriangleMesh * m_mesh;
     TriangleDifference * m_diff;
     MPoint m_restPos;
 	MVector m_offsetToRest;
     BaseBuffer * m_localP;
+    BaseBuffer * m_triId;
+    int m_numObjects;
 	bool m_isInitd;
 };

@@ -152,6 +152,7 @@ MStatus SargassoCmd::createNode(const MObjectArray & transforms,
 	std::map<unsigned, char> bindInds;
 	Vector3F * localPs = new Vector3F[nt];
 	MVectorArray localPArray;
+    MIntArray objTriArray;
 	Geometry::ClosestToPointTestResult cls;
 	for(i=0;i<nt;i++) {
 		MFnTransform ftrans(transforms[i]);
@@ -173,6 +174,7 @@ MStatus SargassoCmd::createNode(const MObjectArray & transforms,
 		localPArray.append(MVector(localPs[i].x, localPs[i].y, localPs[i].z));
 		//AHelper::Info<Vector3F>(" localp ", cls._hitPoint);
 		bindInds[cls._icomponent] = 1;
+        objTriArray.append(cls._icomponent);
 	}
 	delete[] localPs;
 	
@@ -220,6 +222,12 @@ MStatus SargassoCmd::createNode(const MObjectArray & transforms,
 	MFnIntArrayData bindData;
     MObject obind = bindData.create(bindTris);
     pbind.setMObject(obind);
+    
+    MPlug pobjtri = fsarg.findPlug("objectTriId", false, &stat);
+	
+	MFnIntArrayData objtriData;
+    MObject oobjtri = objtriData.create(objTriArray);
+    pobjtri.setMObject(oobjtri);
 	
     MPlug pwm = fmesh.findPlug("worldMesh");
     MPlug ptm = fsarg.findPlug("targetMesh");
