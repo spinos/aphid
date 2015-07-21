@@ -14,7 +14,7 @@
 MStatus initializePlugin( MObject obj )
 { 
 	MStatus   status;
-	MFnPlugin plugin( obj, "Zhang Jian", "0.0.2 Tue Jul 21 20:18:32 CST 2015 first", "Any");
+	MFnPlugin plugin( obj, "Zhang Jian", "0.0.3 Tue Jul 22 00:22:32 CST 2015 first", "Any");
 
 	status = plugin.registerNode( "sargassoNode", SargassoNode::id, SargassoNode::creator,
 		SargassoNode::initialize );

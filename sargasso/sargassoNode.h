@@ -49,13 +49,13 @@ public:
 private:
     bool creatRestShape(const MObject & m);
     bool updateShape(const MObject & m);
+	void updateSpace(MDataBlock& block, unsigned idx);
     Vector3F * localP();
     unsigned * objectTriangleInd();
 private:
+	MMatrix m_currentSpace;
     ATriangleMesh * m_mesh;
     TriangleDifference * m_diff;
-    MPoint m_restPos;
-	MVector m_offsetToRest;
     BaseBuffer * m_localP;
     BaseBuffer * m_triId;
     int m_numObjects;

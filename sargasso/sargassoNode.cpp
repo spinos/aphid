@@ -6,6 +6,7 @@
 #include <maya/MFnMeshData.h>
 #include <maya/MFnMesh.h>
 #include <maya/MFnUnitAttribute.h>
+#include <maya/MFnMatrixAttribute.h>
 #include <maya/MTransformationMatrix.h>
 #include <AHelper.h>
 #include <ATriangleMesh.h>
@@ -38,6 +39,7 @@ SargassoNode::SargassoNode()
     m_localP = new BaseBuffer;
     m_triId = new BaseBuffer;
     m_numObjects = 0;
+	m_currentSpace = MMatrix::identity;
 }
 
 SargassoNode::~SargassoNode() 
@@ -62,7 +64,7 @@ MStatus SargassoNode::compute( const MPlug& plug, MDataBlock& block )
         plug == constraintTranslateX || 
         plug == constraintTranslateY ||
         plug == constraintTranslateZ) {
-         
+         // AHelper::Info<MString>("ov child", plug.name());
          // AHelper::Info<unsigned>("ov id", plug.parent().logicalIndex());
          unsigned iobject = plug.parent().logicalIndex();
          if(iobject > m_numObjects-1) {
@@ -74,38 +76,30 @@ MStatus SargassoNode::compute( const MPlug& plug, MDataBlock& block )
              MDataHandle hm = block.inputValue(atargetMesh);
              updateShape(hm.asMesh());
          }
+		 
+		 if(plug == constraintRotateX)
+			updateSpace(block, iobject);
          
-         unsigned itri = objectTriangleInd()[iobject];
+		const Vector3F objectP = localP()[iobject];
          
-         const Vector3F objectP = localP()[iobject];
+		 MPoint tran(objectP.x, objectP.y, objectP.z);
+		 MPoint solvedT = tran * m_currentSpace;
          
-         Matrix33F q = m_diff->Q()[itri];
-         q.orthoNormalize();
-         const Vector3F t = m_mesh->triangleCenter(itri);
-         Matrix44F sp;
-         sp.setRotation(q);
-		 sp.setTranslation(t);
-         Vector3F solvedT = sp.transform(objectP);
-         
-         MMatrix mat;
-         AHelper::ConvertToMMatrix(mat, sp);
-         MTransformationMatrix mtm(mat);
-         
+		 MTransformationMatrix mtm(m_currentSpace);
          double rot[3];
          MTransformationMatrix::RotationOrder rotorder =  MTransformationMatrix::kXYZ;
          mtm.getRotation(rot, rotorder);
          
          MDataHandle hout = block.outputValue(plug, &stat);
-         if(!stat) AHelper::Info<MString>("cannot get output value", plug.parent().name());
              
          if(plug == constraintTranslateX) {
-             hout.set((double)solvedT.x);
+             hout.set(solvedT.x);
          }
          else if(plug == constraintTranslateY) {
-             hout.set((double)solvedT.y);
+             hout.set(solvedT.y);
          }
          else if(plug == constraintTranslateZ) {
-             hout.set((double)solvedT.z);
+             hout.set(solvedT.z);
          }
          else if(plug == constraintRotateX) {
              hout.set(rot[0]);
@@ -136,14 +130,14 @@ MStatus SargassoNode::initialize()
 
 	MFnTypedAttribute typedAttr;
     
-    MFnTypedAttribute pimAttr;
-    aconstraintParentInverseMatrix = pimAttr.create( "constraintParentInvMat", "cpim", MFnData::kMatrix, &status );
+    MFnMatrixAttribute pimAttr;
+    aconstraintParentInverseMatrix = pimAttr.create( "constraintParentInvMat", "cpim", MFnMatrixAttribute::kDouble, &status );
     pimAttr.setArray(true);	
     pimAttr.setStorable(false);	
     pimAttr.setDisconnectBehavior(MFnAttribute::kDelete);
 	
     status = addAttribute(aconstraintParentInverseMatrix);
-	if (!status) { status.perror("addAttribute"); return status;}
+	if (!status) { status.perror("addAttribute parent inverse matrix"); return status;}
     
     MFnNumericAttribute numAttr;
     constraintTranslateX = numAttr.create( "constraintTranslateX", "ctx", MFnNumericData::kDouble, 0.0, &status );
@@ -393,6 +387,31 @@ bool SargassoNode::updateShape(const MObject & m)
     
    // MGlobal::displayInfo("update mesh");
     return true;
+}
+
+void SargassoNode::updateSpace(MDataBlock& block, unsigned idx)
+{
+	MStatus stat;
+	MArrayDataHandle hparentspaces = block.inputArrayValue(aconstraintParentInverseMatrix, &stat);
+	// if(!stat) MGlobal::displayInfo("cannot input array");
+	stat = hparentspaces.jumpToElement(idx);
+	//if(!stat) AHelper::Info<unsigned>("cannot jump to elm", iobject);
+	MDataHandle hspace = hparentspaces.inputValue(&stat);
+	// if(!stat) MGlobal::displayInfo("cannot input single");
+	const MMatrix parentSpace = hspace.asMatrix();
+	
+	const unsigned itri = objectTriangleInd()[idx];
+         
+	Matrix33F q = m_diff->Q()[itri];
+	q.orthoNormalize();
+	const Vector3F t = m_mesh->triangleCenter(itri);
+	Matrix44F sp;
+	sp.setRotation(q);
+	sp.setTranslation(t);
+
+    AHelper::ConvertToMMatrix(m_currentSpace, sp);
+	m_currentSpace *= parentSpace;
+	// AHelper::PrintMatrix("parent inv", m_currentSpace);
 }
 
 Vector3F * SargassoNode::localP()
