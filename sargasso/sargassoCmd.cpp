@@ -264,6 +264,21 @@ MStatus SargassoCmd::createNode(const MObjectArray & transforms,
                             MString(".ctz ") +
                             ftrans.name() +
                             MString(".tz "));
+        MGlobal::executeCommand(MString("connectAttr -f ") +
+                            ov +
+                            MString(".crx ") +
+                            ftrans.name() +
+                            MString(".rx "));
+        MGlobal::executeCommand(MString("connectAttr -f ") +
+                            ov +
+                            MString(".cry ") +
+                            ftrans.name() +
+                            MString(".ry "));
+        MGlobal::executeCommand(MString("connectAttr -f ") +
+                            ov +
+                            MString(".crz ") +
+                            ftrans.name() +
+                            MString(".rz "));
     }
 	return MS::kSuccess;
 }

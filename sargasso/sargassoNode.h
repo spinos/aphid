@@ -27,17 +27,14 @@ public:
 
     virtual MStatus connectionMade(const MPlug &plug, const MPlug &otherPlug, bool asSrc);
 public:
-	static MObject		compoundOutput;
-    static MObject		targetTransform;
-	static MObject		targetWeight;
-    static MObject		targetOffset;
-    static MObject		targetRestP;
-        
+	static MObject		compoundOutput;        
 	static MObject		aconstraintParentInverseMatrix;
-
     static MObject		constraintTranslateX;
     static MObject		constraintTranslateY;
     static MObject		constraintTranslateZ;
+    static MObject		constraintRotateX;
+    static MObject		constraintRotateY;
+    static MObject		constraintRotateZ;
 	
 	static MObject atargetRestP;
 	static MObject atargetTri;

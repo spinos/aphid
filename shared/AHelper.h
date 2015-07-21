@@ -37,6 +37,7 @@
 #include <maya/MItMeshPolygon.h>
 #include <maya/MPlugArray.h>
 #include <maya/MFnTransform.h>
+#include <Matrix44F.h>
 #include <sstream>
 class AHelper
 {
@@ -136,5 +137,6 @@ public:
 	}
     
     static void PrintMatrix(const std::string & note, const MMatrix & mat);
+    static void ConvertToMMatrix(MMatrix & dst, const Matrix44F & src);
 };
 #endif

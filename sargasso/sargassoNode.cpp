@@ -5,20 +5,21 @@
 #include <maya/MFnPointArrayData.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MFnMesh.h>
+#include <maya/MFnUnitAttribute.h>
+#include <maya/MTransformationMatrix.h>
 #include <AHelper.h>
 #include <ATriangleMesh.h>
 #include <TriangleDifference.h>
 #include <BaseBuffer.h>
 MTypeId     SargassoNode::id( 0x9b1798 );
-MObject     SargassoNode::compoundOutput;  
-MObject		SargassoNode::targetTransform;      
-MObject     SargassoNode::targetWeight;    
-MObject		SargassoNode::targetOffset;
-MObject		SargassoNode::targetRestP;
+MObject     SargassoNode::compoundOutput;
 MObject     SargassoNode::aconstraintParentInverseMatrix;       
 MObject		SargassoNode::constraintTranslateX;
 MObject		SargassoNode::constraintTranslateY;
 MObject		SargassoNode::constraintTranslateZ;
+MObject	SargassoNode::constraintRotateX;
+MObject	SargassoNode::constraintRotateY;
+MObject	SargassoNode::constraintRotateZ;
 MObject SargassoNode::atargetRestP;
 MObject SargassoNode::atargetTri;
 MObject SargassoNode::atargetNv;
@@ -54,11 +55,14 @@ void SargassoNode::postConstructor()
 MStatus SargassoNode::compute( const MPlug& plug, MDataBlock& block )
 {	
 	MStatus stat;
-
-    if(plug == constraintTranslateX || 
+    
+    if(plug == constraintRotateX || 
+        plug == constraintRotateY ||
+        plug == constraintRotateZ ||
+        plug == constraintTranslateX || 
         plug == constraintTranslateY ||
         plug == constraintTranslateZ) {
-         // AHelper::Info<MString>("compute plug", plug.parent().name());
+         
          // AHelper::Info<unsigned>("ov id", plug.parent().logicalIndex());
          unsigned iobject = plug.parent().logicalIndex();
          if(iobject > m_numObjects-1) {
@@ -66,7 +70,7 @@ MStatus SargassoNode::compute( const MPlug& plug, MDataBlock& block )
              return MS::kSuccess;
          }
          
-         if(iobject == 0 && plug == constraintTranslateX) {
+         if(iobject == 0 && plug == constraintRotateX) {
              MDataHandle hm = block.inputValue(atargetMesh);
              updateShape(hm.asMesh());
          }
@@ -83,6 +87,14 @@ MStatus SargassoNode::compute( const MPlug& plug, MDataBlock& block )
 		 sp.setTranslation(t);
          Vector3F solvedT = sp.transform(objectP);
          
+         MMatrix mat;
+         AHelper::ConvertToMMatrix(mat, sp);
+         MTransformationMatrix mtm(mat);
+         
+         double rot[3];
+         MTransformationMatrix::RotationOrder rotorder =  MTransformationMatrix::kXYZ;
+         mtm.getRotation(rot, rotorder);
+         
          MDataHandle hout = block.outputValue(plug, &stat);
          if(!stat) AHelper::Info<MString>("cannot get output value", plug.parent().name());
              
@@ -95,83 +107,17 @@ MStatus SargassoNode::compute( const MPlug& plug, MDataBlock& block )
          else if(plug == constraintTranslateZ) {
              hout.set((double)solvedT.z);
          }
+         else if(plug == constraintRotateX) {
+             hout.set(rot[0]);
+         }
+         else if(plug == constraintRotateY) {
+             hout.set(rot[1]);
+         }
+         else if(plug == constraintRotateZ) {
+             hout.set(rot[2]);
+         }
          block.setClean( plug );
     }
-/*
-        if(!m_isInitd) {
-// read rest position
-            MDataHandle htgo = block.inputValue(targetRestP);
-            double3 & tgo = htgo.asDouble3();
-            MGlobal::displayInfo(MString("target rest p ")+tgo[0]+" "+tgo[1]+" "+tgo[2]);
-            m_restPos = MPoint(tgo[0],tgo[1],tgo[2]);
-			m_isInitd = true;
-		}
-		
-		MArrayDataHandle targetArray = block.inputArrayValue( compoundOutput );
-		const unsigned int targetArrayCount = targetArray.elementCount();
-        MMatrix tm;
-        tm.setToIdentity();
-        unsigned int i;
-		for ( i = 0; i < targetArrayCount; i++ ) {
-            MDataHandle targetElement = targetArray.inputValue(&returnStatus);
-            if(!returnStatus) {
-                MGlobal::displayInfo("failed to get input value target element");
-            }
-            MDataHandle htm = targetElement.child(targetTransform);
-            MFnMatrixData ftm(htm.data(), &returnStatus);
-            if(!returnStatus) {
-                MGlobal::displayInfo("failed to get matrix data");
-            }
-            tm = ftm.matrix();
-            targetArray.next();
-        }
-		
-		MDataHandle hparentInvMat = block.inputValue(aconstraintParentInverseMatrix);
-		MMatrix parentInvMat = hparentInvMat.asMatrix();
-
-// world position
-        MPoint curPos(tm(3,0), tm(3,1), tm(3,2));
-// offset in local space
-		m_offsetToRest = m_restPos - curPos;
-// object position in world space
-		MPoint localP = m_offsetToRest * tm + curPos;
-// in local space
-		localP *= parentInvMat;
-
-        MDataHandle hout;
-        if(plug == constraintTranslateX) {
-            hout = block.outputValue(constraintTranslateX);
-			hout.set(localP.x);
-        }
-        else if(plug == constraintTranslateY) {
-            hout = block.outputValue(constraintTranslateY);
-			hout.set(localP.y);
-        }
-        else if(plug == constraintTranslateZ) {
-            hout = block.outputValue(constraintTranslateZ);
-			hout.set(localP.z);
-        }
-		
-		//MPlug pgTx(thisMObject(), constraintTargetX);
-		//pgTx.setValue(m_lastPos.x);
-		//MPlug pgTy(thisMObject(), constraintTargetY);
-		//pgTy.setValue(m_lastPos.y);
-		//MPlug pgTz(thisMObject(), constraintTargetZ);
-		//pgTz.setValue(m_lastPos.z);
-		
-		MPlug pgOx(thisMObject(), constraintObjectX);
-		pgOx.setValue(m_offsetToRest.x);
-		MPlug pgOy(thisMObject(), constraintObjectY);
-		pgOy.setValue(m_offsetToRest.y);
-		MPlug pgOz(thisMObject(), constraintObjectZ);
-		pgOz.setValue(m_offsetToRest.z);
-        
-       // MFnNumericData nd;
-		//MObject offsetData = nd.create( MFnNumericData::k3Double);
-        //nd.setData3Double(m_lastPos.x, m_lastPos.y, m_lastPos.z);
-        //MPlug pgTgo(thisMObject(), targetOffset);
-        //pgTgo.setValue(offsetData);
-*/
 	else
 		return MS::kUnknownParameter;
 
@@ -188,9 +134,6 @@ MStatus SargassoNode::initialize()
 	MFnNumericAttribute nAttr;
 	MStatus				status;
 
-	// constraint attributes
-
-// Parent inverse matrix: delete on disconnect
 	MFnTypedAttribute typedAttr;
     
     MFnTypedAttribute pimAttr;
@@ -202,23 +145,6 @@ MStatus SargassoNode::initialize()
     status = addAttribute(aconstraintParentInverseMatrix);
 	if (!status) { status.perror("addAttribute"); return status;}
     
-    targetTransform = typedAttr.create( "targetTransform", "ttm", MFnData::kMatrix, &status ); 	
-    if (!status) { status.perror("typedAttr.create:targetTransform"); return status;}
-    status = typedAttr.setDisconnectBehavior(MFnAttribute::kDelete);
-    if (!status) { status.perror("typedAttr.setDisconnectBehavior:targetTransform"); return status;}
-    
-// Target weight: double, min 0, default 1.0, keyable, delete on disconnect
-	MFnNumericAttribute typedAttrKeyable;
-		SargassoNode::targetWeight 
-			= typedAttrKeyable.create( "weight", "wt", MFnNumericData::kDouble, 1.0, &status );
-		if (!status) { status.perror("typedAttrKeyable.create:weight"); return status;}
-		status = typedAttrKeyable.setMin( (double) 0 );
-		if (!status) { status.perror("typedAttrKeyable.setMin"); return status;}
-		status = typedAttrKeyable.setKeyable( true );
-		if (!status) { status.perror("typedAttrKeyable.setKeyable"); return status;}
-		status = typedAttrKeyable.setDisconnectBehavior(MFnAttribute::kDelete);
-		if (!status) { status.perror("typedAttrKeyable.setDisconnectBehavior:cgeom"); return status;}
-
     MFnNumericAttribute numAttr;
     constraintTranslateX = numAttr.create( "constraintTranslateX", "ctx", MFnNumericData::kDouble, 0.0, &status );
     if(!status) {
@@ -238,6 +164,25 @@ MStatus SargassoNode::initialize()
         return status;
     }
     
+    MFnUnitAttribute angleAttr;
+    constraintRotateX = angleAttr.create( "constraintRotateX", "crx", MFnUnitAttribute::kAngle , 0.0, &status );
+    if(!status) {
+        MGlobal::displayInfo("failed to create attrib constraintRotateX");
+        return status;
+    }
+    
+    constraintRotateY = angleAttr.create( "constraintRotateY", "cry", MFnUnitAttribute::kAngle , 0.0, &status );
+    if(!status) {
+        MGlobal::displayInfo("failed to create attrib constraintRotateY");
+        return status;
+    }
+    
+    constraintRotateZ = angleAttr.create( "constraintRotateZ", "crz", MFnUnitAttribute::kAngle , 0.0, &status );
+    if(!status) {
+        MGlobal::displayInfo("failed to create attrib constraintRotateY");
+        return status;
+    }
+    
 	{	// Compound target(geometry,weight): array, delete on disconnect
 		MFnCompoundAttribute compoundAttr;
 		compoundOutput = compoundAttr.create( "outValue", "otv",&status );
@@ -248,19 +193,13 @@ MStatus SargassoNode::initialize()
 		if (!status) { status.perror("compoundAttr.addChild ty"); return status;}
 		status = compoundAttr.addChild( constraintTranslateZ );
 		if (!status) { status.perror("compoundAttr.addChild tz"); return status;}
-		
+		compoundAttr.addChild( constraintRotateX );
+        compoundAttr.addChild( constraintRotateY );
+        compoundAttr.addChild( constraintRotateZ );
         compoundAttr.setArray( true );
 		//status = compoundAttr.setDisconnectBehavior(MFnAttribute::kDelete);
 		//if (!status) { status.perror("typedAttrKeyable.setDisconnectBehavior:cgeom"); return status;}
 	}
-
-    targetOffset = numAttr.create("targetOffset", "tgo", MFnNumericData::k3Double, 0.0, &status);
-    if (!status) { status.perror("addAttribute targetOffset"); return status;}
-    addAttribute(targetOffset);
-    
-    targetRestP = numAttr.create("targetRestAt", "tgrt", MFnNumericData::k3Double, 0.0, &status);
-    if (!status) { status.perror("addAttribute targetRestAt"); return status;}
-    addAttribute(targetRestP);
 
 	status = addAttribute( compoundOutput );
 	if (!status) { status.perror("addAttribute"); return status;}
