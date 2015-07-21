@@ -47,16 +47,22 @@ MStatus SargassoCmd::parseArgs(const MArgList &args)
 	
 	if(argData.isFlagSet("-h")) m_mode = WHelp;
 	
-	return MS::kUnknownParameter;
+	return MS::kSuccess;
 }
 
 MStatus SargassoCmd::doIt(const MArgList &argList)
 {
-	MStatus ReturnStatus;
+	MStatus status;
+	status = parseArgs(argList);
+	if (!status)
+		return status;
+	
+	return redoIt();
+}
 
-	if ( MS::kFailure == parseArgs(argList) )
-		return MS::kFailure;
-		
+MStatus	SargassoCmd::redoIt()
+{
+	m_sarg = MObject::kNullObj;
 	if(m_mode == WHelp) return printHelp();
 	
 	MSelectionList selList;
@@ -94,9 +100,15 @@ MStatus SargassoCmd::doIt(const MArgList &argList)
 		return printHelp();
 	}
 	
-	createNode(transforms, targetMesh);
+	m_sarg = createNode(transforms, targetMesh);
     
-	return MS::kUnknownParameter;
+	return MS::kSuccess;
+}
+
+MStatus	SargassoCmd::undoIt()
+{
+	MStatus stat = MGlobal::deleteNode(m_sarg);
+	return stat;
 }
 
 MStatus SargassoCmd::printHelp()
@@ -109,7 +121,7 @@ MStatus SargassoCmd::printHelp()
 	return MS::kSuccess;
 }
 
-MStatus SargassoCmd::createNode(const MObjectArray & transforms,
+MObject SargassoCmd::createNode(const MObjectArray & transforms,
 					const MObject & targetMesh)
 {
 	MFnMesh fmesh(targetMesh);
@@ -280,5 +292,9 @@ MStatus SargassoCmd::createNode(const MObjectArray & transforms,
                             ftrans.name() +
                             MString(".rz "));
     }
-	return MS::kSuccess;
+	setResult(fsarg.name());
+	return osarg;
 }
+
+bool SargassoCmd::isUndoable() const
+{ return true; }
