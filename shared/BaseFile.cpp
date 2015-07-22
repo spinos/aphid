@@ -28,7 +28,8 @@ BaseFile::BaseFile(const char * name)
 	m_dirty = 0;
 }
 
-BaseFile::~BaseFile() {}
+BaseFile::~BaseFile() 
+{ close(); }
 
 bool BaseFile::clear()
 {

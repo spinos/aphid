@@ -12,6 +12,7 @@
 #include <iostream>
 HFile::HFile() : BaseFile() {}
 HFile::HFile(const char * name) : BaseFile(name) {}
+HFile::~HFile() {}
 
 bool HFile::doCreate(const std::string & fileName)
 {

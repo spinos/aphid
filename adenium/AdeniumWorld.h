@@ -2,6 +2,7 @@
 #define ADENIUMWORLD_H
 #include <gl_heads.h>
 #include <Matrix44F.h>
+
 class BvhTriangleSystem;
 class CUDABuffer;
 class BvhBuilder;
@@ -13,6 +14,8 @@ class ATriangleMesh;
 class TriangleDifference;
 class ATetrahedronMesh;
 class TriangleAnchorDeformer;
+class OVelocityFile;
+class AFrameRange;
 class AdeniumWorld {
 public:
     AdeniumWorld();
@@ -33,16 +36,21 @@ public:
     bool matchRestMesh(ATriangleMesh * m);
     void setDifferenceObject(ATriangleMesh * m);
     ATriangleMesh * deformedMesh();
-    void deform(bool toReset);
+    void processFrame(bool toReset);
     bool isRayCast() const;
     void toggleRayCast();
     
     const Vector3F currentTranslation() const;
+    void beginRecordVelocity(AFrameRange * fr);
 private:
     void drawTriangle(TriangleSystem * tri);
     void drawTetrahedron();
     void drawAnchors();
     void drawOverallTranslation();
+    bool saveVelocityFramerange(AFrameRange * fr);
+    void saveVelocity(bool toReset);
+    const unsigned totalNumPoints() const;
+    
 private:
     Matrix44F m_restSpaceInv;
     TriangleDifference * m_difference;
@@ -54,6 +62,7 @@ private:
     ATriangleMesh * m_deformedMesh;
     ATetrahedronMesh * m_tetraMesh;
     TriangleAnchorDeformer * m_tetraDeformer;
+    OVelocityFile * m_velocityOut;
 	unsigned m_numObjects;
 	static GLuint m_texture;
     bool m_enableRayCast;

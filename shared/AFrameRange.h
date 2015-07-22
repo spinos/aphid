@@ -15,7 +15,8 @@ public:
 	AFrameRange();
 	virtual ~AFrameRange();
 	void reset();
-	bool isValid();
+	bool isValid() const;
+	int numFramesInRange() const;
 	static int FirstFrame;
 	static int LastFrame;
 	static int SamplesPerFrame;

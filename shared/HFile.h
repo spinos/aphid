@@ -16,6 +16,7 @@ class HFile : public BaseFile {
 public:
 	HFile();
 	HFile(const char * name);
+	virtual ~HFile();
 	
 	virtual bool doCreate(const std::string & fileName);
 	virtual bool doRead(const std::string & fileName);

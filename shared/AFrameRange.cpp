@@ -22,8 +22,9 @@ void AFrameRange::reset()
 	SamplesPerFrame = 1;
 }
 
-bool AFrameRange::isValid()
-{
-	return (LastFrame > FirstFrame);
-}
+bool AFrameRange::isValid() const
+{ return (LastFrame > FirstFrame); }
+
+int AFrameRange::numFramesInRange() const
+{ return LastFrame - FirstFrame + 1; }
 

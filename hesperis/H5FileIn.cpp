@@ -12,10 +12,6 @@ ATriangleMesh * H5FileIn::findBakedMesh(std::string & name)
 {
     if(!readFrameRange()) return 0;
     
-    HFrameRange fr("/.fr");
-    fr.load(this);
-    fr.close();
-    
     HBase b("/");
     std::vector<std::string > gs;
     LsNames2<HBase, HTriangleMesh>(gs, &b);

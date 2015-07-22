@@ -11,6 +11,7 @@
 #include <WorldDbgDraw.h>
 #include <tetrahedron_math.h>
 #include <TriangleAnchorDeformer.h>
+#include <OVelocityFile.h>
 
 WorldDbgDraw * AdeniumWorld::DbgDrawer = 0;
 GLuint AdeniumWorld::m_texture = 0;
@@ -24,6 +25,9 @@ m_tetraMesh(0)
 {
     m_image = new AdeniumRender;
     m_tetraDeformer = new TriangleAnchorDeformer;
+    m_velocityOut = new OVelocityFile;
+    if(!m_velocityOut->create("./velocity.tmp"))
+        std::cout<<"\n WARNING: adenium world cannot create velocity file in current dir!\n";
 }
 
 AdeniumWorld::~AdeniumWorld() 
@@ -33,6 +37,7 @@ AdeniumWorld::~AdeniumWorld()
     if(m_difference) delete m_difference;
     if(m_deformedMesh) delete m_deformedMesh;
     if(m_tetraMesh) delete m_tetraMesh;
+    delete m_velocityOut;
 }
 
 void AdeniumWorld::setRestMesh(ATriangleMesh * m)
@@ -121,7 +126,10 @@ void AdeniumWorld::drawTriangle(TriangleSystem * tri)
 
 void AdeniumWorld::drawTetrahedron()
 {
-    if(!m_tetraMesh) return;
+    if(!m_tetraMesh) {
+        std::cout<<"\n WARNING: adenium world has tetrahedron mesh!\n";
+        return;
+    }
     
     glColor3f(0.13f, 0.29f, 0.24f);
     const unsigned nt = m_tetraMesh->numTetrahedrons();
@@ -245,7 +253,7 @@ void AdeniumWorld::setDifferenceObject(ATriangleMesh * m)
 ATriangleMesh * AdeniumWorld::deformedMesh()
 { return m_deformedMesh; }
 
-void AdeniumWorld::deform(bool toReset)
+void AdeniumWorld::processFrame(bool toReset)
 {
     if(toReset) m_difference->resetTranslation(m_deformedMesh);
     else m_difference->addTranslation(m_deformedMesh);
@@ -258,6 +266,8 @@ void AdeniumWorld::deform(bool toReset)
     m_difference->computeQ(m_deformedMesh);
     if(toReset) m_tetraDeformer->reset(m_deformedMesh);
     else m_tetraDeformer->solve(m_deformedMesh);
+    
+    saveVelocity(toReset);
     
     const unsigned nv = m_deformedMesh->numPoints();
     if(isRayCast()) {
@@ -290,4 +300,38 @@ void AdeniumWorld::toggleRayCast()
 
 const Vector3F AdeniumWorld::currentTranslation() const
 { return m_difference->lastTranslation(); }
+
+bool AdeniumWorld::saveVelocityFramerange(AFrameRange * fr)
+{ 
+    if(!m_velocityOut->isOpened()) {
+        std::cout<<"\n WARNING: adenium world cannot write velocity file frame range!\n";
+        return false;
+    }
+    m_velocityOut->writeFrameRange(fr);
+    return true;
+}
+
+void AdeniumWorld::beginRecordVelocity(AFrameRange * fr)
+{
+    if(!saveVelocityFramerange(fr)) return;
+    m_velocityOut->beginCountNumFramesPlayed();
+    m_velocityOut->createPoints(totalNumPoints());
+}
+
+void AdeniumWorld::saveVelocity(bool toReset)
+{
+// todo get cur pos
+    if(toReset) m_velocityOut->frameBegin();
+    if(m_velocityOut->isFrameEnd()) m_velocityOut->frameBegin();
+    else m_velocityOut->nextFrame();
+    m_velocityOut->countNumFramesPlayed();
+}
+
+const unsigned AdeniumWorld::totalNumPoints() const
+{
+    unsigned n = m_deformedMesh->numPoints();
+    if(m_tetraMesh) n += m_tetraMesh->numPoints();
+    else std::cout<<"\n WARNING: adenium world has tetrahedron mesh!\n";
+    return n;
+}
 //:~
