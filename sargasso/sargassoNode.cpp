@@ -57,6 +57,7 @@ void SargassoNode::postConstructor()
 MStatus SargassoNode::compute( const MPlug& plug, MDataBlock& block )
 {	
 	MStatus stat;
+	if(!m_isInitd) return stat;
     
     if(plug == constraintRotateX || 
         plug == constraintRotateY ||
@@ -79,36 +80,26 @@ MStatus SargassoNode::compute( const MPlug& plug, MDataBlock& block )
 		 
 		 if(plug == constraintRotateX)
 			updateSpace(block, iobject);
-         
-		const Vector3F objectP = localP()[iobject];
-         
-		 MPoint tran(objectP.x, objectP.y, objectP.z);
-		 MPoint solvedT = tran * m_currentSpace;
-         
-		 MTransformationMatrix mtm(m_currentSpace);
-         double rot[3];
-         MTransformationMatrix::RotationOrder rotorder =  MTransformationMatrix::kXYZ;
-         mtm.getRotation(rot, rotorder);
-         
+                  
          MDataHandle hout = block.outputValue(plug, &stat);
              
          if(plug == constraintTranslateX) {
-             hout.set(solvedT.x);
+             hout.set(m_solvedT.x);
          }
          else if(plug == constraintTranslateY) {
-             hout.set(solvedT.y);
+             hout.set(m_solvedT.y);
          }
          else if(plug == constraintTranslateZ) {
-             hout.set(solvedT.z);
+             hout.set(m_solvedT.z);
          }
          else if(plug == constraintRotateX) {
-             hout.set(rot[0]);
+             hout.set(m_rot[0]);
          }
          else if(plug == constraintRotateY) {
-             hout.set(rot[1]);
+             hout.set(m_rot[1]);
          }
          else if(plug == constraintRotateZ) {
-             hout.set(rot[2]);
+             hout.set(m_rot[2]);
          }
          block.setClean( plug );
     }
@@ -244,7 +235,7 @@ MStatus SargassoNode::initialize()
 	addAttribute(atargetMesh);
 	
     attributeAffects(atargetMesh, compoundOutput);
-    attributeAffects(aconstraintParentInverseMatrix, compoundOutput);
+    // attributeAffects(aconstraintParentInverseMatrix, compoundOutput);
 
 	return MS::kSuccess;
 }
@@ -257,9 +248,19 @@ MStatus SargassoNode::connectionMade(const MPlug &plug, const MPlug &otherPlug, 
         MObject val;
         plug.getValue(val);
         creatRestShape(val);
+		m_isInitd = true;
     }
 
     return MPxNode::connectionMade( plug, otherPlug, asSrc );
+}
+
+MStatus SargassoNode::connectionBroken(const MPlug &plug, const MPlug &otherPlug, bool asSrc)
+{
+	if ( plug == atargetMesh ) {
+        m_isInitd = false;
+    }
+
+    return MPxNode::connectionBroken( plug, otherPlug, asSrc );
 }
 
 bool SargassoNode::creatRestShape(const MObject & m)
@@ -392,7 +393,8 @@ bool SargassoNode::updateShape(const MObject & m)
 void SargassoNode::updateSpace(MDataBlock& block, unsigned idx)
 {
 	MStatus stat;
-	/*MArrayDataHandle hparentspaces = block.inputArrayValue(aconstraintParentInverseMatrix, &stat);
+	/* // jump to elm is slow
+	MArrayDataHandle hparentspaces = block.inputArrayValue(aconstraintParentInverseMatrix, &stat);
 	// if(!stat) MGlobal::displayInfo("cannot input array");
 	stat = hparentspaces.jumpToElement(idx);
 	//if(!stat) AHelper::Info<unsigned>("cannot jump to elm", iobject);
@@ -412,6 +414,14 @@ void SargassoNode::updateSpace(MDataBlock& block, unsigned idx)
     AHelper::ConvertToMMatrix(m_currentSpace, sp);
 	// m_currentSpace *= parentSpace;
 	// AHelper::PrintMatrix("parent inv", m_currentSpace);
+	
+	const Vector3F objectP = localP()[idx];
+    MPoint tran(objectP.x, objectP.y, objectP.z);
+	m_solvedT = tran * m_currentSpace;
+         
+	MTransformationMatrix mtm(m_currentSpace);
+	MTransformationMatrix::RotationOrder rotorder =  MTransformationMatrix::kXYZ;
+	mtm.getRotation(m_rot, rotorder);
 }
 
 Vector3F * SargassoNode::localP()

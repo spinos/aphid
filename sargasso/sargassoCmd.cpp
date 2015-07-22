@@ -171,7 +171,7 @@ MObject SargassoCmd::createNode(const MObjectArray & transforms,
 		MVector t = ftrans.getTranslation(MSpace::kTransform);
 		MDagPath ptrans;
 		MDagPath::getAPathTo(transforms[i], ptrans);
-		MMatrix wtm = AHelper::GetWorldTransformMatrix(ptrans);
+		MMatrix wtm = AHelper::GetWorldParentTransformMatrix(ptrans);
 		t *= wtm;
 		
 		Vector3F wp(t.x, t.y, t.z);
@@ -292,6 +292,7 @@ MObject SargassoCmd::createNode(const MObjectArray & transforms,
                             ftrans.name() +
                             MString(".rz "));
     }
+	MGlobal::clearSelectionList();
 	setResult(fsarg.name());
 	return osarg;
 }

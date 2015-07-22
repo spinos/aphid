@@ -26,6 +26,7 @@ public:
 	static  MStatus		initialize();
 
     virtual MStatus connectionMade(const MPlug &plug, const MPlug &otherPlug, bool asSrc);
+	virtual MStatus connectionBroken(const MPlug &plug, const MPlug &otherPlug, bool asSrc);
 public:
 	static MObject		compoundOutput;        
 	static MObject		aconstraintParentInverseMatrix;
@@ -53,6 +54,8 @@ private:
     Vector3F * localP();
     unsigned * objectTriangleInd();
 private:
+	MPoint m_solvedT;
+	double m_rot[3];
 	MMatrix m_currentSpace;
     ATriangleMesh * m_mesh;
     TriangleDifference * m_diff;
