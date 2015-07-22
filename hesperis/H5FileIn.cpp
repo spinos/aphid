@@ -5,15 +5,12 @@
 #include <HFrameRange.h>
 #include <boost/format.hpp>
 
-H5FileIn::H5FileIn() : HFile() {}
-H5FileIn::H5FileIn(const char * name) : HFile(name) {}
+H5FileIn::H5FileIn() : APlaybackFile() {}
+H5FileIn::H5FileIn(const char * name) : APlaybackFile(name) {}
 
 ATriangleMesh * H5FileIn::findBakedMesh(std::string & name)
 {
-    if(!entityExists("/.fr")) {
-        std::cout<<" found no frame range\n";
-        return 0;
-    }
+    if(!readFrameRange()) return 0;
     
     HFrameRange fr("/.fr");
     fr.load(this);
@@ -68,19 +65,10 @@ ATriangleMesh * H5FileIn::findBakedMesh(std::string & name)
     return tri;
 }
 
-void H5FileIn::frameBegin()
-{ m_currentFrame = FirstFrame; }
-
-bool H5FileIn::isFrameEnd() const
-{ return m_currentFrame == LastFrame; }
-
-void H5FileIn::nextFrame()
-{ m_currentFrame++; }
-
 bool H5FileIn::readFrame(Vector3F * dst, unsigned nv)
 {
     useDocument();
-    const std::string frame = boost::str(boost::format("%1%") % m_currentFrame);
+    const std::string frame = boost::str(boost::format("%1%") % currentFrame());
    
     HBase bakeNode(m_bakeName.c_str());
     if(!bakeNode.hasNamedData(frame.c_str())) {
@@ -91,10 +79,4 @@ bool H5FileIn::readFrame(Vector3F * dst, unsigned nv)
     bakeNode.close();
     return true;
 }
-
-const int H5FileIn::currentFrame() const
-{ return m_currentFrame; }
-
-bool H5FileIn::isFrameBegin() const
-{ return m_currentFrame == FirstFrame; }
 //:~

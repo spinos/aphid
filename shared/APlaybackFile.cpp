@@ -20,6 +20,15 @@ const int APlaybackFile::currentFrame() const
 bool APlaybackFile::isFrameBegin() const
 { return m_currentFrame == FirstFrame; }
 
+bool APlaybackFile::writeFrameRange(AFrameRange * src)
+{
+    if(!src->isValid()) return false;
+	HFrameRange g("/.fr");
+	g.save(src);
+	g.close();
+    return true;
+}
+
 bool APlaybackFile::readFrameRange()
 {
     if(!entityExists("/.fr")) {

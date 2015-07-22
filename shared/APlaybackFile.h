@@ -13,6 +13,7 @@ public:
     void nextFrame();
     const int currentFrame() const;
     
+    bool writeFrameRange(AFrameRange * src);
     bool readFrameRange();
 protected:
 
