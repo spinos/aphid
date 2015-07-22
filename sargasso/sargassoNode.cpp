@@ -392,14 +392,14 @@ bool SargassoNode::updateShape(const MObject & m)
 void SargassoNode::updateSpace(MDataBlock& block, unsigned idx)
 {
 	MStatus stat;
-	MArrayDataHandle hparentspaces = block.inputArrayValue(aconstraintParentInverseMatrix, &stat);
+	/*MArrayDataHandle hparentspaces = block.inputArrayValue(aconstraintParentInverseMatrix, &stat);
 	// if(!stat) MGlobal::displayInfo("cannot input array");
 	stat = hparentspaces.jumpToElement(idx);
 	//if(!stat) AHelper::Info<unsigned>("cannot jump to elm", iobject);
 	MDataHandle hspace = hparentspaces.inputValue(&stat);
 	// if(!stat) MGlobal::displayInfo("cannot input single");
 	const MMatrix parentSpace = hspace.asMatrix();
-	
+	*/
 	const unsigned itri = objectTriangleInd()[idx];
          
 	Matrix33F q = m_diff->Q()[itri];
@@ -410,7 +410,7 @@ void SargassoNode::updateSpace(MDataBlock& block, unsigned idx)
 	sp.setTranslation(t);
 
     AHelper::ConvertToMMatrix(m_currentSpace, sp);
-	m_currentSpace *= parentSpace;
+	// m_currentSpace *= parentSpace;
 	// AHelper::PrintMatrix("parent inv", m_currentSpace);
 }
 

@@ -57,7 +57,7 @@ void TriangleDifference::computeUndeformedV(ATriangleMesh * mesh)
 Vector3F TriangleDifference::getV4(const Vector3F & v1, const Vector3F & v2, const Vector3F & v3) const
 {
 	Vector3F nor = (v2 - v1).cross(v3 - v1);
-    nor.normalize();
+    nor *= 1.f / sqrt(nor.length());
 	return v1 + nor;
 }
 
