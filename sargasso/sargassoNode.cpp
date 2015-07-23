@@ -407,17 +407,14 @@ void SargassoNode::updateSpace(MDataBlock& block, unsigned idx)
 	Matrix33F q = m_diff->Q()[itri];
 	q.orthoNormalize();
 	const Vector3F t = m_mesh->triangleCenter(itri);
-	Matrix44F sp;
-	sp.setRotation(q);
-	sp.setTranslation(t);
+	Matrix44F sp(q, t);
 
     AHelper::ConvertToMMatrix(m_currentSpace, sp);
 	// m_currentSpace *= parentSpace;
 	// AHelper::PrintMatrix("parent inv", m_currentSpace);
 	
 	const Vector3F objectP = localP()[idx];
-    MPoint tran(objectP.x, objectP.y, objectP.z);
-	m_solvedT = tran * m_currentSpace;
+	m_solvedT = MPoint(objectP.x, objectP.y, objectP.z) * m_currentSpace;
          
 	MTransformationMatrix mtm(m_currentSpace);
 	MTransformationMatrix::RotationOrder rotorder =  MTransformationMatrix::kXYZ;

@@ -30,6 +30,16 @@ Matrix44F::Matrix44F(float * mat)
 Matrix44F::Matrix44F(double * mat)
 { for(int i = 0; i < 16; i++) v[i] = mat[i]; }
 
+Matrix44F::Matrix44F(const Matrix33F & r, const Vector3F & t)
+{
+	setRotation(r);
+	setTranslation(t);
+	*m(0,3) = 0.f;
+	*m(1,3) = 0.f;
+	*m(2,3) = 0.f;
+	*m(3,3) = 1.f;
+}
+
 Matrix44F::~Matrix44F() {}
 
 /*

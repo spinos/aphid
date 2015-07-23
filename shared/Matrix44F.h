@@ -19,6 +19,7 @@
 	Matrix44F(const Matrix44F & a);
 	Matrix44F(float * mat);
     Matrix44F(double * mat);
+	Matrix44F(const Matrix33F & r, const Vector3F & t);
 	~Matrix44F();
 	float operator() (int i, int j);
 	float operator() (int i, int j) const;

@@ -22,6 +22,7 @@ public:
 	const unsigned bufferSize() const;
 	char * data() const;
     void copyFrom(const void * src, unsigned size);
+	void copyFrom(const void * src, unsigned size, unsigned loc);
 protected:
 
 private:

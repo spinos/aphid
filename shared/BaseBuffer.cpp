@@ -37,4 +37,10 @@ char * BaseBuffer::data() const
 
 void BaseBuffer::copyFrom(const void * src, unsigned size)
 { memcpy( data(), src, size ); }
+
+void BaseBuffer::copyFrom(const void * src, unsigned size, unsigned loc)
+{ 
+	char * dst = &data()[loc];
+	memcpy( dst, src, size ); 
+}
 //:~

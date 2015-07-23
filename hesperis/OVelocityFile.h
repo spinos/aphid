@@ -8,6 +8,7 @@ public:
     virtual ~OVelocityFile();
     
     void createPoints(unsigned n);
+	void setCurrentP(const Vector3F * src, unsigned nv, unsigned nvdrift);
 protected:
     bool writeNumPoints(int n);
 private:

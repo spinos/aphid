@@ -30,6 +30,9 @@ void OVelocityFile::createPoints(unsigned n)
     writeNumPoints(n);
 }
 
+void OVelocityFile::setCurrentP(const Vector3F * src, unsigned nv, unsigned nvdrift)
+{ m_currentP->copyFrom(src, nv*12, nvdrift*12); }
+
 bool OVelocityFile::writeNumPoints(int n)
 {
     useDocument();
