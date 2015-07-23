@@ -108,4 +108,9 @@ bool FEMWorldInterface::readTriangleMeshFromFile(CudaDynamicWorld * world)
     world->addTriangleSystem(new BvhTriangleSystem((ATriangleMesh *)triangleMeshes.geometry(0)));
 	return true;
 }
+
+bool FEMWorldInterface::useVelocityFile()
+{
+    return true;   
+}
 //:~

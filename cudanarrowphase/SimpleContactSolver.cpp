@@ -28,7 +28,7 @@ SimpleContactSolver::SimpleContactSolver()
 	m_pntTetHash[0] = new CUDABuffer;
 	m_pntTetHash[1] = new CUDABuffer;
 	m_numContacts = 0;
-	std::cout<<" sizeof struct ContactConstraint "<<sizeof(ContactConstraint)<<"\n";
+	// std::cout<<" sizeof struct ContactConstraint "<<sizeof(ContactConstraint)<<"\n";
 }
 
 SimpleContactSolver::~SimpleContactSolver() {}

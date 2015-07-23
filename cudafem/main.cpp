@@ -3,9 +3,10 @@
 #include <QtCore>
 #include "window.h"
 #include "FemGlobal.h"
+#include <iostream>
 int main(int argc, char *argv[])
 {
-	qDebug()<<" strating cuda fem\n";
+	std::cout<<"Cuda FEM start up\n";
 	if(argc > 1) FemGlobal::FileName = argv[argc - 1];
     else FemGlobal::FileName = "untitled.hes";
     QApplication app(argc, argv);

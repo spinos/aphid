@@ -26,6 +26,7 @@ protected:
 private:
     void stopPhysics();
     void startPhysics();
+    void togglePhysics();
 private:
     CudaDynamicWorld * m_world;
     FEMWorldInterface * m_interface;

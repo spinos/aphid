@@ -11,6 +11,10 @@
 #define DRGDRW 0
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
+    std::cout<<"\n press R to reset"
+    <<"\n press Space to toggle physics"
+    <<"\n press L to enable bake file"
+    <<"\n";
 	perspCamera()->setFarClipPlane(20000.f);
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
@@ -55,11 +59,11 @@ void GLWidget::clientDraw()
 #if DRGDRW
     if(m_isPhysicsRunning) m_interface->draw(m_world, getDrawer());
 #else
-    if(m_isPhysicsRunning) {
+    if(m_isPhysicsRunning)
         emit updatePhysics();
-        m_interface->draw(m_world, getDrawer());
-        m_world->dbgDraw();
-    }
+    m_interface->draw(m_world, getDrawer());
+    // m_world->dbgDraw();
+
 #endif
     //else m_interface->drawFaulty(m_world, getDrawer());
 }
@@ -125,11 +129,11 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
         case Qt::Key_R:
             m_world->reset();
             break;
-        case Qt::Key_S:
-            if(m_isPhysicsRunning) 
-                stopPhysics();
-            else
-                startPhysics();
+        case Qt::Key_Space:
+            togglePhysics();
+            break;
+        case Qt::Key_L:
+            m_interface->useVelocityFile();
             break;
         case Qt::Key_A:
 			m_interface->changeMaxDisplayLevel(1);
@@ -148,3 +152,8 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 	Base3DView::keyReleaseEvent(event);
 }
 
+void GLWidget::togglePhysics()
+{
+    if(m_isPhysicsRunning) stopPhysics();
+    else startPhysics();   
+}

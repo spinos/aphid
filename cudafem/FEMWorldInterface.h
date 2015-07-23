@@ -10,6 +10,7 @@ public:
     
     virtual void create(CudaDynamicWorld * world);
     
+    bool useVelocityFile();
 protected:
 
 private:
