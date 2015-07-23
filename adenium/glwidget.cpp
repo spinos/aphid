@@ -45,13 +45,19 @@ void GLWidget::clientDraw()
 	
     if(AdeniumInterface::BakeFile.isOpened()) {
         sst.str("");
-        sst<<"frame: "<<AdeniumInterface::BakeFile.currentFrame();
+        sst<<"bake file: "<<AdeniumInterface::BakeFile.fileName();
         hudText(sst.str(), 2);
+        sst.str("");
+        sst<<"frame: "<<AdeniumInterface::BakeFile.currentFrame();
+        hudText(sst.str(), 3);
         AdeniumInterface::ReadBakeFrame(m_world);
         sst.str("");
         sst<<"world p: "<<m_world->currentTranslation();
-        hudText(sst.str(), 3);
+        hudText(sst.str(), 4);
+        if(m_world->doneVelocityCaching()) hudText("all frames saved", 5);
     }
+    else 
+        hudText("no bake loaded", 2);
     
     sst.str("");
 	sst<<"fps: "<<frameRate();

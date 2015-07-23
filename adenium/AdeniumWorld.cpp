@@ -320,10 +320,16 @@ void AdeniumWorld::beginRecordVelocity(AFrameRange * fr)
 
 void AdeniumWorld::saveVelocity(bool toReset)
 {
-// todo get cur pos
+    if(doneVelocityCaching()) return;
+    
+    recordP();
     if(toReset) m_velocityOut->frameBegin();
+    
+    m_velocityOut->writeFrameVelocity();
+    
     if(m_velocityOut->isFrameEnd()) m_velocityOut->frameBegin();
     else m_velocityOut->nextFrame();
+    
     m_velocityOut->countNumFramesPlayed();
 }
 
@@ -334,4 +340,20 @@ const unsigned AdeniumWorld::totalNumPoints() const
     else std::cout<<"\n WARNING: adenium world has tetrahedron mesh!\n";
     return n;
 }
+
+void AdeniumWorld::recordP()
+{
+    unsigned vdrift = 0;
+    unsigned nv;
+    if(m_tetraMesh) {
+        nv = m_tetraMesh->numPoints();
+        m_velocityOut->setCurrentP(m_tetraMesh->points(), nv, vdrift);
+        vdrift = nv;
+    }
+    nv = m_deformedMesh->numPoints();
+    m_velocityOut->setCurrentP(m_deformedMesh->points(), nv, vdrift);
+}
+
+bool AdeniumWorld::doneVelocityCaching() const
+{ return m_velocityOut->allFramesPlayed(); }
 //:~

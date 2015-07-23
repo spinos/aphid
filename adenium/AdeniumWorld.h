@@ -42,6 +42,7 @@ public:
     
     const Vector3F currentTranslation() const;
     void beginRecordVelocity(AFrameRange * fr);
+    bool doneVelocityCaching() const;
 private:
     void drawTriangle(TriangleSystem * tri);
     void drawTetrahedron();
@@ -49,6 +50,7 @@ private:
     void drawOverallTranslation();
     bool saveVelocityFramerange(AFrameRange * fr);
     void saveVelocity(bool toReset);
+    void recordP();
     const unsigned totalNumPoints() const;
     
 private:
