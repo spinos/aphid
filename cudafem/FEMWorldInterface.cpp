@@ -8,7 +8,7 @@
 #include <SahBuilder.h>
 #include <GeometryArray.h>
 #include <BvhTriangleSystem.h>
-
+#include <IVelocityFile.h>
 FEMWorldInterface::FEMWorldInterface() {}
 FEMWorldInterface::~FEMWorldInterface() {}
 
@@ -109,8 +109,20 @@ bool FEMWorldInterface::readTriangleMeshFromFile(CudaDynamicWorld * world)
 	return true;
 }
 
-bool FEMWorldInterface::useVelocityFile()
+bool FEMWorldInterface::useVelocityFile(CudaDynamicWorld * world)
 {
-    return true;   
+    IVelocityFile * velfile = new IVelocityFile;
+    if(!velfile->open("./velocity.tmp")) return false;
+    
+    const unsigned nv = velfile->readNumPoints();
+    std::cout<<"\n cached n velocity "<<nv;
+    if(nv != world->totalNumPoints()) {
+        std::cout<<" not match world n point "<<world->totalNumPoints();
+        return false;
+    }
+    
+    velfile->frameBegin();
+    CudaDynamicWorld::VelocityCache = velfile;
+    return true;
 }
 //:~

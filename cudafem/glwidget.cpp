@@ -133,7 +133,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
             togglePhysics();
             break;
         case Qt::Key_L:
-            m_interface->useVelocityFile();
+            m_interface->useVelocityFile(m_world);
             break;
         case Qt::Key_A:
 			m_interface->changeMaxDisplayLevel(1);

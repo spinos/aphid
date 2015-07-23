@@ -9,8 +9,7 @@ public:
     virtual ~FEMWorldInterface();
     
     virtual void create(CudaDynamicWorld * world);
-    
-    bool useVelocityFile();
+    bool useVelocityFile(CudaDynamicWorld * world);
 protected:
 
 private:

@@ -113,7 +113,7 @@ bool HesperisIO::WriteMeshes(const std::map<std::string, MDagPath > & paths,
         return false;
     }
     
-    combined->setDagName(parentName);
+    // combined->setDagName(parentName);
     std::string meshName = "|meshes";
     if(parentName.size()>1) meshName = boost::str(boost::format("%1%|meshes") % parentName);
 	

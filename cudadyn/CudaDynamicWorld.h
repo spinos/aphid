@@ -12,6 +12,7 @@ class WorldDbgDraw;
 class BvhTriangleSystem;
 class CudaMassSystem;
 class CudaLinearBvh;
+class IVelocityFile;
 class CudaDynamicWorld
 {
 public:
@@ -39,10 +40,11 @@ public:
 	CudaNarrowphase * narrowphase() const;
 	SimpleContactSolver * contactSolver() const;
 	const unsigned numContacts() const;
-    
+    const unsigned totalNumPoints() const;
     void dbgDraw();
     
     static WorldDbgDraw * DbgDrawer;
+    static IVelocityFile * VelocityCache;
 protected:
 	
 private:

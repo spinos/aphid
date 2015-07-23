@@ -387,3 +387,4 @@ const unsigned CudaNarrowphase::bufferId() const
 	
 const unsigned CudaNarrowphase::otherBufferId() const
 { return (m_bufferId + 1) & 1; }
+//:~

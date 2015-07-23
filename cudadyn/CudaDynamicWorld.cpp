@@ -7,8 +7,10 @@
 #include <CudaBase.h>
 #include <BvhBuilder.h>
 #include <WorldDbgDraw.h>
+#include <IVelocityFile.h>
 
 WorldDbgDraw * CudaDynamicWorld::DbgDrawer = 0;
+IVelocityFile * CudaDynamicWorld::VelocityCache = 0;
 
 CudaDynamicWorld::CudaDynamicWorld() 
 {
@@ -178,4 +180,7 @@ CudaLinearBvh * CudaDynamicWorld::bvhObject(unsigned idx) const
 
 CudaMassSystem * CudaDynamicWorld::object(unsigned idx) const
 { return m_objects[idx]; }
+
+const unsigned CudaDynamicWorld::totalNumPoints() const
+{ return m_narrowphase->numPoints(); }
 //:~
