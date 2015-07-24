@@ -27,6 +27,8 @@ public:
     
     const float volume() const;
     void setVolume(float x);
+	
+	virtual std::string verbosestr() const;
 protected:
 	
 private:

@@ -17,8 +17,10 @@ public:
 	
 	const unsigned numPoints() const;
 	Vector3F * points() const;
+	float * pointRadius() const;
 	
 	void create(unsigned n);
+	void copyPointsFrom(Vector3F * src);
 	
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox() const;
@@ -31,5 +33,6 @@ protected:
 
 private:
 	BaseBuffer * m_points;
+	BaseBuffer * m_radius;
 	unsigned m_numPoints;
 };

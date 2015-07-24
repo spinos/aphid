@@ -82,4 +82,14 @@ const float ATetrahedronMesh::volume() const
 
 void ATetrahedronMesh::setVolume(float x)
 { m_volume = x;}
+
+std::string ATetrahedronMesh::verbosestr() const
+{
+	std::stringstream sst;
+	sst<<" tetrahedron mesh nv "<<numPoints()
+		<<"\n ntetra "<<numTetrahedrons()
+		<<"\n volume "<<volume()
+		<<"\n";
+	return sst.str();
+}
 //:~

@@ -160,7 +160,7 @@ bool HesperisFile::doRead(const std::string & fileName)
 {
 	if(!HFile::doRead(fileName)) return false;
 	
-	std::cout<<" reading curves file "<<fileName<<"\n";
+	std::cout<<" reading hesperis file "<<fileName<<"\n";
 	HWorld grpWorld;
 	grpWorld.load();
 	

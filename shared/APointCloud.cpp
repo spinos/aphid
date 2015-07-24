@@ -13,12 +13,14 @@
 APointCloud::APointCloud() 
 {
 	m_points = new BaseBuffer;
+	m_radius = new BaseBuffer;
 	m_numPoints = 0;
 }
 
 APointCloud::~APointCloud() 
 {
 	delete m_points;
+	delete m_radius;
 }
 
 const TypedEntity::Type APointCloud::type() const
@@ -30,10 +32,14 @@ const unsigned APointCloud::numPoints() const
 Vector3F * APointCloud::points() const
 { return (Vector3F *)m_points->data(); }
 
+float * APointCloud::pointRadius() const
+{ return (float *)m_radius->data(); }
+
 void APointCloud::create(unsigned n)
 {	
 	m_numPoints = n;
 	m_points->create(n * 12);
+	m_radius->create(n * 4);
 }
 
 const unsigned APointCloud::numComponents() const
@@ -44,7 +50,7 @@ const BoundingBox APointCloud::calculateBBox() const
 	BoundingBox b;
 	unsigned i=0;
 	for(; i< m_numPoints; i++)
-		b.expandBy(points()[i], 1e-6f);
+		b.expandBy(points()[i], pointRadius()[i]);
 		
 	return b;
 }
@@ -52,7 +58,7 @@ const BoundingBox APointCloud::calculateBBox() const
 const BoundingBox APointCloud::calculateBBox(unsigned icomponent) const
 {
 	BoundingBox b;
-	b.expandBy(points()[icomponent], 1e-6f);
+	b.expandBy(points()[icomponent], pointRadius()[icomponent]);
 	return b;
 }
 
@@ -76,3 +82,7 @@ bool APointCloud::intersectBox(unsigned icomponent, const BoundingBox & box)
 
 bool APointCloud::intersectTetrahedron(unsigned icomponent, const Vector3F * tet)
 { return pointInsideTetrahedronTest(points()[icomponent], tet); }
+
+void APointCloud::copyPointsFrom(Vector3F * src)
+{ m_points->copyFrom(src, numPoints() * 12); }
+//:~
