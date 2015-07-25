@@ -175,6 +175,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/HTriangleMesh.cpp
 ../shared/HTetrahedronMesh.cpp
 ../shared/AFrameRange.cpp
+../shared/APlayback.cpp
 ../shared/APlaybackFile.cpp
 ../shared/AGenericMesh.cpp
 ../shared/CurveBuilder.cpp
