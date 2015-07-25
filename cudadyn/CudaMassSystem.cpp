@@ -9,6 +9,7 @@
 
 #include "CudaMassSystem.h"
 #include <CUDABuffer.h>
+#include <iostream>
 CudaMassSystem::CudaMassSystem() 
 {
 	m_deviceAnchor = new CUDABuffer;
@@ -21,6 +22,7 @@ CudaMassSystem::~CudaMassSystem()
 
 void CudaMassSystem::initOnDevice()
 {
+    std::cout<<"\n mass system init on device";
 	m_deviceAnchor->create(numPoints() * 4);
 	m_deviceAnchor->hostToDevice(hostAnchor());
 }
@@ -33,6 +35,9 @@ void CudaMassSystem::setDeviceXiPtr(CUDABuffer * ptr, unsigned loc)
 
 void CudaMassSystem::setDeviceVPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceV = ptr; m_vLoc = loc; }
+
+void CudaMassSystem::setDeviceVaPtr(CUDABuffer * ptr, unsigned loc)
+{ m_deviceVa = ptr; m_vaLoc = loc; }
 
 void CudaMassSystem::setDeviceMassPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceMass = ptr; m_massLoc = loc; }
@@ -49,6 +54,9 @@ void * CudaMassSystem::deviceXi()
 void * CudaMassSystem::deviceV()
 {  return m_deviceV->bufferOnDeviceAt(m_vLoc); }
 
+void * CudaMassSystem::deviceVa()
+{ return m_deviceVa->bufferOnDeviceAt(m_vaLoc); }
+
 void * CudaMassSystem::deviceMass()
 {  return m_deviceMass->bufferOnDeviceAt(m_massLoc); }
 
@@ -57,14 +65,24 @@ void * CudaMassSystem::deviceTretradhedronIndices()
 
 CUDABuffer * CudaMassSystem::deviceXBuf()
 { return m_deviceX; }
+
 CUDABuffer * CudaMassSystem::deviceVBuf()
 { return m_deviceV; }
+
+CUDABuffer * CudaMassSystem::deviceAnchoredVBuf()
+{ return m_deviceVa; }
+
+CUDABuffer * CudaMassSystem::deviceAnchorBuf()
+{ return m_deviceAnchor; }
 
 const unsigned CudaMassSystem::xLoc() const
 { return m_xLoc; }
 
 const unsigned CudaMassSystem::vLoc() const
 { return m_vLoc; }
+
+const unsigned CudaMassSystem::anchoredVLoc() const
+{ return m_vaLoc; }
 
 void * CudaMassSystem::deviceAnchor()
 { return m_deviceAnchor->bufferOnDevice(); }

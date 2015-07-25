@@ -459,8 +459,8 @@ __global__ void squeezeContactPosAndVel_kernel(float3 * dstPos,
 	dstContact[toLoc] = srcContact[iPair];
 }
 
-__global__ void resetX_kernel(float3 * dst, float3 * src, 
-                              float3 * vel, 
+__global__ void resetXV_kernel(float3 * dst, float3 * src, 
+                              float3 * vel, float3 * vel0,
                               uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
@@ -471,6 +471,7 @@ __global__ void resetX_kernel(float3 * dst, float3 * src,
         
         dst[ind] = src[ind];
         vel[ind] = make_float3(0.f, 0.f, 0.f);
+        vel0[ind] = make_float3(0.f, 0.f, 0.f);
         ind++;
     }
 }
@@ -562,15 +563,15 @@ void narrowphaseSqueezeContactPairs(uint2 * dstPairs, uint2 * srcPairs,
 									maxInd);
 }
 
-void narrowphaseResetX(float3 * dst, float3 *src, 
-                       float3 * vel,
+void narrowphaseResetXV(float3 * dst, float3 *src, 
+                       float3 * vel, float3 * vel0,
                        uint maxInd)
 {
     dim3 block(512, 1, 1);
     unsigned nblk = iDivUp(maxInd>>3, 512);
     dim3 grid(nblk, 1, 1);
     
-    resetX_kernel<<< grid, block >>>(dst, src, vel, maxInd);
+    resetXV_kernel<<< grid, block >>>(dst, src, vel, vel0, maxInd);
 }
 
 void narrowphase_writePairPosAndVel(float3 * dstPos,

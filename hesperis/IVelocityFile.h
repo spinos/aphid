@@ -14,9 +14,10 @@ public:
     
     unsigned readNumPoints();
     bool readFrameVelocity();
-protected:
+
     Vector3F * velocities() const;
-    
+    BaseBuffer * velocityBuf() const;
+protected:   
 private:
     BaseBuffer * m_vel;
     unsigned m_numV;

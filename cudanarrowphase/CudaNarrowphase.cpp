@@ -44,6 +44,7 @@ CudaNarrowphase::CudaNarrowphase()
     m_objectBuf.m_pos = new CUDABuffer;
     m_objectBuf.m_pos0 = new CUDABuffer;
     m_objectBuf.m_vel = new CUDABuffer;
+    m_objectBuf.m_anchoredVel = new CUDABuffer;
     m_objectBuf.m_mass = new CUDABuffer;
     m_objectBuf.m_ind = new CUDABuffer;
 	m_objectBuf.m_pointCacheLoc = new CUDABuffer;
@@ -66,6 +67,7 @@ CudaNarrowphase::~CudaNarrowphase()
 	delete m_objectBuf.m_pos;
     delete m_objectBuf.m_pos0;
     delete m_objectBuf.m_vel;
+    delete m_objectBuf.m_anchoredVel;
     delete m_objectBuf.m_mass;
     delete m_objectBuf.m_ind;
 	delete m_objectBuf.m_pointCacheLoc;
@@ -155,6 +157,7 @@ void CudaNarrowphase::initOnDevice()
 	m_objectBuf.m_pos->create(m_numPoints * 12);
 	m_objectBuf.m_pos0->create(m_numPoints * 12);
 	m_objectBuf.m_vel->create(m_numPoints * 12);
+    m_objectBuf.m_anchoredVel->create(m_numPoints * 12);
 	m_objectBuf.m_mass->create(m_numPoints * 4);
 	m_objectBuf.m_ind->create(m_numElements * 16); // 4 ints
 	
@@ -170,7 +173,8 @@ void CudaNarrowphase::initOnDevice()
 		curObj->setDeviceXPtr(m_objectBuf.m_pos, m_objectPointStart[i] * 12);
 		curObj->setDeviceXiPtr(m_objectBuf.m_pos0, m_objectPointStart[i] * 12);
 		curObj->setDeviceVPtr(m_objectBuf.m_vel, m_objectPointStart[i] * 12);
-		curObj->setDeviceMassPtr(m_objectBuf.m_mass, m_objectPointStart[i] * 4);
+		curObj->setDeviceVaPtr(m_objectBuf.m_anchoredVel, m_objectPointStart[i] * 12);
+        curObj->setDeviceMassPtr(m_objectBuf.m_mass, m_objectPointStart[i] * 4);
 		curObj->setDeviceTretradhedronIndicesPtr(m_objectBuf.m_ind, m_objectIndexStart[i] * 16);
 		
 		m_objectBuf.m_pos->hostToDevice(curObj->hostX(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
@@ -189,6 +193,8 @@ void CudaNarrowphase::initOnDevice()
 	m_tetVertPos[1]->create(estimatedN * 2 * 4 * 12);
 	m_tetVertVel[0]->create(estimatedN * 2 * 4 * 12);
 	m_tetVertVel[1]->create(estimatedN * 2 * 4 * 12);
+    
+    resetToInitial();
 }
 
 void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)
@@ -376,7 +382,9 @@ void CudaNarrowphase::resetToInitial()
     void * dst = m_objectBuf.m_pos->bufferOnDevice();
 	void * src = m_objectBuf.m_pos0->bufferOnDevice();
     void * vel = m_objectBuf.m_vel->bufferOnDevice();
-	narrowphaseResetX((float3 *)dst, (float3 *)src, (float3 *)vel, m_numPoints);
+    void * vel0 = m_objectBuf.m_anchoredVel->bufferOnDevice();
+	narrowphaseResetXV((float3 *)dst, (float3 *)src, 
+                      (float3 *)vel, (float3 *)vel0, m_numPoints);
 }
 
 void CudaNarrowphase::swapBuffer()
@@ -387,4 +395,7 @@ const unsigned CudaNarrowphase::bufferId() const
 	
 const unsigned CudaNarrowphase::otherBufferId() const
 { return (m_bufferId + 1) & 1; }
+
+void CudaNarrowphase::setAnchoredVelocity(Vector3F * src)
+{ m_objectBuf.m_anchoredVel->hostToDevice(src, m_numPoints * 12); }
 //:~

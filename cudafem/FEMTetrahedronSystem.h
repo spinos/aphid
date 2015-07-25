@@ -15,6 +15,7 @@ public:
     virtual ~FEMTetrahedronSystem();
 	virtual void initOnDevice();
 	virtual void update();
+// override BvhTetrahedronSystem
     virtual void integrate(float dt);
 	
     void verbose();

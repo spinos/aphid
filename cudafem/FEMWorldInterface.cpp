@@ -121,6 +121,8 @@ bool FEMWorldInterface::useVelocityFile(CudaDynamicWorld * world)
         return false;
     }
     
+    if(!velfile->readFrameRange()) return false;
+    
     velfile->frameBegin();
     CudaDynamicWorld::VelocityCache = velfile;
     return true;

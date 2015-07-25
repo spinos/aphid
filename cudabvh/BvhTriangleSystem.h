@@ -11,7 +11,9 @@ public:
 
     virtual void initOnDevice();
 	virtual void update();
-	
+
+// override mass system
+	virtual void integrate(float dt);
 protected:
 
 private:

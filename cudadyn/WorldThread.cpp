@@ -42,6 +42,8 @@ void WorldThread::run()
             return;
         }
         
+        m_world->readVelocityCache();
+        
         for(int i=0; i < NumSubsteps; i++) {
            m_world->stepPhysics(TimeStep);
         }

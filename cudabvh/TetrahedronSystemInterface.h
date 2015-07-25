@@ -17,7 +17,6 @@ void formTetrahedronAabbs(Aabb *dst,
                         float timeStep, 
                         uint4 * tets, 
                         unsigned numTetrahedrons);
-
 }
 #endif        //  #ifndef TETRAHEDRONSYSTEMINTERFACE_H
 

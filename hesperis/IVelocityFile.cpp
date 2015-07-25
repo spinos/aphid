@@ -1,5 +1,6 @@
 #include "IVelocityFile.h"
 #include <BaseBuffer.h>
+#include <boost/format.hpp>
 
 IVelocityFile::IVelocityFile() : APlaybackFile() 
 {
@@ -46,4 +47,23 @@ unsigned IVelocityFile::readNumPoints()
     return nv;
 }
 
+bool IVelocityFile::readFrameVelocity()
+{
+    useDocument();
+    bool stat = true;
+    HBase vg("/vel");
+    const std::string sframe = boost::str( boost::format("%1%") % currentFrame() );
+    if(vg.hasNamedData(sframe.c_str()))
+        vg.readVector3Data(sframe.c_str(), numPoints(), velocities());
+    else {
+        std::cout<<" velocity file cannot read frame "<<currentFrame();
+        stat = false;
+    }
+    vg.close();
+    
+    return stat;
+}
 
+BaseBuffer * IVelocityFile::velocityBuf() const
+{ return m_vel; }
+//;~

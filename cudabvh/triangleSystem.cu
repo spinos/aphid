@@ -17,4 +17,20 @@ void formTetrahedronAabbs(Aabb * dst,
     formTriangleAabbs_kernel<<< grid, block >>>(dst, pos, vel, timeStep, tets, numTriangles<<2);
 }
 
+void integrate(float3 * pos,
+                    float3 * vel,
+                    float3 * vela,
+                    float dt,
+                    uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    integrate_kernel<<< grid, block >>>(pos,
+        vel,
+        vela,
+        dt,
+        maxInd);
+}
 }

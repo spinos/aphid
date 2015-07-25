@@ -30,6 +30,7 @@ public:
     void collide();
     void integrate(float dt);
     void sendXToHost();
+    void readVelocityCache();
 	void reset();
     
     const unsigned numObjects() const;

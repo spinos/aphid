@@ -9,6 +9,12 @@ void formTetrahedronAabbs(Aabb * leafAabbs,
                                 float dt,
                                 uint4 * tets,
                                 uint n);
+
+void integrate(float3 * pos,
+                    float3 * vel,
+                    float3 * vela,
+                    float dt,
+                    uint n);
 }
 #endif        //  #ifndef TRIANGLESYSTEMINTERFACE_H
 

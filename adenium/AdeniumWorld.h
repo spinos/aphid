@@ -60,6 +60,7 @@ private:
 	CUDABuffer * m_objectInd[32];
 	CUDABuffer * m_objectPos[32];
 	CUDABuffer * m_objectVel[32];
+    CUDABuffer * m_objectAnchoredVel[32];
 	AdeniumRender * m_image;
     ATriangleMesh * m_deformedMesh;
     ATetrahedronMesh * m_tetraMesh;

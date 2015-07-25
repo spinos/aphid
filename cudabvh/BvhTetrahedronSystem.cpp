@@ -40,6 +40,7 @@ BvhTetrahedronSystem::~BvhTetrahedronSystem()
 
 void BvhTetrahedronSystem::initOnDevice() 
 {
+    std::cout<<"\n tetrahedron system init on device";
 	m_deviceTetrahedronVicinityInd->create(numTetrahedronVicinityInd() * 4);
 	m_deviceTetrahedronVicinityStart->create((numTetrahedrons() + 1) * 4);
 	m_deviceTetrahedronVicinityInd->hostToDevice(hostTetrahedronVicinityInd());

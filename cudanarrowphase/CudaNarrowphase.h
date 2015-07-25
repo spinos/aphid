@@ -10,6 +10,7 @@
  *
  */
 #define CUDANARROWPHASE_MAX_NUMOBJECTS 32
+class Vector3F;
 class CudaMassSystem;
 class CUDABuffer;
 class BaseBuffer;
@@ -20,6 +21,7 @@ public:
 		CUDABuffer * m_pos;
 		CUDABuffer * m_pos0;
 		CUDABuffer * m_vel;
+        CUDABuffer * m_anchoredVel;
 		CUDABuffer * m_mass;
 		CUDABuffer * m_ind;
 		CUDABuffer * m_pointCacheLoc;
@@ -34,6 +36,7 @@ public:
 	
 	void initOnDevice();
 	void resetToInitial();
+    void setAnchoredVelocity(Vector3F * src);
 	
 	void addMassSystem(CudaMassSystem * tetra);
 	void computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs);

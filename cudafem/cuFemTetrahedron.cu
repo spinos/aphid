@@ -1,4 +1,5 @@
-#include "cuFemTetrahedron_implement.h"
+#include "bvh_common.h"
+#include <radixsort_implement.h>
 #include "cuFemMath.cu"
 
 __global__ void computeBVolume_kernel(float4 * dst, 
@@ -13,7 +14,8 @@ __global__ void computeBVolume_kernel(float4 * dst,
 }
 
 __global__ void integrate_kernel(float3 * pos, 
-								float3 * vel, 
+								float3 * vel,
+                                float3 * anchoredVel,
 								uint * anchor,
 								float dt, 
 								uint maxInd)
@@ -21,7 +23,8 @@ __global__ void integrate_kernel(float3 * pos,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	if(anchor[ind] > (1<<28)) return;
+    float3 va = anchoredVel[ind];
+	if(anchor[ind] > (1<<23)) vel[ind] = va;
 	float3_add_inplace(pos[ind], scale_float3_by(vel[ind], dt));
 }
 
@@ -386,23 +389,6 @@ void cuFemTetrahedron_externalForce(float3 * dst,
         maxInd);
 }
 
-void cuFemTetrahedron_integrate(float3 * pos, 
-								float3 * vel, 
-								uint * anchor,
-								float dt, 
-								uint maxInd)
-{
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(maxInd, 512);
-    dim3 grid(nblk, 1, 1);
-    
-    integrate_kernel<<< grid, block >>>(pos,
-        vel,
-        anchor,
-        dt,
-        maxInd);
-}
-
 }
 
 namespace tetrahedronfem {
@@ -499,4 +485,22 @@ void stiffnessAssembly(mat33 * dst,
                                             maxInd);
 }
 
+void integrate(float3 * pos, 
+								float3 * vel, 
+                                float3 * anchoredVel,
+								uint * anchor,
+								float dt, 
+								uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    integrate_kernel<<< grid, block >>>(pos,
+        vel,
+        anchoredVel,
+        anchor,
+        dt,
+        maxInd);
+}
 }

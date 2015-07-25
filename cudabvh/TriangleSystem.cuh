@@ -43,5 +43,19 @@ __global__ void formTriangleAabbs_kernel(Aabb *dst, float3 * pos, float3 * vel, 
 	dst[itet] = res;
 }
 
+__global__ void integrate_kernel(float3 * pos, 
+								float3 * vel,
+                                float3 * vela,
+								float dt, 
+								uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+    float3 anchoredVel = vela[ind];
+    vel[ind] = anchoredVel;
+	float3_add_inplace(pos[ind], scale_float3_by(anchoredVel, dt));
+}
+
 #endif        //  #ifndef TRIANGLESYSTEM_CUH
 

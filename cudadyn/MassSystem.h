@@ -48,7 +48,7 @@ protected:
 	void addTriangle(unsigned a, unsigned b, unsigned c);
 	void setTotalMass(float x);
     
-    void setAnchoredPoint(unsigned i, unsigned anchorInd);
+    void setAnchoredValue(unsigned i, unsigned anchorInd);
 	bool isAnchoredPoint(unsigned i);
 	
 private:

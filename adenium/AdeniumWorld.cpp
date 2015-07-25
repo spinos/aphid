@@ -182,10 +182,16 @@ void AdeniumWorld::initOnDevice()
 		
 		m_objectVel[i] = new CUDABuffer;
 		m_objectVel[i]->create(np*12);
-		
-		curObj->setDeviceVPtr(m_objectVel[i], 0);
+        
+        curObj->setDeviceVPtr(m_objectVel[i], 0);
 		m_objectVel[i]->hostToDevice(curObj->hostV(), np * 12);
+        
+        m_objectAnchoredVel[i] = new CUDABuffer;
+		m_objectAnchoredVel[i]->create(np*12);
 		
+		curObj->setDeviceVaPtr(m_objectVel[i], 0);
+		m_objectAnchoredVel[i]->hostToDevice(curObj->hostV(), np * 12);
+        
 		m_objectInd[i] = new CUDABuffer;
 		m_objectInd[i]->create(ne * 16);
 		
@@ -193,7 +199,7 @@ void AdeniumWorld::initOnDevice()
 		m_objectInd[i]->hostToDevice(curObj->hostTetrahedronIndices(), ne * 16);
 		
 		curObj->initOnDevice();
-		
+        std::cout<<"\nobj update";
 		m_objects[i]->update();
 		m_objects[i]->sendDbgToHost();
 	}
@@ -347,7 +353,7 @@ void AdeniumWorld::recordP()
     unsigned nv;
     if(m_tetraMesh) {
         nv = m_tetraMesh->numPoints();
-        m_velocityOut->setCurrentP(m_tetraMesh->points(), nv, vdrift);
+        m_velocityOut->setCurrentP(m_tetraDeformer->deformedP(), nv, vdrift);
         vdrift = nv;
     }
     nv = m_deformedMesh->numPoints();

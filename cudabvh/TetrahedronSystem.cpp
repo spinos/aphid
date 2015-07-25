@@ -99,8 +99,8 @@ TetrahedronSystem::TetrahedronSystem(ATetrahedronMesh * md)
 		
 	unsigned * anchor = md->anchors();
 	for(i=0; i< md->numPoints(); i++) {
-// 0 or 1 for now
-		if(anchor[i] > 0) setAnchoredPoint(i, anchor[i]);
+        //std::cout<<"a "<<anchor[i];
+		if(anchor[i] > 0) hostAnchor()[i] = anchor[i];
 	}
     
     std::cout<<"\n initial volume "<<md->volume()<<"\n";

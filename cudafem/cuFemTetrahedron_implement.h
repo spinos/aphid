@@ -36,6 +36,13 @@ void stiffnessAssembly(mat33 * dst,
                         uint * bufferIndices,
                         uint maxBufferInd,
                         uint maxInd);
+
+void integrate(float3 * pos, 
+                        float3 * vel, 
+                        float3 * anchoredVel,
+                        uint * anchor,
+                        float dt, 
+                        uint maxInd);
 }
 
 extern "C" {
@@ -70,12 +77,6 @@ void cuFemTetrahedron_dampK(mat33 * stiffness,
 void cuFemTetrahedron_externalForce(float3 * dst,
                                 float * mass,
                                 uint maxInd);
-								
-void cuFemTetrahedron_integrate(float3 * pos, 
-								float3 * vel, 
-								uint * anchor,
-								float dt, 
-								uint maxInd);
 }
 #endif        //  #ifndef CUFEMTETRAHEDRON_IMPLEMENT_H
 

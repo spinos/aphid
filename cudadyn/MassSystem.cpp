@@ -165,14 +165,11 @@ void MassSystem::setTotalMass(float x)
 const float MassSystem::totalMass() const
 { return m_totalMass; }
 
-void MassSystem::setAnchoredPoint(unsigned i, unsigned anchorInd)
-{
-	unsigned * anchor = &hostAnchor()[i];
-	*anchor = ((1<<30) | anchorInd);
-}
+void MassSystem::setAnchoredValue(unsigned i, unsigned anchorInd)
+{ hostAnchor()[i] = ((1<<24) | anchorInd); }
 
 bool MassSystem::isAnchoredPoint(unsigned i)
-{ return (hostAnchor()[i] > (1<<29)); }
+{ return (hostAnchor()[i] > (1<<23)); }
 
 void MassSystem::integrate(float dt) {}
 

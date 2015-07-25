@@ -40,8 +40,8 @@ void narrowphaseSqueezeContactPairs(uint2 * dstPairs, uint2 * srcPairs,
 									uint * counts, uint * packLoc, 
 									uint maxInd);
 
-void narrowphaseResetX(float3 * dst, float3 *src, 
-                       float3 * vel,
+void narrowphaseResetXV(float3 * dst, float3 *src, 
+                       float3 * vel, float3 * vel0,
                        uint maxInd);
 
 void narrowphase_writePairPosAndVel(float3 * dstPos,

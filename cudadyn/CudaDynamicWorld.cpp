@@ -8,7 +8,9 @@
 #include <BvhBuilder.h>
 #include <WorldDbgDraw.h>
 #include <IVelocityFile.h>
+#include <CudaDbgLog.h>
 
+CudaDbgLog wdlg("world.txt");
 WorldDbgDraw * CudaDynamicWorld::DbgDrawer = 0;
 IVelocityFile * CudaDynamicWorld::VelocityCache = 0;
 
@@ -118,6 +120,13 @@ void CudaDynamicWorld::reset()
 {
     if(m_numObjects < 1) return;
     m_narrowphase->resetToInitial();
+    if(!VelocityCache) return;
+   
+    VelocityCache->frameBegin();
+    VelocityCache->readFrameVelocity();
+    VelocityCache->nextFrame();
+    
+    m_narrowphase->setAnchoredVelocity(VelocityCache->velocities());
 }
 
 void CudaDynamicWorld::sendXToHost()
@@ -183,4 +192,20 @@ CudaMassSystem * CudaDynamicWorld::object(unsigned idx) const
 
 const unsigned CudaDynamicWorld::totalNumPoints() const
 { return m_narrowphase->numPoints(); }
+
+void CudaDynamicWorld::readVelocityCache()
+{
+    if(!VelocityCache) return;
+
+    if(VelocityCache->isFrameBegin()) m_narrowphase->resetToInitial();
+    VelocityCache->readFrameVelocity();
+    if(VelocityCache->isFrameEnd()) VelocityCache->frameBegin();
+    else VelocityCache->nextFrame();
+    
+   //wdlg.writeVec3(VelocityCache->velocityBuf(), 
+	//				VelocityCache->numPoints(), 
+	//				" Va ", CudaDbgLog::FAlways);
+    
+    m_narrowphase->setAnchoredVelocity(VelocityCache->velocities());
+}
 //:~

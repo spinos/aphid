@@ -88,6 +88,10 @@ void FEMTetrahedronSystem::initOnDevice()
     CudaConjugateGradientSolver::initOnDevice();
     BvhTetrahedronSystem::initOnDevice();
     m_hasBVolume = false;
+    
+    bglg.writeUInt(deviceAnchorBuf(), 
+					numPoints(), 
+					" anchored ", CudaDbgLog::FOnce);
 }
 
 unsigned matrixCoord(unsigned * indices, unsigned tet, 
@@ -468,12 +472,17 @@ void FEMTetrahedronSystem::solveConjugateGradient()
 
 void FEMTetrahedronSystem::integrate(float dt)
 {
-    cuFemTetrahedron_integrate((float3 *)deviceX(), 
+    tetrahedronfem::integrate((float3 *)deviceX(), 
 								(float3 *)deviceV(), 
+                                (float3 *)deviceVa(),
 								(uint *)deviceAnchor(),
 								dt, 
 								numPoints());
-    CudaBase::CheckCudaError("fem tetrahedron integrate");
+    CudaBase::CheckCudaError("fem tetrahedron system integrate");
+    
+    //bglg.writeVec3(deviceAnchoredVBuf(), 
+	//				numPoints(), 
+	//				" Va ", CudaDbgLog::FAlways);
 }
 
 void FEMTetrahedronSystem::update()

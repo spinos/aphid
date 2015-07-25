@@ -63,6 +63,7 @@ void CudaLinearBvh::setNumPrimitives(unsigned n)
 
 void CudaLinearBvh::initOnDevice()
 {
+    std::cout<<"\n cuda linear bvh init on device";
 	m_leafAabbs->create(numLeafNodes() * sizeof(Aabb));
 // assume numInternalNodes() >> ReduceMaxBlocks
 	m_internalNodeAabbs->create(numInternalNodes() * sizeof(Aabb));
