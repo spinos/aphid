@@ -22,6 +22,8 @@
 #include <Geometry.h>
 #include <GeometryArray.h>
 #include <ATriangleMesh.h>
+#include <APointCloud.h>
+
 GeoDrawer::GeoDrawer() 
 {
 	m_sphere = new GeodesicSphereMesh(8);
@@ -613,4 +615,13 @@ void GeoDrawer::geometryArray(GeometryArray * arr) const
 
 void GeoDrawer::setAlignDir(const Vector3F & v)
 { m_alignDir = v; }
+
+void GeoDrawer::pointCloud(APointCloud * cloud) const
+{
+	const unsigned n = cloud->numPoints();
+	Vector3F * p = cloud->points();
+	float * r = cloud->pointRadius();
+	unsigned i = 0;
+	for(; i<n;i++) alignedCircle(p[i], r[i]);
+}
 //:~

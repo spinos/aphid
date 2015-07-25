@@ -39,7 +39,8 @@ public:
 	
 	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
 	void expandBy(const BoundingBox &another);
-	void expandBy(const Vector3F & pos, float r = 0.f);
+	void expandBy(const Vector3F & pos);
+	void expandBy(const Vector3F & pos, float r);
 	void shrinkBy(const BoundingBox &another);
 	void expand(float v);
 	Vector3F center() const;
