@@ -25,6 +25,7 @@ class Primitive;
 class DiscMesh;
 class Geometry;
 class GeometryArray;
+class APointCloud;
 class GeoDrawer : public MeshDrawer {
 public:
 	GeoDrawer();
@@ -72,6 +73,8 @@ public:
 	void setAlignDir(const Vector3F & v);
 	void alignedDisc(const Vector3F & pos, float radius) const;
 	void alignedCircle(const Vector3F & pos, float radius) const;
+	
+	void pointCloud(APointCloud * cloud) const;
 	
 private:
 	Vector3F m_alignDir;

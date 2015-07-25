@@ -24,6 +24,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+	LarixInterface::DrawWorld(m_world, getDrawer());
 }
 
 void GLWidget::clientSelect(QMouseEvent * event)

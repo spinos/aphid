@@ -70,6 +70,7 @@ void LarixInterface::DrawWorld(LarixWorld * world, KdTreeDrawer * drawer)
 	APointCloud * cloud = world->pointCloud();
 	if(!cloud) return;
 	
-	
+	glColor3f(.57f, .21f, 0.f);
+	drawer->pointCloud(cloud);
 }
 //:~

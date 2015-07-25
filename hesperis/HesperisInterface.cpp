@@ -11,6 +11,8 @@
 #include "HesperisFile.h"
 #include <CurveGroup.h>
 #include <GeometryArray.h>
+#include <KdTreeDrawer.h>
+#include <APointCloud.h>
 
 std::string HesperisInterface::FileName("unknown");
 HesperisInterface::HesperisInterface() {}
@@ -69,4 +71,4 @@ bool HesperisInterface::ReadTetrahedronData(GeometryArray * data)
 	
 	return data->numGeometries() > 0;
 }
-
+//:~

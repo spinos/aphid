@@ -7,6 +7,8 @@
  *
  */
 #include <string>
+class APointCloud;
+class KdTreeDrawer;
 class CurveGroup;
 class GeometryArray;
 class HesperisInterface {
@@ -21,7 +23,7 @@ public:
 	
 	static std::string FileName;
 protected:
-
+	
 private:
 
 };
