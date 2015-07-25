@@ -110,7 +110,8 @@ void CudaDynamicWorld::collide()
 
 void CudaDynamicWorld::integrate(float dt)
 {
-    for(unsigned i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
+    // for(unsigned i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
+	m_narrowphase->integrate(dt);
 }
 
 const unsigned CudaDynamicWorld::numContacts() const

@@ -23,6 +23,7 @@ public:
 		CUDABuffer * m_vel;
         CUDABuffer * m_anchoredVel;
 		CUDABuffer * m_mass;
+		CUDABuffer * m_anchor;
 		CUDABuffer * m_ind;
 		CUDABuffer * m_pointCacheLoc;
 		CUDABuffer * m_indexCacheLoc;
@@ -59,6 +60,7 @@ public:
 	CUDABuffer * contactPairsBuffer();
 	CUDABuffer * contactBuffer();
 
+	void integrate(float dt);
 protected:
 
 private:

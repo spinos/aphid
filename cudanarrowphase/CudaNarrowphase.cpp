@@ -37,6 +37,7 @@ CudaNarrowphase::CudaNarrowphase()
 	// std::cout<<" size of simplex "<<sizeof(SSimplex)<<" \n";
 	// std::cout<<" size of ctc "<<sizeof(ClosestPointTestContext)<<" \n";
 	// std::cout<<" size of contact "<<sizeof(SContactData)<<" \n";
+	m_numPoints = 0;
     m_bufferId = 0;
     m_numObjects = 0;
 	m_numPairs = 0;
@@ -46,6 +47,7 @@ CudaNarrowphase::CudaNarrowphase()
     m_objectBuf.m_vel = new CUDABuffer;
     m_objectBuf.m_anchoredVel = new CUDABuffer;
     m_objectBuf.m_mass = new CUDABuffer;
+	m_objectBuf.m_anchor = new CUDABuffer;
     m_objectBuf.m_ind = new CUDABuffer;
 	m_objectBuf.m_pointCacheLoc = new CUDABuffer;
 	m_objectBuf.m_indexCacheLoc = new CUDABuffer;
@@ -69,6 +71,7 @@ CudaNarrowphase::~CudaNarrowphase()
     delete m_objectBuf.m_vel;
     delete m_objectBuf.m_anchoredVel;
     delete m_objectBuf.m_mass;
+	delete m_objectBuf.m_anchor;
     delete m_objectBuf.m_ind;
 	delete m_objectBuf.m_pointCacheLoc;
 	delete m_objectBuf.m_indexCacheLoc;
@@ -159,6 +162,7 @@ void CudaNarrowphase::initOnDevice()
 	m_objectBuf.m_vel->create(m_numPoints * 12);
     m_objectBuf.m_anchoredVel->create(m_numPoints * 12);
 	m_objectBuf.m_mass->create(m_numPoints * 4);
+	m_objectBuf.m_anchor->create(m_numPoints * 4);
 	m_objectBuf.m_ind->create(m_numElements * 16); // 4 ints
 	
 	m_objectBuf.m_pointCacheLoc->create(CUDANARROWPHASE_MAX_NUMOBJECTS * 4);
@@ -175,12 +179,14 @@ void CudaNarrowphase::initOnDevice()
 		curObj->setDeviceVPtr(m_objectBuf.m_vel, m_objectPointStart[i] * 12);
 		curObj->setDeviceVaPtr(m_objectBuf.m_anchoredVel, m_objectPointStart[i] * 12);
         curObj->setDeviceMassPtr(m_objectBuf.m_mass, m_objectPointStart[i] * 4);
+		curObj->setDeviceAnchorPtr(m_objectBuf.m_anchor, m_objectPointStart[i] * 4);
 		curObj->setDeviceTretradhedronIndicesPtr(m_objectBuf.m_ind, m_objectIndexStart[i] * 16);
 		
 		m_objectBuf.m_pos->hostToDevice(curObj->hostX(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_pos0->hostToDevice(curObj->hostXi(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_vel->hostToDevice(curObj->hostV(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_mass->hostToDevice(curObj->hostMass(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
+		m_objectBuf.m_anchor->hostToDevice(curObj->hostAnchor(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
 		m_objectBuf.m_ind->hostToDevice(curObj->hostTetrahedronIndices(), m_objectIndexStart[i] * 16, curObj->numElements() * 16);
 	}
 	
@@ -377,7 +383,7 @@ void CudaNarrowphase::squeezeContacts(unsigned numPairs)
 
 void CudaNarrowphase::resetToInitial()
 {
-    if(m_numPoints < 1) return;
+    if(numPoints() < 1) return;
     
     void * dst = m_objectBuf.m_pos->bufferOnDevice();
 	void * src = m_objectBuf.m_pos0->bufferOnDevice();
@@ -398,4 +404,20 @@ const unsigned CudaNarrowphase::otherBufferId() const
 
 void CudaNarrowphase::setAnchoredVelocity(Vector3F * src)
 { m_objectBuf.m_anchoredVel->hostToDevice(src, m_numPoints * 12); }
+
+void CudaNarrowphase::integrate(float dt)
+{
+	if(numPoints() < 1) return;
+	void * pos = m_objectBuf.m_pos->bufferOnDevice();
+	void * vel = m_objectBuf.m_vel->bufferOnDevice();
+    void * vela = m_objectBuf.m_anchoredVel->bufferOnDevice();
+	void * anchors = m_objectBuf.m_anchor->bufferOnDevice();
+	narrowphase_integrate((float3 *)pos, 
+                           (float3 *)vel, 
+                           (float3 *)vela, 
+						   (uint *)anchors,
+                           dt, 
+                           numPoints());
+    CudaBase::CheckCudaError("narrowphase integrate");
+}
 //:~

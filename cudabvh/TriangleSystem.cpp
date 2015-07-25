@@ -29,9 +29,12 @@ TriangleSystem::TriangleSystem(ATriangleMesh * md)
         tetra[i*4+2] = ind[i*3+2];
         tetra[i*4+3] = tetra[i*4+2];
     }
-    
+
+// all points are passive/anchored
     float * mass = hostMass();
     for(i=0;i<np;i++) mass[i] = 1e20f;
+	unsigned * anchor = hostAnchor();
+	for(i=0;i<np;i++) anchor[i] = 1<<24;
 	
 	setNumPoints(np);
 	setNumTetrahedrons(md->numTriangles());

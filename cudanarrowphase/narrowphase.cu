@@ -476,6 +476,21 @@ __global__ void resetXV_kernel(float3 * dst, float3 * src,
     }
 }
 
+__global__ void integrate_kernel1(float3 * pos, 
+								float3 * vel,
+                                float3 * anchoredVel,
+								uint * anchor,
+								float dt, 
+								uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+    float3 va = anchoredVel[ind];
+	if(anchor[ind] > 0) vel[ind] = va;
+	float3_add_inplace(pos[ind], scale_float3_by(vel[ind], dt));
+}
+
 extern "C" {
 
 void narrowphaseComputeSeparateAxis(ContactData * dstContact,
@@ -635,6 +650,25 @@ void narrowphase_squeezeContactPosAndVel(float3 * dstPos,
 									srcContact,
 									counts, scanResult, 
 									numPairs<<3);
+}
+
+void narrowphase_integrate(float3 * pos, 
+								float3 * vel, 
+                                float3 * anchoredVel,
+								uint * anchor,
+								float dt, 
+								uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    integrate_kernel1<<< grid, block >>>(pos,
+        vel,
+        anchoredVel,
+        anchor,
+        dt,
+        maxInd);
 }
 
 }

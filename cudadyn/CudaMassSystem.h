@@ -24,6 +24,7 @@ public:
 	void setDeviceVPtr(CUDABuffer * ptr, unsigned loc);
     void setDeviceVaPtr(CUDABuffer * ptr, unsigned loc);
 	void setDeviceMassPtr(CUDABuffer * ptr, unsigned loc);
+	void setDeviceAnchorPtr(CUDABuffer * ptr, unsigned loc);
 	void setDeviceTretradhedronIndicesPtr(CUDABuffer * ptr, unsigned loc);
 
     void * deviceX();
@@ -54,6 +55,6 @@ private:
 	CUDABuffer * m_deviceMass;
 	CUDABuffer * m_deviceAnchor;
 	CUDABuffer * m_deviceTetrahedronIndices;
-	unsigned m_xLoc, m_xiLoc, m_vLoc, m_vaLoc, m_massLoc, m_iLoc;
+	unsigned m_xLoc, m_xiLoc, m_vLoc, m_vaLoc, m_massLoc, m_anchorLoc, m_iLoc;
 };
 #endif        //  #ifndef CUDAMASSSYSTEM_H

@@ -10,21 +10,13 @@
 #include "CudaMassSystem.h"
 #include <CUDABuffer.h>
 #include <iostream>
-CudaMassSystem::CudaMassSystem() 
-{
-	m_deviceAnchor = new CUDABuffer;
-}
+CudaMassSystem::CudaMassSystem() {}
 
-CudaMassSystem::~CudaMassSystem() 
-{
-	delete m_deviceAnchor;
-}
+CudaMassSystem::~CudaMassSystem() {}
 
 void CudaMassSystem::initOnDevice()
 {
-    std::cout<<"\n mass system init on device";
-	m_deviceAnchor->create(numPoints() * 4);
-	m_deviceAnchor->hostToDevice(hostAnchor());
+    // std::cout<<"\n mass system init on device";
 }
 
 void CudaMassSystem::setDeviceXPtr(CUDABuffer * ptr, unsigned loc)
@@ -41,6 +33,9 @@ void CudaMassSystem::setDeviceVaPtr(CUDABuffer * ptr, unsigned loc)
 
 void CudaMassSystem::setDeviceMassPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceMass = ptr; m_massLoc = loc; }
+
+void CudaMassSystem::setDeviceAnchorPtr(CUDABuffer * ptr, unsigned loc)
+{ m_deviceAnchor = ptr; m_anchorLoc = loc;}
 
 void CudaMassSystem::setDeviceTretradhedronIndicesPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceTetrahedronIndices = ptr; m_iLoc = loc; }
@@ -59,6 +54,9 @@ void * CudaMassSystem::deviceVa()
 
 void * CudaMassSystem::deviceMass()
 {  return m_deviceMass->bufferOnDeviceAt(m_massLoc); }
+
+void * CudaMassSystem::deviceAnchor()
+{ return m_deviceAnchor->bufferOnDeviceAt(m_anchorLoc); }
 
 void * CudaMassSystem::deviceTretradhedronIndices()
 { return m_deviceTetrahedronIndices->bufferOnDeviceAt(m_iLoc); }
@@ -83,9 +81,6 @@ const unsigned CudaMassSystem::vLoc() const
 
 const unsigned CudaMassSystem::anchoredVLoc() const
 { return m_vaLoc; }
-
-void * CudaMassSystem::deviceAnchor()
-{ return m_deviceAnchor->bufferOnDevice(); }
 
 CUDABuffer * CudaMassSystem::anchorBuf()
 { return m_deviceAnchor; }
