@@ -51,8 +51,8 @@ void WorldThread::run()
             return;
         }
         
-        m_world->sendXToHost();
         m_world->readVelocityCache();
+        m_world->sendXToHost();
         
         m_numLoops+=NumSubsteps; 
 

@@ -55,6 +55,9 @@ void GLWidget::clientDraw()
 	sst.str("");
 	sst<<"fps: "<<frameRate();
     hudText(sst.str(), 1);
+    sst.str("");
+	sst<<"n contacts: "<<m_world->numContacts();
+    hudText(sst.str(), 2);
     
 #if DRGDRW
     if(m_isPhysicsRunning) m_interface->draw(m_world, getDrawer());

@@ -195,7 +195,9 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	}
 	
 // 2 tet per contact, 4 pnt per tet, key is pnt index, value is tet index in split
-	const unsigned pntHashBufLength = nextPow2(numContacts * 2 * 4);
+	const unsigned pntHashBufLength = iRound1024(numContacts * 2 * 4);
+    //std::cout<<"\n pntHashBufLength"<<pntHashBufLength
+    //<<" numContact"<<numContacts;
 	m_pntTetHash[0]->create(pntHashBufLength * 8);
 	m_pntTetHash[1]->create(pntHashBufLength * 8);
 	
@@ -210,10 +212,10 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                (uint * )perObjectIndexStart,
 	                numContacts * 2,
 	                pntHashBufLength);
-	CudaBase::CheckCudaError("jacobi solver point-tetra hash");
+    CudaBase::CheckCudaError("jacobi solver point-tetra hash");
     
 	void * intermediate = m_pntTetHash[1]->bufferOnDevice();
-	RadixSort((KeyValuePair *)pntTetHash, (KeyValuePair *)intermediate, pntHashBufLength, 32);
+	RadixSort((KeyValuePair *)pntTetHash, (KeyValuePair *)intermediate, pntHashBufLength, 30);
     	
 	simpleContactSolverUpdateVelocity((float3 *)vel,
 	                (float3 *)deltaLinVel,
