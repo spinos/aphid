@@ -6,7 +6,7 @@
 #include "simpleContactSolver_implement.h"
 #include "bvh_math.cuh"
 #include "barycentric.cu"
-#include "stripedModel.cu"
+#include "stripedModel.cuh"
 #include <CudaBase.h>
 #define SETCONSTRAINT_TPB 128
 #define SOLVECONTACT_TPB 256

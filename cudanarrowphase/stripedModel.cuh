@@ -1,16 +1,17 @@
-#ifndef STRIPEDMODEL_CU
-#define STRIPEDMODEL_CU
+#ifndef STRIPEDMODEL_CUH
+#define STRIPEDMODEL_CUH
 
 #include "bvh_math.cuh"
 
+// limit num elements per object to 1^20-1
 inline __device__ uint combineObjectElementInd(uint objectIdx, uint elementIdx)
-{ return (objectIdx<<24 | elementIdx); }
+{ return (objectIdx<<20 | elementIdx); }
 
 inline __device__ uint extractObjectInd(uint combined)
-{ return (combined>>24);}
+{ return (combined>>20);}
 
 inline __device__ uint extractElementInd(uint combined)
-{ return ((combined<<8)>>8);}
+{ return ((combined<<12)>>12);}
 
 inline __device__ uint4 computePointIndex(uint * pointStarts,
                                             uint * indexStarts,
@@ -28,5 +29,5 @@ inline __device__ uint4 computePointIndex(uint * pointStarts,
     r.w = objectDrift + elementInd.w;
     return r;
 }
-#endif        //  #ifndef STRIPEDMODEL_CU
+#endif        //  #ifndef STRIPEDMODEL_CUH
 

@@ -1,4 +1,5 @@
 #include "stackUtil.cuh"
+#include "stripedModel.cuh"
 #include "TetrahedronSystemInterface.h"
 #include <CudaBase.h>
 

@@ -1,7 +1,6 @@
 #ifndef STACKUTIL_CUH
 #define STACKUTIL_CUH
 
-#include "stripedModel.cu"
 #include "bvh_math.cuh"
 #include "radixsort_implement.h"
 #include "Aabb.cuh"

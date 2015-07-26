@@ -6,7 +6,7 @@
 #include "cuReduceInBlock.cuh"
 #include "bvh_math.cuh"
 #include "Aabb.cuh"
-#include "stripedModel.cu"
+#include "stripedModel.cuh"
 
 #define BVH_PACKET_TRAVERSE_CACHE_SIZE 64
 #define BVH_TRAVERSE_MAX_STACK_SIZE 64

@@ -1,7 +1,7 @@
 #include "narrowphase_implement.h"
 #include "bvh_math.cuh"
 #include <gjk_math.cu>
-#include <stripedModel.cu>
+#include <stripedModel.cuh>
 #include <CudaBase.h>
 
 #define GJK_BLOCK_SIZE 64
