@@ -41,7 +41,7 @@ void APlayback::nextSample()
 { m_currentSample++; }
 
 const bool APlayback::isSampleEnd() const
-{ return m_currentSample == SamplesPerFrame; }
+{ return (m_currentSample + 1) == SamplesPerFrame; }
 
 void APlayback::begin()
 {

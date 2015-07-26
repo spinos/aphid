@@ -12,6 +12,7 @@ public:
 protected:
     bool writeNumPoints(int n);
     void calculateVelocity();
+	void zeroVelocity();
     void writeVelocity(int t);
 private:
     BaseBuffer * m_currentP;

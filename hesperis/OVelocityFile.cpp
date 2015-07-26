@@ -49,8 +49,10 @@ bool OVelocityFile::writeFrameVelocity()
     if(!isFrameBegin()) {
         calculateVelocity();
         writeVelocity(currentFrame()-1);
-        if(isFrameEnd())
+        if(isFrameEnd()) {
+			zeroVelocity();
             writeVelocity(currentFrame());
+		}
     }
     m_lastP->copyFrom(m_currentP->data(), numPoints() * 12);
     return true;
@@ -63,6 +65,13 @@ void OVelocityFile::calculateVelocity()
     unsigned i=0;
     for(;i<numPoints();i++)
         velocities()[i] = (pos1[i] - pos0[i]) * 30.f; // 30 fps
+}
+
+void OVelocityFile::zeroVelocity()
+{
+	unsigned i=0;
+    for(;i<numPoints();i++)
+        velocities()[i] = Vector3F::Zero;
 }
 
 void OVelocityFile::writeVelocity(int t)
