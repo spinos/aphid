@@ -62,16 +62,21 @@ void OVelocityFile::calculateVelocity()
 {
     Vector3F * pos0 = (Vector3F *)m_lastP->data();
     Vector3F * pos1 = (Vector3F *)m_currentP->data();
+    float topSpeed = -1e8f;
+    float speed;
     unsigned i=0;
-    for(;i<numPoints();i++)
+    for(;i<numPoints();i++) {
         velocities()[i] = (pos1[i] - pos0[i]) * 30.f; // 30 fps
+        speed = velocities()[i].length();
+        if(topSpeed < speed) topSpeed = speed;
+    }
+    std::cout<<"\n max speed "<<topSpeed;
 }
 
 void OVelocityFile::zeroVelocity()
 {
 	unsigned i=0;
-    for(;i<numPoints();i++)
-        velocities()[i] = Vector3F::Zero;
+    for(;i<numPoints();i++) velocities()[i] = Vector3F::Zero;
 }
 
 void OVelocityFile::writeVelocity(int t)

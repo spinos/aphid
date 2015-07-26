@@ -76,8 +76,7 @@ TetrahedronSystem::TetrahedronSystem()
 		}
 		vy = -vy;
 	}
-	
-	setTotalMass(500.f);
+	setTotalMass(100.f);
     calculateMass();
     createL2Vicinity();
 }
@@ -102,9 +101,12 @@ TetrahedronSystem::TetrahedronSystem(ATetrahedronMesh * md)
         //std::cout<<"a "<<anchor[i];
 		if(anchor[i] > 0) hostAnchor()[i] = anchor[i];
 	}
-    
-    std::cout<<"\n initial volume "<<md->volume()<<"\n";
-    setTotalMass(95.f * md->volume());
+// density of nylon = 1.15 g/cm^3
+// very low density is unstable
+    std::cout<<"\n initial volume "<<md->volume()
+       <<"\n initial mass "<<(100.15f * md->volume())
+       <<"\n";
+    setTotalMass(100.15f * md->volume());
     calculateMass();
     createL2Vicinity();
 }

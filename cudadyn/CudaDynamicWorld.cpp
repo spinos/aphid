@@ -74,7 +74,8 @@ void CudaDynamicWorld::initOnDevice()
 	CudaLinearBvh::Builder->initOnDevice();
     
     unsigned i;
-	for(i=0; i < m_numObjects; i++) m_objects[i]->initOnDevice();
+	for(i=0; i < m_numObjects; i++)
+        m_objects[i]->initOnDevice();
 	
     m_broadphase->initOnDevice();
     m_narrowphase->initOnDevice();
@@ -109,10 +110,7 @@ void CudaDynamicWorld::collide()
 }
 
 void CudaDynamicWorld::integrate(float dt)
-{
-    // for(unsigned i=0; i < m_numObjects; i++) m_objects[i]->integrate(dt);
-	m_narrowphase->integrate(dt);
-}
+{ m_narrowphase->integrate(dt); }
 
 const unsigned CudaDynamicWorld::numContacts() const
 { return m_narrowphase->numContacts(); }
@@ -121,13 +119,10 @@ void CudaDynamicWorld::reset()
 {
     if(m_numObjects < 1) return;
     m_narrowphase->resetToInitial();
-    if(!VelocityCache) return;
-   
-    VelocityCache->frameBegin();
-    VelocityCache->readFrameVelocity();
-    VelocityCache->nextFrame();
-    
-    m_narrowphase->setAnchoredVelocity(VelocityCache->velocities());
+    if(VelocityCache) {
+        delete VelocityCache;
+        VelocityCache = 0;
+    }
 }
 
 void CudaDynamicWorld::sendXToHost()
@@ -152,6 +147,7 @@ void CudaDynamicWorld::sendXToHost()
      }
 	
 	m_broadphase->sendDbgToHost();
+    
 #if 0		
 	cudaEventRecord(stop_event, 0);
     cudaEventSynchronize(stop_event);
@@ -197,16 +193,14 @@ const unsigned CudaDynamicWorld::totalNumPoints() const
 void CudaDynamicWorld::readVelocityCache()
 {
     if(!VelocityCache) return;
-
-    if(VelocityCache->isFrameBegin()) m_narrowphase->resetToInitial();
+    if(VelocityCache->isOutOfRange()) return;
     VelocityCache->readFrameVelocity();
-    if(VelocityCache->isFrameEnd()) VelocityCache->frameBegin();
-    else VelocityCache->nextFrame();
+    VelocityCache->nextFrame();
     
    //wdlg.writeVec3(VelocityCache->velocityBuf(), 
 	//				VelocityCache->numPoints(), 
 	//				" Va ", CudaDbgLog::FAlways);
-    
+    // cudaDeviceSynchronize();
     m_narrowphase->setAnchoredVelocity(VelocityCache->velocities());
 }
 //:~

@@ -37,12 +37,10 @@ void WorldThread::run()
 {	 
     forever 
     {
-	    if (abort) {
+        if (abort) {
             qDebug()<<"abort physics b4";
             return;
         }
-        
-        m_world->readVelocityCache();
         
         for(int i=0; i < NumSubsteps; i++) {
            m_world->stepPhysics(TimeStep);
@@ -54,6 +52,8 @@ void WorldThread::run()
         }
         
         m_world->sendXToHost();
+        m_world->readVelocityCache();
+        
         m_numLoops+=NumSubsteps; 
 
 		emit doneStep();

@@ -123,7 +123,7 @@ void CudaConjugateGradientSolver::solve(void * X,
         
         if(error) *error = d1;
         
-		if(d1 < 0.01f)
+		if(d1 < 0.09f)
 			break;
 
 		if(fabs(d)<1e-10f)

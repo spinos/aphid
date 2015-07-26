@@ -69,7 +69,6 @@ void CudaLinearBvh::initOnDevice()
 	m_internalNodeAabbs->create(numInternalNodes() * sizeof(Aabb));
 	
 	m_leafHash->create(nextPow2(numLeafNodes()) * sizeof(KeyValuePair));
-	
 	m_leafNodeParentIndices->create(numLeafNodes() * sizeof(int));
 	m_internalNodeChildIndices->create(numInternalNodes() * sizeof(int2));
 	m_internalNodeParentIndices->create(numInternalNodes() * sizeof(int));

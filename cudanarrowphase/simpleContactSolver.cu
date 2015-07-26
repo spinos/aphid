@@ -750,7 +750,8 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
     float3 a = dstVelocity[iPnt];
 	float3_add_inplace(a, sumLinVel);
     float speed = float3_length(a);
-    if(speed>10.f) float3_scale_inplace(a, 10.f/speed);
+// limit speed here
+    if(speed>12.f) float3_scale_inplace(a, 12.f/speed);
     dstVelocity[iPnt] = a;
 }
 

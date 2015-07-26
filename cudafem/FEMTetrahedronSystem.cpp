@@ -88,10 +88,6 @@ void FEMTetrahedronSystem::initOnDevice()
     CudaConjugateGradientSolver::initOnDevice();
     BvhTetrahedronSystem::initOnDevice();
     m_hasBVolume = false;
-    
-    bglg.writeUInt(deviceAnchorBuf(), 
-					numPoints(), 
-					" anchored ", CudaDbgLog::FOnce);
 }
 
 unsigned matrixCoord(unsigned * indices, unsigned tet, 
