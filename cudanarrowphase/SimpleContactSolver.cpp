@@ -73,7 +73,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
     if(numContacts < 1) return; 
     
 	m_numContacts = numContacts;
-	const unsigned indBufLength = nextPow2(numContacts * 2);
+	const unsigned indBufLength = iRound1024(numContacts * 2);
 	
 	m_sortedInd[0]->create(indBufLength * 8);	
 	m_sortedInd[1]->create(indBufLength * 8);
@@ -84,7 +84,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	simpleContactSolverWriteContactIndex((KeyValuePair *)bodyContactHash, (uint *)pairs, numContacts * 2, indBufLength);
 	
 	void * tmp = m_sortedInd[1]->bufferOnDevice();
-	RadixSort((KeyValuePair *)bodyContactHash, (KeyValuePair *)tmp, indBufLength, 32);
+	RadixSort((KeyValuePair *)bodyContactHash, (KeyValuePair *)tmp, indBufLength, 30);
 	
 	m_splitPair->create(numContacts * 8);
 	void * splits = m_splitPair->bufferOnDevice();
