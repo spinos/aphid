@@ -681,6 +681,40 @@ void testAtomic()
     if(passed) std::cout<<"passed!\n";
 }
 
+void testAsyncKernels()
+{
+    std::cout<<" test kernel behavior\n";
+    const unsigned n = 1<<8;
+    
+    CUDABuffer din;
+    din.create(n*4);
+    
+    cu_setZero((int *)din.bufferOnDevice(),
+        n);
+    
+    unsigned i;
+    for(i=0;i<23;i++)
+        cu_addOne((int *)din.bufferOnDevice(),
+            n);
+    
+    BaseBuffer hout;
+    hout.create(n*4);
+    din.deviceToHost(hout.data());
+    
+    int * iout = (int *)hout.data();
+	
+    int passed = 1;
+    for(i=0;i<n;i++) { 
+        if(iout[i] != 23) {
+            passed = 0;
+            std::cout<<" gpu result "<<iout[i]<<" != 23, failed";
+            break;
+        }
+    }
+    
+    if(passed) std::cout<<"passed!\n";
+}
+
 int main(int argc, char **argv)
 {
     // This will pick the best possible CUDA capable device
@@ -704,14 +738,15 @@ int main(int argc, char **argv)
         
     // printf("test conjugate gradient\n");
     // testCg();
-    testReduceMax();
+    // testReduceMax();
 	// testReduceMinMax();
 	//testReduceMinMaxBox4();
-	testReduceMinMaxBox();
+	// testReduceMinMaxBox();
 	//testReduceSum();
 	// testScan();
     // testRadixSort();
     // testAtomic();
+    testAsyncKernels();
     printf("done.\n");
     exit(0);
 }

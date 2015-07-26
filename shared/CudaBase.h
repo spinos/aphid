@@ -21,7 +21,7 @@ public:
     static int LimitNThreadPerBlock(int regPT, int memPT);
 	static void CheckCudaError(cudaError_t err, const char * info);
     static void CheckCudaError(const char * info);
-    
+    static cudaError_t Synchronize();
     static int MemoryUsed;
 	static std::string BreakInfo;
 private:

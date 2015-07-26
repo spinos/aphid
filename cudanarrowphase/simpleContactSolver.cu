@@ -12,6 +12,8 @@
 #define SOLVECONTACT_TPB 256
 #define DEFORMABILITY 0.0134f
 #define ENABLE_DEFORMABILITY 0
+#define VERYLARGE_INT 16777215 // 1<<24 - 1
+#define VERYLARGE_INT_M1 16777214 
 inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
                                                   float3 averageLinearVel,
                                                   float3 * position,
@@ -618,16 +620,16 @@ __global__ void writePointTetHash_kernel(KeyValuePair * pntTetHash,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	uint istart = ind * 4;
+	const uint istart = ind * 4;
 	
 	if(ind >= numBodies) {
-	    pntTetHash[istart].key = 1<<30;
-        pntTetHash[istart + 1].key = 1<<30;
-        pntTetHash[istart + 2].key = 1<<30;
-        pntTetHash[istart + 3].key = 1<<30;
+	    pntTetHash[istart].key = VERYLARGE_INT;
+        pntTetHash[istart + 1].key = VERYLARGE_INT;
+        pntTetHash[istart + 2].key = VERYLARGE_INT;
+        pntTetHash[istart + 3].key = VERYLARGE_INT;
         return;
 	}
-	   
+	
 	const unsigned iContact = ind>>1;
 	
 	uint splitInd = splits[iContact].x;
@@ -640,10 +642,10 @@ __global__ void writePointTetHash_kernel(KeyValuePair * pntTetHash,
 	    
 	if(bodyCount[splitInd] < 1) {
 // redundant
-        pntTetHash[istart].key = 1<<30;
-        pntTetHash[istart + 1].key = 1<<30;
-        pntTetHash[istart + 2].key = 1<<30;
-        pntTetHash[istart + 3].key = 1<<30;
+        pntTetHash[istart].key = VERYLARGE_INT;
+        pntTetHash[istart + 1].key = VERYLARGE_INT;
+        pntTetHash[istart + 2].key = VERYLARGE_INT;
+        pntTetHash[istart + 3].key = VERYLARGE_INT;
 	}
 	else {
 	    const uint4 ia = computePointIndex(pointStart, indexStart, indices, iBody);
@@ -678,7 +680,7 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	
 	const uint iPnt = pntTetHash[ind].key;
 	
-	if(iPnt > (1<<24)) return;
+	if(iPnt > VERYLARGE_INT_M1) return;
 	
 	int isFirst = 0;
 	

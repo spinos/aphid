@@ -215,7 +215,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
     CudaBase::CheckCudaError("jacobi solver point-tetra hash");
     
 	void * intermediate = m_pntTetHash[1]->bufferOnDevice();
-	RadixSort((KeyValuePair *)pntTetHash, (KeyValuePair *)intermediate, pntHashBufLength, 30);
+	RadixSort((KeyValuePair *)pntTetHash, (KeyValuePair *)intermediate, pntHashBufLength, 24);
     	
 	simpleContactSolverUpdateVelocity((float3 *)vel,
 	                (float3 *)deltaLinVel,
@@ -230,5 +230,6 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                     (uint * )perObjPointStart,
                     (uint * )perObjectIndexStart,
                     numContacts * 2 * 4);
-    CudaBase::CheckCudaError("jacobi solver update velocity");
+    CudaBase::CheckCudaError(CudaBase::Synchronize(),
+        "jacobi solver update velocity");
 }

@@ -111,4 +111,7 @@ void CudaBase::CheckCudaError(cudaError_t err, const char * info)
 
 void CudaBase::CheckCudaError(const char * info)
 { CheckCudaError(cudaGetLastError(), info); }
+
+cudaError_t CudaBase::Synchronize()
+{ return cudaDeviceSynchronize(); }
 //:~
