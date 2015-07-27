@@ -10,7 +10,7 @@
 #include <CudaBase.h>
 
 CudaDbgLog bglg("stiffness.txt");
-
+float FEMTetrahedronSystem::YoungsModulus = 200000.f;
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
     m_Re = new CUDABuffer;
@@ -493,6 +493,5 @@ void FEMTetrahedronSystem::update()
 	updateStiffnessMatrix();
 	dynamicsAssembly(1.f/60.f);
 	solveConjugateGradient();
-	// verbose();
 	BvhTetrahedronSystem::update();
 }

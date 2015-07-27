@@ -32,6 +32,9 @@ private:
     FEMWorldInterface * m_interface;
     WorldThread * m_thread;
     bool m_isPhysicsRunning;
+
+public slots:
+    void receiveYoungsModulus(double x);
 private slots:
     void simulate();
 signals:

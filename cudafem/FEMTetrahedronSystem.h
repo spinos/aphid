@@ -17,7 +17,7 @@ public:
 	virtual void update();
 // override BvhTetrahedronSystem
     virtual void integrate(float dt);
-	
+	static float YoungsModulus;
     void verbose();
 protected:
     

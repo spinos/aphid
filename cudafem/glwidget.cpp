@@ -7,6 +7,7 @@
 #include "FEMWorldInterface.h"
 #include <WorldThread.h>
 #include <WorldDbgDraw.h>
+#include <FEMTetrahedronSystem.h>
 
 #define DRGDRW 0
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -27,9 +28,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_thread = new WorldThread(m_world, this);
 	m_isPhysicsRunning = 0;
 }
-//! [0]
 
-//! [1]
 GLWidget::~GLWidget()
 {
     delete m_thread;
@@ -160,3 +159,7 @@ void GLWidget::togglePhysics()
     if(m_isPhysicsRunning) stopPhysics();
     else startPhysics();   
 }
+
+void GLWidget::receiveYoungsModulus(double x)
+{ FEMTetrahedronSystem::YoungsModulus = (float)x; }
+//:~

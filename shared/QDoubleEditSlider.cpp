@@ -32,7 +32,6 @@ QDoubleEditSlider::QDoubleEditSlider(const QString & name, QWidget *parent)
 	
 	setLimit(0.1, 10.0);
 	setValue(5.0);
-	updateSlider(5.0);
 	
 	connect(m_edit, SIGNAL(returnPressed()),
             this, SLOT(validateEditValue()));
@@ -50,7 +49,11 @@ void QDoubleEditSlider::setLimit(double bottom, double top)
 void QDoubleEditSlider::setValue(double x)
 {
 	setEditValue(x);
+    disconnect(m_slider, SIGNAL(valueChanged(int)),
+            this, SLOT(convertEditValue(int)));
 	updateSlider(x);
+    connect(m_slider, SIGNAL(valueChanged(int)),
+            this, SLOT(convertEditValue(int)));
 }
 
 double QDoubleEditSlider::value() const
@@ -68,8 +71,8 @@ void QDoubleEditSlider::validateEditValue()
 
 void QDoubleEditSlider::updateSlider(double x)
 {
-	double slideMin = x / 3;
-	double slideMax = x * 3;
+	double slideMin = x / 2;
+	double slideMax = x * 2;
 	if(slideMin < m_bottomValue) slideMin = m_bottomValue;
 	if(slideMax > m_topValue) slideMax = m_topValue;
 	if(x == m_bottomValue || x == m_topValue) {
@@ -94,7 +97,7 @@ void QDoubleEditSlider::setEditValue(double x)
 
 void QDoubleEditSlider::convertEditValue(int x)
 {
-	double d = m_slideMin + (m_slideMax - m_slideMin) * (double)x / 100.0;
+	const double d = m_slideMin + (m_slideMax - m_slideMin) * (double)x / 100.0;
 	setEditValue(d);
 }
 

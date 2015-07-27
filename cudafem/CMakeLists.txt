@@ -59,6 +59,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "FEMTetrahedronSystem.h"
 "FEMWorldInterface.h"
 "window.h"
+PhysicsControl.h
 "glwidget.h")
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
@@ -66,6 +67,8 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../shared/CudaBase.cpp"
 "../shared/CUDABuffer.cpp"
 "../shared/CudaDbgLog.cpp"
+"../shared/QIntEditSlider.cpp"
+"../shared/QDoubleEditSlider.cpp"
 "../cudabvh/CudaLinearBvh.cpp"
 "../cudabvh/TriangleSystem.cpp"
 "../cudabvh/TetrahedronSystem.cpp"
@@ -95,6 +98,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "FEMWorldInterface.cpp"
 "glwidget.cpp"
 "window.cpp"
+PhysicsControl.cpp
 "main.cpp")
 
 if (WIN32)

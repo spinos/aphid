@@ -4,10 +4,12 @@
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
-
+class QMenu;
+class QAction;
 QT_END_NAMESPACE
-//! [0]
+
 class GLWidget;
+class PhysicsControl;
 
 class Window : public QMainWindow
 {
@@ -20,7 +22,14 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
+    void createActions();
+    void createMenus();
+    
+private:
     GLWidget *glWidget;
+    PhysicsControl * m_physicsControl;
+    QMenu * windowMenu;
+    QAction * showPhysicsControlAct;
 };
 //! [0]
 
