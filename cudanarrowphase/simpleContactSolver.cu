@@ -608,6 +608,14 @@ __global__ void averageVelocities_kernel(float3 * linearVelocity,
 	}
 }
 
+__global__ void resetPointTetHash_kernel(KeyValuePair * pntTetHash,
+	                uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+    pntTetHash[ind].key = VERYLARGE_INT;
+}
+
 __global__ void writePointTetHash_kernel(KeyValuePair * pntTetHash,
 	                uint2 * pairs,
 	                uint2 * splits,
@@ -615,32 +623,25 @@ __global__ void writePointTetHash_kernel(KeyValuePair * pntTetHash,
 	                uint4 * indices,
 	                uint * pointStart,
                     uint * indexStart,
-                    uint numBodies,
-	                uint maxInd)
+                    uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
 	const uint istart = ind * 4;
 	
-	if(ind >= numBodies) {
-	    pntTetHash[istart].key = VERYLARGE_INT;
-        pntTetHash[istart + 1].key = VERYLARGE_INT;
-        pntTetHash[istart + 2].key = VERYLARGE_INT;
-        pntTetHash[istart + 3].key = VERYLARGE_INT;
-        return;
-	}
-	
 	const unsigned iContact = ind>>1;
 	
 	uint splitInd = splits[iContact].x;
 	uint iBody = pairs[iContact].x;
 	
-	if((ind & 1)>0) {
+	if(ind & 1) {
 	    splitInd = splits[iContact].y;
 	    iBody = pairs[iContact].y;
 	}
-	    
+    
+	KeyValuePair kv;  
+    
 	if(bodyCount[splitInd] < 1) {
 // redundant
         pntTetHash[istart].key = VERYLARGE_INT;
@@ -651,14 +652,18 @@ __global__ void writePointTetHash_kernel(KeyValuePair * pntTetHash,
 	else {
 	    const uint4 ia = computePointIndex(pointStart, indexStart, indices, iBody);
 	    
-	    pntTetHash[istart  ].key = ia.x;
-	    pntTetHash[istart  ].value = ind;
-	    pntTetHash[istart+1].key = ia.y;
-	    pntTetHash[istart+1].value = ind;
-	    pntTetHash[istart+2].key = ia.z;
-	    pntTetHash[istart+2].value = ind;
-	    pntTetHash[istart+3].key = ia.w;
-	    pntTetHash[istart+3].value = ind;
+        kv.value = ind;
+	    kv.key = ia.x;
+        pntTetHash[istart  ] = kv;
+        
+        kv.key = ia.y;
+	    pntTetHash[istart+1] = kv;
+        
+        kv.key = ia.z;
+	    pntTetHash[istart+2] = kv;
+	    
+        kv.key = ia.w;
+	    pntTetHash[istart+3] = kv;
 	}
 }
 
@@ -706,7 +711,7 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	for(;;) {
 	    iContact = pntTetHash[cur].value>>1;
 	
-        if((pntTetHash[cur].value & 1)>0) {
+        if(pntTetHash[cur].value & 1) {
             splitInd = splits[iContact].y;
             
 #if ENABLE_DEFORMABILITY
@@ -969,9 +974,12 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                uint bufLength)
 {
     dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(numBodies, 512);
+    unsigned nblk = iDivUp(bufLength, 512);
     dim3 grid(nblk, 1, 1);
     
+    resetPointTetHash_kernel<<< grid, block >>>(pntTetHash,
+                                                bufLength);
+    grid.x = iDivUp(numBodies, 512);
     writePointTetHash_kernel<<< grid, block >>>(pntTetHash,
 	                pairs,
 	                splits,
@@ -979,8 +987,7 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                ind,
 	                perObjPointStart,
 	                perObjectIndexStart,
-	                numBodies,
-	                bufLength);
+	                numBodies);
 }
 
 void simpleContactSolverUpdateVelocity(float3 * dstVelocity,

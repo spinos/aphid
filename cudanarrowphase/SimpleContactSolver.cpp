@@ -13,6 +13,12 @@
 #include "simpleContactSolver_implement.h"
 #include <DynGlobal.h>
 #include <CudaBase.h>
+
+#if 0
+#include <CudaDbgLog.h>
+CudaDbgLog svlg("solver.txt");
+#endif
+
 SimpleContactSolver::SimpleContactSolver() 
 {
 	m_sortedInd[0] = new CUDABuffer;
@@ -196,8 +202,8 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	
 // 2 tet per contact, 4 pnt per tet, key is pnt index, value is tet index in split
 	const unsigned pntHashBufLength = iRound1024(numContacts * 2 * 4);
-    //std::cout<<"\n pntHashBufLength"<<pntHashBufLength
-    //<<" numContact"<<numContacts;
+    // std::cout<<"\n pntHashBufLength"<<pntHashBufLength
+    // <<" numContact"<<numContacts;
 	m_pntTetHash[0]->create(pntHashBufLength * 8);
 	m_pntTetHash[1]->create(pntHashBufLength * 8);
 	
@@ -212,11 +218,17 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                (uint * )perObjectIndexStart,
 	                numContacts * 2,
 	                pntHashBufLength);
-    CudaBase::CheckCudaError("jacobi solver point-tetra hash");
+    CudaBase::CheckCudaError(CudaBase::Synchronize(),
+                             "jacobi solver point-tetra hash");
     
 	void * intermediate = m_pntTetHash[1]->bufferOnDevice();
 	RadixSort((KeyValuePair *)pntTetHash, (KeyValuePair *)intermediate, pntHashBufLength, 24);
-    	
+
+#if 0
+    svlg.writeHash(m_pntTetHash[1], numContacts * 2, 
+                   "pnttet_hash", CudaDbgLog::FAlways);
+#endif
+    
 	simpleContactSolverUpdateVelocity((float3 *)vel,
 	                (float3 *)deltaLinVel,
 	                (float3 *)deltaAngVel,
