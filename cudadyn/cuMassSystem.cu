@@ -10,7 +10,7 @@ __global__ void computeMass_kernel(float * dst,
 	if(ind >= maxInd) return;
 	
 	float m0 = mass0[ind];
-	if(anchored[ind] > 0) dst[ind] = m0 * scale;
+	if(anchored[ind] == 0) dst[ind] = m0 * scale;
 }
 
 namespace masssystem {
