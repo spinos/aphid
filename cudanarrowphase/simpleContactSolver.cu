@@ -451,8 +451,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
  *  Lecture 7 Collision Resolution Pg. 18
  *  j = (1 + Cr)Vr.N*M^-1
  */
-    J += constraints[iContact].relVel;
-    J *= 0.5f;
+    J += constraints[iContact].relVel * .5f;
     J *= constraints[iContact].Minv;
 	
 	float prevSum = constraints[iContact].lambda;
@@ -466,8 +465,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
 	
 	const float invMassA = splitMass[splitInd];
 	
-    //if(invMassA > 1e-6f)
-        applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
+    applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
 	//applyImpulse(deltaAngularVelocity[splitInd], J * invMassA, torqueA);
 }
 
@@ -759,7 +757,7 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	float3_add_inplace(a, sumLinVel);
     float speed = float3_length(a);
 // limit speed here
-    if(speed>10.f) float3_scale_inplace(a, 10.f/speed);
+    if(speed>14.f) float3_scale_inplace(a, 14.f/speed);
     dstVelocity[iPnt] = a;
 }
 

@@ -194,6 +194,9 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/TriangleDifference.cpp
 ../shared/ADeformer.cpp
 ../shared/TriangleAnchorDeformer.cpp
+../shared/SplineMap1D.cpp
+../shared/ATetrahedronMeshGroup.cpp
+../shared/HTetrahedronMeshGroup.cpp
                                 ../lapl/VertexAdjacency.cpp 
                 ../lapl/Anchor.cpp 
                 ../catmullclark/BaseQuad.cpp 

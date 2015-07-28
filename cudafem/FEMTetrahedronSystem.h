@@ -6,12 +6,13 @@
 class BaseBuffer;
 class CUDABuffer;
 class CudaCSRMatrix;
+class ATetrahedronMeshGroup;
 class FEMTetrahedronSystem : public BvhTetrahedronSystem, 
                                 public CudaConjugateGradientSolver
 {
 public:
     FEMTetrahedronSystem();
-    FEMTetrahedronSystem(ATetrahedronMesh * md);
+    FEMTetrahedronSystem(ATetrahedronMeshGroup * md);
     virtual ~FEMTetrahedronSystem();
 	virtual void initOnDevice();
 	virtual void update();

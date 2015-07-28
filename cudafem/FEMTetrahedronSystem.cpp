@@ -8,6 +8,7 @@
 #include <boost/format.hpp>
 #include <FemGlobal.h>
 #include <CudaBase.h>
+#include <ATetrahedronMeshGroup.h>
 
 CudaDbgLog bglg("stiffness.txt");
 float FEMTetrahedronSystem::YoungsModulus = 160000.f;
@@ -29,7 +30,7 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
 	m_hasBVolume = false;
 }
 
-FEMTetrahedronSystem::FEMTetrahedronSystem(ATetrahedronMesh * md) :
+FEMTetrahedronSystem::FEMTetrahedronSystem(ATetrahedronMeshGroup * md) :
 BvhTetrahedronSystem(md)
 {
     m_Re = new CUDABuffer;

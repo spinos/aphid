@@ -22,7 +22,9 @@ public:
 	virtual char verifyType();
 	virtual char save(ATetrahedronMesh * tetra);
 	virtual char load(ATetrahedronMesh * tetra);
-	
+
+protected:
+    char readAftCreation(ATetrahedronMesh * tetra);
 private:
 	
 };

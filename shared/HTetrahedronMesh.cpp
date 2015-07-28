@@ -86,14 +86,20 @@ char HTetrahedronMesh::load(ATetrahedronMesh * tetra)
 	readIntAttr(".nt", &nt);
 	
 	tetra->create(nv, nt);
-	
-	readVector3Data(".p", nv, (Vector3F *)tetra->points());
-	readIntData(".a", nv, (unsigned *)tetra->anchors());
-	readIntData(".v", nt * 4, (unsigned *)tetra->indices());
+
+	return readAftCreation(tetra);
+}
+
+char HTetrahedronMesh::readAftCreation(ATetrahedronMesh * tetra)
+{
+    readVector3Data(".p", tetra->numPoints(), (Vector3F *)tetra->points());
+	readIntData(".a", tetra->numPoints(), (unsigned *)tetra->anchors());
+	readIntData(".v", tetra->numTetrahedrons() * 4, (unsigned *)tetra->indices());
 	
     float vlm = 0.f;
     readFloatAttr(".vlm", &vlm);
     tetra->setVolume(vlm);
-	return 1;
+    
+    return 1;
 }
 //:~
