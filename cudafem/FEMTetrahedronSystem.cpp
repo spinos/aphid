@@ -27,6 +27,7 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
     m_F0 = new CUDABuffer;
     m_Fe = new CUDABuffer;
 	m_BVolume = new CUDABuffer;
+    m_stripeAttenuate = new CUDABuffer;
 	m_hasBVolume = false;
 }
 
@@ -46,6 +47,7 @@ BvhTetrahedronSystem(md)
     m_F0 = new CUDABuffer;
     m_Fe = new CUDABuffer;
 	m_BVolume = new CUDABuffer;
+    m_stripeAttenuate = new CUDABuffer;
 }
 
 FEMTetrahedronSystem::~FEMTetrahedronSystem() 
@@ -63,6 +65,7 @@ FEMTetrahedronSystem::~FEMTetrahedronSystem()
     delete m_F0;
     delete m_Fe;
 	delete m_BVolume;
+    delete m_stripeAttenuate;
 }
 
 void FEMTetrahedronSystem::initOnDevice()
@@ -79,6 +82,8 @@ void FEMTetrahedronSystem::initOnDevice()
     m_F0->create(numPoints() * 12);
     m_Fe->create(numPoints() * 12);
 	m_BVolume->create(numTetrahedrons() * 64);
+    m_stripeAttenuate->create(numTetrahedrons() * 4);
+    m_stripeAttenuate->hostToDevice(hostElementValue(), numTetrahedrons() * 4);
     
     m_deviceStiffnessTetraHash->hostToDevice(m_stiffnessTetraHash->data());
     m_deviceStiffnessInd->hostToDevice(m_stiffnessInd->data());
@@ -383,6 +388,7 @@ void FEMTetrahedronSystem::updateStiffnessMatrix()
                                         (mat33 *)re,
                                         (KeyValuePair *)sth,
                                         (uint *)ind,
+                                        (float *)m_stripeAttenuate->bufferOnDevice(),
                                         YoungsModulus,
                                         numTetrahedrons() * 16,
                                         m_stiffnessMatrix->numNonZero());
@@ -422,6 +428,7 @@ void FEMTetrahedronSystem::updateForce()
                                         (mat33 *)re,
                                         (KeyValuePair *)vth,
                                         (unsigned *)ind,
+                                        (float *)m_stripeAttenuate->bufferOnDevice(),
                                         YoungsModulus,
                                         numTetrahedrons() * 16,
                                         numPoints());

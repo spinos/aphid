@@ -124,7 +124,8 @@ __global__ void dampK_kernel(mat33 * stiffness,
 }
 
 __global__ void internalForce_kernel(float3 * dst,
-    float d16, float d17, float d18,
+                                    float * stiffnessAttenuate,
+                                    float Y,
                                     float3 * pos,
                                     uint4 * tetvert,
                                     float4 * BVol,
@@ -138,7 +139,7 @@ __global__ void internalForce_kernel(float3 * dst,
 	if(ind >= maxInd) return;
 	
 	float3_set_zero(dst[ind]);
-	
+	float d16, float d17, float d18;
 	float4 * B;
 	float3 pj, force, sum;
 	mat33 Ke, Re;
@@ -162,7 +163,9 @@ __global__ void internalForce_kernel(float3 * dst,
 		
 		Re = orientation[iTet];
 		B = &BVol[iTet<<2];
-		calculateKe(Ke, B, d16, d17, d18, i, j);	    
+		calculateIsotropicElasticity(Y * stiffnessAttenuate[iTet], 
+                                     d16, d17, d18);
+	    calculateKe(Ke, B, d16, d17, d18, i, j);	    
 		
 	    uint * tetv = &(tetvert[iTet].x);
 	    pj = pos[tetv[j]];
@@ -196,7 +199,8 @@ __global__ void resetStiffnessMatrix_kernel(mat33* dst,
 }
 
 __global__ void stiffnessAssembly_kernel(mat33 * dst,
-                                        float d16, float d17, float d18,
+                                         float * stiffnessAttenuate,
+                                         float Y,
                                         float4 * BVol,
                                         mat33 * orientation,
                                         KeyValuePair * tetraInd,
@@ -209,6 +213,7 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 	
 	set_mat33_zero(dst[ind]);
 	
+    float d16, float d17, float d18;
 	float4 * B;
 	mat33 Ke, Re, ReT, tmp, tmpT;
 	uint iTet, i, j, needT;
@@ -220,6 +225,8 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 	    
 	    B = &BVol[iTet<<2];
 	    
+        calculateIsotropicElasticity(Y * stiffnessAttenuate[iTet],
+                                     d16, d17, d18);
 	    calculateKe(Ke, B, d16, d17, d18, i, j);
 
 	    Re = orientation[iTet];
@@ -434,6 +441,7 @@ void internalForce(float3 * dst,
                                     mat33 * orientation,
                                     KeyValuePair * tetraInd,
                                     uint * bufferIndices,
+                                    float * stiffnessAttenuate,
                                     float Y,
                                     uint maxBufferInd,
                                     uint maxInd)
@@ -443,11 +451,9 @@ void internalForce(float3 * dst,
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);
     
-    float d16, d17, d18;
-    calculateIsotropicElasticity(Y, d16, d17, d18);
-    
     internalForce_kernel<<< grid, block >>>(dst,
-                                            d16, d17, d18,
+                                            stiffnessAttenuate,
+                                            Y,
                                             pos,
                                             tetvert,
                                             BVol,
@@ -465,6 +471,7 @@ void stiffnessAssembly(mat33 * dst,
                                         mat33 * orientation,
                                         KeyValuePair * tetraInd,
                                         uint * bufferIndices,
+                                        float * stiffnessAttenuate,
                                         float Y,
                                         uint maxBufferInd,
                                         uint maxInd)
@@ -474,11 +481,9 @@ void stiffnessAssembly(mat33 * dst,
     unsigned nblk = iDivUp(maxInd, tpb);
     dim3 grid(nblk, 1, 1);
     
-    float d16, d17, d18;
-    calculateIsotropicElasticity(Y, d16, d17, d18);
-    
     stiffnessAssembly_kernel<<< grid, block >>>(dst,
-                                            d16, d17, d18,
+                                            stiffnessAttenuate,
+                                            Y,
                                             BVol,
                                             orientation,
                                             tetraInd,

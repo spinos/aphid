@@ -50,6 +50,7 @@ private:
     CUDABuffer * m_F0;
     CUDABuffer * m_Fe;
 	CUDABuffer * m_BVolume;
+    CUDABuffer * m_stripeAttenuate;
     bool m_hasBVolume;
 };
 
