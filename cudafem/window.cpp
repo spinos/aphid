@@ -12,7 +12,10 @@ Window::Window()
     setWindowTitle(tr("Cuda FEM"));
     createActions();
     createMenus();
-    connect(m_physicsControl, SIGNAL(youngsModulusChanged(double)), 
+    connect(m_physicsControl, SIGNAL(densityChanged(double)), 
+            glWidget, SLOT(receiveDensity(double)));
+	
+	connect(m_physicsControl, SIGNAL(youngsModulusChanged(double)), 
             glWidget, SLOT(receiveYoungsModulus(double)));
     
     connect(m_physicsControl, SIGNAL(stiffnessAttenuateEndsChanged(QPointF)), 

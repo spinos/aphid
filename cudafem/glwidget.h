@@ -34,6 +34,7 @@ private:
     bool m_isPhysicsRunning;
 
 public slots:
+	void receiveDensity(double x);
     void receiveYoungsModulus(double x);
     void receiveStiffnessAttenuateEnds(QPointF v);
     void receiveStiffnessAttenuateLeft(QPointF v);

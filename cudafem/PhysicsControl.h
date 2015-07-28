@@ -32,11 +32,13 @@ public:
 public slots:
 	
 private slots:
+	void sendDensity(double x);
     void sendYoungModulus(double x);
     void sendStiffnessAttenuateEnds(QPointF v);
     void sendStiffnessAttenuateLeft(QPointF v);
     void sendStiffnessAttenuateRight(QPointF v);
 signals:
+	void densityChanged(double x);
 	void youngsModulusChanged(double a);
     void stiffnessAttenuateEndsChanged(QPointF v);
     void stiffnessAttenuateLeftChanged(QPointF v);
@@ -47,6 +49,7 @@ private:
     QGroupBox * yAGrp;
     QLabel * stiffnessCurveLabel;
     QSplineEdit * m_youngAttenuateValue;
-	
+	QGroupBox * dsGrp;
+	QDoubleEditSlider * m_densityValue;
 };
 #endif

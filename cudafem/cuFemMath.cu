@@ -186,9 +186,9 @@ inline __device__ void calculateIsotropicElasticity(float Y,
 inline __device__ void calculateIsotropicElasticity4(float Y,
             float4 & d)
 {   
-    float d15 = Y / (1.0f + nu) / (1.0f - 2 * nu);
-    d.x = (1.0f - nu) * d15;
-    d.y = nu * d15;
+    d.w = Y / (1.0f + nu) / (1.0f - 2 * nu);
+    d.x = (1.0f - nu) * d.w;
+    d.y = nu * d.w;
     d.z = Y / 2 / (1.0f + nu);
 }
 

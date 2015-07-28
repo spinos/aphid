@@ -34,9 +34,11 @@ public:
 	void * deviceMass();
 	void * deviceAnchor();
 	void * deviceTretradhedronIndices();
+	void * deviceInitialMass();
 	
 	void sendXToHost();
 	void sendVToHost();
+	
 protected:
 	CUDABuffer * deviceXBuf();
 	CUDABuffer * deviceVBuf();
@@ -46,7 +48,7 @@ protected:
 	const unsigned vLoc() const;
     const unsigned anchoredVLoc() const;
 	CUDABuffer * anchorBuf();
-
+	virtual void updateMass();
 private:
 	CUDABuffer * m_deviceX;
 	CUDABuffer * m_deviceXi;
@@ -55,6 +57,7 @@ private:
 	CUDABuffer * m_deviceMass;
 	CUDABuffer * m_deviceAnchor;
 	CUDABuffer * m_deviceTetrahedronIndices;
+	CUDABuffer * m_initialMass;
 	unsigned m_xLoc, m_xiLoc, m_vLoc, m_vaLoc, m_massLoc, m_anchorLoc, m_iLoc;
 };
 #endif        //  #ifndef CUDAMASSSYSTEM_H

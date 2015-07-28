@@ -15,14 +15,13 @@ public:
     void updateStiffnessMapEnds(float a, float b);
     void updateStiffnessMapLeft(float x, float y);
     void updateStiffnessMapRight(float x, float y);
+	void updateDensity(float x);
 	void updateYoungsModulus(float x);
 protected:
 
 private:
 	bool readTetrahedronMeshFromFile(CudaDynamicWorld * world);
 	bool readTriangleMeshFromFile(CudaDynamicWorld * world);
-    StripeMap m_map;
-    FEMTetrahedronSystem * m_tetra;
 };
 
 #endif        //  #ifndef FEMWORLDINTERFACE_H

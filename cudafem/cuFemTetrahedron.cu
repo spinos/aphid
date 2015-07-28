@@ -39,6 +39,7 @@ __global__ void elasticity_kernel(float4 * d,
 	if(ind >= maxInd) return;
 	
 	float bezier = calculateBezierPoint1D(alpha[ind]);
+	if(bezier < 0.05f) bezier = 0.05f;
 	
     float4 d161718;
     calculateIsotropicElasticity4(Y * bezier, 

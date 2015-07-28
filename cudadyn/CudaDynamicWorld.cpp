@@ -80,6 +80,9 @@ void CudaDynamicWorld::initOnDevice()
     m_broadphase->initOnDevice();
     m_narrowphase->initOnDevice();
 	m_contactSolver->initOnDevice();
+	std::cout<<"\n cuda dynamice world initialized"
+	<<"\n used "<<CudaBase::MemoryUsed<<" byte memory"
+	<<"\n";
 }
 
 void CudaDynamicWorld::stepPhysics(float dt)

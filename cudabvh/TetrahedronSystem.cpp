@@ -19,7 +19,7 @@
 #define NTET 1600
 #define NPNT 6400
 
-SplineMap1D TetrahedronSystem::SplineMap;
+float TetrahedronSystem::Density = 100.f;
 
 TetrahedronSystem::TetrahedronSystem() 
 {
@@ -109,9 +109,9 @@ TetrahedronSystem::TetrahedronSystem(ATetrahedronMesh * md)
 // density of nylon = 1.15 g/cm^3
 // very low density is unstable
     std::cout<<"\n initial volume "<<md->volume()
-       <<"\n initial mass "<<(100.15f * md->volume())
+       <<"\n initial mass "<<(100.f * md->volume())
        <<"\n";
-    setTotalMass(100.15f * md->volume());
+    setTotalMass(100.f * md->volume());
     calculateMass();
     createL2Vicinity();
 }

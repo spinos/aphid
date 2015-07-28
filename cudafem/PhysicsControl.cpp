@@ -39,9 +39,20 @@ PhysicsControl::PhysicsControl(QWidget *parent)
 	yaLayout->setStretch(1, 1);
 	
     yAGrp->setLayout(yaLayout);
-    
-    QVBoxLayout *layout = new QVBoxLayout;
 	
+	m_densityValue = new QDoubleEditSlider(tr("Density"), this);
+	m_densityValue->setLimit(0.1, 200.0);
+	m_densityValue->setValue(100.0);
+	
+	dsGrp = new QGroupBox;
+    QVBoxLayout * dsLayout = new QVBoxLayout;
+    dsLayout->addWidget(m_densityValue);
+	dsLayout->setStretch(1, 1);
+	
+    dsGrp->setLayout(dsLayout);
+	
+    QVBoxLayout *layout = new QVBoxLayout;
+	layout->addWidget(dsGrp);
 	layout->addWidget(YGrp);
 	layout->addWidget(yAGrp);
 	layout->setStretch(1, 1);
@@ -49,11 +60,15 @@ PhysicsControl::PhysicsControl(QWidget *parent)
 	
 	setLayout(layout);
     
-    connect(m_youngModulusValue, SIGNAL(valueChanged(double)), this, SLOT(sendYoungModulus(double)));
+    connect(m_densityValue, SIGNAL(valueChanged(double)), this, SLOT(sendDensity(double)));
+	connect(m_youngModulusValue, SIGNAL(valueChanged(double)), this, SLOT(sendYoungModulus(double)));
     connect(m_youngAttenuateValue, SIGNAL(valueChanged(QPointF)), this, SLOT(sendStiffnessAttenuateEnds(QPointF)));
     connect(m_youngAttenuateValue, SIGNAL(leftControlChanged(QPointF)), this, SLOT(sendStiffnessAttenuateLeft(QPointF)));
     connect(m_youngAttenuateValue, SIGNAL(rightControlChanged(QPointF)), this, SLOT(sendStiffnessAttenuateRight(QPointF)));
 }
+
+void PhysicsControl::sendDensity(double x)
+{ emit densityChanged(x); }
 
 void PhysicsControl::sendYoungModulus(double x)
 { emit youngsModulusChanged(x); }

@@ -159,6 +159,9 @@ void GLWidget::togglePhysics()
     else startPhysics();   
 }
 
+void GLWidget::receiveDensity(double x)
+{ m_interface->updateDensity((float)x); }
+
 void GLWidget::receiveYoungsModulus(double x)
 { m_interface->updateYoungsModulus((float)x); }
 

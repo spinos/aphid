@@ -11,7 +11,7 @@
  */
 #include <map>
 #include <CudaMassSystem.h>
-#include <SplineMap1D.h>
+
 class BaseBuffer;
 class ATetrahedronMesh;
 class TetrahedronSystem : public CudaMassSystem {
@@ -28,7 +28,7 @@ public:
 	virtual const unsigned numElements() const;
     float * hostElementValue() const;
 	
-	static SplineMap1D SplineMap;
+	static float Density;
 protected:
 	float totalInitialVolume();
     void calculateMass();

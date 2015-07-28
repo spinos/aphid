@@ -9,10 +9,13 @@
 #include <FemGlobal.h>
 #include <CudaBase.h>
 #include <ATetrahedronMeshGroup.h>
+#include <masssystem_impl.h>
 
 CudaDbgLog bglg("stiffness.txt");
+SplineMap1D FEMTetrahedronSystem::SplineMap;
 float FEMTetrahedronSystem::YoungsModulus = 160000.f;
 bool FEMTetrahedronSystem::NeedElasticity = true;
+bool FEMTetrahedronSystem::NeedMass = false;
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
     m_Re = new CUDABuffer;
@@ -417,6 +420,23 @@ void FEMTetrahedronSystem::updateBVolume()
 	m_hasBVolume = true;
 }
 
+void FEMTetrahedronSystem::updateMass()
+{
+	if(!NeedMass) return;
+	
+	void * mass = deviceMass();
+	void * mass0 = deviceInitialMass();
+	void * a = deviceAnchor();
+	float relDensity = Density / 100.f;
+	masssystem::computeMass((float * )mass, 
+                    (float *)mass0,
+					(uint *)a,
+                    relDensity,
+                    numPoints());
+	CudaBase::CheckCudaError("fem update mass");
+	NeedMass = false;
+}
+
 void FEMTetrahedronSystem::updateElasticity()
 {
 	if(!NeedElasticity) return;
@@ -526,6 +546,7 @@ void FEMTetrahedronSystem::update()
 #if DISABLE_FEM
 	return CudaTetrahedronSystem::update();
 #endif
+	updateMass();
 	updateExternalForce();
 	updateBVolume();
 	updateOrientation();
@@ -539,4 +560,7 @@ void FEMTetrahedronSystem::update()
 
 void FEMTetrahedronSystem::SetNeedElasticity()
 { NeedElasticity = true; }
+
+void FEMTetrahedronSystem::SetNeedMass()
+{ NeedMass = true; }
 //:~

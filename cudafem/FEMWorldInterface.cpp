@@ -36,7 +36,6 @@ bool FEMWorldInterface::readTetrahedronMeshFromFile(CudaDynamicWorld * world)
 	
 	HesperisFile hes;
 	hes.setReadComponent(HesperisFile::RTetra);
-	// hes.addTetrahedron("tetra_0", &meshData);
 	if(!hes.open(FemGlobal::FileName)) return false;
 	hes.close();
 	
@@ -54,13 +53,14 @@ bool FEMWorldInterface::readTetrahedronMeshFromFile(CudaDynamicWorld * world)
     mesh->resetVelocity();
     world->addTetrahedronSystem(mesh);
     
-    m_map.create(meshData);
-    m_map.setLastIndex(meshData->numIndices());
-    delete meshData;
+	StripeMap stripemap;
     
-    m_tetra = mesh;
-    m_map.computeTetrahedronInStripe(m_tetra->hostElementValue(),
-                                     m_tetra->numTetrahedrons());
+    stripemap.create(meshData);
+    stripemap.setLastIndex(meshData->numIndices());
+    stripemap.computeTetrahedronInStripe(mesh->hostElementValue(),
+                                     mesh->numTetrahedrons());
+									 
+	delete meshData;
 	return true;
 }
 /*
@@ -131,22 +131,28 @@ bool FEMWorldInterface::useVelocityFile(CudaDynamicWorld * world)
     return true;
 }
 
+void FEMWorldInterface::updateDensity(float x)
+{
+	TetrahedronSystem::Density = x;
+	FEMTetrahedronSystem::SetNeedMass();
+}
+
 void FEMWorldInterface::updateStiffnessMapEnds(float a, float b)
 {
-    TetrahedronSystem::SplineMap.setStart(a);
-    TetrahedronSystem::SplineMap.setEnd(b);
+    FEMTetrahedronSystem::SplineMap.setStart(a);
+    FEMTetrahedronSystem::SplineMap.setEnd(b);
 	FEMTetrahedronSystem::SetNeedElasticity();
 }
 
 void FEMWorldInterface::updateStiffnessMapLeft(float x, float y)
 { 
-	TetrahedronSystem::SplineMap.setLeftControl(x, y); 
+	FEMTetrahedronSystem::SplineMap.setLeftControl(x, y); 
 	FEMTetrahedronSystem::SetNeedElasticity();
 }
 
 void FEMWorldInterface::updateStiffnessMapRight(float x, float y)
 { 
-	TetrahedronSystem::SplineMap.setRightControl(x, y); 
+	FEMTetrahedronSystem::SplineMap.setRightControl(x, y); 
 	FEMTetrahedronSystem::SetNeedElasticity();
 }
 

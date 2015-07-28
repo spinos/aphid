@@ -146,7 +146,8 @@ set (CUSOURCES "../scan/scan.cu"
 "../sahbvh/BvhLazy.cu"
 "cuFemMath.cu"
 "cuFemTetrahedron.cu"
-"cuConjugateGradient.cu")
+"cuConjugateGradient.cu"
+../cudadyn/cuMassSystem.cu)
 
 if (WIN32)
 set (CUDA_NVCC_FLAGS "--disable-warnings --ptxas-options=-v -arch sm_21")

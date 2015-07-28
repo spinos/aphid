@@ -3,6 +3,7 @@
 
 #include <BvhTetrahedronSystem.h>
 #include <CudaConjugateGradientSolver.h>
+#include <SplineMap1D.h>
 class BaseBuffer;
 class CUDABuffer;
 class CudaCSRMatrix;
@@ -19,11 +20,14 @@ public:
 	virtual void update();
 // override BvhTetrahedronSystem
     virtual void integrate(float dt);
+	static SplineMap1D SplineMap;
 	static float YoungsModulus;
     static void SetNeedElasticity();
+	static void SetNeedMass();
     void verbose();
 protected:
-    
+// override cudamasssystem
+    virtual void updateMass();
 private:
     void createStiffnessMatrix();
 	void createVertexTetraHash();
@@ -56,6 +60,7 @@ private:
 	CUDABuffer * m_tetrahedronElasticity;
     bool m_hasBVolume;
 	static bool NeedElasticity;
+	static bool NeedMass;
 };
 
 #endif        //  #ifndef FEMTETRAHEDRONSYSTEM_H

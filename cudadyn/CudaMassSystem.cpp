@@ -10,13 +10,20 @@
 #include "CudaMassSystem.h"
 #include <CUDABuffer.h>
 #include <iostream>
-CudaMassSystem::CudaMassSystem() {}
+CudaMassSystem::CudaMassSystem() 
+{
+	m_initialMass = new CUDABuffer;
+}
 
-CudaMassSystem::~CudaMassSystem() {}
+CudaMassSystem::~CudaMassSystem() 
+{
+	delete m_initialMass;
+}
 
 void CudaMassSystem::initOnDevice()
 {
-    // std::cout<<"\n mass system init on device";
+    m_initialMass->create(numPoints() * 4);
+	m_initialMass->hostToDevice(hostMass(), numPoints() * 4);
 }
 
 void CudaMassSystem::setDeviceXPtr(CUDABuffer * ptr, unsigned loc)
@@ -53,7 +60,10 @@ void * CudaMassSystem::deviceVa()
 { return m_deviceVa->bufferOnDeviceAt(m_vaLoc); }
 
 void * CudaMassSystem::deviceMass()
-{  return m_deviceMass->bufferOnDeviceAt(m_massLoc); }
+{ return m_deviceMass->bufferOnDeviceAt(m_massLoc); }
+
+void * CudaMassSystem::deviceInitialMass()
+{ return m_initialMass->bufferOnDevice(); }
 
 void * CudaMassSystem::deviceAnchor()
 { return m_deviceAnchor->bufferOnDeviceAt(m_anchorLoc); }
@@ -90,4 +100,6 @@ void CudaMassSystem::sendXToHost()
 
 void CudaMassSystem::sendVToHost()
 { deviceVBuf()->deviceToHost(hostV(), vLoc(), numPoints() * 12); }
+
+void CudaMassSystem::updateMass() {}
 //:~
