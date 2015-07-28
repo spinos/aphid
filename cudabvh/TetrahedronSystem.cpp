@@ -19,6 +19,8 @@
 #define NTET 1600
 #define NPNT 6400
 
+SplineMap1D TetrahedronSystem::SplineMap;
+
 TetrahedronSystem::TetrahedronSystem() 
 {
 	m_hostTetrahedronVicinityInd = new BaseBuffer;

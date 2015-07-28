@@ -12,6 +12,7 @@ public:
     void setEnd(float y);
     void setLeftControl(float x, float y);
     void setRightControl(float x, float y);
+	const BezierSpline * spline() const;
 protected:
 
 private:

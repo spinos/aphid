@@ -12,6 +12,7 @@
 
 CudaDbgLog bglg("stiffness.txt");
 float FEMTetrahedronSystem::YoungsModulus = 160000.f;
+bool FEMTetrahedronSystem::NeedElasticity = true;
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
     m_Re = new CUDABuffer;
@@ -28,6 +29,7 @@ FEMTetrahedronSystem::FEMTetrahedronSystem()
     m_Fe = new CUDABuffer;
 	m_BVolume = new CUDABuffer;
     m_stripeAttenuate = new CUDABuffer;
+	m_tetrahedronElasticity = new CUDABuffer;
 	m_hasBVolume = false;
 }
 
@@ -48,6 +50,7 @@ BvhTetrahedronSystem(md)
     m_Fe = new CUDABuffer;
 	m_BVolume = new CUDABuffer;
     m_stripeAttenuate = new CUDABuffer;
+	m_tetrahedronElasticity = new CUDABuffer;
 }
 
 FEMTetrahedronSystem::~FEMTetrahedronSystem() 
@@ -66,6 +69,7 @@ FEMTetrahedronSystem::~FEMTetrahedronSystem()
     delete m_Fe;
 	delete m_BVolume;
     delete m_stripeAttenuate;
+	delete m_tetrahedronElasticity;
 }
 
 void FEMTetrahedronSystem::initOnDevice()
@@ -84,6 +88,7 @@ void FEMTetrahedronSystem::initOnDevice()
 	m_BVolume->create(numTetrahedrons() * 64);
     m_stripeAttenuate->create(numTetrahedrons() * 4);
     m_stripeAttenuate->hostToDevice(hostElementValue(), numTetrahedrons() * 4);
+	m_tetrahedronElasticity->create(numTetrahedrons() * 16);
     
     m_deviceStiffnessTetraHash->hostToDevice(m_stiffnessTetraHash->data());
     m_deviceStiffnessInd->hostToDevice(m_stiffnessInd->data());
@@ -381,6 +386,7 @@ void FEMTetrahedronSystem::updateStiffnessMatrix()
     void * xi = deviceXi();
     void * tetv = deviceTretradhedronIndices();
     void * bv = m_BVolume->bufferOnDevice();
+	void * e = m_tetrahedronElasticity->bufferOnDevice();
     tetrahedronfem::stiffnessAssembly((mat33 *)dst,
                                         (float3 *)xi,
                                         (uint4 *)tetv,
@@ -388,8 +394,7 @@ void FEMTetrahedronSystem::updateStiffnessMatrix()
                                         (mat33 *)re,
                                         (KeyValuePair *)sth,
                                         (uint *)ind,
-                                        (float *)m_stripeAttenuate->bufferOnDevice(),
-                                        YoungsModulus,
+                                        (float4 *)e,
                                         numTetrahedrons() * 16,
                                         m_stiffnessMatrix->numNonZero());
 }
@@ -412,6 +417,30 @@ void FEMTetrahedronSystem::updateBVolume()
 	m_hasBVolume = true;
 }
 
+void FEMTetrahedronSystem::updateElasticity()
+{
+	if(!NeedElasticity) return;
+	float bezierPnts[8];
+	bezierPnts[0] = SplineMap.spline()->cv[0].x;
+	bezierPnts[1] = SplineMap.spline()->cv[0].y;
+	bezierPnts[2] = SplineMap.spline()->cv[1].x;
+	bezierPnts[3] = SplineMap.spline()->cv[1].y;
+	bezierPnts[4] = SplineMap.spline()->cv[2].x;
+	bezierPnts[5] = SplineMap.spline()->cv[2].y;
+	bezierPnts[6] = SplineMap.spline()->cv[3].x;
+	bezierPnts[7] = SplineMap.spline()->cv[3].y;
+	
+	void * d = m_tetrahedronElasticity->bufferOnDevice();
+	float * stripex = (float *)m_stripeAttenuate->bufferOnDevice();
+	tetrahedronfem::computeElasticity((float4 *)d,
+												stripex,
+												YoungsModulus,
+												numTetrahedrons(),
+												bezierPnts);
+	CudaBase::CheckCudaError("fem update elasticity");
+	NeedElasticity = false;
+}
+
 void FEMTetrahedronSystem::updateForce()
 {
     void * d = m_F0->bufferOnDevice();
@@ -421,6 +450,7 @@ void FEMTetrahedronSystem::updateForce()
     void * xi = deviceXi();
     void * tetv = deviceTretradhedronIndices();
 	void * bv = m_BVolume->bufferOnDevice();
+	void * e = m_tetrahedronElasticity->bufferOnDevice();
     tetrahedronfem::internalForce((float3 *)d,
                                         (float3 *)xi,
                                         (uint4 *)tetv,
@@ -428,10 +458,10 @@ void FEMTetrahedronSystem::updateForce()
                                         (mat33 *)re,
                                         (KeyValuePair *)vth,
                                         (unsigned *)ind,
-                                        (float *)m_stripeAttenuate->bufferOnDevice(),
-                                        YoungsModulus,
+										(float4 *)e,
                                         numTetrahedrons() * 16,
                                         numPoints());
+    CudaBase::CheckCudaError("fem update force");
 }
 
 void FEMTetrahedronSystem::dynamicsAssembly(float dt)
@@ -499,6 +529,7 @@ void FEMTetrahedronSystem::update()
 	updateExternalForce();
 	updateBVolume();
 	updateOrientation();
+	updateElasticity();
 	updateForce();
 	updateStiffnessMatrix();
 	dynamicsAssembly(1.f/60.f);
@@ -506,6 +537,6 @@ void FEMTetrahedronSystem::update()
 	BvhTetrahedronSystem::update();
 }
 
-void FEMTetrahedronSystem::transferStiffness()
-{ m_stripeAttenuate->hostToDevice(hostElementValue(), numTetrahedrons() * 4); }
+void FEMTetrahedronSystem::SetNeedElasticity()
+{ NeedElasticity = true; }
 //:~

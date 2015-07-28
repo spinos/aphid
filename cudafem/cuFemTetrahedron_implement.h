@@ -24,8 +24,7 @@ void internalForce(float3 * dst,
                     mat33 * orientation,
                     KeyValuePair * tetraInd,
                     uint * bufferIndices,
-                    float * stiffnessAttenuate,
-                    float Y,
+                    float4 * elasticity,
                     uint maxBufferInd,
                     uint maxInd);
 
@@ -36,8 +35,7 @@ void stiffnessAssembly(mat33 * dst,
                         mat33 * orientation,
                         KeyValuePair * tetraInd,
                         uint * bufferIndices,
-                        float * stiffnessAttenuate,
-                        float Y,
+                        float4 * elasticity,
                         uint maxBufferInd,
                         uint maxInd);
 
@@ -47,6 +45,12 @@ void integrate(float3 * pos,
                         uint * anchor,
                         float dt, 
                         uint maxInd);
+
+void computeElasticity(float4 * d,
+                        float * alpha,
+                        float Y,
+                        uint maxInd,
+                        float * splineV);
 }
 
 extern "C" {

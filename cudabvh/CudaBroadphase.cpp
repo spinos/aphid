@@ -95,8 +95,7 @@ void CudaBroadphase::initOnDevice()
 	}
 	
 	m_scanBufferLength = CudaScan::getScanBufferLength(m_numBoxes);
-    std::cout<<" broadphase scan buf length "<<m_scanBufferLength<<"\n";
-	m_pairCounts->create(m_scanBufferLength * 4);
+    m_pairCounts->create(m_scanBufferLength * 4);
 	m_pairStart->create(m_scanBufferLength * 4);
 	m_pairWriteLocation->create(m_scanBufferLength * 4);
 	m_scanIntermediate->create(m_scanBufferLength);

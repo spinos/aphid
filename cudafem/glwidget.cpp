@@ -7,7 +7,6 @@
 #include "FEMWorldInterface.h"
 #include <WorldThread.h>
 #include <WorldDbgDraw.h>
-#include <FEMTetrahedronSystem.h>
 
 #define DRGDRW 0
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
@@ -129,8 +128,6 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
         case Qt::Key_R:
-            m_interface->remapStiffness();
-            m_interface->transferStiffness();
             m_world->reset();
             break;
         case Qt::Key_Space:
@@ -163,21 +160,14 @@ void GLWidget::togglePhysics()
 }
 
 void GLWidget::receiveYoungsModulus(double x)
-{ FEMTetrahedronSystem::YoungsModulus = (float)x; }
+{ m_interface->updateYoungsModulus((float)x); }
 
 void GLWidget::receiveStiffnessAttenuateEnds(QPointF v)
-{
-    // qDebug()<<" "<<v.x()<<" "<<v.y();
-    m_interface->updateStiffnessMapEnds(v.x(), v.y());
-}
+{ m_interface->updateStiffnessMapEnds(v.x(), v.y()); }
 
 void GLWidget::receiveStiffnessAttenuateLeft(QPointF v)
-{
-    m_interface->updateStiffnessMapLeft(v.x(), v.y());
-}
+{ m_interface->updateStiffnessMapLeft(v.x(), v.y()); }
 
 void GLWidget::receiveStiffnessAttenuateRight(QPointF v)
-{
-    m_interface->updateStiffnessMapRight(v.x(), v.y());
-}
+{ m_interface->updateStiffnessMapRight(v.x(), v.y()); }
 //:~

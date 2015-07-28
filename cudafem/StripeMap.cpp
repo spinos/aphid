@@ -1,7 +1,7 @@
 #include "StripeMap.h"
 #include <AStripedModel.h>
 #include <BaseBuffer.h>
-StripeMap::StripeMap() : SplineMap1D(1.f, 0.5f)
+StripeMap::StripeMap()
 {
     m_stripeIndices = new BaseBuffer;
 }
@@ -40,7 +40,7 @@ void StripeMap::computeTetrahedronInStripe(float * dst, unsigned n)
         tetv = i*4;
         alpha = (float)tetv - (float)firstInStripe;
         alpha /= (float)lastInStripe - (float)firstInStripe;
-        dst[i] = interpolate(alpha);
+        dst[i] = alpha;
 
         if(tetv == lastInStripe) {
             iStripe++;

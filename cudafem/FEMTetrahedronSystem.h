@@ -20,7 +20,7 @@ public:
 // override BvhTetrahedronSystem
     virtual void integrate(float dt);
 	static float YoungsModulus;
-    void transferStiffness();
+    static void SetNeedElasticity();
     void verbose();
 protected:
     
@@ -29,6 +29,7 @@ private:
 	void createVertexTetraHash();
     void resetOrientation();
     void updateOrientation();
+	void updateElasticity();
     void resetStiffnessMatrix();
     void updateStiffnessMatrix();
     void resetForce();
@@ -52,7 +53,9 @@ private:
     CUDABuffer * m_Fe;
 	CUDABuffer * m_BVolume;
     CUDABuffer * m_stripeAttenuate;
+	CUDABuffer * m_tetrahedronElasticity;
     bool m_hasBVolume;
+	static bool NeedElasticity;
 };
 
 #endif        //  #ifndef FEMTETRAHEDRONSYSTEM_H

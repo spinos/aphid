@@ -15,8 +15,7 @@ public:
     void updateStiffnessMapEnds(float a, float b);
     void updateStiffnessMapLeft(float x, float y);
     void updateStiffnessMapRight(float x, float y);
-    void remapStiffness();
-    void transferStiffness();
+	void updateYoungsModulus(float x);
 protected:
 
 private:

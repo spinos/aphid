@@ -1,7 +1,6 @@
-#include <SplineMap1D.h>
 class AStripedModel;
 class BaseBuffer;
-class StripeMap : public SplineMap1D {
+class StripeMap {
 public:
     StripeMap();
     virtual ~StripeMap();

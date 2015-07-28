@@ -3,7 +3,6 @@
 
 #include "bvh_math.cuh"
 #include "matrix_math.cu"
-#include <CudaBase.h>
 
 inline __device__ void extractTetij(uint c, uint & tet, uint & i, uint & j)
 {
@@ -177,15 +176,20 @@ __constant__ float nu = 0.01f;
 
 inline __device__ void calculateIsotropicElasticity(float Y,
             float & d16, float & d17, float & d18)
-{
-// float nu = 0.02f; 
-// 40,000 to 800,000
-// float Y = 40000.0f;
-    
+{   
     float d15 = Y / (1.0f + nu) / (1.0f - 2 * nu);
     d16 = (1.0f - nu) * d15;
     d17 = nu * d15;
     d18 = Y / 2 / (1.0f + nu);
+}
+
+inline __device__ void calculateIsotropicElasticity4(float Y,
+            float4 & d)
+{   
+    float d15 = Y / (1.0f + nu) / (1.0f - 2 * nu);
+    d.x = (1.0f - nu) * d15;
+    d.y = nu * d15;
+    d.z = Y / 2 / (1.0f + nu);
 }
 
 #endif        //  #ifndef CUFEMMATH_CU

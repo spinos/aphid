@@ -1,6 +1,8 @@
 #include "bvh_common.h"
 #include <radixsort_implement.h>
 #include "cuFemMath.cu"
+#include <CudaBase.h>
+#include <Spline1D.cuh>
 
 __global__ void computeBVolume_kernel(float4 * dst, 
                     float3 * pos,
@@ -26,6 +28,22 @@ __global__ void integrate_kernel(float3 * pos,
     float3 va = anchoredVel[ind];
 	if(anchor[ind] > (1<<23)) vel[ind] = va;
 	float3_add_inplace(pos[ind], scale_float3_by(vel[ind], dt));
+}
+
+__global__ void elasticity_kernel(float4 * d,
+                        float * alpha,
+                        float Y,
+                        uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	float bezier = calculateBezierPoint1D(alpha[ind]);
+	
+    float4 d161718;
+    calculateIsotropicElasticity4(Y * bezier, 
+                                     d161718);
+    d[ind] = d161718;
 }
 
 __global__ void externalForce_kernel(float3 * dst,
@@ -124,14 +142,13 @@ __global__ void dampK_kernel(mat33 * stiffness,
 }
 
 __global__ void internalForce_kernel(float3 * dst,
-                                    float * stiffnessAttenuate,
-                                    float Y,
                                     float3 * pos,
                                     uint4 * tetvert,
                                     float4 * BVol,
                                     mat33 * orientation,
                                     KeyValuePair * tetraInd,
                                     uint * bufferIndices,
+                                    float4 * elasticity,
                                     uint maxBufferInd,
                                     uint maxInd)
 {
@@ -139,7 +156,7 @@ __global__ void internalForce_kernel(float3 * dst,
 	if(ind >= maxInd) return;
 	
 	float3_set_zero(dst[ind]);
-	float d16, d17, d18;
+	float4 d161718;
 	float4 * B;
 	float3 pj, force, sum;
 	mat33 Ke, Re;
@@ -163,9 +180,10 @@ __global__ void internalForce_kernel(float3 * dst,
 		
 		Re = orientation[iTet];
 		B = &BVol[iTet<<2];
-		calculateIsotropicElasticity(Y * stiffnessAttenuate[iTet], 
-                                     d16, d17, d18);
-	    calculateKe(Ke, B, d16, d17, d18, i, j);	    
+		
+		d161718 = elasticity[iTet];
+		
+	    calculateKe(Ke, B, d161718.x, d161718.y, d161718.z, i, j);	    
 		
 	    uint * tetv = &(tetvert[iTet].x);
 	    pj = pos[tetv[j]];
@@ -199,12 +217,11 @@ __global__ void resetStiffnessMatrix_kernel(mat33* dst,
 }
 
 __global__ void stiffnessAssembly_kernel(mat33 * dst,
-                                         float * stiffnessAttenuate,
-                                         float Y,
                                         float4 * BVol,
                                         mat33 * orientation,
                                         KeyValuePair * tetraInd,
                                         uint * bufferIndices,
+                                        float4 * elasticity,
                                         uint maxBufferInd,
                                         uint maxInd)
 {
@@ -213,7 +230,7 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 	
 	set_mat33_zero(dst[ind]);
 	
-    float d16, d17, d18;
+    float4 d161718;
 	float4 * B;
 	mat33 Ke, Re, ReT, tmp, tmpT;
 	uint iTet, i, j, needT;
@@ -225,9 +242,9 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 	    
 	    B = &BVol[iTet<<2];
 	    
-        calculateIsotropicElasticity(Y * stiffnessAttenuate[iTet],
-                                     d16, d17, d18);
-	    calculateKe(Ke, B, d16, d17, d18, i, j);
+	    d161718 = elasticity[iTet];
+        
+	    calculateKe(Ke, B, d161718.x, d161718.y, d161718.z, i, j);
 
 	    Re = orientation[iTet];
 		
@@ -441,8 +458,7 @@ void internalForce(float3 * dst,
                                     mat33 * orientation,
                                     KeyValuePair * tetraInd,
                                     uint * bufferIndices,
-                                    float * stiffnessAttenuate,
-                                    float Y,
+                                    float4 * elasticity,
                                     uint maxBufferInd,
                                     uint maxInd)
 {
@@ -452,14 +468,13 @@ void internalForce(float3 * dst,
     dim3 grid(nblk, 1, 1);
     
     internalForce_kernel<<< grid, block >>>(dst,
-                                            stiffnessAttenuate,
-                                            Y,
                                             pos,
                                             tetvert,
                                             BVol,
                                             orientation,
                                             tetraInd,
                                             bufferIndices,
+                                            elasticity,
                                             maxBufferInd,
                                             maxInd);
 }
@@ -471,8 +486,7 @@ void stiffnessAssembly(mat33 * dst,
                                         mat33 * orientation,
                                         KeyValuePair * tetraInd,
                                         uint * bufferIndices,
-                                        float * stiffnessAttenuate,
-                                        float Y,
+                                        float4 * elasticity,
                                         uint maxBufferInd,
                                         uint maxInd)
 {
@@ -482,12 +496,11 @@ void stiffnessAssembly(mat33 * dst,
     dim3 grid(nblk, 1, 1);
     
     stiffnessAssembly_kernel<<< grid, block >>>(dst,
-                                            stiffnessAttenuate,
-                                            Y,
                                             BVol,
                                             orientation,
                                             tetraInd,
                                             bufferIndices,
+                                            elasticity,
                                             maxBufferInd,
                                             maxInd);
 }
@@ -508,6 +521,24 @@ void integrate(float3 * pos,
         anchoredVel,
         anchor,
         dt,
+        maxInd);
+}
+
+void computeElasticity(float4 * d,
+                        float * alpha,
+                        float Y,
+                        uint maxInd,
+                        float * splineV)
+{
+    cudaMemcpyToSymbol(CSplineCvs, splineV, 32); 
+    
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    elasticity_kernel<<< grid, block >>>(d,
+        alpha,
+        Y,
         maxInd);
 }
 }
