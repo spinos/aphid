@@ -11,6 +11,7 @@ public:
 	
 	void create(unsigned np, unsigned nt, unsigned ns);
 	
+    virtual std::string verbosestr() const;
 private:
 
 };

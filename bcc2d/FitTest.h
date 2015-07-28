@@ -30,4 +30,6 @@ private:
 	GeometryArray * m_allGeo;
 	std::vector<Vector3F > m_tetrahedronP;
 	std::vector<unsigned > m_tetrahedronInd;
+    std::vector<unsigned > m_pdrift;
+    std::vector<unsigned > m_idrift;
 };

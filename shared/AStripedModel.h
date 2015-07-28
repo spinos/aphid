@@ -22,6 +22,8 @@ public:
 	unsigned * indexDrifts();
 	const unsigned numStripes() const;
 	
+    void copyPointDrift(unsigned * src, unsigned n, unsigned loc=0);
+    void copyIndexDrift(unsigned * src, unsigned n, unsigned loc=0);
 private:
 	unsigned m_numStripes;
 	BaseBuffer * m_pDrift;

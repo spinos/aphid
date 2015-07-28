@@ -9,3 +9,12 @@ void ATetrahedronMeshGroup::create(unsigned np, unsigned nt, unsigned ns)
 	AStripedModel::create(ns);
 }
 
+std::string ATetrahedronMeshGroup::verbosestr() const
+{
+	std::stringstream sst;
+	sst<<ATetrahedronMesh::verbosestr()
+    <<" nstripe "<<numStripes()
+    <<"\n";
+	return sst.str();
+}
+

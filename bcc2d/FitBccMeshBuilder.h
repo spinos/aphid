@@ -23,7 +23,9 @@ public:
 	
 	void build(GeometryArray * curves, 
 	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd);
+	           std::vector<unsigned > & tetrahedronInd,
+               std::vector<unsigned > & pointDrifts,
+               std::vector<unsigned > & indexDrifts);
 	
 	void build(BezierCurve * curve, 
 	           std::vector<Vector3F > & tetrahedronP, 

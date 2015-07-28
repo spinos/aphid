@@ -9,6 +9,8 @@
 #include <GeometryArray.h>
 #include <BvhTriangleSystem.h>
 #include <IVelocityFile.h>
+#include <ATetrahedronMeshGroup.h>
+
 FEMWorldInterface::FEMWorldInterface() {}
 FEMWorldInterface::~FEMWorldInterface() {}
 
@@ -49,11 +51,11 @@ bool FEMWorldInterface::readTetrahedronMeshFromFile(CudaDynamicWorld * world)
     unsigned i = n-1;
 #endif
     for(;i<n;i++) {
-        ATetrahedronMesh * meshData = (ATetrahedronMesh *)tetrahedronGeos.geometry(i);
-        std::cout<<"\n tetrahedron mesh["<<i<<"]"
-	    <<"\n n tetrahedron: "<<meshData->numTetrahedrons()
-        <<"\n n vertex: "<<meshData->numPoints()
+        ATetrahedronMeshGroup * meshData = (ATetrahedronMeshGroup *)tetrahedronGeos.geometry(i);
+        std::cout<<"\n mesh["<<i<<"]"
+	    <<"\n "<<meshData->verbosestr()
         <<"\n";
+        
         FEMTetrahedronSystem * mesh = new FEMTetrahedronSystem(meshData);
         mesh->resetVelocity();
         world->addTetrahedronSystem(mesh);

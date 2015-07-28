@@ -12,7 +12,7 @@
 #include <BaseBuffer.h>
 #include <APolygonalMesh.h>
 #include <ATriangleMeshGroup.h>
-#include <ATetrahedronMesh.h>
+#include <ATetrahedronMeshGroup.h>
 #include <BaseTransform.h>
 #include <GeometryArray.h>
 #include <SHelper.h>
@@ -104,11 +104,11 @@ bool HesperisFile::writeCurve()
 
 bool HesperisFile::writeTetrahedron()
 {
-	std::map<std::string, ATetrahedronMesh *>::iterator it = m_terahedrons.begin();
+	std::map<std::string, ATetrahedronMeshGroup *>::iterator it = m_terahedrons.begin();
 	for(; it != m_terahedrons.end(); ++it) {
 		std::cout<<" write tetrahedron mesh "<<worldPath(it->first)
 		<<"\n";
-		HTetrahedronMesh grp(worldPath(it->first));
+		HTetrahedronMeshGroup grp(worldPath(it->first));
 		grp.save(it->second);
 		grp.close();
 	}
@@ -147,7 +147,7 @@ void HesperisFile::addTransform(const std::string & name, BaseTransform * data)
 void HesperisFile::addCurve(const std::string & name, CurveGroup * data)
 { m_curves[checkPath(name)] = data; }
 
-void HesperisFile::addTetrahedron(const std::string & name, ATetrahedronMesh * data)
+void HesperisFile::addTetrahedron(const std::string & name, ATetrahedronMeshGroup * data)
 { m_terahedrons[checkPath(name)] = data; }
 
 void HesperisFile::addTriangleMesh(const std::string & name, ATriangleMeshGroup * data)
@@ -214,11 +214,11 @@ bool HesperisFile::listTetrahedron(HBase * grp)
 {
     clearTetrahedronMeshes();
     std::vector<std::string > tetraNames;
-    LsNames<HTetrahedronMesh>(tetraNames, grp);
+    LsNames<HTetrahedronMeshGroup>(tetraNames, grp);
 	
 	std::vector<std::string>::const_iterator it = tetraNames.begin();
 	for(;it!=tetraNames.end();++it)
-		addTetrahedron(*it, new ATetrahedronMesh);
+		addTetrahedron(*it, new ATetrahedronMeshGroup);
 
 	return true;
 }
@@ -226,10 +226,10 @@ bool HesperisFile::listTetrahedron(HBase * grp)
 bool HesperisFile::readTetrahedron()
 {
     bool allValid = true;
-	std::map<std::string, ATetrahedronMesh *>::iterator it = m_terahedrons.begin();
+	std::map<std::string, ATetrahedronMeshGroup *>::iterator it = m_terahedrons.begin();
 	for(; it != m_terahedrons.end(); ++it) {
 		std::cout<<" read tetrahedron mesh "<<it->first<<"\n";
-		HTetrahedronMesh grp(it->first);
+		HTetrahedronMeshGroup grp(it->first);
 		if(!grp.load(it->second)) {
 			std::cout<<" cannot load "<<it->first;
 			allValid = false;
@@ -280,7 +280,7 @@ void HesperisFile::extractTetrahedronMeshes(GeometryArray * dst)
 {
     dst->create(m_terahedrons.size());
 	unsigned i = 0;
-	std::map<std::string, ATetrahedronMesh *>::const_iterator it = m_terahedrons.begin();
+	std::map<std::string, ATetrahedronMeshGroup *>::const_iterator it = m_terahedrons.begin();
 	for(; it != m_terahedrons.end(); ++it) {
 		dst->setGeometry(it->second, i);
 		i++;
@@ -370,7 +370,7 @@ void HesperisFile::clearPolygonalMeshes()
 
 void HesperisFile::clearTetrahedronMeshes()
 {
-    std::map<std::string, ATetrahedronMesh *>::iterator it = m_terahedrons.begin();
+    std::map<std::string, ATetrahedronMeshGroup *>::iterator it = m_terahedrons.begin();
 	for(; it != m_terahedrons.end(); ++it) 
         delete it->second;
     m_terahedrons.clear(); 

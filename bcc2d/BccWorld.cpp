@@ -19,6 +19,7 @@
 #include <ATriangleMesh.h>
 #include "FitBccMeshBuilder.h"
 #include "CurveReduction.h"
+#include <ATetrahedronMeshGroup.h>
 
 BccWorld::BccWorld(KdTreeDrawer * drawer)
 {
@@ -223,6 +224,7 @@ void BccWorld::createTetrahedronMeshes()
 	unsigned ntet = 0;
 	unsigned nvert = 0;
 	unsigned nanchored = 0;
+    unsigned nstripes = 0;
     float vlm;
 	unsigned i=0;
 	for(;i<n;i++) {
@@ -236,12 +238,14 @@ void BccWorld::createTetrahedronMeshes()
 		ntet += m_meshes[i].numTetrahedrons();
 		nvert += m_meshes[i].numPoints();
 		nanchored += m_meshes[i].numAnchoredPoints();
+        nstripes += m_meshes[i].numStripes();
 	}
 	
 	std::cout<<"\n n tetrahedron meshes "<<n
 	<<"\n total n tetrahedrons "<<ntet
 	<<"\n total n points "<<nvert
 	<<"\n total n anchored points "<<nanchored
+    <<"\n total n stripes "<<nstripes
 	<<"\n";
 	m_numMeshes = n;
 	m_totalNumTetrahedrons = ntet;
@@ -408,8 +412,10 @@ bool BccWorld::save()
 		hes.addTetrahedron(sst.str(), &m_meshes[i]);
 	}
 #else
-	ATetrahedronMesh * cm = combinedTetrahedronMesh();
+
+	ATetrahedronMeshGroup * cm = combinedTetrahedronMesh();
 	hes.addTetrahedron("tetra_c", cm);
+    
 #endif	
 
 	if(!hes.open(BccGlobal::FileName)) return false;
@@ -419,7 +425,9 @@ bool BccWorld::save()
 	
 #if 0
 #else
+
 	delete cm;
+    
 #endif
 
 	return true;
@@ -544,25 +552,34 @@ void BccWorld::rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos
 	<<"\n";
 }
 
-ATetrahedronMesh * BccWorld::combinedTetrahedronMesh()
+ATetrahedronMeshGroup * BccWorld::combinedTetrahedronMesh()
 {
-	ATetrahedronMesh * omesh = new ATetrahedronMesh;
+	ATetrahedronMeshGroup * omesh = new ATetrahedronMeshGroup;
 	unsigned ntet = 0;
 	unsigned nvert = 0;
+    unsigned nstrip = 0;
 	unsigned i = 0;
 	for(; i < m_numMeshes; i++) {
 		ntet += m_meshes[i].numTetrahedrons();
 		nvert += m_meshes[i].numPoints();
+        nstrip += m_meshes[i].numStripes();
 	}
-	omesh->create(nvert, ntet);
-	
+	omesh->create(nvert, ntet, nstrip);
+ 
 	ntet = 0;
 	nvert = 0;
+    nstrip = 0;
 	i = 0;
 	for(; i < m_numMeshes; i++) {
+        omesh->copyPointDrift(m_meshes[i].pointDrifts(), 
+                              m_meshes[i].numStripes(), nstrip);
+        omesh->copyIndexDrift(m_meshes[i].indexDrifts(), 
+                              m_meshes[i].numStripes(), nstrip);
+        
 		omesh->copyStripe(&m_meshes[i], nvert, ntet * 4);
 		ntet += m_meshes[i].numTetrahedrons();
 		nvert += m_meshes[i].numPoints();
+        nstrip += m_meshes[i].numStripes();
 	}
 	float vlm = omesh->calculateVolume();
 	omesh->setVolume(vlm);
@@ -570,6 +587,7 @@ ATetrahedronMesh * BccWorld::combinedTetrahedronMesh()
 	<<"\n n points "<<nvert
 	<<"\n initial volume "<<vlm
 	<<"\n";
+    omesh->verbose();
 	return omesh;
 }
 //:~

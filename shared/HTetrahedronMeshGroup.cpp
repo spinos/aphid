@@ -45,10 +45,10 @@ char HTetrahedronMeshGroup::load(ATetrahedronMeshGroup * tetra)
 	readIntAttr(".nv", &nv);
 	
 	int nt = 1;
-	readIntAttr(".ntri", &nt);
+	readIntAttr(".nt", &nt);
 	
 	tetra->create(nv, nt, npart);
-	
+
 	readIntData(".pntdrift", npart, (unsigned *)tetra->pointDrifts());
 	readIntData(".inddrift", npart, (unsigned *)tetra->indexDrifts());
 	

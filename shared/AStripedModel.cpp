@@ -38,4 +38,10 @@ unsigned * AStripedModel::indexDrifts()
 
 const unsigned AStripedModel::numStripes() const
 { return m_numStripes; }
+
+void AStripedModel::copyPointDrift(unsigned * src, unsigned n, unsigned loc)
+{ m_pDrift->copyFrom(src, n * 4, loc * 4); }
+ 
+void AStripedModel::copyIndexDrift(unsigned * src, unsigned n, unsigned loc)
+{ m_iDrift->copyFrom(src, n * 4, loc * 4); }
 //:~

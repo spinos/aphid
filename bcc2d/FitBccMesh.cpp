@@ -22,28 +22,25 @@ void FitBccMesh::create(GeometryArray * geoa, KdIntersection * anchorMesh)
 {
 	std::vector<Vector3F > tetrahedronP;
 	std::vector<unsigned > tetrahedronInd;
+    std::vector<unsigned > pdrifts;
+    std::vector<unsigned > idrifts;
 	
 	FitBccMeshBuilder builder;
-	builder.build(geoa, tetrahedronP, tetrahedronInd);
+	builder.build(geoa, tetrahedronP, tetrahedronInd,
+                  pdrifts, idrifts);
 	
 	unsigned nt = tetrahedronInd.size()/4;
 	unsigned np = tetrahedronP.size();
 	
-	// nt = 16;
-	// np = 18;
+    ATetrahedronMeshGroup::create(np, nt, geoa->numGeometries());
 	
-	//std::cout<<" n tetrahedrons "<<nt<<"\n";
-	//std::cout<<" n vertices "<<np<<"\n";
-	
-	setNumPoints(np);
-	setNumIndices(nt * 4);
-	createBuffer(np, nt * 4);
-	
+    const unsigned ns = numStripes();
 	unsigned i;
 	for(i=0;i<np;i++) points()[i] = tetrahedronP[i];
-	
 	for(i=0;i<nt*4;i++) indices()[i] = tetrahedronInd[i];
-	
+	for(i=0;i<ns;i++) pointDrifts()[i] = pdrifts[i];
+    for(i=0;i<ns;i++) indexDrifts()[i] = idrifts[i];
+    
 	resetAnchors(np);
 	
 	addAnchors(builder.startPoints(), builder.tetrahedronDrifts(), geoa->numGeometries(), anchorMesh);

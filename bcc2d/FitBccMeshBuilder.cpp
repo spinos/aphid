@@ -44,7 +44,9 @@ void FitBccMeshBuilder::cleanup()
     
 void FitBccMeshBuilder::build(GeometryArray * curves, 
 	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd)
+	           std::vector<unsigned > & tetrahedronInd,
+               std::vector<unsigned > & pointDrifts,
+               std::vector<unsigned > & indexDrifts)
 {
     const unsigned n = curves->numGeometries();
 	if(m_startPoints) delete[] m_startPoints;
@@ -54,6 +56,8 @@ void FitBccMeshBuilder::build(GeometryArray * curves,
 	
     unsigned i=0;
     for(;i<n;i++) {
+        pointDrifts.push_back(tetrahedronP.size());
+        indexDrifts.push_back(tetrahedronInd.size());
 		m_tetraDrift[i] = tetrahedronInd.size() / 4;
         build((BezierCurve *)curves->geometry(i), 
 	           tetrahedronP, 

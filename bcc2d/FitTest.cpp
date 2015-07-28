@@ -32,7 +32,8 @@ FitTest::FitTest(KdTreeDrawer * drawer)
 	createRandomCurves();
 #endif
 
-	build(m_allGeo, m_tetrahedronP, m_tetrahedronInd);
+	build(m_allGeo, m_tetrahedronP, m_tetrahedronInd,
+          m_pdrift, m_idrift);
 	
 	std::cout<<" tetrahedron n p "<<m_tetrahedronP.size()<<"\n"
 		<<" n tetrahedron "<<m_tetrahedronInd.size()/4<<"\n done\n";

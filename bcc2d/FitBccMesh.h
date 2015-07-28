@@ -7,11 +7,11 @@
  *
  */
 
-#include <ATetrahedronMesh.h>
+#include <ATetrahedronMeshGroup.h>
 class GeometryArray;
 class KdIntersection;
 
-class FitBccMesh : public ATetrahedronMesh {
+class FitBccMesh : public ATetrahedronMeshGroup {
 public:
 	FitBccMesh();
 	virtual ~FitBccMesh();

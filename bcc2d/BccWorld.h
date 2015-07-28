@@ -17,6 +17,7 @@ class BccMesh;
 class FitBccMesh;
 class ATriangleMesh;
 class CurveReduction;
+class ATetrahedronMeshGroup;
 
 class BccWorld {
 public:
@@ -55,7 +56,7 @@ private:
 	void reduceGroup(unsigned igroup);
 	float groupCurveLength(GeometryArray * geos);
 	void rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos);
-	ATetrahedronMesh * combinedTetrahedronMesh();
+	ATetrahedronMeshGroup * combinedTetrahedronMesh();
 private:
     KdTreeDrawer * m_drawer;
     CurveGroup * m_curves;

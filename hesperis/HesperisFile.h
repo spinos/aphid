@@ -15,7 +15,7 @@
 #include <HTransform.h>
 #include <HFrameRange.h>
 #include <HTriangleMeshGroup.h>
-#include <HTetrahedronMesh.h>
+#include <HTetrahedronMeshGroup.h>
 #include <HCurveGroup.h>
 #include <HWorld.h>
 #include <HPolygonalMesh.h>
@@ -27,7 +27,7 @@
 class BaseTransform;
 class CurveGroup;
 class BaseBuffer;
-class ATetrahedronMesh;
+class ATetrahedronMeshGroup;
 class ATriangleMesh;
 class ATriangleMeshGroup;
 class GeometryArray;
@@ -61,7 +61,7 @@ public:
 	
     void addTransform(const std::string & name, BaseTransform * data);
 	void addCurve(const std::string & name, CurveGroup * data);
-	void addTetrahedron(const std::string & name, ATetrahedronMesh * data);
+	void addTetrahedron(const std::string & name, ATetrahedronMeshGroup * data);
 	void addTriangleMesh(const std::string & name, ATriangleMeshGroup * data);
 	void addPolygonalMesh(const std::string & name, APolygonalMesh * data);
     
@@ -122,7 +122,7 @@ private:
 private:
 	std::map<std::string, BaseTransform * > m_transforms;
 	std::map<std::string, CurveGroup * > m_curves;
-	std::map<std::string, ATetrahedronMesh * > m_terahedrons;
+	std::map<std::string, ATetrahedronMeshGroup * > m_terahedrons;
 	std::map<std::string, ATriangleMeshGroup * > m_triangleMeshes;
     std::map<std::string, APolygonalMesh * > m_polyMeshes;
     ReadComponent m_readComp;
