@@ -434,6 +434,7 @@ void internalForce(float3 * dst,
                                     mat33 * orientation,
                                     KeyValuePair * tetraInd,
                                     uint * bufferIndices,
+                                    float Y,
                                     uint maxBufferInd,
                                     uint maxInd)
 {
@@ -443,7 +444,7 @@ void internalForce(float3 * dst,
     dim3 grid(nblk, 1, 1);
     
     float d16, d17, d18;
-    calculateIsotropicElasticity(d16, d17, d18);
+    calculateIsotropicElasticity(Y, d16, d17, d18);
     
     internalForce_kernel<<< grid, block >>>(dst,
                                             d16, d17, d18,
@@ -464,6 +465,7 @@ void stiffnessAssembly(mat33 * dst,
                                         mat33 * orientation,
                                         KeyValuePair * tetraInd,
                                         uint * bufferIndices,
+                                        float Y,
                                         uint maxBufferInd,
                                         uint maxInd)
 {
@@ -473,7 +475,7 @@ void stiffnessAssembly(mat33 * dst,
     dim3 grid(nblk, 1, 1);
     
     float d16, d17, d18;
-    calculateIsotropicElasticity(d16, d17, d18);
+    calculateIsotropicElasticity(Y, d16, d17, d18);
     
     stiffnessAssembly_kernel<<< grid, block >>>(dst,
                                             d16, d17, d18,

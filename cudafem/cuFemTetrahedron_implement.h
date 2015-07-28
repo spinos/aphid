@@ -24,6 +24,7 @@ void internalForce(float3 * dst,
                     mat33 * orientation,
                     KeyValuePair * tetraInd,
                     uint * bufferIndices,
+                    float Y,
                     uint maxBufferInd,
                     uint maxInd);
 
@@ -34,6 +35,7 @@ void stiffnessAssembly(mat33 * dst,
                         mat33 * orientation,
                         KeyValuePair * tetraInd,
                         uint * bufferIndices,
+                        float Y,
                         uint maxBufferInd,
                         uint maxInd);
 

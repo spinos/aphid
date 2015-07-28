@@ -19,8 +19,8 @@ PhysicsControl::PhysicsControl(QWidget *parent)
     YGrp = new QGroupBox;
     
     m_youngModulusValue = new QDoubleEditSlider(tr("Young's modulus"), this);
-	m_youngModulusValue->setLimit(80000.0, 800000.0);
-	m_youngModulusValue->setValue(200000.0);
+	m_youngModulusValue->setLimit(40000.0, 800000.0);
+	m_youngModulusValue->setValue(160000.0);
     
     QHBoxLayout * yLayout = new QHBoxLayout;
 	yLayout->addWidget(m_youngModulusValue);

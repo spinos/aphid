@@ -174,11 +174,12 @@ inline __device__ void calculateKe(mat33 & Ke,
 }
 
 
-inline void calculateIsotropicElasticity(float & d16, float & d17, float & d18)
+inline void calculateIsotropicElasticity(float Y,
+            float & d16, float & d17, float & d18)
 {
     float nu = 0.02f; 
 // 40,000 to 800,000
-    float Y = 40000.0f;
+// float Y = 40000.0f;
     
     float d15 = Y / (1.0f + nu) / (1.0f - 2 * nu);
     d16 = (1.0f - nu) * d15;

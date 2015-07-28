@@ -10,7 +10,7 @@
 #include <CudaBase.h>
 
 CudaDbgLog bglg("stiffness.txt");
-float FEMTetrahedronSystem::YoungsModulus = 200000.f;
+float FEMTetrahedronSystem::YoungsModulus = 160000.f;
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
     m_Re = new CUDABuffer;
@@ -382,6 +382,7 @@ void FEMTetrahedronSystem::updateStiffnessMatrix()
                                         (mat33 *)re,
                                         (KeyValuePair *)sth,
                                         (uint *)ind,
+                                        YoungsModulus,
                                         numTetrahedrons() * 16,
                                         m_stiffnessMatrix->numNonZero());
 }
@@ -420,6 +421,7 @@ void FEMTetrahedronSystem::updateForce()
                                         (mat33 *)re,
                                         (KeyValuePair *)vth,
                                         (unsigned *)ind,
+                                        YoungsModulus,
                                         numTetrahedrons() * 16,
                                         numPoints());
 }
