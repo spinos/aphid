@@ -139,7 +139,7 @@ __global__ void internalForce_kernel(float3 * dst,
 	if(ind >= maxInd) return;
 	
 	float3_set_zero(dst[ind]);
-	float d16, float d17, float d18;
+	float d16, d17, d18;
 	float4 * B;
 	float3 pj, force, sum;
 	mat33 Ke, Re;
@@ -213,7 +213,7 @@ __global__ void stiffnessAssembly_kernel(mat33 * dst,
 	
 	set_mat33_zero(dst[ind]);
 	
-    float d16, float d17, float d18;
+    float d16, d17, d18;
 	float4 * B;
 	mat33 Ke, Re, ReT, tmp, tmpT;
 	uint iTet, i, j, needT;

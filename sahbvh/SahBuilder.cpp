@@ -193,7 +193,7 @@ void SahBuilder::rebuild(CudaLinearBvh * bvh)
     m_runHeads->create(CudaScan::getScanBufferLength(n) * 4);
 	m_runIndices->create(CudaScan::getScanBufferLength(n) * 4);
 	m_clusterAabb->create(n * 24);
-    
+	
 	void * primitiveHash = bvh->primitiveHash();
 	void * primitiveAabb = bvh->primitiveAabb();
 	
