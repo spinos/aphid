@@ -15,10 +15,12 @@
 QT_BEGIN_NAMESPACE
 class QGroupBox;
 class QCheckBox;
+class QLabel;
 QT_END_NAMESPACE
 
 class QIntEditSlider;
 class QDoubleEditSlider;
+class QSplineEdit;
 
 class PhysicsControl : public QDialog
 {
@@ -37,6 +39,9 @@ signals:
 private:
     QGroupBox * YGrp;
     QDoubleEditSlider * m_youngModulusValue;
+    QGroupBox * yAGrp;
+    QLabel * stiffnessCurveLabel;
+    QSplineEdit * m_youngAttenuateValue;
 	
 };
 #endif
