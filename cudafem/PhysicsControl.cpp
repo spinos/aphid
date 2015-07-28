@@ -50,8 +50,20 @@ PhysicsControl::PhysicsControl(QWidget *parent)
 	setLayout(layout);
     
     connect(m_youngModulusValue, SIGNAL(valueChanged(double)), this, SLOT(sendYoungModulus(double)));
+    connect(m_youngAttenuateValue, SIGNAL(valueChanged(QPointF)), this, SLOT(sendStiffnessAttenuateEnds(QPointF)));
+    connect(m_youngAttenuateValue, SIGNAL(leftControlChanged(QPointF)), this, SLOT(sendStiffnessAttenuateLeft(QPointF)));
+    connect(m_youngAttenuateValue, SIGNAL(rightControlChanged(QPointF)), this, SLOT(sendStiffnessAttenuateRight(QPointF)));
 }
 
 void PhysicsControl::sendYoungModulus(double x)
 { emit youngsModulusChanged(x); }
+
+void PhysicsControl::sendStiffnessAttenuateEnds(QPointF v)
+{ emit stiffnessAttenuateEndsChanged(v); }
+
+void PhysicsControl::sendStiffnessAttenuateLeft(QPointF v)
+{ emit stiffnessAttenuateLeftChanged(v); }
+
+void PhysicsControl::sendStiffnessAttenuateRight(QPointF v)
+{ emit stiffnessAttenuateRightChanged(v); }
 //:~

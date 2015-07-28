@@ -35,6 +35,9 @@ private:
 
 public slots:
     void receiveYoungsModulus(double x);
+    void receiveStiffnessAttenuateEnds(QPointF v);
+    void receiveStiffnessAttenuateLeft(QPointF v);
+    void receiveStiffnessAttenuateRight(QPointF v);
 private slots:
     void simulate();
 signals:

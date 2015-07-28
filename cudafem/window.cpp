@@ -14,6 +14,16 @@ Window::Window()
     createMenus();
     connect(m_physicsControl, SIGNAL(youngsModulusChanged(double)), 
             glWidget, SLOT(receiveYoungsModulus(double)));
+    
+    connect(m_physicsControl, SIGNAL(stiffnessAttenuateEndsChanged(QPointF)), 
+            glWidget, SLOT(receiveStiffnessAttenuateEnds(QPointF)));
+    
+    connect(m_physicsControl, SIGNAL(stiffnessAttenuateLeftChanged(QPointF)), 
+            glWidget, SLOT(receiveStiffnessAttenuateLeft(QPointF)));
+    
+    connect(m_physicsControl, SIGNAL(stiffnessAttenuateRightChanged(QPointF)), 
+            glWidget, SLOT(receiveStiffnessAttenuateRight(QPointF)));
+    
     statusBar()->showMessage(tr("Ready"));
 }
 //! [1]

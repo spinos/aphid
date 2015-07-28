@@ -146,25 +146,25 @@ void QSplineEdit::selectControlHandle(int x, int y)
 	QPointF pmouse(x, y);
 	
 	QPointF tostart = toDrawSpace(0, m_startValue) - pmouse;
-	if(tostart.manhattanLength() < 5.0) {
+	if(tostart.manhattanLength() < 9.0) {
 		m_selected = HStart;
 		return;
 	}
 	
 	QPointF toend = toDrawSpace(1, m_endValue) - pmouse;
-	if(toend.manhattanLength() < 5.0) {
+	if(toend.manhattanLength() < 9.0) {
 		m_selected = HEnd;
 		return;
 	}
 	
 	QPointF toone = toDrawSpace(m_startCvx, m_startCvy) - pmouse;
-	if(toone.manhattanLength() < 5.0) {
+	if(toone.manhattanLength() < 9.0) {
 		m_selected = HControlLeft;
 		return;
 	}
 	
 	QPointF totwo = toDrawSpace(m_endCvx, m_endCvy) - pmouse;
-	if(totwo.manhattanLength() < 5.0) {
+	if(totwo.manhattanLength() < 9.0) {
 		m_selected = HControlRight;
 		return;
 	}

@@ -58,8 +58,8 @@ bool FEMWorldInterface::readTetrahedronMeshFromFile(CudaDynamicWorld * world)
     m_map.setLastIndex(meshData->numIndices());
     delete meshData;
     
-    m_map.computeTetrahedronInStripe(mesh->hostElementValue(),
-                                     mesh->numTetrahedrons());
+    m_tetra = mesh;
+    remapStiffness();
 	return true;
 }
 /*
@@ -129,4 +129,25 @@ bool FEMWorldInterface::useVelocityFile(CudaDynamicWorld * world)
     CudaDynamicWorld::VelocityCache = velfile;
     return true;
 }
+
+void FEMWorldInterface::updateStiffnessMapEnds(float a, float b)
+{
+    m_map.setStart(a);
+    m_map.setEnd(b);
+}
+
+void FEMWorldInterface::updateStiffnessMapLeft(float x, float y)
+{ m_map.setLeftControl(x, y); }
+
+void FEMWorldInterface::updateStiffnessMapRight(float x, float y)
+{ m_map.setRightControl(x, y); }
+
+void FEMWorldInterface::remapStiffness()
+{
+    m_map.computeTetrahedronInStripe(m_tetra->hostElementValue(),
+                                     m_tetra->numTetrahedrons());
+}
+
+void FEMWorldInterface::transferStiffness()
+{ m_tetra->transferStiffness(); }
 //:~

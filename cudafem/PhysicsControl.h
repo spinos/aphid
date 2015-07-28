@@ -33,9 +33,14 @@ public slots:
 	
 private slots:
     void sendYoungModulus(double x);
+    void sendStiffnessAttenuateEnds(QPointF v);
+    void sendStiffnessAttenuateLeft(QPointF v);
+    void sendStiffnessAttenuateRight(QPointF v);
 signals:
 	void youngsModulusChanged(double a);
-    
+    void stiffnessAttenuateEndsChanged(QPointF v);
+    void stiffnessAttenuateLeftChanged(QPointF v);
+    void stiffnessAttenuateRightChanged(QPointF v);
 private:
     QGroupBox * YGrp;
     QDoubleEditSlider * m_youngModulusValue;

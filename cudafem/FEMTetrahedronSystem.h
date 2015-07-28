@@ -20,6 +20,7 @@ public:
 // override BvhTetrahedronSystem
     virtual void integrate(float dt);
 	static float YoungsModulus;
+    void transferStiffness();
     void verbose();
 protected:
     

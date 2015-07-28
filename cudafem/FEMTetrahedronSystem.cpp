@@ -505,4 +505,7 @@ void FEMTetrahedronSystem::update()
 	solveConjugateGradient();
 	BvhTetrahedronSystem::update();
 }
+
+void FEMTetrahedronSystem::transferStiffness()
+{ m_stripeAttenuate->hostToDevice(hostElementValue(), numTetrahedrons() * 4); }
 //:~
