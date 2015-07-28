@@ -572,9 +572,13 @@ ATetrahedronMeshGroup * BccWorld::combinedTetrahedronMesh()
 	i = 0;
 	for(; i < m_numMeshes; i++) {
         omesh->copyPointDrift(m_meshes[i].pointDrifts(), 
-                              m_meshes[i].numStripes(), nstrip);
+                              m_meshes[i].numStripes(), 
+                              nstrip,
+                              nvert);
         omesh->copyIndexDrift(m_meshes[i].indexDrifts(), 
-                              m_meshes[i].numStripes(), nstrip);
+                              m_meshes[i].numStripes(), 
+                              nstrip,
+                              ntet*4);
         
 		omesh->copyStripe(&m_meshes[i], nvert, ntet * 4);
 		ntet += m_meshes[i].numTetrahedrons();

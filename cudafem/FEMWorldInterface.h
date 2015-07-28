@@ -2,6 +2,7 @@
 #define FEMWORLDINTERFACE_H
 
 #include <DynamicWorldInterface.h>
+#include <StripeMap.h>
 class FEMTetrahedronSystem;
 class FEMWorldInterface : public DynamicWorldInterface {
 public:
@@ -15,6 +16,7 @@ protected:
 private:
 	bool readTetrahedronMeshFromFile(CudaDynamicWorld * world);
 	bool readTriangleMeshFromFile(CudaDynamicWorld * world);
+    StripeMap m_map;
 };
 
 #endif        //  #ifndef FEMWORLDINTERFACE_H

@@ -44,22 +44,22 @@ bool FEMWorldInterface::readTetrahedronMeshFromFile(CudaDynamicWorld * world)
 	hes.extractTetrahedronMeshes(&tetrahedronGeos);
     
     unsigned n = tetrahedronGeos.numGeometries();
-#if 0
-    n = 10;
-    unsigned i = 9;
-#else
-    unsigned i = n-1;
-#endif
-    for(;i<n;i++) {
-        ATetrahedronMeshGroup * meshData = (ATetrahedronMeshGroup *)tetrahedronGeos.geometry(i);
-        std::cout<<"\n mesh["<<i<<"]"
+    if(n<1) std::cout<<"\n ERROR: found zero tetrahedron mesh ";
+    ATetrahedronMeshGroup * meshData = (ATetrahedronMeshGroup *)tetrahedronGeos.geometry(0);
+    std::cout<<"\n mesh["<<0<<"]"
 	    <<"\n "<<meshData->verbosestr()
         <<"\n";
         
-        FEMTetrahedronSystem * mesh = new FEMTetrahedronSystem(meshData);
-        mesh->resetVelocity();
-        world->addTetrahedronSystem(mesh);
-    }
+    FEMTetrahedronSystem * mesh = new FEMTetrahedronSystem(meshData);
+    mesh->resetVelocity();
+    world->addTetrahedronSystem(mesh);
+    
+    m_map.create(meshData);
+    m_map.setLastIndex(meshData->numIndices());
+    delete meshData;
+    
+    m_map.computeTetrahedronInStripe(mesh->hostElementValue(),
+                                     mesh->numTetrahedrons());
 	return true;
 }
 /*

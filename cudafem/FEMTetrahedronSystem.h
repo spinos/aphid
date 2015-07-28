@@ -7,6 +7,7 @@ class BaseBuffer;
 class CUDABuffer;
 class CudaCSRMatrix;
 class ATetrahedronMeshGroup;
+
 class FEMTetrahedronSystem : public BvhTetrahedronSystem, 
                                 public CudaConjugateGradientSolver
 {
@@ -49,7 +50,7 @@ private:
     CUDABuffer * m_F0;
     CUDABuffer * m_Fe;
 	CUDABuffer * m_BVolume;
-	bool m_hasBVolume;
+    bool m_hasBVolume;
 };
 
 #endif        //  #ifndef FEMTETRAHEDRONSYSTEM_H

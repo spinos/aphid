@@ -23,9 +23,10 @@ TetrahedronSystem::TetrahedronSystem()
 {
 	m_hostTetrahedronVicinityInd = new BaseBuffer;
 	m_hostTetrahedronVicinityStart = new BaseBuffer;
-	
+	m_hostElementValue = new BaseBuffer;
 	create(NTET, NTET * 4, NPNT);
-	
+	m_hostElementValue->create(NTET * 4);
+    
 	float * hv = &hostV()[0];
 	
 	unsigned i, j;
@@ -85,9 +86,11 @@ TetrahedronSystem::TetrahedronSystem(ATetrahedronMesh * md)
 {
 	m_hostTetrahedronVicinityInd = new BaseBuffer;
 	m_hostTetrahedronVicinityStart = new BaseBuffer;
-	
+	m_hostElementValue = new BaseBuffer;
 	create(md->numTetrahedrons() + 100, md->numTetrahedrons() * 4 + 400, md->numPoints() + 400);
-	Vector3F * p = md->points();
+	m_hostElementValue->create((md->numTetrahedrons() + 100) * 4);
+    
+    Vector3F * p = md->points();
 	unsigned i;
 	for(i=0; i< md->numPoints(); i++)
 	    addPoint((float *)&p[i]);
@@ -366,4 +369,7 @@ const int TetrahedronSystem::elementRank() const
 
 const unsigned TetrahedronSystem::numElements() const
 { return numTetrahedrons(); }
+
+float * TetrahedronSystem::hostElementValue() const
+{ return (float *)m_hostElementValue->data(); }
 //~:

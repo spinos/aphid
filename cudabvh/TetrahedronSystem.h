@@ -25,6 +25,7 @@ public:
 // override mass system
 	virtual const int elementRank() const;
 	virtual const unsigned numElements() const;
+    float * hostElementValue() const;
 protected:
 	float totalInitialVolume();
     void calculateMass();
@@ -44,6 +45,7 @@ typedef std::map<unsigned, unsigned>::iterator VicinityMapIter;
 private:
 	BaseBuffer * m_hostTetrahedronVicinityInd;
 	BaseBuffer * m_hostTetrahedronVicinityStart;
+    BaseBuffer * m_hostElementValue;
 	unsigned m_tetrahedronVicinitySize;
 };
 #endif        //  #ifndef TETRAHEDRONSYSTEM_H

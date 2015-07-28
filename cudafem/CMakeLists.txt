@@ -100,6 +100,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "glwidget.cpp"
 "window.cpp"
 PhysicsControl.cpp
+StripeMap.cpp
 "main.cpp")
 
 if (WIN32)
