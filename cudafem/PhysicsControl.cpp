@@ -11,6 +11,7 @@
 #include <QIntEditSlider.h>
 #include <QDoubleEditSlider.h>
 #include <QSplineEdit.h>
+#include <QAngleEdit.h>
 #include "PhysicsControl.h"
 
 PhysicsControl::PhysicsControl(QWidget *parent)
@@ -51,11 +52,20 @@ PhysicsControl::PhysicsControl(QWidget *parent)
 	
     dsGrp->setLayout(dsLayout);
 	
+	m_angleValue = new QAngleEdit(this);
+	//m_angleValue->setMin(-1.57);
+	//m_angleValue->setMax(1.57);
+	QGroupBox * windGrp = new QGroupBox;
+	QVBoxLayout * windLayout = new QVBoxLayout;
+	windLayout->addWidget(m_angleValue);
+	windGrp->setLayout(windLayout);
+	
     QVBoxLayout *layout = new QVBoxLayout;
 	layout->addWidget(dsGrp);
 	layout->addWidget(YGrp);
 	layout->addWidget(yAGrp);
-	layout->setStretch(1, 1);
+	layout->addWidget(windGrp);
+	layout->setStretch(3, 1);
 	layout->setSpacing(4);
 	
 	setLayout(layout);

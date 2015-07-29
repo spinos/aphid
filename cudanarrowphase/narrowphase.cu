@@ -487,8 +487,10 @@ __global__ void integrate_kernel1(float3 * pos,
 	if(ind >= maxInd) return;
 	
     float3 va = anchoredVel[ind];
-	if(anchor[ind] > 0) vel[ind] = va;
-	float3_add_inplace(pos[ind], scale_float3_by(vel[ind], dt));
+    float3 v = vel[ind];
+	if(anchor[ind] > 0) v = va;
+	float3_add_inplace(pos[ind], scale_float3_by(v, dt));
+	vel[ind] = v;
 }
 
 extern "C" {

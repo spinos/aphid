@@ -70,8 +70,8 @@ __global__ void externalForce_kernel(float3 * dst,
     float3_scale_inplace(w, m);
     float3_add_inplace(F, w);
     
-    float3 u = velocity[ind];
-    float3_minus_inplace(u, CWind);
+    float3 u = CWind;;
+    float3_minus_inplace(u, velocity[ind]);
     float3_scale_inplace(u, m * 0.019f);
     float3_add_inplace(F, u);
     dst[ind] = F;
@@ -418,15 +418,19 @@ void cuFemTetrahedron_dampK(mat33 * stiffness,
 
 namespace tetrahedronfem {
 
+void setGravity(float * g)
+{ cudaMemcpyToSymbol(CGravity, g, 12); }
+
+void setWind(float * w)
+{ cudaMemcpyToSymbol(CWind, w, 12); }
+
 void computeExternalForce(float3 * dst,
                                 float * mass,
                                 float3 * velocity,
                                 float * wind,
                                 uint maxInd)
 {
-    float gravity[3] = {0.f, -9.81f, 0.f};
-    cudaMemcpyToSymbol(CGravity, gravity, 12);
-    cudaMemcpyToSymbol(CWind, wind, 12); 
+	setWind(wind);
     
     dim3 block(512, 1, 1);
     unsigned nblk = iDivUp(maxInd, 512);

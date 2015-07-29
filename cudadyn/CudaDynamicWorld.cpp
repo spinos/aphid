@@ -9,6 +9,7 @@
 #include <WorldDbgDraw.h>
 #include <IVelocityFile.h>
 #include <CudaDbgLog.h>
+#include <cuFemTetrahedron_implement.h>
 
 WorldDbgDraw * CudaDynamicWorld::DbgDrawer = 0;
 IVelocityFile * CudaDynamicWorld::VelocityCache = 0;
@@ -82,6 +83,9 @@ void CudaDynamicWorld::initOnDevice()
 	std::cout<<"\n cuda dynamice world initialized"
 	<<"\n used "<<CudaBase::MemoryUsed<<" byte memory"
 	<<"\n";
+	
+	float gravity[3] = {0.f, -9.81f, 0.f};
+	tetrahedronfem::setGravity(gravity);
 }
 
 void CudaDynamicWorld::stepPhysics(float dt)

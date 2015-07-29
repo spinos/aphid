@@ -5,6 +5,9 @@
 #include <radixsort_implement.h>
 
 namespace tetrahedronfem {
+void setGravity(float * g);
+void setWind(float * w);
+
 void computeExternalForce(float3 * dst,
                                 float * mass,
                                 float3 * velocity,

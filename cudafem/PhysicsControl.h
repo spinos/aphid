@@ -21,6 +21,7 @@ QT_END_NAMESPACE
 class QIntEditSlider;
 class QDoubleEditSlider;
 class QSplineEdit;
+class QAngleEdit;
 
 class PhysicsControl : public QDialog
 {
@@ -51,5 +52,6 @@ private:
     QSplineEdit * m_youngAttenuateValue;
 	QGroupBox * dsGrp;
 	QDoubleEditSlider * m_densityValue;
+	QAngleEdit * m_angleValue;
 };
 #endif
