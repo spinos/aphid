@@ -5,6 +5,12 @@
 #include <radixsort_implement.h>
 
 namespace tetrahedronfem {
+void computeExternalForce(float3 * dst,
+                                float * mass,
+                                float3 * velocity,
+                                float * wind,
+                                uint maxInd);
+
 void computeBVolume(float4 * dst, 
                     float3 * pos,
                     uint4 * tetVertices,
@@ -80,10 +86,6 @@ void cuFemTetrahedron_dampK(mat33 * stiffness,
                                 uint * rowPtr,
                                 uint * colInd,
                                 float dt,
-                                uint maxInd);
-
-void cuFemTetrahedron_externalForce(float3 * dst,
-                                float * mass,
                                 uint maxInd);
 }
 #endif        //  #ifndef CUFEMTETRAHEDRON_IMPLEMENT_H

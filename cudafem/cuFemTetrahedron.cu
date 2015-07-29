@@ -4,6 +4,9 @@
 #include <CudaBase.h>
 #include <Spline1D.cuh>
 
+__constant__ float3 CGravity;
+__constant__ float3 CWind;
+
 __global__ void computeBVolume_kernel(float4 * dst, 
                     float3 * pos,
                     uint4 * tetVertices,
@@ -49,6 +52,7 @@ __global__ void elasticity_kernel(float4 * d,
 
 __global__ void externalForce_kernel(float3 * dst,
                                 float * mass,
+                                float3 * velocity,
                                 uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
@@ -60,8 +64,17 @@ __global__ void externalForce_kernel(float3 * dst,
 	    return;
 	}
 	
-	float3 gravity = make_float3(0.f, -9.81f, 0.f);
-	dst[ind] = scale_float3_by(gravity, mass[ind]);
+	float3 F = scale_float3_by(CGravity, m);
+    
+    float3 w = CWind;
+    float3_scale_inplace(w, m);
+    float3_add_inplace(F, w);
+    
+    float3 u = velocity[ind];
+    float3_minus_inplace(u, CWind);
+    float3_scale_inplace(u, m * 0.019f);
+    float3_add_inplace(F, u);
+    dst[ind] = F;
 }
 
 __global__ void computeRhs_kernel(float3 * rhs,
@@ -401,22 +414,30 @@ void cuFemTetrahedron_dampK(mat33 * stiffness,
         maxInd);
 }
 
-void cuFemTetrahedron_externalForce(float3 * dst,
+}
+
+namespace tetrahedronfem {
+
+void computeExternalForce(float3 * dst,
                                 float * mass,
+                                float3 * velocity,
+                                float * wind,
                                 uint maxInd)
 {
+    float gravity[3] = {0.f, -9.81f, 0.f};
+    cudaMemcpyToSymbol(CGravity, gravity, 12);
+    cudaMemcpyToSymbol(CWind, wind, 12); 
+    
     dim3 block(512, 1, 1);
     unsigned nblk = iDivUp(maxInd, 512);
     dim3 grid(nblk, 1, 1);
     
     externalForce_kernel<<< grid, block >>>(dst,
         mass,
+        velocity,
         maxInd);
 }
 
-}
-
-namespace tetrahedronfem {
 void computeBVolume(float4 * dst, 
                     float3 * pos,
                     uint4 * tetVertices,

@@ -24,6 +24,7 @@ public:
 	static float YoungsModulus;
     static void SetNeedElasticity();
 	static void SetNeedMass();
+    
     void verbose();
 protected:
 // override cudamasssystem

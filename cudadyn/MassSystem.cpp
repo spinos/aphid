@@ -10,6 +10,7 @@
 #include "MassSystem.h"
 #include <BaseBuffer.h>
 #include <tetrahedron_math.h>
+Vector3F MassSystem::WindVec = Vector3F::Zero;
 MassSystem::MassSystem() : 
 m_numTetrahedrons(0), 
 m_numPoints(0), 

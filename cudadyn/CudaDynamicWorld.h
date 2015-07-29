@@ -47,7 +47,8 @@ public:
     static WorldDbgDraw * DbgDrawer;
     static IVelocityFile * VelocityCache;
 protected:
-	
+    void resetWind();
+	void updateWind();
 private:
     CudaBroadphase * m_broadphase;
     CudaNarrowphase * m_narrowphase;

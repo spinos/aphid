@@ -9,6 +9,7 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+#include <Vector3F.h>
 class BaseBuffer;
 class MassSystem {
 public:
@@ -38,6 +39,8 @@ public:
 	virtual void integrate(float dt);
     
     void setHostX(float * src);
+    
+    static Vector3F WindVec;
 protected:
 	void setNumPoints(unsigned x);
 	void setNumTetrahedrons(unsigned x);

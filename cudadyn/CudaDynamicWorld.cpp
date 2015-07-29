@@ -125,6 +125,7 @@ void CudaDynamicWorld::reset()
         delete VelocityCache;
         VelocityCache = 0;
     }
+    resetWind();
 }
 
 void CudaDynamicWorld::sendXToHost()
@@ -194,10 +195,30 @@ const unsigned CudaDynamicWorld::totalNumPoints() const
 void CudaDynamicWorld::readVelocityCache()
 {
     if(!VelocityCache) return;
-    if(VelocityCache->isOutOfRange()) return;
+    if(VelocityCache->isOutOfRange()) {
+        resetWind();
+        return;
+    }
+    VelocityCache->readFrameTranslationalVelocity();
     VelocityCache->readFrameVelocity();
     VelocityCache->nextFrame();
     
 	m_narrowphase->setAnchoredVelocity(VelocityCache->velocities());
+    updateWind();
+}
+
+void CudaDynamicWorld::resetWind()
+{ MassSystem::WindVec = Vector3F::Zero; }
+
+void CudaDynamicWorld::updateWind()
+{
+    Vector3F windVec = *VelocityCache->translationalVelocity();
+    windVec.reverse();
+    float scale = windVec.length();
+    if(scale>20.f) {
+        scale /= 20.f;
+        windVec /= scale;
+    }
+    MassSystem::WindVec = windVec;
 }
 //:~

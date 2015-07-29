@@ -51,7 +51,7 @@ bool OVelocityFile::writeFrameTranslationalVelocity()
 {
 	if(!isFrameBegin()) {
         *translationalVelocity() = (m_currentT - m_lastT) * 30.f;
-        writeVelocity(currentFrame()-1);
+        writeTranslationalVelocity(currentFrame()-1);
         if(isFrameEnd()) {
 			*translationalVelocity() = Vector3F::Zero;
             writeTranslationalVelocity(currentFrame());

@@ -16,6 +16,7 @@ SplineMap1D FEMTetrahedronSystem::SplineMap;
 float FEMTetrahedronSystem::YoungsModulus = 160000.f;
 bool FEMTetrahedronSystem::NeedElasticity = true;
 bool FEMTetrahedronSystem::NeedMass = false;
+
 FEMTetrahedronSystem::FEMTetrahedronSystem() 
 {
     m_Re = new CUDABuffer;
@@ -510,9 +511,12 @@ void FEMTetrahedronSystem::dynamicsAssembly(float dt)
 void FEMTetrahedronSystem::updateExternalForce()
 {
     void * force = m_Fe->bufferOnDevice();
+    void * vel = deviceV();
     void * mass = deviceMass();
-    cuFemTetrahedron_externalForce((float3 *)force,
+    tetrahedronfem::computeExternalForce((float3 *)force,
                                 (float *)mass,
+                                (float3 *)vel,
+                                (float *)&WindVec,
                                 numPoints());
 }
 
