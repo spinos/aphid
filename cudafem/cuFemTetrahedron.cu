@@ -93,7 +93,8 @@ __global__ void computeRhs_kernel(float3 * rhs,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-	float3_set_zero(rhs[ind]);
+	float3 result;
+	float3_set_zero(result);
 	
 	const uint nextRow = rowPtr[ind+1];
 	uint cur = rowPtr[ind];
@@ -106,25 +107,29 @@ __global__ void computeRhs_kernel(float3 * rhs,
 	    K = stiffness[cur];
 	    j = colInd[cur];
 	    mat33_float3_prod(tmp, K, pos[j]);
-	    float3_minus_inplace(rhs[ind], tmp);
+	    float3_minus_inplace(result, tmp);
 		
-		mat33_mult_f(stiffness[cur], dt2);
+		mat33_mult_f(K, dt2);
+		stiffness[cur] = K;
 		
 	    if(ind == colInd[cur]) {
 	        damping = .21f * mi * dt + mi;
-	        stiffness[cur].v[0].x += damping;
-	        stiffness[cur].v[1].y += damping;
-	        stiffness[cur].v[2].z += damping;
+	        K = stiffness[cur];
+	        K.v[0].x += damping;
+	        K.v[1].y += damping;
+	        K.v[2].z += damping;
+	        stiffness[cur] = K;
 	    }
 	}
 	
-	float3_minus_inplace(rhs[ind], f0[ind]);
-	float3_add_inplace(rhs[ind], externalForce[ind]);
-	float3_scale_inplace(rhs[ind], dt);
+	float3_minus_inplace(result, f0[ind]);
+	float3_add_inplace(result, externalForce[ind]);
+	float3_scale_inplace(result, dt);
 
 	tmp = vel[ind];
 	float3_scale_inplace(tmp, mi);
-	float3_add_inplace(rhs[ind], tmp);
+	float3_add_inplace(result, tmp);
+	rhs[ind] = result;
 }
 
 __global__ void dampK_kernel(mat33 * stiffness,
