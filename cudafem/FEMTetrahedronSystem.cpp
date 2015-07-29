@@ -11,7 +11,7 @@
 #include <ATetrahedronMeshGroup.h>
 #include <masssystem_impl.h>
 
-CudaDbgLog bglg("stiffness.txt");
+// CudaDbgLog bglg("stiffness.txt");
 SplineMap1D FEMTetrahedronSystem::SplineMap;
 float FEMTetrahedronSystem::YoungsModulus = 160000.f;
 bool FEMTetrahedronSystem::NeedElasticity = true;

@@ -50,6 +50,7 @@ private:
     void drawOverallTranslation();
     bool saveVelocityFramerange(AFrameRange * fr);
     void saveVelocity(bool toReset);
+	void recordT();
     void recordP();
     const unsigned totalNumPoints() const;
     

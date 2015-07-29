@@ -7,7 +7,6 @@
 #include <CudaDbgLog.h>
 #include <boost/format.hpp>
 #include <FemGlobal.h>
-CudaDbgLog cglg("cgsolver.txt");
 
 CudaConjugateGradientSolver::CudaConjugateGradientSolver()
 {

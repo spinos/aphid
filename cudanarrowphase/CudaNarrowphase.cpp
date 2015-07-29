@@ -16,7 +16,6 @@
 #include <DynGlobal.h>
 #include <CudaDbgLog.h>
 #include <CudaBase.h>
-CudaDbgLog nplg("nph.txt");
 
 struct SSimplex {
     float3 p[4];

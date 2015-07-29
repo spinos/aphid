@@ -33,7 +33,7 @@ unsigned IVelocityFile::readNumPoints()
 {
     int nv = 0;
     useDocument();
-    HBase vg("/vel");
+    HBase vg(deformationName());
     if(vg.hasNamedAttr(".nv"))
         vg.readIntAttr(".nv", &nv);
     vg.close();
@@ -51,12 +51,29 @@ bool IVelocityFile::readFrameVelocity()
 {
     useDocument();
     bool stat = true;
-    HBase vg("/vel");
+    HBase vg(deformationName());
     const std::string sframe = boost::str( boost::format("%1%") % currentFrame() );
     if(vg.hasNamedData(sframe.c_str()))
         vg.readVector3Data(sframe.c_str(), numPoints(), velocities());
     else {
-        std::cout<<" velocity file cannot read frame "<<currentFrame();
+        std::cout<<" velocity file cannot read frame vertex velocity "<<currentFrame();
+        stat = false;
+    }
+    vg.close();
+    
+    return stat;
+}
+
+bool IVelocityFile::readFrameTranslationalVelocity()
+{
+	useDocument();
+    bool stat = true;
+    HBase vg(translationName());
+    const std::string sframe = boost::str( boost::format("%1%") % currentFrame() );
+    if(vg.hasNamedAttr(sframe.c_str()))
+        vg.readFloatAttr(sframe.c_str(), (float *)translationalVelocity());
+    else {
+        std::cout<<" velocity file cannot read frame translational velocity "<<currentFrame();
         stat = false;
     }
     vg.close();
@@ -66,4 +83,13 @@ bool IVelocityFile::readFrameVelocity()
 
 BaseBuffer * IVelocityFile::velocityBuf() const
 { return m_vel; }
+
+Vector3F * IVelocityFile::translationalVelocity()
+{ return &m_translationalVelocity; }
+
+const std::string IVelocityFile::translationName() const
+{ return "/translate"; }
+
+const std::string IVelocityFile::deformationName() const
+{ return "/deform"; }
 //;~

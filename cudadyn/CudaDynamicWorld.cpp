@@ -10,7 +10,6 @@
 #include <IVelocityFile.h>
 #include <CudaDbgLog.h>
 
-CudaDbgLog wdlg("world.txt");
 WorldDbgDraw * CudaDynamicWorld::DbgDrawer = 0;
 IVelocityFile * CudaDynamicWorld::VelocityCache = 0;
 
@@ -199,10 +198,6 @@ void CudaDynamicWorld::readVelocityCache()
     VelocityCache->readFrameVelocity();
     VelocityCache->nextFrame();
     
-   //wdlg.writeVec3(VelocityCache->velocityBuf(), 
-	//				VelocityCache->numPoints(), 
-	//				" Va ", CudaDbgLog::FAlways);
-    // cudaDeviceSynchronize();
-    m_narrowphase->setAnchoredVelocity(VelocityCache->velocities());
+	m_narrowphase->setAnchoredVelocity(VelocityCache->velocities());
 }
 //:~

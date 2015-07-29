@@ -30,18 +30,35 @@ void OVelocityFile::createPoints(unsigned n)
     writeNumPoints(n);
 }
 
+void OVelocityFile::setCurrentTranslation(const Vector3F & t)
+{ m_currentT = t; }
+
 void OVelocityFile::setCurrentP(const Vector3F * src, unsigned nv, unsigned nvdrift)
 { m_currentP->copyFrom(src, nv*12, nvdrift*12); }
 
 bool OVelocityFile::writeNumPoints(int n)
 {
     useDocument();
-    HBase vg("/vel");
+    HBase vg(deformationName());
     if(!vg.hasNamedAttr(".nv"))
         vg.addIntAttr(".nv");
     vg.writeIntAttr(".nv", &n);
     vg.close();
     return true;
+}
+
+bool OVelocityFile::writeFrameTranslationalVelocity()
+{
+	if(!isFrameBegin()) {
+        *translationalVelocity() = (m_currentT - m_lastT) * 30.f;
+        writeVelocity(currentFrame()-1);
+        if(isFrameEnd()) {
+			*translationalVelocity() = Vector3F::Zero;
+            writeTranslationalVelocity(currentFrame());
+		}
+    }
+	m_lastT = m_currentT;
+	return true;
 }
 
 bool OVelocityFile::writeFrameVelocity()
@@ -79,11 +96,24 @@ void OVelocityFile::zeroVelocity()
     for(;i<numPoints();i++) velocities()[i] = Vector3F::Zero;
 }
 
+void OVelocityFile::writeTranslationalVelocity(int t)
+{
+	const Vector3F v = *translationalVelocity();
+	std::cout<<"\n write translational velocity "<<v<<" at frame "<<t;
+    useDocument();
+	const std::string sframe = boost::str( boost::format("%1%") % t );
+	HBase vg(translationName());
+	if(!vg.hasNamedAttr(sframe.c_str()))
+	    vg.addFloatAttr(sframe.c_str(), 3);
+    vg.writeFloatAttr(sframe.c_str(), (float *)&v);
+	vg.close();
+}
+
 void OVelocityFile::writeVelocity(int t)
 {
-    std::cout<<"\n write velocity at frame "<<t;
+    std::cout<<"\n write vertex velocity at frame "<<t;
     useDocument();
-    HBase vg("/vel");
+    HBase vg(deformationName());
     const std::string sframe = boost::str( boost::format("%1%") % t );
     if(!vg.hasNamedData(sframe.c_str()))
 	    vg.addVector3Data(sframe.c_str(), numPoints());

@@ -125,7 +125,7 @@ give 14 nodes to each block
 #include <CudaScan.h>
 #include "SahInterface.h"
 
-CudaDbgLog sahlg("sah.txt");
+// CudaDbgLog sahlg("sah.txt");
 
 static std::vector<std::pair<int, int> > binDesc;
 static std::vector<std::pair<int, int> > emissionDesc;
@@ -214,7 +214,7 @@ void SahBuilder::rebuild(CudaLinearBvh * bvh)
     numInternal = splitPrimitives(bvh, numInternal);
     bvh->setNumActiveInternalNodes(numInternal);
     
-    sahlg.writeInt(bvh->distanceInternalNodeFromRootBuf(), numInternal, "node_level", CudaDbgLog::FOnce);
+    // sahlg.writeInt(bvh->distanceInternalNodeFromRootBuf(), numInternal, "node_level", CudaDbgLog::FOnce);
     
     int maxDistanceToRoot = 0;
 	reducer()->max<int>(maxDistanceToRoot, (int *)bvh->distanceInternalNodeFromRoot(), numInternal);
@@ -223,7 +223,7 @@ void SahBuilder::rebuild(CudaLinearBvh * bvh)
 	
 	countPrimitivesInNode(bvh);
     
-    sahlg.writeInt(bvh->internalNodeNumPrimitiveBuf(), numInternal, "primitive_count", CudaDbgLog::FOnce);
+    // sahlg.writeInt(bvh->internalNodeNumPrimitiveBuf(), numInternal, "primitive_count", CudaDbgLog::FOnce);
 	
 	float cost = computeCostOfTraverse(bvh);
     std::cout<<" cost of traverse: "<<cost<<"\n";
@@ -245,7 +245,7 @@ int SahBuilder::splitClusters(CudaLinearBvh * bvh, unsigned numClusters)
         1);
     
     // sahlg.writeHash(m_runHash, numClusters, "split_indirections", CudaDbgLog::FOnce);
-    sahlg.writeInt2(bvh->internalChildBuf(), n, "internal_node", CudaDbgLog::FOnce);
+    // sahlg.writeInt2(bvh->internalChildBuf(), n, "internal_node", CudaDbgLog::FOnce);
     // sahlg.writeAabb(bvh->internalAabbBuf(), n, "internal_box", CudaDbgLog::FOnce);
     // sahlg.writeUInt(bvh->internalParentBuf(), n, "parent_node", CudaDbgLog::FOnce);
     return n;
@@ -282,7 +282,7 @@ void SahBuilder::decompressCluster(CudaLinearBvh * bvh, int numClusters, int num
                             numClusters,
                             bvh->numPrimitives(),
                             numNodes);
-    sahlg.writeInt2(bvh->internalChildBuf(), numNodes, "decompressed_node", CudaDbgLog::FOnce); 
+    // sahlg.writeInt2(bvh->internalChildBuf(), numNodes, "decompressed_node", CudaDbgLog::FOnce); 
 }
 
 int SahBuilder::splitPrimitives(CudaLinearBvh * bvh, int numInternal)
@@ -298,7 +298,7 @@ int SahBuilder::splitPrimitives(CudaLinearBvh * bvh, int numInternal)
         (KeyValuePair *)sortIntermediate(),
         bvh->numPrimitives(),
         numInternal); 
-    sahlg.writeInt2(bvh->internalChildBuf(), nn, "internal_node1", CudaDbgLog::FOnce);
+    // sahlg.writeInt2(bvh->internalChildBuf(), nn, "internal_node1", CudaDbgLog::FOnce);
     // sahlg.writeUInt(bvh->internalParentBuf(), x, "parent_node1", CudaDbgLog::FOnce);
     return nn;
 }
@@ -383,7 +383,7 @@ unsigned SahBuilder::sortPrimitives(CudaLinearBvh * bvh,
 		    				(uint *)m_runLength->bufferOnDevice(),
 		    				numRuns);
 	
-	sahlg.writeHash(bvh->primitiveHashBuf(), numPrimitives, "primitive_hash", CudaDbgLog::FOnce);
+	// sahlg.writeHash(bvh->primitiveHashBuf(), numPrimitives, "primitive_hash", CudaDbgLog::FOnce);
  
 	
 	sahcompress::computeRunHead((uint *)m_runHeads->bufferOnDevice(), 
