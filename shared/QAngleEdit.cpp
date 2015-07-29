@@ -19,13 +19,22 @@ QAngleEdit::QAngleEdit(QWidget *parent)
 }
 
 void QAngleEdit::setMin(double x)
-{ m_lowLimit = x; }
+{ 
+	m_lowLimit = x; 
+	update();
+}
 
 void QAngleEdit::setMax(double x)
-{ m_highLimit = x; }
+{ 
+	m_highLimit = x; 
+	update();
+}
 
 void QAngleEdit::setValue(double x)
-{ m_value = x; }
+{
+	m_value = x; 
+	update();
+}
 
 QSize QAngleEdit::minimumSizeHint() const
 { return QSize(100, 100); }
@@ -149,4 +158,7 @@ void QAngleEdit::mouseReleaseEvent(QMouseEvent *event)
 
 double QAngleEdit::toDeg(double a) const
 { return a * 180.0 / 3.14159269; }
+
+double QAngleEdit::value() const
+{ return m_value; }
 //:~

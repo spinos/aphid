@@ -71,6 +71,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../shared/QDoubleEditSlider.cpp"
 ../shared/QSplineEdit.cpp
 ../shared/QAngleEdit.cpp
+../shared/QPolarCoordinateEdit.cpp
 "../cudabvh/CudaLinearBvh.cpp"
 "../cudabvh/TriangleSystem.cpp"
 "../cudabvh/TetrahedronSystem.cpp"

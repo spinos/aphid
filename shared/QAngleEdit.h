@@ -28,6 +28,8 @@ public:
 	
 	QSize minimumSizeHint() const;
     QSize sizeHint() const;
+	
+	double value() const;
 private slots:
 	
 protected:
