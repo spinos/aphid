@@ -97,8 +97,8 @@ void CudaDynamicWorld::stepPhysics(float dt)
 void CudaDynamicWorld::collide()
 {
     if(m_numObjects < 1) return;
-	unsigned i;
-	for(i=0; i < m_numObjects; i++) bvhObject(i)->update();
+	unsigned i = 0;
+	for(; i < m_numObjects; i++) bvhObject(i)->update();
     // CudaBase::CheckCudaError("bvh update");
        
 	m_broadphase->computeOverlappingPairs();
@@ -116,7 +116,10 @@ void CudaDynamicWorld::collide()
 }
 
 void CudaDynamicWorld::integrate(float dt)
-{ m_narrowphase->integrate(dt); }
+{ 
+	unsigned i = 0;
+	for(; i < m_numObjects; i++) object(i)->integrate(dt);
+}
 
 const unsigned CudaDynamicWorld::numContacts() const
 { return m_narrowphase->numContacts(); }

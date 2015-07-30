@@ -6,4 +6,17 @@ void computeMass(float * dst,
                 uint * anchored,
                 float scale,
                 uint maxInd);
+
+void integrate(float3 * pos, 
+                float3 * vel, 
+                float3 * anchoredVel,
+                uint * anchor,
+                float dt, 
+                uint maxInd);
+
+void integrateAllAnchored(float3 * pos,
+                    float3 * vel,
+                    float3 * vela,
+                    float dt,
+                    uint maxInd);
 }

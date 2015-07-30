@@ -532,7 +532,7 @@ void FEMTetrahedronSystem::solveConjugateGradient()
 
 void FEMTetrahedronSystem::integrate(float dt)
 {
-    tetrahedronfem::integrate((float3 *)deviceX(), 
+    masssystem::integrate((float3 *)deviceX(), 
 								(float3 *)deviceV(), 
                                 (float3 *)deviceVa(),
 								(uint *)deviceAnchor(),

@@ -63,14 +63,6 @@ void narrowphase_squeezeContactPosAndVel(float3 * dstPos, float3 * srcPos,
                                     ContactData * dstContact, ContactData *srcContact,
 									uint *counts, uint * scanResult, 
 									uint numPairs);
-									
-void narrowphase_integrate(float3 * pos, 
-                        float3 * vel, 
-                        float3 * anchoredVel,
-                        uint * anchor,
-                        float dt, 
-                        uint maxInd);
-						
 }
 #endif        //  #ifndef NARROWPHASE_IMPLEMENT_H
 

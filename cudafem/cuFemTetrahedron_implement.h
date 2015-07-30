@@ -48,13 +48,6 @@ void stiffnessAssembly(mat33 * dst,
                         uint maxBufferInd,
                         uint maxInd);
 
-void integrate(float3 * pos, 
-                        float3 * vel, 
-                        float3 * anchoredVel,
-                        uint * anchor,
-                        float dt, 
-                        uint maxInd);
-
 void computeElasticity(float4 * d,
                         float * alpha,
                         float Y,

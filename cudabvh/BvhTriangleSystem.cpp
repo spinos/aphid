@@ -2,6 +2,7 @@
 #include <CUDABuffer.h>
 #include "TriangleSystemInterface.h"
 #include <CudaBase.h>
+#include <masssystem_impl.h>
 
 BvhTriangleSystem::BvhTriangleSystem(ATriangleMesh * md) : TriangleSystem(md)
 {
@@ -35,7 +36,7 @@ void BvhTriangleSystem::formTetrahedronAabbs()
 
 void BvhTriangleSystem::integrate(float dt)
 {
-    trianglesys::integrate((float3 *)deviceX(), 
+    masssystem::integrateAllAnchored((float3 *)deviceX(), 
                            (float3 *)deviceV(), 
                            (float3 *)deviceVa(), 
                            dt, 

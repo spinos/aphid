@@ -16,6 +16,7 @@
 #include <DynGlobal.h>
 #include <CudaDbgLog.h>
 #include <CudaBase.h>
+#include <masssystem_impl.h>
 
 struct SSimplex {
     float3 p[4];
@@ -411,7 +412,7 @@ void CudaNarrowphase::integrate(float dt)
 	void * vel = m_objectBuf.m_vel->bufferOnDevice();
     void * vela = m_objectBuf.m_anchoredVel->bufferOnDevice();
 	void * anchors = m_objectBuf.m_anchor->bufferOnDevice();
-	narrowphase_integrate((float3 *)pos, 
+	masssystem::integrate((float3 *)pos, 
                            (float3 *)vel, 
                            (float3 *)vela, 
 						   (uint *)anchors,

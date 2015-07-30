@@ -18,21 +18,6 @@ __global__ void computeBVolume_kernel(float4 * dst,
 	calculateBandVolume(&dst[ind<<2], pos, tetVertices[ind]);
 }
 
-__global__ void integrate_kernel(float3 * pos, 
-								float3 * vel,
-                                float3 * anchoredVel,
-								uint * anchor,
-								float dt, 
-								uint maxInd)
-{
-    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-	if(ind >= maxInd) return;
-	
-    float3 va = anchoredVel[ind];
-	if(anchor[ind] > (1<<23)) vel[ind] = va;
-	float3_add_inplace(pos[ind], scale_float3_by(vel[ind], dt));
-}
-
 __global__ void elasticity_kernel(float4 * d,
                         float * alpha,
                         float Y,
@@ -533,25 +518,6 @@ void stiffnessAssembly(mat33 * dst,
                                             elasticity,
                                             maxBufferInd,
                                             maxInd);
-}
-
-void integrate(float3 * pos, 
-								float3 * vel, 
-                                float3 * anchoredVel,
-								uint * anchor,
-								float dt, 
-								uint maxInd)
-{
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(maxInd, 512);
-    dim3 grid(nblk, 1, 1);
-    
-    integrate_kernel<<< grid, block >>>(pos,
-        vel,
-        anchoredVel,
-        anchor,
-        dt,
-        maxInd);
 }
 
 void computeElasticity(float4 * d,
