@@ -20,6 +20,10 @@ void BvhTriangleSystem::initOnDevice()
 
 void BvhTriangleSystem::update()
 {
+	masssystem::useAnchoredVelocity((float3 *)deviceV(), 
+                                (float3 *)deviceVa(),
+								(uint *)deviceAnchor(),
+								numPoints());
 	formTetrahedronAabbs();
     CudaLinearBvh::update();
 }

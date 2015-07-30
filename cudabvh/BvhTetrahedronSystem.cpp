@@ -14,6 +14,7 @@
 #include "tetrahedronSystem_implement.h"
 #include "TetrahedronSystemInterface.h"
 #include <CudaDbgLog.h>
+#include <masssystem_impl.h>
 
 // CudaDbgLog tetsyslg("tetsys.txt");
 
@@ -60,6 +61,10 @@ void BvhTetrahedronSystem::initOnDevice()
 
 void BvhTetrahedronSystem::update()
 {
+    masssystem::useAnchoredVelocity((float3 *)deviceV(), 
+                                (float3 *)deviceVa(),
+								(uint *)deviceAnchor(),
+								numPoints());
 	formTetrahedronAabbs();
     CudaLinearBvh::update();
 }

@@ -7,6 +7,11 @@ void computeMass(float * dst,
                 float scale,
                 uint maxInd);
 
+void useAnchoredVelocity(float3 * vel, 
+                float3 * anchoredVel,
+                uint * anchor,
+                uint maxInd);
+
 void integrate(float3 * pos, 
                 float3 * vel, 
                 float3 * anchoredVel,
@@ -19,4 +24,9 @@ void integrateAllAnchored(float3 * pos,
                     float3 * vela,
                     float dt,
                     uint maxInd);
+
+void integrateSimple(float3 * pos, 
+                float3 * vel, 
+                float dt, 
+                uint maxInd);
 }
