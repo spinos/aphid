@@ -179,8 +179,7 @@ void GLWidget::receiveWindSpeed(double x)
 
 void GLWidget::receiveWindVec(QPointF v)
 { 
-    Vector3F cat;
-    cat.fromPolarXYZ(v.x(), v.y());
+    Vector3F cat = Vector3F::FromPolarXYZ(v.x(), v.y());
     m_interface->updateWindVec(cat); 
 }
 //:~

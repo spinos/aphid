@@ -315,11 +315,13 @@ void Vector3F::clamp(const float & limit)
 	if(z < -limit) z = -limit;
 }
 
-void Vector3F::fromPolarXYZ(float phi, float theta, float zdir)
+Vector3F Vector3F::FromPolarXYZ(float phi, float theta, float zdir)
 {
-    x = cos(theta) * cos(phi);
-    y = sin(theta);
-    z = zdir * cos(theta) * sin(phi);
+    Vector3F result;
+    result.x = cos(theta) * cos(phi);
+    result.y = sin(theta);
+    result.z = zdir * cos(theta) * sin(phi);
+    return result;
 }
 
 void Vector3F::verbose(const char * pref) const
