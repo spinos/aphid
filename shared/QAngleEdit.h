@@ -20,7 +20,7 @@ class QAngleEdit : public QWidget
 {
 	Q_OBJECT
 public:
-	QAngleEdit(QWidget *parent = 0);
+	QAngleEdit(const QString & name, QWidget *parent = 0);
 	
 	void setMin(double x);
 	void setMax(double x);
@@ -49,6 +49,7 @@ private:
 	double toValueSpace(double x, double y, bool & status) const;
 	double toDeg(double a) const;
 private:
+	QString m_name; 
 	double m_value, m_lowLimit, m_highLimit, m_last;
 	bool m_active;
 };

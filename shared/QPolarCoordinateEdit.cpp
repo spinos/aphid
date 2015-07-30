@@ -10,19 +10,21 @@
 #include "QPolarCoordinateEdit.h"
 #include "QAngleEdit.h"
 
-QPolarCoordinateEdit::QPolarCoordinateEdit(QWidget *parent)
+QPolarCoordinateEdit::QPolarCoordinateEdit(const QString & name, QWidget *parent)
 	: QWidget(parent)
 {
-	m_phi = new QAngleEdit(this);
-	m_theta = new QAngleEdit(this);
+	m_name = new QLabel(name, this);
+	m_phi = new QAngleEdit(tr("Phi"), this);
+	m_theta = new QAngleEdit(tr("Theta"), this);
 	m_theta->setMin(-1.57);
 	m_theta->setMax(1.57);
 	
 	QHBoxLayout *layout = new QHBoxLayout;
+	layout->addWidget(m_name);
 	layout->addWidget(m_phi);
 	layout->addWidget(m_theta);
-	layout->addStretch(1);
-	layout->setSpacing(2);
+	layout->setStretch(0, 1);
+	layout->setSpacing(0);
 	
 	setLayout(layout);
 	

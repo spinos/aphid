@@ -9,9 +9,10 @@
 #include <QtGui>
 #include "QAngleEdit.h"
 
-QAngleEdit::QAngleEdit(QWidget *parent)
+QAngleEdit::QAngleEdit(const QString & name, QWidget *parent)
 	: QWidget(parent)
 {
+	m_name = name;
 	m_value = 0.0;
 	m_lowLimit = 0.0;
 	m_highLimit = 3.14159269 * 2.0;
@@ -48,6 +49,9 @@ void QAngleEdit::paintEvent(QPaintEvent *event)
 	QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 	paintBackground(painter);
+	painter.resetTransform();
+	painter.setPen(Qt::black);
+	painter.drawText(2, 98, m_name);
 	paintDelta(painter);
 	paintHandle(painter);
 }

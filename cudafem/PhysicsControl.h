@@ -38,12 +38,16 @@ private slots:
     void sendStiffnessAttenuateEnds(QPointF v);
     void sendStiffnessAttenuateLeft(QPointF v);
     void sendStiffnessAttenuateRight(QPointF v);
+	void sendWindSpeed(double x);
+	void sendWindVec(QPointF v);
 signals:
 	void densityChanged(double x);
 	void youngsModulusChanged(double a);
     void stiffnessAttenuateEndsChanged(QPointF v);
     void stiffnessAttenuateLeftChanged(QPointF v);
     void stiffnessAttenuateRightChanged(QPointF v);
+	void windVecChanged(QPointF v);
+	void windSpeedChanged(double x);
 private:
     QGroupBox * YGrp;
     QDoubleEditSlider * m_youngModulusValue;
@@ -52,6 +56,7 @@ private:
     QSplineEdit * m_youngAttenuateValue;
 	QGroupBox * dsGrp;
 	QDoubleEditSlider * m_densityValue;
+	QDoubleEditSlider * m_windSpeedValue;
 	QPolarCoordinateEdit * m_windVecValue;
 };
 #endif

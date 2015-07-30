@@ -12,14 +12,14 @@
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
-
+class QLabel;
 QT_END_NAMESPACE
 class QAngleEdit;
 class QPolarCoordinateEdit : public QWidget 
 {
 	Q_OBJECT
 public:
-	QPolarCoordinateEdit(QWidget *parent = 0);
+	QPolarCoordinateEdit(const QString & name, QWidget *parent = 0);
 	
 	void setPhi(double x);
 	void setTheta(double x);
@@ -35,6 +35,7 @@ signals:
 private:
 	
 private:
+	QLabel * m_name;
 	QAngleEdit * m_theta;
 	QAngleEdit * m_phi;
 };

@@ -30,7 +30,7 @@ PhysicsControl::PhysicsControl(QWidget *parent)
 	
     YGrp->setLayout(yLayout);
     
-    stiffnessCurveLabel = new QLabel(tr("Stiffness Curve"));
+    stiffnessCurveLabel = new QLabel(tr("Stiffness curve"));
     m_youngAttenuateValue = new QSplineEdit(this);
     
     yAGrp = new QGroupBox;
@@ -52,10 +52,14 @@ PhysicsControl::PhysicsControl(QWidget *parent)
 	
     dsGrp->setLayout(dsLayout);
 	
-	m_windVecValue = new QPolarCoordinateEdit(this);
+	m_windSpeedValue = new QDoubleEditSlider(tr("Wind speed"), this);
+	m_windVecValue = new QPolarCoordinateEdit(tr("Wind vector"), this);
 	QGroupBox * windGrp = new QGroupBox;
 	QVBoxLayout * windLayout = new QVBoxLayout;
 	windLayout->addWidget(m_windVecValue);
+	windLayout->addWidget(m_windSpeedValue);
+	windLayout->setStretch(1, 1);
+	windLayout->setSpacing(2);
 	windGrp->setLayout(windLayout);
 	
     QVBoxLayout *layout = new QVBoxLayout;
@@ -73,6 +77,8 @@ PhysicsControl::PhysicsControl(QWidget *parent)
     connect(m_youngAttenuateValue, SIGNAL(valueChanged(QPointF)), this, SLOT(sendStiffnessAttenuateEnds(QPointF)));
     connect(m_youngAttenuateValue, SIGNAL(leftControlChanged(QPointF)), this, SLOT(sendStiffnessAttenuateLeft(QPointF)));
     connect(m_youngAttenuateValue, SIGNAL(rightControlChanged(QPointF)), this, SLOT(sendStiffnessAttenuateRight(QPointF)));
+	connect(m_windSpeedValue, SIGNAL(valueChanged(double)), this, SLOT(sendWindSpeed(double)));
+	connect(m_windVecValue, SIGNAL(valueChanged(QPointF)), this, SLOT(sendWindVec(QPointF)));
 }
 
 void PhysicsControl::sendDensity(double x)
@@ -89,4 +95,10 @@ void PhysicsControl::sendStiffnessAttenuateLeft(QPointF v)
 
 void PhysicsControl::sendStiffnessAttenuateRight(QPointF v)
 { emit stiffnessAttenuateRightChanged(v); }
+
+void PhysicsControl::sendWindSpeed(double x)
+{ emit windSpeedChanged(x); }
+
+void PhysicsControl::sendWindVec(QPointF v)
+{ emit windVecChanged(v); }
 //:~
