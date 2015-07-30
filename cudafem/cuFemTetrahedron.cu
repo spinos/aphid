@@ -72,7 +72,7 @@ __global__ void externalForce_kernel(float3 * dst,
     
     float3 u = CWind;;
     float3_minus_inplace(u, velocity[ind]);
-    float3_scale_inplace(u, m * 0.019f);
+    float3_scale_inplace(u, m * 0.01f);
     float3_add_inplace(F, u);
     dst[ind] = F;
 }

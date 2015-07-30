@@ -173,4 +173,14 @@ void GLWidget::receiveStiffnessAttenuateLeft(QPointF v)
 
 void GLWidget::receiveStiffnessAttenuateRight(QPointF v)
 { m_interface->updateStiffnessMapRight(v.x(), v.y()); }
+
+void GLWidget::receiveWindSpeed(double x)
+{ m_interface->updateWindSpeed(x); }
+
+void GLWidget::receiveWindVec(QPointF v)
+{ 
+    Vector3F cat;
+    cat.fromPolarXYZ(v.x(), v.y());
+    m_interface->updateWindVec(cat); 
+}
 //:~

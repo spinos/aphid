@@ -13,7 +13,7 @@
 
 WorldDbgDraw * CudaDynamicWorld::DbgDrawer = 0;
 IVelocityFile * CudaDynamicWorld::VelocityCache = 0;
-
+Vector3F CudaDynamicWorld::MovementRelativeToAir = Vector3F::Zero;
 CudaDynamicWorld::CudaDynamicWorld() 
 {
     m_broadphase = new CudaBroadphase;
@@ -129,7 +129,7 @@ void CudaDynamicWorld::reset()
         delete VelocityCache;
         VelocityCache = 0;
     }
-    resetWind();
+    resetMovenentRelativeToAir();
 }
 
 void CudaDynamicWorld::sendXToHost()
@@ -200,29 +200,33 @@ void CudaDynamicWorld::readVelocityCache()
 {
     if(!VelocityCache) return;
     if(VelocityCache->isOutOfRange()) {
-        resetWind();
+        resetMovenentRelativeToAir();
         return;
     }
+
     VelocityCache->readFrameTranslationalVelocity();
     VelocityCache->readFrameVelocity();
     VelocityCache->nextFrame();
     
 	m_narrowphase->setAnchoredVelocity(VelocityCache->velocities());
-    updateWind();
+    updateMovenentRelativeToAir();
 }
 
-void CudaDynamicWorld::resetWind()
-{ MassSystem::WindVec = Vector3F::Zero; }
+void CudaDynamicWorld::resetMovenentRelativeToAir()
+{ MovementRelativeToAir.setZero(); }
+
+void CudaDynamicWorld::updateMovenentRelativeToAir()
+{
+    MovementRelativeToAir = *VelocityCache->translationalVelocity();
+    MovementRelativeToAir.reverse();
+    MovementRelativeToAir.clamp(20.f);
+}
 
 void CudaDynamicWorld::updateWind()
 {
-    Vector3F windVec = *VelocityCache->translationalVelocity();
-    windVec.reverse();
-    float scale = windVec.length();
-    if(scale>20.f) {
-        scale /= 20.f;
-        windVec /= scale;
-    }
-    MassSystem::WindVec = windVec;
+    Vector3F air = MassSystem::WindDirection * MassSystem::WindMagnitude;
+    air.reverse();
+    air += MovementRelativeToAir;
+    MassSystem::WindVec = air;
 }
 //:~

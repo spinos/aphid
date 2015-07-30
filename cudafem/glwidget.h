@@ -39,6 +39,8 @@ public slots:
     void receiveStiffnessAttenuateEnds(QPointF v);
     void receiveStiffnessAttenuateLeft(QPointF v);
     void receiveStiffnessAttenuateRight(QPointF v);
+    void receiveWindSpeed(double x);
+    void receiveWindVec(QPointF v);
 private slots:
     void simulate();
 signals:

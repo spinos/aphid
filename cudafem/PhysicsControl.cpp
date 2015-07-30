@@ -53,7 +53,9 @@ PhysicsControl::PhysicsControl(QWidget *parent)
     dsGrp->setLayout(dsLayout);
 	
 	m_windSpeedValue = new QDoubleEditSlider(tr("Wind speed"), this);
-	m_windVecValue = new QPolarCoordinateEdit(tr("Wind vector"), this);
+	m_windSpeedValue->setLimit(0.0, 30.0);
+    m_windSpeedValue->setValue(0.0);
+    m_windVecValue = new QPolarCoordinateEdit(tr("Wind vector"), this);
 	QGroupBox * windGrp = new QGroupBox;
 	QVBoxLayout * windLayout = new QVBoxLayout;
 	windLayout->addWidget(m_windVecValue);

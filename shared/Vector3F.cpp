@@ -315,6 +315,13 @@ void Vector3F::clamp(const float & limit)
 	if(z < -limit) z = -limit;
 }
 
+void Vector3F::fromPolarXYZ(float phi, float theta, float zdir)
+{
+    x = cos(theta) * cos(phi);
+    y = sin(theta);
+    z = zdir * cos(theta) * sin(phi);
+}
+
 void Vector3F::verbose(const char * pref) const
 {
 	std::cout<<pref<<str()<<"\n";

@@ -41,6 +41,8 @@ public:
     void setHostX(float * src);
     
     static Vector3F WindVec;
+    static Vector3F WindDirection;
+    static float WindMagnitude;
 protected:
 	void setNumPoints(unsigned x);
 	void setNumTetrahedrons(unsigned x);

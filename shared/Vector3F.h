@@ -69,6 +69,7 @@ public:
 	void resize(float l);
 	Vector3F progress(const Vector3F& linearVelocity, const float & timeStep) const;
 	void clamp(const float & limit);
+    void fromPolarXYZ(float phi, float theta, float zdir=-1.f);
 	void verbose(const char * pref) const;
 	
 	static Vector3F XAxis;

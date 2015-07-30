@@ -27,6 +27,12 @@ Window::Window()
     connect(m_physicsControl, SIGNAL(stiffnessAttenuateRightChanged(QPointF)), 
             glWidget, SLOT(receiveStiffnessAttenuateRight(QPointF)));
     
+    connect(m_physicsControl, SIGNAL(windSpeedChanged(double)), 
+            glWidget, SLOT(receiveWindSpeed(double)));
+    
+    connect(m_physicsControl, SIGNAL(windVecChanged(QPointF)), 
+            glWidget, SLOT(receiveWindVec(QPointF)));
+    
     statusBar()->showMessage(tr("Ready"));
 }
 //! [1]

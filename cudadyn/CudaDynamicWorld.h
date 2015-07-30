@@ -2,6 +2,7 @@
 #define CUDADYNAMICWORLD_H
 
 #include "DynGLobal.h"
+#include <Vector3F.h>
 class CudaBroadphase;
 class CudaNarrowphase;
 class SimpleContactSolver;
@@ -32,6 +33,7 @@ public:
     void sendXToHost();
     void readVelocityCache();
 	void reset();
+    void updateWind();
     
     const unsigned numObjects() const;
     CudaLinearBvh * bvhObject(unsigned idx) const;
@@ -46,9 +48,10 @@ public:
     
     static WorldDbgDraw * DbgDrawer;
     static IVelocityFile * VelocityCache;
+    static Vector3F MovementRelativeToAir;
 protected:
-    void resetWind();
-	void updateWind();
+    void resetMovenentRelativeToAir();
+	void updateMovenentRelativeToAir();
 private:
     CudaBroadphase * m_broadphase;
     CudaNarrowphase * m_narrowphase;

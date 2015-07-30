@@ -17,6 +17,7 @@ public:
     void updateStiffnessMapRight(float x, float y);
 	void updateDensity(float x);
 	void updateYoungsModulus(float x);
+
 protected:
 
 private:

@@ -17,7 +17,8 @@ public:
     virtual ~DynamicWorldInterface();
     
     virtual void create(CudaDynamicWorld * world);
-    
+    void updateWindSpeed(float x);
+    void updateWindVec(const Vector3F & v);
 	void changeMaxDisplayLevel(int d);
     void draw(CudaDynamicWorld * world, GeoDrawer * drawer);
     // void draw(CudaDynamicWorld * world, GeoDrawer * drawer);

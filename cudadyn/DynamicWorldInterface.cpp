@@ -39,6 +39,12 @@ DynamicWorldInterface::DynamicWorldInterface()
 
 DynamicWorldInterface::~DynamicWorldInterface() {}
 
+void DynamicWorldInterface::updateWindSpeed(float x)
+{ MassSystem::WindMagnitude = x; }
+
+void DynamicWorldInterface::updateWindVec(const Vector3F & v)
+{ MassSystem::WindDirection = v; }
+
 void DynamicWorldInterface::create(CudaDynamicWorld * world)
 {
 	world->setBvhBuilder(new SahBuilder);
