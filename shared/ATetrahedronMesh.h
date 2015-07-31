@@ -19,7 +19,8 @@ public:
 	virtual const Type type() const;
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
-	const unsigned numTetrahedrons() const;
+	virtual bool intersectBox(unsigned icomponent, const BoundingBox & box);
+    const unsigned numTetrahedrons() const;
 	
 	void create(unsigned np, unsigned nt);
 	unsigned * tetrahedronIndices(unsigned idx) const;

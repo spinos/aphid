@@ -215,5 +215,6 @@ add_library(aphid STATIC ../shared/line_math.h
 ../kdtree/KdIntersection.cpp
 ../shared/APointCloud.cpp
 ../shared/ATriangleMesh.cpp
-../shared/ATetrahedronMesh.cpp)
+../shared/ATetrahedronMesh.cpp
+../shared/GjkIntersection.cpp)
 

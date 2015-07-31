@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 2.8)
 project (larix)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
-
+set (CMAKE_BUILD_TYPE RELEASE)
 include_directories ("../shared"
 "../bcc2d"
 "../hesperis"
@@ -16,15 +16,24 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../shared/Morton3D.h"
 "window.h"
 "glwidget.h"
-"LarixWorld.h")
+AdaptiveGrid.h
+LarixWorld.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
 ../hesperis/HesperisFile.cpp
 ../hesperis/HesperisInterface.cpp
+../btree/Types.cpp
+../btree/Entity.cpp
+../btree/BNode.cpp
+../btree/BTree.cpp
+../btree/Array.cpp
+../bcc2d/MortonHash.cpp
+../bcc2d/CartesianGrid.cpp
 glwidget.cpp
 window.cpp
 main.cpp
 LarixInterface.cpp
+AdaptiveGrid.cpp
 LarixWorld.cpp)
 
 if (WIN32)
@@ -81,6 +90,10 @@ endif()
 find_package (zlib REQUIRED)
 target_link_libraries (larix ${ZLIB_LIBRARIES})
 
+if(WIN32)
+set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
+endif()
+
 find_package (Qt4 REQUIRED)
 message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
 set (QT_MT_REQUIRED ON)
@@ -95,7 +108,7 @@ if(WIN32)
 	set (Boost_USE_STATIC_LIBS ON)
 	set (Boost_USE_MULTITHREADED ON)
 	include_directories ("D:/usr/boost_1_51_0")
-	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread)
+	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono)
 else()
 
 if(APPLE)

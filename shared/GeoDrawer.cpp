@@ -22,7 +22,9 @@
 #include <Geometry.h>
 #include <GeometryArray.h>
 #include <ATriangleMesh.h>
+#include <ATetrahedronMesh.h>
 #include <APointCloud.h>
+#include <tetrahedron_math.h>
 
 GeoDrawer::GeoDrawer() 
 {
@@ -623,5 +625,24 @@ void GeoDrawer::pointCloud(APointCloud * cloud) const
 	float * r = cloud->pointRadius();
 	unsigned i = 0;
 	for(; i<n;i++) alignedCircle(p[i], r[i]);
+}
+
+void GeoDrawer::tetrahedronMesh(ATetrahedronMesh * mesh) const
+{
+    const unsigned nt = mesh->numTetrahedrons();
+    unsigned * indices = mesh->indices();
+    Vector3F * points = mesh->points();
+	glBegin(GL_TRIANGLES);
+    unsigned i, j;
+    Vector3F q;
+    unsigned * tet;
+    for(i=0; i< nt; i++) {
+        tet = &indices[i*4];
+        for(j=0; j< 12; j++) {
+            q = points[ tet[ TetrahedronToTriangleVertex[j] ] ];
+            glVertex3fv((GLfloat *)&q);
+        }
+    }
+    glEnd();
 }
 //:~

@@ -10,6 +10,7 @@
 #include "ATetrahedronMesh.h"
 #include "BaseBuffer.h"
 #include "tetrahedron_math.h"
+#include <GjkIntersection.h>
 
 ATetrahedronMesh::ATetrahedronMesh() 
 {
@@ -42,6 +43,16 @@ const BoundingBox ATetrahedronMesh::calculateBBox(unsigned icomponent) const
 	box.updateMin(p[v[3]]);
 	box.updateMax(p[v[3]]);
 	return box;
+}
+
+bool ATetrahedronMesh::intersectBox(unsigned icomponent, const BoundingBox & box)
+{
+    BoundingBox tbox = calculateBBox(icomponent);
+    if(!tbox.intersect(box)) return false;
+    
+    Vector3F * p = points();
+	unsigned * v = tetrahedronIndices(icomponent);
+    return gjk::IntersectTest::evaluateTetrahedron(p, v);
 }
 
 void ATetrahedronMesh::create(unsigned np, unsigned nt)

@@ -14,6 +14,8 @@
 #include "LarixWorld.h"
 #include <KdTreeDrawer.h>
 #include "tetrahedron_math.h"
+#include <KdIntersection.h>
+#include "AdaptiveGrid.h"
 
 LarixInterface::LarixInterface() {}
 LarixInterface::~LarixInterface() {}
@@ -24,9 +26,19 @@ bool LarixInterface::CreateWorld(LarixWorld * world)
 	if(!ReadTetrahedronData(&geos)) return false;
 	
 	ATetrahedronMesh * tetra = (ATetrahedronMesh *)geos.geometry(0);
-	
+    
+    KdIntersection tree;
+    tree.addGeometry(tetra);
+    KdTree::MaxBuildLevel = 20;
+	KdTree::NumPrimitivesInLeafThreashold = 9;
+    tree.create();
+    
+	world->setTetrahedronMesh(tetra);
 	APointCloud * pc = ConvertTetrahedrons(tetra);
 	world->setPointCloud(pc);
+    
+    AdaptiveGrid g(tree.getBBox());
+    g.create(&tree);
 	return true;
 }
 
@@ -61,16 +73,21 @@ APointCloud * LarixInterface::ConvertTetrahedrons(ATetrahedronMesh * mesh)
 	}
 // VolumeOfSphere = 4 Pi r^3 / 3
 // RadiusOfSphere = ( 3 V / 4 / Pi )^(1/3)	
-	for(;i<nv;i++) r[i] = pow(r[i] * .75f / 3.14159f, .33f);
+	for(i=0;i<nv;i++) r[i] = pow(r[i] * .75f / 3.14159f, .33f);
 	return pc;
 }
 
 void LarixInterface::DrawWorld(LarixWorld * world, KdTreeDrawer * drawer)
 {
-	APointCloud * cloud = world->pointCloud();
-	if(!cloud) return;
+	// APointCloud * cloud = world->pointCloud();
+	//if(!cloud) return;
+    
+    ATetrahedronMesh * mesh = world->tetrahedronMesh();
+    if(!mesh) return;
 	
-	glColor3f(.57f, .21f, 0.f);
-	drawer->pointCloud(cloud);
+	glColor3f(.17f, .21f, .15f);
+	//drawer->pointCloud(cloud);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    drawer->tetrahedronMesh(mesh);
 }
 //:~

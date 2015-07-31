@@ -96,12 +96,12 @@ inline bool pointInsideTetrahedronTest(const Vector3F & p, const Vector3F * v)
     Float4 coord = getBarycentricCoordinate4(p, v);
    
     if(coord.x < 0.f || coord.y < 0.f || coord.z < 0.f || coord.w < 0.f)
-        return 0;
+        return false;
     
     if(coord.x > 1.f || coord.y > 1.f || coord.z > 1.f || coord.w > 1.f)
-        return 0;
+        return false;
     
-    return 1;
+    return true;
 }
 
 inline bool tetrahedronLineIntersection(const Vector3F * tet, const Vector3F & lineBegin, const Vector3F & lineEnd,
@@ -177,6 +177,183 @@ inline float tetrahedronVolume(const Vector3F * p)
 	Vector3F e2 = p[2]-p[0];
 	Vector3F e3 = p[3]-p[0];
 	return  e1.dot( e2.cross( e3 ) ) / 6.0f;
+}
+
+inline bool isTriangleDegenerated(const Vector3F * v)
+{
+	const Vector3F n = Vector3F(v[1], v[0]).cross( Vector3F(v[2], v[0]) );
+    const float D0 = n.length2();
+	// std::cout<<" D0 "<<D0<<"\n";
+    return (D0 < 1e-6f);
+}
+
+inline Vector3F closestPOnLine(const Vector3F * p, const Vector3F & referencePoint)
+{
+    Vector3F vr = referencePoint - p[0];
+    Vector3F v1 = p[1] - p[0];
+	const float dr = vr.length();
+	if(dr < 1e-6f) {
+        return p[0];
+    }
+	
+	const float d1 = v1.length();
+	vr.normalize();
+	v1.normalize();
+	float vrdv1 = vr.dot(v1) * dr;
+	if(vrdv1 < 0.f) vrdv1 = 0.f;
+	if(vrdv1 > d1) vrdv1 = d1;
+	
+	v1 = p[0] + v1 * vrdv1;
+    return v1;
+}
+
+inline bool closestPointToOriginInsideTriangle(const Vector3F * p, const Vector3F & referencePoint,
+                                                   Vector3F & resultP)
+{
+	Vector3F ab = p[1] - p[0];
+    Vector3F ac = p[2] - p[0];
+    Vector3F nor = ab.cross(ac);
+    nor.normalize();
+    
+    float t = p[0].dot(nor);
+    Vector3F onplane = nor * t;
+    
+    Vector3F e01 = p[1] - p[0];
+	Vector3F x0 = onplane - p[0];
+	if(e01.cross(x0).dot(nor) < 0.f) return false;
+	
+	Vector3F e12 = p[2] - p[1];
+	Vector3F x1 = onplane - p[1];
+	if(e12.cross(x1).dot(nor) < 0.f) return false;
+	
+	Vector3F e20 = p[0] - p[2];
+	Vector3F x2 = onplane - p[2];
+	if(e20.cross(x2).dot(nor) < 0.f) return false;
+	
+	resultP = onplane + referencePoint;
+    return true;
+}
+
+inline Vector3F closestPOnTriangle(const Vector3F * p, const Vector3F & referencePoint)
+{	
+	Vector3F pr[3];
+	pr[0] = p[0] - referencePoint;
+	pr[1] = p[1] - referencePoint;
+	pr[2] = p[2] - referencePoint;
+	
+    Vector3F result;
+    if(closestPointToOriginInsideTriangle(pr, referencePoint, result))
+        return result;
+		
+    pr[0] = p[0];
+	pr[1] = p[1];
+	result = closestPOnLine(pr, referencePoint);
+    float minDist = result.distanceTo(referencePoint);
+	
+	pr[0] = p[1];
+	pr[1] = p[2];
+	Vector3F q = closestPOnLine(pr, referencePoint);
+    float dist = q.distanceTo(referencePoint);
+    if(minDist > dist) {
+        result = q;
+        minDist = dist;
+    }
+	
+	pr[0] = p[2];
+	pr[1] = p[0];
+	q = closestPOnLine(pr, referencePoint);
+    dist = q.distanceTo(referencePoint);
+    if(minDist > dist) {
+        result = q;
+        minDist = dist;
+    }
+    return result;
+}
+
+inline Vector3F closestPOnTetrahedron(const Vector3F * p, const Vector3F & referencePoint)
+{
+	Vector3F result = closestPOnTriangle(p, referencePoint);
+    float minDist = result.distanceTo(referencePoint);
+	
+	Vector3F pr[3];
+	pr[0] = p[0];
+	pr[1] = p[1];
+	pr[2] = p[3];
+	Vector3F q = closestPOnTriangle(pr, referencePoint);
+    float dist = q.distanceTo(referencePoint);
+	if(minDist > dist) {
+        result = q;
+        minDist = dist;
+    }
+    
+	pr[0] = p[0];
+	pr[1] = p[2];
+	pr[2] = p[3];
+	q = closestPOnTriangle(pr, referencePoint);
+	dist = q.distanceTo(referencePoint);
+	if(minDist > dist) {
+        result = q;
+        minDist = dist;
+    }
+    
+	pr[0] = p[1];
+	pr[1] = p[2];
+	pr[2] = p[3];
+	q = closestPOnTriangle(pr, referencePoint);
+    dist = q.distanceTo(referencePoint);
+	if(minDist > dist) {
+        result = q;
+        minDist = dist;
+    }
+    
+    return result;
+}
+
+inline Float4 getBarycentricCoordinate2(const Vector3F & p, const Vector3F * v)
+{
+	Float4 coord;
+	Vector3F dv = v[1] - v[0];
+	float D0 = dv.length();
+	if(D0 < 1e-6f) {
+        std::cout<<" line is degenerate ("<<v[0].str()<<","<<v[1].str()<<")\n";
+        coord.x = coord.y = coord.z = coord.w = -1.f;
+        return coord;
+    }  
+	Vector3F dp = p - v[1];
+	coord.x = dp.length() / D0;
+	coord.y = 1.f - coord.x;
+	coord.z = coord.w = 0.f;
+	return coord;
+}
+
+inline Float4 getBarycentricCoordinate3(const Vector3F & p, const Vector3F * v)
+{
+    Matrix33F mat;
+    
+    Float4 coord;
+    
+    Vector3F n = Vector3F(v[1] - v[0]).cross( Vector3F(v[2] - v[0]) );
+	
+    float D0 = n.length2();
+    if(D0 < 1e-10f) {
+        std::cout<<" tiangle is degenerate ("<<v[0].str()<<","<<v[1].str()<<","<<v[2].str()<<")\n";
+        coord.x = coord.y = coord.z = coord.w = -1.f;
+        return coord;
+    }  
+    
+	Vector3F na = Vector3F(v[2] - v[1]).cross( Vector3F(p - v[1]) );
+    float D1 = n.dot(na);
+	Vector3F nb = Vector3F(v[0] - v[2]).cross( Vector3F(p - v[2]) );  
+    float D2 = n.dot(nb);
+	Vector3F nc = Vector3F(v[1] - v[0]).cross( Vector3F(p - v[0]) );
+    float D3 = n.dot(nc);
+    
+    coord.x = D1/D0;
+    coord.y = D2/D0;
+    coord.z = D3/D0;
+    coord.w = 0.f;
+    
+    return coord;
 }
 #endif        //  #ifndef TETRAHEDRON_MATH_H
 
