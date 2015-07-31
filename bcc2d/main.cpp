@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QtCore>
 #include <QDebug>
 #include "BccGlobal.h"
 #include "window.h"
@@ -11,7 +12,10 @@ int main(int argc, char *argv[])
 		BccGlobal::FileName = argv[argc-1];
 	}
 	
+    QResource::registerResource("resource.rcc");
     QApplication app(argc, argv);
+    QIcon professorIcon(":/tetrahedron.png");
+    app.setWindowIcon(professorIcon);
     Window window;
     window.resize(800, 600);
 	window.show();
