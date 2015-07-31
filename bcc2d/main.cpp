@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 		BccGlobal::FileName = argv[argc-1];
 	}
 	
-    QResource::registerResource("resource.rcc");
+    QResource::registerResource("bcc_resource.rcc");
     QApplication app(argc, argv);
     QIcon professorIcon(":/tetrahedron.png");
     app.setWindowIcon(professorIcon);

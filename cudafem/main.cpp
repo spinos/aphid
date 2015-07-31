@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     else FemGlobal::FileName = "untitled.hes";
 // external binary resource
 // rcc -binary image.qrc -o resource.rcc
-    QResource::registerResource("resource.rcc");
+    QResource::registerResource("fem_resource.rcc");
     QApplication app(argc, argv);
     QIcon professorIcon(":/professor.png");
     app.setWindowIcon(professorIcon);
