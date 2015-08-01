@@ -37,8 +37,9 @@ bool LarixInterface::CreateWorld(LarixWorld * world)
 	APointCloud * pc = ConvertTetrahedrons(tetra);
 	world->setPointCloud(pc);
     
-    AdaptiveGrid g(tree.getBBox());
-    g.create(&tree);
+    AdaptiveGrid * g = new AdaptiveGrid(tree.getBBox());
+    g->create(&tree);
+	world->setGrid(g);
 	return true;
 }
 
@@ -85,9 +86,12 @@ void LarixInterface::DrawWorld(LarixWorld * world, KdTreeDrawer * drawer)
     ATetrahedronMesh * mesh = world->tetrahedronMesh();
     if(!mesh) return;
 	
-	glColor3f(.17f, .21f, .15f);
+	drawer->setColor(.17f, .21f, .15f);
 	//drawer->pointCloud(cloud);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     drawer->tetrahedronMesh(mesh);
+	
+	drawer->setColor(.3f, .2f, .1f);
+	drawer->cartesianGrid(world->grid());
 }
 //:~

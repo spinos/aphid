@@ -22,13 +22,6 @@ LarixWorld.h)
 set (SOURCE_FILES ../shared/Base3DView.cpp
 ../hesperis/HesperisFile.cpp
 ../hesperis/HesperisInterface.cpp
-../btree/Types.cpp
-../btree/Entity.cpp
-../btree/BNode.cpp
-../btree/BTree.cpp
-../btree/Array.cpp
-../bcc2d/MortonHash.cpp
-../bcc2d/CartesianGrid.cpp
 glwidget.cpp
 window.cpp
 main.cpp

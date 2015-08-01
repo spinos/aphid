@@ -11,6 +11,7 @@ class KdTreeDrawer;
 class APointCloud;
 class ATetrahedronMesh;
 class LarixWorld;
+
 class LarixInterface : public HesperisInterface {
 public:
 	LarixInterface();

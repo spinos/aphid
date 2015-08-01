@@ -14,9 +14,11 @@ public:
     const Vector3F origin() const;
 	const float span() const;
     
-protected:
 	sdb::CellHash * cells();
+    const Vector3F cellCenter(unsigned code) const;
     const float cellSizeAtLevel(int level) const;
+	
+protected:
 	const float gridSize() const;
 	const unsigned mortonEncode(const Vector3F & p) const;
 	sdb::CellValue * findGrid(unsigned code) const;
@@ -25,7 +27,6 @@ protected:
 	const Vector3F gridOrigin(unsigned code) const;
 	const Vector3F cellOrigin(unsigned code, int level) const;
 	void removeCell(unsigned code);
-    const Vector3F cellCenter(unsigned code) const;
     const Vector3F putIntoBound(const Vector3F & p) const;
 	void printHash();
 private:

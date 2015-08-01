@@ -27,6 +27,7 @@ class Geometry;
 class GeometryArray;
 class APointCloud;
 class ATetrahedronMesh;
+class CartesianGrid;
 
 class GeoDrawer : public MeshDrawer {
 public:
@@ -78,6 +79,7 @@ public:
 	
 	void pointCloud(APointCloud * cloud) const;
 	void tetrahedronMesh(ATetrahedronMesh * mesh) const;
+	void cartesianGrid(CartesianGrid * grid) const;
 private:
 	Vector3F m_alignDir;
 	GeodesicSphereMesh * m_sphere;

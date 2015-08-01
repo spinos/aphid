@@ -25,6 +25,7 @@
 #include <ATetrahedronMesh.h>
 #include <APointCloud.h>
 #include <tetrahedron_math.h>
+#include <CartesianGrid.h>
 
 GeoDrawer::GeoDrawer() 
 {
@@ -644,5 +645,23 @@ void GeoDrawer::tetrahedronMesh(ATetrahedronMesh * mesh) const
         }
     }
     glEnd();
+}
+
+void GeoDrawer::cartesianGrid(CartesianGrid * grid) const
+{
+	sdb::CellHash * c = grid->cells();
+	Vector3F l;
+    BoundingBox box;
+    float h;
+	c->begin();
+	while(!c->end()) {
+		l = grid->cellCenter(c->key());
+		h = grid->cellSizeAtLevel(c->value()->level) * .5f;
+        box.setMin(l.x - h, l.y - h, l.z - h);
+        box.setMax(l.x + h, l.y + h, l.z + h);
+        boundingBox(box);
+		
+	    c->next();   
+	}
 }
 //:~

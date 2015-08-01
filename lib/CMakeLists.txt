@@ -1,7 +1,8 @@
 cmake_minimum_required (VERSION 2.8)
 project (aphid)
 set (CMAKE_BUILD_TYPE RELEASE)
-include_directories(../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit ../powell ../../ofl/shared)
+include_directories(../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit ../powell ../../ofl/shared
+../btree)
 IF (WIN32)
 include_directories(D:/usr/boost_1_51_0 D:/usr/openEXR/include/OpenEXR D:/usr/libxml2/include D:/usr/HDF5/include
 D:/usr/boost_1_51_0/boost/tr1/tr1)
@@ -216,5 +217,12 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/APointCloud.cpp
 ../shared/ATriangleMesh.cpp
 ../shared/ATetrahedronMesh.cpp
-../shared/GjkIntersection.cpp)
+../shared/GjkIntersection.cpp
+../btree/Types.cpp
+../btree/Entity.cpp
+../btree/BNode.cpp
+../btree/BTree.cpp
+../btree/Array.cpp
+../btree/MortonHash.cpp
+../shared/CartesianGrid.cpp)
 
