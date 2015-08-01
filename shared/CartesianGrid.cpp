@@ -63,9 +63,10 @@ const unsigned CartesianGrid::mortonEncode(const Vector3F & p) const
 }
 
 sdb::CellValue * CartesianGrid::findGrid(unsigned code) const
-{
-    return m_cellHash->find(code);
-}
+{ return m_cellHash->find(code); }
+
+sdb::CellValue * CartesianGrid::findCell(unsigned code) const
+{ return m_cellHash->find(code); }
 
 unsigned CartesianGrid::addGrid(const Vector3F & p)
 {

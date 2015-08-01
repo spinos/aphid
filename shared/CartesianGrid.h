@@ -22,6 +22,7 @@ protected:
 	const float gridSize() const;
 	const unsigned mortonEncode(const Vector3F & p) const;
 	sdb::CellValue * findGrid(unsigned code) const;
+	sdb::CellValue * findCell(unsigned code) const;
 	unsigned addGrid(const Vector3F & p);
     unsigned addCell(const Vector3F & p, int level);
 	const Vector3F gridOrigin(unsigned code) const;

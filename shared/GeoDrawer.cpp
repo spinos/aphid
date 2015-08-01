@@ -699,14 +699,11 @@ void GeoDrawer::cartesianGrid(CartesianGrid * grid) const
 {
 	sdb::CellHash * c = grid->cells();
 	Vector3F l;
-    BoundingBox box;
     float h;
 	c->begin();
 	while(!c->end()) {
 		l = grid->cellCenter(c->key());
 		h = grid->cellSizeAtLevel(c->value()->level);
-        box.setMin(l.x - h, l.y - h, l.z - h);
-        box.setMax(l.x + h, l.y + h, l.z + h);
         unitBoxAt(l, h);
 		
 	    c->next();   
