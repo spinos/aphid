@@ -46,6 +46,54 @@ GeoDrawer::~GeoDrawer()
 	delete m_disc;
 }
 
+void GeoDrawer::unitBox() const
+{
+	glBegin(GL_LINES);
+	
+	glVertex3f(-.5f, -.5f, -.5f);
+	glVertex3f( .5f, -.5f, -.5f);
+	glVertex3f(-.5f,  .5f, -.5f);
+	glVertex3f( .5f,  .5f, -.5f);
+	
+	glVertex3f(-.5f, -.5f,  .5f);
+	glVertex3f( .5f, -.5f,  .5f);
+	glVertex3f(-.5f,  .5f,  .5f);
+	glVertex3f( .5f,  .5f,  .5f);
+	
+	glVertex3f(-.5f, -.5f, -.5f);
+	glVertex3f(-.5f,  .5f, -.5f);
+	glVertex3f( .5f, -.5f, -.5f);
+	glVertex3f( .5f,  .5f, -.5f);
+	
+	glVertex3f(-.5f, -.5f,  .5f);
+	glVertex3f(-.5f,  .5f,  .5f);
+	glVertex3f( .5f, -.5f,  .5f);
+	glVertex3f( .5f,  .5f,  .5f);
+	
+	glVertex3f(-.5f, -.5f, -.5f);
+	glVertex3f(-.5f, -.5f,  .5f);
+	glVertex3f( .5f, -.5f, -.5f);
+	glVertex3f( .5f, -.5f,  .5f);
+	
+	glVertex3f(-.5f,  .5f, -.5f);
+	glVertex3f(-.5f,  .5f,  .5f);
+	glVertex3f( .5f,  .5f, -.5f);
+	glVertex3f( .5f,  .5f,  .5f);
+	
+	glEnd();
+}
+
+void GeoDrawer::unitBoxAt(const Vector3F & p, const float & size) const
+{
+	glPushMatrix();
+
+	glTranslatef(p.x, p.y, p.z);
+	glScalef(size, size, size);
+	
+	unitBox();
+	glPopMatrix();	
+}
+
 void GeoDrawer::box(float width, float height, float depth)
 {
 	glBegin(GL_LINES);
@@ -656,10 +704,10 @@ void GeoDrawer::cartesianGrid(CartesianGrid * grid) const
 	c->begin();
 	while(!c->end()) {
 		l = grid->cellCenter(c->key());
-		h = grid->cellSizeAtLevel(c->value()->level) * .5f;
+		h = grid->cellSizeAtLevel(c->value()->level);
         box.setMin(l.x - h, l.y - h, l.z - h);
         box.setMax(l.x + h, l.y + h, l.z + h);
-        boundingBox(box);
+        unitBoxAt(l, h);
 		
 	    c->next();   
 	}

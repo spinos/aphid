@@ -39,10 +39,11 @@ void AdaptiveGrid::create(KdIntersection * tree)
         }
     }
     bool needRefine = tagCellsToRefine(tree);
-    while(needRefine && level < 6) {
-        level++;
-        refine(tree, level);
-        tagCellsToRefine(tree);
+    while(needRefine && level <= 6) {
+        std::cout<<" n level "<<level<<" cell "<<numCells()<<"\n";
+		refine(tree);
+		level++;
+		if(level < 6) tagCellsToRefine(tree);
     }
 }
 
@@ -93,43 +94,35 @@ bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
     return result;
 }
 
-void AdaptiveGrid::refine(KdIntersection * tree, int level)
-{
-    const unsigned n = numCells();
-    
-    BaseBuffer parentKeyBuf;
-    parentKeyBuf.create(n*4);
-    unsigned * parentKey = (unsigned *)parentKeyBuf.data();
-    
-    sdb::CellHash * c = cells();
-	unsigned i = 0;
-	c->begin();
-	while(!c->end()) {
-		parentKey[i] = c->key();
-		i++;
-		c->next();
-	}
-    
+void AdaptiveGrid::refine(KdIntersection * tree)
+{    
+	int level1;
+	float hh;
     int u;
-    Vector3F sample, subs, closestP;
+    Vector3F sample, subs;
+	unsigned k;
 
-    for(i=0; i< n; i++) {
-        if(!cellNeedRefine(parentKey[i])) continue;
+	m_cellsToRefine->begin();
+	while (!m_cellsToRefine->end()) {
+		sdb::CellValue * parentCell = m_cellsToRefine->value();
+		if(parentCell->visited > 0) {
         
-        sdb::CellValue * parentCell = m_cellsToRefine->find(parentKey[i]);
-        int level1 = parentCell->level + 1;
-        // std::cout<<" l1 "<<level1<<" "<<level;
-        float hh = cellSizeAtLevel(level1) * .5f;
-        sample = cellCenter(parentKey[i]);
-		removeCell(parentKey[i]);
-		for(u = 0; u < 8; u++) {
-			subs = sample + Vector3F(hh * OctChildOffset[u][0], 
-			hh * OctChildOffset[u][1], 
-			hh * OctChildOffset[u][2]);
-			addCell(subs, level1);
+			k = m_cellsToRefine->key();
+			
+			level1 = parentCell->level + 1;
+			hh = cellSizeAtLevel(level1) * .5f;
+			sample = cellCenter(k);
+			removeCell(k);
+			for(u = 0; u < 8; u++) {
+				subs = sample + Vector3F(hh * OctChildOffset[u][0], 
+				hh * OctChildOffset[u][1], 
+				hh * OctChildOffset[u][2]);
+				addCell(subs, level1);
+			}
 		}
+		
+		m_cellsToRefine->next();
     }
-    std::cout<<" n level "<<level<<" cell "<<numCells()<<"\n";
 }
 
 void AdaptiveGrid::setCellToRefine(unsigned k, const sdb::CellValue * v,

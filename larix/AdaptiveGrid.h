@@ -10,7 +10,7 @@ public:
     void create(KdIntersection * tree);
 protected:
     virtual bool tagCellsToRefine(KdIntersection * tree);
-    void refine(KdIntersection * tree, int level);
+    void refine(KdIntersection * tree);
 private:
     void setCellToRefine(unsigned k, const sdb::CellValue * v,
                          int toRefine);
