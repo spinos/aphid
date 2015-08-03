@@ -15,7 +15,7 @@ AdaptiveGrid::~AdaptiveGrid()
     delete m_cellsToRefine;
 }
 
-void AdaptiveGrid::create(KdIntersection * tree)
+void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
 {
 // start at 8 cells per axis
     int level = 3;
@@ -39,19 +39,17 @@ void AdaptiveGrid::create(KdIntersection * tree)
         }
     }
     bool needRefine = tagCellsToRefine(tree);
-    while(needRefine && level <= 6) {
+    while(needRefine && level <= maxLevel) {
         std::cout<<" n level "<<level<<" cell "<<numCells()<<"\n";
 		refine(tree);
 		level++;
-		if(level < 6) tagCellsToRefine(tree);
+		if(level < maxLevel) tagCellsToRefine(tree);
     }
 }
 
 bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
 {
     m_cellsToRefine->clear();
-    
-    const unsigned n = numCells();
     
     sdb::CellHash * c = cells();
     Vector3F l;
