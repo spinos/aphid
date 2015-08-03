@@ -13,7 +13,15 @@
 #include "BaseBuffer.h"
 
 class AField {
-public:
+public:	
+	enum SamplerType {
+		SUnknown = 0,
+		SPoint = 1,
+		SLine = 2,
+		STriangle = 3,
+		STetrahedron = 4
+	};
+	
 	template<typename T>
 	class BaseSampler {
 	public:
@@ -107,12 +115,16 @@ public:
 	T sample(BaseSampler<T> * sampler) const 
 	{ return sampler->evaluate(value()); }
 	
+	void getChannelNames(std::vector<std::string > & names) const;
+	TypedBuffer * currentChannel() const;
+	TypedBuffer * namedChannel(const std::string & name);
+	
 protected:
 	template<typename T> 
 	T * value() const
 	{ return (T *)m_currentChannel->data(); }
 
 private:
-	std::map<std::string, BaseBuffer * > m_channels;
-	BaseBuffer * m_currentChannel;
+	std::map<std::string, TypedBuffer * > m_channels;
+	TypedBuffer * m_currentChannel;
 };

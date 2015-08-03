@@ -129,7 +129,7 @@ bool KdIntersection::leafIntersectTetrahedron(KdTreeNode *node, const BoundingBo
 	return false;
 }
 
-unsigned KdIntersection::countElementIntersectBox(const BoundingBox & box)
+unsigned KdIntersection::countElementIntersectBox(std::vector<unsigned> & result, const BoundingBox & box)
 {
     KdTreeNode * root = getRoot();
 	if(!root) return 0;
@@ -138,12 +138,12 @@ unsigned KdIntersection::countElementIntersectBox(const BoundingBox & box)
 	
 	m_testBox = box;
 	
-    unsigned result = 0;
+    result.clear();
 	internalCountElementIntersectBox(result, root, b);
-    return result;
+    return result.size();
 }
 
-void KdIntersection::internalCountElementIntersectBox(unsigned & result, KdTreeNode *node, const BoundingBox & box)
+void KdIntersection::internalCountElementIntersectBox(std::vector<unsigned> & result, KdTreeNode *node, const BoundingBox & box)
 {
     if(!box.intersect(m_testBox)) return;
 	
@@ -159,7 +159,7 @@ void KdIntersection::internalCountElementIntersectBox(unsigned & result, KdTreeN
 	internalCountElementIntersectBox(result, node->getRight(), rightBox);
 }
 
-void KdIntersection::leafCountElementIntersectBox(unsigned & result, KdTreeNode *node, const BoundingBox & box)
+void KdIntersection::leafCountElementIntersectBox(std::vector<unsigned> & result, KdTreeNode *node, const BoundingBox & box)
 {
     const unsigned num = node->getNumPrims();
 	if(num < 1) return;
@@ -176,7 +176,7 @@ void KdIntersection::leafCountElementIntersectBox(unsigned & result, KdTreeNode 
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		
-		if(geo->intersectBox(icomponent, m_testBox)) result++;
+		if(geo->intersectBox(icomponent, m_testBox)) result.push_back(icomponent);
 		indir.next();
 	}
 }

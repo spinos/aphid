@@ -40,6 +40,12 @@ bool Geometry::intersectRay(unsigned icomponent, const Ray * r)
 
 void Geometry::closestToPoint(ClosestToPointTestResult * result) {}
 
+void Geometry::closestToPointElms(const std::vector<unsigned > & elements, ClosestToPointTestResult * result)
+{ 
+	std::vector<unsigned >::const_iterator it = elements.begin();
+	for(;it!=elements.end();++it) closestToPoint(*it, result);
+}
+
 void Geometry::closestToPoint(unsigned icomponent, ClosestToPointTestResult * result) {}
 
 const Vector3F Geometry::boundingCenter() const

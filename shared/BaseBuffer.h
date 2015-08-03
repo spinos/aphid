@@ -29,4 +29,26 @@ private:
     char * m_native;
 	unsigned m_bufferSize;
 };
+
+class TypedBuffer : public BaseBuffer {
+public:
+	enum ValueType {
+		TUnknown = 0,
+		TChar = 1,
+		TShort = 2,
+		TFlt = 4,
+		TVec2 = 8,
+		TVec3 = 12,
+		TVec4 = 16
+	};
+	
+	TypedBuffer();
+	virtual ~TypedBuffer();
+	
+	void create(ValueType t, unsigned size);
+	
+	ValueType valueType() const;
+private:
+	ValueType m_type;
+};
 #endif        //  #ifndef BASEBUFFER_H

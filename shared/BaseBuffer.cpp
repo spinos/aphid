@@ -43,4 +43,16 @@ void BaseBuffer::copyFrom(const void * src, unsigned size, unsigned loc)
 	char * dst = &data()[loc];
 	memcpy( dst, src, size ); 
 }
+
+TypedBuffer::TypedBuffer() {}
+TypedBuffer::~TypedBuffer() {}
+	
+void TypedBuffer::create(ValueType t, unsigned size)
+{
+	BaseBuffer::create(size);
+	m_type = t;
+}
+
+TypedBuffer::ValueType TypedBuffer::valueType() const
+{ return m_type; }
 //:~

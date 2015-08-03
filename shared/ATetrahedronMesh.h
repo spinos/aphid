@@ -19,6 +19,7 @@ public:
 	virtual const Type type() const;
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
+	virtual void closestToPoint(unsigned icomponent, ClosestToPointTestResult * result);
 	virtual bool intersectBox(unsigned icomponent, const BoundingBox & box);
     const unsigned numTetrahedrons() const;
 	

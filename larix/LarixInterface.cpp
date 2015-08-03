@@ -36,9 +36,27 @@ bool LarixInterface::CreateWorld(LarixWorld * world)
 	world->setTetrahedronMesh(tetra);
 	APointCloud * pc = ConvertTetrahedrons(tetra);
 	world->setPointCloud(pc);
-    
+
+// a field of color
+	const unsigned n = tetra->numPoints();
+	AField dv;
+	dv.addVec3Channel("foo", n);
+	dv.useChannel("foo");
+	Vector3F * vdv = dv.vec3Value();
+	Vector3F * p = tetra->points();
+	const BoundingBox bigBox = tree.getBBox();
+	const float boxdx = bigBox.distance(0);
+	const float boxdy = bigBox.distance(1);
+	const float boxdz = bigBox.distance(2);
+	unsigned i = 0;
+	for(;i<n;i++) {
+		vdv[i].x = (p[i].x - bigBox.getMin().x) / boxdx;
+		vdv[i].y = (p[i].y - bigBox.getMin().y) / boxdy;
+		vdv[i].z = (p[i].z - bigBox.getMin().z) / boxdz;
+	}
+	
     AdaptiveField * g = new AdaptiveField(tree.getBBox());
-    g->create(&tree);
+    g->create(&tree, &dv, tetra, AField::STetrahedron);
 	world->setField(g);
 	return true;
 }

@@ -70,9 +70,9 @@ void ATriangleMesh::closestToPoint(unsigned icomponent, ClosestToPointTestResult
 	result->_distance = d;
 	result->_hasResult = true;
 	result->_hitPoint = clampledP;
-	result->_tricoord[0] = bar.getV(0);
-	result->_tricoord[1] = bar.getV(1);
-	result->_tricoord[2] = bar.getV(2);
+	result->_contributes[0] = bar.getV(0);
+	result->_contributes[1] = bar.getV(1);
+	result->_contributes[2] = bar.getV(2);
 	result->_hitNormal = bar.getNormal();
 	result->_icomponent = icomponent;
 }

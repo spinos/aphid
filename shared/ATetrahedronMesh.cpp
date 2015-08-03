@@ -94,6 +94,50 @@ const float ATetrahedronMesh::volume() const
 void ATetrahedronMesh::setVolume(float x)
 { m_volume = x;}
 
+void ATetrahedronMesh::closestToPoint(unsigned icomponent, ClosestToPointTestResult * result)
+{
+	if(result->_distance < 0.f) return;
+	Vector3F * p = points();
+	unsigned * v = tetrahedronIndices(icomponent);
+    
+	Vector3F q[4];
+	q[0] = p[v[0]];
+	q[1] = p[v[1]];
+	q[2] = p[v[2]];
+	q[3] = p[v[3]];
+	
+	Float4 coord;
+	if(pointInsideTetrahedronTest(result->_toPoint, q)) {
+		result->_distance = -1.f;
+		result->_hasResult = true;
+		result->_icomponent = icomponent;
+		result->_isInside = true;
+		
+		coord = getBarycentricCoordinate4(result->_toPoint, q);
+		result->_contributes[0] = coord.x;
+		result->_contributes[1] = coord.y;
+		result->_contributes[2] = coord.z;
+		result->_contributes[3] = coord.w;
+		return;
+	}
+	
+	Vector3F clamped = closestPOnTetrahedron(q, result->_toPoint);
+	float d = clamped.distanceTo(result->_toPoint);
+	
+	if(d>=result->_distance) return;
+	
+	result->_distance = d;
+	result->_hasResult = true;
+	result->_icomponent = icomponent;
+	result->_isInside = false;
+	
+	coord = getBarycentricCoordinate4(clamped, q);
+	result->_contributes[0] = coord.x;
+	result->_contributes[1] = coord.y;
+	result->_contributes[2] = coord.z;
+	result->_contributes[3] = coord.w;
+}
+
 std::string ATetrahedronMesh::verbosestr() const
 {
 	std::stringstream sst;

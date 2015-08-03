@@ -11,20 +11,23 @@
 #include <TypedEntity.h>
 #include <AVerbose.h>
 #include <BoundingBox.h>
+#include <vector>
 class Geometry : public TypedEntity, public AVerbose {
 public:
 	struct ClosestToPointTestResult {
 		Vector3F _toPoint;
 		Vector3F _hitPoint;
 		Vector3F _hitNormal;
-		float _tricoord[3];
+		float _contributes[4];
 		float _distance;
 		unsigned _icomponent;
 		bool _hasResult;
+		bool _isInside;
 		void reset(const Vector3F & p, float d) {
 			_toPoint = p;
 			_distance = d;
 			_hasResult = false;
+			_isInside = false;
 		}
 		bool closeTo(const BoundingBox & box) {
 			return box.distanceTo(_toPoint) < _distance;
@@ -46,6 +49,7 @@ public:
 	virtual bool intersectTetrahedron(unsigned icomponent, const Vector3F * tet);
 	virtual bool intersectRay(unsigned icomponent, const Ray * r);
 	virtual void closestToPoint(ClosestToPointTestResult * result);
+	virtual void closestToPointElms(const std::vector<unsigned > & elements, ClosestToPointTestResult * result);
 	virtual void closestToPoint(unsigned icomponent, ClosestToPointTestResult * result);
 protected:
     
