@@ -9,7 +9,7 @@
 #pragma once
 class ATetrahedronMesh;
 class APointCloud;
-class AdaptiveGrid;
+class AdaptiveField;
 
 class LarixWorld {
 public:
@@ -22,12 +22,13 @@ public:
 	void setPointCloud(APointCloud * pc);
 	APointCloud * pointCloud() const;
 	
-	void setGrid(AdaptiveGrid * g);
-	AdaptiveGrid * grid() const;
+	void setField(AdaptiveField * g);
+	AdaptiveField * field() const;
+
 protected:
 
 private:
     ATetrahedronMesh * m_mesh;
 	APointCloud * m_cloud;
-	AdaptiveGrid * m_grid;
+	AdaptiveField * m_field;
 };

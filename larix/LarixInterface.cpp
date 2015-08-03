@@ -15,7 +15,7 @@
 #include <KdTreeDrawer.h>
 #include "tetrahedron_math.h"
 #include <KdIntersection.h>
-#include "AdaptiveGrid.h"
+#include "AdaptiveField.h"
 
 LarixInterface::LarixInterface() {}
 LarixInterface::~LarixInterface() {}
@@ -37,9 +37,9 @@ bool LarixInterface::CreateWorld(LarixWorld * world)
 	APointCloud * pc = ConvertTetrahedrons(tetra);
 	world->setPointCloud(pc);
     
-    AdaptiveGrid * g = new AdaptiveGrid(tree.getBBox());
+    AdaptiveField * g = new AdaptiveField(tree.getBBox());
     g->create(&tree);
-	world->setGrid(g);
+	world->setField(g);
 	return true;
 }
 
@@ -92,6 +92,6 @@ void LarixInterface::DrawWorld(LarixWorld * world, KdTreeDrawer * drawer)
     drawer->tetrahedronMesh(mesh);
 	
 	drawer->setColor(.3f, .2f, .1f);
-	drawer->cartesianGrid(world->grid());
+	drawer->cartesianGrid(world->field());
 }
 //:~
