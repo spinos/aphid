@@ -10,20 +10,20 @@
 #include "LarixWorld.h"
 #include <ATetrahedronMesh.h>
 #include <APointCloud.h>
-#include <AdaptiveGrid.h>
+#include <AdaptiveField.h>
 
 LarixWorld::LarixWorld() 
 { 
     m_cloud = 0;
     m_mesh = 0;
-	m_grid = 0;
+	m_field = 0;
 }
 
 LarixWorld::~LarixWorld() 
 { 
     if(m_cloud) delete m_cloud; 
     if(m_mesh) delete m_mesh;
-	if(m_grid) delete m_grid;
+	if(m_field) delete m_field;
 }
 
 void LarixWorld::setTetrahedronMesh(ATetrahedronMesh * m)
@@ -38,9 +38,9 @@ void LarixWorld::setPointCloud(APointCloud * pc)
 APointCloud * LarixWorld::pointCloud() const
 { return m_cloud; }
 
-void LarixWorld::setGrid(AdaptiveGrid * g)
-{ m_grid = g; }
+void LarixWorld::setField(AdaptiveField * g)
+{ m_field = g; }
 
-AdaptiveGrid * LarixWorld::grid() const
-{ return m_grid; }
+AdaptiveField * LarixWorld::field() const
+{ return m_field; }
 //:~
