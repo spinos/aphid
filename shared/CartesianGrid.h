@@ -17,6 +17,7 @@ public:
 	sdb::CellHash * cells();
     const Vector3F cellCenter(unsigned code) const;
     const float cellSizeAtLevel(int level) const;
+	BoundingBox cellBox(unsigned code, int level) const;
 	
 protected:
 	const float gridSize() const;

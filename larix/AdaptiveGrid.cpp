@@ -45,6 +45,7 @@ void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
 		level++;
 		if(level < maxLevel) tagCellsToRefine(tree);
     }
+	m_cellsToRefine->clear();
 }
 
 bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
@@ -52,19 +53,14 @@ bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
     m_cellsToRefine->clear();
     
     sdb::CellHash * c = cells();
-    Vector3F l;
     BoundingBox box;
-    float h;
+
     c->begin();
     bool result = false;
     //unsigned count;
     unsigned i = 0;
     while(!c->end()) {
-        l = cellCenter(c->key());
-		h = cellSizeAtLevel(c->value()->level) * .5f;
-        box.setMin(l.x - h, l.y - h, l.z - h);
-        box.setMax(l.x + h, l.y + h, l.z + h);
-        
+        box = cellBox(c->key(), c->value()->level);
         gjk::IntersectTest::SetA(box);
 		//count = tree->countElementIntersectBox(box);
         
@@ -81,7 +77,16 @@ bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
     
     if(!result) return result;
     
-    c->begin();
+    tagCellsToRefineByNeighbours();
+	tagCellsToRefineByNeighbours();
+	
+    return result;
+}
+
+void AdaptiveGrid::tagCellsToRefineByNeighbours()
+{
+	sdb::CellHash * c = cells();
+	c->begin();
     while(!c->end()) {
         if(!cellNeedRefine(c->key())) {
             if(check24NeighboursToRefine(c->key(), c->value()))
@@ -89,7 +94,6 @@ bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
         }
         c->next();
     }
-    return result;
 }
 
 void AdaptiveGrid::refine(KdIntersection * tree)

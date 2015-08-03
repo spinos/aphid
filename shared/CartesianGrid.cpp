@@ -107,6 +107,16 @@ const Vector3F CartesianGrid::cellCenter(unsigned code) const
     return gridOrigin(code) + Vector3F(.5f * h, .5f * h, .5f * h);
 }
 
+BoundingBox CartesianGrid::cellBox(unsigned code, int level) const
+{
+	BoundingBox box;
+	Vector3F l = cellCenter(code);
+	float h = cellSizeAtLevel(level) * .5f;
+	box.setMin(l.x - h, l.y - h, l.z - h);
+	box.setMax(l.x + h, l.y + h, l.z + h);
+	return box;
+}
+
 const Vector3F CartesianGrid::gridOrigin(unsigned code) const
 {
     unsigned x, y, z;
