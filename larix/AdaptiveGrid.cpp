@@ -59,7 +59,7 @@ bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
     float h;
     c->begin();
     bool result = false;
-    unsigned count;
+    //unsigned count;
     unsigned i = 0;
     while(!c->end()) {
         l = cellCenter(c->key());
@@ -68,9 +68,9 @@ bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
         box.setMax(l.x + h, l.y + h, l.z + h);
         
         gjk::IntersectTest::SetA(box);
-		count = tree->countElementIntersectBox(box);
+		//count = tree->countElementIntersectBox(box);
         
-        if(count > 1) {
+        if(tree->intersectBox(box)) {
             setCellToRefine(c->key(), c->value(), 1);
             result = true;
         }
@@ -184,4 +184,26 @@ bool AdaptiveGrid::check24NeighboursToRefine(unsigned k, const sdb::CellValue * 
         if(cellNeedRefine(code)) return true;
     }
     return false; 
+}
+
+bool AdaptiveGrid::multipleChildrenTouched(KdIntersection * tree,
+                                 const Vector3F & parentCenter,
+                                 float parentSize)
+{
+    const float hh = parentSize * .5f;
+    BoundingBox box;
+    Vector3F sample;
+    int count = 0;
+    int i = 0;
+    for(; i < 8; i++) {
+        sample = parentCenter + Vector3F(hh * OctChildOffset[i][0], 
+        hh * OctChildOffset[i][1], 
+        hh * OctChildOffset[i][2]);
+        box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
+        box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
+        gjk::IntersectTest::SetA(box);
+        if(tree->intersectBox(box)) count++;
+        if(count > 1) return true;
+    }
+    return false;
 }
