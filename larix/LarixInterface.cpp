@@ -122,7 +122,7 @@ void LarixInterface::DrawField(AdaptiveField * field,
         std::cout<<" field has no channel named "<<channelName;
         return;
     }
-    
+    drawer->setWired(0);
     BoundingBox box;
     field->getBounding(box);
     
@@ -133,12 +133,12 @@ void LarixInterface::DrawField(AdaptiveField * field,
 	c->begin();
 	while(!c->end()) {
 		l = field->cellCenter(c->key());
-		h = field->cellSizeAtLevel(c->value()->level) * .99f;
+		h = field->cellSizeAtLevel(c->value()->level);
         
-        if(c->value()->visited //) {
-        && l.z < box.center().z ) {
+        if(c->value()->visited ) {
+        // && l.z < box.center().z ) {
             drawer->setColor(col->x, col->y, col->z);
-            drawer->solidCube(l.x, l.y, l.z, h);
+            drawer->unitCubeAt(l, h);
         }
 		
 	    c->next();

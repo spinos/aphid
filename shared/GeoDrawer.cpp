@@ -85,44 +85,57 @@ void GeoDrawer::unitBox() const
     glDrawArrays(GL_LINES, 0, 24);
     glDisableClientState(GL_VERTEX_ARRAY);
 }
-/*
-static const float UnitBoxTriangle[24][3] = {
-{-.5f, -.5f, -.5f},
-{ .5f,  .5f, -.5f},
-{ .5f, -.5f, -.5f},
 
-{-.5f,  .5f, -.5f},
+static const float UnitBoxTriangle[36][3] = {
+{-.5f, -.5f, -.5f}, // back
 { .5f,  .5f, -.5f},
-	
-{-.5f, -.5f,  .5f},
-{ .5f, -.5f,  .5f},
-{-.5f,  .5f,  .5f},
-{ .5f,  .5f,  .5f},
-	
+{ .5f, -.5f, -.5f},
 {-.5f, -.5f, -.5f},
 {-.5f,  .5f, -.5f},
-{ .5f, -.5f, -.5f},
 { .5f,  .5f, -.5f},
 	
-{-.5f, -.5f,  .5f},
+{-.5f, -.5f,  .5f}, // front
+{ .5f, -.5f,  .5f},
 {-.5f,  .5f,  .5f},
 { .5f, -.5f,  .5f},
 { .5f,  .5f,  .5f},
+{-.5f,  .5f,  .5f},
 	
-{-.5f, -.5f, -.5f},
+{-.5f, -.5f, -.5f}, // left
 {-.5f, -.5f,  .5f},
+{-.5f,  .5f,  .5f},
+{-.5f,  .5f,  .5f},
+{-.5f,  .5f, -.5f},
+{-.5f, -.5f,  .5f},
+	
+{ .5f, -.5f, -.5f}, // right
+{ .5f,  .5f, -.5f},
+{ .5f, -.5f,  .5f},
+{ .5f, -.5f,  .5f},
+{ .5f,  .5f, -.5f},
+{ .5f,  .5f,  .5f},
+	
+{-.5f, -.5f, -.5f}, // bottom
 { .5f, -.5f, -.5f},
 { .5f, -.5f,  .5f},
+{ .5f, -.5f,  .5f},
+{-.5f, -.5f,  .5f},
+{-.5f, -.5f, -.5f},
 	
-{-.5f,  .5f, -.5f},
+{-.5f,  .5f, -.5f}, // top
 {-.5f,  .5f,  .5f},
 { .5f,  .5f, -.5f},
+{ .5f,  .5f, -.5f},
+{-.5f,  .5f,  .5f},
 { .5f,  .5f,  .5f}
-}
-*/
+};
+
 void GeoDrawer::unitCube() const
 {
-    
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, UnitBoxTriangle);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void GeoDrawer::unitBoxAt(const Vector3F & p, const float & size) const
@@ -133,6 +146,17 @@ void GeoDrawer::unitBoxAt(const Vector3F & p, const float & size) const
 	glScalef(size, size, size);
 	
 	unitBox();
+	glPopMatrix();	
+}
+
+void GeoDrawer::unitCubeAt(const Vector3F & p, const float & size) const
+{
+	glPushMatrix();
+
+	glTranslatef(p.x, p.y, p.z);
+	glScalef(size, size, size);
+	
+	unitCube();
 	glPopMatrix();	
 }
 
