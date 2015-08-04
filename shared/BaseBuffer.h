@@ -48,6 +48,10 @@ public:
 	void create(ValueType t, unsigned size);
 	
 	ValueType valueType() const;
+    
+    template<typename T>
+    T * typedData() const
+    { return (T *)data(); }
 private:
 	ValueType m_type;
 };

@@ -10,6 +10,7 @@
  *
  */
 #include "AGenericMesh.h"
+#include "BaseSampler.h"
 
 class ATetrahedronMesh : public AGenericMesh {
 public:
@@ -29,11 +30,14 @@ public:
     
     const float volume() const;
     void setVolume(float x);
+    
+    TetrahedronSampler * sampler();
 	
 	virtual std::string verbosestr() const;
 protected:
 	
 private:
+    TetrahedronSampler m_sampler;
 	float m_volume;
 };
 #endif        //  #ifndef ATETRAHEDRONMESH_H

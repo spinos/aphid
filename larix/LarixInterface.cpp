@@ -56,7 +56,7 @@ bool LarixInterface::CreateWorld(LarixWorld * world)
 	}
 	
     AdaptiveField * g = new AdaptiveField(tree.getBBox());
-    g->create(&tree, &dv, tetra, AField::STetrahedron);
+    g->create(&tree, &dv, tetra);
 	world->setField(g);
 	return true;
 }
@@ -110,6 +110,39 @@ void LarixInterface::DrawWorld(LarixWorld * world, KdTreeDrawer * drawer)
     drawer->tetrahedronMesh(mesh);
 	
 	drawer->setColor(.3f, .2f, .1f);
-	drawer->cartesianGrid(world->field());
+	//drawer->cartesianGrid(world->field());
+    DrawField(world->field(), "foo", drawer);
+}
+
+void LarixInterface::DrawField(AdaptiveField * field, 
+                          const std::string & channelName,
+                          KdTreeDrawer * drawer)
+{
+    if(!field->useChannel(channelName)) {
+        std::cout<<" field has no channel named "<<channelName;
+        return;
+    }
+    
+    BoundingBox box;
+    field->getBounding(box);
+    
+    Vector3F * col = field->vec3Value();
+    sdb::CellHash * c = field->cells();
+	Vector3F l;
+    float h;
+	c->begin();
+	while(!c->end()) {
+		l = field->cellCenter(c->key());
+		h = field->cellSizeAtLevel(c->value()->level) * .99f;
+        
+        if(c->value()->visited //) {
+        && l.z < box.center().z ) {
+            drawer->setColor(col->x, col->y, col->z);
+            drawer->solidCube(l.x, l.y, l.z, h);
+        }
+		
+	    c->next();
+        col++;
+	}
 }
 //:~

@@ -11,6 +11,7 @@ class KdTreeDrawer;
 class APointCloud;
 class ATetrahedronMesh;
 class LarixWorld;
+class AdaptiveField;
 
 class LarixInterface : public HesperisInterface {
 public:
@@ -22,4 +23,7 @@ public:
 protected:
 	static APointCloud * ConvertTetrahedrons(ATetrahedronMesh * mesh);
 private:
+    static void DrawField(AdaptiveField * field, 
+                          const std::string & channelName,
+                          KdTreeDrawer * drawer);
 };

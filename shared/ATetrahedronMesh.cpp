@@ -138,6 +138,9 @@ void ATetrahedronMesh::closestToPoint(unsigned icomponent, ClosestToPointTestRes
 	result->_contributes[3] = coord.w;
 }
 
+TetrahedronSampler * ATetrahedronMesh::sampler()
+{ return &m_sampler; }
+
 std::string ATetrahedronMesh::verbosestr() const
 {
 	std::stringstream sst;

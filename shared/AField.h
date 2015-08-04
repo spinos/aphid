@@ -11,95 +11,9 @@
 #include <map>
 #include <string>
 #include "BaseBuffer.h"
-
+#include "BaseSampler.h"
 class AField {
 public:	
-	enum SamplerType {
-		SUnknown = 0,
-		SPoint = 1,
-		SLine = 2,
-		STriangle = 3,
-		STetrahedron = 4
-	};
-	
-	template<typename T>
-	class BaseSampler {
-	public:
-		BaseSampler() {}
-		
-		virtual T evaluate(T * data) const
-		{ return T(); }
-	};
-	
-	template<typename T>
-	class LineSampler : public BaseSampler<T> {
-	public:
-		LineSampler() {}
-		
-		unsigned * vertices() 
-		{ return m_vertices; }
-		
-		float * contributes() 
-		{ return m_contributes; }
-		
-		virtual T evaluate(T * data) const 
-		{
-			return data()[m_vertices[0]] * m_contributes[0]
-					+ data()[m_vertices[1]] * m_contributes[1];
-		}
-		
-	private:
-		unsigned m_vertices[2];
-		float m_contributes[2];
-	};
-	
-	template<typename T>
-	class TriangleSampler : public BaseSampler<T> {
-	public:
-		TriangleSampler() {}
-		
-		unsigned * vertices() 
-		{ return m_vertices; }
-		
-		float * contributes() 
-		{ return m_contributes; }
-		
-		virtual T evaluate(T * data) const 
-		{
-			return data()[m_vertices[0]] * m_contributes[0]
-					+ data()[m_vertices[1]] * m_contributes[1]
-					+ data()[m_vertices[2]] * m_contributes[2];
-		}
-		
-	private:
-		unsigned m_vertices[3];
-		float m_contributes[3];
-	};
-	
-	template<typename T>
-	class TetrahedronSampler : public BaseSampler<T> {
-	public:
-		TetrahedronSampler() {}
-		
-		unsigned * vertices() 
-		{ return m_vertices; }
-		
-		float * contributes() 
-		{ return m_contributes; }
-		
-		virtual T evaluate(T * data) const 
-		{
-			return data()[m_vertices[0]] * m_contributes[0]
-					+ data()[m_vertices[1]] * m_contributes[1]
-					+ data()[m_vertices[2]] * m_contributes[2]
-					+ data()[m_vertices[3]] * m_contributes[3];
-		}
-		
-	private:
-		unsigned m_vertices[4];
-		float m_contributes[4];
-	};
-	
 	AField();
 	virtual ~AField();
 	
@@ -111,17 +25,17 @@ public:
 	float * fltValue() const;
 	Vector3F * vec3Value() const;
 	
-	template<typename T> 
-	T sample(BaseSampler<T> * sampler) const 
-	{ return sampler->evaluate(value()); }
+	template<typename T, typename Ts> 
+	T sample(Ts * s) const 
+	{ return s->evaluate<T>(currentValue<T>()); }
 	
 	void getChannelNames(std::vector<std::string > & names) const;
 	TypedBuffer * currentChannel() const;
 	TypedBuffer * namedChannel(const std::string & name);
-	
+	unsigned numChannels() const;
 protected:
 	template<typename T> 
-	T * value() const
+	T * currentValue() const
 	{ return (T *)m_currentChannel->data(); }
 
 private:

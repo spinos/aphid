@@ -46,41 +46,83 @@ GeoDrawer::~GeoDrawer()
 	delete m_disc;
 }
 
+static const float UnitBoxLine[24][3] = {
+{-.5f, -.5f, -.5f},
+{ .5f, -.5f, -.5f},
+{-.5f,  .5f, -.5f},
+{ .5f,  .5f, -.5f},
+	
+{-.5f, -.5f,  .5f},
+{ .5f, -.5f,  .5f},
+{-.5f,  .5f,  .5f},
+{ .5f,  .5f,  .5f},
+	
+{-.5f, -.5f, -.5f},
+{-.5f,  .5f, -.5f},
+{ .5f, -.5f, -.5f},
+{ .5f,  .5f, -.5f},
+	
+{-.5f, -.5f,  .5f},
+{-.5f,  .5f,  .5f},
+{ .5f, -.5f,  .5f},
+{ .5f,  .5f,  .5f},
+	
+{-.5f, -.5f, -.5f},
+{-.5f, -.5f,  .5f},
+{ .5f, -.5f, -.5f},
+{ .5f, -.5f,  .5f},
+	
+{-.5f,  .5f, -.5f},
+{-.5f,  .5f,  .5f},
+{ .5f,  .5f, -.5f},
+{ .5f,  .5f,  .5f}
+};
+
 void GeoDrawer::unitBox() const
+{   
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, UnitBoxLine);
+    glDrawArrays(GL_LINES, 0, 24);
+    glDisableClientState(GL_VERTEX_ARRAY);
+}
+/*
+static const float UnitBoxTriangle[24][3] = {
+{-.5f, -.5f, -.5f},
+{ .5f,  .5f, -.5f},
+{ .5f, -.5f, -.5f},
+
+{-.5f,  .5f, -.5f},
+{ .5f,  .5f, -.5f},
+	
+{-.5f, -.5f,  .5f},
+{ .5f, -.5f,  .5f},
+{-.5f,  .5f,  .5f},
+{ .5f,  .5f,  .5f},
+	
+{-.5f, -.5f, -.5f},
+{-.5f,  .5f, -.5f},
+{ .5f, -.5f, -.5f},
+{ .5f,  .5f, -.5f},
+	
+{-.5f, -.5f,  .5f},
+{-.5f,  .5f,  .5f},
+{ .5f, -.5f,  .5f},
+{ .5f,  .5f,  .5f},
+	
+{-.5f, -.5f, -.5f},
+{-.5f, -.5f,  .5f},
+{ .5f, -.5f, -.5f},
+{ .5f, -.5f,  .5f},
+	
+{-.5f,  .5f, -.5f},
+{-.5f,  .5f,  .5f},
+{ .5f,  .5f, -.5f},
+{ .5f,  .5f,  .5f}
+}
+*/
+void GeoDrawer::unitCube() const
 {
-	glBegin(GL_LINES);
-	
-	glVertex3f(-.5f, -.5f, -.5f);
-	glVertex3f( .5f, -.5f, -.5f);
-	glVertex3f(-.5f,  .5f, -.5f);
-	glVertex3f( .5f,  .5f, -.5f);
-	
-	glVertex3f(-.5f, -.5f,  .5f);
-	glVertex3f( .5f, -.5f,  .5f);
-	glVertex3f(-.5f,  .5f,  .5f);
-	glVertex3f( .5f,  .5f,  .5f);
-	
-	glVertex3f(-.5f, -.5f, -.5f);
-	glVertex3f(-.5f,  .5f, -.5f);
-	glVertex3f( .5f, -.5f, -.5f);
-	glVertex3f( .5f,  .5f, -.5f);
-	
-	glVertex3f(-.5f, -.5f,  .5f);
-	glVertex3f(-.5f,  .5f,  .5f);
-	glVertex3f( .5f, -.5f,  .5f);
-	glVertex3f( .5f,  .5f,  .5f);
-	
-	glVertex3f(-.5f, -.5f, -.5f);
-	glVertex3f(-.5f, -.5f,  .5f);
-	glVertex3f( .5f, -.5f, -.5f);
-	glVertex3f( .5f, -.5f,  .5f);
-	
-	glVertex3f(-.5f,  .5f, -.5f);
-	glVertex3f(-.5f,  .5f,  .5f);
-	glVertex3f( .5f,  .5f, -.5f);
-	glVertex3f( .5f,  .5f,  .5f);
-	
-	glEnd();
+    
 }
 
 void GeoDrawer::unitBoxAt(const Vector3F & p, const float & size) const

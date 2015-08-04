@@ -16,7 +16,7 @@ CartesianGrid::CartesianGrid(const BoundingBox & bound)
     
     m_numCells = 0;
 	
-	sdb::TreeNode::MaxNumKeysPerNode = 256;
+	sdb::TreeNode::MaxNumKeysPerNode = 512;
 	sdb::TreeNode::MinNumKeysPerNode = 32;
 
 	m_cellHash = new sdb::CellHash;

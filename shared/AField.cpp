@@ -42,10 +42,10 @@ bool AField::useChannel(const std::string & name)
 }
 
 float * AField::fltValue() const
-{ return value<float>(); }
+{ return currentValue<float>(); }
 
 Vector3F * AField::vec3Value() const
-{ return value<Vector3F>(); }
+{ return currentValue<Vector3F>(); }
 
 void AField::getChannelNames(std::vector<std::string > & names) const
 {
@@ -58,4 +58,7 @@ TypedBuffer * AField::currentChannel() const
 
 TypedBuffer * AField::namedChannel(const std::string & name)
 { return m_channels[name]; }
+
+unsigned AField::numChannels() const
+{ return m_channels.size(); }
 //:~

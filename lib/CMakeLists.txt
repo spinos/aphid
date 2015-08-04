@@ -226,6 +226,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../btree/Sequence.cpp
 ../btree/Array.cpp
 ../btree/MortonHash.cpp
+../shared/BaseSampler.cpp
 ../shared/AField.cpp
 ../shared/CartesianGrid.cpp)
 
