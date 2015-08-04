@@ -16,6 +16,7 @@
 #include "tetrahedron_math.h"
 #include <KdIntersection.h>
 #include "AdaptiveField.h"
+#include <Plane.h>
 
 LarixInterface::LarixInterface() {}
 LarixInterface::~LarixInterface() {}
@@ -126,6 +127,15 @@ void LarixInterface::DrawField(AdaptiveField * field,
     BoundingBox box;
     field->getBounding(box);
     
+    Plane clipp;
+    clipp.create(box.center(), box.center() + Vector3F::ZAxis,
+                 box.center() + Vector3F::XAxis * .5f + Vector3F::ZAxis,
+                 box.center() + Vector3F::XAxis + Vector3F::YAxis * 2.f);
+    
+    Vector3F nor;
+    clipp.getNormal(nor);
+    Vector3F pop;
+    
     Vector3F * col = field->vec3Value();
     sdb::CellHash * c = field->cells();
 	Vector3F l;
@@ -135,10 +145,13 @@ void LarixInterface::DrawField(AdaptiveField * field,
 		l = field->cellCenter(c->key());
 		h = field->cellSizeAtLevel(c->value()->level);
         
-        if(c->value()->visited ) {
-        // && l.z < box.center().z ) {
+        clipp.projectPoint(l, pop);
+        if((l-pop).dot(nor) < 0.f) {
+            if(c->value()->visited ) {
+
             drawer->setColor(col->x, col->y, col->z);
             drawer->unitCubeAt(l, h);
+            }
         }
 		
 	    c->next();
