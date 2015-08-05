@@ -896,4 +896,24 @@ std::string SHelper::ParentPath(const std::string & name, const std::string & se
 		}
 	return r;
 }
+
+std::string SHelper::Combine(const std::vector<std::string > & names)
+{
+	std::stringstream sst;
+	std::vector<std::string >::const_iterator it = names.begin();
+	for(;it!=names.end();++it) sst<<"|"<<*it;
+	return sst.str();
+}
+
+void SHelper::Split(const std::string & combined, std::vector<std::string > & names)
+{
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("|/");
+	tokenizer tokens(combined, sep);
+	for (tokenizer::iterator tok_iter = tokens.begin();
+		tok_iter != tokens.end(); ++tok_iter)
+		{
+			names.push_back(*tok_iter);
+		}
+}
 //:~

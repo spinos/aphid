@@ -52,6 +52,8 @@ public:
     template<typename T>
     T * typedData() const
     { return (T *)data(); }
+	
+	unsigned numElements() const;
 private:
 	ValueType m_type;
 };

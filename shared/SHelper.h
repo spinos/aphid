@@ -64,6 +64,8 @@ public:
 	static char isMatched(const std::string &one, const std::string &another);
 	static bool IsPullPath(const std::string & name);
     static std::string ParentPath(const std::string & name, const std::string & separator);
+	static std::string Combine(const std::vector<std::string > & names);
+	static void Split(const std::string & combined, std::vector<std::string > & names);
 };
 #endif
 //:~

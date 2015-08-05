@@ -55,4 +55,29 @@ void TypedBuffer::create(ValueType t, unsigned size)
 
 TypedBuffer::ValueType TypedBuffer::valueType() const
 { return m_type; }
+
+unsigned TypedBuffer::numElements() const
+{
+	unsigned n = bufferSize();
+	switch (valueType()) {
+		case TShort:
+			n = n>>1;
+			break;
+		case TFlt:
+			n = n>>2;
+			break;
+		case TVec2:
+			n = n>>3;
+			break;
+		case TVec3:
+			n = n/12;
+			break;
+		case TVec4:
+			n = n>>4;
+			break;
+		default:
+			break;
+	}
+	return n;
+}
 //:~

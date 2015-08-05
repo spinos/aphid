@@ -4,7 +4,7 @@
 #include <HBase.h>
 
 class AField;
-
+class TypedBuffer;
 class HField : public HBase {
 public:
 	HField(const std::string & path);
@@ -15,7 +15,8 @@ public:
 	virtual char load(AField * fld);
 
 protected:
-    
+    void saveAChannel(const std::string& name, TypedBuffer * chan);
+	void loadAChannel(const std::string& name, AField * fld);
 private:
 	
 };
