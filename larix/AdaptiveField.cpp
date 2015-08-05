@@ -7,7 +7,7 @@ AdaptiveField::AdaptiveField(const BoundingBox & bound) :
     AdaptiveGrid(bound)
 {
     m_sampleParams = new SampleHash;
-	m_neighbours = new BaseBuffer;
+	m_neighbours = new NeighbourHash;
 }
 
 AdaptiveField::~AdaptiveField() 
@@ -28,11 +28,16 @@ void AdaptiveField::setCellValues(KdIntersection * tree,
 					AField * source,
 					ATetrahedronMesh * mesh)
 {
+    std::cout<<"\n creating samples... ";
     createSamples(tree, mesh);
+    std::cout<<"\n n samples "<<m_sampleParams->size();
+    std::cout<<"\n sampling... ";
     sampleCellValues(source, mesh->sampler());
 	findNeighbours();
+    std::cout<<"\n interpolating... ";
     int i=0;
     for(;i<24;i++) interpolate();
+    std::cout<<"\n done!";
 }
 
 void AdaptiveField::createSamples(KdIntersection * tree,
@@ -64,7 +69,6 @@ void AdaptiveField::createSamples(KdIntersection * tree,
 		c->next();
 		i++;
 	}
-    std::cout<<"\n n samples "<<m_sampleParams->size();
 }
 
 void AdaptiveField::setSampleParam(unsigned code,
@@ -122,20 +126,15 @@ void AdaptiveField::sampleNamedChannel(const std::string & channelName,
 
 void AdaptiveField::findNeighbours()
 {
-    m_neighbours->create(numCells() * 24 * 4);
-    CellNeighbourInds * neis = neighbours();
-
-	sdb::CellHash * c = cells();
+    sdb::CellHash * c = cells();
     c->begin();
 	while(!c->end()) {
-		findNeighbourCells( neis, c->key(), c->value() );
+        CellNeighbourInds * nei = new CellNeighbourInds;
+		findNeighbourCells( nei, c->key(), c->value() );
+        m_neighbours->insert(c->key(), nei);
 		c->next();
-        neis++;
 	}
 }
-
-AdaptiveField::CellNeighbourInds * AdaptiveField::neighbours() const
-{ return (CellNeighbourInds *)m_neighbours->data(); }
 
 void AdaptiveField::interpolate()
 {

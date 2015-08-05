@@ -7,7 +7,7 @@ public:
     AdaptiveGrid(const BoundingBox & bound);
     virtual ~AdaptiveGrid();
     
-    virtual void create(KdIntersection * tree, int maxLevel = 6);
+    virtual void create(KdIntersection * tree, int maxLevel = 7);
 protected:
     virtual bool tagCellsToRefine(KdIntersection * tree);
 	void tagCellsToRefineByNeighbours();

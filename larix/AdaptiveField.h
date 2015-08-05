@@ -10,9 +10,9 @@ public:
     
     virtual void create(KdIntersection * tree, AField * source,
 						ATetrahedronMesh * mesh,
-						int maxLevel = 6);
+						int maxLevel = 7);
 protected:
-    CellNeighbourInds * neighbours() const;
+    
 private:
 	void setCellValues(KdIntersection * tree, 
 					AField * source,
@@ -53,7 +53,6 @@ private:
     template<typename T>
     void interpolateChannel(TypedBuffer * chan)
     {
-        CellNeighbourInds * nei = neighbours();
         T * io = chan->typedData<T>();
         unsigned idx;
         sdb::CellHash * c = cells();
@@ -61,27 +60,29 @@ private:
         while(!c->end()) {
             if(c->value()->visited < 1) {
                 idx = c->value()->index;
-                io[idx] = interpolateValue(io, nei[idx]);
+                
+                CellNeighbourInds * nei = m_neighbours->find(c->key());
+                io[idx] = interpolateValue(io, nei);
             }
             c->next();
         }
     }
     
     template<typename T>
-    T interpolateValue(T * io, CellNeighbourInds & nei)
+    T interpolateValue(T * io, CellNeighbourInds * nei)
     {
         T r;
         int nnei = 0;
         int i = 0;
         bool first = true;
         for(;i<6;i++) {
-            if(nei.hasSide(i)) {
+            if(nei->hasSide(i)) {
                 if(first) {
-                    r = interpolateValue(io, nei.side(i));
+                    r = interpolateValue(io, nei->side(i));
                     first = false;
                 }
                 else
-                    r += interpolateValue(io, nei.side(i));
+                    r += interpolateValue(io, nei->side(i));
                 nnei++;
             }
         }
@@ -124,5 +125,5 @@ private:
 typedef sdb::Array<unsigned, SampleParam> SampleHash;
     SampleHash * m_sampleParams;
 typedef sdb::Array<unsigned, CellNeighbourInds> NeighbourHash;	
-    BaseBuffer * m_neighbours;
+    NeighbourHash * m_neighbours;
 };

@@ -35,8 +35,6 @@ bool LarixInterface::CreateWorld(LarixWorld * world)
     tree.create();
     
 	world->setTetrahedronMesh(tetra);
-	APointCloud * pc = ConvertTetrahedrons(tetra);
-	world->setPointCloud(pc);
 
 // a field of color
 	const unsigned n = tetra->numPoints();
@@ -57,7 +55,7 @@ bool LarixInterface::CreateWorld(LarixWorld * world)
 	}
 	
     AdaptiveField * g = new AdaptiveField(tree.getBBox());
-    g->create(&tree, &dv, tetra, 7);
+    g->create(&tree, &dv, tetra);
 	world->setField(g);
 	return true;
 }
@@ -99,14 +97,10 @@ APointCloud * LarixInterface::ConvertTetrahedrons(ATetrahedronMesh * mesh)
 
 void LarixInterface::DrawWorld(LarixWorld * world, KdTreeDrawer * drawer)
 {
-	// APointCloud * cloud = world->pointCloud();
-	//if(!cloud) return;
-    
     ATetrahedronMesh * mesh = world->tetrahedronMesh();
     if(!mesh) return;
 	
 	drawer->setColor(.17f, .21f, .15f);
-	//drawer->pointCloud(cloud);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     drawer->tetrahedronMesh(mesh);
 	
@@ -128,9 +122,8 @@ void LarixInterface::DrawField(AdaptiveField * field,
     field->getBounding(box);
     
     Plane clipp;
-    clipp.create(box.center(), box.center() + Vector3F::ZAxis,
-                 box.center() + Vector3F::XAxis * .5f + Vector3F::ZAxis,
-                 box.center() + Vector3F::XAxis + Vector3F::YAxis * 2.f);
+    clipp.set(Vector3F::XAxis + Vector3F::YAxis + Vector3F::ZAxis,
+              box.center() - Vector3F::XAxis * .5f);
     
     Vector3F nor;
     clipp.getNormal(nor);

@@ -81,7 +81,8 @@ bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
     
     tagCellsToRefineByNeighbours();
 	tagCellsToRefineByNeighbours();
-	
+	tagCellsToRefineByNeighbours();
+
     return result;
 }
 

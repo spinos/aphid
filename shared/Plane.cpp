@@ -23,11 +23,7 @@ Plane::Plane(float a, float b, float c, float d)
 
 Plane::Plane(const Vector3F & nor, const Vector3F & pop)
 {
-	Vector3F nn = nor.normal();
-	m_a = nn.x;
-	m_b = nn.y;
-	m_c = nn.z;
-	m_d = - pop.dot(nn);
+    set(nor, pop);
 }
 
 Plane::Plane(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, const Vector3F & p3)
@@ -36,6 +32,15 @@ Plane::Plane(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, cons
 }
 
 Plane::~Plane() {}
+
+void Plane::set(const Vector3F & nor, const Vector3F & pop)
+{
+    Vector3F nn = nor.normal();
+	m_a = nn.x;
+	m_b = nn.y;
+	m_c = nn.z;
+	m_d = - pop.dot(nn);
+}
 
 void Plane::create(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, const Vector3F & p3)
 {
