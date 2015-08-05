@@ -68,6 +68,12 @@ sdb::CellValue * CartesianGrid::findGrid(unsigned code) const
 sdb::CellValue * CartesianGrid::findCell(unsigned code) const
 { return m_cellHash->find(code); }
 
+sdb::CellValue * CartesianGrid::findCell(const Vector3F & p) const
+{
+	if(!isPInsideBound(p)) return 0;
+	return findCell(mortonEncode(p));
+}
+
 unsigned CartesianGrid::addGrid(const Vector3F & p)
 {
     unsigned code = mortonEncode(p);
@@ -142,6 +148,11 @@ const Vector3F CartesianGrid::putIntoBound(const Vector3F & p) const
     if(r.z >= m_origin.z + m_span) r.z = m_origin.z + m_span - 1e-7;
     return r;
 }
+
+bool CartesianGrid::isPInsideBound(const Vector3F & p) const
+{ return (p.x - m_origin.x < m_span
+			&& p.y - m_origin.y < m_span
+			&& p.z - m_origin.z < m_span); }
 
 void CartesianGrid::printHash()
 {

@@ -31,6 +31,10 @@ private:
                         ATetrahedronMesh * mesh);
     
     void sampleCellValues(AField * source, BaseSampler * sampler);
+	
+	void findNeighbours();
+	
+	
 private:
     struct SampleParam {
         unsigned _vertices[4];
@@ -39,4 +43,7 @@ private:
     
 typedef sdb::Array<unsigned, SampleParam> SampleHash;
     SampleHash * m_sampleParams;
+	
+typedef sdb::Array<unsigned, CellNeighbourInds> NeighborHash;
+    NeighborHash * m_neighbours;
 };

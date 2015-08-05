@@ -7,11 +7,13 @@ AdaptiveField::AdaptiveField(const BoundingBox & bound) :
     AdaptiveGrid(bound)
 {
     m_sampleParams = new SampleHash;
+	m_neighbours = new NeighborHash;
 }
 
 AdaptiveField::~AdaptiveField() 
 {
     delete m_sampleParams;
+	delete m_neighbours;
 }
 
 void AdaptiveField::create(KdIntersection * tree, AField * source,
@@ -28,6 +30,7 @@ void AdaptiveField::setCellValues(KdIntersection * tree,
 {
     createSamples(tree, mesh);
     sampleCellValues(source, mesh->sampler());
+	findNeighbours();
 }
 
 void AdaptiveField::createSamples(KdIntersection * tree,
@@ -130,5 +133,16 @@ void AdaptiveField::setACellValues(unsigned idata,
             dst[idata] = source->sample<Vector3F, TetrahedronSampler>(reinterpret_cast<TetrahedronSampler *>(sampler));
 		}
 	}
+}
+
+void AdaptiveField::findNeighbours()
+{
+	sdb::CellHash * c = cells();
+    c->begin();
+	while(!c->end()) {
+		m_neighbours->insert(c->key(), findNeighbourCells(c->key()));
+		c->next();
+	}
+	std::cout<<" neighbour hash size "<<m_neighbours->size();
 }
 //:~

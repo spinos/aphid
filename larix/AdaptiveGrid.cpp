@@ -4,6 +4,8 @@
 #include <BaseBuffer.h>
 #include <bcc_common.h>
 
+unsigned AdaptiveGrid::CellNeighbourInds::InvalidIndex = 1<<30;
+
 AdaptiveGrid::AdaptiveGrid(const BoundingBox & bound) :
     CartesianGrid(bound)
 {
@@ -146,6 +148,15 @@ bool AdaptiveGrid::cellNeedRefine(unsigned k)
     return parentCell->visited > 0;
 }
 
+static const float Cell6NeighboursCenterOffset[6][3] = {
+{ -1.f,   0.f,   0.f},
+{  1.f,   0.f,   0.f},
+{  0.f,  -1.f,   0.f},
+{  0.f,   1.f,   0.f},
+{  0.f,   0.f,  -1.f},
+{  0.f,   0.f,   1.f}
+};
+
 static const float Cell24NeighboursCenterOffset[24][3] = {
 {-.75f, -.25f, -.25f}, // x-axis
 { .75f, -.25f, -.25f}, 
@@ -182,8 +193,10 @@ bool AdaptiveGrid::check24NeighboursToRefine(unsigned k, const sdb::CellValue * 
         Vector3F q = sample + Vector3F(h * Cell24NeighboursCenterOffset[i][0],
                                        h * Cell24NeighboursCenterOffset[i][1],
                                        h * Cell24NeighboursCenterOffset[i][2]);
-        unsigned code = mortonEncode(q);
-        if(cellNeedRefine(code)) return true;
+		if(isPInsideBound(q)) {
+			unsigned code = mortonEncode(q);
+			if(cellNeedRefine(code)) return true;
+		}
     }
     return false; 
 }
@@ -209,3 +222,51 @@ bool AdaptiveGrid::multipleChildrenTouched(KdIntersection * tree,
     }
     return false;
 }
+
+
+AdaptiveGrid::CellNeighbourInds * AdaptiveGrid::findNeighbourCells(unsigned code)
+{
+	CellNeighbourInds * v = new CellNeighbourInds;
+	const Vector3F center = cellCenter(code);
+	Vector3F neighbourP;
+	
+	int i = 0;
+	for(;i<6; i++) {
+		neighbourP = neighbourCellCenter(i, center);
+		sdb::CellValue * cell = findCell(neighbourP);
+		if(cell)
+			v->side(i)[0] = cell->index;
+		else
+			findFinerNeighbourCells(v, i, center);
+	}
+	
+	return v;
+}
+
+Vector3F AdaptiveGrid::neighbourCellCenter(int i, const Vector3F & p) const
+{ 
+	return p + Vector3F(Cell6NeighboursCenterOffset[i][0],
+						Cell6NeighboursCenterOffset[i][1],
+						Cell6NeighboursCenterOffset[i][2]); 
+}
+
+void AdaptiveGrid::findFinerNeighbourCells(CellNeighbourInds * dst, int side,
+								const Vector3F & center)
+{
+	Vector3F neighbourP;
+	int i = 0;
+	for(;i<4;i++) {
+		neighbourP = finerNeighbourCellCenter(i, side, center);
+		sdb::CellValue * cell = findCell(neighbourP);
+		if(cell) dst->side(side)[i] = cell->index;
+	}
+}
+
+Vector3F AdaptiveGrid::finerNeighbourCellCenter(int i, int side, const Vector3F & p) const
+{
+	const int idx = i + side * 4;
+	return p + Vector3F(Cell24NeighboursCenterOffset[idx][0],
+						Cell24NeighboursCenterOffset[idx][1],
+						Cell24NeighboursCenterOffset[idx][2]);
+}
+//:~

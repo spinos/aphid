@@ -27,7 +27,7 @@ public:
 	
 	template<typename T, typename Ts> 
 	T sample(Ts * s) const 
-	{ return s->evaluate<T>(currentValue<T>()); }
+	{ return s->evaluate(currentValue<T>()); }
 	
 	void getChannelNames(std::vector<std::string > & names) const;
 	TypedBuffer * currentChannel() const;
