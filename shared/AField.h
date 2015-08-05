@@ -24,6 +24,7 @@ public:
 	
 	float * fltValue() const;
 	Vector3F * vec3Value() const;
+    void setChannelZero(const std::string & name);
 	
 	template<typename T, typename Ts> 
 	T sample(Ts * s) const 
@@ -38,6 +39,8 @@ protected:
 	T * currentValue() const
 	{ return (T *)m_currentChannel->data(); }
 
+    void setFltChannelZero(TypedBuffer * chan);
+    void setVec3ChannelZero(TypedBuffer * chan);
 private:
 	std::map<std::string, TypedBuffer * > m_channels;
 	TypedBuffer * m_currentChannel;

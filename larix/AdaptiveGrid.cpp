@@ -174,7 +174,7 @@ static const float Cell24NeighboursCenterOffset[24][3] = {
 {-.25f,  .75f,  .25f},
 { .25f, -.75f,  .25f},
 { .25f,  .75f,  .25f},
-{-.25f, -.25f, -.75f}, // x-axis
+{-.25f, -.25f, -.75f}, // z-axis
 {-.25f, -.25f,  .75f},
 { .25f, -.25f, -.75f},
 { .25f, -.25f,  .75f},
@@ -224,49 +224,48 @@ bool AdaptiveGrid::multipleChildrenTouched(KdIntersection * tree,
 }
 
 
-AdaptiveGrid::CellNeighbourInds * AdaptiveGrid::findNeighbourCells(unsigned code)
+void AdaptiveGrid::findNeighbourCells(CellNeighbourInds * dst, unsigned code,
+                                      sdb::CellValue * v)
 {
-	CellNeighbourInds * v = new CellNeighbourInds;
+    dst->reset();
 	const Vector3F center = cellCenter(code);
 	Vector3F neighbourP;
 	
 	int i = 0;
 	for(;i<6; i++) {
-		neighbourP = neighbourCellCenter(i, center);
+		neighbourP = neighbourCellCenter(i, center, cellSizeAtLevel(v->level));
 		sdb::CellValue * cell = findCell(neighbourP);
 		if(cell)
-			v->side(i)[0] = cell->index;
+			dst->side(i)[0] = cell->index;
 		else
-			findFinerNeighbourCells(v, i, center);
+			findFinerNeighbourCells(dst, i, center, cellSizeAtLevel(v->level));
 	}
-	
-	return v;
 }
 
-Vector3F AdaptiveGrid::neighbourCellCenter(int i, const Vector3F & p) const
+Vector3F AdaptiveGrid::neighbourCellCenter(int i, const Vector3F & p, float size) const
 { 
-	return p + Vector3F(Cell6NeighboursCenterOffset[i][0],
-						Cell6NeighboursCenterOffset[i][1],
-						Cell6NeighboursCenterOffset[i][2]); 
+	return p + Vector3F(size * Cell6NeighboursCenterOffset[i][0],
+						size * Cell6NeighboursCenterOffset[i][1],
+						size * Cell6NeighboursCenterOffset[i][2]); 
 }
 
 void AdaptiveGrid::findFinerNeighbourCells(CellNeighbourInds * dst, int side,
-								const Vector3F & center)
+								const Vector3F & center, float size)
 {
 	Vector3F neighbourP;
 	int i = 0;
 	for(;i<4;i++) {
-		neighbourP = finerNeighbourCellCenter(i, side, center);
+		neighbourP = finerNeighbourCellCenter(i, side, center, size);
 		sdb::CellValue * cell = findCell(neighbourP);
 		if(cell) dst->side(side)[i] = cell->index;
 	}
 }
 
-Vector3F AdaptiveGrid::finerNeighbourCellCenter(int i, int side, const Vector3F & p) const
+Vector3F AdaptiveGrid::finerNeighbourCellCenter(int i, int side, const Vector3F & p, float size) const
 {
 	const int idx = i + side * 4;
-	return p + Vector3F(Cell24NeighboursCenterOffset[idx][0],
-						Cell24NeighboursCenterOffset[idx][1],
-						Cell24NeighboursCenterOffset[idx][2]);
+	return p + Vector3F(size * Cell24NeighboursCenterOffset[idx][0],
+						size * Cell24NeighboursCenterOffset[idx][1],
+						size * Cell24NeighboursCenterOffset[idx][2]);
 }
 //:~

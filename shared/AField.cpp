@@ -61,4 +61,30 @@ TypedBuffer * AField::namedChannel(const std::string & name)
 
 unsigned AField::numChannels() const
 { return m_channels.size(); }
+
+void AField::setChannelZero(const std::string & name)
+{
+    TypedBuffer * chan = namedChannel(name);
+    
+    if(chan->valueType() == TypedBuffer::TFlt)
+		setFltChannelZero(chan);
+	else if(chan->valueType() == TypedBuffer::TVec3)
+		setVec3ChannelZero(chan);
+}
+
+void AField::setFltChannelZero(TypedBuffer * chan)
+{
+    float * dst = (float *)chan->data();
+    const unsigned n = chan->bufferSize() / 4;
+    unsigned i=0;
+    for(;i<n;i++) dst[i] = 0.f;
+}
+
+void AField::setVec3ChannelZero(TypedBuffer * chan)
+{
+    Vector3F * dst = (Vector3F *)chan->data();
+    const unsigned n = chan->bufferSize() / 12;
+    unsigned i=0;
+    for(;i<n;i++) dst[i].setZero();
+}
 //:~

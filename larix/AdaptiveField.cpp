@@ -7,7 +7,7 @@ AdaptiveField::AdaptiveField(const BoundingBox & bound) :
     AdaptiveGrid(bound)
 {
     m_sampleParams = new SampleHash;
-	m_neighbours = new NeighborHash;
+	m_neighbours = new BaseBuffer;
 }
 
 AdaptiveField::~AdaptiveField() 
@@ -31,6 +31,8 @@ void AdaptiveField::setCellValues(KdIntersection * tree,
     createSamples(tree, mesh);
     sampleCellValues(source, mesh->sampler());
 	findNeighbours();
+    int i=0;
+    for(;i<24;i++) interpolate();
 }
 
 void AdaptiveField::createSamples(KdIntersection * tree,
@@ -94,55 +96,58 @@ void AdaptiveField::sampleCellValues(AField * source, BaseSampler * sampler)
 			addFloatChannel(*it, n);
 		else if(source->currentChannel()->valueType() == TypedBuffer::TVec3)
 			addVec3Channel(*it, n);
+        setChannelZero(*it);
 	}
     if(numChannels() < 1) {
         std::cout<<"\n field has no channels";
         return;
     }
     
-    sdb::CellHash * c = cells();
-    c->begin();
-	while(!c->end()) {
-		if(c->value()->visited) {
-            SampleParam * param = m_sampleParams->find(c->key());
-            sampler->set(param->_vertices, param->_contributes);
-			setACellValues(c->value()->index,
-                           sampler,
-                           source,
-                           names);
-		}
-		c->next();
-	}
+    it = names.begin();
+	for(;it!=names.end();++it)
+        sampleNamedChannel(*it, source, sampler);
 }
 
-void AdaptiveField::setACellValues(unsigned idata, 
-                                   BaseSampler * sampler,
-					AField * source,
-					const std::vector<std::string > & channelNames)
+void AdaptiveField::sampleNamedChannel(const std::string & channelName,
+                                       AField * source, BaseSampler * sampler)
 {
-	std::vector<std::string >::const_iterator it = channelNames.begin();
-	for(;it!=channelNames.end();++it) {
-		TypedBuffer * chan = namedChannel(*it);
-        source->useChannel(*it);
-		if(chan->valueType() == TypedBuffer::TFlt) {
-			float * dst = chan->typedData<float>();
-            dst[idata] = source->sample<float, TetrahedronSampler>(reinterpret_cast<TetrahedronSampler *>(sampler));
-		}
-		else if(chan->valueType() == TypedBuffer::TVec3) {
-			Vector3F * dst = chan->typedData<Vector3F>();
-            dst[idata] = source->sample<Vector3F, TetrahedronSampler>(reinterpret_cast<TetrahedronSampler *>(sampler));
-		}
-	}
+    source->useChannel(channelName);
+    TypedBuffer * chan = namedChannel(channelName);
+    
+    if(chan->valueType() == TypedBuffer::TFlt)
+        sampleChannelValue<float, TetrahedronSampler>(chan, source, sampler);
+    else if(chan->valueType() == TypedBuffer::TVec3)
+        sampleChannelValue<Vector3F, TetrahedronSampler>(chan, source, sampler);
 }
 
 void AdaptiveField::findNeighbours()
 {
+    m_neighbours->create(numCells() * 24 * 4);
+    CellNeighbourInds * neis = neighbours();
+
 	sdb::CellHash * c = cells();
     c->begin();
 	while(!c->end()) {
-		m_neighbours->insert(c->key(), findNeighbourCells(c->key()));
+		findNeighbourCells( neis, c->key(), c->value() );
 		c->next();
+        neis++;
 	}
-	std::cout<<" neighbour hash size "<<m_neighbours->size();
+}
+
+AdaptiveField::CellNeighbourInds * AdaptiveField::neighbours() const
+{ return (CellNeighbourInds *)m_neighbours->data(); }
+
+void AdaptiveField::interpolate()
+{
+    std::vector<std::string > names;
+	getChannelNames(names);
+	std::vector<std::string >::const_iterator it = names.begin();
+	for(;it!=names.end();++it) {
+		TypedBuffer * chan = namedChannel(*it);
+        if(chan->valueType() == TypedBuffer::TFlt)
+            interpolateChannel<float>(chan);
+        else if(chan->valueType() == TypedBuffer::TVec3)
+            interpolateChannel<Vector3F>(chan);
+	}
 }
 //:~
