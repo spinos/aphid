@@ -4,6 +4,7 @@ class KdIntersection;
 class AdaptiveGrid : public CartesianGrid
 {
 public:
+	AdaptiveGrid(float * originSpan);
     AdaptiveGrid(const BoundingBox & bound);
     virtual ~AdaptiveGrid();
     

@@ -3,6 +3,13 @@
 #include <GjkIntersection.h>
 #include <ATetrahedronMesh.h>
 
+AdaptiveField::AdaptiveField(float * originSpan) :
+	AdaptiveGrid(originSpan)
+{
+    m_sampleParams = new SampleHash;
+	m_neighbours = new NeighbourHash;
+}
+
 AdaptiveField::AdaptiveField(const BoundingBox & bound) :
     AdaptiveGrid(bound)
 {

@@ -2,6 +2,18 @@
 #include <iostream>
 #include <Morton3D.h>
 #include <BNode.h>
+
+CartesianGrid::CartesianGrid(float * originSpan)
+{
+	m_origin.set(originSpan[0], originSpan[1], originSpan[2]);
+	m_span = originSpan[3];
+	m_gridH = m_span / 1024.f;
+	m_numCells = 0;
+	sdb::TreeNode::MaxNumKeysPerNode = 512;
+	sdb::TreeNode::MinNumKeysPerNode = 32;
+	m_cellHash = new sdb::CellHash;
+}
+
 CartesianGrid::CartesianGrid(const BoundingBox & bound) 
 {
     m_origin = bound.getMin();
@@ -85,6 +97,17 @@ unsigned CartesianGrid::addGrid(const Vector3F & p)
 	
     m_numCells++;
 	return code;
+}
+
+void CartesianGrid::addCell(unsigned code, int level, int visited, unsigned index)
+{
+	sdb::CellValue * ind = new sdb::CellValue;
+	ind->level = level;
+	ind->visited = visited;
+	ind->index = index;
+	m_cellHash->insert(code, ind);
+	
+    m_numCells++;
 }
 
 unsigned CartesianGrid::addCell(const Vector3F & p, int level)

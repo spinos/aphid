@@ -6,6 +6,12 @@
 
 unsigned AdaptiveGrid::CellNeighbourInds::InvalidIndex = 1<<30;
 
+AdaptiveGrid::AdaptiveGrid(float * originSpan) :
+	CartesianGrid(originSpan)
+{
+    m_cellsToRefine = new sdb::CellHash;
+}
+
 AdaptiveGrid::AdaptiveGrid(const BoundingBox & bound) :
     CartesianGrid(bound)
 {

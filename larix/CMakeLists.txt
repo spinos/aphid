@@ -28,6 +28,7 @@ main.cpp
 LarixInterface.cpp
 AdaptiveGrid.cpp
 AdaptiveField.cpp
+HAdaptiveField.cpp
 LarixWorld.cpp)
 
 if (WIN32)
