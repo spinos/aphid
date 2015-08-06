@@ -66,7 +66,10 @@ void GLWidget::clientDraw()
         sst<<"current frame: "<<m_interface->CurrentFrame();
         hudText(sst.str(), 4);
         if(m_world->isToSaveCache()) {
-            hudText("cacheing frames", 5);
+            if(m_world->allFramesCached())
+                hudText("all frames cached", 5);
+            else  
+                hudText("cacheing frames", 5);
         }
     }
     

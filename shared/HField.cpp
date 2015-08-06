@@ -100,6 +100,9 @@ void HField::saveAChannel(const std::string& name, TypedBuffer * chan)
 	}
 	
 	grp.close();
+    
+    HBase gbake(grp.childPath(".bake"));
+    gbake.close();
 }
 
 void HField::loadAChannel(const std::string& name, AField * fld)
@@ -133,5 +136,39 @@ void HField::loadAChannel(const std::string& name, AField * fld)
 	}
 		
 	grp.close();
+}
+
+void HField::saveFrame(const std::string & frame, AField * fld)
+{
+    std::vector<std::string > names;
+    fld->getChannelNames(names);
+    
+    std::vector<std::string >::const_iterator it = names.begin();
+	for(; it!= names.end();++it) 
+        saveAChannelFrame(frame, *it, fld->namedChannel(*it));
+}
+
+void HField::saveAChannelFrame(const std::string & frame,
+                           const std::string& channelName, TypedBuffer * chan)
+{
+    HBase grp(childPath(channelName));
+	int ne = chan->numElements();
+    HBase gbake(grp.childPath(".bake"));
+    
+    if(chan->valueType() == TypedBuffer::TFlt) {
+		if(!gbake.hasNamedData(frame.c_str()))
+			gbake.addFloatData(frame.c_str(), ne);
+			
+		gbake.writeFloatData(frame.c_str(), ne, chan->typedData<float>());
+	}
+	else if(chan->valueType() == TypedBuffer::TVec3) {
+		if(!gbake.hasNamedData(frame.c_str()))
+			gbake.addVector3Data(frame.c_str(), ne);
+			
+		gbake.writeVector3Data(frame.c_str(), ne, chan->typedData<Vector3F>());
+	}
+    
+    gbake.close();
+    grp.close();
 }
 //:~

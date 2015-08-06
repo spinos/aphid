@@ -128,6 +128,8 @@ bool FEMWorldInterface::useVelocityFile(CudaDynamicWorld * world)
     
     velfile->frameBegin();
     CudaDynamicWorld::VelocityCache = velfile;
+    world->beginCache();
+    velfile->beginCountNumFramesPlayed();
     return true;
 }
 

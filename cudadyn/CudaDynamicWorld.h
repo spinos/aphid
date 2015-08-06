@@ -1,6 +1,6 @@
 #ifndef CUDADYNAMICWORLD_H
 #define CUDADYNAMICWORLD_H
-
+#include <vector>
 #include "DynGLobal.h"
 #include <Vector3F.h>
 class CudaBroadphase;
@@ -14,6 +14,7 @@ class BvhTriangleSystem;
 class CudaMassSystem;
 class CudaLinearBvh;
 class IVelocityFile;
+class H5FileOut;
 class CudaDynamicWorld
 {
 public:
@@ -38,6 +39,8 @@ public:
     bool isToSaveCache() const;
     void setToSaveCache(bool x);
     virtual void saveCache();
+    void beginCache();
+    bool allFramesCached() const;
     
     const unsigned numObjects() const;
     CudaLinearBvh * bvhObject(unsigned idx) const;
@@ -57,12 +60,17 @@ protected:
     void resetMovenentRelativeToAir();
 	void updateMovenentRelativeToAir();
 private:
+    std::string objName(int i) const;
+private:
+    std::vector<unsigned > m_activeObjectInds;
     CudaBroadphase * m_broadphase;
     CudaNarrowphase * m_narrowphase;
     SimpleContactSolver * m_contactSolver;
     CudaMassSystem * m_objects[CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS];
+    H5FileOut * m_positionFile;
     unsigned m_numObjects;
     bool m_enableSaveCache;
+    bool m_finishedCaching;
 };
 #endif        //  #ifndef CUDADYNAMICWORLD_H
 
