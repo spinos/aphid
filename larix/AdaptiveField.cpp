@@ -41,6 +41,7 @@ void AdaptiveField::setCellValues(KdIntersection * tree,
     std::cout<<"\n sampling... ";
     sampleCellValues(source, mesh->sampler());
 	findNeighbours();
+	// checkNeighbours();
     std::cout<<"\n interpolating... ";
     int i=0;
     for(;i<24;i++) interpolate();
@@ -154,6 +155,24 @@ void AdaptiveField::interpolate()
             interpolateChannel<float>(chan);
         else if(chan->valueType() == TypedBuffer::TVec3)
             interpolateChannel<Vector3F>(chan);
+	}
+}
+
+void AdaptiveField::checkNeighbours()
+{
+	int i, s;
+	m_neighbours->begin();
+	while(!m_neighbours->end()) {
+		CellNeighbourInds * inds = m_neighbours->value();
+		for(i=0;i<6;i++) {
+			s = inds->countSide(i);
+			if(s != 0 && s != 1 && s != 4) {
+				std::cout<<"\n cell"<<m_neighbours->key()
+				<<" side"<<i
+				<<" has "<<s<<" neighbors ";
+			}
+		}
+		m_neighbours->next();
 	}
 }
 //:~

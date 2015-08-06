@@ -47,6 +47,18 @@ protected:
             <<_value[16]<<","<<_value[17]<<","<<_value[18]<<","<<_value[19]<<";\n"
             <<_value[20]<<","<<_value[21]<<","<<_value[22]<<","<<_value[23]<<";\n";
         }
+		
+		int countSide(int i)
+		{
+			unsigned * s = side(i);
+			int r = 0;
+			if(s[0] < InvalidIndex) r++;
+			if(s[1] < InvalidIndex) r++;
+			if(s[2] < InvalidIndex) r++;
+			if(s[3] < InvalidIndex) r++;
+			return r;
+		}
+		
         unsigned _value[24];
 	};
 	
@@ -61,7 +73,7 @@ private:
     bool multipleChildrenTouched(KdIntersection * tree,
                                  const Vector3F & parentCenter,
                                  float parentSize);
-	Vector3F neighbourCellCenter(int i, const Vector3F & p, float size) const;
+	Vector3F neighbourCellCenter(int side, const Vector3F & p, float size) const;
 	void findFinerNeighbourCells(CellNeighbourInds * dst, int side,
 								const Vector3F & center, float size);
 	Vector3F finerNeighbourCellCenter(int i, int side, const Vector3F & p, float size) const;

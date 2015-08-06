@@ -165,29 +165,29 @@ static const float Cell6NeighboursCenterOffset[6][3] = {
 };
 
 static const float Cell24NeighboursCenterOffset[24][3] = {
-{-.75f, -.25f, -.25f}, // x-axis
-{ .75f, -.25f, -.25f}, 
+{-.75f, -.25f, -.25f}, // left
 {-.75f,  .25f, -.25f},
-{ .75f,  .25f, -.25f},
 {-.75f, -.25f,  .25f},
-{ .75f, -.25f,  .25f}, 
 {-.75f,  .25f,  .25f},
+{ .75f, -.25f, -.25f}, // right
+{ .75f,  .25f, -.25f},
+{ .75f, -.25f,  .25f}, 
 { .75f,  .25f,  .25f},
-{-.25f, -.75f, -.25f}, // y-axis
-{-.25f,  .75f, -.25f},
+{-.25f, -.75f, -.25f}, // bottom
 { .25f, -.75f, -.25f},
-{ .25f,  .75f, -.25f},
 {-.25f, -.75f,  .25f},
-{-.25f,  .75f,  .25f},
 { .25f, -.75f,  .25f},
+{-.25f,  .75f, -.25f}, // top
+{ .25f,  .75f, -.25f},
+{-.25f,  .75f,  .25f},
 { .25f,  .75f,  .25f},
-{-.25f, -.25f, -.75f}, // z-axis
-{-.25f, -.25f,  .75f},
+{-.25f, -.25f, -.75f}, // back
 { .25f, -.25f, -.75f},
-{ .25f, -.25f,  .75f},
 {-.25f,  .25f, -.75f},
-{-.25f,  .25f,  .75f},
 { .25f,  .25f, -.75f},
+{-.25f, -.25f,  .75f}, // front
+{ .25f, -.25f,  .75f},
+{-.25f,  .25f,  .75f},
 { .25f,  .25f,  .75f}
 };
 
@@ -238,22 +238,24 @@ void AdaptiveGrid::findNeighbourCells(CellNeighbourInds * dst, unsigned code,
 	const Vector3F center = cellCenter(code);
 	Vector3F neighbourP;
 	
-	int i = 0;
-	for(;i<6; i++) {
-		neighbourP = neighbourCellCenter(i, center, cellSizeAtLevel(v->level));
+	float csize;
+	int side = 0;
+	for(;side<6; side++) {
+		csize = cellSizeAtLevel(v->level);
+		neighbourP = neighbourCellCenter(side, center, csize);
 		sdb::CellValue * cell = findCell(neighbourP);
 		if(cell)
-			dst->side(i)[0] = cell->index;
+			dst->side(side)[0] = cell->index;
 		else
-			findFinerNeighbourCells(dst, i, center, cellSizeAtLevel(v->level));
+			findFinerNeighbourCells(dst, side, center, csize);
 	}
 }
 
-Vector3F AdaptiveGrid::neighbourCellCenter(int i, const Vector3F & p, float size) const
+Vector3F AdaptiveGrid::neighbourCellCenter(int side, const Vector3F & p, float size) const
 { 
-	return p + Vector3F(size * Cell6NeighboursCenterOffset[i][0],
-						size * Cell6NeighboursCenterOffset[i][1],
-						size * Cell6NeighboursCenterOffset[i][2]); 
+	return p + Vector3F(size * Cell6NeighboursCenterOffset[side][0],
+						size * Cell6NeighboursCenterOffset[side][1],
+						size * Cell6NeighboursCenterOffset[side][2]); 
 }
 
 void AdaptiveGrid::findFinerNeighbourCells(CellNeighbourInds * dst, int side,

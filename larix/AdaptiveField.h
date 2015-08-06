@@ -116,6 +116,7 @@ private:
     }
     
     void interpolate();
+	void checkNeighbours();
     
 private:
     struct SampleParam {

@@ -148,7 +148,7 @@ bool IntersectTest::evaluate(PointSet * B)
     Vector3F v = A->X(0);
 	if(v.length2() < 1e-6f) v = A->X(1);
     
-    for(int i=0; i < 99; i++) {
+    for(int i=0; i < 32; i++) {
 // SA-B(-v)
 	    pa = A->supportPoint(v.reversed());
 		pb = B->supportPoint(v);
