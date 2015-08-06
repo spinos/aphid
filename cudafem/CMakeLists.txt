@@ -92,8 +92,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../shared/CSRMatrix.cpp"
 "../hesperis/IVelocityFile.cpp"
 "../hesperis/HesperisFile.cpp"
-../hesperis/H5FileIn.cpp
-../hesperis/H5FileOut.cpp
+../hesperis/H5FieldOut.cpp
 "../sahbvh/BvhBuilder.cpp"
 "../sahbvh/SahBuilder.cpp"
 "FemGlobal.cpp"

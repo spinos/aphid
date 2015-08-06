@@ -1,11 +1,11 @@
-#include "H5FileIn.h"
+#include "APlaybackFile.h"
 #include <string>
 #include <map>
 class AField;
-class H5FileOut : public H5FileIn {
+class H5FieldOut : public APlaybackFile {
 public:
-    H5FileOut();
-    H5FileOut(const char * name);
+    H5FieldOut();
+    H5FieldOut(const char * name);
     
     void addField(const std::string & fieldName,
                       AField * fld);

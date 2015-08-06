@@ -10,7 +10,7 @@
 #include <IVelocityFile.h>
 #include <CudaDbgLog.h>
 #include <cuFemTetrahedron_implement.h>
-#include <H5FileOut.h>
+#include <H5FieldOut.h>
 #include <AField.h>
 
 WorldDbgDraw * CudaDynamicWorld::DbgDrawer = 0;
@@ -24,7 +24,7 @@ CudaDynamicWorld::CudaDynamicWorld()
 	m_numObjects = 0;
     m_enableSaveCache = false;
     m_finishedCaching = false;
-    m_positionFile = new H5FileOut;
+    m_positionFile = new H5FieldOut;
     if(!m_positionFile->create("./position.tmp"))
         std::cout<<"\n error: dynamic world cannot create position cache file!\n";
 }

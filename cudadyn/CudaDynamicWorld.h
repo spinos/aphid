@@ -14,7 +14,7 @@ class BvhTriangleSystem;
 class CudaMassSystem;
 class CudaLinearBvh;
 class IVelocityFile;
-class H5FileOut;
+class H5FieldOut;
 class CudaDynamicWorld
 {
 public:
@@ -67,7 +67,7 @@ private:
     CudaNarrowphase * m_narrowphase;
     SimpleContactSolver * m_contactSolver;
     CudaMassSystem * m_objects[CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS];
-    H5FileOut * m_positionFile;
+    H5FieldOut * m_positionFile;
     unsigned m_numObjects;
     bool m_enableSaveCache;
     bool m_finishedCaching;
