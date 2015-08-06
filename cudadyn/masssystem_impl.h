@@ -12,6 +12,10 @@ void useAnchoredVelocity(float3 * vel,
                 uint * anchor,
                 uint maxInd);
 
+void useAllAnchoredVelocity(float3 * vel, 
+                float3 * anchoredVel,
+                uint maxInd);
+
 void integrate(float3 * pos, 
                 float3 * vel, 
                 float3 * anchoredVel,

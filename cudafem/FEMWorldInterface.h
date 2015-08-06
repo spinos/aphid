@@ -11,6 +11,10 @@ public:
     
     virtual void create(CudaDynamicWorld * world);
     bool useVelocityFile(CudaDynamicWorld * world);
+    static bool HasVelocityFile();
+    static int VelocityFileBegin();
+    static int VelocityFileEnd();
+    static int CurrentFrame();
     
     void updateStiffnessMapEnds(float a, float b);
     void updateStiffnessMapLeft(float x, float y);

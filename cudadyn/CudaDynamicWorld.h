@@ -35,6 +35,10 @@ public:
 	void reset();
     void updateWind();
     
+    bool isToSaveCache() const;
+    void setToSaveCache(bool x);
+    virtual void saveCache();
+    
     const unsigned numObjects() const;
     CudaLinearBvh * bvhObject(unsigned idx) const;
 	CudaMassSystem * object(unsigned idx) const;
@@ -58,6 +62,7 @@ private:
     SimpleContactSolver * m_contactSolver;
     CudaMassSystem * m_objects[CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS];
     unsigned m_numObjects;
+    bool m_enableSaveCache;
 };
 #endif        //  #ifndef CUDADYNAMICWORLD_H
 

@@ -137,6 +137,18 @@ void FEMWorldInterface::updateDensity(float x)
 	FEMTetrahedronSystem::SetNeedMass();
 }
 
+bool FEMWorldInterface::HasVelocityFile()
+{ return CudaDynamicWorld::VelocityCache != 0; }
+
+int FEMWorldInterface::VelocityFileBegin()
+{ return CudaDynamicWorld::VelocityCache->FirstFrame; }
+
+int FEMWorldInterface::VelocityFileEnd()
+{ return CudaDynamicWorld::VelocityCache->LastFrame; }
+
+int FEMWorldInterface::CurrentFrame()
+{ return CudaDynamicWorld::VelocityCache->currentFrame(); }
+
 void FEMWorldInterface::updateStiffnessMapEnds(float a, float b)
 {
     FEMTetrahedronSystem::SplineMap.setStart(a);

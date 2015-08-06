@@ -20,6 +20,7 @@ CudaDynamicWorld::CudaDynamicWorld()
     m_narrowphase = new CudaNarrowphase;
 	m_contactSolver = new SimpleContactSolver;
 	m_numObjects = 0;
+    m_enableSaveCache = false;
 }
 
 CudaDynamicWorld::~CudaDynamicWorld()
@@ -117,7 +118,7 @@ void CudaDynamicWorld::collide()
 
 void CudaDynamicWorld::integrate(float dt)
 { 
-#if 0
+#if 1
 	unsigned i = 0;
 	for(; i < m_numObjects; i++) object(i)->integrate(dt);
 #else
@@ -130,6 +131,7 @@ const unsigned CudaDynamicWorld::numContacts() const
 
 void CudaDynamicWorld::reset()
 {
+    setToSaveCache(false);
     if(m_numObjects < 1) return;
     m_narrowphase->resetToInitial();
     if(VelocityCache) {
@@ -208,6 +210,7 @@ void CudaDynamicWorld::readVelocityCache()
     if(!VelocityCache) return;
     if(VelocityCache->isOutOfRange()) {
         resetMovenentRelativeToAir();
+        VelocityCache->nextFrame();
         return;
     }
 
@@ -235,5 +238,17 @@ void CudaDynamicWorld::updateWind()
     air.reverse();
     air += MovementRelativeToAir;
     MassSystem::WindVec = air;
+}
+
+bool CudaDynamicWorld::isToSaveCache() const
+{ return m_enableSaveCache; }
+
+void CudaDynamicWorld::setToSaveCache(bool x)
+{ m_enableSaveCache = x; }
+
+void CudaDynamicWorld::saveCache()
+{
+    if(!m_enableSaveCache) return;
+    
 }
 //:~

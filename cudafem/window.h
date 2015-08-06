@@ -25,11 +25,16 @@ private:
     void createActions();
     void createMenus();
     
+private slots:
+    void receiveTurnOffCaching();
+    
 private:
     GLWidget *glWidget;
     PhysicsControl * m_physicsControl;
     QMenu * windowMenu;
     QAction * showPhysicsControlAct;
+    QMenu * cachingMenu;
+    QAction * enableCachingAct;
 };
 //! [0]
 

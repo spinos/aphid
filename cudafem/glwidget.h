@@ -27,6 +27,7 @@ private:
     void stopPhysics();
     void startPhysics();
     void togglePhysics();
+    
 private:
     CudaDynamicWorld * m_world;
     FEMWorldInterface * m_interface;
@@ -41,11 +42,13 @@ public slots:
     void receiveStiffnessAttenuateRight(QPointF v);
     void receiveWindSpeed(double x);
     void receiveWindVec(QPointF v);
+    void togglePositionOut();
+    
 private slots:
     void simulate();
 signals:
     void updatePhysics();
-
+    void turnOffCaching();
 };
 //! [3]
 

@@ -13,6 +13,17 @@ __global__ void computeMass_kernel(float * dst,
 	if(anchored[ind] == 0) dst[ind] = m0 * scale;
 }
 
+__global__ void useAllAnchoredVelocity_kernel(float3 * vel,
+                                float3 * anchoredVel,
+								uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+    float3 va = anchoredVel[ind];
+    vel[ind] = va;
+}
+
 __global__ void useAnchoredVelocity_kernel(float3 * vel,
                                 float3 * anchoredVel,
 								uint * anchored,
@@ -97,6 +108,19 @@ void useAnchoredVelocity(float3 * vel,
     useAnchoredVelocity_kernel<<< grid, block >>>(vel,
         anchoredVel,
         anchored,
+        maxInd);
+}
+
+void useAllAnchoredVelocity(float3 * vel, 
+                float3 * anchoredVel,
+                uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    useAllAnchoredVelocity_kernel<<< grid, block >>>(vel,
+        anchoredVel,
         maxInd);
 }
 

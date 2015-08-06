@@ -57,6 +57,19 @@ void GLWidget::clientDraw()
 	sst<<"n contacts: "<<m_world->numContacts();
     hudText(sst.str(), 2);
     
+    if(m_interface->HasVelocityFile()) {
+        sst.str("");
+        sst<<"cache range: ("<<m_interface->VelocityFileBegin()
+        <<","<<m_interface->VelocityFileEnd()<<")";
+        hudText(sst.str(), 3);
+        sst.str("");
+        sst<<"current frame: "<<m_interface->CurrentFrame();
+        hudText(sst.str(), 4);
+        if(m_world->isToSaveCache()) {
+            hudText("cacheing frames", 5);
+        }
+    }
+    
 #if DRGDRW
     if(m_isPhysicsRunning) m_interface->draw(m_world, getDrawer());
 #else
@@ -129,6 +142,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     switch (event->key()) {
         case Qt::Key_R:
             m_world->reset();
+            emit turnOffCaching();
             break;
         case Qt::Key_Space:
             togglePhysics();
@@ -181,5 +195,11 @@ void GLWidget::receiveWindVec(QPointF v)
 { 
     Vector3F cat = Vector3F::FromPolarXYZ(v.x(), v.y());
     m_interface->updateWindVec(cat); 
+}
+
+void GLWidget::togglePositionOut()
+{
+    if(m_world->isToSaveCache()) m_world->setToSaveCache(false);
+    else m_world->setToSaveCache(true);
 }
 //:~

@@ -33,6 +33,9 @@ Window::Window()
     connect(m_physicsControl, SIGNAL(windVecChanged(QPointF)), 
             glWidget, SLOT(receiveWindVec(QPointF)));
     
+    connect(glWidget, SIGNAL(turnOffCaching()), 
+            this, SLOT(receiveTurnOffCaching()));
+    
     statusBar()->showMessage(tr("Ready"));
 }
 //! [1]
@@ -49,6 +52,9 @@ void Window::createMenus()
 {
     windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showPhysicsControlAct);
+    
+    cachingMenu = menuBar()->addMenu(tr("&Caching"));
+    cachingMenu->addAction(enableCachingAct);
 }
 
 void Window::createActions()
@@ -56,4 +62,13 @@ void Window::createActions()
     showPhysicsControlAct = new QAction(tr("&Physics Control"), this);
 	showPhysicsControlAct->setStatusTip(tr("Show physics settings"));
     connect(showPhysicsControlAct, SIGNAL(triggered()), m_physicsControl, SLOT(show()));
+    
+    enableCachingAct = new QAction(tr("&Position"), this);
+    enableCachingAct->setCheckable(true);
+	enableCachingAct->setStatusTip(tr("Enable/Disable writing position cache"));
+    connect(enableCachingAct, SIGNAL(triggered()), glWidget, SLOT(togglePositionOut()));
 }
+
+void Window::receiveTurnOffCaching()
+{ enableCachingAct->setChecked(false); }
+//:~

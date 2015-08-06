@@ -89,6 +89,7 @@ set (CUSOURCES "../scan/scan.cu"
 "../sahbvh/BvhHash.cu"
 "../sahbvh/BvhCost.cu"
 "../sahbvh/BvhLazy.cu"
+../cudadyn/cuMassSystem.cu
 "AdeniumRender.cu")
 
 if (WIN32)

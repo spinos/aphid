@@ -140,11 +140,11 @@ void LarixInterface::DrawField(AdaptiveField * field,
         
         clipp.projectPoint(l, pop);
         if((l-pop).dot(nor) < 0.f) {
-           // if(c->value()->visited ) {
+            //if(c->value()->visited ) {
 
             drawer->setColor(col->x, col->y, col->z);
             drawer->unitCubeAt(l, h);
-           // }
+            // }
         }
 		
 	    c->next();

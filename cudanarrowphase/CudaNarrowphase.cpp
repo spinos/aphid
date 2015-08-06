@@ -412,11 +412,11 @@ void CudaNarrowphase::integrate(float dt)
 	void * vel = m_objectBuf.m_vel->bufferOnDevice();
     void * vela = m_objectBuf.m_anchoredVel->bufferOnDevice();
 	void * anchors = m_objectBuf.m_anchor->bufferOnDevice();
-	masssystem::integrateSimple((float3 *)pos, 
+	masssystem::integrate((float3 *)pos, 
                            (float3 *)vel, 
-                           //(float3 *)vela, 
-						   //(uint *)anchors,
-                           dt, 
+                           (float3 *)vela, 
+						   (uint *)anchors,
+                           dt,
                            numPoints());
     CudaBase::CheckCudaError("narrowphase integrate");
 }

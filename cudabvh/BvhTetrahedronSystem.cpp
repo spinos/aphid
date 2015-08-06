@@ -15,6 +15,7 @@
 #include "TetrahedronSystemInterface.h"
 #include <CudaDbgLog.h>
 #include <masssystem_impl.h>
+#include <CudaBase.h>
 
 // CudaDbgLog tetsyslg("tetsys.txt");
 
@@ -76,10 +77,19 @@ void BvhTetrahedronSystem::formTetrahedronAabbs()
     void * idx = deviceTretradhedronIndices();
     void * dst = leafAabbs();
     tetrasys::formTetrahedronAabbs((Aabb *)dst, (float3 *)cvs, (float3 *)vsrc, 1.f/60.f, (uint4 *)idx, numTetrahedrons());
+    CudaBase::CheckCudaError("tetrahedron system form aabb");
 }
 
-void BvhTetrahedronSystem::integrate(float timeStep)
-{ tetrahedronSystemIntegrate((float3 *)deviceX(), (float3 *)deviceV(), timeStep, numPoints()); }
+void BvhTetrahedronSystem::integrate(float dt)
+{ 
+    masssystem::integrate((float3 *)deviceX(), 
+                           (float3 *)deviceV(), 
+                           (float3 *)deviceVa(), 
+						   (uint *)deviceAnchor(),
+                           dt,
+                           numPoints());
+    CudaBase::CheckCudaError("tetrahedron system integrate");
+}
 
 void * BvhTetrahedronSystem::vicinity()
 { return m_vicinity->bufferOnDevice(); }
