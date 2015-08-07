@@ -16,6 +16,8 @@ public:
                       AField * fld);
     
     unsigned numFields() const;
+    
+    bool readFrame();
 protected:
     const std::map<std::string, AField *> * fields() const;
 private:

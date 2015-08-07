@@ -15,6 +15,7 @@ public:
 	virtual char load(AField * fld);
 
     void saveFrame(const std::string & frame, AField * fld);
+    void loadFrame(const std::string & frame, AField * fld);
 protected:
     void saveAChannel(const std::string& name, TypedBuffer * chan);
 	void loadAChannel(const std::string& name, AField * fld);

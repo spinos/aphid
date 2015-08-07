@@ -1,5 +1,5 @@
 #include "APlayback.h"
-
+#include <boost/format.hpp>
 APlayback::APlayback() { m_numFramesPlayed = 0; }
 APlayback::~APlayback() {}
 
@@ -61,4 +61,7 @@ void APlayback::next()
 
 const bool APlayback::end() const
 { return (isFrameEnd() && isSampleEnd()); }
+
+std::string APlayback::currentFrameStr() const
+{ return boost::str(boost::format("%1%") % m_currentFrame); }
 //:~

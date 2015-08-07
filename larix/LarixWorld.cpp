@@ -99,6 +99,7 @@ int LarixWorld::currentCacheFrame() const
 void LarixWorld::progressFrame()
 { 
     if(m_sourceFile->isOutOfRange()) return;
+    m_sourceFile->readFrame();
     m_sourceFile->nextFrame(); 
 }
 //:~

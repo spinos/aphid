@@ -2,6 +2,7 @@
 #define APLAYBACK_H
 
 #include "AFrameRange.h"
+#include <string>
 
 class APlayback : public AFrameRange {
 public:
@@ -28,7 +29,7 @@ public:
     const bool end() const;
     
 protected:
-
+    std::string currentFrameStr() const;
 private:
     int m_currentFrame;
     int m_currentSample;

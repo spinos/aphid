@@ -171,4 +171,14 @@ void HField::saveAChannelFrame(const std::string & frame,
     gbake.close();
     grp.close();
 }
+
+void HField::loadFrame(const std::string & frame, AField * fld)
+{
+    std::vector<std::string > names;
+    fld->getChannelNames(names);
+    
+    std::vector<std::string >::const_iterator it = names.begin();
+	//for(; it!= names.end();++it) 
+   //     loadAChannelFrame(frame, *it, fld->namedChannel(*it));
+}
 //:~

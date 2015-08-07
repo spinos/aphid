@@ -60,4 +60,19 @@ const std::map<std::string, AField *> * H5FieldIn::fields() const
 
 unsigned H5FieldIn::numFields() const
 { return m_fields.size(); }
+
+bool H5FieldIn::readFrame()
+{
+    useDocument();
+    const std::string sframe = currentFrameStr();
+    
+    std::map<std::string, AField *>::const_iterator it = m_fields.begin();
+    for(;it!=m_fields.end(); ++it) {
+        HField grp(it->first);
+        grp.loadFrame(sframe, it->second);
+        grp.close();
+    }
+    
+    return true;
+}
 //:~
