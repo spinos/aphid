@@ -292,6 +292,7 @@ void CudaDynamicWorld::beginCache()
     for(;it!=m_activeObjectInds.end();++it) {
         AField * f = new AField;
         f->addVec3Channel("P", m_objects[*it]->numPoints());
+        f->namedChannel("P")->copyFrom(m_objects[*it]->hostX(), m_objects[*it]->numPoints() * 12);
         m_positionFile->addField(objName(*it), f);
     }
 }

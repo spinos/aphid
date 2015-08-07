@@ -3,6 +3,7 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
+class AWorldThread;
 class LarixWorld;
 class GLWidget : public Base3DView
 {
@@ -23,9 +24,10 @@ protected:
     
 private:
 	LarixWorld * m_world;
-
+    AWorldThread * m_thread;
 private slots:
     
-
+signals:
+    void updatePhysics();
 };
 #endif

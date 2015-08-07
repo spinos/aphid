@@ -11,16 +11,19 @@ public:
 	
 	virtual FieldType fieldType() const;
     
-    virtual void create(KdIntersection * tree, AField * source,
+    virtual void create(KdIntersection * tree,
 						ATetrahedronMesh * mesh,
 						int maxLevel = 7);
+    
+    void addFloatChannel(const std::string & name);
+	void addVec3Channel(const std::string & name);
+	
+    void computeChannelValue(const std::string & channelName,
+                             TypedBuffer * source,
+                             BaseSampler * sampler);
 protected:
     
 private:
-	void setCellValues(KdIntersection * tree, 
-					AField * source,
-					ATetrahedronMesh * mesh);
-    
     void createSamples(KdIntersection * tree,
                        ATetrahedronMesh * mesh);
     
@@ -28,16 +31,16 @@ private:
                         Geometry::ClosestToPointTestResult * ctx,
                         ATetrahedronMesh * mesh);
     
-    void sampleCellValues(AField * source, BaseSampler * sampler);
-	
 	void findNeighbours();
     
-    void sampleNamedChannel(const std::string & channelName,
-                            AField * source, BaseSampler * sampler);
+    void sampleAChannel(TypedBuffer * chan,
+                                   TypedBuffer * source,
+                                   BaseSampler * sampler);
 	
 	template<typename T, typename Ts>
     void sampleChannelValue(TypedBuffer * chan,
-                            AField * source, BaseSampler * sampler)
+                            TypedBuffer * source, 
+                            BaseSampler * sampler)
     {
         T * dst = chan->typedData<T>();
         

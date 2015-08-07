@@ -18,7 +18,7 @@ AField::~AField()
 }
 
 AField::FieldType AField::fieldType() const
-{ return FldDefault; }
+{ return FldBase; }
 
 void AField::addFloatChannel(const std::string & name, unsigned n)
 {
@@ -60,7 +60,10 @@ TypedBuffer * AField::currentChannel() const
 { return m_currentChannel; }
 
 TypedBuffer * AField::namedChannel(const std::string & name)
-{ return m_channels[name]; }
+{ 
+    if(m_channels.find(name) == m_channels.end()) return 0;
+    return m_channels[name]; 
+}
 
 unsigned AField::numChannels() const
 { return m_channels.size(); }

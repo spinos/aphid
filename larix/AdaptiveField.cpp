@@ -26,25 +26,30 @@ AdaptiveField::~AdaptiveField()
 AField::FieldType AdaptiveField::fieldType() const
 { return FldAdaptive; }
 
-void AdaptiveField::create(KdIntersection * tree, AField * source,
+void AdaptiveField::addFloatChannel(const std::string & name)
+{ AField::addFloatChannel(name, numCells()); }
+
+void AdaptiveField::addVec3Channel(const std::string & name)
+{ AField::addVec3Channel(name, numCells()); }
+
+void AdaptiveField::create(KdIntersection * tree,
 					ATetrahedronMesh * mesh,
 					int maxLevel)
 {
 	AdaptiveGrid::create(tree, maxLevel);	
-	setCellValues(tree, source, mesh);
-}
-
-void AdaptiveField::setCellValues(KdIntersection * tree, 
-					AField * source,
-					ATetrahedronMesh * mesh)
-{
     std::cout<<"\n creating samples... ";
     createSamples(tree, mesh);
     std::cout<<"\n n samples "<<m_sampleParams->size();
+    findNeighbours();
+    // checkNeighbours();
+}
+
+void AdaptiveField::computeChannelValue(const std::string & channelName,
+                         TypedBuffer * source,
+                         BaseSampler * sampler)
+{
     std::cout<<"\n sampling... ";
-    sampleCellValues(source, mesh->sampler());
-	findNeighbours();
-	// checkNeighbours();
+    sampleAChannel(namedChannel(channelName), source, sampler);
     std::cout<<"\n interpolating... ";
     int i=0;
     for(;i<24;i++) interpolate();
@@ -99,36 +104,10 @@ void AdaptiveField::setSampleParam(unsigned code,
     m_sampleParams->insert(code, v);
 }
 
-void AdaptiveField::sampleCellValues(AField * source, BaseSampler * sampler)
+void AdaptiveField::sampleAChannel(TypedBuffer * chan,
+                                   TypedBuffer * source,
+                                   BaseSampler * sampler)
 {
-    const unsigned n = numCells();
-	std::vector<std::string > names;
-	source->getChannelNames(names);
-	std::vector<std::string >::const_iterator it = names.begin();
-	for(;it!=names.end();++it) {
-		source->useChannel(*it);
-		if(source->currentChannel()->valueType() == TypedBuffer::TFlt)
-			addFloatChannel(*it, n);
-		else if(source->currentChannel()->valueType() == TypedBuffer::TVec3)
-			addVec3Channel(*it, n);
-        setChannelZero(*it);
-	}
-    if(numChannels() < 1) {
-        std::cout<<"\n field has no channels";
-        return;
-    }
-    
-    it = names.begin();
-	for(;it!=names.end();++it)
-        sampleNamedChannel(*it, source, sampler);
-}
-
-void AdaptiveField::sampleNamedChannel(const std::string & channelName,
-                                       AField * source, BaseSampler * sampler)
-{
-    source->useChannel(channelName);
-    TypedBuffer * chan = namedChannel(channelName);
-    
     if(chan->valueType() == TypedBuffer::TFlt)
         sampleChannelValue<float, TetrahedronSampler>(chan, source, sampler);
     else if(chan->valueType() == TypedBuffer::TVec3)

@@ -132,4 +132,7 @@ void AGenericMesh::moveIntoSpace(const Matrix44F & m)
     unsigned i=0;
 	for(;i<n;i++) p[i] = m.transform(p[i]);
 }
+
+BaseBuffer * AGenericMesh::pointsBuf() const
+{ return m_points; }
 //:~

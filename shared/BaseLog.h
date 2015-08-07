@@ -17,7 +17,7 @@
 #include <vector>
 #include <map>
 #include <boost/format.hpp>
-
+#include "BaseBuffer.h"
 class BaseLog {
 public:
 	enum Frequency {
@@ -47,6 +47,49 @@ public:
 	{
 		return boost::str(boost::format("%1%_%2%\n") % a % name);
 	}
+    
+    void writeFlt(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+    
+    void writeUInt(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+    void writeInt(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+    void writeVec3(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+    void writeMat33(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+    void writeHash(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+    void writeMortonHash(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+    void writeInt2(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+    void writeAabb(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+	
+    void writeStruct(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                const std::vector<std::pair<int, int> > & desc,
+	                unsigned size,
+	                Frequency freq = FOnce);
+	
 protected:
 	template <typename T>
 	void _write(const T & a) {
@@ -54,6 +97,24 @@ protected:
 	}
 	bool checkFrequency(Frequency freq, const std::string & notation,
 						char ignorePath = 0);
+    
+    template<typename T>
+    void writeSingle(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce)
+	{
+	    if(!checkFrequency(freq, notation)) return;
+        T * m = (T *)buf->data();
+        newLine();
+        write(notation);
+        writeArraySize(n);
+        unsigned i = 0;
+        for(; i < n; i++) {
+            writeArrayIndex(i);
+            _write<T>(m[i]);
+            newLine();
+        }
+	}
 private:
     void writeByTypeAndLoc(int type, int loc, char * data);
 	std::string fullPathName(const std::string & name);

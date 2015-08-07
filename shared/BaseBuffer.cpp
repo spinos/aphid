@@ -7,6 +7,7 @@
  *
  */
 #include "BaseBuffer.h"
+#include <Vector3F.h>
 #include <iostream>
 BaseBuffer::BaseBuffer() : m_bufferSize(0), m_native(0)
 {}
@@ -80,4 +81,24 @@ unsigned TypedBuffer::numElements() const
 	}
 	return n;
 }
+
+void TypedBuffer::operator-=( const BaseBuffer * other )
+{
+    switch (valueType()) {
+		case TFlt:
+            minusFlt(other);
+			break;
+		case TVec3:
+            minusVec3(other);
+			break;
+		default:
+			break;
+	}
+}
+
+void TypedBuffer::minusFlt(const BaseBuffer * other)
+{ minus<float>(other, numElements()); }
+
+void TypedBuffer::minusVec3(const BaseBuffer * other)
+{ minus<Vector3F>(other, numElements()); }
 //:~

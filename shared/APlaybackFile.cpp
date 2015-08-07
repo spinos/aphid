@@ -24,7 +24,7 @@ bool APlaybackFile::readFrameRange()
 {
     useDocument();
     if(!entityExists("/.fr")) {
-        std::cout<<" playback file has no frame range\n";
+        std::cout<<"\n error: playback file has no frame range\n";
         AFrameRange::reset();
         return false;
     }
@@ -32,6 +32,10 @@ bool APlaybackFile::readFrameRange()
     HFrameRange fr("/.fr");
     fr.load(this);
     fr.close();
+    
+    std::cout<<"\n playback range: ("<<this->FirstFrame
+        <<","<<this->LastFrame
+        <<")";
     
     return true;
 }

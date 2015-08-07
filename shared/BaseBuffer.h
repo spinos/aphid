@@ -23,6 +23,15 @@ public:
 	char * data() const;
     void copyFrom(const void * src, unsigned size);
 	void copyFrom(const void * src, unsigned size, unsigned loc);
+    
+    template<typename T>
+    void minus(const BaseBuffer * other, unsigned n)
+    {
+        T * dst = (T *)data();
+        T * src = (T *)other->data();
+        unsigned i = 0;
+        for(;i<n;i++) dst[i] -= src[i];
+    }
 protected:
 
 private:
@@ -54,6 +63,16 @@ public:
     { return (T *)data(); }
 	
 	unsigned numElements() const;
+	
+    template<typename T, typename Ts> 
+	T sample(Ts * s) const 
+	{ return s->evaluate(typedData<T>()); }
+    
+    void operator-=( const BaseBuffer * other );
+
+protected:
+    void minusFlt(const BaseBuffer * other);
+    void minusVec3(const BaseBuffer * other);
 private:
 	ValueType m_type;
 };

@@ -10,9 +10,12 @@ public:
 	virtual bool doRead(const std::string & fileName);
     
     AField * fieldByName(const std::string & fieldName);
+    AField * fieldByIndex(unsigned idx);
 
     virtual void addField(const std::string & fieldName,
                       AField * fld);
+    
+    unsigned numFields() const;
 protected:
     const std::map<std::string, AField *> * fields() const;
 private:

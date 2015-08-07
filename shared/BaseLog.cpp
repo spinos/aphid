@@ -8,6 +8,7 @@
  */
 
 #include "BaseLog.h"
+#include "AllMath.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace boost::posix_time;
@@ -119,4 +120,169 @@ std::string BaseLog::fullPathName(const std::string & name)
 	}
 	sst<<name;
 	return sst.str();
+}
+
+void BaseLog::writeFlt(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+	if(!checkFrequency(freq, notation)) return;
+	float * m = (float *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        writeArrayIndex(i);
+        _write<float>(m[i]);
+		newLine();
+    }
+}
+
+void BaseLog::writeInt(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+    writeSingle<int>(buf, n, notation, freq);
+}
+
+void BaseLog::writeUInt(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+	writeSingle<unsigned int>(buf, n, notation, freq);
+}
+
+void BaseLog::writeVec3(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+	if(!checkFrequency(freq, notation)) return;
+	Vector3F * m = (Vector3F *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        writeArrayIndex(i);
+        write(m[i].str());
+		newLine();
+    }
+}
+
+void BaseLog::writeMat33(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+	if(!checkFrequency(freq, notation)) return;
+	
+    Matrix33F * m = (Matrix33F *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        writeArrayIndex(i);
+        write(m[i].str());
+    }
+}
+
+void BaseLog::writeHash(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+	if(!checkFrequency(freq, notation)) return;
+	
+    unsigned * m = (unsigned *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        writeArrayIndex(i);
+        write(boost::str(boost::format("(%1%,%2%)\n") % m[i*2] %  m[i*2+1]));
+    }
+}
+
+const char *byte_to_binary(unsigned x)
+{
+    static char b[33];
+    b[32] = '\0';
+
+    for (int z = 0; z < 32; z++) {
+        b[31-z] = ((x>>z) & 0x1) ? '1' : '0';
+    }
+
+    return b;
+}
+
+void BaseLog::writeMortonHash(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    unsigned * m = (unsigned *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        writeArrayIndex(i);
+        write(boost::str(boost::format("(%1%,%2%)\n") % byte_to_binary(m[i*2]) %  m[i*2+1]));
+    }
+}
+
+void BaseLog::writeInt2(BaseBuffer * buf, unsigned n, 
+                const std::string & notation,
+                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    int * m = (int *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        writeArrayIndex(i);
+        write(boost::str(boost::format("(%1%,%2%)\n") % m[i*2] % m[i*2+1]));
+    }
+}
+
+void BaseLog::writeAabb(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    float * m = (float *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        writeArrayIndex(i);
+        write(boost::str(boost::format("((%1%,%2%,%3%),(%4%,%5%,%6%))\n") % m[i*6] % m[i*6+1] % m[i*6+2] 
+            % m[i*6+3] % m[i*6+4] % m[i*6+5]));
+    }
+}
+
+void BaseLog::writeStruct(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                const std::vector<std::pair<int, int> > & desc,
+	                unsigned size,
+	                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    char * m = (char *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        writeArrayIndex(i);
+        writeStruct1(&m[i*size], desc);
+    }
 }

@@ -15,7 +15,7 @@
 class AField {
 public:	
 	enum FieldType {
-		FldDefault = 0,
+		FldBase = 0,
 		FldAdaptive = 1
 	};
 	

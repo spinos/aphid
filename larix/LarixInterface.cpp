@@ -17,15 +17,18 @@
 #include <KdIntersection.h>
 #include "AdaptiveField.h"
 #include <Plane.h>
+#include <BaseLog.h>
+
+BaseLog lxlg("log.txt");
 
 LarixInterface::LarixInterface() {}
 LarixInterface::~LarixInterface() {}
 
 bool LarixInterface::CreateWorld(LarixWorld * world)
-{
+{  
 	GeometryArray geos;
 	if(!ReadTetrahedronData(&geos)) return false;
-	
+ 
 	ATetrahedronMesh * tetra = (ATetrahedronMesh *)geos.geometry(0);
     
     KdIntersection tree;
@@ -36,27 +39,40 @@ bool LarixInterface::CreateWorld(LarixWorld * world)
     
 	world->setTetrahedronMesh(tetra);
 
-// a field of color
-	const unsigned n = tetra->numPoints();
-	AField dv;
-	dv.addVec3Channel("foo", n);
-	dv.useChannel("foo");
-	Vector3F * vdv = dv.vec3Value();
-	Vector3F * p = tetra->points();
-	const BoundingBox bigBox = tree.getBBox();
-	const float boxdx = bigBox.distance(0);
-	const float boxdy = bigBox.distance(1);
-	const float boxdz = bigBox.distance(2);
-	unsigned i = 0;
-	for(;i<n;i++) {
-		vdv[i].x = (p[i].x - bigBox.getMin().x) / boxdx;
-		vdv[i].y = (p[i].y - bigBox.getMin().y) / boxdy;
-		vdv[i].z = (p[i].z - bigBox.getMin().z) / boxdz;
-	}
-	
     AdaptiveField * g = new AdaptiveField(tree.getBBox());
-    g->create(&tree, &dv, tetra);
+    g->create(&tree, tetra);
+    g->addVec3Channel("dP");
+    
+    if(world->hasSourceP()) {
+        TypedBuffer * sourceP = world->sourceP();
+        *sourceP -= tetra->pointsBuf();
+        g->computeChannelValue("dP", sourceP, tetra->sampler());
+        
+        lxlg.writeVec3(sourceP, sourceP->numElements(), "P");
+    }
+    else {
+        const unsigned n = tetra->numPoints();
+        TypedBuffer dv;
+        dv.create(TypedBuffer::TVec3, n*12);
+    
+        Vector3F * vdv = dv.typedData<Vector3F>();
+        Vector3F * p = tetra->points();
+        const BoundingBox bigBox = tree.getBBox();
+        const float boxdx = bigBox.distance(0);
+        const float boxdy = bigBox.distance(1);
+        const float boxdz = bigBox.distance(2);
+        unsigned i = 0;
+        for(;i<n;i++) {
+            vdv[i].x = (p[i].x - bigBox.getMin().x) / boxdx;
+            vdv[i].y = (p[i].y - bigBox.getMin().y) / boxdy;
+            vdv[i].z = (p[i].z - bigBox.getMin().z) / boxdz;
+        }
+    
+        g->computeChannelValue("dP", &dv, tetra->sampler());
+    }
 	world->setField(g);
+        
+    world->beginCache();
 	return true;
 }
 
@@ -106,7 +122,7 @@ void LarixInterface::DrawWorld(LarixWorld * world, KdTreeDrawer * drawer)
 	
 	drawer->setColor(.3f, .2f, .1f);
 	//drawer->cartesianGrid(world->field());
-    DrawField(world->field(), "foo", drawer);
+    DrawField(world->field(), "dP", drawer);
 }
 
 void LarixInterface::DrawField(AdaptiveField * field, 

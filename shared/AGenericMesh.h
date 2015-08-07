@@ -34,6 +34,8 @@ public:
 	void getAnchorInd(std::map<unsigned, unsigned> & dst) const;
     const Vector3F averageP() const;
     void moveIntoSpace(const Matrix44F & m);
+    
+    BaseBuffer * pointsBuf() const;
 protected:
 	void createBuffer(unsigned np, unsigned ni);
 	void setNumPoints(unsigned n);
