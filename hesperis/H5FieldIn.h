@@ -6,6 +6,8 @@ class H5FieldIn : public APlaybackFile {
 public:
     H5FieldIn();
     H5FieldIn(const char * name);
+	
+	virtual bool doRead(const std::string & fileName);
     
     AField * fieldByName(const std::string & fieldName);
 

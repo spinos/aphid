@@ -6,6 +6,14 @@
 H5FieldIn::H5FieldIn() : APlaybackFile() {}
 H5FieldIn::H5FieldIn(const char * name) : APlaybackFile(name) {}
 
+bool H5FieldIn::doRead(const std::string & fileName)
+{
+	if(!HFile::doRead(fileName)) return false;
+	
+// todo read contents here
+	return true;
+}
+
 AField * H5FieldIn::fieldByName(const std::string & fieldName)
 { return m_fields[fieldName]; }
 

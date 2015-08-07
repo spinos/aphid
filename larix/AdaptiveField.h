@@ -8,6 +8,8 @@ public:
 	AdaptiveField(float * originSpan);
     AdaptiveField(const BoundingBox & bound);
     virtual ~AdaptiveField();
+	
+	virtual FieldType fieldType() const;
     
     virtual void create(KdIntersection * tree, AField * source,
 						ATetrahedronMesh * mesh,

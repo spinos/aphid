@@ -285,6 +285,9 @@ void CudaDynamicWorld::beginCache()
     std::cout<<"\n dynamic world begin cache frames ("<<VelocityCache->FirstFrame
     <<","<<VelocityCache->LastFrame<<")";
     m_positionFile->writeFrameRange(VelocityCache);
+	
+// todo m_positionFile->addFlt3Attribute(".translate");
+	
     std::vector<unsigned >::const_iterator it = m_activeObjectInds.begin();
     for(;it!=m_activeObjectInds.end();++it) {
         AField * f = new AField;

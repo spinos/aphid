@@ -11,12 +11,16 @@
 #include <ATetrahedronMesh.h>
 #include <APointCloud.h>
 #include <AdaptiveField.h>
+#include <H5FieldIn.h>
 
 LarixWorld::LarixWorld() 
 { 
     m_cloud = 0;
     m_mesh = 0;
 	m_field = 0;
+	m_sourceFile = new H5FieldIn;
+	if(!m_sourceFile->open("./position.tmp"))
+		std::cout<<"\n error: larix world cannot open position cache file!\n";
 }
 
 LarixWorld::~LarixWorld() 

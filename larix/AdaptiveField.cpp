@@ -23,6 +23,9 @@ AdaptiveField::~AdaptiveField()
 	delete m_neighbours;
 }
 
+AField::FieldType AdaptiveField::fieldType() const
+{ return FldAdaptive; }
+
 void AdaptiveField::create(KdIntersection * tree, AField * source,
 					ATetrahedronMesh * mesh,
 					int maxLevel)

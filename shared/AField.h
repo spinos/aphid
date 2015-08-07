@@ -14,8 +14,15 @@
 #include "BaseSampler.h"
 class AField {
 public:	
+	enum FieldType {
+		FldDefault = 0,
+		FldAdaptive = 1
+	};
+	
 	AField();
 	virtual ~AField();
+	
+	virtual FieldType fieldType() const;
 	
 	void addFloatChannel(const std::string & name, unsigned n);
 	void addVec3Channel(const std::string & name, unsigned n);

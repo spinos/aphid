@@ -10,6 +10,7 @@
 class ATetrahedronMesh;
 class APointCloud;
 class AdaptiveField;
+class H5FieldIn;
 
 class LarixWorld {
 public:
@@ -31,4 +32,5 @@ private:
     ATetrahedronMesh * m_mesh;
 	APointCloud * m_cloud;
 	AdaptiveField * m_field;
+	H5FieldIn * m_sourceFile;
 };

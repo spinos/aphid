@@ -17,6 +17,9 @@ AField::~AField()
 	m_channels.clear();
 }
 
+AField::FieldType AField::fieldType() const
+{ return FldDefault; }
+
 void AField::addFloatChannel(const std::string & name, unsigned n)
 {
 	TypedBuffer * b = new TypedBuffer;
