@@ -21,6 +21,8 @@ protected:
 	void loadAChannel(const std::string& name, AField * fld);
     void saveAChannelFrame(const std::string & frame,
                            const std::string& channelName, TypedBuffer * chan);
+	bool loadAChannelFrame(const std::string & frame,
+                           const std::string& channelName, TypedBuffer * chan);
 private:
 	
 };

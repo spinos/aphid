@@ -41,6 +41,8 @@ void AWorldThread::run()
             qDebug()<<"abort physics b4";
             return;
         }
+		
+		m_world->prePhysics();
         
         for(int i=0; i < NumSubsteps; i++) {
            m_world->stepPhysics(TimeStep);
@@ -50,6 +52,8 @@ void AWorldThread::run()
             qDebug()<<"abort physics aft";
             return;
         }
+		
+		m_world->postPhysics();
         
         m_world->progressFrame();
         

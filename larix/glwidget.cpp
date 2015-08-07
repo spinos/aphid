@@ -62,7 +62,29 @@ void GLWidget::clientMouseInput(QMouseEvent * event)
 	setUpdatesEnabled(true);
 }
 
-void GLWidget::keyPressEvent(QKeyEvent *e)
+void GLWidget::keyPressEvent(QKeyEvent * event)
 {
-	Base3DView::keyPressEvent(e);
+	switch (event->key()) {
+        case Qt::Key_S:
+			saveField();
+            break;
+        default:
+			break;
+    }
+	
+	Base3DView::keyPressEvent(event);
+}
+
+void GLWidget::saveField()
+{
+	QString selectedFilter;
+	QString fileName = QFileDialog::getSaveFileName(this,
+							tr("Save .fld file as output dP field"),
+							tr("info"),
+							tr("All Files (*);;Field Files (*.fld)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName == "") return;
+    if(!m_world->setFileOut(fileName.toUtf8().data()))
+        qDebug()<<" failed to save field file: "<<fileName;
 }

@@ -1,3 +1,4 @@
+#pragma once
 #include "AdaptiveGrid.h"
 #include <AField.h>
 #include <Geometry.h>

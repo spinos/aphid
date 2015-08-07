@@ -23,6 +23,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../hesperis/HesperisFile.cpp
 ../hesperis/HesperisInterface.cpp
 ../hesperis/H5FieldIn.cpp
+../hesperis/H5FieldOut.cpp
 glwidget.cpp
 window.cpp
 main.cpp

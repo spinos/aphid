@@ -23,6 +23,8 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
     
 private:
+	void saveField();
+private:
 	LarixWorld * m_world;
     AWorldThread * m_thread;
 private slots:

@@ -1,3 +1,4 @@
+#pragma once
 #include "APlaybackFile.h"
 #include <string>
 #include <map>

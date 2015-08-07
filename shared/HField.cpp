@@ -178,7 +178,32 @@ void HField::loadFrame(const std::string & frame, AField * fld)
     fld->getChannelNames(names);
     
     std::vector<std::string >::const_iterator it = names.begin();
-	//for(; it!= names.end();++it) 
-   //     loadAChannelFrame(frame, *it, fld->namedChannel(*it));
+	for(; it!= names.end();++it) 
+        loadAChannelFrame(frame, *it, fld->namedChannel(*it));
+}
+
+bool HField::loadAChannelFrame(const std::string & frame,
+                           const std::string& channelName, TypedBuffer * chan)
+{
+    HBase grp(childPath(channelName));
+	int ne = chan->numElements();
+    HBase gbake(grp.childPath(".bake"));
+    
+    if(chan->valueType() == TypedBuffer::TFlt) {
+		if(!gbake.hasNamedData(frame.c_str()))
+			return false;
+			
+		gbake.readFloatData(frame.c_str(), ne, chan->typedData<float>());
+	}
+	else if(chan->valueType() == TypedBuffer::TVec3) {
+		if(!gbake.hasNamedData(frame.c_str()))
+			return false;
+			
+		gbake.readVector3Data(frame.c_str(), ne, chan->typedData<Vector3F>());
+	}
+    
+    gbake.close();
+    grp.close();
+	return true;
 }
 //:~

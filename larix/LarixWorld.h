@@ -12,12 +12,16 @@ class ATetrahedronMesh;
 class APointCloud;
 class AdaptiveField;
 class H5FieldIn;
+class H5FieldOut;
 class TypedBuffer;
 
 class LarixWorld : public AWorld {
 public:
 	LarixWorld();
 	virtual ~LarixWorld();
+	
+	// override aworld
+    virtual void progressFrame();
     
     void setTetrahedronMesh(ATetrahedronMesh * m);
     ATetrahedronMesh * tetrahedronMesh() const;
@@ -35,8 +39,8 @@ public:
     int cacheRangeMax() const;
     void beginCache();
     int currentCacheFrame() const;
-// override aworld
-    virtual void progressFrame();
+	
+	bool setFileOut(const std::string & fileName);
 protected:
     bool checkSourceField();
     void readCacheRange();
@@ -46,4 +50,5 @@ private:
 	AdaptiveField * m_field;
 	H5FieldIn * m_sourceFile;
     TypedBuffer * m_sourceP;
+	H5FieldOut * m_outFile;
 };

@@ -12,7 +12,7 @@
 #include <APointCloud.h>
 #include <AdaptiveField.h>
 #include <H5FieldIn.h>
-#include <AFrameRange.h>
+#include <H5FieldOut.h>
 
 LarixWorld::LarixWorld() 
 { 
@@ -25,6 +25,7 @@ LarixWorld::LarixWorld()
 		std::cout<<"\n error: larix world cannot open position cache file!\n";
  
     checkSourceField();
+	m_outFile = new H5FieldOut;
 }
 
 LarixWorld::~LarixWorld() 
@@ -32,6 +33,8 @@ LarixWorld::~LarixWorld()
     if(m_cloud) delete m_cloud; 
     if(m_mesh) delete m_mesh;
 	if(m_field) delete m_field;
+	delete m_sourceFile;
+	delete m_outFile;
 }
 
 void LarixWorld::setTetrahedronMesh(ATetrahedronMesh * m)
@@ -100,6 +103,27 @@ void LarixWorld::progressFrame()
 { 
     if(m_sourceFile->isOutOfRange()) return;
     m_sourceFile->readFrame();
+	m_field->computeChannelValue("dP", m_sourceP, m_mesh->sampler());
+	if(m_outFile->isOpened()) 
+		m_outFile->writeFrame(m_sourceFile->currentFrame());
+	
     m_sourceFile->nextFrame(); 
+}
+
+bool LarixWorld::setFileOut(const std::string & fileName)
+{
+	if(!m_outFile->create(fileName)) {
+		std::cout<<"\n error: larix world cannot create out cache file "
+			<<fileName;
+		return false;
+	}
+ 
+	std::cout<<"\n larix world begin cache frames ("<<m_sourceFile->FirstFrame
+    <<","<<m_sourceFile->LastFrame<<")";
+    
+	m_outFile->writeFrameRange(m_sourceFile);
+	m_outFile->addField("lax", m_field);
+	beginCache();
+	return true;
 }
 //:~
