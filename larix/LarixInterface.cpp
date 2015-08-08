@@ -135,9 +135,8 @@ void LarixInterface::drawWorld(LarixWorld * world, KdTreeDrawer * drawer)
     drawer->tetrahedronMesh(mesh);
 	
 	drawer->setColor(.3f, .2f, .1f);
-	//drawer->cartesianGrid(world->field());
+	// drawGrid(world->field(), drawer);
     
-    //m_cellColors->copyFrom(world->field()->namedChannel("dP")->data());
     drawField(world->field(), "dP", drawer);
 }
 
@@ -145,10 +144,6 @@ void LarixInterface::drawField(AdaptiveField * field,
                           const std::string & channelName,
                           KdTreeDrawer * drawer)
 {
-    //if(!field->useChannel(channelName)) {
-   //     std::cout<<" field has no channel named "<<channelName;
-   //     return;
-   // }
     drawer->setWired(0);
     BoundingBox box;
     field->getBounding(box);
@@ -161,10 +156,9 @@ void LarixInterface::drawField(AdaptiveField * field,
     clipp.getNormal(nor);
     Vector3F pop;
     
-    
     const unsigned n = field->numCells();
-    std::cout<<"begin draw col"<<n;
-    m_cellColors->copyFrom(field->namedChannel("dP")->data());
+    // std::cout<<"begin draw col"<<n;
+    // m_cellColors->copyFrom(field->namedChannel("dP")->data());
     Vector3F * col = (Vector3F *)m_cellColors->data(); //field->vec3Value();
     
     //lxlg.writeVec3(m_cellColors, n, "dP", BaseLog::FAlways);
@@ -176,29 +170,48 @@ void LarixInterface::drawField(AdaptiveField * field,
     Vector3F l;
     float h;
     
+	glBegin(GL_TRIANGLES);
     for(i=0;i<n;i++) {
         l.set(src[i].x, src[i].y, src[i].z);
         h = src[i].w;
         clipp.projectPoint(l, pop);
         if((l-pop).dot(nor) < 0.f) { // behind clipping plane
-            //drawer->setColor(col[i].x, col[i].y, col[i].z);
-            glColor3f(col->x, col->y, col->z);
-            if((i&1023) == 0)std::cout<<" "<<l;
+            drawer->useColor((float *)&col[i]);
+            //if((i&1023) == 0)std::cout<<" "<<l;
             
             drawer->unitCubeAt(l, h);
             
         }
-        if((i&1023) == 0) std::cout<<" "<<i;
-        col++;
+        //if((i&1023) == 0) std::cout<<" "<<i;
     }
+	glEnd();
 
     std::cout<<"end draw col";
+}
+
+void LarixInterface::drawGrid(AdaptiveField * field,
+								KdTreeDrawer * drawer)
+{
+	const unsigned n = field->numCells();
+    unsigned i = 0;
+	
+    Float4 * src = (Float4 *)m_cells->data();
+    Vector3F l;
+    float h;
+    
+	glBegin(GL_LINES);
+    for(i=0;i<n;i++) {
+        l.set(src[i].x, src[i].y, src[i].z);
+        h = src[i].w;
+        
+		drawer->unitBoxAt(l, h);
+    }
+	glEnd();
 }
 
 void LarixInterface::buildCells(AdaptiveField * field)
 {
     const unsigned n = field->numCells();
-    std::cout<<"\n buffer n cells "<<n;
     m_cells->create(n*16);
     m_cellColors->create(n*12);
     

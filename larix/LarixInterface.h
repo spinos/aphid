@@ -27,6 +27,8 @@ private:
     void drawField(AdaptiveField * field, 
                           const std::string & channelName,
                           KdTreeDrawer * drawer);
+	void drawGrid(AdaptiveField * field,
+					KdTreeDrawer * drawer);
     void buildCells(AdaptiveField * fld);
 private:
 // cell center and size

@@ -104,12 +104,15 @@ int LarixWorld::currentCacheFrame() const
 
 void LarixWorld::progressFrame()
 { 
-    if(!m_sourceFile->isOpened()) return;
-    if(m_sourceFile->isOutOfRange()) return;
-    m_sourceFile->readFrame();
-    *m_sourceP -= m_mesh->pointsBuf();
-    m_field->computeChannelValue("dP", m_sourceP, m_mesh->sampler());
-    //m_outColor->copyFrom(m_field->namedChannel("dP")->data());
+    // if(m_sourceFile->isOutOfRange()) return;
+    if(m_sourceFile->isOpened()) {
+		m_sourceFile->readFrame();
+		*m_sourceP -= m_mesh->pointsBuf();
+		m_field->computeChannelValue("dP", m_sourceP, m_mesh->sampler());
+	}
+	
+    m_outColor->copyFrom(m_field->namedChannel("dP")->data());
+	
 	if(m_outFile->isOpened()) 
 		m_outFile->writeFrame(m_sourceFile->currentFrame());
 	
