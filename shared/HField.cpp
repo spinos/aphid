@@ -14,6 +14,9 @@ char HField::verifyType()
     
     if(!hasNamedAttr(".fieldChannelNames"))
         return 0;
+		
+	if(!hasNamedAttr(".fieldType"))
+        return 0;
     
     return 1;
 }
@@ -24,6 +27,12 @@ char HField::save(AField * fld)
 		std::cout<<"\n field has no channel";
 		return 0;
 	}
+	
+	if(!hasNamedAttr(".fieldType"))
+		addIntAttr(".fieldType");
+		
+	int t = fld->fieldType();
+	writeIntAttr(".fieldType", &t);
 	
     std::vector<std::string > names;
     fld->getChannelNames(names);

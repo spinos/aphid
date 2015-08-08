@@ -3,6 +3,8 @@
 #include <string>
 #include <map>
 class AField;
+class AdaptiveField;
+
 class H5FieldIn : public APlaybackFile {
 public:
     H5FieldIn();
@@ -21,6 +23,10 @@ public:
     bool readFrame();
 protected:
     const std::map<std::string, AField *> * fields() const;
+private:
+	AField * createTypedField(const std::string & name);
+	AField * createBaseField(const std::string & name);
+	AdaptiveField * createAdaptiveField(const std::string & name);
 private:
     std::map<std::string, AField *> m_fields;
 };

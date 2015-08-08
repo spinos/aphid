@@ -1,6 +1,6 @@
 #include "H5FieldIn.h"
-#include <AField.h>
-#include <HField.h>
+#include <HAdaptiveField.h>
+#include <AdaptiveField.h>
 #include <boost/format.hpp>
 
 H5FieldIn::H5FieldIn() : APlaybackFile() {}
@@ -22,11 +22,7 @@ bool H5FieldIn::doRead(const std::string & fileName)
     
     std::vector<std::string >::const_iterator it = names.begin();
     for(;it!=names.end();++it) {
-        HField g(*it);
-        AField * f = new AField;
-        g.load(f);
-        g.close();
-        
+        AField * f = createTypedField(*it);
         addField(*it, f);
     }
     
@@ -74,5 +70,36 @@ bool H5FieldIn::readFrame()
     }
     
     return true;
+}
+
+AField * H5FieldIn::createTypedField(const std::string & name)
+{
+	HBase g(name);
+	int t = 0;
+	g.readIntAttr(".fieldType", &t);
+	g.close();
+	
+	if(t==AField::FldAdaptive)
+		return createBaseField(name);
+
+	return createBaseField(name);
+}
+
+AField * H5FieldIn::createBaseField(const std::string & name)
+{
+	AField * f = new AField;
+	HField gb(name);
+	gb.load(f);
+	gb.close();
+	return f;
+}
+
+AdaptiveField * H5FieldIn::createAdaptiveField(const std::string & name)
+{
+	AdaptiveField * f;
+	HAdaptiveField gb(name);
+	gb.load(f);
+	gb.close();
+	return f;
 }
 //:~
