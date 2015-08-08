@@ -12,18 +12,24 @@ class APointCloud;
 class ATetrahedronMesh;
 class LarixWorld;
 class AdaptiveField;
+class BaseBuffer;
 
 class LarixInterface : public HesperisInterface {
 public:
 	LarixInterface();
 	virtual ~LarixInterface();
 	
-	static bool CreateWorld(LarixWorld * world);
-	static void DrawWorld(LarixWorld * world, KdTreeDrawer * drawer);
+	bool createWorld(LarixWorld * world);
+	void drawWorld(LarixWorld * world, KdTreeDrawer * drawer);
 protected:
 	static APointCloud * ConvertTetrahedrons(ATetrahedronMesh * mesh);
 private:
-    static void DrawField(AdaptiveField * field, 
+    void drawField(AdaptiveField * field, 
                           const std::string & channelName,
                           KdTreeDrawer * drawer);
+    void buildCells(AdaptiveField * fld);
+private:
+// cell center and size
+    BaseBuffer * m_cells;
+    BaseBuffer * m_cellColors;
 };

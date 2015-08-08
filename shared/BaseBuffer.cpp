@@ -36,12 +36,15 @@ const unsigned BaseBuffer::bufferSize() const
 char * BaseBuffer::data() const 
 {return m_native; }
 
+void BaseBuffer::copyFrom(const void * src)
+{ memcpy( m_native, src, bufferSize() ); }
+
 void BaseBuffer::copyFrom(const void * src, unsigned size)
-{ memcpy( data(), src, size ); }
+{ memcpy( m_native, src, size ); }
 
 void BaseBuffer::copyFrom(const void * src, unsigned size, unsigned loc)
 { 
-	char * dst = &data()[loc];
+	char * dst = &((char *)m_native)[loc];
 	memcpy( dst, src, size ); 
 }
 

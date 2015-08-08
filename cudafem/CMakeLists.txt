@@ -17,7 +17,8 @@ include_directories ("../shared"
 "../fem"
 "../onebitsort"
 "../sahbvh"
-"../taskQueue")
+"../taskQueue"
+../btree)
 
 set (HEADER_FILES "../shared/Base3DView.h" 
 "../shared/Morton3D.h"

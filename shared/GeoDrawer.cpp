@@ -132,10 +132,16 @@ static const float UnitBoxTriangle[36][3] = {
 
 void GeoDrawer::unitCube() const
 {
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, UnitBoxTriangle);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    //glEnableClientState(GL_VERTEX_ARRAY);
+    //glVertexPointer(3, GL_FLOAT, 0, UnitBoxTriangle);
+    //glDrawArrays(GL_TRIANGLES, 0, 36);
+    //glDisableClientState(GL_VERTEX_ARRAY);
+    //glBegin(GL_TRIANGLES);
+    int i=0;
+    for(;i<36;i++) glVertex3f(UnitBoxTriangle[i][0],
+        UnitBoxTriangle[i][1],
+        UnitBoxTriangle[i][2]);
+    //glEnd();
 }
 
 void GeoDrawer::unitBoxAt(const Vector3F & p, const float & size) const
@@ -157,6 +163,7 @@ void GeoDrawer::unitCubeAt(const Vector3F & p, const float & size) const
 	glScalef(size, size, size);
 	
 	unitCube();
+
 	glPopMatrix();	
 }
 

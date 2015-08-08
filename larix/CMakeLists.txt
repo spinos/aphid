@@ -16,21 +16,15 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../shared/Morton3D.h"
 "window.h"
 "glwidget.h"
-AdaptiveGrid.h
 LarixWorld.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
 ../hesperis/HesperisFile.cpp
 ../hesperis/HesperisInterface.cpp
-../hesperis/H5FieldIn.cpp
-../hesperis/H5FieldOut.cpp
 glwidget.cpp
 window.cpp
 main.cpp
 LarixInterface.cpp
-AdaptiveGrid.cpp
-AdaptiveField.cpp
-HAdaptiveField.cpp
 AWorldThread.cpp
 AWorld.cpp
 LarixWorld.cpp)

@@ -9,25 +9,33 @@
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
+    m_interface = new LarixInterface;
 	m_world = new LarixWorld;
+    m_interface->createWorld(m_world);
     m_thread = new AWorldThread(m_world, this);
-	LarixInterface::CreateWorld(m_world);
 }
 
 GLWidget::~GLWidget()
 {
-	delete m_world;
+	delete m_thread;
+    delete m_world;
+    delete m_interface;
 }
 
 void GLWidget::clientInit()
 {
-	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
-    connect(this, SIGNAL(updatePhysics()), m_thread, SLOT(simulate()));
+	// connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+    //connect(this, SIGNAL(updatePhysics()), m_thread, SLOT(simulate()));
+    //connect(m_thread, SIGNAL(doneStep()), this, SLOT(update()));
+    //connect(this, SIGNAL(isDrawing(bool)), m_thread, SLOT(lockTransfer(bool)));
+    //emit updatePhysics();
 }
 
 void GLWidget::clientDraw()
 {
-	LarixInterface::DrawWorld(m_world, getDrawer());
+    m_world->progressFrame();
+	m_interface->drawWorld(m_world, getDrawer());
+
     if(m_world->hasSourceP()) {
         std::stringstream sst;
         sst<<"cache range: ("<<m_world->cacheRangeMin()
@@ -37,7 +45,8 @@ void GLWidget::clientDraw()
         sst.str("");
         sst<<"current frame: "<<m_world->currentCacheFrame();
         hudText(sst.str(), 2);
-        emit updatePhysics();
+        //emit updatePhysics();
+        
     }
 }
 

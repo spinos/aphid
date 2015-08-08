@@ -36,7 +36,7 @@ void AdaptiveField::create(KdIntersection * tree,
 					ATetrahedronMesh * mesh,
 					int maxLevel)
 {
-	AdaptiveGrid::create(tree, maxLevel);	
+	AdaptiveGrid::create(tree, maxLevel);
     std::cout<<"\n creating samples... ";
     createSamples(tree, mesh);
     std::cout<<"\n n samples "<<m_sampleParams->size();

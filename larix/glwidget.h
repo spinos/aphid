@@ -5,6 +5,7 @@
 #include <Base3DView.h>
 class AWorldThread;
 class LarixWorld;
+class LarixInterface;
 class GLWidget : public Base3DView
 {
     Q_OBJECT
@@ -25,11 +26,13 @@ protected:
 private:
 	void saveField();
 private:
+    LarixInterface * m_interface;
 	LarixWorld * m_world;
     AWorldThread * m_thread;
 private slots:
     
 signals:
     void updatePhysics();
+    void isDrawing(bool x);
 };
 #endif

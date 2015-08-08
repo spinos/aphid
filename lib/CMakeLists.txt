@@ -2,7 +2,9 @@ cmake_minimum_required (VERSION 2.8)
 project (aphid)
 set (CMAKE_BUILD_TYPE RELEASE)
 include_directories(../mallard ../shared ../lapl ../catmullclark ../easymodel ../../ofl/opium ../fit ../powell ../../ofl/shared
-../btree)
+../btree
+../kdtree
+../hesperis)
 IF (WIN32)
 include_directories(D:/usr/boost_1_51_0 D:/usr/openEXR/include/OpenEXR D:/usr/libxml2/include D:/usr/HDF5/include
 D:/usr/boost_1_51_0/boost/tr1/tr1)
@@ -229,5 +231,10 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/BaseSampler.cpp
 ../shared/AField.cpp
 ../shared/CartesianGrid.cpp
-../shared/HField.cpp)
+../shared/HField.cpp
+../hesperis/HAdaptiveField.cpp
+../hesperis/H5FieldIn.cpp
+../hesperis/H5FieldOut.cpp
+../hesperis/AdaptiveGrid.cpp
+../hesperis/AdaptiveField.cpp)
 

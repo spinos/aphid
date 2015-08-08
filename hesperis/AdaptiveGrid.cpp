@@ -2,7 +2,6 @@
 #include <KdIntersection.h>
 #include <GjkIntersection.h>
 #include <BaseBuffer.h>
-#include <bcc_common.h>
 
 unsigned AdaptiveGrid::CellNeighbourInds::InvalidIndex = 1<<30;
 
@@ -47,13 +46,14 @@ void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
         }
     }
     bool needRefine = tagCellsToRefine(tree);
-    while(needRefine && level <= maxLevel) {
-        std::cout<<" n level "<<level<<" cell "<<numCells()<<"\n";
+    while(needRefine && level < maxLevel) {
+        std::cout<<"\n n level "<<level<<" cell "<<numCells();
 		refine(tree);
 		level++;
 		if(level < maxLevel) tagCellsToRefine(tree);
     }
 	m_cellsToRefine->clear();
+    std::cout<<"\n n level "<<level<<" cell "<<numCells();
 }
 
 bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
@@ -105,6 +105,16 @@ void AdaptiveGrid::tagCellsToRefineByNeighbours()
     }
 }
 
+static const float Cell8ChildOffset[8][3] = {
+{-1.f, -1.f, -1.f},
+{-1.f, -1.f, 1.f},
+{-1.f, 1.f, -1.f},
+{-1.f, 1.f, 1.f},
+{1.f, -1.f, -1.f},
+{1.f, -1.f, 1.f},
+{1.f, 1.f, -1.f},
+{1.f, 1.f, 1.f}};
+
 void AdaptiveGrid::refine(KdIntersection * tree)
 {    
 	int level1;
@@ -125,9 +135,9 @@ void AdaptiveGrid::refine(KdIntersection * tree)
 			sample = cellCenter(k);
 			removeCell(k);
 			for(u = 0; u < 8; u++) {
-				subs = sample + Vector3F(hh * OctChildOffset[u][0], 
-				hh * OctChildOffset[u][1], 
-				hh * OctChildOffset[u][2]);
+				subs = sample + Vector3F(hh * Cell8ChildOffset[u][0], 
+				hh * Cell8ChildOffset[u][1], 
+				hh * Cell8ChildOffset[u][2]);
 				addCell(subs, level1);
 			}
 		}
@@ -218,9 +228,9 @@ bool AdaptiveGrid::multipleChildrenTouched(KdIntersection * tree,
     int count = 0;
     int i = 0;
     for(; i < 8; i++) {
-        sample = parentCenter + Vector3F(hh * OctChildOffset[i][0], 
-        hh * OctChildOffset[i][1], 
-        hh * OctChildOffset[i][2]);
+        sample = parentCenter + Vector3F(hh * Cell8ChildOffset[i][0], 
+        hh * Cell8ChildOffset[i][1], 
+        hh * Cell8ChildOffset[i][2]);
         box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
         box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
         gjk::IntersectTest::SetA(box);

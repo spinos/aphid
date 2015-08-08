@@ -76,6 +76,9 @@ void BaseDrawer::setColor(float r, float g, float b) const
 	glColor3f(r, g, b);
 }
 
+void BaseDrawer::useColor(float * c) const
+{ glColor3fv(c); }
+
 void BaseDrawer::useColor(const Float3 & c) const
 {
 	glColor3fv((float *)&c);

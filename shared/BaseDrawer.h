@@ -24,6 +24,7 @@ public:
 
 	void setGrey(float g) const;
 	void setColor(float r, float g, float b) const;
+    void useColor(float * c) const;
 	void useColor(const Float3 & c) const;
 	void end() const;
 	void beginSolidTriangle();

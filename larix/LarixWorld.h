@@ -14,6 +14,7 @@ class AdaptiveField;
 class H5FieldIn;
 class H5FieldOut;
 class TypedBuffer;
+class BaseBuffer;
 
 class LarixWorld : public AWorld {
 public:
@@ -34,6 +35,7 @@ public:
 
     bool hasSourceP() const;
     TypedBuffer * sourceP();
+    void setSourceP(TypedBuffer * x);
 
     int cacheRangeMin() const;
     int cacheRangeMax() const;
@@ -41,6 +43,8 @@ public:
     int currentCacheFrame() const;
 	
 	bool setFileOut(const std::string & fileName);
+    
+    void setCellColorOutBuf(BaseBuffer * b);
 protected:
     bool checkSourceField();
     void readCacheRange();
@@ -51,4 +55,5 @@ private:
 	H5FieldIn * m_sourceFile;
     TypedBuffer * m_sourceP;
 	H5FieldOut * m_outFile;
+    BaseBuffer * m_outColor;
 };
