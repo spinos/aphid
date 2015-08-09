@@ -117,7 +117,7 @@ int LarixWorld::currentCacheFrame() const
 { return m_sourceFile->currentFrame(); }
 
 void LarixWorld::progressFrame()
-{ 
+{
     if(m_sourceFile->isOutOfRange()) {
         m_isCachingFinished = true;
         return;

@@ -133,7 +133,7 @@ void LarixInterface::drawWorld(LarixWorld * world, KdTreeDrawer * drawer)
     drawer->tetrahedronMesh(mesh);
 	
 	drawer->setColor(.3f, .2f, .1f);
-	//drawer->cartesianGrid(world->field());
+	// drawGrid(world->field(), drawer);
     
     drawField(world->field(), "dP", drawer);
 }
@@ -160,6 +160,7 @@ void LarixInterface::drawField(AdaptiveField * field,
     Float4 * src = (Float4 *)m_cells->data();
     Vector3F l;
     float h;
+
     glBegin(GL_TRIANGLES);
     for(i=0;i<n;i++) {
         l.set(src[i].x, src[i].y, src[i].z);
@@ -173,6 +174,26 @@ void LarixInterface::drawField(AdaptiveField * field,
         col++;
     }
     glEnd();
+}
+
+void LarixInterface::drawGrid(AdaptiveField * field,
+								KdTreeDrawer * drawer)
+{
+	const unsigned n = field->numCells();
+    unsigned i = 0;
+	
+    Float4 * src = (Float4 *)m_cells->data();
+    Vector3F l;
+    float h;
+    
+	glBegin(GL_LINES);
+    for(i=0;i<n;i++) {
+        l.set(src[i].x, src[i].y, src[i].z);
+        h = src[i].w;
+        
+		drawer->unitBoxAt(l, h);
+    }
+	glEnd();
 }
 
 void LarixInterface::buildCells(AdaptiveField * field)

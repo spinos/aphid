@@ -46,7 +46,7 @@ GeoDrawer::~GeoDrawer()
 	delete m_disc;
 }
 
-static const float UnitBoxLine[24][3] = {
+const float UnitBoxLine[24][3] = {
 {-.5f, -.5f, -.5f},
 { .5f, -.5f, -.5f},
 {-.5f,  .5f, -.5f},
