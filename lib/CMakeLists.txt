@@ -180,6 +180,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/AFrameRange.cpp
 ../shared/APlayback.cpp
 ../shared/APlaybackFile.cpp
+../shared/MultiPlaybackFile.cpp
 ../shared/AGenericMesh.cpp
 ../shared/CurveBuilder.cpp
 ../shared/GeometryArray.cpp
