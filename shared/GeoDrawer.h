@@ -34,8 +34,6 @@ public:
 	GeoDrawer();
 	virtual ~GeoDrawer();
 	
-	void unitBox() const;
-    void unitCube() const;
 	void unitBoxAt(const Vector3F & p, const float & size) const;
 	void unitCubeAt(const Vector3F & p, const float & size) const;
 	void box(float width, float height, float depth);

@@ -78,15 +78,7 @@ static const float UnitBoxLine[24][3] = {
 { .5f,  .5f,  .5f}
 };
 
-void GeoDrawer::unitBox() const
-{   
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, UnitBoxLine);
-    glDrawArrays(GL_LINES, 0, 24);
-    glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-static const float UnitBoxTriangle[36][3] = {
+const float UnitBoxTriangle[36][3] = {
 {-.5f, -.5f, -.5f}, // back
 { .5f,  .5f, -.5f},
 { .5f, -.5f, -.5f},
@@ -130,41 +122,22 @@ static const float UnitBoxTriangle[36][3] = {
 { .5f,  .5f,  .5f}
 };
 
-void GeoDrawer::unitCube() const
-{
-    //glEnableClientState(GL_VERTEX_ARRAY);
-    //glVertexPointer(3, GL_FLOAT, 0, UnitBoxTriangle);
-    //glDrawArrays(GL_TRIANGLES, 0, 36);
-    //glDisableClientState(GL_VERTEX_ARRAY);
-    //glBegin(GL_TRIANGLES);
-    int i=0;
-    for(;i<36;i++) glVertex3f(UnitBoxTriangle[i][0],
-        UnitBoxTriangle[i][1],
-        UnitBoxTriangle[i][2]);
-    //glEnd();
-}
-
 void GeoDrawer::unitBoxAt(const Vector3F & p, const float & size) const
 {
-	glPushMatrix();
-
-	glTranslatef(p.x, p.y, p.z);
-	glScalef(size, size, size);
-	
-	unitBox();
-	glPopMatrix();	
+	for(int i=0;i<24;i++) {
+        glVertex3f(UnitBoxLine[i][0] * size + p.x,
+        UnitBoxLine[i][1] * size + p.y,
+        UnitBoxLine[i][2] * size + p.z);
+    }
 }
 
 void GeoDrawer::unitCubeAt(const Vector3F & p, const float & size) const
 {
-	glPushMatrix();
-
-	glTranslatef(p.x, p.y, p.z);
-	glScalef(size, size, size);
-	
-	unitCube();
-
-	glPopMatrix();	
+	for(int i=0;i<36;i++) {
+        glVertex3f(UnitBoxTriangle[i][0] * size + p.x,
+        UnitBoxTriangle[i][1] * size + p.y,
+        UnitBoxTriangle[i][2] * size + p.z);
+    }
 }
 
 void GeoDrawer::box(float width, float height, float depth)
@@ -770,6 +743,7 @@ void GeoDrawer::tetrahedronMesh(ATetrahedronMesh * mesh) const
 
 void GeoDrawer::cartesianGrid(CartesianGrid * grid) const
 {
+    glBegin(GL_LINES);
 	sdb::CellHash * c = grid->cells();
 	Vector3F l;
     float h;
@@ -781,5 +755,6 @@ void GeoDrawer::cartesianGrid(CartesianGrid * grid) const
 		
 	    c->next();   
 	}
+    glEnd();
 }
 //:~

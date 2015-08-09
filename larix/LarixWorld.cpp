@@ -104,13 +104,14 @@ int LarixWorld::currentCacheFrame() const
 
 void LarixWorld::progressFrame()
 { 
-    if(!m_sourceFile->isOpened()) return;
     if(m_sourceFile->isOutOfRange()) return;
-    m_sourceFile->readFrame();
-    *m_sourceP -= m_mesh->pointsBuf();
-    m_field->computeChannelValue("dP", m_sourceP, m_mesh->sampler());
-    //m_outColor->copyFrom(m_field->namedChannel("dP")->data());
-	if(m_outFile->isOpened()) 
+    if(m_sourceFile->isOpened()) {
+        m_sourceFile->readFrame();
+        *m_sourceP -= m_mesh->pointsBuf();
+        m_field->computeChannelValue("dP", m_sourceP, m_mesh->sampler());
+    }
+    
+    if(m_outFile->isOpened()) 
 		m_outFile->writeFrame(m_sourceFile->currentFrame());
 	
     m_sourceFile->nextFrame(); 
@@ -132,7 +133,4 @@ bool LarixWorld::setFileOut(const std::string & fileName)
 	beginCache();
 	return true;
 }
-
-void LarixWorld::setCellColorOutBuf(BaseBuffer * b)
-{ m_outColor = b; }
 //:~

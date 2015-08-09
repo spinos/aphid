@@ -24,13 +24,11 @@ BaseLog lxlg("log.txt");
 LarixInterface::LarixInterface() 
 { 
     m_cells = new BaseBuffer;
-    m_cellColors = new BaseBuffer;
 }
 
 LarixInterface::~LarixInterface() 
 { 
     delete m_cells;
-    delete m_cellColors;
 }
 
 bool LarixInterface::createWorld(LarixWorld * world)
@@ -83,8 +81,8 @@ bool LarixInterface::createWorld(LarixWorld * world)
     }
 	world->setField(g);
     buildCells(g);
-    world->setCellColorOutBuf(m_cellColors);
-    m_cellColors->copyFrom(g->namedChannel("dP")->data());
+    
+    //m_cellColors->copyFrom(g->namedChannel("dP")->data());
     //lxlg.writeVec3(m_cellColors, g->namedChannel("dP")->numElements(), "dP");
     world->beginCache();
 	return true;
@@ -137,7 +135,6 @@ void LarixInterface::drawWorld(LarixWorld * world, KdTreeDrawer * drawer)
 	drawer->setColor(.3f, .2f, .1f);
 	//drawer->cartesianGrid(world->field());
     
-    //m_cellColors->copyFrom(world->field()->namedChannel("dP")->data());
     drawField(world->field(), "dP", drawer);
 }
 
@@ -164,43 +161,32 @@ void LarixInterface::drawField(AdaptiveField * field,
     
     const unsigned n = field->numCells();
     std::cout<<"begin draw col"<<n;
-    m_cellColors->copyFrom(field->namedChannel("dP")->data());
-    Vector3F * col = (Vector3F *)m_cellColors->data(); //field->vec3Value();
-    
-    //lxlg.writeVec3(m_cellColors, n, "dP", BaseLog::FAlways);
-    //Vector3F * srcf = (Vector3F *)field->namedChannel("dP")->data();
-    unsigned i = 0;
-    //for(;i<n;i++) col[i] = srcf[i];
+    Vector3F * col = (Vector3F *)field->namedData("dP");
+    unsigned i;
     
     Float4 * src = (Float4 *)m_cells->data();
     Vector3F l;
     float h;
-    
+    glBegin(GL_TRIANGLES);
     for(i=0;i<n;i++) {
         l.set(src[i].x, src[i].y, src[i].z);
         h = src[i].w;
         clipp.projectPoint(l, pop);
-        if((l-pop).dot(nor) < 0.f) { // behind clipping plane
-            //drawer->setColor(col[i].x, col[i].y, col[i].z);
+         if((l-pop).dot(nor) < 0.f) { // behind clipping plane
             glColor3f(col->x, col->y, col->z);
-            if((i&1023) == 0)std::cout<<" "<<l;
-            
             drawer->unitCubeAt(l, h);
             
         }
-        if((i&1023) == 0) std::cout<<" "<<i;
         col++;
     }
-
+    glEnd();
     std::cout<<"end draw col";
 }
 
 void LarixInterface::buildCells(AdaptiveField * field)
 {
     const unsigned n = field->numCells();
-    std::cout<<"\n buffer n cells "<<n;
     m_cells->create(n*16);
-    m_cellColors->create(n*12);
     
     Float4 * dst = (Float4 *)m_cells->data();
     

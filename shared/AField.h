@@ -40,7 +40,8 @@ public:
 	void getChannelNames(std::vector<std::string > & names) const;
 	TypedBuffer * currentChannel() const;
 	TypedBuffer * namedChannel(const std::string & name);
-	unsigned numChannels() const;
+	char * namedData(const std::string & name);
+    unsigned numChannels() const;
 protected:
 	template<typename T> 
 	T * currentValue() const

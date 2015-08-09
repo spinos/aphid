@@ -44,7 +44,6 @@ public:
 	
 	bool setFileOut(const std::string & fileName);
     
-    void setCellColorOutBuf(BaseBuffer * b);
 protected:
     bool checkSourceField();
     void readCacheRange();
@@ -55,5 +54,4 @@ private:
 	H5FieldIn * m_sourceFile;
     TypedBuffer * m_sourceP;
 	H5FieldOut * m_outFile;
-    BaseBuffer * m_outColor;
 };

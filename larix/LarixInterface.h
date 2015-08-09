@@ -31,5 +31,4 @@ private:
 private:
 // cell center and size
     BaseBuffer * m_cells;
-    BaseBuffer * m_cellColors;
 };

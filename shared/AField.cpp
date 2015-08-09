@@ -65,6 +65,13 @@ TypedBuffer * AField::namedChannel(const std::string & name)
     return m_channels[name]; 
 }
 
+char * AField::namedData(const std::string & name)
+{
+    TypedBuffer * chan = namedChannel(name);
+    if(!chan) return 0;
+    return chan->data();
+}
+
 unsigned AField::numChannels() const
 { return m_channels.size(); }
 
