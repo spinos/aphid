@@ -53,5 +53,6 @@ private:
 	AdaptiveField * m_field;
 	H5FieldIn * m_sourceFile;
     TypedBuffer * m_sourceP;
+    H5FieldOut * m_cacheFile;
 	H5FieldOut * m_outFile;
 };

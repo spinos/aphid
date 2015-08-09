@@ -119,6 +119,7 @@ void LarixWorld::progressFrame()
 
 bool LarixWorld::setFileOut(const std::string & fileName)
 {
+    return false;
 	if(!m_outFile->create(fileName)) {
 		std::cout<<"\n error: larix world cannot create out cache file "
 			<<fileName;

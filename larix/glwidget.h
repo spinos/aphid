@@ -29,10 +29,10 @@ private:
     LarixInterface * m_interface;
 	LarixWorld * m_world;
     AWorldThread * m_thread;
+    
 private slots:
     
 signals:
     void updatePhysics();
-    void isDrawing(bool x);
 };
 #endif

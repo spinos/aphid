@@ -9,7 +9,6 @@ AWorldThread::AWorldThread(AWorld * world, QObject *parent)
     m_world = world;
     abort = false;
 	restart = false;
-    blockTransfer = true;
 	m_numLoops = 0;
 }
 
@@ -17,7 +16,6 @@ AWorldThread::~AWorldThread()
 {
     mutex.lock();
     abort = true;
-    blockTransfer = false;
     condition.wakeOne();
     mutex.unlock();
     wait();
@@ -35,26 +33,10 @@ void AWorldThread::simulate()
     }
 }
 
-void AWorldThread::lockTransfer(bool x)
-{ 
-    QMutexLocker locker(&mutex);
-
-    blockTransfer = x;
-
-    qDebug()<<"set lockTransfer "<<blockTransfer;
-}
-
 void AWorldThread::run()
 {	 
-    //forever 
+    forever 
     {
-        //bool waitTransfer = blockTransfer;
-        //qDebug()<<"get lockTransfer "<<waitTransfer;
-        //if(waitTransfer) {
-        //    qDebug()<<"wait for transfer lock";
-        //    condition.wait(&mutex);
-       // }
-        
         if (abort) {
             qDebug()<<"abort physics b4";
             return;
@@ -73,13 +55,10 @@ void AWorldThread::run()
 		
 		m_world->postPhysics();
 
-        //mutex.lock();
         m_world->progressFrame();
-        //mutex.unlock(); 
         
-        m_numLoops+=NumSubsteps; 
+        m_numLoops += NumSubsteps; 
 
-        qDebug()<<"done step";
 		emit doneStep();
 
 		mutex.lock();
@@ -95,10 +74,4 @@ void AWorldThread::run()
 
 const unsigned AWorldThread::numLoops() const
 { return m_numLoops; }
-
-void AWorldThread::block()
-{ mutex.lock(); }
-
-void AWorldThread::unblock()
-{ mutex.unlock(); }
 //:~

@@ -24,18 +24,15 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientInit()
 {
-	// connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
-    //connect(this, SIGNAL(updatePhysics()), m_thread, SLOT(simulate()));
-    //connect(m_thread, SIGNAL(doneStep()), this, SLOT(update()));
-    //connect(this, SIGNAL(isDrawing(bool)), m_thread, SLOT(lockTransfer(bool)));
-    //emit updatePhysics();
+	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+    connect(this, SIGNAL(updatePhysics()), m_thread, SLOT(simulate()));
+    // connect(m_thread, SIGNAL(doneStep()), this, SLOT(update()));
 }
 
 void GLWidget::clientDraw()
 {
-    m_world->progressFrame();
-	m_interface->drawWorld(m_world, getDrawer());
-
+    emit updatePhysics();
+    m_interface->drawWorld(m_world, getDrawer());
     if(m_world->hasSourceP()) {
         std::stringstream sst;
         sst<<"cache range: ("<<m_world->cacheRangeMin()
@@ -45,8 +42,6 @@ void GLWidget::clientDraw()
         sst.str("");
         sst<<"current frame: "<<m_world->currentCacheFrame();
         hudText(sst.str(), 2);
-        //emit updatePhysics();
-        
     }
 }
 

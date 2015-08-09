@@ -142,25 +142,18 @@ void LarixInterface::drawField(AdaptiveField * field,
                           const std::string & channelName,
                           KdTreeDrawer * drawer)
 {
-    //if(!field->useChannel(channelName)) {
-   //     std::cout<<" field has no channel named "<<channelName;
-   //     return;
-   // }
     drawer->setWired(0);
     BoundingBox box;
     field->getBounding(box);
-    
     Plane clipp;
     clipp.set(Vector3F::XAxis + Vector3F::YAxis + Vector3F::ZAxis,
-              box.center() - Vector3F::XAxis * .5f);
+              box.center());
     
     Vector3F nor;
     clipp.getNormal(nor);
     Vector3F pop;
-    
-    
+
     const unsigned n = field->numCells();
-    std::cout<<"begin draw col"<<n;
     Vector3F * col = (Vector3F *)field->namedData("dP");
     unsigned i;
     
@@ -180,7 +173,6 @@ void LarixInterface::drawField(AdaptiveField * field,
         col++;
     }
     glEnd();
-    std::cout<<"end draw col";
 }
 
 void LarixInterface::buildCells(AdaptiveField * field)
