@@ -24,6 +24,7 @@ AdaptiveGrid::~AdaptiveGrid()
 
 void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
 {
+	std::cout<<"\n create adaptive grid max level "<<maxLevel;
 // start at 8 cells per axis
     int level = 3;
     const int dim = 1<<level;
@@ -47,13 +48,13 @@ void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
     }
     bool needRefine = tagCellsToRefine(tree);
     while(needRefine && level < maxLevel) {
-        std::cout<<"\n n level "<<level<<" cell "<<numCells();
+        std::cout<<"\n level"<<level<<" n cell "<<numCells();
 		refine(tree);
 		level++;
-		if(level < maxLevel) tagCellsToRefine(tree);
+		if(level < maxLevel) needRefine = tagCellsToRefine(tree);
     }
 	m_cellsToRefine->clear();
-    std::cout<<"\n n level "<<level<<" cell "<<numCells();
+    std::cout<<"\n level"<<level<<" n cell "<<numCells();
 }
 
 bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
