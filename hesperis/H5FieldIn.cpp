@@ -102,4 +102,17 @@ AdaptiveField * H5FieldIn::createAdaptiveField(const std::string & name)
 	gb.close();
 	return f;
 }
+
+void H5FieldIn::verbose() const
+{
+    std::cout<<"\n h5 field file:"
+    <<"\n n fields "<<numFields();
+    
+    std::map<std::string, AField *>::const_iterator it = m_fields.begin();
+    for(;it!=m_fields.end();++it) {
+        std::cout<<"\n field[\""<<it->first<<"\"]";
+        it->second->verbose();
+    }
+    APlaybackFile::verbose();
+}
 //:~

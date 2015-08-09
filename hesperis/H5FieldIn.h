@@ -21,6 +21,8 @@ public:
     unsigned numFields() const;
     
     bool readFrame();
+    
+    virtual void verbose() const;
 protected:
     const std::map<std::string, AField *> * fields() const;
 private:

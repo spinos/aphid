@@ -100,4 +100,14 @@ void AField::setVec3ChannelZero(TypedBuffer * chan)
     unsigned i=0;
     for(;i<n;i++) dst[i].setZero();
 }
+
+void AField::verbose() const
+{
+    std::cout<<"\n field:"
+    <<"\n n channels "<<numChannels();
+    
+    std::map<std::string, TypedBuffer * >::const_iterator it = m_channels.begin();
+	for(;it!=m_channels.end();++it)
+         std::cout<<"\n channel[\""<<it->first<<"\"]";
+}
 //:~

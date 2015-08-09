@@ -42,6 +42,8 @@ public:
 	TypedBuffer * namedChannel(const std::string & name);
 	char * namedData(const std::string & name);
     unsigned numChannels() const;
+    
+    void verbose() const;
 protected:
 	template<typename T> 
 	T * currentValue() const

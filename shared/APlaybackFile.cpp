@@ -32,11 +32,14 @@ bool APlaybackFile::readFrameRange()
     HFrameRange fr("/.fr");
     fr.load(this);
     fr.close();
-    
-    std::cout<<"\n playback range: ("<<this->FirstFrame
-        <<","<<this->LastFrame
-        <<")";
-    
+
     return true;
+}
+
+void APlaybackFile::verbose() const
+{
+    std::cout<<"\n playback range: ("<<this->FirstFrame
+    <<","<<this->LastFrame
+    <<")";
 }
 //:~

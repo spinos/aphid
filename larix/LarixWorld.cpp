@@ -26,7 +26,7 @@ LarixWorld::LarixWorld()
 	m_sourceFile = new H5FieldIn;
 	if(!m_sourceFile->open("./position.tmp"))
 		std::cout<<"\n error: larix world cannot open position cache file!\n";
- 
+    
     checkSourceField();
     m_cacheFile = new H5FieldOut;
     if(!m_cacheFile->create("./dposition.tmp")) 
@@ -100,8 +100,7 @@ void LarixWorld::setCacheRange()
 { 
     if(!m_sourceFile->isOpened()) return;
     m_sourceFile->readFrameRange(); 
-    std::cout<<"\n larix world begin cache frames ("<<m_sourceFile->FirstFrame
-    <<","<<m_sourceFile->LastFrame<<")";
+    m_sourceFile->verbose();
 }
 
 void LarixWorld::beginCache()
@@ -139,7 +138,7 @@ void LarixWorld::progressFrame()
 bool LarixWorld::setFileOut(const std::string & fileName)
 {
     if(!isCachingFinished()) return false;
-    
+    m_cacheFile->verbose();
     boost::filesystem::path fromtFp("./dposition.tmp");
     boost::filesystem::path toFp(fileName);
     try 

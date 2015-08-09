@@ -11,6 +11,7 @@ public:
     bool writeFrameRange(AFrameRange * src);
     bool readFrameRange();
     
+    virtual void verbose() const;
 protected:
 
 private:
