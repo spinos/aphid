@@ -43,7 +43,7 @@ public:
     int currentCacheFrame() const;
 	
 	bool setFileOut(const std::string & fileName);
-    
+    bool isCachingFinished() const;
 protected:
     bool checkSourceField();
     void setCacheRange();
@@ -54,5 +54,5 @@ private:
 	H5FieldIn * m_sourceFile;
     TypedBuffer * m_sourceP;
     H5FieldOut * m_cacheFile;
-	H5FieldOut * m_outFile;
+    bool m_isCachingFinished;
 };

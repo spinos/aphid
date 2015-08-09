@@ -48,12 +48,12 @@ void AdaptiveField::computeChannelValue(const std::string & channelName,
                          TypedBuffer * source,
                          BaseSampler * sampler)
 {
-    std::cout<<"\n sampling... ";
+    std::cout<<"\n sampling "<<channelName<<"... ";
     sampleAChannel(namedChannel(channelName), source, sampler);
     std::cout<<"\n interpolating... ";
     int i=0;
     for(;i<24;i++) interpolate();
-    std::cout<<"\n done!";
+    std::cout<<" done!";
 }
 
 void AdaptiveField::createSamples(KdIntersection * tree,

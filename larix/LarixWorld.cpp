@@ -13,6 +13,9 @@
 #include <AdaptiveField.h>
 #include <H5FieldIn.h>
 #include <H5FieldOut.h>
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include "boost/filesystem/convenience.hpp"
 
 LarixWorld::LarixWorld() 
 { 
@@ -25,10 +28,10 @@ LarixWorld::LarixWorld()
 		std::cout<<"\n error: larix world cannot open position cache file!\n";
  
     checkSourceField();
-	m_outFile = new H5FieldOut;
     m_cacheFile = new H5FieldOut;
     if(!m_cacheFile->create("./dposition.tmp")) 
         std::cout<<"\n error: larix world cannot create dposition field cache file!\n";
+    m_isCachingFinished = false;
 }
 
 LarixWorld::~LarixWorld() 
@@ -37,7 +40,7 @@ LarixWorld::~LarixWorld()
     if(m_mesh) delete m_mesh;
 	if(m_field) delete m_field;
 	delete m_sourceFile;
-	delete m_outFile;
+    delete m_cacheFile;
 }
 
 void LarixWorld::setTetrahedronMesh(ATetrahedronMesh * m)
@@ -97,6 +100,8 @@ void LarixWorld::setCacheRange()
 { 
     if(!m_sourceFile->isOpened()) return;
     m_sourceFile->readFrameRange(); 
+    std::cout<<"\n larix world begin cache frames ("<<m_sourceFile->FirstFrame
+    <<","<<m_sourceFile->LastFrame<<")";
 }
 
 void LarixWorld::beginCache()
@@ -114,7 +119,11 @@ int LarixWorld::currentCacheFrame() const
 
 void LarixWorld::progressFrame()
 { 
-    if(m_sourceFile->isOutOfRange()) return;
+    if(m_sourceFile->isOutOfRange()) {
+        m_isCachingFinished = true;
+        return;
+    }
+    
     if(m_sourceFile->isOpened()) {
         m_sourceFile->readFrame();
         *m_sourceP -= m_mesh->pointsBuf();
@@ -123,27 +132,29 @@ void LarixWorld::progressFrame()
     
     if(m_cacheFile->isOpened()) 
         m_cacheFile->writeFrame(m_sourceFile->currentFrame());
-
-    if(m_outFile->isOpened()) 
-		m_outFile->writeFrame(m_sourceFile->currentFrame());
-	
+    
     m_sourceFile->nextFrame(); 
 }
 
 bool LarixWorld::setFileOut(const std::string & fileName)
 {
-    return false;
-	if(!m_outFile->create(fileName)) {
-		std::cout<<"\n error: larix world cannot create out cache file "
-			<<fileName;
-		return false;
-	}
- 
-	std::cout<<"\n larix world begin cache frames ("<<m_sourceFile->FirstFrame
-    <<","<<m_sourceFile->LastFrame<<")";
+    if(!isCachingFinished()) return false;
     
-	m_outFile->writeFrameRange(m_sourceFile);
-	m_outFile->addField("lax", m_field);
+    boost::filesystem::path fromtFp("./dposition.tmp");
+    boost::filesystem::path toFp(fileName);
+    try 
+    {
+    boost::filesystem::copy_file(fromtFp, toFp,
+             boost::filesystem::copy_option::overwrite_if_exists);
+    }
+    catch (const boost::filesystem::filesystem_error& ex)
+    {
+        std::cout << "\n" << ex.what() << '\n';
+        return false;
+    }
 	return true;
 }
+
+bool LarixWorld::isCachingFinished() const
+{ return m_isCachingFinished && m_cacheFile->isOpened(); }
 //:~

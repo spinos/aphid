@@ -42,6 +42,8 @@ void GLWidget::clientDraw()
         sst.str("");
         sst<<"current frame: "<<m_world->currentCacheFrame();
         hudText(sst.str(), 2);
+        if(m_world->isCachingFinished())
+            hudText("all frame cached", 3);
     }
 }
 
@@ -81,6 +83,12 @@ void GLWidget::keyPressEvent(QKeyEvent * event)
 
 void GLWidget::saveField()
 {
+    if(!m_world->isCachingFinished()) {
+        QMessageBox::information(this, tr("Warning: cannot save"), 
+                     tr("Caching is not finished. Wait for all frames cached to save the resulting field data."));
+        return;    
+    }
+    
 	QString selectedFilter;
 	QString fileName = QFileDialog::getSaveFileName(this,
 							tr("Save .fld file as output dP field"),
