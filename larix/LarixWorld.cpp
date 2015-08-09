@@ -26,6 +26,9 @@ LarixWorld::LarixWorld()
  
     checkSourceField();
 	m_outFile = new H5FieldOut;
+    m_cacheFile = new H5FieldOut;
+    if(!m_cacheFile->create("./dposition.tmp")) 
+        std::cout<<"\n error: larix world cannot create dposition field cache file!\n";
 }
 
 LarixWorld::~LarixWorld() 
@@ -90,12 +93,19 @@ int LarixWorld::cacheRangeMin() const
 int LarixWorld::cacheRangeMax() const
 { return m_sourceFile->LastFrame; }
 
-void LarixWorld::readCacheRange()
-{ if(m_sourceFile->isOpened()) m_sourceFile->readFrameRange(); }
+void LarixWorld::setCacheRange()
+{ 
+    if(!m_sourceFile->isOpened()) return;
+    m_sourceFile->readFrameRange(); 
+}
 
 void LarixWorld::beginCache()
 {
-    readCacheRange();
+    setCacheRange();
+    if(m_cacheFile->isOpened()) {
+        m_cacheFile->writeFrameRange(m_sourceFile);
+        m_cacheFile->addField("lax", m_field);
+    }
     m_sourceFile->frameBegin();
 }
 
@@ -111,6 +121,9 @@ void LarixWorld::progressFrame()
         m_field->computeChannelValue("dP", m_sourceP, m_mesh->sampler());
     }
     
+    if(m_cacheFile->isOpened()) 
+        m_cacheFile->writeFrame(m_sourceFile->currentFrame());
+
     if(m_outFile->isOpened()) 
 		m_outFile->writeFrame(m_sourceFile->currentFrame());
 	
@@ -131,7 +144,6 @@ bool LarixWorld::setFileOut(const std::string & fileName)
     
 	m_outFile->writeFrameRange(m_sourceFile);
 	m_outFile->addField("lax", m_field);
-	beginCache();
 	return true;
 }
 //:~

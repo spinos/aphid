@@ -1,7 +1,8 @@
 #pragma once
 #include "H5FieldIn.h"
-#include <AField.h>
-#include <HField.h>
+class AField;
+class AdaptiveField;
+
 class H5FieldOut : public H5FieldIn {
 public:
     H5FieldOut();
@@ -12,8 +13,14 @@ public:
     
     void writeFrame(int frame);
 protected:
-
+    template<typename Th, typename Tf>
+    void initField(const std::string & name,
+                   Tf * field) {
+        Th grp(name);
+        grp.save(field);
+        grp.close();
+    }
 private:
-	HField * matchFieldType(const std::string & fieldName,  
-							AField::FieldType typ) const;
+	void initFieldByType(const std::string & fieldName,  
+							AField * fld);
 };

@@ -1,4 +1,5 @@
 #include "H5FieldOut.h"
+#include <AdaptiveField.h>
 #include <HAdaptiveField.h>
 #include <boost/format.hpp>
 
@@ -10,10 +11,7 @@ void H5FieldOut::addField(const std::string & fieldName,
 {
     H5FieldIn::addField(fieldName, fld);
     useDocument();
-    HField * grp = matchFieldType(fieldName, fld->fieldType());
-    grp->save(fld);
-    grp->close();
-	delete grp;
+    initFieldByType(fieldName, fld);
 }
 
 void H5FieldOut::writeFrame(int frame)
@@ -28,18 +26,16 @@ void H5FieldOut::writeFrame(int frame)
     }
 }
 
-HField * H5FieldOut::matchFieldType(const std::string & fieldName, 
-									AField::FieldType typ) const
+void H5FieldOut::initFieldByType(const std::string & fieldName, 
+									AField * fld)
 {
-	HField * r;
-	switch (typ) {
+	switch (fld->fieldType()) {
 		case AField::FldAdaptive:
-			r = new HAdaptiveField(fieldName);
+            initField<HAdaptiveField, AdaptiveField>(fieldName,(AdaptiveField *)fld);
 			break;
 		default:
-			r = new HField(fieldName);
+            initField<HField, AField>(fieldName, fld);
 			break;
 	}
-	return r;
 }
 //:~

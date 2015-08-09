@@ -36,7 +36,9 @@ char HAdaptiveField::verifyType()
 
 char HAdaptiveField::save(AdaptiveField * fld)
 {
-	int nc = fld->numCells();
+    int nc = fld->numCells();
+    std::cout<<"\n hadaptivefield save n cells "<<nc;
+	
 	if(!hasNamedAttr(".ncells"))
 		addIntAttr(".ncells");
 	

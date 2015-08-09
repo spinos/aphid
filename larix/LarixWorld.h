@@ -46,7 +46,7 @@ public:
     
 protected:
     bool checkSourceField();
-    void readCacheRange();
+    void setCacheRange();
 private:
     ATetrahedronMesh * m_mesh;
 	APointCloud * m_cloud;

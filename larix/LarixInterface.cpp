@@ -19,7 +19,7 @@
 #include <Plane.h>
 #include <BaseLog.h>
 
-BaseLog lxlg("log.txt");
+// BaseLog lxlg("log.txt");
 
 LarixInterface::LarixInterface() 
 { 
