@@ -65,12 +65,12 @@ const float CartesianGrid::gridSize() const
 
 const unsigned CartesianGrid::mortonEncode(const Vector3F & p) const
 {
-	const Vector3F q = putIntoBound(p);
+//	const Vector3F q = putIntoBound(p);
     const float ih = 1.f / gridSize();
 // numerical inaccuracy
-    unsigned x = (q.x - m_origin.x) * ih;
-    unsigned y = (q.y - m_origin.y) * ih;
-    unsigned z = (q.z - m_origin.z) * ih;
+    unsigned x = (p.x - m_origin.x) * ih;
+    unsigned y = (p.y - m_origin.y) * ih;
+    unsigned z = (p.z - m_origin.z) * ih;
 	return encodeMorton3D(x, y, z);
 }
 
@@ -186,3 +186,4 @@ void CartesianGrid::printHash()
 	    m_cellHash->next();   
 	}
 }
+//:~

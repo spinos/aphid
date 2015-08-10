@@ -92,6 +92,12 @@ MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, cons
 	APlaybackFile * file = AvailableFieldFiles.namedFile(substituded.c_str());
 	if(file) {
 		H5FieldIn * fieldf = (H5FieldIn *)file;
+		if(multiIndex == 0) {
+			if(fieldf->currentFrame() != iframe) {
+				fieldf->setCurrentFrame(iframe);
+				fieldf->readFrame();
+			}
+		}
 		//SampleFrame &sampler = AdaptiveFieldDeformer::H5Files.getFrameSampler(substituded.c_str());
 		//sampler.calculateWeights(dtime);
 		// MGlobal::displayInfo(MString("smp ")+ sampler.m_frames[0] + " " + sampler.m_frames[1] + " " + sampler.m_samples[0]  + " " + sampler.m_samples[1]  + " " + sampler.m_weights[0]  + " " + sampler.m_weights[1]);

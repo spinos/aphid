@@ -15,6 +15,7 @@ public:
     void frameBegin();
     void nextFrame();
     const int currentFrame() const;
+	void setCurrentFrame(int x);
     
     void beginCountNumFramesPlayed();
     void countNumFramesPlayed();

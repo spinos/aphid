@@ -64,4 +64,7 @@ const bool APlayback::end() const
 
 std::string APlayback::currentFrameStr() const
 { return boost::str(boost::format("%1%") % m_currentFrame); }
+
+void APlayback::setCurrentFrame(int x)
+{ m_currentFrame = x; }
 //:~

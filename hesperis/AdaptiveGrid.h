@@ -9,6 +9,9 @@ public:
     virtual ~AdaptiveGrid();
     
     virtual void create(KdIntersection * tree, int maxLevel = 7);
+	int maxLevel() const;
+	sdb::CellValue * locateCell(const Vector3F & p) const;
+	
 protected:
     virtual bool tagCellsToRefine(KdIntersection * tree);
 	void tagCellsToRefineByNeighbours();
@@ -79,4 +82,5 @@ private:
 	Vector3F finerNeighbourCellCenter(int i, int side, const Vector3F & p, float size) const;
 private:
     sdb::CellHash * m_cellsToRefine;
+	int m_maxLevel;
 };

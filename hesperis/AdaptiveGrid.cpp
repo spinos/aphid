@@ -24,6 +24,7 @@ AdaptiveGrid::~AdaptiveGrid()
 
 void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
 {
+	m_maxLevel = maxLevel;
 	std::cout<<"\n create adaptive grid max level "<<maxLevel;
 // start at 8 cells per axis
     int level = 3;
@@ -288,4 +289,24 @@ Vector3F AdaptiveGrid::finerNeighbourCellCenter(int i, int side, const Vector3F 
 						size * Cell24NeighboursCenterOffset[idx][1],
 						size * Cell24NeighboursCenterOffset[idx][2]);
 }
+
+sdb::CellValue * AdaptiveGrid::locateCell(const Vector3F & p) const
+{
+	int l = maxLevel();
+	unsigned code = mortonEncode(p);
+	code = code>>((10 - l)*3);
+	sdb::CellValue * found = findCell(code);
+	if(found) return found;
+	
+	while(l>2) {
+		code = code>>3;
+		found = findCell(code);
+		if(found) return found;
+		l--;
+	}
+	return 0; 
+}
+
+int AdaptiveGrid::maxLevel() const
+{ return m_maxLevel; }
 //:~

@@ -21,6 +21,7 @@ public:
 	BoundingBox cellBox(unsigned code, int level) const;
 	
 	void addCell(unsigned code, int level, int visited, unsigned index);
+	
 protected:
 	const float gridSize() const;
 	const unsigned mortonEncode(const Vector3F & p) const;
