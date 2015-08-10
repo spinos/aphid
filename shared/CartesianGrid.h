@@ -22,6 +22,7 @@ public:
 	
 	void addCell(unsigned code, int level, int visited, unsigned index);
 	
+    unsigned mortonEncodeLevel(const Vector3F & p, int level) const;
 protected:
 	const float gridSize() const;
 	const unsigned mortonEncode(const Vector3F & p) const;
@@ -36,6 +37,7 @@ protected:
     const Vector3F putIntoBound(const Vector3F & p) const;
 	bool isPInsideBound(const Vector3F & p) const;
 	void printHash();
+    void printGrids(int level);
 private:
     Vector3F m_origin;
     float m_span, m_gridH; // same for each dimensions

@@ -3,7 +3,7 @@ project (testbit)
 # The version number.
 set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
-
+set (CMAKE_BUILD_TYPE RELEASE)
 set (HEADER_FILES "../shared/Morton3D.h")
 include_directories ("../shared")
 add_executable (testbit ${HEADER_FILES} main.cpp)

@@ -161,7 +161,8 @@ void AdaptiveField::checkNeighbours()
 void AdaptiveField::verbose() const
 {
     std::cout<<"\n adaptive field:"
-    <<"\n n cells "<<numCells();
+    <<"\n n cells "<<numCells()
+    <<"\n max level "<<maxLevel();
     AField::verbose();
 }
 //:~

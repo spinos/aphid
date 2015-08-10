@@ -170,6 +170,23 @@ void BaseLog::writeVec3(BaseBuffer * buf, unsigned n,
     }
 }
 
+void BaseLog::writeInt3(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	int * m = (int *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        writeArrayIndex(i);
+        write(boost::str(boost::format("(%1%,%2%,%3%)\n") % m[0] %  m[1] % m[2]));
+        m += 3;
+    }
+}
+
 void BaseLog::writeMat33(BaseBuffer * buf, unsigned n, 
 	                const std::string & notation,
 	                Frequency freq)
@@ -232,6 +249,26 @@ void BaseLog::writeMortonHash(BaseBuffer * buf, unsigned n,
         write(boost::str(boost::format("(%1%,%2%)\n") % byte_to_binary(m[i*2]) %  m[i*2+1]));
     }
 }
+
+void BaseLog::writeMortonCode(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq)
+{
+    if(!checkFrequency(freq, notation)) return;
+	
+    unsigned * m = (unsigned *)buf->data();
+	newLine();
+    write(notation);
+	writeArraySize(n);
+    unsigned i = 0;
+    for(; i < n; i++) {
+        writeArrayIndex(i);
+        write( boost::str( boost::format("%1%\n") % byte_to_binary(m[i]) ) );
+    }
+}
+
+void BaseLog::writeMortonCode(unsigned i)
+{ write(boost::str(boost::format(" %1%") % byte_to_binary(i))); }
 
 void BaseLog::writeInt2(BaseBuffer * buf, unsigned n, 
                 const std::string & notation,

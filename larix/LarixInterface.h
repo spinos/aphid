@@ -30,6 +30,7 @@ private:
 	void drawGrid(AdaptiveField * field,
 					KdTreeDrawer * drawer);
     void buildCells(AdaptiveField * fld);
+    void testLocateCells(AdaptiveField * fld, ATetrahedronMesh * tetra);
 private:
 // cell center and size
     BaseBuffer * m_cells;

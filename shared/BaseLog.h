@@ -31,6 +31,7 @@ public:
 	void write(const std::string & os);
 	void write(unsigned & i);
 	void writeTime();
+    void writeMortonCode(unsigned i);
 	void newLine();
 	void writeArraySize(const unsigned & n);
 	void writeArrayIndex(const unsigned & n);
@@ -63,6 +64,10 @@ public:
     void writeVec3(BaseBuffer * buf, unsigned n, 
 	                const std::string & notation,
 	                Frequency freq = FOnce);
+    
+    void writeInt3(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
 	
     void writeMat33(BaseBuffer * buf, unsigned n, 
 	                const std::string & notation,
@@ -73,6 +78,10 @@ public:
 	                Frequency freq = FOnce);
 	
     void writeMortonHash(BaseBuffer * buf, unsigned n, 
+	                const std::string & notation,
+	                Frequency freq = FOnce);
+    
+    void writeMortonCode(BaseBuffer * buf, unsigned n, 
 	                const std::string & notation,
 	                Frequency freq = FOnce);
 	

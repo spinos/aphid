@@ -5,7 +5,7 @@
 #define max(a, b) (a > b?a: b)
 
 // http://stackoverflow.com/questions/18529057/produce-interleaving-bit-patterns-morton-keys-for-32-bit-64-bit-and-128bit
-unsigned expandBits(unsigned v) 
+inline unsigned expandBits(unsigned v) 
 { 
     // v = (v * 0x00010001u) & 0xFF0000FFu; 
     // v = (v * 0x00000101u) & 0x0F00F00Fu; 
@@ -21,7 +21,7 @@ unsigned expandBits(unsigned v)
 
 // Calculates a 30-bit Morton code for the 
 // given 3D point located within the unit cube [0,1].
-unsigned encodeMorton3D(unsigned x, unsigned y, unsigned z) 
+inline unsigned encodeMorton3D(unsigned x, unsigned y, unsigned z) 
 { 
     x = min(max(x, 0), 1023); 
     y = min(max(y, 0), 1023); 
@@ -35,7 +35,7 @@ unsigned encodeMorton3D(unsigned x, unsigned y, unsigned z)
 // decoding morton code to cartesian coordinate
 // https://fgiesen.wordpress.com/2009/12/13/decoding-morton-codes/
 
-unsigned Compact1By2(unsigned x)
+inline unsigned Compact1By2(unsigned x)
 {
   x &= 0x09249249;                  // x = ---- 9--8 --7- -6-- 5--4 --3- -2-- 1--0
   x = (x ^ (x >>  2)) & 0x030c30c3; // x = ---- --98 ---- 76-- --54 ---- 32-- --10
@@ -45,7 +45,7 @@ unsigned Compact1By2(unsigned x)
   return x;
 }
 
-void decodeMorton3D(unsigned code, unsigned & x, unsigned & y, unsigned & z)
+inline void decodeMorton3D(unsigned code, unsigned & x, unsigned & y, unsigned & z)
 {
     x = Compact1By2(code >> 2);
     y = Compact1By2(code >> 1);

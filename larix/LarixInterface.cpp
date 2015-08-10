@@ -19,7 +19,7 @@
 #include <Plane.h>
 #include <BaseLog.h>
 
-// BaseLog lxlg("log.txt");
+BaseLog lxlg("log.txt");
 
 LarixInterface::LarixInterface() 
 { 
@@ -85,6 +85,8 @@ bool LarixInterface::createWorld(LarixWorld * world)
     //m_cellColors->copyFrom(g->namedChannel("dP")->data());
     //lxlg.writeVec3(m_cellColors, g->namedChannel("dP")->numElements(), "dP");
     world->beginCache();
+    
+    testLocateCells(g, tetra);
 	return true;
 }
 
@@ -133,9 +135,9 @@ void LarixInterface::drawWorld(LarixWorld * world, KdTreeDrawer * drawer)
     drawer->tetrahedronMesh(mesh);
 	
 	drawer->setColor(.3f, .2f, .1f);
-	// drawGrid(world->field(), drawer);
+	drawGrid(world->field(), drawer);
     
-    drawField(world->field(), "dP", drawer);
+    // drawField(world->field(), "dP", drawer);
 }
 
 void LarixInterface::drawField(AdaptiveField * field, 
@@ -201,6 +203,10 @@ void LarixInterface::buildCells(AdaptiveField * field)
     const unsigned n = field->numCells();
     m_cells->create(n*16);
     
+    BaseBuffer codes;
+    codes.create(n*4);
+    unsigned * dcode = (unsigned *)codes.data();
+    
     Float4 * dst = (Float4 *)m_cells->data();
     
     sdb::CellHash * c = field->cells();
@@ -210,6 +216,7 @@ void LarixInterface::buildCells(AdaptiveField * field)
 	c->begin();
 	while(!c->end()) {
 		l = field->cellCenter(c->key());
+        dcode[i] = c->key();
 		h = field->cellSizeAtLevel(c->value()->level);
         
         dst[i].x = l.x;
@@ -220,5 +227,23 @@ void LarixInterface::buildCells(AdaptiveField * field)
 	    c->next();
         i++;
 	}
+    
+    lxlg.writeMortonCode(&codes, n, "key");
+}
+
+void LarixInterface::testLocateCells(AdaptiveField * fld, ATetrahedronMesh * tetra)
+{
+    std::cout<<"\n test locate cells";
+    const unsigned n = tetra->numPoints();
+    Vector3F * p = tetra->points();
+    unsigned i = 916;
+   // for(;i<n;i++) {
+        sdb::CellValue * c = fld->locateCell(p[i]);
+        if(!c) {
+            std::cout<<"\n cannot find cell for p["<< i << "] " <<p[i];
+            //lxlg.writeMortonCode(fld->mortonEncodeLevel(p[i], 7));
+            return;
+        }
+   // }
 }
 //:~

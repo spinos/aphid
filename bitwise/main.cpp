@@ -233,6 +233,42 @@ void testMap()
     std::cout<<" \n";
 }
 
+void testCell()
+{
+    std::cout<<"\n test cell\n";
+    Vector3F origin;
+    std::cout<<"\n origin "<<origin;
+    float span = 1023.1276f;
+    float h = span / 1024.f;
+    float ih = 1.f / h;
+    std::cout<<"\n span "<<span;
+    Vector3F p(32.5468f, 33.25f, 37.76f);
+    std::cout<<"\n p "<<p;
+    unsigned x = (p.x - origin.x) * ih;
+    unsigned y = (p.y - origin.y) * ih;
+    unsigned z = (p.z - origin.z) * ih;
+    std::cout<<"\n level 10 xyz"<<x<<","<<y<<","<<z;
+    
+    int level = 7;
+    int d = 10 - level;
+    x = x>>d;
+    y = y>>d;
+    z = z>>d;
+    x = x<<d;
+    y = y<<d;
+    z = z<<d;
+    
+    std::cout<<"\n level 7 origin xyz"<<x<<","<<y<<","<<z;
+    
+    int a = (1<<(d-1)) - 1;
+    std::cout<<"\n level 7 half "<<a;
+    
+    x += a;
+    y += a;
+    z += a;
+    std::cout<<"\n level 7 center xyz"<<x<<","<<y<<","<<z;
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
@@ -327,6 +363,8 @@ int main(int argc, char * const argv[])
 	std::cout<<boost::format("39 mod 16: %1%\n") % (39 & 15);
 	
 	testMap();
+    
+    testCell();
 	std::cout<<"end of test\n";
 	return 0;
 }

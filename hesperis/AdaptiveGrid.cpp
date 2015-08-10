@@ -34,7 +34,7 @@ void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
     const float h = cellSizeAtLevel(level);
     const float hh = h * .5f;
 
-    const Vector3F ori = origin() + Vector3F(hh, hh, hh) * .999f;
+    const Vector3F ori = origin() + Vector3F(hh, hh, hh);
     Vector3F sample, closestP;
     BoundingBox box;
     for(k=0; k < dim; k++) {
@@ -56,6 +56,7 @@ void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
     }
 	m_cellsToRefine->clear();
     std::cout<<"\n level"<<level<<" n cell "<<numCells();
+    printGrids(7);
 }
 
 bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
@@ -293,17 +294,10 @@ Vector3F AdaptiveGrid::finerNeighbourCellCenter(int i, int side, const Vector3F 
 sdb::CellValue * AdaptiveGrid::locateCell(const Vector3F & p) const
 {
 	int l = maxLevel();
-	unsigned code = mortonEncode(p);
-	code = code>>((10 - l)*3);
+	unsigned code = mortonEncodeLevel(p, 7);
 	sdb::CellValue * found = findCell(code);
 	if(found) return found;
 	
-	while(l>2) {
-		code = code>>3;
-		found = findCell(code);
-		if(found) return found;
-		l--;
-	}
 	return 0; 
 }
 

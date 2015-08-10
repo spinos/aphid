@@ -2,12 +2,14 @@
 #include <iostream>
 #include <Morton3D.h>
 #include <BNode.h>
-
+#include <BaseLog.h>
+#include <BaseBuffer.h>
+BaseLog ctlg("ctlog.txt");
 CartesianGrid::CartesianGrid(float * originSpan)
 {
 	m_origin.set(originSpan[0], originSpan[1], originSpan[2]);
 	m_span = originSpan[3];
-	m_gridH = m_span / 1024.f;
+	m_gridH = m_span / 1024.0;
 	m_numCells = 0;
 	sdb::TreeNode::MaxNumKeysPerNode = 512;
 	sdb::TreeNode::MinNumKeysPerNode = 32;
@@ -24,7 +26,7 @@ CartesianGrid::CartesianGrid(const BoundingBox & bound)
     m_origin.y -= margin;
     m_origin.z -= margin;
     m_span += margin * 2.f;
-	m_gridH = m_span / 1024.f;
+	m_gridH = m_span / 1024.0;
     
     m_numCells = 0;
 	
@@ -66,12 +68,42 @@ const float CartesianGrid::gridSize() const
 const unsigned CartesianGrid::mortonEncode(const Vector3F & p) const
 {
 //	const Vector3F q = putIntoBound(p);
-    const float ih = 1.f / gridSize();
+    const float h = gridSize();
 // numerical inaccuracy
-    unsigned x = (p.x - m_origin.x) * ih;
-    unsigned y = (p.y - m_origin.y) * ih;
-    unsigned z = (p.z - m_origin.z) * ih;
+    unsigned x = (p.x - m_origin.x) /h;
+    unsigned y = (p.y - m_origin.y) /h;
+    unsigned z = (p.z - m_origin.z) /h;
 	return encodeMorton3D(x, y, z);
+}
+
+unsigned CartesianGrid::mortonEncodeLevel(const Vector3F & p, int level) const
+{
+    if(level == 10) return mortonEncode(p);
+    
+    const float h = gridSize();
+    unsigned x = (p.x - m_origin.x) / h;
+    unsigned y = (p.y - m_origin.y) / h;
+    unsigned z = (p.z - m_origin.z) / h;
+    //std::cout<<"\n level 10 xyz"<<x<<","<<y<<","<<z;
+    int d = 10 - level;
+    x = x>>d;
+    y = y>>d;
+    z = z>>d;
+    
+    x = x<<d;
+    y = y<<d;
+    z = z<<d;
+    
+    //std::cout<<"\n level 7 origin xyz"<<x<<","<<y<<","<<z;
+    
+    int a = (1<<(d-1)) - 1;
+    //std::cout<<"\n level 7 half "<<a;
+    
+    x += a;
+    y += a;
+    z += a;
+    std::cout<<"\n level 7 center xyz"<<x<<","<<y<<","<<z;
+    return encodeMorton3D(x, y, z);
 }
 
 sdb::CellValue * CartesianGrid::findGrid(unsigned code) const
@@ -112,8 +144,9 @@ void CartesianGrid::addCell(unsigned code, int level, int visited, unsigned inde
 
 unsigned CartesianGrid::addCell(const Vector3F & p, int level)
 {
-    unsigned code = mortonEncode(p);
-
+    const float epsilon = gridSize()*.001f;
+    Vector3F q(p.x - epsilon, p.y - epsilon, p.z - epsilon);
+    unsigned code = mortonEncode(q);
 	sdb::CellValue * ind = new sdb::CellValue;
 	ind->level = level;
 	ind->visited = 0;
@@ -185,5 +218,21 @@ void CartesianGrid::printHash()
 		std::cout<<" "<<m_cellHash->value()->level<<"\n";
 	    m_cellHash->next();   
 	}
+}
+
+void CartesianGrid::printGrids(int level)
+{
+    BaseBuffer codes;
+    const unsigned n = numCells();
+    codes.create(n*12);
+    unsigned * xyz = (unsigned *)codes.data();
+    sdb::CellHash * c = cells();
+    c->begin();
+    while(!c->end()) {
+        decodeMorton3D(c->key(), xyz[0], xyz[1], xyz[2]);
+        c->next();  
+        xyz += 3;
+    }
+    ctlg.writeInt3(&codes, n, "grid");
 }
 //:~
