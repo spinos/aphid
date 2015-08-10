@@ -2,6 +2,7 @@
 #include <KdIntersection.h>
 #include <GjkIntersection.h>
 #include <BaseBuffer.h>
+#include <Morton3D.h>
 
 unsigned AdaptiveGrid::CellNeighbourInds::InvalidIndex = 1<<30;
 
@@ -280,9 +281,22 @@ void AdaptiveGrid::findFinerNeighbourCells(CellNeighbourInds * dst,
 sdb::CellValue * AdaptiveGrid::locateCell(const Vector3F & p) const
 {
 	int l = maxLevel();
-	unsigned code = mortonEncodeLevel(p, l);
+	unsigned x, y, z;
+	gridOfP(p, x, y ,z);
+	gridOfCell(x, y, z, l);
+	
+	unsigned code = encodeMorton3D(x, y, z);
 	sdb::CellValue * found = findCell(code);
 	if(found) return found;
+	
+	while (l>3) {
+		l--;
+		gridOfCell(x, y, z, l);
+	
+		code = encodeMorton3D(x, y, z);
+		found = findCell(code);
+		if(found) return found;
+	}
 	
 	return 0; 
 }

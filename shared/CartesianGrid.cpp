@@ -66,19 +66,27 @@ const unsigned CartesianGrid::mortonEncode(const Vector3F & p) const
 	return encodeMorton3D(x, y, z);
 }
 
-unsigned CartesianGrid::mortonEncodeLevel(const Vector3F & p, int level) const
+void CartesianGrid::gridOfP(const Vector3F & p, unsigned & x,
+									unsigned & y,
+									unsigned & z) const
 {
-    if(level == 10) return mortonEncode(p);
-    
-    const float h = gridSize();
-    unsigned x = (p.x - m_origin.x) / h;
+	const float h = gridSize();
+    x = (p.x - m_origin.x) / h;
 	if(x>1023) x= 1023;
-    unsigned y = (p.y - m_origin.y) / h;
+    y = (p.y - m_origin.y) / h;
 	if(y>1023) y= 1023;
-    unsigned z = (p.z - m_origin.z) / h;
+    z = (p.z - m_origin.z) / h;
 	if(z>1023) z= 1023;
-    //std::cout<<"\n level 10 xyz"<<x<<","<<y<<","<<z;
-    int d = 10 - level;
+}
+
+void CartesianGrid::gridOfCell(unsigned & x,
+									unsigned & y,
+									unsigned & z,
+									int level) const
+{
+	int d = 10 - level;
+    int a = (1<<(d-1));
+	
     x = x>>d;
     y = y>>d;
     z = z>>d;
@@ -87,16 +95,17 @@ unsigned CartesianGrid::mortonEncodeLevel(const Vector3F & p, int level) const
     y = y<<d;
     z = z<<d;
     
-    //std::cout<<"\n level 7 origin xyz"<<x<<","<<y<<","<<z;
-    
-    int a = (1<<(d-1));
-    //std::cout<<"\n level 7 half "<<a;
-    
     x += a;
     y += a;
     z += a;
-   //std::cout<<"\n level 7 center xyz"<<x<<","<<y<<","<<z;
-    return encodeMorton3D(x, y, z);
+}
+
+unsigned CartesianGrid::mortonEncodeLevel(const Vector3F & p, int level) const
+{
+	unsigned x, y, z;
+	gridOfP(p, x, y ,z);
+    gridOfCell(x, y, z, level);
+	return encodeMorton3D(x, y, z);
 }
 
 sdb::CellValue * CartesianGrid::findGrid(unsigned code) const
@@ -104,12 +113,6 @@ sdb::CellValue * CartesianGrid::findGrid(unsigned code) const
 
 sdb::CellValue * CartesianGrid::findCell(unsigned code) const
 { return m_cellHash->find(code); }
-
-sdb::CellValue * CartesianGrid::findCell(const Vector3F & p) const
-{
-	if(!isPInsideBound(p)) return 0;
-	return findCell(mortonEncode(p));
-}
 
 unsigned CartesianGrid::addGrid(const Vector3F & p)
 {
@@ -137,10 +140,7 @@ void CartesianGrid::addCell(unsigned code, int level, int visited, unsigned inde
 
 unsigned CartesianGrid::addCell(const Vector3F & p, int level)
 {
-    //const float epsilon = gridSize()*.0001f;
-    //Vector3F q(p.x + epsilon, p.y + epsilon, p.z + epsilon);
-    //unsigned code = mortonEncode(q);
-	unsigned code = mortonEncodeLevel(p, level);
+    unsigned code = mortonEncodeLevel(p, level);
 	sdb::CellValue * ind = new sdb::CellValue;
 	ind->level = level;
 	ind->visited = 0;
@@ -185,16 +185,14 @@ const Vector3F CartesianGrid::cellOrigin(unsigned code, int level) const
     return cellCenter(code) - Vector3F(h, h, h);
 }
 
-const Vector3F CartesianGrid::putIntoBound(const Vector3F & p) const
+void CartesianGrid::putPInsideBound(Vector3F & p) const
 {
-    Vector3F r = p;
-    if(r.x <= m_origin.x) r.x = m_origin.x + 1e-7;
-    if(r.x >= m_origin.x + m_span) r.x = m_origin.x + m_span - 1e-7;
-    if(r.y <= m_origin.y) r.y = m_origin.y + 1e-7;
-    if(r.y >= m_origin.y + m_span) r.y = m_origin.y + m_span - 1e-7;
-    if(r.z <= m_origin.z) r.z = m_origin.z + 1e-7;
-    if(r.z >= m_origin.z + m_span) r.z = m_origin.z + m_span - 1e-7;
-    return r;
+    if(p.x <= m_origin.x) p.x = m_origin.x + 1e-7;
+    if(p.x >= m_origin.x + m_span) p.x = m_origin.x + m_span - 1e-7;
+    if(p.y <= m_origin.y) p.y = m_origin.y + 1e-7;
+    if(p.y >= m_origin.y + m_span) p.y = m_origin.y + m_span - 1e-7;
+    if(p.z <= m_origin.z) p.z = m_origin.z + 1e-7;
+    if(p.z >= m_origin.z + m_span) p.z = m_origin.z + m_span - 1e-7;
 }
 
 bool CartesianGrid::isPInsideBound(const Vector3F & p) const

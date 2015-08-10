@@ -258,17 +258,23 @@ void LarixInterface::buildCells(AdaptiveField * field)
 
 void LarixInterface::testLocateCells(AdaptiveField * fld, ATetrahedronMesh * tetra)
 {
-    std::cout<<"\n test locate cells";
+    std::cout<<"\n test locate cells ... ";
     const unsigned n = tetra->numPoints();
     Vector3F * p = tetra->points();
+	Vector3F q;
+	bool passed = true;
     unsigned i = 0;
 	for(;i<n;i++) {
-        sdb::CellValue * c = fld->locateCell(p[i]);
+		q = p[i];
+		q += Vector3F(RandomFn11(), RandomFn11(), RandomFn11());
+		fld->putPInsideBound(q);
+        sdb::CellValue * c = fld->locateCell(q);
         if(!c) {
-            std::cout<<"\n cannot find cell for p["<< i << "] " <<p[i];
+            std::cout<<"\n cannot find cell for p["<< i << "] " <<q;
             //lxlg.writeMortonCode(fld->mortonEncodeLevel(p[i], 7));
-            //fld->printMortonEncodeLevel(p[i], 7);
+			passed = false;
         }
 	}
+	if(passed) std::cout<<"all passed.\n";
 }
 //:~

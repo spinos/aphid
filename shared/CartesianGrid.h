@@ -26,20 +26,28 @@ public:
     unsigned mortonEncodeLevel(const Vector3F & p, int level) const;
 	void printGrids(BaseBuffer * dst);
 	
+	bool isPInsideBound(const Vector3F & p) const;
+	void putPInsideBound(Vector3F & p) const;
+	
 protected:
 	const float gridSize() const;
+	
+	void gridOfP(const Vector3F & p, unsigned & x,
+									unsigned & y,
+									unsigned & z) const;
+	void gridOfCell(unsigned & x,
+									unsigned & y,
+									unsigned & z,
+									int level) const;
 	const unsigned mortonEncode(const Vector3F & p) const;
 	sdb::CellValue * findGrid(unsigned code) const;
 	sdb::CellValue * findCell(unsigned code) const;
-	sdb::CellValue * findCell(const Vector3F & p) const;
 	unsigned addGrid(const Vector3F & p);
     unsigned addCell(const Vector3F & p, int level);
 	const Vector3F gridOrigin(unsigned code) const;
 	const Vector3F cellOrigin(unsigned code, int level) const;
 	void removeCell(unsigned code);
-    const Vector3F putIntoBound(const Vector3F & p) const;
-	bool isPInsideBound(const Vector3F & p) const;
-	void printHash();
+    void printHash();
 	
 	unsigned encodeNeighborCell(unsigned code, 
 									int level,
