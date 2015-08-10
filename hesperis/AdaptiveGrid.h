@@ -10,6 +10,7 @@ public:
     
     virtual void create(KdIntersection * tree, int maxLevel = 7);
 	int maxLevel() const;
+    void setMaxLevel(int x);
 	sdb::CellValue * locateCell(const Vector3F & p) const;
 	
 protected:

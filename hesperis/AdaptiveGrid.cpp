@@ -309,4 +309,7 @@ sdb::CellValue * AdaptiveGrid::locateCell(const Vector3F & p) const
 
 int AdaptiveGrid::maxLevel() const
 { return m_maxLevel; }
+
+void AdaptiveGrid::setMaxLevel(int x)
+{ m_maxLevel = x; }
 //:~

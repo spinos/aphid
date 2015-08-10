@@ -157,4 +157,11 @@ void AdaptiveField::checkNeighbours()
 		m_neighbours->next();
 	}
 }
+
+void AdaptiveField::verbose() const
+{
+    std::cout<<"\n adaptive field:"
+    <<"\n n cells "<<numCells();
+    AField::verbose();
+}
 //:~

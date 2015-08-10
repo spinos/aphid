@@ -43,7 +43,7 @@ public:
 	char * namedData(const std::string & name);
     unsigned numChannels() const;
     
-    void verbose() const;
+    virtual void verbose() const;
 protected:
 	template<typename T> 
 	T * currentValue() const

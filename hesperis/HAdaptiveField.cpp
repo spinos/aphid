@@ -30,6 +30,9 @@ char HAdaptiveField::verifyType()
 		
 	if(!hasNamedAttr(".origin_span"))
         return 0;
+    
+    if(!hasNamedAttr(".max_level"))
+        return 0;
 		
 	return HField::verifyType();
 }
@@ -53,6 +56,12 @@ char HAdaptiveField::save(AdaptiveField * fld)
 	originSpan[2] = fld->origin().z;
 	originSpan[3] = fld->span();
 	writeFloatAttr(".origin_span", originSpan);
+    
+    if(!hasNamedAttr(".max_level"))
+        addIntAttr(".max_level");
+    
+    int ml = fld->maxLevel();
+    writeIntAttr(".ncells", &ml);
 	
 	BaseBuffer dhash;
 	dhash.create(nc * 16);
@@ -84,8 +93,12 @@ char HAdaptiveField::load(AdaptiveField * fld)
 	
 	float originSpan[4];
 	readFloatAttr(".origin_span", originSpan);
+    
+    int ml = 7;
+    readIntAttr(".ncells", &ml);
 	
 	fld = new AdaptiveField(originSpan);
+    fld->setMaxLevel(ml);
 	
 	BaseBuffer dhash;
 	dhash.create(nc * 16);

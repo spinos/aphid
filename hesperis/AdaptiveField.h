@@ -22,6 +22,8 @@ public:
     void computeChannelValue(const std::string & channelName,
                              TypedBuffer * source,
                              BaseSampler * sampler);
+    
+    virtual void verbose() const;
 protected:
     
 private:
