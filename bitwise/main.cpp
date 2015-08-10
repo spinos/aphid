@@ -365,6 +365,8 @@ int main(int argc, char * const argv[])
 	testMap();
     
     testCell();
+	
+	std::cout<<"\n (int) -1.45f is "<<(int)-1.45f;
 	std::cout<<"end of test\n";
 	return 0;
 }

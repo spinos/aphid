@@ -2,6 +2,7 @@
 #include <KdIntersection.h>
 #include <GjkIntersection.h>
 #include <ATetrahedronMesh.h>
+#include <Morton3D.h>
 
 AdaptiveField::AdaptiveField(float * originSpan) :
 	AdaptiveGrid(originSpan)
@@ -41,7 +42,7 @@ void AdaptiveField::create(KdIntersection * tree,
     createSamples(tree, mesh);
     std::cout<<"\n n samples "<<m_sampleParams->size();
     findNeighbours();
-    // checkNeighbours();
+    checkNeighbours();
 }
 
 void AdaptiveField::computeChannelValue(const std::string & channelName,
@@ -142,6 +143,7 @@ void AdaptiveField::interpolate()
 
 void AdaptiveField::checkNeighbours()
 {
+	unsigned x, y, z;
 	int i, s;
 	m_neighbours->begin();
 	while(!m_neighbours->end()) {
@@ -149,7 +151,8 @@ void AdaptiveField::checkNeighbours()
 		for(i=0;i<6;i++) {
 			s = inds->countSide(i);
 			if(s != 0 && s != 1 && s != 4) {
-				std::cout<<"\n cell"<<m_neighbours->key()
+				decodeMorton3D(m_neighbours->key(), x, y, z);
+				std::cout<<"\n cell ("<<x<<","<<y<<","<<z<<")"
 				<<" side"<<i
 				<<" has "<<s<<" neighbors ";
 			}

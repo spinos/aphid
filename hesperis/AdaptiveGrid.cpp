@@ -56,7 +56,6 @@ void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
     }
 	m_cellsToRefine->clear();
     std::cout<<"\n level"<<level<<" n cell "<<numCells();
-    printGrids(7);
 }
 
 bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
@@ -68,13 +67,10 @@ bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
 
     c->begin();
     bool result = false;
-    //unsigned count;
-    unsigned i = 0;
     while(!c->end()) {
         box = cellBox(c->key(), c->value()->level);
         gjk::IntersectTest::SetA(box);
-		//count = tree->countElementIntersectBox(box);
-        
+		
         if(tree->intersectBox(box)) {
             setCellToRefine(c->key(), c->value(), 1);
             result = true;
@@ -82,8 +78,7 @@ bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
         else 
             setCellToRefine(c->key(), c->value(), 0);
         
-        i++;
-	    c->next();   
+        c->next();   
 	}
     
     if(!result) return result;
@@ -91,7 +86,7 @@ bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
     tagCellsToRefineByNeighbours();
 	tagCellsToRefineByNeighbours();
 	tagCellsToRefineByNeighbours();
-
+	
     return result;
 }
 
@@ -168,53 +163,55 @@ bool AdaptiveGrid::cellNeedRefine(unsigned k)
     return parentCell->visited > 0;
 }
 
-static const float Cell6NeighboursCenterOffset[6][3] = {
-{ -1.f,   0.f,   0.f},
-{  1.f,   0.f,   0.f},
-{  0.f,  -1.f,   0.f},
-{  0.f,   1.f,   0.f},
-{  0.f,   0.f,  -1.f},
-{  0.f,   0.f,   1.f}
+static const int Cell6NeighborOffsetI[6][3] = {
+{-1, 0, 0},
+{ 1, 0, 0},
+{ 0,-1, 0},
+{ 0, 1, 0},
+{ 0, 0,-1},
+{ 0, 0, 1},
 };
 
-static const float Cell24NeighboursCenterOffset[24][3] = {
-{-.75f, -.25f, -.25f}, // left
-{-.75f,  .25f, -.25f},
-{-.75f, -.25f,  .25f},
-{-.75f,  .25f,  .25f},
-{ .75f, -.25f, -.25f}, // right
-{ .75f,  .25f, -.25f},
-{ .75f, -.25f,  .25f}, 
-{ .75f,  .25f,  .25f},
-{-.25f, -.75f, -.25f}, // bottom
-{ .25f, -.75f, -.25f},
-{-.25f, -.75f,  .25f},
-{ .25f, -.75f,  .25f},
-{-.25f,  .75f, -.25f}, // top
-{ .25f,  .75f, -.25f},
-{-.25f,  .75f,  .25f},
-{ .25f,  .75f,  .25f},
-{-.25f, -.25f, -.75f}, // back
-{ .25f, -.25f, -.75f},
-{-.25f,  .25f, -.75f},
-{ .25f,  .25f, -.75f},
-{-.25f, -.25f,  .75f}, // front
-{ .25f, -.25f,  .75f},
-{-.25f,  .25f,  .75f},
-{ .25f,  .25f,  .75f}
+static const int Cell24FinerNeighborOffsetI[24][3] = {
+{ 1,-1,-1}, // left
+{ 1, 1,-1},
+{ 1,-1, 1},
+{ 1, 1, 1},
+{-1,-1,-1}, // right
+{-1, 1,-1},
+{-1,-1, 1},
+{-1, 1, 1},
+{-1, 1,-1}, // bottom
+{ 1, 1,-1},
+{-1, 1, 1},
+{ 1, 1, 1},
+{-1,-1,-1}, // top
+{ 1,-1,-1},
+{-1,-1, 1},
+{ 1,-1, 1},
+{-1,-1, 1}, // back
+{ 1,-1, 1},
+{-1, 1, 1},
+{ 1, 1, 1},
+{-1,-1,-1}, // front
+{ 1,-1,-1},
+{-1, 1,-1},
+{ 1, 1,-1}
 };
 
 bool AdaptiveGrid::check24NeighboursToRefine(unsigned k, const sdb::CellValue * v)
 { 
-    const Vector3F sample = cellCenter(k);
-    const float h = cellSizeAtLevel(v->level);
-    int i = 0;
-    for(;i<24;i++) {
-        Vector3F q = sample + Vector3F(h * Cell24NeighboursCenterOffset[i][0],
-                                       h * Cell24NeighboursCenterOffset[i][1],
-                                       h * Cell24NeighboursCenterOffset[i][2]);
-		if(isPInsideBound(q)) {
-			unsigned code = mortonEncode(q);
+    int i, j;
+    for(i=0;i<6;i++) {
+		for(j=0;j<4;j++) {
+			unsigned code = encodeFinerNeighborCell(k,
+												v->level,
+									Cell6NeighborOffsetI[i][0], 
+									Cell6NeighborOffsetI[i][1],
+									Cell6NeighborOffsetI[i][2],
+									Cell24FinerNeighborOffsetI[i * 4 + j][0],
+									Cell24FinerNeighborOffsetI[i * 4 + j][1],
+									Cell24FinerNeighborOffsetI[i * 4 + j][2]);
 			if(cellNeedRefine(code)) return true;
 		}
     }
@@ -243,58 +240,47 @@ bool AdaptiveGrid::multipleChildrenTouched(KdIntersection * tree,
     return false;
 }
 
-
 void AdaptiveGrid::findNeighbourCells(CellNeighbourInds * dst, unsigned code,
                                       sdb::CellValue * v)
 {
     dst->reset();
-	const Vector3F center = cellCenter(code);
-	Vector3F neighbourP;
-	
-	float csize;
 	int side = 0;
 	for(;side<6; side++) {
-		csize = cellSizeAtLevel(v->level);
-		neighbourP = neighbourCellCenter(side, center, csize);
-		sdb::CellValue * cell = findCell(neighbourP);
+		sdb::CellValue * cell = findNeighborCell(code, 
+									v->level,
+									Cell6NeighborOffsetI[side][0], 
+									Cell6NeighborOffsetI[side][1],
+									Cell6NeighborOffsetI[side][2]);
 		if(cell)
 			dst->side(side)[0] = cell->index;
 		else
-			findFinerNeighbourCells(dst, side, center, csize);
+			findFinerNeighbourCells(dst, side, code, v->level);
 	}
 }
 
-Vector3F AdaptiveGrid::neighbourCellCenter(int side, const Vector3F & p, float size) const
-{ 
-	return p + Vector3F(size * Cell6NeighboursCenterOffset[side][0],
-						size * Cell6NeighboursCenterOffset[side][1],
-						size * Cell6NeighboursCenterOffset[side][2]); 
-}
-
-void AdaptiveGrid::findFinerNeighbourCells(CellNeighbourInds * dst, int side,
-								const Vector3F & center, float size)
+void AdaptiveGrid::findFinerNeighbourCells(CellNeighbourInds * dst, 
+								int side,
+								unsigned code,
+								int level)
 {
-	Vector3F neighbourP;
 	int i = 0;
 	for(;i<4;i++) {
-		neighbourP = finerNeighbourCellCenter(i, side, center, size);
-		sdb::CellValue * cell = findCell(neighbourP);
+		sdb::CellValue * cell = findFinerNeighborCell(code,
+												level,
+									Cell6NeighborOffsetI[side][0], 
+									Cell6NeighborOffsetI[side][1],
+									Cell6NeighborOffsetI[side][2],
+									Cell24FinerNeighborOffsetI[side * 4][0],
+									Cell24FinerNeighborOffsetI[side * 4][1],
+									Cell24FinerNeighborOffsetI[side * 4][2]);
 		if(cell) dst->side(side)[i] = cell->index;
 	}
-}
-
-Vector3F AdaptiveGrid::finerNeighbourCellCenter(int i, int side, const Vector3F & p, float size) const
-{
-	const int idx = i + side * 4;
-	return p + Vector3F(size * Cell24NeighboursCenterOffset[idx][0],
-						size * Cell24NeighboursCenterOffset[idx][1],
-						size * Cell24NeighboursCenterOffset[idx][2]);
 }
 
 sdb::CellValue * AdaptiveGrid::locateCell(const Vector3F & p) const
 {
 	int l = maxLevel();
-	unsigned code = mortonEncodeLevel(p, 7);
+	unsigned code = mortonEncodeLevel(p, l);
 	sdb::CellValue * found = findCell(code);
 	if(found) return found;
 	

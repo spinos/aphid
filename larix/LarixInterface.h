@@ -29,6 +29,8 @@ private:
                           KdTreeDrawer * drawer);
 	void drawGrid(AdaptiveField * field,
 					KdTreeDrawer * drawer);
+	void drawLocateCells(AdaptiveField * fld, ATetrahedronMesh * tetra,
+					KdTreeDrawer * drawer);
     void buildCells(AdaptiveField * fld);
     void testLocateCells(AdaptiveField * fld, ATetrahedronMesh * tetra);
 private:

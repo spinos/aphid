@@ -16,9 +16,9 @@ Vector3F * PointSet::x()
     
 Vector3F PointSet::supportPoint(const Vector3F & v, Vector3F * localP) const
 { 
-    float maxdotv = -1e8;
+    float maxdotv = -1e8f;
     float dotv;
-    
+	
     Vector3F res, q;
     for(int i=0; i < numPoints(); i++) {
         q = X(i);
@@ -157,7 +157,7 @@ bool IntersectTest::evaluate(PointSet * B)
 // terminate when v is close enough to v(A - B).
 // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
 		v2 = v.length2();
-	    if(v2 - w.dot(v) < 0.0001f * v2) {
+	    if(v2 - w.dot(v) < 0.001f * v2) {
 // std::cout<<" v is close to w "<<v2 - w.dot(v)<<"\n";
 			break;
 	    }

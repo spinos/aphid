@@ -47,7 +47,7 @@ bool LarixInterface::createWorld(LarixWorld * world)
 	world->setTetrahedronMesh(tetra);
 
     AdaptiveField * g = new AdaptiveField(tree.getBBox());
-    g->create(&tree, tetra);
+    g->create(&tree, tetra, 7);
     g->addVec3Channel("dP");
 
     if(world->hasSourceP()) {
@@ -83,10 +83,15 @@ bool LarixInterface::createWorld(LarixWorld * world)
     buildCells(g);
     
     //m_cellColors->copyFrom(g->namedChannel("dP")->data());
-    //lxlg.writeVec3(m_cellColors, g->namedChannel("dP")->numElements(), "dP");
+    //
     world->beginCache();
     
     testLocateCells(g, tetra);
+	
+	BaseBuffer grids;
+	g->printGrids(&grids);
+	lxlg.writeInt3(&grids, g->numCells(), "grd");
+	
 	return true;
 }
 
@@ -135,9 +140,29 @@ void LarixInterface::drawWorld(LarixWorld * world, KdTreeDrawer * drawer)
     drawer->tetrahedronMesh(mesh);
 	
 	drawer->setColor(.3f, .2f, .1f);
-	drawGrid(world->field(), drawer);
-    
-    // drawField(world->field(), "dP", drawer);
+	// drawGrid(world->field(), drawer);
+	drawField(world->field(), "dP", drawer);
+	//drawLocateCells(world->field(), mesh, drawer);
+}
+
+void LarixInterface::drawLocateCells(AdaptiveField * fld, ATetrahedronMesh * mesh,
+					KdTreeDrawer * drawer)
+{
+	drawer->setColor(1.f, 0.f, 0.f);
+	glBegin(GL_TRIANGLES);
+
+	const unsigned n = mesh->numPoints();
+    Vector3F * p = mesh->points();
+    unsigned i = 0;
+	for(;i<n;i++) {
+        sdb::CellValue * c = fld->locateCell(p[i]);
+        if(!c) {
+            std::cout<<"\n cannot find cell for p["<< i << "] " <<p[i];
+            //lxlg.writeMortonCode(fld->mortonEncodeLevel(p[i], 7));
+            drawer->unitCubeAt(p[i], .5f);
+        }
+	}
+	glEnd();    
 }
 
 void LarixInterface::drawField(AdaptiveField * field, 
@@ -236,14 +261,14 @@ void LarixInterface::testLocateCells(AdaptiveField * fld, ATetrahedronMesh * tet
     std::cout<<"\n test locate cells";
     const unsigned n = tetra->numPoints();
     Vector3F * p = tetra->points();
-    unsigned i = 916;
-   // for(;i<n;i++) {
+    unsigned i = 0;
+	for(;i<n;i++) {
         sdb::CellValue * c = fld->locateCell(p[i]);
         if(!c) {
             std::cout<<"\n cannot find cell for p["<< i << "] " <<p[i];
             //lxlg.writeMortonCode(fld->mortonEncodeLevel(p[i], 7));
-            return;
+            //fld->printMortonEncodeLevel(p[i], 7);
         }
-   // }
+	}
 }
 //:~

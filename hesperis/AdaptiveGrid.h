@@ -77,10 +77,11 @@ private:
     bool multipleChildrenTouched(KdIntersection * tree,
                                  const Vector3F & parentCenter,
                                  float parentSize);
-	Vector3F neighbourCellCenter(int side, const Vector3F & p, float size) const;
-	void findFinerNeighbourCells(CellNeighbourInds * dst, int side,
-								const Vector3F & center, float size);
-	Vector3F finerNeighbourCellCenter(int i, int side, const Vector3F & p, float size) const;
+	void findFinerNeighbourCells(CellNeighbourInds * dst, 
+								int side,
+								unsigned code, 
+								int level);
+	
 private:
     sdb::CellHash * m_cellsToRefine;
 	int m_maxLevel;

@@ -3,6 +3,7 @@
 
 #include <BoundingBox.h>
 #include <MortonHash.h>
+class BaseBuffer;
 class CartesianGrid 
 {
 public:
@@ -23,6 +24,8 @@ public:
 	void addCell(unsigned code, int level, int visited, unsigned index);
 	
     unsigned mortonEncodeLevel(const Vector3F & p, int level) const;
+	void printGrids(BaseBuffer * dst);
+	
 protected:
 	const float gridSize() const;
 	const unsigned mortonEncode(const Vector3F & p) const;
@@ -37,7 +40,24 @@ protected:
     const Vector3F putIntoBound(const Vector3F & p) const;
 	bool isPInsideBound(const Vector3F & p) const;
 	void printHash();
-    void printGrids(int level);
+	
+	unsigned encodeNeighborCell(unsigned code, 
+									int level,
+									int dx, int dy, int dz);
+
+    sdb::CellValue * findNeighborCell(unsigned code, 
+									int level,
+									int dx, int dy, int dz);
+									
+	unsigned encodeFinerNeighborCell(unsigned code, 
+									int level,
+									int dx, int dy, int dz,
+									int cx, int cy, int cz) const;
+									
+	sdb::CellValue * findFinerNeighborCell(unsigned code, 
+									int level,
+									int dx, int dy, int dz,
+									int cx, int cy, int cz);
 private:
     Vector3F m_origin;
     float m_span, m_gridH; // same for each dimensions
