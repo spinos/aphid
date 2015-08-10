@@ -143,6 +143,8 @@ void AdaptiveField::interpolate()
 
 void AdaptiveField::checkNeighbours()
 {
+	std::cout<<"\n check neighbors ... ";
+	bool stat = true;
 	unsigned x, y, z;
 	int i, s;
 	m_neighbours->begin();
@@ -155,10 +157,12 @@ void AdaptiveField::checkNeighbours()
 				std::cout<<"\n cell ("<<x<<","<<y<<","<<z<<")"
 				<<" side"<<i
 				<<" has "<<s<<" neighbors ";
+				stat = false;
 			}
 		}
 		m_neighbours->next();
 	}
+	if(stat) std::cout<<"all passed.\n";
 }
 
 void AdaptiveField::verbose() const

@@ -254,8 +254,17 @@ void AdaptiveGrid::findNeighbourCells(CellNeighbourInds * dst, unsigned code,
 									Cell6NeighborOffsetI[side][2]);
 		if(cell)
 			dst->side(side)[0] = cell->index;
-		else
-			findFinerNeighbourCells(dst, side, code, v->level);
+		else {
+			cell = findNeighborCell(code, 
+									v->level - 1,
+									Cell6NeighborOffsetI[side][0], 
+									Cell6NeighborOffsetI[side][1],
+									Cell6NeighborOffsetI[side][2]);
+			if(cell)
+				dst->side(side)[0] = cell->index;
+			else
+				findFinerNeighbourCells(dst, side, code, v->level);
+		}
 	}
 }
 
@@ -271,9 +280,9 @@ void AdaptiveGrid::findFinerNeighbourCells(CellNeighbourInds * dst,
 									Cell6NeighborOffsetI[side][0], 
 									Cell6NeighborOffsetI[side][1],
 									Cell6NeighborOffsetI[side][2],
-									Cell24FinerNeighborOffsetI[side * 4][0],
-									Cell24FinerNeighborOffsetI[side * 4][1],
-									Cell24FinerNeighborOffsetI[side * 4][2]);
+									Cell24FinerNeighborOffsetI[side * 4 + i][0],
+									Cell24FinerNeighborOffsetI[side * 4 + i][1],
+									Cell24FinerNeighborOffsetI[side * 4 + i][2]);
 		if(cell) dst->side(side)[i] = cell->index;
 	}
 }

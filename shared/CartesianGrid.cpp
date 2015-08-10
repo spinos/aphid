@@ -175,8 +175,9 @@ const Vector3F CartesianGrid::gridOrigin(unsigned code) const
 {
     unsigned x, y, z;
     decodeMorton3D(code, x, y, z);
-    const float h = gridSize();
-    return Vector3F(m_origin.x + h * x, m_origin.y + h * y, m_origin.z + h * z);
+    return Vector3F(m_origin.x + m_gridH * x, 
+					m_origin.y + m_gridH * y, 
+					m_origin.z + m_gridH * z);
 }
 
 const Vector3F CartesianGrid::cellOrigin(unsigned code, int level) const

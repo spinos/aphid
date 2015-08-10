@@ -68,7 +68,7 @@ protected:
 	
 	void findNeighbourCells(CellNeighbourInds * dst, unsigned code,
                             sdb::CellValue * v);
-	
+							
 private:
     void setCellToRefine(unsigned k, const sdb::CellValue * v,
                          int toRefine);
@@ -77,6 +77,7 @@ private:
     bool multipleChildrenTouched(KdIntersection * tree,
                                  const Vector3F & parentCenter,
                                  float parentSize);
+
 	void findFinerNeighbourCells(CellNeighbourInds * dst, 
 								int side,
 								unsigned code, 
