@@ -10,6 +10,7 @@
 #include <iostream>
 #include <map>
 #include <boost/format.hpp>
+#include <boost/timer.hpp>
 #include <tetrahedron_math.h>
 #ifdef __APPLE__
 typedef unsigned long long uint64;
@@ -272,6 +273,8 @@ void testCell()
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
+	boost::timer bTimer;
+	bTimer.restart();
 	std::cout<<"bit size of uint:   "<<sizeof(uint) * 8<<"\n";
 	std::cout<<"bit size of uint64: "<<sizeof(uint64) * 8<<"\n";
 	
@@ -366,7 +369,7 @@ int main(int argc, char * const argv[])
     
     testCell();
 	
-	std::cout<<"\n (int) -1.45f is "<<(int)-1.45f;
-	std::cout<<"end of test\n";
+	std::cout << "\n elapsed time " << bTimer.elapsed();
+	std::cout<<" end of test\n";
 	return 0;
 }

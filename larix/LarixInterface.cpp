@@ -18,7 +18,7 @@
 #include "AdaptiveField.h"
 #include <Plane.h>
 #include <BaseLog.h>
-
+#include <boost/timer.hpp>
 #if 0
 BaseLog lxlg("log.txt");
 #endif
@@ -86,7 +86,7 @@ bool LarixInterface::createWorld(LarixWorld * world)
     
     world->beginCache();
     
-    // testLocateCells(g, tetra);
+    testLocateCells(g, tetra);
 #if 0
 	BaseBuffer grids;
 	g->printGrids(&grids);
@@ -260,7 +260,11 @@ void LarixInterface::buildCells(AdaptiveField * field)
 void LarixInterface::testLocateCells(AdaptiveField * fld, ATetrahedronMesh * tetra)
 {
     std::cout<<"\n test locate cells ... ";
+	boost::timer bTimer;
+	bTimer.restart();
+	
     const unsigned n = tetra->numPoints();
+	std::cout<<"\n n points "<<n;
     Vector3F * p = tetra->points();
 	Vector3F q;
 	bool passed = true;
@@ -276,6 +280,7 @@ void LarixInterface::testLocateCells(AdaptiveField * fld, ATetrahedronMesh * tet
 			passed = false;
         }
 	}
-	if(passed) std::cout<<"all passed.\n";
+	std::cout << "\n elapsed time " << bTimer.elapsed()<< " secs ";
+	if(passed) std::cout<<" all passed.\n";
 }
 //:~

@@ -82,6 +82,8 @@ public:
         return output;
     }
 	
+	Pair<Entity *, Entity> findInNode(const KeyType & x);
+	
 	const int numKeys() const  { return m_numKeys; }
 	const KeyType key(const int & i) const { return m_data[i].key; }
 	Entity * index(const int & i) const { return m_data[i].index; }
@@ -183,6 +185,7 @@ private:
 	bool shouldInteriorMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) < MaxNumKeysPerNode; }
 	int shouldBalance(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) / 2 - lft->numKeys(); }
 	
+	bool isKeyInRange(const KeyType & x) const;
 	const SearchResult findKey(const KeyType & x) const;
 	int keyRight(const KeyType & x) const;
 	int keyLeft(const KeyType & x) const;
@@ -1112,6 +1115,13 @@ const std::string BNode<KeyType>::str() const
 	return sst.str();
 }
 
+template <typename KeyType>
+bool BNode<KeyType>::isKeyInRange(const KeyType & x) const
+{ 
+	if(numKeys() < 1) return false;
+	return (x >= key(0) && x<= key(numKeys() - 1)); 
+}
+
 template <typename KeyType> 
 const SearchResult BNode<KeyType>::findKey(const KeyType & x) const
 {
@@ -1169,7 +1179,7 @@ Pair<Entity *, Entity> BNode<KeyType>::findLeaf(const KeyType & x)
 	Pair<Entity *, Entity> r;
 	r.key = this;
 	r.index = NULL;
-	if(numKeys() < 1) return r;
+	if(!isKeyInRange(x)) return r;
 	int found = findKey(x).found;
 	
 	if(found < 0) return r;
@@ -1183,5 +1193,9 @@ Pair<Entity *, Entity> BNode<KeyType>::findInterior(const KeyType & x)
 	BNode * n = nextIndex(x);
 	return n->find(x);
 }
+
+template <typename KeyType>
+Pair<Entity *, Entity> BNode<KeyType>::findInNode(const KeyType & x)
+{ return findLeaf(x); }
 
 } // end of namespace sdb

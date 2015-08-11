@@ -1,18 +1,6 @@
 #include "AdaptiveFieldDeformer.h"
-// Function Sets
-//
-#include <maya/MFnNumericAttribute.h>
-#include <maya/MFnTypedAttribute.h>
-#include <maya/MFnSingleIndexedComponent.h>
-#include <maya/MString.h>
-#include <maya/MFloatArray.h>
-#include <maya/MPointArray.h>
-#include <maya/MIntArray.h>
-
 // General Includes
 //
-#include <maya/MGlobal.h>
-#include <maya/MPlug.h>
 #include <maya/MDataBlock.h>
 #include <maya/MDataHandle.h>
 #include <maya/MIOStream.h>
@@ -93,6 +81,7 @@ MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, cons
 	if(file) {
 		H5FieldIn * fieldf = (H5FieldIn *)file;
 		if(multiIndex == 0) {
+// on frame change
 			if(fieldf->currentFrame() != iframe) {
 				fieldf->setCurrentFrame(iframe);
                 MGlobal::displayInfo(MString("field deformer read frame ")+iframe);
@@ -224,7 +213,7 @@ bool AdaptiveFieldDeformer::openFieldFile(const std::string & name)
     AdaptiveField * fld = (AdaptiveField *)f->fieldByIndex(0);
 
     MGlobal::displayInfo(MString("adaptive field n cells ") + fld->numCells());
-    
+    f->setCurrentFrame(-999999);
 	AvailableFieldFiles.addFile(f);
 	return true;
 }
