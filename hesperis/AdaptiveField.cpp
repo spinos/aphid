@@ -4,6 +4,12 @@
 #include <ATetrahedronMesh.h>
 #include <Morton3D.h>
 
+AdaptiveField::AdaptiveField()
+{
+    m_sampleParams = new SampleHash;
+	m_neighbours = new NeighbourHash;
+}
+
 AdaptiveField::AdaptiveField(float * originSpan) :
 	AdaptiveGrid(originSpan)
 {

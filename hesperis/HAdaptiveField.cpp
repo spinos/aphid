@@ -61,7 +61,7 @@ char HAdaptiveField::save(AdaptiveField * fld)
         addIntAttr(".max_level");
     
     int ml = fld->maxLevel();
-    writeIntAttr(".ncells", &ml);
+    writeIntAttr(".max_level", &ml);
 	
 	BaseBuffer dhash;
 	dhash.create(nc * 16);
@@ -95,22 +95,22 @@ char HAdaptiveField::load(AdaptiveField * fld)
 	readFloatAttr(".origin_span", originSpan);
     
     int ml = 7;
-    readIntAttr(".ncells", &ml);
+    readIntAttr(".max_level", &ml);
 	
-	fld = new AdaptiveField(originSpan);
-    fld->setMaxLevel(ml);
+    fld->setBounding(originSpan);
+	fld->setMaxLevel(ml);
 	
 	BaseBuffer dhash;
 	dhash.create(nc * 16);
 	readCharData(".cellHash", nc*16, dhash.data());
 	
 	IOCellHash * src = (IOCellHash *)dhash.data();
-	
+	std::cout<<"\n hadaptive field add n cells "<<nc;
 	unsigned i = 0;
 	for(;i<nc;i++) {
 		fld->addCell(src->code, src->level, src->visited, src->index);
 		src++;
 	}
-	
+	std::cout<<"\n hadaptive field done load";
 	return HField::load(fld);
 }

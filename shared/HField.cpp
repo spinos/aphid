@@ -58,8 +58,6 @@ char HField::save(AField * fld)
 
 char HField::load(AField * fld) 
 {
-    if(!verifyType()) return 0;
-    
 	int nc = 1;
     readIntAttr(".fieldNumChannels", &nc);
 	
@@ -73,9 +71,10 @@ char HField::load(AField * fld)
 		return 0;
 	}
 	
+    std::cout<<"\n hfield load n channels "<<nc;
 	std::vector<std::string >::const_iterator it = channelNames.begin();
 	for(; it!= channelNames.end();++it) loadAChannel(*it, fld);
-	
+	std::cout<<"\n hfield done load";
     return 1;
 }
 

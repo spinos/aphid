@@ -7,10 +7,12 @@ class BaseBuffer;
 class CartesianGrid 
 {
 public:
+    CartesianGrid();
 	CartesianGrid(float * originSpan);
     CartesianGrid(const BoundingBox & bound);
     virtual ~CartesianGrid();
     
+    void setBounding(float * originSpan);
     const unsigned numCells() const;
     void getBounding(BoundingBox & bound) const;
     const Vector3F origin() const;

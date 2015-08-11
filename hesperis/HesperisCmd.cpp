@@ -1,6 +1,5 @@
 #include "HesperisCmd.h"
 #include <maya/MGlobal.h>
-#include <maya/MSelectionList.h>
 #include <maya/MItSelectionList.h>
 #include <maya/MItDag.h>
 #include <maya/MArgDatabase.h>
@@ -8,6 +7,7 @@
 #include "HesperisFile.h"
 #include <ASearchHelper.h>
 #include <BaseTransform.h>
+#include <H5FieldIn.h>
 
 void *HesperisCmd::creator()
 { return new HesperisCmd; }
@@ -18,6 +18,7 @@ MSyntax HesperisCmd::newSyntax()
 
 	syntax.addFlag("-w", "-write", MSyntax::kString);
 	syntax.addFlag("-gm", "-growMesh", MSyntax::kString);
+    syntax.addFlag("-fd", "-fieldDeform", MSyntax::kString);
 	syntax.addFlag("-h", "-help", MSyntax::kNoArg);
 	syntax.enableQuery(false);
 	syntax.enableEdit(false);
@@ -55,6 +56,16 @@ MStatus HesperisCmd::parseArgs ( const MArgList& args )
 		
 		MGlobal::displayInfo(MString(" hesperis will write grow mesh ") + m_growMeshName);
 	}
+    
+    if(argData.isFlagSet("-fd")) {
+        argData.getFlagArgument("-fd", 0, m_fileName);
+		if(!stat) {
+			MGlobal::displayInfo(" cannot parse -fd flag");
+			return MS::kFailure;
+		}
+        m_ioMode = IOFieldDeform;
+        MGlobal::displayInfo(MString(" hesperis will add field deformer ") + m_fileName);
+    }
 	
 	if(argData.isFlagSet("-h")) 
 	{
@@ -65,6 +76,11 @@ MStatus HesperisCmd::parseArgs ( const MArgList& args )
 		MGlobal::displayInfo(" no valid arguments are set, use -h for help");
 		return MS::kFailure;
 	}
+    
+    if(m_ioMode == IOWrite && m_growMeshName == "") {
+        MGlobal::displayInfo(" no -gm is set for export, use -h for help");
+		return MS::kFailure;
+    }
 	
 	return MS::kSuccess;
 }
@@ -84,7 +100,13 @@ MStatus HesperisCmd::doIt(const MArgList &args)
 		MGlobal::displayInfo(" Empty selction!");
 		return MS::kSuccess;
 	}
-	
+    
+    if(m_ioMode == IOWrite) return writeSelected(selList);
+    if(m_ioMode == IOFieldDeform) return deformSelected();
+}
+
+MStatus HesperisCmd::writeSelected(const MSelectionList & selList)
+{
 	MItSelectionList iter( selList );
 	
 	std::map<std::string, MDagPath > curves;
@@ -135,10 +157,15 @@ void HesperisCmd::writeMesh(HesperisFile * file)
 
 MStatus HesperisCmd::printHelp()
 {
-	MGlobal::displayInfo(MString("To use hesperis cmd:")
+	MGlobal::displayInfo(MString(" howto use hesperis cmd:")
+         + MString("\n export mode")
 		+MString("\n select group of curves to export")
 		+MString("\n hesperis -w filename -gm fullPathToTransformOfMesh")
-        +MString("\n -gm or -growMesh is full path name to the transform of grow mesh"));
+        +MString("\n -gm or -growMesh is full path name to the transform of grow mesh")
+            + MString("\n deform mode")
+            + MString("\n select group of geometries to deform")
+            + MString("\n hesperis -fd filename")
+            + MString("\n -fd or -fieldDeform is filename of .fld file") );
 	return MS::kSuccess;
 }
 
@@ -150,5 +177,60 @@ void HesperisCmd::testTransform()
 	
 	BaseTransform data;
 	HesperisIO::GetTransform(&data, meshGrp);
+}
+
+MStatus HesperisCmd::deformSelected()
+{
+    H5FieldIn t;
+    if(!t.open(m_fileName.asChar())) {
+        MGlobal::displayInfo(MString("cannot open file")
+                             + m_fileName);
+        return MS::kFailure;
+    }
+    
+    MGlobal::displayInfo(MString("hesperis add field deformer from file")
+                         +m_fileName);
+    MStringArray deformerName;
+    MGlobal::executeCommand("deformer -type hesperisDeformer", deformerName);
+    MGlobal::displayInfo(MString("node ")+deformerName[0]);
+    MGlobal::executeCommand(MString("setAttr -type \"string\" ")
+                            + deformerName[0]
+                            + MString(".cachePath \"")
+                            + m_fileName
+                            + "\"");
+    
+    int minFrame = t.FirstFrame;
+    int maxFrame = t.LastFrame;
+    MGlobal::displayInfo(MString("hesperis set field deformer frame range (")
+                         +minFrame
+                         +MString(",")
+                         +maxFrame
+                         +MString(")"));
+    MGlobal::executeCommand(MString("setAttr ")
+                            + deformerName[0]
+                            + MString(".minFrame \"")
+                            + minFrame
+                            + "\"");
+    MGlobal::executeCommand(MString("setAttr ")
+                            + deformerName[0]
+                            + MString(".maxFrame \"")
+                            + maxFrame
+                            + "\"");
+    
+    MGlobal::executeCommand(MString("setKeyframe -v ")
+                            +minFrame
+                            +MString(" -t ")
+                            +minFrame
+                            +MString(" -itt \"linear\" ")
+                            +deformerName[0]
+                            +MString(".currentTime"));
+    MGlobal::executeCommand(MString("setKeyframe -v ")
+                            +maxFrame
+                            +MString(" -t ")
+                            +maxFrame
+                            +MString(" -itt \"linear\" ")
+                            +deformerName[0]
+                            +MString(".currentTime"));
+    return MS::kSuccess;
 }
 //:~

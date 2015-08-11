@@ -24,9 +24,9 @@ public:
 	static  MObject aminframe;
 	static  MObject amaxframe;
 	static  MObject acachename;
-	static  MObject areadloc;
 	static  MObject asubframe;
 	
+    static void CloseAllFiles();
 private:
 	bool openFieldFile(const std::string & name);
 	void setP(float env, float *p, MItGeometry& iter);

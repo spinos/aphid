@@ -29,6 +29,7 @@
 #include <SHelper.h>
 #include <AHelper.h>
 #include "H5FieldIn.h"
+#include "AdaptiveField.h"
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/progress.hpp>
@@ -49,7 +50,6 @@ MObject AdaptiveFieldDeformer::aframe;
 MObject AdaptiveFieldDeformer::aminframe;
 MObject AdaptiveFieldDeformer::amaxframe;
 MObject AdaptiveFieldDeformer::acachename;
-MObject AdaptiveFieldDeformer::areadloc;
 MObject AdaptiveFieldDeformer::asubframe;
 MultiPlaybackFile AdaptiveFieldDeformer::AvailableFieldFiles;
 
@@ -95,6 +95,7 @@ MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, cons
 		if(multiIndex == 0) {
 			if(fieldf->currentFrame() != iframe) {
 				fieldf->setCurrentFrame(iframe);
+                MGlobal::displayInfo(MString("field deformer read frame ")+iframe);
 				fieldf->readFrame();
 			}
 		}
@@ -160,11 +161,6 @@ MStatus AdaptiveFieldDeformer::initialize()
  	tAttr.setStorable(true);
 	addAttribute( acachename );
 	
-	areadloc = numAttr.create( "readLocation", "rlc", MFnNumericData::kInt, 0 );
-	numAttr.setStorable(true);
-	numAttr.setKeyable(true);
-	addAttribute( areadloc );
-	
 	asubframe = numAttr.create( "subframe", "sbf", MFnNumericData::kInt, 1 );
 	numAttr.setStorable(true);
 	numAttr.setKeyable(true);
@@ -219,7 +215,20 @@ bool AdaptiveFieldDeformer::openFieldFile(const std::string & name)
 								+ MString(name.c_str()));
 		return false;
 	}
+    const unsigned n = f->numFields();
+    if(n < 1) {
+        MGlobal::displayInfo("file has no field");
+        return false;
+    }
+    
+    AdaptiveField * fld = (AdaptiveField *)f->fieldByIndex(0);
+
+    MGlobal::displayInfo(MString("adaptive field n cells ") + fld->numCells());
+    
 	AvailableFieldFiles.addFile(f);
 	return true;
 }
+
+void AdaptiveFieldDeformer::CloseAllFiles()
+{ AvailableFieldFiles.cleanup();}
 //:~

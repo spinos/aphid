@@ -139,6 +139,8 @@ bool LarixWorld::setFileOut(const std::string & fileName)
 {
     if(!isCachingFinished()) return false;
     m_cacheFile->verbose();
+// flush b4 cpy
+    m_cacheFile->flush();
     boost::filesystem::path fromtFp("./dposition.tmp");
     boost::filesystem::path toFp(fileName);
     try 
@@ -151,6 +153,17 @@ bool LarixWorld::setFileOut(const std::string & fileName)
         std::cout << "\n" << ex.what() << '\n';
         return false;
     }
+// test resulting file
+    H5FieldIn t;
+    if(!t.open(fileName)) {
+        std::cout<<"\n cannot open destination file";
+        return false;
+    }
+    
+    AdaptiveField * fld = (AdaptiveField *)t.fieldByIndex(0);
+    
+    std::cout<<"\n adaptive field n cells "<< fld->numCells();
+    t.close();
 	return true;
 }
 

@@ -23,9 +23,11 @@ bool H5FieldIn::doRead(const std::string & fileName)
     std::vector<std::string >::const_iterator it = names.begin();
     for(;it!=names.end();++it) {
         AField * f = createTypedField(*it);
+        std::cout<<"\n add field "<<*it;
         addField(*it, f);
     }
     
+    verbose();
 	return true;
 }
 
@@ -49,6 +51,7 @@ AField * H5FieldIn::fieldByIndex(unsigned idx)
 
 void H5FieldIn::addField(const std::string & fieldName,
                       AField * fld)
+// todo keep fld typ
 { m_fields[fieldName] = fld; }
 
 const std::map<std::string, AField *> * H5FieldIn::fields() const
@@ -80,7 +83,7 @@ AField * H5FieldIn::createTypedField(const std::string & name)
 	g.close();
 	
 	if(t==AField::FldAdaptive)
-		return createBaseField(name);
+		return createAdaptiveField(name);
 
 	return createBaseField(name);
 }
@@ -96,7 +99,7 @@ AField * H5FieldIn::createBaseField(const std::string & name)
 
 AdaptiveField * H5FieldIn::createAdaptiveField(const std::string & name)
 {
-	AdaptiveField * f;
+	AdaptiveField * f = new AdaptiveField;
 	HAdaptiveField gb(name);
 	gb.load(f);
 	gb.close();
@@ -111,7 +114,7 @@ void H5FieldIn::verbose() const
     std::map<std::string, AField *>::const_iterator it = m_fields.begin();
     for(;it!=m_fields.end();++it) {
         std::cout<<"\n field[\""<<it->first<<"\"]";
-        it->second->verbose();
+        ((AdaptiveField *)it->second)->verbose();
     }
     APlaybackFile::verbose();
 }

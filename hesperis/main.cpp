@@ -2,11 +2,11 @@
 #include <maya/MGlobal.h>
 #include "HesperisCmd.h"
 #include "AdaptiveFieldDeformer.h"
-
+static const MString Verinfo("1.3.5 Tue Aug 11 17:33:15 CST 2015 field deform");
 MStatus initializePlugin(MObject obj)
 {
         MStatus         status;
-        MFnPlugin       plugin(obj, "Zhang Jian", "1.3.4 Sat Jul 18 18:27:54 CST 2015 grow mesh in world space", "Any");
+        MFnPlugin       plugin(obj, "Zhang Jian", Verinfo.asChar(), "Any");
 
 		status = plugin.registerNode( "hesperisDeformer", AdaptiveFieldDeformer::id,
 						 &AdaptiveFieldDeformer::creator, &AdaptiveFieldDeformer::initialize,
@@ -23,6 +23,7 @@ MStatus initializePlugin(MObject obj)
                 return status;
         }
 
+        MGlobal::displayInfo(MString("hesperis load plug-in version ") + Verinfo);
         return status;
 }
 
@@ -30,6 +31,8 @@ MStatus uninitializePlugin(MObject obj)
 {
         MStatus         status;
         MFnPlugin       plugin(obj);
+        
+        AdaptiveFieldDeformer::CloseAllFiles();
 		
 		status = plugin.deregisterNode( AdaptiveFieldDeformer::id );
 		if (!status) {
@@ -42,6 +45,8 @@ MStatus uninitializePlugin(MObject obj)
                 status.perror("deregisterCommand");
                 return status;
         }
+        
+        MGlobal::displayInfo(MString("hesperis unload plug-in version ") + Verinfo);
         
         return status;
 }

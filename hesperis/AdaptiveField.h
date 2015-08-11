@@ -6,6 +6,7 @@ class ATetrahedronMesh;
 class AdaptiveField : public AdaptiveGrid, public AField
 {
 public:
+    AdaptiveField();
 	AdaptiveField(float * originSpan);
     AdaptiveField(const BoundingBox & bound);
     virtual ~AdaptiveField();

@@ -4,15 +4,21 @@
 #include <BNode.h>
 #include <BaseBuffer.h>
 
-CartesianGrid::CartesianGrid(float * originSpan)
+CartesianGrid::CartesianGrid()
 {
-	m_origin.set(originSpan[0], originSpan[1], originSpan[2]);
-	m_span = originSpan[3];
-	m_gridH = m_span / 1024.0;
-	m_numCells = 0;
+    m_numCells = 0;
 	sdb::TreeNode::MaxNumKeysPerNode = 512;
 	sdb::TreeNode::MinNumKeysPerNode = 32;
 	m_cellHash = new sdb::CellHash;
+}
+
+CartesianGrid::CartesianGrid(float * originSpan)
+{
+    m_numCells = 0;
+	sdb::TreeNode::MaxNumKeysPerNode = 512;
+	sdb::TreeNode::MinNumKeysPerNode = 32;
+	m_cellHash = new sdb::CellHash;
+    setBounding(originSpan);
 }
 
 CartesianGrid::CartesianGrid(const BoundingBox & bound) 
@@ -29,6 +35,13 @@ CartesianGrid::CartesianGrid(const BoundingBox & bound)
 CartesianGrid::~CartesianGrid() 
 {
     delete m_cellHash;
+}
+
+void CartesianGrid::setBounding(float * originSpan)
+{
+    m_origin.set(originSpan[0], originSpan[1], originSpan[2]);
+	m_span = originSpan[3];
+	m_gridH = m_span / 1024.0;
 }
 
 const unsigned CartesianGrid::numCells() const
