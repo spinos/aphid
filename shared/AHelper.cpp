@@ -1,4 +1,6 @@
 #include "AHelper.h"
+#include <AllMath.h>
+#include <maya/MFnAnimCurve.h>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
@@ -995,5 +997,51 @@ void AHelper::ConvertToMMatrix(MMatrix & dst, const Matrix44F & src)
     dst[3][1] = src.M(3,1);
     dst[3][2] = src.M(3,2);
     dst[3][3] = src.M(3,3);
+}
+
+void AHelper::SimpleAnimation(const MPlug & dst, int a, int b)
+{
+	float dQ = b - a;
+	float dt = b - a;
+	float ang = atan(dQ/dt);
+	ang = AngleToDegree<float>(a);
+	
+	float length = sqrt(dQ*dQ + dt*dt) * 0.33;
+	
+	float inAngle = ang;
+	float inWeight = length;
+		
+	float outAngle = ang;
+	float outWeight = length;
+	
+	MAngle angle(inAngle, MAngle::kDegrees);
+	MAngle angleo(outAngle, MAngle::kDegrees);
+
+	MFnAnimCurve animCv;
+	animCv.create ( dst, MFnAnimCurve::kAnimCurveTU );
+	animCv.setIsWeighted(true);
+	MTime::Unit timeUnit = MTime::uiUnit();
+	
+	MTime tmt(a, timeUnit);
+	double v = a;
+	
+	animCv.addKeyframe(tmt, v);
+	animCv.setTangentsLocked(0, false);
+	animCv.setWeightsLocked(0, false);
+	animCv.setTangent(0, angle, inWeight, true);
+	animCv.setTangent(0, angleo, outWeight, false);
+	animCv.setInTangentType(0, MFnAnimCurve::kTangentLinear );
+	animCv.setOutTangentType(0, MFnAnimCurve::kTangentLinear );
+	
+	tmt = MTime(b, timeUnit);
+	v = b;
+	
+	animCv.addKeyframe(tmt, v);
+	animCv.setTangentsLocked(1, false);
+	animCv.setWeightsLocked(1, false);
+	animCv.setTangent(1, angle, inWeight, true);
+	animCv.setTangent(1, angleo, outWeight, false);
+	animCv.setInTangentType(1, MFnAnimCurve::kTangentLinear );
+	animCv.setOutTangentType(1, MFnAnimCurve::kTangentLinear );
 }
 //:~

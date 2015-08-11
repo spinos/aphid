@@ -8,8 +8,7 @@ class CartesianGrid
 {
 public:
     CartesianGrid();
-	CartesianGrid(float * originSpan);
-    CartesianGrid(const BoundingBox & bound);
+	CartesianGrid(const BoundingBox & bound);
     virtual ~CartesianGrid();
     
     void setBounding(float * originSpan);

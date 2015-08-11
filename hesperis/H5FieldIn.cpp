@@ -34,27 +34,42 @@ bool H5FieldIn::doRead(const std::string & fileName)
 AField * H5FieldIn::fieldByName(const std::string & fieldName)
 { 
     if(m_fields.find(fieldName) == m_fields.end()) return 0;
-    return m_fields[fieldName]; 
+    return m_fields[fieldName].second; 
 }
 
 AField * H5FieldIn::fieldByIndex(unsigned idx)
 {
     unsigned i=0;
-    
-    std::map<std::string, AField *>::const_iterator it = m_fields.begin();
+    std::map<std::string, TypeFieldPair>::const_iterator it = m_fields.begin();
     for(;it!=m_fields.end();++it) {
-        if(i==idx) return it->second;
+        if(i==idx) return it->second.second;
         i++;
     }
     return 0;
 }
 
+AField::FieldType H5FieldIn::fieldTypeByName(const std::string & fieldName)
+{ 
+	if(m_fields.find(fieldName) == m_fields.end()) return AField::FldBase;
+    return m_fields[fieldName].first;
+}
+
+AField::FieldType H5FieldIn::fieldTypeByIndex(unsigned idx)
+{
+	unsigned i=0;
+    std::map<std::string, TypeFieldPair>::const_iterator it = m_fields.begin();
+    for(;it!=m_fields.end();++it) {
+        if(i==idx) return it->second.first;
+        i++;
+    }
+    return AField::FldBase;
+}
+
 void H5FieldIn::addField(const std::string & fieldName,
                       AField * fld)
-// todo keep fld typ
-{ m_fields[fieldName] = fld; }
+{ m_fields[fieldName] = TypeFieldPair(fld->fieldType(), fld); }
 
-const std::map<std::string, AField *> * H5FieldIn::fields() const
+const std::map<std::string, H5FieldIn::TypeFieldPair> * H5FieldIn::fields() const
 { return &m_fields; }
 
 unsigned H5FieldIn::numFields() const
@@ -65,10 +80,10 @@ bool H5FieldIn::readFrame()
     useDocument();
     const std::string sframe = currentFrameStr();
     
-    std::map<std::string, AField *>::const_iterator it = m_fields.begin();
+    std::map<std::string, TypeFieldPair>::const_iterator it = m_fields.begin();
     for(;it!=m_fields.end(); ++it) {
         HField grp(it->first);
-        grp.loadFrame(sframe, it->second);
+        grp.loadFrame(sframe, it->second.second);
         grp.close();
     }
     
@@ -111,10 +126,13 @@ void H5FieldIn::verbose() const
     std::cout<<"\n h5 field file:"
     <<"\n n fields "<<numFields();
     
-    std::map<std::string, AField *>::const_iterator it = m_fields.begin();
+    std::map<std::string, TypeFieldPair>::const_iterator it = m_fields.begin();
     for(;it!=m_fields.end();++it) {
         std::cout<<"\n field[\""<<it->first<<"\"]";
-        ((AdaptiveField *)it->second)->verbose();
+		if(it->second.first == AField::FldBase)
+			it->second.second->verbose();
+		else
+			((AdaptiveField *)it->second.second)->verbose();
     }
     APlaybackFile::verbose();
 }

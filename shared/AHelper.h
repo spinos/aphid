@@ -138,5 +138,6 @@ public:
     
     static void PrintMatrix(const std::string & note, const MMatrix & mat);
     static void ConvertToMMatrix(MMatrix & dst, const Matrix44F & src);
+	static void SimpleAnimation(const MPlug & dst, int a, int b);
 };
 #endif

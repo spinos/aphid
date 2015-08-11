@@ -18,10 +18,10 @@ void H5FieldOut::writeFrame(int frame)
 {
     useDocument();
     const std::string sframe = boost::str(boost::format("%1%") % frame);
-    std::map<std::string, AField *>::const_iterator it = fields()->begin();
+    std::map<std::string, TypeFieldPair>::const_iterator it = fields()->begin();
     for(;it!=fields()->end(); ++it) {
         HField grp(it->first);
-        grp.saveFrame(sframe, it->second);
+        grp.saveFrame(sframe, it->second.second);
         grp.close();
     }
 }

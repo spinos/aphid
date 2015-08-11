@@ -103,6 +103,8 @@ MStatus HesperisCmd::doIt(const MArgList &args)
     
     if(m_ioMode == IOWrite) return writeSelected(selList);
     if(m_ioMode == IOFieldDeform) return deformSelected();
+	
+	return MS::kSuccess;
 }
 
 MStatus HesperisCmd::writeSelected(const MSelectionList & selList)
@@ -190,6 +192,17 @@ MStatus HesperisCmd::deformSelected()
     
     MGlobal::displayInfo(MString("hesperis add field deformer from file")
                          +m_fileName);
+						 
+	int minFrame = t.FirstFrame;
+    int maxFrame = t.LastFrame;
+	t.close();
+	
+    MGlobal::displayInfo(MString("hesperis field deform frame range (")
+                         +minFrame
+                         +MString(",")
+                         +maxFrame
+                         +MString(")"));
+	
     MStringArray deformerName;
     MGlobal::executeCommand("deformer -type hesperisDeformer", deformerName);
     MGlobal::displayInfo(MString("node ")+deformerName[0]);
@@ -198,39 +211,18 @@ MStatus HesperisCmd::deformSelected()
                             + MString(".cachePath \"")
                             + m_fileName
                             + "\"");
-    
-    int minFrame = t.FirstFrame;
-    int maxFrame = t.LastFrame;
-    MGlobal::displayInfo(MString("hesperis set field deformer frame range (")
-                         +minFrame
-                         +MString(",")
-                         +maxFrame
-                         +MString(")"));
-    MGlobal::executeCommand(MString("setAttr ")
-                            + deformerName[0]
-                            + MString(".minFrame \"")
-                            + minFrame
-                            + "\"");
-    MGlobal::executeCommand(MString("setAttr ")
-                            + deformerName[0]
-                            + MString(".maxFrame \"")
-                            + maxFrame
-                            + "\"");
-    
-    MGlobal::executeCommand(MString("setKeyframe -v ")
-                            +minFrame
-                            +MString(" -f ")
-                            +minFrame
-                            +MString(" -itt \"linear\"  -ott \"linear\" ")
-                            +deformerName[0]
-                            +MString(".currentTime"));
-    MGlobal::executeCommand(MString("setKeyframe -v ")
-                            +maxFrame
-                            +MString(" -f ")
-                            +maxFrame
-                            +MString(" -itt \"linear\"  -ott \"linear\" ")
-                            +deformerName[0]
-                            +MString(".currentTime"));
+							
+	MObject odef;
+	if( !ASearchHelper::FirstDepNodeByName(odef, deformerName[0], MFn::kPluginDeformerNode) ) {
+		MGlobal::displayInfo(MString("cannot find node by name ")
+							+ deformerName[0]);
+		return MS::kFailure;
+	}
+	
+	MFnDependencyNode fdef(odef);
+	fdef.findPlug("minFrame").setValue(minFrame);
+	fdef.findPlug("maxFrame").setValue(maxFrame);
+	AHelper::SimpleAnimation(fdef.findPlug("currentTime"), minFrame, maxFrame);
     return MS::kSuccess;
 }
 //:~

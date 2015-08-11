@@ -2,7 +2,7 @@
 #include "APlaybackFile.h"
 #include <string>
 #include <map>
-class AField;
+#include <AField.h>
 class AdaptiveField;
 
 class H5FieldIn : public APlaybackFile {
@@ -14,6 +14,9 @@ public:
     
     AField * fieldByName(const std::string & fieldName);
     AField * fieldByIndex(unsigned idx);
+	
+	AField::FieldType fieldTypeByName(const std::string & fieldName);
+    AField::FieldType fieldTypeByIndex(unsigned idx);
 
     virtual void addField(const std::string & fieldName,
                       AField * fld);
@@ -24,11 +27,12 @@ public:
     
     virtual void verbose() const;
 protected:
-    const std::map<std::string, AField *> * fields() const;
+    typedef std::pair<AField::FieldType, AField *> TypeFieldPair;
+    const std::map<std::string, TypeFieldPair> * fields() const;
 private:
 	AField * createTypedField(const std::string & name);
 	AField * createBaseField(const std::string & name);
 	AdaptiveField * createAdaptiveField(const std::string & name);
 private:
-    std::map<std::string, AField *> m_fields;
+	std::map<std::string, TypeFieldPair> m_fields;
 };

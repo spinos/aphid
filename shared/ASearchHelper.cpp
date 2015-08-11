@@ -890,4 +890,21 @@ bool ASearchHelper::FristNamedPlugInHistory(MObject &root, MFn::Type type, MStri
 	}
 	return false;
 }
+
+bool ASearchHelper::FirstDepNodeByName(MObject& node, const MString & name, MFn::Type type)
+{
+	MItDependencyNodes itdep(type);
+	for(; !itdep.isDone(); itdep.next())
+	{
+		MObject ocur = itdep.thisNode();
+		std::string curname(MFnDependencyNode(ocur).name().asChar());
+		curname = SHelper::removeNamespace(curname);
+		if(name == MString(curname.c_str()) )
+		{
+			node = ocur;
+			return true;
+		}
+	}
+	return false;
+}
 //~:
