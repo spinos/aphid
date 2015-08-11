@@ -19,7 +19,9 @@
 #include <Plane.h>
 #include <BaseLog.h>
 
+#if 0
 BaseLog lxlg("log.txt");
+#endif
 
 LarixInterface::LarixInterface() 
 { 
@@ -82,16 +84,14 @@ bool LarixInterface::createWorld(LarixWorld * world)
 	world->setField(g);
     buildCells(g);
     
-    //m_cellColors->copyFrom(g->namedChannel("dP")->data());
-    //
     world->beginCache();
     
-    testLocateCells(g, tetra);
-	
+    // testLocateCells(g, tetra);
+#if 0
 	BaseBuffer grids;
 	g->printGrids(&grids);
 	lxlg.writeInt3(&grids, g->numCells(), "grd");
-	
+#endif	
 	return true;
 }
 
@@ -252,8 +252,9 @@ void LarixInterface::buildCells(AdaptiveField * field)
 	    c->next();
         i++;
 	}
-    
+#if 0
     lxlg.writeMortonCode(&codes, n, "key");
+#endif
 }
 
 void LarixInterface::testLocateCells(AdaptiveField * fld, ATetrahedronMesh * tetra)

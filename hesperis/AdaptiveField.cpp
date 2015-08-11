@@ -42,7 +42,7 @@ void AdaptiveField::create(KdIntersection * tree,
     createSamples(tree, mesh);
     std::cout<<"\n n samples "<<m_sampleParams->size();
     findNeighbours();
-    checkNeighbours();
+// checkNeighbours();
 }
 
 void AdaptiveField::computeChannelValue(const std::string & channelName,

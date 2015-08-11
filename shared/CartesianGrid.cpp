@@ -112,7 +112,10 @@ sdb::CellValue * CartesianGrid::findGrid(unsigned code) const
 { return m_cellHash->find(code); }
 
 sdb::CellValue * CartesianGrid::findCell(unsigned code) const
-{ return m_cellHash->find(code); }
+{
+    if(code < 1) return 0;
+    return m_cellHash->find(code); 
+}
 
 unsigned CartesianGrid::addGrid(const Vector3F & p)
 {
