@@ -219,16 +219,16 @@ MStatus HesperisCmd::deformSelected()
     
     MGlobal::executeCommand(MString("setKeyframe -v ")
                             +minFrame
-                            +MString(" -t ")
+                            +MString(" -f ")
                             +minFrame
-                            +MString(" -itt \"linear\" ")
+                            +MString(" -itt \"linear\"  -ott \"linear\" ")
                             +deformerName[0]
                             +MString(".currentTime"));
     MGlobal::executeCommand(MString("setKeyframe -v ")
                             +maxFrame
-                            +MString(" -t ")
+                            +MString(" -f ")
                             +maxFrame
-                            +MString(" -itt \"linear\" ")
+                            +MString(" -itt \"linear\"  -ott \"linear\" ")
                             +deformerName[0]
                             +MString(".currentTime"));
     return MS::kSuccess;
