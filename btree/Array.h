@@ -59,6 +59,11 @@ public:
 		
 		return m_lastSearchResult;
 	}
+	
+	void clearSearchBuffer() {
+		m_lastSearchResult = NULL;
+		m_lastSearchNode = NULL;
+	}
 
 private:
 	ValueType * m_lastSearchResult;

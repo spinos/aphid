@@ -7,6 +7,7 @@
 int main(int argc, char *argv[])
 {
 	if(argc > 1) HesperisInterface::FileName = argv[argc - 1];
+	else HesperisInterface::FileName = "/Users/jianzhang/foo.hes";
     
     qDebug()<<"main";
     QApplication app(argc, argv);

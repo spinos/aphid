@@ -8,10 +8,11 @@ class CartesianGrid
 {
 public:
     CartesianGrid();
-	CartesianGrid(const BoundingBox & bound);
-    virtual ~CartesianGrid();
+	virtual ~CartesianGrid();
     
     void setBounding(float * originSpan);
+	void setBounding(const BoundingBox & bound);
+    
     const unsigned numCells() const;
     void getBounding(BoundingBox & bound) const;
     const Vector3F origin() const;

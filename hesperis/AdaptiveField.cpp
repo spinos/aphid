@@ -10,20 +10,6 @@ AdaptiveField::AdaptiveField()
 	m_neighbours = new NeighbourHash;
 }
 
-AdaptiveField::AdaptiveField(float * originSpan) :
-	AdaptiveGrid(originSpan)
-{
-    m_sampleParams = new SampleHash;
-	m_neighbours = new NeighbourHash;
-}
-
-AdaptiveField::AdaptiveField(const BoundingBox & bound) :
-    AdaptiveGrid(bound)
-{
-    m_sampleParams = new SampleHash;
-	m_neighbours = new NeighbourHash;
-}
-
 AdaptiveField::~AdaptiveField() 
 {
     delete m_sampleParams;

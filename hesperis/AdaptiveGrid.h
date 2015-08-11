@@ -5,9 +5,7 @@ class AdaptiveGrid : public CartesianGrid
 {
 public:
     AdaptiveGrid();
-	AdaptiveGrid(float * originSpan);
-    AdaptiveGrid(const BoundingBox & bound);
-    virtual ~AdaptiveGrid();
+	virtual ~AdaptiveGrid();
     
     virtual void create(KdIntersection * tree, int maxLevel = 7);
 	int maxLevel() const;

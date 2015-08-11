@@ -23,7 +23,7 @@ template<typename T>
 class Sequence : public Entity {
 public:
 	Sequence(Entity * parent = NULL) : Entity(parent) {
-		m_root = new BNode<T>;
+		m_root = new BNode<T>();
 	}
 	
 	virtual ~Sequence() {
@@ -40,19 +40,24 @@ public:
 	}
 	
 	bool find(const T & x) {
+		if(m_root->numKeys() < 1) return false;
+		
 		Pair<Entity *, Entity> g = m_root->find(x);
-		if(!g.index) 
-			return false;
+		if(!g.index) return false;
 
 		return true;
 	}
 	
 	Pair<Entity *, Entity> findEntity(const T & x, MatchFunction::Condition mf = MatchFunction::mExact, T * extraKey = NULL) {
-		Pair<Entity *, Entity> g = m_root->find(x);
+		Pair<Entity *, Entity> g;
+		if(m_root->numKeys() < 1) return g;
+		
+		g = m_root->find(x);
 		if(mf == MatchFunction::mExact) return g;
 		if(g.index) {
 			if(extraKey) *extraKey = x;
 		}
+		/* // remove static LatestSearch
 		else {
 			SearchResult sr = BNode<T>::LatestSearch;
 			BNode<T> * n = static_cast<BNode<T> *>(g.key);
@@ -70,7 +75,7 @@ public:
 					return g;
 				}
 			}
-		}
+		}*/
 		return g;
 	}
 	
@@ -80,6 +85,7 @@ public:
 		m_currentData = 0;
 	}
 	
+	/*
 	void beginAt(const T & x) {
 		Pair<Entity *, Entity> g = m_root->find(x);
 		m_current = static_cast<BNode<T> *>(g.key);
@@ -87,6 +93,7 @@ public:
 		SearchResult sr = BNode<T>::LatestSearch;
 		m_currentData = sr.found;
 	}
+	*/
 	
 	void next() {
 		m_currentData++;
@@ -117,7 +124,7 @@ public:
 	
 	void clear() {
 		delete m_root;
-		m_root = new BNode<T>;
+		m_root = new BNode<T>();
 	}
 
 protected:	

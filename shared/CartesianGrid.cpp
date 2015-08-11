@@ -12,17 +12,6 @@ CartesianGrid::CartesianGrid()
 	m_cellHash = new sdb::CellHash;
 }
 
-CartesianGrid::CartesianGrid(const BoundingBox & bound) 
-{
-    m_origin = bound.getMin();
-    m_span = bound.getLongestDistance();
-    m_gridH = m_span / 1024.0;
-    m_numCells = 0;
-	sdb::TreeNode::MaxNumKeysPerNode = 512;
-	sdb::TreeNode::MinNumKeysPerNode = 32;
-	m_cellHash = new sdb::CellHash;
-}
-
 CartesianGrid::~CartesianGrid() 
 {
     delete m_cellHash;
@@ -33,6 +22,13 @@ void CartesianGrid::setBounding(float * originSpan)
     m_origin.set(originSpan[0], originSpan[1], originSpan[2]);
 	m_span = originSpan[3];
 	m_gridH = m_span / 1024.0;
+}
+
+void CartesianGrid::setBounding(const BoundingBox & bound)
+{
+	m_origin = bound.getMin();
+    m_span = bound.getLongestDistance();
+    m_gridH = m_span / 1024.0;
 }
 
 const unsigned CartesianGrid::numCells() const

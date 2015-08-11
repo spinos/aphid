@@ -87,7 +87,7 @@ public:
 	const int numKeys() const  { return m_numKeys; }
 	const KeyType key(const int & i) const { return m_data[i].key; }
 	Entity * index(const int & i) const { return m_data[i].index; }
-	static SearchResult LatestSearch;
+	// static SearchResult LatestSearch;
 private:	
 	const KeyType firstKey() const;
 	const KeyType lastKey() const;
@@ -181,7 +181,7 @@ private:
 	void increaseNumKeys() { m_numKeys++; }
 	void setNumKeys(int x) { m_numKeys = x; }
 	
-	bool shouldMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) <= MaxNumKeysPerNode; }
+	bool shouldMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) < MaxNumKeysPerNode; }
 	bool shouldInteriorMerge(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) < MaxNumKeysPerNode; }
 	int shouldBalance(BNode * lft, BNode * rgt) const { return (lft->numKeys() + rgt->numKeys()) / 2 - lft->numKeys(); }
 	
@@ -200,8 +200,8 @@ private:
 	int m_numKeys;
 };
 
-template <typename KeyType>
-SearchResult BNode<KeyType>::LatestSearch;
+//template <typename KeyType>
+//SearchResult BNode<KeyType>::LatestSearch;
 
 template <typename KeyType>  
 BNode<KeyType>::BNode(Entity * parent) : TreeNode(parent)
@@ -255,7 +255,7 @@ Pair<KeyType, Entity> * BNode<KeyType>::insert(const KeyType & x)
 template <typename KeyType> 
 void BNode<KeyType>::remove(const KeyType & x)
 {
-    if(isRoot()) {
+	if(isRoot()) {
     
 		SeparatedNodes.reset();
 		removeRoot(x);
@@ -298,8 +298,9 @@ Pair<KeyType, Entity> * BNode<KeyType>::insertRoot(const KeyType & x)
 		if(isFull()) {
 			dst = splitRoot(x);
 		}
-		else
+		else {
 			insertKey(x);
+		}
 	}
 	return dst->dataP(dst->findKey(x).found);
 }
@@ -309,10 +310,12 @@ Pair<KeyType, Entity> * BNode<KeyType>::insertLeaf(const KeyType & x)
 {
 	BNode * dst = this;
 	if(!hasKey(x)) {
-		if(isFull())
+		if(isFull()) {
 			dst = splitLeaf(x);
-		else
+		}
+		else {
 			insertKey(x);
+		}
 	}
 	return dst->dataP(dst->findKey(x).found);
 }
@@ -338,12 +341,13 @@ void BNode<KeyType>::insertData(Pair<KeyType, Entity> x)
 
 template <typename KeyType> 
 void BNode<KeyType>::insertKey(KeyType x)
-{	
+{  
 	int i;
-    for(i= numKeys() - 1;i >= 0 && m_data[i].key > x; i--)
-        m_data[i+1] = m_data[i];
+    for(i= numKeys() - 1;i >= 0 && m_data[i].key > x; i--) {
+		m_data[i+1] = m_data[i];
+	}
 		
-    m_data[i+1].key = x;
+	m_data[i+1].key = x;
 	m_data[i+1].index = NULL;
 	//std::cout<<"insert key "<<x.key<<" at "<<i+1<<"\n";
     increaseNumKeys();
@@ -352,7 +356,6 @@ void BNode<KeyType>::insertKey(KeyType x)
 template <typename KeyType> 
 BNode<KeyType> * BNode<KeyType>::splitRoot(KeyType x)
 {
-	//std::cout<<"split root "<<*this;
 	Entity * dangling = SeparatedNodes.give();
 	BNode * one = static_cast<BNode *>(dangling);
 	if(one) {
@@ -387,7 +390,7 @@ BNode<KeyType> * BNode<KeyType>::splitRoot(KeyType x)
 template <typename KeyType> 
 BNode<KeyType> * BNode<KeyType>::splitLeaf(const KeyType & x)
 {
-	//std::cout<<"split leaf "<<*this;
+	//std::cout<<" split leaf begin ";
 	//std::cout<<"into ";
 	Entity * oldRgt = sibling();
 	BNode * two = new BNode(parent()); two->setLeaf();
@@ -412,6 +415,7 @@ BNode<KeyType> * BNode<KeyType>::splitLeaf(const KeyType & x)
 	parentNode()->bounce(b);
 	//balanceLeafLeft();
 	
+	//std::cout<<" end ";
 	if(two->hasKey(x)) return two;
 	return this;
 }
@@ -1125,27 +1129,35 @@ bool BNode<KeyType>::isKeyInRange(const KeyType & x) const
 template <typename KeyType> 
 const SearchResult BNode<KeyType>::findKey(const KeyType & x) const
 {
-	SearchResult & r = LatestSearch;
+	SearchResult r;
     r.found = -1;
     r.low = 0; 
 	r.high = numKeys() - 1;
 	if(numKeys() < 1) return r;
+	
+	if(numKeys() < 2) {
+		if(key(0) == x) r.found = 0;
+		return r;
+	}
+	
+	if(numKeys() < 3) {
+		if(key(0) == x) r.found = 0;
+		if(key(1) == x) r.found = 1;
+		return r;
+	}
+	
     int mid;
-        
-    while(r.low <= r.high) {
+    while(r.low < r.high - 1) {
         mid = (r.low + r.high) / 2;
         
-        if(key(r.low) == x) r.found = r.low;
+		if(key(mid) == x) r.found = mid;
+        else if(key(r.low) == x) r.found = r.low;
         else if(key(r.high) == x) r.found = r.high;
-        else if(key(mid) == x) r.found = mid;
         
         if(r.found > -1) break;
 		
         if(x < key(mid)) r.high = mid;
         else r.low = mid;
-        
-		//std::cout<<" "<<r.low<<":"<<r.high<<"\n";
-        if(r.low >= r.high - 1) break;
     }
     
     return r;
@@ -1183,7 +1195,9 @@ Pair<Entity *, Entity> BNode<KeyType>::findLeaf(const KeyType & x)
 	int found = findKey(x).found;
 	
 	if(found < 0) return r;
-	r.index = data(found).index;
+	
+	r.index = dataP(found)->index;
+	
 	return r;
 }
 

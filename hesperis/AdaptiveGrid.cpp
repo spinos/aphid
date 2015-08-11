@@ -11,18 +11,6 @@ AdaptiveGrid::AdaptiveGrid()
     m_cellsToRefine = new sdb::CellHash;
 }
 
-AdaptiveGrid::AdaptiveGrid(float * originSpan) :
-	CartesianGrid(originSpan)
-{
-    m_cellsToRefine = new sdb::CellHash;
-}
-
-AdaptiveGrid::AdaptiveGrid(const BoundingBox & bound) :
-    CartesianGrid(bound)
-{
-    m_cellsToRefine = new sdb::CellHash;
-}
-
 AdaptiveGrid::~AdaptiveGrid() 
 {
     delete m_cellsToRefine;
@@ -66,8 +54,9 @@ void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
 
 bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
 {
-    m_cellsToRefine->clear();
-    
+	m_cellsToRefine->clear();
+	m_cellsToRefine->clearSearchBuffer();
+	
     sdb::CellHash * c = cells();
     BoundingBox box;
 
@@ -160,8 +149,8 @@ void AdaptiveGrid::setCellToRefine(unsigned k, const sdb::CellValue * v,
 }
 
 bool AdaptiveGrid::cellNeedRefine(unsigned k)
-{ 
-    sdb::CellValue * parentCell = m_cellsToRefine->find(k);
+{
+	sdb::CellValue * parentCell = m_cellsToRefine->find(k);
     if(!parentCell) {
         //std::cout<<"error: cannot find cell "<<k;
         return false;

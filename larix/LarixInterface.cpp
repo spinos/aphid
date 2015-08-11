@@ -48,7 +48,8 @@ bool LarixInterface::createWorld(LarixWorld * world)
     
 	world->setTetrahedronMesh(tetra);
 
-    AdaptiveField * g = new AdaptiveField(tree.getBBox());
+    AdaptiveField * g = new AdaptiveField;
+	g->setBounding(tree.getBBox());
     g->create(&tree, tetra, 7);
     g->addVec3Channel("dP");
 
