@@ -12,6 +12,7 @@
 #include <boost/format.hpp>
 #include <boost/timer.hpp>
 #include <tetrahedron_math.h>
+#include <IndexArray.h>
 #ifdef __APPLE__
 typedef unsigned long long uint64;
 #else
@@ -270,11 +271,63 @@ void testCell()
     std::cout<<"\n level 7 center xyz"<<x<<","<<y<<","<<z;
 }
 
+void testVecArray()
+{
+	std::cout<<"\n test array";
+	const unsigned n = 1<<16;
+	unsigned i = 0;
+	boost::timer bTimer;
+
+	bTimer.restart();
+	IndexArray arrs;
+	arrs.expandBy(n);
+	for(i=0;i<n;i++) {
+		//arrs.expandBy(1);
+		*arrs.asIndex() = i;
+		arrs.next();
+	}
+	
+	int b = 0;
+	arrs.begin();
+	for(i=0;i<n;i++) {
+		b += *arrs.asIndex();
+		arrs.next();
+	}
+	
+	std::cout<<"\n sum "<<b;
+	
+	std::cout << "\n create "<<n<< " array took " << bTimer.elapsed()<<"secs";
+	arrs.verbose();
+	
+	unsigned access = *arrs.asIndex(9235);
+	std::cout<<" test access [9235] "<<(access);
+	bTimer.restart();
+	
+	std::vector<unsigned> vecs;
+	vecs.resize(n);
+	for(i=0;i<n;i++) vecs[i] = i;
+	
+	b = 0;
+	for(i=0;i<n;i++) b += vecs[i];
+	std::cout<<"\n sum "<<b;
+	
+	std::cout << "\n create "<<n<< " vector took " << bTimer.elapsed()<<"secs";
+	
+	bTimer.restart();
+	
+	unsigned * mems = new unsigned[n];
+	for(i=0;i<n;i++) mems[i] = i;
+	b = 0;
+	for(i=0;i<n;i++) b += mems[i];
+	std::cout<<"\n sum "<<b;
+	
+	std::cout << "\n create "<<n<< " mem took " << bTimer.elapsed()<<"secs";
+	
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
-	boost::timer bTimer;
-	bTimer.restart();
 	std::cout<<"bit size of uint:   "<<sizeof(uint) * 8<<"\n";
 	std::cout<<"bit size of uint64: "<<sizeof(uint64) * 8<<"\n";
 	
@@ -365,11 +418,8 @@ int main(int argc, char * const argv[])
 	
 	std::cout<<boost::format("39 mod 16: %1%\n") % (39 & 15);
 	
-	testMap();
-    
-    testCell();
+	testVecArray();
 	
-	std::cout << "\n elapsed time " << bTimer.elapsed();
 	std::cout<<" end of test\n";
 	return 0;
 }

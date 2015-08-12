@@ -11,8 +11,7 @@
 
 PrimitiveArray::PrimitiveArray() 
 {
-	setIndex(0);
-	setElementSize(sizeof(Primitive));
+	initialize();
 }
 
 PrimitiveArray::~PrimitiveArray() 
@@ -24,13 +23,16 @@ Primitive *PrimitiveArray::asPrimitive(unsigned index)
 {
 	return (Primitive *)at(index);
 }
-
+/*
 Primitive *PrimitiveArray::asPrimitive(unsigned index) const
 {
 	return (Primitive *)at(index);
 }
-
+*/
 Primitive *PrimitiveArray::asPrimitive()
 {
 	return (Primitive *)current();
 }
+
+unsigned PrimitiveArray::elementSize() const
+{ return sizeof(Primitive); }

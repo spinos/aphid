@@ -102,11 +102,11 @@ MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, cons
 		}
        
         if(m_pieceCached->capacity() < (multiIndex + 1)) {
-            m_pieceCached->expandBy(4);
+            m_pieceCached->expandBy(1);
         }
         
         if(m_cellIndices->capacity() < (m_elementOffset + iter.count())) {
-            m_cellIndices->expandBy(4*iter.count());
+            m_cellIndices->expandBy(iter.count());
         }
         
         unsigned * isCached = m_pieceCached->asIndex(multiIndex);

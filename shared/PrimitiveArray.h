@@ -11,12 +11,14 @@
 #include <BaseArray.h>
 #include <Primitive.h>
 
-class PrimitiveArray : public BaseArray {
+class PrimitiveArray : public BaseArray<Primitive> {
 public:
 	PrimitiveArray();
 	virtual ~PrimitiveArray();
 	
 	Primitive * asPrimitive(unsigned index);
-	Primitive * asPrimitive(unsigned index) const;
+	//Primitive * asPrimitive(unsigned index) const;
 	Primitive * asPrimitive();
+protected:
+	virtual unsigned elementSize() const;
 };

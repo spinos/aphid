@@ -11,12 +11,12 @@
 
 #include <BaseArray.h>
 
-class IndexArray : public BaseArray {
+class IndexArray : public BaseArray<unsigned> {
 public:
 	IndexArray();
 	virtual ~IndexArray();
 	
-	unsigned *asIndex(unsigned index);
-	unsigned *asIndex(unsigned index) const;
 	unsigned *asIndex();
+	unsigned *asIndex(unsigned i);
+
 };

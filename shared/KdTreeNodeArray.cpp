@@ -11,8 +11,7 @@
 #include <iostream>
 KdTreeNodeArray::KdTreeNodeArray() 
 {
-	setIndex(0);
-	setElementSize(sizeof(KdTreeNode));
+	initialize();
 	//std::cout<<"size of kdtreenode "<<sizeof(KdTreeNode)<<"\n";
 }
 
@@ -30,3 +29,9 @@ KdTreeNode *KdTreeNodeArray::asKdTreeNode()
 {
 	return (KdTreeNode *)current();
 }
+
+unsigned KdTreeNodeArray::elementSize() const
+{ return 8; }
+
+unsigned KdTreeNodeArray::numElementPerBlock() const
+{ return 65536; }

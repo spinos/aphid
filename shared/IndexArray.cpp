@@ -11,26 +11,26 @@
 
 IndexArray::IndexArray()
 {
-	setIndex(0);
-	setElementSize(sizeof(unsigned));
+	initialize();
 }
 
 IndexArray::~IndexArray() 
 {
 	clear();
 }
-
+/*
 unsigned *IndexArray::asIndex(unsigned index)
 {
 	return (unsigned *)at(index);
 }
-
-unsigned *IndexArray::asIndex(unsigned index) const
+*/
+unsigned *IndexArray::asIndex(unsigned x) 
 {
-	return (unsigned *)at(index);
+	return at(x);
 }
 
 unsigned *IndexArray::asIndex()
 {
-	return (unsigned *)current();
+	return current();
 }
+//:~
