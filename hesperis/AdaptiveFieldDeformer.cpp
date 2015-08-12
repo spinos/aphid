@@ -16,6 +16,7 @@
 
 #include <SHelper.h>
 #include <AHelper.h>
+#include <IndexArray.h>
 #include "H5FieldIn.h"
 #include "AdaptiveField.h"
 #include <boost/filesystem/operations.hpp>
@@ -42,10 +43,19 @@ MObject AdaptiveFieldDeformer::asubframe;
 MultiPlaybackFile AdaptiveFieldDeformer::AvailableFieldFiles;
 
 AdaptiveFieldDeformer::AdaptiveFieldDeformer()
-{ m_lastFilename = ""; }
+{ 
+    m_lastFilename = ""; 
+    m_field = NULL;
+    m_cellIndices = new IndexArray;
+    m_pieceCached = new IndexArray;
+    m_elementOffset = 0;
+}
 
 AdaptiveFieldDeformer::~AdaptiveFieldDeformer()
-{}
+{
+    delete m_cellIndices;
+    delete m_pieceCached;
+}
 
 MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, const MMatrix& mat, unsigned int multiIndex)
 {
@@ -77,6 +87,8 @@ MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, cons
 		m_lastFilename = substituded;
 	}
 	
+    if(multiIndex == 0) m_elementOffset = 0;
+    
 	APlaybackFile * file = AvailableFieldFiles.namedFile(substituded.c_str());
 	if(file) {
 		H5FieldIn * fieldf = (H5FieldIn *)file;
@@ -88,36 +100,68 @@ MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, cons
 				fieldf->readFrame();
 			}
 		}
-		//SampleFrame &sampler = AdaptiveFieldDeformer::H5Files.getFrameSampler(substituded.c_str());
-		//sampler.calculateWeights(dtime);
-		// MGlobal::displayInfo(MString("smp ")+ sampler.m_frames[0] + " " + sampler.m_frames[1] + " " + sampler.m_samples[0]  + " " + sampler.m_samples[1]  + " " + sampler.m_weights[0]  + " " + sampler.m_weights[1]);
-		//if(isSubframe == 0)
-		  //  sampler.m_weights[0] = 1.f;
-		
-		// float *p = new float[iter.count() * 3];
-		
-		// char hasData = readFrame(p, iter.count(), sampler.m_frames[0], sampler.m_samples[0]);
-		
-		//if(hasData) {
-		//	if(sampler.m_weights[0] > 0.99f) {
-		//		setP(envl, p, iter);
-		//	}
-		//	else {
-		//		float *p1 = new float[iter.count() * 3];
-		//		hasData = readFrame(p1, iter.count(), sampler.m_frames[1], sampler.m_samples[1]);
-		//		if(hasData) {
-		//			mixFrames(p, p1, iter.count(), sampler.m_weights[0], sampler.m_weights[1]);
-		//		}
-		//		setP(envl, p, iter);
-					
-		//		delete[] p1;
-		//	}
-		//}
-		
-		//delete[] p;
+       
+        if(m_pieceCached->capacity() < (multiIndex + 1)) {
+            m_pieceCached->expandBy(4);
+        }
+        
+        if(m_cellIndices->capacity() < (m_elementOffset + iter.count())) {
+            m_cellIndices->expandBy(4*iter.count());
+        }
+        
+        unsigned * isCached = m_pieceCached->asIndex(multiIndex);
+            
+        m_cellIndices->setIndex(m_elementOffset);
+        if(*isCached != 1) {
+            AHelper::Info<unsigned>("field deformer build cell for geometry", multiIndex);
+            cacheCellIndex(iter);
+            *isCached = 1;
+        }
+        
+// go back to begin
+        m_cellIndices->setIndex(m_elementOffset);
+        iter.reset();
+        
+        Vector3F * dP = (Vector3F *)m_field->namedData("dP");
+        Vector3F samp;
+        MPoint q;
+        
+        for (; !iter.isDone(); iter.next()) {
+            MPoint ori = iter.position();
+            samp.set(ori.x, ori.y, ori.z);
+            samp += dP[*m_cellIndices->asIndex()];
+            
+            q.x = samp.x;
+            q.y = samp.y;
+            q.z = samp.z;
+            
+            iter.setPosition(q);
+            m_cellIndices->next();
+        }
+        m_elementOffset += iter.count();
 	}
 	
 	return status;
+}
+
+void AdaptiveFieldDeformer::cacheCellIndex(MItGeometry& iter)
+{
+    AHelper::Info<unsigned>(" piecemeal offset ", m_cellIndices->index());
+    Vector3F samp;
+    MPoint q;
+    for (; !iter.isDone(); iter.next()) {
+        MPoint ori = iter.position();
+        samp.set(ori.x, ori.y, ori.z);
+        m_field->putPInsideBound(samp);
+        sdb::CellValue * c = m_field->locateCell(samp);
+        if(c) *m_cellIndices->asIndex() = c->index;
+        else *m_cellIndices->asIndex() = 0;
+        
+        //AHelper::Info<unsigned>("cell ", *m_cellIndices->asIndex());
+            
+        m_cellIndices->next();
+    }
+    
 }
 
 void* AdaptiveFieldDeformer::creator()
@@ -210,9 +254,9 @@ bool AdaptiveFieldDeformer::openFieldFile(const std::string & name)
         return false;
     }
     
-    AdaptiveField * fld = (AdaptiveField *)f->fieldByIndex(0);
+    m_field = (AdaptiveField *)f->fieldByIndex(0);
 
-    MGlobal::displayInfo(MString("adaptive field n cells ") + fld->numCells());
+    MGlobal::displayInfo(MString("adaptive field n cells ") + m_field->numCells());
     f->setCurrentFrame(-999999);
 	AvailableFieldFiles.addFile(f);
 	return true;

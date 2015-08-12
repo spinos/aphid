@@ -6,6 +6,8 @@
 #include <maya/MPxDeformerNode.h>
 #include <vector>
 #include <MultiPlaybackFile.h>
+class AdaptiveField;
+class IndexArray;
 using namespace std;
  
 class AdaptiveFieldDeformer : public MPxDeformerNode
@@ -29,12 +31,17 @@ public:
     static void CloseAllFiles();
 private:
 	bool openFieldFile(const std::string & name);
+    void cacheCellIndex(MItGeometry& iter);
 	void setP(float env, float *p, MItGeometry& iter);
 	char readFrame(float *data, int count, int frame, int sample);
 	void mixFrames(float *p, float *p1, int count, float weight0, float weights1);
 private:
 	static MultiPlaybackFile AvailableFieldFiles;
 	std::string m_lastFilename;
+    AdaptiveField * m_field;
+    IndexArray * m_cellIndices;
+    IndexArray * m_pieceCached;
+    unsigned m_elementOffset;
 };
 
 #endif
