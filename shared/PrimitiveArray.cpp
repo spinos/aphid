@@ -11,12 +11,10 @@
 
 PrimitiveArray::PrimitiveArray() 
 {
-	initialize();
 }
 
 PrimitiveArray::~PrimitiveArray() 
 {
-	clear();
 }
 
 Primitive *PrimitiveArray::asPrimitive(unsigned index)

@@ -283,14 +283,15 @@ void testVecArray()
 	arrs.expandBy(n);
 	for(i=0;i<n;i++) {
 		//arrs.expandBy(1);
-		*arrs.asIndex() = i;
+		//*arrs.asIndex() = i;
+		arrs.setValue(i);
 		arrs.next();
 	}
 	
 	int b = 0;
 	arrs.begin();
 	for(i=0;i<n;i++) {
-		b += *arrs.asIndex();
+		b += arrs.value();
 		arrs.next();
 	}
 	

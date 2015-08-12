@@ -10,9 +10,9 @@
 #pragma once
 #include <vector>
 #include <iostream>
-#define BASEARRNUMELEMPERBLK 8192
-#define BASEARRNUMELEMPERBLKM1 8191
-#define BASEARRNUMELEMPERBLKL2 13
+#define BASEARRNUMELEMPERBLK 4096
+#define BASEARRNUMELEMPERBLKM1 4095
+#define BASEARRNUMELEMPERBLKL2 12
 
 template<typename T>
 class BaseArrayBlock {
@@ -24,6 +24,8 @@ public:
 	void disconnect();
 	BaseArrayBlock * sibling();
 	T * data();
+	T cdata() const;
+	void setData(const T & x);
 	
 	void begin();
 	void next();
@@ -69,6 +71,14 @@ T * BaseArrayBlock<T>::data()
 { return &m_data[m_loc]; }
 
 template<typename T>
+T BaseArrayBlock<T>::cdata() const
+{ return m_data[m_loc]; }
+
+template<typename T>
+void BaseArrayBlock<T>::setData(const T & x)
+{ m_data[m_loc] = x; }
+
+template<typename T>
 BaseArrayBlock<T> * BaseArrayBlock<T>::sibling()
 { return m_sibling; }
 
@@ -101,7 +111,7 @@ public:
 	void clear();
 	void initialize();
 	
-	T * expandBy(unsigned size);
+	void expandBy(unsigned size);
 	
 	void begin();
 	void next();
@@ -110,15 +120,13 @@ public:
 	unsigned index() const;
 	void setIndex(unsigned index);
 	
+	void setValue(const T & x);
+	T value() const;
 	T * current();
 	T * at(unsigned index);
 	
 	unsigned capacity() const;
-	
 	unsigned numBlocks() const;
-	
-	// virtual float sortKeyAt(unsigned idx) const;
-	// virtual void swapElement(unsigned a, unsigned b);
 	
 	void verbose() const;
 	
@@ -138,7 +146,7 @@ template<typename T>
 BaseArray<T>::BaseArray() 
 {
 	m_root = new BaseArrayBlock<T>;
-	m_numBlocks = 1;
+	initialize();
 }
 
 template<typename T>
@@ -155,9 +163,9 @@ void BaseArray<T>::clear()
 template<typename T>
 void BaseArray<T>::initialize()
 {
-	begin();
 	m_numBlocks = 1;
 	m_capacity = BASEARRNUMELEMPERBLK;
+	begin();
 }
 
 template<typename T>
@@ -171,10 +179,10 @@ void BaseArray<T>::begin()
 template<typename T>
 void BaseArray<T>::next()
 {
-	if(!m_lastBlock->end())
-		m_lastBlock->next();
-	else
+	if(m_lastBlock->end())
 		nextBlock();
+	else
+		m_lastBlock->next();
 }
 
 template<typename T>
@@ -193,7 +201,7 @@ bool BaseArray<T>::end() const
 }
 
 template<typename T>
-T * BaseArray<T>::expandBy(unsigned size)
+void BaseArray<T>::expandBy(unsigned size)
 {
 	int overflown = index() + 1 + size - capacity();
 	if(overflown > 0) {
@@ -208,12 +216,19 @@ T * BaseArray<T>::expandBy(unsigned size)
 			m_capacity += BASEARRNUMELEMPERBLK;
 		}
 	}
-	return current();
 }
+
+template<typename T>
+void BaseArray<T>::setValue(const T & x)
+{ m_lastBlock->setData(x); }
 
 template<typename T>
 T * BaseArray<T>::current()
 { return m_lastBlock->data(); }
+
+template<typename T>
+T BaseArray<T>::value() const
+{ return m_lastBlock->cdata(); }
 
 template<typename T>
 unsigned BaseArray<T>::index() const
@@ -246,9 +261,6 @@ T * BaseArray<T>::at(unsigned index)
 {
 	setIndex(index);
 	return current();
-	//unsigned blockIdx = (index * elementSize()) << 19;
-	//unsigned offset = (index * elementSize()) & BASEARRAYBLOCKM1;
-	//return m_blocks[blockIdx]->aligned + offset;
 }
 
 template<typename T>

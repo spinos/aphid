@@ -11,13 +11,11 @@
 #include <iostream>
 KdTreeNodeArray::KdTreeNodeArray() 
 {
-	initialize();
 	//std::cout<<"size of kdtreenode "<<sizeof(KdTreeNode)<<"\n";
 }
 
 KdTreeNodeArray::~KdTreeNodeArray() 
 {
-	clear();
 }
 
 KdTreeNode *KdTreeNodeArray::asKdTreeNode(unsigned index)

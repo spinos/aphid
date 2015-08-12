@@ -11,12 +11,10 @@
 
 IndexArray::IndexArray()
 {
-	initialize();
 }
 
 IndexArray::~IndexArray() 
 {
-	clear();
 }
 /*
 unsigned *IndexArray::asIndex(unsigned index)
