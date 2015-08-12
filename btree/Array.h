@@ -10,7 +10,6 @@ public:
     Array(Entity * parent = NULL) : Sequence<KeyType>(parent) 
 	{
 		m_lastSearchResult = NULL;
-		m_lastSearchNode = NULL;
 	}
     
     void insert(const KeyType & x, ValueType * v) {
@@ -39,16 +38,8 @@ public:
 		if(m_lastSearchResult && m_lastSearchKey == k)
 			return m_lastSearchResult;
 			
-// probably it is the same node
-		Pair<Entity *, Entity> g;
-		if(m_lastSearchNode) g = m_lastSearchNode->findInNode(k);
-		
-// restart search
-		if(!g.index) g = Sequence<KeyType>::findEntity(k, mf, extraKey);
-		
-// keep the node reached
-		m_lastSearchNode = static_cast<BNode<KeyType> *>(g.key);
-		
+		Pair<Entity *, Entity> g = Sequence<KeyType>::findEntity(k, mf, extraKey);
+
 		if(!g.index) return NULL;
 		
 		Single<ValueType> * s = static_cast<Single<ValueType> *>(g.index);
@@ -62,12 +53,10 @@ public:
 	
 	void clearSearchBuffer() {
 		m_lastSearchResult = NULL;
-		m_lastSearchNode = NULL;
 	}
 
 private:
 	ValueType * m_lastSearchResult;
-	BNode<KeyType> * m_lastSearchNode;
 	KeyType m_lastSearchKey;
 };
 } //end namespace sdb

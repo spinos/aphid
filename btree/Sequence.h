@@ -24,6 +24,7 @@ class Sequence : public Entity {
 public:
 	Sequence(Entity * parent = NULL) : Entity(parent) {
 		m_root = new BNode<T>();
+		m_lastSearchNode = NULL;
 	}
 	
 	virtual ~Sequence() {
@@ -50,24 +51,28 @@ public:
 	
 	Pair<Entity *, Entity> findEntity(const T & x, MatchFunction::Condition mf = MatchFunction::mExact, T * extraKey = NULL) {
 		Pair<Entity *, Entity> g;
-		if(m_root->numKeys() < 1) return g;
+// probably it is the same node
+		if(m_lastSearchNode) g = m_lastSearchNode->findInNode(x);
 		
-		g = m_root->find(x);
-		if(mf == MatchFunction::mExact) return g;
-		if(g.index) {
-			if(extraKey) *extraKey = x;
+		if(!g.index) {
+// restart search
+			g = m_root->find(x);
+// keep the node reached
+			m_lastSearchNode = static_cast<BNode<T> *>(g.key);
 		}
-		/* // remove static LatestSearch
-		else {
-			SearchResult sr = BNode<T>::LatestSearch;
-			BNode<T> * n = static_cast<BNode<T> *>(g.key);
-			if(n->key(sr.high) > x) {
-				g.index = n->index(sr.high);
-				if(extraKey) *extraKey = n->key(sr.high);
+		
+		if(mf == MatchFunction::mLequal) {
+			if(g.index) return g;
+			SearchResult sr;
+			g = m_lastSearchNode->findInNode1(x, &sr);
+			if(m_lastSearchNode->key(sr.high) > x) {
+				g.key = m_lastSearchNode;
+				g.index = m_lastSearchNode->index(sr.high);
+				if(extraKey) *extraKey = m_lastSearchNode->key(sr.high);
 				return g;
 			}
 			else {
-				BNode<T> * rgt = static_cast<BNode<T> *>(n->sibling());
+				BNode<T> * rgt = static_cast<BNode<T> *>(m_lastSearchNode->sibling());
 				if(rgt) {
 					g.key = rgt;
 					g.index = rgt->index(0);
@@ -75,7 +80,8 @@ public:
 					return g;
 				}
 			}
-		}*/
+		}
+		
 		return g;
 	}
 	
@@ -125,6 +131,11 @@ public:
 	void clear() {
 		delete m_root;
 		m_root = new BNode<T>();
+		m_lastSearchNode = NULL;
+	}
+	
+	void verbose() {
+		std::cout<<"\n sequence root node "<<*m_root;
 	}
 
 protected:	
@@ -169,6 +180,7 @@ private:
 private:
 	BNode<T> * m_root;
 	BNode<T> * m_current;
+	BNode<T> * m_lastSearchNode;
 	int m_currentData;
 };
 } //end namespace sdb

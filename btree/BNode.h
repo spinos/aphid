@@ -83,11 +83,12 @@ public:
     }
 	
 	Pair<Entity *, Entity> findInNode(const KeyType & x);
+	Pair<Entity *, Entity> findInNode1(const KeyType & x, SearchResult * result);
 	
 	const int numKeys() const  { return m_numKeys; }
 	const KeyType key(const int & i) const { return m_data[i].key; }
 	Entity * index(const int & i) const { return m_data[i].index; }
-	// static SearchResult LatestSearch;
+	
 private:	
 	const KeyType firstKey() const;
 	const KeyType lastKey() const;
@@ -366,7 +367,6 @@ BNode<KeyType> * BNode<KeyType>::splitRoot(KeyType x)
 	else
 		one = new BNode(this);
 	
-	//BNode * one = new BNode(this); 
 	one->setLeaf();
 	BNode * two = new BNode(this); two->setLeaf();
 	
@@ -374,7 +374,7 @@ BNode<KeyType> * BNode<KeyType>::splitRoot(KeyType x)
 	ex.key = x;
 	partData(ex, m_data, one, two, true);
 	
-	//std::cout<<"into "<<*one<<*two;
+	// std::cout<<"\n split root into "<<*one<<*two;
 	
 	setFirstIndex(one);
 	m_data[0].key = two->firstKey();
@@ -390,8 +390,6 @@ BNode<KeyType> * BNode<KeyType>::splitRoot(KeyType x)
 template <typename KeyType> 
 BNode<KeyType> * BNode<KeyType>::splitLeaf(const KeyType & x)
 {
-	//std::cout<<" split leaf begin ";
-	//std::cout<<"into ";
 	Entity * oldRgt = sibling();
 	BNode * two = new BNode(parent()); two->setLeaf();
 
@@ -404,7 +402,9 @@ BNode<KeyType> * BNode<KeyType>::splitLeaf(const KeyType & x)
 	Pair<KeyType, Entity> ex;
 	ex.key = x;
 	partData(ex, old, this, two, true);
-	//std::cout<<*this<<*two;
+	
+	// std::cout<<"\n split leaf into "<<*this<<*two;
+	
 	delete[] old;
 	connectSibling(two);
 	if(oldRgt) two->connectSibling(oldRgt);
@@ -415,7 +415,6 @@ BNode<KeyType> * BNode<KeyType>::splitLeaf(const KeyType & x)
 	parentNode()->bounce(b);
 	//balanceLeafLeft();
 	
-	//std::cout<<" end ";
 	if(two->hasKey(x)) return two;
 	return this;
 }
@@ -423,7 +422,6 @@ BNode<KeyType> * BNode<KeyType>::splitLeaf(const KeyType & x)
 template <typename KeyType> 
 void BNode<KeyType>::bounce(Pair<KeyType, Entity> b)
 {	
-	//std::cout<<"bounce "<<b.key<<"\n";
 	if(isFull()) {
 		if(isRoot()) 
 			partRoot(b);
@@ -928,7 +926,6 @@ void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 		else 
 			setFirstIndex(lft->firstIndex());
 			
-		// delete lft;
 		SeparatedNodes.take(lft);
 		
 		connectChildren();
@@ -1108,22 +1105,22 @@ template <typename KeyType>
 const std::string BNode<KeyType>::str() const 
 {
 	std::stringstream sst;
-	sst.str("");
-	int i;
-    sst<<"(";
-    for(i=0;i< numKeys();i++) {
-		sst<<m_data[i].key;
-		if(i< numKeys()-1) sst<<" ";
-	}
-    sst<<") ";
+	sst<<" nkeys "
+	<<numKeys()
+    <<" ["
+    <<firstKey()
+	<<":"
+	<<lastKey()
+    <<"] ";
 	return sst.str();
 }
 
 template <typename KeyType>
 bool BNode<KeyType>::isKeyInRange(const KeyType & x) const
 { 
-	if(numKeys() < 1) return false;
-	return (x >= key(0) && x<= key(numKeys() - 1)); 
+	if( x < firstKey() ) return false;
+	if( x > lastKey() ) return false; 
+	return true;
 }
 
 template <typename KeyType> 
@@ -1210,6 +1207,25 @@ Pair<Entity *, Entity> BNode<KeyType>::findInterior(const KeyType & x)
 
 template <typename KeyType>
 Pair<Entity *, Entity> BNode<KeyType>::findInNode(const KeyType & x)
-{ return findLeaf(x); }
+{ 
+	return findLeaf(x); 
+}
+
+template <typename KeyType>
+Pair<Entity *, Entity> BNode<KeyType>::findInNode1(const KeyType & x, SearchResult * result)
+{ 
+	Pair<Entity *, Entity> r;
+	r.key = this;
+	r.index = NULL;
+	if(!isKeyInRange(x)) return r;
+	
+	*result = findKey(x);
+
+	if(result->found < 0) return r;
+	
+	r.index = dataP(result->found)->index;
+	
+	return r; 
+}
 
 } // end of namespace sdb
