@@ -46,15 +46,13 @@ AdaptiveFieldDeformer::AdaptiveFieldDeformer()
 { 
     m_lastFilename = ""; 
     m_field = NULL;
-    m_cellIndices = new IndexArray;
-    m_pieceCached = new IndexArray;
     m_elementOffset = 0;
 }
 
 AdaptiveFieldDeformer::~AdaptiveFieldDeformer()
 {
-    delete m_cellIndices;
-    delete m_pieceCached;
+    m_cellIndices.clear();
+    m_pieceCached.clear();
 }
 
 MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, const MMatrix& mat, unsigned int multiIndex)
@@ -96,70 +94,68 @@ MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, cons
 // on frame change
 			if(fieldf->currentFrame() != iframe) {
 				fieldf->setCurrentFrame(iframe);
-                MGlobal::displayInfo(MString("field deformer read frame ")+iframe);
-				fieldf->readFrame();
+                fieldf->readFrame();
 			}
 		}
        
-        if(m_pieceCached->capacity() < (multiIndex + 1)) {
-            m_pieceCached->expandBy(4);
+        if(m_pieceCached.size() < (multiIndex + 1)) {
+            m_pieceCached.push_back(0);
         }
         
-        if(m_cellIndices->capacity() < (m_elementOffset + iter.count())) {
-            m_cellIndices->expandBy(4*iter.count());
+        if(m_cellIndices.size() < (m_elementOffset + iter.count())) {
+            m_cellIndices.resize(m_elementOffset + iter.count());
         }
-        
-        unsigned * isCached = m_pieceCached->asIndex(multiIndex);
-            
-        m_cellIndices->setIndex(m_elementOffset);
-        if(*isCached != 1) {
+          
+        if(m_pieceCached[multiIndex] != 1) {
             AHelper::Info<unsigned>("field deformer build cell for geometry", multiIndex);
-            cacheCellIndex(iter);
-            *isCached = 1;
+            cacheCellIndex(iter, m_elementOffset);
+            m_pieceCached[multiIndex] = 1;
         }
         
 // go back to begin
-        m_cellIndices->setIndex(m_elementOffset);
         iter.reset();
         
         Vector3F * dP = (Vector3F *)m_field->namedData("dP");
         Vector3F samp;
         MPoint q;
         
-        for (; !iter.isDone(); iter.next()) {
+        for (unsigned i=0; !iter.isDone(); iter.next()) {
             MPoint ori = iter.position();
             samp.set(ori.x, ori.y, ori.z);
-            samp += dP[*m_cellIndices->asIndex()];
+            samp += dP[ m_cellIndices[ i + m_elementOffset ] ];
             
             q.x = samp.x;
             q.y = samp.y;
             q.z = samp.z;
             
             iter.setPosition(q);
-            m_cellIndices->next();
+            i++;
         }
         m_elementOffset += iter.count();
 	}
+    else {
+        if(multiIndex == 0) MGlobal::displayInfo(MString("field deformer cannot read frame ")+iframe);		
+    }
 	
 	return status;
 }
 
-void AdaptiveFieldDeformer::cacheCellIndex(MItGeometry& iter)
+void AdaptiveFieldDeformer::cacheCellIndex(MItGeometry& iter, unsigned elmOffset)
 {
-    AHelper::Info<unsigned>(" piecemeal offset ", m_cellIndices->index());
+    AHelper::Info<unsigned>(" piecemeal offset ", elmOffset);
     Vector3F samp;
     MPoint q;
+    unsigned i = 0;
     for (; !iter.isDone(); iter.next()) {
         MPoint ori = iter.position();
         samp.set(ori.x, ori.y, ori.z);
         m_field->putPInsideBound(samp);
         sdb::CellValue * c = m_field->locateCell(samp);
-        if(c) *m_cellIndices->asIndex() = c->index;
-        else *m_cellIndices->asIndex() = 0;
+        if(c) m_cellIndices[ i + elmOffset ] = c->index;
+        else m_cellIndices[ i + elmOffset ] = 0;
         
         //AHelper::Info<unsigned>("cell ", *m_cellIndices->asIndex());
-            
-        m_cellIndices->next();
+        i++;
     }
     
 }
