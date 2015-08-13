@@ -11,12 +11,19 @@
 #include <AHelper.h>
 
 MTypeId     BoundTranslateNode::id( 0xa2f8bf );
-MObject     BoundTranslateNode::compoundOutput;      
+//MObject     BoundTranslateNode::compoundOutput;      
 MObject		BoundTranslateNode::constraintTranslateX;
 MObject		BoundTranslateNode::constraintTranslateY;
 MObject		BoundTranslateNode::constraintTranslateZ;
 
-MObject BoundTranslateNode::atargetBound;
+//MObject BoundTranslateNode::ainBoundMin;
+MObject BoundTranslateNode::ainBoundMinX;
+MObject BoundTranslateNode::ainBoundMinY;
+MObject BoundTranslateNode::ainBoundMinZ;
+//MObject BoundTranslateNode::ainBoundMax;
+MObject BoundTranslateNode::ainBoundMaxX;
+MObject BoundTranslateNode::ainBoundMaxY;
+MObject BoundTranslateNode::ainBoundMaxZ;
 
 BoundTranslateNode::BoundTranslateNode() 
 {}
@@ -30,36 +37,24 @@ void BoundTranslateNode::postConstructor()
 MStatus BoundTranslateNode::compute( const MPlug& plug, MDataBlock& block )
 {	
 	MStatus stat;
-	if(!m_isInitd) return stat;
     
-    if(plug == constraintTranslateX || 
-        plug == constraintTranslateY ||
-        plug == constraintTranslateZ) {
-         // AHelper::Info<MString>("ov child", plug.name());
-         // AHelper::Info<unsigned>("ov id", plug.parent().logicalIndex());
-         unsigned iobject = plug.parent().logicalIndex();
-         if(iobject > m_numObjects-1) {
-             MGlobal::displayInfo("n constraint is out of bound");
-             return MS::kSuccess;
-         }
-         
-         if(iobject == 0 && plug == constraintRotateX) {
-             MDataHandle hm = block.inputValue(atargetMesh);
-             updateShape(hm.asMesh());
-         }
-		       
-         MDataHandle hout = block.outputValue(plug, &stat);
-             
-         if(plug == constraintTranslateX) {
-             hout.set(m_solvedT.x);
-         }
-         else if(plug == constraintTranslateY) {
-             hout.set(m_solvedT.y);
-         }
-         else if(plug == constraintTranslateZ) {
-             hout.set(m_solvedT.z);
-         }
-         block.setClean( plug );
+    if(plug == constraintTranslateX ) {
+        computeBoundCenter(block);
+        MDataHandle hout = block.outputValue(constraintTranslateX);
+        hout.set(m_boundCenter.x);
+        block.setClean( plug );
+    }
+    else if(plug == constraintTranslateY) {
+        computeBoundCenter(block);
+        MDataHandle hout = block.outputValue(constraintTranslateY);
+        hout.set(m_boundCenter.y);
+        block.setClean( plug );
+    }
+    else if(plug == constraintTranslateZ) {
+        computeBoundCenter(block);
+        MDataHandle hout = block.outputValue(constraintTranslateZ);
+        hout.set(m_boundCenter.z);
+        block.setClean( plug ); 
     }
 	else
 		return MS::kUnknownParameter;
@@ -74,32 +69,66 @@ void* BoundTranslateNode::creator()
 
 MStatus BoundTranslateNode::initialize()
 {
-	MFnNumericAttribute nAttr;
 	MStatus				status;
 
 	MFnTypedAttribute typedAttr;
     
     MFnNumericAttribute numAttr;
-    constraintTranslateX = numAttr.create( "constraintTranslateX", "ctx", MFnNumericData::kDouble, 0.0, &status );
+
+    ainBoundMinX = numAttr.create( "bBoxMinX", "bbmnx", MFnNumericData::kDouble, 0.0, &status );
+    ainBoundMinY = numAttr.create( "bBoxMinY", "bbmny", MFnNumericData::kDouble, 0.0, &status );
+    ainBoundMinZ = numAttr.create( "bBoxMinZ", "bbmnz", MFnNumericData::kDouble, 0.0, &status );
+    addAttribute(ainBoundMinX);
+    addAttribute(ainBoundMinY);
+    addAttribute(ainBoundMinZ);
+    /*
+    MFnCompoundAttribute compoundAttr;
+    ainBoundMin = compoundAttr.create( "inBoundingBoxMin", "bbmn", &status );
+    compoundAttr.addChild( ainBoundMinX );
+    compoundAttr.addChild( ainBoundMinY );
+    compoundAttr.addChild( ainBoundMinZ );
+    addAttribute(ainBoundMin);*/
+
+    ainBoundMaxX = numAttr.create( "bBoxMaxX", "bbmxx", MFnNumericData::kDouble, 0.0, &status );
+    ainBoundMaxY = numAttr.create( "bBoxMaxY", "bbmxy", MFnNumericData::kDouble, 0.0, &status );
+    ainBoundMaxZ = numAttr.create( "bBoxMaxZ", "bbmxz", MFnNumericData::kDouble, 0.0, &status );
+    addAttribute(ainBoundMaxX);
+    addAttribute(ainBoundMaxY);
+    addAttribute(ainBoundMaxZ);
+    /*ainBoundMax = compoundAttr.create( "inBoundingBoxMax", "bbmx", &status );
+    compoundAttr.addChild( ainBoundMaxX );
+    compoundAttr.addChild( ainBoundMaxY );
+    compoundAttr.addChild( ainBoundMaxZ );
+    addAttribute(ainBoundMax);*/
+ 
+    constraintTranslateX = numAttr.create( "outTranslateX", "ctx", MFnNumericData::kDouble, 0.0, &status );
+    numAttr.setWritable(false);
+    numAttr.setStorable(false);
     if(!status) {
         MGlobal::displayInfo("failed to create attrib constraintTranslateX");
         return status;
     }
+    addAttribute(constraintTranslateX);
     
-    constraintTranslateY = numAttr.create( "constraintTranslateY", "cty", MFnNumericData::kDouble, 0.0, &status );
+    constraintTranslateY = numAttr.create( "outTranslateY", "cty", MFnNumericData::kDouble, 0.0, &status );;
+    numAttr.setWritable(false);
+    numAttr.setStorable(false);
     if(!status) {
         MGlobal::displayInfo("failed to create attrib constraintTranslateY");
         return status;
     }
+    addAttribute(constraintTranslateY);
     
-    constraintTranslateZ = numAttr.create( "constraintTranslateZ", "ctz", MFnNumericData::kDouble, 0.0, &status );
+    constraintTranslateZ = numAttr.create( "outTranslateZ", "ctz", MFnNumericData::kDouble, 0.0, &status );
+    numAttr.setWritable(false);
+    numAttr.setStorable(false);
     if(!status) {
         MGlobal::displayInfo("failed to create attrib constraintTranslateY");
         return status;
     }
+    addAttribute(constraintTranslateZ);
     
-	MFnCompoundAttribute compoundAttr;
-	compoundOutput = compoundAttr.create( "outValue", "otv",&status );
+	/*compoundOutput = compoundAttr.create( "outValue", "otv",&status );
 	if (!status) { status.perror("compoundAttr.create"); return status;}
 	status = compoundAttr.addChild( constraintTranslateX );
 	if (!status) { status.perror("compoundAttr.addChild tx"); return status;}
@@ -107,19 +136,37 @@ MStatus BoundTranslateNode::initialize()
 	if (!status) { status.perror("compoundAttr.addChild ty"); return status;}
 	status = compoundAttr.addChild( constraintTranslateZ );
 	if (!status) { status.perror("compoundAttr.addChild tz"); return status;}
-	compoundAttr.addChild( constraintRotateX );
-	compoundAttr.addChild( constraintRotateY );
-	compoundAttr.addChild( constraintRotateZ );
 
 	status = addAttribute( compoundOutput );
 	if (!status) { status.perror("addAttribute"); return status;}
-
-	atargetBound = typedAttr.create("targetMesh", "tgms", MFnMeshData::kMesh, &status);
-	typedAttr.setStorable(false);
-	addAttribute(atargetBound);
-	
-    attributeAffects(atargetBound, compoundOutput);
-    
+*/
+/*
+    attributeAffects(ainBoundMinX, constraintTranslateX);
+    attributeAffects(ainBoundMinX, constraintTranslateY);
+    attributeAffects(ainBoundMinX, constraintTranslateZ);
+    attributeAffects(ainBoundMaxX, constraintTranslateX);
+    attributeAffects(ainBoundMaxX, constraintTranslateY);
+    attributeAffects(ainBoundMaxX, constraintTranslateZ);*/
+    attributeAffects(ainBoundMinX, constraintTranslateX);
+    attributeAffects(ainBoundMinX, constraintTranslateY);
+    attributeAffects(ainBoundMinX, constraintTranslateZ);
+    attributeAffects(ainBoundMinX, constraintTranslateX);
+    attributeAffects(ainBoundMinX, constraintTranslateY);
+    attributeAffects(ainBoundMinX, constraintTranslateZ);
 	return MS::kSuccess;
+}
+
+void BoundTranslateNode::computeBoundCenter(MDataBlock& block)
+{
+    double mnx = block.inputValue(ainBoundMinX).asDouble();
+    double mny = block.inputValue(ainBoundMinY).asDouble();
+    double mnz = block.inputValue(ainBoundMinZ).asDouble();
+    double mxx = block.inputValue(ainBoundMaxX).asDouble();
+    double mxy = block.inputValue(ainBoundMaxY).asDouble();
+    double mxz = block.inputValue(ainBoundMaxZ).asDouble();
+    
+    m_boundCenter.x = (mnx + mxx) * .5;
+    m_boundCenter.y = (mny + mxy) * .5;
+    m_boundCenter.z = (mnz + mxz) * .5;
 }
 //:~

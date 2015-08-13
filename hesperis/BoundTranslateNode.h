@@ -8,6 +8,7 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnCompoundAttribute.h>
 #include <maya/MTypes.h>
+#include <maya/MPoint.h>
 #include <Vector3F.h>
 
 class BoundTranslateNode : public MPxNode
@@ -23,15 +24,22 @@ public:
 	static  MStatus		initialize();
 
 public:
-	static MObject		compoundOutput;        
+	//static MObject		compoundOutput;        
 	static MObject		constraintTranslateX;
     static MObject		constraintTranslateY;
     static MObject		constraintTranslateZ;
 	
-	static MObject atargetBound;
+	//static MObject ainBoundMin;
+    static MObject ainBoundMinX;
+    static MObject ainBoundMinY;
+    static MObject ainBoundMinZ;
+    //static MObject ainBoundMax;
+    static MObject ainBoundMaxX;
+    static MObject ainBoundMaxY;
+    static MObject ainBoundMaxZ;
 	static	MTypeId		id;
 private:
-    
+    void computeBoundCenter(MDataBlock& block);
 private:
-	
+	MPoint m_boundCenter;
 };

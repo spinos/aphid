@@ -2,7 +2,9 @@
 #include <maya/MGlobal.h>
 #include "HesperisCmd.h"
 #include "AdaptiveFieldDeformer.h"
-static const MString Verinfo("1.3.5 Tue Aug 11 17:33:15 CST 2015 field deform");
+#include "BoundTranslateNode.h"
+
+static const MString Verinfo("1.3.6 Thu Aug 13 18:29:36 CST 2015 bounding box center as translate");
 MStatus initializePlugin(MObject obj)
 {
         MStatus         status;
@@ -15,6 +17,13 @@ MStatus initializePlugin(MObject obj)
 			status.perror("registerDeformer");
 			return status;
 		}
+        
+        status = plugin.registerNode( "hesperisTranslateNode", BoundTranslateNode::id, BoundTranslateNode::creator,
+                                        BoundTranslateNode::initialize );
+        if (!status) {
+            status.perror("registerNode");
+            return status;
+        }
 		
         status = plugin.registerCommand("hesperis",
                                         HesperisCmd::creator, HesperisCmd::newSyntax);
@@ -22,7 +31,8 @@ MStatus initializePlugin(MObject obj)
                 status.perror("registerCommand");
                 return status;
         }
-
+//  connectAttr -f pSphere1.boundingBoxMin hesperisTranslateNode1.inBoundingBoxMin;
+//  connectAttr -f pSphere1.boundingBoxMax hesperisTranslateNode1.inBoundingBoxMax;
         MGlobal::displayInfo(MString("hesperis load plug-in version ") + Verinfo);
         return status;
 }
@@ -39,6 +49,12 @@ MStatus uninitializePlugin(MObject obj)
 			  status.perror("deregisterDeformer");
 			  return status;
 		}
+        
+        status = plugin.deregisterNode( BoundTranslateNode::id );
+        if (!status) {
+            status.perror("deregisterNode");
+            return status;
+        }
 
         status = plugin.deregisterCommand("hesperis");
         if (!status) {
