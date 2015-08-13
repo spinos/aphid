@@ -300,8 +300,13 @@ void testTimedArray(unsigned n, unsigned nrep)
     }
     std::cout << "\n access "<<n<< " array took " << bTimer.elapsed() <<" secs";
 	std::cout<<"\n sum "<<b;
-    unsigned access = *arrs.asIndex(9235);
-	std::cout<<" test access [9235] "<<(access);
+    unsigned access = *arrs.asIndex(49235);
+	std::cout<<"\n access [49235] "<<(access);
+	access = *arrs.asIndex(349235);
+	std::cout<<"\n access [349235] "<<(access);
+	access = *arrs.asIndex(235);
+	std::cout<<"\n access [235] "<<(access);
+	arrs.verbose();
 }
 
 void testTimedVec(unsigned n, unsigned nrep)
@@ -311,8 +316,9 @@ void testTimedVec(unsigned n, unsigned nrep)
     unsigned i, j, b;
     std::vector<unsigned> vecs;
 	//vecs.resize(n);
-	for(i=0;i<n;i++) //vecs[i] = i;
-        vecs.push_back(i);
+	for(i=0;i<n;i++) {//vecs[i] = i;
+		vecs.push_back(i);
+	}
     
     std::cout << "\n fill "<<n<< " vector took " << bTimer.elapsed() <<" secs";
 	
@@ -320,7 +326,9 @@ void testTimedVec(unsigned n, unsigned nrep)
     
 	for(j=0;j<nrep;j++) {
         b= 0;
-        for(i=0;i<n;i++) b += vecs[i];
+        for(i=0;i<n;i++) {
+			b += vecs[i];
+		}
     }
 	std::cout << "\n access "<<n<< " vector took " << bTimer.elapsed() <<" secs";
 	std::cout<<"\n sum "<<b;
@@ -332,14 +340,18 @@ void testTimedMem(unsigned n, unsigned nrep)
     bTimer.restart();
     unsigned i, j, b;
     unsigned * mems = new unsigned[n];
-	for(i=0;i<n;i++) mems[i] = i;
+	for(i=0;i<n;i++) {
+		mems[i] = i;
+	}
     
 	std::cout << "\n fill "<<n<< " mem took " << bTimer.elapsed() <<" secs";
 	
     bTimer.restart();
 	for(j=0;j<nrep;j++) {
         b= 0;
-        for(i=0;i<n;i++) b += mems[i];
+        for(i=0;i<n;i++) {
+			b += mems[i];
+		}
     }
 	std::cout << "\n access "<<n<< " mem took " << bTimer.elapsed() <<" secs";
     std::cout<<"\n sum "<<b;
@@ -348,7 +360,7 @@ void testTimedMem(unsigned n, unsigned nrep)
 void testVecArray()
 {
 	std::cout<<"\n test array";
-	const unsigned n = 9999999;
+	const unsigned n = 777777;
     
     testTimedMem(n, 100);
     testTimedVec(n, 100);

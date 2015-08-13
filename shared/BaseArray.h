@@ -17,14 +17,22 @@
 template<typename T>
 class BaseArrayBlock {
 public:
-	BaseArrayBlock();
+	BaseArrayBlock(BaseArrayBlock * parent = NULL);
 	~BaseArrayBlock();
 	
-	void connectTo(BaseArrayBlock * another);
+	unsigned globalIndex() const;
+	void setGlobalIndex(unsigned x);
+	
+	void connectToRight(BaseArrayBlock * another);
 	void disconnect();
-	BaseArrayBlock * sibling();
+	
+	bool hasParent() const;
+	BaseArrayBlock * parent();
+	bool hasChild() const;
+	BaseArrayBlock * child();
+	
 	T * data();
-	T cdata() const;
+	T & cdata() const;
 	void setData(const T & x);
 	
 	void begin();
@@ -34,36 +42,53 @@ public:
 	unsigned index() const;
 	void setIndex(unsigned x);
 	
+	void chainBegin();
+	
 private:
-	BaseArrayBlock * m_sibling;
+	BaseArrayBlock * m_parent;
+	BaseArrayBlock * m_child;
 	T * m_data;
-	int m_loc;
+	unsigned m_loc;
+	unsigned m_globalIndex;
 };
 
 template<typename T>
-BaseArrayBlock<T>::BaseArrayBlock()
+BaseArrayBlock<T>::BaseArrayBlock(BaseArrayBlock * parent)
 {
 	m_data = new T[BASEARRNUMELEMPERBLK];
-	m_sibling = NULL;
+	m_parent = parent;
+	m_child = NULL;
 	m_loc = 0;
+	m_globalIndex = 0;
 }
 
 template<typename T>
 BaseArrayBlock<T>::~BaseArrayBlock()
 {
-	if(m_sibling) delete m_sibling;
+	if(m_child) delete m_child;
 	delete m_data;
 }
 
 template<typename T>
-void BaseArrayBlock<T>::connectTo(BaseArrayBlock * another)
-{ m_sibling = another; }
+unsigned BaseArrayBlock<T>::globalIndex() const
+{ return m_globalIndex; }
+
+template<typename T>
+void BaseArrayBlock<T>::setGlobalIndex(unsigned x)
+{ m_globalIndex = x; }
+
+template<typename T>
+void BaseArrayBlock<T>::connectToRight(BaseArrayBlock * another)
+{ 
+	m_child = another; 
+	another->setGlobalIndex(m_globalIndex + BASEARRNUMELEMPERBLK);
+}
 
 template<typename T>
 void BaseArrayBlock<T>::disconnect()
 {
-	if(m_sibling) delete m_sibling;
-	m_sibling = NULL;
+	if(m_child) delete m_child;
+	m_child = NULL;
 }
 
 template<typename T>
@@ -71,7 +96,7 @@ T * BaseArrayBlock<T>::data()
 { return &m_data[m_loc]; }
 
 template<typename T>
-T BaseArrayBlock<T>::cdata() const
+T & BaseArrayBlock<T>::cdata() const
 { return m_data[m_loc]; }
 
 template<typename T>
@@ -79,8 +104,20 @@ void BaseArrayBlock<T>::setData(const T & x)
 { m_data[m_loc] = x; }
 
 template<typename T>
-BaseArrayBlock<T> * BaseArrayBlock<T>::sibling()
-{ return m_sibling; }
+bool BaseArrayBlock<T>::hasParent() const
+{ return (m_parent != NULL); }
+
+template<typename T>
+BaseArrayBlock<T> * BaseArrayBlock<T>::parent()
+{ return m_parent; }
+
+template<typename T>
+bool BaseArrayBlock<T>::hasChild() const
+{ return m_child != NULL; }
+
+template<typename T>
+BaseArrayBlock<T> * BaseArrayBlock<T>::child()
+{ return m_child; }
 
 template<typename T>
 void BaseArrayBlock<T>::begin()
@@ -103,6 +140,14 @@ void BaseArrayBlock<T>::setIndex(unsigned x)
 { m_loc = x; }
 
 template<typename T>
+void BaseArrayBlock<T>::chainBegin()
+{ 
+	begin();
+	if(m_child) m_child->chainBegin();
+}
+
+
+template<typename T>
 class BaseArray {
 public:
 	BaseArray();
@@ -121,7 +166,7 @@ public:
 	void setIndex(unsigned index);
 	
 	void setValue(const T & x);
-	T value() const;
+	T & value() const;
 	T * current();
 	T * at(unsigned index);
 	
@@ -136,8 +181,6 @@ protected:
 private:
 	BaseArrayBlock<T> * m_root;
 	BaseArrayBlock<T> * m_lastBlock;
-	unsigned m_currentBlock;
-	unsigned m_numBlocks;
 	unsigned m_capacity;
 };
 
@@ -163,7 +206,6 @@ void BaseArray<T>::clear()
 template<typename T>
 void BaseArray<T>::initialize()
 {
-	m_numBlocks = 1;
 	m_capacity = BASEARRNUMELEMPERBLK;
 	begin();
 }
@@ -171,9 +213,8 @@ void BaseArray<T>::initialize()
 template<typename T>
 void BaseArray<T>::begin()
 {
-	m_currentBlock = 0;
+	m_root->chainBegin();
 	m_lastBlock = m_root;
-	m_lastBlock->begin();
 }
 
 template<typename T>
@@ -188,16 +229,15 @@ void BaseArray<T>::next()
 template<typename T>
 void BaseArray<T>::nextBlock()	
 {
-	m_lastBlock = m_lastBlock->sibling();
-	m_lastBlock->begin();
-	m_currentBlock++;
+	m_lastBlock = m_lastBlock->child();
+	// m_lastBlock->begin();
 }
 
 template<typename T>
 bool BaseArray<T>::end() const
 {
 	return (m_lastBlock->end() 
-				&& m_currentBlock == m_numBlocks-1);
+				&& (!m_lastBlock->hasChild()));
 }
 
 template<typename T>
@@ -208,11 +248,10 @@ void BaseArray<T>::expandBy(unsigned size)
 		unsigned blockToCreate = (overflown >> BASEARRNUMELEMPERBLKL2) + 1;
 		BaseArrayBlock<T> * head = m_lastBlock;
 		for(unsigned i = 0; i < blockToCreate; i++) {
-			BaseArrayBlock<T> * tail = new BaseArrayBlock<T>;
-			head->connectTo(tail);
+			BaseArrayBlock<T> * tail = new BaseArrayBlock<T>(head);
+			head->connectToRight(tail);
 			head = tail;
 			
-			m_numBlocks++;
 			m_capacity += BASEARRNUMELEMPERBLK;
 		}
 	}
@@ -227,13 +266,13 @@ T * BaseArray<T>::current()
 { return m_lastBlock->data(); }
 
 template<typename T>
-T BaseArray<T>::value() const
+T & BaseArray<T>::value() const
 { return m_lastBlock->cdata(); }
 
 template<typename T>
 unsigned BaseArray<T>::index() const
 {
-	return (m_currentBlock * BASEARRNUMELEMPERBLK) 
+	return m_lastBlock->globalIndex() 
 			+ m_lastBlock->index();
 }
 
@@ -241,19 +280,20 @@ template<typename T>
 void BaseArray<T>::setIndex(unsigned index)
 {
 	unsigned y = index >> BASEARRNUMELEMPERBLKL2;
-	unsigned x = index - ( y * BASEARRNUMELEMPERBLK );
-	
-	if(m_currentBlock != y) {
-		m_lastBlock = m_root;
-		m_currentBlock = 0;
-		unsigned i = 0;
-		for(;i<y;i++) {
-			m_lastBlock = m_lastBlock->sibling();
-			m_currentBlock++;
+	unsigned b = y * BASEARRNUMELEMPERBLK;
+
+	if(m_lastBlock->globalIndex() > b ) {
+		while(m_lastBlock->hasParent() && m_lastBlock->globalIndex() > b) {
+			m_lastBlock = m_lastBlock->parent();
+		}
+	}
+	else if(m_lastBlock->globalIndex() < b ) {
+		while(m_lastBlock->hasChild() && m_lastBlock->globalIndex() < b) {
+			m_lastBlock = m_lastBlock->child();
 		}
 	}
 	
-	m_lastBlock->setIndex(x);
+	m_lastBlock->setIndex(index - b);
 }
 
 template<typename T>
@@ -269,7 +309,7 @@ unsigned BaseArray<T>::capacity() const
 
 template<typename T>
 unsigned BaseArray<T>::numBlocks() const
-{ return m_numBlocks; }
+{ return m_capacity / BASEARRNUMELEMPERBLK; }
 
 template<typename T>
 void BaseArray<T>::verbose() const
