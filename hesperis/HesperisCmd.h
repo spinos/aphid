@@ -16,6 +16,7 @@ private:
 	MStatus parseArgs ( const MArgList& args );
 	MStatus writeSelected(const MSelectionList & selList);
     MStatus deformSelected();
+	MStatus attachSelected();
     void writeMesh(HesperisFile * file);
 	MStatus printHelp();
 	void testTransform();

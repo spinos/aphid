@@ -37,6 +37,7 @@ public:
     static MObject ainBoundMaxX;
     static MObject ainBoundMaxY;
     static MObject ainBoundMaxZ;
+	static MObject ainParentMatrix;
 	static	MTypeId		id;
 private:
     void computeBoundCenter(MDataBlock& block);

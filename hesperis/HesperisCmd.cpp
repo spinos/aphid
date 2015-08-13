@@ -45,17 +45,6 @@ MStatus HesperisCmd::parseArgs ( const MArgList& args )
 		m_ioMode = IOWrite;
 		MGlobal::displayInfo(MString(" hesperis will write to file ") + m_fileName);
 	}
-	
-	if(argData.isFlagSet("-gm")) 
-	{
-		argData.getFlagArgument("-gm", 0, m_growMeshName);
-		if(!stat) {
-			MGlobal::displayInfo(" cannot parse -gm flag");
-			return MS::kFailure;
-		}
-		
-		MGlobal::displayInfo(MString(" hesperis will write grow mesh ") + m_growMeshName);
-	}
     
     if(argData.isFlagSet("-fd")) {
         argData.getFlagArgument("-fd", 0, m_fileName);
@@ -66,6 +55,18 @@ MStatus HesperisCmd::parseArgs ( const MArgList& args )
         m_ioMode = IOFieldDeform;
         MGlobal::displayInfo(MString(" hesperis will add field deformer ") + m_fileName);
     }
+	
+	if(argData.isFlagSet("-gm")) 
+	{
+		argData.getFlagArgument("-gm", 0, m_growMeshName);
+		if(!stat) {
+			MGlobal::displayInfo(" cannot parse -gm flag");
+			return MS::kFailure;
+		}
+		
+		if(m_ioMode == IOWrite) MGlobal::displayInfo(MString(" hesperis will write grow mesh ") + m_growMeshName);
+		if(m_ioMode == IOFieldDeform) MGlobal::displayInfo(MString(" hesperis will attach to grow mesh ") + m_growMeshName);
+	}
 	
 	if(argData.isFlagSet("-h")) 
 	{
@@ -166,8 +167,9 @@ MStatus HesperisCmd::printHelp()
         +MString("\n -gm or -growMesh is full path name to the transform of grow mesh")
             + MString("\n deform mode")
             + MString("\n select group of geometries to deform")
-            + MString("\n hesperis -fd filename")
-            + MString("\n -fd or -fieldDeform is filename of .fld file") );
+            + MString("\n hesperis -fd filename -gm fullPathToTransformOfMesh")
+            + MString("\n -fd or -fieldDeform is filename of .fld file") 
+			+ MString("\n -gm or -growMesh is full path name to the transform of grow mesh that the deformed stuff will be attached to"));
 	return MS::kSuccess;
 }
 
@@ -223,6 +225,73 @@ MStatus HesperisCmd::deformSelected()
 	fdef.findPlug("minFrame").setValue(minFrame);
 	fdef.findPlug("maxFrame").setValue(maxFrame);
 	AHelper::SimpleAnimation(fdef.findPlug("currentTime"), minFrame, maxFrame);
+	
+	if(m_growMeshName == "") {
+		MGlobal::displayInfo(" no grow mesh is set");
+		return MS::kSuccess;
+	}
+	return attachSelected();
+}
+	
+MStatus HesperisCmd::attachSelected()
+{
+	MGlobal::displayInfo(MString(" attach to grow mesh ") + m_growMeshName);
+	MSelectionList selList;
+    MGlobal::getActiveSelectionList(selList);
+    
+	MItSelectionList iter( selList );
+	
+	MDagPath apath;		
+	iter.getDagPath( apath );
+		
+	MObject otrans = apath.node();
+	if(!otrans.hasFn(MFn::kTransform)) {
+		MGlobal::displayWarning("must select a transform/group to attach to grow mesh");
+		return MS::kFailure;
+	}
+	
+	ASearchHelper searcher;
+	MDagPath meshGrp;
+	if(!searcher.dagByFullName(m_growMeshName.asChar(), meshGrp)) {
+		MGlobal::displayWarning(MString("cannot find grow mesh by name ")+m_growMeshName);
+		return MS::kFailure;
+	}
+	MObject ogrow = meshGrp.node();
+	if(!ogrow.hasFn(MFn::kTransform)) {
+		MGlobal::displayWarning("-gm must be a transform/group");
+		return MS::kFailure;
+	}
+	
+	MStatus stat;
+	MDGModifier modif;
+	MObject hestranslate = modif.createNode("hesperisTranslateNode", &stat);
+	if(stat) {
+		MGlobal::displayWarning("cannot create hes translate node");
+		return MS::kFailure;
+	}
+	modif.doIt();
+	
+	MFnDependencyNode fhest(hestranslate);
+	MFnDependencyNode fgrow(ogrow);
+	
+	modif.connect(fgrow.findPlug("boundingBoxMinX", true), fhest.findPlug("bBoxMinX", true));
+	modif.connect(fgrow.findPlug("boundingBoxMinY", true), fhest.findPlug("bBoxMinY", true));
+	modif.connect(fgrow.findPlug("boundingBoxMinZ", true), fhest.findPlug("bBoxMinZ", true));
+	modif.connect(fgrow.findPlug("boundingBoxMaxX", true), fhest.findPlug("bBoxMaxX", true));
+	modif.connect(fgrow.findPlug("boundingBoxMaxY", true), fhest.findPlug("bBoxMaxY", true));
+	modif.connect(fgrow.findPlug("boundingBoxMaxZ", true), fhest.findPlug("bBoxMaxZ", true));
+	
+	MPlug psrcwpmat = fgrow.findPlug("worldParentMatrix", true, &stat);
+	if(!stat) MGlobal::displayInfo("cannot find plug worldParentMatrix");
+	modif.connect(psrcwpmat, fhest.findPlug("inParentMatrix", true));
+	modif.doIt();
+	
+	MFnDependencyNode ftrans(otrans);
+	modif.connect(fhest.findPlug("outTranslateX", true), ftrans.findPlug("translateX", true));
+	modif.connect(fhest.findPlug("outTranslateY", true), ftrans.findPlug("translateY", true));
+	modif.connect(fhest.findPlug("outTranslateZ", true), ftrans.findPlug("translateZ", true));
+	modif.doIt();
+	
     return MS::kSuccess;
 }
 //:~

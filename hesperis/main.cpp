@@ -4,7 +4,7 @@
 #include "AdaptiveFieldDeformer.h"
 #include "BoundTranslateNode.h"
 
-static const MString Verinfo("1.3.6 Thu Aug 13 18:29:36 CST 2015 bounding box center as translate");
+static const MString Verinfo("1.3.7 Fri Aug 14 04:17:29 CST 2015 bounding box center as translate");
 MStatus initializePlugin(MObject obj)
 {
         MStatus         status;

@@ -24,6 +24,7 @@ MObject BoundTranslateNode::ainBoundMinZ;
 MObject BoundTranslateNode::ainBoundMaxX;
 MObject BoundTranslateNode::ainBoundMaxY;
 MObject BoundTranslateNode::ainBoundMaxZ;
+MObject BoundTranslateNode::ainParentMatrix;
 
 BoundTranslateNode::BoundTranslateNode() 
 {}
@@ -100,6 +101,11 @@ MStatus BoundTranslateNode::initialize()
     compoundAttr.addChild( ainBoundMaxY );
     compoundAttr.addChild( ainBoundMaxZ );
     addAttribute(ainBoundMax);*/
+	
+	MFnMatrixAttribute pimAttr;
+    ainParentMatrix = pimAttr.create( "inParentMatrix", "ipm", MFnMatrixAttribute::kDouble, &status );
+    pimAttr.setStorable(false);	
+	addAttribute(ainParentMatrix);
  
     constraintTranslateX = numAttr.create( "outTranslateX", "ctx", MFnNumericData::kDouble, 0.0, &status );
     numAttr.setWritable(false);
@@ -153,6 +159,9 @@ MStatus BoundTranslateNode::initialize()
     attributeAffects(ainBoundMinX, constraintTranslateX);
     attributeAffects(ainBoundMinX, constraintTranslateY);
     attributeAffects(ainBoundMinX, constraintTranslateZ);
+	attributeAffects(ainParentMatrix, constraintTranslateX);
+	attributeAffects(ainParentMatrix, constraintTranslateY);
+	attributeAffects(ainParentMatrix, constraintTranslateZ);
 	return MS::kSuccess;
 }
 
@@ -164,9 +173,10 @@ void BoundTranslateNode::computeBoundCenter(MDataBlock& block)
     double mxx = block.inputValue(ainBoundMaxX).asDouble();
     double mxy = block.inputValue(ainBoundMaxY).asDouble();
     double mxz = block.inputValue(ainBoundMaxZ).asDouble();
-    
+    MMatrix mat = block.inputValue(ainParentMatrix).asMatrix();
     m_boundCenter.x = (mnx + mxx) * .5;
     m_boundCenter.y = (mny + mxy) * .5;
     m_boundCenter.z = (mnz + mxz) * .5;
+	m_boundCenter *= mat;
 }
 //:~
