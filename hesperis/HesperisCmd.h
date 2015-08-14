@@ -4,6 +4,7 @@
 #include <maya/MArgList.h>
 #include <maya/MString.h>
 #include <maya/MSelectionList.h>
+#include <Vector3F.h>
 class HesperisFile;
 class HesperisCmd : public MPxCommand {
 public:                                                                                                                 
@@ -16,7 +17,7 @@ private:
 	MStatus parseArgs ( const MArgList& args );
 	MStatus writeSelected(const MSelectionList & selList);
     MStatus deformSelected();
-	MStatus attachSelected();
+	MStatus attachSelected(const Vector3F & offsetV);
     void writeMesh(HesperisFile * file);
 	MStatus printHelp();
 	void testTransform();

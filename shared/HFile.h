@@ -22,6 +22,7 @@ public:
 	virtual bool doRead(const std::string & fileName);
 	virtual void doClose();
 	
+    void beginWrite();
 	void flush();
 	
 protected:

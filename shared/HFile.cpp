@@ -57,6 +57,9 @@ void HFile::setDocument(const HDocument & doc)
 	m_doc = doc;
 }
 
+void HFile::beginWrite()
+{ useDocument(); }
+
 void HFile::flush()
 {
 	useDocument();

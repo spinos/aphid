@@ -3,11 +3,13 @@
 #include <maya/MItSelectionList.h>
 #include <maya/MItDag.h>
 #include <maya/MArgDatabase.h>
+#include <maya/MDagModifier.h>
 #include "HesperisIO.h"
 #include "HesperisFile.h"
 #include <ASearchHelper.h>
 #include <BaseTransform.h>
 #include <H5FieldIn.h>
+#include <HAttributeEntry.h>
 
 void *HesperisCmd::creator()
 { return new HesperisCmd; }
@@ -197,6 +199,11 @@ MStatus HesperisCmd::deformSelected()
 						 
 	int minFrame = t.FirstFrame;
     int maxFrame = t.LastFrame;
+    
+    HFlt3AttributeEntry transgrp(".translate");
+    Vector3F fieldT;
+    transgrp.load(&fieldT);
+    AHelper::Info<Vector3F>("field translate is ", fieldT);
 	t.close();
 	
     MGlobal::displayInfo(MString("hesperis field deform frame range (")
@@ -230,10 +237,10 @@ MStatus HesperisCmd::deformSelected()
 		MGlobal::displayInfo(" no grow mesh is set");
 		return MS::kSuccess;
 	}
-	return attachSelected();
+	return attachSelected(fieldT);
 }
 	
-MStatus HesperisCmd::attachSelected()
+MStatus HesperisCmd::attachSelected(const Vector3F & offsetV)
 {
 	MGlobal::displayInfo(MString(" attach to grow mesh ") + m_growMeshName);
 	MSelectionList selList;
@@ -263,13 +270,15 @@ MStatus HesperisCmd::attachSelected()
 	}
 	
 	MStatus stat;
-	MDGModifier modif;
+    MDGModifier modif;
+	MDagModifier dmodif;
 	MObject hestranslate = modif.createNode("hesperisTranslateNode", &stat);
-	if(stat) {
+	modif.doIt();
+    
+    if(hestranslate.isNull()) {
 		MGlobal::displayWarning("cannot create hes translate node");
 		return MS::kFailure;
 	}
-	modif.doIt();
 	
 	MFnDependencyNode fhest(hestranslate);
 	MFnDependencyNode fgrow(ogrow);
@@ -281,17 +290,22 @@ MStatus HesperisCmd::attachSelected()
 	modif.connect(fgrow.findPlug("boundingBoxMaxY", true), fhest.findPlug("bBoxMaxY", true));
 	modif.connect(fgrow.findPlug("boundingBoxMaxZ", true), fhest.findPlug("bBoxMaxZ", true));
 	
-	MPlug psrcwpmat = fgrow.findPlug("worldParentMatrix", true, &stat);
+	MPlug psrcwpmat = fgrow.findPlug("parentMatrix", true, &stat);
 	if(!stat) MGlobal::displayInfo("cannot find plug worldParentMatrix");
 	modif.connect(psrcwpmat, fhest.findPlug("inParentMatrix", true));
 	modif.doIt();
 	
-	MFnDependencyNode ftrans(otrans);
-	modif.connect(fhest.findPlug("outTranslateX", true), ftrans.findPlug("translateX", true));
-	modif.connect(fhest.findPlug("outTranslateY", true), ftrans.findPlug("translateY", true));
-	modif.connect(fhest.findPlug("outTranslateZ", true), ftrans.findPlug("translateZ", true));
-	modif.doIt();
-	
+    MFnDependencyNode ftrans(otrans);
+
+	dmodif.connect(fhest.findPlug("outTranslateX", true), ftrans.findPlug("translateX", true));
+	dmodif.connect(fhest.findPlug("outTranslateY", true), ftrans.findPlug("translateY", true));
+	dmodif.connect(fhest.findPlug("outTranslateZ", true), ftrans.findPlug("translateZ", true));
+	stat = dmodif.doIt();
+	if(!stat) MGlobal::displayInfo(MString("cannot make some connections to ")+ftrans.name());
+    
+    fhest.findPlug("offsetX").setValue((double)-offsetV.x);
+    fhest.findPlug("offsetY").setValue((double)-offsetV.y);
+    fhest.findPlug("offsetZ").setValue((double)-offsetV.z);
     return MS::kSuccess;
 }
 //:~

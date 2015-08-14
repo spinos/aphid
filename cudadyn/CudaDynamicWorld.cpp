@@ -236,7 +236,7 @@ void CudaDynamicWorld::updateMovenentRelativeToAir()
 {
     MovementRelativeToAir = *VelocityCache->translationalVelocity();
     MovementRelativeToAir.reverse();
-    MovementRelativeToAir.clamp(20.f);
+    MovementRelativeToAir.clamp(60.f);
 }
 
 void CudaDynamicWorld::updateWind()

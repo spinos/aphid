@@ -13,6 +13,7 @@
 #include <AdaptiveField.h>
 #include <H5FieldIn.h>
 #include <H5FieldOut.h>
+#include <HAttributeEntry.h>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/convenience.hpp"
@@ -64,6 +65,14 @@ AdaptiveField * LarixWorld::field() const
 void LarixWorld::setFieldTranslate(const Vector3F & v)
 {
 	std::cout<<"\n field translate to "<<v;
+    if(!m_cacheFile->isOpened()) {
+        std::cout<<"\n ./dposition.tmp is not opened, cannot save field translate";
+        return;
+    }
+    m_cacheFile->beginWrite();
+    HFlt3AttributeEntry t(".translate");
+    t.save(&v);
+    std::cout<<"\n saved field translate "<<v;
 }
 
 bool LarixWorld::checkSourceField()

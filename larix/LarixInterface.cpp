@@ -36,6 +36,13 @@ LarixInterface::~LarixInterface()
 
 bool LarixInterface::createWorld(LarixWorld * world)
 {  
+    GeometryArray trigeo;
+	if(!ReadTriangleData(&trigeo)) return false;
+ 
+	ATriangleMesh * tri = (ATriangleMesh *)trigeo.geometry(0);
+    
+	world->setFieldTranslate(tri->boundingCenter());
+	
 	GeometryArray geos;
 	if(!ReadTetrahedronData(&geos)) return false;
  
@@ -94,14 +101,6 @@ bool LarixInterface::createWorld(LarixWorld * world)
 	g->printGrids(&grids);
 	lxlg.writeInt3(&grids, g->numCells(), "grd");
 #endif	
-
-	GeometryArray trigeo;
-	if(!ReadTriangleData(&trigeo)) return false;
- 
-	ATriangleMesh * tri = (ATriangleMesh *)geos.geometry(0);
-    
-	world->setFieldTranslate(tri->boundingCenter());
-	
 	return true;
 }
 

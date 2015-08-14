@@ -25,6 +25,9 @@ MObject BoundTranslateNode::ainBoundMaxX;
 MObject BoundTranslateNode::ainBoundMaxY;
 MObject BoundTranslateNode::ainBoundMaxZ;
 MObject BoundTranslateNode::ainParentMatrix;
+MObject BoundTranslateNode::ainOffsetX;
+MObject BoundTranslateNode::ainOffsetY;
+MObject BoundTranslateNode::ainOffsetZ;
 
 BoundTranslateNode::BoundTranslateNode() 
 {}
@@ -76,6 +79,14 @@ MStatus BoundTranslateNode::initialize()
     
     MFnNumericAttribute numAttr;
 
+    ainOffsetX = numAttr.create( "offsetX", "ofx", MFnNumericData::kDouble, 0.0, &status );
+    ainOffsetY = numAttr.create( "offsetY", "ofy", MFnNumericData::kDouble, 0.0, &status );
+    ainOffsetZ = numAttr.create( "offsetZ", "ofz", MFnNumericData::kDouble, 0.0, &status );
+    numAttr.setStorable(true);
+    addAttribute(ainOffsetX);
+    addAttribute(ainOffsetY);
+    addAttribute(ainOffsetZ);
+    
     ainBoundMinX = numAttr.create( "bBoxMinX", "bbmnx", MFnNumericData::kDouble, 0.0, &status );
     ainBoundMinY = numAttr.create( "bBoxMinY", "bbmny", MFnNumericData::kDouble, 0.0, &status );
     ainBoundMinZ = numAttr.create( "bBoxMinZ", "bbmnz", MFnNumericData::kDouble, 0.0, &status );
@@ -162,6 +173,9 @@ MStatus BoundTranslateNode::initialize()
 	attributeAffects(ainParentMatrix, constraintTranslateX);
 	attributeAffects(ainParentMatrix, constraintTranslateY);
 	attributeAffects(ainParentMatrix, constraintTranslateZ);
+    attributeAffects(ainOffsetX, constraintTranslateX);
+	attributeAffects(ainOffsetX, constraintTranslateY);
+	attributeAffects(ainOffsetX, constraintTranslateZ);
 	return MS::kSuccess;
 }
 
@@ -173,10 +187,13 @@ void BoundTranslateNode::computeBoundCenter(MDataBlock& block)
     double mxx = block.inputValue(ainBoundMaxX).asDouble();
     double mxy = block.inputValue(ainBoundMaxY).asDouble();
     double mxz = block.inputValue(ainBoundMaxZ).asDouble();
+    double ofx = block.inputValue(ainOffsetX).asDouble();
+    double ofy = block.inputValue(ainOffsetY).asDouble();
+    double ofz = block.inputValue(ainOffsetZ).asDouble();
     MMatrix mat = block.inputValue(ainParentMatrix).asMatrix();
-    m_boundCenter.x = (mnx + mxx) * .5;
-    m_boundCenter.y = (mny + mxy) * .5;
-    m_boundCenter.z = (mnz + mxz) * .5;
+    m_boundCenter.x = (mnx + mxx) * .5 + ofx;
+    m_boundCenter.y = (mny + mxy) * .5 + ofy;
+    m_boundCenter.z = (mnz + mxz) * .5 + ofz;
 	m_boundCenter *= mat;
 }
 //:~

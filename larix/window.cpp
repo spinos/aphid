@@ -10,7 +10,7 @@ Window::Window()
     glWidget = new GLWidget;
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Untitled"));
+    setWindowTitle(tr("Larix Adaptive Field Generator"));
 }
 //! [1]
 

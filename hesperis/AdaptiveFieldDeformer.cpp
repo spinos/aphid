@@ -107,7 +107,7 @@ MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, cons
         }
           
         if(m_pieceCached[multiIndex] != 1) {
-            AHelper::Info<unsigned>("field deformer build cell for geometry", multiIndex);
+            // AHelper::Info<unsigned>("field deformer build cell for geometry", multiIndex);
             cacheCellIndex(iter, m_elementOffset);
             m_pieceCached[multiIndex] = 1;
         }
@@ -142,7 +142,7 @@ MStatus AdaptiveFieldDeformer::deform(MDataBlock& block, MItGeometry& iter, cons
 
 void AdaptiveFieldDeformer::cacheCellIndex(MItGeometry& iter, unsigned elmOffset)
 {
-    AHelper::Info<unsigned>(" piecemeal offset ", elmOffset);
+// AHelper::Info<unsigned>(" piecemeal offset ", elmOffset);
     Vector3F samp;
     MPoint q;
     unsigned i = 0;
