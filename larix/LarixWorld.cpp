@@ -61,6 +61,11 @@ void LarixWorld::setField(AdaptiveField * g)
 AdaptiveField * LarixWorld::field() const
 { return m_field; }
 
+void LarixWorld::setFieldTranslate(const Vector3F & v)
+{
+	std::cout<<"\n field translate to "<<v;
+}
+
 bool LarixWorld::checkSourceField()
 {
     if(m_sourceFile->numFields() < 1) {

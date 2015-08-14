@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <AWorld.h>
+#include <Vector3F.h>
 class ATetrahedronMesh;
 class APointCloud;
 class AdaptiveField;
@@ -32,6 +33,8 @@ public:
 	
 	void setField(AdaptiveField * g);
 	AdaptiveField * field() const;
+	
+	void setFieldTranslate(const Vector3F & v);
 
     bool hasSourceP() const;
     TypedBuffer * sourceP();

@@ -9,6 +9,7 @@
 
 #include "LarixInterface.h"
 #include <GeometryArray.h>
+#include <ATriangleMesh.h>
 #include <ATetrahedronMesh.h>
 #include <APointCloud.h>
 #include "LarixWorld.h"
@@ -93,6 +94,14 @@ bool LarixInterface::createWorld(LarixWorld * world)
 	g->printGrids(&grids);
 	lxlg.writeInt3(&grids, g->numCells(), "grd");
 #endif	
+
+	GeometryArray trigeo;
+	if(!ReadTriangleData(&trigeo)) return false;
+ 
+	ATriangleMesh * tri = (ATriangleMesh *)geos.geometry(0);
+    
+	world->setFieldTranslate(tri->boundingCenter());
+	
 	return true;
 }
 
