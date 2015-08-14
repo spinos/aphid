@@ -10,9 +10,9 @@
 #pragma once
 #include <vector>
 #include <iostream>
-#define BASEARRNUMELEMPERBLK 32768
-#define BASEARRNUMELEMPERBLKM1 32767
-#define BASEARRNUMELEMPERBLKL2 15
+#define BASEARRNUMELEMPERBLK 16384
+#define BASEARRNUMELEMPERBLKM1 16383
+#define BASEARRNUMELEMPERBLKL2 14
 
 template<typename T>
 class BaseArrayBlock {
@@ -284,11 +284,13 @@ void BaseArray<T>::setIndex(unsigned index)
 
 	if(m_lastBlock->globalIndex() > b ) {
 		while(m_lastBlock->hasParent() && m_lastBlock->globalIndex() > b) {
+			m_lastBlock->begin();
 			m_lastBlock = m_lastBlock->parent();
 		}
 	}
 	else if(m_lastBlock->globalIndex() < b ) {
 		while(m_lastBlock->hasChild() && m_lastBlock->globalIndex() < b) {
+			m_lastBlock->begin();
 			m_lastBlock = m_lastBlock->child();
 		}
 	}

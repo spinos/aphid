@@ -304,8 +304,19 @@ void testTimedArray(unsigned n, unsigned nrep)
 	std::cout<<"\n access [49235] "<<(access);
 	access = *arrs.asIndex(349235);
 	std::cout<<"\n access [349235] "<<(access);
-	access = *arrs.asIndex(235);
-	std::cout<<"\n access [235] "<<(access);
+	access = *arrs.asIndex(16383);
+	std::cout<<"\n access [16383] "<<(access);
+	arrs.next();
+	access = *arrs.current();
+	std::cout<<"\n access [16384] "<<(access);
+	arrs.next();
+	access = *arrs.current();
+	std::cout<<"\n access [16385] "<<(access);
+	access = *arrs.asIndex(65535);
+	std::cout<<"\n access [65535] "<<(access);
+	arrs.next();
+	access = *arrs.current();
+	std::cout<<"\n access [16386] "<<(access);
 	arrs.verbose();
 }
 
