@@ -222,6 +222,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/ATriangleMesh.cpp
 ../shared/ATetrahedronMesh.cpp
 ../shared/GjkIntersection.cpp
+../shared/MersenneTwister.cpp
 ../btree/Types.cpp
 ../btree/Entity.cpp
 ../btree/BNode.cpp

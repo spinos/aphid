@@ -12,6 +12,7 @@
 #include <boost/format.hpp>
 #include <boost/timer.hpp>
 #include <tetrahedron_math.h>
+#include <MersenneTwister.h>
 #ifdef __APPLE__
 typedef unsigned long long uint64;
 #else
@@ -270,6 +271,17 @@ void testCell()
     std::cout<<"\n level 7 center xyz"<<x<<","<<y<<","<<z;
 }
 
+void testMersenne()
+{
+	std::cout<<"\n test Mersenne Twister pseudorandom number generator\n";
+	
+	MersenneTwister rng(1);
+	int i = 0;
+	for(;i<255;i++) {
+		std::cout<<" "<<rng.iRandom(0, 1000);
+	}
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
@@ -368,6 +380,8 @@ int main(int argc, char * const argv[])
 	testMap();
     
     testCell();
+	
+	testMersenne();
 	
 	std::cout << "\n elapsed time " << bTimer.elapsed();
 	std::cout<<" end of test\n";
