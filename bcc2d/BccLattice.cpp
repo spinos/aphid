@@ -8,8 +8,9 @@
 Vector3F BccLattice::NodeCenterOffset;
 
 BccLattice::BccLattice(const BoundingBox & bound) :
-    CartesianGrid(bound)
+    CartesianGrid()
 {   
+	CartesianGrid::setBounding(bound);
     m_greenEdges = new sdb::EdgeHash;
     m_tetrahedrons = 0;
     m_numTetrahedrons = 0;

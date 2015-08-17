@@ -36,9 +36,6 @@ BccWorld::BccWorld(KdTreeDrawer * drawer)
 		createRandomCurveGeometry();
 #endif
 	
-	createCurveStartP();
-	createAnchorIntersect();
-	
 	std::cout<<" creating kd tree\n";
 	m_cluster = new KdCluster;
 	m_cluster->addGeometry(m_allGeo);
@@ -57,9 +54,7 @@ BccWorld::~BccWorld()
     delete m_reducer;
 	delete m_curves;
 	delete m_cluster;
-	delete m_anchorIntersect;
 	delete m_allGeo;
-	delete m_curveStartP;
 	delete[] m_meshes;
 }
 
@@ -182,26 +177,6 @@ void BccWorld::createRandomCurveGeometry()
 				Vector3F(-.15f, 1.f, 0.33f), 
 				11, 21,
 				.9f);
-}
-
-void BccWorld::createCurveStartP()
-{
-	const unsigned n = m_allGeo->numGeometries();
-	m_curveStartP = new APointCloud;
-	m_curveStartP->create(n);
-	Vector3F * p = m_curveStartP->points();
-	
-	unsigned i=0;
-	for(;i<n;i++) p[i] = ((BezierCurve *)m_allGeo->geometry(i))->m_cvs[0];	
-}
-
-void BccWorld::createAnchorIntersect()
-{
-	m_anchorIntersect = new KdIntersection;
-	m_anchorIntersect->addGeometry(m_curveStartP);
-	KdTree::MaxBuildLevel = 32;
-	KdTree::NumPrimitivesInLeafThreashold = 9;
-	m_anchorIntersect->create();
 }
 
 void BccWorld::createTetrahedronMeshes()
@@ -514,7 +489,7 @@ void BccWorld::reduceGroup(unsigned igroup)
 	}
 	
 	if(!reduced) {
-        std::cout<<" bcc has insufficient for curve reduction, skipped.\n";
+        std::cout<<" insufficient condition for curve reduction, skipped.\n";
         return;
     }
 	

@@ -17,9 +17,12 @@ protected:
 private:
     GeometryArray * mergeCurves(GeometryArray * curves);
     unsigned minimumNumCvsInGroup(unsigned igroup, GeometryArray * curves) const;
+	unsigned maximumNumCvsInGroup(unsigned igroup, GeometryArray * curves) const;
+	void weightByCurveLengths(float * weights, unsigned igroup, GeometryArray * curves) const;
     BezierCurve * duplicateCurve(unsigned igroup, GeometryArray * curves);
     BezierCurve * mergeCurvesInGroup(unsigned igroup, GeometryArray * geos);
-    Vector3F samplePointsInGroup(float param, unsigned igroup, GeometryArray * geos);
+    Vector3F samplePointsInGroup(float param, unsigned igroup, GeometryArray * geos,
+								float * weights);
 	typedef QuickSortPair<float, unsigned > GapInd;
 	void computeSampleGaps(Vector3F * samples, unsigned n, GeometryArray * curves);
 	int computeM(unsigned n, float distanceThreshold);

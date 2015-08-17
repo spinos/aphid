@@ -39,8 +39,6 @@ private:
 	bool createCurveGeometryFromFile();
 	void createTestCurveGeometry();
 	void createRandomCurveGeometry();
-	void createCurveStartP();
-	void createAnchorIntersect();
 	void createTetrahedronMeshes();
 	void createTriangleMeshesFromFile();
     bool readCurveDataFromFile();
@@ -61,10 +59,8 @@ private:
     KdTreeDrawer * m_drawer;
     CurveGroup * m_curves;
 	KdCluster * m_cluster;
-	KdIntersection * m_anchorIntersect;
 	KdIntersection * m_triIntersect;
 	GeometryArray * m_allGeo;
-	APointCloud * m_curveStartP;
 	GeometryArray * m_triangleMeshes;
 #if WORLD_USE_FIT
 	FitBccMesh * m_meshes;

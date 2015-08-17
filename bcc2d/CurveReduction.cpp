@@ -121,6 +121,34 @@ unsigned CurveReduction::minimumNumCvsInGroup(unsigned igroup, GeometryArray * c
     return res;
 }
 
+unsigned CurveReduction::maximumNumCvsInGroup(unsigned igroup, GeometryArray * curves) const
+{
+    unsigned res = 1;
+    unsigned i;
+    for(i=0; i< N(); i++) {
+        if(group(i) == igroup) {
+            BaseCurve * c = static_cast<BaseCurve *>(curves->geometry(i));
+            if(res < c->numVertices()) res = c->numVertices();
+        }
+    }
+    return res;
+}
+
+void CurveReduction::weightByCurveLengths(float * weights, unsigned igroup, GeometryArray * curves) const
+{
+	float sum = 0.f;
+	unsigned i;
+    for(i=0; i< N(); i++) {
+        if(group(i) == igroup) {
+            BaseCurve * c = static_cast<BaseCurve *>(curves->geometry(i));
+            weights[i] = c->length();
+			sum += weights[i];
+        }
+    }
+	
+	for(i=0; i< N(); i++) weights[i] /= sum;
+}
+
 BezierCurve * CurveReduction::duplicateCurve(unsigned igroup, GeometryArray * curves)
 {
     CurveBuilder cb;
@@ -144,29 +172,35 @@ BezierCurve * CurveReduction::duplicateCurve(unsigned igroup, GeometryArray * cu
 
 BezierCurve * CurveReduction::mergeCurvesInGroup(unsigned igroup, GeometryArray * geos)
 {
-    unsigned nv = minimumNumCvsInGroup(igroup, geos);
+	float * weights = new float[N()];
+	weightByCurveLengths(weights, igroup, geos);
+    unsigned nv = maximumNumCvsInGroup(igroup, geos);
     const float delta = 1.f / (float)(nv-1);
     CurveBuilder cb;
     unsigned i=0;
     for(;i< nv;i++)
-        cb.addVertex(samplePointsInGroup(delta * i, igroup, geos));
+        cb.addVertex(samplePointsInGroup(delta * i, igroup, geos, weights));
     
+	delete[] weights;
     BezierCurve * b = new BezierCurve;
     cb.finishBuild(b);
     return b;
 }
 
-Vector3F CurveReduction::samplePointsInGroup(float param, unsigned igroup, GeometryArray * geos)
+Vector3F CurveReduction::samplePointsInGroup(float param, unsigned igroup, GeometryArray * geos,
+											float * weights)
 {
+	const float meanWeight = 1.f / (float)countPerGroup(igroup);
+	
     Vector3F sum = Vector3F::Zero;
     unsigned i = 0;
     for(; i< N(); i++) {
         if(group(i) == igroup) {
             BaseCurve * c = static_cast<BaseCurve *>(geos->geometry(i));
-            sum += c->interpolate(param);
+            sum += c->interpolate(param) * ( meanWeight * (1.f - param) + weights[i] * param );
         }
     }
-    sum *= 1.f / (float)countPerGroup(igroup);
+    
     return sum;
 }
 //:~

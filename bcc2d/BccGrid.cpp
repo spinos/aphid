@@ -6,8 +6,9 @@
 #include <KdIntersection.h>
 
 BccGrid::BccGrid(const BoundingBox & bound) :
-    CartesianGrid(bound)
+    CartesianGrid()
 {
+	CartesianGrid::setBounding(bound);
     m_lattice = new BccLattice(bound);
 }
 
