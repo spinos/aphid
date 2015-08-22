@@ -10,9 +10,11 @@
 class KdTreeDrawer;
 class AGenericMesh;
 class ATetrahedronMesh;
+class ATriangleMesh;
 class BccWorld;
 class AdaptiveField;
 class BaseBuffer;
+class MeshSeparator;
 
 class BccInterface : public HesperisInterface {
 public:
@@ -27,7 +29,7 @@ public:
 	bool loadCurveGeometry(BccWorld * world, const std::string & filename);
 	bool loadPatchGeometry(BccWorld * world, const std::string & filename);
 protected:
-	
+	void separate(ATriangleMesh * mesh);
 private:
     void drawTetrahedronMesh(ATetrahedronMesh * m, KdTreeDrawer * drawer);
 	void drawGeometry(GeometryArray * geos, KdTreeDrawer * drawer);
@@ -36,4 +38,5 @@ private:
 private:
 // cell center and size
     BaseBuffer * m_cells;
+	MeshSeparator * m_patchSeparator;
 };

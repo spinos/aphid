@@ -16,17 +16,20 @@
 #include "tetrahedron_math.h"
 #include <KdIntersection.h>
 #include <HesperisFile.h>
+#include <MeshSeparator.h>
 #include <BaseLog.h>
 #include <boost/timer.hpp>
 
 BccInterface::BccInterface() 
 { 
     m_cells = new BaseBuffer;
+	m_patchSeparator = new MeshSeparator;
 }
 
 BccInterface::~BccInterface() 
 { 
     delete m_cells;
+	delete m_patchSeparator;
 }
 
 bool BccInterface::createWorld(BccWorld * world)
@@ -87,7 +90,9 @@ bool BccInterface::loadPatchGeometry(BccWorld * world, const std::string & filen
 	if(res) {
 		const unsigned n = trigeo->numGeometries();
 		std::cout<<"\n bcc interface loading "<<n<<" triangle mesh geometries as patch ";
-// todo separate patches and compute object aligned bbox
+		unsigned i=0;
+		for(;i<n;i++)
+			separate((ATriangleMesh *)trigeo->geometry(i));
 	}
 	else {
 		std::cout<<"\n hes file contains no triangle mesh geometry. ";
@@ -171,5 +176,20 @@ bool BccInterface::saveWorld(BccWorld * world)
 	delete cm;
     
 	return true;
+}
+
+void BccInterface::separate(ATriangleMesh * mesh)
+{
+	std::cout<<"\n mesh n tri "<<mesh->numTriangles();
+	m_patchSeparator->separate(mesh);
+	const unsigned n = m_patchSeparator->numPatches();
+	if(n < 2) {
+		std::cout<<"\n cannot separate one continuous mesh ";
+		return;
+	}
+	
+	std::cout<<"\n sep to n patches "<<n;
+// todo compute object aligned bbox
+	
 }
 //:~
