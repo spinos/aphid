@@ -24,7 +24,7 @@ public:
 	BccWorld();
     virtual ~BccWorld();
 	
-	void addTriangleMesh(ATriangleMesh * m);
+	void setTiangleGeometry(GeometryArray * x);
 	void addCurveGroup(CurveGroup * m);
 	bool buildTetrahedronMesh();
     
@@ -35,6 +35,7 @@ public:
     const float totalCurveLength() const;
     const unsigned numCurves() const;
 	const unsigned numTetrahedrons() const;
+	unsigned numTriangles() const;
 	const unsigned numPoints() const;
 	unsigned numTetrahedronMeshes() const;
 	ATetrahedronMesh * tetrahedronMesh(unsigned i) const;
@@ -46,7 +47,7 @@ public:
 private:
 	bool createAllCurveGeometry();
 	void createCurveGeometry(unsigned geoBegin, CurveGroup * data);
-	bool createTriangleGeometry();
+	bool createTriangleIntersection();
 	void createTetrahedronMeshes();
     
 	void clearTetrahedronMesh();
@@ -65,7 +66,6 @@ private:
 #else
 	BccMesh * m_meshes;
 #endif
-	std::vector<ATriangleMesh *> m_triGeos;
 	std::vector<CurveGroup *> m_curveGeos;
     CurveReduction * m_reducer;
 	unsigned m_numMeshes, m_numCurves, m_totalNumTetrahedrons, m_totalNumPoints;

@@ -22,6 +22,10 @@ public:
 	bool createWorld(BccWorld * world);
 	void drawWorld(BccWorld * world, KdTreeDrawer * drawer);
 	bool saveWorld(BccWorld * world);
+	
+	bool loadTriangleGeometry(BccWorld * world, const std::string & filename);
+	bool loadCurveGeometry(BccWorld * world, const std::string & filename);
+	bool loadPatchGeometry(BccWorld * world, const std::string & filename);
 protected:
 	
 private:

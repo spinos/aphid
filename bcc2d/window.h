@@ -20,8 +20,14 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
+	void createActions();
+    void createMenus();
+    
+private:
     GLWidget *glWidget;
+	QMenu * fileMenu;
+    QAction * importTriangleAct;
+	QAction * importCurveAct;
+	QAction * importPatchAct;
 };
-//! [0]
-
 #endif

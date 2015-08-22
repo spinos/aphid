@@ -27,6 +27,7 @@ BccWorld::BccWorld()
 	m_numMeshes = 0;
     m_totalCurveLength = 0.f;
     m_estimatedNumGroups = 2500.f;
+	m_triangleMeshes = NULL;
 	m_reducer = new CurveReduction;
 	m_cluster = 0;
 }
@@ -37,10 +38,14 @@ BccWorld::~BccWorld()
 	delete m_cluster;
 	delete m_allGeo;
 	delete[] m_meshes;
+	delete m_triangleMeshes;
 }
 
-void BccWorld::addTriangleMesh(ATriangleMesh * m)
-{ m_triGeos.push_back(m); }
+void BccWorld::setTiangleGeometry(GeometryArray * x)
+{ 
+	m_triangleMeshes = x;
+	createTriangleIntersection();
+}
 
 void BccWorld::addCurveGroup(CurveGroup * m)
 { m_curveGeos.push_back(m); }
@@ -95,6 +100,7 @@ void BccWorld::createTetrahedronMeshes()
 
 GeometryArray * BccWorld::selectedGroup(unsigned & idx) const
 {
+	if(!m_cluster) return NULL;
 	idx = m_cluster->currentGroup();
 	if(!m_cluster->isGroupIdValid(idx)) return NULL;
 	return m_cluster->group(idx);
@@ -127,6 +133,16 @@ unsigned BccWorld::numTetrahedronMeshes() const
 GeometryArray * BccWorld::triangleGeometries() const
 { return m_triangleMeshes; }
 
+unsigned BccWorld::numTriangles() const
+{
+	if(!m_triangleMeshes) return 0;
+	const unsigned m = m_triangleMeshes->numGeometries();
+	unsigned nt = 0;
+	unsigned i = 0;
+	for(;i<m;i++) nt += ((ATriangleMesh *)m_triangleMeshes->geometry(i))->numTriangles();
+	return nt;
+}
+
 void BccWorld::rebuildTetrahedronsMesh(float deltaNumGroups)
 {
     m_estimatedNumGroups += deltaNumGroups * numCurves();
@@ -139,6 +155,7 @@ void BccWorld::rebuildTetrahedronsMesh(float deltaNumGroups)
 
 void BccWorld::select(const Ray * r)
 {
+	if(!m_cluster) return;
 	BaseCurve::RayIntersectionTolerance = totalCurveLength() / m_estimatedNumGroups * .37f;
 	if(!m_cluster->intersectRay(r))
 		clearSelection();
@@ -329,18 +346,9 @@ void BccWorld::createCurveGeometry(unsigned geoBegin, CurveGroup * data)
 	}
 }
 
-bool BccWorld::createTriangleGeometry()
-{
-	const unsigned n = m_triGeos.size();
-	if(n<1) return false;
-	
-	m_triangleMeshes = new GeometryArray;
-	m_triangleMeshes->create(n);
-	
+bool BccWorld::createTriangleIntersection()
+{	
 	unsigned i;
-	for(i=0; i<n; i++) 
-		m_triangleMeshes->setGeometry(m_triGeos[i], i);
-	
 	m_triIntersect = new KdIntersection;
 	for(i=0; i<m_triangleMeshes->numGeometries(); i++) {
 		ATriangleMesh * m = (ATriangleMesh *)m_triangleMeshes->geometry(i);
@@ -358,9 +366,13 @@ bool BccWorld::createTriangleGeometry()
 
 bool BccWorld::buildTetrahedronMesh()
 {	
+	if(!m_triIntersect) {
+		std::cout<<"\n bcc world has no grow mesh ";
+		return false;
+	}
 	if(!createAllCurveGeometry()) return false;
 	
-	std::cout<<" creating kd tree\n";
+	std::cout<<"\n bcc world creating curve cluster ";
 	m_cluster = new KdCluster;
 	m_cluster->addGeometry(m_allGeo);
 	
@@ -369,9 +381,8 @@ bool BccWorld::buildTetrahedronMesh()
 	
 	m_cluster->create();
 	
-	createTriangleGeometry();
+	std::cout<<"\n bcc world building tetrahedron mesh ";
 	createTetrahedronMeshes();
-	std::cout<<"\n bcc world done building tetrahedron mesh ";
 	return true;
 }
 //:~

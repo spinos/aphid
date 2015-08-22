@@ -44,8 +44,11 @@ void GLWidget::clientDraw()
 	sst<<"n tetrahedrons: "<<m_world->numTetrahedrons();
     hudText(sst.str(), 2);
 	sst.str("");
-	sst<<"n points: "<<m_world->numPoints();
+	sst<<"n tetrahedron mesh points: "<<m_world->numPoints();
     hudText(sst.str(), 3);
+	sst.str("");
+	sst<<"n grow mesh triangles: "<<m_world->numTriangles();
+    hudText(sst.str(), 4);
 #endif
 }
 
@@ -115,3 +118,51 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 	setUpdatesEnabled(true);
 	Base3DView::keyPressEvent(event);
 }
+
+void GLWidget::importGrowMesh()
+{
+	QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this,
+							tr("Open .hes file for grow mesh"),
+							tr("info"),
+							tr("All Files (*);;Hesperis Files (*.hes)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName == "") return;
+    if(!m_interface->loadTriangleGeometry(m_world, fileName.toUtf8().data()))
+        qDebug()<<" failed to load grow mesh from hes file: "<<fileName;
+}
+
+void GLWidget::importCurve()
+{
+	QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this,
+							tr("Open .hes file for curve"),
+							tr("info"),
+							tr("All Files (*);;Hesperis Files (*.hes)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName == "") return;
+    if(m_interface->loadCurveGeometry(m_world, fileName.toUtf8().data()))
+		m_world->buildTetrahedronMesh();
+	else
+		qDebug()<<" failed to load curve from hes file: "<<fileName;
+}
+
+void GLWidget::importPatch()
+{
+	QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this,
+							tr("Open .hes file for triangle patch"),
+							tr("info"),
+							tr("All Files (*);;Hesperis Files (*.hes)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+	if(fileName == "") return;
+    if(m_interface->loadPatchGeometry(m_world, fileName.toUtf8().data())) {
+	
+	}
+	else
+		qDebug()<<" failed to load patch from hes file: "<<fileName;
+}
+//:~

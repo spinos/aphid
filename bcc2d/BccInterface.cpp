@@ -30,10 +30,41 @@ BccInterface::~BccInterface()
 }
 
 bool BccInterface::createWorld(BccWorld * world)
-{  
+{
+	bool hasCrv = loadCurveGeometry(world, FileName);
+	bool hasTri = loadTriangleGeometry(world, FileName);
+	
+	if(hasCrv && hasTri) 
+		world->buildTetrahedronMesh();
 
+	return true;
+}
+
+bool BccInterface::loadTriangleGeometry(BccWorld * world, const std::string & filename)
+{
+	const std::string oldFilename = FileName;
+	FileName = filename;
+	GeometryArray * trigeo = new GeometryArray;
+	bool res = ReadTriangleData(trigeo);
+	if(res) {
+		const unsigned n = trigeo->numGeometries();
+		std::cout<<"\n bcc interface loading "<<n<<" triangle mesh geometries. ";
+		world->setTiangleGeometry(trigeo);
+	}
+	else {
+		std::cout<<"\n hes file contains no triangle mesh geometry. ";
+	}
+	FileName = oldFilename;
+	return res;
+}
+
+bool BccInterface::loadCurveGeometry(BccWorld * world, const std::string & filename)
+{
+	const std::string oldFilename = FileName;
+	FileName = filename;
 	GeometryArray curvegeo;
-	if(ReadCurveData(&curvegeo)) {
+	bool res = ReadCurveData(&curvegeo);
+	if(res) {
 		const unsigned n = curvegeo.numGeometries();
 		std::cout<<"\n bcc interface loading "<<n<<" curve geometries. ";
 		unsigned i=0;
@@ -41,24 +72,28 @@ bool BccInterface::createWorld(BccWorld * world)
 			world->addCurveGroup((CurveGroup *)curvegeo.geometry(i));
 	}
 	else {
-		std::cout<<"\n hes file contains no curve geometries. ";
+		std::cout<<"\n hes file contains no curve geometry. ";
 	}
-	
-    GeometryArray trigeo;
-	if(ReadTriangleData(&trigeo)) {
-		const unsigned n = trigeo.numGeometries();
-		std::cout<<"\n bcc interface loading "<<n<<" triangle mesh geometries. ";
-		unsigned i=0;
-		for(;i<n;i++)
-			world->addTriangleMesh((ATriangleMesh *)trigeo.geometry(i));
+	FileName = oldFilename;
+	return res;
+}
+
+bool BccInterface::loadPatchGeometry(BccWorld * world, const std::string & filename)
+{
+	const std::string oldFilename = FileName;
+	FileName = filename;
+	GeometryArray * trigeo = new GeometryArray;
+	bool res = ReadTriangleData(trigeo);
+	if(res) {
+		const unsigned n = trigeo->numGeometries();
+		std::cout<<"\n bcc interface loading "<<n<<" triangle mesh geometries as patch ";
+// todo separate patches and compute object aligned bbox
 	}
 	else {
-		std::cout<<"\n hes file contains no triangle mesh geometries. ";
+		std::cout<<"\n hes file contains no triangle mesh geometry. ";
 	}
-	
-	world->buildTetrahedronMesh();
-
-	return true;
+	FileName = oldFilename;
+	return res;
 }
 
 void BccInterface::drawWorld(BccWorld * world, KdTreeDrawer * drawer)
@@ -69,13 +104,9 @@ void BccInterface::drawWorld(BccWorld * world, KdTreeDrawer * drawer)
 	for(i=0;i<n;i++) {
 		drawTetrahedronMesh(world->tetrahedronMesh(i), drawer);
 		drawAnchors(world->tetrahedronMesh(i), drawer, das);
-    
-		//drawer->setColor(.17f, .21f, .15f);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//drawer->tetrahedronMesh(mesh);
 	}
 	
-	drawGeometry(world->triangleGeometries(), drawer);
+	if(world->triangleGeometries()) drawGeometry(world->triangleGeometries(), drawer);
 	
 	unsigned igroup;
 	GeometryArray * selected = world->selectedGroup(igroup);
@@ -84,11 +115,6 @@ void BccInterface::drawWorld(BccWorld * world, KdTreeDrawer * drawer)
 		glDisable(GL_DEPTH_TEST);
 		drawer->geometry(selected);
 	}
-		
-	// drawer->setColor(.3f, .2f, .1f);
-	// drawGrid(world->field(), drawer);
-	// drawField(world->field(), "dP", drawer);
-	// drawLocateCells(world->field(), mesh, drawer);
 }
 
 void BccInterface::drawTetrahedronMesh(ATetrahedronMesh * m, KdTreeDrawer * drawer)

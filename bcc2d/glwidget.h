@@ -13,8 +13,11 @@ class GLWidget : public Base3DView
 public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
-public slots:
 	
+public slots:
+	void importGrowMesh();
+	void importCurve();
+	void importPatch();
 signals:
 
 protected:
