@@ -67,6 +67,7 @@ public:
     
     virtual bool doWrite(const std::string & fileName);
 	virtual bool doRead(const std::string & fileName);
+	void extractCurves(GeometryArray * dst);
     void extractTetrahedronMeshes(GeometryArray * dst);
 	void extractTriangleMeshes(GeometryArray * dst);
 
@@ -112,6 +113,7 @@ private:
     bool writePolygon();
     
 	bool readFrames(HBase * grp);
+	bool listCurve(HBase * grp);
 	bool readCurve();
     bool listTetrahedron(HBase * grp);
 	bool readTetrahedron();

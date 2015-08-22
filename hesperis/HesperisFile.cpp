@@ -166,6 +166,7 @@ bool HesperisFile::doRead(const std::string & fileName)
 	
 	switch (m_readComp) {
 		case RCurve:
+			listCurve(&grpWorld);
 			readCurve();
 			break;
 		case RTetra:
@@ -187,16 +188,29 @@ bool HesperisFile::doRead(const std::string & fileName)
 	return true;
 }
 
+bool HesperisFile::listCurve(HBase * grp)
+{
+	clearCurves();
+    std::vector<std::string > curveNames;
+    LsNames<HCurveGroup>(curveNames, grp);
+	
+	std::vector<std::string>::const_iterator it = curveNames.begin();
+	for(;it!=curveNames.end();++it)
+		addCurve(*it, new CurveGroup);
+
+	return true;
+}
+
 bool HesperisFile::readCurve()
 {
 	bool allValid = true;
 	std::map<std::string, CurveGroup *>::iterator itcurve = m_curves.begin();
 	for(; itcurve != m_curves.end(); ++itcurve) {
-		std::cout<<" read curve "<<worldPath(itcurve->first)
+		std::cout<<" read curve "<<itcurve->first
 		<<"\n";
-		HCurveGroup grpCurve(worldPath(itcurve->first));
+		HCurveGroup grpCurve(itcurve->first);
 		if(!grpCurve.load(itcurve->second)) {
-			std::cout<<" cannot load "<<worldPath(itcurve->first)
+			std::cout<<" cannot load "<<itcurve->first
 			<<"\n";
 			allValid = false;
 		}
@@ -274,6 +288,18 @@ bool HesperisFile::readTriangle()
 		std::cout<<" encounter problem(s) reading triangles.\n";
 
 	return allValid;
+}
+
+void HesperisFile::extractCurves(GeometryArray * dst)
+{
+	dst->create(m_curves.size());
+	unsigned i = 0;
+	std::map<std::string, CurveGroup *>::const_iterator it = m_curves.begin();
+	for(; it != m_curves.end(); ++it) {
+		dst->setGeometry(it->second, i);
+		i++;
+	}
+	dst->setNumGeometries(i);
 }
 
 void HesperisFile::extractTetrahedronMeshes(GeometryArray * dst)

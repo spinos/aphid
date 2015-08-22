@@ -1,5 +1,6 @@
 #include <QtGui>
 #include "BccGlobal.h"
+#include "BccInterface.h"
 #include <gl_heads.h>
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
@@ -9,16 +10,19 @@
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
+	m_interface = new BccInterface;
 #if TEST_FIT
     FitBccMeshBuilder::EstimatedGroupSize = 2.1f;
 	m_fit = new FitTest(getDrawer());
 #else
-	m_world = new BccWorld(getDrawer());
+	m_world = new BccWorld;
+	m_interface->createWorld(m_world);
 #endif
 }
 
 GLWidget::~GLWidget()
-{ 
+{
+	delete m_interface;
 }
 
 void GLWidget::clientInit()
@@ -31,7 +35,7 @@ void GLWidget::clientDraw()
 #if TEST_FIT
 	m_fit->draw();
 #else
-	m_world->draw();
+	m_interface->drawWorld(m_world, getDrawer());
 	std::stringstream sst;
 	sst.str("");
 	sst<<"n curves: "<<m_world->numCurves();
@@ -81,7 +85,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 #if TEST_FIT
 
 #else
-			m_world->save();
+			m_interface->saveWorld(m_world);
 #endif
 		}
 	}

@@ -21,12 +21,13 @@ class ATetrahedronMeshGroup;
 
 class BccWorld {
 public:
-	BccWorld(KdTreeDrawer * drawer);
+	BccWorld();
     virtual ~BccWorld();
-    
-    void draw();
-    bool save();
 	
+	void addTriangleMesh(ATriangleMesh * m);
+	void addCurveGroup(CurveGroup * m);
+	bool buildTetrahedronMesh();
+    
 	void select(const Ray * r);
 	void clearSelection();
     void reduceSelected(float x);
@@ -35,29 +36,26 @@ public:
     const unsigned numCurves() const;
 	const unsigned numTetrahedrons() const;
 	const unsigned numPoints() const;
+	unsigned numTetrahedronMeshes() const;
+	ATetrahedronMesh * tetrahedronMesh(unsigned i) const;
+	GeometryArray * triangleGeometries() const;
+	GeometryArray * selectedGroup(unsigned & idx) const;
+	float drawAnchorSize() const;
+	ATetrahedronMeshGroup * combinedTetrahedronMesh();
+	
 private:
-	bool createCurveGeometryFromFile();
-	void createTestCurveGeometry();
-	void createRandomCurveGeometry();
+	bool createAllCurveGeometry();
+	void createCurveGeometry(unsigned geoBegin, CurveGroup * data);
+	bool createTriangleGeometry();
 	void createTetrahedronMeshes();
-	void createTriangleMeshesFromFile();
-    bool readCurveDataFromFile();
-	bool readTriangleDataFromFile();
-	void drawCurveStars();
-
-	void drawTetrahedronMesh();
-	void drawTetrahedronMesh(unsigned nt, Vector3F * points, unsigned * indices);
-	void drawAnchor();
-	void drawTriangleMesh();
-    void clearTetrahedronMesh();
+    
+	void clearTetrahedronMesh();
 	void reduceAllGroups();
 	void reduceGroup(unsigned igroup);
 	float groupCurveLength(GeometryArray * geos);
 	void rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos);
-	ATetrahedronMeshGroup * combinedTetrahedronMesh();
+	
 private:
-    KdTreeDrawer * m_drawer;
-    CurveGroup * m_curves;
 	KdCluster * m_cluster;
 	KdIntersection * m_triIntersect;
 	GeometryArray * m_allGeo;
@@ -67,6 +65,8 @@ private:
 #else
 	BccMesh * m_meshes;
 #endif
+	std::vector<ATriangleMesh *> m_triGeos;
+	std::vector<CurveGroup *> m_curveGeos;
     CurveReduction * m_reducer;
 	unsigned m_numMeshes, m_numCurves, m_totalNumTetrahedrons, m_totalNumPoints;
     float m_totalCurveLength;

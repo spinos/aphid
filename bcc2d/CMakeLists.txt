@@ -2,10 +2,11 @@
 ## http://www.cmake.org/cmake/help/v3.0/manual/cmake-qt.7.html#introduction
 
 cmake_minimum_required (VERSION 2.8)
-project (testbcc)
+project (bcc)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
+
 include_directories ("../shared" 
 "../cudabvh" 
 "../radixsort" 
@@ -34,17 +35,12 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "SampleGroup.h"
 "CurveReduction.h"
 "FitBccMeshBuilder.h"
-"FitBccMesh.h")
+"FitBccMesh.h"
+BccInterface.h)
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
-"../btree/Types.cpp"
-"../btree/Entity.cpp"
-"../btree/BNode.cpp"
-"../btree/BTree.cpp"
-"../btree/Array.cpp"
 "../hesperis/HesperisFile.cpp"
 "../kdtree/RandomCurve.cpp"
-"BccGlobal.cpp"
 "main.cpp"
 "glWidget.cpp"
 "window.cpp"
@@ -58,13 +54,16 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "SampleGroup.cpp"
 "CurveReduction.cpp"
 "FitBccMeshBuilder.cpp"
-"FitBccMesh.cpp")
+"FitBccMesh.cpp"
+../hesperis/HesperisFile.cpp
+../hesperis/HesperisInterface.cpp
+BccInterface.cpp)
 
 if (WIN32)
 set (SOURCE_FILES ${SOURCE_FILES} "../shared/gExtension.cpp")
 endif ()
 
-add_executable (testbcc ${HEADER_FILES} ${SOURCE_FILES})
+add_executable (${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 ## find_package(HDF5 REQUIRED)
 if (WIN32)
@@ -79,14 +78,14 @@ if (WIN32)
 set (SZIP_INCLUDE_DIR "D:/usr/szip-2.1/src")
 set (SZIP_LIBRARIES "D:/usr/szip-2.1/szip.lib")
 include_directories (${SZIP_INCLUDE_DIR})
-target_link_libraries (testbcc ${SZIP_LIBRARIES})
+target_link_libraries (${PROJECT_NAME} ${SZIP_LIBRARIES})
 endif ()
 
 include_directories (${HDF5_INCLUDE_DIR})
-target_link_libraries (testbcc ${HDF5_LIBRARIES})
+target_link_libraries (${PROJECT_NAME} ${HDF5_LIBRARIES})
 
 find_package (OpenGL REQUIRED)
-target_link_libraries (testbcc ${OPENGL_LIBRARIES})
+target_link_libraries (${PROJECT_NAME} ${OPENGL_LIBRARIES})
 
 
 if (WIN32)
@@ -95,7 +94,7 @@ else ()
 set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
 endif ()
 
-target_link_libraries (testbcc ${Aphid_Library})
+target_link_libraries (${PROJECT_NAME} ${Aphid_Library})
 
 if (WIN32)
 set (OpenEXR_Library "D:/usr/openEXR/lib/Half.lib"
@@ -108,14 +107,14 @@ set (OpenEXR_Library "/usr/local/lib/libHalf.a"
 "/usr/local/lib/libIlmImf.a"
 "/usr/local/lib/libIlmThread.a")
 endif ()
-target_link_libraries (testbcc ${OpenEXR_Library})
+target_link_libraries (${PROJECT_NAME} ${OpenEXR_Library})
 
 if(WIN32)
 set (ZLIB_ROOT "D:/usr/zlib-1.2.5")
 endif()
 
 find_package (zlib REQUIRED)
-target_link_libraries (testbcc ${ZLIB_LIBRARIES})
+target_link_libraries (${PROJECT_NAME} ${ZLIB_LIBRARIES})
 
 if(WIN32)
 ## set (QT_QMAKE_EXECUTABLE "D:/usr/Qtx64/4.7.1/bin/qmake.exe")
@@ -132,7 +131,7 @@ include_directories (${QT_INCLUDE_DIR})
 include (${QT_USE_FILE})
 
 ## target_link_libraries (testcudafem Qt4::QtGui Qt4::QtOpenGL)
-target_link_libraries(testbcc ${QT_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES})
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -170,5 +169,4 @@ set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
 message (${Boost_LIBRARIES})
-target_link_libraries(testbcc ${Boost_LIBRARIES})
-
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})

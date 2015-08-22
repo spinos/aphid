@@ -10,7 +10,8 @@
  *
  */
 #include <AllMath.h>
-class CurveGroup {
+#include <Geometry.h>
+class CurveGroup : public Geometry {
 public:
 	CurveGroup();
 	virtual ~CurveGroup();

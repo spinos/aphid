@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QtCore>
 #include <QDebug>
-#include "BccGlobal.h"
+#include "BccInterface.h"
 #include "window.h"
 
 //! [0]
@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
 	qDebug()<<" starting Bcc Tetrahedron\n";
 	if(argc > 1) {
-		BccGlobal::FileName = argv[argc-1];
+		BccInterface::FileName = argv[argc-1];
 	}
 	
     QResource::registerResource("bcc_resource.rcc");

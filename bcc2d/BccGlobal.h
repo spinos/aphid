@@ -20,8 +20,4 @@
 #define WORLD_USE_FIT 1
 #define WORLD_TEST_SINGLE 0
 
-class BccGlobal {
-public:
-	static std::string FileName;
-};
 #endif        //  #ifndef BCCGLOBAL_H

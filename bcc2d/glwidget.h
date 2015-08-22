@@ -4,6 +4,7 @@
 #include <Base3DView.h>
 #include <BccGlobal.h>
 class BccWorld;
+class BccInterface;
 class FitTest;
 class GLWidget : public Base3DView
 {
@@ -33,6 +34,7 @@ private:
 #else
 	BccWorld * m_world;
 #endif
+	BccInterface * m_interface;
 
 private slots:
     

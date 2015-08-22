@@ -31,17 +31,17 @@ bool HesperisInterface::CheckFileExists()
 	return true;
 }
 
-bool HesperisInterface::ReadCurveData(CurveGroup * data)
+bool HesperisInterface::ReadCurveData(GeometryArray * data)
 {
 	if(!CheckFileExists()) return false;
 	
 	HesperisFile hes;
 	hes.setReadComponent(HesperisFile::RCurve);
-	hes.addCurve("curves", data);
 	if(!hes.open(FileName)) return false;
 	hes.close();
 	
-	return true;
+	hes.extractCurves(data);
+	return data->numGeometries() > 0;
 }
 
 bool HesperisInterface::ReadTriangleData(GeometryArray * data)

@@ -17,7 +17,7 @@ public:
 	virtual ~HesperisInterface();
 	
 	static bool CheckFileExists();
-	static bool ReadCurveData(CurveGroup * data);
+	static bool ReadCurveData(GeometryArray * data);
 	static bool ReadTriangleData(GeometryArray * data);
 	static bool ReadTetrahedronData(GeometryArray * data);
 	
