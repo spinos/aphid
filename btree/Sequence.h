@@ -134,6 +134,16 @@ public:
 		m_lastSearchNode = NULL;
 	}
 	
+	bool intersect(Sequence * another)
+	{
+		begin();
+		while(!end()) {
+			if(another->find(currentKey())) return true;
+			next();
+		}
+		return false;
+	}
+	
 	void verbose() {
 		std::cout<<"\n sequence root node "<<*m_root;
 	}

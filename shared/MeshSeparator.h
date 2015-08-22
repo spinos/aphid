@@ -7,6 +7,7 @@
  *
  */
 #include <Array.h>
+#include <map>
 #include <vector>
 class ATriangleMesh;
 class MeshSeparator {
@@ -16,14 +17,18 @@ public:
 	
 	void separate(ATriangleMesh * m);
 	unsigned numPatches() const;
-	unsigned patchTriangleBegin(unsigned i) const;
+	
 protected:
 typedef sdb::Array<unsigned, char> VertexIndices;
 
-	bool isVerticesConnectedToLastPatch(unsigned * v);
-	void connectVerticesToLastPatch(unsigned * v);
-	void clearLastPatch();
+	bool isVerticesConnectedToAnyPatch(unsigned * v, int & ipatch);
+	void connectVerticesToPatch(unsigned * v, unsigned ipatch);
+	void addPatch(unsigned x);
+	void clearPatches();
+	void mergeConnectedPatches();
+	bool isPatchConnectedToAnyPatch(unsigned t, unsigned & connectedPatch, VertexIndices * v);
+	void mergePatches(unsigned a, unsigned b);
+	void removePatch(unsigned a);
 private:
-	VertexIndices m_lastPatch;
-	std::vector<unsigned> m_patchTriangleBegins;
+	std::map<unsigned, VertexIndices *> m_patches;
 };
