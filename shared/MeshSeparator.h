@@ -9,6 +9,7 @@
 #include <Array.h>
 #include <map>
 #include <vector>
+class BaseBuffer;
 class ATriangleMesh;
 class MeshSeparator {
 public:
@@ -18,6 +19,10 @@ public:
 	void separate(ATriangleMesh * m);
 	unsigned numPatches() const;
 	
+	void patchBegin();
+	bool patchEnd();
+	void nextPatch();
+	unsigned getPatchCvs(BaseBuffer * pos, ATriangleMesh * m);
 protected:
 typedef sdb::Array<unsigned, char> VertexIndices;
 
@@ -31,4 +36,5 @@ typedef sdb::Array<unsigned, char> VertexIndices;
 	void removePatch(unsigned a);
 private:
 	std::map<unsigned, VertexIndices *> m_patches;
+	std::map<unsigned, VertexIndices *>::iterator m_patchIt;
 };

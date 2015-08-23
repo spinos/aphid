@@ -9,6 +9,7 @@
 
 #include "MeshSeparator.h"
 #include "ATriangleMesh.h"
+#include "BaseBuffer.h"
 
 MeshSeparator::MeshSeparator() 
 {
@@ -132,5 +133,32 @@ void MeshSeparator::removePatch(unsigned a)
 	std::map<unsigned, VertexIndices *>::iterator it = m_patches.find(a);
 	delete it->second;
 	m_patches.erase(it);
+}
+
+void MeshSeparator::patchBegin()
+{ m_patchIt = m_patches.begin(); }
+
+bool MeshSeparator::patchEnd()
+{ return m_patchIt == m_patches.end(); }
+
+void MeshSeparator::nextPatch()
+{ m_patchIt++; }
+
+unsigned MeshSeparator::getPatchCvs(BaseBuffer * pos, ATriangleMesh * m)
+{
+	VertexIndices * inds = m_patchIt->second;
+	const unsigned n = inds->size();
+	pos->create(n * 12);
+	Vector3F * dst = (Vector3F *)pos->data();
+	Vector3F * src = (Vector3F *)m->points();
+	unsigned i=0;
+	inds->begin();
+	while(!inds->end()) {
+		dst[i] = src[inds->key()];
+		i++;
+		inds->next();
+	}
+	
+	return n;
 }
 //:~

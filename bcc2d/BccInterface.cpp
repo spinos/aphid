@@ -17,6 +17,7 @@
 #include <KdIntersection.h>
 #include <HesperisFile.h>
 #include <MeshSeparator.h>
+#include <PrincipalComponents.h>
 #include <BaseLog.h>
 #include <boost/timer.hpp>
 
@@ -189,7 +190,14 @@ void BccInterface::separate(ATriangleMesh * mesh)
 	}
 	
 	std::cout<<"\n sep to n patches "<<n;
-// todo compute object aligned bbox
-	
+	PrincipalComponents pca;
+	BaseBuffer pos;
+	m_patchSeparator->patchBegin();
+	while(!m_patchSeparator->patchEnd()) {
+		const unsigned np = m_patchSeparator->getPatchCvs(&pos, mesh);
+		m_patchSeparator->nextPatch();
+		
+		pca.analyze((Vector3F *)pos.data(), np);
+	}
 }
 //:~

@@ -360,6 +360,8 @@ Vector3F Matrix33F::scale() const
 
 void Matrix33F::orthoNormalize()
 {
+// The Gram–Schmidt process
+// reference https://en.wikipedia.org/wiki/Gram%E2%80%93Schmidt_process
     Vector3F r0(M(0, 0), M(0, 1), M(0, 2));
     Vector3F r1(M(1, 0), M(1, 1), M(1, 2));
     Vector3F r2(M(2, 0), M(2, 1), M(2, 2));
@@ -408,10 +410,113 @@ void Matrix33F::set(const Quaternion & q)
 	*m(2, 2) = 1.0f - qxqx2 - qyqy2;
 }
 
+Vector3F Matrix33F::eigenVector(float & lambda) const
+{
+// power iterative method finds dominant eigen pair
+// reference http://www.math.pitt.edu/~sussmanm/2071Spring09/lab08/index.html
+// reference http://mathfaculty.fullerton.edu/mathews/n2003/PowerMethodMod.html
+	
+	Vector3F bk(0.f, 0.f, 1.f);
+	Vector3F bk1;
+	float ck = 1.f;
+	Vector3F yk;
+	
+	int i = 0;
+	for(;i<100;i++) {
+		yk = (*this) * bk;
+		ck = yk.length();
+		bk1 = yk / ck;
+
+		if(bk1.distanceTo(bk)<1e-6f) break;
+		bk = bk1;
+	}
+	
+	lambda = ck;
+	return bk1;
+}
+
+float Matrix33F::trace() const
+{ return v[0] + v[4] + v[8]; }
+
+bool Matrix33F::isSymmetric() const
+{
+	if(v[1] != v[3]) return false;
+	if(v[2] != v[6]) return false;
+	if(v[5] != v[7]) return false;
+	return true;
+}
+
+Vector3F Matrix33F::eigenValues() const
+{
+// when A is symmetric 
+// reference https://en.wikipedia.org/wiki/Eigenvalue_algorithm#3.C3.973_matrices
+
+	float p1 = v[1] * v[1] + v[2] * v[2] + v[5] * v[5];
+	if(p1 < 1e-7f) return Vector3F(v[0], v[4], v[8]);
+	
+	float q = trace() / 3.f;
+	float p2 = (M(0,0) - q) * (M(0,0) - q)
+				+ (M(1,1) - q) * (M(1,1) - q)
+				+ (M(2,2) - q) * (M(2,2) - q)
+				+ 2.f * p1;
+	float p = sqrt(p2 / 6.f);
+	Matrix33F B = *this + IdentityMatrix * (-q);
+	B *= 1.f / p;
+	float r = B.determinant() * .5f;
+	
+	float phi;
+	if(r <= -1.f) phi = 3.141592653589f / 3.f;
+	else if(r>= 1.f) phi = 0.f;
+	else phi = acos(r) / 3.f;
+	
+	float eig1 = q + 2.f * p * cos(phi);
+	float eig3 = q + 2.f * p * cos(phi + (2* 3.141592653589f/3.f));
+	float eig2 = 3.f * q - eig1 - eig3;
+
+	return Vector3F(eig1, eig2, eig3);
+}
+
+Matrix33F Matrix33F::eigenSystem(Vector3F & values) const
+{
+	values = eigenValues();
+	
+	Matrix33F Vk;
+	Matrix33F Vk1;
+	Matrix33F A(*this);
+	int i = 0;
+	for(;i<50;i++) {
+		Vk1 = Vk * A;
+		Vk1.orthoNormalize();
+		
+		if(Vk.distanceTo(Vk1)<1e-9f) break;
+		Vk = Vk1;
+	}
+	
+	Vector3F vx(Vk1.v[0], Vk1.v[1], Vk1.v[2]);
+	values.x = (A * vx).length();
+	Vector3F vy(Vk1.v[3], Vk1.v[4], Vk1.v[5]);
+	values.y = (A * vy).length();
+	Vector3F vz(Vk1.v[6], Vk1.v[7], Vk1.v[8]);
+	values.z = (A * vz).length();
+	return Vk1;
+}
+
+float Matrix33F::distanceTo(const Matrix33F & another) const
+{
+	float r = 0.f;
+	float d;
+	int i=0;
+	for(;i<9;i++) {
+		d = v[i] - another.v[i];
+		r += d*d;
+	}
+	return r;
+}
+
 const std::string Matrix33F::str() const
 {
 	std::stringstream sst;
-	sst.str("");
+	sst.str("\n");
     sst<<"["<<v[0]<<", "<<v[1]<<", "<<v[2]<<"]\n";
     sst<<"["<<v[3]<<", "<<v[4]<<", "<<v[5]<<"]\n";
 	sst<<"["<<v[6]<<", "<<v[7]<<", "<<v[8]<<"]\n";
@@ -419,3 +524,53 @@ const std::string Matrix33F::str() const
 	return sst.str();
 }
 
+Vector3F Matrix33F::SolveAxb(const Matrix33F & A, const Vector3F & b)
+{
+// gaussian elimination
+// reference http://mathworld.wolfram.com/GaussianElimination.html
+
+	float m[3][4];
+	m[0][0] = A.v[0]; m[0][1] = A.v[1]; m[0][2] = A.v[2]; m[0][3] = b.x;
+	m[1][0] = A.v[3]; m[1][1] = A.v[4]; m[1][2] = A.v[5]; m[1][3] = b.y;
+	m[2][0] = A.v[6]; m[2][1] = A.v[7]; m[2][2] = A.v[8]; m[2][3] = b.z;
+	
+	float t;
+	if(m[0][0] < 1e-3f && m[0][0] > 1e-3f) {
+		t = m[2][0];
+		m[2][0] = m[0][0];
+		m[0][0] = t;
+		
+		t = m[2][1];
+		m[2][1] = m[0][1];
+		m[0][1] = t;
+		
+		t = m[2][2];
+		m[2][2] = m[0][2];
+		m[0][2] = t;
+		
+		t = m[2][3];
+		m[2][3] = m[0][3];
+		m[0][3] = t;
+	}
+	
+	int i;
+	t = m[1][0] / m[0][0];
+	for(i=0;i<4;i++) m[1][i] -= m[0][i] * t;
+	
+	t = m[2][0] / m[0][0];
+	for(i=0;i<4;i++) m[2][i] -= m[0][i] * t;
+	
+	t = m[2][1] / m[1][1];
+	for(i=1;i<4;i++) m[2][i] -= m[1][i] * t;
+	
+	std::cout<<" arg m\n["<<m[0][0]<<","<<m[0][1]<<","<<m[0][2]<<","<<m[0][3]<<"]"
+					<<"\n["<<m[1][0]<<","<<m[1][1]<<","<<m[1][2]<<","<<m[1][3]<<"]"
+					<<"\n["<<m[2][0]<<","<<m[2][1]<<","<<m[2][2]<<","<<m[2][3]<<"]";
+					
+	Vector3F sol;
+	sol.z =	  m[2][3]	/ m[2][2];
+	sol.y = ( m[1][3]                   - sol.z * m[1][2] ) / m[1][1];
+	sol.x = ( m[0][3] - sol.y * m[0][1] - sol.z * m[0][2] ) / m[0][0];
+	return sol;
+}
+//:~

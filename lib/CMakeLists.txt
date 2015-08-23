@@ -224,6 +224,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/GjkIntersection.cpp
 ../shared/MersenneTwister.cpp
 ../shared/MeshSeparator.cpp
+../shared/PrincipalComponents.cpp
 ../btree/Types.cpp
 ../btree/Entity.cpp
 ../btree/BNode.cpp

@@ -58,6 +58,14 @@
 	void orthoNormalize();
 	void set(const Quaternion & q);
 	
+	Vector3F eigenVector(float & lambda) const;
+	Vector3F eigenValues() const;
+	Matrix33F eigenSystem(Vector3F & values) const;
+	float trace() const;
+	bool isSymmetric() const;
+	float distanceTo(const Matrix33F & another) const;
+	static Vector3F SolveAxb(const Matrix33F & A, const Vector3F & b);
+	
 	static Matrix33F IdentityMatrix;
 	
     friend std::ostream& operator<<(std::ostream &output, const Matrix33F & p) {
