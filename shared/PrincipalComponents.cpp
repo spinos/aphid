@@ -8,11 +8,12 @@
  */
 
 #include "PrincipalComponents.h"
+#include <BoundingBox.h>
 
 PrincipalComponents::PrincipalComponents() {}
 PrincipalComponents::~PrincipalComponents() {}
 
-void PrincipalComponents::analyze(Vector3F * pos, unsigned n)
+AOrientedBox PrincipalComponents::analyze(Vector3F * pos, unsigned n)
 {
 	Vector3F bar = Vector3F::Zero;
 	unsigned i=0;
@@ -39,8 +40,25 @@ void PrincipalComponents::analyze(Vector3F * pos, unsigned n)
 	//std::cout<<"\n eigen vals "<<covarianceMatrix.eigenValues();
 	
 	Vector3F egv;
-	std::cout<<"\n eigen sys "<<covarianceMatrix.eigenSystem(egv);
-	std::cout<<"\n all eigen vals "<<egv;
+	Matrix33F egs = covarianceMatrix.eigenSystem(egv);
+	AOrientedBox r;
+	r.setOrientation(egs);
+	
+	Matrix33F invspace(egs);
+	invspace.inverse();
+	BoundingBox bb;
+	for(i=0;i<n;i++) {
+		pos[i] = invspace.transform(pos[i]);
+		bb.expandBy(pos[i]);
+	}
+	
+	Vector3F offset = bb.center();
+	offset = egs.transform(offset);
+	r.setCenter(bar + offset);
+	
+	Vector3F ext(bb.distance(0) * .5f, bb.distance(1) * .5f, bb.distance(2) * .5f);
+	r.setExtent(ext);
+	return r;
 }
 
 float PrincipalComponents::covarianceXX(Vector3F * pos, unsigned n) const

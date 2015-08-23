@@ -7,6 +7,7 @@
  *
  */
 #include <HesperisInterface.h>
+#include <AOrientedBox.h>
 class KdTreeDrawer;
 class AGenericMesh;
 class ATetrahedronMesh;
@@ -36,6 +37,8 @@ private:
 	void drawAnchors(AGenericMesh * mesh, KdTreeDrawer * drawer,
 						float drawSize);
 private:
+	ATriangleMesh * m_patchMesh;
+	std::vector<AOrientedBox> m_patchBoxes;
 // cell center and size
     BaseBuffer * m_cells;
 	MeshSeparator * m_patchSeparator;

@@ -25,12 +25,14 @@ BccInterface::BccInterface()
 { 
     m_cells = new BaseBuffer;
 	m_patchSeparator = new MeshSeparator;
+	m_patchMesh = NULL;
 }
 
 BccInterface::~BccInterface() 
 { 
     delete m_cells;
 	delete m_patchSeparator;
+	m_patchBoxes.clear();
 }
 
 bool BccInterface::createWorld(BccWorld * world)
@@ -91,6 +93,7 @@ bool BccInterface::loadPatchGeometry(BccWorld * world, const std::string & filen
 	if(res) {
 		const unsigned n = trigeo->numGeometries();
 		std::cout<<"\n bcc interface loading "<<n<<" triangle mesh geometries as patch ";
+		m_patchMesh = (ATriangleMesh *)trigeo->geometry(0);
 		unsigned i=0;
 		for(;i<n;i++)
 			separate((ATriangleMesh *)trigeo->geometry(i));
@@ -120,6 +123,25 @@ void BccInterface::drawWorld(BccWorld * world, KdTreeDrawer * drawer)
 		drawer->setGroupColorLight(igroup);
 		glDisable(GL_DEPTH_TEST);
 		drawer->geometry(selected);
+	}
+	
+	if(m_patchMesh) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glColor3f(.03f, .14f, .44f);
+		drawer->geometry(m_patchMesh);
+	}
+	
+	glColor3f(0.f, 0.99f, 0.f);
+	glBegin(GL_LINES);
+	std::vector<AOrientedBox>::const_iterator it = m_patchBoxes.begin();
+	for(;it!=m_patchBoxes.end();++it)
+		drawer->orientedBox(&(*it));
+	glEnd();
+	
+	it = m_patchBoxes.begin();
+	for(;it!=m_patchBoxes.end();++it) {
+		const AOrientedBox ob = *it;
+		drawer->coordsys( ob.orientation(), ob.center(), ob.extent() );
 	}
 }
 
@@ -190,6 +212,7 @@ void BccInterface::separate(ATriangleMesh * mesh)
 	}
 	
 	std::cout<<"\n sep to n patches "<<n;
+	m_patchBoxes.clear();
 	PrincipalComponents pca;
 	BaseBuffer pos;
 	m_patchSeparator->patchBegin();
@@ -197,7 +220,7 @@ void BccInterface::separate(ATriangleMesh * mesh)
 		const unsigned np = m_patchSeparator->getPatchCvs(&pos, mesh);
 		m_patchSeparator->nextPatch();
 		
-		pca.analyze((Vector3F *)pos.data(), np);
+		m_patchBoxes.push_back( pca.analyze((Vector3F *)pos.data(), np) );
 	}
 }
 //:~

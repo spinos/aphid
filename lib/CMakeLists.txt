@@ -225,6 +225,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/MersenneTwister.cpp
 ../shared/MeshSeparator.cpp
 ../shared/PrincipalComponents.cpp
+../shared/AOrientedBox.cpp
 ../btree/Types.cpp
 ../btree/Entity.cpp
 ../btree/BNode.cpp

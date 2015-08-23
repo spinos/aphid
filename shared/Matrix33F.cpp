@@ -38,6 +38,9 @@ float Matrix33F::operator() (int i, int j) const
 	return v[i * 3 + j];
 }
 
+Vector3F Matrix33F::row(int i) const
+{ return Vector3F(v[i*3], v[i*3 + 1], v[i*3 + 2]); }
+
 Vector3F Matrix33F::operator*( Vector3F other ) const
 {
 	Vector3F v;

@@ -6,14 +6,15 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-
+#pragma once
 #include <AllMath.h>
+#include <AOrientedBox.h>
 class PrincipalComponents {
 public:
 	PrincipalComponents();
 	virtual ~PrincipalComponents();
 	
-	void analyze(Vector3F * pos, unsigned n);
+	AOrientedBox analyze(Vector3F * pos, unsigned n);
 	
 protected:
 	float covarianceXX(Vector3F * pos, unsigned n) const;

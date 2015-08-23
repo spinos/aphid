@@ -28,6 +28,7 @@
 	~Matrix33F();
 	float operator() (int i, int j);
 	float operator() (int i, int j) const;
+	Vector3F row(int i) const;
 	Vector3F operator*( Vector3F other ) const;
 	void operator*= (float scaling);
 	void operator+=(Matrix33F other);

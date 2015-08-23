@@ -28,6 +28,7 @@ class GeometryArray;
 class APointCloud;
 class ATetrahedronMesh;
 class CartesianGrid;
+class AOrientedBox;
 
 class GeoDrawer : public MeshDrawer {
 public:
@@ -50,7 +51,9 @@ public:
 	void arrow(const Vector3F& origin, const Vector3F& dest) const;
 	
 	void coordsys(float scale = 1.f) const;
+	void coordsys(const Vector3F & scale) const;
 	void coordsys(const Matrix33F & orient, float size = 1.f, Vector3F * p = 0) const;
+	void coordsys(const Matrix33F & orient, const Vector3F & p, const Vector3F & size) const;
 	
 	void manipulator(TransformManipulator * m);
 	void spaceHandle(SpaceHandle * hand);
@@ -82,6 +85,8 @@ public:
 	void pointCloud(APointCloud * cloud) const;
 	void tetrahedronMesh(ATetrahedronMesh * mesh) const;
 	void cartesianGrid(CartesianGrid * grid) const;
+	
+	void orientedBox(const AOrientedBox * ob) const;
 private:
 	Vector3F m_alignDir;
 	GeodesicSphereMesh * m_sphere;
@@ -89,5 +94,6 @@ private:
 	CubeMesh * m_cube;
 	CircleCurve * m_circle;
 	DiscMesh * m_disc;
+	Vector3F * m_boxVBuf;
 };
 #endif        //  #ifndef GEODRAWER_H

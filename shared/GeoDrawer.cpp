@@ -26,6 +26,7 @@
 #include <APointCloud.h>
 #include <tetrahedron_math.h>
 #include <CartesianGrid.h>
+#include <AOrientedBox.h>
 
 GeoDrawer::GeoDrawer() 
 {
@@ -35,6 +36,7 @@ GeoDrawer::GeoDrawer()
 	m_cube = new CubeMesh;
 	m_disc = new DiscMesh;
 	m_alignDir = Vector3F::ZAxis;
+	m_boxVBuf = new Vector3F[8];
 }
 
 GeoDrawer::~GeoDrawer()
@@ -44,6 +46,7 @@ GeoDrawer::~GeoDrawer()
 	delete m_circle;
 	delete m_cube;
 	delete m_disc;
+	delete m_boxVBuf;
 }
 
 const float UnitBoxLine[24][3] = {
@@ -300,17 +303,40 @@ void GeoDrawer::coordsys(float scale) const
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glColor3f(1.f, 0.f, 0.f);
-	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(scale, 0.f, 0.f));
+	arrow(Vector3F::Zero, Vector3F(scale, 0.f, 0.f));
 	glColor3f(0.f, 1.f, 0.f);
-	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, scale, 0.f));
+	arrow(Vector3F::Zero, Vector3F(0.f, scale, 0.f));
 	glColor3f(0.f, 0.f, 1.f);
-	arrow(Vector3F(0.f, 0.f, 0.f), Vector3F(0.f, 0.f, scale));
+	arrow(Vector3F::Zero, Vector3F(0.f, 0.f, scale));
+}
+
+void GeoDrawer::coordsys(const Vector3F & scale) const
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glColor3f(1.f, 0.f, 0.f);
+	arrow(Vector3F::Zero, Vector3F(scale.x, 0.f, 0.f));
+	glColor3f(0.f, 1.f, 0.f);
+	arrow(Vector3F::Zero, Vector3F(0.f, scale.y, 0.f));
+	glColor3f(0.f, 0.f, 1.f);
+	arrow(Vector3F::Zero, Vector3F(0.f, 0.f, scale.z));
 }
 
 void GeoDrawer::coordsys(const Matrix33F & orient, float scale, Vector3F * p) const
 {
 	glPushMatrix();
 	if(p) glTranslatef(p->x, p->y, p->z);
+	float m[16];
+	orient.glMatrix(m);
+	glMultMatrixf((const GLfloat*)m);
+	coordsys(scale);
+	
+	glPopMatrix();
+}
+
+void GeoDrawer::coordsys(const Matrix33F & orient, const Vector3F & p, const Vector3F & scale) const
+{
+	glPushMatrix();
+	glTranslatef(p.x, p.y, p.z);
 	float m[16];
 	orient.glMatrix(m);
 	glMultMatrixf((const GLfloat*)m);
@@ -756,5 +782,21 @@ void GeoDrawer::cartesianGrid(CartesianGrid * grid) const
 	    c->next();   
 	}
     glEnd();
+}
+
+const int IndexBoxLine[24] = {
+0, 1, 2, 3,
+4, 5, 6, 7,
+0, 2, 1, 3,
+4, 6, 5, 7,
+0, 4, 1, 5,
+2, 6, 3, 7
+};
+
+void GeoDrawer::orientedBox(const AOrientedBox * ob) const
+{
+	ob->getBoxVertices(m_boxVBuf);
+	int i = 0;
+	for(;i<24;i++) glVertex3fv((float *)&m_boxVBuf[IndexBoxLine[i]]);
 }
 //:~
