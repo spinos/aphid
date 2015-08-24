@@ -57,6 +57,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "FitBccMesh.cpp"
 ../hesperis/HesperisFile.cpp
 ../hesperis/HesperisInterface.cpp
+BlockBccMeshBuilder.cpp
 BccInterface.cpp)
 
 if (WIN32)

@@ -52,8 +52,8 @@ public:
 	
 	void coordsys(float scale = 1.f) const;
 	void coordsys(const Vector3F & scale) const;
-	void coordsys(const Matrix33F & orient, float size = 1.f, Vector3F * p = 0) const;
-	void coordsys(const Matrix33F & orient, const Vector3F & p, const Vector3F & size) const;
+	void coordsys(const Matrix33F & orient, float size = 1.f, Vector3F * p = 0);
+	void coordsys(const Matrix33F & orient, const Vector3F & p, const Vector3F & size);
 	
 	void manipulator(TransformManipulator * m);
 	void spaceHandle(SpaceHandle * hand);
@@ -95,5 +95,6 @@ private:
 	CircleCurve * m_circle;
 	DiscMesh * m_disc;
 	Vector3F * m_boxVBuf;
+	float m_spaceBuf[16];
 };
 #endif        //  #ifndef GEODRAWER_H

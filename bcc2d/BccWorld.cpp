@@ -20,6 +20,7 @@
 #include "FitBccMeshBuilder.h"
 #include "CurveReduction.h"
 #include <ATetrahedronMeshGroup.h>
+#include <BlockBccMeshBuilder.h>
 
 BccWorld::BccWorld()
 {
@@ -29,6 +30,7 @@ BccWorld::BccWorld()
     m_estimatedNumGroups = 2500.f;
 	m_triangleMeshes = NULL;
 	m_reducer = new CurveReduction;
+	m_blockBuilder = new BlockBccMeshBuilder;
 	m_cluster = 0;
 }
 
@@ -39,6 +41,7 @@ BccWorld::~BccWorld()
 	delete m_allGeo;
 	delete[] m_meshes;
 	delete m_triangleMeshes;
+	delete m_blockBuilder;
 }
 
 void BccWorld::setTiangleGeometry(GeometryArray * x)
@@ -384,5 +387,11 @@ bool BccWorld::buildTetrahedronMesh()
 	std::cout<<"\n bcc world building tetrahedron mesh ";
 	createTetrahedronMeshes();
 	return true;
+}
+
+void BccWorld::addPatchBoxes(const std::vector<AOrientedBox> & src)
+{
+	std::vector<AOrientedBox>::const_iterator it = src.begin();
+	for(;it!=src.end();++it) m_patchBoxes.push_back(*it);
 }
 //:~

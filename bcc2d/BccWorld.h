@@ -2,6 +2,7 @@
 #define BCCWORLD_H
 #include <ALLMath.h>
 #include <BoundingBox.h>
+#include <AOrientedBox.h>
 #include <HTetrahedronMesh.h>
 #include "BccGlobal.h"
 
@@ -18,6 +19,7 @@ class FitBccMesh;
 class ATriangleMesh;
 class CurveReduction;
 class ATetrahedronMeshGroup;
+class BlockBccMeshBuilder;
 
 class BccWorld {
 public:
@@ -27,6 +29,7 @@ public:
 	void setTiangleGeometry(GeometryArray * x);
 	void addCurveGroup(CurveGroup * m);
 	bool buildTetrahedronMesh();
+	void addPatchBoxes(const std::vector<AOrientedBox> & src);
     
 	void select(const Ray * r);
 	void clearSelection();
@@ -67,7 +70,9 @@ private:
 	BccMesh * m_meshes;
 #endif
 	std::vector<CurveGroup *> m_curveGeos;
+	std::vector<AOrientedBox> m_patchBoxes;
     CurveReduction * m_reducer;
+	BlockBccMeshBuilder * m_blockBuilder;
 	unsigned m_numMeshes, m_numCurves, m_totalNumTetrahedrons, m_totalNumPoints;
     float m_totalCurveLength;
     float m_estimatedNumGroups;

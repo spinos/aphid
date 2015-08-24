@@ -321,25 +321,25 @@ void GeoDrawer::coordsys(const Vector3F & scale) const
 	arrow(Vector3F::Zero, Vector3F(0.f, 0.f, scale.z));
 }
 
-void GeoDrawer::coordsys(const Matrix33F & orient, float scale, Vector3F * p) const
+void GeoDrawer::coordsys(const Matrix33F & orient, float scale, Vector3F * p)
 {
 	glPushMatrix();
 	if(p) glTranslatef(p->x, p->y, p->z);
-	float m[16];
-	orient.glMatrix(m);
-	glMultMatrixf((const GLfloat*)m);
+	
+	orient.glMatrix(m_spaceBuf);
+	glMultMatrixf((const GLfloat*)m_spaceBuf);
 	coordsys(scale);
 	
 	glPopMatrix();
 }
 
-void GeoDrawer::coordsys(const Matrix33F & orient, const Vector3F & p, const Vector3F & scale) const
+void GeoDrawer::coordsys(const Matrix33F & orient, const Vector3F & p, const Vector3F & scale)
 {
 	glPushMatrix();
 	glTranslatef(p.x, p.y, p.z);
-	float m[16];
-	orient.glMatrix(m);
-	glMultMatrixf((const GLfloat*)m);
+	
+	orient.glMatrix(m_spaceBuf);
+	glMultMatrixf((const GLfloat*)m_spaceBuf);
 	coordsys(scale);
 	
 	glPopMatrix();
@@ -383,10 +383,10 @@ void GeoDrawer::spaceHandle(SpaceHandle * hand)
 {
 	if(!hand) return;
 	glPushMatrix();
-	float m[16];
+	
     
-    hand->spaceMatrix(m);
-	glMultMatrixf((const GLfloat*)m);
+    hand->spaceMatrix(m_spaceBuf);
+	glMultMatrixf((const GLfloat*)m_spaceBuf);
 	glDisable(GL_DEPTH_TEST);
 	
 	colorAsActive();
@@ -399,11 +399,10 @@ void GeoDrawer::spaceHandle(SpaceHandle * hand)
 void GeoDrawer::anchor(Anchor *a, char active)
 {
 	glPushMatrix();
-	float m[16];
-    
-    a->spaceMatrix(m);
-    
-    glMultMatrixf((const GLfloat*)m);
+	
+    a->spaceMatrix(m_spaceBuf);
+    glMultMatrixf((const GLfloat*)m_spaceBuf);
+	
 	glDisable(GL_DEPTH_TEST);
 	
 	unsigned nouse;

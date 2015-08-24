@@ -22,15 +22,16 @@ AOrientedBox PrincipalComponents::analyze(Vector3F * pos, unsigned n)
 	
 	for(i=0;i<n;i++) pos[i] -= bar;
 	
+// is symmetric
 	Matrix33F covarianceMatrix;
 	*covarianceMatrix.m(0,0) = covarianceXX(pos, n);
 	*covarianceMatrix.m(0,1) = covarianceXY(pos, n);
 	*covarianceMatrix.m(0,2) = covarianceXZ(pos, n);
-	*covarianceMatrix.m(1,0) = covarianceYX(pos, n);
+	*covarianceMatrix.m(1,0) = covarianceMatrix.M(0,1);
 	*covarianceMatrix.m(1,1) = covarianceYY(pos, n);
 	*covarianceMatrix.m(1,2) = covarianceYZ(pos, n);
-	*covarianceMatrix.m(2,0) = covarianceZX(pos, n);
-	*covarianceMatrix.m(2,1) = covarianceZY(pos, n);
+	*covarianceMatrix.m(2,0) = covarianceMatrix.M(0,2);
+	*covarianceMatrix.m(2,1) = covarianceMatrix.M(1,2);
 	*covarianceMatrix.m(2,2) = covarianceZZ(pos, n);
 	
 	//float domegv;

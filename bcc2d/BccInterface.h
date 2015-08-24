@@ -30,7 +30,7 @@ public:
 	bool loadCurveGeometry(BccWorld * world, const std::string & filename);
 	bool loadPatchGeometry(BccWorld * world, const std::string & filename);
 protected:
-	void separate(ATriangleMesh * mesh);
+	bool separate(ATriangleMesh * mesh);
 private:
     void drawTetrahedronMesh(ATetrahedronMesh * m, KdTreeDrawer * drawer);
 	void drawGeometry(GeometryArray * geos, KdTreeDrawer * drawer);

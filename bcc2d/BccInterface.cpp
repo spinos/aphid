@@ -95,8 +95,10 @@ bool BccInterface::loadPatchGeometry(BccWorld * world, const std::string & filen
 		std::cout<<"\n bcc interface loading "<<n<<" triangle mesh geometries as patch ";
 		m_patchMesh = (ATriangleMesh *)trigeo->geometry(0);
 		unsigned i=0;
-		for(;i<n;i++)
-			separate((ATriangleMesh *)trigeo->geometry(i));
+		for(;i<n;i++) {
+			if(separate((ATriangleMesh *)trigeo->geometry(i)))
+				world->addPatchBoxes(m_patchBoxes);
+		}
 	}
 	else {
 		std::cout<<"\n hes file contains no triangle mesh geometry. ";
@@ -201,14 +203,14 @@ bool BccInterface::saveWorld(BccWorld * world)
 	return true;
 }
 
-void BccInterface::separate(ATriangleMesh * mesh)
+bool BccInterface::separate(ATriangleMesh * mesh)
 {
 	std::cout<<"\n mesh n tri "<<mesh->numTriangles();
 	m_patchSeparator->separate(mesh);
 	const unsigned n = m_patchSeparator->numPatches();
 	if(n < 2) {
 		std::cout<<"\n cannot separate one continuous mesh ";
-		return;
+		return false;
 	}
 	
 	std::cout<<"\n sep to n patches "<<n;
@@ -222,5 +224,14 @@ void BccInterface::separate(ATriangleMesh * mesh)
 		
 		m_patchBoxes.push_back( pca.analyze((Vector3F *)pos.data(), np) );
 	}
+	
+	float totalLength = 0.f;
+	std::vector<AOrientedBox>::const_iterator it = m_patchBoxes.begin();
+	for(;it!=m_patchBoxes.end();++it)
+		totalLength += (*it).extent().x;
+		
+	totalLength *= 2.f;
+	std::cout<<"\n total patch length "<<totalLength;
+	return true;
 }
 //:~
