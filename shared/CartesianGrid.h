@@ -32,6 +32,8 @@ public:
 	bool isPInsideBound(const Vector3F & p) const;
 	void putPInsideBound(Vector3F & p) const;
 	
+	sdb::CellValue * findCell(unsigned code) const;
+	
 protected:
 	const float gridSize() const;
 	
@@ -44,7 +46,6 @@ protected:
 									int level) const;
 	const unsigned mortonEncode(const Vector3F & p) const;
 	sdb::CellValue * findGrid(unsigned code) const;
-	sdb::CellValue * findCell(unsigned code) const;
 	unsigned addGrid(const Vector3F & p);
     const Vector3F gridOrigin(unsigned code) const;
 	const Vector3F cellOrigin(unsigned code, int level) const;
@@ -72,7 +73,6 @@ private:
     Vector3F m_origin;
     float m_span, m_gridH; // same for each dimensions
     sdb::CellHash * m_cellHash;
-    unsigned m_numCells;
 };
 
 #endif        //  #ifndef CARTESIANGRID_H

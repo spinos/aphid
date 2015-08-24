@@ -6,8 +6,7 @@
 
 CartesianGrid::CartesianGrid()
 {
-    m_numCells = 0;
-	sdb::TreeNode::MaxNumKeysPerNode = 512;
+    sdb::TreeNode::MaxNumKeysPerNode = 512;
 	sdb::TreeNode::MinNumKeysPerNode = 32;
 	m_cellHash = new sdb::CellHash;
 }
@@ -34,7 +33,7 @@ void CartesianGrid::setBounding(const BoundingBox & bound)
 }
 
 const unsigned CartesianGrid::numCells() const
-{ return m_numCells; }
+{ return m_cellHash->size(); }
 
 void CartesianGrid::getBounding(BoundingBox & bound) const
 {
@@ -128,8 +127,7 @@ unsigned CartesianGrid::addGrid(const Vector3F & p)
 	ind->visited = 0;
 	m_cellHash->insert(code, ind);
 	
-    m_numCells++;
-	return code;
+    return code;
 }
 
 void CartesianGrid::addCell(unsigned code, int level, int visited, unsigned index)
@@ -139,8 +137,6 @@ void CartesianGrid::addCell(unsigned code, int level, int visited, unsigned inde
 	ind->visited = visited;
 	ind->index = index;
 	m_cellHash->insert(code, ind);
-	
-    m_numCells++;
 }
 
 unsigned CartesianGrid::addCell(const Vector3F & p, int level)
@@ -151,16 +147,11 @@ unsigned CartesianGrid::addCell(const Vector3F & p, int level)
 	ind->visited = 0;
 	m_cellHash->insert(code, ind);
 	
-    m_numCells++;
-	return code;
+    return code;
 }
 
 void CartesianGrid::removeCell(unsigned code)
-{
-	m_cellHash->remove(code);
-	
-	m_numCells--;
-}
+{ m_cellHash->remove(code); }
 
 // cell level < 10
 const Vector3F CartesianGrid::cellCenter(unsigned code) const

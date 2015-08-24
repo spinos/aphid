@@ -141,6 +141,35 @@ void ATetrahedronMesh::closestToPoint(unsigned icomponent, ClosestToPointTestRes
 TetrahedronSampler * ATetrahedronMesh::sampler()
 { return &m_sampler; }
 
+void ATetrahedronMesh::checkTetrahedronVolume()
+{
+	const unsigned n = numTetrahedrons();
+	Vector3F * pos = points();
+	Vector3F p[4];
+	unsigned tmp;
+	unsigned i = 0;
+	for(;i<n;i++) {
+		unsigned * tet = tetrahedronIndices(i);
+		p[0] = pos[tet[0]];
+		p[1] = pos[tet[1]];
+		p[2] = pos[tet[2]];
+		p[3] = pos[tet[3]];
+		
+		if(tetrahedronVolume(p)<0.f) {
+			tmp = tet[1];
+			tet[1] = tet[2];
+			tet[2] = tmp;
+			
+			p[0] = pos[tet[0]];
+			p[1] = pos[tet[1]];
+			p[2] = pos[tet[2]];
+			p[3] = pos[tet[3]];
+			
+			std::cout<<" tet vol after swap 1 2 "<<tetrahedronVolume(p)<<"\n";
+		}
+	}
+}
+
 std::string ATetrahedronMesh::verbosestr() const
 {
 	std::stringstream sst;

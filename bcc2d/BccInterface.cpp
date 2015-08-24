@@ -138,9 +138,13 @@ void BccInterface::drawWorld(BccWorld * world, KdTreeDrawer * drawer)
 	}
     
     if(m_tetMesh) {
+#if 0
+		drawTetrahedronMesh(m_tetMesh, drawer);
+#else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glColor3f(.03f, .14f, .44f);
 		drawer->tetrahedronMesh(m_tetMesh);
+#endif
 	}
 	
     const std::vector<AOrientedBox> * boxes = world->patchBoxes();
@@ -244,8 +248,13 @@ void BccInterface::testBlockMesh()
 {
     BlockBccMeshBuilder builder;
     AOrientedBox box;
-    box.setExtent(Vector3F(8.f, 4.f, 1.f));
-    box.setCenter(Vector3F(4.f, 2.f, 4.f));
-    builder.build(box, 8, 2, 1);
+    box.setExtent(Vector3F(28.f, 14.f, 1.f));
+    box.setCenter(Vector3F(0.1f, 7.f, 1.f));
+	unsigned nv, nt;
+    builder.build(box, 22, 3, 1, nv, nt);
+	std::cout<<"\n tet nv nt "<<nv<<" "<<nt;
+	m_tetMesh = new ATetrahedronMesh;
+	m_tetMesh->create(nv, nt);
+	builder.getResult(m_tetMesh);
 }
 //:~

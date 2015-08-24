@@ -32,6 +32,7 @@ public:
     void setVolume(float x);
     
     TetrahedronSampler * sampler();
+	void checkTetrahedronVolume();
 	
 	virtual std::string verbosestr() const;
 protected:

@@ -197,10 +197,10 @@ void FitBccMeshBuilder::checkTetrahedronVolume(std::vector<Vector3F > & tetrahed
 			tetrahedronInd[i+1] = tetrahedronInd[i+2];
 			tetrahedronInd[i+2] = tmp;
 			
-			p[0] = tetrahedronP[tetrahedronInd[i]];
-			p[1] = tetrahedronP[tetrahedronInd[i+1]];
-			p[2] = tetrahedronP[tetrahedronInd[i+2]];
-			p[3] = tetrahedronP[tetrahedronInd[i+3]];
+			//p[0] = tetrahedronP[tetrahedronInd[i]];
+			//p[1] = tetrahedronP[tetrahedronInd[i+1]];
+			//p[2] = tetrahedronP[tetrahedronInd[i+2]];
+			//p[3] = tetrahedronP[tetrahedronInd[i+3]];
 			
 			// std::cout<<" tet vol after swap 1 2 "<<tetrahedronVolume(p)<<"\n";
 		}
