@@ -79,8 +79,9 @@ IndexArray &BuildKdTreeStream::indirection()
 
 KdTreeNode *BuildKdTreeStream::createTreeBranch()
 {
-	KdTreeNode *p = (KdTreeNode *)m_nodes.expandBy(2);
-	unsigned long * tmp = (unsigned long*)m_nodes.current();
+	m_nodes.expandBy(2);
+	KdTreeNode *p = m_nodes.current();
+	unsigned long * tmp = (unsigned long*)p;
 	tmp[1] = tmp[3] = 6;
 	m_nodes.next();
 	tmp = (unsigned long*)m_nodes.current();

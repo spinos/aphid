@@ -11,11 +11,14 @@
 #include <BaseArray.h>
 #include <KdTreeNode.h>
 
-class KdTreeNodeArray : public BaseArray {
+class KdTreeNodeArray : public BaseArray<KdTreeNode> {
 public:
 	KdTreeNodeArray();
 	virtual ~KdTreeNodeArray();
 	
 	KdTreeNode * asKdTreeNode(unsigned index);
 	KdTreeNode * asKdTreeNode();
+protected:
+	virtual unsigned elementSize() const;
+	virtual unsigned numElementPerBlock() const;
 };

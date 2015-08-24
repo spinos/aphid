@@ -9,11 +9,15 @@
 
 #include <iostream>
 #include <map>
+//#include <boost/timer/timer.hpp>
 #include <boost/format.hpp>
 #include <boost/timer.hpp>
+
 #include <tetrahedron_math.h>
 #include <MersenneTwister.h>
 #include <AOrientedBox.h>
+#include <IndexArray.h>
+
 #ifdef __APPLE__
 typedef unsigned long long uint64;
 #else
@@ -309,11 +313,92 @@ void testOBox()
     std::cout << "\n visit vec took " << bTimer.elapsed()<<" seconds";
 }
 
+void testTimedArray(unsigned n, unsigned nrep)
+{
+    unsigned i,j, b;
+    boost::timer bTimer;
+    
+    IndexArray arrs;
+	//arrs.expandBy(n);
+	for(i=0;i<n;i++) {
+		arrs.expandBy(1);
+		//*arrs.asIndex() = i;
+		arrs.setValue(i);
+		arrs.next();
+	}
+    std::cout << "\n fill "<<n<< " array took " << bTimer.elapsed() <<" secs";
+
+    bTimer.restart();
+    
+    for(j=0;j<nrep;j++) {
+        b= 0;
+        arrs.begin();
+        for(i=0;i<n;i++) {
+            //b += *arrs.asIndex();
+            b += arrs.value();
+            arrs.next();
+        }
+    }
+    std::cout << "\n access "<<n<< " array took " << bTimer.elapsed() <<" secs";
+	std::cout<<"\n sum "<<b;
+    unsigned access = *arrs.asIndex(9235);
+	std::cout<<" test access [9235] "<<(access);
+}
+
+void testTimedVec(unsigned n, unsigned nrep)
+{
+    boost::timer bTimer;
+    bTimer.restart();
+    unsigned i, j, b;
+    std::vector<unsigned> vecs;
+	//vecs.resize(n);
+	for(i=0;i<n;i++) //vecs[i] = i;
+        vecs.push_back(i);
+    
+    std::cout << "\n fill "<<n<< " vector took " << bTimer.elapsed() <<" secs";
+	
+    bTimer.restart();
+    
+	for(j=0;j<nrep;j++) {
+        b= 0;
+        for(i=0;i<n;i++) b += vecs[i];
+    }
+	std::cout << "\n access "<<n<< " vector took " << bTimer.elapsed() <<" secs";
+	std::cout<<"\n sum "<<b;
+}
+
+void testTimedMem(unsigned n, unsigned nrep)
+{
+    boost::timer bTimer;
+    bTimer.restart();
+    unsigned i, j, b;
+    unsigned * mems = new unsigned[n];
+	for(i=0;i<n;i++) mems[i] = i;
+    
+	std::cout << "\n fill "<<n<< " mem took " << bTimer.elapsed() <<" secs";
+	
+    bTimer.restart();
+	for(j=0;j<nrep;j++) {
+        b= 0;
+        for(i=0;i<n;i++) b += mems[i];
+    }
+	std::cout << "\n access "<<n<< " mem took " << bTimer.elapsed() <<" secs";
+    std::cout<<"\n sum "<<b;
+}
+
+void testVecArray()
+{
+	std::cout<<"\n test array";
+	const unsigned n = 9999999;
+    
+    testTimedMem(n, 100);
+    testTimedVec(n, 100);
+    testTimedArray(n, 100);
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
-	boost::timer bTimer;
-	bTimer.restart();
 	std::cout<<"bit size of uint:   "<<sizeof(uint) * 8<<"\n";
 	std::cout<<"bit size of uint64: "<<sizeof(uint64) * 8<<"\n";
 	
@@ -404,15 +489,12 @@ int main(int argc, char * const argv[])
 	
 	std::cout<<boost::format("39 mod 16: %1%\n") % (39 & 15);
 	
-	testMap();
-    
-    testCell();
+	testVecArray();
 	
 	testMersenne();
     
     testOBox();
     
-	std::cout << "\n elapsed time " << bTimer.elapsed();
 	std::cout<<" end of test\n";
 	return 0;
 }

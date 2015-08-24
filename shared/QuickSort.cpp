@@ -31,6 +31,7 @@ void QuickSort::Sort(unsigned * kv, int first, int last)
 	if(low<last) Sort(kv,low,last);
 }
 
+/*
 void QuickSort::Sort(BaseArray &array,int first,int last)
 {
 	if(last < first) return;
@@ -48,9 +49,6 @@ void QuickSort::Sort(BaseArray &array,int first,int last)
 
 		if(low<=high)
 		{
-			/*temp = array[low];
-			array[low++] = array[high];
-			array[high--]=temp;*/
 			array.swapElement(low, high);
 			low++;
 			high--;
@@ -60,6 +58,7 @@ void QuickSort::Sort(BaseArray &array,int first,int last)
 	if(first<high) Sort(array,first,high);
 	if(low<last) Sort(array,low,last);
 }
+*/
 
 void QuickSort::Sort(vector<unsigned> &array,int first,int last)
 {
