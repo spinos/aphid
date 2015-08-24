@@ -18,21 +18,21 @@
 #include <HesperisFile.h>
 #include <MeshSeparator.h>
 #include <PrincipalComponents.h>
+#include "BlockBccMeshBuilder.h"
 #include <BaseLog.h>
 #include <boost/timer.hpp>
 
 BccInterface::BccInterface() 
-{ 
-    m_cells = new BaseBuffer;
+{
 	m_patchSeparator = new MeshSeparator;
 	m_patchMesh = NULL;
+    m_tetMesh = NULL;
+    testBlockMesh();
 }
 
 BccInterface::~BccInterface() 
-{ 
-    delete m_cells;
+{
 	delete m_patchSeparator;
-	m_patchBoxes.clear();
 }
 
 bool BccInterface::createWorld(BccWorld * world)
@@ -96,8 +96,12 @@ bool BccInterface::loadPatchGeometry(BccWorld * world, const std::string & filen
 		m_patchMesh = (ATriangleMesh *)trigeo->geometry(0);
 		unsigned i=0;
 		for(;i<n;i++) {
-			if(separate((ATriangleMesh *)trigeo->geometry(i)))
-				world->addPatchBoxes(m_patchBoxes);
+            std::vector<AOrientedBox> patchBoxes;
+			if(separate((ATriangleMesh *)trigeo->geometry(i),
+                patchBoxes)) {
+				world->addPatchBoxes(patchBoxes);
+                patchBoxes.clear();
+            }
 		}
 	}
 	else {
@@ -132,11 +136,18 @@ void BccInterface::drawWorld(BccWorld * world, KdTreeDrawer * drawer)
 		glColor3f(.03f, .14f, .44f);
 		drawer->geometry(m_patchMesh);
 	}
+    
+    if(m_tetMesh) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glColor3f(.03f, .14f, .44f);
+		drawer->tetrahedronMesh(m_tetMesh);
+	}
 	
+    const std::vector<AOrientedBox> * boxes = world->patchBoxes();
 	glColor3f(0.f, 0.99f, 0.f);
 	glBegin(GL_LINES);
-	std::vector<AOrientedBox>::const_iterator it = m_patchBoxes.begin();
-	for(;it!=m_patchBoxes.end();++it)
+	std::vector<AOrientedBox>::const_iterator it = boxes->begin();
+	for(;it!=boxes->end();++it)
 		drawer->orientedBox(&(*it));
 	glEnd();
 }
@@ -197,7 +208,7 @@ bool BccInterface::saveWorld(BccWorld * world)
 	return true;
 }
 
-bool BccInterface::separate(ATriangleMesh * mesh)
+bool BccInterface::separate(ATriangleMesh * mesh, std::vector<AOrientedBox> & patchBoxes)
 {
 	std::cout<<"\n mesh n tri "<<mesh->numTriangles();
 	m_patchSeparator->separate(mesh);
@@ -208,7 +219,7 @@ bool BccInterface::separate(ATriangleMesh * mesh)
 	}
 	
 	std::cout<<"\n sep to n patches "<<n;
-	m_patchBoxes.clear();
+	
 	PrincipalComponents pca;
 	BaseBuffer pos;
 	m_patchSeparator->patchBegin();
@@ -216,16 +227,25 @@ bool BccInterface::separate(ATriangleMesh * mesh)
 		const unsigned np = m_patchSeparator->getPatchCvs(&pos, mesh);
 		m_patchSeparator->nextPatch();
 		
-		m_patchBoxes.push_back( pca.analyze((Vector3F *)pos.data(), np) );
+		patchBoxes.push_back( pca.analyze((Vector3F *)pos.data(), np) );
 	}
 	
 	float totalLength = 0.f;
-	std::vector<AOrientedBox>::const_iterator it = m_patchBoxes.begin();
-	for(;it!=m_patchBoxes.end();++it)
+	std::vector<AOrientedBox>::const_iterator it = patchBoxes.begin();
+	for(;it!=patchBoxes.end();++it)
 		totalLength += (*it).extent().x;
 		
 	totalLength *= 2.f;
 	std::cout<<"\n total patch length "<<totalLength;
 	return true;
+}
+
+void BccInterface::testBlockMesh()
+{
+    BlockBccMeshBuilder builder;
+    AOrientedBox box;
+    box.setExtent(Vector3F(8.f, 4.f, 1.f));
+    box.setCenter(Vector3F(4.f, 2.f, 4.f));
+    builder.build(box, 8, 2, 1);
 }
 //:~

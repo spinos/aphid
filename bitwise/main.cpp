@@ -304,7 +304,7 @@ void testOBox()
     std::cout << "\n create vec took " << bTimer.elapsed()<<" seconds";
 	
     bTimer.restart();
-    for(j=0;j<99;j++) {
+    for(j=0;j<100;j++) {
         for(i=0;i<n;i++) {
             AOrientedBox * a = &vecbox[ind[i]];
             Vector3F d = a->extent();

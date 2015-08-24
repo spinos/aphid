@@ -46,7 +46,8 @@ public:
 	GeometryArray * selectedGroup(unsigned & idx) const;
 	float drawAnchorSize() const;
 	ATetrahedronMeshGroup * combinedTetrahedronMesh();
-	
+	const std::vector<AOrientedBox> * patchBoxes() const;
+    
 private:
 	bool createAllCurveGeometry();
 	void createCurveGeometry(unsigned geoBegin, CurveGroup * data);

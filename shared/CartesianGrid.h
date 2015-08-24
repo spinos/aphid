@@ -24,6 +24,7 @@ public:
 	BoundingBox cellBox(unsigned code, int level) const;
 	
 	void addCell(unsigned code, int level, int visited, unsigned index);
+	unsigned addCell(const Vector3F & p, int level);
 	
     unsigned mortonEncodeLevel(const Vector3F & p, int level) const;
 	void printGrids(BaseBuffer * dst);
@@ -45,8 +46,7 @@ protected:
 	sdb::CellValue * findGrid(unsigned code) const;
 	sdb::CellValue * findCell(unsigned code) const;
 	unsigned addGrid(const Vector3F & p);
-    unsigned addCell(const Vector3F & p, int level);
-	const Vector3F gridOrigin(unsigned code) const;
+    const Vector3F gridOrigin(unsigned code) const;
 	const Vector3F cellOrigin(unsigned code, int level) const;
 	void removeCell(unsigned code);
     void printHash();

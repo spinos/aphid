@@ -7,6 +7,7 @@
  *
  */
 #include <AOrientedBox.h>
+class CartesianGrid;
 class BlockBccMeshBuilder {
 public:
 	BlockBccMeshBuilder();
@@ -15,6 +16,7 @@ public:
 	void build(const AOrientedBox & ob, 
 				int gx, int gy, int gz);
 protected:
-
+    void addTetrahedron(Vector3F * v);
 private:
+    CartesianGrid * m_verticesPool;
 };

@@ -394,4 +394,7 @@ void BccWorld::addPatchBoxes(const std::vector<AOrientedBox> & src)
 	std::vector<AOrientedBox>::const_iterator it = src.begin();
 	for(;it!=src.end();++it) m_patchBoxes.push_back(*it);
 }
+
+const std::vector<AOrientedBox> * BccWorld::patchBoxes() const
+{ return &m_patchBoxes; }
 //:~

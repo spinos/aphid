@@ -30,16 +30,15 @@ public:
 	bool loadCurveGeometry(BccWorld * world, const std::string & filename);
 	bool loadPatchGeometry(BccWorld * world, const std::string & filename);
 protected:
-	bool separate(ATriangleMesh * mesh);
+	bool separate(ATriangleMesh * mesh, std::vector<AOrientedBox> & patchBoxes);
 private:
     void drawTetrahedronMesh(ATetrahedronMesh * m, KdTreeDrawer * drawer);
 	void drawGeometry(GeometryArray * geos, KdTreeDrawer * drawer);
 	void drawAnchors(AGenericMesh * mesh, KdTreeDrawer * drawer,
 						float drawSize);
+    void testBlockMesh();
 private:
 	ATriangleMesh * m_patchMesh;
-	std::vector<AOrientedBox> m_patchBoxes;
-// cell center and size
-    BaseBuffer * m_cells;
+    ATetrahedronMesh * m_tetMesh;
 	MeshSeparator * m_patchSeparator;
 };
