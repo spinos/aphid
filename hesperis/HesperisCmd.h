@@ -16,6 +16,8 @@ private:
 	void pushCurves(const MDagPathArray & curves);
 	MStatus parseArgs ( const MArgList& args );
 	MStatus writeSelected(const MSelectionList & selList);
+    MStatus writeSelectedCurve(const MSelectionList & selList);
+    MStatus writeSelectedMesh(const MSelectionList & selList);
     MStatus deformSelected();
 	MStatus attachSelected(const Vector3F & offsetV);
     void writeMesh(HesperisFile * file);
@@ -29,7 +31,15 @@ private:
         IOFieldDeform = 3,
 		IOHelp = 4
 	};
+    
+    enum HandleType {
+        HTAll = 0,
+        HTCurve = 1,
+        HTMesh = 2
+    };
+    
 	IOMode m_ioMode;
+    HandleType m_handelType;
 	MString m_fileName;
 	MString m_growMeshName;
 };

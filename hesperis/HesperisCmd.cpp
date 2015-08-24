@@ -21,6 +21,7 @@ MSyntax HesperisCmd::newSyntax()
 	syntax.addFlag("-w", "-write", MSyntax::kString);
 	syntax.addFlag("-gm", "-growMesh", MSyntax::kString);
     syntax.addFlag("-fd", "-fieldDeform", MSyntax::kString);
+    syntax.addFlag("-sm", "-selectedMesh", MSyntax::kNoArg);
 	syntax.addFlag("-h", "-help", MSyntax::kNoArg);
 	syntax.enableQuery(false);
 	syntax.enableEdit(false);
@@ -31,6 +32,7 @@ MSyntax HesperisCmd::newSyntax()
 MStatus HesperisCmd::parseArgs ( const MArgList& args )
 {
 	m_ioMode = IOUnknown;
+    m_handelType = HTAll;
 	m_fileName = "";
 	m_growMeshName = "";
 	
@@ -69,6 +71,11 @@ MStatus HesperisCmd::parseArgs ( const MArgList& args )
 		if(m_ioMode == IOWrite) MGlobal::displayInfo(MString(" hesperis will write grow mesh ") + m_growMeshName);
 		if(m_ioMode == IOFieldDeform) MGlobal::displayInfo(MString(" hesperis will attach to grow mesh ") + m_growMeshName);
 	}
+    
+    if(argData.isFlagSet("-sm")) {
+        m_handelType = HTMesh;
+        MGlobal::displayInfo(MString(" hesperis will write selected mesh"));
+    }
 	
 	if(argData.isFlagSet("-h")) 
 	{
@@ -80,9 +87,11 @@ MStatus HesperisCmd::parseArgs ( const MArgList& args )
 		return MS::kFailure;
 	}
     
-    if(m_ioMode == IOWrite && m_growMeshName == "") {
-        MGlobal::displayInfo(" no -gm is set for export, use -h for help");
-		return MS::kFailure;
+    if(m_ioMode == IOWrite) {
+        if(m_handelType == HTAll && m_growMeshName == "") {
+            MGlobal::displayInfo(" no -gm is set for export, use -h for help");
+            return MS::kFailure;
+        }
     }
 	
 	return MS::kSuccess;
@@ -111,6 +120,47 @@ MStatus HesperisCmd::doIt(const MArgList &args)
 }
 
 MStatus HesperisCmd::writeSelected(const MSelectionList & selList)
+{
+    if(m_handelType == HTAll) return writeSelectedCurve(selList);
+    else if(m_handelType == HTMesh) return writeSelectedMesh(selList);
+    return MS::kFailure;
+}
+
+MStatus HesperisCmd::writeSelectedMesh(const MSelectionList & selList)
+{
+    MItSelectionList iter( selList );
+	
+	std::map<std::string, MDagPath > meshes;
+	MDagPathArray tms;
+	
+	for(; !iter.isDone(); iter.next()) {								
+		MDagPath apath;		
+		iter.getDagPath( apath );
+		tms.append(apath);
+		ASearchHelper::AllTypedPaths(meshes, apath, MFn::kMesh);
+	}
+	
+	if(meshes.size() < 1) {
+		MGlobal::displayInfo(" zero mesh selction!");
+		return MS::kSuccess;
+	}
+	
+	HesperisFile hesf;
+	bool fstat = hesf.create(m_fileName.asChar());
+	if(!fstat) {
+		MGlobal::displayWarning(MString(" cannot create file ")+ m_fileName);
+		return MS::kSuccess;
+	}
+	
+	HesperisIO::WriteTransforms(tms, &hesf);
+	HesperisIO::WriteMeshes(meshes, &hesf);
+	
+	MGlobal::displayInfo(" done.");
+	
+	return MS::kSuccess;
+}
+ 
+MStatus HesperisCmd::writeSelectedCurve(const MSelectionList & selList)
 {
 	MItSelectionList iter( selList );
 	
@@ -167,6 +217,8 @@ MStatus HesperisCmd::printHelp()
 		+MString("\n select group of curves to export")
 		+MString("\n hesperis -w filename -gm fullPathToTransformOfMesh")
         +MString("\n -gm or -growMesh is full path name to the transform of grow mesh")
+        +MString("\n hesperis -w filename -sm")
+        +MString("\n -sm or -selectedMesh is set to write selected mesh")
             + MString("\n deform mode")
             + MString("\n select group of geometries to deform")
             + MString("\n hesperis -fd filename -gm fullPathToTransformOfMesh")

@@ -13,6 +13,7 @@
 #include <boost/timer.hpp>
 #include <tetrahedron_math.h>
 #include <MersenneTwister.h>
+#include <AOrientedBox.h>
 #ifdef __APPLE__
 typedef unsigned long long uint64;
 #else
@@ -282,6 +283,32 @@ void testMersenne()
 	}
 }
 
+void testOBox()
+{
+    std::cout<<"\n test oriented box ";
+    std::vector<AOrientedBox> vecbox;
+    int n = 65536;
+    int i, j;
+    
+    int * ind = new int[n];
+    MersenneTwister rng(1);
+    for(i=0;i<n;i++) ind[i] = rng.iRandom(0, 65535);
+    
+    boost::timer bTimer;
+	bTimer.restart();
+    for(i=0;i<n;i++) vecbox.push_back(AOrientedBox());
+    std::cout << "\n create vec took " << bTimer.elapsed()<<" seconds";
+	
+    bTimer.restart();
+    for(j=0;j<99;j++) {
+        for(i=0;i<n;i++) {
+            AOrientedBox * a = &vecbox[ind[i]];
+            Vector3F d = a->extent();
+        }
+    }
+    std::cout << "\n visit vec took " << bTimer.elapsed()<<" seconds";
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
@@ -382,7 +409,9 @@ int main(int argc, char * const argv[])
     testCell();
 	
 	testMersenne();
-	
+    
+    testOBox();
+    
 	std::cout << "\n elapsed time " << bTimer.elapsed();
 	std::cout<<" end of test\n";
 	return 0;

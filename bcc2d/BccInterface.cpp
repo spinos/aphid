@@ -139,12 +139,6 @@ void BccInterface::drawWorld(BccWorld * world, KdTreeDrawer * drawer)
 	for(;it!=m_patchBoxes.end();++it)
 		drawer->orientedBox(&(*it));
 	glEnd();
-	
-	it = m_patchBoxes.begin();
-	for(;it!=m_patchBoxes.end();++it) {
-		const AOrientedBox ob = *it;
-		drawer->coordsys( ob.orientation(), ob.center(), ob.extent() );
-	}
 }
 
 void BccInterface::drawTetrahedronMesh(ATetrahedronMesh * m, KdTreeDrawer * drawer)
