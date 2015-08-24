@@ -8,13 +8,15 @@
  */
 
 #include "FitBccMeshBuilder.h"
-#include "BccGlobal.h"
+#include <GeometryArray.h>
 #include <BezierCurve.h>
 #include "BccOctahedron.h"
 #include "bcc_common.h"
 #include <KdTreeDrawer.h>
 #include "CurveSampler.h"
 #include "SampleGroup.h"
+#include <ATetrahedronMesh.h>
+#include <KdIntersection.h>
 //#define DBG_PRINT
 
 float FitBccMeshBuilder::EstimatedGroupSize = 1.f;
@@ -229,4 +231,35 @@ Vector3F * FitBccMeshBuilder::startPoints()
 
 unsigned * FitBccMeshBuilder::tetrahedronDrifts()
 { return m_tetraDrift; }
+
+void FitBccMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdIntersection * anchorMesh)
+{
+	unsigned i, j, k;
+	unsigned * anchorTri = new unsigned[n];
+	Geometry::ClosestToPointTestResult cls;
+	for(i=0; i< n; i++) {
+		cls.reset(startPoints()[i], 1e8f);
+		anchorMesh->closestToPoint(&cls);
+		anchorTri[i] = cls._icomponent;
+	}
+	
+	BoundingBox box;
+	for(k = 0; k <n; k++) {
+	for(i=0; i< 6; i++) {
+        unsigned * tet = mesh->tetrahedronIndices(tetrahedronDrifts()[k] + i);
+		
+		box.reset();
+        for(j=0; j< 4; j++)
+            box.expandBy(mesh->points()[tet[j]], 1e-3f); 
+        
+		if(box.center().distanceTo(startPoints()[k]) > box.radius())
+			continue;
+		
+		for(j=0; j< 4; j++) {
+			mesh->anchors()[tet[j]] = (1<<24 | anchorTri[k]);
+		}
+    }
+	}
+	delete[] anchorTri;
+}
 //:~

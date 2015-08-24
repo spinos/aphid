@@ -1,23 +1,15 @@
 #include <QtGui>
-#include "BccGlobal.h"
 #include "BccInterface.h"
 #include <gl_heads.h>
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
-#include "DrawNp.h"
 #include "BccWorld.h"
-#include "FitTest.h"
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_interface = new BccInterface;
-#if TEST_FIT
-    FitBccMeshBuilder::EstimatedGroupSize = 2.1f;
-	m_fit = new FitTest(getDrawer());
-#else
 	m_world = new BccWorld;
 	m_interface->createWorld(m_world);
-#endif
 }
 
 GLWidget::~GLWidget()
@@ -32,9 +24,6 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-#if TEST_FIT
-	m_fit->draw();
-#else
 	m_interface->drawWorld(m_world, getDrawer());
 	std::stringstream sst;
 	sst.str("");
@@ -49,17 +38,12 @@ void GLWidget::clientDraw()
 	sst.str("");
 	sst<<"n grow mesh triangles: "<<m_world->numTriangles();
     hudText(sst.str(), 4);
-#endif
 }
 
 void GLWidget::clientSelect(QMouseEvent * event)
 {
 	setUpdatesEnabled(false);
-#if TEST_FIT
-
-#else
 	m_world->select(getIncidentRay());
-#endif
 	setUpdatesEnabled(true);
 }
 
@@ -73,11 +57,7 @@ void GLWidget::clientDeselect(QMouseEvent * event)
 void GLWidget::clientMouseInput(QMouseEvent * event)
 {
 	setUpdatesEnabled(false);
-#if TEST_FIT
-
-#else
 	m_world->select(getIncidentRay());
-#endif	
 	setUpdatesEnabled(true);
 }
 
@@ -85,11 +65,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 {
 	if(event->modifiers() == Qt::ControlModifier | Qt::MetaModifier) {
 		if(event->key() == Qt::Key_S) {
-#if TEST_FIT
-
-#else
 			m_interface->saveWorld(m_world);
-#endif
 		}
 	}
     setUpdatesEnabled(false);	

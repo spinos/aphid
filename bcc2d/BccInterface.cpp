@@ -255,6 +255,6 @@ void BccInterface::testBlockMesh()
 	std::cout<<"\n tet nv nt "<<nv<<" "<<nt;
 	m_tetMesh = new ATetrahedronMesh;
 	m_tetMesh->create(nv, nt);
-	builder.getResult(m_tetMesh);
+	builder.getResult(m_tetMesh, box);
 }
 //:~

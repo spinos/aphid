@@ -4,7 +4,6 @@
 #include <BoundingBox.h>
 #include <AOrientedBox.h>
 #include <HTetrahedronMesh.h>
-#include "BccGlobal.h"
 
 class CurveGroup;
 class KdTreeDrawer;
@@ -15,11 +14,11 @@ class GeometryArray;
 class APointCloud;
 struct BezierSpline;
 class BccMesh;
-class FitBccMesh;
 class ATriangleMesh;
 class CurveReduction;
 class ATetrahedronMeshGroup;
 class BlockBccMeshBuilder;
+class FitBccMeshBuilder;
 
 class BccWorld {
 public:
@@ -41,7 +40,7 @@ public:
 	unsigned numTriangles() const;
 	const unsigned numPoints() const;
 	unsigned numTetrahedronMeshes() const;
-	ATetrahedronMesh * tetrahedronMesh(unsigned i) const;
+	ATetrahedronMesh * tetrahedronMesh(unsigned i);
 	GeometryArray * triangleGeometries() const;
 	GeometryArray * selectedGroup(unsigned & idx) const;
 	float drawAnchorSize() const;
@@ -60,20 +59,22 @@ private:
 	float groupCurveLength(GeometryArray * geos);
 	void rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos);
 	
+	void createTetrahedronMeshesByFitCurves();
+	void createTetrahedronMeshesByBlocks();
+	ATetrahedronMeshGroup * fitAGroup(GeometryArray * geos);
+	
 private:
 	KdCluster * m_cluster;
 	KdIntersection * m_triIntersect;
 	GeometryArray * m_allGeo;
 	GeometryArray * m_triangleMeshes;
-#if WORLD_USE_FIT
-	FitBccMesh * m_meshes;
-#else
-	BccMesh * m_meshes;
-#endif
+
+	std::vector<ATetrahedronMeshGroup *> m_tetrahedonMeshes;
 	std::vector<CurveGroup *> m_curveGeos;
 	std::vector<AOrientedBox> m_patchBoxes;
     CurveReduction * m_reducer;
 	BlockBccMeshBuilder * m_blockBuilder;
+	FitBccMeshBuilder * m_fitBuilder;
 	unsigned m_numMeshes, m_numCurves, m_totalNumTetrahedrons, m_totalNumPoints;
     float m_totalCurveLength;
     float m_estimatedNumGroups;

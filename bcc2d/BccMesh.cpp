@@ -8,7 +8,8 @@
  */
 
 #include "BccMesh.h"
-#include <BccGlobal.h>
+#include <GeometryArray.h>
+#include <KdIntersection.h>
 #include <BccGrid.h>
 
 BccMesh::BccMesh() 

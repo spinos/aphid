@@ -19,7 +19,7 @@ public:
 				int gx, int gy, int gz,
 				unsigned & numVertices, unsigned & numTetrahedrons);
 				
-	void getResult(ATetrahedronMesh * mesh);
+	void getResult(ATetrahedronMesh * mesh, const AOrientedBox & ob);
 protected:
     void addTetrahedron(Vector3F * v, unsigned * ind);
 private:

@@ -8,7 +8,8 @@
  */
 
 #include "FitBccMesh.h"
-#include <BccGlobal.h>
+#include <GeometryArray.h>
+#include <KdIntersection.h>
 #include "FitBccMeshBuilder.h"
 FitBccMesh::FitBccMesh() 
 {

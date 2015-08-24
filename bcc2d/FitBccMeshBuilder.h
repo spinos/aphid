@@ -6,6 +6,7 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+#pragma once
 #include <vector>
 class Vector3F;
 class KdTreeDrawer;
@@ -16,6 +17,8 @@ class GeometryArray;
 class KdTreeDrawer;
 class CurveSampler;
 class SampleGroup;
+class ATetrahedronMesh;
+class KdIntersection;
 class FitBccMeshBuilder {
 public:
 	FitBccMeshBuilder();
@@ -34,6 +37,8 @@ public:
 			   
 	Vector3F * startPoints();
 	unsigned * tetrahedronDrifts();
+	
+	void addAnchors(ATetrahedronMesh * mesh, unsigned n, KdIntersection * anchorMesh);
 			   
 	static float EstimatedGroupSize;
 protected:

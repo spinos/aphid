@@ -17,7 +17,6 @@
 #include <KdIntersection.h>
 
 #define TEST_FIT 0
-#define WORLD_USE_FIT 1
 #define WORLD_TEST_SINGLE 0
 
 #endif        //  #ifndef BCCGLOBAL_H

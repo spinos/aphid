@@ -68,12 +68,11 @@ const unsigned AGenericMesh::numPoints() const
 const unsigned AGenericMesh::numIndices() const
 { return m_numIndices; }
 
-void AGenericMesh::resetAnchors(unsigned n)
-{
+void AGenericMesh::clearAnchors()
+{ 
 	unsigned * anchor = (unsigned *)m_anchors->data();
 	unsigned i=0;
-	for(; i < n; i++)
-		anchor[i] = 0;
+	for(; i < m_numPoints; i++) anchor[i] = 0;
 }
 
 void AGenericMesh::copyStripe(AGenericMesh * inmesh, unsigned driftP, unsigned driftI)

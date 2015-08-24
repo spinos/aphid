@@ -206,7 +206,7 @@ void BlockBccMeshBuilder::addTetrahedron(Vector3F * v, unsigned * ind)
 	m_indices.push_back(ind[3]);
 }
 
-void BlockBccMeshBuilder::getResult(ATetrahedronMesh * mesh)
+void BlockBccMeshBuilder::getResult(ATetrahedronMesh * mesh, const AOrientedBox & ob)
 {
 	Vector3F * pos = mesh->points();
 	unsigned * ind = mesh->indices();
@@ -218,11 +218,16 @@ void BlockBccMeshBuilder::getResult(ATetrahedronMesh * mesh)
 		i++;
 	}
 	
+	Vector3F q;
 	i=0;
 	sdb::CellHash * nodes = m_verticesPool->cells();
 	nodes->begin();
 	while(!nodes->end()) {
-		pos[i] = m_verticesPool->cellCenter(nodes->key());
+		q = m_verticesPool->cellCenter(nodes->key());
+		q -= ob.center();
+		q = ob.orientation().transform(q);
+		q += ob.center();
+		pos[i] = q;
 		i++;
 		nodes->next();
 	}

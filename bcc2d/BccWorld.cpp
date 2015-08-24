@@ -15,12 +15,12 @@
 #include <bezierPatch.h>
 #include <APointCloud.h>
 #include <BccMesh.h>
-#include <FitBccMesh.h>
 #include <ATriangleMesh.h>
 #include "FitBccMeshBuilder.h"
 #include "CurveReduction.h"
 #include <ATetrahedronMeshGroup.h>
 #include <BlockBccMeshBuilder.h>
+#include <FitBccMeshBuilder.h>
 
 BccWorld::BccWorld()
 {
@@ -31,6 +31,7 @@ BccWorld::BccWorld()
 	m_triangleMeshes = NULL;
 	m_reducer = new CurveReduction;
 	m_blockBuilder = new BlockBccMeshBuilder;
+	m_fitBuilder = new FitBccMeshBuilder;
 	m_cluster = 0;
 }
 
@@ -39,9 +40,10 @@ BccWorld::~BccWorld()
     delete m_reducer;
 	delete m_cluster;
 	delete m_allGeo;
-	delete[] m_meshes;
+	// delete[] m_meshes;
 	delete m_triangleMeshes;
 	delete m_blockBuilder;
+	delete m_fitBuilder;
 }
 
 void BccWorld::setTiangleGeometry(GeometryArray * x)
@@ -55,50 +57,8 @@ void BccWorld::addCurveGroup(CurveGroup * m)
 
 void BccWorld::createTetrahedronMeshes()
 {
-    if(totalCurveLength()<1.f) {
-        std::cout<<" invalid total curve length "<<totalCurveLength()<<" !\n";
-        return;
-    }
-#if WORLD_USE_FIT
-    FitBccMeshBuilder::EstimatedGroupSize = totalCurveLength() / m_estimatedNumGroups;
-    std::cout<<"\n estimate group size "<<FitBccMeshBuilder::EstimatedGroupSize;
-#endif	
-	unsigned n = m_cluster->numGroups();
-#if WORLD_USE_FIT
-	m_meshes = new FitBccMesh[n];
-#else
-	m_meshes = new BccMesh[n];
-#endif
-	
-	unsigned ntet = 0;
-	unsigned nvert = 0;
-	unsigned nanchored = 0;
-    unsigned nstripes = 0;
-    float vlm;
-	unsigned i=0;
-	for(;i<n;i++) {
-#if WORLD_USE_FIT
-        m_meshes[i].create(m_cluster->group(i), m_triIntersect);
-#else
-		m_meshes[i].create(m_cluster->group(i), m_anchorIntersect, 5);
-#endif
-        vlm = m_meshes[i].calculateVolume();
-        m_meshes[i].setVolume(vlm);
-		ntet += m_meshes[i].numTetrahedrons();
-		nvert += m_meshes[i].numPoints();
-		nanchored += m_meshes[i].numAnchoredPoints();
-        nstripes += m_meshes[i].numStripes();
-	}
-	
-	std::cout<<"\n n tetrahedron meshes "<<n
-	<<"\n total n tetrahedrons "<<ntet
-	<<"\n total n points "<<nvert
-	<<"\n total n anchored points "<<nanchored
-    <<"\n total n stripes "<<nstripes
-	<<"\n";
-	m_numMeshes = n;
-	m_totalNumTetrahedrons = ntet;
-	m_totalNumPoints = nvert;
+	createTetrahedronMeshesByFitCurves();
+	createTetrahedronMeshesByBlocks();
 }
 
 GeometryArray * BccWorld::selectedGroup(unsigned & idx) const
@@ -124,11 +84,15 @@ const unsigned BccWorld::numTetrahedrons() const
 const unsigned BccWorld::numPoints() const
 { return m_totalNumPoints; }
 
-ATetrahedronMesh * BccWorld::tetrahedronMesh(unsigned i) const
-{ return &m_meshes[i]; }
+ATetrahedronMesh * BccWorld::tetrahedronMesh(unsigned i)
+{ return m_tetrahedonMeshes[i]; }
 
 void BccWorld::clearTetrahedronMesh()
-{ if(m_meshes) delete[] m_meshes; }
+{ 
+	std::vector<ATetrahedronMeshGroup *>::iterator it = m_tetrahedonMeshes.begin();
+	for(;it!=m_tetrahedonMeshes.end();++it) delete *it;
+	m_tetrahedonMeshes.clear(); 
+}
 
 unsigned BccWorld::numTetrahedronMeshes() const
 { return m_numMeshes; }
@@ -225,24 +189,21 @@ void BccWorld::reduceGroup(unsigned igroup)
 }
 
 void BccWorld::rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos)
-{
-	const unsigned oldNVert = m_meshes[igroup].numPoints();
-	const unsigned oldNTet = m_meshes[igroup].numTetrahedrons();
+{	
+	ATetrahedronMeshGroup * amesh = m_tetrahedonMeshes[igroup];
+	const unsigned oldNVert = amesh->numPoints();
+	const unsigned oldNTet = amesh->numTetrahedrons();
 	const unsigned oldTotalNTet = m_totalNumTetrahedrons;
 	const unsigned oldTotalNVert = m_totalNumPoints;
-	float vlm;
-#if WORLD_USE_FIT
-	m_meshes[igroup].create(geos, m_triIntersect);
-#else
-	m_meshes[igroup].create(geos, m_anchorIntersect, 5);
-#endif	
-	vlm = m_meshes[igroup].calculateVolume();
-	m_meshes[igroup].setVolume(vlm);
+	
+	delete amesh;
+	
+	m_tetrahedonMeshes[igroup] = fitAGroup(geos);
 	
 	m_totalNumPoints -= oldNVert;
-	m_totalNumPoints += m_meshes[igroup].numPoints();
+	m_totalNumPoints += m_tetrahedonMeshes[igroup]->numPoints();
 	m_totalNumTetrahedrons -= oldNTet;
-	m_totalNumTetrahedrons += m_meshes[igroup].numTetrahedrons();
+	m_totalNumTetrahedrons += m_tetrahedonMeshes[igroup]->numTetrahedrons();
 	
 	std::cout<<" reduce n points from "<<oldTotalNTet<<" to "<<m_totalNumPoints
 	<<"\n n tetrahedrons form "<<oldTotalNTet<<" to "<<m_totalNumTetrahedrons
@@ -257,9 +218,10 @@ ATetrahedronMeshGroup * BccWorld::combinedTetrahedronMesh()
     unsigned nstrip = 0;
 	unsigned i = 0;
 	for(; i < m_numMeshes; i++) {
-		ntet += m_meshes[i].numTetrahedrons();
-		nvert += m_meshes[i].numPoints();
-        nstrip += m_meshes[i].numStripes();
+		ATetrahedronMeshGroup * imesh = m_tetrahedonMeshes[i];
+		ntet += imesh->numTetrahedrons();
+		nvert += imesh->numPoints();
+        nstrip += imesh->numStripes();
 	}
 	omesh->create(nvert, ntet, nstrip);
  
@@ -268,19 +230,20 @@ ATetrahedronMeshGroup * BccWorld::combinedTetrahedronMesh()
     nstrip = 0;
 	i = 0;
 	for(; i < m_numMeshes; i++) {
-        omesh->copyPointDrift(m_meshes[i].pointDrifts(), 
-                              m_meshes[i].numStripes(), 
+		ATetrahedronMeshGroup * imesh = m_tetrahedonMeshes[i];
+        omesh->copyPointDrift(imesh->pointDrifts(), 
+                              imesh->numStripes(), 
                               nstrip,
                               nvert);
-        omesh->copyIndexDrift(m_meshes[i].indexDrifts(), 
-                              m_meshes[i].numStripes(), 
+        omesh->copyIndexDrift(imesh->indexDrifts(), 
+                              imesh->numStripes(), 
                               nstrip,
                               ntet*4);
         
-		omesh->copyStripe(&m_meshes[i], nvert, ntet * 4);
-		ntet += m_meshes[i].numTetrahedrons();
-		nvert += m_meshes[i].numPoints();
-        nstrip += m_meshes[i].numStripes();
+		omesh->copyStripe(imesh, nvert, ntet * 4);
+		ntet += imesh->numTetrahedrons();
+		nvert += imesh->numPoints();
+        nstrip += imesh->numStripes();
 	}
 	float vlm = omesh->calculateVolume();
 	omesh->setVolume(vlm);
@@ -397,4 +360,86 @@ void BccWorld::addPatchBoxes(const std::vector<AOrientedBox> & src)
 
 const std::vector<AOrientedBox> * BccWorld::patchBoxes() const
 { return &m_patchBoxes; }
+
+void BccWorld::createTetrahedronMeshesByFitCurves()
+{	
+    if(totalCurveLength() < 1.f) {
+        std::cout<<" invalid total curve length "<<totalCurveLength()<<" !\n";
+        return;
+    }
+
+    FitBccMeshBuilder::EstimatedGroupSize = totalCurveLength() / m_estimatedNumGroups;
+    std::cout<<"\n estimate group size "<<FitBccMeshBuilder::EstimatedGroupSize;
+	
+	unsigned n = m_cluster->numGroups();
+	
+	unsigned i;
+	for(i=0;i<n;i++)
+		m_tetrahedonMeshes.push_back(fitAGroup(m_cluster->group(i)));
+	
+	unsigned ntet = 0;
+	unsigned nvert = 0;
+	unsigned nanchored = 0;
+	unsigned nstripes = 0;
+	for(i=0;i<n;i++) {
+        ATetrahedronMeshGroup * amesh = m_tetrahedonMeshes[i];
+		ntet += amesh->numTetrahedrons();
+		nvert += amesh->numPoints();
+		nanchored += amesh->numAnchoredPoints();
+        nstripes += amesh->numStripes();
+	}
+	
+	std::cout<<"\n n tetrahedron meshes "<<n
+	<<"\n total n tetrahedrons "<<ntet
+	<<"\n total n points "<<nvert
+	<<"\n total n anchored points "<<nanchored
+    <<"\n total n stripes "<<nstripes
+	<<"\n";
+	m_numMeshes = n;
+	m_totalNumTetrahedrons = ntet;
+	m_totalNumPoints = nvert;
+}
+
+ATetrahedronMeshGroup * BccWorld::fitAGroup(GeometryArray * geos)
+{
+	std::vector<Vector3F > tetrahedronP;
+	std::vector<unsigned > tetrahedronInd;
+    std::vector<unsigned > pdrifts;
+    std::vector<unsigned > idrifts;
+	
+	m_fitBuilder->build(geos, tetrahedronP, tetrahedronInd,
+                  pdrifts, idrifts);
+				  
+	unsigned ntet = tetrahedronInd.size()/4;
+	unsigned nvert = tetrahedronP.size();
+	unsigned nstripes = geos->numGeometries();
+		
+	ATetrahedronMeshGroup * amesh = new ATetrahedronMeshGroup;
+	amesh->create(nvert, ntet, nstripes);
+		
+	unsigned i;
+	for(i=0;i<nvert;i++) amesh->points()[i] = tetrahedronP[i];
+	for(i=0;i<ntet*4;i++) amesh->indices()[i] = tetrahedronInd[i];
+	for(i=0;i<nstripes;i++) amesh->pointDrifts()[i] = pdrifts[i];
+	for(i=0;i<nstripes;i++) amesh->indexDrifts()[i] = idrifts[i];
+	
+	amesh->clearAnchors();
+	
+	m_fitBuilder->addAnchors(amesh, nstripes, m_triIntersect);
+	
+	tetrahedronP.clear();
+	tetrahedronInd.clear();
+	pdrifts.clear();
+	idrifts.clear();
+	
+	float vlm = amesh->calculateVolume();
+	amesh->setVolume(vlm);
+	
+	return amesh;
+}
+
+void BccWorld::createTetrahedronMeshesByBlocks()
+{
+// todo
+}
 //:~
