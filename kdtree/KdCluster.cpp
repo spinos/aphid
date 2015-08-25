@@ -125,7 +125,6 @@ void KdCluster::leafWriteGroup(KdTreeNode *node, const BoundingBox & box)
 		}
 		else {
 			std::cout<<" grouping only works with geometry arry.";
-			return;
 		}
 		indir.next();
 	}

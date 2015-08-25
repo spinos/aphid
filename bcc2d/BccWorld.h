@@ -48,11 +48,10 @@ public:
 	const std::vector<AOrientedBox> * patchBoxes() const;
     
 private:
-	bool createAllCurveGeometry();
-	void createCurveGeometry(unsigned geoBegin, CurveGroup * data);
+	bool createCurveCluster();
+	void addCurveGeometriesToCluster(CurveGroup * data);
 	bool createTriangleIntersection();
-	void createTetrahedronMeshes();
-    
+	
 	void clearTetrahedronMesh();
 	void reduceAllGroups();
 	void reduceGroup(unsigned igroup);
@@ -64,9 +63,8 @@ private:
 	ATetrahedronMeshGroup * fitAGroup(GeometryArray * geos);
 	
 private:
-	KdCluster * m_cluster;
+	KdCluster * m_curveCluster;
 	KdIntersection * m_triIntersect;
-	GeometryArray * m_allGeo;
 	GeometryArray * m_triangleMeshes;
 
 	std::vector<ATetrahedronMeshGroup *> m_tetrahedonMeshes;
@@ -76,8 +74,7 @@ private:
 	BlockBccMeshBuilder * m_blockBuilder;
 	FitBccMeshBuilder * m_fitBuilder;
 	unsigned m_numCurves, m_totalNumTetrahedrons, m_totalNumPoints;
-    float m_totalCurveLength;
-    float m_estimatedNumGroups;
+    float m_totalCurveLength, m_estimatedNumGroups;
 };
 
 #endif        //  #ifndef BCCWORLD_H

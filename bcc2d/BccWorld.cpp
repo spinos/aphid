@@ -31,14 +31,13 @@ BccWorld::BccWorld()
 	m_reducer = new CurveReduction;
 	m_blockBuilder = new BlockBccMeshBuilder;
 	m_fitBuilder = new FitBccMeshBuilder;
-	m_cluster = 0;
+	m_curveCluster = NULL;
 }
 
 BccWorld::~BccWorld() 
 {
     delete m_reducer;
-	delete m_cluster;
-	delete m_allGeo;
+	delete m_curveCluster;
 	delete m_triangleMeshes;
 	delete m_blockBuilder;
 	delete m_fitBuilder;
@@ -53,22 +52,16 @@ void BccWorld::setTiangleGeometry(GeometryArray * x)
 void BccWorld::addCurveGroup(CurveGroup * m)
 { m_curveGeos.push_back(m); }
 
-void BccWorld::createTetrahedronMeshes()
-{
-	createTetrahedronMeshesByFitCurves();
-	createTetrahedronMeshesByBlocks();
-}
-
 GeometryArray * BccWorld::selectedGroup(unsigned & idx) const
 {
-	if(!m_cluster) return NULL;
-	idx = m_cluster->currentGroup();
-	if(!m_cluster->isGroupIdValid(idx)) return NULL;
-	return m_cluster->group(idx);
+	if(!m_curveCluster) return NULL;
+	idx = m_curveCluster->currentGroup();
+	if(!m_curveCluster->isGroupIdValid(idx)) return NULL;
+	return m_curveCluster->group(idx);
 }
 
 float BccWorld::drawAnchorSize() const
-{ return FitBccMeshBuilder::EstimatedGroupSize / 8.f; }
+{ return FitBccMeshBuilder::EstimatedGroupSize / 6.f; }
 
 const float BccWorld::totalCurveLength() const
 { return m_totalCurveLength; }
@@ -114,20 +107,21 @@ void BccWorld::rebuildTetrahedronsMesh(float deltaNumGroups)
     if(m_estimatedNumGroups < 100.f) m_estimatedNumGroups = 100.f;
     
     clearTetrahedronMesh();
-    createTetrahedronMeshes();
+    createTetrahedronMeshesByFitCurves();
+	createTetrahedronMeshesByBlocks();
     std::cout<<" done rebuild. \n";
 }
 
 void BccWorld::select(const Ray * r)
 {
-	if(!m_cluster) return;
+	if(!m_curveCluster) return;
 	BaseCurve::RayIntersectionTolerance = totalCurveLength() / m_estimatedNumGroups * .37f;
-	if(!m_cluster->intersectRay(r))
+	if(!m_curveCluster->intersectRay(r))
 		clearSelection();
 }
 
 void BccWorld::clearSelection()
-{ m_cluster->setCurrentGroup(m_cluster->numGroups()); }
+{ m_curveCluster->setCurrentGroup(m_curveCluster->numGroups()); }
 
 float BccWorld::groupCurveLength(GeometryArray * geos)
 {
@@ -143,8 +137,8 @@ float BccWorld::groupCurveLength(GeometryArray * geos)
 
 void BccWorld::reduceSelected(float x)
 {
-    const unsigned selectedCurveGrp = m_cluster->currentGroup();
-	if(m_cluster->isGroupIdValid(selectedCurveGrp))
+    const unsigned selectedCurveGrp = m_curveCluster->currentGroup();
+	if(m_curveCluster->isGroupIdValid(selectedCurveGrp))
 		reduceGroup(selectedCurveGrp);
 	else
         reduceAllGroups();	
@@ -153,21 +147,21 @@ void BccWorld::reduceSelected(float x)
 void BccWorld::reduceAllGroups()
 {
 	unsigned i = 0;
-	for(;i<m_cluster->numGroups();i++) reduceGroup(i);
+	for(;i<m_curveCluster->numGroups();i++) reduceGroup(i);
 }
 
 void BccWorld::reduceGroup(unsigned igroup)
 {
-	const float oldCurveLength = groupCurveLength(m_cluster->group(igroup));
-	const unsigned oldNCurves = m_cluster->group(igroup)->numGeometries();
+	const float oldCurveLength = groupCurveLength(m_curveCluster->group(igroup));
+	const unsigned oldNCurves = m_curveCluster->group(igroup)->numGeometries();
     GeometryArray * reduced = 0;
 	
 	int i=0;
 	for(;i<20;i++) {
-		GeometryArray * ir = m_reducer->compute(m_cluster->group(igroup), FitBccMeshBuilder::EstimatedGroupSize);
+		GeometryArray * ir = m_reducer->compute(m_curveCluster->group(igroup), FitBccMeshBuilder::EstimatedGroupSize);
 		if(ir) {
 			reduced = ir;
-			m_cluster->setGroupGeometry(igroup, reduced);
+			m_curveCluster->setGroupGeometry(igroup, reduced);
 		}
 		else break;
 	}
@@ -254,38 +248,14 @@ ATetrahedronMeshGroup * BccWorld::combinedTetrahedronMesh()
 	return omesh;
 }
 
-bool BccWorld::createAllCurveGeometry()
-{
-	const unsigned n = m_curveGeos.size();
-	if(n < 1) return false;
-	unsigned i;
-	
-	unsigned m = 0;
-	for(i=0; i< n; i++)
-		m+= m_curveGeos[i]->numCurves();
-
-	m_allGeo = new GeometryArray;
-	m_allGeo->create(m);
-	
-	m_totalCurveLength = 0.f;
-	
-	unsigned geoDrift = 0;
-	for(i=0; i< n; i++) {
-		createCurveGeometry(geoDrift, m_curveGeos[i]);
-		geoDrift += m_curveGeos[i]->numCurves();
-	}
-		
-	std::cout<<" n curves "<<m
-	    <<" total curve length: "<<m_totalCurveLength<<"\n";
-    m_numCurves = m;
-	return true;
-}
-
-void BccWorld::createCurveGeometry(unsigned geoBegin, CurveGroup * data)
+void BccWorld::addCurveGeometriesToCluster(CurveGroup * data)
 {
 	unsigned * cc = data->counts();
 	Vector3F * cvs = data->points();
 	const unsigned n = data->numCurves();
+	
+	GeometryArray * geos = new GeometryArray;
+	geos->create(n);
 	
 	CurveBuilder cb;
 	
@@ -305,10 +275,12 @@ void BccWorld::createCurveGeometry(unsigned geoBegin, CurveGroup * data)
 		
 		m_totalCurveLength += c->length();
 		
-		m_allGeo->setGeometry(c, i + geoBegin);
+		geos->setGeometry(c, i);
 		
 		cvDrift += ncv;
 	}
+	
+	m_curveCluster->addGeometry(geos);
 }
 
 bool BccWorld::createTriangleIntersection()
@@ -335,19 +307,37 @@ bool BccWorld::buildTetrahedronMesh()
 		std::cout<<"\n bcc world has no grow mesh ";
 		return false;
 	}
-	if(!createAllCurveGeometry()) return false;
+	
+	createTetrahedronMeshesByFitCurves();
+	createTetrahedronMeshesByBlocks();
+	return true;
+}
+	
+bool BccWorld::createCurveCluster()
+{
+	const unsigned n = m_curveGeos.size();
+	if(n < 1) return false;
 	
 	std::cout<<"\n bcc world creating curve cluster ";
-	m_cluster = new KdCluster;
-	m_cluster->addGeometry(m_allGeo);
+	if(m_curveCluster) delete m_curveCluster;
+	m_curveCluster = new KdCluster;
+	
+	m_totalCurveLength = 0.f;
+	m_numCurves = 0;
+	
+	unsigned i;
+	for(i=0; i< n; i++) {
+		addCurveGeometriesToCluster(m_curveGeos[i]);
+		m_numCurves += m_curveGeos[i]->numCurves();
+	}
+	
+	std::cout<<"\n total n curves "<<m_numCurves
+	    <<" total curve length: "<<m_totalCurveLength<<"\n";
 	
 	KdTree::MaxBuildLevel = 6;
 	KdTree::NumPrimitivesInLeafThreashold = 31;
 	
-	m_cluster->create();
-	
-	std::cout<<"\n bcc world building tetrahedron mesh ";
-	createTetrahedronMeshes();
+	m_curveCluster->create();
 	return true;
 }
 
@@ -361,20 +351,22 @@ const std::vector<AOrientedBox> * BccWorld::patchBoxes() const
 { return &m_patchBoxes; }
 
 void BccWorld::createTetrahedronMeshesByFitCurves()
-{	
-    if(totalCurveLength() < 1.f) {
-        std::cout<<" invalid total curve length "<<totalCurveLength()<<" !\n";
+{
+    if(!createCurveCluster()) {
+        std::cout<<"\n no curve available in bcc world!";
         return;
     }
+	
+	std::cout<<"\n bcc world building tetrahedron mesh along curve ";
 
     FitBccMeshBuilder::EstimatedGroupSize = totalCurveLength() / m_estimatedNumGroups;
     std::cout<<"\n estimate group size "<<FitBccMeshBuilder::EstimatedGroupSize;
 	
-	unsigned n = m_cluster->numGroups();
+	unsigned n = m_curveCluster->numGroups();
 	
 	unsigned i;
 	for(i=0;i<n;i++)
-		m_tetrahedonMeshes.push_back(fitAGroup(m_cluster->group(i)));
+		m_tetrahedonMeshes.push_back(fitAGroup(m_curveCluster->group(i)));
 	
 	unsigned ntet = 0;
 	unsigned nvert = 0;
