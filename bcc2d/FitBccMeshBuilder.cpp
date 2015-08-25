@@ -16,6 +16,7 @@
 #include "CurveSampler.h"
 #include "SampleGroup.h"
 #include <ATetrahedronMesh.h>
+#include <ATetrahedronMeshGroup.h>
 #include <KdIntersection.h>
 //#define DBG_PRINT
 
@@ -45,11 +46,13 @@ void FitBccMeshBuilder::cleanup()
 }
     
 void FitBccMeshBuilder::build(GeometryArray * curves, 
-	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd,
-               std::vector<unsigned > & pointDrifts,
-               std::vector<unsigned > & indexDrifts)
+					unsigned & ntet, unsigned & nvert, unsigned & nstripes)
 {
+	tetrahedronP.clear();
+	tetrahedronInd.clear();
+	pointDrifts.clear();
+	indexDrifts.clear();
+	
     const unsigned n = curves->numGeometries();
 	if(m_startPoints) delete[] m_startPoints;
 	m_startPoints = new Vector3F[n];
@@ -61,17 +64,17 @@ void FitBccMeshBuilder::build(GeometryArray * curves,
         pointDrifts.push_back(tetrahedronP.size());
         indexDrifts.push_back(tetrahedronInd.size());
 		m_tetraDrift[i] = tetrahedronInd.size() / 4;
-        build((BezierCurve *)curves->geometry(i), 
-	           tetrahedronP, 
-	           tetrahedronInd,
+        build((BezierCurve *)curves->geometry(i),
 			   i);
 	}
+	
+	ntet = tetrahedronInd.size()/4;
+	nvert = tetrahedronP.size();
+	nstripes = curves->numGeometries();
 }
 
-void FitBccMeshBuilder::build(BezierCurve * curve, 
-	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd,
-			   unsigned curveIdx)
+void FitBccMeshBuilder::build(BezierCurve * curve,
+								unsigned curveIdx)
 {
 	const unsigned lastNumTet = tetrahedronInd.size();
     cleanup();
@@ -148,8 +151,6 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 													tetrahedronInd);
 		}
 	}
-
-	checkTetrahedronVolume(tetrahedronP, tetrahedronInd, lastNumTet);
 }
 
 void FitBccMeshBuilder::drawOctahedron(KdTreeDrawer * drawer)
@@ -178,34 +179,6 @@ void FitBccMeshBuilder::drawOctahedron(KdTreeDrawer * drawer, BccOctahedron & oc
 	for(i=8;i<12;i++) {
 		octa.getEdge(a, b, i);
 		drawer->arrow(a, b);
-	}
-}
-
-void FitBccMeshBuilder::checkTetrahedronVolume(std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd, unsigned start)
-{
-	Vector3F p[4];
-	unsigned i = start;
-	unsigned tmp;
-	unsigned tend = tetrahedronInd.size();
-	for(;i<tend;i+=4) {
-		p[0] = tetrahedronP[tetrahedronInd[i]];
-		p[1] = tetrahedronP[tetrahedronInd[i+1]];
-		p[2] = tetrahedronP[tetrahedronInd[i+2]];
-		p[3] = tetrahedronP[tetrahedronInd[i+3]];
-		// std::cout<<" tet vol "<<tetrahedronVolume(p)<<"\n";
-		if(tetrahedronVolume(p)<0.f) {
-			tmp = tetrahedronInd[i+1];
-			tetrahedronInd[i+1] = tetrahedronInd[i+2];
-			tetrahedronInd[i+2] = tmp;
-			
-			//p[0] = tetrahedronP[tetrahedronInd[i]];
-			//p[1] = tetrahedronP[tetrahedronInd[i+1]];
-			//p[2] = tetrahedronP[tetrahedronInd[i+2]];
-			//p[3] = tetrahedronP[tetrahedronInd[i+3]];
-			
-			// std::cout<<" tet vol after swap 1 2 "<<tetrahedronVolume(p)<<"\n";
-		}
 	}
 }
 
@@ -261,5 +234,17 @@ void FitBccMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdInters
     }
 	}
 	delete[] anchorTri;
+}
+
+void FitBccMeshBuilder::getResult(ATetrahedronMeshGroup * mesh)
+{
+	const unsigned ntet = mesh->numTetrahedrons();
+	const unsigned nvert = mesh->numPoints();
+	const unsigned nstripes = mesh->numStripes();
+	unsigned i;
+	for(i=0;i<nvert;i++) mesh->points()[i] = tetrahedronP[i];
+	for(i=0;i<ntet*4;i++) mesh->indices()[i] = tetrahedronInd[i];
+	for(i=0;i<nstripes;i++) mesh->pointDrifts()[i] = pointDrifts[i];
+	for(i=0;i<nstripes;i++) mesh->indexDrifts()[i] = indexDrifts[i];
 }
 //:~

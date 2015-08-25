@@ -75,7 +75,7 @@ private:
     CurveReduction * m_reducer;
 	BlockBccMeshBuilder * m_blockBuilder;
 	FitBccMeshBuilder * m_fitBuilder;
-	unsigned m_numMeshes, m_numCurves, m_totalNumTetrahedrons, m_totalNumPoints;
+	unsigned m_numCurves, m_totalNumTetrahedrons, m_totalNumPoints;
     float m_totalCurveLength;
     float m_estimatedNumGroups;
 };

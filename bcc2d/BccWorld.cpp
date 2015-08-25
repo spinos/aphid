@@ -25,8 +25,7 @@
 BccWorld::BccWorld()
 {
     m_numCurves = 0;
-	m_numMeshes = 0;
-    m_totalCurveLength = 0.f;
+	m_totalCurveLength = 0.f;
     m_estimatedNumGroups = 2500.f;
 	m_triangleMeshes = NULL;
 	m_reducer = new CurveReduction;
@@ -40,7 +39,6 @@ BccWorld::~BccWorld()
     delete m_reducer;
 	delete m_cluster;
 	delete m_allGeo;
-	// delete[] m_meshes;
 	delete m_triangleMeshes;
 	delete m_blockBuilder;
 	delete m_fitBuilder;
@@ -95,7 +93,7 @@ void BccWorld::clearTetrahedronMesh()
 }
 
 unsigned BccWorld::numTetrahedronMeshes() const
-{ return m_numMeshes; }
+{ return m_tetrahedonMeshes.size(); }
 
 GeometryArray * BccWorld::triangleGeometries() const
 { return m_triangleMeshes; }
@@ -216,8 +214,9 @@ ATetrahedronMeshGroup * BccWorld::combinedTetrahedronMesh()
 	unsigned ntet = 0;
 	unsigned nvert = 0;
     unsigned nstrip = 0;
+	const unsigned n = numTetrahedronMeshes();
 	unsigned i = 0;
-	for(; i < m_numMeshes; i++) {
+	for(; i < n; i++) {
 		ATetrahedronMeshGroup * imesh = m_tetrahedonMeshes[i];
 		ntet += imesh->numTetrahedrons();
 		nvert += imesh->numPoints();
@@ -229,7 +228,7 @@ ATetrahedronMeshGroup * BccWorld::combinedTetrahedronMesh()
 	nvert = 0;
     nstrip = 0;
 	i = 0;
-	for(; i < m_numMeshes; i++) {
+	for(; i < n; i++) {
 		ATetrahedronMeshGroup * imesh = m_tetrahedonMeshes[i];
         omesh->copyPointDrift(imesh->pointDrifts(), 
                               imesh->numStripes(), 
@@ -395,42 +394,24 @@ void BccWorld::createTetrahedronMeshesByFitCurves()
 	<<"\n total n anchored points "<<nanchored
     <<"\n total n stripes "<<nstripes
 	<<"\n";
-	m_numMeshes = n;
 	m_totalNumTetrahedrons = ntet;
 	m_totalNumPoints = nvert;
 }
 
 ATetrahedronMeshGroup * BccWorld::fitAGroup(GeometryArray * geos)
 {
-	std::vector<Vector3F > tetrahedronP;
-	std::vector<unsigned > tetrahedronInd;
-    std::vector<unsigned > pdrifts;
-    std::vector<unsigned > idrifts;
+	unsigned ntet, nvert, nstripes;
 	
-	m_fitBuilder->build(geos, tetrahedronP, tetrahedronInd,
-                  pdrifts, idrifts);
-				  
-	unsigned ntet = tetrahedronInd.size()/4;
-	unsigned nvert = tetrahedronP.size();
-	unsigned nstripes = geos->numGeometries();
-		
+	m_fitBuilder->build(geos, ntet, nvert, nstripes);
+	
 	ATetrahedronMeshGroup * amesh = new ATetrahedronMeshGroup;
 	amesh->create(nvert, ntet, nstripes);
-		
-	unsigned i;
-	for(i=0;i<nvert;i++) amesh->points()[i] = tetrahedronP[i];
-	for(i=0;i<ntet*4;i++) amesh->indices()[i] = tetrahedronInd[i];
-	for(i=0;i<nstripes;i++) amesh->pointDrifts()[i] = pdrifts[i];
-	for(i=0;i<nstripes;i++) amesh->indexDrifts()[i] = idrifts[i];
 	
+	m_fitBuilder->getResult(amesh);
+	amesh->checkTetrahedronVolume();
 	amesh->clearAnchors();
 	
 	m_fitBuilder->addAnchors(amesh, nstripes, m_triIntersect);
-	
-	tetrahedronP.clear();
-	tetrahedronInd.clear();
-	pdrifts.clear();
-	idrifts.clear();
 	
 	float vlm = amesh->calculateVolume();
 	amesh->setVolume(vlm);

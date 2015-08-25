@@ -10,9 +10,9 @@
 #pragma once
 #include <vector>
 #include <iostream>
-#define BASEARRNUMELEMPERBLK 32768
-#define BASEARRNUMELEMPERBLKM1 32767
-#define BASEARRNUMELEMPERBLKL2 15
+#define BASEARRNUMELEMPERBLK 8192
+#define BASEARRNUMELEMPERBLKM1 8191
+#define BASEARRNUMELEMPERBLKL2 13
 
 template<typename T>
 class BaseArrayBlock {

@@ -8,7 +8,8 @@
  */
 #pragma once
 #include <AllMath.h>
-class AOrientedBox {
+#include <Geometry.h>
+class AOrientedBox : public Geometry {
 public:
 	AOrientedBox();
 	virtual ~AOrientedBox();
@@ -22,6 +23,9 @@ public:
 	Vector3F extent() const;
 	
 	void getBoxVertices(Vector3F * dst) const;
+	
+	virtual const Type type() const;
+	virtual const BoundingBox calculateBBox() const;
 protected:
 
 private:

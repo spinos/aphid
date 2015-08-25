@@ -30,7 +30,8 @@ public:
 		TCurve = 15,
 		TBezierCurve = 16,
 		TGeometryArray = 17,
-		TPointCloud = 18
+		TPointCloud = 18,
+		TOrientedBox = 19
     };
     	
 	virtual const Type type() const;

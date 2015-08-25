@@ -18,22 +18,20 @@ class KdTreeDrawer;
 class CurveSampler;
 class SampleGroup;
 class ATetrahedronMesh;
+class ATetrahedronMeshGroup;
 class KdIntersection;
 class FitBccMeshBuilder {
 public:
 	FitBccMeshBuilder();
 	virtual ~FitBccMeshBuilder();
 	
-	void build(GeometryArray * curves, 
-	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd,
-               std::vector<unsigned > & pointDrifts,
-               std::vector<unsigned > & indexDrifts);
+	void build(GeometryArray * curves,
+				unsigned & ntet, unsigned & nvert, unsigned & nstripes);
 	
-	void build(BezierCurve * curve, 
-	           std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd,
+	void build(BezierCurve * curve,
 			   unsigned curveIdx);
+			   
+	void getResult(ATetrahedronMeshGroup * m);
 			   
 	Vector3F * startPoints();
 	unsigned * tetrahedronDrifts();
@@ -47,9 +45,13 @@ protected:
 private:
     void cleanup();
 	void drawOctahedron(KdTreeDrawer * drawer, BccOctahedron & octa);
-	void checkTetrahedronVolume(std::vector<Vector3F > & tetrahedronP, 
-	           std::vector<unsigned > & tetrahedronInd, unsigned start);
+	
 private:
+	std::vector<Vector3F > tetrahedronP;
+	std::vector<unsigned > tetrahedronInd;
+    std::vector<unsigned > pointDrifts;
+    std::vector<unsigned > indexDrifts;
+	
 	CurveSampler * m_sampler;
 	SampleGroup * m_reducer;
 	BccOctahedron * m_octa;

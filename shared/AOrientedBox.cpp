@@ -45,4 +45,19 @@ void AOrientedBox::getBoxVertices(Vector3F * dst) const
 	dst[6] = m_center - rx * eh.x + ry * eh.y + rz * eh.z;
 	dst[7] = m_center + rx * eh.x + ry * eh.y + rz * eh.z;
 }
+
+const TypedEntity::Type AOrientedBox::type() const
+{ return TOrientedBox; }
+
+const BoundingBox AOrientedBox::calculateBBox() const
+{
+	Vector3F p[8];
+	getBoxVertices(p);
+	BoundingBox box;
+	for(unsigned i = 0; i < 8; i++) {
+		box.updateMin(p[i]);
+		box.updateMax(p[i]);
+	}
+	return box;
+}
 //:~

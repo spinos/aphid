@@ -159,13 +159,14 @@ void ATetrahedronMesh::checkTetrahedronVolume()
 			tmp = tet[1];
 			tet[1] = tet[2];
 			tet[2] = tmp;
-			
+#if 0			
 			p[0] = pos[tet[0]];
 			p[1] = pos[tet[1]];
 			p[2] = pos[tet[2]];
 			p[3] = pos[tet[3]];
 			
 			std::cout<<" tet vol after swap 1 2 "<<tetrahedronVolume(p)<<"\n";
+#endif
 		}
 	}
 }
