@@ -8,19 +8,13 @@
  */
 
 #include "FitBccMeshBuilder.h"
-#include <GeometryArray.h>
 #include <BezierCurve.h>
 #include "BccOctahedron.h"
 #include "bcc_common.h"
 #include <KdTreeDrawer.h>
 #include "CurveSampler.h"
 #include "SampleGroup.h"
-#include <ATetrahedronMesh.h>
-#include <ATetrahedronMeshGroup.h>
-#include <KdIntersection.h>
 //#define DBG_PRINT
-
-float FitBccMeshBuilder::EstimatedGroupSize = 1.f;
 
 FitBccMeshBuilder::FitBccMeshBuilder() 
 {
@@ -45,7 +39,7 @@ void FitBccMeshBuilder::cleanup()
     if(m_octa) delete[] m_octa;
 }
     
-void FitBccMeshBuilder::build(GeometryArray * curves, 
+void FitBccMeshBuilder::build(GeometryArray * geos, 
 					unsigned & ntet, unsigned & nvert, unsigned & nstripes)
 {
 	tetrahedronP.clear();
@@ -53,7 +47,7 @@ void FitBccMeshBuilder::build(GeometryArray * curves,
 	pointDrifts.clear();
 	indexDrifts.clear();
 	
-    const unsigned n = curves->numGeometries();
+    const unsigned n = geos->numGeometries();
 	if(m_startPoints) delete[] m_startPoints;
 	m_startPoints = new Vector3F[n];
 	if(m_tetraDrift) delete[] m_tetraDrift;
@@ -64,13 +58,13 @@ void FitBccMeshBuilder::build(GeometryArray * curves,
         pointDrifts.push_back(tetrahedronP.size());
         indexDrifts.push_back(tetrahedronInd.size());
 		m_tetraDrift[i] = tetrahedronInd.size() / 4;
-        build((BezierCurve *)curves->geometry(i),
+        build((BezierCurve *)geos->geometry(i),
 			   i);
 	}
 	
 	ntet = tetrahedronInd.size()/4;
 	nvert = tetrahedronP.size();
-	nstripes = curves->numGeometries();
+	nstripes = n;
 }
 
 void FitBccMeshBuilder::build(BezierCurve * curve,
@@ -234,17 +228,5 @@ void FitBccMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdInters
     }
 	}
 	delete[] anchorTri;
-}
-
-void FitBccMeshBuilder::getResult(ATetrahedronMeshGroup * mesh)
-{
-	const unsigned ntet = mesh->numTetrahedrons();
-	const unsigned nvert = mesh->numPoints();
-	const unsigned nstripes = mesh->numStripes();
-	unsigned i;
-	for(i=0;i<nvert;i++) mesh->points()[i] = tetrahedronP[i];
-	for(i=0;i<ntet*4;i++) mesh->indices()[i] = tetrahedronInd[i];
-	for(i=0;i<nstripes;i++) mesh->pointDrifts()[i] = pointDrifts[i];
-	for(i=0;i<nstripes;i++) mesh->indexDrifts()[i] = indexDrifts[i];
 }
 //:~

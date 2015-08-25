@@ -238,6 +238,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/AField.cpp
 ../shared/CartesianGrid.cpp
 ../shared/HField.cpp
+../shared/TetrahedronMeshBuilder.cpp
 ../hesperis/HAdaptiveField.cpp
 ../hesperis/H5FieldIn.cpp
 ../hesperis/H5FieldOut.cpp

@@ -1,10 +1,7 @@
 #include "BccWorld.h"
 #include <BezierCurve.h>
 #include <KdTreeDrawer.h>
-#include "BccGrid.h"
 #include <CurveGroup.h>
-#include "bcc_common.h"
-#include <line_math.h>
 #include <HesperisFile.h>
 #include <KdCluster.h>
 #include <KdIntersection.h>
@@ -13,14 +10,11 @@
 #include <BezierCurve.h>
 #include <RandomCurve.h>
 #include <bezierPatch.h>
-#include <APointCloud.h>
-#include <BccMesh.h>
 #include <ATriangleMesh.h>
 #include "FitBccMeshBuilder.h"
 #include "CurveReduction.h"
 #include <ATetrahedronMeshGroup.h>
 #include <BlockBccMeshBuilder.h>
-#include <FitBccMeshBuilder.h>
 
 BccWorld::BccWorld()
 {
@@ -32,22 +26,21 @@ BccWorld::BccWorld()
 	m_blockBuilder = new BlockBccMeshBuilder;
 	m_fitBuilder = new FitBccMeshBuilder;
 	m_curveCluster = NULL;
+	m_patchCluster = NULL;
 }
 
 BccWorld::~BccWorld() 
 {
     delete m_reducer;
 	delete m_curveCluster;
+	delete m_patchCluster;
 	delete m_triangleMeshes;
 	delete m_blockBuilder;
 	delete m_fitBuilder;
 }
 
 void BccWorld::setTiangleGeometry(GeometryArray * x)
-{ 
-	m_triangleMeshes = x;
-	createTriangleIntersection();
-}
+{ m_triangleMeshes = x; }
 
 void BccWorld::addCurveGroup(CurveGroup * m)
 { m_curveGeos.push_back(m); }
@@ -190,7 +183,7 @@ void BccWorld::rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos
 	
 	delete amesh;
 	
-	m_tetrahedonMeshes[igroup] = fitAGroup(geos);
+	m_tetrahedonMeshes[igroup] = genTetFromGeometry(geos, m_fitBuilder);
 	
 	m_totalNumPoints -= oldNVert;
 	m_totalNumPoints += m_tetrahedonMeshes[igroup]->numPoints();
@@ -285,6 +278,7 @@ void BccWorld::addCurveGeometriesToCluster(CurveGroup * data)
 
 bool BccWorld::createTriangleIntersection()
 {	
+	if(!m_triangleMeshes) return false;
 	unsigned i;
 	m_triIntersect = new KdIntersection;
 	for(i=0; i<m_triangleMeshes->numGeometries(); i++) {
@@ -303,7 +297,7 @@ bool BccWorld::createTriangleIntersection()
 
 bool BccWorld::buildTetrahedronMesh()
 {	
-	if(!m_triIntersect) {
+	if(!createTriangleIntersection()) {
 		std::cout<<"\n bcc world has no grow mesh ";
 		return false;
 	}
@@ -366,8 +360,8 @@ void BccWorld::createTetrahedronMeshesByFitCurves()
 	
 	unsigned i;
 	for(i=0;i<n;i++)
-		m_tetrahedonMeshes.push_back(fitAGroup(m_curveCluster->group(i)));
-	
+		m_tetrahedonMeshes.push_back(genTetFromGeometry(m_curveCluster->group(i), m_fitBuilder));
+		
 	unsigned ntet = 0;
 	unsigned nvert = 0;
 	unsigned nanchored = 0;
@@ -390,20 +384,20 @@ void BccWorld::createTetrahedronMeshesByFitCurves()
 	m_totalNumPoints = nvert;
 }
 
-ATetrahedronMeshGroup * BccWorld::fitAGroup(GeometryArray * geos)
+ATetrahedronMeshGroup * BccWorld::genTetFromGeometry(GeometryArray * geos, TetrahedronMeshBuilder * builder)
 {
 	unsigned ntet, nvert, nstripes;
 	
-	m_fitBuilder->build(geos, ntet, nvert, nstripes);
+	builder->build(geos, ntet, nvert, nstripes);
 	
 	ATetrahedronMeshGroup * amesh = new ATetrahedronMeshGroup;
 	amesh->create(nvert, ntet, nstripes);
 	
-	m_fitBuilder->getResult(amesh);
+	builder->getResult(amesh);
 	amesh->checkTetrahedronVolume();
 	amesh->clearAnchors();
 	
-	m_fitBuilder->addAnchors(amesh, nstripes, m_triIntersect);
+	builder->addAnchors(amesh, nstripes, m_triIntersect);
 	
 	float vlm = amesh->calculateVolume();
 	amesh->setVolume(vlm);
@@ -411,8 +405,50 @@ ATetrahedronMeshGroup * BccWorld::fitAGroup(GeometryArray * geos)
 	return amesh;
 }
 
+bool BccWorld::createPatchCluster()
+{
+	const unsigned n = m_patchBoxes.size();
+	if(n < 1) return false;
+	
+	std::cout<<"\n bcc world creating patch cluster ";
+	if(m_patchCluster) delete m_patchCluster;
+	m_patchCluster = new KdCluster;
+	
+	GeometryArray * geos = new GeometryArray;
+	geos->create(n);
+	
+	float totalPatchLength = 0.f;
+	
+	unsigned i;
+	for(i=0; i< n; i++) {
+		totalPatchLength += m_patchBoxes[i].extent().x * 2.f;
+		geos->setGeometry(&m_patchBoxes[i], i);
+	}
+	
+	m_patchCluster->addGeometry(geos);
+	
+	std::cout<<"\n total n patches "<<n
+	    <<" total patch length: "<<totalPatchLength<<"\n";
+	
+	KdTree::MaxBuildLevel = 6;
+	KdTree::NumPrimitivesInLeafThreashold = 31;
+	
+	m_patchCluster->create();
+	
+	return true;
+}
+
 void BccWorld::createTetrahedronMeshesByBlocks()
 {
-// todo
+	if(!createPatchCluster()) {
+        std::cout<<"\n no patch available in bcc world!";
+        return;
+    }
+
+	unsigned n = m_patchCluster->numGroups();
+	unsigned i;
+	for(i=0;i<n;i++)
+		m_tetrahedonMeshes.push_back(genTetFromGeometry(m_patchCluster->group(i), m_blockBuilder));
+	
 }
 //:~

@@ -17,6 +17,7 @@ class BccMesh;
 class ATriangleMesh;
 class CurveReduction;
 class ATetrahedronMeshGroup;
+class TetrahedronMeshBuilder;
 class BlockBccMeshBuilder;
 class FitBccMeshBuilder;
 
@@ -49,6 +50,7 @@ public:
     
 private:
 	bool createCurveCluster();
+	bool createPatchCluster();
 	void addCurveGeometriesToCluster(CurveGroup * data);
 	bool createTriangleIntersection();
 	
@@ -60,10 +62,12 @@ private:
 	
 	void createTetrahedronMeshesByFitCurves();
 	void createTetrahedronMeshesByBlocks();
-	ATetrahedronMeshGroup * fitAGroup(GeometryArray * geos);
+	ATetrahedronMeshGroup * genTetFromGeometry(GeometryArray * geos, 
+												TetrahedronMeshBuilder * builder);
 	
 private:
 	KdCluster * m_curveCluster;
+	KdCluster * m_patchCluster;
 	KdIntersection * m_triIntersect;
 	GeometryArray * m_triangleMeshes;
 

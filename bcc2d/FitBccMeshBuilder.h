@@ -7,51 +7,38 @@
  *
  */
 #pragma once
-#include <vector>
+#include <TetrahedronMeshBuilder.h>
 class Vector3F;
 class KdTreeDrawer;
 class BezierCurve;
 struct BezierSpline;
 class BccOctahedron;
-class GeometryArray;
 class KdTreeDrawer;
 class CurveSampler;
 class SampleGroup;
-class ATetrahedronMesh;
-class ATetrahedronMeshGroup;
-class KdIntersection;
-class FitBccMeshBuilder {
+
+class FitBccMeshBuilder : public TetrahedronMeshBuilder {
 public:
 	FitBccMeshBuilder();
 	virtual ~FitBccMeshBuilder();
 	
-	void build(GeometryArray * curves,
+	virtual void build(GeometryArray * geos,
 				unsigned & ntet, unsigned & nvert, unsigned & nstripes);
 	
+	virtual void addAnchors(ATetrahedronMesh * mesh, unsigned n, KdIntersection * anchorMesh);
+	
+protected:
 	void build(BezierCurve * curve,
 			   unsigned curveIdx);
-			   
-	void getResult(ATetrahedronMeshGroup * m);
-			   
-	Vector3F * startPoints();
-	unsigned * tetrahedronDrifts();
-	
-	void addAnchors(ATetrahedronMesh * mesh, unsigned n, KdIntersection * anchorMesh);
-			   
-	static float EstimatedGroupSize;
-protected:
 	void drawOctahedron(KdTreeDrawer * drawer);
 	void drawSamples(KdTreeDrawer * drawer);
 private:
     void cleanup();
 	void drawOctahedron(KdTreeDrawer * drawer, BccOctahedron & octa);
+	Vector3F * startPoints();
+	unsigned * tetrahedronDrifts();
 	
 private:
-	std::vector<Vector3F > tetrahedronP;
-	std::vector<unsigned > tetrahedronInd;
-    std::vector<unsigned > pointDrifts;
-    std::vector<unsigned > indexDrifts;
-	
 	CurveSampler * m_sampler;
 	SampleGroup * m_reducer;
 	BccOctahedron * m_octa;

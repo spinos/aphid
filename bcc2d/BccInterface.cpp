@@ -27,7 +27,7 @@ BccInterface::BccInterface()
 	m_patchSeparator = new MeshSeparator;
 	m_patchMesh = NULL;
     m_tetMesh = NULL;
-    testBlockMesh();
+    // testBlockMesh();
 }
 
 BccInterface::~BccInterface() 
@@ -247,14 +247,25 @@ bool BccInterface::separate(ATriangleMesh * mesh, std::vector<AOrientedBox> & pa
 void BccInterface::testBlockMesh()
 {
     BlockBccMeshBuilder builder;
-    AOrientedBox box;
-    box.setExtent(Vector3F(28.f, 14.f, 1.f));
-    box.setCenter(Vector3F(0.1f, 7.f, 1.f));
-	unsigned nv, nt;
-    builder.build(box, 22, 3, 1, nv, nt);
-	std::cout<<"\n tet nv nt "<<nv<<" "<<nt;
-	m_tetMesh = new ATetrahedronMesh;
-	m_tetMesh->create(nv, nt);
-	builder.getResult(m_tetMesh, box);
+    AOrientedBox box1;
+    box1.setExtent(Vector3F(28.f, 14.f, 1.f));
+    box1.setCenter(Vector3F(0.1f, -2.f, 1.f));
+	
+	AOrientedBox box2;
+	Matrix33F rot; rot.set(Quaternion(0.f, 1.f, 0.f, .5f));
+	box2.setOrientation(rot);
+    box2.setExtent(Vector3F(18.f, 4.f, 1.f));
+    box2.setCenter(Vector3F(2.1f, 13.f, -1.f));
+	
+	GeometryArray boxes;
+	boxes.create(2);
+	boxes.setGeometry(&box1, 0);
+	boxes.setGeometry(&box2, 1);
+	unsigned nv, nt, ns;
+    builder.build(&boxes, nt, nv, ns);
+	std::cout<<"\n tet nt nv ns "<<nt<<" "<<nv<<" "<<ns;
+	m_tetMesh = new ATetrahedronMeshGroup;
+	m_tetMesh->create(nv, nt, ns);
+	builder.getResult(m_tetMesh);
 }
 //:~

@@ -11,6 +11,7 @@
 class KdTreeDrawer;
 class AGenericMesh;
 class ATetrahedronMesh;
+class ATetrahedronMeshGroup;
 class ATriangleMesh;
 class BccWorld;
 class AdaptiveField;
@@ -39,6 +40,6 @@ private:
     void testBlockMesh();
 private:
 	ATriangleMesh * m_patchMesh;
-    ATetrahedronMesh * m_tetMesh;
+    ATetrahedronMeshGroup * m_tetMesh;
 	MeshSeparator * m_patchSeparator;
 };

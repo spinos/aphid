@@ -6,21 +6,25 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+#include <TetrahedronMeshBuilder.h>
 #include <AOrientedBox.h>
 #include <deque>
 class CartesianGrid;
-class ATetrahedronMesh;
-class BlockBccMeshBuilder {
+class GeometryArray;
+class BlockBccMeshBuilder : public TetrahedronMeshBuilder {
 public:
 	BlockBccMeshBuilder();
 	virtual ~BlockBccMeshBuilder();
 	
-	void build(const AOrientedBox & ob, 
-				int gx, int gy, int gz,
-				unsigned & numVertices, unsigned & numTetrahedrons);
-				
-	void getResult(ATetrahedronMesh * mesh, const AOrientedBox & ob);
+	virtual void build(GeometryArray * geos,
+				unsigned & ntet, unsigned & nvert, unsigned & nstripes);
+	 
+	virtual void addAnchors(ATetrahedronMesh * mesh, unsigned n, KdIntersection * anchorMesh);
+	
 protected:
+	void build(AOrientedBox * ob, 
+				int gx, int gy, int gz);
+	
     void addTetrahedron(Vector3F * v, unsigned * ind);
 private:
 	void addNorth(const Vector3F & center, float size, float hsize);
@@ -28,5 +32,4 @@ private:
 	void addDepth(const Vector3F & center, float size, float hsize, int i, int n);
 private:
     CartesianGrid * m_verticesPool;
-	std::deque<unsigned > m_indices;
 };
