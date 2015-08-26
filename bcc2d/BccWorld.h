@@ -28,7 +28,7 @@ public:
 	
 	void setTiangleGeometry(GeometryArray * x);
 	void addCurveGroup(CurveGroup * m);
-	bool buildTetrahedronMesh();
+	bool buildTetrahedronMesh(bool reset = true);
 	void addPatchBoxes(const std::vector<AOrientedBox> & src);
     
 	void select(const Ray * r);
@@ -51,13 +51,18 @@ public:
 private:
 	bool createCurveCluster();
 	bool createPatchCluster();
+	float computeTotalCurveLength();
+	float computeTotalPatchArea();
+	float groupCurveLength(GeometryArray * geos);
+	float groupPatchArea(GeometryArray * geos);
+	
 	void addCurveGeometriesToCluster(CurveGroup * data);
 	bool createTriangleIntersection();
 	
 	void clearTetrahedronMesh();
 	void reduceAllGroups();
 	void reduceGroup(unsigned igroup);
-	float groupCurveLength(GeometryArray * geos);
+	
 	void rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos);
 	
 	void createTetrahedronMeshesByFitCurves();
@@ -78,7 +83,7 @@ private:
 	BlockBccMeshBuilder * m_blockBuilder;
 	FitBccMeshBuilder * m_fitBuilder;
 	unsigned m_numCurves, m_totalNumTetrahedrons, m_totalNumPoints;
-    float m_totalCurveLength, m_estimatedNumGroups;
+    float m_totalCurveLength, m_totalPatchArea, m_estimatedNumGroups;
 };
 
 #endif        //  #ifndef BCCWORLD_H
