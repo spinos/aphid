@@ -102,6 +102,9 @@ public:
         
         return true;   
     }
+    
+    static std::string WorldPath(const std::string & name);
+    
 protected: 
 
 private: 
@@ -119,7 +122,7 @@ private:
 	bool readTetrahedron();
 	bool listTriangle(HBase * grp);
 	bool readTriangle();
-    std::string worldPath(const std::string & name) const;
+    
 	std::string checkPath(const std::string & name) const;
 private:
 	std::map<std::string, BaseTransform * > m_transforms;

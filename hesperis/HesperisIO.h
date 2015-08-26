@@ -50,6 +50,7 @@ public:
     static bool GetTransform(BaseTransform * dst, const MDagPath & path);
     static bool LsCurves(std::vector<std::string > & dst);
     static bool LsMeshes(std::vector<std::string > & dst);
+    static bool LsTransforms(std::vector<std::string > & dst);
 	static Matrix33F::RotateOrder GetRotationOrder(MTransformationMatrix::RotationOrder x);
 
 protected:

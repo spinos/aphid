@@ -52,17 +52,20 @@ char HTransform::save(BaseTransform * tm)
 	if(!hasNamedAttr(".translate"))
 		addFloatAttr(".translate", 3);
 		
-	writeFloatAttr(".translate", (float *)&tm->translation());
+    Vector3F v3 = tm->translation();
+	writeFloatAttr(".translate", (float *)&v3);
 	
-	if(!hasNamedAttr(".rotate"))
+    if(!hasNamedAttr(".rotate"))
 		addFloatAttr(".rotate", 3);
 		
-	writeFloatAttr(".rotate", (float *)&tm->rotationAngles());
+	v3 = tm->rotationAngles();
+	writeFloatAttr(".rotate", (float *)&v3);
 	
 	if(!hasNamedAttr(".scale"))
 		addFloatAttr(".scale", 3);
 		
-	writeFloatAttr(".scale", (float *)&tm->scale());
+	v3 = tm->scale();
+	writeFloatAttr(".scale", (float *)&v3);
 	
     return 1;
 }

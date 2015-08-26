@@ -328,6 +328,14 @@ bool HesperisIO::LsMeshes(std::vector<std::string > & dst)
     return true;
 }
 
+bool HesperisIO::LsTransforms(std::vector<std::string > & dst)
+{
+    HWorld grpWorld;
+    HesperisFile::LsNames<HTransform>(dst, &grpWorld);
+    grpWorld.close();
+    return true;
+}
+
 bool HesperisIO::GetTransform(BaseTransform * dst, const MDagPath & path)
 {
 	MStatus stat;
