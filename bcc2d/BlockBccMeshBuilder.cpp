@@ -11,6 +11,13 @@
 #include <CartesianGrid.h>
 #include <tetrahedron_math.h>
 
+unsigned BlockBccMeshBuilder::MinimumUGrid = 3;
+unsigned BlockBccMeshBuilder::MinimumVGrid = 1;
+unsigned BlockBccMeshBuilder::MinimumWGrid = 1;
+unsigned BlockBccMeshBuilder::MaximumUGrid = 256;
+unsigned BlockBccMeshBuilder::MaximumVGrid = 256;
+unsigned BlockBccMeshBuilder::MaximumWGrid = 256;
+	
 BlockBccMeshBuilder::BlockBccMeshBuilder() 
 {
     m_verticesPool = new CartesianGrid;

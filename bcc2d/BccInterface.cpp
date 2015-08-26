@@ -222,7 +222,7 @@ bool BccInterface::separate(ATriangleMesh * mesh, std::vector<AOrientedBox> & pa
 		return false;
 	}
 	
-	std::cout<<"\n sep to n patches "<<n;
+	std::cout<<"\n separate to "<<n<<" patches ";
 	
 	PrincipalComponents pca;
 	BaseBuffer pos;
@@ -234,13 +234,6 @@ bool BccInterface::separate(ATriangleMesh * mesh, std::vector<AOrientedBox> & pa
 		patchBoxes.push_back( pca.analyze((Vector3F *)pos.data(), np) );
 	}
 	
-	float totalLength = 0.f;
-	std::vector<AOrientedBox>::const_iterator it = patchBoxes.begin();
-	for(;it!=patchBoxes.end();++it)
-		totalLength += (*it).extent().x;
-		
-	totalLength *= 2.f;
-	std::cout<<"\n total patch length "<<totalLength;
 	return true;
 }
 

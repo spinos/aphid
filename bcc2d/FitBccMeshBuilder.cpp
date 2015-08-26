@@ -16,6 +16,8 @@
 #include "SampleGroup.h"
 //#define DBG_PRINT
 
+unsigned FitBccMeshBuilder::MinimumUGrid = 3;
+
 FitBccMeshBuilder::FitBccMeshBuilder() 
 {
     m_octa = 0;
@@ -89,7 +91,7 @@ void FitBccMeshBuilder::build(BezierCurve * curve,
 	}
 
 	unsigned numGroups = (int)(suml/EstimatedGroupSize);
-    if(numGroups < 3) numGroups = 3;
+    if(numGroups < MinimumUGrid) numGroups = MinimumUGrid;
     
 #ifdef DBG_PRINT
 	std::cout<<" total length "<<suml<<"\n"

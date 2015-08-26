@@ -21,6 +21,12 @@ public:
 	 
 	virtual void addAnchors(ATetrahedronMesh * mesh, unsigned n, KdIntersection * anchorMesh);
 	
+	static unsigned MinimumUGrid;
+	static unsigned MinimumVGrid;
+	static unsigned MinimumWGrid;
+	static unsigned MaximumUGrid;
+	static unsigned MaximumVGrid;
+	static unsigned MaximumWGrid;
 protected:
 	void build(AOrientedBox * ob, 
 				int gx, int gy, int gz);

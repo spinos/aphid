@@ -27,6 +27,7 @@ public:
 	
 	virtual void addAnchors(ATetrahedronMesh * mesh, unsigned n, KdIntersection * anchorMesh);
 	
+	static unsigned MinimumUGrid;
 protected:
 	void build(BezierCurve * curve,
 			   unsigned curveIdx);

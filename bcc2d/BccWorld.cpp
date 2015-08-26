@@ -417,18 +417,19 @@ bool BccWorld::createPatchCluster()
 	GeometryArray * geos = new GeometryArray;
 	geos->create(n);
 	
-	float totalPatchLength = 0.f;
-	
+	float totalPatchArea = 0.f;
+	Vector3F patchExtent;
 	unsigned i;
 	for(i=0; i< n; i++) {
-		totalPatchLength += m_patchBoxes[i].extent().x * 2.f;
+		patchExtent = m_patchBoxes[i].extent();
+		totalPatchArea += patchExtent.x * patchExtent.y * 4.f;
 		geos->setGeometry(&m_patchBoxes[i], i);
 	}
 	
 	m_patchCluster->addGeometry(geos);
 	
-	std::cout<<"\n total n patches "<<n
-	    <<" total patch length: "<<totalPatchLength<<"\n";
+	std::cout<<"\n total n patches: "<<n
+	    <<" total patch area: "<<totalPatchArea<<"\n";
 	
 	KdTree::MaxBuildLevel = 6;
 	KdTree::NumPrimitivesInLeafThreashold = 31;
