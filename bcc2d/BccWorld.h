@@ -41,13 +41,15 @@ public:
 	unsigned numTriangles() const;
 	const unsigned numPoints() const;
 	unsigned numTetrahedronMeshes() const;
-	ATetrahedronMesh * tetrahedronMesh(unsigned i);
+	ATetrahedronMeshGroup * tetrahedronMesh(unsigned i) const;
 	GeometryArray * triangleGeometries() const;
 	GeometryArray * selectedGroup(unsigned & idx) const;
 	float drawAnchorSize() const;
-	ATetrahedronMeshGroup * combinedTetrahedronMesh();
 	const std::vector<AOrientedBox> * patchBoxes() const;
     
+	void computeTetrahedronMeshStatistics(unsigned & ntet, 
+					unsigned & nvert, unsigned & nstripe,
+					unsigned & nanchor) const;
 private:
 	bool createCurveCluster();
 	bool createPatchCluster();

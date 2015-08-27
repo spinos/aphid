@@ -69,7 +69,7 @@ const unsigned BccWorld::numTetrahedrons() const
 const unsigned BccWorld::numPoints() const
 { return m_totalNumPoints; }
 
-ATetrahedronMesh * BccWorld::tetrahedronMesh(unsigned i)
+ATetrahedronMeshGroup * BccWorld::tetrahedronMesh(unsigned i) const
 { return m_tetrahedonMeshes[i]; }
 
 void BccWorld::clearTetrahedronMesh()
@@ -145,7 +145,6 @@ void BccWorld::reduceAllGroups()
 
 void BccWorld::reduceGroup(unsigned igroup)
 {
-	const float oldCurveLength = groupCurveLength(m_curveCluster->group(igroup));
 	const unsigned oldNCurves = m_curveCluster->group(igroup)->numGeometries();
     GeometryArray * reduced = 0;
 	
@@ -163,9 +162,6 @@ void BccWorld::reduceGroup(unsigned igroup)
         std::cout<<" insufficient condition for curve reduction, skipped.\n";
         return;
     }
-	
-	m_totalCurveLength -= oldCurveLength;
-	m_totalCurveLength += groupCurveLength(reduced);
 	
 	m_numCurves -= oldNCurves;
 	m_numCurves += reduced->numGeometries();
@@ -193,52 +189,6 @@ void BccWorld::rebuildGroupTetrahedronMesh(unsigned igroup, GeometryArray * geos
 	std::cout<<" reduce n points from "<<oldTotalNTet<<" to "<<m_totalNumPoints
 	<<"\n n tetrahedrons form "<<oldTotalNTet<<" to "<<m_totalNumTetrahedrons
 	<<"\n";
-}
-
-ATetrahedronMeshGroup * BccWorld::combinedTetrahedronMesh()
-{
-	ATetrahedronMeshGroup * omesh = new ATetrahedronMeshGroup;
-	unsigned ntet = 0;
-	unsigned nvert = 0;
-    unsigned nstrip = 0;
-	const unsigned n = numTetrahedronMeshes();
-	unsigned i = 0;
-	for(; i < n; i++) {
-		ATetrahedronMeshGroup * imesh = m_tetrahedonMeshes[i];
-		ntet += imesh->numTetrahedrons();
-		nvert += imesh->numPoints();
-        nstrip += imesh->numStripes();
-	}
-	omesh->create(nvert, ntet, nstrip);
- 
-	ntet = 0;
-	nvert = 0;
-    nstrip = 0;
-	i = 0;
-	for(; i < n; i++) {
-		ATetrahedronMeshGroup * imesh = m_tetrahedonMeshes[i];
-        omesh->copyPointDrift(imesh->pointDrifts(), 
-                              imesh->numStripes(), 
-                              nstrip,
-                              nvert);
-        omesh->copyIndexDrift(imesh->indexDrifts(), 
-                              imesh->numStripes(), 
-                              nstrip,
-                              ntet*4);
-        
-		omesh->copyStripe(imesh, nvert, ntet * 4);
-		ntet += imesh->numTetrahedrons();
-		nvert += imesh->numPoints();
-        nstrip += imesh->numStripes();
-	}
-	float vlm = omesh->calculateVolume();
-	omesh->setVolume(vlm);
-	std::cout<<" combined all meshes:\n n tetrahedrons "<<ntet
-	<<"\n n points "<<nvert
-	<<"\n initial volume "<<vlm
-	<<"\n";
-    omesh->verbose();
-	return omesh;
 }
 
 void BccWorld::addCurveGeometriesToCluster(CurveGroup * data)
@@ -314,29 +264,21 @@ bool BccWorld::buildTetrahedronMesh(bool reset)
 	m_totalPatchArea = computeTotalPatchArea();
 	std::cout<<"\n total curve length: "<<m_totalCurveLength
 			<<"\n total patch area: "<<m_totalPatchArea;
+			
+	FitBccMeshBuilder::EstimatedGroupSize = (m_totalCurveLength + m_totalPatchArea) / m_estimatedNumGroups;
+    std::cout<<"\n estimate group size "<<FitBccMeshBuilder::EstimatedGroupSize;
 
 	createTetrahedronMeshesByFitCurves();
 	createTetrahedronMeshesByBlocks();
 	
-	unsigned ntet = 0;
-	unsigned nvert = 0;
-	unsigned nanchored = 0;
-	unsigned nstripes = 0;
-	const unsigned n = m_tetrahedonMeshes.size();
-	unsigned i;
-	for(i=0;i<n;i++) {
-        ATetrahedronMeshGroup * amesh = m_tetrahedonMeshes[i];
-		ntet += amesh->numTetrahedrons();
-		nvert += amesh->numPoints();
-		nanchored += amesh->numAnchoredPoints();
-        nstripes += amesh->numStripes();
-	}
+	unsigned ntet, nvert, nanchor, nstripe;
+	computeTetrahedronMeshStatistics(ntet, nvert, nstripe, nanchor);
 	
-	std::cout<<"\n n tetrahedron meshes "<<n
+	std::cout<<"\n n tetrahedron meshes "<<numTetrahedronMeshes()
 	<<"\n total n tetrahedrons "<<ntet
 	<<"\n total n points "<<nvert
-	<<"\n total n anchored points "<<nanchored
-    <<"\n total n stripes "<<nstripes
+	<<"\n total n anchored points "<<nanchor
+    <<"\n total n stripes "<<nstripe
 	<<"\n building finished \n";
 	m_totalNumTetrahedrons = ntet;
 	m_totalNumPoints = nvert;
@@ -423,9 +365,6 @@ void BccWorld::createTetrahedronMeshesByFitCurves()
     }
 	std::cout<<"\n bcc world building tetrahedron mesh along curve ";
 
-    FitBccMeshBuilder::EstimatedGroupSize = totalCurveLength() / m_estimatedNumGroups;
-    std::cout<<"\n estimate group size "<<FitBccMeshBuilder::EstimatedGroupSize;
-	
 	unsigned n = m_curveCluster->numGroups();
 	
 	unsigned i;
@@ -495,5 +434,22 @@ void BccWorld::createTetrahedronMeshesByBlocks()
 	unsigned i;
 	for(i=0;i<n;i++)
 		m_tetrahedonMeshes.push_back(genTetFromGeometry(m_patchCluster->group(i), m_blockBuilder));
+}
+
+void BccWorld::computeTetrahedronMeshStatistics(unsigned & ntet, unsigned & nvert, unsigned & nstripe, unsigned & nanchor) const
+{
+	ntet = 0;
+	nvert = 0;
+	nstripe = 0;
+	nanchor = 0;
+	const unsigned n = numTetrahedronMeshes();
+	unsigned i = 0;
+	for(; i < n; i++) {
+		ATetrahedronMeshGroup * imesh = m_tetrahedonMeshes[i];
+		ntet += imesh->numTetrahedrons();
+		nvert += imesh->numPoints();
+        nstripe += imesh->numStripes();
+		nanchor += imesh->numAnchoredPoints();
+	}
 }
 //:~

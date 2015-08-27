@@ -199,7 +199,41 @@ bool BccInterface::saveWorld(BccWorld * world)
 	HesperisFile hes;
 	hes.setWriteComponent(HesperisFile::WTetra);
 	
-	ATetrahedronMeshGroup * cm = world->combinedTetrahedronMesh();
+	unsigned ntet, nvert, nstripe, nanchor;
+	world->computeTetrahedronMeshStatistics(ntet, nvert, nstripe, nanchor);
+	
+	ATetrahedronMeshGroup * cm = new ATetrahedronMeshGroup;
+	cm->create(nvert, ntet, nstripe);
+	
+	const unsigned n = world->numTetrahedronMeshes();
+	
+	ntet = 0;
+	nvert = 0;
+    nstripe = 0;
+	unsigned i = 0;
+	for(; i < n; i++) {
+		ATetrahedronMeshGroup * imesh = world->tetrahedronMesh(i);
+        cm->copyPointDrift(imesh->pointDrifts(), 
+                              imesh->numStripes(), 
+                              nstripe,
+                              nvert);
+        cm->copyIndexDrift(imesh->indexDrifts(), 
+                              imesh->numStripes(), 
+                              nstripe,
+                              ntet*4);
+        
+		cm->copyStripe(imesh, nvert, ntet * 4);
+		
+		ntet += imesh->numTetrahedrons();
+		nvert += imesh->numPoints();
+        nstripe += imesh->numStripes();
+	}
+	float vlm = cm->calculateVolume();
+	cm->setVolume(vlm);
+	
+	std::cout<<"\n combined all for save out ";
+	cm->verbose();
+	
 	hes.addTetrahedron("tetra_c", cm);
 
 	if(!hes.open(FileName)) return false;
