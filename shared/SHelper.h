@@ -67,6 +67,7 @@ public:
 	static std::string Combine(const std::vector<std::string > & names);
 	static void Split(const std::string & combined, std::vector<std::string > & names);
 	static bool Find(const std::string & name, const std::string & part, bool caseSensitive = true);
+    static bool DeduceAttribName(const std::string & hesPath, std::string & attribName);
 };
 #endif
 //:~

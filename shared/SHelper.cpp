@@ -929,4 +929,54 @@ bool SHelper::Find(const std::string & name, const std::string & part, bool case
 	
 	return boost::algorithm::find_first(lname, lpart);
 }
+
+bool SHelper::DeduceAttribName(const std::string & hesPath, std::string & attribName)
+{
+    if(SHelper::Find(hesPath, "translateX") 
+        || SHelper::Find(hesPath, "Translation/X")) {
+        attribName = "translateX";
+        return true;
+    }
+    if(SHelper::Find(hesPath, "translateY")
+        || SHelper::Find(hesPath, "Translation/Y")) {
+        attribName = "translateY";
+        return true;
+    }
+    if(SHelper::Find(hesPath, "translateZ")
+        || SHelper::Find(hesPath, "Translation/Z")) {
+        attribName = "translateZ";
+        return true;
+    }
+    if(SHelper::Find(hesPath, "rotateX")
+        || SHelper::Find(hesPath, "Rotation/X")) {
+        attribName = "rotateX";
+        return true;
+    }
+    if(SHelper::Find(hesPath, "rotateY")
+        || SHelper::Find(hesPath, "Rotation/Y")) {
+        attribName = "rotateY";
+        return true;
+    }
+    if(SHelper::Find(hesPath, "rotateZ")
+        || SHelper::Find(hesPath, "Rotation/Z")) {
+        attribName = "rotateZ";
+        return true;
+    }
+    if(SHelper::Find(hesPath, "scaleX") 
+        || SHelper::Find(hesPath, "Scaling/X")) {
+        attribName = "scaleX";
+        return true;
+    }
+    if(SHelper::Find(hesPath, "scaleY") 
+        || SHelper::Find(hesPath, "Scaling/Y")) {
+        attribName = "scaleY";
+        return true;
+    }
+    if(SHelper::Find(hesPath, "scaleZ") 
+        || SHelper::Find(hesPath, "Scaling/Z")) {
+        attribName = "scaleZ";
+        return true;
+    }
+    return false;
+}
 //:~

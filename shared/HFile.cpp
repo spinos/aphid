@@ -68,3 +68,7 @@ void HFile::flush()
 
 bool HFile::entityExists(const std::string & name)
 { return m_doc.checkExist(name) == 1; }
+
+bool HFile::find(const std::string & pathName)
+{ return entityExists(pathName); }
+//:~

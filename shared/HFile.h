@@ -24,7 +24,7 @@ public:
 	
     void beginWrite();
 	void flush();
-	
+	bool find(const std::string & pathName);
 protected:
 	void useDocument();
 	void setDocument(const HDocument & doc);
