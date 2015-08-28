@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/replace.hpp>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -519,6 +518,7 @@ void SHelper::pathToFilename(std::string& name)
 
 void SHelper::noColon(std::string& name)
 {
+	if(name.find(':')<0) return;
 	std::string r;
 	std::string str = name;
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
@@ -916,5 +916,17 @@ void SHelper::Split(const std::string & combined, std::vector<std::string > & na
 		{
 			names.push_back(*tok_iter);
 		}
+}
+
+bool SHelper::Find(const std::string & name, const std::string & part, bool caseSensitive)
+{ 
+	if(caseSensitive) return boost::algorithm::find_first(name, part);
+	
+	std::string lname(name);
+	boost::algorithm::to_lower(lname);
+	std::string lpart(part);
+	boost::algorithm::to_lower(lpart);
+	
+	return boost::algorithm::find_first(lname, lpart);
 }
 //:~
