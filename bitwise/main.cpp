@@ -17,6 +17,7 @@
 #include <MersenneTwister.h>
 #include <AOrientedBox.h>
 #include <IndexArray.h>
+#include <SHelper.h>
 
 #ifdef __APPLE__
 typedef unsigned long long uint64;
@@ -396,6 +397,11 @@ void testVecArray()
     testTimedArray(n, 100);
 }
 
+void tsetFind()
+{
+	std::cout<<" find translateX in /a/b/b/abc_translateX "<<SHelper::Find("/a/b/b/abc_Lcl Translate/X", "lcl translate/X", true);
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"bitwise test\n";
@@ -489,11 +495,12 @@ int main(int argc, char * const argv[])
 	
 	std::cout<<boost::format("39 mod 16: %1%\n") % (39 & 15);
 	
-	testVecArray();
+	// testVecArray();
 	
-	testMersenne();
+	// testMersenne();
     
-    testOBox();
+    // testOBox();
+	tsetFind();
     
 	std::cout<<" end of test\n";
 	return 0;
