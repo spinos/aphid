@@ -55,7 +55,7 @@ public:
 	static void stripAll(std::string& name);
 	static std::string afterLastUnderscore(const std::string &res);
 	static char fuzzyMatch(std::string &one,std::string &another);
-	static char removeAnyNamespace(std::string &name);
+	static char removeAnyNamespace(std::string &name, const char * separator = "|");
 	static char replaceAnyNamespace(std::string &name,std::string &_namespace);
 	static char fuzzyMatchNamespace(std::string &one,std::string &another);
 	static std::string removeNamespace(const std::string &in);

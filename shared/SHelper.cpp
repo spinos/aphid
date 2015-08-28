@@ -752,10 +752,11 @@ std::string getNamespace(const std::string &res)
 
 }
 
-char SHelper::removeAnyNamespace(std::string &name)
+char SHelper::removeAnyNamespace(std::string &name, const char * separator)
 {
+    if(!name.rfind(separator)) return 0;
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	boost::char_separator<char> sep("|");
+	boost::char_separator<char> sep(separator);
 	tokenizer tokens(name, sep);
 
 	std::stringstream sst;
@@ -766,7 +767,7 @@ char SHelper::removeAnyNamespace(std::string &name)
 		std::string curTokenname=(*tok_iter);
 		
 		std::string name_wo_namespace = removeNamespace(curTokenname);
-		sst << "|" << name_wo_namespace; 
+		sst << separator << name_wo_namespace; 
 		
 	}
 	
