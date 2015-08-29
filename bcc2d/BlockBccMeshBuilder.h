@@ -28,14 +28,15 @@ public:
 	static unsigned MaximumVGrid;
 	static unsigned MaximumWGrid;
 protected:
-	void build(AOrientedBox * ob, 
-				int gx, int gy, int gz);
+	void build(AOrientedBox * ob);
 	
     void addTetrahedron(Vector3F * v, unsigned * ind);
 private:
 	void addNorth(const Vector3F & center, float size, float hsize);
 	void addEast(const Vector3F & center, float size, float hsize, int i, int n);
 	void addDepth(const Vector3F & center, float size, float hsize, int i, int n);
+	
 private:
     CartesianGrid * m_verticesPool;
+	AOrientedBox * m_boxes;
 };

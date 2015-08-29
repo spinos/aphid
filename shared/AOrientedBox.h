@@ -21,7 +21,8 @@ public:
 	Vector3F center() const;
 	Matrix33F orientation() const;
 	Vector3F extent() const;
-	
+	Vector3F majorPoint(bool low) const;
+	Vector3F majorVector(bool low) const;
 	void getBoxVertices(Vector3F * dst) const;
 	
 	virtual const Type type() const;

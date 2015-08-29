@@ -19,9 +19,10 @@
 BccWorld::BccWorld()
 {
     m_numCurves = 0;
+	m_numPatches = 0;
 	m_totalCurveLength = 0.f;
 	m_totalPatchArea = 0.f;
-    m_estimatedNumGroups = 2500.f;
+    m_estimatedNumGroups = 1000.f;
 	m_triangleMeshes = NULL;
 	m_reducer = new CurveReduction;
 	m_blockBuilder = new BlockBccMeshBuilder;
@@ -63,6 +64,9 @@ const float BccWorld::totalCurveLength() const
 const unsigned BccWorld::numCurves() const
 { return m_numCurves; }
 
+unsigned BccWorld::numPatches() const
+{ return m_numPatches; }
+
 const unsigned BccWorld::numTetrahedrons() const
 { return m_totalNumTetrahedrons; }
 
@@ -97,7 +101,7 @@ unsigned BccWorld::numTriangles() const
 
 void BccWorld::rebuildTetrahedronsMesh(float deltaNumGroups)
 {
-    m_estimatedNumGroups += deltaNumGroups * numCurves();
+    m_estimatedNumGroups += deltaNumGroups * (numCurves() + numPatches() * 2);
     if(m_estimatedNumGroups < 100.f) m_estimatedNumGroups = 100.f;
     
     clearTetrahedronMesh();
@@ -398,6 +402,7 @@ bool BccWorld::createPatchCluster()
 	const unsigned n = m_patchBoxes.size();
 	if(n < 1) return false;
 	
+	m_numPatches = n;
 	std::cout<<"\n bcc world creating patch cluster ";
 	if(m_patchCluster) delete m_patchCluster;
 	m_patchCluster = new KdCluster;

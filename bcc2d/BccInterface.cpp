@@ -236,7 +236,11 @@ bool BccInterface::saveWorld(BccWorld * world)
 	
 	hes.addTetrahedron("tetra_c", cm);
 
-	if(!hes.open(FileName)) return false;
+	if(!hes.open(FileName)) {
+// todo create a file and save tri and tet mesh
+		return false;
+	}
+	
 	hes.setDirty();
 	hes.save();
 	hes.close();

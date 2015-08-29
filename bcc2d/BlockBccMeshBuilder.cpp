@@ -15,16 +15,18 @@ unsigned BlockBccMeshBuilder::MinimumUGrid = 3;
 unsigned BlockBccMeshBuilder::MinimumVGrid = 1;
 unsigned BlockBccMeshBuilder::MinimumWGrid = 1;
 unsigned BlockBccMeshBuilder::MaximumUGrid = 256;
-unsigned BlockBccMeshBuilder::MaximumVGrid = 256;
-unsigned BlockBccMeshBuilder::MaximumWGrid = 256;
+unsigned BlockBccMeshBuilder::MaximumVGrid = 2;
+unsigned BlockBccMeshBuilder::MaximumWGrid = 1;
 	
 BlockBccMeshBuilder::BlockBccMeshBuilder() 
 {
     m_verticesPool = new CartesianGrid;
+	m_boxes = NULL;
 }
 BlockBccMeshBuilder::~BlockBccMeshBuilder() 
 {
     delete m_verticesPool;
+	if(m_boxes) delete[] m_boxes;
 }
 
 void BlockBccMeshBuilder::build(GeometryArray * geos, 
@@ -36,12 +38,15 @@ void BlockBccMeshBuilder::build(GeometryArray * geos,
 	indexDrifts.clear();
 	
     const unsigned n = geos->numGeometries();
+	if(m_boxes) delete[] m_boxes;
+	m_boxes = new AOrientedBox[n];
+	
     unsigned i=0;
     for(;i<n;i++) {
         pointDrifts.push_back(tetrahedronP.size());
         indexDrifts.push_back(tetrahedronInd.size());
-		build((AOrientedBox *)geos->geometry(i),
-				8, 2, 1);
+		build((AOrientedBox *)geos->geometry(i));
+		m_boxes[i] = *(AOrientedBox *)geos->geometry(i);
 	}
 	
 	ntet = tetrahedronInd.size()/4;
@@ -49,9 +54,20 @@ void BlockBccMeshBuilder::build(GeometryArray * geos,
 	nstripes = n;
 }
 
-void BlockBccMeshBuilder::build(AOrientedBox * ob, 
-				int gx, int gy, int gz)
+void BlockBccMeshBuilder::build(AOrientedBox * ob)
 {
+	int gx = ob->extent().x * 2.f / EstimatedGroupSize;
+	if(gx > MaximumUGrid ) gx = MaximumUGrid;
+	else if(gx < MinimumUGrid ) gx = MinimumUGrid;
+	
+	int gy = ob->extent().y * 2.f / EstimatedGroupSize;
+	if(gy > MaximumVGrid ) gy = MaximumVGrid;
+	else if(gy < MinimumVGrid ) gy = MinimumVGrid;
+	
+	int gz = ob->extent().z * 2.f / EstimatedGroupSize;
+	if(gz > MaximumWGrid ) gz = MaximumWGrid;
+	else if(gz < MinimumWGrid ) gz = MinimumWGrid;
+	
     const Vector3F center = ob->center();
     const float span = ob->extent().x;
     float originSpan[4];
@@ -247,6 +263,33 @@ void BlockBccMeshBuilder::addTetrahedron(Vector3F * v, unsigned * ind)
 
 void BlockBccMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdIntersection * anchorMesh)
 {
-
+	Vector3F endP[2];
+	float lowerDist;
+	unsigned anchorTri;
+	Vector3F anchorPnt;
+	BoundingBox ab;
+	unsigned i;
+	Geometry::ClosestToPointTestResult cls;
+	for(i=0;i<n;i++) {
+		AOrientedBox & box = m_boxes[i];
+// find which end of the box x-axis is closer to grow mesh
+		endP[0]  = box.majorPoint(true);
+		cls.reset(endP[0], 1e8f);
+		anchorMesh->closestToPoint(&cls);
+		lowerDist = cls._distance;
+		anchorTri = cls._icomponent;
+		anchorPnt = endP[0] - box.majorVector(true) * EstimatedGroupSize * .5f;
+		
+		endP[1] = box.majorPoint(false);
+		cls.reset(endP[1], 1e8f);
+		anchorMesh->closestToPoint(&cls);
+		
+		if(cls._distance < lowerDist) {
+			anchorTri = cls._icomponent;
+			anchorPnt = endP[1] - box.majorVector(false) * EstimatedGroupSize * .5f;
+		}
+		
+		addAnchor(mesh, i, anchorPnt, anchorTri);
+	}
 }
 //:~

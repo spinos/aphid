@@ -37,6 +37,7 @@ public:
     void rebuildTetrahedronsMesh(float deltaNumGroups);
     const float totalCurveLength() const;
     const unsigned numCurves() const;
+	unsigned numPatches() const;
 	const unsigned numTetrahedrons() const;
 	unsigned numTriangles() const;
 	const unsigned numPoints() const;
@@ -84,7 +85,7 @@ private:
     CurveReduction * m_reducer;
 	BlockBccMeshBuilder * m_blockBuilder;
 	FitBccMeshBuilder * m_fitBuilder;
-	unsigned m_numCurves, m_totalNumTetrahedrons, m_totalNumPoints;
+	unsigned m_numCurves, m_numPatches, m_totalNumTetrahedrons, m_totalNumPoints;
     float m_totalCurveLength, m_totalPatchArea, m_estimatedNumGroups;
 };
 

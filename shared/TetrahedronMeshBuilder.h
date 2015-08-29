@@ -25,7 +25,10 @@ public:
 	void getResult(ATetrahedronMeshGroup * m);
 	
 	static float EstimatedGroupSize;
-	
+protected:
+	void TetrahedronMeshBuilder::addAnchor(ATetrahedronMesh * mesh, 
+					unsigned istripe,
+					const Vector3F & p, unsigned tri);
 protected:
 	std::vector<Vector3F > tetrahedronP;
 	std::vector<unsigned > tetrahedronInd;

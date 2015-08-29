@@ -29,7 +29,7 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 	
 private:
-
+	bool preSaveCheck();
 private:
 	BccWorld * m_world;
 	BccInterface * m_interface;

@@ -30,6 +30,16 @@ Matrix33F AOrientedBox::orientation() const
 Vector3F AOrientedBox::extent() const
 { return m_extent; }
 
+Vector3F AOrientedBox::majorPoint(bool low) const
+{ return (m_center + majorVector(low) * m_extent.x); }
+
+Vector3F AOrientedBox::majorVector(bool low) const
+{ 
+	float dir = 1.f;
+	if(low) dir = -1.f;
+	return m_orientation.row(0) * dir;
+}
+
 void AOrientedBox::getBoxVertices(Vector3F * dst) const
 {
 	const Vector3F rx = m_orientation.row(0);

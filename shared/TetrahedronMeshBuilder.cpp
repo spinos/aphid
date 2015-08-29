@@ -30,3 +30,28 @@ void TetrahedronMeshBuilder::getResult(ATetrahedronMeshGroup * mesh)
 	for(i=0;i<nstripes;i++) mesh->pointDrifts()[i] = pointDrifts[i];
 	for(i=0;i<nstripes;i++) mesh->indexDrifts()[i] = indexDrifts[i];
 }
+
+void TetrahedronMeshBuilder::addAnchor(ATetrahedronMesh * mesh, 
+					unsigned istripe,
+					const Vector3F & p, unsigned tri)
+{
+	unsigned tetMax = mesh->numTetrahedrons() * 4;
+	if(istripe < indexDrifts.size() -1)
+		tetMax = indexDrifts[istripe + 1];
+		
+	BoundingBox box;
+	unsigned i = indexDrifts[istripe];
+	unsigned j;
+	for(;i<tetMax;i+=4) {
+		unsigned * tet = mesh->tetrahedronIndices(i/4);
+		box.reset();
+        for(j=0; j< 4; j++)
+            box.expandBy(mesh->points()[tet[j]], 1e-3f); 
+			
+		if(box.center().distanceTo(p) > box.radius())
+			continue;
+		
+		for(j=0; j< 4; j++)
+			mesh->anchors()[tet[j]] = (1<<24 | tri);
+	}
+}

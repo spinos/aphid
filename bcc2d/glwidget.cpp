@@ -65,7 +65,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 {
 	if(event->modifiers() == Qt::ControlModifier | Qt::MetaModifier) {
 		if(event->key() == Qt::Key_S) {
-			m_interface->saveWorld(m_world);
+			if(preSaveCheck()) m_interface->saveWorld(m_world);
 		}
 	}
     setUpdatesEnabled(false);	
@@ -140,5 +140,22 @@ void GLWidget::importPatch()
 	}
 	else
 		qDebug()<<" failed to load patch from hes file: "<<fileName;
+}
+
+bool GLWidget::preSaveCheck()
+{
+	if(m_interface->FileName == "unknown") {
+		QString selectedFilter;
+		QString fileName = QFileDialog::getSaveFileName(this,
+							tr("Save current scene to .hes file"),
+							tr("info"),
+							tr("All Files (*);;Hesperis Files (*.hes)"),
+							&selectedFilter,
+							QFileDialog::DontUseNativeDialog);
+		if(fileName == "") return false;
+		
+		m_interface->FileName = fileName.toUtf8().data();
+	}
+	return true;
 }
 //:~
