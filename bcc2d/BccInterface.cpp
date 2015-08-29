@@ -196,7 +196,27 @@ void BccInterface::drawAnchors(AGenericMesh * mesh, KdTreeDrawer * drawer,
 
 bool BccInterface::saveWorld(BccWorld * world)
 {
+    if(world->numTetrahedronMeshes() < 1) {
+        std::cout<<" no tetrahedron mesh to save";
+        return false;
+    }
+    
 	HesperisFile hes;
+    if(!hes.open(FileName)) {
+        
+        GeometryArray * gmgeo = world->triangleGeometries();
+        if(!gmgeo) {
+            std::cout<<" no triangle mesh to save";
+            return false;
+        }
+        
+        hes.create(FileName);
+        hes.setWriteComponent(HesperisFile::WTri);
+        hes.addTriangleMesh("growmesh", (ATriangleMeshGroup *)gmgeo->geometry(0));
+        hes.setDirty();
+        hes.save();
+	}
+    
 	hes.setWriteComponent(HesperisFile::WTetra);
 	
 	unsigned ntet, nvert, nstripe, nanchor;
@@ -235,12 +255,6 @@ bool BccInterface::saveWorld(BccWorld * world)
 	cm->verbose();
 	
 	hes.addTetrahedron("tetra_c", cm);
-
-	if(!hes.open(FileName)) {
-// todo create a file and save tri and tet mesh
-		return false;
-	}
-	
 	hes.setDirty();
 	hes.save();
 	hes.close();

@@ -451,7 +451,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
  *  Lecture 7 Collision Resolution Pg. 18
  *  j = (1 + Cr)Vr.N*M^-1
  */
-    J += constraints[iContact].relVel * .5f;
+    J += constraints[iContact].relVel * .005f;
     J *= constraints[iContact].Minv;
 	
 	float prevSum = constraints[iContact].lambda;
@@ -757,7 +757,7 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	float3_add_inplace(a, sumLinVel);
     float speed = float3_length(a);
 // limit speed here
-    if(speed>14.f) float3_scale_inplace(a, 14.f/speed);
+    if(speed>60.f) float3_scale_inplace(a, 60.f/speed);
     dstVelocity[iPnt] = a;
 }
 
