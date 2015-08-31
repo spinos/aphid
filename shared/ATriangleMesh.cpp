@@ -10,6 +10,7 @@
 #include "ATriangleMesh.h"
 #include "BaseBuffer.h"
 #include "BarycentricCoordinate.h"
+#include <iostream>
 
 ATriangleMesh::ATriangleMesh() 
 {
@@ -91,5 +92,11 @@ std::string ATriangleMesh::verbosestr() const
 		<<"\n ntri "<<numTriangles()
 		<<"\n";
 	return sst.str();
+}
+
+bool ATriangleMesh::intersectTetrahedron(unsigned icomponent, const Vector3F * tet)
+{
+    
+    return false;
 }
 //:~

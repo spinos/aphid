@@ -16,6 +16,7 @@ public:
 	HGroup(const std::string & path);
 	virtual ~HGroup() {}
 	
+    bool isOpened() const;
 	virtual char create();
 	virtual char open();
 	virtual void close();

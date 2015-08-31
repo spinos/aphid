@@ -73,20 +73,20 @@ char HTransform::save(BaseTransform * tm)
 char HTransform::load(BaseTransform * tm)
 {
 	Vector3F t3;
-	if(hasNamedAttr(".translate")) {
+	//if(hasNamedAttr(".translate")) {
 		readFloatAttr(".translate", (float *)&t3);
 		tm->setTranslation(t3);
-	}
+	//}
 	
-	if(hasNamedAttr(".rotate")) {
+	//if(hasNamedAttr(".rotate")) {
 		readFloatAttr(".rotate", (float *)&t3);
 		tm->setRotationAngles(t3);
-	}
+	//}
 	
-	if(hasNamedAttr(".scale")) {
+	//if(hasNamedAttr(".scale")) {
 		readFloatAttr(".scale", (float *)&t3);
 		tm->setScale(t3);
-	}
+	//}
     return 1;
 }
 //:~

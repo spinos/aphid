@@ -44,3 +44,7 @@ int HGroup::objectType() const
 {
 	return H5G_GROUP;
 }
+
+bool HGroup::isOpened() const
+{ return fObjectId > -1; }
+//:~

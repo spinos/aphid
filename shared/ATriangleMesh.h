@@ -20,6 +20,7 @@ public:
 	virtual const unsigned numComponents() const;
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
 	virtual void closestToPoint(unsigned icomponent, ClosestToPointTestResult * result);
+	virtual bool intersectTetrahedron(unsigned icomponent, const Vector3F * tet);
 	const unsigned numTriangles() const;
 	
 	void create(unsigned np, unsigned nt);

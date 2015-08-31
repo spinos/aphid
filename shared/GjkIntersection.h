@@ -17,6 +17,17 @@ private:
 
 };
 
+class TriangleSet : public PointSet {
+public:
+    TriangleSet();
+    virtual ~TriangleSet();
+    virtual int numPoints() const;
+    virtual Vector3F X(int idx) const;
+    virtual Vector3F * x();
+private:
+    Vector3F m_p[3];
+};
+
 class TetrahedronSet : public PointSet {
 public:
     TetrahedronSet();
@@ -57,7 +68,9 @@ public:
 class IntersectTest {
 public:
     static void SetA(const BoundingBox & box);
+    static void SetATetrahedron(const Vector3F * p);
     static bool evaluateTetrahedron(Vector3F * p, unsigned * v);
+    static bool evaluateTriangle(Vector3F * p, unsigned * v);
     static bool evaluate(PointSet * B);
 private:
     static PointSet * A;

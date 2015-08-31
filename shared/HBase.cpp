@@ -295,11 +295,12 @@ char HBase::readCharData(const char * dataName, unsigned count, char *dst, HData
 
 char HBase::hasNamedAttr(const char * attrName)
 {
-	hsize_t nattr = H5Aget_num_attrs(fObjectId);
+    const int n = numAttrs();
+    if(n<1) return 0;
 	//std::cout<<"\n "<<fObjectPath<<" has "<<nattr<<" attrs\n";
-	hsize_t i;
-	for(i = 0; i < nattr; i++) {
-		hid_t aid = H5Aopen_idx(fObjectId, (unsigned int)i );
+	int i;
+	for(i = 0; i < n; i++) {
+		hid_t aid = H5Aopen_idx(fObjectId, i);
 		//std::cout<<getAttrName(aid)<<"\n";
 		if(getAttrName(aid) == attrName) {
 			//std::cout<<"found "<<attrName;

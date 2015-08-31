@@ -9,6 +9,7 @@
 
 #include "KdIntersection.h"
 #include <GeometryArray.h>
+#include <GjkIntersection.h>
 KdIntersection::KdIntersection() {}
 KdIntersection::~KdIntersection() {}
 
@@ -84,9 +85,10 @@ bool KdIntersection::intersectTetrahedron(const Vector3F * tet)
 	m_testBox.expandBy(tet[2]);
 	m_testBox.expandBy(tet[3]);
 	
+    gjk::IntersectTest::SetATetrahedron(tet);
+    
 	BoundingBox b = getBBox();
-	
-	return recursiveIntersectTetrahedron(root, b); 
+    return recursiveIntersectTetrahedron(root, b); 
 }
 
 bool KdIntersection::recursiveIntersectTetrahedron(KdTreeNode *node, const BoundingBox & box)

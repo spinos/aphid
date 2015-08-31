@@ -299,8 +299,8 @@ void BlockBccMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdInte
 		}
 		
 		// addAnchor(mesh, i, anchorPnt, anchorTri);
-		addAnchorByThreshold(mesh, i, invspace, box.center(), 
-							anchorX, isLowerEnd, anchorTri);
+		// addAnchorByThreshold(mesh, i, invspace, box.center(), 
+			//				anchorX, isLowerEnd, anchorTri);
 	}
 	addAnchor(mesh, anchorMesh);
 }

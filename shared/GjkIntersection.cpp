@@ -33,6 +33,15 @@ Vector3F PointSet::supportPoint(const Vector3F & v, Vector3F * localP) const
     return res;
 }
 
+TriangleSet::TriangleSet() {}
+TriangleSet::~TriangleSet() {}
+int TriangleSet::numPoints() const
+{ return 3; }
+Vector3F TriangleSet::X(int idx) const
+{ return m_p[idx]; }
+Vector3F * TriangleSet::x()
+{ return m_p; }
+
 TetrahedronSet::TetrahedronSet() {}
 
 TetrahedronSet::~TetrahedronSet() {}
@@ -191,6 +200,16 @@ void IntersectTest::SetA(const BoundingBox & box)
     p[7].set(box.m_data[3], box.m_data[4], box.m_data[5]);
 }
 
+void IntersectTest::SetATetrahedron(const Vector3F * p)
+{
+    if(A) delete A;
+    A = new TetrahedronSet;
+    A->x()[0] = p[0];
+    A->x()[1] = p[1];
+    A->x()[2] = p[2];
+    A->x()[3] = p[3];
+}
+
 bool IntersectTest::evaluateTetrahedron(Vector3F * p, unsigned * v)
 {
     TetrahedronSet B;
@@ -199,6 +218,16 @@ bool IntersectTest::evaluateTetrahedron(Vector3F * p, unsigned * v)
     pt[1] = p[v[1]];
     pt[2] = p[v[2]];
     pt[3] = p[v[3]];
+    return evaluate(&B);
+}
+
+bool IntersectTest::evaluateTriangle(Vector3F * p, unsigned * v)
+{
+    TriangleSet B;
+    Vector3F * pt = B.x();
+    pt[0] = p[v[0]];
+    pt[1] = p[v[1]];
+    pt[2] = p[v[2]];
     return evaluate(&B);
 }
 
