@@ -31,6 +31,8 @@ public:
 	CUDABuffer * splitInverseMassBuf();
 	
 	const unsigned numContacts() const;
+	
+	void setSpeedLimit(float x);
 private:
 	CUDABuffer * m_sortedInd[2];
 	CUDABuffer * m_splitPair;

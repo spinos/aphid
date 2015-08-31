@@ -1,5 +1,6 @@
 #include "IVelocityFile.h"
 #include <BaseBuffer.h>
+#include <HAttributeEntry.h>
 #include <boost/format.hpp>
 
 IVelocityFile::IVelocityFile() : APlaybackFile() 
@@ -81,6 +82,16 @@ bool IVelocityFile::readFrameTranslationalVelocity()
     return stat;
 }
 
+bool IVelocityFile::readMaxSpeed()
+{
+	useDocument();
+	HFltAttributeEntry vg(maxSpeedName());
+	vg.load(&m_maxSpeed);
+	vg.close();
+	std::cout<<"\n max speed "<<m_maxSpeed;
+	return true;
+}
+
 BaseBuffer * IVelocityFile::velocityBuf() const
 { return m_vel; }
 
@@ -92,4 +103,16 @@ const std::string IVelocityFile::translationName() const
 
 const std::string IVelocityFile::deformationName() const
 { return "/deform"; }
+
+const std::string IVelocityFile::maxSpeedName() const
+{ return "/max_speed"; }
+
+void IVelocityFile::resetMaxSpeed()
+{ m_maxSpeed = 0.f; }
+
+void IVelocityFile::updateMaxSpeed(float x)
+{ if( m_maxSpeed < x ) m_maxSpeed = x; }
+
+float IVelocityFile::maxSpeed() const
+{ return m_maxSpeed; }
 //;~

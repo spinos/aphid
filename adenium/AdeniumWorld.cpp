@@ -330,10 +330,14 @@ void AdeniumWorld::saveVelocity(bool toReset)
     
     recordT();
 	recordP();
-    if(toReset) m_velocityOut->frameBegin();
+    if(toReset) {
+		m_velocityOut->resetMaxSpeed();
+		m_velocityOut->frameBegin();
+	}
     
 	m_velocityOut->writeFrameTranslationalVelocity();
     m_velocityOut->writeFrameVelocity();
+	m_velocityOut->writeMaxSpeed();
     
     if(m_velocityOut->isFrameEnd()) m_velocityOut->frameBegin();
     else m_velocityOut->nextFrame();

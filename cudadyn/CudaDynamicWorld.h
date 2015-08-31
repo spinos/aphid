@@ -34,7 +34,8 @@ public:
     void sendXToHost();
     void readVelocityCache();
 	void reset();
-    void updateWind();
+	void updateWind();
+	void updateSpeedLimit(float x);
     
     bool isToSaveCache() const;
     void setToSaveCache(bool x);
@@ -73,4 +74,3 @@ private:
     bool m_finishedCaching;
 };
 #endif        //  #ifndef CUDADYNAMICWORLD_H
-

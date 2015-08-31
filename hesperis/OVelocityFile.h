@@ -12,6 +12,8 @@ public:
 	void setCurrentP(const Vector3F * src, unsigned nv, unsigned nvdrift);
 	bool writeFrameTranslationalVelocity();
     bool writeFrameVelocity();
+	bool writeMaxSpeed();
+	
 protected:
     bool writeNumPoints(int n);
     void calculateVelocity();

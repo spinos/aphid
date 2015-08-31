@@ -115,5 +115,9 @@ void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
                     uint numPoints);
 
 }
+
+namespace contactsolver {
+	void setSpeedLimit(float x);
+}
 #endif        //  #ifndef SIMPLECONTACTSOLVER_IMPLEMENT_H
 

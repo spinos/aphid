@@ -37,7 +37,7 @@ public:
 	
 	void initOnDevice();
 	void resetToInitial();
-    void setAnchoredVelocity(Vector3F * src);
+	void setAnchoredVelocity(Vector3F * src);
 	
 	void addMassSystem(CudaMassSystem * tetra);
 	void computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs);

@@ -245,3 +245,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
     CudaBase::CheckCudaError(CudaBase::Synchronize(),
         "jacobi solver update velocity");
 }
+
+void SimpleContactSolver::setSpeedLimit(float x)
+{ contactsolver::setSpeedLimit(x); }
+//:~

@@ -1,6 +1,7 @@
 #include "OVelocityFile.h"
 #include <BaseBuffer.h>
 #include <HBase.h>
+#include <HAttributeEntry.h>
 #include <Vector3F.h>
 #include <boost/format.hpp>
 
@@ -87,7 +88,7 @@ void OVelocityFile::calculateVelocity()
         speed = velocities()[i].length();
         if(topSpeed < speed) topSpeed = speed;
     }
-    std::cout<<"\n max speed "<<topSpeed;
+	updateMaxSpeed(topSpeed);
 }
 
 void OVelocityFile::zeroVelocity()
@@ -119,5 +120,15 @@ void OVelocityFile::writeVelocity(int t)
 	    vg.addVector3Data(sframe.c_str(), numPoints());
     vg.writeVector3Data(sframe.c_str(), numPoints(), velocities());
     vg.close();
+}
+
+bool OVelocityFile::writeMaxSpeed()
+{
+	float ms = maxSpeed();
+	std::cout<<"\n max speed "<<ms;
+	useDocument();
+	HFltAttributeEntry vg(maxSpeedName());
+	vg.save(&ms);
+	vg.close();
 }
 //:~

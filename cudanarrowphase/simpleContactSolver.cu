@@ -15,6 +15,7 @@
 #define VERYLARGE_INT 16777215 // 1<<24 - 1
 #define VERYLARGE_INT_M1 16777214 
 #define VERYVERYLARGE_INT 1073741823 // 1<<30 - 1
+__constant__ float CSpeedLimit;
 inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
                                                   float3 averageLinearVel,
                                                   float3 * position,
@@ -757,7 +758,7 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	float3_add_inplace(a, sumLinVel);
     float speed = float3_length(a);
 // limit speed here
-    if(speed>60.f) float3_scale_inplace(a, 60.f/speed);
+    if(speed>CSpeedLimit) float3_scale_inplace(a, CSpeedLimit/speed);
     dstVelocity[iPnt] = a;
 }
 
@@ -1024,3 +1025,9 @@ void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
 }
 
 }
+
+namespace contactsolver {
+	void setSpeedLimit(float x)
+	{ cudaMemcpyToSymbol(CSpeedLimit, &x, 4); }
+}
+//:~

@@ -94,6 +94,7 @@ void CudaDynamicWorld::initOnDevice()
 	
 	float gravity[3] = {0.f, -9.81f, 0.f};
 	tetrahedronfem::setGravity(gravity);
+	m_contactSolver->setSpeedLimit(50.f);
 }
 
 void CudaDynamicWorld::stepPhysics(float dt)
@@ -306,4 +307,7 @@ std::string CudaDynamicWorld::objName(int i) const
     oss << "/massSystem_" << i;
     return oss.str();
 }
+
+void CudaDynamicWorld::updateSpeedLimit(float x)
+{ m_contactSolver->setSpeedLimit(x + 50.f); }
 //:~
