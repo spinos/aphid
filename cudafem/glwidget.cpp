@@ -48,6 +48,8 @@ void GLWidget::clientDraw()
         emit updatePhysics();
         return;
     }
+	else if(m_isPhysicsRunning)
+        emit updatePhysics();
     
     std::stringstream sst;
 	sst.str("");
@@ -76,8 +78,6 @@ void GLWidget::clientDraw()
 #if DRGDRW
     if(m_isPhysicsRunning) m_interface->draw(m_world, getDrawer());
 #else
-    if(m_isPhysicsRunning)
-        emit updatePhysics();
     m_interface->draw(m_world, getDrawer());
     // m_world->dbgDraw();
 

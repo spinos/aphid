@@ -284,7 +284,7 @@ void BlockBccMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdInte
 		lowerDist = cls._distance;
 		anchorTri = cls._icomponent;
 		anchorPnt = endP[0] - box.majorVector(true) * EstimatedGroupSize * .5f;
-		anchorX = -box.extent().x + EstimatedGroupSize * .53f;
+		anchorX = -box.extent().x + EstimatedGroupSize * .9f;
 		isLowerEnd = true;
 		
 		endP[1] = box.majorPoint(false);
@@ -294,15 +294,13 @@ void BlockBccMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdInte
 		if(cls._distance < lowerDist) {
 			anchorTri = cls._icomponent;
 			anchorPnt = endP[1] - box.majorVector(false) * EstimatedGroupSize * .5f;
-			anchorX = box.extent().x - EstimatedGroupSize * .53f;
+			anchorX = box.extent().x - EstimatedGroupSize * .9f;
 			isLowerEnd = false;
 		}
-		
-		// addAnchor(mesh, i, anchorPnt, anchorTri);
-		// addAnchorByThreshold(mesh, i, invspace, box.center(), 
-			//				anchorX, isLowerEnd, anchorTri);
+		addAnchorByThreshold(mesh, i, invspace, box.center(), 
+							anchorX, isLowerEnd, anchorTri);
 	}
-	addAnchor(mesh, anchorMesh);
+	// addAnchor(mesh, anchorMesh);
 }
 
 void BlockBccMeshBuilder::addAnchorByThreshold(ATetrahedronMesh * mesh, 
@@ -329,10 +327,10 @@ void BlockBccMeshBuilder::addAnchorByThreshold(ATetrahedronMesh * mesh,
 			
 		q = invspace.transform(box.center() - center);
 		if(isLower) {
-			if(q.x < threshold) continue;
+			if(q.x > threshold) continue;
 		}
 		else {
-			if(q.x > threshold) continue;
+			if(q.x < threshold) continue;
 		}
 		
 		for(j=0; j< 4; j++)

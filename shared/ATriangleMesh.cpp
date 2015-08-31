@@ -10,6 +10,7 @@
 #include "ATriangleMesh.h"
 #include "BaseBuffer.h"
 #include "BarycentricCoordinate.h"
+#include <GjkIntersection.h>
 #include <iostream>
 
 ATriangleMesh::ATriangleMesh() 
@@ -96,7 +97,8 @@ std::string ATriangleMesh::verbosestr() const
 
 bool ATriangleMesh::intersectTetrahedron(unsigned icomponent, const Vector3F * tet)
 {
-    
-    return false;
+    Vector3F * p = points();
+	unsigned * v = triangleIndices(icomponent);
+	return gjk::IntersectTest::evaluateTriangle(p, v);
 }
 //:~
