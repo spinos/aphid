@@ -267,11 +267,16 @@ void BlockBccMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdInte
 	float lowerDist;
 	unsigned anchorTri;
 	Vector3F anchorPnt;
+	float anchorX;
 	BoundingBox ab;
+	Matrix33F invspace;
+	bool isLowerEnd;
 	unsigned i;
 	Geometry::ClosestToPointTestResult cls;
 	for(i=0;i<n;i++) {
 		AOrientedBox & box = m_boxes[i];
+		invspace = box.orientation();
+		invspace.inverse();
 // find which end of the box x-axis is closer to grow mesh
 		endP[0]  = box.majorPoint(true);
 		cls.reset(endP[0], 1e8f);
@@ -279,6 +284,8 @@ void BlockBccMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdInte
 		lowerDist = cls._distance;
 		anchorTri = cls._icomponent;
 		anchorPnt = endP[0] - box.majorVector(true) * EstimatedGroupSize * .5f;
+		anchorX = -box.extent().x + EstimatedGroupSize * .53f;
+		isLowerEnd = true;
 		
 		endP[1] = box.majorPoint(false);
 		cls.reset(endP[1], 1e8f);
@@ -287,9 +294,49 @@ void BlockBccMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdInte
 		if(cls._distance < lowerDist) {
 			anchorTri = cls._icomponent;
 			anchorPnt = endP[1] - box.majorVector(false) * EstimatedGroupSize * .5f;
+			anchorX = box.extent().x - EstimatedGroupSize * .53f;
+			isLowerEnd = false;
 		}
 		
-		addAnchor(mesh, i, anchorPnt, anchorTri);
+		// addAnchor(mesh, i, anchorPnt, anchorTri);
+		addAnchorByThreshold(mesh, i, invspace, box.center(), 
+							anchorX, isLowerEnd, anchorTri);
+	}
+	addAnchor(mesh, anchorMesh);
+}
+
+void BlockBccMeshBuilder::addAnchorByThreshold(ATetrahedronMesh * mesh, 
+					unsigned istripe,
+					const Matrix33F & invspace, 
+					const Vector3F & center,
+					float threshold,
+					bool isLower,
+					unsigned tri)
+{
+	unsigned tetMax = mesh->numTetrahedrons() * 4;
+	if(istripe < indexDrifts.size() -1)
+		tetMax = indexDrifts[istripe + 1];
+		
+	BoundingBox box;
+	Vector3F q;
+	unsigned i = indexDrifts[istripe];
+	unsigned j;
+	for(;i<tetMax;i+=4) {
+		unsigned * tet = mesh->tetrahedronIndices(i/4);
+		box.reset();
+        for(j=0; j< 4; j++)
+            box.expandBy(mesh->points()[tet[j]], 1e-3f); 
+			
+		q = invspace.transform(box.center() - center);
+		if(isLower) {
+			if(q.x < threshold) continue;
+		}
+		else {
+			if(q.x > threshold) continue;
+		}
+		
+		for(j=0; j< 4; j++)
+			mesh->anchors()[tet[j]] = (1<<24 | tri);
 	}
 }
 //:~

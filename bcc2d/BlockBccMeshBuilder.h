@@ -31,6 +31,13 @@ protected:
 	void build(AOrientedBox * ob);
 	
     void addTetrahedron(Vector3F * v, unsigned * ind);
+	void addAnchorByThreshold(ATetrahedronMesh * mesh, 
+					unsigned istripe,
+					const Matrix33F & invspace, 
+					const Vector3F & center,
+					float threshold,
+					bool isLower,
+					unsigned tri);
 private:
 	void addNorth(const Vector3F & center, float size, float hsize);
 	void addEast(const Vector3F & center, float size, float hsize, int i, int n);

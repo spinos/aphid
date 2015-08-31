@@ -26,9 +26,12 @@ public:
 	
 	static float EstimatedGroupSize;
 protected:
-	void TetrahedronMeshBuilder::addAnchor(ATetrahedronMesh * mesh, 
+	void addAnchor(ATetrahedronMesh * mesh, 
 					unsigned istripe,
-					const Vector3F & p, unsigned tri);
+					const Vector3F & p, 
+					unsigned tri);
+	void addAnchor(ATetrahedronMesh * mesh, 
+					KdIntersection * anchorMesh);
 protected:
 	std::vector<Vector3F > tetrahedronP;
 	std::vector<unsigned > tetrahedronInd;

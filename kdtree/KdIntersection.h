@@ -20,7 +20,7 @@ public:
 	virtual bool intersectTetrahedron(const Vector3F * tet);
     virtual unsigned countElementIntersectBox(std::vector<unsigned> & result, 
 												const BoundingBox & box);
-	
+	unsigned intersectedElement() const;
 protected:
 	
 private:
@@ -33,5 +33,6 @@ private:
 private:
 	BoundingBox m_testBox;
 	Vector3F m_testTetrahedron[4];
+	unsigned m_intersectElement;
 };
 #endif        //  #ifndef KDINTERSECTION_H

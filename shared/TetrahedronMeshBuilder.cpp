@@ -55,3 +55,21 @@ void TetrahedronMeshBuilder::addAnchor(ATetrahedronMesh * mesh,
 			mesh->anchors()[tet[j]] = (1<<24 | tri);
 	}
 }
+
+void TetrahedronMeshBuilder::addAnchor(ATetrahedronMesh * mesh, 
+					KdIntersection * anchorMesh)
+{
+	const unsigned n = mesh->numTetrahedrons();
+	Vector3F p[4];
+	unsigned tri, i, j;
+	for(i=0;i<n;i++) {
+		unsigned * tet = mesh->tetrahedronIndices(i);
+		for(j=0; j< 4; j++) p[j] = mesh->points()[tet[j]];
+		
+		if(!anchorMesh->intersectTetrahedron(p)) continue;
+			
+		tri = anchorMesh->intersectedElement();
+		for(j=0; j< 4; j++) mesh->anchors()[tet[j]] = (1<<24 | tri);
+	}
+}
+//:~
