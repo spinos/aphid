@@ -21,6 +21,8 @@ public:
     virtual char save(AAnimationCurve * curve);
 	virtual char load(AAnimationCurve * curve);
 private:
+	void saveKeys(AAnimationCurve * curve, int n);
+	void loadKeys(AAnimationCurve * curve, int n);
 	void saveKey(unsigned i, const AAnimationKey & key);
 	AAnimationKey loadKey(int i);
 };

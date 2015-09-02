@@ -18,8 +18,8 @@ HAnimationCurve::~HAnimationCurve()
 	
 char HAnimationCurve::verifyType()
 {
-	if(!hasNamedAttr(".animcurve_type"))
-		return 0;
+	if(!hasNamedAttr(".animcurve_type")) return 0;
+	if(!hasNamedAttr(".n_keys")) return 0;
     return 1;
 }
 
@@ -31,12 +31,30 @@ char HAnimationCurve::save(AAnimationCurve * curve)
 	int t = curve->curveType();
 	writeIntAttr(".animcurve_type", &t);
 	
-	const unsigned n = curve->numKeys();
-	unsigned i=0;
-	for(;i<n;i++)
-		saveKey(i, curve->key(i));
+	if(!hasNamedAttr(".n_keys"))
+        addIntAttr(".n_keys");
+	
+	int n = curve->numKeys();
+	writeIntAttr(".n_keys", &n);
+	
+	saveKeys(curve, n);
 	
 	return 1;
+}
+
+void HAnimationCurve::saveKeys(AAnimationCurve * curve, int n)
+{
+	if(n<1) return;
+	AAnimationKey * data = new AAnimationKey[n];
+	int i = 0;
+	for(;i<n;i++)
+		data[i] = curve->key(i);
+	
+	if(!hasNamedData(".key_data"))
+		addCharData(".key_data", n * sizeof(AAnimationKey));
+		
+	writeCharData(".key_data", n * sizeof(AAnimationKey), (char *)data);
+	delete[] data;
 }
 
 void HAnimationCurve::saveKey(unsigned i, const AAnimationKey & key)
@@ -94,11 +112,22 @@ char HAnimationCurve::load(AAnimationCurve * curve)
 	else 
 		std::cout<<"\n warnning: anim curve type is unknown";
 		
-	const int nc = numChildren();
-	int i = 0;
-	for(;i<nc;i++) curve->addKey(loadKey(i));
+	int n = 0;
+	readIntAttr(".n_keys", &n);
+	
+	loadKeys(curve, n);
 	
 	return 1;
+}
+
+void HAnimationCurve::loadKeys(AAnimationCurve * curve, int n)
+{
+	if(n<1) return;
+	AAnimationKey * data = new AAnimationKey[n];
+	readCharData(".key_data", n * sizeof(AAnimationKey), (char *)data);
+	int i=0;
+	for(;i<n;i++) curve->addKey(data[i]);
+	delete[] data;
 }
 
 AAnimationKey HAnimationCurve::loadKey(int i)
