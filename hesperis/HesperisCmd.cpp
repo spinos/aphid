@@ -40,7 +40,7 @@ MStatus HesperisCmd::parseArgs ( const MArgList& args )
 	MStatus stat;
 	if(argData.isFlagSet("-w")) 
 	{
-		argData.getFlagArgument("-w", 0, m_fileName);
+		stat = argData.getFlagArgument("-w", 0, m_fileName);
 		if(!stat) {
 			MGlobal::displayInfo(" cannot parse -w flag");
 			return MS::kFailure;
@@ -51,7 +51,7 @@ MStatus HesperisCmd::parseArgs ( const MArgList& args )
 	}
     
     if(argData.isFlagSet("-fd")) {
-        argData.getFlagArgument("-fd", 0, m_fileName);
+        stat = argData.getFlagArgument("-fd", 0, m_fileName);
 		if(!stat) {
 			MGlobal::displayInfo(" cannot parse -fd flag");
 			return MS::kFailure;
@@ -62,7 +62,7 @@ MStatus HesperisCmd::parseArgs ( const MArgList& args )
 	
 	if(argData.isFlagSet("-gm")) 
 	{
-		argData.getFlagArgument("-gm", 0, m_growMeshName);
+		stat = argData.getFlagArgument("-gm", 0, m_growMeshName);
 		if(!stat) {
 			MGlobal::displayInfo(" cannot parse -gm flag");
 			return MS::kFailure;
