@@ -42,6 +42,7 @@ void HFile::doClose()
 {
 	if(!isOpened()) return;
 	useDocument();
+    closeOpenedGroups();
 	std::cout<<"close "<<HObject::FileIO.fileName()<<"\n";
 	HObject::FileIO.close();
 	BaseFile::doClose();
@@ -71,4 +72,33 @@ bool HFile::entityExists(const std::string & name)
 
 bool HFile::find(const std::string & pathName)
 { return entityExists(pathName); }
+
+bool HFile::isGroupOpened(const std::string & pathName) const
+{ return m_openedGroups.find(pathName) != m_openedGroups.end(); }
+
+bool HFile::openGroup(const std::string & pathName)
+{
+    if(!find(pathName)) return false;
+    if(isGroupOpened(pathName)) return true;
+    m_openedGroups[pathName] = new HBase(pathName);
+    return true;
+}
+
+void HFile::closeOpenedGroups()
+{
+    const int n = m_openedGroups.size();
+    int i, j;
+    for(j=n-1;j>=0;j--) {
+        i=0;
+        std::map<std::string, HBase *>::iterator it = m_openedGroups.begin();
+        for(;it!=m_openedGroups.end();++it) {
+            if(i==j) {
+                delete it->second;
+                break;
+            }
+            i++;
+        }
+    }
+    m_openedGroups.clear();
+}
 //:~

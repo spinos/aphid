@@ -1,3 +1,6 @@
+#ifndef HFRAMERANGE_H
+#define HFRAMERANGE_H
+
 /*
  *  HFrameRange.h
  *  testbcc
@@ -21,3 +24,5 @@ public:
 private:
 	
 };
+#endif        //  #ifndef HFRAMERANGE_H
+

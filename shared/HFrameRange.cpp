@@ -34,6 +34,11 @@ char HFrameRange::save(AFrameRange * tm)
         addIntAttr(".spf");
     
     writeIntAttr(".spf", &tm->SamplesPerFrame);
+    
+    if(!hasNamedAttr(".fps"))
+        addFloatAttr(".fps");
+    
+    writeFloatAttr(".fps", &tm->FramesPerSecond);
     return 1;
 }
 
@@ -42,5 +47,6 @@ char HFrameRange::load(AFrameRange * tm)
 	readIntAttr(".sf", &tm->FirstFrame);
 	readIntAttr(".ef", &tm->LastFrame);
 	readIntAttr(".spf", &tm->SamplesPerFrame);
+    readFloatAttr(".fps", &tm->FramesPerSecond);
     return 1;
 }

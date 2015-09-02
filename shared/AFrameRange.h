@@ -17,6 +17,7 @@ public:
 	void reset();
 	bool isValid() const;
 	int numFramesInRange() const;
+    static float FramesPerSecond;
 	static int FirstFrame;
 	static int LastFrame;
 	static int SamplesPerFrame;

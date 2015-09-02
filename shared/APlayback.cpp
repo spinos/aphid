@@ -1,6 +1,8 @@
 #include "APlayback.h"
 #include <boost/format.hpp>
-APlayback::APlayback() { m_numFramesPlayed = 0; }
+APlayback::APlayback() 
+{ m_numFramesPlayed = 0; }
+
 APlayback::~APlayback() {}
 
 bool APlayback::isFrameBegin() const

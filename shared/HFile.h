@@ -11,6 +11,7 @@
 #include "HDocument.h"
 #include "BaseFile.h"
 #include "HBase.h"
+#include <map>
 
 class HFile : public BaseFile {
 public:
@@ -25,6 +26,9 @@ public:
     void beginWrite();
 	void flush();
 	bool find(const std::string & pathName);
+    bool isGroupOpened(const std::string & pathName) const;
+    bool openGroup(const std::string & pathName);
+    
 protected:
 	void useDocument();
 	void setDocument(const HDocument & doc);
@@ -53,5 +57,8 @@ protected:
         return true;   
     }
 private:
+    void closeOpenedGroups();
+private:
+    std::map<std::string, HBase *> m_openedGroups;
 	HDocument m_doc;
 };
