@@ -397,9 +397,29 @@ void testVecArray()
     testTimedArray(n, 100);
 }
 
-void tsetFind()
+void testFind()
 {
 	std::cout<<" find translateX in /a/b/b/abc_translateX "<<SHelper::Find("/a/b/b/abc_Lcl Translate/X", "lcl translate/X", true);
+}
+
+void testRgba()
+{
+    unsigned mred = 0xff000000;
+    std::cout<<boost::format("mask 0xff000000: %1%\n") % byte_to_binary(mred);
+    unsigned mgreen = 0x00ff0000;
+    std::cout<<boost::format("mask 0x00ff0000: %1%\n") % byte_to_binary(mgreen);
+    unsigned mblue = 0x0000ff00;
+    std::cout<<boost::format("mask 0x0000ff00: %1%\n") % byte_to_binary(mblue);
+    unsigned ma = 0x000000ff;
+    std::cout<<boost::format("mask 0x000000ff: %1%\n") % byte_to_binary(ma);
+    unsigned a = (255<<24) | (0<<16) | (99<<8) | 1;
+    std::cout<<boost::format("       rgba: %1%\n") % byte_to_binary(a);
+    std::cout<<boost::format("rgba masked: %1%\n") % byte_to_binary(a & mred);
+    unsigned rr = (a & mred)>>24;
+    unsigned rg = (a & mgreen)>>16;
+    unsigned rb = (a & mblue)>>8;
+    unsigned ra = (a & ma);
+    std::cout<<boost::format("recovered rgba: %1% %2% %3% %4%\n") % rr % rg % rb % ra;
 }
 
 int main(int argc, char * const argv[])
@@ -500,7 +520,7 @@ int main(int argc, char * const argv[])
 	// testMersenne();
     
     // testOBox();
-	tsetFind();
+	testRgba();
     
 	std::cout<<" end of test\n";
 	return 0;

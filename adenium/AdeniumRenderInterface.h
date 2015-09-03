@@ -9,10 +9,12 @@ void setCameraProp(float * src);
 void setModelViewMatrix(float * src, 
             uint size);
 
-void resetImage(float4 * pix, 
+void resetImage(uint * pix, 
+				float * depth,
             uint n);
 
-void renderImage(float4 * pix,
+void renderImage(uint * pix,
+                float * depth,
                 uint imageW,
                 uint imageH,
                 int2 * nodes,

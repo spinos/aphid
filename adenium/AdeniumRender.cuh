@@ -24,6 +24,30 @@ inline __device__ int iLeafNode(int2 child)
 __device__ uint tId()
 { return blockDim.x * threadIdx.y + threadIdx.x; }
 
+
+__device__ uint rgbaFloatToInt(float4 rgba)
+{
+    rgba.x = __saturatef(rgba.x);   // clamp to [0.0, 1.0]
+    rgba.y = __saturatef(rgba.y);
+    rgba.z = __saturatef(rgba.z);
+    rgba.w = __saturatef(rgba.w);
+    return (uint(rgba.w*255)<<24) | (uint(rgba.z*255)<<16) | (uint(rgba.y*255)<<8) | uint(rgba.x*255);
+}
+
+__device__ float4 intToRgbaFloat(uint combined)
+{
+    uint r = ( combined & 0xff000000 )>>24;
+    uint g = ( combined & 0x00ff0000 )>>16;
+    uint b = ( combined & 0x0000ff00 )>>8;
+    uint a = ( combined & 0x000000ff );
+    float4 rgba;
+    rgba.x = (float)r / 255.f;
+    rgba.y = (float)g / 255.f;
+    rgba.z = (float)b / 255.f;
+    rgba.w = (float)a / 255.f;
+    return rgba;
+}
+
 struct OrthographicEye
 {
     __device__
@@ -149,16 +173,20 @@ __device__ int intersectLeafTrianglesG(float & rayLength,
     return stat;   
 }
 
-__global__ void resetImage_kernel(float4 * pix, 
+__global__ void resetImage_kernel(uint * pix, 
+                                float * depth,
 								uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
-	pix[ind] = make_float4(0.f, 0.f, 0.f, 1e20f);
+	// pix[ind] = make_float4(0.f, 0.f, 0.f, 1e20f);
+	pix[ind] = 0; 
+	depth[ind] = 1e20f;
 }
 
 template<int NumThreads, typename T>
-__global__ void renderImage_kernel(float4 * pix,
+__global__ void renderImage_kernel(uint * pix,
+                float * depth,
                 int2 * internalNodeChildIndices,
 				Aabb * internalNodeAabbs,
 				KeyValuePair * elementHash,
@@ -171,15 +199,15 @@ __global__ void renderImage_kernel(float4 * pix,
     uint x = blockIdx.x*blockDim.x + threadIdx.x;
     uint y = blockIdx.y*blockDim.y + threadIdx.y;
     const int isInImage = (x < c_imageSize.x && y < c_imageSize.y);
-
+    const int pixInd = y * c_imageSize.x + x;
     Ray eyeRay;
     eye.computeEyeRay(eyeRay, x, y);
   
-    float4 outRgbz; 
+    float4 outRgba; 
     float rayLength;
     if(isInImage) {
-        outRgbz = pix[y * c_imageSize.x + x];
-        rayLength = outRgbz.w;
+        outRgba = intToRgbaFloat(pix[pixInd]);
+        rayLength = depth[pixInd];
     }
 /* 
  *  smem layout in ints
@@ -287,10 +315,10 @@ __global__ void renderImage_kernel(float4 * pix,
                     }
                     
                     hitN = float3_normalize(hitN);
-                    outRgbz.x = hitN.x;
-                    outRgbz.y = hitN.y;
-                    outRgbz.z = hitN.z;
-                    outRgbz.w = rayLength;
+                    outRgba.x = hitN.x;
+                    outRgba.y = hitN.y;
+                    outRgba.z = hitN.z;
+                    outRgba.w = 1.f;
                 }
             }
             }
@@ -343,8 +371,9 @@ __global__ void renderImage_kernel(float4 * pix,
             }
             }
             else {
+// outside image
                 sbranch[tid] = 0;
-                svisit[tid] =0;
+                svisit[tid] = 0;
             }
             __syncthreads();
             
@@ -352,17 +381,17 @@ __global__ void renderImage_kernel(float4 * pix,
             reduceSumInBlock<NumThreads, int>(tid, sbranch);
             reduceMaxInBlock<NumThreads, int>(tid, svisit);
             if(tid<1) {
-                if(svisit[tid] == 0) {
+                if(svisit[0] == 0) {
 // visit no child, take out top of stack
                     sstackSize--;
                 }
-                else if(svisit[tid] == 1) {
+                else if(svisit[0] == 1) {
 // visit right child
                     sstack[ sstackSize - 1 ] = child.y; 
                 }
                 else {
 // visit both children
-                    if(sbranch[tid]<1) {
+                    if(sbranch[0]<1) {
                         pushChild = child;
                     }
                     else {
@@ -383,7 +412,9 @@ __global__ void renderImage_kernel(float4 * pix,
             if(sstackSize<1) break;
         }
     }
-    if(isInImage) 
-        pix[y * c_imageSize.x + x] = outRgbz;
+    if(isInImage) {
+        pix[pixInd] = rgbaFloatToInt(outRgba);
+        depth[pixInd] = rayLength;
+    }
 }
 

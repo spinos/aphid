@@ -1,14 +1,16 @@
 #include "AdeniumRender.cuh"
 
 namespace adetrace {
-void resetImage(float4 * pix, 
+void resetImage(uint * pix,
+            float * depth,
             uint n)
 {
     dim3 block(512, 1, 1);
     unsigned nblk = iDivUp(n, 512);
     dim3 grid(nblk, 1, 1);
     
-    resetImage_kernel<<< grid, block >>>(pix,
+    resetImage_kernel<<< grid, block >>>(pix, 
+        depth,
         n);
 }
 
@@ -27,7 +29,8 @@ void setCameraProp(float * src)
     cudaMemcpyToSymbol(c_cameraProp, src, 8);
 }
 
-void renderImage(float4 * pix,
+void renderImage(uint * pix,
+                float * depth,
                 uint imageW,
                 uint imageH,
                 int2 * nodes,
@@ -45,6 +48,7 @@ void renderImage(float4 * pix,
     if(isOrthographic) {
         OrthographicEye eye;
         renderImage_kernel<64, OrthographicEye> <<< grid, block, 16320 >>>(pix,
+                depth,
                         nodes,
                         nodeAabbs,
 				elementHash,
@@ -55,6 +59,7 @@ void renderImage(float4 * pix,
 	else {
 	    PerspectiveEye eye;
 	    renderImage_kernel<64, PerspectiveEye> <<< grid, block, 16320 >>>(pix,
+	            depth,
                         nodes,
                         nodeAabbs,
 				elementHash,

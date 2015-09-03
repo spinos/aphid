@@ -11,12 +11,14 @@
 AdeniumRender::AdeniumRender() :
 m_imageWidth(0), m_imageHeight(0)
 {
-    m_deviceRgbzPix = new CudaPixelBuffer;
+    m_deviceRgbaPix = new CudaPixelBuffer;
+	m_depth = new CUDABuffer;
 }
 
 AdeniumRender::~AdeniumRender() 
 {
-    delete m_deviceRgbzPix;
+    delete m_deviceRgbaPix;
+	delete m_depth;
 }
 
 bool AdeniumRender::resize(int w, int h)
@@ -37,15 +39,17 @@ int AdeniumRender::numPixels() const
 
 void AdeniumRender::reset()
 {
-	m_deviceRgbzPix->create(numPixels() * 16);
+	m_deviceRgbaPix->create(numPixels() * 4);
+	m_depth->create(numPixels() * 4);
 	int imgs[2];
 	imgs[0] = imageWidth();
 	imgs[1] = imageHeight();
 	adetrace::setImageSize(imgs);
-	void * pix = m_deviceRgbzPix->map();
-	adetrace::resetImage((float4 *)pix, (uint)numPixels());
+	void * pix = m_deviceRgbaPix->map();
+	void * d = m_depth->bufferOnDevice();
+	adetrace::resetImage((uint *)pix, (float *)d, (uint)numPixels());
 	CudaBase::CheckCudaError(" reset image");
-	m_deviceRgbzPix->unmap();
+	m_deviceRgbaPix->unmap();
 }
 
 void AdeniumRender::setModelViewMatrix(float * src)
@@ -63,10 +67,11 @@ void AdeniumRender::renderOrhographic(BaseCamera * camera, BvhTriangleSystem * t
 	void * internalNodeChildIndex = tri->internalNodeChildIndices();
 	void * internalNodeAabbs = tri->internalNodeAabbs();
 	void * indirection = tri->primitiveHash();
-    void * pix = m_deviceRgbzPix->map();
+    void * pix = m_deviceRgbaPix->map();
     void * vertices = tri->deviceTretradhedronIndices(); 
     void * points = tri->deviceX();
-	adetrace::renderImage((float4 *)pix,
+	adetrace::renderImage((uint *)pix,
+				(float *)m_depth->bufferOnDevice(),
                 imageWidth(),
                 imageHeight(),
                 (int2 *)internalNodeChildIndex,
@@ -76,7 +81,7 @@ void AdeniumRender::renderOrhographic(BaseCamera * camera, BvhTriangleSystem * t
 				(float3 *)points,
 				1);
 	CudaBase::CheckCudaError(" render ortho image");
-	m_deviceRgbzPix->unmap();
+	m_deviceRgbaPix->unmap();
 }
 
 void AdeniumRender::renderPerspective(BaseCamera * camera, BvhTriangleSystem * tri)
@@ -89,10 +94,11 @@ void AdeniumRender::renderPerspective(BaseCamera * camera, BvhTriangleSystem * t
 	void * internalNodeChildIndex = tri->internalNodeChildIndices();
 	void * internalNodeAabbs = tri->internalNodeAabbs();
 	void * indirection = tri->primitiveHash();
-    void * pix = m_deviceRgbzPix->map();
+    void * pix = m_deviceRgbaPix->map();
     void * vertices = tri->deviceTretradhedronIndices(); 
     void * points = tri->deviceX();
-	adetrace::renderImage((float4 *)pix,
+	adetrace::renderImage((uint *)pix,
+				(float *)m_depth->bufferOnDevice(),
                 imageWidth(),
                 imageHeight(),
                 (int2 *)internalNodeChildIndex,
@@ -102,7 +108,7 @@ void AdeniumRender::renderPerspective(BaseCamera * camera, BvhTriangleSystem * t
 				(float3 *)points,
 				0);
 	CudaBase::CheckCudaError(" render persp image");
-	m_deviceRgbzPix->unmap();
+	m_deviceRgbaPix->unmap();
 }
 
 const int AdeniumRender::imageWidth() const
@@ -112,8 +118,8 @@ const int AdeniumRender::imageHeight() const
 { return m_imageHeight; }
 
 void AdeniumRender::bindBuffer()
-{ m_deviceRgbzPix->bind(); }
+{ m_deviceRgbaPix->bind(); }
 
 void AdeniumRender::unbindBuffer()
-{ m_deviceRgbzPix->unbind(); }
+{ m_deviceRgbaPix->unbind(); }
 //:~

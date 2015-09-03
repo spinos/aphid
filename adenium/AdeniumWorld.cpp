@@ -240,13 +240,13 @@ void AdeniumWorld::render(BaseCamera * camera)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, m_image->imageWidth(), m_image->imageHeight(), 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_image->imageWidth(), m_image->imageHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	}
 	
 	glEnable(GL_TEXTURE_2D);
 	m_image->bindBuffer();
 	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->imageWidth(), m_image->imageHeight(), GL_RGBA, GL_FLOAT,0);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->imageWidth(), m_image->imageHeight(), GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	m_image->unbindBuffer();
 }
 

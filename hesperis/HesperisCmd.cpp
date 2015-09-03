@@ -109,7 +109,7 @@ MStatus HesperisCmd::doIt(const MArgList &args)
     MGlobal::getActiveSelectionList(selList);
     
 	if(selList.length() < 1) {
-		MGlobal::displayInfo(" Empty selction!");
+		MGlobal::displayInfo(" empty selction");
 		return MS::kSuccess;
 	}
     

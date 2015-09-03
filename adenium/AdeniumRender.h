@@ -27,7 +27,8 @@ private:
     bool isSizeValid(int x, int y) const;
     int numPixels() const;
 private:
-    CudaPixelBuffer * m_deviceRgbzPix;
+    CudaPixelBuffer * m_deviceRgbaPix;
+	CUDABuffer * m_depth;
     int m_imageWidth, m_imageHeight;
 };
 #endif        //  #ifndef ADENIUMRENDER_H
