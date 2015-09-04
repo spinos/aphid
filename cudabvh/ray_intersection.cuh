@@ -84,7 +84,7 @@ __device__ int ray_box(float & distanceMin, float & distanceMax,
 	distanceMin = fmax( t_min.z, fmax(t_min.y, fmax(t_min.x, distanceMin)) );
 	distanceMax = fmin( t_max.z, fmin(t_max.y, fmin(t_max.x, distanceMax)) );
 
-	return (distanceMin <= distanceMax && distanceMax > 0.f);
+	return (distanceMin < distanceMax && distanceMax > 0.f);
 }
 #endif        //  #ifndef RAY_INTERSECTION_CUH
 

@@ -219,7 +219,8 @@ __global__ void renderImage_kernel(uint * pix,
  *  4   -> 4+m-1       stack
  *  4+m -> 4+m+n-1  branching
  *  4+m+n -> 4+m+n+n-1  visiting
- *  4+m+n+n -> 4+m+n+n+12*c-1 triangle points
+ *  4+m+n+n -> 4+m+n+n+n-1  visiting right first
+ *  4+m+n+n+n -> 4+m+n+n+n+12*c-1 triangle points
  *
  *  branching is first child to visit
  *  -1 left 1 right 0 neither
@@ -234,7 +235,8 @@ __global__ void renderImage_kernel(uint * pix,
     int * sstack =  &sdata[4];
     int * sbranch = &sdata[4 + ADE_RAYTRAVERSE_MAX_STACK_SIZE];
     int * svisit =  &sdata[4 + ADE_RAYTRAVERSE_MAX_STACK_SIZE + NumThreads];
-    float3 * strianglePCache = (float3 *)&sdata[4 + ADE_RAYTRAVERSE_MAX_STACK_SIZE + NumThreads + NumThreads];
+    int * svisitrf =  &sdata[4 + ADE_RAYTRAVERSE_MAX_STACK_SIZE + NumThreads + NumThreads];
+    float3 * strianglePCache = (float3 *)&sdata[4 + ADE_RAYTRAVERSE_MAX_STACK_SIZE + NumThreads + NumThreads + NumThreads];
     const uint tid = tId();
     if(tid<1) {
         sstack[0] = 0x80000000;
@@ -243,7 +245,7 @@ __global__ void renderImage_kernel(uint * pix,
     __syncthreads();
 
     float3 hitP, hitN;
-    int hitTriangle;
+    int hitTriangle = -1;
     int4 triV;
     int canLeafFitInSmem;
     int numTriangles;
@@ -346,10 +348,14 @@ __global__ void renderImage_kernel(uint * pix,
                     rightBox);
             
             svisit[tid] = 2 * b1 + b2;
+            svisitrf[tid] = 2 * b2 + b1;
             if(svisit[tid]==3) { 
 // visit both children
                 if(mu1 < lambda1) {
 // vist right child first
+                    sbranch[tid] = 1;
+                }
+                else if(mu2 < lambda2) {
                     sbranch[tid] = 1;
                 }
                 else {
@@ -374,22 +380,30 @@ __global__ void renderImage_kernel(uint * pix,
 // outside image
                 sbranch[tid] = 0;
                 svisit[tid] = 0;
+                svisitrf[tid] = 0;
             }
             __syncthreads();
             
 // branching decision
             reduceSumInBlock<NumThreads, int>(tid, sbranch);
             reduceMaxInBlock<NumThreads, int>(tid, svisit);
+            reduceMaxInBlock<NumThreads, int>(tid, svisitrf);
+            
             if(tid<1) {
                 if(svisit[0] == 0) {
 // visit no child, take out top of stack
                     sstackSize--;
                 }
                 else if(svisit[0] == 1) {
-// visit right child
+// visit right child only
                     sstack[ sstackSize - 1 ] = child.y; 
                 }
                 else {
+                    if(svisitrf[0] == 1) {
+// visit left child only
+                        sstack[ sstackSize - 1 ] = child.x; 
+                    }
+                    else {
 // visit both children
                     if(sbranch[0]<1) {
                         pushChild = child;
@@ -404,6 +418,7 @@ __global__ void renderImage_kernel(uint * pix,
                             sstack[ sstackSize ] = pushChild.x;
                             sstackSize++;
                     }
+                    }
                 }
             }
             
@@ -412,7 +427,7 @@ __global__ void renderImage_kernel(uint * pix,
             if(sstackSize<1) break;
         }
     }
-    if(isInImage) {
+    if(isInImage && hitTriangle > -1) {
         pix[pixInd] = rgbaFloatToInt(outRgba);
         depth[pixInd] = rayLength;
     }
