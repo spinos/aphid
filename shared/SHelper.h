@@ -68,6 +68,10 @@ public:
 	static void Split(const std::string & combined, std::vector<std::string > & names);
 	static bool Find(const std::string & name, const std::string & part, bool caseSensitive = true);
     static bool DeduceAttribName(const std::string & hesPath, std::string & attribName);
+    static bool GetNamespace(std::string & res);
+    static bool GetFirstNamespace(std::string & res);
+    static std::string GetParentName(const std::string& name, const std::string & term);
+    static std::string GetFollowupName(const std::string& name, const std::string & term);
 };
 #endif
 //:~

@@ -20,8 +20,8 @@ PhysicsControl::PhysicsControl(QWidget *parent)
     setWindowTitle(tr("Physics Control"));
     
     m_youngModulusValue = new QDoubleEditSlider(tr("Young's modulus"), this);
-	m_youngModulusValue->setLimit(40000.0, 800000.0);
-	m_youngModulusValue->setValue(160000.0);
+	m_youngModulusValue->setLimit(40000.0, 2000000.0);
+	m_youngModulusValue->setValue(300000.0);
 	
 	YGrp = new QGroupBox;
     QHBoxLayout * yLayout = new QHBoxLayout;
@@ -42,7 +42,7 @@ PhysicsControl::PhysicsControl(QWidget *parent)
     yAGrp->setLayout(yaLayout);
 	
 	m_densityValue = new QDoubleEditSlider(tr("Density"), this);
-	m_densityValue->setLimit(0.1, 200.0);
+	m_densityValue->setLimit(0.1, 1000.0);
 	m_densityValue->setValue(100.0);
 	
 	dsGrp = new QGroupBox;

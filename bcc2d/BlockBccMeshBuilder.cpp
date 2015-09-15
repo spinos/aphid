@@ -15,8 +15,8 @@ unsigned BlockBccMeshBuilder::MinimumUGrid = 3;
 unsigned BlockBccMeshBuilder::MinimumVGrid = 1;
 unsigned BlockBccMeshBuilder::MinimumWGrid = 1;
 unsigned BlockBccMeshBuilder::MaximumUGrid = 256;
-unsigned BlockBccMeshBuilder::MaximumVGrid = 3;
-unsigned BlockBccMeshBuilder::MaximumWGrid = 1;
+unsigned BlockBccMeshBuilder::MaximumVGrid = 7;
+unsigned BlockBccMeshBuilder::MaximumWGrid = 2;
 	
 BlockBccMeshBuilder::BlockBccMeshBuilder() 
 {

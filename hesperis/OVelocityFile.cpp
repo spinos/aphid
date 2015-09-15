@@ -130,5 +130,6 @@ bool OVelocityFile::writeMaxSpeed()
 	HFltAttributeEntry vg(maxSpeedName());
 	vg.save(&ms);
 	vg.close();
+    return true;
 }
 //:~

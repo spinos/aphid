@@ -736,20 +736,34 @@ std::string SHelper::removeNamespace(const std::string &in)
 	return result;
 }
 //get nsp from res
-std::string getNamespace(const std::string &res)
+bool SHelper::GetNamespace(std::string & res)
 {
 	int found = res.rfind(':');
 
-	if(found < 0) return res;
+	if(found < 0) return false;
 	
 	std::string result = res;
 
 	int length=res.length();
 	
-	result = result.erase(found,length);
+	res = result.erase(found,length);
 
-	return result;
+	return true;
+}
 
+bool SHelper::GetFirstNamespace(std::string & res)
+{
+    int found = res.find(':');
+
+	if(found < 0) return false;
+	
+	std::string result = res;
+
+	int length=res.length();
+	
+	res = result.erase(found,length);
+
+	return true;
 }
 
 char SHelper::removeAnyNamespace(std::string &name, const char * separator)
@@ -978,5 +992,49 @@ bool SHelper::DeduceAttribName(const std::string & hesPath, std::string & attrib
         return true;
     }
     return false;
+}
+
+std::string SHelper::GetParentName(const std::string& name, const std::string & term)
+{
+    std::string r("");
+	std::string str = name;
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("|/");
+	tokenizer tokens(str, sep);
+	for (tokenizer::iterator tok_iter = tokens.begin();
+		tok_iter != tokens.end(); ++tok_iter)
+		{
+			tokenizer::iterator nextit = tok_iter;
+			++nextit;
+            
+			if(nextit != tokens.end())
+				r = r + "|" +(*tok_iter);
+            
+            if((*nextit).compare(term) == 0)
+                break;
+		}
+	return r;
+}
+
+std::string SHelper::GetFollowupName(const std::string& name, const std::string & term)
+{
+    bool found = false;
+    std::string r("");
+	std::string str = name;
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("|/");
+	tokenizer tokens(str, sep);
+	for (tokenizer::iterator tok_iter = tokens.begin();
+		tok_iter != tokens.end(); ++tok_iter)
+		{
+            if((*tok_iter).compare(term) == 0) {
+                found = true;
+            }
+            
+            if(found)
+                r = r + "|" +(*tok_iter);
+
+		}
+	return r;
 }
 //:~

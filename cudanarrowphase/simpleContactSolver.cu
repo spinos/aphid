@@ -339,7 +339,7 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	
 	float rel = computeRelativeVelocity1(nA, nB,
 	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
-	if(rel * rel < 0.01f) rel = 0.f;
+	//if(rel * rel < 0.01f) rel = 0.f;
 	constraints[iContact].relVel = rel;
 }
 
@@ -452,7 +452,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
  *  Lecture 7 Collision Resolution Pg. 18
  *  j = (1 + Cr)Vr.N*M^-1
  */
-    J += constraints[iContact].relVel * .005f;
+    J += constraints[iContact].relVel * .8f;
     J *= constraints[iContact].Minv;
 	
 	float prevSum = constraints[iContact].lambda;

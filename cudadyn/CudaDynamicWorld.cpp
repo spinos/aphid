@@ -309,5 +309,5 @@ std::string CudaDynamicWorld::objName(int i) const
 }
 
 void CudaDynamicWorld::updateSpeedLimit(float x)
-{ m_contactSolver->setSpeedLimit(x + 50.f); }
+{ m_contactSolver->setSpeedLimit(x + 20.f); }
 //:~
