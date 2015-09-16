@@ -15,6 +15,7 @@
 #define VERYLARGE_INT 16777215 // 1<<24 - 1
 #define VERYLARGE_INT_M1 16777214 
 #define VERYVERYLARGE_INT 1073741823 // 1<<30 - 1
+#define VYACCELERATION 0.1635f // 9.81 / 60
 __constant__ float CSpeedLimit;
 inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
                                                   float3 averageLinearVel,
@@ -93,8 +94,10 @@ inline __device__ float computeRelativeVelocity1(float3 nA,
                             float3 linearVelocityA, 
                             float3 linearVelocityB)
 {
-    return float3_dot(linearVelocityA, nA) +
+    float r = float3_dot(linearVelocityA, nA) +
             float3_dot(linearVelocityB, nB);
+    if(r * r < 0.01f) r = 0.f;
+    return r;
 }
 
 inline __device__ float computeRelativeVelocity(float3 nA,
@@ -125,8 +128,7 @@ inline __device__ float computeMassTensor(//float3 nA, float3 nB,
     //float3 jmjA = float3_cross( scale_float3_by(torqueA, invMassA), rA );
     //float3 jmjB = float3_cross( scale_float3_by(torqueB, invMassB), rB );
     
-    return -1.f/(invMassA + invMassB +  
-         invMassA + invMassB);    
+    return -1.f/(invMassA + invMassB);    
          // invMassA * float3_dot(jmjA, nA) + 
          // invMassB * float3_dot(jmjB, nB));
 }
@@ -337,9 +339,14 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	                            //torqueA, torqueB,
 	                            splitMass[dstInd.x], splitMass[dstInd.y]);
 	
+	//if(splitMass[dstInd.x] > 1e-3f) 
+	    sVel[threadIdx.x].y += VYACCELERATION;
+	//if(splitMass[dstInd.y] > 1e-3f) 
+	    sVel[threadIdx.x+1].y += VYACCELERATION;
+	
 	float rel = computeRelativeVelocity1(nA, nB,
 	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
-	//if(rel * rel < 0.01f) rel = 0.f;
+	
 	constraints[iContact].relVel = rel;
 }
 
@@ -400,14 +407,21 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
 	
 	const uint iContact = ind>>1;
 	
-	uint splitInd = splits[iContact].x;
-	uint iBody = pairs[iContact].x;
-	BarycentricCoordinate coord = constraints[iContact].coordA;
+	const ContactConstraint inConstraint = constraints[iContact];
+	
+	uint splitInd;
+	uint iBody;
+	BarycentricCoordinate coord;
 	
 	if((threadIdx.x & 1)>0) {
 	    splitInd = splits[iContact].y;
 	    iBody = pairs[iContact].y;
-	    coord = constraints[iContact].coordB;
+	    coord = inConstraint.coordB;
+	}
+	else {
+	    splitInd = splits[iContact].x;
+	    iBody = pairs[iContact].x;
+	    coord = inConstraint.coordA;
 	}
 
 // initial velocities
@@ -416,12 +430,19 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
     float3 velA;
     interpolate_float3i(velA, ia, velocities, &coord);
     
-	float3 nA = constraints[iContact].normal;
-	float3 rA = contacts[iContact].localA;
+    const float invMassA = splitMass[splitInd];
+	if(invMassA > 1e-5f)
+	    velA.y += VYACCELERATION;
+    
+	float3 nA = inConstraint.normal;
+	float3 rA;
 	
 	if((ind & 1)>0) {
 	    nA = float3_reverse(nA);
 	    rA = contacts[iContact].localB;
+	}
+	else {
+	    rA = contacts[iContact].localA;
 	}
 	
 // N pointing inside object
@@ -443,6 +464,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
 	
 	float J = computeRelativeVelocity1(sN[iLeft], sN[iRight],
 	                        sVel[iLeft], sVel[iRight]);
+
 /*
  *  reference
  *  Game Physics 
@@ -451,9 +473,10 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
  *  Dr. Nicolas Pronost 
  *  Lecture 7 Collision Resolution Pg. 18
  *  j = (1 + Cr)Vr.N*M^-1
+ *  Cr is restitution
  */
-    J += constraints[iContact].relVel * .8f;
-    J *= constraints[iContact].Minv;
+    J += .49f * inConstraint.relVel;
+    J *= inConstraint.Minv;
 	
 	float prevSum = constraints[iContact].lambda;
 	float updated = prevSum;
@@ -464,9 +487,7 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
 	
 	J = updated - prevSum;
 	
-	const float invMassA = splitMass[splitInd];
-	
-    applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
+	applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
 	//applyImpulse(deltaAngularVelocity[splitInd], J * invMassA, torqueA);
 }
 

@@ -106,12 +106,17 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	simpleContactSolverCountBody((uint *)bodyCount, 
 	                        (KeyValuePair *)bodyContactHash, 
 	                        splitBufLength);
-							
+// num iterattions by max contacts per object
+// todo ignore static object count
+#if 0						
 	int mxcount = 0;
 	max<int>(mxcount, (int *)bodyCount, splitBufLength);
-//if(mxcount>9) std::cout<<" max count per contact "<<mxcount; 
+//if(mxcount>9) 
+//      std::cout<<" max count per contact "<<mxcount; 
 	int numiterations = mxcount + 3;
-    numiterations = 5;
+#else
+	int numiterations = 6;
+#endif
 	
 	m_splitInverseMass->create(splitBufLength * 4);
 	void * splitMass = m_splitInverseMass->bufferOnDevice();
