@@ -94,10 +94,8 @@ inline __device__ float computeRelativeVelocity1(float3 nA,
                             float3 linearVelocityA, 
                             float3 linearVelocityB)
 {
-    float r = float3_dot(linearVelocityA, nA) +
+    return float3_dot(linearVelocityA, nA) +
             float3_dot(linearVelocityB, nB);
-    if(r * r < 0.01f) r = 0.f;
-    return r;
 }
 
 inline __device__ float computeRelativeVelocity(float3 nA,
@@ -339,9 +337,9 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	                            //torqueA, torqueB,
 	                            splitMass[dstInd.x], splitMass[dstInd.y]);
 	
-	//if(splitMass[dstInd.x] > 1e-3f) 
+	if(splitMass[dstInd.x] > 1e-5f) 
 	    sVel[threadIdx.x].y += VYACCELERATION;
-	//if(splitMass[dstInd.y] > 1e-3f) 
+	if(splitMass[dstInd.y] > 1e-5f) 
 	    sVel[threadIdx.x+1].y += VYACCELERATION;
 	
 	float rel = computeRelativeVelocity1(nA, nB,
@@ -475,7 +473,10 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
  *  j = (1 + Cr)Vr.N*M^-1
  *  Cr is restitution
  */
-    J += .49f * inConstraint.relVel;
+    float restitution = .49f;
+    if(J * J < 0.008f) restitution = 0.f;
+    
+    J += restitution * inConstraint.relVel;
     J *= inConstraint.Minv;
 	
 	float prevSum = constraints[iContact].lambda;
