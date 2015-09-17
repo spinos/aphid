@@ -337,9 +337,9 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	                            //torqueA, torqueB,
 	                            splitMass[dstInd.x], splitMass[dstInd.y]);
 	
-	if(splitMass[dstInd.x] > 1e-5f) 
+	//if(splitMass[dstInd.x] > 1e-5f) 
 	    sVel[threadIdx.x].y += VYACCELERATION;
-	if(splitMass[dstInd.y] > 1e-5f) 
+	//if(splitMass[dstInd.y] > 1e-5f) 
 	    sVel[threadIdx.x+1].y += VYACCELERATION;
 	
 	float rel = computeRelativeVelocity1(nA, nB,
