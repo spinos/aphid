@@ -41,6 +41,7 @@ private:
 	CUDABuffer * m_constraint;
 	CUDABuffer * m_deltaLinearVelocity;
 	CUDABuffer * m_deltaAngularVelocity;
+	CUDABuffer * m_contactLinearVelocity;
 	CUDABuffer * m_relVel;
 	CUDABuffer * m_pntTetHash[2];
 	unsigned m_numContacts;

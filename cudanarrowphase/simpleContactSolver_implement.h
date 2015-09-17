@@ -37,18 +37,6 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
                                         uint * bodyCount, 
                                         uint bufLength);
 
-void simpleContactSolverSetContactConstraint(ContactConstraint* constraints,
-                                        uint2 * splits,
-                                        uint2 * pairs,
-                                        float3 * pos,
-                                        float3 * vel,
-                                        uint4 * ind,
-                                        uint * perObjPointStart,
-                                        uint * perObjectIndexStart,
-                                        float * splitMass,
-                                        ContactData * contacts,
-                                        uint numContacts);
-
 void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel, 
                                         float3 * deltaAngVel, 
                                         uint bufLength);
@@ -69,20 +57,6 @@ void simpleContactSolverSolveContact(ContactConstraint* constraints,
                         float * deltaJ,
                         int maxNIt,
                         int it);
-
-void simpleContactSolverSolveContactWoJ(ContactConstraint* constraints,
-                        float3 * deltaLinearVelocity,
-	                    float3 * deltaAngularVelocity,
-	                    uint2 * pairs,
-                        uint2 * splits,
-	                    float * splitMass,
-	                    ContactData * contacts,
-	                    float3 * positions,
-                        float3 * velocities,
-                        uint4 * indices,
-                        uint * perObjPointStart,
-                        uint * perObjectIndexStart,
-                        uint numContacts);
 
 void simpleContactSolverAverageVelocities(float3 * linearVelocity,
                         float3 * angularVelocity,
@@ -119,5 +93,28 @@ void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
 namespace contactsolver {
 	void setSpeedLimit(float x);
 }
-#endif        //  #ifndef SIMPLECONTACTSOLVER_IMPLEMENT_H
 
+namespace contactconstraint {
+    void prepareContactConstraint(ContactConstraint* constraints,
+        float3 * contactLinearVel,
+                                        uint2 * splits,
+                                        uint2 * pairs,
+                                        float3 * pos,
+                                        float3 * vel,
+                                        uint4 * ind,
+                                        uint * perObjPointStart,
+                                        uint * perObjectIndexStart,
+                                        float * splitMass,
+                                        ContactData * contacts,
+                                        uint numContacts);
+
+    void resolveCollision(ContactConstraint* constraints,
+                        float3 * contactLinearVelocity,
+                        float3 * deltaLinearVelocity,
+	                    uint2 * pairs,
+                        uint2 * splits,
+	                    float * splitMass,
+	                    ContactData * contacts,
+	                    uint numContacts);
+}
+#endif        //  #ifndef SIMPLECONTACTSOLVER_IMPLEMENT_H

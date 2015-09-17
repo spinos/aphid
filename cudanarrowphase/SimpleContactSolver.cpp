@@ -14,7 +14,7 @@
 #include <DynGlobal.h>
 #include <CudaBase.h>
 
-#if 0
+#if 1
 #include <CudaDbgLog.h>
 CudaDbgLog svlg("solver.txt");
 #endif
@@ -29,7 +29,7 @@ SimpleContactSolver::SimpleContactSolver()
 	m_constraint = new CUDABuffer;
 	m_deltaLinearVelocity = new CUDABuffer;
 	m_deltaAngularVelocity = new CUDABuffer;
-	// m_deltaJ = new CUDABuffer;
+	m_contactLinearVelocity = new CUDABuffer;
 	m_relVel = new CUDABuffer;
 	m_pntTetHash[0] = new CUDABuffer;
 	m_pntTetHash[1] = new CUDABuffer;
@@ -140,11 +140,13 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                             splitBufLength);
 	
 	m_constraint->create(numContacts * 64);
+	m_contactLinearVelocity->create(numContacts * 2 * 12);
 	void * constraint = m_constraint->bufferOnDevice();
-	
+	void * contactLinearVel = m_contactLinearVelocity->bufferOnDevice();
 	void * contacts = contactBuf->bufferOnDevice();
 	
-	simpleContactSolverSetContactConstraint((ContactConstraint *)constraint,
+	contactconstraint::prepareContactConstraint((ContactConstraint *)constraint,
+	    (float3 *)contactLinearVel,
 	    (uint2 *)splits,
 	    (uint2 *)pairs,
 	    (float3 *)pos,
@@ -155,7 +157,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
         (float *)splitMass,
 	    (ContactData *)contacts,
         numContacts * 2);
-    CudaBase::CheckCudaError("jacobi solver set constraint");
+    CudaBase::CheckCudaError("jacobi solver prepare constraint");
 	
 	m_deltaLinearVelocity->create(nextPow2(splitBufLength * 12));
 	m_deltaAngularVelocity->create(nextPow2(splitBufLength * 12));
@@ -179,24 +181,31 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	
 	const unsigned numSplitBodies = ScanUtil::getScanResult(m_bodyCount, m_scanBodyCount[0], scanBufLength);
 	*/
-	
+#if 0
+    svlg.writeHash(m_sortedInd[0], numContacts * 2, 
+                   "body_contact", CudaDbgLog::FAlways);
+#endif
 	int i;
 	for(i=0; i< numiterations; i++) {
 // compute impulse and velocity changes per contact
-        simpleContactSolverSolveContactWoJ((ContactConstraint *)constraint,
-	                    (float3 *)deltaLinVel,
-	                    (float3 *)deltaAngVel,
+        contactconstraint::resolveCollision((ContactConstraint *)constraint,
+	                    (float3 *)contactLinearVel,
+                        (float3 *)deltaLinVel,
 	                    (uint2 *)pairs,
 	                    (uint2 *)splits,
 	                    (float *)splitMass,
 	                    (ContactData *)contacts,
-	                    (float3 *)pos,
-	                    (float3 *)vel,
-	                    (uint4 *)ind,
-	                    (uint * )perObjPointStart,
-	                    (uint * )perObjectIndexStart,
 	                    numContacts * 2);
-        CudaBase::CheckCudaError("jacobi solver solve impulse");
+        CudaBase::CheckCudaError("jacobi solver resolve collision");
+        
+#if 0
+    unsigned ii = i;
+    svlg.write(ii);
+#endif
+#if 0
+    svlg.writeVec3(m_deltaLinearVelocity, numContacts * 2, 
+                   "deltaV_b4", CudaDbgLog::FAlways);
+#endif
     
 	    simpleContactSolverAverageVelocities((float3 *)deltaLinVel,
                         (float3 *)deltaAngVel,
@@ -204,6 +213,11 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                         (KeyValuePair *)bodyContactHash, 
                         splitBufLength);
         CudaBase::CheckCudaError("jacobi solver average velocity");
+        
+#if 0
+    svlg.writeVec3(m_deltaLinearVelocity, numContacts * 2, 
+                   "deltaV_avg", CudaDbgLog::FAlways);
+#endif
 	}
 	
 // 2 tet per contact, 4 pnt per tet, key is pnt index, value is tet index in split
@@ -224,7 +238,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                (uint * )perObjectIndexStart,
 	                numContacts * 2,
 	                pntHashBufLength);
-    CudaBase::CheckCudaError(CudaBase::Synchronize(),
+    CudaBase::CheckCudaError(// CudaBase::Synchronize(),
                              "jacobi solver point-tetra hash");
     
 	void * intermediate = m_pntTetHash[1]->bufferOnDevice();
@@ -248,7 +262,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                     (uint * )perObjPointStart,
                     (uint * )perObjectIndexStart,
                     numContacts * 2 * 4);
-    CudaBase::CheckCudaError(CudaBase::Synchronize(),
+    CudaBase::CheckCudaError(// CudaBase::Synchronize(),
         "jacobi solver update velocity");
 }
 
