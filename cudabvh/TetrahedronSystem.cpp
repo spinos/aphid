@@ -156,7 +156,7 @@ void TetrahedronSystem::calculateMass()
     float * mass = hostMass();
     for(i=0; i< np; i++) {
 		if(isAnchoredPoint(i))
-			mass[i] = 1e20f;
+			mass[i] = 1e9f;
         else
 			mass[i] = base;
     }

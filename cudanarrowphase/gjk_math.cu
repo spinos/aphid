@@ -7,9 +7,9 @@
 #include "line_math.cu"
 #include "triangle_math.cu"
 
-#define GJK_MAX_NUM_ITERATIONS 10
-#define GJK_THIN_MARGIN 0.005f
-#define GJK_THIN_MARGIN2 0.01f
+#define GJK_MAX_NUM_ITERATIONS 9
+#define GJK_THIN_MARGIN 0.009f
+#define GJK_THIN_MARGIN2 0.018f
 #define GJK_STEPSIZE 0.01666667f
 #define FLOAT3_ORIGIN make_float3(0.f, 0.f, 0.f)
 

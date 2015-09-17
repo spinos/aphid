@@ -98,7 +98,7 @@ __global__ void computeRhs_kernel(float3 * rhs,
 		stiffness[cur] = K;
 		
 	    if(ind == colInd[cur]) {
-	        damping = .21f * mi * dt + mi;
+	        damping = .99f * mi * dt + mi;
 	        K.v[0].x += damping;
 	        K.v[1].y += damping;
 	        K.v[2].z += damping;

@@ -1,6 +1,9 @@
 /*
  * reference
  * http://www.cs.cornell.edu/courses/cs5643/2013sp/a3Rigidbody/
+ * http://www-cs-students.stanford.edu/~eparker/files/PhysicsEngine/
+ * http://www.rowlhouse.co.uk/jiggle/index.html
+ * http://www.richardtonge.com/papers/Tonge-2012-MassSplittingForJitterFreeParallelRigidBodySimulation-preprint.pdf
  */
 
 #include "simpleContactSolver_implement.h"
@@ -115,7 +118,8 @@ inline __device__ float computeRelativeVelocity(float3 nA,
 
 inline __device__ void applyImpulse(float3 & dst, float J, float3 N)
 {
-    dst = float3_add(dst, scale_float3_by(N, J));
+    // dst = float3_add(dst, scale_float3_by(N, J));
+    float3_add_inplace(dst, scale_float3_by(N, J));
 }
 
 inline __device__ float computeMassTensor(//float3 nA, float3 nB, 
@@ -337,9 +341,9 @@ __global__ void setContactConstraint_kernel(ContactConstraint* constraints,
 	                            //torqueA, torqueB,
 	                            splitMass[dstInd.x], splitMass[dstInd.y]);
 	
-	//if(splitMass[dstInd.x] > 1e-5f) 
+	if(splitMass[dstInd.x] > 1e-5f) 
 	    sVel[threadIdx.x].y += VYACCELERATION;
-	//if(splitMass[dstInd.y] > 1e-5f) 
+	if(splitMass[dstInd.y] > 1e-5f) 
 	    sVel[threadIdx.x+1].y += VYACCELERATION;
 	
 	float rel = computeRelativeVelocity1(nA, nB,
@@ -429,8 +433,8 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
     interpolate_float3i(velA, ia, velocities, &coord);
     
     const float invMassA = splitMass[splitInd];
-	if(invMassA > 1e-5f)
-	    velA.y += VYACCELERATION;
+	//if(invMassA > 1e-5f)
+	//     velA.y += VYACCELERATION;
     
 	float3 nA = inConstraint.normal;
 	float3 rA;
@@ -473,8 +477,8 @@ __global__ void solveContactWoJ_kernel(ContactConstraint* constraints,
  *  j = (1 + Cr)Vr.N*M^-1
  *  Cr is restitution
  */
-    float restitution = .49f;
-    if(J * J < 0.008f) restitution = 0.f;
+    float restitution = .5f;
+    if(J * J < 0.01f) restitution = 0.f;
     
     J += restitution * inConstraint.relVel;
     J *= inConstraint.Minv;

@@ -32,7 +32,7 @@ TriangleSystem::TriangleSystem(ATriangleMesh * md)
 
 // all points are passive/anchored
     float * mass = hostMass();
-    for(i=0;i<np;i++) mass[i] = 1e20f;
+    for(i=0;i<np;i++) mass[i] = 1e9f;
 	unsigned * anchor = hostAnchor();
 	for(i=0;i<np;i++) anchor[i] = 1<<24;
 	
