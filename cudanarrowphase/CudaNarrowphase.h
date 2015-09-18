@@ -24,6 +24,7 @@ public:
         CUDABuffer * m_anchoredVel;
 		CUDABuffer * m_mass;
 		CUDABuffer * m_anchor;
+        CUDABuffer * m_linearImpulse;
 		CUDABuffer * m_ind;
 		CUDABuffer * m_pointCacheLoc;
 		CUDABuffer * m_indexCacheLoc;
@@ -60,6 +61,7 @@ public:
 	CUDABuffer * contactPairsBuffer();
 	CUDABuffer * contactBuffer();
 
+    void updateGravity(float dt);
 	void integrate(float dt);
 protected:
 

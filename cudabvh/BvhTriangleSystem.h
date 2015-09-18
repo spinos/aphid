@@ -11,6 +11,7 @@ public:
 
     virtual void initOnDevice();
 	virtual void update();
+    virtual void updateBvhImpulseBased();
 
 // override mass system
 	virtual void integrate(float dt);

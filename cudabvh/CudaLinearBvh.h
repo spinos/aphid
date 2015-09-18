@@ -23,6 +23,7 @@ public:
 	virtual ~CudaLinearBvh();
 	
 	virtual void initOnDevice();
+    virtual void updateBvhImpulseBased();
 	virtual void update();
 	
 	const unsigned numPrimitives() const;

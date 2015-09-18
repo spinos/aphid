@@ -799,7 +799,13 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                numBodies);
 }
 
-void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
+}
+
+namespace contactsolver {
+	void setSpeedLimit(float x)
+	{ cudaMemcpyToSymbol(CSpeedLimit, &x, 4); }
+    
+    void updateImpulse(float3 * dstImpulse,
                     float3 * deltaLinearVelocity,
 	                float3 * deltaAngularVelocity,
 	                KeyValuePair * pntTetHash,
@@ -819,7 +825,7 @@ void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
     unsigned nblk = iDivUp(numPoints, tpb);
     dim3 grid(nblk, 1, 1);
     
-    updateVelocity_kernel<<< grid, block >>>(dstVelocity,
+    updateVelocity_kernel<<< grid, block >>>(dstImpulse,
                     deltaLinearVelocity,
 	                deltaAngularVelocity,
 	                pntTetHash,
@@ -833,12 +839,6 @@ void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
                     objectIndexStarts,
                     numPoints);
 }
-
-}
-
-namespace contactsolver {
-	void setSpeedLimit(float x)
-	{ cudaMemcpyToSymbol(CSpeedLimit, &x, 4); }
 }
 
 namespace contactconstraint {
@@ -848,6 +848,7 @@ void prepareContactConstraint(ContactConstraint* constraints,
                                         uint2 * pairs,
                                         float3 * pos,
                                         float3 * vel,
+                                        float3 * impulse,
                                         uint4 * ind,
                                         uint * perObjPointStart,
                                         uint * perObjectIndexStart,
@@ -865,6 +866,7 @@ void prepareContactConstraint(ContactConstraint* constraints,
                                         pairs,
                                         pos,
                                         vel,
+                                        impulse,
                                         ind,
                                         perObjPointStart,
                                         perObjectIndexStart,

@@ -74,7 +74,12 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                uint numBodies,
 	                uint bufLength);
 
-void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
+}
+
+namespace contactsolver {
+	void setSpeedLimit(float x);
+    
+    void updateImpulse(float3 * dstImpulse,
                     float3 * deltaLinearVelocity,
 	                float3 * deltaAngularVelocity,
 	                KeyValuePair * pntTetHash,
@@ -87,11 +92,6 @@ void simpleContactSolverUpdateVelocity(float3 * dstVelocity,
                     uint * objectPointStarts,
                     uint * objectIndexStarts,
                     uint numPoints);
-
-}
-
-namespace contactsolver {
-	void setSpeedLimit(float x);
 }
 
 namespace contactconstraint {
@@ -101,6 +101,7 @@ namespace contactconstraint {
                                         uint2 * pairs,
                                         float3 * pos,
                                         float3 * vel,
+                                        float3 * impulse,
                                         uint4 * ind,
                                         uint * perObjPointStart,
                                         uint * perObjectIndexStart,

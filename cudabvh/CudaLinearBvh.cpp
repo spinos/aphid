@@ -250,4 +250,7 @@ void CudaLinearBvh::setCostOfTraverse(float x)
 
 const float CudaLinearBvh::costOfTraverse() const
 { return m_costOfTraverse; }
+
+void CudaLinearBvh::updateBvhImpulseBased()
+{}
 //:~

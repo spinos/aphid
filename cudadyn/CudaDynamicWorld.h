@@ -30,6 +30,7 @@ public:
     void stepPhysics(float dt);
     
     void collide();
+    void updateSystem(float dt);
     void integrate(float dt);
     void sendXToHost();
     void readVelocityCache();

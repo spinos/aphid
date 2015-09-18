@@ -24,6 +24,12 @@ void BvhTriangleSystem::update()
     CudaLinearBvh::update();
 }
 
+void BvhTriangleSystem::updateBvhImpulseBased()
+{
+    formTetrahedronAabbs();
+    CudaLinearBvh::update();
+}
+
 void BvhTriangleSystem::formTetrahedronAabbs()
 {
     void * cvs = deviceX();

@@ -82,7 +82,7 @@ __global__ void resolveCollision_kernel(ContactConstraint* constraints,
  *  j = (1 + Cr)Vr.N*M^-1
  *  Cr is restitution
  */
-    float restitution = .5f;
+    float restitution = .99f;
     // if(J * J < 0.01f) restitution = 0.f;
     
     J += restitution * inConstraint.relVel;

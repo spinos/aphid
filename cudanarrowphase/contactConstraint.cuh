@@ -58,6 +58,7 @@ __global__ void prepareContactConstraint_kernel(ContactConstraint* constraints,
                                         uint2 * pairs,
                                         float3 * srcPos,
                                         float3 * srcVel,
+                                        float3 * srcImpulse,
                                         uint4 * indices,
                                         uint * pointStarts,
                                         uint * indexStarts,
@@ -75,17 +76,21 @@ __global__ void prepareContactConstraint_kernel(ContactConstraint* constraints,
 	
 	int isRgt = (threadIdx.x & 1);
 	
+    float3 v0, v1;
 	uint4 ia;
 	if(isRgt>0) {
 	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].y);
 	    constraints[iContact].coordB = localCoordinate(ia, srcPos, contact.localB);
-	    interpolate_float3i(sVel[threadIdx.x], ia, srcVel, &constraints[iContact].coordB);
+	    interpolate_float3i(v0, ia, srcVel, &constraints[iContact].coordB);
+        interpolate_float3i(v1, ia, srcImpulse, &constraints[iContact].coordB);
 	}
 	else {
 	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].x);
 	    constraints[iContact].coordA = localCoordinate(ia, srcPos, contact.localA);
-	    interpolate_float3i(sVel[threadIdx.x], ia, srcVel, &constraints[iContact].coordA);
+	    interpolate_float3i(v0, ia, srcVel, &constraints[iContact].coordA);
+        interpolate_float3i(v1, ia, srcImpulse, &constraints[iContact].coordA);
 	}
+    sVel[threadIdx.x] = float3_add(v0, v1);
 	contactLinearVel[ind] = sVel[threadIdx.x];
 	__syncthreads();
 

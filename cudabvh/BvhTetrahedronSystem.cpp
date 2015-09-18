@@ -70,6 +70,29 @@ void BvhTetrahedronSystem::update()
     CudaLinearBvh::update();
 }
 
+void BvhTetrahedronSystem::updateBvhImpulseBased()
+{
+    formTetrahedronAabbsImpulsed();
+    CudaLinearBvh::update();
+}
+
+void BvhTetrahedronSystem::formTetrahedronAabbsImpulsed()
+{
+    void * pos = deviceX();
+    void * vel = deviceV();
+    void * deltaVel = deviceImpulse();
+    void * idx = deviceTretradhedronIndices();
+    void * dst = leafAabbs();
+    tetrasys::formTetrahedronAabbsImpulsed((Aabb *)dst, 
+                                   (float3 *)pos, 
+                                   (float3 *)vel, 
+                                   (float3 *)deltaVel,
+                                   1.f/60.f, 
+                                   (uint4 *)idx, 
+                                   numTetrahedrons());
+    CudaBase::CheckCudaError("tetrahedron system form aabb");
+}
+
 void BvhTetrahedronSystem::formTetrahedronAabbs()
 {
 	void * cvs = deviceX();

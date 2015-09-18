@@ -19,6 +19,7 @@ public:
 	virtual ~BvhTetrahedronSystem();
 	virtual void initOnDevice();
 	virtual void update();
+    virtual void updateBvhImpulseBased();
 	
 	void * vicinity();
 // override mass system
@@ -28,6 +29,7 @@ protected:
     
 private:
 	void formTetrahedronAabbs();
+    void formTetrahedronAabbsImpulsed();
 private:
 	CUDABuffer * m_deviceTetrahedronVicinityInd;
 	CUDABuffer * m_deviceTetrahedronVicinityStart;

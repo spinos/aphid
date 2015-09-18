@@ -46,5 +46,28 @@ void formTetrahedronAabbs(Aabb *dst,
     formTetrahedronAabbs_kernel<<< grid, block >>>(dst, pos, vel, timeStep, tets, numTetrahedrons<<2);
 }
 
+void formTetrahedronAabbsImpulsed(Aabb * leafAabbs,
+                                float3 * pos,
+                                float3 * vel,
+                                float3 * deltaVel,
+                                float timeStep,
+                                uint4 * tets,
+                                uint numTetrahedrons)
+{
+    int tpb = CALC_TETRA_AABB_NUM_THREADS;
+
+    dim3 block(tpb, 1, 1);
+    unsigned nblk = iDivUp(numTetrahedrons<<2, tpb);
+    
+    dim3 grid(nblk, 1, 1);
+    formTetrahedronAabbsImpulsed_kernel<<< grid, block >>>(leafAabbs, 
+                                                           pos, 
+                                                           vel,
+                                                           deltaVel,
+                                                           timeStep, 
+                                                           tets, 
+                                                           numTetrahedrons<<2);
+}
+
 }
 

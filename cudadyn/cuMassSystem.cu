@@ -78,6 +78,35 @@ __global__ void integrate2_kernel(float3 * pos,
 	float3_add_inplace(pos[ind], scale_float3_by(va, dt));
 }
 
+__global__ void addGravity_kernel(float3 * deltaVel, 
+								uint * anchored,
+                                float dt, 
+								uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+    if(anchored[ind] > 0) deltaVel[ind] = make_float3(0.f, 0.f, 0.f);
+    else deltaVel[ind] = make_float3(0.f, -0.1635f, 0.f);
+}
+
+__global__ void impulseForce_kernel(float3 * force,
+                           float3 * deltaVel,
+                           float * mass,
+                           float dt,
+                           uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+/*
+ *   F = J / dt
+ *   J = m * dv
+ */
+    float m = mass[ind];
+    if(m > 1e5f) force[ind] = make_float3(0.f, 0.f, 0.f);
+    else force[ind] = scale_float3_by(deltaVel[ind], m / dt);
+}
+
 namespace masssystem {
 void computeMass(float * dst,
                 float * mass0,
@@ -171,6 +200,38 @@ void integrateSimple(float3 * pos,
     
     integrate2_kernel<<< grid, block >>>(pos,
         vel,
+        dt,
+        maxInd);
+}
+
+void addGravity(float3 * deltaVel,
+                uint * anchored,
+                float dt,
+                uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    addGravity_kernel<<< grid, block >>>(deltaVel,
+        anchored,
+        dt,
+        maxInd);
+}
+
+void impulseForce(float3 * force,
+                           float3 * deltaVel,
+                           float * mass,
+                           float dt,
+                           uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    impulseForce_kernel<<< grid, block >>>(force,
+                                           deltaVel,
+        mass,
         dt,
         maxInd);
 }

@@ -106,9 +106,10 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	simpleContactSolverCountBody((uint *)bodyCount, 
 	                        (KeyValuePair *)bodyContactHash, 
 	                        splitBufLength);
+
+#if 0
 // num iterattions by max contacts per object
 // todo ignore static object count
-#if 0						
 	int mxcount = 0;
 	max<int>(mxcount, (int *)bodyCount, splitBufLength);
 //if(mxcount>9) 
@@ -125,6 +126,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	void * pos = objectBuf->m_pos->bufferOnDevice();
 	void * vel = objectBuf->m_vel->bufferOnDevice();
 	void * mass = objectBuf->m_mass->bufferOnDevice();
+    void * linearImpulse = objectBuf->m_linearImpulse->bufferOnDevice();
 	void * ind = objectBuf->m_ind->bufferOnDevice();
 	void * perObjPointStart = objectBuf->m_pointCacheLoc->bufferOnDevice();
 	void * perObjectIndexStart = objectBuf->m_indexCacheLoc->bufferOnDevice();
@@ -151,6 +153,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	    (uint2 *)pairs,
 	    (float3 *)pos,
 	    (float3 *)vel,
+        (float3 *)linearImpulse,
 	    (uint4 *)ind,
         (uint * )perObjPointStart,
         (uint * )perObjectIndexStart,
@@ -249,7 +252,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                    "pnttet_hash", CudaDbgLog::FAlways);
 #endif
     
-	simpleContactSolverUpdateVelocity((float3 *)vel,
+    contactsolver::updateImpulse((float3 *)linearImpulse,
 	                (float3 *)deltaLinVel,
 	                (float3 *)deltaAngVel,
 	                (KeyValuePair *)pntTetHash,

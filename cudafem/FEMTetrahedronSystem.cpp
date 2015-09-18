@@ -567,4 +567,29 @@ void FEMTetrahedronSystem::SetNeedElasticity()
 
 void FEMTetrahedronSystem::SetNeedMass()
 { NeedMass = true; }
+
+void FEMTetrahedronSystem::updateSystem(float dt)
+{
+    updateMass();
+	updateExternalForceByImpulse(dt);
+	updateBVolume();
+	updateOrientation();
+	updateElasticity();
+	updateForce();
+	updateStiffnessMatrix();
+	dynamicsAssembly(dt);
+	solveConjugateGradient();
+}
+
+void FEMTetrahedronSystem::updateExternalForceByImpulse(float dt)
+{
+    void * force = m_Fe->bufferOnDevice();
+    void * deltaVel = deviceImpulse();
+    void * mass = deviceMass();
+    masssystem::impulseForce((float3 *)force,
+                                (float3 *)deltaVel,
+                                (float *)mass,
+                                dt,
+                                numPoints());
+}
 //:~

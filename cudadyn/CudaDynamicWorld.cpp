@@ -99,29 +99,36 @@ void CudaDynamicWorld::initOnDevice()
 
 void CudaDynamicWorld::stepPhysics(float dt)
 {
+// add impulse
+    m_narrowphase->updateGravity(dt);
+// resolve contact, update impulse of collision
     collide();
+// update system by impulse
+    updateSystem(dt);
+// update position
 	integrate(dt);
 }
 
 void CudaDynamicWorld::collide()
 {
-    if(m_numObjects < 1) return;
-	unsigned i = 0;
-	for(; i < m_numObjects; i++) bvhObject(i)->update();
-    // CudaBase::CheckCudaError("bvh update");
+    unsigned i;
+    for(i=0; i < m_numObjects; i++) bvhObject(i)->updateBvhImpulseBased();
        
 	m_broadphase->computeOverlappingPairs();
-    // CudaBase::CheckCudaError("broadphase update");
 
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
 	                                m_broadphase->numOverlappingPairs());
-    // CudaBase::CheckCudaError("narrowphase update");
 
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),
 									m_narrowphase->contactPairsBuffer(),
 									m_narrowphase->objectBuffer());
-    // CudaBase::CheckCudaError("solve contact");
+}
+
+void CudaDynamicWorld::updateSystem(float dt)
+{
+    unsigned i;
+    for(i=0; i < m_numObjects; i++) m_objects[i]->updateSystem(dt);
 }
 
 void CudaDynamicWorld::integrate(float dt)

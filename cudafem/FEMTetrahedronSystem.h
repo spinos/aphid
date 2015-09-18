@@ -18,6 +18,8 @@ public:
     virtual ~FEMTetrahedronSystem();
 	virtual void initOnDevice();
 	virtual void update();
+// override CudaMassSystem
+    virtual void updateSystem(float dt);
 // override BvhTetrahedronSystem
     virtual void integrate(float dt);
 	static SplineMap1D SplineMap;
@@ -41,6 +43,7 @@ private:
     void updateForce();
     void dynamicsAssembly(float dt);
     void updateExternalForce();
+    void updateExternalForceByImpulse(float dt);
 	void solveConjugateGradient();
 	void updateBVolume();
 private:

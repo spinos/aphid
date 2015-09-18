@@ -26,6 +26,8 @@ void CudaMassSystem::initOnDevice()
 	m_initialMass->hostToDevice(hostMass(), numPoints() * 4);
 }
 
+void CudaMassSystem::updateSystem(float dt) {}
+
 void CudaMassSystem::setDeviceXPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceX = ptr; m_xLoc = loc; }
 
@@ -42,7 +44,10 @@ void CudaMassSystem::setDeviceMassPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceMass = ptr; m_massLoc = loc; }
 
 void CudaMassSystem::setDeviceAnchorPtr(CUDABuffer * ptr, unsigned loc)
-{ m_deviceAnchor = ptr; m_anchorLoc = loc;}
+{ m_deviceAnchor = ptr; m_anchorLoc = loc; }
+
+void CudaMassSystem::setDeviceImpulsePtr(CUDABuffer * ptr, unsigned loc)
+{ m_deviceImpulse = ptr; m_impulseLoc = loc; }
 
 void CudaMassSystem::setDeviceTretradhedronIndicesPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceTetrahedronIndices = ptr; m_iLoc = loc; }
@@ -67,6 +72,9 @@ void * CudaMassSystem::deviceInitialMass()
 
 void * CudaMassSystem::deviceAnchor()
 { return m_deviceAnchor->bufferOnDeviceAt(m_anchorLoc); }
+
+void * CudaMassSystem::deviceImpulse()
+{ return m_deviceImpulse->bufferOnDeviceAt(m_impulseLoc); }
 
 void * CudaMassSystem::deviceTretradhedronIndices()
 { return m_deviceTetrahedronIndices->bufferOnDeviceAt(m_iLoc); }

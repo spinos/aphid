@@ -33,4 +33,15 @@ void integrateSimple(float3 * pos,
                 float3 * vel, 
                 float dt, 
                 uint maxInd);
+
+void addGravity(float3 * deltaVel,
+                uint * anchored,
+                float dt,
+                uint maxInd);
+
+void impulseForce(float3 * force,
+                           float3 * deltaVel,
+                           float * mass,
+                           float dt,
+                           uint maxInd);
 }
