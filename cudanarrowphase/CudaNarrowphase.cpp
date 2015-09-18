@@ -276,8 +276,9 @@ void CudaNarrowphase::computeTimeOfImpact()
 	
 	void * counts = m_validCounts->bufferOnDevice();
 	
+#define MaxTOINumIterations 4
 	int i;
-	for(i=0; i<DynGlobal::MaxTOINumIterations; i++) {
+	for(i=0; i<MaxTOINumIterations; i++) {
 		void * dstContact = m_contact[bufferId()]->bufferOnDevice();
 		void * pairPos = m_tetVertPos[bufferId()]->bufferOnDevice();
 		void * pairVel = m_tetVertVel[bufferId()]->bufferOnDevice();
@@ -287,7 +288,7 @@ void CudaNarrowphase::computeTimeOfImpact()
 		(float3 *)pairVel,
 		lastNumPairs);
         CudaBase::CheckCudaError("narrowphase time of impact");
-		
+		/*
 		if(i<1) {
 			m_numPairs = countValidContacts(m_contact[bufferId()], lastNumPairs);
 			if(m_numPairs<1) return;
@@ -296,8 +297,7 @@ void CudaNarrowphase::computeTimeOfImpact()
 			swapBuffer();
 			lastNumPairs = m_numPairs;
 		}
-		
-		/*
+
 		if(m_numPairs < lastNumPairs>>2) {
 			// std::cout<<" squeez contact pairs "<<lastNumPairs<<" to "<<m_numPairs<<"\n";
 

@@ -14,10 +14,5 @@
 #define DISABLE_COLLISION_DETECTION 0
 #define DISABLE_CONTACT 0
 #define DISABLE_COLLISION_RESOLUTION 0
-class DynGlobal
-{
-public:
-    static int MaxTOINumIterations;
-};
 #endif        //  #ifndef BVHGLOBAL_H
 

@@ -545,23 +545,6 @@ void FEMTetrahedronSystem::integrate(float dt)
 	//				" Va ", CudaDbgLog::FAlways);
 }
 
-void FEMTetrahedronSystem::update()
-{ 
-#if DISABLE_FEM
-	return CudaTetrahedronSystem::update();
-#endif
-	updateMass();
-	updateExternalForce();
-	updateBVolume();
-	updateOrientation();
-	updateElasticity();
-	updateForce();
-	updateStiffnessMatrix();
-	dynamicsAssembly(1.f/60.f);
-	solveConjugateGradient();
-	BvhTetrahedronSystem::update();
-}
-
 void FEMTetrahedronSystem::SetNeedElasticity()
 { NeedElasticity = true; }
 

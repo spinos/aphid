@@ -17,7 +17,6 @@ public:
     FEMTetrahedronSystem(ATetrahedronMeshGroup * md);
     virtual ~FEMTetrahedronSystem();
 	virtual void initOnDevice();
-	virtual void update();
 // override CudaMassSystem
     virtual void updateSystem(float dt);
 // override BvhTetrahedronSystem

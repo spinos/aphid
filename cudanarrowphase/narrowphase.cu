@@ -354,9 +354,10 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 	unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 
 	if(ind >= maxInd) return;
-	
+
+// assuming already penetrated
 	dstContact[ind].separateAxis=make_float4(0.f, 0.f, 0.f, 0.f);
-	dstContact[ind].timeOfImpact = 1e8f;
+	dstContact[ind].timeOfImpact = 1e-10f;
 	
 	float3 * ppos = & pos[ind<<3];
 	
@@ -386,7 +387,6 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 // output	
 	interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
 	dstContact[ind].separateAxis = sas;
-	dstContact[ind].timeOfImpact = 1e-9f;
 }
 
 __device__ int isValidPair(float toi, const float4 & sa)
