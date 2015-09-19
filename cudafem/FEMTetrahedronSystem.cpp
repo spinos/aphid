@@ -530,21 +530,6 @@ void FEMTetrahedronSystem::solveConjugateGradient()
 #endif
 }
 
-void FEMTetrahedronSystem::integrate(float dt)
-{
-    masssystem::integrate((float3 *)deviceX(), 
-								(float3 *)deviceV(), 
-                                (float3 *)deviceVa(),
-								(uint *)deviceAnchor(),
-								dt, 
-								numPoints());
-    CudaBase::CheckCudaError("fem tetrahedron system integrate");
-    
-    //bglg.writeVec3(deviceAnchoredVBuf(), 
-	//				numPoints(), 
-	//				" Va ", CudaDbgLog::FAlways);
-}
-
 void FEMTetrahedronSystem::SetNeedElasticity()
 { NeedElasticity = true; }
 

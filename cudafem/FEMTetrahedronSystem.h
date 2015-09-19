@@ -19,8 +19,6 @@ public:
 	virtual void initOnDevice();
 // override CudaMassSystem
     virtual void updateSystem(float dt);
-// override BvhTetrahedronSystem
-    virtual void integrate(float dt);
 	static SplineMap1D SplineMap;
 	static float YoungsModulus;
     static void SetNeedElasticity();

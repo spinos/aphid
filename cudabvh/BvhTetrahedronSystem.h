@@ -22,8 +22,6 @@ public:
     virtual void updateBvhImpulseBased();
 	
 	void * vicinity();
-// override mass system
-	virtual void integrate(float dt);
 	
 protected:
     

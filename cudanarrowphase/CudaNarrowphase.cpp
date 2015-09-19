@@ -17,16 +17,17 @@
 #include <CudaDbgLog.h>
 #include <CudaBase.h>
 #include <masssystem_impl.h>
+#define MaxTOINumIterations 5
 
 CudaNarrowphase::CudaNarrowphase() 
 {
 	m_numPoints = 0;
-    m_bufferId = 0;
     m_numObjects = 0;
 	m_numPairs = 0;
 	m_numContacts = 0;
     m_objectBuf.m_pos = new CUDABuffer;
     m_objectBuf.m_pos0 = new CUDABuffer;
+    m_objectBuf.m_prePos = new CUDABuffer;
     m_objectBuf.m_vel = new CUDABuffer;
     m_objectBuf.m_anchoredVel = new CUDABuffer;
     m_objectBuf.m_mass = new CUDABuffer;
@@ -52,6 +53,7 @@ CudaNarrowphase::~CudaNarrowphase()
 {
 	delete m_objectBuf.m_pos;
     delete m_objectBuf.m_pos0;
+    delete m_objectBuf.m_prePos;
     delete m_objectBuf.m_vel;
     delete m_objectBuf.m_anchoredVel;
     delete m_objectBuf.m_mass;
@@ -80,10 +82,10 @@ const unsigned CudaNarrowphase::numElements() const
 { return m_numElements; }
 
 void CudaNarrowphase::getContact0(BaseBuffer * dst)
-{ m_contact[otherBufferId()]->deviceToHost(dst->data(), dst->bufferSize()); }
+{ m_contact[0]->deviceToHost(dst->data(), dst->bufferSize()); }
 
 void CudaNarrowphase::getContact(BaseBuffer * dst)
-{ m_contact[bufferId()]->deviceToHost(dst->data(), dst->bufferSize()); }
+{ m_contact[1]->deviceToHost(dst->data(), dst->bufferSize()); }
 
 void CudaNarrowphase::getContactCounts(BaseBuffer * dst)
 { m_validCounts->deviceToHost(dst->data(), dst->bufferSize()); }
@@ -95,16 +97,16 @@ const unsigned CudaNarrowphase::numContacts() const
 { return m_numContacts; }
 
 void * CudaNarrowphase::contacts0()
-{ return m_contact[otherBufferId()]->bufferOnDevice(); }
+{ return m_contact[0]->bufferOnDevice(); }
 
 void * CudaNarrowphase::contacts()
-{ return m_contact[bufferId()]->bufferOnDevice(); }
+{ return m_contact[1]->bufferOnDevice(); }
 
 void * CudaNarrowphase::contactPairs()
-{ return m_contactPairs[bufferId()]->bufferOnDevice();}
+{ return m_contactPairs[1]->bufferOnDevice();}
 
 void CudaNarrowphase::getContactPairs(BaseBuffer * dst)
-{ m_contactPairs[bufferId()]->deviceToHost(dst->data(), dst->bufferSize());}
+{ m_contactPairs[1]->deviceToHost(dst->data(), dst->bufferSize());}
 
 void CudaNarrowphase::getScanResult(BaseBuffer * dst)
 { m_scanValidContacts->deviceToHost(dst->data(), dst->bufferSize());}
@@ -113,10 +115,10 @@ CudaNarrowphase::CombinedObjectBuffer * CudaNarrowphase::objectBuffer()
 { return &m_objectBuf; }
 
 CUDABuffer * CudaNarrowphase::contactPairsBuffer()
-{ return m_contactPairs[bufferId()]; }
+{ return m_contactPairs[1]; }
 
 CUDABuffer * CudaNarrowphase::contactBuffer()
-{ return m_contact[bufferId()]; }
+{ return m_contact[1]; }
 
 void CudaNarrowphase::addMassSystem(CudaMassSystem * tetra)
 {
@@ -144,6 +146,7 @@ void CudaNarrowphase::initOnDevice()
 	
 	m_objectBuf.m_pos->create(m_numPoints * 12);
 	m_objectBuf.m_pos0->create(m_numPoints * 12);
+	m_objectBuf.m_prePos->create(m_numPoints * 12);
 	m_objectBuf.m_vel->create(m_numPoints * 12);
     m_objectBuf.m_anchoredVel->create(m_numPoints * 12);
 	m_objectBuf.m_mass->create(m_numPoints * 4);
@@ -186,7 +189,7 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	return;
 #endif
     if(numOverlappingPairs < 1) return;
-    
+    m_numPairs = numOverlappingPairs;
     // std::cout<<" n overlappings "<<numOverlappingPairs<<"\n";
 	
 	void * overlappingPairs = overlappingPairBuf->bufferOnDevice();
@@ -195,31 +198,24 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	computeInitialSeparation();
 	
 	// std::cout<<" n contact after initial separation "<<
-	//m_numContacts = countValidContacts(m_contact[bufferId()], numOverlappingPairs);
+	// m_numContacts = countValidContacts(m_contact[bufferId()], numOverlappingPairs);
     
 	computeTimeOfImpact();
 	
-	if(m_numPairs < 1) {
-		m_numContacts = 0;
-		return;
-	}
+	unsigned numPen = countPenetratingContacts(m_numPairs);
+	std::cout<<"  n pens "<<numPen;
 	
-	m_numContacts = countValidContacts(m_contact[bufferId()], m_numPairs);
-	
-	if(m_numContacts < 1) return;
+	m_numContacts = countNoPenetratingContacts(m_numPairs);
 		
-	if(m_numContacts < m_numPairs) {
+	if(m_numContacts > 0 && m_numContacts < m_numPairs) {
 		// std::cout<<" final squeez contact pairs to "<<m_numContacts<<"\n";
 		squeezeContacts(m_numPairs);
-		swapBuffer();
 	}
 }
 
 void CudaNarrowphase::resetContacts(void * overlappingPairs, unsigned numOverlappingPairs)
 {
-	m_numPairs = numOverlappingPairs;
 	m_numContacts = 0;
-	m_bufferId = 0;
 	
 	m_contact[0]->create(numOverlappingPairs * 48);
 	m_contact[1]->create(numOverlappingPairs * 48);
@@ -237,22 +233,24 @@ void CudaNarrowphase::resetContacts(void * overlappingPairs, unsigned numOverlap
 
 	void * pos = m_objectBuf.m_pos->bufferOnDevice();
 	void * vel = m_objectBuf.m_vel->bufferOnDevice();
+	void * deltaVel = m_objectBuf.m_linearImpulse->bufferOnDevice();
 	void * ind = m_objectBuf.m_ind->bufferOnDevice();
-	void * pairPos = m_tetVertPos[bufferId()]->bufferOnDevice();
-	void * pairVel = m_tetVertVel[bufferId()]->bufferOnDevice();
+	void * pairPos = m_tetVertPos[0]->bufferOnDevice();
+	void * pairVel = m_tetVertVel[0]->bufferOnDevice();
 	
 	narrowphase_writePairPosAndVel((float3 *)pairPos,
 		(float3 *)pairVel,
 		(uint2 *)overlappingPairs,
 		(float3 *)pos,
 		(float3 *)vel,
+		(float3 *)deltaVel,
 		(uint4 *)ind,
 		(uint *)m_objectBuf.m_pointCacheLoc->bufferOnDevice(),
 		(uint *)m_objectBuf.m_indexCacheLoc->bufferOnDevice(),
 		numOverlappingPairs);
     CudaBase::CheckCudaError("narrowphase write pair p and v");
 		
-	void * dstPair = m_contactPairs[bufferId()]->bufferOnDevice();
+	void * dstPair = m_contactPairs[0]->bufferOnDevice();
 	narrowphase_writePairs((uint2 *)dstPair, 
 		(uint2 *)overlappingPairs,
 		numOverlappingPairs);
@@ -261,8 +259,8 @@ void CudaNarrowphase::resetContacts(void * overlappingPairs, unsigned numOverlap
 
 void CudaNarrowphase::computeInitialSeparation()
 {
-	void * dstContact = m_contact[bufferId()]->bufferOnDevice();
-	void * pairPos = m_tetVertPos[bufferId()]->bufferOnDevice();
+	void * dstContact = m_contact[0]->bufferOnDevice();
+	void * pairPos = m_tetVertPos[0]->bufferOnDevice();
 	
 	narrowphase_computeInitialSeparation((ContactData *)dstContact,
 		(float3 *)pairPos,
@@ -276,54 +274,43 @@ void CudaNarrowphase::computeTimeOfImpact()
 	
 	void * counts = m_validCounts->bufferOnDevice();
 	
-#define MaxTOINumIterations 4
 	int i;
 	for(i=0; i<MaxTOINumIterations; i++) {
-		void * dstContact = m_contact[bufferId()]->bufferOnDevice();
-		void * pairPos = m_tetVertPos[bufferId()]->bufferOnDevice();
-		void * pairVel = m_tetVertVel[bufferId()]->bufferOnDevice();
+		void * dstContact = m_contact[0]->bufferOnDevice();
+		void * pairPos = m_tetVertPos[0]->bufferOnDevice();
+		void * pairVel = m_tetVertVel[0]->bufferOnDevice();
 	
 	    narrowphase_advanceTimeOfImpactIterative((ContactData *)dstContact,
 		(float3 *)pairPos,
 		(float3 *)pairVel,
 		lastNumPairs);
         CudaBase::CheckCudaError("narrowphase time of impact");
-		/*
-		if(i<1) {
-			m_numPairs = countValidContacts(m_contact[bufferId()], lastNumPairs);
-			if(m_numPairs<1) return;
-			// std::cout<<" squeez contact pairs "<<lastNumPairs<<" to "<<m_numPairs<<"\n";
-			squeezeContacts(lastNumPairs);
-			swapBuffer();
-			lastNumPairs = m_numPairs;
-		}
-
-		if(m_numPairs < lastNumPairs>>2) {
-			// std::cout<<" squeez contact pairs "<<lastNumPairs<<" to "<<m_numPairs<<"\n";
-
-			//nplg.writeVec3(m_tetVertPos[bufferId()], lastNumPairs<<3, "posb4", CudaDbgLog::FAlways);
-			//nplg.writeVec3(m_tetVertVel[bufferId()], lastNumPairs<<3, "velb4", CudaDbgLog::FAlways);
-	
-			squeezeContacts(lastNumPairs);
-			swapBuffer();
-			
-			//nplg.writeVec3(m_tetVertPos[bufferId()], m_numPairs<<3, "posaft", CudaDbgLog::FAlways);
-			//nplg.writeVec3(m_tetVertVel[bufferId()], m_numPairs<<3, "velaft", CudaDbgLog::FAlways);
-
-			lastNumPairs = m_numPairs;
-		}*/
 	}
 }
 
-unsigned CudaNarrowphase::countValidContacts(CUDABuffer * contactBuf, unsigned n)
+unsigned CudaNarrowphase::countNoPenetratingContacts(unsigned n)
 {
 	const unsigned scanValidPairLength = CudaScan::getScanBufferLength(n);
 	
 	void * counts = m_validCounts->bufferOnDevice();
 
-	narrowphaseComputeValidPairs((uint *)counts, (ContactData *)contactBuf->bufferOnDevice(), 
+	narrowphaseComputeValidPairs((uint *)counts, (ContactData *)m_contact[0]->bufferOnDevice(), 
 										n, scanValidPairLength);
     CudaBase::CheckCudaError("narrowphase count valid pairs");
+	
+	return m_scanIntermediate->prefixSum(m_scanValidContacts, 
+												m_validCounts, scanValidPairLength);
+}
+
+unsigned CudaNarrowphase::countPenetratingContacts(unsigned n)
+{
+    const unsigned scanValidPairLength = CudaScan::getScanBufferLength(n);
+	
+	void * counts = m_validCounts->bufferOnDevice();
+
+	narrowphase_computePenetratingPairs((uint *)counts, (ContactData *)m_contact[0]->bufferOnDevice(), 
+										n, scanValidPairLength);
+    CudaBase::CheckCudaError("narrowphase count penetrating pairs");
 	
 	return m_scanIntermediate->prefixSum(m_scanValidContacts, 
 												m_validCounts, scanValidPairLength);
@@ -334,17 +321,17 @@ void CudaNarrowphase::squeezeContacts(unsigned numPairs)
 	//nplg.writeUInt(m_validCounts, numPairs, "counts", CudaDbgLog::FAlways);
 	//nplg.writeUInt(m_scanValidContacts, numPairs, "scan_result", CudaDbgLog::FAlways);
 	
-	void * srcContact = m_contact[bufferId()]->bufferOnDevice();
-	void * dstContact = m_contact[otherBufferId()]->bufferOnDevice();
+	void * srcContact = m_contact[0]->bufferOnDevice();
+	void * dstContact = m_contact[1]->bufferOnDevice();
 	
-	void * srcPairs = m_contactPairs[bufferId()]->bufferOnDevice();
-	void * dstPairs = m_contactPairs[otherBufferId()]->bufferOnDevice();
+	void * srcPairs = m_contactPairs[0]->bufferOnDevice();
+	void * dstPairs = m_contactPairs[1]->bufferOnDevice();
 	
-	void * srcPos = m_tetVertPos[bufferId()]->bufferOnDevice();
-	void * dstPos = m_tetVertPos[otherBufferId()]->bufferOnDevice();
+	void * srcPos = m_tetVertPos[0]->bufferOnDevice();
+	void * dstPos = m_tetVertPos[1]->bufferOnDevice();
 	
-	void * srcVel = m_tetVertVel[bufferId()]->bufferOnDevice();
-	void * dstVel = m_tetVertVel[otherBufferId()]->bufferOnDevice();
+	void * srcVel = m_tetVertVel[0]->bufferOnDevice();
+	void * dstVel = m_tetVertVel[1]->bufferOnDevice();
 	
 	void * counts = m_validCounts->bufferOnDevice();
 	void * scanResult = m_scanValidContacts->bufferOnDevice();
@@ -370,26 +357,19 @@ void CudaNarrowphase::resetToInitial()
                       (float3 *)vel, (float3 *)vel0, m_numPoints);
 }
 
-void CudaNarrowphase::swapBuffer()
-{ m_bufferId = (m_bufferId + 1) & 1; }
-
-const unsigned CudaNarrowphase::bufferId() const
-{ return m_bufferId; }
-	
-const unsigned CudaNarrowphase::otherBufferId() const
-{ return (m_bufferId + 1) & 1; }
-
 void CudaNarrowphase::setAnchoredVelocity(Vector3F * src)
 { m_objectBuf.m_anchoredVel->hostToDevice(src, m_numPoints * 12); }
 
-void CudaNarrowphase::integrate(float dt)
+void CudaNarrowphase::upatePosition(float dt)
 {
 	if(numPoints() < 1) return;
 	void * pos = m_objectBuf.m_pos->bufferOnDevice();
 	void * vel = m_objectBuf.m_vel->bufferOnDevice();
     void * vela = m_objectBuf.m_anchoredVel->bufferOnDevice();
+	void * pre = m_objectBuf.m_prePos->bufferOnDevice();
 	void * anchors = m_objectBuf.m_anchor->bufferOnDevice();
 	masssystem::integrate((float3 *)pos, 
+	                        (float3 *)pre, 
                            (float3 *)vel, 
                            (float3 *)vela, 
 						   (uint *)anchors,

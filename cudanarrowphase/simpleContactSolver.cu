@@ -6,7 +6,6 @@
  * http://www.richardtonge.com/papers/Tonge-2012-MassSplittingForJitterFreeParallelRigidBodySimulation-preprint.pdf
  */
 
-#include "simpleContactSolver_implement.h"
 #include "bvh_math.cuh"
 #include "barycentric.cu"
 #include "stripedModel.cuh"
@@ -842,7 +841,7 @@ namespace contactsolver {
 }
 
 namespace contactconstraint {
-void prepareContactConstraint(ContactConstraint* constraints,
+void prepareNoPenetratingContact(ContactConstraint* constraints,
     float3 * contactLinearVel,
                                         uint2 * splits,
                                         uint2 * pairs,
@@ -860,11 +859,46 @@ void prepareContactConstraint(ContactConstraint* constraints,
     unsigned nblk = iDivUp(numContacts2, SETCONSTRAINT_TPB);
     dim3 grid(nblk, 1, 1);
     
-    prepareContactConstraint_kernel<<< grid, block >>>(constraints,
+    prepareNoPenetratingContactConstraint_kernel<<< grid, block >>>(constraints,
         contactLinearVel,
                                         splits,
                                         pairs,
                                         pos,
+                                        vel,
+                                        impulse,
+                                        ind,
+                                        perObjPointStart,
+                                        perObjectIndexStart,
+                                        splitMass,
+                                        contacts,
+                                        numContacts2);
+}
+
+void preparePenetratingContact(ContactConstraint* constraints,
+    float3 * contactLinearVel,
+                                        uint2 * splits,
+                                        uint2 * pairs,
+                                        float3 * pos,
+                                        float3 * prePos,
+                                        float3 * vel,
+                                        float3 * impulse,
+                                        uint4 * ind,
+                                        uint * perObjPointStart,
+                                        uint * perObjectIndexStart,
+                                        float * splitMass,
+                                        ContactData * contacts,
+                                        uint numContacts2)
+{
+    dim3 block(SETCONSTRAINT_TPB, 1, 1);
+    unsigned nblk = iDivUp(numContacts2, SETCONSTRAINT_TPB);
+    dim3 grid(nblk, 1, 1);
+    
+    preparePenetratingContactConstraint_kernel<<< grid, block >>>(constraints,
+        contactLinearVel,
+                                        splits,
+                                        pairs,
+                                        pos,
+                                        prePos,
                                         vel,
                                         impulse,
                                         ind,
@@ -897,5 +931,29 @@ void resolveCollision(ContactConstraint* constraints,
 	                    contacts,
 	                    numContacts2);
 }
+
+void separatePenetreated(ContactConstraint* constraints,
+                        float3 * contactLinearVelocity,
+                        float3 * deltaLinearVelocity,
+	                    uint2 * pairs,
+                        uint2 * splits,
+	                    float * splitMass,
+	                    ContactData * contacts,
+	                    uint numContacts2)
+{
+    dim3 block(SOLVECONTACT_TPB, 1, 1);
+    unsigned nblk = iDivUp(numContacts2, SOLVECONTACT_TPB);
+    dim3 grid(nblk, 1, 1);
+    
+    separatePenetreated_kernel<<< grid, block >>>(constraints,
+                        contactLinearVelocity,
+                        deltaLinearVelocity,
+	                    pairs,
+                        splits,
+	                    splitMass,
+	                    contacts,
+	                    numContacts2);
+}
+
 }
 //:~

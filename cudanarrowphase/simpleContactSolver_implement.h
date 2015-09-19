@@ -95,7 +95,7 @@ namespace contactsolver {
 }
 
 namespace contactconstraint {
-    void prepareContactConstraint(ContactConstraint* constraints,
+    void prepareNoPenetratingContact(ContactConstraint* constraints,
         float3 * contactLinearVel,
                                         uint2 * splits,
                                         uint2 * pairs,
@@ -108,8 +108,32 @@ namespace contactconstraint {
                                         float * splitMass,
                                         ContactData * contacts,
                                         uint numContacts);
+    
+    void preparePenetratingContact(ContactConstraint* constraints,
+        float3 * contactLinearVel,
+                                        uint2 * splits,
+                                        uint2 * pairs,
+                                        float3 * pos,
+                                        float3 * prePos,
+                                        float3 * vel,
+                                        float3 * impulse,
+                                        uint4 * ind,
+                                        uint * perObjPointStart,
+                                        uint * perObjectIndexStart,
+                                        float * splitMass,
+                                        ContactData * contacts,
+                                        uint numContacts);
 
     void resolveCollision(ContactConstraint* constraints,
+                        float3 * contactLinearVelocity,
+                        float3 * deltaLinearVelocity,
+	                    uint2 * pairs,
+                        uint2 * splits,
+	                    float * splitMass,
+	                    ContactData * contacts,
+	                    uint numContacts);
+	
+	void separatePenetreated(ContactConstraint* constraints,
                         float3 * contactLinearVelocity,
                         float3 * deltaLinearVelocity,
 	                    uint2 * pairs,

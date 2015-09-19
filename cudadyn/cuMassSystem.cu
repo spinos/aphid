@@ -50,7 +50,8 @@ __global__ void integrate_kernel(float3 * pos,
 	float3_add_inplace(pos[ind], scale_float3_by(anchoredVel, dt));
 }
 
-__global__ void integrate1_kernel(float3 * pos, 
+__global__ void updatePosition_kernel(float3 * pos, 
+                                float3 * pos0,
 								float3 * vel,
                                 float3 * anchoredVel,
 								uint * anchor,
@@ -63,6 +64,7 @@ __global__ void integrate1_kernel(float3 * pos,
     float3 va = anchoredVel[ind];
     if(anchor[ind] > 0) vel[ind] = va;
 	else va = vel[ind];
+	pos0[ind] = pos[ind];
 	float3_add_inplace(pos[ind], scale_float3_by(va, dt));
 }
 
@@ -154,6 +156,7 @@ void useAllAnchoredVelocity(float3 * vel,
 }
 
 void integrate(float3 * pos, 
+                float3 * prePos,
 								float3 * vel, 
                                 float3 * anchoredVel,
 								uint * anchor,
@@ -164,7 +167,8 @@ void integrate(float3 * pos,
     unsigned nblk = iDivUp(maxInd, 512);
     dim3 grid(nblk, 1, 1);
     
-    integrate1_kernel<<< grid, block >>>(pos,
+    updatePosition_kernel<<< grid, block >>>(pos,
+        prePos,
         vel,
         anchoredVel,
         anchor,

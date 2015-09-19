@@ -1,4 +1,3 @@
-#include "narrowphase_implement.h"
 #include "bvh_math.cuh"
 #include <gjk_math.cu>
 #include <stripedModel.cuh>
@@ -82,6 +81,7 @@ __global__ void writePairPosAndVel_kernel(float3 * dstPos,
 		uint2 * pairs,
 		float3 * srcPos,
 		float3 * srcVel,
+		float3 * srcImpulse,
 		uint4 * indices,
 		uint * pointStart, uint * indexStart, 
 		uint maxInd)
@@ -105,9 +105,10 @@ __global__ void writePairPosAndVel_kernel(float3 * dstPos,
 	
 // 512 threads 64 ta 64 tb
 	const int iVert = (threadIdx.x >> 1) & 3;
+	const uint itetvet = tetVertices[iVert];
 	
-	dstPos[ind] = srcPos[tetVertices[iVert]];
-	dstVel[ind] = srcVel[tetVertices[iVert]];
+	dstPos[ind] = srcPos[itetvet];
+	dstVel[ind] = float3_add( srcVel[itetvet], srcImpulse[itetvet] );
 }
 
 __global__ void computeSeparateAxis_kernel(ContactData * dstContact,
@@ -381,8 +382,11 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 		sas, 
 	    coord);
 	}
-// still intersected no solution
-	if(sas.w < 1.f) return;
+// still intersected negative toi
+    if(sas.w < 1.f) {
+        dstContact[ind].timeOfImpact = - GJK_STEPSIZE;
+        return;
+    }
 
 // output	
 	interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
@@ -410,8 +414,26 @@ __global__ void computeValidPairs_kernel(uint* dstCounts,
 	    return;
 	}
 	
-	const ContactData cd = srcContact[ind];
-	dstCounts[ind] = isValidPair(cd.timeOfImpact, cd.separateAxis);	
+	// const ContactData cd = srcContact[ind];
+	// dstCounts[ind] = isValidPair(cd.timeOfImpact, cd.separateAxis);	
+	dstCounts[ind] = (srcContact[ind].timeOfImpact < GJK_STEPSIZE);	
+}
+
+__global__ void computePenetratingPairs_kernel(uint* dstCounts, 
+                    ContactData * srcContact, 
+                    uint numContacts, 
+                    uint scanBufferLength)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if(ind >= scanBufferLength) return;
+	
+	if(ind >= numContacts) {
+	    dstCounts[ind] = 0;
+	    return;
+	}
+	
+	dstCounts[ind] = (srcContact[ind].timeOfImpact < 0.f);	
 }
 
 __global__ void squeezeContactPairs_kernel(uint2 * dstPairs, uint2 * srcPairs,
@@ -579,6 +601,7 @@ void narrowphase_writePairPosAndVel(float3 * dstPos,
 		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,
+		float3 * deltaVel,
 		uint4 * ind,
 		uint * pointStart, uint * indexStart, 
 		uint numOverlappingPairs)
@@ -592,6 +615,7 @@ void narrowphase_writePairPosAndVel(float3 * dstPos,
 		pairs,
 		pos,
 		vel,
+		deltaVel,
 		ind,
 		pointStart, indexStart, 
 		numOverlappingPairs<<3);
@@ -635,6 +659,18 @@ void narrowphase_squeezeContactPosAndVel(float3 * dstPos,
 									srcContact,
 									counts, scanResult, 
 									numPairs<<3);
+}
+
+void narrowphase_computePenetratingPairs(uint * dstCounts, 
+        ContactData * srcContact, 
+        uint numContacts, 
+        uint scanBufferLength)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(scanBufferLength, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    computePenetratingPairs_kernel<<< grid, block >>>(dstCounts, srcContact, numContacts, scanBufferLength);
 }
 
 }

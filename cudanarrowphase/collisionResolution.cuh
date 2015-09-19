@@ -33,6 +33,8 @@ __global__ void resolveCollision_kernel(ContactConstraint* constraints,
 	
 	const ContactConstraint inConstraint = constraints[iContact];
 	
+	if(inConstraint.relVel > -1e-8f) return;
+	
 	uint splitInd;
 	
 	if((threadIdx.x & 1)>0) {
@@ -99,5 +101,44 @@ __global__ void resolveCollision_kernel(ContactConstraint* constraints,
 	
 	applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
 }
-#endif        //  #ifndef COLLISIONRESOLUTION_CUH
 
+__global__ void separatePenetreated_kernel(ContactConstraint* constraints,
+                        float3 * contactLinearVelocity,
+                        float3 * deltaLinearVelocity,
+	                    uint2 * pairs,
+                        uint2 * splits,
+	                    float * splitMass,
+	                    ContactData * contacts,
+	                    uint maxInd)
+{
+    __shared__ float3 sVel[SOLVECONTACT_TPB];
+    __shared__ float3 sN[SOLVECONTACT_TPB];
+    
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	const uint iContact = ind>>1;
+	
+	const ContactConstraint inConstraint = constraints[iContact];
+	
+	if(inConstraint.relVel < 0.f) return;
+	
+	uint splitInd;
+	
+	if((threadIdx.x & 1)>0) {
+	    splitInd = splits[iContact].y;
+	}
+	else {
+	    splitInd = splits[iContact].x;
+	}
+
+// reverse velocities
+    float3 velA = contactLinearVelocity[ind];
+    addDeltaVelocityLinearOnly(velA, 
+        deltaLinearVelocity[splitInd]);
+    deltaLinearVelocity[splitInd] = scale_float3_by(velA,
+        splitMass[splitInd] * inConstraint.Minv * 2.31f);
+    
+}
+
+#endif        //  #ifndef COLLISIONRESOLUTION_CUH

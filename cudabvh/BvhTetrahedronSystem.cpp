@@ -103,17 +103,6 @@ void BvhTetrahedronSystem::formTetrahedronAabbs()
     CudaBase::CheckCudaError("tetrahedron system form aabb");
 }
 
-void BvhTetrahedronSystem::integrate(float dt)
-{ 
-    masssystem::integrate((float3 *)deviceX(), 
-                           (float3 *)deviceV(), 
-                           (float3 *)deviceVa(), 
-						   (uint *)deviceAnchor(),
-                           dt,
-                           numPoints());
-    CudaBase::CheckCudaError("tetrahedron system integrate");
-}
-
 void * BvhTetrahedronSystem::vicinity()
 { return m_vicinity->bufferOnDevice(); }
 //:~

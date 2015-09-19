@@ -35,6 +35,11 @@ void narrowphaseComputeValidPairs(uint * dstCounts,
         uint numContacts, 
         uint scanBufferLength);
 
+void narrowphase_computePenetratingPairs(uint * dstCounts, 
+        ContactData * srcContact, 
+        uint numContacts, 
+        uint scanBufferLength);
+
 void narrowphaseSqueezeContactPairs(uint2 * dstPairs, uint2 * srcPairs,
                                     ContactData * dstContact, ContactData *srcContact,
 									uint * counts, uint * packLoc, 
@@ -49,6 +54,7 @@ void narrowphase_writePairPosAndVel(float3 * dstPos,
 		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,
+		float3 * deltaVel,
 		uint4 * ind,
 		uint * pointStart, uint * indexStart, 
 		uint numOverlappingPairs);

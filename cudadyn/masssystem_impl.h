@@ -16,7 +16,8 @@ void useAllAnchoredVelocity(float3 * vel,
                 float3 * anchoredVel,
                 uint maxInd);
 
-void integrate(float3 * pos, 
+void integrate(float3 * pos,
+                float3 * prePos,
                 float3 * vel, 
                 float3 * anchoredVel,
                 uint * anchor,

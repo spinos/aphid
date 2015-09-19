@@ -133,11 +133,11 @@ void CudaDynamicWorld::updateSystem(float dt)
 
 void CudaDynamicWorld::integrate(float dt)
 { 
-#if 1
+#if 0
 	unsigned i = 0;
 	for(; i < m_numObjects; i++) object(i)->integrate(dt);
 #else
-    m_narrowphase->integrate(dt);
+    m_narrowphase->upatePosition(dt);
 #endif
 }
 

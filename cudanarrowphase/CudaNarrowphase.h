@@ -20,6 +20,7 @@ public:
 	struct CombinedObjectBuffer {
 		CUDABuffer * m_pos;
 		CUDABuffer * m_pos0;
+		CUDABuffer * m_prePos;
 		CUDABuffer * m_vel;
         CUDABuffer * m_anchoredVel;
 		CUDABuffer * m_mass;
@@ -62,18 +63,16 @@ public:
 	CUDABuffer * contactBuffer();
 
     void updateGravity(float dt);
-	void integrate(float dt);
+	void upatePosition(float dt);
 protected:
 
 private:
 	void resetContacts(void * overlappingPairs, unsigned numOverlappingPairs);
 	void computeInitialSeparation();
-	unsigned countValidContacts(CUDABuffer * contactBuf, unsigned n);
+	unsigned countNoPenetratingContacts(unsigned n);
+	unsigned countPenetratingContacts(unsigned n);
 	void computeTimeOfImpact();
 	void squeezeContacts(unsigned numPairs);
-	void swapBuffer();
-	const unsigned bufferId() const;
-	const unsigned otherBufferId() const;
 private:
 	CombinedObjectBuffer m_objectBuf;
 	CUDABuffer * m_contact[2];
@@ -87,7 +86,6 @@ private:
     unsigned m_objectPointStart[CUDANARROWPHASE_MAX_NUMOBJECTS];
 	unsigned m_objectIndexStart[CUDANARROWPHASE_MAX_NUMOBJECTS];
 	unsigned m_numObjects, m_numPoints, m_numElements, m_numContacts, m_numPairs;
-	unsigned m_bufferId;
 };
 #endif        //  #ifndef CUDANARROWPHASE_H
 
