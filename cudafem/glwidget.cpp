@@ -58,20 +58,23 @@ void GLWidget::clientDraw()
     sst.str("");
 	sst<<"n contacts: "<<m_world->numContacts();
     hudText(sst.str(), 2);
+    sst.str("");
+    sst<<"total energy: "<<(m_world->totalEnergy() / 1000.f)<<" J";
+    hudText(sst.str(), 3);
     
     if(m_interface->HasVelocityFile()) {
         sst.str("");
         sst<<"cache range: ("<<m_interface->VelocityFileBegin()
         <<","<<m_interface->VelocityFileEnd()<<")";
-        hudText(sst.str(), 3);
+        hudText(sst.str(), 4);
         sst.str("");
         sst<<"current frame: "<<m_interface->CurrentFrame();
-        hudText(sst.str(), 4);
+        hudText(sst.str(), 5);
         if(m_world->isToSaveCache()) {
             if(m_world->allFramesCached())
-                hudText("all frames cached", 5);
+                hudText("all frames cached", 6);
             else  
-                hudText("cacheing frames", 5);
+                hudText("cacheing frames", 6);
         }
     }
     

@@ -200,7 +200,7 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	computeInitialSeparation();
 	
 	// std::cout<<" n contact after initial separation "<<
-	// m_numContacts = countValidContacts(m_contact[bufferId()], numOverlappingPairs);
+	// m_numContacts = countNoPenetratingContacts(m_numPairs);
     
 	computeTimeOfImpact();
 	

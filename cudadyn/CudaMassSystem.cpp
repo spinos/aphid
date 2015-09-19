@@ -9,21 +9,29 @@
 
 #include "CudaMassSystem.h"
 #include <CUDABuffer.h>
+#include <CudaReduction.h>
 #include <iostream>
+#include "masssystem_impl.h"
 CudaMassSystem::CudaMassSystem() 
 {
 	m_initialMass = new CUDABuffer;
+	m_nodeEnergy = new CUDABuffer;
+	m_reduce = new CudaReduction;
 }
 
 CudaMassSystem::~CudaMassSystem() 
 {
 	delete m_initialMass;
+	delete m_nodeEnergy;
+	delete m_reduce;
 }
 
 void CudaMassSystem::initOnDevice()
 {
     m_initialMass->create(numPoints() * 4);
+    m_nodeEnergy->create(numPoints() * 4);
 	m_initialMass->hostToDevice(hostMass(), numPoints() * 4);
+	m_reduce->initOnDevice();
 }
 
 void CudaMassSystem::updateSystem(float dt) {}
@@ -110,4 +118,19 @@ void CudaMassSystem::sendVToHost()
 { deviceVBuf()->deviceToHost(hostV(), vLoc(), numPoints() * 12); }
 
 void CudaMassSystem::updateMass() {}
+
+float CudaMassSystem::energy()
+{ 
+// mv^2
+    void * dst = m_nodeEnergy->bufferOnDevice();
+    void * mass = deviceMass();
+    void * vel = deviceV();
+    masssystem::computeEnergy((float *)dst,
+                                (float *)mass,
+                                (float3 *)vel,
+                                numPoints());
+    float e;
+    m_reduce->sum<float>(e, (float *)dst, numPoints());
+    return e; 
+}
 //:~

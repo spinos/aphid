@@ -22,6 +22,7 @@ CudaDynamicWorld::CudaDynamicWorld()
     m_narrowphase = new CudaNarrowphase;
 	m_contactSolver = new SimpleContactSolver;
 	m_numObjects = 0;
+	m_totalEnergy = 0.f;
     m_enableSaveCache = false;
     m_finishedCaching = false;
     m_positionFile = new H5FieldOut;
@@ -310,4 +311,16 @@ std::string CudaDynamicWorld::objName(int i) const
 
 void CudaDynamicWorld::updateSpeedLimit(float x)
 { m_contactSolver->setSpeedLimit(x + 20.f); }
+
+float CudaDynamicWorld::totalEnergy() const
+{ return m_totalEnergy; }
+
+void CudaDynamicWorld::updateEnergy()
+{
+    m_totalEnergy = 0.f;
+    const unsigned nobj = numObjects();
+    for(unsigned i=0; i< nobj; i++) {
+        m_totalEnergy += m_objects[i]->energy();
+	}
+}
 //:~

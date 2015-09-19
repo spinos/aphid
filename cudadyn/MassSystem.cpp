@@ -179,4 +179,7 @@ void MassSystem::integrate(float dt) {}
 
 void MassSystem::setHostX(float * src)
 { m_hostX->copyFrom(src, numPoints() * 12); }
+
+float MassSystem::energy()
+{ return 0; }
 //:~

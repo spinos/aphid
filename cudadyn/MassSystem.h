@@ -37,6 +37,7 @@ public:
     const float totalMass() const;
 	
 	virtual void integrate(float dt);
+	virtual float energy();
     
     void setHostX(float * src);
     

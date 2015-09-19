@@ -45,4 +45,9 @@ void impulseForce(float3 * force,
                            float * mass,
                            float dt,
                            uint maxInd);
+
+void computeEnergy(float * dst,
+                float * mass,
+                float3 * vel,
+                uint maxInd);
 }

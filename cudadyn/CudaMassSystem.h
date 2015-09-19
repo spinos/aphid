@@ -11,7 +11,7 @@
  */
 #include <MassSystem.h>
 class CUDABuffer;
-
+class CudaReduction;
 class CudaMassSystem : public MassSystem {
 public:
 	CudaMassSystem();
@@ -42,6 +42,9 @@ public:
 	void sendXToHost();
 	void sendVToHost();
 	
+// override mass system
+    virtual float energy();
+	
 protected:
 	CUDABuffer * deviceXBuf();
 	CUDABuffer * deviceVBuf();
@@ -62,6 +65,8 @@ private:
     CUDABuffer * m_deviceImpulse;
 	CUDABuffer * m_deviceTetrahedronIndices;
 	CUDABuffer * m_initialMass;
+	CUDABuffer * m_nodeEnergy;
+	CudaReduction * m_reduce;
 	unsigned m_xLoc, m_xiLoc, m_vLoc, m_vaLoc, m_massLoc, m_anchorLoc, m_iLoc, m_impulseLoc;
 };
 #endif        //  #ifndef CUDAMASSSYSTEM_H

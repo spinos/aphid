@@ -51,6 +51,7 @@ void WorldThread::run()
             return;
         }
         
+        m_world->updateEnergy();
         m_world->readVelocityCache();
         m_world->updateWind();
         m_world->sendXToHost();

@@ -52,12 +52,6 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 	float4 sas;
 	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, sas, 
 	    coord);
-//  intersected try zero margin	
-/*	if(sas.w < 1.f) {
-	    computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, 
-		sas,
-	    coord);
-	}*/
 // still intersected negative toi
     if(sas.w < 1.f)
         return;

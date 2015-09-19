@@ -37,6 +37,7 @@ public:
 	void reset();
 	void updateWind();
 	void updateSpeedLimit(float x);
+	void updateEnergy();
     
     bool isToSaveCache() const;
     void setToSaveCache(bool x);
@@ -53,6 +54,7 @@ public:
 	SimpleContactSolver * contactSolver() const;
 	const unsigned numContacts() const;
     const unsigned totalNumPoints() const;
+    float totalEnergy() const;
     void dbgDraw();
     
     static WorldDbgDraw * DbgDrawer;
@@ -71,6 +73,7 @@ private:
     CudaMassSystem * m_objects[CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS];
     H5FieldOut * m_positionFile;
     unsigned m_numObjects;
+    float m_totalEnergy;
     bool m_enableSaveCache;
     bool m_finishedCaching;
 };

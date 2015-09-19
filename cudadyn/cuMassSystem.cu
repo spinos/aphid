@@ -109,6 +109,19 @@ __global__ void impulseForce_kernel(float3 * force,
     else force[ind] = scale_float3_by(deltaVel[ind], m / dt);
 }
 
+__global__ void computeEnergy_kernel(float * energy,
+                float * mass,
+                float3 * vel,
+                uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	float m = mass[ind];
+    if(m > 1e5f) energy[ind] = 0.f;
+    else energy[ind] = float3_length2(vel[ind]) * m;
+}
+
 namespace masssystem {
 void computeMass(float * dst,
                 float * mass0,
@@ -237,6 +250,21 @@ void impulseForce(float3 * force,
                                            deltaVel,
         mass,
         dt,
+        maxInd);
+}
+
+void computeEnergy(float * dst,
+                float * mass,
+                float3 * vel,
+                uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    computeEnergy_kernel<<< grid, block >>>(dst,
+        mass,
+        vel,
         maxInd);
 }
 
