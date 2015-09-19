@@ -162,24 +162,6 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
         numContacts * 2);
     CudaBase::CheckCudaError("jacobi solver prepare constraint");
     
-    void * prePos = objectBuf->m_prePos->bufferOnDevice();
-	
-    contactconstraint::preparePenetratingContact((ContactConstraint *)constraint,
-	    (float3 *)contactLinearVel,
-	    (uint2 *)splits,
-	    (uint2 *)pairs,
-	    (float3 *)pos,
-	    (float3 *)prePos,
-	    (float3 *)vel,
-        (float3 *)linearImpulse,
-	    (uint4 *)ind,
-        (uint * )perObjPointStart,
-        (uint * )perObjectIndexStart,
-        (float *)splitMass,
-	    (ContactData *)contacts,
-        numContacts * 2);
-    CudaBase::CheckCudaError("jacobi solver prepare penetrating constraint");
-	
 	m_deltaLinearVelocity->create(nextPow2(splitBufLength * 12));
 	m_deltaAngularVelocity->create(nextPow2(splitBufLength * 12));
 	
@@ -240,18 +222,6 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                    "deltaV_avg", CudaDbgLog::FAlways);
 #endif
 	}
-	
-// try to move penetrated bodies to previous position        
-    contactconstraint::separatePenetreated((ContactConstraint *)constraint,
-                    (float3 *)contactLinearVel,
-                    (float3 *)deltaLinVel,
-                    (uint2 *)pairs,
-                    (uint2 *)splits,
-                    (float *)splitMass,
-                    (ContactData *)contacts,
-                    numContacts * 2);
-    CudaBase::CheckCudaError("jacobi solver separate penetrated");
-
 
 // 2 tet per contact, 4 pnt per tet, key is pnt index, value is tet index in split
 	const unsigned pntHashBufLength = iRound1024(numContacts * 2 * 4);

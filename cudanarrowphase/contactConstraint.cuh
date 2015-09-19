@@ -53,29 +53,27 @@ inline __device__ float computeRelativeVelocityLinearOnly(float3 nA,
 }
 
 __global__ void prepareNoPenetratingContactConstraint_kernel(ContactConstraint* constraints,
-    float3 * contactLinearVel,
-                                        uint2 * splits,
-                                        uint2 * pairs,
-                                        float3 * srcPos,
-                                        float3 * srcVel,
-                                        float3 * srcImpulse,
-                                        uint4 * indices,
-                                        uint * pointStarts,
-                                        uint * indexStarts,
-                                        float * splitMass,
-                                        ContactData * contacts,
-                                        uint maxInd)
+                            float3 * contactLinearVel,
+                            uint2 * splits,
+                            uint2 * pairs,
+                            float3 * srcPos,
+                            float3 * srcVel,
+                            float3 * srcImpulse,
+                            uint4 * indices,
+                            uint * pointStarts,
+                            uint * indexStarts,
+                            float * splitMass,
+                            ContactData * contacts,
+                            uint maxInd)
 {
     __shared__ float3 sVel[SETCONSTRAINT_TPB];
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
 	uint iContact = ind>>1;
-	
-	ContactData contact = contacts[iContact];
-	if(contact.timeOfImpact < 0.f) return;
-	
 	int isRgt = (threadIdx.x & 1);
+	   
+    ContactData contact = contacts[iContact];
 	
 	BarycentricCoordinate wei;
     float3 v0, v1;
@@ -120,69 +118,9 @@ __global__ void prepareNoPenetratingContactConstraint_kernel(ContactConstraint* 
 	
 	float rel = computeRelativeVelocityLinearOnly(nA, nB,
 	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
-	
+// penalty for shallow penetrations
+	if(contact.timeOfImpact < 1e-8f) rel -= 2.f;
 	outConstraint.relVel = rel;
-	constraints[iContact] = outConstraint;
-}
-
-__global__ void preparePenetratingContactConstraint_kernel(ContactConstraint* constraints,
-    float3 * contactLinearVel,
-                                        uint2 * splits,
-                                        uint2 * pairs,
-                                        float3 * srcPos,
-                                        float3 * srcPrePos,
-                                        float3 * srcVel,
-                                        float3 * srcImpulse,
-                                        uint4 * indices,
-                                        uint * pointStarts,
-                                        uint * indexStarts,
-                                        float * splitMass,
-                                        ContactData * contacts,
-                                        uint maxInd)
-{
-    __shared__ float3 sVel[SETCONSTRAINT_TPB];
-    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-	if(ind >= maxInd) return;
-	
-	uint iContact = ind>>1;
-	
-	ContactData contact = contacts[iContact];
-	if(contact.timeOfImpact > 0.f) return;
-	
-	int isRgt = (threadIdx.x & 1);
-	
-	BarycentricCoordinate averageWei = make_float4(.25f, .25f, .25f, .25f);
-    float3 v0, v1, p0, p1;
-	uint4 ia;
-	if(isRgt>0) {
-	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].y);	    
-	}
-	else {
-	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].x);
-	}
-	interpolate_float3i(v0, ia, srcVel, &averageWei);
-    interpolate_float3i(v1, ia, srcImpulse, &averageWei);
-    interpolate_float3i(p0, ia, srcPrePos, &averageWei);
-    interpolate_float3i(p1, ia, srcPos, &averageWei);
-	
-	float3_add_inplace(v0, v1);
-	float3_minus_inplace(p1, p0);
-	v1 = scale_float3_by(p1, 60.f);
-	float3_add_inplace(v0, v1);
-	contactLinearVel[ind] = v0;
-	
-	__syncthreads();
-
-	if(isRgt) return;
-	
-	ContactConstraint outConstraint;
-	outConstraint.lambda = 0.f;
-
-	const uint2 dstInd = splits[iContact];
-	
-	outConstraint.Minv = computeMassTensor(splitMass[dstInd.x], splitMass[dstInd.y]);
-	
-	outConstraint.relVel = 0.f;
 	constraints[iContact] = outConstraint;
 }
 

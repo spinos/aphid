@@ -25,6 +25,10 @@ void narrowphase_computeInitialSeparation(ContactData * dstContact,
 		float3 * pos,
 		uint numOverlappingPairs);
 
+void narrowphase_separateShallowPenetration(ContactData * dstContact,
+		float3 * pos,
+		uint numOverlappingPairs);
+
 void narrowphase_advanceTimeOfImpactIterative(ContactData * dstContact,
 		float3 * pos,
 		float3 * vel,
@@ -51,10 +55,12 @@ void narrowphaseResetXV(float3 * dst, float3 *src,
 
 void narrowphase_writePairPosAndVel(float3 * dstPos,
 		float3 * dstVel,
+		float3 * dstPrePos,
 		uint2 * pairs,
 		float3 * pos,
 		float3 * vel,
 		float3 * deltaVel,
+		float3 * prePos,
 		uint4 * ind,
 		uint * pointStart, uint * indexStart, 
 		uint numOverlappingPairs);

@@ -72,6 +72,7 @@ private:
 	unsigned countNoPenetratingContacts(unsigned n);
 	unsigned countPenetratingContacts(unsigned n);
 	void computeTimeOfImpact();
+	void handleShallowPenetrations();
 	void squeezeContacts(unsigned numPairs);
 private:
 	CombinedObjectBuffer m_objectBuf;
@@ -81,6 +82,7 @@ private:
 	CUDABuffer * m_scanValidContacts;
 	CudaScan * m_scanIntermediate;
 	CUDABuffer * m_tetVertPos[2];
+	CUDABuffer * m_tetVertPrePos;
 	CUDABuffer * m_tetVertVel[2];
     CudaMassSystem * m_objects[CUDANARROWPHASE_MAX_NUMOBJECTS];
     unsigned m_objectPointStart[CUDANARROWPHASE_MAX_NUMOBJECTS];

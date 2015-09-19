@@ -17,7 +17,7 @@
 #include <CudaDbgLog.h>
 #include <CudaBase.h>
 #include <masssystem_impl.h>
-#define MaxTOINumIterations 5
+#define MaxTOINumIterations 4
 
 CudaNarrowphase::CudaNarrowphase() 
 {
@@ -47,6 +47,7 @@ CudaNarrowphase::CudaNarrowphase()
 	m_tetVertPos[1] = new CUDABuffer;
 	m_tetVertVel[0] = new CUDABuffer;
 	m_tetVertVel[1] = new CUDABuffer;
+	m_tetVertPrePos = new CUDABuffer;
 }
 
 CudaNarrowphase::~CudaNarrowphase() 
@@ -73,6 +74,7 @@ CudaNarrowphase::~CudaNarrowphase()
 	delete m_tetVertPos[1];
 	delete m_tetVertVel[0];
 	delete m_tetVertVel[1];
+	delete m_tetVertPrePos;
 }
 
 const unsigned CudaNarrowphase::numPoints() const
@@ -188,8 +190,8 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 #if DISABLE_COLLISION_RESOLUTION
 	return;
 #endif
-    if(numOverlappingPairs < 1) return;
     m_numPairs = numOverlappingPairs;
+    if(numOverlappingPairs < 1) return;
     // std::cout<<" n overlappings "<<numOverlappingPairs<<"\n";
 	
 	void * overlappingPairs = overlappingPairBuf->bufferOnDevice();
@@ -202,12 +204,14 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
     
 	computeTimeOfImpact();
 	
-	unsigned numPen = countPenetratingContacts(m_numPairs);
-	std::cout<<"  n pens "<<numPen;
+	//unsigned numPen = countPenetratingContacts(m_numPairs);
+	//std::cout<<"  n pens "<<numPen;
+	
+	handleShallowPenetrations();
 	
 	m_numContacts = countNoPenetratingContacts(m_numPairs);
 		
-	if(m_numContacts > 0 && m_numContacts < m_numPairs) {
+	if(m_numContacts > 0) {
 		// std::cout<<" final squeez contact pairs to "<<m_numContacts<<"\n";
 		squeezeContacts(m_numPairs);
 	}
@@ -225,6 +229,7 @@ void CudaNarrowphase::resetContacts(void * overlappingPairs, unsigned numOverlap
 	m_tetVertPos[1]->create(numOverlappingPairs * 2 * 4 * 12);
 	m_tetVertVel[0]->create(numOverlappingPairs * 2 * 4 * 12);
 	m_tetVertVel[1]->create(numOverlappingPairs * 2 * 4 * 12);
+	m_tetVertPrePos->create(numOverlappingPairs * 2 * 4 * 12);
 	
 	const unsigned scanValidPairLength = CudaScan::getScanBufferLength(numOverlappingPairs);
 	m_scanIntermediate->create(scanValidPairLength);
@@ -234,21 +239,25 @@ void CudaNarrowphase::resetContacts(void * overlappingPairs, unsigned numOverlap
 	void * pos = m_objectBuf.m_pos->bufferOnDevice();
 	void * vel = m_objectBuf.m_vel->bufferOnDevice();
 	void * deltaVel = m_objectBuf.m_linearImpulse->bufferOnDevice();
+	void * prePos = m_objectBuf.m_prePos->bufferOnDevice();
 	void * ind = m_objectBuf.m_ind->bufferOnDevice();
 	void * pairPos = m_tetVertPos[0]->bufferOnDevice();
 	void * pairVel = m_tetVertVel[0]->bufferOnDevice();
+	void * pairPrePos = m_tetVertPrePos->bufferOnDevice();
 	
 	narrowphase_writePairPosAndVel((float3 *)pairPos,
 		(float3 *)pairVel,
+		(float3 *)pairPrePos,
 		(uint2 *)overlappingPairs,
 		(float3 *)pos,
 		(float3 *)vel,
 		(float3 *)deltaVel,
+		(float3 *)prePos,
 		(uint4 *)ind,
 		(uint *)m_objectBuf.m_pointCacheLoc->bufferOnDevice(),
 		(uint *)m_objectBuf.m_indexCacheLoc->bufferOnDevice(),
 		numOverlappingPairs);
-    CudaBase::CheckCudaError("narrowphase write pair p and v");
+    CudaBase::CheckCudaError("narrowphase write pair ppre, p and v");
 		
 	void * dstPair = m_contactPairs[0]->bufferOnDevice();
 	narrowphase_writePairs((uint2 *)dstPair, 
@@ -270,8 +279,6 @@ void CudaNarrowphase::computeInitialSeparation()
 
 void CudaNarrowphase::computeTimeOfImpact()
 {
-	unsigned lastNumPairs = m_numPairs;
-	
 	void * counts = m_validCounts->bufferOnDevice();
 	
 	int i;
@@ -283,9 +290,23 @@ void CudaNarrowphase::computeTimeOfImpact()
 	    narrowphase_advanceTimeOfImpactIterative((ContactData *)dstContact,
 		(float3 *)pairPos,
 		(float3 *)pairVel,
-		lastNumPairs);
+		m_numPairs);
         CudaBase::CheckCudaError("narrowphase time of impact");
 	}
+}
+
+void CudaNarrowphase::handleShallowPenetrations()
+{
+/*  assuming pairs are not penetrating on previous frame
+ *  try to find the separation axis
+ */
+    void * dstContact = m_contact[0]->bufferOnDevice();
+	void * pairPos = m_tetVertPrePos->bufferOnDevice();
+	
+	narrowphase_separateShallowPenetration((ContactData *)dstContact,
+		(float3 *)pairPos,
+		m_numPairs);
+    CudaBase::CheckCudaError("narrowphase initial sep");
 }
 
 unsigned CudaNarrowphase::countNoPenetratingContacts(unsigned n)
@@ -318,9 +339,6 @@ unsigned CudaNarrowphase::countPenetratingContacts(unsigned n)
 
 void CudaNarrowphase::squeezeContacts(unsigned numPairs)
 {
-	//nplg.writeUInt(m_validCounts, numPairs, "counts", CudaDbgLog::FAlways);
-	//nplg.writeUInt(m_scanValidContacts, numPairs, "scan_result", CudaDbgLog::FAlways);
-	
 	void * srcContact = m_contact[0]->bufferOnDevice();
 	void * dstContact = m_contact[1]->bufferOnDevice();
 	

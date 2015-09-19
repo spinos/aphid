@@ -118,7 +118,7 @@ void CudaDynamicWorld::collide()
 
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
 	                                m_broadphase->numOverlappingPairs());
-
+	
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),
 									m_narrowphase->contactPairsBuffer(),
@@ -132,14 +132,7 @@ void CudaDynamicWorld::updateSystem(float dt)
 }
 
 void CudaDynamicWorld::integrate(float dt)
-{ 
-#if 0
-	unsigned i = 0;
-	for(; i < m_numObjects; i++) object(i)->integrate(dt);
-#else
-    m_narrowphase->upatePosition(dt);
-#endif
-}
+{ m_narrowphase->upatePosition(dt); }
 
 const unsigned CudaDynamicWorld::numContacts() const
 { return m_narrowphase->numContacts(); }

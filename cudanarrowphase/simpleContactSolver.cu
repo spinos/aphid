@@ -628,9 +628,9 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 
     float3 a = dstVelocity[iPnt];
 	float3_add_inplace(a, sumLinVel);
-    float speed = float3_length(a);
+    //float speed = float3_length(a);
 // limit speed here
-    // if(speed>CSpeedLimit) float3_scale_inplace(a, CSpeedLimit/speed);
+    //if(speed>CSpeedLimit) float3_scale_inplace(a, CSpeedLimit/speed);
     dstVelocity[iPnt] = a;
 }
 
@@ -864,41 +864,6 @@ void prepareNoPenetratingContact(ContactConstraint* constraints,
                                         splits,
                                         pairs,
                                         pos,
-                                        vel,
-                                        impulse,
-                                        ind,
-                                        perObjPointStart,
-                                        perObjectIndexStart,
-                                        splitMass,
-                                        contacts,
-                                        numContacts2);
-}
-
-void preparePenetratingContact(ContactConstraint* constraints,
-    float3 * contactLinearVel,
-                                        uint2 * splits,
-                                        uint2 * pairs,
-                                        float3 * pos,
-                                        float3 * prePos,
-                                        float3 * vel,
-                                        float3 * impulse,
-                                        uint4 * ind,
-                                        uint * perObjPointStart,
-                                        uint * perObjectIndexStart,
-                                        float * splitMass,
-                                        ContactData * contacts,
-                                        uint numContacts2)
-{
-    dim3 block(SETCONSTRAINT_TPB, 1, 1);
-    unsigned nblk = iDivUp(numContacts2, SETCONSTRAINT_TPB);
-    dim3 grid(nblk, 1, 1);
-    
-    preparePenetratingContactConstraint_kernel<<< grid, block >>>(constraints,
-        contactLinearVel,
-                                        splits,
-                                        pairs,
-                                        pos,
-                                        prePos,
                                         vel,
                                         impulse,
                                         ind,
