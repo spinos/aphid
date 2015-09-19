@@ -246,7 +246,7 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 
         separateDistance = float4_length(sas);
 // close enough use result of last step
-        if(separateDistance < 0.001f) { 
+        if(separateDistance < 1e-6f) { 
             break;
         }
         
@@ -312,9 +312,9 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
 	    return;
 	
 // use thin shell margin
-	separateDistance -= GJK_THIN_MARGIN2;
+	// separateDistance -= GJK_THIN_MARGIN2;
 
-	const float toi = ct.timeOfImpact + separateDistance / closeInSpeed * .571f;
+	const float toi = ct.timeOfImpact + separateDistance / closeInSpeed * .51f;
 
 // too far away	
 	if(toi > GJK_STEPSIZE) { 
@@ -373,14 +373,14 @@ __global__ void computeInitialSeparation_kernel(ContactData * dstContact,
 	ClosestPointTestContext ctc;
 	BarycentricCoordinate coord;
 	float4 sas;
-//	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, sas, 
-//	    coord);
-// intersected try zero margin	
-//	if(sas.w < 1.f) {
+	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, sas, 
+	    coord);
+//  intersected try zero margin	
+	if(sas.w < 1.f) {
 	    computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, 
 		sas, 
 	    coord);
-//	}
+	}
 // still intersected no solution
 	if(sas.w < 1.f) return;
 
