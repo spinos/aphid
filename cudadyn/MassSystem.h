@@ -9,9 +9,10 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+#include <DynamicBody.h>
 #include <Vector3F.h>
 class BaseBuffer;
-class MassSystem {
+class MassSystem : public aphid::DynamicBody {
 public:
 	MassSystem();
 	virtual ~MassSystem();
@@ -56,6 +57,7 @@ protected:
     
     void setAnchoredValue(unsigned i, unsigned anchorInd);
 	bool isAnchoredPoint(unsigned i);
+	float averageNodeMass() const;
 	
 private:
 	BaseBuffer * m_hostX;

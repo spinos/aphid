@@ -100,6 +100,7 @@ void CudaDynamicWorld::initOnDevice()
 
 void CudaDynamicWorld::stepPhysics(float dt)
 {
+    if( allSleeping() ) return;
 // add impulse
     m_narrowphase->updateGravity(dt);
 // resolve contact, update impulse of collision
@@ -148,6 +149,7 @@ void CudaDynamicWorld::reset()
         VelocityCache = 0;
     }
     resetMovenentRelativeToAir();
+    wakeUpAll();
 }
 
 void CudaDynamicWorld::sendXToHost()
@@ -165,6 +167,7 @@ void CudaDynamicWorld::sendXToHost()
 #endif   
 	 unsigned i;
      for(i=0; i< nobj; i++) {
+		if(m_objects[i]->isSleeping()) continue;
 		m_objects[i]->sendXToHost();
         CudaLinearBvh * bvh = bvhObject(i);
         bvh->sendDbgToHost();
@@ -318,9 +321,33 @@ float CudaDynamicWorld::totalEnergy() const
 void CudaDynamicWorld::updateEnergy()
 {
     m_totalEnergy = 0.f;
-    const unsigned nobj = numObjects();
-    for(unsigned i=0; i< nobj; i++) {
+    for(unsigned i=0; i< numObjects(); i++) {
         m_totalEnergy += m_objects[i]->energy();
 	}
+}
+
+void CudaDynamicWorld::putToSleep()
+{
+    for(unsigned i=0; i< numObjects(); i++) {
+        if(m_objects[i]->isSleeping()) continue;
+        if(m_objects[i]->velocitySize() < 4.7e-5f) {
+            m_objects[i]->putToSleep();
+        }
+	}
+}
+
+bool CudaDynamicWorld::allSleeping() const
+{
+    for(unsigned i=0; i< numObjects(); i++) {
+        if(!m_objects[i]->isSleeping()) return false;
+    }
+    return true;
+}
+
+void CudaDynamicWorld::wakeUpAll()
+{
+    for(unsigned i=0; i< numObjects(); i++) {
+        m_objects[i]->wakeUp();
+    }
 }
 //:~

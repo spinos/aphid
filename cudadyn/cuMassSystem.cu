@@ -112,14 +112,34 @@ __global__ void impulseForce_kernel(float3 * force,
 __global__ void computeEnergy_kernel(float * energy,
                 float * mass,
                 float3 * vel,
+                float defaultNodeMass,
                 uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
 	float m = mass[ind];
-    if(m > 1e5f) energy[ind] = 0.f;
+    if(m > 1e5f) m = defaultNodeMass;
     else energy[ind] = float3_length2(vel[ind]) * m;
+}
+
+__global__ void computeLength_kernel(float * energy,
+                float3 * vel,
+                uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	energy[ind] = float3_length2(vel[ind]);
+}
+
+__global__ void zeroVelocity_kernel(float3 * vel,
+                uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	vel[ind] = make_float3(0.f, 0.f, 0.f);
 }
 
 namespace masssystem {
@@ -256,6 +276,7 @@ void impulseForce(float3 * force,
 void computeEnergy(float * dst,
                 float * mass,
                 float3 * vel,
+                float defaultNodeMass,
                 uint maxInd)
 {
     dim3 block(512, 1, 1);
@@ -265,6 +286,32 @@ void computeEnergy(float * dst,
     computeEnergy_kernel<<< grid, block >>>(dst,
         mass,
         vel,
+        defaultNodeMass,
+        maxInd);
+}
+
+void computeLength(float * dst,
+                float3 * vel,
+                uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    computeLength_kernel<<< grid, block >>>(dst,
+        vel,
+        maxInd);
+}
+
+
+void zeroVelocity(float3 * vel,
+                uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    zeroVelocity_kernel<<< grid, block >>>(vel,
         maxInd);
 }
 

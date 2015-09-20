@@ -59,7 +59,7 @@ void GLWidget::clientDraw()
 	sst<<"n contacts: "<<m_world->numContacts();
     hudText(sst.str(), 2);
     sst.str("");
-    sst<<"total energy: "<<(m_world->totalEnergy() / 1000.f)<<" J";
+    sst<<"total energy: "<<m_world->totalEnergy()<<" J";
     hudText(sst.str(), 3);
     
     if(m_interface->HasVelocityFile()) {

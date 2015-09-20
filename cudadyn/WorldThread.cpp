@@ -52,8 +52,11 @@ void WorldThread::run()
         }
         
         m_world->updateEnergy();
+        m_world->putToSleep();
+// before step?
         m_world->readVelocityCache();
         m_world->updateWind();
+        
         m_world->sendXToHost();
         m_world->saveCache();
         

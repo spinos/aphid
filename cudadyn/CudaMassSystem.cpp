@@ -121,6 +121,7 @@ void CudaMassSystem::updateMass() {}
 
 float CudaMassSystem::energy()
 { 
+    if(isSleeping()) return 0.f;
 // mv^2
     void * dst = m_nodeEnergy->bufferOnDevice();
     void * mass = deviceMass();
@@ -128,9 +129,32 @@ float CudaMassSystem::energy()
     masssystem::computeEnergy((float *)dst,
                                 (float *)mass,
                                 (float3 *)vel,
+                                averageNodeMass(),
                                 numPoints());
     float e;
     m_reduce->sum<float>(e, (float *)dst, numPoints());
-    return e; 
+    return e * .001f; 
+}
+
+float CudaMassSystem::velocitySize()
+{ return energy() / totalMass(); }
+
+float CudaMassSystem::impulseSize()
+{
+    void * dst = m_nodeEnergy->bufferOnDevice();
+    void * vel = deviceV();
+    masssystem::computeLength((float *)dst,
+                                (float3 *)vel,
+                                numPoints());
+    float e;
+    m_reduce->sum<float>(e, (float *)dst, numPoints());
+    return e;
+}
+
+void CudaMassSystem::stopMoving()
+{
+    void * vel = deviceV();
+    masssystem::zeroVelocity((float3 *)vel,
+                                numPoints());
 }
 //:~

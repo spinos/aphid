@@ -26,6 +26,7 @@ void BvhTriangleSystem::update()
 
 void BvhTriangleSystem::updateBvhImpulseBased()
 {
+    if(isSleeping()) return;
     formTetrahedronAabbs();
     CudaLinearBvh::update();
 }

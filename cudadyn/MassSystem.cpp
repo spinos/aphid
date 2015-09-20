@@ -182,4 +182,7 @@ void MassSystem::setHostX(float * src)
 
 float MassSystem::energy()
 { return 0; }
+
+float MassSystem::averageNodeMass() const
+{ return totalMass() / numPoints(); }
 //:~

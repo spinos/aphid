@@ -38,6 +38,7 @@ public:
 	void updateWind();
 	void updateSpeedLimit(float x);
 	void updateEnergy();
+	void putToSleep();
     
     bool isToSaveCache() const;
     void setToSaveCache(bool x);
@@ -65,6 +66,8 @@ protected:
 	void updateMovenentRelativeToAir();
 private:
     std::string objName(int i) const;
+    bool allSleeping() const;
+    void wakeUpAll();
 private:
     std::vector<unsigned > m_activeObjectInds;
     CudaBroadphase * m_broadphase;

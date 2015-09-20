@@ -72,6 +72,7 @@ void BvhTetrahedronSystem::update()
 
 void BvhTetrahedronSystem::updateBvhImpulseBased()
 {
+    if(isSleeping()) return;
     formTetrahedronAabbsImpulsed();
     CudaLinearBvh::update();
 }

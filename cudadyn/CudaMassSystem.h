@@ -44,6 +44,9 @@ public:
 	
 // override mass system
     virtual float energy();
+    
+    float velocitySize();
+    float impulseSize();
 	
 protected:
 	CUDABuffer * deviceXBuf();
@@ -55,6 +58,9 @@ protected:
     const unsigned anchoredVLoc() const;
 	CUDABuffer * anchorBuf();
 	virtual void updateMass();
+// override dynamic body
+	virtual void stopMoving();
+	
 private:
 	CUDABuffer * m_deviceX;
 	CUDABuffer * m_deviceXi;

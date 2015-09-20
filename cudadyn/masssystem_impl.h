@@ -49,5 +49,14 @@ void impulseForce(float3 * force,
 void computeEnergy(float * dst,
                 float * mass,
                 float3 * vel,
+                float defaultNodeMass,
                 uint maxInd);
+
+void computeLength(float * dst,
+                float3 * vel,
+                uint maxInd);
+
+void zeroVelocity(float3 * vel,
+                uint maxInd);
+
 }

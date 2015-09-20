@@ -39,11 +39,10 @@ TriangleSystem::TriangleSystem(ATriangleMesh * md)
 	setNumPoints(np);
 	setNumTetrahedrons(md->numTriangles());
 	setNumTriangles(md->numTriangles());
+	setTotalMass(np);
 }
 
-TriangleSystem::~TriangleSystem() 
-{
-}
+TriangleSystem::~TriangleSystem() {}
 
 const int TriangleSystem::elementRank() const
 { return 3; }

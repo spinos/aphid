@@ -35,6 +35,7 @@ protected:
 	void createL1Vicinity();
 	void createL2Vicinity();
 	const unsigned numTetrahedronVicinityInd() const;
+	
 private:
     
 typedef std::map<unsigned, unsigned> VicinityMap;

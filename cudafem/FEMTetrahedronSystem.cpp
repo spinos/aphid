@@ -538,6 +538,7 @@ void FEMTetrahedronSystem::SetNeedMass()
 
 void FEMTetrahedronSystem::updateSystem(float dt)
 {
+    if(isSleeping()) return;
     updateMass();
 	updateExternalForceByImpulse(dt);
 	updateBVolume();
