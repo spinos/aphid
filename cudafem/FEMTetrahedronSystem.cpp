@@ -550,6 +550,11 @@ void FEMTetrahedronSystem::updateSystem(float dt)
 	solveConjugateGradient();
 }
 
+void FEMTetrahedronSystem::resetSystem()
+{
+    resetOrientation();
+}
+
 void FEMTetrahedronSystem::updateExternalForceByImpulse(float dt)
 {
     void * force = m_Fe->bufferOnDevice();

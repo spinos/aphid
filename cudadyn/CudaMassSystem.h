@@ -19,6 +19,7 @@ public:
 	
 	virtual void initOnDevice();
 	virtual void updateSystem(float dt);
+	virtual void resetSystem();
     
 	void setDeviceXPtr(CUDABuffer * ptr, unsigned loc);
 	void setDeviceXiPtr(CUDABuffer * ptr, unsigned loc);

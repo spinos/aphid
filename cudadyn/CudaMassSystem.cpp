@@ -36,6 +36,8 @@ void CudaMassSystem::initOnDevice()
 
 void CudaMassSystem::updateSystem(float dt) {}
 
+void CudaMassSystem::resetSystem() {}
+
 void CudaMassSystem::setDeviceXPtr(CUDABuffer * ptr, unsigned loc)
 { m_deviceX = ptr; m_xLoc = loc; }
 
@@ -133,7 +135,7 @@ float CudaMassSystem::energy()
                                 numPoints());
     float e;
     m_reduce->sum<float>(e, (float *)dst, numPoints());
-    return e * .001f; 
+    return e * .001f;
 }
 
 float CudaMassSystem::velocitySize()

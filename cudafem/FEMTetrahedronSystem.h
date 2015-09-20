@@ -19,6 +19,7 @@ public:
 	virtual void initOnDevice();
 // override CudaMassSystem
     virtual void updateSystem(float dt);
+    virtual void resetSystem();
 	static SplineMap1D SplineMap;
 	static float YoungsModulus;
     static void SetNeedElasticity();

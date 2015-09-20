@@ -15,6 +15,8 @@ class CudaMassSystem;
 class CudaLinearBvh;
 class IVelocityFile;
 class H5FieldOut;
+class CudaForceController;
+
 class CudaDynamicWorld
 {
 public:
@@ -29,9 +31,6 @@ public:
     
     void stepPhysics(float dt);
     
-    void collide();
-    void updateSystem(float dt);
-    void integrate(float dt);
     void sendXToHost();
     void readVelocityCache();
 	void reset();
@@ -68,6 +67,12 @@ private:
     std::string objName(int i) const;
     bool allSleeping() const;
     void wakeUpAll();
+    void resetAll();
+    void updateGravity(float dt);
+    void collide();
+    void updateSystem(float dt);
+    void integrate(float dt);
+    
 private:
     std::vector<unsigned > m_activeObjectInds;
     CudaBroadphase * m_broadphase;
@@ -75,6 +80,7 @@ private:
     SimpleContactSolver * m_contactSolver;
     CudaMassSystem * m_objects[CUDA_DYNAMIC_WORLD_MAX_NUM_OBJECTS];
     H5FieldOut * m_positionFile;
+    CudaForceController * m_controller;
     unsigned m_numObjects;
     float m_totalEnergy;
     bool m_enableSaveCache;

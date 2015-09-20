@@ -1,5 +1,8 @@
 #include <bvh_common.h>
 #include "bvh_math.cuh"
+
+__constant__ float3 CMASSGravity;
+
 __global__ void computeMass_kernel(float * dst,
                 float * mass0,
                 uint * anchored,
@@ -81,15 +84,15 @@ __global__ void integrate2_kernel(float3 * pos,
 }
 
 __global__ void addGravity_kernel(float3 * deltaVel, 
-								uint * anchored,
+								float * mass,
                                 float dt, 
 								uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-    if(anchored[ind] > 0) deltaVel[ind] = make_float3(0.f, 0.f, 0.f);
-    else deltaVel[ind] = make_float3(0.f, -0.1635f, 0.f);
+    if(mass[ind] > 1e5f) deltaVel[ind] = make_float3(0.f, 0.f, 0.f);
+    else deltaVel[ind] = scale_float3_by(CMASSGravity, dt);
 }
 
 __global__ void impulseForce_kernel(float3 * force,
@@ -120,7 +123,7 @@ __global__ void computeEnergy_kernel(float * energy,
 	
 	float m = mass[ind];
     if(m > 1e5f) m = defaultNodeMass;
-    else energy[ind] = float3_length2(vel[ind]) * m;
+    energy[ind] = float3_length2(vel[ind]) * m;
 }
 
 __global__ void computeLength_kernel(float * energy,
@@ -242,7 +245,7 @@ void integrateSimple(float3 * pos,
 }
 
 void addGravity(float3 * deltaVel,
-                uint * anchored,
+                float * mass,
                 float dt,
                 uint maxInd)
 {
@@ -251,7 +254,7 @@ void addGravity(float3 * deltaVel,
     dim3 grid(nblk, 1, 1);
     
     addGravity_kernel<<< grid, block >>>(deltaVel,
-        anchored,
+        mass,
         dt,
         maxInd);
 }
@@ -314,5 +317,8 @@ void zeroVelocity(float3 * vel,
     zeroVelocity_kernel<<< grid, block >>>(vel,
         maxInd);
 }
+
+void setGravity(float * g)
+{ cudaMemcpyToSymbol(CMASSGravity, g, 12); }
 
 }

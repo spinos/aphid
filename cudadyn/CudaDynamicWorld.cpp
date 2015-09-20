@@ -12,6 +12,7 @@
 #include <cuFemTetrahedron_implement.h>
 #include <H5FieldOut.h>
 #include <AField.h>
+#include "CudaForceController.h"
 
 WorldDbgDraw * CudaDynamicWorld::DbgDrawer = 0;
 IVelocityFile * CudaDynamicWorld::VelocityCache = 0;
@@ -28,6 +29,7 @@ CudaDynamicWorld::CudaDynamicWorld()
     m_positionFile = new H5FieldOut;
     if(!m_positionFile->create("./position.tmp"))
         std::cout<<"\n error: dynamic world cannot create position cache file!\n";
+    m_controller = new CudaForceController;
 }
 
 CudaDynamicWorld::~CudaDynamicWorld()
@@ -35,6 +37,7 @@ CudaDynamicWorld::~CudaDynamicWorld()
     delete m_broadphase;
     delete m_narrowphase;
     delete m_contactSolver;
+    delete m_controller;
 }
 
 const unsigned CudaDynamicWorld::numObjects() const
@@ -93,16 +96,18 @@ void CudaDynamicWorld::initOnDevice()
 	<<"\n used "<<CudaBase::MemoryUsed<<" byte memory"
 	<<"\n";
 	
-	float gravity[3] = {0.f, -9.81f, 0.f};
-	tetrahedronfem::setGravity(gravity);
 	m_contactSolver->setSpeedLimit(50.f);
+	m_controller->setNumNodes( m_narrowphase->numPoints() );
+	m_controller->setMassBuf( m_narrowphase->objectBuffer()->m_mass );
+	m_controller->setImpulseBuf( m_narrowphase->objectBuffer()->m_linearImpulse );
+	m_controller->setGravity(0.f, -9.81f, 0.f);
 }
 
 void CudaDynamicWorld::stepPhysics(float dt)
 {
     if( allSleeping() ) return;
 // add impulse
-    m_narrowphase->updateGravity(dt);
+    updateGravity(dt);
 // resolve contact, update impulse of collision
     collide();
 // update system by impulse
@@ -110,6 +115,9 @@ void CudaDynamicWorld::stepPhysics(float dt)
 // update position
 	integrate(dt);
 }
+
+void CudaDynamicWorld::updateGravity(float dt)
+{ m_controller->updateGravity(dt); }
 
 void CudaDynamicWorld::collide()
 {
@@ -150,6 +158,7 @@ void CudaDynamicWorld::reset()
     }
     resetMovenentRelativeToAir();
     wakeUpAll();
+    resetAll();
 }
 
 void CudaDynamicWorld::sendXToHost()
@@ -348,6 +357,13 @@ void CudaDynamicWorld::wakeUpAll()
 {
     for(unsigned i=0; i< numObjects(); i++) {
         m_objects[i]->wakeUp();
+    }
+}
+
+void CudaDynamicWorld::resetAll()
+{
+    for(unsigned i=0; i< numObjects(); i++) {
+        m_objects[i]->resetSystem();
     }
 }
 //:~

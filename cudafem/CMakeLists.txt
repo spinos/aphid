@@ -85,6 +85,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../cudanarrowphase/CudaNarrowphase.cpp"
 "../cudanarrowphase/SimpleContactSolver.cpp"
 "../cudadyn/CudaDynamicWorld.cpp"
+../cudadyn/CudaForceController.cpp
 "../cudadyn/DynamicWorldInterface.cpp"
 "../cudadyn/WorldDbgDraw.cpp"
 "../cudadyn/MassSystem.cpp"

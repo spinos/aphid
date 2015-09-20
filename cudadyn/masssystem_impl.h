@@ -1,3 +1,6 @@
+#ifndef MASSSYSTEM_IMPL_H
+#define MASSSYSTEM_IMPL_H
+
 #include <bvh_common.h>
 
 namespace masssystem {
@@ -36,7 +39,7 @@ void integrateSimple(float3 * pos,
                 uint maxInd);
 
 void addGravity(float3 * deltaVel,
-                uint * anchored,
+                float * mass,
                 float dt,
                 uint maxInd);
 
@@ -59,4 +62,8 @@ void computeLength(float * dst,
 void zeroVelocity(float3 * vel,
                 uint maxInd);
 
+void setGravity(float * g);
+
 }
+#endif        //  #ifndef MASSSYSTEM_IMPL_H
+

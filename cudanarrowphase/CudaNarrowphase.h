@@ -62,8 +62,8 @@ public:
 	CUDABuffer * contactPairsBuffer();
 	CUDABuffer * contactBuffer();
 
-    void updateGravity(float dt);
-	void upatePosition(float dt);
+    void upatePosition(float dt);
+    
 protected:
 
 private:

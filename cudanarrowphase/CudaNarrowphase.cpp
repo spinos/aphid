@@ -395,17 +395,4 @@ void CudaNarrowphase::upatePosition(float dt)
                            numPoints());
     CudaBase::CheckCudaError("narrowphase integrate");
 }
-
-void CudaNarrowphase::updateGravity(float dt)
-{
-    if(numPoints() < 1) return;
-    void * anchors = m_objectBuf.m_anchor->bufferOnDevice();
-    void * impusle = m_objectBuf.m_linearImpulse->bufferOnDevice();
-    
-    masssystem::addGravity((float3 *)impusle, 
-                           (uint *)anchors,
-                           dt,
-                           numPoints());
-    CudaBase::CheckCudaError("narrowphase update gravity");
-}
 //:~
