@@ -118,7 +118,7 @@ namespace contactconstraint {
 	                    ContactData * contacts,
 	                    uint numContacts);
 	
-	void separatePenetreated(ContactConstraint* constraints,
+	void resolveFriction(ContactConstraint* constraints,
                         float3 * contactLinearVelocity,
                         float3 * deltaLinearVelocity,
 	                    uint2 * pairs,
@@ -126,5 +126,6 @@ namespace contactconstraint {
 	                    float * splitMass,
 	                    ContactData * contacts,
 	                    uint numContacts);
+	
 }
 #endif        //  #ifndef SIMPLECONTACTSOLVER_IMPLEMENT_H

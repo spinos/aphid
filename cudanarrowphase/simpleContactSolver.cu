@@ -897,7 +897,7 @@ void resolveCollision(ContactConstraint* constraints,
 	                    numContacts2);
 }
 
-void separatePenetreated(ContactConstraint* constraints,
+void resolveFriction(ContactConstraint* constraints,
                         float3 * contactLinearVelocity,
                         float3 * deltaLinearVelocity,
 	                    uint2 * pairs,
@@ -910,7 +910,7 @@ void separatePenetreated(ContactConstraint* constraints,
     unsigned nblk = iDivUp(numContacts2, SOLVECONTACT_TPB);
     dim3 grid(nblk, 1, 1);
     
-    separatePenetreated_kernel<<< grid, block >>>(constraints,
+    resolveFriction_kernel<<< grid, block >>>(constraints,
                         contactLinearVelocity,
                         deltaLinearVelocity,
 	                    pairs,

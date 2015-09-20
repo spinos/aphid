@@ -119,7 +119,7 @@ __global__ void prepareNoPenetratingContactConstraint_kernel(ContactConstraint* 
 	float rel = computeRelativeVelocityLinearOnly(nA, nB,
 	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
 // penalty for shallow penetrations
-	if(contact.timeOfImpact < 1e-8f) rel -= 1.99f;
+	if(contact.timeOfImpact < 1e-8f) rel -= 1.59f;
 	outConstraint.relVel = rel;
 	constraints[iContact] = outConstraint;
 }

@@ -221,6 +221,24 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
     svlg.writeVec3(m_deltaLinearVelocity, numContacts * 2, 
                    "deltaV_avg", CudaDbgLog::FAlways);
 #endif
+
+        contactconstraint::resolveFriction((ContactConstraint *)constraint,
+	                    (float3 *)contactLinearVel,
+                        (float3 *)deltaLinVel,
+	                    (uint2 *)pairs,
+	                    (uint2 *)splits,
+	                    (float *)splitMass,
+	                    (ContactData *)contacts,
+	                    numContacts * 2);
+        CudaBase::CheckCudaError("jacobi solver resolve friction");
+        
+        simpleContactSolverAverageVelocities((float3 *)deltaLinVel,
+                        (float3 *)deltaAngVel,
+                        (uint *)bodyCount,
+                        (KeyValuePair *)bodyContactHash, 
+                        splitBufLength);
+        CudaBase::CheckCudaError("jacobi solver average velocity");
+
 	}
 
 // 2 tet per contact, 4 pnt per tet, key is pnt index, value is tet index in split

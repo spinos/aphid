@@ -330,7 +330,7 @@ void CudaDynamicWorld::putToSleep()
 {
     for(unsigned i=0; i< numObjects(); i++) {
         if(m_objects[i]->isSleeping()) continue;
-        if(m_objects[i]->velocitySize() < 4.7e-5f) {
+        if(m_objects[i]->velocitySize() < 2.3e-5f) {
             m_objects[i]->putToSleep();
         }
 	}

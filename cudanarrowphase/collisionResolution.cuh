@@ -33,8 +33,6 @@ __global__ void resolveCollision_kernel(ContactConstraint* constraints,
 	
 	const ContactConstraint inConstraint = constraints[iContact];
 	
-	if(inConstraint.relVel > -1e-8f) return;
-	
 	uint splitInd;
 	
 	if((threadIdx.x & 1)>0) {
@@ -102,7 +100,7 @@ __global__ void resolveCollision_kernel(ContactConstraint* constraints,
 	applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
 }
 
-__global__ void separatePenetreated_kernel(ContactConstraint* constraints,
+__global__ void resolveFriction_kernel(ContactConstraint* constraints,
                         float3 * contactLinearVelocity,
                         float3 * deltaLinearVelocity,
 	                    uint2 * pairs,
@@ -121,8 +119,6 @@ __global__ void separatePenetreated_kernel(ContactConstraint* constraints,
 	
 	const ContactConstraint inConstraint = constraints[iContact];
 	
-	if(inConstraint.relVel < 0.f) return;
-	
 	uint splitInd;
 	
 	if((threadIdx.x & 1)>0) {
@@ -132,13 +128,60 @@ __global__ void separatePenetreated_kernel(ContactConstraint* constraints,
 	    splitInd = splits[iContact].x;
 	}
 
-// reverse velocities
+// initial velocities
     float3 velA = contactLinearVelocity[ind];
-    addDeltaVelocityLinearOnly(velA, 
-        deltaLinearVelocity[splitInd]);
-    deltaLinearVelocity[splitInd] = scale_float3_by(velA,
-        splitMass[splitInd] * inConstraint.Minv * 2.31f);
     
+    const float invMassA = splitMass[splitInd];
+
+	float3 nA = inConstraint.normal;
+	
+	if((ind & 1)>0) {
+	    nA = float3_reverse(nA);
+	}
+	
+	addDeltaVelocityLinearOnly(velA, 
+        deltaLinearVelocity[splitInd]);
+    
+    sN[threadIdx.x] = nA;
+    sVel[threadIdx.x] = velA;
+    __syncthreads();
+    
+    uint iLeft = (threadIdx.x>>1)<<1;
+    uint iRight = iLeft + 1;
+
+// VA - VB
+	float3 velRel = float3_difference(sVel[iLeft], sVel[iRight]);
+
+    if((ind & 1)>0) {
+	    float3_scale_inplace(velRel, -1.f);
+	}
+	
+	float speed = float3_length(velRel);
+	if(speed < 1e-6f) return;
+
+// direction of relative velocity
+	float3_divide_inplace(velRel, speed);
+	
+	float ang = float3_dot(velRel, nA);
+	if(ang < 0.f) ang = - ang;
+
+// project to contact normal	
+	float3_scale_inplace(nA, ang);
+
+// inversed direction of rectional impulse
+// will multiply negative mass tensor bellow	
+	float3 reaction = float3_difference(velRel, nA);
+	
+	float mag = float3_length(reaction);
+	if(mag < 1e-6f) return;
+
+	float3_divide_inplace(reaction, mag);
+
+// large enough to be dynamic friction	
+	if(mag > .33f) mag = .33f;
+
+    float3_scale_inplace(reaction, mag * speed * inConstraint.Minv * invMassA);
+	float3_add_inplace(deltaLinearVelocity[splitInd], reaction);
 }
 
 #endif        //  #ifndef COLLISIONRESOLUTION_CUH
