@@ -147,7 +147,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
         case Qt::Key_R:
-            m_world->reset();
+            m_world->setPendingReset();
             emit turnOffCaching();
             break;
         case Qt::Key_Space:

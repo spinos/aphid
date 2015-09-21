@@ -51,13 +51,14 @@ void WorldThread::run()
             return;
         }
         
-        m_world->updateEnergy();
-        m_world->putToSleep();
+       m_world->updateEnergy();
+       // m_world->putToSleep();
 // before step?
         m_world->readVelocityCache();
         
         m_world->sendXToHost();
         m_world->saveCache();
+        m_world->reset();
         
         m_numLoops+=NumSubsteps; 
 

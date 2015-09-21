@@ -176,6 +176,7 @@ void CudaNarrowphase::initOnDevice()
 		
 		m_objectBuf.m_pos->hostToDevice(curObj->hostX(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_pos0->hostToDevice(curObj->hostXi(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
+        m_objectBuf.m_prePos->hostToDevice(curObj->hostX(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_vel->hostToDevice(curObj->hostV(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_mass->hostToDevice(curObj->hostMass(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
 		m_objectBuf.m_anchor->hostToDevice(curObj->hostAnchor(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
@@ -185,7 +186,9 @@ void CudaNarrowphase::initOnDevice()
     reset();
 }
 
-void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)
+void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, 
+                                      unsigned numOverlappingPairs,
+                                      bool toHandleShallowPenetrating)
 {
 #if DISABLE_COLLISION_RESOLUTION
 	return;
@@ -208,7 +211,7 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 	//unsigned numPen = countPenetratingContacts(m_numPairs);
 	//std::cout<<"  n pens "<<numPen;
 	
-	handleShallowPenetrations();
+	if(toHandleShallowPenetrating) handleShallowPenetrations();
 	
 	m_numContacts = countNoPenetratingContacts(m_numPairs);
 		

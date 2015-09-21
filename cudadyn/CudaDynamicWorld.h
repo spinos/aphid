@@ -34,6 +34,7 @@ public:
     void sendXToHost();
     void readVelocityCache();
 	void reset();
+    void setPendingReset();
 
 	void updateSpeedLimit(float x);
 	void updateEnergy();
@@ -85,5 +86,6 @@ private:
     float m_totalEnergy;
     bool m_enableSaveCache;
     bool m_finishedCaching;
+    bool m_isPendingReset;
 };
 #endif        //  #ifndef CUDADYNAMICWORLD_H

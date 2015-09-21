@@ -178,7 +178,7 @@ __global__ void resolveFriction_kernel(ContactConstraint* constraints,
 	float3_divide_inplace(reaction, mag);
 
 // large enough to be dynamic friction	
-	if(mag > .49f) mag = .49f;
+	if(mag > .439f) mag = .439f;
 
     float3_scale_inplace(reaction, mag * speed * inConstraint.Minv * invMassA);
 	float3_add_inplace(deltaLinearVelocity[splitInd], reaction);

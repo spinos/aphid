@@ -30,6 +30,7 @@ CudaDynamicWorld::CudaDynamicWorld()
     if(!m_positionFile->create("./position.tmp"))
         std::cout<<"\n error: dynamic world cannot create position cache file!\n";
     m_controller = new CudaForceController;
+    m_isPendingReset = false;
 }
 
 CudaDynamicWorld::~CudaDynamicWorld()
@@ -131,8 +132,10 @@ void CudaDynamicWorld::collide()
 	m_broadphase->computeOverlappingPairs();
 
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
-	                                m_broadphase->numOverlappingPairs());
-	
+	                                m_broadphase->numOverlappingPairs(),
+                                    m_totalEnergy > 0.f);
+                                    //false);
+
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),
 									m_narrowphase->contactPairsBuffer(),
@@ -153,9 +156,9 @@ const unsigned CudaDynamicWorld::numContacts() const
 
 void CudaDynamicWorld::reset()
 {
+    if(!m_isPendingReset) return;
     setToSaveCache(false);
     if(m_numObjects < 1) return;
-    m_narrowphase->reset();
     if(VelocityCache) {
         delete VelocityCache;
         VelocityCache = 0;
@@ -163,6 +166,9 @@ void CudaDynamicWorld::reset()
     m_controller->resetMovenentRelativeToAir();
     wakeUpAll();
     resetAll();
+    m_totalEnergy = 0.f;
+    m_narrowphase->reset();
+    m_isPendingReset = false;
 }
 
 void CudaDynamicWorld::sendXToHost()
@@ -355,4 +361,7 @@ void CudaDynamicWorld::resetAll()
         m_objects[i]->resetSystem();
     }
 }
+
+void CudaDynamicWorld::setPendingReset()
+{ m_isPendingReset = true; }
 //:~

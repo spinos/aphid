@@ -78,7 +78,6 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 #endif
     if(numContacts < 1) return; 
     
-	m_numContacts = numContacts;
 	const unsigned indBufLength = iRound1024(numContacts * 2);
 	
 	m_sortedInd[0]->create(indBufLength * 8);	
@@ -116,7 +115,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 //      std::cout<<" max count per contact "<<mxcount; 
 	int numiterations = mxcount + 3;
 #else
-	int numiterations = 10;
+	int numiterations = 9;
 #endif
 	
 	m_splitInverseMass->create(splitBufLength * 4);

@@ -42,7 +42,9 @@ public:
 	void setAnchoredVelocity(Vector3F * src);
 	
 	void addMassSystem(CudaMassSystem * tetra);
-	void computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs);
+	void computeContacts(CUDABuffer * overlappingPairBuf, 
+                         unsigned numOverlappingPairs,
+                         bool toHandleShallowPenetrating = false);
 	
 	void getContact(BaseBuffer * dst);
 	const unsigned numPairs() const;
