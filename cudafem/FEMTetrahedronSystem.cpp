@@ -510,6 +510,7 @@ void FEMTetrahedronSystem::dynamicsAssembly(float dt)
 
 void FEMTetrahedronSystem::updateExternalForce()
 {
+    /*
     void * force = m_Fe->bufferOnDevice();
     void * vel = deviceV();
     void * mass = deviceMass();
@@ -517,7 +518,7 @@ void FEMTetrahedronSystem::updateExternalForce()
                                 (float *)mass,
                                 (float3 *)vel,
                                 (float *)&WindVec,
-                                numPoints());
+                                numPoints());*/
 }
 
 void FEMTetrahedronSystem::solveConjugateGradient()

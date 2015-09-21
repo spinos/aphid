@@ -91,8 +91,8 @@ __global__ void addGravity_kernel(float3 * deltaVel,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	
-    if(mass[ind] > 1e5f) deltaVel[ind] = make_float3(0.f, 0.f, 0.f);
-    else deltaVel[ind] = scale_float3_by(CMASSGravity, dt);
+    if(mass[ind] < 1e5f) 
+        float3_add_inplace( deltaVel[ind], scale_float3_by(CMASSGravity, dt) );
 }
 
 __global__ void impulseForce_kernel(float3 * force,
@@ -143,6 +143,19 @@ __global__ void zeroVelocity_kernel(float3 * vel,
 	if(ind >= maxInd) return;
 	
 	vel[ind] = make_float3(0.f, 0.f, 0.f);
+}
+
+__global__ void setVelocity_kernel(float3 * deltaVel,
+                float * mass,
+                float x, float y, float z,
+                uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	float m = mass[ind];
+    if(m > 1e5f) deltaVel[ind] = make_float3(0.f, 0.f, 0.f);
+    else deltaVel[ind] = make_float3(x, y, z);
 }
 
 namespace masssystem {
@@ -320,5 +333,20 @@ void zeroVelocity(float3 * vel,
 
 void setGravity(float * g)
 { cudaMemcpyToSymbol(CMASSGravity, g, 12); }
+
+void setVelocity(float3 * deltaVel,
+                float * mass,
+                float x, float y, float z,
+                uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    setVelocity_kernel<<< grid, block >>>(deltaVel,
+        mass,
+        x, y, z,
+        maxInd);
+}
 
 }

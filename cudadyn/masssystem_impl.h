@@ -64,6 +64,11 @@ void zeroVelocity(float3 * vel,
 
 void setGravity(float * g);
 
+void setVelocity(float3 * deltaVel,
+                float * mass,
+                float x, float y, float z,
+                uint maxInd);
+
 }
 #endif        //  #ifndef MASSSYSTEM_IMPL_H
 

@@ -16,7 +16,7 @@
 
 WorldDbgDraw * CudaDynamicWorld::DbgDrawer = 0;
 IVelocityFile * CudaDynamicWorld::VelocityCache = 0;
-Vector3F CudaDynamicWorld::MovementRelativeToAir = Vector3F::Zero;
+
 CudaDynamicWorld::CudaDynamicWorld() 
 {
     m_broadphase = new CudaBroadphase;
@@ -107,6 +107,7 @@ void CudaDynamicWorld::stepPhysics(float dt)
 {
     if( allSleeping() ) return;
 // add impulse
+    updateWind();
     updateGravity(dt);
 // resolve contact, update impulse of collision
     collide();
@@ -115,6 +116,9 @@ void CudaDynamicWorld::stepPhysics(float dt)
 // update position
 	integrate(dt);
 }
+
+void CudaDynamicWorld::updateWind()
+{ m_controller->updateWind(); }
 
 void CudaDynamicWorld::updateGravity(float dt)
 { m_controller->updateGravity(dt); }
@@ -151,12 +155,12 @@ void CudaDynamicWorld::reset()
 {
     setToSaveCache(false);
     if(m_numObjects < 1) return;
-    m_narrowphase->resetToInitial();
+    m_narrowphase->reset();
     if(VelocityCache) {
         delete VelocityCache;
         VelocityCache = 0;
     }
-    resetMovenentRelativeToAir();
+    m_controller->resetMovenentRelativeToAir();
     wakeUpAll();
     resetAll();
 }
@@ -230,7 +234,7 @@ void CudaDynamicWorld::readVelocityCache()
 {
     if(!VelocityCache) return;
     if(VelocityCache->isOutOfRange()) {
-        resetMovenentRelativeToAir();
+        m_controller->resetMovenentRelativeToAir();
         VelocityCache->nextFrame();
         return;
     }
@@ -240,25 +244,10 @@ void CudaDynamicWorld::readVelocityCache()
     VelocityCache->nextFrame();
 
 	m_narrowphase->setAnchoredVelocity(VelocityCache->velocities());
-    updateMovenentRelativeToAir();
-}
 
-void CudaDynamicWorld::resetMovenentRelativeToAir()
-{ MovementRelativeToAir.setZero(); }
-
-void CudaDynamicWorld::updateMovenentRelativeToAir()
-{
-    MovementRelativeToAir = *VelocityCache->translationalVelocity();
-    MovementRelativeToAir.reverse();
-    MovementRelativeToAir.clamp(60.f);
-}
-
-void CudaDynamicWorld::updateWind()
-{
-    Vector3F air = MassSystem::WindDirection * MassSystem::WindMagnitude;
+    Vector3F air = *VelocityCache->translationalVelocity();
     air.reverse();
-    air += MovementRelativeToAir;
-    MassSystem::WindVec = air;
+    m_controller->setMovenentRelativeToAir(air);
 }
 
 bool CudaDynamicWorld::isToSaveCache() const
@@ -339,7 +328,7 @@ void CudaDynamicWorld::putToSleep()
 {
     for(unsigned i=0; i< numObjects(); i++) {
         if(m_objects[i]->isSleeping()) continue;
-        if(m_objects[i]->velocitySize() < 2.3e-5f) {
+        if(m_objects[i]->velocitySize() < 2.9e-5f) {
             m_objects[i]->putToSleep();
         }
 	}

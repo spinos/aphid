@@ -16,6 +16,7 @@
 #include <tetrahedron_math.h>
 #include <boost/format.hpp>
 #include <TriangleSystem.h>
+#include "CudaForceController.h"
 
 DynamicWorldInterface::DynamicWorldInterface() 
 {
@@ -40,10 +41,10 @@ DynamicWorldInterface::DynamicWorldInterface()
 DynamicWorldInterface::~DynamicWorldInterface() {}
 
 void DynamicWorldInterface::updateWindSpeed(float x)
-{ MassSystem::WindMagnitude = x; }
+{ CudaForceController::WindMagnitude = x; }
 
 void DynamicWorldInterface::updateWindVec(const Vector3F & v)
-{ MassSystem::WindDirection = v; }
+{ CudaForceController::WindDirection = v; }
 
 void DynamicWorldInterface::create(CudaDynamicWorld * world)
 {

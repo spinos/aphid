@@ -82,8 +82,8 @@ __global__ void resolveCollision_kernel(ContactConstraint* constraints,
  *  j = (1 + Cr)Vr.N*M^-1
  *  Cr is restitution
  */
-    float restitution = .999f;
-    // if(J * J < 0.01f) restitution = 0.f;
+    float restitution = .8f;
+    //if(J * J < 0.01f) restitution = 0.f;
     
     J += restitution * inConstraint.relVel;
     J *= inConstraint.Minv;
@@ -178,7 +178,7 @@ __global__ void resolveFriction_kernel(ContactConstraint* constraints,
 	float3_divide_inplace(reaction, mag);
 
 // large enough to be dynamic friction	
-	if(mag > .33f) mag = .33f;
+	if(mag > .49f) mag = .49f;
 
     float3_scale_inplace(reaction, mag * speed * inConstraint.Minv * invMassA);
 	float3_add_inplace(deltaLinearVelocity[splitInd], reaction);

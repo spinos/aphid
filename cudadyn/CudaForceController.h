@@ -1,5 +1,6 @@
 #ifndef CUDAFORCECONTROLLER_H
 #define CUDAFORCECONTROLLER_H
+#include <Vector3F.h>
 class CUDABuffer;
 class CudaForceController {
 public:
@@ -10,8 +11,15 @@ public:
     void setGravity(float x, float y, float z);
     void setMassBuf(CUDABuffer * x);
     void setImpulseBuf(CUDABuffer * x);
+    void setMovenentRelativeToAir(const Vector3F & v);
+    void resetMovenentRelativeToAir();
     
+    void updateWind();
     void updateGravity(float dt);
+    
+    static Vector3F MovementRelativeToAir;
+    static Vector3F WindDirection;
+    static float WindMagnitude;
     
 protected:
 

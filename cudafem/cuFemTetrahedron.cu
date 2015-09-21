@@ -136,7 +136,7 @@ __global__ void dampK_kernel(mat33 * stiffness,
 	    mat33_mult_f(stiffness[cur], dt2);
 		
 	    if(ind == colInd[cur]) {
-	        damping = .2f * mi * dt + mi;
+	        damping = .1f * mi * dt + mi;
 	        stiffness[cur].v[0].x += damping;
 	        stiffness[cur].v[1].y += damping;
 	        stiffness[cur].v[2].z += damping;

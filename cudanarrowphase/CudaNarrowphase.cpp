@@ -182,7 +182,7 @@ void CudaNarrowphase::initOnDevice()
 		m_objectBuf.m_ind->hostToDevice(curObj->hostTetrahedronIndices(), m_objectIndexStart[i] * 16, curObj->numElements() * 16);
 	}
  
-    resetToInitial();
+    reset();
 }
 
 void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned numOverlappingPairs)
@@ -190,6 +190,7 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf, unsigned 
 #if DISABLE_COLLISION_RESOLUTION
 	return;
 #endif
+    m_numContacts = 0;
     m_numPairs = numOverlappingPairs;
     if(numOverlappingPairs < 1) return;
     // std::cout<<" n overlappings "<<numOverlappingPairs<<"\n";
@@ -363,8 +364,9 @@ void CudaNarrowphase::squeezeContacts(unsigned numPairs)
     CudaBase::CheckCudaError("narrowphase squeeze contact");
 }
 
-void CudaNarrowphase::resetToInitial()
+void CudaNarrowphase::reset()
 {
+    m_numContacts = 0;
     if(numPoints() < 1) return;
     
     void * dst = m_objectBuf.m_pos->bufferOnDevice();

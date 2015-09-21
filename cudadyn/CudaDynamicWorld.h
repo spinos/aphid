@@ -34,7 +34,7 @@ public:
     void sendXToHost();
     void readVelocityCache();
 	void reset();
-	void updateWind();
+
 	void updateSpeedLimit(float x);
 	void updateEnergy();
 	void putToSleep();
@@ -59,15 +59,15 @@ public:
     
     static WorldDbgDraw * DbgDrawer;
     static IVelocityFile * VelocityCache;
-    static Vector3F MovementRelativeToAir;
+
 protected:
-    void resetMovenentRelativeToAir();
-	void updateMovenentRelativeToAir();
+    
 private:
     std::string objName(int i) const;
     bool allSleeping() const;
     void wakeUpAll();
     void resetAll();
+    void updateWind();
     void updateGravity(float dt);
     void collide();
     void updateSystem(float dt);

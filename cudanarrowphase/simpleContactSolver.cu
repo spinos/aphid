@@ -18,7 +18,7 @@
 #define VERYLARGE_INT 16777215 // 1<<24 - 1
 #define VERYLARGE_INT_M1 16777214 
 #define VERYVERYLARGE_INT 1073741823 // 1<<30 - 1
-#define VYACCELERATION 0.1635f // 9.81 / 60
+
 __constant__ float CSpeedLimit;
 inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
                                                   float3 averageLinearVel,

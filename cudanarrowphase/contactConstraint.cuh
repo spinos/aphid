@@ -3,6 +3,7 @@
 
 #include "simpleContactSolver_implement.h"
 #define SETCONSTRAINT_TPB 128
+#define VYACCELERATION 0.1635f // 9.81 / 60
 
 inline __device__ BarycentricCoordinate localCoordinate(uint4 ia,
                                     float3 * position,
@@ -112,14 +113,16 @@ __global__ void prepareNoPenetratingContactConstraint_kernel(ContactConstraint* 
 	                            splitMass[dstInd.x], splitMass[dstInd.y]);
 	
 	//if(splitMass[dstInd.x] > 1e-5f) 
-	  //  sVel[threadIdx.x].y += VYACCELERATION;
+	//    sVel[threadIdx.x].y += VYACCELERATION;
 	//if(splitMass[dstInd.y] > 1e-5f) 
-	  //  sVel[threadIdx.x+1].y += VYACCELERATION;
-	
+	//    sVel[threadIdx.x+1].y += VYACCELERATION;
+
 	float rel = computeRelativeVelocityLinearOnly(nA, nB,
 	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
 // penalty for shallow penetrations
-	if(contact.timeOfImpact < 1e-8f) rel -= 1.59f;
+    if(contact.timeOfImpact < 1e-8f) {
+        rel -= 3.9f + float3_length( float3_difference( sVel[threadIdx.x], sVel[threadIdx.x+1] ) );
+    }
 	outConstraint.relVel = rel;
 	constraints[iContact] = outConstraint;
 }

@@ -10,9 +10,6 @@
 #include "MassSystem.h"
 #include <BaseBuffer.h>
 #include <tetrahedron_math.h>
-Vector3F MassSystem::WindVec = Vector3F::Zero;
-Vector3F MassSystem::WindDirection = Vector3F::XAxis;
-float MassSystem::WindMagnitude = 0.f;
     
 MassSystem::MassSystem() : 
 m_numTetrahedrons(0), 

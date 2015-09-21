@@ -38,7 +38,7 @@ public:
 	const unsigned numElements() const;
 	
 	void initOnDevice();
-	void resetToInitial();
+	void reset();
 	void setAnchoredVelocity(Vector3F * src);
 	
 	void addMassSystem(CudaMassSystem * tetra);
