@@ -16,7 +16,7 @@ CudaForceController::CudaForceController()
     m_gravity[1] = -9.81f;
     m_gravity[2] = 0.f;
     m_windSeed = 0;
-    m_windTurbulence = .5f;
+    m_windTurbulence = 0.f;
 }
 
 CudaForceController::~CudaForceController() {}
@@ -95,7 +95,7 @@ void CudaForceController::updateGravity(float dt)
 }
 
 void CudaForceController::setWindSeed(unsigned x)
-{ m_windSeed = x; }
+{ m_windSeed = (x * 16807UL) & 2147483647 ; }
 
 void CudaForceController::setWindTurbulence(float x)
 { m_windTurbulence = x; }
