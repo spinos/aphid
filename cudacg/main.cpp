@@ -25,6 +25,7 @@
 #include <BaseBuffer.h>
 #include <CudaScan.h>
 #include <cu_testAtomic_impl.h>
+#include "TestPRNG_impl.h"
 
 cudaEvent_t start_event, stop_event;
     
@@ -715,6 +716,29 @@ void testAsyncKernels()
     if(passed) std::cout<<"passed!\n";
 }
 
+void testPRNG()
+{
+    std::cout<<" test pseudo random number generator\n";
+    const unsigned n = 1<<10;
+    
+    CUDABuffer din;
+    din.create(n*4);
+    
+    tprng::rand((float *)din.bufferOnDevice(),
+        n);
+    
+    BaseBuffer hout;
+    hout.create(n*4);
+    din.deviceToHost(hout.data());
+    
+    float * iout = (float *)hout.data();
+	
+    unsigned i;
+    for(i=0;i<n;i++) { 
+        std::cout<<"\n "<<iout[i];
+    }
+}
+
 int main(int argc, char **argv)
 {
     // This will pick the best possible CUDA capable device
@@ -746,7 +770,8 @@ int main(int argc, char **argv)
 	// testScan();
     // testRadixSort();
     // testAtomic();
-    testAsyncKernels();
+    // testAsyncKernels();
+    testPRNG();
     printf("done.\n");
     exit(0);
 }

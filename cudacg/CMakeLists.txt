@@ -34,7 +34,8 @@ set (CUSOURCES "../radixsort/radixsort.cu"
 "../reduction/cuReduceMin.cu"
 "../reduction/cuReduceMinMax.cu"
 "../reduction/cuReduceMinMaxBox.cu"
-"../reduction/cuReduceSum.cu")
+"../reduction/cuReduceSum.cu"
+TestPRNG.cu)
 
 ## add_executable (testcudacg ${HEADER_FILES} main.cpp)
 if(WIN32)
@@ -86,4 +87,11 @@ target_link_libraries (testcudacg ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (testcudacg ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (testcudacg ${Boost_REGEX_LIBRARY})
 
+if (WIN32)
+set (Aphid_Library "D:/aphid/lib/aphid.lib")
+else ()
+set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
+endif ()
+
+target_link_libraries (testcudacg ${Aphid_Library})
 
