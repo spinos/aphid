@@ -144,6 +144,16 @@ __global__ void setVelocity_kernel(float3 * deltaVel,
     else deltaVel[ind] = make_float3(x, y, z);
 }
 
+__global__ void copyPosition_kernel(float3 * dst,
+                    float3 * src,
+                    uint maxInd)
+{
+    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
+	if(ind >= maxInd) return;
+	
+	dst[ind] = src[ind];
+}
+
 namespace masssystem {
 void computeMass(float * dst,
                 float * mass0,
@@ -314,6 +324,19 @@ void setVelocity(float3 * deltaVel,
     setVelocity_kernel<<< grid, block >>>(deltaVel,
         mass,
         x, y, z,
+        maxInd);
+}
+
+void copyPosition(float3 * dst,
+                    float3 * src,
+                    uint maxInd)
+{
+    dim3 block(512, 1, 1);
+    unsigned nblk = iDivUp(maxInd, 512);
+    dim3 grid(nblk, 1, 1);
+    
+    copyPosition_kernel<<< grid, block >>>(dst,
+        src,
         maxInd);
 }
 

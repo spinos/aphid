@@ -174,11 +174,8 @@ void CudaNarrowphase::initOnDevice()
         curObj->setDeviceImpulsePtr(m_objectBuf.m_linearImpulse, m_objectPointStart[i] * 4);
 		curObj->setDeviceTretradhedronIndicesPtr(m_objectBuf.m_ind, m_objectIndexStart[i] * 16);
 		
-		m_objectBuf.m_pos->hostToDevice(curObj->hostX(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
 		m_objectBuf.m_pos0->hostToDevice(curObj->hostXi(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
-        m_objectBuf.m_prePos->hostToDevice(curObj->hostX(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
-		m_objectBuf.m_vel->hostToDevice(curObj->hostV(), m_objectPointStart[i] * 12, curObj->numPoints() * 12);
-		m_objectBuf.m_mass->hostToDevice(curObj->hostMass(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
+        m_objectBuf.m_mass->hostToDevice(curObj->hostMass(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
 		m_objectBuf.m_anchor->hostToDevice(curObj->hostAnchor(), m_objectPointStart[i] * 4, curObj->numPoints() * 4);
 		m_objectBuf.m_ind->hostToDevice(curObj->hostTetrahedronIndices(), m_objectIndexStart[i] * 16, curObj->numElements() * 16);
 	}
@@ -373,11 +370,22 @@ void CudaNarrowphase::reset()
     if(numPoints() < 1) return;
     
     void * dst = m_objectBuf.m_pos->bufferOnDevice();
+    void * dst1 = m_objectBuf.m_prePos->bufferOnDevice();
 	void * src = m_objectBuf.m_pos0->bufferOnDevice();
     void * vel = m_objectBuf.m_vel->bufferOnDevice();
     void * vel0 = m_objectBuf.m_anchoredVel->bufferOnDevice();
-	narrowphaseResetXV((float3 *)dst, (float3 *)src, 
-                      (float3 *)vel, (float3 *)vel0, m_numPoints);
+    void * impulse = m_objectBuf.m_linearImpulse->bufferOnDevice();
+    
+    masssystem::copyPosition((float3 *)dst, (float3 *)src,
+                            m_numPoints);
+    masssystem::copyPosition((float3 *)dst1, (float3 *)src,
+                            m_numPoints);
+    masssystem::zeroVelocity((float3 *)impulse, 
+                            m_numPoints);
+    masssystem::zeroVelocity((float3 *)vel, 
+                            m_numPoints);
+    masssystem::zeroVelocity((float3 *)vel0, 
+                            m_numPoints); 
 }
 
 void CudaNarrowphase::setAnchoredVelocity(Vector3F * src)

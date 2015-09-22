@@ -144,7 +144,7 @@ void CudaDynamicWorld::collide()
 	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
 	                                m_broadphase->numOverlappingPairs(),
                                     m_totalEnergy > 0.f);
-                                    //false);
+                                    // false);
 
 	m_contactSolver->solveContacts(m_narrowphase->numContacts(),
 									m_narrowphase->contactBuffer(),

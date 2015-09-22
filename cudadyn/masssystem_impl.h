@@ -67,6 +67,9 @@ void setVelocity(float3 * deltaVel,
                 float x, float y, float z,
                 uint maxInd);
 
+void copyPosition(float3 * dst,
+                    float3 * src,
+                    uint maxInd);
 }
 #endif        //  #ifndef MASSSYSTEM_IMPL_H
 

@@ -54,12 +54,12 @@ void CudaForceController::updateWind()
 {
     if(m_numNodes < 1) return;
     void * mass = m_mass->bufferOnDevice();
-    void * impusle = m_impulse->bufferOnDevice();
-    masssystem::setVelocity((float3 *)impusle, 
+    void * impulse = m_impulse->bufferOnDevice();
+    masssystem::setVelocity((float3 *)impulse, 
                            (float *)mass,
                            -MovementRelativeToAir.x, -MovementRelativeToAir.y, -MovementRelativeToAir.z,
                            m_numActiveNodes);
-    
+                    
     if(WindMagnitude < 1e-5f) return;
     
     Vector3F maj = WindDirection * WindMagnitude;
@@ -73,7 +73,7 @@ void CudaForceController::updateWind()
                             (float *)&vu,
                             (float *)&vv);
     
-    windforce::setWind((float3 *)impusle, 
+    windforce::setWind((float3 *)impulse, 
                            (float *)mass,
                            m_windTurbulence * WindMagnitude,
                            m_windSeed,
