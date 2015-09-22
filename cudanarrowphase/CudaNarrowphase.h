@@ -35,6 +35,7 @@ public:
 	virtual ~CudaNarrowphase();
 	
 	const unsigned numPoints() const;
+	unsigned numActiveNodes() const;
 	const unsigned numElements() const;
 	
 	void initOnDevice();

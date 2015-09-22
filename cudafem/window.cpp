@@ -30,6 +30,9 @@ Window::Window()
     connect(m_physicsControl, SIGNAL(windSpeedChanged(double)), 
             glWidget, SLOT(receiveWindSpeed(double)));
     
+    connect(m_physicsControl, SIGNAL(windTurbulenceChanged(double)), 
+            glWidget, SLOT(receiveWindTurbulence(double)));
+    
     connect(m_physicsControl, SIGNAL(windVecChanged(QPointF)), 
             glWidget, SLOT(receiveWindVec(QPointF)));
     

@@ -53,6 +53,7 @@ public:
     CudaBroadphase * broadphase() const;
 	CudaNarrowphase * narrowphase() const;
 	SimpleContactSolver * contactSolver() const;
+	CudaForceController * controller() const;
 	const unsigned numContacts() const;
     const unsigned totalNumPoints() const;
     float totalEnergy() const;
@@ -83,6 +84,7 @@ private:
     H5FieldOut * m_positionFile;
     CudaForceController * m_controller;
     unsigned m_numObjects;
+    unsigned m_numSimulationSteps;
     float m_totalEnergy;
     bool m_enableSaveCache;
     bool m_finishedCaching;

@@ -23,6 +23,7 @@ CudaDynamicWorld::CudaDynamicWorld()
     m_narrowphase = new CudaNarrowphase;
 	m_contactSolver = new SimpleContactSolver;
 	m_numObjects = 0;
+	m_numSimulationSteps = 0;
 	m_totalEnergy = 0.f;
     m_enableSaveCache = false;
     m_finishedCaching = false;
@@ -52,6 +53,9 @@ CudaNarrowphase * CudaDynamicWorld::narrowphase() const
 
 SimpleContactSolver * CudaDynamicWorld::contactSolver() const
 { return m_contactSolver; }
+
+CudaForceController * CudaDynamicWorld::controller() const
+{ return m_controller; }
 
 void CudaDynamicWorld::setBvhBuilder(BvhBuilder * builder)
 { CudaLinearBvh::Builder = builder; }
@@ -99,6 +103,8 @@ void CudaDynamicWorld::initOnDevice()
 	
 	m_contactSolver->setSpeedLimit(50.f);
 	m_controller->setNumNodes( m_narrowphase->numPoints() );
+	std::cout<<"\n n active nodes "<<m_narrowphase->numActiveNodes();
+	m_controller->setNumActiveNodes( m_narrowphase->numActiveNodes() );
 	m_controller->setMassBuf( m_narrowphase->objectBuffer()->m_mass );
 	m_controller->setImpulseBuf( m_narrowphase->objectBuffer()->m_linearImpulse );
 	m_controller->setGravity(0.f, -9.81f, 0.f);
@@ -106,6 +112,7 @@ void CudaDynamicWorld::initOnDevice()
 
 void CudaDynamicWorld::stepPhysics(float dt)
 {
+    m_numSimulationSteps++;
     if( allSleeping() ) return;
 // add impulse
     updateWind();
@@ -119,7 +126,10 @@ void CudaDynamicWorld::stepPhysics(float dt)
 }
 
 void CudaDynamicWorld::updateWind()
-{ m_controller->updateWind(); }
+{ 
+    m_controller->setWindSeed(m_numSimulationSteps);
+    m_controller->updateWind(); 
+}
 
 void CudaDynamicWorld::updateGravity(float dt)
 { m_controller->updateGravity(dt); }

@@ -172,7 +172,7 @@ inline __device__ void calculateKe(mat33 & Ke,
     mat33_mult_f(Ke, volume);
 }
 
-__constant__ float nu = 0.01f;
+__constant__ float nu = 0.f;
 
 inline __device__ void calculateIsotropicElasticity(float Y,
             float & d16, float & d17, float & d18)

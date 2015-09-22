@@ -400,4 +400,7 @@ void CudaNarrowphase::upatePosition(float dt)
                            numPoints());
     CudaBase::CheckCudaError("narrowphase integrate");
 }
+
+unsigned CudaNarrowphase::numActiveNodes() const
+{ return numPoints() - m_objects[m_numObjects - 1]->numPoints(); }
 //:~

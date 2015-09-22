@@ -724,18 +724,27 @@ void testPRNG()
     CUDABuffer din;
     din.create(n*4);
     
+    CUDABuffer dsd;
+    dsd.create(n*4);
+    
     tprng::rand((float *)din.bufferOnDevice(),
+        (unsigned *)dsd.bufferOnDevice(),
         n);
     
     BaseBuffer hout;
     hout.create(n*4);
     din.deviceToHost(hout.data());
     
+    BaseBuffer hsdout;
+    hsdout.create(n*4);
+    dsd.deviceToHost(hsdout.data());
+    
     float * iout = (float *)hout.data();
+    unsigned * sdout = (unsigned *)hsdout.data();
 	
     unsigned i;
     for(i=0;i<n;i++) { 
-        std::cout<<"\n "<<iout[i];
+        std::cout<<"\n "<<sdout[i]<<" "<<iout[i];
     }
 }
 

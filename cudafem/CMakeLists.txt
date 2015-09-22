@@ -152,6 +152,7 @@ set (CUSOURCES "../scan/scan.cu"
 "cuFemMath.cu"
 "cuFemTetrahedron.cu"
 "cuConjugateGradient.cu"
+../cudadyn/cuControlForce.cu
 ../cudadyn/cuMassSystem.cu)
 
 if (WIN32)

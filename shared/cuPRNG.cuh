@@ -31,12 +31,13 @@ __device__ unsigned MultiplacationModulus(unsigned & seed)
     return seed = (seed * 16807UL) & 2147483647;
 }
 
-__device__ float HybridTaus()  
+__device__ float HybridTaus(unsigned & seed)  
 {  
-    unsigned z1 = blockIdx.x*blockDim.x + threadIdx.x + 15625;
+    unsigned z1 = seed + 15625UL;
     unsigned z2 = MultiplacationModulus(z1);
     unsigned z3 = MultiplacationModulus(z2);
     unsigned z4 = MultiplacationModulus(z3);
+    seed = z4;
     return 2.3283064365387e-10f * (              // Periods  
     TausStep(z1, shift1[threadIdx.x & 3], shift2[threadIdx.x & 3], shift3[threadIdx.x & 3], offset[threadIdx.x & 3]) ^
     TausStep(z2, shift1[(threadIdx.x+1) & 3], shift2[(threadIdx.x+1) & 3], shift3[(threadIdx.x+1) & 3], offset[(threadIdx.x+1) & 3]) ^ 

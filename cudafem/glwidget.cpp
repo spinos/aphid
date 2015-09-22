@@ -5,6 +5,7 @@
 #include <KdTreeDrawer.h>
 #include "CudaDynamicWorld.h"
 #include "FEMWorldInterface.h"
+#include <CudaForceController.h>
 #include <WorldThread.h>
 #include <WorldDbgDraw.h>
 
@@ -196,6 +197,9 @@ void GLWidget::receiveStiffnessAttenuateRight(QPointF v)
 
 void GLWidget::receiveWindSpeed(double x)
 { m_interface->updateWindSpeed(x); }
+
+void GLWidget::receiveWindTurbulence(double x)
+{ m_world->controller()->setWindTurbulence(x); }
 
 void GLWidget::receiveWindVec(QPointF v)
 { 

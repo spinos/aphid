@@ -62,8 +62,6 @@ void computeLength(float * dst,
 void zeroVelocity(float3 * vel,
                 uint maxInd);
 
-void setGravity(float * g);
-
 void setVelocity(float3 * deltaVel,
                 float * mass,
                 float x, float y, float z,

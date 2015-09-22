@@ -41,6 +41,7 @@ public slots:
     void receiveStiffnessAttenuateLeft(QPointF v);
     void receiveStiffnessAttenuateRight(QPointF v);
     void receiveWindSpeed(double x);
+    void receiveWindTurbulence(double x);
     void receiveWindVec(QPointF v);
     void togglePositionOut();
     

@@ -53,13 +53,18 @@ PhysicsControl::PhysicsControl(QWidget *parent)
     dsGrp->setLayout(dsLayout);
 	
 	m_windSpeedValue = new QDoubleEditSlider(tr("Wind speed"), this);
-	m_windSpeedValue->setLimit(0.0, 30.0);
+	m_windSpeedValue->setLimit(0.0, 40.0);
     m_windSpeedValue->setValue(0.0);
     m_windVecValue = new QPolarCoordinateEdit(tr("Wind vector"), this);
+	m_windTurbulenceValue = new QDoubleEditSlider(tr("Wind turbulence"), this);
+	m_windTurbulenceValue->setLimit(0.0, 2.0);
+	m_windTurbulenceValue->setValue(0.0);
+	
 	QGroupBox * windGrp = new QGroupBox;
 	QVBoxLayout * windLayout = new QVBoxLayout;
 	windLayout->addWidget(m_windVecValue);
 	windLayout->addWidget(m_windSpeedValue);
+	windLayout->addWidget(m_windTurbulenceValue);
 	windLayout->setStretch(1, 1);
 	windLayout->setSpacing(2);
 	windGrp->setLayout(windLayout);
@@ -81,6 +86,7 @@ PhysicsControl::PhysicsControl(QWidget *parent)
     connect(m_youngAttenuateValue, SIGNAL(rightControlChanged(QPointF)), this, SLOT(sendStiffnessAttenuateRight(QPointF)));
 	connect(m_windSpeedValue, SIGNAL(valueChanged(double)), this, SLOT(sendWindSpeed(double)));
 	connect(m_windVecValue, SIGNAL(valueChanged(QPointF)), this, SLOT(sendWindVec(QPointF)));
+	connect(m_windTurbulenceValue, SIGNAL(valueChanged(double)), this, SLOT(sendWindTurbulence(double)));
 }
 
 void PhysicsControl::sendDensity(double x)
@@ -103,4 +109,7 @@ void PhysicsControl::sendWindSpeed(double x)
 
 void PhysicsControl::sendWindVec(QPointF v)
 { emit windVecChanged(v); }
+
+void PhysicsControl::sendWindTurbulence(double x)
+{ emit windTurbulenceChanged(x); }
 //:~

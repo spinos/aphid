@@ -1,8 +1,6 @@
 #include <bvh_common.h>
 #include "bvh_math.cuh"
 
-__constant__ float3 CMASSGravity;
-
 __global__ void computeMass_kernel(float * dst,
                 float * mass0,
                 uint * anchored,
@@ -81,18 +79,6 @@ __global__ void integrate2_kernel(float3 * pos,
 	
     float3 va = vel[ind];
 	float3_add_inplace(pos[ind], scale_float3_by(va, dt));
-}
-
-__global__ void addGravity_kernel(float3 * deltaVel, 
-								float * mass,
-                                float dt, 
-								uint maxInd)
-{
-    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-	if(ind >= maxInd) return;
-	
-    if(mass[ind] < 1e5f) 
-        float3_add_inplace( deltaVel[ind], scale_float3_by(CMASSGravity, dt) );
 }
 
 __global__ void impulseForce_kernel(float3 * force,
@@ -257,21 +243,6 @@ void integrateSimple(float3 * pos,
         maxInd);
 }
 
-void addGravity(float3 * deltaVel,
-                float * mass,
-                float dt,
-                uint maxInd)
-{
-    dim3 block(512, 1, 1);
-    unsigned nblk = iDivUp(maxInd, 512);
-    dim3 grid(nblk, 1, 1);
-    
-    addGravity_kernel<<< grid, block >>>(deltaVel,
-        mass,
-        dt,
-        maxInd);
-}
-
 void impulseForce(float3 * force,
                            float3 * deltaVel,
                            float * mass,
@@ -330,9 +301,6 @@ void zeroVelocity(float3 * vel,
     zeroVelocity_kernel<<< grid, block >>>(vel,
         maxInd);
 }
-
-void setGravity(float * g)
-{ cudaMemcpyToSymbol(CMASSGravity, g, 12); }
 
 void setVelocity(float3 * deltaVel,
                 float * mass,
