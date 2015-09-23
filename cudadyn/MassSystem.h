@@ -51,6 +51,8 @@ protected:
 	void addTetrahedron(unsigned a, unsigned b, unsigned c, unsigned d);
 	void addTriangle(unsigned a, unsigned b, unsigned c);
 	void setTotalMass(float x);
+    void setInitialTotalMass(float x);
+    float initialTotalMass() const;
     
     void setAnchoredValue(unsigned i, unsigned anchorInd);
 	bool isAnchoredPoint(unsigned i);
@@ -66,6 +68,6 @@ private:
 	BaseBuffer * m_hostTriangleIndices;
     unsigned m_numPoints, m_numTetrahedrons, m_numTriangles;
 	unsigned m_maxNumPoints, m_maxNumTetrahedrons, m_maxNumTriangles;
-    float m_totalMass;
+    float m_totalMass, m_initialTotalMass;
 };
 #endif        //  #ifndef MASSSYSTEM_H

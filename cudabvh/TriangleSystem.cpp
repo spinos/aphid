@@ -40,6 +40,7 @@ TriangleSystem::TriangleSystem(ATriangleMesh * md)
 	setNumTetrahedrons(md->numTriangles());
 	setNumTriangles(md->numTriangles());
 	setTotalMass(np);
+    setInitialTotalMass(np);
 }
 
 TriangleSystem::~TriangleSystem() {}

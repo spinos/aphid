@@ -57,7 +57,7 @@ void CudaForceController::updateWind()
     void * impulse = m_impulse->bufferOnDevice();
     masssystem::setVelocity((float3 *)impulse, 
                            (float *)mass,
-                           -MovementRelativeToAir.x, -MovementRelativeToAir.y, -MovementRelativeToAir.z,
+                           -MovementRelativeToAir.x / 60.f, -MovementRelativeToAir.y  / 60.f, -MovementRelativeToAir.z  / 60.f,
                            m_numActiveNodes);
                     
     if(WindMagnitude < 1e-5f) return;

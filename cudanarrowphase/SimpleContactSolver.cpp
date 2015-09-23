@@ -14,7 +14,7 @@
 #include <DynGlobal.h>
 #include <CudaBase.h>
 
-#if 1
+#if 0
 #include <CudaDbgLog.h>
 CudaDbgLog svlg("solver.txt");
 #endif

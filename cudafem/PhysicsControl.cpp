@@ -42,7 +42,7 @@ PhysicsControl::PhysicsControl(QWidget *parent)
     yAGrp->setLayout(yaLayout);
 	
 	m_densityValue = new QDoubleEditSlider(tr("Density"), this);
-	m_densityValue->setLimit(0.1, 1000.0);
+	m_densityValue->setLimit(10.0, 1000.0);
 	m_densityValue->setValue(100.0);
 	
 	dsGrp = new QGroupBox;

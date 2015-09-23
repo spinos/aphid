@@ -166,7 +166,7 @@ __global__ void separateShallowPenetration_kernel(ContactData * dstContact,
 	ClosestPointTestContext ctc;
 	BarycentricCoordinate coord;
 	float4 sas;
-	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], 0.f, ctc, sas, 
+	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, sas, 
 	    coord);
 
 // still intersected negative toi

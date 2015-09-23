@@ -141,7 +141,7 @@ void CudaDynamicWorld::collide()
        
 	m_broadphase->computeOverlappingPairs();
 
-	m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
+    m_narrowphase->computeContacts(m_broadphase->overlappingPairBuf(), 
 	                                m_broadphase->numOverlappingPairs(),
                                     m_totalEnergy > 0.f);
                                     // false);
@@ -173,11 +173,11 @@ void CudaDynamicWorld::reset()
         delete VelocityCache;
         VelocityCache = 0;
     }
-    m_controller->resetMovenentRelativeToAir();
     wakeUpAll();
     resetAll();
     m_totalEnergy = 0.f;
     m_narrowphase->reset();
+    m_controller->resetMovenentRelativeToAir();
     m_isPendingReset = false;
 }
 
@@ -344,7 +344,7 @@ void CudaDynamicWorld::putToSleep()
 {
     for(unsigned i=0; i< numObjects(); i++) {
         if(m_objects[i]->isSleeping()) continue;
-        if(m_objects[i]->velocitySize() < 2.9e-5f) {
+        if(m_objects[i]->velocitySize() < 1e-5f) {
             m_objects[i]->putToSleep();
         }
 	}

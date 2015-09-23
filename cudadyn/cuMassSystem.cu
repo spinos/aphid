@@ -3,7 +3,6 @@
 
 __global__ void computeMass_kernel(float * dst,
                 float * mass0,
-                uint * anchored,
                 float scale,
                 uint maxInd)
 {
@@ -11,7 +10,7 @@ __global__ void computeMass_kernel(float * dst,
 	if(ind >= maxInd) return;
 	
 	float m0 = mass0[ind];
-	if(anchored[ind] == 0) dst[ind] = m0 * scale;
+	if( m0 < 1e5f ) dst[ind] = m0 * scale;
 }
 
 __global__ void useAllAnchoredVelocity_kernel(float3 * vel,
@@ -157,7 +156,6 @@ __global__ void copyPosition_kernel(float3 * dst,
 namespace masssystem {
 void computeMass(float * dst,
                 float * mass0,
-                uint * anchored,
                 float scale,
                 uint maxInd)
 {
@@ -167,7 +165,6 @@ void computeMass(float * dst,
     
     computeMass_kernel<<< grid, block >>>(dst,
         mass0,
-        anchored,
         scale,
         maxInd);
 }

@@ -14,9 +14,14 @@
 #include "narrowphase_implement.h"
 #include <CudaScan.h>
 #include <DynGlobal.h>
-#include <CudaDbgLog.h>
 #include <CudaBase.h>
 #include <masssystem_impl.h>
+
+#if 0
+#include <CudaDbgLog.h>
+CudaDbgLog nplg("narrowphase.txt");
+#endif
+
 #define MaxTOINumIterations 4
 
 CudaNarrowphase::CudaNarrowphase() 
@@ -265,6 +270,11 @@ void CudaNarrowphase::resetContacts(void * overlappingPairs, unsigned numOverlap
 		(uint2 *)overlappingPairs,
 		numOverlappingPairs);
     CudaBase::CheckCudaError("narrowphase write pair");
+    
+#if 0
+    nplg.writeVec3( m_tetVertPrePos,numPoints(), 
+                   "pre_pos", CudaDbgLog::FAlways);
+#endif
 }
 
 void CudaNarrowphase::computeInitialSeparation()

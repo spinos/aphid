@@ -15,7 +15,8 @@ MassSystem::MassSystem() :
 m_numTetrahedrons(0), 
 m_numPoints(0), 
 m_numTriangles(0),
-m_totalMass(0.f)
+m_totalMass(0.f),
+m_initialTotalMass(0.f)
 {
 	m_hostX = new BaseBuffer;
 	m_hostXi = new BaseBuffer;
@@ -182,4 +183,10 @@ float MassSystem::energy()
 
 float MassSystem::averageNodeMass() const
 { return totalMass() / numPoints(); }
+
+void MassSystem::setInitialTotalMass(float x)
+{ m_initialTotalMass = x; }
+
+float MassSystem::initialTotalMass() const
+{ return m_initialTotalMass; }
 //:~

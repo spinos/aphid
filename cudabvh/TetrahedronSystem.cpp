@@ -80,6 +80,7 @@ TetrahedronSystem::TetrahedronSystem()
 		vy = -vy;
 	}
 	setTotalMass(100.f);
+    setInitialTotalMass(100.f);
     calculateMass();
     createL2Vicinity();
 }
@@ -112,6 +113,7 @@ TetrahedronSystem::TetrahedronSystem(ATetrahedronMesh * md)
        <<"\n initial mass "<<(100.f * md->volume())
        <<"\n";
     setTotalMass(100.f * md->volume());
+    setInitialTotalMass(100.f * md->volume());
     calculateMass();
     createL2Vicinity();
 }

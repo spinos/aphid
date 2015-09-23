@@ -138,7 +138,7 @@ bool FEMWorldInterface::useVelocityFile(CudaDynamicWorld * world)
 void FEMWorldInterface::updateDensity(float x)
 {
 	TetrahedronSystem::Density = x;
-	FEMTetrahedronSystem::SetNeedMass();
+    FEMTetrahedronSystem::SetNeedMass();
 }
 
 bool FEMWorldInterface::HasVelocityFile()

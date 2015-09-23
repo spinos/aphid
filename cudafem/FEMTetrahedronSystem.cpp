@@ -427,12 +427,14 @@ void FEMTetrahedronSystem::updateMass()
 	
 	void * mass = deviceMass();
 	void * mass0 = deviceInitialMass();
-	void * a = deviceAnchor();
-	float relDensity = Density / 100.f;
+	float scaling = Density / 100.f;
+    float tm = initialTotalMass();
+    std::cout<<" tet set total mass "<<(tm * scaling);
+    setTotalMass(tm * scaling);
+	
 	masssystem::computeMass((float * )mass, 
                     (float *)mass0,
-					(uint *)a,
-                    relDensity,
+                    scaling,
                     numPoints());
 	CudaBase::CheckCudaError("fem update mass");
 	NeedMass = false;
