@@ -768,7 +768,11 @@ bool SHelper::GetFirstNamespace(std::string & res)
 
 char SHelper::removeAnyNamespace(std::string &name, const char * separator)
 {
-    if(!name.rfind(separator)) return 0;
+    if(!name.rfind(separator)) {
+        name = removeNamespace(name);
+        return 1;
+    }
+    
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep(separator);
 	tokenizer tokens(name, sep);
