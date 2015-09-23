@@ -34,6 +34,8 @@ public:
 	void select(const Ray * r);
 	void clearSelection();
     void reduceSelected(float x);
+    
+    void rebuildTetrahedronsMeshBy(unsigned n);
     void rebuildTetrahedronsMesh(float deltaNumGroups);
     const float totalCurveLength() const;
     const unsigned numCurves() const;
@@ -51,6 +53,7 @@ public:
 	void computeTetrahedronMeshStatistics(unsigned & ntet, 
 					unsigned & nvert, unsigned & nstripe,
 					unsigned & nanchor) const;
+    unsigned estimatedNumGroups() const;
 private:
 	bool createCurveCluster();
 	bool createPatchCluster();

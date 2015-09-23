@@ -33,11 +33,17 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "SampleGroup.h"
 "CurveReduction.h"
 "FitBccMeshBuilder.h"
+GenTetControl.h
 BccInterface.h)
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../hesperis/HesperisFile.cpp"
 "../kdtree/RandomCurve.cpp"
+../shared/QIntEditSlider.cpp
+../shared/QDoubleEditSlider.cpp
+../shared/QSplineEdit.cpp
+../shared/QAngleEdit.cpp
+../shared/QPolarCoordinateEdit.cpp
 "main.cpp"
 "glWidget.cpp"
 "window.cpp"
@@ -50,6 +56,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 ../hesperis/HesperisFile.cpp
 ../hesperis/HesperisInterface.cpp
 BlockBccMeshBuilder.cpp
+GenTetControl.cpp
 BccInterface.cpp)
 
 if (WIN32)

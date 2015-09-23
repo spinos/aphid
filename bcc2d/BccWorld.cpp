@@ -102,8 +102,13 @@ unsigned BccWorld::numTriangles() const
 void BccWorld::rebuildTetrahedronsMesh(float deltaNumGroups)
 {
     m_estimatedNumGroups += deltaNumGroups * (numCurves() + numPatches() * 2);
-    if(m_estimatedNumGroups < 100.f) m_estimatedNumGroups = 100.f;
-    
+    rebuildTetrahedronsMeshBy(m_estimatedNumGroups);
+}
+ 
+void BccWorld::rebuildTetrahedronsMeshBy(unsigned n)
+{
+    if(n < 100.f) n = 100.f;
+    m_estimatedNumGroups = n;
     clearTetrahedronMesh();
 	buildTetrahedronMesh(false);
     std::cout<<" done rebuild. \n";
@@ -457,4 +462,7 @@ void BccWorld::computeTetrahedronMeshStatistics(unsigned & ntet, unsigned & nver
 		nanchor += imesh->numAnchoredPoints();
 	}
 }
+
+unsigned BccWorld::estimatedNumGroups() const
+{ return m_estimatedNumGroups; }
 //:~

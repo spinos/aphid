@@ -18,8 +18,10 @@ public slots:
 	void importGrowMesh();
 	void importCurve();
 	void importPatch();
+    void receiveRebuildTet(double x);
+    
 signals:
-
+    void estimatedNChanged(unsigned x);
 protected:
     virtual void clientInit();
     virtual void clientDraw();

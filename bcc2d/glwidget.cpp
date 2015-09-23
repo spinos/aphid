@@ -72,9 +72,11 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 	switch (event->key()) {
 		case Qt::Key_K:
 		    m_world->rebuildTetrahedronsMesh(-1.f);
+            emit estimatedNChanged(m_world->estimatedNumGroups());
 			break;
 		case Qt::Key_L:
 		    m_world->rebuildTetrahedronsMesh(1.f);
+            emit estimatedNChanged(m_world->estimatedNumGroups());
 			break;
 		case Qt::Key_M:
 		    m_world->reduceSelected(.13f);
@@ -157,5 +159,13 @@ bool GLWidget::preSaveCheck()
 		m_interface->FileName = fileName.toUtf8().data();
 	}
 	return true;
+}
+
+void GLWidget::receiveRebuildTet(double x)
+{ 
+    setUpdatesEnabled(false);
+    m_world->rebuildTetrahedronsMeshBy(x);
+    setUpdatesEnabled(true);
+    update();
 }
 //:~

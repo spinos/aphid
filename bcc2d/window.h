@@ -8,6 +8,7 @@ QT_BEGIN_NAMESPACE
 QT_END_NAMESPACE
 
 class GLWidget;
+class GenTetControl;
 
 class Window : public QMainWindow
 {
@@ -25,9 +26,12 @@ private:
     
 private:
     GLWidget *glWidget;
+    GenTetControl * m_buildControl;
 	QMenu * fileMenu;
     QAction * importTriangleAct;
 	QAction * importCurveAct;
 	QAction * importPatchAct;
+    QMenu * windowMenu;
+    QAction * buildControlAct;
 };
 #endif
