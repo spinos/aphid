@@ -44,6 +44,7 @@ public slots:
     void receiveWindTurbulence(double x);
     void receiveWindVec(QPointF v);
     void togglePositionOut();
+	void receiveGravity(Vector3F v);
     
 private slots:
     void simulate();

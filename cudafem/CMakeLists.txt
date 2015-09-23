@@ -70,6 +70,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "../shared/CudaDbgLog.cpp"
 "../shared/QIntEditSlider.cpp"
 "../shared/QDoubleEditSlider.cpp"
+../shared/QDouble3Edit.cpp
 ../shared/QSplineEdit.cpp
 ../shared/QAngleEdit.cpp
 ../shared/QPolarCoordinateEdit.cpp

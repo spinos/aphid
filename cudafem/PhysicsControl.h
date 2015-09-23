@@ -20,6 +20,7 @@ QT_END_NAMESPACE
 
 class QIntEditSlider;
 class QDoubleEditSlider;
+class QDouble3Edit;
 class QSplineEdit;
 class QPolarCoordinateEdit;
 
@@ -41,6 +42,7 @@ private slots:
 	void sendWindSpeed(double x);
 	void sendWindVec(QPointF v);
 	void sendWindTurbulence(double x);
+	void sendGravity(Vector3F v);
 signals:
 	void densityChanged(double x);
 	void youngsModulusChanged(double a);
@@ -50,6 +52,7 @@ signals:
 	void windVecChanged(QPointF v);
 	void windSpeedChanged(double x);
 	void windTurbulenceChanged(double x);
+	void gravityChanged(Vector3F v);
 private:
     QGroupBox * YGrp;
     QDoubleEditSlider * m_youngModulusValue;
@@ -61,5 +64,6 @@ private:
 	QDoubleEditSlider * m_windSpeedValue;
 	QPolarCoordinateEdit * m_windVecValue;
 	QDoubleEditSlider * m_windTurbulenceValue;
+	QDouble3Edit * m_gravityValue;
 };
 #endif

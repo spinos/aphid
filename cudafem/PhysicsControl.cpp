@@ -12,6 +12,7 @@
 #include <QDoubleEditSlider.h>
 #include <QSplineEdit.h>
 #include <QPolarCoordinateEdit.h>
+#include <QDouble3Edit.h>
 #include "PhysicsControl.h"
 
 PhysicsControl::PhysicsControl(QWidget *parent)
@@ -69,11 +70,21 @@ PhysicsControl::PhysicsControl(QWidget *parent)
 	windLayout->setSpacing(2);
 	windGrp->setLayout(windLayout);
 	
+	m_gravityValue = new QDouble3Edit(tr("Gravity"), this);
+	m_gravityValue->setValue(Vector3F(0.f, -9.81f, 0.f));
+	QGroupBox * gravityGrp = new QGroupBox;
+	QVBoxLayout * gravityLayout = new QVBoxLayout;
+	gravityLayout->addWidget(m_gravityValue);
+	gravityLayout->setStretch(1, 1);
+	gravityLayout->setSpacing(2);
+	gravityGrp->setLayout(gravityLayout);
+	
     QVBoxLayout *layout = new QVBoxLayout;
 	layout->addWidget(dsGrp);
 	layout->addWidget(YGrp);
 	layout->addWidget(yAGrp);
 	layout->addWidget(windGrp);
+	layout->addWidget(gravityGrp);
 	layout->setStretch(3, 1);
 	layout->setSpacing(4);
 	
@@ -87,6 +98,7 @@ PhysicsControl::PhysicsControl(QWidget *parent)
 	connect(m_windSpeedValue, SIGNAL(valueChanged(double)), this, SLOT(sendWindSpeed(double)));
 	connect(m_windVecValue, SIGNAL(valueChanged(QPointF)), this, SLOT(sendWindVec(QPointF)));
 	connect(m_windTurbulenceValue, SIGNAL(valueChanged(double)), this, SLOT(sendWindTurbulence(double)));
+	connect(m_gravityValue, SIGNAL(valueChanged(Vector3F)), this, SLOT(sendGravity(Vector3F)));
 }
 
 void PhysicsControl::sendDensity(double x)
@@ -112,4 +124,7 @@ void PhysicsControl::sendWindVec(QPointF v)
 
 void PhysicsControl::sendWindTurbulence(double x)
 { emit windTurbulenceChanged(x); }
+
+void PhysicsControl::sendGravity(Vector3F v)
+{ emit gravityChanged(v); }
 //:~

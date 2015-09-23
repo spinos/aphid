@@ -35,6 +35,9 @@ Window::Window()
     
     connect(m_physicsControl, SIGNAL(windVecChanged(QPointF)), 
             glWidget, SLOT(receiveWindVec(QPointF)));
+			
+	connect(m_physicsControl, SIGNAL(gravityChanged(Vector3F)), 
+            glWidget, SLOT(receiveGravity(Vector3F)));
     
     connect(glWidget, SIGNAL(turnOffCaching()), 
             this, SLOT(receiveTurnOffCaching()));

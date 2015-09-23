@@ -212,4 +212,7 @@ void GLWidget::togglePositionOut()
     if(m_world->isToSaveCache()) m_world->setToSaveCache(false);
     else m_world->setToSaveCache(true);
 }
+
+void GLWidget::receiveGravity(Vector3F v)
+{ m_world->controller()->setGravity(v.x, v.y, v.z); }
 //:~
