@@ -44,6 +44,7 @@ private:
 	CUDABuffer * m_contactLinearVelocity;
 	CUDABuffer * m_relVel;
 	CUDABuffer * m_pntTetHash[2];
+	CUDABuffer * m_bodyTetInd;
 	unsigned m_numContacts;
 };
 #endif        //  #ifndef SIMPLECONTACTSOLVER_H

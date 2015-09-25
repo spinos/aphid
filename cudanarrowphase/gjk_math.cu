@@ -202,16 +202,18 @@ inline __device__ void interpolatePointAB(Simplex & s,
                                             const BarycentricCoordinate & contributes, 
                                             float3 & pA, float3 & pB)
 {
-	pA.x = pA.y = pA.z = 0.f;
-	pB.x = pB.y = pB.z = 0.f;
+	float3 qA = make_float3(0.f, 0.f, 0.f);
+	float3 qB = make_float3(0.f, 0.f, 0.f);
 	const float * wei = &contributes.x;
 	int i;
 	for(i =0; i < s.dimension; i++) {
 		if(wei[i] > 1e-5f) {
-		    pA = float3_add(pA, scale_float3_by(s.pA[i], wei[i]));
-			pB = float3_add(pB, scale_float3_by(s.pB[i], wei[i]));
+		    float3_add_inplace(qA, scale_float3_by(s.pA[i], wei[i]));
+		    float3_add_inplace(qB, scale_float3_by(s.pB[i], wei[i]));
 		}
 	}
+	pA = qA;
+	pB = qB;
 }
 
 inline __device__ void compareAndSwap(float * key, float3 * v1, float3* v2, float3 * v3, int a, int b)
@@ -344,7 +346,7 @@ inline __device__ void checkClosestDistance(Simplex & s,
 	
 	computeContributionSimplex(coord, s, result.closestPoint);
 	
-	interpolatePointAB(s, coord, dstPA, dstPB);
+	// interpolatePointAB(s, coord, dstPA, dstPB);
 }
 
 #endif        //  #ifndef _GJK_MATH_CU_

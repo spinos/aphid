@@ -122,7 +122,7 @@ __global__ void computeSeparateAxis_kernel(ContactData * dstContact,
 	computeSeparateDistance(sS[threadIdx.x], sPrxA[threadIdx.x], sPrxB[threadIdx.x], GJK_THIN_MARGIN, ctc, dstContact[ind].separateAxis, 
 	    coord);
 	
-	interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+	// interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
 }
 
 __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
@@ -163,7 +163,7 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
 // still intersected no solution
 	if(sas.w < 1.f) return;
 	
-	interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+	// interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
 	
 	float3 nor = float3_normalize(float3_from_float4(sas));
 	
@@ -228,7 +228,7 @@ __global__ void computeTimeOfImpact_kernel(ContactData * dstContact,
         
 // output toi and r
         dstContact[ind].timeOfImpact = toi;
-        interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
+        // interpolatePointAB(sS[threadIdx.x], coord, dstContact[ind].localA, dstContact[ind].localB);
 
         separateDistance = float4_length(sas);
 // close enough use result of last step

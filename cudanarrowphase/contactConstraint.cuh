@@ -5,14 +5,13 @@
 #define SETCONSTRAINT_TPB 128
 #define VYACCELERATION 0.1635f // 9.81 / 60
 
-inline __device__ BarycentricCoordinate localCoordinate(uint4 ia,
+inline __device__ BarycentricCoordinate localCoordinate1(uint4 ia,
                                     float3 * position,
                                     float3 localP)
 {
     float3 q;
 	float3_average4(q, position, ia);
-	q = float3_add(q, localP);
-	
+	float3_add_inplace(q, localP);
 	return getBarycentricCoordinate4i(q, position, ia);
 }
 
@@ -56,17 +55,15 @@ inline __device__ float computeRelativeVelocityLinearOnly(float3 nA,
 __global__ void prepareNoPenetratingContactConstraint_kernel(ContactConstraint* constraints,
                             float3 * contactLinearVel,
                             uint2 * splits,
-                            uint2 * pairs,
                             float3 * srcPos,
                             float3 * srcVel,
                             float3 * srcImpulse,
-                            uint4 * indices,
-                            uint * pointStarts,
-                            uint * indexStarts,
                             float * splitMass,
                             ContactData * contacts,
+                            uint4 * tetind,
                             uint maxInd)
 {
+    __shared__ float4 sCoord[SETCONSTRAINT_TPB];
     __shared__ float3 sVel[SETCONSTRAINT_TPB];
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
@@ -76,19 +73,19 @@ __global__ void prepareNoPenetratingContactConstraint_kernel(ContactConstraint* 
 	   
     ContactData contact = contacts[iContact];
 	
+    ContactConstraint outConstraint;
+	
 	BarycentricCoordinate wei;
     float3 v0, v1;
-	uint4 ia;
+	uint4 ia = tetind[ind];
 	if(isRgt>0) {
-	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].y);
-	    wei = localCoordinate(ia, srcPos, contact.localB);
-	    constraints[iContact].coordB = wei;
+	    wei = localCoordinate1(ia, srcPos, contact.localB);
+	    
 	}
 	else {
-	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].x);
-	    wei = localCoordinate(ia, srcPos, contact.localA);
-	    constraints[iContact].coordA = wei;
+	    wei = localCoordinate1(ia, srcPos, contact.localA);
 	}
+	sCoord[threadIdx.x] = wei;
 	interpolate_float3i(v0, ia, srcVel, &wei);
     interpolate_float3i(v1, ia, srcImpulse, &wei);
     sVel[threadIdx.x] = float3_add(v0, v1);
@@ -97,7 +94,6 @@ __global__ void prepareNoPenetratingContactConstraint_kernel(ContactConstraint* 
 
 	if(isRgt) return;
 	
-	ContactConstraint outConstraint;
 	outConstraint.lambda = 0.f;
 	
 	const uint2 dstInd = splits[iContact];
@@ -120,9 +116,11 @@ __global__ void prepareNoPenetratingContactConstraint_kernel(ContactConstraint* 
 	float rel = computeRelativeVelocityLinearOnly(nA, nB,
 	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
 // penalty for shallow penetrations
-    if(contact.timeOfImpact < 1e-8f) {
-        rel -= 2.f + float3_length( float3_difference( sVel[threadIdx.x], sVel[threadIdx.x+1] ) );
+    if(contact.timeOfImpact < 1e-9f) {
+        rel -= 3.f + float3_length( float3_difference( sVel[threadIdx.x], sVel[threadIdx.x+1] ) );
     }
+    outConstraint.coordA = sCoord[threadIdx.x];
+    outConstraint.coordB = sCoord[threadIdx.x+1];
 	outConstraint.relVel = rel;
 	constraints[iContact] = outConstraint;
 }

@@ -17,7 +17,7 @@
 #include <CudaBase.h>
 #include <masssystem_impl.h>
 
-#if 0
+#if 1
 #include <CudaDbgLog.h>
 CudaDbgLog nplg("narrowphase.txt");
 #endif
@@ -221,6 +221,26 @@ void CudaNarrowphase::computeContacts(CUDABuffer * overlappingPairBuf,
 		// std::cout<<" final squeez contact pairs to "<<m_numContacts<<"\n";
 		squeezeContacts(m_numPairs);
 	}
+	
+#if 1
+    unsigned szc = sizeof(ContactData);
+    nplg.write(szc);
+    
+#endif
+#if 0
+    nplg.writeVec3( m_tetVertPos[1],
+                    m_numContacts * 8,
+                   "contectP", CudaDbgLog::FAlways);
+    
+    nplg.writeVec3( m_tetVertVel[1],
+                    m_numContacts * 8,
+                   "contactV", CudaDbgLog::FAlways);
+    
+    nplg.writeVec3( m_tetVertPrePos,
+                    m_numContacts * 8,
+                   "contactPrev", CudaDbgLog::FAlways);
+    
+#endif
 }
 
 void CudaNarrowphase::resetContacts(void * overlappingPairs, unsigned numOverlappingPairs)
@@ -272,8 +292,9 @@ void CudaNarrowphase::resetContacts(void * overlappingPairs, unsigned numOverlap
     CudaBase::CheckCudaError("narrowphase write pair");
     
 #if 0
-    nplg.writeVec3( m_tetVertPrePos,numPoints(), 
-                   "pre_pos", CudaDbgLog::FAlways);
+    nplg.writeVec3( m_tetVertVel[0],
+                    numOverlappingPairs * 2,
+                   "pairV", CudaDbgLog::FAlways);
 #endif
 }
 

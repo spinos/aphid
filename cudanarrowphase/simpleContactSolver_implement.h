@@ -35,6 +35,7 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
 	                                    uint * perObjPointStart,
 	                                    uint * perObjectIndexStart,
                                         uint * bodyCount, 
+                                        uint4 * tet,
                                         uint bufLength);
 
 void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel, 
@@ -102,11 +103,9 @@ namespace contactconstraint {
                                         float3 * pos,
                                         float3 * vel,
                                         float3 * impulse,
-                                        uint4 * ind,
-                                        uint * perObjPointStart,
-                                        uint * perObjectIndexStart,
                                         float * splitMass,
                                         ContactData * contacts,
+                                        uint4 * tetind,
                                         uint numContacts);
 
     void resolveCollision(ContactConstraint* constraints,

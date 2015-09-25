@@ -25,6 +25,7 @@ struct ClosestPointTestContext {
 struct ContactData {
     float4 separateAxis;
     float3 localA;
+    float padding;
     float3 localB;
     float timeOfImpact;
 };

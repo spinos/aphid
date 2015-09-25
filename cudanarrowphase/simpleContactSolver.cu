@@ -219,7 +219,8 @@ __global__ void computeSplitInvMass_kernel(float * invMass,
 	                                    uint4 * indices,
 	                                    uint * pointStart,
 	                                    uint * indexStart,
-	                                    uint * bodyCount, 
+	                                    uint * bodyCount,
+	                                    uint4 * tet,
                                         uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
@@ -230,7 +231,7 @@ __global__ void computeSplitInvMass_kernel(float * invMass,
 	
 	uint4 ia;
 	uint dstInd;
-	if(isRgt) {
+	if(isRgt > 0) {
 	    dstInd = splits[iPair].y;
 	    ia = computePointIndex(pointStart, indexStart, indices, pairs[iPair].y);
 	}
@@ -238,6 +239,8 @@ __global__ void computeSplitInvMass_kernel(float * invMass,
 	    dstInd = splits[iPair].x;
 	    ia = computePointIndex(pointStart, indexStart, indices, pairs[iPair].x);
 	}
+	
+	tet[ind] = ia;
 	
 	uint n = getBodyCountAt(dstInd, bodyCount);
 	
@@ -384,11 +387,11 @@ __global__ void solveContact_kernel(ContactConstraint* constraints,
     interpolate_float3i(velA, ia, velocities, &coord);
     
 	float3 nA = constraints[iContact].normal;
-	float3 rA = contacts[iContact].localA;
+	float3 rA;// = contacts[iContact].localA;
 	
 	if((ind & 1)>0) {
 	    nA = float3_reverse(nA);
-	    rA = contacts[iContact].localB;
+	    // rA = contacts[iContact].localB;
 	}
 	
 // N pointing inside object
@@ -685,6 +688,7 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
 	                                    uint * perObjPointStart,
 	                                    uint * perObjectIndexStart,
                                         uint * bodyCount, 
+                                        uint4 * tet,
                                         uint bufLength)
 {
     dim3 block(512, 1, 1);
@@ -699,6 +703,7 @@ void simpleContactSolverComputeSplitInverseMass(float * invMass,
 	                                    perObjPointStart,
 	                                    perObjectIndexStart,
 	                                    bodyCount, 
+	                                    tet,
 	                                    bufLength);
 }
 
@@ -848,11 +853,9 @@ void prepareNoPenetratingContact(ContactConstraint* constraints,
                                         float3 * pos,
                                         float3 * vel,
                                         float3 * impulse,
-                                        uint4 * ind,
-                                        uint * perObjPointStart,
-                                        uint * perObjectIndexStart,
                                         float * splitMass,
                                         ContactData * contacts,
+                                        uint4 * tetind,
                                         uint numContacts2)
 {
     dim3 block(SETCONSTRAINT_TPB, 1, 1);
@@ -862,15 +865,12 @@ void prepareNoPenetratingContact(ContactConstraint* constraints,
     prepareNoPenetratingContactConstraint_kernel<<< grid, block >>>(constraints,
         contactLinearVel,
                                         splits,
-                                        pairs,
                                         pos,
                                         vel,
                                         impulse,
-                                        ind,
-                                        perObjPointStart,
-                                        perObjectIndexStart,
                                         splitMass,
                                         contacts,
+                                        tetind,
                                         numContacts2);
 }
 
