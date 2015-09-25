@@ -17,6 +17,7 @@ class QGroupBox;
 class QCheckBox;
 class QLabel;
 class QPushButton;
+class QComboBox;
 QT_END_NAMESPACE
 
 class QIntEditSlider;
@@ -36,11 +37,13 @@ public slots:
     
 private slots:
 	void sendRebuild();
+    void sendPatchMethod(int x);
 signals:
 	void rebuildTet(double n);
-    
+    void patchMethodChanged(int x);
 private:
     QDoubleEditSlider * m_estimateNValue;
     QPushButton * m_rebuildAct;
+    QComboBox * m_patchMethodChooser;
 };
 #endif

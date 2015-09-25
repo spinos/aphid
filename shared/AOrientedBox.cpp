@@ -40,6 +40,16 @@ Vector3F AOrientedBox::majorVector(bool low) const
 	return m_orientation.row(0) * dir;
 }
 
+Vector3F AOrientedBox::minorPoint(bool low) const
+{ return (m_center + minorVector(low) * m_extent.y); }
+
+Vector3F AOrientedBox::minorVector(bool low) const
+{
+    float dir = 1.f;
+	if(low) dir = -1.f;
+	return m_orientation.row(1) * dir;
+}
+
 void AOrientedBox::getBoxVertices(Vector3F * dst) const
 {
 	const Vector3F rx = m_orientation.row(0);

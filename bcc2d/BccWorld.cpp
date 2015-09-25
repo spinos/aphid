@@ -15,6 +15,7 @@
 #include "CurveReduction.h"
 #include <ATetrahedronMeshGroup.h>
 #include <BlockBccMeshBuilder.h>
+#include "SingleMeshBuilder.h"
 
 BccWorld::BccWorld()
 {
@@ -27,8 +28,10 @@ BccWorld::BccWorld()
 	m_reducer = new CurveReduction;
 	m_blockBuilder = new BlockBccMeshBuilder;
 	m_fitBuilder = new FitBccMeshBuilder;
+    m_singleBuilder = new SingleMeshBuilder;
 	m_curveCluster = NULL;
 	m_patchCluster = NULL;
+    m_patchGenMethod = MBlock;
 }
 
 BccWorld::~BccWorld() 
@@ -39,6 +42,7 @@ BccWorld::~BccWorld()
 	delete m_triangleMeshes;
 	delete m_blockBuilder;
 	delete m_fitBuilder;
+    delete m_singleBuilder;
 }
 
 void BccWorld::setTiangleGeometry(GeometryArray * x)
@@ -442,8 +446,10 @@ void BccWorld::createTetrahedronMeshesByBlocks()
     }
 	unsigned n = m_patchCluster->numGroups();
 	unsigned i;
-	for(i=0;i<n;i++)
-		m_tetrahedonMeshes.push_back(genTetFromGeometry(m_patchCluster->group(i), m_blockBuilder));
+	for(i=0;i<n;i++) {
+		// m_tetrahedonMeshes.push_back(genTetFromGeometry(m_patchCluster->group(i), m_blockBuilder));
+        m_tetrahedonMeshes.push_back(genTetFromGeometry(m_patchCluster->group(i), m_singleBuilder));
+    }
 }
 
 void BccWorld::computeTetrahedronMeshStatistics(unsigned & ntet, unsigned & nvert, unsigned & nstripe, unsigned & nanchor) const
@@ -465,4 +471,16 @@ void BccWorld::computeTetrahedronMeshStatistics(unsigned & ntet, unsigned & nver
 
 unsigned BccWorld::estimatedNumGroups() const
 { return m_estimatedNumGroups; }
+
+void BccWorld::setPatchGenMethod(int x)
+{
+    switch (x) {
+    case 1:
+        m_patchGenMethod = MSingleOctahedron;
+        break;
+    default:
+        m_patchGenMethod = MBlock;
+        break;
+    }
+}
 //:~

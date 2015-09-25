@@ -20,6 +20,7 @@ class ATetrahedronMeshGroup;
 class TetrahedronMeshBuilder;
 class BlockBccMeshBuilder;
 class FitBccMeshBuilder;
+class SingleMeshBuilder;
 
 class BccWorld {
 public:
@@ -54,6 +55,7 @@ public:
 					unsigned & nvert, unsigned & nstripe,
 					unsigned & nanchor) const;
     unsigned estimatedNumGroups() const;
+    void setPatchGenMethod(int x);
 private:
 	bool createCurveCluster();
 	bool createPatchCluster();
@@ -77,6 +79,10 @@ private:
 												TetrahedronMeshBuilder * builder);
 	
 private:
+    enum PatchGenMethod {
+        MBlock = 0,
+        MSingleOctahedron = 1
+    };
 	KdCluster * m_curveCluster;
 	KdCluster * m_patchCluster;
 	KdIntersection * m_triIntersect;
@@ -88,8 +94,10 @@ private:
     CurveReduction * m_reducer;
 	BlockBccMeshBuilder * m_blockBuilder;
 	FitBccMeshBuilder * m_fitBuilder;
+    SingleMeshBuilder * m_singleBuilder;
 	unsigned m_numCurves, m_numPatches, m_totalNumTetrahedrons, m_totalNumPoints;
     float m_totalCurveLength, m_totalPatchArea, m_estimatedNumGroups;
+    PatchGenMethod m_patchGenMethod;
 };
 
 #endif        //  #ifndef BCCWORLD_H

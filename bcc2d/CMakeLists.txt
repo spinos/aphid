@@ -56,6 +56,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 ../hesperis/HesperisFile.cpp
 ../hesperis/HesperisInterface.cpp
 BlockBccMeshBuilder.cpp
+SingleMeshBuilder.cpp
 GenTetControl.cpp
 BccInterface.cpp)
 

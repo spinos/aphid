@@ -19,7 +19,7 @@ public slots:
 	void importCurve();
 	void importPatch();
     void receiveRebuildTet(double x);
-    
+    void receivePatchMethod(int x);
 signals:
     void estimatedNChanged(unsigned x);
 protected:

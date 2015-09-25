@@ -168,4 +168,7 @@ void GLWidget::receiveRebuildTet(double x)
     setUpdatesEnabled(true);
     update();
 }
+
+void GLWidget::receivePatchMethod(int x)
+{ m_world->setPatchGenMethod(x); }
 //:~

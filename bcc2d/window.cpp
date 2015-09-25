@@ -20,6 +20,9 @@ Window::Window()
     connect(m_buildControl, SIGNAL(rebuildTet(double)), 
             glWidget, SLOT(receiveRebuildTet(double)));
     
+    connect(m_buildControl, SIGNAL(patchMethodChanged(int)), 
+            glWidget, SLOT(receivePatchMethod(int)));
+    
     connect(glWidget, SIGNAL(estimatedNChanged(unsigned)), 
             m_buildControl, SLOT(receiveEstimatedN(unsigned)));
     

@@ -23,6 +23,8 @@ public:
 	Vector3F extent() const;
 	Vector3F majorPoint(bool low) const;
 	Vector3F majorVector(bool low) const;
+    Vector3F minorPoint(bool low) const;
+	Vector3F minorVector(bool low) const;
 	void getBoxVertices(Vector3F * dst) const;
 	
 	virtual const Type type() const;
