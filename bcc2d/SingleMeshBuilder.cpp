@@ -72,7 +72,7 @@ void SingleMeshBuilder::build(AOrientedBox * ob)
     int i=0;
     for(;i<6;i++) tetrahedronP.push_back(tetV[i]);
     unsigned drift = pointDrifts.back();
-    
+
     tetrahedronInd.push_back(drift + 0);
     tetrahedronInd.push_back(drift + 1);
     tetrahedronInd.push_back(drift + 2);
@@ -102,7 +102,7 @@ void SingleMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdInters
 	int anchorSide;
 	BoundingBox ab;
 	Matrix33F invspace;
-	unsigned i;
+	unsigned i, j;
 	Geometry::ClosestToPointTestResult cls;
 	for(i=0;i<n;i++) {
 		AOrientedBox & box = m_boxes[i];
@@ -110,57 +110,54 @@ void SingleMeshBuilder::addAnchors(ATetrahedronMesh * mesh, unsigned n, KdInters
 		invspace.inverse();
 // find which side of the box x-y plane is closer to grow mesh
 		endP[0]  = box.majorPoint(true);
-		cls.reset(endP[0], 1e8f);
-		anchorMesh->closestToPoint(&cls);
-		lowerDist = cls._distance;
-		anchorTri = cls._icomponent;
+        endP[1] = box.minorPoint(true);
+        endP[2] = box.majorPoint(false);
+        endP[3] = box.minorPoint(false);
+        
+        lowerDist = 1e8f;
         anchorSide = 0;
-		
-		endP[1] = box.minorPoint(false);
-		cls.reset(endP[1], 1e8f);
-		anchorMesh->closestToPoint(&cls);
-		
-		if(cls._distance < lowerDist) {
-			anchorTri = cls._icomponent;
-            anchorSide = 1;
-		}
-		//addAnchorByThreshold(mesh, i, invspace, box.center(), 
-		//					anchorX, isLowerEnd, anchorTri);
+        for(j = 0; j<4; j++) {
+            cls.reset(endP[j], 1e8f);
+            anchorMesh->closestToPoint(&cls);
+            
+            if(lowerDist > cls._distance) {
+                lowerDist = cls._distance;
+                anchorTri = cls._icomponent;
+                anchorSide = j;
+            }   
+        }
+        
+        float threshold = box.extent().y * 1.01f;
+        if(anchorSide == 1 || anchorSide == 3) threshold = box.extent().x * 1.01f;
+		addAnchorBySide(mesh, i, invspace, box.center(), 
+						endP[anchorSide], 
+                        threshold,
+                        anchorTri);
 	}
 }
-/*
-void SingleMeshBuilder::addAnchorByThreshold(ATetrahedronMesh * mesh, 
+
+void SingleMeshBuilder::addAnchorBySide(ATetrahedronMesh * mesh, 
 					unsigned istripe,
 					const Matrix33F & invspace, 
 					const Vector3F & center,
-					float threshold,
-					bool isLower,
+					const Vector3F toPoint,
+                    float threashold,
 					unsigned tri)
 {
-	unsigned tetMax = mesh->numTetrahedrons() * 4;
+    unsigned tetMax = mesh->numTetrahedrons() * 4;
 	if(istripe < indexDrifts.size() -1)
 		tetMax = indexDrifts[istripe + 1];
-		
+    
 	BoundingBox box;
 	Vector3F q;
 	unsigned i = indexDrifts[istripe];
 	unsigned j;
 	for(;i<tetMax;i+=4) {
 		unsigned * tet = mesh->tetrahedronIndices(i/4);
-		box.reset();
-        for(j=0; j< 4; j++)
-            box.expandBy(mesh->points()[tet[j]], 1e-3f); 
-			
-		q = invspace.transform(box.center() - center);
-		if(isLower) {
-			if(q.x > threshold) continue;
-		}
-		else {
-			if(q.x < threshold) continue;
-		}
-		
-		for(j=0; j< 4; j++)
-			mesh->anchors()[tet[j]] = (1<<24 | tri);
+		for(j=0; j<4; j++) {
+            if( toPoint.distanceTo( mesh->points()[tet[j]] ) < threashold )
+                mesh->anchors()[tet[j]] = (1<<24 | tri);
+        }
 	}
-}*/
+}
 //:~

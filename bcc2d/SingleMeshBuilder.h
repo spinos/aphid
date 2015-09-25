@@ -23,14 +23,14 @@ public:
 	
 protected:
 	void build(AOrientedBox * ob);
-	/*
-    void addAnchorByThreshold(ATetrahedronMesh * mesh, 
+	
+    void addAnchorBySide(ATetrahedronMesh * mesh, 
 					unsigned istripe,
 					const Matrix33F & invspace, 
 					const Vector3F & center,
-					float threshold,
-					bool isLower,
-					unsigned tri);*/
+					const Vector3F toPoint,
+                    float threashold,
+					unsigned tri);
 private:
 	
 private:

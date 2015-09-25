@@ -76,7 +76,7 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
 	const ContactData ct = dstContact[ind];
 	
 // already determined no contact
-	if(ct.separateAxis.w < 1.f || ct.timeOfImpact > GJK_STEPSIZE)
+	if(ct.separateAxis.w < 1.f || ct.timeOfImpact > GJK_STEPSIZE || ct.timeOfImpact < 0.f)
 	    return;
 	
 	float3 * ppos = & pos[ind<<3];
@@ -170,7 +170,7 @@ __global__ void separateShallowPenetration_kernel(ContactData * dstContact,
 	    coord);
 
 // still intersected negative toi
-    if(sas.w < 1.f)
+    if(sas.w < 1.f) 
         return;
 
 // output	
