@@ -1,9 +1,7 @@
 #ifndef CONTACTCONSTRAINT_CUH
 #define CONTACTCONSTRAINT_CUH
 
-#include "simpleContactSolver_implement.h"
-#define SETCONSTRAINT_TPB 128
-#define VYACCELERATION 0.1635f // 9.81 / 60
+#include "contactSolverCommon.cuh"
 
 inline __device__ BarycentricCoordinate localCoordinate1(uint4 ia,
                                     float3 * position,
@@ -32,15 +30,6 @@ inline __device__ float computeMassTensor(//float3 nA, float3 nB,
     return -1.f/(invMassA + invMassB);    
          // invMassA * float3_dot(jmjA, nA) + 
          // invMassB * float3_dot(jmjB, nB));
-}
-
-inline __device__ float computeRelativeVelocity1(float3 nA,
-                            float3 nB,
-                            float3 linearVelocityA, 
-                            float3 linearVelocityB)
-{
-    return float3_dot(linearVelocityA, nA) +
-            float3_dot(linearVelocityB, nB);
 }
 
 inline __device__ float computeRelativeVelocityLinearOnly(float3 nA,
@@ -117,7 +106,7 @@ __global__ void prepareNoPenetratingContactConstraint_kernel(ContactConstraint* 
 	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
 // penalty for shallow penetrations
     if(contact.timeOfImpact < 1e-9f) {
-        rel -= 3.f + float3_length( float3_difference( sVel[threadIdx.x], sVel[threadIdx.x+1] ) );
+        rel -= 4.f + float3_length( float3_difference( sVel[threadIdx.x], sVel[threadIdx.x+1] ) );
     }
     outConstraint.coordA = sCoord[threadIdx.x];
     outConstraint.coordB = sCoord[threadIdx.x+1];

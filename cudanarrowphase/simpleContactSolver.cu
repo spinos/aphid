@@ -6,11 +6,7 @@
  * http://www.richardtonge.com/papers/Tonge-2012-MassSplittingForJitterFreeParallelRigidBodySimulation-preprint.pdf
  */
 
-#include "bvh_math.cuh"
-#include "barycentric.cu"
-#include "stripedModel.cuh"
-#include "contactConstraint.cuh"
-#include "collisionResolution.cuh"
+#include "contactSolverCommon.cuh"
 #include <CudaBase.h>
 
 #define DEFORMABILITY 0.0134f
@@ -20,6 +16,7 @@
 #define VERYVERYLARGE_INT 1073741823 // 1<<30 - 1
 
 __constant__ float CSpeedLimit;
+
 inline __device__ void computeBodyAngularVelocity(float3 & angularVel,
                                                   float3 averageLinearVel,
                                                   float3 * position,
@@ -246,69 +243,6 @@ __global__ void computeSplitInvMass_kernel(float * invMass,
 	
 	invMass[dstInd] = (float)n / (mass[ia.x] + mass[ia.y] + mass[ia.z] + mass[ia.w]);
 }
-/*
-__global__ void setContactConstraint_kernel(ContactConstraint* constraints,
-                                        uint2 * splits,
-                                        uint2 * pairs,
-                                        float3 * srcPos,
-                                        float3 * srcVel,
-                                        uint4 * indices,
-                                        uint * pointStarts,
-                                        uint * indexStarts,
-                                        float * splitMass,
-                                        ContactData * contacts,
-                                        uint maxInd)
-{
-    __shared__ float3 sVel[SETCONSTRAINT_TPB];
-    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-	if(ind >= maxInd) return;
-	
-	uint iContact = ind>>1;
-	
-	ContactData contact = contacts[iContact];
-	
-	int isRgt = (threadIdx.x & 1);
-	
-	uint4 ia;
-	if(isRgt>0) {
-	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].y);
-	    constraints[iContact].coordB = localCoordinate(ia, srcPos, contact.localB);
-	    interpolate_float3i(sVel[threadIdx.x], ia, srcVel, &constraints[iContact].coordB);
-	    __syncthreads();
-	}
-	else {
-	    ia = computePointIndex(pointStarts, indexStarts, indices, pairs[iContact].x);
-	    constraints[iContact].coordA = localCoordinate(ia, srcPos, contact.localA);
-	    interpolate_float3i(sVel[threadIdx.x], ia, srcVel, &constraints[iContact].coordA);
-	    __syncthreads();
-	}
-
-	if(isRgt) return;
-	
-	constraints[iContact].lambda = 0.f;
-
-	const uint2 dstInd = splits[iContact];
-	
-	float3 nA = normalOnA(contact);
-	float3 nB = float3_reverse(nA);
-	//float3 torqueA = float3_cross(contact.localA, nA);
-	//float3 torqueB = float3_cross(contact.localB, nB);
-	
-	constraints[iContact].normal = nA;// float3_from_float4(contact.separateAxis);
-	constraints[iContact].Minv = computeMassTensor(//nA, nB, contact.localA, contact.localB,
-	                            //torqueA, torqueB,
-	                            splitMass[dstInd.x], splitMass[dstInd.y]);
-	
-	//if(splitMass[dstInd.x] > 1e-5f) 
-	  //  sVel[threadIdx.x].y += VYACCELERATION;
-	//if(splitMass[dstInd.y] > 1e-5f) 
-	  //  sVel[threadIdx.x+1].y += VYACCELERATION;
-	
-	float rel = computeRelativeVelocity1(nA, nB,
-	                        sVel[threadIdx.x], sVel[threadIdx.x+1]);
-	
-	constraints[iContact].relVel = rel;
-}*/
 
 __global__ void clearDeltaVelocity_kernel(float3 * deltaLinVel, 
                                         float3 * deltaAngVel, 
@@ -318,31 +252,7 @@ __global__ void clearDeltaVelocity_kernel(float3 * deltaLinVel,
 	if(ind >= maxInd) return;
 	
 	deltaLinVel[ind] = make_float3(0.f, 0.f, 0.f);
-	deltaAngVel[ind] = make_float3(0.f, 0.f, 0.f);
-}
-
-__global__ void stopAtContact_kernel(float3 * dstVelocity,
-                        uint2 * pairs,
-                        uint4 * indices,
-                        uint * pointStarts,
-                        uint * indexStarts,
-                        uint maxInd)
-{
-    unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
-	if(ind >= maxInd) return;
-	
-	const uint4 ia = computePointIndex(pointStarts, indexStarts, indices, pairs[ind].x);
-	const uint4 ib = computePointIndex(pointStarts, indexStarts, indices, pairs[ind].y);
-	
-	dstVelocity[ia.x] = make_float3(0.f, 0.f, 0.f);
-	dstVelocity[ia.y] = make_float3(0.f, 0.f, 0.f);
-	dstVelocity[ia.z] = make_float3(0.f, 0.f, 0.f);
-	dstVelocity[ia.w] = make_float3(0.f, 0.f, 0.f);
-	
-	dstVelocity[ib.x] = make_float3(0.f, 0.f, 0.f);
-	dstVelocity[ib.y] = make_float3(0.f, 0.f, 0.f);
-	dstVelocity[ib.z] = make_float3(0.f, 0.f, 0.f);
-	dstVelocity[ib.w] = make_float3(0.f, 0.f, 0.f);
+	// deltaAngVel[ind] = make_float3(0.f, 0.f, 0.f);
 }
 
 __global__ void solveContact_kernel(ContactConstraint* constraints,
@@ -430,8 +340,8 @@ __global__ void solveContact_kernel(ContactConstraint* constraints,
 	
 	const float invMassA = splitMass[splitInd];
 	
-	applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
-	applyImpulse(deltaAngularVelocity[splitInd], J * invMassA, torqueA);
+	//applyImpulse(deltaLinearVelocity[splitInd], J * invMassA, nA);
+	//applyImpulse(deltaAngularVelocity[splitInd], J * invMassA, torqueA);
 }
 
 __global__ void averageVelocities_kernel(float3 * linearVelocity,
@@ -449,7 +359,7 @@ __global__ void averageVelocities_kernel(float3 * linearVelocity,
 	uint a = srcInd[ind].key;
 	
 	float3 linSum = linearVelocity[ind];
-	float3 angSum = angularVelocity[ind];
+	// float3 angSum = angularVelocity[ind];
 
 	unsigned cur = ind;
 // add up backward
@@ -459,16 +369,16 @@ __global__ void averageVelocities_kernel(float3 * linearVelocity,
 	    if(srcInd[cur].key != a) break;
 	    
 	    linSum = float3_add(linSum, linearVelocity[cur]);
-	    angSum = float3_add(angSum, angularVelocity[cur]);
+	    // angSum = float3_add(angSum, angularVelocity[cur]);
 	}
 
 	if(c > 1) {
 	    linSum = scale_float3_by(linSum, 1.f / (float)c);
-	    angSum = scale_float3_by(angSum, 1.f / (float)c);
+	    // angSum = scale_float3_by(angSum, 1.f / (float)c);
 	}
 	
 	linearVelocity[ind] = linSum;
-	angularVelocity[ind] = angSum;
+	// angularVelocity[ind] = angSum;
 	
 	cur = ind;
 // write backward
@@ -478,7 +388,7 @@ __global__ void averageVelocities_kernel(float3 * linearVelocity,
 	    if(srcInd[cur].key != a) break;
 	    
 	    linearVelocity[cur] = linSum;
-	    angularVelocity[cur] = angSum;
+	    // angularVelocity[cur] = angSum;
 	}
 }
 
@@ -494,9 +404,7 @@ __global__ void writePointTetHash_kernel(KeyValuePair * pntTetHash,
 	                uint2 * pairs,
 	                uint2 * splits,
 	                uint * bodyCount,
-	                uint4 * indices,
-	                uint * pointStart,
-                    uint * indexStart,
+	                uint4 * tet,
                     uint maxInd)
 {
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
@@ -524,8 +432,7 @@ __global__ void writePointTetHash_kernel(KeyValuePair * pntTetHash,
         pntTetHash[istart + 3].key = VERYLARGE_INT;
 	}
 	else {
-	    const uint4 ia = computePointIndex(pointStart, indexStart, indices, iBody);
-	    
+	    uint4 ia = tet[ind];
         kv.value = ind;
 	    kv.key = ia.x;
         pntTetHash[istart  ] = kv;
@@ -629,12 +536,13 @@ __global__ void updateVelocity_kernel(float3 * dstVelocity,
 	if(count > 1.f)
 	    sumLinVel = scale_float3_by(sumLinVel, 1.f / count);
 
-    float3 a = dstVelocity[iPnt];
-	float3_add_inplace(a, sumLinVel);
-    float speed = float3_length(a);
+    //float3 a = dstVelocity[iPnt];
+	//float3_add_inplace(a, sumLinVel);
+    float speed = float3_length(sumLinVel);
 // limit speed here
-    if(speed > CSpeedLimit) float3_scale_inplace(a, CSpeedLimit / speed);
-    dstVelocity[iPnt] = a;
+    if(speed > CSpeedLimit) float3_scale_inplace(sumLinVel, CSpeedLimit / speed);
+    //dstVelocity[iPnt] = a;
+    float3_add_inplace(dstVelocity[iPnt], sumLinVel);
 }
 
 extern "C" {
@@ -720,45 +628,6 @@ void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel,
                                        bufLength);
 }
 
-void simpleContactSolverSolveContact(ContactConstraint* constraints,
-                        float3 * deltaLinearVelocity,
-	                    float3 * deltaAngularVelocity,
-                        uint2 * pairs,
-                        uint2 * splits,
-	                    float * splitMass,
-	                    ContactData * contacts,
-	                    float3 * positions,
-                        float3 * velocities,
-                        uint4 * indices,
-                        uint * perObjPointStart,
-                        uint * perObjectIndexStart,
-                        uint numContacts2,
-                        float * deltaJ,
-                        int maxNIt,
-                        int it)
-{
-    dim3 block(SOLVECONTACT_TPB, 1, 1);
-    unsigned nblk = iDivUp(numContacts2, SOLVECONTACT_TPB);
-    dim3 grid(nblk, 1, 1);
-    
-    solveContact_kernel<<< grid, block >>>(constraints,
-                        deltaLinearVelocity,
-	                    deltaAngularVelocity,
-	                    pairs,
-                        splits,
-	                    splitMass,
-	                    contacts,
-	                    positions,
-                        velocities,
-                        indices,
-                        perObjPointStart,
-                        perObjectIndexStart,
-                        numContacts2,
-                        deltaJ,
-                        maxNIt,
-                        it);
-}
-
 void simpleContactSolverAverageVelocities(float3 * linearVelocity,
                         float3 * angularVelocity,
                         uint * bodyCount, 
@@ -780,9 +649,7 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                uint2 * pairs,
 	                uint2 * splits,
 	                uint * bodyCount,
-	                uint4 * ind,
-	                uint * perObjPointStart,
-                    uint * perObjectIndexStart,
+	                uint4 * tet,
 	                uint numBodies,
 	                uint bufLength)
 {
@@ -797,9 +664,7 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                pairs,
 	                splits,
 	                bodyCount,
-	                ind,
-	                perObjPointStart,
-	                perObjectIndexStart,
+	                tet,
 	                numBodies);
 }
 
@@ -845,80 +710,5 @@ namespace contactsolver {
 }
 }
 
-namespace contactconstraint {
-void prepareNoPenetratingContact(ContactConstraint* constraints,
-    float3 * contactLinearVel,
-                                        uint2 * splits,
-                                        uint2 * pairs,
-                                        float3 * pos,
-                                        float3 * vel,
-                                        float3 * impulse,
-                                        float * splitMass,
-                                        ContactData * contacts,
-                                        uint4 * tetind,
-                                        uint numContacts2)
-{
-    dim3 block(SETCONSTRAINT_TPB, 1, 1);
-    unsigned nblk = iDivUp(numContacts2, SETCONSTRAINT_TPB);
-    dim3 grid(nblk, 1, 1);
-    
-    prepareNoPenetratingContactConstraint_kernel<<< grid, block >>>(constraints,
-        contactLinearVel,
-                                        splits,
-                                        pos,
-                                        vel,
-                                        impulse,
-                                        splitMass,
-                                        contacts,
-                                        tetind,
-                                        numContacts2);
-}
 
-void resolveCollision(ContactConstraint* constraints,
-                        float3 * contactLinearVelocity,
-                        float3 * deltaLinearVelocity,
-	                    uint2 * pairs,
-                        uint2 * splits,
-	                    float * splitMass,
-	                    ContactData * contacts,
-	                    uint numContacts2)
-{
-    dim3 block(SOLVECONTACT_TPB, 1, 1);
-    unsigned nblk = iDivUp(numContacts2, SOLVECONTACT_TPB);
-    dim3 grid(nblk, 1, 1);
-    
-    resolveCollision_kernel<<< grid, block >>>(constraints,
-                        contactLinearVelocity,
-                        deltaLinearVelocity,
-	                    pairs,
-                        splits,
-	                    splitMass,
-	                    contacts,
-	                    numContacts2);
-}
-
-void resolveFriction(ContactConstraint* constraints,
-                        float3 * contactLinearVelocity,
-                        float3 * deltaLinearVelocity,
-	                    uint2 * pairs,
-                        uint2 * splits,
-	                    float * splitMass,
-	                    ContactData * contacts,
-	                    uint numContacts2)
-{
-    dim3 block(SOLVECONTACT_TPB, 1, 1);
-    unsigned nblk = iDivUp(numContacts2, SOLVECONTACT_TPB);
-    dim3 grid(nblk, 1, 1);
-    
-    resolveFriction_kernel<<< grid, block >>>(constraints,
-                        contactLinearVelocity,
-                        deltaLinearVelocity,
-	                    pairs,
-                        splits,
-	                    splitMass,
-	                    contacts,
-	                    numContacts2);
-}
-
-}
 //:~

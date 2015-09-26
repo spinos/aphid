@@ -1,5 +1,5 @@
 #include "cuConjugateGradient_implement.h"
-#include <matrix_math.cu>
+#include "../cudanarrowphase/matrix_math.cuh"
 
 __global__ void addX_kernel(float3 * X,
                             float3 * residual,

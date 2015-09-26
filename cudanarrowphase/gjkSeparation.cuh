@@ -1,7 +1,7 @@
 #ifndef GJKSEPARATION_CUH
 #define GJKSEPARATION_CUH
 
-#include <gjk_math.cu>
+#include <gjk_math.cuh>
 #include <stripedModel.cuh>
 
 #define GJK_BLOCK_SIZE 64
@@ -76,7 +76,7 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
 	const ContactData ct = dstContact[ind];
 	
 // already determined no contact
-	if(ct.separateAxis.w < 1.f || ct.timeOfImpact > GJK_STEPSIZE || ct.timeOfImpact < 0.f)
+	if(ct.separateAxis.w < 1.f || ct.timeOfImpact > GJK_STEPSIZE )
 	    return;
 	
 	float3 * ppos = & pos[ind<<3];
@@ -99,13 +99,13 @@ __global__ void advanceTimeOfImpactIterative_kernel(ContactData * dstContact,
 	float separateDistance = float4_length(ct.separateAxis);
 	
 // within thin shell margin
-	if(separateDistance <= GJK_THIN_MARGIN2)
+	if(separateDistance <= GJK_THIN_MARGIN)
 	    return;
 	
 // use thin shell margin
 	// separateDistance -= GJK_THIN_MARGIN2;
 
-	const float toi = ct.timeOfImpact + separateDistance / closeInSpeed * .51f;
+	const float toi = ct.timeOfImpact + separateDistance / closeInSpeed * .251f;
 
 // too far away	
 	if(toi > GJK_STEPSIZE) { 

@@ -1,8 +1,7 @@
-#ifndef CUFEMMATH_CU
-#define CUFEMMATH_CU
+#ifndef _CUFEMMATH_CUH_
+#define _CUFEMMATH_CUH_
 
-#include "bvh_math.cuh"
-#include "matrix_math.cu"
+#include "../cudanarrowphase/matrix_math.cuh"
 
 inline __device__ void extractTetij(uint c, uint & tet, uint & i, uint & j)
 {

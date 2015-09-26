@@ -1,7 +1,7 @@
 #ifndef COLLISIONRESOLUTION_CUH
 #define COLLISIONRESOLUTION_CUH
 
-#define SOLVECONTACT_TPB 256
+#include "contactSolverCommon.cuh"
 
 inline __device__ void addDeltaVelocityLinearOnly(float3 & dst, 
         float3 deltaLinearVelocity)

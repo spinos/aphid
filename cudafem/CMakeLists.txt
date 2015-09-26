@@ -136,11 +136,6 @@ set (CUSOURCES "../scan/scan.cu"
 "../reduction/cuReduceMinMax.cu"
 "../reduction/cuReduceMinMaxBox.cu"
 "../radixsort/radixsort.cu"
-"../cudanarrowphase/matrix_math.cu"
-"../cudanarrowphase/line_math.cu"
-"../cudanarrowphase/triangle_math.cu"
-"../cudanarrowphase/barycentric.cu"
-"../cudanarrowphase/gjk_math.cu"
 "../cudanarrowphase/simpleContactSolver.cu"
 "../cudanarrowphase/narrowphase.cu"
 "../taskQueue/SimpleQueue.cu"
@@ -150,11 +145,12 @@ set (CUSOURCES "../scan/scan.cu"
 "../sahbvh/BvhHash.cu"
 "../sahbvh/BvhCost.cu"
 "../sahbvh/BvhLazy.cu"
-"cuFemMath.cu"
-"cuFemTetrahedron.cu"
-"cuConjugateGradient.cu"
+../cudanarrowphase/contactConstraint.cu
+../cudanarrowphase/collisionResolution.cu
 ../cudadyn/cuControlForce.cu
-../cudadyn/cuMassSystem.cu)
+../cudadyn/cuMassSystem.cu
+cuConjugateGradient.cu
+cuFemTetrahedron.cu)
 
 if (WIN32)
 set (CUDA_NVCC_FLAGS "--disable-warnings --ptxas-options=-v -arch sm_21")

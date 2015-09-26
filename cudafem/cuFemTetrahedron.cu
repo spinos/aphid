@@ -1,6 +1,6 @@
 #include "bvh_common.h"
 #include <radixsort_implement.h>
-#include "cuFemMath.cu"
+#include "cuFemMath.cuh"
 #include <CudaBase.h>
 #include <Spline1D.cuh>
 

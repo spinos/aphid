@@ -3,9 +3,9 @@
 
 #include "bvh_common.h"
 #include "bvh_math.cuh"
-#include "barycentric.cu"
-#include "line_math.cu"
-#include "triangle_math.cu"
+#include "barycentric.cuh"
+#include "line_math.cuh"
+#include "triangle_math.cuh"
 
 #define GJK_MAX_NUM_ITERATIONS 10
 #define GJK_THIN_MARGIN 0.04f

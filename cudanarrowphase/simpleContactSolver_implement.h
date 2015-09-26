@@ -42,23 +42,6 @@ void simpleContactSolverClearDeltaVelocity(float3 * deltaLinVel,
                                         float3 * deltaAngVel, 
                                         uint bufLength);
 
-void simpleContactSolverSolveContact(ContactConstraint* constraints,
-                        float3 * deltaLinearVelocity,
-	                    float3 * deltaAngularVelocity,
-	                    uint2 * pairs,
-                        uint2 * splits,
-	                    float * splitMass,
-	                    ContactData * contacts,
-	                    float3 * positions,
-                        float3 * velocities,
-                        uint4 * indices,
-                        uint * perObjPointStart,
-                        uint * perObjectIndexStart,
-                        uint numContacts,
-                        float * deltaJ,
-                        int maxNIt,
-                        int it);
-
 void simpleContactSolverAverageVelocities(float3 * linearVelocity,
                         float3 * angularVelocity,
                         uint * bodyCount, 
@@ -69,9 +52,7 @@ void simpleContactSolverWritePointTetHash(KeyValuePair * pntTetHash,
 	                uint2 * pairs,
 	                uint2 * splits,
 	                uint * bodyCount,
-	                uint4 * ind,
-	                uint * perObjPointStart,
-                    uint * perObjectIndexStart,
+	                uint4 * tet,
 	                uint numBodies,
 	                uint bufLength);
 
@@ -107,7 +88,9 @@ namespace contactconstraint {
                                         ContactData * contacts,
                                         uint4 * tetind,
                                         uint numContacts);
+}
 
+namespace collisionres {
     void resolveCollision(ContactConstraint* constraints,
                         float3 * contactLinearVelocity,
                         float3 * deltaLinearVelocity,

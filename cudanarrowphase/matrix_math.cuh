@@ -1,5 +1,5 @@
-#ifndef _MATRIX_MATH_H_
-#define _MATRIX_MATH_H_
+#ifndef MATRIX_MATH_CUH
+#define MATRIX_MATH_CUH
 
 #include "bvh_math.cuh"
 

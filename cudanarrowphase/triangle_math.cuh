@@ -1,8 +1,8 @@
 #ifndef TRIANGLE_MATH_CU
 #define TRIANGLE_MATH_CU
 
-#include "barycentric.cu"
-#include "line_math.cu"
+#include "barycentric.cuh"
+#include "line_math.cuh"
 
 inline __device__ void computeClosestPointOnTriangleInside2(const float3 & p, 
                                         const float3 & v0,

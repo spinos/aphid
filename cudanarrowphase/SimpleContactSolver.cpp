@@ -253,7 +253,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	int i;
 	for(i=0; i< numiterations; i++) {
 // compute impulse and velocity changes per contact
-        contactconstraint::resolveCollision((ContactConstraint *)constraint,
+        collisionres::resolveCollision((ContactConstraint *)constraint,
 	                    (float3 *)contactLinearVel,
                         (float3 *)deltaLinVel,
 	                    (uint2 *)pairs,
@@ -284,7 +284,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
                    "deltaV_avg", CudaDbgLog::FAlways);
 #endif
 
-        contactconstraint::resolveFriction((ContactConstraint *)constraint,
+        collisionres::resolveFriction((ContactConstraint *)constraint,
 	                    (float3 *)contactLinearVel,
                         (float3 *)deltaLinVel,
 	                    (uint2 *)pairs,
@@ -316,9 +316,7 @@ void SimpleContactSolver::solveContacts(unsigned numContacts,
 	                (uint2 *)pairs,
 	                (uint2 *)splits,
 	                (uint *)bodyCount,
-	                (uint4 *)ind,
-	                (uint * )perObjPointStart,
-	                (uint * )perObjectIndexStart,
+	                (uint4 *)m_bodyTetInd->bufferOnDevice(),
 	                numContacts * 2,
 	                pntHashBufLength);
     CudaBase::CheckCudaError(// CudaBase::Synchronize(),
