@@ -185,6 +185,7 @@ MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & pa
 	std::string validName(nodeName);
 	SHelper::noColon(validName);
 	fmesh.setName(validName.c_str()); 
+    MGlobal::displayInfo(validName.c_str());
 	
 	if(data->numUVs() < 1) {
 		MGlobal::displayWarning(MString(" poly mesh has no uv ")+nodeName.c_str());

@@ -847,8 +847,11 @@ void ASearchHelper::AllTypedPaths(std::map<std::string, MDagPath > & dst, const 
 		MDagPath apath;		
 		iter.getPath( apath );
 		MFnDagNode fdag(apath);
-		if(!fdag.isIntermediateObject()) 
-            dst[apath.fullPathName().asChar()] = apath;
+		if(!fdag.isIntermediateObject()) {
+            std::string nodeName(apath.fullPathName().asChar());
+            SHelper::removeAnyNamespace(nodeName);
+            dst[nodeName] = apath;
+        }
 	}
 }
 
