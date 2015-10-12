@@ -838,18 +838,46 @@ bool ASearchHelper::FirstTypedObj(const MObject &root, MObject & dst, MFn::Type 
     return false;
 }
 
-void ASearchHelper::AllTypedPaths(std::map<std::string, MDagPath > & dst, const MDagPath & root, MFn::Type typ)
+void ASearchHelper::LsAllTypedPaths(MDagPathArray & dst, const MDagPath & root, MFn::Type typ)
 {
 	MStatus stat;
-	MItDag iter;
-	iter.reset(root, MItDag::kDepthFirst, typ);
-	for(; !iter.isDone(); iter.next()) {								
-		MDagPath apath;		
-		iter.getPath( apath );
-		MFnDagNode fdag(apath);
-		if(!fdag.isIntermediateObject()) 
-            dst[apath.fullPathName().asChar()] = apath;
+	const unsigned nc = root.childCount();
+	std::map<std::string, MDagPath > sorted;
+// ls transform children ordered by name
+	unsigned i;
+	for(i=0; i<nc; i++) {
+		MObject	child = root.child(i);
+		if(child.hasFn(MFn::kTransform)) {
+			MDagPath pchild;
+			MDagPath::getAPathTo(child, pchild);
+			sorted[MFnDagNode(child).name().asChar()] = pchild;
+		}
 	}
+	
+// handle transform children first
+	std::map<std::string, MDagPath >::const_iterator it = sorted.begin();
+	for(; it !=sorted.end(); ++it)
+		LsAllTypedPaths(dst, it->second, typ);
+	
+// then typed children	
+	if(root.node().hasFn(typ) && !MFnDagNode(root).isIntermediateObject()) 
+		dst.append(root);
+	
+	sorted.clear();
+	if(typ == MFn::kTransform) return;
+	
+	for(i=0; i<nc; i++) {
+		MObject	child = root.child(i);
+		if(child.hasFn(typ) && !MFnDagNode(child).isIntermediateObject()) {
+			MDagPath pchild;
+			MDagPath::getAPathTo(child, pchild);
+			sorted[MFnDagNode(child).name().asChar()] = pchild;
+		}
+	}
+	
+	it = sorted.begin();
+	for(; it !=sorted.end(); ++it)
+		dst.append(it->second);
 }
 
 bool ASearchHelper::FirstObjByAttrValInArray(MObjectArray &objarr, MString &attrname, MString &attrval, MObject &res)

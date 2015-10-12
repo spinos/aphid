@@ -11,15 +11,17 @@
 #include <SHelper.h>
 #include <HTransform.h>
 #include <HPolygonalMesh.h>
-bool HesperisPolygonalMeshIO::WritePolygonalMeshes(const std::map<std::string, MDagPath > & paths, HesperisFile * file)
+#include <AHelper.h>
+bool HesperisPolygonalMeshIO::WritePolygonalMeshes(const MDagPathArray & paths, HesperisFile * file)
 {
     file->clearPolygonalMeshes();
-    std::map<std::string, MDagPath >::const_iterator it = paths.begin();
-    for(;it!=paths.end();++it) {
+	const unsigned n = paths.length();
+	unsigned i;
+    for(i=0; i<n; i++) {
         APolygonalMesh * mesh = new APolygonalMesh;
-        CreateMeshData(mesh, it->second);
+        CreateMeshData(mesh, paths[i]);
         // MGlobal::displayInfo(mesh->verbosestr().c_str());
-        file->addPolygonalMesh(it->second.fullPathName().asChar(), mesh);
+        file->addPolygonalMesh(paths[i].fullPathName().asChar(), mesh);
     }
     
     file->setDirty();
@@ -36,10 +38,10 @@ bool HesperisPolygonalMeshIO::CreateMeshData(APolygonalMesh * data, const MDagPa
     MStatus stat;
     MFnMesh fmesh(path.node(), &stat);
     if(!stat) {
-        MGlobal::displayInfo(MString(" not a mesh ") + path.fullPathName());
+        // MGlobal::displayInfo(MString(" not a mesh ") + path.fullPathName());
         return false;
     }
-    
+	
     unsigned np = fmesh.numVertices();
     unsigned nf = fmesh.numPolygons();
     unsigned ni = fmesh.numFaceVertices();
@@ -185,6 +187,7 @@ MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & pa
 	std::string validName(nodeName);
 	SHelper::noColon(validName);
 	fmesh.setName(validName.c_str()); 
+	// AHelper::Info<std::string>("create poly", validName);
 	
 	if(data->numUVs() < 1) {
 		MGlobal::displayWarning(MString(" poly mesh has no uv ")+nodeName.c_str());

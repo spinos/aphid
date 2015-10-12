@@ -34,15 +34,15 @@ public:
 	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName = "");
     static bool AddTransform(const MDagPath & path, HesperisFile * file, const std::string & beheadName = "");
     static bool IsCurveValid(const MDagPath & path);
-	static bool WriteCurves(const std::map<std::string, MDagPath > & paths, 
+	static bool WriteCurves(const MDagPathArray & paths, 
 							HesperisFile * file, 
 							const std::string & parentName = "");
-	static bool WriteMeshes(const std::map<std::string, MDagPath > & paths, 
+	static bool WriteMeshes(const MDagPathArray & paths, 
 							HesperisFile * file, 
 							const std::string & parentName = "");
-	static bool CreateCurveGroup(const std::map<std::string, MDagPath > & paths, 
+	static bool CreateCurveGroup(const MDagPathArray & paths, 
 								CurveGroup * dst);
-    static bool CreateMeshGroup(const std::map<std::string, MDagPath > & paths, 
+    static bool CreateMeshGroup(const MDagPathArray & paths, 
 								ATriangleMeshGroup * dst);
     static MMatrix GetParentTransform(const MDagPath & path);
     static MMatrix GetWorldTransform(const MDagPath & path);

@@ -50,17 +50,17 @@ bool HesperisCurveCreator::CheckExistingCurves(CurveGroup * geos, MObject &targe
 	MDagPath root;
     MDagPath::getAPathTo(target, root);
 	
-	std::map<std::string, MDagPath > existing;
-	ASearchHelper::AllTypedPaths(existing, root, MFn::kNurbsCurve);
+	MDagPathArray existing;
+	ASearchHelper::LsAllTypedPaths(existing, root, MFn::kNurbsCurve);
 	
-    const unsigned ne = existing.size();
+    const unsigned ne = existing.length();
     if(ne < 1) return false;
     if(ne != geos->numCurves()) return false;
     
     unsigned n = 0;
-    std::map<std::string, MDagPath >::const_iterator it = existing.begin();
-    for(;it!=existing.end();++it) {
-        MFnNurbsCurve fcurve(it->second.node());
+    unsigned i;
+    for(i=0; i< ne; i++) {
+        MFnNurbsCurve fcurve(existing[i].node());
 		n += fcurve.numCVs();
     }
 	

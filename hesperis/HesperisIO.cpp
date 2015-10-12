@@ -47,7 +47,7 @@ bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file, const 
 	MFnDagNode fdg(path);
 	if(fdg.parentCount() < 1) return false;
 	
-	AHelper::Info<MString>("hes io add transform ", path.fullPathName());
+// AHelper::Info<MString>("hes io add transform ", path.fullPathName());
 
 	MObject oparent = fdg.parent(0);
 	MFnDagNode fp(oparent);
@@ -77,7 +77,7 @@ bool HesperisIO::IsCurveValid(const MDagPath & path)
 	return true;
 }
 
-bool HesperisIO::WriteCurves(const std::map<std::string, MDagPath > & paths, 
+bool HesperisIO::WriteCurves(const MDagPathArray & paths, 
 							HesperisFile * file, 
 							const std::string & parentName) 
 {
@@ -103,7 +103,7 @@ bool HesperisIO::WriteCurves(const std::map<std::string, MDagPath > & paths,
 	return true;
 }
 
-bool HesperisIO::WriteMeshes(const std::map<std::string, MDagPath > & paths, 
+bool HesperisIO::WriteMeshes(const MDagPathArray & paths, 
 							HesperisFile * file, 
 							const std::string & parentName)
 {
@@ -183,17 +183,17 @@ bool HesperisIO::FindNamedChild(MObject & dst, const std::string & name, MObject
     return false;
 }
 
-bool HesperisIO::CreateCurveGroup(const std::map<std::string, MDagPath > & paths, CurveGroup * dst)
+bool HesperisIO::CreateCurveGroup(const MDagPathArray & paths, CurveGroup * dst)
 {
     MStatus stat;
-	unsigned j;
+	unsigned i, j;
 	int numCvs = 0;
 	unsigned numNodes = 0;
     
-	std::map<std::string, MDagPath >::const_iterator it = paths.begin();
-    for(;it!=paths.end();++it) {
-		if(!IsCurveValid(it->second)) continue;
-		MFnNurbsCurve fcurve(it->second.node());
+	const unsigned n = paths.length();
+    for(i=0; i<n; i++) {
+		if(!IsCurveValid(paths[i])) continue;
+		MFnNurbsCurve fcurve(paths[i].node());
 		numCvs += fcurve.numCVs();
 		numNodes++;
 	}
@@ -213,13 +213,12 @@ bool HesperisIO::CreateCurveGroup(const std::map<std::string, MDagPath > & paths
 	MPoint wp;
 	MMatrix worldTm;
 	
-	it = paths.begin();
-	for(;it!=paths.end();++it) {
-		if(!IsCurveValid(it->second)) continue;
+	for(i=0; i<n; i++) {
+		if(!IsCurveValid(paths[i])) continue;
 		
-		worldTm = GetWorldTransform(it->second);
+		worldTm = GetWorldTransform(paths[i]);
 		
-		MFnNurbsCurve fcurve(it->second.node());
+		MFnNurbsCurve fcurve(paths[i].node());
 		nj = fcurve.numCVs();
 		MPointArray ps;
 		fcurve.getCVs(ps, MSpace::kWorld);
@@ -236,10 +235,10 @@ bool HesperisIO::CreateCurveGroup(const std::map<std::string, MDagPath > & paths
     return true;
 }
 
-bool HesperisIO::CreateMeshGroup(const std::map<std::string, MDagPath > & paths, ATriangleMeshGroup * dst)
+bool HesperisIO::CreateMeshGroup(const MDagPathArray & paths, ATriangleMeshGroup * dst)
 {
     MStatus stat;
-	unsigned j;
+	unsigned i, j;
 	int numPnts = 0;
 	unsigned numNodes = 0;
 	unsigned numTris = 0;
@@ -251,9 +250,9 @@ bool HesperisIO::CreateMeshGroup(const std::map<std::string, MDagPath > & paths,
     MPoint wp;
 	MMatrix worldTm;
     
-    std::map<std::string, MDagPath >::const_iterator it = paths.begin();
-    for(;it!=paths.end();++it) {
-		MFnMesh fmesh(it->second.node(), &stat);
+    const unsigned n = paths.length();
+    for(i=0; i<n; i++) {
+		MFnMesh fmesh(paths[i].node(), &stat);
 		if(!stat) continue;
 		numNodes++;
         
@@ -280,15 +279,14 @@ bool HesperisIO::CreateMeshGroup(const std::map<std::string, MDagPath > & paths,
     unsigned pDrift = 0;
     unsigned iDrift = 0;
     unsigned iNode = 0;
-    it = paths.begin();
-    for(;it!=paths.end();++it) {
-		MFnMesh fmesh(it->second.node(), &stat);
+    for(i=0; i<n; i++) {
+		MFnMesh fmesh(paths[i].node(), &stat);
 		if(!stat) continue;
         
         //MGlobal::displayInfo(MString("p drift ")+pDrift+
         //                     MString("i drift ")+iDrift);
 		
-        worldTm = GetWorldTransform(it->second);
+        worldTm = GetWorldTransform(paths[i]);
 		
 		fmesh.getPoints(ps, MSpace::kObject);
 		fmesh.getTriangles(triangleCounts, triangleVertices);

@@ -64,7 +64,7 @@ public:
 	char sameParent(MObject &one, MObject &another);
 	
     static bool FirstObjByAttrValInArray(MObjectArray &objarr, MString &attrname, MString &attrval, MObject &res);
-	static void AllTypedPaths(std::map<std::string, MDagPath > & dst, const MDagPath & root, MFn::Type typ);
+	static void LsAllTypedPaths(MDagPathArray & dst, const MDagPath & root, MFn::Type typ);
 	static bool FirstTypedObj(const MObject &root, MObject & dst, MFn::Type typ);
 	static bool FirstConnectedTypedDepNodeByTypename(MFn::Type type, MString& name, MObject& root, MObject& node);
     static bool FristNamedPlugInHistory(MObject &root, MFn::Type type, MString &name1, MPlug &plug1);
