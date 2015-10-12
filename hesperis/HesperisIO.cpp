@@ -57,6 +57,8 @@ bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file, const 
 	
 	std::string nodeName = path.fullPathName().asChar();
 	if(beheadName.size() > 1) SHelper::behead(nodeName, beheadName);
+    SHelper::removeAnyNamespace(nodeName);
+    
 // todo extract tm    
 	file->addTransform(nodeName, new BaseTransform);
 	return true;
@@ -89,6 +91,7 @@ bool HesperisIO::WriteCurves(const MDagPathArray & paths,
     
 	std::string curveName = "|curves";
     if(parentName.size()>1) curveName = boost::str(boost::format("%1%|curves") % parentName);
+    SHelper::removeAnyNamespace(curveName);
 	
 	MGlobal::displayInfo(MString("hes io write curve group ")+curveName.c_str());
     file->clearCurves();
@@ -116,7 +119,8 @@ bool HesperisIO::WriteMeshes(const MDagPathArray & paths,
     // combined->setDagName(parentName);
     std::string meshName = "|meshes";
     if(parentName.size()>1) meshName = boost::str(boost::format("%1%|meshes") % parentName);
-	
+    SHelper::removeAnyNamespace(meshName);
+
     MGlobal::displayInfo(MString("hes io write mesh group ")+meshName.c_str());
     
     file->clearTriangleMeshes();
@@ -282,7 +286,7 @@ bool HesperisIO::CreateMeshGroup(const MDagPathArray & paths, ATriangleMeshGroup
     for(i=0; i<n; i++) {
 		MFnMesh fmesh(paths[i].node(), &stat);
 		if(!stat) continue;
-        
+        //MGlobal::displayInfo(fmesh.name());
         //MGlobal::displayInfo(MString("p drift ")+pDrift+
         //                     MString("i drift ")+iDrift);
 		
