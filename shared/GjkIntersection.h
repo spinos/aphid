@@ -68,6 +68,7 @@ public:
 class IntersectTest {
 public:
     static void SetA(const BoundingBox & box);
+    static void SetABox(const Vector3F * p);
     static void SetATetrahedron(const Vector3F * p);
     static bool evaluateTetrahedron(Vector3F * p, unsigned * v);
     static bool evaluateTriangle(Vector3F * p, unsigned * v);

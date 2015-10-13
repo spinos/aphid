@@ -210,6 +210,21 @@ void IntersectTest::SetATetrahedron(const Vector3F * p)
     A->x()[3] = p[3];
 }
 
+void IntersectTest::SetABox(const Vector3F * p)
+{
+    if(A) delete A;
+    A = new BoxSet;
+    Vector3F * q = A->x();
+    q[0] = p[0];
+    q[1] = p[1];
+    q[2] = p[2];
+    q[3] = p[3];
+    q[4] = p[4];
+    q[5] = p[5];
+    q[6] = p[6];
+    q[7] = p[7];
+}
+
 bool IntersectTest::evaluateTetrahedron(Vector3F * p, unsigned * v)
 {
     TetrahedronSet B;

@@ -999,6 +999,26 @@ void AHelper::ConvertToMMatrix(MMatrix & dst, const Matrix44F & src)
     dst[3][3] = src.M(3,3);
 }
 
+void AHelper::ConvertToMatrix44F(Matrix44F & dst, const MMatrix & src)
+{
+    *dst.m(0, 0) = src.matrix[0][0];
+    *dst.m(0, 1) = src.matrix[0][1];
+    *dst.m(0, 2) = src.matrix[0][2];
+    *dst.m(0, 3) = src.matrix[0][3];
+    *dst.m(1, 0) = src.matrix[1][0];
+    *dst.m(1, 1) = src.matrix[1][1];
+    *dst.m(1, 2) = src.matrix[1][2];
+    *dst.m(1, 3) = src.matrix[1][3];
+    *dst.m(2, 0) = src.matrix[2][0];
+    *dst.m(2, 1) = src.matrix[2][1];
+    *dst.m(2, 2) = src.matrix[2][2];
+    *dst.m(2, 3) = src.matrix[2][3];
+    *dst.m(3, 0) = src.matrix[3][0];
+    *dst.m(3, 1) = src.matrix[3][1];
+    *dst.m(3, 2) = src.matrix[3][2];
+    *dst.m(3, 3) = src.matrix[3][3];
+}
+
 void AHelper::SimpleAnimation(const MPlug & dst, int a, int b)
 {
 	float dQ = b - a;
