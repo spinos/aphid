@@ -33,6 +33,19 @@ Vector3F PointSet::supportPoint(const Vector3F & v, Vector3F * localP) const
     return res;
 }
 
+const std::string PointSet::str() const
+{
+	std::stringstream sst;
+	sst.str("( ");
+	int i;
+	for(i=0; i<numPoints(); i++) {
+		sst<<X(i);
+		if( (i+1) == numPoints() ) sst<<" )";
+		else sst<<", ";
+	}
+	return sst.str();
+}
+
 TriangleSet::TriangleSet() {}
 TriangleSet::~TriangleSet() {}
 int TriangleSet::numPoints() const

@@ -11,6 +11,8 @@ public:
     virtual Vector3F X(int idx) const;
     virtual Vector3F * x();
     virtual Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const;
+	const std::string str() const;
+	
 protected:
 
 private:
@@ -76,6 +78,5 @@ public:
 private:
     static PointSet * A;
 };
-bool Intersects(PointSet * A, PointSet * B);
 
 }

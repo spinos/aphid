@@ -18,7 +18,6 @@
 #include <Matrix33F.h>
 #include <Matrix44F.h>
 #include <Vector2F.h>
-#include <boost/scoped_array.hpp>
 
 inline bool IsNan(float a) { return a != a; }
 
