@@ -1,5 +1,5 @@
 INCLUDEPATH += ../shared \
-                ../../Library/boost_1_44_0 \
+                ../../Library/boost_1_55_0 \
                 D:/usr/local/include
                
 SOURCES       = main.cpp
@@ -13,8 +13,9 @@ win32 {
 }
 macx {
     CONFIG -= app_bundle
-    INCLUDEPATH += ../../Library/boost_1_44_0
-     QMAKE_LIBDIR += ../../Library/boost_1_44_0/stage/lib
+    INCLUDEPATH += ../../Library/boost_1_55_0
+     QMAKE_LIBDIR += ../../Library/boost_1_55_0/stage/lib
     LIBS += -lboost_date_time\
-            -lboost_thread
+            -lboost_thread\
+            -lboost_system
 }

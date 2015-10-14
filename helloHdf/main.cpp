@@ -1,13 +1,10 @@
 #include <iostream>
 
-#include "HGroup.h"
-#include "HDataset.h"
-#include "HIntAttribute.h"
-#include "HFloatAttribute.h"
+#include <HBase.h>
 #include "hdf5_hl.h"
 #define MAX_NAME 1024
 
-
+#include "Holder.h"
 
 void
 do_dtype(hid_t tid) {
@@ -64,12 +61,15 @@ void do_attr(hid_t aid) {
 	 */
 	len = H5Aget_name(aid, MAX_NAME, buf );
 	printf("    Attribute Name : %s\n",buf);
-
+	
 	/*    
 	 * Get attribute information: dataspace, data type 
 	 */
 	aspace = H5Aget_space(aid); /* the dimensions of the attribute data */
-
+	hsize_t     dims_out[3];
+	H5Sget_simple_extent_dims(aspace, dims_out, NULL);
+	printf("    Attribute Dimension : %i\n", dims_out[0]);
+	
 	atype  = H5Aget_type(aid); 
 	do_dtype(atype);
 
@@ -277,16 +277,18 @@ char diagnoseFile(const char* filename)
 {
 	hid_t file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
 	if(file_id < 0) {
-		printf("cannot open file\n");
+		printf("\n cannot open file\n");
 		return 0;
 	}
+	printf("\n diagnose file");
+	printf(filename);
 	hid_t    grp = H5Gopen(file_id,"/", H5P_DEFAULT);
 	scan_group(grp);
 	H5Gclose(grp);
 	herr_t   status = H5Fclose(file_id);
 	if(status < 0)
-		printf("diagnose not closed\n");
-	
+		printf("\n diagnose not closed\n");
+	std::cout<<"\n end diagnose\n";
 	return 1;
 }
 
@@ -501,57 +503,65 @@ hid_t    file_id, dataset_id, dataspace_id; /* identifiers */
     status = H5Dclose (dataset_id);
     status = H5Pclose (plist_id);
     status = H5Fclose (file_id);
+	std::cout<<"\n end test compression\n";
+}
+
+void changeTime(const char * filename, bool rma1 = false)
+{
+	HObject::FileIO.open(filename, HDocument::oReadAndWrite);
+	
+	printf("\n opened to add .time");
+	
+	HBase w1("/");
+	if(!w1.hasNamedData(".time")) w1.addFloatData(".time", 300);
+		
+	float trange[300];
+	int i;
+	for(i=0; i<300; i++) trange[i] = -.5f + ((float)(rand() % 1023)) / 1024.f;
+
+	w1.writeFloatData(".time", 300, trange);
+	w1.close();
+	
+	if(rma1) HObject::FileIO.deleteObject("/A1");
+	if(!HObject::FileIO.close()) std::cout<<"\n warning: file not closed!\n";
+	
+	printf("\n closed aft read");
 }
 
 int main (int argc, char * const argv[]) {
-    // insert code here...
-    std::cout << "Hello, HDF5!\n";
-
-	//writeFile("dset.h5","/car");
-	//writeFile("dset.h5","/foo2");
-	//writeFile("dset.h5","/boo/tar");
-	//writeFile("dset.h5","/boo/c");
-	//writeFile("dset.h5","/boo/x");
-	//diagnoseFile("/Users/jianzhang/Desktop/scene.abc");
+    if(argc > 1) {
+		changeTime(argv[1], true);
+		diagnoseFile(argv[1]);
+		return 0;
+	}
 	
+    std::cout << "Hello, HDF5!\n";
 	
 	if(HObject::FileIO.open("dset.h5", HDocument::oReadAndWrite)) {
-		printf("opened");
+		printf("\n opened to write");
 	}
 	else {
-		printf("not opened");
+		printf("\n not opened");
 	}
 	
-	HGroup grpA("/A1");
-	grpA.create();
-	
-	if(HObject::FileIO.checkExist("/A1"))
-		printf("find grp /A1");
+	HBase w("/");
+	if(!w.hasNamedAttr(".range")) w.addIntAttr(".range", 4);
 		
-	HIntAttribute rootAttr("/.range");
-	rootAttr.create(4);
-	rootAttr.open();
-	
 	int vrange[4];
 	vrange[0] = 31;
 	vrange[1] = 1037;
 	vrange[2] = -87;
 	vrange[3] = 7;
-	if(!rootAttr.write(vrange)) std::cout<<"/.range write failed\n";
-	rootAttr.close();
+	w.writeIntAttr(".range", vrange);
+	w.close();
 	
-	HFloatAttribute fltAttr("/.time");
-	fltAttr.create(2);
-	fltAttr.open();
+	HGroup grpA("/A1");
+	grpA.create();
 	
-	float vtime[2];
-	vtime[0] = .00947;
-	vtime[1] = -36.450;
-	if(!fltAttr.write(vtime)) std::cout<<"/.time write failed\n";
-	fltAttr.close();
+	if(HObject::FileIO.checkExist("/A1"))
+		printf("\n found grp /A1");
 	
-	HGroup grpAC("/A1/C");
-	grpAC.create();
+	HBase grpAC("/A1/C");
 	
 	HGroup grpB("/B2");
 	grpB.create();
@@ -562,72 +572,22 @@ int main (int argc, char * const argv[]) {
 	HGroup grpBDE("/B2/D/E");
 	grpBDE.create();
 	
-	HDataset dsetAg("/A1/g");
-	dsetAg.create(32,1);
-	dsetAg.open();
-	dsetAg.write();
-	dsetAg.close();
+	if(!grpAC.hasNamedData("g")) grpAC.addIntData("g", 4);
+	grpAC.writeIntData("g", 4, vrange);
+	grpAC.close();
 	
-	HDataset dsetBg("/B2/D/g");
-	dsetBg.create(32,1);
-	dsetBg.open();
-	dsetBg.write();
-	dsetBg.close();
+	if(!HObject::FileIO.close()) std::cout<<"\n warning: file not closed!\n";
 	
-	HObject::FileIO.close();
-
-	HObject::FileIO.open("dset.h5", HDocument::oReadAndWrite);
-	dsetAg.open();
-	dsetAg.read();
-	dsetAg.close();
+	printf("\n closed aft write");
 	
-	dsetBg.open();
-	dsetBg.read();
-	dsetBg.close();
-	
-	HObject::FileIO.deleteObject("/A1");
-	HObject::FileIO.close();
-	//printf("diagnose\n");
-	
+	changeTime("dset.h5");
 	diagnoseFile("dset.h5");
-	//diagnoseFile("/Users/jianzhang/man/bakep/alot/hdt.h5");
-	
-	if(HObject::FileIO.open("dset.h5", HDocument::oReadOnly)) {
-		printf("opened to read /.range\n");
-	}
-	
-	HIntAttribute inAttr("/.range");
-	if(!inAttr.open())
-		std::cout<<"/.range not opened\n";
-	
-	int *vinattr;
-	if(!inAttr.read(vinattr)) std::cout<<"./range read failed\n";
-	
-	int at = inAttr.dataSpaceDimension();
-	//
-	
-	inAttr.close();
-	
-	std::cout<<"inst attr /.range: "<<vinattr[0]<<", "<<vinattr[1]<<", "<<vinattr[2]<<", "<<vinattr[3]<<std::endl;
-	std::cout<<"dim attr: "<<at<<std::endl;
-	
-	HIntAttribute dummy("/.nouse");
-	//if(!dummy.open()) std::cout<<"no dummy";
-	
-	HFloatAttribute inTime("/.time");
-	inTime.open();
-	
-	float *vintime;
-	inTime.read(vintime);
-	
-	std::cout<<"float attr /.time: "<<vintime[0]<<", "<<vintime[1]<<std::endl;
-	
-	
-	inTime.close();
-	HObject::FileIO.close();
-	              
+              
 	testCompression();
 	
-	if(argc > 2) diagnoseFile(argv[1]);
+	printf("\n test holding");
+	Holder hold;
+	hold.Run("dset.h5");
 	return 0;
 }
+//:~
