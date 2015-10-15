@@ -68,7 +68,7 @@ protected:
 
             HTransform child(*it);
             
-            BaseTransform dtrans;
+			BaseTransform dtrans;
             child.load(&dtrans);
             MObject otm = HesperisTransformCreator::create(&dtrans, target, nodeName);
             

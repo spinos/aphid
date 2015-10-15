@@ -31,7 +31,8 @@ MObject HesperisCurveCreator::create(CurveGroup * data, MObject & parentObj,
 	
 	if(CheckExistingCurves(data, parentObj)) return res;
 	
-	MGlobal::displayInfo(MString("hesperis create ")+ data->numCurves()
+	MGlobal::displayInfo(MString("hesperis create ")
+	+data->numCurves()
     +MString(" curves"));
 	
 	Vector3F * pnts = data->points();

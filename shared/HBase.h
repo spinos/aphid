@@ -81,6 +81,7 @@ public:
 			if(isChildGroup(i)) {
 				T gc(childPath(i));
 				if(gc.verifyType()) names.push_back(childPath(i));
+				gc.close();
 			}
 		}
 	}
