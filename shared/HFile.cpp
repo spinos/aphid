@@ -43,7 +43,6 @@ void HFile::doClose()
 	if(!isOpened()) return;
 	useDocument();
     closeOpenedGroups();
-	std::cout<<"close "<<HObject::FileIO.fileName()<<"\n";
 	HObject::FileIO.close();
 	BaseFile::doClose();
 }

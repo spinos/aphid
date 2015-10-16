@@ -238,7 +238,7 @@ scan_group(hid_t gid) {
 			memb_name, (size_t)MAX_NAME );
 			
 			//printf("   %d ",len);//fflush(stdout);
-		printf("  Member Name: %s ",memb_name);//fflush(stdout);
+		// printf("  Member Name: %s ",memb_name);//fflush(stdout);
 		otype =  H5Gget_objtype_by_idx(gid, (size_t)i );
 		
 		switch(otype) {
@@ -253,10 +253,10 @@ scan_group(hid_t gid) {
 				H5Gclose(grpid);
 				break;
 			case H5G_DATASET:
-				printf("\n_  DATASET:\n");
+				/*printf("\n_  DATASET:\n");
 				dsid = H5Dopen(gid,memb_name, H5P_DEFAULT);
 				do_dset(dsid);
-				H5Dclose(dsid);
+				H5Dclose(dsid);*/
 				break;
 			case H5G_TYPE:
 				printf("\n_  DATA TYPE:\n");
@@ -291,7 +291,7 @@ char diagnoseFile(const char* filename)
 	std::cout<<"\n end diagnose\n";
 	return 1;
 }
-
+#if 0
 char create_group(hid_t file, const char * name)
 {
 	if(H5LTpath_valid(file, name, 1)) {
@@ -397,7 +397,7 @@ char readFile(const char* filename)
     H5Fclose(file_id);
 	return 1;
 }
-
+#endif
 #define FILE    "cmprss.h5"
 #define RANK    2
 #define DIM0    10000
@@ -583,7 +583,7 @@ int main (int argc, char * const argv[]) {
 	changeTime("dset.h5");
 	diagnoseFile("dset.h5");
               
-	testCompression();
+	// testCompression();
 	
 	printf("\n test holding");
 	Holder hold;

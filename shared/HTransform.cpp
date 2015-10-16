@@ -9,8 +9,9 @@ HTransform::~HTransform()
 	
 char HTransform::verifyType()
 {
-    if(!hasNamedAttr(".transform_type"))
-		return 0;
+// empty as transform
+    if(numAttrs() < 1) return 1;
+    if(!hasNamedAttr(".transform_type")) return 0;
     return 1;
 }
 
