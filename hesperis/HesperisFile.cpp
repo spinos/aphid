@@ -401,4 +401,12 @@ void HesperisFile::clearTetrahedronMeshes()
         delete it->second;
     m_terahedrons.clear(); 
 }
+
+std::string HesperisFile::modifiedTime()
+{
+	HWorld grpWorld;
+	grpWorld.load();
+	grpWorld.close();
+	return grpWorld.modifiedTimeStr();
+}
 //:~

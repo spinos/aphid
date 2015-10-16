@@ -79,6 +79,8 @@ public:
     void clearTriangleMeshes();
 	void clearPolygonalMeshes();
     void clearTetrahedronMeshes();
+	
+	std::string modifiedTime();
     
     template<typename Th>
     static bool LsNames(std::vector<std::string> & dst, HBase * parent)
