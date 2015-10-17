@@ -935,4 +935,35 @@ bool ASearchHelper::FirstDepNodeByName(MObject& node, const MString & name, MFn:
 	}
 	return false;
 }
+
+void ASearchHelper::TransformsBetween(MDagPathArray & dst,
+								const MDagPath & longer, const MDagPath & shorter)
+{
+	MDagPath cur = longer;
+	MStatus stat = cur.pop();
+	while(stat) {
+		if(cur == shorter) return;
+		if(!cur.node().hasFn(MFn::kTransform)) return;
+		dst.append(cur);
+		stat = cur.pop();
+	}
+}
+
+void ASearchHelper::Merge(MDagPathArray & dst, const MDagPathArray & src)
+{
+	unsigned i, j;
+	const unsigned n = src.length();
+	for(i=0; i<n; i++) {
+		MDagPath ap = src[i];
+		bool found = false;
+		for(j=0; j< dst.length(); j++) {
+			if(dst[j] == ap) {
+				found = true;
+				break;
+			}
+		}
+		
+		if(!found) dst.append(ap);
+	}
+}
 //~:

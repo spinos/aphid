@@ -69,5 +69,8 @@ public:
 	static bool FirstConnectedTypedDepNodeByTypename(MFn::Type type, MString& name, MObject& root, MObject& node);
     static bool FristNamedPlugInHistory(MObject &root, MFn::Type type, MString &name1, MPlug &plug1);
 	static bool FirstDepNodeByName(MObject& node, const MString & name, MFn::Type type);
+	static void TransformsBetween(MDagPathArray & dst,
+								const MDagPath & longer, const MDagPath & shorter);
+	static void Merge(MDagPathArray & dst, const MDagPathArray & src);
 };
 #endif
