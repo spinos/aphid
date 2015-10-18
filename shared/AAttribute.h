@@ -104,6 +104,7 @@ class ANumericAttribute : public AAttribute {
 public:
 	enum NumericAttributeType {
 		TUnkownNumeric,
+		TByteNumeric,
 		TShortNumeric,
 		TIntNumeric,
 		TFloatNumeric,
@@ -140,6 +141,20 @@ protected:
 	
 private:
 	short m_value;
+};
+
+class AByteNumericAttribute : public AShortNumericAttribute {
+public:	
+	AByteNumericAttribute();
+	AByteNumericAttribute(short x);
+	virtual ~AByteNumericAttribute();
+	
+	virtual NumericAttributeType numericType() const;
+	
+protected:
+	
+private:
+
 };
 
 class AIntNumericAttribute : public ANumericAttribute {

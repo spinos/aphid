@@ -109,7 +109,10 @@ ANumericAttribute * AAttributeHelper::AsNumericData(const MPlug & plg)
 		return r;
 	}
 	switch(fn.unitType()) {
-       case MFnNumericData::kByte :  
+       case MFnNumericData::kByte : 
+			va = GetPlugValue<short>(plg);
+			r = new AByteNumericAttribute(va);
+           break;
        case MFnNumericData::kShort :
             va = GetPlugValue<short>(plg);
 			r = new AShortNumericAttribute(va);
@@ -197,6 +200,14 @@ bool AAttributeHelper::IsStringAttr(MObject & entity)
 bool AAttributeHelper::IsEnumAttr(MObject & entity)
 { return entity.hasFn(MFn::kEnumAttribute); }
 
+bool AAttributeHelper::IsNumericAttr(MObject & entity, MFnNumericData::Type t)
+{
+	if(!entity.hasFn(MFn::kNumericAttribute)) return false;
+	MFnNumericAttribute fn(entity);
+	if(fn.unitType() != t) return false;
+	return true;
+}
+
 bool AAttributeHelper::AddStringAttr(MObject & attr, MObject & node, 
 									const std::string & nameLong, 
 									const std::string & nameShort)
@@ -204,6 +215,20 @@ bool AAttributeHelper::AddStringAttr(MObject & attr, MObject & node,
 	MFnTypedAttribute fAttr;
 	attr = fAttr.create(MString(nameLong.c_str()), MString(nameShort.c_str()), MFnData::kString);
 	fAttr.setStorable(true);
+	MFnDependencyNode fn(node);
+	MStatus stat = fn.addAttribute( attr, MFnDependencyNode::kLocalDynamicAttr );
+	return stat == MS::kSuccess;
+}
+
+bool AAttributeHelper::AddNumericAttr(MObject & attr, MObject & node, 
+									const std::string & nameLong, 
+									const std::string & nameShort,
+									MFnNumericData::Type t)
+{
+	MFnNumericAttribute fAttr;
+	attr = fAttr.create(MString(nameLong.c_str()), MString(nameShort.c_str()), t);
+	fAttr.setStorable(true);
+	fAttr.setKeyable(true);
 	MFnDependencyNode fn(node);
 	MStatus stat = fn.addAttribute( attr, MFnDependencyNode::kLocalDynamicAttr );
 	return stat == MS::kSuccess;

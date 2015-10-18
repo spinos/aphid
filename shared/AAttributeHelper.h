@@ -55,11 +55,16 @@ public:
 	static bool HasNamedAttribute(MObject & attrib, MObject & node, const std::string & name);
 	static bool IsStringAttr(MObject & entity);
 	static bool IsEnumAttr(MObject & entity);
+	static bool IsNumericAttr(MObject & entity, MFnNumericData::Type t);
 	static bool AddStringAttr(MObject & attr, MObject & node, 
 							const std::string & nameLong, 
 							const std::string & nameShort);
-	static bool AAttributeHelper::AddEnumAttr(MObject & attr, MObject & node, 
-									const std::string & nameLong, 
-									const std::string & nameShort,
-									const std::map<short, std::string > & fields);
+	static bool AddEnumAttr(MObject & attr, MObject & node, 
+							const std::string & nameLong, 
+							const std::string & nameShort,
+							const std::map<short, std::string > & fields);
+	static bool AddNumericAttr(MObject & attr, MObject & node, 
+							const std::string & nameLong, 
+							const std::string & nameShort,
+							MFnNumericData::Type t);
 };

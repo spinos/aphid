@@ -158,25 +158,88 @@ bool HesperisAttributeIO::ReadStringAttribute(AStringAttribute * data, MObject &
 
 bool HesperisAttributeIO::ReadNumericAttribute(ANumericAttribute * data, MObject &target)
 {
+	MFnNumericData::Type dt = MFnNumericData::kInvalid;
 	switch(data->numericType()) {
+		case ANumericAttribute::TByteNumeric:
+			dt = MFnNumericData::kByte;
+			break;
 		case ANumericAttribute::TShortNumeric:
+			dt = MFnNumericData::kShort;
 			break;
 		case ANumericAttribute::TIntNumeric:
+			dt = MFnNumericData::kInt;
 			break;
 		case ANumericAttribute::TBooleanNumeric:
+			dt = MFnNumericData::kBoolean;
 			break;
 		case ANumericAttribute::TFloatNumeric:
+			dt = MFnNumericData::kFloat;
 			break;
 		case ANumericAttribute::TDoubleNumeric:
+			dt = MFnNumericData::kDouble;
 			break;
 		default:
 			break;
     }
+	if(dt == MFnNumericData::kInvalid) return false;
+	MObject attr;
+	if(AAttributeHelper::HasNamedAttribute(attr, target, data->shortName() )) {
+		if(!AAttributeHelper::IsNumericAttr(attr, dt) ) {
+			AHelper::Info<std::string >(" existing attrib is not correct numeric type ", data->longName() );
+			return false;
+		}
+	}
+	else {
+		if(!AAttributeHelper::AddNumericAttr(attr, target,
+							data->longName(),
+							data->shortName(),
+							dt) ) {
+			AHelper::Info<std::string >(" cannot create numeric attrib ", data->longName() );
+			return false;
+		}
+	}
+	
+	short va;
+	int vb;
+	float vc;
+	double vd;
+	bool ve;
+	MPlug pg(target, attr);
+	switch(data->numericType()) {
+		case ANumericAttribute::TByteNumeric:
+			va = (static_cast<AByteNumericAttribute *> (data))->value();
+			pg.setValue(va);
+			break;
+		case ANumericAttribute::TShortNumeric:
+			va = (static_cast<AShortNumericAttribute *> (data))->value();
+			pg.setValue(va);
+			break;
+		case ANumericAttribute::TIntNumeric:
+			vb = (static_cast<AIntNumericAttribute *> (data))->value();
+			pg.setValue(vb);
+			break;
+		case ANumericAttribute::TBooleanNumeric:
+			ve = (static_cast<ABooleanNumericAttribute *> (data))->value();
+			pg.setValue(ve);
+			break;
+		case ANumericAttribute::TFloatNumeric:
+			vc = (static_cast<AFloatNumericAttribute *> (data))->value();
+			pg.setValue(vc);
+			break;
+		case ANumericAttribute::TDoubleNumeric:
+			vd = (static_cast<ADoubleNumericAttribute *> (data))->value();
+			pg.setValue(vd);
+			break;
+		default:
+			break;
+    }
+	
 	return true;
 }
 
 bool HesperisAttributeIO::ReadCompoundAttribute(ACompoundAttribute * data, MObject &target)
 {
+	AHelper::Info<std::string >(" todo compound attrib ", data->longName() );
 	return true;
 }
 

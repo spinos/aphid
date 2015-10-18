@@ -54,6 +54,7 @@ void HAttributeGroup::writeNumeric(ANumericAttribute * data)
 	writeIntAttr(".num_typ", &t);
 	
 	switch (data->numericType()) {
+		case ANumericAttribute::TByteNumeric:
 		case ANumericAttribute::TShortNumeric:
 		case ANumericAttribute::TIntNumeric:
 		case ANumericAttribute::TBooleanNumeric:
@@ -74,6 +75,10 @@ void HAttributeGroup::writeNumericValueAsInt(ANumericAttribute * data)
 	int vb;
 	bool vc;
 	switch (data->numericType()) {
+		case ANumericAttribute::TByteNumeric:
+			va = (static_cast<AByteNumericAttribute *> (data))->value();
+			vb = va;
+			break;
 		case ANumericAttribute::TShortNumeric:
 			va = (static_cast<AShortNumericAttribute *> (data))->value();
 			vb = va;
@@ -205,6 +210,7 @@ char HAttributeGroup::load(AAttributeWrap & wrap)
 bool HAttributeGroup::loadNumeric(ANumericAttribute * data)
 {
 	switch (data->numericType()) {
+		case ANumericAttribute::TByteNumeric:
 		case ANumericAttribute::TShortNumeric:
 		case ANumericAttribute::TIntNumeric:
 		case ANumericAttribute::TBooleanNumeric:
@@ -329,7 +335,10 @@ ACompoundAttribute * AAttributeWrap::createCompound()
 ANumericAttribute * AAttributeWrap::createNumeric(int numericType)
 {
 	ANumericAttribute * r = NULL;
-	if( numericType == ANumericAttribute::TShortNumeric ) {
+	if( numericType == ANumericAttribute::TByteNumeric ) {
+		r = new AByteNumericAttribute;
+	}
+	else if( numericType == ANumericAttribute::TShortNumeric ) {
 		r = new AShortNumericAttribute;
 	}
 	else if( numericType == ANumericAttribute::TIntNumeric ) {

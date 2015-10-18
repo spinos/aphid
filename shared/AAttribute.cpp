@@ -163,6 +163,15 @@ void AShortNumericAttribute::setValue(const float & x)
 short AShortNumericAttribute::value() const
 { return m_value; }
 
+AByteNumericAttribute::AByteNumericAttribute() {}
+
+AByteNumericAttribute::AByteNumericAttribute(short x) : AShortNumericAttribute() {}
+
+AByteNumericAttribute::~AByteNumericAttribute() {}
+
+ANumericAttribute::NumericAttributeType AByteNumericAttribute::numericType() const
+{ return TByteNumeric; }
+
 AIntNumericAttribute::AIntNumericAttribute()
 { m_value = 0; }
 
