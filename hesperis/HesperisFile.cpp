@@ -14,6 +14,7 @@
 #include <ATriangleMeshGroup.h>
 #include <ATetrahedronMeshGroup.h>
 #include <BaseTransform.h>
+#include <AAttribute.h>
 #include <GeometryArray.h>
 #include <SHelper.h>
 #include <sstream>
@@ -62,6 +63,9 @@ bool HesperisFile::doWrite(const std::string & fileName)
 			break;
         case WPoly:
 			writePolygon();
+			break;
+		case WAttrib:
+			writeAttribute();
 			break;
 		default:
 			break;
@@ -140,6 +144,22 @@ bool HesperisFile::writePolygon()
 	}
 	return true;
 }
+
+bool HesperisFile::writeAttribute()
+{
+	std::map<std::string, AAttribute *>::iterator it = m_attribs.begin();
+	for(; it != m_attribs.end(); ++it) {
+		std::cout<<" write attrib "<<WorldPath(it->first)
+		<<"\n";
+		HAttributeGroup grp(WorldPath(it->first));
+		grp.save(it->second);
+		grp.close();
+	}
+	return true;
+}
+
+void HesperisFile::addAttribute(const std::string & name, AAttribute * data)
+{ m_attribs[checkPath(name)] = data; }
 
 void HesperisFile::addTransform(const std::string & name, BaseTransform * data)
 { m_transforms[checkPath(name)] = data; }
@@ -400,6 +420,14 @@ void HesperisFile::clearTetrahedronMeshes()
 	for(; it != m_terahedrons.end(); ++it) 
         delete it->second;
     m_terahedrons.clear(); 
+}
+
+void HesperisFile::clearAttributes()
+{
+	std::map<std::string, AAttribute *>::iterator it = m_attribs.begin();
+	for(; it != m_attribs.end(); ++it) 
+        delete it->second;
+    m_attribs.clear(); 
 }
 
 std::string HesperisFile::modifiedTime()

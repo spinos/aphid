@@ -71,6 +71,5 @@ public:
 	static bool FirstDepNodeByName(MObject& node, const MString & name, MFn::Type type);
 	static void TransformsBetween(MDagPathArray & dst,
 								const MDagPath & longer, const MDagPath & shorter);
-	static void Merge(MDagPathArray & dst, const MDagPathArray & src);
 };
 #endif

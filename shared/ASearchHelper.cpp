@@ -948,22 +948,4 @@ void ASearchHelper::TransformsBetween(MDagPathArray & dst,
 		stat = cur.pop();
 	}
 }
-
-void ASearchHelper::Merge(MDagPathArray & dst, const MDagPathArray & src)
-{
-	unsigned i, j;
-	const unsigned n = src.length();
-	for(i=0; i<n; i++) {
-		MDagPath ap = src[i];
-		bool found = false;
-		for(j=0; j< dst.length(); j++) {
-			if(dst[j] == ap) {
-				found = true;
-				break;
-			}
-		}
-		
-		if(!found) dst.append(ap);
-	}
-}
 //~:

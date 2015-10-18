@@ -8,6 +8,8 @@
  */
 #include <maya/MDagPath.h>
 #include <maya/MDagPathArray.h>
+#include <maya/MPlug.h>
+#include <maya/MPlugArray.h>
 #include <maya/MMatrix.h>
 #include <maya/MTransformationMatrix.h>
 #include <maya/MObject.h>
@@ -31,6 +33,8 @@ public:
 
 class HesperisIO {
 public:
+	static bool WriteAttributes(const MPlugArray & attribs, HesperisFile * file, const std::string & beheadName = "");
+    static bool AddAttribute(const MPlug & attrib, HesperisFile * file, const std::string & beheadName = "");
 	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName = "");
     static bool AddTransform(const MDagPath & path, HesperisFile * file, const std::string & beheadName = "");
     static bool IsCurveValid(const MDagPath & path);

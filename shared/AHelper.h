@@ -39,6 +39,8 @@
 #include <maya/MFnTransform.h>
 #include <Matrix44F.h>
 #include <sstream>
+#include <boost/lexical_cast.hpp>
+
 class AHelper
 {
 public:
@@ -140,5 +142,34 @@ public:
     static void ConvertToMMatrix(MMatrix & dst, const Matrix44F & src);
 	static void ConvertToMatrix44F(Matrix44F & dst, const MMatrix & src);
 	static void SimpleAnimation(const MPlug & dst, int a, int b);
+	template<typename T>
+	static void Merge(T & dst, const T & src)
+	{
+		unsigned i, j;
+		const unsigned n = src.length();
+		for(i=0; i<n; i++) {
+			bool found = false;
+			for(j=0; j< dst.length(); j++) {
+				if(dst[j] == src[i]) {
+					found = true;
+					break;
+				}
+			}
+			
+			if(!found) dst.append(src[i]);
+		}
+	}
+	
+	template<typename T>
+	static T GetValueFromStr(const char * src)
+	{
+		try {
+			return boost::lexical_cast<T>(src);
+		}
+		catch(boost::bad_lexical_cast &)
+		{
+			return 0;
+		}
+	}
 };
 #endif

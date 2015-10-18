@@ -85,3 +85,14 @@ std::string HObject::PartialPath(const std::string & entryName, const std::strin
 	res.erase(0, entryName.size() + 1);
 	return res;
 }
+
+std::string HObject::lastName() const
+{
+	std::string result = fObjectPath;
+	int found = result.rfind('/')+1;
+	if(found > -1)
+		result = result.erase(0, found);
+
+	return result;
+}
+//:~

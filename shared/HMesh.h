@@ -15,7 +15,7 @@ public:
 	HMesh(const std::string & path);
 	virtual ~HMesh();
 	
-	char verifyType();
+	virtual char verifyType();
 	virtual char save(BaseMesh * mesh);
 	virtual char load(BaseMesh * mesh);
 	

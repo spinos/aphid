@@ -242,6 +242,8 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/TetrahedronMeshBuilder.cpp
 ../shared/AAnimationCurve.cpp
 ../shared/HAnimationCurve.cpp
+../shared/AAttribute.cpp
+../shared/HAttributeGroup.cpp
 ../hesperis/HAdaptiveField.cpp
 ../hesperis/H5FieldIn.cpp
 ../hesperis/H5FieldOut.cpp

@@ -22,10 +22,64 @@
 #include <HWorld.h>
 #include <HCurveGroup.h>
 #include <HTriangleMeshGroup.h>
-#include <AHelper.h>
+#include <AAttributeHelper.h>
 #include <CurveGroup.h>
 #include <sstream>
 #include <boost/format.hpp>
+
+bool HesperisIO::WriteAttributes(const MPlugArray & attribs, HesperisFile * file, const std::string & beheadName)
+{
+	file->clearAttributes();
+	
+	unsigned i = 0;
+	for(;i<attribs.length();i++) AddAttribute(attribs[i], file, beheadName);
+	
+	file->setDirty();
+	file->setWriteComponent(HesperisFile::WAttrib);
+    bool fstat = file->save();
+	if(!fstat) MGlobal::displayWarning(MString(" cannot save attrib to file ")+ file->fileName().c_str());
+	file->close();
+	return true;
+}
+
+bool HesperisIO::AddAttribute(const MPlug & attrib, HesperisFile * file, const std::string & beheadName)
+{
+	MStatus stat;
+	MFnDagNode fdg(attrib.node(), &stat);
+	if(!stat) {
+		AHelper::Info<const char *>("not a dag ", MFnDependencyNode(attrib.node()).name().asChar());
+		return false;
+	}
+	AHelper::Info<const char *>("dag ", fdg.fullPathName().asChar());
+	
+	std::string nodeName = fdg.fullPathName().asChar();
+	if(beheadName.size() > 1) SHelper::behead(nodeName, beheadName);
+	SHelper::removeAnyNamespace(nodeName);
+	
+	const std::string attrName = boost::str(boost::format("%1%|%2%") % nodeName % attrib.partialName().asChar());
+	AHelper::Info<std::string>("att ", attrName);
+	
+	AAttribute::AttributeType t = AAttributeHelper::GetAttribType(attrib.attribute());
+	switch(t) {
+    case AAttribute::aString:
+        file->addAttribute(attrName, AAttributeHelper::AsStrData(attrib));
+        break;
+    case AAttribute::aNumeric:
+        file->addAttribute(attrName, AAttributeHelper::AsNumericData(attrib));
+        break;
+    case AAttribute::aCompound:
+        file->addAttribute(attrName, AAttributeHelper::AsCompoundData(attrib));
+        break;
+    case AAttribute::aEnum:
+        file->addAttribute(attrName, AAttributeHelper::AsEnumData(attrib));
+        break;
+    default:
+        AHelper::Info<std::string>("attr type not supported ", attrName);
+        break;
+    }
+
+	return true;
+}
 
 bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName)
 {

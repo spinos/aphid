@@ -23,6 +23,8 @@ public:
 	virtual void close() {}
 	virtual int objectType() const;
 	virtual char exists();
+	
+	std::string lastName() const;
 
 	static std::string ValidPathName(const std::string & name);
 	static std::string FullPath(const std::string & entryName, const std::string & sliceName);

@@ -19,6 +19,7 @@
 #include <HCurveGroup.h>
 #include <HWorld.h>
 #include <HPolygonalMesh.h>
+#include <HAttributeGroup.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -32,6 +33,7 @@ class ATriangleMesh;
 class ATriangleMeshGroup;
 class GeometryArray;
 class APolygonalMesh;
+class AAttribute;
 
 class HesperisFile : public HFile {
 public:
@@ -49,7 +51,8 @@ public:
 		WTetra = 1,
 		WTri = 2,
 		WTransform = 3,
-        WPoly = 4
+        WPoly = 4,
+		WAttrib = 5
 	};
 	
 	HesperisFile();
@@ -59,6 +62,7 @@ public:
 	void setReadComponent(ReadComponent comp);
 	void setWriteComponent(WriteComponent comp);
 	
+	void addAttribute(const std::string & name, AAttribute * data);
     void addTransform(const std::string & name, BaseTransform * data);
 	void addCurve(const std::string & name, CurveGroup * data);
 	void addTetrahedron(const std::string & name, ATetrahedronMeshGroup * data);
@@ -79,6 +83,7 @@ public:
     void clearTriangleMeshes();
 	void clearPolygonalMeshes();
     void clearTetrahedronMeshes();
+	void clearAttributes();
 	
 	std::string modifiedTime();
     
@@ -116,6 +121,7 @@ private:
 	bool writeTetrahedron();
 	bool writeTriangle();
     bool writePolygon();
+	bool writeAttribute();
     
 	bool readFrames(HBase * grp);
 	bool listCurve(HBase * grp);
@@ -132,6 +138,7 @@ private:
 	std::map<std::string, ATetrahedronMeshGroup * > m_terahedrons;
 	std::map<std::string, ATriangleMeshGroup * > m_triangleMeshes;
     std::map<std::string, APolygonalMesh * > m_polyMeshes;
+	std::map<std::string, AAttribute * > m_attribs;
     ReadComponent m_readComp;
 	WriteComponent m_writeComp;
 };
