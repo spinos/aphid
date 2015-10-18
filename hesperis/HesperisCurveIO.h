@@ -19,5 +19,5 @@ public:
 
 class HesperisCurveIO : public HesperisIO {
 public:
-	static bool ReadCurves(HesperisFile * file, MObject &target = MObject::kNullObj);
+	static bool ReadCurves(MObject &target = MObject::kNullObj);
 };

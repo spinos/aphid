@@ -177,4 +177,53 @@ AEnumAttribute * AAttributeHelper::AsEnumData(const MPlug & plg)
     }
 	return r;
 }
+
+bool AAttributeHelper::HasNamedAttribute(MObject & attrib, MObject & node, const std::string & name)
+{
+	MFnDependencyNode fn(node);
+	MStatus stat;
+	attrib = fn.attribute(MString(name.c_str()), &stat);
+	return stat == MS::kSuccess;
+}
+
+bool AAttributeHelper::IsStringAttr(MObject & entity)
+{
+	if(!entity.hasFn(MFn::kTypedAttribute)) return false;
+	MFnTypedAttribute fn(entity);
+	if(fn.attrType() != MFnData::kString) return false;
+	return true;
+}
+
+bool AAttributeHelper::IsEnumAttr(MObject & entity)
+{ return entity.hasFn(MFn::kEnumAttribute); }
+
+bool AAttributeHelper::AddStringAttr(MObject & attr, MObject & node, 
+									const std::string & nameLong, 
+									const std::string & nameShort)
+{
+	MFnTypedAttribute fAttr;
+	attr = fAttr.create(MString(nameLong.c_str()), MString(nameShort.c_str()), MFnData::kString);
+	fAttr.setStorable(true);
+	MFnDependencyNode fn(node);
+	MStatus stat = fn.addAttribute( attr, MFnDependencyNode::kLocalDynamicAttr );
+	return stat == MS::kSuccess;
+}
+
+bool AAttributeHelper::AddEnumAttr(MObject & attr, MObject & node, 
+									const std::string & nameLong, 
+									const std::string & nameShort,
+									const std::map<short, std::string > & fields)
+{
+	MFnEnumAttribute fAttr;
+    attr = fAttr.create(MString(nameLong.c_str()), MString(nameShort.c_str()));
+    
+	std::map<short, std::string >::const_iterator it = fields.begin();
+	for(; it!=fields.end(); ++it) fAttr.addField(it->second.c_str(), it->first);
+        
+	fAttr.setStorable(true);
+	fAttr.setKeyable(true);
+    MFnDependencyNode fn(node);;
+	MStatus stat = fn.addAttribute( attr, MFnDependencyNode::kLocalDynamicAttr );
+	return stat == MS::kSuccess;
+}
 //:~

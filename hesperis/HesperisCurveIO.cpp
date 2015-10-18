@@ -15,7 +15,7 @@
 #include <HCurveGroup.h>
 #include <CurveGroup.h>
 #include <ASearchHelper.h>
-bool HesperisCurveIO::ReadCurves(HesperisFile * file, MObject &target)
+bool HesperisCurveIO::ReadCurves(MObject &target)
 {
 	MGlobal::displayInfo("opium read curve");
     HWorld grpWorld;

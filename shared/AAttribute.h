@@ -74,6 +74,7 @@ public:
 	void setValue(short a);
 	void addField(short ind, const std::string & name);
 	
+	unsigned numFields() const;
 	short value(short & a, short & b) const;
 	std::string fieldName(short ind);
 protected:

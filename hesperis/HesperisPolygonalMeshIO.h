@@ -22,5 +22,5 @@ public:
     static bool WritePolygonalMeshes(const MDagPathArray & paths, HesperisFile * file);
     static bool CreateMeshData(APolygonalMesh * data, const MDagPath & path);
 	static bool CreateMeshUV(APolygonalUV * data, const MDagPath & path, const MString & setName);
-    static bool ReadMeshes(HesperisFile * file, MObject &target = MObject::kNullObj);
+    static bool ReadMeshes(MObject &target = MObject::kNullObj);
 };

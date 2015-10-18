@@ -107,6 +107,9 @@ short AEnumAttribute::value(short & a, short & b) const
 std::string AEnumAttribute::fieldName(short ind)
 { return m_fields[ind]; }
 
+unsigned AEnumAttribute::numFields() const
+{ return m_fields.size(); }
+
 ACompoundAttribute::ACompoundAttribute() {}
 ACompoundAttribute::~ACompoundAttribute() 
 {

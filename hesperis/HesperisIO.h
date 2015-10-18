@@ -14,14 +14,12 @@
 #include <maya/MTransformationMatrix.h>
 #include <maya/MObject.h>
 #include <AllMath.h>
-#include <HBase.h>
 #include <BaseTransform.h>
 #include <HTransform.h>
 #include <SHelper.h>
 #include <string>
 #include <map>
-
-class HesperisFile;
+#include "HesperisFile.h"
 class CurveGroup;
 class ATriangleMeshGroup;
 
@@ -33,8 +31,6 @@ public:
 
 class HesperisIO {
 public:
-	static bool WriteAttributes(const MPlugArray & attribs, HesperisFile * file, const std::string & beheadName = "");
-    static bool AddAttribute(const MPlug & attrib, HesperisFile * file, const std::string & beheadName = "");
 	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName = "");
     static bool AddTransform(const MDagPath & path, HesperisFile * file, const std::string & beheadName = "");
     static bool IsCurveValid(const MDagPath & path);

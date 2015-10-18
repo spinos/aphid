@@ -28,13 +28,13 @@ char HAttributeGroup::save(AAttribute * data)
 	int t = data->attrType();
 	writeIntAttr(".attr_typ", &t);
 	
-	std::cout<<"\nsave attr type "<<data->attrTypeStr();
+//  std::cout<<"\nsave attr type "<<data->attrTypeStr();
 	
 	if(!hasNamedAttr(".longname"))
 		addStringAttr(".longname", data->longName().size());
 	writeStringAttr(".longname", data->longName());
 		
-	std::cout<<"\nsave attr name "<<data->longName();
+//  std::cout<<"\nsave attr name "<<data->longName();
 	
 	if(data->isNumeric()) writeNumeric( static_cast<ANumericAttribute *> (data) );
 	else if(data->isEnum()) writeEnum( static_cast<AEnumAttribute *> (data) );
@@ -92,7 +92,7 @@ void HAttributeGroup::writeNumericValueAsInt(ANumericAttribute * data)
 		addIntAttr(".val");
 	
 	writeIntAttr(".val", &vb);
-	std::cout<<" value "<<vb;
+//	std::cout<<" value "<<vb;
 }
 
 void HAttributeGroup::writeNumericValueAsFlt(ANumericAttribute * data)
@@ -114,7 +114,7 @@ void HAttributeGroup::writeNumericValueAsFlt(ANumericAttribute * data)
 		addFloatAttr(".val");
 	
 	writeFloatAttr(".val", &va);
-	std::cout<<" value "<<va;
+//	std::cout<<" value "<<va;
 }
 
 void HAttributeGroup::writeEnum(AEnumAttribute * data)
@@ -133,8 +133,8 @@ void HAttributeGroup::writeEnum(AEnumAttribute * data)
 		addIntAttr(".range", 2);
 	writeIntAttr(".range", r);	
 	
-	std::cout<<" value "<<v;
-	std::cout<<" range "<<a<<":"<<b;
+//  std::cout<<" value "<<v;
+//  std::cout<<" range "<<a<<":"<<b;
 	
 	short i;
 	std::stringstream sst;
@@ -145,7 +145,7 @@ void HAttributeGroup::writeEnum(AEnumAttribute * data)
 		if(!hasNamedAttr(sst.str().c_str()))
 			addStringAttr(sst.str().c_str(), fn.size());
 		writeStringAttr(sst.str().c_str(), fn);
-		std::cout<<" field "<<i<<":"<<fn;
+//      std::cout<<" field "<<i<<":"<<fn;
 	}
 }
 
@@ -192,7 +192,7 @@ char HAttributeGroup::load(AAttributeWrap & wrap)
 	}
 	
 	AAttribute * data = wrap.attrib();
-	if(!data) return false;
+	if(!data) return 0;
 	
 	std::string lnm;
 	readStringAttr(".longname", lnm);

@@ -134,9 +134,9 @@ bool HesperisPolygonalMeshIO::CreateMeshUV(APolygonalUV * data, const MDagPath &
 	return true;
 }
 
-bool HesperisPolygonalMeshIO::ReadMeshes(HesperisFile * file, MObject &target)
+bool HesperisPolygonalMeshIO::ReadMeshes(MObject &target)
 {
-    MGlobal::displayInfo("opium read poly mesh");
+    MGlobal::displayInfo("opium v3 read poly mesh");
     HWorld grpWorld;
     ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisPolygonalMeshCreator>(&grpWorld, target);
     grpWorld.close();
