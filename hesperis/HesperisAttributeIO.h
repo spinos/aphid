@@ -19,10 +19,11 @@ public:
     static bool AddAttribute(const MPlug & attrib, HesperisFile * file, const std::string & beheadName = "");
 	
 	static bool ReadAttributes(MObject &target = MObject::kNullObj);
+	static bool ReadAttributes(HBase * parent, MObject &target);
+	
 protected:
 	
 private:
-	static bool ReadAttributes(HBase * parent, MObject &target);
 	static bool ReadAttribute(AAttribute * data, MObject &target);
 	static bool ReadStringAttribute(AStringAttribute * data, MObject &target);
 	static bool ReadNumericAttribute(ANumericAttribute * data, MObject &target);

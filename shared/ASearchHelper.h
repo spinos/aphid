@@ -71,5 +71,10 @@ public:
 	static bool FirstDepNodeByName(MObject& node, const MString & name, MFn::Type type);
 	static void TransformsBetween(MDagPathArray & dst,
 								const MDagPath & longer, const MDagPath & shorter);
+	static void TransformsToWorld(std::map<std::string, MDagPath> & dst,
+								const MDagPath & longer);
+	static void LsAllTransformsTo(std::map<std::string, MDagPath> & dst, const MDagPathArray & tails);
+	static void LsAll(std::map<std::string, MDagPath> & dst, const MDagPathArray & tails);
+
 };
 #endif

@@ -948,4 +948,32 @@ void ASearchHelper::TransformsBetween(MDagPathArray & dst,
 		stat = cur.pop();
 	}
 }
+
+void ASearchHelper::TransformsToWorld(std::map<std::string, MDagPath> & dst,
+								const MDagPath & longer)
+{
+	MDagPath cur = longer;
+	MStatus stat = cur.pop();
+	while(stat) {
+		if(!cur.node().hasFn(MFn::kTransform)) return;
+		dst[cur.fullPathName().asChar()] = cur;
+		stat = cur.pop();
+	}
+}
+
+void ASearchHelper::LsAllTransformsTo(std::map<std::string, MDagPath> & dst, const MDagPathArray & tails)
+{
+	const unsigned n = tails.length();
+	unsigned i = 0;
+	for(;i<n;i++)
+		TransformsToWorld(dst, tails[i]);
+}
+
+void ASearchHelper::LsAll(std::map<std::string, MDagPath> & dst, const MDagPathArray & tails)
+{
+	const unsigned n = tails.length();
+	unsigned i = 0;
+	for(;i<n;i++)
+		dst[tails[i].fullPathName().asChar()] = tails[i];
+}
 //~:

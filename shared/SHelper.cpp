@@ -385,7 +385,7 @@ void SHelper::endNoReturn(std::string& res)
 	if( res[end] == '\n' || res[end] == '\r') res.erase(end);
 }
 
-void SHelper::listAllNames(std::string& name, std::vector<std::string>& all)
+void SHelper::listAllNames(const std::string& name, std::vector<std::string>& all)
 {
 	all.clear();
 	std::string r;
@@ -396,9 +396,6 @@ void SHelper::listAllNames(std::string& name, std::vector<std::string>& all)
 	for (tokenizer::iterator tok_iter = tokens.begin();
 		tok_iter != tokens.end(); ++tok_iter)
 		{
-// mesh shape will be the last
-			tokenizer::iterator nextit = tok_iter;
-			++nextit;
 			r = r + "|" +(*tok_iter);
 			all.push_back(r);	
 		}

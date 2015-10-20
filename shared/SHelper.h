@@ -42,7 +42,7 @@ public:
 	static std::string getLastName(const std::string& name);
 	static std::string getHighestParentName(std::string& name);
 	static void getHierarchy(const char *name, std::vector<std::string> &res);
-	static void listAllNames(std::string& name, std::vector<std::string>& all);
+	static void listAllNames(const std::string& name, std::vector<std::string>& all);
 	static char hasParent(std::string& name);
 	static void listParentNames(const std::string& name, std::vector<std::string>& parents);
 	static void pathToFilename(std::string& name);

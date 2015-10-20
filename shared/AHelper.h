@@ -142,6 +142,17 @@ public:
     static void ConvertToMMatrix(MMatrix & dst, const Matrix44F & src);
 	static void ConvertToMatrix44F(Matrix44F & dst, const MMatrix & src);
 	static void SimpleAnimation(const MPlug & dst, int a, int b);
+	
+	template<typename T>
+	static void Append(T & dst, const T & src)
+	{
+		unsigned i, j;
+		const unsigned n = src.length();
+		for(i=0; i<n; i++) {
+			dst.append(src[i]);
+		}
+	}
+	
 	template<typename T>
 	static void Merge(T & dst, const T & src)
 	{
