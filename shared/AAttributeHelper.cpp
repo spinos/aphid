@@ -251,35 +251,4 @@ bool AAttributeHelper::AddEnumAttr(MObject & attr, MObject & node,
 	MStatus stat = fn.addAttribute( attr, MFnDependencyNode::kLocalDynamicAttr );
 	return stat == MS::kSuccess;
 }
-
-short AAttributeHelper::TangentTypeAsShort(MFnAnimCurve::TangentType type)
-{
-	switch (type) {
-		case MFnAnimCurve::kTangentGlobal:
-			return 1;//"tangentGlobal";
-		case MFnAnimCurve::kTangentFixed:
-			return 2;//"tangentFixed";
-		case MFnAnimCurve::kTangentLinear:
-			return 3;//"tangentLinear";
-		case MFnAnimCurve::kTangentFlat:
-			return 4;//"tangentFlat";
-		case MFnAnimCurve::kTangentSmooth:
-			return 5;//"tangentSmooth";
-		case MFnAnimCurve::kTangentStep:
-			return 6;//"tangentStep";
-		case MFnAnimCurve::kTangentStepNext:
-			return 7;//"tangentStepNext";
-		case MFnAnimCurve::kTangentSlow:
-			return 8;//"tangentSlow";
-		case MFnAnimCurve::kTangentFast:
-			return 9;//"tangentFast";
-		case MFnAnimCurve::kTangentClamped:
-			return 10;//"tangentClamped";
-		case MFnAnimCurve::kTangentPlateau:
-			return 11;//"tangentPlateau";
-		default:
-			break;
-	}
-	return 1;//"tangentGlobal";
-}
 //:~

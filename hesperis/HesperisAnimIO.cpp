@@ -10,12 +10,13 @@
 #include "HesperisAnimIO.h"
 #include <AAttributeHelper.h>
 #include <HAnimationCurve.h>
-#include <AAnimationCurve.h>
 #include <maya/MFnAnimCurve.h>
 #include <maya/MAnimUtil.h>
 #include <boost/format.hpp>
 
-bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCurveObj, double secondsPerFrame,
+double HesperisAnimIO::SecondsPerFrame = 0.0416667;
+
+bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCurveObj,
 								const std::string & beheadName)
 {
 	MObject entity = attrib.node();
@@ -49,12 +50,11 @@ bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCu
 	const unsigned numKeys = animCurve.numKeyframes();
 	for (unsigned i = 0; i < numKeys; i++) {
 		AAnimationKey dataKey;
-		dataKey._key = (float)animCurve.time(i).value() * secondsPerFrame; // as seconds
-		// AHelper::Info<float>("time ", dataKey._key);
+		dataKey._key = (float)animCurve.time(i).value() * SecondsPerFrame; // as seconds
 		dataKey._value = animCurve.value(i);
 		
-		dataKey._inTangentType = AAttributeHelper::TangentTypeAsShort(animCurve.inTangentType(i));
-		dataKey._outTangentType = AAttributeHelper::TangentTypeAsShort(animCurve.outTangentType(i));
+		dataKey._inTangentType = TangentTypeAsInt(animCurve.inTangentType(i));
+		dataKey._outTangentType = TangentTypeAsInt(animCurve.outTangentType(i));
 		
 		MAngle angle;
 		double weight;
@@ -75,3 +75,171 @@ bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCu
 	
 	return true;
 }
+
+bool HesperisAnimIO::ReadAnimation(HBase * parent, MObject & entity, MObject & attr)
+{	
+	MPlug panim(entity, attr);
+	if(panim.isNull() ) return false;
+	
+	std::vector<std::string > animNames;
+	parent->lsTypedChild<HAnimationCurve>(animNames);
+	std::vector<std::string>::const_iterator it = animNames.begin();
+	
+	for(;it!=animNames.end();++it) {
+		std::string nodeName = *it;
+		
+		SHelper::behead(nodeName, parent->pathToObject());
+		SHelper::behead(nodeName, "/");
+
+		AAnimationCurve dataCurve;
+		HAnimationCurve grp(*it);
+		grp.load(&dataCurve);
+		grp.close();
+
+		ProcessAnimationCurve(dataCurve, panim);
+	}
+	return true;
+}
+
+bool HesperisAnimIO::ProcessAnimationCurve(const AAnimationCurve & data, MPlug & dst)
+{
+	const unsigned n = data.numKeys();
+    if(n<1) return false;
+	
+	RemoveAnimationCurve(dst);
+	
+	MFnAnimCurve * animCv;
+	if( MAnimUtil::isAnimated( dst, false ) ) {
+		animCv = new MFnAnimCurve(dst);
+	} else {
+		animCv = new MFnAnimCurve;
+		animCv->create( dst );
+	}
+	
+	animCv->setIsWeighted(true);
+
+	unsigned i = 0;
+    for(;i<n;i++) {
+        AAnimationKey dataKey = data.key(i);
+        
+        MTime tmt(dataKey._key / SecondsPerFrame, MTime::uiUnit()); // from seconds
+        double valueKey = dataKey._value;
+        
+        
+        MStatus added = animCv->addKeyframe ( tmt, valueKey, NULL);
+        if(added != MStatus::kSuccess) {
+            MGlobal::displayInfo(MString("cannot add key ") + i);
+            return false;
+        }
+        
+// need unlock				
+        animCv->setTangentsLocked(i, false);
+        animCv->setWeightsLocked(i, false);
+        
+        MAngle iangle(dataKey._inAngle, MAngle::kDegrees);
+        animCv->setTangent( i, iangle, dataKey._inWeight, true);
+        MAngle oangle(dataKey._outAngle, MAngle::kDegrees);
+        animCv->setTangent( i, oangle, dataKey._outWeight, false);
+        
+        animCv->setInTangentType(i, IntAsTangentType(dataKey._inTangentType) );
+        animCv->setOutTangentType(i, IntAsTangentType(dataKey._outTangentType) );
+    }
+
+    delete animCv;
+
+	return true;
+}
+
+bool HesperisAnimIO::RemoveAnimationCurve(MPlug & dst)
+{
+	MObjectArray animation;
+	MAnimUtil::findAnimation ( dst, animation );
+	if(animation.length() > 0 ) {
+		MDGModifier modif;
+		modif.deleteNode(animation[0]);
+		if(!modif.doIt())
+			AHelper::Info<MString>("cannot remove existing animation", dst.name());
+	}
+	return true;
+}
+
+int HesperisAnimIO::TangentTypeAsInt(MFnAnimCurve::TangentType type)
+{
+	int y = 1;
+	switch (type) {
+		case MFnAnimCurve::kTangentFixed:
+			y = 2;//"tangentFixed";
+			break;
+		case MFnAnimCurve::kTangentLinear:
+			y = 3;//"tangentLinear";
+			break;
+		case MFnAnimCurve::kTangentFlat:
+			y = 4;//"tangentFlat";
+			break;
+		case MFnAnimCurve::kTangentSmooth:
+			y = 5;//"tangentSmooth";
+			break;
+		case MFnAnimCurve::kTangentStep:
+			y = 6;//"tangentStep";
+			break;
+		case MFnAnimCurve::kTangentStepNext:
+			y = 7;//"tangentStepNext";
+			break;
+		case MFnAnimCurve::kTangentSlow:
+			y = 8;//"tangentSlow";
+			break;
+		case MFnAnimCurve::kTangentFast:
+			y = 9;//"tangentFast";
+			break;
+		case MFnAnimCurve::kTangentClamped:
+			y = 10;//"tangentClamped";
+			break;
+		case MFnAnimCurve::kTangentPlateau:
+			y = 11;//"tangentPlateau";
+			break;
+		default:
+			break;
+	}
+	return y;
+}
+
+MFnAnimCurve::TangentType HesperisAnimIO::IntAsTangentType(int x)
+{
+	MFnAnimCurve::TangentType y = MFnAnimCurve::kTangentGlobal;
+	switch (x) {
+		case 2 :
+			y = MFnAnimCurve::kTangentFixed;
+			break;
+		case 3 :
+			y = MFnAnimCurve::kTangentLinear;
+			break;
+		case 4 :
+			y = MFnAnimCurve::kTangentFlat;
+			break;
+		case 5 :
+			y = MFnAnimCurve::kTangentSmooth;
+			break;
+		case 6 :
+			y = MFnAnimCurve::kTangentStep;
+			break;
+		case 7 :
+			y = MFnAnimCurve::kTangentStepNext;
+			break;
+		case 8 :
+			y = MFnAnimCurve::kTangentSlow;
+			break;
+		case 9 :
+			y = MFnAnimCurve::kTangentFast;
+			break;
+		case 10:
+			y = MFnAnimCurve::kTangentClamped;
+			break;
+		case 11 :
+			y = MFnAnimCurve::kTangentPlateau;
+			break;
+		default:
+			break;
+	}
+	return y;
+}
+//:~

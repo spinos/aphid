@@ -8,9 +8,9 @@
  */
 
 #pragma once
-#include "HesperisIO.h"
+#include "HesperisAnimIO.h"
 
-class HesperisAttributeIO : public HesperisIO {
+class HesperisAttributeIO : public HesperisAnimIO {
 public:
 	HesperisAttributeIO();
 	virtual ~HesperisAttributeIO();
@@ -24,9 +24,9 @@ public:
 protected:
 	
 private:
-	static bool ReadAttribute(AAttribute * data, MObject &target);
-	static bool ReadStringAttribute(AStringAttribute * data, MObject &target);
-	static bool ReadNumericAttribute(ANumericAttribute * data, MObject &target);
-	static bool ReadCompoundAttribute(ACompoundAttribute * data, MObject &target);
-	static bool ReadEnumAttribute(AEnumAttribute * data, MObject &target);
+	static bool ReadAttribute(MObject & dst, AAttribute * data, MObject &target);
+	static bool ReadStringAttribute(MObject & dst, AStringAttribute * data, MObject &target);
+	static bool ReadNumericAttribute(MObject & dst, ANumericAttribute * data, MObject &target);
+	static bool ReadCompoundAttribute(MObject & dst, ACompoundAttribute * data, MObject &target);
+	static bool ReadEnumAttribute(MObject & dst, AEnumAttribute * data, MObject &target);
 };

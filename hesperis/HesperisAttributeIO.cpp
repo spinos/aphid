@@ -102,8 +102,11 @@ bool HesperisAttributeIO::ReadAttributes(HBase * parent, MObject &target)
 	for(;it!=allAttrs.end();++it) {
 		HAttributeGroup a(*it);
 		AAttributeWrap wrap;
-		if(a.load(wrap))
-			ReadAttribute(wrap.attrib(), target);
+		if(a.load(wrap)) {
+			MObject attr;
+			if(ReadAttribute(attr, wrap.attrib(), target))
+				ReadAnimation(&a, target, attr);
+		}
 		a.close();
 	}
 	
@@ -113,20 +116,20 @@ bool HesperisAttributeIO::ReadAttributes(HBase * parent, MObject &target)
 	return true;
 }
 
-bool HesperisAttributeIO::ReadAttribute(AAttribute * data, MObject &target)
+bool HesperisAttributeIO::ReadAttribute(MObject & dst, AAttribute * data, MObject &target)
 {
 	switch(data->attrType()) {
 		case AAttribute::aString:
-			ReadStringAttribute(static_cast<AStringAttribute *> (data), target);
+			ReadStringAttribute(dst, static_cast<AStringAttribute *> (data), target);
 			break;
 		case AAttribute::aNumeric:
-			ReadNumericAttribute(static_cast<ANumericAttribute *> (data), target);
+			ReadNumericAttribute(dst, static_cast<ANumericAttribute *> (data), target);
 			break;
 		case AAttribute::aCompound:
-			ReadCompoundAttribute(static_cast<ACompoundAttribute *> (data), target);
+			ReadCompoundAttribute(dst, static_cast<ACompoundAttribute *> (data), target);
 			break;
 		case AAttribute::aEnum:
-			ReadEnumAttribute(static_cast<AEnumAttribute *> (data), target);
+			ReadEnumAttribute(dst, static_cast<AEnumAttribute *> (data), target);
 			break;
 		default:
 			break;
@@ -134,17 +137,16 @@ bool HesperisAttributeIO::ReadAttribute(AAttribute * data, MObject &target)
 	return true;
 }
 
-bool HesperisAttributeIO::ReadStringAttribute(AStringAttribute * data, MObject &target)
+bool HesperisAttributeIO::ReadStringAttribute(MObject & dst, AStringAttribute * data, MObject &target)
 {
-	MObject attr;
-	if(AAttributeHelper::HasNamedAttribute(attr, target, data->shortName() )) {
-		if(!AAttributeHelper::IsStringAttr(attr) ) {
+	if(AAttributeHelper::HasNamedAttribute(dst, target, data->shortName() )) {
+		if(!AAttributeHelper::IsStringAttr(dst) ) {
 			AHelper::Info<std::string >(" existing attrib is not string ", data->longName() );
 			return false;
 		}
 	}
 	else {
-		if(!AAttributeHelper::AddStringAttr(attr, target,
+		if(!AAttributeHelper::AddStringAttr(dst, target,
 							data->longName(),
 							data->shortName())) {
 			AHelper::Info<std::string >(" cannot create string attrib ", data->longName() );
@@ -152,11 +154,11 @@ bool HesperisAttributeIO::ReadStringAttribute(AStringAttribute * data, MObject &
 		}
 	}
 	
-	MPlug(target, attr).setValue(data->value().c_str() );
+	MPlug(target, dst).setValue(data->value().c_str() );
 	return true;
 }
 
-bool HesperisAttributeIO::ReadNumericAttribute(ANumericAttribute * data, MObject &target)
+bool HesperisAttributeIO::ReadNumericAttribute(MObject & dst, ANumericAttribute * data, MObject &target)
 {
 	MFnNumericData::Type dt = MFnNumericData::kInvalid;
 	switch(data->numericType()) {
@@ -182,15 +184,15 @@ bool HesperisAttributeIO::ReadNumericAttribute(ANumericAttribute * data, MObject
 			break;
     }
 	if(dt == MFnNumericData::kInvalid) return false;
-	MObject attr;
-	if(AAttributeHelper::HasNamedAttribute(attr, target, data->shortName() )) {
-		if(!AAttributeHelper::IsNumericAttr(attr, dt) ) {
+
+	if(AAttributeHelper::HasNamedAttribute(dst, target, data->shortName() )) {
+		if(!AAttributeHelper::IsNumericAttr(dst, dt) ) {
 			AHelper::Info<std::string >(" existing attrib is not correct numeric type ", data->longName() );
 			return false;
 		}
 	}
 	else {
-		if(!AAttributeHelper::AddNumericAttr(attr, target,
+		if(!AAttributeHelper::AddNumericAttr(dst, target,
 							data->longName(),
 							data->shortName(),
 							dt) ) {
@@ -204,7 +206,7 @@ bool HesperisAttributeIO::ReadNumericAttribute(ANumericAttribute * data, MObject
 	float vc;
 	double vd;
 	bool ve;
-	MPlug pg(target, attr);
+	MPlug pg(target, dst);
 	switch(data->numericType()) {
 		case ANumericAttribute::TByteNumeric:
 			va = (static_cast<AByteNumericAttribute *> (data))->value();
@@ -237,13 +239,13 @@ bool HesperisAttributeIO::ReadNumericAttribute(ANumericAttribute * data, MObject
 	return true;
 }
 
-bool HesperisAttributeIO::ReadCompoundAttribute(ACompoundAttribute * data, MObject &target)
+bool HesperisAttributeIO::ReadCompoundAttribute(MObject & dst, ACompoundAttribute * data, MObject &target)
 {
 	AHelper::Info<std::string >(" todo compound attrib ", data->longName() );
-	return true;
+	return false;
 }
 
-bool HesperisAttributeIO::ReadEnumAttribute(AEnumAttribute * data, MObject &target)
+bool HesperisAttributeIO::ReadEnumAttribute(MObject & dst, AEnumAttribute * data, MObject &target)
 {
 	if(data->numFields() < 1) {
 		AHelper::Info<std::string >(" enum attrib has no field ", data->longName() );
@@ -253,9 +255,8 @@ bool HesperisAttributeIO::ReadEnumAttribute(AEnumAttribute * data, MObject &targ
 	short a, b, i;
 	short v = data->value(a, b);
 		
-	MObject attr;
-	if(AAttributeHelper::HasNamedAttribute(attr, target, data->shortName() )) {
-		if(!AAttributeHelper::IsEnumAttr(attr) ) {
+	if(AAttributeHelper::HasNamedAttribute(dst, target, data->shortName() )) {
+		if(!AAttributeHelper::IsEnumAttr(dst) ) {
 			AHelper::Info<std::string >(" existing attrib is not enum ", data->longName() );
 			return false;
 		}
@@ -266,7 +267,7 @@ bool HesperisAttributeIO::ReadEnumAttribute(AEnumAttribute * data, MObject &targ
 			fld[i] = data->fieldName(i);
 		}
 		
-		if(!AAttributeHelper::AddEnumAttr(attr, target,
+		if(!AAttributeHelper::AddEnumAttr(dst, target,
 							data->longName(),
 							data->shortName(),
 							fld )) {
@@ -276,7 +277,7 @@ bool HesperisAttributeIO::ReadEnumAttribute(AEnumAttribute * data, MObject &targ
 		fld.clear();
 	}
 	
-	MPlug(target, attr).setValue(v);
+	MPlug(target, dst).setValue(v);
 	return true;
 }
 //:~
