@@ -20,6 +20,8 @@
 #include <string>
 #include <map>
 #include "HesperisFile.h"
+#include "H5IO.h"
+
 class CurveGroup;
 class ATriangleMeshGroup;
 
@@ -29,7 +31,7 @@ public:
                        const std::string & nodeName);
 };
 
-class HesperisIO {
+class HesperisIO : public H5IO {
 public:
 	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName = "");
     static bool AddTransform(const MDagPath & path, HesperisFile * file, const std::string & beheadName = "");
@@ -53,6 +55,9 @@ public:
     static bool LsTransforms(std::vector<std::string > & dst);
 	static Matrix33F::RotateOrder GetRotationOrder(MTransformationMatrix::RotationOrder x);
 
+	static std::string H5PathNameTo(const MDagPath & path);
+	static std::string H5PathNameTo(const MObject & node);
+	
 protected:
     template<typename Th, typename Td, typename Tc>
     static bool ReadTransformAnd(HBase * parent, MObject &target)

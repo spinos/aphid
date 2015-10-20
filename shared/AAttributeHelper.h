@@ -9,6 +9,7 @@
 
 #include "AHelper.h"
 #include <AAttribute.h>
+#include <maya/MFnAnimCurve.h>
 class MString;
 class MObject;
 
@@ -67,4 +68,5 @@ public:
 							const std::string & nameLong, 
 							const std::string & nameShort,
 							MFnNumericData::Type t);
+	static short TangentTypeAsShort(MFnAnimCurve::TangentType type);
 };
