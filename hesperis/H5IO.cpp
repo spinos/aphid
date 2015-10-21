@@ -10,6 +10,8 @@
 #include "H5IO.h"
 #include <SHelper.h>
 
+std::string H5IO::BeheadName("");
+
 void H5IO::CreateGroup(const std::string & name)
 {
 	std::vector<std::string> allNames; 

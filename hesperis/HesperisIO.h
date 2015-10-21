@@ -55,8 +55,8 @@ public:
     static bool LsTransforms(std::vector<std::string > & dst);
 	static Matrix33F::RotateOrder GetRotationOrder(MTransformationMatrix::RotationOrder x);
 
-	static std::string H5PathNameTo(const MDagPath & path);
-	static std::string H5PathNameTo(const MObject & node);
+	static std::string H5PathNameTo(const MDagPath & path, const std::string & beheadName = "");
+	static std::string H5PathNameTo(const MObject & node, const std::string & beheadName = "");
 	
 protected:
     template<typename Th, typename Td, typename Tc>

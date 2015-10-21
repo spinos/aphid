@@ -403,14 +403,15 @@ Matrix33F::RotateOrder HesperisIO::GetRotationOrder(MTransformationMatrix::Rotat
 	return r;
 }
 
-std::string HesperisIO::H5PathNameTo(const MDagPath & path)
+std::string HesperisIO::H5PathNameTo(const MDagPath & path, const std::string & beheadName)
 {
 	std::string r(path.fullPathName().asChar());
+	if(beheadName.size() > 1) SHelper::behead(r, beheadName);
     SHelper::removeAnyNamespace(r);
     return r;
 }
 
-std::string HesperisIO::H5PathNameTo(const MObject & node)
+std::string HesperisIO::H5PathNameTo(const MObject & node, const std::string & beheadName)
 {
 	MStatus stat;
 	MFnDagNode pf(node, &stat);
@@ -418,6 +419,7 @@ std::string HesperisIO::H5PathNameTo(const MObject & node)
 	if(stat) r = pf.fullPathName().asChar();
 	else r = MFnDependencyNode(node).name().asChar();
 	
+	if(beheadName.size() > 1) SHelper::behead(r, beheadName);
     SHelper::removeAnyNamespace(r);
     return r;
 }

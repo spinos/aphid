@@ -33,18 +33,7 @@ bool HesperisAttributeIO::WriteAttributes(const MPlugArray & attribs, HesperisFi
 
 bool HesperisAttributeIO::AddAttribute(const MPlug & attrib, HesperisFile * file, const std::string & beheadName)
 {
-	MStatus stat;
-	MFnDagNode fdg(attrib.node(), &stat);
-	if(!stat) {
-		AHelper::Info<const char *>("not a dag ", MFnDependencyNode(attrib.node()).name().asChar());
-		return false;
-	}
-	AHelper::Info<const char *>("dag ", fdg.fullPathName().asChar());
-	
-	std::string nodeName = fdg.fullPathName().asChar();
-	if(beheadName.size() > 1) SHelper::behead(nodeName, beheadName);
-	SHelper::removeAnyNamespace(nodeName);
-	
+	const std::string nodeName = H5PathNameTo(attrib.node(), beheadName);
 	const std::string attrName = boost::str(boost::format("%1%|%2%") % nodeName % attrib.partialName().asChar());
 	AHelper::Info<std::string>("att ", attrName);
 	

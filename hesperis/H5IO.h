@@ -19,7 +19,7 @@ public:
 		grp.save(data);
 		grp.close();
 	}
-	
+	static std::string BeheadName;
 protected:
 	
 private:
