@@ -7,7 +7,6 @@
  *
  */
 #include <HDocument.h>
-#include <SampleFrame.h>
 #include <string>
 #include <map>
 class H5Availability {
@@ -21,5 +20,5 @@ public:
 	std::string closeAll();
 	
 private:
-	std::map<std::string, HDocument *>fFileStatus;
+	std::map<std::string, HDocument * > fFileStatus;
 };

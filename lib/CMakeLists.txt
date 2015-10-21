@@ -248,5 +248,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../hesperis/H5FieldIn.cpp
 ../hesperis/H5FieldOut.cpp
 ../hesperis/AdaptiveGrid.cpp
-../hesperis/AdaptiveField.cpp)
+../hesperis/AdaptiveField.cpp
+../hesperis/H5IO.cpp
+../hesperis/H5Availability.cpp)
 

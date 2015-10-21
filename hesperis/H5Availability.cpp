@@ -6,13 +6,10 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include <SHelper.h>
-#include <HObject.h>
-#include <HIntAttribute.h>
-#include <sstream>
 #include "H5Availability.h"
 #include <HBase.h>
-#include <AHelper.h>
+#include <SHelper.h>
+#include <sstream>
 
 H5Availability::H5Availability() {}
 H5Availability::~H5Availability() {}
@@ -22,14 +19,10 @@ char  H5Availability::openFile(const char* filename, HDocument::OpenMode accessF
 	if(fFileStatus.count(filename) < 1) {
         HDocument * d = new HDocument;
 		d->open(h5FileName(filename).c_str(), accessFlag);
-        if(d->isOpened()) {
-            // m_samplers[filename] = SampleFrame();
+        if(d->isOpened())
             fFileStatus[filename] = d;       
-        }
-        else {
-            AHelper::Info<const char *>("h5 not opened", filename);
+        else 
             return 0;
-        }
 	}
 	
 	HObject::FileIO = *fFileStatus[filename];
