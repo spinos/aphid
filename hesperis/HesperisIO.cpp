@@ -44,10 +44,7 @@ bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * fil
 bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file )
 {
 	const std::string nodeName = H5PathNameTo(path);
-	if(nodeName.size() < 2 || nodeName.compare(BeheadName) == 0 ) {
-		AHelper::Info<MString>(" skip head ", path.fullPathName());
-		return false;
-	}
+	if(nodeName.size() < 2 ) return false;
 	
 	MFnDagNode fdg(path);
 	if(fdg.parentCount() < 1) return false;
