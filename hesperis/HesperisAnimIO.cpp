@@ -16,8 +16,7 @@
 
 double HesperisAnimIO::SecondsPerFrame = 0.0416667;
 
-bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCurveObj,
-								const std::string & beheadName)
+bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCurveObj)
 {
 	MObject entity = attrib.node();
 	const std::string nodeName = H5PathNameTo(entity);
@@ -26,7 +25,7 @@ bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCu
 	SHelper::validateFilePath(animName);
 	const std::string attrName = boost::str(boost::format("%1%|%2%|%3%") % nodeName % shortName % animName );
 	
-		MStatus status;
+	MStatus status;
 	MFnAnimCurve animCurve(animCurveObj, &status);
 	if (MS::kSuccess != status) {
 		AHelper::Info<std::string >(" not an anim curve ", attrName );
@@ -86,11 +85,6 @@ bool HesperisAnimIO::ReadAnimation(HBase * parent, MObject & entity, MObject & a
 	std::vector<std::string>::const_iterator it = animNames.begin();
 	
 	for(;it!=animNames.end();++it) {
-		std::string nodeName = *it;
-		
-		SHelper::behead(nodeName, parent->pathToObject());
-		SHelper::behead(nodeName, "/");
-
 		AAnimationCurve dataCurve;
 		HAnimationCurve grp(*it);
 		grp.load(&dataCurve);

@@ -26,12 +26,12 @@
 #include <sstream>
 #include <boost/format.hpp>
 
-bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName)
+bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file )
 {
     file->clearTransforms();
     
 	unsigned i = 0;
-	for(;i<paths.length();i++) AddTransform(paths[i], file, beheadName);
+	for(;i<paths.length();i++) AddTransform(paths[i], file );
 	
 	file->setDirty();
 	file->setWriteComponent(HesperisFile::WTransform);
@@ -41,8 +41,14 @@ bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * fil
 	return true;
 }
 
-bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file, const std::string & beheadName)
+bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file )
 {
+	const std::string nodeName = H5PathNameTo(path);
+	if(nodeName.size() < 2 || nodeName.compare(BeheadName) == 0 ) {
+		AHelper::Info<MString>(" skip head ", path.fullPathName());
+		return false;
+	}
+	
 	MFnDagNode fdg(path);
 	if(fdg.parentCount() < 1) return false;
 	
@@ -52,14 +58,10 @@ bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file, const 
 	MFnDagNode fp(oparent);
 	MDagPath pp;
 	fp.getPath(pp);
-	AddTransform(pp, file, beheadName);
+	AddTransform(pp, file);
 	
-	std::string nodeName = path.fullPathName().asChar();
-	if(beheadName.size() > 1) SHelper::behead(nodeName, beheadName);
-    SHelper::removeAnyNamespace(nodeName);
-    
 // todo extract tm    
-	file->addTransform(nodeName, new BaseTransform);
+	file->addTransform( nodeName, new BaseTransform );
 	return true;
 }
 
@@ -90,8 +92,8 @@ bool HesperisIO::WriteCurves(const MDagPathArray & paths,
     
 	std::string curveName = "|curves";
     if(parentName.size()>1) curveName = boost::str(boost::format("%1%|curves") % parentName);
-    SHelper::removeAnyNamespace(curveName);
-	
+	H5PathName(curveName);
+    
 	MGlobal::displayInfo(MString("hes io write curve group ")+curveName.c_str());
     file->clearCurves();
     file->addCurve(curveName, gcurve);
@@ -118,8 +120,8 @@ bool HesperisIO::WriteMeshes(const MDagPathArray & paths,
     // combined->setDagName(parentName);
     std::string meshName = "|meshes";
     if(parentName.size()>1) meshName = boost::str(boost::format("%1%|meshes") % parentName);
-    SHelper::removeAnyNamespace(meshName);
-
+    H5PathName(meshName);
+    
     MGlobal::displayInfo(MString("hes io write mesh group ")+meshName.c_str());
     
     file->clearTriangleMeshes();
@@ -403,15 +405,14 @@ Matrix33F::RotateOrder HesperisIO::GetRotationOrder(MTransformationMatrix::Rotat
 	return r;
 }
 
-std::string HesperisIO::H5PathNameTo(const MDagPath & path, const std::string & beheadName)
+std::string HesperisIO::H5PathNameTo(const MDagPath & path)
 {
 	std::string r(path.fullPathName().asChar());
-	if(beheadName.size() > 1) SHelper::behead(r, beheadName);
-    SHelper::removeAnyNamespace(r);
+	H5PathName(r);
     return r;
 }
 
-std::string HesperisIO::H5PathNameTo(const MObject & node, const std::string & beheadName)
+std::string HesperisIO::H5PathNameTo(const MObject & node)
 {
 	MStatus stat;
 	MFnDagNode pf(node, &stat);
@@ -419,8 +420,7 @@ std::string HesperisIO::H5PathNameTo(const MObject & node, const std::string & b
 	if(stat) r = pf.fullPathName().asChar();
 	else r = MFnDependencyNode(node).name().asChar();
 	
-	if(beheadName.size() > 1) SHelper::behead(r, beheadName);
-    SHelper::removeAnyNamespace(r);
+	H5PathName(r);
     return r;
 }
 

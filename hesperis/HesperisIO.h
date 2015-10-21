@@ -33,8 +33,8 @@ public:
 
 class HesperisIO : public H5IO {
 public:
-	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file, const std::string & beheadName = "");
-    static bool AddTransform(const MDagPath & path, HesperisFile * file, const std::string & beheadName = "");
+	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file );
+    static bool AddTransform(const MDagPath & path, HesperisFile * file );
     static bool IsCurveValid(const MDagPath & path);
 	static bool WriteCurves(const MDagPathArray & paths, 
 							HesperisFile * file, 
@@ -55,8 +55,8 @@ public:
     static bool LsTransforms(std::vector<std::string > & dst);
 	static Matrix33F::RotateOrder GetRotationOrder(MTransformationMatrix::RotationOrder x);
 
-	static std::string H5PathNameTo(const MDagPath & path, const std::string & beheadName = "");
-	static std::string H5PathNameTo(const MObject & node, const std::string & beheadName = "");
+	static std::string H5PathNameTo(const MDagPath & path);
+	static std::string H5PathNameTo(const MObject & node);
 	
 protected:
     template<typename Th, typename Td, typename Tc>

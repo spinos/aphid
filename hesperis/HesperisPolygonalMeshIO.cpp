@@ -21,7 +21,7 @@ bool HesperisPolygonalMeshIO::WritePolygonalMeshes(const MDagPathArray & paths, 
         APolygonalMesh * mesh = new APolygonalMesh;
         CreateMeshData(mesh, paths[i]);
         // MGlobal::displayInfo(mesh->verbosestr().c_str());
-        file->addPolygonalMesh(paths[i].fullPathName().asChar(), mesh);
+        file->addPolygonalMesh( H5PathNameTo(paths[i]), mesh );
     }
     
     file->setDirty();

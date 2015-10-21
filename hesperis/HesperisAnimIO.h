@@ -13,8 +13,7 @@
 
 class HesperisAnimIO : public HesperisIO {
 public:
-	static bool WriteAnimation(const MPlug & attrib, const MObject & animCurveObj,
-								const std::string & beheadName = "");
+	static bool WriteAnimation(const MPlug & attrib, const MObject & animCurveObj);
 	
 	static bool ReadAnimation(HBase * parent, MObject & entity, MObject & attr);
 	static bool ProcessAnimationCurve(const AAnimationCurve & data, MPlug & dst);

@@ -631,8 +631,8 @@ void SHelper::behead(std::string& name, const std::string& head)
 		return;
 	if(name.find(head) != 0)
 		return;
-		
-	name = name.substr(head.size());
+	if(head.find(name) == 0) name = "";
+	else name = name.substr(head.size());
 }
 
 void SHelper::stripAll(std::string& name)

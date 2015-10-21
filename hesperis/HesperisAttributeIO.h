@@ -15,8 +15,8 @@ public:
 	HesperisAttributeIO();
 	virtual ~HesperisAttributeIO();
 	
-	static bool WriteAttributes(const MPlugArray & attribs, HesperisFile * file, const std::string & beheadName = "");
-    static bool AddAttribute(const MPlug & attrib, HesperisFile * file, const std::string & beheadName = "");
+	static bool WriteAttributes(const MPlugArray & attribs, HesperisFile * file);
+    static bool AddAttribute(const MPlug & attrib, HesperisFile * file);
 	
 	static bool ReadAttributes(MObject &target = MObject::kNullObj);
 	static bool ReadAttributes(HBase * parent, MObject &target);

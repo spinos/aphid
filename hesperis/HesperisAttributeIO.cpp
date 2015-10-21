@@ -16,12 +16,12 @@
 HesperisAttributeIO::HesperisAttributeIO() {}
 HesperisAttributeIO::~HesperisAttributeIO() {}
 
-bool HesperisAttributeIO::WriteAttributes(const MPlugArray & attribs, HesperisFile * file, const std::string & beheadName)
+bool HesperisAttributeIO::WriteAttributes(const MPlugArray & attribs, HesperisFile * file)
 {
 	file->clearAttributes();
 	
 	unsigned i = 0;
-	for(;i<attribs.length();i++) AddAttribute(attribs[i], file, beheadName);
+	for(;i<attribs.length();i++) AddAttribute(attribs[i], file);
 	
 	file->setDirty();
 	file->setWriteComponent(HesperisFile::WAttrib);
@@ -31,9 +31,9 @@ bool HesperisAttributeIO::WriteAttributes(const MPlugArray & attribs, HesperisFi
 	return true;
 }
 
-bool HesperisAttributeIO::AddAttribute(const MPlug & attrib, HesperisFile * file, const std::string & beheadName)
+bool HesperisAttributeIO::AddAttribute(const MPlug & attrib, HesperisFile * file)
 {
-	const std::string nodeName = H5PathNameTo(attrib.node(), beheadName);
+	const std::string nodeName = H5PathNameTo(attrib.node());
 	const std::string attrName = boost::str(boost::format("%1%|%2%") % nodeName % attrib.partialName().asChar());
 	AHelper::Info<std::string>("att ", attrName);
 	

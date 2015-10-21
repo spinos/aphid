@@ -20,7 +20,9 @@ public:
 		grp.close();
 	}
 	static std::string BeheadName;
+	
 protected:
+	static void H5PathName(std::string & dst);
 	
 private:
 };
