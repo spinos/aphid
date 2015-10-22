@@ -11,7 +11,7 @@
 
 class HesperisCurveCreator {
 public:
-    static MObject create(CurveGroup * data, MObject & parentObj,
+	static MObject create(CurveGroup * data, MObject & parentObj,
                        const std::string & nodeName);
 	static bool CheckExistingCurves(CurveGroup * geos, MObject &target);
 	static bool CreateACurve(Vector3F * pos, unsigned nv, MObject &target = MObject::kNullObj);
@@ -19,5 +19,11 @@ public:
 
 class HesperisCurveIO : public HesperisIO {
 public:
+	static bool IsCurveValid(const MDagPath & path);
+	static bool CreateCurveGroup(const MDagPathArray & paths, 
+								CurveGroup * dst);
+	static bool WriteCurves(const MDagPathArray & paths, 
+							HesperisFile * file, 
+							const std::string & parentName = "");
 	static bool ReadCurves(MObject &target = MObject::kNullObj);
 };

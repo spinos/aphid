@@ -4,7 +4,7 @@
 #include <maya/MItDag.h>
 #include <maya/MArgDatabase.h>
 #include <maya/MDagModifier.h>
-#include "HesperisIO.h"
+#include "HesperisCurveIO.h"
 #include "HesperisFile.h"
 #include <ASearchHelper.h>
 #include <BaseTransform.h>
@@ -130,17 +130,17 @@ MStatus HesperisCmd::writeSelectedMesh(const MSelectionList & selList)
 {
     MItSelectionList iter( selList );
 	
-	std::map<std::string, MDagPath > meshes;
+	MDagPathArray meshes;
 	MDagPathArray tms;
 	
 	for(; !iter.isDone(); iter.next()) {								
 		MDagPath apath;		
 		iter.getDagPath( apath );
 		tms.append(apath);
-		ASearchHelper::AllTypedPaths(meshes, apath, MFn::kMesh);
+		ASearchHelper::LsAllTypedPaths(meshes, apath, MFn::kMesh);
 	}
 	
-	if(meshes.size() < 1) {
+	if(meshes.length() < 1) {
 		MGlobal::displayInfo(" zero mesh selction!");
 		return MS::kSuccess;
 	}
@@ -164,17 +164,17 @@ MStatus HesperisCmd::writeSelectedCurve(const MSelectionList & selList)
 {
 	MItSelectionList iter( selList );
 	
-	std::map<std::string, MDagPath > curves;
+	MDagPathArray curves;
 	MDagPathArray tms;
 	
 	for(; !iter.isDone(); iter.next()) {								
 		MDagPath apath;		
 		iter.getDagPath( apath );
 		tms.append(apath);
-		ASearchHelper::AllTypedPaths(curves, apath, MFn::kNurbsCurve);
+		ASearchHelper::LsAllTypedPaths(curves, apath, MFn::kNurbsCurve);
 	}
 	
-	if(curves.size() < 1) {
+	if(curves.length() < 1) {
 		MGlobal::displayInfo(" zero curve selction!");
 		return MS::kSuccess;
 	}
@@ -187,7 +187,7 @@ MStatus HesperisCmd::writeSelectedCurve(const MSelectionList & selList)
 	}
 	
 	HesperisIO::WriteTransforms(tms, &hesf);
-	HesperisIO::WriteCurves(curves, &hesf);
+	HesperisCurveIO::WriteCurves(curves, &hesf);
 	
 	writeMesh(&hesf);
 	
@@ -202,9 +202,9 @@ void HesperisCmd::writeMesh(HesperisFile * file)
 	ASearchHelper searcher;
 	MDagPath meshGrp;
 	if(!searcher.dagByFullName(m_growMeshName.asChar(), meshGrp)) return;
-	std::map<std::string, MDagPath > meshes;
-	ASearchHelper::AllTypedPaths(meshes, meshGrp, MFn::kMesh);
-	if(meshes.size() < 1)
+	MDagPathArray meshes;
+	ASearchHelper::LsAllTypedPaths(meshes, meshGrp, MFn::kMesh);
+	if(meshes.length() < 1)
 		MGlobal::displayInfo(MString(" no mesh found by name ")+m_growMeshName);
 
 	HesperisIO::WriteMeshes(meshes, file);

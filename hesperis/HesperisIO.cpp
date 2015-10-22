@@ -62,48 +62,6 @@ bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file )
 	return true;
 }
 
-bool HesperisIO::IsCurveValid(const MDagPath & path)
-{
-	MStatus stat;
-	MFnNurbsCurve fcurve(path.node(), &stat);
-	if(!stat) {
-		// MGlobal::displayInfo(path.fullPathName() + " is not a curve!");
-		return false;
-	}
-	if(fcurve.numCVs() < 4) {
-		MGlobal::displayInfo(path.fullPathName() + " has less than 4 cvs!");
-		return false;
-	}
-	return true;
-}
-
-bool HesperisIO::WriteCurves(const MDagPathArray & paths, 
-							HesperisFile * file, 
-							const std::string & parentName) 
-{
-    CurveGroup * gcurve = new CurveGroup;
-    if(!CreateCurveGroup(paths, gcurve)) {
-        MGlobal::displayInfo(" hesperis check curves error");
-        return false;
-    }
-    
-	std::string curveName = "|curves";
-    if(parentName.size()>1) curveName = boost::str(boost::format("%1%|curves") % parentName);
-	H5PathName(curveName);
-    
-	MGlobal::displayInfo(MString("hes io write curve group ")+curveName.c_str());
-    file->clearCurves();
-    file->addCurve(curveName, gcurve);
-	
-	file->setDirty();
-	file->setWriteComponent(HesperisFile::WCurve);
-	bool fstat = file->save();
-	if(!fstat) MGlobal::displayWarning(MString(" cannot save curves to file ")+ file->fileName().c_str());
-	file->close();
-	
-	return true;
-}
-
 bool HesperisIO::WriteMeshes(const MDagPathArray & paths, 
 							HesperisFile * file, 
 							const std::string & parentName)
@@ -183,58 +141,6 @@ bool HesperisIO::FindNamedChild(MObject & dst, const std::string & name, MObject
         }
     }
     return false;
-}
-
-bool HesperisIO::CreateCurveGroup(const MDagPathArray & paths, CurveGroup * dst)
-{
-    MStatus stat;
-	unsigned i, j;
-	int numCvs = 0;
-	unsigned numNodes = 0;
-    
-	const unsigned n = paths.length();
-    for(i=0; i<n; i++) {
-		if(!IsCurveValid(paths[i])) continue;
-		MFnNurbsCurve fcurve(paths[i].node());
-		numCvs += fcurve.numCVs();
-		numNodes++;
-	}
-    
-    if(numCvs < 4) {
-		MGlobal::displayInfo(" too fews cvs!");
-		return false;
-	}
-    
-    dst->create(numNodes, numCvs);
-    Vector3F * pnts = dst->points();
-	unsigned * counts = dst->counts();
-    
-    unsigned inode = 0;
-	unsigned icv = 0;
-	unsigned nj;
-	MPoint wp;
-	MMatrix worldTm;
-	
-	for(i=0; i<n; i++) {
-		if(!IsCurveValid(paths[i])) continue;
-		
-		worldTm = GetWorldTransform(paths[i]);
-		
-		MFnNurbsCurve fcurve(paths[i].node());
-		nj = fcurve.numCVs();
-		MPointArray ps;
-		fcurve.getCVs(ps, MSpace::kWorld);
-		
-		counts[inode] = nj;
-		inode++;
-		
-		for(j=0; j<nj; j++) {
-			wp = ps[j] * worldTm;
-			pnts[icv].set((float)wp.x, (float)wp.y, (float)wp.z);
-			icv++;
-		}
-	}
-    return true;
 }
 
 bool HesperisIO::CreateMeshGroup(const MDagPathArray & paths, ATriangleMeshGroup * dst)

@@ -86,9 +86,10 @@ bool HesperisAnimIO::ReadAnimation(HBase * parent, MObject & entity, MObject & a
 	
 	for(;it!=animNames.end();++it) {
 		AAnimationCurve dataCurve;
-		HAnimationCurve grp(*it);
-		grp.load(&dataCurve);
-		grp.close();
+		//HAnimationCurve grp(*it);
+		//grp.load(&dataCurve);
+		//grp.close();
+		LoadData<HAnimationCurve, AAnimationCurve>(*it, &dataCurve);
 
 		ProcessAnimationCurve(dataCurve, panim);
 	}

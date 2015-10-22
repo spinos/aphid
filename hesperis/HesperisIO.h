@@ -35,15 +35,9 @@ class HesperisIO : public H5IO {
 public:
 	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file );
     static bool AddTransform(const MDagPath & path, HesperisFile * file );
-    static bool IsCurveValid(const MDagPath & path);
-	static bool WriteCurves(const MDagPathArray & paths, 
-							HesperisFile * file, 
-							const std::string & parentName = "");
 	static bool WriteMeshes(const MDagPathArray & paths, 
 							HesperisFile * file, 
 							const std::string & parentName = "");
-	static bool CreateCurveGroup(const MDagPathArray & paths, 
-								CurveGroup * dst);
     static bool CreateMeshGroup(const MDagPathArray & paths, 
 								ATriangleMeshGroup * dst);
     static MMatrix GetParentTransform(const MDagPath & path);
