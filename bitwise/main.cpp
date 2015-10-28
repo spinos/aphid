@@ -18,6 +18,7 @@
 #include <AOrientedBox.h>
 #include <IndexArray.h>
 #include <SHelper.h>
+#include <KdGeometry.h>
 
 #ifdef __APPLE__
 typedef unsigned long long uint64;
@@ -402,6 +403,29 @@ void testFind()
 	std::cout<<" find translateX in /a/b/b/abc_translateX "<<SHelper::Find("/a/b/b/abc_Lcl Translate/X", "lcl translate/X", true);
 }
 
+void testTree()
+{
+    std::cout<<" test kdtree\n";
+    SahSplit<99, TestBox> su;
+    int i;
+    for(i-0; i<99; i++) {
+        TestBox *a = new TestBox;
+        float r = float( rand() % 999 ) / 999.f;
+        float th = float( rand() % 999 ) / 999.f * 1.5f;
+        float x = 8.f * r * cos(th);
+        float y = 8.f * r * sin(th);
+        float z = 4.f * float( rand() % 999 ) / 999.f;
+        a->setMin(-1 + x, -1 + y, -1 + z);
+        a->setMax( 1 + x,  1 + y,  1 + z);
+        su.set(i, a);
+    }
+    KdGeometry<8, TestBox> tr;
+    su.subdivide(tr.root());
+    
+    SplitEvent * plane = su.bestSplit();
+    plane->verbose();
+}
+
 void testRgba()
 {
     unsigned mred = 0xff000000;
@@ -520,7 +544,8 @@ int main(int argc, char * const argv[])
 	// testMersenne();
     
     // testOBox();
-	testRgba();
+	// testRgba();
+    testTree();
     
 	std::cout<<" end of test\n";
 	return 0;
