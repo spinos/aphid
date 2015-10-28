@@ -20,6 +20,8 @@ public:
 	
 	void setPos(float val);
 	void setAxis(int val);
+	/// split box into left and right box
+	void setBAP(const BoundingBox & b, int a, float p);
 	
 	float getPos() const;
 	int getAxis() const;
@@ -37,6 +39,8 @@ public:
 	int side(const BoundingBox &box) const;
 	void updateLeftBox(const BoundingBox &box);
 	void updateRightBox(const BoundingBox &box);
+	BoundingBox leftBound() const;
+	BoundingBox rightBound() const;
 	float hasBothSides() const;
 	void verbose() const;
 
@@ -45,7 +49,7 @@ public:
 	static int NumEventPerDimension;
 	
 private:
-	BoundingBox m_leftBox, m_rightBox;
+	BoundingBox m_leftBox, m_rightBox, m_lftBound, m_rgtBound;
 	float m_pos;
 	int m_axis;
 	float m_cost;

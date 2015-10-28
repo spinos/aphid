@@ -252,6 +252,26 @@ char BoundingBox::intersect(const BoundingBox & another) const
     return 1;
 }
 
+bool BoundingBox::intersect(const BoundingBox & another, BoundingBox * tightBox) const
+{
+	float a, b, c, d;
+	for(int i=0; i < 3; i++) {
+		a = getMin(i);
+		b = getMax(i);
+		c = another.getMin(i);
+		d = another.getMax(i);
+		if(a > d) return false;
+        if(b < c) return false;
+/// higher of min
+		if(a < c) a = c;
+		tightBox->setMin(a, i);
+/// lower of max		
+		if(b > d) b = d;
+		tightBox->setMax(b, i);    
+	}
+	return true;
+}
+
 char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const 
 {
     float t0 = ray.m_tmin, t1 = ray.m_tmax;

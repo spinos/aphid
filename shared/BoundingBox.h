@@ -1,4 +1,4 @@
-/*
+	/*
  *  BoundingBox.h
  *  kdtree
  *
@@ -51,6 +51,7 @@ public:
     float radius() const;
 	
 	char intersect(const BoundingBox & another) const;
+	bool intersect(const BoundingBox & another, BoundingBox * tightBox) const;
 	char intersect(const Ray &ray, float *hitt0, float *hitt1) const;
 	bool intersect(const Plane & p, float & tmin, float & tmax) const;
 	char isPointInside(const Vector3F & p) const;

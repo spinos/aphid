@@ -403,27 +403,47 @@ void testFind()
 	std::cout<<" find translateX in /a/b/b/abc_translateX "<<SHelper::Find("/a/b/b/abc_Lcl Translate/X", "lcl translate/X", true);
 }
 
+class TestBox : public BoundingBox
+{
+public:
+    TestBox() {}
+    virtual ~TestBox() {}
+    BoundingBox calculateBBox() const
+    { return * this; }
+    BoundingBox bbox() const
+    { return * this; }
+};
+
 void testTree()
 {
     std::cout<<" test kdtree\n";
-    SahSplit<99, TestBox> su;
+    SahSplit<TestBox> su(100);
+	BoundingBox rootBox;
     int i;
-    for(i-0; i<99; i++) {
+    for(i=0; i<100; i++) {
         TestBox *a = new TestBox;
         float r = float( rand() % 999 ) / 999.f;
         float th = float( rand() % 999 ) / 999.f * 1.5f;
         float x = 8.f * r * cos(th);
-        float y = 8.f * r * sin(th);
+        float y = 18.f * r * sin(th);
         float z = 4.f * float( rand() % 999 ) / 999.f;
         a->setMin(-1 + x, -1 + y, -1 + z);
         a->setMax( 1 + x,  1 + y,  1 + z);
         su.set(i, a);
+		rootBox.expandBy(a->calculateBBox());
     }
+	std::cout<<"\n root box "<<rootBox;
+	su.setBBox(rootBox);
+	
     KdGeometry<8, TestBox> tr;
     su.subdivide(tr.root());
     
     SplitEvent * plane = su.bestSplit();
     plane->verbose();
+	
+	SahSplit<TestBox> lsu(plane->leftCount());
+	SahSplit<TestBox> rsu(plane->rightCount());
+	su.partition(&lsu, &rsu);
 }
 
 void testRgba()

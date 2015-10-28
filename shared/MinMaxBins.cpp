@@ -9,11 +9,11 @@
 
 #include "MinMaxBins.h"
 #include <iostream>
-MinMaxBins::MinMaxBins() : m_isFlat(0) {}
+MinMaxBins::MinMaxBins() : m_isFlat(0), m_minBin(NULL), m_maxBin(NULL) {}
 MinMaxBins::~MinMaxBins() 
 {
-	delete[] m_minBin;
-	delete[] m_maxBin;
+	if(m_minBin) delete[] m_minBin;
+	if(m_maxBin) delete[] m_maxBin;
 }
 	
 void MinMaxBins::create(const unsigned &num, const float &min, const float &max)

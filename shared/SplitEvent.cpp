@@ -29,6 +29,14 @@ void SplitEvent::setAxis(int val)
 	m_isEmpty = 0;
 	m_axis = val;
 }
+
+void SplitEvent::setBAP(const BoundingBox & b, int a, float p)
+{
+	b.split(a, p, m_lftBound, m_rgtBound);
+	m_axis = a;
+	m_pos = p;
+	m_isEmpty = 0;
+}
 	
 float SplitEvent::getPos() const
 {
@@ -121,7 +129,21 @@ float SplitEvent::hasBothSides() const
 	return (m_leftNumPrim > 0 && m_rightNumPrim > 0);
 }
 
+BoundingBox SplitEvent::leftBound() const
+{ return m_lftBound; }
+
+BoundingBox SplitEvent::rightBound() const
+{ return m_rgtBound; }
+
 void SplitEvent::verbose() const
 {
-	printf("cost %f left %i %f right %i %f\n", m_cost, m_leftNumPrim, m_leftBox.area(), m_rightNumPrim, m_rightBox.area());
+	std::cout<<" split event\n"
+	<<" cost "<<m_cost
+	<<" prim count "<<m_leftNumPrim<<"/"<<m_rightNumPrim
+	<<"\n left bound "<<m_lftBound
+	<<"\n right bound "<<m_rgtBound
+	<<"\n left box "<<m_leftBox
+	<<"\n right box "<<m_rightBox;
+	//printf("cost %f left %i %f right %i %f\n", m_cost, m_leftNumPrim, m_leftBox.area(), m_rightNumPrim, m_rightBox.area());
 }
+//:~
