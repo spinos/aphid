@@ -116,7 +116,9 @@ void SplitEvent::calculateCost(float x)
 	m_cost = 15.f + 20.f * (leftBBox.area() * m_leftNumPrim + rightBBox.area() * m_rightNumPrim) / ParentBoxArea;
 	*/
 	if(m_isEmpty) return;
-	m_cost = 1.5f + 2.f * (m_leftBox.area() * m_leftNumPrim + m_rightBox.area() * m_rightNumPrim) / x;
+	m_cost = 1.5f;
+	if(m_leftBox.isValid()) m_cost += 2.f * (m_leftBox.area() * m_leftNumPrim) / x;
+	if(m_rightBox.isValid()) m_cost += 2.f * (m_rightBox.area() * m_rightNumPrim) / x;
 }
 
 float SplitEvent::area() const

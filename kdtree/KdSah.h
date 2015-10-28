@@ -1,6 +1,7 @@
 #pragma once
 #include <SplitEvent.h>
 #include <MinMaxBins.h>
+#include <Boundary.h>
 #include <boost/thread.hpp>
 
 template <typename T>
@@ -18,9 +19,14 @@ public:
     
     void set(int idx, T * x);
     
-    void subdivide(KdTreeNode * node);
     SplitEvent * bestSplit();
     void partition(SahSplit * leftSplit, SahSplit * rightSplit);
+	
+	int numPrims() const 
+	{ return m_numPrims; }
+	
+	float visitCost() const
+	{ return 1.99f * m_numPrims; }
 protected:
 
 private:
@@ -34,11 +40,11 @@ private:
 };
 
 template <typename T>
-SahSplit<T>::SahSplit(int n)
+SahSplit<T>::SahSplit(int n) : m_input(NULL)
 {
     m_bins = new MinMaxBins[SplitEvent::Dimension];
 	m_event = new SplitEvent[SplitEvent::NumEventPerDimension * SplitEvent::Dimension];
-	m_input = new T *[n];
+	if(n>0) m_input = new T *[n];
 	m_numPrims = n;
 }
 
@@ -47,20 +53,12 @@ SahSplit<T>::~SahSplit()
 {
     delete[] m_bins;
     delete[] m_event;
-	delete[] m_input;
+	if(m_input) delete[] m_input;
 }
 
 template <typename T>
 void SahSplit<T>::set(int idx, T * x)
 { m_input[idx] = x; }
-
-template <typename T>
-void SahSplit<T>::subdivide(KdTreeNode * node)
-{
-    const BoundingBox bb = getBBox();
-    calculateBins(bb);
-	calculateSplitEvents(bb);
-}
 
 template <typename T>
 void SahSplit<T>::calculateBins(const BoundingBox & b)
@@ -165,14 +163,22 @@ void SahSplit<T>::updateEventsAlong(const BoundingBox & b, const int &axis)
 template <typename T>
 SplitEvent * SahSplit<T>::bestSplit()
 {
-	m_bestEventIdx = splitAtLowestCost();
+	const BoundingBox bb = getBBox();
+    calculateBins(bb);
+	calculateSplitEvents(bb);
 	
+	m_bestEventIdx = splitAtLowestCost();
+#if 1
 	int lc = 0;
 	if(byCutoffEmptySpace(lc)) {
 		if(m_event[lc].getCost() < m_event[m_bestEventIdx].getCost() * 2.f)
 			m_bestEventIdx = lc;
+			std::cout<<" cutoff at "
+				<<lc/SplitEvent::NumEventPerDimension
+				<<":"
+				<<lc%SplitEvent::NumEventPerDimension;
 	}
-		
+#endif
 	return &m_event[m_bestEventIdx];
 }
 
@@ -196,37 +202,44 @@ int SahSplit<T>::splitAtLowestCost()
 template <typename T>
 bool SahSplit<T>::byCutoffEmptySpace(int & dst)
 {
+	const BoundingBox bb = getBBox();
 	int res = -1;
-	float vol, emptyVolume = -1.f;
+	float vol, area, emptyVolume = -1.f;
 	int i, head, tail;
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		head = 0;
-		SplitEvent * cand = splitAt(axis, 0);
+		if(axis == 0) area = bb.distance(1) * bb.distance(2);
+		else if(axis == 1) area = bb.distance(2) * bb.distance(0);
+		else if(axis == 2) area = bb.distance(0) * bb.distance(1);
+		
+		head = 4;
+		SplitEvent * cand = splitAt(axis, 4);
 		if(cand->leftCount() == 0) {
-			for(i = 1; i < SplitEvent::NumEventPerDimension - 1; i++) {
+			for(i = 4; i < SplitEvent::NumEventPerDimension - 1; i++) {
 				cand = splitAt(axis, i);
 				if(cand->leftCount() == 0)
 					head = i;
 			}
 			
-			if(head > 2) {
-				vol = head;
+			if(head > 4) {
+				vol = area * head;
 				if(vol > emptyVolume) {
 					emptyVolume = vol;
 					res = SplitEvent::NumEventPerDimension * axis + head;
 				}
 			}
 		}
-		tail = SplitEvent::NumEventPerDimension - 1;
-		cand = splitAt(axis, SplitEvent::NumEventPerDimension - 1);
+		
+		tail = SplitEvent::NumEventPerDimension - 5;
+		cand = splitAt(axis, SplitEvent::NumEventPerDimension - 5);
 		if(cand->rightCount() == 0) {
-			for(i = 1; i < SplitEvent::NumEventPerDimension - 1; i++) {
-				cand = splitAt(axis, SplitEvent::NumEventPerDimension - 1 - i);
+			for(i = SplitEvent::NumEventPerDimension - 5; i > 1; i--) {
+				cand = splitAt(axis, i);
 				if(cand->rightCount() == 0)
-					tail = SplitEvent::NumEventPerDimension - 1 - i;
+					tail = i;
 			}
-			if(tail < SplitEvent::NumEventPerDimension - 3) {
-				vol = SplitEvent::NumEventPerDimension - tail;
+			
+			if(tail < SplitEvent::NumEventPerDimension - 5) {
+				vol = area * (SplitEvent::NumEventPerDimension - tail);
 				if(vol > emptyVolume) {
 					emptyVolume = vol;
 					res = SplitEvent::NumEventPerDimension * axis + tail;
@@ -234,19 +247,8 @@ bool SahSplit<T>::byCutoffEmptySpace(int & dst)
 			}
 		}
 	}
-	if(res > 0) {
-		dst = res;
-		/*
-		std::cout<<" cutoff at "
-				<<res/SplitEvent::NumEventPerDimension
-				<<":"
-				<<res%SplitEvent::NumEventPerDimension
-				<<" count "
-				<<m_event[res].leftCount()
-				<<":"
-				<<m_event[res].rightCount());
-		*/
-	}
+	if(res > 0) dst = res;
+	
 	return res>0;
 }
 

@@ -19,6 +19,7 @@
 #include <IndexArray.h>
 #include <SHelper.h>
 #include <KdGeometry.h>
+#include <KdBuilder.h>
 
 #ifdef __APPLE__
 typedef unsigned long long uint64;
@@ -417,15 +418,15 @@ public:
 void testTree()
 {
     std::cout<<" test kdtree\n";
-    SahSplit<TestBox> su(100);
+    SahSplit<TestBox> su(400);
 	BoundingBox rootBox;
     int i;
-    for(i=0; i<100; i++) {
+    for(i=0; i<400; i++) {
         TestBox *a = new TestBox;
         float r = float( rand() % 999 ) / 999.f;
         float th = float( rand() % 999 ) / 999.f * 1.5f;
-        float x = 8.f * r * cos(th);
-        float y = 18.f * r * sin(th);
+        float x = 40.f * r * cos(th);
+        float y = 32.f * r * sin(th);
         float z = 4.f * float( rand() % 999 ) / 999.f;
         a->setMin(-1 + x, -1 + y, -1 + z);
         a->setMax( 1 + x,  1 + y,  1 + z);
@@ -435,15 +436,18 @@ void testTree()
 	std::cout<<"\n root box "<<rootBox;
 	su.setBBox(rootBox);
 	
-    KdGeometry<8, TestBox> tr;
-    su.subdivide(tr.root());
+    KdGeometry<9, TestBox> tr;
+    /*su.subdivide();
     
     SplitEvent * plane = su.bestSplit();
     plane->verbose();
 	
 	SahSplit<TestBox> lsu(plane->leftCount());
 	SahSplit<TestBox> rsu(plane->rightCount());
-	su.partition(&lsu, &rsu);
+	su.partition(&lsu, &rsu);*/
+	
+	KdBuilder<4, TestBox > bud;
+	bud.build(&su);
 }
 
 void testRgba()
