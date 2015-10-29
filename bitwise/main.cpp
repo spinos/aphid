@@ -446,7 +446,7 @@ void testTree()
 	SahSplit<TestBox> rsu(plane->rightCount());
 	su.partition(&lsu, &rsu);*/
 	
-	KdBuilder<4, TestBox > bud;
+	KdBuilder<3, 4, TestBox, KdNode3 > bud;
 	bud.build(&su);
 }
 

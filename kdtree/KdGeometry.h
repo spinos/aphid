@@ -1,7 +1,7 @@
 #pragma once
 #include <Geometry.h>
 #include <Boundary.h>
-#include <KdTreeNode.h>
+#include "KdNNode.h"
 #include "KdSah.h"
 
 template <int MaxLevel, typename T>
