@@ -53,8 +53,10 @@ public:
 	void setLeft( KdTreeNode* a_Left );
 	void setPrimStart(unsigned long offset);
 	void setNumPrims(unsigned long numPrims);
+	void setOffset(int x);
 	KdTreeNode* getLeft() const;
 	KdTreeNode* getRight() const;
+	int getOffset() const;
 
 	enum EMask {
 		EInnerAxisMask = ~0x3,

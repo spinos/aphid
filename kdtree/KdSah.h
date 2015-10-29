@@ -27,6 +27,9 @@ public:
 	
 	float visitCost() const
 	{ return 1.99f * m_numPrims; }
+	
+	bool isEmpty() const
+	{ return m_numPrims < 1; }
 protected:
 
 private:

@@ -78,5 +78,9 @@ KdTreeNode* KdTreeNode::getRight() const
 	return (KdTreeNode*)(getLeft()) + 1; 
 }
 
+void KdTreeNode::setOffset(int x)
+{ inner.combined = (x<<3) + (inner.combined & EIndirectionMask); }
 
+int KdTreeNode::getOffset() const
+{ return (inner.combined & ~EIndirectionMask)>>3; }
 //:~

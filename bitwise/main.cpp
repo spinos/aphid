@@ -18,7 +18,7 @@
 #include <AOrientedBox.h>
 #include <IndexArray.h>
 #include <SHelper.h>
-#include <KdGeometry.h>
+#include <KdNTree.h>
 #include <KdBuilder.h>
 
 #ifdef __APPLE__
@@ -418,16 +418,17 @@ public:
 void testTree()
 {
     std::cout<<" test kdtree\n";
-    SahSplit<TestBox> su(400);
+	const int n = 1200;
+    SahSplit<TestBox> su(n);
 	BoundingBox rootBox;
     int i;
-    for(i=0; i<400; i++) {
+    for(i=0; i<n; i++) {
         TestBox *a = new TestBox;
         float r = float( rand() % 999 ) / 999.f;
         float th = float( rand() % 999 ) / 999.f * 1.5f;
-        float x = 40.f * r * cos(th);
-        float y = 32.f * r * sin(th);
-        float z = 4.f * float( rand() % 999 ) / 999.f;
+        float x = 20.f + 40.f * r * cos(th);
+        float y = 20.f + 32.f * r * sin(th);
+        float z = -40.f + 24.f * float( rand() % 999 ) / 999.f;
         a->setMin(-1 + x, -1 + y, -1 + z);
         a->setMax( 1 + x,  1 + y,  1 + z);
         su.set(i, a);
@@ -436,7 +437,19 @@ void testTree()
 	std::cout<<"\n root box "<<rootBox;
 	su.setBBox(rootBox);
 	
-    KdGeometry<9, TestBox> tr;
+	int maxLevel = 1;
+	int nn = 1<<KdNode4::BranchingFactor();
+	while(nn < n>>KdNode4::BranchingFactor()-1) {
+		std::cout<<" nn "<<nn;
+		nn = nn<<KdNode4::BranchingFactor();
+		maxLevel++;
+	}
+	std::cout<<"\n nn "<<nn<<" calc tr max level "<<maxLevel;
+	
+    KdNTree<TestBox, KdNode4 > tr(maxLevel);
+	
+	std::cout<<" max n nodes "<<tr.maxNumNodes();
+	
     /*su.subdivide();
     
     SplitEvent * plane = su.bestSplit();
@@ -446,8 +459,8 @@ void testTree()
 	SahSplit<TestBox> rsu(plane->rightCount());
 	su.partition(&lsu, &rsu);*/
 	
-	KdBuilder<3, 4, TestBox, KdNode3 > bud;
-	bud.build(&su);
+	KdNBuilder<4, 4, TestBox, KdNode4 > bud;
+	bud.build(&su, tr.nodes());
 }
 
 void testRgba()
