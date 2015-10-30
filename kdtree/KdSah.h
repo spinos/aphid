@@ -30,6 +30,9 @@ public:
 	
 	bool isEmpty() const
 	{ return m_numPrims < 1; }
+	
+	void verbose() const;
+	
 protected:
 
 private:
@@ -289,11 +292,21 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 	}
 	std::cout<<"\n partition "
 			<<leftCount
-			<<"/"<<rightCount
+			<<"|"<<rightCount
 			<<"\n";
 }
 
 template <typename T>
 SplitEvent * SahSplit<T>::splitAt(int axis, int idx) const
 { return &m_event[axis * SplitEvent::NumEventPerDimension + idx]; }
+
+template <typename T>
+void SahSplit<T>::verbose() const
+{
+	std::cout<<"\n split source "
+			<<getBBox()
+			<<" n prims "<<numPrims()
+			<<" visit cost "<<visitCost()
+			<<"\n";
+}
 //:~

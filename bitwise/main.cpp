@@ -418,7 +418,7 @@ public:
 void testTree()
 {
     std::cout<<" test kdtree\n";
-	const int n = 1200;
+	const int n = 1100;
     SahSplit<TestBox> su(n);
 	BoundingBox rootBox;
     int i;
@@ -428,7 +428,7 @@ void testTree()
         float th = float( rand() % 999 ) / 999.f * 1.5f;
         float x = 20.f + 40.f * r * cos(th);
         float y = 20.f + 32.f * r * sin(th);
-        float z = -40.f + 24.f * float( rand() % 999 ) / 999.f;
+        float z = -40.f + 4.f * float( rand() % 999 ) / 999.f;
         a->setMin(-1 + x, -1 + y, -1 + z);
         a->setMax( 1 + x,  1 + y,  1 + z);
         su.set(i, a);
@@ -446,21 +446,12 @@ void testTree()
 	}
 	std::cout<<"\n nn "<<nn<<" calc tr max level "<<maxLevel;
 	
-    KdNTree<TestBox, KdNode4 > tr(maxLevel);
+    KdNTree<TestBox, KdNode4 > tr(maxLevel, n);
 	
 	std::cout<<" max n nodes "<<tr.maxNumNodes();
 	
-    /*su.subdivide();
-    
-    SplitEvent * plane = su.bestSplit();
-    plane->verbose();
-	
-	SahSplit<TestBox> lsu(plane->leftCount());
-	SahSplit<TestBox> rsu(plane->rightCount());
-	su.partition(&lsu, &rsu);*/
-	
 	KdNBuilder<4, 4, TestBox, KdNode4 > bud;
-	bud.build(&su, tr.nodes());
+	bud.build(&su, tr.nodes(), tr.root());
 }
 
 void testRgba()
