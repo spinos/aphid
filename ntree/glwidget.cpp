@@ -13,7 +13,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
     
     std::cout<<" test kdtree\n";
-	const int n = 1100;
+	const int n = 4000;
     m_boxes = new SahSplit<TestBox>(n);
 	BoundingBox rootBox;
     int i;
@@ -21,9 +21,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
         TestBox *a = new TestBox;
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
-        float x = -60.f + 120.f * r * cos(th);
-        float y = -40.f + 80.f * r * sin(th);
-        float z = -40.f + 22.f * float( rand() % 999 ) / 999.f + 5.f * sin(y/23.f);
+        float x = -60.f + 200.f * r * cos(th);
+        float y = -40.f + 100.f * r * sin(th) + 5.f * sin(x/23.f);
+        float z = -40.f + 50.f * float( rand() % 999 ) / 999.f + 5.f * sin(y/23.f);
         a->setMin(-1 + x, -1 + y, -1 + z);
         a->setMax( 1 + x,  1 + y,  1 + z);
         m_boxes->set(i, a);
@@ -36,12 +36,11 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     
     std::cout<<" max n nodes "<<m_tree->maxNumNodes();
 	
-	KdNBuilder<4, 4, TestBox, KdNode4 > bud;
+	KdNBuilder<4, TestBox, KdNode4 > bud;
+	bud.SetNumPrimsInLeaf(9);
 	bud.build(m_boxes, m_tree->nodes());
-    std::cout<<" tree bound "<<m_tree->getBBox();
-    
-    m_tree->nodes()[0].verbose();
-    std::cout<<"\n size of node "<<sizeof(KdNode4);
+    m_maxDrawTreeLevel = 2;
+    // std::cout<<"\n size of node "<<sizeof(KdNode4);
 }
 //! [0]
 
@@ -63,7 +62,7 @@ void GLWidget::clientDraw()
 
 void GLWidget::drawBoxes() const
 {
-    getDrawer()->setColor(.65f, .65f, .65f);
+    getDrawer()->setColor(.065f, .165f, .065f);
     const int n = m_boxes->numPrims();
     int i = 0;
     for(;i<n;i++) {
@@ -73,50 +72,77 @@ void GLWidget::drawBoxes() const
 
 void GLWidget::drawTree()
 {
-    drawNode(m_tree->nodes(), 0, m_tree->getBBox() );
+	m_treeletColI = 0;
+	getDrawer()->setColor(.15f, .25f, .35f);
+	getDrawer()->boundingBox(m_tree->getBBox() );
+    
+    drawANode(&m_tree->nodes()[0], 0, m_tree->getBBox(), 0, true );
 }
 
-void GLWidget::drawNode(KdNode4 * nodes, int idx, const BoundingBox & box)
+void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot)
 {
-    getDrawer()->setColor(.15f, .25f, .35f);
-    getDrawer()->boundingBox(box);
-    KdNode4 * n = &nodes[idx];
-    int i = 0;
-    for(;i<KdNode4::NumNodes;i++) {
-        KdTreeNode * nn = n->node(i);
-        if(nn->isLeaf()) continue;
-        drawSplitPlane(nn, box);
-    }
-}
-
-void GLWidget::drawSplitPlane(KdTreeNode * node, const BoundingBox & box)
-{
-    Vector3F corner0(box.getMin(0), box.getMin(1), box.getMin(2));
-	Vector3F corner1(box.getMax(0), box.getMax(1), box.getMax(2));
-	const int axis = node->getAxis();
-    const float pos = node->getSplitPos();
-	corner0.setComp(pos, axis);
-	corner1.setComp(pos, axis);
-    glBegin(GL_LINE_LOOP);
-	if(axis == 0) {
-		glVertex3f(corner0.x, corner0.y, corner0.z);
-		glVertex3f(corner0.x, corner1.y, corner0.z);
-		glVertex3f(corner0.x, corner1.y, corner1.z);
-		glVertex3f(corner0.x, corner0.y, corner1.z);
+	KdTreeNode * nn = treelet->node(idx);
+	if(nn->isLeaf()) {
+		getDrawer()->setColor(.19f, .52f, .15f);
+		// getDrawer()->boundingBox(box);
+		return;
 	}
-	else if(axis == 1) {
-		glVertex3f(corner0.x, corner0.y, corner0.z);
-		glVertex3f(corner1.x, corner0.y, corner0.z);
-		glVertex3f(corner1.x, corner0.y, corner1.z);
-		glVertex3f(corner0.x, corner0.y, corner1.z);
+	
+	BoundingBox flat(box);
+	const int axis = nn->getAxis();
+	const float pos = nn->getSplitPos();
+	flat.setMin(pos, axis);
+	flat.setMax(pos, axis);
+	
+	if(level == m_maxDrawTreeLevel-1) getDrawer()->setGroupColorLight(m_treeletColI);
+	else getDrawer()->setColor(.1f, .15f, .12f);
+	
+	getDrawer()->boundingBox(flat);
+	
+	BoundingBox lft, rgt;
+	box.split(axis, pos, lft, rgt);
+	
+	int offset = nn->getOffset();
+	if(offset > KdNode4::TreeletOffsetMask ) {
+		offset &= ~KdNode4::TreeletOffsetMask;
+		if(isRoot) drawATreelet(treelet + offset, lft, rgt, level);
 	}
 	else {
-		glVertex3f(corner0.x, corner0.y, corner0.z);
-		glVertex3f(corner1.x, corner0.y, corner0.z);
-		glVertex3f(corner1.x, corner1.y, corner0.z);
-		glVertex3f(corner0.x, corner1.y, corner0.z);
+		drawANode(treelet, idx + offset, lft, level);
+		drawANode(treelet, idx + offset + 1, rgt, level);
 	}
-	glEnd();
+}
+
+void GLWidget::drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBox & box, int level)
+{
+	KdTreeNode * nn = treelet->node(idx);
+	if(nn->isLeaf()) return;
+	
+	const int axis = nn->getAxis();
+	const float pos = nn->getSplitPos();
+	BoundingBox lft, rgt;
+	box.split(axis, pos, lft, rgt);
+	
+	int offset = nn->getOffset();
+	if(offset > KdNode4::TreeletOffsetMask ) {
+		offset &= ~KdNode4::TreeletOffsetMask;
+		drawATreelet(treelet + offset, lft, rgt, level);
+	}
+	else {
+		drawConnectedTreelet(treelet, idx + offset, lft, level);
+		drawConnectedTreelet(treelet, idx + offset + 1, rgt, level);
+	}
+}
+
+void GLWidget::drawATreelet(KdNode4 * treelet, const BoundingBox & lftBox, const BoundingBox & rgtBox, int level)
+{	
+	m_treeletColI++;
+	if(level >= m_maxDrawTreeLevel) return;
+	drawANode(treelet, 0, lftBox, level);
+	drawANode(treelet, 1, rgtBox, level);
+	
+	drawConnectedTreelet(treelet, 0, lftBox, level+1);
+	drawConnectedTreelet(treelet, 1, rgtBox, level+1);
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
@@ -138,9 +164,22 @@ void GLWidget::simulate()
 {
 }
 
-void GLWidget::keyPressEvent(QKeyEvent *e)
+void GLWidget::keyPressEvent(QKeyEvent *event)
 {
-	Base3DView::keyPressEvent(e);
+	switch (event->key()) {
+		case Qt::Key_K:
+			m_maxDrawTreeLevel--;
+			qDebug()<<"down level "<<m_maxDrawTreeLevel;
+		    break;
+		case Qt::Key_L:
+			m_maxDrawTreeLevel++;
+		    qDebug()<<"up level "<<m_maxDrawTreeLevel;
+			break;
+		default:
+			break;
+	}
+	
+	Base3DView::keyPressEvent(event);
 }
 
 void GLWidget::keyReleaseEvent(QKeyEvent *event)

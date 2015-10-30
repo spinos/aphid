@@ -20,7 +20,7 @@ public:
 	void verbose();
 	
 	static int NumNodes;
-	static int BranchingFactor();
+	static int BranchingFactor;
 	
 	enum EMask {
 		TreeletOffsetMask = 1<<20,
@@ -73,8 +73,7 @@ template <int NumLevels>
 int KdNNode<NumLevels>::NumNodes = (1<<NumLevels+1) - 2;
 
 template <int NumLevels>
-int KdNNode<NumLevels>::BranchingFactor()
-{ return NumLevels; }
+int KdNNode<NumLevels>::BranchingFactor = NumLevels;
 
 typedef KdNNode<3> KdNode3;
 typedef KdNNode<4> KdNode4;

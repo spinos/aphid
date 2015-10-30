@@ -31,7 +31,7 @@ template <typename T, typename Tn>
 KdNTree<T, Tn>::KdNTree(int numPrims) 
 {
     m_maxLevel = 3;
-    m_maxNumNodes = numPrims>>Tn::BranchingFactor();
+    m_maxNumNodes = numPrims>>Tn::BranchingFactor-1;
     m_nodePool = new Tn[m_maxNumNodes];
     m_leafData = new T[numPrims<<1];
 }

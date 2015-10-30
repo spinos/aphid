@@ -184,10 +184,12 @@ SplitEvent * SahSplit<T>::bestSplit()
 	if(byCutoffEmptySpace(lc)) {
 		if(m_event[lc].getCost() < m_event[m_bestEventIdx].getCost() * 2.f)
 			m_bestEventIdx = lc;
+#if 0
 			std::cout<<" cutoff at "
 				<<lc/SplitEvent::NumEventPerDimension
 				<<":"
 				<<lc%SplitEvent::NumEventPerDimension;
+#endif
 	}
 #endif
 	return &m_event[m_bestEventIdx];
@@ -295,9 +297,11 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 		}
 		
 	}
-	std::cout<<"\n partition "
-			<<leftCount
-			<<"|"<<rightCount;
+
+	// std::cout<<"\n partition "<<m_numPrims
+	//		<<" -> "<<leftCount
+	//		<<"|"<<rightCount;
+
 }
 
 template <typename T>

@@ -38,15 +38,18 @@ protected:
 private:
     void drawBoxes() const;
     void drawTree();
-    void drawNode(KdNode4 * nodes, int idx, const BoundingBox & box);
-    void drawSplitPlane(KdTreeNode * node, const BoundingBox & box);
-    
+    void drawATreelet(KdNode4 * treelet, const BoundingBox & lftBox, const BoundingBox & rgtBox, int level);
+	void drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot = false);
+    void drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBox & box, int level);
+
 private slots:
     void simulate();
     
 private:
     KdNTree<TestBox, KdNode4 > * m_tree;
     SahSplit<TestBox> * m_boxes;
+	int m_treeletColI;
+	int m_maxDrawTreeLevel;
 };
 //! [3]
 
