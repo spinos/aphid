@@ -7,11 +7,11 @@ template <int NumLevels>
 class KdNNode {
     /// n levels
     /// 2^n - 2 nodes
-    KdTreeNode m_nodes[1<<NumLevels];
+    KdTreeNode m_nodes[(1<<NumLevels+1) - 2];
 public:
 	KdNNode();
 	
-    KdTreeNode * node(int idx) const
+    KdTreeNode * node(int idx)
     { return & m_nodes[idx]; }
     
 	void setInternal(int idx, int axis, float pos, int offset);
@@ -19,7 +19,7 @@ public:
 	
 	void verbose();
 	
-	static int NumNodes();
+	static int NumNodes;
 	static int BranchingFactor();
 	
 	enum EMask {
@@ -28,7 +28,11 @@ public:
 };
 
 template <int NumLevels>
-KdNNode<NumLevels>::KdNNode() {}
+KdNNode<NumLevels>::KdNNode() 
+{
+    int i = 0;
+    for(;i<NumNodes;i++) m_nodes[i].setLeaf(true); 
+}
 
 template <int NumLevels>
 void KdNNode<NumLevels>::setInternal(int idx, int axis, float pos, int offset)
@@ -49,9 +53,9 @@ template <int NumLevels>
 void KdNNode<NumLevels>::verbose()
 {
 	std::cout<<"\n treelet level "<<NumLevels
-			<<" n node "<<NumNodes();
+			<<" n node "<<NumNodes;
 	int i = 0;
-	for(;i<NumNodes();i++) {
+	for(;i<NumNodes;i++) {
 		std::cout<<"\n node "<<i;
 		if(m_nodes[i].isLeaf()) {
 			std::cout<<" leaf";
@@ -66,8 +70,7 @@ void KdNNode<NumLevels>::verbose()
 }
 
 template <int NumLevels>
-int KdNNode<NumLevels>::NumNodes() 
-{ return (1<<NumLevels+1) - 2; }
+int KdNNode<NumLevels>::NumNodes = (1<<NumLevels+1) - 2;
 
 template <int NumLevels>
 int KdNNode<NumLevels>::BranchingFactor()

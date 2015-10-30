@@ -18,6 +18,7 @@ public:
     virtual ~SahSplit();
     
     void set(int idx, T * x);
+    T * get(int idx) const;
     
     SplitEvent * bestSplit();
     void partition(SahSplit * leftSplit, SahSplit * rightSplit);
@@ -65,6 +66,10 @@ SahSplit<T>::~SahSplit()
 template <typename T>
 void SahSplit<T>::set(int idx, T * x)
 { m_input[idx] = x; }
+
+template <typename T>
+T * SahSplit<T>::get(int idx) const
+{ return m_input[idx]; }
 
 template <typename T>
 void SahSplit<T>::calculateBins(const BoundingBox & b)

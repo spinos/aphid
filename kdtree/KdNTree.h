@@ -12,7 +12,7 @@ class KdNTree : public Geometry, public Boundary
 	int m_maxLevel;
     int m_maxNumNodes;
 public:
-    KdNTree(int maxLevel, int numPrims);
+    KdNTree(int numPrims);
 	virtual ~KdNTree();
 
     Tn * getRoot() const;
@@ -28,9 +28,9 @@ private:
 };
 
 template <typename T, typename Tn>
-KdNTree<T, Tn>::KdNTree(int maxLevel, int numPrims) 
+KdNTree<T, Tn>::KdNTree(int numPrims) 
 {
-    m_maxLevel = maxLevel;
+    m_maxLevel = 3;
     m_maxNumNodes = numPrims>>Tn::BranchingFactor();
     m_nodePool = new Tn[m_maxNumNodes];
     m_leafData = new T[numPrims<<1];

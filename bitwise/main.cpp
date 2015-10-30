@@ -18,8 +18,6 @@
 #include <AOrientedBox.h>
 #include <IndexArray.h>
 #include <SHelper.h>
-#include <KdNTree.h>
-#include <KdBuilder.h>
 
 #ifdef __APPLE__
 typedef unsigned long long uint64;
@@ -402,56 +400,6 @@ void testVecArray()
 void testFind()
 {
 	std::cout<<" find translateX in /a/b/b/abc_translateX "<<SHelper::Find("/a/b/b/abc_Lcl Translate/X", "lcl translate/X", true);
-}
-
-class TestBox : public BoundingBox
-{
-public:
-    TestBox() {}
-    virtual ~TestBox() {}
-    BoundingBox calculateBBox() const
-    { return * this; }
-    BoundingBox bbox() const
-    { return * this; }
-};
-
-void testTree()
-{
-    std::cout<<" test kdtree\n";
-	const int n = 1100;
-    SahSplit<TestBox> su(n);
-	BoundingBox rootBox;
-    int i;
-    for(i=0; i<n; i++) {
-        TestBox *a = new TestBox;
-        float r = float( rand() % 999 ) / 999.f;
-        float th = float( rand() % 999 ) / 999.f * 1.5f;
-        float x = 20.f + 40.f * r * cos(th);
-        float y = 20.f + 32.f * r * sin(th);
-        float z = -40.f + 4.f * float( rand() % 999 ) / 999.f;
-        a->setMin(-1 + x, -1 + y, -1 + z);
-        a->setMax( 1 + x,  1 + y,  1 + z);
-        su.set(i, a);
-		rootBox.expandBy(a->calculateBBox());
-    }
-	std::cout<<"\n root box "<<rootBox;
-	su.setBBox(rootBox);
-	
-	int maxLevel = 1;
-	int nn = 1<<KdNode4::BranchingFactor();
-	while(nn < n>>KdNode4::BranchingFactor()-1) {
-		std::cout<<" nn "<<nn;
-		nn = nn<<KdNode4::BranchingFactor();
-		maxLevel++;
-	}
-	std::cout<<"\n nn "<<nn<<" calc tr max level "<<maxLevel;
-	
-    KdNTree<TestBox, KdNode4 > tr(maxLevel, n);
-	
-	std::cout<<" max n nodes "<<tr.maxNumNodes();
-	
-	KdNBuilder<4, 4, TestBox, KdNode4 > bud;
-	bud.build(&su, tr.nodes());
 }
 
 void testRgba()

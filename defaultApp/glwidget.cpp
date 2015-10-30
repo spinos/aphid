@@ -19,7 +19,11 @@ GLWidget::~GLWidget()
 {
 }
 
-//! [7]
+void GLWidget::clientInit()
+{
+	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+}
+
 void GLWidget::clientDraw()
 {
 }

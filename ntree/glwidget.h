@@ -3,6 +3,18 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
+#include <KdNTree.h>
+
+class TestBox : public BoundingBox
+{
+public:
+    TestBox() {}
+    virtual ~TestBox() {}
+    BoundingBox calculateBBox() const
+    { return * this; }
+    BoundingBox bbox() const
+    { return * this; }
+};
 
 class GLWidget : public Base3DView
 {
@@ -24,10 +36,17 @@ protected:
     
 //! [3]
 private:
-
+    void drawBoxes() const;
+    void drawTree();
+    void drawNode(KdNode4 * nodes, int idx, const BoundingBox & box);
+    void drawSplitPlane(KdTreeNode * node, const BoundingBox & box);
+    
 private slots:
     void simulate();
-
+    
+private:
+    KdNTree<TestBox, KdNode4 > * m_tree;
+    SahSplit<TestBox> * m_boxes;
 };
 //! [3]
 

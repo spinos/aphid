@@ -2,7 +2,7 @@
 ## http://www.cmake.org/cmake/help/v3.0/manual/cmake-qt.7.html#introduction
 
 cmake_minimum_required (VERSION 2.8)
-project (foo)
+project (testntree)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
@@ -26,17 +26,17 @@ if (WIN32)
 set (SOURCE_FILES ${SOURCE_FILES} "../shared/gExtension.cpp")
 endif ()
 
-add_executable (foo ${HEADER_FILES} ${SOURCE_FILES})
+add_executable (testntree ${HEADER_FILES} ${SOURCE_FILES})
 
 find_package (OpenGL REQUIRED)
-target_link_libraries (foo ${OPENGL_LIBRARIES})
+target_link_libraries (testntree ${OPENGL_LIBRARIES})
 
 if (WIN32)
 set (Aphid_Library "D:/aphid/lib/aphid.lib")
 else ()
 set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
 endif ()
-target_link_libraries (foo ${Aphid_Library})
+target_link_libraries (testntree ${Aphid_Library})
 
 if (WIN32)
 set (OpenEXR_Library "D:/usr/openEXR/lib/Half.lib"
@@ -50,10 +50,10 @@ set (OpenEXR_Library "/usr/local/lib/libHalf.a"
 "/usr/local/lib/libIlmThread.a")
 endif()
 
-target_link_libraries (foo ${OpenEXR_Library})
+target_link_libraries (testntree ${OpenEXR_Library})
 
 find_package (zlib REQUIRED)
-target_link_libraries (foo ${ZLIB_LIBRARIES})
+target_link_libraries (testntree ${ZLIB_LIBRARIES})
 
 if(WIN32)
 set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
@@ -62,7 +62,7 @@ endif()
 find_package (Qt4 REQUIRED)
 message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
 set (QT_USE_QTOPENGL ON)
-target_link_libraries (foo Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (testntree Qt4::QtGui Qt4::QtOpenGL)
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -96,15 +96,15 @@ message ("boost regex is" ${Boost_REGEX_LIBRARY})
 message ("boost filesystem is" ${Boost_FILESYSTEM_LIBRARY})
 message ("boost thread is" ${Boost_THREAD_LIBRARY})
 
-target_link_libraries (foo ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (foo ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (foo ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (foo ${Boost_REGEX_LIBRARY})
-target_link_libraries (foo ${Boost_THREAD_LIBRARY})
-target_link_libraries (foo ${Boost_CHRONO_LIBRARY})
+target_link_libraries (testntree ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (testntree ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (testntree ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (testntree ${Boost_REGEX_LIBRARY})
+target_link_libraries (testntree ${Boost_THREAD_LIBRARY})
+target_link_libraries (testntree ${Boost_CHRONO_LIBRARY})
 
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
 message (${Boost_LIBRARIES})
-target_link_libraries(foo ${Boost_LIBRARIES})
+target_link_libraries(testntree ${Boost_LIBRARIES})

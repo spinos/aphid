@@ -254,7 +254,6 @@ void KdNBuilder<NumLevels, NumPrimsInLeafLog, T, Tn>::build(SahSplit<T> * parent
     KdTreelet<NumLevels, NumPrimsInLeafLog, T, Tn> treelet(1);
 	Tn * root = &nodes[0];
 	treelet.build(0, parent, &nodes[1], root, 0);
-	// root->verbose();
 	subdivide(&treelet, nodes);
     std::cout<<"\n n tree nodes "<<m_branchIdx+2;
 }
