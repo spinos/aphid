@@ -292,8 +292,7 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 	}
 	std::cout<<"\n partition "
 			<<leftCount
-			<<"|"<<rightCount
-			<<"\n";
+			<<"|"<<rightCount;
 }
 
 template <typename T>
