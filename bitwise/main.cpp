@@ -451,7 +451,7 @@ void testTree()
 	std::cout<<" max n nodes "<<tr.maxNumNodes();
 	
 	KdNBuilder<4, 4, TestBox, KdNode4 > bud;
-	bud.build(&su, tr.nodes(), tr.root());
+	bud.build(&su, tr.nodes());
 }
 
 void testRgba()

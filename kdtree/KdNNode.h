@@ -21,6 +21,10 @@ public:
 	
 	static int NumNodes();
 	static int BranchingFactor();
+	
+	enum EMask {
+		TreeletOffsetMask = 1<<20,
+	};
 };
 
 template <int NumLevels>
@@ -56,7 +60,7 @@ void KdNNode<NumLevels>::verbose()
 			std::cout<<" internal"
 					<<" split axis "<<m_nodes[i].getAxis()
 					<<" pos "<<m_nodes[i].getSplitPos()
-					<<" offset "<<m_nodes[i].getOffset();
+					<<" offset "<<(m_nodes[i].getOffset() & ~TreeletOffsetMask);
 		}
 	}
 }
