@@ -15,9 +15,7 @@ public:
     KdNTree(int numPrims);
 	virtual ~KdNTree();
 
-    Tn * getRoot() const;
     Tn * root();
-    Tn * getNodes() const;
     Tn * nodes();
     int maxLevel() const;
     int maxNumNodes() const;
@@ -44,16 +42,8 @@ KdNTree<T, Tn>::~KdNTree()
 }
 
 template <typename T, typename Tn>
-Tn * KdNTree<T, Tn>::getRoot() const
-{ return &m_nodePool[0]; }
-
-template <typename T, typename Tn>
 Tn * KdNTree<T, Tn>::root()
 { return &m_nodePool[0]; }
-
-template <typename T, typename Tn>
-Tn * KdNTree<T, Tn>::getNodes() const
-{ return m_nodePool; }
 
 template <typename T, typename Tn>
 Tn * KdNTree<T, Tn>::nodes()

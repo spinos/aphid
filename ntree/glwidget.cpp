@@ -39,7 +39,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	KdNBuilder<4, TestBox, KdNode4 > bud;
 	bud.SetNumPrimsInLeaf(9);
 	bud.build(m_boxes, m_tree->nodes());
-    m_maxDrawTreeLevel = 2;
+    m_maxDrawTreeLevel = 1;
     // std::cout<<"\n size of node "<<sizeof(KdNode4);
 }
 //! [0]
@@ -75,15 +75,16 @@ void GLWidget::drawTree()
 	m_treeletColI = 0;
 	getDrawer()->setColor(.15f, .25f, .35f);
 	getDrawer()->boundingBox(m_tree->getBBox() );
-    
     drawANode(&m_tree->nodes()[0], 0, m_tree->getBBox(), 0, true );
 }
 
 void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot)
 {
+	if(level == m_maxDrawTreeLevel-1) getDrawer()->setGroupColorLight(m_treeletColI);
+	else getDrawer()->setColor(.1f, .15f, .12f);
+	
 	KdTreeNode * nn = treelet->node(idx);
 	if(nn->isLeaf()) {
-		getDrawer()->setColor(.19f, .52f, .15f);
 		// getDrawer()->boundingBox(box);
 		return;
 	}
@@ -94,10 +95,7 @@ void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, in
 	flat.setMin(pos, axis);
 	flat.setMax(pos, axis);
 	
-	if(level == m_maxDrawTreeLevel-1) getDrawer()->setGroupColorLight(m_treeletColI);
-	else getDrawer()->setColor(.1f, .15f, .12f);
-	
-	getDrawer()->boundingBox(flat);
+	if(idx < Treelet4::LastLevelOffset() ) getDrawer()->boundingBox(flat);
 	
 	BoundingBox lft, rgt;
 	box.split(axis, pos, lft, rgt);
@@ -138,6 +136,13 @@ void GLWidget::drawATreelet(KdNode4 * treelet, const BoundingBox & lftBox, const
 {	
 	m_treeletColI++;
 	if(level >= m_maxDrawTreeLevel) return;
+	
+	if(level == m_maxDrawTreeLevel-1) getDrawer()->setGroupColorLight(m_treeletColI);
+	else getDrawer()->setColor(.1f, .15f, .12f);
+	
+	getDrawer()->boundingBox(lftBox);
+    getDrawer()->boundingBox(rgtBox);
+    
 	drawANode(treelet, 0, lftBox, level);
 	drawANode(treelet, 1, rgtBox, level);
 	

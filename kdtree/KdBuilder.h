@@ -8,40 +8,28 @@
  */
 
 #pragma once
+#include "Treelet.h"
 #include "KdSah.h"
 
 template<int NumLevels, typename T, typename Tn>
-class KdTreelet {
+class KdTreeletBuilder : public Treelet<NumLevels > {
 	static int NumSubSplits;
-	static int LevelOffset[NumLevels+1];
-    
-	///
-	///           parent
-    ///       [0           1]root         level 0
-	///       
-    ///   [2    3]0      [4      5]1      level 1
-	///
-    ///  [6 7]2 [8 9]3  [10 11]4 [12 13]5 level 2
-    ///
-	///  []6[]7 []8[]9  []10[]11 []12[]13 level 3
-	///
     SahSplit<T> * m_splits[(1<<NumLevels+1) - 1];
 	int m_index;
     
 public:
-	KdTreelet(int index);
-	virtual ~KdTreelet();
+	KdTreeletBuilder(int index);
+	virtual ~KdTreeletBuilder();
 	
 	void build(int parentIdx, SahSplit<T> * parent, Tn * node, Tn * root, int iRoot);
-	static int NumNodes();
-	static int LastLevelOffset();
 	
 	SahSplit<T> * split(int idx);
     void setIndex(int x);
     int index() const;
     
 	static int NumPrimsInLeaf;
-    
+    static int TotalNumLeafPrims;
+	
 protected:
 	bool subdivideRoot(int parentIdx, SahSplit<T> * parent, Tn * root, int iRoot);
 	bool subdivideInterial(Tn * interial, int level);
@@ -53,31 +41,26 @@ private:
 };
 
 template<int NumLevels, typename T, typename Tn>
-int KdTreelet<NumLevels, T, Tn>::NumPrimsInLeaf = 8;
+int KdTreeletBuilder<NumLevels, T, Tn>::NumPrimsInLeaf = 8;
 
 template<int NumLevels, typename T, typename Tn>
-int KdTreelet<NumLevels, T, Tn>::NumSubSplits = (1<<NumLevels+1) - 1;
+int KdTreeletBuilder<NumLevels, T, Tn>::NumSubSplits = (1<<NumLevels+1) - 1;
 
 template<int NumLevels, typename T, typename Tn>
-int KdTreelet<NumLevels, T, Tn>::LevelOffset[NumLevels+1];
+int KdTreeletBuilder<NumLevels, T, Tn>::TotalNumLeafPrims = 0;
 
 template<int NumLevels, typename T, typename Tn>
-KdTreelet<NumLevels, T, Tn>::KdTreelet(int index)
+KdTreeletBuilder<NumLevels, T, Tn>::KdTreeletBuilder(int index)
 {
 	int i;
 	for(i=0;i<NumSubSplits;i++) {
 		m_splits[i] = NULL;
 	}
-	int a = 0;
-	for(i=1;i<=NumLevels;i++) {
-		LevelOffset[i] = a;
-		a += 1<<i;
-	}
     m_index = index;
 }
 
 template<int NumLevels, typename T, typename Tn>
-KdTreelet<NumLevels, T, Tn>::~KdTreelet()
+KdTreeletBuilder<NumLevels, T, Tn>::~KdTreeletBuilder()
 {
 	int i;
 	for(i=1;i<NumSubSplits;i++) {
@@ -86,7 +69,7 @@ KdTreelet<NumLevels, T, Tn>::~KdTreelet()
 }
 
 template<int NumLevels, typename T, typename Tn>
-void KdTreelet<NumLevels, T, Tn>::build(int parentIdx, SahSplit<T> * parent, Tn * node, Tn * root, int iRoot)
+void KdTreeletBuilder<NumLevels, T, Tn>::build(int parentIdx, SahSplit<T> * parent, Tn * node, Tn * root, int iRoot)
 {
 	if(!subdivideRoot(parentIdx, parent, root, iRoot)) return;
 	
@@ -97,7 +80,7 @@ void KdTreelet<NumLevels, T, Tn>::build(int parentIdx, SahSplit<T> * parent, Tn 
 }
 
 template<int NumLevels, typename T, typename Tn>
-bool KdTreelet<NumLevels, T, Tn>::subdivideRoot(int parentIdx, SahSplit<T> * parent, Tn * root, int iRoot)
+bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideRoot(int parentIdx, SahSplit<T> * parent, Tn * root, int iRoot)
 {
 	if(parent->numPrims() <= NumPrimsInLeaf) {
 		setNodeLeaf(parent, root, iRoot);
@@ -127,15 +110,15 @@ bool KdTreelet<NumLevels, T, Tn>::subdivideRoot(int parentIdx, SahSplit<T> * par
 }
 
 template<int NumLevels, typename T, typename Tn>
-bool KdTreelet<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int level)
+bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int level)
 {
 	bool needNextLevel = false;
     // std::cout<<"\n\n subdiv level "<<level;
     const int nSplitAtLevel = 1<<level;
     int i;
     for(i=0; i<nSplitAtLevel; i++) {
-        const int iNode = LevelOffset[level] + i;
-        const int iLftChild = iNode + iNode + 2;
+        const int iNode = Treelet<NumLevels>::OffsetByLevel(level) + i;
+        const int iLftChild = iNode + Treelet<NumLevels>::ChildOffset(iNode);
         
 		// std::cout<<"\n  node "<<iNode;
 		
@@ -173,7 +156,7 @@ bool KdTreelet<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int level)
 			//	<<" rgt "<<iLftChild + 1;
 			
 			clearSplit(iNode);
-			setNodeInternal(interial, iNode, plane->getAxis(), plane->getPos(), iNode + 2);
+			setNodeInternal(interial, iNode, plane->getAxis(), plane->getPos(), Treelet<NumLevels>::ChildOffset(iNode) );
 		}
 		else {
 			// std::cout<<"\n end of treelet "<<parent->numPrims();
@@ -186,39 +169,32 @@ bool KdTreelet<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int level)
 }
 
 template<int NumLevels, typename T, typename Tn>
-void KdTreelet<NumLevels, T, Tn>::clearSplit(int idx)
+void KdTreeletBuilder<NumLevels, T, Tn>::clearSplit(int idx)
 {
 	delete m_splits[idx];
 	m_splits[idx] = NULL;
 }
 
 template<int NumLevels, typename T, typename Tn>
-void KdTreelet<NumLevels, T, Tn>::setNodeInternal(Tn * node, int idx, int axis, float pos, int offset)
+void KdTreeletBuilder<NumLevels, T, Tn>::setNodeInternal(Tn * node, int idx, int axis, float pos, int offset)
 { node->setInternal(idx, axis, pos, offset); }
 
 template<int NumLevels, typename T, typename Tn>
-void KdTreelet<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * node, int idx)
+void KdTreeletBuilder<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * node, int idx)
 {
 	if(!parent->isEmpty()) {
 		// std::cout<<"\n leaf n prims "<<parent->numPrims();
 	}
 	node->setLeaf(idx);
+	TotalNumLeafPrims += parent->numPrims();
 }
 
 template<int NumLevels, typename T, typename Tn>
-int KdTreelet<NumLevels, T, Tn>::NumNodes()
-{ return (1<<(NumLevels+1)) - 2; }
-
-template<int NumLevels, typename T, typename Tn>
-int KdTreelet<NumLevels, T, Tn>::LastLevelOffset()
-{ return LevelOffset[NumLevels];}
-
-template<int NumLevels, typename T, typename Tn>
-SahSplit<T> * KdTreelet<NumLevels, T, Tn>::split(int idx)
+SahSplit<T> * KdTreeletBuilder<NumLevels, T, Tn>::split(int idx)
 { return m_splits[idx]; }
 
 template<int NumLevels, typename T, typename Tn>
-void KdTreelet<NumLevels, T, Tn>::costNotice(SahSplit<T> * parent, SplitEvent * plane) const
+void KdTreeletBuilder<NumLevels, T, Tn>::costNotice(SahSplit<T> * parent, SplitEvent * plane) const
 {
 	std::cout<<"\n visit cost "
 			<<parent->visitCost()
@@ -228,11 +204,11 @@ void KdTreelet<NumLevels, T, Tn>::costNotice(SahSplit<T> * parent, SplitEvent * 
 }
 
 template<int NumLevels, typename T, typename Tn>
-void KdTreelet<NumLevels, T, Tn>::setIndex(int x)
+void KdTreeletBuilder<NumLevels, T, Tn>::setIndex(int x)
 { m_index = x; }
 
 template<int NumLevels, typename T, typename Tn>
-int KdTreelet<NumLevels, T, Tn>::index() const
+int KdTreeletBuilder<NumLevels, T, Tn>::index() const
 { return m_index; }
 
 
@@ -245,7 +221,7 @@ public:
 	virtual ~KdNBuilder();
 	
 	void build(SahSplit<T> * parent, Tn * nodes);
-	void subdivide(KdTreelet<NumLevels, T, Tn> * treelet, Tn * nodes);
+	void subdivide(KdTreeletBuilder<NumLevels, T, Tn> * treelet, Tn * nodes);
 	
 	static void SetNumPrimsInLeaf(int x);
 	
@@ -265,34 +241,37 @@ KdNBuilder<NumLevels, T, Tn>::~KdNBuilder() {}
 
 template<int NumLevels, typename T, typename Tn>
 void KdNBuilder<NumLevels, T, Tn>::SetNumPrimsInLeaf(int x)
-{ KdTreelet<NumLevels, T, Tn>::NumPrimsInLeaf = x; }
+{ KdTreeletBuilder<NumLevels, T, Tn>::NumPrimsInLeaf = x; }
 
 template<int NumLevels, typename T, typename Tn>
 void KdNBuilder<NumLevels, T, Tn>::build(SahSplit<T> * parent, Tn * nodes)
 {
 	m_branchIdx = 1;
-    KdTreelet<NumLevels, T, Tn> treelet(1);
+	KdTreeletBuilder<NumLevels, T, Tn>::TotalNumLeafPrims = 0;
+    KdTreeletBuilder<NumLevels, T, Tn> treelet(1);
 	Tn * root = &nodes[0];
-	/// only first node in first treelet is active
+	/// only first node in first treelet is useful
 	/// spawn into second treelet
 	treelet.build(0, parent, &nodes[1], root, 0);
 	subdivide(&treelet, nodes);
     std::cout<<"\n n tree nodes "<<m_branchIdx+1;
+	std::cout<<"\n n leaf prims "<<KdTreeletBuilder<NumLevels, T, Tn>::TotalNumLeafPrims;
 }
 
 template<int NumLevels, typename T, typename Tn>
-void KdNBuilder<NumLevels, T, Tn>::subdivide(KdTreelet<NumLevels, T, Tn> * treelet, Tn * nodes)
+void KdNBuilder<NumLevels, T, Tn>::subdivide(KdTreeletBuilder<NumLevels, T, Tn> * treelet, Tn * nodes)
 {	
     const int parentIdx = treelet->index();
     Tn * parentNode = &nodes[parentIdx];
-	const int n = treelet->NumNodes();
+	const int n = treelet->numNodes();
 	int i = treelet->LastLevelOffset();
 	for(;i<n;i++) {
 		SahSplit<T> * parent = treelet->split(i);
 		if(!parent) continue;
-        addBranch();
+		
+		addBranch();
 
-        KdTreelet<NumLevels, T, Tn> subTreelet(m_branchIdx);
+        KdTreeletBuilder<NumLevels, T, Tn> subTreelet(m_branchIdx);
         subTreelet.build(parentIdx, parent, &nodes[m_branchIdx], parentNode, i);
 		subdivide(&subTreelet, nodes);
 	}
