@@ -13,7 +13,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
     
     std::cout<<" test kdtree\n";
-	const int n = 4000;
+	const int n = 5000;
     m_boxes = new SahSplit<TestBox>(n);
 	BoundingBox rootBox;
     int i;
@@ -22,8 +22,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
         float x = -60.f + 200.f * r * cos(th);
-        float y = -40.f + 100.f * r * sin(th) + 5.f * sin(x/23.f);
-        float z = -40.f + 50.f * float( rand() % 999 ) / 999.f + 5.f * sin(y/23.f);
+        float y = -40.f + 100.f * r * sin(th) + 16.f * sin(x/31.f);
+        float z = -40.f + 50.f * float( rand() % 999 ) / 999.f + 9.f * sin(y/23.f);
         a->setMin(-1 + x, -1 + y, -1 + z);
         a->setMax( 1 + x,  1 + y,  1 + z);
         m_boxes->set(i, a);
@@ -37,8 +37,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     std::cout<<" max n nodes "<<m_tree->maxNumNodes();
 	
 	KdNBuilder<4, TestBox, KdNode4 > bud;
-	bud.SetNumPrimsInLeaf(9);
-	bud.build(m_boxes, m_tree->nodes());
+	bud.SetNumPrimsInLeaf(8);
+	bud.build(m_boxes, m_tree);
+	m_tree->verbose();
     m_maxDrawTreeLevel = 1;
     // std::cout<<"\n size of node "<<sizeof(KdNode4);
 }
@@ -56,7 +57,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-    drawBoxes();
+    // drawBoxes();
     drawTree();
 }
 
@@ -85,7 +86,7 @@ void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, in
 	
 	KdTreeNode * nn = treelet->node(idx);
 	if(nn->isLeaf()) {
-		// getDrawer()->boundingBox(box);
+		drawALeaf(nn->getPrimStart(), nn->getNumPrims(), box);
 		return;
 	}
 	
@@ -148,6 +149,20 @@ void GLWidget::drawATreelet(KdNode4 * treelet, const BoundingBox & lftBox, const
 	
 	drawConnectedTreelet(treelet, 0, lftBox, level+1);
 	drawConnectedTreelet(treelet, 1, rgtBox, level+1);
+}
+
+void GLWidget::drawALeaf(unsigned start, unsigned n, const BoundingBox & box)
+{
+	if(n<1) {
+		getDrawer()->setColor(0.f, 0.f, 0.f);
+		getDrawer()->boundingBox(box);
+	}
+	else {
+		int i = 0;
+		for(;i<n;i++) {
+			getDrawer()->boundingBox(*m_tree->dataAt(start + i));
+		}
+	}
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

@@ -41,7 +41,8 @@ private:
     void drawATreelet(KdNode4 * treelet, const BoundingBox & lftBox, const BoundingBox & rgtBox, int level);
 	void drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot = false);
     void drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBox & box, int level);
-
+	void drawALeaf(unsigned start, unsigned n, const BoundingBox & box);
+	
 private slots:
     void simulate();
     
