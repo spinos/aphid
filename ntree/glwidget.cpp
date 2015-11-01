@@ -14,7 +14,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     
     std::cout<<" test kdtree\n";
 	const int n = 5000;
-    m_boxes = new SahSplit<TestBox>(n);
+    m_source = new VectorArray<TestBox>();
+	
 	BoundingBox rootBox;
     int i;
     for(i=0; i<n; i++) {
@@ -26,19 +27,21 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
         float z = -40.f + 50.f * float( rand() % 999 ) / 999.f + 9.f * sin(y/23.f);
         a->setMin(-1 + x, -1 + y, -1 + z);
         a->setMax( 1 + x,  1 + y,  1 + z);
-        m_boxes->set(i, a);
+        
+		m_source->add(a);
 		rootBox.expandBy(a->calculateBBox());
     }
-    m_boxes->setBBox(rootBox);
+	
+	SahSplit<TestBox> boxes(n, m_source);
+	boxes.initIndices();
+    boxes.setBBox(rootBox);
     
-    m_tree = new KdNTree<TestBox, KdNode4 >(n);
+    m_tree = new KdNTree<TestBox, KdNode4 >(m_source);
     m_tree->setBBox(rootBox);
     
-    std::cout<<" max n nodes "<<m_tree->maxNumNodes();
-	
 	KdNBuilder<4, TestBox, KdNode4 > bud;
 	bud.SetNumPrimsInLeaf(8);
-	bud.build(m_boxes, m_tree);
+	bud.build(&boxes, m_tree);
 	m_tree->verbose();
     m_maxDrawTreeLevel = 1;
     // std::cout<<"\n size of node "<<sizeof(KdNode4);
@@ -64,10 +67,10 @@ void GLWidget::clientDraw()
 void GLWidget::drawBoxes() const
 {
     getDrawer()->setColor(.065f, .165f, .065f);
-    const int n = m_boxes->numPrims();
+    const int n = m_source->size();
     int i = 0;
     for(;i<n;i++) {
-        getDrawer()->boundingBox(*m_boxes->get(i));
+        getDrawer()->boundingBox(*m_source->get(i));
     }
 }
 
@@ -154,8 +157,8 @@ void GLWidget::drawATreelet(KdNode4 * treelet, const BoundingBox & lftBox, const
 void GLWidget::drawALeaf(unsigned start, unsigned n, const BoundingBox & box)
 {
 	if(n<1) {
-		getDrawer()->setColor(0.f, 0.f, 0.f);
-		getDrawer()->boundingBox(box);
+		// getDrawer()->setColor(0.f, 0.f, 0.f);
+		// getDrawer()->boundingBox(box);
 	}
 	else {
 		int i = 0;

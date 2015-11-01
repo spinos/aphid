@@ -8,15 +8,16 @@
 template <typename T, typename Tn>
 class KdNTree : public Geometry, public Boundary
 {
+	VectorArray<T> * m_source;
     Tn * m_nodePool;
-    T  ** m_leafData;
+    int * m_leafDataIndices;
     int m_maxNumNodes;
 	int m_maxNumData;
 	int m_numNodes;
-	int m_numData;
+	int m_numLeafData;
 	
 public:
-    KdNTree(int numPrims);
+    KdNTree(VectorArray<T> * source);
 	virtual ~KdNTree();
 
     Tn * root();
@@ -28,9 +29,11 @@ public:
 	int numNodes() const;
 	int addNode();
 	
-	void addData(T * x);
+	void addDataIndex(int x);
 	int numData() const;
 	T * dataAt(int idx) const;
+	
+	VectorArray<T> * source();
 	
 	virtual std::string verbosestr() const;
 protected:
@@ -40,22 +43,28 @@ private:
 };
 
 template <typename T, typename Tn>
-KdNTree<T, Tn>::KdNTree(int numPrims) 
+KdNTree<T, Tn>::KdNTree(VectorArray<T> * source) 
 {
+	m_source = source;
+	int numPrims = source->size();
     m_maxNumNodes = numPrims>>Tn::BranchingFactor-1;
 	m_maxNumData = numPrims<<1;
     m_nodePool = new Tn[m_maxNumNodes];
-    m_leafData = new T*[m_maxNumData];
+    m_leafDataIndices = new int[m_maxNumData];
 	m_numNodes = 1;
-	m_numData = 0;
+	m_numLeafData = 0;
 }
 
 template <typename T, typename Tn>
 KdNTree<T, Tn>::~KdNTree() 
 {
     delete[] m_nodePool;
-    delete[] m_leafData;
+    delete[] m_leafDataIndices;
 }
+
+template <typename T, typename Tn>
+VectorArray<T> * KdNTree<T, Tn>::source()
+{ return m_source; }
 
 template <typename T, typename Tn>
 Tn * KdNTree<T, Tn>::root()
@@ -79,13 +88,13 @@ int KdNTree<T, Tn>::numNodes() const
 
 template <typename T, typename Tn>
 int KdNTree<T, Tn>::numData() const
-{ return m_numData; }
+{ return m_numLeafData; }
 
 template <typename T, typename Tn>
-void KdNTree<T, Tn>::addData(T * x)
+void KdNTree<T, Tn>::addDataIndex(int x)
 {
-	m_leafData[m_numData] = x;
-	m_numData++;
+	m_leafDataIndices[m_numLeafData] = x;
+	m_numLeafData++;
 }
 
 template <typename T, typename Tn>
@@ -97,7 +106,7 @@ int KdNTree<T, Tn>::addNode()
 
 template <typename T, typename Tn>
 T * KdNTree<T, Tn>::dataAt(int idx) const
-{ return m_leafData[idx]; }
+{ return m_source->get(m_leafDataIndices[idx]); }
 
 template <typename T, typename Tn>
 std::string KdNTree<T, Tn>::verbosestr() const
@@ -105,6 +114,7 @@ std::string KdNTree<T, Tn>::verbosestr() const
 	std::stringstream sst;
 	sst<<"\n KdNTree: "
 	<<"\n treelet level "<<Tn::BranchingFactor
+	<<"\n n input "<<m_source->size()
 	<<"\n n nodes(max) "<<numNodes()<<"("<<maxNumNodes()<<")"
 	<<"\n n data(max)  "<<numData()<<"("<<maxNumData()<<")\n";
 	return sst.str();

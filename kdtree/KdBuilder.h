@@ -92,8 +92,8 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideRoot(int parentIdx, SahSplit<T
 		return false;
 	}
 	
-	SahSplit<T>  * lftChild = new SahSplit<T>(plane->leftCount());
-	SahSplit<T>  * rgtChild = new SahSplit<T>(plane->rightCount());
+	SahSplit<T>  * lftChild = new SahSplit<T>(plane->leftCount(), parent->source() );
+	SahSplit<T>  * rgtChild = new SahSplit<T>(plane->rightCount(), parent->source() );
 	parent->partition(lftChild, rgtChild);
 	
 	m_splits[0] = lftChild;
@@ -141,8 +141,8 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int le
 		}
 		
 		if(level < NumLevels) {
-			SahSplit<T>  * lftChild = new SahSplit<T>(plane->leftCount());
-			SahSplit<T>  * rgtChild = new SahSplit<T>(plane->rightCount());
+			SahSplit<T>  * lftChild = new SahSplit<T>(plane->leftCount(), parent->source() );
+			SahSplit<T>  * rgtChild = new SahSplit<T>(plane->rightCount(), parent->source() );
 			parent->partition(lftChild, rgtChild);
 			
 			m_splits[iLftChild] = lftChild;
@@ -187,7 +187,7 @@ void KdTreeletBuilder<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * 
 		//		<<":"<<primStart+primLen-1;
 		int i = 0;
 		for(;i<parent->numPrims();i++)
-			m_tree->addData( parent->get(i) );
+			m_tree->addDataIndex( parent->indexAt(i) );
 	}
 	node->setLeaf(idx, primStart, primLen);
 }

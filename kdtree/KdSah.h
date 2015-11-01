@@ -3,22 +3,54 @@
 #include <MinMaxBins.h>
 #include <Boundary.h>
 #include <boost/thread.hpp>
+#include <vector>
+
+template <typename T>
+class VectorArray {
+	
+	std::vector<T *> m_data;
+	
+public:
+	VectorArray() {}
+	virtual ~VectorArray() 
+	{
+		const int n = m_data.size();
+		int i = 0;
+		for(; i<n; i++) delete m_data[i];
+			
+		m_data.clear();
+	}
+	
+	void add(T * a) 
+	{ m_data.push_back(a); }
+	
+	int size() const
+	{ return m_data.size(); }
+	
+	T * get(int idx) const
+	{ return m_data[idx]; }
+};
 
 template <typename T>
 class SahSplit : public Boundary {
     
-    T ** m_input;
+	VectorArray<T> * m_source;
+    int * m_indices;
     MinMaxBins * m_bins;
 	SplitEvent * m_event;
     int m_bestEventIdx;
 	int m_numPrims;
     
 public:
-    SahSplit(int n);
+    SahSplit(int n, VectorArray<T> * source);
     virtual ~SahSplit();
+	
+	void initIndices();
     
-    void set(int idx, T * x);
-    T * get(int idx) const;
+    // T * get(int idx) const;
+	
+	void setIndexAt(int idx, int val);
+	int indexAt(int idx) const;
     
     SplitEvent * bestSplit();
     void partition(SahSplit * leftSplit, SahSplit * rightSplit);
@@ -31,6 +63,9 @@ public:
 	
 	bool isEmpty() const
 	{ return m_numPrims < 1; }
+	
+	VectorArray<T> * source()
+	{ return m_source; }
 	
 	void verbose() const;
 	
@@ -47,11 +82,12 @@ private:
 };
 
 template <typename T>
-SahSplit<T>::SahSplit(int n) : m_input(NULL)
+SahSplit<T>::SahSplit(int n, VectorArray<T> * source) : m_indices(NULL)
 {
+	m_source = source;
     m_bins = new MinMaxBins[SplitEvent::Dimension];
 	m_event = new SplitEvent[SplitEvent::NumEventPerDimension * SplitEvent::Dimension];
-	if(n>0) m_input = new T *[n];
+	if(n>0) m_indices = new int[n];
 	m_numPrims = n;
 }
 
@@ -60,16 +96,27 @@ SahSplit<T>::~SahSplit()
 {
     delete[] m_bins;
     delete[] m_event;
-	if(m_input) delete[] m_input;
+	if(m_indices) delete[] m_indices;
 }
 
 template <typename T>
-void SahSplit<T>::set(int idx, T * x)
-{ m_input[idx] = x; }
+void SahSplit<T>::initIndices() 
+{
+	int i = 0;
+	for(;i<m_numPrims; i++) m_indices[i] = i;
+}
+
+//template <typename T>
+//T * SahSplit<T>::get(int idx) const
+//{ return m_source->get(idx); }
 
 template <typename T>
-T * SahSplit<T>::get(int idx) const
-{ return m_input[idx]; }
+void SahSplit<T>::setIndexAt(int idx, int val)
+{ m_indices[idx] = val; }
+
+template <typename T>
+int SahSplit<T>::indexAt(int idx) const
+{ return m_indices[idx]; }
 
 template <typename T>
 void SahSplit<T>::calculateBins(const BoundingBox & b)
@@ -84,7 +131,9 @@ void SahSplit<T>::calculateBins(const BoundingBox & b)
 		m_bins[axis].create(SplitEvent::NumBinPerDimension, b.getMin(axis), b.getMax(axis));
 	
 		for(int i = 0; i < m_numPrims; i++) {
-            const BoundingBox primBox = m_input[i]->bbox();
+			const int iprim = indexAt(i);
+			T * geo = m_source->get(iprim);
+            const BoundingBox primBox = geo->bbox();
 			m_bins[axis].add(primBox.getMin(axis), primBox.getMax(axis));
 		}
 		
@@ -148,13 +197,15 @@ void SahSplit<T>::updateEventsAlong(const BoundingBox & b, const int &axis)
 	BoundingBox tightBox;
 	int i;	
     for(i = 0; i < m_numPrims; i++) {
-		const BoundingBox & primBox = m_input[i]->bbox();
+		const int iprim = indexAt(i);
+		T * geo = m_source->get(iprim);
+		const BoundingBox & primBox = geo->bbox();
 
 		int minGrid = (primBox.getMin(axis) - min) / delta;
 		if(minGrid < 0) minGrid = 0;
 		
 		for(int g = minGrid; g < SplitEvent::NumEventPerDimension; g++) {
-			m_input[i]->intersect(m_event[eventOffset + g].leftBound(), &tightBox );
+			geo->intersect(m_event[eventOffset + g].leftBound(), &tightBox );
 			m_event[eventOffset + g].updateLeftBox(tightBox);
 		}
 
@@ -162,7 +213,7 @@ void SahSplit<T>::updateEventsAlong(const BoundingBox & b, const int &axis)
 		if(maxGrid > SplitEvent::NumEventPerDimension) maxGrid = SplitEvent::NumEventPerDimension;
 
 		for(int g = maxGrid; g > 0; g--) {
-			m_input[i]->intersect(m_event[eventOffset + g - 1].rightBound(), &tightBox );
+			geo->intersect(m_event[eventOffset + g - 1].rightBound(), &tightBox );
 			m_event[eventOffset + g - 1].updateRightBox(tightBox);
 		}
 	}
@@ -280,18 +331,20 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 	int rightCount = 0;
 	int side;
 	for(unsigned i = 0; i < m_numPrims; i++) {
-		const BoundingBox & primBox = m_input[i]->bbox();
+		const int iprim = indexAt(i);
+		T * geo = m_source->get(iprim);
+		const BoundingBox & primBox = geo->bbox();
 		
 		side = e.side(primBox);
 		if(side < 2) {
 			if(primBox.touch(leftBox)) {
-				leftSplit->set(leftCount, m_input[i]);
+				leftSplit->setIndexAt(leftCount, iprim);
 				leftCount++;
 			}
 		}
 		if(side > 0) {
 			if(primBox.touch(rightBox)) {
-				rightSplit->set(rightCount, m_input[i]);
+				rightSplit->setIndexAt(rightCount, iprim);
 				rightCount++;
 			}
 		}

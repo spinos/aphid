@@ -48,7 +48,7 @@ private slots:
     
 private:
     KdNTree<TestBox, KdNode4 > * m_tree;
-    SahSplit<TestBox> * m_boxes;
+    VectorArray<TestBox> * m_source;
 	int m_treeletColI;
 	int m_maxDrawTreeLevel;
 };
