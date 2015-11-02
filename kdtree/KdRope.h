@@ -54,10 +54,10 @@ public:
 		for(;i<3;i++) {
 			if(i==splitAxis) {
 				if(dir & 1) {
-					if(b.getMin(splitAxis) > a.getMax(splitAxis) ) return false;
+					if(b.getMin(splitAxis) != a.getMax(splitAxis) ) return false;
 				}
 				else {
-					if(b.getMax(splitAxis) > a.getMin(splitAxis) ) return false;
+					if(b.getMax(splitAxis) != a.getMin(splitAxis) ) return false;
 				}
 			}
 			else {
@@ -97,7 +97,7 @@ public:
 protected:
 	void visitRoot(KdTreeNode * parent, const BoundingBox & box, const KdNeighbors & ns);
 	bool visitInterial(int level);
-	void revisitInterial(int iNode, int level);
+	void visitCousins(int iNode, int level);
 	bool chooseCousinAsNeighbor(int iNeighbor, int iNode, int iParent, int & updated);
 	void pushLeaves();
 private:
@@ -151,7 +151,15 @@ bool KdRope<NumLevels, T, Tn>::visitInterial(int level)
 	Tn * treelet = &m_tree->nodes()[iTreelet];
 	const int nAtLevel = 1<<level;
 	BoundingBox lftBox, rgtBox;
-    int i;
+	int i;
+	if(level > 1) {
+		for(i=0; i<nAtLevel; i++) {
+			const int iNode = levelBegin + i;
+			KdTreeNode * node = treelet->node(iNode);
+			visitCousins(iNode, level);
+		}
+	}
+    
 	if(level < NumLevels) {
 		for(i=0; i<nAtLevel; i++) {
 			const int iNode = levelBegin + i;
@@ -182,22 +190,13 @@ bool KdRope<NumLevels, T, Tn>::visitInterial(int level)
 		}
 	}
 	
-	for(i=0; i<nAtLevel; i++) {
-		const int iNode = levelBegin + i;
-		KdTreeNode * node = treelet->node(iNode);
-		revisitInterial(iNode, level);
-	}
-	
 	return needNextLevel;
 }
 
 template<int NumLevels, typename T, typename Tn>
-void KdRope<NumLevels, T, Tn>::revisitInterial(int iNode, int level)
+void KdRope<NumLevels, T, Tn>::visitCousins(int iNode, int level)
 {
-	if(level < 2) return;
-	
 	const int hi = Treelet<NumLevels>::OffsetByLevel(level);
-	
 	KdNeighbors & nodeNs = m_ns[iNode];
 	int i = 0;
 	for(;i<6;i++) {
@@ -206,7 +205,7 @@ void KdRope<NumLevels, T, Tn>::revisitInterial(int iNode, int level)
 			if(ni.m_padding0 < hi) {
 				int updated;
 				if(chooseCousinAsNeighbor(i, iNode, ni.m_padding0, updated)) {
-					std::cout<<"\n cousin nei "<<iNode<<" "<<updated;
+					// std::cout<<"\n ud nei "<<iNode<<" "<<ni.m_padding0<<" -> "<<updated;
 					m_ns[iNode].set(m_boxes[updated], i, Treelet<NumLevels>::index(), updated);
 				}
 			}
@@ -245,7 +244,7 @@ void KdRope<NumLevels, T, Tn>::pushLeaves()
 		
 		KdTreeNode * node = treelet->node(i);
 		if(node->isLeaf()) {
-			std::cout<<"\n leaf "<<i<<" nei";
+			std::cout<<"\n treelet "<<iTreelet<<" leaf "<<i<<" nei";
 			nodeNs.verbose();
 		}
 	}
