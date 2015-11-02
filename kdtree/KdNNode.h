@@ -28,11 +28,7 @@ public:
 };
 
 template <int NumLevels>
-KdNNode<NumLevels>::KdNNode() 
-{
-    int i = 0;
-    for(;i<NumNodes;i++) m_nodes[i].setLeaf(true); 
-}
+KdNNode<NumLevels>::KdNNode() {}
 
 template <int NumLevels>
 void KdNNode<NumLevels>::setInternal(int idx, int axis, float pos, int offset)

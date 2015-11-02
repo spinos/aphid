@@ -47,8 +47,6 @@ public:
 	
 	void initIndices();
     
-    // T * get(int idx) const;
-	
 	void setIndexAt(int idx, int val);
 	int indexAt(int idx) const;
     
@@ -74,6 +72,7 @@ protected:
 private:
     void calculateBins(const BoundingBox & b);
 	void calculateSplitEvents(const BoundingBox & b);
+	void binningAlong(const BoundingBox & b, int axis);
 	void initEventsAlong(const BoundingBox & b, const int &axis);
 	void updateEventsAlong(const BoundingBox & b, const int &axis);
     int splitAtLowestCost();
@@ -106,10 +105,6 @@ void SahSplit<T>::initIndices()
 	for(;i<m_numPrims; i++) m_indices[i] = i;
 }
 
-//template <typename T>
-//T * SahSplit<T>::get(int idx) const
-//{ return m_source->get(idx); }
-
 template <typename T>
 void SahSplit<T>::setIndexAt(int idx, int val)
 { m_indices[idx] = val; }
@@ -121,24 +116,42 @@ int SahSplit<T>::indexAt(int idx) const
 template <typename T>
 void SahSplit<T>::calculateBins(const BoundingBox & b)
 {
-    for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		//printf("bbox size %f\n", m_bbox.getMax(axis) - m_bbox.getMin(axis));
-		if(b.distance(axis) < 10e-4f) {
-		    //printf("bbox[%i] is flat", axis);
-			m_bins[axis].setFlat();
-			continue;
-		}
-		m_bins[axis].create(SplitEvent::NumBinPerDimension, b.getMin(axis), b.getMax(axis));
-	
-		for(int i = 0; i < m_numPrims; i++) {
-			const int iprim = indexAt(i);
-			T * geo = m_source->get(iprim);
-            const BoundingBox primBox = geo->bbox();
-			m_bins[axis].add(primBox.getMin(axis), primBox.getMax(axis));
-		}
-		
-		m_bins[axis].scan();
+	int axis;
+	const float thre = b.getLongestDistance() * .19f;
+	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(b.distance(axis) < thre) 
+		    m_bins[axis].setFlat();		
 	}
+	
+	boost::thread boxThread[3];
+	
+	
+	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat())
+			continue;
+		boxThread[axis] = boost::thread(boost::bind(&SahSplit::binningAlong, this, b, axis));
+	}
+	
+	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat())
+			continue;
+		boxThread[axis].join();
+	}
+}
+
+template <typename T>
+void SahSplit<T>::binningAlong(const BoundingBox & b, int axis)
+{	
+	m_bins[axis].create(SplitEvent::NumBinPerDimension, b.getMin(axis), b.getMax(axis));
+
+	for(int i = 0; i < m_numPrims; i++) {
+		const int iprim = indexAt(i);
+		T * geo = m_source->get(iprim);
+		const BoundingBox primBox = geo->bbox();
+		m_bins[axis].add(primBox.getMin(axis), primBox.getMax(axis));
+	}
+	
+	m_bins[axis].scan();
 }
 
 template <typename T>

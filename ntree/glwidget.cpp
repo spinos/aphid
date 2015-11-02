@@ -138,10 +138,12 @@ void GLWidget::drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBo
 
 void GLWidget::drawATreelet(KdNode4 * treelet, const BoundingBox & lftBox, const BoundingBox & rgtBox, int level)
 {	
-	m_treeletColI++;
 	if(level >= m_maxDrawTreeLevel) return;
 	
-	if(level == m_maxDrawTreeLevel-1) getDrawer()->setGroupColorLight(m_treeletColI);
+	if(level == m_maxDrawTreeLevel-1) {
+		m_treeletColI++;
+		getDrawer()->setGroupColorLight(m_treeletColI);
+	}
 	else getDrawer()->setColor(.1f, .15f, .12f);
 	
 	getDrawer()->boundingBox(lftBox);

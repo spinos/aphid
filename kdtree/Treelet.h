@@ -21,12 +21,14 @@ class Treelet {
 	///------------------------------------------
 	
 	static int LevelOffset[NumLevels+1];
+	int m_index;
+	
 public:
-	Treelet();
+	Treelet(int x);
 	virtual ~Treelet();
 	
 	int numNodes() const;
-	
+	int index() const;
 	static int LastLevelOffset();
 	static int OffsetByLevel(int level);
 	static int ChildOffset(int x);
@@ -38,8 +40,9 @@ template<int NumLevels>
 int Treelet<NumLevels>::LevelOffset[NumLevels+1];
 
 template<int NumLevels>
-Treelet<NumLevels>::Treelet()
+Treelet<NumLevels>::Treelet(int x)
 {
+	m_index = x;
 	int i;
 	int a = 0;
 	for(i=1;i<=NumLevels;i++) {
@@ -66,5 +69,9 @@ int Treelet<NumLevels>::numNodes() const
 template<int NumLevels>
 int Treelet<NumLevels>::ChildOffset(int x)
 { return x + 2; }
+
+template<int NumLevels>
+int Treelet<NumLevels>::index() const
+{ return m_index; }
 
 typedef Treelet<4> Treelet4;

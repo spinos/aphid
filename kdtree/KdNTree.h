@@ -14,6 +14,7 @@ class KdNTree : public Geometry, public Boundary
     int m_maxNumNodes;
 	int m_maxNumData;
 	int m_numNodes;
+	int m_numLeafNodes;
 	int m_numLeafData;
 	
 public:
@@ -32,6 +33,8 @@ public:
 	void addDataIndex(int x);
 	int numData() const;
 	T * dataAt(int idx) const;
+	
+	void addNumLeafNodes();
 	
 	VectorArray<T> * source();
 	
@@ -52,6 +55,7 @@ KdNTree<T, Tn>::KdNTree(VectorArray<T> * source)
     m_nodePool = new Tn[m_maxNumNodes];
     m_leafDataIndices = new int[m_maxNumData];
 	m_numNodes = 1;
+	m_numLeafNodes = 0;
 	m_numLeafData = 0;
 }
 
@@ -109,6 +113,10 @@ T * KdNTree<T, Tn>::dataAt(int idx) const
 { return m_source->get(m_leafDataIndices[idx]); }
 
 template <typename T, typename Tn>
+void KdNTree<T, Tn>::addNumLeafNodes()
+{ m_numLeafNodes++; }
+
+template <typename T, typename Tn>
 std::string KdNTree<T, Tn>::verbosestr() const
 { 
 	std::stringstream sst;
@@ -116,7 +124,8 @@ std::string KdNTree<T, Tn>::verbosestr() const
 	<<"\n treelet level "<<Tn::BranchingFactor
 	<<"\n n input "<<m_source->size()
 	<<"\n n nodes(max) "<<numNodes()<<"("<<maxNumNodes()<<")"
-	<<"\n n data(max)  "<<numData()<<"("<<maxNumData()<<")\n";
+	<<"\n n data(max)  "<<numData()<<"("<<maxNumData()<<")"
+	<<"\n n leaf nodes "<<m_numLeafNodes<<"\n";
 	return sst.str();
 }
 //:~

@@ -66,5 +66,6 @@ public:
         output << p.str();
         return output;
     }
-	float m_data[8];
+	float m_data[6];
+	int m_padding0, m_padding1;
 };
