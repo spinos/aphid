@@ -11,16 +11,16 @@
 #include "Treelet.h"
 #include "KdNTree.h"
 
-struct KdNeighbors {
+class KdNeighbors {
 	/// 0 left 1 right 2 bottom 3 top 4 back 5 front
-	
+public:
 	BoundingBox _n[6];
 	void reset() 
 	{
 		int i = 0;
 		for(;i<6;i++) {
-			_n[i].m_padding0 = 0; 
-			_n[i].m_padding1 = 0; // zero is null
+			_n[i].m_padding0 = 0; // parent node
+			_n[i].m_padding1 = 0; // treelet, zero is null
 		}
 	}
 	
@@ -28,6 +28,11 @@ struct KdNeighbors {
 	{
 		int idx = axis<<1;
 		if(isHigh) idx++;
+		set(box, idx, treeletIdx, nodeIdx);
+	}
+	
+	void set(const BoundingBox & box, int idx, int treeletIdx, int nodeIdx)
+	{
 		_n[idx] = box;
 		_n[idx].m_padding0 = nodeIdx;
 		_n[idx].m_padding1 = treeletIdx;
@@ -38,6 +43,27 @@ struct KdNeighbors {
 		int i = 0;
 		for(;i<6;i++) {
 			if(_n[i].m_padding1 != 0) return false;
+		}
+		return true;
+	}
+	
+	static bool IsNeighborOf(int dir, const BoundingBox & a, const BoundingBox & b)
+	{
+		const int splitAxis = dir / 2;
+		int i = 0;
+		for(;i<3;i++) {
+			if(i==splitAxis) {
+				if(dir & 1) {
+					if(b.getMin(splitAxis) > a.getMax(splitAxis) ) return false;
+				}
+				else {
+					if(b.getMax(splitAxis) > a.getMin(splitAxis) ) return false;
+				}
+			}
+			else {
+				if(b.getMin(i) > a.getMin(i)) return false;
+				if(b.getMax(i) < a.getMax(i)) return false;
+			}
 		}
 		return true;
 	}
@@ -71,6 +97,8 @@ public:
 protected:
 	void visitRoot(KdTreeNode * parent, const BoundingBox & box, const KdNeighbors & ns);
 	bool visitInterial(int level);
+	void revisitInterial(int iNode, int level);
+	bool chooseCousinAsNeighbor(int iNeighbor, int iNode, int iParent, int & updated);
 	void pushLeaves();
 private:
 	
@@ -92,7 +120,7 @@ void KdRope<NumLevels, T, Tn>::build(int parentTreelet, int parentNodeIdx, const
 	KdTreeNode * rootNode = root->node(parentNodeIdx);
 	visitRoot(rootNode, box, ns);
 	int level = 1;
-    for(;level < NumLevels; level++) {
+    for(;level <= NumLevels; level++) {
 		if(!visitInterial(level)) break;
 	}
 	pushLeaves();
@@ -118,39 +146,90 @@ template<int NumLevels, typename T, typename Tn>
 bool KdRope<NumLevels, T, Tn>::visitInterial(int level)
 {
 	bool needNextLevel = false;
+	const int levelBegin = Treelet<NumLevels>::OffsetByLevel(level);
 	const int iTreelet = Treelet<NumLevels>::index();
 	Tn * treelet = &m_tree->nodes()[iTreelet];
 	const int nAtLevel = 1<<level;
 	BoundingBox lftBox, rgtBox;
     int i;
-    for(i=0; i<nAtLevel; i++) {
-		const int iNode = Treelet<NumLevels>::OffsetByLevel(level) + i;
-		KdTreeNode * node = treelet->node(iNode);
-		if(node->isLeaf()) continue;
+	if(level < NumLevels) {
+		for(i=0; i<nAtLevel; i++) {
+			const int iNode = levelBegin + i;
+			KdTreeNode * node = treelet->node(iNode);
+			if(node->isLeaf()) continue;
+
+			const BoundingBox nodeBox = m_boxes[iNode];
+			const float pos = node->getSplitPos();
+			const int axis = node->getAxis();
+			
+			m_splitAxis[iNode] = axis;
+			m_splitPos[iNode] = pos;
 		
-        const BoundingBox nodeBox = m_boxes[iNode];
-		const float pos = node->getSplitPos();
-		const int axis = node->getAxis();
-		
-		m_splitAxis[iNode] = axis;
-		m_splitPos[iNode] = pos;
-	
-		nodeBox.split(axis, pos, lftBox, rgtBox);
-		
-		const int iLftChild = iNode + Treelet<NumLevels>::ChildOffset(iNode);
-		m_boxes[iLftChild] = lftBox;
-		m_boxes[iLftChild + 1] = rgtBox;
-		
-		const KdNeighbors nodeNs = m_ns[iNode];
-		m_ns[iLftChild] = nodeNs;
-		m_ns[iLftChild + 1] = nodeNs;
-		
-		m_ns[iLftChild].set(rgtBox, axis, true, iTreelet, iLftChild + 1);
-		m_ns[iLftChild + 1].set(lftBox, axis, false, iTreelet, iLftChild);
-		
-		needNextLevel = true;
+			nodeBox.split(axis, pos, lftBox, rgtBox);
+			
+			const int iLftChild = iNode + Treelet<NumLevels>::ChildOffset(iNode);
+			m_boxes[iLftChild] = lftBox;
+			m_boxes[iLftChild + 1] = rgtBox;
+			
+			const KdNeighbors nodeNs = m_ns[iNode];
+			m_ns[iLftChild] = nodeNs;
+			m_ns[iLftChild + 1] = nodeNs;
+			
+			m_ns[iLftChild].set(rgtBox, axis, true, iTreelet, iLftChild + 1);
+			m_ns[iLftChild + 1].set(lftBox, axis, false, iTreelet, iLftChild);
+			
+			needNextLevel = true;
+		}
 	}
+	
+	for(i=0; i<nAtLevel; i++) {
+		const int iNode = levelBegin + i;
+		KdTreeNode * node = treelet->node(iNode);
+		revisitInterial(iNode, level);
+	}
+	
 	return needNextLevel;
+}
+
+template<int NumLevels, typename T, typename Tn>
+void KdRope<NumLevels, T, Tn>::revisitInterial(int iNode, int level)
+{
+	if(level < 2) return;
+	
+	const int hi = Treelet<NumLevels>::OffsetByLevel(level);
+	
+	KdNeighbors & nodeNs = m_ns[iNode];
+	int i = 0;
+	for(;i<6;i++) {
+		BoundingBox & ni = nodeNs._n[i];
+		if(ni.m_padding1 != 0) {
+			if(ni.m_padding0 < hi) {
+				int updated;
+				if(chooseCousinAsNeighbor(i, iNode, ni.m_padding0, updated)) {
+					std::cout<<"\n cousin nei "<<iNode<<" "<<updated;
+					m_ns[iNode].set(m_boxes[updated], i, Treelet<NumLevels>::index(), updated);
+				}
+			}
+		}
+	}
+}
+
+template<int NumLevels, typename T, typename Tn>
+bool KdRope<NumLevels, T, Tn>::chooseCousinAsNeighbor(int iNeighbor, int iNode, int iParent, int & updated)
+{
+	const BoundingBox a = m_boxes[iNode];
+	const int iLftCousin = iParent + Treelet<NumLevels>::ChildOffset(iParent);
+	BoundingBox b = m_boxes[iLftCousin];
+	if(KdNeighbors::IsNeighborOf(iNeighbor, a, b)) {
+		updated = iLftCousin;
+		return true;
+	}
+	b = m_boxes[iLftCousin + 1];
+	if(KdNeighbors::IsNeighborOf(iNeighbor, a, b)) {
+		updated = iLftCousin + 1;
+		return true;
+	}
+	return false;
 }
 
 template<int NumLevels, typename T, typename Tn>

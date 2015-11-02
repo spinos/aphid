@@ -194,11 +194,11 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 	switch (event->key()) {
 		case Qt::Key_K:
 			m_maxDrawTreeLevel--;
-			qDebug()<<"down level "<<m_maxDrawTreeLevel;
+			// qDebug()<<"down level "<<m_maxDrawTreeLevel;
 		    break;
 		case Qt::Key_L:
 			m_maxDrawTreeLevel++;
-		    qDebug()<<"up level "<<m_maxDrawTreeLevel;
+		    // qDebug()<<"up level "<<m_maxDrawTreeLevel;
 			break;
 		default:
 			break;
