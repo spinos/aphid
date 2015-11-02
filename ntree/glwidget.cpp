@@ -89,7 +89,7 @@ void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, in
 	
 	KdTreeNode * nn = treelet->node(idx);
 	if(nn->isLeaf()) {
-		drawALeaf(nn->getPrimStart(), nn->getNumPrims(), box);
+		drawALeaf(m_tree->leafPrimStart(nn->getPrimStart() ), nn->getNumPrims(), box);
 		return;
 	}
 	

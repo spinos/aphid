@@ -177,18 +177,18 @@ void KdTreeletBuilder<NumLevels, T, Tn>::setNodeInternal(Tn * node, int idx, int
 template<int NumLevels, typename T, typename Tn>
 void KdTreeletBuilder<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * node, int idx)
 {
+	unsigned iLeaf = m_tree->numLeafNodes();
 	unsigned primStart = 0, primLen = 0;
 	if(!parent->isEmpty()) {
 		primStart = m_tree->numData();
 		primLen = parent->numPrims();
-		// std::cout<<"\n leaf prims "<<primStart
-		//		<<":"<<primStart+primLen-1;
 		int i = 0;
 		for(;i<parent->numPrims();i++)
 			m_tree->addDataIndex( parent->indexAt(i) );
 	}
-	node->setLeaf(idx, primStart, primLen);
-	m_tree->addNumLeafNodes();
+	// std::cout<<" leaf["<<iLeaf<<"] ("<<primStart<<","<<primStart+primLen-1<<")";
+	node->setLeaf(idx, iLeaf, primLen);
+	m_tree->addLeafNode(primStart);
 }
 
 template<int NumLevels, typename T, typename Tn>
@@ -213,12 +213,13 @@ public:
 	virtual ~KdNBuilder();
 	
 	void build(SahSplit<T> * parent, KdNTree<T, Tn> * tree);
-	void subdivide(KdTreeletBuilder<NumLevels, T, Tn> * treelet, KdNTree<T, Tn> * tree);
 	
 	static void SetNumPrimsInLeaf(int x);
 	
 protected:
-
+	void subdivide(KdTreeletBuilder<NumLevels, T, Tn> * treelet, KdNTree<T, Tn> * tree);
+	void process(const KdRope<NumLevels, T, Tn> * treelet, KdNTree<T, Tn> * tree);
+	
 private:
 
 };
@@ -250,6 +251,7 @@ void KdNBuilder<NumLevels, T, Tn>::build(SahSplit<T> * parent, KdNTree<T, Tn> * 
 	KdNeighbors ns;
 	ns.reset();
 	rope.build(0, 0, parent->getBBox(), ns);
+	process(&rope, tree);
 }
 
 template<int NumLevels, typename T, typename Tn>
@@ -269,6 +271,31 @@ void KdNBuilder<NumLevels, T, Tn>::subdivide(KdTreeletBuilder<NumLevels, T, Tn> 
         KdTreeletBuilder<NumLevels, T, Tn> subTreelet(branchIdx, tree);
         subTreelet.build(parentIdx, parent, &nodes[branchIdx], parentNode, i);
 		subdivide(&subTreelet, tree);
+	}
+}
+
+template<int NumLevels, typename T, typename Tn>
+void KdNBuilder<NumLevels, T, Tn>::process(const KdRope<NumLevels, T, Tn> * treelet, KdNTree<T, Tn> * tree)
+{
+	const int parentIdx = treelet->index();
+	Tn * nodes = tree->nodes();
+    Tn * parentNode = &nodes[parentIdx];
+	const int n = treelet->numNodes();
+	int i = treelet->LastLevelOffset();
+	for(;i<n;i++) {
+		KdTreeNode * k = parentNode->node(i);
+		if(k->isLeaf()) continue;
+		
+		int offset = k->getOffset();
+		if(offset < 1) continue;
+		
+		offset &= ~KdNode4::TreeletOffsetMask;
+			
+		const int branchIdx = parentIdx + offset;
+
+        KdRope<NumLevels, T, Tn> subTreelet(branchIdx, tree);
+		subTreelet.build(parentIdx, i, treelet->box(i), treelet->neighbor(i) );
+		//process(&subTreelet, tree);
 	}
 }
 //:~

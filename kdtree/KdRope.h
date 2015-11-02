@@ -72,8 +72,8 @@ public:
 	{
 		int i = 0;
 		for(;i<6;i++) {
-			if(_n[i].m_padding1 != 0) std::cout<<"\n ["<<i<<"] "<<_n[i].m_padding0
-				<<" "<<_n[i].m_padding1
+			if(_n[i].m_padding1 != 0) std::cout<<"\n ["<<i<<"] "<<_n[i].m_padding1
+				<<" "<<_n[i].m_padding0
 				<<" "<<_n[i];
 		}
 	}
@@ -94,6 +94,9 @@ public:
 	
 	void build(int parentTreelet, int parentNodeIdx, const BoundingBox & box, const KdNeighbors & ns);
 	
+	BoundingBox box(int idx) const;
+	KdNeighbors neighbor(int idx) const;
+	
 protected:
 	void visitRoot(KdTreeNode * parent, const BoundingBox & box, const KdNeighbors & ns);
 	bool visitInterial(int level);
@@ -112,6 +115,14 @@ KdRope<NumLevels, T, Tn>::KdRope(int index, KdNTree<T, Tn> * tree) : Treelet<Num
 	int i = 0;
 	for(;i<n;i++) m_ns[i].reset();
 }
+
+template<int NumLevels, typename T, typename Tn>
+BoundingBox KdRope<NumLevels, T, Tn>::box(int idx) const
+{ return m_boxes[idx]; }
+
+template<int NumLevels, typename T, typename Tn>
+KdNeighbors KdRope<NumLevels, T, Tn>::neighbor(int idx) const
+{ return m_ns[idx]; }
 
 template<int NumLevels, typename T, typename Tn>
 void KdRope<NumLevels, T, Tn>::build(int parentTreelet, int parentNodeIdx, const BoundingBox & box, const KdNeighbors & ns)
@@ -244,7 +255,7 @@ void KdRope<NumLevels, T, Tn>::pushLeaves()
 		
 		KdTreeNode * node = treelet->node(i);
 		if(node->isLeaf()) {
-			std::cout<<"\n treelet "<<iTreelet<<" leaf "<<i<<" nei";
+			std::cout<<"\n treelet["<<iTreelet<<"] leaf["<<i<<"] push neighbor";
 			nodeNs.verbose();
 		}
 	}
