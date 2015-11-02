@@ -248,10 +248,12 @@ void KdNBuilder<NumLevels, T, Tn>::build(SahSplit<T> * parent, KdNTree<T, Tn> * 
 	subdivide(&treelet, tree);
 	
 	KdRope<NumLevels, T, Tn> rope(1, tree);
+	rope.beginMap();
 	KdNeighbors ns;
 	ns.reset();
 	rope.build(0, 0, parent->getBBox(), ns);
 	process(&rope, tree);
+	rope.endMap();
 }
 
 template<int NumLevels, typename T, typename Tn>
@@ -287,15 +289,16 @@ void KdNBuilder<NumLevels, T, Tn>::process(const KdRope<NumLevels, T, Tn> * tree
 		if(k->isLeaf()) continue;
 		
 		int offset = k->getOffset();
-		if(offset < 1) continue;
-		
+		if(offset < KdNode4::TreeletOffsetMask) continue; /// empty
 		offset &= ~KdNode4::TreeletOffsetMask;
 			
 		const int branchIdx = parentIdx + offset;
 
         KdRope<NumLevels, T, Tn> subTreelet(branchIdx, tree);
+		// std::cout<<"\n process "<<parentIdx<<" "<<i<<" "<<treelet->box(i);
+		// treelet->neighbor(i).verbose();
 		subTreelet.build(parentIdx, i, treelet->box(i), treelet->neighbor(i) );
-		//process(&subTreelet, tree);
+		process(&subTreelet, tree);
 	}
 }
 //:~

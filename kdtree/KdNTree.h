@@ -5,6 +5,77 @@
 #include "KdSah.h"
 #include <sstream>
 
+class KdNeighbors {
+	/// 0 left 1 right 2 bottom 3 top 4 back 5 front
+public:
+	BoundingBox _n[6];
+	void reset() 
+	{
+		int i = 0;
+		for(;i<6;i++) {
+			_n[i].m_padding0 = 0; // node
+			_n[i].m_padding1 = 0; // treelet, zero is null
+		}
+	}
+	
+	void set(const BoundingBox & box, int axis, bool isHigh, int treeletIdx, int nodeIdx)
+	{
+		int idx = axis<<1;
+		if(isHigh) idx++;
+		set(box, idx, treeletIdx, nodeIdx);
+	}
+	
+	void set(const BoundingBox & box, int idx, int treeletIdx, int nodeIdx)
+	{
+		_n[idx] = box;
+		_n[idx].m_padding0 = nodeIdx;
+		_n[idx].m_padding1 = treeletIdx;
+	}
+	
+	bool isEmpty() const
+	{
+		int i = 0;
+		for(;i<6;i++) {
+			if(_n[i].m_padding1 != 0) return false;
+		}
+		return true;
+	}
+	
+	static bool IsNeighborOf(int dir, const BoundingBox & a, const BoundingBox & b)
+	{
+		const int splitAxis = dir / 2;
+		int i = 0;
+		for(;i<3;i++) {
+			if(i==splitAxis) {
+				if(dir & 1) {
+					if(b.getMin(splitAxis) != a.getMax(splitAxis) ) return false;
+				}
+				else {
+					if(b.getMax(splitAxis) != a.getMin(splitAxis) ) return false;
+				}
+			}
+			else {
+				if(b.getMin(i) > a.getMin(i)) return false;
+				if(b.getMax(i) < a.getMax(i)) return false;
+			}
+		}
+		return true;
+	}
+	
+	unsigned encodeTreeletNodeHash(int i, int s) const
+	{ return (_n[i].m_padding1 << (s + 1)) + _n[i].m_padding0; }
+	
+	void verbose() const
+	{
+		int i = 0;
+		for(;i<6;i++) {
+			if(_n[i].m_padding1 != 0) std::cout<<"\n ["<<i<<"] "<<_n[i].m_padding1
+				<<" "<<_n[i].m_padding0
+				<<" "<<_n[i];
+		}
+	}
+};
+
 template <typename T, typename Tn>
 class KdNTree : public Geometry, public Boundary
 {
@@ -12,19 +83,22 @@ class KdNTree : public Geometry, public Boundary
 	///                    \-> rope_ind   --> leaf_neighbors[rope_ind]
 	///
 	struct TreeLeaf {
+		unsigned _ropeInd[6];
 		unsigned _primStart;
-		unsigned _ropeInd;
+		unsigned _nouse;
 	};
 	
 	VectorArray<T> * m_source;
     Tn * m_nodePool;
 	TreeLeaf * m_leafNodes;
+	BoundingBox * m_ropes;
     int * m_leafDataIndices;
     int m_maxNumNodes;
 	int m_maxNumData;
 	int m_numNodes;
 	int m_numLeafNodes;
 	int m_numLeafData;
+	unsigned m_numRopes;
 	
 public:
     KdNTree(VectorArray<T> * source);
@@ -46,8 +120,15 @@ public:
 	int numLeafNodes() const;
 	void addLeafNode(unsigned primStart);
 	unsigned leafPrimStart(unsigned idx) const;
-	unsigned leafRopeInd(unsigned idx) const;
 	
+	void setLeafRope(unsigned idx, const KdNeighbors & ns);
+	
+	void createRopes(unsigned n);
+	void setRope(unsigned idx, const BoundingBox & v );
+	
+	unsigned leafRopeInd(unsigned idx, int ri) const;
+	void setLeafRopeInd(unsigned x, unsigned idx, int ri);
+
 	VectorArray<T> * source();
 	
 	virtual std::string verbosestr() const;
@@ -70,6 +151,8 @@ KdNTree<T, Tn>::KdNTree(VectorArray<T> * source)
 	m_numNodes = 1;
 	m_numLeafNodes = 0;
 	m_numLeafData = 0;
+	m_numRopes = 0;
+	m_ropes = NULL;
 }
 
 template <typename T, typename Tn>
@@ -78,6 +161,7 @@ KdNTree<T, Tn>::~KdNTree()
     delete[] m_nodePool;
 	delete[] m_leafNodes;
     delete[] m_leafDataIndices;
+	if(m_ropes) delete[] m_ropes;
 }
 
 template <typename T, typename Tn>
@@ -142,8 +226,41 @@ unsigned KdNTree<T, Tn>::leafPrimStart(unsigned idx) const
 { return m_leafNodes[idx]._primStart; }
 
 template <typename T, typename Tn>
-unsigned KdNTree<T, Tn>::leafRopeInd(unsigned idx) const
-{ return m_leafNodes[idx]._ropeInd; }
+void KdNTree<T, Tn>::createRopes(unsigned n)
+{ 
+	m_numRopes = n;
+	m_ropes = new BoundingBox[n]; 
+}
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::setRope(unsigned idx, const BoundingBox & v )
+{ m_ropes[idx] = v; }
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::setLeafRope(unsigned idx, const KdNeighbors & ns)
+{
+	int i = 0;
+	for(;i<6;i++) {
+		if(ns._n[i].m_padding1 != 0) {
+			m_leafNodes[idx]._ropeInd[i] = ns.encodeTreeletNodeHash(i, Tn::BranchingFactor);
+		}
+		else {
+			m_leafNodes[idx]._ropeInd[i] = 0;
+		}
+	}
+	// ns.verbose();
+}
+
+template <typename T, typename Tn>
+unsigned KdNTree<T, Tn>::leafRopeInd(unsigned idx, int ri) const
+{ return m_leafNodes[idx]._ropeInd[ri]; }
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::setLeafRopeInd(unsigned x, unsigned idx, int ri)
+{ 
+	// std::cout<<"\n map "<<m_leafNodes[idx]._ropeInd[ri]<<" to "<<x;
+	m_leafNodes[idx]._ropeInd[ri] = x; 
+}
 
 template <typename T, typename Tn>
 std::string KdNTree<T, Tn>::verbosestr() const
@@ -152,9 +269,10 @@ std::string KdNTree<T, Tn>::verbosestr() const
 	sst<<"\n KdNTree: "
 	<<"\n treelet level "<<Tn::BranchingFactor
 	<<"\n n input "<<m_source->size()
-	<<"\n n nodes(max) "<<numNodes()<<"("<<maxNumNodes()<<")"
-	<<"\n n leaf(max) "<<m_numLeafNodes<<"("<<(maxNumNodes()<<2)<<")"
+	<<"\n n node(max) "<<numNodes()<<"("<<maxNumNodes()<<")"
+	<<"\n n leaf(max) "<<numLeafNodes()<<"("<<(maxNumNodes()<<2)<<")"
 	<<"\n n data(max) "<<numData()<<"("<<maxNumData()<<")"
+	<<"\n n rope "<<m_numRopes
 	<<"\n";
 	return sst.str();
 }

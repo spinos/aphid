@@ -11,74 +11,6 @@
 #include "Treelet.h"
 #include "KdNTree.h"
 
-class KdNeighbors {
-	/// 0 left 1 right 2 bottom 3 top 4 back 5 front
-public:
-	BoundingBox _n[6];
-	void reset() 
-	{
-		int i = 0;
-		for(;i<6;i++) {
-			_n[i].m_padding0 = 0; // parent node
-			_n[i].m_padding1 = 0; // treelet, zero is null
-		}
-	}
-	
-	void set(const BoundingBox & box, int axis, bool isHigh, int treeletIdx, int nodeIdx)
-	{
-		int idx = axis<<1;
-		if(isHigh) idx++;
-		set(box, idx, treeletIdx, nodeIdx);
-	}
-	
-	void set(const BoundingBox & box, int idx, int treeletIdx, int nodeIdx)
-	{
-		_n[idx] = box;
-		_n[idx].m_padding0 = nodeIdx;
-		_n[idx].m_padding1 = treeletIdx;
-	}
-	
-	bool isEmpty() const
-	{
-		int i = 0;
-		for(;i<6;i++) {
-			if(_n[i].m_padding1 != 0) return false;
-		}
-		return true;
-	}
-	
-	static bool IsNeighborOf(int dir, const BoundingBox & a, const BoundingBox & b)
-	{
-		const int splitAxis = dir / 2;
-		int i = 0;
-		for(;i<3;i++) {
-			if(i==splitAxis) {
-				if(dir & 1) {
-					if(b.getMin(splitAxis) != a.getMax(splitAxis) ) return false;
-				}
-				else {
-					if(b.getMax(splitAxis) != a.getMin(splitAxis) ) return false;
-				}
-			}
-			else {
-				if(b.getMin(i) > a.getMin(i)) return false;
-				if(b.getMax(i) < a.getMax(i)) return false;
-			}
-		}
-		return true;
-	}
-	
-	void verbose() const
-	{
-		int i = 0;
-		for(;i<6;i++) {
-			if(_n[i].m_padding1 != 0) std::cout<<"\n ["<<i<<"] "<<_n[i].m_padding1
-				<<" "<<_n[i].m_padding0
-				<<" "<<_n[i];
-		}
-	}
-};
-
 template<int NumLevels, typename T, typename Tn>
 class KdRope : public Treelet<NumLevels > {
 	
@@ -87,6 +19,7 @@ class KdRope : public Treelet<NumLevels > {
 	float m_splitPos[(1<<NumLevels+1) - 2];
 	KdNeighbors m_ns[(1<<NumLevels+1) - 2];
 	KdNTree<T, Tn> * m_tree;
+	static std::map<unsigned, BoundingBox > BoxMap;
 	
 public:
 	KdRope(int index, KdNTree<T, Tn> * tree);
@@ -97,15 +30,22 @@ public:
 	BoundingBox box(int idx) const;
 	KdNeighbors neighbor(int idx) const;
 	
+	void beginMap();
+	void endMap();
+	
 protected:
 	void visitRoot(KdTreeNode * parent, const BoundingBox & box, const KdNeighbors & ns);
 	bool visitInterial(int level);
 	void visitCousins(int iNode, int level);
 	bool chooseCousinAsNeighbor(int iNeighbor, int iNode, int iParent, int & updated);
 	void pushLeaves();
+	void mapNeighbors(KdNeighbors & ns);
 private:
 	
 };
+
+template<int NumLevels, typename T, typename Tn>
+std::map<unsigned, BoundingBox > KdRope<NumLevels, T, Tn>::BoxMap;
 
 template<int NumLevels, typename T, typename Tn>
 KdRope<NumLevels, T, Tn>::KdRope(int index, KdNTree<T, Tn> * tree) : Treelet<NumLevels>(index)
@@ -250,13 +190,63 @@ void KdRope<NumLevels, T, Tn>::pushLeaves()
 	const int n = Treelet<NumLevels>::numNodes();
 	int i = 0;
 	for(;i<n;i++) {
-		const KdNeighbors nodeNs = m_ns[i];
+		KdNeighbors nodeNs = m_ns[i];
 		if(nodeNs.isEmpty()) continue;
 		
 		KdTreeNode * node = treelet->node(i);
 		if(node->isLeaf()) {
-			std::cout<<"\n treelet["<<iTreelet<<"] leaf["<<i<<"] push neighbor";
-			nodeNs.verbose();
+			// std::cout<<" rope treelet["<<iTreelet<<"] leaf["<<i<<"]";
+			m_tree->setLeafRope(node->getPrimStart(), nodeNs);
+			mapNeighbors(nodeNs);
+		}
+	}
+}
+
+template<int NumLevels, typename T, typename Tn>
+void KdRope<NumLevels, T, Tn>::beginMap()
+{ BoxMap.clear(); }
+
+template<int NumLevels, typename T, typename Tn>
+void KdRope<NumLevels, T, Tn>::mapNeighbors(KdNeighbors & ns)
+{
+	int i = 0;
+	for(;i<6;i++) {
+		if(ns._n[i].m_padding1 != 0) {
+			unsigned k = ns.encodeTreeletNodeHash(i, Tn::BranchingFactor);
+			ns._n[i].m_padding1 = k;
+			BoxMap[k] = ns._n[i];
+		}
+	}
+}
+
+template<int NumLevels, typename T, typename Tn>
+void KdRope<NumLevels, T, Tn>::endMap()
+{
+	std::cout<<"\n n ropes "<<BoxMap.size();
+	unsigned i = 0;
+	std::map<unsigned, BoundingBox >::iterator it = BoxMap.begin();
+	for(;it!=BoxMap.end(); ++it) {
+		it->second.m_padding0 = i;
+		i++;
+	}
+	
+	m_tree->createRopes(BoxMap.size());
+	i = 0;
+	it = BoxMap.begin();
+	for(;it!=BoxMap.end(); ++it) {
+		m_tree->setRope(i, it->second);
+		i++;
+	}
+	
+	const unsigned n = m_tree->numLeafNodes();
+	int j;
+	i = 0;
+	for(;i<n;i++) {
+		for(j=0;j<6;j++) {
+			unsigned k = m_tree->leafRopeInd(i, j);
+			if(k != 0) {
+				m_tree->setLeafRopeInd(BoxMap[k].m_padding0, i, j);
+			}
 		}
 	}
 }
