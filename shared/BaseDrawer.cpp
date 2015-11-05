@@ -130,44 +130,42 @@ void BaseDrawer::boundingRectangle(const BoundingRectangle & b) const
 
 void BaseDrawer::boundingBox(const BoundingBox & b) const
 {
-	Vector3F corner0(b.getMin(0), b.getMin(1), b.getMin(2));
-	Vector3F corner1(b.getMax(0), b.getMax(1), b.getMax(2));
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(corner0.x, corner0.y, corner0.z);
-	glVertex3f(corner0.x, corner1.y, corner0.z);
-	glVertex3f(corner1.x, corner1.y, corner0.z);
-	glVertex3f(corner1.x, corner0.y, corner0.z);
-	glEnd();
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(corner0.x, corner0.y, corner1.z);
-	glVertex3f(corner1.x, corner0.y, corner1.z);
-	glVertex3f(corner1.x, corner1.y, corner1.z);
-	glVertex3f(corner0.x, corner1.y, corner1.z);
-	glEnd();
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(corner0.x, corner0.y, corner0.z);
-	glVertex3f(corner0.x, corner0.y, corner1.z);
-	glVertex3f(corner0.x, corner1.y, corner1.z);
-	glVertex3f(corner0.x, corner1.y, corner0.z);
-	glEnd();
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(corner1.x, corner0.y, corner0.z);
-	glVertex3f(corner1.x, corner1.y, corner0.z);
-	glVertex3f(corner1.x, corner1.y, corner1.z);
-	glVertex3f(corner1.x, corner0.y, corner1.z);
-	glEnd();
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(corner0.x, corner0.y, corner0.z);
-	glVertex3f(corner1.x, corner0.y, corner0.z);
-	glVertex3f(corner1.x, corner0.y, corner1.z);
-	glVertex3f(corner0.x, corner0.y, corner1.z);
-	glEnd();
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(corner0.x, corner1.y, corner0.z);
-	glVertex3f(corner0.x, corner1.y, corner1.z);
-	glVertex3f(corner1.x, corner1.y, corner1.z);
-	glVertex3f(corner1.x, corner1.y, corner0.z);
-	glEnd();
+    Vector3F corner0 = b.X(0);
+	Vector3F corner1 = b.X(1);
+    Vector3F corner2 = b.X(2);
+    Vector3F corner3 = b.X(3);
+	Vector3F corner4 = b.X(4);
+    Vector3F corner5 = b.X(5);
+    Vector3F corner6 = b.X(6);
+    Vector3F corner7 = b.X(7);
+    glBegin(GL_LINES);
+    glVertex3fv((float *)&corner0);
+	glVertex3fv((float *)&corner1);
+	glVertex3fv((float *)&corner1);
+	glVertex3fv((float *)&corner3);
+	glVertex3fv((float *)&corner3);
+	glVertex3fv((float *)&corner2);
+	glVertex3fv((float *)&corner2);
+	glVertex3fv((float *)&corner0);
+    
+	glVertex3fv((float *)&corner4);
+	glVertex3fv((float *)&corner5);
+	glVertex3fv((float *)&corner5);
+	glVertex3fv((float *)&corner7);
+	glVertex3fv((float *)&corner7);
+	glVertex3fv((float *)&corner6);
+	glVertex3fv((float *)&corner6);
+	glVertex3fv((float *)&corner4);
+    
+	glVertex3fv((float *)&corner0);
+	glVertex3fv((float *)&corner4);
+	glVertex3fv((float *)&corner1);
+	glVertex3fv((float *)&corner5);
+	glVertex3fv((float *)&corner2);
+	glVertex3fv((float *)&corner6);
+	glVertex3fv((float *)&corner3);
+    glVertex3fv((float *)&corner7);
+    glEnd();
 }
 
 void BaseDrawer::useSpace(const Matrix44F & s) const

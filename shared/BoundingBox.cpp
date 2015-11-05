@@ -398,6 +398,18 @@ float BoundingBox::radius() const
     return sqrt(dx*dx + dy*dy + dz*dz);
 }
 
+int BoundingBox::numPoints() const
+{ return 8; }
+
+Vector3F BoundingBox::X(int idx) const
+{
+    Vector3F r(m_data[0], m_data[1], m_data[2]);
+    if(idx > 3) r.z = m_data[5];
+    if((idx & 3) > 1) r.y = m_data[4];
+    if(idx & 1) r.x = m_data[3];
+    return r;
+}
+
 void BoundingBox::verbose() const
 {
 	std::cout<<str()<<"\n";

@@ -214,3 +214,10 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 	Base3DView::keyReleaseEvent(event);
 }
 
+void GLWidget::resizeEvent(QResizeEvent * event)
+{
+    QSize renderAreaSize = size();
+    qDebug()<<"render size "<<renderAreaSize.width()<<" "<<renderAreaSize.height();
+    m_engine.initScreen(renderAreaSize.width(), renderAreaSize.height());
+    Base3DView::resizeEvent(event);
+}

@@ -11,33 +11,21 @@
 
 #include "KdNTree.h"
 #include "KdBuilder.h"
-#include <ViewFrame.h>
-
-class KdScreen {
-	
-	ViewFrame m_base;
-	unsigned char * m_rgba;
-	float * m_z;
-	
-public:
-	KdScreen();
-	virtual ~KdScreen();
-	
-	void create(int w, int h) {}
-	
-};
+#include "KdScreen.h"
 
 template<typename T>
 class KdEngine {
 
 	KdNTree<T, KdNode4 > * m_tree;
-	
+	KdScreen<KdNTree<T, KdNode4 > > * m_screen;
+    
 public:
 	KdEngine();
 	virtual ~KdEngine();
 	
 	void initGeometry(VectorArray<T> * source, const BoundingBox & box);
-	
+	void initScreen(int w, int h);
+	void render(const Frustum & f);
 	KdNTree<T, KdNode4 > * tree();
 	
 protected:
@@ -50,12 +38,14 @@ template<typename T>
 KdEngine<T>::KdEngine()
 {
 	m_tree = new KdNTree<T, KdNode4 >();
+    m_screen = new KdScreen<KdNTree<T, KdNode4 > >();
 }
 
 template<typename T>
 KdEngine<T>::~KdEngine()
 {
 	delete m_tree;
+    delete m_screen;
 }
 
 template<typename T>
@@ -73,6 +63,17 @@ void KdEngine<T>::initGeometry(VectorArray<T> * source, const BoundingBox & box)
 }
 
 template<typename T>
+void KdEngine<T>::initScreen(int w, int h)
+{ m_screen->create(w, h); }
+
+template<typename T>
 KdNTree<T, KdNode4 > * KdEngine<T>::tree()
 { return m_tree; }
+
+template<typename T>
+void KdEngine<T>::render(const Frustum & f)
+{
+    m_screen->setView(f);
+    m_screen->getVisibleFrames(m_tree);
+}
 //:~

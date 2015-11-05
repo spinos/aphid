@@ -4,7 +4,7 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 #include <KdEngine.h>
-#include <ConvexShape.h>
+#include <KdScreen.h>
 
 class TestBox : public BoundingBox
 {
@@ -34,8 +34,8 @@ protected:
     virtual void clientMouseInput(Vector3F & stir);
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
-    
-//! [3]
+    virtual void resizeEvent(QResizeEvent * event);
+
 private:
     void drawBoxes() const;
     void drawTree();

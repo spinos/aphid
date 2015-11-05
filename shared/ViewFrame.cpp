@@ -30,3 +30,9 @@ bool RectangleI::isLandscape() const
 
 ViewFrame::ViewFrame() {}
 ViewFrame::~ViewFrame() {}
+
+void ViewFrame::setRect(int x0, int y0, int x1, int y1)
+{ m_rect.set(x0, y0, x1, y1); }
+
+void ViewFrame::setView(const Frustum & f)
+{ m_frustum = f; }
