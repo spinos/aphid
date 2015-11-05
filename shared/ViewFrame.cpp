@@ -1,0 +1,32 @@
+/*
+ *  ViewFrame.cpp
+ *  
+ *
+ *  Created by jian zhang on 11/5/15.
+ *  Copyright 2015 __MyCompanyName__. All rights reserved.
+ *
+ */
+
+#include "ViewFrame.h"
+
+void RectangleI::set(int x0, int y0, int x1, int y1)
+{
+	m_v[0] = x0; m_v[1] = y0;
+	m_v[2] = x1; m_v[3] = y1;
+}
+
+int RectangleI::width() const
+{ return m_v[2] - m_v[0] + 1; }
+
+int RectangleI::height() const
+{ return m_v[3] - m_v[1] + 1; }
+
+int RectangleI::area() const
+{ return width() * height(); }
+
+bool RectangleI::isLandscape() const
+{ return width() >= height(); }
+
+
+ViewFrame::ViewFrame() {}
+ViewFrame::~ViewFrame() {}

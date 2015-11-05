@@ -154,3 +154,56 @@ void LineDrawer::smoothCurve(const BezierSpline & sp, short deg) const
 	}
 	glEnd();
 }
+
+void LineDrawer::frustum(const Frustum * f)
+{	
+	glBegin(GL_LINES);
+	Vector3F p = f->X(0);
+	glVertex3fv((float *)&p);
+	p = f->X(1);
+	glVertex3fv((float *)&p);
+	glVertex3fv((float *)&p);
+	p = f->X(2);
+	glVertex3fv((float *)&p);
+	glVertex3fv((float *)&p);
+	p = f->X(3);
+	glVertex3fv((float *)&p);
+	glVertex3fv((float *)&p);
+	p = f->X(0);
+	glVertex3fv((float *)&p);
+	
+	p = f->X(4);
+	glVertex3fv((float *)&p);
+	p = f->X(5);
+	glVertex3fv((float *)&p);
+	glVertex3fv((float *)&p);
+	p = f->X(6);
+	glVertex3fv((float *)&p);
+	glVertex3fv((float *)&p);
+	p = f->X(7);
+	glVertex3fv((float *)&p);
+	glVertex3fv((float *)&p);
+	p = f->X(4);
+	glVertex3fv((float *)&p);
+	
+	glVertex3fv((float *)&p);
+	p = f->X(0);
+	glVertex3fv((float *)&p);
+	
+	p = f->X(5);
+	glVertex3fv((float *)&p);
+	p = f->X(1);
+	glVertex3fv((float *)&p);
+	
+	p = f->X(6);
+	glVertex3fv((float *)&p);
+	p = f->X(2);
+	glVertex3fv((float *)&p);
+	
+	p = f->X(7);
+	glVertex3fv((float *)&p);
+	p = f->X(3);
+	glVertex3fv((float *)&p);
+	glEnd();
+}
+//:~

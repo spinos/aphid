@@ -3,7 +3,8 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
-#include <KdNTree.h>
+#include <KdEngine.h>
+#include <ConvexShape.h>
 
 class TestBox : public BoundingBox
 {
@@ -47,8 +48,10 @@ private slots:
     void simulate();
     
 private:
-    KdNTree<TestBox, KdNode4 > * m_tree;
-    VectorArray<TestBox> * m_source;
+	KdEngine<TestBox> m_engine;
+	VectorArray<TestBox> * m_source;
+	KdNTree<TestBox, KdNode4 > * m_tree;
+	Frustum m_frustum;
 	int m_treeletColI;
 	int m_maxDrawTreeLevel;
 };

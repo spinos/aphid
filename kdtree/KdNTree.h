@@ -65,6 +65,12 @@ public:
 	unsigned encodeTreeletNodeHash(int i, int s) const
 	{ return (_n[i].m_padding1 << (s + 1)) + _n[i].m_padding0; }
 	
+	void decodeTreeletNodeHash(int i, int s, unsigned & itreelet, unsigned & inode) const
+	{
+		itreelet = _n[i].m_padding1 >> s+1;
+		inode = _n[i].m_padding1 & ~(1<<s+1);
+	}
+	
 	void verbose() const
 	{
 		int i = 0;
@@ -77,7 +83,7 @@ public:
 };
 
 template <typename T, typename Tn>
-class KdNTree : public Geometry, public Boundary
+class KdNTree : public AVerbose, public Boundary
 {
 	/// i --> tree_leaf[i] --> prim_start
 	///                    \-> rope_ind   --> leaf_neighbors[rope_ind]
@@ -101,8 +107,11 @@ class KdNTree : public Geometry, public Boundary
 	unsigned m_numRopes;
 	
 public:
-    KdNTree(VectorArray<T> * source);
+    KdNTree();
 	virtual ~KdNTree();
+	
+	void init(VectorArray<T> * source, const BoundingBox & box);
+	bool isNull() const;
 
     Tn * root();
     Tn * nodes();
@@ -135,12 +144,26 @@ public:
 protected:
 
 private:
-
+	void clear();
 };
 
 template <typename T, typename Tn>
-KdNTree<T, Tn>::KdNTree(VectorArray<T> * source) 
+KdNTree<T, Tn>::KdNTree() 
 {
+	m_maxNumNodes = 0;
+}
+
+template <typename T, typename Tn>
+KdNTree<T, Tn>::~KdNTree() 
+{
+    clear();
+}
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::init(VectorArray<T> * source, const BoundingBox & box) 
+{
+	clear();
+	Boundary::setBBox(box);
 	m_source = source;
 	int numPrims = source->size();
     m_maxNumNodes = numPrims>>Tn::BranchingFactor-1;
@@ -152,16 +175,20 @@ KdNTree<T, Tn>::KdNTree(VectorArray<T> * source)
 	m_numLeafNodes = 0;
 	m_numLeafData = 0;
 	m_numRopes = 0;
-	m_ropes = NULL;
 }
 
 template <typename T, typename Tn>
-KdNTree<T, Tn>::~KdNTree() 
+bool KdNTree<T, Tn>::isNull() const
+{ return m_maxNumNodes>0; }
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::clear()
 {
-    delete[] m_nodePool;
+	if(isNull()) return;
+	delete[] m_nodePool;
 	delete[] m_leafNodes;
     delete[] m_leafDataIndices;
-	if(m_ropes) delete[] m_ropes;
+	delete[] m_ropes;
 }
 
 template <typename T, typename Tn>

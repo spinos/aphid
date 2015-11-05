@@ -3,7 +3,6 @@
 #include <BaseCamera.h>
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
-#include <KdBuilder.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -32,18 +31,20 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 		rootBox.expandBy(a->calculateBBox());
     }
 	
-	SahSplit<TestBox> boxes(n, m_source);
-	boxes.initIndices();
-    boxes.setBBox(rootBox);
+	m_engine.initGeometry(m_source, rootBox);
+    m_tree = m_engine.tree();
+	
+	
+	const double nearClip = 1.001f;
+    const double farClip = 999.999f;
+    const double hAperture = 1.f;
+    const double vAperture = .8f;
+    const double aov = 57.f;
+	Matrix44F camspace;
+	camspace.setTranslation(0.f, 0.f, 100.f);
+	m_frustum.set(nearClip, farClip, hAperture, vAperture, aov, camspace);
     
-    m_tree = new KdNTree<TestBox, KdNode4 >(m_source);
-    m_tree->setBBox(rootBox);
-    
-	KdNBuilder<4, TestBox, KdNode4 > bud;
-	bud.SetNumPrimsInLeaf(8);
-	bud.build(&boxes, m_tree);
-	m_tree->verbose();
-    m_maxDrawTreeLevel = 1;
+	m_maxDrawTreeLevel = 1;
     // std::cout<<"\n size of node "<<sizeof(KdNode4);
 }
 //! [0]
@@ -60,6 +61,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+	getDrawer()->frustum(&m_frustum);
     // drawBoxes();
     drawTree();
 }
@@ -165,7 +167,7 @@ void GLWidget::drawALeaf(unsigned start, unsigned n, const BoundingBox & box)
 	else {
 		int i = 0;
 		for(;i<n;i++) {
-			getDrawer()->boundingBox(*m_tree->dataAt(start + i));
+			getDrawer()->boundingBox(* m_tree->dataAt(start + i) );
 		}
 	}
 }

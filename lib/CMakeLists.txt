@@ -227,6 +227,8 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/PrincipalComponents.cpp
 ../shared/AOrientedBox.cpp
 ../shared/DynamicBody.cpp
+../shared/ConvexShape.cpp
+../shared/ViewFrame.cpp
 ../btree/Types.cpp
 ../btree/Entity.cpp
 ../btree/BNode.cpp

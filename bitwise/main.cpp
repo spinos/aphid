@@ -18,6 +18,7 @@
 #include <AOrientedBox.h>
 #include <IndexArray.h>
 #include <SHelper.h>
+#include <ConvexShape.h>
 
 #ifdef __APPLE__
 typedef unsigned long long uint64;
@@ -521,7 +522,7 @@ int main(int argc, char * const argv[])
     
     // testOBox();
 	// testRgba();
-    testTree();
+    std::cout<<"\n size of frustum "<<sizeof(Frustum);
     
 	std::cout<<" end of test\n";
 	return 0;

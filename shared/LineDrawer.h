@@ -9,6 +9,7 @@
 #pragma once
 
 #include "BaseDrawer.h"
+#include "ConvexShape.h"
 class LineBuffer;
 class AdaptableStripeBuffer;
 class BaseCurve;
@@ -26,4 +27,5 @@ public:
 	void linearCurve(const BaseCurve & curve) const;
 	void smoothCurve(const BezierCurve & curve, short deg) const;
 	void smoothCurve(const BezierSpline & sp, short deg) const;
+	void frustum(const Frustum * f);
 };
