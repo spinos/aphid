@@ -79,4 +79,45 @@ private:
     static PointSet * A;
 };
 
+template<typename T1, typename T2>
+class Intersect1 {
+public:
+    static bool Evaluate(const T1 & A, const T2 & B)
+    {
+        Simplex s;
+        float v2;
+        Vector3F w, pa, pb, q;
+    
+        Vector3F v = A.X(0);
+        if(v.length2() < 1e-6f) v = A.X(1);
+    
+        for(int i=0; i < 32; i++) {
+    // SA-B(-v)
+            pa = A.supportPoint(v.reversed());
+            pb = B.supportPoint(v);
+            w = pa - pb;
+            
+    // terminate when v is close enough to v(A - B).
+    // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
+            v2 = v.length2();
+            if(v2 - w.dot(v) < 0.001f * v2) {
+    // std::cout<<" v is close to w "<<v2 - w.dot(v)<<"\n";
+                break;
+            }
+            
+            s.add(w);
+            
+            if(s.isPInside(Vector3F::Zero)) {
+    // std::cout<<" Minkowski difference contains the reference point\n";
+                return true;
+            }
+            
+            v = s.closestPTo(Vector3F::Zero);
+            s.reduceToSmallest();
+        }
+        
+        return false;
+    }
+};
+
 }

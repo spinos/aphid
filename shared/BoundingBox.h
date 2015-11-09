@@ -67,6 +67,7 @@ public:
         return output;
     }
     int numPoints() const;
+    Vector3F supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
     Vector3F X(int idx) const;
 	float m_data[6];
 	int m_padding0, m_padding1;

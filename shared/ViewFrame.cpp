@@ -36,3 +36,6 @@ void ViewFrame::setRect(int x0, int y0, int x1, int y1)
 
 void ViewFrame::setView(const Frustum & f)
 { m_frustum = f; }
+
+Frustum ViewFrame::view() const
+{ return m_frustum; }

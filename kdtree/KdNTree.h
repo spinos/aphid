@@ -105,7 +105,7 @@ class KdNTree : public AVerbose, public Boundary
 	int m_numLeafNodes;
 	int m_numLeafData;
 	unsigned m_numRopes;
-	
+
 public:
     KdNTree();
 	virtual ~KdNTree();
@@ -141,6 +141,8 @@ public:
 	VectorArray<T> * source();
 	
 	virtual std::string verbosestr() const;
+    
+    typedef Tn TreeletType;
 protected:
 
 private:

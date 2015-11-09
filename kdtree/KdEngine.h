@@ -28,6 +28,10 @@ public:
 	void render(const Frustum & f);
 	KdNTree<T, KdNode4 > * tree();
 	
+    KdScreen<KdNTree<T, KdNode4 > > * screen();
+    typedef KdNTree<T, KdNode4 > TreeType;
+    typedef KdScreen<KdNTree<T, KdNode4 > > ScreenType;
+    
 protected:
 
 private:
@@ -76,4 +80,8 @@ void KdEngine<T>::render(const Frustum & f)
     m_screen->setView(f);
     m_screen->getVisibleFrames(m_tree);
 }
+
+template<typename T>
+KdScreen<KdNTree<T, KdNode4 > > * KdEngine<T>::screen()
+{ return m_screen; }
 //:~

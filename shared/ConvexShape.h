@@ -35,7 +35,7 @@ public:
 	Vector3F * x();
 	Vector3F X(int idx) const;
 	int numPoints() const;
-	Vector3F supportPoint(const Vector3F & v, Vector3F * localP) const;
+	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
 
 	/// 1----p0 p0---0 
 	/// |     | |    |

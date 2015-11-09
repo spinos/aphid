@@ -410,6 +410,25 @@ Vector3F BoundingBox::X(int idx) const
     return r;
 }
 
+Vector3F BoundingBox::supportPoint(const Vector3F & v, Vector3F * localP) const
+{
+    float maxdotv = -1e8f;
+    float dotv;
+	
+    Vector3F res, q;
+    for(int i=0; i < numPoints(); i++) {
+        q = X(i);
+        dotv = q.dot(v);
+        if(dotv > maxdotv) {
+            maxdotv = dotv;
+            res = q;
+            if(localP) *localP = q;
+        }
+    }
+    
+    return res;
+}
+
 void BoundingBox::verbose() const
 {
 	std::cout<<str()<<"\n";

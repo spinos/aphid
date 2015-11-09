@@ -38,10 +38,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	const double nearClip = 1.001f;
     const double farClip = 999.999f;
     const double hAperture = 1.f;
-    const double vAperture = .8f;
-    const double aov = 57.f;
+    const double vAperture = .75f;
+    const double aov = 55.f;
 	Matrix44F camspace;
-	camspace.setTranslation(0.f, 0.f, 100.f);
+	camspace.setTranslation(0.f, 10.f, 60.f);
 	m_frustum.set(nearClip, farClip, hAperture, vAperture, aov, camspace);
     
 	m_maxDrawTreeLevel = 1;
@@ -64,6 +64,8 @@ void GLWidget::clientDraw()
 	getDrawer()->frustum(&m_frustum);
     // drawBoxes();
     drawTree();
+    m_engine.render(m_frustum);
+    drawScreen();
 }
 
 void GLWidget::drawBoxes() const
@@ -170,6 +172,15 @@ void GLWidget::drawALeaf(unsigned start, unsigned n, const BoundingBox & box)
 			getDrawer()->boundingBox(* m_tree->dataAt(start + i) );
 		}
 	}
+}
+
+void GLWidget::drawScreen()
+{
+    getDrawer()->setColor(0.f, .6f, 0.f);
+    KdEngine<TestBox>::ScreenType * scrn = m_engine.screen();
+    const unsigned n = scrn->numBoxes();
+    unsigned i = 0;
+    for(;i<n;i++) getDrawer()->boundingBox(* m_tree->dataAt(scrn->box(i) ) );
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
