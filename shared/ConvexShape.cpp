@@ -27,14 +27,14 @@ void Frustum::set(float nearClip, float farClip,
     float nright = nearClip * h_fov;
     float ntop = nearClip * v_fov;
 	
-	m_corners[0].set(fright, ftop, -farClip);
-	m_corners[1].set(-fright, ftop, -farClip);
-	m_corners[2].set(-fright, -ftop, -farClip);
-	m_corners[3].set(fright, -ftop, -farClip);
-	m_corners[4].set(nright, ntop, -nearClip);
-	m_corners[5].set(-nright, ntop, -nearClip);
-	m_corners[6].set(-nright, -ntop, -nearClip);
-	m_corners[7].set(nright, -ntop, -nearClip);
+	m_corners[0].set(-fright, -ftop, -farClip);
+	m_corners[1].set( fright, -ftop, -farClip);
+	m_corners[2].set(-fright,  ftop, -farClip);
+	m_corners[3].set( fright,  ftop, -farClip);
+	m_corners[4].set(-nright, -ntop, -nearClip);
+	m_corners[5].set( nright, -ntop, -nearClip);
+	m_corners[6].set(-nright,  ntop, -nearClip);
+	m_corners[7].set( nright,  ntop, -nearClip);
 	
 	int i = 0;
     for(; i<8; i++) m_corners[i] = space.transform(m_corners[i]);
@@ -68,40 +68,41 @@ Vector3F Frustum::supportPoint(const Vector3F & v, Vector3F * localP) const
     return res;
 }
 
-void Frustum::split(Frustum & child0, Frustum & child1, bool alongX) const
+void Frustum::split(Frustum & child0, Frustum & child1, float alpha, bool alongX) const
 {
+	const float oneMAlpha = 1.f - alpha;
 	child0 = *this;
 	child1 = *this;
 	Vector3F * lft = child0.x();
 	Vector3F * rgt = child1.x();
 	Vector3F p0, p1, p2, p3;
 	if(alongX) {
-		p0 = (X(0) + X(1)) * .5f;
-		p1 = (X(2) + X(3)) * .5f;
-		p2 = (X(4) + X(5)) * .5f;
-		p3 = (X(6) + X(7)) * .5f;
-		lft[0] = p0;
-		rgt[1] = p0;
+		p0 = X(0) * oneMAlpha + X(1) * alpha;
+		p1 = X(2) * oneMAlpha + X(3) * alpha;
+		p2 = X(4) * oneMAlpha + X(5) * alpha;
+		p3 = X(6) * oneMAlpha + X(7) * alpha;
+		lft[1] = p0;
+		rgt[0] = p0;
 		lft[3] = p1;
 		rgt[2] = p1;
-		lft[4] = p2;
-		rgt[5] = p2;
+		lft[5] = p2;
+		rgt[4] = p2;
 		lft[7] = p3;
 		rgt[6] = p3;
 	}
 	else {
-		p0 = (X(0) + X(3)) * .5f;
-		p1 = (X(1) + X(2)) * .5f;
-		p2 = (X(4) + X(7)) * .5f;
-		p3 = (X(5) + X(6)) * .5f;
-		lft[0] = p0;
-		rgt[3] = p0;
-		lft[1] = p1;
-		rgt[2] = p1;
-		lft[4] = p2;
-		rgt[7] = p2;
-		lft[5] = p3;
-		rgt[6] = p3;
+		p0 = X(0) * oneMAlpha + X(2) * alpha;
+		p1 = X(1) * oneMAlpha + X(3) * alpha;
+		p2 = X(4) * oneMAlpha + X(6) * alpha;
+		p3 = X(5) * oneMAlpha + X(7) * alpha;
+		lft[2] = p0;
+		rgt[0] = p0;
+		lft[3] = p1;
+		rgt[1] = p1;
+		lft[6] = p2;
+		rgt[4] = p2;
+		lft[7] = p3;
+		rgt[5] = p3;
 	}
 }
 //;~

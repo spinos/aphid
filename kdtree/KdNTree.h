@@ -129,6 +129,7 @@ public:
 	int numLeafNodes() const;
 	void addLeafNode(unsigned primStart);
 	unsigned leafPrimStart(unsigned idx) const;
+	void getLeafBox(BoundingBox & dst, unsigned idx, unsigned count) const;
 	
 	void setLeafRope(unsigned idx, const KdNeighbors & ns);
 	
@@ -253,6 +254,15 @@ void KdNTree<T, Tn>::addLeafNode(unsigned primStart)
 template <typename T, typename Tn>
 unsigned KdNTree<T, Tn>::leafPrimStart(unsigned idx) const
 { return m_leafNodes[idx]._primStart; }
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::getLeafBox(BoundingBox & dst, unsigned idx, unsigned count) const
+{
+	dst.reset();
+	const unsigned s = leafPrimStart(idx);
+    unsigned i = 0;
+    for(;i< count; i++) dst.expandBy( dataAt(s + i)->bbox() );
+}
 
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::createRopes(unsigned n)

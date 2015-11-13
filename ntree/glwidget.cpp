@@ -22,7 +22,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
         float x = -60.f + 200.f * r * cos(th);
-        float y = -40.f + 100.f * r * sin(th) + 16.f * sin(x/31.f);
+        float y = -40.f + 100.f * r * sin(th) + 36.f * sin(x/12.f);
         float z = -40.f + 50.f * float( rand() % 999 ) / 999.f + 9.f * sin(y/23.f);
         a->setMin(-1 + x, -1 + y, -1 + z);
         a->setMax( 1 + x,  1 + y,  1 + z);
@@ -41,7 +41,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     const double vAperture = .75f;
     const double aov = 55.f;
 	Matrix44F camspace;
-	camspace.setTranslation(0.f, 10.f, 60.f);
+	camspace.rotateX( .05f);
+	camspace.rotateY(-.14f);
+	camspace.setTranslation(10.f, 10.f, 170.f);
 	m_frustum.set(nearClip, farClip, hAperture, vAperture, aov, camspace);
     
 	m_maxDrawTreeLevel = 1;
@@ -178,9 +180,12 @@ void GLWidget::drawScreen()
 {
     getDrawer()->setColor(0.f, .6f, 0.f);
     KdEngine<TestBox>::ScreenType * scrn = m_engine.screen();
-    const unsigned n = scrn->numBoxes();
+    const unsigned n = scrn->m_views.size();
+	// qDebug()<<" nv "<<n;
     unsigned i = 0;
-    for(;i<n;i++) getDrawer()->boundingBox(* m_tree->dataAt(scrn->box(i) ) );
+    for(;i<n;i++) {
+		getDrawer()->frustum(&scrn->m_views[i].view());
+	}
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

@@ -6,11 +6,12 @@
 
 template<typename T>
 class KdScreen {
-	ViewFrame m_subFrames[1<<12];
 	ViewFrame m_base;
+	RectangleI * m_tiles;
 	unsigned char * m_rgba;
 	float * m_z;
 	std::vector<unsigned > m_boxes;
+	int m_numTiles;
     
 public:
     KdScreen();
@@ -22,13 +23,19 @@ public:
     
     unsigned numBoxes() const;
     unsigned box(unsigned idx) const;
+	
+	std::vector<ViewFrame > m_views;
 private:
     void clear();
-    void splitInterialNode(T * tree, int iTreelet, int iNode, const BoundingBox & box,
-                           const Frustum & fru);
-    bool firstLeafNode(unsigned & dst, T * tree, int iTreelet, int iNode, const BoundingBox & box,
+    bool splitInterialNode(T * tree, int iTreelet, int iNode, const BoundingBox & box,
+                           const ViewFrame & frm);
+	bool splitLeafNode(KdTreeNode * node, const BoundingBox & box,
+                           const ViewFrame & frm);
+						   
+    bool firstLeafNode(BoundingBox & dst, T * tree, int iTreelet, int iNode, const BoundingBox & box,
                        const Frustum & fru);
     void addToBoxes(T * tree, unsigned iLeafNode, unsigned count);
+	void createTiles();
 };
 
 template<typename T>
@@ -49,6 +56,7 @@ void KdScreen<T>::clear()
 {
     if(m_rgba) delete[] m_rgba;
     if(m_z) delete[] m_z;
+	if(m_tiles) delete[] m_tiles;
 }
 
 template<typename T>
@@ -57,8 +65,30 @@ void KdScreen<T>::create(int w, int h)
     clear();
     m_rgba = new unsigned char[w * h * 4];
     m_z = new float[w * h];
-    
     m_base.setRect(0, 0, w-1, h-1);
+	
+	createTiles()
+}
+
+template<typename T>
+void KdScreen<T>::createTiles()
+{
+	int ns = m_base.rect().width() / 32;
+	if(w & 31) ns++;
+	int nt = m_base.rect().height() / 32;
+	if(h & 31) nt++;
+	
+	const int n = (ns * nt);
+	m_tiles = new RectangleI[n];
+	std::cout<<"\n max n tiles "<<n;
+	m_numTiles = n;
+	
+	int i, j;
+	for(j=0;j<nt;j++) {
+		for(i=0;i<ns;i++) {
+			
+		}
+	}
 }
 
 template<typename T>
@@ -71,30 +101,66 @@ template<typename T>
 bool KdScreen<T>::getVisibleFrames(T * tree)
 {
     m_boxes.clear();
-    
+    m_views.clear();
     const BoundingBox box = tree->getBBox();
-    if(!gjk::Intersect1<Frustum, BoundingBox >::Evaluate(m_base.view(), box )) 
-        return false;
-    
-    splitInterialNode(tree, 0, 0, box, m_base.view() );
+    // splitInterialNode(tree, 0, 0, box, m_base );
     
     return true;
 }
 
 template<typename T>
-void KdScreen<T>::splitInterialNode(T * tree, int iTreelet, int iNode, const BoundingBox & box,
-                                    const Frustum & fru)
+bool KdScreen<T>::splitInterialNode(T * tree, int iTreelet, int iNode, const BoundingBox & box,
+                                    const ViewFrame & frm)
 {
-#if 0
-    unsigned iLeaf; 
-    if( firstLeafNode(iLeaf, tree, iTreelet, iNode, box,
-                                fru) ) return;
+#if 1	
+	if(frm.numPixels() <= 1024) {
+		m_views.push_back(frm);
+		return true;
+	}
+
+	ViewFrame child0, child1;
+	frm.split(child0, child1);
+	
+	BoundingBox tbox;
+	if(firstLeafNode(tbox, tree, iTreelet, iNode, box,
+                                child0.view()) )
+			splitInterialNode(tree, iTreelet, iNode, box, child0 );
+			
+	if(firstLeafNode(tbox, tree, iTreelet, iNode, box,
+                                child1.view()) )
+			splitInterialNode(tree, iTreelet, iNode, box, child1 );
+/*
+	if(gjk::Intersect1<Frustum, BoundingBox >::Evaluate(child0.view(), lftBox ) ) {
+		if(isFar)
+			splitInterialNode(tree, iTreelet + offset, 0, lftBox, child0 );
+		else
+			splitInterialNode(tree, iTreelet, iNode + offset, lftBox, child0); 
+	}
+	
+	if(gjk::Intersect1<Frustum, BoundingBox >::Evaluate(child1.view(), lftBox ) ) {
+		if(isFar)
+			splitInterialNode(tree, iTreelet + offset, 0, lftBox, child1 );
+		else
+			splitInterialNode(tree, iTreelet, iNode + offset, lftBox, child1); 
+	}
+	
+	if(gjk::Intersect1<Frustum, BoundingBox >::Evaluate(child0.view(), rgtBox ) ) {
+		if(isFar)
+			splitInterialNode(tree, iTreelet + offset, 1, rgtBox, child0 );
+		else
+			splitInterialNode(tree, iTreelet, iNode + offset + 1, rgtBox, child0); 
+	}
+	
+	if(gjk::Intersect1<Frustum, BoundingBox >::Evaluate(child1.view(), rgtBox ) ) {
+		if(isFar)
+			splitInterialNode(tree, iTreelet + offset, 1, rgtBox, child1 );
+		else
+			splitInterialNode(tree, iTreelet, iNode + offset + 1, rgtBox, child1); 
+	}
+*/	
+	return false;
+	
 #else
-    KdTreeNode * node = tree->nodes()[iTreelet].node(iNode);
-    if(node->isLeaf()) {
-        addToBoxes(tree, node->getPrimStart(), node->getNumPrims());
-        return;
-    }
     
     const int axis = node->getAxis();
 	const float pos = node->getSplitPos();
@@ -122,13 +188,40 @@ void KdScreen<T>::splitInterialNode(T * tree, int iTreelet, int iNode, const Bou
 }
 
 template<typename T>
-bool KdScreen<T>::firstLeafNode(unsigned & dst, T * tree, int iTreelet, int iNode, const BoundingBox & box,
+bool KdScreen<T>::splitLeafNode(KdTreeNode * node, const BoundingBox & box,
+                           const ViewFrame & frm)
+{
+	if(node->getNumPrims() < 1) return false;
+	
+	if(frm.numPixels() <= 1024) {
+		m_views.push_back(frm);
+		return true;
+	}
+	
+	ViewFrame child0, child1;
+	frm.split(child0, child1);
+
+	if(gjk::Intersect1<Frustum, BoundingBox >::Evaluate(child0.view(), box ) ) {
+		// std::cout<<"\n lft frm "<<child0;
+		splitLeafNode(node, box, child0 );
+	}
+	
+	if(gjk::Intersect1<Frustum, BoundingBox >::Evaluate(child1.view(), box ) ) {
+		// std::cout<<"\n rgt frm "<<child1;
+		splitLeafNode(node, box, child1 );
+	}
+	
+	return true;
+}
+
+template<typename T>
+bool KdScreen<T>::firstLeafNode(BoundingBox & dst, T * tree, int iTreelet, int iNode, const BoundingBox & box,
                                 const Frustum & fru)
 {
     KdTreeNode * node = tree->nodes()[iTreelet].node(iNode);
     if(node->isLeaf()) {
         if(node->getNumPrims() < 1) return false;
-        dst = node->getPrimStart();
+        tree->getLeafBox(dst, node->getPrimStart(), node->getNumPrims() );
         addToBoxes(tree, node->getPrimStart(), node->getNumPrims());
         return true;
     }

@@ -37,31 +37,31 @@ public:
 	int numPoints() const;
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
 
-	/// 1----p0 p0---0 
+	/// 2----p1 p1---3 
 	/// |     | |    |
 	/// |     | |    |
-	/// 2----p1 p1---3
+	/// 0----p0 p0---1
 	///
-	/// 5----p2 p2---4
-	/// |     | |    |
-	/// |     | |    |
 	/// 6----p3 p3---7
+	/// |     | |    |
+	/// |     | |    |
+	/// 4----p2 p2---5
 	///
-	/// 1------------0 
+	/// 2------------3 
 	/// |            |
-	/// p1-----------p0
-	/// p1-----------p0 
+	/// p0-----------p1
+	/// p0-----------p1 
 	/// |            |
-	/// 2------------3
+	/// 0------------1
 	///
-	/// 5------------4
-	/// |            |
-	/// p3-----------p2
-	/// p3-----------p2
-	/// |            |
 	/// 6------------7
+	/// |            |
+	/// p2-----------p3
+	/// p2-----------p3
+	/// |            |
+	/// 4------------5
 	///
-	void split(Frustum & child0, Frustum & child1, bool alongX = true) const;
+	void split(Frustum & child0, Frustum & child1, float alpha, bool alongX = true) const;
 	
 protected:
 

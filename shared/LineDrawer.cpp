@@ -163,10 +163,10 @@ void LineDrawer::frustum(const Frustum * f)
 	p = f->X(1);
 	glVertex3fv((float *)&p);
 	glVertex3fv((float *)&p);
-	p = f->X(2);
-	glVertex3fv((float *)&p);
-	glVertex3fv((float *)&p);
 	p = f->X(3);
+	glVertex3fv((float *)&p);
+	glVertex3fv((float *)&p);
+	p = f->X(2);
 	glVertex3fv((float *)&p);
 	glVertex3fv((float *)&p);
 	p = f->X(0);
@@ -177,10 +177,10 @@ void LineDrawer::frustum(const Frustum * f)
 	p = f->X(5);
 	glVertex3fv((float *)&p);
 	glVertex3fv((float *)&p);
-	p = f->X(6);
-	glVertex3fv((float *)&p);
-	glVertex3fv((float *)&p);
 	p = f->X(7);
+	glVertex3fv((float *)&p);
+	glVertex3fv((float *)&p);
+	p = f->X(6);
 	glVertex3fv((float *)&p);
 	glVertex3fv((float *)&p);
 	p = f->X(4);
