@@ -1,0 +1,18 @@
+http://graphics.stanford.edu/software/lightpack/
+
+stanford 1996, include source code. But the light field resolution is really low.
+
+
+http://spams-devel.gforge.inria.fr/index.html
+
+Sparse coding and dictionary learning, include source code.
+
+
+Dynamically Reparameterized Light Fields
+
+http://groups.csail.mit.edu/graphics/pubs/thesis_isaksen.pdf
+
+
+A Compressive Light Field Projection System
+
+http://web.media.mit.edu/~gordonw/CompressiveLightFieldProjector/
