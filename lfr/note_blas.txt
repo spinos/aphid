@@ -1,0 +1,9 @@
+need both blas and cblas
+
+http://www.netlib.org/blas/#_reference_blas_version_3_5_0
+
+use f77 instead of gfortran
+
+commend out xerbla.f and xerbla_array.f to prevent len_trim symbol not found error
+
+link blas and cblas library
