@@ -32,11 +32,25 @@ public:
     T operator()(const int i) const;
     
     T* v() const;
+	T* raw();
     
     void setZero();
-	T size() const;
+/// ||x||
+	T norm() const;
 	void scale(const T s);
     void normalize();
+/// element index of max value
+	int maxInd() const;
+/// max element value
+	T max() const;
+/// element index of max value
+	int maxAbsInd() const;
+/// max element value
+	T maxAbs() const;
+	
+	void add(const DenseVector<T> & x);
+	void minus(const DenseVector<T> & x);
+	void copy(const DenseVector<T> & x);
 	
 	friend std::ostream& operator<<(std::ostream &output, const DenseVector<T> & p) {
         output << p.str();
@@ -85,11 +99,15 @@ T* DenseVector<T>::v() const
 { return m_v; }
 
 template<typename T>
+T* DenseVector<T>::raw()
+{ return m_v; }
+
+template<typename T>
 void DenseVector<T>::setZero()
 { memset(m_v,0,m_numElements*sizeof(T)); }
 
 template<typename T>
-T DenseVector<T>::size() const
+T DenseVector<T>::norm() const
 {
 	T s = 0.f;
 	for(int i = 0; i<m_numElements; i++) s += m_v[i] * m_v[i];
@@ -105,8 +123,65 @@ void DenseVector<T>::scale(const T s)
 template<typename T>
 void DenseVector<T>::normalize()
 {
-	const T s = size();
+	const T s = norm();
 	if(s > 1e-9) scale(1.0 / s);
+}
+
+template<typename T>
+int DenseVector<T>::maxInd() const
+{
+	int imax = 0;
+	T vmax = m_v[0];
+	for(int i=1; i<m_numElements; i++) {
+		T cur = m_v[i];
+		if(cur > vmax) {
+			imax = i;
+			vmax = cur;
+		}
+	}
+	return imax;
+}
+
+template<typename T>
+T DenseVector<T>::max() const
+{ return m_v[maxInd()]; }
+
+template<typename T>
+int DenseVector<T>::maxAbsInd() const
+{
+	int imax = 0;
+	T vmax = ABS(m_v[0]);
+	for(int i=1; i<m_numElements; i++) {
+		T cur = ABS(m_v[i]);
+		if(cur > vmax) {
+			imax = i;
+			vmax = cur;
+		}
+	}
+	return imax;
+}
+
+template<typename T>
+T DenseVector<T>::maxAbs() const
+{ return m_v[maxAbsInd()]; }
+
+template<typename T>
+void DenseVector<T>::add(const DenseVector<T> & x)
+{
+	cblas_axpy<T>(m_numElements, T(1.0), x.v(), 1, m_v, 1);
+}
+
+template<typename T>
+void DenseVector<T>::minus(const DenseVector<T> & x)
+{
+	cblas_axpy<T>(m_numElements, T(-1.0), x.v(), 1, m_v, 1);
+}
+
+template<typename T>
+void DenseVector<T>::copy(const DenseVector<T> & x)
+{
+	create(x.numElements());
+	memcpy(m_v, x.v(), m_numElements*sizeof(T));
 }
 
 template<typename T>
@@ -153,9 +228,11 @@ public:
     T& operator()(const int i, const int j);
     T operator()(const int i, const int j) const;
 	T* column(const int i) const;
-
+	void getColumn(DenseVector<T> & x, const int i) const;
+	
 	void setZero();
 	void scale(const T s);
+	
 /// normalize each column
 	void normalize();
 /// AT * A
@@ -164,6 +241,9 @@ public:
 	void addDiagonal(const T diag);
 /// copy upper-right part to lower-left part
 	void fillSymmetric();
+/// b = alpha A * x + beta b
+	void mult(DenseVector<T>& b, const DenseVector<T>& x, 
+            const T alpha = 1.0, const T beta = 0.0) const;
 /// b = alpha AT * x + beta b
 	void multTrans(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
@@ -217,6 +297,12 @@ template <typename T>
 T* DenseMatrix<T>::column(const int i) const
 { return &m_v[i*m_numRows]; }
 
+template <typename T>
+void DenseMatrix<T>::getColumn(DenseVector<T> & x, const int i) const
+{
+	memcpy(x.raw(), column(i), m_numRows*sizeof(T));
+}
+
 template <typename T> 
 void DenseMatrix<T>::setZero()
 {
@@ -260,6 +346,16 @@ void DenseMatrix<T>::AtA(DenseMatrix<T>& dst) const
 										T(1.0), m_v, m_numRows, 
 										T(0.0), dst.m_v, m_numColumns);
     dst.fillSymmetric();
+}
+
+template <typename T>
+void DenseMatrix<T>::mult(DenseVector<T>& b, const DenseVector<T>& x, 
+            const T alpha, const T beta) const
+{
+	cblas_gemv<T>(CblasColMajor, CblasNoTrans, m_numRows, m_numColumns, 
+							alpha, m_v, m_numRows, 
+							x.v(), 1, 
+							beta, b.v(), 1);
 }
 
 template <typename T>

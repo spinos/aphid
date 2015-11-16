@@ -23,3 +23,7 @@ Tensor Displays:
 Compressive Light Field Synthesis using Multilayer Displays with Directional Backlighting
 
 http://web.media.mit.edu/~gordonw/TensorDisplays/
+
+Least Squares Regression
+
+http://statweb.stanford.edu/~tibs/ElemStatLearn/printings/ESLII_print10.pdf

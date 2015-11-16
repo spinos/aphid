@@ -3,7 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "linearMath.h"
+#include "regr.h"
+#include <MersenneTwister.h>
 
 void testblas()
 {
@@ -72,10 +73,19 @@ int main ( )
 { 
 	testblas();
 	
+	MersenneTwister twist(999);
+	
 	lfr::DenseMatrix<float> A;
-	A.create(4, 8);
+	A.create(6, 5);
 	
 	float * c0 = A.column(0);
+	int i, j;
+	for(i=0; i<6; i++) {
+		for(j=0;j<5;j++) {
+			c0[i*5+j] = twist.random();
+		}
+	}
+	/*
 	c0[0] = 1;
 	c0[1] = 2;
 	c0[2] = 3;
@@ -113,28 +123,47 @@ int main ( )
 	c3[4] = 4;
 	c3[5] = 4;
 	c3[6] = 4;
-	c3[7] = 1;
+	c3[7] = 1;*/
 
 	A.normalize();
 	
+	lfr::DenseMatrix<float> G;
+	
+	A.AtA(G);
+	
+	// G.addDiagonal(1.f);
+	
 	std::cout<<" A "<<A;
 	
-	lfr::DenseMatrix<float> B;
+	std::cout<<" Gramian = A' * A "<<G;
 	
-	A.AtA(B);
+	lfr::DenseVector<float> y;
+	y.create(A.numRows());
+	y.setZero();
+	float * vy = y.v();
+	vy[3] = .3f;
+	vy[2] = .8f;
+	vy[3] = .1f;
 	
-	B.addDiagonal(1.f);
-	std::cout<<" B = A' * A "<<B;
-	
-	lfr::DenseVector<float> L(B.column(1), B.numRows());
-	
-	std::cout<<" L "<<L;
+	std::cout<<"\n y "<<y;
 	
 	lfr::DenseVector<float> b;
-	b.create(B.numRows());
+	b.create(A.numColumns());
 	
-	B.multTrans(b, L);
+	A.multTrans(b, y);
 	
 	std::cout<<" b "<<b;
+	std::cout<<"\n max "<<b.maxInd();
+	
+	lfr::DenseVector<float> c;
+	c.copy(b);
+	std::cout<<" c "<<c;
+	
+	b.add(c);
+	std::cout<<" b + c "<<b;
+	
+	lfr::LAR<float> lar(&A);
+	lar.lars(y);
+	
 	return 1;
 }

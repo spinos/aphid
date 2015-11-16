@@ -8,6 +8,10 @@
  */
 #include <cblas.h>
 
+template <typename T> void cblas_axpy(int N,
+       T alpha,  T *X,  int ldx,
+       T* Y,  int ldy);
+	   
 template <typename T> void cblas_gemv( CBLAS_ORDER Order, CBLAS_TRANSPOSE Trans,  int M,  int N,
        T alpha,  T *A,  int lda,
        T* X,  int incX,
@@ -17,6 +21,18 @@ template <typename T> void cblas_syrk( CBLAS_ORDER order,
        CBLAS_UPLO Uplo,  CBLAS_TRANSPOSE Trans,  int N,  int K,
        T alpha,  T *A,  int lda,
        T beta, T*C,  int ldc);
+	   
+template <> void cblas_axpy<double>(int N,
+       double alpha,  double* X,  int incX,
+       double* Y,  int incY) {
+	cblas_daxpy(N, alpha, X, incX, Y, incY);
+}
+
+template <> void cblas_axpy<float>(int N,
+       float alpha,  float* X,  int incX,
+       float* Y,  int incY) {
+	cblas_saxpy(N, alpha, X, incX, Y, incY);
+}
 	   
 template <> inline void cblas_gemv<double>( CBLAS_ORDER Order, CBLAS_TRANSPOSE Trans,  int M,  int N,
        double alpha,  double *A,  int lda,
