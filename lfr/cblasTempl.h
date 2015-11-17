@@ -6,6 +6,7 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+
 #include <cblas.h>
 
 template <typename T> void cblas_axpy(int N,

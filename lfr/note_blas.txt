@@ -7,3 +7,7 @@ use f77 instead of gfortran
 commend out xerbla.f and xerbla_array.f to prevent len_trim symbol not found error
 
 link blas and cblas library
+
+build clapack with cmake
+set (CMAKE_BUILD_TYPE RELEASE)
+http://icl.cs.utk.edu/lapack-for-windows/clapack/index.html#build
