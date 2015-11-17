@@ -27,3 +27,9 @@ http://web.media.mit.edu/~gordonw/TensorDisplays/
 Least Squares Regression
 
 http://statweb.stanford.edu/~tibs/ElemStatLearn/printings/ESLII_print10.pdf
+
+Gram-Schmidt
+
+http://cns.bu.edu/%7Emvss/courses/cn700/CN700-Lec3.pdf
+
+https://en.wikipedia.org/wiki/QR_decomposition
