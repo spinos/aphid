@@ -4,13 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
-#include "cblasTempl.h"
-
-// MIN, MAX macros
-#define MIN(a,b) (((a) > (b)) ? (b) : (a))
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#define SIGN(a) (((a) < 0) ? -1.0 : 1.0)
-#define ABS(a) (((a) < 0) ? -(a) : (a))
+#include "clapackTempl.h"
 
 namespace lfr {
 template<typename T>
@@ -42,11 +36,11 @@ public:
 /// element index of max value
 	int maxInd() const;
 /// max element value
-	T max() const;
+	T maxVal() const;
 /// element index of max value
 	int maxAbsInd() const;
 /// max element value
-	T maxAbs() const;
+	T maxAbsVal() const;
 	
 	void add(const DenseVector<T> & x);
 	void minus(const DenseVector<T> & x);
@@ -143,16 +137,16 @@ int DenseVector<T>::maxInd() const
 }
 
 template<typename T>
-T DenseVector<T>::max() const
+T DenseVector<T>::maxVal() const
 { return m_v[maxInd()]; }
 
 template<typename T>
 int DenseVector<T>::maxAbsInd() const
 {
 	int imax = 0;
-	T vmax = ABS(m_v[0]);
+	T vmax = abs(m_v[0]);
 	for(int i=1; i<m_numElements; i++) {
-		T cur = ABS(m_v[i]);
+		T cur = abs(m_v[i]);
 		if(cur > vmax) {
 			imax = i;
 			vmax = cur;
@@ -162,19 +156,19 @@ int DenseVector<T>::maxAbsInd() const
 }
 
 template<typename T>
-T DenseVector<T>::maxAbs() const
+T DenseVector<T>::maxAbsVal() const
 { return m_v[maxAbsInd()]; }
 
 template<typename T>
 void DenseVector<T>::add(const DenseVector<T> & x)
 {
-	cblas_axpy<T>(m_numElements, T(1.0), x.v(), 1, m_v, 1);
+	clapack_axpy<T>(m_numElements, T(1.0), x.v(), 1, m_v, 1);
 }
 
 template<typename T>
 void DenseVector<T>::minus(const DenseVector<T> & x)
 {
-	cblas_axpy<T>(m_numElements, T(-1.0), x.v(), 1, m_v, 1);
+	clapack_axpy<T>(m_numElements, T(-1.0), x.v(), 1, m_v, 1);
 }
 
 template<typename T>
@@ -228,6 +222,7 @@ public:
     T& operator()(const int i, const int j);
     T operator()(const int i, const int j) const;
 	T* column(const int i) const;
+	T* raw();
 	void getColumn(DenseVector<T> & x, const int i) const;
 	
 	void setZero();
@@ -247,11 +242,32 @@ public:
 /// b = alpha AT * x + beta b
 	void multTrans(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
+/// A = b * b
+/// by relatively robust representations
+/// A is symmetric and positive semi-definite matrix
+/// A = Z⋅D⋅ZT
+/// D = D'⋅D'
+/// b = Z⋅D'⋅ZT
+	void sqrtRRR(DenseMatrix<T>& b) const;
 	
 	friend std::ostream& operator<<(std::ostream &output, const DenseMatrix<T> & p) {
         output << p.str();
         return output;
     }
+	
+	static void PrintMatrix(char* desc, int m, int n, T* a)
+	{
+		int i, j;
+		std::cout<<"\n "<<desc;
+		for(i=0; i< m; i++) {
+			std::cout<<"\n| ";
+			for(j=0; j< n; j++) {
+				std::cout<<" "<<a[j*m + i];
+			}
+			std::cout<<" |";
+		}
+		std::cout<<"\n";
+	}
 
 protected:
 
@@ -298,6 +314,10 @@ T* DenseMatrix<T>::column(const int i) const
 { return &m_v[i*m_numRows]; }
 
 template <typename T>
+T* DenseMatrix<T>::raw()
+{ return m_v; }
+
+template <typename T>
 void DenseMatrix<T>::getColumn(DenseVector<T> & x, const int i) const
 {
 	memcpy(x.raw(), column(i), m_numRows*sizeof(T));
@@ -342,7 +362,7 @@ void DenseMatrix<T>::AtA(DenseMatrix<T>& dst) const
 /// c is n-by-n matrix
 /// alpha = 1, beta = 0 
 	dst.create(m_numColumns, m_numColumns);
-	cblas_syrk<T>(CblasColMajor, CblasUpper, CblasTrans, m_numColumns, m_numRows, 
+	clapack_syrk<T>("U", "T", m_numColumns, m_numRows, 
 										T(1.0), m_v, m_numRows, 
 										T(0.0), dst.m_v, m_numColumns);
     dst.fillSymmetric();
@@ -352,7 +372,7 @@ template <typename T>
 void DenseMatrix<T>::mult(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha, const T beta) const
 {
-	cblas_gemv<T>(CblasColMajor, CblasNoTrans, m_numRows, m_numColumns, 
+	clapack_gemv<T>("N", m_numRows, m_numColumns, 
 							alpha, m_v, m_numRows, 
 							x.v(), 1, 
 							beta, b.v(), 1);
@@ -362,7 +382,7 @@ template <typename T>
 void DenseMatrix<T>::multTrans(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha, const T beta) const
 {
-	cblas_gemv<T>(CblasColMajor, CblasTrans, m_numRows, m_numColumns, 
+	clapack_gemv<T>("T", m_numRows, m_numColumns, 
 							alpha, m_v, m_numRows, 
 							x.v(), 1, 
 							beta, b.v(), 1);
@@ -381,10 +401,70 @@ void DenseMatrix<T>::fillSymmetric()
 template <typename T>  
 void DenseMatrix<T>::addDiagonal(const T diag) 
 { 
-	const int n = MIN(m_numRows, m_numColumns);
+	const int n = min(m_numRows, m_numColumns);
 	for(int i = 0; i<n; ++i) 
 		m_v[i*m_numRows+i] += diag; 
 };
+
+/// http://scc.qibebt.cas.cn/docs/library/Intel%20MKL/2011/mkl_manual/lse/functn_syevr.htm
+/// all eigenvalues and eigenvectors
+template <typename T> 
+void DenseMatrix<T>::sqrtRRR(DenseMatrix<T>& b) const
+{
+	T * W = new T[m_numRows];
+	T * Z = new T[m_numRows*m_numRows];
+	integer * ISuppz = new integer[2*m_numRows];
+	
+	T * work;
+	integer * iwork;
+	T abstol = -1.0;
+	T vl, vu;
+	int il = 1;
+	int iu = m_numRows;
+	integer m;
+	integer info;
+	integer lwork = -1;
+	integer liwork = -1;
+	T queryWork; work = &queryWork;
+	integer queryIwork; iwork = &queryIwork;
+	
+	clapack_syevr<T>("V", "A", "U", m_numRows, m_v, m_numRows, 
+		&vl, &vu, il, iu, abstol, &m,
+         W, Z, m_numRows, ISuppz, 
+		 work, &lwork, iwork, &liwork, &info);
+		 
+	lwork = queryWork;
+	liwork = queryIwork;
+	
+	work = new T[lwork];
+	iwork = new integer[liwork];
+	
+	clapack_syevr<T>("V", "A", "U", m_numRows, m_v, m_numRows, 
+		&vl, &vu, il, iu, abstol, &m,
+         W, Z, m_numRows, ISuppz, 
+		 work, &lwork, iwork, &liwork, &info);
+		 
+/// B = Z * D		 
+	T * B = new T[m_numRows*m_numRows];
+	int i, j;
+    for(i=0; i< m_numRows; i++) {
+		double  lambda=sqrt(W[i]);
+        for(j=0; j< m_numRows; j++) {
+            B[i*m_numRows + j] = Z[i*m_numRows + j] * lambda;
+        }
+    }
+
+/// b = B * ZT	
+	clapack_gemm<double>("N", "T", m_numRows, m_numRows, m_numRows,
+						1.0, B, m_numRows, Z, m_numRows, 0.0, b.raw(), m_numRows);
+						
+	delete[] work;
+	delete[] iwork;
+	delete[] B;
+	delete[] W;
+	delete[] Z;
+	delete[] ISuppz;
+}
 
 template<typename T>
 const std::string DenseMatrix<T>::str() const

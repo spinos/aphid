@@ -24,6 +24,10 @@ template <typename T> int clapack_syevr(char *jobz, char *range, char *uplo, int
 template <typename T> int clapack_gemm(char *transa, char *transb, integer m, integer n, integer k, 
 	T alpha, T *a, integer lda, 
 	T *b, integer ldb, T beta, T *c__, integer ldc);
+	
+template <typename T> int clapack_syrk(char *uplo, char *trans, integer n, integer k, 
+	T alpha, T *a, integer lda, T beta, 
+	T *c__, integer ldc);
 
 template <> void clapack_axpy<double>(integer N,
        double alpha,  double* X,  integer incX,
@@ -119,4 +123,22 @@ template <> int clapack_gemm<float>(char *transa, char *transb, integer m, integ
 	return sgemm_(transa, transb, &m, &n, &k, 
 	&alpha, a, &lda, 
 	b, &ldb,&beta, c__, &ldc);
+}
+
+template <> int clapack_syrk<double>(char *uplo, char *trans, integer n, integer k, 
+	double alpha, double *a, integer lda, double beta, 
+	double *c__, integer ldc)
+{ 
+	return dsyrk_(uplo, trans, &n, &k, 
+	&alpha, a, &lda, &beta, 
+	c__, &ldc);
+}
+
+template <> int clapack_syrk<float>(char *uplo, char *trans, integer n, integer k, 
+	float alpha, float *a, integer lda, float beta, 
+	float *c__, integer ldc)
+{ 
+	return ssyrk_(uplo, trans, &n, &k, 
+	&alpha, a, &lda, &beta, 
+	c__, &ldc);
 }

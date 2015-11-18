@@ -1,5 +1,5 @@
 #include <iostream>
-#include "clapackTempl.h"
+#include "linearMath.h"
 #include <cmath>
 
 void printMatrix( char* desc, int m, int n, double* a ) 
@@ -96,24 +96,35 @@ void testSVD()
 }
 
 #define NSELECT 5
-void testSqrt()
-{
-	std::cout<<"\n todo test sqrt";
-	double A[N*N] = {
+const double VA[N*N] = {
             0.67,  0.00,  0.00,  0.00,  0.00,
-           -0.20,  3.82,  0.00,  0.00,  0.00,
-            0.19, -0.13,  3.27,  0.00,  0.00,
+           -0.21,  3.82,  0.00,  0.00,  0.00,
+            0.29, -0.13,  3.27,  0.00,  0.00,
            -1.06,  1.06,  0.11,  5.89,  0.00,
             0.46, -0.48,  1.10, -0.98,  4.54
         };
+		
+void testSqrt()
+{
+	std::cout<<"\n test sqrt Relatively Robust Representations";
+
+#if 0
+	double A[N*N] = {
+			0.67,  0.00,  0.00,  0.00,  0.00,
+           -0.21,  3.82,  0.00,  0.00,  0.00,
+            0.29, -0.13,  3.27,  0.00,  0.00,
+           -1.06,  1.06,  0.11,  5.89,  0.00,
+            0.46, -0.48,  1.10, -0.98,  4.54
+        };
+		
 	printMatrix("A", N, N, A);
-	
+
 	double W[N];
-	double Z[N*N];
-	integer ISUPPZ[N];
-	
-	double * work;// = (double *)malloc(26*N*sizeof(double));
-	integer * iwork;// = (integer *)malloc(10*N*sizeof(integer));
+	double Z[N*NSELECT];
+	integer ISUPPZ[2*N];
+	int i, j;
+	double * work;
+	integer * iwork;
 	double abstol = -1.0;
 	double vl, vu;
 	int il = 1;
@@ -131,8 +142,6 @@ void testSqrt()
 		 work, &lwork, iwork, &liwork, &info);
 		 
 	std::cout<<"\n m "<<m;
-	std::cout<<"\n lwork "<<work[0];
-	std::cout<<"\n liwork "<<iwork[0];
 	std::cout<<"\n info "<<info;
 	
 	lwork = queryWork;
@@ -158,7 +167,7 @@ void testSqrt()
 	printMatrix( "Z", N, m, Z);
 	
 	double B[N*N];
-	int i, j;
+	
     for(i=0; i< N; i++) {
 		double  lambda=sqrt(W[i]);
         for(j=0; j< N; j++) {
@@ -179,12 +188,36 @@ void testSqrt()
 						1.0, A, N, B, N, 0.0, Z, N);
 						
 	printMatrix("A = A' * A'", N, N, Z);
+#else
+	lfr::DenseMatrix<double> A;
+	A.create(N, N);
+	double *va = A.raw();
+	int i, j;
+	for(i=0;i<N*N;i++) va[i] = VA[i];
+	//A.fillSymmetric();
+	
+	std::cout<<"A"<<A;
+	
+	lfr::DenseMatrix<double> b;
+	b.create(N, N);
+	
+	A.sqrtRRR(b);
+	
+	std::cout<<"b"<<b;
+	
+	double Y[N*N];
+	
+	clapack_gemm<double>("N", "N", N, N, N,
+						1.0, b.column(0), N, b.column(0), N, 0.0, Y, N);
+						
+	printMatrix("A = A' * A'", N, N, Y);
+#endif
 }
 
 int main()
 { 
-    testAdd();
-    testSVD();
+    // testAdd();
+    // testSVD();
 	testSqrt();
     return 1;
 }
