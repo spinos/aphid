@@ -10,4 +10,5 @@ link blas and cblas library
 
 build clapack with cmake
 set (CMAKE_BUILD_TYPE RELEASE)
+make install
 http://icl.cs.utk.edu/lapack-for-windows/clapack/index.html#build
