@@ -28,6 +28,12 @@ template <typename T> int clapack_gemm(char *transa, char *transb, integer m, in
 template <typename T> int clapack_syrk(char *uplo, char *trans, integer n, integer k, 
 	T alpha, T *a, integer lda, T beta, 
 	T *c__, integer ldc);
+	
+template <typename T> int clapack_sytrf(char *uplo, integer n, T *a, integer lda, 
+	integer *ipiv, T *work, integer *lwork, integer *info);
+	
+template <typename T> int clapack_sytri(char *uplo, integer n, T *a, integer lda, 
+	integer *ipiv, T *work, integer *info);
 
 template <> void clapack_axpy<double>(integer N,
        double alpha,  double* X,  integer incX,
@@ -141,4 +147,30 @@ template <> int clapack_syrk<float>(char *uplo, char *trans, integer n, integer 
 	return ssyrk_(uplo, trans, &n, &k, 
 	&alpha, a, &lda, &beta, 
 	c__, &ldc);
+}
+
+template <> int clapack_sytrf<double>(char *uplo, integer n, double *a, integer lda, 
+	integer *ipiv, double *work, integer *lwork, integer *info)
+{
+	return dsytrf_(uplo,  &n, a, &lda, 
+		ipiv, work, lwork, info);
+}
+
+template <> int clapack_sytrf<float>(char *uplo, integer n, float *a, integer lda, 
+	integer *ipiv, float *work, integer *lwork, integer *info)
+{
+	return ssytrf_(uplo,  &n, a, &lda, 
+		ipiv, work, lwork, info);
+}
+
+template <> int clapack_sytri<double>(char *uplo, integer n, double *a, integer lda, 
+	integer *ipiv, double *work, integer *info)
+{
+	return dsytri_(uplo, &n, a, &lda, ipiv, work, info);
+}
+
+template <> int clapack_sytri<float>(char *uplo, integer n, float *a, integer lda, 
+	integer *ipiv, float *work, integer *info)
+{
+	return ssytri_(uplo, &n, a, &lda, ipiv, work, info);
 }

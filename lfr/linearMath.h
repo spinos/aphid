@@ -15,7 +15,8 @@ class DenseVector {
 	bool m_isReferenced;
     
 public:
-    DenseVector();             
+    DenseVector(); 
+	DenseVector(int n);             
 	DenseVector(T * v, int n);
     virtual ~DenseVector();
     
@@ -29,6 +30,7 @@ public:
 	T* raw();
     
     void setZero();
+	void setOne();
 /// ||x||
 	T norm() const;
 	void scale(const T s);
@@ -41,6 +43,8 @@ public:
 	int maxAbsInd() const;
 /// max element value
 	T maxAbsVal() const;
+/// sum of element values
+	T sumVal() const;
 	
 	void add(const DenseVector<T> & x);
 	void minus(const DenseVector<T> & x);
@@ -60,6 +64,13 @@ private:
 
 template<typename T>
 DenseVector<T>::DenseVector() : m_v(NULL), m_numElements(0), m_isReferenced(false) {}
+
+template<typename T>
+DenseVector<T>::DenseVector(int n)
+{
+	m_v = new T[n];
+    m_numElements = n;
+}
 
 template<typename T>
 DenseVector<T>::DenseVector(T * v, int n) : m_v(v), m_numElements(n), m_isReferenced(true) {}
@@ -99,6 +110,10 @@ T* DenseVector<T>::raw()
 template<typename T>
 void DenseVector<T>::setZero()
 { memset(m_v,0,m_numElements*sizeof(T)); }
+
+template<typename T>
+void DenseVector<T>::setOne()
+{ for(int i = 0; i<m_numElements; i++) m_v[i] = 1.0; }
 
 template<typename T>
 T DenseVector<T>::norm() const
@@ -160,6 +175,14 @@ T DenseVector<T>::maxAbsVal() const
 { return m_v[maxAbsInd()]; }
 
 template<typename T>
+T DenseVector<T>::sumVal() const
+{
+	T s = m_v[0];
+	for(int i=1; i<m_numElements; i++) s += m_v[i];
+	return s;
+}
+
+template<typename T>
 void DenseVector<T>::add(const DenseVector<T> & x)
 {
 	clapack_axpy<T>(m_numElements, T(1.0), x.v(), 1, m_v, 1);
@@ -202,7 +225,8 @@ void DenseVector<T>::clear()
 }
 
 /// column-major dense matrix
-
+/// n row is 1st dimension
+/// n col is 2nd dimension
 template<typename T>
 class DenseMatrix {
 	friend class DenseVector<T>;
@@ -212,9 +236,10 @@ class DenseMatrix {
     
 public:
     DenseMatrix();
+	DenseMatrix(int numRow, int numCol);
     virtual ~DenseMatrix();
     
-    void create(int numCol, int numRow);
+    void create(int numRow, int numCol);
     int numColumns() const;
     int numRows() const;
 	
@@ -236,11 +261,15 @@ public:
 	void addDiagonal(const T diag);
 /// copy upper-right part to lower-left part
 	void fillSymmetric();
+	bool inverseSymmetric();
 /// b = alpha A * x + beta b
 	void mult(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
 /// b = alpha AT * x + beta b
 	void multTrans(DenseVector<T>& b, const DenseVector<T>& x, 
+            const T alpha = 1.0, const T beta = 0.0) const;
+/// b = xT * A
+	void lefthandMult(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
 /// A = b * b
 /// by relatively robust representations
@@ -248,7 +277,10 @@ public:
 /// A = Z⋅D⋅ZT
 /// D = D'⋅D'
 /// b = Z⋅D'⋅ZT
-	void sqrtRRR(DenseMatrix<T>& b) const;
+	bool sqrtRRR(DenseMatrix<T>& b) const;
+	
+/// b = (AT A)^-1AT
+	bool pseudoInverse(DenseMatrix<T>& b) const;
 	
 	friend std::ostream& operator<<(std::ostream &output, const DenseMatrix<T> & p) {
         output << p.str();
@@ -278,14 +310,22 @@ private:
 };
 
 template<typename T>
-DenseMatrix<T>::DenseMatrix():m_v(NULL), m_numColumns(0), m_numRows(0) {}
+DenseMatrix<T>::DenseMatrix() : m_v(NULL), m_numColumns(0), m_numRows(0) {}
+
+template<typename T>
+DenseMatrix<T>::DenseMatrix(int numRow, int numCol) : m_v(NULL), m_numColumns(0), m_numRows(0)
+{ 
+	m_numColumns = numCol;
+    m_numRows = numRow;
+    m_v = new T[numCol*numRow];
+}
 
 template<typename T>
 DenseMatrix<T>::~DenseMatrix() 
 { clear(); }
 
 template<typename T>
-void DenseMatrix<T>::create(int numCol, int numRow)
+void DenseMatrix<T>::create(int numRow, int numCol)
 {
     clear();
     m_numColumns = numCol;
@@ -388,6 +428,18 @@ void DenseMatrix<T>::multTrans(DenseVector<T>& b, const DenseVector<T>& x,
 							beta, b.v(), 1);
 }
 
+/// http://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
+template <typename T>
+void DenseMatrix<T>::lefthandMult(DenseVector<T>& b, const DenseVector<T>& x, 
+            const T alpha, const T beta) const
+{
+/// xT is 1-by-m vector(matrix)
+/// b is 1-by-n vector(matrix)
+	clapack_gemm<double>("T", "N", 1, m_numColumns, m_numColumns, 
+							alpha, x.v(), x.numElements(), 
+							m_v, m_numRows, beta, b.raw(), 1);
+}
+
 template <typename T>
 void DenseMatrix<T>::fillSymmetric() 
 {
@@ -396,6 +448,28 @@ void DenseMatrix<T>::fillSymmetric()
          m_v[j*m_numRows+i]=m_v[i*m_numRows+j];
       }
    }
+}
+
+template<typename T>
+bool DenseMatrix<T>::inverseSymmetric()
+{
+	T * work;
+	T queryWork;
+	work = &queryWork;
+	integer * ipiv = new integer[m_numRows];
+	int i;
+	for(i=0;i<m_numRows;i++) ipiv[i] = i;
+	integer info;
+	integer lwork = -1;
+	clapack_sytrf<T>("U",m_numRows,m_v,m_numRows, ipiv, work, &lwork, &info);
+	lwork = work[0];
+	work = new T[lwork];
+	clapack_sytrf<T>("U",m_numRows,m_v,m_numRows, ipiv, work, &lwork, &info);
+	clapack_sytri<T>("U",m_numRows,m_v,m_numRows, ipiv, work, &info);
+	fillSymmetric();
+	delete[] work;
+	delete[] ipiv;
+	return info==0;
 }
 
 template <typename T>  
@@ -409,7 +483,7 @@ void DenseMatrix<T>::addDiagonal(const T diag)
 /// http://scc.qibebt.cas.cn/docs/library/Intel%20MKL/2011/mkl_manual/lse/functn_syevr.htm
 /// all eigenvalues and eigenvectors
 template <typename T> 
-void DenseMatrix<T>::sqrtRRR(DenseMatrix<T>& b) const
+bool DenseMatrix<T>::sqrtRRR(DenseMatrix<T>& b) const
 {
 	T * W = new T[m_numRows];
 	T * Z = new T[m_numRows*m_numRows];
@@ -464,13 +538,14 @@ void DenseMatrix<T>::sqrtRRR(DenseMatrix<T>& b) const
 	delete[] W;
 	delete[] Z;
 	delete[] ISuppz;
+	return info == 0;
 }
 
 template<typename T>
 const std::string DenseMatrix<T>::str() const
 {
 	std::stringstream sst;
-	sst<<m_numRows<<"-by-"<<m_numColumns<<" matrix ";
+	sst<<"\n "<<m_numRows<<"-by-"<<m_numColumns<<" matrix ";
 	for (int i = 0; i<m_numRows; ++i) {
       sst<<"\n|";
 	  for (int j = 0; j<m_numColumns; ++j) {
@@ -509,7 +584,7 @@ public:
     SparseMatrix();
     virtual ~SparseMatrix();
     
-    void create(int numCol, int numRow, int maxNz);
+    void create(int numRow, int numCol, int maxNz);
     int numColumns() const;
     int numRows() const;
     int maxNumNonZero() const;
@@ -528,7 +603,7 @@ SparseMatrix<T>::~SparseMatrix()
 { clear(); }
 
 template<typename T>
-void SparseMatrix<T>::create(int numCol, int numRow, int maxNz)
+void SparseMatrix<T>::create(int numRow, int numCol, int maxNz)
 {
     clear();
     m_numColumns = numCol;

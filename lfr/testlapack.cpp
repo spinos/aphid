@@ -194,7 +194,6 @@ void testSqrt()
 	double *va = A.raw();
 	int i, j;
 	for(i=0;i<N*N;i++) va[i] = VA[i];
-	//A.fillSymmetric();
 	
 	std::cout<<"A"<<A;
 	
@@ -214,10 +213,87 @@ void testSqrt()
 #endif
 }
 
+void testInv()
+{
+	std::cout<<"\n test symmetric inverse";
+	lfr::DenseMatrix<double> A;
+	A.create(N, N);
+	memcpy(A.raw(), VA, N*N*sizeof(double));
+	
+	A.fillSymmetric();
+	A.normalize();
+	
+	lfr::DenseMatrix<double> G;
+	G.create(N, N);
+	A.AtA(G);
+	double X[N*N];
+	memcpy(X, G.raw(), N*N*sizeof(double));
+	
+	std::cout<<"A"<<G;
+	G.inverseSymmetric();
+	std::cout<<"A^-1"<<G;
+	
+	double Y[N*N];
+	
+	clapack_gemm<double>("N", "N", N, N, N,
+						1.0, G.column(0), N, X, N, 0.0, Y, N);
+	
+	printMatrix("A * A^-1", N, N, Y);					
+}
+
+#define XjM 6
+#define NXj 4
+const double VAs[XjM*NXj] = { .6, 3.27, 2.3, 3.2, 4.1, 4.4,
+						-15.7, -.1, -2.1, .3, 4.5, 5.9,
+						-6.3, -1.9, 2.1, 2.4, 4.1, 7.1,
+						-4.1, 3.9, 3.93, 3.9, 2.2, .9 };
+void testEquiangularVector()
+{
+	std::cout<<"\n test equiangular vector";
+	lfr::DenseMatrix<double> XA(XjM, NXj);
+	memcpy(XA.raw(), VAs, XjM*NXj*sizeof(double));
+	XA.normalize();
+	std::cout<<"\n XA"<<XA;
+	lfr::DenseMatrix<double> GA;
+	XA.AtA(GA);
+	// std::cout<<"\n GA"<<GA;
+	GA.inverseSymmetric();
+	std::cout<<"\n GA^-1"<<GA;
+	
+	lfr::DenseVector<double> IA(NXj);
+	IA.setOne();
+	// std::cout<<"\n IA"<<IA;
+	
+	lfr::DenseVector<double> IGAI(NXj);
+	GA.lefthandMult(IGAI, IA);
+							
+	std::cout<<"\n IGA"<<IGAI;
+	double AA = 1.0 / sqrt(IGAI.sumVal());
+	std::cout<<"\n AA "<<AA;
+	
+	lfr::DenseVector<double> AGI(NXj);
+	GA.mult(AGI, IA);
+	
+	AGI.scale(AA);					
+	std::cout<<"\n AGI "<<AGI;
+	
+	lfr::DenseVector<double> UA(XjM);
+	XA.mult(UA, AGI);
+	std::cout<<"\n UA "<<UA;
+	std::cout<<"\n length "<<UA.norm();
+	
+	lfr::DenseVector<double> corr(NXj);
+	XA.multTrans(corr, UA);
+							
+	std::cout<<"\n corr "<<corr;
+}
+
 int main()
 { 
     // testAdd();
     // testSVD();
-	testSqrt();
+	// testSqrt();
+	// testInv();
+	testEquiangularVector();
     return 1;
 }
