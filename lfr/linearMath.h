@@ -11,7 +11,7 @@ template<typename T>
 class DenseVector {
    
     T * m_v;
-    int m_numElements;
+    int m_numElements, m_capacity;
 	bool m_isReferenced;
     
 public:
@@ -21,6 +21,7 @@ public:
     virtual ~DenseVector();
     
     void create(int n);
+	void resize(int n);
     int numElements() const;
     
     T& operator()(const int i);
@@ -33,6 +34,7 @@ public:
 	void setOne();
 /// ||x||
 	T norm() const;
+	T norm2() const;
 	void scale(const T s);
     void normalize();
 /// element index of max value
@@ -45,10 +47,16 @@ public:
 	T maxAbsVal() const;
 /// sum of element values
 	T sumVal() const;
+/// dot product
+/// http://mathworld.wolfram.com/VectorMultiplication.html
+	T dot(const DenseVector<T> & x) const;
+	T dot(const T * x) const;
 	
-	void add(const DenseVector<T> & x);
-	void minus(const DenseVector<T> & x);
+	void add(const DenseVector<T> & x, const T alpha = 1.0);
+	void add(T * x, const T alpha = 1.0);
+	void minus(const DenseVector<T> & x, const T alpha = 1.0);
 	void copy(const DenseVector<T> & x);
+	void copyData(const T * x);
 	
 	friend std::ostream& operator<<(std::ostream &output, const DenseVector<T> & p) {
         output << p.str();
@@ -59,21 +67,19 @@ protected:
 private:
 	const std::string str() const;
     void clear();
-    
 };
 
 template<typename T>
-DenseVector<T>::DenseVector() : m_v(NULL), m_numElements(0), m_isReferenced(false) {}
+DenseVector<T>::DenseVector() : m_v(NULL), m_numElements(0), m_capacity(0), m_isReferenced(false) {}
 
 template<typename T>
-DenseVector<T>::DenseVector(int n)
+DenseVector<T>::DenseVector(int n) : m_numElements(n), m_capacity(n), m_isReferenced(false)
 {
 	m_v = new T[n];
-    m_numElements = n;
 }
 
 template<typename T>
-DenseVector<T>::DenseVector(T * v, int n) : m_v(v), m_numElements(n), m_isReferenced(true) {}
+DenseVector<T>::DenseVector(T * v, int n) : m_v(v), m_numElements(n), m_capacity(0), m_isReferenced(true) {}
 
 template<typename T>
 DenseVector<T>::~DenseVector()
@@ -85,6 +91,18 @@ void DenseVector<T>::create(int n)
     clear();
     m_v = new T[n];
     m_numElements = n;
+	m_capacity = n;
+}
+
+template<typename T>
+void DenseVector<T>::resize(int n)
+{
+	if(m_capacity >= n && !m_isReferenced) {
+		m_numElements = n;
+	}
+	else {
+		create(n);
+	}
 }
 
 template<typename T>
@@ -117,10 +135,14 @@ void DenseVector<T>::setOne()
 
 template<typename T>
 T DenseVector<T>::norm() const
+{ return sqrt(norm2()); }
+
+template<typename T>
+T DenseVector<T>::norm2() const
 {
 	T s = 0.f;
 	for(int i = 0; i<m_numElements; i++) s += m_v[i] * m_v[i];
-	return sqrt(s);
+	return s;
 }
 
 template<typename T>
@@ -183,29 +205,45 @@ T DenseVector<T>::sumVal() const
 }
 
 template<typename T>
-void DenseVector<T>::add(const DenseVector<T> & x)
+T DenseVector<T>::dot(const DenseVector<T> & x) const
+{ return dot(x.v()); }
+
+template<typename T>
+T DenseVector<T>::dot(const T * x) const
 {
-	clapack_axpy<T>(m_numElements, T(1.0), x.v(), 1, m_v, 1);
+	T s = 0.0;
+	for(int i=0; i<m_numElements; i++) s += m_v[i] * x[i];
+	return s;
 }
 
 template<typename T>
-void DenseVector<T>::minus(const DenseVector<T> & x)
-{
-	clapack_axpy<T>(m_numElements, T(-1.0), x.v(), 1, m_v, 1);
-}
+void DenseVector<T>::add(const DenseVector<T> & x, const T alpha)
+{ add(x.v(), alpha); }
+
+template<typename T>
+void DenseVector<T>::add(T * x, const T alpha)
+{ clapack_axpy<T>(m_numElements, alpha, x, 1, m_v, 1); }
+
+template<typename T>
+void DenseVector<T>::minus(const DenseVector<T> & x, const T alpha)
+{ add(x.v(), -alpha); }
 
 template<typename T>
 void DenseVector<T>::copy(const DenseVector<T> & x)
 {
 	create(x.numElements());
-	memcpy(m_v, x.v(), m_numElements*sizeof(T));
+	copyData(x.v());
 }
+
+template<typename T>
+void DenseVector<T>::copyData(const T * x)
+{ memcpy(m_v, x, m_numElements*sizeof(T)); }
 
 template<typename T>
 const std::string DenseVector<T>::str() const
 {
 	std::stringstream sst;
-	sst<<m_numElements<<" vector \n|";
+	sst<<" is "<<m_numElements<<" vector \n|";
 	for (int i = 0; i<m_numElements; ++i) {
 	  sst<<" "<<static_cast<double>(m_v[i]);
    }
@@ -216,12 +254,13 @@ const std::string DenseVector<T>::str() const
 template<typename T>
 void DenseVector<T>::clear()
 {
-    m_numElements = 0;
-	if(m_isReferenced) return;
-	if(m_v) {
-        delete[] m_v;
-        m_v = NULL;
+    if(m_v) {
+        if(!m_isReferenced) delete[] m_v;
     }
+	m_v = NULL;
+	m_numElements = 0;
+	m_capacity = 0;
+	m_isReferenced = false;
 }
 
 /// column-major dense matrix
@@ -233,14 +272,19 @@ class DenseMatrix {
     T * m_v;
     int m_numColumns;
     int m_numRows;
-    
+    int m_capacity;
+	
 public:
     DenseMatrix();
 	DenseMatrix(int numRow, int numCol);
     virtual ~DenseMatrix();
     
     void create(int numRow, int numCol);
-    int numColumns() const;
+	void resize(int numRow, int numCol);
+/// resize one dimension after created 
+	void resizeNumRow(int numRow);
+	void resizeNumCol(int numCol);
+	int numColumns() const;
     int numRows() const;
 	
 /// i is column index, j is row index
@@ -250,8 +294,11 @@ public:
 	T* raw();
 	void getColumn(DenseVector<T> & x, const int i) const;
 	
+	void copyColumn(const int i, const T * x);
+	
 	void setZero();
 	void scale(const T s);
+	void scaleColumn(const int i, const T s);
 	
 /// normalize each column
 	void normalize();
@@ -302,7 +349,7 @@ public:
 	}
 
 protected:
-
+    
 private:
 	const std::string str() const;
     void clear();
@@ -310,14 +357,13 @@ private:
 };
 
 template<typename T>
-DenseMatrix<T>::DenseMatrix() : m_v(NULL), m_numColumns(0), m_numRows(0) {}
+DenseMatrix<T>::DenseMatrix() : m_v(NULL), m_numColumns(0), m_numRows(0), m_capacity(0) {}
 
 template<typename T>
-DenseMatrix<T>::DenseMatrix(int numRow, int numCol) : m_v(NULL), m_numColumns(0), m_numRows(0)
+DenseMatrix<T>::DenseMatrix(int numRow, int numCol) : m_numColumns(numCol), m_numRows(numRow)
 { 
-	m_numColumns = numCol;
-    m_numRows = numRow;
-    m_v = new T[numCol*numRow];
+	m_capacity = numCol*numRow;
+    m_v = new T[m_capacity];
 }
 
 template<typename T>
@@ -330,8 +376,29 @@ void DenseMatrix<T>::create(int numRow, int numCol)
     clear();
     m_numColumns = numCol;
     m_numRows = numRow;
-    m_v = new T[numCol*numRow];
+	m_capacity = numCol*numRow;
+    m_v = new T[m_capacity];
 }
+
+template<typename T>
+void DenseMatrix<T>::resize(int numRow, int numCol)
+{
+	if(m_capacity >= numRow*numCol) {
+		m_numColumns = numCol;
+		m_numRows = numRow;
+	}
+	else {
+		create(numRow, numCol);
+	}
+}
+
+template<typename T>
+void DenseMatrix<T>::resizeNumRow(int numRow)
+{ resize(numRow, m_numColumns); }
+
+template<typename T>
+void DenseMatrix<T>::resizeNumCol(int numCol)
+{ resize(m_numRows, numCol); }
 
 template<typename T>
 int DenseMatrix<T>::numColumns() const
@@ -359,15 +426,16 @@ T* DenseMatrix<T>::raw()
 
 template <typename T>
 void DenseMatrix<T>::getColumn(DenseVector<T> & x, const int i) const
-{
-	memcpy(x.raw(), column(i), m_numRows*sizeof(T));
-}
+{ memcpy(x.raw(), column(i), m_numRows*sizeof(T)); }
+
+template <typename T>
+void DenseMatrix<T>::copyColumn(const int i, const T * x)
+{ memcpy(&m_v[i*m_numRows], x, m_numRows*sizeof(T)); }
 
 template <typename T> 
 void DenseMatrix<T>::setZero()
 {
-	int i = 0;
-	for(;i<m_numColumns;i++) {
+	for(int i = 0;i<m_numColumns;i++) {
 		DenseVector<T> d(&m_v[i*m_numRows], m_numRows);
 		d.setZero();
 	}
@@ -376,11 +444,14 @@ void DenseMatrix<T>::setZero()
 template <typename T> 
 void DenseMatrix<T>::scale(const T s)
 {
-	int i = 0;
-	for(;i<m_numColumns;i++) {
-		DenseVector<T> d(&m_v[i*m_numRows], m_numRows);
-		d.scale(s);
-	}
+	for(int i=0;i<m_numColumns;i++) scaleColumn(i, s);
+}
+
+template <typename T> 
+void DenseMatrix<T>::scaleColumn(const int i, const T s)
+{
+	DenseVector<T> d(&m_v[i*m_numRows], m_numRows);
+	d.scale(s);
 }
 
 template <typename T> 
@@ -401,10 +472,10 @@ void DenseMatrix<T>::AtA(DenseMatrix<T>& dst) const
 /// a is k-by-n matrix
 /// c is n-by-n matrix
 /// alpha = 1, beta = 0 
-	dst.create(m_numColumns, m_numColumns);
+	dst.resize(m_numColumns, m_numColumns);
 	clapack_syrk<T>("U", "T", m_numColumns, m_numRows, 
 										T(1.0), m_v, m_numRows, 
-										T(0.0), dst.m_v, m_numColumns);
+										T(0.0), dst.raw(), m_numColumns);
     dst.fillSymmetric();
 }
 
@@ -435,7 +506,7 @@ void DenseMatrix<T>::lefthandMult(DenseVector<T>& b, const DenseVector<T>& x,
 {
 /// xT is 1-by-m vector(matrix)
 /// b is 1-by-n vector(matrix)
-	clapack_gemm<double>("T", "N", 1, m_numColumns, m_numColumns, 
+	clapack_gemm<T>("T", "N", 1, m_numColumns, m_numColumns, 
 							alpha, x.v(), x.numElements(), 
 							m_v, m_numRows, beta, b.raw(), 1);
 }
@@ -566,6 +637,7 @@ void DenseMatrix<T>::clear()
     }
     m_numColumns = 0;
     m_numRows = 0;
+	m_capacity = 0;
 }
 
 /// column-major sparse matrix in csr
