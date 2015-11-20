@@ -295,8 +295,8 @@ void testLAR()
 	std::cout<<"\n test least angle regression";
 	MersenneTwister twist(117);
 	
-	const int p = 500;
-	const int m = 24;
+	const int p = 200;
+	const int m = 10;
 	lfr::DenseMatrix<double> A(m, p);
 	
 	double * c0 = A.raw();
@@ -310,20 +310,20 @@ void testLAR()
 	A.normalize();
 	
 	lfr::DenseVector<double> y(m);
-	y.copyData(A.column(99));
+	y.copyData(A.column(97));
 	for(i=0;i<m;i++)
-		y.raw()[i] += .01 * twist.random();
+		y.raw()[i] += .05 * twist.random();
 	
-	y.scale(2.0);
+	y.scale(4.0);
 	
 	std::cout<<"\n y "<<y;
 	
 	lfr::LAR<double> lar(&A);
 	lar.lars(y);
 	// std::cout<<"\n b "<<*lar.coefficients();
-	lfr::DenseVector<double> yhat(m);
-	A.mult(yhat, *lar.coefficients());
-	std::cout<<"\n yhat "<<yhat;
+	//lfr::DenseVector<double> yhat(m);
+	//A.mult(yhat, *lar.coefficients());
+	//std::cout<<"\n yhat "<<yhat;
 }
 
 int main()

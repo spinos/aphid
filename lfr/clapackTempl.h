@@ -1,6 +1,12 @@
 #include <f2c.h>
 #include <clapack.h>
 
+/// res = dot(x, y)
+template <typename T> T clapack_dot(integer n, T *dx, integer incx, T *dy, integer incy);
+
+/// x <- a * x
+template <typename T> int clapack_scal(integer n, T da, T *dx, integer incx);
+
 template <typename T> void clapack_axpy(integer N,
        T alpha,  T *X,  integer ldx,
        T* Y,  integer ldy);
@@ -9,6 +15,10 @@ template <typename T> void clapack_gemv(char * trans, integer M,  integer N,
        T alpha,  T *A,  integer lda,
        T* X,  integer incX,
 	   T beta, T * Y, integer incY);
+
+/// y <- alpha * a * x + beta * y   
+template <typename T> int clapack_symv(char *uplo, integer n, T alpha, 
+	T *a, integer lda, T *x, integer incx, T beta, T *y, integer incy);
 	   
 template <typename T> int clapack_gesvd(char *jobu, char *jobvt, integer m, integer n, 
 	T *a, integer lda, T *s, T *u, integer ldu, T *vt, 
@@ -24,7 +34,13 @@ template <typename T> int clapack_syevr(char *jobz, char *range, char *uplo, int
 template <typename T> int clapack_gemm(char *transa, char *transb, integer m, integer n, integer k, 
 	T alpha, T *a, integer lda, 
 	T *b, integer ldb, T beta, T *c__, integer ldc);
-	
+
+/// http://scc.qibebt.cas.cn/docs/library/Intel%20MKL/2011/mkl_manual/lau/functn_c_z_syr.htm
+/// symmetric rank-1 update	
+/// a <- alpha * x * x' + a
+template <typename T> int clapack_syr(char *uplo, integer n, T alpha, 
+	T *x, integer incx, T *a, integer lda);
+
 template <typename T> int clapack_syrk(char *uplo, char *trans, integer n, integer k, 
 	T alpha, T *a, integer lda, T beta, 
 	T *c__, integer ldc);
@@ -34,6 +50,26 @@ template <typename T> int clapack_sytrf(char *uplo, integer n, T *a, integer lda
 	
 template <typename T> int clapack_sytri(char *uplo, integer n, T *a, integer lda, 
 	integer *ipiv, T *work, integer *info);
+
+template <> double clapack_dot<double>(integer n, double *dx, integer incx, double *dy, integer incy)
+{
+	return ddot_(&n, dx, &incx, dy, &incy);
+}
+
+template <> float clapack_dot<float>(integer n, float *dx, integer incx, float *dy, integer incy)
+{
+	return sdot_(&n, dx, &incx, dy, &incy);
+}
+
+template <> int clapack_scal<double>(integer n, double da, double *dx, integer incx)
+{
+	return dscal_(&n, &da, dx, &incx);
+}
+
+template <> int clapack_scal<float>(integer n, float da, float *dx, integer incx)
+{
+	return sscal_(&n, &da, dx, &incx);
+}
 
 template <> void clapack_axpy<double>(integer N,
        double alpha,  double* X,  integer incX,
@@ -67,6 +103,20 @@ template <> void clapack_gemv<float>(char * trans, integer M,  integer N,
            &alpha, A, &lda, 
            X, &incX, 
            &beta, Y, &incY);
+}
+
+template <> int clapack_symv<double>(char *uplo, integer n, double alpha, 
+	double *a, integer lda, double *x, integer incx, double beta, double *y, integer incy)
+{
+	return dsymv_(uplo, &n, &alpha, 
+		a, &lda, x, &incx, &beta, y, &incy);
+}
+
+template <> int clapack_symv<float>(char *uplo, integer n, float alpha, 
+	float *a, integer lda, float *x, integer incx, float beta, float *y, integer incy)
+{
+	return ssymv_(uplo, &n, &alpha, 
+		a, &lda, x, &incx, &beta, y, &incy);
 }
 
 template <> int clapack_gesvd<float>(char *jobu, char *jobvt, integer m, integer n, 
@@ -129,6 +179,18 @@ template <> int clapack_gemm<float>(char *transa, char *transb, integer m, integ
 	return sgemm_(transa, transb, &m, &n, &k, 
 	&alpha, a, &lda, 
 	b, &ldb,&beta, c__, &ldc);
+}
+
+template <> int clapack_syr<double>(char *uplo, integer n, double alpha, 
+	double *x, integer incx, double *a, integer lda)
+{
+	return dsyr_(uplo, &n, &alpha, x, &incx, a, &lda);
+}
+
+template <> int clapack_syr<float>(char *uplo, integer n, float alpha, 
+	float *x, integer incx, float *a, integer lda)
+{
+	return ssyr_(uplo, &n, &alpha, x, &incx, a, &lda);
 }
 
 template <> int clapack_syrk<double>(char *uplo, char *trans, integer n, integer k, 

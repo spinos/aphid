@@ -24,7 +24,7 @@ public:
 	void resize(int n);
     int numElements() const;
     
-    T& operator()(const int i);
+    T& operator[](const int i);
     T operator()(const int i) const;
     
     T* v() const;
@@ -34,17 +34,22 @@ public:
 	void setOne();
 /// ||x||
 	T norm() const;
-	T norm2() const;
+/// dot(x, x)
+	T normSq() const;
 	void scale(const T s);
     void normalize();
 /// element index of max value
 	int maxInd() const;
 /// max element value
 	T maxVal() const;
-/// element index of max value
+/// element index of max absolute value
 	int maxAbsInd() const;
-/// max element value
+/// max absolute element value
 	T maxAbsVal() const;
+/// element index of min absolute value
+	int minAbsInd(int range) const;
+/// min absolute element value
+	T minAbsVal(int range) const;
 /// sum of element values
 	T sumVal() const;
 /// dot product
@@ -110,7 +115,7 @@ int DenseVector<T>::numElements() const
 { return m_numElements; }
 
 template<typename T>
-T& DenseVector<T>::operator()(const int i)
+T& DenseVector<T>::operator[](const int i)
 { return m_v[i]; }
 
 template<typename T>
@@ -135,20 +140,18 @@ void DenseVector<T>::setOne()
 
 template<typename T>
 T DenseVector<T>::norm() const
-{ return sqrt(norm2()); }
+{ return sqrt(normSq()); }
 
 template<typename T>
-T DenseVector<T>::norm2() const
+T DenseVector<T>::normSq() const
 {
-	T s = 0.f;
-	for(int i = 0; i<m_numElements; i++) s += m_v[i] * m_v[i];
-	return s;
+	return clapack_dot<T>(m_numElements,m_v,1,m_v,1);
 }
 
 template<typename T>
 void DenseVector<T>::scale(const T s)
 {
-	for(int i = 0; i<m_numElements; i++) m_v[i] *= s;
+	clapack_scal(m_numElements, s, m_v, 1);
 }
 
 template<typename T>
@@ -195,6 +198,25 @@ int DenseVector<T>::maxAbsInd() const
 template<typename T>
 T DenseVector<T>::maxAbsVal() const
 { return m_v[maxAbsInd()]; }
+
+template<typename T>
+int DenseVector<T>::minAbsInd(int range) const
+{ 
+	int imin = 0;
+	T vmin = abs(m_v[0]);
+	for(int i=1; i<range; i++) {
+		T cur = abs(m_v[i]);
+		if(cur < vmin) {
+			imin = i;
+			vmin = cur;
+		}
+	}
+	return imin; 
+}
+
+template<typename T>
+T DenseVector<T>::minAbsVal(int range) const
+{ return m_v[minAbsInd()]; }
 
 template<typename T>
 T DenseVector<T>::sumVal() const
@@ -347,6 +369,8 @@ public:
 		}
 		std::cout<<"\n";
 	}
+	
+	void printColumn(const int i) const;
 
 protected:
     
