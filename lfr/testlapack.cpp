@@ -293,10 +293,10 @@ void testEquiangularVector()
 void testLAR()
 {
 	std::cout<<"\n test least angle regression";
-	MersenneTwister twist(117);
+	MersenneTwister twist(99);
 	
-	const int p = 200;
-	const int m = 10;
+	const int p = 500;
+	const int m = 9;
 	lfr::DenseMatrix<double> A(m, p);
 	
 	double * c0 = A.raw();
@@ -310,13 +310,11 @@ void testLAR()
 	A.normalize();
 	
 	lfr::DenseVector<double> y(m);
-	y.copyData(A.column(97));
+	y.copyData(A.column(23));
 	for(i=0;i<m;i++)
-		y.raw()[i] += .05 * twist.random();
+		y.raw()[i] += .005 * (twist.random() - 0.5);
 	
-	y.scale(4.0);
-	
-	std::cout<<"\n y "<<y;
+	y.scale(10.0);
 	
 	lfr::LAR<double> lar(&A);
 	lar.lars(y);

@@ -14,197 +14,13 @@ namespace lfr {
 
 #define sign(x) ((x)>=0 ? 1 : -1)
 
-template<typename T>
-struct AngleProp {
-/// correlation to signal
-	T _corr;
-/// ind in Xa
-	int _colInd;
-};
-	
-template<typename T>
-class LASelector {
-
-/// array of Xj
-	DenseMatrix<T> m_Xa;
-/// inverse of gram of Xa
-	DenseMatrix<T> m_Gainv;
-/// direction of advance
-/// Ua <- Xa Wa
-	DenseVector<T> m_Ua;
-/// ones
-	DenseVector<T> m_Ia;
-///	Aa <- Ia^t Ga^-1 Ia
-	DenseVector<T> m_IGaI;
-///	Wa <- Aa Ga^-1 Ia
-	DenseVector<T> m_Wa;
-/// last selected
-	int m_jLast;
-
-public:
-	LASelector();
-	virtual ~LASelector() {}
-/// clear and set first dim of Xj
-	void create(const int m);
-	bool select(int idx, const DenseMatrix<T> & X, const DenseVector<T> & correl);
-	void deselect(const DenseVector<T> & correl);
-	void advance(DenseVector<T> & beta, DenseVector<T> & residual, const T eps);
-	int numSelected() const;
-	
-/// max num columns of Xa and Ga
-	static int MaxNumSelections;
-protected:
-
-private:
-	void calculateUa();
-	void bisectUa();
-	void equiangularUa();
-	
-private:
-/// look up column index and previous correlation by j
-typedef std::map<int, AngleProp<T> > LookupType;
-	LookupType m_lookup;
-	
-};
-
-template<typename T>
-int LASelector<T>::MaxNumSelections = 25;
-
-template<typename T>
-LASelector<T>::LASelector() {}
-
-template<typename T>
-void LASelector<T>::create(const int m)
-{
-	m_lookup.clear();
-	m_Xa.create(m, MaxNumSelections);
-	m_Ua.create(m);
-	m_Gainv.create(MaxNumSelections, MaxNumSelections);
-	m_Ia.create(MaxNumSelections);
-	m_Ia.setOne();
-	m_IGaI.create(MaxNumSelections);
-	m_Wa.create(MaxNumSelections);
-}
-
-template<typename T>
-int LASelector<T>::numSelected() const
-{ return m_lookup.size(); }
-
-template<typename T>
-bool LASelector<T>::select(int idx, const DenseMatrix<T> & X, const DenseVector<T> & correl)
-{
-/// already selected, skip
-	if(m_lookup.find(idx) != m_lookup.end() ) return false;
-
-	const int colInd = numSelected();
-	const T corr = correl.v()[idx];
-/// add sign(c) Xj to last	
-	m_Xa.copyColumn(colInd, X.column(idx));
-	m_Xa.scaleColumn(colInd, sign(corr));
-	m_Xa.resizeNumCol(colInd+1);
-/// add corr and colInd
-	AngleProp<T> a;
-	a._corr = corr;
-	a._colInd = colInd;
-	m_lookup[idx] = a;
-	
-	m_jLast = idx;
-	
-	if(numSelected() > 2) { //std::cout<<"\n Xa "<<m_Xa; 
-		m_Xa.AtA(m_Gainv); //std::cout<<"\n Ga "<<m_Gainv;
-		m_Gainv.addDiagonal(1e-6); //std::cout<<"\n Ga "<<m_Gainv;
-		m_Gainv.inverseSymmetric();	//std::cout<<"\n Gainv "<<m_Gainv;
-	}
-	calculateUa();
-	return true;
-}
-
-template<typename T>
-void LASelector<T>::calculateUa()
-{
-	if(numSelected()==1)
-		m_Ua.copyData(m_Xa.column(0));
-	else if(numSelected()==2)
-		bisectUa();
-	else
-		equiangularUa();
-}
-
-template<typename T>
-void LASelector<T>::bisectUa()
-{
-	m_Ua.setZero();
-	m_Ua.add(m_Xa.column(0), 0.5);
-	m_Ua.add(m_Xa.column(1), 0.5);
-	m_Ua.normalize();
-}
-
-template<typename T>
-void LASelector<T>::equiangularUa()
-{
-	const int n = numSelected();
-	m_Ia.resize(n);
-	m_IGaI.resize(n);
-	m_Wa.resize(n); 
-	
-	m_Gainv.lefthandMult(m_IGaI, m_Ia); //std::cout<<"\n IGaI "<<m_IGaI;
-	
-	const T Aa = 1.0 / sqrt(m_IGaI.sumVal()); //std::cout<<"\n scalar Aa "<<Aa;
-	m_Gainv.mult(m_Wa, m_Ia);
-	m_Wa.scale(Aa);
-	
-	m_Xa.mult(m_Ua, m_Wa);
-	
-	std::cout<<"\n c0 "<<m_Ua.dot(m_Xa.column(0))<<" c1 "<<m_Ua.dot(m_Xa.column(1))
-			<<" c2 "<<m_Ua.dot(m_Xa.column(2));
-}
-
-template<typename T>
-void LASelector<T>::deselect(const DenseVector<T> & correl)
-{
-	T lo = 1e8, hi = -1e8;
-	typename LookupType::iterator it = m_lookup.begin();
-	for(;it != m_lookup.end(); ++it) {
-		//if(sign(correl.v()[it->first]) != sign(it->second._corr)) 
-		//	std::cout<<" sign changed "<<it->first<<" "<<it->second._corr<<" / "<<correl.v()[it->first];
-			
-		//if(abs(correl.v()[it->first]) < 1e-3) 
-		//	std::cout<<" drop "<<it->first<<" "<<correl.v()[it->first];
-			
-		if(correl.v()[it->first] < lo) lo = correl.v()[it->first];
-		if(correl.v()[it->first] > hi) hi = correl.v()[it->first];
-/// update corrj
-		it->second._corr = correl.v()[it->first];
-	}
-	// std::cout<<" corr min/max "<<lo<<"/"<<hi;
-}
-
-template<typename T>
-void LASelector<T>::advance(DenseVector<T> & beta, DenseVector<T> & residual, const T eps)
-{
-	//std::cout<<" n sel "<<numSelected()<<" Ua "<<m_Ua;
-	// if(m_Ua.dot(residual) < 1e-3) 
-	// std::cout<<"\n ua corr "<<m_Ua.dot(residual);
-	T c = m_Ua.dot(residual) * eps; 
-/// advance along Ua and reduce R
-	residual.minus(m_Ua, c);
-	
-/// angle between Xj and Ua
-	// if(numSelected()>1) c *= m_Ua.dot(m_Xa.column(0));
-		
-	typename LookupType::const_iterator it = m_lookup.begin();
-	for(;it != m_lookup.end(); ++it) {
-/// increase bj
-		beta.raw()[it->first] += c * sign( it->second._corr ) / numSelected();
-	}
-}
-
 /// Least Angle Regression
-/// Y^ = x1b1 + x2b2 + ... xpbp
+/// Y^ = x1 * b1 + x2 * b2 + ... xp * bp
 /// find b
 /// minimize ||Y - Y^||
 /// Y is measurement/signal/respounce
-/// X matrix of predictors, normalized
+/// X matrix of predictors/patterns/atoms, normalized
+/// Y^ is projected of Y
 
 template<typename T>
 class LAR {
@@ -228,6 +44,7 @@ class LAR {
 	DenseVector<T> m_work;
 /// num predictors
 	int m_p;
+	int m_numSel;
 /// step size	
 	T m_epsilon;
 	
@@ -240,6 +57,7 @@ public:
 protected:
 	
 private:
+	void showProof(const DenseVector<T> & Y);
 };
 
 template<typename T>
@@ -275,19 +93,21 @@ void LAR<T>::lars(const DenseVector<T> & Y)
 	m_residual.copy(Y);
 	std::cout<<"\n in err "<<normX;
 	
-/// find most correlated predictor
+/// c <- D^t * R
 	m_X->multTrans(m_correl, m_residual);
+/// find most correlated predictor
 	int currentInd = m_correl.maxAbsInd();
 	
 	T thrs = 0;
-	int nsel = 0;
+	m_numSel = 0;
+	bool toSelect = true;
 	int i, j;
 /// for each predictor
-	for(i=0; i< m_p; i++) {
-/// select
-		std::cout<<"\n select X"<<currentInd;
-		nsel++;
+	for(i=0; i< m_p; ++i) {
+		if(toSelect) {
+/// begin select
 		m_ind.raw()[i] = currentInd;
+		m_numSel++;
 /// Ga[i] <- G[selected]
 		m_Ga.copyColumn(i, m_G.column(currentInd));
 /// fill upper part of Gs by Ga to (i,i)
@@ -311,7 +131,8 @@ void LAR<T>::lars(const DenseVector<T> & Y)
 /// rand 1 the part to (i-1,i-1)
 			clapack_syr<T>("U",i, schur,  m_u.v(),1, m_invGs.raw(), m_p);
 		}
-		
+/// end select
+		} 
 /// direction of work
 		for (j = 0; j<=i; ++j)
 			m_work[j] = m_correl[m_ind[j]] > 0 ? T(1.0) : T(-1.0);
@@ -359,20 +180,19 @@ void LAR<T>::lars(const DenseVector<T> & Y)
 		for (j = 0; j< m_p; ++j)
 			m_work[j+m_p] = ((m_work[j+m_p] < INFINITY) && (m_work[j+m_p] < T(1.0))) ? (currentCorrelation - m_correl[j])/(T(1.0) - m_work[j+m_p]) : INFINITY;
 
-/// select the smallest work
+/// select by smallest work 
 		int index = m_work.minAbsInd(2*m_p);
 		
 		T step = m_work[index];
 		
 		currentInd = index % m_p;
-		std::cout<<"\n smallest work ind "<<currentInd;
 		
 /// sum of uj
-		T coeff1 = 0;
+		T coeff1 = 0.0;
 		for (j = 0; j<=i; ++j)
 			coeff1 += m_correl[m_ind[j]] > 0 ? m_u[j] : -m_u[j];
 /// sum of cj * uj	
-		T coeff2 = 0;
+		T coeff2 = 0.0;
 		for (j = 0; j<=i; ++j)
 			coeff2 += m_correl[m_ind[j]] * m_u[j];
 		
@@ -392,40 +212,84 @@ void LAR<T>::lars(const DenseVector<T> & Y)
 /// c <- c - step * work
 		clapack_axpy<T>(m_p, -step, &m_work[2*m_p], 1, m_correl.raw(), 1);
 
-		// std::cout<<"\n coeff1 "<<coeff1<<" 2 "<<coeff2;
+		std::cout<<"\n coeff1 "<<coeff1<<" 2 "<<coeff2;
 /// reduce normX
 		normX += coeff1*step*step - 2*coeff2*step;
 		std::cout<<"\n normX "<<normX;
 /// add thrs
 		thrs += step * coeff1;
 		
-		if (step == maxStep) {
-			std::cout<<"\n step < maxStep todo downdate";
-			break;
-		}
-		
 /// exit condition
-		if(abs(step) < 1e-15 || normX < 1e-15) break;
+		if(abs(step) < 1e-13 || normX < 1e-13) break;
+		
+		if (step == maxStep) {
+			std::cout<<"\n step < maxStep\n downdate"
+			<<" first pass zero "<<m_ind[firstPassZero]; // break;
+			
+			for( j = firstPassZero; j<i; ++j) {
+				m_Ga.copyColumn(j, m_Ga.column(j+1));
+				m_ind[j] = m_ind[j+1];
+				m_beta[j] = m_beta[j+1];
+			}
+			m_ind[i] = -1;
+			m_beta[i] = 0.0;
+			
+			for (j = firstPassZero; j<i; ++j) {
+				memcpy(m_Gs.column(j), m_Gs.column(j+1), firstPassZero*sizeof(T));
+				memcpy(&m_Gs.column(j)[firstPassZero], 
+						&m_Gs.column(j+1)[firstPassZero+1], (i-firstPassZero)*sizeof(T));
+			}
+			
+			const T schur = m_invGs.column(firstPassZero)[firstPassZero];
+			memcpy(m_u.raw(), m_invGs.column(firstPassZero), firstPassZero*sizeof(T));
+			memcpy(&m_invGs.column(firstPassZero)[firstPassZero],
+					&m_invGs.column(firstPassZero+1)[firstPassZero], (i-firstPassZero)*sizeof(T));
+					
+			for (j = firstPassZero; j<i; ++j) {
+				memcpy(m_invGs.column(j), m_invGs.column(j+1), firstPassZero*sizeof(T));
+				memcpy(&m_invGs.column(j)[firstPassZero], 
+						&m_invGs.column(j+1)[firstPassZero+1], (i-firstPassZero)*sizeof(T));
+			}
+			
+			clapack_syr<T>("U", i, T(-1.0)/schur, m_u.v(),1, m_invGs.raw(), m_p);
+			
+			i -= 2;
+			m_numSel--;
+			toSelect = false;
+		}
+		else 
+			toSelect = true;
 	}
-	std::cout<<"\n n iter "<<i<<" out err "<<normX;
-	std::cout<<"\n n sel "<<nsel;
 	
-	for(j=0;j<nsel;j++) {
+	showProof(Y);
+}
+	
+template<typename T>
+void LAR<T>::showProof(const DenseVector<T> & Y)
+{
+	std::cout<<"\n n sel "<<m_numSel<<" |";
+	int i, j;
+	for(j=0;j<m_numSel;j++) {
 		std::cout<<" "<<m_ind[j];
 	}
-	std::cout<<"\n b ";
-	for(j=0;j<nsel;j++) {
+	std::cout<<" |\n b |";
+	for(j=0;j<m_numSel;j++) {
 		std::cout<<" "<<m_beta[j];
 	}
 
+	std::cout<<" |\n y "<<Y;
+	
 	DenseVector<T> proof(Y.numElements());
 	proof.setZero();
 	for(i=0;i<Y.numElements();i++) {
-		for(j=0;j<nsel;j++) {
+		for(j=0;j<m_numSel;j++) {
 			proof[i] += m_X->column(m_ind[j])[i] * m_beta[j];
 		}
 	}
-	std::cout<<"\n proof "<<proof;
+	std::cout<<"\n y^ "<<proof;
+	
+	proof.minus(Y);
+	std::cout<<"\n ||y - y^|| "<<proof.norm();
 }
 
 template<typename T>

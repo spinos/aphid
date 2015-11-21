@@ -25,7 +25,7 @@ public:
     int numElements() const;
     
     T& operator[](const int i);
-    T operator()(const int i) const;
+    T operator[](const int i) const;
     
     T* v() const;
 	T* raw();
@@ -119,7 +119,7 @@ T& DenseVector<T>::operator[](const int i)
 { return m_v[i]; }
 
 template<typename T>
-T DenseVector<T>::operator()(const int i) const
+T DenseVector<T>::operator[](const int i) const
 { return m_v[i]; }
 
 template<typename T>
