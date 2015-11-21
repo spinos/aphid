@@ -32,7 +32,7 @@ public:
     
     void setZero();
 	void setOne();
-/// ||x||
+/// l2-norm ||x|| 
 	T norm() const;
 /// dot(x, x)
 	T normSq() const;
@@ -52,6 +52,8 @@ public:
 	T minAbsVal(int range) const;
 /// sum of element values
 	T sumVal() const;
+/// sum of absolute element values
+	T sumAbsVal() const;
 /// dot product
 /// http://mathworld.wolfram.com/VectorMultiplication.html
 	T dot(const DenseVector<T> & x) const;
@@ -223,6 +225,14 @@ T DenseVector<T>::sumVal() const
 {
 	T s = m_v[0];
 	for(int i=1; i<m_numElements; i++) s += m_v[i];
+	return s;
+}
+
+template<typename T>
+T DenseVector<T>::sumAbsVal() const
+{ 
+	T s = abs(m_v[0]);
+	for(int i=1; i<m_numElements; i++) s += abs(m_v[i]);
 	return s;
 }
 

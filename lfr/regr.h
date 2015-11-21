@@ -26,8 +26,6 @@ template<typename T>
 class LAR {
 /// coefficients 
 	DenseVector<T> m_beta;
-/// R
-	DenseVector<T> m_residual;
 /// D^t * R correlation to residual
 	DenseVector<T> m_correl;
 /// D predictors
@@ -52,7 +50,10 @@ public:
 	LAR(const DenseMatrix<T> * X);
 	virtual ~LAR();
 	
-	void lars(const DenseVector<T> & Y);
+/// Y is signal
+/// lambda is penalty constraint of sparsity, 
+/// large lambda value induces less non-zero coefficients and less accurate projection
+	void lars(const DenseVector<T> & Y, const T lambda = 0.0);
 	const DenseVector<T> * coefficients() const;
 protected:
 	
@@ -82,26 +83,28 @@ template<typename T>
 LAR<T>::~LAR() {}
 
 template<typename T>
-void LAR<T>::lars(const DenseVector<T> & Y)
+void LAR<T>::lars(const DenseVector<T> & Y, const T lambda)
 {
 /// ||Y||^2
 	T normX = Y.normSq();
 /// bj <- 0
 	m_beta.setZero();
 	m_u.setZero();
-/// R <- Y
-	m_residual.copy(Y);
+
 	std::cout<<"\n in err "<<normX;
 	
+/// R <- Y	
 /// c <- D^t * R
-	m_X->multTrans(m_correl, m_residual);
+	m_X->multTrans(m_correl, Y);
 /// find most correlated predictor
 	int currentInd = m_correl.maxAbsInd();
 	
-	T thrs = 0;
+/// T thrs = 0;
 	m_numSel = 0;
 	bool toSelect = true;
 	int i, j;
+	int numIter = 0;
+	const int maxNumIter = m_p<<2;
 /// for each predictor
 	for(i=0; i< m_p; ++i) {
 		if(toSelect) {
@@ -200,7 +203,7 @@ void LAR<T>::lars(const DenseVector<T> & Y)
 		std::cout<<"\n C "<<currentCorrelation;
 		std::cout<<"\n step "<<step<<" max "<<maxStep;
 /// step_max2 = current_correlation-constraint(lambda)
-		step = min(min(step, currentCorrelation - 0.0), maxStep);
+		step = min(min(step, currentCorrelation - lambda), maxStep);
 		
 		if(step == INFINITY) break;
 		
@@ -217,10 +220,11 @@ void LAR<T>::lars(const DenseVector<T> & Y)
 		normX += coeff1*step*step - 2*coeff2*step;
 		std::cout<<"\n normX "<<normX;
 /// add thrs
-		thrs += step * coeff1;
+///		thrs += step * coeff1;
 		
 /// exit condition
-		if(abs(step) < 1e-13 || normX < 1e-13) break;
+		numIter++;
+		if(numIter >= maxNumIter || abs(step) < 1e-13 || normX < 1e-13) break;
 		
 		if (step == maxStep) {
 			std::cout<<"\n step < maxStep\n downdate"
@@ -289,7 +293,9 @@ void LAR<T>::showProof(const DenseVector<T> & Y)
 	std::cout<<"\n y^ "<<proof;
 	
 	proof.minus(Y);
-	std::cout<<"\n ||y - y^|| "<<proof.norm();
+	std::cout<<"\n sum |y - y^| "<<proof.sumAbsVal();
+	std::cout<<"\n norm y "<<Y.norm()
+		<<"\n sum |b| "<<m_beta.sumAbsVal();
 }
 
 template<typename T>
