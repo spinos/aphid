@@ -2,9 +2,10 @@
 #include <math.h>
 #include "LfThread.h"
 
-LfThread::LfThread(QObject *parent)
+LfThread::LfThread(LfWorld * world, QObject *parent)
     : QThread(parent)
 {
+	m_world = world;
     restart = false;
     abort = false;
 
@@ -33,6 +34,9 @@ void LfThread::render(QSize resultSize)
         condition.wakeOne();
     }
 }
+
+void LfThread::initAtoms()
+{}
 
 void LfThread::run()
 {

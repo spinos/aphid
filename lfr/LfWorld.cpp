@@ -14,6 +14,7 @@
 #include "boost/filesystem/convenience.hpp"
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <zEXRImage.h>
 
 LfParameter::LfParameter(int argc, char *argv[])
 {
@@ -79,6 +80,7 @@ LfParameter::LfParameter(int argc, char *argv[])
 	if(m_isValid) {
 		std::cout<<"\n atom size "<<m_atomSize;
 		std::cout<<"\n dictionary length "<<m_dictionaryLength;
+		countPatches();
 	}
 }
 
@@ -117,6 +119,22 @@ bool LfParameter::searchImagesIn(const char * dirname)
 	
 	std::cout<<" found "<<m_imageNames.size();
 	return true;
+}
+
+void LfParameter::countPatches()
+{
+	m_numPatches = 0;
+	std::vector<std::string >::const_iterator it = m_imageNames.begin();
+	for(; it!=m_imageNames.end();++it) {
+		std::string fn = *it + ".exr";
+		
+		ZEXRImage img;
+		if(img.open(fn.c_str()))
+			m_numPatches += (img.getWidth() / m_atomSize) * (img.getHeight() / m_atomSize);
+		else 
+			std::cout<<"\n cannot open exr "<<fn;
+	}
+	std::cout<<"\n num patch "<<m_numPatches;
 }
 
 void LfParameter::PrintHelp()

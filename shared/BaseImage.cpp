@@ -13,9 +13,11 @@ BaseImage::BaseImage()
 {
 }
 
+BaseImage::BaseImage(const char * filename) : BaseFile(filename) 
+{}
+
 BaseImage::~BaseImage()
 {
-	clear();
 }
 
 void BaseImage::doClear() 

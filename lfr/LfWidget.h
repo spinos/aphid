@@ -1,13 +1,14 @@
 #include <QPixmap>
 #include <QWidget>
-#include "LfThread.h"
 
+class LfWorld;
+class LfThread;
 class LfWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    LfWidget(QWidget *parent = 0);
+    LfWidget(LfWorld * world, QWidget *parent = 0);
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -18,7 +19,8 @@ private slots:
 	void simulate(); 
 
 private:
-    LfThread thread;
+	LfWorld * m_world;
+    LfThread * m_thread;
     QPixmap pixmap;
 
 };

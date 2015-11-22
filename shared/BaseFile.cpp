@@ -26,6 +26,8 @@ BaseFile::BaseFile(const char * name)
 	m_fileName = std::string(name);
 	_opened = 0;
 	m_dirty = 0;
+	m_clearMode = Normal;
+	m_error = NoError;
 }
 
 BaseFile::~BaseFile() 
@@ -153,6 +155,7 @@ bool BaseFile::doCreate(const std::string & fileName)
 
 bool BaseFile::doRead(const std::string & fileName)
 {
+	std::cout<<"\n base file do read "<<fileName;
 	return true;
 }
 

@@ -119,16 +119,19 @@ endif ()
 target_link_libraries (testla ${Aphid_Library})
 
 if (WIN32)
+set (OpenEXR_INCLUDE_DIR D:/usr/openEXR/include/OpenEXR)
 set (OpenEXR_Library "D:/usr/openEXR/lib/Half.lib"
 "D:/usr/openEXR/lib/Iex.lib"
 "D:/usr/openEXR/lib/IlmImf.lib"
 "D:/usr/openEXR/lib/IlmThread.lib")
 else ()
+set (OpenEXR_INCLUDE_DIR /usr/local/include/OpenEXR)
 set (OpenEXR_Library "/usr/local/lib/libHalf.a"
 "/usr/local/lib/libIex.a"
 "/usr/local/lib/libIlmImf.a"
 "/usr/local/lib/libIlmThread.a")
 endif ()
+include_directories (${OpenEXR_INCLUDE_DIR})
 target_link_libraries (testla ${OpenEXR_Library})
 
 find_package (zlib REQUIRED)

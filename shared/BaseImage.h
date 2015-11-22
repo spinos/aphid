@@ -11,12 +11,15 @@
 class BaseImage : public BaseFile {
 public:
 	enum ChannelRank {
+		None = 0,
+		RED = 1,
 		RGB = 3,
 		RGBA = 4,
 		RGBAZ = 5
 	};
 	
 	BaseImage();
+	BaseImage(const char * filename);
 	virtual ~BaseImage();
 	
 	virtual void doClear();

@@ -96,18 +96,14 @@ void ZEXRSampler::sample(float u, float v, int count, float * dst) const
 					+ (_pixels[y1 * ystride + x0 * _rank + k] * ( 1.f - alphau) + _pixels[y1 * ystride + x1 * _rank + k] * alphau) * alphav);
 }
 
-ZEXRImage::ZEXRImage() : _pixels(0), m_zData(0) {}
+ZEXRImage::ZEXRImage() : _pixels(0), m_zData(0), m_hasMipmap(false) {}
 
-ZEXRImage::ZEXRImage(const char* filename, bool loadMipmap) : _pixels(0), m_zData(0)
-{
-    m_hasMipmap = loadMipmap;
-	open(filename);
-}
+ZEXRImage::ZEXRImage(const char * filename) : m_hasMipmap(false), BaseImage(filename) {}
 
-ZEXRImage::~ZEXRImage(void)
+ZEXRImage::ZEXRImage(bool loadMipmap) : _pixels(0), m_zData(0), m_hasMipmap(loadMipmap) {}
+
+ZEXRImage::~ZEXRImage()
 {
-    if(m_zData) delete[] m_zData;
-    if(_pixels) delete[] _pixels;
 }
 
 bool ZEXRImage::doRead(const std::string & filename)
@@ -117,17 +113,22 @@ bool ZEXRImage::doRead(const std::string & filename)
 		return false;
 	}
 	
-	clear();
 	try {
 	Imf::InputFile file(filename.c_str());
 	Imath::Box2i dw = file.header().dataWindow(); 
 	m_imageWidth = dw.max.x - dw.min.x + 1;
 	m_imageHeight = dw.max.y - dw.min.y + 1;
 	
-	m_channelRank = RGB;
 	const Imf::ChannelList &channels = file.header().channels(); 
-	const Imf::Channel *channelAPtr = channels.findChannel("A");
-	if(channelAPtr) m_channelRank = RGBA;
+	
+	const Imf::Channel *rChannel = channels.findChannel("R");
+	if(rChannel) m_channelRank = RED;
+	const Imf::Channel *gChannel = channels.findChannel("G");
+	const Imf::Channel *bChannel = channels.findChannel("B");
+	if(rChannel && gChannel && bChannel) m_channelRank = RGB;
+	const Imf::Channel *aChannel = channels.findChannel("A");
+	if(rChannel && gChannel && bChannel && aChannel) m_channelRank = RGBA;
+	
 	const Imf::Channel *channelZPtr = channels.findChannel("Z");
 	if(channelZPtr) {
 	    m_channelRank = RGBAZ;
@@ -138,8 +139,8 @@ bool ZEXRImage::doRead(const std::string & filename)
 	        m_channelRank = RGBAZ;
 	}
 	
-	readPixels(file);
-	if(m_hasMipmap) setupMipmaps();
+		readPixels(file);
+		if(m_hasMipmap) setupMipmaps();
 	}
 	catch (const std::exception &exc) { 
 		std::cout<<"ERROR: "<<filename<<" cannot be loaded as an openEXR image\n";
@@ -151,6 +152,7 @@ bool ZEXRImage::doRead(const std::string & filename)
 
 bool ZEXRImage::findZChannel(Imf::InputFile & file)
 {
+	m_zChannelName = "";
 	const Imf::ChannelList &channels = file.header().channels(); 
 	Imf::ChannelList::ConstIterator it = channels.begin();
 	for(; it!= channels.end(); ++it) {
@@ -160,8 +162,10 @@ bool ZEXRImage::findZChannel(Imf::InputFile & file)
 	    }
 	}
 	
+	if(m_zChannelName.size() < 1) return false;
+	
 	const Imf::Channel *channelZPtr = channels.findChannel(m_zChannelName.c_str());
-// http://code.woboq.org/appleseed/appleseed/openexr/include/OpenEXR/ImfPixelType.h.html#Imf::PixelType
+/// http://code.woboq.org/appleseed/appleseed/openexr/include/OpenEXR/ImfPixelType.h.html#Imf::PixelType
 	if(channelZPtr->type == Imf::FLOAT)
 	    return true;
 
@@ -193,6 +197,7 @@ bool ZEXRImage::isAnOpenExrFile (const std::string& fileName)
 	if(!f.is_open()) return 0;
 	char b[4]; 
 	f.read (b, sizeof (b)); 
+	f.close();
 	return !!f && b[0] == 0x76 && b[1] == 0x2f && b[2] == 0x31 && b[3] == 0x01; 
 }
 

@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 	LfWorld world(param);
 	
     QApplication app(argc, argv);
-    LfWidget widget;
+    LfWidget widget(&world);
     widget.show();
     return app.exec();
 }

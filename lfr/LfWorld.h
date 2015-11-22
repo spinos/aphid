@@ -15,6 +15,7 @@ class LfParameter {
 	std::string m_imageName;
 	int m_atomSize;
 	int m_dictionaryLength;
+	int m_numPatches;
 	bool m_isValid;
 public:
 	LfParameter(int argc, char *argv[]);
@@ -26,6 +27,7 @@ protected:
 
 private:
 	bool searchImagesIn(const char * dirname);
+	void countPatches();
 };
 
 class LfWorld  {

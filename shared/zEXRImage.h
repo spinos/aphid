@@ -29,7 +29,7 @@ class ZEXRSampler
 {
 public:
 	ZEXRSampler();
-	~ZEXRSampler();
+	virtual ~ZEXRSampler();
 	void setPixels(ZEXRImage * src);
 	void reduceFrom(ZEXRSampler * src);
 	void setWidth(int w);
@@ -44,8 +44,9 @@ class ZEXRImage : public BaseImage
 {
 public:
 	ZEXRImage();
-	ZEXRImage(const char* filename, bool loadMipmap = false);
-	~ZEXRImage(void);
+	ZEXRImage(const char * filename);
+	ZEXRImage(bool loadMipmap);
+	virtual ~ZEXRImage();
 	
 	virtual bool doRead(const std::string & filename);
 	virtual void doClear();

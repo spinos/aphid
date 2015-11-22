@@ -1,21 +1,23 @@
 #include <QtGui>
 #include "LfWidget.h"
+#include "LfThread.h"
 
-LfWidget::LfWidget(QWidget *parent)
+LfWidget::LfWidget(LfWorld * world, QWidget *parent)
     : QWidget(parent)
 {
-
+	m_world = world;
+	m_thread = new LfThread(world, this);
     qRegisterMetaType<QImage>("QImage");
-    connect(&thread, SIGNAL(renderedImage(QImage)),
+    connect(m_thread, SIGNAL(renderedImage(QImage)),
             this, SLOT(updatePixmap(QImage)));
 
-    setWindowTitle(tr("White Noise"));
+    setWindowTitle(tr("Image Atoms"));
 
     resize(500, 400);
 	
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(40);
+	// QTimer *timer = new QTimer(this);
+	// connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
+	// timer->start(40);
 }
 
 void LfWidget::paintEvent(QPaintEvent * /* event */)
@@ -35,7 +37,7 @@ void LfWidget::paintEvent(QPaintEvent * /* event */)
 
 void LfWidget::resizeEvent(QResizeEvent * /* event */)
 {
-    thread.render(size());
+    // m_thread->render(size());
 }
 
 void LfWidget::updatePixmap(const QImage &image)
@@ -47,5 +49,5 @@ void LfWidget::updatePixmap(const QImage &image)
 void LfWidget::simulate()
 {
     update();
-    thread.render(size());
+    //m_thread->render(size());
 }
