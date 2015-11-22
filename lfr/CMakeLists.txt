@@ -3,13 +3,19 @@ project (testla)
 # The version number.
 set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
+set (CMAKE_AUTOMOC ON)
+set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
 set (HEADER_FILES ../shared/Morton3D.h
 clapackTempl.h
 linearMath.h
 regr.h)
 include_directories ( ../shared ../kdtree)
-add_executable (testla ${HEADER_FILES} testlapack.cpp)
+add_executable (testla ${HEADER_FILES} 
+LfWorld.cpp
+LfThread.cpp
+LfWidget.cpp
+main.cpp)
 
 if(WIN32)
     include_directories (D:/usr/CLAPACK/include)
@@ -32,6 +38,34 @@ message ("f2c " ${F2C_LIBRARY})
 target_link_libraries (testla ${F2C_LIBRARY})
 target_link_libraries (testla ${BLAS_LIBRARY})
 target_link_libraries (testla ${LAPACK_LIBRARY})
+
+if (WIN32)
+set (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
+set (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
+else ()
+set (HDF5_INCLUDE_DIR "/users/jianzhang/Library/hdf5/include")
+set (HDF5_LIBRARIES "/users/jianzhang/Library/hdf5/lib/libhdf5.dylib")
+endif ()
+
+if (WIN32)
+set (SZIP_INCLUDE_DIR "D:/usr/szip-2.1/src")
+set (SZIP_LIBRARIES "D:/usr/szip-2.1/szip.lib")
+include_directories (${SZIP_INCLUDE_DIR})
+target_link_libraries (testla ${SZIP_LIBRARIES})
+endif ()
+
+include_directories (${HDF5_INCLUDE_DIR})
+target_link_libraries (testla ${HDF5_LIBRARIES})
+
+if(WIN32)
+set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
+endif()
+
+find_package (Qt4 REQUIRED)
+target_link_libraries (testla Qt4::QtGui)
+## message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
+## set (QT_USE_QTOPENGL ON)
+## target_link_libraries (testla Qt4::QtGui Qt4::QtOpenGL)
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -66,6 +100,9 @@ message ("boost regex " ${Boost_REGEX_LIBRARY})
 message ("boost filesystem " ${Boost_FILESYSTEM_LIBRARY})
 message ("boost thread " ${Boost_THREAD_LIBRARY})
 
+set (AttributeNoninline "__attribute__ ((noinline))")
+add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
+
 target_link_libraries (testla ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (testla ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (testla ${Boost_DATE_TIME_LIBRARY})
@@ -80,3 +117,19 @@ set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
 endif ()
 
 target_link_libraries (testla ${Aphid_Library})
+
+if (WIN32)
+set (OpenEXR_Library "D:/usr/openEXR/lib/Half.lib"
+"D:/usr/openEXR/lib/Iex.lib"
+"D:/usr/openEXR/lib/IlmImf.lib"
+"D:/usr/openEXR/lib/IlmThread.lib")
+else ()
+set (OpenEXR_Library "/usr/local/lib/libHalf.a"
+"/usr/local/lib/libIex.a"
+"/usr/local/lib/libIlmImf.a"
+"/usr/local/lib/libIlmThread.a")
+endif ()
+target_link_libraries (testla ${OpenEXR_Library})
+
+find_package (zlib REQUIRED)
+target_link_libraries (testla ${ZLIB_LIBRARIES})
