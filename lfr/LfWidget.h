@@ -1,6 +1,8 @@
 #include <QPixmap>
 #include <QWidget>
 
+namespace lfr {
+
 class LfWorld;
 class LfThread;
 class LfWidget : public QWidget
@@ -21,7 +23,8 @@ private slots:
 private:
 	LfWorld * m_world;
     LfThread * m_thread;
-    QPixmap pixmap;
+    QPixmap m_pixmap;
 
 };
 
+}

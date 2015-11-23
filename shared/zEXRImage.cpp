@@ -1,5 +1,24 @@
 #include "zEXRImage.h"
-#include <cmath>
+#include <ImfHeader.h>
+#include <ImfRgbaFile.h>
+#include <ImfInputFile.h>
+#include <ImfOutputFile.h>
+#include <ImfChannelList.h>
+#include <ImfArray.h>
+
+#include <ImfBoxAttribute.h>
+#include <ImfChannelListAttribute.h>
+#include <ImfCompressionAttribute.h>
+#include <ImfChromaticitiesAttribute.h>
+#include <ImfFloatAttribute.h>
+#include <ImfEnvmapAttribute.h>
+#include <ImfDoubleAttribute.h>
+#include <ImfIntAttribute.h>
+#include <ImfLineOrderAttribute.h>
+#include <ImfMatrixAttribute.h>
+#include <ImfOpaqueAttribute.h>
+#include <ImfStringAttribute.h>
+#include <ImfVecAttribute.h>
 
 double Log2( double n )  
 {  
@@ -415,4 +434,37 @@ void ZEXRImage::sample(float u, float v, int count, float * dst) const
 	int loc = pixelLoc(u, v, true, count);
 	for(int i = 0; i < count; i++)
 		dst[i] = _pixels[loc + i];
+}
+
+bool ZEXRImage::getTile(float * dst, int ind, int tileSize, int rank) const
+{
+	const int dimx = m_imageWidth / tileSize;
+	const int dimy = m_imageHeight / tileSize;
+	int rind = ind % (dimx * dimy);
+	int y = rind / dimx;
+	int x = rind - y * dimx;
+	return getTile(dst, x, y, tileSize, rank);
+}
+
+bool ZEXRImage::getTile(float * dst, int x, int y, int tileSize, int rank) const
+{	
+	int colorRank = m_channelRank;
+	if(colorRank > 4) colorRank = 4;
+	
+	half *line = &_pixels[(y * tileSize * m_imageWidth + x * tileSize) * colorRank];
+	int i, j, k;
+	for(j=0;j<tileSize; j++) {
+		for(i=0;i<tileSize; i++) {
+			for(k=0;k<rank;k++) {
+				dst[(j * tileSize + i) * rank + k] = line[i * colorRank + k];
+				
+			}
+			
+			// dst[(j * tileSize + i) * rank + 0] = 1.f / tileSize * i;
+
+		}
+		line += m_imageWidth * colorRank;
+	}
+	
+	return true;
 }

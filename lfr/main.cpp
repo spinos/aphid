@@ -3,6 +3,8 @@
 #include "LfWidget.h"
 #include <iostream>
 
+using namespace lfr;
+
 int main(int argc, char *argv[])
 {
 	LfParameter param(argc, argv);

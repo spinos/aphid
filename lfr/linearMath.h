@@ -7,6 +7,7 @@
 #include "clapackTempl.h"
 
 namespace lfr {
+
 template<typename T>
 class DenseVector {
    
@@ -205,9 +206,9 @@ template<typename T>
 int DenseVector<T>::minAbsInd(int range) const
 { 
 	int imin = 0;
-	T vmin = abs(m_v[0]);
+	T vmin = std::abs<T>(m_v[0]);
 	for(int i=1; i<range; i++) {
-		T cur = abs(m_v[i]);
+		T cur = std::abs<T>(m_v[i]);
 		if(cur < vmin) {
 			imin = i;
 			vmin = cur;
@@ -231,8 +232,8 @@ T DenseVector<T>::sumVal() const
 template<typename T>
 T DenseVector<T>::sumAbsVal() const
 { 
-	T s = abs(m_v[0]);
-	for(int i=1; i<m_numElements; i++) s += abs(m_v[i]);
+	T s = std::abs<T>(m_v[0]);
+	for(int i=1; i<m_numElements; i++) s += std::abs<T>(m_v[i]);
 	return s;
 }
 
@@ -580,7 +581,7 @@ bool DenseMatrix<T>::inverseSymmetric()
 template <typename T>  
 void DenseMatrix<T>::addDiagonal(const T diag) 
 { 
-	const int n = min(m_numRows, m_numColumns);
+	const int n = std::min<T>(m_numRows, m_numColumns);
 	for(int i = 0; i<n; ++i) 
 		m_v[i*m_numRows+i] += diag; 
 };

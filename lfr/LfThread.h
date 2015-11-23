@@ -12,6 +12,8 @@ QT_BEGIN_NAMESPACE
 class QImage;
 QT_END_NAMESPACE
 
+namespace lfr {
+
 class LfThread : public QThread
 {
     Q_OBJECT
@@ -40,4 +42,5 @@ private:
 
 };
 
+}
 #endif

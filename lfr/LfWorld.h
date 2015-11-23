@@ -8,6 +8,7 @@
  */
 #include <string>
 #include <vector>
+namespace lfr {
 
 class LfParameter {
 
@@ -22,6 +23,10 @@ public:
 	virtual ~LfParameter();
 	
 	bool isValid() const;
+	int atomSize() const;
+	int dictionaryLength() const;
+	int numPatches() const;
+	std::string imageName(int i) const;
 	static void PrintHelp();
 protected:
 
@@ -30,17 +35,25 @@ private:
 	void countPatches();
 };
 
+template<typename T> class DenseMatrix;
+
 class LfWorld  {
 	
 	const LfParameter * m_param;
+	DenseMatrix<float> * m_D;
 public:
 
 	LfWorld(const LfParameter & param);
 	virtual ~LfWorld();
 	
-	
+	const LfParameter * param() const;
+/// randomly set dictionary, set result in image in qRgba format
+	void fillDictionary(unsigned * imageBits, int imageW, int imageH);
+	void fillPatch(unsigned * dst, float * color, int s, int imageW, int rank = 3);
 protected:
 
 private:
 	
 };
+}
+

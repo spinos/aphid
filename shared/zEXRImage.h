@@ -2,27 +2,8 @@
 #define ZFN_EXR_H
 #include <BaseImage.h>
 #include <vector>
-#include <ImfRgbaFile.h>
-#include <ImfHeader.h>
-#include <ImfOutputFile.h>
+#include <half.h>
 #include <ImfInputFile.h>
-#include <ImfChannelList.h>
-#include <ImfArray.h>
-
-#include <ImfBoxAttribute.h>
-#include <ImfChannelListAttribute.h>
-#include <ImfCompressionAttribute.h>
-#include <ImfChromaticitiesAttribute.h>
-#include <ImfFloatAttribute.h>
-#include <ImfEnvmapAttribute.h>
-#include <ImfDoubleAttribute.h>
-#include <ImfIntAttribute.h>
-#include <ImfLineOrderAttribute.h>
-#include <ImfMatrixAttribute.h>
-#include <ImfOpaqueAttribute.h>
-#include <ImfStringAttribute.h>
-#include <ImfVecAttribute.h>
-
 class ZEXRImage;
 
 class ZEXRSampler
@@ -66,6 +47,8 @@ public:
 	static bool isAnOpenExrFile(const std::string& filename);
 	static void listExrChannelNames(const std::string& filename, std::vector<std::string>& dst);
 	
+	bool getTile(float * dst, int ind, int tileSize, int rank = 3) const;
+	bool getTile(float * dst, int x, int y, int tileSize, int rank = 3) const;
 	half *_pixels;
 	float * m_zData;
 	

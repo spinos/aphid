@@ -6,7 +6,6 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-#include <iostream>
 #include "LfWorld.h"
 #include <boost/lexical_cast.hpp>
 #include "boost/filesystem/operations.hpp"
@@ -14,14 +13,26 @@
 #include "boost/filesystem/convenience.hpp"
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+
+#include "linearMath.h"
+#include "regr.h"
+/// f2c macros conflict
+#define _WIN32
 #include <zEXRImage.h>
+#include <OpenEXR/ImathLimits.h>
+#include <MersenneTwister.h>
+
+namespace lfr {
 
 LfParameter::LfParameter(int argc, char *argv[])
 {
+	std::cout<<"\n exr limit "<<Imath::limits<int>::min();
+	std::cout<<"\n test min "<<std::min<int>(-99, -98);
+	std::cout<<"\n test abs "<<std::abs<int>(-75);
 	std::cout<<"\n lfr (Light Field Research) version 20151122";
 	m_isValid = false;
 	m_atomSize = 10;
-	m_dictionaryLength = 256;
+	m_dictionaryLength = 1024;
 	bool foundImages = false;
 	if(argc == 1) {
 		m_isValid = searchImagesIn("./");
@@ -56,8 +67,8 @@ LfParameter::LfParameter(int argc, char *argv[])
 				}
 				try {
 					m_dictionaryLength = boost::lexical_cast<int>(argv[i+1]);
-					if(m_dictionaryLength < 256) {
-						std::cout<<"\n bad --dictionaryLength value (< 256)";
+					if(m_dictionaryLength < 1024) {
+						std::cout<<"\n bad --dictionaryLength value (< 1024)";
 						break;
 					}
 				}
@@ -81,6 +92,7 @@ LfParameter::LfParameter(int argc, char *argv[])
 		std::cout<<"\n atom size "<<m_atomSize;
 		std::cout<<"\n dictionary length "<<m_dictionaryLength;
 		countPatches();
+		m_isValid = m_numPatches > 0;
 	}
 }
 
@@ -111,7 +123,7 @@ bool LfParameter::searchImagesIn(const char * dirname)
 				std::string fileext = boost::filesystem::extension(itdir->path().string());
 				boost::algorithm::to_lower(fileext);
 				if(fileext == ext) {
-					m_imageNames.push_back( boost::filesystem::basename(itdir->path()));
+					m_imageNames.push_back( boost::filesystem::basename(itdir->path()) + ".exr");
 				}
 			}
 		}
@@ -126,7 +138,7 @@ void LfParameter::countPatches()
 	m_numPatches = 0;
 	std::vector<std::string >::const_iterator it = m_imageNames.begin();
 	for(; it!=m_imageNames.end();++it) {
-		std::string fn = *it + ".exr";
+		std::string fn = *it;
 		
 		ZEXRImage img;
 		if(img.open(fn.c_str()))
@@ -137,6 +149,18 @@ void LfParameter::countPatches()
 	std::cout<<"\n num patch "<<m_numPatches;
 }
 
+int LfParameter::atomSize() const
+{ return m_atomSize; }
+
+int LfParameter::dictionaryLength() const
+{ return m_dictionaryLength; }
+
+std::string LfParameter::imageName(int i) const
+{ return m_imageNames[i]; }
+
+int LfParameter::numPatches() const
+{ return m_numPatches; }
+
 void LfParameter::PrintHelp()
 {
 	std::cout<<"\n lfr (Light Field Research) version 20151122"
@@ -145,14 +169,75 @@ void LfParameter::PrintHelp()
 	<<"\n Input file must be image of OpenEXR format. If no file is provided,"
 	<<"\n current dir will be searched for any file with name ending in .exr."
 	<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 10"
-	<<"\n -dl or --dictionaryLength    integer    length of dictionary, no less than 256"
+	<<"\n -dl or --dictionaryLength    integer    length of dictionary, no less than 1024"
 	<<"\n -h or --help    print this information"
 	<<"\n";
 }
 
+
 LfWorld::LfWorld(const LfParameter & param) 
 {
 	m_param = &param;
+	m_D =new DenseMatrix<float>(param.atomSize() * param.atomSize() * 3, 
+										param.dictionaryLength() );
 }
 
 LfWorld::~LfWorld() {}
+
+const LfParameter * LfWorld::param() const
+{ return m_param; }
+
+void LfWorld::fillDictionary(unsigned * imageBits, int imageW, int imageH)
+{
+	ZEXRImage img;
+	std::string fn = m_param->imageName(0);
+	img.open(fn.c_str());
+	
+	MersenneTwister twist(99);
+	
+	const int n = m_param->numPatches();
+	const int k = m_param->dictionaryLength();
+	const int s = m_param->atomSize();
+	const int dimx = imageW / s;
+	const int dimy = imageH / s;
+	
+	int i, j;
+	unsigned * line = imageBits;
+	for(j=0;j<dimy;j++) {
+		for(i=0;i<dimx;i++) {
+			const int ind = dimx * j + i;
+			if(ind < k) {
+				float * d = m_D->column(ind);
+				int rt = twist.random() * n;
+				img.getTile(d, rt, s);
+				
+				fillPatch(&line[i * s], d, s, imageW);
+			}
+			else {
+				
+			}
+		}
+		line += imageW * s;
+	}
+}
+
+void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int rank)
+{
+	int i, j, k;
+	unsigned * line = dst;
+	for(j=0;j<s; j++) {
+		for(i=0; i<s; i++) {
+			unsigned v = 255<<24;
+			for(k=0;k<rank;k++) {
+				
+				unsigned rgb = 255 * color[(j * s + i) * rank + k];
+				rgb = std::min<unsigned>(rgb, 255);
+				v = v | ( rgb << ((2-k) << 3) );
+			}
+			line[i] = v;
+		}
+		line += imageW;
+	}
+}
+
+}
