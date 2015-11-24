@@ -459,9 +459,6 @@ bool ZEXRImage::getTile(float * dst, int x, int y, int tileSize, int rank) const
 				dst[(j * tileSize + i) * rank + k] = line[i * colorRank + k];
 				
 			}
-			
-			// dst[(j * tileSize + i) * rank + 0] = 1.f / tileSize * i;
-
 		}
 		line += m_imageWidth * colorRank;
 	}

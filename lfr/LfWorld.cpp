@@ -20,7 +20,6 @@
 #define _WIN32
 #include <zEXRImage.h>
 #include <OpenEXR/ImathLimits.h>
-#include <MersenneTwister.h>
 
 namespace lfr {
 
@@ -161,6 +160,15 @@ std::string LfParameter::imageName(int i) const
 int LfParameter::numPatches() const
 { return m_numPatches; }
 
+int LfParameter::dimensionOfX() const
+{ return m_atomSize * m_atomSize * 3; }
+
+int LfParameter::randomImageInd() const
+{ 
+	if(m_imageNames.size() < 2) return 0; 
+	return rand() % m_imageNames.size();
+}
+
 void LfParameter::PrintHelp()
 {
 	std::cout<<"\n lfr (Light Field Research) version 20151122"
@@ -178,7 +186,9 @@ void LfParameter::PrintHelp()
 LfWorld::LfWorld(const LfParameter & param) 
 {
 	m_param = &param;
-	m_D =new DenseMatrix<float>(param.atomSize() * param.atomSize() * 3, 
+	m_D = new DenseMatrix<float>(param.dimensionOfX(), 
+										param.dictionaryLength() );
+	m_G = new DenseMatrix<float>(param.dictionaryLength(), 
 										param.dictionaryLength() );
 }
 
@@ -190,16 +200,17 @@ const LfParameter * LfWorld::param() const
 void LfWorld::fillDictionary(unsigned * imageBits, int imageW, int imageH)
 {
 	ZEXRImage img;
-	std::string fn = m_param->imageName(0);
+	int imgI = m_param->randomImageInd();
+	std::string fn = m_param->imageName(imgI);
 	img.open(fn.c_str());
-	
-	MersenneTwister twist(99);
+	int preImgI = imgI;
 	
 	const int n = m_param->numPatches();
 	const int k = m_param->dictionaryLength();
 	const int s = m_param->atomSize();
 	const int dimx = imageW / s;
 	const int dimy = imageH / s;
+	const int m = m_param->dimensionOfX();
 	
 	int i, j;
 	unsigned * line = imageBits;
@@ -207,9 +218,16 @@ void LfWorld::fillDictionary(unsigned * imageBits, int imageW, int imageH)
 		for(i=0;i<dimx;i++) {
 			const int ind = dimx * j + i;
 			if(ind < k) {
+/// init D with random signal 
 				float * d = m_D->column(ind);
-				int rt = twist.random() * n;
-				img.getTile(d, rt, s);
+				imgI = m_param->randomImageInd();
+				if(preImgI != imgI) {
+					fn = m_param->imageName(imgI);
+					img.open(fn.c_str());
+					preImgI = imgI;
+				}
+				
+				img.getTile(d, rand(), s);
 				
 				fillPatch(&line[i * s], d, s, imageW);
 			}
@@ -219,6 +237,9 @@ void LfWorld::fillDictionary(unsigned * imageBits, int imageW, int imageH)
 		}
 		line += imageW * s;
 	}
+	m_D->normalize();
+	m_D->AtA(*m_G);
+	cleanDictionary();
 }
 
 void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int rank)
@@ -228,8 +249,7 @@ void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int ra
 	for(j=0;j<s; j++) {
 		for(i=0; i<s; i++) {
 			unsigned v = 255<<24;
-			for(k=0;k<rank;k++) {
-				
+			for(k=0;k<rank;k++) {				
 				unsigned rgb = 255 * color[(j * s + i) * rank + k];
 				rgb = std::min<unsigned>(rgb, 255);
 				v = v | ( rgb << ((2-k) << 3) );
@@ -238,6 +258,40 @@ void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int ra
 		}
 		line += imageW;
 	}
+}
+
+void LfWorld::cleanDictionary()
+{
+	const int n = m_param->numPatches();
+	const int k = m_D->numColumns();
+	int i, j, l;
+	for (i = 0; i<k; ++i) {
+/// lower part of G
+		for (j = i; j<k; ++j) {
+			bool toClean = false;
+			if(j==i) {
+/// diagonal part
+				toClean = std::abs<float>( m_G->column(i)[j] ) < 1e-4;
+			}
+			else {
+				toClean = ( std::abs<float>( m_G->column(i)[j] ) / sqrt( m_G->column(i)[i] * m_G->column(j)[j]) ) > 0.9999;
+			}
+			if(toClean) {
+/// D_j <- randomly choose signal element
+				DenseVector<float> dj(m_D->column(j), m_D->numRows() );
+				int rt = rand();
+				
+				dj.normalize();
+/// G_j <- D^t * D_j
+				DenseVector<float> gj(m_G->column(j), k);
+				m_D->multTrans(gj, dj);
+/// copy to diagonal line of G
+				for (l = 0; l<k; ++l)
+					m_G->column(l)[j] = m_G->column(j)[l];
+			}
+		}
+	}
+	m_G->addDiagonal(1e-10);
 }
 
 }
