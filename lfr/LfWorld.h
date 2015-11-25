@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+class ZEXRImage;
+
 namespace lfr {
 
 class LfParameter {
@@ -41,6 +43,14 @@ private:
 template<typename T> class DenseMatrix;
 
 class LfWorld  {
+	struct ImageInd {
+		ZEXRImage * _image;
+		int _ind;
+	};
+	
+#define MAX_NUM_OPENED_IMAGES 25 
+	ImageInd m_openedImages[MAX_NUM_OPENED_IMAGES];
+	int m_currentImage;
 	
 	const LfParameter * m_param;
 	DenseMatrix<float> * m_D;
@@ -55,7 +65,8 @@ public:
 	void fillDictionary(unsigned * imageBits, int imageW, int imageH);
 	void fillPatch(unsigned * dst, float * color, int s, int imageW, int rank = 3);
 protected:
-
+	bool isImageOpened(const int ind, ZEXRImage * img) const;
+	void opendImage(const int ind, ZEXRImage * img);
 private:
 	void cleanDictionary();
 };

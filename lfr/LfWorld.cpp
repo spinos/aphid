@@ -190,6 +190,13 @@ LfWorld::LfWorld(const LfParameter & param)
 										param.dictionaryLength() );
 	m_G = new DenseMatrix<float>(param.dictionaryLength(), 
 										param.dictionaryLength() );
+										
+	int i = 0;
+	for(;i<MAX_NUM_OPENED_IMAGES;++i) {
+		m_openedImages[i]._ind = -1;
+		m_openedImages[i]._image = NULL;
+	}
+	m_currentImage = 0;
 }
 
 LfWorld::~LfWorld() {}
@@ -292,6 +299,33 @@ void LfWorld::cleanDictionary()
 		}
 	}
 	m_G->addDiagonal(1e-10);
+}
+
+bool LfWorld::isImageOpened(const int ind, ZEXRImage * img) const
+{
+	int i = 0;
+	for(;i<MAX_NUM_OPENED_IMAGES;++i) {
+		if(m_openedImages[i]._ind < 0) break;
+		
+		if( m_openedImages[i]._ind == ind ) {
+			img = m_openedImages[i]._image;
+			return true;
+		}
+	}
+	return false;
+}
+
+void LfWorld::opendImage(const int ind, ZEXRImage * img)
+{
+	ImageInd & imgind = m_openedImages[m_currentImage];
+	if(imgind._ind < 0) {
+		imgind._image = new ZEXRImage;
+	}
+	imgind._ind = ind;
+	imgind._image->open(m_param->imageName(ind));
+	img = imgind._image;
+	
+	m_currentImage = (m_currentImage + 1) % MAX_NUM_OPENED_IMAGES;
 }
 
 }
