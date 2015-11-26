@@ -40,6 +40,26 @@ target_link_libraries (testla ${BLAS_LIBRARY})
 target_link_libraries (testla ${LAPACK_LIBRARY})
 
 if (WIN32)
+set (OpenEXR_INCLUDE_DIR D:/usr/openEXR/include/OpenEXR)
+set (OpenEXR_Library "D:/usr/openEXR/lib/Half.lib"
+"D:/usr/openEXR/lib/Iex.lib"
+"D:/usr/openEXR/lib/IlmImf.lib"
+"D:/usr/openEXR/lib/IlmThread.lib")
+else ()
+set (OpenEXR_INCLUDE_DIR /usr/local/include/OpenEXR)
+set (OpenEXR_Library /usr/local/lib/libHalf.a
+ /usr/local/lib/libIex-2_1.dylib
+ /usr/local/lib/libIlmImf-2_1.dylib
+ /usr/local/lib/libIlmThread-2_1.dylib)
+endif ()
+include_directories (${OpenEXR_INCLUDE_DIR})
+target_link_libraries (testla ${OpenEXR_Library})
+message (" openexr " ${OpenEXR_Library})
+
+find_package (zlib REQUIRED)
+target_link_libraries (testla ${ZLIB_LIBRARIES})
+
+if (WIN32)
 set (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
 set (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
 else ()
@@ -118,21 +138,4 @@ endif ()
 
 target_link_libraries (testla ${Aphid_Library})
 
-if (WIN32)
-set (OpenEXR_INCLUDE_DIR D:/usr/openEXR/include/OpenEXR)
-set (OpenEXR_Library "D:/usr/openEXR/lib/Half.lib"
-"D:/usr/openEXR/lib/Iex.lib"
-"D:/usr/openEXR/lib/IlmImf.lib"
-"D:/usr/openEXR/lib/IlmThread.lib")
-else ()
-set (OpenEXR_INCLUDE_DIR /usr/local/include/OpenEXR)
-set (OpenEXR_Library "/usr/local/lib/libHalf.a"
-"/usr/local/lib/libIex.a"
-"/usr/local/lib/libIlmImf.a"
-"/usr/local/lib/libIlmThread.a")
-endif ()
-include_directories (${OpenEXR_INCLUDE_DIR})
-target_link_libraries (testla ${OpenEXR_Library})
 
-find_package (zlib REQUIRED)
-target_link_libraries (testla ${ZLIB_LIBRARIES})
