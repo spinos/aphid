@@ -9,7 +9,8 @@
 #include <AllMath.h>
 #include "tessellator.h"
 
-Tessellator::Tessellator() : _positions(0), _normals(0), _vertices(0), _displacementMap(0) {}
+Tessellator::Tessellator() : _positions(0), _normals(0), _vertices(0)//, _displacementMap(0) 
+{}
 Tessellator::~Tessellator() 
 {
 	cleanup();
@@ -32,12 +33,12 @@ void Tessellator::setNumSeg(int n)
 	_texcoords = new Vector3F[numVertices()];
 	_vertices = new int[numIndices()];
 }
-
+/*
 void Tessellator::setDisplacementMap(ZEXRImage* image)
 {
 	_displacementMap = image;
 }
-
+*/
 void Tessellator::evaluate(BezierPatch& bezier)
 {
 	float delta = 1.f / _numSeg;
@@ -52,11 +53,11 @@ void Tessellator::evaluate(BezierPatch& bezier)
 		}
 	}
 	
-	if(_displacementMap)
-	{
-		displacePositions(bezier);
-		calculateNormals();
-	}
+	//if(_displacementMap)
+	//{
+	//	displacePositions(bezier);
+	//	calculateNormals();
+	//}
 	
 	//testLOD(bezier);
 	
@@ -83,7 +84,7 @@ void Tessellator::displacePositions(BezierPatch& bezier)
 		{
 			//bezier.evaluateSurfaceLOD(delta * i, delta * j, &d);
 			int idx = j * (_numSeg + 1) + i;
-			_displacementMap->sample(_texcoords[idx].x, _texcoords[idx].y, log2f(le) + 4, 1, d);
+			//_displacementMap->sample(_texcoords[idx].x, _texcoords[idx].y, log2f(le) + 4, 1, d);
 			_positions[idx] += _normals[idx] * (d[0] - 0.5f);
 			
 		}
@@ -101,7 +102,7 @@ void Tessellator::testLOD(BezierPatch& bezier)
 		{
 			//bezier.evaluateSurfaceLOD(delta * i, delta * j, &d);
 			int idx = j * (_numSeg + 1) + i;
-			_displacementMap->sample(_texcoords[idx].x, _texcoords[idx].y, log2f(le) + 4, 1, d);// + bezier.getLODBase());
+			//_displacementMap->sample(_texcoords[idx].x, _texcoords[idx].y, log2f(le) + 4, 1, d);// + bezier.getLODBase());
 			_normals[idx].x = d[0];
 			_normals[idx].y = d[0];
 			_normals[idx].z = d[0];

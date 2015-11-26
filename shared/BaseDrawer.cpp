@@ -15,7 +15,7 @@
 #include "BaseDrawer.h"
 #include "Matrix33F.h"
 #include <cmath>
-#include <zEXRImage.h>
+// #include <zEXRImage.h>
 
 static const int sModLightColors = 15;
 static const float sLightColors[16][3] = {
@@ -250,7 +250,7 @@ void BaseDrawer::clearTexture(int idx)
 	GLuint * tex = &m_textureNames[idx];
 	if(*tex > 0) glDeleteTextures(1, tex);
 }
-
+/*
 int BaseDrawer::loadTexture(int idx, ZEXRImage * image)
 {
 	if(idx < 0) idx = addTexture();
@@ -277,7 +277,7 @@ int BaseDrawer::loadTexture(int idx, ZEXRImage * image)
 	
 	return idx;
 }
-
+*/
 void BaseDrawer::texture(int idx)
 {	
 	glDisable(GL_LIGHTING);

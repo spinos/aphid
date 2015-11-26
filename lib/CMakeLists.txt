@@ -6,9 +6,10 @@ include_directories(../mallard ../shared ../lapl ../catmullclark ../easymodel ..
 ../kdtree
 ../hesperis)
 IF (WIN32)
-include_directories(D:/usr/boost_1_51_0 D:/usr/openEXR/include/OpenEXR D:/usr/libxml2/include D:/usr/HDF5/include
+include_directories(D:/usr/boost_1_51_0 
+D:/usr/libxml2/include D:/usr/HDF5/include
 D:/usr/boost_1_51_0/boost/tr1/tr1)
-ADD_DEFINITIONS(-DOPENEXR_DLL -DNDEBUG -D_WIN32_WINDOWS 
+ADD_DEFINITIONS( -DNDEBUG -D_WIN32_WINDOWS 
 ## http://www.boost.org/doc/libs/1_49_0/libs/config/doc/html/boost_config/boost_macro_reference.html
 -DBOOST_HAS_TR1)
 ## http://stackoverflow.com/questions/3499487/replacing-native-vs-2010-vc10-tr1-libraries-with-boost-tr1
@@ -16,7 +17,7 @@ set (_HAS_CPP0X 0)
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 ELSE ()
-include_directories(../../Library/boost_1_55_0 ../../Library/hdf5/include /usr/local/include/OpenEXR)
+include_directories(../../Library/boost_1_55_0 ../../Library/hdf5/include)
 ENDIF()
 add_library(aphid STATIC ../shared/line_math.h
 		../shared/tetrahedron_math.h
@@ -118,7 +119,6 @@ add_library(aphid STATIC ../shared/line_math.h
     ../shared/HWorld.cpp 
     ../shared/HMesh.cpp 
     ../shared/BaseImage.cpp 
-    ../shared/zEXRImage.cpp 
         ../shared/BaseFile.cpp
     ../shared/BaseFileGroup.cpp
     ../shared/BakeDeformer.cpp 

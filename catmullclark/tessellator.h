@@ -8,14 +8,14 @@
  */
 #include <Vector3F.h>
 #include "bezierPatch.h"
-#include <zEXRImage.h>
+//#include <zEXRImage.h>
 class Tessellator {
 public:
 	Tessellator();
 	~Tessellator();
 	void cleanup();
 	void setNumSeg(int n);
-	void setDisplacementMap(ZEXRImage* image);
+	//void setDisplacementMap(ZEXRImage* image);
 	void evaluate(BezierPatch& bezier);
 	void displacePositions(BezierPatch& bezier);
 	void calculateNormals();
@@ -34,5 +34,5 @@ public:
 	Vector3F* _normals;
 	Vector3F* _texcoords;
 	int* _vertices;
-	ZEXRImage* _displacementMap;
+	//ZEXRImage* _displacementMap;
 };

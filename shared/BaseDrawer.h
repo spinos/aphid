@@ -14,7 +14,7 @@
 #include <ConvexShape.h>
 #include <GProfile.h>
 
-class ZEXRImage;
+// class ZEXRImage;
 
 class BaseDrawer {
 public:
@@ -51,7 +51,7 @@ public:
 	void useSpace(const Matrix44F & s) const;
 	void useSpace(const Matrix33F & s) const;
 	void useDepthTest(char on) const;
-	int loadTexture(int idx, ZEXRImage * image);
+	// int loadTexture(int idx, ZEXRImage * image);
 	void clearTexture(int idx);
 	void texture(int idx);
 	void bindTexture(int idx);
