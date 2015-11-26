@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+
 #include "clapackTempl.h"
 
 namespace lfr {
@@ -187,9 +188,9 @@ template<typename T>
 int DenseVector<T>::maxAbsInd() const
 {
 	int imax = 0;
-	T vmax = abs(m_v[0]);
+	T vmax = absoluteValue<T>(m_v[0]);
 	for(int i=1; i<m_numElements; i++) {
-		T cur = abs(m_v[i]);
+		T cur = absoluteValue<T>(m_v[i]);
 		if(cur > vmax) {
 			imax = i;
 			vmax = cur;
@@ -206,9 +207,9 @@ template<typename T>
 int DenseVector<T>::minAbsInd(int range) const
 { 
 	int imin = 0;
-	T vmin = std::abs<T>(m_v[0]);
+	T vmin = absoluteValue<T>(m_v[0]);
 	for(int i=1; i<range; i++) {
-		T cur = std::abs<T>(m_v[i]);
+		T cur = absoluteValue<T>(m_v[i]);
 		if(cur < vmin) {
 			imin = i;
 			vmin = cur;
@@ -232,8 +233,8 @@ T DenseVector<T>::sumVal() const
 template<typename T>
 T DenseVector<T>::sumAbsVal() const
 { 
-	T s = std::abs<T>(m_v[0]);
-	for(int i=1; i<m_numElements; i++) s += std::abs<T>(m_v[i]);
+	T s = absoluteValue<T>(m_v[0]);
+	for(int i=1; i<m_numElements; i++) s += absoluteValue<T>(m_v[i]);
 	return s;
 }
 

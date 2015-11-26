@@ -28,6 +28,8 @@ public:
 	virtual void allWhite();
 	virtual void allBlack();
 	
+	void setChannelRank(ChannelRank x);
+	ChannelRank channelRank() const;
     void setWidth(int x);
     void setHeight(int x);
 	int getWidth() const;
@@ -42,7 +44,7 @@ public:
 	virtual void applyMask(BaseImage * another);
 	bool isRGBAZ() const;
 	void verbose() const;
-	
-	ChannelRank m_channelRank;
+private:
+    ChannelRank m_channelRank;
 	
 };

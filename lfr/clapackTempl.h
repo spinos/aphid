@@ -1,6 +1,10 @@
 #include <f2c.h>
 #include <clapack.h>
 
+template<typename T>
+T absoluteValue(T a)
+{ return a > 0 ? a : -a; }
+
 /// res = dot(x, y)
 template <typename T> T clapack_dot(integer n, T *dx, integer incx, T *dy, integer incy);
 

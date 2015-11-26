@@ -49,8 +49,8 @@ void LfThread::initAtoms()
 	
 	QImage img(w*s, h*s, QImage::Format_RGB32);
 	uint *scanLine = reinterpret_cast<uint *>(img.bits());
-	m_world->fillDictionary(scanLine, w*s, h*s);
-	
+	m_world->initDictionary();
+	m_world->dictionaryAsImage(scanLine, w*s, h*s);
 	emit renderedImage(img);
 }
 

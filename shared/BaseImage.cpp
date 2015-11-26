@@ -92,6 +92,12 @@ void BaseImage::applyMask(BaseImage * another) {}
 bool BaseImage::isRGBAZ() const 
 { return m_channelRank == RGBAZ; }
 
+void BaseImage::setChannelRank(ChannelRank x)
+{ m_channelRank = x; }
+	
+BaseImage::ChannelRank BaseImage::channelRank() const
+{ return m_channelRank; }
+
 void BaseImage::verbose() const
 {
 	std::cout<<"Image file: "<<fileName()<<"\n";

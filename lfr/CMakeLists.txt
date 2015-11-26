@@ -13,12 +13,11 @@ regr.h)
 include_directories ( ../shared ../kdtree)
 add_executable (testla ${HEADER_FILES} 
 ../shared/zEXRImage.cpp
+LfParameter.cpp
 LfWorld.cpp
 LfThread.cpp
 LfWidget.cpp
 main.cpp)
-
-add_definitions (-DOPENEXR_DLL)
 
 if(WIN32)
     include_directories (D:/usr/CLAPACK/include)
@@ -43,17 +42,18 @@ target_link_libraries (testla ${BLAS_LIBRARY})
 target_link_libraries (testla ${LAPACK_LIBRARY})
 
 if (WIN32)
+add_definitions (-DOPENEXR_DLL)
 set (OpenEXR_INCLUDE_DIR D:/usr/openexr21/include)
 set (OpenEXR_Library "D:/usr/openexr21/lib/Half.lib"
 "D:/usr/openexr21/lib/Iex-2_1.lib"
 "D:/usr/openexr21/lib/IlmImf-2_1.lib"
 "D:/usr/openexr21/lib/IlmThread-2_1.lib")
 else ()
-set (OpenEXR_INCLUDE_DIR /usr/local/include/OpenEXR)
-set (OpenEXR_Library /usr/local/lib/libHalf.a
- /usr/local/lib/libIex-2_1.dylib
- /usr/local/lib/libIlmImf-2_1.dylib
- /usr/local/lib/libIlmThread-2_1.dylib)
+set (OpenEXR_INCLUDE_DIR /Users/jianzhang/Library/openexr21/include)
+set (OpenEXR_Library /Users/jianzhang/Library/openexr21/lib/libHalf.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIex-2_1.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIlmImf-2_1.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIlmThread-2_1.dylib)
 endif ()
 include_directories (${OpenEXR_INCLUDE_DIR})
 target_link_libraries (testla ${OpenEXR_Library})

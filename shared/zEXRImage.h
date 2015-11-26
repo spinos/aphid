@@ -4,6 +4,8 @@
 #include <vector>
 #include <OpenEXR/half.h>
 #include <OpenEXR/ImfInputFile.h>
+#include <OpenEXR/ImfHeader.h>
+
 class ZEXRImage;
 using namespace IMATH_NAMESPACE;
 using namespace OPENEXR_IMF_NAMESPACE;
@@ -46,7 +48,7 @@ public:
 	virtual void applyMask(BaseImage * another);
 	
 	static bool isAnOpenExrFile(const std::string& filename);
-	static void listExrChannelNames(const std::string& filename, std::vector<std::string>& dst);
+	static void PrintChannelNames(const std::string& filename);
 	
 	bool getTile1(float * dst, int ind, int tileSize, int rank = 3) const;
 	bool getTile(float * dst, int x, int y, int tileSize, int rank = 3) const;
@@ -57,6 +59,7 @@ public:
 	int _numMipmaps;
 	
 private:
+    ChannelRank checkColors(const Header & head) const;
 	void readPixels(InputFile& file);
 	void readZ(InputFile& file);
 	void setupMipmaps();
