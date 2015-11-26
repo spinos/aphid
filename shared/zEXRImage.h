@@ -2,10 +2,11 @@
 #define ZFN_EXR_H
 #include <BaseImage.h>
 #include <vector>
-#include <half.h>
-#include <ImfInputFile.h>
+#include <OpenEXR/half.h>
+#include <OpenEXR/ImfInputFile.h>
 class ZEXRImage;
-
+using namespace IMATH_NAMESPACE;
+using namespace OPENEXR_IMF_NAMESPACE;
 class ZEXRSampler
 {
 public:
@@ -47,7 +48,7 @@ public:
 	static bool isAnOpenExrFile(const std::string& filename);
 	static void listExrChannelNames(const std::string& filename, std::vector<std::string>& dst);
 	
-	bool getTile(float * dst, int ind, int tileSize, int rank = 3) const;
+	bool getTile1(float * dst, int ind, int tileSize, int rank = 3) const;
 	bool getTile(float * dst, int x, int y, int tileSize, int rank = 3) const;
 	half *_pixels;
 	float * m_zData;
@@ -56,10 +57,10 @@ public:
 	int _numMipmaps;
 	
 private:
-	void readPixels(Imf::InputFile& file);
-	void readZ(Imf::InputFile& file);
+	void readPixels(InputFile& file);
+	void readZ(InputFile& file);
 	void setupMipmaps();
-	bool findZChannel(Imf::InputFile & file);
+	bool findZChannel(const ChannelList &channels);
 private:
     std::string m_zChannelName;
     bool m_hasMipmap;

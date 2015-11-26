@@ -9,6 +9,7 @@
 #pragma once
 #include <BaseFile.h>
 class BaseImage : public BaseFile {
+    	int m_imageWidth, m_imageHeight;
 public:
 	enum ChannelRank {
 		None = 0,
@@ -27,6 +28,8 @@ public:
 	virtual void allWhite();
 	virtual void allBlack();
 	
+    void setWidth(int x);
+    void setHeight(int x);
 	int getWidth() const;
 	int getHeight() const;
 	const float aspectRation() const;
@@ -40,7 +43,6 @@ public:
 	bool isRGBAZ() const;
 	void verbose() const;
 	
-	int m_imageWidth, m_imageHeight;
 	ChannelRank m_channelRank;
 	
 };

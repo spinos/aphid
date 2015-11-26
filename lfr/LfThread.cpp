@@ -75,7 +75,7 @@ void LfThread::run()
                 uint *scanLine = reinterpret_cast<uint *>(image.scanLine(y));
 				for (int x = 0; x < resultSize.width(); ++x) 
 				{
-					int g = random()%256;
+					int g = rand()%256;
 					*scanLine++ = qRgb(g, g, g);
                 }
             }

@@ -1,0 +1,31 @@
+to avoid builtin_trap
+
+add_definitions (-DPLATFORM_WINDOWS)
+
+install location
+
+set (CMAKE_INSTALL_PREFIX d:/usr/openexr21)
+
+set (ILMBASE_PACKAGE_PREFIX d:/usr/openexr21)
+
+copy ilmbase libs to ilmimf
+cd ilmimf 
+b44ExplLogTable.exe > b44ExplLogTable.h
+copy resulting b44ExplLogTable.h to ./
+
+set (CMAKE_INSTALL_PREFIX d:/usr/openexr21)
+
+make zlib release
+
+set (ZLIB_INCLUDE_DIR d:/usr/zlib-1.2.5)
+set (ZLIB_LIBRARY d:/usr/zlib-1.2.5/zlib.lib)
+FIND_PACKAGE(ZLIB REQUIRED)
+INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+
+skip IlmImfTest IlmImfFuzzTest exrmultiview exrmultipart
+
+need zlib1.dll
+
+examples 
+
+https://github.com/openexr/openexr-images/tree/master/ScanLines

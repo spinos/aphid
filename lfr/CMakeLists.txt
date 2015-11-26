@@ -12,15 +12,18 @@ linearMath.h
 regr.h)
 include_directories ( ../shared ../kdtree)
 add_executable (testla ${HEADER_FILES} 
+../shared/zEXRImage.cpp
 LfWorld.cpp
 LfThread.cpp
 LfWidget.cpp
 main.cpp)
 
+add_definitions (-DOPENEXR_DLL)
+
 if(WIN32)
     include_directories (D:/usr/CLAPACK/include)
-    set(CBLAS_LIBRARY D:/usr/CLAPACK/lib/blas.lib)
-	set(CLAPACK_LIBRARY D:/usr/CLAPACK/lib/lapack.lib)
+    set(BLAS_LIBRARY D:/usr/CLAPACK/lib/blas.lib)
+	set(LAPACK_LIBRARY D:/usr/CLAPACK/lib/lapack.lib)
     set(F2C_LIBRARY D:/usr/CLAPACK/lib/libf2c.lib)
     
 endif()
@@ -40,11 +43,11 @@ target_link_libraries (testla ${BLAS_LIBRARY})
 target_link_libraries (testla ${LAPACK_LIBRARY})
 
 if (WIN32)
-set (OpenEXR_INCLUDE_DIR D:/usr/openEXR/include/OpenEXR)
-set (OpenEXR_Library "D:/usr/openEXR/lib/Half.lib"
-"D:/usr/openEXR/lib/Iex.lib"
-"D:/usr/openEXR/lib/IlmImf.lib"
-"D:/usr/openEXR/lib/IlmThread.lib")
+set (OpenEXR_INCLUDE_DIR D:/usr/openexr21/include)
+set (OpenEXR_Library "D:/usr/openexr21/lib/Half.lib"
+"D:/usr/openexr21/lib/Iex-2_1.lib"
+"D:/usr/openexr21/lib/IlmImf-2_1.lib"
+"D:/usr/openexr21/lib/IlmThread-2_1.lib")
 else ()
 set (OpenEXR_INCLUDE_DIR /usr/local/include/OpenEXR)
 set (OpenEXR_Library /usr/local/lib/libHalf.a

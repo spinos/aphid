@@ -40,6 +40,12 @@ int BaseImage::getHeight() const
 	return m_imageHeight;
 }
 
+void BaseImage::setWidth(int x)
+{ m_imageWidth = x; }
+
+void BaseImage::setHeight(int x)
+{ m_imageHeight = x; }
+
 const float BaseImage::aspectRation() const
 { return (float)m_imageHeight/(float)m_imageWidth; }
 
@@ -90,7 +96,7 @@ void BaseImage::verbose() const
 {
 	std::cout<<"Image file: "<<fileName()<<"\n";
 	std::cout<<" format: "<<formatName()<<"\n";
-	std::cout<<" size: ("<<m_imageWidth<<", "<<m_imageHeight<<")\n";
+	std::cout<<" size: ("<<getWidth()<<", "<<getHeight()<<")\n";
 	if(m_channelRank == RGB)
 		std::cout<<" channels: RGB\n";
 	else if(m_channelRank == RGBA)

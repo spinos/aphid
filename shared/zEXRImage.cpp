@@ -1,24 +1,24 @@
 #include "zEXRImage.h"
-#include <ImfHeader.h>
-#include <ImfRgbaFile.h>
-#include <ImfInputFile.h>
-#include <ImfOutputFile.h>
-#include <ImfChannelList.h>
-#include <ImfArray.h>
+#include <OpenEXR/ImfHeader.h>
+#include <OpenEXR/ImfRgbaFile.h>
+#include <OpenEXR/ImfInputFile.h>
+#include <OpenEXR/ImfOutputFile.h>
+#include <OpenEXR/ImfChannelList.h>
+#include <OpenEXR/ImfArray.h>
 
-#include <ImfBoxAttribute.h>
-#include <ImfChannelListAttribute.h>
-#include <ImfCompressionAttribute.h>
-#include <ImfChromaticitiesAttribute.h>
-#include <ImfFloatAttribute.h>
-#include <ImfEnvmapAttribute.h>
-#include <ImfDoubleAttribute.h>
-#include <ImfIntAttribute.h>
-#include <ImfLineOrderAttribute.h>
-#include <ImfMatrixAttribute.h>
-#include <ImfOpaqueAttribute.h>
-#include <ImfStringAttribute.h>
-#include <ImfVecAttribute.h>
+#include <OpenEXR/ImfBoxAttribute.h>
+#include <OpenEXR/ImfChannelListAttribute.h>
+#include <OpenEXR/ImfCompressionAttribute.h>
+#include <OpenEXR/ImfChromaticitiesAttribute.h>
+#include <OpenEXR/ImfFloatAttribute.h>
+#include <OpenEXR/ImfEnvmapAttribute.h>
+#include <OpenEXR/ImfDoubleAttribute.h>
+#include <OpenEXR/ImfIntAttribute.h>
+#include <OpenEXR/ImfLineOrderAttribute.h>
+#include <OpenEXR/ImfMatrixAttribute.h>
+#include <OpenEXR/ImfOpaqueAttribute.h>
+#include <OpenEXR/ImfStringAttribute.h>
+#include <OpenEXR/ImfVecAttribute.h>
 
 double Log2( double n )  
 {  
@@ -123,64 +123,100 @@ ZEXRImage::ZEXRImage(bool loadMipmap) : _pixels(0), m_zData(0), m_hasMipmap(load
 
 ZEXRImage::~ZEXRImage()
 {
+    std::cout<<"~img";
 }
 
 bool ZEXRImage::doRead(const std::string & filename)
 {
-	if(!isAnOpenExrFile(filename)) {
+    if(!isAnOpenExrFile(filename)) {
 		std::cout<<"ERROR: "<<filename<<" is not an openEXR image\n";
 		return false;
 	}
 	
-	try {
-	Imf::InputFile file(filename.c_str());
-	Imath::Box2i dw = file.header().dataWindow(); 
-	m_imageWidth = dw.max.x - dw.min.x + 1;
-	m_imageHeight = dw.max.y - dw.min.y + 1;
+	//try {
+	InputFile file(filename.c_str());
+    
+    //ChannelList::ConstIterator it = file.header().channels().begin();
+    
+	//if(it!= file.header().channels().end()) {
+        //std::cout<<" ch "<<it.name();
+	    //if(std::string(it.name()).find_last_of('Z') != std::string::npos) {
+	   //     m_zChannelName = it.name();
+	   //     break;
+	   // }
+       
+       //std::cout<<"\n ch name "<<std::string(it.name())<<" ";
+       //it++;
+       //std::cout<<"\n ch name "<<it.name()<<" ";
+       //it++;
+       //std::cout<<"\n ch name "<<it.name()<<" ";
+       //it++;
+       //std::cout<<"\n ch name "<<it.name()<<" ";
+       //it++;
+      // if(it == file.header().channels().end()) std::cout<<" is end";
+	//}
+    
+	Box2i dw = file.header().dataWindow(); 
+	setWidth(dw.max.x - dw.min.x + 1);
+	setHeight(dw.max.y - dw.min.y + 1);
+    
+	const ChannelList &channels = file.header().channels(); 
 	
-	const Imf::ChannelList &channels = file.header().channels(); 
-	
-	const Imf::Channel *rChannel = channels.findChannel("R");
+	const Channel *rChannel = channels.findChannel("R");
 	if(rChannel) m_channelRank = RED;
-	const Imf::Channel *gChannel = channels.findChannel("G");
-	const Imf::Channel *bChannel = channels.findChannel("B");
+    
+    if(rChannel->type != HALF) std::cout<<" r is not half";
+    
+	const Channel *gChannel = channels.findChannel("G");
+	const Channel *bChannel = channels.findChannel("B");
 	if(rChannel && gChannel && bChannel) m_channelRank = RGB;
-	const Imf::Channel *aChannel = channels.findChannel("A");
+
+    if(gChannel->type != HALF) std::cout<<" g is not half";
+    if(bChannel->type != HALF) std::cout<<" b is not half";
+    
+	const Channel *aChannel = channels.findChannel("A");
 	if(rChannel && gChannel && bChannel && aChannel) m_channelRank = RGBA;
-	
+    
+    if(aChannel->type != HALF) std::cout<<" a is not half";
+    
 	const Imf::Channel *channelZPtr = channels.findChannel("Z");
 	if(channelZPtr) {
 	    m_channelRank = RGBAZ;
 	    m_zChannelName = "Z";
 	}
 	else {
-	    if(findZChannel(file))
-	        m_channelRank = RGBAZ;
+	    //if(findZChannel(channels))
+	    //    m_channelRank = RGBAZ;
 	}
 	
+    
+    
 		readPixels(file);
-		if(m_hasMipmap) setupMipmaps();
-	}
-	catch (const std::exception &exc) { 
-		std::cout<<"ERROR: "<<filename<<" cannot be loaded as an openEXR image\n";
-		return false; 
-	}
+		//if(m_hasMipmap) setupMipmaps();
+        std::cout<<"img wh "<<getWidth()<<" "<<getHeight();
+	//}
+	//catch (const std::exception &exc) { 
+	//	std::cout<<"ERROR: "<<filename<<" cannot be loaded as an openEXR image\n";
+	//	return false; 
+	//}
 
 	return true;
 }
 
-bool ZEXRImage::findZChannel(Imf::InputFile & file)
+bool ZEXRImage::findZChannel(const Imf::ChannelList &channels)
 {
 	m_zChannelName = "";
-	const Imf::ChannelList &channels = file.header().channels(); 
 	Imf::ChannelList::ConstIterator it = channels.begin();
-	for(; it!= channels.end(); ++it) {
-	    if(std::string(it.name()).find_last_of('Z') != std::string::npos) {
-	        m_zChannelName = it.name();
-	        break;
-	    }
+    
+	while(it!= channels.end()) {
+        //std::cout<<" ch "<<it.name();
+	    //if(std::string(it.name()).find_last_of('Z') != std::string::npos) {
+	   //     m_zChannelName = it.name();
+	   //     break;
+	   // }
+       ++it;
 	}
-	
+	return false;
 	if(m_zChannelName.size() < 1) return false;
 	
 	const Imf::Channel *channelZPtr = channels.findChannel(m_zChannelName.c_str());
@@ -193,6 +229,7 @@ bool ZEXRImage::findZChannel(Imf::InputFile & file)
 
 void ZEXRImage::doClear()
 {
+    std::cout<<"img clear";
     if(_pixels) delete[] _pixels;
 	_pixels = 0;
 	if(m_zData) delete[] m_zData;
@@ -246,10 +283,10 @@ void ZEXRImage::listExrChannelNames(const std::string& filename, std::vector<std
 
 void ZEXRImage::setupMipmaps()
 {
-	_numMipmaps = Log2((double)m_imageWidth);
+	_numMipmaps = Log2((double)getWidth() );
 	
 	ZEXRSampler* mipmap = new ZEXRSampler();
-	mipmap->setWidth(m_imageWidth);
+	mipmap->setWidth(getWidth());
 	mipmap->setPixels(this);
 	_mipmaps.push_back(mipmap);
 
@@ -263,34 +300,35 @@ void ZEXRImage::setupMipmaps()
 
 void ZEXRImage::readPixels(Imf::InputFile& file)
 {
-	Imath::Box2i dw = file.header().dataWindow();
+	Box2i dw = file.header().dataWindow();
 	
 	int colorRank = m_channelRank;
 	if(colorRank > 4) colorRank = 4;
 	const int size = getWidth() * getHeight() * colorRank;
 	const int stride = colorRank;
 	
+    std::cout<<"\n size "<<size;
 	_pixels = new half[size];
 	
-	Imf::FrameBuffer frameBuffer; 
+	FrameBuffer frameBuffer; 
 	frameBuffer.insert ("R",                                  // name 
-		Imf::Slice (Imf::HALF,                          // type 
+		Slice (HALF,                          // type 
 							   (char *) _pixels, 
-							   sizeof (*_pixels) * stride,    // xStride 
-							   sizeof (*_pixels) * getWidth() * stride));                         // fillValue 
-	_pixels++;
+							   sizeof (*_pixels) * 1,    // xStride 
+							   sizeof (*_pixels) * getWidth() ));                         // fillValue 
+	//_pixels++;
 	frameBuffer.insert ("G",                                  // name 
-		Imf::Slice (Imf::HALF,                          // type 
+		Slice (HALF,                          // type 
 							   (char *) _pixels, 
-							   sizeof (*_pixels) * stride,    // xStride 
-							   sizeof (*_pixels) * getWidth() * stride));
-	_pixels++;
+							   sizeof (*_pixels) * 1,    // xStride 
+							   sizeof (*_pixels) * getWidth() ));
+	//_pixels++;
 	frameBuffer.insert ("B",                                  // name 
-		Imf::Slice (Imf::HALF,                          // type 
+		Slice (HALF,                          // type 
 							   (char *) _pixels, 
-							   sizeof (*_pixels) * stride,    // xStride 
-							   sizeof (*_pixels) * getWidth() * stride));
-							   
+							   sizeof (*_pixels) * 1,    // xStride 
+							   sizeof (*_pixels) * getWidth() ));
+	/*						   
 	if(stride > 3) {
 		_pixels++;
 		frameBuffer.insert ("A",                                  // name 
@@ -299,10 +337,10 @@ void ZEXRImage::readPixels(Imf::InputFile& file)
 							   sizeof (*_pixels) * stride,    // xStride 
 							   sizeof (*_pixels) * getWidth() * stride));
 		_pixels--;
-	}
-	_pixels--;
-	_pixels--;
-	
+	}*/
+	//_pixels--;
+	//_pixels--;
+	/*
 	if(m_channelRank == RGBAZ) {
 	    m_zData = new float[getWidth() * getHeight()];
 		frameBuffer.insert (m_zChannelName.c_str(),                                  // name 
@@ -312,9 +350,11 @@ void ZEXRImage::readPixels(Imf::InputFile& file)
 							   sizeof (*m_zData) * getWidth() * 1));                         // fillValue 
 							   
 	}
-							   
-	file.setFrameBuffer (frameBuffer); 
-	file.readPixels (dw.min.y, dw.max.y);
+	*/						   
+	//file.setFrameBuffer (frameBuffer); 
+	//file.readPixels (dw.min.y, dw.max.y);
+    
+    std::cout<<"passed read pix";
 }
 
 void ZEXRImage::readZ(Imf::InputFile& file)
@@ -352,8 +392,8 @@ void ZEXRImage::readZ(Imf::InputFile& file)
 
 void ZEXRImage::allWhite()
 {
-	m_imageWidth = m_imageHeight = 1024;
-	const int size = m_imageWidth * m_imageHeight * 3;
+	setWidth(1024); setHeight(1024);
+	const int size = 1024 * 1024 * 3;
 	m_channelRank = RGB;
 	_pixels = new half[size];
 	
@@ -364,8 +404,8 @@ void ZEXRImage::allWhite()
 
 void ZEXRImage::allBlack()
 {
-	m_imageWidth = m_imageHeight = 1024;
-	const int size = m_imageWidth * m_imageHeight * 3;
+	setWidth(1024); setHeight(1024);
+	const int size = 1024 * 1024 * 3;
 	m_channelRank = RGB;
 	_pixels = new half[size];
 	
@@ -381,13 +421,13 @@ int ZEXRImage::getNumMipmaps() const
 
 void ZEXRImage::applyMask(BaseImage * another)
 {
-	const float du = 1.f / (float)m_imageWidth;
-	const float dv = 1.f / (float)m_imageHeight;
+	const float du = 1.f / (float)getWidth();
+	const float dv = 1.f / (float)getHeight();
 	int pixelRank = m_channelRank;
 	if(pixelRank > 4) pixelRank = 4;
-	for(int j = 0; j < m_imageHeight; j++)
+	for(int j = 0; j < getHeight(); j++)
 	{
-		for(int i = 0; i < m_imageWidth; i++)
+		for(int i = 0; i < getWidth(); i++)
 		{
 			float u = du * i;
 			float v = dv * j;
@@ -436,21 +476,29 @@ void ZEXRImage::sample(float u, float v, int count, float * dst) const
 		dst[i] = _pixels[loc + i];
 }
 
-bool ZEXRImage::getTile(float * dst, int ind, int tileSize, int rank) const
+bool ZEXRImage::getTile1(float * dst, int ind, int tileSize, int rank) const
 {
-	const int dimx = m_imageWidth / tileSize;
-	const int dimy = m_imageHeight / tileSize;
+    // std::cout<<" get tile "<<ind;
+    return false;
+    std::cout<<" getr w "<<getWidth();
+    
+    std::cout<<" getr h "<<getHeight();
+	const int dimx = getWidth() / tileSize;
+	const int dimy = getHeight() / tileSize;
 	int rind = ind % (dimx * dimy);
+    
 	int y = rind / dimx;
 	int x = rind - y * dimx;
+    std::cout<<" get tile "<<x<<","<<y;
 	return getTile(dst, x, y, tileSize, rank);
 }
 
 bool ZEXRImage::getTile(float * dst, int x, int y, int tileSize, int rank) const
 {	
+    std::cout<<" get tile "<<x<<","<<y;
 	int colorRank = m_channelRank;
 	if(colorRank > 4) colorRank = 4;
-	
+	/*
 	half *line = &_pixels[(y * tileSize * m_imageWidth + x * tileSize) * colorRank];
 	int i, j, k;
 	for(j=0;j<tileSize; j++) {
@@ -462,6 +510,6 @@ bool ZEXRImage::getTile(float * dst, int x, int y, int tileSize, int rank) const
 		}
 		line += m_imageWidth * colorRank;
 	}
-	
+	*/
 	return true;
 }

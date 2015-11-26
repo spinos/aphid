@@ -134,17 +134,21 @@ bool LfParameter::searchImagesIn(const char * dirname)
 
 void LfParameter::countPatches()
 {
+    ZEXRImage img;
 	m_numPatches = 0;
 	std::vector<std::string >::const_iterator it = m_imageNames.begin();
 	for(; it!=m_imageNames.end();++it) {
 		std::string fn = *it;
+        std::cout<<"\n to open "<<fn;
 		
-		ZEXRImage img;
-		if(img.open(fn.c_str()))
+		if(img.open(fn.c_str())) {
 			m_numPatches += (img.getWidth() / m_atomSize) * (img.getHeight() / m_atomSize);
+            std::cout<<"opend "<<img.isOpened();
+        }
 		else 
 			std::cout<<"\n cannot open exr "<<fn;
 	}
+    std::cout<<"\n pass "<<m_numPatches;
 	std::cout<<"\n num patch "<<m_numPatches;
 }
 
@@ -206,11 +210,12 @@ const LfParameter * LfWorld::param() const
 
 void LfWorld::fillDictionary(unsigned * imageBits, int imageW, int imageH)
 {
-	ZEXRImage img;
-	int imgI = m_param->randomImageInd();
-	std::string fn = m_param->imageName(imgI);
-	img.open(fn.c_str());
-	int preImgI = imgI;
+	ZEXRImage * img = NULL;
+	//int imgI;// = m_param->randomImageInd();
+	//std::string fn = m_param->imageName(imgI);
+	//img.open(fn.c_str());
+	//int preImgI = imgI;
+    
 	
 	const int n = m_param->numPatches();
 	const int k = m_param->dictionaryLength();
@@ -227,14 +232,16 @@ void LfWorld::fillDictionary(unsigned * imageBits, int imageW, int imageH)
 			if(ind < k) {
 /// init D with random signal 
 				float * d = m_D->column(ind);
-				imgI = m_param->randomImageInd();
-				if(preImgI != imgI) {
-					fn = m_param->imageName(imgI);
-					img.open(fn.c_str());
-					preImgI = imgI;
-				}
+                openImage(m_param->randomImageInd(), img);
+                if(!img) std::cout<<" null img ";
+                img->verbose();
+				//if(preImgI != imgI) {
+				//	fn = m_param->imageName(imgI);
+				//	img.open(fn.c_str());
+				//	preImgI = imgI;
+				//}
 				
-				img.getTile(d, rand(), s);
+				img->getTile1(d, rand(), s);
 				
 				fillPatch(&line[i * s], d, s, imageW);
 			}
@@ -246,7 +253,7 @@ void LfWorld::fillDictionary(unsigned * imageBits, int imageW, int imageH)
 	}
 	m_D->normalize();
 	m_D->AtA(*m_G);
-	cleanDictionary();
+	//cleanDictionary();
 }
 
 void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int rank)
@@ -269,8 +276,10 @@ void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int ra
 
 void LfWorld::cleanDictionary()
 {
+    ZEXRImage * img;
 	const int n = m_param->numPatches();
 	const int k = m_D->numColumns();
+    const int s = m_param->atomSize();
 	int i, j, l;
 	for (i = 0; i<k; ++i) {
 /// lower part of G
@@ -286,8 +295,10 @@ void LfWorld::cleanDictionary()
 			if(toClean) {
 /// D_j <- randomly choose signal element
 				DenseVector<float> dj(m_D->column(j), m_D->numRows() );
-				int rt = rand();
-				
+
+				openImage(m_param->randomImageInd(), img);
+                img->getTile1(dj.raw(), rand(), s);
+                
 				dj.normalize();
 /// G_j <- D^t * D_j
 				DenseVector<float> gj(m_G->column(j), k);
@@ -309,22 +320,28 @@ bool LfWorld::isImageOpened(const int ind, ZEXRImage * img) const
 		
 		if( m_openedImages[i]._ind == ind ) {
 			img = m_openedImages[i]._image;
+            std::cout<<" "<<i<<" is opened ";
+            
 			return true;
 		}
 	}
 	return false;
 }
 
-void LfWorld::opendImage(const int ind, ZEXRImage * img)
+void LfWorld::openImage(const int ind, ZEXRImage * img)
 {
-	ImageInd & imgind = m_openedImages[m_currentImage];
-	if(imgind._ind < 0) {
-		imgind._image = new ZEXRImage;
+    if(isImageOpened(ind, img)) return;
+    
+	ImageInd  * imgind = &m_openedImages[m_currentImage];
+	if(imgind->_ind < 0) {
+        std::cout<<"\n __ create "<<m_currentImage;
+		imgind->_image = new ZEXRImage;
 	}
-	imgind._ind = ind;
-	imgind._image->open(m_param->imageName(ind));
-	img = imgind._image;
-	
+	imgind->_ind = ind;
+	imgind->_image->open(m_param->imageName(ind));
+	img = imgind->_image;
+    img->verbose();
+	std::cout<<" open "<<m_currentImage<<"   ";
 	m_currentImage = (m_currentImage + 1) % MAX_NUM_OPENED_IMAGES;
 }
 

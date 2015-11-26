@@ -48,7 +48,7 @@ class LfWorld  {
 		int _ind;
 	};
 	
-#define MAX_NUM_OPENED_IMAGES 25 
+#define MAX_NUM_OPENED_IMAGES 16 
 	ImageInd m_openedImages[MAX_NUM_OPENED_IMAGES];
 	int m_currentImage;
 	
@@ -66,7 +66,7 @@ public:
 	void fillPatch(unsigned * dst, float * color, int s, int imageW, int rank = 3);
 protected:
 	bool isImageOpened(const int ind, ZEXRImage * img) const;
-	void opendImage(const int ind, ZEXRImage * img);
+	void openImage(const int ind, ZEXRImage * img);
 private:
 	void cleanDictionary();
 };

@@ -70,12 +70,14 @@ bool BaseFile::open(const std::string & fileName)
 	if(!clear()) return false;
 	
 	doClose();
-	
-	if(!doRead(fileName)) return false;
-	
+	std::cout<<"base read";
+	//if(!doRead(fileName)) return false;
+    doRead(fileName);
+	std::cout<<"base file open";
 	afterOpen();
 	setFileName(fileName);
 	setOpened();
+    
 	return true;
 }
 
