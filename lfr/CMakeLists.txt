@@ -9,7 +9,11 @@ set (CMAKE_BUILD_TYPE RELEASE)
 set (HEADER_FILES ../shared/Morton3D.h
 clapackTempl.h
 linearMath.h
-regr.h)
+regr.h
+LfParameter.h
+LfWorld.h
+LfThread.h
+LfWidget.h)
 include_directories ( ../shared ../kdtree)
 add_executable (testla ${HEADER_FILES} 
 ../shared/zEXRImage.cpp

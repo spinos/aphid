@@ -18,6 +18,7 @@ protected:
 
 private slots:
     void updatePixmap(const QImage &image);
+	void recvDictionary(const QImage &image);
 	void simulate(); 
 
 private:

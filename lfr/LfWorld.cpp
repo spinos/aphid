@@ -7,21 +7,24 @@
  *
  */
 #include "LfWorld.h"
-#include "linearMath.h"
 #include "regr.h"
 /// f2c macros conflict
 #define _WIN32
 #include <zEXRImage.h>
+#include <MersenneTwister.h>
+
 
 namespace lfr {
 
 LfWorld::LfWorld(LfParameter * param) 
 {
 	m_param = param;
-	m_D = new DenseMatrix<float>(param->dimensionOfX(), 
-										param->dictionaryLength() );
-	m_G = new DenseMatrix<float>(param->dictionaryLength(), 
-										param->dictionaryLength() );
+	const int m = param->dimensionOfX();
+	const int p = param->dictionaryLength();
+	m_D = new DenseMatrix<float>(m, p);
+	m_G = new DenseMatrix<float>(p, p);
+	m_A = new DenseMatrix<float>(p, p);
+	m_B = new DenseMatrix<float>(m, p);
 }
 
 LfWorld::~LfWorld() {}
@@ -122,6 +125,116 @@ void LfWorld::cleanDictionary()
 		}
 	}
 	m_G->addDiagonal(1e-10);
+}
+
+void LfWorld::preLearn()
+{
+	m_A->setZero();
+	m_A->addDiagonal(1e-5);
+	m_B->copy(*m_D);
+	m_B->scale(1e-5);
+}
+
+void LfWorld::learn(int iImage, int iPatch)
+{
+	const int k = m_D->numColumns();
+	DenseVector<float> beta(k);
+	DenseVector<int> ind(k);
+	
+	const int s = m_param->atomSize();
+	LAR<float> lar(m_D, m_G);
+	
+	DenseVector<float> y(m_param->dimensionOfX());
+	
+	ZEXRImage * img = m_param->openImage(iImage);
+	img->getTile1(y.raw(), iPatch, s);
+
+	lar.lars(y, beta, ind, 0.1);
+	
+	int nnz = 0;
+	int i=0;
+	for(;i<k;++i) {
+		if(ind[i] < 0) break;
+		nnz++;
+	}
+	if(nnz < 1) return;
+	
+	std::cout<<"\n\n nnz "<<nnz;
+	
+	sort<float, int>(ind.raw(), beta.raw(), 0, nnz-1);
+	
+/// A <- A + beta * beta^t
+	m_A->rank1Update(beta, ind, nnz);
+/// B <- B + y * beta^t
+	m_B->rank1Update(y, beta, ind, nnz);
+	
+	updateDictionary();
+	std::cout<<"\n\n";
+}
+
+void LfWorld::updateDictionary()
+{
+	const int p = m_D->numColumns();
+	DenseVector<float> ui(m_D->numRows());
+	int i, j;
+	for (j = 0; j<1; ++j) {
+		for (i = 0; i<p; ++i) {
+			const float Aii = m_A->column(i)[i];
+			if (Aii > 1e-6) {
+				DenseVector<float> di(m_D->column(i), m_D->numRows());
+				DenseVector<float> ai(m_A->column(i), m_A->numRows());
+				DenseVector<float> bi(m_B->column(i), m_B->numRows());
+/// ui <- (bi - D * ai) / Aii + di
+				m_D->mult(ui, ai, -1.0f);
+				ui.add(bi);
+				ui.scale(1.0f/Aii);
+				ui.add(di);
+/// di <- ui / max(|| ui ||, 1)				
+				float unm = ui.norm();
+				if(unm < 1.f) unm = 1.f;
+				ui.scale(1.f/unm);
+				m_D->copyColumn(i, ui.v());
+		   }
+		}
+	}
+	
+	m_D->normalize();
+	m_D->AtA(*m_G);
+	cleanDictionary();
+}
+
+void LfWorld::testLAR()
+{
+	std::cout<<"\n test least angle regression";
+	MersenneTwister twist(99);
+	
+	const int p = 200;
+	const int m = 11;
+	DenseMatrix<float> A(m, p);
+	DenseMatrix<float> G(p, p);
+	
+	float * c0 = A.raw();
+	int i, j;
+	for(i=0; i<p; i++) {
+		for(j=0;j<m;j++) {
+			c0[i*m+j] = twist.random() - 0.5;
+		}
+	}
+	
+	A.normalize();
+	A.AtA(G);
+	
+	DenseVector<float> y(m);
+	y.copyData(A.column(23));
+	for(i=0;i<m;i++)
+		y.raw()[i] += .03 * (twist.random() - 0.5);
+	
+	y.scale(10.0);
+	
+	DenseVector<float> beta(p);
+	DenseVector<int> ind(p);
+	LAR<float> lar(&A, &G);
+	lar.lars(y, beta, ind, 0.1);
 }
 
 }

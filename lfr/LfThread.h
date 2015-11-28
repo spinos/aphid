@@ -6,13 +6,13 @@
 #include <QThread>
 #include <QWaitCondition>
 
-#include "LfWorld.h"
-
 QT_BEGIN_NAMESPACE
 class QImage;
 QT_END_NAMESPACE
 
 namespace lfr {
+
+class LfWorld;
 
 class LfThread : public QThread
 {
@@ -24,8 +24,11 @@ public:
 
     void render(QSize resultSize);
 	void initAtoms();
-
+	void beginLearn();
+	
 signals:
+	void sendInitialDictionary(const QImage &image);
+	void sendDictionary(const QImage &image);
     void renderedImage(const QImage &image);
 
 protected:

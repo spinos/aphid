@@ -27,7 +27,7 @@ LfParameter::LfParameter(int argc, char *argv[])
 	m_currentImage = 0;
 	m_isValid = false;
 	m_atomSize = 10;
-	m_dictionaryLength = 1024;
+	m_dictionaryLength = 900;
 	bool foundImages = false;
 	if(argc == 1) {
 		m_isValid = searchImagesIn("./");
@@ -62,8 +62,8 @@ LfParameter::LfParameter(int argc, char *argv[])
 				}
 				try {
 					m_dictionaryLength = boost::lexical_cast<int>(argv[i+1]);
-					if(m_dictionaryLength < 1024) {
-						std::cout<<"\n bad --dictionaryLength value (< 1024)";
+					if(m_dictionaryLength < 900) {
+						std::cout<<"\n bad --dictionaryLength value (< 900)";
 						break;
 					}
 				}
@@ -79,7 +79,8 @@ LfParameter::LfParameter(int argc, char *argv[])
 					m_isValid = true;
 				}
 				else 
-					std::cout<<"\n image doesn't exist "<<argv[i];
+					m_isValid = searchImagesIn("./");
+					// std::cout<<"\n image doesn't exist "<<argv[i];
 			}
 		}
 	}
@@ -88,6 +89,18 @@ LfParameter::LfParameter(int argc, char *argv[])
 		std::cout<<"\n dictionary length "<<m_dictionaryLength;
 		countPatches();
 		m_isValid = m_numPatches > 0;
+	}
+	if(m_isValid) {
+		int w = 8; int h = m_dictionaryLength / w;
+		while(h>w) {
+			w<<=1;
+			h = m_dictionaryLength / w;
+		}
+		if(h*w < m_dictionaryLength) h++;
+		m_dictWidth = w * m_atomSize;
+		m_dictHeight = h * m_atomSize;
+		std::cout<<"\n dictionary image size "<<m_dictWidth<<" x "<<m_dictHeight
+		<<"\n passed parameter check\n";
 	}
 }
 
@@ -193,7 +206,6 @@ ZEXRImage *LfParameter::openImage(const int ind)
     idx = m_currentImage;
 	if(m_openedImages[idx]._ind < 0) {
 		m_openedImages[idx]._image = new ZEXRImage;
-		std::cout<<" create "<<m_openedImages[idx]._image<<"   ";
 	}
 	m_openedImages[idx]._ind = ind;
 	m_openedImages[idx]._image->open(imageName(ind));
@@ -201,6 +213,9 @@ ZEXRImage *LfParameter::openImage(const int ind)
 	m_currentImage = (m_currentImage + 1) % MAX_NUM_OPENED_IMAGES;
 	return m_openedImages[idx]._image;
 }
+
+void LfParameter::getDictionaryImageSize(int & x, int & y) const
+{ x = m_dictWidth; y = m_dictHeight; }
 
 void LfParameter::PrintHelp()
 {
@@ -210,7 +225,7 @@ void LfParameter::PrintHelp()
 	<<"\n Input file must be image of OpenEXR format. If no file is provided,"
 	<<"\n current dir will be searched for any file with name ending in .exr."
 	<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 10"
-	<<"\n -dl or --dictionaryLength    integer    length of dictionary, no less than 1024"
+	<<"\n -dl or --dictionaryLength    integer    length of dictionary, no less than 900"
 	<<"\n -h or --help    print this information"
 	<<"\n";
 }

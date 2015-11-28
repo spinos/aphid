@@ -1,7 +1,9 @@
 #include <QtGui>
-#include <cmath>
+//#include <cmath>
 #include <iostream>
 #include "LfThread.h"
+#include "LfWorld.h"
+
 namespace lfr {
 LfThread::LfThread(LfWorld * world, QObject *parent)
     : QThread(parent)
@@ -38,24 +40,46 @@ void LfThread::render(QSize resultSize)
 
 void LfThread::initAtoms()
 {
-	const int s = m_world->param()->atomSize();
-	const int k = m_world->param()->dictionaryLength();
-	int w = 8; int h = k / w;
-	while(h>w) {
-		w<<=1;
-		h = k / w;
-	}
-	if(h*w < k) h++;
-	
-	QImage img(w*s, h*s, QImage::Format_RGB32);
-	uint *scanLine = reinterpret_cast<uint *>(img.bits());
+	int w, h;
+	m_world->param()->getDictionaryImageSize(w, h);
 	m_world->initDictionary();
-	m_world->dictionaryAsImage(scanLine, w*s, h*s);
-	emit renderedImage(img);
+	QImage img(w, h, QImage::Format_RGB32);
+	uint *scanLine = reinterpret_cast<uint *>(img.bits());
+	m_world->dictionaryAsImage(scanLine, w, h);
+	emit sendInitialDictionary(img);
+}
+
+void LfThread::beginLearn()
+{
+	m_world->preLearn();
+	
+	QMutexLocker locker(&mutex);
+
+	if (!isRunning()) {
+        start(LowPriority);
+    } else {
+        restart = true;
+        condition.wakeOne();
+    }
 }
 
 void LfThread::run()
 {
+	int w, h;
+	m_world->param()->getDictionaryImageSize(w, h);
+	QImage img(w, h, QImage::Format_RGB32);
+	uint *scanLine = reinterpret_cast<uint *>(img.bits());
+		
+	int i=0;
+	for(;i<200;i++) {
+		m_world->learn(0, i);
+		
+		if((i & 3) == 0) {
+			m_world->dictionaryAsImage(scanLine, w, h);
+			emit sendDictionary(img);
+		}
+	}
+/*
     forever {
         mutex.lock();
 
@@ -91,5 +115,6 @@ void LfThread::run()
         restart = false;
         mutex.unlock();
     }
+*/
 }
 }

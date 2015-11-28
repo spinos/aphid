@@ -1,9 +1,43 @@
+#ifndef CLAPACKTEMPL_H
+#define CLAPACKTEMPL_H
+
 #include <f2c.h>
 #include <clapack.h>
 
 template<typename T>
 T absoluteValue(T a)
 { return a > 0 ? a : -a; }
+
+template <typename T, typename I>
+void sort(I* irOut, T* prOut,I beg, I end) {
+   I i;
+   if (end <= beg) return;
+   I pivot=beg;
+   for (i = beg+1; i<=end; ++i) {
+      if (irOut[i] < irOut[pivot]) {
+         if (i == pivot+1) {
+            I tmp = irOut[i];
+            T tmpd = prOut[i];
+            irOut[i]=irOut[pivot];
+            prOut[i]=prOut[pivot];
+            irOut[pivot]=tmp;
+            prOut[pivot]=tmpd;
+         } else {
+            I tmp = irOut[pivot+1];
+            T tmpd = prOut[pivot+1];
+            irOut[pivot+1]=irOut[pivot];
+            prOut[pivot+1]=prOut[pivot];
+            irOut[pivot]=irOut[i];
+            prOut[pivot]=prOut[i];
+            irOut[i]=tmp;
+            prOut[i]=tmpd;
+         }
+         ++pivot;
+      }
+   }
+   sort(irOut,prOut,beg,pivot-1);
+   sort(irOut,prOut,pivot+1,end);
+}
 
 /// res = dot(x, y)
 template <typename T> T clapack_dot(integer n, T *dx, integer incx, T *dy, integer incy);
@@ -240,3 +274,5 @@ template <> int clapack_sytri<float>(char *uplo, integer n, float *a, integer ld
 {
 	return ssytri_(uplo, &n, a, &lda, ipiv, work, info);
 }
+#endif        //  #ifndef CLAPACKTEMPL_H
+

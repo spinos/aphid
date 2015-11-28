@@ -34,6 +34,7 @@ public:
     
     void setZero();
 	void setOne();
+	void setValue(const T x);
 /// l2-norm ||x|| 
 	T norm() const;
 /// dot(x, x)
@@ -66,6 +67,16 @@ public:
 	void minus(const DenseVector<T> & x, const T alpha = 1.0);
 	void copy(const DenseVector<T> & x);
 	void copyData(const T * x);
+	
+	static void PrintVector(char* desc, int n, T* a)
+	{
+		std::cout<<"\n "<<desc<<"\n| ";
+		int i;
+		for(i=0; i< n; i++) {
+			std::cout<<" "<<a[i];
+		}
+		std::cout<<" |\n";
+	}
 	
 	friend std::ostream& operator<<(std::ostream &output, const DenseVector<T> & p) {
         output << p.str();
@@ -140,7 +151,11 @@ void DenseVector<T>::setZero()
 
 template<typename T>
 void DenseVector<T>::setOne()
-{ for(int i = 0; i<m_numElements; i++) m_v[i] = 1.0; }
+{ setValue(1.0); }
+
+template<typename T>
+void DenseVector<T>::setValue(const T x)
+{ for(int i = 0; i<m_numElements; i++) m_v[i] = x; }
 
 template<typename T>
 T DenseVector<T>::norm() const
@@ -328,6 +343,7 @@ public:
 	T* raw();
 	void getColumn(DenseVector<T> & x, const int i) const;
 	
+	void copy(const DenseMatrix<T> & x);
 	void copyColumn(const int i, const T * x);
 	
 	void setZero();
@@ -362,6 +378,13 @@ public:
 	
 /// b = (AT A)^-1AT
 	bool pseudoInverse(DenseMatrix<T>& b) const;
+	
+/// A <- A + alpha * vec1 * vec2^t
+	void rank1Update(const DenseVector<T> & vec1, const DenseVector<T> & vec2, const DenseVector<int> & ind2,
+						const int n2, const T alpha=1.0);
+/// A <- A + alpha * vec * vec^t
+	void rank1Update(const DenseVector<T> & vec1, const DenseVector<int> & ind,
+						const int n, const T alpha=1.0);
 	
 	friend std::ostream& operator<<(std::ostream &output, const DenseMatrix<T> & p) {
         output << p.str();
@@ -463,6 +486,10 @@ T* DenseMatrix<T>::raw()
 template <typename T>
 void DenseMatrix<T>::getColumn(DenseVector<T> & x, const int i) const
 { memcpy(x.raw(), column(i), m_numRows*sizeof(T)); }
+
+template <typename T>
+void DenseMatrix<T>::copy(const DenseMatrix<T> & x)
+{ memcpy(m_v, x.column(0), m_numRows*m_numColumns*sizeof(T)); }
 
 template <typename T>
 void DenseMatrix<T>::copyColumn(const int i, const T * x)
@@ -585,6 +612,40 @@ void DenseMatrix<T>::addDiagonal(const T diag)
 	const int n = std::min<T>(m_numRows, m_numColumns);
 	for(int i = 0; i<n; ++i) 
 		m_v[i*m_numRows+i] += diag; 
+};
+
+template <typename T>  
+void DenseMatrix<T>::rank1Update(const DenseVector<T> & vec1, const DenseVector<T> & vec2, const DenseVector<int> & ind2,
+						const int n2, const T alpha)
+{
+	int * r = ind2.v();
+	T* v = vec2.v();
+	for (int i = 0; i<n2; ++i) {
+		DenseVector<T> Xi(column(r[i]), numRows());
+		Xi.add(vec1,v[i]*alpha);
+	}
+}
+
+template <typename T>  
+void DenseMatrix<T>::rank1Update(const DenseVector<T> & vec1, const DenseVector<int> & ind,
+	const int n, const T alpha) 
+{
+	int * r = ind.v();
+	T* v = vec1.v();
+	int i, j;
+	if (alpha == 1.0) {
+	  for (i = 0; i<n; ++i) {
+		 for (j = 0; j<n; ++j) {
+			column(r[i])[r[j]] += v[j]*v[i];
+		 }
+	  }
+	} else {
+	  for (i = 0; i<n; ++i) {
+		 for (j = 0; j<n; ++j) {
+			column(r[i])[r[j]] += alpha*v[j]*v[i];
+		 }
+	  }
+	}
 };
 
 /// http://scc.qibebt.cas.cn/docs/library/Intel%20MKL/2011/mkl_manual/lse/functn_syevr.htm

@@ -7,6 +7,7 @@ using namespace lfr;
 
 int main(int argc, char *argv[])
 {
+#if 1
 	LfParameter param(argc, argv);
 	
 	if(!param.isValid()) {
@@ -20,4 +21,8 @@ int main(int argc, char *argv[])
     LfWidget widget(&world);
     widget.show();
     return app.exec();
+#else
+	LfWorld::testLAR();
+    return 1;
+#endif
 }

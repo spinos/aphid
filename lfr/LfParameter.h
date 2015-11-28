@@ -19,10 +19,14 @@ class LfParameter {
 	int m_currentImage;
 	
 	std::vector<std::string > m_imageNames;
-	std::string m_imageName;
+/// n x n atom
 	int m_atomSize;
+/// num predictors
 	int m_dictionaryLength;
+/// total num patches
 	int m_numPatches;
+/// dictionary image size
+	int m_dictWidth, m_dictHeight;
 	bool m_isValid;
 public:
 	LfParameter(int argc, char *argv[]);
@@ -39,6 +43,7 @@ public:
 	bool isImageOpened(const int ind, int & idx) const;
 	ZEXRImage *openImage(const int ind);
 	
+	void getDictionaryImageSize(int & x, int & y) const;
 	static void PrintHelp();
 protected:
 

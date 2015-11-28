@@ -10,8 +10,11 @@ LfWidget::LfWidget(LfWorld * world, QWidget *parent)
 	m_world = world;
 	m_thread = new LfThread(world, this);
     qRegisterMetaType<QImage>("QImage");
-    connect(m_thread, SIGNAL(renderedImage(QImage)),
+    connect(m_thread, SIGNAL(sendInitialDictionary(QImage)),
             this, SLOT(updatePixmap(QImage)));
+			
+	connect(m_thread, SIGNAL(sendDictionary(QImage)),
+            this, SLOT(recvDictionary(QImage)));
 
     setWindowTitle(tr("Image Atoms"));
 
@@ -46,6 +49,13 @@ void LfWidget::resizeEvent(QResizeEvent * /* event */)
 void LfWidget::updatePixmap(const QImage &image)
 {
     m_pixmap = QPixmap::fromImage(image);
+    update();
+	m_thread->beginLearn();
+}
+
+void LfWidget::recvDictionary(const QImage &image)
+{
+	m_pixmap = QPixmap::fromImage(image);
     update();
 }
 
