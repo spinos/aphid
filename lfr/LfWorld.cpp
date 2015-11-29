@@ -8,6 +8,7 @@
  */
 #include "LfWorld.h"
 #include "regr.h"
+#include "psnr.h"
 /// f2c macros conflict
 #define _WIN32
 #include <zEXRImage.h>
@@ -29,6 +30,7 @@ LfWorld::LfWorld(LfParameter * param)
 	m_y = new DenseVector<float>(m);
 	m_beta = new DenseVector<float>(p);
 	m_ind = new DenseVector<int>(p);
+	m_errorCalc = new Psnr<float>(m_D);
 }
 
 LfWorld::~LfWorld() {}
@@ -77,15 +79,16 @@ void LfWorld::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH)
 
 void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int rank)
 {
-	unsigned crgb[3];
+	int crgb[3];
 	int i, j, k;
 	unsigned * line = dst;
 	for(j=0;j<s; j++) {
 		for(i=0; i<s; i++) {
 			unsigned v = 255<<24;
 			for(k=0;k<rank;k++) {				
-				crgb[k] = 500 * color[(j * s + i) * rank + k];
-				crgb[k] = std::min<unsigned>(crgb[k], 255);
+				crgb[k] = 8 + 500 * color[(j * s + i) * rank + k];
+				crgb[k] = std::min<int>(crgb[k], 255);
+				crgb[k] = std::max<int>(crgb[k], 0);
 			}
 			v = v | ( crgb[0] << 16 );
 			v = v | ( crgb[1] << 8 );
@@ -107,10 +110,12 @@ void LfWorld::cleanDictionary()
 			bool toClean = false;
 			if(j==i) {
 /// diagonal part
-				toClean = absoluteValue<float>( m_G->column(i)[j] ) < 1e-4;
+				toClean = absoluteValue<float>( m_G->column(i)[j] ) < 1e-5;
 			}
 			else {
-				toClean = ( absoluteValue<float>( m_G->column(i)[j] ) / sqrt( m_G->column(i)[i] * m_G->column(j)[j]) ) > 0.9999;
+				float ab = m_G->column(i)[i] * m_G->column(j)[j];
+				if(ab < 1e-5) toClean = true;
+				else toClean = ( absoluteValue<float>( m_G->column(i)[j] ) / sqrt( ab ) ) > 0.991;
 			}
 			if(toClean) {
 /// D_j <- randomly choose signal element
@@ -129,7 +134,7 @@ void LfWorld::cleanDictionary()
 			}
 		}
 	}
-	m_G->addDiagonal(1e-10);
+	m_G->addDiagonal(1e-7);
 }
 
 void LfWorld::preLearn()
@@ -148,7 +153,7 @@ void LfWorld::learn(int iImage, int iPatch)
 	ZEXRImage * img = m_param->openImage(iImage);
 	img->getTile1(m_y->raw(), iPatch, s);
 
-	m_lar->lars(*m_y, *m_beta, *m_ind, 0.1);
+	m_lar->lars(*m_y, *m_beta, *m_ind, 1e-5);
 	
 	int nnz = 0;
 	int i=0;
@@ -172,7 +177,7 @@ void LfWorld::updateDictionary()
 	DenseVector<float> ui(m_D->numRows());
 	int i, j;
 /// repeat ?
-	for (j = 0; j<2; ++j) {
+	for (j = 0; j<6; ++j) {
 		for (i = 0; i<p; ++i) {
 			const float Aii = m_A->column(i)[i];
 			if (Aii > 1e-6) {
@@ -186,8 +191,9 @@ void LfWorld::updateDictionary()
 				ui.add(di);
 /// di <- ui / max(|| ui ||, 1)				
 				float unm = ui.norm();
-				if(unm < 1.f) unm = 1.f;
-				ui.scale(1.f/unm);
+				if(unm > 1.0) 
+					ui.scale(1.f/unm);
+				
 				m_D->copyColumn(i, ui.v());
 		   }
 		   else {
@@ -214,6 +220,22 @@ void LfWorld::fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, uns
 		if((*m_ind)[i*ratio] < 0) break;
 		scanline[i] = fillColor;
 	}
+}
+
+void LfWorld::computePSNR(float * result, int iImage)
+{
+	ZEXRImage * img = m_param->openImage(iImage);
+	const int s = m_param->atomSize();
+	m_errorCalc->reset();
+	int i;
+	const int n = m_param->imageNumPatches(iImage);
+	for(i=0;i<n;++i) {
+		img->getTile1(m_y->raw(), i, s);
+		m_lar->lars(*m_y, *m_beta, *m_ind, 1e-5);
+		
+		m_errorCalc->add(*m_y, *m_beta, *m_ind);
+	}
+	*result = m_errorCalc->finish();
 }
 
 void LfWorld::testLAR()
@@ -247,7 +269,7 @@ void LfWorld::testLAR()
 	DenseVector<float> beta(p);
 	DenseVector<int> ind(p);
 	LAR<float> lar(&A, &G);
-	lar.lars(y, beta, ind, 0.1);
+	lar.lars(y, beta, ind, 0.0005);
 }
 
 void LfWorld::raiseLuma(unsigned * crgb)

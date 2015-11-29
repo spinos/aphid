@@ -42,12 +42,15 @@ void LfWidget::paintEvent(QPaintEvent * /* event */)
         return;
     }
 
-	painter.drawPixmap(QPoint(2,2), m_pixmap);
+	int x, y;
+	m_world->param()->getDictionaryImageSize(x, y);
+	x *= 2;
+	y *= 2;
+	painter.drawPixmap(QPoint(2,2), m_pixmap.scaled(x,y));
 	
 	if(m_sparsityPix.isNull()) return;
 	
-	int x, y;
-	m_world->param()->getDictionaryImageSize(x, y);
+	
 	painter.drawPixmap(QPoint(x+4, 2), m_sparsityPix);
 }
 
@@ -66,7 +69,6 @@ void LfWidget::updatePixmap(const QImage &image)
 void LfWidget::recvDictionary(const QImage &image)
 {
 	m_pixmap = QPixmap::fromImage(image);
-    update();
 }
 
 void LfWidget::recvSparsity(const QImage &image)

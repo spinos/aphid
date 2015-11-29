@@ -44,6 +44,8 @@ private:
     bool restart;
     bool abort;
 
+	QImage * m_spasityImg;
+	QImage * m_dictImg;
 };
 
 }

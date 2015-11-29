@@ -10,7 +10,11 @@ LfThread::LfThread(LfWorld * world, QObject *parent)
 	m_world = world;
     restart = false;
     abort = false;
-
+/// 128 x 256 spasity visualization
+	m_spasityImg = new QImage(128, 256, QImage::Format_RGB32);
+	int w, h;
+	world->param()->getDictionaryImageSize(w, h);
+	m_dictImg = new QImage(w, h, QImage::Format_RGB32);
 }
 
 LfThread::~LfThread()
@@ -66,14 +70,10 @@ void LfThread::run()
 {
 	int w, h;
 	m_world->param()->getDictionaryImageSize(w, h);
-	QImage dictImg(w, h, QImage::Format_RGB32);
-	uint *scanLine = reinterpret_cast<uint *>(dictImg.bits());
+	uint *scanLine = reinterpret_cast<uint *>(m_dictImg->bits());
 		
 	const int n = m_world->param()->imageNumPatches(0);
-	
-/// 128 x 256 spasity visualization
-	QImage spasityImg(128, 256, QImage::Format_RGB32);
-	uint *spasityLine = reinterpret_cast<uint *>(spasityImg.bits());
+	uint *spasityLine = reinterpret_cast<uint *>(m_spasityImg->bits());
 	
 	unsigned cwhite = 255<<24;
 	cwhite = cwhite | ( 255 << 16 );
@@ -89,10 +89,14 @@ void LfThread::run()
 		if(((i+1) & 255) == 0 || (i+1)==n) {
 			m_world->updateDictionary();
 			m_world->dictionaryAsImage(scanLine, w, h);
-			emit sendDictionary(dictImg);
-			emit sendSparsity(spasityImg);
+			emit sendDictionary(*m_dictImg);
+			emit sendSparsity(*m_spasityImg);
 		}
 	}
+		float err;
+		m_world->computePSNR(&err, 0);
+		std::cout<<"\n PSNR "<<err;
+		std::cout<<"\n repeat";
 	}
 /*
     forever {

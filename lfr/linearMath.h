@@ -177,7 +177,7 @@ template<typename T>
 void DenseVector<T>::normalize()
 {
 	const T s = norm();
-	if(s > 1e-9) scale(1.0 / s);
+	if(s > 1e-5) scale(1.0 / s);
 }
 
 template<typename T>

@@ -95,7 +95,7 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 	T normX = Y.normSq();
 		
 	if(normX < 1e-5) return;
-	std::cout<<"\n in err "<<normX;
+	// std::cout<<"\n in err "<<normX;
 	
 /// R <- Y	
 /// c <- D^t * R
@@ -130,8 +130,14 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 			clapack_symv<T>("U",i,T(1.0),
                   m_invGs.column(0), m_p, m_Gs.column(i),1,T(0.0), m_u.raw(), 1);
 /// i column of invGs
-			const T schur = T(1.0) / ( m_Gs.column(i)[i] 
+			T lower = ( m_Gs.column(i)[i] 
 									- clapack_dot<T>(i, m_u.raw(), 1, m_Gs.column(i), 1) );
+			if(abs(lower) < 1e-10) {
+				std::cout<<"\n divided by zero "<<lower;
+				lower = 1e-10 * sign(lower);
+			}
+			const T schur = T(1.0) / lower;
+			
 			m_invGs.column(i)[i] = schur;
 			memcpy(m_invGs.column(i), m_u.v(), i*sizeof(T));
 			clapack_scal(i, -schur, m_invGs.column(i), 1);
@@ -204,11 +210,11 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 			coeff2 += m_correl[ind[j]] * m_u[j];
 		
 		// std::cout<<"\n maxStep "<<maxStep;
-		std::cout<<"\n c "<<currentCorrelation;
-		std::cout<<" step max "<<maxStep;
+		// std::cout<<"\n c "<<currentCorrelation;
+		// std::cout<<" step max "<<maxStep;
 /// step_max2 = current_correlation - constraint(lambda)
 		step = min(min(step, currentCorrelation - lambda), maxStep);
-		std::cout<<" step "<<step;
+		// std::cout<<" step "<<step;
 		if(step == INFINITY) break;
 		
 /// coefficients
@@ -222,12 +228,12 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 		// std::cout<<"\n coeff1 "<<coeff1<<" 2 "<<coeff2;
 /// reduce normX
 		normX += coeff1*step*step - 2*coeff2*step;
-		std::cout<<" normX "<<normX;
+		// std::cout<<" normX "<<normX;
 /// add thrs
 ///		thrs += step * coeff1;
 		
 		if (step == maxStep) {
-			std::cout<<"\n downdate "<<ind[firstPassZero];
+			// std::cout<<"\n downdate "<<ind[firstPassZero];
 			
 			for( j = firstPassZero; j<i; ++j) {
 				m_Ga.copyColumn(j, m_Ga.column(j+1));
@@ -264,7 +270,7 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 			toSelect = true;
 			
 /// exit condition
-		if(numIter++ >= maxNumIter || absoluteValue<T>(step) < 1e-5 
+		if(numIter++ >= maxNumIter || absoluteValue<T>(step) < 1e-5
 				|| step == (currentCorrelation - lambda)
 				|| normX < 1e-10) break;
 	}

@@ -17,6 +17,7 @@ namespace lfr {
 template<typename T> class DenseVector;
 template<typename T> class DenseMatrix;
 template<typename T> class LAR;
+template<typename T> class Psnr;
 
 class LfWorld  {
 
@@ -37,7 +38,8 @@ class LfWorld  {
 	DenseMatrix<float> * m_B;
 /// least angle regression
 	LAR<float> * m_lar;
-
+/// peak signal-to-noise ratio
+	Psnr<float> * m_errorCalc;
 public:
 
 	LfWorld(LfParameter * param);
@@ -51,6 +53,7 @@ public:
 	void preLearn();
 	void learn(int iImage, int iPatch);
 	void updateDictionary();
+	void computePSNR(float * result, int iImage);
 	static void testLAR();
 protected:
 	

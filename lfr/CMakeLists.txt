@@ -10,6 +10,7 @@ set (HEADER_FILES ../shared/Morton3D.h
 clapackTempl.h
 linearMath.h
 regr.h
+psnr.h
 LfParameter.h
 LfWorld.h
 LfThread.h
