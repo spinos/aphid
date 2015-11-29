@@ -19,12 +19,13 @@ class LfParameter {
 	int m_currentImage;
 	
 	std::vector<std::string > m_imageNames;
+	std::vector<int > m_numPatches;
 /// n x n atom
 	int m_atomSize;
-/// num predictors
-	int m_dictionaryLength;
+/// d/m where m = n^2 * 3 
+	float m_overcomplete;
 /// total num patches
-	int m_numPatches;
+	int m_numTotalPatches;
 /// dictionary image size
 	int m_dictWidth, m_dictHeight;
 	bool m_isValid;
@@ -35,10 +36,11 @@ public:
 	bool isValid() const;
 	int atomSize() const;
 	int dictionaryLength() const;
-	int numPatches() const;
+	int numTotalPatches() const;
 	int dimensionOfX() const;
 	int randomImageInd() const;
 	std::string imageName(int i) const;
+	int imageNumPatches(int i) const;
 	
 	bool isImageOpened(const int ind, int & idx) const;
 	ZEXRImage *openImage(const int ind);
@@ -49,7 +51,7 @@ protected:
 
 private:
 	bool searchImagesIn(const char * dirname);
-	void countPatches();
+	bool countPatches();
 };
 
 }

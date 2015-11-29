@@ -29,6 +29,7 @@ public:
 signals:
 	void sendInitialDictionary(const QImage &image);
 	void sendDictionary(const QImage &image);
+	void sendSparsity(const QImage &image);
     void renderedImage(const QImage &image);
 
 protected:

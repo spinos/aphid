@@ -1,6 +1,7 @@
 #include <QtGui>
 #include "LfWidget.h"
 #include "LfThread.h"
+#include "LfWorld.h"
 
 namespace lfr {
 
@@ -15,6 +16,9 @@ LfWidget::LfWidget(LfWorld * world, QWidget *parent)
 			
 	connect(m_thread, SIGNAL(sendDictionary(QImage)),
             this, SLOT(recvDictionary(QImage)));
+			
+	connect(m_thread, SIGNAL(sendSparsity(QImage)),
+            this, SLOT(recvSparsity(QImage)));
 
     setWindowTitle(tr("Image Atoms"));
 
@@ -38,7 +42,13 @@ void LfWidget::paintEvent(QPaintEvent * /* event */)
         return;
     }
 
-	painter.drawPixmap(QPoint(), m_pixmap);
+	painter.drawPixmap(QPoint(2,2), m_pixmap);
+	
+	if(m_sparsityPix.isNull()) return;
+	
+	int x, y;
+	m_world->param()->getDictionaryImageSize(x, y);
+	painter.drawPixmap(QPoint(x+4, 2), m_sparsityPix);
 }
 
 void LfWidget::resizeEvent(QResizeEvent * /* event */)
@@ -57,6 +67,12 @@ void LfWidget::recvDictionary(const QImage &image)
 {
 	m_pixmap = QPixmap::fromImage(image);
     update();
+}
+
+void LfWidget::recvSparsity(const QImage &image)
+{
+	m_sparsityPix = QPixmap::fromImage(image);
+	update();
 }
 
 void LfWidget::simulate()

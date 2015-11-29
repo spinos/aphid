@@ -27,7 +27,7 @@ LfParameter::LfParameter(int argc, char *argv[])
 	m_currentImage = 0;
 	m_isValid = false;
 	m_atomSize = 10;
-	m_dictionaryLength = 900;
+	m_overcomplete = 1.f;
 	bool foundImages = false;
 	if(argc == 1) {
 		m_isValid = searchImagesIn("./");
@@ -55,20 +55,20 @@ LfParameter::LfParameter(int argc, char *argv[])
 					break;
 				}
 			}
-			if(strcmp(argv[i], "-dl") == 0 || strcmp(argv[i], "--dictionaryLength") == 0) {
+			if(strcmp(argv[i], "-oc") == 0 || strcmp(argv[i], "--overcomplete") == 0) {
 				if(i==argc-1) {
-					std::cout<<"\n --dictionaryLength value is not set";
+					std::cout<<"\n --overcomplete value is not set";
 					break;
 				}
 				try {
-					m_dictionaryLength = boost::lexical_cast<int>(argv[i+1]);
-					if(m_dictionaryLength < 900) {
-						std::cout<<"\n bad --dictionaryLength value (< 900)";
+					m_overcomplete = boost::lexical_cast<float>(argv[i+1]);
+					if(m_overcomplete < 1.f) {
+						std::cout<<"\n bad --m_overcomplete value (< 1.0)";
 						break;
 					}
 				}
 				catch(const boost::bad_lexical_cast &) {
-					std::cout<<"\n bad --dictionaryLength value "<<argv[i+1];
+					std::cout<<"\n bad --m_overcomplete value "<<argv[i+1];
 					break;
 				}
 			}
@@ -86,17 +86,15 @@ LfParameter::LfParameter(int argc, char *argv[])
 	}
 	if(m_isValid) {
 		std::cout<<"\n atom size "<<m_atomSize;
-		std::cout<<"\n dictionary length "<<m_dictionaryLength;
-		countPatches();
-		m_isValid = m_numPatches > 0;
+		std::cout<<"\n dictionary overcompleteness "<<m_overcomplete;
+		m_isValid = countPatches();
 	}
 	if(m_isValid) {
-		int w = 8; int h = m_dictionaryLength / w;
-		while(h>w) {
-			w<<=1;
-			h = m_dictionaryLength / w;
-		}
-		if(h*w < m_dictionaryLength) h++;
+		const float p = dictionaryLength();
+		int w = sqrt(p); 
+		if(w*w < p) w++;
+		int h = p / w;
+		if(h*w < p) h++;
 		m_dictWidth = w * m_atomSize;
 		m_dictHeight = h * m_atomSize;
 		std::cout<<"\n dictionary image size "<<m_dictWidth<<" x "<<m_dictHeight
@@ -141,10 +139,11 @@ bool LfParameter::searchImagesIn(const char * dirname)
 	return true;
 }
 
-void LfParameter::countPatches()
+bool LfParameter::countPatches()
 {
+	m_numPatches.clear();
     ZEXRImage img;
-	m_numPatches = 0;
+	m_numTotalPatches = 0;
 	std::vector<std::string >::const_iterator it = m_imageNames.begin();
 	for(; it!=m_imageNames.end();++it) {
 		std::string fn = *it;
@@ -152,25 +151,30 @@ void LfParameter::countPatches()
 		ZEXRImage::PrintChannelNames(fn);
 		
 		if(img.open(fn.c_str())) {
-			m_numPatches += (img.getWidth() / m_atomSize) * (img.getHeight() / m_atomSize);
+			m_numPatches.push_back( (img.getWidth() / m_atomSize) * (img.getHeight() / m_atomSize) );
+			m_numTotalPatches += m_numPatches.back();
         }
 		else 
 			std::cout<<"\n cannot open exr "<<fn;
 	}
-	std::cout<<"\n num patch "<<m_numPatches;
+	std::cout<<"\n num total patches "<<m_numTotalPatches;
+	return m_numTotalPatches > 0;
 }
 
 int LfParameter::atomSize() const
 { return m_atomSize; }
 
 int LfParameter::dictionaryLength() const
-{ return m_dictionaryLength; }
+{ return dimensionOfX() * m_overcomplete; }
 
 std::string LfParameter::imageName(int i) const
 { return m_imageNames[i]; }
 
-int LfParameter::numPatches() const
-{ return m_numPatches; }
+int LfParameter::imageNumPatches(int i) const
+{ return m_numPatches[i]; }
+
+int LfParameter::numTotalPatches() const
+{ return m_numTotalPatches; }
 
 int LfParameter::dimensionOfX() const
 { return m_atomSize * m_atomSize * 3; }
@@ -225,7 +229,7 @@ void LfParameter::PrintHelp()
 	<<"\n Input file must be image of OpenEXR format. If no file is provided,"
 	<<"\n current dir will be searched for any file with name ending in .exr."
 	<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 10"
-	<<"\n -dl or --dictionaryLength    integer    length of dictionary, no less than 900"
+	<<"\n -oc or --overcomplete    float    overcompleteness of dictionary, d/m, no less than 1.0"
 	<<"\n -h or --help    print this information"
 	<<"\n";
 }

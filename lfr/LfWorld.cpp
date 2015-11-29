@@ -25,6 +25,10 @@ LfWorld::LfWorld(LfParameter * param)
 	m_G = new DenseMatrix<float>(p, p);
 	m_A = new DenseMatrix<float>(p, p);
 	m_B = new DenseMatrix<float>(m, p);
+	m_lar = new LAR<float>(m_D, m_G);
+	m_y = new DenseVector<float>(m);
+	m_beta = new DenseVector<float>(p);
+	m_ind = new DenseVector<int>(p);
 }
 
 LfWorld::~LfWorld() {}
@@ -34,7 +38,6 @@ const LfParameter * LfWorld::param() const
 
 void LfWorld::initDictionary()
 {
-	const int n = m_param->numPatches();
 	const int k = m_param->dictionaryLength();
 	const int s = m_param->atomSize();
 	int i, j;
@@ -74,16 +77,19 @@ void LfWorld::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH)
 
 void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int rank)
 {
+	unsigned crgb[3];
 	int i, j, k;
 	unsigned * line = dst;
 	for(j=0;j<s; j++) {
 		for(i=0; i<s; i++) {
 			unsigned v = 255<<24;
 			for(k=0;k<rank;k++) {				
-				unsigned rgb = 255 * color[(j * s + i) * rank + k];
-				rgb = std::min<unsigned>(rgb, 255);
-				v = v | ( rgb << ((2-k) << 3) );
+				crgb[k] = 500 * color[(j * s + i) * rank + k];
+				crgb[k] = std::min<unsigned>(crgb[k], 255);
 			}
+			v = v | ( crgb[0] << 16 );
+			v = v | ( crgb[1] << 8 );
+			v = v | ( crgb[2] );
 			line[i] = v;
 		}
 		line += imageW;
@@ -92,8 +98,7 @@ void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int ra
 
 void LfWorld::cleanDictionary()
 {
-    const int n = m_param->numPatches();
-	const int k = m_D->numColumns();
+    const int k = m_D->numColumns();
     const int s = m_param->atomSize();
 	int i, j, l;
 	for (i = 0; i<k; ++i) {
@@ -138,38 +143,27 @@ void LfWorld::preLearn()
 void LfWorld::learn(int iImage, int iPatch)
 {
 	const int k = m_D->numColumns();
-	DenseVector<float> beta(k);
-	DenseVector<int> ind(k);
-	
 	const int s = m_param->atomSize();
-	LAR<float> lar(m_D, m_G);
-	
-	DenseVector<float> y(m_param->dimensionOfX());
 	
 	ZEXRImage * img = m_param->openImage(iImage);
-	img->getTile1(y.raw(), iPatch, s);
+	img->getTile1(m_y->raw(), iPatch, s);
 
-	lar.lars(y, beta, ind, 0.1);
+	m_lar->lars(*m_y, *m_beta, *m_ind, 0.1);
 	
 	int nnz = 0;
 	int i=0;
 	for(;i<k;++i) {
-		if(ind[i] < 0) break;
+		if((*m_ind)[i] < 0) break;
 		nnz++;
 	}
 	if(nnz < 1) return;
 	
-	std::cout<<"\n\n nnz "<<nnz;
-	
-	sort<float, int>(ind.raw(), beta.raw(), 0, nnz-1);
+	sort<float, int>(m_ind->raw(), m_beta->raw(), 0, nnz-1);
 	
 /// A <- A + beta * beta^t
-	m_A->rank1Update(beta, ind, nnz);
+	m_A->rank1Update(*m_beta, *m_ind, nnz);
 /// B <- B + y * beta^t
-	m_B->rank1Update(y, beta, ind, nnz);
-	
-	updateDictionary();
-	std::cout<<"\n\n";
+	m_B->rank1Update(*m_y, *m_beta, *m_ind, nnz);
 }
 
 void LfWorld::updateDictionary()
@@ -177,7 +171,8 @@ void LfWorld::updateDictionary()
 	const int p = m_D->numColumns();
 	DenseVector<float> ui(m_D->numRows());
 	int i, j;
-	for (j = 0; j<1; ++j) {
+/// repeat ?
+	for (j = 0; j<2; ++j) {
 		for (i = 0; i<p; ++i) {
 			const float Aii = m_A->column(i)[i];
 			if (Aii > 1e-6) {
@@ -195,12 +190,30 @@ void LfWorld::updateDictionary()
 				ui.scale(1.f/unm);
 				m_D->copyColumn(i, ui.v());
 		   }
+		   else {
+				DenseVector<float> di(m_D->column(i), m_D->numRows());
+				di.setZero();
+		   }
 		}
 	}
 	
 	m_D->normalize();
 	m_D->AtA(*m_G);
 	cleanDictionary();
+}
+
+void LfWorld::fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor)
+{
+	DenseVector<unsigned> scanline(&imageBits[iLine * imageW], imageW);
+	scanline.setZero();
+	const int k = m_param->dictionaryLength();
+	const float ratio = (float)k / imageW;
+			
+	int i = 0;
+	for(;i<imageW;++i) {
+		if((*m_ind)[i*ratio] < 0) break;
+		scanline[i] = fillColor;
+	}
 }
 
 void LfWorld::testLAR()
@@ -235,6 +248,17 @@ void LfWorld::testLAR()
 	DenseVector<int> ind(p);
 	LAR<float> lar(&A, &G);
 	lar.lars(y, beta, ind, 0.1);
+}
+
+void LfWorld::raiseLuma(unsigned * crgb)
+{
+	int Y = 0.299 * crgb[0] + 0.587 * crgb[1] + 0.114 * crgb[2];
+	if(Y < 8) Y = 8;
+	int Cb = 128 - 0.168736 * crgb[0] - 0.331264 * crgb[1] + 0.5 * crgb[2];
+	int Cr = 128 + 0.5 * crgb[0] - 0.418688 * crgb[1] - 0.081312 * crgb[2];
+	crgb[0] = Y + 1.402 * (Cr - 128);
+	crgb[1] = Y - 0.34414 * (Cb - 128) - 0.71414 * (Cr - 128);
+	crgb[2] = Y + 1.772 * (Cb - 128);
 }
 
 }

@@ -609,7 +609,7 @@ bool DenseMatrix<T>::inverseSymmetric()
 template <typename T>  
 void DenseMatrix<T>::addDiagonal(const T diag) 
 { 
-	const int n = std::min<T>(m_numRows, m_numColumns);
+	const int n = min(m_numRows, m_numColumns);
 	for(int i = 0; i<n; ++i) 
 		m_v[i*m_numRows+i] += diag; 
 };

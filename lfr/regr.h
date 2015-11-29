@@ -55,7 +55,7 @@ public:
 /// ind is indices to selections
 /// lambda is penalty constraint of sparsity, 
 /// large lambda value induces less non-zero coefficients and less accurate projection
-	void lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<int> & ind, const T lambda = 0.0);
+	void lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<int> & ind, const T lambda = 0.1);
 	
 protected:
 	
@@ -161,7 +161,7 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 		}
 		// std::cout<<"\n first zero"<<firstPassZero;
 /// absolute max of <D, R>, first one selected
-		T currentCorrelation = abs(m_correl[ind[0]]);
+		T currentCorrelation = absoluteValue<T>(m_correl[ind[0]]);
 		
 /// all 3 parts of work <- Ga * u
 		clapack_gemv<T>("N", m_p, i+1, T(1.0), m_Ga.column(0),
@@ -204,11 +204,11 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 			coeff2 += m_correl[ind[j]] * m_u[j];
 		
 		// std::cout<<"\n maxStep "<<maxStep;
-		std::cout<<"\n C "<<currentCorrelation;
-		std::cout<<"\n step "<<step<<" max "<<maxStep;
-/// step_max2 = current_correlation-constraint(lambda)
+		std::cout<<"\n c "<<currentCorrelation;
+		std::cout<<" step max "<<maxStep;
+/// step_max2 = current_correlation - constraint(lambda)
 		step = min(min(step, currentCorrelation - lambda), maxStep);
-		
+		std::cout<<" step "<<step;
 		if(step == INFINITY) break;
 		
 /// coefficients
@@ -222,13 +222,9 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 		// std::cout<<"\n coeff1 "<<coeff1<<" 2 "<<coeff2;
 /// reduce normX
 		normX += coeff1*step*step - 2*coeff2*step;
-		std::cout<<"\n normX "<<normX;
+		std::cout<<" normX "<<normX;
 /// add thrs
 ///		thrs += step * coeff1;
-		
-/// exit condition
-		numIter++;
-		if(numIter >= maxNumIter || abs(step) < 1e-5 || normX < 1e-10) break;
 		
 		if (step == maxStep) {
 			std::cout<<"\n downdate "<<ind[firstPassZero];
@@ -266,9 +262,12 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 		}
 		else 
 			toSelect = true;
+			
+/// exit condition
+		if(numIter++ >= maxNumIter || absoluteValue<T>(step) < 1e-5 
+				|| step == (currentCorrelation - lambda)
+				|| normX < 1e-10) break;
 	}
-	
-	// showProof(Y, beta, ind);
 }
 	
 template<typename T>

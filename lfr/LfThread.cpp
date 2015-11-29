@@ -1,5 +1,4 @@
 #include <QtGui>
-//#include <cmath>
 #include <iostream>
 #include "LfThread.h"
 #include "LfWorld.h"
@@ -67,17 +66,33 @@ void LfThread::run()
 {
 	int w, h;
 	m_world->param()->getDictionaryImageSize(w, h);
-	QImage img(w, h, QImage::Format_RGB32);
-	uint *scanLine = reinterpret_cast<uint *>(img.bits());
+	QImage dictImg(w, h, QImage::Format_RGB32);
+	uint *scanLine = reinterpret_cast<uint *>(dictImg.bits());
 		
+	const int n = m_world->param()->imageNumPatches(0);
+	
+/// 128 x 256 spasity visualization
+	QImage spasityImg(128, 256, QImage::Format_RGB32);
+	uint *spasityLine = reinterpret_cast<uint *>(spasityImg.bits());
+	
+	unsigned cwhite = 255<<24;
+	cwhite = cwhite | ( 255 << 16 );
+	cwhite = cwhite | ( 255 << 8 );
+	cwhite = cwhite | ( 255 );
+	
+	forever {
 	int i=0;
-	for(;i<200;i++) {
+	for(;i<n;i++) {
 		m_world->learn(0, i);
+		m_world->fillSparsityGraph(spasityLine, i & 255, 128, cwhite);
 		
-		if((i & 3) == 0) {
+		if(((i+1) & 255) == 0 || (i+1)==n) {
+			m_world->updateDictionary();
 			m_world->dictionaryAsImage(scanLine, w, h);
-			emit sendDictionary(img);
+			emit sendDictionary(dictImg);
+			emit sendSparsity(spasityImg);
 		}
+	}
 	}
 /*
     forever {
