@@ -14,6 +14,7 @@ psnr.h
 LfParameter.h
 LfWorld.h
 LfThread.h
+StatisticWidget.h
 LfWidget.h)
 include_directories ( ../shared ../kdtree)
 add_executable (testla ${HEADER_FILES} 
@@ -22,6 +23,7 @@ LfParameter.cpp
 LfWorld.cpp
 LfThread.cpp
 LfWidget.cpp
+StatisticWidget.cpp
 main.cpp)
 
 if(WIN32)
