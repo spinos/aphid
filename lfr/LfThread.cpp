@@ -101,10 +101,11 @@ void LfThread::run()
 				}
 			}
 		}
-		m_world->beginPSNR();
+		
 		for(i=0;i<n;i++) {
 			img.open(m_world->param()->imageName(i));
 			const int m = m_world->param()->imageNumPatches(i);
+			m_world->beginPSNR();
 			for(j=0;j<m;j++) {
 				m_world->computeError(&img, j);
 				m_world->fillSparsityGraph(spasityLine, j & 255, 128, cwhite);
@@ -113,11 +114,12 @@ void LfThread::run()
 					emit sendSparsity(*m_spasityImg);
 				}
 			}
+			float err;
+			m_world->endPSNR(&err);
+			emit sendPSNR(err);
 		}
 		
-		float err;
-		m_world->endPSNR(&err);
-		std::cout<<"\n PSNR "<<err;
+		
 		std::cout<<"\n repeat";
 	}
 /*

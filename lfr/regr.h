@@ -270,9 +270,9 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 			toSelect = true;
 			
 /// exit condition
-		if(numIter++ >= maxNumIter || absoluteValue<T>(step) < 1e-5
+		if(numIter++ >= maxNumIter || absoluteValue<T>(step) < 1e-4
 				|| step == (currentCorrelation - lambda)
-				|| normX < 1e-10) break;
+				|| normX < 1e-8) break;
 	}
 }
 	

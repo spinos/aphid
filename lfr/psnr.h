@@ -68,16 +68,15 @@ void Psnr<T>::add(const DenseVector<T> & y, const DenseVector<T> & beta, const D
 	}
 	
 	if(nnz < 1) {
-		m_n += m;
+		m_n += m/3;
 		return;
 	}
 	
+	m_yhat.setZero();
+	
 	int j;
 	for(i=0;i<m;i++) {
-		m_yhat[i] = 0;
 		for(j=0;j<nnz;j++) {
-			//if( m_X->column(ind[j])[i] != m_X->column(ind[j])[i]) std::cout<<"\n nan d"<<ind[j]<<" "<<i;
-			//if( beta[j] != beta[j] )  std::cout<<"\n nan beta"<<j;
 			m_yhat[i] += m_X->column(ind[j])[i] * beta[j];
 		}
 	}
@@ -87,9 +86,9 @@ void Psnr<T>::add(const DenseVector<T> & y, const DenseVector<T> & beta, const D
 	for(i=0;i<nl;i++) {
 		T e = 0.299 * m_yhat[i*3] + 0.587 * m_yhat[i*3 + 1] + 0.114 * m_yhat[i*3 + 2];
 		e -= 0.299 * y[i*3] + 0.587 * y[i*3 + 1] + 0.114 * y[i*3 + 2];
-		m_sum += 3 * e * e;
+		m_sum += e * e;
 	}
-	m_n += m;
+	m_n += m/3;
 }
 	
 template<typename T>

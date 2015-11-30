@@ -175,7 +175,7 @@ void LfWorld::updateDictionary()
 	DenseVector<float> ui(m_D->numRows());
 	int i, j;
 /// repeat ?
-	for (j = 0; j<1; ++j) {
+//	for (j = 0; j<1; ++j) {
 		for (i = 0; i<p; ++i) {
 			const float Aii = m_A->column(i)[i];
 			if (Aii > 1e-8) {
@@ -199,7 +199,7 @@ void LfWorld::updateDictionary()
 				di.setZero();
 		   }
 		}		
-	}
+//	}
 	
 	m_D->normalize();
 	m_D->AtA(*m_G);

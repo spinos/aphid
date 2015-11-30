@@ -1,7 +1,6 @@
 #include <QApplication>
 #include "LfWorld.h"
-#include "LfWidget.h"
-#include <iostream>
+#include "window.h"
 
 using namespace lfr;
 
@@ -18,8 +17,10 @@ int main(int argc, char *argv[])
 	LfWorld world(&param);
 	
     QApplication app(argc, argv);
-    LfWidget widget(&world);
-    widget.show();
+    Window window(&world);
+	//window.showMaximized();
+    window.resize(800, 600);
+    window.show();
     return app.exec();
 #else
 	LfWorld::testLAR();

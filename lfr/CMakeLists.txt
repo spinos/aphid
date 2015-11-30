@@ -14,8 +14,9 @@ psnr.h
 LfParameter.h
 LfWorld.h
 LfThread.h
-StatisticWidget.h
-LfWidget.h)
+StatisticDialog.h
+LfWidget.h
+window.h)
 include_directories ( ../shared ../kdtree)
 add_executable (testla ${HEADER_FILES} 
 ../shared/zEXRImage.cpp
@@ -23,7 +24,8 @@ LfParameter.cpp
 LfWorld.cpp
 LfThread.cpp
 LfWidget.cpp
-StatisticWidget.cpp
+StatisticDialog.cpp
+window.cpp
 main.cpp)
 
 if(WIN32)
