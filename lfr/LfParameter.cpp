@@ -26,7 +26,7 @@ LfParameter::LfParameter(int argc, char *argv[])
 	}
 	m_currentImage = 0;
 	m_isValid = false;
-	m_atomSize = 10;
+	m_atomSize = 8;
 	m_overcomplete = 1.f;
 	bool foundImages = false;
 	if(argc == 1) {
@@ -45,8 +45,8 @@ LfParameter::LfParameter(int argc, char *argv[])
 				}
 				try {
 					m_atomSize = boost::lexical_cast<int>(argv[i+1]);
-					if(m_atomSize < 10) {
-						std::cout<<"\n bad --atomSize value (< 10)";
+					if(m_atomSize < 8) {
+						std::cout<<"\n bad --atomSize value (< 8)";
 						break;
 					}
 				}
@@ -228,7 +228,7 @@ void LfParameter::PrintHelp()
 	<<"\nDescription:\n lfr learns the underlying pattern of input images."
 	<<"\n Input file must be image of OpenEXR format. If no file is provided,"
 	<<"\n current dir will be searched for any file with name ending in .exr."
-	<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 10"
+	<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 8"
 	<<"\n -oc or --overcomplete    float    overcompleteness of dictionary, d/m, no less than 1.0"
 	<<"\n -h or --help    print this information"
 	<<"\n";

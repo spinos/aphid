@@ -114,8 +114,7 @@ void LfWorld::cleanDictionary()
 			}
 			else {
 				float ab = m_G->column(i)[i] * m_G->column(j)[j];
-				if(ab < 1e-5) toClean = true;
-				else toClean = ( absoluteValue<float>( m_G->column(i)[j] ) / sqrt( ab ) ) > 0.991;
+				toClean = ( absoluteValue<float>( m_G->column(i)[j] ) / sqrt( ab ) ) > 0.99;
 			}
 			if(toClean) {
 /// D_j <- randomly choose signal element
