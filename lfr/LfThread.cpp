@@ -11,8 +11,8 @@ LfThread::LfThread(LfWorld * world, QObject *parent)
 	m_world = world;
     restart = false;
     abort = false;
-/// 128 x 256 spasity visualization
-	m_spasityImg = new QImage(128, 256, QImage::Format_RGB32);
+/// 100 x 256 spasity visualization
+	m_spasityImg = new QImage(100, 256, QImage::Format_RGB32);
 	int w, h;
 	world->param()->getDictionaryImageSize(w, h);
 	m_dictImg = new QImage(w, h, QImage::Format_RGB32);
@@ -91,7 +91,7 @@ void LfThread::run()
 			const int m = m_world->param()->imageNumPatches(i);
 			for(j=0;j<m;j++) {
 				m_world->learn(&img, j);
-				m_world->fillSparsityGraph(spasityLine, j & 255, 128, cwhite);
+				m_world->fillSparsityGraph(spasityLine, j & 255, 100, cwhite);
 			
 				if(((j+1) & 255) == 0 || (j+1)==m) {
 					m_world->updateDictionary();
@@ -108,7 +108,7 @@ void LfThread::run()
 			m_world->beginPSNR();
 			for(j=0;j<m;j++) {
 				m_world->computeError(&img, j);
-				m_world->fillSparsityGraph(spasityLine, j & 255, 128, cwhite);
+				m_world->fillSparsityGraph(spasityLine, j & 255, 100, cwhite);
 				
 				if(((j+1) & 255) == 0 || (j+1)==m) {
 					emit sendSparsity(*m_spasityImg);
@@ -118,9 +118,6 @@ void LfThread::run()
 			m_world->endPSNR(&err);
 			emit sendPSNR(err);
 		}
-		
-		
-		std::cout<<"\n repeat";
 	}
 /*
     forever {

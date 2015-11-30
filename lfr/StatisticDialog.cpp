@@ -14,36 +14,84 @@ StatisticDialog::StatisticDialog(LfWorld * world, QWidget *parent)
 
     setWindowTitle(tr("Statistics"));
 
-    resize(384, 256);
+    resize(520, 240);
 }
 
 void StatisticDialog::paintEvent(QPaintEvent * /* event */)
 {
     QPainter painter(this);
-    painter.fillRect(rect(), Qt::black);
+    painter.fillRect(rect(), Qt::gray);
+	QPen pn(Qt::black);
+	pn.setWidth(1);
+	painter.setPen(pn);
+	painter.setBrush(Qt::NoBrush);
+	
+	drawSparsity(painter, 5, 45);
+	drawPSNR(painter, 5, 175);
+}
 
+void StatisticDialog::drawSparsity(QPainter & painter, int baseX, int baseY)
+{
 	if(m_sparsityPix.isNull()) return;
 	
-	painter.translate(0, 128);	
+	painter.translate(baseX + 26, baseY);	
 	painter.rotate(-90);
-	painter.scale(1,2);
+	painter.scale(2, 1.75);
 	painter.drawPixmap(QPoint(), m_sparsityPix);
 	
-	if(m_psnrs.size() < 1) return;
 	painter.resetTransform();
-	painter.translate(0, 240);
-	QPen pn(Qt::green);
-	painter.setPen(pn);
-	painter.setBrush(Qt::white);
 	
+	const int tenY = baseY - 20;
+	const int lft = baseX + 20;
+	const int rgt = baseX + 480;
+	
+	painter.drawText( QPoint(baseX, tenY), tr("0.1"));
+	painter.drawText( QPoint(rgt, tenY), tr("0.1"));
+	painter.drawLine(QPoint(lft, tenY), QPoint(rgt, tenY));
+	
+	painter.drawText( QPoint(baseX, baseY), tr("0.0"));
+	painter.drawText( QPoint(rgt, baseY), tr("0.0"));
+	painter.drawLine(QPoint(lft, baseY), QPoint(rgt, baseY));
+	
+	painter.drawText( QPoint(baseX+200, baseY+20), tr("Sparsity"));
+}
+
+void StatisticDialog::drawPSNR(QPainter & painter, int baseX, int baseY)
+{
+	const int rgt = baseX + 480;
+	const int lft = baseX + 20;
+	const int twentY = baseY - 40;
+	const int thirtY = baseY - 60;
+	
+	painter.drawText( QPoint(baseX, baseY), tr("0"));
+	painter.drawLine(QPoint(lft, baseY), QPoint(rgt, baseY));
+	painter.drawText( QPoint(rgt, baseY), tr("0"));
+	
+	painter.drawText( QPoint(baseX, twentY), tr("20"));
+	painter.drawLine(QPoint(lft, twentY), QPoint(rgt, twentY));
+	painter.drawText( QPoint(rgt, twentY), tr("20"));
+	
+	painter.drawText( QPoint(baseX, thirtY), tr("30"));
+	painter.drawLine(QPoint(lft, thirtY), QPoint(rgt, thirtY));
+	painter.drawText( QPoint(rgt, thirtY), tr("30"));
+	
+	painter.drawText( QPoint(baseX+200, baseY+20), tr("PSNR"));
+	
+	if(m_psnrs.size() < 1) return;
+	
+	QPen pn(Qt::blue);
+	pn.setWidth(2);
+	painter.setPen(pn);
+	
+	const int llft = baseX + 26;
 	if(m_psnrs.size() > 1) {
 		int i = 1;
 		for(;i<m_psnrs.size();i++) {
-			painter.drawLine(QPoint( (i-1)*2, m_psnrs[i-1] ), QPoint( i*2, m_psnrs[i] ) );
+			painter.drawLine(QPoint(llft + (i-1)*4, baseY+ m_psnrs[i-1] ), QPoint(llft + i*4, baseY+ m_psnrs[i] ) );
 		}
 	}
 	else
-		painter.drawPoint ( 0, m_psnrs[0] );	
+		painter.drawPoint (llft, baseY+m_psnrs[0] );
 }
 
 void StatisticDialog::resizeEvent(QResizeEvent * /* event */)
@@ -58,7 +106,7 @@ void StatisticDialog::recvSparsity(const QImage &image)
 
 void StatisticDialog::recvPSNR(float ratio)
 {
-	if(m_psnrs.size() >= 256) 
+	if(m_psnrs.size() >= 128) 
 		m_psnrs.pop_front();
 	
 	int iratio = ratio * 2;

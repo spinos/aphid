@@ -23,6 +23,10 @@ public slots:
    void recvPSNR(float ratio);
 	
 private:
+	void drawSparsity(QPainter & painter, int baseX, int baseY);
+	void drawPSNR(QPainter & painter, int baseX, int baseY);
+	
+private:
 	QPixmap m_sparsityPix;
 	std::deque<int> m_psnrs;
 };
