@@ -33,3 +33,10 @@ Gram-Schmidt
 http://cns.bu.edu/%7Emvss/courses/cn700/CN700-Lec3.pdf
 
 https://en.wikipedia.org/wiki/QR_decomposition
+
+inpainting color images in learned dictionary
+
+sparse learned representations for image restoration
+
+
+
