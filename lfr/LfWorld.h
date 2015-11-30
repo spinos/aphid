@@ -51,9 +51,12 @@ public:
 	void dictionaryAsImage(unsigned * imageBits, int imageW, int imageH);
 	void fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor);
 	void preLearn();
-	void learn(int iImage, int iPatch);
+	void learn(const ZEXRImage * image, int iPatch);
 	void updateDictionary();
-	void computePSNR(float * result, int iImage);
+	void beginPSNR();
+	void computeError(const ZEXRImage * image, int iPatch);
+	void endPSNR(float * result);
+	
 	static void testLAR();
 protected:
 	

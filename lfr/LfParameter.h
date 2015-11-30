@@ -39,6 +39,7 @@ public:
 	int numTotalPatches() const;
 	int dimensionOfX() const;
 	int randomImageInd() const;
+	int numImages() const;
 	std::string imageName(int i) const;
 	int imageNumPatches(int i) const;
 	

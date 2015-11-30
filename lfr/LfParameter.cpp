@@ -185,6 +185,9 @@ int LfParameter::randomImageInd() const
 	return rand() % m_imageNames.size();
 }
 
+int LfParameter::numImages() const
+{ return m_imageNames.size(); }
+
 bool LfParameter::isImageOpened(const int ind, int & idx) const
 {
 	int i = 0;

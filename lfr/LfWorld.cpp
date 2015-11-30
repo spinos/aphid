@@ -110,11 +110,11 @@ void LfWorld::cleanDictionary()
 			bool toClean = false;
 			if(j==i) {
 /// diagonal part
-				toClean = absoluteValue<float>( m_G->column(i)[j] ) < 1e-5;
+				toClean = absoluteValue<float>( m_G->column(i)[j] ) < 1e-7;
 			}
 			else {
 				float ab = m_G->column(i)[i] * m_G->column(j)[j];
-				toClean = ( absoluteValue<float>( m_G->column(i)[j] ) / sqrt( ab ) ) > 0.99;
+				toClean = ( absoluteValue<float>( m_G->column(i)[j] ) / sqrt( ab ) ) > 0.9999;
 			}
 			if(toClean) {
 /// D_j <- randomly choose signal element
@@ -133,7 +133,7 @@ void LfWorld::cleanDictionary()
 			}
 		}
 	}
-	m_G->addDiagonal(1e-7);
+	m_G->addDiagonal(1e-8);
 }
 
 void LfWorld::preLearn()
@@ -144,15 +144,14 @@ void LfWorld::preLearn()
 	m_B->scale(1e-5);
 }
 
-void LfWorld::learn(int iImage, int iPatch)
+void LfWorld::learn(const ZEXRImage * image, int iPatch)
 {
 	const int k = m_D->numColumns();
 	const int s = m_param->atomSize();
 	
-	ZEXRImage * img = m_param->openImage(iImage);
-	img->getTile1(m_y->raw(), iPatch, s);
+	image->getTile1(m_y->raw(), iPatch, s);
 
-	m_lar->lars(*m_y, *m_beta, *m_ind, 1e-5);
+	m_lar->lars(*m_y, *m_beta, *m_ind, 0.0);
 	
 	int nnz = 0;
 	int i=0;
@@ -176,10 +175,10 @@ void LfWorld::updateDictionary()
 	DenseVector<float> ui(m_D->numRows());
 	int i, j;
 /// repeat ?
-	for (j = 0; j<6; ++j) {
+	for (j = 0; j<1; ++j) {
 		for (i = 0; i<p; ++i) {
 			const float Aii = m_A->column(i)[i];
-			if (Aii > 1e-6) {
+			if (Aii > 1e-8) {
 				DenseVector<float> di(m_D->column(i), m_D->numRows());
 				DenseVector<float> ai(m_A->column(i), m_A->numRows());
 				DenseVector<float> bi(m_B->column(i), m_B->numRows());
@@ -199,7 +198,7 @@ void LfWorld::updateDictionary()
 				DenseVector<float> di(m_D->column(i), m_D->numRows());
 				di.setZero();
 		   }
-		}
+		}		
 	}
 	
 	m_D->normalize();
@@ -221,21 +220,19 @@ void LfWorld::fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, uns
 	}
 }
 
-void LfWorld::computePSNR(float * result, int iImage)
+void LfWorld::beginPSNR()
+{ m_errorCalc->reset(); }
+
+void LfWorld::computeError(const ZEXRImage * image, int iPatch)
 {
-	ZEXRImage * img = m_param->openImage(iImage);
 	const int s = m_param->atomSize();
-	m_errorCalc->reset();
-	int i;
-	const int n = m_param->imageNumPatches(iImage);
-	for(i=0;i<n;++i) {
-		img->getTile1(m_y->raw(), i, s);
-		m_lar->lars(*m_y, *m_beta, *m_ind, 1e-5);
-		
-		m_errorCalc->add(*m_y, *m_beta, *m_ind);
-	}
-	*result = m_errorCalc->finish();
+	image->getTile1(m_y->raw(), iPatch, s);
+	m_lar->lars(*m_y, *m_beta, *m_ind, 0.0);
+	m_errorCalc->add(*m_y, *m_beta, *m_ind);
 }
+
+void LfWorld::endPSNR(float * result)
+{ *result = m_errorCalc->finish(); }
 
 void LfWorld::testLAR()
 {

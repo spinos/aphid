@@ -2,6 +2,7 @@
 #include <iostream>
 #include "LfThread.h"
 #include "LfWorld.h"
+#include <zEXRImage.h>
 
 namespace lfr {
 LfThread::LfThread(LfWorld * world, QObject *parent)
@@ -72,7 +73,11 @@ void LfThread::run()
 	m_world->param()->getDictionaryImageSize(w, h);
 	uint *scanLine = reinterpret_cast<uint *>(m_dictImg->bits());
 		
-	const int n = m_world->param()->imageNumPatches(0);
+	
+	ZEXRImage img;
+	const int n = m_world->param()->numImages();
+	int i, j;
+	
 	uint *spasityLine = reinterpret_cast<uint *>(m_spasityImg->bits());
 	
 	unsigned cwhite = 255<<24;
@@ -81,20 +86,37 @@ void LfThread::run()
 	cwhite = cwhite | ( 255 );
 	
 	forever {
-	int i=0;
-	for(;i<n;i++) {
-		m_world->learn(0, i);
-		m_world->fillSparsityGraph(spasityLine, i & 255, 128, cwhite);
-		
-		if(((i+1) & 255) == 0 || (i+1)==n) {
-			m_world->updateDictionary();
-			m_world->dictionaryAsImage(scanLine, w, h);
-			emit sendDictionary(*m_dictImg);
-			emit sendSparsity(*m_spasityImg);
+		for(i=0;i<n;i++) {
+			img.open(m_world->param()->imageName(i));
+			const int m = m_world->param()->imageNumPatches(i);
+			for(j=0;j<m;j++) {
+				m_world->learn(&img, j);
+				m_world->fillSparsityGraph(spasityLine, j & 255, 128, cwhite);
+			
+				if(((j+1) & 255) == 0 || (j+1)==m) {
+					m_world->updateDictionary();
+					m_world->dictionaryAsImage(scanLine, w, h);
+					emit sendDictionary(*m_dictImg);
+					emit sendSparsity(*m_spasityImg);
+				}
+			}
 		}
-	}
+		m_world->beginPSNR();
+		for(i=0;i<n;i++) {
+			img.open(m_world->param()->imageName(i));
+			const int m = m_world->param()->imageNumPatches(i);
+			for(j=0;j<m;j++) {
+				m_world->computeError(&img, j);
+				m_world->fillSparsityGraph(spasityLine, j & 255, 128, cwhite);
+				
+				if(((j+1) & 255) == 0 || (j+1)==m) {
+					emit sendSparsity(*m_spasityImg);
+				}
+			}
+		}
+		
 		float err;
-		m_world->computePSNR(&err, 0);
+		m_world->endPSNR(&err);
 		std::cout<<"\n PSNR "<<err;
 		std::cout<<"\n repeat";
 	}
