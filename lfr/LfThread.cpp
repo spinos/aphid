@@ -2,7 +2,7 @@
 #include <iostream>
 #include "LfThread.h"
 #include "LfWorld.h"
-#include <zEXRImage.h>
+#include <ExrImage.h>
 
 namespace lfr {
 LfThread::LfThread(LfWorld * world, QObject *parent)
@@ -74,7 +74,7 @@ void LfThread::run()
 	uint *scanLine = reinterpret_cast<uint *>(m_dictImg->bits());
 		
 	
-	ZEXRImage img;
+	ExrImage img;
 	const int n = m_world->param()->numImages();
 	int i, j;
 	

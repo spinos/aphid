@@ -31,7 +31,7 @@ BaseFile::BaseFile(const char * name)
 }
 
 BaseFile::~BaseFile() 
-{ close(); }
+{}
 
 bool BaseFile::clear()
 {

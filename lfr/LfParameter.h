@@ -3,14 +3,14 @@
 
 /// forward declaration 
 /// include openexr headers now will cause macros conflictions
-class ZEXRImage;
+class ExrImage;
 
 namespace lfr {
 
 class LfParameter {
 
     struct ImageInd {
-		ZEXRImage * _image;
+		ExrImage * _image;
 		int _ind;
 	};
 	
@@ -44,7 +44,7 @@ public:
 	int imageNumPatches(int i) const;
 	
 	bool isImageOpened(const int ind, int & idx) const;
-	ZEXRImage *openImage(const int ind);
+	ExrImage *openImage(const int ind);
 	
 	void getDictionaryImageSize(int & x, int & y) const;
 	static void PrintHelp();
