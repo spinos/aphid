@@ -39,4 +39,16 @@ inpainting color images in learned dictionary
 sparse learned representations for image restoration
 
 
-
+m_average = new DenseMatrix<float>(m, m);
+	m_average->setZero();
+	int i, j;
+	const int m3 = m / 3; 
+	int lo, hi;
+	for(j=0;j<m;j++) {
+	    lo = (j / m3) * m3; 
+	    hi = lo + m3;
+	    for(i=lo;i<hi;i++) {
+	        m_average->column(j)[i] = 5.25 / m3;
+	    }
+	}
+	m_average->addDiagonal(1.0);
