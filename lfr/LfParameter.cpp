@@ -142,16 +142,16 @@ bool LfParameter::searchImagesIn(const char * dirname)
 bool LfParameter::countPatches()
 {
 	m_numPatches.clear();
-    ZEXRImage img;
+    //ZEXRImage img;
 	m_numTotalPatches = 0;
 	std::vector<std::string >::const_iterator it = m_imageNames.begin();
 	for(; it!=m_imageNames.end();++it) {
 		std::string fn = *it;
         
-		ZEXRImage::PrintChannelNames(fn);
-		
-		if(img.open(fn.c_str())) {
-			m_numPatches.push_back( (img.getWidth() / m_atomSize) * (img.getHeight() / m_atomSize) );
+		PrintChannelNames(fn);
+		if(0) {
+		//if(img.open(fn.c_str())) {
+			//m_numPatches.push_back( (img.getWidth() / m_atomSize) * (img.getHeight() / m_atomSize) );
 			m_numTotalPatches += m_numPatches.back();
         }
 		else 

@@ -13,6 +13,11 @@
 #include "linearMath.h"
 #include <map>
 
+#ifndef INFINITY
+#include <limits>
+#define INFINITY std::numeric_limits<float>::infinity()
+#endif
+
 namespace lfr {
 
 #define sign(x) ((x)>=0 ? 1 : -1)

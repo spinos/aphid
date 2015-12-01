@@ -68,6 +68,11 @@ include_directories (${OpenEXR_INCLUDE_DIR})
 target_link_libraries (testla ${OpenEXR_Library})
 message (" openexr " ${OpenEXR_Library})
 
+if (WIN32)
+    set (ZLIB_INCLUDE_DIR d:/usr/zlib-1.2.5)
+    set (ZLIB_LIBRARY d:/usr/zlib-1.2.5/zdll.lib)
+endif ()
+
 find_package (zlib REQUIRED)
 target_link_libraries (testla ${ZLIB_LIBRARIES})
 
