@@ -175,16 +175,16 @@ void LfWorld::learn(const ExrImage * image, int iPatch)
 	m_batchB->rank1Update(*m_y, *m_beta, *m_ind, nnz);
 }
 
-void LfWorld::updateDictionary(int niter)
+void LfWorld::updateDictionary(bool forceClean)
 {
-/// combine a batch
-    m_batchA->scale(1.0/256);
-    m_batchB->scale(1.0/256);
+/// combine a batch weighted to smaller step
+    m_batchA->scale(1.0/500);
+    m_batchB->scale(1.0/500);
 /// reduce A increases chance to clean an atom
 /// blindly select a patch can be equally bad, lower than 0.9 is too random
-/// lesser scaling after more loops to reduce cleaning
-    float sc = 0.98;
-    //float sc = float(niter+1000 - 30)/float(niter+1000);
+/// A accumulated after each iteration, lesser chance to clean
+    float sc = 0.93;
+    //float sc = float(niter+10000 - 256)/float(niter+10000);
     m_A->scale(sc);
     m_B->scale(sc);
     m_A->add(*m_batchA);
@@ -194,9 +194,7 @@ void LfWorld::updateDictionary(int niter)
     
 	const int p = m_D->numColumns();
 	DenseVector<float> ui(m_D->numRows());
-	int i, j;
-/// repeat ?
-//	for (j = 0; j<1; ++j) {
+	int i;
 		for (i = 0; i<p; ++i) {
 			const float Aii = m_A->column(i)[i];
 			if (Aii > 1e-6) {
@@ -216,11 +214,12 @@ void LfWorld::updateDictionary(int niter)
 				m_D->copyColumn(i, ui.v());
 		   }
 		   else {
-				DenseVector<float> di(m_D->column(i), m_D->numRows());
-				di.setZero();
+		       if(forceClean) {
+		           DenseVector<float> di(m_D->column(i), m_D->numRows());
+		           di.setZero();
+		       }
 		   }
 		}		
-//	}
 	
 	m_D->normalize();
 	m_D->AtA(*m_G);

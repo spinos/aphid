@@ -171,7 +171,7 @@ std::string LfParameter::imageName(int i) const
 int LfParameter::imageNumPatches(int i) const
 { return m_numPatches[i]; }
 
-int LfParameter::numTotalPatches() const
+int LfParameter::totalNumPatches() const
 { return m_numTotalPatches; }
 
 int LfParameter::dimensionOfX() const

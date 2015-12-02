@@ -84,9 +84,10 @@ void LfThread::run()
 	cwhite = cwhite | ( 255 << 8 );
 	cwhite = cwhite | ( 255 );
 	
-	const int totalNSignals = m_world->param()->numTotalPatches();
+	const int totalNSignals = m_world->param()->totalNumPatches();
 	int niter = 0;
 	forever {
+	    int ns = 0;
 		for(i=0;i<n;i++) {
 			img.open(m_world->param()->imageName(i));
 			const int m = m_world->param()->imageNumPatches(i);
@@ -95,12 +96,13 @@ void LfThread::run()
 				m_world->fillSparsityGraph(spasityLine, j & 255, 100, cwhite);
 			
 				if(((j+1) & 255) == 0 || (j+1)==m) {
-				    m_world->updateDictionary(niter);
+				    m_world->updateDictionary( i==0 && j==0 );
 					m_world->dictionaryAsImage(scanLine, w, h);
 					emit sendDictionary(*m_dictImg);
 					emit sendSparsity(*m_spasityImg);
 				}
 			}
+			ns += m;
 		}
 		
 		for(i=0;i<n;i++) {

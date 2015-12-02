@@ -55,7 +55,7 @@ public:
 	void fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor);
 	void preLearn();
 	void learn(const ExrImage * image, int iPatch);
-	void updateDictionary(int niter);
+	void updateDictionary(bool forceClean);
 	void beginPSNR();
 	void computeError(const ExrImage * image, int iPatch);
 	void endPSNR(float * result);

@@ -36,7 +36,7 @@ public:
 	bool isValid() const;
 	int atomSize() const;
 	int dictionaryLength() const;
-	int numTotalPatches() const;
+	int totalNumPatches() const;
 	int dimensionOfX() const;
 	int randomImageInd() const;
 	int numImages() const;
