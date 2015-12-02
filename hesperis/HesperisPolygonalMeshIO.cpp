@@ -138,6 +138,15 @@ bool HesperisPolygonalMeshIO::ReadMeshes(MObject &target)
 {
     MGlobal::displayInfo("opium v3 read poly mesh");
     HWorld grpWorld;
+    ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisMeshUvConnector>(&grpWorld, target);
+    grpWorld.close();
+    return true;
+}
+
+bool HesperisPolygonalMeshIO::ConnectUv(MObject &target)
+{
+    MGlobal::displayInfo("opium v3 connect poly mesh uv");
+	HWorld grpWorld;
     ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisPolygonalMeshCreator>(&grpWorld, target);
     grpWorld.close();
     return true;
@@ -245,5 +254,23 @@ bool HesperisPolygonalMeshCreator::checkMeshNv(const MObject & node, unsigned nv
 		return false;
 	
 	return (fmesh.numVertices() == nv);
+}
+
+MObject HesperisMeshUvConnector::create(APolygonalMesh * data, MObject & parentObj,
+                       const std::string & nodeName)
+{
+    const int numVertices = data->numPoints();
+    
+    MObject otm = MObject::kNullObj;
+    if(HesperisIO::FindNamedChild(otm, nodeName, parentObj)) {
+        if(!checkMeshNv(otm, numVertices))
+			MGlobal::displayWarning(MString(" existing node ")+ nodeName.c_str() + 
+				MString(" is not a mesh or it is a mesh has wrong number of cvs"));
+            
+		return otm;
+    }
+    
+/// todo create uv reader for hes and connected to existing mesh
+    return otm;
 }
 //:~

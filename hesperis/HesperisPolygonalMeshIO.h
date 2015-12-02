@@ -17,10 +17,17 @@ public:
 	static bool checkMeshNv(const MObject & node, unsigned nv);
 };
 
+class HesperisMeshUvConnector {
+public:
+    static MObject create(APolygonalMesh * data, MObject & parentObj,
+                       const std::string & nodeName);
+};
+
 class HesperisPolygonalMeshIO : public HesperisIO {
 public:
     static bool WritePolygonalMeshes(const MDagPathArray & paths, HesperisFile * file);
     static bool CreateMeshData(APolygonalMesh * data, const MDagPath & path);
 	static bool CreateMeshUV(APolygonalUV * data, const MDagPath & path, const MString & setName);
     static bool ReadMeshes(MObject &target = MObject::kNullObj);
+    static bool ConnectUv(MObject &target = MObject::kNullObj);
 };

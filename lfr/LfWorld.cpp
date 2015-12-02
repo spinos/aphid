@@ -181,8 +181,12 @@ void LfWorld::updateDictionary(int niter)
     m_batchA->scale(1.0/256);
     m_batchB->scale(1.0/256);
 /// reduce A increases chance to clean an atom
-    m_A->scale(0.97);
-    m_B->scale(0.97);
+/// blindly select a patch can be equally bad, lower than 0.9 is too random
+/// lesser scaling after more loops to reduce cleaning
+    float sc = 0.98;
+    //float sc = float(niter+1000 - 30)/float(niter+1000);
+    m_A->scale(sc);
+    m_B->scale(sc);
     m_A->add(*m_batchA);
     m_B->add(*m_batchB);
     m_batchA->setZero();

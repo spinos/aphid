@@ -102,7 +102,6 @@ void LfThread::run()
 				}
 			}
 		}
-		niter += totalNSignals;
 		
 		for(i=0;i<n;i++) {
 			img.open(m_world->param()->imageName(i));
@@ -120,6 +119,8 @@ void LfThread::run()
 			m_world->endPSNR(&err);
 			emit sendPSNR(err);
 		}
+        
+        niter ++;
 	}
 /*
     forever {

@@ -107,7 +107,7 @@ void StatisticDialog::recvSparsity(const QImage &image)
 
 void StatisticDialog::recvPSNR(float ratio)
 {
-	if(m_psnrs.size() >= 128) 
+	if(m_psnrs.size() >= 120) 
 		m_psnrs.pop_front();
 	
 	int iratio = ratio * 3;
