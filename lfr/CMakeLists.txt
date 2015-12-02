@@ -7,6 +7,7 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
 set (HEADER_FILES ../shared/Morton3D.h
+../shared/ExrImage.h
 clapackTempl.h
 linearMath.h
 regr.h
@@ -19,7 +20,7 @@ LfWidget.h
 window.h)
 include_directories ( ../shared ../kdtree)
 add_executable (testla ${HEADER_FILES} 
-../shared/zEXRImage.cpp
+../shared/ExrImage.cpp
 LfParameter.cpp
 LfWorld.cpp
 LfThread.cpp

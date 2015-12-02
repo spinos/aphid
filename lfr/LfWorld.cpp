@@ -11,7 +11,7 @@
 #include "psnr.h"
 /// f2c macros conflict
 #define _WIN32
-#include <zEXRImage.h>
+#include <ExrImage.h>
 #include <MersenneTwister.h>
 
 
@@ -31,6 +31,8 @@ LfWorld::LfWorld(LfParameter * param)
 	m_beta = new DenseVector<float>(p);
 	m_ind = new DenseVector<int>(p);
 	m_errorCalc = new Psnr<float>(m_D);
+	m_batchA = new DenseMatrix<float>(p, p);
+	m_batchB = new DenseMatrix<float>(m, p);
 }
 
 LfWorld::~LfWorld() {}
@@ -46,10 +48,10 @@ void LfWorld::initDictionary()
 	for(i=0;i<k;i++) {
 /// init D with random signal 
         float * d = m_D->column(i);
-        ZEXRImage * img = m_param->openImage(m_param->randomImageInd());
+        ExrImage * img = m_param->openImage(m_param->randomImageInd());
         // if(!img) std::cout<<" null_img ";
         
-        img->getTile1(d, rand(), s);
+        img->getTile(d, rand(), s);
 	}
 	
 	m_D->normalize();
@@ -79,6 +81,7 @@ void LfWorld::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH)
 
 void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int rank)
 {
+    const int stride = s * s;
 	int crgb[3];
 	int i, j, k;
 	unsigned * line = dst;
@@ -86,7 +89,7 @@ void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int ra
 		for(i=0; i<s; i++) {
 			unsigned v = 255<<24;
 			for(k=0;k<rank;k++) {				
-				crgb[k] = 8 + 500 * color[(j * s + i) * rank + k];
+				crgb[k] = 8 + 500 * color[(j * s + i) + k * stride];
 				crgb[k] = std::min<int>(crgb[k], 255);
 				crgb[k] = std::max<int>(crgb[k], 0);
 			}
@@ -120,8 +123,8 @@ void LfWorld::cleanDictionary()
 /// D_j <- randomly choose signal element
 				DenseVector<float> dj(m_D->column(j), m_D->numRows() );
 				
-				ZEXRImage * img = m_param->openImage(m_param->randomImageInd());
-                img->getTile1(dj.raw(), rand(), s);
+				ExrImage * img = m_param->openImage(m_param->randomImageInd());
+                img->getTile(dj.raw(), rand(), s);
                 
 				dj.normalize();
 /// G_j <- D^t * D_j
@@ -141,15 +144,18 @@ void LfWorld::preLearn()
 	m_A->setZero();
 	m_A->addDiagonal(1e-5);
 	m_B->copy(*m_D);
-	m_B->scale(1e-5);
+	m_B->scale(1e-7);
+	
+	m_batchA->setZero();
+	m_batchB->setZero();
 }
 
-void LfWorld::learn(const ZEXRImage * image, int iPatch)
+void LfWorld::learn(const ExrImage * image, int iPatch)
 {
 	const int k = m_D->numColumns();
 	const int s = m_param->atomSize();
 	
-	image->getTile1(m_y->raw(), iPatch, s);
+	image->getTile(m_y->raw(), iPatch, s);
 
 	m_lar->lars(*m_y, *m_beta, *m_ind, 0.0);
 	
@@ -164,13 +170,24 @@ void LfWorld::learn(const ZEXRImage * image, int iPatch)
 	sort<float, int>(m_ind->raw(), m_beta->raw(), 0, nnz-1);
 	
 /// A <- A + beta * beta^t
-	m_A->rank1Update(*m_beta, *m_ind, nnz);
+	m_batchA->rank1Update(*m_beta, *m_ind, nnz);
 /// B <- B + y * beta^t
-	m_B->rank1Update(*m_y, *m_beta, *m_ind, nnz);
+	m_batchB->rank1Update(*m_y, *m_beta, *m_ind, nnz);
 }
 
-void LfWorld::updateDictionary()
+void LfWorld::updateDictionary(int niter)
 {
+/// combine a batch
+    m_batchA->scale(1.0/256);
+    m_batchB->scale(1.0/256);
+/// reduce A increases chance to clean an atom
+    m_A->scale(0.97);
+    m_B->scale(0.97);
+    m_A->add(*m_batchA);
+    m_B->add(*m_batchB);
+    m_batchA->setZero();
+    m_batchB->setZero();
+    
 	const int p = m_D->numColumns();
 	DenseVector<float> ui(m_D->numRows());
 	int i, j;
@@ -178,7 +195,7 @@ void LfWorld::updateDictionary()
 //	for (j = 0; j<1; ++j) {
 		for (i = 0; i<p; ++i) {
 			const float Aii = m_A->column(i)[i];
-			if (Aii > 1e-8) {
+			if (Aii > 1e-6) {
 				DenseVector<float> di(m_D->column(i), m_D->numRows());
 				DenseVector<float> ai(m_A->column(i), m_A->numRows());
 				DenseVector<float> bi(m_B->column(i), m_B->numRows());
@@ -223,10 +240,10 @@ void LfWorld::fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, uns
 void LfWorld::beginPSNR()
 { m_errorCalc->reset(); }
 
-void LfWorld::computeError(const ZEXRImage * image, int iPatch)
+void LfWorld::computeError(const ExrImage * image, int iPatch)
 {
 	const int s = m_param->atomSize();
-	image->getTile1(m_y->raw(), iPatch, s);
+	image->getTile(m_y->raw(), iPatch, s);
 	m_lar->lars(*m_y, *m_beta, *m_ind, 0.0);
 	m_errorCalc->add(*m_y, *m_beta, *m_ind);
 }

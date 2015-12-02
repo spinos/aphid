@@ -40,15 +40,9 @@ class LfWorld  {
 	LAR<float> * m_lar;
 /// peak signal-to-noise ratio
 	Psnr<float> * m_errorCalc;
-/// by 'inpainting color images in learned dictionary'
-/// M = I + gamma / n * K
-/// I is 3n-by-3n identity
-/// gamma = 5.25
-/// n is num pixels in a patch
-/// K is 3n-by-3n diagonal by three n-by-n ones
-/// y should be (R,G,B)^t of 3n length
-/// y^t * M to get average color of signal
-    DenseMatrix<float> * m_average;
+/// per-batch A and B
+    DenseMatrix<float> * m_batchA;
+    DenseMatrix<float> * m_batchB;
 public:
 
 	LfWorld(LfParameter * param);
@@ -60,10 +54,10 @@ public:
 	void dictionaryAsImage(unsigned * imageBits, int imageW, int imageH);
 	void fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor);
 	void preLearn();
-	void learn(const ZEXRImage * image, int iPatch);
-	void updateDictionary();
+	void learn(const ExrImage * image, int iPatch);
+	void updateDictionary(int niter);
 	void beginPSNR();
-	void computeError(const ZEXRImage * image, int iPatch);
+	void computeError(const ExrImage * image, int iPatch);
 	void endPSNR(float * result);
 	
 	static void testLAR();

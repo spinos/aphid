@@ -27,7 +27,7 @@ void StatisticDialog::paintEvent(QPaintEvent * /* event */)
 	painter.setBrush(Qt::NoBrush);
 	
 	drawSparsity(painter, 5, 45);
-	drawPSNR(painter, 5, 175);
+	drawPSNR(painter, 5, 240);
 }
 
 void StatisticDialog::drawSparsity(QPainter & painter, int baseX, int baseY)
@@ -60,12 +60,9 @@ void StatisticDialog::drawPSNR(QPainter & painter, int baseX, int baseY)
 {
 	const int rgt = baseX + 480;
 	const int lft = baseX + 20;
-	const int twentY = baseY - 40;
-	const int thirtY = baseY - 60;
-	
-	painter.drawText( QPoint(baseX, baseY), tr("0"));
-	painter.drawLine(QPoint(lft, baseY), QPoint(rgt, baseY));
-	painter.drawText( QPoint(rgt, baseY), tr("0"));
+	const int twentY = baseY - 60;
+	const int thirtY = baseY - 90;
+	const int fortY = baseY - 120;
 	
 	painter.drawText( QPoint(baseX, twentY), tr("20"));
 	painter.drawLine(QPoint(lft, twentY), QPoint(rgt, twentY));
@@ -75,7 +72,11 @@ void StatisticDialog::drawPSNR(QPainter & painter, int baseX, int baseY)
 	painter.drawLine(QPoint(lft, thirtY), QPoint(rgt, thirtY));
 	painter.drawText( QPoint(rgt, thirtY), tr("30"));
 	
-	painter.drawText( QPoint(baseX+200, baseY+20), tr("PSNR"));
+	painter.drawText( QPoint(baseX, fortY), tr("40"));
+	painter.drawLine(QPoint(lft, fortY), QPoint(rgt, fortY));
+	painter.drawText( QPoint(rgt, fortY), tr("40"));
+	
+	painter.drawText( QPoint(baseX+200, baseY - 30), tr("PSNR"));
 	
 	if(m_psnrs.size() < 1) return;
 	
@@ -109,11 +110,11 @@ void StatisticDialog::recvPSNR(float ratio)
 	if(m_psnrs.size() >= 128) 
 		m_psnrs.pop_front();
 	
-	int iratio = ratio * 2;
+	int iratio = ratio * 3;
 /// upper limit 55
-	if(iratio > 110) iratio = 110;
+	if(iratio > 165) iratio = 165;
 /// lower limit -10
-	if(iratio < -10) iratio = -10;
+	if(iratio < -30) iratio = -30;
 	m_psnrs.push_back(-iratio);
 }
 

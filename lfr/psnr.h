@@ -84,11 +84,20 @@ void Psnr<T>::add(const DenseVector<T> & y, const DenseVector<T> & beta, const D
 /// to luma
 	const int nl = m/3;
 	for(i=0;i<nl;i++) {
-		T e = 0.299 * m_yhat[i*3] + 0.587 * m_yhat[i*3 + 1] + 0.114 * m_yhat[i*3 + 2];
-		e -= 0.299 * y[i*3] + 0.587 * y[i*3 + 1] + 0.114 * y[i*3 + 2];
+#if 1
+		T e = 0.299 * m_yhat[i] + 0.587 * m_yhat[i + nl] + 0.114 * m_yhat[i + nl*2];
+		e -= 0.299 * y[i] + 0.587 * y[i + nl] + 0.114 * y[i + nl*2];
 		m_sum += e * e;
+#else
+        T e = m_yhat[i] - y[i];
+        m_sum += e * e;
+        e = m_yhat[i+ nl] - y[i+ nl];
+        m_sum += e * e;
+        e = m_yhat[i+ nl*2] - y[i+ nl*2];
+        m_sum += e * e;
+#endif
 	}
-	m_n += m/3;
+	m_n += nl;
 }
 	
 template<typename T>

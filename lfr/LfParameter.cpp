@@ -8,16 +8,17 @@
 #include <boost/algorithm/string/case_conv.hpp>
 
 #define _WIN32
-#include <zEXRImage.h>
-#include <OpenEXR/ImathLimits.h>
+#include <ExrImage.h>
+#include <iostream>
+// #include <OpenEXR/ImathLimits.h>
 
 namespace lfr {
 
 LfParameter::LfParameter(int argc, char *argv[])
 {
-	std::cout<<"\n exr limit "<<Imath::limits<int>::min();
-	std::cout<<"\n test min "<<std::min<int>(-99, -98);
-	std::cout<<"\n test abs "<<std::abs<int>(-75);
+	// std::cout<<"\n exr limit "<<Imath::limits<int>::min();
+	// std::cout<<"\n test min "<<std::min<int>(-99, -98);
+	// std::cout<<"\n test abs "<<std::abs<int>(-75);
 	std::cout<<"\n lfr (Light Field Research) version 20151127";
 	int i = 0;
 	for(;i<MAX_NUM_OPENED_IMAGES;++i) {
@@ -142,16 +143,13 @@ bool LfParameter::searchImagesIn(const char * dirname)
 bool LfParameter::countPatches()
 {
 	m_numPatches.clear();
-    //ZEXRImage img;
+    ExrImage img;
 	m_numTotalPatches = 0;
 	std::vector<std::string >::const_iterator it = m_imageNames.begin();
 	for(; it!=m_imageNames.end();++it) {
 		std::string fn = *it;
-        
-		PrintChannelNames(fn);
-		if(0) {
-		//if(img.open(fn.c_str())) {
-			//m_numPatches.push_back( (img.getWidth() / m_atomSize) * (img.getHeight() / m_atomSize) );
+		if(img.open(fn.c_str())) {
+			m_numPatches.push_back( (img.getWidth() / m_atomSize) * (img.getHeight() / m_atomSize) );
 			m_numTotalPatches += m_numPatches.back();
         }
 		else 
@@ -203,7 +201,7 @@ bool LfParameter::isImageOpened(const int ind, int & idx) const
 	return false;
 }
 
-ZEXRImage *LfParameter::openImage(const int ind)
+ExrImage *LfParameter::openImage(const int ind)
 {
     int idx;
     if(isImageOpened(ind, idx)) {
@@ -212,7 +210,7 @@ ZEXRImage *LfParameter::openImage(const int ind)
     
     idx = m_currentImage;
 	if(m_openedImages[idx]._ind < 0) {
-		m_openedImages[idx]._image = new ZEXRImage;
+		m_openedImages[idx]._image = new ExrImage;
 	}
 	m_openedImages[idx]._ind = ind;
 	m_openedImages[idx]._image->open(imageName(ind));

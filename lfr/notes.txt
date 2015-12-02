@@ -38,5 +38,29 @@ inpainting color images in learned dictionary
 
 sparse learned representations for image restoration
 
-
+/// by 'inpainting color images in learned dictionary'
+/// M = I + gamma / n * K
+/// I is 3n-by-3n identity
+/// gamma = 5.25
+/// n is num pixels in a patch
+/// K is 3n-by-3n diagonal by three n-by-n ones
+/// y should be (R,G,B)^t of 3n length
+/// y^t * M to get average color of signal
+    DenseMatrix<float> * m_average;
+    
+m_average = new DenseMatrix<float>(m, m);
+	m_average->setZero();
+	int i, j;
+	const int m3 = m / 3; 
+	int lo, hi;
+	for(j=0;j<m;j++) {
+	    lo = (j / m3) * m3; 
+	    hi = lo + m3;
+	    for(i=lo;i<hi;i++) {
+	        m_average->column(j)[i] = 5.25 / m3;
+	    }
+	}
+	m_average->addDiagonal(1.0);
+	
+http://ukoethe.github.io/vigra/doc/vigra/regression_8hxx_source.html
 
