@@ -1,3 +1,6 @@
+#ifndef LFPARAMETER_H
+#define LFPARAMETER_H
+
 #include <string>
 #include <vector>
 
@@ -56,3 +59,5 @@ private:
 };
 
 }
+#endif        //  #ifndef LFPARAMETER_H
+

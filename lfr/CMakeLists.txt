@@ -12,6 +12,7 @@ clapackTempl.h
 linearMath.h
 regr.h
 psnr.h
+dctmn.h
 LfParameter.h
 LfWorld.h
 LfThread.h

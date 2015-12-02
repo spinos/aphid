@@ -7,13 +7,8 @@
  *
  */
 #include "LfWorld.h"
-#include "regr.h"
-#include "psnr.h"
-/// f2c macros conflict
-#define _WIN32
-#include <ExrImage.h>
+#include "dctmn.h"
 #include <MersenneTwister.h>
-
 
 namespace lfr {
 
@@ -175,11 +170,18 @@ void LfWorld::learn(const ExrImage * image, int iPatch)
 	m_batchB->rank1Update(*m_y, *m_beta, *m_ind, nnz);
 }
 
+void LfWorld::learn(const ExrImage * image, int iPatch0, int iPatch1)
+{
+    int i;
+    for(i=iPatch0; i<= iPatch1; ++i)
+        learn(image, i);
+}
+
 void LfWorld::updateDictionary(bool forceClean)
 {
 /// combine a batch weighted to smaller step
-    m_batchA->scale(1.0/500);
-    m_batchB->scale(1.0/500);
+    m_batchA->scale(1.0/720);
+    m_batchB->scale(1.0/720);
 /// reduce A increases chance to clean an atom
 /// blindly select a patch can be equally bad, lower than 0.9 is too random
 /// A accumulated after each iteration, lesser chance to clean

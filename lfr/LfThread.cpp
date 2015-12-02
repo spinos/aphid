@@ -86,16 +86,22 @@ void LfThread::run()
 	
 	const int totalNSignals = m_world->param()->totalNumPatches();
 	int niter = 0;
+	int endp;
 	forever {
 	    int ns = 0;
 		for(i=0;i<n;i++) {
 			img.open(m_world->param()->imageName(i));
 			const int m = m_world->param()->imageNumPatches(i);
-			for(j=0;j<m;j++) {
-				m_world->learn(&img, j);
-				m_world->fillSparsityGraph(spasityLine, j & 255, 100, cwhite);
-			
-				if(((j+1) & 255) == 0 || (j+1)==m) {
+			int nbatch = m>>8;
+			if( (nbatch<<8) < m ) nbatch++;
+			for(j=0;j<nbatch;j++) {
+			    endp = (j+1) * 256 - 1;
+			    if(endp > m-1) endp = m-1;
+				m_world->learn(&img, j * 256, endp);
+				
+				{
+/// force to clean on first batch of first image only
+                    // if( i==0 && j==0 ) qDebug()<<"frc cl";
 				    m_world->updateDictionary( i==0 && j==0 );
 					m_world->dictionaryAsImage(scanLine, w, h);
 					emit sendDictionary(*m_dictImg);
