@@ -31,6 +31,8 @@ LfWorld::LfWorld(LfParameter * param)
 	m_beta = new DenseVector<float>(p);
 	m_ind = new DenseVector<int>(p);
 	m_errorCalc = new Psnr<float>(m_D);
+	m_batchA = new DenseMatrix<float>(p, p);
+	m_batchB = new DenseMatrix<float>(m, p);
 }
 
 LfWorld::~LfWorld() {}
@@ -142,7 +144,10 @@ void LfWorld::preLearn()
 	m_A->setZero();
 	m_A->addDiagonal(1e-5);
 	m_B->copy(*m_D);
-	m_B->scale(1e-5);
+	m_B->scale(1e-7);
+	
+	m_batchA->setZero();
+	m_batchB->setZero();
 }
 
 void LfWorld::learn(const ExrImage * image, int iPatch)
@@ -165,13 +170,24 @@ void LfWorld::learn(const ExrImage * image, int iPatch)
 	sort<float, int>(m_ind->raw(), m_beta->raw(), 0, nnz-1);
 	
 /// A <- A + beta * beta^t
-	m_A->rank1Update(*m_beta, *m_ind, nnz);
+	m_batchA->rank1Update(*m_beta, *m_ind, nnz);
 /// B <- B + y * beta^t
-	m_B->rank1Update(*m_y, *m_beta, *m_ind, nnz);
+	m_batchB->rank1Update(*m_y, *m_beta, *m_ind, nnz);
 }
 
-void LfWorld::updateDictionary()
+void LfWorld::updateDictionary(int niter)
 {
+/// combine a batch
+    m_batchA->scale(1.0/256);
+    m_batchB->scale(1.0/256);
+/// reduce A increases chance to clean an atom
+    m_A->scale(0.97);
+    m_B->scale(0.97);
+    m_A->add(*m_batchA);
+    m_B->add(*m_batchB);
+    m_batchA->setZero();
+    m_batchB->setZero();
+    
 	const int p = m_D->numColumns();
 	DenseVector<float> ui(m_D->numRows());
 	int i, j;
@@ -179,7 +195,7 @@ void LfWorld::updateDictionary()
 //	for (j = 0; j<1; ++j) {
 		for (i = 0; i<p; ++i) {
 			const float Aii = m_A->column(i)[i];
-			if (Aii > 1e-8) {
+			if (Aii > 1e-6) {
 				DenseVector<float> di(m_D->column(i), m_D->numRows());
 				DenseVector<float> ai(m_A->column(i), m_A->numRows());
 				DenseVector<float> bi(m_B->column(i), m_B->numRows());

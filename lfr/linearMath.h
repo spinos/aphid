@@ -349,6 +349,7 @@ public:
 	void setZero();
 	void scale(const T s);
 	void scaleColumn(const int i, const T s);
+	void add(const DenseMatrix<T> & x, const T alpha = 1.0);
 	
 /// normalize each column
 	void normalize();
@@ -516,6 +517,10 @@ void DenseMatrix<T>::scaleColumn(const int i, const T s)
 	DenseVector<T> d(&m_v[i*m_numRows], m_numRows);
 	d.scale(s);
 }
+
+template<typename T>
+void DenseMatrix<T>::add(const DenseMatrix<T> & x, const T alpha)
+{ clapack_axpy<T>(m_numRows*m_numColumns, alpha, x.column(0), 1, m_v, 1); }
 
 template <typename T> 
 void DenseMatrix<T>::normalize()

@@ -72,7 +72,6 @@ void LfThread::run()
 	int w, h;
 	m_world->param()->getDictionaryImageSize(w, h);
 	uint *scanLine = reinterpret_cast<uint *>(m_dictImg->bits());
-		
 	
 	ExrImage img;
 	const int n = m_world->param()->numImages();
@@ -85,6 +84,8 @@ void LfThread::run()
 	cwhite = cwhite | ( 255 << 8 );
 	cwhite = cwhite | ( 255 );
 	
+	const int totalNSignals = m_world->param()->numTotalPatches();
+	int niter = 0;
 	forever {
 		for(i=0;i<n;i++) {
 			img.open(m_world->param()->imageName(i));
@@ -94,13 +95,14 @@ void LfThread::run()
 				m_world->fillSparsityGraph(spasityLine, j & 255, 100, cwhite);
 			
 				if(((j+1) & 255) == 0 || (j+1)==m) {
-					m_world->updateDictionary();
+				    m_world->updateDictionary(niter);
 					m_world->dictionaryAsImage(scanLine, w, h);
 					emit sendDictionary(*m_dictImg);
 					emit sendSparsity(*m_spasityImg);
 				}
 			}
 		}
+		niter += totalNSignals;
 		
 		for(i=0;i<n;i++) {
 			img.open(m_world->param()->imageName(i));

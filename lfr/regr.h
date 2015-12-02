@@ -134,7 +134,7 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 									- clapack_dot<T>(i, m_u.raw(), 1, m_Gs.column(i), 1) );
 			if(lower == 0) {
 				// std::cout<<"\n divided by zero "<<lower;
-				lower = 1e-8;
+				lower = 1.0;
 			}
 			const T schur = T(1.0) / lower;
 			
