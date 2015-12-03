@@ -86,6 +86,7 @@ void LfThread::run()
 	
 	const int totalNSignals = m_world->param()->totalNumPatches();
 	int niter = 0;
+	int t = 0;
 	int endp;
 	forever {
 	    int ns = 0;
@@ -101,8 +102,9 @@ void LfThread::run()
 				
 				{
 /// force to clean on first batch of first image only
-                    // if( i==0 && j==0 ) qDebug()<<"frc cl";
-				    m_world->updateDictionary( (j&7)==0 );
+                    // if( i==0 && j==0 ) 
+                    qDebug()<<" t"<<t<<" nit"<<niter;
+				    m_world->updateDictionary( false, niter );
 					m_world->dictionaryAsImage(scanLine, w, h);
 					emit sendDictionary(*m_dictImg);
 					emit sendSparsity(*m_spasityImg);
@@ -128,7 +130,8 @@ void LfThread::run()
 			emit sendPSNR(err);
 		}
         
-        niter ++;
+        niter++;
+        m_world->cleanDictionary();
 	}
 /*
     forever {

@@ -193,9 +193,9 @@ void LfWorld::learn(const ExrImage * image, int iPatch0, int iPatch1)
     */
 }
 
-void LfWorld::updateDictionary(bool forceClean)
+void LfWorld::updateDictionary(bool forceClean, int t)
 {
-    m_machine->updateDictionary(forceClean);
+    m_machine->updateDictionary(forceClean, t);
     /*
 /// combine a batch weighted to smaller step
     m_batchA->scale(1.0/720);

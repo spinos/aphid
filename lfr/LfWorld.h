@@ -59,16 +59,16 @@ public:
 	void preLearn();
 	void learn(const ExrImage * image, int iPatch);
 	void learn(const ExrImage * image, int iPatch0, int iPatch1);
-	void updateDictionary(bool forceClean);
+	void updateDictionary(bool forceClean, int t);
 	void beginPSNR();
 	void computeError(const ExrImage * image, int iPatch);
 	void endPSNR(float * result);
+	void cleanDictionary();
 	
 	static void testLAR();
 protected:
 	
 private:
-	void cleanDictionary();
 	void fillPatch(unsigned * dst, float * color, int s, int imageW, int rank = 3);
 	void raiseLuma(unsigned * crgb);
 };

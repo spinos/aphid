@@ -45,7 +45,7 @@ public:
     void cleanDictionary(LfParameter * param);
     void preLearn();
     void learn(const ExrImage * image, int ibegin, int iend);
-    void updateDictionary(bool forceClean);
+    void updateDictionary(bool forceClean, int t);
     
     void dictionaryAsImage(unsigned * imageBits, int imageW, int imageH, 
                             const LfParameter * param);
@@ -156,25 +156,26 @@ void DictionaryMachine<NumThread, T>::learn(const ExrImage * image, int ibegin, 
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::updateDictionary(bool forceClean)
+void DictionaryMachine<NumThread, T>::updateDictionary(bool forceClean, int t)
 {
-/// combine a batch weighted to smaller step
-    m_batchA->scale(1.0/500);
-    m_batchB->scale(1.0/500);
-/// reduce A increases chance to clean an atom
-/// blindly select a patch can be equally bad, lower than 0.9 is too random
-/// A accumulated after each iteration, lesser chance to clean
-    float sc = 0.97;
-    //float sc = float(niter+10000 - 256)/float(niter+10000);
-    m_A->scale(sc);
-    m_B->scale(sc);
-    m_A->add(*m_batchA);
-    m_B->add(*m_batchB);
+/// scaling A and B from previous batch
+    int tn = t+1;
+    if(tn < 256) tn = tn * 256;
+    else tn = 256 * 256 + t - 256;
+    T sc = T(tn+1-256)/T(tn+1);
+/// first 2 scales are too small
+    if(t>0) {
+        m_A->scale(sc);
+        m_B->scale(sc);
+    }
+    m_A->add(*m_batchA, 1.0/255);
+    m_B->add(*m_batchB, 1.0/255);
+/// reset batch
     m_batchA->setZero();
     m_batchB->setZero();
     
 	const int p = m_D->numColumns();
-	
+	int nusd = 0;
 	int i;
     for (i = 0; i<p; ++i) {
         const float Aii = m_A->column(i)[i];
@@ -196,14 +197,16 @@ void DictionaryMachine<NumThread, T>::updateDictionary(bool forceClean)
             m_D->copyColumn(i, m_ui->v());
        }
        else {
+/// only when the atom is never used after a lot loops
            if(forceClean) {
                DenseVector<float> di(m_D->column(i), m_D->numRows());
                di.setZero();
            }
+           nusd++;
        }
-    }		
-	
-	m_D->AtA(*m_G);
+    }
+    m_D->AtA(*m_G);	
+    if(nusd) std::cout<<"\n n unused "<<nusd<<"/"<<i;
 }
 
 template<int NumThread, typename T>
@@ -218,11 +221,11 @@ void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 			bool toClean = false;
 			if(j==i) {
 /// diagonal part
-				toClean = absoluteValue<T>( m_G->column(i)[j] ) < 1e-7;
+				toClean = absoluteValue<T>( m_G->column(i)[j] ) < 1e-5;
 			}
 			else {
 				float ab = m_G->column(i)[i] * m_G->column(j)[j];
-				toClean = ( absoluteValue<T>( m_G->column(i)[j] ) / sqrt( ab ) ) > 0.9999;
+				toClean = ( absoluteValue<T>( m_G->column(i)[j] ) / sqrt( ab ) ) > 0.999999;
 			}
 			if(toClean) {
 /// D_j <- randomly choose signal element
@@ -242,6 +245,7 @@ void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 		}
 	}
 	m_G->addDiagonal(1e-8);
+	
 }
 
 template<int NumThread, typename T>
