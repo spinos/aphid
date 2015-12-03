@@ -28,6 +28,7 @@ Window::Window(LfWorld * world)
             m_statistics, SLOT(recvPSNR(float)));
 			
 	m_thread->initAtoms();
+	m_statistics->show();
 }
 
 void Window::createMenus()

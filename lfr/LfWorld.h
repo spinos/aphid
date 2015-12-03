@@ -59,7 +59,7 @@ public:
 	void preLearn();
 	void learn(const ExrImage * image, int iPatch);
 	void learn(const ExrImage * image, int iPatch0, int iPatch1);
-	void updateDictionary(bool forceClean, int t);
+	void updateDictionary(const ExrImage * image, int t);
 	void beginPSNR();
 	void computeError(const ExrImage * image, int iPatch);
 	void endPSNR(float * result);

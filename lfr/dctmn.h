@@ -31,12 +31,15 @@ class DictionaryMachine {
 /// per-batch A and B
     DenseMatrix<T> * m_batchA;
     DenseMatrix<T> * m_batchB;
+    DenseMatrix<T> * m_preA;
+    DenseMatrix<T> * m_preB;
 /// least angle regression
 	LAR<T> * m_lar;
 /// peak signal-to-noise ratio
 	Psnr<T> * m_errorCalc;
     
 	int m_atomSize;
+	int m_pret;
 public:
     DictionaryMachine(const int m, const int p);
     virtual ~DictionaryMachine();
@@ -45,7 +48,7 @@ public:
     void cleanDictionary(LfParameter * param);
     void preLearn();
     void learn(const ExrImage * image, int ibegin, int iend);
-    void updateDictionary(bool forceClean, int t);
+    void updateDictionary(const ExrImage * image, int t);
     
     void dictionaryAsImage(unsigned * imageBits, int imageW, int imageH, 
                             const LfParameter * param);
@@ -76,6 +79,8 @@ DictionaryMachine<NumThread, T>::DictionaryMachine(const int m, const int p)
 	m_errorCalc = new Psnr<T>(m_D);
 	m_batchA = new DenseMatrix<T>(p, p);
 	m_batchB = new DenseMatrix<T>(m, p);
+	m_preA = new DenseMatrix<T>(p, p);
+	m_preB = new DenseMatrix<T>(m, p);
 	m_ui = new DenseVector<T>(m);
 }
 
@@ -93,6 +98,8 @@ DictionaryMachine<NumThread, T>::~DictionaryMachine()
     delete m_errorCalc;
     delete m_batchA;
     delete m_batchB;
+    delete m_preA;
+    delete m_preB;
     delete m_ui;
 }
 
@@ -120,12 +127,16 @@ template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::preLearn()
 {
 	m_A->setZero();
-	m_A->addDiagonal(1e-5);
+	//m_A->addDiagonal(1e-5);
 	m_B->copy(*m_D);
-	m_B->scale(1e-7);
+/// B0 <- t0 * D
+	m_B->scale(1e-8);
 	
 	m_batchA->setZero();
 	m_batchB->setZero();
+    m_preA->setZero();
+    m_preB->setZero();
+	m_pret = 0;
 }
 
 template<int NumThread, typename T>
@@ -156,37 +167,39 @@ void DictionaryMachine<NumThread, T>::learn(const ExrImage * image, int ibegin, 
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::updateDictionary(bool forceClean, int t)
+void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, int t)
 {
+    T sc = 1.0;
+    if(t>0) {
+      //  m_pret = t;
 /// scaling A and B from previous batch
-    int tn = t+1;
+    int tn = t;
     if(tn < 256) tn = tn * 256;
     else tn = 256 * 256 + t - 256;
-    T sc = T(tn+1-256)/T(tn+1);
-/// first 2 scales are too small
-    if(t>0) {
+        sc = T(tn+1-256)/T(tn+1);
+    
+/// scale the past
         m_A->scale(sc);
         m_B->scale(sc);
     }
-    m_A->add(*m_batchA, 1.0/255);
-    m_B->add(*m_batchB, 1.0/255);
-/// reset batch
+/// add average of batch
+	m_A->add(*m_batchA, 1.0/256.0);
+    m_B->add(*m_batchB, 1.0/256.0);
     m_batchA->setZero();
     m_batchB->setZero();
     
 	const int p = m_D->numColumns();
-	int nusd = 0;
 	int i;
     for (i = 0; i<p; ++i) {
-        const float Aii = m_A->column(i)[i];
+        const T Aii = m_A->column(i)[i];
         if (Aii > 1e-6) {
-            DenseVector<float> di(m_D->column(i), m_D->numRows());
-            DenseVector<float> ai(m_A->column(i), m_A->numRows());
-            DenseVector<float> bi(m_B->column(i), m_B->numRows());
+            DenseVector<T> di(m_D->column(i), m_D->numRows());
+            DenseVector<T> ai(m_A->column(i), m_A->numRows());
+            DenseVector<T> bi(m_B->column(i), m_B->numRows());
 /// ui <- (bi - D * ai) / Aii + di
-            m_D->mult(*m_ui, ai, -1.0f);
+            m_D->mult(*m_ui, ai, -1.0);
             m_ui->add(bi);
-            m_ui->scale(1.0f/Aii);
+            m_ui->scale(1.0/Aii);
             m_ui->add(di);
 /// di <- ui / max(|| ui ||, 1)	?			
             //float unm = m_ui->norm();
@@ -198,15 +211,15 @@ void DictionaryMachine<NumThread, T>::updateDictionary(bool forceClean, int t)
        }
        else {
 /// only when the atom is never used after a lot loops
-           if(forceClean) {
-               DenseVector<float> di(m_D->column(i), m_D->numRows());
-               di.setZero();
-           }
-           nusd++;
+#if 0
+           DenseVector<T> di(m_D->column(i), m_D->numRows());
+           
+           image->getTile(di.raw(), rand(), m_atomSize);
+           di.normalize();
+#endif
        }
     }
     m_D->AtA(*m_G);	
-    if(nusd) std::cout<<"\n n unused "<<nusd<<"/"<<i;
 }
 
 template<int NumThread, typename T>
