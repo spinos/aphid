@@ -19,6 +19,7 @@ class DictionaryMachine {
 	DenseVector<T> * m_beta;
 /// sparse indices
 	DenseVector<int> * m_ind;
+	DenseVector<T> * m_ui;
 /// dictionary
 	DenseMatrix<T> * m_D;
 /// gram of D
@@ -49,6 +50,11 @@ public:
     void dictionaryAsImage(unsigned * imageBits, int imageW, int imageH, 
                             const LfParameter * param);
 	
+    void fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor);
+	void beginPSNR();
+	void computeError(const ExrImage * image, int iPatch);
+	void endPSNR(float * result);
+	
 protected:
     
 private:
@@ -60,7 +66,7 @@ template<int NumThread, typename T>
 DictionaryMachine<NumThread, T>::DictionaryMachine(const int m, const int p)
 {
     m_D = new DenseMatrix<T>(m, p);
-	m_G = new DenseMatrix<T>(p, p);
+    m_G = new DenseMatrix<T>(p, p);
 	m_A = new DenseMatrix<T>(p, p);
 	m_B = new DenseMatrix<T>(m, p);
 	m_lar = new LAR<T>(m_D, m_G);
@@ -70,6 +76,7 @@ DictionaryMachine<NumThread, T>::DictionaryMachine(const int m, const int p)
 	m_errorCalc = new Psnr<T>(m_D);
 	m_batchA = new DenseMatrix<T>(p, p);
 	m_batchB = new DenseMatrix<T>(m, p);
+	m_ui = new DenseVector<T>(m);
 }
 
 template<int NumThread, typename T>
@@ -86,6 +93,7 @@ DictionaryMachine<NumThread, T>::~DictionaryMachine()
     delete m_errorCalc;
     delete m_batchA;
     delete m_batchB;
+    delete m_ui;
 }
 
 template<int NumThread, typename T>
@@ -156,7 +164,7 @@ void DictionaryMachine<NumThread, T>::updateDictionary(bool forceClean)
 /// reduce A increases chance to clean an atom
 /// blindly select a patch can be equally bad, lower than 0.9 is too random
 /// A accumulated after each iteration, lesser chance to clean
-    float sc = 0.93;
+    float sc = 0.97;
     //float sc = float(niter+10000 - 256)/float(niter+10000);
     m_A->scale(sc);
     m_B->scale(sc);
@@ -166,35 +174,35 @@ void DictionaryMachine<NumThread, T>::updateDictionary(bool forceClean)
     m_batchB->setZero();
     
 	const int p = m_D->numColumns();
-	DenseVector<float> ui(m_D->numRows());
-	int i;
-		for (i = 0; i<p; ++i) {
-			const float Aii = m_A->column(i)[i];
-			if (Aii > 1e-6) {
-				DenseVector<float> di(m_D->column(i), m_D->numRows());
-				DenseVector<float> ai(m_A->column(i), m_A->numRows());
-				DenseVector<float> bi(m_B->column(i), m_B->numRows());
-/// ui <- (bi - D * ai) / Aii + di
-				m_D->mult(ui, ai, -1.0f);
-				ui.add(bi);
-				ui.scale(1.0f/Aii);
-				ui.add(di);
-/// di <- ui / max(|| ui ||, 1)				
-				float unm = ui.norm();
-				if(unm > 1.0) 
-					ui.scale(1.f/unm);
-				
-				m_D->copyColumn(i, ui.v());
-		   }
-		   else {
-		       if(forceClean) {
-		           DenseVector<float> di(m_D->column(i), m_D->numRows());
-		           di.setZero();
-		       }
-		   }
-		}		
 	
-	m_D->normalize();
+	int i;
+    for (i = 0; i<p; ++i) {
+        const float Aii = m_A->column(i)[i];
+        if (Aii > 1e-6) {
+            DenseVector<float> di(m_D->column(i), m_D->numRows());
+            DenseVector<float> ai(m_A->column(i), m_A->numRows());
+            DenseVector<float> bi(m_B->column(i), m_B->numRows());
+/// ui <- (bi - D * ai) / Aii + di
+            m_D->mult(*m_ui, ai, -1.0f);
+            m_ui->add(bi);
+            m_ui->scale(1.0f/Aii);
+            m_ui->add(di);
+/// di <- ui / max(|| ui ||, 1)	?			
+            //float unm = m_ui->norm();
+            //if(unm > 1.0) 
+            //	m_ui->scale(1.f/unm);
+            m_ui->normalize();
+            
+            m_D->copyColumn(i, m_ui->v());
+       }
+       else {
+           if(forceClean) {
+               DenseVector<float> di(m_D->column(i), m_D->numRows());
+               di.setZero();
+           }
+       }
+    }		
+	
 	m_D->AtA(*m_G);
 }
 
@@ -281,6 +289,37 @@ void DictionaryMachine<NumThread, T>::fillPatch(unsigned * dst, float * color, i
 		line += imageW;
 	}
 }
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor)
+{
+	DenseVector<unsigned> scanline(&imageBits[iLine * imageW], imageW);
+	scanline.setZero();
+	const int k = m_D->numColumns();
+	const float ratio = (float)k / imageW;
+			
+	int i = 0;
+	for(;i<imageW;++i) {
+		if((*m_ind)[i*ratio] < 0) break;
+		scanline[i] = fillColor;
+	}
+}
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::beginPSNR()
+{ m_errorCalc->reset(); }
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::computeError(const ExrImage * image, int iPatch)
+{
+	image->getTile(m_y->raw(), iPatch, m_atomSize);
+	m_lar->lars(*m_y, *m_beta, *m_ind, 0.0);
+	m_errorCalc->add(*m_y, *m_beta, *m_ind);
+}
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::endPSNR(float * result)
+{ *result = m_errorCalc->finish(); }
 
 }
 #endif        //  #ifndef DCTMN_H

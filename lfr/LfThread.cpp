@@ -102,7 +102,7 @@ void LfThread::run()
 				{
 /// force to clean on first batch of first image only
                     // if( i==0 && j==0 ) qDebug()<<"frc cl";
-				    m_world->updateDictionary( i==0 && j==0 );
+				    m_world->updateDictionary( (j&7)==0 );
 					m_world->dictionaryAsImage(scanLine, w, h);
 					emit sendDictionary(*m_dictImg);
 					emit sendSparsity(*m_spasityImg);

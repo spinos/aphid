@@ -18,10 +18,13 @@ template<typename T> class DenseVector;
 template<typename T> class DenseMatrix;
 template<typename T> class LAR;
 template<typename T> class Psnr;
+template<int n, typename T> class DictionaryMachine;
 
 class LfWorld  {
 
 	LfParameter * m_param;
+    DictionaryMachine<2, float> * m_machine;
+/*
 /// signal
 	DenseVector<float> * m_y;
 /// coefficients
@@ -42,7 +45,7 @@ class LfWorld  {
 	Psnr<float> * m_errorCalc;
 /// per-batch A and B
     DenseMatrix<float> * m_batchA;
-    DenseMatrix<float> * m_batchB;
+    DenseMatrix<float> * m_batchB;*/
 public:
 
 	LfWorld(LfParameter * param);

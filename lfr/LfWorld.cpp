@@ -17,7 +17,8 @@ LfWorld::LfWorld(LfParameter * param)
 	m_param = param;
 	const int m = param->dimensionOfX();
 	const int p = param->dictionaryLength();
-	m_D = new DenseMatrix<float>(m, p);
+	m_machine = new DictionaryMachine<2, float>(m, p);
+	/*m_D = new DenseMatrix<float>(m, p);
 	m_G = new DenseMatrix<float>(p, p);
 	m_A = new DenseMatrix<float>(p, p);
 	m_B = new DenseMatrix<float>(m, p);
@@ -27,16 +28,19 @@ LfWorld::LfWorld(LfParameter * param)
 	m_ind = new DenseVector<int>(p);
 	m_errorCalc = new Psnr<float>(m_D);
 	m_batchA = new DenseMatrix<float>(p, p);
-	m_batchB = new DenseMatrix<float>(m, p);
+	m_batchB = new DenseMatrix<float>(m, p);*/
 }
 
-LfWorld::~LfWorld() {}
+LfWorld::~LfWorld() 
+{ delete m_machine; }
 
 const LfParameter * LfWorld::param() const
 { return m_param; }
 
 void LfWorld::initDictionary()
 {
+    m_machine->initDictionary(m_param);
+    /*
 	const int k = m_param->dictionaryLength();
 	const int s = m_param->atomSize();
 	int i, j;
@@ -51,11 +55,13 @@ void LfWorld::initDictionary()
 	
 	m_D->normalize();
 	m_D->AtA(*m_G);
-	cleanDictionary();
+	cleanDictionary();*/
 }
 
 void LfWorld::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH)
 {
+    m_machine->dictionaryAsImage(imageBits, imageW, imageH, m_param);
+    /*
     const int s = m_param->atomSize();
 	const int dimx = imageW / s;
 	const int dimy = imageH / s;
@@ -71,7 +77,7 @@ void LfWorld::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH)
 			}
 		}
 		line += imageW * s;
-	}
+	}*/
 }
 
 void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int rank)
@@ -99,6 +105,8 @@ void LfWorld::fillPatch(unsigned * dst, float * color, int s, int imageW, int ra
 
 void LfWorld::cleanDictionary()
 {
+    m_machine->cleanDictionary(m_param);
+    /*
     const int k = m_D->numColumns();
     const int s = m_param->atomSize();
 	int i, j, l;
@@ -132,21 +140,25 @@ void LfWorld::cleanDictionary()
 		}
 	}
 	m_G->addDiagonal(1e-8);
+	*/
 }
 
 void LfWorld::preLearn()
 {
+    m_machine->preLearn();
+    /*
 	m_A->setZero();
 	m_A->addDiagonal(1e-5);
 	m_B->copy(*m_D);
 	m_B->scale(1e-7);
 	
 	m_batchA->setZero();
-	m_batchB->setZero();
+	m_batchB->setZero();*/
 }
 
 void LfWorld::learn(const ExrImage * image, int iPatch)
 {
+    /*
 	const int k = m_D->numColumns();
 	const int s = m_param->atomSize();
 	
@@ -168,17 +180,23 @@ void LfWorld::learn(const ExrImage * image, int iPatch)
 	m_batchA->rank1Update(*m_beta, *m_ind, nnz);
 /// B <- B + y * beta^t
 	m_batchB->rank1Update(*m_y, *m_beta, *m_ind, nnz);
+	*/
 }
 
 void LfWorld::learn(const ExrImage * image, int iPatch0, int iPatch1)
 {
+    m_machine->learn(image, iPatch0, iPatch1);
+    /*
     int i;
     for(i=iPatch0; i<= iPatch1; ++i)
         learn(image, i);
+    */
 }
 
 void LfWorld::updateDictionary(bool forceClean)
 {
+    m_machine->updateDictionary(forceClean);
+    /*
 /// combine a batch weighted to smaller step
     m_batchA->scale(1.0/720);
     m_batchB->scale(1.0/720);
@@ -226,10 +244,13 @@ void LfWorld::updateDictionary(bool forceClean)
 	m_D->normalize();
 	m_D->AtA(*m_G);
 	cleanDictionary();
+	*/
 }
 
 void LfWorld::fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor)
 {
+    m_machine->fillSparsityGraph(imageBits, iLine, imageW, fillColor);
+    /*
 	DenseVector<unsigned> scanline(&imageBits[iLine * imageW], imageW);
 	scanline.setZero();
 	const int k = m_param->dictionaryLength();
@@ -239,22 +260,31 @@ void LfWorld::fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, uns
 	for(;i<imageW;++i) {
 		if((*m_ind)[i*ratio] < 0) break;
 		scanline[i] = fillColor;
-	}
+	}*/
 }
 
 void LfWorld::beginPSNR()
-{ m_errorCalc->reset(); }
+{ 
+    m_machine->beginPSNR();
+    // m_errorCalc->reset(); 
+}
 
 void LfWorld::computeError(const ExrImage * image, int iPatch)
 {
+    m_machine->computeError(image, iPatch);
+    /*
 	const int s = m_param->atomSize();
 	image->getTile(m_y->raw(), iPatch, s);
 	m_lar->lars(*m_y, *m_beta, *m_ind, 0.0);
 	m_errorCalc->add(*m_y, *m_beta, *m_ind);
+	*/
 }
 
 void LfWorld::endPSNR(float * result)
-{ *result = m_errorCalc->finish(); }
+{ 
+    m_machine->endPSNR(result);
+    //*result = m_errorCalc->finish(); 
+}
 
 void LfWorld::testLAR()
 {
