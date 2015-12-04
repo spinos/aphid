@@ -41,6 +41,8 @@ public:
 	T normSq() const;
 	void scale(const T s);
     void normalize();
+/// element index of minimum value
+	int minInd(int range) const;
 /// element index of max value
 	int maxInd() const;
 /// max element value
@@ -178,6 +180,21 @@ void DenseVector<T>::normalize()
 {
 	const T s = norm();
 	if(s > 1e-5) scale(1.0 / s);
+}
+
+template<typename T>
+int DenseVector<T>::minInd(int range) const
+{
+	int imin = 0;
+	T vmin = m_v[0];
+	for(int i=1; i<range; i++) {
+		T cur = m_v[i];
+		if(cur < vmin) {
+			imin = i;
+			vmin = cur;
+		}
+	}
+	return imin;
 }
 
 template<typename T>
