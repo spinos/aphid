@@ -26,6 +26,8 @@
 #include <sstream>
 #include <boost/format.hpp>
 
+std::string HesperisIO::CurrentHObjectPath;
+
 bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file )
 {
     file->clearTransforms();

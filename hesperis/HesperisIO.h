@@ -51,7 +51,8 @@ public:
 
 	static std::string H5PathNameTo(const MDagPath & path);
 	static std::string H5PathNameTo(const MObject & node);
-	
+	static std::string CurrentHObjectPath;
+    
 protected:
     template<typename Th, typename Td, typename Tc>
     static bool ReadTransformAnd(HBase * parent, MObject &target)
@@ -85,6 +86,8 @@ protected:
             SHelper::behead(nodeName, "/");
             
             Th child(*ita);
+            CurrentHObjectPath = child.pathToObject();
+            
             Td data;
             child.load(&data);
             Tc::create(&data, target, nodeName);

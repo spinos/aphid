@@ -19,6 +19,7 @@ public:
 
 class HesperisMeshUvConnector {
 public:
+    static MObject MasterMeshNode;
     static MObject create(APolygonalMesh * data, MObject & parentObj,
                        const std::string & nodeName);
 };

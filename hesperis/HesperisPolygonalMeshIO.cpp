@@ -138,7 +138,7 @@ bool HesperisPolygonalMeshIO::ReadMeshes(MObject &target)
 {
     MGlobal::displayInfo("opium v3 read poly mesh");
     HWorld grpWorld;
-    ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisMeshUvConnector>(&grpWorld, target);
+    ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisPolygonalMeshCreator>(&grpWorld, target);
     grpWorld.close();
     return true;
 }
@@ -146,8 +146,22 @@ bool HesperisPolygonalMeshIO::ReadMeshes(MObject &target)
 bool HesperisPolygonalMeshIO::ConnectUv(MObject &target)
 {
     MGlobal::displayInfo("opium v3 connect poly mesh uv");
+    
+    MStatus stat;
+    MDGModifier dgModifier;
+    MObject ohes = dgModifier.createNode("hesMesh", &stat)	;
+    dgModifier.doIt();
+    
+    if(ohes.isNull() || !stat) {
+        MGlobal::displayInfo(" cannot create hes node");
+        return false;
+    }
+    
+    AHelper::Info<MString>(" hesMesh node is ", MFnDependencyNode(ohes).name() );
+    HesperisMeshUvConnector::MasterMeshNode = ohes;
+
 	HWorld grpWorld;
-    ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisPolygonalMeshCreator>(&grpWorld, target);
+    ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisMeshUvConnector>(&grpWorld, target);
     grpWorld.close();
     return true;
 }
@@ -156,16 +170,15 @@ MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & pa
                        const std::string & nodeName)
 {
 	const int numVertices = data->numPoints();
-    
     MObject otm = MObject::kNullObj;
     if(HesperisIO::FindNamedChild(otm, nodeName, parentObj)) {
         if(!checkMeshNv(otm, numVertices))
 			MGlobal::displayWarning(MString(" existing node ")+ nodeName.c_str() + 
 				MString(" is not a mesh or it is a mesh has wrong number of cvs"));
-		
+/// checked and do not create
 		return otm;
     }
-    
+
     MPointArray vertexArray;
 	MIntArray polygonCounts, polygonConnects;
 	const int numPolygons = data->numPolygons();
@@ -202,6 +215,8 @@ MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & pa
 		MGlobal::displayWarning(MString(" poly mesh has no uv ")+nodeName.c_str());
 		return otm;
 	}
+
+	if(data->numUVs() > 1) MGlobal::displayWarning(MString(" poly mesh has multiple uv ")+nodeName.c_str());
 	
 	for(i=0;i<data->numUVs();i++) {
 		std::string setName = data->uvName(i);
@@ -256,6 +271,8 @@ bool HesperisPolygonalMeshCreator::checkMeshNv(const MObject & node, unsigned nv
 	return (fmesh.numVertices() == nv);
 }
 
+MObject HesperisMeshUvConnector::MasterMeshNode;
+
 MObject HesperisMeshUvConnector::create(APolygonalMesh * data, MObject & parentObj,
                        const std::string & nodeName)
 {
@@ -263,14 +280,43 @@ MObject HesperisMeshUvConnector::create(APolygonalMesh * data, MObject & parentO
     
     MObject otm = MObject::kNullObj;
     if(HesperisIO::FindNamedChild(otm, nodeName, parentObj)) {
-        if(!checkMeshNv(otm, numVertices))
+        if( !HesperisPolygonalMeshCreator::checkMeshNv(otm, numVertices)) {
 			MGlobal::displayWarning(MString(" existing node ")+ nodeName.c_str() + 
 				MString(" is not a mesh or it is a mesh has wrong number of cvs"));
-            
-		return otm;
+            return otm;
+        }
+    }
+    if(otm.isNull()) {
+        AHelper::Info<std::string>(" no existing node to add uv ", nodeName);
+        return otm;
     }
     
-/// todo create uv reader for hes and connected to existing mesh
+	MFnDependencyNode fnmaster(MasterMeshNode);
+    MStatus stat;
+    MPlug meshNamePlugs = fnmaster.findPlug("meshName", false, &stat );
+    if(!stat) {
+        MGlobal::displayWarning(" cannot find hes mesh out");
+        return otm;
+    }
+    
+/// add to last
+    unsigned count = meshNamePlugs.numElements();
+//  AHelper::Info<unsigned>(" hes has n mesh ", count);
+    meshNamePlugs.selectAncestorLogicalIndex(count);
+    meshNamePlugs.setValue(MString(HesperisIO::CurrentHObjectPath.c_str() ) );
+
+    MPlug outMeshPlug = fnmaster.findPlug("outMesh", true, &stat );
+    outMeshPlug.selectAncestorLogicalIndex(count, outMeshPlug.attribute());
+    
+    AHelper::Info<MString>("hes mesh uv out ", outMeshPlug.name() );
+
+    MPlug inMeshPlug = MFnDependencyNode(otm).findPlug("inMesh");
+    AHelper::Info<MString>("hes mesh uv in ", inMeshPlug.name() );
+/*
+    MDGModifier dgModifier;
+    dgModifier.connect(outMeshPlug, inMeshPlug);
+    dgModifier.doIt();
+*/
     return otm;
 }
 //:~

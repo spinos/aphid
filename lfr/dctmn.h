@@ -31,8 +31,11 @@ class DictionaryMachine {
 /// per-batch A and B
     DenseMatrix<T> * m_batchA;
     DenseMatrix<T> * m_batchB;
-    DenseMatrix<T> * m_preA;
-    DenseMatrix<T> * m_preB;
+/// previous epoch
+    DenseMatrix<T> * m_pre0A;
+    DenseMatrix<T> * m_pre0B;
+    DenseMatrix<T> * m_pre1A;
+    DenseMatrix<T> * m_pre1B;
 /// least angle regression
 	LAR<T> * m_lar;
 /// peak signal-to-noise ratio
@@ -40,6 +43,7 @@ class DictionaryMachine {
     
 	int m_atomSize;
 	int m_pret;
+    int m_epoch;
 public:
     DictionaryMachine(const int m, const int p);
     virtual ~DictionaryMachine();
@@ -57,7 +61,16 @@ public:
 	void beginPSNR();
 	void computeError(const ExrImage * image, int iPatch);
 	void endPSNR(float * result);
-	
+/// at end of epoch, keep last 2 data, minus current data by data before last
+/// A <- At
+/// B <- Bt
+/// At <- At - At0
+/// Bt <- Bt - Bt0; 
+/// At0 <- At1
+/// Bt0 <- Bt1; 
+/// At1 <- A
+/// Bt1 <- B 
+    void recycleData();
 protected:
     
 private:
@@ -79,8 +92,10 @@ DictionaryMachine<NumThread, T>::DictionaryMachine(const int m, const int p)
 	m_errorCalc = new Psnr<T>(m_D);
 	m_batchA = new DenseMatrix<T>(p, p);
 	m_batchB = new DenseMatrix<T>(m, p);
-	m_preA = new DenseMatrix<T>(p, p);
-	m_preB = new DenseMatrix<T>(m, p);
+	m_pre0A = new DenseMatrix<T>(p, p);
+	m_pre0B = new DenseMatrix<T>(m, p);
+    m_pre1A = new DenseMatrix<T>(p, p);
+	m_pre1B = new DenseMatrix<T>(m, p);
 	m_ui = new DenseVector<T>(m);
 }
 
@@ -98,8 +113,10 @@ DictionaryMachine<NumThread, T>::~DictionaryMachine()
     delete m_errorCalc;
     delete m_batchA;
     delete m_batchB;
-    delete m_preA;
-    delete m_preB;
+    delete m_pre0A;
+    delete m_pre0B;
+    delete m_pre1A;
+    delete m_pre1B;
     delete m_ui;
 }
 
@@ -134,9 +151,12 @@ void DictionaryMachine<NumThread, T>::preLearn()
 	
 	m_batchA->setZero();
 	m_batchB->setZero();
-    m_preA->setZero();
-    m_preB->setZero();
+    m_pre0A->setZero();
+    m_pre0B->setZero();
+    m_pre1A->setZero();
+    m_pre1B->setZero();
 	m_pret = 0;
+    m_epoch = -2;
 }
 
 template<int NumThread, typename T>
@@ -337,6 +357,12 @@ void DictionaryMachine<NumThread, T>::computeError(const ExrImage * image, int i
 template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::endPSNR(float * result)
 { *result = m_errorCalc->finish(); }
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::recycleData()
+{
+    m_epoch++;
+}
 
 }
 #endif        //  #ifndef DCTMN_H
