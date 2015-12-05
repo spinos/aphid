@@ -90,6 +90,7 @@ DictionaryMachine<NumThread, T>::DictionaryMachine(const int m, const int p)
 	m_pre0A = new DenseMatrix<T>(p, p);
 	m_pre0B = new DenseMatrix<T>(m, p);
     m_ui = new DenseVector<T>(m);
+    m_epoch = -1;
 }
 
 template<int NumThread, typename T>
@@ -209,7 +210,7 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
 	int i;
     for (i = 0; i<p; ++i) {
         const T Aii = m_A->column(i)[i];
-        if (Aii > 1e-6) {
+        if (Aii > 1e-8) {
             DenseVector<T> di(m_D->column(i), m_D->numRows());
             DenseVector<T> ai(m_A->column(i), m_A->numRows());
             DenseVector<T> bi(m_B->column(i), m_B->numRows());
@@ -226,15 +227,6 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
             
             m_D->copyColumn(i, m_ui->v());
        }
-       else {
-/// only when the atom is never used after a lot loops
-#if 0
-           DenseVector<T> di(m_D->column(i), m_D->numRows());
-           
-           image->getTile(di.raw(), rand(), m_atomSize);
-           di.normalize();
-#endif
-       }
     }
     m_D->AtA(*m_G);	
 }
@@ -242,22 +234,43 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
 template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 {
-    const int k = m_D->numColumns();
+    if(m_epoch < 0) return;
+	const int k = m_D->numColumns();
     const int s = param->atomSize();
 	int i, j, l;
+	int nusd = 0;
+	for (i = 0; i<k; ++i) {
+        const T Aii = m_A->column(i)[i];
+        if (Aii < 1e-8) {
+            DenseVector<T> dj(m_D->column(i), m_D->numRows() );
+				
+            ExrImage * img = param->openImage(param->randomImageInd());
+            img->getTile(dj.raw(), rand(), s);
+            
+            dj.normalize();
+            nusd++;
+       }
+    }
+    if(nusd > 0) {
+        std::cout<<"\n n unused atoms replaced "<<nusd;
+        m_D->AtA(*m_G);
+    }
+    
+    int ncld = 0;
 	for (i = 0; i<k; ++i) {
 /// lower part of G
 		for (j = i; j<k; ++j) {
 			bool toClean = false;
 			if(j==i) {
 /// diagonal part
-				toClean = absoluteValue<T>( m_G->column(i)[j] ) < 1e-5;
+				toClean = absoluteValue<T>( m_G->column(i)[j] ) < 1e-6;
 			}
 			else {
 				float ab = m_G->column(i)[i] * m_G->column(j)[j];
 				toClean = ( absoluteValue<T>( m_G->column(i)[j] ) / sqrt( ab ) ) > 0.999999;
 			}
 			if(toClean) {
+			    ncld++;
 /// D_j <- randomly choose signal element
 				DenseVector<T> dj(m_D->column(j), m_D->numRows() );
 				
@@ -274,8 +287,10 @@ void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 			}
 		}
 	}
-	m_G->addDiagonal(1e-10);
-	
+	if(ncld>0) {
+	    std::cout<<"\n n cleaned atoms "<<ncld;
+	    m_G->addDiagonal(1e-10);
+	}
 }
 
 template<int NumThread, typename T>
