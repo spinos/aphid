@@ -132,6 +132,11 @@ void LfThread::run()
         
         niter++;
         m_world->cleanDictionary();
+        //if(niter > 1) 
+        {
+            m_world->recycleData();
+            qDebug()<<" recycle"<<niter;
+        }
 	}
 /*
     forever {

@@ -286,6 +286,9 @@ void LfWorld::endPSNR(float * result)
     //*result = m_errorCalc->finish(); 
 }
 
+void LfWorld::recycleData()
+{ m_machine->recycleData(); }
+
 void LfWorld::testLAR()
 {
 	std::cout<<"\n test least angle regression";

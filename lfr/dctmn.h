@@ -44,6 +44,7 @@ class DictionaryMachine {
 	int m_atomSize;
 	int m_pret;
     int m_epoch;
+    T m_lambda;
 public:
     DictionaryMachine(const int m, const int p);
     virtual ~DictionaryMachine();
@@ -61,21 +62,15 @@ public:
 	void beginPSNR();
 	void computeError(const ExrImage * image, int iPatch);
 	void endPSNR(float * result);
-/// at end of epoch, keep last 2 data, minus current data by data before last
-/// A <- At
-/// B <- Bt
-/// At <- At - At0
-/// Bt <- Bt - Bt0; 
-/// At0 <- At1
-/// Bt0 <- Bt1; 
-/// At1 <- A
-/// Bt1 <- B 
+/// keep coefficients of current epoch
+/// at end of epoch, set A and B to current epoch, 
+/// zero current epoch 
     void recycleData();
 protected:
     
 private:
     void fillPatch(unsigned * dst, float * color, int s, int imageW, int rank = 3);
-	
+	void computeLambda(int t);
 };
 
 template<int NumThread, typename T>
@@ -94,9 +89,7 @@ DictionaryMachine<NumThread, T>::DictionaryMachine(const int m, const int p)
 	m_batchB = new DenseMatrix<T>(m, p);
 	m_pre0A = new DenseMatrix<T>(p, p);
 	m_pre0B = new DenseMatrix<T>(m, p);
-    m_pre1A = new DenseMatrix<T>(p, p);
-	m_pre1B = new DenseMatrix<T>(m, p);
-	m_ui = new DenseVector<T>(m);
+    m_ui = new DenseVector<T>(m);
 }
 
 template<int NumThread, typename T>
@@ -115,8 +108,6 @@ DictionaryMachine<NumThread, T>::~DictionaryMachine()
     delete m_batchB;
     delete m_pre0A;
     delete m_pre0B;
-    delete m_pre1A;
-    delete m_pre1B;
     delete m_ui;
 }
 
@@ -130,7 +121,7 @@ void DictionaryMachine<NumThread, T>::initDictionary(LfParameter * param)
 	for(i=0;i<k;i++) {
 /// init D with random signal 
         float * d = m_D->column(i);
-        ExrImage * img = param->openImage(param->randomImageInd());
+        ExrImage * img = param->openImage(0);
         
         img->getTile(d, rand(), m_atomSize);
 	}
@@ -144,19 +135,18 @@ template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::preLearn()
 {
 	m_A->setZero();
-	//m_A->addDiagonal(1e-5);
+	m_A->addDiagonal(1e-4);
 	m_B->copy(*m_D);
 /// B0 <- t0 * D
-	m_B->scale(1e-8);
+	m_B->scale(1e-4);
 	
 	m_batchA->setZero();
 	m_batchB->setZero();
     m_pre0A->setZero();
     m_pre0B->setZero();
-    m_pre1A->setZero();
-    m_pre1B->setZero();
-	m_pret = 0;
-    m_epoch = -2;
+    m_pret = 0;
+    m_epoch = -1;
+    m_lambda = 0.0;
 }
 
 template<int NumThread, typename T>
@@ -190,10 +180,11 @@ template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, int t)
 {
     T sc = 1.0;
-    if(t>0) {
-      //  m_pret = t;
+    //if(t>0) 
+    {
+        m_pret = t;
 /// scaling A and B from previous batch
-    int tn = t;
+    int tn = t+1;
     if(tn < 256) tn = tn * 256;
     else tn = 256 * 256 + t - 256;
         sc = T(tn+1-256)/T(tn+1);
@@ -201,10 +192,16 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
 /// scale the past
         m_A->scale(sc);
         m_B->scale(sc);
+/// slow down early steps
+        m_batchA->scale(sc);
+        m_batchB->scale(sc);
     }
+    
 /// add average of batch
 	m_A->add(*m_batchA, 1.0/256.0);
     m_B->add(*m_batchB, 1.0/256.0);
+    m_pre0A->add(*m_batchA, 1.0/256.0);
+    m_pre0B->add(*m_batchB, 1.0/256.0);
     m_batchA->setZero();
     m_batchB->setZero();
     
@@ -277,7 +274,7 @@ void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 			}
 		}
 	}
-	m_G->addDiagonal(1e-8);
+	m_G->addDiagonal(1e-10);
 	
 }
 
@@ -314,7 +311,7 @@ void DictionaryMachine<NumThread, T>::fillPatch(unsigned * dst, float * color, i
 		for(i=0; i<s; i++) {
 			unsigned v = 255<<24;
 			for(k=0;k<rank;k++) {				
-				crgb[k] = 8 + 500 * color[(j * s + i) + k * stride];
+				crgb[k] = 15 + 496 * color[(j * s + i) + k * stride];
 				crgb[k] = std::min<int>(crgb[k], 255);
 				crgb[k] = std::max<int>(crgb[k], 0);
 			}
@@ -362,6 +359,25 @@ template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::recycleData()
 {
     m_epoch++;
+    std::cout<<"\n epoch "<<m_epoch;
+
+    m_A->copy(*m_pre0A);
+    m_B->copy(*m_pre0B);
+    
+    m_pre0A->setZero();
+	m_pre0B->setZero();
+}
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::computeLambda(int t)
+{
+    if(t<10) m_lambda = 0.0;
+    else {
+        T tt = T(t-9) / 1000.0;
+        if(tt > 1.0) tt = 1.0;
+        m_lambda = 0.003 * tt * tt;
+        std::cout<<" lambda "<<m_lambda;
+    }
 }
 
 }

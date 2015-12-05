@@ -64,6 +64,7 @@ public:
 	void computeError(const ExrImage * image, int iPatch);
 	void endPSNR(float * result);
 	void cleanDictionary();
+	void recycleData();
 	
 	static void testLAR();
 protected:
