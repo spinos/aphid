@@ -99,14 +99,17 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 /// ||Y||^2
 	T normX = Y.normSq();
 		
-	if(normX < 1e-5) return;
+	if(normX < 1e-6) return;
 	// std::cout<<"\n in err "<<normX;
 	
 /// R <- Y	
 /// c <- D^t * R
 	m_X->multTrans(m_correl, Y);
 /// find most correlated predictor
-	int currentInd = m_correl.maxAbsInd();
+///	int currentInd = m_correl.maxAbsInd();
+/// non-negative
+    int currentInd = m_correl.maxInd();
+    if(m_correl[currentInd] < lambda) return;
 	
 /// T thrs = 0;
 	m_numSel = 0;
@@ -192,9 +195,13 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 /// work <- ( C - c ) / ( 1 - Ga * u)
 /// C is max correlation
 /// c is correlation of each predictor
-		for (j = 0; j< m_p; ++j)
-			m_work[j] = ((m_work[j] < INFINITY) && (m_work[j] > T(-1.0))) ? (m_correl[j] + currentCorrelation)/(T(1.0) + m_work[j]) : INFINITY;
+///		for (j = 0; j< m_p; ++j)
+///			m_work[j] = ((m_work[j] < INFINITY) && (m_work[j] > T(-1.0))) ? (m_correl[j] + currentCorrelation)/(T(1.0) + m_work[j]) : INFINITY;
 		
+/// non-negative
+        for (j = 0; j< m_p; ++j) 
+            m_work[j]=INFINITY;
+        
 		for (j = 0; j< m_p; ++j)
 			m_work[j+m_p] = ((m_work[j+m_p] < INFINITY) && (m_work[j+m_p] < T(1.0))) ? (currentCorrelation - m_correl[j])/(T(1.0) - m_work[j+m_p]) : INFINITY;
 
@@ -225,6 +232,10 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 /// coefficients
 /// beta <- beta + step * u
 		clapack_axpy<T>(i+1, step, m_u.v(),1, beta.raw(),1);
+/// non-negative
+        for (j = 0; j<=i; ++j)  {          
+            if (beta[j] < 0) beta[j]=0;
+        }
 		
 /// correlations
 /// c <- c - step * work
@@ -277,7 +288,9 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 /// exit condition
 		if(numIter++ >= maxNumIter || absoluteValue<T>(step) < 1e-4
 				|| step == (currentCorrelation - lambda)
-				|| normX < 1e-8) break;
+				|| normX < 1e-8
+				|| m_numSel > 20
+				) break;
 	}
 }
 	

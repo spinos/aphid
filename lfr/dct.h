@@ -12,6 +12,7 @@ public:
     
     static void BasisFunc(T * dst, int n, int p, int q);
     static void ApplyBasisFunc(T * dst, int n, int p, int q, T weight);
+    static void EnhanceBasisFunc(T * dst, int n, int p, int q, T weight);
     static void AddBasisFunc(T * dst, int n, int p, int q, T weight);
 protected:
     
@@ -58,6 +59,17 @@ void Dct<T>::AddBasisFunc(T * dst, int n, int p, int q, T weight)
     for(i=0;i<n;++i) {
         for(j=0;j<n;++j) {
             dst[j*n+i] += BasisFunc(n ,i,j, p, q) * weight;
+        }
+    }
+}
+
+template <typename T>
+void Dct<T>::EnhanceBasisFunc(T * dst, int n, int p, int q, T weight)
+{  
+    int i, j;
+    for(i=0;i<n;++i) {
+        for(j=0;j<n;++j) {
+            dst[j*n+i] *= 1.0 + BasisFunc(n ,i,j, p, q) * weight;
         }
     }
 }

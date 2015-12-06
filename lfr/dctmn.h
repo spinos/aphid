@@ -119,26 +119,26 @@ void DictionaryMachine<NumThread, T>::initDictionary(LfParameter * param)
     m_atomSize = param->atomSize();
 	const int k = m_D->numColumns();
 	const int m = m_D->numRows();
-	int i, j;
+	int i, j, p, q;
 	for(i=0;i<k;i++) {
 /// init D with random signal 
         float * d = m_D->column(i);
         ExrImage * img = param->openImage(param->randomImageInd());
         
         img->getTile(d, rand(), m_atomSize);
-        int p = rand() & 7;
-        int q = rand() & 7;
-        Dct<T>::AddBasisFunc(d,         m_atomSize, p, q, 0.3);
         p = rand() & 7;
         q = rand() & 7;
-        Dct<T>::AddBasisFunc(&d[m/3],   m_atomSize, p, q, 0.3);
+        Dct<T>::EnhanceBasisFunc(d,         m_atomSize, p, q, 0.8);
         p = rand() & 7;
         q = rand() & 7;
-        Dct<T>::AddBasisFunc(&d[m/3*2], m_atomSize, p, q, 0.3);
-    
+        Dct<T>::EnhanceBasisFunc(&d[m/3],   m_atomSize, p, q, 0.8);
+        p = rand() & 7;
+        q = rand() & 7;
+        Dct<T>::EnhanceBasisFunc(&d[m/3*2], m_atomSize, p, q, 0.8);
+        
 	}
 	
-	m_D->normalize();
+	//m_D->normalize();
 	m_D->AtA(*m_G);
 	cleanDictionary(param);
 }
@@ -147,10 +147,10 @@ template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::preLearn()
 {
 	m_A->setZero();
-	m_A->addDiagonal(1e-4);
+	m_A->addDiagonal(1e-5);
 	m_B->copy(*m_D);
 /// B0 <- t0 * D
-	m_B->scale(1e-4);
+	m_B->scale(1e-5);
 	
 	m_batchA->setZero();
 	m_batchB->setZero();
@@ -158,7 +158,7 @@ void DictionaryMachine<NumThread, T>::preLearn()
     m_pre0B->setZero();
     m_pret = 0;
     m_epoch = -1;
-    m_lambda = 0.0;
+    m_lambda = 1e-5;
 }
 
 template<int NumThread, typename T>
@@ -169,7 +169,7 @@ void DictionaryMachine<NumThread, T>::learn(const ExrImage * image, int ibegin, 
     for(;j<=iend;++j) {
         image->getTile(m_y->raw(), j, m_atomSize);
 
-        m_lar->lars(*m_y, *m_beta, *m_ind, 0.0);
+        m_lar->lars(*m_y, *m_beta, *m_ind, m_lambda);
 	
         int nnz = 0;
         int i=0;
@@ -193,7 +193,6 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
 {
     T sc = 1.0;
     //if(t>0) 
-    {
         m_pret = t;
 /// scaling A and B from previous batch
     int tn = t+1;
@@ -201,12 +200,13 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
     else tn = 256 * 256 + t - 256;
         sc = T(tn+1-256)/T(tn+1);
     
+    if(t>0) {
 /// scale the past
-        m_A->scale(sc);
-        m_B->scale(sc);
+        //m_A->scale(sc);
+        //m_B->scale(sc);
 /// slow down early steps
-        m_batchA->scale(sc);
-        m_batchB->scale(sc);
+        m_batchA->scale(0.01);
+        m_batchB->scale(0.01);
     }
     
 /// add average of batch
@@ -231,10 +231,10 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
             m_ui->scale(1.0/Aii);
             m_ui->add(di);
 /// di <- ui / max(|| ui ||, 1)	?			
-            //float unm = m_ui->norm();
-            //if(unm > 1.0) 
-            //	m_ui->scale(1.f/unm);
-            m_ui->normalize();
+            float unm = m_ui->norm();
+            if(unm > 1.0) 
+            	m_ui->scale(1.f/unm);
+            //m_ui->normalize();
             
             m_D->copyColumn(i, m_ui->v());
        }
@@ -248,7 +248,7 @@ void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 	const int k = m_D->numColumns();
 	const int m = m_D->numRows();
     const int s = param->atomSize();
-	int i, j, l;
+	int i, j, l, p, q;
     
     int ncld = 0;
 	for (i = 0; i<k; ++i) {
@@ -268,19 +268,19 @@ void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 /// D_j <- randomly choose signal element
 				DenseVector<T> dj(m_D->column(j), m_D->numRows() );
 				
-				ExrImage * img = param->openImage(param->randomImageInd());
-                img->getTile(dj.raw(), rand(), s);
-                int p = rand() & 7;
-                int q = rand() & 7;
-                Dct<T>::AddBasisFunc(dj.raw(),         s, p, q, 0.3f);
-                p = rand() & 7;
-                q = rand() & 7;
-                Dct<T>::AddBasisFunc(&dj.raw()[m/3],   s, p, q, 0.3f);
-                p = rand() & 7;
-                q = rand() & 7;
-                Dct<T>::AddBasisFunc(&dj.raw()[m/3*2], s, p, q, 0.3f);
+				//ExrImage * img = param->openImage(param->randomImageInd());
+                //img->getTile(dj.raw(), rand(), s);
+                p = rand() & 3;
+                q = rand() & 3;
+                Dct<T>::AddBasisFunc(dj.raw(),         s, p, q, 0.5);
+                p = rand() & 3;
+                q = rand() & 3;
+                Dct<T>::AddBasisFunc(&dj.raw()[m/3],   s, p, q, 0.5);
+                p = rand() & 3;
+                q = rand() & 3;
+                Dct<T>::AddBasisFunc(&dj.raw()[m/3*2], s, p, q, 0.5);
                 
-				dj.normalize();
+				// dj.normalize();
 /// G_j <- D^t * D_j
 				DenseVector<T> gj(m_G->column(j), k);
 				m_D->multTrans(gj, dj);
@@ -329,7 +329,7 @@ void DictionaryMachine<NumThread, T>::fillPatch(unsigned * dst, float * color, i
 		for(i=0; i<s; i++) {
 			unsigned v = 255<<24;
 			for(k=0;k<rank;k++) {				
-				crgb[k] = 32 + 300 * color[(j * s + i) + k * stride];
+				crgb[k] = 24 + 400 * color[(j * s + i) + k * stride];
 				crgb[k] = std::min<int>(crgb[k], 255);
 				crgb[k] = std::max<int>(crgb[k], 0);
 			}
@@ -365,7 +365,7 @@ template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::computeError(const ExrImage * image, int iPatch)
 {
 	image->getTile(m_y->raw(), iPatch, m_atomSize);
-	m_lar->lars(*m_y, *m_beta, *m_ind, 0.0);
+	m_lar->lars(*m_y, *m_beta, *m_ind, m_lambda);
 	m_errorCalc->add(*m_y, *m_beta, *m_ind);
 }
 
@@ -378,12 +378,19 @@ void DictionaryMachine<NumThread, T>::recycleData()
 {
     m_epoch++;
     std::cout<<"\n epoch "<<m_epoch;
-
+    
     m_A->copy(*m_pre0A);
     m_B->copy(*m_pre0B);
     
+    //if(m_epoch>0) 
+    {
+        m_A->scale(0.7);
+        m_B->scale(0.7);
+    }
+    
     m_pre0A->setZero();
 	m_pre0B->setZero();
+	
 }
 
 template<int NumThread, typename T>

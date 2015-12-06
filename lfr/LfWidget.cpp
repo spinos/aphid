@@ -34,7 +34,7 @@ void LfWidget::paintEvent(QPaintEvent * /* event */)
 	// int x, y;
 	// m_world->param()->getDictionaryImageSize(x, y);
 
-	painter.scale(2,2);	
+	painter.scale(1.25,1.25);	
 	painter.drawPixmap(QPoint(2,2), m_pixmap);
 	
 }
