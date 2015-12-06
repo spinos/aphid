@@ -88,6 +88,7 @@ void LfThread::run()
 	int niter = 0;
 	int t = 0;
 	int endp;
+
 	forever {
 	    int ns = 0;
 		for(i=0;i<n;i++) {
@@ -131,7 +132,7 @@ void LfThread::run()
 		}
         
         niter++;
-        m_world->cleanDictionary();
+        //m_world->cleanDictionary();
         //if(niter > 1) 
         {
             m_world->recycleData();

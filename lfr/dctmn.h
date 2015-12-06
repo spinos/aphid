@@ -4,6 +4,7 @@
 #include "LfParameter.h"
 #include "regr.h"
 #include "psnr.h"
+#include "dct.h"
 /// f2c macros conflict
 #define _WIN32
 #include <ExrImage.h>
@@ -117,14 +118,24 @@ void DictionaryMachine<NumThread, T>::initDictionary(LfParameter * param)
 {
     m_atomSize = param->atomSize();
 	const int k = m_D->numColumns();
-	
+	const int m = m_D->numRows();
 	int i, j;
 	for(i=0;i<k;i++) {
 /// init D with random signal 
         float * d = m_D->column(i);
-        ExrImage * img = param->openImage(0);
+        ExrImage * img = param->openImage(param->randomImageInd());
         
         img->getTile(d, rand(), m_atomSize);
+        int p = rand() & 7;
+        int q = rand() & 7;
+        Dct<T>::AddBasisFunc(d,         m_atomSize, p, q, 0.3);
+        p = rand() & 7;
+        q = rand() & 7;
+        Dct<T>::AddBasisFunc(&d[m/3],   m_atomSize, p, q, 0.3);
+        p = rand() & 7;
+        q = rand() & 7;
+        Dct<T>::AddBasisFunc(&d[m/3*2], m_atomSize, p, q, 0.3);
+    
 	}
 	
 	m_D->normalize();
@@ -234,27 +245,10 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
 template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 {
-    if(m_epoch < 0) return;
 	const int k = m_D->numColumns();
+	const int m = m_D->numRows();
     const int s = param->atomSize();
 	int i, j, l;
-	int nusd = 0;
-	for (i = 0; i<k; ++i) {
-        const T Aii = m_A->column(i)[i];
-        if (Aii < 1e-8) {
-            DenseVector<T> dj(m_D->column(i), m_D->numRows() );
-				
-            ExrImage * img = param->openImage(param->randomImageInd());
-            img->getTile(dj.raw(), rand(), s);
-            
-            dj.normalize();
-            nusd++;
-       }
-    }
-    if(nusd > 0) {
-        std::cout<<"\n n unused atoms replaced "<<nusd;
-        m_D->AtA(*m_G);
-    }
     
     int ncld = 0;
 	for (i = 0; i<k; ++i) {
@@ -267,7 +261,7 @@ void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 			}
 			else {
 				float ab = m_G->column(i)[i] * m_G->column(j)[j];
-				toClean = ( absoluteValue<T>( m_G->column(i)[j] ) / sqrt( ab ) ) > 0.999999;
+				toClean = ( absoluteValue<T>( m_G->column(i)[j] ) / sqrt( ab ) ) > 0.9999;
 			}
 			if(toClean) {
 			    ncld++;
@@ -276,6 +270,15 @@ void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 				
 				ExrImage * img = param->openImage(param->randomImageInd());
                 img->getTile(dj.raw(), rand(), s);
+                int p = rand() & 7;
+                int q = rand() & 7;
+                Dct<T>::AddBasisFunc(dj.raw(),         s, p, q, 0.3f);
+                p = rand() & 7;
+                q = rand() & 7;
+                Dct<T>::AddBasisFunc(&dj.raw()[m/3],   s, p, q, 0.3f);
+                p = rand() & 7;
+                q = rand() & 7;
+                Dct<T>::AddBasisFunc(&dj.raw()[m/3*2], s, p, q, 0.3f);
                 
 				dj.normalize();
 /// G_j <- D^t * D_j
@@ -326,7 +329,7 @@ void DictionaryMachine<NumThread, T>::fillPatch(unsigned * dst, float * color, i
 		for(i=0; i<s; i++) {
 			unsigned v = 255<<24;
 			for(k=0;k<rank;k++) {				
-				crgb[k] = 15 + 496 * color[(j * s + i) + k * stride];
+				crgb[k] = 32 + 300 * color[(j * s + i) + k * stride];
 				crgb[k] = std::min<int>(crgb[k], 255);
 				crgb[k] = std::max<int>(crgb[k], 0);
 			}
