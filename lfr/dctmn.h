@@ -5,9 +5,11 @@
 #include "regr.h"
 #include "psnr.h"
 #include "dct.h"
+#include <boost/thread.hpp>
 /// f2c macros conflict
 #define _WIN32
 #include <ExrImage.h>
+ 
 
 namespace lfr {
 
@@ -39,13 +41,22 @@ class DictionaryMachine {
     DenseMatrix<T> * m_pre1B;
 /// least angle regression
 	LAR<T> * m_lar;
-/// peak signal-to-noise ratio
-	Psnr<T> * m_errorCalc;
     
+	T m_sqePt[NumThread];
+	SquareErr<T> m_sqeWorker[NumThread];
+	LAR<T> * m_larPt[NumThread];
+	DenseVector<T> * m_yPt[NumThread];
+	DenseVector<T> * m_betaPt[NumThread];
+	DenseVector<int> * m_indPt[NumThread];
+	DenseMatrix<T> * m_batchAPt[NumThread];
+    DenseMatrix<T> * m_batchBPt[NumThread];
+	
 	int m_atomSize;
 	int m_pret;
     int m_epoch;
     T m_lambda;
+    T m_totalErr;
+    
 public:
     DictionaryMachine(const int m, const int p);
     virtual ~DictionaryMachine();
@@ -62,7 +73,8 @@ public:
     void fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor);
 	void beginPSNR();
 	void computeError(const ExrImage * image, int iPatch);
-	void endPSNR(float * result);
+	void endPSNR(float * result, const int n);
+	T computePSNR(const ExrImage * image, const int numPatches, const int patchSize);
 /// keep coefficients of current epoch
 /// at end of epoch, set A and B to current epoch, 
 /// zero current epoch 
@@ -70,6 +82,8 @@ public:
 protected:
     
 private:
+    void learnPt(const int iThread, const ExrImage * image, const int workBegin, const int workEnd);
+    void computeErrPt(const int iThread, const ExrImage * image, const int workBegin, const int workEnd);
     void fillPatch(unsigned * dst, float * color, int s, int imageW, int rank = 3);
 	void computeLambda(int t);
 };
@@ -85,13 +99,22 @@ DictionaryMachine<NumThread, T>::DictionaryMachine(const int m, const int p)
 	m_y = new DenseVector<T>(m);
 	m_beta = new DenseVector<T>(p);
 	m_ind = new DenseVector<int>(p);
-	m_errorCalc = new Psnr<T>(m_D);
 	m_batchA = new DenseMatrix<T>(p, p);
 	m_batchB = new DenseMatrix<T>(m, p);
 	m_pre0A = new DenseMatrix<T>(p, p);
 	m_pre0B = new DenseMatrix<T>(m, p);
     m_ui = new DenseVector<T>(m);
     m_epoch = -1;
+    int i=0;
+    for(;i<NumThread;++i) {
+        m_sqeWorker[i].create(m_D);
+        m_larPt[i] = new LAR<T>(m_D, m_G);
+        m_yPt[i] = new DenseVector<T>(m);
+        m_betaPt[i] = new DenseVector<T>(p);
+        m_indPt[i] = new DenseVector<int>(p);
+        m_batchAPt[i] = new DenseMatrix<T>(p, p);
+        m_batchBPt[i] = new DenseMatrix<T>(m, p);
+    }
 }
 
 template<int NumThread, typename T>
@@ -105,12 +128,20 @@ DictionaryMachine<NumThread, T>::~DictionaryMachine()
     delete m_y;
     delete m_beta;
     delete m_ind;
-    delete m_errorCalc;
     delete m_batchA;
     delete m_batchB;
     delete m_pre0A;
     delete m_pre0B;
     delete m_ui;
+    int i=0;
+    for(;i<NumThread;++i) {
+        delete m_larPt[i];
+        delete m_yPt[i];
+        delete m_betaPt[i];
+        delete m_indPt[i];
+        delete m_batchAPt[i];
+        delete m_batchBPt[i];
+    }
 }
 
 template<int NumThread, typename T>
@@ -128,17 +159,17 @@ void DictionaryMachine<NumThread, T>::initDictionary(LfParameter * param)
         img->getTile(d, rand(), m_atomSize);
         p = rand() & 7;
         q = rand() & 7;
-        Dct<T>::EnhanceBasisFunc(d,         m_atomSize, p, q, 0.8);
+        Dct<T>::EnhanceBasisFunc(d,         m_atomSize, p, q, 0.5);
         p = rand() & 7;
         q = rand() & 7;
-        Dct<T>::EnhanceBasisFunc(&d[m/3],   m_atomSize, p, q, 0.8);
+        Dct<T>::EnhanceBasisFunc(&d[m/3],   m_atomSize, p, q, 0.5);
         p = rand() & 7;
         q = rand() & 7;
-        Dct<T>::EnhanceBasisFunc(&d[m/3*2], m_atomSize, p, q, 0.8);
+        Dct<T>::EnhanceBasisFunc(&d[m/3*2], m_atomSize, p, q, 0.5);
         
 	}
 	
-	//m_D->normalize();
+	m_D->normalize();
 	m_D->AtA(*m_G);
 	cleanDictionary(param);
 }
@@ -159,11 +190,58 @@ void DictionaryMachine<NumThread, T>::preLearn()
     m_pret = 0;
     m_epoch = -1;
     m_lambda = 1e-5;
+    int i=0;
+    for(;i<NumThread;++i) {
+        m_batchAPt[i]->setZero();
+        m_batchBPt[i]->setZero();
+    }
+}
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::learnPt(const int iThread, const ExrImage * image, const int workBegin, const int workEnd)
+{
+    const int k = m_D->numColumns();
+    int i = workBegin;
+    for(;i<=workEnd;++i) {
+        image->getTile(m_yPt[iThread]->raw(), i, m_atomSize);
+
+        m_larPt[iThread]->lars(*m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread], m_lambda);
+	
+        int nnz = 0;
+        int i=0;
+        for(;i<k;++i) {
+            if((*m_indPt[iThread])[i] < 0) break;
+            nnz++;
+        }
+        if(nnz < 1) continue;
+        
+        sort<T, int>(m_indPt[iThread]->raw(), m_betaPt[iThread]->raw(), 0, nnz-1);
+        
+/// A <- A + beta * beta^t
+	    m_batchAPt[iThread]->rank1Update(*m_betaPt[iThread], *m_indPt[iThread], nnz);
+/// B <- B + y * beta^t
+	    m_batchBPt[iThread]->rank1Update(*m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread], nnz);
+	}
 }
 
 template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::learn(const ExrImage * image, int ibegin, int iend)
 {
+#if 1
+    const int workSize = (iend - ibegin + 1) / NumThread;
+    boost::thread learnThread[NumThread];
+    int workBegin, workEnd, i=0;
+    for(;i<NumThread;++i) {
+        workBegin = ibegin + i * workSize;
+        workEnd = (i== NumThread - 1) ? iend: workBegin + workSize - 1;
+        learnThread[i] = boost::thread( boost::bind(&DictionaryMachine<NumThread, T>::learnPt, 
+            this, i, image, workBegin, workEnd) );
+    }
+    
+    for(i=0;i<NumThread;++i)
+		learnThread[i].join();
+	
+#else
     const int k = m_D->numColumns();
     int j = ibegin;
     for(;j<=iend;++j) {
@@ -177,7 +255,7 @@ void DictionaryMachine<NumThread, T>::learn(const ExrImage * image, int ibegin, 
             if((*m_ind)[i] < 0) break;
             nnz++;
         }
-        if(nnz < 1) break;
+        if(nnz < 1) continue;
         
         sort<T, int>(m_ind->raw(), m_beta->raw(), 0, nnz-1);
         
@@ -186,6 +264,7 @@ void DictionaryMachine<NumThread, T>::learn(const ExrImage * image, int ibegin, 
 /// B <- B + y * beta^t
 	    m_batchB->rank1Update(*m_y, *m_beta, *m_ind, nnz);
 	}
+#endif
 }
 
 template<int NumThread, typename T>
@@ -199,8 +278,19 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
     if(tn < 256) tn = tn * 256;
     else tn = 256 * 256 + t - 256;
         sc = T(tn+1-256)/T(tn+1);
+        
+/// accumulate pre-thread works
+    int i = 0;
+#if 1
+    for(;i<NumThread;++i) {
+        m_batchA->add(*m_batchAPt[i]);
+        m_batchB->add(*m_batchBPt[i]);
+        m_batchAPt[i]->setZero();
+        m_batchBPt[i]->setZero();
+    }
+#endif
     
-    if(t>0) {
+    if(t>1) {
 /// scale the past
         //m_A->scale(sc);
         //m_B->scale(sc);
@@ -218,7 +308,7 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
     m_batchB->setZero();
     
 	const int p = m_D->numColumns();
-	int i;
+	
     for (i = 0; i<p; ++i) {
         const T Aii = m_A->column(i)[i];
         if (Aii > 1e-8) {
@@ -234,7 +324,6 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
             float unm = m_ui->norm();
             if(unm > 1.0) 
             	m_ui->scale(1.f/unm);
-            //m_ui->normalize();
             
             m_D->copyColumn(i, m_ui->v());
        }
@@ -280,7 +369,7 @@ void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
                 q = rand() & 3;
                 Dct<T>::AddBasisFunc(&dj.raw()[m/3*2], s, p, q, 0.5);
                 
-				// dj.normalize();
+				dj.normalize();
 /// G_j <- D^t * D_j
 				DenseVector<T> gj(m_G->column(j), k);
 				m_D->multTrans(gj, dj);
@@ -359,25 +448,65 @@ void DictionaryMachine<NumThread, T>::fillSparsityGraph(unsigned * imageBits, in
 
 template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::beginPSNR()
-{ m_errorCalc->reset(); }
+{ 
+    m_totalErr = 0.0;
+}
 
 template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::computeError(const ExrImage * image, int iPatch)
 {
 	image->getTile(m_y->raw(), iPatch, m_atomSize);
 	m_lar->lars(*m_y, *m_beta, *m_ind, m_lambda);
-	m_errorCalc->add(*m_y, *m_beta, *m_ind);
+	m_totalErr += m_sqeWorker[0].compute(*m_y, *m_beta, *m_ind);
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::endPSNR(float * result)
-{ *result = m_errorCalc->finish(); }
+void DictionaryMachine<NumThread, T>::endPSNR(float * result, const int n)
+{ 
+    *result = 10.0 * log10( T(1.0) / (1e-10 + m_totalErr / n) );
+}
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::computeErrPt(const int iThread, const ExrImage * image, const int workBegin, const int workEnd)
+{
+    T sum = 0;
+    int i = workBegin;
+    for(;i<=workEnd;++i) {
+        image->getTile(m_yPt[iThread]->raw(), i, m_atomSize);
+        m_larPt[iThread]->lars(*m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread], m_lambda);
+        sum += m_sqeWorker[iThread].compute(*m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread]);
+    }
+    m_sqePt[iThread] = sum;
+}
+
+template<int NumThread, typename T>
+T DictionaryMachine<NumThread, T>::computePSNR(const ExrImage * image, const int numPatches, const int patchSize)
+{
+    const int workSize = numPatches / NumThread;
+    boost::thread errThread[NumThread];
+    int workBegin, workEnd, i=0;
+    for(;i<NumThread;++i) {
+        workBegin = i * workSize;
+        workEnd = (i== NumThread - 1) ? numPatches - 1: workBegin + workSize - 1;
+        errThread[i] = boost::thread( boost::bind(&DictionaryMachine<NumThread, T>::computeErrPt, 
+            this, i, image, workBegin, workEnd) );
+    }
+    
+    for(i=0;i<NumThread;++i)
+		errThread[i].join();
+	
+	T sum = 0.0;
+	for(i=0;i<NumThread;++i)
+		sum += m_sqePt[i];
+	
+    const int numPixels = numPatches * patchSize * patchSize;
+    return 10.0 * log10( T(1.0) / (1e-10 + sum / numPixels) );
+}
 
 template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::recycleData()
 {
     m_epoch++;
-    std::cout<<"\n epoch "<<m_epoch;
     
     m_A->copy(*m_pre0A);
     m_B->copy(*m_pre0B);

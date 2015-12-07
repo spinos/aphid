@@ -17,18 +17,7 @@ LfWorld::LfWorld(LfParameter * param)
 	m_param = param;
 	const int m = param->dimensionOfX();
 	const int p = param->dictionaryLength();
-	m_machine = new DictionaryMachine<2, float>(m, p);
-	/*m_D = new DenseMatrix<float>(m, p);
-	m_G = new DenseMatrix<float>(p, p);
-	m_A = new DenseMatrix<float>(p, p);
-	m_B = new DenseMatrix<float>(m, p);
-	m_lar = new LAR<float>(m_D, m_G);
-	m_y = new DenseVector<float>(m);
-	m_beta = new DenseVector<float>(p);
-	m_ind = new DenseVector<int>(p);
-	m_errorCalc = new Psnr<float>(m_D);
-	m_batchA = new DenseMatrix<float>(p, p);
-	m_batchB = new DenseMatrix<float>(m, p);*/
+	m_machine = new DictionaryMachine<4, float>(m, p);
 }
 
 LfWorld::~LfWorld() 
@@ -156,41 +145,9 @@ void LfWorld::preLearn()
 	m_batchB->setZero();*/
 }
 
-void LfWorld::learn(const ExrImage * image, int iPatch)
-{
-    /*
-	const int k = m_D->numColumns();
-	const int s = m_param->atomSize();
-	
-	image->getTile(m_y->raw(), iPatch, s);
-
-	m_lar->lars(*m_y, *m_beta, *m_ind, 0.0);
-	
-	int nnz = 0;
-	int i=0;
-	for(;i<k;++i) {
-		if((*m_ind)[i] < 0) break;
-		nnz++;
-	}
-	if(nnz < 1) return;
-	
-	sort<float, int>(m_ind->raw(), m_beta->raw(), 0, nnz-1);
-	
-/// A <- A + beta * beta^t
-	m_batchA->rank1Update(*m_beta, *m_ind, nnz);
-/// B <- B + y * beta^t
-	m_batchB->rank1Update(*m_y, *m_beta, *m_ind, nnz);
-	*/
-}
-
 void LfWorld::learn(const ExrImage * image, int iPatch0, int iPatch1)
 {
     m_machine->learn(image, iPatch0, iPatch1);
-    /*
-    int i;
-    for(i=iPatch0; i<= iPatch1; ++i)
-        learn(image, i);
-    */
 }
 
 void LfWorld::updateDictionary(const ExrImage * image, int t)
@@ -250,40 +207,28 @@ void LfWorld::updateDictionary(const ExrImage * image, int t)
 void LfWorld::fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor)
 {
     m_machine->fillSparsityGraph(imageBits, iLine, imageW, fillColor);
-    /*
-	DenseVector<unsigned> scanline(&imageBits[iLine * imageW], imageW);
-	scanline.setZero();
-	const int k = m_param->dictionaryLength();
-	const float ratio = (float)k / imageW;
-			
-	int i = 0;
-	for(;i<imageW;++i) {
-		if((*m_ind)[i*ratio] < 0) break;
-		scanline[i] = fillColor;
-	}*/
 }
 
 void LfWorld::beginPSNR()
 { 
-    m_machine->beginPSNR();
-    // m_errorCalc->reset(); 
+    m_machine->beginPSNR(); 
 }
 
 void LfWorld::computeError(const ExrImage * image, int iPatch)
 {
     m_machine->computeError(image, iPatch);
-    /*
-	const int s = m_param->atomSize();
-	image->getTile(m_y->raw(), iPatch, s);
-	m_lar->lars(*m_y, *m_beta, *m_ind, 0.0);
-	m_errorCalc->add(*m_y, *m_beta, *m_ind);
-	*/
 }
 
 void LfWorld::endPSNR(float * result)
 { 
-    m_machine->endPSNR(result);
-    //*result = m_errorCalc->finish(); 
+    m_machine->endPSNR(result, m_param->totalNumPixels()); 
+}
+
+float LfWorld::computePSNR(const ExrImage * image, int iImage)
+{
+    const int m = m_param->imageNumPatches(iImage);
+    const int s = m_param->atomSize();
+	return m_machine->computePSNR(image, m, s);
 }
 
 void LfWorld::recycleData()

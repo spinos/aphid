@@ -174,6 +174,9 @@ int LfParameter::imageNumPatches(int i) const
 int LfParameter::totalNumPatches() const
 { return m_numTotalPatches; }
 
+int LfParameter::totalNumPixels() const
+{ return m_numTotalPatches * m_atomSize * m_atomSize; }
+
 int LfParameter::dimensionOfX() const
 { return m_atomSize * m_atomSize * 3; }
 

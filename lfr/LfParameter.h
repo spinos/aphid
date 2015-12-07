@@ -40,6 +40,7 @@ public:
 	int atomSize() const;
 	int dictionaryLength() const;
 	int totalNumPatches() const;
+	int totalNumPixels() const;
 	int dimensionOfX() const;
 	int randomImageInd() const;
 	int numImages() const;

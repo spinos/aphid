@@ -91,15 +91,13 @@ public:
 		m_currentData = 0;
 	}
 	
-	/*
-	void beginAt(const T & x) {
-		Pair<Entity *, Entity> g = m_root->find(x);
+	void beginByLastSearch(const T & x) 
+	{
+		SearchResult sr;
+		Pair<Entity *, Entity> g = m_lastSearchNode->findInNode1(x, &sr);	
 		m_current = static_cast<BNode<T> *>(g.key);
-		
-		SearchResult sr = BNode<T>::LatestSearch;
 		m_currentData = sr.found;
 	}
-	*/
 	
 	void next() {
 		m_currentData++;

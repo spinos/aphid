@@ -10,6 +10,78 @@
 #include "linearMath.h"
 
 namespace lfr {
+    
+template<typename T>
+class SquareErr {
+    
+    DenseVector<T> m_yhat;
+	const DenseMatrix<T> * m_X;
+	
+public:
+    SquareErr();
+	virtual ~SquareErr();
+	
+	void create(const DenseMatrix<T> * X);
+	T compute(const DenseVector<T> & y, const DenseVector<T> & beta, const DenseVector<int> & ind);
+	
+protected:
+    
+private:
+    
+};
+
+template<typename T>
+SquareErr<T>::SquareErr() {}
+
+template<typename T>
+SquareErr<T>::~SquareErr() {}
+
+template<typename T>
+void SquareErr<T>::create(const DenseMatrix<T> * X)
+{
+	m_X = X;
+	m_yhat.create( X->numRows() );
+}
+
+template<typename T>
+T SquareErr<T>::compute(const DenseVector<T> & y, const DenseVector<T> & beta, const DenseVector<int> & ind)
+{
+    const int k = m_X->numColumns();
+	int nnz = 0;
+	int i=0;
+	for(;i<k;++i) {
+		if(ind[i] < 0) break;
+		nnz++;
+	}
+	
+	T e, sum = 0.0;
+	const int m = y.numElements();
+	const int nl = m/3;
+	if(nnz < 1) {
+	    for(i=0;i<nl;i++) {
+/// to luma
+	        e = 0.299 * y[i] + 0.587 * y[i + nl] + 0.114 * y[i + nl*2];
+	        sum += e * e;
+		}
+		return sum;
+	}
+	
+	m_yhat.setZero();
+	
+	int j;
+	for(i=0;i<m;i++) {
+		for(j=0;j<nnz;j++) {
+			m_yhat[i] += m_X->column(ind[j])[i] * beta[j];
+		}
+	}
+	
+	for(i=0;i<nl;i++) {
+		e = 0.299 * m_yhat[i] + 0.587 * m_yhat[i + nl] + 0.114 * m_yhat[i + nl*2];
+		e -= 0.299 * y[i] + 0.587 * y[i + nl] + 0.114 * y[i + nl*2];
+		sum += e * e;
+	}
+	return sum;
+}
 
 template<typename T>
 class Psnr {

@@ -102,13 +102,10 @@ void LfThread::run()
 				m_world->learn(&img, j * 256, endp);
 				
 				{
-/// force to clean on first batch of first image only
-                    // if( i==0 && j==0 ) 
-                    // qDebug()<<" t"<<t<<" nit"<<niter;
 				    m_world->updateDictionary( &img, niter );
 					m_world->dictionaryAsImage(scanLine, w, h);
 					emit sendDictionary(*m_dictImg);
-					emit sendSparsity(*m_spasityImg);
+					// emit sendSparsity(*m_spasityImg);
 				}
 			}
 			ns += m;
@@ -116,7 +113,10 @@ void LfThread::run()
 		
 		for(i=0;i<n;i++) {
 			img.open(m_world->param()->imageName(i));
-			const int m = m_world->param()->imageNumPatches(i);
+#if 1
+            float err = m_world->computePSNR(&img, i);
+#else
+            const int m = m_world->param()->imageNumPatches(i);
 			m_world->beginPSNR();
 			for(j=0;j<m;j++) {
 				m_world->computeError(&img, j);
@@ -128,6 +128,7 @@ void LfThread::run()
 			}
 			float err;
 			m_world->endPSNR(&err);
+#endif
 			emit sendPSNR(err);
 		}
         

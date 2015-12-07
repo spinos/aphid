@@ -116,6 +116,7 @@ void StatisticDialog::recvPSNR(float ratio)
 /// lower limit -10
 	if(iratio < -30) iratio = -30;
 	m_psnrs.push_back(-iratio);
+	update();
 }
 
 }

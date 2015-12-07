@@ -200,7 +200,8 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 		
 /// non-negative
         for (j = 0; j< m_p; ++j) 
-            m_work[j]=INFINITY;
+            m_work[j]=INFINITY;
+
         
 		for (j = 0; j< m_p; ++j)
 			m_work[j+m_p] = ((m_work[j+m_p] < INFINITY) && (m_work[j+m_p] < T(1.0))) ? (currentCorrelation - m_correl[j])/(T(1.0) - m_work[j+m_p]) : INFINITY;
@@ -233,7 +234,8 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 /// beta <- beta + step * u
 		clapack_axpy<T>(i+1, step, m_u.v(),1, beta.raw(),1);
 /// non-negative
-        for (j = 0; j<=i; ++j)  {          
+        for (j = 0; j<=i; ++j)
+  {          
             if (beta[j] < 0) beta[j]=0;
         }
 		
@@ -289,7 +291,7 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 		if(numIter++ >= maxNumIter || absoluteValue<T>(step) < 1e-4
 				|| step == (currentCorrelation - lambda)
 				|| normX < 1e-8
-				|| m_numSel > 20
+				|| m_numSel >= 20
 				) break;
 	}
 }
