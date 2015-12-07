@@ -26,9 +26,18 @@ Window::Window(LfMachine * world)
 			
 	connect(m_thread, SIGNAL(sendPSNR(float)),
             m_statistics, SLOT(recvPSNR(float)));
+	
+	connect(m_thread, SIGNAL(sendIterDone(int)),
+            m_statistics, SLOT(recvIterDone(int)));
 			
 	m_thread->initAtoms();
 	m_statistics->show();
+}
+
+Window::~Window()
+{
+	delete m_thread;
+	delete m_statistics;
 }
 
 void Window::createMenus()
@@ -37,14 +46,19 @@ void Window::createMenus()
     fileMenu->addAction(importTriangleAct);
 	fileMenu->addAction(importCurveAct);
 	fileMenu->addAction(importPatchAct);*/
+	generateMenu = menuBar()->addMenu(tr("&Generate"));
+	generateMenu->addAction(generateAct);
     windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(statisticAct);
 }
 
 void Window::createActions()
 {
+	generateAct = new QAction(tr("&Stop"), this);
+	generateAct->setStatusTip(tr("Stop learning to generate"));
+	connect(generateAct, SIGNAL(triggered()), m_thread, SLOT(endLearn()));
     statisticAct = new QAction(tr("&Statistics"), this);
-	statisticAct->setStatusTip(tr("Sparsity and PSNR"));
+	statisticAct->setStatusTip(tr("PSNR"));
     connect(statisticAct, SIGNAL(triggered()), m_statistics, SLOT(show()));
 }
 

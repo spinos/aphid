@@ -24,6 +24,7 @@ class LfParameter {
 	std::vector<std::string > m_imageNames;
 	std::vector<int > m_numPatches;
 	int m_nthread;
+	int m_maxIter;
 /// n x n atom
 	int m_atomSize;
 /// d/m where m = n^2 * 3 
@@ -48,6 +49,7 @@ public:
 	int numImages() const;
 	std::string imageName(int i) const;
 	int imageNumPatches(int i) const;
+	int maxIterations() const;
 	
 	bool isImageOpened(const int ind, int & idx) const;
 	ExrImage *openImage(const int ind);

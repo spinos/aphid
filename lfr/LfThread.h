@@ -22,16 +22,19 @@ public:
     LfThread(LfMachine * world, QObject *parent = 0);
     virtual ~LfThread();
 
-    void render(QSize resultSize);
-	void initAtoms();
+    void initAtoms();
 	void beginLearn();
+	
+public slots:
+	void endLearn();
 	
 signals:
 	void sendInitialDictionary(const QImage &image);
 	void sendDictionary(const QImage &image);
 	void sendSparsity(const QImage &image);
     void sendPSNR(float value);
-
+	void sendIterDone(int n);
+	
 protected:
     void run();
 

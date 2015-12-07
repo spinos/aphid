@@ -119,4 +119,8 @@ void StatisticDialog::recvPSNR(float ratio)
 	update();
 }
 
+void StatisticDialog::recvIterDone(int n)
+{
+}
+
 }

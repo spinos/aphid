@@ -30,6 +30,7 @@ LfParameter::LfParameter(int argc, char *argv[])
 	m_atomSize = 8;
 	m_overcomplete = 1.f;
 	m_nthread = 2;
+	m_maxIter = 100;
 	bool foundImages = false;
 	if(argc == 1) {
 		m_isValid = searchImagesIn("./");
@@ -54,6 +55,23 @@ LfParameter::LfParameter(int argc, char *argv[])
 				}
 				catch(const boost::bad_lexical_cast &) {
 					std::cout<<"\n bad --thread value "<<argv[i+1];
+					break;
+				}
+			}
+			if(strcmp(argv[i], "-mi") == 0 || strcmp(argv[i], "--maxIteration") == 0) {
+				if(i==argc-1) {
+					std::cout<<"\n --maxIteration value is not set";
+					break;
+				}
+				try {
+					m_maxIter = boost::lexical_cast<int>(argv[i+1]);
+					if(m_maxIter < 1) {
+						std::cout<<"\n bad --maxIteration value (< 1)";
+						break;
+					}
+				}
+				catch(const boost::bad_lexical_cast &) {
+					std::cout<<"\n bad --maxIteration value "<<argv[i+1];
 					break;
 				}
 			}
@@ -246,6 +264,9 @@ void LfParameter::getDictionaryImageSize(int & x, int & y) const
 int LfParameter::numThread() const
 { return m_nthread; }
 
+int LfParameter::maxIterations() const
+{ return m_maxIter; }
+
 void LfParameter::PrintHelp()
 {
 	std::cout<<"\n lfr (Light Field Research) version 20151122"
@@ -255,6 +276,7 @@ void LfParameter::PrintHelp()
 	<<"\n current dir will be searched for any file with name ending in .exr."
 	<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 8"
 	<<"\n -t or --thread    integer    number of threads to use, limit to 1 - 24, default is 2"
+	<<"\n -mi or --maxIteration    integer    limit of iterations, default is 100"
 	<<"\n -oc or --overcomplete    float    overcompleteness of dictionary, d/m, no less than 1.0"
 	<<"\n -h or --help    print this information"
 	<<"\n";

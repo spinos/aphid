@@ -21,6 +21,7 @@ protected:
 public slots:
    void recvSparsity(const QImage &image);
    void recvPSNR(float ratio);
+   void recvIterDone(int n);
 	
 private:
 	void drawSparsity(QPainter & painter, int baseX, int baseY);

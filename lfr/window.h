@@ -18,6 +18,7 @@ class Window : public QMainWindow
 
 public:
     Window(LfMachine * world);
+	virtual ~Window();
 	
 protected:
     void keyPressEvent(QKeyEvent *event);
@@ -34,6 +35,8 @@ private:
     LfWidget * m_mainWidget;
 	StatisticDialog * m_statistics;
 	QMenu * windowMenu;
+	QMenu * generateMenu;
+	QAction * generateAct;
 	QAction * statisticAct;
 };
 //! [0]

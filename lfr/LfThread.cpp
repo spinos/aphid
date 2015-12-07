@@ -20,26 +20,7 @@ LfThread::LfThread(LfMachine * world, QObject *parent)
 
 LfThread::~LfThread()
 {
-    mutex.lock();
-    abort = true;
-    condition.wakeOne();
-    mutex.unlock();
-
-    wait();
-}
-
-void LfThread::render(QSize resultSize)
-{
-    QMutexLocker locker(&mutex);
-
-	this->resultSize = resultSize;
-
-    if (!isRunning()) {
-        start(LowPriority);
-    } else {
-        restart = true;
-        condition.wakeOne();
-    }
+    endLearn();
 }
 
 void LfThread::initAtoms()
@@ -67,6 +48,18 @@ void LfThread::beginLearn()
     }
 }
 
+void LfThread::endLearn()
+{
+	if(isRunning() ) {
+	mutex.lock();
+    abort = true;
+    condition.wakeOne();
+    mutex.unlock();
+
+    wait();
+	}
+}
+
 void LfThread::run()
 {
 	int w, h;
@@ -85,13 +78,15 @@ void LfThread::run()
 	cwhite = cwhite | ( 255 );
 	
 	const int totalNSignals = m_world->param()->totalNumPatches();
-	int niter = 0;
-	int t = 0;
+	
 	int endp;
-
-	forever {
-	    int ns = 0;
+	int niter = 0;
+	for(;niter< m_world->param()->maxIterations();++niter) {
 		for(i=0;i<n;i++) {
+			mutex.lock();
+			if (abort) return;
+			mutex.unlock();
+			
 			img.open(m_world->param()->imageName(i));
 			const int m = m_world->param()->imageNumPatches(i);
 			int nbatch = m>>8;
@@ -108,10 +103,13 @@ void LfThread::run()
 					// emit sendSparsity(*m_spasityImg);
 				}
 			}
-			ns += m;
 		}
 		
 		for(i=0;i<n;i++) {
+			mutex.lock();
+			if (abort) return;
+			mutex.unlock();
+			
 			img.open(m_world->param()->imageName(i));
 #if 1
             float e = m_world->computePSNR(&img, i);
@@ -121,11 +119,11 @@ void LfThread::run()
 			m_world->beginPSNR();
 			for(j=0;j<m;j++) {
 				m_world->computeError(&img, j);
-				m_world->fillSparsityGraph(spasityLine, j & 255, 100, cwhite);
+				//m_world->fillSparsityGraph(spasityLine, j & 255, 100, cwhite);
 				
-				if(((j+1) & 255) == 0 || (j+1)==m) {
-					emit sendSparsity(*m_spasityImg);
-				}
+				//if(((j+1) & 255) == 0 || (j+1)==m) {
+				//	emit sendSparsity(*m_spasityImg);
+				//}
 			}
 			float err;
 			m_world->endPSNR(&err);
@@ -134,12 +132,12 @@ void LfThread::run()
 			
 		}
         
-        niter++;
         //m_world->cleanDictionary();
         //if(niter > 1) 
         {
             m_world->recycleData();
-            qDebug()<<" recycle"<<niter;
+			emit sendIterDone(niter+1);
+            //qDebug()<<" recycle"<<niter;
         }
 	}
 /*

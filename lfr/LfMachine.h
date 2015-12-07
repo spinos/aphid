@@ -25,6 +25,7 @@ public:
 	virtual void cleanDictionary();
 	virtual void recycleData();
 	virtual float computePSNR(const ExrImage * image, int iImage);
+	virtual bool save();
 	
 protected:
 	void fillPatch(unsigned * dst, float * color, int s, int imageW, int rank = 3);

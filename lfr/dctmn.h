@@ -9,8 +9,7 @@
 #include <boost/thread.hpp>
 /// f2c macros conflict
 #define _WIN32
-#include <ExrImage.h>
- 
+#include <ExrImage.h> 
 
 namespace lfr {
 
@@ -78,7 +77,8 @@ protected:
 private:
     void learnPt(const int iThread, const ExrImage * image, const int workBegin, const int workEnd);
     void computeErrPt(const int iThread, const ExrImage * image, const int workBegin, const int workEnd);
-    void fillPatch(unsigned * dst, float * color, int s, int imageW, int rank = 3);
+    void fillPatchPt(const int iThread, unsigned * line, const int workBegin, const int workEnd,
+						const int dimx, const int s, const int imageW);
 	void computeLambda(int t);
 };
 
@@ -383,15 +383,13 @@ void DictionaryMachine<NumThread, T>::cleanDictionary()
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH)
+void DictionaryMachine<NumThread, T>::fillPatchPt(const int iThread, unsigned * line, 
+												const int workBegin, const int workEnd,
+												const int dimx, const int s, const int imageW)
 {
-    const int s = param()->atomSize();
-	const int dimx = imageW / s;
-	const int dimy = imageH / s;
 	const int k = param()->dictionaryLength();
 	int i, j;
-	unsigned * line = imageBits;
-	for(j=0;j<dimy;j++) {
+	for(j= workBegin;j<= workEnd;j++) {
 		for(i=0;i<dimx;i++) {
 			const int ind = dimx * j + i;
 			if(ind < k) {
@@ -404,27 +402,41 @@ void DictionaryMachine<NumThread, T>::dictionaryAsImage(unsigned * imageBits, in
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::fillPatch(unsigned * dst, float * color, int s, int imageW, int rank)
+void DictionaryMachine<NumThread, T>::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH)
 {
-    const int stride = s * s;
-	int crgb[3];
-	int i, j, k;
-	unsigned * line = dst;
-	for(j=0;j<s; j++) {
-		for(i=0; i<s; i++) {
-			unsigned v = 255<<24;
-			for(k=0;k<rank;k++) {				
-				crgb[k] = 24 + 400 * color[(j * s + i) + k * stride];
-				crgb[k] = std::min<int>(crgb[k], 255);
-				crgb[k] = std::max<int>(crgb[k], 0);
+    const int s = param()->atomSize();
+	const int dimx = imageW / s;
+	const int dimy = imageH / s;
+	unsigned * line = imageBits;
+	
+#if 1
+	const int workSize = dimy / NumThread;
+	boost::thread fillThread[NumThread];
+	int workBegin, workEnd, tid = 0;
+	for(;tid<NumThread;++tid) {
+        workBegin = tid * workSize;
+        workEnd = (tid== NumThread - 1) ? dimy - 1: workBegin + workSize - 1;
+        fillThread[tid] = boost::thread( boost::bind(&DictionaryMachine<NumThread, T>::fillPatchPt, 
+            this, tid, &line[workBegin * imageW * s], workBegin, workEnd, dimx, s, imageW) );
+    }
+	
+	for(tid=0;tid<NumThread;++tid)
+		fillThread[tid].join();
+		
+#else
+	int i, j;
+	const int k = param()->dictionaryLength();
+	for(j=0;j<dimy;j++) {
+		for(i=0;i<dimx;i++) {
+			const int ind = dimx * j + i;
+			if(ind < k) {
+			    float * d = m_D->column(ind);
+			    fillPatch(&line[i * s], d, s, imageW);
 			}
-			v = v | ( crgb[0] << 16 );
-			v = v | ( crgb[1] << 8 );
-			v = v | ( crgb[2] );
-			line[i] = v;
 		}
-		line += imageW;
+		line += imageW * s;
 	}
+#endif
 }
 
 template<int NumThread, typename T>
