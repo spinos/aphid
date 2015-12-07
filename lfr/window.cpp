@@ -1,7 +1,7 @@
 #include <QtGui>
 #include "window.h"
 
-Window::Window(LfWorld * world)
+Window::Window(LfMachine * world)
 {
    //  qDebug()<<"window";
 	m_thread = new LfThread(world, this);

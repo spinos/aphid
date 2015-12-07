@@ -1,11 +1,11 @@
 #include <QtGui>
 #include <iostream>
 #include "LfThread.h"
-#include "LfWorld.h"
+#include "LfMachine.h"
 #include <ExrImage.h>
 
 namespace lfr {
-LfThread::LfThread(LfWorld * world, QObject *parent)
+LfThread::LfThread(LfMachine * world, QObject *parent)
     : QThread(parent)
 {
 	m_world = world;
@@ -114,7 +114,8 @@ void LfThread::run()
 		for(i=0;i<n;i++) {
 			img.open(m_world->param()->imageName(i));
 #if 1
-            float err = m_world->computePSNR(&img, i);
+            float e = m_world->computePSNR(&img, i);
+            emit sendPSNR(e);
 #else
             const int m = m_world->param()->imageNumPatches(i);
 			m_world->beginPSNR();
@@ -128,8 +129,9 @@ void LfThread::run()
 			}
 			float err;
 			m_world->endPSNR(&err);
-#endif
 			emit sendPSNR(err);
+#endif
+			
 		}
         
         niter++;

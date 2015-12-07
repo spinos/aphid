@@ -23,6 +23,7 @@ class LfParameter {
 	
 	std::vector<std::string > m_imageNames;
 	std::vector<int > m_numPatches;
+	int m_nthread;
 /// n x n atom
 	int m_atomSize;
 /// d/m where m = n^2 * 3 
@@ -37,6 +38,7 @@ public:
 	virtual ~LfParameter();
 	
 	bool isValid() const;
+	int numThread() const;
 	int atomSize() const;
 	int dictionaryLength() const;
 	int totalNumPatches() const;

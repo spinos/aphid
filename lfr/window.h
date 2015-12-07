@@ -2,7 +2,7 @@
 #define WINDOW_H
 
 #include <QMainWindow>
-#include "LfWorld.h"
+#include "LfMachine.h"
 #include "LfThread.h"
 #include "LfWidget.h"
 #include "StatisticDialog.h"
@@ -17,7 +17,7 @@ class Window : public QMainWindow
     Q_OBJECT
 
 public:
-    Window(LfWorld * world);
+    Window(LfMachine * world);
 	
 protected:
     void keyPressEvent(QKeyEvent *event);

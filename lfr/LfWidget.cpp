@@ -1,10 +1,10 @@
 #include <QtGui>
 #include "LfWidget.h"
-#include "LfWorld.h"
+#include "LfMachine.h"
 
 namespace lfr {
 
-LfWidget::LfWidget(LfWorld * world, QWidget *parent)
+LfWidget::LfWidget(LfMachine * world, QWidget *parent)
     : QWidget(parent)
 {
 	m_world = world;

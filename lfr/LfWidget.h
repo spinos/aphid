@@ -5,14 +5,14 @@
 
 namespace lfr {
 
-class LfWorld;
+class LfMachine;
 
 class LfWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    LfWidget(LfWorld * world, QWidget *parent = 0);
+    LfWidget(LfMachine * world, QWidget *parent = 0);
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -22,7 +22,7 @@ private slots:
     void recvDictionary(const QImage &image);
 
 private:
-	LfWorld * m_world;
+	LfMachine * m_world;
     QPixmap m_pixmap;
 };
 

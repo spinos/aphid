@@ -12,14 +12,14 @@ QT_END_NAMESPACE
 
 namespace lfr {
 
-class LfWorld;
+class LfMachine;
 
 class LfThread : public QThread
 {
     Q_OBJECT
 
 public:
-    LfThread(LfWorld * world, QObject *parent = 0);
+    LfThread(LfMachine * world, QObject *parent = 0);
     virtual ~LfThread();
 
     void render(QSize resultSize);
@@ -36,7 +36,7 @@ protected:
     void run();
 
 private:
-	LfWorld * m_world;
+	LfMachine * m_world;
     QMutex mutex;
     QWaitCondition condition;
 

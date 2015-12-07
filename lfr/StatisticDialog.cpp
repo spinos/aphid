@@ -1,10 +1,10 @@
 #include <QtGui>
 #include "StatisticDialog.h"
-#include "LfWorld.h"
+#include "LfMachine.h"
 
 namespace lfr {
 
-StatisticDialog::StatisticDialog(LfWorld * world, QWidget *parent)
+StatisticDialog::StatisticDialog(LfMachine * world, QWidget *parent)
     : QDialog(parent)
 {
 	int x, y;

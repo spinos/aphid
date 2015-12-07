@@ -14,7 +14,7 @@ regr.h
 psnr.h
 dctmn.h
 LfParameter.h
-LfWorld.h
+LfMachine.h
 LfThread.h
 StatisticDialog.h
 LfWidget.h
@@ -23,9 +23,9 @@ include_directories ( ../shared ../kdtree)
 add_executable (testla ${HEADER_FILES} 
 ../shared/ExrImage.cpp
 LfParameter.cpp
-LfWorld.cpp
 LfThread.cpp
 LfWidget.cpp
+LfMachine.cpp
 StatisticDialog.cpp
 window.cpp
 main.cpp)

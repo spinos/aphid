@@ -14,10 +14,6 @@
 
 namespace lfr {
 
-template<typename T> class DenseVector;
-template<typename T> class DenseMatrix;
-template<typename T> class LAR;
-template<typename T> class Psnr;
 template<int n, typename T> class DictionaryMachine;
 
 class LfWorld  {

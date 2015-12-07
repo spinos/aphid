@@ -29,6 +29,7 @@ LfParameter::LfParameter(int argc, char *argv[])
 	m_isValid = false;
 	m_atomSize = 8;
 	m_overcomplete = 1.f;
+	m_nthread = 2;
 	bool foundImages = false;
 	if(argc == 1) {
 		m_isValid = searchImagesIn("./");
@@ -38,6 +39,23 @@ LfParameter::LfParameter(int argc, char *argv[])
 		for(;i<argc;++i) {
 			if(strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
 				PrintHelp();
+			}
+			if(strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--thread") == 0) {
+				if(i==argc-1) {
+					std::cout<<"\n --thread value is not set";
+					break;
+				}
+				try {
+					m_nthread = boost::lexical_cast<int>(argv[i+1]);
+					if(m_nthread < 1) {
+						std::cout<<"\n bad --thread value (< 1)";
+						break;
+					}
+				}
+				catch(const boost::bad_lexical_cast &) {
+					std::cout<<"\n bad --thread value "<<argv[i+1];
+					break;
+				}
 			}
 			if(strcmp(argv[i], "-as") == 0 || strcmp(argv[i], "--atomSize") == 0) {
 				if(i==argc-1) {
@@ -225,6 +243,9 @@ ExrImage *LfParameter::openImage(const int ind)
 void LfParameter::getDictionaryImageSize(int & x, int & y) const
 { x = m_dictWidth; y = m_dictHeight; }
 
+int LfParameter::numThread() const
+{ return m_nthread; }
+
 void LfParameter::PrintHelp()
 {
 	std::cout<<"\n lfr (Light Field Research) version 20151122"
@@ -233,6 +254,7 @@ void LfParameter::PrintHelp()
 	<<"\n Input file must be image of OpenEXR format. If no file is provided,"
 	<<"\n current dir will be searched for any file with name ending in .exr."
 	<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 8"
+	<<"\n -t or --thread    integer    number of threads to use, limit to 1 - 24, default is 2"
 	<<"\n -oc or --overcomplete    float    overcompleteness of dictionary, d/m, no less than 1.0"
 	<<"\n -h or --help    print this information"
 	<<"\n";

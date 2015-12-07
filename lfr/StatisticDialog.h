@@ -6,13 +6,13 @@
 
 namespace lfr {
 
-class LfWorld;
+class LfMachine;
 class StatisticDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    StatisticDialog(LfWorld * world, QWidget *parent = 0);
+    StatisticDialog(LfMachine * world, QWidget *parent = 0);
 
 protected:
     void paintEvent(QPaintEvent *event);

@@ -1,7 +1,8 @@
 #ifndef DCTMN_H
 #define DCTMN_H
 
-#include "LfParameter.h"
+#include <deque>
+#include "LfMachine.h"
 #include "regr.h"
 #include "psnr.h"
 #include "dct.h"
@@ -14,7 +15,7 @@
 namespace lfr {
 
 template<int NumThread, typename T>
-class DictionaryMachine {
+class DictionaryMachine : public LfMachine {
 
 /// signal
 	DenseVector<T> * m_y;
@@ -37,8 +38,6 @@ class DictionaryMachine {
 /// previous epoch
     DenseMatrix<T> * m_pre0A;
     DenseMatrix<T> * m_pre0B;
-    DenseMatrix<T> * m_pre1A;
-    DenseMatrix<T> * m_pre1B;
 /// least angle regression
 	LAR<T> * m_lar;
     
@@ -58,27 +57,22 @@ class DictionaryMachine {
     T m_totalErr;
     
 public:
-    DictionaryMachine(const int m, const int p);
+    DictionaryMachine(LfParameter * param);
     virtual ~DictionaryMachine();
     
-    void initDictionary(LfParameter * param);
-    void cleanDictionary(LfParameter * param);
-    void preLearn();
-    void learn(const ExrImage * image, int ibegin, int iend);
-    void updateDictionary(const ExrImage * image, int t);
-    
-    void dictionaryAsImage(unsigned * imageBits, int imageW, int imageH, 
-                            const LfParameter * param);
-	
-    void fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor);
-	void beginPSNR();
-	void computeError(const ExrImage * image, int iPatch);
-	void endPSNR(float * result, const int n);
-	T computePSNR(const ExrImage * image, const int numPatches, const int patchSize);
+    virtual void initDictionary();
+    virtual void dictionaryAsImage(unsigned * imageBits, int imageW, int imageH);
+	virtual void fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor);
+	virtual void preLearn();
+    virtual void learn(const ExrImage * image, int ibegin, int iend);
+    virtual void updateDictionary(const ExrImage * image, int t);
+    virtual void cleanDictionary();
 /// keep coefficients of current epoch
 /// at end of epoch, set A and B to current epoch, 
 /// zero current epoch 
-    void recycleData();
+    virtual void recycleData(); 
+    virtual T computePSNR(const ExrImage * image, int iImage);
+
 protected:
     
 private:
@@ -89,8 +83,11 @@ private:
 };
 
 template<int NumThread, typename T>
-DictionaryMachine<NumThread, T>::DictionaryMachine(const int m, const int p)
+DictionaryMachine<NumThread, T>::DictionaryMachine(LfParameter * param) :
+    LfMachine(param)
 {
+    const int m = param->dimensionOfX();
+	const int p = param->dictionaryLength();
     m_D = new DenseMatrix<T>(m, p);
     m_G = new DenseMatrix<T>(p, p);
 	m_A = new DenseMatrix<T>(p, p);
@@ -145,16 +142,16 @@ DictionaryMachine<NumThread, T>::~DictionaryMachine()
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::initDictionary(LfParameter * param)
+void DictionaryMachine<NumThread, T>::initDictionary()
 {
-    m_atomSize = param->atomSize();
+    m_atomSize = param()->atomSize();
 	const int k = m_D->numColumns();
 	const int m = m_D->numRows();
 	int i, j, p, q;
 	for(i=0;i<k;i++) {
 /// init D with random signal 
         float * d = m_D->column(i);
-        ExrImage * img = param->openImage(param->randomImageInd());
+        ExrImage * img = param1()->openImage(param()->randomImageInd());
         
         img->getTile(d, rand(), m_atomSize);
         p = rand() & 7;
@@ -171,7 +168,7 @@ void DictionaryMachine<NumThread, T>::initDictionary(LfParameter * param)
 	
 	m_D->normalize();
 	m_D->AtA(*m_G);
-	cleanDictionary(param);
+	cleanDictionary();
 }
 
 template<int NumThread, typename T>
@@ -332,11 +329,11 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const ExrImage * image, i
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
+void DictionaryMachine<NumThread, T>::cleanDictionary()
 {
 	const int k = m_D->numColumns();
 	const int m = m_D->numRows();
-    const int s = param->atomSize();
+    const int s = param()->atomSize();
 	int i, j, l, p, q;
     
     int ncld = 0;
@@ -386,13 +383,12 @@ void DictionaryMachine<NumThread, T>::cleanDictionary(LfParameter * param)
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH, 
-                                        const LfParameter * param)
+void DictionaryMachine<NumThread, T>::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH)
 {
-    const int s = param->atomSize();
+    const int s = param()->atomSize();
 	const int dimx = imageW / s;
 	const int dimy = imageH / s;
-	const int k = param->dictionaryLength();
+	const int k = param()->dictionaryLength();
 	int i, j;
 	unsigned * line = imageBits;
 	for(j=0;j<dimy;j++) {
@@ -447,26 +443,6 @@ void DictionaryMachine<NumThread, T>::fillSparsityGraph(unsigned * imageBits, in
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::beginPSNR()
-{ 
-    m_totalErr = 0.0;
-}
-
-template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::computeError(const ExrImage * image, int iPatch)
-{
-	image->getTile(m_y->raw(), iPatch, m_atomSize);
-	m_lar->lars(*m_y, *m_beta, *m_ind, m_lambda);
-	m_totalErr += m_sqeWorker[0].compute(*m_y, *m_beta, *m_ind);
-}
-
-template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::endPSNR(float * result, const int n)
-{ 
-    *result = 10.0 * log10( T(1.0) / (1e-10 + m_totalErr / n) );
-}
-
-template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::computeErrPt(const int iThread, const ExrImage * image, const int workBegin, const int workEnd)
 {
     T sum = 0;
@@ -480,8 +456,9 @@ void DictionaryMachine<NumThread, T>::computeErrPt(const int iThread, const ExrI
 }
 
 template<int NumThread, typename T>
-T DictionaryMachine<NumThread, T>::computePSNR(const ExrImage * image, const int numPatches, const int patchSize)
+T DictionaryMachine<NumThread, T>::computePSNR(const ExrImage * image, int iImage)
 {
+    const int numPatches = param()->imageNumPatches(iImage);
     const int workSize = numPatches / NumThread;
     boost::thread errThread[NumThread];
     int workBegin, workEnd, i=0;
@@ -499,8 +476,7 @@ T DictionaryMachine<NumThread, T>::computePSNR(const ExrImage * image, const int
 	for(i=0;i<NumThread;++i)
 		sum += m_sqePt[i];
 	
-    const int numPixels = numPatches * patchSize * patchSize;
-    return 10.0 * log10( T(1.0) / (1e-10 + sum / numPixels) );
+    return 10.0 * log10( T(1.0) / (1e-10 + sum / param()->totalNumPixels() ) );
 }
 
 template<int NumThread, typename T>
