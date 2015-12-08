@@ -410,17 +410,18 @@ void DictionaryMachine<NumThread, T>::dictionaryAsImage(unsigned * imageBits, in
 	unsigned * line = imageBits;
 	
 #if 1
-	const int workSize = dimy / NumThread;
+	const int nt = (dimy < NumThread) ? dimy : NumThread;
+	const int workSize = dimy / nt;
 	boost::thread fillThread[NumThread];
 	int workBegin, workEnd, tid = 0;
-	for(;tid<NumThread;++tid) {
+	for(;tid<nt;++tid) {
         workBegin = tid * workSize;
-        workEnd = (tid== NumThread - 1) ? dimy - 1: workBegin + workSize - 1;
+        workEnd = (tid== nt - 1) ? dimy - 1: workBegin + workSize - 1;
         fillThread[tid] = boost::thread( boost::bind(&DictionaryMachine<NumThread, T>::fillPatchPt, 
             this, tid, &line[workBegin * imageW * s], workBegin, workEnd, dimx, s, imageW) );
     }
 	
-	for(tid=0;tid<NumThread;++tid)
+	for(tid=0;tid<nt;++tid)
 		fillThread[tid].join();
 		
 #else

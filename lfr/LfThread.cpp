@@ -78,7 +78,8 @@ void LfThread::run()
 	cwhite = cwhite | ( 255 );
 	
 	const int totalNSignals = m_world->param()->totalNumPatches();
-	
+	QElapsedTimer timer;
+	timer.start();
 	int endp;
 	int niter = 0;
 	for(;niter< m_world->param()->maxIterations();++niter) {
@@ -137,6 +138,7 @@ void LfThread::run()
         {
             m_world->recycleData();
 			emit sendIterDone(niter+1);
+			// timer.elapsed() << "milliseconds";
             //qDebug()<<" recycle"<<niter;
         }
 	}

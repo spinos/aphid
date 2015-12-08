@@ -13,7 +13,7 @@ StatisticDialog::StatisticDialog(LfMachine * world, QWidget *parent)
 	y *= 2;
 
     setWindowTitle(tr("Statistics"));
-
+	m_iteration = 0;
     resize(520, 240);
 }
 
@@ -26,8 +26,8 @@ void StatisticDialog::paintEvent(QPaintEvent * /* event */)
 	painter.setPen(pn);
 	painter.setBrush(Qt::NoBrush);
 	
-	drawSparsity(painter, 5, 45);
-	drawPSNR(painter, 5, 240);
+	drawPSNR(painter, 5, 150);
+	drawNIter(painter, 5, 180);
 }
 
 void StatisticDialog::drawSparsity(QPainter & painter, int baseX, int baseY)
@@ -95,6 +95,14 @@ void StatisticDialog::drawPSNR(QPainter & painter, int baseX, int baseY)
 		painter.drawPoint (llft, baseY+m_psnrs[0] );
 }
 
+void StatisticDialog::drawNIter(QPainter & painter, int baseX, int baseY)
+{
+	QString str = QString("Iteration %1 ").arg(m_iteration);
+	QPen pn(Qt::black);
+	painter.setPen(pn);
+	painter.drawText( QPoint(baseX, baseY), str);
+}
+
 void StatisticDialog::resizeEvent(QResizeEvent * /* event */)
 {
 }
@@ -121,6 +129,8 @@ void StatisticDialog::recvPSNR(float ratio)
 
 void StatisticDialog::recvIterDone(int n)
 {
+	m_iteration = n;
+	update();
 }
 
 }

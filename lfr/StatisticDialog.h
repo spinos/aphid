@@ -26,9 +26,11 @@ public slots:
 private:
 	void drawSparsity(QPainter & painter, int baseX, int baseY);
 	void drawPSNR(QPainter & painter, int baseX, int baseY);
+	void drawNIter(QPainter & painter, int baseX, int baseY);
 	
 private:
 	QPixmap m_sparsityPix;
+	int m_iteration;
 	std::deque<int> m_psnrs;
 };
 
