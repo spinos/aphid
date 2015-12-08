@@ -35,8 +35,10 @@ public:
 	ValueType * find(const KeyType & k, MatchFunction::Condition mf = MatchFunction::mExact, KeyType * extraKey = NULL) 
 	{
 // reuse search result
-		if(m_lastSearchResult && m_lastSearchKey == k)
+		if(m_lastSearchResult && m_lastSearchKey == k) {
+			if(extraKey) *extraKey = k;
 			return m_lastSearchResult;
+		}
 			
 		Pair<Entity *, Entity> g = Sequence<KeyType>::findEntity(k, mf, extraKey);
 

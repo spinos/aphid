@@ -65,6 +65,7 @@ public:
 template <typename KeyType>
 class BNode : public TreeNode
 {
+	
 public:
 	BNode(Entity * parent = NULL);
 	virtual ~BNode();
@@ -158,11 +159,11 @@ private:
 	
 	const Pair<KeyType, Entity> dataRightTo(const KeyType & x) const;
 	
-	bool mergeInterior();
 	void balanceInterior();
 	
-	bool mergeInteriorRight();
-	bool mergeInteriorLeft();
+	bool mergeInterior(const KeyType x);
+	bool mergeInteriorRight(const KeyType x);
+	bool mergeInteriorLeft(const KeyType x);
 	
 	void setData(int k, const Pair<KeyType, Entity> & x);
 	
@@ -196,13 +197,11 @@ private:
 	Pair<Entity *, Entity> findInterior(const KeyType & x);
 		
 	const std::string str() const;
+	void deepPrint() const;
 private:
     Pair<KeyType, Entity> * m_data;
 	int m_numKeys;
 };
-
-//template <typename KeyType>
-//SearchResult BNode<KeyType>::LatestSearch;
 
 template <typename KeyType>  
 BNode<KeyType>::BNode(Entity * parent) : TreeNode(parent)
@@ -608,7 +607,6 @@ bool BNode<KeyType>::balanceLeafRight()
 template <typename KeyType> 
 void BNode<KeyType>::balanceLeafLeft()
 {
-    std::cout<<" balance lft ";
 	const Pair<KeyType, Entity> s = firstData();
 	
 	bool found = false;
@@ -641,7 +639,6 @@ BNode<KeyType> * BNode<KeyType>::ancestor(const KeyType & x, bool & found) const
 		return parentNode();
 	}
 	
-	//if(parentNode()->isRoot()) return NULL;
 	return parentNode()->ancestor(x, found);
 }
 
@@ -693,9 +690,11 @@ void BNode<KeyType>::rightData(int num, BNode * rgt)
 template <typename KeyType> 
 void BNode<KeyType>::leftData(int num, BNode * lft)
 {
-/// connect sibling to lft when send all
-    Entity * rgt = sibling();
-    if(num == numKeys()) lft->connectSibling(rgt);
+/// if leaf connect sibling to lft when send all
+    if(num == numKeys() && isLeaf()) {
+		Entity * rgt = sibling();
+		lft->connectSibling(rgt);
+	}
     
 	for(int i = 0; i < num; i++) {
 		lft->insertData(firstData());
@@ -758,9 +757,7 @@ void BNode<KeyType>::removeLeaf(const KeyType & x)
 template <typename KeyType> 
 bool BNode<KeyType>::mergeLeaf()
 {
-	if(mergeLeafRight())
-		return true;
-		
+	if( mergeLeafRight() ) return true;
 	return mergeLeafLeft();
 }
 
@@ -771,41 +768,38 @@ bool BNode<KeyType>::mergeLeafRight()
 	if(!rgt) return false;
 	
 	BNode * rgtNode = static_cast<BNode *>(rgt);
+	BNode * up = rgtNode->parentNode();
+/// not sharing parent
+	if(parent() != up) return false;
 	
 	const Pair<KeyType, Entity> s = rgtNode->firstData();
 	
 	if(!shouldMerge(this, rgtNode)) return false;
     
-    std::cout<<"\n merg leaf "<<*this<<" to rgt "<<*rgtNode;
-
-	BNode * up = rgtNode->parentNode();
-
-	Pair<KeyType, Entity> old = rgtNode->firstData();
+	Pair<KeyType, Entity> rgt1st = rgtNode->firstData();
 
 	rgtNode->leftData(rgtNode->numKeys(), this);
 
 	delete rgt;
 
-    std::cout<<"\n rgt up"<<*up;
-    std::cout<<"\n par"<<*parentNode();
-	Pair<KeyType, Entity> k = up->dataRightTo(old.key);
+    Pair<KeyType, Entity> k = up->dataRightTo(rgt1st.key);
 	
-	if(parent() == up) {
-		k.index = this;
-		int ki = up->keyRight(k.key);
-		up->setData(ki, k);
-        std::cout<<"\n par aft"<<*parentNode();
-	}
+	k.index = this;
+	int ki = up->keyRight(k.key);
+	up->setData(ki, k);
+	/*}
 	else {
+	
 		bool found = false;
+		std::cout<<"\n search"<<s.key;
 		BNode * crossed = ancestor(s.key, found);
+		std::cout<<"\n replace"<<k.key;
 		crossed->replaceKey(s.key, k.key);
-	}
+		std::cout<<"\n up"<<*crossed;
+	}*/
 	
 	up->pop(k);
-	std::cout<<"\n par aft"<<*parentNode();
-    
-    std::cout<<"\n merg aft"<<*this;
+	
 	return true;
 }
 
@@ -813,32 +807,20 @@ template <typename KeyType>
 bool BNode<KeyType>::mergeLeafLeft()
 {
 	const Pair<KeyType, Entity> s = firstData();
-	
-	bool found = false;
-	BNode * crossed = ancestor(s.key, found);
-	
-	if(!found) return false;
-	
-	BNode * leftSibling = crossed->leafLeftTo(s.key);
-	
-	if(leftSibling == this) return false;
-	
+/// must share parent
+	if(!parentNode()->hasKey(s.key)) return false;
+	BNode * leftSibling = parentNode()->leafLeftTo(s.key);
 	return leftSibling->mergeLeafRight();
 }
 
 template <typename KeyType> 
 bool BNode<KeyType>::removeDataLeaf(const KeyType & x)
 {
-    std::cout<<"\n rm b4 "<<*this;
-	SearchResult s = findKey(x);
-	if(s.found < 0) {
-		// std::cout<<"cannot find key "<<x;
-		return false;
-	}
+    SearchResult s = findKey(x);
+	if(s.found < 0) return false;
 	
 	int found = s.found;
-    std::cout<<"\n rm key"<<found;
-
+    
 /// remove leaf connection
 	if(m_data[found].index) {
 	    delete m_data[found].index;
@@ -857,16 +839,11 @@ bool BNode<KeyType>::removeDataLeaf(const KeyType & x)
 	if(found == 0) {
 		bool c = false;
 		BNode * crossed = ancestor(x, c);
-		if(c) {
-            std::cout<<"\n anc b4"<<*crossed;
-            crossed->replaceKey(x, firstData().key);
-            std::cout<<"\n anc aft"<<*crossed;
-        }
+		if(c) crossed->replaceKey(x, firstData().key);
 	}
 		
     reduceNumKeys();//std::cout<<"reduce in leaf to "<<numKeys();
-    std::cout<<"\n rm aft "<<*this;
-	return true;
+    return true;
 }
 
 template <typename KeyType> 
@@ -874,9 +851,7 @@ bool BNode<KeyType>::removeKey(const KeyType & x)
 {
 	SearchResult s = findKey(x);
 	
-	if(s.found < 0) { std::cout<<" cannot find key ";
-	    return false;
-	}
+	if(s.found < 0) return false;
 	
 	int found = s.found;
 	
@@ -904,9 +879,8 @@ bool BNode<KeyType>::removeKeyAndData(const KeyType & x)
 {
 	SearchResult s = findKey(x);
 	
-	if(s.found < 0) { std::cout<<" cannot find key ";
+	if(s.found < 0)
 	    return false;
-	}
 	
 	int found = s.found;
 	
@@ -944,8 +918,7 @@ void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 	}
 	else {
 		BNode * lft = static_cast<BNode *>(firstIndex());
-        std::cout<<"\n root first "<<*lft;
-		setNumKeys(0);
+        setNumKeys(0);
 		mergeData(lft);
 		
 		if(lft->isLeaf())
@@ -962,13 +935,10 @@ void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 template <typename KeyType> 
 void BNode<KeyType>::popInterior(const Pair<KeyType, Entity> & x)
 {
-    std::cout<<"\n pop b4"<<*this;
-	removeKey(x.key);
-    std::cout<<"\n pop aft"<<*this;
-
+    removeKey(x.key);
+	
 	if(!underflow()) return;
-	//std::cout<<"interior underflow! "<<*this;
-	if(!mergeInterior())
+	if(!mergeInterior(x.key))
 		balanceInterior();
 }
 
@@ -989,10 +959,10 @@ const Pair<KeyType, Entity> BNode<KeyType>::dataRightTo(const KeyType & x) const
 }
 
 template <typename KeyType> 
-bool BNode<KeyType>::mergeInterior()
+bool BNode<KeyType>::mergeInterior(const KeyType x)
 {
-	if(mergeInteriorRight()) return true;
-	return mergeInteriorLeft();
+	if(mergeInteriorRight(x)) return true;
+	return mergeInteriorLeft(x);
 }
 
 template <typename KeyType> 
@@ -1002,28 +972,27 @@ void BNode<KeyType>::balanceInterior()
 }
 
 template <typename KeyType> 
-bool BNode<KeyType>::mergeInteriorRight()
+bool BNode<KeyType>::mergeInteriorRight(const KeyType x)
 {
-    std::cout<<"\n merg in "<<*this; 
+    // std::cout<<"\n merg inner rgt "<<*this; 
 	Pair<KeyType, Entity> k;
-	BNode * rgt = parentNode()->rightTo(lastData().key, k);
+	// std::cout<<"\n parent"<<*parentNode()<<" k "<<x;
+	BNode * rgt = parentNode()->rightTo(x, k);
 	if(!rgt) return false;
-    
-    std::cout<<" rgt "<<*rgt;
     
 	if(!shouldInteriorMerge(this, rgt)) return false;
 	
 	k.index = rgt->firstIndex();
 	
 	insertData(k);
-    std::cout<<"\n merg in aft insert "<<*this; 
 	
+	// deepPrint();
+    
 	rgt->leftData(rgt->numKeys(), this);
     
-    std::cout<<"\n merg in aft left "<<*this; 
-	
-	// delete rgt;
 	SeparatedNodes.take(rgt);
+	
+	// deepPrint();
 	
 	connectChildren();
 	
@@ -1036,12 +1005,12 @@ bool BNode<KeyType>::mergeInteriorRight()
 }
 
 template <typename KeyType> 
-bool BNode<KeyType>::mergeInteriorLeft()
+bool BNode<KeyType>::mergeInteriorLeft(const KeyType x)
 {
 	BNode * lft =leftInteriorNeighbor();
 	if(!lft) return false;
 	
-	return lft->mergeInteriorRight();
+	return lft->mergeInteriorRight(x);
 }
 
 template <typename KeyType> 
@@ -1140,14 +1109,10 @@ template <typename KeyType>
 const std::string BNode<KeyType>::str() const 
 {
 	std::stringstream sst;
-	sst<<" nkeys "
-	<<numKeys()<<" [";
+	sst<<" [";
     if(numKeys() ==0) {
         sst<<"] ";
     } else {
-    //<<firstKey()
-	//<<":"
-	//<<lastKey()
     int i = 0;
     for(;i<numKeys()-1;++i) sst<<key(i)<<",";
     sst<<lastKey()<<"] ";
@@ -1258,7 +1223,12 @@ Pair<Entity *, Entity> BNode<KeyType>::findInNode1(const KeyType & x, SearchResu
 	Pair<Entity *, Entity> r;
 	r.key = this;
 	r.index = NULL;
-	if(!isKeyInRange(x)) return r;
+	if(!isKeyInRange(x)) {
+		result->found = -1;
+		result->high = numKeys() - 1;
+		r.index = dataP(numKeys() - 1)->index;
+		return r;
+	}
 	
 	*result = findKey(x);
 
@@ -1267,6 +1237,16 @@ Pair<Entity *, Entity> BNode<KeyType>::findInNode1(const KeyType & x, SearchResu
 	r.index = dataP(result->found)->index;
 	
 	return r; 
+}
+
+template <typename KeyType>
+void BNode<KeyType>::deepPrint() const
+{
+	std::cout<<"\n "<<*this<<":";
+	std::cout<<" "<<*leftTo(key(0));
+	int i=0;
+	Pair<KeyType, Entity> k;
+	for(;i<numKeys();++i) std::cout<<" "<<key(i)<<":"<<*rightTo(key(i), k);
 }
 
 } // end of namespace sdb

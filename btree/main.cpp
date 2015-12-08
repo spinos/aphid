@@ -15,21 +15,14 @@ using namespace sdb;
 
 void testFind(Array<int, int> & arr, int k)
 {
-	std::cout<<"\ntry to find "<<k<<"\n";
-	int * found = arr.find(k);
-	if(found) {
-		std::cout<<"found arr["<<k<<"] = "<<*found<<" exactly";
-		return;
-	}
-	
-	std::cout<<"no arr["<<k<<"] try lequal find";
+	std::cout<<"\n try to find "<<k<<"\n";
 	int ek;
-	found = arr.find(k, MatchFunction::mLequal, &ek);
-	
-	if(found)
-		std::cout<<"found arr["<<ek<<"] = "<<*found;
+	int * found = arr.find(k, MatchFunction::mLequal, &ek);
+	if(found) {
+		std::cout<<"\n found arr["<<ek<<"] = "<<*found;
+	}
 	else 
-		std::cout<<" "<<k<<" is out of range";
+		std::cout<<"\n "<<k<<" is out of range";
 }
 
 void printList(List<int> & l)
@@ -156,11 +149,12 @@ int main()
 	std::cout<<"\n test array\n";
 	
 	PseudoNoise noi;
-
+	// TreeNode::MaxNumKeysPerNode = 16;
+	// TreeNode::MinNumKeysPerNode = 8;
 	Array<int, int>arr;
-	int p[132];
-	for(int i=0; i < 132; i++) {
-	    p[i] = noi.rint1(i) % 199;
+	int p[155];
+	for(int i=0; i < 155; i++) {
+	    p[i] = noi.rint1(i) % 299;
 	    arr.insert(i, &p[i]);
 	}
 
@@ -172,14 +166,14 @@ int main()
     std::cout<<"\n arr rm 30 ";
 	arr.remove(30);
     arr.display();
-	//arr.insert(30, &p[31]);
-	arr.insert(31, &p[0]);
-	arr.beginAt(31);
+	
+	arr.insert(31, &p[0]); arr.display();
+	arr.beginAt(23);
 	while(!arr.end()) {
 	    std::cout<<" "<<arr.key()<<":"<<*arr.value()<<" ";
 	    arr.next();   
-	}
-	testFind(arr, 0);
+	} 
+	testFind(arr, 31);
 	testFind(arr, 30);
 	testFind(arr, 99);
 	testFind(arr, 199);
@@ -206,11 +200,11 @@ int main()
 	printList(ll);
 	ll.remove(2);
 	printList(ll);
-	std::cout<<"remove "<<ll.value(128);
+	std::cout<<"\n remove "<<ll.value(128);
 	ll.remove(ll.value(128));
 	printList(ll);
 	
 	ll.clear();
-	std::cout<<"\npassed\n";
+	std::cout<<"\n all passed\n";
 	return 0;
 }

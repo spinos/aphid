@@ -61,17 +61,34 @@ public:
 			m_lastSearchNode = static_cast<BNode<T> *>(g.key);
 		}
 		
+/// exact
+		if(g.index) {
+			if(extraKey) *extraKey = x;
+			return g;
+		}
+		
+		SearchResult sr;
+		g = m_lastSearchNode->findInNode1(x, &sr);
+			
+			//std::cout<<"\n last search "<<*m_lastSearchNode
+			//<<" sr.low "<<sr.low<<" sr.high "<<sr.high<<" sr.found "<<sr.found;
+			//if(sr.found < 0) {
+			//	if(extraKey) *extraKey = m_lastSearchNode->key(m_lastSearchNode->numKeys()-1 );
+			//	return g;
+			//}
 		if(mf == MatchFunction::mLequal) {
-			if(g.index) return g;
-			SearchResult sr;
-			g = m_lastSearchNode->findInNode1(x, &sr);
 			if(m_lastSearchNode->key(sr.high) > x) {
+				g.key = m_lastSearchNode;
+				g.index = m_lastSearchNode->index(sr.high-1);
+				if(extraKey) *extraKey = m_lastSearchNode->key(sr.high-1);
+				return g;
+			}
+			else {
 				g.key = m_lastSearchNode;
 				g.index = m_lastSearchNode->index(sr.high);
 				if(extraKey) *extraKey = m_lastSearchNode->key(sr.high);
 				return g;
-			}
-			else {
+				/*
 				BNode<T> * rgt = static_cast<BNode<T> *>(m_lastSearchNode->sibling());
 				if(rgt) {
 					g.key = rgt;
@@ -79,6 +96,7 @@ public:
 					if(extraKey) *extraKey = rgt->key(0);
 					return g;
 				}
+				*/
 			}
 		}
 		
@@ -93,7 +111,8 @@ public:
 	
 	void beginAt(const T & x) 
 	{
-        Pair<Entity *, Entity> g;
+        Pair<Entity *, Entity> g = m_root->find(x);
+		m_lastSearchNode = static_cast<BNode<T> *>(g.key);
         SearchResult sr;
 		g = m_lastSearchNode->findInNode1(x, &sr);
 		m_current = static_cast<BNode<T> *>(g.key);
@@ -186,7 +205,8 @@ protected:
 	}
 
 private:
-	
+	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
+
 private:
 	BNode<T> * m_root;
 	BNode<T> * m_current;
@@ -198,13 +218,23 @@ template<typename T>
 void Sequence<T>::display()
 {
     std::cout<<"\n sequence display "
-    <<"\n root "<<*m_root
-    <<"\n leaves ";
-    beginLeaf();
-    while(!leafEnd()) {
-        std::cout<<*m_current;
-        nextLeaf();
-    }
+    <<"\n root "<<*m_root;
+	
+	std::map<int, std::vector<Entity *> > nodes;
+	m_root->getChildren(nodes, 1);
+	
+	std::map<int, std::vector<Entity *> >::const_iterator it = nodes.begin();
+	for(; it != nodes.end(); ++it)
+		displayLevel((*it).first, (*it).second);
+}
+
+template<typename T>
+void Sequence<T>::displayLevel(const int & level, const std::vector<Entity *> & nodes)
+{
+	std::cout<<"\n level: "<<level<<" ";
+	std::vector<Entity *>::const_iterator it = nodes.begin();
+	for(; it != nodes.end(); ++it)
+		std::cout<<*(static_cast<BNode<T> *>(*it));
 }
 
 } //end namespace sdb
