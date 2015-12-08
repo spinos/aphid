@@ -46,7 +46,7 @@ void TreeNode::setLeaf() { m_isLeaf = true; }
 
 void TreeNode::connectSibling(Entity * another)
 {
-	m_first = another;
+    m_first = another;
 }
 
 void TreeNode::setFirstIndex(Entity * another)

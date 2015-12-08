@@ -55,5 +55,5 @@ float LfMachine::computePSNR(const ExrImage * image, int iImage)
 
 void LfMachine::recycleData() {}
 
-bool LfMachine::save() {}
+bool LfMachine::save() { return false; }
 }

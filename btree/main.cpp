@@ -63,14 +63,15 @@ int main()
 	tree.insert(4);
 	tree.insert(100);
 	tree.display();
+    std::cout<<"\n rm 100 ";
 	tree.remove(100);tree.display();
 	tree.remove(7);tree.display();
 	tree.remove(9);tree.display();
 	tree.remove(8);tree.display();
 	
-	tree.remove(2);
-	tree.remove(4);
-	tree.remove(6);
+	tree.remove(2);tree.display();
+	tree.remove(4);tree.display();
+	tree.remove(6);tree.display();
 	tree.remove(112);tree.display();
 	tree.remove(1);tree.display();
 	
@@ -139,6 +140,7 @@ int main()
 	tree.insert(-48);
 	tree.remove(32);tree.display();
 	tree.remove(23);tree.display();
+    std::cout<<"remove 40";
 	tree.remove(40);tree.display();
 	tree.remove(80);tree.display();
 	tree.remove(46);tree.display();
@@ -151,20 +153,25 @@ int main()
 	tree.find(106);
 	tree.find(22);
 	tree.find(92);
-	std::cout<<"test array\n";
+	std::cout<<"\n test array\n";
 	
 	PseudoNoise noi;
 
 	Array<int, int>arr;
 	int p[132];
 	for(int i=0; i < 132; i++) {
-	    p[i] = noi.rint(i) % 199;
+	    p[i] = noi.rint1(i) % 199;
 	    arr.insert(i, &p[i]);
 	}
 
 	std::cout<<"\n";
+    arr.display();
+    std::cout<<"\n arr rm 99 ";
 	arr.remove(99);
+    arr.display();
+    std::cout<<"\n arr rm 30 ";
 	arr.remove(30);
+    arr.display();
 	//arr.insert(30, &p[31]);
 	arr.insert(31, &p[0]);
 	arr.beginAt(31);
@@ -179,7 +186,7 @@ int main()
 	
 	List<int> ll;
 	for(int i = 0; i < 199; i++)
-		ll.insert(noi.rint(i) % 999);
+		ll.insert(noi.rint1(i) % 999);
 
 	printList(ll);
 	

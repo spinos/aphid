@@ -91,10 +91,11 @@ public:
 		m_currentData = 0;
 	}
 	
-	void beginByLastSearch(const T & x) 
+	void beginAt(const T & x) 
 	{
-		SearchResult sr;
-		Pair<Entity *, Entity> g = m_lastSearchNode->findInNode1(x, &sr);	
+        Pair<Entity *, Entity> g;
+        SearchResult sr;
+		g = m_lastSearchNode->findInNode1(x, &sr);
 		m_current = static_cast<BNode<T> *>(g.key);
 		m_currentData = sr.found;
 	}
@@ -146,6 +147,7 @@ public:
 		std::cout<<"\n sequence root node "<<*m_root;
 	}
 
+    virtual void display();
 protected:	
 	void beginLeaf() {
 		m_current = m_root->firstLeaf();
@@ -191,4 +193,18 @@ private:
 	BNode<T> * m_lastSearchNode;
 	int m_currentData;
 };
+
+template<typename T>
+void Sequence<T>::display()
+{
+    std::cout<<"\n sequence display "
+    <<"\n root "<<*m_root
+    <<"\n leaves ";
+    beginLeaf();
+    while(!leafEnd()) {
+        std::cout<<*m_current;
+        nextLeaf();
+    }
+}
+
 } //end namespace sdb
