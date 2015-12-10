@@ -25,7 +25,8 @@ TreeNode::~TreeNode()
 	if(m_first && !isLeaf()) delete m_first;
 }
 
-bool TreeNode::isRoot() const { return parent() == NULL; }
+bool TreeNode::isRoot() const 
+{ return parent() == NULL; }
 
 bool TreeNode::hasChildren() const 
 { 
@@ -33,26 +34,23 @@ bool TreeNode::hasChildren() const
 	return m_first != NULL;
 }
 
-bool TreeNode::isLeaf() const { return m_isLeaf; }
+bool TreeNode::isLeaf() const 
+{ return m_isLeaf; }
 
 Entity * TreeNode::sibling() const
-{
-	return m_first;
-}
+{ return m_first; }
 
-Entity * TreeNode::firstIndex() const { return m_first; }
+Entity * TreeNode::firstIndex() const 
+{ return m_first; }
 
-void TreeNode::setLeaf() { m_isLeaf = true; }
+void TreeNode::setLeaf() 
+{ m_isLeaf = true; }
 
 void TreeNode::connectSibling(Entity * another)
-{
-    m_first = another;
-}
+{ m_first = another; }
 
 void TreeNode::setFirstIndex(Entity * another)
-{
-	m_first = another;
-}
+{ m_first = another; }
 
 } // end of namespace sdb
 //~:

@@ -51,8 +51,9 @@ public:
 	
 	Pair<Entity *, Entity> findEntity(const T & x, MatchFunction::Condition mf = MatchFunction::mExact, T * extraKey = NULL) {
 		Pair<Entity *, Entity> g;
+		SearchResult sr;
 // probably it is the same node
-		if(m_lastSearchNode) g = m_lastSearchNode->findInNode(x);
+		if(m_lastSearchNode) g = m_lastSearchNode->findInNode(x, &sr);
 		
 		if(!g.index) {
 // restart search
@@ -67,8 +68,7 @@ public:
 			return g;
 		}
 		
-		SearchResult sr;
-		g = m_lastSearchNode->findInNode1(x, &sr);
+		g = m_lastSearchNode->findInNode(x, &sr);
 			
 			//std::cout<<"\n last search "<<*m_lastSearchNode
 			//<<" sr.low "<<sr.low<<" sr.high "<<sr.high<<" sr.found "<<sr.found;
@@ -114,7 +114,7 @@ public:
         Pair<Entity *, Entity> g = m_root->find(x);
 		m_lastSearchNode = static_cast<BNode<T> *>(g.key);
         SearchResult sr;
-		g = m_lastSearchNode->findInNode1(x, &sr);
+		g = m_lastSearchNode->findInNode(x, &sr);
 		m_current = static_cast<BNode<T> *>(g.key);
 		m_currentData = sr.found;
 	}
