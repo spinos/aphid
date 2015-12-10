@@ -21,7 +21,7 @@ void C3Tree::setGridSize(const float & x) { m_gridSize = x; }
 void C3Tree::insert(const VertexP & v)
 {
 	Coord3 k = inGrid((float *)(v.index)->t1);
-	
+
 	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(k);
 	if(!p->index) p->index = new List<VertexP>;
 	static_cast<List<VertexP> *>(p->index)->insert(v);
@@ -38,8 +38,9 @@ List<VertexP> * C3Tree::find(float * p)
 	V3 v(p);
 	
 	Coord3 k = inGrid(v);
-	
-	Pair<Entity *, Entity> g = Sequence<Coord3>::findEntity(k);
+    
+    Coord3 ek;
+	Pair<Entity *, Entity> g = Sequence<Coord3>::findEntity(k, MatchFunction::mExact, &ek);
 	if(!g.index) return NULL;
 	return static_cast<List<VertexP> *>(g.index);
 }

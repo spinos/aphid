@@ -174,6 +174,9 @@ const Dropoff::DistanceFunction Sculptor::ActiveGroup::dropoffFunction() const
 
 Sculptor::Sculptor() 
 {
+    TreeNode::MaxNumKeysPerNode = 256;
+    TreeNode::MinNumKeysPerNode = 16;
+
 	m_tree = new C3Tree;
 	m_active = new ActiveGroup;
 	m_strength = 0.5f;
@@ -199,7 +202,10 @@ void Sculptor::addVertex(const VertexP & v)
 
 void Sculptor::endAddVertices()
 {
-	// std::cout<<"grid count "<<m_tree->size();
+    std::cout<<"\n grid count "<<m_tree->size()
+    <<" max "<<TreeNode::MaxNumKeysPerNode
+    <<" min "<<TreeNode::MinNumKeysPerNode;
+    
 	m_tree->calculateBBox();
 	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());
 }
@@ -229,16 +235,22 @@ void Sculptor::selectPoints(const Ray * incident)
 	while(!m_march.end()) {
 		BoundingBox touchedBox;
 		const std::deque<Vector3F> coords = m_march.touched(selectRadius(), touchedBox);
-		
+
 		std::deque<Vector3F>::const_iterator it = coords.begin();
 		for(; it != coords.end(); ++it) {
 			const Coord3 c = m_tree->gridCoord((const float *)&(*it));
 			if(added.find(c)) continue;
-			added.insert(c);
-			List<VertexP> * pl = m_tree->find((float *)&(*it));
-			intersect(pl, *incident);
-		}
+            
+           added.insert(c);
+            
+           //std::cout<<"\n sc search p"<<*it;
 		
+			List<VertexP> * pl = m_tree->find((float *)&(*it));
+			if(pl)
+            intersect(pl, *incident);
+            m_tree->resetSearch();
+		}
+        
 		float tmin, tmax;
 		touchedBox.intersect(*incident, &tmin, &tmax);
 		if((tmin - m_active->depthMin) > selectRadius()) {
@@ -250,7 +262,7 @@ void Sculptor::selectPoints(const Ray * incident)
 		
 		m_march.step();
 	}
-	
+    
 	m_active->finish();
 }
 
@@ -270,7 +282,7 @@ bool Sculptor::intersect(List<VertexP> * d, const Ray & ray)
 {
 	if(!d) return false;
 	const int num = d->size();
-	const int ndst = m_active->vertices->size();
+    const int ndst = m_active->vertices->size();
 	Vector3F pop;
 	for(int i = 0; i < num; i++) {
 		Vector3F & p = *(d->value(i).index->t1);
@@ -283,6 +295,7 @@ bool Sculptor::intersect(List<VertexP> * d, const Ray & ray)
 			m_active->updateDepthRange(-tt);
 		}
 	}
+            
 	return m_active->vertices->size() > ndst;
 }
 

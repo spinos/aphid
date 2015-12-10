@@ -36,7 +36,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_pool = new PNPref[NUMVERTEX];
 	
 	m_sculptor = new Sculptor;
-	m_sculptor->beginAddVertices(.8f);
+	m_sculptor->beginAddVertices(2.f);
     
     VertexP p;
     for(i = 0; i < NUMVERTEX; i++) {
@@ -49,7 +49,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     }
 	
 	m_sculptor->endAddVertices();
-	m_sculptor->setSelectRadius(1.9f);
+	m_sculptor->setSelectRadius(2.f);
 }
 
 GLWidget::~GLWidget()
@@ -73,12 +73,15 @@ void GLWidget::clientDraw()
 	
 	dr->setColor(0.f, 1.f, .3f);
 	drawPoints(*m_sculptor->activePoints());
+    qDebug()<<"";
 }
 
 void GLWidget::drawPoints(C3Tree * tree)
 {
+    KdTreeDrawer * dr = getDrawer();
 	tree->begin();
 	while(!tree->end()) {
+        // dr->setColor(0.1 * (rand() & 7), 0.1 * (rand() & 7), 0.1 * (rand() & 7));
 		drawPoints(tree->verticesInGrid());
 		tree->next();
 	}

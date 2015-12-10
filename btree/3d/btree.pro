@@ -1,5 +1,5 @@
 INCLUDEPATH += ../../shared ../ ./
-LIBS += -L../../lib -laphid -lIlmImf -lHalf			
+LIBS += -L../../lib -laphid		
 CONFIG += release
 HEADERS       = ../Types.h ../Entity.h ../List.h ../Sequence.h ../BNode.h ../C3Tree.h glwidget.h window.h ../../shared/Base3DView.h ../../shared/RayMarch.h \
                   ../Sculptor.h \
@@ -11,8 +11,9 @@ SOURCES       = ../Types.cpp ../Entity.cpp ../List.cpp ../Sequence.cpp ../BNode.
 					../Ordered.cpp
 QT           += opengl
 win32 {
-    INCLUDEPATH += D:/usr/boost_1_51_0 /usr/local/include/OpenEXR
-    QMAKE_LIBDIR += D:/usr/boost_1_51_0/stage/lib D:/usr/local/openEXR/lib
+    SOURCES += ../../shared/gExtension.cpp
+    INCLUDEPATH += D:/usr/boost_1_51_0 
+    QMAKE_LIBDIR += D:/usr/boost_1_51_0/stage/lib 
     CONFIG += console
 }
 macx {

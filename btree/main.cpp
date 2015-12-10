@@ -149,8 +149,8 @@ int main()
 	std::cout<<"\n test array\n";
 	
 	PseudoNoise noi;
-	// TreeNode::MaxNumKeysPerNode = 16;
-	// TreeNode::MinNumKeysPerNode = 8;
+	TreeNode::MaxNumKeysPerNode = 256;
+	TreeNode::MinNumKeysPerNode = 16;
 	Array<int, int>arr;
 	int p[155];
 	for(int i=0; i < 155; i++) {

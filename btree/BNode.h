@@ -75,8 +75,8 @@ public:
 	virtual ~BNode();
 	
 	Pair<KeyType, Entity> * insert(const KeyType & x);
-    void remove(const KeyType & x);
-	Pair<Entity *, Entity> find(const KeyType & x);
+    Pair<Entity *, Entity> find(const KeyType & x);
+	void remove(const KeyType & x);
 	
     void getChildren(std::map<int, std::vector<Entity *> > & dst, int level) const;
 	BNode * firstLeaf();
@@ -1178,7 +1178,6 @@ Pair<Entity *, Entity> BNode<KeyType>::findRoot(const KeyType & x)
 		BNode * n = nextIndex(x);
 		return n->find(x);
 	}
-	
 	return findLeaf(x);
 }
 

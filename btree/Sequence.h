@@ -42,7 +42,6 @@ public:
 	
 	bool find(const T & x) {
 		if(m_root->numKeys() < 1) return false;
-		
 		Pair<Entity *, Entity> g = m_root->find(x);
 		if(!g.index) return false;
 
@@ -57,17 +56,17 @@ public:
 		
 		if(!g.index) {
 // restart search
-			g = m_root->find(x);
+		    g = m_root->find(x);
 // keep the node reached
-			m_lastSearchNode = static_cast<BNode<T> *>(g.key);
+		    m_lastSearchNode = static_cast<BNode<T> *>(g.key);
 		}
-		
 /// exact
 		if(g.index) {
 			if(extraKey) *extraKey = x;
 			return g;
 		}
 		
+        if(mf == MatchFunction::mExact) return g;
 		g = m_lastSearchNode->findInNode(x, &sr);
 			
 			//std::cout<<"\n last search "<<*m_lastSearchNode
@@ -102,6 +101,9 @@ public:
 		
 		return g;
 	}
+    
+    void resetSearch()
+    { m_lastSearchNode = NULL; }
 	
 	void begin() {
 		beginLeaf();
@@ -111,7 +113,7 @@ public:
 	
 	void beginAt(const T & x) 
 	{
-        Pair<Entity *, Entity> g = m_root->find(x);
+        Pair<Entity *, Entity> g = findEntity(x);
 		m_lastSearchNode = static_cast<BNode<T> *>(g.key);
         SearchResult sr;
 		g = m_lastSearchNode->findInNode(x, &sr);
@@ -121,7 +123,7 @@ public:
 	
 	void next() {
 		m_currentData++;
-		if(m_currentData == leafSize()) {
+		if(m_currentData >= leafSize()) {
 			nextLeaf();
 			if(leafEnd()) return;
 			m_currentData = 0;
