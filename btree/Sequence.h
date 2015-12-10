@@ -24,7 +24,6 @@ class Sequence : public Entity {
 public:
 	Sequence(Entity * parent = NULL) : Entity(parent) {
 		m_root = new BNode<T>();
-		m_lastSearchNode = NULL;
 	}
 	
 	virtual ~Sequence() {
@@ -48,18 +47,10 @@ public:
 		return true;
 	}
 	
-	Pair<Entity *, Entity> findEntity(const T & x, MatchFunction::Condition mf = MatchFunction::mExact, T * extraKey = NULL) {
-		Pair<Entity *, Entity> g;
+	Pair<Entity *, Entity> findEntity(const T & x, MatchFunction::Condition mf = MatchFunction::mExact, T * extraKey = NULL) const
+	{
 		SearchResult sr;
-// probably it is the same node
-		if(m_lastSearchNode) g = m_lastSearchNode->findInNode(x, &sr);
-		
-		if(!g.index) {
-// restart search
-		    g = m_root->find(x);
-// keep the node reached
-		    m_lastSearchNode = static_cast<BNode<T> *>(g.key);
-		}
+		Pair<Entity *, Entity> g = m_root->find(x);
 /// exact
 		if(g.index) {
 			if(extraKey) *extraKey = x;
@@ -67,58 +58,45 @@ public:
 		}
 		
         if(mf == MatchFunction::mExact) return g;
-		g = m_lastSearchNode->findInNode(x, &sr);
+		
+		BNode<T> * lastSearchNode = static_cast<BNode<T> *>(g.key);
+		
+		g = lastSearchNode->findInNode(x, &sr);
 			
 			//std::cout<<"\n last search "<<*m_lastSearchNode
 			//<<" sr.low "<<sr.low<<" sr.high "<<sr.high<<" sr.found "<<sr.found;
-			//if(sr.found < 0) {
-			//	if(extraKey) *extraKey = m_lastSearchNode->key(m_lastSearchNode->numKeys()-1 );
-			//	return g;
-			//}
+
 		if(mf == MatchFunction::mLequal) {
-			if(m_lastSearchNode->key(sr.high) > x) {
-				g.key = m_lastSearchNode;
-				g.index = m_lastSearchNode->index(sr.high-1);
-				if(extraKey) *extraKey = m_lastSearchNode->key(sr.high-1);
-				return g;
+			if(lastSearchNode->key(sr.high) < x) {
+				g.key = lastSearchNode;
+				g.index = lastSearchNode->index(sr.high);
+				if(extraKey) *extraKey = lastSearchNode->key(sr.high);
 			}
 			else {
-				g.key = m_lastSearchNode;
-				g.index = m_lastSearchNode->index(sr.high);
-				if(extraKey) *extraKey = m_lastSearchNode->key(sr.high);
-				return g;
-				/*
-				BNode<T> * rgt = static_cast<BNode<T> *>(m_lastSearchNode->sibling());
-				if(rgt) {
-					g.key = rgt;
-					g.index = rgt->index(0);
-					if(extraKey) *extraKey = rgt->key(0);
-					return g;
-				}
-				*/
+				g.key = lastSearchNode;
+				g.index = lastSearchNode->index(sr.low);
+				if(extraKey) *extraKey = lastSearchNode->key(sr.low);
 			}
 		}
 		
 		return g;
 	}
     
-    void resetSearch()
-    { m_lastSearchNode = NULL; }
-	
 	void begin() {
 		beginLeaf();
 		if(leafEnd()) return;
 		m_currentData = 0;
 	}
 	
-	void beginAt(const T & x) 
+	bool beginAt(const T & x) 
 	{
         Pair<Entity *, Entity> g = findEntity(x);
-		m_lastSearchNode = static_cast<BNode<T> *>(g.key);
-        SearchResult sr;
-		g = m_lastSearchNode->findInNode(x, &sr);
 		m_current = static_cast<BNode<T> *>(g.key);
+		if(!m_current) return false;
+        SearchResult sr;
+		g = m_current->findInNode(x, &sr);
 		m_currentData = sr.found;
+		return true;
 	}
 	
 	void next() {
@@ -151,7 +129,6 @@ public:
 	void clear() {
 		delete m_root;
 		m_root = new BNode<T>();
-		m_lastSearchNode = NULL;
 	}
 	
 	bool intersect(Sequence * another)
@@ -212,7 +189,6 @@ private:
 private:
 	BNode<T> * m_root;
 	BNode<T> * m_current;
-	BNode<T> * m_lastSearchNode;
 	int m_currentData;
 };
 

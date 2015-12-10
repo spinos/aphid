@@ -11,12 +11,11 @@
 
 namespace sdb {
 
-C3Tree::C3Tree(Entity * parent) : Ordered<Coord3, VertexP>(parent)
-{
-	m_gridSize = 1.f;
-}
+C3Tree::C3Tree(Entity * parent) : Ordered<Coord3, VertexP>(parent),
+m_gridSize(1.f) {}
 
-void C3Tree::setGridSize(const float & x) { m_gridSize = x; }
+void C3Tree::setGridSize(const float & x) 
+{ m_gridSize = x; }
 
 void C3Tree::insert(const VertexP & v)
 {
@@ -46,9 +45,7 @@ List<VertexP> * C3Tree::find(float * p)
 }
 
 const Coord3 C3Tree::inGrid(const V3 & p) const
-{
-	return gridCoord(p.data);
-}
+{ return gridCoord(p.data); }
 
 const Coord3 C3Tree::gridCoord(const float * p) const
 {
@@ -60,14 +57,10 @@ const Coord3 C3Tree::gridCoord(const float * p) const
 }
 
 const BoundingBox C3Tree::gridBoundingBox() const
-{
-	return coordToGridBBox(Sequence<Coord3>::currentKey());
-}
+{ return coordToGridBBox(Sequence<Coord3>::currentKey()); }
 
 const BoundingBox C3Tree::boundingBox() const
-{
-	return m_bbox;
-}
+{ return m_bbox; }
 
 void C3Tree::calculateBBox()
 {
@@ -88,9 +81,7 @@ const BoundingBox C3Tree::coordToGridBBox(const Coord3 & c) const
 }
 
 void C3Tree::updateBBox(const BoundingBox & b)
-{
-	m_bbox.expandBy(b);
-}
+{ m_bbox.expandBy(b); }
 
 List<VertexP> * C3Tree::verticesInGrid()
 {

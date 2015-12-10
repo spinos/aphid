@@ -17,6 +17,6 @@ win32 {
     CONFIG += console
 }
 macx {
-    INCLUDEPATH += ../../../Library/boost_1_44_0
+    INCLUDEPATH += ../../../Library/boost_1_55_0
 	LIBS += -lboost_date_time -lboost_system -lboost_thread -lboost_filesystem
 }

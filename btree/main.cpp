@@ -152,10 +152,10 @@ int main()
 	TreeNode::MaxNumKeysPerNode = 256;
 	TreeNode::MinNumKeysPerNode = 16;
 	Array<int, int>arr;
-	int p[155];
-	for(int i=0; i < 155; i++) {
-	    p[i] = noi.rint1(i) % 299;
-	    arr.insert(i, &p[i]);
+	int p[128];
+	for(int i=0; i < 128; i++) {
+	    p[i] = noi.rint1(i) % 199;
+	    arr.insert(i+10, &p[i]);
 	}
 
 	std::cout<<"\n";
@@ -177,6 +177,10 @@ int main()
 	testFind(arr, 30);
 	testFind(arr, 99);
 	testFind(arr, 199);
+	testFind(arr, 0);
+	testFind(arr, 11);
+	
+	return 1;
 	
 	List<int> ll;
 	for(int i = 0; i < 199; i++)

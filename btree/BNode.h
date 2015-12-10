@@ -1212,8 +1212,10 @@ Pair<Entity *, Entity> BNode<KeyType>::findInNode(const KeyType & x, SearchResul
 	r.index = NULL;
 	if(!isKeyInRange(x)) {
 		result->found = -1;
+		result->low = 0;
 		result->high = numKeys() - 1;
-		r.index = dataP(numKeys() - 1)->index;
+		if(firstKey() > x) r.index = firstData().index;
+		else r.index = lastData().index;
 		return r;
 	}
 	

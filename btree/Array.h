@@ -8,9 +8,7 @@ class Array : public Sequence<KeyType>
 {
 public:
     Array(Entity * parent = NULL) : Sequence<KeyType>(parent) 
-	{
-		m_lastSearchResult = NULL;
-	}
+	{}
     
     void insert(const KeyType & x, ValueType * v) {
 		Pair<KeyType, Entity> * p = Sequence<KeyType>::insert(x);
@@ -19,7 +17,7 @@ public:
 		d->setData(v);
 	}
 	
-	ValueType * value() {
+	ValueType * value() const {
 		Single<ValueType> * s = static_cast<Single<ValueType> *>(Sequence<KeyType>::currentIndex());
 		return s->data();
 	}
@@ -32,33 +30,18 @@ public:
 		Sequence<KeyType>::remove(k);
 	}
 	
-	ValueType * find(const KeyType & k, MatchFunction::Condition mf = MatchFunction::mExact, KeyType * extraKey = NULL) 
-	{
-// reuse search result
-		if(m_lastSearchResult && m_lastSearchKey == k) {
-			if(extraKey) *extraKey = k;
-			return m_lastSearchResult;
-		}
-			
+	ValueType * find(const KeyType & k, MatchFunction::Condition mf = MatchFunction::mExact, KeyType * extraKey = NULL) const
+	{			
 		Pair<Entity *, Entity> g = Sequence<KeyType>::findEntity(k, mf, extraKey);
 
 		if(!g.index) return NULL;
 		
 		Single<ValueType> * s = static_cast<Single<ValueType> *>(g.index);
 		
-// keep search result
-		m_lastSearchKey = k;
-		m_lastSearchResult = s->data();
-		
-		return m_lastSearchResult;
-	}
-	
-	void clearSearchBuffer() {
-		m_lastSearchResult = NULL;
+		return s->data();
 	}
 
 private:
-	ValueType * m_lastSearchResult;
-	KeyType m_lastSearchKey;
+	
 };
 } //end namespace sdb

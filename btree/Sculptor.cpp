@@ -248,7 +248,6 @@ void Sculptor::selectPoints(const Ray * incident)
 			List<VertexP> * pl = m_tree->find((float *)&(*it));
 			if(pl)
             intersect(pl, *incident);
-            m_tree->resetSearch();
 		}
         
 		float tmin, tmax;
