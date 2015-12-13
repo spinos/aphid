@@ -167,7 +167,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/TexturePainter.cpp 
 ../shared/BaseShader.cpp 
 ../shared/ShaderGroup.cpp 
-../shared/RayMarch.cpp 
+##../shared/RayMarch.cpp 
 ../shared/GLHUD.cpp
 ../shared/BaseLog.cpp
 ../shared/CurveGroup.cpp 

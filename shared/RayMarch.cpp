@@ -63,23 +63,9 @@ const BoundingBox RayMarch::gridBBox() const
 
 const std::deque<Vector3F> RayMarch::touched(const float & threshold, BoundingBox & limit) const
 {
-	std::deque<Vector3F> r;
 	const Vector3F u(threshold, threshold, threshold);
 	const Vector3F p0 = m_path.m_origin - u;
 	const Vector3F p1 = m_path.m_origin + u;
-	const int ng = threshold * 2.f / m_gridSize + 1;
-	int i, j, k;
-	Vector3F p;
-	for(k= 0; k <= ng; k++) {
-		p.z = p0.z + m_gridSize * k;
-		for(j= 0; j <= ng; j++) {
-			p.y = p0.y + m_gridSize * j;
-			for(i= 0; i <= ng; i++) {
-				p.x = p0.x + m_gridSize * i;
-				if(m_limit.isPointInside(p)) r.push_back(p);
-			}
-		}
-	}
 	
 	const BoundingBox blo = computeBBox(p0);
 	const BoundingBox bhi = computeBBox(p1);
@@ -88,6 +74,27 @@ const std::deque<Vector3F> RayMarch::touched(const float & threshold, BoundingBo
 	limit.expandBy(blo);
 	limit.expandBy(bhi);
 	limit.shrinkBy(m_limit);
+	
+	std::deque<Vector3F> r;
+/// center of cell entered
+	const Vector3F c = computeBBox(m_path.m_origin).center();
+	const int ng = threshold / m_gridSize + 1;
+	int i, j, k;
+	Vector3F p;
+/// check neighbors
+	for(k= -ng; k <= ng; k++) {
+		p.z = c.z + m_gridSize * k;
+		for(j= -ng; j <= ng; j++) {
+			p.y = c.y + m_gridSize * j;
+			for(i= -ng; i <= ng; i++) {
+				p.x = c.x + m_gridSize * i;
+				if(m_limit.isPointInside(p))
+					if(limit.isPointInside(p)) 
+						r.push_back(p);
+			}
+		}
+	}
+	
 	return r;
 }
 

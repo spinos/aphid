@@ -174,7 +174,7 @@ const Dropoff::DistanceFunction Sculptor::ActiveGroup::dropoffFunction() const
 
 Sculptor::Sculptor() 
 {
-    TreeNode::MaxNumKeysPerNode = 256;
+    TreeNode::MaxNumKeysPerNode = 128;
     TreeNode::MinNumKeysPerNode = 16;
 
 	m_tree = new C3Tree;
@@ -231,28 +231,26 @@ void Sculptor::selectPoints(const Ray * incident)
 	m_active->incidentRay = *incident;
 	
 	Sequence<Coord3> added;
+	BoundingBox touchedBox;
 	if(!m_march.begin(*incident)) return;
 	while(!m_march.end()) {
-		BoundingBox touchedBox;
 		const std::deque<Vector3F> coords = m_march.touched(selectRadius(), touchedBox);
 
 		std::deque<Vector3F>::const_iterator it = coords.begin();
 		for(; it != coords.end(); ++it) {
 			const Coord3 c = m_tree->gridCoord((const float *)&(*it));
+/// already tested
 			if(added.find(c)) continue;
             
-           added.insert(c);
-            
-           //std::cout<<"\n sc search p"<<*it;
-		
+			added.insert(c);
+
 			List<VertexP> * pl = m_tree->find((float *)&(*it));
-			if(pl)
-            intersect(pl, *incident);
+			if(pl) intersect(pl, *incident);
 		}
         
 		float tmin, tmax;
 		touchedBox.intersect(*incident, &tmin, &tmax);
-		if((tmin - m_active->depthMin) > selectRadius()) {
+		if((tmin - m_active->depthMin ) > selectRadius() ) {
 #ifdef DEBUG
 		    std::cout<<" brk "<<tmin - m_active->depthMin; 
 #endif

@@ -55,7 +55,6 @@ void AdaptiveGrid::create(KdIntersection * tree, int maxLevel)
 bool AdaptiveGrid::tagCellsToRefine(KdIntersection * tree)
 {
 	m_cellsToRefine->clear();
-	m_cellsToRefine->clearSearchBuffer();
 	
     sdb::CellHash * c = cells();
     BoundingBox box;
