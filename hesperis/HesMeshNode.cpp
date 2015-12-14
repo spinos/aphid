@@ -3,6 +3,8 @@
 #include <maya/MFnMeshData.h>
 #include <Vector3F.h>
 #include <SHelper.h>
+#include <BaseUtil.h>
+#include <HesperisPolygonalMeshIO.h>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
@@ -23,47 +25,74 @@ MObject     HesMeshNode::input;
 MObject     HesMeshNode::ameshname;
 MObject     HesMeshNode::outMesh;
 
-HesMeshNode::HesMeshNode() {}
+HesMeshNode::HesMeshNode() 
+{ m_hesStat = false; }
+
 HesMeshNode::~HesMeshNode() {}
 
 MStatus HesMeshNode::compute( const MPlug& plug, MDataBlock& data )
 {
-	
 	MStatus stat;
 	
-	MString cache_name =  data.inputValue( input ).asString();
-	std::string substitutedCacheName(cache_name.asChar());
-	EnvVar::replace(substitutedCacheName);
-	MString mesh_name =  data.inputValue( ameshname ).asString();
+	MPlug pnames(thisMObject(), ameshname);
+	const unsigned numMeshes = pnames.numElements();
 	
-	if( plug == outMesh ) {
-		MDataHandle meshh = data.outputValue(outMesh, &stat);
+	MString cacheName =  data.inputValue( input ).asString();
+	std::string substitutedCacheName(cacheName.asChar());
+	EnvVar::replace(substitutedCacheName);
+	
+	MArrayDataHandle meshNameArray = data.outputArrayValue( ameshname );
+	MArrayDataHandle meshArry = data.outputArrayValue(outMesh, &stat);
+	
+	if( plug.array() == outMesh ) {
+		const unsigned idx = plug.logicalIndex();
+		if(!m_hesStat) {
+			if(BaseUtil::IsImporting)
+				m_hesStat = true;
+			else
+				m_hesStat = BaseUtil::OpenHes(substitutedCacheName, HDocument::oReadOnly);
+		}
+		
+		if(!m_hesStat) {
+			AHelper::Info<std::string >("hes mesh cannot open file ", substitutedCacheName);
+			return MS::kFailure;
+		}
+		
+		meshArry.jumpToElement(idx);
+		MDataHandle hmesh = meshArry.outputValue();
+		
+		meshNameArray.jumpToElement(idx);
+		const MString meshName = meshNameArray.inputValue().asString();
+		
+		HPolygonalMesh entryMesh(meshName.asChar() );
+		if(!entryMesh.exists()) {
+			MGlobal::displayWarning("hes mesh cannot open " + meshName);
+			return MS::kFailure;
+		}
+		
+		APolygonalMesh dataMesh;
+		entryMesh.load(&dataMesh);
+		
+		HesperisPolygonalMeshCreator::create(&dataMesh, outMeshData);
 		
 		MFnMeshData dataCreator;
 		MObject outMeshData = dataCreator.create(&stat);
-
-		MFnMesh meshFn;
-		/*meshFn.create( _numVertex, _numPolygon, vertexArray, polygonCounts, polygonConnects, outMeshData, &stat );
-		
-		if(_hasUV) {
-			stat = meshFn.setUVs ( _uArray, _vArray );
-			if(!stat)
-			    MGlobal::displayWarning("opium mesh cannot set uvs " + mesh_name);
-			stat = meshFn.assignUVs ( polygonCounts, _uvIds );
-			if(!stat)
-			    MGlobal::displayWarning("opium mesh cannot assugn uvs " + mesh_name);
-		}*/
 			
 		if( !stat ) {
-			MGlobal::displayWarning("opium mesh failed to create " + mesh_name);
+			MGlobal::displayWarning("hes mesh cannot create " + meshName);
 			return MS::kFailure;
 		}
 
-
-		meshh.set(outMeshData);
+		hmesh.set(outMeshData);
 	    
 		data.setClean(plug);
-
+		
+		if( (idx+1)>=numMeshes ) {
+			if(!BaseUtil::IsImporting) {
+				BaseUtil::CloseHes();
+				m_hesStat = false;
+			}
+		}
 	} 
 	else {
 		return MS::kUnknownParameter;
@@ -110,7 +139,7 @@ MStatus HesMeshNode::connectionMade(const MPlug &plug, const MPlug &otherPlug, b
 {
     if ( plug.isElement() ) {
         if( plug.array() == outMesh) {
-/// create mesh data 
+ 
         }
     }
 

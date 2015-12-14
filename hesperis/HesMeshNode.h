@@ -24,7 +24,7 @@ public:
 	static	MTypeId		id;
 	
 private:
-
+	bool m_hesStat;
 };
 
 
