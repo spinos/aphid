@@ -362,6 +362,7 @@ public:
 	
 	void copy(const DenseMatrix<T> & x);
 	void copyColumn(const int i, const T * x);
+	void copyData(const T * x);
 	
 	void setZero();
 	void scale(const T s);
@@ -378,6 +379,15 @@ public:
 /// copy upper-right part to lower-left part
 	void fillSymmetric();
 	bool inverseSymmetric();
+/// b = alpha A^T * x + beta b
+	void transMult(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
+            const T alpha = 1.0, const T beta = 0.0) const;
+/// b = alpha A^T * x^T + beta b
+	void transMultTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
+            const T alpha = 1.0, const T beta = 0.0) const;
+/// b = alpha A * x^T + beta b
+	void multTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
+            const T alpha = 1.0, const T beta = 0.0) const;
 /// b = alpha A * x + beta b
 	void mult(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
@@ -514,6 +524,10 @@ template <typename T>
 void DenseMatrix<T>::copyColumn(const int i, const T * x)
 { memcpy(&m_v[i*m_numRows], x, m_numRows*sizeof(T)); }
 
+template <typename T>
+void DenseMatrix<T>::copyData(const T * x)
+{ memcpy(m_v, x, m_numRows * m_numColumns * sizeof(T)); }
+
 template <typename T> 
 void DenseMatrix<T>::setZero()
 {
@@ -567,6 +581,37 @@ void DenseMatrix<T>::AtA(DenseMatrix<T>& dst) const
 										T(1.0), m_v, m_numRows, 
 										T(0.0), dst.raw(), m_numColumns);
     dst.fillSymmetric();
+}
+
+template <typename T>
+void DenseMatrix<T>::transMult(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
+            const T alpha, const T beta) const
+{
+	clapack_gemm<T>("T", "N", m_numColumns, m_numRows, m_numRows, 
+							alpha, m_v, m_numRows, 
+							x.column(0), x.numRows(), beta, b.raw(), m_numColumns);
+}
+
+template <typename T>
+void DenseMatrix<T>::transMultTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
+            const T alpha, const T beta) const
+{
+	clapack_gemm<T>("T", "T", m_numColumns, m_numRows, m_numRows, 
+							alpha, m_v, m_numRows, 
+							x.column(0), x.numRows(), beta, b.raw(), m_numColumns);
+}
+
+/// b = alpha A * x^T + beta b
+/// M A.m
+/// N x^T.n
+/// K A.n
+template <typename T>
+void DenseMatrix<T>::multTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
+            const T alpha, const T beta) const
+{
+	clapack_gemm<T>("N", "T", m_numRows, m_numRows, m_numColumns, 
+							alpha, m_v, m_numRows, 
+							x.column(0), x.numRows(), beta, b.raw(), m_numRows);
 }
 
 template <typename T>
@@ -841,6 +886,87 @@ void SparseMatrix<T>::clear()
     m_numRows = 0;
     m_numMaxNonZero = 0;
 }
+
+template<typename T>
+class SvdSolver {
+
+	lfr::DenseVector<T> m_s;
+	lfr::DenseMatrix<T> m_u; 
+	lfr::DenseMatrix<T> m_v;
+	
+	T * m_work;
+	int m_l;
+public:
+	SvdSolver();
+	virtual ~SvdSolver();
+	
+	bool compute(const DenseMatrix<T> & M);
+	
+	DenseMatrix<T> * U();
+	DenseVector<T> * S();
+	DenseMatrix<T> * V();
+protected:
+
+private:
+
+};
+
+template<typename T>
+SvdSolver<T>::SvdSolver() 
+{ 
+	m_l = 0;
+	m_work = NULL; 
+}
+
+template<typename T>
+SvdSolver<T>::~SvdSolver() 
+{ if(m_work) free(m_work); }
+
+template<typename T>
+bool SvdSolver<T>::compute(const DenseMatrix<T> & M)
+{
+	const int m = M.numRows();
+	const int n = M.numColumns();
+	
+	m_s.resize(n );
+	m_u.resize(m, m );
+	m_v.resize(n, n );
+	
+	T wkopt;
+
+/// Query and allocate the optimal workspace
+	integer lwork = -1, info;
+	clapack_gesvd<T>( "All", "All", m, n, M.column(0), m, m_s.raw(), m_u.column(0), m, m_v.column(0), n, &wkopt, &lwork, &info );
+	lwork = (int)wkopt;
+	// std::cout<<"\n work l "<<lwork;
+	
+	if(m_l < lwork) {
+		m_l = lwork;
+		if(m_work) free(m_work);
+		m_work = (T*)malloc( lwork*sizeof(T) );
+	}
+/// Compute SVD 
+	clapack_gesvd<T>( "All", "All", m, n, M.column(0), m, m_s.raw(), m_u.column(0), m, m_v.column(0), n, m_work, &lwork, &info );
+/// Check for convergence
+	if( info > 0 ) {
+			std::cout<< "The algorithm computing SVD failed to converge.\n";
+			return false;
+	}
+	
+	return true;
+}
+
+template<typename T>
+DenseMatrix<T> * SvdSolver<T>::U()
+{ return &m_u; }
+
+template<typename T>
+DenseVector<T> * SvdSolver<T>::S()
+{ return &m_s; }
+
+template<typename T>
+DenseMatrix<T> * SvdSolver<T>::V()
+{ return &m_v; }
 
 } /// end of namespace lfr
 

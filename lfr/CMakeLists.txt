@@ -28,7 +28,8 @@ LfWidget.cpp
 LfMachine.cpp
 StatisticDialog.cpp
 window.cpp
-main.cpp)
+testlapack.cpp)
+##main.cpp)
 
 if(WIN32)
     include_directories (D:/usr/CLAPACK/include)
