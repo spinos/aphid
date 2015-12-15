@@ -319,4 +319,32 @@ MObject HesperisMeshUvConnector::create(APolygonalMesh * data, MObject & parentO
 */
     return otm;
 }
+
+void HesperisMeshUvConnector::appendUV(APolygonalMesh * data, MObject & parentObj)
+{
+	if(data->numUVs() < 2) {
+		MGlobal::displayInfo(" hesperis has no uv to append");
+		return;
+	}
+	
+	MStatus stat;
+    MFnMesh fmesh(parentObj, &stat);
+	if(!stat) {
+		MGlobal::displayInfo(" hesperis cannot create poly mesh fn to append uv");
+		return;
+	}
+
+	MIntArray polygonCounts;
+	const int numPolygons = data->numPolygons();
+    
+    unsigned * counts = data->faceCounts();
+	int i;
+    for(i=0;i<numPolygons;i++)
+        polygonCounts.append(counts[i]);
+    
+	for(i=1;i<data->numUVs();i++) {
+		std::string setName = data->uvName(i);
+		HesperisPolygonalMeshCreator::addUV(data->uvData(setName), fmesh, setName, polygonCounts);
+	}
+}
 //:~

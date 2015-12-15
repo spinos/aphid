@@ -22,6 +22,7 @@ public:
     static MObject MasterMeshNode;
     static MObject create(APolygonalMesh * data, MObject & parentObj,
                        const std::string & nodeName);
+	static void appendUV(APolygonalMesh * data, MObject & parentObj);
 };
 
 class HesperisPolygonalMeshIO : public HesperisIO {
