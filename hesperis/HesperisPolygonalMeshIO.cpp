@@ -12,6 +12,8 @@
 #include <HTransform.h>
 #include <HPolygonalMesh.h>
 #include <AHelper.h>
+#include <BaseUtil.h>
+
 bool HesperisPolygonalMeshIO::WritePolygonalMeshes(const MDagPathArray & paths, HesperisFile * file)
 {
     file->clearPolygonalMeshes();
@@ -171,12 +173,14 @@ MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & pa
 {
 	const int numVertices = data->numPoints();
     MObject otm = MObject::kNullObj;
+    if(nodeName.size() > 0) {
     if(HesperisIO::FindNamedChild(otm, nodeName, parentObj)) {
         if(!checkMeshNv(otm, numVertices))
 			MGlobal::displayWarning(MString(" existing node ")+ nodeName.c_str() + 
 				MString(" is not a mesh or it is a mesh has wrong number of cvs"));
 /// checked and do not create
 		return otm;
+    }
     }
 
     MPointArray vertexArray;
@@ -202,14 +206,16 @@ MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & pa
 	otm = fmesh.create(numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, parentObj, &stat );
 
 	if(!stat) {
-		MGlobal::displayWarning(MString(" hesperis failed to create poly mesh ")+nodeName.c_str());
+		AHelper::Info<std::string>(" hesperis failed to create poly mesh ", nodeName);
 		return otm;
 	}
 	
+    if(nodeName.size() > 0) {
 	std::string validName(nodeName);
 	SHelper::noColon(validName);
 	fmesh.setName(validName.c_str()); 
 	// AHelper::Info<std::string>("create poly", validName);
+    }
 	
 	if(data->numUVs() < 1) {
 		MGlobal::displayWarning(MString(" poly mesh has no uv ")+nodeName.c_str());
@@ -293,6 +299,14 @@ MObject HesperisMeshUvConnector::create(APolygonalMesh * data, MObject & parentO
     
 	MFnDependencyNode fnmaster(MasterMeshNode);
     MStatus stat;
+    MPlug hesNamePlug = fnmaster.findPlug("hesPath", false, &stat );
+    if(!stat) {
+        MGlobal::displayWarning(" cannot find hes file name");
+        return otm;
+    }
+    
+    hesNamePlug.setValue(MString(BaseUtil::HesDoc->fileName().c_str() ) );
+    
     MPlug meshNamePlugs = fnmaster.findPlug("meshName", false, &stat );
     if(!stat) {
         MGlobal::displayWarning(" cannot find hes mesh out");
@@ -301,22 +315,22 @@ MObject HesperisMeshUvConnector::create(APolygonalMesh * data, MObject & parentO
     
 /// add to last
     unsigned count = meshNamePlugs.numElements();
-//  AHelper::Info<unsigned>(" hes has n mesh ", count);
+    AHelper::Info<unsigned>(" hes has n mesh ", count);
     meshNamePlugs.selectAncestorLogicalIndex(count);
     meshNamePlugs.setValue(MString(HesperisIO::CurrentHObjectPath.c_str() ) );
 
-    MPlug outMeshPlug = fnmaster.findPlug("outMesh", true, &stat );
-    outMeshPlug.selectAncestorLogicalIndex(count, outMeshPlug.attribute());
+    MPlug outMeshArrayPlug = fnmaster.findPlug("outMesh", true, &stat );
+    MPlug outMeshPlug = outMeshArrayPlug.elementByLogicalIndex(count);
     
-    AHelper::Info<MString>("hes mesh uv out ", outMeshPlug.name() );
+    // AHelper::Info<MString>("hes mesh uv out ", outMeshPlug.name() );
 
     MPlug inMeshPlug = MFnDependencyNode(otm).findPlug("inMesh");
-    AHelper::Info<MString>("hes mesh uv in ", inMeshPlug.name() );
-/*
+    // AHelper::Info<MString>("hes mesh uv in ", inMeshPlug.name() );
+
     MDGModifier dgModifier;
     dgModifier.connect(outMeshPlug, inMeshPlug);
     dgModifier.doIt();
-*/
+
     return otm;
 }
 //:~

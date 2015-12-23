@@ -10,7 +10,7 @@ class MDagPath;
 class HesperisPolygonalMeshCreator {
 public:
     static MObject create(APolygonalMesh * data, MObject & parentObj,
-                       const std::string & nodeName);
+                       const std::string & nodeName = "");
 	static void addUV(APolygonalUV * data, MFnMesh & fmesh,
 						const std::string & setName,
 						const MIntArray & uvCounts);
@@ -21,7 +21,7 @@ class HesperisMeshUvConnector {
 public:
     static MObject MasterMeshNode;
     static MObject create(APolygonalMesh * data, MObject & parentObj,
-                       const std::string & nodeName);
+                       const std::string & nodeName = "");
 };
 
 class HesperisPolygonalMeshIO : public HesperisIO {

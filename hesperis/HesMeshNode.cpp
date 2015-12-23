@@ -5,6 +5,7 @@
 #include <SHelper.h>
 #include <BaseUtil.h>
 #include <HesperisPolygonalMeshIO.h>
+#include <APolygonalMesh.h>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
@@ -25,8 +26,7 @@ MObject     HesMeshNode::input;
 MObject     HesMeshNode::ameshname;
 MObject     HesMeshNode::outMesh;
 
-HesMeshNode::HesMeshNode() 
-{ m_hesStat = false; }
+HesMeshNode::HesMeshNode() {}
 
 HesMeshNode::~HesMeshNode() {}
 
@@ -36,7 +36,7 @@ MStatus HesMeshNode::compute( const MPlug& plug, MDataBlock& data )
 	
 	MPlug pnames(thisMObject(), ameshname);
 	const unsigned numMeshes = pnames.numElements();
-	
+    
 	MString cacheName =  data.inputValue( input ).asString();
 	std::string substitutedCacheName(cacheName.asChar());
 	EnvVar::replace(substitutedCacheName);
@@ -44,44 +44,48 @@ MStatus HesMeshNode::compute( const MPlug& plug, MDataBlock& data )
 	MArrayDataHandle meshNameArray = data.outputArrayValue( ameshname );
 	MArrayDataHandle meshArry = data.outputArrayValue(outMesh, &stat);
 	
+    bool hesStat = false;
 	if( plug.array() == outMesh ) {
 		const unsigned idx = plug.logicalIndex();
-		if(!m_hesStat) {
-			if(BaseUtil::IsImporting)
-				m_hesStat = true;
-			else
-				m_hesStat = BaseUtil::OpenHes(substitutedCacheName, HDocument::oReadOnly);
-		}
+		if(BaseUtil::IsImporting)
+            hesStat = true;
+        else {
+            if(idx == 0) 
+                AHelper::Info<std::string>(" hes mesh open file ", substitutedCacheName );
+            hesStat = BaseUtil::OpenHes(substitutedCacheName, HDocument::oReadOnly);
+        }
 		
-		if(!m_hesStat) {
+		if(!hesStat) {
 			AHelper::Info<std::string >("hes mesh cannot open file ", substitutedCacheName);
 			return MS::kFailure;
 		}
-		
-		meshArry.jumpToElement(idx);
-		MDataHandle hmesh = meshArry.outputValue();
-		
-		meshNameArray.jumpToElement(idx);
+        
+        meshNameArray.jumpToElement(idx);
 		const MString meshName = meshNameArray.inputValue().asString();
 		
-		HPolygonalMesh entryMesh(meshName.asChar() );
-		if(!entryMesh.exists()) {
-			MGlobal::displayWarning("hes mesh cannot open " + meshName);
-			return MS::kFailure;
+        if(!BaseUtil::HesDoc->find(meshName.asChar())) {
+            AHelper::Info<MString>(" hes cannot find mesh ", meshName );
+            return MS::kFailure;
 		}
-		
-		APolygonalMesh dataMesh;
+        
+		meshArry.jumpToElement(idx);
+		MDataHandle hmesh = meshArry.outputValue();
+
+		HPolygonalMesh entryMesh(meshName.asChar() );
+        
+        APolygonalMesh dataMesh;
 		entryMesh.load(&dataMesh);
-		
-		HesperisPolygonalMeshCreator::create(&dataMesh, outMeshData);
-		
-		MFnMeshData dataCreator;
+        entryMesh.close();
+        
+        MFnMeshData dataCreator;
 		MObject outMeshData = dataCreator.create(&stat);
 			
 		if( !stat ) {
 			MGlobal::displayWarning("hes mesh cannot create " + meshName);
 			return MS::kFailure;
 		}
+		
+		HesperisPolygonalMeshCreator::create(&dataMesh, outMeshData);
 
 		hmesh.set(outMeshData);
 	    
@@ -89,8 +93,8 @@ MStatus HesMeshNode::compute( const MPlug& plug, MDataBlock& data )
 		
 		if( (idx+1)>=numMeshes ) {
 			if(!BaseUtil::IsImporting) {
+                AHelper::Info<std::string>(" hes mesh close file ", substitutedCacheName );
 				BaseUtil::CloseHes();
-				m_hesStat = false;
 			}
 		}
 	} 
