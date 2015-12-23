@@ -43,6 +43,65 @@ void testAdd()
 	printMatrix("A <- A + 0.5 X", m, n, A);
 }
 
+void testSVD3()
+{
+	double a[3*8]= {
+            -0.008275, 0.01513, 0.0228, -0.02298, 0.007532, -0.04152, -0.01905, -0.01169,
+0.064, 0.06322, 0.06318, 0.0007675, -4.113e-05, -0.06099, -0.06174, -0.06178,
+0.1215, 0.002071, -0.1193, 0.1173, -0.1192, 0.1121, -0.002552, -0.1191
+		};
+		
+	lfr::DenseMatrix<double> P(3, 8);
+	int i, j;
+	for(i=0;i<3;++i) {
+		for(j=0;j<8;++j) {
+			P.column(j)[i] = a[i*8+j];
+		}
+	}
+	lfr::DenseMatrix<double> Q(3, 8);
+	Q.copyData(P.raw());
+	
+	lfr::DenseMatrix<double> S(3, 3);
+	P.multTrans(S, Q);
+	std::cout<<" S "<<S;
+
+	lfr::SvdSolver<double> slv;
+	slv.compute(S);
+	
+	std::cout<<" s"<<*slv.S();
+	std::cout<<" u"<<*slv.U();
+	std::cout<<" v"<<*slv.V();
+	
+	lfr::DenseMatrix<double> M(3, 3);
+	lfr::DenseMatrix<double> D(3, 3); D.setZero(); D.addDiagonal(1.0);
+	slv.V()->transMult(M, D);
+	M.multTrans(D, *slv.U());
+	std::cout<<" M"<<D;
+}
+
+void testTM()
+{
+	lfr::DenseMatrix<double> Q(4, 3);
+	Q.column(0)[0] = 1; Q.column(1)[0] = 5; Q.column(2)[0] = 9;
+	Q.column(0)[1] = 2; Q.column(1)[1] = 6; Q.column(2)[1] = 10;
+	Q.column(0)[2] = 3; Q.column(1)[2] = 7; Q.column(2)[2] = 11;
+	Q.column(0)[3] = 4; Q.column(1)[3] = 8; Q.column(2)[3] = 12;
+	
+	lfr::DenseMatrix<double> P(4, 4);
+	P.setZero();
+	P.addDiagonal(2.0);
+	
+	std::cout<<"Q"<<Q;
+	std::cout<<"P"<<P;
+
+	lfr::DenseMatrix<double> R(3, 4);
+	
+	Q.transMultTrans(R, P);
+	
+	
+	std::cout<<"R"<<R;
+}
+
 #define M 6
 #define N 5
 #define LDA M
@@ -298,6 +357,7 @@ void testLAR()
 	const int p = 200;
 	const int m = 11;
 	lfr::DenseMatrix<double> A(m, p);
+	lfr::DenseMatrix<double> G(p, p);
 	
 	double * c0 = A.raw();
 	int i, j;
@@ -308,6 +368,7 @@ void testLAR()
 	}
 	
 	A.normalize();
+	A.AtA(G);
 	
 	lfr::DenseVector<double> y(m);
 	y.copyData(A.column(23));
@@ -316,17 +377,22 @@ void testLAR()
 	
 	y.scale(10.0);
 	
-	lfr::LAR<double> lar(&A);
-	lar.lars(y, 0.09);
+	
+	lfr::DenseVector<double> beta(p);
+	lfr::DenseVector<int> ind(p);
+	lfr::LAR<double> lar(&A, &G);
+	lar.lars(y, beta, ind);
 }
 
 int main()
 { 
     // testAdd();
-    // testSVD();
+	//testSVD();
+    testSVD3();
+	testTM();
 	// testSqrt();
 	// testInv();
 	// testEquiangularVector();
-	testLAR();
+	// testLAR();
     return 1;
 }
