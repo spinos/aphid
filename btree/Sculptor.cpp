@@ -160,17 +160,17 @@ void Sculptor::ActiveGroup::setDropoffFunction(Dropoff::DistanceFunction x)
     }
 }
 
-const int Sculptor::ActiveGroup::numActivePoints() const { return m_numActivePoints; }
-const int Sculptor::ActiveGroup::numActiveBlocks() const { return m_numActiveBlocks; }
+const int Sculptor::ActiveGroup::numActivePoints() const 
+{ return m_numActivePoints; }
+
+const int Sculptor::ActiveGroup::numActiveBlocks() const 
+{ return m_numActiveBlocks; }
+
 const float Sculptor::ActiveGroup::meanDepth() const
-{
-	return (meanPosition - incidentRay.m_origin).length();
-}
+{ return (meanPosition - incidentRay.m_origin).length(); }
 
 const Dropoff::DistanceFunction Sculptor::ActiveGroup::dropoffFunction() const
-{
-    return m_dropoffType;
-}
+{ return m_dropoffType; }
 
 Sculptor::Sculptor() 
 {
@@ -217,13 +217,13 @@ void Sculptor::setSelectRadius(const float & x)
 }
 
 const float Sculptor::selectRadius() const
-{
-	return m_active->threshold;
-}
+{ return m_active->threshold; }
 
-void Sculptor::setStrength(const float & x) { m_strength = x; }
+void Sculptor::setStrength(const float & x) 
+{ m_strength = x; }
 
-void Sculptor::setMeshTopology(MeshTopology * topo) { m_topo = topo; }
+void Sculptor::setMeshTopology(MeshTopology * topo) 
+{ m_topo = topo; }
 
 void Sculptor::selectPoints(const Ray * incident)
 {
@@ -296,34 +296,26 @@ bool Sculptor::intersect(List<VertexP> * d, const Ray & ray)
 	return m_active->vertices->size() > ndst;
 }
 
-C3Tree * Sculptor::allPoints() const { return m_tree; }
+C3Tree * Sculptor::allPoints() const 
+{ return m_tree; }
 
-Sculptor::ActiveGroup * Sculptor::activePoints() const { return m_active; }
+Sculptor::ActiveGroup * Sculptor::activePoints() const 
+{ return m_active; }
 
 void Sculptor::pullPoints()
-{
-	movePointsAlong(m_active->meanNormal, 0.02f * selectRadius());
-}
+{ movePointsAlong(m_active->meanNormal, 0.02f * selectRadius()); }
 
 void Sculptor::pushPoints()
-{
-	movePointsAlong(m_active->meanNormal, -0.02f * selectRadius());
-}
+{ movePointsAlong(m_active->meanNormal, -0.02f * selectRadius()); }
 
 void Sculptor::pinchPoints()
-{
-	movePointsToward(m_active->meanPosition, 0.02f);
-}
+{ movePointsToward(m_active->meanPosition, 0.02f); }
 
 void Sculptor::spreadPoints()
-{
-    movePointsToward(m_active->meanPosition, -0.02f);
-}
+{ movePointsToward(m_active->meanPosition, -0.02f); }
 
 void Sculptor::smudgePoints(const Vector3F & x)
-{
-	movePointsAlong(x, 0.08f);
-}
+{ movePointsAlong(x, 0.08f); }
 
 void Sculptor::smoothPoints()
 {	
