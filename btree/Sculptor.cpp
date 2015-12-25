@@ -272,10 +272,7 @@ void Sculptor::deselectPoints()
 	std::cout<<" sel depth "<<m_active->depthMax - m_active->depthMin;
 	std::cout<<" sel count "<<m_active->numActivePoints();
 #endif
-	if(currentStage()->size() > 0) {
-		m_activeStageId = m_stages.size() - 1;
-		appendStage();
-	}
+	finishStage();
 	m_tree->calculateBBox();
 	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());
 	m_active->reset(); 
@@ -320,9 +317,9 @@ void Sculptor::addToStage(VertexP * v)
 	VertexP * av = new VertexP;
 	av->key = v->key;
 	av->index = new PNPref;
+	av->index->t1 = v->index->t1;
 	av->index->t2 = new Vector3F;
 	av->index->t3 = new Vector3F;
-	av->index->t1 = v->index->t1;
 /// Pref <- P
 	*(av->index->t3) = *(v->index->t1);
 	currentStage()->insert(av->key, av);
@@ -334,23 +331,57 @@ void Sculptor::appendStage()
 sdb::Array<int, VertexP> * Sculptor::currentStage()
 { return m_stages.back(); }
 
+void Sculptor::finishStage() 
+{
+	if(currentStage()->size() > 0) {
+		m_activeStageId = m_stages.size() - 1;
+		sdb::Array<int, VertexP> * stg = m_stages[m_activeStageId];
+		stg->begin();
+		while(!stg->end()) {
+			VertexP * vert = stg->value();
+/// N <- P
+			*(vert->index->t2) = *(vert->index->t1);
+			stg->next();	
+		}
+		appendStage();
+	}
+}
+
+void Sculptor::revertStage(sdb::Array<int, VertexP> * stage, bool isBackward)
+{
+	if(!stage) return;
+	
+	stage->begin();
+	while(!stage->end()) {
+		VertexP * vert = stage->value();
+		const Vector3F p0 = *(vert->index->t1);
+		if(isBackward)
+/// P <- Pref
+			*(vert->index->t1) = *(vert->index->t3);
+		else
+/// P <- N
+			*(vert->index->t1) = *(vert->index->t2);
+		m_tree->displace(*vert, p0);
+		stage->next();	
+	}
+	m_tree->calculateBBox();
+}
+
 void Sculptor::undo()
 {
 	sdb::Array<int, VertexP> * stg = m_stages[m_activeStageId];
-	if(!stg) return;
-	
-	stg->begin();
-	while(!stg->end()) {
-		VertexP * vert = stg->value();
-		const Vector3F p0 = *(vert->index->t1);
-/// P <- Pref
-		*(vert->index->t1) = *(vert->index->t3);
-		m_tree->displace(*vert, p0);
-		stg->next();	
-	}
+	revertStage(stg);
 	m_activeStageId--;
 	if(m_activeStageId<0) m_activeStageId=0;
-	m_tree->calculateBBox();
+}
+
+void Sculptor::redo()
+{
+	unsigned i = m_activeStageId+1;
+	if(i>=m_stages.size() ) return;
+	sdb::Array<int, VertexP> * stg = m_stages[i];
+	revertStage(stg, false);
+	m_activeStageId++;
 }
 
 C3Tree * Sculptor::allPoints() const 

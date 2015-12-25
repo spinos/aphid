@@ -148,8 +148,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 	setUpdatesEnabled(false);
 	switch (event->key()) {
 		case Qt::Key_Z:
-			
-			m_sculptor->undo();
+			if(event->modifiers() == Qt::ShiftModifier)
+				m_sculptor->redo();
+			else 
+				m_sculptor->undo();
 			
 			break;
 		default:
