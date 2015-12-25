@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include <Array.h>
 #include <C3Tree.h>
 #include <RayMarch.h>
 #include <Dropoff.h>
@@ -72,8 +73,14 @@ public:
 	void smudgePoints(const Vector3F & x);
 	void smoothPoints();
 	
+	void undo();
+	
 private:
 	bool intersect(List<VertexP> * ps, const Ray & ray);
+	void addToActive(int k, VertexP * v);
+	void addToStage(VertexP * v);
+	Array<int, VertexP> * currentStage();
+	void appendStage();
 	void movePointsAlong(const Vector3F & d, const float & fac);
 	void movePointsToward(const Vector3F & d, const float & fac);
 private:
@@ -82,5 +89,7 @@ private:
 	C3Tree * m_tree;
 	MeshTopology * m_topo;
 	float m_strength;
+	std::deque<Array<int, VertexP> * > m_stages;
+	int m_activeStageId;
 };
 } // end namespace sdb

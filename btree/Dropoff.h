@@ -11,6 +11,7 @@ public:
         kCosineCurve = 3,
         kExponential = 4
     };
+	virtual ~Dropoff() {}
     virtual float f(const float & x, const float & scaling) {
         return 1.f;
     }

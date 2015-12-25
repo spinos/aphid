@@ -45,6 +45,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
         (p.index)->t1 = &m_pos[i];
 		(p.index)->t2 = &m_nor[i];
 		(p.index)->t3 = &m_ref[i];
+/// add vertex as P, N, Pref
         m_sculptor->addVertex(p);
     }
 	
@@ -73,7 +74,7 @@ void GLWidget::clientDraw()
 	
 	dr->setColor(0.f, 1.f, .3f);
 	drawPoints(*m_sculptor->activePoints());
-    qDebug()<<"";
+    qDebug()<<".";
 }
 
 void GLWidget::drawPoints(C3Tree * tree)
@@ -121,8 +122,7 @@ void GLWidget::drawPoints(const Sculptor::ActiveGroup & grp)
 void GLWidget::clientSelect(QMouseEvent */*event*/)
 {
 	setUpdatesEnabled(false);
-	m_sculptor->selectPoints(getIncidentRay());
-	// m_sculptor->pullPoints();
+	//m_sculptor->selectPoints(getIncidentRay());
 	setUpdatesEnabled(true);
 }
 
@@ -142,3 +142,20 @@ void GLWidget::clientMouseInput(QMouseEvent */*event*/)
 	m_sculptor->smudgePoints(dv);
 	setUpdatesEnabled(true);
 }
+
+void GLWidget::keyPressEvent(QKeyEvent *event)
+{
+	setUpdatesEnabled(false);
+	switch (event->key()) {
+		case Qt::Key_Z:
+			
+			m_sculptor->undo();
+			
+			break;
+		default:
+			break;
+	}
+	setUpdatesEnabled(true);
+	Base3DView::keyPressEvent(event);
+}
+//:~

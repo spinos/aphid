@@ -181,6 +181,8 @@ Sculptor::Sculptor()
 	m_active = new ActiveGroup;
 	m_strength = 0.5f;
 	m_topo = NULL;
+	m_activeStageId = 0;
+	appendStage();
 }
 
 Sculptor::~Sculptor()
@@ -270,6 +272,10 @@ void Sculptor::deselectPoints()
 	std::cout<<" sel depth "<<m_active->depthMax - m_active->depthMin;
 	std::cout<<" sel count "<<m_active->numActivePoints();
 #endif
+	if(currentStage()->size() > 0) {
+		m_activeStageId = m_stages.size() - 1;
+		appendStage();
+	}
 	m_tree->calculateBBox();
 	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());
 	m_active->reset(); 
@@ -280,20 +286,71 @@ bool Sculptor::intersect(List<VertexP> * d, const Ray & ray)
 	if(!d) return false;
 	const int num = d->size();
     const int ndst = m_active->vertices->size();
+	float tt;
 	Vector3F pop;
 	for(int i = 0; i < num; i++) {
 		Vector3F & p = *(d->value(i).index->t1);
-		float tt;// = ray.m_origin.dot(ray.m_dir) - p.dot(ray.m_dir);
+		// tt = ray.m_origin.dot(ray.m_dir) - p.dot(ray.m_dir);
 		pop = ray.closetPointOnRay(p, &tt);
-		
+/// select here
 		if(p.distanceTo(pop) < selectRadius()) {
 			int k = -tt / m_active->gridSize;
-			m_active->vertices->insert(k, d->value(i));
+			VertexP * vert = d->valueP(i);
 			m_active->updateDepthRange(-tt);
+			addToStage(vert);
+			addToActive(k, vert);
 		}
 	}
-            
+	
 	return m_active->vertices->size() > ndst;
+}
+
+void Sculptor::addToActive(int k, VertexP * v)
+{
+	VertexP * av = new VertexP;
+	av->key = v->key;
+	av->index = v->index;
+	m_active->vertices->insert(k, *av);
+}
+
+void Sculptor::addToStage(VertexP * v)
+{
+	if(currentStage()->find(v->key) ) return;
+	
+	VertexP * av = new VertexP;
+	av->key = v->key;
+	av->index = new PNPref;
+	av->index->t2 = new Vector3F;
+	av->index->t3 = new Vector3F;
+	av->index->t1 = v->index->t1;
+/// Pref <- P
+	*(av->index->t3) = *(v->index->t1);
+	currentStage()->insert(av->key, av);
+}
+
+void Sculptor::appendStage()
+{ m_stages.push_back(new sdb::Array<int, VertexP>() ); }
+
+sdb::Array<int, VertexP> * Sculptor::currentStage()
+{ return m_stages.back(); }
+
+void Sculptor::undo()
+{
+	sdb::Array<int, VertexP> * stg = m_stages[m_activeStageId];
+	if(!stg) return;
+	
+	stg->begin();
+	while(!stg->end()) {
+		VertexP * vert = stg->value();
+		const Vector3F p0 = *(vert->index->t1);
+/// P <- Pref
+		*(vert->index->t1) = *(vert->index->t3);
+		m_tree->displace(*vert, p0);
+		stg->next();	
+	}
+	m_activeStageId--;
+	if(m_activeStageId<0) m_activeStageId=0;
+	m_tree->calculateBBox();
 }
 
 C3Tree * Sculptor::allPoints() const 

@@ -22,6 +22,7 @@ protected:
 	virtual void clientSelect(QMouseEvent *event);
     virtual void clientDeselect(QMouseEvent *event);
     virtual void clientMouseInput(QMouseEvent *event);
+	virtual void keyPressEvent(QKeyEvent *event);
 	
 private:
 	void drawPoints(C3Tree * tree);
