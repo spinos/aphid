@@ -379,6 +379,7 @@ void Sculptor::undo()
 {
 	sdb::Array<int, VertexP> * stg = m_stages[m_activeStageId];
 	revertStage(stg);
+    m_lastStage = stg;
 	m_activeStageId--;
 	if(m_activeStageId<0) m_activeStageId=0;
 }
@@ -389,6 +390,7 @@ void Sculptor::redo()
 	if(i>=m_stages.size() ) return;
 	sdb::Array<int, VertexP> * stg = m_stages[i];
 	revertStage(stg, false);
+    m_lastStage = stg;
 	m_activeStageId++;
 }
 
@@ -519,5 +521,8 @@ void Sculptor::movePointsToward(const Vector3F & d, const float & fac)
 		vs->next();
 	}
 }
+
+Array<int, VertexP> * Sculptor::lastStage()
+{ return m_lastStage; }
 
 } // end namespace sdb

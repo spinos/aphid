@@ -75,12 +75,14 @@ public:
 	
 	void undo();
 	void redo();
+    Array<int, VertexP> * lastStage();
+	
 private:
 	bool intersect(List<VertexP> * ps, const Ray & ray);
 	void addToActive(int k, VertexP * v);
 	void addToStage(VertexP * v);
 	Array<int, VertexP> * currentStage();
-	void finishStage();
+    void finishStage();
 	void appendStage();
 	void revertStage(sdb::Array<int, VertexP> * stage, bool isBackward = true);
 	void movePointsAlong(const Vector3F & d, const float & fac);
@@ -93,6 +95,7 @@ private:
 	float m_strength;
 /// multiple stages tracking vertex position at selection and de-selection
 	std::deque<Array<int, VertexP> * > m_stages;
+    Array<int, VertexP> * m_lastStage;
 	int m_activeStageId;
 };
 } // end namespace sdb
