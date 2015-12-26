@@ -7,8 +7,9 @@ template<typename KeyType, typename ValueType>
 class Array : public Sequence<KeyType>
 {
 public:
-    Array(Entity * parent = NULL) : Sequence<KeyType>(parent) 
-	{}
+    Array(Entity * parent = NULL) : Sequence<KeyType>(parent) {}
+	
+	virtual ~Array() {}
     
     void insert(const KeyType & x, ValueType * v) {
 		Pair<KeyType, Entity> * p = Sequence<KeyType>::insert(x);
@@ -39,6 +40,18 @@ public:
 		Single<ValueType> * s = static_cast<Single<ValueType> *>(g.index);
 		
 		return s->data();
+	}
+	
+	virtual void clear() 
+	{
+		Sequence<KeyType>::begin();
+		while(!Sequence<KeyType>::end()) {
+			ValueType * p = value();
+			if(p) delete p;
+			Sequence<KeyType>::next();
+		}
+		
+		Sequence<KeyType>::clear();
 	}
 
 private:

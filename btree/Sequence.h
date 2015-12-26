@@ -126,7 +126,7 @@ public:
 		return c;
 	}
 	
-	void clear() {
+	virtual void clear() {
 		delete m_root;
 		m_root = new BNode<T>();
 	}

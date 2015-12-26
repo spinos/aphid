@@ -22,6 +22,8 @@ Sculptor::ActiveGroup::~ActiveGroup()
 {
     m_weights.clear();
     delete m_drop;
+	vertices->clear();
+	delete vertices;
 }
 
 void Sculptor::ActiveGroup::reset() 
@@ -189,6 +191,12 @@ Sculptor::~Sculptor()
 {
 	delete m_tree;
 	delete m_active;
+	std::deque<Array<int, VertexP> * >::iterator it = m_stages.begin();
+	for(;it!=m_stages.end();++it) {
+		(*it)->clear();
+		delete *it;
+	}
+	m_stages.clear();
 }
 
 void Sculptor::beginAddVertices(const float & gridSize)
