@@ -11,7 +11,7 @@ class HesperisPolygonalMeshCreator {
 public:
     static MObject create(APolygonalMesh * data, MObject & parentObj,
                        const std::string & nodeName = "");
-	static void addUV(APolygonalUV * data, MFnMesh & fmesh,
+	static void addUV(APolygonalUV * data, MObject & fmesh,
 						const std::string & setName,
 						const MIntArray & uvCounts);
 	static bool checkMeshNv(const MObject & node, unsigned nv);

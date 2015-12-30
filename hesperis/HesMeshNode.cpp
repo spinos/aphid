@@ -85,6 +85,7 @@ MStatus HesMeshNode::compute( const MPlug& plug, MDataBlock& data )
 			return MS::kFailure;
 		}
 		
+        AHelper::Info<MString>(" hes init mesh ", meshName);
 		HesperisPolygonalMeshCreator::create(&dataMesh, outMeshData);
 
 		hmesh.set(outMeshData);

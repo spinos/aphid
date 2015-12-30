@@ -11,6 +11,7 @@
 #include <SHelper.h>
 #include <HesperisPolygonalMeshIO.h>
 #include <BaseUtil.h>
+#include <APolygonalMesh.h>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
@@ -28,7 +29,7 @@ using namespace std;
 namespace io = boost::iostreams;
 
 MTypeId     HesUVNode::id( 0xdbd007a );
-MObject     HesMeshNode::ainput;
+MObject     HesUVNode::ainput;
 MObject     HesUVNode::ameshname;
 MObject		 HesUVNode::ainMesh;
 MObject		 HesUVNode::aoutMesh;
@@ -44,37 +45,49 @@ MStatus HesUVNode::compute( const MPlug& plug, MDataBlock& data )
 	std::string substitutedCacheName(cacheName.asChar());
 	EnvVar::replace(substitutedCacheName);
 	
-	MString meshName =  data.inputValue( ameshname ).asString();
+	MString meshName = data.inputValue( ameshname ).asString();
 	
 	if(plug == aoutMesh) {
 	
-		HPolygonalMesh entryMesh(meshName.asChar() );
-		if(!entryMesh.exists()) {
-			MGlobal::displayWarning("hes mesh cannot open " + meshName);
-			return MS::kFailure;
-		}
+        bool hesStat = false;
+        if(BaseUtil::IsImporting)
+            hesStat = true;
+        else 
+            hesStat = BaseUtil::OpenHes(substitutedCacheName, HDocument::oReadOnly);
 		
-		bool hesStat = BaseUtil::OpenHes(substitutedCacheName, HDocument::oReadOnly);
-		
-		if(!m_hesStat) {
+        if(!hesStat) {
 			AHelper::Info<std::string >("hes mesh cannot open file ", substitutedCacheName);
 			return MS::kFailure;
 		}
+        
+        if(!BaseUtil::HesDoc->find(meshName.asChar())) {
+            AHelper::Info<MString>(" hes cannot find mesh ", meshName );
+            return MS::kFailure;
+		}
+        
+		HPolygonalMesh entryMesh(meshName.asChar() );
 		
 		APolygonalMesh dataMesh;
 		entryMesh.load(&dataMesh);
-	
+        entryMesh.close();
+        
+        if(!BaseUtil::IsImporting) {
+            AHelper::Info<std::string>(" hes mesh close file ", substitutedCacheName );
+            BaseUtil::CloseHes();
+        }
+        
 		MDataHandle inputData = data.inputValue( ainMesh, &status );
 		MDataHandle outputData = data.outputValue( aoutMesh, &status );
-		AHelper::Info<MString>( " hes init uv", mesh_name);
+		
+        AHelper::Info<MString>( " hes init uv", meshName);
 		
 		outputData.set(inputData.asMesh());
-			
-		MObject omesh = outputData.asMesh();
-
-		HesperisMeshUvConnector::appendUV(&dataMesh, omesh);
 		
-		outputData.setClean();
+		MObject mesh = outputData.asMesh();
+
+		HesperisMeshUvConnector::appendUV(&dataMesh, mesh);
+        
+        outputData.setClean();
 		
 	} else {
 		return MS::kUnknownParameter;
@@ -97,9 +110,10 @@ MStatus HesUVNode::initialize()
 	ainMesh = attrFn.create("inMesh", "im", MFnMeshData::kMesh);
 	attrFn.setStorable(false);
 	addAttribute( ainMesh );
+    
 	aoutMesh = attrFn.create("outMesh", "om", MFnMeshData::kMesh);
 	attrFn.setStorable(false);
-	attrFn.setWritable(false);
+    attrFn.setWritable(false);
 	addAttribute( aoutMesh);
 	
 	MFnTypedAttribute   stringAttr;
