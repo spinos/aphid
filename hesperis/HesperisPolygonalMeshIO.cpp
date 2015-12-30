@@ -226,9 +226,10 @@ MObject HesperisPolygonalMeshCreator::create(APolygonalMesh * data, MObject & pa
         MGlobal::displayWarning(MString(" poly mesh has multiple uv ")+nodeName.c_str());
     }
     
-	for(i=0;i<1;i++) {
+	for(i=0;i<data->numUVs();i++) {
 		std::string setName = data->uvName(i);
-		addUV(data->uvData(setName), otm, setName, polygonCounts);
+/// default uv set
+		if(setName == "map1") addUV(data->uvData(setName), otm, setName, polygonCounts);
 	}
 		
     return otm;
@@ -255,12 +256,7 @@ void HesperisPolygonalMeshCreator::addUV(APolygonalUV * data, MObject & mesh,
 	for(i=0; i<nind; i++) {
 		uvIds.append(ind[i]);
     }
-    
-    AHelper::Info<int>("n face", uvCounts.length() );
-    AHelper::Info<int>("n u ", uArray.length() );
-    AHelper::Info<int>("n v ", vArray.length() );
-    AHelper::Info<int>("n uv ", uvIds.length() );
-		
+    	
 	MString uvSet(setName.c_str());
 
     MStatus stat;
@@ -343,10 +339,13 @@ MObject HesperisMeshUvConnector::create(APolygonalMesh * data, MObject & parentO
 
     MDGModifier dgModifier;
     if(data->numUVs() < 2) {
+/// single uv set
         dgModifier.connect(outMeshPlug, inMeshPlug);
         dgModifier.doIt();
     }
     else {
+		MPlug creatUVPlug = createUVSets(data, outMeshPlug, dgModifier);
+		
         MObject uv = dgModifier.createNode("hesMeshUV");
         dgModifier.doIt();
         
@@ -358,7 +357,7 @@ MObject HesperisMeshUvConnector::create(APolygonalMesh * data, MObject & parentO
         uvMeshNamePlug.setValue(MString(HesperisIO::CurrentHObjectPath.c_str() ) );
         
         MPlug uvInMeshPlug = fuv.findPlug("inMesh");
-        dgModifier.connect(outMeshPlug, uvInMeshPlug);
+        dgModifier.connect(creatUVPlug, uvInMeshPlug);
         dgModifier.doIt();
         
         MPlug uvOutMeshPlug = fuv.findPlug("outMesh");
@@ -384,9 +383,41 @@ void HesperisMeshUvConnector::appendUV(APolygonalMesh * data, MObject & parentOb
     for(i=0;i<numPolygons;i++)
         polygonCounts.append(counts[i]);
     
-	for(i=1;i<data->numUVs();i++) {
+	for(i=0;i<data->numUVs();i++) {
 		std::string setName = data->uvName(i);
 		HesperisPolygonalMeshCreator::addUV(data->uvData(setName), parentObj, setName, polygonCounts);
 	}
+}
+
+MPlug HesperisMeshUvConnector::createUVSets(APolygonalMesh * data, MPlug & origin, MDGModifier & modif)
+{
+	MPlug outMeshPlug;
+	bool isFirst = true;
+	int i = 0;
+	for(;i<data->numUVs();i++) {
+		std::string setName = data->uvName(i);
+		if(setName != "map1" ) {
+			MObject ouvcrt = modif.createNode("createUVSet" );
+			modif.doIt();
+			AHelper::Info<std::string >(" create uvset ", setName );
+			MFnDependencyNode fuvcrt(ouvcrt);
+			fuvcrt.findPlug ( MString("uvSetName") ).setValue(MString(setName.c_str() ) );
+			
+			MPlug inMeshPlug = fuvcrt.findPlug("inputGeometry");
+				
+			if(isFirst) {
+				isFirst = false;
+				modif.connect(origin , inMeshPlug);
+			}
+			else {
+				modif.connect(outMeshPlug, inMeshPlug);
+			}
+			modif.doIt();
+			
+			outMeshPlug = fuvcrt.findPlug("outputGeometry");
+		}
+	}
+	
+	return outMeshPlug;
 }
 //:~
