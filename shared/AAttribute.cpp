@@ -165,7 +165,7 @@ short AShortNumericAttribute::value() const
 
 AByteNumericAttribute::AByteNumericAttribute() {}
 
-AByteNumericAttribute::AByteNumericAttribute(short x) : AShortNumericAttribute() {}
+AByteNumericAttribute::AByteNumericAttribute(short x) : AShortNumericAttribute(x) {}
 
 AByteNumericAttribute::~AByteNumericAttribute() {}
 

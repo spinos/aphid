@@ -112,7 +112,7 @@ ANumericAttribute * AAttributeHelper::AsNumericData(const MPlug & plg)
        case MFnNumericData::kByte : 
 			va = GetPlugValue<short>(plg);
 			r = new AByteNumericAttribute(va);
-           break;
+            break;
        case MFnNumericData::kShort :
             va = GetPlugValue<short>(plg);
 			r = new AShortNumericAttribute(va);
