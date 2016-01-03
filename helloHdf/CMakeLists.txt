@@ -20,9 +20,9 @@ endif ()
 
 if(WIN32)
 set (ZLIB_ROOT "D:/usr/zlib-1.2.5")
+target_link_libraries (hdata "D:/usr/hdf5/lib/zlib.lib")
 endif()
 
-target_link_libraries (hdata "D:/usr/hdf5/lib/zlib.lib")
 
 if (WIN32)
 set (SZIP_INCLUDE_DIR "D:/usr/szip-2.1/src")

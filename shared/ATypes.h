@@ -20,6 +20,29 @@ struct Float4 {
 	: x(a), y(b), z(c), w(d)
 	{}
 	
+	Float4 operator * ( const float& scale ) const
+	{
+		return Float4(
+		x * scale,
+		y * scale,
+		z * scale,
+		w * scale);
+	}
+	
+	Float4 operator + ( const Float4 & b ) const
+	{
+		return Float4(
+		x + b.x,
+		y + b.y,
+		z + b.z,
+		w + b.w);
+	}
+	
+	float dot(const Float4 & b) const
+	{
+		return x * b.x + y * b.y + z * b.z + w * b.w;
+	}
+	
 	float x, y, z, w;
 };
 

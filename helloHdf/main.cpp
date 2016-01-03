@@ -5,6 +5,7 @@
 #define MAX_NAME 1024
 
 #include "Holder.h"
+#include <H2DDataset.h>
 
 void
 do_dtype(hid_t tid) {
@@ -528,6 +529,83 @@ void changeTime(const char * filename, bool rma1 = false)
 	printf("\n closed aft read");
 }
 
+void testTData(const char * filename)
+{
+	std::cout<<"\n begin test t data";
+	HObject::FileIO.open(filename, HDocument::oReadAndWrite);
+	
+	HBase C3("/C3");
+	H2DDataset<4, 3> ds(".d");
+	ds.create(C3.fObjectId);
+
+#define N 128
+	int b[N][3];
+	
+	for(int i=0; i< N;++i ) {
+		b[i][0] = i*3+1;
+		b[i][1] = i*3+2;
+		b[i][2] = i*3+3;
+    }
+	
+	H2DDataset<4, 3>::Select2DPart part;
+	part.start[0] = 0;
+	part.start[1] = 0;
+	part.count[0] = 64;
+	part.count[1] = 3;
+	
+	ds.write((char *)&b[0][0], &part);
+	ds.close();
+	
+	ds.open(C3.fObjectId);
+	part.start[0] = 64;
+	part.start[1] = 0;
+	part.count[0] = 64;
+	part.count[1] = 3;
+	ds.write((char *)&b[64][0], &part);
+	
+	ds.close();
+	
+	ds.open(C3.fObjectId);
+	
+	std::cout<<"\n read all ";
+	part.start[0] = 0;
+	part.start[1] = 0;
+	part.count[0] = 128;
+	part.count[1] = 3;
+	int oba[N*3];
+	ds.read((char *)&oba[0], &part);
+	for(int i=0;i<N;i++) std::cout<<"\n oba["<<i<<"] "<<oba[i*3]<<" "<<oba[i*3+1]<<" "<<oba[i*3+2];
+	
+	part.start[0] = 0;
+	part.start[1] = 0;
+	part.count[0] = 4;
+	part.count[1] = 3;
+	
+	std::cout<<"\n read first 4x3 ";
+	int ob[12];
+	ds.read((char *)&ob[0], &part);
+	for(int i=0;i<4;i++) std::cout<<"\n ob["<<i<<"] "<<oba[i*3]<<" "<<oba[i*3+1]<<" "<<oba[i*3+2];
+	
+	
+	std::cout<<"\n read last 3x2 ";
+	int ob1[9];
+	
+	part.start[0] = 125;
+	part.start[1] = 1;
+	part.count[0] = 3;
+	part.count[1] = 2;
+	
+	ds.read((char *)&ob1[0], &part);
+	for(int i=0;i<3;i++) std::cout<<"\n ob1["<<i<<"] "<<ob1[i*2]<<" "<<ob1[i*2+1];
+	
+	ds.close();
+	
+	C3.close();
+
+	HObject::FileIO.close();
+	std::cout<<"\n end test t data";
+}
+
 int main (int argc, char * const argv[]) {
     if(argc > 1) {
 		changeTime(argv[1], true);
@@ -581,6 +659,9 @@ int main (int argc, char * const argv[]) {
 	printf("\n closed aft write");
 	
 	changeTime("dset.h5");
+	
+	testTData("dset.h5");
+	
 	diagnoseFile("dset.h5");
               
 	// testCompression();
@@ -588,6 +669,7 @@ int main (int argc, char * const argv[]) {
 	printf("\n test holding");
 	Holder hold;
 	hold.Run("dset.h5");
+	
 	return 0;
 }
 //:~
