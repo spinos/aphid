@@ -8,6 +8,7 @@
  */
 #include <AllMath.h>
 #include <VectorArray.h>
+#include <HOocArray.h>
 #include <WorldGrid.h>
 namespace jul {
 

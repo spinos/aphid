@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-project (hdata)
+project (helloh5)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
@@ -20,7 +20,7 @@ endif ()
 
 if(WIN32)
 set (ZLIB_ROOT "D:/usr/zlib-1.2.5")
-target_link_libraries (hdata "D:/usr/hdf5/lib/zlib.lib")
+target_link_libraries (helloh5 "D:/usr/hdf5/lib/zlib.lib")
 endif()
 
 

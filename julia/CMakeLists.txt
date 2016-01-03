@@ -1,11 +1,16 @@
 cmake_minimum_required (VERSION 2.8)
-project (btree)
+project (julia)
  
 include_directories ("." "../shared" "../btree")
 
-add_executable(julia Parameter.cpp 
+set (HEADER_FILES ../btree/WorldGrid.h
+)
+
+set (SOURCE_FILES Parameter.cpp 
 QuatJulia.cpp
 main.cpp)
+
+add_executable(julia ${HEADER_FILES} ${SOURCE_FILES})
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")

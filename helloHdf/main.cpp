@@ -5,7 +5,7 @@
 #define MAX_NAME 1024
 
 #include "Holder.h"
-#include <H2DDataset.h>
+#include <HOocArray.h>
 
 void
 do_dtype(hid_t tid) {
@@ -529,13 +529,13 @@ void changeTime(const char * filename, bool rma1 = false)
 	printf("\n closed aft read");
 }
 
-void testTData(const char * filename)
+void test2dData(const char * filename)
 {
-	std::cout<<"\n begin test t data";
+	std::cout<<"\n begin test 2d data";
 	HObject::FileIO.open(filename, HDocument::oReadAndWrite);
 	
 	HBase C3("/C3");
-	H2DDataset<4, 3> ds(".d");
+	H2dDataset<hdata::TInt, 3> ds(".d");
 	ds.create(C3.fObjectId);
 
 #define N 128
@@ -547,7 +547,7 @@ void testTData(const char * filename)
 		b[i][2] = i*3+3;
     }
 	
-	H2DDataset<4, 3>::Select2DPart part;
+	hdata::Select2DPart part;
 	part.start[0] = 0;
 	part.start[1] = 0;
 	part.count[0] = 64;
@@ -603,7 +603,42 @@ void testTData(const char * filename)
 	C3.close();
 
 	HObject::FileIO.close();
-	std::cout<<"\n end test t data";
+	std::cout<<"\n end test 2d data";
+}
+
+void testOoc(const char * filename)
+{
+	std::cout<<"\n begin test ooc data";
+	HObject::FileIO.open(filename, HDocument::oReadAndWrite);
+	
+	HBase C4("/C4");
+	HOocArray<hdata::TInt, 3, 32> ds(".d");
+	ds.createStorage(C4.fObjectId);
+	
+	int a[3];
+	for(int i=0;i<299;++i) {
+		a[0] = i;
+		a[1] = i+1;
+		a[2] = i+2;
+		ds.insert((char *)a);
+	}
+	ds.finishInsert();
+	
+	ds.open(C4.fObjectId);
+	std::cout<<"\n d n cols "<<ds.numColumns();
+	
+	ds.readIncore(127, 32);
+	
+	int * b = (int *)ds.incoreBuf();
+	for(int i=0;i<32;++i) {
+		std::cout<<"\n b["<<i<<"] "<<b[i*3]<<" "<<b[i*3+1]<<" "<<b[i*3+2];
+	}
+	
+	ds.close();
+	std::cout<<"\n d size "<<ds.size();
+	
+	HObject::FileIO.close();
+	std::cout<<"\n end test ooc data";
 }
 
 int main (int argc, char * const argv[]) {
@@ -660,7 +695,8 @@ int main (int argc, char * const argv[]) {
 	
 	changeTime("dset.h5");
 	
-	testTData("dset.h5");
+	test2dData("dset.h5");
+	testOoc("dset.h5");
 	
 	diagnoseFile("dset.h5");
               

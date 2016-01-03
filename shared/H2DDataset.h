@@ -1,5 +1,5 @@
 /*
- *  H2DDataset.h
+ *  H2dDataset.h
  *  hdata
  *
  *  Created by jian zhang on 1/3/16.
@@ -10,31 +10,47 @@
 #pragma once
 #include "HObject.h"
 
+namespace hdata {
+
+enum Rank {
+	TUnknown = 0,
+	TChar = 1,
+	TShort = 2,
+	TInt = 3,
+	TLongInt = 4,
+	TFloat = 5,
+	TDouble = 6
+};
+
+struct Select2DPart {		
+	hsize_t start[2];
+	hsize_t count[2];
+};
+
+}
+
 template<int DataRank, int NRows>
-class H2DDataset : public HObject {
+class H2dDataset : public HObject {
 
 public:
-	struct Select2DPart {		
-		hsize_t start[2];
-		hsize_t count[2];
-	};
-	
-	H2DDataset(const std::string & path);
-	virtual ~H2DDataset();
+	H2dDataset(const std::string & path);
+	virtual ~H2dDataset();
 	
 	char open(hid_t parentId);
 	char create(hid_t parentId);
 
-	char write(char *data, Select2DPart * part);
-	char read(char *data, Select2DPart * part);
+	char write(char *data, hdata::Select2DPart * part);
+	char read(char *data, hdata::Select2DPart * part);
 
+	int numColumns();
 	virtual int objectType() const;
 	
+	static int NumBitsPerCol();
 protected:
 
 private:
 	hid_t createMemSpace(hsize_t ncols) const;
-	hid_t createMemSpace(Select2DPart * part) const;
+	hid_t createMemSpace(hdata::Select2DPart * part) const;
 	
 	hid_t createFileSpace() const;
 	hid_t dataType();
@@ -43,15 +59,15 @@ private:
 };
 
 template<int DataRank, int NRows>
-H2DDataset<DataRank, NRows>::H2DDataset(const std::string & path) : HObject(path)
+H2dDataset<DataRank, NRows>::H2dDataset(const std::string & path) : HObject(path)
 {}
 
 template<int DataRank, int NRows>
-H2DDataset<DataRank, NRows>::~H2DDataset() 
+H2dDataset<DataRank, NRows>::~H2dDataset() 
 {}
 
 template<int DataRank, int NRows>
-char H2DDataset<DataRank, NRows>::open(hid_t parentId)
+char H2dDataset<DataRank, NRows>::open(hid_t parentId)
 {
 	fObjectId = H5Dopen(parentId, fObjectPath.c_str(), H5P_DEFAULT);
 	
@@ -62,7 +78,7 @@ char H2DDataset<DataRank, NRows>::open(hid_t parentId)
 }
 
 template<int DataRank, int NRows>
-char H2DDataset<DataRank, NRows>::checkDataSpace()
+char H2dDataset<DataRank, NRows>::checkDataSpace()
 {
 	hid_t fileSpace = H5Dget_space(fObjectId);
 	if( H5Sget_simple_extent_ndims(fileSpace ) != 2) {
@@ -82,7 +98,7 @@ char H2DDataset<DataRank, NRows>::checkDataSpace()
 }
 
 template<int DataRank, int NRows>
-char H2DDataset<DataRank, NRows>::create(hid_t parentId)
+char H2dDataset<DataRank, NRows>::create(hid_t parentId)
 {	
 	if(open(parentId) ) {
 		return checkDataSpace();
@@ -120,7 +136,7 @@ char H2DDataset<DataRank, NRows>::create(hid_t parentId)
 }
 
 template<int DataRank, int NRows>
-hid_t H2DDataset<DataRank, NRows>::createFileSpace() const
+hid_t H2dDataset<DataRank, NRows>::createFileSpace() const
 {
 	hsize_t     dims[2];
 	dims[0] = 0;
@@ -136,7 +152,7 @@ hid_t H2DDataset<DataRank, NRows>::createFileSpace() const
 }
 
 template<int DataRank, int NRows>
-hid_t H2DDataset<DataRank, NRows>::createMemSpace(hsize_t ncols) const
+hid_t H2dDataset<DataRank, NRows>::createMemSpace(hsize_t ncols) const
 {
 	hsize_t     dims[2];
 	dims[0] = ncols;
@@ -147,7 +163,7 @@ hid_t H2DDataset<DataRank, NRows>::createMemSpace(hsize_t ncols) const
 }
 
 template<int DataRank, int NRows>
-hid_t H2DDataset<DataRank, NRows>::createMemSpace(Select2DPart * part) const
+hid_t H2dDataset<DataRank, NRows>::createMemSpace(hdata::Select2DPart * part) const
 {
 	int ndim = 2;
 	hid_t s = H5Screate_simple(ndim, part->count, NULL);
@@ -155,29 +171,26 @@ hid_t H2DDataset<DataRank, NRows>::createMemSpace(Select2DPart * part) const
 }
 
 template<int DataRank, int NRows>
-hid_t H2DDataset<DataRank, NRows>::dataType()
+hid_t H2dDataset<DataRank, NRows>::dataType()
 {
-	hid_t r = H5T_C_S1;
+	hid_t r = 0;
 	switch (DataRank) {
-		case 1:
+		case hdata::TChar:
 			r = H5T_NATIVE_CHAR;
 			break;
-		case 2:
+		case hdata::TShort:
 			r = H5T_NATIVE_SHORT;
 			break;
-		case 3:
-			r = H5T_NATIVE_SHORT;
-			break;
-		case 4:
+		case hdata::TInt:
 			r = H5T_NATIVE_INT;
 			break;
-		case 5:
+		case hdata::TLongInt:
 			r = H5T_NATIVE_LONG;
 			break;
-		case 6:
+		case hdata::TFloat:
 			r = H5T_NATIVE_FLOAT;
 			break;
-		case 7:
+		case hdata::TDouble:
 			r = H5T_NATIVE_DOUBLE;
 			break;
 		default:
@@ -187,11 +200,40 @@ hid_t H2DDataset<DataRank, NRows>::dataType()
 }
 
 template<int DataRank, int NRows>
-int H2DDataset<DataRank, NRows>::objectType() const
+int H2dDataset<DataRank, NRows>::NumBitsPerCol()
+{ 
+	int nbits = 0;
+	switch (DataRank) {
+		case hdata::TChar:
+			nbits = 1;
+			break;
+		case hdata::TShort:
+			nbits = 2;
+			break;
+		case hdata::TInt:
+			nbits = 4;
+			break;
+		case hdata::TLongInt:
+			nbits = 8;
+			break;
+		case hdata::TFloat:
+			nbits = 4;
+			break;
+		case hdata::TDouble:
+			nbits = 8;
+			break;
+		default:
+			break;
+	}
+	return nbits * NRows;
+}
+
+template<int DataRank, int NRows>
+int H2dDataset<DataRank, NRows>::objectType() const
 { return H5G_DATASET; }
 
 template<int DataRank, int NRows>
-char H2DDataset<DataRank, NRows>::write(char *data, Select2DPart * part)
+char H2dDataset<DataRank, NRows>::write(char *data, hdata::Select2DPart * part)
 {
 	hsize_t dims[2];
 	dims[0] = part->start[0] + part->count[0];
@@ -214,7 +256,7 @@ char H2DDataset<DataRank, NRows>::write(char *data, Select2DPart * part)
 }
 
 template<int DataRank, int NRows>
-char H2DDataset<DataRank, NRows>::read(char *data, Select2DPart * part)
+char H2dDataset<DataRank, NRows>::read(char *data, hdata::Select2DPart * part)
 {
 	hid_t memSpace = createMemSpace(part);
 	herr_t status;
@@ -229,3 +271,16 @@ char H2DDataset<DataRank, NRows>::read(char *data, Select2DPart * part)
 	H5Sclose(fileSpace);
 	return status >= 0;
 }
+
+template<int DataRank, int NRows>
+int H2dDataset<DataRank, NRows>::numColumns()
+{
+	hid_t fileSpace = H5Dget_space(fObjectId);
+	
+	hsize_t current_dims[2];
+	hsize_t max_dims[2];
+	H5Sget_simple_extent_dims(fileSpace, current_dims, max_dims);
+
+	return current_dims[0];
+}
+
