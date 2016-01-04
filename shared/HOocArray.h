@@ -5,6 +5,7 @@
  *  Created by jian zhang on 1/3/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
+ *  out-of-core 2d array
  */
 
 #pragma once

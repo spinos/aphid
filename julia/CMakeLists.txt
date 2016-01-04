@@ -3,7 +3,8 @@ project (julia)
  
 include_directories ("." "../shared" "../btree")
 
-set (HEADER_FILES ../btree/WorldGrid.h
+set (HEADER_FILES ../btree/HWorldGrid.h
+../btree/HInnerGrid.h
 )
 
 set (SOURCE_FILES Parameter.cpp 
@@ -11,6 +12,22 @@ QuatJulia.cpp
 main.cpp)
 
 add_executable(julia ${HEADER_FILES} ${SOURCE_FILES})
+
+if (WIN32)
+set (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
+set (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
+else ()
+set (HDF5_INCLUDE_DIR "/users/jianzhang/Library/hdf5/include")
+set (HDF5_LIBRARIES "/users/jianzhang/Library/hdf5/lib/libhdf5.dylib")
+endif ()
+
+if(WIN32)
+set (ZLIB_ROOT "D:/usr/zlib-1.2.5")
+target_link_libraries (julia "D:/usr/hdf5/lib/zlib.lib")
+endif()
+
+include_directories (${HDF5_INCLUDE_DIR})
+target_link_libraries (julia ${HDF5_LIBRARIES})
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")

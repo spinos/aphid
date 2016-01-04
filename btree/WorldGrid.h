@@ -36,10 +36,12 @@ public:
 	
 /// put v into grid
 	void insert(const float * at, const ValueType & v);
-	
-private:
+
+protected:	
 /// find grid coord of point(x,y,z)
 	const Coord3 gridCoord(const float * p) const;
+	
+private:
 	
 };
 

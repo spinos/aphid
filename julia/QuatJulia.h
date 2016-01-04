@@ -8,8 +8,8 @@
  */
 #include <AllMath.h>
 #include <VectorArray.h>
-#include <HOocArray.h>
-#include <WorldGrid.h>
+#include <HInnerGrid.h>
+#include <HWorldGrid.h>
 namespace jul {
 
 class QuatJulia {
