@@ -56,4 +56,7 @@ void Parameter::PrintHelp()
 	<<"\n";
 }
 
+std::string Parameter::outFileName() const
+{ return m_outFileName; }
+
 }

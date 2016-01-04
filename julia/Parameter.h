@@ -23,6 +23,8 @@ public:
 	static void PrintHelp();
 	
 	OperationFlag operation() const;
+	
+	std::string outFileName() const;
 protected:
 
 private:

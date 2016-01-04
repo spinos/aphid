@@ -42,6 +42,7 @@ public:
 	
 	void createStorage(hid_t parentId);
 	void openStorage(hid_t parentId);
+	void flush();
 	
 	void insert(char * d);
 	void finishInsert();

@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 	
 	if(param.operation() == jul::Parameter::kGenerate ) {
 		std::cout<<"\n generate julia set ";
-		jul::QuatJulia julia;
+		jul::QuatJulia julia(&param);
 	}
 	return 0;
 }

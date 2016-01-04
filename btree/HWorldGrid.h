@@ -24,6 +24,8 @@ public:
 	virtual ~HWorldGrid();
 	
 	void insert(const float * at, const ValueType & v);
+	void finishInsert();
+	int elementSize();
 
 protected:
 	std::string coord3Str(const Coord3 & c) const;
@@ -47,8 +49,39 @@ void HWorldGrid<ChildType, ValueType>::insert(const float * at, const ValueType 
 	const Coord3 x = WorldGrid<ChildType, ValueType>::gridCoord(at);
 	
 	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(x);
-	if(!p->index) p->index = new ChildType(coord3Str(x), this);
-	static_cast<ChildType *>(p->index)->insert(v);
+	if(!p->index) {
+		p->index = new ChildType(coord3Str(x), this);
+		static_cast<ChildType *>(p->index)->createStorage(fObjectId);
+	}
+	static_cast<ChildType *>(p->index)->insert((char *)&v);
+}
+
+template<typename ChildType, typename ValueType>
+void HWorldGrid<ChildType, ValueType>::finishInsert()
+{
+	WorldGrid<ChildType, ValueType>::begin();
+	while(!WorldGrid<ChildType, ValueType>::end() ) {
+		WorldGrid<ChildType, ValueType>::value()->finishInsert();
+		WorldGrid<ChildType, ValueType>::value()->close();
+		
+		WorldGrid<ChildType, ValueType>::next();
+	}
+}
+
+template<typename ChildType, typename ValueType>
+int HWorldGrid<ChildType, ValueType>::elementSize()
+{
+	int sum = 0;
+	WorldGrid<ChildType, ValueType>::begin();
+	while(!WorldGrid<ChildType, ValueType>::end() ) {
+		ChildType * cell = WorldGrid<ChildType, ValueType>::value();
+		cell->open(fObjectId);
+		sum += cell->numColumns();
+		cell->close();
+		
+		WorldGrid<ChildType, ValueType>::next();
+	}
+	return sum;
 }
 
 template<typename ChildType, typename ValueType>

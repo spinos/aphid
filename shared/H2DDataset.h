@@ -46,8 +46,9 @@ public:
 	virtual int objectType() const;
 	
 	static int NumBitsPerCol();
+	
 protected:
-
+	
 private:
 	hid_t createMemSpace(hsize_t ncols) const;
 	hid_t createMemSpace(hdata::Select2DPart * part) const;
@@ -113,7 +114,7 @@ char H2dDataset<DataRank, NRows>::create(hid_t parentId)
 	H5Pset_layout(createProps, H5D_CHUNKED);
 	
 	int ndim = 2;
-	hsize_t chunkSize[2] = {32, NRows};
+	hsize_t chunkSize[2] = {1024, NRows};
 
 	if(H5Pset_chunk(createProps, ndim, chunkSize)<0) {
       printf("\nError: fail to set chunk\n");
@@ -283,4 +284,3 @@ int H2dDataset<DataRank, NRows>::numColumns()
 
 	return current_dims[0];
 }
-

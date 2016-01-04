@@ -7,7 +7,7 @@
  *
  */
 #include <AllMath.h>
-#include <VectorArray.h>
+#include "Parameter.h"
 #include <HInnerGrid.h>
 #include <HWorldGrid.h>
 namespace jul {
@@ -18,9 +18,9 @@ class QuatJulia {
 	int m_numIter;
 	int m_numGrid;
 /// un-organized grid
-	sdb::WorldGrid<sdb::VectorArray<Vector3F >, Vector3F > * m_tree;
+	sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 3, 256 >, Vector3F > * m_tree;
 public:
-	QuatJulia();
+	QuatJulia(Parameter * param);
 	virtual ~QuatJulia();
 	
 protected:

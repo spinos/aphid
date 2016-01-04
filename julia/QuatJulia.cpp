@@ -8,7 +8,7 @@
  */
 
 #include "QuatJulia.h"
-
+#include <HWorld.h>
 namespace jul {
 
 Float4 quatProd(const Float4 & a, const Float4 & b)
@@ -29,17 +29,24 @@ Float4 quatSq(const Float4 & a)
 			2.0 * a.x * a.w);
 }
 
-QuatJulia::QuatJulia() 
+QuatJulia::QuatJulia(Parameter * param) 
 {
 	sdb::TreeNode::MaxNumKeysPerNode = 128;
 	sdb::TreeNode::MinNumKeysPerNode = 16;
 
 	m_c = Float4(0.f, 0.f, 0.f, 0.f);
-	m_numIter = 8;
-	m_numGrid = 200;
-	m_tree = new sdb::WorldGrid<sdb::VectorArray<Vector3F >, Vector3F >;
-	m_tree->setGridSize(1.f / 11.f);
+	m_numIter = 5;
+	m_numGrid = 220;
+	
+	HObject::FileIO.open(param->outFileName().c_str(), HDocument::oReadAndWrite);
+	HWorld gworld;
+	m_tree = new sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 3, 256 >, Vector3F >("/world/grid");
+	m_tree->setGridSize(1.f / 9.f);
 	generate();
+	m_tree->close();
+	gworld.save();
+	gworld.close();
+	HObject::FileIO.close();
 }
 
 QuatJulia::~QuatJulia()
@@ -63,7 +70,9 @@ void QuatJulia::generate()
 			}
 		}
 	}
-	std::cout<<"\n n pnt "<<n
+	m_tree->finishInsert();
+	std::cout<<"\n n elm "<<m_tree->elementSize()
+	<<"\n n pnt "<<n
 	<<"n grid "<<m_tree->size();
 }
 
