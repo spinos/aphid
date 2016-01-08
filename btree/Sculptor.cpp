@@ -412,6 +412,14 @@ void Sculptor::pinchPoints()
 void Sculptor::spreadPoints()
 { movePointsToward(m_active->meanPosition, -0.02f); }
 
+/// mean normal + from center
+void Sculptor::inflatePoints()
+{ 
+	Vector3F nor = m_active->meanNormal;
+	nor.reverse();
+	movePointsToward(m_active->meanPosition, -0.02f, false, &nor); 
+}
+
 void Sculptor::smudgePoints(const Vector3F & x)
 { movePointsAlong(x, 0.08f); }
 
@@ -486,13 +494,14 @@ void Sculptor::movePointsAlong(const Vector3F & d, const float & fac)
 	}
 }
 
-void Sculptor::movePointsToward(const Vector3F & d, const float & fac)
+void Sculptor::movePointsToward(const Vector3F & d, const float & fac, bool normalize, Vector3F * vmod)
 {
 	if(m_active->numSelected() < 1) return;
 	Ordered<int, VertexP> * vs = m_active->vertices;
 	int vi = 0;
 	int blk = 0;
 	Vector3F tod;
+	float wei;
 	vs->begin();
 	while(!vs->end()) {
 		
@@ -500,7 +509,8 @@ void Sculptor::movePointsToward(const Vector3F & d, const float & fac)
 		const int num = l->size();
 		
 		for(int i = 0; i < num; i++) {
-			if(m_active->weight(vi) < 10e-4) {
+			wei = m_active->weight(vi);
+			if(wei < 1e-4f) {
 				vi++;
 				continue;
 			}
@@ -510,8 +520,10 @@ void Sculptor::movePointsToward(const Vector3F & d, const float & fac)
 			Vector3F & pos = *(vert.index->t1);
 			Vector3F p0(*(vert.index->t1));
 			
-			tod = d - pos; 
-			pos += tod * fac * m_active->weight(vi) * m_strength;
+			tod = d - pos;
+			if(normalize) tod.normalize();
+			pos += tod * fac * wei * m_strength;
+			if(vmod) pos += *vmod * fac * wei;
 		
 			m_tree->displace(vert, p0);
 			vi++;

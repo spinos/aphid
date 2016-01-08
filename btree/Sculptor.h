@@ -72,6 +72,7 @@ public:
 	void spreadPoints();
 	void smudgePoints(const Vector3F & x);
 	void smoothPoints();
+	void inflatePoints();
 	
 	void undo();
 	void redo();
@@ -86,7 +87,7 @@ private:
 	void appendStage();
 	void revertStage(sdb::Array<int, VertexP> * stage, bool isBackward = true);
 	void movePointsAlong(const Vector3F & d, const float & fac);
-	void movePointsToward(const Vector3F & d, const float & fac);
+	void movePointsToward(const Vector3F & d, const float & fac, bool normalize =false, Vector3F * vmod = NULL);
 private:
 	RayMarch m_march;
 	ActiveGroup * m_active;
