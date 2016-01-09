@@ -21,7 +21,13 @@ public:
 	static bool ReadAttributes(MObject &target = MObject::kNullObj);
 	static bool ReadAttributes(HBase * parent, MObject &target);
 	
+	static bool BeginBakeAttribute(const std::string & attrName, ANumericAttribute *data);
+	static bool EndBakeAttribute(const std::string & attrName, ANumericAttribute *data);
+	static bool BakeAttribute(const std::string & attrName, ANumericAttribute *data);
+	static void ClearBakeData();
+	
 protected:
+	static std::map<std::string, HObject * > MappedBakeData;
 	
 private:
 	static bool ReadAttribute(MObject & dst, AAttribute * data, MObject &target);
@@ -29,4 +35,25 @@ private:
 	static bool ReadNumericAttribute(MObject & dst, ANumericAttribute * data, MObject &target);
 	static bool ReadCompoundAttribute(MObject & dst, ACompoundAttribute * data, MObject &target);
 	static bool ReadEnumAttribute(MObject & dst, AEnumAttribute * data, MObject &target);
+	static HObject * CreateBake(HBase * grp, ANumericAttribute::NumericAttributeType typ,
+							const std::string & attrName, const std::string & dataName,
+							bool &stat);
+	static bool InsertDataValue(HObject * grp, ANumericAttribute *data);
+	static bool FinishInsertDataValue(HObject * grp, ANumericAttribute::NumericAttributeType typ);
+	
+	template<typename Td, typename Tv>
+	static bool InsertValue(HObject * g, Tv v)
+	{
+		static_cast<Td *>(g)->insert((char *)&v);
+		return true;
+	}
+	
+	template<typename Td>
+	static bool FinishInsertValue(HObject * g)
+	{
+		static_cast<Td *>(g)->finishInsert();
+		// static_cast<Td *>(g)->printValues();
+		return true;
+	}
+	
 };

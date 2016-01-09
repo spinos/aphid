@@ -172,6 +172,9 @@ AByteNumericAttribute::~AByteNumericAttribute() {}
 ANumericAttribute::NumericAttributeType AByteNumericAttribute::numericType() const
 { return TByteNumeric; }
 
+char AByteNumericAttribute::asChar() const
+{ return (char)value(); }
+
 AIntNumericAttribute::AIntNumericAttribute()
 { m_value = 0; }
 
@@ -251,4 +254,7 @@ void ABooleanNumericAttribute::setValue(const float & x)
 
 bool ABooleanNumericAttribute::value() const
 { return m_value; }
+
+char ABooleanNumericAttribute::asChar() const
+{ return (char)value(); }
 //:~

@@ -151,6 +151,8 @@ public:
 	
 	virtual NumericAttributeType numericType() const;
 	
+	char asChar() const;
+	
 protected:
 	
 private:
@@ -223,6 +225,8 @@ public:
 	virtual void setValue(const float & x);
 	
 	bool value() const;
+	char asChar() const;
+	
 protected:
 	
 private:

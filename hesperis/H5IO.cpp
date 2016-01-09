@@ -14,6 +14,7 @@ std::string H5IO::BeheadName("");
 
 void H5IO::CreateGroup(const std::string & name)
 {
+/// hierarchy to name
 	std::vector<std::string> allNames; 
     SHelper::listAllNames(name, allNames);
     std::vector<std::string>::const_iterator it = allNames.begin();

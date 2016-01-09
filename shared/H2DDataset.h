@@ -45,6 +45,7 @@ public:
 	int numColumns();
 	virtual int objectType() const;
 	
+	static int NumBitsPerPnt();
 	static int NumBitsPerCol();
 	
 protected:
@@ -201,8 +202,8 @@ hid_t H2dDataset<DataRank, NRows>::dataType()
 }
 
 template<int DataRank, int NRows>
-int H2dDataset<DataRank, NRows>::NumBitsPerCol()
-{ 
+int H2dDataset<DataRank, NRows>::NumBitsPerPnt()
+{
 	int nbits = 0;
 	switch (DataRank) {
 		case hdata::TChar:
@@ -226,8 +227,12 @@ int H2dDataset<DataRank, NRows>::NumBitsPerCol()
 		default:
 			break;
 	}
-	return nbits * NRows;
+	return nbits;
 }
+
+template<int DataRank, int NRows>
+int H2dDataset<DataRank, NRows>::NumBitsPerCol()
+{ return NumBitsPerPnt() * NRows; }
 
 template<int DataRank, int NRows>
 int H2dDataset<DataRank, NRows>::objectType() const

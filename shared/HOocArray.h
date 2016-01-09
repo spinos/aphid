@@ -40,9 +40,8 @@ public:
 		delete m_data;
 	}
 	
-	void createStorage(hid_t parentId);
-	void openStorage(hid_t parentId);
-	void flush();
+	bool createStorage(hid_t parentId);
+	bool openStorage(hid_t parentId);
 	
 	void insert(char * d);
 	void finishInsert();
@@ -55,15 +54,17 @@ public:
 	
 	char * incoreBuf() const;
 	
+	void printValues();
+	
 protected:
 
 private:
 	void writeCurrentBuf(int ncols);
-	
+	void printAValue(char * v);
 };
 
 template <int DataRank, int NRows, int BufSize>
-void HOocArray<DataRank, NRows, BufSize>::createStorage(hid_t parentId)
+bool HOocArray<DataRank, NRows, BufSize>::createStorage(hid_t parentId)
 {
 	if(H2dDataset<DataRank, NRows>::create(parentId) ) {
 		H2dDataset<DataRank, NRows>::close();
@@ -71,16 +72,18 @@ void HOocArray<DataRank, NRows, BufSize>::createStorage(hid_t parentId)
 	}
 	else
 		m_parentId = 0;
+	return m_parentId > 0;
 }
 
 template <int DataRank, int NRows, int BufSize>
-void HOocArray<DataRank, NRows, BufSize>::openStorage(hid_t parentId)
+bool HOocArray<DataRank, NRows, BufSize>::openStorage(hid_t parentId)
 {
 	if(H2dDataset<DataRank, NRows>::open(parentId) ) {
 		m_parentId = parentId;
 	}
 	else
 		m_parentId = 0;
+	return m_parentId > 0;
 }
 
 template <int DataRank, int NRows, int BufSize>
@@ -139,3 +142,53 @@ void HOocArray<DataRank, NRows, BufSize>::readIncore(int offset, int ncols)
 template <int DataRank, int NRows, int BufSize>
 char * HOocArray<DataRank, NRows, BufSize>::incoreBuf() const
 { return m_data; }
+
+template <int DataRank, int NRows, int BufSize>
+void HOocArray<DataRank, NRows, BufSize>::printValues()
+{
+	std::cout<<"\n size "<<m_size;
+	int numBlks = m_size / BufSize;
+	if((m_size & (BufSize-1)) > 0) numBlks++;
+	int ncols = BufSize;
+	const int bpp = H2dDataset<DataRank, NRows>::NumBitsPerPnt();
+	int i, j, k, it = 0;
+	for(i=0;i<numBlks;++i) {
+		if((m_size - i*BufSize) < BufSize) ncols = m_size - i*BufSize;
+		std::cout<<"\n read n col "<<ncols;
+		readIncore(i*BufSize, ncols);
+		for(j=0;j<ncols;++j) {
+			for(k=0;k<NRows;++k) {
+				std::cout<<"\n ["<<it<<"]";
+				printAValue(&m_data[(j*NRows+k) * bpp]);
+				it++;
+			}
+		}
+	}
+}
+
+template <int DataRank, int NRows, int BufSize>
+void HOocArray<DataRank, NRows, BufSize>::printAValue(char * v)
+{
+	switch (DataRank) {
+		case hdata::TChar:
+			std::cout<<" "<<*v;
+			break;
+		case hdata::TShort:
+			std::cout<<" "<<*(short *)v;
+			break;
+		case hdata::TInt:
+			std::cout<<" "<<*(int *)v;
+			break;
+		case hdata::TLongInt:
+			std::cout<<" "<<*(long long *)v;
+			break;
+		case hdata::TFloat:
+			std::cout<<" "<<*(float *)v;
+			break;
+		case hdata::TDouble:
+			std::cout<<" "<<*(double *)v;
+			break;
+		default:
+			break;
+	}
+}

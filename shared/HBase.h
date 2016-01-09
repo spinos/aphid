@@ -95,5 +95,20 @@ public:
 			}
 		}
     }
+	
+	template<typename T>
+	T * createDataStorage(const std::string & name, bool & stat)
+	{
+		T * d = new T(name);
+		if(d->createStorage(fObjectId)) {
+			stat = true;
+		}
+		else {
+			std::cout<<"\n HBase createDataStorage error";
+			stat = false;
+		}
+		d->close();
+		return d;
+	}
 };
 #endif        //  #ifndef HBASE_H

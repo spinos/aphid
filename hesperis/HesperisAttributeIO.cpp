@@ -11,7 +11,10 @@
 #include <AAttributeHelper.h>
 #include <HWorld.h>
 #include <HAttributeGroup.h>
+#include <HOocArray.h>
 #include <boost/format.hpp>
+
+std::map<std::string, HObject * > HesperisAttributeIO::MappedBakeData;
 
 HesperisAttributeIO::HesperisAttributeIO() {}
 HesperisAttributeIO::~HesperisAttributeIO() {}
@@ -269,4 +272,138 @@ bool HesperisAttributeIO::ReadEnumAttribute(MObject & dst, AEnumAttribute * data
 	MPlug(target, dst).setValue(v);
 	return true;
 }
+
+bool HesperisAttributeIO::BeginBakeAttribute(const std::string & attrName, ANumericAttribute *data)
+{
+	HBase grp(attrName);
+	bool stat = true;
+	HObject * d = CreateBake(&grp, data->numericType(), attrName, ".bake", stat ); 
+	grp.close();
+	if(stat) {
+		AHelper::Info<std::string >("bake attr", attrName );
+		MappedBakeData[attrName] = d;
+	}
+	else {
+		AHelper::Info<std::string >("HesperisAttributeIO error cannot bake attr", attrName );
+	}
+	return stat;
+}
+
+HObject * HesperisAttributeIO::CreateBake(HBase * grp, ANumericAttribute::NumericAttributeType typ,
+										const std::string & attrName, const std::string & dataName,
+										bool &stat)
+{
+	HObject * d = NULL;
+	stat = false;
+	switch(typ) {
+		case ANumericAttribute::TByteNumeric:
+			d = grp->createDataStorage<HOocArray<hdata::TChar, 1, 64> >(dataName, stat);
+			break;
+		case ANumericAttribute::TShortNumeric:
+			d = grp->createDataStorage<HOocArray<hdata::TShort, 1, 64> >(dataName, stat);
+			break;
+		case ANumericAttribute::TIntNumeric:
+			d = grp->createDataStorage<HOocArray<hdata::TInt, 1, 64> >(dataName, stat);
+			break;
+		case ANumericAttribute::TBooleanNumeric:
+			d = grp->createDataStorage<HOocArray<hdata::TChar, 1, 64> >(dataName, stat);
+			break;
+		case ANumericAttribute::TFloatNumeric:
+			d = grp->createDataStorage<HOocArray<hdata::TFloat, 1, 64> >(dataName, stat);
+			break;
+		case ANumericAttribute::TDoubleNumeric:
+			d = grp->createDataStorage<HOocArray<hdata::TDouble, 1, 64> >(dataName, stat);
+			break;
+		default:
+			break;
+    }
+	
+	return d;
+}
+
+bool HesperisAttributeIO::EndBakeAttribute(const std::string & attrName, ANumericAttribute *data)
+{
+	if(MappedBakeData.find(attrName) == MappedBakeData.end() ) {
+		std::cout<<"\n HesperisAttributeIO error end bake cannot find attr "<<attrName;
+		return false;
+	}
+	HBase grp(attrName);
+	
+	FinishInsertDataValue(MappedBakeData[attrName], data->numericType() );
+	
+	grp.close();
+	
+	return true;
+}
+
+bool HesperisAttributeIO::BakeAttribute(const std::string & attrName, ANumericAttribute *data)
+{
+	if(MappedBakeData.find(attrName) == MappedBakeData.end() ) {
+		std::cout<<"\n HesperisAttributeIO error cannot find attr "<<attrName;
+		return false;
+	}
+	HBase grp(attrName);
+	
+	InsertDataValue(MappedBakeData[attrName], data);
+	
+	grp.close();
+	return true;
+}
+
+bool HesperisAttributeIO::InsertDataValue(HObject * grp, ANumericAttribute *data)
+{
+	switch(data->numericType() ) {
+		case ANumericAttribute::TByteNumeric:
+			InsertValue<HOocArray<hdata::TChar, 1, 64>, char >(grp, static_cast<AByteNumericAttribute *>(data)->asChar() );
+			break;
+		case ANumericAttribute::TShortNumeric:
+			InsertValue<HOocArray<hdata::TShort, 1, 64>, short >(grp, static_cast<AShortNumericAttribute *>(data)->value() );
+			break;
+		case ANumericAttribute::TIntNumeric:
+			InsertValue<HOocArray<hdata::TInt, 1, 64>, int >(grp, static_cast<AIntNumericAttribute *>(data)->value() );
+			break;
+		case ANumericAttribute::TBooleanNumeric:
+			InsertValue<HOocArray<hdata::TChar, 1, 64>, char >(grp, static_cast<ABooleanNumericAttribute *>(data)->asChar() );
+			break;
+		case ANumericAttribute::TFloatNumeric:
+			InsertValue<HOocArray<hdata::TFloat, 1, 64>, float >(grp, static_cast<AFloatNumericAttribute *>(data)->value() );
+			break;
+		case ANumericAttribute::TDoubleNumeric:
+			InsertValue<HOocArray<hdata::TDouble, 1, 64>, double >(grp, static_cast<ADoubleNumericAttribute *>(data)->value() );
+			break;
+		default:
+			break;
+    }
+	return true;
+} 
+
+bool HesperisAttributeIO::FinishInsertDataValue(HObject * grp, ANumericAttribute::NumericAttributeType typ)
+{
+	switch(typ) {
+		case ANumericAttribute::TByteNumeric:
+			FinishInsertValue<HOocArray<hdata::TChar, 1, 64> >(grp);
+			break;
+		case ANumericAttribute::TShortNumeric:
+			FinishInsertValue<HOocArray<hdata::TShort, 1, 64> >(grp);
+			break;
+		case ANumericAttribute::TIntNumeric:
+			FinishInsertValue<HOocArray<hdata::TInt, 1, 64> >(grp);
+			break;
+		case ANumericAttribute::TBooleanNumeric:
+			FinishInsertValue<HOocArray<hdata::TChar, 1, 64> >(grp);
+			break;
+		case ANumericAttribute::TFloatNumeric:
+			FinishInsertValue<HOocArray<hdata::TFloat, 1, 64> >(grp);
+			break;
+		case ANumericAttribute::TDoubleNumeric:
+			FinishInsertValue<HOocArray<hdata::TDouble, 1, 64> >(grp);
+			break;
+		default:
+			break;
+    }
+	return true;
+}
+
+void HesperisAttributeIO::ClearBakeData()
+{ MappedBakeData.clear(); }
 //:~
