@@ -56,4 +56,6 @@ private:
 		return true;
 	}
 	
+	static bool ConnectBaked(HBase * parent, AAttribute * data, MObject & entity, MObject & attr);
+	
 };

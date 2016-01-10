@@ -13,6 +13,7 @@
 #include <HAttributeGroup.h>
 #include <HOocArray.h>
 #include <boost/format.hpp>
+#include "HesperisAttribConnector.h"
 
 std::map<std::string, HObject * > HesperisAttributeIO::MappedBakeData;
 
@@ -96,8 +97,11 @@ bool HesperisAttributeIO::ReadAttributes(HBase * parent, MObject &target)
 		AAttributeWrap wrap;
 		if(a.load(wrap)) {
 			MObject attr;
-			if(ReadAttribute(attr, wrap.attrib(), target))
-				ReadAnimation(&a, target, attr);
+			if(ReadAttribute(attr, wrap.attrib(), target)) {
+				if(!ReadAnimation(&a, target, attr) ) {
+					ConnectBaked(&a, wrap.attrib(), target, attr);
+				}
+			}
 		}
 		a.close();
 	}
@@ -406,4 +410,17 @@ bool HesperisAttributeIO::FinishInsertDataValue(HObject * grp, ANumericAttribute
 
 void HesperisAttributeIO::ClearBakeData()
 { MappedBakeData.clear(); }
+
+bool HesperisAttributeIO::ConnectBaked(HBase * parent, AAttribute * data, MObject & entity, MObject & attr)
+{
+	if(!parent->hasNamedData(".bake")) return false;
+	
+	if(data->attrType() != AAttribute::aNumeric) return false;
+	
+	ANumericAttribute * numericData = static_cast<ANumericAttribute *>(data);
+	
+	HesperisAttribConnector::Connect(parent->pathToObject(), numericData->numericType(), entity, attr);
+			
+	return true;
+}
 //:~

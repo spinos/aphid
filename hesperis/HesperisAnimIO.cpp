@@ -82,13 +82,14 @@ bool HesperisAnimIO::ReadAnimation(HBase * parent, MObject & entity, MObject & a
 	
 	std::vector<std::string > animNames;
 	parent->lsTypedChild<HAnimationCurve>(animNames);
+	
+/// no anim curve
+	if(animNames.size() < 1) return false;
+	
 	std::vector<std::string>::const_iterator it = animNames.begin();
 	
 	for(;it!=animNames.end();++it) {
 		AAnimationCurve dataCurve;
-		//HAnimationCurve grp(*it);
-		//grp.load(&dataCurve);
-		//grp.close();
 		LoadData<HAnimationCurve, AAnimationCurve>(*it, &dataCurve);
 
 		ProcessAnimationCurve(dataCurve, panim);

@@ -2,6 +2,8 @@
 #include <maya/MPxNode.h>
 #include <maya/MDataBlock.h>
 #include <maya/MObject.h> 
+#include <maya/MFnNumericData.h>
+#include <maya/MString.h>
 #include <EnvVar.h>
 #include <H5Holder.h>
 
@@ -29,8 +31,6 @@ public:
 	static  	MObject 	outShort;
 	static MObject aintAttrName;
 	static  	MObject 	outInt;
-	static MObject alongAttrName;
-	static  	MObject 	outLong;
 	static MObject afloatAttrName;
 	static  	MObject 	outFloat;
 	static MObject adoubleAttrName;
@@ -41,6 +41,10 @@ public:
 	static	MTypeId		id;
 	
 private:
+	static void createNameValueAttr(MObject & nameAttr, MObject & valueAttr,
+						const MString & name1L, const MString & name1S, 
+						const MString & name2L, const MString & name2S, 
+						MFnNumericData::Type valueTyp);
 };
 
 

@@ -17,8 +17,6 @@ MObject H5AttribNode::ashortAttrName;
 MObject H5AttribNode::outShort;
 MObject H5AttribNode::aintAttrName;
 MObject H5AttribNode::outInt;
-MObject H5AttribNode::alongAttrName;
-MObject H5AttribNode::outLong;
 MObject H5AttribNode::afloatAttrName;
 MObject H5AttribNode::outFloat;
 MObject H5AttribNode::adoubleAttrName;
@@ -114,23 +112,56 @@ MStatus H5AttribNode::initialize()
  	stringAttr.setStorable(true);
 	addAttribute( input );
 	
-	abyteAttrName = stringAttr.create( "byteAttribName", "btnm", MFnData::kString );
+	createNameValueAttr(abyteAttrName, outByte,
+						"byteAttribName", "btnm", "outByte", "obt", 
+						MFnNumericData::kByte);
+	
+	createNameValueAttr(ashortAttrName, outShort,
+						"shortAttribName", "stnm", "outShort", "ost", 
+						MFnNumericData::kShort);
+						
+	createNameValueAttr(aintAttrName, outInt,
+						"intAttribName", "itnm", "outInt", "oit", 
+						MFnNumericData::kInt);
+	
+	createNameValueAttr(adoubleAttrName, outDouble,
+						"floatAttribName", "ftnm", "outFloat", "oft", 
+						MFnNumericData::kFloat);
+	
+	createNameValueAttr(adoubleAttrName, outDouble,
+						"doubleAttribName", "dbnm", "outDouble", "odb", 
+						MFnNumericData::kDouble);
+	
+	createNameValueAttr(aboolAttrName, outBool,
+						"boolAttribName", "blnm", "outBool", "obl", 
+						MFnNumericData::kBoolean);
+
+	return MS::kSuccess;
+}
+
+void H5AttribNode::createNameValueAttr(MObject & nameAttr, MObject & valueAttr,
+						const MString & name1L, const MString & name1S, 
+						const MString & name2L, const MString & name2S, 
+						MFnNumericData::Type valueTyp)
+{
+	MFnNumericAttribute numAttr;
+	MFnTypedAttribute stringAttr;
+	
+	nameAttr = stringAttr.create( name1L, name1S, MFnData::kString );
  	stringAttr.setStorable(true);
     stringAttr.setArray(true);
     stringAttr.setDisconnectBehavior(MFnAttribute::kDelete);
-	addAttribute( abyteAttrName );
+	addAttribute( nameAttr );
 	
-	outByte = numAttr.create( "outByte", "obt", MFnNumericData::kByte ); 
+	valueAttr = numAttr.create( name2L, name2S, valueTyp ); 
 	numAttr.setStorable(false);
 	numAttr.setWritable(false);
     numAttr.setArray(true);
     numAttr.setDisconnectBehavior(MFnAttribute::kDelete);
-	addAttribute( outByte );
+	addAttribute( valueAttr );
     
-	attributeAffects( aframe, outByte );
-	attributeAffects( input, outByte );
-	
-	return MS::kSuccess;
+	attributeAffects( aframe, valueAttr );
+	attributeAffects( input, valueAttr );
 }
 
 MStatus H5AttribNode::connectionMade(const MPlug &plug, const MPlug &otherPlug, bool asSrc)
