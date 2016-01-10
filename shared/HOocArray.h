@@ -67,7 +67,6 @@ template <int DataRank, int NRows, int BufSize>
 bool HOocArray<DataRank, NRows, BufSize>::createStorage(hid_t parentId)
 {
 	if(H2dDataset<DataRank, NRows, BufSize>::create(parentId) ) {
-		H2dDataset<DataRank, NRows, BufSize>::close();
 		m_parentId = parentId;
 	}
 	else

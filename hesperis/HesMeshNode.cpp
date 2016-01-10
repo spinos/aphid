@@ -41,7 +41,7 @@ MStatus HesMeshNode::compute( const MPlug& plug, MDataBlock& data )
 	std::string substitutedCacheName(cacheName.asChar());
 	EnvVar::replace(substitutedCacheName);
 	
-	MArrayDataHandle meshNameArray = data.outputArrayValue( ameshname );
+	MArrayDataHandle meshNameArray = data.inputArrayValue( ameshname );
 	MArrayDataHandle meshArry = data.outputArrayValue(outMesh, &stat);
 	
     bool hesStat = false;

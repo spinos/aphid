@@ -37,6 +37,8 @@ char HObject::open()
 	return 1;
 }
 
+void HObject::close() {}
+
 std::string HObject::ValidPathName(const std::string & name)
 {
 	std::string r = name;

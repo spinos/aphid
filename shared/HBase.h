@@ -100,12 +100,18 @@ public:
 	T * createDataStorage(const std::string & name, bool & stat)
 	{
 		T * d = new T(name);
-		if(d->createStorage(fObjectId)) {
-			stat = true;
+		if(hasNamedData(name.c_str() ) ) {
+			stat = d->openStorage(fObjectId);
+			if(stat) stat = d->checkDataSpace();
 		}
 		else {
-			std::cout<<"\n HBase createDataStorage error";
-			stat = false;
+			if(d->createStorage(fObjectId)) {
+				stat = true;
+			}
+			else {
+				std::cout<<"\n HBase createDataStorage error";
+				stat = false;
+			}
 		}
 		d->close();
 		return d;

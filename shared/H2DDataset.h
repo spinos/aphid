@@ -38,6 +38,7 @@ public:
 	
 	char open(hid_t parentId);
 	char create(hid_t parentId);
+	virtual void close();
 
 	char write(char *data, hdata::Select2DPart * part);
 	char read(char *data, hdata::Select2DPart * part);
@@ -48,6 +49,8 @@ public:
 	static int NumBitsPerPnt();
 	static int NumBitsPerCol();
 	
+	char checkDataSpace();
+	
 protected:
 	
 private:
@@ -56,8 +59,6 @@ private:
 	
 	hid_t createFileSpace() const;
 	hid_t dataType();
-	
-	char checkDataSpace();
 };
 
 template<int DataRank, int NRows, int CnkSz>
@@ -102,10 +103,6 @@ char H2dDataset<DataRank, NRows, CnkSz>::checkDataSpace()
 template<int DataRank, int NRows, int CnkSz>
 char H2dDataset<DataRank, NRows, CnkSz>::create(hid_t parentId)
 {	
-	if(open(parentId) ) {
-		return checkDataSpace();
-	}
-	
 	hid_t fileSpace = createFileSpace();
 	
 	if(fileSpace < 0) std::cout<<"\nh data space create failed\n";
@@ -136,6 +133,10 @@ char H2dDataset<DataRank, NRows, CnkSz>::create(hid_t parentId)
 	H5Pclose(createProps);
 	return 1;
 }
+
+template<int DataRank, int NRows, int CnkSz>
+void H2dDataset<DataRank, NRows, CnkSz>::close()
+{ H5Dclose(fObjectId); }
 
 template<int DataRank, int NRows, int CnkSz>
 hid_t H2dDataset<DataRank, NRows, CnkSz>::createFileSpace() const

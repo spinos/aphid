@@ -20,7 +20,7 @@ public:
 	virtual char validate();
 	virtual char create();
 	virtual char open();
-	virtual void close() {}
+	virtual void close();
 	virtual int objectType() const;
 	virtual char exists();
 	
