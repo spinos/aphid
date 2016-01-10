@@ -14,7 +14,7 @@
 /// BufSize is max num columns in-core
 
 template <int DataRank, int NRows, int BufSize>
-class HOocArray : public H2dDataset<DataRank, NRows> {
+class HOocArray : public H2dDataset<DataRank, NRows, BufSize > {
 	
 /// in-core buffer
 	char * m_data;
@@ -27,9 +27,9 @@ class HOocArray : public H2dDataset<DataRank, NRows> {
 	hid_t m_parentId;
 	
 public:
-	HOocArray(const std::string & name) : H2dDataset<DataRank, NRows>(name)
+	HOocArray(const std::string & name) : H2dDataset<DataRank, NRows, BufSize>(name)
 	{
-		m_nbits = H2dDataset<DataRank, NRows>::NumBitsPerCol();
+		m_nbits = H2dDataset<DataRank, NRows, BufSize>::NumBitsPerCol();
 		m_data = new char[m_nbits * BufSize];
 		m_incoreSize = 0;
 		m_size = 0;
@@ -66,8 +66,8 @@ private:
 template <int DataRank, int NRows, int BufSize>
 bool HOocArray<DataRank, NRows, BufSize>::createStorage(hid_t parentId)
 {
-	if(H2dDataset<DataRank, NRows>::create(parentId) ) {
-		H2dDataset<DataRank, NRows>::close();
+	if(H2dDataset<DataRank, NRows, BufSize>::create(parentId) ) {
+		H2dDataset<DataRank, NRows, BufSize>::close();
 		m_parentId = parentId;
 	}
 	else
@@ -78,7 +78,7 @@ bool HOocArray<DataRank, NRows, BufSize>::createStorage(hid_t parentId)
 template <int DataRank, int NRows, int BufSize>
 bool HOocArray<DataRank, NRows, BufSize>::openStorage(hid_t parentId)
 {
-	if(H2dDataset<DataRank, NRows>::open(parentId) ) {
+	if(H2dDataset<DataRank, NRows, BufSize>::open(parentId) ) {
 		m_parentId = parentId;
 	}
 	else
@@ -116,9 +116,9 @@ void HOocArray<DataRank, NRows, BufSize>::writeCurrentBuf(int ncols)
 	part.count[0] = ncols;
 	part.count[1] = NRows;
 	
-	H2dDataset<DataRank, NRows>::open(m_parentId);
-	H2dDataset<DataRank, NRows>::write(m_data, &part);
-	H2dDataset<DataRank, NRows>::close();
+	H2dDataset<DataRank, NRows, BufSize>::open(m_parentId);
+	H2dDataset<DataRank, NRows, BufSize>::write(m_data, &part);
+	H2dDataset<DataRank, NRows, BufSize>::close();
 }
 
 template <int DataRank, int NRows, int BufSize>
@@ -130,9 +130,9 @@ void HOocArray<DataRank, NRows, BufSize>::read(char * d, int offset, int ncols)
 	part.count[0] = ncols;
 	part.count[1] = NRows;
 	
-	H2dDataset<DataRank, NRows>::open(m_parentId);
-	H2dDataset<DataRank, NRows>::read(d, &part);
-	H2dDataset<DataRank, NRows>::close();
+	H2dDataset<DataRank, NRows, BufSize>::open(m_parentId);
+	H2dDataset<DataRank, NRows, BufSize>::read(d, &part);
+	H2dDataset<DataRank, NRows, BufSize>::close();
 }
 
 template <int DataRank, int NRows, int BufSize>
@@ -150,7 +150,7 @@ void HOocArray<DataRank, NRows, BufSize>::printValues()
 	int numBlks = m_size / BufSize;
 	if((m_size & (BufSize-1)) > 0) numBlks++;
 	int ncols = BufSize;
-	const int bpp = H2dDataset<DataRank, NRows>::NumBitsPerPnt();
+	const int bpp = H2dDataset<DataRank, NRows, BufSize>::NumBitsPerPnt();
 	int i, j, k, it = 0;
 	for(i=0;i<numBlks;++i) {
 		if((m_size - i*BufSize) < BufSize) ncols = m_size - i*BufSize;
